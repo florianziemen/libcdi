@@ -1,0 +1,125 @@
+#!/bin/sh
+#
+# combine source code into one module
+# easier to compile -- no make file needed
+#
+# pretty generic script -- just echos, cats and greps.
+#
+#
+PROG=cdilib.c
+echo "combining source code into one module"
+echo "output is ${PROG}"
+#set -x
+
+rm -f ${PROG}
+
+DATE=`date`
+
+cat > ${PROG} << EOR
+
+/* Generated automatically from $USER on $DATE */
+
+#if  defined  (HAVE_CONFIG_H)
+#  include "config.h"
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <ctype.h>
+#include <limits.h>
+#include <float.h>
+#include <math.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#if ! defined (HAVE_CONFIG_H)
+#  define  HAVE_LIBGRIB      1
+#  define  HAVE_LIBSERVICE   1
+#  define  HAVE_LIBEXTRA     1
+#  define  HAVE_LIBIEG       1
+#endif
+
+EOR
+
+c="taxis.c           \
+   dmemory.c         \
+   dmemory.h         \
+   error.c           \
+   calendar.c        \
+   model.c           \
+   institution.c     \
+   table.c           \
+   util.c            \
+   varscan.c         \
+   vlist.c           \
+   vlist_var.c       \
+   basetime.c        \
+   servicelib.c      \
+   extralib.c        \
+   ieglib.c          \
+   grid_rot.c        \
+   grid_gme.c        \
+   grid.c            \
+   zaxis.c           \
+   cdf_int.c         \
+   hdf_int.c         \
+   cdi_error.c       \
+   stream_int.c      \
+   stream.c          \
+   stream_history.c  \
+   stream_grb.c      \
+   stream_srv.c      \
+   stream_ext.c      \
+   stream_ieg.c      \
+   stream_cdf.c      \
+   stream_hdf.c      \
+   stream_var.c      \
+   stream_record.c   \
+   tsteps.c          \
+   file.c            \
+   griblib.c         \
+   swap.c            \
+   binary.c          \
+   cdf.c             \
+   hdf.c             \
+"
+
+h="cdi_limits.h taxis.h error.h dtypes.h file.h grib.h service.h extra.h \
+   ieg.h cdi.h calendar.h \
+   basetime.h stream_int.h stream_grb.h  datetime.h stream_cdf.h stream_hdf.h \
+   grib.h tablepar.h table.h util.h grid.h varscan.h binary.h swap.h \
+   service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \
+   hdf_int.h cdf.h hdf.h vlist.h"
+
+cat $h >> ${PROG}
+cat $c | grep -v '#include' >> ${PROG}
+
+if test -f config.h ; then
+   cpp -P -DHAVE_CONFIG_H  version.c >>  ${PROG}
+else
+   echo "error: missing config.h"
+fi
+
+# Fortran interface (with -DHAVE_CF_INTERFACE)
+
+echo "#if defined (HAVE_CF_INTERFACE)" >>  ${PROG}
+echo "#undef realloc" >>  ${PROG}
+echo "#undef malloc" >>  ${PROG}
+echo "#undef calloc" >>  ${PROG}
+echo "#undef free" >>  ${PROG}
+echo "#undef DOUBLE_PRECISION" >>  ${PROG}
+cat cfortran.h  >>  ${PROG}
+echo "#endif" >>  ${PROG}
+cat cdiFortran.c >>  ${PROG}
+
+echo "#undef realloc" >>  ${PROG}
+echo "#undef malloc" >>  ${PROG}
+echo "#undef calloc" >>  ${PROG}
+echo "#undef free" >>  ${PROG}
+
+exit

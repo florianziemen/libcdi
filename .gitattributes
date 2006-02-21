@@ -39,11 +39,13 @@ src/cdi.inc -text
 src/cdiFortran.c -text
 src/cdi_error.c -text
 src/cdi_limits.h -text
+src/cfortran.doc -text
 src/cfortran.h -text
 src/config.h.in -text
 src/datetime.h -text
 src/dmemory.c -text
 src/dmemory.h -text
+src/docu -text
 src/dtypes.h -text
 src/error.c -text
 src/error.h -text
@@ -64,6 +66,9 @@ src/hdf_int.h -text
 src/ieg.h -text
 src/ieglib.c -text
 src/institution.c -text
+src/lock.h -text
+src/make_cdilib -text
+src/make_fint.c -text
 src/model.c -text
 src/service.h -text
 src/servicelib.c -text
