@@ -1,0 +1,1417 @@
+!
+! Fortran interface for CDI library version 0.9.5
+!
+
+      INTEGER    CDI_UNDEFID           
+      PARAMETER (CDI_UNDEFID            = -1)
+!
+!  Error identifier
+!
+      INTEGER    CDI_ESYSTEM           
+      PARAMETER (CDI_ESYSTEM            = -10)
+      INTEGER    CDI_EINVAL            
+      PARAMETER (CDI_EINVAL             = -20)
+      INTEGER    CDI_EUFTYPE           
+      PARAMETER (CDI_EUFTYPE            = -21)
+      INTEGER    CDI_ELIBNAVAIL        
+      PARAMETER (CDI_ELIBNAVAIL         = -22)
+      INTEGER    CDI_EUFSTRUCT         
+      PARAMETER (CDI_EUFSTRUCT          = -23)
+!
+!  File types
+!
+      INTEGER    FILETYPE_GRB          
+      PARAMETER (FILETYPE_GRB           =  1)
+      INTEGER    FILETYPE_G2           
+      PARAMETER (FILETYPE_G2            =  2)
+      INTEGER    FILETYPE_NC           
+      PARAMETER (FILETYPE_NC            =  3)
+      INTEGER    FILETYPE_NC2          
+      PARAMETER (FILETYPE_NC2           =  4)
+      INTEGER    FILETYPE_SRV          
+      PARAMETER (FILETYPE_SRV           =  5)
+      INTEGER    FILETYPE_EXT          
+      PARAMETER (FILETYPE_EXT           =  6)
+      INTEGER    FILETYPE_H5           
+      PARAMETER (FILETYPE_H5            =  7)
+      INTEGER    FILETYPE_IEG          
+      PARAMETER (FILETYPE_IEG           =  8)
+!
+!  Data types
+!
+      INTEGER    DATATYPE_PACK         
+      PARAMETER (DATATYPE_PACK          =  0)
+      INTEGER    DATATYPE_PACK1        
+      PARAMETER (DATATYPE_PACK1         =  1)
+      INTEGER    DATATYPE_PACK2        
+      PARAMETER (DATATYPE_PACK2         =  2)
+      INTEGER    DATATYPE_PACK3        
+      PARAMETER (DATATYPE_PACK3         =  3)
+      INTEGER    DATATYPE_REAL4        
+      PARAMETER (DATATYPE_REAL4         =  4)
+      INTEGER    DATATYPE_REAL8        
+      PARAMETER (DATATYPE_REAL8         =  5)
+      INTEGER    DATATYPE_INT1         
+      PARAMETER (DATATYPE_INT1          =  6)
+      INTEGER    DATATYPE_INT2         
+      PARAMETER (DATATYPE_INT2          =  7)
+      INTEGER    DATATYPE_INT4         
+      PARAMETER (DATATYPE_INT4          =  8)
+!
+!  GRID types
+!
+      INTEGER    GRID_GENERIC          
+      PARAMETER (GRID_GENERIC           =  1)
+      INTEGER    GRID_GAUSSIAN         
+      PARAMETER (GRID_GAUSSIAN          =  2)
+      INTEGER    GRID_GAUSSIAN_REDUCED 
+      PARAMETER (GRID_GAUSSIAN_REDUCED  =  3)
+      INTEGER    GRID_LONLAT           
+      PARAMETER (GRID_LONLAT            =  4)
+      INTEGER    GRID_SPECTRAL         
+      PARAMETER (GRID_SPECTRAL          =  5)
+      INTEGER    GRID_FOURIER          
+      PARAMETER (GRID_FOURIER           =  6)
+      INTEGER    GRID_GME              
+      PARAMETER (GRID_GME               =  7)
+      INTEGER    GRID_TRAJECTORY       
+      PARAMETER (GRID_TRAJECTORY        =  8)
+      INTEGER    GRID_CELL             
+      PARAMETER (GRID_CELL              =  9)
+      INTEGER    GRID_CURVILINEAR      
+      PARAMETER (GRID_CURVILINEAR       = 10)
+!
+!  ZAXIS types
+!
+      INTEGER    ZAXIS_SURFACE         
+      PARAMETER (ZAXIS_SURFACE          =  0)
+      INTEGER    ZAXIS_GENERIC         
+      PARAMETER (ZAXIS_GENERIC          =  1)
+      INTEGER    ZAXIS_HYBRID          
+      PARAMETER (ZAXIS_HYBRID           =  2)
+      INTEGER    ZAXIS_HYBRID_HALF     
+      PARAMETER (ZAXIS_HYBRID_HALF      =  3)
+      INTEGER    ZAXIS_PRESSURE        
+      PARAMETER (ZAXIS_PRESSURE         =  4)
+      INTEGER    ZAXIS_HEIGHT          
+      PARAMETER (ZAXIS_HEIGHT           =  5)
+      INTEGER    ZAXIS_DEPTH_BELOW_SEA 
+      PARAMETER (ZAXIS_DEPTH_BELOW_SEA  =  6)
+      INTEGER    ZAXIS_DEPTH_BELOW_LAND
+      PARAMETER (ZAXIS_DEPTH_BELOW_LAND =  7)
+      INTEGER    ZAXIS_ISENTROPIC      
+      PARAMETER (ZAXIS_ISENTROPIC       =  8)
+      INTEGER    ZAXIS_TRAJECTORY      
+      PARAMETER (ZAXIS_TRAJECTORY       =  9)
+      INTEGER    ZAXIS_ALTITUDE        
+      PARAMETER (ZAXIS_ALTITUDE         = 10)
+!
+!  TAXIS types
+!
+      INTEGER    TAXIS_ABSOLUTE        
+      PARAMETER (TAXIS_ABSOLUTE         =  1)
+      INTEGER    TAXIS_RELATIVE        
+      PARAMETER (TAXIS_RELATIVE         =  2)
+!
+!  TIME types
+!
+      INTEGER    TIME_CONSTANT         
+      PARAMETER (TIME_CONSTANT          =  1)
+      INTEGER    TIME_VARIABLE         
+      PARAMETER (TIME_VARIABLE          =  2)
+!
+!  TUNIT types
+!
+      INTEGER    TUNIT_SECOND          
+      PARAMETER (TUNIT_SECOND           =  1)
+      INTEGER    TUNIT_MINUTE          
+      PARAMETER (TUNIT_MINUTE           =  2)
+      INTEGER    TUNIT_HOUR            
+      PARAMETER (TUNIT_HOUR             =  3)
+      INTEGER    TUNIT_DAY             
+      PARAMETER (TUNIT_DAY              =  4)
+      INTEGER    TUNIT_MONTH           
+      PARAMETER (TUNIT_MONTH            =  5)
+      INTEGER    TUNIT_YEAR            
+      PARAMETER (TUNIT_YEAR             =  6)
+!
+!  CALENDAR types
+!
+      INTEGER    CALENDAR_STANDARD     
+      PARAMETER (CALENDAR_STANDARD      =  0)
+      INTEGER    CALENDAR_NONE         
+      PARAMETER (CALENDAR_NONE          =  1)
+      INTEGER    CALENDAR_360DAYS      
+      PARAMETER (CALENDAR_360DAYS       =  2)
+      INTEGER    CALENDAR_365DAYS      
+      PARAMETER (CALENDAR_365DAYS       =  3)
+      INTEGER    CALENDAR_366DAYS      
+      PARAMETER (CALENDAR_366DAYS       =  4)
+      INTEGER    CALENDAR_PROLEPTIC    
+      PARAMETER (CALENDAR_PROLEPTIC     =  5)
+!
+!  CDI control routines
+!
+!                     cdiDebug
+!                                    (INTEGER         debug)
+      EXTERNAL        cdiDebug
+
+!                     cdiPrintVersion
+      EXTERNAL        cdiPrintVersion
+
+!                     cdiDefMissval
+!                                    (DOUBLEPRECISION missval)
+      EXTERNAL        cdiDefMissval
+
+      DOUBLEPRECISION cdiInqMissval
+      EXTERNAL        cdiInqMissval
+
+      INTEGER         cdiDefGlobal
+!                                    (CHARACTER*(*)   string,
+!                                     INTEGER         val)
+      EXTERNAL        cdiDefGlobal
+
+!                     cdiDefCompress
+!                                    (INTEGER         level)
+      EXTERNAL        cdiDefCompress
+
+!
+!  STREAM control routines
+!
+      INTEGER         streamOpenRead
+!                                    (CHARACTER*(*)   filename)
+      EXTERNAL        streamOpenRead
+
+      INTEGER         streamOpenWrite
+!                                    (CHARACTER*(*)   filename,
+!                                     INTEGER         filetype)
+      EXTERNAL        streamOpenWrite
+
+      INTEGER         streamOpenAppend
+!                                    (CHARACTER*(*)   filename)
+      EXTERNAL        streamOpenAppend
+
+!                     streamClose
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamClose
+
+!                     streamDefVlist
+!                                    (INTEGER         streamID,
+!                                     INTEGER         vlistID)
+      EXTERNAL        streamDefVlist
+
+      INTEGER         streamInqVlist
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamInqVlist
+
+      INTEGER         streamInqFiletype
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamInqFiletype
+
+!                     streamDefByteorder
+!                                    (INTEGER         streamID,
+!                                     INTEGER         byteorder)
+      EXTERNAL        streamDefByteorder
+
+      INTEGER         streamInqByteorder
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamInqByteorder
+
+      INTEGER         streamDefTimestep
+!                                    (INTEGER         streamID,
+!                                     INTEGER         tsID)
+      EXTERNAL        streamDefTimestep
+
+      INTEGER         streamInqTimestep
+!                                    (INTEGER         streamID,
+!                                     INTEGER         tsID)
+      EXTERNAL        streamInqTimestep
+
+      INTEGER         streamNtsteps
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamNtsteps
+
+!
+!  STREAM var I/O routines
+!
+!                     streamReadVar
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     DOUBLEPRECISION data,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamReadVar
+
+!                     streamWriteVar
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     DOUBLEPRECISION data,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamWriteVar
+
+!                     streamReadVarSlice
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     INTEGER         levelID,
+!                                     DOUBLEPRECISION data,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamReadVarSlice
+
+!                     streamWriteVarSlice
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     INTEGER         levelID,
+!                                     DOUBLEPRECISION data,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamWriteVarSlice
+
+!
+!  STREAM record I/O routines
+!
+!                     streamInqRecord
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     INTEGER         levelID)
+      EXTERNAL        streamInqRecord
+
+!                     streamDefRecord
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     INTEGER         levelID)
+      EXTERNAL        streamDefRecord
+
+!                     streamReadRecord
+!                                    (INTEGER         streamID,
+!                                     DOUBLEPRECISION data,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamReadRecord
+
+!                     streamWriteRecord
+!                                    (INTEGER         streamID,
+!                                     DOUBLEPRECISION data,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamWriteRecord
+
+!                     streamCopyRecord
+!                                    (INTEGER         streamIDdest,
+!                                     INTEGER         streamIDsrc)
+      EXTERNAL        streamCopyRecord
+
+!
+!  VLIST routines
+!
+      INTEGER         vlistNew
+      EXTERNAL        vlistNew
+
+!                     vlistFree
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistFree
+
+      INTEGER         vlistDuplicate
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistDuplicate
+
+!                     vlistCopy
+!                                    (INTEGER         vlistID2,
+!                                     INTEGER         vlistID1)
+      EXTERNAL        vlistCopy
+
+!                     vlistCopyFlag
+!                                    (INTEGER         vlistID2,
+!                                     INTEGER         vlistID1)
+      EXTERNAL        vlistCopyFlag
+
+!                     vlistClearFlag
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistClearFlag
+
+!                     vlistCat
+!                                    (INTEGER         vlistID2,
+!                                     INTEGER         vlistID1)
+      EXTERNAL        vlistCat
+
+!                     vlistMerge
+!                                    (INTEGER         vlistID2,
+!                                     INTEGER         vlistID1)
+      EXTERNAL        vlistMerge
+
+!                     vlistPrint
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistPrint
+
+      INTEGER         vlistNvars
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistNvars
+
+      INTEGER         vlistNgrids
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistNgrids
+
+      INTEGER         vlistNzaxis
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistNzaxis
+
+!                     vlistDefNtsteps
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         nts)
+      EXTERNAL        vlistDefNtsteps
+
+      INTEGER         vlistNtsteps
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistNtsteps
+
+      INTEGER         vlistGridsizeMax
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistGridsizeMax
+
+      INTEGER         vlistGrid
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         index)
+      EXTERNAL        vlistGrid
+
+      INTEGER         vlistGridIndex
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         gridID)
+      EXTERNAL        vlistGridIndex
+
+!                     vlistChangeGridIndex
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         index,
+!                                     INTEGER         gridID)
+      EXTERNAL        vlistChangeGridIndex
+
+!                     vlistChangeGrid
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         gridID1,
+!                                     INTEGER         gridID2)
+      EXTERNAL        vlistChangeGrid
+
+      INTEGER         vlistZaxis
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         index)
+      EXTERNAL        vlistZaxis
+
+      INTEGER         vlistZaxisIndex
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         zaxisID)
+      EXTERNAL        vlistZaxisIndex
+
+!                     vlistChangeZaxisIndex
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         index,
+!                                     INTEGER         zaxisID)
+      EXTERNAL        vlistChangeZaxisIndex
+
+!                     vlistChangeZaxis
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         zaxisID1,
+!                                     INTEGER         zaxisID2)
+      EXTERNAL        vlistChangeZaxis
+
+      INTEGER         vlistNrecs
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistNrecs
+
+!                     vlistDefTaxis
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         taxisID)
+      EXTERNAL        vlistDefTaxis
+
+      INTEGER         vlistInqTaxis
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistInqTaxis
+
+!                     vlistDefTable
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         tableID)
+      EXTERNAL        vlistDefTable
+
+      INTEGER         vlistInqTable
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistInqTable
+
+!                     vlistDefInstitut
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         instID)
+      EXTERNAL        vlistDefInstitut
+
+      INTEGER         vlistInqInstitut
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistInqInstitut
+
+!                     vlistDefModel
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         modelID)
+      EXTERNAL        vlistDefModel
+
+      INTEGER         vlistInqModel
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistInqModel
+
+!                     vlistDefAttribute
+!                                    (INTEGER         vlistID,
+!                                     CHARACTER*(*)   attname,
+!                                     CHARACTER*(*)   attstring)
+      EXTERNAL        vlistDefAttribute
+
+!
+!  VLIST VAR routines
+!
+      INTEGER         vlistDefVar
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         gridID,
+!                                     INTEGER         zaxisID,
+!                                     INTEGER         timeID)
+      EXTERNAL        vlistDefVar
+
+!                     vlistChangeVarZaxis
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         zaxisID)
+      EXTERNAL        vlistChangeVarZaxis
+
+!                     vlistInqVar
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         gridID,
+!                                     INTEGER         zaxisID,
+!                                     INTEGER         timeID)
+      EXTERNAL        vlistInqVar
+
+      INTEGER         vlistInqVarGrid
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarGrid
+
+      INTEGER         vlistInqVarZaxis
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarZaxis
+
+      INTEGER         vlistInqVarTime
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarTime
+
+!                     vlistDefVarCode
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         code)
+      EXTERNAL        vlistDefVarCode
+
+      INTEGER         vlistInqVarCode
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarCode
+
+!                     vlistDefVarDatatype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         datatype)
+      EXTERNAL        vlistDefVarDatatype
+
+      INTEGER         vlistInqVarDatatype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarDatatype
+
+!                     vlistDefVarInstitut
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         instID)
+      EXTERNAL        vlistDefVarInstitut
+
+      INTEGER         vlistInqVarInstitut
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarInstitut
+
+!                     vlistDefVarModel
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         modelID)
+      EXTERNAL        vlistDefVarModel
+
+      INTEGER         vlistInqVarModel
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarModel
+
+!                     vlistDefVarTable
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         tableID)
+      EXTERNAL        vlistDefVarTable
+
+      INTEGER         vlistInqVarTable
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarTable
+
+!                     vlistDefVarName
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name)
+      EXTERNAL        vlistDefVarName
+
+!                     vlistInqVarName
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name)
+      EXTERNAL        vlistInqVarName
+
+!                     vlistDefVarLongname
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   longname)
+      EXTERNAL        vlistDefVarLongname
+
+!                     vlistDefVarStdname
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   stdname)
+      EXTERNAL        vlistDefVarStdname
+
+!                     vlistInqVarLongname
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   longname)
+      EXTERNAL        vlistInqVarLongname
+
+!                     vlistInqVarStdname
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   stdname)
+      EXTERNAL        vlistInqVarStdname
+
+!                     vlistDefVarUnits
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   units)
+      EXTERNAL        vlistDefVarUnits
+
+!                     vlistInqVarUnits
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   units)
+      EXTERNAL        vlistInqVarUnits
+
+!                     vlistDefVarMissval
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     DOUBLEPRECISION missval)
+      EXTERNAL        vlistDefVarMissval
+
+      DOUBLEPRECISION vlistInqVarMissval
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarMissval
+
+!                     vlistDefVarScalefactor
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     DOUBLEPRECISION scalefactor)
+      EXTERNAL        vlistDefVarScalefactor
+
+      DOUBLEPRECISION vlistInqVarScalefactor
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarScalefactor
+
+!                     vlistDefVarAddoffset
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     DOUBLEPRECISION addoffset)
+      EXTERNAL        vlistDefVarAddoffset
+
+      DOUBLEPRECISION vlistInqVarAddoffset
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarAddoffset
+
+!                     vlistDefVarAverage
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         average)
+      EXTERNAL        vlistDefVarAverage
+
+      INTEGER         vlistInqVarAverage
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarAverage
+
+      INTEGER         vlistInqVarSize
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarSize
+
+      INTEGER         vlistInqVarID
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         code)
+      EXTERNAL        vlistInqVarID
+
+!                     vlistDefIndex
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         levID,
+!                                     INTEGER         index)
+      EXTERNAL        vlistDefIndex
+
+      INTEGER         vlistInqIndex
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         levID)
+      EXTERNAL        vlistInqIndex
+
+!                     vlistDefFlag
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         levID,
+!                                     INTEGER         flag)
+      EXTERNAL        vlistDefFlag
+
+      INTEGER         vlistInqFlag
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         levID)
+      EXTERNAL        vlistInqFlag
+
+      INTEGER         vlistFlagVar
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistFlagVar
+
+      INTEGER         vlistFlagLevel
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         levelID)
+      EXTERNAL        vlistFlagLevel
+
+      INTEGER         vlistFindVar
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         fvarID)
+      EXTERNAL        vlistFindVar
+
+      INTEGER         vlistFindLevel
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         fvarID,
+!                                     INTEGER         flevelID)
+      EXTERNAL        vlistFindLevel
+
+!
+!  GRID routines
+!
+!                     gridName
+!                                    (INTEGER         gridtype,
+!                                     CHARACTER*(*)   gridname)
+      EXTERNAL        gridName
+
+      INTEGER         gridNew
+!                                    (INTEGER         gridtype,
+!                                     INTEGER         size)
+      EXTERNAL        gridNew
+
+      INTEGER         gridInqType
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqType
+
+      INTEGER         gridInqSize
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqSize
+
+      INTEGER         gridDuplicate
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridDuplicate
+
+!                     gridCompress
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridCompress
+
+!                     gridPrint
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridPrint
+
+      INTEGER         gridSize
+      EXTERNAL        gridSize
+
+!                     gridDefXsize
+!                                    (INTEGER         gridID,
+!                                     INTEGER         xsize)
+      EXTERNAL        gridDefXsize
+
+      INTEGER         gridInqXsize
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqXsize
+
+!                     gridDefYsize
+!                                    (INTEGER         gridID,
+!                                     INTEGER         ysize)
+      EXTERNAL        gridDefYsize
+
+      INTEGER         gridInqYsize
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqYsize
+
+!                     gridDefXvals
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION xvals)
+      EXTERNAL        gridDefXvals
+
+      INTEGER         gridInqXvals
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION xvals)
+      EXTERNAL        gridInqXvals
+
+!                     gridDefYvals
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION yvals)
+      EXTERNAL        gridDefYvals
+
+      INTEGER         gridInqMask
+!                                    (INTEGER         gridID,
+!                                     INTEGER         mask)
+      EXTERNAL        gridInqMask
+
+!                     gridDefMask
+!                                    (INTEGER         gridID,
+!                                     INTEGER         mask)
+      EXTERNAL        gridDefMask
+
+      INTEGER         gridInqYvals
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION yvals)
+      EXTERNAL        gridInqYvals
+
+!                     gridDefXname
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   xname)
+      EXTERNAL        gridDefXname
+
+!                     gridDefXlongname
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   xlongname)
+      EXTERNAL        gridDefXlongname
+
+!                     gridDefXunits
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   xunits)
+      EXTERNAL        gridDefXunits
+
+!                     gridDefYname
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   yname)
+      EXTERNAL        gridDefYname
+
+!                     gridDefYlongname
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   ylongname)
+      EXTERNAL        gridDefYlongname
+
+!                     gridDefYunits
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   yunits)
+      EXTERNAL        gridDefYunits
+
+!                     gridInqXname
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   xname)
+      EXTERNAL        gridInqXname
+
+!                     gridInqXlongname
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   xlongname)
+      EXTERNAL        gridInqXlongname
+
+!                     gridInqXstdname
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   xstdname)
+      EXTERNAL        gridInqXstdname
+
+!                     gridInqXunits
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   xunits)
+      EXTERNAL        gridInqXunits
+
+!                     gridInqYname
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   yname)
+      EXTERNAL        gridInqYname
+
+!                     gridInqYlongname
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   ylongname)
+      EXTERNAL        gridInqYlongname
+
+!                     gridInqYstdname
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   ystdname)
+      EXTERNAL        gridInqYstdname
+
+!                     gridInqYunits
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   yunits)
+      EXTERNAL        gridInqYunits
+
+!                     gridDefPrec
+!                                    (INTEGER         gridID,
+!                                     INTEGER         prec)
+      EXTERNAL        gridDefPrec
+
+      INTEGER         gridInqPrec
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqPrec
+
+      DOUBLEPRECISION gridInqXval
+!                                    (INTEGER         gridID,
+!                                     INTEGER         index)
+      EXTERNAL        gridInqXval
+
+      DOUBLEPRECISION gridInqYval
+!                                    (INTEGER         gridID,
+!                                     INTEGER         index)
+      EXTERNAL        gridInqYval
+
+      DOUBLEPRECISION gridInqXinc
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqXinc
+
+      DOUBLEPRECISION gridInqYinc
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqYinc
+
+      INTEGER         gridIsRotated
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridIsRotated
+
+      DOUBLEPRECISION gridInqXpole
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqXpole
+
+!                     gridDefXpole
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION xpole)
+      EXTERNAL        gridDefXpole
+
+      DOUBLEPRECISION gridInqYpole
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqYpole
+
+!                     gridDefYpole
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION ypole)
+      EXTERNAL        gridDefYpole
+
+      DOUBLEPRECISION gridInqAngle
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqAngle
+
+!                     gridDefAngle
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION angle)
+      EXTERNAL        gridDefAngle
+
+!                     gridDefTrunc
+!                                    (INTEGER         gridID,
+!                                     INTEGER         trunc)
+      EXTERNAL        gridDefTrunc
+
+      INTEGER         gridInqTrunc
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqTrunc
+
+!
+!  Hexagonal GME grid
+!
+      INTEGER         gridInqGMEnd
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqGMEnd
+
+!                     gridDefGMEnd
+!                                    (INTEGER         gridID,
+!                                     INTEGER         nd)
+      EXTERNAL        gridDefGMEnd
+
+      INTEGER         gridInqGMEni
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqGMEni
+
+!                     gridDefGMEni
+!                                    (INTEGER         gridID,
+!                                     INTEGER         ni)
+      EXTERNAL        gridDefGMEni
+
+      INTEGER         gridInqGMEni2
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqGMEni2
+
+!                     gridDefGMEni2
+!                                    (INTEGER         gridID,
+!                                     INTEGER         ni2)
+      EXTERNAL        gridDefGMEni2
+
+      INTEGER         gridInqGMEni3
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqGMEni3
+
+!                     gridDefGMEni3
+!                                    (INTEGER         gridID,
+!                                     INTEGER         ni3)
+      EXTERNAL        gridDefGMEni3
+
+!                     gridDefArea
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION area)
+      EXTERNAL        gridDefArea
+
+!                     gridInqArea
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION area)
+      EXTERNAL        gridInqArea
+
+      INTEGER         gridHasArea
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridHasArea
+
+!                     gridDefNvertex
+!                                    (INTEGER         gridID,
+!                                     INTEGER         nvertex)
+      EXTERNAL        gridDefNvertex
+
+      INTEGER         gridInqNvertex
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqNvertex
+
+!                     gridDefXbounds
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION xbounds)
+      EXTERNAL        gridDefXbounds
+
+      INTEGER         gridInqXbounds
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION xbounds)
+      EXTERNAL        gridInqXbounds
+
+!                     gridDefYbounds
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION ybounds)
+      EXTERNAL        gridDefYbounds
+
+      INTEGER         gridInqYbounds
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION ybounds)
+      EXTERNAL        gridInqYbounds
+
+!                     gridDefRowlon
+!                                    (INTEGER         gridID,
+!                                     INTEGER         nrowlon,
+!                                     INTEGER         rowlon)
+      EXTERNAL        gridDefRowlon
+
+!                     gridInqRowlon
+!                                    (INTEGER         gridID,
+!                                     INTEGER         rowlon)
+      EXTERNAL        gridInqRowlon
+
+!                     gridChangeType
+!                                    (INTEGER         gridID,
+!                                     INTEGER         gridtype)
+      EXTERNAL        gridChangeType
+
+      INTEGER         gridToZonal
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridToZonal
+
+      INTEGER         gridToMeridional
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridToMeridional
+
+      INTEGER         gridToCell
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridToCell
+
+      INTEGER         gridToCurvilinear
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridToCurvilinear
+
+!
+!  ZAXIS routines
+!
+!                     zaxisName
+!                                    (INTEGER         zaxistype,
+!                                     CHARACTER*(*)   gridname)
+      EXTERNAL        zaxisName
+
+      INTEGER         zaxisNew
+!                                    (INTEGER         leveltype,
+!                                     INTEGER         size)
+      EXTERNAL        zaxisNew
+
+      INTEGER         zaxisInqType
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisInqType
+
+      INTEGER         zaxisInqSize
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisInqSize
+
+      INTEGER         zaxisDuplicate
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisDuplicate
+
+!                     zaxisResize
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         size)
+      EXTERNAL        zaxisResize
+
+!                     zaxisPrint
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisPrint
+
+      INTEGER         zaxisSize
+      EXTERNAL        zaxisSize
+
+!                     zaxisDefLevels
+!                                    (INTEGER         zaxisID,
+!                                     DOUBLEPRECISION levels)
+      EXTERNAL        zaxisDefLevels
+
+!                     zaxisInqLevels
+!                                    (INTEGER         zaxisID,
+!                                     DOUBLEPRECISION levels)
+      EXTERNAL        zaxisInqLevels
+
+!                     zaxisDefLevel
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         levelID,
+!                                     DOUBLEPRECISION levels)
+      EXTERNAL        zaxisDefLevel
+
+      DOUBLEPRECISION zaxisInqLevel
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         levelID)
+      EXTERNAL        zaxisInqLevel
+
+!                     zaxisDefName
+!                                    (INTEGER         zaxisID,
+!                                     CHARACTER*(*)   name)
+      EXTERNAL        zaxisDefName
+
+!                     zaxisDefLongname
+!                                    (INTEGER         zaxisID,
+!                                     CHARACTER*(*)   longname)
+      EXTERNAL        zaxisDefLongname
+
+!                     zaxisDefUnits
+!                                    (INTEGER         zaxisID,
+!                                     CHARACTER*(*)   units)
+      EXTERNAL        zaxisDefUnits
+
+!                     zaxisInqName
+!                                    (INTEGER         zaxisID,
+!                                     CHARACTER*(*)   name)
+      EXTERNAL        zaxisInqName
+
+!                     zaxisInqLongname
+!                                    (INTEGER         zaxisID,
+!                                     CHARACTER*(*)   longname)
+      EXTERNAL        zaxisInqLongname
+
+!                     zaxisInqUnits
+!                                    (INTEGER         zaxisID,
+!                                     CHARACTER*(*)   units)
+      EXTERNAL        zaxisInqUnits
+
+!                     zaxisDefPrec
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         prec)
+      EXTERNAL        zaxisDefPrec
+
+      INTEGER         zaxisInqPrec
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisInqPrec
+
+!                     zaxisDefVct
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         size,
+!                                     DOUBLEPRECISION vct)
+      EXTERNAL        zaxisDefVct
+
+      INTEGER         zaxisInqVctSize
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisInqVctSize
+
+      INTEGER         zaxisInqLbounds
+!                                    (INTEGER         zaxisID,
+!                                     DOUBLEPRECISION lbounds)
+      EXTERNAL        zaxisInqLbounds
+
+      INTEGER         zaxisInqUbounds
+!                                    (INTEGER         zaxisID,
+!                                     DOUBLEPRECISION ubounds)
+      EXTERNAL        zaxisInqUbounds
+
+      INTEGER         zaxisInqWeights
+!                                    (INTEGER         zaxisID,
+!                                     DOUBLEPRECISION weights)
+      EXTERNAL        zaxisInqWeights
+
+      DOUBLEPRECISION zaxisInqLbound
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         index)
+      EXTERNAL        zaxisInqLbound
+
+      DOUBLEPRECISION zaxisInqUbound
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         index)
+      EXTERNAL        zaxisInqUbound
+
+!                     zaxisDefLbounds
+!                                    (INTEGER         zaxisID,
+!                                     DOUBLEPRECISION lbounds)
+      EXTERNAL        zaxisDefLbounds
+
+!                     zaxisDefUbounds
+!                                    (INTEGER         zaxisID,
+!                                     DOUBLEPRECISION ubounds)
+      EXTERNAL        zaxisDefUbounds
+
+!                     zaxisDefWeights
+!                                    (INTEGER         zaxisID,
+!                                     DOUBLEPRECISION weights)
+      EXTERNAL        zaxisDefWeights
+
+!                     zaxisChangeType
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         leveltype)
+      EXTERNAL        zaxisChangeType
+
+!
+!  TAXIS routines
+!
+      INTEGER         taxisNew
+!                                    (INTEGER         timetype)
+      EXTERNAL        taxisNew
+
+      INTEGER         taxisDuplicate
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisDuplicate
+
+!                     taxisCopyTimestep
+!                                    (INTEGER         taxisIDdes,
+!                                     INTEGER         taxisIDsrc)
+      EXTERNAL        taxisCopyTimestep
+
+!                     taxisDefType
+!                                    (INTEGER         taxisID,
+!                                     INTEGER         type)
+      EXTERNAL        taxisDefType
+
+!                     taxisDefVdate
+!                                    (INTEGER         taxisID,
+!                                     INTEGER         date)
+      EXTERNAL        taxisDefVdate
+
+!                     taxisDefVtime
+!                                    (INTEGER         taxisID,
+!                                     INTEGER         time)
+      EXTERNAL        taxisDefVtime
+
+!                     taxisDefRdate
+!                                    (INTEGER         taxisID,
+!                                     INTEGER         date)
+      EXTERNAL        taxisDefRdate
+
+!                     taxisDefRtime
+!                                    (INTEGER         taxisID,
+!                                     INTEGER         time)
+      EXTERNAL        taxisDefRtime
+
+!                     taxisDefCalendar
+!                                    (INTEGER         taxisID,
+!                                     INTEGER         calendar)
+      EXTERNAL        taxisDefCalendar
+
+!                     taxisDefTunit
+!                                    (INTEGER         taxisID,
+!                                     INTEGER         tunit)
+      EXTERNAL        taxisDefTunit
+
+!                     taxisDefNumavg
+!                                    (INTEGER         taxisID,
+!                                     INTEGER         numavg)
+      EXTERNAL        taxisDefNumavg
+
+      INTEGER         taxisInqType
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisInqType
+
+      INTEGER         taxisInqVdate
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisInqVdate
+
+      INTEGER         taxisInqVtime
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisInqVtime
+
+      INTEGER         taxisInqRdate
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisInqRdate
+
+      INTEGER         taxisInqRtime
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisInqRtime
+
+      INTEGER         taxisInqCalendar
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisInqCalendar
+
+      INTEGER         taxisInqTunit
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisInqTunit
+
+      INTEGER         taxisInqNumavg
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisInqNumavg
+
+!
+!  Institut routines
+!
+      INTEGER         institutDef
+!                                    (INTEGER         center,
+!                                     INTEGER         subcenter,
+!                                     CHARACTER*(*)   name,
+!                                     CHARACTER*(*)   longname)
+      EXTERNAL        institutDef
+
+      INTEGER         institutInq
+!                                    (INTEGER         center,
+!                                     INTEGER         subcenter,
+!                                     CHARACTER*(*)   name,
+!                                     CHARACTER*(*)   longname)
+      EXTERNAL        institutInq
+
+      INTEGER         institutInqNumber
+      EXTERNAL        institutInqNumber
+
+      INTEGER         institutInqCenter
+!                                    (INTEGER         instID)
+      EXTERNAL        institutInqCenter
+
+      INTEGER         institutInqSubcenter
+!                                    (INTEGER         instID)
+      EXTERNAL        institutInqSubcenter
+
+!
+!  Model routines
+!
+      INTEGER         modelDef
+!                                    (INTEGER         instID,
+!                                     INTEGER         modelgribID,
+!                                     CHARACTER*(*)   name)
+      EXTERNAL        modelDef
+
+      INTEGER         modelInq
+!                                    (INTEGER         instID,
+!                                     INTEGER         modelgribID,
+!                                     CHARACTER*(*)   name)
+      EXTERNAL        modelInq
+
+      INTEGER         modelInqInstitut
+!                                    (INTEGER         modelID)
+      EXTERNAL        modelInqInstitut
+
+      INTEGER         modelInqGribID
+!                                    (INTEGER         modelID)
+      EXTERNAL        modelInqGribID
+
+!
+!  Table routines
+!
+!                     tableWriteC
+!                                    (CHARACTER*(*)   filename,
+!                                     INTEGER         tableID)
+      EXTERNAL        tableWriteC
+
+!                     tableWrite
+!                                    (CHARACTER*(*)   filename,
+!                                     INTEGER         tableID)
+      EXTERNAL        tableWrite
+
+      INTEGER         tableRead
+!                                    (CHARACTER*(*)   tablefile)
+      EXTERNAL        tableRead
+
+      INTEGER         tableDef
+!                                    (INTEGER         modelID,
+!                                     INTEGER         tablenum,
+!                                     CHARACTER*(*)   tablename)
+      EXTERNAL        tableDef
+
+!                     tableDefEntry
+!                                    (INTEGER         tableID,
+!                                     INTEGER         code,
+!                                     CHARACTER*(*)   name,
+!                                     CHARACTER*(*)   longname,
+!                                     CHARACTER*(*)   units)
+      EXTERNAL        tableDefEntry
+
+      INTEGER         tableInq
+!                                    (INTEGER         modelID,
+!                                     INTEGER         tablenum,
+!                                     CHARACTER*(*)   tablename)
+      EXTERNAL        tableInq
+
+      INTEGER         tableInqNumber
+      EXTERNAL        tableInqNumber
+
+      INTEGER         tableInqNum
+!                                    (INTEGER         tableID)
+      EXTERNAL        tableInqNum
+
+      INTEGER         tableInqModel
+!                                    (INTEGER         tableID)
+      EXTERNAL        tableInqModel
+
+!                     tableInqPar
+!                                    (INTEGER         tableID,
+!                                     INTEGER         code,
+!                                     CHARACTER*(*)   name,
+!                                     CHARACTER*(*)   longname,
+!                                     CHARACTER*(*)   units)
+      EXTERNAL        tableInqPar
+
+      INTEGER         tableInqParName
+!                                    (INTEGER         tableID,
+!                                     INTEGER         code,
+!                                     CHARACTER*(*)   name)
+      EXTERNAL        tableInqParName
+
+      INTEGER         tableInqParLongname
+!                                    (INTEGER         tableID,
+!                                     INTEGER         code,
+!                                     CHARACTER*(*)   longname)
+      EXTERNAL        tableInqParLongname
+
+      INTEGER         tableInqParUnits
+!                                    (INTEGER         tableID,
+!                                     INTEGER         code,
+!                                     CHARACTER*(*)   units)
+      EXTERNAL        tableInqParUnits
+
+!
+!  History routines
+!
+!                     streamDefHistory
+!                                    (INTEGER         streamID,
+!                                     INTEGER         size,
+!                                     CHARACTER*(*)   history)
+      EXTERNAL        streamDefHistory
+
+      INTEGER         streamInqHistorySize
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamInqHistorySize
+
+!                     streamInqHistoryString
+!                                    (INTEGER         streamID,
+!                                     CHARACTER*(*)   history)
+      EXTERNAL        streamInqHistoryString
+

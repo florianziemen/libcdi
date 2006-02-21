@@ -1,0 +1,77 @@
+#! /bin/sh
+#
+# default configuration options and compiler flags for different hosts
+#
+if test -z "$1" ; then
+  HOSTNAME=`hostname`
+else
+  HOSTNAME=$1
+fi
+#
+set -x
+#
+case "${HOSTNAME}" in
+# ia64-nec-linux
+    ds*)
+	./configure --prefix=$HOME/local \
+                    --with-netcdf=/pool/ia64/netcdf/netcdf-3.6.0-p1 \
+                    CC=ecc CFLAGS="-g -O2 -Wall -fno-alias CFINT=-Df2cFortran -DMIN_BUF_SIZE=4194304"
+	;;
+# i686-suse-linux
+    linux)
+	./configure --prefix=$HOME/local \
+                    --enable-dap --with-netcdf=$HOME/local \
+                    CC=g++ CFLAGS="-g -O2 -Wall" CFINT=-Df2cFortran
+	;;
+    tolken | gata)
+	./configure --prefix=$HOME/local/LINUX \
+                    --with-netcdf=/scratch/localA/m214003/local \
+	            CC=gcc CFLAGS="-ansi -g -O2 -Wall" CFINT=-Df2cFortran
+	;;
+# sparc-sun-solaris2.6
+    regen | gardiken)
+	./configure --prefix=$HOME/local/SUN \
+                    --with-netcdf=/pf/m/m214089/local/SUN \
+	            CC=gcc CFLAGS="-g -O2 -Wall"
+	;;
+# sparc-sun-solaris2.8
+    xxf)
+	./configure --prefix=$HOME/local/SUN \
+                    --with-netcdf=/client \
+                    CC=cc CFLAGS="-fast"
+	;;
+# sx6-nec-superux12.2
+    cs*)
+	./configure --prefix=$HOME/local \
+         	    --with-netcdf=/pool/netcdf/netcdf-3.6.0-p1 \
+		    CC=c++ \
+                    CFLAGS="-O -Onooverlap,restrict=all -pvctl,fullmsg,noassume,loopcnt=1000000"
+	;;
+    sx6)
+	./configure --host=sx6 --prefix=$HOME/local \
+                    --with-netcdf=/pool/SX-6/netcdf/netcdf-3.6.0-p1 \
+		    CC=sxc++ AR=sxar RANLIB=ls \
+                    CFLAGS="-O -Onooverlap,restrict=all -pvctl,fullmsg,noassume,loopcnt=1000000"
+	;;
+# mips-sgi-irix6.5
+    ecgate1)
+	./configure --prefix=$HOME/local \
+ 	            --with-netcdf=/home/ms/spdekplb/hmk/include,/home/ms/spdekplb/hmk/lib64 \
+	            CC=cc CFLAGS="-O -n32"
+	;;
+# 5000-fujitsu-uxpv4.1_ES
+    vpp5)
+	./configure --prefix=$HOME \
+	            --with-netcdf=$HOME/PROJ \
+	            CC=vcc CFLAGS="-O -Wv,-m3 -K4"
+	;;
+# alphaev56-dec-osf5.1
+    hpca)
+	./configure --prefix=$HOME/local \
+                    --with-netcdf=/usr/local/lib/netcdf-3.5.0/LP64 \
+	            CFLAGS="-q64 -q MAXMEM=-1" CFINT=-Dextname
+	;;
+    *)
+	echo "configuration for hostname $HOSTNAME not found!"
+	;;
+esac

@@ -1,0 +1,615 @@
+#if defined (HAVE_CONFIG_H)
+#  include "config.h"
+#endif
+
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
+#include <ctype.h>
+
+#include "dmemory.h"
+
+#include "service.h"
+#include "error.h"
+#include "file.h"
+#include "binary.h"
+#include "swap.h"
+
+
+#define SINGLE_PRECISION  4
+#define DOUBLE_PRECISION  8
+
+#define SRV_HEADER_LEN  8
+
+
+static int initSrvLib = 0;
+static int srvDefaultHprec = 0;
+static int srvDefaultDprec = 0;
+
+
+/*
+ * A version string.
+ */
+
+#undef  LIBVERSION
+#define LIBVERSION      0.9.3
+#define XSTRING(x)	#x
+#define STRING(x)	XSTRING(x)
+static const char srv_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
+
+const char *srvLibraryVersion(void)
+{
+  return (srv_libvers);
+}
+
+
+int SRV_Debug = 0;    /* If set to 1, debugging */
+
+
+void srvDebug(int debug)
+{
+  static char func[] = "srvDebug";
+
+  SRV_Debug = debug;
+
+  if ( SRV_Debug )
+    Message(func, "debug level %d", debug);
+}
+
+
+void srvLibInit()
+{
+  static char func[] = "srvLibInit";
+  char *envString;
+  char *envName = "SRV_PRECISION";
+
+
+  envString = getenv(envName);
+  if ( envString )
+    {
+      int pos;
+      int nrun;
+      if ( strlen(envString) == 2 ) nrun = 1;
+      else                          nrun = 2;
+
+      pos = 0;
+      while ( nrun-- )
+	{
+	  switch ( tolower((int) envString[pos]) )
+	    {
+	    case 'i':
+	      {
+		switch ( (int) envString[pos+1] )
+		  {
+		  case '4': srvDefaultHprec = SINGLE_PRECISION; break;
+		  case '8': srvDefaultHprec = DOUBLE_PRECISION; break;
+		  default:
+		    Message(func, "Invalid digit in %s: %s", envName, envString);
+		  }
+		break;
+	      }
+	    case 'r':
+	      {
+		switch ( (int) envString[pos+1] )
+		  {
+		  case '4': srvDefaultDprec = SINGLE_PRECISION; break;
+		  case '8': srvDefaultDprec = DOUBLE_PRECISION; break;
+		  default:
+		    Message(func, "Invalid digit in %s: %s", envName, envString);
+		  }
+		break;		
+	      }
+	    default:
+	      Message(func, "Invalid character in %s: %s", envName, envString);
+	    }
+	  pos += 2;
+	}
+    }
+
+  initSrvLib = 1;
+}
+
+
+void srvInit(SRVREC *srvp)
+{
+  srvp->checked    = 0;
+  srvp->byteswap   = 0;
+  srvp->hprec      = 0;
+  srvp->dprec      = 0;
+  srvp->datasize   = 0;
+  srvp->buffersize = 0;
+  srvp->buffer     = NULL;
+}
+
+
+SRVREC *srvNew(void)
+{
+  static char func[] = "srvNew";
+  SRVREC *srvp;
+
+  if ( ! initSrvLib ) srvLibInit();
+
+  srvp = (SRVREC *) malloc(sizeof(SRVREC));
+
+  srvInit(srvp);
+
+  return (srvp);
+}
+
+
+void srvDelete(SRVREC *srvp)
+{
+  static char func[] = "srvDelete";
+
+  if ( srvp )
+    {
+      if ( srvp->buffer ) free(srvp->buffer);
+      free(srvp);
+    }
+}
+
+
+int srvCheckFiletype(int fileID, int *swap)
+{
+  static char func[] = "srvCheckFiletype";
+  size_t blocklen = 0;
+  size_t sblocklen = 0;
+  size_t data = 0;
+  size_t dimx = 0, dimy = 0;
+  int fact = 0, found = 0;
+  unsigned char buffer[72], *pbuf;
+
+  if ( fileRead(fileID, buffer, 4) != 4 ) return (found);
+
+  blocklen  = (size_t) get_UINT32(buffer);
+  sblocklen = (size_t) get_SUINT32(buffer);
+
+  if ( SRV_Debug )
+    Message(func, "blocklen = %d sblocklen = %d", blocklen, sblocklen);
+
+  if ( blocklen == 32 )
+    {
+     *swap = 0;
+      fact = blocklen>>3;
+      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return (found);
+      pbuf = buffer+4*fact;      dimx = (size_t) get_UINT32(pbuf);
+      pbuf = buffer+5*fact;      dimy = (size_t) get_UINT32(pbuf);
+      pbuf = buffer+blocklen+4;  data = (size_t) get_UINT32(pbuf);
+    }
+  else if ( blocklen == 64 )
+    {
+     *swap = 0;
+      fact = blocklen>>3;
+      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return (found);
+      pbuf = buffer+4*fact;      dimx = (size_t) get_UINT64(pbuf);
+      pbuf = buffer+5*fact;      dimy = (size_t) get_UINT64(pbuf);
+      pbuf = buffer+blocklen+4;  data = (size_t) get_UINT32(pbuf);
+    }
+  else if ( sblocklen == 32 )
+    {
+     *swap = 1;
+      fact = sblocklen>>3;
+      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return (found);
+      pbuf = buffer+4*fact;       dimx = (size_t) get_SUINT32(pbuf);
+      pbuf = buffer+5*fact;       dimy = (size_t) get_SUINT32(pbuf);
+      pbuf = buffer+sblocklen+4;  data = (size_t) get_SUINT32(pbuf);
+    }
+  else if ( sblocklen == 64 )
+    {
+     *swap = 1;
+      fact = sblocklen>>3;
+      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return (found);
+      pbuf = buffer+4*fact;       dimx = (size_t) get_SUINT64(pbuf);
+      pbuf = buffer+5*fact;       dimy = (size_t) get_SUINT64(pbuf);
+      pbuf = buffer+sblocklen+4;  data = (size_t) get_SUINT32(pbuf);
+    }
+
+  fileRewind(fileID);
+
+  if      ( data && dimx*dimy*fact == data ) found = 1;
+  else if ( data && dimx*dimy*8    == data ) found = 1;
+
+  if ( SRV_Debug )
+    {
+      Message(func, "swap = %d fact = %d", *swap, fact);
+      Message(func, "dimx = %lu dimy = %lu data = %lu", dimx, dimy, data);
+    }
+
+  return (found);
+}
+
+
+int srvInqHeader(SRVREC *srvp, int *header)
+{
+  static char func[] = "srvInqHeader";
+  size_t i;
+
+
+  for ( i = 0; i < SRV_HEADER_LEN; i++ )
+    header[i] = srvp->header[i];
+  
+  if ( SRV_Debug )
+    Message(func, "datasize = %lu", srvp->datasize);
+
+  return (0);
+}
+
+
+int srvDefHeader(SRVREC *srvp, const int *header)
+{
+  static char func[] = "srvDefHeader";
+  size_t i;
+
+
+  for ( i = 0; i < SRV_HEADER_LEN; i++ )
+    srvp->header[i] = header[i];
+  
+  srvp->datasize = header[4]*header[5];
+
+  if ( SRV_Debug )
+    Message(func, "datasize = %lu", srvp->datasize);
+
+  return (0);
+}
+
+
+int srvInqData(SRVREC *srvp, int prec, void *data)
+{
+  static char func[] = "srvInqData";
+  size_t datasize;
+  size_t i;
+  int ierr = 0;
+  int dprec;
+  void *buffer;
+  int byteswap = srvp->byteswap;
+
+
+  datasize = srvp->datasize;
+
+  buffer = srvp->buffer;
+
+  dprec = srvp->dprec;
+
+  switch ( dprec )
+    {
+    case SINGLE_PRECISION:
+      {
+	if ( sizeof(REAL4) == 4 )
+	  {
+	    if ( byteswap ) swap4byte(buffer, datasize);
+
+	    if ( dprec == prec )
+	      memcpy(data, buffer, datasize*sizeof(REAL4));
+	    else
+	      for (i = 0; i < datasize; i++)
+		((double *) data)[i] = (double) ((float *) buffer)[i];
+	  }
+	else
+	  {
+	    Error(func, "not implemented for %d byte float", sizeof(REAL4));
+	  }	
+	break;
+      }
+    case DOUBLE_PRECISION:
+	if ( sizeof(REAL8) == 8 )
+	  {
+	    if ( byteswap ) swap8byte(buffer, datasize);
+
+	    if ( dprec == prec )
+	      memcpy(data, buffer, datasize*sizeof(REAL8));
+	    else
+	      for (i = 0; i < datasize; i++)
+		((float *) data)[i] = (float) ((double *) buffer)[i];
+	  }
+	else
+	  {
+	    Error(func, "not implemented for %d byte float", sizeof(REAL8));
+	  }	
+	break;
+    default:
+      {
+	Error(func, "unexpected data precision %d", dprec);
+      }
+    }
+
+  return (ierr);
+}
+
+
+int srvInqDataSP(SRVREC *srvp, float *data)
+{
+  return (srvInqData(srvp, SINGLE_PRECISION, (void *) data));
+}
+
+
+int srvInqDataDP(SRVREC *srvp, double *data)
+{
+  return (srvInqData(srvp, DOUBLE_PRECISION, (void *) data));
+}
+
+
+int srvDefData(SRVREC *srvp, int prec, const void *data)
+{
+  static char func[] = "srvDefData";
+  size_t datasize;
+  size_t blocklen;
+  size_t buffersize;
+  size_t i;
+  int dprec, hprec;
+  int *header;
+  void *buffer;
+
+
+  if ( srvDefaultDprec ) dprec = srvDefaultDprec;
+  else                   dprec = srvp->dprec;
+
+  if ( ! dprec ) dprec = prec;
+
+  srvp->dprec = dprec;
+
+  if ( srvDefaultHprec ) hprec = srvDefaultHprec;
+  else                   hprec = srvp->hprec;
+
+  if ( ! hprec ) hprec = dprec;
+  
+  srvp->hprec = hprec;
+
+  header = srvp->header;
+
+  datasize = header[4]*header[5];
+  blocklen = datasize * dprec;
+
+  srvp->datasize = datasize;
+
+  buffersize = srvp->buffersize;
+
+  if ( buffersize != blocklen )
+    {
+      buffersize = blocklen;
+      buffer = srvp->buffer;
+      buffer = realloc(buffer, buffersize);
+      srvp->buffer = buffer;
+      srvp->buffersize = buffersize;
+    }
+  else
+    buffer = srvp->buffer;
+
+  switch ( dprec )
+    {
+    case SINGLE_PRECISION:
+      {
+	if ( dprec == prec )
+	  memcpy(buffer, data, datasize*sizeof(REAL4));
+	else
+	  for (i = 0; i < datasize; i++)
+	    ((float *) buffer)[i] = (float) ((double *) data)[i];
+
+	break;
+      }
+    case DOUBLE_PRECISION:
+      {
+	if ( dprec == prec )
+	  memcpy(buffer, data, datasize*sizeof(REAL8));
+	else
+	  for (i = 0; i < datasize; i++)
+	    ((double *) buffer)[i] = (double) ((float *) data)[i];
+
+	break;
+      }
+    default:
+      {
+	Error(func, "unexpected data precision %d", dprec);
+      }
+    }
+
+  return (0);
+}
+
+
+int srvDefDataSP(SRVREC *srvp, const float *data)
+{
+  return (srvDefData(srvp, SINGLE_PRECISION, (void *) data));
+}
+
+
+int srvDefDataDP(SRVREC *srvp, const double *data)
+{
+  return (srvDefData(srvp, DOUBLE_PRECISION, (void *) data));
+}
+
+
+int srvRead(int fileID, SRVREC *srvp)
+{
+  static char func[] = "srvRead";
+  size_t datasize;
+  size_t blocklen, blocklen2;
+  size_t i;
+  char tempheader[64];
+  int hprec, dprec;
+  void *buffer;
+  int buffersize;
+  int byteswap;
+  int status;
+
+  if ( ! srvp->checked )
+    {
+      status = srvCheckFiletype(fileID, &srvp->byteswap);
+      if ( status == 0 ) Error(func, "Not a SERVICE file!");
+      srvp->checked = 1;
+    }
+
+  byteswap = srvp->byteswap;
+
+  /* read header record */
+  blocklen = binReadF77Block(fileID, byteswap);
+
+  if ( fileEOF(fileID) ) return (-1);
+
+  if ( SRV_Debug )
+    Message(func, "blocklen = %lu", blocklen);
+
+  hprec = blocklen / SRV_HEADER_LEN;
+
+  srvp->hprec = hprec;
+
+  switch ( hprec )
+    {
+    case SINGLE_PRECISION:
+      {
+	binReadInt32(fileID, byteswap, SRV_HEADER_LEN, (INT32 *) tempheader);
+
+	for ( i = 0; i < SRV_HEADER_LEN; i++ )
+          srvp->header[i] = (int) ((INT32 *) tempheader)[i];
+
+	break;
+      }
+    case DOUBLE_PRECISION:
+      {
+	binReadInt64(fileID, byteswap, SRV_HEADER_LEN, (INT64 *) tempheader);
+
+	for ( i = 0; i < SRV_HEADER_LEN; i++ )
+          srvp->header[i] = (int) ((INT64 *) tempheader)[i];
+
+	break;
+      }
+    default:
+      {
+	Error(func, "unexpected header precision %d", hprec);
+      }
+    }
+
+  blocklen2 = binReadF77Block(fileID, byteswap);
+
+  if ( blocklen2 != blocklen )
+    {
+      Warning(func, "header blocklen differ!");
+      return (-1);
+    }
+
+  srvp->datasize = srvp->header[4]*srvp->header[5];
+
+  if ( SRV_Debug )
+    Message(func, "datasize = %lu", srvp->datasize);
+
+  blocklen = binReadF77Block(fileID, byteswap);
+
+  buffersize = srvp->buffersize;
+
+  if ( buffersize < (int) blocklen )
+    {
+      buffersize = blocklen;
+      buffer = srvp->buffer;
+      buffer = realloc(buffer, buffersize);
+      srvp->buffer = buffer;
+      srvp->buffersize = buffersize;
+    }
+  else
+    buffer = srvp->buffer;
+
+  datasize = srvp->datasize;
+
+  dprec = blocklen / datasize;
+
+  srvp->dprec = dprec;
+
+  if ( dprec != SINGLE_PRECISION && dprec != DOUBLE_PRECISION )
+    {
+      Warning(func, "unexpected data precision %d", dprec);
+      return (-1);
+    }
+
+  fileRead(fileID, buffer, blocklen);
+
+  blocklen2 = binReadF77Block(fileID, byteswap);
+
+  if ( blocklen2 != blocklen )
+    {
+      Warning(func, "data blocklen differ!");
+      return (-1);
+    }
+
+  return (0);
+}
+
+
+int srvWrite(int fileID, SRVREC *srvp)
+{
+  static char func[] = "srvWrite";
+  size_t datasize;
+  size_t blocklen;
+  size_t i;
+  int dprec, hprec;
+  char tempheader[64];
+  int *header;
+  void *buffer;
+  int byteswap = srvp->byteswap;
+
+
+  dprec  = srvp->dprec;
+  hprec  = srvp->hprec;
+  header = srvp->header;
+
+  /* write header record */
+  blocklen = SRV_HEADER_LEN * hprec;
+
+  binWriteF77Block(fileID, byteswap, blocklen);
+
+  switch ( hprec )
+    {
+    case SINGLE_PRECISION:
+      {
+	for (i = 0; i < SRV_HEADER_LEN; i++)
+          ((INT32 *) tempheader)[i] = (INT32) header[i];
+
+	binWriteInt32(fileID, byteswap, SRV_HEADER_LEN, (INT32 *) tempheader);
+
+	break;
+      }
+    case DOUBLE_PRECISION:
+      {
+	for (i = 0; i < SRV_HEADER_LEN; i++)
+          ((INT64 *) tempheader)[i] = (INT64) header[i];
+
+	binWriteInt64(fileID, byteswap, SRV_HEADER_LEN, (INT64 *) tempheader);
+
+	break;
+      }
+    default:
+      {
+	Error(func, "unexpected header precision %d", hprec);
+      }
+    }
+  
+  binWriteF77Block(fileID, byteswap, blocklen);
+
+  datasize = header[4]*header[5];
+  blocklen = datasize * dprec;
+
+  binWriteF77Block(fileID, byteswap, blocklen);
+
+  srvp->datasize = datasize;
+
+  buffer = srvp->buffer;
+
+  switch ( dprec )
+    {
+    case SINGLE_PRECISION:
+      {
+	binWriteReal4(fileID, byteswap, datasize, (REAL4 *) buffer);
+	break;
+      }
+    case DOUBLE_PRECISION:
+      {
+	binWriteReal8(fileID, byteswap, datasize, (REAL8 *) buffer);
+	break;
+      }
+    default:
+      {
+	Error(func, "unexpected data precision %d", dprec);
+      }
+    }
+
+  binWriteF77Block(fileID, byteswap, blocklen);
+
+  return (0);
+}

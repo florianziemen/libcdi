@@ -1,0 +1,31 @@
+
+CDI - Climate Data Interface
+----------------------------
+
+     This package contains the source code for the CDI library from
+     the Max-Planck-Institute for Meteorology.
+     CDI is a C and Fortran Interface to access Climate model Data.
+     Supported file formats are GRIB, netCDF, SERVICE, EXTRA and IEG.
+
+Documentation:
+
+     Not available.
+
+Installation:
+
+     Read INSTALL on how to configure, compile and install the library.
+     The configuration script has some more environment variables.
+     Type 'configure -h' to see them.
+
+Porting:
+
+     This library was designed for maximum portability. It is written entirely
+     in ANSI C, and will compile on most UNIX platforms.
+
+     The FORTRAN interface is using the cfortran.h macros from
+     http://www-zeus.desy.de/~burow/cfortran/
+     
+Contact:
+
+     Send questions, comments and bug reports to schulzweida@dkrz.de
+
