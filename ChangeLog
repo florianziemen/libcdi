@@ -1,5 +1,6 @@
 2006-03-??  Uwe Schulzweida  <schulzweida@dkrz.de>
 
+	* program cdi: add option -s for short info
 	* cdfInqContents: improve GRID_CELL support
 	* cdfDefTime: attr text bounds for time axis (bug fix [Veronika])
 	* gridToZonal: add support for GRID_GENERIC if ny > 1
