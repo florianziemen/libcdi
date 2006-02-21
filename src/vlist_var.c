@@ -463,7 +463,7 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
 void vlistInqVarStdname(int vlistID, int varID, char *stdname)
 {
   static char func[] = "vlistInqVarStdname";
-  int code, tableID;
+  /*  int code, tableID; */
   VLIST *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -1138,12 +1138,58 @@ void vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
     }
   else
     {
-      if ( vlistptr->nzaxis + 1 >= MAX_ZAXIS )
-	Error(func, "Maximum of %d zaxis reached", MAX_ZAXIS);
+      for ( index = 0; index < vlistptr->nzaxis; index++ )
+	if ( vlistptr->zaxisIDs[index] == zaxisID ) break;
 
-      vlistptr->zaxisIDs[vlistptr->nzaxis] = zaxisID;
-      vlistptr->nzaxis++;
+      if ( index == nvars )
+	{
+	  if ( vlistptr->nzaxis + 1 >= MAX_ZAXIS )
+	    Error(func, "Maximum of %d zaxis reached", MAX_ZAXIS);
+
+	  vlistptr->zaxisIDs[vlistptr->nzaxis] = zaxisID;
+	  vlistptr->nzaxis++;
+	}
     }
   
   vlistptr->vars[varID].zaxisID = zaxisID;
+}
+
+
+void vlistChangeVarGrid(int vlistID, int varID, int gridID)
+{
+  static char func[] = "vlistChangeVarGrid";
+  int nvars, index;
+  VLIST *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(func, vlistID, varID);
+
+  nvars = vlistptr->nvars;
+  for ( index = 0; index < nvars; index++ )
+    if ( index != varID )
+      if ( vlistptr->vars[index].gridID == vlistptr->vars[varID].gridID ) break;
+
+  if ( index == nvars )
+    {
+      for ( index = 0; index < vlistptr->ngrids; index++ )
+	if ( vlistptr->gridIDs[index] == vlistptr->vars[varID].gridID )
+	  vlistptr->gridIDs[index] = gridID;
+    }
+  else
+    {
+      for ( index = 0; index < vlistptr->ngrids; index++ )
+	if ( vlistptr->gridIDs[index] == gridID ) break;
+
+      if ( index == nvars )
+	{
+	  if ( vlistptr->ngrids + 1 >= MAX_GRIDS )
+	    Error(func, "Maximum of %d grids reached", MAX_GRIDS);
+
+	  vlistptr->gridIDs[vlistptr->ngrids] = gridID;
+	  vlistptr->ngrids++;
+	}
+    }
+  
+  vlistptr->vars[varID].gridID = gridID;
 }
