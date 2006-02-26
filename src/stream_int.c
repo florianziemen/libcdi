@@ -49,7 +49,7 @@ int CDI_Debug   = 0;    /* If set to 1, debugging           */
 char *strfiletype(int filetype)
 {
   char *name;
-  int size = sizeof(Filetypes)/sizeof(char *);
+  int size = (int) (sizeof(Filetypes)/sizeof(char *));
 
   if ( filetype > 0 && filetype < size )
     name = Filetypes[filetype];

@@ -786,7 +786,7 @@ static void file_set_buffer(F_I_L_E *fileptr)
 	fileptr->bufferType = FILE_TYPE_STD;
 
       if ( FileBufferSizeEnv >= 0 )
-	buffersize = FileBufferSizeEnv;
+	buffersize = (size_t) FileBufferSizeEnv;
       else if ( fileptr->bufferSize > 0 )
 	buffersize = fileptr->bufferSize;
       else
@@ -796,11 +796,11 @@ static void file_set_buffer(F_I_L_E *fileptr)
 	}
 
       if ( (size_t) fileptr->size < buffersize )
-	buffersize = fileptr->size;
+	buffersize = (size_t) fileptr->size;
 
       if ( fileptr->bufferType == FILE_TYPE_MMAP )
 	{
-	  size_t blocksize = pagesize();
+	  size_t blocksize = (size_t) pagesize();
 	  size_t minblocksize = 4 * blocksize;
 	  buffersize = buffersize - buffersize % minblocksize;
 
@@ -813,7 +813,7 @@ static void file_set_buffer(F_I_L_E *fileptr)
       fileptr->bufferType = FILE_TYPE_STD;
 
       if ( FileBufferSizeEnv >= 0 )
-	buffersize = FileBufferSizeEnv;
+	buffersize = (size_t) FileBufferSizeEnv;
       else if ( fileptr->bufferSize > 0 )
 	buffersize = fileptr->bufferSize;
       else
@@ -1082,7 +1082,7 @@ int fileOpen(const char *filename, const char *mode)
     {
       fileptr->mode = fmode;
       fileptr->name = strdupx(filename);
-      fileptr->blockSize = filestat.st_blksize;
+      fileptr->blockSize = (size_t) filestat.st_blksize;
 
       if ( fmode == 'r' ) fileptr->size = filestat.st_size;
 

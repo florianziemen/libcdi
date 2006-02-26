@@ -268,7 +268,7 @@ int grbReadRecord(int streamID, double *data, int *nmiss)
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
-  fileRead(fileID, gribbuffer, recsize);
+  fileRead(fileID, gribbuffer, (size_t) recsize);
 
   grbDecodeDataDP(gribbuffer, recsize, data, gridsize, streams[streamID].unreduced, nmiss);
 
@@ -1142,7 +1142,7 @@ int grbScanTimestep2(int streamID)
       if ( recsize > buffersize )
 	{
 	  buffersize = recsize;
-	  gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
+	  gribbuffer = (unsigned char *) realloc(gribbuffer, (size_t)buffersize);
 	}
 
       readsize = recsize;
@@ -1569,7 +1569,7 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
 
   if ( gridtype == GRID_GENERIC )
     {
-      size_t xsize, ysize;
+      int xsize, ysize;
 
       xsize = gridInqXsize(gridID);
       ysize = gridInqYsize(gridID);
