@@ -189,10 +189,10 @@ static int getFiletype(const char *filename, int *byteorder)
     @Item  streamID  Stream identifier
 
 @Description
-The function {\tt streamInqFiletype} gets the filetype of a stream.
+The function {\tt streamInqFiletype} returns the filetype of a stream.
 
 @Result
-{\tt streamInqFiletype} return the type of the file format,
+{\tt streamInqFiletype} returns the type of the file format,
 one of the set of predefined CDI file format types.
 The valid CDI file format types are {\tt FILETYPE_GRB}, {\tt FILETYPE_NC},
 {\tt FILETYPE_NC2}, {\tt FILETYPE_SRV}, and {\tt FILETYPE_EXT}.
@@ -284,7 +284,7 @@ int streamInqByteorder(int streamID)
 char *streamFilesuffix(int filetype)
 {
   static char *fileSuffix[] = {"", ".grb", ".g2", ".nc", ".nc2", ".srv", ".ext", ".h5", ".ieg"};
-  int size = sizeof(fileSuffix)/sizeof(char *);
+  int size = (int) (sizeof(fileSuffix)/sizeof(char *));
 
   if ( filetype > 0 && filetype < size )
     return (fileSuffix[filetype]);
@@ -738,17 +738,17 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 
 /*
 @Function  streamOpenRead
-@Title     Open a file for reading
+@Title     Open a dataset for reading
 
-@Prototype int streamOpenRead(const char *filename)
+@Prototype int streamOpenRead(const char *path)
 @Parameter
-    @Item  filename  The file name of the dataset to be read
+    @Item  path  The name of the dataset to be read
 
 @Description
-The function {\tt streamOpenRead} opens an existing file for reading.
+The function {\tt streamOpenRead} opens an existing dataset for reading.
 
 @Result
-Upon successful completion {\tt streamOpenRead} return an identifier to the
+Upon successful completion {\tt streamOpenRead} returns an identifier to the
 open stream. Otherwise, a negative number with the error status is returned.
 
 @Errors
@@ -810,20 +810,19 @@ int streamOpenAppend(const char *filename)
 
 /*
 @Function  streamOpenWrite
-@Title     Open a file for writing
+@Title     Create a new dataset
 
-@Prototype int streamOpenWrite(const char *filename, int filetype)
+@Prototype int streamOpenWrite(const char *path, int filetype)
 @Parameter
-    @Item  filename  The file name of the dataset to be read
+    @Item  path      The name of the new dataset
     @Item  filetype  The type of the file format, one of the set of predefined CDI file format types.
                      The valid CDI file format types are {\tt FILETYPE_GRB}, {\tt FILETYPE_NC},
                      {\tt FILETYPE_NC2}, {\tt FILETYPE_SRV}, and {\tt FILETYPE_EXT}.
 
 @Description
-The function {\tt streamOpenWrite} create a new file for writing.
-
+The function {\tt streamOpenWrite} creates a new datset.
 @Result
-Upon successful completion {\tt streamOpenWrite} return an identifier to the
+Upon successful completion {\tt streamOpenWrite} returns an identifier to the
 open stream. Otherwise, a negative number with the error status is returned.
 
 @Errors
@@ -857,7 +856,7 @@ int streamOpenWrite(const char *filename, int filetype)
 
 /*
 @Function  streamClose
-@Title     Close an Open file
+@Title     Close an open dataset
 
 @Prototype  void streamClose(int streamID)
 @Parameter
@@ -865,7 +864,7 @@ int streamOpenWrite(const char *filename, int filetype)
                      or {\tt streamOpenWrite}
 
 @Description
-The function {\tt streamClose} closes an open file.
+The function {\tt streamClose} closes an open dataset.
 
 @EndFunction
 */
@@ -996,7 +995,7 @@ void streamClose(int streamID)
 The function {\tt streamDefTimestep} defines the timestep of a stream.
 
 @Result
-{\tt streamDefTimestep} return the number of records of the timestep.
+{\tt streamDefTimestep} returns the number of records of the timestep.
 
 @EndFunction
 */
@@ -1055,10 +1054,10 @@ int streamDefTimestep(int streamID, int tsID)
     @Item  tsID      Timestep identifier
 
 @Description
-The function {\tt streamInqTimestep} gets the timestep of a stream.
+The function {\tt streamInqTimestep} returns the timestep of a stream.
 
 @Result
-{\tt streamInqTimestep} return the number of records of the timestep.
+{\tt streamInqTimestep} returns the number of records of the timestep.
 
 @EndFunction
 */
@@ -1550,7 +1549,7 @@ void streamWriteContents(int streamID, char *cname)
 	  varID   = streams[streamID].tsteps[tsID].records[recID].varID;
 	  levelID = streams[streamID].tsteps[tsID].records[recID].levelID;
 	  recpos  = streams[streamID].tsteps[tsID].records[recID].position;
-	  recsize = streams[streamID].tsteps[tsID].records[recID].size;
+	  recsize = (long)streams[streamID].tsteps[tsID].records[recID].size;
 	  fprintf(cnp, "%4d:%4d:%4d:%4d:%4ld:%ld\n",
 		  tsID, recID, varID, levelID, recsize, (long) recpos);
 	}
@@ -1674,10 +1673,10 @@ void streamDefVlist(int streamID, int vlistID)
     @Item  streamID  Stream identifier
 
 @Description
-The function {\tt streamInqVlist} gets the variable list of a stream.
+The function {\tt streamInqVlist} returns the variable list of a stream.
 
 @Result
-{\tt streamInqVlist} return an identifier to the variable list.
+{\tt streamInqVlist} returns an identifier to the variable list.
 
 @EndFunction
 */

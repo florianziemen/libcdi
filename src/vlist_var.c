@@ -125,7 +125,7 @@ static void vlistCheckVarID(char func[], int vlistID, int varID)
 
 /*
 @Function  vlistDefVar
-@Title     Create a Variable
+@Title     Define a Variable
 
 @Prototype int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
 @Parameter
@@ -139,7 +139,7 @@ static void vlistCheckVarID(char func[], int vlistID, int varID)
 The function {\tt vlistDefVar} adds a new variable to vlistID.
 
 @Result
-{\tt vlistDefVar} return an identifier to the new variable.
+{\tt vlistDefVar} returns an identifier to the new variable.
 
 @EndFunction
 */
@@ -216,7 +216,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
 
 /*
 @Function  vlistDefVarCode
-@Title     Define the Code number of a variable
+@Title     Define the code number of a Variable
 
 @Prototype void vlistDefVarCode(int vlistID, int varID, int code)
 @Parameter
@@ -299,7 +299,7 @@ int vlistInqVarTime(int vlistID, int varID)
 
 /*
 @Function  vlistInqVarCode
-@Title     Get the Code number of a variable
+@Title     Get the Code number of a Variable
 
 @Prototype int vlistInqVarCode(int vlistID, int varID)
 @Parameter
@@ -307,10 +307,10 @@ int vlistInqVarTime(int vlistID, int varID)
     @Item  varID     Variable identifier
 
 @Description
-The function {\tt vlistInqVarCode} gets the code number of a variable.
+The function {\tt vlistInqVarCode} returns the code number of a variable.
 
 @Result
-{\tt vlistInqVarCode} return the code number of the variable.
+{\tt vlistInqVarCode} returns the code number of the variable.
 
 @EndFunction
 */
@@ -378,7 +378,7 @@ char *vlistInqVarUnitsPtr(int vlistID, int varID)
 
 /*
 @Function  vlistInqVarName
-@Title     Get the name of a variable
+@Title     Get the name of a Variable
 
 @Prototype void vlistInqVarName(int vlistID, int varID, char *name)
 @Parameter
@@ -387,10 +387,10 @@ char *vlistInqVarUnitsPtr(int vlistID, int varID)
     @Item  name      Variable name
 
 @Description
-The function {\tt vlistInqVarName} gets the name of a variable.
+The function {\tt vlistInqVarName} returns the name of a variable.
 
 @Result
-{\tt vlistInqVarName} return the name of the variable to the parameter name.
+{\tt vlistInqVarName} returns the name of the variable to the parameter name.
 
 @EndFunction
 */
@@ -420,7 +420,7 @@ void vlistInqVarName(int vlistID, int varID, char *name)
 
 /*
 @Function  vlistInqVarLongname
-@Title     Get the longname of a variable
+@Title     Get the longname of a Variable
 
 @Prototype void vlistInqVarLongname(int vlistID, int varID, char *longname)
 @Parameter
@@ -429,10 +429,10 @@ void vlistInqVarName(int vlistID, int varID, char *name)
     @Item  longname  Variable description
 
 @Description
-The function {\tt vlistInqVarLongname} gets the longname of a variable.
+The function {\tt vlistInqVarLongname} returns the longname of a variable.
 
 @Result
-{\tt vlistInqVaeLongname} return the longname of the variable to the parameter longname.
+{\tt vlistInqVaeLongname} returns the longname of the variable to the parameter longname.
 
 @EndFunction
 */
@@ -488,7 +488,7 @@ void vlistInqVarStdname(int vlistID, int varID, char *stdname)
 
 /*
 @Function  vlistInqVarUnits
-@Title     Get the units of a variable
+@Title     Get the units of a Variable
 
 @Prototype void vlistInqVarUnits(int vlistID, int varID, char *units)
 @Parameter
@@ -497,10 +497,10 @@ void vlistInqVarStdname(int vlistID, int varID, char *stdname)
     @Item  units     Variable units
 
 @Description
-The function {\tt vlistInqVarUnits} gets the units of a variable.
+The function {\tt vlistInqVarUnits} returns the units of a variable.
 
 @Result
-{\tt vlistInqVarUnits} return the units of the variable to the parameter units.
+{\tt vlistInqVarUnits} returns the units of the variable to the parameter units.
 
 @EndFunction
 */
@@ -575,7 +575,7 @@ int vlistInqVarSize(int vlistID, int varID)
 
 /*
 @Function  vlistInqVarDatatype
-@Title     Get the datatype of a variable
+@Title     Get the datatype of a Variable
 
 @Prototype int vlistInqVarDatatype(int vlistID, int varID)
 @Parameter
@@ -583,10 +583,10 @@ int vlistInqVarSize(int vlistID, int varID)
     @Item  varID     Variable identifier
 
 @Description
-The function {\tt vlistInqVarDatatype} gets the datatype of a variable.
+The function {\tt vlistInqVarDatatype} returns the datatype of a variable.
 
 @Result
-{\tt vlistInqVarDatatype} return an identifier to the datatype of the variable.
+{\tt vlistInqVarDatatype} returns an identifier to the datatype of the variable.
 
 @EndFunction
 */
@@ -605,7 +605,7 @@ int vlistInqVarDatatype(int vlistID, int varID)
 
 /*
 @Function  vlistDefVarDatatype
-@Title     Define the data type of a variable
+@Title     Define the data type of a Variable
 
 @Prototype void vlistDefVarDatatype(int vlistID, int varID, int datatype)
 @Parameter
@@ -690,7 +690,7 @@ int vlistInqVarTable(int vlistID, int varID)
 
 /*
 @Function  vlistDefVarName
-@Title     Define the name of a variable
+@Title     Define the name of a Variable
 
 @Prototype void vlistDefVarName(int vlistID, int varID, const char *name)
 @Parameter
@@ -720,7 +720,7 @@ void vlistDefVarName(int vlistID, int varID, const char *name)
 
 /*
 @Function  vlistDefVarLongname
-@Title     Define the long name of a variable
+@Title     Define the long name of a Variable
 
 @Prototype void vlistDefVarLongname(int vlistID, int varID, const char *longname)
 @Parameter
@@ -765,7 +765,7 @@ void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
 
 /*
 @Function  vlistDefVarUnits
-@Title     Define the units of a variable
+@Title     Define the units of a Variable
 
 @Prototype void vlistDefVarUnits(int vlistID, int varID, const char *units)
 @Parameter
@@ -795,7 +795,7 @@ void vlistDefVarUnits(int vlistID, int varID, const char *units)
 
 /*
 @Function  vlistInqVarMissval
-@Title     Get the missing value of a variable
+@Title     Get the missing value of a Variable
 
 @Prototype double vlistInqVarMissval(int vlistID, int varID)
 @Parameter
@@ -803,10 +803,10 @@ void vlistDefVarUnits(int vlistID, int varID, const char *units)
     @Item  varID     Variable identifier
 
 @Description
-The function {\tt vlistInqVarMissval} gets the missing value of a variable.
+The function {\tt vlistInqVarMissval} returns the missing value of a variable.
 
 @Result
-{\tt vlistInqVarMissval} return the missing value of the variable.
+{\tt vlistInqVarMissval} returns the missing value of the variable.
 
 @EndFunction
 */
@@ -850,7 +850,7 @@ double vlistInqVarAddoffset(int vlistID, int varID)
 
 /*
 @Function  vlistDefVarMissval
-@Title     Define the missing value of a variable
+@Title     Define the missing value of a Variable
 
 @Prototype void vlistDefVarMissval(int vlistID, int varID, double missval)
 @Parameter

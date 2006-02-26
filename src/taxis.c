@@ -190,7 +190,7 @@ static void taxisCheckID(const char *func, int taxisID)
 The function {\tt taxisNew} creates a new Time axis.
 
 @Result
-{\tt taxisNew} return an identifier to the new T-axis.
+{\tt taxisNew} returns an identifier to the new T-axis.
 
 @EndFunction
 */
@@ -422,10 +422,10 @@ void taxisCopyTimestep(int taxisIDdes, int taxisIDsrc)
     @Item  taxisID  T-axis identifier
 
 @Description
-The function {\tt taxisInqVdate} gets the verification date of a Time axis.
+The function {\tt taxisInqVdate} returns the verification date of a Time axis.
 
 @Result
-{\tt taxisInqVdate} return the verification date.
+{\tt taxisInqVdate} returns the verification date.
 
 @EndFunction
 */
@@ -448,10 +448,10 @@ int taxisInqVdate(int taxisID)
     @Item  taxisID  T-axis identifier
 
 @Description
-The function {\tt taxisInqVtime} gets the verification time of a Time axis.
+The function {\tt taxisInqVtime} returns the verification time of a Time axis.
 
 @Result
-{\tt taxisInqVtime} return the verification time.
+{\tt taxisInqVtime} returns the verification time.
 
 @EndFunction
 */
@@ -474,10 +474,10 @@ int taxisInqVtime(int taxisID)
     @Item  taxisID  T-axis identifier
 
 @Description
-The function {\tt taxisInqRdate} gets the reference date of a Time axis.
+The function {\tt taxisInqRdate} returns the reference date of a Time axis.
 
 @Result
-{\tt taxisInqVdate} return the reference date.
+{\tt taxisInqVdate} returns the reference date.
 
 @EndFunction
 */
@@ -506,10 +506,10 @@ int taxisInqRdate(int taxisID)
     @Item  taxisID  T-axis identifier
 
 @Description
-The function {\tt taxisInqRtime} gets the reference time of a Time axis.
+The function {\tt taxisInqRtime} returns the reference time of a Time axis.
 
 @Result
-{\tt taxisInqVtime} return the reference time.
+{\tt taxisInqVtime} returns the reference time.
 
 @EndFunction
 */
@@ -538,10 +538,10 @@ int taxisInqRtime(int taxisID)
     @Item  taxisID  T-axis identifier
 
 @Description
-The function {\tt taxisInqCalendar} gets the calendar of a Time axis.
+The function {\tt taxisInqCalendar} returns the calendar of a Time axis.
 
 @Result
-{\tt taxisInqCalendar} return the type of the calendar,
+{\tt taxisInqCalendar} returns the type of the calendar,
 one of the set of predefined CDI calendar types.
 The valid CDI calendar types are {\tt CALENDAR_STANDARD}, {\tt CALENDAR_360DAYS},
 {\tt CALENDAR_365DAYS} and {\tt CALENDAR_366DAYS}.

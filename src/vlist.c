@@ -353,7 +353,7 @@ void vlistUnlock(int vlistID)
     @Item  vlistID1 Source variable list
 
 @Description
-The {\tt vlistCopy} function copies all entries from vlistID1 to vlistID2.
+The function {\tt vlistCopy} copies all entries from vlistID1 to vlistID2.
 
 @EndFunction
 */
@@ -423,10 +423,10 @@ void vlistCopy(int vlistID2, int vlistID1)
     @Item  vlistID Variable list identifier
 
 @Description
-The {\tt vlistDuplicate} function duplicate the variable list from vlistID1.
+The function {\tt vlistDuplicate} duplicates the variable list from vlistID1.
 
 @Result
-{\tt vlistDuplicate} return an identifier to the duplicated variable list.
+{\tt vlistDuplicate} returns an identifier to the duplicated variable list.
 
 @EndFunction
 */
@@ -546,7 +546,7 @@ int vlistInqZaxis(int vlistID, int leveltype, int nlevels, double *levels, int l
     @Item  vlistID1 Source variable list
 
 @Description
-The {\tt vlistCopyFlag} function copies all entries with a flag from vlistID1 to vlistID2.
+The function {\tt vlistCopyFlag} copies all entries with a flag from vlistID1 to vlistID2.
 
 @EndFunction
 */
@@ -917,10 +917,10 @@ void vlistMerge(int vlistID2, int vlistID1)
     @Item  vlistID Variable list identifier
 
 @Description
-The {\tt vlistNvars} function get the number of variables in the variable list vlistID.
+The function {\tt vlistNvars} returns the number of variables in the variable list vlistID.
 
 @Result
-{\tt vlistNvars} return the number of variables in a variable list.
+{\tt vlistNvars} returns the number of variables in a variable list.
 
 @EndFunction
 */
@@ -962,10 +962,10 @@ int vlistNrecs(int vlistID)
     @Item  vlistID Variable list identifier
 
 @Description
-The {\tt vlistNvars} function get the number of grids in the variable list vlistID.
+The function {\tt vlistNgrids} returns the number of grids in the variable list vlistID.
 
 @Result
-{\tt vlistNvars} return the number of grids in a variable list.
+{\tt vlistNgrids} returns the number of grids in a variable list.
 
 @EndFunction
 */
@@ -991,10 +991,10 @@ int vlistNgrids(int vlistID)
     @Item  vlistID Variable list identifier
 
 @Description
-The {\tt vlistNvars} function get the number of zaxis in the variable list vlistID.
+The function {\tt vlistNzaxis} returns the number of zaxis in the variable list vlistID.
 
 @Result
-{\tt vlistNvars} return the number of zaxis in a variable list.
+{\tt vlistNzaxis} returns the number of zaxis in a variable list.
 
 @EndFunction
 */

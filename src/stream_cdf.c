@@ -105,7 +105,7 @@ static int splitBasetime(char *timeunits, TAXIS *taxis)
   int timeunit = -1;
 
   ptu = timeunits;
-  len = strlen(timeunits);
+  len = (int) strlen(timeunits);
 
   (*taxis).type = timetype;
 
@@ -303,7 +303,7 @@ int cdfCopyRecord(int ostreamID, int istreamID)
 {
   static char func[] = "cdfCopyRecord";
   double *data;
-  size_t datasize;
+  int datasize;
   int itsID, otsID, irecID, orecID;
   int ivarID, gridID;
   int nmiss;
@@ -339,6 +339,7 @@ int cdfCopyRecord(int ostreamID, int istreamID)
 
   return (ierr);
 }
+
 /* not used
 int cdfInqRecord(int streamID, int *varID, int *levelID)
 {
