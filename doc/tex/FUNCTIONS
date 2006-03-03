@@ -1,0 +1,109 @@
+===========================
+CDI  Climate Data Interface
+===========================
+
+Function catalog:
+
+-------------------------------------------------------------
+   stream
+-------------------------------------------------------------
+   streamOpenWrite      Create a new dataset
+   streamOpenRead       Open a dataset for reading
+   streamClose          Close an open dataset
+   streamInqFiletype    Get the filetype
+   streamDefVlist       Define the variable list
+   streamInqVlist       Get the variable list
+   streamDefTimestep    Define timestep
+   streamInqTimestep    Get timestep
+   streamWriteVar       Write a variable
+   streamReadVar        Read a variable
+   streamWriteVarSlice  Write a horizontal slice of a variable
+   streamReadVarSlice   Read a horizontal slice of a variable
+-------------------------------------------------------------
+   vlist
+-------------------------------------------------------------
+   vlistNew             Create a variable list
+   vlistFree            Delete a variable list
+   vlistCopy            Copy a variable list
+   vlistDuplicate       Duplicate a variable list
+   vlistCat             Concatenate two variable lists
+   vlistCopyFlag        Copy some entries of a variable list
+   vlistNvars           Number of variables in a variable list
+   vlistNgrids          Number of grids in a variable list
+   vlistNzaxis          Number of zaxis in a variable list
+-------------------------------------------------------------
+   vlist_var
+-------------------------------------------------------------
+   vlistDefVar          Define a Variable
+   vlistDefVarCode      Define the code number of a Variable
+   vlistInqVarCode      Get the Code number of a Variable
+   vlistDefVarName      Define the name of a Variable
+   vlistInqVarName      Get the name of a Variable
+   vlistDefVarLongname  Define the long name of a Variable
+   vlistInqVarLongname  Get the longname of a Variable
+   vlistDefVarUnits     Define the units of a Variable
+   vlistInqVarUnits     Get the units of a Variable
+   vlistDefVarDatatype  Define the data type of a Variable
+   vlistInqVarDatatype  Get the datatype of a Variable
+   vlistDefVarMissval   Define the missing value of a Variable
+   vlistInqVarMissval   Get the missing value of a Variable
+-------------------------------------------------------------
+   grid
+-------------------------------------------------------------
+   gridNew              Create a new Grid
+   gridDuplicate        Duplicate a grid
+   gridInqType          Get the type of a Grid
+   gridInqSize          Get the size of a Grid
+   gridDefXsize         Define the number of values of a X-axis
+   gridInqXsize         Get the number of values of a X-axis
+   gridDefYsize         Define the number of values of a Y-axis
+   gridInqYsize         Get the number of values of a Y-axis
+   gridDefXvals         Define the values of a X-axis
+   gridInqXvals         Get all values of a X-axis
+   gridDefYvals         Define the values of a Y-axis
+   gridInqYvals         Get all values of a Y-axis
+   gridDefXbounds       Define the bounds of a X-axis
+   gridInqXbounds       Get the bounds of a X-axis
+   gridDefYbounds       Define the bounds of a Y-axis
+   gridInqYbounds       Get the bounds of a Y-axis
+   gridDefXname         Define the name of a X-axis
+   gridInqXname         Get the name of a X-axis
+   gridDefXlongname     Define the longname of a X-axis
+   gridInqXlongname     Get the longname of a X-axis
+   gridDefXunits        Define the units of a X-axis
+   gridInqXunits        Get the units of a X-axis
+   gridDefYname         Define the name of a Y-axis
+   gridInqYname         Get the name of a Y-axis
+   gridDefYlongname     Define the longname of a Y-axis
+   gridInqYlongname     Get the longname of a Y-axis
+   gridDefYunits        Define the units of a Y-axis
+   gridInqYunits        Get the units of a Y-axis
+-------------------------------------------------------------
+   zaxis
+-------------------------------------------------------------
+   zaxisNew             Create a new Z-axis
+   zaxisInqType         Get the type of a Z-axis
+   zaxisInqSize         Get the size of a Z-axis
+   zaxisDefLevels       Define the levels of a Z-axis
+   zaxisInqLevels       Get all levels of a Z-axis
+   zaxisInqLevel        Get one level of a Z-axis
+   zaxisDefName         Define the name of a Z-axis
+   zaxisInqName         Get the name of a Z-axis
+   zaxisDefLongname     Define the longname of a Z-axis
+   zaxisInqLongname     Get the longname of a Z-axis
+   zaxisDefUnits        Define the units of a Z-axis
+   zaxisInqUnits        Get the units of a Z-axis
+-------------------------------------------------------------
+   taxis
+-------------------------------------------------------------
+   taxisNew             Create a new T-axis
+   taxisDefRdate        Define the reference date
+   taxisInqRdate        Get the reference date
+   taxisDefRtime        Define the reference time
+   taxisInqRtime        Get the reference time
+   taxisDefVdate        Define the verification date
+   taxisInqVdate        Get the verification date
+   taxisDefVtime        Define the verification time
+   taxisInqVtime        Get the verification time
+   taxisDefCalendar     Define the calendar
+   taxisInqCalendar     Get the calendar

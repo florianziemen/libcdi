@@ -954,7 +954,7 @@ static void file_copy_from_buffer(F_I_L_E *fileptr, void *ptr, size_t size)
     Message(func, "size = %ld  Cnt = %ld", size, fileptr->bufferCnt);
 
   if ( fileptr->bufferCnt < size )
-    Error(func, "Buffer to small. bufferCnt = %d", fileptr->bufferCnt);
+    Error(func, "Buffer too small. bufferCnt = %d", fileptr->bufferCnt);
 
   if ( size == 1 )
     {

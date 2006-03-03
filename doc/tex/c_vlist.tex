@@ -1,0 +1,201 @@
+
+
+\section{Create a variable list: {\tt vlistNew}}
+\index{vlistNew}
+\label{vlistNew}
+\subsection*{Usage}
+
+\begin{verbatim}
+    int vlistNew(void);
+\end{verbatim}
+
+
+\section{Delete a variable list: {\tt vlistFree}}
+\index{vlistFree}
+\label{vlistFree}
+\subsection*{Usage}
+
+\begin{verbatim}
+    void vlistFree(int vlistID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Identifier, from a previous call to {\tt vlistNew}
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Copy a variable list: {\tt vlistCopy}}
+\index{vlistCopy}
+\label{vlistCopy}
+
+The function {\tt vlistCopy} copies all entries from vlistID1 to vlistID2.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    void vlistCopy(int vlistID2, int vlistID1);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID2\ }
+\item[{\tt vlistID2}]
+Target variable list
+\item[{\tt vlistID1}]
+Source variable list
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Duplicate a variable list: {\tt vlistDuplicate}}
+\index{vlistDuplicate}
+\label{vlistDuplicate}
+
+The function {\tt vlistDuplicate} duplicates the variable list from vlistID1.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    int vlistDuplicate(int vlistID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt vlistDuplicate} returns an identifier to the duplicated variable list.
+
+
+
+\section{Concatenate two variable lists: {\tt vlistCat}}
+\index{vlistCat}
+\label{vlistCat}
+
+Concatenate the variable list vlistID1 at the end of vlistID2.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    void vlistCat(int vlistID2, int vlistID1);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID2\ }
+\item[{\tt vlistID2}]
+Target variable list
+\item[{\tt vlistID1}]
+Source variable list
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Copy some entries of a variable list: {\tt vlistCopyFlag}}
+\index{vlistCopyFlag}
+\label{vlistCopyFlag}
+
+The function {\tt vlistCopyFlag} copies all entries with a flag from vlistID1 to vlistID2.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    void vlistCopyFlag(int vlistID2, int vlistID1);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID2\ }
+\item[{\tt vlistID2}]
+Target variable list
+\item[{\tt vlistID1}]
+Source variable list
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Number of variables in a variable list: {\tt vlistNvars}}
+\index{vlistNvars}
+\label{vlistNvars}
+
+The function {\tt vlistNvars} returns the number of variables in the variable list vlistID.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    int vlistNvars(int vlistID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt vlistNvars} returns the number of variables in a variable list.
+
+
+
+\section{Number of grids in a variable list: {\tt vlistNgrids}}
+\index{vlistNgrids}
+\label{vlistNgrids}
+
+The function {\tt vlistNgrids} returns the number of grids in the variable list vlistID.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    int vlistNgrids(int vlistID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt vlistNgrids} returns the number of grids in a variable list.
+
+
+
+\section{Number of zaxis in a variable list: {\tt vlistNzaxis}}
+\index{vlistNzaxis}
+\label{vlistNzaxis}
+
+The function {\tt vlistNzaxis} returns the number of zaxis in the variable list vlistID.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    int vlistNzaxis(int vlistID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt vlistNzaxis} returns the number of zaxis in a variable list.
+

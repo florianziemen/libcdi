@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Wed Feb  1 09:11:50 CET 2006 */
+/* Generated automatically from m214003 on Thu Feb 23 15:07:53 CET 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -3355,10 +3355,10 @@ void gribEncode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
   encodeES(lGrib, &gribLen);
 
   if ( (size_t) gribLen > len )
-    Error(func, "lGrib buffer to small! len = %d  gribLen = %d", len, gribLen);
+    Error(func, "lGrib buffer too small! len = %d  gribLen = %d", len, gribLen);
 
   if ( (size_t) gribLen > kleng*sizeof(int) )
-    Error(func, "kgrib buffer to small! kleng = %d  gribLen = %d", kleng, gribLen);
+    Error(func, "kgrib buffer too small! kleng = %d  gribLen = %d", kleng, gribLen);
 
   (void) PACK_GRIB(lGrib, (char *)CGrib, gribLen, -1L);
 
@@ -3553,7 +3553,7 @@ int gribVersion(unsigned char *is, size_t buffersize)
   static char func[] = "gribVersion";
 
   if ( buffersize < 8 )
-    Error(func, "buffer to small (current size %d)!\n", (int) buffersize);
+    Error(func, "Buffer too small (current size %d)!\n", (int) buffersize);
 
   return (IS_GRIB_Version);
 }
@@ -6279,7 +6279,7 @@ int gribSections(unsigned char *gribbuffer, long recsize, unsigned char **pdsp,
   gribsize += 4;
   if ( gribsize > recsize )
     {
-      fprintf(stderr, "GRIB buffer size %ld to small! Min size = %ld\n", recsize, gribsize);
+      fprintf(stderr, "GRIB buffer size %ld too small! Min size = %ld\n", recsize, gribsize);
       return (1);
     }
 
@@ -6364,7 +6364,7 @@ int gribGinfo(long recpos, long recsize, unsigned char *gribbuffer,
   gribsize += 4;
   if ( gribsize > recsize )
     {
-      fprintf(stderr, "GRIB buffer size %ld to small! Min size = %ld\n", recsize, gribsize);
+      fprintf(stderr, "GRIB buffer size %ld too small! Min size = %ld\n", recsize, gribsize);
       return (1);
     }
 
@@ -7394,7 +7394,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "0.6.4" " of ""Feb  1 2006"" ""09:11:50";
+static const char grb_libvers[] = "0.6.5" " of ""Feb 23 2006"" ""15:07:53";
 
 
 

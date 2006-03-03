@@ -1,0 +1,375 @@
+
+
+\section{Create a new dataset: {\tt streamOpenWrite}}
+\index{streamOpenWrite}
+\label{streamOpenWrite}
+
+The function {\tt streamOpenWrite} creates a new datset.
+\subsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamOpenWrite(CHARACTER*(*) path, INTEGER filetype)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt filetype\ }
+\item[{\tt path}]
+The name of the new dataset
+\item[{\tt filetype}]
+The type of the file format, one of the set of predefined CDI file format types.
+                     The valid CDI file format types are {\tt FILETYPE\_GRB}, {\tt FILETYPE\_NC},
+                     {\tt FILETYPE\_NC2}, {\tt FILETYPE\_SRV}, and {\tt FILETYPE\_EXT}.
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+Upon successful completion {\tt streamOpenWrite} returns an identifier to the
+open stream. Otherwise, a negative number with the error status is returned.
+
+
+\subsection*{Errors}
+
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt CDI\_EUFILETYPE\ }
+\item[{\tt CDI\_ESYSTEM}]
+Operating system error
+\item[{\tt CDI\_EINVAL}]
+Invalid argument
+\item[{\tt CDI\_EUFILETYPE}]
+Unsupported file type
+\item[{\tt CDI\_ELIBNAVAIL}]
+Library not available
+\end{deflist}
+\end{minipage}
+
+
+\subsection*{Example}
+
+Here is an example using {\tt streamOpenWrite} to create a new netCDF file named {\tt foo.nc} for writing:\begin{verbatim}
+    INCLUDE 'cdi.h'
+       ...
+    INTEGER streamID
+       ...
+    streamID = streamOpenWrite("foo.nc", FILETYPE_NC)
+    IF ( streamID .LT. 0 ) CALL handle_error(streamID)
+       ...
+\end{verbatim}
+
+
+\section{Open a dataset for reading: {\tt streamOpenRead}}
+\index{streamOpenRead}
+\label{streamOpenRead}
+
+The function {\tt streamOpenRead} opens an existing dataset for reading.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamOpenRead(CHARACTER*(*) path)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt path\ }
+\item[{\tt path}]
+The name of the dataset to be read
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+Upon successful completion {\tt streamOpenRead} returns an identifier to the
+open stream. Otherwise, a negative number with the error status is returned.
+
+
+\subsection*{Errors}
+
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt CDI\_EUFILETYPE\ }
+\item[{\tt CDI\_ESYSTEM}]
+Operating system error
+\item[{\tt CDI\_EINVAL}]
+Invalid argument
+\item[{\tt CDI\_EUFILETYPE}]
+Unsupported file type
+\item[{\tt CDI\_ELIBNAVAIL}]
+Library not available
+\end{deflist}
+\end{minipage}
+
+
+\subsection*{Example}
+
+Here is an example using {\tt streamOpenRead} to open an existing netCDFfile named {\tt foo.nc} for reading:\begin{verbatim}
+    INCLUDE 'cdi.h'
+       ...
+    INTEGER streamID
+       ...
+    streamID = streamOpenRead("foo.nc")
+    IF ( streamID .LT. 0 ) CALL handle_error(streamID)
+       ...
+\end{verbatim}
+
+
+\section{Close an open dataset: {\tt streamClose}}
+\index{streamClose}
+\label{streamClose}
+
+The function {\tt streamClose} closes an open dataset.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE streamClose(INTEGER streamID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Identifier, from a previous call to {\tt streamOpenRead}
+                     or {\tt streamOpenWrite}
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Get the filetype: {\tt streamInqFiletype}}
+\index{streamInqFiletype}
+\label{streamInqFiletype}
+
+The function {\tt streamInqFiletype} returns the filetype of a stream.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqFiletype(INTEGER streamID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt streamInqFiletype} returns the type of the file format,
+one of the set of predefined CDI file format types.
+The valid CDI file format types are {\tt FILETYPE\_GRB}, {\tt FILETYPE\_NC},
+{\tt FILETYPE\_NC2}, {\tt FILETYPE\_SRV}, and {\tt FILETYPE\_EXT}.
+
+
+
+\section{Define the variable list: {\tt streamDefVlist}}
+\index{streamDefVlist}
+\label{streamDefVlist}
+
+The function {\tt streamDefVlist} defines the variable list of a stream.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    streamDefVlist(int streamID,int vlistID)()
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream identifier
+\item[{\tt vlistID}]
+Variable list identifier
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Get the variable list: {\tt streamInqVlist}}
+\index{streamInqVlist}
+\label{streamInqVlist}
+
+The function {\tt streamInqVlist} returns the variable list of a stream.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqVlist(INTEGER streamID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt streamInqVlist} returns an identifier to the variable list.
+
+
+
+\section{Define timestep: {\tt streamDefTimestep}}
+\index{streamDefTimestep}
+\label{streamDefTimestep}
+
+The function {\tt streamDefTimestep} defines the timestep of a stream.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamDefTimestep(INTEGER streamID, INTEGER tsID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream identifier
+\item[{\tt tsID}]
+Timestep identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt streamDefTimestep} returns the number of records of the timestep.
+
+
+
+\section{Get timestep: {\tt streamInqTimestep}}
+\index{streamInqTimestep}
+\label{streamInqTimestep}
+
+The function {\tt streamInqTimestep} returns the timestep of a stream.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqTimestep(INTEGER streamID, INTEGER tsID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream identifier
+\item[{\tt tsID}]
+Timestep identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt streamInqTimestep} returns the number of records of the timestep.
+
+
+
+\section{Write a variable: {\tt streamWriteVar}}
+\index{streamWriteVar}
+\label{streamWriteVar}
+\subsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE streamWriteVar(INTEGER streamID, INTEGER varID, REAL*8 data, 
+                              INTEGER nmiss)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream identifier
+\item[{\tt varID}]
+Variable identifier
+\item[{\tt data}]
+Data
+\item[{\tt nmiss}]
+Number of missing values
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Read a variable: {\tt streamReadVar}}
+\index{streamReadVar}
+\label{streamReadVar}
+\subsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE streamReadVar(INTEGER streamID, INTEGER varID, REAL*8 data, 
+                             INTEGER nmiss)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream identifier
+\item[{\tt varID}]
+Variable identifier
+\item[{\tt data}]
+Data
+\item[{\tt nmiss}]
+Number of missing values
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Write a horizontal slice of a variable: {\tt streamWriteVarSlice}}
+\index{streamWriteVarSlice}
+\label{streamWriteVarSlice}
+\subsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE streamWriteVarSlice(INTEGER streamID, INTEGER varID, INTEGER levelID, 
+                                   REAL*8 data, INTEGER nmiss)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream identifier
+\item[{\tt varID}]
+Variable identifier
+\item[{\tt levelID}]
+Level identifier
+\item[{\tt data}]
+Data
+\item[{\tt nmiss}]
+Number of missing values
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Read a horizontal slice of a variable: {\tt streamReadVarSlice}}
+\index{streamReadVarSlice}
+\label{streamReadVarSlice}
+\subsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE streamReadVarSlice(INTEGER streamID, INTEGER varID, INTEGER levelID, 
+                                  REAL*8 data, INTEGER nmiss)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream identifier
+\item[{\tt varID}]
+Variable identifier
+\item[{\tt levelID}]
+Level identifier
+\item[{\tt data}]
+Data
+\item[{\tt nmiss}]
+Number of missing values
+
+\end{deflist}
+\end{minipage}

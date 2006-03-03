@@ -1,0 +1,317 @@
+
+
+\section{Create a new Z-axis: {\tt zaxisNew}}
+\index{zaxisNew}
+\label{zaxisNew}
+
+The function {\tt zaxisNew} creates a new Z-axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION zaxisNew(INTEGER zaxistype, INTEGER size)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxistype\ }
+\item[{\tt zaxistype}]
+The type of the Z-axis, one of the set of predefined CDI Z-axis types.
+                      The valid CDI Z-axis types are {\tt ZAXIS\_SURFACE}, {\tt ZAXIS\_HYBRID},
+                      {\tt ZAXIS\_HYBRID\_HALF}, {\tt ZAXIS\_PRESSURE}, {\tt ZAXIS\_HEIGHT},
+                      {\tt ZAXIS\_DEPTH\_BELOW\_SEA} and {\tt ZAXIS\_DEPTH\_BELOW\_LAND}.
+\item[{\tt size}]
+Number of levels
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt zaxisNew} returns an identifier to the new Z-axis.
+
+
+
+\section{Get the type of a Z-axis: {\tt zaxisInqType}}
+\index{zaxisInqType}
+\label{zaxisInqType}
+
+The function {\tt zaxisInqType} returns the type of a Z-axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION zaxisInqType(INTEGER zaxisID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt zaxisInqType} returns the type of the Z-axis,
+one of the set of predefined CDI Z-axis types.
+The valid CDI Z-axis types are {\tt ZAXIS\_SURFACE}, {\tt ZAXIS\_HYBRID},
+{\tt ZAXIS\_HYBRID\_HALF}, {\tt ZAXIS\_PRESSURE}, {\tt ZAXIS\_HEIGHT},
+{\tt ZAXIS\_DEPTH\_BELOW\_SEA} and {\tt ZAXIS\_DEPTH\_BELOW\_LAND}.
+
+
+
+\section{Get the size of a Z-axis: {\tt zaxisInqSize}}
+\index{zaxisInqSize}
+\label{zaxisInqSize}
+
+The function {\tt zaxisInqSize} returns the size of a Z-axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION zaxisInqSize(INTEGER zaxisID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt zaxisInqSize} returns the number of levels of a Z-axis.
+
+
+
+\section{Define the levels of a Z-axis: {\tt zaxisDefLevels}}
+\index{zaxisDefLevels}
+\label{zaxisDefLevels}
+
+The function {\tt zaxisDefLevels} defines the levels of a Z-axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDefLevels(INTEGER zaxisID, REAL*8 levels)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis identifier
+\item[{\tt levels}]
+All levels of the Z-axis
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Get all levels of a Z-axis: {\tt zaxisInqLevels}}
+\index{zaxisInqLevels}
+\label{zaxisInqLevels}
+
+The function {\tt zaxisInqLevels} returns all levels of a Z-axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisInqLevels(INTEGER zaxisID, REAL*8 levels)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis identifier
+\item[{\tt levels}]
+Levels of the Z-axis
+    
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt zaxisInqLevels} saves all levels to the parameter {\tt levels}.
+
+
+\section{Get one level of a Z-axis: {\tt zaxisInqLevel}}
+\index{zaxisInqLevel}
+\label{zaxisInqLevel}
+
+The function {\tt zaxisInqLevel} returns one level of a Z-axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    REAL*8 FUNCTION zaxisInqLevel(INTEGER zaxisID, INTEGER levelID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis identifier
+\item[{\tt levelID}]
+Level index (range: 0 to nlevel-1)
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt zaxisInqLevel} returns the level of a Z-axis.
+
+
+\section{Define the name of a Z-axis: {\tt zaxisDefName}}
+\index{zaxisDefName}
+\label{zaxisDefName}
+
+The function {\tt zaxisDefName} defines the name of a Z-axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDefName(INTEGER zaxisID, CHARACTER*(*) name)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis identifier
+\item[{\tt name}]
+Name of the Z-axis
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Get the name of a Z-axis: {\tt zaxisInqName}}
+\index{zaxisInqName}
+\label{zaxisInqName}
+
+The function {\tt zaxisInqName} returns the name of a Z-axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisInqName(INTEGER zaxisID, CHARACTER*(*) name)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis identifier
+\item[{\tt name}]
+Name of the Z-axis
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt zaxisInqName} returns the name of the Z-axis to the parameter name.
+
+
+
+\section{Define the longname of a Z-axis: {\tt zaxisDefLongname}}
+\index{zaxisDefLongname}
+\label{zaxisDefLongname}
+
+The function {\tt zaxisDefLongname} defines the longname of a Z-axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDefLongname(INTEGER zaxisID, CHARACTER*(*) longname)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt longname\ }
+\item[{\tt zaxisID}]
+Z-axis identifier
+\item[{\tt longname}]
+Longname of the Z-axis
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Get the longname of a Z-axis: {\tt zaxisInqLongname}}
+\index{zaxisInqLongname}
+\label{zaxisInqLongname}
+
+The function {\tt zaxisInqLongname} returns the longname of a Z-axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisInqLongname(INTEGER zaxisID, CHARACTER*(*) longname)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt longname\ }
+\item[{\tt zaxisID}]
+Z-axis identifier
+\item[{\tt longname}]
+Longname of the Z-axis
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt zaxisInqLongname} returns the longname of the Z-axis to the parameter longname.
+
+
+
+\section{Define the units of a Z-axis: {\tt zaxisDefUnits}}
+\index{zaxisDefUnits}
+\label{zaxisDefUnits}
+
+The function {\tt zaxisDefUnits} defines the units of a Z-axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDefUnits(INTEGER zaxisID, CHARACTER*(*) units)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis identifier
+\item[{\tt units}]
+Units of the Z-axis
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Get the units of a Z-axis: {\tt zaxisInqUnits}}
+\index{zaxisInqUnits}
+\label{zaxisInqUnits}
+
+The function {\tt zaxisInqUnits} returns the units of a Z-axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisInqUnits(INTEGER zaxisID, CHARACTER*(*) units)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis identifier
+\item[{\tt units}]
+Units of the Z-axis
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt zaxisInqUnits} returns the units of the Z-axis to the parameter units.
+

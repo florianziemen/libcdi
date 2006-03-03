@@ -1,0 +1,277 @@
+
+
+\section{Create a new T-axis: {\tt taxisNew}}
+\index{taxisNew}
+\label{taxisNew}
+
+The function {\tt taxisNew} creates a new Time axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    int taxisNew(int taxistype);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt taxistype\ }
+\item[{\tt taxistype}]
+The type of the time axis, one of the set of predefined CDI time types.
+                      The valid CDI time types are {\tt TAXIS\_ABSOLUTE} and {\tt TAXIS\_RELATIVE}.
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt taxisNew} returns an identifier to the new T-axis.
+
+
+
+\section{Define the reference date: {\tt taxisDefRdate}}
+\index{taxisDefRdate}
+\label{taxisDefRdate}
+
+The function {\tt taxisDefVdate} defines the reference date of a Time axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    void taxisDefRdate(int taxisID, int rdate);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt taxisID\ }
+\item[{\tt taxisID}]
+T-axis identifier
+\item[{\tt rdate}]
+Reference date (YYYYMMDD)
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Get the reference date: {\tt taxisInqRdate}}
+\index{taxisInqRdate}
+\label{taxisInqRdate}
+
+The function {\tt taxisInqRdate} returns the reference date of a Time axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    int taxisInqRdate(int taxisID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt taxisID\ }
+\item[{\tt taxisID}]
+T-axis identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt taxisInqVdate} returns the reference date.
+
+
+
+\section{Define the reference time: {\tt taxisDefRtime}}
+\index{taxisDefRtime}
+\label{taxisDefRtime}
+
+The function {\tt taxisDefVdate} defines the reference time of a Time axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    void taxisDefRtime(int taxisID, int rtime);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt taxisID\ }
+\item[{\tt taxisID}]
+T-axis identifier
+\item[{\tt rtime}]
+Reference time (HHMM)
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Get the reference time: {\tt taxisInqRtime}}
+\index{taxisInqRtime}
+\label{taxisInqRtime}
+
+The function {\tt taxisInqRtime} returns the reference time of a Time axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    int taxisInqRtime(int taxisID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt taxisID\ }
+\item[{\tt taxisID}]
+T-axis identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt taxisInqVtime} returns the reference time.
+
+
+
+\section{Define the verification date: {\tt taxisDefVdate}}
+\index{taxisDefVdate}
+\label{taxisDefVdate}
+
+The function {\tt taxisDefVdate} defines the verification date of a Time axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    void taxisDefVdate(int taxisID, int vdate);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt taxisID\ }
+\item[{\tt taxisID}]
+T-axis identifier
+\item[{\tt vdate}]
+Verification date (YYYYMMDD)
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Get the verification date: {\tt taxisInqVdate}}
+\index{taxisInqVdate}
+\label{taxisInqVdate}
+
+The function {\tt taxisInqVdate} returns the verification date of a Time axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    int taxisInqVdate(int taxisID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt taxisID\ }
+\item[{\tt taxisID}]
+T-axis identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt taxisInqVdate} returns the verification date.
+
+
+
+\section{Define the verification time: {\tt taxisDefVtime}}
+\index{taxisDefVtime}
+\label{taxisDefVtime}
+
+The function {\tt taxisDefVtime} defines the verification time of a Time axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    void taxisDefVtime(int taxisID, int vtime);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt taxisID\ }
+\item[{\tt taxisID}]
+T-axis identifier
+\item[{\tt vtime}]
+Verification time (HHMM)
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Get the verification time: {\tt taxisInqVtime}}
+\index{taxisInqVtime}
+\label{taxisInqVtime}
+
+The function {\tt taxisInqVtime} returns the verification time of a Time axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    int taxisInqVtime(int taxisID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt taxisID\ }
+\item[{\tt taxisID}]
+T-axis identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt taxisInqVtime} returns the verification time.
+
+
+
+\section{Define the calendar: {\tt taxisDefCalendar}}
+\index{taxisDefCalendar}
+\label{taxisDefCalendar}
+
+The function {\tt taxisDefCalendar} defines the calendar of a Time axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    void taxisDefCalendar(int taxisID, int calendar);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt calendar\ }
+\item[{\tt taxisID}]
+T-axis identifier
+\item[{\tt calendar}]
+The type of the calendar, one of the set of predefined CDI calendar types.
+                     The valid CDI calendar types are {\tt CALENDAR\_STANDARD}, {\tt CALENDAR\_360DAYS},
+                     {\tt CALENDAR\_365DAYS} and {\tt CALENDAR\_366DAYS}.
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Get the calendar: {\tt taxisInqCalendar}}
+\index{taxisInqCalendar}
+\label{taxisInqCalendar}
+
+The function {\tt taxisInqCalendar} returns the calendar of a Time axis.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    int taxisInqCalendar(int taxisID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt taxisID\ }
+\item[{\tt taxisID}]
+T-axis identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt taxisInqCalendar} returns the type of the calendar,
+one of the set of predefined CDI calendar types.
+The valid CDI calendar types are {\tt CALENDAR\_STANDARD}, {\tt CALENDAR\_360DAYS},
+{\tt CALENDAR\_365DAYS} and {\tt CALENDAR\_366DAYS}.
+

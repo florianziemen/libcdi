@@ -1,0 +1,772 @@
+
+
+\section*{\tt \htmlref{gridDefXbounds}{gridDefXbounds}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefXbounds(INTEGER gridID, REAL*8 xbounds)
+\end{verbatim}
+
+Define the bounds of a X-axis
+
+
+\section*{\tt \htmlref{gridDefXlongname}{gridDefXlongname}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefXlongname(INTEGER gridID, CHARACTER*(*) longname)
+\end{verbatim}
+
+Define the longname of a X-axis
+
+
+\section*{\tt \htmlref{gridDefXname}{gridDefXname}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefXname(INTEGER gridID, CHARACTER*(*) name)
+\end{verbatim}
+
+Define the name of a X-axis
+
+
+\section*{\tt \htmlref{gridDefXsize}{gridDefXsize}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefXsize(INTEGER gridID, INTEGER xsize)
+\end{verbatim}
+
+Define the number of values of a X-axis
+
+
+\section*{\tt \htmlref{gridDefXunits}{gridDefXunits}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefXunits(INTEGER gridID, CHARACTER*(*) units)
+\end{verbatim}
+
+Define the units of a X-axis
+
+
+\section*{\tt \htmlref{gridDefXvals}{gridDefXvals}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefXvals(INTEGER gridID, REAL*8 xvals)
+\end{verbatim}
+
+Define the values of a X-axis
+
+
+\section*{\tt \htmlref{gridDefYbounds}{gridDefYbounds}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefYbounds(INTEGER gridID, REAL*8 ybounds)
+\end{verbatim}
+
+Define the bounds of a Y-axis
+
+
+\section*{\tt \htmlref{gridDefYlongname}{gridDefYlongname}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefYlongname(INTEGER gridID, CHARACTER*(*) longname)
+\end{verbatim}
+
+Define the longname of a Y-axis
+
+
+\section*{\tt \htmlref{gridDefYname}{gridDefYname}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefYname(INTEGER gridID, CHARACTER*(*) name)
+\end{verbatim}
+
+Define the name of a Y-axis
+
+
+\section*{\tt \htmlref{gridDefYsize}{gridDefYsize}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefYsize(INTEGER gridID, INTEGER ysize)
+\end{verbatim}
+
+Define the number of values of a Y-axis
+
+
+\section*{\tt \htmlref{gridDefYunits}{gridDefYunits}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefYunits(INTEGER gridID, CHARACTER*(*) units)
+\end{verbatim}
+
+Define the units of a Y-axis
+
+
+\section*{\tt \htmlref{gridDefYvals}{gridDefYvals}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefYvals(INTEGER gridID, REAL*8 yvals)
+\end{verbatim}
+
+Define the values of a Y-axis
+
+
+\section*{\tt \htmlref{gridDuplicate}{gridDuplicate}}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridDuplicate(INTEGER gridID)
+\end{verbatim}
+
+Duplicate a grid
+
+
+\section*{\tt \htmlref{gridInqSize}{gridInqSize}}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridInqSize(INTEGER gridID)
+\end{verbatim}
+
+Get the size of a Grid
+
+
+\section*{\tt \htmlref{gridInqType}{gridInqType}}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridInqType(INTEGER gridID)
+\end{verbatim}
+
+Get the type of a Grid
+
+
+\section*{\tt \htmlref{gridInqXbounds}{gridInqXbounds}}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridInqXbounds(INTEGER gridID, REAL*8 xbounds)
+\end{verbatim}
+
+Get the bounds of a X-axis
+
+
+\section*{\tt \htmlref{gridInqXlongname}{gridInqXlongname}}
+
+\begin{verbatim}
+    SUBROUTINE gridInqXlongname(INTEGER gridID, CHARACTER*(*) longname)
+\end{verbatim}
+
+Get the longname of a X-axis
+
+
+\section*{\tt \htmlref{gridInqXname}{gridInqXname}}
+
+\begin{verbatim}
+    SUBROUTINE gridInqXname(INTEGER gridID, CHARACTER*(*) name)
+\end{verbatim}
+
+Get the name of a X-axis
+
+
+\section*{\tt \htmlref{gridInqXsize}{gridInqXsize}}
+
+\begin{verbatim}
+    SUBROUTINE gridInqXsize(INTEGER gridID)
+\end{verbatim}
+
+Get the number of values of a X-axis
+
+
+\section*{\tt \htmlref{gridInqXunits}{gridInqXunits}}
+
+\begin{verbatim}
+    SUBROUTINE gridInqXunits(INTEGER gridID, CHARACTER*(*) units)
+\end{verbatim}
+
+Get the units of a X-axis
+
+
+\section*{\tt \htmlref{gridInqXvals}{gridInqXvals}}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridInqXvals(INTEGER gridID, REAL*8 xvals)
+\end{verbatim}
+
+Get all values of a X-axis
+
+
+\section*{\tt \htmlref{gridInqYbounds}{gridInqYbounds}}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridInqYbounds(INTEGER gridID, REAL*8 ybounds)
+\end{verbatim}
+
+Get the bounds of a Y-axis
+
+
+\section*{\tt \htmlref{gridInqYlongname}{gridInqYlongname}}
+
+\begin{verbatim}
+    SUBROUTINE gridInqXlongname(INTEGER gridID, CHARACTER*(*) longname)
+\end{verbatim}
+
+Get the longname of a Y-axis
+
+
+\section*{\tt \htmlref{gridInqYname}{gridInqYname}}
+
+\begin{verbatim}
+    SUBROUTINE gridInqYname(INTEGER gridID, CHARACTER*(*) name)
+\end{verbatim}
+
+Get the name of a Y-axis
+
+
+\section*{\tt \htmlref{gridInqYsize}{gridInqYsize}}
+
+\begin{verbatim}
+    SUBROUTINE gridInqYsize(INTEGER gridID)
+\end{verbatim}
+
+Get the number of values of a Y-axis
+
+
+\section*{\tt \htmlref{gridInqYunits}{gridInqYunits}}
+
+\begin{verbatim}
+    SUBROUTINE gridInqYunits(INTEGER gridID, CHARACTER*(*) units)
+\end{verbatim}
+
+Get the units of a Y-axis
+
+
+\section*{\tt \htmlref{gridInqYvals}{gridInqYvals}}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridInqYvals(INTEGER gridID, REAL*8 yvals)
+\end{verbatim}
+
+Get all values of a Y-axis
+
+
+\section*{\tt \htmlref{gridNew}{gridNew}}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridNew(INTEGER gridtype, INTEGER size)
+\end{verbatim}
+
+Create a new Grid
+
+
+\section*{\tt \htmlref{streamClose}{streamClose}}
+
+\begin{verbatim}
+    SUBROUTINE streamClose(INTEGER streamID)
+\end{verbatim}
+
+Close an open dataset
+
+
+\section*{\tt \htmlref{streamDefTimestep}{streamDefTimestep}}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamDefTimestep(INTEGER streamID, INTEGER tsID)
+\end{verbatim}
+
+Define timestep
+
+
+\section*{\tt \htmlref{streamDefVlist}{streamDefVlist}}
+
+\begin{verbatim}
+    streamDefVlist(int streamID,int vlistID)()
+\end{verbatim}
+
+Define the variable list
+
+
+\section*{\tt \htmlref{streamInqFiletype}{streamInqFiletype}}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqFiletype(INTEGER streamID)
+\end{verbatim}
+
+Get the filetype
+
+
+\section*{\tt \htmlref{streamInqTimestep}{streamInqTimestep}}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqTimestep(INTEGER streamID, INTEGER tsID)
+\end{verbatim}
+
+Get timestep
+
+
+\section*{\tt \htmlref{streamInqVlist}{streamInqVlist}}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqVlist(INTEGER streamID)
+\end{verbatim}
+
+Get the variable list
+
+
+\section*{\tt \htmlref{streamOpenRead}{streamOpenRead}}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamOpenRead(CHARACTER*(*) path)
+\end{verbatim}
+
+Open a dataset for reading
+
+
+\section*{\tt \htmlref{streamOpenWrite}{streamOpenWrite}}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamOpenWrite(CHARACTER*(*) path, INTEGER filetype)
+\end{verbatim}
+
+Create a new dataset
+
+
+\section*{\tt \htmlref{streamReadVar}{streamReadVar}}
+
+\begin{verbatim}
+    SUBROUTINE streamReadVar(INTEGER streamID, INTEGER varID, REAL*8 data, 
+                             INTEGER nmiss)
+\end{verbatim}
+
+Read a variable
+
+
+\section*{\tt \htmlref{streamReadVarSlice}{streamReadVarSlice}}
+
+\begin{verbatim}
+    SUBROUTINE streamReadVarSlice(INTEGER streamID, INTEGER varID, INTEGER levelID, 
+                                  REAL*8 data, INTEGER nmiss)
+\end{verbatim}
+
+Read a horizontal slice of a variable
+
+
+\section*{\tt \htmlref{streamWriteVar}{streamWriteVar}}
+
+\begin{verbatim}
+    SUBROUTINE streamWriteVar(INTEGER streamID, INTEGER varID, REAL*8 data, 
+                              INTEGER nmiss)
+\end{verbatim}
+
+Write a variable
+
+
+\section*{\tt \htmlref{streamWriteVarSlice}{streamWriteVarSlice}}
+
+\begin{verbatim}
+    SUBROUTINE streamWriteVarSlice(INTEGER streamID, INTEGER varID, INTEGER levelID, 
+                                   REAL*8 data, INTEGER nmiss)
+\end{verbatim}
+
+Write a horizontal slice of a variable
+
+
+\section*{\tt \htmlref{taxisDefCalendar}{taxisDefCalendar}}
+
+\begin{verbatim}
+    SUBROUTINE taxisDefCalendar(INTEGER taxisID, INTEGER calendar)
+\end{verbatim}
+
+Define the calendar
+
+
+\section*{\tt \htmlref{taxisDefRdate}{taxisDefRdate}}
+
+\begin{verbatim}
+    SUBROUTINE taxisDefRdate(INTEGER taxisID, INTEGER rdate)
+\end{verbatim}
+
+Define the reference date
+
+
+\section*{\tt \htmlref{taxisDefRtime}{taxisDefRtime}}
+
+\begin{verbatim}
+    SUBROUTINE taxisDefRtime(INTEGER taxisID, INTEGER rtime)
+\end{verbatim}
+
+Define the reference time
+
+
+\section*{\tt \htmlref{taxisDefVdate}{taxisDefVdate}}
+
+\begin{verbatim}
+    SUBROUTINE taxisDefVdate(INTEGER taxisID, INTEGER vdate)
+\end{verbatim}
+
+Define the verification date
+
+
+\section*{\tt \htmlref{taxisDefVtime}{taxisDefVtime}}
+
+\begin{verbatim}
+    SUBROUTINE taxisDefVtime(INTEGER taxisID, INTEGER vtime)
+\end{verbatim}
+
+Define the verification time
+
+
+\section*{\tt \htmlref{taxisInqCalendar}{taxisInqCalendar}}
+
+\begin{verbatim}
+    INTEGER FUNCTION taxisInqCalendar(INTEGER taxisID)
+\end{verbatim}
+
+Get the calendar
+
+
+\section*{\tt \htmlref{taxisInqRdate}{taxisInqRdate}}
+
+\begin{verbatim}
+    INTEGER FUNCTION taxisInqRdate(INTEGER taxisID)
+\end{verbatim}
+
+Get the reference date
+
+
+\section*{\tt \htmlref{taxisInqRtime}{taxisInqRtime}}
+
+\begin{verbatim}
+    INTEGER FUNCTION taxisInqRtime(INTEGER taxisID)
+\end{verbatim}
+
+Get the reference time
+
+
+\section*{\tt \htmlref{taxisInqVdate}{taxisInqVdate}}
+
+\begin{verbatim}
+    INTEGER FUNCTION taxisInqVdate(INTEGER taxisID)
+\end{verbatim}
+
+Get the verification date
+
+
+\section*{\tt \htmlref{taxisInqVtime}{taxisInqVtime}}
+
+\begin{verbatim}
+    INTEGER FUNCTION taxisInqVtime(INTEGER taxisID)
+\end{verbatim}
+
+Get the verification time
+
+
+\section*{\tt \htmlref{taxisNew}{taxisNew}}
+
+\begin{verbatim}
+    INTEGER FUNCTION taxisNew(INTEGER taxistype)
+\end{verbatim}
+
+Create a new T-axis
+
+
+\section*{\tt \htmlref{vlistCat}{vlistCat}}
+
+\begin{verbatim}
+    SUBROUTINE vlistCat(INTEGER vlistID2, INTEGER vlistID1)
+\end{verbatim}
+
+Concatenate two variable lists
+
+
+\section*{\tt \htmlref{vlistCopy}{vlistCopy}}
+
+\begin{verbatim}
+    SUBROUTINE vlistCopy(INTEGER vlistID2, INTEGER vlistID1)
+\end{verbatim}
+
+Copy a variable list
+
+
+\section*{\tt \htmlref{vlistCopyFlag}{vlistCopyFlag}}
+
+\begin{verbatim}
+    SUBROUTINE vlistCopyFlag(INTEGER vlistID2, INTEGER vlistID1)
+\end{verbatim}
+
+Copy some entries of a variable list
+
+
+\section*{\tt \htmlref{vlistDefVar}{vlistDefVar}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistDefVar(INTEGER vlistID, INTEGER gridID, INTEGER zaxisID, 
+                                 INTEGER timeID)
+\end{verbatim}
+
+Define a Variable
+
+
+\section*{\tt \htmlref{vlistDefVarCode}{vlistDefVarCode}}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarCode(INTEGER vlistID, INTEGER varID, INTEGER code)
+\end{verbatim}
+
+Define the code number of a Variable
+
+
+\section*{\tt \htmlref{vlistDefVarDatatype}{vlistDefVarDatatype}}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarDatatype(INTEGER vlistID, INTEGER varID, INTEGER datatype)
+\end{verbatim}
+
+Define the data type of a Variable
+
+
+\section*{\tt \htmlref{vlistDefVarLongname}{vlistDefVarLongname}}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarLongname(INTEGER vlistID, INTEGER varID, 
+                                   CHARACTER*(*) longname)
+\end{verbatim}
+
+Define the long name of a Variable
+
+
+\section*{\tt \htmlref{vlistDefVarMissval}{vlistDefVarMissval}}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarMissval(INTEGER vlistID, INTEGER varID, REAL*8 missval)
+\end{verbatim}
+
+Define the missing value of a Variable
+
+
+\section*{\tt \htmlref{vlistDefVarName}{vlistDefVarName}}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarName(INTEGER vlistID, INTEGER varID, CHARACTER*(*) name)
+\end{verbatim}
+
+Define the name of a Variable
+
+
+\section*{\tt \htmlref{vlistDefVarUnits}{vlistDefVarUnits}}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarUnits(INTEGER vlistID, INTEGER varID, CHARACTER*(*) units)
+\end{verbatim}
+
+Define the units of a Variable
+
+
+\section*{\tt \htmlref{vlistDuplicate}{vlistDuplicate}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistDuplicate(INTEGER vlistID)
+\end{verbatim}
+
+Duplicate a variable list
+
+
+\section*{\tt \htmlref{vlistFree}{vlistFree}}
+
+\begin{verbatim}
+    SUBROUTINE vlistFree(INTEGER vlistID)
+\end{verbatim}
+
+Delete a variable list
+
+
+\section*{\tt \htmlref{vlistInqVarCode}{vlistInqVarCode}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqVarCode(INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+Get the Code number of a Variable
+
+
+\section*{\tt \htmlref{vlistInqVarDatatype}{vlistInqVarDatatype}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqVarDatatype(INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+Get the datatype of a Variable
+
+
+\section*{\tt \htmlref{vlistInqVarLongname}{vlistInqVarLongname}}
+
+\begin{verbatim}
+    SUBROUTINE vlistInqVarLongname(INTEGER vlistID, INTEGER varID, 
+                                   CHARACTER*(*) longname)
+\end{verbatim}
+
+Get the longname of a Variable
+
+
+\section*{\tt \htmlref{vlistInqVarMissval}{vlistInqVarMissval}}
+
+\begin{verbatim}
+    REAL*8 FUNCTION vlistInqVarMissval(INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+Get the missing value of a Variable
+
+
+\section*{\tt \htmlref{vlistInqVarName}{vlistInqVarName}}
+
+\begin{verbatim}
+    SUBROUTINE vlistInqVarName(INTEGER vlistID, INTEGER varID, CHARACTER*(*) name)
+\end{verbatim}
+
+Get the name of a Variable
+
+
+\section*{\tt \htmlref{vlistInqVarUnits}{vlistInqVarUnits}}
+
+\begin{verbatim}
+    SUBROUTINE vlistInqVarUnits(INTEGER vlistID, INTEGER varID, CHARACTER*(*) units)
+\end{verbatim}
+
+Get the units of a Variable
+
+
+\section*{\tt \htmlref{vlistNew}{vlistNew}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistNew()
+\end{verbatim}
+
+Create a variable list
+
+
+\section*{\tt \htmlref{vlistNgrids}{vlistNgrids}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistNgrids(INTEGER vlistID)
+\end{verbatim}
+
+Number of grids in a variable list
+
+
+\section*{\tt \htmlref{vlistNvars}{vlistNvars}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistNvars(INTEGER vlistID)
+\end{verbatim}
+
+Number of variables in a variable list
+
+
+\section*{\tt \htmlref{vlistNzaxis}{vlistNzaxis}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistNzaxis(INTEGER vlistID)
+\end{verbatim}
+
+Number of zaxis in a variable list
+
+
+\section*{\tt \htmlref{zaxisDefLevels}{zaxisDefLevels}}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDefLevels(INTEGER zaxisID, REAL*8 levels)
+\end{verbatim}
+
+Define the levels of a Z-axis
+
+
+\section*{\tt \htmlref{zaxisDefLongname}{zaxisDefLongname}}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDefLongname(INTEGER zaxisID, CHARACTER*(*) longname)
+\end{verbatim}
+
+Define the longname of a Z-axis
+
+
+\section*{\tt \htmlref{zaxisDefName}{zaxisDefName}}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDefName(INTEGER zaxisID, CHARACTER*(*) name)
+\end{verbatim}
+
+Define the name of a Z-axis
+
+
+\section*{\tt \htmlref{zaxisDefUnits}{zaxisDefUnits}}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDefUnits(INTEGER zaxisID, CHARACTER*(*) units)
+\end{verbatim}
+
+Define the units of a Z-axis
+
+
+\section*{\tt \htmlref{zaxisInqLevel}{zaxisInqLevel}}
+
+\begin{verbatim}
+    REAL*8 FUNCTION zaxisInqLevel(INTEGER zaxisID, INTEGER levelID)
+\end{verbatim}
+
+Get one level of a Z-axis
+
+
+\section*{\tt \htmlref{zaxisInqLevels}{zaxisInqLevels}}
+
+\begin{verbatim}
+    SUBROUTINE zaxisInqLevels(INTEGER zaxisID, REAL*8 levels)
+\end{verbatim}
+
+Get all levels of a Z-axis
+
+
+\section*{\tt \htmlref{zaxisInqLongname}{zaxisInqLongname}}
+
+\begin{verbatim}
+    SUBROUTINE zaxisInqLongname(INTEGER zaxisID, CHARACTER*(*) longname)
+\end{verbatim}
+
+Get the longname of a Z-axis
+
+
+\section*{\tt \htmlref{zaxisInqName}{zaxisInqName}}
+
+\begin{verbatim}
+    SUBROUTINE zaxisInqName(INTEGER zaxisID, CHARACTER*(*) name)
+\end{verbatim}
+
+Get the name of a Z-axis
+
+
+\section*{\tt \htmlref{zaxisInqSize}{zaxisInqSize}}
+
+\begin{verbatim}
+    INTEGER FUNCTION zaxisInqSize(INTEGER zaxisID)
+\end{verbatim}
+
+Get the size of a Z-axis
+
+
+\section*{\tt \htmlref{zaxisInqType}{zaxisInqType}}
+
+\begin{verbatim}
+    INTEGER FUNCTION zaxisInqType(INTEGER zaxisID)
+\end{verbatim}
+
+Get the type of a Z-axis
+
+
+\section*{\tt \htmlref{zaxisInqUnits}{zaxisInqUnits}}
+
+\begin{verbatim}
+    SUBROUTINE zaxisInqUnits(INTEGER zaxisID, CHARACTER*(*) units)
+\end{verbatim}
+
+Get the units of a Z-axis
+
+
+\section*{\tt \htmlref{zaxisNew}{zaxisNew}}
+
+\begin{verbatim}
+    INTEGER FUNCTION zaxisNew(INTEGER zaxistype, INTEGER size)
+\end{verbatim}
+
+Create a new Z-axis

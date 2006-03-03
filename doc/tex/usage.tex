@@ -1,0 +1,56 @@
+\section{Creating a dataset}
+
+Here is a typical sequence of CDI calls used to create a new dataset:
+
+\begin{verbatim}
+    gridNew              ! define a grid: from type and size
+       ...
+    zaxisNew             ! define a Z-axis: from type and size
+       ...
+    taxisNew             ! define a T-axis: from type
+       ...
+    vlistNew             ! create a variable list
+          ...
+       vlistDefVar       ! define variables: from grid and Z-axis
+          ...
+    streamOpenWrite      ! create a dataset: from name and file type
+       ...
+    streamDefVlist       ! define variable list
+       ...
+    streamDefTimestep    ! define time step
+          ...   
+       streamWriteVar    ! write variable
+          ...
+    streamClose          ! close the dataset
+\end{verbatim}
+
+
+\section{Reading a dataset}
+
+\begin{verbatim}
+    streamOpenRead       ! open existing dataset
+       ...
+    streamInqVlist       ! find out what is in it
+          ...
+       vlistInqVarGrid   ! get grid
+          ...
+       vlistInqVarZaxis  ! get Z-axis
+          ...
+       vlistInqTaxis     ! get T-axis
+          ...
+    streamInqTimestep    ! get time step
+          ...
+       streamReadVar     ! read varible
+          ...
+    streamClose          ! close the dataset
+\end{verbatim}
+
+
+\section{Compiling and Linking with the CDI library}
+
+Details of how to compile and link a program that uses the CDI C or FORTRAN
+interfaces differ, depending on the operating system, the available compilers,
+and where the CDI library and include files are installed.
+Here are examples of how to compile and link a program that uses the CDI library
+on a Unix platform, so that you can adjust these examples to fit your installation.
+

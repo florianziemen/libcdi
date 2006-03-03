@@ -1,0 +1,181 @@
+\documentclass[DIV16,BCOR1cm,11pt,a4paper,fleqn]{scrreprt}         % for pdf output
+%\documentclass[DIV16,BCOR1cm,11pt,a4paper,fleqn]{report}         % for pdf output
+
+%\usepackage{ae}               % fuer die "almost european" computer modern fonts
+%\usepackage{url}              % Standard-Paket fuer WWW-Adressen
+
+%\typearea{10}                 % Einen sinnvollen Satzspiegel aktivieren
+
+%\documentclass[DIV16,BCOR1cm,12pt,a4paper,fleqn]{scrreprt}         % for pdf output
+%\documentclass[DIV16,BCOR1cm,11pt,a4paper,twoside]{scrreprt}  % for ps output
+%\documentclass[a4paper,DIV14,BCOR1cm]{scrartcl}
+
+%Usage:
+%latex2html -local_icons -split 4 -toc_depth 3 -white cdi.tex
+%dvips -o cdi.ps cdi.dvi
+%dvips ps+pdf
+%dvipdf
+%pdflatex
+
+% To allow automatic selection of the right graphics type ...
+
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+   \pdffalse                    % LaTeX
+\else
+   \pdfoutput=1                 % PDFLaTeX
+   \pdftrue
+\fi
+
+\usepackage{thumbpdf}
+
+%\usepackage{html}
+
+\usepackage{makeidx}
+
+%\ifpdf
+%\usepackage[a4paper, colorlinks=true, pdfstartview=FitV, bookmarks=true, linkcolor=blue,
+%            citecolor=blue, urlcolor=blue, latex2html=true]{hyperref}
+%\fi
+
+\usepackage{hyperref}
+\hypersetup{pdftoolbar=true,
+            pdfmenubar=true,
+            pdfwindowui=true,   
+%            pdffitwindow=true,
+            pdfauthor={Uwe Schulzweida},
+            pdftitle={CDI C Reference Manual},
+            pdfcreator={pdflatex + hyperref},
+            pdfstartview=FitV,
+%            pdfpagemode=FullScreen,
+            a4paper,
+            bookmarks=true,
+            linkcolor=blue,
+            citecolor=blue,
+            urlcolor=blue,
+            colorlinks=true}
+
+\makeindex
+%\newcommand{\ii}[1]{\textit{#1}}  \newcommand{\nn}[1]{#1n}
+%\renewcommand{\dotfill}{\leaders\hbox to 5p1{\hss.\hss}\hfill}
+%\newcommand{\idxdotfill}{5p1{\hss.\hss}\hfill}
+\newcommand{\idxdotfill}{\ \dotfill \ }
+%\def\idxdotfill{\leaders\hbox to.6em{\hss .\hss}\hskip 0pt plus 1fill}
+%\MakeShortVerb{\@}
+
+\renewcommand{\indexname}{Function index}
+
+
+\newcommand{\deflabel}[1]{\bf #1\hfill}
+\newenvironment{deflist}[1]
+{\begin{list}{}
+{\settowidth{\labelwidth}{\bf #1}
+\setlength{\parsep}{0mm}
+\setlength{\itemsep}{1mm}
+\setlength{\leftmargin}{\labelwidth}
+\addtolength{\leftmargin}{\labelsep}
+\renewcommand{\makelabel}{\deflabel}}}
+{\end{list}}
+
+
+\begin{document}
+
+\begin{titlepage}
+\vspace*{50mm}
+{\Huge\bf{CDI C Reference Manual}}
+
+\setlength{\unitlength}{1cm}
+\begin{picture}(16,0.4)
+\linethickness{1.5mm}
+\put(0,0.1){\line(1,0){15.85}}
+\end{picture}
+
+\begin{flushright}
+\large\bf{Climate Data Interface \\ Version 0.9.6 \\ March 2006}
+\end{flushright}
+
+\vfill
+
+\Large\bf{Uwe Schulzweida}
+
+\Large\bf{Max-Planck-Institute for Meteorology}
+
+\begin{picture}(16,1)
+\linethickness{1.0mm}
+\put(0,0.7){\line(1,0){15.85}}
+\end{picture}
+\end{titlepage}
+
+
+\tableofcontents
+
+
+\chapter{Introduction}
+
+\input{intro}
+
+
+\chapter{File Formats}
+
+\input{formats}
+
+
+\chapter{Usage of the CDI Library}
+
+\input{usage}
+
+\input{c_link}
+
+
+\chapter{Datasets}
+
+\input{c_stream}
+
+
+\chapter{Variable list}
+
+\input{c_vlist}
+
+\chapter{Variables}
+
+\input{c_vlist_var}
+
+
+\chapter{Grids}
+
+\input{c_grid}
+
+
+\chapter{Z-axis}
+
+\input{c_zaxis}
+
+
+\chapter{T-axis}
+
+\input{c_taxis}
+
+
+\chapter{Institute}
+
+\chapter{Model}
+
+
+\chapter*{Quick Reference}
+\addcontentsline{toc}{chapter}{Quick Reference}
+
+This appendix provide a brief listing of the C language bindings of the
+CDI library routines:
+
+\input{c_ref}
+
+
+\clearpage
+\ifpdf
+\phantomsection
+\fi
+\addcontentsline{toc}{chapter}{\indexname}
+
+\printindex
+
+\end{document}

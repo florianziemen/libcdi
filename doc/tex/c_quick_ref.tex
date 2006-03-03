@@ -1,0 +1,791 @@
+\chapter*{Quick Reference}
+\addcontentsline{toc}{chapter}{Quick Reference}
+
+This appendix provide a brief listing of the C language bindings of the
+CDI library routines:
+
+\section*{\tt \htmlref{gridDefNvertex}{gridDefNvertex}}
+
+\begin{verbatim}
+    void gridDefNvertex (intgridID, intnvertex);
+\end{verbatim}
+
+Define the number of vertex of a Gridbox.
+
+
+\section*{\tt \htmlref{gridDefPrec}{gridDefPrec}}
+
+\begin{verbatim}
+    void gridDefPrec (intgridID, intprec);
+\end{verbatim}
+
+Define the precision of a Grid.
+
+
+\section*{\tt \htmlref{gridDefXbounds}{gridDefXbounds}}
+
+\begin{verbatim}
+    void gridDefXbounds (intgridID, double *xbounds);
+\end{verbatim}
+
+Define the bounds of a X-axis.
+
+
+\section*{\tt \htmlref{gridDefXlongname}{gridDefXlongname}}
+
+\begin{verbatim}
+    void gridDefXlongname (intgridID, char *xlongname);
+\end{verbatim}
+
+Define the longname of a X-axis.
+
+
+\section*{\tt \htmlref{gridDefXname}{gridDefXname}}
+
+\begin{verbatim}
+    void gridDefXname (intgridID, char *xname);
+\end{verbatim}
+
+Define the name of a X-axis.
+
+
+\section*{\tt \htmlref{gridDefXsize}{gridDefXsize}}
+
+\begin{verbatim}
+    void gridDefXsize (intgridID, intxsize);
+\end{verbatim}
+
+Define the size of a X-axis.
+
+
+\section*{\tt \htmlref{gridDefXunits}{gridDefXunits}}
+
+\begin{verbatim}
+    void gridDefXunits (intgridID, char *xunits);
+\end{verbatim}
+
+Define the units of a X-axis.
+
+
+\section*{\tt \htmlref{gridDefXvals}{gridDefXvals}}
+
+\begin{verbatim}
+    void gridDefXvals (intgridID, double *xvals);
+\end{verbatim}
+
+Define the values of a X-axis.
+
+
+\section*{\tt \htmlref{gridDefYbounds}{gridDefYbounds}}
+
+\begin{verbatim}
+    void gridDefYbounds (intgridID, double *ybounds);
+\end{verbatim}
+
+Define the bounds of a Y-axis.
+
+
+\section*{\tt \htmlref{gridDefYlongname}{gridDefYlongname}}
+
+\begin{verbatim}
+    void gridDefYlongname (intgridID, char *ylongname);
+\end{verbatim}
+
+Define the longname of a Y-axis.
+
+
+\section*{\tt \htmlref{gridDefYname}{gridDefYname}}
+
+\begin{verbatim}
+    void gridDefYname (intgridID, char *yname);
+\end{verbatim}
+
+Define the name of a Y-axis.
+
+
+\section*{\tt \htmlref{gridDefYsize}{gridDefYsize}}
+
+\begin{verbatim}
+    void gridDefYsize (intgridID, intysize);
+\end{verbatim}
+
+Define the size of a Y-axis.
+
+
+\section*{\tt \htmlref{gridDefYunits}{gridDefYunits}}
+
+\begin{verbatim}
+    void gridDefYunits (intgridID, char *yunits);
+\end{verbatim}
+
+Define the units of a Y-axis.
+
+
+\section*{\tt \htmlref{gridDefYvals}{gridDefYvals}}
+
+\begin{verbatim}
+    void gridDefYvals (intgridID, double *yvals);
+\end{verbatim}
+
+Define the values of a Y-axis.
+
+
+\section*{\tt \htmlref{gridDuplicate}{gridDuplicate}}
+
+\begin{verbatim}
+    int gridDuplicate (intgridID);
+\end{verbatim}
+
+Duplicate a Grid.
+
+
+\section*{\tt \htmlref{gridInqNvertex}{gridInqNvertex}}
+
+\begin{verbatim}
+    int gridInqNvertex (intgridID);
+\end{verbatim}
+
+Get the number of vertex of a Gridbox.
+
+
+\section*{\tt \htmlref{gridInqPrec}{gridInqPrec}}
+
+\begin{verbatim}
+    int gridInqPrec (intgridID);
+\end{verbatim}
+
+Get the precision of a Grid.
+
+
+\section*{\tt \htmlref{gridInqSize}{gridInqSize}}
+
+\begin{verbatim}
+    int gridInqSize (intgridID);
+\end{verbatim}
+
+Get the size of a Grid.
+
+
+\section*{\tt \htmlref{gridInqType}{gridInqType}}
+
+\begin{verbatim}
+    int gridInqType (intgridID);
+\end{verbatim}
+
+Get the type of a Grid.
+
+
+\section*{\tt \htmlref{gridInqXbounds}{gridInqXbounds}}
+
+\begin{verbatim}
+    int gridInqXbounds (intgridID, double *xbounds);
+\end{verbatim}
+
+Get the bounds of a X-axis.
+
+
+\section*{\tt \htmlref{gridInqXlongname}{gridInqXlongname}}
+
+\begin{verbatim}
+    void gridInqXlongname (intgridID, char *xlongname);
+\end{verbatim}
+
+Get the longname of a X-axis.
+
+
+\section*{\tt \htmlref{gridInqXname}{gridInqXname}}
+
+\begin{verbatim}
+    void gridInqXname (intgridID, char *xname);
+\end{verbatim}
+
+Get the name of a X-axis.
+
+
+\section*{\tt \htmlref{gridInqXsize}{gridInqXsize}}
+
+\begin{verbatim}
+    int gridInqXsize (intgridID);
+\end{verbatim}
+
+Get the size of a X-axis.
+
+
+\section*{\tt \htmlref{gridInqXstdname}{gridInqXstdname}}
+
+\begin{verbatim}
+    void gridInqXstdname (intgridID, char *xstdname);
+\end{verbatim}
+
+Get the standard name of a X-axis.
+
+
+\section*{\tt \htmlref{gridInqXunits}{gridInqXunits}}
+
+\begin{verbatim}
+    void gridInqXunits (intgridID, char *xunits);
+\end{verbatim}
+
+Get the units of a X-axis.
+
+
+\section*{\tt \htmlref{gridInqXval}{gridInqXval}}
+
+\begin{verbatim}
+    double gridInqXval (intgridID, intindex);
+\end{verbatim}
+
+Get one value of a X-axis.
+
+
+\section*{\tt \htmlref{gridInqXvals}{gridInqXvals}}
+
+\begin{verbatim}
+    int gridInqXvals (intgridID, double *xvals);
+\end{verbatim}
+
+Get all values of a X-axis.
+
+
+\section*{\tt \htmlref{gridInqYbounds}{gridInqYbounds}}
+
+\begin{verbatim}
+    int gridInqYbounds (intgridID, double *ybounds);
+\end{verbatim}
+
+Get the bounds of a Y-axis.
+
+
+\section*{\tt \htmlref{gridInqYlongname}{gridInqYlongname}}
+
+\begin{verbatim}
+    void gridInqYlongname (intgridID, char *ylongname);
+\end{verbatim}
+
+Get the longname of a Y-axis.
+
+
+\section*{\tt \htmlref{gridInqYname}{gridInqYname}}
+
+\begin{verbatim}
+    void gridInqYname (intgridID, char *yname);
+\end{verbatim}
+
+Get the name of a Y-axis.
+
+
+\section*{\tt \htmlref{gridInqYsize}{gridInqYsize}}
+
+\begin{verbatim}
+    int gridInqYsize (intgridID);
+\end{verbatim}
+
+Get the size of a Y-axis.
+
+
+\section*{\tt \htmlref{gridInqYstdname}{gridInqYstdname}}
+
+\begin{verbatim}
+    void gridInqYstdname (intgridID, char *ystdname);
+\end{verbatim}
+
+Get the standard name of a Y-axis.
+
+
+\section*{\tt \htmlref{gridInqYunits}{gridInqYunits}}
+
+\begin{verbatim}
+    void gridInqYunits (intgridID, char *yunits);
+\end{verbatim}
+
+Get the units of a Y-axis.
+
+
+\section*{\tt \htmlref{gridInqYval}{gridInqYval}}
+
+\begin{verbatim}
+    double gridInqYval (intgridID, intindex);
+\end{verbatim}
+
+Get one value of a Y-axis.
+
+
+\section*{\tt \htmlref{gridInqYvals}{gridInqYvals}}
+
+\begin{verbatim}
+    int gridInqYvals (intgridID, double *yvals);
+\end{verbatim}
+
+Get all values of a Y-axis.
+
+
+\section*{\tt \htmlref{gridNew}{gridNew}}
+
+\begin{verbatim}
+    int gridNew (intgridtype, intsize);
+\end{verbatim}
+
+Create a new Grid.
+
+
+\section*{\tt \htmlref{streamClose}{streamClose}}
+
+\begin{verbatim}
+    void streamClose (intstreamID);
+\end{verbatim}
+
+Close an Open file.
+
+
+\section*{\tt \htmlref{streamDefVlist}{streamDefVlist}}
+
+\begin{verbatim}
+    void streamDefVlist (intstreamID, intvlistID);
+\end{verbatim}
+
+Define the Vlist for a stream.
+
+
+\section*{\tt \htmlref{streamInqVlist}{streamInqVlist}}
+
+\begin{verbatim}
+    int streamInqVlist (intstreamID);
+\end{verbatim}
+
+Get the Vlist of a stream.
+
+
+\section*{\tt \htmlref{streamOpenRead}{streamOpenRead}}
+
+\begin{verbatim}
+    int streamOpenRead (char *filename);
+\end{verbatim}
+
+Open a file for reading.
+
+
+\section*{\tt \htmlref{streamOpenWrite}{streamOpenWrite}}
+
+\begin{verbatim}
+    int streamOpenWrite (char *filename, intfiletype);
+\end{verbatim}
+
+Open a file for writing.
+
+
+\section*{\tt \htmlref{streamReadVar}{streamReadVar}}
+
+\begin{verbatim}
+    void streamReadVar (intstreamID, intvarID, double *data, int *nmiss);
+\end{verbatim}
+
+Read a variable.
+
+
+\section*{\tt \htmlref{streamReadVarSlice}{streamReadVarSlice}}
+
+\begin{verbatim}
+    void streamReadVarSlice (intstreamID, intvarID, intlevelID, double *data, 
+                             int *nmiss);
+\end{verbatim}
+
+Read a horizontal slice of a variable.
+
+
+\section*{\tt \htmlref{streamWriteVar}{streamWriteVar}}
+
+\begin{verbatim}
+    void streamWriteVar (intstreamID, intvarID, double *data, intnmiss);
+\end{verbatim}
+
+Write a variable.
+
+
+\section*{\tt \htmlref{streamWriteVarSlice}{streamWriteVarSlice}}
+
+\begin{verbatim}
+    void streamWriteVarSlice (intstreamID, intvarID, intlevelID, double *data, 
+                              intnmiss);
+\end{verbatim}
+
+Write a horizontal slice of a variable.
+
+
+\section*{\tt \htmlref{taxisDefCalendar}{taxisDefCalendar}}
+
+\begin{verbatim}
+    void taxisDefCalendar (inttaxisID, intcalendar);
+\end{verbatim}
+
+Define the calendar.
+
+
+\section*{\tt \htmlref{taxisDefRdate}{taxisDefRdate}}
+
+\begin{verbatim}
+    void taxisDefRdate (inttaxisID, intdate);
+\end{verbatim}
+
+Define the reference date.
+
+
+\section*{\tt \htmlref{taxisDefRtime}{taxisDefRtime}}
+
+\begin{verbatim}
+    void taxisDefRtime (inttaxisID, inttime);
+\end{verbatim}
+
+Define the reference date.
+
+
+\section*{\tt \htmlref{taxisDefVdate}{taxisDefVdate}}
+
+\begin{verbatim}
+    void taxisDefVdate (inttaxisID, intdate);
+\end{verbatim}
+
+Define the verification date.
+
+
+\section*{\tt \htmlref{taxisDefVtime}{taxisDefVtime}}
+
+\begin{verbatim}
+    void taxisDefVtime (inttaxisID, inttime);
+\end{verbatim}
+
+Define the verification time.
+
+
+\section*{\tt \htmlref{taxisInqCalendar}{taxisInqCalendar}}
+
+\begin{verbatim}
+    int taxisInqCalendar (inttaxisID);
+\end{verbatim}
+
+Get the calendar.
+
+
+\section*{\tt \htmlref{taxisInqRdate}{taxisInqRdate}}
+
+\begin{verbatim}
+    int taxisInqRdate (inttaxisID);
+\end{verbatim}
+
+Get the reference date.
+
+
+\section*{\tt \htmlref{taxisInqRtime}{taxisInqRtime}}
+
+\begin{verbatim}
+    int taxisInqRtime (inttaxisID);
+\end{verbatim}
+
+Get the reference time.
+
+
+\section*{\tt \htmlref{taxisInqVdate}{taxisInqVdate}}
+
+\begin{verbatim}
+    int taxisInqVdate (inttaxisID);
+\end{verbatim}
+
+Get the verification date.
+
+
+\section*{\tt \htmlref{taxisInqVtime}{taxisInqVtime}}
+
+\begin{verbatim}
+    int taxisInqVtime (inttaxisID);
+\end{verbatim}
+
+Get the verification time.
+
+
+\section*{\tt \htmlref{taxisNew}{taxisNew}}
+
+\begin{verbatim}
+    int taxisNew (inttimetype);
+\end{verbatim}
+
+Create a new T-axis.
+
+
+\section*{\tt \htmlref{vlistCat}{vlistCat}}
+
+\begin{verbatim}
+    void vlistCat (intvlistID2, intvlistID1);
+\end{verbatim}
+
+Concatenate two variable lists.
+
+
+\section*{\tt \htmlref{vlistCopy}{vlistCopy}}
+
+\begin{verbatim}
+    void vlistCopy (intvlistID2, intvlistID1);
+\end{verbatim}
+
+Copy a variable list.
+
+
+\section*{\tt \htmlref{vlistCopyFlag}{vlistCopyFlag}}
+
+\begin{verbatim}
+    void vlistCopyFlag (intvlistID2, intvlistID1);
+\end{verbatim}
+
+Copy some entries of a variable list.
+
+
+\section*{\tt \htmlref{vlistDefVar}{vlistDefVar}}
+
+\begin{verbatim}
+    int vlistDefVar (intvlistID, intgridID, intzaxisID, inttimeID);
+\end{verbatim}
+
+Create a new Variable.
+
+
+\section*{\tt \htmlref{vlistDefVarCode}{vlistDefVarCode}}
+
+\begin{verbatim}
+    void vlistDefVarCode (intvlistID, intvarID, intcode);
+\end{verbatim}
+
+Define the Code number of a variable.
+
+
+\section*{\tt \htmlref{vlistDefVarDatatype}{vlistDefVarDatatype}}
+
+\begin{verbatim}
+    void vlistDefVarDatatype (intvlistID, intvarID, intdatatype);
+\end{verbatim}
+
+Define the data type of a variable.
+
+
+\section*{\tt \htmlref{vlistDefVarLongname}{vlistDefVarLongname}}
+
+\begin{verbatim}
+    void vlistDefVarLongname (intvlistID, intvarID, char *longname);
+\end{verbatim}
+
+Define the long name of a variable.
+
+
+\section*{\tt \htmlref{vlistDefVarMissval}{vlistDefVarMissval}}
+
+\begin{verbatim}
+    void vlistDefVarMissval (intvlistID, intvarID, doublemissval);
+\end{verbatim}
+
+Define the missing value of a variable.
+
+
+\section*{\tt \htmlref{vlistDefVarName}{vlistDefVarName}}
+
+\begin{verbatim}
+    void vlistDefVarName (intvlistID, intvarID, char *name);
+\end{verbatim}
+
+Define the name of a variable.
+
+
+\section*{\tt \htmlref{vlistDefVarUnits}{vlistDefVarUnits}}
+
+\begin{verbatim}
+    void vlistDefVarUnits (intvlistID, intvarID, char *units);
+\end{verbatim}
+
+Define the units of a variable.
+
+
+\section*{\tt \htmlref{vlistDuplicate}{vlistDuplicate}}
+
+\begin{verbatim}
+    int vlistDuplicate (intvlistID);
+\end{verbatim}
+
+Duplicate a variable list.
+
+
+\section*{\tt \htmlref{vlistFree}{vlistFree}}
+
+\begin{verbatim}
+    void vlistFree (intvlistID);
+\end{verbatim}
+
+Delete a variable list.
+
+
+\section*{\tt \htmlref{vlistMerge}{vlistMerge}}
+
+\begin{verbatim}
+    void vlistMerge (intvlistID2, intvlistID1);
+\end{verbatim}
+
+Merge two variable lists.
+
+
+\section*{\tt \htmlref{vlistNew}{vlistNew}}
+
+\begin{verbatim}
+    int vlistNew (
+\end{verbatim}
+
+Create a variable list.
+
+
+\section*{\tt \htmlref{vlistNgrids}{vlistNgrids}}
+
+\begin{verbatim}
+    int vlistNgrids (intvlistID);
+\end{verbatim}
+
+Number of grids in a variable list.
+
+
+\section*{\tt \htmlref{vlistNvars}{vlistNvars}}
+
+\begin{verbatim}
+    int vlistNvars (intvlistID);
+\end{verbatim}
+
+Number of variables in a variable list.
+
+
+\section*{\tt \htmlref{vlistNzaxis}{vlistNzaxis}}
+
+\begin{verbatim}
+    int vlistNzaxis (intvlistID);
+\end{verbatim}
+
+Number of zaxis in a variable list.
+
+
+\section*{\tt \htmlref{zaxisDefLevel}{zaxisDefLevel}}
+
+\begin{verbatim}
+    void zaxisDefLevel (intzaxisID, intlevelID, doublelevels);
+\end{verbatim}
+
+Define one level of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisDefLevels}{zaxisDefLevels}}
+
+\begin{verbatim}
+    void zaxisDefLevels (intzaxisID, double *levels);
+\end{verbatim}
+
+Define the levels of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisDefLongname}{zaxisDefLongname}}
+
+\begin{verbatim}
+    void zaxisDefLongname (intzaxisID, char *longname);
+\end{verbatim}
+
+Define the longname of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisDefName}{zaxisDefName}}
+
+\begin{verbatim}
+    void zaxisDefName (intzaxisID, char *name);
+\end{verbatim}
+
+Define the name of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisDefUnits}{zaxisDefUnits}}
+
+\begin{verbatim}
+    void zaxisDefUnits (intzaxisID, char *units);
+\end{verbatim}
+
+Define the units of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisDuplicate}{zaxisDuplicate}}
+
+\begin{verbatim}
+    int zaxisDuplicate (intzaxisID);
+\end{verbatim}
+
+Duplicate a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisInqLevel}{zaxisInqLevel}}
+
+\begin{verbatim}
+    double zaxisInqLevel (intzaxisID, intlevelID);
+\end{verbatim}
+
+Get one level of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisInqLevels}{zaxisInqLevels}}
+
+\begin{verbatim}
+    void zaxisInqLevels (intzaxisID, double *levels);
+\end{verbatim}
+
+Get all levels of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisInqLongname}{zaxisInqLongname}}
+
+\begin{verbatim}
+    void zaxisInqLongname (intzaxisID, char *longname);
+\end{verbatim}
+
+Get the longname of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisInqName}{zaxisInqName}}
+
+\begin{verbatim}
+    void zaxisInqName (intzaxisID, char *name);
+\end{verbatim}
+
+Get the name of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisInqSize}{zaxisInqSize}}
+
+\begin{verbatim}
+    int zaxisInqSize (intzaxisID);
+\end{verbatim}
+
+Get the size of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisInqType}{zaxisInqType}}
+
+\begin{verbatim}
+    int zaxisInqType (intzaxisID);
+\end{verbatim}
+
+Get the type of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisInqUnits}{zaxisInqUnits}}
+
+\begin{verbatim}
+    void zaxisInqUnits (intzaxisID, char *units);
+\end{verbatim}
+
+Get the units of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisNew}{zaxisNew}}
+
+\begin{verbatim}
+    int zaxisNew (intleveltype, intsize);
+\end{verbatim}
+
+Create a new Z-axis.
+
+
