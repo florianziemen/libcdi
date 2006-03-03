@@ -886,7 +886,7 @@ static int file_fill_buffer(F_I_L_E *fileptr)
 	  fileptr->buffer =
             (char *) mmap(0, (size_t) nread, PROT_READ, MAP_SHARED, fd, fileptr->bufferPos);
 
-	  if ( (int) fileptr->buffer == -1 )
+	  if ( fileptr->buffer == (void *)-1 )
 	    SysError(func, "mmap error for read %s", fileptr->name);
 
 	  offset = fileptr->position - fileptr->bufferPos;
