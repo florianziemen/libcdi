@@ -1,5 +1,6 @@
-2006-03-??  Uwe Schulzweida  <schulzweida@dkrz.de>
+2006-03-08  Uwe Schulzweida  <schulzweida@dkrz.de>
 
+	* using GRIB library version 0.6.5
 	* vlist_var: Add function vlistChangeVarGrid
 	* program cdi: add option -s for short info
 	* cdfInqContents: improve GRID_CELL support

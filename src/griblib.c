@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Thu Feb 23 15:07:53 CET 2006 */
+/* Generated automatically from m214003 on Mon Mar  6 09:23:26 CET 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -2628,7 +2628,7 @@ void gribPrintSec4Wave(int *isec4)
 /* #define HAVE_LIBZ 1      */
 /* #define HAVE_LIBJASPER 1 */
 
-int  BitsPerInt = sizeof(int) * 8;
+int  BitsPerInt = (int) (sizeof(int) * 8);
 
 
 /* GRIB block 0 - indicator block */
@@ -3055,7 +3055,7 @@ int encodeBDS(GRIBPACK *lGrib, int *gribLen, int decscale, int *isec2, int *isec
   int byte_per_value;
   int nbpv;
   /* ibits = BitsPerInt; */
-  int max_nbpv_pow2;
+  double max_nbpv_pow2;
   int exponent, mantissa;
   int fill_bytes = 0;
   double fpval;
@@ -3098,7 +3098,7 @@ int encodeBDS(GRIBPACK *lGrib, int *gribLen, int decscale, int *isec2, int *isec
 
   if ( decscale )
     {
-      double scale = pow(10.0, decscale);
+      double scale = pow(10.0, (double) decscale);
       for ( i = PackStart; i < datasize; ++i ) data[i] *= scale;
     }
 
@@ -3192,7 +3192,7 @@ int encodeBDS(GRIBPACK *lGrib, int *gribLen, int decscale, int *isec2, int *isec
       else                factor = 1.0/intpow2( binscale);
     }
 
-  max_nbpv_pow2 = (int) intpow2(nbpv) - 1;
+  max_nbpv_pow2 = (double) (intpow2(nbpv) - 1);
 
   ref2ibm(&zref, BitsPerInt);
 
@@ -4069,7 +4069,7 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
       if ( decscale )
 	{
 	  double scale;
-	  scale = pow(10.0, -decscale);
+	  scale = pow(10.0, (double)-decscale);
 	  fmin   *= scale;
 	  zscale *= scale;
 	}
@@ -7394,7 +7394,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "0.6.5" " of ""Feb 23 2006"" ""15:07:53";
+static const char grb_libvers[] = "0.6.5" " of ""Mar  6 2006"" ""09:23:26";
 
 
 
