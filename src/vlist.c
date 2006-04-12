@@ -127,7 +127,7 @@ static int vlist_from_pointer(VLIST *ptr)
 	    Message(func, "Pointer %p has idx %d from vlist list", ptr, idx);
 	}
       else
-	Warning(func, "Too much open vlists (limit is %d)!", _vlist_max);
+	Warning(func, "Too many open vlists (limit is %d)!", _vlist_max);
 
       VLIST_UNLOCK
     }
@@ -589,7 +589,10 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	if ( vlistptr1->vars[varID].flag ) nvars2++;
 
       vlistptr2->nvars = nvars2;
-      vlistptr2->vars  = (VARINFO *) malloc(nvars2*sizeof(VARINFO));
+      if ( nvars2 > 0 )
+	vlistptr2->vars  = (VARINFO *) malloc(nvars2*sizeof(VARINFO));
+      else
+	vlistptr2->vars  = NULL;
 
       varID2 = 0;
       for ( varID = 0; varID < nvars; varID++ )
@@ -1275,6 +1278,7 @@ int vlistGrid(int vlistID, int index)
   return (gridID);
 }
 
+
 int vlistGridIndex(int vlistID, int gridID)
 {
   static char func[] = "vlistGridIndex";
@@ -1292,6 +1296,7 @@ int vlistGridIndex(int vlistID, int gridID)
   
   return (index);
 }
+
 
 void vlistChangeGridIndex(int vlistID, int index, int gridID)
 {
@@ -1312,6 +1317,7 @@ void vlistChangeGridIndex(int vlistID, int index, int gridID)
     if ( vlistptr->vars[varID].gridID == gridIDold )
       vlistptr->vars[varID].gridID = gridID;
 }
+
 
 void vlistChangeGrid(int vlistID, int gridID1, int gridID2)
 {
@@ -1339,6 +1345,7 @@ void vlistChangeGrid(int vlistID, int gridID1, int gridID2)
     if ( vlistptr->vars[varID].gridID == gridID1 )
       vlistptr->vars[varID].gridID = gridID2;
 }
+
 
 int vlistZaxis(int vlistID, int index)
 {

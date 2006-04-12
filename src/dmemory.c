@@ -10,10 +10,12 @@
 #include <errno.h>
 
 
+#if ! defined (HAVE_CONFIG_H)
 #if ! defined (HAVE_MALLOC_H)
 #  if defined (__sun) || defined (__i386) || defined (__ia64) || defined (SX)
 #    define  HAVE_MALLOC_H
 #  endif
+#endif
 #endif
 
 #if  defined  (HAVE_MALLOC_H)
@@ -82,6 +84,7 @@ static void memInternalProblem(const char *caller, const char *fmt, ...)
   exit(EXIT_FAILURE);
 }
 
+
 static void memError(const char *caller, const char *file, int line, size_t size)
 {
   printf("\n");
@@ -93,6 +96,7 @@ static void memError(const char *caller, const char *file, int line, size_t size
 	
   exit(EXIT_FAILURE);
 }
+
 
 static void memListPrintEntry(int mtype, int item, size_t size, void *ptr,
 			      const char *caller, const char *file, int line)
@@ -125,6 +129,7 @@ static void memListPrintEntry(int mtype, int item, size_t size, void *ptr,
      fprintf(stderr, " (%s)", caller);     
    fprintf(stderr, "]\n");
 }
+
 
 static void memListPrintTable(void)
 {
@@ -184,6 +189,7 @@ static void memListPrintTable(void)
     }
 }
 
+
 static void memGetDebugLevel(void)
 {
   char *debugLevel;
@@ -200,6 +206,7 @@ static void memGetDebugLevel(void)
     }
 }
 
+
 static void memInit(void)
 {
   static int initDebugLevel = 0;
@@ -210,6 +217,7 @@ static void memInit(void)
       initDebugLevel = 1;
     }  
 }
+
 
 static int memListDeleteEntry(void *ptr, size_t *size)
 {
@@ -234,6 +242,7 @@ static int memListDeleteEntry(void *ptr, size_t *size)
   return (item);
 }
 
+
 static void memTableInitEntry(int memID)
 {
   static char func[] = "memTableInitEntry";
@@ -248,6 +257,7 @@ static void memTableInitEntry(int memID)
   memTable[memID].mtype  = UNDEFID;
   memTable[memID].line   = UNDEFID;
 }
+
 
 static int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
 			   const char *caller, const char *file, int line)
@@ -336,6 +346,7 @@ static int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
   return (item++);
 }
 
+
 static int memListChangeEntry(void *ptrold, void *ptr, size_t size,
 			      const char *caller, const char *file, int line)
 {
@@ -403,6 +414,7 @@ static int memListChangeEntry(void *ptrold, void *ptr, size_t size,
   return (item);
 }
 
+
 void *Calloc(const char *caller, const char *file, int line, size_t nobjs, size_t size)
 {
   void *ptr = NULL;
@@ -433,6 +445,7 @@ void *Calloc(const char *caller, const char *file, int line, size_t nobjs, size_
   return(ptr);
 }
 
+
 void *Malloc(const char *caller, const char *file, int line, size_t size)
 {
   void *ptr = NULL;
@@ -462,6 +475,7 @@ void *Malloc(const char *caller, const char *file, int line, size_t size)
 
   return (ptr);
 }
+
 
 void *Realloc(const char *caller, const char *file, int line, void *ptrold, size_t size)
 {
@@ -498,6 +512,7 @@ void *Realloc(const char *caller, const char *file, int line, void *ptrold, size
   return (ptr);
 }
 
+
 void Free(const char *caller, const char *file, int line, void *ptr)
 {
   static char func[] = "Free";
@@ -523,6 +538,7 @@ void Free(const char *caller, const char *file, int line, void *ptr)
   free(ptr);
 }
 
+
 size_t memTotal(void)
 {
   size_t memtotal = 0;
@@ -544,6 +560,7 @@ size_t memTotal(void)
 
   return (memtotal);
 }
+
 
 void memExitOnError(void)
 {

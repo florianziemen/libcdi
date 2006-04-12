@@ -153,7 +153,7 @@ static int grid_from_pointer(GRID *ptr)
 	    Message(func, "Pointer %p has idx %d from grid list", ptr, idx);
 	}
       else
-	Warning(func, "Too much open grids (limit is %d)!", _grid_max);
+	Warning(func, "Too many open grids (limit is %d)!", _grid_max);
 
       GRID_UNLOCK
     }

@@ -496,7 +496,11 @@ void cdiCreateRecords(int streamID, int tsID)
   else
     nrecords = streams[streamID].tsteps[1].nallrecs;
 
-  records = (RECORD *) malloc(maxrecords*sizeof(RECORD));
+  if ( maxrecords > 0 )
+    records = (RECORD *) malloc(maxrecords*sizeof(RECORD));
+  else
+    records = NULL;
+
   streams[streamID].tsteps[tsID].records    = records;
   streams[streamID].tsteps[tsID].recordSize = maxrecords;
   streams[streamID].tsteps[tsID].nallrecs   = nrecords;

@@ -243,7 +243,7 @@ static int file_from_pointer(F_I_L_E *ptr)
 	    Message(func, "Pointer %p has idx %d from file list", ptr, idx);
 	}
       else
-	Warning(func, "Too much open files (limit is %d)!", _file_max);
+	Warning(func, "Too many open files (limit is %d)!", _file_max);
 
       FILE_UNLOCK
     }

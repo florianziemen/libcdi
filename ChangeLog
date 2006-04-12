@@ -1,10 +1,14 @@
+2006-05-??  Uwe Schulzweida  <schulzweida@dkrz.de>
+
+	* Version 0.9.7 released
+
 2006-03-08  Uwe Schulzweida  <schulzweida@dkrz.de>
 
 	* using GRIB library version 0.6.5
 	* vlist_var: Add function vlistChangeVarGrid
 	* program cdi: add option -s for short info
 	* cdfInqContents: improve GRID_CELL support
-	* cdfDefTime: attr text bounds for time axis (bug fix [Veronika])
+	* cdfDefTime: attr text bounds for time axis (bug report: Veronika)
 	* gridToZonal: add support for GRID_GENERIC if ny > 1
 	* Version 0.9.6 released
 	
