@@ -1,5 +1,7 @@
 2006-05-??  Uwe Schulzweida  <schulzweida@dkrz.de>
 
+	* using GRIB library version 0.6.6
+	* gridPrint: print xfirst and xinc if xinc is constant
 	* Version 0.9.7 released
 
 2006-03-08  Uwe Schulzweida  <schulzweida@dkrz.de>

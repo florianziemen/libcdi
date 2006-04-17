@@ -2442,11 +2442,20 @@ void gridCompress(int gridID)
 	  gridptr->xsize = gridsize;
 	  gridptr->ysize = gridsize;
 
-	  gridptr->xvals = (double *) realloc(gridptr->xvals, gridsize*sizeof(double));
-	  gridptr->yvals = (double *) realloc(gridptr->yvals, gridsize*sizeof(double));
-	  gridptr->area  = (double *) realloc(gridptr->area, gridsize*sizeof(double));
-	  gridptr->xbounds = (double *) realloc(gridptr->xbounds, nv*gridsize*sizeof(double));
-	  gridptr->ybounds = (double *) realloc(gridptr->ybounds, nv*gridsize*sizeof(double));
+	  if ( gridptr->xvals )
+	    gridptr->xvals = (double *) realloc(gridptr->xvals, gridsize*sizeof(double));
+
+	  if ( gridptr->yvals )
+	    gridptr->yvals = (double *) realloc(gridptr->yvals, gridsize*sizeof(double));
+
+	  if ( gridptr->area )
+	    gridptr->area  = (double *) realloc(gridptr->area, gridsize*sizeof(double));
+
+	  if ( gridptr->xbounds )
+	    gridptr->xbounds = (double *) realloc(gridptr->xbounds, nv*gridsize*sizeof(double));
+
+	  if ( gridptr->ybounds )
+	    gridptr->ybounds = (double *) realloc(gridptr->ybounds, nv*gridsize*sizeof(double));
 
 	  free(gridptr->mask);
 	  gridptr->mask = NULL;
@@ -2828,19 +2837,35 @@ void gridPrint(int gridID)
 
 	if ( xvals )
 	  {
-	    nbyte0 = fprintf(fp, "xvals     : ");
-	    nbyte = nbyte0;
-	    for ( index = 0; index < xdim; index++ )
+	    double xfirst = 0.0, xinc = 0.0;
+
+	    if ( type == GRID_LONLAT || type == GRID_GAUSSIAN )
 	      {
-		if ( nbyte > 80 )
-		  {
-		    fprintf(fp, "\n");
-		    fprintf(fp, "%*s", nbyte0, "");
-		    nbyte = nbyte0;
-		  }
-		nbyte += fprintf(fp, "%.9g ", xvals[index]);
+		xfirst = gridInqXval(gridID, 0);
+		xinc   = gridInqXinc(gridID);
 	      }
-	    fprintf(fp, "\n");
+
+	    if ( !DBL_IS_EQUAL(xinc, 0) )
+	      {
+	  	fprintf(fp, "xfirst    : %g\n", xfirst);
+		fprintf(fp, "xinc      : %g\n", xinc);
+	      }
+	    else
+	      {
+		nbyte0 = fprintf(fp, "xvals     : ");
+		nbyte = nbyte0;
+		for ( index = 0; index < xdim; index++ )
+		  {
+		    if ( nbyte > 80 )
+		      {
+			fprintf(fp, "\n");
+			fprintf(fp, "%*s", nbyte0, "");
+			nbyte = nbyte0;
+		      }
+		    nbyte += fprintf(fp, "%.9g ", xvals[index]);
+		  }
+		fprintf(fp, "\n");
+	      }
 	  }
 
 	if ( xbounds )
@@ -2858,19 +2883,35 @@ void gridPrint(int gridID)
 
 	if ( yvals )
 	  {
-	    nbyte0 = fprintf(fp, "yvals     : ");
-	    nbyte = nbyte0;
-	    for ( index = 0; index < ydim; index++ )
+	    double yfirst = 0.0, yinc = 0.0;
+
+	    if ( type == GRID_LONLAT )
 	      {
-		if ( nbyte > 80 )
-		  {
-		    fprintf(fp, "\n");
-		    fprintf(fp, "%*s", nbyte0, "");
-		    nbyte = nbyte0;
-		  }
-		nbyte += fprintf(fp, "%.9g ", yvals[index]);
+		yfirst = gridInqYval(gridID, 0);
+		yinc   = gridInqYinc(gridID);
 	      }
-	    fprintf(fp, "\n");
+
+	    if ( !DBL_IS_EQUAL(yinc, 0) )
+	      {
+	  	fprintf(fp, "yfirst    : %g\n", yfirst);
+		fprintf(fp, "yinc      : %g\n", yinc);
+	      }
+	    else
+	      {
+		nbyte0 = fprintf(fp, "yvals     : ");
+		nbyte = nbyte0;
+		for ( index = 0; index < ydim; index++ )
+		  {
+		    if ( nbyte > 80 )
+		      {
+			fprintf(fp, "\n");
+			fprintf(fp, "%*s", nbyte0, "");
+			nbyte = nbyte0;
+		      }
+		    nbyte += fprintf(fp, "%.9g ", yvals[index]);
+		  }
+		fprintf(fp, "\n");
+	      }
 	  }
 
 	if ( ybounds )
