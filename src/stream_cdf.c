@@ -3452,9 +3452,19 @@ int cdfInqContents(int streamID)
 	      /* check attlen */
 	      if ( (int) attlen != nvdims )
 		{
-		  if ( nvdims > 0 )
-		    Warning(func, "axis attribute length %d does not match nvdim %d for %s",
-			    attlen, nvdims, name);
+		  if ( attlen-1 == nvdims && attstring[attlen] == 0 ) attlen--;
+		  else
+		    {
+		      if ( nvdims > 0 )
+			Warning(func, "axis attribute length %d does not match nvdim %d for %s",
+				attlen, nvdims, name);
+		      if ( nvdims > 0 )
+			{
+			  fprintf(stderr, "attlen %d %d %d\n", strlen(attstring), attlen, nvdims);
+			  for ( i = 0; i < attlen; i++ )
+			    fprintf(stderr, "       %d %d %c\n", i, (int) attstring[i], attstring[i]);
+			}
+		    }
 		}
 	      else
 		{
@@ -3906,7 +3916,6 @@ int cdfInqContents(int streamID)
 		ydimid = ncvars[ncvarid].dimids[i];
 	    }
 	  
-	  /*
 	  if ( ncvars[ncvarid].xvarid != UNDEFID )
 	    xvarid = ncvars[ncvarid].xvarid;
 	  else if ( xdimid != UNDEFID )
@@ -3916,8 +3925,8 @@ int cdfInqContents(int streamID)
 	    yvarid = ncvars[ncvarid].yvarid;
 	  else if ( ydimid != UNDEFID )
 	    yvarid = ncdims[ydimid].ncvarid;
-	  */
 	  
+	  /*
 	  if ( xdimid != UNDEFID )
 	    xvarid = ncdims[xdimid].ncvarid;
 	  if ( xvarid == UNDEFID && ncvars[ncvarid].xvarid != UNDEFID )
@@ -3927,6 +3936,7 @@ int cdfInqContents(int streamID)
 	    yvarid = ncdims[ydimid].ncvarid;
 	  if ( yvarid == UNDEFID && ncvars[ncvarid].yvarid != UNDEFID )
 	    yvarid = ncvars[ncvarid].yvarid;
+	  */
 
 	  if ( xdimid != UNDEFID )
 	    cdf_inq_dimlen(fileID, xdimid, &xsize);
