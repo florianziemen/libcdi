@@ -4,6 +4,7 @@
 	* cdfInqContents: check attlen for attname "axis"
 	* cdfInqContents: use coord vars from attr coordinates (bug report: Alberto Maurizi)
 	* gridPrint: print xfirst and xinc if xinc is constant
+	* gridGenYvals: try to calculate non global gaussian latitides
 	* Version 0.9.7 released
 
 2006-03-08  Uwe Schulzweida  <schulzweida@dkrz.de>

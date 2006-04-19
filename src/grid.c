@@ -318,6 +318,33 @@ void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *x
 }
 
 
+void calc_gaussaw(double *yvals, int ysize, double yfirst, double ylast)
+{
+  static char func[] = "calc_gaussaw";
+  double *yw;
+  int yhsize;
+  int i;
+
+  yw = (double *) malloc(ysize*sizeof(double));
+  gaussaw(yvals, yw, ysize);
+  free(yw);
+  for ( i = 0; i < ysize; i++ )
+    yvals[i] = asin(yvals[i])/M_PI*180.0;
+
+  if ( yfirst < ylast && yfirst > -90.0 && ylast < 90.0 )
+    {
+      double ytmp;
+      yhsize = ysize/2;
+      for ( i = 0; i < yhsize; i++ )
+	{
+	  ytmp = yvals[i];
+	  yvals[i] = yvals[ysize-i-1];
+	  yvals[ysize-i-1] = ytmp;
+	}
+    }
+}
+
+
 void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals)
 {
   static char func[] = "gridGenYvals";
@@ -325,36 +352,42 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 
   if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
     {
-      double *yw;
-      int yhsize;
-
       if ( ysize > 2 )
 	{
-	  yw    = (double *) malloc(ysize*sizeof(double));
-	  gaussaw(yvals, yw, ysize);
-	  free(yw);
-	  for ( i = 0; i < ysize; i++ )
-	    yvals[i] = asin(yvals[i])/M_PI*180.0;
-
-	  if ( yfirst < ylast && yfirst > -90.0 && ylast < 90.0 )
-	    {
-	      double ytmp;
-	      yhsize = ysize/2;
-	      for ( i = 0; i < yhsize; i++ )
-		{
-		  ytmp = yvals[i];
-		  yvals[i] = yvals[ysize-i-1];
-		  yvals[ysize-i-1] = ytmp;
-		}
-	    }
+	  calc_gaussaw(yvals, ysize, yfirst, ylast);
 
 	  if ( ! (yfirst == 0 && ylast == 0) )
 	    if ( fabs(yvals[0] - yfirst) > 0.001 || fabs(yvals[ysize-1] - ylast) > 0.001 )
 	      {
-		Warning(func, "Cannot calculate gaussian latitudes for lat1 = %g latn %g", yfirst, ylast);
-		for ( i = 0; i < ysize; i++ ) yvals[i] = 0;
-		yvals[0] = yfirst;
-		yvals[ysize-1] = ylast;
+		double yinc = fabs(ylast-yfirst)/(ysize-1);
+		double *ytmp;
+		int nstart, lfound = 0;
+		int ny = (int) (180./yinc + 0.5);
+		ny -= ny%2;
+		/* printf("%g %g %g %g %g %d\n", ylast, yfirst, ylast-yfirst,yinc, 180/yinc, ny); */
+		ytmp   = (double *) malloc(ny*sizeof(double));
+		calc_gaussaw(ytmp, ny, yfirst, ylast);
+		for ( i = 0; i < (ny-ysize); i++ )
+		  if ( fabs(ytmp[i] - yfirst) < 0.001 ) break;
+
+		nstart = i;
+
+		if ( (nstart+ysize-1) < ny )
+		  if ( fabs(ytmp[nstart+ysize-1] - ylast) < 0.001 ) lfound = 1;
+
+		if ( lfound )
+		  {
+		    for ( i = 0; i < ysize; i++ ) yvals[i] = ytmp[i+nstart];
+		  }
+		else
+		  {
+		    Warning(func, "Cannot calculate gaussian latitudes for lat1 = %g latn %g", yfirst, ylast);
+		    for ( i = 0; i < ysize; i++ ) yvals[i] = 0;
+		    yvals[0] = yfirst;
+		    yvals[ysize-1] = ylast;
+		  }
+
+		free(ytmp);
 	      }
 	}
       else
@@ -1711,7 +1744,7 @@ double gridInqYinc(int gridID)
 	  yinc = fabs(yvals[1] - yvals[0]);
 	  for ( i = 2; i < ysize; i++ )
 	    if ( fabs(fabs(yvals[i] - yvals[i-1]) - yinc) > (yinc/1000) ) break;
-		  
+
 	  if ( i < ysize ) yinc = 0;
 	  else             yinc = yvals[1] - yvals[0];
 	}
