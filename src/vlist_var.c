@@ -318,12 +318,20 @@ int vlistInqVarCode(int vlistID, int varID)
 {
   static char func[] = "vlistInqVarCode";
   VLIST *vlistptr;
+  int code;
 
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(func, vlistID, varID);
 
-  return (vlistptr->vars[varID].code);
+  code = vlistptr->vars[varID].code;
+
+  if ( code < 0 && vlistptr->vars[varID].tableID != -1 && vlistptr->vars[varID].name != NULL )
+    {
+      tableInqParCode(vlistptr->vars[varID].tableID, vlistptr->vars[varID].name, &code);
+    }
+
+  return (code);
 }
 
 

@@ -607,6 +607,7 @@ int     tableInqModel(int tableID);
 
 void    tableInqPar(int tableID, int code, char *name, char *longname, char *units);
 
+int     tableInqParCode(int tableID, char *name, int *code);
 int     tableInqParName(int tableID, int code, char *name);
 int     tableInqParLongname(int tableID, int code, char *longname);
 int     tableInqParUnits(int tableID, int code, char *units);

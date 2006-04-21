@@ -265,6 +265,10 @@ static void cdfGetAttText(int fileID, int ncvarid, char *attname, char *atttext,
       if ( (int) attlen > maxlen ) attlen = maxlen;
       memcpy(atttext, attbuf, attlen);
     }
+  else
+    {
+      atttext[0] = 0;
+    }
 }
 #endif
 

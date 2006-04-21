@@ -660,6 +660,7 @@ void tableWrite(const char *ptfile, int tableID)
   fclose(ptfp);
 }
 
+
 void tableWriteC(const char *filename, int tableID)
 {
   static char func[] = "tableWriteC";
@@ -746,6 +747,36 @@ void tableWriteC(const char *filename, int tableID)
   fclose(ptfp);
 }
 
+
+int tableInqParCode(int tableID, char *varname, int *code)
+{
+  int item, npars;
+  int err = 0;
+
+  npars = parTable[tableID].npars;
+
+  if ( tableID == UNDEFID || varname == NULL )
+    {
+      err = 1;
+    }
+  else
+    {
+      for ( item = 0; item < npars; item++ )
+	{
+	  if ( parTable[tableID].pars[item].name )
+	    if ( strcmp(parTable[tableID].pars[item].name, varname) == 0 )
+	      {
+		*code = parTable[tableID].pars[item].id;
+		break;
+	      }
+	}
+      if ( item == npars ) err = 1;
+    }
+
+  return (err);
+}
+
+
 int tableInqParName(int tableID, int code, char *varname)
 {
   int item, npars;
@@ -774,6 +805,7 @@ int tableInqParName(int tableID, int code, char *varname)
   return (err);
 }
 
+
 char *tableInqParNamePtr(int tableID, int code)
 {
   char *name = NULL;
@@ -794,6 +826,7 @@ char *tableInqParNamePtr(int tableID, int code)
 
   return (name);
 }
+
 
 char *tableInqParLongnamePtr(int tableID, int code)
 {
@@ -816,6 +849,7 @@ char *tableInqParLongnamePtr(int tableID, int code)
   return (longname);
 }
 
+
 char *tableInqParUnitsPtr(int tableID, int code)
 {
   char *units = NULL;
@@ -836,6 +870,7 @@ char *tableInqParUnitsPtr(int tableID, int code)
 
   return (units);
 }
+
 
 int tableInqParLongname(int tableID, int code, char *longname)
 {
@@ -865,6 +900,7 @@ int tableInqParLongname(int tableID, int code, char *longname)
   return (err);
 }
 
+
 int tableInqParUnits(int tableID, int code, char *units)
 {
   int item, npars;
@@ -892,6 +928,7 @@ int tableInqParUnits(int tableID, int code, char *units)
 
   return (err);
 }
+
 
 void tableInqPar(int tableID, int code, char *name, char *longname, char *units)
 {

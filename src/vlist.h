@@ -5,7 +5,8 @@
 #  include "cdi_limits.h"
 #endif
 
-#define  MAX_ATTRIBUTES  99
+#define  MAX_ATTRIBUTES  256
+
 
 typedef struct
 {
@@ -14,6 +15,7 @@ typedef struct
   int      flevelID;
 }
 LEVINFO;
+
 
 typedef struct
 {
@@ -43,6 +45,7 @@ typedef struct
 }
 VARINFO;
 
+
 typedef struct
 {
   int      self;
@@ -65,6 +68,7 @@ typedef struct
   char    *attstrings[MAX_ATTRIBUTES];
 }
 VLIST;
+
 
 VLIST  *vlist_to_pointer(int vlistID);
 int     vlistNlock(int vlistID);
