@@ -3012,6 +3012,7 @@ int cdfInqContents(int streamID)
   size_t attlen;
   int  ilev;
   char name[256];
+  int attint;
   char attname[256];
   const int attstringlen = 1024; char attstring[1024];
   char *pname, *plongname, *punits;
@@ -3127,37 +3128,43 @@ int cdfInqContents(int streamID)
       cdf_inq_attname(fileID, NC_GLOBAL, iatt, attname);
       cdf_inq_atttype(fileID, NC_GLOBAL, attname, &xtype);
 
-      if ( xtype != NC_CHAR ) continue;
-
-      if ( strcmp(attname, "history") == 0 )
+      if ( xtype == NC_CHAR )
 	{
-	  streams[streamID].historyID = iatt;
+	  if ( strcmp(attname, "history") == 0 )
+	    {
+	      streams[streamID].historyID = iatt;
+	    }
+	  else if ( strcmp(attname, "institution") == 0 )
+	    {
+	      cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
+	      instID = institutInq(0, 0, NULL, attstring);
+	      if ( instID == UNDEFID )
+		instID = institutDef(0, 0, NULL, attstring);
+	    }
+	  else if ( strcmp(attname, "source") == 0 )
+	    {
+	      cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
+	      modelID = modelInq(-1, 0, attstring);
+	    }
+	  else if ( strcmp(attname, "Conventions") == 0 )
+	    {
+	    }
+	  else if ( strcmp(attname, "CDI") == 0 )
+	    {
+	    }
+	  else if ( strcmp(attname, "CDO") == 0 )
+	    {
+	    }
+	  else
+	    {
+	      cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
+	      vlistDefAttribute(vlistID, attname, attstring);
+	    }
 	}
-      else if ( strcmp(attname, "institution") == 0 )
+      else if ( xtype == NC_INT )
 	{
-	  cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
-	  instID = institutInq(0, 0, NULL, attstring);
-	  if ( instID == UNDEFID )
-	    instID = institutDef(0, 0, NULL, attstring);
-	}
-      else if ( strcmp(attname, "source") == 0 )
-	{
-	  cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
-	  modelID = modelInq(-1, 0, attstring);
-	}
-      else if ( strcmp(attname, "Conventions") == 0 )
-	{
-	}
-      else if ( strcmp(attname, "CDI") == 0 )
-	{
-	}
-      else if ( strcmp(attname, "CDO") == 0 )
-	{
-	}
-      else
-	{
-	  cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
-	  vlistDefAttribute(vlistID, attname, attstring);
+	  cdfGetAttInt(fileID, NC_GLOBAL, attname, &attint);
+	  vlistDefIntAttribute(vlistID, attname, attint);
 	}
     }
 
@@ -4633,6 +4640,7 @@ int cdfInqTimestep(int streamID, int tsID)
   return ((int) nrecs);
 }
 
+
 void cdfEndDef(int streamID)
 {
   int varID, ncvarid;
@@ -4651,6 +4659,7 @@ void cdfEndDef(int streamID)
       streams[streamID].accessmode = 1;
     }
 }
+
 
 void cdfDefInstitut(int streamID)
 {
@@ -4704,6 +4713,7 @@ void cdfDefSource(int streamID)
 #endif
 }
 
+
 void cdfDefGlobalAtts(int streamID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -4736,6 +4746,16 @@ void cdfDefGlobalAtts(int streamID)
 
   cdfDefSource(streamID);
   cdfDefInstitut(streamID);
+
+  if ( vlistptr->niatts > 0 )
+    {
+      if ( streams[streamID].ncmode == 2 ) cdf_redef(fileID);
+      for ( iatt = 0; iatt < vlistptr->niatts; iatt++ )
+	{
+	  cdf_put_att_int(fileID, NC_GLOBAL, vlistptr->iattnames[iatt], NC_INT, 1L, &vlistptr->iatts[iatt]);
+	}
+      if ( streams[streamID].ncmode == 2 ) cdf_enddef(fileID);
+    }
 
   streams[streamID].globalatts = 1;
 #endif

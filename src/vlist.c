@@ -153,6 +153,7 @@ static void vlist_init_entry(VLIST *vlistptr)
   vlistptr->tableID        = cdiDefaultTableID;
   vlistptr->varsAllocated  = 0;
   vlistptr->natts          = 0;
+  vlistptr->niatts         = 0;
   vlistptr->ntsteps        = CDI_UNDEFID;
 }
 
@@ -381,6 +382,12 @@ void vlistCopy(int vlistID2, int vlistID1)
 	vlistptr2->attstrings[attID] = NULL;
     }
 
+  for ( attID = 0; attID < vlistptr1->niatts; attID++ )
+    {
+      vlistptr2->iattnames[attID] = strdupx(vlistptr1->iattnames[attID]);
+      vlistptr2->iatts[attID]     = vlistptr1->iatts[attID];
+    }
+
   if ( vlistptr1->vars )
     {
       int nvars = vlistptr1->nvars;
@@ -572,6 +579,12 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	vlistptr2->attstrings[attID] = strdupx(vlistptr1->attstrings[attID]);
       else
 	vlistptr2->attstrings[attID] = NULL;
+    }
+
+  for ( attID = 0; attID < vlistptr1->niatts; attID++ )
+    {
+      vlistptr2->iattnames[attID] = strdupx(vlistptr1->iattnames[attID]);
+      vlistptr2->iatts[attID]     = vlistptr1->iatts[attID];
     }
 
   if ( vlistptr1->vars )
@@ -1507,7 +1520,7 @@ void vlistDefAttribute(int vlistID, const char *attname, const char *attstring)
   else
     {
       for ( attID = 0; attID < vlistptr->natts; attID++ )
-	if ( strcmp(vlistptr->attnames[attID], attname ) == 0 )
+	if ( strcmp(vlistptr->attnames[attID], attname) == 0 )
 	  {
 	    if ( vlistptr->attstrings[attID] )
 	      free(vlistptr->attstrings[attID]);
@@ -1517,7 +1530,7 @@ void vlistDefAttribute(int vlistID, const char *attname, const char *attstring)
 
       if ( attID == vlistptr->natts )
 	{
-	  attID = vlistptr->natts++;
+	  vlistptr->natts++;
 	  vlistptr->attnames[attID] = strdupx(attname);
 	}
 
@@ -1525,5 +1538,41 @@ void vlistDefAttribute(int vlistID, const char *attname, const char *attstring)
 	vlistptr->attstrings[attID] = strdupx(attstring);
       else
 	vlistptr->attstrings[attID] = NULL;
+    }
+}
+
+
+void vlistDefIntAttribute(int vlistID, const char *attname, int attint)
+{
+  static char func[] = "vlistDefIntAttribute";
+  int attID;
+  VLIST *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlist_check_ptr(func, vlistptr);
+
+  if ( attname == NULL ) return;
+
+  if ( (vlistptr->niatts + 1) == MAX_ATTRIBUTES )
+    {
+      Warning(func, "vlistID %d, maximum of %d int attributes reached!",
+	      vlistID, MAX_ATTRIBUTES);
+    }
+  else
+    {
+      for ( attID = 0; attID < vlistptr->niatts; attID++ )
+	if ( strcmp(vlistptr->iattnames[attID], attname) == 0 )
+	  {
+	    break;
+	  }
+
+      if ( attID == vlistptr->niatts )
+	{
+	  vlistptr->niatts++;
+	  vlistptr->iattnames[attID] = strdupx(attname);
+	}
+
+      vlistptr->iatts[attID] = attint;
     }
 }

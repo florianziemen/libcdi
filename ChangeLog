@@ -1,10 +1,11 @@
-2006-05-??  Uwe Schulzweida  <schulzweida@dkrz.de>
+2006-05-04  Uwe Schulzweida  <schulzweida@dkrz.de>
 
 	* using GRIB library version 0.6.6
 	* cdfInqContents: check attlen for attname "axis"
 	* cdfInqContents: use coord vars from attr coordinates (bug report: Alberto Maurizi)
 	* gridPrint: print xfirst and xinc if xinc is constant
 	* gridGenYvals: try to calculate non global gaussian latitides
+	* add global int attr support
 	* add function tableInqParCode
 	* Version 0.9.7 released
 

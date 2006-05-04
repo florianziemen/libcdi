@@ -66,6 +66,9 @@ typedef struct
   int      natts;
   char    *attnames[MAX_ATTRIBUTES];
   char    *attstrings[MAX_ATTRIBUTES];
+  int      niatts;
+  char    *iattnames[MAX_ATTRIBUTES];
+  int      iatts[MAX_ATTRIBUTES];
 }
 VLIST;
 
@@ -84,5 +87,7 @@ void    vlistFreeVarUnits(int vlistID, int varID);
 void    vlistDefVarTime(int vlistID, int varID, int timeID);
 int     vlistInqVarMissvalUsed(int vlistID, int varID);
 int     vlistHasTime(int vlistID);
+
+void vlistDefIntAttribute(int vlistID, const char *attname, int attint);
 
 #endif  /* _VLIST_H */
