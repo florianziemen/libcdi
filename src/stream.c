@@ -1621,7 +1621,7 @@ int streamNtsteps(int streamID)
 @Function  streamDefVlist
 @Title     Define the variable list
 
-@Prototype streamDefVlist(int streamID, int vlistID)
+@Prototype void streamDefVlist(int streamID, int vlistID)
 @Parameter
     @Item  streamID  Stream identifier
     @Item  vlistID   Variable list identifier
