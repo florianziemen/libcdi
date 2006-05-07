@@ -1,5 +1,28 @@
-\documentclass[DIV16,BCOR1cm,11pt,a4paper,fleqn]{scrreprt}         % for pdf output
+\documentclass[DIV16,BCOR1cm,11pt,a4paper,fleqn,twoside]{scrreprt}         % for pdf output
 %\documentclass[DIV16,BCOR1cm,11pt,a4paper,fleqn]{report}         % for pdf output
+
+\usepackage{graphics}
+
+% To define headers and footers
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+% Headers and footers personalization using the `fancyhdr' package
+\fancyhf{} % Clear all fields
+
+\renewcommand{\headrulewidth}{0.2mm}
+\renewcommand{\footrulewidth}{0.2mm}
+
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+%\renewcommand{\sectionmark}[1]{\markright{#1}}
+
+\fancyhead[LO,RE]{\slshape \leftmark}
+%\fancyhead[LE,RO]{\slshape \rightmark}
+\fancyfoot[LE,RO]{\Large\thepage}
+\fancypagestyle{plain}{%
+  \fancyhead{} % get rid of headers
+  \renewcommand{\headrulewidth}{0pt}
+}
 
 %\usepackage{ae}               % fuer die "almost european" computer modern fonts
 %\usepackage{url}              % Standard-Paket fuer WWW-Adressen
@@ -161,7 +184,7 @@
 %\chapter{Model}
 
 
-\chapter*{Quick Reference}
+\chapter*{Quick Reference\markboth{Quick Reference}{}}
 \addcontentsline{toc}{chapter}{Quick Reference}
 
 This appendix provide a brief listing of the C language bindings of the
