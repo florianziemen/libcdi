@@ -1,5 +1,5 @@
 !
-! Fortran interface for CDI library version 0.9.5
+! Fortran interface for CDI library version 1.0.0
 !
 
       INTEGER    CDI_UNDEFID           
@@ -179,16 +179,16 @@
 !  STREAM control routines
 !
       INTEGER         streamOpenRead
-!                                    (CHARACTER*(*)   filename)
+!                                    (CHARACTER*(*)   path)
       EXTERNAL        streamOpenRead
 
       INTEGER         streamOpenWrite
-!                                    (CHARACTER*(*)   filename,
+!                                    (CHARACTER*(*)   path,
 !                                     INTEGER         filetype)
       EXTERNAL        streamOpenWrite
 
       INTEGER         streamOpenAppend
-!                                    (CHARACTER*(*)   filename)
+!                                    (CHARACTER*(*)   path)
       EXTERNAL        streamOpenAppend
 
 !                     streamClose
@@ -299,12 +299,12 @@
 !
 !  VLIST routines
 !
-      INTEGER         vlistNew
-      EXTERNAL        vlistNew
+      INTEGER         vlistCreate
+      EXTERNAL        vlistCreate
 
-!                     vlistFree
+!                     vlistDestroy
 !                                    (INTEGER         vlistID)
-      EXTERNAL        vlistFree
+      EXTERNAL        vlistDestroy
 
       INTEGER         vlistDuplicate
 !                                    (INTEGER         vlistID)
@@ -462,6 +462,12 @@
 !                                     INTEGER         zaxisID,
 !                                     INTEGER         timeID)
       EXTERNAL        vlistDefVar
+
+!                     vlistChangeVarGrid
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         gridID)
+      EXTERNAL        vlistChangeVarGrid
 
 !                     vlistChangeVarZaxis
 !                                    (INTEGER         vlistID,
@@ -705,10 +711,35 @@
 !                                     CHARACTER*(*)   gridname)
       EXTERNAL        gridName
 
-      INTEGER         gridNew
+!                     gridCompress
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridCompress
+
+!                     gridDefMask
+!                                    (INTEGER         gridID,
+!                                     INTEGER         mask)
+      EXTERNAL        gridDefMask
+
+      INTEGER         gridInqMask
+!                                    (INTEGER         gridID,
+!                                     INTEGER         mask)
+      EXTERNAL        gridInqMask
+
+!                     gridPrint
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridPrint
+
+      INTEGER         gridSize
+      EXTERNAL        gridSize
+
+      INTEGER         gridCreate
 !                                    (INTEGER         gridtype,
 !                                     INTEGER         size)
-      EXTERNAL        gridNew
+      EXTERNAL        gridCreate
+
+      INTEGER         gridDuplicate
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridDuplicate
 
       INTEGER         gridInqType
 !                                    (INTEGER         gridID)
@@ -717,21 +748,6 @@
       INTEGER         gridInqSize
 !                                    (INTEGER         gridID)
       EXTERNAL        gridInqSize
-
-      INTEGER         gridDuplicate
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridDuplicate
-
-!                     gridCompress
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridCompress
-
-!                     gridPrint
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridPrint
-
-      INTEGER         gridSize
-      EXTERNAL        gridSize
 
 !                     gridDefXsize
 !                                    (INTEGER         gridID,
@@ -765,16 +781,6 @@
 !                                    (INTEGER         gridID,
 !                                     DOUBLEPRECISION yvals)
       EXTERNAL        gridDefYvals
-
-      INTEGER         gridInqMask
-!                                    (INTEGER         gridID,
-!                                     INTEGER         mask)
-      EXTERNAL        gridInqMask
-
-!                     gridDefMask
-!                                    (INTEGER         gridID,
-!                                     INTEGER         mask)
-      EXTERNAL        gridDefMask
 
       INTEGER         gridInqYvals
 !                                    (INTEGER         gridID,
@@ -1040,10 +1046,10 @@
 !                                     CHARACTER*(*)   gridname)
       EXTERNAL        zaxisName
 
-      INTEGER         zaxisNew
+      INTEGER         zaxisCreate
 !                                    (INTEGER         leveltype,
 !                                     INTEGER         size)
-      EXTERNAL        zaxisNew
+      EXTERNAL        zaxisCreate
 
       INTEGER         zaxisInqType
 !                                    (INTEGER         zaxisID)
@@ -1187,9 +1193,9 @@
 !
 !  TAXIS routines
 !
-      INTEGER         taxisNew
+      INTEGER         taxisCreate
 !                                    (INTEGER         timetype)
-      EXTERNAL        taxisNew
+      EXTERNAL        taxisCreate
 
       INTEGER         taxisDuplicate
 !                                    (INTEGER         taxisID)
@@ -1378,6 +1384,12 @@
 !                                     CHARACTER*(*)   longname,
 !                                     CHARACTER*(*)   units)
       EXTERNAL        tableInqPar
+
+      INTEGER         tableInqParCode
+!                                    (INTEGER         tableID,
+!                                     CHARACTER*(*)   name,
+!                                     INTEGER         code)
+      EXTERNAL        tableInqParCode
 
       INTEGER         tableInqParName
 !                                    (INTEGER         tableID,

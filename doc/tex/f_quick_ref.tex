@@ -4,6 +4,15 @@
 This appendix provide a brief listing of the Fortran language bindings of the
 CDI library routines:
 
+\section*{\tt \htmlref{gridCreate}{gridCreate}}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridCreate (INTEGER gridtype, INTEGER size)
+\end{verbatim}
+
+Create a new Grid.
+
+
 \section*{\tt \htmlref{gridDefNvertex}{gridDefNvertex}}
 
 \begin{verbatim}
@@ -319,22 +328,13 @@ Get one value of a Y-axis.
 Get all values of a Y-axis.
 
 
-\section*{\tt \htmlref{gridNew}{gridNew}}
-
-\begin{verbatim}
-    INTEGER FUNCTION gridNew (INTEGER gridtype, INTEGER size)
-\end{verbatim}
-
-Create a new Grid.
-
-
 \section*{\tt \htmlref{streamClose}{streamClose}}
 
 \begin{verbatim}
     SUBROUTINE streamClose (INTEGER streamID)
 \end{verbatim}
 
-Close an Open file.
+Close an open dataset.
 
 
 \section*{\tt \htmlref{streamDefVlist}{streamDefVlist}}
@@ -358,19 +358,19 @@ Get the Vlist of a stream.
 \section*{\tt \htmlref{streamOpenRead}{streamOpenRead}}
 
 \begin{verbatim}
-    INTEGER FUNCTION streamOpenRead (CHARACTER*(*) filename)
+    INTEGER FUNCTION streamOpenRead (CHARACTER*(*) path)
 \end{verbatim}
 
-Open a file for reading.
+Open a dataset for reading.
 
 
 \section*{\tt \htmlref{streamOpenWrite}{streamOpenWrite}}
 
 \begin{verbatim}
-    INTEGER FUNCTION streamOpenWrite (CHARACTER*(*) filename, INTEGER filetype)
+    INTEGER FUNCTION streamOpenWrite (CHARACTER*(*) path, INTEGER filetype)
 \end{verbatim}
 
-Open a file for writing.
+Create a new dataset.
 
 
 \section*{\tt \htmlref{streamReadVar}{streamReadVar}}
@@ -411,6 +411,15 @@ Write a variable.
 \end{verbatim}
 
 Write a horizontal slice of a variable.
+
+
+\section*{\tt \htmlref{taxisCreate}{taxisCreate}}
+
+\begin{verbatim}
+    INTEGER FUNCTION taxisCreate (INTEGER timetype)
+\end{verbatim}
+
+Create a new T-axis.
 
 
 \section*{\tt \htmlref{taxisDefCalendar}{taxisDefCalendar}}
@@ -503,15 +512,6 @@ Get the verification date.
 Get the verification time.
 
 
-\section*{\tt \htmlref{taxisNew}{taxisNew}}
-
-\begin{verbatim}
-    INTEGER FUNCTION taxisNew (INTEGER timetype)
-\end{verbatim}
-
-Create a new T-axis.
-
-
 \section*{\tt \htmlref{vlistCat}{vlistCat}}
 
 \begin{verbatim}
@@ -539,6 +539,15 @@ Copy a variable list.
 Copy some entries of a variable list.
 
 
+\section*{\tt \htmlref{vlistCreate}{vlistCreate}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistCreate (
+\end{verbatim}
+
+Create a variable list.
+
+
 \section*{\tt \htmlref{vlistDefVar}{vlistDefVar}}
 
 \begin{verbatim}
@@ -555,7 +564,7 @@ Create a new Variable.
     SUBROUTINE vlistDefVarCode (INTEGER vlistID, INTEGER varID, INTEGER code)
 \end{verbatim}
 
-Define the Code number of a variable.
+Define the code number of a Variable.
 
 
 \section*{\tt \htmlref{vlistDefVarDatatype}{vlistDefVarDatatype}}
@@ -564,7 +573,7 @@ Define the Code number of a variable.
     SUBROUTINE vlistDefVarDatatype (INTEGER vlistID, INTEGER varID, INTEGER datatype)
 \end{verbatim}
 
-Define the data type of a variable.
+Define the data type of a Variable.
 
 
 \section*{\tt \htmlref{vlistDefVarLongname}{vlistDefVarLongname}}
@@ -574,7 +583,7 @@ Define the data type of a variable.
                                     CHARACTER*(*) longname)
 \end{verbatim}
 
-Define the long name of a variable.
+Define the long name of a Variable.
 
 
 \section*{\tt \htmlref{vlistDefVarMissval}{vlistDefVarMissval}}
@@ -584,7 +593,7 @@ Define the long name of a variable.
                                    DOUBLEPRECISION missval)
 \end{verbatim}
 
-Define the missing value of a variable.
+Define the missing value of a Variable.
 
 
 \section*{\tt \htmlref{vlistDefVarName}{vlistDefVarName}}
@@ -593,7 +602,7 @@ Define the missing value of a variable.
     SUBROUTINE vlistDefVarName (INTEGER vlistID, INTEGER varID, CHARACTER*(*) name)
 \end{verbatim}
 
-Define the name of a variable.
+Define the name of a Variable.
 
 
 \section*{\tt \htmlref{vlistDefVarUnits}{vlistDefVarUnits}}
@@ -602,7 +611,16 @@ Define the name of a variable.
     SUBROUTINE vlistDefVarUnits (INTEGER vlistID, INTEGER varID, CHARACTER*(*) units)
 \end{verbatim}
 
-Define the units of a variable.
+Define the units of a Variable.
+
+
+\section*{\tt \htmlref{vlistDestroy}{vlistDestroy}}
+
+\begin{verbatim}
+    SUBROUTINE vlistDestroy (INTEGER vlistID)
+\end{verbatim}
+
+Delete a variable list.
 
 
 \section*{\tt \htmlref{vlistDuplicate}{vlistDuplicate}}
@@ -614,15 +632,6 @@ Define the units of a variable.
 Duplicate a variable list.
 
 
-\section*{\tt \htmlref{vlistFree}{vlistFree}}
-
-\begin{verbatim}
-    SUBROUTINE vlistFree (INTEGER vlistID)
-\end{verbatim}
-
-Delete a variable list.
-
-
 \section*{\tt \htmlref{vlistMerge}{vlistMerge}}
 
 \begin{verbatim}
@@ -630,15 +639,6 @@ Delete a variable list.
 \end{verbatim}
 
 Merge two variable lists.
-
-
-\section*{\tt \htmlref{vlistNew}{vlistNew}}
-
-\begin{verbatim}
-    INTEGER FUNCTION vlistNew (
-\end{verbatim}
-
-Create a variable list.
 
 
 \section*{\tt \htmlref{vlistNgrids}{vlistNgrids}}
@@ -666,6 +666,15 @@ Number of variables in a variable list.
 \end{verbatim}
 
 Number of zaxis in a variable list.
+
+
+\section*{\tt \htmlref{zaxisCreate}{zaxisCreate}}
+
+\begin{verbatim}
+    INTEGER FUNCTION zaxisCreate (INTEGER leveltype, INTEGER size)
+\end{verbatim}
+
+Create a new Z-axis.
 
 
 \section*{\tt \htmlref{zaxisDefLevel}{zaxisDefLevel}}
@@ -784,14 +793,5 @@ Get the type of a Z-axis.
 \end{verbatim}
 
 Get the units of a Z-axis.
-
-
-\section*{\tt \htmlref{zaxisNew}{zaxisNew}}
-
-\begin{verbatim}
-    INTEGER FUNCTION zaxisNew (INTEGER leveltype, INTEGER size)
-\end{verbatim}
-
-Create a new Z-axis.
 
 

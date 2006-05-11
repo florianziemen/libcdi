@@ -32,7 +32,7 @@ static int srvDefaultDprec = 0;
  */
 
 #undef  LIBVERSION
-#define LIBVERSION      0.9.3
+#define LIBVERSION      1.0.0
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char srv_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;

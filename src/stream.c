@@ -497,7 +497,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
       if ( streams[streamID].filemode == 'r' )
 	{
 	  VLIST *vlistptr;
-	  streams[streamID].vlistID = vlistNew();
+	  streams[streamID].vlistID = vlistCreate();
 	  /* cdiReadByteorder(streamID); */
 	  status = cdiInqContents(streamID);
 	  if ( status < 0 ) return (status);
@@ -611,7 +611,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
       streams[streamID].filename = strdupx(filename);
       streams[streamID].fileID   = fileID;
 
-      streams[streamID].vlistID = vlistNew();
+      streams[streamID].vlistID = vlistCreate();
       /* cdiReadByteorder(streamID); */
       status = cdiInqContents(streamID);
       if ( status < 0 ) return (status);
@@ -977,7 +977,7 @@ void streamClose(int streamID)
 
   if ( vlistID != -1 )
     {
-      vlistFree(vlistID);
+      vlistDestroy(vlistID);
     }
 }
 
@@ -1016,7 +1016,7 @@ int streamDefTimestep(int streamID, int tsID)
   if ( taxisID == CDI_UNDEFID )
     {
       Warning(func, "taxisID undefined for fileID = %d! Using absolute time axis.", streamID);
-      taxisID = taxisNew(TAXIS_ABSOLUTE);
+      taxisID = taxisCreate(TAXIS_ABSOLUTE);
       vlistDefTaxis(vlistID, taxisID);
     }
 

@@ -556,10 +556,10 @@ static void defineYvals(int gridID)
 
 
 /*
-@Function  gridNew
+@Function  gridCreate
 @Title     Create a new Grid
 
-@Prototype int gridNew(int gridtype, int size)
+@Prototype int gridCreate(int gridtype, int size)
 @Parameter
     @Item  gridtype  The type of the grid, one of the set of predefined CDI grid types.
                      The valid CDI grid types are {\tt GRID_GENERIC}, {\tt GRID_GAUSSIAN},
@@ -567,13 +567,13 @@ static void defineYvals(int gridID)
     @Item  size      Number of gridpoints.
 
 @Description
-The function {\tt gridNew} creates a new Grid.
+The function {\tt gridCreate} creates a new Grid.
 
 @Result
-{\tt gridNew} returns an identifier to the new Grid.
+{\tt gridCreate} returns an identifier to the new Grid.
 
 @Example
-Here is an example using {\tt gridNew} to create a new {\tt LONLAT} Grid:
+Here is an example using {\tt gridCreate} to create a new {\tt LONLAT} Grid:
 
 @Source
 #include <cdi.h>
@@ -584,7 +584,7 @@ int nlat = 6;
 double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
 double lats[nlat] = {-75, -45, -15, 15, 45, 75};
    ...
-gridID = gridNew(GRID_LONLAT, nlon*nlat);
+gridID = gridCreate(GRID_LONLAT, nlon*nlat);
 gridDefXsize(gridID, nlon);
 gridDefYsize(gridID, nlat);
 gridDefXvals(gridID, lons);
@@ -593,9 +593,9 @@ gridDefYvals(gridID, lats);
 @EndSource
 @EndFunction
 */
-int gridNew(int gridtype, int size)
+int gridCreate(int gridtype, int size)
 {
-  static char func[] = "gridNew";
+  static char func[] = "gridCreate";
   int gridID;
   GRID *gridptr;
 
@@ -2178,7 +2178,7 @@ int gridGenerate(GRID grid)
   int gridID;
   GRID *gridptr;
 
-  gridID = gridNew(grid.type, grid.size);
+  gridID = gridCreate(grid.type, grid.size);
 
   gridptr = grid_to_pointer(gridID);
 
@@ -2317,7 +2317,7 @@ int gridGenerate(GRID grid)
 
 @Prototype int gridDuplicate(int gridID)
 @Parameter
-    @Item  gridID  Identifier, from a previous call to {\tt gridNew},
+    @Item  gridID  Identifier, from a previous call to {\tt gridCreate},
                    {\tt gridDuplicate} or {\tt vlistInqVarGrid}.
 
 @Description
@@ -2342,7 +2342,7 @@ int gridDuplicate(int gridID)
   gridtype = gridInqType(gridID);
   gridsize = gridInqSize(gridID);
 
-  gridIDnew = gridNew(gridtype, gridsize);
+  gridIDnew = gridCreate(gridtype, gridsize);
   gridptrnew = grid_to_pointer(gridIDnew);
 
   grid_copy(gridptrnew, gridptr);
@@ -3023,7 +3023,7 @@ int gridToZonal(int gridID1)
 
   gridtype = gridInqType(gridID1);
   gridsize = gridInqYsize(gridID1);
-  gridID2  = gridNew(gridtype, gridsize);
+  gridID2  = gridCreate(gridtype, gridsize);
 	  
   if ( gridtype != GRID_LONLAT &&
        gridtype != GRID_GAUSSIAN &&
@@ -3063,7 +3063,7 @@ int gridToMeridional(int gridID1)
 
   gridtype = gridInqType(gridID1);
   gridsize = gridInqXsize(gridID1);
-  gridID2  = gridNew(gridtype, gridsize);
+  gridID2  = gridCreate(gridtype, gridsize);
 	  
   switch (gridtype)
     {
@@ -3239,7 +3239,7 @@ int gridToCurvilinear(int gridID1)
 
   gridtype = gridInqType(gridID1);
   gridsize = gridInqSize(gridID1);
-  gridID2  = gridNew(GRID_CURVILINEAR, gridsize);
+  gridID2  = gridCreate(GRID_CURVILINEAR, gridsize);
 	  
   switch (gridtype)
     {
@@ -3368,7 +3368,7 @@ int gridToCell(int gridID1)
 
   gridtype = gridInqType(gridID1);
   gridsize = gridInqSize(gridID1);
-  gridID2  = gridNew(GRID_CELL, gridsize);
+  gridID2  = gridCreate(GRID_CELL, gridsize);
 	  
   switch (gridtype)
     {

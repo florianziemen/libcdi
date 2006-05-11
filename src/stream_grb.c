@@ -1006,7 +1006,7 @@ void grbScanTimestep1(int streamID)
 
   if ( fcast )
     {
-      taxisID = taxisNew(TAXIS_RELATIVE);
+      taxisID = taxisCreate(TAXIS_RELATIVE);
       taxis->type  = TAXIS_RELATIVE;
       taxis->rdate = rdate;
       taxis->rtime = rtime;
@@ -1014,7 +1014,7 @@ void grbScanTimestep1(int streamID)
     }
   else
     {
-      taxisID = taxisNew(TAXIS_ABSOLUTE);
+      taxisID = taxisCreate(TAXIS_ABSOLUTE);
       taxis->type  = TAXIS_ABSOLUTE;
     }
 

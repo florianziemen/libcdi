@@ -129,9 +129,9 @@ static void vlistCheckVarID(char func[], int vlistID, int varID)
 
 @Prototype int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
 @Parameter
-    @Item  vlistID   Variable list ID, from a previous call to vlistNew or vlistCopy
-    @Item  gridID    Grid ID, from a previous call to gridNew
-    @Item  zaxisID   Z-axis ID, from a previous call to zaxisNew
+    @Item  vlistID   Variable list ID, from a previous call to vlistCreate or vlistCopy
+    @Item  gridID    Grid ID, from a previous call to gridCreate
+    @Item  zaxisID   Z-axis ID, from a previous call to zaxisCreate
     @Item  timeID    One of the set of predefined CDI time identifiers.
                      The valid CDI time identifiers are TIME_CONSTANT and TIME_VARIABLE.
 
@@ -926,9 +926,9 @@ int vlistInqVarAverage(int vlistID, int varID)
   return (vlistptr->vars[varID].average);
 }
 
-void vlistFreeVarName(int vlistID, int varID)
+void vlistDestroyVarName(int vlistID, int varID)
 {
-  static char func[] = "vlistFreeVarName";
+  static char func[] = "vlistDestroyVarName";
   VLIST *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -940,9 +940,9 @@ void vlistFreeVarName(int vlistID, int varID)
     }
 }
 
-void vlistFreeVarLongname(int vlistID, int varID)
+void vlistDestroyVarLongname(int vlistID, int varID)
 {
-  static char func[] = "vlistFreeVarLongname";
+  static char func[] = "vlistDestroyVarLongname";
   VLIST *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -954,9 +954,9 @@ void vlistFreeVarLongname(int vlistID, int varID)
     }
 }
 
-void vlistFreeVarStdname(int vlistID, int varID)
+void vlistDestroyVarStdname(int vlistID, int varID)
 {
-  static char func[] = "vlistFreeVarStdname";
+  static char func[] = "vlistDestroyVarStdname";
   VLIST *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -968,9 +968,9 @@ void vlistFreeVarStdname(int vlistID, int varID)
     }
 }
 
-void vlistFreeVarUnits(int vlistID, int varID)
+void vlistDestroyVarUnits(int vlistID, int varID)
 {
-  static char func[] = "vlistFreeVarUnits";
+  static char func[] = "vlistDestroyVarUnits";
   VLIST *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);

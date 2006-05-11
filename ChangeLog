@@ -1,3 +1,9 @@
+2006-06-15  Uwe Schulzweida  <schulzweida@dkrz.de>
+
+	* using GRIB library version 1.0.0
+	* rename *New functions to *Create
+	* Version 1.0.0 released
+
 2006-05-04  Uwe Schulzweida  <schulzweida@dkrz.de>
 
 	* using GRIB library version 0.6.6

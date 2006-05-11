@@ -147,10 +147,10 @@ void zaxisCheckID(const char *func, int zaxisID)
 
 
 /*
-@Function  zaxisNew
+@Function  zaxisCreate
 @Title     Create a new Z-axis
 
-@Prototype int zaxisNew(int zaxistype, int size)
+@Prototype int zaxisCreate(int zaxistype, int size)
 @Parameter
     @Item  zaxistype  The type of the Z-axis, one of the set of predefined CDI Z-axis types.
                       The valid CDI Z-axis types are {\tt ZAXIS_SURFACE}, {\tt ZAXIS_HYBRID},
@@ -159,16 +159,16 @@ void zaxisCheckID(const char *func, int zaxisID)
     @Item  size       Number of levels
 
 @Description
-The function {\tt zaxisNew} creates a new Z-axis.
+The function {\tt zaxisCreate} creates a new Z-axis.
 
 @Result
-{\tt zaxisNew} returns an identifier to the new Z-axis.
+{\tt zaxisCreate} returns an identifier to the new Z-axis.
 
 @EndFunction
 */
-int zaxisNew(int zaxistype, int size)
+int zaxisCreate(int zaxistype, int size)
 {
-  static char func[] = "zaxisNew";
+  static char func[] = "zaxisCreate";
   int ilev;
   int zaxisID;
   double *vals;
@@ -849,7 +849,7 @@ int zaxisDuplicate(int zaxisID)
   zaxistype = zaxisInqType(zaxisID);
   zaxissize = zaxisInqSize(zaxisID);
 
-  zaxisIDnew = zaxisNew(zaxistype, zaxissize);
+  zaxisIDnew = zaxisCreate(zaxistype, zaxissize);
 
   memcpy(&zaxisTable[zaxisIDnew], &zaxisTable[zaxisID], sizeof(ZAXIS));
 

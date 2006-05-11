@@ -654,7 +654,7 @@ int varDefZaxis(int vlistID, int leveltype, int nlevels, double *levels, int lbo
     {
       if ( ! zaxisglobdefined )
 	{
-	  zaxisID = zaxisNew(leveltype, nlevels);
+	  zaxisID = zaxisCreate(leveltype, nlevels);
 	  zaxisDefLevels(zaxisID, levels);
 	  if ( lbounds )
 	    {

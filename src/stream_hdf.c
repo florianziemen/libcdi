@@ -4120,9 +4120,9 @@ void hdfInqContents(int streamID)
     }
 
   if ( streams[streamID].tsteps[0].taxis.type == TAXIS_RELATIVE )
-    taxisID = taxisNew(TAXIS_RELATIVE);
+    taxisID = taxisCreate(TAXIS_RELATIVE);
   else
-    taxisID = taxisNew(TAXIS_ABSOLUTE);
+    taxisID = taxisCreate(TAXIS_ABSOLUTE);
 
   vlistDefTaxis(vlistID, taxisID);
 

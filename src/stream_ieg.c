@@ -815,7 +815,7 @@ void iegScanTimestep1(int streamID)
 
   cdiGenVars(streamID);
 
-  taxisID = taxisNew(TAXIS_ABSOLUTE);
+  taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxis->type  = TAXIS_ABSOLUTE;
   taxis->vdate = datetime0.date;
   taxis->vtime = datetime0.time;

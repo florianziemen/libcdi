@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Mon Mar  6 09:23:26 CET 2006 */
+/* Generated automatically from m214003 on Tue May  9 14:32:31 CEST 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -7394,7 +7394,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "0.6.5" " of ""Mar  6 2006"" ""09:23:26";
+static const char grb_libvers[] = "1.0.0" " of ""May  9 2006"" ""14:32:31";
 
 
 

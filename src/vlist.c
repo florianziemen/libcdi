@@ -232,16 +232,16 @@ static void vlist_check_ptr(const char *func, VLIST *vlistptr)
 
 
 /*
-@Function  vlistNew
+@Function  vlistCreate
 @Title     Create a variable list
 
-@Prototype int vlistNew(void)
+@Prototype int vlistCreate(void)
 
 @EndFunction
 */
-int vlistNew(void)
+int vlistCreate(void)
 {
-  static char func[] = "vlistNew";
+  static char func[] = "vlistCreate";
   int vlistID = 0;
   VLIST *vlistptr;
 
@@ -259,18 +259,18 @@ int vlistNew(void)
 
 
 /*
-@Function  vlistFree
+@Function  vlistDestroy
 @Title     Delete a variable list
 
-@Prototype void vlistFree(int vlistID)
+@Prototype void vlistDestroy(int vlistID)
 @Parameter
-    @Item  vlistID Identifier, from a previous call to {\tt vlistNew}
+    @Item  vlistID Identifier, from a previous call to {\tt vlistCreate}
 
 @EndFunction
 */
-void vlistFree(int vlistID)
+void vlistDestroy(int vlistID)
 {
-  static char func[] = "vlistFree";
+  static char func[] = "vlistDestroy";
   VLIST *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -447,7 +447,7 @@ int vlistDuplicate(int vlistID)
 
   vlist_check_ptr(func, vlistptr);
 
-  vlistIDnew = vlistNew();
+  vlistIDnew = vlistCreate();
 
   vlistCopy(vlistIDnew, vlistID);
 
@@ -517,7 +517,7 @@ int vlistInqZaxis(int vlistID, int leveltype, int nlevels, double *levels, int l
     {
       if ( ! zaxisglobdefined )
 	{
-	  zaxisID = zaxisNew(leveltype, nlevels);
+	  zaxisID = zaxisCreate(leveltype, nlevels);
 	  zaxisDefLevels(zaxisID, levels);
 	  if ( lbounds )
 	    {

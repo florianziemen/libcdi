@@ -4,6 +4,15 @@
 This appendix provide a brief listing of the C language bindings of the
 CDI library routines:
 
+\section*{\tt \htmlref{gridCreate}{gridCreate}}
+
+\begin{verbatim}
+    int gridCreate (intgridtype, intsize);
+\end{verbatim}
+
+Create a new Grid.
+
+
 \section*{\tt \htmlref{gridDefNvertex}{gridDefNvertex}}
 
 \begin{verbatim}
@@ -319,22 +328,13 @@ Get one value of a Y-axis.
 Get all values of a Y-axis.
 
 
-\section*{\tt \htmlref{gridNew}{gridNew}}
-
-\begin{verbatim}
-    int gridNew (intgridtype, intsize);
-\end{verbatim}
-
-Create a new Grid.
-
-
 \section*{\tt \htmlref{streamClose}{streamClose}}
 
 \begin{verbatim}
     void streamClose (intstreamID);
 \end{verbatim}
 
-Close an Open file.
+Close an open dataset.
 
 
 \section*{\tt \htmlref{streamDefVlist}{streamDefVlist}}
@@ -358,19 +358,19 @@ Get the Vlist of a stream.
 \section*{\tt \htmlref{streamOpenRead}{streamOpenRead}}
 
 \begin{verbatim}
-    int streamOpenRead (char *filename);
+    int streamOpenRead (char *path);
 \end{verbatim}
 
-Open a file for reading.
+Open a dataset for reading.
 
 
 \section*{\tt \htmlref{streamOpenWrite}{streamOpenWrite}}
 
 \begin{verbatim}
-    int streamOpenWrite (char *filename, intfiletype);
+    int streamOpenWrite (char *path, intfiletype);
 \end{verbatim}
 
-Open a file for writing.
+Create a new dataset.
 
 
 \section*{\tt \htmlref{streamReadVar}{streamReadVar}}
@@ -409,6 +409,15 @@ Write a variable.
 \end{verbatim}
 
 Write a horizontal slice of a variable.
+
+
+\section*{\tt \htmlref{taxisCreate}{taxisCreate}}
+
+\begin{verbatim}
+    int taxisCreate (inttimetype);
+\end{verbatim}
+
+Create a new T-axis.
 
 
 \section*{\tt \htmlref{taxisDefCalendar}{taxisDefCalendar}}
@@ -501,15 +510,6 @@ Get the verification date.
 Get the verification time.
 
 
-\section*{\tt \htmlref{taxisNew}{taxisNew}}
-
-\begin{verbatim}
-    int taxisNew (inttimetype);
-\end{verbatim}
-
-Create a new T-axis.
-
-
 \section*{\tt \htmlref{vlistCat}{vlistCat}}
 
 \begin{verbatim}
@@ -537,6 +537,15 @@ Copy a variable list.
 Copy some entries of a variable list.
 
 
+\section*{\tt \htmlref{vlistCreate}{vlistCreate}}
+
+\begin{verbatim}
+    int vlistCreate (
+\end{verbatim}
+
+Create a variable list.
+
+
 \section*{\tt \htmlref{vlistDefVar}{vlistDefVar}}
 
 \begin{verbatim}
@@ -552,7 +561,7 @@ Create a new Variable.
     void vlistDefVarCode (intvlistID, intvarID, intcode);
 \end{verbatim}
 
-Define the Code number of a variable.
+Define the code number of a Variable.
 
 
 \section*{\tt \htmlref{vlistDefVarDatatype}{vlistDefVarDatatype}}
@@ -561,7 +570,7 @@ Define the Code number of a variable.
     void vlistDefVarDatatype (intvlistID, intvarID, intdatatype);
 \end{verbatim}
 
-Define the data type of a variable.
+Define the data type of a Variable.
 
 
 \section*{\tt \htmlref{vlistDefVarLongname}{vlistDefVarLongname}}
@@ -570,7 +579,7 @@ Define the data type of a variable.
     void vlistDefVarLongname (intvlistID, intvarID, char *longname);
 \end{verbatim}
 
-Define the long name of a variable.
+Define the long name of a Variable.
 
 
 \section*{\tt \htmlref{vlistDefVarMissval}{vlistDefVarMissval}}
@@ -579,7 +588,7 @@ Define the long name of a variable.
     void vlistDefVarMissval (intvlistID, intvarID, doublemissval);
 \end{verbatim}
 
-Define the missing value of a variable.
+Define the missing value of a Variable.
 
 
 \section*{\tt \htmlref{vlistDefVarName}{vlistDefVarName}}
@@ -588,7 +597,7 @@ Define the missing value of a variable.
     void vlistDefVarName (intvlistID, intvarID, char *name);
 \end{verbatim}
 
-Define the name of a variable.
+Define the name of a Variable.
 
 
 \section*{\tt \htmlref{vlistDefVarUnits}{vlistDefVarUnits}}
@@ -597,7 +606,16 @@ Define the name of a variable.
     void vlistDefVarUnits (intvlistID, intvarID, char *units);
 \end{verbatim}
 
-Define the units of a variable.
+Define the units of a Variable.
+
+
+\section*{\tt \htmlref{vlistDestroy}{vlistDestroy}}
+
+\begin{verbatim}
+    void vlistDestroy (intvlistID);
+\end{verbatim}
+
+Delete a variable list.
 
 
 \section*{\tt \htmlref{vlistDuplicate}{vlistDuplicate}}
@@ -609,15 +627,6 @@ Define the units of a variable.
 Duplicate a variable list.
 
 
-\section*{\tt \htmlref{vlistFree}{vlistFree}}
-
-\begin{verbatim}
-    void vlistFree (intvlistID);
-\end{verbatim}
-
-Delete a variable list.
-
-
 \section*{\tt \htmlref{vlistMerge}{vlistMerge}}
 
 \begin{verbatim}
@@ -625,15 +634,6 @@ Delete a variable list.
 \end{verbatim}
 
 Merge two variable lists.
-
-
-\section*{\tt \htmlref{vlistNew}{vlistNew}}
-
-\begin{verbatim}
-    int vlistNew (
-\end{verbatim}
-
-Create a variable list.
 
 
 \section*{\tt \htmlref{vlistNgrids}{vlistNgrids}}
@@ -661,6 +661,15 @@ Number of variables in a variable list.
 \end{verbatim}
 
 Number of zaxis in a variable list.
+
+
+\section*{\tt \htmlref{zaxisCreate}{zaxisCreate}}
+
+\begin{verbatim}
+    int zaxisCreate (intleveltype, intsize);
+\end{verbatim}
+
+Create a new Z-axis.
 
 
 \section*{\tt \htmlref{zaxisDefLevel}{zaxisDefLevel}}
@@ -778,14 +787,5 @@ Get the type of a Z-axis.
 \end{verbatim}
 
 Get the units of a Z-axis.
-
-
-\section*{\tt \htmlref{zaxisNew}{zaxisNew}}
-
-\begin{verbatim}
-    int zaxisNew (intleveltype, intsize);
-\end{verbatim}
-
-Create a new Z-axis.
 
 

@@ -4446,7 +4446,7 @@ int cdfInqContents(int streamID)
 	    if ( strncmp("var", pname, 3) == 0 )
 	      {
 		vlistDefVarCode(vlistID, varID, atoi(pname+3));
-		vlistFreeVarName(vlistID, varID);
+		vlistDestroyVarName(vlistID, varID);
 	      }
 	}
       if ( vlistInqVarCode(vlistID, varID) == -varID-1 )
@@ -4458,7 +4458,7 @@ int cdfInqContents(int streamID)
 	    if ( strncmp("code", pname, 4) == 0 )
 	      {
 		vlistDefVarCode(vlistID, varID, atoi(pname+4));
-		vlistFreeVarName(vlistID, varID);
+		vlistDestroyVarName(vlistID, varID);
 	      }
 	}
     }
@@ -4473,9 +4473,9 @@ int cdfInqContents(int streamID)
 	{
 	  if ( tableInqParNamePtr(cdiDefaultTableID, code) )
 	    {
-	      vlistFreeVarName(vlistID, varID);
-	      vlistFreeVarLongname(vlistID, varID);
-	      vlistFreeVarUnits(vlistID, varID);
+	      vlistDestroyVarName(vlistID, varID);
+	      vlistDestroyVarLongname(vlistID, varID);
+	      vlistDestroyVarUnits(vlistID, varID);
 
 	      if ( tableID != UNDEFID )
 		{
@@ -4543,9 +4543,9 @@ int cdfInqContents(int streamID)
       }
 
   if ( streams[streamID].tsteps[0].taxis.type == TAXIS_RELATIVE )
-    taxisID = taxisNew(TAXIS_RELATIVE);
+    taxisID = taxisCreate(TAXIS_RELATIVE);
   else
-    taxisID = taxisNew(TAXIS_ABSOLUTE);
+    taxisID = taxisCreate(TAXIS_ABSOLUTE);
 
   if ( calendar != UNDEFID )
     {

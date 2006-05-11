@@ -343,7 +343,7 @@ void streamDefineTaxis(int streamID)
 	  taxisID = vlistInqTaxis(vlistID);
 	  if ( taxisID == CDI_UNDEFID )
 	    {
-	      taxisID = taxisNew(TAXIS_ABSOLUTE);
+	      taxisID = taxisCreate(TAXIS_ABSOLUTE);
 	      vlistDefTaxis(vlistID, taxisID);
 	    }
 	    

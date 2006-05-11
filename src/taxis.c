@@ -178,25 +178,25 @@ static void taxisCheckID(const char *func, int taxisID)
 
 
 /*
-@Function  taxisNew
+@Function  taxisCreate
 @Title     Create a new T-axis
 
-@Prototype int taxisNew(int taxistype)
+@Prototype int taxisCreate(int taxistype)
 @Parameter
     @Item  taxistype  The type of the time axis, one of the set of predefined CDI time types.
                       The valid CDI time types are {\tt TAXIS_ABSOLUTE} and {\tt TAXIS_RELATIVE}.
 
 @Description
-The function {\tt taxisNew} creates a new Time axis.
+The function {\tt taxisCreate} creates a new Time axis.
 
 @Result
-{\tt taxisNew} returns an identifier to the new T-axis.
+{\tt taxisCreate} returns an identifier to the new T-axis.
 
 @EndFunction
 */
-int taxisNew(int taxistype)
+int taxisCreate(int taxistype)
 {
-  static char func[] = "taxisNew";
+  static char func[] = "taxisCreate";
   int taxisID;
 
   if ( CDI_Debug )
