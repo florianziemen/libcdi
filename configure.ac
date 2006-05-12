@@ -292,4 +292,4 @@ AC_SUBST([FC],$F77)
 AC_SUBST([CFINT])
 AC_SUBST([AR])
 
-AC_OUTPUT(Makefile src/Makefile prog/Makefile tests/Makefile)
+AC_OUTPUT(Makefile src/Makefile prog/Makefile tests/Makefile examples/Makefile)

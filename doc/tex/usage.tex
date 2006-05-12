@@ -2,16 +2,16 @@
 
 Here is a typical sequence of CDI calls used to create a new dataset:
 
-\begin{verbatim}
-    gridNew              ! define a grid: from type and size
+\begin{lstlisting}[backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+    gridCreate           ! create a horizontal Grid: from type and size
        ...
-    zaxisNew             ! define a Z-axis: from type and size
+    zaxisCreate          ! create a vertical Z-axis: from type and size
        ...
-    taxisNew             ! define a T-axis: from type
+    taxisCreate          ! create a Time axis: from type
        ...
-    vlistNew             ! create a variable list
+    vlistCreate          ! create a variable list
           ...
-       vlistDefVar       ! define variables: from grid and Z-axis
+       vlistDefVar       ! define variables: from Grid and Z-axis
           ...
     streamOpenWrite      ! create a dataset: from name and file type
        ...
@@ -22,28 +22,36 @@ Here is a typical sequence of CDI calls used to create a new dataset:
        streamWriteVar    ! write variable
           ...
     streamClose          ! close the dataset
-\end{verbatim}
+       ...
+    vlistDestroy         ! destroy the variable list
+       ...
+    taxisDestroy         ! destroy the Time axis
+       ...
+    zaxisDestroy         ! destroy the Z-axis
+       ...
+    gridDestroy          ! destroy the Grid
+\end{lstlisting}
 
 
 \section{Reading a dataset}
 
-\begin{verbatim}
+\begin{lstlisting}[backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
     streamOpenRead       ! open existing dataset
        ...
     streamInqVlist       ! find out what is in it
           ...
-       vlistInqVarGrid   ! get grid
+       vlistInqVarGrid   ! get an identifier to the Grid
           ...
-       vlistInqVarZaxis  ! get Z-axis
+       vlistInqVarZaxis  ! get an identifier to the Z-axis
           ...
-       vlistInqTaxis     ! get T-axis
+       vlistInqTaxis     ! get an identifier to the T-axis
           ...
     streamInqTimestep    ! get time step
           ...
        streamReadVar     ! read varible
           ...
     streamClose          ! close the dataset
-\end{verbatim}
+\end{lstlisting}
 
 
 \section{Compiling and Linking with the CDI library}

@@ -82,7 +82,7 @@ am__quote = @am__quote@
 install_sh = @install_sh@
 
 #
-SUBDIRS = src prog tests
+SUBDIRS = src prog examples tests
 #
 EXTRA_DIST = config/default
 #

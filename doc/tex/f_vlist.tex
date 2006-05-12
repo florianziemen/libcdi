@@ -1,28 +1,28 @@
 
 
-\section{Create a variable list: {\tt vlistNew}}
-\index{vlistNew}
-\label{vlistNew}
+\section{Create a variable list: {\tt vlistCreate}}
+\index{vlistCreate}
+\label{vlistCreate}
 \subsection*{Usage}
 
 \begin{verbatim}
-    INTEGER FUNCTION vlistNew()
+    INTEGER FUNCTION vlistCreate()
 \end{verbatim}
 
 
-\section{Delete a variable list: {\tt vlistFree}}
-\index{vlistFree}
-\label{vlistFree}
+\section{Destroy a variable list: {\tt vlistDestroy}}
+\index{vlistDestroy}
+\label{vlistDestroy}
 \subsection*{Usage}
 
 \begin{verbatim}
-    SUBROUTINE vlistFree(INTEGER vlistID)
+    SUBROUTINE vlistDestroy(INTEGER vlistID)
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Identifier, from a previous call to {\tt vlistNew}
+Identifier, from a previous call to {\tt vlistCreate}
 
 \end{deflist}
 \end{minipage}

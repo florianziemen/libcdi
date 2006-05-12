@@ -179,7 +179,7 @@ static void taxisCheckID(const char *func, int taxisID)
 
 /*
 @Function  taxisCreate
-@Title     Create a new T-axis
+@Title     Create a Time axis
 
 @Prototype int taxisCreate(int taxistype)
 @Parameter
@@ -187,10 +187,10 @@ static void taxisCheckID(const char *func, int taxisID)
                       The valid CDI time types are {\tt TAXIS_ABSOLUTE} and {\tt TAXIS_RELATIVE}.
 
 @Description
-The function {\tt taxisCreate} creates a new Time axis.
+The function {\tt taxisCreate} creates a Time axis.
 
 @Result
-{\tt taxisCreate} returns an identifier to the new T-axis.
+{\tt taxisCreate} returns an identifier to the Time axis.
 
 @EndFunction
 */
@@ -209,6 +209,21 @@ int taxisCreate(int taxistype)
     Message(func, "taxisID: %d", taxisID);
 
   return (taxisID);
+}
+
+
+/*
+@Function  taxisDestroy
+@Title     Destroy a Time axis
+
+@Prototype void taxisDestroy(int taxisID)
+@Parameter
+    @Item  taxisID Identifier, from a previous call to {\tt taxisCreate}
+
+@EndFunction
+*/
+void taxisDestroy(int taxisID)
+{
 }
 
 

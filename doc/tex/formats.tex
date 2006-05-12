@@ -6,16 +6,20 @@ over an unlimited number of time steps.
 
 \section{netCDF}
 
-NetCDF (network Common Data Form) is an interface for array-oriented data
+\htmlref{NetCDF}{NetCDF} (network Common Data Form) is an interface for array-oriented data
 access and a library that provides an implementation of the interface.
 The netCDF library also defines a machine-independent format for 
 representing scientific data. Together, the interface, library, and 
 format support the creation, access, and sharing of scientific data.
+
 CDI supports only 2D, 3D and 4D arrays and the attributes must follow the
 \href{http://ftp.unidata.ucar.edu/software/netcdf/docs/conventions.html}
      {GDT, COARDS or CF Conventions}.
+NetCDF is an external library and not part of CDI. To use netCDF with
+CDI the netCDF library must be installed before the configuration
+of the CDI library (see \htmlref{Build}{Build}).
 
-%ncdap
+\subsection{ncdap}
 
 
 \section{SERVICE}
@@ -31,10 +35,10 @@ The following Fortran code example can be used to read a
 SERVICE record with an accuarcy of 4 bytes:
 
 \begin{lstlisting}[backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
-   INTEGER*4 icode, ilevel, idate, itime, nlon, nlat, idispo1, idispo2
+   INTEGER*4 icode,ilevel,idate,itime,nlon,nlat,idispo1,idispo2
    REAL*4 field(mlon,mlat)
-
-   READ(unit) icode, ilevel, idate, itime, nlon, nlat, idispo1, idispo2
+      ...
+   READ(unit) icode,ilevel,idate,itime,nlon,nlat,idispo1,idispo2
    READ(unit) ((field(ilon,ilat), ilon=1,nlon), ilat=1,nlat)
 \end{lstlisting}
 
@@ -68,10 +72,10 @@ The following Fortran code example can be used to read an
 EXTRA record with an accuarcy of 4 bytes:
 
 \begin{lstlisting}[backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
-   INTEGER*4 idate, icode, ilevel, nsize
+   INTEGER*4 idate,icode,ilevel,nsize
    REAL*4 field(msize)
-
-   READ(unit) idate, icode, ilevel, nsize
+      ...
+   READ(unit) idate,icode,ilevel,nsize
    READ(unit) (field(isize),isize=1,nsize)
 \end{lstlisting}
 
@@ -91,10 +95,10 @@ The meaning of the variables are:
 
 \section{IEG}
 
-IEG is the standard output format of the regional model \htmlref{REMO}{REMO}.
+IEG is the standard binary output format of the regional model \htmlref{REMO}{REMO}.
 It is simple an unpacked GRIB format. The product and grid
-description section are coded with 32 bit integer values and the
-data section can have 32 or 64 bit IEEE floating point values.
+description section are coded with 4 byte integer values and the
+data section can have 4 or 8 byte IEEE floating point values.
 The header and the data section have the standard Fortran blocking
 for binary data records.
 CDI supports only data on an rotated grid for the IEG format.

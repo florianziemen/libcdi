@@ -1,15 +1,15 @@
 
 
-\section{Create a new Grid: {\tt gridNew}}
-\index{gridNew}
-\label{gridNew}
+\section{Create a horizontal Grid: {\tt gridCreate}}
+\index{gridCreate}
+\label{gridCreate}
 
-The function {\tt gridNew} creates a new Grid.
+The function {\tt gridCreate} creates a horizontal Grid.
 
 \subsection*{Usage}
 
 \begin{verbatim}
-    INTEGER FUNCTION gridNew(INTEGER gridtype, INTEGER size)
+    INTEGER FUNCTION gridCreate(INTEGER gridtype, INTEGER size)
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -26,12 +26,14 @@ Number of gridpoints.
 
 \subsection*{Result}
 
-{\tt gridNew} returns an identifier to the new Grid.
+{\tt gridCreate} returns an identifier to the Grid.
 
 
 \subsection*{Example}
 
-Here is an example using {\tt gridNew} to create a new {\tt LONLAT} Grid:\begin{verbatim}
+Here is an example using {\tt gridCreate} to create a {\tt LONLAT} Grid:
+
+\begin{lstlisting}[backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
     INCLUDE 'cdi.h'
        ...
     INTEGER gridID
@@ -40,20 +42,38 @@ Here is an example using {\tt gridNew} to create a new {\tt LONLAT} Grid:\begin{
     REAL*8 lons(nlon) = (/0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330/)
     REAL*8 lats(nlat) = (/-75, -45, -15, 15, 45, 75/)
        ...
-    gridID = gridNew(GRID_LONLAT, nlon*nlat)
+    gridID = gridCreate(GRID_LONLAT, nlon*nlat)
     CALL gridDefXsize(gridID, nlon)
     CALL gridDefYsize(gridID, nlat)
     CALL gridDefXvals(gridID, lons)
     CALL gridDefYvals(gridID, lats)
        ...
+\end{lstlisting}
+
+
+\section{Destroy a horizontal Grid: {\tt gridDestroy}}
+\index{gridDestroy}
+\label{gridDestroy}
+\subsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE gridDestroy(INTEGER gridID)
 \end{verbatim}
 
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Identifier, from a previous call to {\tt gridCreate}
 
-\section{Duplicate a grid: {\tt gridDuplicate}}
+\end{deflist}
+\end{minipage}
+
+
+\section{Duplicate a horizontal Grid: {\tt gridDuplicate}}
 \index{gridDuplicate}
 \label{gridDuplicate}
 
-The function {\tt gridDuplicate} duplicates a grid.
+The function {\tt gridDuplicate} duplicates a horizontal Grid.
 
 \subsection*{Usage}
 
@@ -64,7 +84,7 @@ The function {\tt gridDuplicate} duplicates a grid.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt gridID\ }
 \item[{\tt gridID}]
-Identifier, from a previous call to {\tt gridNew},
+Identifier, from a previous call to {\tt gridCreate},
                    {\tt gridDuplicate} or {\tt vlistInqVarGrid}.
 
 \end{deflist}
@@ -72,7 +92,7 @@ Identifier, from a previous call to {\tt gridNew},
 
 \subsection*{Result}
 
-{\tt gridDuplicate} returns an identifier to the duplicated grid.
+{\tt gridDuplicate} returns an identifier to the duplicated Grid.
 
 
 

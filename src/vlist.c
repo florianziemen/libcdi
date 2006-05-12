@@ -260,7 +260,7 @@ int vlistCreate(void)
 
 /*
 @Function  vlistDestroy
-@Title     Delete a variable list
+@Title     Destroy a variable list
 
 @Prototype void vlistDestroy(int vlistID)
 @Parameter

@@ -10,8 +10,8 @@ streamWriteVar      stream
 streamReadVar       stream
 streamWriteVarSlice stream
 streamReadVarSlice  stream
-vlistNew            vlist
-vlistFree           vlist
+vlistCreate         vlist
+vlistDestroy        vlist
 vlistCopy           vlist
 vlistDuplicate      vlist
 vlistCat            vlist
@@ -37,7 +37,8 @@ vlistDefVarDatatype vlist_var
 vlistInqVarDatatype vlist_var
 vlistDefVarMissval  vlist_var
 vlistInqVarMissval  vlist_var
-gridNew             grid
+gridCreate          grid
+gridDestroy         grid
 gridDuplicate       grid
 gridInqType         grid
 gridInqSize         grid
@@ -65,7 +66,8 @@ gridDefYlongname    grid
 gridInqYlongname    grid
 gridDefYunits       grid
 gridInqYunits       grid
-zaxisNew            zaxis
+zaxisCreate         zaxis
+zaxisDestroy        zaxis
 zaxisInqType        zaxis
 zaxisInqSize        zaxis
 zaxisDefLevels      zaxis
@@ -77,7 +79,8 @@ zaxisDefLongname    zaxis
 zaxisInqLongname    zaxis
 zaxisDefUnits       zaxis
 zaxisInqUnits       zaxis
-taxisNew            taxis
+taxisCreate         taxis
+taxisDestroy        taxis
 taxisDefRdate       taxis
 taxisInqRdate       taxis
 taxisDefRtime       taxis

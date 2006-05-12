@@ -1,15 +1,15 @@
 
 
-\section{Create a new T-axis: {\tt taxisNew}}
-\index{taxisNew}
-\label{taxisNew}
+\section{Create a Time axis: {\tt taxisCreate}}
+\index{taxisCreate}
+\label{taxisCreate}
 
-The function {\tt taxisNew} creates a new Time axis.
+The function {\tt taxisCreate} creates a Time axis.
 
 \subsection*{Usage}
 
 \begin{verbatim}
-    int taxisNew(int taxistype);
+    int taxisCreate(int taxistype);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -23,8 +23,26 @@ The type of the time axis, one of the set of predefined CDI time types.
 
 \subsection*{Result}
 
-{\tt taxisNew} returns an identifier to the new T-axis.
+{\tt taxisCreate} returns an identifier to the Time axis.
 
+
+
+\section{Destroy a Time axis: {\tt taxisDestroy}}
+\index{taxisDestroy}
+\label{taxisDestroy}
+\subsection*{Usage}
+
+\begin{verbatim}
+    void taxisDestroy(int taxisID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt taxisID\ }
+\item[{\tt taxisID}]
+Identifier, from a previous call to {\tt taxisCreate}
+
+\end{deflist}
+\end{minipage}
 
 
 \section{Define the reference date: {\tt taxisDefRdate}}

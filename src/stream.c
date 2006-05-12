@@ -195,7 +195,7 @@ The function {\tt streamInqFiletype} returns the filetype of a stream.
 {\tt streamInqFiletype} returns the type of the file format,
 one of the set of predefined CDI file format types.
 The valid CDI file format types are {\tt FILETYPE_GRB}, {\tt FILETYPE_NC},
-{\tt FILETYPE_NC2}, {\tt FILETYPE_SRV}, and {\tt FILETYPE_EXT}.
+{\tt FILETYPE_NC2}, {\tt FILETYPE_SRV}, {\tt FILETYPE_EXT} and {\tt FILETYPE_IEG}.
 
 @EndFunction
 */
@@ -817,7 +817,7 @@ int streamOpenAppend(const char *filename)
     @Item  path      The name of the new dataset
     @Item  filetype  The type of the file format, one of the set of predefined CDI file format types.
                      The valid CDI file format types are {\tt FILETYPE_GRB}, {\tt FILETYPE_NC},
-                     {\tt FILETYPE_NC2}, {\tt FILETYPE_SRV}, and {\tt FILETYPE_EXT}.
+                     {\tt FILETYPE_NC2}, {\tt FILETYPE_SRV}, {\tt FILETYPE_EXT} and {\tt FILETYPE_IEG}.
 
 @Description
 The function {\tt streamOpenWrite} creates a new datset.
@@ -984,7 +984,7 @@ void streamClose(int streamID)
 
 /*
 @Function  streamDefTimestep
-@Title     Define timestep
+@Title     Define time step
 
 @Prototype int streamDefTimestep(int streamID, int tsID)
 @Parameter
@@ -992,10 +992,10 @@ void streamClose(int streamID)
     @Item  tsID      Timestep identifier
 
 @Description
-The function {\tt streamDefTimestep} defines the timestep of a stream.
+The function {\tt streamDefTimestep} defines the time step of a stream.
 
 @Result
-{\tt streamDefTimestep} returns the number of records of the timestep.
+{\tt streamDefTimestep} returns the number of records of the time step.
 
 @EndFunction
 */
@@ -1046,7 +1046,7 @@ int streamDefTimestep(int streamID, int tsID)
 
 /*
 @Function  streamInqTimestep
-@Title     Get timestep
+@Title     Get time step
 
 @Prototype int streamInqTimestep(int streamID, int tsID)
 @Parameter
@@ -1054,10 +1054,10 @@ int streamDefTimestep(int streamID, int tsID)
     @Item  tsID      Timestep identifier
 
 @Description
-The function {\tt streamInqTimestep} returns the timestep of a stream.
+The function {\tt streamInqTimestep} returns the time step of a stream.
 
 @Result
-{\tt streamInqTimestep} returns the number of records of the timestep.
+{\tt streamInqTimestep} returns the number of records of the time step.
 
 @EndFunction
 */
@@ -1157,11 +1157,14 @@ int streamInqTimestep(int streamID, int tsID)
 
 @Prototype void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 @Parameter
-    @Item  streamID  Stream identifier
+    @Item  streamID  Stream identifier, from a previous call to streamOpenRead
     @Item  varID     Variable identifier
-    @Item  data      Data
+    @Item  data      Pointer to the location into which the data value is read
     @Item  nmiss     Number of missing values
 
+@Description
+The function streamReadVar reads all the values of one time step of a variable
+from an open dataset.
 @EndFunction
 */
 void streamReadVar(int streamID, int varID, double *data, int *nmiss)
@@ -1231,11 +1234,14 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 
 @Prototype void streamWriteVar(int streamID, int varID, double *data, int nmiss)
 @Parameter
-    @Item  streamID  Stream identifier
+    @Item  streamID  Stream identifier, from a previous call to streamOpenWrite
     @Item  varID     Variable identifier
-    @Item  data      Data
+    @Item  data      Pointer to a block of data values to be written
     @Item  nmiss     Number of missing values
 
+@Description
+The function streamWriteVar writes the values of one time step of a variable 
+to an open dataset.
 @EndFunction
 */
 void streamWriteVar(int streamID, int varID, double *data, int nmiss)
@@ -1306,12 +1312,15 @@ void streamWriteVar(int streamID, int varID, double *data, int nmiss)
 
 @Prototype void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
 @Parameter
-    @Item  streamID  Stream identifier
+    @Item  streamID  Stream identifier, from a previous call to streamOpenRead
     @Item  varID     Variable identifier
     @Item  levelID   Level identifier
-    @Item  data      Data
+    @Item  data      Pointer to the location into which the data value is read
     @Item  nmiss     Number of missing values
 
+@Description
+The function streamReadVar reads all the values of a horizontal slice of a variable
+from an open dataset.
 @EndFunction
 */
 void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
@@ -1379,12 +1388,15 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
 
 @Prototype void streamWriteVarSlice(int streamID, int varID, int levelID, double *data, int nmiss)
 @Parameter
-    @Item  streamID  Stream identifier
+    @Item  streamID  Stream identifier, from a previous call to streamOpenWrite
     @Item  varID     Variable identifier
     @Item  levelID   Level identifier
-    @Item  data      Data
+    @Item  data      Pointer to a block of data values to be written
     @Item  nmiss     Number of missing values
 
+@Description
+The function streamWriteVarSlice writes the values of a horizontal slice of a 
+variable to an open dataset.
 @EndFunction
 */
 void streamWriteVarSlice(int streamID, int varID, int levelID, double *data, int nmiss)

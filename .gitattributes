@@ -20,6 +20,7 @@ config/mkinstalldirs -text
 /configure.ac -text
 doc/tex/FUNCTIONS -text
 doc/tex/Modules -text
+doc/tex/c_examples.tex -text
 doc/tex/c_grid.tex -text
 doc/tex/c_link.tex -text
 doc/tex/c_quick_ref.tex -text
@@ -51,6 +52,11 @@ doc/tex/makeps_c -text
 doc/tex/makeps_f -text
 doc/tex/test.tex -text
 doc/tex/usage.tex -text
+examples/Makefile.am -text
+examples/Makefile.in -text
+examples/cdi_copy.c -text
+examples/cdi_read.c -text
+examples/cdi_write.c -text
 prog/Makefile.am -text
 prog/Makefile.in -text
 prog/cdi.c -text

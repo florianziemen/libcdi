@@ -13,8 +13,8 @@ Function catalog:
    streamInqFiletype    Get the filetype
    streamDefVlist       Define the variable list
    streamInqVlist       Get the variable list
-   streamDefTimestep    Define timestep
-   streamInqTimestep    Get timestep
+   streamDefTimestep    Define time step
+   streamInqTimestep    Get time step
    streamWriteVar       Write a variable
    streamReadVar        Read a variable
    streamWriteVarSlice  Write a horizontal slice of a variable
@@ -22,8 +22,8 @@ Function catalog:
 -------------------------------------------------------------
    vlist
 -------------------------------------------------------------
-   vlistNew             Create a variable list
-   vlistFree            Delete a variable list
+   vlistCreate          Create a variable list
+   vlistDestroy         Destroy a variable list
    vlistCopy            Copy a variable list
    vlistDuplicate       Duplicate a variable list
    vlistCat             Concatenate two variable lists
@@ -50,8 +50,9 @@ Function catalog:
 -------------------------------------------------------------
    grid
 -------------------------------------------------------------
-   gridNew              Create a new Grid
-   gridDuplicate        Duplicate a grid
+   gridCreate           Create a horizontal Grid
+   gridDestroy          Destroy a horizontal Grid
+   gridDuplicate        Duplicate a horizontal Grid
    gridInqType          Get the type of a Grid
    gridInqSize          Get the size of a Grid
    gridDefXsize         Define the number of values of a X-axis
@@ -81,7 +82,8 @@ Function catalog:
 -------------------------------------------------------------
    zaxis
 -------------------------------------------------------------
-   zaxisNew             Create a new Z-axis
+   zaxisCreate          Create a vertical Z-axis
+   zaxisDestroy         Destroy a vertical Z-axis
    zaxisInqType         Get the type of a Z-axis
    zaxisInqSize         Get the size of a Z-axis
    zaxisDefLevels       Define the levels of a Z-axis
@@ -96,7 +98,8 @@ Function catalog:
 -------------------------------------------------------------
    taxis
 -------------------------------------------------------------
-   taxisNew             Create a new T-axis
+   taxisCreate          Create a Time axis
+   taxisDestroy         Destroy a Time axis
    taxisDefRdate        Define the reference date
    taxisInqRdate        Get the reference date
    taxisDefRtime        Define the reference time

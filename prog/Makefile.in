@@ -87,11 +87,11 @@ bin_PROGRAMS = cdi createtable
 #
 cdi_SOURCES = cdi.c
 #
-cdi_LDADD = ../src/libcdi.a $(LDFLAGS) -lm
+cdi_LDADD = $(top_srcdir)/src/libcdi.a $(LDFLAGS) -lm
 #
 createtable_SOURCES = createtable.c
 #
-createtable_LDADD = ../src/libcdi.a $(LDFLAGS) -lm
+createtable_LDADD = $(top_srcdir)/src/libcdi.a $(LDFLAGS) -lm
 #
 CLEANFILES = `ls *~`
 subdir = prog
@@ -103,11 +103,11 @@ PROGRAMS = $(bin_PROGRAMS)
 
 am_cdi_OBJECTS = cdi.$(OBJEXT)
 cdi_OBJECTS = $(am_cdi_OBJECTS)
-cdi_DEPENDENCIES = ../src/libcdi.a
+cdi_DEPENDENCIES = $(top_srcdir)/src/libcdi.a
 cdi_LDFLAGS =
 am_createtable_OBJECTS = createtable.$(OBJEXT)
 createtable_OBJECTS = $(am_createtable_OBJECTS)
-createtable_DEPENDENCIES = ../src/libcdi.a
+createtable_DEPENDENCIES = $(top_srcdir)/src/libcdi.a
 createtable_LDFLAGS =
 
 DEFS = @DEFS@

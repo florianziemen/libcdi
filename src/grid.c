@@ -557,7 +557,7 @@ static void defineYvals(int gridID)
 
 /*
 @Function  gridCreate
-@Title     Create a new Grid
+@Title     Create a horizontal Grid
 
 @Prototype int gridCreate(int gridtype, int size)
 @Parameter
@@ -567,13 +567,13 @@ static void defineYvals(int gridID)
     @Item  size      Number of gridpoints.
 
 @Description
-The function {\tt gridCreate} creates a new Grid.
+The function {\tt gridCreate} creates a horizontal Grid.
 
 @Result
-{\tt gridCreate} returns an identifier to the new Grid.
+{\tt gridCreate} returns an identifier to the Grid.
 
 @Example
-Here is an example using {\tt gridCreate} to create a new {\tt LONLAT} Grid:
+Here is an example using {\tt gridCreate} to create a {\tt LONLAT} Grid:
 
 @Source
 #include <cdi.h>
@@ -666,6 +666,21 @@ int gridCreate(int gridtype, int size)
     }
 
   return (gridID);
+}
+
+
+/*
+@Function  gridDestroy
+@Title     Destroy a horizontal Grid
+
+@Prototype void gridDestroy(int gridID)
+@Parameter
+    @Item  gridID Identifier, from a previous call to {\tt gridCreate}
+
+@EndFunction
+*/
+void gridDestroy(int gridID)
+{
 }
 
 
@@ -2313,7 +2328,7 @@ int gridGenerate(GRID grid)
 
 /*
 @Function  gridDuplicate
-@Title     Duplicate a grid
+@Title     Duplicate a horizontal Grid
 
 @Prototype int gridDuplicate(int gridID)
 @Parameter
@@ -2321,10 +2336,10 @@ int gridGenerate(GRID grid)
                    {\tt gridDuplicate} or {\tt vlistInqVarGrid}.
 
 @Description
-The function {\tt gridDuplicate} duplicates a grid.
+The function {\tt gridDuplicate} duplicates a horizontal Grid.
 
 @Result
-{\tt gridDuplicate} returns an identifier to the duplicated grid.
+{\tt gridDuplicate} returns an identifier to the duplicated Grid.
 
 @EndFunction
 */

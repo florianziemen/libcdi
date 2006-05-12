@@ -148,7 +148,7 @@ void zaxisCheckID(const char *func, int zaxisID)
 
 /*
 @Function  zaxisCreate
-@Title     Create a new Z-axis
+@Title     Create a vertical Z-axis
 
 @Prototype int zaxisCreate(int zaxistype, int size)
 @Parameter
@@ -159,10 +159,10 @@ void zaxisCheckID(const char *func, int zaxisID)
     @Item  size       Number of levels
 
 @Description
-The function {\tt zaxisCreate} creates a new Z-axis.
+The function {\tt zaxisCreate} creates a vertical Z-axis.
 
 @Result
-{\tt zaxisCreate} returns an identifier to the new Z-axis.
+{\tt zaxisCreate} returns an identifier to the vertical Z-axis.
 
 @EndFunction
 */
@@ -196,6 +196,21 @@ int zaxisCreate(int zaxistype, int size)
   zaxisTable[zaxisID].vals = vals;
 
   return (zaxisID);
+}
+
+
+/*
+@Function  zaxisDestroy
+@Title     Destroy a vertical Z-axis
+
+@Prototype void zaxisDestroy(int zaxisID)
+@Parameter
+    @Item  zaxisID Identifier, from a previous call to {\tt zaxisCreate}
+
+@EndFunction
+*/
+void zaxisDestroy(int zaxisID)
+{
 }
 
 

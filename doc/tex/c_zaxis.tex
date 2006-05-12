@@ -1,15 +1,15 @@
 
 
-\section{Create a new Z-axis: {\tt zaxisNew}}
-\index{zaxisNew}
-\label{zaxisNew}
+\section{Create a vertical Z-axis: {\tt zaxisCreate}}
+\index{zaxisCreate}
+\label{zaxisCreate}
 
-The function {\tt zaxisNew} creates a new Z-axis.
+The function {\tt zaxisCreate} creates a vertical Z-axis.
 
 \subsection*{Usage}
 
 \begin{verbatim}
-    int zaxisNew(int zaxistype, int size);
+    int zaxisCreate(int zaxistype, int size);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -27,8 +27,26 @@ Number of levels
 
 \subsection*{Result}
 
-{\tt zaxisNew} returns an identifier to the new Z-axis.
+{\tt zaxisCreate} returns an identifier to the vertical Z-axis.
 
+
+
+\section{Destroy a vertical Z-axis: {\tt zaxisDestroy}}
+\index{zaxisDestroy}
+\label{zaxisDestroy}
+\subsection*{Usage}
+
+\begin{verbatim}
+    void zaxisDestroy(int zaxisID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Identifier, from a previous call to {\tt zaxisCreate}
+
+\end{deflist}
+\end{minipage}
 
 
 \section{Get the type of a Z-axis: {\tt zaxisInqType}}

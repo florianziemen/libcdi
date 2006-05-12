@@ -1,5 +1,14 @@
 
 
+\section*{\tt \htmlref{gridCreate}{gridCreate}}
+
+\begin{verbatim}
+    int gridCreate(int gridtype, int size);
+\end{verbatim}
+
+Create a horizontal Grid
+
+
 \section*{\tt \htmlref{gridDefXbounds}{gridDefXbounds}}
 
 \begin{verbatim}
@@ -108,13 +117,22 @@ Define the units of a Y-axis
 Define the values of a Y-axis
 
 
+\section*{\tt \htmlref{gridDestroy}{gridDestroy}}
+
+\begin{verbatim}
+    void gridDestroy(int gridID);
+\end{verbatim}
+
+Destroy a horizontal Grid
+
+
 \section*{\tt \htmlref{gridDuplicate}{gridDuplicate}}
 
 \begin{verbatim}
     int gridDuplicate(int gridID);
 \end{verbatim}
 
-Duplicate a grid
+Duplicate a horizontal Grid
 
 
 \section*{\tt \htmlref{gridInqSize}{gridInqSize}}
@@ -243,15 +261,6 @@ Get the units of a Y-axis
 Get all values of a Y-axis
 
 
-\section*{\tt \htmlref{gridNew}{gridNew}}
-
-\begin{verbatim}
-    int gridNew(int gridtype, int size);
-\end{verbatim}
-
-Create a new Grid
-
-
 \section*{\tt \htmlref{streamClose}{streamClose}}
 
 \begin{verbatim}
@@ -267,7 +276,7 @@ Close an open dataset
     int streamDefTimestep(int streamID, int tsID);
 \end{verbatim}
 
-Define timestep
+Define time step
 
 
 \section*{\tt \htmlref{streamDefVlist}{streamDefVlist}}
@@ -294,7 +303,7 @@ Get the filetype
     int streamInqTimestep(int streamID, int tsID);
 \end{verbatim}
 
-Get timestep
+Get time step
 
 
 \section*{\tt \htmlref{streamInqVlist}{streamInqVlist}}
@@ -362,6 +371,15 @@ Write a variable
 Write a horizontal slice of a variable
 
 
+\section*{\tt \htmlref{taxisCreate}{taxisCreate}}
+
+\begin{verbatim}
+    int taxisCreate(int taxistype);
+\end{verbatim}
+
+Create a Time axis
+
+
 \section*{\tt \htmlref{taxisDefCalendar}{taxisDefCalendar}}
 
 \begin{verbatim}
@@ -405,6 +423,15 @@ Define the verification date
 \end{verbatim}
 
 Define the verification time
+
+
+\section*{\tt \htmlref{taxisDestroy}{taxisDestroy}}
+
+\begin{verbatim}
+    void taxisDestroy(int taxisID);
+\end{verbatim}
+
+Destroy a Time axis
 
 
 \section*{\tt \htmlref{taxisInqCalendar}{taxisInqCalendar}}
@@ -452,15 +479,6 @@ Get the verification date
 Get the verification time
 
 
-\section*{\tt \htmlref{taxisNew}{taxisNew}}
-
-\begin{verbatim}
-    int taxisNew(int taxistype);
-\end{verbatim}
-
-Create a new T-axis
-
-
 \section*{\tt \htmlref{vlistCat}{vlistCat}}
 
 \begin{verbatim}
@@ -486,6 +504,15 @@ Copy a variable list
 \end{verbatim}
 
 Copy some entries of a variable list
+
+
+\section*{\tt \htmlref{vlistCreate}{vlistCreate}}
+
+\begin{verbatim}
+    int vlistCreate(void);
+\end{verbatim}
+
+Create a variable list
 
 
 \section*{\tt \htmlref{vlistDefVar}{vlistDefVar}}
@@ -551,6 +578,15 @@ Define the name of a Variable
 Define the units of a Variable
 
 
+\section*{\tt \htmlref{vlistDestroy}{vlistDestroy}}
+
+\begin{verbatim}
+    void vlistDestroy(int vlistID);
+\end{verbatim}
+
+Destroy a variable list
+
+
 \section*{\tt \htmlref{vlistDuplicate}{vlistDuplicate}}
 
 \begin{verbatim}
@@ -558,15 +594,6 @@ Define the units of a Variable
 \end{verbatim}
 
 Duplicate a variable list
-
-
-\section*{\tt \htmlref{vlistFree}{vlistFree}}
-
-\begin{verbatim}
-    void vlistFree(int vlistID);
-\end{verbatim}
-
-Delete a variable list
 
 
 \section*{\tt \htmlref{vlistInqVarCode}{vlistInqVarCode}}
@@ -623,15 +650,6 @@ Get the name of a Variable
 Get the units of a Variable
 
 
-\section*{\tt \htmlref{vlistNew}{vlistNew}}
-
-\begin{verbatim}
-    int vlistNew(void);
-\end{verbatim}
-
-Create a variable list
-
-
 \section*{\tt \htmlref{vlistNgrids}{vlistNgrids}}
 
 \begin{verbatim}
@@ -657,6 +675,15 @@ Number of variables in a variable list
 \end{verbatim}
 
 Number of zaxis in a variable list
+
+
+\section*{\tt \htmlref{zaxisCreate}{zaxisCreate}}
+
+\begin{verbatim}
+    int zaxisCreate(int zaxistype, int size);
+\end{verbatim}
+
+Create a vertical Z-axis
 
 
 \section*{\tt \htmlref{zaxisDefLevels}{zaxisDefLevels}}
@@ -693,6 +720,15 @@ Define the name of a Z-axis
 \end{verbatim}
 
 Define the units of a Z-axis
+
+
+\section*{\tt \htmlref{zaxisDestroy}{zaxisDestroy}}
+
+\begin{verbatim}
+    void zaxisDestroy(int zaxisID);
+\end{verbatim}
+
+Destroy a vertical Z-axis
 
 
 \section*{\tt \htmlref{zaxisInqLevel}{zaxisInqLevel}}
@@ -756,12 +792,3 @@ Get the type of a Z-axis
 \end{verbatim}
 
 Get the units of a Z-axis
-
-
-\section*{\tt \htmlref{zaxisNew}{zaxisNew}}
-
-\begin{verbatim}
-    int zaxisNew(int zaxistype, int size);
-\end{verbatim}
-
-Create a new Z-axis

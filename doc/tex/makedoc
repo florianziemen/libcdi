@@ -236,12 +236,14 @@ while (<MOFILE>) {
 	($kword) = split(" ", $tag, 1);
 	$kword = uc($kword);
 	if ( "$kword" eq "\@SOURCE" ) {
-	  printcfdoc ("\\begin{verbatim}\n");
+#	  printcfdoc ("\\begin{verbatim}\n");
+	  printcfdoc ("\\begin{lstlisting}[backgroundcolor=\\color{zebg}, basicstyle=\\footnotesize]\n");
 	  $source = 1;
 	  next;
 	}
 	if ( "$kword" eq "\@ENDSOURCE" ) {
-	  printcfdoc ("\\end{verbatim}\n");
+#	  printcfdoc ("\\end{verbatim}\n");
+	  printcfdoc ("\\end{lstlisting}\n");
 	  $source = 0;
 	  next;
 	}
@@ -399,9 +401,10 @@ sub printcfdoc {
   @list = @_;
   if ( $#list >= 0 ) {
     foreach $tag (@list) {
+      chomp $tag;
       $tag =~ s/_/\\_/og;
-      print CDOCFILE "$tag";
-      print FDOCFILE "$tag";
+      print CDOCFILE "$tag\n";
+      print FDOCFILE "$tag\n";
     }
   }
 }
