@@ -20,6 +20,7 @@ config/mkinstalldirs -text
 /configure.ac -text
 doc/tex/FUNCTIONS -text
 doc/tex/Modules -text
+doc/tex/bib.tex -text
 doc/tex/c_examples.tex -text
 doc/tex/c_grid.tex -text
 doc/tex/c_link.tex -text
