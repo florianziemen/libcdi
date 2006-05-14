@@ -737,6 +737,10 @@
 !                                     INTEGER         size)
       EXTERNAL        gridCreate
 
+!                     gridDestroy
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridDestroy
+
       INTEGER         gridDuplicate
 !                                    (INTEGER         gridID)
       EXTERNAL        gridDuplicate
@@ -1051,6 +1055,10 @@
 !                                     INTEGER         size)
       EXTERNAL        zaxisCreate
 
+!                     zaxisDestroy
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisDestroy
+
       INTEGER         zaxisInqType
 !                                    (INTEGER         zaxisID)
       EXTERNAL        zaxisInqType
@@ -1196,6 +1204,10 @@
       INTEGER         taxisCreate
 !                                    (INTEGER         timetype)
       EXTERNAL        taxisCreate
+
+!                     taxisDestroy
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisDestroy
 
       INTEGER         taxisDuplicate
 !                                    (INTEGER         taxisID)

@@ -3463,7 +3463,7 @@ int cdfInqContents(int streamID)
 	      /* check attlen */
 	      if ( (int) attlen != nvdims )
 		{
-		  if ( attlen-1 == nvdims && attstring[attlen] == 0 ) attlen--;
+		  if ( (int)(attlen-1) == nvdims && attstring[attlen] == 0 ) attlen--;
 		  else
 		    {
 		      if ( nvdims > 0 )
@@ -3472,7 +3472,7 @@ int cdfInqContents(int streamID)
 		      if ( nvdims > 0 )
 			{
 			  fprintf(stderr, "attlen %d %d %d\n", strlen(attstring), attlen, nvdims);
-			  for ( i = 0; i < attlen; i++ )
+			  for ( i = 0; i < (int)attlen; i++ )
 			    fprintf(stderr, "       %d %d %c\n", i, (int) attstring[i], attstring[i]);
 			}
 		    }

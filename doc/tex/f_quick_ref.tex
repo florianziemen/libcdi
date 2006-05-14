@@ -10,7 +10,7 @@ CDI library routines:
     INTEGER FUNCTION gridCreate (INTEGER gridtype, INTEGER size)
 \end{verbatim}
 
-Create a new Grid.
+Create a horizontal Grid.
 
 
 \section*{\tt \htmlref{gridDefNvertex}{gridDefNvertex}}
@@ -137,6 +137,15 @@ Define the units of a Y-axis.
 \end{verbatim}
 
 Define the values of a Y-axis.
+
+
+\section*{\tt \htmlref{gridDestroy}{gridDestroy}}
+
+\begin{verbatim}
+    SUBROUTINE gridDestroy (INTEGER gridID)
+\end{verbatim}
+
+Destroy a horizontal Grid.
 
 
 \section*{\tt \htmlref{gridDuplicate}{gridDuplicate}}
@@ -337,6 +346,15 @@ Get all values of a Y-axis.
 Close an open dataset.
 
 
+\section*{\tt \htmlref{streamDefTimestep}{streamDefTimestep}}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamDefTimestep (INTEGER streamID, INTEGER tsID)
+\end{verbatim}
+
+Define time step.
+
+
 \section*{\tt \htmlref{streamDefVlist}{streamDefVlist}}
 
 \begin{verbatim}
@@ -344,6 +362,24 @@ Close an open dataset.
 \end{verbatim}
 
 Define the Vlist for a stream.
+
+
+\section*{\tt \htmlref{streamInqFiletype}{streamInqFiletype}}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqFiletype (INTEGER streamID)
+\end{verbatim}
+
+Get the filetype.
+
+
+\section*{\tt \htmlref{streamInqTimestep}{streamInqTimestep}}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqTimestep (INTEGER streamID, INTEGER tsID)
+\end{verbatim}
+
+Get time step.
 
 
 \section*{\tt \htmlref{streamInqVlist}{streamInqVlist}}
@@ -419,7 +455,7 @@ Write a horizontal slice of a variable.
     INTEGER FUNCTION taxisCreate (INTEGER timetype)
 \end{verbatim}
 
-Create a new T-axis.
+Create a Time axis.
 
 
 \section*{\tt \htmlref{taxisDefCalendar}{taxisDefCalendar}}
@@ -465,6 +501,15 @@ Define the verification date.
 \end{verbatim}
 
 Define the verification time.
+
+
+\section*{\tt \htmlref{taxisDestroy}{taxisDestroy}}
+
+\begin{verbatim}
+    SUBROUTINE taxisDestroy (INTEGER taxisID)
+\end{verbatim}
+
+Destroy a Time axis.
 
 
 \section*{\tt \htmlref{taxisInqCalendar}{taxisInqCalendar}}
@@ -620,7 +665,7 @@ Define the units of a Variable.
     SUBROUTINE vlistDestroy (INTEGER vlistID)
 \end{verbatim}
 
-Delete a variable list.
+Destroy a variable list.
 
 
 \section*{\tt \htmlref{vlistDuplicate}{vlistDuplicate}}
@@ -674,7 +719,7 @@ Number of zaxis in a variable list.
     INTEGER FUNCTION zaxisCreate (INTEGER leveltype, INTEGER size)
 \end{verbatim}
 
-Create a new Z-axis.
+Create a vertical Z-axis.
 
 
 \section*{\tt \htmlref{zaxisDefLevel}{zaxisDefLevel}}
@@ -721,6 +766,15 @@ Define the name of a Z-axis.
 \end{verbatim}
 
 Define the units of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisDestroy}{zaxisDestroy}}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDestroy (INTEGER zaxisID)
+\end{verbatim}
+
+Destroy a vertical Z-axis.
 
 
 \section*{\tt \htmlref{zaxisDuplicate}{zaxisDuplicate}}

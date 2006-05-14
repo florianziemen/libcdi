@@ -56,8 +56,12 @@ doc/tex/usage.tex -text
 examples/Makefile.am -text
 examples/Makefile.in -text
 examples/cdi_copy.c -text
+examples/cdi_copy_f.f -text
 examples/cdi_read.c -text
+examples/cdi_read_f.f -text
 examples/cdi_write.c -text
+examples/cdi_write_f.f -text
+examples/compf -text
 prog/Makefile.am -text
 prog/Makefile.in -text
 prog/cdi.c -text
