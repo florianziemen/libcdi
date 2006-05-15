@@ -605,6 +605,7 @@ void iegAddRecord(int streamID, int code, int *pdb, int *gdb, double *vct,
     {
       level1 = IEG_P_Level2(pdb);
       level2 = 0;
+      if ( IEG_P_LevelType(pdb) == 100 ) level1 *= 100;
     }
   /*
   fprintf(stderr, "%d %d %d %d\n", code, IEG_P_LevelType(pdb), IEG_P_Level1(pdb), IEG_P_Level2(pdb));
@@ -780,6 +781,8 @@ void iegScanTimestep1(int streamID)
       else
 	rlevel = IEG_P_Level2(iegp->ipdb);
 
+      if ( IEG_P_LevelType(iegp->ipdb) == 100 ) rlevel *= 100;
+
       iegDateTime(iegp->ipdb, &vdate, &vtime);
 
       if ( nrecs == 0 )
@@ -928,6 +931,8 @@ int iegScanTimestep2(int streamID)
 	rlevel = IEG_P_Level1(iegp->ipdb);
       else
 	rlevel = IEG_P_Level2(iegp->ipdb);
+
+      if ( IEG_P_LevelType(iegp->ipdb) == 100 ) rlevel *= 100;
 
       iegDateTime(iegp->ipdb, &vdate, &vtime);
 
@@ -1102,6 +1107,8 @@ int iegScanTimestep(int streamID)
 	    rlevel = IEG_P_Level1(iegp->ipdb);
 	  else
 	    rlevel = IEG_P_Level2(iegp->ipdb);
+
+	  if ( IEG_P_LevelType(iegp->ipdb) == 100 ) rlevel *= 100;
 
 	  iegDateTime(iegp->ipdb, &vdate, &vtime);
 
