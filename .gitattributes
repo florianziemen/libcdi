@@ -34,6 +34,7 @@ doc/tex/c_zaxis.tex -text
 doc/tex/cdi_cman.tex -text
 doc/tex/cdi_fman.tex -text
 doc/tex/cleanup -text
+doc/tex/f_examples.tex -text
 doc/tex/f_grid.tex -text
 doc/tex/f_link.tex -text
 doc/tex/f_quick_ref.tex -text
