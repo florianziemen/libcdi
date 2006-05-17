@@ -4,6 +4,7 @@
 	* rename *New functions to *Create
 	* stream_ieg: multiply pressure levels with 100 (report: Holger Goettel)
 	* gridPrint: GME support
+	* cdi_error: change return type to char*
         * add dummy functions gridDestroy, zaxisDestroy, taxisDestroy
 	* Version 1.0.0 released
 

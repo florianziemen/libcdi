@@ -96,11 +96,11 @@ extern "C" {
 
 /* CDI control routines */
 
-const char *cdiStringError(int cdiErrno);
+char   *cdiStringError(int cdiErrno);
 
 void    cdiDebug(int debug);
 
-const char *cdiLibraryVersion(void);
+char   *cdiLibraryVersion(void);
 void    cdiPrintVersion(void);
 
 void    cdiDefMissval(double missval);

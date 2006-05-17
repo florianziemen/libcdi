@@ -64,6 +64,8 @@ FCALLSCSUB2 (streamDefByteorder, STREAMDEFBYTEORDER, streamdefbyteorder, INT, IN
 FCALLSCFUN1 (INT, streamInqByteorder, STREAMINQBYTEORDER, streaminqbyteorder, INT)
 FCALLSCFUN2 (INT, streamDefTimestep, STREAMDEFTIMESTEP, streamdeftimestep, INT, INT)
 FCALLSCFUN2 (INT, streamInqTimestep, STREAMINQTIMESTEP, streaminqtimestep, INT, INT)
+FCALLSCFUN1 (STRING, streamFilename, STREAMFILENAME, streamfilename, INT)
+FCALLSCFUN1 (STRING, streamFilesuffix, STREAMFILESUFFIX, streamfilesuffix, INT)
 FCALLSCFUN1 (INT, streamNtsteps, STREAMNTSTEPS, streamntsteps, INT)
 
 /*  STREAM var I/O routines  */
@@ -166,6 +168,7 @@ FCALLSCFUN3 (INT, vlistFindLevel, VLISTFINDLEVEL, vlistfindlevel, INT, INT, INT)
 /*  GRID routines  */
 
 FCALLSCSUB2 (gridName, GRIDNAME, gridname, INT, PSTRING)
+FCALLSCFUN1 (STRING, gridNamePtr, GRIDNAMEPTR, gridnameptr, INT)
 FCALLSCSUB1 (gridCompress, GRIDCOMPRESS, gridcompress, INT)
 FCALLSCSUB2 (gridDefMask, GRIDDEFMASK, griddefmask, INT, PINT)
 FCALLSCFUN2 (INT, gridInqMask, GRIDINQMASK, gridinqmask, INT, PINT)
@@ -298,6 +301,7 @@ FCALLSCFUN1 (INT, taxisInqRtime, TAXISINQRTIME, taxisinqrtime, INT)
 FCALLSCFUN1 (INT, taxisInqCalendar, TAXISINQCALENDAR, taxisinqcalendar, INT)
 FCALLSCFUN1 (INT, taxisInqTunit, TAXISINQTUNIT, taxisinqtunit, INT)
 FCALLSCFUN1 (INT, taxisInqNumavg, TAXISINQNUMAVG, taxisinqnumavg, INT)
+FCALLSCFUN1 (STRING, tunitNamePtr, TUNITNAMEPTR, tunitnameptr, INT)
 
 /*  Institut routines  */
 
@@ -306,6 +310,8 @@ FCALLSCFUN4 (INT, institutInq, INSTITUTINQ, institutinq, INT, INT, STRING, STRIN
 FCALLSCFUN0 (INT, institutInqNumber, INSTITUTINQNUMBER, institutinqnumber)
 FCALLSCFUN1 (INT, institutInqCenter, INSTITUTINQCENTER, institutinqcenter, INT)
 FCALLSCFUN1 (INT, institutInqSubcenter, INSTITUTINQSUBCENTER, institutinqsubcenter, INT)
+FCALLSCFUN1 (STRING, institutInqNamePtr, INSTITUTINQNAMEPTR, institutinqnameptr, INT)
+FCALLSCFUN1 (STRING, institutInqLongnamePtr, INSTITUTINQLONGNAMEPTR, institutinqlongnameptr, INT)
 
 /*  Model routines  */
 
@@ -313,6 +319,7 @@ FCALLSCFUN3 (INT, modelDef, MODELDEF, modeldef, INT, INT, STRING)
 FCALLSCFUN3 (INT, modelInq, MODELINQ, modelinq, INT, INT, PSTRING)
 FCALLSCFUN1 (INT, modelInqInstitut, MODELINQINSTITUT, modelinqinstitut, INT)
 FCALLSCFUN1 (INT, modelInqGribID, MODELINQGRIBID, modelinqgribid, INT)
+FCALLSCFUN1 (STRING, modelInqNamePtr, MODELINQNAMEPTR, modelinqnameptr, INT)
 
 /*  Table routines  */
 
@@ -320,6 +327,7 @@ FCALLSCSUB2 (tableWriteC, TABLEWRITEC, tablewritec, STRING, INT)
 FCALLSCSUB2 (tableWrite, TABLEWRITE, tablewrite, STRING, INT)
 FCALLSCFUN1 (INT, tableRead, TABLEREAD, tableread, STRING)
 FCALLSCFUN3 (INT, tableDef, TABLEDEF, tabledef, INT, INT, STRING)
+FCALLSCFUN1 (STRING, tableInqNamePtr, TABLEINQNAMEPTR, tableinqnameptr, INT)
 FCALLSCSUB5 (tableDefEntry, TABLEDEFENTRY, tabledefentry, INT, INT, STRING, STRING, STRING)
 FCALLSCFUN3 (INT, tableInq, TABLEINQ, tableinq, INT, INT, STRING)
 FCALLSCFUN0 (INT, tableInqNumber, TABLEINQNUMBER, tableinqnumber)
@@ -330,6 +338,9 @@ FCALLSCFUN3 (INT, tableInqParCode, TABLEINQPARCODE, tableinqparcode, INT, PSTRIN
 FCALLSCFUN3 (INT, tableInqParName, TABLEINQPARNAME, tableinqparname, INT, INT, PSTRING)
 FCALLSCFUN3 (INT, tableInqParLongname, TABLEINQPARLONGNAME, tableinqparlongname, INT, INT, PSTRING)
 FCALLSCFUN3 (INT, tableInqParUnits, TABLEINQPARUNITS, tableinqparunits, INT, INT, PSTRING)
+FCALLSCFUN2 (STRING, tableInqParNamePtr, TABLEINQPARNAMEPTR, tableinqparnameptr, INT, INT)
+FCALLSCFUN2 (STRING, tableInqParLongnamePtr, TABLEINQPARLONGNAMEPTR, tableinqparlongnameptr, INT, INT)
+FCALLSCFUN2 (STRING, tableInqParUnitsPtr, TABLEINQPARUNITSPTR, tableinqparunitsptr, INT, INT)
 
 /*  History routines  */
 

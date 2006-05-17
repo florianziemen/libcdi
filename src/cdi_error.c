@@ -7,22 +7,22 @@
 #include "cdi.h"
 
 static char UnknownError[] = "Unknown Error";
+static char _EUFTYPE[]     = "Unsupported file type";
+static char _ELIBNAVAIL[]  = "Unsupported file type (library not available)";
+static char _EUFSTRUCT[]   = "Unsupported file structure";
 
-const char *cdiStringError(int cdiErrno)
+char *cdiStringError(int cdiErrno)
 {
   switch (cdiErrno) {
   case CDI_ESYSTEM:
     {
-      const char *cp = (const char *) strerror(errno);
+      char *cp = (char *) strerror(errno);
       if ( cp == NULL ) break;
       return cp;
     }
-  case CDI_EUFTYPE:
-    return "Unsupported file type";
-  case CDI_ELIBNAVAIL:
-    return "Unsupported file type (library not available)";
-  case CDI_EUFSTRUCT:
-    return "Unsupported file structure";
+  case CDI_EUFTYPE:    return _EUFTYPE;
+  case CDI_ELIBNAVAIL: return _ELIBNAVAIL;
+  case CDI_EUFSTRUCT:  return _EUFSTRUCT;
   }
 
   return UnknownError;

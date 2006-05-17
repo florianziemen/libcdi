@@ -234,6 +234,14 @@
 !                                     INTEGER         tsID)
       EXTERNAL        streamInqTimestep
 
+      CHARACTER*80    streamFilename
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamFilename
+
+      CHARACTER*80    streamFilesuffix
+!                                    (INTEGER         filetype)
+      EXTERNAL        streamFilesuffix
+
       INTEGER         streamNtsteps
 !                                    (INTEGER         streamID)
       EXTERNAL        streamNtsteps
@@ -717,6 +725,10 @@
 !                                    (INTEGER         gridtype,
 !                                     CHARACTER*(*)   gridname)
       EXTERNAL        gridName
+
+      CHARACTER*80    gridNamePtr
+!                                    (INTEGER         gridtype)
+      EXTERNAL        gridNamePtr
 
 !                     gridCompress
 !                                    (INTEGER         gridID)
@@ -1297,6 +1309,10 @@
 !                                    (INTEGER         taxisID)
       EXTERNAL        taxisInqNumavg
 
+      CHARACTER*80    tunitNamePtr
+!                                    (INTEGER         tunitID)
+      EXTERNAL        tunitNamePtr
+
 !
 !  Institut routines
 !
@@ -1325,6 +1341,14 @@
 !                                    (INTEGER         instID)
       EXTERNAL        institutInqSubcenter
 
+      CHARACTER*80    institutInqNamePtr
+!                                    (INTEGER         instID)
+      EXTERNAL        institutInqNamePtr
+
+      CHARACTER*80    institutInqLongnamePtr
+!                                    (INTEGER         instID)
+      EXTERNAL        institutInqLongnamePtr
+
 !
 !  Model routines
 !
@@ -1348,6 +1372,10 @@
 !                                    (INTEGER         modelID)
       EXTERNAL        modelInqGribID
 
+      CHARACTER*80    modelInqNamePtr
+!                                    (INTEGER         modelID)
+      EXTERNAL        modelInqNamePtr
+
 !
 !  Table routines
 !
@@ -1370,6 +1398,10 @@
 !                                     INTEGER         tablenum,
 !                                     CHARACTER*(*)   tablename)
       EXTERNAL        tableDef
+
+      CHARACTER*80    tableInqNamePtr
+!                                    (INTEGER         tableID)
+      EXTERNAL        tableInqNamePtr
 
 !                     tableDefEntry
 !                                    (INTEGER         tableID,
@@ -1427,6 +1459,21 @@
 !                                     INTEGER         code,
 !                                     CHARACTER*(*)   units)
       EXTERNAL        tableInqParUnits
+
+      CHARACTER*80    tableInqParNamePtr
+!                                    (INTEGER         tableID,
+!                                     INTEGER         parID)
+      EXTERNAL        tableInqParNamePtr
+
+      CHARACTER*80    tableInqParLongnamePtr
+!                                    (INTEGER         tableID,
+!                                     INTEGER         parID)
+      EXTERNAL        tableInqParLongnamePtr
+
+      CHARACTER*80    tableInqParUnitsPtr
+!                                    (INTEGER         tableID,
+!                                     INTEGER         parID)
+      EXTERNAL        tableInqParUnitsPtr
 
 !
 !  History routines

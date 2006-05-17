@@ -74,7 +74,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   enum              {ISVOID, ISSTRING,        ISSTRINGP,       ISINT,     ISINTP,     ISREAL, ISDOUBLE, ISDOUBLEP, ISCONSTSTRING};
   char *f77name[] = {"",     "CHARACTER*(*)", "CHARACTER*(*)", "INTEGER", "INTEGER", "REAL", "DOUBLEPRECISION", "DOUBLEPRECISION", "CHARACTER*80"};
   char *cfint[] =   {"",     "STRING",        "PSTRING",       "INT",     "PINT",    "FLOAT", "DOUBLE", "PDOUBLE",  "STRING"};
-  char *cname[] =   {"void", "char *",        "char *",        "int",     "int *",   "float", "double", "double *", "const char *"};
+  char *cname[] =   {"void", "char *",        "char *",        "int",     "int *",   "float", "double", "double *", "char *"};
   char funcname[128];
   char *funcargname[20];
   int  funcargtype[20];
@@ -132,6 +132,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
       funcargc = 0;
       if ( strncmp(line, "int", 3)    == 0 || 
 	   strncmp(line, "void", 4)   == 0 ||
+	   strncmp(line, "char", 4)   == 0 ||
 	   strncmp(line, "const", 5)  == 0 ||
 	   strncmp(line, "double", 6) == 0 )
 	{
@@ -165,6 +166,11 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	    {
 	      functype = ISDOUBLE;
 	      pline += 6;
+	    }
+	  else if ( strncmp(line, "char*", 5) == 0 )
+	    {
+	      functype = ISCONSTSTRING;
+	      pline += 5;
 	    }
 	  else if ( strncmp(line, "constchar*", 10) == 0 )
 	    {
