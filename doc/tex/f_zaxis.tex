@@ -27,8 +27,25 @@ Number of levels
 
 \subsection*{Result}
 
-{\tt zaxisCreate} returns an identifier to the vertical Z-axis.
+{\tt zaxisCreate} returns an identifier to the Z-axis.
 
+
+\subsection*{Example}
+
+Here is an example using {\tt zaxisCreate} to create a pressure level Z-axis:
+
+\begin{lstlisting}[backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+    INCLUDE 'cdi.h'
+       ...
+    #define  NLEV    5
+       ...
+    REAL*8 levs(NLEV) = (/101300, 92500, 85000, 50000, 20000/)
+    INTEGER zaxisID
+       ...
+    zaxisID = zaxisCreate(ZAXIS_PRESSURE, NLEV)
+    CALL zaxisDefLevels(zaxisID, levs)
+       ...
+\end{lstlisting}
 
 
 \section{Destroy a vertical Z-axis: {\tt zaxisDestroy}}

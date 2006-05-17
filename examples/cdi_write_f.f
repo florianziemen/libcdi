@@ -2,6 +2,8 @@
 
       IMPLICIT NONE
 
+      INCLUDE 'cdi.inc'
+
       INTEGER NLON, NLAT, NLEV, NTIME
       PARAMETER (NLON  = 12)   ! Number of longitudes
       PARAMETER (NLAT  =  6)   ! Number of latitudes
@@ -18,12 +20,10 @@
       DATA lats /-75, -45, -15, 15, 45, 75/
       DATA levs /101300, 92500, 85000, 50000, 20000/
 
-      INCLUDE 'cdi.inc'
-
       nmiss = 0
 
 !     Create a regular lon/lat grid
-      gridID  = gridCreate(GRID_LONLAT, NLON*NLAT)
+      gridID = gridCreate(GRID_LONLAT, NLON*NLAT)
       CALL gridDefXsize(gridID, NLON)
       CALL gridDefYsize(gridID, NLAT)
       CALL gridDefXvals(gridID, lons)
@@ -54,7 +54,11 @@
       CALL vlistDefTaxis(vlistID, taxisID)
 
 !     Create a dataset in netCDF format
-      streamID  = streamOpenWrite("example.nc", FILETYPE_NC)
+      streamID = streamOpenWrite("example.nc", FILETYPE_NC)
+      IF ( streamID < 0 ) THEN
+         WRITE(0,*) cdiStringError(streamID)
+         STOP
+      END IF
 
 !     Assign the variable list to the dataset
       CALL streamDefVlist(streamID, vlistID)

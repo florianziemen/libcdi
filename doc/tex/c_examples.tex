@@ -5,6 +5,7 @@
 \section{Write a dataset}
 
 \begin{lstlisting}[frame=single, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+#include <stdio.h>
 #include "cdi.h"
 
 #define  NLON   12 /* Number of longitudes */
@@ -25,7 +26,7 @@ int main(void)
 
 
   /* Create a regular lon/lat grid */
-  gridID  = gridCreate(GRID_LONLAT, NLON*NLAT);
+  gridID = gridCreate(GRID_LONLAT, NLON*NLAT);
   gridDefXsize(gridID, NLON);
   gridDefYsize(gridID, NLAT);
   gridDefXvals(gridID, lons);
@@ -56,7 +57,12 @@ int main(void)
   vlistDefTaxis(vlistID, taxisID);
 
   /* Create a dataset in netCDF format */
-  streamID  = streamOpenWrite("example.nc", FILETYPE_NC);
+  streamID = streamOpenWrite("example.nc", FILETYPE_NC);
+  if ( streamID < 0 )
+    {
+      fprintf(stderr, "%s\n", cdiStringError(streamID));
+      return(1);
+    }
 
   /* Assign the variable list to the dataset */
   streamDefVlist(streamID, vlistID);
@@ -135,6 +141,7 @@ data:
 \section{Read a dataset}
 
 \begin{lstlisting}[frame=single, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+#include <stdio.h>
 #include "cdi.h"
 
 #define  NLON   12 /* Number of longitudes */
@@ -151,7 +158,12 @@ int main(void)
 
 
   /* Open the dataset */
-  streamID  = streamOpenRead("example.nc");
+  streamID = streamOpenRead("example.nc");
+  if ( streamID < 0 )
+    {
+      fprintf(stderr, "%s\n", cdiStringError(streamID));
+      return(1);
+    }
 
   /* Get the variable list of the dataset */
   vlistID = streamInqVlist(streamID);
@@ -189,6 +201,7 @@ int main(void)
 \section{Copy a dataset}
 
 \begin{lstlisting}[frame=single, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+#include <stdio.h>
 #include "cdi.h"
 
 #define  NLON   12 /* Number of longitudes */
@@ -205,7 +218,12 @@ int main(void)
 
 
   /* Open the input dataset */
-  streamID1  = streamOpenRead("example.nc");
+  streamID1 = streamOpenRead("example.nc");
+  if ( streamID1 < 0 )
+    {
+      fprintf(stderr, "%s\n", cdiStringError(streamID1));
+      return(1);
+    }
 
   /* Get the variable list of the dataset */
   vlistID1 = streamInqVlist(streamID1);
@@ -217,8 +235,13 @@ int main(void)
   /* Get the Time axis form the variable list */
   taxisID = vlistInqTaxis(vlistID1);
 
-  /* Open the output dataset */
-  streamID2  = streamOpenWrite("example.grb", FILETYPE_GRB);
+  /* Open the output dataset (GRIB format) */
+  streamID2 = streamOpenWrite("example.grb", FILETYPE_GRB);
+  if ( streamID2 < 0 )
+    {
+      fprintf(stderr, "%s\n", cdiStringError(streamID2));
+      return(1);
+    }
 
   vlistID2 = vlistDuplicate(vlistID1);
 

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "cdi.h"
 
 #define  NLON   12 /* Number of longitudes */
@@ -15,6 +16,11 @@ int main(void)
 
   /* Open the input dataset */
   streamID1  = streamOpenRead("example.nc");
+  if ( streamID1 < 0 )
+    {
+      fprintf(stderr, "%s\n", cdiStringError(streamID1));
+      return(1);
+    }
 
   /* Get the variable list of the dataset */
   vlistID1 = streamInqVlist(streamID1);
@@ -26,8 +32,13 @@ int main(void)
   /* Get the Time axis form the variable list */
   taxisID = vlistInqTaxis(vlistID1);
 
-  /* Open the output dataset */
+  /* Open the output dataset (GRIB format) */
   streamID2  = streamOpenWrite("example.grb", FILETYPE_GRB);
+  if ( streamID2 < 0 )
+    {
+      fprintf(stderr, "%s\n", cdiStringError(streamID2));
+      return(1);
+    }
 
   vlistID2 = vlistDuplicate(vlistID1);
 

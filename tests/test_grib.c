@@ -27,16 +27,16 @@ int main(int argc, char *argv[])
   datasize = nlon * nlat;
   data = (double *) malloc(datasize*sizeof(double));
 
-  gridID = gridNew(GRID_GAUSSIAN, datasize);
+  gridID = gridCreate(GRID_GAUSSIAN, datasize);
   gridDefXsize(gridID, nlon);
   gridDefYsize(gridID, nlat);
 
-  zaxisID = zaxisNew(ZAXIS_SURFACE, 1);
+  zaxisID = zaxisCreate(ZAXIS_SURFACE, 1);
 
-  vlistID = vlistNew();
+  vlistID = vlistCreate();
   vlistDefVar(vlistID, gridID, zaxisID, TIME_VARIABLE);
 
-  taxisID = taxisNew(TAXIS_ABSOLUTE);
+  taxisID = taxisCreate(TAXIS_ABSOLUTE);
   vlistDefTaxis(vlistID, taxisID);
 
   streamID1 = streamOpenWrite(fname, filetype);

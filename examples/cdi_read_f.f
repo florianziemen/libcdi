@@ -2,6 +2,8 @@
 
       IMPLICIT NONE
 
+      INCLUDE 'cdi.inc'
+
       INTEGER NLON, NLAT, NLEV, NTIME
       PARAMETER (NLON  = 12)   ! Number of longitudes
       PARAMETER (NLAT  =  6)   ! Number of latitudes
@@ -13,10 +15,12 @@
       INTEGER nmiss, status, vdate, vtime
       REAL*8 var1(NLON*NLAT), var2(NLON*NLAT*NLEV)
 
-      INCLUDE 'cdi.inc'
-
 !     Open the dataset
-      streamID  = streamOpenRead("example.nc")
+      streamID = streamOpenRead("example.nc")
+      IF ( streamID < 0 ) THEN
+         WRITE(0,*) cdiStringError(streamID)
+         STOP
+      END IF
 
 !     Get the variable list of the dataset
       vlistID = streamInqVlist(streamID)

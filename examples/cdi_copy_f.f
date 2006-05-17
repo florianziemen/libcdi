@@ -2,6 +2,8 @@
 
       IMPLICIT NONE
 
+      INCLUDE 'cdi.inc'
+
       INTEGER NLON, NLAT, NLEV, NTIME
       PARAMETER (NLON  = 12)   ! Number of longitudes
       PARAMETER (NLAT  =  6)   ! Number of latitudes
@@ -13,10 +15,12 @@
       INTEGER i, nmiss, status, vdate, vtime
       REAL*8 var1(NLON*NLAT), var2(NLON*NLAT*NLEV)
 
-      INCLUDE 'cdi.inc'
-
 !     Open the input dataset
-      streamID1  = streamOpenRead("example.nc")
+      streamID1 = streamOpenRead("example.nc")
+      IF ( streamID1 < 0 ) THEN
+         WRITE(0,*) cdiStringError(streamID1)
+         STOP
+      END IF
 
 !     Get the variable list of the dataset
       vlistID1 = streamInqVlist(streamID1)
@@ -28,8 +32,12 @@
 !     Get the Time axis form the variable list
       taxisID = vlistInqTaxis(vlistID1)
 
-!     Open the output dataset
-      streamID2  = streamOpenWrite("example.grb", FILETYPE_GRB)
+!     Open the output dataset (GRIB format)
+      streamID2 = streamOpenWrite("example.grb", FILETYPE_GRB)
+      IF ( streamID2 < 0 ) THEN
+         WRITE(0,*) cdiStringError(streamID2)
+         STOP
+      END IF
 
       vlistID2 = vlistDuplicate(vlistID1)
 

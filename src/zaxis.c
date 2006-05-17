@@ -162,8 +162,23 @@ void zaxisCheckID(const char *func, int zaxisID)
 The function {\tt zaxisCreate} creates a vertical Z-axis.
 
 @Result
-{\tt zaxisCreate} returns an identifier to the vertical Z-axis.
+{\tt zaxisCreate} returns an identifier to the Z-axis.
 
+@Example
+Here is an example using {\tt zaxisCreate} to create a pressure level Z-axis:
+
+@Source
+#include "cdi.h"
+   ...
+#define  NLEV    5
+   ...
+double levs[NLEV] = {101300, 92500, 85000, 50000, 20000};
+int zaxisID;
+   ...
+zaxisID = zaxisCreate(ZAXIS_PRESSURE, NLEV);
+zaxisDefLevels(zaxisID, levs);
+   ...
+@EndSource
 @EndFunction
 */
 int zaxisCreate(int zaxistype, int size)

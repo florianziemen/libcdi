@@ -42,7 +42,9 @@
 
 /*  CDI control routines  */
 
+FCALLSCFUN1 (STRING, cdiStringError, CDISTRINGERROR, cdistringerror, INT)
 FCALLSCSUB1 (cdiDebug, CDIDEBUG, cdidebug, INT)
+FCALLSCFUN0 (STRING, cdiLibraryVersion, CDILIBRARYVERSION, cdilibraryversion)
 FCALLSCSUB0 (cdiPrintVersion, CDIPRINTVERSION, cdiprintversion)
 FCALLSCSUB1 (cdiDefMissval, CDIDEFMISSVAL, cdidefmissval, DOUBLE)
 FCALLSCFUN0 (DOUBLE, cdiInqMissval, CDIINQMISSVAL, cdiinqmissval)

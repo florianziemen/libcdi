@@ -31,20 +31,21 @@ Number of gridpoints.
 
 \subsection*{Example}
 
-Here is an example using {\tt gridCreate} to create a {\tt LONLAT} Grid:
+Here is an example using {\tt gridCreate} to create a regular lon/lat Grid:
 
 \begin{lstlisting}[backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
-    #include <cdi.h>
+    #include "cdi.h"
        ...
+    #define  NLON  12
+    #define  NLAT   6
+       ...
+    double lons[NLON] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
+    double lats[NLAT] = {-75, -45, -15, 15, 45, 75};
     int gridID;
-    int nlon = 12;
-    int nlat = 6;
-    double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
-    double lats[nlat] = {-75, -45, -15, 15, 45, 75};
        ...
-    gridID = gridCreate(GRID_LONLAT, nlon*nlat);
-    gridDefXsize(gridID, nlon);
-    gridDefYsize(gridID, nlat);
+    gridID = gridCreate(GRID_LONLAT, NLON*NLAT);
+    gridDefXsize(gridID, NLON);
+    gridDefYsize(gridID, NLAT);
     gridDefXvals(gridID, lons);
     gridDefYvals(gridID, lats);
        ...

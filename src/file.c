@@ -20,13 +20,19 @@ int getpagesize(void);
 
 
 #ifndef strdupx
-#define strdupx(s)			          \
-({					      	  \
-   const char *__old = (s);			  \
-   size_t __len = strlen(__old) + 1;		  \
-   char *__new = (char *) malloc(__len);	  \
-   (char *) memcpy(__new, __old, __len);	  \
+#ifndef strdup
+char *strdup(const char *s);
+#endif
+#define strdupx  strdup
+/*
+#define strdupx(s)                                \
+({                                                \
+   const char *__old = (s);                       \
+   size_t __len = strlen(__old) + 1;              \
+   char *__new = (char *) malloc(__len);          \
+   (char *) memcpy(__new, __old, __len);          \
 })
+*/
 #endif
 
 #if ! defined (HAVE_MMAP)

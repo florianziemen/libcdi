@@ -152,9 +152,16 @@
 !
 !  CDI control routines
 !
+      CHARACTER*80    cdiStringError
+!                                    (INTEGER         cdiErrno)
+      EXTERNAL        cdiStringError
+
 !                     cdiDebug
 !                                    (INTEGER         debug)
       EXTERNAL        cdiDebug
+
+      CHARACTER*80    cdiLibraryVersion
+      EXTERNAL        cdiLibraryVersion
 
 !                     cdiPrintVersion
       EXTERNAL        cdiPrintVersion

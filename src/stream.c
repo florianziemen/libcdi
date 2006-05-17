@@ -764,7 +764,7 @@ Here is an example using {\tt streamOpenRead} to open an existing netCDF
 file named {\tt foo.nc} for reading:
 
 @Source
-#include <cdi.h>
+#include "cdi.h"
    ...
 int streamID;
    ...
@@ -838,7 +838,7 @@ Here is an example using {\tt streamOpenWrite} to create a new netCDF file
 named {\tt foo.nc} for writing:
 
 @Source
-#include <cdi.h>
+#include "cdi.h"
    ...
 int streamID;
    ...

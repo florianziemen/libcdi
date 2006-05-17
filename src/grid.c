@@ -573,20 +573,21 @@ The function {\tt gridCreate} creates a horizontal Grid.
 {\tt gridCreate} returns an identifier to the Grid.
 
 @Example
-Here is an example using {\tt gridCreate} to create a {\tt LONLAT} Grid:
+Here is an example using {\tt gridCreate} to create a regular lon/lat Grid:
 
 @Source
-#include <cdi.h>
+#include "cdi.h"
    ...
+#define  NLON  12
+#define  NLAT   6
+   ...
+double lons[NLON] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
+double lats[NLAT] = {-75, -45, -15, 15, 45, 75};
 int gridID;
-int nlon = 12;
-int nlat = 6;
-double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
-double lats[nlat] = {-75, -45, -15, 15, 45, 75};
    ...
-gridID = gridCreate(GRID_LONLAT, nlon*nlat);
-gridDefXsize(gridID, nlon);
-gridDefYsize(gridID, nlat);
+gridID = gridCreate(GRID_LONLAT, NLON*NLAT);
+gridDefXsize(gridID, NLON);
+gridDefYsize(gridID, NLAT);
 gridDefXvals(gridID, lons);
 gridDefYvals(gridID, lats);
    ...
@@ -2847,13 +2848,16 @@ void gridPrint(int gridID)
   fprintf(fp, "gridtype  : %s\n", gridNamePtr(type));
   fprintf(fp, "gridsize  : %d\n", gridsize);
 
-  if ( gridptr->xname[0]     ) fprintf(fp, "xname     : %s\n", gridptr->xname);
-  if ( gridptr->xlongname[0] ) fprintf(fp, "xlongname : %s\n", gridptr->xlongname);
-  if ( gridptr->xunits[0]    ) fprintf(fp, "xunits    : %s\n", gridptr->xunits);
-  if ( gridptr->yname[0]     ) fprintf(fp, "yname     : %s\n", gridptr->yname);
-  if ( gridptr->ylongname[0] ) fprintf(fp, "ylongname : %s\n", gridptr->ylongname);
-  if ( gridptr->yunits[0]    ) fprintf(fp, "yunits    : %s\n", gridptr->yunits);
-  if ( type == GRID_CELL ) fprintf(fp, "nvertex   : %d\n", nvertex);
+  if ( type != GRID_GME )
+    {
+      if ( gridptr->xname[0]     ) fprintf(fp, "xname     : %s\n", gridptr->xname);
+      if ( gridptr->xlongname[0] ) fprintf(fp, "xlongname : %s\n", gridptr->xlongname);
+      if ( gridptr->xunits[0]    ) fprintf(fp, "xunits    : %s\n", gridptr->xunits);
+      if ( gridptr->yname[0]     ) fprintf(fp, "yname     : %s\n", gridptr->yname);
+      if ( gridptr->ylongname[0] ) fprintf(fp, "ylongname : %s\n", gridptr->ylongname);
+      if ( gridptr->yunits[0]    ) fprintf(fp, "yunits    : %s\n", gridptr->yunits);
+      if ( type == GRID_CELL ) fprintf(fp, "nvertex   : %d\n", nvertex);
+    }
 
   switch (type)
     {
@@ -3018,6 +3022,11 @@ void gridPrint(int gridID)
     case GRID_SPECTRAL:
       {
 	fprintf(fp, "truncation : %d\n", trunc);
+	break;
+      }
+    case GRID_GME:
+      {
+	fprintf(fp, "ni        : %d\n", gridInqGMEni(gridID));
 	break;
       }
    default:

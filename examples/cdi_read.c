@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "cdi.h"
 
 #define  NLON   12 /* Number of longitudes */
@@ -14,7 +15,12 @@ int main(void)
 
 
   /* Open the dataset */
-  streamID  = streamOpenRead("example.nc");
+  streamID = streamOpenRead("example.nc");
+  if ( streamID < 0 )
+    {
+      fprintf(stderr, "%s\n", cdiStringError(streamID));
+      return(1);
+    }
 
   /* Get the variable list of the dataset */
   vlistID = streamInqVlist(streamID);

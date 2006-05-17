@@ -367,8 +367,8 @@ sub printfortran {
   $line =~ s/const char \*/CHARACTER\*(\*) /og;
   $line =~ s/char \*/CHARACTER\*(\*) /og;
   $line =~ s/if /IF /og;
-  $line =~ s/#include </INCLUDE \'/og;
-  $line =~ s/>$/\'/og;
+  $line =~ s/#include \"/INCLUDE \'/og;
+  $line =~ s/\"$/\'/og;
   $line =~ s/handle_error/CALL handle_error/og;
   printfsrc ("    $line");
 }

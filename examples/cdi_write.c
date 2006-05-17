@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "cdi.h"
 
 #define  NLON   12 /* Number of longitudes */
@@ -18,7 +19,7 @@ int main(void)
 
 
   /* Create a regular lon/lat grid */
-  gridID  = gridCreate(GRID_LONLAT, NLON*NLAT);
+  gridID = gridCreate(GRID_LONLAT, NLON*NLAT);
   gridDefXsize(gridID, NLON);
   gridDefYsize(gridID, NLAT);
   gridDefXvals(gridID, lons);
@@ -49,7 +50,12 @@ int main(void)
   vlistDefTaxis(vlistID, taxisID);
 
   /* Create a dataset in netCDF format */
-  streamID  = streamOpenWrite("example.nc", FILETYPE_NC);
+  streamID = streamOpenWrite("example.nc", FILETYPE_NC);
+  if ( streamID < 0 )
+    {
+      fprintf(stderr, "%s\n", cdiStringError(streamID));
+      return(1);
+    }
 
   /* Assign the variable list to the dataset */
   streamDefVlist(streamID, vlistID);
