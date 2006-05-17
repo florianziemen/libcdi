@@ -16,6 +16,7 @@
 	* gridPrint: print xfirst and xinc if xinc is constant
 	* gridGenYvals: try to calculate non global gaussian latitides
 	* add global int attr support
+	* streamOpenRead: fix bug if open failed
 	* add function tableInqParCode
 	* Version 0.9.7 released
 

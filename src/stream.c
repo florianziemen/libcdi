@@ -785,7 +785,7 @@ int streamOpenRead(const char *filename)
 
   streamID = streamOpen(filename, "r", filetype);
 
-  streams[streamID].byteorder = byteorder;
+  if ( streamID >= 0 ) streams[streamID].byteorder = byteorder;
 
   return (streamID);
 }
