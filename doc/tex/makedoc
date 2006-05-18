@@ -403,6 +403,8 @@ sub printcfdoc {
     foreach $tag (@list) {
       chomp $tag;
       $tag =~ s/_/\\_/og;
+      $tag =~ s/\@fref\{([^}]*)\}/{\\htmlref{\\tt \1}{\1}}/og;
+      $tag =~ s/\@func\{([^}]*)\}/{\\tt \1}/og;
       print CDOCFILE "$tag\n";
       print FDOCFILE "$tag\n";
     }

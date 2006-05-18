@@ -562,18 +562,18 @@ static void defineYvals(int gridID)
 @Prototype int gridCreate(int gridtype, int size)
 @Parameter
     @Item  gridtype  The type of the grid, one of the set of predefined CDI grid types.
-                     The valid CDI grid types are {\tt GRID_GENERIC}, {\tt GRID_GAUSSIAN},
-                     {\tt GRID_LONLAT}, {\tt GRID_SPECTRAL}, {\tt GRID_CURVILINEAR} and {\tt GRID_CELL}.
+                     The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
+                     @func{GRID_LONLAT}, @func{GRID_SPECTRAL}, @func{GRID_CURVILINEAR} and @func{GRID_CELL}.
     @Item  size      Number of gridpoints.
 
 @Description
-The function {\tt gridCreate} creates a horizontal Grid.
+The function @func{gridCreate} creates a horizontal Grid.
 
 @Result
-{\tt gridCreate} returns an identifier to the Grid.
+@func{gridCreate} returns an identifier to the Grid.
 
 @Example
-Here is an example using {\tt gridCreate} to create a regular lon/lat Grid:
+Here is an example using @func{gridCreate} to create a regular lon/lat Grid:
 
 @Source
 #include "cdi.h"
@@ -676,7 +676,7 @@ int gridCreate(int gridtype, int size)
 
 @Prototype void gridDestroy(int gridID)
 @Parameter
-    @Item  gridID Identifier, from a previous call to {\tt gridCreate}
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
 
 @EndFunction
 */
@@ -711,11 +711,11 @@ void gridName(int gridtype, char *gridname)
 
 @Prototype void gridDefXname(int gridID, const char *name)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  name      Name of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  name     Name of the X-axis
 
 @Description
-The function {\tt gridDefXname} defines the name of a X-axis.
+The function @func{gridDefXname} defines the name of a X-axis.
 
 @EndFunction
 */
@@ -736,11 +736,11 @@ void gridDefXname(int gridID, char *xname)
 
 @Prototype void gridDefXlongname(int gridID, const char *longname)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  longname  Longname of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  longname Longname of the X-axis
 
 @Description
-The function {\tt gridDefXlongname} defines the longname of a X-axis.
+The function @func{gridDefXlongname} defines the longname of a X-axis.
 
 @EndFunction
 */
@@ -761,11 +761,11 @@ void gridDefXlongname(int gridID, char *xlongname)
 
 @Prototype void gridDefXunits(int gridID, const char *units)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  units     Units of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  units    Units of the X-axis
 
 @Description
-The function {\tt gridDefXunits} defines the units of a X-axis.
+The function @func{gridDefXunits} defines the units of a X-axis.
 
 @EndFunction
 */
@@ -786,11 +786,11 @@ void gridDefXunits(int gridID, char *xunits)
 
 @Prototype void gridDefYname(int gridID, const char *name)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  name      Name of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  name     Name of the Y-axis
 
 @Description
-The function {\tt gridDefYname} defines the name of a Y-axis.
+The function @func{gridDefYname} defines the name of a Y-axis.
 
 @EndFunction
 */
@@ -811,11 +811,11 @@ void gridDefYname(int gridID, char *yname)
 
 @Prototype void gridDefYlongname(int gridID, const char *longname)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  longname  Longname of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  longname Longname of the Y-axis
 
 @Description
-The function {\tt gridDefYlongname} defines the longname of a Y-axis.
+The function @func{gridDefYlongname} defines the longname of a Y-axis.
 
 @EndFunction
 */
@@ -836,11 +836,11 @@ void gridDefYlongname(int gridID, char *ylongname)
 
 @Prototype void gridDefYunits(int gridID, const char *units)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  units     Units of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  units    Units of the Y-axis
 
 @Description
-The function {\tt gridDefYunits} defines the units of a Y-axis.
+The function @func{gridDefYunits} defines the units of a Y-axis.
 
 @EndFunction
 */
@@ -861,14 +861,14 @@ void gridDefYunits(int gridID, char *yunits)
 
 @Prototype void gridInqXname(int gridID, const char *name)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  name      Name of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  name     Name of the X-axis
 
 @Description
-The function {\tt gridInqXname} returns the name of a X-axis.
+The function @func{gridInqXname} returns the name of a X-axis.
 
 @Result
-{\tt gridInqXname} returns the name of the X-axis to the parameter name.
+@func{gridInqXname} returns the name of the X-axis to the parameter name.
 
 @EndFunction
 */
@@ -888,14 +888,14 @@ void gridInqXname(int gridID, char *xname)
 
 @Prototype void gridInqXlongname(int gridID, const char *longname)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  longname  Longname of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  longname Longname of the X-axis
 
 @Description
-The function {\tt gridInqXlongname} returns the longname of a X-axis.
+The function @func{gridInqXlongname} returns the longname of a X-axis.
 
 @Result
-{\tt gridInqXlongname} returns the longname of the X-axis to the parameter longname.
+@func{gridInqXlongname} returns the longname of the X-axis to the parameter longname.
 
 @EndFunction
 */
@@ -915,14 +915,14 @@ void gridInqXlongname(int gridID, char *xlongname)
 
 @Prototype void gridInqXunits(int gridID, const char *units)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  units     Units of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  units    Units of the X-axis
 
 @Description
-The function {\tt gridInqXunits} returns the units of a X-axis.
+The function @func{gridInqXunits} returns the units of a X-axis.
 
 @Result
-{\tt gridInqXunits} returns the units of the X-axis to the parameter units.
+@func{gridInqXunits} returns the units of the X-axis to the parameter units.
 
 @EndFunction
 */
@@ -952,14 +952,14 @@ void gridInqXstdname(int gridID, char *xstdname)
 
 @Prototype void gridInqYname(int gridID, const char *name)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  name      Name of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  name     Name of the Y-axis
 
 @Description
-The function {\tt gridInqYname} returns the name of a Y-axis.
+The function @func{gridInqYname} returns the name of a Y-axis.
 
 @Result
-{\tt gridInqYname} returns the name of the Y-axis to the parameter name.
+@func{gridInqYname} returns the name of the Y-axis to the parameter name.
 
 @EndFunction
 */
@@ -979,14 +979,14 @@ void gridInqYname(int gridID, char *yname)
 
 @Prototype void gridInqXlongname(int gridID, const char *longname)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  longname  Longname of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  longname Longname of the Y-axis
 
 @Description
-The function {\tt gridInqYlongname} returns the longname of a Y-axis.
+The function @func{gridInqYlongname} returns the longname of a Y-axis.
 
 @Result
-{\tt gridInqYlongname} returns the longname of the Y-axis to the parameter longname.
+@func{gridInqYlongname} returns the longname of the Y-axis to the parameter longname.
 
 @EndFunction
 */
@@ -1006,14 +1006,14 @@ void gridInqYlongname(int gridID, char *ylongname)
 
 @Prototype void gridInqYunits(int gridID, const char *units)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  units     Units of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  units    Units of the Y-axis
 
 @Description
-The function {\tt gridInqYunits} returns the units of a Y-axis.
+The function @func{gridInqYunits} returns the units of a Y-axis.
 
 @Result
-{\tt gridInqYunits} returns the units of the Y-axis to the parameter units.
+@func{gridInqYunits} returns the units of the Y-axis to the parameter units.
 
 @EndFunction
 */
@@ -1042,16 +1042,16 @@ void gridInqYstdname(int gridID, char *ystdname)
 
 @Prototype int gridInqType(int gridID)
 @Parameter
-    @Item  gridID  Grid identifier
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
 
 @Description
-The function {\tt gridInqType} returns the type of a Grid.
+The function @func{gridInqType} returns the type of a Grid.
 
 @Result
-{\tt gridInqType} returns the type of the grid,
+@func{gridInqType} returns the type of the grid,
 one of the set of predefined CDI grid types.
-The valid CDI grid types are {\tt GRID_GENERIC}, {\tt GRID_GAUSSIAN},
-{\tt GRID_LONLAT}, {\tt GRID_SPECTRAL}, {\tt GRID_CURVILINEAR} and {\tt GRID_CELL}.
+The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
+@func{GRID_LONLAT}, @func{GRID_SPECTRAL}, @func{GRID_CURVILINEAR} and @func{GRID_CELL}.
 
 @EndFunction
 */
@@ -1074,13 +1074,13 @@ int gridInqType(int gridID)
 
 @Prototype int gridInqSize(int gridID)
 @Parameter
-    @Item  gridID  Grid identifier
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
 
 @Description
-The function {\tt gridInqSize} returns the size of a Grid.
+The function @func{gridInqSize} returns the size of a Grid.
 
 @Result
-{\tt gridInqSize} returns the number of grid points of a Grid.
+@func{gridInqSize} returns the number of grid points of a Grid.
 
 @EndFunction
 */
@@ -1173,11 +1173,11 @@ void gridDefTrunc(int gridID, int trunc)
 
 @Prototype void gridDefXsize(int gridID, int xsize)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  xsize     Number of values of a X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  xsize    Number of values of a X-axis
 
 @Description
-The function {\tt gridDefXsize} defines the number of values of a X-axis.
+The function @func{gridDefXsize} defines the number of values of a X-axis.
 
 @EndFunction
 */
@@ -1257,13 +1257,13 @@ int gridInqPrec(int gridID)
 
 @Prototype void gridInqXsize(int gridID)
 @Parameter
-    @Item  gridID    Grid identifier
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
 
 @Description
-The function {\tt gridInqXsize} returns the number of values of a X-axis.
+The function @func{gridInqXsize} returns the number of values of a X-axis.
 
 @Result
-{\tt gridInqXsize} returns the number of values of a X-axis.
+@func{gridInqXsize} returns the number of values of a X-axis.
 
 @EndFunction
 */
@@ -1286,11 +1286,11 @@ int gridInqXsize(int gridID)
 
 @Prototype void gridDefYsize(int gridID, int ysize)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  ysize     Number of values of a Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  ysize    Number of values of a Y-axis
 
 @Description
-The function {\tt gridDefYsize} defines the number of values of a Y-axis.
+The function @func{gridDefYsize} defines the number of values of a Y-axis.
 
 @EndFunction
 */
@@ -1324,13 +1324,13 @@ void gridDefYsize(int gridID, int ysize)
 
 @Prototype void gridInqYsize(int gridID)
 @Parameter
-    @Item  gridID    Grid identifier
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
 
 @Description
-The function {\tt gridInqYsize} returns the number of values of a Y-axis.
+The function @func{gridInqYsize} returns the number of values of a Y-axis.
 
 @Result
-{\tt gridInqYsize} returns the number of values of a Y-axis.
+@func{gridInqYsize} returns the number of values of a Y-axis.
 
 @EndFunction
 */
@@ -1465,16 +1465,16 @@ void gridDefMask(int gridID, int *mask)
 
 @Prototype int gridInqXvals(int gridID, double *xvals)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  xvals     X-values of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  xvals    X-values of the grid
 
 @Description
-The function {\tt gridInqXvals} returns all values of the X-axis.
+The function @func{gridInqXvals} returns all values of the X-axis.
 
 @Result
-Upon successful completion {\tt gridInqXvals} returns the number of values and
-the values are stored in {\tt xvals}.
-Otherwise, 0 is returned and {\tt xvals} is empty.
+Upon successful completion @func{gridInqXvals} returns the number of values and
+the values are stored in @func{xvals}.
+Otherwise, 0 is returned and @func{xvals} is empty.
 
 @EndFunction
 */
@@ -1513,11 +1513,11 @@ int gridInqXvals(int gridID, double *xvals)
 
 @Prototype void gridDefXvals(int gridID, double *xvals)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  xvals     X-values of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  xvals    X-values of the grid
 
 @Description
-The function {\tt gridDefXvals} defines all values of the X-axis.
+The function @func{gridDefXvals} defines all values of the X-axis.
 
 @EndFunction
 */
@@ -1559,16 +1559,16 @@ void gridDefXvals(int gridID, double *xvals)
 
 @Prototype int gridInqYvals(int gridID, double *yvals)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  yvals     Y-values of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  yvals    Y-values of the grid
 
 @Description
-The function {\tt gridInqYvals} returns all values of the Y-axis.
+The function @func{gridInqYvals} returns all values of the Y-axis.
 
 @Result
-Upon successful completion {\tt gridInqYvals} returns the number of values and
-the values are stored in {\tt yvals}.
-Otherwise, 0 is returned and {\tt yvals} is empty.
+Upon successful completion @func{gridInqYvals} returns the number of values and
+the values are stored in @func{yvals}.
+Otherwise, 0 is returned and @func{yvals} is empty.
 
 @EndFunction
 */
@@ -1607,11 +1607,11 @@ int gridInqYvals(int gridID, double *yvals)
 
 @Prototype void gridDefYvals(int gridID, double *yvals)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  yvals     Y-values of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  yvals    Y-values of the grid
 
 @Description
-The function {\tt gridDefYvals} defines all values of the Y-axis.
+The function @func{gridDefYvals} defines all values of the Y-axis.
 
 @EndFunction
 */
@@ -2333,14 +2333,14 @@ int gridGenerate(GRID grid)
 
 @Prototype int gridDuplicate(int gridID)
 @Parameter
-    @Item  gridID  Identifier, from a previous call to {\tt gridCreate},
-                   {\tt gridDuplicate} or {\tt vlistInqVarGrid}.
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate},
+                    @func{gridDuplicate} or @func{vlistInqVarGrid}.
 
 @Description
-The function {\tt gridDuplicate} duplicates a horizontal Grid.
+The function @func{gridDuplicate} duplicates a horizontal Grid.
 
 @Result
-{\tt gridDuplicate} returns an identifier to the duplicated Grid.
+@func{gridDuplicate} returns an identifier to the duplicated Grid.
 
 @EndFunction
 */
@@ -2605,11 +2605,11 @@ int gridInqNvertex(int gridID)
 
 @Prototype void gridDefXbounds(int gridID, double *xbounds)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  xbounds   X-bounds of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  xbounds  X-bounds of the grid
 
 @Description
-The function {\tt gridDefXbounds} defines all bounds of the X-axis.
+The function @func{gridDefXbounds} defines all bounds of the X-axis.
 
 @EndFunction
 */
@@ -2653,16 +2653,16 @@ void gridDefXbounds(int gridID, double *xbounds)
 
 @Prototype int gridInqXbounds(int gridID, double *xbounds)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  xbounds   X-bounds of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  xbounds  X-bounds of the grid
 
 @Description
-The function {\tt gridInqXbounds} returns the bounds of the X-axis.
+The function @func{gridInqXbounds} returns the bounds of the X-axis.
 
 @Result
-Upon successful completion {\tt gridInqXbounds} returns the number of bounds and
-the bounds are stored in {\tt xbounds}.
-Otherwise, 0 is returned and {\tt xbounds} is empty.
+Upon successful completion @func{gridInqXbounds} returns the number of bounds and
+the bounds are stored in @func{xbounds}.
+Otherwise, 0 is returned and @func{xbounds} is empty.
 
 @EndFunction
 */
@@ -2713,11 +2713,11 @@ double *gridInqXboundsPtr(int gridID)
 
 @Prototype void gridDefYbounds(int gridID, double *ybounds)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  ybounds   Y-bounds of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  ybounds  Y-bounds of the grid
 
 @Description
-The function {\tt gridDefYbounds} defines all bounds of the Y-axis.
+The function @func{gridDefYbounds} defines all bounds of the Y-axis.
 
 @EndFunction
 */
@@ -2761,16 +2761,16 @@ void gridDefYbounds(int gridID, double *ybounds)
 
 @Prototype int gridInqYbounds(int gridID, double *ybounds)
 @Parameter
-    @Item  gridID    Grid identifier
-    @Item  ybounds   Y-bounds of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  ybounds  Y-bounds of the grid
 
 @Description
-The function {\tt gridInqYbounds} returns the bounds of the Y-axis.
+The function @func{gridInqYbounds} returns the bounds of the Y-axis.
 
 @Result
-Upon successful completion {\tt gridInqYbounds} returns the number of bounds and
-the bounds are stored in {\tt ybounds}.
-Otherwise, 0 is returned and {\tt ybounds} is empty.
+Upon successful completion @func{gridInqYbounds} returns the number of bounds and
+the bounds are stored in @func{ybounds}.
+Otherwise, 0 is returned and @func{ybounds} is empty.
 
 @EndFunction
 */

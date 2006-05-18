@@ -264,7 +264,7 @@ int vlistCreate(void)
 
 @Prototype void vlistDestroy(int vlistID)
 @Parameter
-    @Item  vlistID Identifier, from a previous call to {\tt vlistCreate}
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
 
 @EndFunction
 */
@@ -350,11 +350,11 @@ void vlistUnlock(int vlistID)
 
 @Prototype void vlistCopy(int vlistID2, int vlistID1)
 @Parameter
-    @Item  vlistID2 Target variable list
-    @Item  vlistID1 Source variable list
+    @Item  vlistID2  Target variable list ID
+    @Item  vlistID1  Source variable list ID
 
 @Description
-The function {\tt vlistCopy} copies all entries from vlistID1 to vlistID2.
+The function @func{vlistCopy} copies all entries from vlistID1 to vlistID2.
 
 @EndFunction
 */
@@ -427,13 +427,13 @@ void vlistCopy(int vlistID2, int vlistID1)
 
 @Prototype int vlistDuplicate(int vlistID)
 @Parameter
-    @Item  vlistID Variable list identifier
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
 
 @Description
-The function {\tt vlistDuplicate} duplicates the variable list from vlistID1.
+The function @func{vlistDuplicate} duplicates the variable list from vlistID1.
 
 @Result
-{\tt vlistDuplicate} returns an identifier to the duplicated variable list.
+@func{vlistDuplicate} returns an identifier to the duplicated variable list.
 
 @EndFunction
 */
@@ -549,11 +549,11 @@ int vlistInqZaxis(int vlistID, int leveltype, int nlevels, double *levels, int l
 
 @Prototype void vlistCopyFlag(int vlistID2, int vlistID1)
 @Parameter
-    @Item  vlistID2 Target variable list
-    @Item  vlistID1 Source variable list
+    @Item  vlistID2  Target variable list ID
+    @Item  vlistID1  Source variable list ID
 
 @Description
-The function {\tt vlistCopyFlag} copies all entries with a flag from vlistID1 to vlistID2.
+The function @func{vlistCopyFlag} copies all entries with a flag from vlistID1 to vlistID2.
 
 @EndFunction
 */
@@ -719,8 +719,8 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
 @Prototype void vlistCat(int vlistID2, int vlistID1)
 @Parameter
-    @Item  vlistID2 Target variable list
-    @Item  vlistID1 Source variable list
+    @Item  vlistID2  Target variable list ID
+    @Item  vlistID1  Source variable list ID
 
 @Description
 Concatenate the variable list vlistID1 at the end of vlistID2.
@@ -802,8 +802,8 @@ void vlistCat(int vlistID2, int vlistID1)
 
 @Prototype void vlistMerge(int vlistID2, int vlistID1)
 @Parameter
-    @Item  vlistID2 Target variable list
-    @Item  vlistID1 Source variable list
+    @Item  vlistID2  Target variable list ID
+    @Item  vlistID1  Source variable list ID
 
 @Description
 Merge the variable list vlistID1 and the variable list vlistID2.
@@ -930,13 +930,13 @@ void vlistMerge(int vlistID2, int vlistID1)
 
 @Prototype int vlistNvars(int vlistID)
 @Parameter
-    @Item  vlistID Variable list identifier
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
 
 @Description
-The function {\tt vlistNvars} returns the number of variables in the variable list vlistID.
+The function @func{vlistNvars} returns the number of variables in the variable list vlistID.
 
 @Result
-{\tt vlistNvars} returns the number of variables in a variable list.
+@func{vlistNvars} returns the number of variables in a variable list.
 
 @EndFunction
 */
@@ -975,13 +975,13 @@ int vlistNrecs(int vlistID)
 
 @Prototype int vlistNgrids(int vlistID)
 @Parameter
-    @Item  vlistID Variable list identifier
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
 
 @Description
-The function {\tt vlistNgrids} returns the number of grids in the variable list vlistID.
+The function @func{vlistNgrids} returns the number of grids in the variable list vlistID.
 
 @Result
-{\tt vlistNgrids} returns the number of grids in a variable list.
+@func{vlistNgrids} returns the number of grids in a variable list.
 
 @EndFunction
 */
@@ -1004,13 +1004,13 @@ int vlistNgrids(int vlistID)
 
 @Prototype int vlistNzaxis(int vlistID)
 @Parameter
-    @Item  vlistID Variable list identifier
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
 
 @Description
-The function {\tt vlistNzaxis} returns the number of zaxis in the variable list vlistID.
+The function @func{vlistNzaxis} returns the number of zaxis in the variable list vlistID.
 
 @Result
-{\tt vlistNzaxis} returns the number of zaxis in a variable list.
+@func{vlistNzaxis} returns the number of zaxis in a variable list.
 
 @EndFunction
 */
@@ -1124,6 +1124,21 @@ void vlistPrint(int vlistID)
     }
 }
 
+
+/*
+@Function  vlistDefTaxis
+@Title     Define the time axis
+
+@Prototype void vlistDefTaxis(int vlistID, int taxisID)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
+
+@Description
+The function @func{vlistDefTaxis} defines the time axis of a variable list.
+
+@EndFunction
+*/
 void vlistDefTaxis(int vlistID, int taxisID)
 {
   static char func[] = "vlistDefTaxis";
@@ -1136,6 +1151,23 @@ void vlistDefTaxis(int vlistID, int taxisID)
   vlistptr->taxisID = taxisID;
 }
 
+
+/*
+@Function  vlistInqTaxis
+@Title     Get the time axis
+
+@Prototype int vlistInqTaxis(int vlistID)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+
+@Description
+The function @func{vlistInqTaxis} returns the time axis of a variable list.
+
+@Result
+@func{vlistInqTaxis} returns an identifier to the time axis.
+
+@EndFunction
+*/
 int vlistInqTaxis(int vlistID)
 {
   static char func[] = "vlistInqTaxis";

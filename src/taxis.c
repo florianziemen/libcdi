@@ -184,13 +184,13 @@ static void taxisCheckID(const char *func, int taxisID)
 @Prototype int taxisCreate(int taxistype)
 @Parameter
     @Item  taxistype  The type of the time axis, one of the set of predefined CDI time types.
-                      The valid CDI time types are {\tt TAXIS_ABSOLUTE} and {\tt TAXIS_RELATIVE}.
+                      The valid CDI time types are @func{TAXIS_ABSOLUTE} and @func{TAXIS_RELATIVE}.
 
 @Description
-The function {\tt taxisCreate} creates a Time axis.
+The function @func{taxisCreate} creates a Time axis.
 
 @Result
-{\tt taxisCreate} returns an identifier to the Time axis.
+@func{taxisCreate} returns an identifier to the Time axis.
 
 @EndFunction
 */
@@ -218,7 +218,7 @@ int taxisCreate(int taxistype)
 
 @Prototype void taxisDestroy(int taxisID)
 @Parameter
-    @Item  taxisID Identifier, from a previous call to {\tt taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
 
 @EndFunction
 */
@@ -259,11 +259,11 @@ void taxisDefType(int taxisID, int type)
 
 @Prototype void taxisDefVdate(int taxisID, int vdate)
 @Parameter
-    @Item  taxisID  T-axis identifier
+    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
     @Item  vdate    Verification date (YYYYMMDD)
 
 @Description
-The function {\tt taxisDefVdate} defines the verification date of a Time axis.
+The function @func{taxisDefVdate} defines the verification date of a Time axis.
 
 @EndFunction
 */
@@ -283,11 +283,11 @@ void taxisDefVdate(int taxisID, int vdate)
 
 @Prototype void taxisDefVtime(int taxisID, int vtime)
 @Parameter
-    @Item  taxisID  T-axis identifier
+    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
     @Item  vtime    Verification time (HHMM)
 
 @Description
-The function {\tt taxisDefVtime} defines the verification time of a Time axis.
+The function @func{taxisDefVtime} defines the verification time of a Time axis.
 
 @EndFunction
 */
@@ -307,11 +307,11 @@ void taxisDefVtime(int taxisID, int vtime)
 
 @Prototype void taxisDefRdate(int taxisID, int rdate)
 @Parameter
-    @Item  taxisID  T-axis identifier
+    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
     @Item  rdate    Reference date (YYYYMMDD)
 
 @Description
-The function {\tt taxisDefVdate} defines the reference date of a Time axis.
+The function @func{taxisDefVdate} defines the reference date of a Time axis.
 
 @EndFunction
 */
@@ -331,11 +331,11 @@ void taxisDefRdate(int taxisID, int rdate)
 
 @Prototype void taxisDefRtime(int taxisID, int rtime)
 @Parameter
-    @Item  taxisID  T-axis identifier
+    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
     @Item  rtime    Reference time (HHMM)
 
 @Description
-The function {\tt taxisDefVdate} defines the reference time of a Time axis.
+The function @func{taxisDefVdate} defines the reference time of a Time axis.
 
 @EndFunction
 */
@@ -355,13 +355,13 @@ void taxisDefRtime(int taxisID, int rtime)
 
 @Prototype void taxisDefCalendar(int taxisID, int calendar)
 @Parameter
-    @Item  taxisID   T-axis identifier
-    @Item  calendar  The type of the calendar, one of the set of predefined CDI calendar types.
-                     The valid CDI calendar types are {\tt CALENDAR_STANDARD}, {\tt CALENDAR_360DAYS},
-                     {\tt CALENDAR_365DAYS} and {\tt CALENDAR_366DAYS}.
+    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
+    @Item  calendar The type of the calendar, one of the set of predefined CDI calendar types.
+                    The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_360DAYS},
+                    @func{CALENDAR_365DAYS} and @func{CALENDAR_366DAYS}.
 
 @Description
-The function {\tt taxisDefCalendar} defines the calendar of a Time axis.
+The function @func{taxisDefCalendar} defines the calendar of a Time axis.
 
 @EndFunction
 */
@@ -434,13 +434,13 @@ void taxisCopyTimestep(int taxisIDdes, int taxisIDsrc)
 
 @Prototype int taxisInqVdate(int taxisID)
 @Parameter
-    @Item  taxisID  T-axis identifier
+    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
 
 @Description
-The function {\tt taxisInqVdate} returns the verification date of a Time axis.
+The function @func{taxisInqVdate} returns the verification date of a Time axis.
 
 @Result
-{\tt taxisInqVdate} returns the verification date.
+@func{taxisInqVdate} returns the verification date.
 
 @EndFunction
 */
@@ -460,13 +460,13 @@ int taxisInqVdate(int taxisID)
 
 @Prototype int taxisInqVtime(int taxisID)
 @Parameter
-    @Item  taxisID  T-axis identifier
+    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
 
 @Description
-The function {\tt taxisInqVtime} returns the verification time of a Time axis.
+The function @func{taxisInqVtime} returns the verification time of a Time axis.
 
 @Result
-{\tt taxisInqVtime} returns the verification time.
+@func{taxisInqVtime} returns the verification time.
 
 @EndFunction
 */
@@ -486,13 +486,13 @@ int taxisInqVtime(int taxisID)
 
 @Prototype int taxisInqRdate(int taxisID)
 @Parameter
-    @Item  taxisID  T-axis identifier
+    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
 
 @Description
-The function {\tt taxisInqRdate} returns the reference date of a Time axis.
+The function @func{taxisInqRdate} returns the reference date of a Time axis.
 
 @Result
-{\tt taxisInqVdate} returns the reference date.
+@func{taxisInqVdate} returns the reference date.
 
 @EndFunction
 */
@@ -518,13 +518,13 @@ int taxisInqRdate(int taxisID)
 
 @Prototype int taxisInqRtime(int taxisID)
 @Parameter
-    @Item  taxisID  T-axis identifier
+    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
 
 @Description
-The function {\tt taxisInqRtime} returns the reference time of a Time axis.
+The function @func{taxisInqRtime} returns the reference time of a Time axis.
 
 @Result
-{\tt taxisInqVtime} returns the reference time.
+@func{taxisInqVtime} returns the reference time.
 
 @EndFunction
 */
@@ -550,16 +550,16 @@ int taxisInqRtime(int taxisID)
 
 @Prototype int taxisInqCalendar(int taxisID)
 @Parameter
-    @Item  taxisID  T-axis identifier
+    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
 
 @Description
-The function {\tt taxisInqCalendar} returns the calendar of a Time axis.
+The function @func{taxisInqCalendar} returns the calendar of a Time axis.
 
 @Result
-{\tt taxisInqCalendar} returns the type of the calendar,
+@func{taxisInqCalendar} returns the type of the calendar,
 one of the set of predefined CDI calendar types.
-The valid CDI calendar types are {\tt CALENDAR_STANDARD}, {\tt CALENDAR_360DAYS},
-{\tt CALENDAR_365DAYS} and {\tt CALENDAR_366DAYS}.
+The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_360DAYS},
+@func{CALENDAR_365DAYS} and @func{CALENDAR_366DAYS}.
 
 @EndFunction
 */

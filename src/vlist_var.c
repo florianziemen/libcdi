@@ -129,17 +129,17 @@ static void vlistCheckVarID(char func[], int vlistID, int varID)
 
 @Prototype int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
 @Parameter
-    @Item  vlistID   Variable list ID, from a previous call to vlistCreate or vlistCopy
-    @Item  gridID    Grid ID, from a previous call to gridCreate
-    @Item  zaxisID   Z-axis ID, from a previous call to zaxisCreate
-    @Item  timeID    One of the set of predefined CDI time identifiers.
-                     The valid CDI time identifiers are TIME_CONSTANT and TIME_VARIABLE.
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  timeID   One of the set of predefined CDI time identifiers.
+                    The valid CDI time identifiers are TIME_CONSTANT and TIME_VARIABLE.
 
 @Description
-The function {\tt vlistDefVar} adds a new variable to vlistID.
+The function @func{vlistDefVar} adds a new variable to vlistID.
 
 @Result
-{\tt vlistDefVar} returns an identifier to the new variable.
+@func{vlistDefVar} returns an identifier to the new variable.
 
 @EndFunction
 */
@@ -220,12 +220,12 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
 
 @Prototype void vlistDefVarCode(int vlistID, int varID, int code)
 @Parameter
-    @Item  vlistID   Variable list identifier
-    @Item  varID     Variable identifier
-    @Item  code      Code number
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier
+    @Item  code     Code number
 
 @Description
-The function {\tt vlistDefVarCode} defines the code number of a variable.
+The function @func{vlistDefVarCode} defines the code number of a variable.
 
 @EndFunction
 */
@@ -303,14 +303,14 @@ int vlistInqVarTime(int vlistID, int varID)
 
 @Prototype int vlistInqVarCode(int vlistID, int varID)
 @Parameter
-    @Item  vlistID   Variable list identifier
-    @Item  varID     Variable identifier
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier
 
 @Description
-The function {\tt vlistInqVarCode} returns the code number of a variable.
+The function @func{vlistInqVarCode} returns the code number of a variable.
 
 @Result
-{\tt vlistInqVarCode} returns the code number of the variable.
+@func{vlistInqVarCode} returns the code number of the variable.
 
 @EndFunction
 */
@@ -390,15 +390,15 @@ char *vlistInqVarUnitsPtr(int vlistID, int varID)
 
 @Prototype void vlistInqVarName(int vlistID, int varID, char *name)
 @Parameter
-    @Item  vlistID   Variable list identifier
-    @Item  varID     Variable identifier
-    @Item  name      Variable name
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier
+    @Item  name     Variable name
 
 @Description
-The function {\tt vlistInqVarName} returns the name of a variable.
+The function @func{vlistInqVarName} returns the name of a variable.
 
 @Result
-{\tt vlistInqVarName} returns the name of the variable to the parameter name.
+@func{vlistInqVarName} returns the name of the variable to the parameter name.
 
 @EndFunction
 */
@@ -432,15 +432,15 @@ void vlistInqVarName(int vlistID, int varID, char *name)
 
 @Prototype void vlistInqVarLongname(int vlistID, int varID, char *longname)
 @Parameter
-    @Item  vlistID   Variable list identifier
-    @Item  varID     Variable identifier
-    @Item  longname  Variable description
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier
+    @Item  longname Variable description
 
 @Description
-The function {\tt vlistInqVarLongname} returns the longname of a variable.
+The function @func{vlistInqVarLongname} returns the longname of a variable.
 
 @Result
-{\tt vlistInqVaeLongname} returns the longname of the variable to the parameter longname.
+@func{vlistInqVaeLongname} returns the longname of the variable to the parameter longname.
 
 @EndFunction
 */
@@ -500,15 +500,15 @@ void vlistInqVarStdname(int vlistID, int varID, char *stdname)
 
 @Prototype void vlistInqVarUnits(int vlistID, int varID, char *units)
 @Parameter
-    @Item  vlistID   Variable list identifier
-    @Item  varID     Variable identifier
-    @Item  units     Variable units
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier
+    @Item  units    Variable units
 
 @Description
-The function {\tt vlistInqVarUnits} returns the units of a variable.
+The function @func{vlistInqVarUnits} returns the units of a variable.
 
 @Result
-{\tt vlistInqVarUnits} returns the units of the variable to the parameter units.
+@func{vlistInqVarUnits} returns the units of the variable to the parameter units.
 
 @EndFunction
 */
@@ -587,14 +587,14 @@ int vlistInqVarSize(int vlistID, int varID)
 
 @Prototype int vlistInqVarDatatype(int vlistID, int varID)
 @Parameter
-    @Item  vlistID   Variable list identifier
-    @Item  varID     Variable identifier
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier
 
 @Description
-The function {\tt vlistInqVarDatatype} returns the datatype of a variable.
+The function @func{vlistInqVarDatatype} returns the datatype of a variable.
 
 @Result
-{\tt vlistInqVarDatatype} returns an identifier to the datatype of the variable.
+@func{vlistInqVarDatatype} returns an identifier to the datatype of the variable.
 
 @EndFunction
 */
@@ -617,12 +617,12 @@ int vlistInqVarDatatype(int vlistID, int varID)
 
 @Prototype void vlistDefVarDatatype(int vlistID, int varID, int datatype)
 @Parameter
-    @Item  vlistID   Variable list identifier
-    @Item  varID     Variable identifier
-    @Item  datatype  Data type identifier
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier
+    @Item  datatype Data type identifier
 
 @Description
-The function {\tt vlistDefVarDatatype} defines the data type of a variable.
+The function @func{vlistDefVarDatatype} defines the data type of a variable.
 
 @EndFunction
 */
@@ -702,12 +702,12 @@ int vlistInqVarTable(int vlistID, int varID)
 
 @Prototype void vlistDefVarName(int vlistID, int varID, const char *name)
 @Parameter
-    @Item  vlistID   Variable list identifier
-    @Item  varID     Variable identifier
-    @Item  name      Name of the variable
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier
+    @Item  name     Name of the variable
 
 @Description
-The function {\tt vlistDefVarName} defines the name of a variable.
+The function @func{vlistDefVarName} defines the name of a variable.
 
 @EndFunction
 */
@@ -732,12 +732,12 @@ void vlistDefVarName(int vlistID, int varID, const char *name)
 
 @Prototype void vlistDefVarLongname(int vlistID, int varID, const char *longname)
 @Parameter
-    @Item  vlistID   Variable list identifier
-    @Item  varID     Variable identifier
-    @Item  longname  Long name of the variable
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier
+    @Item  longname Long name of the variable
 
 @Description
-The function {\tt vlistDefVarLongname} defines the long name of a variable.
+The function @func{vlistDefVarLongname} defines the long name of a variable.
 
 @EndFunction
 */
@@ -777,12 +777,12 @@ void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
 
 @Prototype void vlistDefVarUnits(int vlistID, int varID, const char *units)
 @Parameter
-    @Item  vlistID   Variable list identifier
-    @Item  varID     Variable identifier
-    @Item  units     Units of the variable
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier
+    @Item  units    Units of the variable
 
 @Description
-The function {\tt vlistDefVarUnits} defines the units of a variable.
+The function @func{vlistDefVarUnits} defines the units of a variable.
 
 @EndFunction
 */
@@ -807,14 +807,14 @@ void vlistDefVarUnits(int vlistID, int varID, const char *units)
 
 @Prototype double vlistInqVarMissval(int vlistID, int varID)
 @Parameter
-    @Item  vlistID   Variable list identifier
-    @Item  varID     Variable identifier
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier
 
 @Description
-The function {\tt vlistInqVarMissval} returns the missing value of a variable.
+The function @func{vlistInqVarMissval} returns the missing value of a variable.
 
 @Result
-{\tt vlistInqVarMissval} returns the missing value of the variable.
+@func{vlistInqVarMissval} returns the missing value of the variable.
 
 @EndFunction
 */
@@ -862,12 +862,12 @@ double vlistInqVarAddoffset(int vlistID, int varID)
 
 @Prototype void vlistDefVarMissval(int vlistID, int varID, double missval)
 @Parameter
-    @Item  vlistID   Variable list identifier
-    @Item  varID     Variable identifier
-    @Item  missval   Missing value
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier
+    @Item  missval  Missing value
 
 @Description
-The function {\tt vlistDefVarMissval} defines the missing value of a variable.
+The function @func{vlistDefVarMissval} defines the missing value of a variable.
 
 @EndFunction
 */

@@ -7,6 +7,11 @@ extern "C" {
 
 #define  CDI_UNDEFID             -1
 
+/* Byte order */
+
+#define  CDI_BIGENDIAN            0   /* Byte order BIGENDIAN     */
+#define  CDI_LITTLEENDIAN         1   /* Byte order LITTLEENDIAN  */
+
 /* Error identifier */
 
 #define  CDI_ESYSTEM            -10   /* Operating system error           */
@@ -130,7 +135,10 @@ int     streamInqVlist(int streamID);
 /*      streamInqFiletype: Get the filetype */
 int     streamInqFiletype(int streamID);
 
+/*      streamDefByteorder: Define the byteorder */
 void    streamDefByteorder(int streamID, int byteorder);
+
+/*      streamInqByteorder: Get the byteorder */
 int     streamInqByteorder(int streamID);
 
 /*      streamDefTimestep: Define time step */
@@ -217,8 +225,13 @@ int     vlistZaxisIndex(int vlistID, int zaxisID);
 void    vlistChangeZaxisIndex(int vlistID, int index, int zaxisID);
 void    vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2);
 int     vlistNrecs(int vlistID);
+
+/*      vlistDefTaxis: Define the time axis of a variable list */
 void    vlistDefTaxis(int vlistID, int taxisID);
+
+/*      vlistInqTaxis: Get the time axis of a variable list */
 int     vlistInqTaxis(int vlistID);
+
 void    vlistDefTable(int vlistID, int tableID);
 int     vlistInqTable(int vlistID);
 void    vlistDefInstitut(int vlistID, int instID);

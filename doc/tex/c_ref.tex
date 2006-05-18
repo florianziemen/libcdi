@@ -270,6 +270,15 @@ Get all values of a Y-axis
 Close an open dataset
 
 
+\section*{\tt \htmlref{streamDefByteorder}{streamDefByteorder}}
+
+\begin{verbatim}
+    void streamDefByteorder(int streamID, int byteorder);
+\end{verbatim}
+
+Define the byte order
+
+
 \section*{\tt \htmlref{streamDefTimestep}{streamDefTimestep}}
 
 \begin{verbatim}
@@ -286,6 +295,15 @@ Define time step
 \end{verbatim}
 
 Define the variable list
+
+
+\section*{\tt \htmlref{streamInqByteorder}{streamInqByteorder}}
+
+\begin{verbatim}
+    int streamInqByteorder(int streamID);
+\end{verbatim}
+
+Get the byte order
 
 
 \section*{\tt \htmlref{streamInqFiletype}{streamInqFiletype}}
@@ -515,6 +533,15 @@ Copy some entries of a variable list
 Create a variable list
 
 
+\section*{\tt \htmlref{vlistDefTaxis}{vlistDefTaxis}}
+
+\begin{verbatim}
+    void vlistDefTaxis(int vlistID, int taxisID);
+\end{verbatim}
+
+Define the time axis
+
+
 \section*{\tt \htmlref{vlistDefVar}{vlistDefVar}}
 
 \begin{verbatim}
@@ -594,6 +621,15 @@ Destroy a variable list
 \end{verbatim}
 
 Duplicate a variable list
+
+
+\section*{\tt \htmlref{vlistInqTaxis}{vlistInqTaxis}}
+
+\begin{verbatim}
+    int vlistInqTaxis(int vlistID);
+\end{verbatim}
+
+Get the time axis
 
 
 \section*{\tt \htmlref{vlistInqVarCode}{vlistInqVarCode}}

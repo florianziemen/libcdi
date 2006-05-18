@@ -5,6 +5,7 @@
 	* stream_ieg: multiply pressure levels with 100 (report: Holger Goettel)
 	* gridPrint: GME support
 	* cdi_error: change return type to char*
+	* move byte order types to cdi.h
         * add dummy functions gridDestroy, zaxisDestroy, taxisDestroy
 	* Version 1.0.0 released
 

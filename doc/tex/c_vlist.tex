@@ -22,7 +22,7 @@
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Identifier, from a previous call to {\tt vlistCreate}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
 
 \end{deflist}
 \end{minipage}
@@ -43,9 +43,9 @@ The function {\tt vlistCopy} copies all entries from vlistID1 to vlistID2.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID2\ }
 \item[{\tt vlistID2}]
-Target variable list
+Target variable list ID
 \item[{\tt vlistID1}]
-Source variable list
+Source variable list ID
 
 \end{deflist}
 \end{minipage}
@@ -66,7 +66,7 @@ The function {\tt vlistDuplicate} duplicates the variable list from vlistID1.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list identifier
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
 
 \end{deflist}
 \end{minipage}
@@ -92,9 +92,9 @@ Concatenate the variable list vlistID1 at the end of vlistID2.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID2\ }
 \item[{\tt vlistID2}]
-Target variable list
+Target variable list ID
 \item[{\tt vlistID1}]
-Source variable list
+Source variable list ID
 
 \end{deflist}
 \end{minipage}
@@ -115,9 +115,9 @@ The function {\tt vlistCopyFlag} copies all entries with a flag from vlistID1 to
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID2\ }
 \item[{\tt vlistID2}]
-Target variable list
+Target variable list ID
 \item[{\tt vlistID1}]
-Source variable list
+Source variable list ID
 
 \end{deflist}
 \end{minipage}
@@ -138,7 +138,7 @@ The function {\tt vlistNvars} returns the number of variables in the variable li
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list identifier
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
 
 \end{deflist}
 \end{minipage}
@@ -164,7 +164,7 @@ The function {\tt vlistNgrids} returns the number of grids in the variable list 
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list identifier
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
 
 \end{deflist}
 \end{minipage}
@@ -190,7 +190,7 @@ The function {\tt vlistNzaxis} returns the number of zaxis in the variable list 
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list identifier
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
 
 \end{deflist}
 \end{minipage}
@@ -198,4 +198,53 @@ Variable list identifier
 \subsection*{Result}
 
 {\tt vlistNzaxis} returns the number of zaxis in a variable list.
+
+
+
+\section{Define the time axis: {\tt vlistDefTaxis}}
+\index{vlistDefTaxis}
+\label{vlistDefTaxis}
+
+The function {\tt vlistDefTaxis} defines the time axis of a variable list.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    void vlistDefTaxis(int vlistID, int taxisID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+\item[{\tt taxisID}]
+Time axis ID, from a previous call to {\tt taxisCreate}
+
+\end{deflist}
+\end{minipage}
+
+
+\section{Get the time axis: {\tt vlistInqTaxis}}
+\index{vlistInqTaxis}
+\label{vlistInqTaxis}
+
+The function {\tt vlistInqTaxis} returns the time axis of a variable list.
+
+\subsection*{Usage}
+
+\begin{verbatim}
+    int vlistInqTaxis(int vlistID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+
+\end{deflist}
+\end{minipage}
+
+\subsection*{Result}
+
+{\tt vlistInqTaxis} returns an identifier to the time axis.
 

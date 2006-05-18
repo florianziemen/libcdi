@@ -11,6 +11,8 @@ Function catalog:
    streamOpenRead       Open a dataset for reading
    streamClose          Close an open dataset
    streamInqFiletype    Get the filetype
+   streamDefByteorder   Define the byte order
+   streamInqByteorder   Get the byte order
    streamDefVlist       Define the variable list
    streamInqVlist       Get the variable list
    streamDefTimestep    Define time step
@@ -31,6 +33,8 @@ Function catalog:
    vlistNvars           Number of variables in a variable list
    vlistNgrids          Number of grids in a variable list
    vlistNzaxis          Number of zaxis in a variable list
+   vlistDefTaxis        Define the time axis
+   vlistInqTaxis        Get the time axis
 -------------------------------------------------------------
    vlist_var
 -------------------------------------------------------------

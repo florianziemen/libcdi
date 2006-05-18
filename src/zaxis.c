@@ -153,19 +153,19 @@ void zaxisCheckID(const char *func, int zaxisID)
 @Prototype int zaxisCreate(int zaxistype, int size)
 @Parameter
     @Item  zaxistype  The type of the Z-axis, one of the set of predefined CDI Z-axis types.
-                      The valid CDI Z-axis types are {\tt ZAXIS_SURFACE}, {\tt ZAXIS_HYBRID},
-                      {\tt ZAXIS_HYBRID_HALF}, {\tt ZAXIS_PRESSURE}, {\tt ZAXIS_HEIGHT},
-                      {\tt ZAXIS_DEPTH_BELOW_SEA} and {\tt ZAXIS_DEPTH_BELOW_LAND}.
+                      The valid CDI Z-axis types are @func{ZAXIS_SURFACE}, @func{ZAXIS_HYBRID},
+                      @func{ZAXIS_HYBRID_HALF}, @func{ZAXIS_PRESSURE}, @func{ZAXIS_HEIGHT},
+                      @func{ZAXIS_DEPTH_BELOW_SEA} and @func{ZAXIS_DEPTH_BELOW_LAND}.
     @Item  size       Number of levels
 
 @Description
-The function {\tt zaxisCreate} creates a vertical Z-axis.
+The function @func{zaxisCreate} creates a vertical Z-axis.
 
 @Result
-{\tt zaxisCreate} returns an identifier to the Z-axis.
+@func{zaxisCreate} returns an identifier to the Z-axis.
 
 @Example
-Here is an example using {\tt zaxisCreate} to create a pressure level Z-axis:
+Here is an example using @func{zaxisCreate} to create a pressure level Z-axis:
 
 @Source
 #include "cdi.h"
@@ -220,7 +220,7 @@ int zaxisCreate(int zaxistype, int size)
 
 @Prototype void zaxisDestroy(int zaxisID)
 @Parameter
-    @Item  zaxisID Identifier, from a previous call to {\tt zaxisCreate}
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
 
 @EndFunction
 */
@@ -254,11 +254,11 @@ void zaxisName(int zaxistype, char *zaxisname)
 
 @Prototype void zaxisDefName(int zaxisID, const char *name)
 @Parameter
-    @Item  zaxisID   Z-axis identifier
-    @Item  name      Name of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  name     Name of the Z-axis
 
 @Description
-The function {\tt zaxisDefName} defines the name of a Z-axis.
+The function @func{zaxisDefName} defines the name of a Z-axis.
 
 @EndFunction
 */
@@ -275,11 +275,11 @@ void zaxisDefName(int zaxisID, const char *name)
 
 @Prototype void zaxisDefLongname(int zaxisID, const char *longname)
 @Parameter
-    @Item  zaxisID   Z-axis identifier
-    @Item  longname  Longname of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  longname Longname of the Z-axis
 
 @Description
-The function {\tt zaxisDefLongname} defines the longname of a Z-axis.
+The function @func{zaxisDefLongname} defines the longname of a Z-axis.
 
 @EndFunction
 */
@@ -296,11 +296,11 @@ void zaxisDefLongname(int zaxisID, const char *longname)
 
 @Prototype void zaxisDefUnits(int zaxisID, const char *units)
 @Parameter
-    @Item  zaxisID   Z-axis identifier
-    @Item  units     Units of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  units    Units of the Z-axis
 
 @Description
-The function {\tt zaxisDefUnits} defines the units of a Z-axis.
+The function @func{zaxisDefUnits} defines the units of a Z-axis.
 
 @EndFunction
 */
@@ -317,14 +317,14 @@ void zaxisDefUnits(int zaxisID, const char *units)
 
 @Prototype void zaxisInqName(int zaxisID, char *name)
 @Parameter
-    @Item  zaxisID     Z-axis identifier
-    @Item  name        Name of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  name     Name of the Z-axis
 
 @Description
-The function {\tt zaxisInqName} returns the name of a Z-axis.
+The function @func{zaxisInqName} returns the name of a Z-axis.
 
 @Result
-{\tt zaxisInqName} returns the name of the Z-axis to the parameter name.
+@func{zaxisInqName} returns the name of the Z-axis to the parameter name.
 
 @EndFunction
 */
@@ -340,14 +340,14 @@ void zaxisInqName(int zaxisID, char *name)
 
 @Prototype void zaxisInqLongname(int zaxisID, char *longname)
 @Parameter
-    @Item  zaxisID     Z-axis identifier
-    @Item  longname    Longname of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  longname Longname of the Z-axis
 
 @Description
-The function {\tt zaxisInqLongname} returns the longname of a Z-axis.
+The function @func{zaxisInqLongname} returns the longname of a Z-axis.
 
 @Result
-{\tt zaxisInqLongname} returns the longname of the Z-axis to the parameter longname.
+@func{zaxisInqLongname} returns the longname of the Z-axis to the parameter longname.
 
 @EndFunction
 */
@@ -363,14 +363,14 @@ void zaxisInqLongname(int zaxisID, char *longname)
 
 @Prototype void zaxisInqUnits(int zaxisID, char *units)
 @Parameter
-    @Item  zaxisID     Z-axis identifier
-    @Item  units       Units of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  units    Units of the Z-axis
 
 @Description
-The function {\tt zaxisInqUnits} returns the units of a Z-axis.
+The function @func{zaxisInqUnits} returns the units of a Z-axis.
 
 @Result
-{\tt zaxisInqUnits} returns the units of the Z-axis to the parameter units.
+@func{zaxisInqUnits} returns the units of the Z-axis to the parameter units.
 
 @EndFunction
 */
@@ -406,11 +406,11 @@ int zaxisInqPrec(int zaxisID)
 
 @Prototype void zaxisDefLevels(int zaxisID, double *levels)
 @Parameter
-    @Item  zaxisID   Z-axis identifier
-    @Item  levels    All levels of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  levels   All levels of the Z-axis
 
 @Description
-The function {\tt zaxisDefLevels} defines the levels of a Z-axis.
+The function @func{zaxisDefLevels} defines the levels of a Z-axis.
 
 @EndFunction
 */
@@ -438,12 +438,12 @@ void zaxisDefLevels(int zaxisID, double *levels)
 
 @Prototype void zaxisDefLevel(int zaxisID, int levelID, double level)
 @Parameter
-    @Item  zaxisID   Z-axis identifier
-    @Item  levelID   Level identifier
-    @Item  level     Level
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  levelID  Level identifier
+    @Item  level    Level
 
 @Description
-The function {\tt zaxisDefLevel} defines one level of a Z-axis.
+The function @func{zaxisDefLevel} defines one level of a Z-axis.
 
 @EndFunction
 */
@@ -464,14 +464,14 @@ void zaxisDefLevel(int zaxisID, int levelID, double level)
 
 @Prototype double zaxisInqLevel(int zaxisID, int levelID)
 @Parameter
-    @Item  zaxisID   Z-axis identifier
-    @Item  levelID   Level index (range: 0 to nlevel-1)
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  levelID  Level index (range: 0 to nlevel-1)
 
 @Description
-The function {\tt zaxisInqLevel} returns one level of a Z-axis.
+The function @func{zaxisInqLevel} returns one level of a Z-axis.
 
 @Result
-{\tt zaxisInqLevel} returns the level of a Z-axis.
+@func{zaxisInqLevel} returns the level of a Z-axis.
 @EndFunction
 */
 double zaxisInqLevel(int zaxisID, int levelID)
@@ -528,14 +528,14 @@ const double *zaxisInqLevelsPtr(int zaxisID)
 
 @Prototype void zaxisInqLevels(int zaxisID, double *levels)
 @Parameter
-    @Item  zaxisID   Z-axis identifier
-    @Item  levels    Levels of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  levels   Levels of the Z-axis
     
 @Description
-The function {\tt zaxisInqLevels} returns all levels of a Z-axis.
+The function @func{zaxisInqLevels} returns all levels of a Z-axis.
 
 @Result
-{\tt zaxisInqLevels} saves all levels to the parameter {\tt levels}.
+@func{zaxisInqLevels} saves all levels to the parameter @func{levels}.
 @EndFunction
 */
 void zaxisInqLevels(int zaxisID, double *levels)
@@ -640,17 +640,17 @@ int zaxisInqLevelID(int zaxisID, double level)
 
 @Prototype int zaxisInqType(int zaxisID)
 @Parameter
-    @Item  zaxisID   Z-axis identifier
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
 
 @Description
-The function {\tt zaxisInqType} returns the type of a Z-axis.
+The function @func{zaxisInqType} returns the type of a Z-axis.
 
 @Result
-{\tt zaxisInqType} returns the type of the Z-axis,
+@func{zaxisInqType} returns the type of the Z-axis,
 one of the set of predefined CDI Z-axis types.
-The valid CDI Z-axis types are {\tt ZAXIS_SURFACE}, {\tt ZAXIS_HYBRID},
-{\tt ZAXIS_HYBRID_HALF}, {\tt ZAXIS_PRESSURE}, {\tt ZAXIS_HEIGHT},
-{\tt ZAXIS_DEPTH_BELOW_SEA} and {\tt ZAXIS_DEPTH_BELOW_LAND}.
+The valid CDI Z-axis types are @func{ZAXIS_SURFACE}, @func{ZAXIS_HYBRID},
+@func{ZAXIS_HYBRID_HALF}, @func{ZAXIS_PRESSURE}, @func{ZAXIS_HEIGHT},
+@func{ZAXIS_DEPTH_BELOW_SEA} and @func{ZAXIS_DEPTH_BELOW_LAND}.
 
 @EndFunction
 */
@@ -670,13 +670,13 @@ int zaxisInqType(int zaxisID)
 
 @Prototype int zaxisInqSize(int zaxisID)
 @Parameter
-    @Item  zaxisID  Z-axis identifier
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
 
 @Description
-The function {\tt zaxisInqSize} returns the size of a Z-axis.
+The function @func{zaxisInqSize} returns the size of a Z-axis.
 
 @Result
-{\tt zaxisInqSize} returns the number of levels of a Z-axis.
+@func{zaxisInqSize} returns the number of levels of a Z-axis.
 
 @EndFunction
 */

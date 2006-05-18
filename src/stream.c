@@ -78,9 +78,6 @@ void cdiDebug(int level)
 #undef  IsBigendian
 #define IsBigendian()  ( u_byteorder.c[sizeof(long) - 1] )
 
-#define  CDI_BIGENDIAN            0   /* Data type BIGENDIAN     */
-#define  CDI_LITTLEENDIAN         1   /* Data type LITTLEENDIAN  */
-
 
 static int getByteorder(int byteswap)
 {
@@ -186,16 +183,16 @@ static int getFiletype(const char *filename, int *byteorder)
 
 @Prototype int streamInqFiletype(int streamID)
 @Parameter
-    @Item  streamID  Stream identifier
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
 
 @Description
-The function {\tt streamInqFiletype} returns the filetype of a stream.
+The function @func{streamInqFiletype} returns the filetype of a stream.
 
 @Result
-{\tt streamInqFiletype} returns the type of the file format,
+@func{streamInqFiletype} returns the type of the file format,
 one of the set of predefined CDI file format types.
-The valid CDI file format types are {\tt FILETYPE_GRB}, {\tt FILETYPE_NC},
-{\tt FILETYPE_NC2}, {\tt FILETYPE_SRV}, {\tt FILETYPE_EXT} and {\tt FILETYPE_IEG}.
+The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_NC},
+@func{FILETYPE_NC2}, @func{FILETYPE_SRV}, @func{FILETYPE_EXT} and @func{FILETYPE_IEG}.
 
 @EndFunction
 */
@@ -227,6 +224,22 @@ int getByteswap(int byteorder)
 }
 
 
+/*
+@Function  streamDefByteorder
+@Title     Define the byte order
+
+@Prototype void streamDefByteorder(int streamID, int byteorder)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
+    @Item  byteorder The byte order of a dataset, one of the CDI constants @func{CDI_BIGENDIAN} and
+                     @func{CDI_LITTLEENDIAN}.
+
+@Description
+The function @func{streamDefByteorder} defines the byte order of a binary dataset
+with the file format type @func{FILETYPE_SRV}, @func{FILETYPE_EXT} or @func{FILETYPE_IEG}.
+
+@EndFunction
+*/
 void streamDefByteorder(int streamID, int byteorder)
 {
   static char func[] = "streamDefByteorder";
@@ -271,6 +284,24 @@ void streamDefByteorder(int streamID, int byteorder)
 }
 
 
+/*
+@Function  streamInqByteorder
+@Title     Get the byte order
+
+@Prototype int streamInqByteorder(int streamID)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
+
+@Description
+The function @func{streamInqByteorder} returns the byte order of a binary dataset
+with the file format type @func{FILETYPE_SRV}, @func{FILETYPE_EXT} or @func{FILETYPE_IEG}.
+
+@Result
+@func{streamInqByteorder} returns the type of the byte order.
+The valid CDI byte order types are @func{CDI_BIGENDIAN} and @func{CDI_LITTLEENDIAN}
+
+@EndFunction
+*/
 int streamInqByteorder(int streamID)
 {
   static char func[] = "streamInqByteorder";
@@ -745,10 +776,10 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
     @Item  path  The name of the dataset to be read
 
 @Description
-The function {\tt streamOpenRead} opens an existing dataset for reading.
+The function @func{streamOpenRead} opens an existing dataset for reading.
 
 @Result
-Upon successful completion {\tt streamOpenRead} returns an identifier to the
+Upon successful completion @func{streamOpenRead} returns an identifier to the
 open stream. Otherwise, a negative number with the error status is returned.
 
 @Errors
@@ -760,8 +791,8 @@ open stream. Otherwise, a negative number with the error status is returned.
 @EndList
 
 @Example
-Here is an example using {\tt streamOpenRead} to open an existing netCDF
-file named {\tt foo.nc} for reading:
+Here is an example using @func{streamOpenRead} to open an existing netCDF
+file named @func{foo.nc} for reading:
 
 @Source
 #include "cdi.h"
@@ -816,13 +847,13 @@ int streamOpenAppend(const char *filename)
 @Parameter
     @Item  path      The name of the new dataset
     @Item  filetype  The type of the file format, one of the set of predefined CDI file format types.
-                     The valid CDI file format types are {\tt FILETYPE_GRB}, {\tt FILETYPE_NC},
-                     {\tt FILETYPE_NC2}, {\tt FILETYPE_SRV}, {\tt FILETYPE_EXT} and {\tt FILETYPE_IEG}.
+                     The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_NC},
+                     @func{FILETYPE_NC2}, @func{FILETYPE_SRV}, @func{FILETYPE_EXT} and @func{FILETYPE_IEG}.
 
 @Description
-The function {\tt streamOpenWrite} creates a new datset.
+The function @func{streamOpenWrite} creates a new datset.
 @Result
-Upon successful completion {\tt streamOpenWrite} returns an identifier to the
+Upon successful completion @func{streamOpenWrite} returns an identifier to the
 open stream. Otherwise, a negative number with the error status is returned.
 
 @Errors
@@ -834,8 +865,8 @@ open stream. Otherwise, a negative number with the error status is returned.
 @EndList
 
 @Example
-Here is an example using {\tt streamOpenWrite} to create a new netCDF file 
-named {\tt foo.nc} for writing:
+Here is an example using @func{streamOpenWrite} to create a new netCDF file 
+named @func{foo.nc} for writing:
 
 @Source
 #include "cdi.h"
@@ -860,11 +891,10 @@ int streamOpenWrite(const char *filename, int filetype)
 
 @Prototype  void streamClose(int streamID)
 @Parameter
-    @Item  streamID  Identifier, from a previous call to {\tt streamOpenRead}
-                     or {\tt streamOpenWrite}
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
 
 @Description
-The function {\tt streamClose} closes an open dataset.
+The function @func{streamClose} closes an open dataset.
 
 @EndFunction
 */
@@ -988,14 +1018,14 @@ void streamClose(int streamID)
 
 @Prototype int streamDefTimestep(int streamID, int tsID)
 @Parameter
-    @Item  streamID  Stream identifier
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
     @Item  tsID      Timestep identifier
 
 @Description
-The function {\tt streamDefTimestep} defines the time step of a stream.
+The function @func{streamDefTimestep} defines the time step of a stream.
 
 @Result
-{\tt streamDefTimestep} returns the number of records of the time step.
+@func{streamDefTimestep} returns the number of records of the time step.
 
 @EndFunction
 */
@@ -1050,14 +1080,14 @@ int streamDefTimestep(int streamID, int tsID)
 
 @Prototype int streamInqTimestep(int streamID, int tsID)
 @Parameter
-    @Item  streamID  Stream identifier
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
     @Item  tsID      Timestep identifier
 
 @Description
-The function {\tt streamInqTimestep} returns the time step of a stream.
+The function @func{streamInqTimestep} returns the time step of a stream.
 
 @Result
-{\tt streamInqTimestep} returns the number of records of the time step.
+@func{streamInqTimestep} returns the number of records of the time step.
 
 @EndFunction
 */
@@ -1157,7 +1187,7 @@ int streamInqTimestep(int streamID, int tsID)
 
 @Prototype void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 @Parameter
-    @Item  streamID  Stream identifier, from a previous call to streamOpenRead
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
     @Item  varID     Variable identifier
     @Item  data      Pointer to the location into which the data value is read
     @Item  nmiss     Number of missing values
@@ -1234,7 +1264,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 
 @Prototype void streamWriteVar(int streamID, int varID, double *data, int nmiss)
 @Parameter
-    @Item  streamID  Stream identifier, from a previous call to streamOpenWrite
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
     @Item  varID     Variable identifier
     @Item  data      Pointer to a block of data values to be written
     @Item  nmiss     Number of missing values
@@ -1312,7 +1342,7 @@ void streamWriteVar(int streamID, int varID, double *data, int nmiss)
 
 @Prototype void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
 @Parameter
-    @Item  streamID  Stream identifier, from a previous call to streamOpenRead
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
     @Item  varID     Variable identifier
     @Item  levelID   Level identifier
     @Item  data      Pointer to the location into which the data value is read
@@ -1388,7 +1418,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
 
 @Prototype void streamWriteVarSlice(int streamID, int varID, int levelID, double *data, int nmiss)
 @Parameter
-    @Item  streamID  Stream identifier, from a previous call to streamOpenWrite
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
     @Item  varID     Variable identifier
     @Item  levelID   Level identifier
     @Item  data      Pointer to a block of data values to be written
@@ -1635,11 +1665,11 @@ int streamNtsteps(int streamID)
 
 @Prototype void streamDefVlist(int streamID, int vlistID)
 @Parameter
-    @Item  streamID  Stream identifier
-    @Item  vlistID   Variable list identifier
+    @Item  streamID Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
 
 @Description
-The function {\tt streamDefVlist} defines the variable list of a stream.
+The function @func{streamDefVlist} defines the variable list of a stream.
 
 @EndFunction
 */
@@ -1682,13 +1712,13 @@ void streamDefVlist(int streamID, int vlistID)
 
 @Prototype int streamInqVlist(int streamID)
 @Parameter
-    @Item  streamID  Stream identifier
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
 
 @Description
-The function {\tt streamInqVlist} returns the variable list of a stream.
+The function @func{streamInqVlist} returns the variable list of a stream.
 
 @Result
-{\tt streamInqVlist} returns an identifier to the variable list.
+@func{streamInqVlist} returns an identifier to the variable list.
 
 @EndFunction
 */
