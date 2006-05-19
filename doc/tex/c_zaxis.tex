@@ -16,8 +16,8 @@ The function {\tt zaxisCreate} creates a vertical Z-axis.
 \begin{deflist}{\tt zaxistype\ }
 \item[{\tt zaxistype}]
 The type of the Z-axis, one of the set of predefined CDI Z-axis types.
-                      The valid CDI Z-axis types are {\tt ZAXIS\_SURFACE}, {\tt ZAXIS\_HYBRID},
-                      {\tt ZAXIS\_HYBRID\_HALF}, {\tt ZAXIS\_PRESSURE}, {\tt ZAXIS\_HEIGHT},
+                      The valid CDI Z-axis types are {\tt ZAXIS\_GENERIC}, {\tt ZAXIS\_SURFACE},
+                      {\tt ZAXIS\_HYBRID}, {\tt ZAXIS\_PRESSURE}, {\tt ZAXIS\_HEIGHT},
                       {\tt ZAXIS\_DEPTH\_BELOW\_SEA} and {\tt ZAXIS\_DEPTH\_BELOW\_LAND}.
 \item[{\tt size}]
 Number of levels
@@ -34,7 +34,8 @@ Number of levels
 
 Here is an example using {\tt zaxisCreate} to create a pressure level Z-axis:
 
-\begin{lstlisting}[backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+\begin{lstlisting}[language=C, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+
     #include "cdi.h"
        ...
     #define  NLEV    5
@@ -90,8 +91,8 @@ Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
 
 {\tt zaxisInqType} returns the type of the Z-axis,
 one of the set of predefined CDI Z-axis types.
-The valid CDI Z-axis types are {\tt ZAXIS\_SURFACE}, {\tt ZAXIS\_HYBRID},
-{\tt ZAXIS\_HYBRID\_HALF}, {\tt ZAXIS\_PRESSURE}, {\tt ZAXIS\_HEIGHT},
+The valid CDI Z-axis types are {\tt ZAXIS\_GENERIC}, {\tt ZAXIS\_SURFACE},
+{\tt ZAXIS\_HYBRID}, {\tt ZAXIS\_PRESSURE}, {\tt ZAXIS\_HEIGHT},
 {\tt ZAXIS\_DEPTH\_BELOW\_SEA} and {\tt ZAXIS\_DEPTH\_BELOW\_LAND}.
 
 

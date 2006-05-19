@@ -17,7 +17,8 @@ The function {\tt gridCreate} creates a horizontal Grid.
 \item[{\tt gridtype}]
 The type of the grid, one of the set of predefined CDI grid types.
                      The valid CDI grid types are {\tt GRID\_GENERIC}, {\tt GRID\_GAUSSIAN},
-                     {\tt GRID\_LONLAT}, {\tt GRID\_SPECTRAL}, {\tt GRID\_CURVILINEAR} and {\tt GRID\_CELL}.
+                     {\tt GRID\_LONLAT}, {\tt GRID\_SPECTRAL}, {\tt GRID\_GME}, 
+                     {\tt GRID\_CURVILINEAR} and {\tt GRID\_CELL}.
 \item[{\tt size}]
 Number of gridpoints.
 
@@ -33,7 +34,8 @@ Number of gridpoints.
 
 Here is an example using {\tt gridCreate} to create a regular lon/lat Grid:
 
-\begin{lstlisting}[backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+\begin{lstlisting}[language=C, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+
     #include "cdi.h"
        ...
     #define  NLON  12
@@ -122,7 +124,8 @@ Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}
 {\tt gridInqType} returns the type of the grid,
 one of the set of predefined CDI grid types.
 The valid CDI grid types are {\tt GRID\_GENERIC}, {\tt GRID\_GAUSSIAN},
-{\tt GRID\_LONLAT}, {\tt GRID\_SPECTRAL}, {\tt GRID\_CURVILINEAR} and {\tt GRID\_CELL}.
+{\tt GRID\_LONLAT}, {\tt GRID\_SPECTRAL}, {\tt GRID\_GME}, {\tt GRID\_CURVILINEAR}
+and {\tt GRID\_CELL}.
 
 
 

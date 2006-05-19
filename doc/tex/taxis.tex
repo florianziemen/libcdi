@@ -1,0 +1,30 @@
+This section contains functions to define a Time axis.
+A T-axis  object is necessary to define the time axis of a dataset.
+The following different Time axis types are available:
+
+\vspace*{3mm}
+\hspace*{8mm}\begin{minipage}{15cm}
+\begin{deflist}{{\bf TAXIS\_RELATIVE \ \ }}
+\item[{\bf TAXIS\_ABSOLUTE}]  Absolute time axis    
+\item[{\bf TAXIS\_RELATIVE}]  Relative time axis
+\end{deflist}
+\end{minipage}
+\vspace*{3mm}
+
+An absolute time axis has the current time to each time step.
+It can be used without knowledge of the calendar.
+
+A relative time is the time relative to a fixed reference time.
+The current time results from the reference time and the elapsed interval.
+The result depends on the used calendar.
+CDI supports the following Calendar:
+
+\vspace*{3mm}
+\hspace*{8mm}\begin{minipage}{15cm}
+\begin{deflist}{{\bf CALENDAR\_PROLEPTIC \ \ }}
+\item[{\bf CALENDAR\_STANDARD}]  Mixed Gregorian/Julian calendar. This is the default.
+\item[{\bf CALENDAR\_360DAYS }]  All years are 360 days divided into 30 day months.
+\item[{\bf CALENDAR\_365DAYS }]  Gregorian calendar without leap years, i.e., all years are 365 days long.
+\item[{\bf CALENDAR\_366DAYS }]  Gregorian calendar with every year being a leap year, i.e., all years are 366 days long.
+\end{deflist}
+\end{minipage}

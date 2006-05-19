@@ -183,8 +183,8 @@ static void taxisCheckID(const char *func, int taxisID)
 
 @Prototype int taxisCreate(int taxistype)
 @Parameter
-    @Item  taxistype  The type of the time axis, one of the set of predefined CDI time types.
-                      The valid CDI time types are @func{TAXIS_ABSOLUTE} and @func{TAXIS_RELATIVE}.
+    @Item  taxistype  The type of the Time axis, one of the set of predefined CDI time axis types.
+                      The valid CDI time axis types are @func{TAXIS_ABSOLUTE} and @func{TAXIS_RELATIVE}.
 
 @Description
 The function @func{taxisCreate} creates a Time axis.

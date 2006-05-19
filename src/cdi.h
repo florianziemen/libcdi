@@ -274,6 +274,7 @@ int     vlistInqVarTable(int vlistID, int varID);
 /*      vlistDefVarName: Define the name of a Variable */
 void    vlistDefVarName(int vlistID, int varID, const char *name);
 
+/*      vlistInqVarName: Get the name of a Variable */
 void    vlistInqVarName(int vlistID, int varID, char *name);
 
 /*      vlistDefVarLongname: Define the long name of a Variable */
@@ -281,17 +282,21 @@ void    vlistDefVarLongname(int vlistID, int varID, const char *longname);
 
 void    vlistDefVarStdname(int vlistID, int varID, const char *stdname);
 
+/*      vlistInqVarLongname: Get the long name of a Variable */
 void    vlistInqVarLongname(int vlistID, int varID, char *longname);
+
 void    vlistInqVarStdname(int vlistID, int varID, char *stdname);
 
 /*      vlistDefVarUnits: Define the units of a Variable */
 void    vlistDefVarUnits(int vlistID, int varID, const char *units);
 
+/*      vlistInqVarUnits: Get the units of a Variable */
 void    vlistInqVarUnits(int vlistID, int varID, char *units);
 
 /*      vlistDefVarMissval: Define the missing value of a Variable */
 void    vlistDefVarMissval(int vlistID, int varID, double missval);
 
+/*      vlistInqVarMissval: Get the missing value of a Variable */
 double  vlistInqVarMissval(int vlistID, int varID);
 
 void    vlistDefVarScalefactor(int vlistID, int varID, double scalefactor);

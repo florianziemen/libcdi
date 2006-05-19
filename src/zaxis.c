@@ -153,8 +153,8 @@ void zaxisCheckID(const char *func, int zaxisID)
 @Prototype int zaxisCreate(int zaxistype, int size)
 @Parameter
     @Item  zaxistype  The type of the Z-axis, one of the set of predefined CDI Z-axis types.
-                      The valid CDI Z-axis types are @func{ZAXIS_SURFACE}, @func{ZAXIS_HYBRID},
-                      @func{ZAXIS_HYBRID_HALF}, @func{ZAXIS_PRESSURE}, @func{ZAXIS_HEIGHT},
+                      The valid CDI Z-axis types are @func{ZAXIS_GENERIC}, @func{ZAXIS_SURFACE},
+                      @func{ZAXIS_HYBRID}, @func{ZAXIS_PRESSURE}, @func{ZAXIS_HEIGHT},
                       @func{ZAXIS_DEPTH_BELOW_SEA} and @func{ZAXIS_DEPTH_BELOW_LAND}.
     @Item  size       Number of levels
 
@@ -648,8 +648,8 @@ The function @func{zaxisInqType} returns the type of a Z-axis.
 @Result
 @func{zaxisInqType} returns the type of the Z-axis,
 one of the set of predefined CDI Z-axis types.
-The valid CDI Z-axis types are @func{ZAXIS_SURFACE}, @func{ZAXIS_HYBRID},
-@func{ZAXIS_HYBRID_HALF}, @func{ZAXIS_PRESSURE}, @func{ZAXIS_HEIGHT},
+The valid CDI Z-axis types are @func{ZAXIS_GENERIC}, @func{ZAXIS_SURFACE},
+@func{ZAXIS_HYBRID}, @func{ZAXIS_PRESSURE}, @func{ZAXIS_HEIGHT},
 @func{ZAXIS_DEPTH_BELOW_SEA} and @func{ZAXIS_DEPTH_BELOW_LAND}.
 
 @EndFunction
