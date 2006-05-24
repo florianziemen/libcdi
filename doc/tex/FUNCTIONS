@@ -48,7 +48,7 @@ Function catalog:
    vlistDefVarUnits     Define the units of a Variable
    vlistInqVarUnits     Get the units of a Variable
    vlistDefVarDatatype  Define the data type of a Variable
-   vlistInqVarDatatype  Get the datatype of a Variable
+   vlistInqVarDatatype  Get the data type of a Variable
    vlistDefVarMissval   Define the missing value of a Variable
    vlistInqVarMissval   Get the missing value of a Variable
 -------------------------------------------------------------

@@ -34,6 +34,7 @@ doc/tex/c_zaxis.tex -text
 doc/tex/cdi_cman.tex -text
 doc/tex/cdi_fman.tex -text
 doc/tex/cleanup -text
+doc/tex/dataset.tex -text
 doc/tex/f_examples.tex -text
 doc/tex/f_grid.tex -text
 doc/tex/f_link.tex -text
@@ -46,6 +47,7 @@ doc/tex/f_vlist_var.tex -text
 doc/tex/f_zaxis.tex -text
 doc/tex/formats.tex -text
 doc/tex/grid.tex -text
+doc/tex/install.tex -text
 doc/tex/intro.tex -text
 doc/tex/makedoc -text
 doc/tex/makehtml -text
@@ -53,9 +55,12 @@ doc/tex/makepdf_c -text
 doc/tex/makepdf_f -text
 doc/tex/makeps_c -text
 doc/tex/makeps_f -text
+doc/tex/modules.tex -text
 doc/tex/taxis.tex -text
 doc/tex/test.tex -text
 doc/tex/usage.tex -text
+doc/tex/variable.tex -text
+doc/tex/vlist.tex -text
 doc/tex/zaxis.tex -text
 examples/Makefile.am -text
 examples/Makefile.in -text

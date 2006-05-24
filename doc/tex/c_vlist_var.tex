@@ -22,7 +22,7 @@ Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}
 Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
 \item[{\tt timeID}]
 One of the set of predefined CDI time identifiers.
-                    The valid CDI time identifiers are TIME\_CONSTANT and TIME\_VARIABLE.
+                    The valid CDI time identifiers are {\tt TIME\_CONSTANT} and {\tt TIME\_VARIABLE}.
 
 \end{deflist}
 \end{minipage}
@@ -31,6 +31,26 @@ One of the set of predefined CDI time identifiers.
 
 {\tt vlistDefVar} returns an identifier to the new variable.
 
+
+\subsubsection*{Example}
+
+Here is an example using {\tt vlistCreate} to create a variable list
+and add a variable with {\tt vlistDefVar}.
+
+\begin{lstlisting}[language=C, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+
+    #include "cdi.h"
+       ...
+    int vlistID, varID;
+       ...
+    vlistID = vlistCreate();
+    varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARIABLE);
+       ...
+    streamDefVlist(streamID, vlistID);
+       ...
+    vlistDestroy(vlistID);
+       ...
+\end{lstlisting}
 
 
 \subsection{Define the code number of a Variable: {\tt vlistDefVarCode}}
@@ -270,17 +290,20 @@ Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate
 \item[{\tt varID}]
 Variable identifier
 \item[{\tt datatype}]
-Data type identifier
+The data type identifier.
+                    The valid CDI data types are {\tt DATATYPE\_PACK1}, {\tt DATATYPE\_PACK2},
+                    {\tt DATATYPE\_PACK3}, {\tt DATATYPE\_REAL4} and {\tt DATATYPE\_REAL8}.
+
 
 \end{deflist}
 \end{minipage}
 
 
-\subsection{Get the datatype of a Variable: {\tt vlistInqVarDatatype}}
+\subsection{Get the data type of a Variable: {\tt vlistInqVarDatatype}}
 \index{vlistInqVarDatatype}
 \label{vlistInqVarDatatype}
 
-The function {\tt vlistInqVarDatatype} returns the datatype of a variable.
+The function {\tt vlistInqVarDatatype} returns the data type of a variable.
 
 \subsubsection*{Usage}
 
@@ -300,7 +323,9 @@ Variable identifier
 
 \subsubsection*{Result}
 
-{\tt vlistInqVarDatatype} returns an identifier to the datatype of the variable.
+{\tt vlistInqVarDatatype} returns an identifier to the data type of the variable.
+The valid CDI data types are {\tt DATATYPE\_PACK1}, {\tt DATATYPE\_PACK2}, {\tt DATATYPE\_PACK3},
+{\tt DATATYPE\_REAL4} and {\tt DATATYPE\_REAL8}.
 
 
 

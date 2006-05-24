@@ -257,11 +257,13 @@ int     vlistInqVarTime(int vlistID, int varID);
 /*      vlistDefVarCode: Define the code number of a Variable */
 void    vlistDefVarCode(int vlistID, int varID, int code);
 
+/*      vlistInqVarCode: Get the code number of a Variable */
 int     vlistInqVarCode(int vlistID, int varID);
 
 /*      vlistDefVarDatatype: Define the data type of a Variable */
 void    vlistDefVarDatatype(int vlistID, int varID, int datatype);
 
+/*      vlistInqVarDatatype: Get the data type of a Variable */
 int     vlistInqVarDatatype(int vlistID, int varID);
 
 void    vlistDefVarInstitut(int vlistID, int varID, int instID);

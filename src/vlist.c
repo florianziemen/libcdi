@@ -237,6 +237,23 @@ static void vlist_check_ptr(const char *func, VLIST *vlistptr)
 
 @Prototype int vlistCreate(void)
 
+@Example
+Here is an example using @func{vlistCreate} to create a variable list
+and add a variable with @func{vlistDefVar}.
+
+@Source
+#include "cdi.h"
+   ...
+int vlistID, varID;
+   ...
+vlistID = vlistCreate();
+varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARIABLE);
+   ...
+streamDefVlist(streamID, vlistID);
+   ...
+vlistDestroy(vlistID);
+   ...
+@EndSource
 @EndFunction
 */
 int vlistCreate(void)

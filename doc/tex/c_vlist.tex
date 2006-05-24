@@ -9,6 +9,26 @@
     int vlistCreate(void);
 \end{verbatim}
 
+\subsubsection*{Example}
+
+Here is an example using {\tt vlistCreate} to create a variable list
+and add a variable with {\tt vlistDefVar}.
+
+\begin{lstlisting}[language=C, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+
+    #include "cdi.h"
+       ...
+    int vlistID, varID;
+       ...
+    vlistID = vlistCreate();
+    varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARIABLE);
+       ...
+    streamDefVlist(streamID, vlistID);
+       ...
+    vlistDestroy(vlistID);
+       ...
+\end{lstlisting}
+
 
 \subsection{Destroy a variable list: {\tt vlistDestroy}}
 \index{vlistDestroy}

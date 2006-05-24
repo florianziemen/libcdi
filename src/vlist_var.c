@@ -133,7 +133,7 @@ static void vlistCheckVarID(char func[], int vlistID, int varID)
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
     @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
     @Item  timeID   One of the set of predefined CDI time identifiers.
-                    The valid CDI time identifiers are TIME_CONSTANT and TIME_VARIABLE.
+                    The valid CDI time identifiers are @func{TIME_CONSTANT} and @func{TIME_VARIABLE}.
 
 @Description
 The function @func{vlistDefVar} adds a new variable to vlistID.
@@ -141,6 +141,23 @@ The function @func{vlistDefVar} adds a new variable to vlistID.
 @Result
 @func{vlistDefVar} returns an identifier to the new variable.
 
+@Example
+Here is an example using @func{vlistCreate} to create a variable list
+and add a variable with @func{vlistDefVar}.
+
+@Source
+#include "cdi.h"
+   ...
+int vlistID, varID;
+   ...
+vlistID = vlistCreate();
+varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARIABLE);
+   ...
+streamDefVlist(streamID, vlistID);
+   ...
+vlistDestroy(vlistID);
+   ...
+@EndSource
 @EndFunction
 */
 int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
@@ -583,7 +600,7 @@ int vlistInqVarSize(int vlistID, int varID)
 
 /*
 @Function  vlistInqVarDatatype
-@Title     Get the datatype of a Variable
+@Title     Get the data type of a Variable
 
 @Prototype int vlistInqVarDatatype(int vlistID, int varID)
 @Parameter
@@ -591,10 +608,12 @@ int vlistInqVarSize(int vlistID, int varID)
     @Item  varID    Variable identifier
 
 @Description
-The function @func{vlistInqVarDatatype} returns the datatype of a variable.
+The function @func{vlistInqVarDatatype} returns the data type of a variable.
 
 @Result
-@func{vlistInqVarDatatype} returns an identifier to the datatype of the variable.
+@func{vlistInqVarDatatype} returns an identifier to the data type of the variable.
+The valid CDI data types are @func{DATATYPE_PACK1}, @func{DATATYPE_PACK2}, @func{DATATYPE_PACK3},
+@func{DATATYPE_REAL4} and @func{DATATYPE_REAL8}.
 
 @EndFunction
 */
@@ -619,7 +638,10 @@ int vlistInqVarDatatype(int vlistID, int varID)
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
     @Item  varID    Variable identifier
-    @Item  datatype Data type identifier
+    @Item  datatype The data type identifier.
+                    The valid CDI data types are @func{DATATYPE_PACK1}, @func{DATATYPE_PACK2},
+                    @func{DATATYPE_PACK3}, @func{DATATYPE_REAL4} and @func{DATATYPE_REAL8}.
+
 
 @Description
 The function @func{vlistDefVarDatatype} defines the data type of a variable.
