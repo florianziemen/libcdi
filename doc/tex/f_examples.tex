@@ -1,15 +1,24 @@
-\appendix
+\chapter{\label{example}Examples}
 
-\chapter{\label{appendixa}Examples}
+This appendix contains complete examples to write, read
+and copy a dataset with the CDI library.
 
 
-\section{Write a dataset}
+\section{\label{example_write}Write a dataset}
+
+Here is an example using CDI to write a netCDF dataset with 
+2 variables on 3 time steps. The first variable is a 2D field
+on surface level and the second variable is a 3D field on 5 pressure
+levels. Both variables are on the same lon/lat grid. 
 
 \lstinputlisting[language=Fortran, frame=single, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
 {../../examples/cdi_write_f.f}
 
 
 \subsection{Result}
+
+This is the {\tt ncdump -h} output of the resulting netCDF file {\tt example.nc}.
+
 \begin{lstlisting}[frame=single, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
 netcdf example {
 dimensions:
@@ -48,11 +57,17 @@ data:
 
 \section{Read a dataset}
 
+This example reads the netCDF file {\tt example.nc} from \htmlref{Appendix B.1}{example_write}.
+
 \lstinputlisting[language=Fortran, frame=single, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
 {../../examples/cdi_read_f.f}
 
 
 \section{Copy a dataset}
+
+This example reads the netCDF file {\tt example.nc} from \htmlref{Appendix B.1}{example_write}
+and writes the result to a GRIB dataset by simple setting the output file type
+to {\tt FILETYPE\_GRB}.
 
 \lstinputlisting[language=Fortran, frame=single, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
 {../../examples/cdi_copy_f.f}

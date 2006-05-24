@@ -1,11 +1,11 @@
 
 
-\section{Create a new dataset: {\tt streamOpenWrite}}
+\subsection{Create a new dataset: {\tt streamOpenWrite}}
 \index{streamOpenWrite}
 \label{streamOpenWrite}
 
 The function {\tt streamOpenWrite} creates a new datset.
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     int streamOpenWrite(const char *path, int filetype);
@@ -23,13 +23,13 @@ The type of the file format, one of the set of predefined CDI file format types.
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 Upon successful completion {\tt streamOpenWrite} returns an identifier to the
 open stream. Otherwise, a negative number with the error status is returned.
 
 
-\subsection*{Errors}
+\subsubsection*{Errors}
 
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -46,7 +46,7 @@ Library not available
 \end{minipage}
 
 
-\subsection*{Example}
+\subsubsection*{Example}
 
 Here is an example using {\tt streamOpenWrite} to create a new netCDF file 
 named {\tt foo.nc} for writing:
@@ -63,13 +63,13 @@ named {\tt foo.nc} for writing:
 \end{lstlisting}
 
 
-\section{Open a dataset for reading: {\tt streamOpenRead}}
+\subsection{Open a dataset for reading: {\tt streamOpenRead}}
 \index{streamOpenRead}
 \label{streamOpenRead}
 
 The function {\tt streamOpenRead} opens an existing dataset for reading.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     int streamOpenRead(const char *path);
@@ -83,13 +83,13 @@ The name of the dataset to be read
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 Upon successful completion {\tt streamOpenRead} returns an identifier to the
 open stream. Otherwise, a negative number with the error status is returned.
 
 
-\subsection*{Errors}
+\subsubsection*{Errors}
 
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -106,7 +106,7 @@ Library not available
 \end{minipage}
 
 
-\subsection*{Example}
+\subsubsection*{Example}
 
 Here is an example using {\tt streamOpenRead} to open an existing netCDF
 file named {\tt foo.nc} for reading:
@@ -123,13 +123,13 @@ file named {\tt foo.nc} for reading:
 \end{lstlisting}
 
 
-\section{Close an open dataset: {\tt streamClose}}
+\subsection{Close an open dataset: {\tt streamClose}}
 \index{streamClose}
 \label{streamClose}
 
 The function {\tt streamClose} closes an open dataset.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void streamClose(int streamID);
@@ -144,13 +144,13 @@ Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}
 \end{minipage}
 
 
-\section{Get the filetype: {\tt streamInqFiletype}}
+\subsection{Get the filetype: {\tt streamInqFiletype}}
 \index{streamInqFiletype}
 \label{streamInqFiletype}
 
 The function {\tt streamInqFiletype} returns the filetype of a stream.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     int streamInqFiletype(int streamID);
@@ -164,7 +164,7 @@ Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt streamInqFiletype} returns the type of the file format,
 one of the set of predefined CDI file format types.
@@ -173,14 +173,14 @@ The valid CDI file format types are {\tt FILETYPE\_GRB}, {\tt FILETYPE\_NC},
 
 
 
-\section{Define the byte order: {\tt streamDefByteorder}}
+\subsection{Define the byte order: {\tt streamDefByteorder}}
 \index{streamDefByteorder}
 \label{streamDefByteorder}
 
 The function {\tt streamDefByteorder} defines the byte order of a binary dataset
 with the file format type {\tt FILETYPE\_SRV}, {\tt FILETYPE\_EXT} or {\tt FILETYPE\_IEG}.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void streamDefByteorder(int streamID, int byteorder);
@@ -198,14 +198,14 @@ The byte order of a dataset, one of the CDI constants {\tt CDI\_BIGENDIAN} and
 \end{minipage}
 
 
-\section{Get the byte order: {\tt streamInqByteorder}}
+\subsection{Get the byte order: {\tt streamInqByteorder}}
 \index{streamInqByteorder}
 \label{streamInqByteorder}
 
 The function {\tt streamInqByteorder} returns the byte order of a binary dataset
 with the file format type {\tt FILETYPE\_SRV}, {\tt FILETYPE\_EXT} or {\tt FILETYPE\_IEG}.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     int streamInqByteorder(int streamID);
@@ -219,20 +219,20 @@ Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt streamInqByteorder} returns the type of the byte order.
 The valid CDI byte order types are {\tt CDI\_BIGENDIAN} and {\tt CDI\_LITTLEENDIAN}
 
 
 
-\section{Define the variable list: {\tt streamDefVlist}}
+\subsection{Define the variable list: {\tt streamDefVlist}}
 \index{streamDefVlist}
 \label{streamDefVlist}
 
 The function {\tt streamDefVlist} defines the variable list of a stream.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void streamDefVlist(int streamID, int vlistID);
@@ -249,13 +249,13 @@ Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate
 \end{minipage}
 
 
-\section{Get the variable list: {\tt streamInqVlist}}
+\subsection{Get the variable list: {\tt streamInqVlist}}
 \index{streamInqVlist}
 \label{streamInqVlist}
 
 The function {\tt streamInqVlist} returns the variable list of a stream.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     int streamInqVlist(int streamID);
@@ -269,19 +269,19 @@ Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt streamInqVlist} returns an identifier to the variable list.
 
 
 
-\section{Define time step: {\tt streamDefTimestep}}
+\subsection{Define time step: {\tt streamDefTimestep}}
 \index{streamDefTimestep}
 \label{streamDefTimestep}
 
 The function {\tt streamDefTimestep} defines the time step of a stream.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     int streamDefTimestep(int streamID, int tsID);
@@ -297,19 +297,19 @@ Timestep identifier
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt streamDefTimestep} returns the number of records of the time step.
 
 
 
-\section{Get time step: {\tt streamInqTimestep}}
+\subsection{Get time step: {\tt streamInqTimestep}}
 \index{streamInqTimestep}
 \label{streamInqTimestep}
 
 The function {\tt streamInqTimestep} returns the time step of a stream.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     int streamInqTimestep(int streamID, int tsID);
@@ -325,19 +325,19 @@ Timestep identifier
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt streamInqTimestep} returns the number of records of the time step.
 
 
 
-\section{Write a variable: {\tt streamWriteVar}}
+\subsection{Write a variable: {\tt streamWriteVar}}
 \index{streamWriteVar}
 \label{streamWriteVar}
 
 The function streamWriteVar writes the values of one time step of a variable 
 to an open dataset.
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void streamWriteVar(int streamID, int varID, double *data, int nmiss);
@@ -358,13 +358,13 @@ Number of missing values
 \end{minipage}
 
 
-\section{Read a variable: {\tt streamReadVar}}
+\subsection{Read a variable: {\tt streamReadVar}}
 \index{streamReadVar}
 \label{streamReadVar}
 
 The function streamReadVar reads all the values of one time step of a variable
 from an open dataset.
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void streamReadVar(int streamID, int varID, double *data, int *nmiss);
@@ -385,13 +385,13 @@ Number of missing values
 \end{minipage}
 
 
-\section{Write a horizontal slice of a variable: {\tt streamWriteVarSlice}}
+\subsection{Write a horizontal slice of a variable: {\tt streamWriteVarSlice}}
 \index{streamWriteVarSlice}
 \label{streamWriteVarSlice}
 
 The function streamWriteVarSlice writes the values of a horizontal slice of a 
 variable to an open dataset.
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void streamWriteVarSlice(int streamID, int varID, int levelID, double *data, 
@@ -415,13 +415,13 @@ Number of missing values
 \end{minipage}
 
 
-\section{Read a horizontal slice of a variable: {\tt streamReadVarSlice}}
+\subsection{Read a horizontal slice of a variable: {\tt streamReadVarSlice}}
 \index{streamReadVarSlice}
 \label{streamReadVarSlice}
 
 The function streamReadVar reads all the values of a horizontal slice of a variable
 from an open dataset.
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void streamReadVarSlice(int streamID, int varID, int levelID, double *data, 

@@ -3,6 +3,8 @@
 
 \usepackage{graphics}
 
+\newcommand{\CDI}{{\bfseries\sffamily CDI\ }}
+
 % To define headers and footers
 \usepackage{fancyhdr}
 \pagestyle{fancy}
@@ -75,7 +77,7 @@
             pdfwindowui=true,   
 %            pdffitwindow=true,
             pdfauthor={Uwe Schulzweida},
-            pdftitle={CDI C Reference Manual},
+            pdftitle={CDI C Manual},
             pdfcreator={pdflatex + hyperref},
             pdfstartview=FitV,
 %            pdfpagemode=FullScreen,
@@ -113,7 +115,7 @@
 
 \begin{titlepage}
 \vspace*{50mm}
-{\Huge\bf{CDI C Reference Manual}}
+{\Huge\CDI \bf C Manual}
 
 \setlength{\unitlength}{1cm}
 \begin{picture}(16,0.4)
@@ -142,54 +144,52 @@
 
 
 \chapter{Introduction}
-
 \input{intro}
 
 
 \chapter{File Formats}
-
 \input{formats}
 
 
-\chapter{Usage of the CDI Library}
-
+\chapter{Use of the CDI Library}
 \input{usage}
-
 \input{c_link}
 
 
-\chapter{Datasets}
+\chapter{CDI modules}
+\input{modules}
 
+\newpage
+\section{Dataset functions}
+\input{dataset}
 \input{c_stream}
 
 
-\chapter{Variable list}
-
+\newpage
+\section{Variable list functions}
 \input{c_vlist}
 
-\chapter{Variables}
 
+\newpage
+\section{Variable functions}
 \input{c_vlist_var}
 
 
-\chapter{Grid}
-
+\newpage
+\section{Grid functions}
 \input{grid}
-
 \input{c_grid}
 
 
-\chapter{Z-axis}
-
+\newpage
+\section{Z-axis functions}
 \input{zaxis}
-
 \input{c_zaxis}
 
 
-\chapter{T-axis}
-
+\newpage
+\section{T-axis functions}
 \input{taxis}
-
 \input{c_taxis}
 
 
@@ -200,8 +200,12 @@
 \input{bib}
 
 
-\chapter*{Quick Reference\markboth{Quick Reference}{}}
-\addcontentsline{toc}{chapter}{Quick Reference}
+\appendix
+
+
+\chapter{Quick Reference}
+%\chapter{Quick Reference\markboth{Quick Reference}{}}
+%\addcontentsline{toc}{chapter}{Quick Reference}
 
 This appendix provide a brief listing of the C language bindings of the
 CDI library routines:

@@ -74,10 +74,10 @@
 
 !        Init var1 and var2
          DO i = 1, NLON*NLAT
-            var1(i) = 1
+            var1(i) = 1.1
          END DO
          DO i = 1, NLON*NLAT*NLEV
-            var2(i) = 2
+            var2(i) = 2.2
          END DO
 
 !        Write var1 and var2

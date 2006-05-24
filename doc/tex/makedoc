@@ -142,7 +142,7 @@ while (<MOFILE>) {
     $hrefproto{$funcname} = $cproto;
     $hreftitle{$funcname} = $title;
 
-    printcfdoc ("\n\n\\section{$title: {\\tt $funcname}}\n");
+    printcfdoc ("\n\n\\subsection{$title: {\\tt $funcname}}\n");
     printcfdoc ("\\index{$funcname}\n");
     printcfdoc ("\\label{$funcname}\n");
 
@@ -170,7 +170,7 @@ while (<MOFILE>) {
       }
     }
 
-    printcfdoc ("\\subsection*{Usage}\n\n");
+    printcfdoc ("\\subsubsection*{Usage}\n\n");
     printcfdoc ("\\begin{verbatim}\n");
     printproto ($cproto);
     printcfdoc ("\\end{verbatim}\n");
@@ -180,7 +180,7 @@ while (<MOFILE>) {
     }
 
     if ( $#result >= 0 ) {
-      printcfdoc ("\n\\subsection*{Result}\n\n");
+      printcfdoc ("\n\\subsubsection*{Result}\n\n");
       foreach $tag (@result) {
 	$line = $tag;
 	($kword) = split(" ", $tag, 1);
@@ -204,7 +204,7 @@ while (<MOFILE>) {
     }
 
     if ( $#errors >= 0 ) {
-      printcfdoc ("\n\\subsection*{Errors}\n\n");
+      printcfdoc ("\n\\subsubsection*{Errors}\n\n");
       $list = 0;
       foreach $tag (@errors) {
 	$line = $tag;
@@ -229,7 +229,7 @@ while (<MOFILE>) {
     }
 
     if ( $#example >= 0 ) {
-      printcfdoc ("\n\\subsection*{Example}\n\n");
+      printcfdoc ("\n\\subsubsection*{Example}\n\n");
       $source = 0;
       foreach $tag (@example) {
 	$line = $tag;

@@ -4,9 +4,9 @@ over an unlimited number of time steps.
 \section{GRIB}
 
 
-\section{netCDF}
+\section{NetCDF}
 
-\htmlref{NetCDF}{NetCDF} (network Common Data Form) is an interface for array-oriented data
+\htmlref{NetCDF}{NetCDF} (Network Common Data Form) is an interface for array-oriented data
 access and a library that provides an implementation of the interface.
 The netCDF library also defines a machine-independent format for 
 representing scientific data. Together, the interface, library, and 
@@ -17,7 +17,7 @@ CDI supports only 2D, 3D and 4D arrays and the attributes must follow the
      {GDT, COARDS or CF Conventions}.
 NetCDF is an external library and not part of CDI. To use netCDF with
 CDI the netCDF library must be installed before the configuration
-of the CDI library (see \htmlref{Build}{Build}).
+of the CDI library (see \htmlref{Build}{build}).
 
 \subsection{ncdap}
 
@@ -32,7 +32,7 @@ for binary data records.
 A SERVICE record can have an accuracy of 4 or 8 bytes and 
 the byteorder can be little or big endian.
 The following Fortran code example can be used to read a 
-SERVICE record with an accuarcy of 4 bytes:
+SERVICE record with an accuracy of 4 bytes:
 
 \begin{lstlisting}[backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
    INTEGER*4 icode,ilevel,idate,itime,nlon,nlat,idispo1,idispo2
@@ -69,7 +69,7 @@ for binary data records.
 An EXTRA record can have an accuracy of 4 or 8 bytes and 
 the byteorder can be little or big endian.
 The following Fortran code example can be used to read an
-EXTRA record with an accuarcy of 4 bytes:
+EXTRA record with an accuracy of 4 bytes:
 
 \begin{lstlisting}[backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
    INTEGER*4 idate,icode,ilevel,nsize

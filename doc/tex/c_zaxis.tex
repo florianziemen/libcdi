@@ -1,12 +1,12 @@
 
 
-\section{Create a vertical Z-axis: {\tt zaxisCreate}}
+\subsection{Create a vertical Z-axis: {\tt zaxisCreate}}
 \index{zaxisCreate}
 \label{zaxisCreate}
 
 The function {\tt zaxisCreate} creates a vertical Z-axis.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     int zaxisCreate(int zaxistype, int size);
@@ -25,12 +25,12 @@ Number of levels
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt zaxisCreate} returns an identifier to the Z-axis.
 
 
-\subsection*{Example}
+\subsubsection*{Example}
 
 Here is an example using {\tt zaxisCreate} to create a pressure level Z-axis:
 
@@ -49,10 +49,10 @@ Here is an example using {\tt zaxisCreate} to create a pressure level Z-axis:
 \end{lstlisting}
 
 
-\section{Destroy a vertical Z-axis: {\tt zaxisDestroy}}
+\subsection{Destroy a vertical Z-axis: {\tt zaxisDestroy}}
 \index{zaxisDestroy}
 \label{zaxisDestroy}
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void zaxisDestroy(int zaxisID);
@@ -67,13 +67,13 @@ Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
 \end{minipage}
 
 
-\section{Get the type of a Z-axis: {\tt zaxisInqType}}
+\subsection{Get the type of a Z-axis: {\tt zaxisInqType}}
 \index{zaxisInqType}
 \label{zaxisInqType}
 
 The function {\tt zaxisInqType} returns the type of a Z-axis.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     int zaxisInqType(int zaxisID);
@@ -87,7 +87,7 @@ Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt zaxisInqType} returns the type of the Z-axis,
 one of the set of predefined CDI Z-axis types.
@@ -97,13 +97,13 @@ The valid CDI Z-axis types are {\tt ZAXIS\_GENERIC}, {\tt ZAXIS\_SURFACE},
 
 
 
-\section{Get the size of a Z-axis: {\tt zaxisInqSize}}
+\subsection{Get the size of a Z-axis: {\tt zaxisInqSize}}
 \index{zaxisInqSize}
 \label{zaxisInqSize}
 
 The function {\tt zaxisInqSize} returns the size of a Z-axis.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     int zaxisInqSize(int zaxisID);
@@ -117,19 +117,19 @@ Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt zaxisInqSize} returns the number of levels of a Z-axis.
 
 
 
-\section{Define the levels of a Z-axis: {\tt zaxisDefLevels}}
+\subsection{Define the levels of a Z-axis: {\tt zaxisDefLevels}}
 \index{zaxisDefLevels}
 \label{zaxisDefLevels}
 
 The function {\tt zaxisDefLevels} defines the levels of a Z-axis.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void zaxisDefLevels(int zaxisID, double *levels);
@@ -146,13 +146,13 @@ All levels of the Z-axis
 \end{minipage}
 
 
-\section{Get all levels of a Z-axis: {\tt zaxisInqLevels}}
+\subsection{Get all levels of a Z-axis: {\tt zaxisInqLevels}}
 \index{zaxisInqLevels}
 \label{zaxisInqLevels}
 
 The function {\tt zaxisInqLevels} returns all levels of a Z-axis.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void zaxisInqLevels(int zaxisID, double *levels);
@@ -168,18 +168,18 @@ Levels of the Z-axis
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt zaxisInqLevels} saves all levels to the parameter {\tt levels}.
 
 
-\section{Get one level of a Z-axis: {\tt zaxisInqLevel}}
+\subsection{Get one level of a Z-axis: {\tt zaxisInqLevel}}
 \index{zaxisInqLevel}
 \label{zaxisInqLevel}
 
 The function {\tt zaxisInqLevel} returns one level of a Z-axis.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     double zaxisInqLevel(int zaxisID, int levelID);
@@ -195,18 +195,18 @@ Level index (range: 0 to nlevel-1)
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt zaxisInqLevel} returns the level of a Z-axis.
 
 
-\section{Define the name of a Z-axis: {\tt zaxisDefName}}
+\subsection{Define the name of a Z-axis: {\tt zaxisDefName}}
 \index{zaxisDefName}
 \label{zaxisDefName}
 
 The function {\tt zaxisDefName} defines the name of a Z-axis.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void zaxisDefName(int zaxisID, const char *name);
@@ -223,13 +223,13 @@ Name of the Z-axis
 \end{minipage}
 
 
-\section{Get the name of a Z-axis: {\tt zaxisInqName}}
+\subsection{Get the name of a Z-axis: {\tt zaxisInqName}}
 \index{zaxisInqName}
 \label{zaxisInqName}
 
 The function {\tt zaxisInqName} returns the name of a Z-axis.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void zaxisInqName(int zaxisID, char *name);
@@ -245,19 +245,19 @@ Name of the Z-axis
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt zaxisInqName} returns the name of the Z-axis to the parameter name.
 
 
 
-\section{Define the longname of a Z-axis: {\tt zaxisDefLongname}}
+\subsection{Define the longname of a Z-axis: {\tt zaxisDefLongname}}
 \index{zaxisDefLongname}
 \label{zaxisDefLongname}
 
 The function {\tt zaxisDefLongname} defines the longname of a Z-axis.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void zaxisDefLongname(int zaxisID, const char *longname);
@@ -274,13 +274,13 @@ Longname of the Z-axis
 \end{minipage}
 
 
-\section{Get the longname of a Z-axis: {\tt zaxisInqLongname}}
+\subsection{Get the longname of a Z-axis: {\tt zaxisInqLongname}}
 \index{zaxisInqLongname}
 \label{zaxisInqLongname}
 
 The function {\tt zaxisInqLongname} returns the longname of a Z-axis.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void zaxisInqLongname(int zaxisID, char *longname);
@@ -296,19 +296,19 @@ Longname of the Z-axis
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt zaxisInqLongname} returns the longname of the Z-axis to the parameter longname.
 
 
 
-\section{Define the units of a Z-axis: {\tt zaxisDefUnits}}
+\subsection{Define the units of a Z-axis: {\tt zaxisDefUnits}}
 \index{zaxisDefUnits}
 \label{zaxisDefUnits}
 
 The function {\tt zaxisDefUnits} defines the units of a Z-axis.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void zaxisDefUnits(int zaxisID, const char *units);
@@ -325,13 +325,13 @@ Units of the Z-axis
 \end{minipage}
 
 
-\section{Get the units of a Z-axis: {\tt zaxisInqUnits}}
+\subsection{Get the units of a Z-axis: {\tt zaxisInqUnits}}
 \index{zaxisInqUnits}
 \label{zaxisInqUnits}
 
 The function {\tt zaxisInqUnits} returns the units of a Z-axis.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void zaxisInqUnits(int zaxisID, char *units);
@@ -347,7 +347,7 @@ Units of the Z-axis
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt zaxisInqUnits} returns the units of the Z-axis to the parameter units.
 

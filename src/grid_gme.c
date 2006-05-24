@@ -1308,7 +1308,12 @@ void gme_grid(int gridsize, double *rlon, double *rlat,
   /* check gridsize */
   if ( (ni+1)*(ni+1)*nd != gridsize )
     {
-      fprintf(stderr, "gme_grid: internal problem, grids have different size!\n");
+      fprintf(stderr, "gme_grid: Calculation of the global GME grid failed (ni=%d)!\n", ni);
+      if ( (ni+1)*(ni+1)*nd > gridsize )
+	{
+	  fprintf(stderr, "gme_grid: Resulting grid size is greater than the predetermined grid size of %d.\n", gridsize);
+	  fprintf(stderr, "gme_grid: Maybe this is only a part of a global GME grid without further information.\n");
+	}
       exit (-1);
     }
 

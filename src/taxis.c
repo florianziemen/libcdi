@@ -192,6 +192,21 @@ The function @func{taxisCreate} creates a Time axis.
 @Result
 @func{taxisCreate} returns an identifier to the Time axis.
 
+@Example
+Here is an example using @func{taxisCreate} to create a relative T-axis
+with a standard calendar.
+
+@Source
+#include "cdi.h"
+   ...
+int taxisID;
+   ...
+taxisID = taxisCreate(TAXIS_RELATIVE);
+taxisDefCalendar(taxisID, CALENDAR_STANDARD);
+taxisDefRdate(taxisID, 19870101);
+taxisDefRtime(taxisID, 1200);
+   ...
+@EndSource
 @EndFunction
 */
 int taxisCreate(int taxistype)

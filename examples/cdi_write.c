@@ -71,8 +71,8 @@ int main(void)
       streamDefTimestep(streamID, tsID);
 
       /* Init var1 and var2 */
-      for ( i = 0; i < NLON*NLAT;      i++ ) var1[i] = 1;
-      for ( i = 0; i < NLON*NLAT*NLEV; i++ ) var2[i] = 2;
+      for ( i = 0; i < NLON*NLAT;      i++ ) var1[i] = 1.1;
+      for ( i = 0; i < NLON*NLAT*NLEV; i++ ) var2[i] = 2.2;
 
       /* Write var1 and var2 */
       streamWriteVar(streamID, varID1, var1, nmiss);

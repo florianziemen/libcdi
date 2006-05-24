@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Tue May  9 14:32:31 CEST 2006 */
+/* Generated automatically from m214003 on Mon May 22 13:02:46 CEST 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -4465,9 +4465,11 @@ void gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 
   if ( *iret != 0 ) return;
 
+  ISEC4_NumNonMissValues = ISEC4_NumValues;
+
   if ( bitmapSize > 0 )
     {
-      ISEC4_NumNonMissValues = ISEC4_NumValues;
+      /* ISEC4_NumNonMissValues = ISEC4_NumValues; */
       ISEC4_NumValues        = bitmapSize;
 
       if ( dfunc != 'J' || bitmapSize == ISEC4_NumNonMissValues )
@@ -7394,7 +7396,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.0" " of ""May  9 2006"" ""14:32:31";
+static const char grb_libvers[] = "1.0.0" " of ""May 22 2006"" ""13:02:46";
 
 
 

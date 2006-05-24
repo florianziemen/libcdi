@@ -1,12 +1,12 @@
 
 
-\section{Define a Variable: {\tt vlistDefVar}}
+\subsection{Define a Variable: {\tt vlistDefVar}}
 \index{vlistDefVar}
 \label{vlistDefVar}
 
 The function {\tt vlistDefVar} adds a new variable to vlistID.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID);
@@ -27,19 +27,19 @@ One of the set of predefined CDI time identifiers.
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt vlistDefVar} returns an identifier to the new variable.
 
 
 
-\section{Define the code number of a Variable: {\tt vlistDefVarCode}}
+\subsection{Define the code number of a Variable: {\tt vlistDefVarCode}}
 \index{vlistDefVarCode}
 \label{vlistDefVarCode}
 
 The function {\tt vlistDefVarCode} defines the code number of a variable.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void vlistDefVarCode(int vlistID, int varID, int code);
@@ -58,13 +58,13 @@ Code number
 \end{minipage}
 
 
-\section{Get the Code number of a Variable: {\tt vlistInqVarCode}}
+\subsection{Get the Code number of a Variable: {\tt vlistInqVarCode}}
 \index{vlistInqVarCode}
 \label{vlistInqVarCode}
 
 The function {\tt vlistInqVarCode} returns the code number of a variable.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     int vlistInqVarCode(int vlistID, int varID);
@@ -80,19 +80,19 @@ Variable identifier
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt vlistInqVarCode} returns the code number of the variable.
 
 
 
-\section{Define the name of a Variable: {\tt vlistDefVarName}}
+\subsection{Define the name of a Variable: {\tt vlistDefVarName}}
 \index{vlistDefVarName}
 \label{vlistDefVarName}
 
 The function {\tt vlistDefVarName} defines the name of a variable.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void vlistDefVarName(int vlistID, int varID, const char *name);
@@ -111,13 +111,13 @@ Name of the variable
 \end{minipage}
 
 
-\section{Get the name of a Variable: {\tt vlistInqVarName}}
+\subsection{Get the name of a Variable: {\tt vlistInqVarName}}
 \index{vlistInqVarName}
 \label{vlistInqVarName}
 
 The function {\tt vlistInqVarName} returns the name of a variable.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void vlistInqVarName(int vlistID, int varID, char *name);
@@ -135,19 +135,19 @@ Variable name
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt vlistInqVarName} returns the name of the variable to the parameter name.
 
 
 
-\section{Define the long name of a Variable: {\tt vlistDefVarLongname}}
+\subsection{Define the long name of a Variable: {\tt vlistDefVarLongname}}
 \index{vlistDefVarLongname}
 \label{vlistDefVarLongname}
 
 The function {\tt vlistDefVarLongname} defines the long name of a variable.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void vlistDefVarLongname(int vlistID, int varID, const char *longname);
@@ -166,13 +166,13 @@ Long name of the variable
 \end{minipage}
 
 
-\section{Get the longname of a Variable: {\tt vlistInqVarLongname}}
+\subsection{Get the longname of a Variable: {\tt vlistInqVarLongname}}
 \index{vlistInqVarLongname}
 \label{vlistInqVarLongname}
 
 The function {\tt vlistInqVarLongname} returns the longname of a variable.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void vlistInqVarLongname(int vlistID, int varID, char *longname);
@@ -190,19 +190,19 @@ Variable description
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt vlistInqVaeLongname} returns the longname of the variable to the parameter longname.
 
 
 
-\section{Define the units of a Variable: {\tt vlistDefVarUnits}}
+\subsection{Define the units of a Variable: {\tt vlistDefVarUnits}}
 \index{vlistDefVarUnits}
 \label{vlistDefVarUnits}
 
 The function {\tt vlistDefVarUnits} defines the units of a variable.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void vlistDefVarUnits(int vlistID, int varID, const char *units);
@@ -221,13 +221,13 @@ Units of the variable
 \end{minipage}
 
 
-\section{Get the units of a Variable: {\tt vlistInqVarUnits}}
+\subsection{Get the units of a Variable: {\tt vlistInqVarUnits}}
 \index{vlistInqVarUnits}
 \label{vlistInqVarUnits}
 
 The function {\tt vlistInqVarUnits} returns the units of a variable.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void vlistInqVarUnits(int vlistID, int varID, char *units);
@@ -245,19 +245,19 @@ Variable units
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt vlistInqVarUnits} returns the units of the variable to the parameter units.
 
 
 
-\section{Define the data type of a Variable: {\tt vlistDefVarDatatype}}
+\subsection{Define the data type of a Variable: {\tt vlistDefVarDatatype}}
 \index{vlistDefVarDatatype}
 \label{vlistDefVarDatatype}
 
 The function {\tt vlistDefVarDatatype} defines the data type of a variable.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void vlistDefVarDatatype(int vlistID, int varID, int datatype);
@@ -276,13 +276,13 @@ Data type identifier
 \end{minipage}
 
 
-\section{Get the datatype of a Variable: {\tt vlistInqVarDatatype}}
+\subsection{Get the datatype of a Variable: {\tt vlistInqVarDatatype}}
 \index{vlistInqVarDatatype}
 \label{vlistInqVarDatatype}
 
 The function {\tt vlistInqVarDatatype} returns the datatype of a variable.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     int vlistInqVarDatatype(int vlistID, int varID);
@@ -298,19 +298,19 @@ Variable identifier
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt vlistInqVarDatatype} returns an identifier to the datatype of the variable.
 
 
 
-\section{Define the missing value of a Variable: {\tt vlistDefVarMissval}}
+\subsection{Define the missing value of a Variable: {\tt vlistDefVarMissval}}
 \index{vlistDefVarMissval}
 \label{vlistDefVarMissval}
 
 The function {\tt vlistDefVarMissval} defines the missing value of a variable.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     void vlistDefVarMissval(int vlistID, int varID, double missval);
@@ -329,13 +329,13 @@ Missing value
 \end{minipage}
 
 
-\section{Get the missing value of a Variable: {\tt vlistInqVarMissval}}
+\subsection{Get the missing value of a Variable: {\tt vlistInqVarMissval}}
 \index{vlistInqVarMissval}
 \label{vlistInqVarMissval}
 
 The function {\tt vlistInqVarMissval} returns the missing value of a variable.
 
-\subsection*{Usage}
+\subsubsection*{Usage}
 
 \begin{verbatim}
     double vlistInqVarMissval(int vlistID, int varID);
@@ -351,7 +351,7 @@ Variable identifier
 \end{deflist}
 \end{minipage}
 
-\subsection*{Result}
+\subsubsection*{Result}
 
 {\tt vlistInqVarMissval} returns the missing value of the variable.
 
