@@ -12,8 +12,8 @@ CDI - Climate Data Interface
 
 Documentation:
 
-     ANSI C Manual:  ./doc/cdi_cman.pdf
-     Fortran Manual: ./doc/cdi_fman.pdf
+     CDI C Manual:       ./doc/cdi_cman.pdf
+     CDI Fortran Manual: ./doc/cdi_fman.pdf
 
 Installation:
 
