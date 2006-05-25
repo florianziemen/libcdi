@@ -12,12 +12,12 @@ The netCDF library also defines a machine-independent format for
 representing scientific data. Together, the interface, library, and 
 format support the creation, access, and sharing of scientific data.
 
-CDI supports only 2D, 3D and 4D arrays and the attributes must follow the
+\CDI supports only 2D, 3D and 4D arrays and the attributes must follow the
 \href{http://ftp.unidata.ucar.edu/software/netcdf/docs/conventions.html}
      {GDT, COARDS or CF Conventions}.
-NetCDF is an external library and not part of CDI. To use netCDF with
-CDI the netCDF library must be installed before the configuration
-of the CDI library (see \htmlref{Build}{build}).
+NetCDF is an external library and not part of \CDI. To use netCDF with
+\CDI the netCDF library must be installed before the configuration
+of the \CDI library (see \htmlref{Build}{build}).
 
 \subsection{ncdap}
 
@@ -54,8 +54,8 @@ The meaning of the variables are:
 \item[{\tt itime}]    The time as HHMM
 \item[{\tt nlon}]     The number of longitudes
 \item[{\tt nlat}]     The number of latitides
-\item[{\tt idispo1}]  For the users disposal (Not used in CDI)
-\item[{\tt idispo2}]  For the users disposal (Not used in CDI)
+\item[{\tt idispo1}]  For the users disposal (Not used in \CDI)
+\item[{\tt idispo2}]  For the users disposal (Not used in \CDI)
 \end{deflist}
 \end{minipage}
 
@@ -101,4 +101,9 @@ description section are coded with 4 byte integer values and the
 data section can have 4 or 8 byte IEEE floating point values.
 The header and the data section have the standard Fortran blocking
 for binary data records.
-CDI supports only data on an rotated grid for the IEG format.
+\CDI supports only data on an rotated grid for the IEG format.
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

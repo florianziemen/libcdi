@@ -2336,7 +2336,7 @@ int gridGenerate(GRID grid)
 @Prototype int gridDuplicate(int gridID)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate},
-                    @func{gridDuplicate} or @func{vlistInqVarGrid}.
+                    @fref{gridDuplicate} or @fref{vlistInqVarGrid}.
 
 @Description
 The function @func{gridDuplicate} duplicates a horizontal Grid.

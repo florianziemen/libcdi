@@ -1,6 +1,6 @@
 This module contains functions to read and write the data.
 To create a new dataset the output format must be specified
-with one of the following predefined file types:
+with one of the following predefined file format types:
 
 \vspace*{3mm}
 \hspace*{8mm}\begin{minipage}{15cm}
@@ -15,9 +15,11 @@ with one of the following predefined file types:
 \end{minipage}
 \vspace*{3mm}
 
+NetCDF is only available if the \CDI library was compiled with netCDF support!
+
 To set the byte order of a binary dataset with the file format
 type {\tt FILETYPE\_SRV}, {\tt FILETYPE\_EXT} or {\tt FILETYPE\_IEG} use one of the
-following constants in the call to {\htmlref{\tt streamDefByteorder}{streamDefByteorder}}:
+following predefined constants in the call to {\htmlref{\tt streamDefByteorder}{streamDefByteorder}}:
 
 \vspace*{3mm}
 \hspace*{8mm}\begin{minipage}{15cm}

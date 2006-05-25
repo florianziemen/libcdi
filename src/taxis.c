@@ -274,7 +274,7 @@ void taxisDefType(int taxisID, int type)
 
 @Prototype void taxisDefVdate(int taxisID, int vdate)
 @Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
     @Item  vdate    Verification date (YYYYMMDD)
 
 @Description
@@ -298,7 +298,7 @@ void taxisDefVdate(int taxisID, int vdate)
 
 @Prototype void taxisDefVtime(int taxisID, int vtime)
 @Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
     @Item  vtime    Verification time (HHMM)
 
 @Description
@@ -322,7 +322,7 @@ void taxisDefVtime(int taxisID, int vtime)
 
 @Prototype void taxisDefRdate(int taxisID, int rdate)
 @Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
     @Item  rdate    Reference date (YYYYMMDD)
 
 @Description
@@ -346,7 +346,7 @@ void taxisDefRdate(int taxisID, int rdate)
 
 @Prototype void taxisDefRtime(int taxisID, int rtime)
 @Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
     @Item  rtime    Reference time (HHMM)
 
 @Description
@@ -370,7 +370,7 @@ void taxisDefRtime(int taxisID, int rtime)
 
 @Prototype void taxisDefCalendar(int taxisID, int calendar)
 @Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
     @Item  calendar The type of the calendar, one of the set of predefined CDI calendar types.
                     The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_360DAYS},
                     @func{CALENDAR_365DAYS} and @func{CALENDAR_366DAYS}.
@@ -449,7 +449,7 @@ void taxisCopyTimestep(int taxisIDdes, int taxisIDsrc)
 
 @Prototype int taxisInqVdate(int taxisID)
 @Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
 
 @Description
 The function @func{taxisInqVdate} returns the verification date of a Time axis.
@@ -475,7 +475,7 @@ int taxisInqVdate(int taxisID)
 
 @Prototype int taxisInqVtime(int taxisID)
 @Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
 
 @Description
 The function @func{taxisInqVtime} returns the verification time of a Time axis.
@@ -501,7 +501,7 @@ int taxisInqVtime(int taxisID)
 
 @Prototype int taxisInqRdate(int taxisID)
 @Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
 
 @Description
 The function @func{taxisInqRdate} returns the reference date of a Time axis.
@@ -533,7 +533,7 @@ int taxisInqRdate(int taxisID)
 
 @Prototype int taxisInqRtime(int taxisID)
 @Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
 
 @Description
 The function @func{taxisInqRtime} returns the reference time of a Time axis.
@@ -565,7 +565,7 @@ int taxisInqRtime(int taxisID)
 
 @Prototype int taxisInqCalendar(int taxisID)
 @Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
 
 @Description
 The function @func{taxisInqCalendar} returns the calendar of a Time axis.

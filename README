@@ -7,15 +7,28 @@ CDI - Climate Data Interface
      CDI is a C and Fortran Interface to access Climate model Data.
      Supported file formats are GRIB, netCDF, SERVICE, EXTRA and IEG.
 
+     CDI is licensed under the GNU General Public License, version 2.
+     Read the file COPYING in the source distribution for details.
+
 Documentation:
 
-     Not available.
+     ANSI C Manual:  ./doc/cdi_cman.pdf
+     Fortran Manual: ./doc/cdi_fman.pdf
 
 Installation:
 
-     Read INSTALL on how to configure, compile and install the library.
-     The configuration script has some more environment variables.
-     Type 'configure -h' to see them.
+     1. Run ./configure, with some options if you wish. The standard
+        options are documented in the INSTALL file. The configuration
+        script has some more options; type 'configure -h' to see them.
+        The most interesting ones are the usual
+        --prefix=<installation directory> and
+        --with-netcdf=<netCDF root directory> to enable netCDF support.
+
+     2. Do "make" to compile the library.
+
+     3. (Optional) Do "make install", possibly as root if the destination
+        permissions require that. This installs CDI in the directory
+        specified during configuration. The default prefix is /usr/local.
 
 Porting:
 
@@ -27,5 +40,5 @@ Porting:
      
 Contact:
 
-     Send questions, comments and bug reports to schulzweida@dkrz.de
+     Send questions, comments and bug reports to Uwe.Schulzweida@zmaw.de
 

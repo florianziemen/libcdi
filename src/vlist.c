@@ -1149,7 +1149,7 @@ void vlistPrint(int vlistID)
 @Prototype void vlistDefTaxis(int vlistID, int taxisID)
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  taxisID  Time axis ID, from a previous call to @func{taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
 
 @Description
 The function @func{vlistDefTaxis} defines the time axis of a variable list.

@@ -403,6 +403,7 @@ sub printcfdoc {
   if ( $#list >= 0 ) {
     foreach $tag (@list) {
       chomp $tag;
+      $tag =~ s/ CDI / \\CDI /og;
       $tag =~ s/_/\\_/og;
       $tag =~ s/\@fref\{([^}]*)\}/{\\htmlref{\\tt \1}{\1}}/og;
       $tag =~ s/\@func\{([^}]*)\}/{\\tt \1}/og;
