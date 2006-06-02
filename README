@@ -5,7 +5,7 @@ CDI - Climate Data Interface
      This package contains the source code for the CDI library from
      the Max-Planck-Institute for Meteorology.
      CDI is a C and Fortran Interface to access Climate model Data.
-     Supported file formats are GRIB, netCDF, SERVICE, EXTRA and IEG.
+     Supported data formats are GRIB, netCDF, SERVICE, EXTRA and IEG.
 
      CDI is licensed under the GNU General Public License, version 2.
      Read the file COPYING in the source distribution for details.

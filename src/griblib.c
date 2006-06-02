@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Mon May 22 13:02:46 CEST 2006 */
+/* Generated automatically from m214003 on Fri Jun  2 12:42:10 CEST 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -80,7 +80,11 @@ void   scatterComplex(double *fpdata, int pcStart, int truncation, int dimSP);
 void   scm0(double *pdl, double *pdr, double *pfl, double *pfr, int klg);
 int    rowina2(double *p, int ko, int ki, double *pw,
 	       int kcode, double msval, int *kret);
+int    rowina3(double *p, int ko, int ki, double *pw,
+	       int kcode, double msval, int *kret);
 int    qu2reg2(double *pfield, int *kpoint, int klat, int klon,
+	       double *ztemp, double msval, int *kret);
+int    qu2reg3(double *pfield, int *kpoint, int klat, int klon,
 	       double *ztemp, double msval, int *kret);
 
 #if  defined  (INT32)
@@ -2772,14 +2776,14 @@ void encodePDS(GRIBPACK *lpds, int pdsLen, int *isec1)
   Put1Byte(ISEC1_Parameter);      /*  8 Parameter Code           */
   Put1Byte(ISEC1_LevelType);      /*  9 Type of level            */
   if ( (ISEC1_LevelType !=  20) &&
-       (ISEC1_LevelType != LTYPE_99)        &&
-       (ISEC1_LevelType != LTYPE_ISOBARIC)  &&
-       (ISEC1_LevelType != LTYPE_ALTITUDE)  &&
-       (ISEC1_LevelType != LTYPE_HEIGHT)    &&
-       (ISEC1_LevelType != LTYPE_SIGMA)     &&
-       (ISEC1_LevelType != LTYPE_HYBRID)    &&
-       (ISEC1_LevelType != LTYPE_LANDDEPTH) &&
-       (ISEC1_LevelType != 113) &&
+       (ISEC1_LevelType != LTYPE_99)         &&
+       (ISEC1_LevelType != LTYPE_ISOBARIC)   &&
+       (ISEC1_LevelType != LTYPE_ALTITUDE)   &&
+       (ISEC1_LevelType != LTYPE_HEIGHT)     &&
+       (ISEC1_LevelType != LTYPE_SIGMA)      &&
+       (ISEC1_LevelType != LTYPE_HYBRID)     &&
+       (ISEC1_LevelType != LTYPE_LANDDEPTH)  &&
+       (ISEC1_LevelType != LTYPE_ISENTROPIC) &&
        (ISEC1_LevelType != 115) &&
        (ISEC1_LevelType != 117) &&
        (ISEC1_LevelType != 125) &&
@@ -3697,7 +3701,7 @@ static int decodePDS(unsigned char *pds, int *isec0, int *isec1)
        (ISEC1_LevelType != LTYPE_SIGMA)     && 
        (ISEC1_LevelType != LTYPE_HYBRID)    && 
        (ISEC1_LevelType != LTYPE_LANDDEPTH) && 
-       (ISEC1_LevelType != 113) && 
+       (ISEC1_LevelType != LTYPE_ISENTROPIC) && 
        (ISEC1_LevelType != 115) && 
        (ISEC1_LevelType != 117) && 
        (ISEC1_LevelType != 125) && 
@@ -4561,7 +4565,8 @@ void gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 
       ztemp = (double *) malloc(ISEC4_NumValues*sizeof(double));
       if ( ztemp == NULL ) SysError(func, "No Memory!");
-      (void) qu2reg2(fsec4, ISEC2_RowLonPtr, nlat, nlon, ztemp, FSEC3_MissVal, iret);
+      /* (void) qu2reg2(fsec4, ISEC2_RowLonPtr, nlat, nlon, ztemp, FSEC3_MissVal, iret); */
+      (void) qu2reg3(fsec4, ISEC2_RowLonPtr, nlat, nlon, ztemp, FSEC3_MissVal, iret);
       free(ztemp);
 
       if ( bitmapSize > 0 )
@@ -5084,6 +5089,7 @@ void scm0(double *pdl, double *pdr, double *pfl, double *pfr, int klg)
     }
 } /* scm0 */
 
+
 int rowina2(double *p, int ko, int ki, double *pw,
 	    int kcode, double msval, int *kret)
 {
@@ -5252,6 +5258,176 @@ L900:
     return 0;
 } /* rowina2 */
 
+
+int rowina3(double *p, int ko, int ki, double *pw,
+	    int kcode, double msval, int *kret)
+{
+  /* System generated locals */
+  int pw_dim1, pw_offset, i_1;
+
+  /* Local variables */
+  double zwt1, zrdi, zpos;
+  int jl, ip;
+  double zdo, zwt;
+
+  /* Parameter adjustments */
+  --p;
+  pw_dim1 = ko + 3;
+  pw_offset = pw_dim1;
+  pw -= pw_offset;
+
+  /* **** ROWINA2 - Interpolation of row of values. */
+  /*     Input Parameters. */
+  /*     ----------------- */
+  /*     P      - Row of values to be interpolated. */
+  /*              Dimension must be at least KO. */
+  /*     KO     - Number of values required. */
+  /*     KI     - Number of values in P on input. */
+  /*     PW     - Working array. */
+  /*              Dimension must be at least (0:KO+2,3). */
+  /*     KCODE  - Interpolation required. */
+  /*              1 , linear. */
+  /*              3 , cubic. */
+  /*     PMSVAL - Value used for missing data indicator. */
+
+  /*     Output Parameters. */
+  /*     ------------------ */
+  /*     P     - Now contains KO values. */
+  /*     KRET  - Return code */
+  /*             0, OK */
+  /*             Non-zero, error */
+
+  /*     Author. */
+  /*     ------- */
+  /*     J.D.Chambers    ECMWF     22.07.94 */
+
+  /*     ********************************    */
+  /*     Section 1.  Linear interpolation .. */
+  /*     ********************************    */
+
+  *kret = 0;
+
+  if ( kcode == 1 )
+    {
+      /*    Move input values to work array */
+      for ( jl = 1; jl <= ki; ++jl )
+	pw[jl + pw_dim1] = p[jl];
+
+      /*    Arrange wrap-around value in work array */
+      pw[ki + 1 + pw_dim1] = p[1];
+
+      /*    Set up constants to be used to figure out weighting for */
+      /*    values in interpolation. */
+      zrdi = (double) ki;
+      zdo = 1.0 / (double) ko;
+
+      /*    Loop through the output points */
+      for ( jl = 1; jl <= ko; ++jl )
+	{
+
+	  /*    Calculate weight from the start of row */
+	  zpos = (jl - 1) * zdo;
+	  zwt = zpos * zrdi;
+
+	  /*    Get the current array position(minus 1) from the weight - */
+	  /*    note the implicit truncation. */
+	  ip = (int) zwt;
+
+	  /*    If the left value is missing, use the right value */
+	  if (pw[ip + 1 + pw_dim1] == msval)
+	    {
+	      p[jl] = pw[ip + 2 + pw_dim1];
+	    }
+	  /*    If the right value is missing, use the left value */
+	  else if (pw[ip + 2 + pw_dim1] == msval)
+	    {
+	      p[jl] = pw[ip + 1 + pw_dim1];
+	    }
+	  /*    If neither missing, interpolate ... */
+	  else
+	    {
+
+	      /*       Adjust the weight to range (0.0 to 1.0) */
+	      zwt -= ip;
+
+	      /*       Interpolate using the weighted values on either side */
+	      /*       of the output point position */
+	      p[jl] = (1.0 - zwt) * pw[ip + 1 + pw_dim1] +
+		zwt * pw[ip + 2 + pw_dim1];
+	    }
+	}
+
+      /*     *******************************    */
+      /*     Section 2.  Cubic interpolation .. */
+      /*     *******************************    */
+
+    }
+  else if ( kcode == 3 )
+    {
+      i_1 = ki;
+      for ( jl = 1; jl <= i_1; ++jl )
+	{
+          if ( p[jl] == msval )
+	    {
+	      fprintf(stderr," ROWINA2: ");
+	      fprintf(stderr," Cubic interpolation not supported");
+	      fprintf(stderr," for fields containing missing data.\n");
+	      *kret = 1;
+	      goto L900;
+	    }
+          pw[jl + pw_dim1] = p[jl];
+	}
+      pw[pw_dim1] = p[ki];
+      pw[ki + 1 + pw_dim1] = p[1];
+      pw[ki + 2 + pw_dim1] = p[2];
+      i_1 = ki;
+      for ( jl = 1; jl <= i_1; ++jl )
+	{
+          pw[jl + (pw_dim1 << 1)] =
+	        - pw[jl - 1 + pw_dim1] / 3.0 -
+	          pw[jl     + pw_dim1] * 0.5 +
+	          pw[jl + 1 + pw_dim1] - pw[jl + 2 + pw_dim1] / 6.0;
+          pw[jl + 1 + pw_dim1 * 3] =
+                  pw[jl - 1 + pw_dim1] / 6.0 -
+                  pw[jl     + pw_dim1] +
+                  pw[jl + 1 + pw_dim1] * 0.5 +
+                  pw[jl + 2 + pw_dim1] / 3.0;
+	}
+
+      scm0(&pw[(pw_dim1 << 1) + 1], &pw[pw_dim1 * 3 + 2],
+	   &pw[pw_dim1 + 1], &pw[pw_dim1 + 2], ki);
+
+      zrdi = (double) ki;
+      zdo = 1.0 / (double) ko;
+      for ( jl = 1; jl <= ko; ++jl )
+	{
+          zpos = (jl - 1) * zdo;
+          zwt = zpos * zrdi;
+          ip = (int) zwt + 1;
+          zwt = zwt + 1.0 - ip;
+          zwt1 = 1.0 - zwt;
+          p[jl] = ((3.0 - zwt1 * 2.0) * pw[ip + pw_dim1] +
+                  zwt * pw[ip + (pw_dim1 << 1)]) * zwt1 * zwt1 +
+                  ((3.0 - zwt * 2.0) * pw[ip + 1 + pw_dim1] -
+                  zwt1 * pw[ip + 1 + pw_dim1 * 3]) * zwt * zwt;
+	}
+
+    }
+  else
+    {
+      /*    **************************************    */
+      /*    Section 3.  Invalid interpolation code .. */
+      /*    **************************************    */
+      fprintf(stderr," ROWINA2:");
+      fprintf(stderr," Invalid interpolation code = %2d\n",kcode);
+      *kret = 2;
+    }
+
+L900:
+    return 0;
+} /* rowina3 */
+
+
 int qu2reg2(double *pfield, int *kpoint, int klat, int klon,
 	    double *ztemp, double msval, int *kret)
 {
@@ -5264,12 +5440,15 @@ int qu2reg2(double *pfield, int *kpoint, int klat, int klon,
    /* Local variables */
    int ilii, ilio, icode;
    double *zline = NULL;
-   double zwork[1929];   /* was [643][3] */
+   double *zwork = NULL;
    int iregno, iquano, j210, j220, j230, j240, j225;
 
 
-   zline = (double *) malloc(klon*sizeof(double));
+   zline = (double *) malloc(2*klon*sizeof(double));
    if ( zline == NULL ) SysError(func, "No Memory!");
+
+   zwork = (double *) malloc(3*(2*klon+3)*sizeof(double));
+   if ( zwork == NULL ) SysError(func, "No Memory!");
 
    /* Parameter adjustments */
    --pfield;
@@ -5406,9 +5585,173 @@ int qu2reg2(double *pfield, int *kpoint, int klat, int klon,
 L900:
 
    free(zline);
+   free(zwork);
 
    return 0;
-} /* qu2reg2_ */
+} /* qu2reg2 */
+
+
+int qu2reg3(double *pfield, int *kpoint, int klat, int klon,
+	    double *ztemp, double msval, int *kret)
+{
+   static char func[] = "qu2reg2";
+
+   /* System generated locals */
+   int i_1, i_2;
+   int kcode = 1;
+
+   /* Local variables */
+   int ilii, ilio, icode;
+   double *zline = NULL;
+   double *zwork = NULL;
+   int iregno, iquano, j210, j220, j230, j240, j225;
+
+
+   zline = (double *) malloc(2*klon*sizeof(double));
+   if ( zline == NULL ) SysError(func, "No Memory!");
+
+   zwork = (double *) malloc(3*(2*klon+3)*sizeof(double));
+   if ( zwork == NULL ) SysError(func, "No Memory!");
+
+   /* Parameter adjustments */
+   --pfield;
+   --kpoint;
+
+/* **** QU2REG - Convert quasi-regular grid data to regular. */
+/*     Input Parameters. */
+/*     ----------------- */
+/*     PFIELD     - Array containing quasi-regular grid */
+/*                  data. */
+/*     KPOINT     - Array containing list of the number of */
+/*                  points on each latitude (or longitude) of */
+/*                  the quasi-regular grid. */
+/*     KLAT       - Number of latitude lines */
+/*     KLON       - Number of longitude lines */
+/*     KCODE      - Interpolation required. */
+/*                  1 , linear - data quasi-regular on */
+/*                               latitude lines. */
+/*                  3 , cubic -  data quasi-regular on */
+/*                               latitude lines. */
+/*                  11, linear - data quasi-regular on */
+/*                               longitude lines. */
+/*                  13, cubic -  data quasi-regular on */
+/*                               longitude lines. */
+/*     PMSVAL     - Value used for missing data indicator. */
+/*     Output Parameters. */
+/*     ------------------ */
+/*     KRET       - return code */
+/*                  0 = OK */
+/*                  non-zero indicates fatal error */
+/*     PFIELD     - Array containing regular grid data. */
+/*     Author. */
+/*     ------- */
+/*     J.D.Chambers     ECMWF      22.07.94 */
+/*     J.D.Chambers     ECMWF      13.09.94 */
+/*     Add return code KRET and remove calls to ABORT. */
+
+
+/* ------------------------------ */
+/* Section 1. Set initial values. */
+/* ------------------------------ */
+
+   *kret = 0;
+
+/* Check input parameters. */
+
+   if (kcode != 1 && kcode != 3 && kcode != 11 && kcode != 13) {
+      fprintf(stderr," QU2REG :");
+      fprintf(stderr," Invalid interpolation type code = %2d\n",kcode);
+      *kret = 1;
+      goto L900;
+   }
+
+/* Set array indices to 0. */
+
+   ilii = 0;
+   ilio = 0;
+
+/* Establish values of loop parameters. */
+
+   if (kcode > 10) {
+
+/*    Quasi-regular along longitude lines. */
+
+      iquano = klon;
+      iregno = klat;
+      icode = kcode - 10;
+   } else {
+
+/*    Quasi-regular along latitude lines. */
+
+      iquano = klat;
+      iregno = klon;
+      icode = kcode;
+   }
+
+/*     -------------------------------------------------------- */
+/**    Section 2. Interpolate field from quasi to regular grid. */
+/*     -------------------------------------------------------- */
+
+   i_1 = iquano;
+   for (j230 = 1; j230 <= i_1; ++j230) {
+
+      if (iregno != kpoint[j230]) {
+
+/*       Line contains less values than required,so */
+/*       extract quasi-regular grid values for a line */
+
+         i_2 = kpoint[j230];
+         for (j210 = 1; j210 <= i_2; ++j210) {
+            ++ilii;
+            zline[j210 - 1] = pfield[ilii];
+         }
+
+/*       and interpolate this line. */
+
+         rowina3(zline, iregno, kpoint[j230], zwork, icode, msval, kret);
+         if (*kret != 0) goto L900;
+
+/*       Add regular grid values for this line to the
+         temporary array. */
+
+         i_2 = iregno;
+         for (j220 = 1; j220 <= i_2; ++j220) {
+            ++ilio;
+            ztemp[ilio - 1] = zline[j220 - 1];
+         }
+
+      } else {
+
+/*       Line contains the required number of values, so add */
+/*       this line to the temporary array. */
+
+         i_2 = iregno;
+         for (j225 = 1; j225 <= i_2; ++j225) {
+            ++ilio;
+            ++ilii;
+            ztemp[ilio - 1] = pfield[ilii];
+         }
+      }
+   }
+
+/* Copy temporary array to user array. */
+
+   i_1 = klon * klat;
+   for (j240 = 1; j240 <= i_1; ++j240) {
+      pfield[j240] = ztemp[j240 - 1];
+   }
+
+/* -------------------------------------------------------- */
+/* Section 9. Return to calling routine. Format statements. */
+/* -------------------------------------------------------- */
+
+L900:
+
+   free(zline);
+   free(zwork);
+
+   return 0;
+} /* qu2reg3 */
 
 
 FILE *grprsm = NULL;
@@ -7396,7 +7739,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.0" " of ""May 22 2006"" ""13:02:46";
+static const char grb_libvers[] = "1.0.0" " of ""Jun  2 2006"" ""12:42:10";
 
 
 

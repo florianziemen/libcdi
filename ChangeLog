@@ -2,6 +2,7 @@
 
 	* using GRIB library version 1.0.0
 	* rename *New functions to *Create
+	* stream_grb: update level type ISENTROPIC (report: Ag Stephens)
 	* stream_ieg: multiply pressure levels with 100 (report: Holger Goettel)
 	* gridPrint: GME support
 	* cdi_error: change return type to char*

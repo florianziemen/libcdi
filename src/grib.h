@@ -18,6 +18,7 @@
 #define  LTYPE_HYBRID_LAYER        110
 #define  LTYPE_LANDDEPTH           111
 #define  LTYPE_LANDDEPTH_LAYER     112
+#define  LTYPE_ISENTROPIC          113
 #define  LTYPE_SEADEPTH            160
 #define  LTYPE_99_MARGIN          1000
 

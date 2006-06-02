@@ -315,6 +315,11 @@ int gribGetZaxisType(int grbleveltype)
 	leveltype = ZAXIS_DEPTH_BELOW_LAND;
 	break;
       }
+    case LTYPE_ISENTROPIC:
+      {
+	leveltype = ZAXIS_ISENTROPIC;
+	break;
+      }
     case LTYPE_SEADEPTH:
       {
 	leveltype = ZAXIS_DEPTH_BELOW_SEA;

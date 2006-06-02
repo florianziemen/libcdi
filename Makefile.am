@@ -2,6 +2,6 @@
 #
 SUBDIRS = src prog examples tests
 #
-EXTRA_DIST=config/default
+EXTRA_DIST=config/default doc/cdi_cman.pdf doc/cdi_fman.pdf
 #
 CLEANFILES  = `ls *~`

@@ -51,7 +51,7 @@ extern "C" {
 #define  GRID_LONLAT              4
 #define  GRID_SPECTRAL            5
 #define  GRID_FOURIER             6
-#define  GRID_GME                 7
+#define  GRID_GME                 7  /* Icosahedral-hexagonal GME Grid */
 #define  GRID_TRAJECTORY          8
 #define  GRID_CELL                9
 #define  GRID_CURVILINEAR        10

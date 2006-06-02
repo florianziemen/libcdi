@@ -84,7 +84,7 @@ install_sh = @install_sh@
 #
 SUBDIRS = src prog examples tests
 #
-EXTRA_DIST = config/default
+EXTRA_DIST = config/default doc/cdi_cman.pdf doc/cdi_fman.pdf
 #
 CLEANFILES = `ls *~`
 subdir = .
@@ -235,7 +235,7 @@ distcleancheck_listfiles = find . -type f -print
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkinstalldirs) $(distdir)/config
+	$(mkinstalldirs) $(distdir)/config $(distdir)/doc
 	@list='$(DISTFILES)'; for file in $$list; do \
 	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
 	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
