@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Fri Jun  2 12:42:10 CEST 2006 */
+/* Generated automatically from m214003 on Thu Jun 15 13:28:06 CEST 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -81,11 +81,11 @@ void   scm0(double *pdl, double *pdr, double *pfl, double *pfr, int klg);
 int    rowina2(double *p, int ko, int ki, double *pw,
 	       int kcode, double msval, int *kret);
 int    rowina3(double *p, int ko, int ki, double *pw,
-	       int kcode, double msval, int *kret);
+	       int kcode, double msval, int *kret, int omisng, int operio, int oveggy);
 int    qu2reg2(double *pfield, int *kpoint, int klat, int klon,
 	       double *ztemp, double msval, int *kret);
 int    qu2reg3(double *pfield, int *kpoint, int klat, int klon,
-	       double *ztemp, double msval, int *kret);
+	       double msval, int *kret, int omisng, int operio, int oveggy);
 
 #if  defined  (INT32)
 long   packInt32(INT32 *up, char *cp, long bc, long tc);
@@ -4555,19 +4555,22 @@ void gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 
   if ( dfunc == 'R' && ISEC2_Reduced )
     {
-      double *ztemp;
-      int  nlon, nlat;
+      int nlon, nlat;
+      int lsect3, lperio, lveggy;
       ISEC2_Reduced = 0;
       ISEC2_NumLon = ISEC2_NumLat*2;
       nlon = ISEC2_NumLon;
       nlat = ISEC2_NumLat;
       ISEC4_NumValues = nlon*nlat;
 
-      ztemp = (double *) malloc(ISEC4_NumValues*sizeof(double));
-      if ( ztemp == NULL ) SysError(func, "No Memory!");
-      /* (void) qu2reg2(fsec4, ISEC2_RowLonPtr, nlat, nlon, ztemp, FSEC3_MissVal, iret); */
-      (void) qu2reg3(fsec4, ISEC2_RowLonPtr, nlat, nlon, ztemp, FSEC3_MissVal, iret);
-      free(ztemp);
+      lsect3 = bitmapSize > 0;
+      lperio = 1;
+      lveggy = (ISEC1_CodeTable == 128) && (ISEC1_CenterID == 98) && 
+	       ((ISEC1_Parameter == 27) || (ISEC1_Parameter == 28) || 
+		(ISEC1_Parameter == 29) || (ISEC1_Parameter == 30));
+
+      (void) qu2reg3(fsec4, ISEC2_RowLonPtr, nlat, nlon, FSEC3_MissVal, iret,
+		     lsect3, lperio, lveggy);
 
       if ( bitmapSize > 0 )
 	{
@@ -5260,8 +5263,89 @@ L900:
 
 
 int rowina3(double *p, int ko, int ki, double *pw,
-	    int kcode, double msval, int *kret)
+	    int kcode, double msval, int *kret, int omisng, int operio, int oveggy)
 {
+  /*
+C---->
+C**** ROWINA3 - Interpolation of row of values.
+C
+C     Purpose.
+C     --------
+C
+C     Interpolate a row of values.
+C
+C
+C**   Interface.
+C     ----------
+C
+C     CALL ROWINA3( P, KO, KI, PW, KCODE, PMSVAL, KRET, OMISNG, OPERIO)
+C
+C
+C     Input Parameters.
+C     -----------------
+C
+C     P      - Row of values to be interpolated.
+C              Dimension must be at least KO.
+C
+C     KO     - Number of values required.
+C
+C     KI     - Number of values in P on input.
+C
+C     PW     - Working array.
+C              Dimension must be at least (0:KO+2,3).
+C
+C     KCODE  - Interpolation required.
+C              1 , linear.
+C              3 , cubic.
+C
+C     PMSVAL - Value used for missing data indicator.
+C
+C     OMISNG - True if missing values are present in field.
+C
+C     OPERIO - True if input field is periodic.
+C
+C     OVEGGY     - True if 'nearest neighbour' processing must be used
+C                  for interpolation
+C
+C     Output Parameters.
+C     ------------------
+C
+C     P     - Now contains KO values.
+C     KRET  - Return code
+C             0, OK
+C             Non-zero, error
+C
+C
+C     Method.
+C     -------
+C
+C     Linear or cubic interpolation performed as required.
+C
+C     Comments.
+C     ---------
+C
+C     This is a version of ROWINA which allows for missing data
+C     values and hence for bitmapped fields.
+C
+C
+C     Author.
+C     -------
+C
+C     J.D.Chambers    ECMWF     22.07.94
+C
+C
+C     Modifications.
+C     --------------
+C
+C     J.D.Chambers    ECMWF     13.09.94
+C     Add return code KRET and remove calls to ABORT.
+C
+C     J. Clochard, Meteo France, for ECMWF - January 1998.
+C     Addition of OMISNG and OPERIO arguments.
+C
+C
+C     -----------------------------------------------------------------
+*/
   /* System generated locals */
   int pw_dim1, pw_offset, i_1;
 
@@ -5276,35 +5360,6 @@ int rowina3(double *p, int ko, int ki, double *pw,
   pw_offset = pw_dim1;
   pw -= pw_offset;
 
-  /* **** ROWINA2 - Interpolation of row of values. */
-  /*     Input Parameters. */
-  /*     ----------------- */
-  /*     P      - Row of values to be interpolated. */
-  /*              Dimension must be at least KO. */
-  /*     KO     - Number of values required. */
-  /*     KI     - Number of values in P on input. */
-  /*     PW     - Working array. */
-  /*              Dimension must be at least (0:KO+2,3). */
-  /*     KCODE  - Interpolation required. */
-  /*              1 , linear. */
-  /*              3 , cubic. */
-  /*     PMSVAL - Value used for missing data indicator. */
-
-  /*     Output Parameters. */
-  /*     ------------------ */
-  /*     P     - Now contains KO values. */
-  /*     KRET  - Return code */
-  /*             0, OK */
-  /*             Non-zero, error */
-
-  /*     Author. */
-  /*     ------- */
-  /*     J.D.Chambers    ECMWF     22.07.94 */
-
-  /*     ********************************    */
-  /*     Section 1.  Linear interpolation .. */
-  /*     ********************************    */
-
   *kret = 0;
 
   if ( kcode == 1 )
@@ -5313,11 +5368,11 @@ int rowina3(double *p, int ko, int ki, double *pw,
       for ( jl = 1; jl <= ki; ++jl )
 	pw[jl + pw_dim1] = p[jl];
 
-      /*    Arrange wrap-around value in work array */
+      /* Arrange wrap-around value in work array */
       pw[ki + 1 + pw_dim1] = p[1];
 
-      /*    Set up constants to be used to figure out weighting for */
-      /*    values in interpolation. */
+      /* Set up constants to be used to figure out weighting for */
+      /* values in interpolation. */
       zrdi = (double) ki;
       zdo = 1.0 / (double) ko;
 
@@ -5325,35 +5380,45 @@ int rowina3(double *p, int ko, int ki, double *pw,
       for ( jl = 1; jl <= ko; ++jl )
 	{
 
-	  /*    Calculate weight from the start of row */
+	  /* Calculate weight from the start of row */
 	  zpos = (jl - 1) * zdo;
 	  zwt = zpos * zrdi;
 
-	  /*    Get the current array position(minus 1) from the weight - */
-	  /*    note the implicit truncation. */
+	  /* Get the current array position(minus 1) from the weight - */
+	  /* note the implicit truncation. */
 	  ip = (int) zwt;
+		  
+	  /* Adjust the weight to range (0.0 to 1.0) */
+	  zwt -= ip;
 
-	  /*    If the left value is missing, use the right value */
-	  if (pw[ip + 1 + pw_dim1] == msval)
+          /* If 'nearest neighbour' processing must be used */
+	  if ( oveggy )
 	    {
-	      p[jl] = pw[ip + 2 + pw_dim1];
+              if ( zwt < 0.5 )
+                p[jl] = pw[ip + 1 + pw_dim1];
+	      else
+		p[jl] = pw[ip + 2 + pw_dim1];
 	    }
-	  /*    If the right value is missing, use the left value */
-	  else if (pw[ip + 2 + pw_dim1] == msval)
-	    {
-	      p[jl] = pw[ip + 1 + pw_dim1];
-	    }
-	  /*    If neither missing, interpolate ... */
 	  else
 	    {
-
-	      /*       Adjust the weight to range (0.0 to 1.0) */
-	      zwt -= ip;
-
-	      /*       Interpolate using the weighted values on either side */
-	      /*       of the output point position */
-	      p[jl] = (1.0 - zwt) * pw[ip + 1 + pw_dim1] +
-		zwt * pw[ip + 2 + pw_dim1];
+	      /*    If the left value is missing, use the right value */
+	      if (pw[ip + 1 + pw_dim1] == msval)
+		{
+		  p[jl] = pw[ip + 2 + pw_dim1];
+		}
+	      /*    If the right value is missing, use the left value */
+	      else if (pw[ip + 2 + pw_dim1] == msval)
+		{
+		  p[jl] = pw[ip + 1 + pw_dim1];
+		}
+	      /*    If neither missing, interpolate ... */
+	      else
+		{
+		  /*       Interpolate using the weighted values on either side */
+		  /*       of the output point position */
+		  p[jl] = (1.0 - zwt) * pw[ip + 1 + pw_dim1] +
+		    zwt * pw[ip + 2 + pw_dim1];
+		}
 	    }
 	}
 
@@ -5592,8 +5657,104 @@ L900:
 
 
 int qu2reg3(double *pfield, int *kpoint, int klat, int klon,
-	    double *ztemp, double msval, int *kret)
+	    double msval, int *kret, int omisng, int operio, int oveggy)
 {
+  /*
+C**** QU2REG3 - Convert quasi-regular grid data to regular.
+C
+C     Purpose.
+C     --------
+C
+C     Convert quasi-regular grid data to regular,
+C     using either a linear or cubic interpolation.
+C
+C
+C**   Interface.
+C     ----------
+C
+C     CALL QU2REG3(PFIELD,KPOINT,KLAT,KLON,KCODE,PMSVAL,OMISNG,OPERIO,
+C    X            OVEGGY)
+C
+C
+C     Input Parameters.
+C     -----------------
+C
+C     PFIELD     - Array containing quasi-regular grid data.
+C
+C     KPOINT     - Array containing list of the number of
+C                  points on each latitude (or longitude) of
+C                  the quasi-regular grid.
+C
+C     KLAT       - Number of latitude lines
+C
+C     KLON       - Number of longitude lines
+C
+C     KCODE      - Interpolation required.
+C                  1 , linear - data quasi-regular on latitude lines.
+C                  3 , cubic -  data quasi-regular on latitude lines.
+C                  11, linear - data quasi-regular on longitude lines.
+C                  13, cubic -  data quasi-regular on longitude lines.
+C
+C     PMSVAL     - Value used for missing data indicator.
+C
+C     OMISNG     - True if missing values are present in field.
+C
+C     OPERIO     - True if input field is periodic.
+C
+C     OVEGGY     - True if 'nearest neighbour' processing must be used
+C                  for interpolation
+C
+C
+C     Output Parameters.
+C     ------------------
+C
+C     KRET       - return code
+C                  0 = OK
+C                  non-zero indicates fatal error
+C
+C
+C     Output Parameters.
+C     ------------------
+C
+C     PFIELD     - Array containing regular grid data.
+C
+C
+C     Method.
+C     -------
+C
+C     Data is interpolated and expanded into a temporary array,
+C     which is then copied back into the user's array.
+C     Returns an error code if an invalid interpolation is requested
+C     or field size exceeds array dimensions.
+C
+C     Comments.
+C     ---------
+C
+C     This routine is an adaptation of QU2REG to allow missing data
+C     values, and hence bit mapped fields.
+C
+C
+C     Author.
+C     -------
+C
+C     J.D.Chambers     ECMWF      22.07.94
+C
+C
+C     Modifications.
+C     --------------
+C
+C     J.D.Chambers     ECMWF      13.09.94
+C     Add return code KRET and remove calls to ABORT.
+C
+C     J.D.Chambers     ECMWF        Feb 1997
+C     Allow for 64-bit pointers
+C
+C     J. Clochard, Meteo France, for ECMWF - January 1998.
+C     Addition of OMISNG and OPERIO arguments.
+C     Fix message for longitude number out of bounds, and routine
+C     name in title and formats.
+C
+*/
    static char func[] = "qu2reg2";
 
    /* System generated locals */
@@ -5602,10 +5763,13 @@ int qu2reg3(double *pfield, int *kpoint, int klat, int klon,
 
    /* Local variables */
    int ilii, ilio, icode;
+   double *ztemp = NULL;
    double *zline = NULL;
    double *zwork = NULL;
    int iregno, iquano, j210, j220, j230, j240, j225;
 
+   ztemp = (double *) malloc(klon*klat*sizeof(double));
+   if ( ztemp == NULL ) SysError(func, "No Memory!");
 
    zline = (double *) malloc(2*klon*sizeof(double));
    if ( zline == NULL ) SysError(func, "No Memory!");
@@ -5616,39 +5780,6 @@ int qu2reg3(double *pfield, int *kpoint, int klat, int klon,
    /* Parameter adjustments */
    --pfield;
    --kpoint;
-
-/* **** QU2REG - Convert quasi-regular grid data to regular. */
-/*     Input Parameters. */
-/*     ----------------- */
-/*     PFIELD     - Array containing quasi-regular grid */
-/*                  data. */
-/*     KPOINT     - Array containing list of the number of */
-/*                  points on each latitude (or longitude) of */
-/*                  the quasi-regular grid. */
-/*     KLAT       - Number of latitude lines */
-/*     KLON       - Number of longitude lines */
-/*     KCODE      - Interpolation required. */
-/*                  1 , linear - data quasi-regular on */
-/*                               latitude lines. */
-/*                  3 , cubic -  data quasi-regular on */
-/*                               latitude lines. */
-/*                  11, linear - data quasi-regular on */
-/*                               longitude lines. */
-/*                  13, cubic -  data quasi-regular on */
-/*                               longitude lines. */
-/*     PMSVAL     - Value used for missing data indicator. */
-/*     Output Parameters. */
-/*     ------------------ */
-/*     KRET       - return code */
-/*                  0 = OK */
-/*                  non-zero indicates fatal error */
-/*     PFIELD     - Array containing regular grid data. */
-/*     Author. */
-/*     ------- */
-/*     J.D.Chambers     ECMWF      22.07.94 */
-/*     J.D.Chambers     ECMWF      13.09.94 */
-/*     Add return code KRET and remove calls to ABORT. */
-
 
 /* ------------------------------ */
 /* Section 1. Set initial values. */
@@ -5708,7 +5839,7 @@ int qu2reg3(double *pfield, int *kpoint, int klat, int klon,
 
 /*       and interpolate this line. */
 
-         rowina3(zline, iregno, kpoint[j230], zwork, icode, msval, kret);
+         rowina3(zline, iregno, kpoint[j230], zwork, icode, msval, kret, omisng, operio , oveggy);
          if (*kret != 0) goto L900;
 
 /*       Add regular grid values for this line to the
@@ -5747,8 +5878,9 @@ int qu2reg3(double *pfield, int *kpoint, int klat, int klon,
 
 L900:
 
-   free(zline);
    free(zwork);
+   free(zline);
+   free(ztemp);
 
    return 0;
 } /* qu2reg3 */
@@ -7739,7 +7871,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.0" " of ""Jun  2 2006"" ""12:42:10";
+static const char grb_libvers[] = "1.0.0" " of ""Jun 15 2006"" ""13:28:07";
 
 
 
