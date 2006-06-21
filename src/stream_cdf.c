@@ -3468,10 +3468,10 @@ int cdfInqContents(int streamID)
 		    {
 		      if ( nvdims > 0 )
 			Warning(func, "axis attribute length %d does not match nvdim %d for %s",
-				attlen, nvdims, name);
+				(int) attlen, nvdims, name);
 		      if ( nvdims > 0 )
 			{
-			  fprintf(stderr, "attlen %d %d %d\n", strlen(attstring), attlen, nvdims);
+			  fprintf(stderr, "attlen %d %d %d\n", (int) strlen(attstring), (int) attlen, nvdims);
 			  for ( i = 0; i < (int)attlen; i++ )
 			    fprintf(stderr, "       %d %d %c\n", i, (int) attstring[i], attstring[i]);
 			}

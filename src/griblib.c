@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Thu Jun 15 13:28:06 CEST 2006 */
+/* Generated automatically from m214003 on Tue Jun 20 08:25:24 CEST 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -7095,7 +7095,13 @@ void gribPrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
 /* #define SZTEST */
 
 #if  defined  (HAVE_LIBSZ)
+#if defined(__cplusplus)
+extern "C" {
+#endif
 #  include "szlib.h"
+#if defined (__cplusplus)
+}
+#endif
 
 #  define OPTIONS_MASK        (SZ_RAW_OPTION_MASK | SZ_MSB_OPTION_MASK | SZ_NN_OPTION_MASK)
 #  define PIXELS_PER_BLOCK    (8)
@@ -7443,7 +7449,7 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
     int status;
     int datstart, datsize;
     SZ_com_t sz_param;          /* szip parameter block */
-    char *dest, *source;
+    unsigned char *dest, *source;
     size_t destLen, sourceLen;
     int bds_len, bds_nbits, bds_flag, bds_rep, bds_cplx, bds_aflag;
     int lnil;
@@ -7569,7 +7575,7 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
 #endif
 
     
-    status= SZ_BufftoBuffCompress(dest, &destLen, source, sourceLen, &sz_param);
+    status = SZ_BufftoBuffCompress(dest, &destLen, source, sourceLen, &sz_param);
     if ( status != SZ_OK )
       {
 	if ( status == SZ_NO_ENCODER_ERROR )
@@ -7871,7 +7877,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.0" " of ""Jun 15 2006"" ""13:28:07";
+static const char grb_libvers[] = "1.0.0" " of ""Jun 20 2006"" ""08:25:24";
 
 
 
