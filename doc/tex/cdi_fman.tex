@@ -3,7 +3,7 @@
 
 \usepackage{graphics}
 
-\newcommand{\CDI}{{\bfseries\sffamily CDI\ }}
+\newcommand{\CDI}{\bfseries\sffamily CDI}
 
 % To define headers and footers
 \usepackage{fancyhdr}
@@ -114,7 +114,7 @@
 
 \begin{titlepage}
 \vspace*{50mm}
-{\Huge\CDI \bf Fortran Manual}
+{\Huge{\CDI} \ \bf Fortran Manual}
 
 \setlength{\unitlength}{1cm}
 \begin{picture}(16,0.4)
@@ -158,7 +158,7 @@
 \chapter{CDI modules}
 \input{modules}
 
-\newpage
+%\newpage
 \section{Dataset functions}
 \input{dataset}
 \input{f_stream}

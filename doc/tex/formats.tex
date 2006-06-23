@@ -1,5 +1,5 @@
-Every input and output file is a collection of 2D or 3D variables
-over an unlimited number of time steps.
+%Every input and output file is a collection of 2D or 3D variables
+%over an unlimited number of time steps.
 
 \section{GRIB edition 1}
 
@@ -23,41 +23,53 @@ of locally used parameters and geometries. Any activity
 that generates and distributes GRIB records must also make
 their locally defined GRIB tables available to users.
 
-\CDI does not support the full GRIB standard. The following
-data representation and level types are implemented:
+{\CDI} does not support the full GRIB standard. The following
+data representation and level types are implemented: \\
 
-\begin{itemize}
-\item Latitude/Longitude  Grid
-\item Gaussian Latitude/Longitude Grid
-\item Spherical Harmonic Coefficients
-\item Icosahedral-hexagonal GME Grid
-\end{itemize}
+\begin{tabular}{rl}
+\textbf{Grid type} &  \\
+   0  & Latitude/longitude grid \\
+   4  & Gaussian latitude/longitude grid \\
+  10  & Rotated latitude/longitude grid \\
+  50  & Spherical Harmonic Coefficients \\
+ 192  & Icosahedral-hexagonal GME grid \\
+\end{tabular}
 
-\begin{itemize}
-\item Surface level
-\item Isobaric level
-\item Height above ground
-\item Hybrid level     
-%\item Layer between two hybrid levels  
-\item Depth below land surface     
-%\item Layer between two depths below land surface     
-\item Depth below sea level   
-\end{itemize}
-     
-%0  	Latitude/Longitude  Grid
-%4 	Gaussian Latitude/Longitude Grid
-%50 	Spherical Harmonic Coefficients
-%192    Icosahedral-hexagonal GME Grid
-%
-%1       Surface level
-%100     Isobaric level
-%103     fixed height level
-%105     Height above ground
-%109     Hybrid level     
-%110     Layer between two hybrid levels  
-%111     Depth below land surface     
-%112     Layer between two depths below land surface     
-%160     Depth below sea level        
+
+\begin{tabular}{rl}
+\textbf{Level type} & \\
+   1  & Surface level \\
+ 100  & Isobaric level \\
+ 103  & Altitude above mean sea level \\
+ 105  & Height above ground \\
+ 109  & Hybrid level      \\
+ 110  & Layer between two hybrid levels   \\
+ 111  & Depth below land surface    \\
+ 112  & Layer between two depths below land surface   \\   
+ 113  & Isentropic (theta) level \\
+ 160  & Depth below sea level    \\
+\end{tabular}
+
+%\begin{itemize}
+%\item   0 Latitude/longitude grid
+%\item   4 Gaussian latitude/longitude grid
+%\item  10 Rotated latitude/longitude grid
+%\item  50 Spherical Harmonic Coefficients
+%\item 192 Icosahedral-hexagonal GME grid
+%\end{itemize}
+
+%\begin{itemize}
+%\item   1 Surface level
+%\item 100 Isobaric level
+%\item 103 Altitude above mean sea level
+%\item 105 Height above ground
+%\item 109 Hybrid level     
+%\item 110 Layer between two hybrid levels  
+%\item 111 Depth below land surface   
+%\item 112 Layer between two depths below land surface     
+%\item 113 Isentropic (theta) level
+%\item 160 Depth below sea level   
+%\end{itemize}
 
 
 \section{NetCDF}
@@ -68,12 +80,12 @@ The netCDF library also defines a machine-independent format for
 representing scientific data. Together, the interface, library, and 
 format support the creation, access, and sharing of scientific data.
 
-\CDI supports only 2D, 3D and 4D arrays and the attributes should follow the
+{\CDI} supports only 2D, 3D and 4D arrays and the attributes should follow the
 \href{http://ftp.unidata.ucar.edu/software/netcdf/docs/conventions.html}
      {GDT, COARDS or CF Conventions}.
-NetCDF is an external library and not part of \CDI. To use netCDF with
-\CDI the netCDF library must be installed before the configuration
-of the \CDI library (see \htmlref{Build}{build}).
+NetCDF is an external library and not part of {\CDI}. To use netCDF with
+{\CDI} the netCDF library must be installed before the configuration
+of the {\CDI} library (see \htmlref{Build}{build}).
 
 %\subsection{ncdap}
 
@@ -110,8 +122,8 @@ The meaning of the variables are:
 \item[{\tt itime}]    The time as HHMM
 \item[{\tt nlon}]     The number of longitudes
 \item[{\tt nlat}]     The number of latitides
-\item[{\tt idispo1}]  For the users disposal (Not used in \CDI)
-\item[{\tt idispo2}]  For the users disposal (Not used in \CDI)
+\item[{\tt idispo1}]  For the users disposal (Not used in {\CDI})
+\item[{\tt idispo2}]  For the users disposal (Not used in {\CDI})
 \end{deflist}
 \end{minipage}
 
@@ -157,7 +169,7 @@ description section are coded with 4 byte integer values and the
 data section can have 4 or 8 byte IEEE floating point values.
 The header and the data section have the standard Fortran blocking
 for binary data records.
-\CDI supports only data on an rotated grid for the IEG format.
+{\CDI} supports only data on an rotated grid for the IEG format.
 
 %%% Local Variables: 
 %%% mode: latex

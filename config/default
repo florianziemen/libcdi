@@ -23,9 +23,9 @@ case "${HOSTNAME}" in
                     --enable-dap --with-netcdf=$HOME/local \
                     CC=g++ CFLAGS="-g -O2 -Wall" CFINT=-Df2cFortran
 	;;
-    tolken | gata)
+    gata)
 	./configure --prefix=$HOME/local/LINUX \
-                    --with-netcdf=/scratch/localA/m214003/local \
+                    --with-netcdf=/client \
 	            CC=gcc CFLAGS="-ansi -g -O2 -Wall" CFINT=-Df2cFortran
 	;;
 # sparc-sun-solaris2.8

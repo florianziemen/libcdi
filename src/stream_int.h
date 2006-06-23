@@ -221,6 +221,7 @@ extern int cdiDefaultInstID;
 extern int cdiDefaultModelID;
 extern int cdiDefaultTableID;
 extern int cdiDefaultLeveltype;
+extern int cdiNcMissingValue;
 
 int     streamInqFileID(int streamID);
 

@@ -463,6 +463,9 @@ void cdfDefMissval(int streamID, int varID, int dtype)
 
       cdf_put_att_double(fileID, ncvarid, "_FillValue", (nc_type) xtype, 1L, &missval);
 
+      if ( cdiNcMissingValue == 1 )
+	cdf_put_att_double(fileID, ncvarid, "missing_value", (nc_type) xtype, 1L, &missval);
+
       if ( streams[streamID].ncmode == 2 ) cdf_enddef(fileID);
 
       streams[streamID].vars[varID].defmiss = TRUE;

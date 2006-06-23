@@ -21,6 +21,7 @@
 int cdiDefaultInstID  = CDI_UNDEFID;
 int cdiDefaultModelID = CDI_UNDEFID;
 int cdiDefaultTableID = CDI_UNDEFID;
+int cdiNcMissingValue = CDI_UNDEFID;
 
 double cdiDefaultMissval = -9.E33;
 
@@ -153,6 +154,9 @@ void cdiInitialize(void)
 
       envString = getenv("CD_MISSVAL");
       if ( envString ) cdiDefaultMissval = atof(envString);
+
+      envString = getenv("NC_MISSING_VALUE");
+      if ( envString ) cdiNcMissingValue = atof(envString);
     }
 }
 

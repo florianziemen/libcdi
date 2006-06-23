@@ -1,4 +1,4 @@
-Every FORTRAN file that references \CDI functions or constants must contain
+Every FORTRAN file that references {\CDI} functions or constants must contain
 an appropriate {\tt INCLUDE} statement before the first such reference:
 
 \begin{verbatim}
@@ -15,11 +15,11 @@ the compiler, to specify a directory where {\tt cdi.inc} is installed, for examp
 
 Alternatively, you could specify an absolute path name in the {\tt INCLUDE}
 statement, but then your program would not compile on another platform
-where \CDI is installed in a different location.
+where {\CDI} is installed in a different location.
 
-Unless the \CDI library is installed in a standard directory where the linker
+Unless the {\CDI} library is installed in a standard directory where the linker
 always looks, you must use the {\tt -L} and {\tt -l} options to links an object file that
-uses the \CDI library. For example:
+uses the {\CDI} library. For example:
 
 \begin{verbatim}
    f77 -o myprogram myprogram.o -L/usr/local/cdi/lib -lcdi
@@ -31,7 +31,7 @@ Alternatively, you could specify an absolute path name for the library:
    f77 -o myprogram myprogram.o -L/usr/local/cdi/lib/libcdi
 \end{verbatim}
 
-If the \CDI library is using other external libraries, you must add this
+If the {\CDI} library is using other external libraries, you must add this
 libraries in the same way.
 For example with the netCDF library:
 
