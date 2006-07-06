@@ -11,9 +11,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-int getpagesize(void);
-
+/*
+size_t getpagesize(void);
+*/
 #include "dmemory.h"
 #include "error.h"
 #include "file.h"

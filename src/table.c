@@ -577,6 +577,7 @@ void tableWrite(const char *ptfile, int tableID)
   FILE *ptfp;
   int tablenum, modelID, instID = CDI_UNDEFID;
   int center = 0, subcenter = 0;
+  char *name, *longname, *units;
   char *instnameptr = NULL, *modelnameptr = NULL;
 
   if ( CDI_Debug )
@@ -596,12 +597,23 @@ void tableWrite(const char *ptfile, int tableID)
 
   for ( item = 0; item < npars; item++)
     {
-      lenname  = strlen(parTable[tableID].pars[item].name);
-      lenlname = strlen(parTable[tableID].pars[item].longname);
-      lenunits = strlen(parTable[tableID].pars[item].units);
-      if ( lenname  > maxname )  maxname  = lenname;
-      if ( lenlname > maxlname ) maxlname = lenlname;
-      if ( lenunits > maxunits ) maxunits = lenunits;
+      if ( parTable[tableID].pars[item].name )
+	{
+	  lenname  = strlen(parTable[tableID].pars[item].name);
+	  if ( lenname  > maxname )  maxname  = lenname;
+	}
+
+      if ( parTable[tableID].pars[item].longname )
+	{
+	  lenlname = strlen(parTable[tableID].pars[item].longname);
+	  if ( lenlname > maxlname ) maxlname = lenlname;
+	}
+
+      if ( parTable[tableID].pars[item].units )
+	{
+	  lenunits = strlen(parTable[tableID].pars[item].units);
+	  if ( lenunits > maxunits ) maxunits = lenunits;
+	}
     }
 
   tablenum = tableInqNum(tableID);
@@ -647,14 +659,17 @@ void tableWrite(const char *ptfile, int tableID)
 	  
   for ( item = 0; item < npars; item++)
     {
+      name = parTable[tableID].pars[item].name;
+      longname = parTable[tableID].pars[item].longname;
+      units = parTable[tableID].pars[item].units;
+      if ( name == NULL ) name = " ";
+      if ( longname == NULL ) longname = " ";
+      if ( units == NULL ) units = " ";
       fprintf(ptfp, "%4d | %-*s | %-*s | %-*s\n",
 	      parTable[tableID].pars[item].id,
-	      maxname,
-	      parTable[tableID].pars[item].name,
-	      maxlname,
-	      parTable[tableID].pars[item].longname,
-	      maxunits,
-	      parTable[tableID].pars[item].units);
+	      maxname, name,
+	      maxlname, longname,
+	      maxunits, units);
     }
 
   fclose(ptfp);
@@ -689,18 +704,23 @@ void tableWriteC(const char *filename, int tableID)
 
   for ( item = 0; item < npars; item++)
     {
-      lenname  = strlen(parTable[tableID].pars[item].name);
+      if ( parTable[tableID].pars[item].name )
+	{
+	  lenname  = strlen(parTable[tableID].pars[item].name);
+	  if ( lenname  > maxname )  maxname  = lenname;
+	}
+
       if ( parTable[tableID].pars[item].longname )
-	lenlname = strlen(parTable[tableID].pars[item].longname);
-      else
-	lenlname = 0;
+	{
+	  lenlname = strlen(parTable[tableID].pars[item].longname);
+	  if ( lenlname > maxlname ) maxlname = lenlname;
+	}
+
       if ( parTable[tableID].pars[item].units )
-	lenunits = strlen(parTable[tableID].pars[item].units);
-      else
-	lenunits = 0;
-      if ( lenname  > maxname )  maxname  = lenname;
-      if ( lenlname > maxlname ) maxlname = lenlname;
-      if ( lenunits > maxunits ) maxunits = lenunits;
+	{
+	  lenunits = strlen(parTable[tableID].pars[item].units);
+	  if ( lenunits > maxunits ) maxunits = lenunits;
+	}
     }
 
   strcpy(tablename, parTable[tableID].name);

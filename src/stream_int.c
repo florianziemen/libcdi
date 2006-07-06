@@ -156,7 +156,7 @@ void cdiInitialize(void)
       if ( envString ) cdiDefaultMissval = atof(envString);
 
       envString = getenv("NC_MISSING_VALUE");
-      if ( envString ) cdiNcMissingValue = atof(envString);
+      if ( envString ) cdiNcMissingValue = atoi(envString);
     }
 }
 
