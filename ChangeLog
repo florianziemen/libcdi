@@ -1,5 +1,6 @@
 2006-08-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* split GRIB level type 105 with env var SPLIT_LTYPE_105
 	* file.c: remove declaration of getpagesize (report: Mark Hadfield)
 	* tableWrite: bug fix for undefined strings
 	* Version 1.0.1 released

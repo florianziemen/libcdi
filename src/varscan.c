@@ -45,12 +45,14 @@ typedef struct
 }
 VARTABLE;
 
+
 int vartableInit = 0;
 VARTABLE *vartable;
 static int varTablesize = 0;
 int nvars = 0;
 
-void codeInitEntry(int varID, int code)
+
+static void codeInitEntry(int varID, int code)
 {
   vartable[varID].code           = code;
   vartable[varID].prec           = 0;
@@ -63,7 +65,8 @@ void codeInitEntry(int varID, int code)
   vartable[varID].tableID        = UNDEFID;
 }
 
-int varGetEntry(int code, int leveltype, int codetable)
+
+static int varGetEntry(int code, int leveltype, int codetable)
 {
   int varID;
 
@@ -77,6 +80,7 @@ int varGetEntry(int code, int leveltype, int codetable)
 
   return (UNDEFID);
 }
+
 
 void varFree(void)
 {
@@ -236,10 +240,11 @@ void varAddRecord(int recID, int code, int gridID, int leveltype, int lbounds,
 		  int numavg, int codetable)
 {
   static char func[] = "varAddRecord";
-  int varID;
+  int varID = UNDEFID;
   int levelID = -1;
 
-  varID = varGetEntry(code, leveltype, codetable);
+  if ( ! (cdiSplitLtype105 == 1 && leveltype == ZAXIS_HEIGHT) )
+    varID = varGetEntry(code, leveltype, codetable);
 
   if ( varID == UNDEFID )
     {

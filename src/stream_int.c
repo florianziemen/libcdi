@@ -22,6 +22,7 @@ int cdiDefaultInstID  = CDI_UNDEFID;
 int cdiDefaultModelID = CDI_UNDEFID;
 int cdiDefaultTableID = CDI_UNDEFID;
 int cdiNcMissingValue = CDI_UNDEFID;
+int cdiSplitLtype105  = CDI_UNDEFID;
 
 double cdiDefaultMissval = -9.E33;
 
@@ -157,6 +158,9 @@ void cdiInitialize(void)
 
       envString = getenv("NC_MISSING_VALUE");
       if ( envString ) cdiNcMissingValue = atoi(envString);
+
+      envString = getenv("SPLIT_LTYPE_105");
+      if ( envString ) cdiSplitLtype105 = atoi(envString);
     }
 }
 
