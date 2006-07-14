@@ -39,6 +39,8 @@ Function catalog:
    vlist_var
 -------------------------------------------------------------
    vlistDefVar          Define a Variable
+   vlistInqVarGrid      Get the Grid ID of a Variable
+   vlistInqVarZaxis     Get the Zaxis ID of a Variable
    vlistDefVarCode      Define the code number of a Variable
    vlistInqVarCode      Get the Code number of a Variable
    vlistDefVarName      Define the name of a Variable

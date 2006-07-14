@@ -24,8 +24,8 @@ vlistNzaxis         vlist
 vlistDefTaxis       vlist
 vlistInqTaxis       vlist
 vlistDefVar         vlist_var
- vlistInqVarGrid     vlist_var
- vlistInqVarZaxis    vlist_var
+vlistInqVarGrid     vlist_var
+vlistInqVarZaxis    vlist_var
  vlistInqVarTime     vlist_var
 vlistDefVarCode     vlist_var
 vlistInqVarCode     vlist_var

@@ -276,6 +276,23 @@ void vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *timeID)
 }
 
 
+/*
+@Function  vlistInqVarGrid
+@Title     Get the Grid ID of a Variable
+
+@Prototype int vlistInqVarGrid(int vlistID, int varID)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier
+
+@Description
+The function @func{vlistInqVarGrid} returns the grid ID of a variable.
+
+@Result
+@func{vlistInqVarGrid} returns the grid ID of the variable.
+
+@EndFunction
+*/
 int vlistInqVarGrid(int vlistID, int varID)
 {
   static char func[] = "vlistInqVarGrid";
@@ -289,6 +306,23 @@ int vlistInqVarGrid(int vlistID, int varID)
 }
 
 
+/*
+@Function  vlistInqVarZaxis
+@Title     Get the Zaxis ID of a Variable
+
+@Prototype int vlistInqVarZaxis(int vlistID, int varID)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier
+
+@Description
+The function @func{vlistInqVarZaxis} returns the zaxis ID of a variable.
+
+@Result
+@func{vlistInqVarZaxis} returns the zaxis ID of the variable.
+
+@EndFunction
+*/
 int vlistInqVarZaxis(int vlistID, int varID)
 {
   static char func[] = "vlistInqVarZaxis";

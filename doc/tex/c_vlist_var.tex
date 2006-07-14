@@ -53,6 +53,62 @@ and add a variable with {\tt vlistDefVar}.
 \end{lstlisting}
 
 
+\subsection{Get the Grid ID of a Variable: {\tt vlistInqVarGrid}}
+\index{vlistInqVarGrid}
+\label{vlistInqVarGrid}
+
+The function {\tt vlistInqVarGrid} returns the grid ID of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int vlistInqVarGrid(int vlistID, int varID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+\item[{\tt varID}]
+Variable identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistInqVarGrid} returns the grid ID of the variable.
+
+
+
+\subsection{Get the Zaxis ID of a Variable: {\tt vlistInqVarZaxis}}
+\index{vlistInqVarZaxis}
+\label{vlistInqVarZaxis}
+
+The function {\tt vlistInqVarZaxis} returns the zaxis ID of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int vlistInqVarZaxis(int vlistID, int varID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+\item[{\tt varID}]
+Variable identifier
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistInqVarZaxis} returns the zaxis ID of the variable.
+
+
+
 \subsection{Define the code number of a Variable: {\tt vlistDefVarCode}}
 \index{vlistDefVarCode}
 \label{vlistDefVarCode}
