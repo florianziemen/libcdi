@@ -299,7 +299,7 @@ void taxisDefVdate(int taxisID, int vdate)
 @Prototype void taxisDefVtime(int taxisID, int vtime)
 @Parameter
     @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
-    @Item  vtime    Verification time (HHMM)
+    @Item  vtime    Verification time (hhmm)
 
 @Description
 The function @func{taxisDefVtime} defines the verification time of a Time axis.
@@ -347,7 +347,7 @@ void taxisDefRdate(int taxisID, int rdate)
 @Prototype void taxisDefRtime(int taxisID, int rtime)
 @Parameter
     @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
-    @Item  rtime    Reference time (HHMM)
+    @Item  rtime    Reference time (hhmm)
 
 @Description
 The function @func{taxisDefVdate} defines the reference time of a Time axis.

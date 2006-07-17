@@ -561,7 +561,7 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 		}
 	    }
 
-	  fprintf(stdout, "   YYYY-MM-DD HH:MM   YYYY-MM-DD HH:MM   YYYY-MM-DD HH:MM   YYYY-MM-DD HH:MM\n");
+	  fprintf(stdout, "   YYYY-MM-DD hh:mm   YYYY-MM-DD hh:mm   YYYY-MM-DD hh:mm   YYYY-MM-DD hh:mm\n");
 
 	  ntimeout = 0;
 	  tsID = 0;
