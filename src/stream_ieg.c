@@ -32,8 +32,8 @@ int iegInqDatatype(int prec)
 {
   int datatype;
 
-  if ( prec == DOUBLE_PRECISION ) datatype = DATATYPE_REAL8;
-  else                            datatype = DATATYPE_REAL4;
+  if ( prec == DOUBLE_PRECISION ) datatype = DATATYPE_FLT64;
+  else                            datatype = DATATYPE_FLT32;
 
   return (datatype);
 }
@@ -43,10 +43,10 @@ int iegDefDatatype(int datatype)
 {
   int prec;
 
-  if ( datatype != DATATYPE_REAL4 && datatype != DATATYPE_REAL8 )
-    datatype = DATATYPE_REAL4;
+  if ( datatype != DATATYPE_FLT32 && datatype != DATATYPE_FLT64 )
+    datatype = DATATYPE_FLT32;
 
-  if ( datatype == DATATYPE_REAL8 ) prec = DOUBLE_PRECISION;
+  if ( datatype == DATATYPE_FLT64 ) prec = DOUBLE_PRECISION;
   else                              prec = SINGLE_PRECISION;
 
   return (prec);

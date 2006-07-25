@@ -1,5 +1,8 @@
-2006-08-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+2006-08-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* using GRIB library version 1.0.1
+	* add DATATYPE PACK1 to PACK32
+	* change DATATYPE from byte to bit
 	* split GRIB level type 105 with env var SPLIT_LTYPE_105
 	* file.c: remove declaration of getpagesize (report: Mark Hadfield)
 	* tableWrite: bug fix for undefined strings

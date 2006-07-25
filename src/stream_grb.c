@@ -812,8 +812,8 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
 
   lbounds = gribGetZaxisHasBounds(ISEC1_LevelType);
 
-  if ( prec > DATATYPE_PACK3 ) prec = DATATYPE_PACK3;
-  if ( prec < DATATYPE_PACK  ) prec = DATATYPE_PACK;
+  if ( prec > 32 ) prec = DATATYPE_PACK32;
+  if ( prec <  0 ) prec = DATATYPE_PACK;
 
   varAddRecord(recID, code, gridID, leveltype, lbounds, level1, level2,
 	       prec, &varID, &levelID, numavg, ISEC1_CodeTable);
@@ -932,21 +932,10 @@ void grbScanTimestep1(int streamID)
       level2   = ISEC1_Level2;
       if ( ISEC1_LevelType == 100 ) level1 *= 100;
 
-      switch (ISEC4_NumBits)
-	{
-	case 8:
-	  prec = DATATYPE_PACK1;
-          break;
-	case 16:
-	  prec = DATATYPE_PACK2;
-          break;
-	case 24:
-	  prec = DATATYPE_PACK3;
-          break;
-	default:
-	  prec = DATATYPE_PACK;
-          break;
-	}
+      if ( ISEC4_NumBits > 0 && ISEC4_NumBits <= 32 )
+	prec = ISEC4_NumBits;
+      else
+        prec = DATATYPE_PACK;
 
       gribDateTime(isec1, &vdate, &vtime);
 
@@ -1870,15 +1859,10 @@ void grbDefData(int datatype, int *isec4, int gridID)
 
   if ( datatype != UNDEFID )
     {
-      if ( datatype != DATATYPE_PACK  && datatype != DATATYPE_PACK1 &&
-	   datatype != DATATYPE_PACK2 && datatype != DATATYPE_PACK3 )
-	{
-	  if   ( datatype == DATATYPE_REAL8 ) datatype = DATATYPE_PACK3;
-	  else                           datatype = DATATYPE_PACK2;
-	}
-      datatype *= 8;
-      if ( datatype == 8 || datatype == 16 || datatype == 24 )
+      if ( datatype > 0 && datatype <= 32 )
 	ISEC4_NumBits = datatype;
+      else if ( datatype == DATATYPE_FLT64 )
+	ISEC4_NumBits = 24;
       else
 	ISEC4_NumBits = 16;
     }

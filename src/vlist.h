@@ -27,7 +27,7 @@ typedef struct
   int      gridID;
   int      zaxisID;
   int      timeID;    /* ( TIME_VARIABLE or TIME_CONSTANT ) */
-  int      datatype;  /* DATATYPE_PACKX for GRIB data, else DATATYPE_REAL4 or DATATYPE_REAL8 */
+  int      datatype;  /* DATATYPE_PACKX for GRIB data, else DATATYPE_FLT32 or DATATYPE_FLT64 */
   int      instID;
   int      modelID;
   int      tableID;

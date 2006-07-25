@@ -12,17 +12,17 @@ one of the following time types must be specified:
 \end{minipage}
 \vspace*{3mm}
 
-The default data type is 2 byte for GRIB and 4 byte for all other
+The default data type is 16 bit for GRIB and 32 bit for all other
 file format types. To change the data type use one of the following 
 predefined constants:
 
 \vspace*{3mm}
 \hspace*{8mm}\begin{minipage}{15cm}
 \begin{deflist}{{\large\tt DATATYPE\_PACK1 \ \ }}
-\item[{\large\tt DATATYPE\_PACK1}]  1 packed byte (only for GRIB)
-\item[{\large\tt DATATYPE\_PACK2}]  2 packed byte (only for GRIB)
-\item[{\large\tt DATATYPE\_PACK3}]  3 packed byte (only for GRIB)
-\item[{\large\tt DATATYPE\_REAL4}]  4 byte floating point
-\item[{\large\tt DATATYPE\_REAL8}]  8 byte floating point
+\item[{\large\tt DATATYPE\_PACK8}]    8 packed bit (only for GRIB)
+\item[{\large\tt DATATYPE\_PACK16}]  16 packed bit (only for GRIB)
+\item[{\large\tt DATATYPE\_PACK24}]  24 packed bit (only for GRIB)
+\item[{\large\tt DATATYPE\_REAL32}]  32 bit floating point
+\item[{\large\tt DATATYPE\_REAL64}]  64 bit floating point
 \end{deflist}
 \end{minipage}

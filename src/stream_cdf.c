@@ -277,11 +277,11 @@ int cdfInqDatatype(int xtype)
 {
   int datatype;
 
-  if      ( xtype == NC_BYTE  )  datatype = DATATYPE_INT1;
-  else if ( xtype == NC_SHORT )  datatype = DATATYPE_INT2;
-  else if ( xtype == NC_INT   )  datatype = DATATYPE_INT4;
-  else if ( xtype == NC_FLOAT )  datatype = DATATYPE_REAL4;
-  else                           datatype = DATATYPE_REAL8;
+  if      ( xtype == NC_BYTE  )  datatype = DATATYPE_INT8;
+  else if ( xtype == NC_SHORT )  datatype = DATATYPE_INT16;
+  else if ( xtype == NC_INT   )  datatype = DATATYPE_INT32;
+  else if ( xtype == NC_FLOAT )  datatype = DATATYPE_FLT32;
+  else                           datatype = DATATYPE_FLT64;
 
   return (datatype);
 }
@@ -292,10 +292,10 @@ int cdfDefDatatype(int datatype)
 {
   int xtype;
 
-  if      ( datatype == DATATYPE_INT1  )  xtype = NC_BYTE;
-  else if ( datatype == DATATYPE_INT2  )  xtype = NC_SHORT;
-  else if ( datatype == DATATYPE_INT4  )  xtype = NC_INT;
-  else if ( datatype == DATATYPE_REAL8 )  xtype = NC_DOUBLE;
+  if      ( datatype == DATATYPE_INT8  )  xtype = NC_BYTE;
+  else if ( datatype == DATATYPE_INT16  )  xtype = NC_SHORT;
+  else if ( datatype == DATATYPE_INT32  )  xtype = NC_INT;
+  else if ( datatype == DATATYPE_FLT64 )  xtype = NC_DOUBLE;
   else                                    xtype = NC_FLOAT;
 
   return (xtype);
@@ -805,7 +805,7 @@ void cdfDefTrajLon(int streamID, int gridID)
   int vlistID;
   int xtype = NC_DOUBLE;
 
-  if ( gridInqPrec(gridID) == DATATYPE_REAL4 ) xtype = NC_FLOAT;
+  if ( gridInqPrec(gridID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
@@ -862,7 +862,7 @@ void cdfDefTrajLat(int streamID, int gridID)
   int vlistID;
   int xtype = NC_DOUBLE;
 
-  if ( gridInqPrec(gridID) == DATATYPE_REAL4 ) xtype = NC_FLOAT;
+  if ( gridInqPrec(gridID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
 
   vlistID = streamInqVlist(streamID);
   fileID = streamInqFileID(streamID);
@@ -924,7 +924,7 @@ void cdfDefXaxis(int streamID, int gridID)
   int vlistID;
   int xtype = NC_DOUBLE;
 
-  if ( gridInqPrec(gridID) == DATATYPE_REAL4 ) xtype = NC_FLOAT;
+  if ( gridInqPrec(gridID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
@@ -1040,7 +1040,7 @@ void cdfDefYaxis(int streamID, int gridID)
   int vlistID;
   int xtype = NC_DOUBLE;
 
-  if ( gridInqPrec(gridID) == DATATYPE_REAL4 ) xtype = NC_FLOAT;
+  if ( gridInqPrec(gridID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
@@ -1163,7 +1163,7 @@ void cdfDefLonLat2D(int streamID, int gridID)
   int vlistID;
   int xtype = NC_DOUBLE;
 
-  if ( gridInqPrec(gridID) == DATATYPE_REAL4 ) xtype = NC_FLOAT;
+  if ( gridInqPrec(gridID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
@@ -1475,7 +1475,7 @@ void cdfDefCell(int streamID, int gridID)
   int vlistID;
   int xtype = NC_DOUBLE;
 
-  if ( gridInqPrec(gridID) == DATATYPE_REAL4 ) xtype = NC_FLOAT;
+  if ( gridInqPrec(gridID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
@@ -1745,7 +1745,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
   int zaxisindex;
   int xtype = NC_DOUBLE;
 
-  if ( zaxisInqPrec(zaxisID) == DATATYPE_REAL4 ) xtype = NC_FLOAT;
+  if ( zaxisInqPrec(zaxisID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
@@ -2381,7 +2381,7 @@ void cdfWriteVarDP(int streamID, int varID, double *data, int nmiss)
 
   if ( nmiss > 0 ) cdfDefMissval(streamID, varID, dtype);
 
-  /*  if ( dtype == DATATYPE_INT1 || dtype == DATATYPE_INT2 || dtype == DATATYPE_INT4 ) */
+  /*  if ( dtype == DATATYPE_INT8 || dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 ) */
     {
       int laddoffset, lscalefactor;
       double addoffset, scalefactor;
@@ -2694,7 +2694,7 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int n
 
   if ( nmiss > 0 ) cdfDefMissval(streamID, varID, dtype);
 
-  /*  if ( dtype == DATATYPE_INT1 || dtype == DATATYPE_INT2 || dtype == DATATYPE_INT4 ) */
+  /*  if ( dtype == DATATYPE_INT8 || dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 ) */
     {
       int laddoffset, lscalefactor;
       double addoffset, scalefactor;
@@ -3972,7 +3972,7 @@ int cdfInqContents(int streamID)
 
 	  memset(&grid, 0, sizeof(GRID));
 
-	  grid.prec = DATATYPE_REAL8;
+	  grid.prec = DATATYPE_FLT64;
 	  grid.trunc = ncvars[ncvarid].truncation;
 	  
 	  if ( ncvars[ncvarid].gridtype == GRID_TRAJECTORY )
@@ -3997,7 +3997,7 @@ int cdfInqContents(int streamID)
 		      size = xsize;
 		    }
 
-		  if ( ncvars[xvarid].xtype == NC_FLOAT ) grid.prec = DATATYPE_REAL4;
+		  if ( ncvars[xvarid].xtype == NC_FLOAT ) grid.prec = DATATYPE_FLT32;
 		  grid.xvals = (double *) malloc(size*sizeof(double));
 		  cdf_get_var_double(fileID, xvarid, grid.xvals);
 		  strcpy(grid.xname, ncvars[xvarid].name);
@@ -4030,7 +4030,7 @@ int cdfInqContents(int streamID)
 		      else                    size = ysize;
 		    }
 
-		  if ( ncvars[yvarid].xtype == NC_FLOAT ) grid.prec = DATATYPE_REAL4;
+		  if ( ncvars[yvarid].xtype == NC_FLOAT ) grid.prec = DATATYPE_FLT32;
 		  grid.yvals = (double *) malloc(size*sizeof(double));
 		  cdf_get_var_double(fileID, yvarid, grid.yvals);
 		  strcpy(grid.yname, ncvars[yvarid].name);
@@ -4311,14 +4311,14 @@ int cdfInqContents(int streamID)
 	  
 	  if ( zaxisType == UNDEFID )  zaxisType = ZAXIS_GENERIC;
 
-	  zprec = DATATYPE_REAL8;
+	  zprec = DATATYPE_FLT64;
 
 	  if ( zvarid != UNDEFID )
 	    {
 	      pname     = ncvars[zvarid].name;
 	      plongname = ncvars[zvarid].longname;
 	      punits    = ncvars[zvarid].units;
-	      if ( ncvars[zvarid].xtype == NC_FLOAT ) zprec = DATATYPE_REAL4;
+	      if ( ncvars[zvarid].xtype == NC_FLOAT ) zprec = DATATYPE_FLT32;
 	      if ( (len = strlen(pname)) > 2 )
 		if ( pname[len-2] == '_' && isdigit((int) pname[len-1]) )
 		  pname[len-2] = 0;

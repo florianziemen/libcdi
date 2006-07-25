@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Tue Jun 20 08:25:24 CEST 2006 */
+/* Generated automatically from m214003 on Tue Jul 25 14:09:26 CEST 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -47,11 +47,11 @@
 #endif
 
 #if  defined  (INT32)
-#  define  GRIBPACK     INT32
+#  define  GRIBPACK     unsigned INT32
 #  define  PACK_GRIB    packInt32
 #  define  UNPACK_GRIB  unpackInt32
 #else
-#  define  GRIBPACK     INT64
+#  define  GRIBPACK     unsigned INT64
 #  define  PACK_GRIB    packInt64
 #  define  UNPACK_GRIB  unpackInt64
 #endif
@@ -3055,13 +3055,13 @@ int encodeBDS(GRIBPACK *lGrib, int *gribLen, int decscale, int *isec2, int *isec
   int z = *gribLen;
   int i, jloop;
   int blockLength, PackStart, Flag;
-  int binscale = 0, pval;
-  int byte_per_value;
+  int binscale = 0;
+  unsigned int pval;
   int nbpv;
   /* ibits = BitsPerInt; */
   double max_nbpv_pow2;
   int exponent, mantissa;
-  int fill_bytes = 0;
+  int unused_bits = 0;
   double fpval;
   double factor = 1, fmin, fmax, zref;
   double range, rangec;
@@ -3076,29 +3076,29 @@ int encodeBDS(GRIBPACK *lGrib, int *gribLen, int decscale, int *isec2, int *isec
       Message(func, "complex packing of spectral data unsupported, using simple packing!");
     }
 
-  byte_per_value = ISEC4_NumBits >> 3;
-
   if ( ISEC2_GridType == GTYPE_SPECTRAL )
     {
-      *datstart = 15;
+      *datstart   = 15;
       PackStart   = 1;
       Flag        = 128;
-      blockLength = 11 + 4 + byte_per_value*(datasize - 1);
+      blockLength = 11 + 4 + (ISEC4_NumBits*(datasize - 1) + 7)/8;
     }
   else
     {
-      *datstart = 11;
+      *datstart   = 11;
       PackStart   = 0;
       Flag        = 0;
-      blockLength = 11 + byte_per_value*datasize;
+      blockLength = 11 + (ISEC4_NumBits*datasize + 7)/8;
     }
 
-  if ( (blockLength%2) == 1 )
-    {
-      fill_bytes = 1;
-      Flag += (fill_bytes*8);
-      blockLength++;
-    }
+  if ( (blockLength%2) == 1 ) blockLength++;
+
+  if ( ISEC2_GridType == GTYPE_SPECTRAL )
+    unused_bits = blockLength*8 - 15*8 - ISEC4_NumBits*(datasize - 1);
+  else
+    unused_bits = blockLength*8 - 11*8 - ISEC4_NumBits*(datasize);
+
+  Flag += unused_bits;
 
   if ( decscale )
     {
@@ -3209,7 +3209,7 @@ int encodeBDS(GRIBPACK *lGrib, int *gribLen, int decscale, int *isec2, int *isec
 
   if ( PackStart ) Put1Real(data[0]);
 
-  *datsize  = (datasize-PackStart)*byte_per_value;
+  *datsize  = ((datasize-PackStart)*ISEC4_NumBits + 7)/8;
 
   if      ( ISEC4_NumBits ==  8 )
     {
@@ -3220,12 +3220,12 @@ int encodeBDS(GRIBPACK *lGrib, int *gribLen, int decscale, int *isec2, int *isec
 #elif defined (__uxp__)
 #pragma loop novrec
 #endif
-      for ( i = PackStart ; i < datasize; i++ )
+      for ( i = PackStart; i < datasize; i++ )
 	{
           fpval = ((data[i] - zref) * factor + 0.5);
 	  if ( fpval > max_nbpv_pow2 ) fpval = max_nbpv_pow2;
 	  if ( fpval < 0 ) fpval = 0;
-	  pval = (int) fpval;
+	  pval = (unsigned int) fpval;
 	  lGrib[z  ] = pval;
           z++;
 	}
@@ -3239,12 +3239,12 @@ int encodeBDS(GRIBPACK *lGrib, int *gribLen, int decscale, int *isec2, int *isec
 #elif defined (__uxp__)
 #pragma loop novrec
 #endif
-      for ( i = PackStart ; i < datasize; i++ )
+      for ( i = PackStart; i < datasize; i++ )
 	{
 	  fpval = ((data[i] - zref) * factor + 0.5);
 	  if ( fpval > max_nbpv_pow2 ) fpval = max_nbpv_pow2;
 	  if ( fpval < 0 ) fpval = 0;
-	  pval = (int) fpval;
+	  pval = (unsigned int) fpval;
 	  lGrib[z  ] = pval >>  8;
           lGrib[z+1] = pval;
 	  z += 2;
@@ -3259,24 +3259,89 @@ int encodeBDS(GRIBPACK *lGrib, int *gribLen, int decscale, int *isec2, int *isec
 #elif defined (__uxp__)
 #pragma loop novrec
 #endif
-      for ( i = PackStart ; i < datasize; i++ )
+      for ( i = PackStart; i < datasize; i++ )
 	{
           fpval = ((data[i] - zref) * factor + 0.5);
 	  if ( fpval > max_nbpv_pow2 ) fpval = max_nbpv_pow2;
 	  if ( fpval < 0 ) fpval = 0;
-	  pval = (int) fpval;
+	  pval = (unsigned int) fpval;
           lGrib[z  ] =  pval >> 16;
           lGrib[z+1] =  pval >>  8;
           lGrib[z+2] =  pval;
           z += 3;
 	}
     }
+  else if ( ISEC4_NumBits == 32 )
+    {
+#if   defined (CRAY)
+#pragma _CRI ivdep
+#elif defined (SX)
+#pragma vdir nodep
+#elif defined (__uxp__)
+#pragma loop novrec
+#endif
+      for ( i = PackStart; i < datasize; i++ )
+	{
+          fpval = ((data[i] - zref) * factor + 0.5);
+	  if ( fpval > max_nbpv_pow2 ) fpval = max_nbpv_pow2;
+	  if ( fpval < 0 ) fpval = 0;
+	  pval = (unsigned int) fpval;
+          lGrib[z  ] =  pval >> 24;
+          lGrib[z+1] =  pval >> 16;
+          lGrib[z+2] =  pval >>  8;
+          lGrib[z+3] =  pval;
+          z += 4;
+	}
+    }
+  else if ( ISEC4_NumBits > 0 && ISEC4_NumBits <= 32 )
+    {
+      int cbits, jbits;
+      unsigned int c;
+      static unsigned int mask[] = {0,1,3,7,15,31,63,127,255};
+    
+      /* code from gribw routine flist2bitstream */
+
+      cbits = 8;
+      c = 0;
+      for ( i = PackStart; i < datasize; i++ )
+	{
+	  /* note float -> unsigned int .. truncate */
+          fpval = ((data[i] - zref) * factor + 0.5);
+	  if ( fpval > max_nbpv_pow2 ) fpval = max_nbpv_pow2;
+	  if ( fpval < 0 ) fpval = 0;
+	  pval = (unsigned int) fpval;
+
+	  jbits = ISEC4_NumBits;
+	  while ( cbits <= jbits ) 
+	    {
+	      if ( cbits == 8 )
+		{
+		  jbits -= 8;
+		  lGrib[z++] = (pval >> jbits) & 255;
+		}
+	      else
+		{
+		  jbits -= cbits;
+		  lGrib[z++] = (c << cbits) + ((pval >> jbits) & mask[cbits]);
+		  cbits = 8;
+		  c = 0;
+		}
+	    }
+	  /* now jbits < cbits */
+	  if ( jbits )
+	    {
+	      c = (c << jbits) + (pval & mask[jbits]);
+	      cbits -= jbits;
+	    }
+	}
+      if (cbits != 8) lGrib[z++] = c << cbits;
+    }
   else
     {
       Error(func, "Unimplemented packing factor %d", ISEC4_NumBits);
     }
 
-  if ( fill_bytes )
+  if ( unused_bits >= 8 )
     Put1Byte(0);              /*  Fillbyte                     */
 
   *gribLen = z;
@@ -4249,6 +4314,7 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
 	  int tbits = 0;
 	  int n_bits = ISEC4_NumBits;
 	  int t_bits = 0;
+
 	  jmask = (1 << n_bits) - 1;
 	  /* code from wgrib routine BDS_unpack */
 	  for ( i = 0; i < jlend; i++ )
@@ -7877,7 +7943,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.0" " of ""Jun 20 2006"" ""08:25:24";
+static const char grb_libvers[] = "1.0.1" " of ""Jul 25 2006"" ""14:09:26";
 
 
 

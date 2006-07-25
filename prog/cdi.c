@@ -311,14 +311,14 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 
 	  prec = vlistInqVarDatatype(vlistID, varID);
 	  if      ( prec == DATATYPE_PACK  ) strcpy(pstr, "P0");
-	  else if ( prec == DATATYPE_PACK1 ) strcpy(pstr, "P1");
-	  else if ( prec == DATATYPE_PACK2 ) strcpy(pstr, "P2");
-	  else if ( prec == DATATYPE_PACK3 ) strcpy(pstr, "P3");
-	  else if ( prec == DATATYPE_REAL4 ) strcpy(pstr, "R4");
-	  else if ( prec == DATATYPE_REAL8 ) strcpy(pstr, "R8");
-	  else if ( prec == DATATYPE_INT1  ) strcpy(pstr, "I1");
-	  else if ( prec == DATATYPE_INT2  ) strcpy(pstr, "I2");
-	  else if ( prec == DATATYPE_INT4  ) strcpy(pstr, "I4");
+	  else if ( prec == DATATYPE_PACK8 ) strcpy(pstr, "P1");
+	  else if ( prec == DATATYPE_PACK16 ) strcpy(pstr, "P2");
+	  else if ( prec == DATATYPE_PACK24 ) strcpy(pstr, "P3");
+	  else if ( prec == DATATYPE_FLT32 ) strcpy(pstr, "R4");
+	  else if ( prec == DATATYPE_FLT64 ) strcpy(pstr, "R8");
+	  else if ( prec == DATATYPE_INT8  ) strcpy(pstr, "I1");
+	  else if ( prec == DATATYPE_INT16  ) strcpy(pstr, "I2");
+	  else if ( prec == DATATYPE_INT32  ) strcpy(pstr, "I4");
 	  else                               strcpy(pstr, "-1");
 
 	  fprintf(stdout, " %-3s", pstr);
@@ -597,11 +597,11 @@ static void setDefaultDataType(char *datatypestr)
       datatype = atoi(datatypestr);
       datatypestr++;
 
-      if      ( datatype == 1 ) DefaultDataType = DATATYPE_PACK1;
-      else if ( datatype == 2 ) DefaultDataType = DATATYPE_PACK2;
-      else if ( datatype == 3 ) DefaultDataType = DATATYPE_PACK3;
-      else if ( datatype == 4 ) DefaultDataType = DATATYPE_REAL4;
-      else if ( datatype == 8 ) DefaultDataType = DATATYPE_REAL8;
+      if      ( datatype == 1 ) DefaultDataType = DATATYPE_PACK8;
+      else if ( datatype == 2 ) DefaultDataType = DATATYPE_PACK16;
+      else if ( datatype == 3 ) DefaultDataType = DATATYPE_PACK24;
+      else if ( datatype == 4 ) DefaultDataType = DATATYPE_FLT32;
+      else if ( datatype == 8 ) DefaultDataType = DATATYPE_FLT64;
       else
 	{
 	  fprintf(stderr, "Unsupported datatype %d!\n", datatype);

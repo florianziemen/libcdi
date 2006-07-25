@@ -257,11 +257,11 @@ int hdfInqDatatype(int xtype)
 {
   int datatype;
 
-  if      ( xtype == H5T_NATIVE_CHAR  )  datatype = DATATYPE_INT1;
-  else if ( xtype == H5T_NATIVE_SHORT )  datatype = DATATYPE_INT2;
-  else if ( xtype == H5T_NATIVE_INT   )  datatype = DATATYPE_INT4;
-  else if ( xtype == H5T_NATIVE_FLOAT )  datatype = DATATYPE_REAL4;
-  else                                   datatype = DATATYPE_REAL8;
+  if      ( xtype == H5T_NATIVE_CHAR  )  datatype = DATATYPE_INT8;
+  else if ( xtype == H5T_NATIVE_SHORT )  datatype = DATATYPE_INT16;
+  else if ( xtype == H5T_NATIVE_INT   )  datatype = DATATYPE_INT32;
+  else if ( xtype == H5T_NATIVE_FLOAT )  datatype = DATATYPE_FLT32;
+  else                                   datatype = DATATYPE_FLT64;
 
   return (datatype);
 }
@@ -273,10 +273,10 @@ int hdfDefDatatype(int datatype)
 {
   int xtype;
 
-  if      ( datatype == DATATYPE_INT1  )  xtype = H5T_NATIVE_CHAR;
-  else if ( datatype == DATATYPE_INT2  )  xtype = H5T_NATIVE_SHORT;
-  else if ( datatype == DATATYPE_INT4  )  xtype = H5T_NATIVE_INT;
-  else if ( datatype == DATATYPE_REAL8 )  xtype = H5T_NATIVE_DOUBLE;
+  if      ( datatype == DATATYPE_INT8  )  xtype = H5T_NATIVE_CHAR;
+  else if ( datatype == DATATYPE_INT16  )  xtype = H5T_NATIVE_SHORT;
+  else if ( datatype == DATATYPE_INT32  )  xtype = H5T_NATIVE_INT;
+  else if ( datatype == DATATYPE_FLT64 )  xtype = H5T_NATIVE_DOUBLE;
   else                                    xtype = H5T_NATIVE_FLOAT;
 
   return (xtype);
@@ -432,7 +432,7 @@ void hdfDefMissval(int streamID, int varID, int dtype)
       missval = vlistInqVarMissval(vlistID, varID);
       if ( streams[streamID].ncmode == 2 ) hdf_redef(fileID);
 
-      if ( dtype == DATATYPE_REAL8 )
+      if ( dtype == DATATYPE_FLT64 )
 	hdf_put_att_double(fileID, ncvarid, "_FillValue", H5T_NATIVE_DOUBLE, 1L, &missval);
       else
 	hdf_put_att_double(fileID, ncvarid, "_FillValue", NC_FLOAT, 1L, &missval);
@@ -580,7 +580,7 @@ void hdfWriteRecord(int streamID, double *data, int nmiss)
   if ( nmiss > 0 ) hdfDefMissval(streamID, varID, dtype);
   */
 
-  if ( dtype == DATATYPE_INT1 || dtype == DATATYPE_INT2 || dtype == DATATYPE_INT4 )
+  if ( dtype == DATATYPE_INT8 || dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 )
     {
       int laddoffset, lscalefactor;
       double addoffset, scalefactor;
@@ -2362,7 +2362,7 @@ void hdfWriteVarDP(int streamID, int varID, double *data, int nmiss)
 
   if ( nmiss > 0 ) hdfDefMissval(streamID, varID, dtype);
 
-  if ( dtype == DATATYPE_INT1 || dtype == DATATYPE_INT2 || dtype == DATATYPE_INT4 )
+  if ( dtype == DATATYPE_INT8 || dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 )
     {
       int laddoffset, lscalefactor;
       double addoffset, scalefactor;
@@ -2609,7 +2609,7 @@ int hdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int n
   /*
   if ( nmiss > 0 ) hdfDefMissval(streamID, varID, dtype);
   */
-  if ( dtype == DATATYPE_INT1 || dtype == DATATYPE_INT2 || dtype == DATATYPE_INT4 )
+  if ( dtype == DATATYPE_INT8 || dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 )
     {
       int laddoffset, lscalefactor;
       double addoffset, scalefactor;

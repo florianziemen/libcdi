@@ -646,8 +646,8 @@ The function @func{vlistInqVarDatatype} returns the data type of a variable.
 
 @Result
 @func{vlistInqVarDatatype} returns an identifier to the data type of the variable.
-The valid CDI data types are @func{DATATYPE_PACK1}, @func{DATATYPE_PACK2}, @func{DATATYPE_PACK3},
-@func{DATATYPE_REAL4} and @func{DATATYPE_REAL8}.
+The valid CDI data types are @func{DATATYPE_PACK8}, @func{DATATYPE_PACK16}, @func{DATATYPE_PACK24},
+@func{DATATYPE_FLT32} and @func{DATATYPE_FLT64}.
 
 @EndFunction
 */
@@ -673,8 +673,8 @@ int vlistInqVarDatatype(int vlistID, int varID)
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
     @Item  varID    Variable identifier
     @Item  datatype The data type identifier.
-                    The valid CDI data types are @func{DATATYPE_PACK1}, @func{DATATYPE_PACK2},
-                    @func{DATATYPE_PACK3}, @func{DATATYPE_REAL4} and @func{DATATYPE_REAL8}.
+                    The valid CDI data types are @func{DATATYPE_PACK8}, @func{DATATYPE_PACK16},
+                    @func{DATATYPE_PACK24}, @func{DATATYPE_FLT32} and @func{DATATYPE_FLT64}.
 
 
 @Description
