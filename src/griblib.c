@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Tue Jul 25 14:09:26 CEST 2006 */
+/* Generated automatically from m214003 on Do Jul 27 20:36:33 CEST 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -88,13 +88,13 @@ int    qu2reg3(double *pfield, int *kpoint, int klat, int klon,
 	       double msval, int *kret, int omisng, int operio, int oveggy);
 
 #if  defined  (INT32)
-long   packInt32(INT32 *up, char *cp, long bc, long tc);
+long   packInt32(unsigned INT32 *up, char *cp, long bc, long tc);
 #endif
-long   packInt64(INT64 *up, char *cp, long bc, long tc);
+long   packInt64(unsigned INT64 *up, char *cp, long bc, long tc);
 #if  defined  (INT32)
-long   unpackInt32(unsigned char *cp, INT32 *up, long bc, long tc);
+long   unpackInt32(unsigned char *cp, unsigned INT32 *up, long bc, long tc);
 #endif
-long   unpackInt64(unsigned char *cp, INT64 *up, long bc, long tc);
+long   unpackInt64(unsigned char *cp, unsigned INT64 *up, long bc, long tc);
 
 void  gribEncode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 		 double *fsec3, int *isec4, double *fsec4, int klenp, int *kgrib,
@@ -6177,14 +6177,14 @@ C     ----------------------------------------------------------------
 /* pack 8-bit bytes from 64-bit words to a packed buffer */
 /* same as : for ( int i = 0; i < bc; ++i ) cp[i] = (char) up[i]; */
 
-long packInt64(INT64 *up, char *cp, long bc, long tc)
+long packInt64(unsigned INT64 *up, char *cp, long bc, long tc)
 {
 #if defined (CRAY)
   (void) _pack(up, cp, bc, tc);
 #else
   static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
   char *cp0;
-  INT64 upi, *up0, *ip0, *ip1, *ip2, *ip3, *ip4, *ip5, *ip6, *ip7;
+  unsigned INT64 upi, *up0, *ip0, *ip1, *ip2, *ip3, *ip4, *ip5, *ip6, *ip7;
   long head, trail, inner, i, j;
   int ipack = sizeof(INT64);
   
@@ -6213,7 +6213,7 @@ long packInt64(INT64 *up, char *cp, long bc, long tc)
   ip6 = ip0 + 6;
   ip7 = ip0 + 7;
 
-  up0 = (INT64 *) (cp + head);
+  up0 = (unsigned INT64 *) (cp + head);
 
   /* Here we should process any bytes until the first word boundary 
    * of our destination buffer 
@@ -6286,13 +6286,12 @@ long packInt64(INT64 *up, char *cp, long bc, long tc)
 /* unpack 8-bit bytes from a packed buffer with 64-bit words */
 /* same as : for ( int i = 0; i < bc; ++i ) up[i] = (INT64) cp[i]; */
 
-long
-unpackInt64(unsigned char *cp, INT64 *up, long bc, long tc)
+long unpackInt64(unsigned char *cp, unsigned INT64 *up, long bc, long tc)
 {
   static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
   unsigned char *cp0;
   unsigned INT64 *up0;
-  INT64 *ip0, *ip1, *ip2, *ip3, *ip4, *ip5, *ip6, *ip7;
+  unsigned INT64 *ip0, *ip1, *ip2, *ip3, *ip4, *ip5, *ip6, *ip7;
   long head, trail, inner, i, j;
   long offset;
   int ipack = sizeof(INT64);
@@ -6328,7 +6327,7 @@ unpackInt64(unsigned char *cp, INT64 *up, long bc, long tc)
   /* Process any bytes until the first word boundary 
    * of our source buffer 
    */
-  for ( i = 0 ; i < head ; i++ ) up[i] = (INT64) cp[i];
+  for ( i = 0 ; i < head ; i++ ) up[i] = (unsigned INT64) cp[i];
 
   j = 0;
 
@@ -6378,7 +6377,7 @@ unpackInt64(unsigned char *cp, INT64 *up, long bc, long tc)
     {
       offset = head + ipack*inner;
       cp0 = cp + offset;
-      for ( i = 0 ; i < trail ; i++ ) up[i+offset] = (INT64) cp0[i];
+      for ( i = 0 ; i < trail ; i++ ) up[i+offset] = (unsigned INT64) cp0[i];
     }
   /*
   if ( tc != -1 ) {
@@ -6393,11 +6392,11 @@ unpackInt64(unsigned char *cp, INT64 *up, long bc, long tc)
 /* same as : for ( int i = 0; i < bc; ++i ) cp[i] = (char) up[i]; */
 
 #if  defined  (INT32)
-long packInt32(INT32 *up, char *cp, long bc, long tc)
+long packInt32(unsigned INT32 *up, char *cp, long bc, long tc)
 {
   static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
   char *cp0;
-  INT32 *up0, *ip0, *ip1, *ip2, *ip3;
+  unsigned INT32 *up0, *ip0, *ip1, *ip2, *ip3;
   long head, trail, inner, i, j;
   int ipack = sizeof(INT32);
   
@@ -6422,7 +6421,7 @@ long packInt32(INT32 *up, char *cp, long bc, long tc)
   ip2 = ip0 + 2;
   ip3 = ip0 + 3;
 
-  up0 = (INT32 *) (cp + head);
+  up0 = (unsigned INT32 *) (cp + head);
 
   /* Here we should process any bytes until the first word boundary 
    * of our destination buffer 
@@ -6489,12 +6488,12 @@ long packInt32(INT32 *up, char *cp, long bc, long tc)
 /* same as : for ( int i = 0; i < bc; ++i ) up[i] = (INT32) cp[i]; */
 
 #if  defined  (INT32)
-long unpackInt32(unsigned char *cp, INT32 *up, long bc, long tc)
+long unpackInt32(unsigned char *cp, unsigned INT32 *up, long bc, long tc)
 {
   static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
   unsigned char *cp0;
   unsigned INT32 *up0;
-  INT32 *ip0, *ip1, *ip2, *ip3;
+  unsigned INT32 *ip0, *ip1, *ip2, *ip3;
   long head, trail, inner, i, j;
   long offset;
   int ipack = sizeof(INT32);
@@ -6526,7 +6525,7 @@ long unpackInt32(unsigned char *cp, INT32 *up, long bc, long tc)
   /* Process any bytes until the first word boundary 
    * of our source buffer 
    */
-  for ( i = 0 ; i < head ; i++ ) up[i] = (INT32) cp[i];
+  for ( i = 0 ; i < head ; i++ ) up[i] = (unsigned INT32) cp[i];
 
   j = 0;
 
@@ -6568,7 +6567,7 @@ long unpackInt32(unsigned char *cp, INT32 *up, long bc, long tc)
     {
       offset = head + ipack*inner;
       cp0 = cp + offset;
-      for ( i = 0 ; i < trail ; i++ ) up[i+offset] = (INT32) cp0[i];
+      for ( i = 0 ; i < trail ; i++ ) up[i+offset] = (unsigned INT32) cp0[i];
     }
   /*
   if ( tc != -1 ) {
@@ -7943,7 +7942,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.1" " of ""Jul 25 2006"" ""14:09:26";
+static const char grb_libvers[] = "1.0.1" " of ""Jul 27 2006"" ""20:36:33";
 
 
 
