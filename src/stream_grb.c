@@ -247,11 +247,14 @@ int grbDecodeDataDP(unsigned char *gribbuffer, int gribsize, double *data, int g
 
 	      gribsize = gribUnzip(gribbuffer, unzipsize, itmpbuffer, gribsize);
 
+	      if ( gribsize <= 0 )
+		Error(func, "Decompression problem!\n");
+	   
 	      free(itmpbuffer);
 	    }
 	  else
 	    {
-	      fprintf(stderr, "Decompression for %d not implemented!\n", izip);
+	      Error(func, "Decompression for %d not implemented!\n", izip);
 	    }
     }
 
