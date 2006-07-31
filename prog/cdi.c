@@ -71,7 +71,7 @@ static void usage(void)
 
   fprintf(stderr, "    -V             Print version number\n");
   fprintf(stderr, "\n");
-  fprintf(stderr, "  Report bugs to <schulzweida@dkrz.de>\n");
+  fprintf(stderr, "  Report bugs to <Uwe.Schulzweida@zmaw.de>\n");
 }
 
 
@@ -310,16 +310,14 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 	    fprintf(stdout, " variable");
 
 	  prec = vlistInqVarDatatype(vlistID, varID);
-	  if      ( prec == DATATYPE_PACK  ) strcpy(pstr, "P0");
-	  else if ( prec == DATATYPE_PACK8 ) strcpy(pstr, "P1");
-	  else if ( prec == DATATYPE_PACK16 ) strcpy(pstr, "P2");
-	  else if ( prec == DATATYPE_PACK24 ) strcpy(pstr, "P3");
-	  else if ( prec == DATATYPE_FLT32 ) strcpy(pstr, "R4");
-	  else if ( prec == DATATYPE_FLT64 ) strcpy(pstr, "R8");
-	  else if ( prec == DATATYPE_INT8  ) strcpy(pstr, "I1");
-	  else if ( prec == DATATYPE_INT16  ) strcpy(pstr, "I2");
-	  else if ( prec == DATATYPE_INT32  ) strcpy(pstr, "I4");
-	  else                               strcpy(pstr, "-1");
+	  if      ( prec == DATATYPE_PACK   ) strcpy(pstr, "P0");
+	  else if ( prec > 0 && prec <= 32  ) sprintf(pstr, "P%d", prec);
+	  else if ( prec == DATATYPE_FLT32  ) strcpy(pstr, "F32");
+	  else if ( prec == DATATYPE_FLT64  ) strcpy(pstr, "F64");
+	  else if ( prec == DATATYPE_INT8   ) strcpy(pstr, "I8");
+	  else if ( prec == DATATYPE_INT16  ) strcpy(pstr, "I16");
+	  else if ( prec == DATATYPE_INT32  ) strcpy(pstr, "I32");
+	  else                                strcpy(pstr, "-1");
 
 	  fprintf(stdout, " %-3s", pstr);
 
@@ -861,6 +859,7 @@ int main(int argc, char *argv[])
 	}
 
       tsID = 0;
+      if ( Info || fname2 )
       while ( (nrecs = streamInqTimestep(streamID1, tsID)) > 0 )
 	{
 	  if ( fname2 && ntsteps != 0 )

@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Do Jul 27 20:36:33 CEST 2006 */
+/* Generated automatically from m214003 on Mon Jul 31 09:47:39 CEST 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -7263,9 +7263,9 @@ int  gribBzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbuf
     bds_rep   =  bds_flag >> 7;
     bds_cplx  = (bds_flag >> 6)&1;
     bds_aflag = (bds_flag >> 4)&1;
-
-    if ( bds_nbits != 8 && bds_nbits != 16 && bds_nbits != 24 ) return (rec_len);
-
+    
+    if ( bds_nbits != 8 && bds_nbits != 16 && bds_nbits != 24 && bds_nbits != 32 ) return (rec_len);
+    
     if ( bds_rep == 0 )
       {
 	datstart = 11;
@@ -7525,9 +7525,18 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
     bds_rep   =  bds_flag >> 7;
     bds_cplx  = (bds_flag >> 6)&1;
     bds_aflag = (bds_flag >> 4)&1;
-
-    if ( bds_nbits != 8 && bds_nbits != 16 && bds_nbits != 24 ) return (rec_len);
-
+    
+    if ( bds_nbits != 8 && bds_nbits != 16 && bds_nbits != 24 && bds_nbits != 32 )
+      {
+	static int linfo = 1;
+	if ( linfo )
+	  {
+	    linfo = 0;
+	    fprintf(stderr, "GRIB zip is only available for 8, 16, 24 and 32 bit data!\n");
+	  }
+	return (rec_len);
+      }
+    
     sz_param.options_mask        = OPTIONS_MASK;
 #if defined (SZTEST)
     sz_param.bits_per_pixel      = 8;
@@ -7569,6 +7578,7 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
     source = bds + datstart;
     dest = sbuf;
 
+#if ! defined (SZTEST)
     if ( bds_nbits == 24 )
       {
 	int i, nelem;
@@ -7584,14 +7594,12 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
 	memcpy(source, pbuf, sourceLen);
 	free(pbuf);
       }
-
+#endif
 
 #if defined (SZTEST)
     {
-      int nbytes = bds_nbits/8;
       int i;
-
-      if ( nbytes == 2 )
+      if ( bds_nbits == 16 )
 	{
 	  if ( datstart == 15 )
 	    {
@@ -7599,18 +7607,16 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
 	      tmpbuffer2[1] = source[1];
 	      for ( i = 0; i < sourceLen/4; i++ )
 		{
-		  
 		  tmpbuffer2[(sourceLen/4)*2+2+2*i]   = source[2+4*i];
 		  tmpbuffer2[(sourceLen/4)*2+2+2*i+1] = source[2+4*i+1];
 		  
 		  tmpbuffer2[2+2*i]   = source[2+4*i+2];
-		  tmpbuffer2[2+2*i+1]   = source[2+4*i+3];
-		  
+		  tmpbuffer2[2+2*i+1] = source[2+4*i+3];
 		}
 
 	      for ( i = 0; i < sourceLen/2; i++ )
 		{
-		  tmpbuffer[i] = tmpbuffer2[2*i];
+		  tmpbuffer[            i] = tmpbuffer2[2*i];
 		  tmpbuffer[sourceLen/2+i] = tmpbuffer2[2*i+1];
 		}
 	    }
@@ -7618,17 +7624,17 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
 	    {
 	      for ( i = 0; i < sourceLen/2; i++ )
 		{
-		  tmpbuffer[i] = source[2*i];
+		  tmpbuffer[            i] = source[2*i];
 		  tmpbuffer[sourceLen/2+i] = source[2*i+1];
 		}
 	    }
 	}
-      else if ( nbytes == 3 )
+      else if ( bds_nbits == 24 )
 	{
 	  for ( i = 0; i < sourceLen/3; i++ )
 	    {
-	      tmpbuffer[i] = source[3*i];
-	      tmpbuffer[sourceLen/3+i] = source[3*i+1];
+	      tmpbuffer[              i] = source[3*i];
+	      tmpbuffer[  sourceLen/3+i] = source[3*i+1];
 	      tmpbuffer[2*sourceLen/3+i] = source[3*i+2];
 	    }
 	}
@@ -7639,7 +7645,6 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
     }
 #endif
 
-    
     status = SZ_BufftoBuffCompress(dest, &destLen, source, sourceLen, &sz_param);
     if ( status != SZ_OK )
       {
@@ -7795,26 +7800,26 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   recLen = ((int) ((bds[14]<<16)+(bds[15]<<8)+bds[16]));
 
-    bds_len   = BDS_Len;
-    bds_nbits = BDS_NumBits;
-    bds_flag  = BDS_Flag;
-    bds_rep   =  bds_flag >> 7;
-    bds_cplx  = (bds_flag >> 6)&1;
-    bds_aflag = (bds_flag >> 4)&1;
+  bds_len   = BDS_Len;
+  bds_nbits = BDS_NumBits;
+  bds_flag  = BDS_Flag;
+  bds_rep   =  bds_flag >> 7;
+  bds_cplx  = (bds_flag >> 6)&1;
+  bds_aflag = (bds_flag >> 4)&1;
 
-    if ( bds_rep == 0 )
-      {
-	datstart = 11;
-      }
-    else if ( bds_rep == 1 && bds_cplx == 0 )
-      {
-	datstart = 15;
-      }
-    else
-      {
-	fprintf(stderr, "compression of complex packed spectral data unsupported!\n");
-	return (0);
-      }
+  if ( bds_rep == 0 )
+    {
+      datstart = 11;
+    }
+  else if ( bds_rep == 1 && bds_cplx == 0 )
+    {
+      datstart = 15;
+    }
+  else
+    {
+      fprintf(stderr, "compression of complex packed spectral data unsupported!\n");
+      return (0);
+    }
 
   source = (char *) bds + datstart + 12;
   sourceLen = ((int) ((bds[20]<<16)+(bds[21]<<8)+bds[22]));
@@ -7832,8 +7837,8 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
   BDS_Flag -= 16;
 
   bdsLen = datstart + destLen;
-#if  defined  (HAVE_LIBSZ)
 
+#if  defined  (HAVE_LIBSZ)
   {
     int status;
     size_t tmpLen;
@@ -7931,7 +7936,6 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
     fprintf(stderr, "recLen, gribLen, bdsLen %d %d %d\n", recLen, gribLen, bdsLen);
     */
   }
-
 #else
   if ( libszwarn )
     {
@@ -7942,7 +7946,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.1" " of ""Jul 27 2006"" ""20:36:33";
+static const char grb_libvers[] = "1.0.1" " of ""Jul 31 2006"" ""09:47:39";
 
 
 

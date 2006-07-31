@@ -223,7 +223,36 @@ int grbDecodeDataDP(unsigned char *gribbuffer, int gribsize, double *data, int g
 
   if ( (izip = gribGetZip(gribsize, gribbuffer, &unzipsize)) > 0 )
     {
-      Error(func, "SZIP decompression not implemented!\n");
+	  if ( izip == 128 ) /* szip */
+	    {
+	      unsigned char *itmpbuffer = NULL;
+	      size_t itmpbuffersize = 0;
+
+	      if ( unzipsize < (long) gribsize )
+		{
+		  fprintf(stderr, "Decompressed size smaller than compressed size (in %d; out %ld)!\n",
+			  gribsize, unzipsize);
+		  return (status);
+		}
+
+	      if ( itmpbuffersize < gribsize )
+		{
+		  itmpbuffersize = gribsize;
+		  itmpbuffer = (unsigned char *) realloc(itmpbuffer, itmpbuffersize);
+		}
+
+	      memcpy(itmpbuffer, gribbuffer, itmpbuffersize);
+
+	      unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
+
+	      gribsize = gribUnzip(gribbuffer, unzipsize, itmpbuffer, gribsize);
+
+	      free(itmpbuffer);
+	    }
+	  else
+	    {
+	      fprintf(stderr, "Decompression for %d not implemented!\n", izip);
+	    }
     }
 
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, data,
@@ -398,6 +427,7 @@ int grbScanTimestep(int streamID)
   TAXIS *taxis;
   int vlistID;
   int rindex, nrecs = 0;
+  long unzipsize;
   COMPVAR compVar, compVar0;
 
   streamCheckID(func, streamID);
@@ -462,8 +492,20 @@ int grbScanTimestep(int streamID)
 		    streams[streamID].tsteps[tsID].recordSize);
 	      break;
 	    }
+
+	  if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
+	    {
+	      unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
+	      if ( (long) buffersize < unzipsize )
+		{
+		  buffersize = unzipsize;
+		  gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
+		}
+	    }
+
 	  gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
 		   ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);
+
 	  rcode    = ISEC1_Parameter;
 	  level1   = ISEC1_Level1;
 	  level2   = ISEC1_Level2;
@@ -883,6 +925,7 @@ void grbScanTimestep1(int streamID)
   int rdate = 0, rtime = 0, tunit = 0, fcast = 0;
   TAXIS *taxis;
   int vlistID;
+  long unzipsize;
   COMPVAR compVar, compVar0;
 
   streamCheckID(func, streamID);
@@ -923,6 +966,16 @@ void grbScanTimestep1(int streamID)
       readsize = recsize;
       status = gribRead(fileID, gribbuffer, &readsize);
       if ( status ) break;
+
+      if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
+	{
+	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
+	  if ( (long) buffersize < unzipsize )
+	    {
+	      buffersize = unzipsize;
+	      gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
+	    }
+	}
 
       gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
 	       ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);
@@ -1080,6 +1133,7 @@ int grbScanTimestep2(int streamID)
   int nextstep;
   TAXIS *taxis;
   int vlistID;
+  long unzipsize;
   COMPVAR compVar, compVar0;
 
   streamCheckID(func, streamID);
@@ -1142,6 +1196,16 @@ int grbScanTimestep2(int streamID)
       readsize = recsize;
       status = gribRead(fileID, gribbuffer, &readsize);
       if ( status ) break;
+
+      if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
+	{
+	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
+	  if ( (long) buffersize < unzipsize )
+	    {
+	      buffersize = unzipsize;
+	      gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
+	    }
+	}
 
       gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
 	       ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);

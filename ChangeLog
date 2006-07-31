@@ -1,6 +1,7 @@
 2006-08-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* using GRIB library version 1.0.1
+	* add test version of SUNZIP for GRIB data
 	* add DATATYPE PACK1 to PACK32
 	* change DATATYPE from byte to bit
 	* split GRIB level type 105 with env var SPLIT_LTYPE_105
