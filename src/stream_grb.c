@@ -235,7 +235,7 @@ int grbDecodeDataDP(unsigned char *gribbuffer, int gribsize, double *data, int g
 		  return (status);
 		}
 
-	      if ( itmpbuffersize < gribsize )
+	      if ( itmpbuffersize < (size_t) gribsize )
 		{
 		  itmpbuffersize = gribsize;
 		  itmpbuffer = (unsigned char *) realloc(itmpbuffer, itmpbuffersize);
