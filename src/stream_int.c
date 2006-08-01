@@ -73,9 +73,11 @@ void streamCheckID(const char *func, int streamID)
     Error(func, "streamID %d not open!", streamID);
 }
 
+
 int cdiDefaultLeveltype = -1;
 static int cdiDataUnreduced = 0;
-static int cdiDataCompress = 0;
+static int cdiCompressType  = 0;
+static int cdiCompressLevel = 0;
 
 
 int cdiDefGlobal(const char *string, int val)
@@ -91,10 +93,13 @@ int cdiDefGlobal(const char *string, int val)
   return (ret);
 }
 
-void cdiDefCompress(int level)
+
+void cdiDefCompress(int type, int level)
 {
-  cdiDataCompress = level;
+  cdiCompressType  = type;
+  cdiCompressLevel = level;
 }
+
 
 long cdiGetenvInt(char *envName)
 {
@@ -225,7 +230,8 @@ void streamsInitEntry(int streamID)
   streams[streamID].vct.ilevID        = UNDEFID;
   streams[streamID].vct.mlevID        = UNDEFID;
   streams[streamID].unreduced         = cdiDataUnreduced;
-  streams[streamID].compress          = cdiDataCompress;
+  streams[streamID].compressType      = cdiCompressType;
+  streams[streamID].compressLevel     = cdiCompressLevel;
 
   basetimeInit(&streams[streamID].basetime);
 

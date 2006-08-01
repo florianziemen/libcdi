@@ -209,7 +209,8 @@ typedef struct {
   int       localatts;
   VCT       vct;
   int       unreduced;
-  int       compress;
+  int       compressType;
+  int       compressLevel;
 }
 CDITABLE;
 

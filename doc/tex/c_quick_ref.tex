@@ -346,6 +346,15 @@ Get all values of a Y-axis.
 Close an open dataset.
 
 
+\section*{\tt \htmlref{streamDefByteorder}{streamDefByteorder}}
+
+\begin{verbatim}
+    void streamDefByteorder (intstreamID, intbyteorder);
+\end{verbatim}
+
+Define the byteorder.
+
+
 \section*{\tt \htmlref{streamDefTimestep}{streamDefTimestep}}
 
 \begin{verbatim}
@@ -362,6 +371,15 @@ Define time step.
 \end{verbatim}
 
 Define the Vlist for a stream.
+
+
+\section*{\tt \htmlref{streamInqByteorder}{streamInqByteorder}}
+
+\begin{verbatim}
+    int streamInqByteorder (intstreamID);
+\end{verbatim}
+
+Get the byteorder.
 
 
 \section*{\tt \htmlref{streamInqFiletype}{streamInqFiletype}}
@@ -591,6 +609,15 @@ Copy some entries of a variable list.
 Create a variable list.
 
 
+\section*{\tt \htmlref{vlistDefTaxis}{vlistDefTaxis}}
+
+\begin{verbatim}
+    void vlistDefTaxis (intvlistID, inttaxisID);
+\end{verbatim}
+
+Define the time axis of a variable list.
+
+
 \section*{\tt \htmlref{vlistDefVar}{vlistDefVar}}
 
 \begin{verbatim}
@@ -670,6 +697,69 @@ Destroy a variable list.
 \end{verbatim}
 
 Duplicate a variable list.
+
+
+\section*{\tt \htmlref{vlistInqTaxis}{vlistInqTaxis}}
+
+\begin{verbatim}
+    int vlistInqTaxis (intvlistID);
+\end{verbatim}
+
+Get the time axis of a variable list.
+
+
+\section*{\tt \htmlref{vlistInqVarCode}{vlistInqVarCode}}
+
+\begin{verbatim}
+    int vlistInqVarCode (intvlistID, intvarID);
+\end{verbatim}
+
+Get the code number of a Variable.
+
+
+\section*{\tt \htmlref{vlistInqVarDatatype}{vlistInqVarDatatype}}
+
+\begin{verbatim}
+    int vlistInqVarDatatype (intvlistID, intvarID);
+\end{verbatim}
+
+Get the data type of a Variable.
+
+
+\section*{\tt \htmlref{vlistInqVarLongname}{vlistInqVarLongname}}
+
+\begin{verbatim}
+    void vlistInqVarLongname (intvlistID, intvarID, char *longname);
+\end{verbatim}
+
+Get the long name of a Variable.
+
+
+\section*{\tt \htmlref{vlistInqVarMissval}{vlistInqVarMissval}}
+
+\begin{verbatim}
+    double vlistInqVarMissval (intvlistID, intvarID);
+\end{verbatim}
+
+Get the missing value of a Variable.
+
+
+\section*{\tt \htmlref{vlistInqVarName}{vlistInqVarName}}
+
+\begin{verbatim}
+    void vlistInqVarName (intvlistID, intvarID, char *name);
+\end{verbatim}
+
+Get the name of a Variable.
+
+
+\section*{\tt \htmlref{vlistInqVarUnits}{vlistInqVarUnits}}
+
+\begin{verbatim}
+    void vlistInqVarUnits (intvlistID, intvarID, char *units);
+\end{verbatim}
+
+Get the units of a Variable.
 
 
 \section*{\tt \htmlref{vlistMerge}{vlistMerge}}

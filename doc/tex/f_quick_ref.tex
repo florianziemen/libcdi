@@ -346,6 +346,15 @@ Get all values of a Y-axis.
 Close an open dataset.
 
 
+\section*{\tt \htmlref{streamDefByteorder}{streamDefByteorder}}
+
+\begin{verbatim}
+    SUBROUTINE streamDefByteorder (INTEGER streamID, INTEGER byteorder)
+\end{verbatim}
+
+Define the byteorder.
+
+
 \section*{\tt \htmlref{streamDefTimestep}{streamDefTimestep}}
 
 \begin{verbatim}
@@ -362,6 +371,15 @@ Define time step.
 \end{verbatim}
 
 Define the Vlist for a stream.
+
+
+\section*{\tt \htmlref{streamInqByteorder}{streamInqByteorder}}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqByteorder (INTEGER streamID)
+\end{verbatim}
+
+Get the byteorder.
 
 
 \section*{\tt \htmlref{streamInqFiletype}{streamInqFiletype}}
@@ -593,6 +611,15 @@ Copy some entries of a variable list.
 Create a variable list.
 
 
+\section*{\tt \htmlref{vlistDefTaxis}{vlistDefTaxis}}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefTaxis (INTEGER vlistID, INTEGER taxisID)
+\end{verbatim}
+
+Define the time axis of a variable list.
+
+
 \section*{\tt \htmlref{vlistDefVar}{vlistDefVar}}
 
 \begin{verbatim}
@@ -675,6 +702,70 @@ Destroy a variable list.
 \end{verbatim}
 
 Duplicate a variable list.
+
+
+\section*{\tt \htmlref{vlistInqTaxis}{vlistInqTaxis}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqTaxis (INTEGER vlistID)
+\end{verbatim}
+
+Get the time axis of a variable list.
+
+
+\section*{\tt \htmlref{vlistInqVarCode}{vlistInqVarCode}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqVarCode (INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+Get the code number of a Variable.
+
+
+\section*{\tt \htmlref{vlistInqVarDatatype}{vlistInqVarDatatype}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqVarDatatype (INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+Get the data type of a Variable.
+
+
+\section*{\tt \htmlref{vlistInqVarLongname}{vlistInqVarLongname}}
+
+\begin{verbatim}
+    SUBROUTINE vlistInqVarLongname (INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) longname)
+\end{verbatim}
+
+Get the long name of a Variable.
+
+
+\section*{\tt \htmlref{vlistInqVarMissval}{vlistInqVarMissval}}
+
+\begin{verbatim}
+    DOUBLEPRECISION FUNCTION vlistInqVarMissval (INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+Get the missing value of a Variable.
+
+
+\section*{\tt \htmlref{vlistInqVarName}{vlistInqVarName}}
+
+\begin{verbatim}
+    SUBROUTINE vlistInqVarName (INTEGER vlistID, INTEGER varID, CHARACTER*(*) name)
+\end{verbatim}
+
+Get the name of a Variable.
+
+
+\section*{\tt \htmlref{vlistInqVarUnits}{vlistInqVarUnits}}
+
+\begin{verbatim}
+    SUBROUTINE vlistInqVarUnits (INTEGER vlistID, INTEGER varID, CHARACTER*(*) units)
+\end{verbatim}
+
+Get the units of a Variable.
 
 
 \section*{\tt \htmlref{vlistMerge}{vlistMerge}}

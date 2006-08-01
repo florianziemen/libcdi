@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Mon Jul 31 09:47:39 CEST 2006 */
+/* Generated automatically from m214003 on Tue Aug  1 14:58:09 CEST 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -7756,6 +7756,8 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
 
 	zz = gribLen;
 	while ( zz & 7 ) dbuf[zz++] = 0;
+
+	gribLen = zz;
       }
     /*
     fprintf(stderr, "%3d %3d griblen in %6d  out %6d  CR %g   slen %6d dlen %6d  CR %g\n",
@@ -7768,7 +7770,7 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
 #else
   if ( libszwarn )
     {
-      Warning(func, "Compression disabled, szlib not available!");
+      Warning(func, "Decompression disabled, szlib not available!");
       libszwarn = 0;
     }
 #endif
@@ -7946,7 +7948,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.1" " of ""Jul 31 2006"" ""09:47:39";
+static const char grb_libvers[] = "1.0.1" " of ""Aug  1 2006"" ""14:58:09";
 
 
 

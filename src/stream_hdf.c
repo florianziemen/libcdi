@@ -1980,6 +1980,7 @@ int hdfDefVar(int streamID, int varID)
   int tablenum;
   hsize_t cdims[9];
   int plistid;
+  int compressType;
   int compressLevel;
   int vlistID;
 
@@ -2079,8 +2080,9 @@ int hdfDefVar(int streamID, int varID)
   plistid = H5Pcreate(H5P_DATASET_CREATE);
   H5Pset_chunk(plistid, ndims, cdims);
 
-  compressLevel = streams[streamID].compress;
-  if ( compressLevel )
+  compressType  = streams[streamID].compressType;
+  compressLevel = streams[streamID].compressLevel;
+  if ( compressType == COMPRESS_GZIP )
     H5Pset_deflate(plistid, compressLevel);
 
   hdf_def_var(fileID, name, xtype, ndims, dims, &ncvarid, plistid);

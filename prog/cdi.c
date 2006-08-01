@@ -32,7 +32,7 @@ int DefaultDataType = CDI_UNDEFID;
 
 static void version(void)
 {
-  fprintf(stderr, "CDI version 1.5.1\n");
+  fprintf(stderr, "CDI version 1.6.0\n");
   cdiPrintVersion();
   fprintf(stderr, "\n");
 /*
@@ -46,6 +46,7 @@ static void version(void)
   1.4.3  11 Apr 2005 : change date and time format to ISO
   1.5.0  22 Nov 2005 : IEG support
   1.5.1  21 Feb 2006 : add option -s for short info
+  1.6.0   1 Aug 2006 : add option -z szip for SZIP compression of GRIB records
 */
 }
 
@@ -617,7 +618,7 @@ static void setDefaultDataType(char *datatypestr)
 	  level = atoi(datatypestr);
 	  datatypestr++;	      
 	}
-      cdiDefCompress(level);
+      cdiDefCompress(COMPRESS_GZIP, level);
     }
 }
 
@@ -672,6 +673,20 @@ int handle_error(int cdiErrno, const char *fmt, ...)
 }
 
 
+void defineCompress(const char *arg)
+{
+  size_t len = strlen(arg);
+
+  if      ( strncmp(arg, "szip", len) == 0 )
+    cdiDefCompress(COMPRESS_SZIP, 0);
+  else if ( strncmp(arg, "gzip", len) == 0 )
+    cdiDefCompress(COMPRESS_GZIP, 6);
+  else
+    fprintf(stderr, "Compression %s unsupported!\n", arg);  
+}
+
+
+
 int main(int argc, char *argv[])
 {
   int c;
@@ -695,7 +710,7 @@ int main(int argc, char *argv[])
   if (Progname == 0) Progname = argv[0];
   else               Progname++;
 
-  while ( (c = getopt(argc, argv, "f:t:w:cdhlmqrsvVz")) != EOF )
+  while ( (c = getopt(argc, argv, "f:t:w:z:cdhlmqrsvVZ")) != EOF )
     {
       switch (c)
 	{
@@ -732,8 +747,11 @@ int main(int argc, char *argv[])
 	case 'w':
 	  wTable = optarg;
 	  break;
+	case 'Z':
+	  cdiDefCompress(COMPRESS_GZIP, 6);
+	  break;
 	case 'z':
-	  cdiDefCompress(6);
+	  defineCompress(optarg);
 	  break;
 	case 'h':
 	  usage();

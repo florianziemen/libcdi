@@ -13,10 +13,16 @@
 #endif
 
 
+/*  Byte order  */
+
+
 /*  Error identifier  */
 
 
 /*  File types  */
+
+
+/*  Compress types  */
 
 
 /*  Data types  */
@@ -49,7 +55,7 @@ FCALLSCSUB0 (cdiPrintVersion, CDIPRINTVERSION, cdiprintversion)
 FCALLSCSUB1 (cdiDefMissval, CDIDEFMISSVAL, cdidefmissval, DOUBLE)
 FCALLSCFUN0 (DOUBLE, cdiInqMissval, CDIINQMISSVAL, cdiinqmissval)
 FCALLSCFUN2 (INT, cdiDefGlobal, CDIDEFGLOBAL, cdidefglobal, STRING, INT)
-FCALLSCSUB1 (cdiDefCompress, CDIDEFCOMPRESS, cdidefcompress, INT)
+FCALLSCSUB2 (cdiDefCompress, CDIDEFCOMPRESS, cdidefcompress, INT, INT)
 
 /*  STREAM control routines  */
 

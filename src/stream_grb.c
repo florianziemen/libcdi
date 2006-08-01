@@ -2224,6 +2224,7 @@ int grbWriteRecord(int streamID, const double *data, int nmiss)
   int varID;
   int datatype;
   int vlistID;
+  size_t nbytes;
 
   streamCheckID(func, streamID);
 
@@ -2298,10 +2299,27 @@ int grbWriteRecord(int streamID, const double *data, int nmiss)
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
 	   datasize, (int *) gribbuffer, gribsize, &iword, "C", &iret);
 
-  if ( iret ) Error(func, "Problem during GRIB encode (errno = %d)!", iret);;
+  if ( iret ) Error(func, "Problem during GRIB encode (errno = %d)!", iret);
+
+  nbytes = iword*sizeof(int);
+
+  if ( streams[streamID].compressType == COMPRESS_SZIP )
+    {
+      unsigned char *buffer;
+      size_t buffersize;
+
+      buffersize = gribbuffersize;
+      buffer = (unsigned char *) malloc(buffersize);
+
+      memcpy(buffer, gribbuffer, gribbuffersize);
+
+      nbytes = gribZip(gribbuffer, (long) gribbuffersize, buffer, (long) buffersize);
+
+      free(buffer);
+    }
 
   /*  gribPrintSec2DP(isec0, isec2, fsec2); */
-  status = gribWrite(fileID, gribbuffer, iword*sizeof(int));
+  status = gribWrite(fileID, gribbuffer, nbytes);
 
   if ( gribbuffer ) free(gribbuffer);
 

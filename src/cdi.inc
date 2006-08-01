@@ -1,9 +1,16 @@
 !
-! Fortran interface for CDI library version 1.0.0
+! Fortran interface for CDI library version 1.0.1
 !
 
       INTEGER    CDI_UNDEFID           
       PARAMETER (CDI_UNDEFID            = -1)
+!
+!  Byte order
+!
+      INTEGER    CDI_BIGENDIAN         
+      PARAMETER (CDI_BIGENDIAN          =  0)
+      INTEGER    CDI_LITTLEENDIAN      
+      PARAMETER (CDI_LITTLEENDIAN       =  1)
 !
 !  Error identifier
 !
@@ -37,6 +44,13 @@
       INTEGER    FILETYPE_IEG          
       PARAMETER (FILETYPE_IEG           =  8)
 !
+!  Compress types
+!
+      INTEGER    COMPRESS_SZIP         
+      PARAMETER (COMPRESS_SZIP          =  1)
+      INTEGER    COMPRESS_GZIP         
+      PARAMETER (COMPRESS_GZIP          =  2)
+!
 !  Data types
 !
       INTEGER    DATATYPE_PACK         
@@ -47,16 +61,74 @@
       PARAMETER (DATATYPE_PACK2         =  2)
       INTEGER    DATATYPE_PACK3        
       PARAMETER (DATATYPE_PACK3         =  3)
-      INTEGER    DATATYPE_REAL4        
-      PARAMETER (DATATYPE_REAL4         =  4)
-      INTEGER    DATATYPE_REAL8        
-      PARAMETER (DATATYPE_REAL8         =  5)
-      INTEGER    DATATYPE_INT1         
-      PARAMETER (DATATYPE_INT1          =  6)
-      INTEGER    DATATYPE_INT2         
-      PARAMETER (DATATYPE_INT2          =  7)
-      INTEGER    DATATYPE_INT4         
-      PARAMETER (DATATYPE_INT4          =  8)
+      INTEGER    DATATYPE_PACK4        
+      PARAMETER (DATATYPE_PACK4         =  4)
+      INTEGER    DATATYPE_PACK5        
+      PARAMETER (DATATYPE_PACK5         =  5)
+      INTEGER    DATATYPE_PACK6        
+      PARAMETER (DATATYPE_PACK6         =  6)
+      INTEGER    DATATYPE_PACK7        
+      PARAMETER (DATATYPE_PACK7         =  7)
+      INTEGER    DATATYPE_PACK8        
+      PARAMETER (DATATYPE_PACK8         =  8)
+      INTEGER    DATATYPE_PACK9        
+      PARAMETER (DATATYPE_PACK9         =  9)
+      INTEGER    DATATYPE_PACK10       
+      PARAMETER (DATATYPE_PACK10        = 10)
+      INTEGER    DATATYPE_PACK11       
+      PARAMETER (DATATYPE_PACK11        = 11)
+      INTEGER    DATATYPE_PACK12       
+      PARAMETER (DATATYPE_PACK12        = 12)
+      INTEGER    DATATYPE_PACK13       
+      PARAMETER (DATATYPE_PACK13        = 13)
+      INTEGER    DATATYPE_PACK14       
+      PARAMETER (DATATYPE_PACK14        = 14)
+      INTEGER    DATATYPE_PACK15       
+      PARAMETER (DATATYPE_PACK15        = 15)
+      INTEGER    DATATYPE_PACK16       
+      PARAMETER (DATATYPE_PACK16        = 16)
+      INTEGER    DATATYPE_PACK17       
+      PARAMETER (DATATYPE_PACK17        = 17)
+      INTEGER    DATATYPE_PACK18       
+      PARAMETER (DATATYPE_PACK18        = 18)
+      INTEGER    DATATYPE_PACK19       
+      PARAMETER (DATATYPE_PACK19        = 19)
+      INTEGER    DATATYPE_PACK20       
+      PARAMETER (DATATYPE_PACK20        = 20)
+      INTEGER    DATATYPE_PACK21       
+      PARAMETER (DATATYPE_PACK21        = 21)
+      INTEGER    DATATYPE_PACK22       
+      PARAMETER (DATATYPE_PACK22        = 22)
+      INTEGER    DATATYPE_PACK23       
+      PARAMETER (DATATYPE_PACK23        = 23)
+      INTEGER    DATATYPE_PACK24       
+      PARAMETER (DATATYPE_PACK24        = 24)
+      INTEGER    DATATYPE_PACK25       
+      PARAMETER (DATATYPE_PACK25        = 25)
+      INTEGER    DATATYPE_PACK26       
+      PARAMETER (DATATYPE_PACK26        = 26)
+      INTEGER    DATATYPE_PACK27       
+      PARAMETER (DATATYPE_PACK27        = 27)
+      INTEGER    DATATYPE_PACK28       
+      PARAMETER (DATATYPE_PACK28        = 28)
+      INTEGER    DATATYPE_PACK29       
+      PARAMETER (DATATYPE_PACK29        = 29)
+      INTEGER    DATATYPE_PACK30       
+      PARAMETER (DATATYPE_PACK30        = 30)
+      INTEGER    DATATYPE_PACK31       
+      PARAMETER (DATATYPE_PACK31        = 31)
+      INTEGER    DATATYPE_PACK32       
+      PARAMETER (DATATYPE_PACK32        = 32)
+      INTEGER    DATATYPE_FLT32        
+      PARAMETER (DATATYPE_FLT32         = 132)
+      INTEGER    DATATYPE_FLT64        
+      PARAMETER (DATATYPE_FLT64         = 164)
+      INTEGER    DATATYPE_INT8         
+      PARAMETER (DATATYPE_INT8          = 208)
+      INTEGER    DATATYPE_INT16        
+      PARAMETER (DATATYPE_INT16         = 216)
+      INTEGER    DATATYPE_INT32        
+      PARAMETER (DATATYPE_INT32         = 232)
 !
 !  GRID types
 !
@@ -179,7 +251,8 @@
       EXTERNAL        cdiDefGlobal
 
 !                     cdiDefCompress
-!                                    (INTEGER         level)
+!                                    (INTEGER         type,
+!                                     INTEGER         level)
       EXTERNAL        cdiDefCompress
 
 !
