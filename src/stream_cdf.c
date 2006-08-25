@@ -256,7 +256,7 @@ static void cdfGetAttText(int fileID, int ncvarid, char *attname, char *atttext,
 
   cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
 
-  if ( (int) attlen < 65636 )
+  if ( (int) attlen < sizeof(attbuf) )
     {
       cdf_get_att_text(fileID, ncvarid, attname, attbuf);
 
@@ -3130,38 +3130,44 @@ int cdfInqContents(int streamID)
     {
       cdf_inq_attname(fileID, NC_GLOBAL, iatt, attname);
       cdf_inq_atttype(fileID, NC_GLOBAL, attname, &xtype);
+      cdf_inq_attlen(fileID, NC_GLOBAL, attname, &attlen);
 
       if ( xtype == NC_CHAR )
 	{
-	  if ( strcmp(attname, "history") == 0 )
+	  cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
+
+	  if ( attlen > 0 && attstring[0] != 0 )
 	    {
-	      streams[streamID].historyID = iatt;
-	    }
-	  else if ( strcmp(attname, "institution") == 0 )
-	    {
-	      cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
-	      instID = institutInq(0, 0, NULL, attstring);
-	      if ( instID == UNDEFID )
-		instID = institutDef(0, 0, NULL, attstring);
-	    }
-	  else if ( strcmp(attname, "source") == 0 )
-	    {
-	      cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
-	      modelID = modelInq(-1, 0, attstring);
-	    }
-	  else if ( strcmp(attname, "Conventions") == 0 )
-	    {
-	    }
-	  else if ( strcmp(attname, "CDI") == 0 )
-	    {
-	    }
-	  else if ( strcmp(attname, "CDO") == 0 )
-	    {
-	    }
-	  else
-	    {
-	      cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
-	      vlistDefAttribute(vlistID, attname, attstring);
+	      if ( strcmp(attname, "history") == 0 )
+		{
+		  streams[streamID].historyID = iatt;
+		}
+	      else if ( strcmp(attname, "institution") == 0 )
+		{
+		  cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
+		  instID = institutInq(0, 0, NULL, attstring);
+		  if ( instID == UNDEFID )
+		    instID = institutDef(0, 0, NULL, attstring);
+		}
+	      else if ( strcmp(attname, "source") == 0 )
+		{
+		  cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
+		  modelID = modelInq(-1, 0, attstring);
+		}
+	      else if ( strcmp(attname, "Conventions") == 0 )
+		{
+		}
+	      else if ( strcmp(attname, "CDI") == 0 )
+		{
+		}
+	      else if ( strcmp(attname, "CDO") == 0 )
+		{
+		}
+	      else
+		{
+		  cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
+		  vlistDefAttribute(vlistID, attname, attstring);
+		}
 	    }
 	}
       else if ( xtype == NC_INT )

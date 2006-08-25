@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Tue Aug  1 14:58:09 CEST 2006 */
+/* Generated automatically from m214003 on Fri Aug 25 08:58:12 CEST 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -3993,10 +3993,14 @@ static int decodeGDS(unsigned char  *gds, int *isec0, int *isec2, double *fsec2,
       */
     }
   else
-    Message(func, "Gridtype %d unsupported", ISEC2_GridType);
+    {
+      ISEC2_NumLon = GDS_NumLon;
+      ISEC2_NumLat = GDS_NumLat;
+      Message(func, "Gridtype %d unsupported", ISEC2_GridType);
+    }
 
-      /*    vertical coordinate parameters for hybrid levels.     */
-      /*    get number of vertical coordinate parameters, if any. */
+  /*    vertical coordinate parameters for hybrid levels.     */
+  /*    get number of vertical coordinate parameters, if any. */
 
   ISEC2_NumVCP = 0;
 
@@ -7948,7 +7952,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.1" " of ""Aug  1 2006"" ""14:58:09";
+static const char grb_libvers[] = "1.0.2" " of ""Aug 25 2006"" ""08:58:12";
 
 
 
