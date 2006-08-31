@@ -1,8 +1,10 @@
 
 2006-09-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* using GRIB library version 1.0.1
-	* Version 1.0.1 released
+	* using GRIB library version 1.0.2
+	* cdfDefVar: set default datatype for addoffset and scalefactor to double
+	* cdfWriteVar*: round integer field with NINT [report: Etienne Tourigny]
+	* Version 1.0.2 released
 
 2006-08-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
@@ -11,7 +13,7 @@
 	* add DATATYPE PACK1 to PACK32
 	* change DATATYPE from byte to bit
 	* split GRIB level type 105 with env var SPLIT_LTYPE_105
-	* file.c: remove declaration of getpagesize (report: Mark Hadfield)
+	* file.c: remove declaration of getpagesize [report: Mark Hadfield]
 	* tableWrite: bug fix for undefined strings
 	* Version 1.0.1 released
 

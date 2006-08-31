@@ -293,8 +293,8 @@ int cdfDefDatatype(int datatype)
   int xtype;
 
   if      ( datatype == DATATYPE_INT8  )  xtype = NC_BYTE;
-  else if ( datatype == DATATYPE_INT16  )  xtype = NC_SHORT;
-  else if ( datatype == DATATYPE_INT32  )  xtype = NC_INT;
+  else if ( datatype == DATATYPE_INT16 )  xtype = NC_SHORT;
+  else if ( datatype == DATATYPE_INT32 )  xtype = NC_INT;
   else if ( datatype == DATATYPE_FLT64 )  xtype = NC_DOUBLE;
   else                                    xtype = NC_FLOAT;
 
@@ -2136,17 +2136,27 @@ int cdfDefVar(int streamID, int varID)
     {
       int laddoffset, lscalefactor;
       double addoffset, scalefactor;
+      int astype = NC_DOUBLE;
 
       addoffset    = vlistInqVarAddoffset(vlistID, varID);
       scalefactor  = vlistInqVarScalefactor(vlistID, varID);
       laddoffset   = addoffset   != 0.0;
       lscalefactor = scalefactor != 1.0;
 
+      if ( laddoffset || lscalefactor )
+	{
+	  if ( DBL_IS_EQUAL(addoffset, (double) ((float) addoffset)) &&
+	       DBL_IS_EQUAL(scalefactor, (double) ((float) scalefactor)) )
+	    {
+	      astype = NC_FLOAT;
+	    }
+	}
+
       if ( laddoffset )
-	cdf_put_att_double(fileID, ncvarid, "add_offset", NC_FLOAT, 1L, &addoffset);
+	cdf_put_att_double(fileID, ncvarid, "add_offset", (nc_type) astype, 1L, &addoffset);
 
       if ( lscalefactor )
-	cdf_put_att_double(fileID, ncvarid, "scale_factor", NC_FLOAT, 1L, &scalefactor);
+	cdf_put_att_double(fileID, ncvarid, "scale_factor", (nc_type) astype, 1L, &scalefactor);
     }
 
   streams[streamID].vars[varID].ncvarid = ncvarid;
@@ -2268,8 +2278,8 @@ void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
 	    {
 	      if ( !DBL_IS_EQUAL(data[i], missval) )
 		{
-		  if ( lscalefactor ) data[i] = data[i] * scalefactor;
-		  if ( laddoffset )   data[i] = data[i] + addoffset;
+		  if ( lscalefactor ) data[i] *= scalefactor;
+		  if ( laddoffset )   data[i] += addoffset;
 		}
 	    }
 	}
@@ -2277,8 +2287,8 @@ void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
 	{
 	  for ( i = 0; i < (int) size; i++ )
 	    {
-	      if ( lscalefactor ) data[i] = data[i] * scalefactor;
-	      if ( laddoffset )   data[i] = data[i] + addoffset;
+	      if ( lscalefactor ) data[i] *= scalefactor;
+	      if ( laddoffset )   data[i] += addoffset;
 	    }
 	}
     }
@@ -2383,6 +2393,7 @@ void cdfWriteVarDP(int streamID, int varID, double *data, int nmiss)
 
   /*  if ( dtype == DATATYPE_INT8 || dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 ) */
     {
+      int nvals;
       int laddoffset, lscalefactor;
       double addoffset, scalefactor;
       double missval;
@@ -2392,31 +2403,36 @@ void cdfWriteVarDP(int streamID, int varID, double *data, int nmiss)
       laddoffset   = addoffset   != 0.0;
       lscalefactor = scalefactor != 1.0;
 
+      nvals = gridInqSize(gridID)*zaxisInqSize(zaxisID);
+
       if ( laddoffset || lscalefactor )
 	{
-	  gridID  = vlistInqVarGrid(vlistID, varID);
-	  size    = gridInqSize(gridID)*zaxisInqSize(zaxisID);
 	  missval = vlistInqVarMissval(vlistID, varID);
 
 	  if ( nmiss > 0 )
 	    {
-	      for ( i = 0; i < (int) size; i++ )
+	      for ( i = 0; i < nvals; i++ )
 		{
 		  if ( !DBL_IS_EQUAL(data[i], missval) )
 		    {
-		      if ( laddoffset )   data[i] = data[i] - addoffset;
-		      if ( lscalefactor ) data[i] = data[i] / scalefactor;
+		      if ( laddoffset )   data[i] -= addoffset;
+		      if ( lscalefactor ) data[i] /= scalefactor;
 		    }
 		}
 	    }
 	  else
 	    {
-	      for ( i = 0; i < (int) size; i++ )
+	      for ( i = 0; i < nvals; i++ )
 		{
-		  if ( laddoffset )   data[i] = data[i] - addoffset;
-		  if ( lscalefactor ) data[i] = data[i] / scalefactor;
+		  if ( laddoffset )   data[i] -= addoffset;
+		  if ( lscalefactor ) data[i] /= scalefactor;
 		}
 	    }
+	}
+
+      if ( dtype == DATATYPE_INT8 || dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 )
+	{
+	  for ( i = 0; i < nvals; i++ ) data[i] = NINT(data[i]);
 	}
     }
 
@@ -2586,8 +2602,8 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 	    {
 	      if ( !DBL_IS_EQUAL(data[i], missval) )
 		{
-		  if ( lscalefactor ) data[i] = data[i] * scalefactor;
-		  if ( laddoffset )   data[i] = data[i] + addoffset;
+		  if ( lscalefactor ) data[i] *= scalefactor;
+		  if ( laddoffset )   data[i] += addoffset;
 		}
 	    }
 	}
@@ -2595,8 +2611,8 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 	{
 	  for ( i = 0; i < (int) size; i++ )
 	    {
-	      if ( lscalefactor ) data[i] = data[i] * scalefactor;
-	      if ( laddoffset )   data[i] = data[i] + addoffset;
+	      if ( lscalefactor ) data[i] *= scalefactor;
+	      if ( laddoffset )   data[i] += addoffset;
 	    }
 	}
     }
@@ -2696,6 +2712,7 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int n
 
   /*  if ( dtype == DATATYPE_INT8 || dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 ) */
     {
+      int nvals;
       int laddoffset, lscalefactor;
       double addoffset, scalefactor;
       double missval;
@@ -2705,31 +2722,36 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int n
       laddoffset   = addoffset   != 0.0;
       lscalefactor = scalefactor != 1.0;
 
+      nvals = gridInqSize(gridID);
+
       if ( laddoffset || lscalefactor )
 	{
-	  gridID  = vlistInqVarGrid(vlistID, varID);
-	  size    = gridInqSize(gridID);
 	  missval = vlistInqVarMissval(vlistID, varID);
 
 	  if ( nmiss > 0 )
 	    {
-	      for ( i = 0; i < (int) size; i++ )
+	      for ( i = 0; i < nvals; i++ )
 		{
 		  if ( !DBL_IS_EQUAL(data[i], missval) )
 		    {
-		      if ( laddoffset )   data[i] = data[i] - addoffset;
-		      if ( lscalefactor ) data[i] = data[i] / scalefactor;
+		      if ( laddoffset )   data[i] -= addoffset;
+		      if ( lscalefactor ) data[i] /= scalefactor;
 		    }
 		}
 	    }
 	  else
 	    {
-	      for ( i = 0; i < (int) size; i++ )
+	      for ( i = 0; i < nvals; i++ )
 		{
-		  if ( laddoffset )   data[i] = data[i] - addoffset;
-		  if ( lscalefactor ) data[i] = data[i] / scalefactor;
+		  if ( laddoffset )   data[i] -= addoffset;
+		  if ( lscalefactor ) data[i] /= scalefactor;
 		}
 	    }
+	}
+
+      if ( dtype == DATATYPE_INT8 || dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 )
+	{
+	  for ( i = 0; i < nvals; i++ ) data[i] = NINT(data[i]);
 	}
     }
 

@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Fri Aug 25 08:58:12 CEST 2006 */
+/* Generated automatically from m214003 on Fri Aug 25 13:27:40 CEST 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -6930,7 +6930,9 @@ int gribGinfo(long recpos, long recsize, unsigned char *gribbuffer,
   if ( bms ) intnum[1] = bpos;
   else       intnum[1] = -999;
   intnum[2] = BDS_NumBits;
-  fltnum[0] = 1.0;
+
+  /*  fltnum[0] = 1.0; */
+  fltnum[0] = pow(10.0, (double)PDS_DecimalScale);
   fltnum[1] = bsf;
   fltnum[2] = BDS_RefValue;
   /*
@@ -7123,11 +7125,12 @@ void gribPrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
   int level, nerr;
   unsigned char *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
   double cr = 1;
+  double refval, scale;
 
   if ( header )
     {
       fprintf(stdout, 
-      "  Rec : Code Level     BDS Flag Scale  RefValue Bits  CR\n");
+      "  Rec : Code Level     BDS Flag    Scale  RefValue Bits  CR\n");
 /*     ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+ */
       header = 0;
     }
@@ -7155,10 +7158,24 @@ void gribPrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
       cr = ((double)s1)/s2;
     }
 
-  fprintf(stdout, "%5d :%4d%7d %7d %4d%5d%11.5g%4d %6.4g\n", nrec,
+  refval = BDS_RefValue;
+
+  if ( BDS_BinScale < 0 )
+    scale = 1.0/pow(2.0, (double) -BDS_BinScale);
+  else
+    scale = pow(2.0, (double) BDS_BinScale);
+
+  if ( PDS_DecimalScale )
+    {
+      double decscale;
+      decscale = pow(10.0, (double)-PDS_DecimalScale);
+      refval *= decscale;
+      scale  *= decscale;
+    }
+
+  fprintf(stdout, "%5d :%4d%7d %7d %4d%8.5g%11.5g%4d %6.4g\n", nrec,
 	  PDS_Parameter, level,
-	  BDS_Len, BDS_Flag,
-	  BDS_BinScale, BDS_RefValue, BDS_NumBits, cr);
+	  BDS_Len, BDS_Flag, scale, refval, BDS_NumBits, cr);
 }
 
 /* #define SZTEST */
@@ -7952,7 +7969,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.2" " of ""Aug 25 2006"" ""08:58:12";
+static const char grb_libvers[] = "1.0.2" " of ""Aug 25 2006"" ""13:27:40";
 
 
 
