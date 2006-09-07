@@ -117,6 +117,7 @@ typedef struct
 {
   off_t     position;
   size_t    size;
+  int       zip;
   int       ilevel;
   int       ilevel2;
   int       ltype;

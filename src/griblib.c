@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Fri Aug 25 13:27:40 CEST 2006 */
+/* Generated automatically from m214003 on Mon Sep  4 11:08:24 CEST 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -7690,7 +7690,6 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
     
     if ( destLen < MIN_COMPRESS*sourceLen )
       {
-	int zz;
 	/*
 	if ( sourceLen < 1000000 )
 	{
@@ -7774,11 +7773,6 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
 	dbuf[4] = 255 & (gribLen >> 16);
 	dbuf[5] = 255 & (gribLen >>  8);
 	dbuf[6] = 255 & (gribLen);
-
-	zz = gribLen;
-	while ( zz & 7 ) dbuf[zz++] = 0;
-
-	gribLen = zz;
       }
     /*
     fprintf(stderr, "%3d %3d griblen in %6d  out %6d  CR %g   slen %6d dlen %6d  CR %g\n",
@@ -7795,6 +7789,8 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
       libszwarn = 0;
     }
 #endif
+
+  while ( gribLen & 7 ) dbuf[gribLen++] = 0;
 
   rec_len = gribLen;
 
@@ -7969,7 +7965,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.2" " of ""Aug 25 2006"" ""13:27:40";
+static const char grb_libvers[] = "1.0.2" " of ""Sep  4 2006"" ""11:08:25";
 
 
 

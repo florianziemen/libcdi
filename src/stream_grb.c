@@ -205,7 +205,7 @@ int grbDefRecord(int streamID)
 
 
 int grbDecodeDataDP(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
-		    int unreduced, int *nmiss)
+		    int unreduced, int *nmiss, int *zip)
 {
   static char func[] = "grbDecodeDataDP";
   int status = 0;
@@ -216,6 +216,8 @@ int grbDecodeDataDP(unsigned char *gribbuffer, int gribsize, double *data, int g
   double fsec2[512], fsec3[2];
   char hoper[2];
 
+  *zip = 0;
+
   if ( unreduced ) strcpy(hoper, "R");
   else             strcpy(hoper, "D");
 
@@ -223,6 +225,7 @@ int grbDecodeDataDP(unsigned char *gribbuffer, int gribsize, double *data, int g
 
   if ( (izip = gribGetZip(gribsize, gribbuffer, &unzipsize)) > 0 )
     {
+          *zip = izip;
 	  if ( izip == 128 ) /* szip */
 	    {
 	      unsigned char *itmpbuffer = NULL;
@@ -281,6 +284,7 @@ int grbReadRecord(int streamID, double *data, int *nmiss)
   off_t recpos;
   int gridsize;
   int vlistID;
+  int zip;
 
   streamCheckID(func, streamID);
 
@@ -302,7 +306,9 @@ int grbReadRecord(int streamID, double *data, int *nmiss)
 
   fileRead(fileID, gribbuffer, (size_t) recsize);
 
-  grbDecodeDataDP(gribbuffer, recsize, data, gridsize, streams[streamID].unreduced, nmiss);
+  grbDecodeDataDP(gribbuffer, recsize, data, gridsize, streams[streamID].unreduced, nmiss, &zip);
+
+  streams[streamID].tsteps[tsID].records[recID].zip = zip;
 
   return (status);
 }
@@ -1425,6 +1431,7 @@ void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
   off_t recpos, currentfilepos;
   int imiss;
   int vlistID;
+  int zip;
 
   streamCheckID(func, streamID);
 
@@ -1454,13 +1461,16 @@ void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
 
       fileRead(fileID, gribbuffer, recsize);
 
-      grbDecodeDataDP(gribbuffer, recsize, &data[levelID*gridsize], gridsize, streams[streamID].unreduced, &imiss);
+      grbDecodeDataDP(gribbuffer, recsize, &data[levelID*gridsize], gridsize, streams[streamID].unreduced, &imiss, &zip);
 
       *nmiss += imiss;
+
+      streams[streamID].tsteps[tsID].records[recID].zip = zip;
     }
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 }
+
 
 void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *nmiss)
 {
@@ -1472,6 +1482,7 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
   off_t recpos, currentfilepos;
   int tsID, recID;
   int vlistID;
+  int zip;
 
   streamCheckID(func, streamID);
 
@@ -1501,10 +1512,13 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
 
   fileRead(fileID, gribbuffer, recsize);
 
-  grbDecodeDataDP(gribbuffer, recsize, data, gridsize, streams[streamID].unreduced, nmiss);
+  grbDecodeDataDP(gribbuffer, recsize, data, gridsize, streams[streamID].unreduced, nmiss, &zip);
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
+
+  streams[streamID].tsteps[tsID].records[recID].zip = zip;
 }
+
 
 void grbDefInstitut(int *isec1, int center, int subcenter)
 {
@@ -2169,10 +2183,13 @@ int grbCopyRecord(int ostreamID, int istreamID)
   int ifileID, ofileID;
   int tsID, recID, vrecID;
   long recsize;
-  long bufsize;
+  size_t gribbuffersize;
   off_t recpos;
   int status = 0;
-  char *buffer;
+  char *gribbuffer;
+  size_t nbytes;
+  long unzipsize;
+  int izip;
 
   streamCheckID(func, istreamID);
   streamCheckID(func, ostreamID);
@@ -2188,17 +2205,37 @@ int grbCopyRecord(int ostreamID, int istreamID)
 
   fileSetPos(ifileID, recpos, SEEK_SET);
 
-  bufsize = recsize == (recsize>>3)<<3 ? recsize : (1+(recsize>>3))<<3;
+  gribbuffersize = recsize == (recsize>>3)<<3 ? recsize : (1+(recsize>>3))<<3;
 
-  buffer = (char *) malloc(bufsize);
+  gribbuffer = (char *) malloc(gribbuffersize);
 
-  fileRead(ifileID, buffer, recsize);
+  fileRead(ifileID, gribbuffer, recsize);
+
+  nbytes = recsize;
+
+  izip = gribGetZip(recsize, gribbuffer, &unzipsize);
   
-  while ( recsize & 7 ) buffer[recsize++] = 0;
+  if ( izip == 0 )
+    if ( streams[ostreamID].compressType == COMPRESS_SZIP )
+      {
+	unsigned char *buffer;
+	size_t buffersize;
 
-  fileWrite(ofileID, buffer, recsize);
+	buffersize = gribbuffersize;
+	buffer = (unsigned char *) malloc(buffersize);
 
-  free(buffer);
+	memcpy(buffer, gribbuffer, gribbuffersize);
+
+	nbytes = gribZip(gribbuffer, (long) gribbuffersize, buffer, (long) buffersize);
+
+	free(buffer);
+      }
+
+  while ( nbytes & 7 ) gribbuffer[nbytes++] = 0;
+
+  fileWrite(ofileID, gribbuffer, nbytes);
+
+  free(gribbuffer);
 
   return (status);
 }
@@ -2334,7 +2371,9 @@ void streamInqGinfo(int streamID, int *intnum, float *fltnum)
   int filetype;
   void *gribbuffer;
   long recsize;
+  long gribbuffersize;
   off_t recpos;
+  int zip;
 
   streamCheckID(func, streamID);
 
@@ -2347,10 +2386,15 @@ void streamInqGinfo(int streamID, int *intnum, float *fltnum)
       recID   = streams[streamID].tsteps[tsID].recIDs[vrecID];
       recpos  = streams[streamID].tsteps[tsID].records[recID].position;
       recsize = streams[streamID].tsteps[tsID].records[recID].size;
+      zip     = streams[streamID].tsteps[tsID].records[recID].zip;
 
       gribbuffer = streams[streamID].record->buffer;
+      gribbuffersize = streams[streamID].record->buffersize;
 
-      gribGinfo(recpos, recsize, (unsigned char *) gribbuffer, intnum, fltnum);
+      if ( zip > 0 )
+	Error(func, "Compressed GRIB records unsupported!");
+      else
+	gribGinfo(recpos, gribbuffersize, (unsigned char *) gribbuffer, intnum, fltnum);
     }
 }
 

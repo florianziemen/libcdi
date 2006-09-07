@@ -2150,6 +2150,8 @@ int cdfDefVar(int streamID, int varID)
 	    {
 	      astype = NC_FLOAT;
 	    }
+
+	  if ( xtype == (int) NC_FLOAT ) astype = NC_FLOAT;
 	}
 
       if ( laddoffset )
