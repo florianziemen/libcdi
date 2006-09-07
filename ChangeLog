@@ -3,6 +3,7 @@
 
 	* using GRIB library version 1.0.2
 	* grbCopyRecord: add SZIP support
+	* vlistChangeVarGrid: bug fix
 	* cdfDefVar: set default datatype for addoffset and scalefactor to double
 	* cdfWriteVar*: round integer fields with NINT [report: Etienne Tourigny]
 	* Version 1.0.2 released

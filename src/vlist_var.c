@@ -1205,7 +1205,7 @@ void vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
       for ( index = 0; index < vlistptr->nzaxis; index++ )
 	if ( vlistptr->zaxisIDs[index] == zaxisID ) break;
 
-      if ( index == nvars )
+      if ( index == vlistptr->nzaxis )
 	{
 	  if ( vlistptr->nzaxis + 1 >= MAX_ZAXIS )
 	    Error(func, "Maximum of %d zaxis reached", MAX_ZAXIS);
@@ -1245,7 +1245,7 @@ void vlistChangeVarGrid(int vlistID, int varID, int gridID)
       for ( index = 0; index < vlistptr->ngrids; index++ )
 	if ( vlistptr->gridIDs[index] == gridID ) break;
 
-      if ( index == nvars )
+      if ( index == vlistptr->ngrids )
 	{
 	  if ( vlistptr->ngrids + 1 >= MAX_GRIDS )
 	    Error(func, "Maximum of %d grids reached", MAX_GRIDS);
