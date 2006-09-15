@@ -115,12 +115,13 @@ static void printInfo(int gridtype, int date, int time, int code, double level,
   fprintf(stdout, "%7d ", datasize);
 
   fprintf(stdout, "%7d :", nmiss);
-
+  /*
   if ( gridtype == GRID_SPECTRAL )
     {
       fprintf(stdout, "            %#12.5g\n", data[0]);
     }
   else
+  */
     {
       if ( nmiss > 0 )
 	{

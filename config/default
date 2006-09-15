@@ -29,7 +29,7 @@ case "${HOSTNAME}" in
 	./configure --prefix=$HOME/local/LINUX \
                     --with-netcdf=/client \
                     CPPFLAGS="-DHAVE_LIBSZ -I$HOME/local/LINUX/include"  LIBS=$HOME/local/LINUX/lib/libsz.a \
-	            CC=gcc CFLAGS="-ansi -g -O2 -Wall" CFINT=-Df2cFortran
+	            CC=gcc CFLAGS="-ansi -g -O2 -Wall -W -Wfloat-equal" CFINT=-Df2cFortran
 	;;
 # sparc-sun-solaris2.8
     xxf)

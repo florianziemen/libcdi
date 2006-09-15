@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Mon Sep  4 11:08:24 CEST 2006 */
+/* Generated automatically from m214003 on Fri Sep  8 13:11:30 CEST 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -54,6 +54,14 @@
 #  define  GRIBPACK     unsigned INT64
 #  define  PACK_GRIB    packInt64
 #  define  UNPACK_GRIB  unpackInt64
+#endif
+
+
+#ifndef DBL_IS_EQUAL
+/*
+#define DBL_IS_EQUAL(x,y) (fabs(x - y) <= 2.0*(y*DBL_EPSILON + DBL_MIN))
+*/
+#define DBL_IS_EQUAL(x,y) (!(fabs(x - y) > 0))
 #endif
 
 
@@ -621,7 +629,7 @@ void confp3(double pval, int *kexp, int *kmant, int kbits, int kround)
   /*   Section 2 . Convert value of zero.                              */
   /* ----------------------------------------------------------------- */
 
-  if ( ! fabs(pval) )
+  if ( ! (fabs(pval) > 0))
     {
       *kexp  = 0;
       *kmant = 0;
@@ -2871,7 +2879,7 @@ void encodePDS(GRIBPACK *lpds, int pdsLen, int *isec1)
 
 /* GRIB BLOCK 2 - GRID DESCRIPTION SECTION */
 
-void encodeGDS(GRIBPACK *lGrib, int *gribLen, int *isec1, int *isec2, double *fsec2)
+void encodeGDS(GRIBPACK *lGrib, int *gribLen, int *isec2, double *fsec2)
 {
   int z = *gribLen;
   int exponent, mantissa;
@@ -3003,7 +3011,7 @@ void encodeBMS(GRIBPACK *lGrib, int *gribLen, double *fsec3, int *isec4, double 
 #endif
   for ( i = 0; i < bitmapSize; i++ )
     {
-      if ( data[i] != FSEC3_MissVal )
+      if ( !DBL_IS_EQUAL(data[i], FSEC3_MissVal) )
 	{
 	  data[fsec4size++] = data[i];
 	  imask[i] = 1;
@@ -3145,7 +3153,7 @@ int encodeBDS(GRIBPACK *lGrib, int *gribLen, int decscale, int *isec2, int *isec
     {
       binscale = 0;
     }
-  else if ( (fmin != 0.0) && (fabs(range/fmin) <= jpepsln) )
+  else if ( (!DBL_IS_EQUAL(fmin, 0.0)) && (fabs(range/fmin) <= jpepsln) )
     {
       binscale = 0;
     }
@@ -3396,7 +3404,7 @@ void gribEncode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
   encodePDS(lpds, pdsLen, isec1);
   gribLen += pdsLen;
 
-  encodeGDS(lGrib, &gribLen, isec1, isec2, fsec2);
+  encodeGDS(lGrib, &gribLen, isec2, fsec2);
   /*
     ----------------------------------------------------------------
     BMS Bit-Map Section Section (Section 3)
@@ -4289,20 +4297,20 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
       else if ( ISEC4_NumBits ==  8 )
          for ( i = 0; i < jlend; i++ )
 	   {
-             fpdata[i] = fmin + zscale * lgrib[i];
+             fpdata[i] = fmin + zscale * (int)lgrib[i];
 	   }
       else if ( ISEC4_NumBits == 16 )
          for ( i = 0; i < jlend; i++ )
 	   {
              fpdata[i] = fmin + zscale *
-                         ((lgrib[2*i  ] <<  8) +  lgrib[2*i+1]);
+                         (((int)lgrib[2*i  ] <<  8) +  (int)lgrib[2*i+1]);
 	   }
       else if ( ISEC4_NumBits == 24 )
          for ( i = 0; i < jlend; i++ )
 	   {
              fpdata[i] = fmin + zscale *
-                         ((lgrib[3*i  ] << 16) + (lgrib[3*i+1] <<  8) +
-                           lgrib[3*i+2]);
+                         (((int)lgrib[3*i  ] << 16) + ((int)lgrib[3*i+1] <<  8) +
+                           (int)lgrib[3*i+2]);
 	   }
       else if ( ISEC4_NumBits == 32 )
          for ( i = 0; i < jlend; i++ )
@@ -4647,7 +4655,7 @@ void gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 	  int i, j = 0;
 
 	  for ( i = 0; i < ISEC4_NumValues; i++ )
-	    if ( fsec4[i] != FSEC3_MissVal ) j++;
+	    if ( !DBL_IS_EQUAL(fsec4[i], FSEC3_MissVal) ) j++;
 
 	  ISEC4_NumNonMissValues = j;
 	}
@@ -5238,12 +5246,12 @@ int rowina2(double *p, int ko, int ki, double *pw,
 	  ip = (int) zwt;
 
 	  /*    If the left value is missing, use the right value */
-	  if (pw[ip + 1 + pw_dim1] == msval)
+	  if ( DBL_IS_EQUAL(pw[ip + 1 + pw_dim1], msval) )
 	    {
 	      p[jl] = pw[ip + 2 + pw_dim1];
 	    }
 	  /*    If the right value is missing, use the left value */
-	  else if (pw[ip + 2 + pw_dim1] == msval)
+	  else if ( DBL_IS_EQUAL(pw[ip + 2 + pw_dim1], msval) )
 	    {
 	      p[jl] = pw[ip + 1 + pw_dim1];
 	    }
@@ -5271,7 +5279,7 @@ int rowina2(double *p, int ko, int ki, double *pw,
       i_1 = ki;
       for ( jl = 1; jl <= i_1; ++jl )
 	{
-          if ( p[jl] == msval )
+          if ( DBL_IS_EQUAL(p[jl], msval) )
 	    {
 	      fprintf(stderr," ROWINA2: ");
 	      fprintf(stderr," Cubic interpolation not supported");
@@ -5472,12 +5480,12 @@ C     -----------------------------------------------------------------
 	  else
 	    {
 	      /*    If the left value is missing, use the right value */
-	      if (pw[ip + 1 + pw_dim1] == msval)
+	      if ( DBL_IS_EQUAL(pw[ip + 1 + pw_dim1], msval) )
 		{
 		  p[jl] = pw[ip + 2 + pw_dim1];
 		}
 	      /*    If the right value is missing, use the left value */
-	      else if (pw[ip + 2 + pw_dim1] == msval)
+	      else if ( DBL_IS_EQUAL(pw[ip + 2 + pw_dim1], msval) )
 		{
 		  p[jl] = pw[ip + 1 + pw_dim1];
 		}
@@ -5502,7 +5510,7 @@ C     -----------------------------------------------------------------
       i_1 = ki;
       for ( jl = 1; jl <= i_1; ++jl )
 	{
-          if ( p[jl] == msval )
+          if ( DBL_IS_EQUAL(p[jl], msval) )
 	    {
 	      fprintf(stderr," ROWINA2: ");
 	      fprintf(stderr," Cubic interpolation not supported");
@@ -7510,7 +7518,9 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
   int nerr;
   int gribLen;
   int rec_len;
+#if ! defined  (HAVE_LIBSZ)
   static int libszwarn = 1;
+#endif
   unsigned char *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
 #if defined (SZTEST)
     char tmpbuffer[1000000];
@@ -7801,7 +7811,9 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
 int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize)
 {
   static char func[] = "gribUnzip";
+#if ! defined  (HAVE_LIBSZ)
   static int libszwarn = 1;
+#endif
   int nerr;
   unsigned char *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
   int bdsLen, recLen, gribLen = 0;
@@ -7965,7 +7977,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.2" " of ""Sep  4 2006"" ""11:08:25";
+static const char grb_libvers[] = "1.0.2" " of ""Sep  8 2006"" ""13:11:30";
 
 
 

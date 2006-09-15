@@ -1996,6 +1996,9 @@ void grbWriteVarDP(int streamID, int varID, const double *data, int nmiss)
   int instID, modelID, tableID;
   int datatype;
   int vlistID;
+  size_t nbytes;
+
+  streamCheckID(func, streamID);
 
   if ( CDI_Debug ) Message(func, "streamID = %d  varID = %d", streamID, varID);
 
@@ -2075,7 +2078,24 @@ void grbWriteVarDP(int streamID, int varID, const double *data, int nmiss)
 
       if ( iret ) Error(func, "Problem during GRIB encode (errno = %d)!", iret);;
       
-      gribWrite(fileID, gribbuffer, iword*sizeof(int));
+      nbytes = iword*sizeof(int);
+
+      if ( streams[streamID].compressType == COMPRESS_SZIP )
+	{
+	  unsigned char *buffer;
+	  size_t buffersize;
+
+	  buffersize = gribbuffersize;
+	  buffer = (unsigned char *) malloc(buffersize);
+
+	  memcpy(buffer, gribbuffer, gribbuffersize);
+	  
+	  nbytes = gribZip(gribbuffer, (long) gribbuffersize, buffer, (long) buffersize);
+	  
+	  free(buffer);
+	}
+
+      gribWrite(fileID, gribbuffer, nbytes);
     }
 
   if ( gribbuffer ) free(gribbuffer);
@@ -2100,6 +2120,9 @@ void grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data
   int instID, modelID, tableID;
   int datatype;
   int vlistID;
+  size_t nbytes;
+
+  streamCheckID(func, streamID);
 
   memset(isec1, 0, 32*sizeof(int));
   fsec2[0] = 0; fsec2[1] = 0;
@@ -2171,7 +2194,24 @@ void grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data
 
   if ( iret ) Error(func, "Problem during GRIB encode (errno = %d)!", iret);;
 
-  gribWrite(fileID, gribbuffer, iword*sizeof(int));
+  nbytes = iword*sizeof(int);
+
+  if ( streams[streamID].compressType == COMPRESS_SZIP )
+    {
+      unsigned char *buffer;
+      size_t buffersize;
+
+      buffersize = gribbuffersize;
+      buffer = (unsigned char *) malloc(buffersize);
+
+      memcpy(buffer, gribbuffer, gribbuffersize);
+
+      nbytes = gribZip(gribbuffer, (long) gribbuffersize, buffer, (long) buffersize);
+
+      free(buffer);
+    }
+
+  gribWrite(fileID, gribbuffer, nbytes);
 
   if ( gribbuffer ) free(gribbuffer);
 }
@@ -2186,7 +2226,7 @@ int grbCopyRecord(int ostreamID, int istreamID)
   size_t gribbuffersize;
   off_t recpos;
   int status = 0;
-  char *gribbuffer;
+  unsigned char *gribbuffer;
   size_t nbytes;
   long unzipsize;
   int izip;
@@ -2207,7 +2247,7 @@ int grbCopyRecord(int ostreamID, int istreamID)
 
   gribbuffersize = recsize == (recsize>>3)<<3 ? recsize : (1+(recsize>>3))<<3;
 
-  gribbuffer = (char *) malloc(gribbuffersize);
+  gribbuffer = (unsigned char *) malloc(gribbuffersize);
 
   fileRead(ifileID, gribbuffer, recsize);
 
