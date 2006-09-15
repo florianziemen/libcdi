@@ -23,13 +23,13 @@ case "${HOSTNAME}" in
 	./configure --prefix=$HOME/local \
                     --enable-dap --with-netcdf=$HOME/local \
                     CPPFLAGS="-DHAVE_LIBSZ -I$HOME/local/include"  LIBS=$HOME/local/lib/libsz.a \
-                    CC=g++ CFLAGS="-g -O2 -Wall" CFINT=-Df2cFortran
+                    CC=g++ CFLAGS="-g -O2 -Wall -W -Wfloat-equal" CFINT=-Df2cFortran
 	;;
     gata)
 	./configure --prefix=$HOME/local/LINUX \
                     --with-netcdf=/client \
                     CPPFLAGS="-DHAVE_LIBSZ -I$HOME/local/LINUX/include"  LIBS=$HOME/local/LINUX/lib/libsz.a \
-	            CC=gcc CFLAGS="-ansi -g -O2 -Wall -W -Wfloat-equal" CFINT=-Df2cFortran
+	            CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal" CFINT=-Df2cFortran
 	;;
 # sparc-sun-solaris2.8
     xxf)
