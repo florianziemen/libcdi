@@ -356,7 +356,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 	{
 	  calc_gaussaw(yvals, ysize, yfirst, ylast);
 
-	  if ( ! (yfirst == 0 && ylast == 0) )
+	  if ( ! (DBL_IS_EQUAL(yfirst, 0) && DBL_IS_EQUAL(ylast, 0)) )
 	    if ( fabs(yvals[0] - yfirst) > 0.001 || fabs(yvals[ysize-1] - ylast) > 0.001 )
 	      {
 		double yinc = fabs(ylast-yfirst)/(ysize-1);
@@ -401,7 +401,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
     {
       if ( ! fabs(yinc) && ysize > 1 )
 	{
-	  if ( yfirst == ylast && yfirst != 0 ) ylast *= -1;
+	  if ( DBL_IS_EQUAL(yfirst, ylast) && !DBL_IS_EQUAL(yfirst, 0) ) ylast *= -1;
 
 	  if ( yfirst > ylast )
 	    yinc = (yfirst-ylast)/(ysize-1);
@@ -2110,11 +2110,11 @@ int gridCompare(int gridID, GRID grid)
 	      if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
 		{
 		  if ( grid.xdef == 2 && grid.ydef == 2 )
-		    if ( ! (grid.xfirst == 0 && grid.xlast == 0 && grid.xinc == 0) &&
-			 ! (grid.yfirst == 0 && grid.ylast == 0 && grid.yinc == 0) &&
-			 grid.xfirst != grid.xlast && grid.yfirst != grid.ylast )
-		      if ( grid.xfirst != gridInqXval(gridID, 0) ||
-			   grid.yfirst != gridInqYval(gridID, 0) ||
+		    if ( ! (DBL_IS_EQUAL(grid.xfirst, 0) && DBL_IS_EQUAL(grid.xlast, 0) && DBL_IS_EQUAL(grid.xinc, 0)) &&
+			 ! (DBL_IS_EQUAL(grid.yfirst, 0) && DBL_IS_EQUAL(grid.ylast, 0) && DBL_IS_EQUAL(grid.yinc, 0)) &&
+			 !DBL_IS_EQUAL(grid.xfirst, grid.xlast) && !DBL_IS_EQUAL(grid.yfirst, grid.ylast) )
+		      if ( !DBL_IS_EQUAL(grid.xfirst, gridInqXval(gridID, 0)) ||
+			   !DBL_IS_EQUAL(grid.yfirst, gridInqYval(gridID, 0)) ||
 			   fabs(fabs(grid.xinc) - fabs(gridInqXinc(gridID))) > fabs(grid.xinc/1000) ||
 			   fabs(fabs(grid.yinc) - fabs(gridInqYinc(gridID))) > fabs(grid.yinc/1000) )
 			{
@@ -2130,8 +2130,8 @@ int gridCompare(int gridID, GRID grid)
 		{
 		  if ( grid.xdef == 2 && grid.ydef == 2 )
 		    {
-		      if ( ! (grid.xfirst == 0 && grid.xlast == 0 && grid.xinc == 0) &&
-			   ! (grid.yfirst == 0 && grid.ylast == 0) )
+		      if ( ! (DBL_IS_EQUAL(grid.xfirst, 0) && DBL_IS_EQUAL(grid.xlast, 0) && DBL_IS_EQUAL(grid.xinc, 0)) &&
+			   ! (DBL_IS_EQUAL(grid.yfirst, 0) && DBL_IS_EQUAL(grid.ylast, 0)) )
 			if ( fabs(grid.xfirst - gridInqXval(gridID, 0)) > 0.001 ||
 			     fabs(grid.yfirst - gridInqYval(gridID, 0)) > 0.001 ||
 			     fabs(fabs(grid.xinc) - fabs(gridInqXinc(gridID))) > fabs(grid.xinc/1000))
@@ -2142,8 +2142,8 @@ int gridCompare(int gridID, GRID grid)
 		  else
 		    {
 		      if ( grid.xvals && grid.yvals )
-			if ( grid.xvals[0] != gridInqXval(gridID, 0) ||
-			     grid.yvals[0] != gridInqYval(gridID, 0) ||
+			if ( !DBL_IS_EQUAL(grid.xvals[0], gridInqXval(gridID, 0)) ||
+			     !DBL_IS_EQUAL(grid.yvals[0], gridInqYval(gridID, 0)) ||
 			     fabs(fabs(grid.xvals[1]-grid.xvals[0]) - fabs(gridInqXinc(gridID)))
 			     > fabs(grid.xinc/1000))
 			  {
