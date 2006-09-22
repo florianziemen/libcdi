@@ -16,7 +16,7 @@ case "${HOSTNAME}" in
 	./configure --prefix=$HOME/local \
                     --with-netcdf=/pool/ia64/netcdf/netcdf-3.6.0-p1 \
                     CPPFLAGS="-DHAVE_LIBSZ -I$HOME/local/include"  LIBS=$HOME/local/lib/libsz.a \
-                    CC=icc CFLAGS="-g -O2 -Wall -fno-alias CFINT=-Df2cFortran -DMIN_BUF_SIZE=4194304"
+                    CC=icc CFLAGS="-g -O2 -Wall -fno-alias -DMIN_BUF_SIZE=4194304" CFINT=-Df2cFortran
 	;;
 # i686-suse-linux
     linux)
