@@ -23,10 +23,10 @@ int binReadInt64(int fileID, int byteswap, size_t size, INT64 *ptr);
 int binWriteInt32(int fileID, int byteswap, size_t size, INT32 *ptr);
 int binWriteInt64(int fileID, int byteswap, size_t size, INT64 *ptr);
 
-int binReadReal4(int fileID, int byteswap, size_t size, REAL4 *ptr);
-int binReadReal8(int fileID, int byteswap, size_t size, REAL8 *ptr);
+int binReadFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr);
+int binReadFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr);
 
-int binWriteReal4(int fileID, int byteswap, size_t size, REAL4 *ptr);
-int binWriteReal8(int fileID, int byteswap, size_t size, REAL8 *ptr);
+int binWriteFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr);
+int binWriteFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr);
 
 #endif  /* _BINARY_H */

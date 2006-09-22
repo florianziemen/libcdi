@@ -32,7 +32,7 @@ static int extDefaultDprec = 0;
  */
 
 #undef  LIBVERSION
-#define LIBVERSION      1.0.0
+#define LIBVERSION      1.0.1
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char ext_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
@@ -270,36 +270,36 @@ int extInqData(EXTREC *extp, int prec, void *data)
     {
     case SINGLE_PRECISION:
       {
-	if ( sizeof(REAL4) == 4 )
+	if ( sizeof(FLT32) == 4 )
 	  {
 	    if ( byteswap ) swap4byte(buffer, datasize);
 
 	    if ( dprec == prec )
-	      memcpy(data, buffer, datasize*sizeof(REAL4));
+	      memcpy(data, buffer, datasize*sizeof(FLT32));
 	    else
 	      for (i = 0; i < datasize; i++)
 		((double *) data)[i] = (double) ((float *) buffer)[i];
 	  }
 	else
 	  {
-	    Error(func, "not implemented for %d byte float", sizeof(REAL4));
+	    Error(func, "not implemented for %d byte float", sizeof(FLT32));
 	  }	
 	break;
       }
     case DOUBLE_PRECISION:
-	if ( sizeof(REAL8) == 8 )
+	if ( sizeof(FLT64) == 8 )
 	  {
 	    if ( byteswap ) swap8byte(buffer, datasize);
 
 	    if ( dprec == prec )
-	      memcpy(data, buffer, datasize*sizeof(REAL8));
+	      memcpy(data, buffer, datasize*sizeof(FLT64));
 	    else
 	      for (i = 0; i < datasize; i++)
 		((float *) data)[i] = (float) ((double *) buffer)[i];
 	  }
 	else
 	  {
-	    Error(func, "not implemented for %d byte float", sizeof(REAL8));
+	    Error(func, "not implemented for %d byte float", sizeof(FLT64));
 	  }	
 	break;
     default:
@@ -375,7 +375,7 @@ int extDefData(EXTREC *extp, int prec, const void *data)
     case SINGLE_PRECISION:
       {
 	if ( dprec == prec )
-	  memcpy(buffer, data, datasize*sizeof(REAL4));
+	  memcpy(buffer, data, datasize*sizeof(FLT32));
 	else
 	  for (i = 0; i < datasize; i++)
 	    ((float *) buffer)[i] = (float) ((double *) data)[i];
@@ -385,7 +385,7 @@ int extDefData(EXTREC *extp, int prec, const void *data)
     case DOUBLE_PRECISION:
       {
 	if ( dprec == prec )
-	  memcpy(buffer, data, datasize*sizeof(REAL8));
+	  memcpy(buffer, data, datasize*sizeof(FLT64));
 	else
 	  for (i = 0; i < datasize; i++)
 	    ((double *) buffer)[i] = (double) ((float *) data)[i];
@@ -591,12 +591,12 @@ int extWrite(int fileID, EXTREC *extp)
     {
     case SINGLE_PRECISION:
       {
-	binWriteReal4(fileID, byteswap, datasize, (REAL4 *) buffer);
+	binWriteFlt32(fileID, byteswap, datasize, (FLT32 *) buffer);
 	break;
       }
     case DOUBLE_PRECISION:
       {
-	binWriteReal8(fileID, byteswap, datasize, (REAL8 *) buffer);
+	binWriteFlt64(fileID, byteswap, datasize, (FLT64 *) buffer);
 	break;
       }
     default:

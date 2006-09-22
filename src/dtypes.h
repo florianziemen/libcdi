@@ -30,15 +30,15 @@
 #  define  INT64  long long
 #endif
 
-/* REAL4 */
+/* FLT32 */
 
-#undef   REAL4
-#define  REAL4  float
+#undef   FLT32
+#define  FLT32  float
 
-/* Real8 */
+/* FLT64 */
 
-#undef   REAL8
-#define  REAL8  double
+#undef   FLT64
+#define  FLT64  double
 
 /* UINT32 and UINT64 */
 

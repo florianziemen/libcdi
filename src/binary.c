@@ -162,36 +162,36 @@ int binReadInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
 }
 
 
-int binReadReal4(int fileID, int byteswap, size_t size, REAL4 *ptr)
+int binReadFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr)
 {
-  static char func[] = "binReadReal4";
+  static char func[] = "binReadFlt32";
 
-  if ( sizeof(REAL4) == 4 )
+  if ( sizeof(FLT32) == 4 )
     {
       fileRead(fileID, (void *) ptr, 4*size);
       if ( byteswap ) swap4byte(ptr, size);
     }
   else
     {
-      Error(func, "not implemented for %d byte float", sizeof(REAL4));
+      Error(func, "not implemented for %d byte float", sizeof(FLT32));
     }
 
   return (0);
 }
 
 
-int binReadReal8(int fileID, int byteswap, size_t size, REAL8 *ptr)
+int binReadFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr)
 {
-  static char func[] = "binReadReal8";
+  static char func[] = "binReadFlt64";
 
-  if ( sizeof(REAL8) == 8 )
+  if ( sizeof(FLT64) == 8 )
     {
       fileRead(fileID, (void *) ptr, 8*size);
       if ( byteswap ) swap8byte(ptr, size);
     }
   else
     {
-      Error(func, "not implemented for %d byte float", sizeof(REAL8));
+      Error(func, "not implemented for %d byte float", sizeof(FLT64));
     }
 
   return (0);
@@ -234,36 +234,36 @@ int binWriteInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
 }
 
 
-int binWriteReal4(int fileID, int byteswap, size_t size, REAL4 *ptr)
+int binWriteFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr)
 {
-  static char func[] = "binWriteReal4";
+  static char func[] = "binWriteFlt32";
 
-  if ( sizeof(REAL4) == 4 )
+  if ( sizeof(FLT32) == 4 )
     {
       if ( byteswap ) swap4byte(ptr, size);
       fileWrite(fileID, (void *) ptr, 4*size);
     }
   else
     {
-      Error(func, "not implemented for %d byte float", sizeof(REAL4));
+      Error(func, "not implemented for %d byte float", sizeof(FLT32));
     }
 
   return (0);
 }
 
 
-int binWriteReal8(int fileID, int byteswap, size_t size, REAL8 *ptr)
+int binWriteFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr)
 {
-  static char func[] = "binWriteReal8";
+  static char func[] = "binWriteFlt64";
 
-  if ( sizeof(REAL8) == 8 )
+  if ( sizeof(FLT64) == 8 )
     {
       if ( byteswap ) swap8byte(ptr, size);
       fileWrite(fileID, (void *) ptr, 8*size);
     }
   else
     {
-      Error(func, "not implemented for %d byte float", sizeof(REAL8));
+      Error(func, "not implemented for %d byte float", sizeof(FLT64));
     }
 
   return (0);
