@@ -528,7 +528,8 @@ int iegWrite(int fileID, IEGREC *iegp)
   size_t blocklen;
   size_t i;
   int dprec;
-  float refval;
+  float refvalf;
+  double refval;
   char tmpbuf[800];
   float fvct[100];
   void *buffer;
@@ -541,7 +542,7 @@ int iegWrite(int fileID, IEGREC *iegp)
   if ( dprec == SINGLE_PRECISION )
     blocklen = 636;
   else
-    blocklen = 1036;
+    blocklen = 1040;
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
@@ -552,7 +553,11 @@ int iegWrite(int fileID, IEGREC *iegp)
   binWriteInt32(fileID, byteswap, 18, (INT32 *) tmpbuf);
 
   refval = iegp->refval;
-  binWriteFlt32(fileID, byteswap, 1, (FLT32 *) &refval);
+  refvalf = (float) refval;
+  if ( dprec == SINGLE_PRECISION )
+    binWriteFlt32(fileID, byteswap, 1, (FLT32 *) &refvalf);
+  else
+    binWriteFlt64(fileID, byteswap, 1, (FLT64 *) &refval);
 
   for ( i = 0; i < 3; i++ ) ((INT32 *) tmpbuf)[i] = (INT32) iegp->igdb[18+i];
   binWriteInt32(fileID, byteswap, 3, (INT32 *) tmpbuf);

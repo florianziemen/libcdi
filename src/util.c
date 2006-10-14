@@ -44,8 +44,8 @@ void cdiPrintDatatypes(void)
   fprintf (stderr, "+-------------+-----------+\n"); 
   fprintf (stderr, "| INT32       | %-9s |\n", STRING(INT32));
   fprintf (stderr, "| INT64       | %-9s |\n", STRING(INT64));
-  fprintf (stderr, "| REAL4       | %-9s |\n", STRING(REAL4));
-  fprintf (stderr, "| REAL8       | %-9s |\n", STRING(REAL8));
+  fprintf (stderr, "| FLT32       | %-9s |\n", STRING(FLT32));
+  fprintf (stderr, "| FLT64       | %-9s |\n", STRING(FLT64));
   fprintf (stderr, "+-------------+-----------+\n");
 
   if ( IsBigendian() )

@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Mon Sep 18 08:44:28 CEST 2006 */
+/* Generated automatically from m214003 on Wed Oct 11 10:35:23 CEST 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -931,6 +931,7 @@ int gribRefDate(int *isec1)
   return (date) ;
 }
 
+
 int gribRefTime(int *isec1)
 {
   int time, rhour, rminute;
@@ -943,11 +944,18 @@ int gribRefTime(int *isec1)
   return (time) ;
 }
 
+
 int gribTimeIsFC(int *isec1)
 {
   int isFC = FALSE;
+  int time_period;
 
-  if ( ISEC1_TimePeriod1 > 0 && ISEC1_Day > 0 )
+  if ( ISEC1_TimeRange == 10 )
+    time_period = (ISEC1_TimePeriod1<<8) + ISEC1_TimePeriod2;
+  else
+    time_period = ISEC1_TimePeriod1;
+
+  if ( time_period > 0 && ISEC1_Day > 0 )
     {
       if ( ISEC1_TimeRange == 0 || ISEC1_TimeRange == 10 ) isFC = TRUE;
     }
@@ -955,11 +963,13 @@ int gribTimeIsFC(int *isec1)
   return (isFC);
 }
 
+
 void gribDateTime(int *isec1, int *date, int *time)
 {
   static char func[] = "gribDateTime";
   static int lprint = TRUE;
   int ryear, rmonth, rday, rhour, rminute;
+  int time_period;
   double second = 0.0;
   double rvalue;
   double add;
@@ -982,8 +992,13 @@ void gribDateTime(int *isec1, int *date, int *time)
   rminute = ISEC1_Minute;
 
   /* printf("ref %d/%d/%d %d:%d\n", ryear, rmonth, rday, rhour, rminute); */
-  
-  if ( ISEC1_TimePeriod1 > 0 && rday > 0 )
+
+  if ( ISEC1_TimeRange == 10 )
+    time_period = (ISEC1_TimePeriod1<<8) + ISEC1_TimePeriod2;
+  else
+    time_period = ISEC1_TimePeriod1;
+
+  if ( time_period > 0 && rday > 0 )
     {
       if ( ISEC1_TimeRange == 0 || ISEC1_TimeRange == 10 )
 	{
@@ -992,9 +1007,9 @@ void gribDateTime(int *isec1, int *date, int *time)
 	  add = 0;
 	  switch ( ISEC1_TimeUnit )
 	    {
-	    case ISEC1_TABLE4_MINUTE:  add =    60 * ISEC1_TimePeriod1; break;
-	    case ISEC1_TABLE4_HOUR:    add =  3600 * ISEC1_TimePeriod1; break;
-	    case ISEC1_TABLE4_DAY:     add = 86400 * ISEC1_TimePeriod1; break;
+	    case ISEC1_TABLE4_MINUTE:  add =    60 * time_period; break;
+	    case ISEC1_TABLE4_HOUR:    add =  3600 * time_period; break;
+	    case ISEC1_TABLE4_DAY:     add = 86400 * time_period; break;
 	    default:
 	      if ( lprint )
 		{
@@ -1015,6 +1030,7 @@ void gribDateTime(int *isec1, int *date, int *time)
 
   return;
 }
+
 
 void gprintf(const char *caller, const char *fmt, ...)
 {
@@ -4288,7 +4304,55 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
 	      */
 	    }
 	}
+      /*
+      {
+	int ii, j, m;
+	unsigned ival[8192];
 
+	for ( i = 0; i < jlend*ISEC4_NumBits/8; i++ ) fputc(lgrib[i], stderr);
+
+         for ( i = 0; i < jlend; i++ )
+	   {
+	     if ( ISEC4_NumBits == 24 )
+	       ival[i] = (((int)lgrib[3*i  ] << 16) + ((int)lgrib[3*i +1 ] <<  8) +  (int)lgrib[3*i+2]);
+	     else
+	       ival[i] = (((int)lgrib[2*i  ] <<  8) +  (int)lgrib[2*i+1]);
+	   }
+      */
+	 /*
+	 for ( i = 0; i < 8; i++ ) printf("%d ", ival[i]);
+	 printf("\n");
+	
+	for ( j = 0; j < ISEC4_NumBits; j++ )
+	  {
+	    printf("\nbitmask %d:\n", j+1);
+	    for ( i = 0; i < jlend; i++ )
+	      {
+		printf("%d", ((int)ival[i] >> j) & 1);
+		if ( (i+1)%64 == 0 ) printf("\n");
+	      }
+	  }
+	 */
+	 /*
+	for ( j = 0; j < ISEC4_NumBits; j++ )
+	  {
+	    m = 0;
+	    ii = 0;
+	    for ( i = 0; i < jlend; i++ )
+	      {
+		ii++;
+		m += (((int)ival[i] >> j) & 1) << ii;
+		if ( (i+1)%8 == 0 )
+		  {
+		    fputc(m, stdout);
+		    m = 0;
+		    ii = 0;
+		  }
+	      }
+	  }
+	exit(0);
+      }
+	 */
       if ( ISEC4_NumBits ==  0 )
 	{
 	  for ( i = 0; i < jlend; i++ )
@@ -7014,7 +7078,7 @@ void gribPrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
   if ( header )
     {
       fprintf(stdout, 
-      "  Rec : PDS Tab Cen Sub Ver Grid Code LTyp Level1 Level2    Date  Time P1 TU TR NAVE Scale\n");
+      "  Rec : PDS Tab Cen Sub Ver Grid Code LTyp Level1 Level2    Date  Time P1 P2 TU TR NAVE Scale\n");
 /*     ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+ */
       header = 0;
     }
@@ -7046,10 +7110,10 @@ void gribPrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
       exit(EXIT_FAILURE);
     }
 
-  fprintf(stdout, "%5d :%4d%4d%4d%4d%4d %4d %4d%4d%7d%7d %8d%6d%3d%3d%3d%5d%6d\n", nrec,
+  fprintf(stdout, "%5d :%4d%4d%4d%4d%4d %4d %4d%4d%7d%7d %8d%6d%3d%3d%3d%3d%5d%6d\n", nrec,
 	  PDS_Len,  PDS_CodeTable,   PDS_CenterID, subcenter, PDS_ModelID,
 	  PDS_GridDefinition, PDS_Parameter, PDS_LevelType, PDS_Level1, PDS_Level2,
-	  PDS_Date, PDS_Time, PDS_TimePeriod1, PDS_TimeUnit, PDS_TimeRange,
+	  PDS_Date, PDS_Time, PDS_TimePeriod1, PDS_TimePeriod2, PDS_TimeUnit, PDS_TimeRange,
 	  PDS_AvgNum, decimalscale);
 }
 
@@ -7977,7 +8041,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.2" " of ""Sep 18 2006"" ""08:44:28";
+static const char grb_libvers[] = "1.0.3" " of ""Oct 11 2006"" ""10:35:23";
 
 
 
