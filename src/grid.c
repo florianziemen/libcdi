@@ -300,7 +300,7 @@ void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *x
 {
   int i;
 
-  if ( ! fabs(xinc) && xsize > 1 )
+  if ( (! (fabs(xinc) > 0)) && xsize > 1 )
     {
       if ( xfirst >= xlast )
 	{
@@ -399,7 +399,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
   /*     else if ( gridtype == GRID_LONLAT || gridtype == GRID_GENERIC ) */
   else
     {
-      if ( ! fabs(yinc) && ysize > 1 )
+      if ( (! (fabs(yinc) > 0)) && ysize > 1 )
 	{
 	  if ( DBL_IS_EQUAL(yfirst, ylast) && !DBL_IS_EQUAL(yfirst, 0) ) ylast *= -1;
 
@@ -529,7 +529,7 @@ static void defineYvals(int gridID)
 	  yfirst = gridptr->yfirst;
 	  ylast  = gridptr->ylast;
 	  yinc = gridptr->yinc;
-	  if ( ! fabs(yinc) )
+	  if ( ! (fabs(yinc) > 0) )
 	    {
 	      if ( ysize > 1 )
 		{
@@ -1706,7 +1706,7 @@ double gridInqXinc(int gridID)
 
   xinc = gridptr->xinc;
 
-  if ( ! fabs(xinc) && gridptr->xvals )
+  if ( (! (fabs(xinc) > 0)) && gridptr->xvals )
     {
       int xsize;
       double *xvals;
@@ -1748,7 +1748,7 @@ double gridInqYinc(int gridID)
 
   yinc = gridptr->yinc;
 
-  if ( ! fabs(yinc) && gridptr->yvals )
+  if ( (! (fabs(yinc) > 0)) && gridptr->yvals )
     {
       int ysize;
       double *yvals;
@@ -3283,6 +3283,9 @@ int gridToCurvilinear(int gridID1)
 
 	gridDefXsize(gridID2, nx);
 	gridDefYsize(gridID2, ny);
+
+	if ( ! (gridInqXvals(gridID1, NULL) && gridInqYvals(gridID1, NULL)) )
+	  Error(func, "Grid has no values");
 
 	xvals = (double *) malloc(nx*sizeof(double));
 	yvals = (double *) malloc(ny*sizeof(double));
