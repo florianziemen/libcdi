@@ -1,5 +1,5 @@
 !
-! Fortran interface for CDI library version 1.0.1
+! Fortran interface for CDI library version 1.0.3
 !
 
       INTEGER    CDI_UNDEFID           
@@ -50,6 +50,8 @@
       PARAMETER (COMPRESS_SZIP          =  1)
       INTEGER    COMPRESS_GZIP         
       PARAMETER (COMPRESS_GZIP          =  2)
+      INTEGER    COMPRESS_BZIP2        
+      PARAMETER (COMPRESS_BZIP2         =  3)
 !
 !  Data types
 !
@@ -818,7 +820,8 @@
       EXTERNAL        gridInqMask
 
 !                     gridPrint
-!                                    (INTEGER         gridID)
+!                                    (INTEGER         gridID,
+!                                     INTEGER         opt)
       EXTERNAL        gridPrint
 
       INTEGER         gridSize

@@ -2817,7 +2817,7 @@ double *gridInqYboundsPtr(int gridID)
 }
 
 
-void gridPrint(int gridID)
+void gridPrint(int gridID, int opt)
 {
   static char func[] = "gridPrint";
   FILE *fp = stdout;
@@ -2899,7 +2899,7 @@ void gridPrint(int gridID)
 		xinc   = gridInqXinc(gridID);
 	      }
 
-	    if ( !DBL_IS_EQUAL(xinc, 0) )
+	    if ( !DBL_IS_EQUAL(xinc, 0) && opt )
 	      {
 	  	fprintf(fp, "xfirst    : %g\n", xfirst);
 		fprintf(fp, "xinc      : %g\n", xinc);
@@ -2945,7 +2945,7 @@ void gridPrint(int gridID)
 		yinc   = gridInqYinc(gridID);
 	      }
 
-	    if ( !DBL_IS_EQUAL(yinc, 0) )
+	    if ( !DBL_IS_EQUAL(yinc, 0) && opt )
 	      {
 	  	fprintf(fp, "yfirst    : %g\n", yfirst);
 		fprintf(fp, "yinc      : %g\n", yinc);

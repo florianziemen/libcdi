@@ -130,7 +130,7 @@ static void printInfo(int gridtype, int date, int time, int code, double level,
 	  arrmax  = -1e50;
 	  for ( i = 0; i < datasize; i++ )
 	    {
-	      if ( data[i] != missval )
+	      if ( fabs(data[i]-missval) > 0 )
 		{
 		  if ( data[i] < arrmin ) arrmin = data[i];
 		  if ( data[i] > arrmax ) arrmax = data[i];
@@ -818,7 +818,7 @@ int main(int argc, char *argv[])
 	  vlistPrint(vlistID1);
 	  ngrids = vlistNgrids(vlistID1);
 	  nzaxis = vlistNzaxis(vlistID1);
-	  for ( gridID = 0; gridID < ngrids; gridID++ ) gridPrint(gridID);
+	  for ( gridID = 0; gridID < ngrids; gridID++ ) gridPrint(gridID, 1);
 	  for ( zaxisID = 0; zaxisID < nzaxis; zaxisID++ ) zaxisPrint(zaxisID);
 	}
 
