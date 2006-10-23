@@ -29,6 +29,7 @@ LevelTypeEntry[] = {
   {"lev",     "isentropic",               "K"},
   {"lev",     "trajectory",               ""},
   {"alt",     "altitude",                 "m"},
+  {"lev",     "sigma",                    "level"},
 };
 
 static int CDI_MaxLeveltype = sizeof(LevelTypeEntry) / sizeof(LevelTypeEntry[0]);

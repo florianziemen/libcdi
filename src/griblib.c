@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Wed Oct 11 10:35:23 CEST 2006 */
+/* Generated automatically from m214003 on Mon Oct 23 12:36:43 CEST 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -3100,6 +3100,12 @@ int encodeBDS(GRIBPACK *lGrib, int *gribLen, int decscale, int *isec2, int *isec
       Message(func, "complex packing of spectral data unsupported, using simple packing!");
     }
 
+  if ( decscale )
+    {
+      double scale = pow(10.0, (double) decscale);
+      for ( i = 0; i < datasize; ++i ) data[i] *= scale;
+    }
+
   if ( ISEC2_GridType == GTYPE_SPECTRAL )
     {
       *datstart   = 15;
@@ -3123,12 +3129,6 @@ int encodeBDS(GRIBPACK *lGrib, int *gribLen, int decscale, int *isec2, int *isec
     unused_bits = blockLength*8 - 11*8 - ISEC4_NumBits*(datasize);
 
   Flag += unused_bits;
-
-  if ( decscale )
-    {
-      double scale = pow(10.0, (double) decscale);
-      for ( i = PackStart; i < datasize; ++i ) data[i] *= scale;
-    }
 
   fmin = fmax = data[PackStart];
 
@@ -3359,6 +3359,9 @@ int encodeBDS(GRIBPACK *lGrib, int *gribLen, int decscale, int *isec2, int *isec
 	    }
 	}
       if (cbits != 8) lGrib[z++] = c << cbits;
+    }
+  else if ( ISEC4_NumBits == 0 )
+    {
     }
   else
     {
@@ -4162,14 +4165,6 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
 	zscale = 1.0/intpow2(-jscale);
       else
 	zscale = intpow2(jscale);
-
-      if ( decscale )
-	{
-	  double scale;
-	  scale = pow(10.0, (double)-decscale);
-	  fmin   *= scale;
-	  zscale *= scale;
-	}
     }
 
   /* get number of bits in each data value. */
@@ -4422,6 +4417,13 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
       pcScale = isec4[16];
       scatterComplex(fsec4, pcStart, ISEC2_PentaJ, ISEC4_NumValues);
       scaleComplex(fsec4, pcStart, pcScale, ISEC2_PentaJ);
+    }
+
+
+  if ( decscale )
+    {
+      double scale = pow(10.0, (double)-decscale);
+      for ( i = 0; i < ISEC4_NumValues; i++ ) fsec4[i] *= scale;
     }
 
   return (bdsLen);
@@ -8041,7 +8043,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.3" " of ""Oct 11 2006"" ""10:35:23";
+static const char grb_libvers[] = "1.0.3" " of ""Oct 23 2006"" ""12:36:44";
 
 
 

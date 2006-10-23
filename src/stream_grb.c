@@ -341,6 +341,11 @@ int gribGetZaxisType(int grbleveltype)
 	leveltype = ZAXIS_ALTITUDE;
 	break;
       }
+    case LTYPE_SIGMA:
+      {
+	leveltype = ZAXIS_SIGMA;
+	break;
+      }
     case LTYPE_HYBRID:
     case LTYPE_HYBRID_LAYER:
       {
@@ -1873,6 +1878,17 @@ void grbDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID
 
 	ilevel = (int) level;
 	ISEC1_LevelType = LTYPE_ALTITUDE;
+	ISEC1_Level1    = ilevel;
+	ISEC1_Level2    = 0;
+
+	break;
+      }
+    case ZAXIS_SIGMA:
+      {
+	level = zaxisInqLevel(zaxisID, levelID);
+
+	ilevel = (int) level;
+	ISEC1_LevelType = LTYPE_SIGMA;
 	ISEC1_Level1    = ilevel;
 	ISEC1_Level2    = 0;
 

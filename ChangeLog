@@ -2,6 +2,7 @@
 
         * using GRIB library version 1.0.3
 	* using EXSE library version 1.0.1
+	* add SIGMA level support
 	* gridPrint: extented
 	* Version 1.0.3 released
 
