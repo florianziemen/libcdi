@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Mon Oct 23 12:36:43 CEST 2006 */
+/* Generated automatically from m214003 on Fri Nov  3 13:30:05 CET 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -4299,55 +4299,7 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
 	      */
 	    }
 	}
-      /*
-      {
-	int ii, j, m;
-	unsigned ival[8192];
 
-	for ( i = 0; i < jlend*ISEC4_NumBits/8; i++ ) fputc(lgrib[i], stderr);
-
-         for ( i = 0; i < jlend; i++ )
-	   {
-	     if ( ISEC4_NumBits == 24 )
-	       ival[i] = (((int)lgrib[3*i  ] << 16) + ((int)lgrib[3*i +1 ] <<  8) +  (int)lgrib[3*i+2]);
-	     else
-	       ival[i] = (((int)lgrib[2*i  ] <<  8) +  (int)lgrib[2*i+1]);
-	   }
-      */
-	 /*
-	 for ( i = 0; i < 8; i++ ) printf("%d ", ival[i]);
-	 printf("\n");
-	
-	for ( j = 0; j < ISEC4_NumBits; j++ )
-	  {
-	    printf("\nbitmask %d:\n", j+1);
-	    for ( i = 0; i < jlend; i++ )
-	      {
-		printf("%d", ((int)ival[i] >> j) & 1);
-		if ( (i+1)%64 == 0 ) printf("\n");
-	      }
-	  }
-	 */
-	 /*
-	for ( j = 0; j < ISEC4_NumBits; j++ )
-	  {
-	    m = 0;
-	    ii = 0;
-	    for ( i = 0; i < jlend; i++ )
-	      {
-		ii++;
-		m += (((int)ival[i] >> j) & 1) << ii;
-		if ( (i+1)%8 == 0 )
-		  {
-		    fputc(m, stdout);
-		    m = 0;
-		    ii = 0;
-		  }
-	      }
-	  }
-	exit(0);
-      }
-	 */
       if ( ISEC4_NumBits ==  0 )
 	{
 	  for ( i = 0; i < jlend; i++ )
@@ -7204,7 +7156,7 @@ void gribPrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
   if ( header )
     {
       fprintf(stdout, 
-      "  Rec : Code Level     BDS Flag    Scale  RefValue Bits  CR\n");
+      "  Rec : Code Level     BDS Flag     Scale   RefValue Bits  CR\n");
 /*     ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+ */
       header = 0;
     }
@@ -7247,7 +7199,7 @@ void gribPrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
       scale  *= decscale;
     }
 
-  fprintf(stdout, "%5d :%4d%7d %7d %4d%8.5g%11.5g%4d %6.4g\n", nrec,
+  fprintf(stdout, "%5d :%4d%7d %7d %4d %8.5g %11.5g%4d %6.4g\n", nrec,
 	  PDS_Parameter, level,
 	  BDS_Len, BDS_Flag, scale, refval, BDS_NumBits, cr);
 }
@@ -8043,7 +7995,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.3" " of ""Oct 23 2006"" ""12:36:44";
+static const char grb_libvers[] = "1.0.3" " of ""Nov  3 2006"" ""13:30:06";
 
 
 
