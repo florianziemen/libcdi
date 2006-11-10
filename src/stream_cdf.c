@@ -2453,6 +2453,7 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   int xid = UNDEFID, yid = UNDEFID, zid = UNDEFID;
   int ncvarid;
   int tsID;
+  int gridsize;
   size_t size;
   size_t start[4];
   size_t count[4];
@@ -2486,6 +2487,10 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   gridID  = vlistInqVarGrid(vlistID, varID);
   zaxisID = vlistInqVarZaxis(vlistID, varID);
   timeID  = vlistInqVarTime(vlistID, varID);
+
+  gridsize = gridInqSize(gridID);
+      
+  streams[streamID].numvals += gridsize;
 
   gridindex = vlistGridIndex(vlistID, gridID);
   if ( gridInqType(gridID) == GRID_TRAJECTORY )
@@ -2581,10 +2586,9 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   *nmiss = 0;
   if ( vlistInqVarMissvalUsed(vlistID, varID) == TRUE  )
     {
-      size    = gridInqSize(gridID);
       missval = vlistInqVarMissval(vlistID, varID);
 
-      for ( i = 0; i < (int) size; i++ )
+      for ( i = 0; i < gridsize; i++ )
 	if ( DBL_IS_EQUAL(data[i], missval) ) *nmiss += 1;
     }
 
@@ -2595,12 +2599,11 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 
   if ( laddoffset || lscalefactor )
     {
-      size    = gridInqSize(gridID);
       missval = vlistInqVarMissval(vlistID, varID);
 
       if ( *nmiss > 0 )
 	{
-	  for ( i = 0; i < (int) size; i++ )
+	  for ( i = 0; i < gridsize; i++ )
 	    {
 	      if ( !DBL_IS_EQUAL(data[i], missval) )
 		{
@@ -2611,7 +2614,7 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 	}
       else
 	{
-	  for ( i = 0; i < (int) size; i++ )
+	  for ( i = 0; i < gridsize; i++ )
 	    {
 	      if ( lscalefactor ) data[i] *= scalefactor;
 	      if ( laddoffset )   data[i] += addoffset;

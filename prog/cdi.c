@@ -958,6 +958,8 @@ int main(int argc, char *argv[])
 
       free(data);
 
+      fprintf(stderr, "%ld\n", (long) streamNvals(streamID1));
+
       if ( fname2 ) streamClose(streamID2);
       streamClose(streamID1);
     }

@@ -302,6 +302,8 @@ int grbReadRecord(int streamID, double *data, int *nmiss)
   gridID   = vlistInqVarGrid(vlistID, varID);
   gridsize = gridInqSize(gridID);
 
+  streams[streamID].numvals += gridsize;
+
   fileSetPos(fileID, recpos, SEEK_SET);
 
   fileRead(fileID, gribbuffer, (size_t) recsize);

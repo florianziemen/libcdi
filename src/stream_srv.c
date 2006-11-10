@@ -123,9 +123,11 @@ int srvReadRecord(int streamID, double *data, int *nmiss)
   srvInqHeader(srvp, header);
   srvInqDataDP(srvp, data);
 
+  missval = vlistInqVarMissval(vlistID, varID);
   gridID  = vlistInqVarGrid(vlistID, varID);
   size    = gridInqSize(gridID);
-  missval = vlistInqVarMissval(vlistID, varID);
+
+  streams[streamID].numvals += size;
 
   *nmiss = 0;
   for ( i = 0; i < size; i++ )

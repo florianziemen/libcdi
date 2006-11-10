@@ -1658,6 +1658,14 @@ int streamNtsteps(int streamID)
   return (streams[streamID].ntsteps);
 }
 
+off_t   streamNvals(int streamID)
+{
+  static char func[] = "streamNvals";
+
+  streamCheckID(func, streamID);
+
+  return (streams[streamID].numvals);
+}
 
 /*
 @Function  streamDefVlist

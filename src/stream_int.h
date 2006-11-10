@@ -179,6 +179,7 @@ typedef struct {
   int       fileID;
   int       dimgroupID;
   int       filemode;
+  off_t     numvals;
   char     *filename;
   char     *ctlname;
   FILE     *ctlfp;

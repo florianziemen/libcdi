@@ -204,6 +204,7 @@ void streamsInitEntry(int streamID)
   streams[streamID].fileID            = 0;
   streams[streamID].dimgroupID        = UNDEFID;
   streams[streamID].filemode          = 0;
+  streams[streamID].numvals           = 0;
   streams[streamID].filename          = NULL;
   streams[streamID].ctlname           = NULL;
   streams[streamID].ctlfp             = NULL;
