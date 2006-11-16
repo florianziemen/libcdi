@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Fri Nov  3 13:30:05 CET 2006 */
+/* Generated automatically from m214003 on Thu Nov 16 14:21:31 CET 2006 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -4260,10 +4260,15 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
 
   if ( bds_aflag )
     {
+      /*
       if ( irep == 0 ) 
 	ISEC4_NumValues = ISEC2_NumLon*ISEC2_NumLat;
       else
 	ISEC4_NumValues = (ISEC2_PentaJ+1)*(ISEC2_PentaJ+2);
+      */
+      ISEC4_NumValues = GET_UINT3(bds[17],bds[18],bds[19])*8/ISEC4_NumBits;
+
+      if ( irep == 1 ) ISEC4_NumValues++;
     }
 
   if ( dfunc == 'J' ) return (bdsLen);
@@ -7995,7 +8000,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.3" " of ""Nov  3 2006"" ""13:30:06";
+static const char grb_libvers[] = "1.0.4" " of ""Nov 16 2006"" ""14:21:31";
 
 
 

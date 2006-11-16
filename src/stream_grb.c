@@ -1327,8 +1327,8 @@ int grbScanTimestep2(int streamID)
       gridID = vlistInqVarGrid(vlistID, varID);
       if ( gridInqSize(gridID) == 1 && gridInqType(gridID) == GRID_LONLAT )
 	{
-	  if ( gridInqXval(gridID, 0) != ISEC2_FirstLon*0.001 ||
-	       gridInqYval(gridID, 0) != ISEC2_FirstLat*0.001 )
+	  if ( !DBL_IS_EQUAL(gridInqXval(gridID, 0),ISEC2_FirstLon*0.001) ||
+	       !DBL_IS_EQUAL(gridInqYval(gridID, 0),ISEC2_FirstLat*0.001) )
 	    gridChangeType(gridID, GRID_TRAJECTORY);
 	}
     }

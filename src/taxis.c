@@ -627,7 +627,7 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
   double value, factor = 1;
   int timeunit;
   int calendar, dpy = 0;
-  double second;
+  double second = 0;
   static int lwarn = TRUE;
 
   *vdate = 0;
@@ -688,7 +688,7 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
     }
 
   *vdate = year*10000 + month*100 + day;
-  *vtime = hour*100 + minute;
+  *vtime = hour*100 + minute /* + (int) (second/60+0.5)*/;
 }
 
 

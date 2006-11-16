@@ -96,7 +96,7 @@ NCVAR;
 static int splitBasetime(char *timeunits, TAXIS *taxis)
 {
   static char func[] = "splitBasetime";
-  int len;
+  int len, i;
   char *ptu;
   int year, month, day;
   int hour = 0, minute = 0, second = 0;
@@ -106,6 +106,8 @@ static int splitBasetime(char *timeunits, TAXIS *taxis)
 
   ptu = timeunits;
   len = (int) strlen(timeunits);
+
+  for ( i = 0; i < len; i++ ) ptu[i] = tolower((int) ptu[i]);
 
   (*taxis).type = timetype;
 
@@ -118,7 +120,7 @@ static int splitBasetime(char *timeunits, TAXIS *taxis)
   else if ( strncmp(ptu, "year",   4) == 0 ) timeunit = TUNIT_YEAR;
   else
     {
-      Message(func, "Unsupported TIMEUNIT %s!", ptu);
+      Message(func, "Unsupported TIMEUNIT: %s!", ptu);
       return (1);
     }
 
