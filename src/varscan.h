@@ -16,6 +16,7 @@ int  varDefGrid(int vlistID, GRID grid, int mode);
 int  varDefZaxis(int vlistID, int leveltype, int nlevels, double *levels, int lbounds, double *levels1, double *levels2,
 		 int vctsize, double *vct, char *name, char *longname, char *units, int prec, int mode);
 
+void varDefSzip(int varID, int szip);
 void varDefInst(int varID, int instID);
 int  varInqInst(int varID);
 void varDefModel(int varID, int modelID);

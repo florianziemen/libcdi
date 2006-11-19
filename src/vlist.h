@@ -42,6 +42,7 @@ typedef struct
   double   scalefactor;
   double   addoffset;
   LEVINFO *levinfo;
+  int      szip;
 }
 VARINFO;
 

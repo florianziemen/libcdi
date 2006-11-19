@@ -2,6 +2,7 @@
 
         * using GRIB library version 1.0.4
 	* splitBasetime: convert timeunit string to lower case
+	* new function: vlistInqVarSzip
 	* new function: streamNvals
 	* Version 1.0.4 released
 

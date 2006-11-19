@@ -42,6 +42,7 @@ typedef struct
   int         modelID;
   int         tableID;
   int         codetable;
+  int         szip;
 }
 VARTABLE;
 
@@ -63,6 +64,7 @@ static void codeInitEntry(int varID, int code)
   vartable[varID].instID         = UNDEFID;
   vartable[varID].modelID        = UNDEFID;
   vartable[varID].tableID        = UNDEFID;
+  vartable[varID].szip           = FALSE;
 }
 
 
@@ -317,6 +319,7 @@ void cdiGenVars(int streamID)
   int prec;
   int average;
   int lbounds;
+  int szip;
   char name[256], longname[256], units[256];
   double *dlevels = NULL;
   double *dlevels1 = NULL;
@@ -339,10 +342,11 @@ void cdiGenVars(int streamID)
       modelID   = vartable[varID].modelID;
       tableID   = vartable[varID].tableID;
       average   = vartable[varID].average;
+      szip      = vartable[varID].szip;
 
       zaxisID = UNDEFID;
 
-      if ( leveltype == ZAXIS_GENERIC && nlevels == 1 && ! fabs(vartable[varID].levelTable[0].level1) )
+      if ( leveltype == ZAXIS_GENERIC && nlevels == 1 && ! (fabs(vartable[varID].levelTable[0].level1)>0) )
 	leveltype = ZAXIS_SURFACE;
 
       dlevels = (double *) malloc(nlevels*sizeof(double));
@@ -416,6 +420,7 @@ void cdiGenVars(int streamID)
       vlistDefVarCode(vlistID, varID, code);
       vlistDefVarDatatype(vlistID, varID, prec);
       vlistDefVarAverage(vlistID, varID, average);
+      vlistDefVarSzip(vlistID, varID, szip);
 
       if ( cdiDefaultTableID != UNDEFID )
 	{
@@ -577,7 +582,7 @@ int zaxisCompare(int zaxisID, int leveltype, int nlevels, int lbounds, double *l
 	  dlevels = zaxisInqLevelsPtr(zaxisID);
 	  for ( levelID = 0; levelID < nlevels; levelID++ )
 	    {
-	      if ( fabs(dlevels[levelID] - levels[levelID]) )
+	      if ( fabs(dlevels[levelID] - levels[levelID]) > 0 )
 		break;
 	    }
 
@@ -688,6 +693,13 @@ int varDefZaxis(int vlistID, int leveltype, int nlevels, double *levels, int lbo
     }
 
   return (zaxisID);
+}
+
+
+void varDefSzip(int varID, int szip)
+{
+  if ( szip )
+    vartable[varID].szip = TRUE;
 }
 
 

@@ -35,6 +35,7 @@ static void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].units        = NULL;
   vlistptr->vars[varID].nlevs        = 0;
   vlistptr->vars[varID].levinfo      = NULL;
+  vlistptr->vars[varID].szip         = FALSE;
 }
 
 static int vlistvarNewEntry(int vlistID)
@@ -1257,3 +1258,32 @@ void vlistChangeVarGrid(int vlistID, int varID, int gridID)
   
   vlistptr->vars[varID].gridID = gridID;
 }
+
+
+void vlistDefVarSzip(int vlistID, int varID, int szip)
+{
+  static char func[] = "vlistDefVarSzip";
+  int nvars, index;
+  VLIST *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(func, vlistID, varID);
+
+  vlistptr->vars[varID].szip = szip;
+}
+
+
+int vlistInqVarSzip(int vlistID, int varID)
+{
+  static char func[] = "vlistInqVarSzip";
+  int nvars, index;
+  VLIST *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(func, vlistID, varID);
+
+  return (vlistptr->vars[varID].szip);
+}
+

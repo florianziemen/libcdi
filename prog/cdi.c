@@ -167,7 +167,7 @@ static void printInfo(int gridtype, int date, int time, int code, double level,
 #define  CDI_BIGENDIAN            0   /* Data type BIGENDIAN     */
 #define  CDI_LITTLEENDIAN         1   /* Data type LITTLEENDIAN  */
 
-static void printFiletype(int streamID)
+void printFiletype(int streamID)
 {
   int filetype;
 
@@ -176,52 +176,56 @@ static void printFiletype(int streamID)
   switch ( filetype )
     {
     case FILETYPE_GRB:
-      printf("   File format: GRIB");
+      printf("GRIB");
       break;
     case FILETYPE_NC:
-      printf("   File format: netCDF");
+      printf("netCDF");
       break;
     case FILETYPE_NC2:
-      printf("   File format: netCDF2");
+      printf("netCDF2");
       break;
     case FILETYPE_SRV:
-      printf("   File format: SERVICE");
-      switch ( streamInqByteorder(streamID) )
-	{
-	case CDI_BIGENDIAN:
-	  printf("  BIGENDIAN"); break;
-	case CDI_LITTLEENDIAN:
-	  printf("  LITTLEENDIAN"); break;
-	default:
-	  printf("  byteorder: %d undefined", streamInqByteorder(streamID)); break;
-	}
+      printf("SERVICE");
       break;
     case FILETYPE_EXT:
-      printf("   File format: EXTRA");
-      switch ( streamInqByteorder(streamID) )
-	{
-	case CDI_BIGENDIAN:
-	  printf("  BIGENDIAN"); break;
-	case CDI_LITTLEENDIAN:
-	  printf("  LITTLEENDIAN"); break;
-	default:
-	  printf("  byteorder: %d undefined", streamInqByteorder(streamID)); break;
-	}
+      printf("EXTRA");
       break;
     case FILETYPE_IEG:
-      printf("   File format: IEG");
-      switch ( streamInqByteorder(streamID) )
-	{
-	case CDI_BIGENDIAN:
-	  printf("  BIGENDIAN"); break;
-	case CDI_LITTLEENDIAN:
-	  printf("  LITTLEENDIAN"); break;
-	default:
-	  printf("  byteorder: %d undefined", streamInqByteorder(streamID)); break;
-	}
+      printf("IEG");
       break;
     default:
       printf("  File format: unsupported filetype %d" , filetype);
+    }
+
+  if ( filetype == FILETYPE_SRV || filetype == FILETYPE_EXT || filetype == FILETYPE_IEG )
+    {
+      switch ( streamInqByteorder(streamID) )
+	{
+	case CDI_BIGENDIAN:
+	  printf("  BIGENDIAN"); break;
+	case CDI_LITTLEENDIAN:
+	  printf("  LITTLEENDIAN"); break;
+	default:
+	  printf("  byteorder: %d undefined", streamInqByteorder(streamID)); break;
+	}
+    }
+
+  if ( filetype == FILETYPE_GRB )
+    {
+      int vlistID, nvars, varID;
+
+      vlistID = streamInqVlist(streamID);
+
+      nvars = vlistNvars(vlistID);
+
+      for ( varID = 0; varID < nvars; varID++ )
+	{
+	  if ( vlistInqVarSzip(vlistID, varID) )
+	    {
+	      printf(" SZIP");
+	      break;
+	    }
+	}
     }
 
   printf("\n");
@@ -265,6 +269,7 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
   int year, month, day, hour, minute;
   char pstr[4];
 
+      printf("   File format: ");
       printFiletype(streamID);
 
       if ( vardis )
@@ -323,7 +328,15 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 
 	  fprintf(stdout, " %-3s", pstr);
 
-	  fprintf(stdout, " %9d", gridsize);
+	  if ( prec > 0 && prec <= 32 )
+	    {
+	      if ( vlistInqVarSzip(vlistID, varID) )
+		fprintf(stdout, "z");
+	      else
+		fprintf(stdout, " ");
+	    }
+
+	  fprintf(stdout, "%9d", gridsize);
 
 	  fprintf(stdout, " %3d ", gridID + 1);
 
@@ -958,7 +971,7 @@ int main(int argc, char *argv[])
 
       free(data);
 
-      fprintf(stderr, "%ld\n", (long) streamNvals(streamID1));
+      /* fprintf(stderr, "%ld\n", (long) streamNvals(streamID1)); */
 
       if ( fname2 ) streamClose(streamID2);
       streamClose(streamID1);
