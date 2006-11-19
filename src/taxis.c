@@ -796,7 +796,7 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
     }
   else
     {
-      Message(func, "Unsupported TIMEUNIT %s!", tunitNamePtr(timeunit));
+      Message(func, "Unsupported TIMEUNIT: %s!", tunitNamePtr(timeunit));
     }
 
   *date = vdate;

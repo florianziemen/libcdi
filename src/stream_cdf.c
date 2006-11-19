@@ -141,12 +141,12 @@ static int splitBasetime(char *timeunits, TAXIS *taxis)
 
 	  if ( timetype == TAXIS_ABSOLUTE )
 	    {
-	      if ( strncmp(ptu, "%Y%m%d.%f", 9) != 0 && timeunit == TUNIT_DAY )
+	      if ( strncmp(ptu, "%y%m%d.%f", 9) != 0 && timeunit == TUNIT_DAY )
 		{
 		  Message(func, "Unsupported format %s for TIMEUNIT day!", ptu);
 		  timeunit = -1;
 		}
-	      else if ( strncmp(ptu, "%Y%m.%f", 7) != 0 && timeunit == TUNIT_MONTH )
+	      else if ( strncmp(ptu, "%y%m.%f", 7) != 0 && timeunit == TUNIT_MONTH )
 		{
 		  Message(func, "Unsupported format %s for TIMEUNIT month!", ptu);
 		  timeunit = -1;
