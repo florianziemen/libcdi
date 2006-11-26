@@ -34,7 +34,7 @@ double rls_to_rl(double phis, double rlas, double polphi, double pollam)
 
   zlampol = deg2rad*pollam;
   zphis   = deg2rad*phis;
-  if ( rlas > 180.0 ) rlas = rlas - 360.0;
+  if ( rlas > 180.0 ) rlas -= 360.0;
   zrlas   = deg2rad*rlas;
 
   zarg1   = sin(zlampol)*(- zsinpol*cos(zrlas)*cos(zphis)  +
@@ -44,7 +44,7 @@ double rls_to_rl(double phis, double rlas, double polphi, double pollam)
                             zcospol*           sin(zphis)) +
             sin(zlampol)*           sin(zrlas)*cos(zphis);
 
-  if ( zarg2 == 0.0 ) zarg2 = 1.0e-20;
+  if ( fabs(zarg2) < 1.0e-20 ) zarg2 = 1.0e-20;
 
   return (rad2deg*atan2(zarg1, zarg2));
 }
@@ -68,7 +68,7 @@ double phs_to_ph(double phis, double rlas, double polphi)
   zcospol = cos(deg2rad*polphi);
 
   zphis   = deg2rad*phis;
-  if (rlas > 180.0 ) rlas = rlas - 360.0;
+  if ( rlas > 180.0 ) rlas -= 360.0;
   zrlas   = deg2rad*rlas;
 
   zarg    = zcospol*cos(zphis)*cos(zrlas) + zsinpol*sin(zphis);
@@ -96,14 +96,15 @@ double rl_to_rls(double phi, double rla, double polphi, double pollam)
   zcospol = cos(deg2rad*polphi);
   zlampol =     deg2rad*pollam;
 
-  if ( rla > 180.0 ) rla = rla - 360.0;
+  if ( rla > 180.0 ) rla -= 360.0;
 
   zrla = deg2rad*rla;
   zphi = deg2rad*phi;
 
   zarg1  = - sin(zrla-zlampol)*cos(zphi);
   zarg2  = - zsinpol*cos(zphi)*cos(zrla-zlampol)+zcospol*sin(zphi);
-  if ( zarg2 == 0.0 ) zarg2 = 1.0e-20;
+
+  if ( fabs(zarg2) < 1.0e-20 ) zarg2 = 1.0e-20;
 
   return (rad2deg*atan2(zarg1,zarg2));
 }
@@ -129,7 +130,7 @@ double ph_to_phs(double phi, double rla, double polphi, double pollam)
   zlampol =     deg2rad*pollam;
 
   zphi = deg2rad*phi;
-  if ( rla > 180.0 ) rla = rla-360.0;
+  if ( rla > 180.0 ) rla -= 360.0;
   zrla = deg2rad*rla;
 
   zarg = zcospol*cos(zphi)*cos(zrla-zlampol) + zsinpol*sin(zphi);
@@ -163,7 +164,7 @@ void usvs_to_uv(double us, double vs, double phi, double rla,
   zrla    = rla   *deg2rad;
   zphi    = phi   *deg2rad;
   pollamd = pollam;
-  if ( pollam < 0.0 ) pollamd = 360.0 + pollam;
+  if ( pollamd < 0.0 ) pollamd += 360.0;
 
   /* laenge im rotierten system berechnen */
   zrlas = rl_to_rls(phi, rla, polphi, pollam)*deg2rad;
