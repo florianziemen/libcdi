@@ -118,7 +118,7 @@ static int vlist_from_pointer(VLIST *ptr)
       if ( _vlistAvail )
 	{
 	  newptr       = _vlistAvail;
-	  _vlistAvail   = _vlistAvail->next;
+	  _vlistAvail  = _vlistAvail->next;
 	  newptr->next = 0;
 	  idx	       = newptr->idx;
 	  newptr->ptr  = ptr;
