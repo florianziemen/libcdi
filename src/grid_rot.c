@@ -178,7 +178,9 @@ void usvs_to_uv(double us, double vs, double phi, double rla,
   zbeta = sign(zbeta, -(rla - (pollamd-180.0)));
   */
   zbeta = fabs(acos(zarg));
-  if ( -(rla - (pollamd-180.0)) < 0 ) zbeta = -zbeta;
+  /*  if ( -(rla - (pollamd-180.0)) < 0 ) zbeta = -zbeta;*/
+  /*  if ( -(rla - (pollamd-180.0)) < 0 && !(rla > pollamd && rla < 180) ) zbeta = -zbeta;*/
+  if ( rla > pollamd-180 && rla <= pollamd ) zbeta = -zbeta;
 
   /* us - wind transformieren */
   *u = us*cos(zbeta) - vs*sin(zbeta);

@@ -1,6 +1,8 @@
 2006-11-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
         * using GRIB library version 1.0.4
+	* cdfInqContents: use grid_mapping not for curvilinear grids
+	* add env IGNORE_ATT_COORDINATES to ignore attribute coordinates
 	* splitBasetime: convert timeunit string to lower case
 	* new function: vlistInqVarSzip
 	* new function: streamNvals

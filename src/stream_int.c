@@ -24,6 +24,8 @@ int cdiDefaultTableID = CDI_UNDEFID;
 int cdiNcMissingValue = CDI_UNDEFID;
 int cdiSplitLtype105  = CDI_UNDEFID;
 
+int cdiIgnoreAttCoordinates = FALSE;
+
 double cdiDefaultMissval = -9.E33;
 
 
@@ -166,6 +168,9 @@ void cdiInitialize(void)
 
       envString = getenv("SPLIT_LTYPE_105");
       if ( envString ) cdiSplitLtype105 = atoi(envString);
+
+      envString = getenv("IGNORE_ATT_COORDINATES");
+      if ( envString ) cdiIgnoreAttCoordinates = atoi(envString);
     }
 }
 
