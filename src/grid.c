@@ -231,7 +231,7 @@ static void grid_delete_entry(GRID *gridptr)
 
   _gridList[idx].next = _gridAvail;
   _gridList[idx].ptr  = 0;
-  _gridAvail   	      = &_gridList[idx];
+  _gridAvail          = &_gridList[idx];
 
   GRID_UNLOCK
 
