@@ -22,7 +22,6 @@ libcdi_a_SOURCES = 	 \
 	basetime.c     	 \
 	stream_history.c \
 	stream_grb.c     \
-	stream_hdf.c     \
 	stream_cdf.c     \
 	stream_srv.c     \
 	stream_ext.c     \
@@ -39,9 +38,7 @@ libcdi_a_SOURCES = 	 \
 	servicelib.c     \
 	extralib.c       \
 	ieglib.c         \
-	hdf.c            \
 	cdf.c            \
-	hdf_int.c	 \
 	cdf_int.c	 \
 	file.c         	 \
 	binary.c	 \
@@ -49,9 +46,7 @@ libcdi_a_SOURCES = 	 \
 	griblib.c  	 \
 	cfortran.h       \
 	binary.h	 \
-	hdf.h	 	 \
 	cdf.h	 	 \
-	hdf_int.h	 \
 	cdf_int.h	 \
 	datetime.h	 \
 	dmemory.h	 \
@@ -66,7 +61,6 @@ libcdi_a_SOURCES = 	 \
 	vlist.h	         \
 	taxis.h	         \
 	stream_grb.h	 \
-	stream_hdf.h	 \
 	stream_cdf.h	 \
 	stream_srv.h	 \
 	stream_ext.h	 \

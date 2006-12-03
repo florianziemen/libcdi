@@ -104,7 +104,6 @@ libcdi_a_SOURCES = \
 	basetime.c     	 \
 	stream_history.c \
 	stream_grb.c     \
-	stream_hdf.c     \
 	stream_cdf.c     \
 	stream_srv.c     \
 	stream_ext.c     \
@@ -121,9 +120,7 @@ libcdi_a_SOURCES = \
 	servicelib.c     \
 	extralib.c       \
 	ieglib.c         \
-	hdf.c            \
 	cdf.c            \
-	hdf_int.c	 \
 	cdf_int.c	 \
 	file.c         	 \
 	binary.c	 \
@@ -131,9 +128,7 @@ libcdi_a_SOURCES = \
 	griblib.c  	 \
 	cfortran.h       \
 	binary.h	 \
-	hdf.h	 	 \
 	cdf.h	 	 \
-	hdf_int.h	 \
 	cdf_int.h	 \
 	datetime.h	 \
 	dmemory.h	 \
@@ -148,7 +143,6 @@ libcdi_a_SOURCES = \
 	vlist.h	         \
 	taxis.h	         \
 	stream_grb.h	 \
-	stream_hdf.h	 \
 	stream_cdf.h	 \
 	stream_srv.h	 \
 	stream_ext.h	 \
@@ -180,15 +174,14 @@ am_libcdi_a_OBJECTS = cdiFortran.$(OBJEXT) cdi_error.$(OBJEXT) \
 	table.$(OBJEXT) util.$(OBJEXT) varscan.$(OBJEXT) \
 	calendar.$(OBJEXT) vlist.$(OBJEXT) vlist_var.$(OBJEXT) \
 	basetime.$(OBJEXT) stream_history.$(OBJEXT) \
-	stream_grb.$(OBJEXT) stream_hdf.$(OBJEXT) stream_cdf.$(OBJEXT) \
-	stream_srv.$(OBJEXT) stream_ext.$(OBJEXT) stream_ieg.$(OBJEXT) \
-	grid.$(OBJEXT) grid_rot.$(OBJEXT) grid_gme.$(OBJEXT) \
-	zaxis.$(OBJEXT) stream.$(OBJEXT) stream_var.$(OBJEXT) \
-	stream_record.$(OBJEXT) tsteps.$(OBJEXT) stream_int.$(OBJEXT) \
-	servicelib.$(OBJEXT) extralib.$(OBJEXT) ieglib.$(OBJEXT) \
-	hdf.$(OBJEXT) cdf.$(OBJEXT) hdf_int.$(OBJEXT) cdf_int.$(OBJEXT) \
-	file.$(OBJEXT) binary.$(OBJEXT) swap.$(OBJEXT) \
-	griblib.$(OBJEXT)
+	stream_grb.$(OBJEXT) stream_cdf.$(OBJEXT) stream_srv.$(OBJEXT) \
+	stream_ext.$(OBJEXT) stream_ieg.$(OBJEXT) grid.$(OBJEXT) \
+	grid_rot.$(OBJEXT) grid_gme.$(OBJEXT) zaxis.$(OBJEXT) \
+	stream.$(OBJEXT) stream_var.$(OBJEXT) stream_record.$(OBJEXT) \
+	tsteps.$(OBJEXT) stream_int.$(OBJEXT) servicelib.$(OBJEXT) \
+	extralib.$(OBJEXT) ieglib.$(OBJEXT) cdf.$(OBJEXT) \
+	cdf_int.$(OBJEXT) file.$(OBJEXT) binary.$(OBJEXT) \
+	swap.$(OBJEXT) griblib.$(OBJEXT)
 libcdi_a_OBJECTS = $(am_libcdi_a_OBJECTS)
 
 DEFS = @DEFS@
@@ -204,12 +197,11 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/error.Po ./$(DEPDIR)/extralib.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/file.Po ./$(DEPDIR)/griblib.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/grid.Po ./$(DEPDIR)/grid_gme.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/grid_rot.Po ./$(DEPDIR)/hdf.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/hdf_int.Po ./$(DEPDIR)/ieglib.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/grid_rot.Po ./$(DEPDIR)/ieglib.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/institution.Po ./$(DEPDIR)/model.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/servicelib.Po ./$(DEPDIR)/stream.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/stream_cdf.Po ./$(DEPDIR)/stream_ext.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/stream_grb.Po ./$(DEPDIR)/stream_hdf.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/stream_grb.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/stream_history.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/stream_ieg.Po ./$(DEPDIR)/stream_int.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/stream_record.Po \
@@ -313,8 +305,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid_gme.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid_rot.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hdf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hdf_int.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ieglib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/institution.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/model.Po@am__quote@
@@ -323,7 +313,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cdf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_ext.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_grb.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_hdf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_history.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_ieg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_int.Po@am__quote@

@@ -11,11 +11,8 @@
 
 #include "dmemory.h"
 
-#include "file.h"
 #include "cdi.h"
 #include "stream_int.h"
-#include "cdf_int.h"
-#include "stream_srv.h"
 
 
 int cdiDefaultInstID  = CDI_UNDEFID;
@@ -44,63 +41,14 @@ char *Filetypes[] = {
 #undef  UNDEFID
 #define UNDEFID  CDI_UNDEFID
 
-CDITABLE *streams = 0;
-int streamsSize = 0;
 
 int CDI_Debug   = 0;    /* If set to 1, debugging           */
-
-
-char *strfiletype(int filetype)
-{
-  char *name;
-  int size = (int) (sizeof(Filetypes)/sizeof(char *));
-
-  if ( filetype > 0 && filetype < size )
-    name = Filetypes[filetype];
-  else
-    name = Filetypes[0];  
-
-  return (name);
-}
-
-void streamCheckID(const char *func, int streamID)
-{
-  if ( streamID == CDI_UNDEFID )
-    Error(func, "streamID undefined!");
-
-  if ( streamID < 0 || streamID >= streamsSize )
-    Error(func, "streamID %d out of range!", streamID);
-
-  if ( streams[streamID].filename == NULL )
-    Error(func, "streamID %d not open!", streamID);
-}
 
 
 int cdiDefaultLeveltype = -1;
 static int cdiDataUnreduced = 0;
 static int cdiCompressType  = 0;
 static int cdiCompressLevel = 0;
-
-
-int cdiDefGlobal(const char *string, int val)
-{
-  int ret = 0;
-
-  if ( strcmp(string, "CD_REGULARGRID") == 0 )
-    {
-      cdiDataUnreduced = val;
-      ret = 1;
-    }
-
-  return (ret);
-}
-
-
-void cdiDefCompress(int type, int level)
-{
-  cdiCompressType  = type;
-  cdiCompressLevel = level;
-}
 
 
 long cdiGetenvInt(char *envName)
@@ -175,6 +123,309 @@ void cdiInitialize(void)
 }
 
 
+char *strfiletype(int filetype)
+{
+  char *name;
+  int size = (int) (sizeof(Filetypes)/sizeof(char *));
+
+  if ( filetype > 0 && filetype < size )
+    name = Filetypes[filetype];
+  else
+    name = Filetypes[0];  
+
+  return (name);
+}
+
+
+static int  STREAM_Debug = 0;   /* If set to 1, debugging */
+
+static int _stream_max = 4096;
+
+static void stream_initialize(void);
+
+static int _stream_init = FALSE;
+
+#if  defined  (HAVE_LIBPTHREAD)
+#  include <pthread.h>
+
+static pthread_once_t _stream_init_thread = PTHREAD_ONCE_INIT;
+static pthread_mutex_t _stream_mutex;
+
+#  define STREAM_LOCK           pthread_mutex_lock(&_stream_mutex);
+#  define STREAM_UNLOCK         pthread_mutex_unlock(&_stream_mutex);
+#  define STREAM_INIT                               \
+   if ( _stream_init == FALSE ) pthread_once(&_stream_init_thread, stream_initialize);
+
+#else
+
+#  define STREAM_LOCK
+#  define STREAM_UNLOCK
+#  define STREAM_INIT                               \
+   if ( _stream_init == FALSE ) stream_initialize();
+
+#endif
+
+
+typedef struct _streamPtrToIdx {
+  int idx;
+  STREAM *ptr;
+  struct _streamPtrToIdx *next;
+} streamPtrToIdx;
+
+
+static streamPtrToIdx *_streamList;
+static streamPtrToIdx *_streamAvail = 0;
+
+
+static void stream_list_new(void)
+{
+  static char func[] = "stream_list_new";
+
+  _streamList = (streamPtrToIdx *) malloc(_stream_max*sizeof(streamPtrToIdx));
+}
+
+
+static void stream_list_delete(void)
+{
+  static char func[] = "stream_list_delete";
+
+  if ( _streamList ) free(_streamList);
+}
+
+
+static void stream_init_pointer(void)
+{
+  int  i;
+  
+  for ( i = 0; i < _stream_max; i++ )
+    {
+      _streamList[i].next = _streamList + i + 1;
+      _streamList[i].idx  = i;
+      _streamList[i].ptr  = 0;
+    }
+
+  _streamList[_stream_max-1].next = 0;
+
+  _streamAvail = _streamList;
+}
+
+
+STREAM *stream_to_pointer(int idx)
+{
+  static char func[] = "stream_to_pointer";
+  STREAM *streamptr = NULL;
+
+  STREAM_INIT
+
+  if ( idx >= 0 && idx < _stream_max )
+    {
+      STREAM_LOCK
+
+      streamptr = _streamList[idx].ptr;
+
+      STREAM_UNLOCK
+    }
+  else
+    Error(func, "stream index %d undefined!", idx);
+
+  return (streamptr);
+}
+
+
+/* Create an index from a pointer */
+static int stream_from_pointer(STREAM *ptr)
+{
+  static char func[] = "stream_from_pointer";
+  int      idx = -1;
+  streamPtrToIdx *newptr;
+
+  if ( ptr )
+    {
+      STREAM_LOCK
+
+      if ( _streamAvail )
+	{
+	  newptr       = _streamAvail;
+	  _streamAvail   = _streamAvail->next;
+	  newptr->next = 0;
+	  idx	       = newptr->idx;
+	  newptr->ptr  = ptr;
+      
+	  if ( STREAM_Debug )
+	    Message(func, "Pointer %p has idx %d from stream list", ptr, idx);
+	}
+      else
+	Warning(func, "Too many open streams (limit is %d)!", _stream_max);
+
+      STREAM_UNLOCK
+    }
+  else
+    Error(func, "Internal problem (pointer %p undefined)", ptr);
+
+  return (idx);
+}
+
+
+static void stream_init_entry(STREAM *streamptr)
+{
+  int i;
+
+  streamptr->self         = stream_from_pointer(streamptr);
+
+  streamptr->accesstype        = UNDEFID;
+  streamptr->accessmode        = 0;
+  streamptr->filetype          = UNDEFID;
+  streamptr->byteorder         = UNDEFID;
+  streamptr->fileID            = 0;
+  streamptr->dimgroupID        = UNDEFID;
+  streamptr->filemode          = 0;
+  streamptr->numvals           = 0;
+  streamptr->filename          = NULL;
+  streamptr->ctlname           = NULL;
+  streamptr->ctlfp             = NULL;
+  streamptr->record            = NULL;
+  streamptr->varsAllocated     = 0;
+  streamptr->nrecs             = 0;
+  streamptr->nvars             = 0;
+  streamptr->vars              = NULL;
+  streamptr->varinit           = 0;
+  streamptr->ncmode            = 0;
+  streamptr->curTsID           = UNDEFID;
+  streamptr->rtsteps           = 0;
+  streamptr->ntsteps           = UNDEFID;
+  streamptr->numTimestep       = 0;
+  streamptr->tsteps            = NULL;
+  streamptr->tstepsTableSize   = 0;
+  streamptr->tstepsNextID      = 0;
+  streamptr->historyID         = UNDEFID;
+  streamptr->vlistID           = UNDEFID;
+  streamptr->globalatts        = 0;
+  streamptr->localatts         = 0;
+  streamptr->vct.ilev          = 0;
+  streamptr->vct.mlev          = 0;
+  streamptr->vct.ilevID        = UNDEFID;
+  streamptr->vct.mlevID        = UNDEFID;
+  streamptr->unreduced         = cdiDataUnreduced;
+  streamptr->compressType      = cdiCompressType;
+  streamptr->compressLevel     = cdiCompressLevel;
+
+  basetimeInit(&streamptr->basetime);
+
+  for ( i = 0; i < MAX_GRIDS; i++ ) streamptr->xdimID[i]   = UNDEFID;
+  for ( i = 0; i < MAX_GRIDS; i++ ) streamptr->ydimID[i]   = UNDEFID;
+  for ( i = 0; i < MAX_ZAXIS; i++ ) streamptr->zaxisID[i]  = UNDEFID;
+  for ( i = 0; i < MAX_GRIDS; i++ ) streamptr->ncxvarID[i] = UNDEFID;
+  for ( i = 0; i < MAX_GRIDS; i++ ) streamptr->ncyvarID[i] = UNDEFID;
+  for ( i = 0; i < MAX_GRIDS; i++ ) streamptr->ncavarID[i] = UNDEFID;
+}
+
+
+STREAM *stream_new_entry(void)
+{
+  static char func[] = "stream_new_entry";
+  STREAM *streamptr;
+
+  cdiInitialize(); /* ***************** make MT versiob !!! */
+
+  STREAM_INIT
+
+  streamptr = (STREAM *) malloc(sizeof(STREAM));
+
+  if ( streamptr ) stream_init_entry(streamptr);
+
+  return (streamptr);
+}
+
+
+void stream_delete_entry(STREAM *streamptr)
+{
+  static char func[] = "stream_delete_entry";
+  int idx;
+
+  idx = streamptr->self;
+
+  STREAM_LOCK
+
+  free(streamptr);
+
+  _streamList[idx].next = _streamAvail;
+  _streamList[idx].ptr  = 0;
+  _streamAvail          = &_streamList[idx];
+
+  STREAM_UNLOCK
+
+  if ( STREAM_Debug )
+    Message(func, "Removed idx %d from stream list", idx);
+}
+
+
+static void stream_initialize(void)
+{
+  char *env;
+
+#if  defined  (HAVE_LIBPTHREAD)
+  /* initialize global API mutex lock */
+  pthread_mutex_init(&_stream_mutex, NULL);
+#endif
+
+  env = getenv("STREAM_DEBUG");
+  if ( env ) STREAM_Debug = atoi(env);
+
+  stream_list_new();
+  atexit(stream_list_delete);
+
+  stream_init_pointer();
+
+  _stream_init = TRUE;
+}
+
+
+void stream_check_ptr(const char *func, STREAM *streamptr)
+{
+  if ( streamptr == NULL )
+    Error(func, "stream undefined!");
+}
+
+
+int streamSize(void)
+{
+  int streamsize = 0;
+  int i;
+  
+  STREAM_INIT
+
+  STREAM_LOCK
+
+  for ( i = 0; i < _stream_max; i++ )
+    if ( _streamList[i].ptr ) streamsize++;
+
+  STREAM_UNLOCK
+
+  return (streamsize);
+}
+
+
+int cdiDefGlobal(const char *string, int val)
+{
+  int ret = 0;
+
+  if ( strcmp(string, "CD_REGULARGRID") == 0 )
+    {
+      cdiDataUnreduced = val;
+      ret = 1;
+    }
+
+  return (ret);
+}
+
+
+void cdiDefCompress(int type, int level)
+{
+  cdiCompressType  = type;
+  cdiCompressLevel = level;
+}
+
+
 void cdiDefMissval(double missval)
 {
   cdiInitialize();
@@ -192,135 +443,16 @@ double cdiInqMissval(void)
 }
 
 
-void streamsInitEntry(int streamID)
-{
-  static char func[] = "streamsInitEntry";
-  int i;
-
-  if ( streamID < 0 || streamID >= streamsSize )
-    Error(func, "streamID %d undefined!", streamID);
-
-  cdiInitialize();
-
-  streams[streamID].accesstype        = UNDEFID;
-  streams[streamID].accessmode        = 0;
-  streams[streamID].filetype          = UNDEFID;
-  streams[streamID].byteorder         = UNDEFID;
-  streams[streamID].fileID            = 0;
-  streams[streamID].dimgroupID        = UNDEFID;
-  streams[streamID].filemode          = 0;
-  streams[streamID].numvals           = 0;
-  streams[streamID].filename          = NULL;
-  streams[streamID].ctlname           = NULL;
-  streams[streamID].ctlfp             = NULL;
-  streams[streamID].record            = NULL;
-  streams[streamID].varsAllocated     = 0;
-  streams[streamID].nrecs             = 0;
-  streams[streamID].nvars             = 0;
-  streams[streamID].vars              = NULL;
-  streams[streamID].varinit           = 0;
-  streams[streamID].ncmode            = 0;
-  streams[streamID].curTsID           = UNDEFID;
-  streams[streamID].rtsteps           = 0;
-  streams[streamID].ntsteps           = UNDEFID;
-  streams[streamID].numTimestep       = 0;
-  streams[streamID].tsteps            = NULL;
-  streams[streamID].tstepsTableSize   = 0;
-  streams[streamID].tstepsNextID      = 0;
-  streams[streamID].historyID         = UNDEFID;
-  streams[streamID].vlistID           = UNDEFID;
-  streams[streamID].globalatts        = 0;
-  streams[streamID].localatts         = 0;
-  streams[streamID].vct.ilev          = 0;
-  streams[streamID].vct.mlev          = 0;
-  streams[streamID].vct.ilevID        = UNDEFID;
-  streams[streamID].vct.mlevID        = UNDEFID;
-  streams[streamID].unreduced         = cdiDataUnreduced;
-  streams[streamID].compressType      = cdiCompressType;
-  streams[streamID].compressLevel     = cdiCompressLevel;
-
-  basetimeInit(&streams[streamID].basetime);
-
-  for ( i = 0; i < MAX_GRIDS; i++ ) streams[streamID].xdimID[i]   = UNDEFID;
-  for ( i = 0; i < MAX_GRIDS; i++ ) streams[streamID].ydimID[i]   = UNDEFID;
-  for ( i = 0; i < MAX_ZAXIS; i++ ) streams[streamID].zaxisID[i]  = UNDEFID;
-  for ( i = 0; i < MAX_GRIDS; i++ ) streams[streamID].ncxvarID[i] = UNDEFID;
-  for ( i = 0; i < MAX_GRIDS; i++ ) streams[streamID].ncyvarID[i] = UNDEFID;
-  for ( i = 0; i < MAX_GRIDS; i++ ) streams[streamID].ncavarID[i] = UNDEFID;
-}
-
-
-int streamsNewEntry(int filetype)
-{
-  static char func[] = "streamsNewEntry";
-  int streamsMax = 1024;
-  int streamID = 0;
-
-  /*
-    Look for a free slot in streams.
-    (Create the table the first time through).
-  */
-  if ( !streamsSize )
-    {
-      int i;
-
-      streamsSize = 2;
-      streams = (CDITABLE *) malloc(streamsSize*sizeof(CDITABLE));
-      if( streams == NULL )
-	{
-          Message(func, "streamsSize = %d", streamsSize);
-	  SysError(func, "Allocation of CDITABLE failed");
-	}
-
-      for( i = 0; i < streamsSize; i++ )
-	streamsInitEntry(i);
-    }
-  else
-    {
-      while( streamID < streamsSize )
-	{
-	  if ( streams[streamID].filetype == UNDEFID ) break;
-	  streamID++;
-	}
-    }
-  /*
-    If the table overflows, double its size.
-  */
-  if( streamID == streamsSize )
-    {
-      int i;
-
-      if ( streamsSize == streamsMax )
-	Error(func, "CDI maximum table size of %d reached", streamsMax);
-
-      streamsSize = 2*streamsSize;
-      streams = (CDITABLE *) realloc(streams, streamsSize*sizeof(CDITABLE));
-      if( streams == NULL )
-	{
-          Message(func, "streamsSize = %d", streamsSize);
-	  SysError(func, "Reallocation of CDITABLE failed");
-	}
-      streamID = streamsSize/2;
-
-      for( i = streamID; i < streamsSize; i++ )
-	streamsInitEntry(i);
-    }
-
-  streamsInitEntry(streamID);
-
-  streams[streamID].filetype = filetype;
-
-  return (streamID);
-}
-
-
 void cdiCheckContents(int streamID)
 {
   static char func[] = "cdiCheckContents";
   int index, nzaxis, zaxisID;
   int vlistID;
+  STREAM *streamptr;
 
-  streamCheckID(func, streamID);
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(func, streamptr);
 
   vlistID = streamInqVlist(streamID);
   nzaxis = vlistNzaxis(vlistID);
@@ -337,15 +469,22 @@ void cdiCheckContents(int streamID)
 
 int streamInqFileID(int streamID)
 {
-  return (streams[streamID].fileID);
+  STREAM *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
+
+  return (streamptr->fileID);
 }
 
 
 void streamDefineTaxis(int streamID)
 {
   static char func[] = "streamDefineTaxis";
+  STREAM *streamptr;
 
-  if ( streams[streamID].tsteps == NULL )
+  streamptr = stream_to_pointer(streamID);
+
+  if ( streamptr->tsteps == NULL )
     {
       int varID, nvars;
       int vlistID;
@@ -377,29 +516,40 @@ void streamDefineTaxis(int streamID)
 
 void streamDefDimgroupID(int streamID, int dimgroupID)
 {
-  streams[streamID].dimgroupID = dimgroupID;
+  STREAM *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
+
+  streamptr->dimgroupID = dimgroupID;
 }
 
 
 int streamInqDimgroupID(int streamID)
 {
-  return (streams[streamID].dimgroupID);
+  STREAM *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
+
+  return (streamptr->dimgroupID);
 }
 
 
 void cdiDefAccesstype(int streamID, int type)
 {
   static char func[] = "cdiDefAccesstype";
+  STREAM *streamptr;
 
-  if ( streams[streamID].accesstype == UNDEFID )
+  streamptr = stream_to_pointer(streamID);
+
+  if ( streamptr->accesstype == UNDEFID )
     {
-      streams[streamID].accesstype = type;
+      streamptr->accesstype = type;
     }
   else
     {
-      if ( streams[streamID].accesstype != type )
+      if ( streamptr->accesstype != type )
 	{
-	  if ( streams[streamID].accesstype == TYPE_REC )
+	  if ( streamptr->accesstype == TYPE_REC )
 	    Error(func, "Change access type from REC to VAR not allowed!");
 	  else
 	    Error(func, "Change access type from VAR to REC not allowed!");
@@ -410,5 +560,9 @@ void cdiDefAccesstype(int streamID, int type)
 
 int cdiInqAccesstype(int streamID)
 {
-  return (streams[streamID].accesstype);
+  STREAM *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
+
+  return (streamptr->accesstype);
 }

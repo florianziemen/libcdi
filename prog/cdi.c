@@ -60,8 +60,7 @@ static void usage(void)
   fprintf(stderr, "\n");
   fprintf(stderr, "  Options:\n");
   fprintf(stderr, "    -d             Print debugging information\n");
-  fprintf(stderr, "    -f <format>    Format of the output file. (grb, nc, nc2, hdf5, src or ext)\n");
-  fprintf(stderr, "                   (e.g hdf5_8z  --> hdf5 format with compressed 8 byte reals)\n");
+  fprintf(stderr, "    -f <format>    Format of the output file. (grb, nc, nc2, src, ext or ieg)\n");
   fprintf(stderr, "    -s             give short information if ofile is missing\n");
   fprintf(stderr, "    -t <table>     Parameter table name/file\n");
   fprintf(stderr, "                   Predefined tables: ");
@@ -618,7 +617,7 @@ static void setDefaultDataType(char *datatypestr)
       else
 	{
 	  fprintf(stderr, "Unsupported datatype %d!\n", datatype);
-	  fprintf(stderr, "Use 4/8 for filetype nc, hdf5, srv, ext, ieg and 1/2/3 for grb.\n");
+	  fprintf(stderr, "Use 4/8 for filetype nc, srv, ext, ieg and 1/2/3 for grb.\n");
 	  exit(-1);
 	}
     }
@@ -647,12 +646,10 @@ static void setDefaultFileType(char *filetypestr)
       else if ( strncmp(filetypestr, "srv",  3) == 0 ) DefaultFileType = FILETYPE_SRV;
       else if ( strncmp(filetypestr, "ext",  3) == 0 ) DefaultFileType = FILETYPE_EXT;
       else if ( strncmp(filetypestr, "ieg",  3) == 0 ) DefaultFileType = FILETYPE_IEG;
-      else if ( strncmp(filetypestr, "h5",   2) == 0 ) DefaultFileType = FILETYPE_H5;
-      else if ( strncmp(filetypestr, "hdf5", 4) == 0 ) DefaultFileType = FILETYPE_H5;
       else
 	{
 	  fprintf(stderr, "Unsupported filetype %s!\n", filetypestr);
-	  fprintf(stderr, "Available filetypes are grb, nc, hdf5, srv, ext, ieg.\n");
+	  fprintf(stderr, "Available filetypes are grb, nc, srv, ext, ieg.\n");
 	  exit(-1);
 	}
 

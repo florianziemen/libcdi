@@ -13,17 +13,21 @@
 
 static void streamvarInitEntry(int streamID, int varID)
 {
-  streams[streamID].vars[varID].ncvarid      = CDI_UNDEFID;
-  streams[streamID].vars[varID].defmiss      = 0;
-  streams[streamID].vars[varID].nlevs        = 0;
-  streams[streamID].vars[varID].level        = NULL;
-  streams[streamID].vars[varID].lindex       = NULL;
+  STREAM *streamptr;
 
-  streams[streamID].vars[varID].timeID       = CDI_UNDEFID;
-  streams[streamID].vars[varID].gridID       = CDI_UNDEFID;
-  streams[streamID].vars[varID].zaxisID      = CDI_UNDEFID;
-  streams[streamID].vars[varID].level        = NULL;
-  streams[streamID].vars[varID].nlevs        = 0;
+  streamptr = stream_to_pointer(streamID);
+
+  streamptr->vars[varID].ncvarid      = CDI_UNDEFID;
+  streamptr->vars[varID].defmiss      = 0;
+  streamptr->vars[varID].nlevs        = 0;
+  streamptr->vars[varID].level        = NULL;
+  streamptr->vars[varID].lindex       = NULL;
+
+  streamptr->vars[varID].timeID       = CDI_UNDEFID;
+  streamptr->vars[varID].gridID       = CDI_UNDEFID;
+  streamptr->vars[varID].zaxisID      = CDI_UNDEFID;
+  streamptr->vars[varID].level        = NULL;
+  streamptr->vars[varID].nlevs        = 0;
 }
 
 
@@ -33,9 +37,12 @@ static int streamvarNewEntry(int streamID)
   int varID = 0;
   int streamvarSize;
   SVARINFO *streamvar;
+  STREAM *streamptr;
 
-  streamvarSize = streams[streamID].varsAllocated;
-  streamvar     = streams[streamID].vars;
+  streamptr = stream_to_pointer(streamID);
+
+  streamvarSize = streamptr->varsAllocated;
+  streamvar     = streamptr->vars;
   /*
     Look for a free slot in streamvar.
     (Create the table the first time through).
@@ -83,12 +90,12 @@ static int streamvarNewEntry(int streamID)
 	streamvar[i].isUsed = FALSE;
     }
 
-  streams[streamID].varsAllocated = streamvarSize;
-  streams[streamID].vars          = streamvar;
+  streamptr->varsAllocated = streamvarSize;
+  streamptr->vars          = streamvar;
 
   streamvarInitEntry(streamID, varID);
 
-  streams[streamID].vars[varID].isUsed = TRUE;
+  streamptr->vars[varID].isUsed = TRUE;
 
   return (varID);
 }
@@ -102,16 +109,19 @@ int streamNewVar(int streamID, int gridID, int zaxisID)
   int *lindex;
   int nlevs;
   int levID;
+  STREAM *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
 
   if ( CDI_Debug )
     Message(func, "gridID = %d  zaxisID = %d", gridID, zaxisID);
 
   varID = streamvarNewEntry(streamID);
 
-  streams[streamID].nvars++;
+  streamptr->nvars++;
 
-  streams[streamID].vars[varID].gridID  = gridID;
-  streams[streamID].vars[varID].zaxisID = zaxisID;
+  streamptr->vars[varID].gridID  = gridID;
+  streamptr->vars[varID].zaxisID = zaxisID;
 
   nlevs = zaxisInqSize(zaxisID);
 
@@ -124,9 +134,9 @@ int streamNewVar(int streamID, int gridID, int zaxisID)
   for ( levID = 0; levID < nlevs; levID++ )
     lindex[levID] = levID;
 
-  streams[streamID].vars[varID].nlevs  = nlevs;
-  streams[streamID].vars[varID].level  = level;
-  streams[streamID].vars[varID].lindex = lindex;
+  streamptr->vars[varID].nlevs  = nlevs;
+  streamptr->vars[varID].level  = level;
+  streamptr->vars[varID].lindex = lindex;
 
   return (varID);
 }

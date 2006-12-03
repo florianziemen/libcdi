@@ -67,7 +67,6 @@ c="taxis.c           \
    grid.c            \
    zaxis.c           \
    cdf_int.c         \
-   hdf_int.c         \
    cdi_error.c       \
    stream_int.c      \
    stream.c          \
@@ -77,7 +76,6 @@ c="taxis.c           \
    stream_ext.c      \
    stream_ieg.c      \
    stream_cdf.c      \
-   stream_hdf.c      \
    stream_var.c      \
    stream_record.c   \
    tsteps.c          \
@@ -86,15 +84,14 @@ c="taxis.c           \
    swap.c            \
    binary.c          \
    cdf.c             \
-   hdf.c             \
 "
 
 h="cdi_limits.h taxis.h error.h dtypes.h file.h grib.h service.h extra.h \
    ieg.h cdi.h calendar.h \
-   basetime.h stream_int.h stream_grb.h  datetime.h stream_cdf.h stream_hdf.h \
+   basetime.h stream_int.h stream_grb.h  datetime.h stream_cdf.h \
    grib.h tablepar.h table.h util.h grid.h varscan.h binary.h swap.h \
    service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \
-   hdf_int.h cdf.h hdf.h vlist.h"
+   cdf.h vlist.h"
 
 cat $h >> ${PROG}
 cat $c | grep -v '#include' >> ${PROG}

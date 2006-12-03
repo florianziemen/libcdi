@@ -10,16 +10,20 @@
 
 static void tstepsInitEntry(int streamID, int tsID)
 {
-  streams[streamID].tsteps[tsID].curRecID     = CDI_UNDEFID;
-  streams[streamID].tsteps[tsID].position     = 0;
-  streams[streamID].tsteps[tsID].records      = NULL;
-  streams[streamID].tsteps[tsID].recordSize   = 0;
-  streams[streamID].tsteps[tsID].nallrecs     = 0;
-  streams[streamID].tsteps[tsID].recIDs       = NULL;
-  streams[streamID].tsteps[tsID].nrecs        = 0;
-  streams[streamID].tsteps[tsID].next         = 0;
+  STREAM *streamptr;
 
-  ptaxisInit(&streams[streamID].tsteps[tsID].taxis);
+  streamptr = stream_to_pointer(streamID);
+
+  streamptr->tsteps[tsID].curRecID     = CDI_UNDEFID;
+  streamptr->tsteps[tsID].position     = 0;
+  streamptr->tsteps[tsID].records      = NULL;
+  streamptr->tsteps[tsID].recordSize   = 0;
+  streamptr->tsteps[tsID].nallrecs     = 0;
+  streamptr->tsteps[tsID].recIDs       = NULL;
+  streamptr->tsteps[tsID].nrecs        = 0;
+  streamptr->tsteps[tsID].next         = 0;
+
+  ptaxisInit(&streamptr->tsteps[tsID].taxis);
 }
 
 int tstepsNewEntry(int streamID)
@@ -28,10 +32,13 @@ int tstepsNewEntry(int streamID)
   int tsID = 0;
   int tstepsTableSize;
   TSTEPS *tstepsTable;
+  STREAM *streamptr;
 
-  tsID            = streams[streamID].tstepsNextID++;
-  tstepsTableSize = streams[streamID].tstepsTableSize;
-  tstepsTable     = streams[streamID].tsteps;
+  streamptr = stream_to_pointer(streamID);
+
+  tsID            = streamptr->tstepsNextID++;
+  tstepsTableSize = streamptr->tstepsTableSize;
+  tstepsTable     = streamptr->tsteps;
 
   /*
     If the table overflows, double its size.
@@ -48,12 +55,12 @@ int tstepsNewEntry(int streamID)
 	}
     }
 
-  streams[streamID].tstepsTableSize = tstepsTableSize;
-  streams[streamID].tsteps          = tstepsTable;
+  streamptr->tstepsTableSize = tstepsTableSize;
+  streamptr->tsteps          = tstepsTable;
 
   tstepsInitEntry(streamID, tsID);
 
-  streams[streamID].tsteps[tsID].taxis.used = TRUE;
+  streamptr->tsteps[tsID].taxis.used = TRUE;
 
   return (tsID);
 }
@@ -63,23 +70,26 @@ void cdiCreateTimesteps(int streamID)
   static char func[] = "cdiCreateTimesteps";
   int ntsteps;
   int tsID;
+  STREAM *streamptr;
 
-  if ( streams[streamID].ntsteps < 0 || streams[streamID].tstepsTableSize > 0 )
+  streamptr = stream_to_pointer(streamID);
+
+  if ( streamptr->ntsteps < 0 || streamptr->tstepsTableSize > 0 )
     return;
 
-  if ( streams[streamID].ntsteps == 0 ) ntsteps = 1;    /* <<<<<-------- */
-  else ntsteps = streams[streamID].ntsteps;
+  if ( streamptr->ntsteps == 0 ) ntsteps = 1;    /* <<<<<-------- */
+  else ntsteps = streamptr->ntsteps;
 
-  streams[streamID].tsteps = (TSTEPS *) malloc(ntsteps*sizeof(TSTEPS));
-  if ( streams[streamID].tsteps == NULL )
+  streamptr->tsteps = (TSTEPS *) malloc(ntsteps*sizeof(TSTEPS));
+  if ( streamptr->tsteps == NULL )
     SysError(func, "Allocation of TSTEPS failed");
 
-  streams[streamID].tstepsTableSize = ntsteps;
-  streams[streamID].tstepsNextID    = ntsteps;
+  streamptr->tstepsTableSize = ntsteps;
+  streamptr->tstepsNextID    = ntsteps;
 
   for ( tsID = 0; tsID < ntsteps; tsID++ )
     {
       tstepsInitEntry(streamID, tsID);
-      streams[streamID].tsteps[tsID].taxis.used = TRUE;
+      streamptr->tsteps[tsID].taxis.used = TRUE;
     }
 }

@@ -103,8 +103,11 @@ int grbInqRecord(int streamID, int *varID, int *levelID)
   int gribsize;
   size_t readsize;
   int vlistID;
+  STREAM *streamptr;
 
-  streamCheckID(func, streamID);
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(func, streamptr);
 
   vlistID  = streamInqVlist(streamID);
   fileID   = streamInqFileID(streamID);
@@ -115,11 +118,11 @@ int grbInqRecord(int streamID, int *varID, int *levelID)
   gribsize = gribGetSize(fileID);
   if ( gribsize == 0 ) return (0);
 
-  gribbuffer = streams[streamID].record->buffer;
+  gribbuffer = streamptr->record->buffer;
   gribbuffer = realloc(gribbuffer, gribsize);
 
-  streams[streamID].record->buffer = gribbuffer;
-  streams[streamID].record->buffersize = gribsize;
+  streamptr->record->buffer = gribbuffer;
+  streamptr->record->buffersize = gribsize;
 
   readsize = gribsize;
   status = gribRead(fileID, (unsigned char *) gribbuffer, &readsize);
@@ -174,12 +177,12 @@ int grbInqRecord(int streamID, int *varID, int *levelID)
       }
     }
 
-  streams[streamID].record->code     = ISEC1_Parameter;
-  streams[streamID].record->level    = ISEC1_Level1;
-  gribDateTime(isec1, &streams[streamID].record->date, &streams[streamID].record->time);
-  streams[streamID].record->gridID   = gridID;
-  streams[streamID].record->zaxisID  = zaxisID;
-  streams[streamID].record->nrec++;
+  streamptr->record->code     = ISEC1_Parameter;
+  streamptr->record->level    = ISEC1_Level1;
+  gribDateTime(isec1, &streamptr->record->date, &streamptr->record->time);
+  streamptr->record->gridID   = gridID;
+  streamptr->record->zaxisID  = zaxisID;
+  streamptr->record->nrec++;
 
   *levelID = zaxisInqLevelID(zaxisID, (double) ISEC1_Level1);
 
@@ -194,11 +197,14 @@ int grbDefRecord(int streamID)
   int fileID;
   int gridID;
   int status = 0;
+  STREAM *streamptr;
 
-  streamCheckID(func, streamID);
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(func, streamptr);
 
   fileID = streamInqFileID(streamID);
-  gridID = streams[streamID].record->gridID;
+  gridID = streamptr->record->gridID;
 
   return (status);
 }
@@ -285,32 +291,35 @@ int grbReadRecord(int streamID, double *data, int *nmiss)
   int gridsize;
   int vlistID;
   int zip;
+  STREAM *streamptr;
 
-  streamCheckID(func, streamID);
+  streamptr = stream_to_pointer(streamID);
 
-  gribbuffer = (unsigned char *) streams[streamID].record->buffer;
+  stream_check_ptr(func, streamptr);
+
+  gribbuffer = (unsigned char *) streamptr->record->buffer;
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
-  tsID    = streams[streamID].curTsID;
-  vrecID  = streams[streamID].tsteps[tsID].curRecID;
-  recID   = streams[streamID].tsteps[tsID].recIDs[vrecID];
-  recpos  = streams[streamID].tsteps[tsID].records[recID].position;
-  recsize = streams[streamID].tsteps[tsID].records[recID].size;
-  varID   = streams[streamID].tsteps[tsID].records[recID].varID;
+  tsID    = streamptr->curTsID;
+  vrecID  = streamptr->tsteps[tsID].curRecID;
+  recID   = streamptr->tsteps[tsID].recIDs[vrecID];
+  recpos  = streamptr->tsteps[tsID].records[recID].position;
+  recsize = streamptr->tsteps[tsID].records[recID].size;
+  varID   = streamptr->tsteps[tsID].records[recID].varID;
 
   gridID   = vlistInqVarGrid(vlistID, varID);
   gridsize = gridInqSize(gridID);
 
-  streams[streamID].numvals += gridsize;
+  streamptr->numvals += gridsize;
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
   fileRead(fileID, gribbuffer, (size_t) recsize);
 
-  grbDecodeDataDP(gribbuffer, recsize, data, gridsize, streams[streamID].unreduced, nmiss, &zip);
+  grbDecodeDataDP(gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, &zip);
 
-  streams[streamID].tsteps[tsID].records[recID].zip = zip;
+  streamptr->tsteps[tsID].records[recID].zip = zip;
 
   return (status);
 }
@@ -445,45 +454,48 @@ int grbScanTimestep(int streamID)
   int rindex, nrecs = 0;
   long unzipsize;
   COMPVAR compVar, compVar0;
+  STREAM *streamptr;
 
-  streamCheckID(func, streamID);
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(func, streamptr);
 
   vlistID = streamInqVlist(streamID);
 
   if ( CDI_Debug )
     {
       Message(func, "streamID = %d", streamID);
-      Message(func, "cts = %d", streams[streamID].curTsID);
-      Message(func, "rts = %d", streams[streamID].rtsteps);
-      Message(func, "nts = %d", streams[streamID].ntsteps);
+      Message(func, "cts = %d", streamptr->curTsID);
+      Message(func, "rts = %d", streamptr->rtsteps);
+      Message(func, "nts = %d", streamptr->ntsteps);
     }
 
-  isec0 = streams[streamID].record->sec0;
-  isec1 = streams[streamID].record->sec1;
-  isec2 = streams[streamID].record->sec2;
-  isec3 = streams[streamID].record->sec3;
-  isec4 = streams[streamID].record->sec4;
+  isec0 = streamptr->record->sec0;
+  isec1 = streamptr->record->sec1;
+  isec2 = streamptr->record->sec2;
+  isec3 = streamptr->record->sec3;
+  isec4 = streamptr->record->sec4;
 
-  tsID  = streams[streamID].rtsteps;
-  taxis = &streams[streamID].tsteps[tsID].taxis;
+  tsID  = streamptr->rtsteps;
+  taxis = &streamptr->tsteps[tsID].taxis;
 
-  if ( streams[streamID].tsteps[tsID].recordSize == 0 )
+  if ( streamptr->tsteps[tsID].recordSize == 0 )
     {
-      gribbuffer = (unsigned char *) streams[streamID].record->buffer;
-      buffersize = streams[streamID].record->buffersize;
+      gribbuffer = (unsigned char *) streamptr->record->buffer;
+      buffersize = streamptr->record->buffersize;
 
       cdiCreateRecords(streamID, tsID);
 
-      nrecs = streams[streamID].tsteps[1].nrecs;
+      nrecs = streamptr->tsteps[1].nrecs;
 
-      streams[streamID].tsteps[tsID].nrecs = nrecs;
-      streams[streamID].tsteps[tsID].recIDs = (int *) malloc(nrecs*sizeof(int));
+      streamptr->tsteps[tsID].nrecs = nrecs;
+      streamptr->tsteps[tsID].recIDs = (int *) malloc(nrecs*sizeof(int));
       for ( recID = 0; recID < nrecs; recID++ )
-	streams[streamID].tsteps[tsID].recIDs[recID] = streams[streamID].tsteps[1].recIDs[recID];
+	streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
 
       fileID = streamInqFileID(streamID);
 
-      fileSetPos(fileID, streams[streamID].tsteps[tsID].position, SEEK_SET);
+      fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
       for ( rindex = 0; rindex <= nrecs; rindex++ )
 	{
@@ -491,7 +503,7 @@ int grbScanTimestep(int streamID)
 	  recpos  = fileGetPos(fileID);
 	  if ( recsize == 0 )
 	    {
-	      streams[streamID].ntsteps = streams[streamID].rtsteps + 1;
+	      streamptr->ntsteps = streamptr->rtsteps + 1;
 	      break;
 	    }
 	  if ( recsize > buffersize )
@@ -505,7 +517,7 @@ int grbScanTimestep(int streamID)
 	  if ( status )
 	    {
 	      Error(func, "Inconsistent timestep %d (GRIB record %d/%d)!\n", tsID+1, rindex+1,
-		    streams[streamID].tsteps[tsID].recordSize);
+		    streamptr->tsteps[tsID].recordSize);
 	      break;
 	    }
 
@@ -556,7 +568,7 @@ int grbScanTimestep(int streamID)
 		{
 	      /*
 		  Message(func, "Change numavg from %d to %d not allowed!",
-			  streams[streamID].tsteps[tsID].taxis.numavg, ISEC1_AvgNum);
+			  streamptr->tsteps[tsID].taxis.numavg, ISEC1_AvgNum);
 	      */
 		  warn_numavg = FALSE;
 		}
@@ -573,16 +585,16 @@ int grbScanTimestep(int streamID)
           compVar.ltype  = ISEC1_LevelType;
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
-	      recID   = streams[streamID].tsteps[tsID].recIDs[vrecID];
-	      compVar0.code   = streams[streamID].tsteps[tsID].records[recID].code;
-	      compVar0.table  = streams[streamID].tsteps[tsID].records[recID].table;
-	      compVar0.level1 = streams[streamID].tsteps[tsID].records[recID].ilevel;
-	      compVar0.level2 = streams[streamID].tsteps[tsID].records[recID].ilevel2;
-	      compVar0.ltype  = streams[streamID].tsteps[tsID].records[recID].ltype;
+	      recID   = streamptr->tsteps[tsID].recIDs[vrecID];
+	      compVar0.code   = streamptr->tsteps[tsID].records[recID].code;
+	      compVar0.table  = streamptr->tsteps[tsID].records[recID].table;
+	      compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
+	      compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
+	      compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
 	      if ( memcmp(&compVar0, &compVar, sizeof(COMPVAR)) == 0 )
 		{
-		  streams[streamID].tsteps[tsID].records[recID].used = TRUE;
-		  streams[streamID].tsteps[tsID].recIDs[rindex] = recID;
+		  streamptr->tsteps[tsID].records[recID].used = TRUE;
+		  streamptr->tsteps[tsID].recIDs[rindex] = recID;
 		  break;
 		}
 	    }
@@ -596,23 +608,23 @@ int grbScanTimestep(int streamID)
 	  if ( CDI_Debug )
 	    Message(func, "%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, rcode, level1, vdate, vtime);
 
-	  compVar0.code   = streams[streamID].tsteps[tsID].records[recID].code;
-	  compVar0.table  = streams[streamID].tsteps[tsID].records[recID].table;
-	  compVar0.level1 = streams[streamID].tsteps[tsID].records[recID].ilevel;
-	  compVar0.level2 = streams[streamID].tsteps[tsID].records[recID].ilevel2;
-	  compVar0.ltype  = streams[streamID].tsteps[tsID].records[recID].ltype;
+	  compVar0.code   = streamptr->tsteps[tsID].records[recID].code;
+	  compVar0.table  = streamptr->tsteps[tsID].records[recID].table;
+	  compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
+	  compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
+	  compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
 
 	  if ( memcmp(&compVar0, &compVar, sizeof(COMPVAR)) != 0 )
 	    {
 	      Message(func, "tsID = %d recID = %d code = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,
-		      streams[streamID].tsteps[tsID].records[recID].code, rcode,
-		      streams[streamID].tsteps[tsID].records[recID].ilevel, level1);
+		      streamptr->tsteps[tsID].records[recID].code, rcode,
+		      streamptr->tsteps[tsID].records[recID].ilevel, level1);
 	      Error(func, "Invalid, unsupported or inconsistent record structure");
 	    }
 	  
-	  streams[streamID].tsteps[tsID].records[recID].position = recpos;
-	  streams[streamID].tsteps[tsID].records[recID].size = recsize;
+	  streamptr->tsteps[tsID].records[recID].position = recpos;
+	  streamptr->tsteps[tsID].records[recID].size = recsize;
 
 	  if ( CDI_Debug )
 	    Message(func, "%4d %8d %4d %8d %8d %6d", rindex, (int)recpos, rcode, level1, vdate, vtime);
@@ -620,58 +632,61 @@ int grbScanTimestep(int streamID)
 
       for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	{
-	  recID   = streams[streamID].tsteps[tsID].recIDs[vrecID];
-	  if ( ! streams[streamID].tsteps[tsID].records[recID].used ) break;
+	  recID   = streamptr->tsteps[tsID].recIDs[vrecID];
+	  if ( ! streamptr->tsteps[tsID].records[recID].used ) break;
 	}
 
       if ( vrecID < nrecs )
 	{
 	  Warning(func, "2 code %d level %d not found at timestep %d",
-		  streams[streamID].tsteps[tsID].records[recID].code,
-		  streams[streamID].tsteps[tsID].records[recID].ilevel,
+		  streamptr->tsteps[tsID].records[recID].code,
+		  streamptr->tsteps[tsID].records[recID].ilevel,
 		  tsID+1);
 	  return (CDI_EUFSTRUCT);
 	}
 
-      streams[streamID].rtsteps++;
+      streamptr->rtsteps++;
 
-      if ( streams[streamID].ntsteps != streams[streamID].rtsteps )
+      if ( streamptr->ntsteps != streamptr->rtsteps )
 	{
 	  tsID = tstepsNewEntry(streamID);
-	  if ( tsID != streams[streamID].rtsteps )
+	  if ( tsID != streamptr->rtsteps )
 	    Error(func, "Internal error. tsID = %d", tsID);
 
-	  streams[streamID].tsteps[tsID-1].next   = 1;
-	  streams[streamID].tsteps[tsID].position = recpos;
+	  streamptr->tsteps[tsID-1].next   = 1;
+	  streamptr->tsteps[tsID].position = recpos;
 	}
 
-      fileSetPos(fileID, streams[streamID].tsteps[tsID].position, SEEK_SET);
-      streams[streamID].tsteps[tsID].position = recpos;
+      fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
+      streamptr->tsteps[tsID].position = recpos;
 
-      streams[streamID].record->buffer     = gribbuffer;
-      streams[streamID].record->buffersize = buffersize;
+      streamptr->record->buffer     = gribbuffer;
+      streamptr->record->buffersize = buffersize;
     }
 
-  if ( nrecs > 0 && nrecs < streams[streamID].tsteps[tsID].nrecs )
+  if ( nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs )
     {
       Warning(func, "Incomplete timestep. Stop scanning at timestep %d.\n", tsID);
-      streams[streamID].ntsteps = tsID;
+      streamptr->ntsteps = tsID;
     }
 
-  return (streams[streamID].ntsteps);
+  return (streamptr->ntsteps);
 }
 
 
 int grbInqTimeSize(int streamID)
 {
   static char func[] = "grbInqTimeSize";
+  STREAM *streamptr;
 
-  streamCheckID(func, streamID);
+  streamptr = stream_to_pointer(streamID);
 
-  while ( ! streams[streamID].ntsteps )
+  stream_check_ptr(func, streamptr);
+
+  while ( ! streamptr->ntsteps )
     grbScanTimestep(streamID);
 
-  return (streams[streamID].ntsteps);
+  return (streamptr->ntsteps);
 }
 
 
@@ -690,11 +705,14 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
   RECORD *record;
   GRID grid;
   int vlistID;
+  STREAM *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
 
   vlistID = streamInqVlist(streamID);
-  tsID    = streams[streamID].curTsID;
+  tsID    = streamptr->curTsID;
   recID   = recordNewEntry(streamID, tsID);
-  record  = &streams[streamID].tsteps[tsID].records[recID];
+  record  = &streamptr->tsteps[tsID].records[recID];
 
   numavg  = ISEC1_AvgNum;
 
@@ -714,7 +732,7 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
 
   gridtype = gribGetGridType(isec2);
 
-  if ( streams[streamID].unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
+  if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
     {
       gridtype = GRID_GAUSSIAN;
       ISEC2_NumLon = 2*ISEC2_NumLat;
@@ -910,8 +928,8 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
       varDefTable(varID, tableID);
     }
 
-  streams[streamID].tsteps[tsID].nallrecs++;
-  streams[streamID].nrecs++;
+  streamptr->tsteps[tsID].nallrecs++;
+  streamptr->nrecs++;
 
   if ( CDI_Debug )
     Message(func, "varID = %d  code = %d  leveltype = %d  gridID = %d  levelID = %d",
@@ -946,19 +964,22 @@ void grbScanTimestep1(int streamID)
   int szip;
   long unzipsize;
   COMPVAR compVar, compVar0;
+  STREAM *streamptr;
 
-  streamCheckID(func, streamID);
+  streamptr = stream_to_pointer(streamID);
 
-  streams[streamID].curTsID = 0;
+  stream_check_ptr(func, streamptr);
 
-  isec0 = streams[streamID].record->sec0;
-  isec1 = streams[streamID].record->sec1;
-  isec2 = streams[streamID].record->sec2;
-  isec3 = streams[streamID].record->sec3;
-  isec4 = streams[streamID].record->sec4;
+  streamptr->curTsID = 0;
+
+  isec0 = streamptr->record->sec0;
+  isec1 = streamptr->record->sec1;
+  isec2 = streamptr->record->sec2;
+  isec3 = streamptr->record->sec3;
+  isec4 = streamptr->record->sec4;
 
   tsID  = tstepsNewEntry(streamID);
-  taxis = &streams[streamID].tsteps[tsID].taxis;
+  taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( tsID != 0 )
     Error(func, "Internal problem! tstepsNewEntry returns %d", tsID);
@@ -973,7 +994,7 @@ void grbScanTimestep1(int streamID)
 
       if ( recsize == 0 )
 	{
-	  streams[streamID].ntsteps = 1;
+	  streamptr->ntsteps = 1;
 	  break;
 	}
       if ( recsize > buffersize )
@@ -1033,11 +1054,11 @@ void grbScanTimestep1(int streamID)
           compVar.ltype  = ISEC1_LevelType;
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
-	      compVar0.code   = streams[streamID].tsteps[0].records[recID].code;
-	      compVar0.table  = streams[streamID].tsteps[0].records[recID].table;
-	      compVar0.level1 = streams[streamID].tsteps[0].records[recID].ilevel;
-	      compVar0.level2 = streams[streamID].tsteps[0].records[recID].ilevel2;
-	      compVar0.ltype  = streams[streamID].tsteps[0].records[recID].ltype;
+	      compVar0.code   = streamptr->tsteps[0].records[recID].code;
+	      compVar0.table  = streamptr->tsteps[0].records[recID].table;
+	      compVar0.level1 = streamptr->tsteps[0].records[recID].ilevel;
+	      compVar0.level2 = streamptr->tsteps[0].records[recID].ilevel2;
+	      compVar0.ltype  = streamptr->tsteps[0].records[recID].ltype;
 
 	      if ( memcmp(&compVar0, &compVar, sizeof(COMPVAR)) == 0 ) break;
 	    }
@@ -1068,7 +1089,7 @@ void grbScanTimestep1(int streamID)
       grbAddRecord(streamID, rcode, isec1, isec2, fsec2, isec4, recsize, recpos, prec, szip);
     }
 
-  streams[streamID].rtsteps = 1;
+  streamptr->rtsteps = 1;
 
   cdiGenVars(streamID);
 
@@ -1092,38 +1113,38 @@ void grbScanTimestep1(int streamID)
   vlistID = streamInqVlist(streamID);
   vlistDefTaxis(vlistID, taxisID);
 
-  nrecords = streams[streamID].tsteps[0].nallrecs;
-  if ( nrecords < streams[streamID].tsteps[0].recordSize )
+  nrecords = streamptr->tsteps[0].nallrecs;
+  if ( nrecords < streamptr->tsteps[0].recordSize )
     {
-      streams[streamID].tsteps[0].recordSize = nrecords;
-      streams[streamID].tsteps[0].records =
-      (RECORD *) realloc(streams[streamID].tsteps[0].records, nrecords*sizeof(RECORD));
+      streamptr->tsteps[0].recordSize = nrecords;
+      streamptr->tsteps[0].records =
+      (RECORD *) realloc(streamptr->tsteps[0].records, nrecords*sizeof(RECORD));
     }
 
-  streams[streamID].tsteps[0].recIDs = (int *) malloc(nrecords*sizeof(int));
-  streams[streamID].tsteps[0].nrecs = nrecords;
+  streamptr->tsteps[0].recIDs = (int *) malloc(nrecords*sizeof(int));
+  streamptr->tsteps[0].nrecs = nrecords;
   for ( recID = 0; recID < nrecords; recID++ )
-    streams[streamID].tsteps[0].recIDs[recID] = recID;
+    streamptr->tsteps[0].recIDs[recID] = recID;
 
-  streams[streamID].record->buffer     = gribbuffer;
-  streams[streamID].record->buffersize = buffersize;
+  streamptr->record->buffer     = gribbuffer;
+  streamptr->record->buffersize = buffersize;
 
-  if ( streams[streamID].ntsteps == -1 )
+  if ( streamptr->ntsteps == -1 )
     {
       tsID = tstepsNewEntry(streamID);
-      if ( tsID != streams[streamID].rtsteps )
+      if ( tsID != streamptr->rtsteps )
 	Error(func, "Internal error. tsID = %d", tsID);
 
-      streams[streamID].tsteps[tsID-1].next   = TRUE;
-      streams[streamID].tsteps[tsID].position = recpos;
+      streamptr->tsteps[tsID-1].next   = TRUE;
+      streamptr->tsteps[tsID].position = recpos;
     }
 
-  if ( streams[streamID].ntsteps == 1 )
+  if ( streamptr->ntsteps == 1 )
     {
       if ( taxis->vdate == 0 && taxis->vtime == 0 )
 	{
-	  streams[streamID].ntsteps = 0;
-	  for ( varID = 0; varID < streams[streamID].nvars; varID++ )
+	  streamptr->ntsteps = 0;
+	  for ( varID = 0; varID < streamptr->nvars; varID++ )
 	    {
 	      vlistDefVarTime(vlistID, varID, TIME_CONSTANT);
 	    }
@@ -1156,47 +1177,50 @@ int grbScanTimestep2(int streamID)
   int vlistID;
   long unzipsize;
   COMPVAR compVar, compVar0;
+  STREAM *streamptr;
 
-  streamCheckID(func, streamID);
+  streamptr = stream_to_pointer(streamID);
 
-  streams[streamID].curTsID = 1;
+  stream_check_ptr(func, streamptr);
 
-  isec0 = streams[streamID].record->sec0;
-  isec1 = streams[streamID].record->sec1;
-  isec2 = streams[streamID].record->sec2;
-  isec3 = streams[streamID].record->sec3;
-  isec4 = streams[streamID].record->sec4;
+  streamptr->curTsID = 1;
+
+  isec0 = streamptr->record->sec0;
+  isec1 = streamptr->record->sec1;
+  isec2 = streamptr->record->sec2;
+  isec3 = streamptr->record->sec3;
+  isec4 = streamptr->record->sec4;
 
   fileID  = streamInqFileID(streamID);
   vlistID = streamInqVlist(streamID);
   taxisID = vlistInqTaxis(vlistID);
 
-  gribbuffer = (unsigned char *) streams[streamID].record->buffer;
-  buffersize = streams[streamID].record->buffersize;
+  gribbuffer = (unsigned char *) streamptr->record->buffer;
+  buffersize = streamptr->record->buffersize;
                                           
-  tsID = streams[streamID].rtsteps;
+  tsID = streamptr->rtsteps;
   if ( tsID != 1 )
     Error(func, "Internal problem! unexpeceted timestep %d", tsID+1);
 
-  taxis = &streams[streamID].tsteps[tsID].taxis;
+  taxis = &streamptr->tsteps[tsID].taxis;
 
-  fileSetPos(fileID, streams[streamID].tsteps[tsID].position, SEEK_SET);
+  fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
   cdiCreateRecords(streamID, tsID);
 
-  nrecords = streams[streamID].tsteps[tsID].nallrecs;
-  streams[streamID].tsteps[1].recIDs = (int *) malloc(nrecords*sizeof(int));
-  streams[streamID].tsteps[1].nrecs = 0;
+  nrecords = streamptr->tsteps[tsID].nallrecs;
+  streamptr->tsteps[1].recIDs = (int *) malloc(nrecords*sizeof(int));
+  streamptr->tsteps[1].nrecs = 0;
   for ( recID = 0; recID < nrecords; recID++ )
-    streams[streamID].tsteps[1].recIDs[recID] = -1;
+    streamptr->tsteps[1].recIDs[recID] = -1;
       
   for ( recID = 0; recID < nrecords; recID++ )
     {
-      varID = streams[streamID].tsteps[0].records[recID].varID;
-      streams[streamID].tsteps[tsID].records[recID].position = 
-	streams[streamID].tsteps[0].records[recID].position;
-      streams[streamID].tsteps[tsID].records[recID].size     = 
-	streams[streamID].tsteps[0].records[recID].size;
+      varID = streamptr->tsteps[0].records[recID].varID;
+      streamptr->tsteps[tsID].records[recID].position = 
+	streamptr->tsteps[0].records[recID].position;
+      streamptr->tsteps[tsID].records[recID].size     = 
+	streamptr->tsteps[0].records[recID].size;
     }
 
   for ( rindex = 0; rindex <= nrecords; rindex++ )
@@ -1205,7 +1229,7 @@ int grbScanTimestep2(int streamID)
       recpos  = fileGetPos(fileID);
       if ( recsize == 0 )
 	{
-	  streams[streamID].ntsteps = 2;
+	  streamptr->ntsteps = 2;
 	  break;
 	}
       if ( recsize > buffersize )
@@ -1280,21 +1304,21 @@ int grbScanTimestep2(int streamID)
       nextstep = FALSE;
       for ( recID = 0; recID < nrecords; recID++ )
 	{
-	  compVar0.code   = streams[streamID].tsteps[tsID].records[recID].code;
-	  compVar0.table  = streams[streamID].tsteps[tsID].records[recID].table;
-	  compVar0.level1 = streams[streamID].tsteps[tsID].records[recID].ilevel;
-	  compVar0.level2 = streams[streamID].tsteps[tsID].records[recID].ilevel2;
-	  compVar0.ltype  = streams[streamID].tsteps[tsID].records[recID].ltype;
+	  compVar0.code   = streamptr->tsteps[tsID].records[recID].code;
+	  compVar0.table  = streamptr->tsteps[tsID].records[recID].table;
+	  compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
+	  compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
+	  compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
 	  if ( memcmp(&compVar0, &compVar, sizeof(COMPVAR)) == 0 )
 	    {
-	      if ( streams[streamID].tsteps[tsID].records[recID].used )
+	      if ( streamptr->tsteps[tsID].records[recID].used )
 		{
 		  nextstep = TRUE;
 		}
 	      else
 		{
-		  streams[streamID].tsteps[tsID].records[recID].used = TRUE;
-		  streams[streamID].tsteps[tsID].recIDs[rindex] = recID;
+		  streamptr->tsteps[tsID].records[recID].used = TRUE;
+		  streamptr->tsteps[tsID].recIDs[rindex] = recID;
 		}
 	      break;
 	    }
@@ -1310,25 +1334,25 @@ int grbScanTimestep2(int streamID)
       if ( CDI_Debug )
 	Message(func, "%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, rcode, level1, vdate, vtime);
 
-      streams[streamID].tsteps[tsID].records[recID].size = recsize;
+      streamptr->tsteps[tsID].records[recID].size = recsize;
 
-      compVar0.code   = streams[streamID].tsteps[tsID].records[recID].code;
-      compVar0.table  = streams[streamID].tsteps[tsID].records[recID].table;
-      compVar0.level1 = streams[streamID].tsteps[tsID].records[recID].ilevel;
-      compVar0.level2 = streams[streamID].tsteps[tsID].records[recID].ilevel2;
-      compVar0.ltype  = streams[streamID].tsteps[tsID].records[recID].ltype;
+      compVar0.code   = streamptr->tsteps[tsID].records[recID].code;
+      compVar0.table  = streamptr->tsteps[tsID].records[recID].table;
+      compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
+      compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
+      compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
 
       if ( memcmp(&compVar0, &compVar, sizeof(COMPVAR)) != 0 )
 	{
 	  Message(func, "tsID = %d recID = %d code = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
-		  streams[streamID].tsteps[tsID].records[recID].code, rcode,
-		  streams[streamID].tsteps[tsID].records[recID].ilevel, level1);
+		  streamptr->tsteps[tsID].records[recID].code, rcode,
+		  streamptr->tsteps[tsID].records[recID].ilevel, level1);
 	  return (CDI_EUFSTRUCT);
 	}
 
-      streams[streamID].tsteps[1].records[recID].position = recpos;
-      varID = streams[streamID].tsteps[tsID].records[recID].varID;
+      streamptr->tsteps[1].records[recID].position = recpos;
+      varID = streamptr->tsteps[tsID].records[recID].varID;
       gridID = vlistInqVarGrid(vlistID, varID);
       if ( gridInqSize(gridID) == 1 && gridInqType(gridID) == GRID_LONLAT )
 	{
@@ -1341,9 +1365,9 @@ int grbScanTimestep2(int streamID)
   nrecs = 0;
   for ( recID = 0; recID < nrecords; recID++ )
     {
-      if ( ! streams[streamID].tsteps[tsID].records[recID].used )
+      if ( ! streamptr->tsteps[tsID].records[recID].used )
 	{
-	  varID = streams[streamID].tsteps[tsID].records[recID].varID;
+	  varID = streamptr->tsteps[tsID].records[recID].varID;
 	  vlistDefVarTime(vlistID, varID, TIME_CONSTANT);
 	}
       else
@@ -1351,22 +1375,22 @@ int grbScanTimestep2(int streamID)
 	  nrecs++;
 	}
     }
-  streams[streamID].tsteps[tsID].nrecs = nrecs;
+  streamptr->tsteps[tsID].nrecs = nrecs;
 
-  streams[streamID].rtsteps = 2;
+  streamptr->rtsteps = 2;
 
-  if ( streams[streamID].ntsteps == -1 )
+  if ( streamptr->ntsteps == -1 )
     {
       tsID = tstepsNewEntry(streamID);
-      if ( tsID != streams[streamID].rtsteps )
+      if ( tsID != streamptr->rtsteps )
 	Error(func, "Internal error. tsID = %d", tsID);
 
-      streams[streamID].tsteps[tsID-1].next   = TRUE;
-      streams[streamID].tsteps[tsID].position = recpos;
+      streamptr->tsteps[tsID-1].next   = TRUE;
+      streamptr->tsteps[tsID].position = recpos;
     }
 
-  streams[streamID].record->buffer     = gribbuffer;
-  streams[streamID].record->buffersize = buffersize;
+  streamptr->record->buffer     = gribbuffer;
+  streamptr->record->buffersize = buffersize;
 
   return (0);
 }
@@ -1377,16 +1401,19 @@ int grbInqContents(int streamID)
   static char func[] = "grbInqContents";
   int fileID;
   int status = 0;
+  STREAM *streamptr;
 
-  streamCheckID(func, streamID);
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(func, streamptr);
 
   fileID = streamInqFileID(streamID);
 
-  streams[streamID].curTsID = 0;
+  streamptr->curTsID = 0;
 
   grbScanTimestep1(streamID);
  
-  if ( streams[streamID].ntsteps == -1 ) status = grbScanTimestep2(streamID);
+  if ( streamptr->ntsteps == -1 ) status = grbScanTimestep2(streamID);
 
   fileSetPos(fileID, 0, SEEK_SET);
 
@@ -1398,34 +1425,37 @@ int grbInqTimestep(int streamID, int tsID)
 {
   static char func[] = "grbInqTimestep";
   int ntsteps, nrecs;
+  STREAM *streamptr;
 
-  streamCheckID(func, streamID);
+  streamptr = stream_to_pointer(streamID);
 
-  if ( tsID == 0 && streams[streamID].rtsteps == 0 )
+  stream_check_ptr(func, streamptr);
+
+  if ( tsID == 0 && streamptr->rtsteps == 0 )
     Error(func, "Call to cdiInqContents missing!");
 
   if ( CDI_Debug )
-    Message(func, "tsid = %d rtsteps = %d", tsID, streams[streamID].rtsteps);
+    Message(func, "tsid = %d rtsteps = %d", tsID, streamptr->rtsteps);
   
   ntsteps = UNDEFID;
-  while ( (tsID + 1) > streams[streamID].rtsteps && ntsteps == UNDEFID )
+  while ( (tsID + 1) > streamptr->rtsteps && ntsteps == UNDEFID )
     {
       ntsteps = grbScanTimestep(streamID);
       if ( ntsteps == CDI_EUFSTRUCT )
 	{
-	  streams[streamID].ntsteps = streams[streamID].rtsteps;
+	  streamptr->ntsteps = streamptr->rtsteps;
 	  break;
 	}
     }
 
-  if ( tsID >= streams[streamID].ntsteps && streams[streamID].ntsteps != CDI_UNDEFID )
+  if ( tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID )
     {
       nrecs = 0;
     }
   else
     {
-      streams[streamID].curTsID = tsID;
-      nrecs = streams[streamID].tsteps[tsID].nrecs;
+      streamptr->curTsID = tsID;
+      nrecs = streamptr->tsteps[tsID].nrecs;
     }
 
   return (nrecs);
@@ -1444,16 +1474,19 @@ void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
   int imiss;
   int vlistID;
   int zip;
+  STREAM *streamptr;
 
-  streamCheckID(func, streamID);
+  streamptr = stream_to_pointer(streamID);
 
-  gribbuffer = (unsigned char *) streams[streamID].record->buffer;
+  stream_check_ptr(func, streamptr);
+
+  gribbuffer = (unsigned char *) streamptr->record->buffer;
 
   vlistID  = streamInqVlist(streamID);
   fileID   = streamInqFileID(streamID);
-  tsID     = streams[streamID].curTsID;
+  tsID     = streamptr->curTsID;
 
-  nlevs    = streams[streamID].vars[varID].nlevs;
+  nlevs    = streamptr->vars[varID].nlevs;
   gridID   = vlistInqVarGrid(vlistID, varID);
   gridsize = gridInqSize(gridID);
 
@@ -1465,19 +1498,19 @@ void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
   *nmiss = 0;
   for ( levelID = 0; levelID < nlevs; levelID++ )
     {
-      recID   = streams[streamID].vars[varID].level[levelID];
-      recpos  = streams[streamID].tsteps[tsID].records[recID].position;
-      recsize = streams[streamID].tsteps[tsID].records[recID].size;
+      recID   = streamptr->vars[varID].level[levelID];
+      recpos  = streamptr->tsteps[tsID].records[recID].position;
+      recsize = streamptr->tsteps[tsID].records[recID].size;
 
       fileSetPos(fileID, recpos, SEEK_SET);
 
       fileRead(fileID, gribbuffer, recsize);
 
-      grbDecodeDataDP(gribbuffer, recsize, &data[levelID*gridsize], gridsize, streams[streamID].unreduced, &imiss, &zip);
+      grbDecodeDataDP(gribbuffer, recsize, &data[levelID*gridsize], gridsize, streamptr->unreduced, &imiss, &zip);
 
       *nmiss += imiss;
 
-      streams[streamID].tsteps[tsID].records[recID].zip = zip;
+      streamptr->tsteps[tsID].records[recID].zip = zip;
     }
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
@@ -1495,15 +1528,18 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
   int tsID, recID;
   int vlistID;
   int zip;
+  STREAM *streamptr;
 
-  streamCheckID(func, streamID);
+  streamptr = stream_to_pointer(streamID);
 
-  gribbuffer = (unsigned char *) streams[streamID].record->buffer;
+  stream_check_ptr(func, streamptr);
+
+  gribbuffer = (unsigned char *) streamptr->record->buffer;
 
   vlistID  = streamInqVlist(streamID);
   gridID   = vlistInqVarGrid(vlistID, varID);
   gridsize = gridInqSize(gridID);
-  tsID     = streams[streamID].curTsID;
+  tsID     = streamptr->curTsID;
 
   if ( CDI_Debug )
     Message(func, "gridID = %d gridsize = %d", gridID, gridsize);
@@ -1512,9 +1548,9 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
 
   currentfilepos = fileGetPos(fileID);
 
-  recID   = streams[streamID].vars[varID].level[levelID];
-  recpos  = streams[streamID].tsteps[tsID].records[recID].position;
-  recsize = streams[streamID].tsteps[tsID].records[recID].size;
+  recID   = streamptr->vars[varID].level[levelID];
+  recpos  = streamptr->tsteps[tsID].records[recID].position;
+  recsize = streamptr->tsteps[tsID].records[recID].size;
 
   if ( recsize == 0 )
     Error(func, "Internal problem! Recordsize is zero for record %d at timestep %d",
@@ -1524,11 +1560,11 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
 
   fileRead(fileID, gribbuffer, recsize);
 
-  grbDecodeDataDP(gribbuffer, recsize, data, gridsize, streams[streamID].unreduced, nmiss, &zip);
+  grbDecodeDataDP(gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, &zip);
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
-  streams[streamID].tsteps[tsID].records[recID].zip = zip;
+  streamptr->tsteps[tsID].records[recID].zip = zip;
 }
 
 
@@ -2020,8 +2056,11 @@ void grbWriteVarDP(int streamID, int varID, const double *data, int nmiss)
   int datatype;
   int vlistID;
   size_t nbytes;
+  STREAM *streamptr;
 
-  streamCheckID(func, streamID);
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(func, streamptr);
 
   if ( CDI_Debug ) Message(func, "streamID = %d  varID = %d", streamID, varID);
 
@@ -2030,7 +2069,7 @@ void grbWriteVarDP(int streamID, int varID, const double *data, int nmiss)
 
   fileID  = streamInqFileID(streamID);
   vlistID = streamInqVlist(streamID);
-  tsID    = streams[streamID].curTsID;
+  tsID    = streamptr->curTsID;
 
   gridID   = vlistInqVarGrid(vlistID, varID);
   zaxisID  = vlistInqVarZaxis(vlistID, varID);
@@ -2038,10 +2077,10 @@ void grbWriteVarDP(int streamID, int varID, const double *data, int nmiss)
   nlevs    = zaxisInqSize(zaxisID);
 
   code     = vlistInqVarCode(vlistID, varID);
-  date     = streams[streamID].tsteps[tsID].taxis.vdate;
-  time     = streams[streamID].tsteps[tsID].taxis.vtime;
+  date     = streamptr->tsteps[tsID].taxis.vdate;
+  time     = streamptr->tsteps[tsID].taxis.vtime;
   if ( vlistInqVarAverage(vlistID, varID) )
-    numavg = streams[streamID].tsteps[tsID].taxis.numavg;
+    numavg = streamptr->tsteps[tsID].taxis.numavg;
   datasize = gridInqSize(gridID);
 
   if ( CDI_Debug )
@@ -2103,7 +2142,7 @@ void grbWriteVarDP(int streamID, int varID, const double *data, int nmiss)
       
       nbytes = iword*sizeof(int);
 
-      if ( streams[streamID].compressType == COMPRESS_SZIP )
+      if ( streamptr->compressType == COMPRESS_SZIP )
 	{
 	  unsigned char *buffer;
 	  size_t buffersize;
@@ -2144,15 +2183,18 @@ void grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data
   int datatype;
   int vlistID;
   size_t nbytes;
+  STREAM *streamptr;
 
-  streamCheckID(func, streamID);
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(func, streamptr);
 
   memset(isec1, 0, 32*sizeof(int));
   fsec2[0] = 0; fsec2[1] = 0;
 
   vlistID  = streamInqVlist(streamID);
   fileID   = streamInqFileID(streamID);
-  tsID     = streams[streamID].curTsID;
+  tsID     = streamptr->curTsID;
 
   gridID   = vlistInqVarGrid(vlistID, varID);
   zaxisID  = vlistInqVarZaxis(vlistID, varID);
@@ -2161,10 +2203,10 @@ void grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data
     Message(func, "gridID = %d zaxisID = %d", gridID, zaxisID);
 
   code     = vlistInqVarCode(vlistID, varID);
-  date     = streams[streamID].tsteps[tsID].taxis.vdate;
-  time     = streams[streamID].tsteps[tsID].taxis.vtime;
+  date     = streamptr->tsteps[tsID].taxis.vdate;
+  time     = streamptr->tsteps[tsID].taxis.vtime;
   if ( vlistInqVarAverage(vlistID, varID) )
-    numavg = streams[streamID].tsteps[tsID].taxis.numavg;
+    numavg = streamptr->tsteps[tsID].taxis.numavg;
   datasize = gridInqSize(gridID);
 
   gribbuffersize = datasize*4+3000;
@@ -2219,7 +2261,7 @@ void grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data
 
   nbytes = iword*sizeof(int);
 
-  if ( streams[streamID].compressType == COMPRESS_SZIP )
+  if ( streamptr->compressType == COMPRESS_SZIP )
     {
       unsigned char *buffer;
       size_t buffersize;
@@ -2240,10 +2282,10 @@ void grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data
 }
 
 
-int grbCopyRecord(int ostreamID, int istreamID)
+int grbCopyRecord(int streamID2, int streamID1)
 {
   static char func[] = "grbCopyRecord";
-  int ifileID, ofileID;
+  int fileID1, fileID2;
   int tsID, recID, vrecID;
   long recsize;
   size_t gribbuffersize;
@@ -2253,33 +2295,38 @@ int grbCopyRecord(int ostreamID, int istreamID)
   size_t nbytes;
   long unzipsize;
   int izip;
+  STREAM *streamptr1;
+  STREAM *streamptr2;
 
-  streamCheckID(func, istreamID);
-  streamCheckID(func, ostreamID);
+  streamptr1 = stream_to_pointer(streamID1);
+  streamptr2 = stream_to_pointer(streamID2);
 
-  ifileID = streamInqFileID(istreamID);
-  ofileID = streamInqFileID(ostreamID);
+  stream_check_ptr(func, streamptr1);
+  stream_check_ptr(func, streamptr2);
 
-  tsID    = streams[istreamID].curTsID;
-  vrecID  = streams[istreamID].tsteps[tsID].curRecID;
-  recID   = streams[istreamID].tsteps[tsID].recIDs[vrecID];
-  recpos  = streams[istreamID].tsteps[tsID].records[recID].position;
-  recsize = streams[istreamID].tsteps[tsID].records[recID].size;
+  fileID1 = streamInqFileID(streamID1);
+  fileID2 = streamInqFileID(streamID2);
 
-  fileSetPos(ifileID, recpos, SEEK_SET);
+  tsID    = streamptr1->curTsID;
+  vrecID  = streamptr1->tsteps[tsID].curRecID;
+  recID   = streamptr1->tsteps[tsID].recIDs[vrecID];
+  recpos  = streamptr1->tsteps[tsID].records[recID].position;
+  recsize = streamptr1->tsteps[tsID].records[recID].size;
+
+  fileSetPos(fileID1, recpos, SEEK_SET);
 
   gribbuffersize = recsize == (recsize>>3)<<3 ? recsize : (1+(recsize>>3))<<3;
 
   gribbuffer = (unsigned char *) malloc(gribbuffersize);
 
-  fileRead(ifileID, gribbuffer, recsize);
+  fileRead(fileID1, gribbuffer, recsize);
 
   nbytes = recsize;
 
   izip = gribGetZip(recsize, gribbuffer, &unzipsize);
   
   if ( izip == 0 )
-    if ( streams[ostreamID].compressType == COMPRESS_SZIP )
+    if ( streamptr2->compressType == COMPRESS_SZIP )
       {
 	unsigned char *buffer;
 	size_t buffersize;
@@ -2296,7 +2343,7 @@ int grbCopyRecord(int ostreamID, int istreamID)
 
   while ( nbytes & 7 ) gribbuffer[nbytes++] = 0;
 
-  fileWrite(ofileID, gribbuffer, nbytes);
+  fileWrite(fileID2, gribbuffer, nbytes);
 
   free(gribbuffer);
 
@@ -2325,18 +2372,21 @@ int grbWriteRecord(int streamID, const double *data, int nmiss)
   int datatype;
   int vlistID;
   size_t nbytes;
+  STREAM *streamptr;
 
-  streamCheckID(func, streamID);
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(func, streamptr);
 
   memset(isec1, 0, 32*sizeof(int));
   fsec2[0] = 0; fsec2[1] = 0;
 
-  varID    = streams[streamID].record->varID;
-  levelID  = streams[streamID].record->levelID;
+  varID    = streamptr->record->varID;
+  levelID  = streamptr->record->levelID;
 
   fileID   = streamInqFileID(streamID);
   vlistID  = streamInqVlist(streamID);
-  tsID     = streams[streamID].curTsID;
+  tsID     = streamptr->curTsID;
 
   gridID   = vlistInqVarGrid(vlistID, varID);
   zaxisID  = vlistInqVarZaxis(vlistID, varID);
@@ -2345,10 +2395,10 @@ int grbWriteRecord(int streamID, const double *data, int nmiss)
     Message(func, "gridID = %d zaxisID = %d", gridID, zaxisID);
 
   code     = vlistInqVarCode(vlistID, varID);
-  date     = streams[streamID].tsteps[tsID].taxis.vdate;
-  time     = streams[streamID].tsteps[tsID].taxis.vtime;
+  date     = streamptr->tsteps[tsID].taxis.vdate;
+  time     = streamptr->tsteps[tsID].taxis.vtime;
   if ( vlistInqVarAverage(vlistID, varID) )
-    numavg = streams[streamID].tsteps[tsID].taxis.numavg;
+    numavg = streamptr->tsteps[tsID].taxis.numavg;
   datasize = gridInqSize(gridID);
 
   gribbuffersize = datasize*4+3000;
@@ -2403,7 +2453,7 @@ int grbWriteRecord(int streamID, const double *data, int nmiss)
 
   nbytes = iword*sizeof(int);
 
-  if ( streams[streamID].compressType == COMPRESS_SZIP )
+  if ( streamptr->compressType == COMPRESS_SZIP )
     {
       unsigned char *buffer;
       size_t buffersize;
@@ -2437,22 +2487,25 @@ void streamInqGinfo(int streamID, int *intnum, float *fltnum)
   long gribbuffersize;
   off_t recpos;
   int zip;
+  STREAM *streamptr;
 
-  streamCheckID(func, streamID);
+  streamptr = stream_to_pointer(streamID);
 
-  filetype = streams[streamID].filetype;
+  stream_check_ptr(func, streamptr);
+
+  filetype = streamptr->filetype;
 
   if ( filetype == FILETYPE_GRB )
     {
-      tsID    = streams[streamID].curTsID;
-      vrecID  = streams[streamID].tsteps[tsID].curRecID;
-      recID   = streams[streamID].tsteps[tsID].recIDs[vrecID];
-      recpos  = streams[streamID].tsteps[tsID].records[recID].position;
-      recsize = streams[streamID].tsteps[tsID].records[recID].size;
-      zip     = streams[streamID].tsteps[tsID].records[recID].zip;
+      tsID    = streamptr->curTsID;
+      vrecID  = streamptr->tsteps[tsID].curRecID;
+      recID   = streamptr->tsteps[tsID].recIDs[vrecID];
+      recpos  = streamptr->tsteps[tsID].records[recID].position;
+      recsize = streamptr->tsteps[tsID].records[recID].size;
+      zip     = streamptr->tsteps[tsID].records[recID].zip;
 
-      gribbuffer = streams[streamID].record->buffer;
-      gribbuffersize = streams[streamID].record->buffersize;
+      gribbuffer = streamptr->record->buffer;
+      gribbuffersize = streamptr->record->buffersize;
 
       if ( zip > 0 )
 	Error(func, "Compressed GRIB records unsupported!");

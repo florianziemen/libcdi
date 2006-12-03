@@ -114,10 +114,6 @@ src/grid.c -text
 src/grid.h -text
 src/grid_gme.c -text
 src/grid_rot.c -text
-src/hdf.c -text
-src/hdf.h -text
-src/hdf_int.c -text
-src/hdf_int.h -text
 src/ieg.h -text
 src/ieglib.c -text
 src/institution.c -text
@@ -134,8 +130,6 @@ src/stream_ext.c -text
 src/stream_ext.h -text
 src/stream_grb.c -text
 src/stream_grb.h -text
-src/stream_hdf.c -text
-src/stream_hdf.h -text
 src/stream_history.c -text
 src/stream_ieg.c -text
 src/stream_ieg.h -text

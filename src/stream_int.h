@@ -172,6 +172,7 @@ VCT;
 
 
 typedef struct {
+  int       self;
   int       accesstype;   /* TYPE_REC or TYPE_VAR */
   int       accessmode;
   int       filetype;
@@ -214,10 +215,9 @@ typedef struct {
   int       compressType;
   int       compressLevel;
 }
-CDITABLE;
+STREAM;
 
 
-extern CDITABLE *streams;
 extern int CDI_Debug;      /* If set to 1, debuggig (default 0)            */
 extern double cdiDefaultMissval;
 extern int cdiDefaultInstID;
@@ -226,6 +226,11 @@ extern int cdiDefaultTableID;
 extern int cdiDefaultLeveltype;
 extern int cdiNcMissingValue;
 extern int cdiSplitLtype105;
+
+STREAM *stream_to_pointer(int idx);
+STREAM *stream_new_entry(void);
+void stream_delete_entry(STREAM *streamptr);
+void stream_check_ptr(const char *func, STREAM *streamptr);
 
 int     streamInqFileID(int streamID);
 

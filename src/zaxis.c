@@ -350,6 +350,7 @@ int zaxisCreate(int zaxistype, int size)
 
   zaxisID = zaxisptr->self;
 
+  zaxisptr->type = zaxistype;
   zaxisptr->size = size;
 
   if ( zaxistype > CDI_MaxLeveltype )

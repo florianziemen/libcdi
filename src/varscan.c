@@ -325,6 +325,9 @@ void cdiGenVars(int streamID)
   double *dlevels1 = NULL;
   double *dlevels2 = NULL;
   int vlistID;
+  STREAM *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
 
   vlistID =  streamInqVlist(streamID);
 
@@ -468,7 +471,7 @@ void cdiGenVars(int streamID)
       */
       for ( levelID = 0; levelID < nlevels; levelID++ )
 	{
-	  streams[streamID].vars[varID].level[levelID] =
+	  streamptr->vars[varID].level[levelID] =
 	    vartable[varID].levelTable[levelID].recID;
 	  for ( lindex = 0; lindex < nlevels; lindex++ )
 	    if ( levelID == vartable[varID].levelTable[lindex].lindex ) break;
@@ -476,7 +479,7 @@ void cdiGenVars(int streamID)
 	  if ( lindex == nlevels )
 	    Error(func, "Internal problem! lindex not found.");
 
-	  streams[streamID].vars[varID].lindex[levelID] = lindex;
+	  streamptr->vars[varID].lindex[levelID] = lindex;
 	}
     }
 
