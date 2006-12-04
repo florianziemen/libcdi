@@ -71,13 +71,15 @@ typedef struct _gridPtrToIdx {
 } gridPtrToIdx;
 
 
-static gridPtrToIdx *_gridList;
-static gridPtrToIdx *_gridAvail = 0;
+static gridPtrToIdx *_gridList  = NULL;
+static gridPtrToIdx *_gridAvail = NULL;
 
 
 static void grid_list_new(void)
 {
   static char func[] = "grid_list_new";
+
+  assert(_gridList == NULL);
 
   _gridList = (gridPtrToIdx *) malloc(_grid_max*sizeof(gridPtrToIdx));
 }

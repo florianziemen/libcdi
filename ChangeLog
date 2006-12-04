@@ -2,6 +2,7 @@
 
 	* stream: mt safe version
 	* zaxis: mt safe version
+	* model: mt safe version
 	* remove H5 test version
 	* cdi_limits: define MAX_STREAMS, MAX_VLISTS, MAX_GRIDS, MAX_ZAXIS
 	* Version 1.0.5 released

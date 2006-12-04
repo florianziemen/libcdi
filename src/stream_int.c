@@ -173,13 +173,15 @@ typedef struct _streamPtrToIdx {
 } streamPtrToIdx;
 
 
-static streamPtrToIdx *_streamList;
-static streamPtrToIdx *_streamAvail = 0;
+static streamPtrToIdx *_streamList  = NULL;
+static streamPtrToIdx *_streamAvail = NULL;
 
 
 static void stream_list_new(void)
 {
   static char func[] = "stream_list_new";
+
+  assert(_streamList == NULL);
 
   _streamList = (streamPtrToIdx *) malloc(_stream_max*sizeof(streamPtrToIdx));
 }

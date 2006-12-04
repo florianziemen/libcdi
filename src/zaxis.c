@@ -51,7 +51,6 @@ typedef struct {
   int      type;
   int      size;
   int      direction;
-  int      used;
   int      vctsize;
   double  *vct;
 }
@@ -93,13 +92,15 @@ typedef struct _zaxisPtrToIdx {
 } zaxisPtrToIdx;
 
 
-static zaxisPtrToIdx *_zaxisList;
-static zaxisPtrToIdx *_zaxisAvail = 0;
+static zaxisPtrToIdx *_zaxisList  = NULL;
+static zaxisPtrToIdx *_zaxisAvail = NULL;
 
 
 static void zaxis_list_new(void)
 {
   static char func[] = "zaxis_list_new";
+
+  assert(_zaxisList == NULL);
 
   _zaxisList = (zaxisPtrToIdx *) malloc(_zaxis_max*sizeof(zaxisPtrToIdx));
 }

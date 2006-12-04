@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h> 
@@ -167,13 +168,15 @@ typedef struct _filePtrToIdx {
 } filePtrToIdx;
 
 
-static filePtrToIdx *_fileList;
-static filePtrToIdx *_fileAvail = 0;
+static filePtrToIdx *_fileList  = NULL;
+static filePtrToIdx *_fileAvail = NULL;
 
 
 static void file_list_new(void)
 {
   static char func[] = "file_list_new";
+
+  assert(_fileList == NULL);
 
   _fileList = (filePtrToIdx *) malloc(_file_max*sizeof(filePtrToIdx));
 }

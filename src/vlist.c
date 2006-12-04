@@ -45,13 +45,15 @@ typedef struct _vlistPtrToIdx {
 } vlistPtrToIdx;
 
 
-static vlistPtrToIdx *_vlistList;
-static vlistPtrToIdx *_vlistAvail = 0;
+static vlistPtrToIdx *_vlistList  = NULL;
+static vlistPtrToIdx *_vlistAvail = NULL;
 
 
 static void vlist_list_new(void)
 {
   static char func[] = "vlist_list_new";
+
+  assert(_vlistList == NULL);
 
   _vlistList = (vlistPtrToIdx *) malloc(_vlist_max*sizeof(vlistPtrToIdx));
 }

@@ -61,7 +61,7 @@ int institutsNewEntry(void)
     {
       int i;
 
-      institutsSize = 2;
+      institutsSize = 32;
       instituts = (Institut *) malloc(institutsSize*sizeof(Institut));
       if( instituts == NULL )
 	{
