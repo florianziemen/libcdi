@@ -1108,8 +1108,7 @@ void zaxisResize(int zaxisID, int size)
   zaxisptr->size = size;
 
   if ( zaxisptr->vals )
-    zaxisptr->vals =
-      (double *) realloc(zaxisptr->vals, size*sizeof(double));
+    zaxisptr->vals = (double *) realloc(zaxisptr->vals, size*sizeof(double));
 }
 
 

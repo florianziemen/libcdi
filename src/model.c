@@ -252,16 +252,6 @@ static void model_initialize(void)
 }
 
 
-static void model_copy(MODEL *modelptr2, MODEL *modelptr1)
-{
-  int modelID2;
-
-  modelID2 = modelptr2->self;
-  memcpy(modelptr2, modelptr1, sizeof(MODEL));
-  modelptr2->self = modelID2;
-}
-
-
 static void model_check_ptr(const char *func, MODEL *modelptr)
 {
   if ( modelptr == NULL )
