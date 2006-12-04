@@ -3,6 +3,7 @@
 	* stream: mt safe version
 	* zaxis: mt safe version
 	* remove H5 test version
+	* cdi_limits: define MAX_STREAMS, MAX_VLISTS, MAX_GRIDS, MAX_ZAXIS
 	* Version 1.0.5 released
 
 2006-11-30  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

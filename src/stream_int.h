@@ -201,12 +201,12 @@ typedef struct {
   BaseTime  basetime;
   int       ncmode;
   int       vlistID;
-  int       xdimID[MAX_GRIDS];
-  int       ydimID[MAX_GRIDS];
-  int       zaxisID[MAX_ZAXIS];
-  int       ncxvarID[MAX_GRIDS];
-  int       ncyvarID[MAX_GRIDS];
-  int       ncavarID[MAX_GRIDS];
+  int       xdimID[MAX_GRIDS_PS];
+  int       ydimID[MAX_GRIDS_PS];
+  int       zaxisID[MAX_ZAXIS_PS];
+  int       ncxvarID[MAX_GRIDS_PS];
+  int       ncyvarID[MAX_GRIDS_PS];
+  int       ncavarID[MAX_GRIDS_PS];
   int       historyID;
   int       globalatts;
   int       localatts;

@@ -1,7 +1,11 @@
 #ifndef _CDI_LIMITS_H
 #define _CDI_LIMITS_H
 
-#define  MAX_GRIDS  128  /* maximum of different grids for each file */
-#define  MAX_ZAXIS  128  /* maximum of different zaxis for each file */
+#define  MAX_STREAMS   4096  /* maximum number of streams */
+#define  MAX_VLISTS    4096  /* maximum number of vlists  */
+#define  MAX_GRIDS     1024  /* maximum number of grids   */
+#define  MAX_ZAXIS     1024  /* maximum number of zaxis   */
+#define  MAX_GRIDS_PS   128  /* maximum number of different grids per stream */
+#define  MAX_ZAXIS_PS   128  /* maximum number of different zaxis per stream */
 
 #endif  /* _CDI_LIMITS_H */

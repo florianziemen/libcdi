@@ -139,7 +139,7 @@ char *strfiletype(int filetype)
 
 static int  STREAM_Debug = 0;   /* If set to 1, debugging */
 
-static int _stream_max = 4096;
+static int _stream_max = MAX_STREAMS;
 
 static void stream_initialize(void);
 
@@ -311,12 +311,12 @@ static void stream_init_entry(STREAM *streamptr)
 
   basetimeInit(&streamptr->basetime);
 
-  for ( i = 0; i < MAX_GRIDS; i++ ) streamptr->xdimID[i]   = UNDEFID;
-  for ( i = 0; i < MAX_GRIDS; i++ ) streamptr->ydimID[i]   = UNDEFID;
-  for ( i = 0; i < MAX_ZAXIS; i++ ) streamptr->zaxisID[i]  = UNDEFID;
-  for ( i = 0; i < MAX_GRIDS; i++ ) streamptr->ncxvarID[i] = UNDEFID;
-  for ( i = 0; i < MAX_GRIDS; i++ ) streamptr->ncyvarID[i] = UNDEFID;
-  for ( i = 0; i < MAX_GRIDS; i++ ) streamptr->ncavarID[i] = UNDEFID;
+  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->xdimID[i]   = UNDEFID;
+  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ydimID[i]   = UNDEFID;
+  for ( i = 0; i < MAX_ZAXIS_PS; i++ ) streamptr->zaxisID[i]  = UNDEFID;
+  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncxvarID[i] = UNDEFID;
+  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncyvarID[i] = UNDEFID;
+  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncavarID[i] = UNDEFID;
 }
 
 

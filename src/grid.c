@@ -37,7 +37,7 @@ char *Grids[] = {
 
 static int  GRID_Debug = 0;   /* If set to 1, debugging */
 
-static int _grid_max = 1024;
+static int _grid_max = MAX_GRIDS;
 
 static void grid_initialize(void);
 

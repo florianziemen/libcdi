@@ -11,7 +11,7 @@
 
 static int  VLIST_Debug = 0;   /* If set to 1, debugging */
 
-static int _vlist_max = 1024;
+static int _vlist_max = MAX_VLISTS;
 
 static void vlist_initialize(void);
 
@@ -710,8 +710,8 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	    if ( index ==vlistptr2->ngrids )
 	      {
 		vlistptr2->gridIDs[vlistptr2->ngrids++] = gridID;
-		if (vlistptr2->ngrids >= MAX_GRIDS )
-		  Error(func, "Internal Problem! More than %d grids.", MAX_GRIDS);
+		if (vlistptr2->ngrids >= MAX_GRIDS_PS )
+		  Error(func, "Internal Problem! More than %d grids.", MAX_GRIDS_PS);
 	      }
 
 	    for ( index = 0; index <vlistptr2->nzaxis; index++ )
@@ -720,8 +720,8 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	    if ( index ==vlistptr2->nzaxis )
 	      {
 		vlistptr2->zaxisIDs[vlistptr2->nzaxis++] = zaxisID;
-		if (vlistptr2->nzaxis >= MAX_ZAXIS )
-		  Error(func, "Internal Problem! More than %d zaxis.", MAX_ZAXIS);
+		if (vlistptr2->nzaxis >= MAX_ZAXIS_PS )
+		  Error(func, "Internal Problem! More than %d zaxis.", MAX_ZAXIS_PS);
 	      }
 
 	    varID2++;
@@ -795,8 +795,8 @@ void vlistCat(int vlistID2, int vlistID1)
       if ( index == vlistptr2->ngrids )
 	{
 	  vlistptr2->gridIDs[vlistptr2->ngrids++] = gridID;
-	  if ( vlistptr2->ngrids >= MAX_GRIDS )
-	    Error(func, "Internal Problem! More than %d grids.", MAX_GRIDS);
+	  if ( vlistptr2->ngrids >= MAX_GRIDS_PS )
+	    Error(func, "Internal Problem! More than %d grids.", MAX_GRIDS_PS);
 	}
 
       zaxisID = vlistptr1->vars[varID].zaxisID;
@@ -806,8 +806,8 @@ void vlistCat(int vlistID2, int vlistID1)
       if ( index == vlistptr2->nzaxis )
 	{
 	  vlistptr2->zaxisIDs[vlistptr2->nzaxis++] = zaxisID;
-	  if ( vlistptr2->nzaxis >= MAX_ZAXIS )
-	    Error(func, "Internal Problem! More than %d zaxis.", MAX_ZAXIS);
+	  if ( vlistptr2->nzaxis >= MAX_ZAXIS_PS )
+	    Error(func, "Internal Problem! More than %d zaxis.", MAX_ZAXIS_PS);
 	}
     }
 }
