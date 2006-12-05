@@ -23,8 +23,14 @@
 #define SINGLE_PRECISION  4
 #define DOUBLE_PRECISION  8
 
-
 #if defined (HAVE_LIBEXTRA)
+
+
+typedef struct {
+  int code;
+  int level;
+} EXTCOMPVAR; 
+
 
 int extInqDatatype(int prec)
 {
@@ -342,7 +348,6 @@ void extScanTimestep1(int streamID)
   int rxysize = 0;
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0;
-  long levelcode, levelcode0 = 0;
   int tsID;
   int varID;
   long recsize;
@@ -351,6 +356,7 @@ void extScanTimestep1(int streamID)
   int taxisID = -1;
   TAXIS *taxis;
   int vlistID;
+  EXTCOMPVAR compVar, compVar0;
   EXTREC *extp;
   STREAM *streamptr;
 
@@ -399,12 +405,14 @@ void extScanTimestep1(int streamID)
 	{
 	  datetime.date = vdate;
 	  datetime.time = vtime;
-	  levelcode = rlevel*1000 + rcode;
+	  compVar.code  = rcode;
+          compVar.level = rlevel;
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
-	      levelcode0 = streamptr->tsteps[0].records[recID].ilevel*1000 +
-	 	           streamptr->tsteps[0].records[recID].code;
-	      if ( levelcode == levelcode0 ) break;
+	      compVar0.code  = streamptr->tsteps[0].records[recID].code;
+	      compVar0.level = streamptr->tsteps[0].records[recID].ilevel;
+
+	      if ( memcmp(&compVar0, &compVar, sizeof(EXTCOMPVAR)) == 0 ) break;
 	    }
 	  if ( recID < nrecs ) break;
 	  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) )
@@ -478,7 +486,6 @@ int extScanTimestep2(int streamID)
   int fileID;
   int rxysize = 0;
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
-  long levelcode, levelcode0 = 0;
   int tsID;
   int varID;
   long recsize;
@@ -487,6 +494,7 @@ int extScanTimestep2(int streamID)
   int nextstep;
   TAXIS *taxis;
   int vlistID;
+  EXTCOMPVAR compVar, compVar0;
   EXTREC *extp;
   STREAM *streamptr;
 
@@ -551,13 +559,15 @@ int extScanTimestep2(int streamID)
 	  taxis->vtime = vtime;
 	}
 
-      levelcode = rlevel*1000 + rcode;
+      compVar.code  = rcode;
+      compVar.level = rlevel;
       nextstep = FALSE;
       for ( recID = 0; recID < nrecords; recID++ )
 	{
-	  levelcode0 = streamptr->tsteps[tsID].records[recID].ilevel*1000 +
-	               streamptr->tsteps[tsID].records[recID].code;
-	  if ( levelcode == levelcode0 )
+	  compVar0.code  = streamptr->tsteps[tsID].records[recID].code;
+	  compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
+
+	  if ( memcmp(&compVar0, &compVar, sizeof(EXTCOMPVAR)) == 0 )
 	    {
 	      if ( streamptr->tsteps[tsID].records[recID].used )
 		{
@@ -584,10 +594,10 @@ int extScanTimestep2(int streamID)
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
-      levelcode0 = streamptr->tsteps[tsID].records[recID].ilevel*1000 +
-	           streamptr->tsteps[tsID].records[recID].code;
+      compVar0.code  = streamptr->tsteps[tsID].records[recID].code;
+      compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
-      if ( levelcode != levelcode0 )
+      if ( memcmp(&compVar0, &compVar, sizeof(EXTCOMPVAR)) != 0 )
 	{
 	  Message(func, "tsID = %d recID = %d code = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
@@ -664,12 +674,12 @@ int extScanTimestep(int streamID)
   int tsID;
   int rxysize = 0;
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
-  long levelcode, levelcode0 = 0;
   long recsize = 0;
   off_t recpos = 0;
   int recID;
   TAXIS *taxis;
   int rindex, nrecs = 0;
+  EXTCOMPVAR compVar, compVar0;
   EXTREC *extp;
   STREAM *streamptr;
 
@@ -738,11 +748,12 @@ int extScanTimestep(int streamID)
 	  /*
 	  extCmpRecord(streamID, tsID, nrecs, recpos, rcode, rlevel, rxysize);
 	  */
-	  levelcode  = rlevel*1000 + rcode;
-	  levelcode0 = streamptr->tsteps[tsID].records[recID].ilevel*1000 +
-	               streamptr->tsteps[tsID].records[recID].code;
+	  compVar.code  = rcode;
+          compVar.level = rlevel;
+	  compVar0.code  = streamptr->tsteps[tsID].records[recID].code;
+	  compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
-	  if ( levelcode != levelcode0 )
+	  if ( memcmp(&compVar0, &compVar, sizeof(EXTCOMPVAR)) != 0 )
 	    {
 	      Message(func, "tsID = %d recID = %d code = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,

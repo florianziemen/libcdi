@@ -108,7 +108,7 @@ static void printInfo(int gridtype, int date, int time, int code, double level,
   decodeDate(date, &year, &month, &day);
   decodeTime(time, &hour, &minute);
 
-  fprintf(stdout, "%6d : %4.4d-%2.2d-%2.2d %2.2d:%2.2d%4d %7g ",
+  fprintf(stdout, "%6d : %4.4d-%2.2d-%2.2d %2.2d:%2.2d %3d %7g ",
 	  ++rec, year, month, day, hour, minute, code, level);
 
   fprintf(stdout, "%7d ", datasize);
