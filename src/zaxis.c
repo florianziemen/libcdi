@@ -176,7 +176,7 @@ static int zaxis_from_pointer(ZAXIS *ptr)
 	    Message(func, "Pointer %p has idx %d from zaxis list", ptr, idx);
 	}
       else
-	Warning(func, "Too many open zaxiss (limit is %d)!", _zaxis_max);
+	Warning(func, "Too many open zaxis (limit is %d)!", _zaxis_max);
 
       ZAXIS_UNLOCK
     }

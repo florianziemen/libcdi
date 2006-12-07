@@ -3,6 +3,7 @@
 
 
 typedef struct {
+  int     self;
   int     used;
   int     type;           /* time type             */
   int     vdate;          /* verification date     */
