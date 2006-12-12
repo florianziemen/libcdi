@@ -1,11 +1,11 @@
-2006-12-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+2006-12-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* stream: mt safe version
 	* zaxis: mt safe version
 	* taxis: mt safe version
 	* model: mt safe version
 	* remove H5 test version
-	* stream_srv: bug fix for codes > 999 [report: Simon Blessing]
+	* stream_srv/ext/ieg: bug fix for codes > 999 [report: Simon Blessing]
 	* cdi_limits: define MAX_STREAMS, MAX_VLISTS, MAX_GRIDS, MAX_ZAXIS
 	* Version 1.0.5 released
 

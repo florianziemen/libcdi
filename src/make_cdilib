@@ -46,9 +46,9 @@ cat > ${PROG} << EOR
 
 EOR
 
-c="taxis.c           \
-   dmemory.c         \
+c="dmemory.c         \
    dmemory.h         \
+   taxis.c           \
    error.c           \
    calendar.c        \
    model.c           \
