@@ -383,7 +383,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 		  }
 		else
 		  {
-		    Warning(func, "Cannot calculate gaussian latitudes for lat1 = %g latn %g", yfirst, ylast);
+		    Warning(func, "Cannot calculate gaussian latitudes for lat1 = %g latn = %g", yfirst, ylast);
 		    for ( i = 0; i < ysize; i++ ) yvals[i] = 0;
 		    yvals[0] = yfirst;
 		    yvals[ysize-1] = ylast;

@@ -585,7 +585,7 @@ int grbScanTimestep(int streamID)
           compVar.ltype  = ISEC1_LevelType;
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
-	      recID   = streamptr->tsteps[tsID].recIDs[vrecID];
+	      recID   = streamptr->tsteps[1].recIDs[vrecID];
 	      compVar0.code   = streamptr->tsteps[tsID].records[recID].code;
 	      compVar0.table  = streamptr->tsteps[tsID].records[recID].table;
 	      compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
@@ -1705,6 +1705,11 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
 	  gridChangeType(gridID, gridtype);
 	}
       else if ( xsize == 1 && ysize == 1 )
+	{
+	  gridtype = GRID_LONLAT;
+	  gridChangeType(gridID, gridtype);
+	}
+      else if ( gridInqXvals(gridID, NULL) && gridInqYvals(gridID, NULL) )
 	{
 	  gridtype = GRID_LONLAT;
 	  gridChangeType(gridID, gridtype);

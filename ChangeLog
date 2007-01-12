@@ -1,5 +1,7 @@
 2007-01-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* grbDefGrid: change generic grid to lonlat grid
+	* grbScanTimestep: bug fix for unsorted codes
 	* Version 1.0.6 released
 
 2006-12-14  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
