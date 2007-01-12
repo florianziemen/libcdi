@@ -210,7 +210,11 @@ static void vlist_initialize(void)
   vlist_list_new();
   atexit(vlist_list_delete);
 
+  VLIST_LOCK
+
   vlist_init_pointer();
+
+  VLIST_UNLOCK
 
   _vlist_init = TRUE;
 }

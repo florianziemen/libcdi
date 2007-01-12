@@ -257,7 +257,11 @@ static void zaxis_initialize(void)
   zaxis_list_new();
   atexit(zaxis_list_delete);
 
+  ZAXIS_LOCK
+
   zaxis_init_pointer();
+
+  ZAXIS_UNLOCK
 
   _zaxis_init = TRUE;
 }

@@ -774,7 +774,11 @@ static void file_initialize(void)
   file_list_new();
   atexit(file_list_delete);
 
+  FILE_LOCK
+
   file_init_pointer();
+
+  FILE_UNLOCK
 
   if ( FILE_Debug ) atexit(file_table_print);
 

@@ -376,7 +376,11 @@ static void stream_initialize(void)
   stream_list_new();
   atexit(stream_list_delete);
 
+  STREAM_LOCK
+
   stream_init_pointer();
+
+  STREAM_UNLOCK
 
   _stream_init = TRUE;
 }

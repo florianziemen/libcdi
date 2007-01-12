@@ -272,7 +272,11 @@ static void taxis_initialize(void)
   taxis_list_new();
   atexit(taxis_list_delete);
 
+  TAXIS_LOCK
+
   taxis_init_pointer();
+  
+  TAXIS_UNLOCK
 
   _taxis_init = TRUE;
 

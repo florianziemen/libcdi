@@ -257,7 +257,11 @@ static void grid_initialize(void)
   grid_list_new();
   atexit(grid_list_delete);
 
+  GRID_LOCK
+
   grid_init_pointer();
+
+  GRID_UNLOCK
 
   _grid_init = TRUE;
 }

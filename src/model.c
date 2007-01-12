@@ -244,7 +244,11 @@ static void model_initialize(void)
   model_list_new();
   atexit(model_list_delete);
 
+  MODEL_LOCK
+
   model_init_pointer();
+
+  MODEL_UNLOCK
 
   _model_init = TRUE;
 
