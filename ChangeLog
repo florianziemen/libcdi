@@ -1,5 +1,6 @@
 2007-01-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+        * using GRIB library version 1.0.5
 	* grbDefGrid: change generic grid to lonlat grid
 	* grbScanTimestep: bug fix for unsorted codes
 	* LOCK/UNLOCK around _init_pointer

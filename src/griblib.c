@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Thu Nov 16 14:21:31 CET 2006 */
+/* Generated automatically from m214003 on Fr Jan 19 21:46:12 CET 2007 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -131,7 +131,7 @@ void  gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 
 /* Section 0: Indicator Section (IS) */
 
-#define  IS_GRIB_Len         GET_INT3(is[ 4], is[ 5], is[ 6])
+#define  IS_GRIB_Len         GET_UINT3(is[ 4], is[ 5], is[ 6])
 #define  IS_GRIB_Version     GET_UINT1(is[ 7])
 
 /* Section 1: Product Definition Section (PDS) */
@@ -1234,8 +1234,9 @@ void gribPrintSec1(int *isec0, int *isec1)
   int jloop, jiloop;
   float value;
 
-  char hversion[9];
+  int hversion[4];
   /*
+  char hversion[9];
   char hfirst[121], hsecond[121], hthird[121], hfourth[121];
   */
 
@@ -1365,9 +1366,9 @@ void gribPrintSec1(int *isec0, int *isec1)
   /*
     Regular MARS labelling, or reformatted Washington EPS products.
   */
-  if ( (isec1[ 1] == 98 && isec1[23] ==  1) ||
-       (isec1[21] == 98 && isec1[23] ==  1) ||
-       (isec1[ 1] ==  7 && isec1[21] == 98) )
+  if ( (ISEC1_CenterID    == 98 && ISEC1_LocalFLag ==  1) ||
+       (ISEC1_SubCenterID == 98 && ISEC1_LocalFLag ==  1) ||
+       (ISEC1_CenterID    ==  7 && ISEC1_SubCenterID == 98) )
     {
       /*   Parameters common to all definitions.  */
 
@@ -1401,8 +1402,12 @@ void gribPrintSec1(int *isec0, int *isec1)
       fprintf(grprsm, " Type.                                %9d\n", isec1[38]);
       fprintf(grprsm, " Stream.                              %9d\n", isec1[39]);
 
-      sprintf(hversion, "%8d", isec1[40]);
-      fprintf(grprsm, " Version number or Experiment identifier.  %4s\n", &hversion[4]);
+      hversion[0] = (int) *((char*)&isec1[40]);
+      hversion[1] = (int) *((char*)&isec1[40]+1);
+      hversion[2] = (int) *((char*)&isec1[40]+2);
+      hversion[3] = (int) *((char*)&isec1[40]+3);
+      fprintf(grprsm, " Version number or Experiment identifier.  %c%c%c%c\n",
+	      hversion[3], hversion[2], hversion[1], hversion[0]);
       /*
 	ECMWF Local definition 1.
 	(MARS labelling or ensemble forecast data)
@@ -1743,8 +1748,10 @@ void gribPrintSec1(int *isec0, int *isec1)
 	  fprintf(grprsm, "   Class                              %9d\n", isec1[41]);
 	  fprintf(grprsm, "   Type                               %9d\n", isec1[42]);
 	  fprintf(grprsm, "   Stream                             %9d\n", isec1[43]);
+	  /*
 	  sprintf(hversion, "%8d", isec1[44]);
 	  fprintf(grprsm, "   Version number/experiment identifier:   %4s\n", &hversion[4]);
+	  */
 	  iyear = isec1[45];
 	  if ( iyear > 50 )
 	    iyear = iyear + 1900;
@@ -2693,6 +2700,12 @@ void encodeES(GRIBPACK *lGrib, int *gribLen)
   lGrib[z++] = '7';
   lGrib[z++] = '7';
   lGrib[z++] = '7';
+
+  if ( z > 16777216 )
+    {
+      fprintf(stderr, "Abort: GRIB record to large (max = 16777216)!\n");
+      exit(1);
+    }
 
   lGrib[4] = z >> 16;
   lGrib[5] = z >>  8;
@@ -3727,6 +3740,18 @@ static int decodeIS(unsigned char *is, int *isec0, int *iret)
 }
 
 
+static void decodePDS_ECMWF_local_Extension_1(unsigned char *pds, int *isec1)
+{
+  isec1[36] = GET_UINT1(pds[40]);         /* extension identifier       */
+  isec1[37] = GET_UINT1(pds[41]);         /* Class                      */
+  isec1[38] = GET_UINT1(pds[42]);         /* Type                       */
+  isec1[39] = GET_UINT2(pds[43],pds[44]); /* Stream                     */
+  isec1[40] = GET_UINT4(pds[45],pds[46],pds[47],pds[48]);
+  isec1[41] = GET_UINT1(pds[49]);         /* Forecast number            */
+  isec1[42] = GET_UINT1(pds[50]);         /* Total number of forecasts  */
+}
+
+
 static void decodePDS_DWD_local_Extension_254(unsigned char *pds, int *isec1)
 {
   int i, isvn;
@@ -3849,7 +3874,7 @@ static int decodePDS(unsigned char *pds, int *isec0, int *isec1)
 	{
 	  ISEC1_LocalFLag = 1;
 
-	  if ( ISEC1_CenterID == 78 ) 
+	  if ( ISEC1_CenterID == 78 )
 	    {
 	      if ( pds[40] == 254 ) 
 		{
@@ -3860,7 +3885,14 @@ static int decodePDS(unsigned char *pds, int *isec0, int *isec1)
 		  decodePDS_DWD_local_Extension_253(pds, isec1);
 		}
 	    }
-	  else   
+	  else if ( (ISEC1_CenterID    == 98 && ISEC1_LocalFLag ==  1) ||
+		    (ISEC1_SubCenterID == 98 && ISEC1_LocalFLag ==  1) ||
+		    (ISEC1_CenterID    ==  7 && ISEC1_SubCenterID == 98) )
+	    {
+	      if ( pds[40] == 1 )
+		decodePDS_ECMWF_local_Extension_1(pds, isec1);
+	    }
+	  else
 	    {
 	      int i;
 	      for ( i = 0; i < localextlen; i++ )
@@ -7033,11 +7065,12 @@ void gribPrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
   static int header = 1;
   unsigned char *is = NULL, *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
   int century, subcenter, decimalscale, nerr;
+  int fc_num = 0;
 
   if ( header )
     {
       fprintf(stdout, 
-      "  Rec : PDS Tab Cen Sub Ver Grid Code LTyp Level1 Level2    Date  Time P1 P2 TU TR NAVE Scale\n");
+      "  Rec : PDS Tab Cen Sub Ver Grid Code LTyp Level1 Level2    Date  Time P1 P2 TU TR NAVE Scale FCnum\n");
 /*     ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+ */
       header = 0;
     }
@@ -7069,11 +7102,17 @@ void gribPrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
       exit(EXIT_FAILURE);
     }
 
-  fprintf(stdout, "%5d :%4d%4d%4d%4d%4d %4d %4d%4d%7d%7d %8d%6d%3d%3d%3d%3d%5d%6d\n", nrec,
+  if ( PDS_Len > 28 )
+    if ( PDS_CenterID    == 98 || PDS_Subcenter == 98 ||
+	(PDS_CenterID    ==  7 && PDS_Subcenter == 98) )
+      if ( pds[40] == 1 )
+	fc_num = GET_UINT1(pds[49]);
+
+  fprintf(stdout, "%5d :%4d%4d%4d%4d%4d %4d %4d%4d%7d%7d %8d%6d%3d%3d%3d%3d%5d%6d%5d\n", nrec,
 	  PDS_Len,  PDS_CodeTable,   PDS_CenterID, subcenter, PDS_ModelID,
 	  PDS_GridDefinition, PDS_Parameter, PDS_LevelType, PDS_Level1, PDS_Level2,
 	  PDS_Date, PDS_Time, PDS_TimePeriod1, PDS_TimePeriod2, PDS_TimeUnit, PDS_TimeRange,
-	  PDS_AvgNum, decimalscale);
+	  PDS_AvgNum, decimalscale, fc_num);
 }
 
 
@@ -8000,7 +8039,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.4" " of ""Nov 16 2006"" ""14:21:31";
+static const char grb_libvers[] = "1.0.3" " of ""Jan 19 2007"" ""21:46:13";
 
 
 
