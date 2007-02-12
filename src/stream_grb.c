@@ -1635,12 +1635,12 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
       hour   =  time / 100;
       minute =  time - hour*100;
       /*
-      printf("date time %d %d\n", date, time);
+      printf("date time %d %d %g\n", date, time, value);
       printf("year %d, month %d, day %d, hour %d, minute %d\n", year, month, day, hour, minute);
       */
       InvCalendar(year, month, day, hour, minute, 0.0, tunit, &value);
       
-      if ( value > 255 ) timetype = TAXIS_ABSOLUTE;
+      if ( value < 0 || value > 255 ) timetype = TAXIS_ABSOLUTE;
       
       ISEC1_TimeRange = 0;
       ISEC1_TimePeriod1 = (int) value;
