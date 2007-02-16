@@ -1767,6 +1767,8 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
 	    ISEC2_LatIncr = NINT(gridInqYinc(gridID)*1000);
 	    if ( fabs(gridInqYinc(gridID)*1000 - ISEC2_LatIncr) > FLT_EPSILON )
 	      ISEC2_LatIncr = 0;
+
+	    if ( ISEC2_LatIncr < 0 ) ISEC2_LatIncr = -ISEC2_LatIncr;
 	  }
 
 	if ( ISEC2_LatIncr == 0 || ISEC2_LonIncr == 0 )
