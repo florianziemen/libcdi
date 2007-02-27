@@ -956,6 +956,7 @@ void grbScanTimestep1(int streamID)
   int nrecords, nrecs, recID;
   int prec;
   long recsize = 0;
+  int warn_time = TRUE;
   int warn_numavg = TRUE;
   int taxisID = -1;
   int rdate = 0, rtime = 0, tunit = 0, fcast = 0;
@@ -1063,8 +1064,12 @@ void grbScanTimestep1(int streamID)
 	      if ( memcmp(&compVar0, &compVar, sizeof(COMPVAR)) == 0 ) break;
 	    }
 	  if ( recID < nrecs ) break;
-	  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) )
-	    Warning(func, "Inconsistent verification time for code %d level %d", rcode, level1);
+	  if ( warn_time )
+	    if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) )
+	      {
+		Warning(func, "Inconsistent verification time (code %d level %d)", rcode, level1);
+		warn_time = FALSE;
+	      }
 	}
 
       if ( ISEC1_AvgNum )
