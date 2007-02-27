@@ -4483,7 +4483,7 @@ int cdfInqContents(int streamID)
 	    }
 
       	  ncvars[ncvarid].zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, 0, NULL, NULL,
-						vctsize, vct, pname, plongname, punits, zprec, 1);
+						vctsize, vct, pname, plongname, punits, zprec, 1, 0);
 	  free(zvar);
 
 	  zaxisindex = vlistZaxisIndex(vlistID, ncvars[ncvarid].zaxisID);

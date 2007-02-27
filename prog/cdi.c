@@ -32,7 +32,7 @@ int DefaultDataType = CDI_UNDEFID;
 
 static void version(void)
 {
-  fprintf(stderr, "CDI version 1.6.0\n");
+  fprintf(stderr, "CDI version 1.6.1\n");
   cdiPrintVersion();
   fprintf(stderr, "\n");
 /*
@@ -47,6 +47,7 @@ static void version(void)
   1.5.0  22 Nov 2005 : IEG support
   1.5.1  21 Feb 2006 : add option -s for short info
   1.6.0   1 Aug 2006 : add option -z szip for SZIP compression of GRIB records
+  1.6.1  27 Feb 2007 : short info with ltype for GENERIC zaxis
 */
 }
 
@@ -251,6 +252,7 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
   int varID;
   int gridsize = 0;
   int gridID, zaxisID, code;
+  int zaxistype, ltype;
   int vdate, vtime;
   int nrecs, nvars, ngrids, nzaxis, ntsteps;
   int levelID, levelsize;
@@ -467,13 +469,18 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
       for ( index = 0; index < nzaxis; index++)
 	{
 	  zaxisID   = vlistZaxis(vlistID, index);
+	  zaxistype = zaxisInqType(zaxisID);
+	  ltype     = zaxisInqLtype(zaxisID);
 	  levelsize = zaxisInqSize(zaxisID);
 	  /* zaxisInqLongname(zaxisID, longname); */
 	  zaxisName(zaxisInqType(zaxisID), longname);
 	  longname[16] = 0;
 	  zaxisInqUnits(zaxisID, units);
 	  units[12] = 0;
-	  nbyte0    = fprintf(stdout, "  %4d : %-16s  %5s : ", zaxisID+1, longname, units);
+	  if ( zaxistype == ZAXIS_GENERIC && ltype != 0 )
+	    nbyte0    = fprintf(stdout, "  %4d : %-10s  (ltype=%3d) : ", zaxisID+1, longname, ltype);
+	  else
+	    nbyte0    = fprintf(stdout, "  %4d : %-16s  %5s : ", zaxisID+1, longname, units);
 	  nbyte = nbyte0;
 	  for ( levelID = 0; levelID < levelsize; levelID++ )
 	    {

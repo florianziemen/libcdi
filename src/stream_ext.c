@@ -293,7 +293,7 @@ void extAddRecord(int streamID, int code, int level, int xysize,
   datatype = extInqDatatype(prec);
 
   varAddRecord(recID, code, gridID, leveltype, 0, level, 0,
-	       datatype, &varID, &levelID, 0, 0);
+	       datatype, &varID, &levelID, 0, 0, 0);
 
   (*record).varID   = varID;
   (*record).levelID = levelID;

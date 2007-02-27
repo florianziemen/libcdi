@@ -17,7 +17,7 @@ static struct {
   char *longname;
   char *units;
 }
-LevelTypeEntry[] = {
+ZaxistypeEntry[] = {
   {"sfc",     "surface",                  ""},
   {"lev",     "generic",                  "level"},
   {"lev",     "hybrid",                   "level"},
@@ -32,7 +32,7 @@ LevelTypeEntry[] = {
   {"lev",     "sigma",                    "level"},
 };
 
-static int CDI_MaxLeveltype = sizeof(LevelTypeEntry) / sizeof(LevelTypeEntry[0]);
+static int CDI_MaxZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]);
 
 
 #define  LevelDown  0
@@ -49,6 +49,7 @@ typedef struct {
   int      self;
   int      prec;
   int      type;
+  int      ltype;    /* GRIB level type */
   int      size;
   int      direction;
   int      vctsize;
@@ -199,6 +200,7 @@ static void zaxis_init_entry(ZAXIS *zaxisptr)
   zaxisptr->lbounds     = NULL;
   zaxisptr->weights     = NULL;
   zaxisptr->type        = CDI_UNDEFID;
+  zaxisptr->ltype       = 0;
   zaxisptr->direction   = CDI_UNDEFID;
   zaxisptr->prec        = 0;
   zaxisptr->size        = 0;
@@ -358,12 +360,12 @@ int zaxisCreate(int zaxistype, int size)
   zaxisptr->type = zaxistype;
   zaxisptr->size = size;
 
-  if ( zaxistype > CDI_MaxLeveltype )
-    Error(func, "Internal problem! zaxistype > CDI_MaxLeveltype");
+  if ( zaxistype > CDI_MaxZaxistype )
+    Error(func, "Internal problem! zaxistype > CDI_MaxZaxistype");
 
-  zaxisDefName(zaxisID, LevelTypeEntry[zaxistype].name);
-  zaxisDefLongname(zaxisID, LevelTypeEntry[zaxistype].longname);
-  zaxisDefUnits(zaxisID, LevelTypeEntry[zaxistype].units);
+  zaxisDefName(zaxisID, ZaxistypeEntry[zaxistype].name);
+  zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
+  zaxisDefUnits(zaxisID, ZaxistypeEntry[zaxistype].units);
 
   vals = (double *) malloc(size*sizeof(double));
 
@@ -394,14 +396,14 @@ void zaxisDestroy(int zaxisID)
 }
 
 
-char *zaxisNamePtr(int leveltype)
+char *zaxisNamePtr(int zaxistype)
 {
   char *name;
 
-  if ( leveltype >= 0 && leveltype < CDI_MaxLeveltype )
-    name = LevelTypeEntry[leveltype].longname;
+  if ( zaxistype >= 0 && zaxistype < CDI_MaxZaxistype )
+    name = ZaxistypeEntry[zaxistype].longname;
   else
-    name = LevelTypeEntry[ZAXIS_GENERIC].longname;
+    name = ZaxistypeEntry[ZAXIS_GENERIC].longname;
 
   return (name);
 }
@@ -592,6 +594,32 @@ int zaxisInqPrec(int zaxisID)
   zaxis_check_ptr(func, zaxisptr);
 
   return (zaxisptr->prec);
+}
+
+
+void zaxisDefLtype(int zaxisID, int ltype)
+{
+  static char func[] = "zaxisDefLtype";
+  ZAXIS *zaxisptr;
+
+  zaxisptr = zaxis_to_pointer(zaxisID);
+
+  zaxis_check_ptr(func, zaxisptr);
+
+  zaxisptr->ltype = ltype;
+}
+
+
+int zaxisInqLtype(int zaxisID)
+{
+  static char func[] = "zaxisInqLtype";
+  ZAXIS *zaxisptr;
+
+  zaxisptr = zaxis_to_pointer(zaxisID);
+
+  zaxis_check_ptr(func, zaxisptr);
+
+  return (zaxisptr->ltype);
 }
 
 
@@ -1083,7 +1111,7 @@ void zaxisDefWeights(int zaxisID, double *weights)
 }
 
 
-void zaxisChangeType(int zaxisID, int leveltype)
+void zaxisChangeType(int zaxisID, int zaxistype)
 {
   static char func[] = "zaxisChangeType";
   ZAXIS *zaxisptr;
@@ -1094,9 +1122,9 @@ void zaxisChangeType(int zaxisID, int leveltype)
 
   Message(func, "Change zaxis type from %s to %s\n",
 	  zaxisNamePtr(zaxisptr->type),
-	  zaxisNamePtr(leveltype));
+	  zaxisNamePtr(zaxistype));
   
-  zaxisptr->type = leveltype;
+  zaxisptr->type = zaxistype;
 }
 
 

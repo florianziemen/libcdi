@@ -496,7 +496,7 @@ void vlistClearFlag(int vlistID)
 }
 
 
-int vlistInqZaxis(int vlistID, int leveltype, int nlevels, double *levels, int lbounds, double *levels2,
+int vlistInqZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbounds, double *levels2,
 		  int vctsize, const double *vct)
 {
   static char func[] = "vlistInqZaxis";
@@ -518,7 +518,7 @@ int vlistInqZaxis(int vlistID, int leveltype, int nlevels, double *levels, int l
     {
       zaxisID = vlistptr->zaxisIDs[index];
 
-      if ( zaxisCompare(zaxisID, leveltype, nlevels, lbounds, levels, NULL, NULL) == 0 )
+      if ( zaxisCompare(zaxisID, zaxistype, nlevels, lbounds, levels, NULL, NULL, 0) == 0 )
 	{
 	  zaxisdefined = 1;
 	  break;
@@ -529,7 +529,7 @@ int vlistInqZaxis(int vlistID, int leveltype, int nlevels, double *levels, int l
     {
       nzaxis = zaxisSize();
       for ( zaxisID = 0; zaxisID < nzaxis; zaxisID++ )
-	if ( zaxisCompare(zaxisID, leveltype, nlevels, lbounds, levels, NULL, NULL) == 0 )
+	if ( zaxisCompare(zaxisID, zaxistype, nlevels, lbounds, levels, NULL, NULL, 0) == 0 )
 	  {
 	    zaxisglobdefined = 1;
 	    break;
@@ -540,7 +540,7 @@ int vlistInqZaxis(int vlistID, int leveltype, int nlevels, double *levels, int l
     {
       if ( ! zaxisglobdefined )
 	{
-	  zaxisID = zaxisCreate(leveltype, nlevels);
+	  zaxisID = zaxisCreate(zaxistype, nlevels);
 	  zaxisDefLevels(zaxisID, levels);
 	  if ( lbounds )
 	    {
@@ -548,7 +548,7 @@ int vlistInqZaxis(int vlistID, int leveltype, int nlevels, double *levels, int l
 	      zaxisDefUbounds(zaxisID, levels2);
 	    }
 
-	  if ( leveltype == ZAXIS_HYBRID )
+	  if ( zaxistype == ZAXIS_HYBRID )
 	    {
 	      if ( vctsize > 0 )
 		zaxisDefVct(zaxisID, vctsize, vct);

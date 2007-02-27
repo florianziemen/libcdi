@@ -6,15 +6,16 @@
 #endif
 
 
-void varAddRecord(int recID, int code, int gridID, int leveltype, int lbounds,
+void varAddRecord(int recID, int code, int gridID, int zaxistype, int lbounds,
 		  int level1, int level2, int prec, int *pvarID, int *plevelID,
-		  int numavg, int codetable);
+		  int numavg, int codetable, int ltype);
 
 void varDefVCT(size_t vctsize, double *vctptr);
 
 int  varDefGrid(int vlistID, GRID grid, int mode);
-int  varDefZaxis(int vlistID, int leveltype, int nlevels, double *levels, int lbounds, double *levels1, double *levels2,
-		 int vctsize, double *vct, char *name, char *longname, char *units, int prec, int mode);
+int  varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbounds,
+		 double *levels1, double *levels2, int vctsize, double *vct, char *name,
+		 char *longname, char *units, int prec, int mode, int ltype);
 
 void varDefSzip(int varID, int szip);
 void varDefInst(int varID, int instID);
@@ -24,6 +25,6 @@ int  varInqModel(int varID);
 void varDefTable(int varID, int tableID);
 int  varInqTable(int varID);
 
-int  zaxisCompare(int zaxisID, int leveltype, int nlevels, int lbounds, double *levels, char *longname, char *units);
+int  zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, double *levels, char *longname, char *units, int ltype);
 
 #endif

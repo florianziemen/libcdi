@@ -325,76 +325,76 @@ int grbReadRecord(int streamID, double *data, int *nmiss)
 }
 
 
-int gribGetZaxisType(int grbleveltype)
+int gribGetZaxisType(int grb_ltype)
 {
-  int leveltype = 0;
+  int zaxistype = 0;
 
-  switch ( grbleveltype )
+  switch ( grb_ltype )
     {
     case LTYPE_SURFACE:
       {
-	leveltype = ZAXIS_SURFACE;
+	zaxistype = ZAXIS_SURFACE;
 	break;
       }
     case LTYPE_99:
     case LTYPE_ISOBARIC:
       {
-	leveltype = ZAXIS_PRESSURE;
+	zaxistype = ZAXIS_PRESSURE;
 	break;
       }
     case LTYPE_HEIGHT:
       {
-	leveltype = ZAXIS_HEIGHT;
+	zaxistype = ZAXIS_HEIGHT;
 	break;
       }
     case LTYPE_ALTITUDE:
       {
-	leveltype = ZAXIS_ALTITUDE;
+	zaxistype = ZAXIS_ALTITUDE;
 	break;
       }
     case LTYPE_SIGMA:
       {
-	leveltype = ZAXIS_SIGMA;
+	zaxistype = ZAXIS_SIGMA;
 	break;
       }
     case LTYPE_HYBRID:
     case LTYPE_HYBRID_LAYER:
       {
-	leveltype = ZAXIS_HYBRID;
+	zaxistype = ZAXIS_HYBRID;
 	break;
       }
     case LTYPE_LANDDEPTH:
     case LTYPE_LANDDEPTH_LAYER:
       {
-	leveltype = ZAXIS_DEPTH_BELOW_LAND;
+	zaxistype = ZAXIS_DEPTH_BELOW_LAND;
 	break;
       }
     case LTYPE_ISENTROPIC:
       {
-	leveltype = ZAXIS_ISENTROPIC;
+	zaxistype = ZAXIS_ISENTROPIC;
 	break;
       }
     case LTYPE_SEADEPTH:
       {
-	leveltype = ZAXIS_DEPTH_BELOW_SEA;
+	zaxistype = ZAXIS_DEPTH_BELOW_SEA;
 	break;
       }
     default:
       {
-	leveltype = ZAXIS_GENERIC;
+	zaxistype = ZAXIS_GENERIC;
 	break;
       }
     }
 
-  return (leveltype);
+  return (zaxistype);
 }
 
 
-int gribGetZaxisHasBounds(int grbleveltype)
+int gribGetZaxisHasBounds(int grb_ltype)
 {
   int lbounds = 0;
 
-  switch (grbleveltype)
+  switch (grb_ltype)
     {
     case LTYPE_HYBRID_LAYER:
     case LTYPE_LANDDEPTH_LAYER:
@@ -695,7 +695,7 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
 {
   static char func[] = "grbAddRecord";
   int gridtype;
-  int leveltype;
+  int zaxistype;
   int gridID = UNDEFID, varID;
   int levelID = 0;
   int tsID, recID;
@@ -720,7 +720,7 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
   if ( ISEC1_LevelType == 100 ) level1 *= 100;
   level2  = ISEC1_Level2;
 
-  /* fprintf(stderr, "code %d %d %d\n", code, level1, level2); */
+  /* fprintf(stderr, "code %d %d %d %d\n", code, level1, level2, ISEC1_LevelType); */
 
   (*record).size     = recsize;
   (*record).position = position;
@@ -876,9 +876,9 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
 
   gridID = varDefGrid(vlistID, grid, 0);
 
-  leveltype = gribGetZaxisType(ISEC1_LevelType);
+  zaxistype = gribGetZaxisType(ISEC1_LevelType);
 
-  if ( leveltype == ZAXIS_HYBRID )
+  if ( zaxistype == ZAXIS_HYBRID )
     {
       int vctsize = ISEC2_NumVCP;
       double *vctptr = &fsec2[10];
@@ -891,8 +891,8 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
   if ( prec > 32 ) prec = DATATYPE_PACK32;
   if ( prec <  0 ) prec = DATATYPE_PACK;
 
-  varAddRecord(recID, code, gridID, leveltype, lbounds, level1, level2,
-	       prec, &varID, &levelID, numavg, ISEC1_CodeTable);
+  varAddRecord(recID, code, gridID, zaxistype, lbounds, level1, level2,
+	       prec, &varID, &levelID, numavg, ISEC1_CodeTable, ISEC1_LevelType);
 
   (*record).varID   = varID;
   (*record).levelID = levelID;
@@ -932,8 +932,8 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
   streamptr->nrecs++;
 
   if ( CDI_Debug )
-    Message(func, "varID = %d  code = %d  leveltype = %d  gridID = %d  levelID = %d",
-	    varID, code, leveltype, gridID, levelID);
+    Message(func, "varID = %d  code = %d  zaxistype = %d  gridID = %d  levelID = %d",
+	    varID, code, zaxistype, gridID, levelID);
 }
 
 
@@ -1820,21 +1820,22 @@ void grbDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID
 {
   static char func[] = "grbDefLevel";
   double level;
-  int ilevel, leveltype;
+  int ilevel, zaxistype, ltype;
   static int warning = 1;
   static int vct_warning = 1;
 
-  leveltype = zaxisInqType(zaxisID);
+  zaxistype = zaxisInqType(zaxisID);
+  ltype = zaxisInqLtype(zaxisID);
 
-  if ( leveltype == ZAXIS_GENERIC )
+  if ( zaxistype == ZAXIS_GENERIC && ltype == 0 )
     {
-      leveltype = ZAXIS_PRESSURE;
-      zaxisChangeType(zaxisID, leveltype);
+      zaxistype = ZAXIS_PRESSURE;
+      zaxisChangeType(zaxisID, zaxistype);
     }
 
   ISEC2_NumVCP = 0;
 
-  switch (leveltype)
+  switch (zaxistype)
     {
     case ZAXIS_SURFACE:
       {
@@ -1986,9 +1987,20 @@ void grbDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID
 
 	break;
       }
+    case ZAXIS_GENERIC:
+      {
+	level = zaxisInqLevel(zaxisID, levelID);
+
+	ilevel = (int) level;
+	ISEC1_LevelType = ltype;
+	ISEC1_Level1    = ilevel;
+	ISEC1_Level2    = 0;
+
+	break;
+      }
     default:
       {
-	Error(func, "leveltype >%s< unsupported", zaxisNamePtr(leveltype));
+	Error(func, "zaxistype >%s< unsupported", zaxisNamePtr(zaxistype));
 	break;
       }
     }

@@ -599,6 +599,9 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
   taxis_check_ptr(func, taxisptr1);
   taxis_check_ptr(func, taxisptr2);
 
+  taxisptr2->rdate = taxisptr1->rdate;
+  taxisptr2->rtime = taxisptr1->rtime;
+
   taxisptr2->vdate = taxisptr1->vdate;
   taxisptr2->vtime = taxisptr1->vtime;
 
