@@ -473,7 +473,7 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 	  ltype     = zaxisInqLtype(zaxisID);
 	  levelsize = zaxisInqSize(zaxisID);
 	  /* zaxisInqLongname(zaxisID, longname); */
-	  zaxisName(zaxisInqType(zaxisID), longname);
+	  zaxisName(zaxistype, longname);
 	  longname[16] = 0;
 	  zaxisInqUnits(zaxisID, units);
 	  units[12] = 0;
