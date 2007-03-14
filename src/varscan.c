@@ -579,8 +579,11 @@ int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, double *l
   int differ = 1;
   int levelID;
   int zlbounds = 0;
+  int ltype_is_equal = FALSE;
 
-  if ( ltype == zaxisInqLtype(zaxisID) && (zaxistype == zaxisInqType(zaxisID) || zaxistype == ZAXIS_GENERIC) )
+  if ( ltype == zaxisInqLtype(zaxisID) ) ltype_is_equal = TRUE;
+
+  if ( ltype_is_equal && (zaxistype == zaxisInqType(zaxisID) || zaxistype == ZAXIS_GENERIC) )
     {
       if ( zaxisInqLbounds(zaxisID, NULL) > 0 ) zlbounds = 1;
       if ( nlevels == zaxisInqSize(zaxisID) && zlbounds == lbounds )

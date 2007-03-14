@@ -4372,10 +4372,21 @@ int cdfInqContents(int streamID)
 		if ( xdimid == xdimid2 &&
 		     (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == UNDEFID)) )
 		  {
-		    if ( CDI_Debug )
-		      Message(func, "gridID %d %d %s",
-			      ncvars[ncvarid].gridID, ncvarid2, ncvars[ncvarid2].name);
-		    ncvars[ncvarid2].gridID = ncvars[ncvarid].gridID;
+		    int same_grid = TRUE;
+
+		    if ( xvarid != -1 && ncvars[ncvarid2].xvarid != UNDEFID &&
+			 xvarid != ncvars[ncvarid2].xvarid ) same_grid = FALSE;
+
+		    if ( yvarid != -1 && ncvars[ncvarid2].yvarid != UNDEFID &&
+			 yvarid != ncvars[ncvarid2].yvarid ) same_grid = FALSE;
+
+		    if ( same_grid )
+		      {
+			if ( CDI_Debug )
+			  Message(func, "gridID %d %d %s",
+				  ncvars[ncvarid].gridID, ncvarid2, ncvars[ncvarid2].name);
+			ncvars[ncvarid2].gridID = ncvars[ncvarid].gridID;
+		      }
 		  }
 	      }
 	}

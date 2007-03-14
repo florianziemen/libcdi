@@ -1,4 +1,9 @@
-2007-03-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+2007-05-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdfInqContents: check also x/yvarid to compare curvilinear grids
+	* Version 1.0.7 released
+
+2007-03-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
         * using GRIB library version 1.0.5
 	* use GRIB ltype to define GENERIC zaxis

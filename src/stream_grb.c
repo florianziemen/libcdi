@@ -535,9 +535,10 @@ int grbScanTimestep(int streamID)
 		   ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);
 
 	  rcode    = ISEC1_Parameter;
+	  if ( ISEC1_LevelType == 100 ) ISEC1_Level1 *= 100;
+	  if ( ISEC1_LevelType ==  99 ) ISEC1_LevelType = 100;
 	  level1   = ISEC1_Level1;
 	  level2   = ISEC1_Level2;
-	  if ( ISEC1_LevelType == 100 ) level1 *= 100;
 
 	  gribDateTime(isec1, &vdate, &vtime);
 
@@ -717,7 +718,6 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
   numavg  = ISEC1_AvgNum;
 
   level1  = ISEC1_Level1;
-  if ( ISEC1_LevelType == 100 ) level1 *= 100;
   level2  = ISEC1_Level2;
 
   /* fprintf(stderr, "code %d %d %d %d\n", code, level1, level2, ISEC1_LevelType); */
@@ -1024,9 +1024,10 @@ void grbScanTimestep1(int streamID)
 	       ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);
 
       rcode    = ISEC1_Parameter;
+      if ( ISEC1_LevelType == 100 ) ISEC1_Level1 *= 100;
+      if ( ISEC1_LevelType ==  99 ) ISEC1_LevelType = 100;
       level1   = ISEC1_Level1;
       level2   = ISEC1_Level2;
-      if ( ISEC1_LevelType == 100 ) level1 *= 100;
 
       if ( ISEC4_NumBits > 0 && ISEC4_NumBits <= 32 )
 	prec = ISEC4_NumBits;
@@ -1261,9 +1262,10 @@ int grbScanTimestep2(int streamID)
 	       ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);
 
       rcode     = ISEC1_Parameter;
+      if ( ISEC1_LevelType == 100 ) ISEC1_Level1 *= 100;
+      if ( ISEC1_LevelType ==  99 ) ISEC1_LevelType = 100;
       level1    = ISEC1_Level1;
       level2    = ISEC1_Level2;
-      if ( ISEC1_LevelType == 100 ) level1 *= 100;
 
       gribDateTime(isec1, &vdate, &vtime);
 
