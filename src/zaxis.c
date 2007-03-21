@@ -1162,32 +1162,32 @@ int zaxisDuplicate(int zaxisID)
 
   zaxis_copy(zaxisptrnew, zaxisptr);
 
-  strcpy(zaxisptr->name, zaxisptr->name);
-  strcpy(zaxisptr->longname, zaxisptr->longname);
-  strcpy(zaxisptr->units, zaxisptr->units);
+  strcpy(zaxisptrnew->name, zaxisptr->name);
+  strcpy(zaxisptrnew->longname, zaxisptr->longname);
+  strcpy(zaxisptrnew->units, zaxisptr->units);
 
   if ( zaxisptr->vals != NULL )
     {
       size = zaxissize;
 
-      zaxisptr->vals = (double *) malloc(size*sizeof(double));
-      memcpy(zaxisptr->vals, zaxisptr->vals, size*sizeof(double));
+      zaxisptrnew->vals = (double *) malloc(size*sizeof(double));
+      memcpy(zaxisptrnew->vals, zaxisptr->vals, size*sizeof(double));
     }
 
   if ( zaxisptr->lbounds )
     {
       size = zaxissize;
 
-      zaxisptr->lbounds = (double *) malloc(size*sizeof(double));
-      memcpy(zaxisptr->lbounds, zaxisptr->lbounds, size*sizeof(double));
+      zaxisptrnew->lbounds = (double *) malloc(size*sizeof(double));
+      memcpy(zaxisptrnew->lbounds, zaxisptr->lbounds, size*sizeof(double));
     }
 
   if ( zaxisptr->ubounds )
     {
       size = zaxissize;
 
-      zaxisptr->ubounds = (double *) malloc(size*sizeof(double));
-      memcpy(zaxisptr->ubounds, zaxisptr->ubounds, size*sizeof(double));
+      zaxisptrnew->ubounds = (double *) malloc(size*sizeof(double));
+      memcpy(zaxisptrnew->ubounds, zaxisptr->ubounds, size*sizeof(double));
     }
 
   if ( zaxisptr->vct != NULL )
@@ -1196,9 +1196,9 @@ int zaxisDuplicate(int zaxisID)
 
       if ( size )
 	{
-	  zaxisptr->vctsize = size;
-	  zaxisptr->vct = (double *) malloc(size*sizeof(double));
-	  memcpy(zaxisptr->vct, zaxisptr->vct, size*sizeof(double));
+	  zaxisptrnew->vctsize = size;
+	  zaxisptrnew->vct = (double *) malloc(size*sizeof(double));
+	  memcpy(zaxisptrnew->vct, zaxisptr->vct, size*sizeof(double));
 	}
     }
 

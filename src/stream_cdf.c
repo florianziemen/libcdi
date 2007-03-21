@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -3232,6 +3233,8 @@ int cdfInqContents(int streamID)
       ncvars[ncvarid].varids[3]    = UNDEFID;
       ncvars[ncvarid].cellarea     = UNDEFID;
       ncvars[ncvarid].tableID      = UNDEFID;
+      ncvars[ncvarid].xtype        = 0;
+      ncvars[ncvarid].ndims        = 0;
       ncvars[ncvarid].gmapid       = UNDEFID;
       ncvars[ncvarid].vlen         = 0;
       ncvars[ncvarid].vdata        = NULL;
@@ -4063,7 +4066,7 @@ int cdfInqContents(int streamID)
 	      else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS )
 		ydimid = ncvars[ncvarid].dimids[i];
 	    }
-	  
+
 	  if ( ncvars[ncvarid].xvarid != UNDEFID )
 	    xvarid = ncvars[ncvarid].xvarid;
 	  else if ( xdimid != UNDEFID )
@@ -4073,7 +4076,7 @@ int cdfInqContents(int streamID)
 	    yvarid = ncvars[ncvarid].yvarid;
 	  else if ( ydimid != UNDEFID )
 	    yvarid = ncdims[ydimid].ncvarid;
-	  
+
 	  /*
 	  if ( xdimid != UNDEFID )
 	    xvarid = ncdims[xdimid].ncvarid;

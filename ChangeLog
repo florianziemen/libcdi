@@ -1,5 +1,6 @@
 2007-05-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* zaxisDuplicate: bug fix
 	* cdfInqContents: check also x/yvarid to compare curvilinear grids
 	* Version 1.0.7 released
 
