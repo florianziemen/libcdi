@@ -21,6 +21,10 @@
 #include "ieg.h"
 #include "vlist.h"
 
+#define  MAX_FNAMES  3
+
+FILE *popen(const char *command, const char *type);
+int pclose(FILE *stream);
 
 void cdiPrintDefaults(void)
 {
@@ -168,6 +172,140 @@ static int getFiletype(const char *filename, int *byteorder)
   *byteorder = getByteorder(swap);
 
   return (filetype);
+}
+
+
+int _readline_(FILE *fp, char *line, int len)
+{
+  int ichar, ipos = 0;
+
+  while ( (ichar = fgetc(fp)) != EOF )
+    {
+      if ( ichar == '\n' ) break;
+      line[ipos++] = ichar;
+      if ( ipos >= len )
+        {
+          fprintf(stderr, "readline Warning: end of line not found (maxlen = %d)!\n", len);
+          break;
+        }
+    }
+  line[ipos] = 0;
+
+  if ( feof(fp) && ipos == 0 ) return (0);
+
+  return (1);
+}
+
+#define  MAX_LINE  4096
+
+int get_fnames(const char *argument, char *fnames[], int max_fnames)
+{
+  static char func[] = "get_fnames";
+  int num_fnames = 0;
+  int len;
+  int nfiles = 0;
+  int i, j;
+  const char *pch;
+  char line[MAX_LINE];
+
+  len = (int) strlen(argument);
+  for ( i = 0; i < len; ++i )
+    if ( argument[i] == ':' ) break;
+
+  if ( i < len )
+    {
+      pch = &argument[i+1];
+      len -= (i+1);
+      if ( len && ( strncmp(argument, "filelist:", i) == 0 || 
+		    strncmp(argument, "flist:", i) == 0 ) )
+	{
+	  for ( i = 0; i < len; ++i ) if ( pch[i] == ',' ) nfiles++;
+
+	  if ( nfiles == 0 )
+	    {
+	      FILE *fp;
+	      fp = fopen(pch, "r");
+	      if ( fp == NULL ) Error(func, "Open failed on %s", pch);
+
+	      if ( CDI_Debug )
+		Message(func, "Reading file names from %s", pch);
+
+	      rewind(fp);
+
+	      nfiles = 0;
+	      while ( _readline_(fp, line, MAX_LINE) )
+		{
+		  if ( line[0] == '#' || line[0] == '\0' ||
+		       line[0] == ' ' ) continue;
+		  
+		  if ( nfiles >= max_fnames )
+		    {
+		      Warning(func, "Too many input files (limit: %d)", max_fnames);
+		      break;
+		    }
+		  fnames[nfiles] = strdupx(line);
+		  nfiles++;
+		}
+	      
+	      fclose(fp);
+
+	      if ( nfiles == 0 ) Error(func, "No input file found in %s", pch);
+	    }
+	  else
+	    {
+	      char xline[65536];
+	      	      
+	      strcpy(xline, pch);
+	      for ( i = 0; i < len; i++ ) if ( xline[i] == ',' ) xline[i] = 0;
+	      
+	      nfiles++;
+	      if ( nfiles >= max_fnames )
+		{
+		  Warning(func, "Too many input files (limit: %d)", max_fnames);
+		  nfiles = max_fnames;
+		}
+
+	      i = 0;
+	      for ( j = 0; j < nfiles; j++ )
+		{
+		  fnames[j] = strdupx(&xline[i]);
+		  i += strlen(&xline[i]) + 1;
+		}
+	    }
+	}
+      else if ( len && strncmp(argument, "ls:", i) == 0 )
+	{
+	  char command[4096];
+	  FILE *pfp;
+	  
+	  strcpy(command, "ls ");
+	  strcat(command, pch);
+
+	  pfp = popen(command, "r");
+	  if ( pfp == 0 )
+	    SysError(func, "popen %s failed", command);
+	  
+	  nfiles = 0;
+	  while ( _readline_(pfp, line, MAX_LINE) )
+	    {
+	      if ( nfiles >= max_fnames )
+		{
+		  Warning(func, "Too many input files (limit: %d)", max_fnames);
+		  break;
+		}
+	      fnames[nfiles++] = strdupx(line);
+	    }
+
+	  pclose(pfp);
+
+	  for ( j = 0; j < nfiles; j++ )
+	    fnames[j] = fnames[j];
+	}
+    }
+
+  num_fnames = nfiles;
+  
+  return (num_fnames);
 }
 
 
@@ -781,11 +919,25 @@ if ( streamID < 0 ) handle_error(streamID);
 @EndSource
 @EndFunction
 */
-int streamOpenRead(const char *filename)
+int streamOpenRead(const char *filenames)
 {
   int filetype, byteorder;
   int streamID;
+  int num_fnames;
+  char *fnames[MAX_FNAMES];
+  const char *filename;
   STREAM *streamptr = NULL;
+
+  num_fnames = get_fnames(filenames, fnames, MAX_FNAMES);
+
+  if ( num_fnames == 0 )
+    filename = filenames;
+  else
+    {
+      int i; 
+      for ( i = 0; i < num_fnames; ++i) printf("fnames: %d %s\n", i, fnames[i]);
+      filename = fnames[0];
+    }
 
   filetype = getFiletype(filename, &byteorder);
 
