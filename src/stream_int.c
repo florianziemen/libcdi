@@ -319,6 +319,10 @@ static void stream_init_entry(STREAM *streamptr)
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncxvarID[i] = UNDEFID;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncyvarID[i] = UNDEFID;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncavarID[i] = UNDEFID;
+
+  streamptr->curfile           = 0;
+  streamptr->nfiles            = 0;
+  streamptr->fnames            = NULL;
 }
 
 

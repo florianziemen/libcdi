@@ -921,6 +921,7 @@ if ( streamID < 0 ) handle_error(streamID);
 */
 int streamOpenRead(const char *filenames)
 {
+  static char func[] = "streamOpenRead";
   int filetype, byteorder;
   int streamID;
   int num_fnames;
@@ -949,6 +950,15 @@ int streamOpenRead(const char *filenames)
     {
       streamptr = stream_to_pointer(streamID);
       streamptr->byteorder = byteorder;
+
+      if ( num_fnames > 0 )
+	{
+	  int i;
+	  streamptr->nfiles = num_fnames;
+	  streamptr->fnames = (char **) malloc(num_fnames*sizeof(char *));
+	  for ( i = 0; i < num_fnames; ++i )
+	    streamptr->fnames[i] = fnames[i];
+	}
     }
 
   return (streamID);
@@ -1125,7 +1135,7 @@ void streamClose(int streamID)
     }
   free(streamptr->vars);
 
-  for ( index = 0; index < streamptr->ntsteps; index++ )
+  for ( index = 0; index < streamptr->ntsteps; ++index )
     {
       if ( streamptr->tsteps[index].records )
 	free(streamptr->tsteps[index].records);
@@ -1134,6 +1144,14 @@ void streamClose(int streamID)
     }
     
   if ( streamptr->tsteps ) free(streamptr->tsteps);
+
+  if ( streamptr->nfiles > 0 )
+    {
+      for ( index = 0; index < streamptr->nfiles; ++index )
+	free(streamptr->fnames[index]);
+
+      free(streamptr->fnames);
+    }
 
   stream_delete_entry(streamptr);
 

@@ -215,6 +215,9 @@ typedef struct {
   int       unreduced;
   int       compressType;
   int       compressLevel;
+  int       curfile;
+  int       nfiles;
+  char    **fnames;
 }
 STREAM;
 
