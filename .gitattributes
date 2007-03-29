@@ -9,6 +9,10 @@
 /README -text
 /acinclude.m4 -text
 /aclocal.m4 -text
+app/Makefile.am -text
+app/Makefile.in -text
+app/cdi.c -text
+app/createtable.c -text
 config/config.guess -text
 config/config.sub -text
 config/default -text
@@ -73,10 +77,6 @@ examples/cdi_read_f.f -text
 examples/cdi_write.c -text
 examples/cdi_write_f.f -text
 examples/compf -text
-prog/Makefile.am -text
-prog/Makefile.in -text
-prog/cdi.c -text
-prog/createtable.c -text
 src/Makefile.am -text
 src/Makefile.in -text
 src/basetime.c -text
