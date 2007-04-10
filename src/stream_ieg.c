@@ -545,7 +545,7 @@ int iegDefRecord(int streamID)
   gridID  = vlistInqVarGrid(vlistID, varID);
   zaxisID = vlistInqVarZaxis(vlistID, varID);
   
-  iegInit(iegp);
+  iegInitMem(iegp);
   for ( i = 0; i < 37; i++ ) iegp->ipdb[i] = -1;
 
   iegp->byteswap = getByteswap(byteorder);
@@ -1371,7 +1371,7 @@ void iegWriteVarDP(int streamID, int varID, const double *data)
 
   iegp     = streamptr->record->iegp;
 
-  iegInit(iegp);
+  iegInitMem(iegp);
   for ( i = 0; i < 37; i++ ) iegp->ipdb[i] = -1;
 
   vlistID  = streamInqVlist(streamID);

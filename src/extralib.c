@@ -32,7 +32,7 @@ static int extDefaultDprec = 0;
  */
 
 #undef  LIBVERSION
-#define LIBVERSION      1.0.1
+#define LIBVERSION      1.0.2
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char ext_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;

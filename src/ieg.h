@@ -76,6 +76,7 @@ int  iegCheckFiletype(int fileID, int *swap);
 IEGREC *iegNew(void);
 void iegDelete(IEGREC *iegp);
 void iegInit(IEGREC *iegp);
+void iegInitMem(IEGREC *iegp);
 
 int  iegRead(int fileID, IEGREC *iegp);
 int  iegWrite(int fileID, IEGREC *iegp);

@@ -29,7 +29,7 @@ static int iegDefaultDprec = 0;
  */
 
 #undef  LIBVERSION
-#define LIBVERSION      1.0.1
+#define LIBVERSION      1.0.2
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char ieg_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
@@ -106,7 +106,11 @@ void iegInit(IEGREC *iegp)
   iegp->datasize   = 0;
   iegp->buffersize = 0;
   iegp->buffer     = NULL;
+}
 
+
+void iegInitMem(IEGREC *iegp)
+{
   memset(iegp->ipdb, 0, sizeof(iegp->ipdb));
   memset(iegp->igdb, 0, sizeof(iegp->igdb));
   memset(iegp->vct,  0, sizeof(iegp->vct));
@@ -123,6 +127,7 @@ IEGREC *iegNew(void)
   iegp = (IEGREC *) malloc(sizeof(IEGREC));
 
   iegInit(iegp);
+  iegInitMem(iegp);
 
   return (iegp);
 }
