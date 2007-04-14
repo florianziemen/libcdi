@@ -94,7 +94,7 @@ createtable_SOURCES = createtable.c
 createtable_LDADD = ../src/libcdi.a $(LDFLAGS) -lm
 #
 CLEANFILES = `ls *~`
-subdir = prog
+subdir = app
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/config.h
 CONFIG_CLEAN_FILES =
@@ -132,7 +132,7 @@ all: all-am
 .SUFFIXES: .c .o .obj
 $(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.ac $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  prog/Makefile
+	  $(AUTOMAKE) --gnu  app/Makefile
 Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
