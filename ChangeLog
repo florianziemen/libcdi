@@ -3,6 +3,7 @@
 	* using EXSE library version 1.0.2
 	* stream_ieg: bug fix memory leak [report: Philip Lorenz]
 	* zaxisDuplicate: bug fix
+	* cdfInqContents: print warning if cell_measures is missing
 	* cdfInqContents: check also x/yvarid to compare curvilinear grids
 	* Version 1.0.7 released
 

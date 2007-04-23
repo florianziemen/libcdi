@@ -3467,7 +3467,7 @@ int cdfInqContents(int streamID)
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		}
 	      else
-		Warning(func, "%s %s", nc_strerror(status), attstring);
+		Warning(func, "%s - %s", nc_strerror(status), attstring);
 	    }
 	  else if ( strcmp(attname, "cell_measures") == 0 )
 	    {
@@ -3490,8 +3490,17 @@ int cdfInqContents(int streamID)
 	      */
 	      if ( strcmp(cell_measures, "area") == 0 )
 		{
-		  cdf_inq_varid(fileID, cell_var, &ncvars[ncvarid].cellarea);
-		  cdfSetVar(ncvars, ncvars[ncvarid].cellarea, FALSE);
+		  int status;
+		  int nc_cell_id;
+
+		  status = nc_inq_varid(fileID, cell_var, &nc_cell_id);
+		  if ( status == NC_NOERR )
+		    {
+		      ncvars[ncvarid].cellarea = nc_cell_id;
+		      cdfSetVar(ncvars, ncvars[ncvarid].cellarea, FALSE);
+		    }
+		  else
+		    Warning(func, "%s - %s", nc_strerror(status), cell_var);
 		}
 	      else
 		{
@@ -3553,7 +3562,7 @@ int cdfInqContents(int streamID)
 			ncvars[ncvarid].varids[i] = dimvarid;
 		    }
 		  else
-		    Warning(func, "%s %s", nc_strerror(status), varname);
+		    Warning(func, "%s - %s", nc_strerror(status), varname);
 
 		  if ( lstop ) break;
 		}
@@ -3562,14 +3571,18 @@ int cdfInqContents(int streamID)
 	  else if ( strcmp(attname, "grid_mapping") == 0 )
 	    {
 	      int status;
+	      int nc_gmap_id;
 	      
 	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen);
 
-	      status = nc_inq_varid(fileID, attstring, &ncvars[ncvarid].gmapid);
+	      status = nc_inq_varid(fileID, attstring, &nc_gmap_id);
 	      if ( status == NC_NOERR )
-		cdfSetVar(ncvars, ncvars[ncvarid].gmapid, FALSE);
+		{
+		  ncvars[ncvarid].gmapid = nc_gmap_id;
+		  cdfSetVar(ncvars, ncvars[ncvarid].gmapid, FALSE);
+		}
 	      else
-		Warning(func, "%s %s", nc_strerror(status), attstring);
+		Warning(func, "%s - %s", nc_strerror(status), attstring);
 
 	      cdfSetVar(ncvars, ncvarid, TRUE);
 	    }
