@@ -282,7 +282,7 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 	  strcat(command, pch);
 
 	  pfp = popen(command, "r");
-	  if ( pfp == 0 )
+	  if ( pfp == NULL )
 	    SysError(func, "popen %s failed", command);
 	  
 	  nfiles = 0;
@@ -297,9 +297,10 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 	    }
 
 	  pclose(pfp);
-
+	  /*
 	  for ( j = 0; j < nfiles; j++ )
 	    fnames[j] = fnames[j];
+	  */
 	}
     }
 
@@ -556,7 +557,7 @@ int cdiInqContents(int streamID)
     default:
       {
 	if ( CDI_Debug )
-	  Message(func, "%s library not available!", strfiletype(filetype));
+	  Message(func, "%s support not compiled in!", strfiletype(filetype));
 
 	status = CDI_ELIBNAVAIL;
       }
@@ -643,7 +644,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 #endif
     default:
       {
-	if ( CDI_Debug ) Message(func, "%s library not available!", strfiletype(filetype));
+	if ( CDI_Debug ) Message(func, "%s support not compiled in!", strfiletype(filetype));
 	return (CDI_ELIBNAVAIL);
       }
     }
@@ -748,7 +749,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 #endif
     default:
       {
-	if ( CDI_Debug ) Message(func, "%s library not available!", strfiletype(filetype));
+	if ( CDI_Debug ) Message(func, "%s support not compiled in!", strfiletype(filetype));
 	return (CDI_ELIBNAVAIL);
       }
     }
@@ -818,7 +819,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 #endif
       default:
 	{
-	  if ( CDI_Debug ) Message(func, "%s library not available!", strfiletype(filetype));
+	  if ( CDI_Debug ) Message(func, "%s support not compiled in!", strfiletype(filetype));
 	  return (CDI_ELIBNAVAIL);
 	}
     }
@@ -867,7 +868,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 #endif
     default:
       {
-	if ( CDI_Debug ) Message(func, "%s library not available!", strfiletype(filetype));
+	if ( CDI_Debug ) Message(func, "%s support not compiled in!", strfiletype(filetype));
 	return (CDI_ELIBNAVAIL);
       }
     }
@@ -901,7 +902,7 @@ open stream. Otherwise, a negative number with the error status is returned.
    @Item  CDI_ESYSTEM     Operating system error
    @Item  CDI_EINVAL      Invalid argument
    @Item  CDI_EUFILETYPE  Unsupported file type
-   @Item  CDI_ELIBNAVAIL  Library not available
+   @Item  CDI_ELIBNAVAIL  Library support not compiled in
 @EndList
 
 @Example
@@ -1007,7 +1008,7 @@ open stream. Otherwise, a negative number with the error status is returned.
    @Item  CDI_ESYSTEM     Operating system error
    @Item  CDI_EINVAL      Invalid argument
    @Item  CDI_EUFILETYPE  Unsupported file type
-   @Item  CDI_ELIBNAVAIL  Library not available
+   @Item  CDI_ELIBNAVAIL  Library support not compiled in
 @EndList
 
 @Example
@@ -1110,7 +1111,7 @@ void streamClose(int streamID)
 #endif
       default:
 	{
-	  Error(func, "%s library not available!", strfiletype(filetype));
+	  Error(func, "%s support not compiled in!", strfiletype(filetype));
 	  break;
 	}
       }
@@ -1319,7 +1320,7 @@ int streamInqTimestep(int streamID, int tsID)
 #endif
     default:
       {
-	Error(func, "%s library not available!", strfiletype(filetype));
+	Error(func, "%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
@@ -1407,7 +1408,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 #endif
     default:
       {
-	Error(func, "%s library not available!", strfiletype(filetype));
+	Error(func, "%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
@@ -1488,7 +1489,7 @@ void streamWriteVar(int streamID, int varID, double *data, int nmiss)
 #endif
     default:
       {
-	Error(func, "%s library not available!", strfiletype(filetype));
+	Error(func, "%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
@@ -1567,7 +1568,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
 #endif
     default:
       {
-	Error(func, "%s library not available!", strfiletype(filetype));
+	Error(func, "%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
@@ -1648,7 +1649,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, double *data, int
 #endif
     default:
       {
-	Error(func, "%s library not available!", strfiletype(filetype));
+	Error(func, "%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }

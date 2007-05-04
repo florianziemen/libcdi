@@ -23,6 +23,9 @@
 #define UNDEFID  CDI_UNDEFID
 
 
+int _readline_(FILE *fp, char *line, int len);
+
+
 typedef struct {
   int code;
   int table;
@@ -922,7 +925,71 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
   if ( varInqTable(varID) == UNDEFID )
     {
       int tableID;
+
       tableID = tableInq(varInqModel(varID), ISEC1_CodeTable, NULL);
+      /*
+      if ( tableID == UNDEFID && cdiPartabPath )
+	{
+	  char line[8192];
+	  char command[4096];
+	  FILE *pfp;
+	  int nfiles;
+	  int max_partab = 4096;
+	  char *fnames[4096];
+	  int cen, sub, ver, tab, nf, fi;
+	  int icen, isub, iver, itab;
+
+	  icen = ISEC1_CenterID;
+          isub = ISEC1_SubCenterID;
+          iver = ISEC1_ModelID;
+          itab = ISEC1_CodeTable;
+	  
+	  sprintf(command, "cd %s 2> /dev/null; ls * 2> /dev/null", cdiPartabPath);
+
+	  pfp = popen(command, "r");
+	  if ( pfp == NULL )
+	    SysError(func, "popen %s failed", command);
+	  
+	  nfiles = 0;
+	  while ( _readline_(pfp, line, 8192) )
+	    {
+	      cen = -1; sub = -1; ver = -1; tab = -1;
+	      nf = sscanf(line, "Cen%d_Sub%d_Ver%d_Tab%d", &cen, &sub, &ver, &tab);
+	      printf("%d %d %d %d %d\n", nf, cen, sub, ver, tab);
+	      if ( nfiles >= max_partab )
+		{
+		  Warning(func, "Too many parameter tables (limit: %d)", max_partab);
+		  break;
+		}
+	      fnames[nfiles++] = strdupx(line);
+	      printf("test: %s\n", line);
+	    }
+
+	  pclose(pfp);
+
+	  if ( nfiles )
+	    {
+	      cen = -1; sub = -1; ver = -1; tab = -1;
+	      for ( fi = 0; fi < nfiles; ++fi )
+		{
+		  nf = sscanf(fnames[fi], "Cen%d_Sub%d_Ver%d_Tab%d", &cen, &sub, &ver, &tab);
+		  if ( nf == 4 && cen == icen && sub == isub && ver == iver && tab == itab ) goto END_LABEL;
+		}
+	      for ( fi = 0; fi < nfiles; ++fi )
+		{
+		  nf = sscanf(fnames[fi], "Cen%d_Sub%d_Tab%d", &cen, &sub, &tab);
+		  if ( nf == 3 && cen == icen && sub == isub && tab == itab ) goto END_LABEL;
+		}
+
+	    END_LABEL:
+
+	      if ( fi < nfiles )
+		{
+		  printf("found table %s\n", fnames[fi]);
+		}
+	    }
+	}
+      */
       if ( tableID == UNDEFID )
 	tableID = tableDef(varInqModel(varID), ISEC1_CodeTable, NULL);
       varDefTable(varID, tableID);

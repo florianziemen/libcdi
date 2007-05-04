@@ -8,7 +8,7 @@
 
 static char UnknownError[] = "Unknown Error";
 static char _EUFTYPE[]     = "Unsupported file type";
-static char _ELIBNAVAIL[]  = "Unsupported file type (library not available)";
+static char _ELIBNAVAIL[]  = "Unsupported file type (library support not compiled in)";
 static char _EUFSTRUCT[]   = "Unsupported file structure";
 
 char *cdiStringError(int cdiErrno)

@@ -191,7 +191,7 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
 #endif
     default:
       {
-	Error(func, "%s library not available!", strfiletype(filetype));
+	Error(func, "%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
@@ -283,7 +283,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
 #endif
     default:
       {
-	Error(func, "%s library not available!", strfiletype(filetype));
+	Error(func, "%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
@@ -345,7 +345,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
 #endif
     default:
       {
-	Error(func, "%s library not available!", strfiletype(filetype));
+	Error(func, "%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
@@ -405,7 +405,7 @@ void streamWriteRecord(int streamID, double *data, int nmiss)
 #endif
     default:
       {
-	Error(func, "%s library not available!", strfiletype(filetype));
+	Error(func, "%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }

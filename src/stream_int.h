@@ -231,6 +231,9 @@ extern int cdiDefaultLeveltype;
 extern int cdiNcMissingValue;
 extern int cdiSplitLtype105;
 
+extern char *cdiPartabPath;
+extern int   cdiPartabIntern;
+
 STREAM *stream_to_pointer(int idx);
 STREAM *stream_new_entry(void);
 void stream_delete_entry(STREAM *streamptr);

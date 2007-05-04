@@ -23,6 +23,9 @@ int cdiSplitLtype105  = CDI_UNDEFID;
 
 int cdiIgnoreAttCoordinates = FALSE;
 
+char *cdiPartabPath   = NULL;
+int   cdiPartabIntern = 1;
+
 double cdiDefaultMissval = -9.E33;
 
 
@@ -94,6 +97,7 @@ long cdiGetenvInt(char *envName)
 
 void cdiInitialize(void)
 {
+  static char func[] = "cdiInitialize";
   static int Init_CDI = FALSE;
   char *envString;
   long value;
@@ -119,6 +123,12 @@ void cdiInitialize(void)
 
       envString = getenv("IGNORE_ATT_COORDINATES");
       if ( envString ) cdiIgnoreAttCoordinates = atoi(envString);
+
+      envString = getenv("PARTAB_INTERN");
+      if ( envString ) cdiPartabIntern = atoi(envString);
+
+      envString = getenv("PARTAB_PATH");
+      if ( envString ) cdiPartabPath = strdup(envString);
     }
 }
 

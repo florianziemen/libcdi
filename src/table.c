@@ -17,7 +17,7 @@
 #include "tablepar.h"
 #include "table.h"
 
-#define MAX_TABLE  99
+#define MAX_TABLE  256
 #define MAX_PARS   1024
 
 typedef struct
@@ -106,7 +106,8 @@ void parTableInit(void)
 {
   ParTableInit = 1;
 
-  tableDefault();
+  if ( cdiPartabIntern )
+    tableDefault();
 
   tableGetPath();
 }
@@ -350,7 +351,7 @@ int tableFromEnv(int modelID, int tablenum)
 	  sprintf(tablename+len, "_%03d", tablenum);
 	}
       tablenamefound = 1;
-      /* printf("tableInq: tablename = >%s<\n", tablename); */
+      /* printf("%s: tablename = >%s<\n", func, tablename); */
     }
   else
     {
@@ -366,7 +367,7 @@ int tableFromEnv(int modelID, int tablenum)
 		  sprintf(tablename+len, "_%03d", tablenum);
 		}
 	      tablenamefound = 1;
-	      /* printf("tableInq: tablename = >%s<\n", tablename); */
+	      /* printf("%s: tablename = >%s<\n", func, tablename); */
 	    }
 	}
     }
