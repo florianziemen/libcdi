@@ -3137,7 +3137,7 @@ int cdfInqContents(int streamID)
   char name[256];
   int attint;
   char attname[256];
-  const int attstringlen = 1024; char attstring[1024];
+  const int attstringlen = 8192; char attstring[8192];
   char *pname, *plongname, *punits;
   int iatt, timehasunit = 0;
   int time_has_bounds = FALSE;
