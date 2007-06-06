@@ -191,6 +191,7 @@ static void grid_init_entry(GRID *gridptr)
   gridptr->size         = 0;
   gridptr->xsize        = 0;
   gridptr->ysize        = 0;
+  gridptr->isCyclic     = CDI_UNDEFID;
   gridptr->isRotated    = FALSE;
   gridptr->xpole        = 0.0;
   gridptr->ypole        = 0.0;
@@ -2072,6 +2073,70 @@ void gridChangeType(int gridID, int gridtype)
 	  gridNamePtr(gridtype));
   
   gridptr->type = gridtype;
+}
+
+
+static void grid_check_cyclic(GRID *gridptr)
+{
+  int xsize, ysize, gridsize;
+  int i1, i2, j, k1, k2, nc;
+  double xinc, x0;
+  const double *xvals, *xbounds;
+
+  gridptr->isCyclic = FALSE;
+
+  gridsize = gridptr->size;
+  xsize = gridptr->xsize;
+  ysize = gridptr->ysize;
+  xvals = gridptr->xvals;
+  xbounds = gridptr->xbounds;
+
+  if ( gridptr->type == GRID_GAUSSIAN || gridptr->type == GRID_LONLAT )
+    {
+      if ( xvals && xsize > 1 )
+	{
+	  xinc = xvals[1] - xvals[0];
+	  x0 = 2*xvals[xsize-1]-xvals[xsize-2]-360;
+	  if ( DBL_IS_EQUAL(x0, xvals[0]) ) gridptr->isCyclic = TRUE;
+	}
+    }
+  else if ( gridptr->type == GRID_CURVILINEAR )
+    {
+      if ( xbounds && xsize > 1 )
+	{
+	  gridptr->isCyclic = TRUE;
+	  for ( j = 0; j < ysize; ++j )
+	    {
+	      i1 = j*xsize*4;
+	      i2 = j*xsize*4+(xsize-1)*4;
+	      nc = 0;
+	      for ( k1 = 0; k1 < 4; ++k1 )
+		{
+		  for ( k2 = 0; k2 < 4; ++k2 )
+		    {
+		      if ( DBL_IS_EQUAL(xbounds[i1+k1], xbounds[i2+k2]) ) nc++;
+		    }
+		}
+	      if ( nc != 2 )
+		{
+		  gridptr->isCyclic = FALSE;
+		  break;
+		}
+	    }
+	}
+    }
+}
+
+
+int gridIsCyclic(int gridID)
+{
+  GRID *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  if ( gridptr->isCyclic == CDI_UNDEFID ) grid_check_cyclic(gridptr);
+
+  return ( gridptr->isCyclic );
 }
 
 

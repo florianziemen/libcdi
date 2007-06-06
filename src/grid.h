@@ -16,6 +16,7 @@ typedef struct {
   double  xlast, ylast;
   double  xinc, yinc;
   double  xpole, ypole, angle;    /* rotated north pole             */
+  int     isCyclic;               /* TRUE for global cyclic grids   */
   int     isRotated;              /* TRUE for rotated grids         */
   int     xdef;                   /* 0: undefined 1:xvals 2:x0+xinc */
   int     ydef;                   /* 0: undefined 1:yvals 2:y0+yinc */

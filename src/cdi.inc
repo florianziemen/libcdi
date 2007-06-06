@@ -1,5 +1,5 @@
 !
-! Fortran interface for CDI library version 1.0.3
+! Fortran interface for CDI library version 1.0.7
 !
 
       INTEGER    CDI_UNDEFID           
@@ -39,8 +39,6 @@
       PARAMETER (FILETYPE_SRV           =  5)
       INTEGER    FILETYPE_EXT          
       PARAMETER (FILETYPE_EXT           =  6)
-      INTEGER    FILETYPE_H5           
-      PARAMETER (FILETYPE_H5            =  7)
       INTEGER    FILETYPE_IEG          
       PARAMETER (FILETYPE_IEG           =  8)
 !
@@ -179,6 +177,8 @@
       PARAMETER (ZAXIS_TRAJECTORY       =  9)
       INTEGER    ZAXIS_ALTITUDE        
       PARAMETER (ZAXIS_ALTITUDE         = 10)
+      INTEGER    ZAXIS_SIGMA           
+      PARAMETER (ZAXIS_SIGMA            = 11)
 !
 !  TAXIS types
 !
@@ -588,6 +588,17 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarTime
 
+!                     vlistDefVarSzip
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         szip)
+      EXTERNAL        vlistDefVarSzip
+
+      INTEGER         vlistInqVarSzip
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarSzip
+
 !                     vlistDefVarCode
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
@@ -983,6 +994,10 @@
 !                                    (INTEGER         gridID)
       EXTERNAL        gridInqYinc
 
+      INTEGER         gridIsCyclic
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridIsCyclic
+
       INTEGER         gridIsRotated
 !                                    (INTEGER         gridID)
       EXTERNAL        gridIsRotated
@@ -1146,7 +1161,7 @@
       EXTERNAL        zaxisName
 
       INTEGER         zaxisCreate
-!                                    (INTEGER         leveltype,
+!                                    (INTEGER         zaxistype,
 !                                     INTEGER         size)
       EXTERNAL        zaxisCreate
 
@@ -1238,6 +1253,15 @@
 !                                    (INTEGER         zaxisID)
       EXTERNAL        zaxisInqPrec
 
+!                     zaxisDefLtype
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         ltype)
+      EXTERNAL        zaxisDefLtype
+
+      INTEGER         zaxisInqLtype
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisInqLtype
+
 !                     zaxisDefVct
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         size,
@@ -1290,7 +1314,7 @@
 
 !                     zaxisChangeType
 !                                    (INTEGER         zaxisID,
-!                                     INTEGER         leveltype)
+!                                     INTEGER         zaxistype)
       EXTERNAL        zaxisChangeType
 
 !
