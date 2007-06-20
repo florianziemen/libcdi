@@ -212,7 +212,8 @@ static void model_defaults(void)
   (void)    modelDef(instID, 199, "ERA40");
 
   instID  = institutInq(  0,   0, "MPIMET", NULL);
-  ECHAM5  = modelDef(instID,  63, "ECHAM5.3");
+  ECHAM5  = modelDef(instID,  64, "ECHAM5.4");
+  (void)    modelDef(instID,  63, "ECHAM5.3");
   (void)    modelDef(instID,  62, "ECHAM5.2");
   (void)    modelDef(instID,  61, "ECHAM5.1");
 
