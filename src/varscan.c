@@ -689,7 +689,8 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
 	  if ( zaxistype == ZAXIS_HYBRID )
 	    {
 	      /* if ( vctsize > 0 && vctsize >= 2*(nlevels+1)) */
-	      if ( vctsize > 0 && vctsize >= 2*(nlevels))
+	      /* if ( vctsize > 0 && vctsize >= 2*(nlevels)) */
+	      if ( vctsize > 0 )
 		zaxisDefVct(zaxisID, vctsize, vct);
 	      else
 		Warning(func, "VCT missing");

@@ -5,6 +5,7 @@
 	* stream_ieg: bug fix memory leak [report: Philip Lorenz]
 	* add function gridIsCyclic
 	* zaxisDuplicate: bug fix
+	* varscan: add full vct support
 	* cdfInqContents: print warning if cell_measures is missing
 	* cdfInqContents: check also x/yvarid to compare curvilinear grids
 	* Version 1.0.7 released
