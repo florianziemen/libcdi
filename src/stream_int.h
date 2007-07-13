@@ -281,4 +281,10 @@ int     streamInqDimgroupID(int streamID);
 
 int getByteswap(int byteorder);
 
+void decode_date(int date, int *year, int *month, int *day);
+int  encode_date(int year, int month, int day);
+void decode_time(int time, int *hour, int *minute);
+int  encode_time(int hour, int minute);
+
+
 #endif  /* _STREAM_INT_H */

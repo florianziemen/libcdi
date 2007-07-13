@@ -1,3 +1,8 @@
+2007-09-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* use always decode_date and encode_date to decode/encode date
+	* Version 1.0.8 released
+
 2007-06-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* using EXSE library version 1.0.2

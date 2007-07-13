@@ -1679,11 +1679,8 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
       
       rdate   = taxisInqRdate(timeID);
       rtime   = taxisInqRtime(timeID);
-      year    =  rdate / 10000;
-      month   = (rdate - year*10000) / 100;
-      day     =  rdate - year*10000 - month*100;
-      hour    =  rtime / 100;
-      minute  =  rtime - hour*100;
+      decode_date(rdate, &year, &month, &day);
+      decode_time(rtime, &hour, &minute);
       century =  year / 100;
 
       ISEC1_Year   = year - century*100;
@@ -1703,11 +1700,8 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
 	case TUNIT_DAY:     tunit.factor = 86400; ISEC1_TimeUnit = ISEC1_TABLE4_DAY; break;
 	default:            tunit.factor =  3600; ISEC1_TimeUnit = ISEC1_TABLE4_HOUR; break;
 	}
-      year   =  date / 10000;
-      month  = (date - year*10000) / 100;
-      day    =  date - year*10000 - month*100;
-      hour   =  time / 100;
-      minute =  time - hour*100;
+      decode_date(date, &year, &month, &day);
+      decode_time(time, &hour, &minute);
       /*
       printf("date time %d %d %g\n", date, time, value);
       printf("year %d, month %d, day %d, hour %d, minute %d\n", year, month, day, hour, minute);
@@ -1722,11 +1716,8 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
 
   if ( timetype == TAXIS_ABSOLUTE )
     {
-      year    =  date / 10000;
-      month   = (date - year*10000) / 100;
-      day     =  date - year*10000 - month*100;
-      hour    =  time / 100;
-      minute  =  time - hour*100;
+      decode_date(date, &year, &month, &day);
+      decode_time(time, &hour, &minute);
       century =  year / 100;
 
       ISEC1_Year     = year - century*100;

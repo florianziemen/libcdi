@@ -185,8 +185,8 @@ static int splitBasetime(char *timeunits, TAXIS *taxis)
 		    }
 		}
 
-	      rdate = year*10000 + month*100 + day;
-	      rtime = hour*100 + minute;
+	      rdate = encode_date(year, month, day);
+	      rtime = encode_time(hour, minute);
 	      (*taxis).rdate = rdate;
 	      (*taxis).rtime = rtime;
 	    }
@@ -673,11 +673,10 @@ void cdfDefTime(int streamID)
 	  rdate  = taxis->vdate;
 	  rtime  = taxis->vtime;
 	}
-      year   =  rdate / 10000;
-      month  = (rdate - year*10000) / 100;
-      day    =  rdate - year*10000 - month*100;
-      hour   =  rtime / 100;
-      minute =  rtime - hour*100;
+
+      decode_date(rdate, &year, &month, &day);
+      decode_time(rtime, &hour, &minute);
+
       sprintf(unitstr, "%s since %d-%02d-%02d %02d:%02d",
 	      tunitNamePtr(timeunit), year, month, day, hour, minute);
     }
@@ -4798,7 +4797,6 @@ int cdfInqTimestep(int streamID, int tsID)
 
 	      decode_timeval(timevalue, taxis, &taxis->vdate_ub, &taxis->vtime_ub);
 	    }
-
 	}
     }
 

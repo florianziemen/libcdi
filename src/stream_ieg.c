@@ -217,11 +217,8 @@ void iegDefTime(int *pdb, int date, int time, int timeID)
 
   if ( timetype == TAXIS_ABSOLUTE || timetype == TAXIS_RELATIVE )
     {
-      year    =  date / 10000;
-      month   = (date - year*10000) / 100;
-      day     =  date - year*10000 - month*100;
-      hour    =  time / 100;
-      minute  =  time - hour*100;
+      decode_date(date, &year, &month, &day);
+      decode_time(time, &hour, &minute);
 
       IEG_P_Year(pdb)     = year;
       IEG_P_Month(pdb)    = month;
@@ -756,8 +753,8 @@ void iegDateTime(int *pdb, int *date, int *time)
 
   if ( rminute == -1 ) rminute = 0;
 
-  *date = ryear*10000 + rmonth*100 + rday;
-  *time = rhour*100 + rminute;
+  *date = encode_date(ryear, rmonth, rday);
+  *time = encode_time(rhour, rminute);
 }
 
 

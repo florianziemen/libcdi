@@ -17,6 +17,9 @@
 #define DBL_IS_EQUAL(x,y) (!(fabs(x - y) > 0))
 #endif
 
+void decode_date(int date, int *year, int *month, int *day);
+void decode_time(int time, int *hour, int *minute);
+
 
 int getopt(int argc, char *const argv[], const char *optstring);
 
@@ -76,21 +79,6 @@ static void usage(void)
 }
 
 
-static void decodeDate(int date, int *year, int *month, int *day)
-{
-  *year   =  date / 10000;
-  *month  = (date - *year*10000) / 100;
-  *day    =  date - *year*10000 - *month*100;
-}
-
-
-static void decodeTime(int time, int *hour, int *minute)
-{
-  *hour   =  time / 100;
-  *minute =  time - *hour*100;
-}
-
-
 static void printInfo(int gridtype, int date, int time, int code, double level,
 		      int datasize, int nmiss, double missval, const double *data)
 {
@@ -106,8 +94,8 @@ static void printInfo(int gridtype, int date, int time, int code, double level,
 /*   ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+ */
   }
 
-  decodeDate(date, &year, &month, &day);
-  decodeTime(time, &hour, &minute);
+  decode_date(date, &year, &month, &day);
+  decode_time(time, &hour, &minute);
 
   fprintf(stdout, "%6d : %4.4d-%2.2d-%2.2d %2.2d:%2.2d %3d %7g ",
 	  ++rec, year, month, day, hour, minute, code, level);
@@ -229,21 +217,6 @@ void printFiletype(int streamID)
     }
 
   printf("\n");
-}
-
-
-void decode_date(int date, int *year, int *month, int *day)
-{
-  *year   =  date / 10000;
-  *month  = (date - *year*10000) / 100;
-  *day    =  date - *year*10000 - *month*100;
-}
-
-
-void decode_time(int time, int *hour, int *minute)
-{
-  *hour   =  time / 100;
-  *minute =  time - *hour*100;
 }
 
 

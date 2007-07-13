@@ -12,6 +12,11 @@ streamWriteVar      stream
 streamReadVar       stream
 streamWriteVarSlice stream
 streamReadVarSlice  stream
+ streamDefRecord     stream_record
+ streamInqRecord     stream_record
+ streamWriteRecord   stream_record
+ streamReadRecord    stream_record
+ streamCopyRecord    stream_record
 vlistCreate         vlist
 vlistDestroy        vlist
 vlistCopy           vlist
@@ -33,6 +38,8 @@ vlistDefVarName     vlist_var
 vlistInqVarName     vlist_var
 vlistDefVarLongname vlist_var
 vlistInqVarLongname vlist_var
+ vlistDefVarStdname  vlist_var
+ vlistInqVarStdname  vlist_var
 vlistDefVarUnits    vlist_var
 vlistInqVarUnits    vlist_var
 vlistDefVarDatatype vlist_var
@@ -42,6 +49,8 @@ vlistInqVarMissval  vlist_var
 gridCreate          grid
 gridDestroy         grid
 gridDuplicate       grid
+ gridIsCyclic        grid
+ gridIsRotated       grid
 gridInqType         grid
 gridInqSize         grid
 gridDefXsize        grid
@@ -56,6 +65,8 @@ gridDefXbounds      grid
 gridInqXbounds      grid
 gridDefYbounds      grid
 gridInqYbounds      grid
+ gridDefXpole        grid
+ gridInqXpole        grid
 gridDefXname        grid
 gridInqXname        grid
 gridDefXlongname    grid
@@ -70,11 +81,19 @@ gridDefYunits       grid
 gridInqYunits       grid
 zaxisCreate         zaxis
 zaxisDestroy        zaxis
+ zaxisDuplicate      zaxis
 zaxisInqType        zaxis
 zaxisInqSize        zaxis
 zaxisDefLevels      zaxis
 zaxisInqLevels      zaxis
 zaxisInqLevel       zaxis
+ zaxisDefLbounds     zaxis
+ zaxisDefUbounds     zaxis
+ zaxisInqLbounds     zaxis
+ zaxisInqUbounds     zaxis
+ zaxisDefVct         zaxis
+ zaxisInqVctSize     zaxis
+ zaxisInqVct         zaxis
 zaxisDefName        zaxis
 zaxisInqName        zaxis
 zaxisDefLongname    zaxis
@@ -83,6 +102,7 @@ zaxisDefUnits       zaxis
 zaxisInqUnits       zaxis
 taxisCreate         taxis
 taxisDestroy        taxis
+ taxisDuplicate      taxis
 taxisDefRdate       taxis
 taxisInqRdate       taxis
 taxisDefRtime       taxis

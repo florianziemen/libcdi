@@ -25,6 +25,49 @@ char *Timeunits[] = {
 };
 
 
+void decode_date(int date, int *year, int *month, int *day)
+{
+  int idate;
+
+  *year  =  date / 10000;
+  idate  = date - *year*10000;
+  if ( idate < 0 ) idate = -idate;
+  *month = idate / 100;
+  *day   = idate - *month*100;
+}
+
+
+int encode_date(int year, int month, int day)
+{
+  int date;
+  int iyear;
+
+  iyear = year;
+  if ( iyear < 0 ) iyear = -iyear;
+  date = iyear*10000 + month*100 + day;
+  if ( year < 0 ) date = -date;
+
+  return (date);
+}
+
+
+void decode_time(int time, int *hour, int *minute)
+{
+  *hour   =  time / 100;
+  *minute =  time - *hour*100;
+}
+
+
+int encode_time(int hour, int minute)
+{
+  int time;
+
+  time = hour*100 + minute;
+
+  return (time);
+}
+
+
 char *tunitNamePtr(int unitID)
 {
   char *name;
@@ -839,11 +882,8 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
 
   rdate  = (*taxis).rdate;
   rtime  = (*taxis).rtime;
-  year   =  rdate / 10000;
-  month  = (rdate - year*10000) / 100;
-  day    =  rdate - year*10000 - month*100;
-  hour   =  rtime / 100;
-  minute =  rtime - hour*100;
+  decode_date(rdate, &year, &month, &day);
+  decode_time(rtime, &hour, &minute);
 
   if ( timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR )
     {
@@ -883,8 +923,8 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
       cdiCalendar(dpy, timevalue, tunit, &year, &month, &day, &hour, &minute, &second);
     }
 
-  *vdate = year*10000 + month*100 + day;
-  *vtime = hour*100 + minute /* + (int) (second/60+0.5)*/;
+  *vdate = encode_date(year, month, day);
+  *vtime = encode_time(hour, minute);
 }
 
 
@@ -903,34 +943,28 @@ double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
   timeunit = (*taxis).unit;
   calendar = (*taxis).calendar;
 
-  if      ( calendar == CALENDAR_360DAYS ) dpy = 360;
-  else if ( calendar == CALENDAR_365DAYS ) dpy = 365;
-  else if ( calendar == CALENDAR_366DAYS ) dpy = 366;
+  if      ( calendar == CALENDAR_360DAYS )   dpy = 360;
+  else if ( calendar == CALENDAR_365DAYS )   dpy = 365;
+  else if ( calendar == CALENDAR_366DAYS )   dpy = 366;
   else if ( calendar == CALENDAR_PROLEPTIC ) dpy = -1;
 
-  rdate  = (*taxis).rdate;
-  rtime  = (*taxis).rtime;
+  rdate = (*taxis).rdate;
+  rtime = (*taxis).rtime;
   if ( rdate == -1 )
     {
       rdate  = (*taxis).vdate;
       rtime  = (*taxis).vtime;
     }
 
-  ryear  =  rdate / 10000;
-  rmonth = (rdate - ryear*10000) / 100;
-  day    =  rdate - ryear*10000 - rmonth*100;
-  hour   =  rtime / 100;
-  minute =  rtime - hour*100;
+  decode_date(rdate, &ryear, &rmonth, &day);
+  decode_time(rtime, &hour, &minute);
 
   cdiInvCalendar(dpy, ryear, rmonth, day, hour, minute, 0.0, tunit, &value);
   tunit.origin = value;
   tunit.factor = 60.0;
       
-  year   =  vdate / 10000;
-  month  = (vdate - year*10000) / 100;
-  day    =  vdate - year*10000 - month*100;
-  hour   =  vtime / 100;
-  minute =  vtime - hour*100;
+  decode_date(vdate, &year, &month, &day);
+  decode_time(vtime, &hour, &minute);
 
   if ( timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR )
     {
