@@ -156,6 +156,7 @@ static int splitBasetime(char *timeunits, TAXIS *taxis)
 	  else if ( timetype == TAXIS_RELATIVE )
 	    {
 	      year = atoi(ptu);
+	      if ( year < 0 ) ptu++;
 	      while ( isdigit((int) *ptu) ) ptu++;
 	      month = atoi(++ptu);
 	      while ( isdigit((int) *ptu) ) ptu++;
@@ -189,6 +190,9 @@ static int splitBasetime(char *timeunits, TAXIS *taxis)
 	      rtime = encode_time(hour, minute);
 	      (*taxis).rdate = rdate;
 	      (*taxis).rtime = rtime;
+
+	      if ( CDI_Debug )
+		Message(func, "rdate = %d  rtime = %d", rdate, rtime);	      
 	    }
 	}
     }
