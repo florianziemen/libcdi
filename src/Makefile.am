@@ -17,6 +17,7 @@ libcdi_a_SOURCES = 	 \
 	util.c         	 \
 	varscan.c      	 \
 	calendar.c 	 \
+	timebase.c 	 \
 	vlist.c 	 \
 	vlist_var.c 	 \
 	basetime.c     	 \
@@ -58,6 +59,7 @@ libcdi_a_SOURCES = 	 \
 	cdi.h	 	 \
 	cdi_limits.h	 \
 	calendar.h	 \
+	timebase.h	 \
 	vlist.h	         \
 	taxis.h	         \
 	stream_grb.h	 \

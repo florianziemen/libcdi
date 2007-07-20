@@ -1673,9 +1673,10 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
 
   if ( timetype == TAXIS_RELATIVE )
     {
-      sUnit tunit = {0, 1};
+      int factor = 1;
       int rdate, rtime;
-      double value;
+      int julday1, secofday1, julday2, secofday2, days, secs;
+      int ival;
       
       rdate   = taxisInqRdate(timeID);
       rtime   = taxisInqRtime(timeID);
@@ -1691,14 +1692,14 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
       /*
       printf("year %d, month %d, day %d, hour %d, minute %d\n", year, month, day, hour, minute);
       */
-      InvCalendar(year, month, day, hour, minute, 0.0, tunit, &value);
-      tunit.origin = value;
+      encode_juldaysec(year, month, day, hour, minute, &julday1, &secofday1);
+
       switch (taxisInqTunit(timeID))
 	{
-	case TUNIT_MINUTE:  tunit.factor =    60; ISEC1_TimeUnit = ISEC1_TABLE4_MINUTE; break;
-	case TUNIT_HOUR:    tunit.factor =  3600; ISEC1_TimeUnit = ISEC1_TABLE4_HOUR; break;
-	case TUNIT_DAY:     tunit.factor = 86400; ISEC1_TimeUnit = ISEC1_TABLE4_DAY; break;
-	default:            tunit.factor =  3600; ISEC1_TimeUnit = ISEC1_TABLE4_HOUR; break;
+	case TUNIT_MINUTE:  factor =    60; ISEC1_TimeUnit = ISEC1_TABLE4_MINUTE; break;
+	case TUNIT_HOUR:    factor =  3600; ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;   break;
+	case TUNIT_DAY:     factor = 86400; ISEC1_TimeUnit = ISEC1_TABLE4_DAY;    break;
+	default:            factor =  3600; ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;   break;
 	}
       decode_date(date, &year, &month, &day);
       decode_time(time, &hour, &minute);
@@ -1706,12 +1707,15 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
       printf("date time %d %d %g\n", date, time, value);
       printf("year %d, month %d, day %d, hour %d, minute %d\n", year, month, day, hour, minute);
       */
-      InvCalendar(year, month, day, hour, minute, 0.0, tunit, &value);
+      encode_juldaysec(year, month, day, hour, minute, &julday2, &secofday2);
+
+      (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
+      ival = (int) ((days*86400.0 + secs)/factor);
       
-      if ( value < 0 || value > 255 ) timetype = TAXIS_ABSOLUTE;
+      if ( ival < 0 || ival > 255 ) timetype = TAXIS_ABSOLUTE;
       
       ISEC1_TimeRange = 0;
-      ISEC1_TimePeriod1 = (int) value;
+      ISEC1_TimePeriod1 = ival;
     }
 
   if ( timetype == TAXIS_ABSOLUTE )

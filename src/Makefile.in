@@ -99,6 +99,7 @@ libcdi_a_SOURCES = \
 	util.c         	 \
 	varscan.c      	 \
 	calendar.c 	 \
+	timebase.c 	 \
 	vlist.c 	 \
 	vlist_var.c 	 \
 	basetime.c     	 \
@@ -140,6 +141,7 @@ libcdi_a_SOURCES = \
 	cdi.h	 	 \
 	cdi_limits.h	 \
 	calendar.h	 \
+	timebase.h	 \
 	vlist.h	         \
 	taxis.h	         \
 	stream_grb.h	 \
@@ -172,8 +174,8 @@ am_libcdi_a_OBJECTS = cdiFortran.$(OBJEXT) cdi_error.$(OBJEXT) \
 	taxis.$(OBJEXT) error.$(OBJEXT) version.$(OBJEXT) \
 	dmemory.$(OBJEXT) model.$(OBJEXT) institution.$(OBJEXT) \
 	table.$(OBJEXT) util.$(OBJEXT) varscan.$(OBJEXT) \
-	calendar.$(OBJEXT) vlist.$(OBJEXT) vlist_var.$(OBJEXT) \
-	basetime.$(OBJEXT) stream_history.$(OBJEXT) \
+	calendar.$(OBJEXT) timebase.$(OBJEXT) vlist.$(OBJEXT) \
+	vlist_var.$(OBJEXT) basetime.$(OBJEXT) stream_history.$(OBJEXT) \
 	stream_grb.$(OBJEXT) stream_cdf.$(OBJEXT) stream_srv.$(OBJEXT) \
 	stream_ext.$(OBJEXT) stream_ieg.$(OBJEXT) grid.$(OBJEXT) \
 	grid_rot.$(OBJEXT) grid_gme.$(OBJEXT) zaxis.$(OBJEXT) \
@@ -207,10 +209,11 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/stream_record.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/stream_srv.Po ./$(DEPDIR)/stream_var.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/swap.Po ./$(DEPDIR)/table.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/taxis.Po ./$(DEPDIR)/tsteps.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/util.Po ./$(DEPDIR)/varscan.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/version.Po ./$(DEPDIR)/vlist.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/vlist_var.Po ./$(DEPDIR)/zaxis.Po
+@AMDEP_TRUE@	./$(DEPDIR)/taxis.Po ./$(DEPDIR)/timebase.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/tsteps.Po ./$(DEPDIR)/util.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/varscan.Po ./$(DEPDIR)/version.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/vlist.Po ./$(DEPDIR)/vlist_var.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/zaxis.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -322,6 +325,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/table.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/taxis.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timebase.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tsteps.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/varscan.Po@am__quote@

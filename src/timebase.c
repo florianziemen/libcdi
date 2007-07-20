@@ -1,12 +1,5 @@
-#include <stdio.h>		/* for NULL */
+#include <stdio.h>
 #include <math.h>		/* for floor() */
-
-#include "cdi.h"  		/* CALENDAR_ */
-
-
-static int month_360[12] = {30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30};
-static int month_365[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-static int month_366[12] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 
 void decode_date(int date, int *year, int *month, int *day)
@@ -53,7 +46,7 @@ int encode_time(int hour, int minute)
 
 
 /* convert Julian date into year, months, day */
-static void julday_to_gregdate(
+void decode_julday(
     int  	       julday,		/* Julian day number to convert */
     int			*year,		/* Gregorian year (out) */
     int			*mon,		/* Gregorian month (1-12) (out) */
@@ -84,7 +77,7 @@ static void julday_to_gregdate(
 }
 
 /* convert year, month, day into Julian calendar day */
-static int gregdate_to_julday(int year, int month, int day)
+int encode_julday(int year, int month, int day)
 {
   int y;
   int m;
@@ -123,137 +116,25 @@ static int gregdate_to_julday(int year, int month, int day)
 }
 
 
-static void decode_days(int dpy, int days, int *year, int *month, int *day)
+int date_to_julday(int date)
 {
-  int i = 0;
-  int *dpm = NULL;
-
-  *year = (days-1) / dpy;
-  days -= (*year*dpy);
-
-  if      ( dpy == 360 ) dpm = month_360;
-  else if ( dpy == 365 ) dpm = month_365;
-  else if ( dpy == 366 ) dpm = month_366;
-
-  if ( dpm )
-    for ( i = 0; i < 12; i++ )
-      {
-	if ( days > dpm[i] ) days -= dpm[i];
-	else break;
-      }
-
-  *month = i + 1;
-  *day   = days;
-}
-
-
-static int encode_days(int dpy, int year, int month, int day)
-{
-  int i;
-  int *dpm = NULL;
-  double rval;
-
-  rval = dpy * year + day;
-
-  if      ( dpy == 360 ) dpm = month_360;
-  else if ( dpy == 365 ) dpm = month_365;
-  else if ( dpy == 366 ) dpm = month_366;
-  
-  if ( dpm ) for ( i = 0; i < month-1; i++ ) rval += dpm[i];
-
-  return (rval);
-}
-
-
-int calendar_dpy(int calendar)
-{
-  int dpy = 0;
-
-  if      ( calendar == CALENDAR_360DAYS ) dpy = 360;
-  else if ( calendar == CALENDAR_365DAYS ) dpy = 365;
-  else if ( calendar == CALENDAR_366DAYS ) dpy = 366;
-
-  return (dpy);
-}
-
-
-int days_per_month(int calendar, int year, int month)
-{
-  int dayspermonth = 0;
-  int *dpm = NULL;
-  int dpy;
-
-  dpy = calendar_dpy(calendar);
-
-  if      ( dpy == 360 ) dpm = month_360;
-  else if ( dpy == 365 ) dpm = month_365;
-  else                   dpm = month_366;
-
-  if ( month >= 1 && month <= 12 )
-    dayspermonth = dpm[month-1];
-  else
-    fprintf(stderr, "days_per_month: month %d out of range\n", month);
-
-  if ( dpy == 0 && month == 2 )
-    {
-      if ( (year%4 == 0 && year%100 != 0) || year%400 == 0 )
-	dayspermonth = 29;
-      else
-	dayspermonth = 28;
-    }
-
-  return (dayspermonth);
-}
-
-
-int days_per_year(int calendar, int year)
-{
-  int daysperyear;
-  int dpy;
-
-  dpy = calendar_dpy(calendar);
-
-  if ( dpy == 0 )
-    {
-      if ( year == 1582 )
-	dpy = 355;
-      else if ( (year%4 == 0 && year%100 != 0) || year%400 == 0 )
-	dpy = 366;
-      else
-	dpy = 365;
-    }
-
-  daysperyear = dpy;
-  
-  return (daysperyear);
-}
-
-
-int encode_juldays(int dpy, int date)
-{
-  int juldays;
+  int julday;
   int year, month, day;
 
   decode_date(date, &year, &month, &day);
 
-  if ( dpy == 360 || dpy == 365 || dpy == 366 )
-    juldays = encode_days(dpy, year, month, day);
-  else
-    juldays = gregdate_to_julday(year, month, day);
+  julday = encode_julday(year, month, day);
 
-  return (juldays);
+  return (julday);
 }
 
 
-int decode_juldays(int dpy, int juldays)
+int julday_to_date(int julday)
 {
   int date;
   int year, month, day;
 
-  if ( dpy == 360 || dpy == 365 || dpy == 366 )
-    decode_days(dpy, juldays, &year, &month, &day);
-  else
-    julday_to_gregdate(juldays, &year, &month, &day);
+  decode_julday(julday, &year, &month, &day);
 
   date = encode_date(year, month, day);
 
@@ -261,7 +142,7 @@ int decode_juldays(int dpy, int juldays)
 }
 
 
-int encode_secofday(int time)
+int time_to_sec(int time)
 {
   int secofday;
   int hour, minute;
@@ -274,7 +155,7 @@ int encode_secofday(int time)
 }
 
 
-int decode_secofday(int secofday)
+int sec_to_time(int secofday)
 {
   int time;
   int hour, minute;
@@ -288,7 +169,7 @@ int decode_secofday(int secofday)
 }
 
 
-void julian_add_seconds(int dpy, int seconds, int *juldays, int *secofday)
+void julday_add_seconds(int seconds, int *julday, int *secofday)
 {
   int days;
 
@@ -298,21 +179,73 @@ void julian_add_seconds(int dpy, int seconds, int *juldays, int *secofday)
 
   *secofday -= days*86400;
 
-  *juldays += days;
+  *julday += days;
 }
 
-#define TEST
+/* add days and secs to julday/secofday */
+void julday_add(int days, int secs, int *julday, int *secofday)
+{
+  int mdays;
+
+  *julday += days;
+  *secofday += secs;
+
+  mdays = *secofday/86400;
+
+  if ( mdays > 0 )
+    {
+      *julday += mdays;
+      *secofday -= mdays*86400;
+    }
+}
+
+/* subtract julday1/secofday1 from julday2/secofday2 and returns the result in seconds */
+int julday_sub(int julday1, int secofday1, int julday2, int secofday2, int *days, int *secs)
+{
+  int seconds;
+
+  *days = julday2 - julday1;
+  *secs = secofday2 - secofday1;
+
+  if ( *secs < 0 )
+    {
+      *days -= 1;
+      *secs += 86400;
+    }
+
+  seconds = *days*86400 + *secs;
+
+  return (seconds);
+}
+
+
+void encode_juldaysec(int year, int month, int day, int hour, int minute, int *julday, int *secofday)
+{
+  *julday = encode_julday(year, month, day);
+
+  *secofday = (hour*60 + minute)*60;
+}
+
+
+void decode_juldaysec(int julday, int secofday, int *year, int *month, int *day, int *hour, int *minute)
+{
+  decode_julday(julday, year, month, day);
+
+  *hour   = secofday/3600;
+  *minute = secofday/60 - *hour*60;
+}
+
+
 #ifdef TEST
 int main(void)
 {
   int nmin;
   int vdate0, vtime0;
   int vdate, vtime;
-  int dpy = 0;
   int ijulinc;
   int i, j = 0;
   int year, mon, day, hour, min;
-  int juldays, secofday;
+  int julday, secofday;
 
   /* 1 - Check valid range of years */
 
@@ -327,15 +260,15 @@ int main(void)
       decode_date(vdate0, &year, &mon, &day);
       decode_time(vtime0, &hour, &min);
 
-      juldays  = encode_juldays(dpy, vdate0);
-      secofday = encode_secofday(vtime0);
+      julday  = date_to_julday(vdate0);
+      secofday = time_to_sec(vtime0);
 
-      vdate = decode_juldays(dpy, juldays);
-      vtime = decode_secofday(secofday);
+      vdate = julday_to_date(julday);
+      vtime = sec_to_time(secofday);
 
       if ( vdate0 != vdate || vtime0 != vtime )
 	printf("%4d %8d %4d %8d %4d %9d %9d\n",
-	       ++j, vdate0, vtime0, vdate, vtime, juldays, secofday);
+	       ++j, vdate0, vtime0, vdate, vtime, julday, secofday);
 
       year++;
       vdate0 = encode_date(year, mon, day);
@@ -353,8 +286,8 @@ int main(void)
 
   printf("start time: %8d %4d\n", vdate0, vtime0);
 
-  juldays = encode_juldays(dpy, vdate0);
-  secofday = encode_secofday(vtime0);
+  julday = date_to_julday(vdate0);
+  secofday = time_to_sec(vtime0);
   for ( i = 0; i < nmin; i++ )
     {
       decode_date(vdate0, &year, &mon, &day);
@@ -381,13 +314,13 @@ int main(void)
       vdate0 = encode_date(year, mon, day);
       vtime0 = encode_time(hour, min);
 
-      julian_add_seconds(dpy, ijulinc, &juldays, &secofday);
+      julday_add_seconds(ijulinc, &julday, &secofday);
 
-      vdate = decode_juldays(dpy, juldays);
-      vtime = decode_secofday(secofday);
+      vdate = julday_to_date(julday);
+      vtime = sec_to_time(secofday);
       if ( vdate0 != vdate || vtime0 != vtime )
 	printf("%4d %8d %4d %8d %4d %9d %9d\n",
-	       ++j, vdate0, vtime0, vdate, vtime, juldays, secofday);
+	       ++j, vdate0, vtime0, vdate, vtime, julday, secofday);
     }
 
   printf("stop time: %8d %4d\n", vdate0, vtime0);
@@ -397,33 +330,10 @@ int main(void)
 #endif
 
 
-void encode_calendar(int dpy, int year, int month, int day, int hour, int minute, int *juldays, int *secofday)
-{
-  if ( dpy == 360 || dpy == 365 || dpy == 366 )
-    *juldays = encode_days(dpy, year, month, day);
-  else
-    *juldays = gregdate_to_julday(year, month, day);
-
-  *secofday = (hour*60 + minute)*60;
-}
-
-
-void decode_calendar(int dpy, int juldays, int secofday, int *year, int *month, int *day, int *hour, int *minute)
-{
-  if ( dpy == 360 || dpy == 365 || dpy == 366 )
-    decode_days(dpy, juldays, year, month, day);
-  else
-    julday_to_gregdate(juldays, year, month, day);
-
-  *hour   = secofday/3600;
-  *minute = secofday/60 - *hour*60;
-}
-
-
 #ifdef TEST2
 int main(void)
 {
-  int i, dpy = -1;
+  int i;
   int julday, secofday;
   int year, month, day, hour, minute;
   int value = 30;
@@ -431,20 +341,19 @@ int main(void)
 
   year=1979; month=1; day=15; hour=12; minute=30;
 
-  printf("dpy = %d\n", dpy);
   printf("%d/%02d/%02d %02d:%02d\n", year, month, day, hour, minute);
 
-  encode_calendar(dpy, year, month, day, hour, minute, &julday, &secofday);
+  encode_juldaysec(year, month, day, hour, minute, &julday, &secofday);
 
-  decode_calendar(dpy, julday, secofday, &year, &month, &day, &hour, &minute);
+  decode_juldaysec(julday, secofday, &year, &month, &day, &hour, &minute);
   printf("%d/%02d/%02d %02d:%02d   %d %d\n", year, month, day, hour, minute, julday, secofday);
 
   for ( i = 0; i < 420; i++ )
     {
 
-      decode_calendar(dpy, julday, secofday, &year, &month, &day, &hour, &minute);
+      decode_juldaysec(julday, secofday, &year, &month, &day, &hour, &minute);
       printf("%2d %d/%02d/%02d %02d:%02d\n", i, year, month, day, hour, minute);
-      julian_add_seconds(dpy, value*factor, &julday, &secofday);
+      julday_add_seconds(value*factor, &julday, &secofday);
     }
 
   return (0);

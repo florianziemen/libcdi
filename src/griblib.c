@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Mon Mar  5 09:59:41 CET 2007 */
+/* Generated automatically from m214003 on Thu Jul 19 14:54:00 CEST 2007 */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -13,7 +13,7 @@
 #include "file.h"
 #include "dmemory.h"
 #include "dtypes.h"
-#include "calendar.h"
+#include "timebase.h"
 
 #ifndef _GRIB_INT_H
 #define _GRIB_INT_H
@@ -926,7 +926,7 @@ int gribRefDate(int *isec1)
   rmonth  = ISEC1_Month;
   rday    = ISEC1_Day;
 
-  date = ryear*10000 + rmonth*100 + rday;
+  date = encode_date(ryear, rmonth, rday);
 
   return (date) ;
 }
@@ -939,7 +939,7 @@ int gribRefTime(int *isec1)
   rhour   = ISEC1_Hour;
   rminute = ISEC1_Minute;
 
-  time = rhour*100 + rminute;
+  time = encode_time(rhour, rminute);
 
   return (time) ;
 }
@@ -970,10 +970,7 @@ void gribDateTime(int *isec1, int *date, int *time)
   static int lprint = TRUE;
   int ryear, rmonth, rday, rhour, rminute;
   int time_period;
-  double second = 0.0;
-  double rvalue;
-  double add;
-  sUnit unit = {0, 1};
+  int julday, secofday, addsec;
 
   ryear = ISEC1_Year;
 
@@ -1002,14 +999,14 @@ void gribDateTime(int *isec1, int *date, int *time)
     {
       if ( ISEC1_TimeRange == 0 || ISEC1_TimeRange == 10 )
 	{
-	  InvCalendar(ryear, rmonth, rday, rhour, rminute, second, unit, &rvalue);
+	  encode_juldaysec(ryear, rmonth, rday, rhour, rminute, &julday, &secofday);
 
-	  add = 0;
+	  addsec = 0;
 	  switch ( ISEC1_TimeUnit )
 	    {
-	    case ISEC1_TABLE4_MINUTE:  add =    60 * time_period; break;
-	    case ISEC1_TABLE4_HOUR:    add =  3600 * time_period; break;
-	    case ISEC1_TABLE4_DAY:     add = 86400 * time_period; break;
+	    case ISEC1_TABLE4_MINUTE:  addsec =    60 * time_period; break;
+	    case ISEC1_TABLE4_HOUR:    addsec =  3600 * time_period; break;
+	    case ISEC1_TABLE4_DAY:     addsec = 86400 * time_period; break;
 	    default:
 	      if ( lprint )
 		{
@@ -1017,16 +1014,17 @@ void gribDateTime(int *isec1, int *date, int *time)
 		  lprint = FALSE;
 		}
 	    }
-	  rvalue += add;
 
-	  Calendar(rvalue, unit, &ryear, &rmonth, &rday, &rhour, &rminute, &second);
+	  julday_add_seconds(addsec, &julday, &secofday);
+
+	  decode_juldaysec(julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute);
 	}
     }
   /*
   printf("new %d/%d/%d %d:%d\n", ryear, rmonth, rday, rhour, rminute);
   */
-  *date = ryear*10000 + rmonth*100 + rday;
-  *time = rhour*100 + rminute;
+  *date = encode_date(ryear, rmonth, rday);
+  *time = encode_time(rhour, rminute);
 
   return;
 }
@@ -8039,7 +8037,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.5" " of ""Mar  5 2007"" ""09:59:41";
+static const char grb_libvers[] = "1.0.6" " of ""Jul 19 2007"" ""14:54:00";
 
 
 

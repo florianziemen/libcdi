@@ -38,6 +38,9 @@ char *strdup(const char *s);
 #ifndef _BASETIME_H
 #  include "basetime.h"
 #endif
+#ifndef _TIMEBASE_H
+#  include "timebase.h"
+#endif
 #ifndef  _TAXIS_H
 #  include "taxis.h"
 #endif
@@ -280,11 +283,6 @@ void    streamDefDimgroupID(int streamID, int dimgroupID);
 int     streamInqDimgroupID(int streamID);
 
 int getByteswap(int byteorder);
-
-void decode_date(int date, int *year, int *month, int *day);
-int  encode_date(int year, int month, int day);
-void decode_time(int time, int *hour, int *minute);
-int  encode_time(int hour, int minute);
 
 
 #endif  /* _STREAM_INT_H */

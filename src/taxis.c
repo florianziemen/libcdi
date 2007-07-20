@@ -8,6 +8,7 @@
 
 #include "cdi.h"
 #include "stream_int.h"
+#include "calendar.h"
 
 int DefaultTimeType = TAXIS_ABSOLUTE;
 int DefaultTimeUnit = TUNIT_HOUR;
@@ -23,49 +24,6 @@ char *Timeunits[] = {
   "months",
   "years",
 };
-
-
-void decode_date(int date, int *year, int *month, int *day)
-{
-  int idate;
-
-  *year  =  date / 10000;
-  idate  = date - *year*10000;
-  if ( idate < 0 ) idate = -idate;
-  *month = idate / 100;
-  *day   = idate - *month*100;
-}
-
-
-int encode_date(int year, int month, int day)
-{
-  int date;
-  int iyear;
-
-  iyear = year;
-  if ( iyear < 0 ) iyear = -iyear;
-  date = iyear*10000 + month*100 + day;
-  if ( year < 0 ) date = -date;
-
-  return (date);
-}
-
-
-void decode_time(int time, int *hour, int *minute)
-{
-  *hour   =  time / 100;
-  *minute =  time - *hour*100;
-}
-
-
-int encode_time(int hour, int minute)
-{
-  int time;
-
-  time = hour*100 + minute;
-
-  return (time);
-}
 
 
 char *tunitNamePtr(int unitID)
@@ -857,28 +815,102 @@ TAXIS *taxisPtr(int taxisID)
 }
 
 
+void decode_timevalue(int timeunit, double timevalue, int *days, int *secs)
+{
+  static char func[] = "decode_timevalue";
+  static int lwarn = TRUE;
+
+  if ( timeunit == TUNIT_MINUTE )
+    {
+      timevalue *= 60;
+      timeunit = TUNIT_SECOND;
+    }
+  else if ( timeunit == TUNIT_HOUR )
+    {
+      timevalue /= 24;
+      timeunit = TUNIT_DAY;
+    }
+
+  if ( timeunit == TUNIT_SECOND )
+    {
+      *days = (int) (timevalue/86400);
+      *secs = (int) (timevalue - *days*86400.);
+      /*
+      {
+	double cval = *days*86400. + *secs;
+	if ( cval != timevalue )
+	  printf("TUNIT_SECOND error: %g %g %d %d\n", timevalue, cval, *days, *secs);
+      }
+      */
+    }
+  else if ( timeunit == TUNIT_DAY )
+    {
+      *days = (int) timevalue;
+      *secs = (int) ((timevalue - *days)*86400);
+      /*
+      {
+	double cval = *days + *secs/86400.;
+	if ( cval != timevalue )
+	  printf("TUNIT_DAY error: %g %g %d %d\n", timevalue, cval, *days, *secs);
+      }
+      */
+    }
+  else
+    {
+      if ( lwarn )
+	{
+	  Warning(func, "timeunit %s unsupported!", tunitNamePtr(timeunit));
+	  lwarn = FALSE;
+	}
+    }
+}
+
+
+void encode_timevalue(int days, int secs, int timeunit, double *timevalue)
+{
+  static char func[] = "encode_timevalue";
+  static int lwarn = TRUE;
+
+  if ( timeunit == TUNIT_SECOND )
+    {
+      *timevalue = days*86400. + secs;
+    }
+  else if ( timeunit == TUNIT_MINUTE )
+    {
+      *timevalue = days*1440. + secs/60.;
+    }
+  else if ( timeunit == TUNIT_HOUR )
+    {
+      *timevalue = days*24. + secs/3600.;
+    }
+  else if ( timeunit == TUNIT_DAY )
+    {
+      *timevalue = days + secs/86400.;
+    }
+  else
+    {
+      if ( lwarn )
+	{
+	  Warning(func, "timeunit %s unsupported!", tunitNamePtr(timeunit));
+	  lwarn = FALSE;
+	}
+    }
+}
+
+
 void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
 {
-  static char func[] = "timeval2vtime";
   int year, month, day, hour, minute;
   int rdate, rtime;
-  sUnit tunit = {0, 1};
-  double value, factor = 1;
   int timeunit;
-  int calendar, dpy = 0;
-  double second = 0;
-  static int lwarn = TRUE;
+  int calendar;
+  int julday, secofday, days, secs;
 
   *vdate = 0;
   *vtime = 0;
 
   timeunit = (*taxis).unit;
   calendar = (*taxis).calendar;
-
-  if      ( calendar == CALENDAR_360DAYS )   dpy = 360;
-  else if ( calendar == CALENDAR_365DAYS )   dpy = 365;
-  else if ( calendar == CALENDAR_366DAYS )   dpy = 366;
-  else if ( calendar == CALENDAR_PROLEPTIC ) dpy = -1;
 
   rdate  = (*taxis).rdate;
   rtime  = (*taxis).rtime;
@@ -896,31 +928,13 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
     }
   else
     {
-      switch ( timeunit )
-	{
-	case TUNIT_SECOND: factor =     1.0; break;
-	case TUNIT_MINUTE: factor =    60.0; break;
-	case TUNIT_HOUR:   factor =  3600.0; break;
-	case TUNIT_DAY:    factor = 86400.0; break;
-	default:
-	  if ( lwarn )
-	    {
-	      Warning(func, "timeunit %s unsupported!", tunitNamePtr(timeunit));
-	      lwarn = FALSE;
-	    }
-	}
+      encode_caldaysec(calendar, year, month, day, hour, minute, &julday, &secofday);
 
-      /* attention: used offset of 1 second to prevent rounding errors */
-      cdiInvCalendar(dpy, year, month, day, hour, minute, 1.0, tunit, &value);
+      decode_timevalue(timeunit, timevalue, &days, &secs);
 
-      if ( timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR )
-	timevalue = value;
-      else
-	tunit.origin = value;
+      julday_add(days, secs, &julday, &secofday);
 
-      tunit.factor = factor;
-
-      cdiCalendar(dpy, timevalue, tunit, &year, &month, &day, &hour, &minute, &second);
+      decode_caldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute);
     }
 
   *vdate = encode_date(year, month, day);
@@ -930,23 +944,16 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
 
 double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
 {
-  static char func[] = "vtime2timeval";
   int ryear, rmonth;
   int year, month, day, hour, minute;
   int rdate, rtime;
-  sUnit tunit = {0, 1};
   double value;
   int timeunit;
-  int calendar, dpy = 0;
-  static int lwarn = TRUE;
+  int calendar;
+  int julday1, secofday1, julday2, secofday2, days, secs;
 
   timeunit = (*taxis).unit;
   calendar = (*taxis).calendar;
-
-  if      ( calendar == CALENDAR_360DAYS )   dpy = 360;
-  else if ( calendar == CALENDAR_365DAYS )   dpy = 365;
-  else if ( calendar == CALENDAR_366DAYS )   dpy = 366;
-  else if ( calendar == CALENDAR_PROLEPTIC ) dpy = -1;
 
   rdate = (*taxis).rdate;
   rtime = (*taxis).rtime;
@@ -959,9 +966,7 @@ double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
   decode_date(rdate, &ryear, &rmonth, &day);
   decode_time(rtime, &hour, &minute);
 
-  cdiInvCalendar(dpy, ryear, rmonth, day, hour, minute, 0.0, tunit, &value);
-  tunit.origin = value;
-  tunit.factor = 60.0;
+  encode_caldaysec(calendar, ryear, rmonth, day, hour, minute, &julday1, &secofday1);
       
   decode_date(vdate, &year, &month, &day);
   decode_time(vtime, &hour, &minute);
@@ -973,21 +978,11 @@ double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
     }
   else
     {
-      switch ( timeunit )
-	{
-	case TUNIT_SECOND: tunit.factor =      1.0; break;
-	case TUNIT_MINUTE: tunit.factor =     60.0; break;
-	case TUNIT_HOUR:   tunit.factor =   3600.0; break;
-	case TUNIT_DAY:    tunit.factor =  86400.0; break;
-	default:
-	  if ( lwarn )
-	    {
-	      Warning(func, "timeunit %s unsupported!", tunitNamePtr(timeunit));
-	      lwarn = FALSE;
-	    }
-	}
+      encode_caldaysec(calendar, year, month, day, hour, minute, &julday2, &secofday2);
 
-      cdiInvCalendar(dpy, year, month, day, hour, minute, 0.0, tunit, &value);
+      julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
+
+      encode_timevalue(days, secs, timeunit, &value);
     }
 
   return (value);
