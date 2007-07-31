@@ -1,5 +1,7 @@
 
-/* Generated automatically from m214003 on Thu Jul 19 14:54:00 CEST 2007 */
+/* Generated automatically from m214003 on Tue Jul 31 09:15:55 CEST 2007 */
+
+/* GRIBLIB_VERSION="1.0.6" */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -919,7 +921,12 @@ int gribRefDate(int *isec1)
 
   ryear = ISEC1_Year;
   if ( ryear != 255 )
-    ryear = ((ISEC1_Century-1)*100 + ISEC1_Year);
+    {
+      if ( ISEC1_Century > 127 )
+	ryear = ((ISEC1_Century-1-256)*100 + ISEC1_Year);
+      else
+	ryear = ((ISEC1_Century-1)*100 + ISEC1_Year);
+    }
   else
     ryear = 1;
 
@@ -977,7 +984,12 @@ void gribDateTime(int *isec1, int *date, int *time)
   if ( ISEC1_Century )
     {
       if ( ryear != 255 )
-	ryear = ((ISEC1_Century-1)*100 + ISEC1_Year);
+	{
+	  if ( ISEC1_Century > 127 )
+	    ryear = ((ISEC1_Century-1-256)*100 + ISEC1_Year);
+	  else
+	    ryear = ((ISEC1_Century-1)*100 + ISEC1_Year);
+	}
       else
 	ryear = 1;
     }
@@ -8037,7 +8049,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.6" " of ""Jul 19 2007"" ""14:54:00";
+static const char grb_libvers[] = "1.0.6" " of ""Jul 31 2007"" ""09:15:56";
 
 
 

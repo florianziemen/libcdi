@@ -999,8 +999,11 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
     {
       timevalue /= 24;
       vdate = (int) timevalue;
-      vtime = (int) ((timevalue - vdate)*1440 + 0.01);
-
+      if ( vdate < 0 )
+	vtime = (int) (-(timevalue - vdate)*1440 + 0.01);
+      else
+	vtime = (int) ((timevalue - vdate)*1440 + 0.01);
+ 
       hour   = vtime / 60;
       minute = vtime - hour*60;
       vtime  = hour*100 + minute;
@@ -1008,7 +1011,10 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
   else if ( timeunit == TUNIT_DAY )
     {
       vdate = (int) timevalue;
-      vtime = (int) ((timevalue - vdate)*1440 + 0.01);
+      if ( vdate < 0 )
+	vtime = (int) (-(timevalue - vdate)*1440 + 0.01);
+      else
+	vtime = (int) ((timevalue - vdate)*1440 + 0.01);
 
       hour   = vtime / 60;
       minute = vtime - hour*60;
@@ -1052,7 +1058,10 @@ double encode_timeval(int date, int time, TAXIS *taxis)
 	{
 	  int hour   = time / 100;
 	  int minute = time - hour*100;
-	  timevalue = date + (hour*60 + minute)/1440.;
+	  if ( date < 0 )
+	    timevalue = -(-date + (hour*60 + minute)/1440.);
+	  else
+	    timevalue = date + (hour*60 + minute)/1440.;
 	}
     }
   else

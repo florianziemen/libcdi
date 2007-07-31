@@ -15,9 +15,15 @@ rm -f ${PROG}
 
 DATE=`date`
 
+if test -f config.h ; then
+   CDILIBVERSION=`grep PACKAGE_VERSION config.h | cut -f3 -d" "`
+fi
+
 cat > ${PROG} << EOR
 
 /* Generated automatically from $USER on $DATE */
+
+/* CDILIB_VERSION=$CDILIBVERSION */
 
 #if  defined  (HAVE_CONFIG_H)
 #  include "config.h"
@@ -99,6 +105,7 @@ cat $c | grep -v '#include' >> ${PROG}
 
 if test -f config.h ; then
    cpp -P -DHAVE_CONFIG_H  version.c >>  ${PROG}
+   CDIVERSION=`grep PACKAGE_VERSION config.h | cut -f3 -d" "`
 else
    echo "error: missing config.h"
 fi

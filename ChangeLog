@@ -4,6 +4,7 @@
 	* replace calendar module by a new one because of date/time problems
 	  with years < 0 [report: Veronika Gayler]
 	* add module timebase
+	* taxis: add support for years less than zero
 	* use always decode_date and encode_date to decode/encode date
 	* Version 1.0.8 released
 
