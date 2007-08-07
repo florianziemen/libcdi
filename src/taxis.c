@@ -835,6 +835,7 @@ void decode_timevalue(int timeunit, double timevalue, int *days, int *secs)
     {
       *days = (int) (timevalue/86400);
       *secs = (int) (timevalue - *days*86400.);
+      if ( *secs < 0 ) { *days -= 1; *secs += 86400; };
       /*
       {
 	double cval = *days*86400. + *secs;
@@ -847,6 +848,7 @@ void decode_timevalue(int timeunit, double timevalue, int *days, int *secs)
     {
       *days = (int) timevalue;
       *secs = (int) ((timevalue - *days)*86400);
+      if ( *secs < 0 ) { *days -= 1; *secs += 86400; };
       /*
       {
 	double cval = *days + *secs/86400.;
@@ -967,7 +969,7 @@ double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
   decode_time(rtime, &hour, &minute);
 
   encode_caldaysec(calendar, ryear, rmonth, day, hour, minute, &julday1, &secofday1);
-      
+
   decode_date(vdate, &year, &month, &day);
   decode_time(vtime, &hour, &minute);
 
