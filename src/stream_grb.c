@@ -1791,6 +1791,8 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
 
   ISEC2_Reduced = FALSE;
 
+  ISEC2_ScanFlag = 0;
+
   switch (gridtype)
     {
     case GRID_LONLAT:
@@ -1851,6 +1853,12 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
 	    ISEC2_LonSP =   NINT((gridInqXpole(gridID) + 180) * 1000);
 	  }
 
+	/* East -> West */
+	if ( ISEC2_LastLon < ISEC2_FirstLon ) ISEC2_ScanFlag += 1;
+
+	/* South -> North */
+	if ( ISEC2_LastLat > ISEC2_FirstLat ) ISEC2_ScanFlag += 2;
+
 	break;
       }
     case GRID_SPECTRAL:
@@ -1880,8 +1888,6 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
     default:
       Error(func, "%s grid unsupported!", gridNamePtr(gridtype));
     }
-
-  ISEC2_ScanFlag = 0;
 }
 
 
