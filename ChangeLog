@@ -1,6 +1,7 @@
 2007-09-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
         * using GRIB library version 1.0.6
+	* stream_grb:grbDefGrid use ISEC2_ScanFlag [request: Alex Kann]
 	* replace calendar module by a new one because of date/time problems
 	  with years < 0 [report: Veronika Gayler]
 	* add module timebase

@@ -1598,7 +1598,7 @@ int gridInqYvals(int gridID, double *yvals)
     size = gridptr->ysize;
 
   if ( CDI_Debug && size == 0 )
-    Warning(func, "size undefined for gridID = %d", gridID);
+    Warning(func, "Size undefined for gridID = %d!", gridID);
     
   if ( yvals && gridptr->yvals )
     for ( i = 0; i < size; i++ )
@@ -1644,12 +1644,12 @@ void gridDefYvals(int gridID, double *yvals)
     size = gridptr->ysize;
 
   if ( size == 0 )
-    Error(func, "size undefined for gridID = %d", gridID);
+    Error(func, "Size undefined for gridID = %d!", gridID);
     
   if ( gridptr->yvals == NULL )
     gridptr->yvals = (double *) malloc(size*sizeof(double));
   else if ( CDI_Debug )
-    Warning(func, "values allready defined!");
+    Warning(func, "Values allready defined!");
     
   for ( i = 0; i < size; i++ )
     gridptr->yvals[i] = yvals[i];
@@ -2348,6 +2348,23 @@ int gridGenerate(GRID grid)
       {
 	gridDefYsize(gridID, grid.ysize);
 	gridDefRowlon(gridID, grid.ysize, grid.rowlon);
+
+	if ( grid.ydef == 1 )
+	  {
+	    gridDefYvals(gridID, grid.yvals);
+	    if ( grid.ybounds && grid.nvertex )
+	      gridDefYbounds(gridID, grid.ybounds);
+	  }
+	else if ( grid.ydef == 2 )
+	  {
+	    double *yvals = (double *) malloc(grid.ysize*sizeof(double));
+	    gridGenYvals(grid.type, grid.ysize, grid.yfirst, grid.ylast, grid.yinc, yvals);
+	    gridDefYvals(gridID, yvals);
+	    free(yvals);
+	    /*
+	    gridDefYinc(gridID, grid.yinc);
+	    */
+	  }
 	break;
       }
     case GRID_SPECTRAL:

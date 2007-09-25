@@ -634,26 +634,36 @@ static void setDefaultFileType(char *filetypestr)
 {
   if ( filetypestr )
     {
-      if      ( strncmp(filetypestr, "grb",  3) == 0 ) DefaultFileType = FILETYPE_GRB;
-      else if ( strncmp(filetypestr, "nc2",  3) == 0 ) DefaultFileType = FILETYPE_NC2;
-      else if ( strncmp(filetypestr, "nc",   2) == 0 ) DefaultFileType = FILETYPE_NC;
-      else if ( strncmp(filetypestr, "srv",  3) == 0 ) DefaultFileType = FILETYPE_SRV;
-      else if ( strncmp(filetypestr, "ext",  3) == 0 ) DefaultFileType = FILETYPE_EXT;
-      else if ( strncmp(filetypestr, "ieg",  3) == 0 ) DefaultFileType = FILETYPE_IEG;
+      char *ftstr = filetypestr;
+
+      if      ( strncmp(filetypestr, "grb", 3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_GRB; }
+      else if ( strncmp(filetypestr, "nc2", 3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC2; }
+      else if ( strncmp(filetypestr, "nc",  2)  == 0 ) { ftstr += 2; DefaultFileType = FILETYPE_NC;  }
+      else if ( strncmp(filetypestr, "srv", 3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_SRV; }
+      else if ( strncmp(filetypestr, "ext", 3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_EXT; }
+      else if ( strncmp(filetypestr, "ieg", 3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_IEG; }
       else
 	{
 	  fprintf(stderr, "Unsupported filetype %s!\n", filetypestr);
-	  fprintf(stderr, "Available filetypes are grb, nc, srv, ext, ieg.\n");
-	  exit(-1);
+	  fprintf(stderr, "Available filetypes: grb, nc, nc2, srv, ext and ieg\n");
+	  exit(EXIT_FAILURE);
 	}
 
-      if ( DefaultFileType != CDI_UNDEFID )
+      if ( DefaultFileType != CDI_UNDEFID && *ftstr != 0 )
 	{
-	  if ( (filetypestr = strchr(filetypestr, '_' )) )
+	  if ( *ftstr == '_' )
 	    {
-	      filetypestr++;
+	      ftstr++;
 
-	      setDefaultDataType(filetypestr);
+	      setDefaultDataType(ftstr);
+	    }
+	  else
+	    {
+	      fprintf(stderr, "Unexpected character >%c< in file type >%s<!\n", *ftstr, filetypestr);
+	      fprintf(stderr, "Use format[_nbits] with:\n");
+	      fprintf(stderr, "    format = grb, nc, nc2, srv, ext or ieg\n");
+	      fprintf(stderr, "    nbits  = 32/64 for nc, nc2, srv, ext, ieg; 1 - 32 for grb\n");
+	      exit(EXIT_FAILURE);
 	    }
 	}
     }

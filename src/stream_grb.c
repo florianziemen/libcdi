@@ -1854,10 +1854,10 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
 	  }
 
 	/* East -> West */
-	if ( ISEC2_LastLon < ISEC2_FirstLon ) ISEC2_ScanFlag += 1;
+	if ( ISEC2_LastLon < ISEC2_FirstLon ) ISEC2_ScanFlag += 128;
 
 	/* South -> North */
-	if ( ISEC2_LastLat > ISEC2_FirstLat ) ISEC2_ScanFlag += 2;
+	if ( ISEC2_LastLat > ISEC2_FirstLat ) ISEC2_ScanFlag += 64;
 
 	break;
       }
