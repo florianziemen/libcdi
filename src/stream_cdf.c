@@ -2073,6 +2073,8 @@ int cdfDefVar(int streamID, int varID)
   int gridindex, zaxisindex;
   int tablenum;
   int vlistID;
+  int iax = 0;
+  char axis[5];
   STREAM *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -2104,7 +2106,9 @@ int cdfDefVar(int streamID, int varID)
     {
       if ( tid == UNDEFID ) Error(func, "Internal problem! Time undefined.");
       dims[ndims++] = tid;
+      axis[iax++] = 't';
     }
+  if ( zid != UNDEFID ) axis[iax++] = 'z';
   if ( zid != UNDEFID ) dims[ndims++] = zid;
   if ( yid != UNDEFID ) dims[ndims++] = yid;
   if ( xid != UNDEFID ) dims[ndims++] = xid;
@@ -2210,6 +2214,9 @@ int cdfDefVar(int streamID, int varID)
     {
       int gridTruncation = gridInqTrunc(gridID);
 
+      axis[iax++] = '-';
+      axis[iax++] = '-';
+      cdf_put_att_text(fileID, ncvarid, "axis", iax, axis);
       cdf_put_att_int(fileID, ncvarid, "truncation", NC_INT, 1L, &gridTruncation);
     }
 

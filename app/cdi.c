@@ -302,13 +302,10 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 
 	  fprintf(stdout, " %-3s", pstr);
 
-	  if ( prec > 0 && prec <= 32 )
-	    {
-	      if ( vlistInqVarSzip(vlistID, varID) )
-		fprintf(stdout, "z");
-	      else
-		fprintf(stdout, " ");
-	    }
+	  if ( vlistInqVarSzip(vlistID, varID) )
+	    fprintf(stdout, "z");
+	  else
+	    fprintf(stdout, " ");
 
 	  fprintf(stdout, "%9d", gridsize);
 
