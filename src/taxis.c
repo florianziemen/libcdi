@@ -902,11 +902,13 @@ void encode_timevalue(int days, int secs, int timeunit, double *timevalue)
 
 void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
 {
+  static char func[] = "timeval2vtime";
   int year, month, day, hour, minute;
   int rdate, rtime;
   int timeunit;
   int calendar;
   int julday, secofday, days, secs;
+  static int lwarn = TRUE;
 
   *vdate = 0;
   *vtime = 0;
@@ -923,6 +925,12 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
     {
       if ( timeunit == TUNIT_YEAR ) timevalue *= 12;
 
+      if ( (NINT(timevalue*10))%10 && lwarn )
+	{
+	  Warning(func, "Possible wrong calculation of date/time!\nTime offset must be integer for time unit MONTH and YEAR!");
+	  lwarn = FALSE;
+	}
+      
       month += NINT(timevalue);
 
       while ( month > 12 ) { month -= 12; year++; }
