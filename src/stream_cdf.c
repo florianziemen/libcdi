@@ -1673,8 +1673,7 @@ void cdfDefVCT(int streamID, int zaxisID)
   streamptr = stream_to_pointer(streamID);
 
   type = zaxisInqType(zaxisID);
-
-  if ( type == ZAXIS_HYBRID )
+  if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
     {
       int i;
       int fileID;
@@ -1852,12 +1851,12 @@ void cdfDefZaxis(int streamID, int zaxisID)
 
       if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
 	{
-	  size_t ilev = zaxisInqVctSize(zaxisID)/2;
-	  size_t mlev = ilev - 1;
+	  int ilev = zaxisInqVctSize(zaxisID)/2;
+	  int mlev = ilev - 1;
 
 	  if ( type == ZAXIS_HYBRID )
 	    {
-	      if ( (int) mlev != dimlen )
+	      if (  mlev != dimlen )
 		{
 		  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
@@ -1888,7 +1887,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
 
 	  if ( type == ZAXIS_HYBRID_HALF )
 	    {
-	      if ( (int) ilev != dimlen )
+	      if ( ilev != dimlen )
 		{
 		  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 

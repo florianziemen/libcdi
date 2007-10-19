@@ -686,7 +686,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
 	      zaxisDefUbounds(zaxisID, levels2);
 	    }
 
-	  if ( zaxistype == ZAXIS_HYBRID )
+	  if ( zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF )
 	    {
 	      /* if ( vctsize > 0 && vctsize >= 2*(nlevels+1)) */
 	      /* if ( vctsize > 0 && vctsize >= 2*(nlevels)) */

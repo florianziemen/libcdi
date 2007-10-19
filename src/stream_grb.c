@@ -1920,6 +1920,7 @@ void grbDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID
 	break;
       }
     case ZAXIS_HYBRID:
+    case ZAXIS_HYBRID_HALF:
       {
 	int vctsize;
 
