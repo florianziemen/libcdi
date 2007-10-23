@@ -1,4 +1,4 @@
-2007-09-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+2007-10-22  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
         * using GRIB library version 1.0.6
 	* stream_grb:grbDefGrid use ISEC2_ScanFlag [request: Alex Kann]
