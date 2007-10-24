@@ -1,7 +1,7 @@
 
-/* Generated automatically from m214003 on Tue Jul 31 09:15:55 CEST 2007 */
+/* Generated automatically from m214003 on Wed Oct 24 15:20:09 CEST 2007 */
 
-/* GRIBLIB_VERSION="1.0.6" */
+/* GRIBLIB_VERSION="1.0.7" */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -212,6 +212,13 @@ void  gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 #define  GDS_LatSP           GET_INT3(gds[32], gds[33], gds[34])
 #define  GDS_LonSP           GET_INT3(gds[35], gds[36], gds[37])
 #define  GDS_RotAngle        GET_Real(&(gds[38]))
+
+/* Lambert */
+#define  GDS_LoV             GET_INT3(gds[17], gds[18], gds[19])
+#define  GDS_Xinc            GET_INT3(gds[20], gds[21], gds[22])
+#define  GDS_Yinc            GET_INT3(gds[23], gds[24], gds[25])
+#define  GDS_LatS1           GET_INT3(gds[28], gds[29], gds[30])
+#define  GDS_LatS2           GET_INT3(gds[31], gds[32], gds[33])
 
 /* Section 3: Bit Map Section (BMS) */
 
@@ -2920,12 +2927,15 @@ void encodePDS(GRIBPACK *lpds, int pdsLen, int *isec1)
 
 void encodeGDS(GRIBPACK *lGrib, int *gribLen, int *isec2, double *fsec2)
 {
+  static char func[] = "encodeGDS";
   int z = *gribLen;
   int exponent, mantissa;
   int i;
   int ival;
   int pvoffset = 255;
   int gdslen = 32;
+
+  if ( ISEC2_GridType == GTYPE_LAMBERT ) gdslen += 10;
 
   if ( ISEC2_GridType == GTYPE_LATLON_ROT )  gdslen += 10;
 
@@ -2962,7 +2972,26 @@ void encodeGDS(GRIBPACK *lGrib, int *gribLen, int *isec2, double *fsec2)
       Put1Byte(ISEC2_GME_BFlag);
       PutnZero(5);
     }
-  else
+  else if ( ISEC2_GridType == GTYPE_LAMBERT )
+    {
+      Put2Byte(ISEC2_NumLon);          /*  6- 7 Longitudes               */
+
+      Put2Byte(ISEC2_NumLat);          /*  8- 9 Latitudes                */
+      Put3Int(ISEC2_FirstLat);
+      Put3Int(ISEC2_FirstLon);
+      Put1Byte(ISEC2_ResFlag);         /* 16    Resolution flag          */
+      Put3Int(ISEC2_LoV);              /* 17-19 */
+      Put3Int(ISEC2_Xinc);             /* 20-22 */
+      Put3Int(ISEC2_Yinc);             /* 23-25 */
+      PutnZero(1);
+      Put1Byte(ISEC2_ScanFlag);        /* 27    Scanning mode            */
+      Put3Int(ISEC2_LatS1);            /* 28-30 */  
+      Put3Int(ISEC2_LatS2);            /* 31-33 */
+      PutnZero(8);                     /* 34-41 */
+    }
+  else if ( ISEC2_GridType == GTYPE_LATLON    ||
+	    ISEC2_GridType == GTYPE_GAUSSIAN  ||
+	    ISEC2_GridType == GTYPE_LATLON_ROT )
     {
       Put2Byte(ISEC2_NumLon);          /*  6- 7 Longitudes               */
 
@@ -2987,6 +3016,10 @@ void encodeGDS(GRIBPACK *lGrib, int *gribLen, int *isec2, double *fsec2)
 	  Put3Int(ISEC2_LonSP);
 	  Put1Real(FSEC2_RotAngle);
 	}
+    }
+  else
+    {
+      Error(func, "Unsupported grid type %d", ISEC2_GridType);
     }
 
 #if defined (SX)
@@ -4029,6 +4062,20 @@ static int decodeGDS(unsigned char  *gds, int *isec0, int *isec2, double *fsec2,
       /*
       iret = decodeGDS_LL(gds, gdspos, isec0, isec2, imisng);
       */
+    }
+  else if ( ISEC2_GridType == GTYPE_LAMBERT )
+    {
+      ISEC2_NumLon    = GDS_NumLon;
+      ISEC2_NumLat    = GDS_NumLat;
+      ISEC2_FirstLat  = GDS_FirstLat;
+      ISEC2_FirstLon  = GDS_FirstLon;
+      ISEC2_ResFlag   = GDS_ResFlag;
+      ISEC2_LoV       = GDS_LoV;
+      ISEC2_Xinc      = GDS_Xinc;
+      ISEC2_Yinc      = GDS_Yinc;
+      ISEC2_LatS1     = GDS_LatS1;
+      ISEC2_LatS2     = GDS_LatS2;
+      ISEC2_ScanFlag  = GDS_ScanFlag;
     }
   else if ( ISEC2_GridType == GTYPE_SPECTRAL )
     {
@@ -8049,7 +8096,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.6" " of ""Jul 31 2007"" ""09:15:56";
+static const char grb_libvers[] = "1.0.7" " of ""Oct 24 2007"" ""15:20:10";
 
 
 

@@ -32,6 +32,7 @@ char *Grids[] = {
   "trajectory",
   "cell",
   "curvilinear",
+  "lambert",
 };
 
 
@@ -181,6 +182,9 @@ static void grid_init_entry(GRID *gridptr)
   gridptr->nrowlon      = 0;
   gridptr->xinc         = 0.0;
   gridptr->yinc         = 0.0;
+  gridptr->lov          = 0.0;
+  gridptr->lats1        = 0.0;
+  gridptr->lats2        = 0.0;
   gridptr->trunc        = 0;
   gridptr->nvertex      = 0;
   gridptr->nd           = 0;
@@ -2280,6 +2284,7 @@ int gridGenerate(GRID grid)
     case GRID_CELL:
     case GRID_CURVILINEAR:
     case GRID_GENERIC:
+    case GRID_LAMBERT:
       {
 	if ( grid.xsize > 0 ) gridDefXsize(gridID, grid.xsize);
 	if ( grid.ysize > 0 ) gridDefYsize(gridID, grid.ysize);

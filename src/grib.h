@@ -33,6 +33,7 @@
 #define  GTYPE_GAUSSIAN_ROT         14  /*  rotated gaussian grid                    */
 #define  GTYPE_GAUSSIAN_STR         24  /*  stretched gaussian grid                  */
 #define  GTYPE_GAUSSIAN_ROTSTR      34  /*  rotated and stretched gaussian grid      */
+#define  GTYPE_LAMBERT               3  /*  Lambert conformal                        */
 #define  GTYPE_SPECTRAL             50  /*  spherical harmonics                      */
 #define  GTYPE_GME                 192  /*  hexagonal GME grid                       */
 
@@ -119,6 +120,14 @@
 #define  ISEC2_NumPar               (isec2[ 9])  /*  Number of parallels between a pole and the E.*/
 #define  ISEC2_ScanFlag             (isec2[10])  /*  Scanning mode flags                          */
 #define  ISEC2_NumVCP               (isec2[11])  /*  Number of vertical coordinate parameters     */
+
+/* Lambert */
+#define  ISEC2_LoV                  (isec2[ 6])  /*  Orientation of the grid                      */
+#define  ISEC2_Xinc                 (isec2[ 8])  /*  X-direction grid length                      */
+#define  ISEC2_Yinc                 (isec2[ 9])  /*  Y-direction grid length                      */
+#define  ISEC2_LatS1                (isec2[13])  /*  First lat at which the secant cone cuts the sphere */
+#define  ISEC2_LatS2                (isec2[14])  /*  Second lat at which the secant cone cuts the sphere */
+
 
 #define  ISEC2_Reduced              (isec2[16])  /* 0: regular, 1: reduced grid                   */
 

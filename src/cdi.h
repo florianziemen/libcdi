@@ -91,6 +91,7 @@ extern "C" {
 #define  GRID_TRAJECTORY          8
 #define  GRID_CELL                9
 #define  GRID_CURVILINEAR        10
+#define  GRID_LAMBERT            11
 
 /* ZAXIS types */
 

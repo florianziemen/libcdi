@@ -1,3 +1,9 @@
+2007-12-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+        * using GRIB library version 1.0.7
+	* add support for Lambert conformal grids
+	* Version 1.0.9 released
+	
 2007-10-22  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
         * using GRIB library version 1.0.6

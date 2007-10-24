@@ -48,6 +48,11 @@ int gribGetGridType(int *isec2)
 	gridtype = GRID_LONLAT;
 	break;
       }
+    case   3:
+      {
+	gridtype = GRID_LAMBERT;
+	break;
+      }
     case   4:
       {
 	if ( ISEC2_Reduced )
@@ -166,10 +171,8 @@ int grbInqRecord(int streamID, int *varID, int *levelID)
 	break;
       }
     case GRID_SPECTRAL:
-      {
-	break;
-      }
     case GRID_GME:
+    case GRID_LAMBERT:
       {
 	break;
       }
@@ -833,6 +836,29 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
 	    grid.ylast  = ISEC2_LastLat  * 0.001;
 	    grid.ydef   = 2;	    
 	  }
+	break;
+      }
+    case GRID_LAMBERT:
+      {
+	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
+	  Error(func, "wrong datasize! isec4len = %d isec2len = %d",
+		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
+	grid.size  = ISEC4_NumValues;
+	grid.xsize = ISEC2_NumLon;
+	grid.ysize = ISEC2_NumLat;
+	grid.xinc  = ISEC2_Xinc;
+	grid.yinc  = ISEC2_Yinc;
+
+	grid.xfirst = ISEC2_FirstLon * 0.001;
+	grid.xdef   = 0;	    
+
+	grid.yfirst = ISEC2_FirstLat * 0.001;
+	grid.ydef   = 0;
+
+	grid.lov    = ISEC2_LoV * 0.001;
+	grid.lats1  = ISEC2_LatS1 * 0.001;
+	grid.lats2  = ISEC2_LatS2 * 0.001;
+
 	break;
       }
     case GRID_SPECTRAL:
