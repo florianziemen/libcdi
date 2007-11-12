@@ -984,7 +984,11 @@ int main(int argc, char *argv[])
 
       /* fprintf(stderr, "%ld\n", (long) streamNvals(streamID1)); */
 
-      if ( fname2 ) streamClose(streamID2);
+      if ( fname2 )
+	{
+	  streamClose(streamID2);
+	  vlistDestroy(vlistID2);
+	}
       streamClose(streamID1);
     }
 

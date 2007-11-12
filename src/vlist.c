@@ -226,6 +226,7 @@ static void vlist_copy(VLIST *vlistptr2, VLIST *vlistptr1)
 
   vlistID2 = vlistptr2->self;
   memcpy(vlistptr2, vlistptr1, sizeof(VLIST));
+  vlistptr2->atts.nelems = 0;
   vlistptr2->self = vlistID2;
 }
 

@@ -9,7 +9,8 @@
 #include "vlist.h"
 
 
-static CDI_atts *get_attsp(VLIST *vlistptr, int varID)
+static
+CDI_atts *get_attsp(VLIST *vlistptr, int varID)
 {
   static char func[] = "get_attsp";
   CDI_atts *attsp = NULL;
@@ -27,7 +28,8 @@ static CDI_atts *get_attsp(VLIST *vlistptr, int varID)
 }
 
 
-static CDI_attr *find_attr(CDI_atts *attsp, const char *name)
+static
+CDI_attr *find_attr(CDI_atts *attsp, const char *name)
 {
   CDI_attr *attrp;
   size_t attrid;
@@ -53,7 +55,8 @@ static CDI_attr *find_attr(CDI_atts *attsp, const char *name)
 }
 
 
-static CDI_attr *new_attr(CDI_atts *attsp, const char *name)
+static
+CDI_attr *new_attr(CDI_atts *attsp, const char *name)
 {
   static char func[] = "new_attr";
   CDI_attr *attrp;
@@ -77,7 +80,8 @@ static CDI_attr *new_attr(CDI_atts *attsp, const char *name)
 }
 
 
-static void fill_attr(CDI_attr *attrp, int type, size_t nelems, size_t xsz, const void *xvalue)
+static
+void fill_attr(CDI_attr *attrp, int type, size_t nelems, size_t xsz, const void *xvalue)
 {
   static char func[] = "fill_attr";
 
@@ -159,7 +163,7 @@ int vlistDelAtts(int vlistID, int varID)
   attsp = get_attsp(vlistptr, varID);
   if ( attsp == NULL ) Error(func, "Internal problem, attributes not found!");
 
-  for ( attrid = 0; attrid < attsp->nelems; attrid++ )
+  for ( attrid = 0; attrid < (int)attsp->nelems; attrid++ )
     {
       attrp = &(attsp->value[attrid]);
       if ( attrp->name   ) free(attrp->name);
@@ -182,7 +186,8 @@ int vlistDelAttr(int vlistID, int varID, const char *name)
 }
 
 
-static int vlist_def_attr(int type, int vlistID, int varID, const char *name, size_t len, size_t xsz, const void *xp)
+static
+int vlist_def_attr(int type, int vlistID, int varID, const char *name, size_t len, size_t xsz, const void *xp)
 {
   static char func[] = "vlist_def_attr";
   int status = CDI_NOERR;
@@ -215,7 +220,8 @@ static int vlist_def_attr(int type, int vlistID, int varID, const char *name, si
 }
 
 
-static int vlist_inq_attr(int type, int vlistID, int varID, const char *name, size_t mxsz, void *xp)
+static
+int vlist_inq_attr(int type, int vlistID, int varID, const char *name, size_t mxsz, void *xp)
 {
   static char func[] = "vlist_inq_attr";
   int status = CDI_NOERR;
