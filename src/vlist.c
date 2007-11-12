@@ -154,9 +154,9 @@ static void vlist_init_entry(VLIST *vlistptr)
   vlistptr->modelID        = cdiDefaultModelID;
   vlistptr->tableID        = cdiDefaultTableID;
   vlistptr->varsAllocated  = 0;
-  vlistptr->natts          = 0;
-  vlistptr->niatts         = 0;
   vlistptr->ntsteps        = CDI_UNDEFID;
+  vlistptr->atts.nalloc    = MAX_ATTRIBUTES;
+  vlistptr->atts.nelems    = 0;  
 }
 
 
@@ -309,15 +309,9 @@ void vlistDestroy(int vlistID)
   else
     {
       int nvars = vlistptr->nvars;
-      int varID, attID;
+      int varID;
 
-      for ( attID = 0; attID < vlistptr->natts; attID++ )
-	{
-	  free(vlistptr->attnames[attID]);
-
-	  if ( vlistptr->attstrings[attID] )
-	    free(vlistptr->attstrings[attID]);
-	}
+      vlistDelAtts(vlistID, CDI_GLOBAL);
 
       for ( varID = 0; varID < nvars; varID++ )
 	if ( vlistptr->vars[varID].levinfo ) free(vlistptr->vars[varID].levinfo);
@@ -384,7 +378,6 @@ The function @func{vlistCopy} copies all entries from vlistID1 to vlistID2.
 void vlistCopy(int vlistID2, int vlistID1)
 {
   static char func[] = "vlistCopy";
-  int attID;
   VLIST *vlistptr1, *vlistptr2;
 
   vlistptr1 = vlist_to_pointer(vlistID1);
@@ -394,22 +387,8 @@ void vlistCopy(int vlistID2, int vlistID1)
   vlist_check_ptr(func, vlistptr2);
 
   vlist_copy(vlistptr2, vlistptr1);
-  
-  for ( attID = 0; attID < vlistptr1->natts; attID++ )
-    {
-      vlistptr2->attnames[attID] = strdupx(vlistptr1->attnames[attID]);
 
-      if ( vlistptr1->attstrings[attID] )
-	vlistptr2->attstrings[attID] = strdupx(vlistptr1->attstrings[attID]);
-      else
-	vlistptr2->attstrings[attID] = NULL;
-    }
-
-  for ( attID = 0; attID < vlistptr1->niatts; attID++ )
-    {
-      vlistptr2->iattnames[attID] = strdupx(vlistptr1->iattnames[attID]);
-      vlistptr2->iatts[attID]     = vlistptr1->iatts[attID];
-    }
+  vlistCopyVarAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
 
   if ( vlistptr1->vars )
     {
@@ -583,7 +562,6 @@ The function @func{vlistCopyFlag} copies all entries with a flag from vlistID1 t
 void vlistCopyFlag(int vlistID2, int vlistID1)
 {
   static char func[] = "vlistCopyFlag";
-  int attID;
   VLIST *vlistptr1, *vlistptr2;
 
   vlistptr1 = vlist_to_pointer(vlistID1);
@@ -594,21 +572,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
   vlist_copy(vlistptr2, vlistptr1);
   
-  for ( attID = 0; attID < vlistptr1->natts; attID++ )
-    {
-      vlistptr2->attnames[attID] = strdupx(vlistptr1->attnames[attID]);
-
-      if ( vlistptr1->attstrings[attID] )
-	vlistptr2->attstrings[attID] = strdupx(vlistptr1->attstrings[attID]);
-      else
-	vlistptr2->attstrings[attID] = NULL;
-    }
-
-  for ( attID = 0; attID < vlistptr1->niatts; attID++ )
-    {
-      vlistptr2->iattnames[attID] = strdupx(vlistptr1->iattnames[attID]);
-      vlistptr2->iatts[attID]     = vlistptr1->iatts[attID];
-    }
+  vlistCopyVarAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
 
   if ( vlistptr1->vars )
     {
@@ -1554,80 +1518,3 @@ int vlistHasTime(int vlistID)
   return (hastime);
 }
 
-
-void vlistDefAttribute(int vlistID, const char *attname, const char *attstring)
-{
-  static char func[] = "vlistDefAttribute";
-  int attID;
-  VLIST *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
-
-  vlist_check_ptr(func, vlistptr);
-
-  if ( attname == NULL ) return;
-
-  if ( (vlistptr->natts + 1) == MAX_ATTRIBUTES )
-    {
-      Warning(func, "vlistID %d, maximum of %d attributes reached!",
-	      vlistID, MAX_ATTRIBUTES);
-    }
-  else
-    {
-      for ( attID = 0; attID < vlistptr->natts; attID++ )
-	if ( strcmp(vlistptr->attnames[attID], attname) == 0 )
-	  {
-	    if ( vlistptr->attstrings[attID] )
-	      free(vlistptr->attstrings[attID]);
-	    
-	    break;
-	  }
-
-      if ( attID == vlistptr->natts )
-	{
-	  vlistptr->natts++;
-	  vlistptr->attnames[attID] = strdupx(attname);
-	}
-
-      if ( attstring )
-	vlistptr->attstrings[attID] = strdupx(attstring);
-      else
-	vlistptr->attstrings[attID] = NULL;
-    }
-}
-
-
-void vlistDefIntAttribute(int vlistID, const char *attname, int attint)
-{
-  static char func[] = "vlistDefIntAttribute";
-  int attID;
-  VLIST *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
-
-  vlist_check_ptr(func, vlistptr);
-
-  if ( attname == NULL ) return;
-
-  if ( (vlistptr->niatts + 1) == MAX_ATTRIBUTES )
-    {
-      Warning(func, "vlistID %d, maximum of %d int attributes reached!",
-	      vlistID, MAX_ATTRIBUTES);
-    }
-  else
-    {
-      for ( attID = 0; attID < vlistptr->niatts; attID++ )
-	if ( strcmp(vlistptr->iattnames[attID], attname) == 0 )
-	  {
-	    break;
-	  }
-
-      if ( attID == vlistptr->niatts )
-	{
-	  vlistptr->niatts++;
-	  vlistptr->iattnames[attID] = strdupx(attname);
-	}
-
-      vlistptr->iatts[attID] = attint;
-    }
-}

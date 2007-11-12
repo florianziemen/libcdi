@@ -102,6 +102,7 @@ libcdi_a_SOURCES = \
 	timebase.c 	 \
 	vlist.c 	 \
 	vlist_var.c 	 \
+	vlist_att.c 	 \
 	basetime.c     	 \
 	stream_history.c \
 	stream_grb.c     \
@@ -175,15 +176,15 @@ am_libcdi_a_OBJECTS = cdiFortran.$(OBJEXT) cdi_error.$(OBJEXT) \
 	dmemory.$(OBJEXT) model.$(OBJEXT) institution.$(OBJEXT) \
 	table.$(OBJEXT) util.$(OBJEXT) varscan.$(OBJEXT) \
 	calendar.$(OBJEXT) timebase.$(OBJEXT) vlist.$(OBJEXT) \
-	vlist_var.$(OBJEXT) basetime.$(OBJEXT) stream_history.$(OBJEXT) \
-	stream_grb.$(OBJEXT) stream_cdf.$(OBJEXT) stream_srv.$(OBJEXT) \
-	stream_ext.$(OBJEXT) stream_ieg.$(OBJEXT) grid.$(OBJEXT) \
-	grid_rot.$(OBJEXT) grid_gme.$(OBJEXT) zaxis.$(OBJEXT) \
-	stream.$(OBJEXT) stream_var.$(OBJEXT) stream_record.$(OBJEXT) \
-	tsteps.$(OBJEXT) stream_int.$(OBJEXT) servicelib.$(OBJEXT) \
-	extralib.$(OBJEXT) ieglib.$(OBJEXT) cdf.$(OBJEXT) \
-	cdf_int.$(OBJEXT) file.$(OBJEXT) binary.$(OBJEXT) \
-	swap.$(OBJEXT) griblib.$(OBJEXT)
+	vlist_var.$(OBJEXT) vlist_att.$(OBJEXT) basetime.$(OBJEXT) \
+	stream_history.$(OBJEXT) stream_grb.$(OBJEXT) \
+	stream_cdf.$(OBJEXT) stream_srv.$(OBJEXT) stream_ext.$(OBJEXT) \
+	stream_ieg.$(OBJEXT) grid.$(OBJEXT) grid_rot.$(OBJEXT) \
+	grid_gme.$(OBJEXT) zaxis.$(OBJEXT) stream.$(OBJEXT) \
+	stream_var.$(OBJEXT) stream_record.$(OBJEXT) tsteps.$(OBJEXT) \
+	stream_int.$(OBJEXT) servicelib.$(OBJEXT) extralib.$(OBJEXT) \
+	ieglib.$(OBJEXT) cdf.$(OBJEXT) cdf_int.$(OBJEXT) file.$(OBJEXT) \
+	binary.$(OBJEXT) swap.$(OBJEXT) griblib.$(OBJEXT)
 libcdi_a_OBJECTS = $(am_libcdi_a_OBJECTS)
 
 DEFS = @DEFS@
@@ -212,8 +213,8 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/taxis.Po ./$(DEPDIR)/timebase.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/tsteps.Po ./$(DEPDIR)/util.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/varscan.Po ./$(DEPDIR)/version.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/vlist.Po ./$(DEPDIR)/vlist_var.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/zaxis.Po
+@AMDEP_TRUE@	./$(DEPDIR)/vlist.Po ./$(DEPDIR)/vlist_att.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/vlist_var.Po ./$(DEPDIR)/zaxis.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -331,6 +332,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/varscan.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vlist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vlist_att.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vlist_var.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zaxis.Po@am__quote@
 

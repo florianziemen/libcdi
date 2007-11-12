@@ -64,6 +64,7 @@ c="dmemory.c         \
    util.c            \
    varscan.c         \
    vlist.c           \
+   vlist_att.c       \
    vlist_var.c       \
    basetime.c        \
    servicelib.c      \

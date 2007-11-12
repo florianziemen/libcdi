@@ -15,7 +15,14 @@ typedef struct {
   double  xfirst, yfirst;
   double  xlast, ylast;
   double  xinc, yinc;
-  double  lov, lats1, lats2;      /* lambert grid                   */
+  double  lam_originLon;          /* lambert                        */
+  double  lam_originLat;
+  double  lam_lonParY;
+  double  lam_lat1;
+  double  lam_lat2;
+  double  lam_xinc;
+  double  lam_yinc;
+  int     lam_defined;
   double  xpole, ypole, angle;    /* rotated north pole             */
   int     isCyclic;               /* TRUE for global cyclic grids   */
   int     isRotated;              /* TRUE for rotated grids         */

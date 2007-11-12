@@ -416,6 +416,18 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 	    {
 	      fprintf(stdout, "size      : dim = %d  nvertex = %d\n", gridsize, gridInqNvertex(gridID));
 	    }
+	  else if ( gridtype == GRID_LAMBERT )
+	    {
+	      double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
+	      gridInqLambert(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
+	      fprintf(stdout, "size      : dim = %d  nx = %d  ny = %d\n", gridsize, xsize, ysize);
+	      fprintf(stdout, "%*s", nbyte0, "");	  
+	      fprintf(stdout, "            originLon = %g  originLat = %g  lonParY = %g\n",
+		      originLon, originLat, lonParY);
+	      fprintf(stdout, "%*s", nbyte0, "");	  
+	      fprintf(stdout, "            lat1 = %g  lat2 = %g  xinc = %gm  yinc = %gm\n", 
+		      lat1, lat2, xincm, yincm);
+	    }
 	  else /* if ( gridtype == GRID_GENERIC ) */
 	    {
 	      if ( ysize == 0 )
@@ -431,7 +443,8 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 		}
 	    }
 
-	  if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_CELL || gridtype == GRID_GENERIC )
+	  if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_CELL ||
+	       gridtype == GRID_GENERIC || gridtype == GRID_LAMBERT )
 	    {
 	      if ( gridInqXvals(gridID, NULL) || gridInqYvals(gridID, NULL) || gridHasArea(gridID) ||
 		   gridInqXbounds(gridID, NULL) || gridInqYbounds(gridID, NULL) )

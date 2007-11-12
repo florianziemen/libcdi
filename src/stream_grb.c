@@ -846,18 +846,17 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
 	grid.size  = ISEC4_NumValues;
 	grid.xsize = ISEC2_NumLon;
 	grid.ysize = ISEC2_NumLat;
-	grid.xinc  = ISEC2_Xinc;
-	grid.yinc  = ISEC2_Yinc;
 
-	grid.xfirst = ISEC2_FirstLon * 0.001;
+	grid.lam_xinc      = ISEC2_Xinc;
+	grid.lam_yinc      = ISEC2_Yinc;
+	grid.lam_originLon = ISEC2_FirstLon * 0.001;
+	grid.lam_originLat = ISEC2_FirstLat * 0.001;
+	grid.lam_lonParY   = ISEC2_LoV * 0.001;
+	grid.lam_lat1      = ISEC2_LatS1 * 0.001;
+	grid.lam_lat2      = ISEC2_LatS2 * 0.001;
+
 	grid.xdef   = 0;	    
-
-	grid.yfirst = ISEC2_FirstLat * 0.001;
 	grid.ydef   = 0;
-
-	grid.lov    = ISEC2_LoV * 0.001;
-	grid.lats1  = ISEC2_LatS1 * 0.001;
-	grid.lats2  = ISEC2_LatS2 * 0.001;
 
 	break;
       }
@@ -1836,10 +1835,10 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
 	  }
 	else
 	  {
-	    nlon = (int) gridInqXsize(gridID);
+	    nlon = gridInqXsize(gridID);
 	  }
 
-	nlat = (int) gridInqYsize(gridID);
+	nlat = gridInqYsize(gridID);
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
 	  ISEC2_GridType = 4;
 	else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )

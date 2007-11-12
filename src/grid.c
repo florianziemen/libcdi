@@ -182,9 +182,14 @@ static void grid_init_entry(GRID *gridptr)
   gridptr->nrowlon      = 0;
   gridptr->xinc         = 0.0;
   gridptr->yinc         = 0.0;
-  gridptr->lov          = 0.0;
-  gridptr->lats1        = 0.0;
-  gridptr->lats2        = 0.0;
+  gridptr->lam_originLon = 0.0;
+  gridptr->lam_originLat = 0.0;
+  gridptr->lam_lonParY  = 0.0;
+  gridptr->lam_lat1     = 0.0;
+  gridptr->lam_lat2     = 0.0;
+  gridptr->lam_xinc     = 0.0;
+  gridptr->lam_yinc     = 0.0;
+  gridptr->lam_defined  = FALSE;
   gridptr->trunc        = 0;
   gridptr->nvertex      = 0;
   gridptr->nd           = 0;
@@ -2347,6 +2352,10 @@ int gridGenerate(GRID grid)
 	    gridDefArea(gridID, grid.area);
 	  }
 
+	if ( grid.type == GRID_LAMBERT )
+	  gridDefLambert(gridID, grid.lam_originLon, grid.lam_originLat, grid.lam_lonParY,
+			 grid.lam_lat1, grid.lam_lat2, grid.lam_xinc, grid.lam_yinc);
+
 	break;
       }
     case GRID_GAUSSIAN_REDUCED:
@@ -3684,3 +3693,54 @@ const double *gridInqYvalsPtr(int gridID)
 
   return ( gridptr->yvals );
 }
+
+
+void gridDefLambert(int gridID, double originLon, double originLat, double lonParY,
+		    double lat1, double lat2, double xinc, double yinc)
+{
+  static char func[] = "gridDefLambert";
+  GRID *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  if ( gridptr->type != GRID_LAMBERT )
+    Warning(func, "Lambert grid definition for %s grid not allowed!", gridNamePtr(gridptr->type));
+
+  gridptr->lam_originLon = originLon;
+  gridptr->lam_originLat = originLat;
+  gridptr->lam_lonParY   = lonParY;
+  gridptr->lam_lat1      = lat1;
+  gridptr->lam_lat2      = lat2;
+  gridptr->lam_xinc      = xinc;
+  gridptr->lam_yinc      = yinc;
+  gridptr->lam_defined   = TRUE;
+}
+
+
+void gridInqLambert(int gridID, double *originLon, double *originLat, double *lonParY,
+		    double *lat1, double *lat2, double *xinc, double *yinc)
+{
+  static char func[] = "gridDefLambert";
+  GRID *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  if ( gridptr->type != GRID_LAMBERT )
+    Warning(func, "Lambert grid definition for %s grid not available!", gridNamePtr(gridptr->type));
+  else
+    {
+      if ( gridptr->lam_defined )
+	{
+	  *originLon = gridptr->lam_originLon;
+	  *originLat = gridptr->lam_originLat;
+	  *lonParY   = gridptr->lam_lonParY;
+	  *lat1      = gridptr->lam_lat1;
+	  *lat2      = gridptr->lam_lat2;
+	  *xinc      = gridptr->lam_xinc;
+	  *yinc      = gridptr->lam_yinc;
+	}
+      else
+	Warning(func, "Lambert grid undefined (gridID = %d)", gridID);
+    }
+}
+

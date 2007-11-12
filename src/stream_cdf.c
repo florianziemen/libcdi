@@ -3268,7 +3268,8 @@ int cdfInqContents(int streamID)
 
       if ( xtype == NC_CHAR )
 	{
-	  cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
+	  cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen-1);
+	  attstring[attlen+1] = 0;
 
 	  if ( attlen > 0 && attstring[0] != 0 )
 	    {
@@ -3278,14 +3279,14 @@ int cdfInqContents(int streamID)
 		}
 	      else if ( strcmp(attname, "institution") == 0 )
 		{
-		  cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
+		  cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen-1);
 		  instID = institutInq(0, 0, NULL, attstring);
 		  if ( instID == UNDEFID )
 		    instID = institutDef(0, 0, NULL, attstring);
 		}
 	      else if ( strcmp(attname, "source") == 0 )
 		{
-		  cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
+		  cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen-1);
 		  modelID = modelInq(-1, 0, attstring);
 		}
 	      else if ( strcmp(attname, "Conventions") == 0 )
@@ -3299,15 +3300,15 @@ int cdfInqContents(int streamID)
 		}
 	      else
 		{
-		  cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen);
-		  vlistDefAttribute(vlistID, attname, attstring);
+		  cdfGetAttText(fileID, NC_GLOBAL, attname, attstring, attstringlen-1);
+		  vlistDefAttrTxt(vlistID, CDI_GLOBAL, attname, (int)strlen(attstring)+1, attstring);
 		}
 	    }
 	}
-      else if ( xtype == NC_INT )
+      else if ( xtype == NC_INT && attlen == 1 )
 	{
 	  cdfGetAttInt(fileID, NC_GLOBAL, attname, &attint);
-	  vlistDefIntAttribute(vlistID, attname, attint);
+	  vlistDefAttrInt(vlistID, CDI_GLOBAL, attname, 1, &attint);
 	}
     }
 
@@ -3398,14 +3399,14 @@ int cdfInqContents(int streamID)
 	  else if ( strcmp(attname, "trunc_type") == 0 )
 	    {
 	      cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
-	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen);
+	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen-1);
 	      if ( strncmp(attstring, "Triangular", attlen) == 0 )
 		ncvars[ncvarid].gridtype = GRID_SPECTRAL;
 	    }
 	  else if ( strcmp(attname, "grid_type") == 0 )
 	    {
 	      cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
-	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen);
+	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen-1);
 
 	      if      ( strncmp(attstring, "gaussian", attlen) == 0 )
 		ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
@@ -3465,7 +3466,7 @@ int cdfInqContents(int streamID)
 	    {
 	      int status, ncboundsid;
 
-	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen);
+	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen-1);
 
 	      status = nc_inq_varid(fileID, attstring, &ncboundsid);
 
@@ -3482,7 +3483,7 @@ int cdfInqContents(int streamID)
 	    {
 	      char *pstring, *cell_measures = NULL, *cell_var = NULL;
 
-	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen);
+	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen-1);
 	      pstring = attstring;
 
 	      while ( isspace((int) *pstring) ) pstring++;
@@ -3522,7 +3523,7 @@ int cdfInqContents(int streamID)
 	    {
 	      char *pstring, *xvarname = NULL, *yvarname = NULL;
 	      
-	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen);
+	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen-1);
 	      pstring = attstring;
 
 	      while ( isspace((int) *pstring) ) pstring++;
@@ -3551,7 +3552,7 @@ int cdfInqContents(int streamID)
 	      int dimvarid;
 	      extern int cdiIgnoreAttCoordinates;
 	      
-	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen);
+	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen-1);
 	      pstring = attstring;
 
 	      for ( i = 0; i < 4; i++ )
@@ -3582,7 +3583,7 @@ int cdfInqContents(int streamID)
 	      int status;
 	      int nc_gmap_id;
 	      
-	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen);
+	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen-1);
 
 	      status = nc_inq_varid(fileID, attstring, &nc_gmap_id);
 	      if ( status == NC_NOERR )
@@ -3598,7 +3599,7 @@ int cdfInqContents(int streamID)
 	  else if ( strcmp(attname, "positive") == 0 )
 	    {	      
 	      cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
-	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen);
+	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen-1);
 
 	      if    ( strncmp(attstring, "down", attlen) == 0 ) ncvars[ncvarid].positive = -1;
 	      else if ( strncmp(attstring, "up", attlen) == 0 ) ncvars[ncvarid].positive = 1;
@@ -3619,7 +3620,7 @@ int cdfInqContents(int streamID)
 	    }
 	  else if ( strcmp(attname, "axis") == 0 )
 	    {
-	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen);
+	      cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen-1);
 	      cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
 	      /* attlen = strlen(attstring); */
 	      /* check attlen */
@@ -4344,7 +4345,7 @@ int cdfInqContents(int streamID)
 
 		  if ( strcmp(attname, "grid_mapping_name") == 0 )
 		    {
-		      cdfGetAttText(fileID, ncvars[ncvarid].gmapid, attname, attstring, attstringlen);
+		      cdfGetAttText(fileID, ncvars[ncvarid].gmapid, attname, attstring, attstringlen-1);
 
 		      if ( strcmp(attstring, "rotated_latitude_longitude") == 0 )
 			grid.isRotated = TRUE;
@@ -4685,7 +4686,7 @@ int cdfInqContents(int streamID)
       TAXIS *taxis;
       taxis = &streamptr->tsteps[0].taxis;
 
-      cdfGetAttText(fileID, ncvarid, "units", attstring, attstringlen);
+      cdfGetAttText(fileID, ncvarid, "units", attstring, attstringlen-1);
       if ( splitBasetime(attstring, taxis) == 1 )
 	streamptr->basetime.ncvarid = UNDEFID;
     }
@@ -4696,7 +4697,7 @@ int cdfInqContents(int streamID)
   if ( ncvarid != -1 )
     if ( ncvars[ncvarid].calendar == TRUE )
       {
-	cdfGetAttText(fileID, ncvarid, "calendar", attstring, attstringlen);
+	cdfGetAttText(fileID, ncvarid, "calendar", attstring, attstringlen-1);
 
 	if ( strcmp(attstring, "standard")  == 0 ||
 	     strcmp(attstring, "gregorian") == 0 )
@@ -4908,6 +4909,13 @@ void cdfDefGlobalAtts(int streamID)
   size_t len;
   VLIST *vlistptr;
   STREAM *streamptr;
+  int natts;
+  char attrname[256];
+  int attrtype;
+  int attrlen;
+  int attrint;
+  double attrflt;
+  char attrtxt[2048];
 
   streamptr = stream_to_pointer(streamID);
 
@@ -4918,37 +4926,41 @@ void cdfDefGlobalAtts(int streamID)
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  if ( vlistptr->natts > 0 )
-    {
-      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-      for ( iatt = 0; iatt < vlistptr->natts; iatt++ )
-	{
-	  if ( vlistptr->attstrings[iatt] )
-	    {
-	      len = strlen(vlistptr->attstrings[iatt]);
-	      cdf_put_att_text(fileID, NC_GLOBAL, vlistptr->attnames[iatt],
-			       len, vlistptr->attstrings[iatt]);
-	    }
-	}
-      if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
-    }
-
   cdfDefSource(streamID);
   cdfDefInstitut(streamID);
 
-  if ( vlistptr->niatts > 0 )
+  vlistInqNatts(vlistID, CDI_GLOBAL, &natts);
+
+  if ( natts > 0 && streamptr->ncmode == 2 ) cdf_redef(fileID);
+
+  for ( iatt = 0; iatt < natts; ++iatt )
     {
-      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-      for ( iatt = 0; iatt < vlistptr->niatts; iatt++ )
+      vlistInqAttr(vlistID, CDI_GLOBAL, iatt, attrname, &attrtype, &attrlen);
+
+      if ( attrtype == DATATYPE_TXT )
 	{
-	  cdf_put_att_int(fileID, NC_GLOBAL, vlistptr->iattnames[iatt], NC_INT, 1L, &vlistptr->iatts[iatt]);
+	  vlistInqAttrTxt(vlistID, CDI_GLOBAL, attrname, sizeof(attrtxt), attrtxt);
+	  len = strlen(attrtxt);
+	  cdf_put_att_text(fileID, NC_GLOBAL, attrname, len+1, attrtxt);
 	}
-      if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
+      else if ( attrtype == DATATYPE_INT )
+	{
+	  vlistInqAttrInt(vlistID, CDI_GLOBAL, attrname, 1, &attrint);
+	  cdf_put_att_int(fileID, NC_GLOBAL, attrname, NC_INT, 1L, &attrint);
+	}
+      else if ( attrtype == DATATYPE_FLT )
+	{
+	  vlistInqAttrFlt(vlistID, CDI_GLOBAL, attrname, 1, &attrflt);
+	  cdf_put_att_double(fileID, NC_GLOBAL, attrname, NC_DOUBLE, 1L, &attrflt);
+	}
     }
+
+  if ( natts > 0 && streamptr->ncmode == 2 ) cdf_enddef(fileID);
 
   streamptr->globalatts = 1;
 #endif
 }
+
 
 void cdfDefLocalAtts(int streamID)
 {

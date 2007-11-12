@@ -20,6 +20,7 @@ libcdi_a_SOURCES = 	 \
 	timebase.c 	 \
 	vlist.c 	 \
 	vlist_var.c 	 \
+	vlist_att.c 	 \
 	basetime.c     	 \
 	stream_history.c \
 	stream_grb.c     \

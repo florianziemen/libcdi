@@ -8,6 +8,27 @@
 #define  MAX_ATTRIBUTES  256
 
 
+/*
+ * CDI attribute
+ */
+typedef struct {
+  size_t xsz;		/* amount of space at xvalue             */
+  size_t namesz;        /* size of name                          */
+  char  *name;          /* attribute name                        */
+  int    type;		/* data type of xvalue (INT, FLT or TXT) */
+  int    nctype;
+  size_t nelems;     	/* number of elements                    */
+  void  *xvalue;      	/* the actual data                       */
+} CDI_attr;
+
+
+typedef struct {
+  size_t nalloc;		/* number allocated >= nelems */
+  size_t nelems;		/* length of the array */
+  CDI_attr value[MAX_ATTRIBUTES];
+} CDI_atts;
+
+
 typedef struct
 {
   int      flag;
@@ -64,17 +85,13 @@ typedef struct
   int      gridIDs[MAX_GRIDS_PS];
   int      zaxisIDs[MAX_ZAXIS_PS];
   VARINFO *vars;
-  int      natts;
-  char    *attnames[MAX_ATTRIBUTES];
-  char    *attstrings[MAX_ATTRIBUTES];
-  int      niatts;
-  char    *iattnames[MAX_ATTRIBUTES];
-  int      iatts[MAX_ATTRIBUTES];
+  CDI_atts atts;
 }
 VLIST;
 
 
 VLIST  *vlist_to_pointer(int vlistID);
+void    vlistCheckVarID(char *func, int vlistID, int varID);
 int     vlistNlock(int vlistID);
 void    vlistLock(int vlistID);
 void    vlistUnlock(int vlistID);
@@ -89,6 +106,7 @@ void    vlistDefVarTime(int vlistID, int varID, int timeID);
 int     vlistInqVarMissvalUsed(int vlistID, int varID);
 int     vlistHasTime(int vlistID);
 
-void vlistDefIntAttribute(int vlistID, const char *attname, int attint);
+int     vlistDelAtts(int vlistID, int varID);
+int     vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2);
 
 #endif  /* _VLIST_H */
