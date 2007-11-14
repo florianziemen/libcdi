@@ -64,6 +64,7 @@ typedef struct
   double   addoffset;
   LEVINFO *levinfo;
   int      szip;
+  CDI_atts atts;
 }
 VARINFO;
 

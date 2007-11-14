@@ -341,7 +341,7 @@ STREAM *stream_new_entry(void)
   static char func[] = "stream_new_entry";
   STREAM *streamptr;
 
-  cdiInitialize(); /* ***************** make MT versiob !!! */
+  cdiInitialize(); /* ***************** make MT version !!! */
 
   STREAM_INIT
 

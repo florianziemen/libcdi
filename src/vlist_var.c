@@ -36,6 +36,8 @@ static void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].nlevs        = 0;
   vlistptr->vars[varID].levinfo      = NULL;
   vlistptr->vars[varID].szip         = FALSE;
+  vlistptr->vars[varID].atts.nalloc  = MAX_ATTRIBUTES;
+  vlistptr->vars[varID].atts.nelems  = 0;
 }
 
 static int vlistvarNewEntry(int vlistID)

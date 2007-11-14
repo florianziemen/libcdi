@@ -81,6 +81,8 @@ typedef struct {
   int      positive;
   int      dimids[8];
   int      dimtype[8];
+  int      natts;
+  int     *atts;
   size_t   vlen;
   double  *vdata;
   double   missval;
@@ -306,6 +308,44 @@ int cdfDefDatatype(int datatype)
   else                                    xtype = NC_FLOAT;
 
   return (xtype);
+}
+#endif
+
+
+#if  defined  (HAVE_LIBNETCDF)
+void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
+{
+  int natts, iatt;
+  int attrtype, attrlen;
+  size_t len;
+  int attrint;
+  double attrflt;
+  char attrname[1024];
+  char attrtxt[8192];
+
+  vlistInqNatts(vlistID, varID, &natts);
+
+  for ( iatt = 0; iatt < natts; iatt++ )
+    {
+      vlistInqAttr(vlistID, varID, iatt, attrname, &attrtype, &attrlen);
+
+      if ( attrtype == DATATYPE_TXT )
+	{
+	  vlistInqAttrTxt(vlistID, varID, attrname, sizeof(attrtxt), attrtxt);
+	  len = strlen(attrtxt);
+	  cdf_put_att_text(fileID, ncvarID, attrname, len+1, attrtxt);
+	}
+      else if ( attrtype == DATATYPE_INT )
+	{
+	  vlistInqAttrInt(vlistID, varID, attrname, 1, &attrint);
+	  cdf_put_att_int(fileID, ncvarID, attrname, NC_INT, 1L, &attrint);
+	}
+      else if ( attrtype == DATATYPE_FLT )
+	{
+	  vlistInqAttrFlt(vlistID, varID, attrname, 1, &attrflt);
+	  cdf_put_att_double(fileID, ncvarID, attrname, NC_DOUBLE, 1L, &attrflt);
+	}
+    }
 }
 #endif
 
@@ -2250,6 +2290,9 @@ int cdfDefVar(int streamID, int varID)
 
   streamptr->vars[varID].ncvarid = ncvarid;
 
+  /* Attributes */
+  defineAttributes(vlistID, varID, fileID, ncvarid);
+
   if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
 
 #endif
@@ -3257,6 +3300,8 @@ int cdfInqContents(int streamID)
       ncvars[ncvarid].longname[0]  = 0;
       ncvars[ncvarid].stdname[0]   = 0;
       ncvars[ncvarid].units[0]     = 0;
+      ncvars[ncvarid].natts        = 0;
+      ncvars[ncvarid].atts         = NULL;
     }
 
   /* read global attributtes*/
@@ -3368,7 +3413,7 @@ int cdfInqContents(int streamID)
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, ncvars[ncvarid].longname, MAXNAMELEN);
       	    }
-	  if ( strcmp(attname, "standard_name") == 0 )
+	  else if ( strcmp(attname, "standard_name") == 0 )
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, ncvars[ncvarid].stdname, MAXNAMELEN);
       	    }
@@ -3668,6 +3713,38 @@ int cdfInqContents(int streamID)
 		    }
 		}
 	    }
+	  else
+	    {
+	      if ( ncvars[ncvarid].natts == 0 )
+		ncvars[ncvarid].atts = (int *) malloc(nvatts*sizeof(int));
+
+	      ncvars[ncvarid].atts[ncvars[ncvarid].natts++] = iatt;
+	      /*
+	      int attrint;
+	      double attrflt;
+	      nc_type attrtype;
+	      cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
+	      cdf_inq_atttype(fileID, ncvarid, attname, &attrtype);
+	      if ( attlen == 1 && (attrtype == NC_INT || attrtype == NC_SHORT) )
+		{
+		  cdfGetAttInt(fileID, ncvarid, attname, &attrint);
+		  printf("int: %s.%s = %d\n", ncvars[ncvarid].name, attname, attrint);
+		}
+	      else if ( attlen == 1 && (attrtype == NC_FLOAT || attrtype == NC_DOUBLE) )
+		{
+		  cdfGetAttDouble(fileID, ncvarid, attname, &attrflt);
+		  printf("flt: %s.%s = %g\n", ncvars[ncvarid].name, attname, attrflt);
+		}
+	      else if ( attrtype == NC_CHAR )
+		{
+		  cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen-1);
+		  attstring[attlen] = 0;
+		  printf("txt: %s.%s = %s\n", ncvars[ncvarid].name, attname, attstring);
+		}
+	      else
+		printf("att: %s.%s = unknown\n", ncvars[ncvarid].name, attname);
+	      */
+	    }
 	}
     }
 
@@ -3840,7 +3917,11 @@ int cdfInqContents(int streamID)
 		{
 		  if      ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer midpoints") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
+		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
+		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
 		  else if ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer interfaces") == 0 )
+		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
+		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
 		  else
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
@@ -3930,7 +4011,11 @@ int cdfInqContents(int streamID)
 		{
 		  if      ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer midpoints") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
+		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
+		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
 		  else if ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer interfaces") == 0 )
+		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
+		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
 		  else
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
@@ -4609,6 +4694,56 @@ int cdfInqContents(int streamID)
 		vlistInqVarGrid(vlistID, varID), vlistInqVarZaxis(vlistID, varID));
     }
 
+  for ( varID = 0; varID < nvars; varID++ )
+    {
+      ncvarid = varids[varID];
+
+      if ( ncvars[ncvarid].natts )
+	{
+	  int attnum, attrint;
+	  double attrflt;
+	  nc_type attrtype;
+
+	  nvatts = ncvars[ncvarid].natts;
+	  for ( iatt = 0; iatt < nvatts; iatt++ )
+	    {
+	      attnum = ncvars[ncvarid].atts[iatt];
+	      cdf_inq_attname(fileID, ncvarid, attnum, attname);
+	      cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
+	      cdf_inq_atttype(fileID, ncvarid, attname, &attrtype);
+	      if ( attlen == 1 && (attrtype == NC_INT || attrtype == NC_SHORT) )
+		{
+		  cdfGetAttInt(fileID, ncvarid, attname, &attrint);
+		  vlistDefAttrInt(vlistID, varID, attname, 1, &attrint);
+		  if ( CDI_Debug )
+		    printf("int: %s.%s = %d\n", ncvars[ncvarid].name, attname, attrint);
+		}
+	      else if ( attlen == 1 && (attrtype == NC_FLOAT || attrtype == NC_DOUBLE) )
+		{
+		  cdfGetAttDouble(fileID, ncvarid, attname, &attrflt);
+		  vlistDefAttrFlt(vlistID, varID, attname, 1, &attrflt);
+		  if ( CDI_Debug )
+		    printf("flt: %s.%s = %g\n", ncvars[ncvarid].name, attname, attrflt);
+		}
+	      else if ( attrtype == NC_CHAR )
+		{
+		  cdfGetAttText(fileID, ncvarid, attname, attstring, attstringlen-1);
+		  attstring[attlen] = 0;
+		  vlistDefAttrTxt(vlistID, varID, attname, attlen+1, attstring);
+		  if ( CDI_Debug )
+		    printf("txt: %s.%s = %s\n", ncvars[ncvarid].name, attname, attstring);
+		}
+	      else
+		{
+		  if ( CDI_Debug )
+		    printf("att: %s.%s = unknown\n", ncvars[ncvarid].name, attname);
+		}
+	    }
+
+	  free(ncvars[ncvarid].atts);
+	}
+    }
+
   if ( varids ) free(varids);
 
   for ( varID = 0; varID < nvars; varID++ )
@@ -4675,7 +4810,7 @@ int cdfInqContents(int streamID)
       if ( modelID != UNDEFID ) vlistDefVarModel(vlistID, varID, modelID);
       if ( tableID != UNDEFID ) vlistDefVarTable(vlistID, varID, tableID);
     }
-
+ 
   cdiCreateTimesteps(streamID);
 
   /* time varID */
@@ -4905,17 +5040,9 @@ void cdfDefGlobalAtts(int streamID)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int fileID, vlistID;
-  int iatt;
-  size_t len;
   VLIST *vlistptr;
   STREAM *streamptr;
   int natts;
-  char attrname[256];
-  int attrtype;
-  int attrlen;
-  int attrint;
-  double attrflt;
-  char attrtxt[2048];
 
   streamptr = stream_to_pointer(streamID);
 
@@ -4933,27 +5060,7 @@ void cdfDefGlobalAtts(int streamID)
 
   if ( natts > 0 && streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-  for ( iatt = 0; iatt < natts; ++iatt )
-    {
-      vlistInqAttr(vlistID, CDI_GLOBAL, iatt, attrname, &attrtype, &attrlen);
-
-      if ( attrtype == DATATYPE_TXT )
-	{
-	  vlistInqAttrTxt(vlistID, CDI_GLOBAL, attrname, sizeof(attrtxt), attrtxt);
-	  len = strlen(attrtxt);
-	  cdf_put_att_text(fileID, NC_GLOBAL, attrname, len+1, attrtxt);
-	}
-      else if ( attrtype == DATATYPE_INT )
-	{
-	  vlistInqAttrInt(vlistID, CDI_GLOBAL, attrname, 1, &attrint);
-	  cdf_put_att_int(fileID, NC_GLOBAL, attrname, NC_INT, 1L, &attrint);
-	}
-      else if ( attrtype == DATATYPE_FLT )
-	{
-	  vlistInqAttrFlt(vlistID, CDI_GLOBAL, attrname, 1, &attrflt);
-	  cdf_put_att_double(fileID, NC_GLOBAL, attrname, NC_DOUBLE, 1L, &attrflt);
-	}
-    }
+  defineAttributes(vlistID, CDI_GLOBAL, fileID, NC_GLOBAL);
 
   if ( natts > 0 && streamptr->ncmode == 2 ) cdf_enddef(fileID);
 

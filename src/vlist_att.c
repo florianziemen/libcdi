@@ -21,7 +21,8 @@ CDI_atts *get_attsp(VLIST *vlistptr, int varID)
     }
   else
     {
-      /*      attsp = vlistptr->vars[varID]->atts; */
+      if ( varID >= 0 && varID < vlistptr->nvars )
+	attsp = &(vlistptr->vars[varID].atts);
     }
 
   return (attsp);
@@ -106,7 +107,7 @@ int vlistInqNatts(int vlistID, int varID, int *nattsp)
   vlistptr = vlist_to_pointer(vlistID);
   
   attsp = get_attsp(vlistptr, varID);
-  if ( attsp == NULL ) Error(func, "Internal problem, attributes not found!");
+  assert(attsp != NULL);
 
   *nattsp = attsp->nelems;
 
@@ -127,7 +128,7 @@ int vlistInqAttr(int vlistID, int varID, int attrnum, char *name, int *typep, in
   vlistptr = vlist_to_pointer(vlistID);
 
   attsp = get_attsp(vlistptr, varID);
-  if ( attsp == NULL ) Error(func, "Internal problem, attributes not found!");
+  assert(attsp != NULL);
 
   if ( attrnum >= 0 && attrnum < (int)attsp->nelems )
     attrp = &(attsp->value[attrnum]);
@@ -161,7 +162,7 @@ int vlistDelAtts(int vlistID, int varID)
   vlistptr = vlist_to_pointer(vlistID);
 
   attsp = get_attsp(vlistptr, varID);
-  if ( attsp == NULL ) Error(func, "Internal problem, attributes not found!");
+  assert(attsp != NULL);
 
   for ( attrid = 0; attrid < (int)attsp->nelems; attrid++ )
     {
@@ -203,7 +204,7 @@ int vlist_def_attr(int type, int vlistID, int varID, const char *name, size_t le
   vlistptr = vlist_to_pointer(vlistID);
 
   attsp = get_attsp(vlistptr, varID);
-  if ( attsp == NULL ) Error(func, "Internal problem, attributes not found!");
+  assert(attsp != NULL);
 
   attrp = find_attr(attsp, name);
   if ( attrp != NULL ) /* name in use */
@@ -238,7 +239,7 @@ int vlist_inq_attr(int type, int vlistID, int varID, const char *name, size_t mx
   vlistptr = vlist_to_pointer(vlistID);
 
   attsp = get_attsp(vlistptr, varID);
-  if ( attsp == NULL ) Error(func, "Internal problem, attributes not found!");
+  assert(attsp != NULL);
 
   attrp = find_attr(attsp, name);
   if ( attrp != NULL ) /* name in use */
@@ -268,7 +269,7 @@ int vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2)
   vlistptr1 = vlist_to_pointer(vlistID1);
 
   attsp1 = get_attsp(vlistptr1, varID_1);
-  if ( attsp1 == NULL ) Error(func, "Internal problem, attributes not found!");
+  assert(attsp1 != NULL);
 
   for ( attrid = 0; attrid < (int)attsp1->nelems; attrid++ )
     {
