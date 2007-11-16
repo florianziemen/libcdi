@@ -1062,7 +1062,12 @@ double encode_timeval(int date, int time, TAXIS *taxis)
     {
       if ( taxis->unit == TUNIT_MONTH )
 	{
-	  timevalue = date/100 + 0.5;
+	  int year, month, day;
+	  decode_date(date, &year, &month, &day);
+	  if ( day == 0 )
+	    timevalue = date/100;
+	  else
+	    timevalue = date/100 + 0.5;
 	}
       else
 	{
