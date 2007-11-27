@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Wed Oct 24 15:20:09 CEST 2007 */
+/* Generated automatically from m214003 on Tue Nov 27 08:44:46 CET 2007 */
 
 /* GRIBLIB_VERSION="1.0.7" */
 
@@ -205,9 +205,9 @@ void  gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 #define  GDS_ResFlag         GET_UINT1(gds[16])
 #define  GDS_LastLat         GET_INT3(gds[17], gds[18], gds[19])
 #define  GDS_LastLon         GET_INT3(gds[20], gds[21], gds[22])
-#define  GDS_LonIncr         GET_INT2(gds[23], gds[24])
-#define  GDS_LatIncr         GET_INT2(gds[25], gds[26])
-#define  GDS_NumPar          GET_INT2(gds[25], gds[26])
+#define  GDS_LonIncr         GET_UINT2(gds[23], gds[24])
+#define  GDS_LatIncr         GET_UINT2(gds[25], gds[26])
+#define  GDS_NumPar          GET_UINT2(gds[25], gds[26])
 #define  GDS_ScanFlag        GET_UINT1(gds[27])
 #define  GDS_LatSP           GET_INT3(gds[32], gds[33], gds[34])
 #define  GDS_LonSP           GET_INT3(gds[35], gds[36], gds[37])
@@ -257,6 +257,10 @@ void  gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 #define Put2Byte(Value) ((lGrib[z++] = (Value) >>  8), \
                          (lGrib[z++] = (Value)))
 #define Put3Byte(Value) ((lGrib[z++] = (Value) >> 16), \
+                         (lGrib[z++] = (Value) >>  8), \
+                         (lGrib[z++] = (Value)))
+#define Put4Byte(Value) ((lGrib[z++] = (Value) >> 24), \
+                         (lGrib[z++] = (Value) >> 16), \
                          (lGrib[z++] = (Value) >>  8), \
                          (lGrib[z++] = (Value)))
 
@@ -1078,10 +1082,12 @@ gribExDP(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
     gribDecode(isec0, isec1, isec2, fsec2, isec3,
 	       fsec3, isec4, fsec4, klenp, kgrib,
 	       kleng, kword, yfunc, kret);
-  else if ( *hoper == 'C' )
+  else if ( yfunc == 'C' )
     gribEncode(isec0, isec1, isec2, fsec2, isec3,
 	       fsec3, isec4, fsec4, klenp, kgrib,
 	       kleng, kword, yfunc, kret);
+  else if ( yfunc == 'V' )
+    fprintf(stderr, " c-gribex: Version is %s\n", gribLibraryVersion());
   else
     {
       Error(func, "oper %c unsupported\n", yfunc);
@@ -1155,6 +1161,8 @@ gribExSP(int *isec0, int *isec1, int *isec2, float *fsec2sp, int *isec3,
 
       free(fsec4dp);
     }
+  else if ( yfunc == 'V' )
+    fprintf(stderr, " c-gribex: Version is %s\n", gribLibraryVersion());
   else
     {
       Error(func, "oper %c unsupported\n", yfunc);
@@ -1251,9 +1259,8 @@ void gribPrintSec1(int *isec0, int *isec1)
   int jloop, jiloop;
   float value;
 
-  int hversion[4];
-  /*
   char hversion[9];
+  /*
   char hfirst[121], hsecond[121], hthird[121], hfourth[121];
   */
 
@@ -1418,13 +1425,8 @@ void gribPrintSec1(int *isec0, int *isec1)
       fprintf(grprsm, " Class.                               %9d\n", isec1[37]);
       fprintf(grprsm, " Type.                                %9d\n", isec1[38]);
       fprintf(grprsm, " Stream.                              %9d\n", isec1[39]);
-
-      hversion[0] = (int) *((char*)&isec1[40]);
-      hversion[1] = (int) *((char*)&isec1[40]+1);
-      hversion[2] = (int) *((char*)&isec1[40]+2);
-      hversion[3] = (int) *((char*)&isec1[40]+3);
-      fprintf(grprsm, " Version number or Experiment identifier.  %c%c%c%c\n",
-	      hversion[3], hversion[2], hversion[1], hversion[0]);
+      sprintf(hversion, "%4s", (char*)&isec1[40]); hversion[4] = 0;
+      fprintf(grprsm, " Version number or Experiment identifier.  %4s\n", hversion);
       /*
 	ECMWF Local definition 1.
 	(MARS labelling or ensemble forecast data)
@@ -2737,6 +2739,7 @@ void encodeES(GRIBPACK *lGrib, int *gribLen)
 
 #define DWD_extension_253_len 37
 #define DWD_extension_254_len 26
+#define ECMWF_extension_1_len 24
 
 int getLocalExtLen(int *isec1)
 {
@@ -2755,6 +2758,13 @@ int getLocalExtLen(int *isec1)
 	      extlen = DWD_extension_253_len;
 	    }
 	}
+      else if ( ISEC1_CenterID == 98 )
+        {
+	  if ( isec1[36] == 1 )
+	    {
+	      extlen = ECMWF_extension_1_len;
+	    }
+        }
     }
 
   return (extlen);
@@ -2809,6 +2819,38 @@ void encodePDS_DWD_local_Extension_253(GRIBPACK *lGrib, int *zs, int *isec1)
   Put2Byte(isec1[54]);        /* 62 Actual number of ensemble member  */
   Put1Byte(isec1[55]);        /* 64 Model major version number        */ 
   Put1Byte(isec1[56]);        /* 65 Model minor version number        */ 
+
+  *zs = z;
+}
+
+
+void encodePDS_ECMWF_local_Extension_1 (GRIBPACK *lGrib, int *zs, int *isec1)
+{
+  int i, localextlen, isvn;
+  int z = *zs;
+  static char func[] = "encodePDS_ECMWF_local_Extension_1";
+
+  localextlen = getLocalExtLen(isec1);
+  for ( i = 0; i < localextlen-12; i++ )
+    {
+      Put1Byte(isec1[24+i]);
+    }
+                              /* 12 bytes explicitly encoded below: */
+  Put1Byte(isec1[36]);        /* ECMWF local GRIB use definition identifier */
+                              /*    1=MARS labelling or ensemble fcst. data */
+  Put1Byte(isec1[37]);        /* Class                                      */
+  Put1Byte(isec1[38]);        /* Type                                       */
+  Put2Byte(isec1[39]);        /* Stream                                     */
+
+  /* Version number or experiment identifier    */
+  Put1Byte(((unsigned char*) &isec1[40])[0]);
+  Put1Byte(((unsigned char*) &isec1[40])[1]);
+  Put1Byte(((unsigned char*) &isec1[40])[2]);
+  Put1Byte(((unsigned char*) &isec1[40])[3]);
+
+  Put1Byte(isec1[41]);        /* Ensemble forecast number                   */
+  Put1Byte(isec1[42]);        /* Total number of forecasts in ensemble      */
+  Put1Byte(0);                /* (Spare)                                    */
 
   *zs = z;
 }
@@ -2910,6 +2952,13 @@ void encodePDS(GRIBPACK *lpds, int pdsLen, int *isec1)
 	      encodePDS_DWD_local_Extension_253(lGrib, &z, isec1);
 	    }
 	}
+      else if ( ISEC1_CenterID == 98 )
+	{
+	  if ( isec1[36] == 1 )
+	    {
+	      encodePDS_ECMWF_local_Extension_1(lGrib, &z, isec1);
+	    }
+	}
       else
 	{
 	  int i, localextlen;
@@ -2934,6 +2983,7 @@ void encodeGDS(GRIBPACK *lGrib, int *gribLen, int *isec2, double *fsec2)
   int ival;
   int pvoffset = 255;
   int gdslen = 32;
+  unsigned lonIncr, latIncr;
 
   if ( ISEC2_GridType == GTYPE_LAMBERT ) gdslen += 10;
 
@@ -2993,19 +3043,35 @@ void encodeGDS(GRIBPACK *lGrib, int *gribLen, int *isec2, double *fsec2)
 	    ISEC2_GridType == GTYPE_GAUSSIAN  ||
 	    ISEC2_GridType == GTYPE_LATLON_ROT )
     {
-      Put2Byte(ISEC2_NumLon);          /*  6- 7 Longitudes               */
+      int numlon;
+      if ( ISEC2_Reduced )
+	numlon = 65535;
+      else
+	numlon = ISEC2_NumLon;
 
-      Put2Byte(ISEC2_NumLat);          /*  8- 9 Latitudes                */
+      Put2Byte(numlon);                /*  6- 7 Number of Longitudes     */
+
+      Put2Byte(ISEC2_NumLat);          /*  8- 9 Number of Latitudes      */
       Put3Int(ISEC2_FirstLat);
       Put3Int(ISEC2_FirstLon);
       Put1Byte(ISEC2_ResFlag);         /* 16    Resolution flag          */
       Put3Int(ISEC2_LastLat);
       Put3Int(ISEC2_LastLon);
-      Put2Byte(ISEC2_LonIncr);                  /* 23-24 i - direction increment  */
+      if ( ISEC2_ResFlag == 0 )
+	{
+	  lonIncr = 65535;
+	  latIncr = 65535;
+	}
+      else
+	{
+	  lonIncr = ISEC2_LonIncr;
+	  latIncr = ISEC2_LatIncr;
+	}
+      Put2Byte(lonIncr);                  /* 23-24 i - direction increment  */
       if ( ISEC2_GridType == GTYPE_GAUSSIAN )
 	Put2Byte(ISEC2_NumPar);        /* 25-26 Latitudes Pole->Equator  */
       else
-	Put2Byte(ISEC2_LatIncr);              /* 25-26 j - direction increment  */
+	Put2Byte(latIncr);              /* 25-26 j - direction increment  */
 
       Put1Byte(ISEC2_ScanFlag);        /* 27    Scanning mode            */
       PutnZero(4);                     /* 28-31 reserved                 */
@@ -3789,7 +3855,8 @@ static void decodePDS_ECMWF_local_Extension_1(unsigned char *pds, int *isec1)
   isec1[37] = GET_UINT1(pds[41]);         /* Class                      */
   isec1[38] = GET_UINT1(pds[42]);         /* Type                       */
   isec1[39] = GET_UINT2(pds[43],pds[44]); /* Stream                     */
-  isec1[40] = GET_UINT4(pds[45],pds[46],pds[47],pds[48]);
+  /* isec1[40] = GET_UINT4(pds[45],pds[46],pds[47],pds[48]); */
+  memcpy((char*) &isec1[40], &pds[45], 4);
   isec1[41] = GET_UINT1(pds[49]);         /* Forecast number            */
   isec1[42] = GET_UINT1(pds[50]);         /* Total number of forecasts  */
 }
@@ -3969,13 +4036,15 @@ static int decodeGDS(unsigned char  *gds, int *isec0, int *isec2, double *fsec2,
 
   imisng = 0;
 
+  memset(isec2, 0, 22*sizeof(int));
+
   gdsLen = GDS_Len;
 
   ipvpl = GDS_PVPL;
   if ( ipvpl == 0 ) ipvpl = 255;
 
   if ( ipvpl != 255 )
-    { /* Either vct or regrid */
+    { /* Either vct or reduced grid */
       if ( GDS_NV != 0 )
 	{ /* we have vct */
 	  VertCoorTab = TRUE;
@@ -4032,6 +4101,7 @@ static int decodeGDS(unsigned char  *gds, int *isec0, int *isec2, double *fsec2,
       ISEC2_LastLat   = GDS_LastLat;
       ISEC2_LastLon   = GDS_LastLon;
       ISEC2_LonIncr   = GDS_LonIncr;
+
       ISEC2_NumPar    = GDS_NumPar;
       ISEC2_ScanFlag  = GDS_ScanFlag;
       if ( ISEC2_GridType == GTYPE_LATLON_ROT )
@@ -8096,7 +8166,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.7" " of ""Oct 24 2007"" ""15:20:10";
+static const char grb_libvers[] = "1.0.7" " of ""Nov 27 2007"" ""08:44:46";
 
 
 
