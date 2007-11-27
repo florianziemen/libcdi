@@ -2995,7 +2995,7 @@ void gridPrint(int gridID, int opt)
 	  {
 	    double xfirst = 0.0, xinc = 0.0;
 
-	    if ( type == GRID_LONLAT || type == GRID_GAUSSIAN )
+	    if ( type == GRID_LONLAT || type == GRID_GAUSSIAN || type == GRID_GENERIC )
 	      {
 		xfirst = gridInqXval(gridID, 0);
 		xinc   = gridInqXinc(gridID);
@@ -3041,7 +3041,7 @@ void gridPrint(int gridID, int opt)
 	  {
 	    double yfirst = 0.0, yinc = 0.0;
 
-	    if ( type == GRID_LONLAT )
+	    if ( type == GRID_LONLAT || type == GRID_GENERIC )
 	      {
 		yfirst = gridInqYval(gridID, 0);
 		yinc   = gridInqYinc(gridID);

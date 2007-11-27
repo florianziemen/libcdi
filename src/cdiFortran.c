@@ -25,7 +25,10 @@
 /*  Compress types  */
 
 
-/*  Data types  */
+/*  external data types  */
+
+
+/*  internal data types  */
 
 
 /*  GRID types  */
@@ -123,7 +126,6 @@ FCALLSCSUB2 (vlistDefInstitut, VLISTDEFINSTITUT, vlistdefinstitut, INT, INT)
 FCALLSCFUN1 (INT, vlistInqInstitut, VLISTINQINSTITUT, vlistinqinstitut, INT)
 FCALLSCSUB2 (vlistDefModel, VLISTDEFMODEL, vlistdefmodel, INT, INT)
 FCALLSCFUN1 (INT, vlistInqModel, VLISTINQMODEL, vlistinqmodel, INT)
-FCALLSCSUB3 (vlistDefAttribute, VLISTDEFATTRIBUTE, vlistdefattribute, INT, STRING, STRING)
 
 /*  VLIST VAR routines  */
 
@@ -172,6 +174,18 @@ FCALLSCFUN2 (INT, vlistFlagVar, VLISTFLAGVAR, vlistflagvar, INT, INT)
 FCALLSCFUN3 (INT, vlistFlagLevel, VLISTFLAGLEVEL, vlistflaglevel, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistFindVar, VLISTFINDVAR, vlistfindvar, INT, INT)
 FCALLSCFUN3 (INT, vlistFindLevel, VLISTFINDLEVEL, vlistfindlevel, INT, INT, INT)
+
+/*  VLIST attributes  */
+
+FCALLSCFUN3 (INT, vlistInqNatts, VLISTINQNATTS, vlistinqnatts, INT, INT, PINT)
+FCALLSCFUN6 (INT, vlistInqAttr, VLISTINQATTR, vlistinqattr, INT, INT, INT, PSTRING, PINT, PINT)
+FCALLSCFUN3 (INT, vlistDelAttr, VLISTDELATTR, vlistdelattr, INT, INT, STRING)
+FCALLSCFUN5 (INT, vlistDefAttrInt, VLISTDEFATTRINT, vlistdefattrint, INT, INT, STRING, INT, PINT)
+FCALLSCFUN5 (INT, vlistDefAttrFlt, VLISTDEFATTRFLT, vlistdefattrflt, INT, INT, STRING, INT, PDOUBLE)
+FCALLSCFUN5 (INT, vlistDefAttrTxt, VLISTDEFATTRTXT, vlistdefattrtxt, INT, INT, STRING, INT, STRING)
+FCALLSCFUN5 (INT, vlistInqAttrInt, VLISTINQATTRINT, vlistinqattrint, INT, INT, STRING, INT, PINT)
+FCALLSCFUN5 (INT, vlistInqAttrFlt, VLISTINQATTRFLT, vlistinqattrflt, INT, INT, STRING, INT, PDOUBLE)
+FCALLSCFUN5 (INT, vlistInqAttrTxt, VLISTINQATTRTXT, vlistinqattrtxt, INT, INT, STRING, INT, PSTRING)
 
 /*  GRID routines  */
 
@@ -236,6 +250,11 @@ FCALLSCFUN1 (INT, gridInqGMEni2, GRIDINQGMENI2, gridinqgmeni2, INT)
 FCALLSCSUB2 (gridDefGMEni2, GRIDDEFGMENI2, griddefgmeni2, INT, INT)
 FCALLSCFUN1 (INT, gridInqGMEni3, GRIDINQGMENI3, gridinqgmeni3, INT)
 FCALLSCSUB2 (gridDefGMEni3, GRIDDEFGMENI3, griddefgmeni3, INT, INT)
+
+/*  Lambert grid  */
+
+FCALLSCSUB8 (gridDefLambert, GRIDDEFLAMBERT, griddeflambert, INT, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE)
+FCALLSCSUB8 (gridInqLambert, GRIDINQLAMBERT, gridinqlambert, INT, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE)
 FCALLSCSUB2 (gridDefArea, GRIDDEFAREA, griddefarea, INT, PDOUBLE)
 FCALLSCSUB2 (gridInqArea, GRIDINQAREA, gridinqarea, INT, PDOUBLE)
 FCALLSCFUN1 (INT, gridHasArea, GRIDHASAREA, gridhasarea, INT)

@@ -1,9 +1,11 @@
 !
-! Fortran interface for CDI library version 1.0.7
+! Fortran interface for CDI library version 1.0.9
 !
 
       INTEGER    CDI_UNDEFID           
       PARAMETER (CDI_UNDEFID            = -1)
+      INTEGER    CDI_GLOBAL            
+      PARAMETER (CDI_GLOBAL             = -1)
 !
 !  Byte order
 !
@@ -14,6 +16,8 @@
 !
 !  Error identifier
 !
+      INTEGER    CDI_NOERR             
+      PARAMETER (CDI_NOERR              =  0)
       INTEGER    CDI_ESYSTEM           
       PARAMETER (CDI_ESYSTEM            = -10)
       INTEGER    CDI_EINVAL            
@@ -29,8 +33,8 @@
 !
       INTEGER    FILETYPE_GRB          
       PARAMETER (FILETYPE_GRB           =  1)
-      INTEGER    FILETYPE_G2           
-      PARAMETER (FILETYPE_G2            =  2)
+      INTEGER    FILETYPE_GB2          
+      PARAMETER (FILETYPE_GB2           =  2)
       INTEGER    FILETYPE_NC           
       PARAMETER (FILETYPE_NC            =  3)
       INTEGER    FILETYPE_NC2          
@@ -51,7 +55,7 @@
       INTEGER    COMPRESS_BZIP2        
       PARAMETER (COMPRESS_BZIP2         =  3)
 !
-!  Data types
+!  external data types
 !
       INTEGER    DATATYPE_PACK         
       PARAMETER (DATATYPE_PACK          =  0)
@@ -130,6 +134,15 @@
       INTEGER    DATATYPE_INT32        
       PARAMETER (DATATYPE_INT32         = 232)
 !
+!  internal data types
+!
+      INTEGER    DATATYPE_INT          
+      PARAMETER (DATATYPE_INT           = 251)
+      INTEGER    DATATYPE_FLT          
+      PARAMETER (DATATYPE_FLT           = 252)
+      INTEGER    DATATYPE_TXT          
+      PARAMETER (DATATYPE_TXT           = 253)
+!
 !  GRID types
 !
       INTEGER    GRID_GENERIC          
@@ -152,6 +165,8 @@
       PARAMETER (GRID_CELL              =  9)
       INTEGER    GRID_CURVILINEAR      
       PARAMETER (GRID_CURVILINEAR       = 10)
+      INTEGER    GRID_LAMBERT          
+      PARAMETER (GRID_LAMBERT           = 11)
 !
 !  ZAXIS types
 !
@@ -537,12 +552,6 @@
 !                                    (INTEGER         vlistID)
       EXTERNAL        vlistInqModel
 
-!                     vlistDefAttribute
-!                                    (INTEGER         vlistID,
-!                                     CHARACTER*(*)   attname,
-!                                     CHARACTER*(*)   attstring)
-      EXTERNAL        vlistDefAttribute
-
 !
 !  VLIST VAR routines
 !
@@ -803,6 +812,78 @@
 !                                     INTEGER         fvarID,
 !                                     INTEGER         flevelID)
       EXTERNAL        vlistFindLevel
+
+!
+!  VLIST attributes
+!
+      INTEGER         vlistInqNatts
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         nattsp)
+      EXTERNAL        vlistInqNatts
+
+      INTEGER         vlistInqAttr
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         attrnum,
+!                                     CHARACTER*(*)   name,
+!                                     INTEGER         typep,
+!                                     INTEGER         lenp)
+      EXTERNAL        vlistInqAttr
+
+      INTEGER         vlistDelAttr
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name)
+      EXTERNAL        vlistDelAttr
+
+      INTEGER         vlistDefAttrInt
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name,
+!                                     INTEGER         len,
+!                                     INTEGER         ip)
+      EXTERNAL        vlistDefAttrInt
+
+      INTEGER         vlistDefAttrFlt
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name,
+!                                     INTEGER         len,
+!                                     DOUBLEPRECISION dp)
+      EXTERNAL        vlistDefAttrFlt
+
+      INTEGER         vlistDefAttrTxt
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name,
+!                                     INTEGER         len,
+!                                     CHARACTER*(*)   tp)
+      EXTERNAL        vlistDefAttrTxt
+
+      INTEGER         vlistInqAttrInt
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name,
+!                                     INTEGER         mlen,
+!                                     INTEGER         ip)
+      EXTERNAL        vlistInqAttrInt
+
+      INTEGER         vlistInqAttrFlt
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name,
+!                                     INTEGER         mlen,
+!                                     DOUBLEPRECISION dp)
+      EXTERNAL        vlistInqAttrFlt
+
+      INTEGER         vlistInqAttrTxt
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name,
+!                                     INTEGER         mlen,
+!                                     CHARACTER*(*)   tp)
+      EXTERNAL        vlistInqAttrTxt
 
 !
 !  GRID routines
@@ -1076,6 +1157,31 @@
 !                                    (INTEGER         gridID,
 !                                     INTEGER         ni3)
       EXTERNAL        gridDefGMEni3
+
+!
+!  Lambert grid
+!
+!                     gridDefLambert
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION originLon,
+!                                     DOUBLEPRECISION originLat,
+!                                     DOUBLEPRECISION lonParY,
+!                                     DOUBLEPRECISION lat1,
+!                                     DOUBLEPRECISION lat2,
+!                                     DOUBLEPRECISION xinc,
+!                                     DOUBLEPRECISION yinc)
+      EXTERNAL        gridDefLambert
+
+!                     gridInqLambert
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION originLon,
+!                                     DOUBLEPRECISION originLat,
+!                                     DOUBLEPRECISION lonParY,
+!                                     DOUBLEPRECISION lat1,
+!                                     DOUBLEPRECISION lat2,
+!                                     DOUBLEPRECISION xinc,
+!                                     DOUBLEPRECISION yinc)
+      EXTERNAL        gridInqLambert
 
 !                     gridDefArea
 !                                    (INTEGER         gridID,
