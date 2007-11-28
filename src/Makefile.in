@@ -113,6 +113,7 @@ libcdi_a_SOURCES = \
 	grid.c           \
 	grid_rot.c       \
 	grid_gme.c       \
+	grid_lambert.c   \
 	zaxis.c		 \
         stream.c         \
 	stream_var.c     \
@@ -180,11 +181,12 @@ am_libcdi_a_OBJECTS = cdiFortran.$(OBJEXT) cdi_error.$(OBJEXT) \
 	stream_history.$(OBJEXT) stream_grb.$(OBJEXT) \
 	stream_cdf.$(OBJEXT) stream_srv.$(OBJEXT) stream_ext.$(OBJEXT) \
 	stream_ieg.$(OBJEXT) grid.$(OBJEXT) grid_rot.$(OBJEXT) \
-	grid_gme.$(OBJEXT) zaxis.$(OBJEXT) stream.$(OBJEXT) \
-	stream_var.$(OBJEXT) stream_record.$(OBJEXT) tsteps.$(OBJEXT) \
-	stream_int.$(OBJEXT) servicelib.$(OBJEXT) extralib.$(OBJEXT) \
-	ieglib.$(OBJEXT) cdf.$(OBJEXT) cdf_int.$(OBJEXT) file.$(OBJEXT) \
-	binary.$(OBJEXT) swap.$(OBJEXT) griblib.$(OBJEXT)
+	grid_gme.$(OBJEXT) grid_lambert.$(OBJEXT) zaxis.$(OBJEXT) \
+	stream.$(OBJEXT) stream_var.$(OBJEXT) stream_record.$(OBJEXT) \
+	tsteps.$(OBJEXT) stream_int.$(OBJEXT) servicelib.$(OBJEXT) \
+	extralib.$(OBJEXT) ieglib.$(OBJEXT) cdf.$(OBJEXT) \
+	cdf_int.$(OBJEXT) file.$(OBJEXT) binary.$(OBJEXT) \
+	swap.$(OBJEXT) griblib.$(OBJEXT)
 libcdi_a_OBJECTS = $(am_libcdi_a_OBJECTS)
 
 DEFS = @DEFS@
@@ -200,11 +202,11 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/error.Po ./$(DEPDIR)/extralib.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/file.Po ./$(DEPDIR)/griblib.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/grid.Po ./$(DEPDIR)/grid_gme.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/grid_rot.Po ./$(DEPDIR)/ieglib.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/institution.Po ./$(DEPDIR)/model.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/servicelib.Po ./$(DEPDIR)/stream.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/stream_cdf.Po ./$(DEPDIR)/stream_ext.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/stream_grb.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/grid_lambert.Po ./$(DEPDIR)/grid_rot.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ieglib.Po ./$(DEPDIR)/institution.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/model.Po ./$(DEPDIR)/servicelib.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/stream.Po ./$(DEPDIR)/stream_cdf.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/stream_ext.Po ./$(DEPDIR)/stream_grb.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/stream_history.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/stream_ieg.Po ./$(DEPDIR)/stream_int.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/stream_record.Po \
@@ -308,6 +310,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/griblib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid_gme.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid_lambert.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid_rot.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ieglib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/institution.Po@am__quote@

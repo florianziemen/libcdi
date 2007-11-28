@@ -3373,9 +3373,10 @@ int gridToCurvilinear(int gridID1)
     {
     case GRID_LONLAT:
     case GRID_GAUSSIAN:
+    case GRID_LAMBERT:
       {
 	int i, j, nx, ny;
-	double *xvals, *yvals;
+	double *xvals = NULL, *yvals = NULL;
 	double *xvals2D, *yvals2D;
 	double *xbounds = NULL, *ybounds = NULL;
 	double *xbounds2D, *ybounds2D;
@@ -3386,40 +3387,73 @@ int gridToCurvilinear(int gridID1)
 	gridDefXsize(gridID2, nx);
 	gridDefYsize(gridID2, ny);
 
-	if ( ! (gridInqXvals(gridID1, NULL) && gridInqYvals(gridID1, NULL)) )
-	  Error(func, "Grid has no values");
-
-	xvals = (double *) malloc(nx*sizeof(double));
-	yvals = (double *) malloc(ny*sizeof(double));
-
 	xvals2D = (double *) malloc(gridsize*sizeof(double));
 	yvals2D = (double *) malloc(gridsize*sizeof(double));
 
-	gridInqXvals(gridID1, xvals);
-	gridInqYvals(gridID1, yvals);
 
-	if ( gridIsRotated(gridID1) )
+	if ( gridtype == GRID_LAMBERT )
 	  {
-	    double xpole, ypole;
+	    double xi, xj;
+	    double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
+	    double zlat, zlon;
+	    int status;
 
-	    xpole = gridInqXpole(gridID1);
-	    ypole = gridInqYpole(gridID1);
-
+	    gridInqLambert(gridID1, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
+	    /*
+	    while ( originLon < 0 ) originLon += 360;
+	    while ( lonParY   < 0 ) lonParY   += 360;
+	    */
+	    if ( ! DBL_IS_EQUAL(xincm, yincm) )
+	      Warning(func, "X and Y increment must be equal on Lambert grid (Xinc = %g, Yinc = %g)\n", 
+		      xincm, yincm);
+	    if ( ! DBL_IS_EQUAL(lat1, lat2) )
+	      Warning(func, "Lat1 and Lat2 must be equal on Lambert grid (Lat1 = %g, Lat2 = %g)\n", 
+		      lat1, lat2);
+		
 	    for ( j = 0; j < ny; j++ )
 	      for ( i = 0; i < nx; i++ )
 		{
-		  xvals2D[j*nx+i] = rls_to_rl(yvals[j], xvals[i], ypole, xpole);
-		  yvals2D[j*nx+i] = phs_to_ph(yvals[j], xvals[i], ypole);
-		}	    
+		  xi = i+1;
+		  xj = j+1;
+		  status = W3FB12(xi, xj, originLat, originLon, xincm, lonParY, lat1, &zlat,&zlon);
+		  xvals2D[j*nx+i] = zlon;
+		  yvals2D[j*nx+i] = zlat;
+		}
 	  }
 	else
 	  {
-	    for ( j = 0; j < ny; j++ )
-	      for ( i = 0; i < nx; i++ )
-		{
-		  xvals2D[j*nx+i] = xvals[i];
-		  yvals2D[j*nx+i] = yvals[j];
-		}
+	    if ( ! (gridInqXvals(gridID1, NULL) && gridInqYvals(gridID1, NULL)) )
+	      Error(func, "Grid has no values");
+
+	    xvals = (double *) malloc(nx*sizeof(double));
+	    yvals = (double *) malloc(ny*sizeof(double));
+
+	    gridInqXvals(gridID1, xvals);
+	    gridInqYvals(gridID1, yvals);
+
+	    if ( gridIsRotated(gridID1) )
+	      {
+		double xpole, ypole;
+		
+		xpole = gridInqXpole(gridID1);
+		ypole = gridInqYpole(gridID1);
+		
+		for ( j = 0; j < ny; j++ )
+		  for ( i = 0; i < nx; i++ )
+		    {
+		      xvals2D[j*nx+i] = rls_to_rl(yvals[j], xvals[i], ypole, xpole);
+		      yvals2D[j*nx+i] = phs_to_ph(yvals[j], xvals[i], ypole);
+		    }	    
+	      }
+	    else
+	      {
+		for ( j = 0; j < ny; j++ )
+		  for ( i = 0; i < nx; i++ )
+		    {
+		      xvals2D[j*nx+i] = xvals[i];
+		      yvals2D[j*nx+i] = yvals[j];
+		    }
+	      }
 	  }
 
 	gridDefXvals(gridID2, xvals2D);
@@ -3428,53 +3462,105 @@ int gridToCurvilinear(int gridID1)
 	free(xvals2D);
 	free(yvals2D);
 
-	if ( gridInqXboundsPtr(gridID1) )
-	  {
-	    xbounds = (double *) malloc(2*nx*sizeof(double));
-	    gridInqXbounds(gridID1, xbounds);
-	  }
-	else if ( nx > 1 )
-	  {
-	    xbounds = (double *) malloc(2*nx*sizeof(double));
-	    gridGenXbounds(nx, xvals, xbounds);
-	  }
+	if ( gridtype == GRID_LAMBERT )
+	  {		
+	    double xi, xj;
+	    double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
+	    double zlat, zlon;
+	    int status;
+	    int index;
 
-	if ( gridInqYboundsPtr(gridID1) )
-	  {
-	    ybounds = (double *) malloc(2*ny*sizeof(double));
-	    gridInqYbounds(gridID1, ybounds);
-	  }
-	else if ( ny > 1 )
-	  {
-	    ybounds = (double *) malloc(2*ny*sizeof(double));
-	    gridGenYbounds(ny, yvals, ybounds);
-	  }
+	    gridInqLambert(gridID1, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
 
-	free(xvals);
-	free(yvals);
-
-	if ( xbounds && ybounds )
-	  {
 	    xbounds2D = (double *) malloc(4*gridsize*sizeof(double));
 	    ybounds2D = (double *) malloc(4*gridsize*sizeof(double));
 
-	    if ( gridIsRotated(gridID1) )
-	      {
-		gridGenRotBounds(gridID1, nx, ny, xbounds, ybounds, xbounds2D, ybounds2D);
-	      }
-	    else
-	      {
-		gridGenXbounds2D(nx, ny, xbounds, xbounds2D);
-		gridGenYbounds2D(nx, ny, ybounds, ybounds2D);
-	      }
+	    for ( j = 0; j < ny; j++ )
+	      for ( i = 0; i < nx; i++ )
+		{
+		  index = j*4*nx + 4*i;
+
+		  xi = i+1.5;
+		  xj = j+1.5;
+		  status = W3FB12(xi, xj, originLat, originLon, xincm, lonParY, lat1, &zlat,&zlon);
+		  xbounds2D[index+0] = zlon;
+		  ybounds2D[index+0] = zlat;
+
+		  xi = i+0.5;
+		  xj = j+1.5;
+		  status = W3FB12(xi, xj, originLat, originLon, xincm, lonParY, lat1, &zlat,&zlon);
+		  xbounds2D[index+1] = zlon;
+		  ybounds2D[index+1] = zlat;
+
+		  xi = i+0.5;
+		  xj = j+0.5;
+		  status = W3FB12(xi, xj, originLat, originLon, xincm, lonParY, lat1, &zlat,&zlon);
+		  xbounds2D[index+2] = zlon;
+		  ybounds2D[index+2] = zlat;
+
+		  xi = i+1.5;
+		  xj = j+0.5;
+		  status = W3FB12(xi, xj, originLat, originLon, xincm, lonParY, lat1, &zlat,&zlon);
+		  xbounds2D[index+3] = zlon;
+		  ybounds2D[index+3] = zlat;
+		}
 
 	    gridDefXbounds(gridID2, xbounds2D);
 	    gridDefYbounds(gridID2, ybounds2D);
 
-	    free(xbounds);
-	    free(ybounds);
 	    free(xbounds2D);
 	    free(ybounds2D);
+	  }
+	else
+	  {
+	    if ( gridInqXboundsPtr(gridID1) )
+	      {
+		xbounds = (double *) malloc(2*nx*sizeof(double));
+		gridInqXbounds(gridID1, xbounds);
+	      }
+	    else if ( nx > 1 )
+	      {
+		xbounds = (double *) malloc(2*nx*sizeof(double));
+		gridGenXbounds(nx, xvals, xbounds);
+	      }
+
+	    if ( gridInqYboundsPtr(gridID1) )
+	      {
+		ybounds = (double *) malloc(2*ny*sizeof(double));
+		gridInqYbounds(gridID1, ybounds);
+	      }
+	    else if ( ny > 1 )
+	      {
+		ybounds = (double *) malloc(2*ny*sizeof(double));
+		gridGenYbounds(ny, yvals, ybounds);
+	      }
+
+	    free(xvals);
+	    free(yvals);
+
+	    if ( xbounds && ybounds )
+	      {
+		xbounds2D = (double *) malloc(4*gridsize*sizeof(double));
+		ybounds2D = (double *) malloc(4*gridsize*sizeof(double));
+
+		if ( gridIsRotated(gridID1) )
+		  {
+		    gridGenRotBounds(gridID1, nx, ny, xbounds, ybounds, xbounds2D, ybounds2D);
+		  }
+		else
+		  {
+		    gridGenXbounds2D(nx, ny, xbounds, xbounds2D);
+		    gridGenYbounds2D(nx, ny, ybounds, ybounds2D);
+		  }
+		
+		gridDefXbounds(gridID2, xbounds2D);
+		gridDefYbounds(gridID2, ybounds2D);
+		
+		free(xbounds);
+		free(ybounds);
+		free(xbounds2D);
+		free(ybounds2D);
+	      }
 	  }
 
 	break;
@@ -3705,15 +3791,17 @@ void gridDefLambert(int gridID, double originLon, double originLat, double lonPa
 
   if ( gridptr->type != GRID_LAMBERT )
     Warning(func, "Lambert grid definition for %s grid not allowed!", gridNamePtr(gridptr->type));
-
-  gridptr->lam_originLon = originLon;
-  gridptr->lam_originLat = originLat;
-  gridptr->lam_lonParY   = lonParY;
-  gridptr->lam_lat1      = lat1;
-  gridptr->lam_lat2      = lat2;
-  gridptr->lam_xinc      = xinc;
-  gridptr->lam_yinc      = yinc;
-  gridptr->lam_defined   = TRUE;
+  else
+    {
+      gridptr->lam_originLon = originLon;
+      gridptr->lam_originLat = originLat;
+      gridptr->lam_lonParY   = lonParY;
+      gridptr->lam_lat1      = lat1;
+      gridptr->lam_lat2      = lat2;
+      gridptr->lam_xinc      = xinc;
+      gridptr->lam_yinc      = yinc;
+      gridptr->lam_defined   = TRUE;
+    }
 }
 
 

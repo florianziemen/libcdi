@@ -113,6 +113,7 @@ src/griblib.c -text
 src/grid.c -text
 src/grid.h -text
 src/grid_gme.c -text
+src/grid_lambert.c -text
 src/grid_rot.c -text
 src/ieg.h -text
 src/ieglib.c -text
