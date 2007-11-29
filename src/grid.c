@@ -2137,7 +2137,7 @@ static void grid_check_cyclic(GRID *gridptr)
 }
 
 
-int gridIsCyclic(int gridID)
+int gridIsCircular(int gridID)
 {
   GRID *gridptr;
 

@@ -496,7 +496,7 @@ double  gridInqYval(int gridID, int index);
 double  gridInqXinc(int gridID);
 double  gridInqYinc(int gridID);
 
-int     gridIsCyclic(int gridID);
+int     gridIsCircular(int gridID);
 int     gridIsRotated(int gridID);
 double  gridInqXpole(int gridID);
 void    gridDefXpole(int gridID, double xpole);

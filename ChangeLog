@@ -3,7 +3,7 @@
         * using GRIB library version 1.0.7
 	* new attribute routines: vlistInqNatts, vlistDefAttr and vlistInqAttr
 	  for Int, Flt and Txt
-	* add support for Lambert conformal grids
+	* Add support for Lambert grids [request: Patrick Samuelsson]
 	* Version 1.0.9 released
 	
 2007-10-22  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

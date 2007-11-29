@@ -1075,9 +1075,9 @@
 !                                    (INTEGER         gridID)
       EXTERNAL        gridInqYinc
 
-      INTEGER         gridIsCyclic
+      INTEGER         gridIsCircular
 !                                    (INTEGER         gridID)
-      EXTERNAL        gridIsCyclic
+      EXTERNAL        gridIsCircular
 
       INTEGER         gridIsRotated
 !                                    (INTEGER         gridID)
