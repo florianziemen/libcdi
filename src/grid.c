@@ -3123,6 +3123,24 @@ void gridPrint(int gridID, int opt)
 	free(rowlon);
 	break;
       }
+    case GRID_LAMBERT:
+      {
+	double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
+	gridInqLambert(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
+
+	fprintf(fp, "xsize     : %d\n", xsize);
+	fprintf(fp, "ysize     : %d\n", ysize);
+
+	fprintf(fp, "originLon : %g\n", originLon);
+	fprintf(fp, "originLat : %g\n", originLat);
+	fprintf(fp, "lonParY   : %g\n", lonParY);
+	fprintf(fp, "lat1      : %g\n", lat1);
+	fprintf(fp, "lat2      : %g\n", lat2);
+	fprintf(fp, "xinc      : %g\n", xincm);
+	fprintf(fp, "yinc      : %g\n", yincm);
+
+	break;
+      }
     case GRID_SPECTRAL:
       {
 	fprintf(fp, "truncation : %d\n", trunc);
