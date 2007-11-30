@@ -1778,6 +1778,8 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
   static char func[] = "grbDefGrid";
   int gridtype;
 
+  memset(isec2, 0, 16*sizeof(int));
+
   ISEC1_Sec2Or3Flag = 128;
   
   gridtype = gridInqType(gridID);
@@ -1840,11 +1842,11 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
 
 	nlat = gridInqYsize(gridID);
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
-	  ISEC2_GridType = 4;
+	  ISEC2_GridType = GTYPE_GAUSSIAN;
 	else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
-	  ISEC2_GridType = 10;
+	  ISEC2_GridType = GTYPE_LATLON_ROT;
 	else
-	  ISEC2_GridType = 0;
+	  ISEC2_GridType = GTYPE_LATLON;
 
 	ISEC2_NumLon   = nlon;
 	ISEC2_NumLat   = nlat;
@@ -1886,23 +1888,46 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
 
 	break;
       }
+    case GRID_LAMBERT:
+      {
+	double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
+	int xsize, ysize;
+
+	xsize = gridInqXsize(gridID);
+	ysize = gridInqYsize(gridID);
+
+	gridInqLambert(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
+
+	ISEC2_GridType = GTYPE_LAMBERT;
+	ISEC2_NumLon   = xsize;
+	ISEC2_NumLat   = ysize;
+	ISEC2_FirstLon = NINT(originLon * 1000);
+	ISEC2_FirstLat = NINT(originLat * 1000);
+	ISEC2_LoV      = NINT(lonParY * 1000);
+	ISEC2_LatS1    = NINT(lat1 * 1000);
+	ISEC2_LatS2    = NINT(lat2 * 1000);
+	ISEC2_Xinc     = NINT(xincm);
+	ISEC2_Yinc     = NINT(yincm);
+
+	break;
+      }
     case GRID_SPECTRAL:
       {
-	ISEC2_GridType = 50;
-	ISEC2_PentaJ  = gridInqTrunc(gridID);
-	ISEC2_PentaK  = ISEC2_PentaJ;
-	ISEC2_PentaM  = ISEC2_PentaJ;
-	ISEC2_RepType = 1;
-	ISEC2_RepMode = 1;
+	ISEC2_GridType = GTYPE_SPECTRAL;
+	ISEC2_PentaJ   = gridInqTrunc(gridID);
+	ISEC2_PentaK   = ISEC2_PentaJ;
+	ISEC2_PentaM   = ISEC2_PentaJ;
+	ISEC2_RepType  = 1;
+	ISEC2_RepMode  = 1;
 	break;
       }
     case GRID_GME:
       {
-	ISEC2_GridType = 192;
-	ISEC2_GME_ND  = gridInqGMEnd(gridID);
-	ISEC2_GME_NI  = gridInqGMEni(gridID);
-	ISEC2_GME_NI2 = gridInqGMEni2(gridID);
-	ISEC2_GME_NI3 = gridInqGMEni3(gridID);
+	ISEC2_GridType   = GTYPE_GME;
+	ISEC2_GME_ND     = gridInqGMEnd(gridID);
+	ISEC2_GME_NI     = gridInqGMEni(gridID);
+	ISEC2_GME_NI2    = gridInqGMEni2(gridID);
+	ISEC2_GME_NI3    = gridInqGMEni3(gridID);
 	ISEC2_GME_AFlag  = 0;
 	ISEC2_GME_LatPP  = 90000;
 	ISEC2_GME_LonPP  = 0;
