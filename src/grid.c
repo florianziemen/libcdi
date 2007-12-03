@@ -579,8 +579,8 @@ static void defineYvals(int gridID)
 @Parameter
     @Item  gridtype  The type of the grid, one of the set of predefined CDI grid types.
                      The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
-                     @func{GRID_LONLAT}, @func{GRID_SPECTRAL}, @func{GRID_GME}, 
-                     @func{GRID_CURVILINEAR} and @func{GRID_CELL}.
+                     @func{GRID_LONLAT}, @func{GRID_LAMBERT}, @func{GRID_SPECTRAL},
+                     @func{GRID_GME}, @func{GRID_CURVILINEAR} and @func{GRID_CELL}.
     @Item  size      Number of gridpoints.
 
 @Description
@@ -1068,8 +1068,8 @@ The function @func{gridInqType} returns the type of a Grid.
 @func{gridInqType} returns the type of the grid,
 one of the set of predefined CDI grid types.
 The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
-@func{GRID_LONLAT}, @func{GRID_SPECTRAL}, @func{GRID_GME}, @func{GRID_CURVILINEAR}
-and @func{GRID_CELL}.
+@func{GRID_LONLAT}, @func{GRID_LAMBERT}, @func{GRID_SPECTRAL}, @func{GRID_GME},
+@func{GRID_CURVILINEAR} and @func{GRID_CELL}.
 
 @EndFunction
 */

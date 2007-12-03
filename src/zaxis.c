@@ -312,7 +312,7 @@ int zaxisSize(void)
 @Parameter
     @Item  zaxistype  The type of the Z-axis, one of the set of predefined CDI Z-axis types.
                       The valid CDI Z-axis types are @func{ZAXIS_GENERIC}, @func{ZAXIS_SURFACE},
-                      @func{ZAXIS_HYBRID}, @func{ZAXIS_PRESSURE}, @func{ZAXIS_HEIGHT},
+                      @func{ZAXIS_HYBRID}, @func{ZAXIS_SIGMA}, @func{ZAXIS_PRESSURE}, @func{ZAXIS_HEIGHT},
                       @func{ZAXIS_DEPTH_BELOW_SEA} and @func{ZAXIS_DEPTH_BELOW_LAND}.
     @Item  size       Number of levels
 
@@ -906,7 +906,7 @@ The function @func{zaxisInqType} returns the type of a Z-axis.
 @func{zaxisInqType} returns the type of the Z-axis,
 one of the set of predefined CDI Z-axis types.
 The valid CDI Z-axis types are @func{ZAXIS_GENERIC}, @func{ZAXIS_SURFACE},
-@func{ZAXIS_HYBRID}, @func{ZAXIS_PRESSURE}, @func{ZAXIS_HEIGHT},
+@func{ZAXIS_HYBRID}, @func{ZAXIS_SIGMA}, @func{ZAXIS_PRESSURE}, @func{ZAXIS_HEIGHT},
 @func{ZAXIS_DEPTH_BELOW_SEA} and @func{ZAXIS_DEPTH_BELOW_LAND}.
 
 @EndFunction
