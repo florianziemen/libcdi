@@ -3799,6 +3799,26 @@ const double *gridInqYvalsPtr(int gridID)
 }
 
 
+/*
+@Function  gridDefLambert
+@Title     Define the parameter of a Lambert grid
+
+@Prototype void gridDefLambert(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc)
+@Parameter
+    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}
+    @Item  originLon Longitude of the first grid point
+    @Item  originLat Latitude of the first grid point
+    @Item  lonParY   The East longitude of the meridian which is parallel to the Y-axis
+    @Item  lat1      First latitude from the pole at which the secant cone cuts the sphere
+    @Item  lat2      Second latitude at which the secant cone cuts the sphere
+    @Item  xinc      X-direction grid lenght in meter
+    @Item  yinc      Y-direction grid lenght in meter
+ 
+@Description
+The function @func{gridDefLambert} defines the parameter of a Lambert grid.
+
+@EndFunction
+*/
 void gridDefLambert(int gridID, double originLon, double originLat, double lonParY,
 		    double lat1, double lat2, double xinc, double yinc)
 {
@@ -3823,6 +3843,26 @@ void gridDefLambert(int gridID, double originLon, double originLat, double lonPa
 }
 
 
+/*
+@Function  gridInqLambert
+@Title     Get the parameter of a Lambert grid
+
+@Prototype void gridInqLambert(int gridID, double *originLon, double *originLat, double *lonParY, double *lat1, double *lat2, double *xinc, double *yinc)
+@Parameter
+    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}
+    @Item  originLon Longitude of the first grid point
+    @Item  originLat Latitude of the first grid point
+    @Item  lonParY   The East longitude of the meridian which is parallel to the Y-axis
+    @Item  lat1      First latitude from the pole at which the secant cone cuts the sphere
+    @Item  lat2      Second latitude at which the secant cone cuts the sphere
+    @Item  xinc      X-direction grid lenght in meter
+    @Item  yinc      Y-direction grid lenght in meter
+ 
+@Description
+The function @func{gridInqLambert} returns the parameter of a Lambert grid.
+
+@EndFunction
+*/
 void gridInqLambert(int gridID, double *originLon, double *originLat, double *lonParY,
 		    double *lat1, double *lat2, double *xinc, double *yinc)
 {

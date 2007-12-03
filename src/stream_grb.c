@@ -42,18 +42,18 @@ int gribGetGridType(int *isec2)
 
   switch (ISEC2_GridType)
     {
-    case   0:
-    case  10:
+    case  GTYPE_LATLON:
+    case  GTYPE_LATLON_ROT:
       {
 	gridtype = GRID_LONLAT;
 	break;
       }
-    case   3:
+    case  GTYPE_LAMBERT:
       {
 	gridtype = GRID_LAMBERT;
 	break;
       }
-    case   4:
+    case  GTYPE_GAUSSIAN:
       {
 	if ( ISEC2_Reduced )
 	  gridtype = GRID_GAUSSIAN_REDUCED;
@@ -61,12 +61,12 @@ int gribGetGridType(int *isec2)
 	  gridtype = GRID_GAUSSIAN;
 	break;
       }
-    case  50:
+    case  GTYPE_SPECTRAL:
       {
 	gridtype = GRID_SPECTRAL;
 	break;
       }
-    case 192:
+    case  GTYPE_GME:
       {
 	gridtype = GRID_GME;
 	break;
@@ -843,6 +843,7 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
 	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
 	  Error(func, "wrong datasize! isec4len = %d isec2len = %d",
 		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
+
 	grid.size  = ISEC4_NumValues;
 	grid.xsize = ISEC2_NumLon;
 	grid.ysize = ISEC2_NumLat;
@@ -1908,6 +1909,8 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
 	ISEC2_LatS2    = NINT(lat2 * 1000);
 	ISEC2_Xinc     = NINT(xincm);
 	ISEC2_Yinc     = NINT(yincm);
+
+	ISEC2_ScanFlag = 2; /* scanning west to east, south to north */
 
 	break;
       }

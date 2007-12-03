@@ -769,3 +769,76 @@ Units of the Y-axis
 
 {\tt gridInqYunits} returns the units of the Y-axis to the parameter units.
 
+
+
+\subsection{Define the parameter of a Lambert grid: {\tt gridDefLambert}}
+\index{gridDefLambert}
+\label{gridDefLambert}
+
+The function {\tt gridDefLambert} defines the parameter of a Lambert grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefLambert(int gridID, double originLon, double originLat, double lonParY, 
+                        double lat1, double lat2, double xinc, double yinc);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt originLon\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}
+\item[{\tt originLon}]
+Longitude of the first grid point
+\item[{\tt originLat}]
+Latitude of the first grid point
+\item[{\tt lonParY}]
+The East longitude of the meridian which is parallel to the Y-axis
+\item[{\tt lat1}]
+First latitude from the pole at which the secant cone cuts the sphere
+\item[{\tt lat2}]
+Second latitude at which the secant cone cuts the sphere
+\item[{\tt xinc}]
+X-direction grid lenght in meter
+\item[{\tt yinc}]
+Y-direction grid lenght in meter
+ 
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the parameter of a Lambert grid: {\tt gridInqLambert}}
+\index{gridInqLambert}
+\label{gridInqLambert}
+
+The function {\tt gridInqLambert} returns the parameter of a Lambert grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridInqLambert(int gridID, double *originLon, double *originLat, 
+                        double *lonParY, double *lat1, double *lat2, double *xinc, 
+                        double *yinc);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt originLon\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}
+\item[{\tt originLon}]
+Longitude of the first grid point
+\item[{\tt originLat}]
+Latitude of the first grid point
+\item[{\tt lonParY}]
+The East longitude of the meridian which is parallel to the Y-axis
+\item[{\tt lat1}]
+First latitude from the pole at which the secant cone cuts the sphere
+\item[{\tt lat2}]
+Second latitude at which the secant cone cuts the sphere
+\item[{\tt xinc}]
+X-direction grid lenght in meter
+\item[{\tt yinc}]
+Y-direction grid lenght in meter
+ 
+\end{deflist}
+\end{minipage}

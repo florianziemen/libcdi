@@ -9,6 +9,16 @@
 Create a horizontal Grid
 
 
+\section*{\tt \htmlref{gridDefLambert}{gridDefLambert}}
+
+\begin{verbatim}
+    void gridDefLambert(int gridID, double originLon, double originLat, double lonParY, 
+                        double lat1, double lat2, double xinc, double yinc);
+\end{verbatim}
+
+Define the parameter of a Lambert grid
+
+
 \section*{\tt \htmlref{gridDefXbounds}{gridDefXbounds}}
 
 \begin{verbatim}
@@ -133,6 +143,17 @@ Destroy a horizontal Grid
 \end{verbatim}
 
 Duplicate a horizontal Grid
+
+
+\section*{\tt \htmlref{gridInqLambert}{gridInqLambert}}
+
+\begin{verbatim}
+    void gridInqLambert(int gridID, double *originLon, double *originLat, 
+                        double *lonParY, double *lat1, double *lat2, double *xinc, 
+                        double *yinc);
+\end{verbatim}
+
+Get the parameter of a Lambert grid
 
 
 \section*{\tt \htmlref{gridInqSize}{gridInqSize}}

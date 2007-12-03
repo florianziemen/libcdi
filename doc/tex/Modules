@@ -79,6 +79,8 @@ gridDefYlongname    grid
 gridInqYlongname    grid
 gridDefYunits       grid
 gridInqYunits       grid
+gridDefLambert      grid
+gridInqLambert      grid
 zaxisCreate         zaxis
 zaxisDestroy        zaxis
  zaxisDuplicate      zaxis
