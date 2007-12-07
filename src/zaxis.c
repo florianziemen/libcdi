@@ -1265,7 +1265,7 @@ void zaxisPrint(int zaxisID)
       fprintf(stdout, "\n");
     }
 
-  if ( type == ZAXIS_HYBRID )
+  if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
     {
       int i;
       int vctsize;

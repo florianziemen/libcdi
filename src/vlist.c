@@ -769,6 +769,9 @@ void vlistCat(int vlistID2, int vlistID1)
       vlistptr2->vars[varID2].levinfo = (LEVINFO *) malloc(nlevs*sizeof(LEVINFO));
       memcpy(vlistptr2->vars[varID2].levinfo, vlistptr1->vars[varID].levinfo, nlevs*sizeof(LEVINFO));
 
+      vlistptr2->vars[varID2].atts.nelems = 0;
+      vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
+
       gridID = vlistptr1->vars[varID].gridID;
       for ( index = 0; index < vlistptr2->ngrids; index++ )
 	if ( gridID == vlistptr2->gridIDs[index] ) break;
