@@ -1,5 +1,5 @@
 !
-! Fortran interface for CDI library version 1.0.9
+! Fortran interface for CDI library version 1.1.0
 !
 
       INTEGER    CDI_UNDEFID           
@@ -822,68 +822,68 @@
 !                                     INTEGER         nattsp)
       EXTERNAL        vlistInqNatts
 
-      INTEGER         vlistInqAttr
+      INTEGER         vlistInqAtt
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
 !                                     INTEGER         attrnum,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         typep,
 !                                     INTEGER         lenp)
-      EXTERNAL        vlistInqAttr
+      EXTERNAL        vlistInqAtt
 
-      INTEGER         vlistDelAttr
+      INTEGER         vlistDelAtt
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name)
-      EXTERNAL        vlistDelAttr
+      EXTERNAL        vlistDelAtt
 
-      INTEGER         vlistDefAttrInt
+      INTEGER         vlistDefAttInt
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         len,
 !                                     INTEGER         ip)
-      EXTERNAL        vlistDefAttrInt
+      EXTERNAL        vlistDefAttInt
 
-      INTEGER         vlistDefAttrFlt
+      INTEGER         vlistDefAttFlt
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         len,
 !                                     DOUBLEPRECISION dp)
-      EXTERNAL        vlistDefAttrFlt
+      EXTERNAL        vlistDefAttFlt
 
-      INTEGER         vlistDefAttrTxt
+      INTEGER         vlistDefAttTxt
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         len,
 !                                     CHARACTER*(*)   tp)
-      EXTERNAL        vlistDefAttrTxt
+      EXTERNAL        vlistDefAttTxt
 
-      INTEGER         vlistInqAttrInt
+      INTEGER         vlistInqAttInt
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         mlen,
 !                                     INTEGER         ip)
-      EXTERNAL        vlistInqAttrInt
+      EXTERNAL        vlistInqAttInt
 
-      INTEGER         vlistInqAttrFlt
+      INTEGER         vlistInqAttFlt
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         mlen,
 !                                     DOUBLEPRECISION dp)
-      EXTERNAL        vlistInqAttrFlt
+      EXTERNAL        vlistInqAttFlt
 
-      INTEGER         vlistInqAttrTxt
+      INTEGER         vlistInqAttTxt
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         mlen,
 !                                     CHARACTER*(*)   tp)
-      EXTERNAL        vlistInqAttrTxt
+      EXTERNAL        vlistInqAttTxt
 
 !
 !  GRID routines
