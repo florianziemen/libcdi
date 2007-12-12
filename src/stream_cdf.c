@@ -331,8 +331,8 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
       if ( atttype == DATATYPE_TXT )
 	{
 	  vlistInqAttTxt(vlistID, varID, attname, sizeof(atttxt), atttxt);
-	  len = strlen(atttxt);
-	  cdf_put_att_text(fileID, ncvarID, attname, len+1, atttxt);
+	  len = attlen;
+	  cdf_put_att_text(fileID, ncvarID, attname, len, atttxt);
 	}
       else if ( atttype == DATATYPE_INT )
 	{
@@ -3352,7 +3352,7 @@ int cdfInqContents(int streamID)
 	      else
 		{
 		  cdfGetAttText(fileID, NC_GLOBAL, attname, attstringlen-1, attstring);
-		  vlistDefAttTxt(vlistID, CDI_GLOBAL, attname, (int)strlen(attstring)+1, attstring);
+		  vlistDefAttTxt(vlistID, CDI_GLOBAL, attname, (int)attlen, attstring);
 		}
 	    }
 	}
@@ -3361,7 +3361,7 @@ int cdfInqContents(int streamID)
 	  int *attint;
 	  attint = (int *) malloc(attlen*sizeof(int));
 	  cdfGetAttInt(fileID, NC_GLOBAL, attname, attlen, attint);
-	  vlistDefAttInt(vlistID, CDI_GLOBAL, attname, attlen, attint);
+	  vlistDefAttInt(vlistID, CDI_GLOBAL, attname, (int)attlen, attint);
 	  free(attint);
 	}
       else if ( xtype == NC_FLOAT || xtype == NC_DOUBLE )
@@ -3369,7 +3369,7 @@ int cdfInqContents(int streamID)
 	  double *attflt;
 	  attflt = (double *) malloc(attlen*sizeof(double));
 	  cdfGetAttDouble(fileID, NC_GLOBAL, attname, attlen, attflt);
-	  vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, attlen, attflt);
+	  vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, (int)attlen, attflt);
 	  free(attflt);
 	}
     }
@@ -4732,7 +4732,7 @@ int cdfInqContents(int streamID)
 		  int *attint;
 		  attint = (int *) malloc(attlen*sizeof(int));
 		  cdfGetAttInt(fileID, ncvarid, attname, attlen, attint);
-		  vlistDefAttInt(vlistID, varID, attname, attlen, attint);
+		  vlistDefAttInt(vlistID, varID, attname, (int)attlen, attint);
 		  if ( CDI_Debug )
 		    printf("int: %s.%s = %d\n", ncvars[ncvarid].name, attname, attint[0]);
 		  free(attint);
@@ -4742,7 +4742,7 @@ int cdfInqContents(int streamID)
 		  double *attflt;
 		  attflt = (double *) malloc(attlen*sizeof(double));
 		  cdfGetAttDouble(fileID, ncvarid, attname, attlen, attflt);
-		  vlistDefAttFlt(vlistID, varID, attname, attlen, attflt);
+		  vlistDefAttFlt(vlistID, varID, attname, (int)attlen, attflt);
 		  if ( CDI_Debug )
 		    printf("flt: %s.%s = %g\n", ncvars[ncvarid].name, attname, attflt[0]);
 		  free(attflt);
@@ -4751,7 +4751,7 @@ int cdfInqContents(int streamID)
 		{
 		  cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
 		  attstring[attlen] = 0;
-		  vlistDefAttTxt(vlistID, varID, attname, attlen+1, attstring);
+		  vlistDefAttTxt(vlistID, varID, attname, (int)attlen, attstring);
 		  if ( CDI_Debug )
 		    printf("txt: %s.%s = %s\n", ncvars[ncvarid].name, attname, attstring);
 		}
