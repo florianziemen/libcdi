@@ -1882,7 +1882,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
 
   zaxisInqName(zaxisID, axisname);
 
-  for ( index = 0; index < zaxisindex; index++ )
+  for ( index = 0; index < nzaxis; index++ )
     {
       if ( streamptr->zaxisID[index] != UNDEFID )
 	{
