@@ -1,7 +1,7 @@
 
-/* Generated automatically from m214003 on Tue Nov 27 08:44:46 CET 2007 */
+/* Generated automatically from m214003 on Wed Jan  2 12:09:11 CET 2008 */
 
-/* GRIBLIB_VERSION="1.0.7" */
+/* GRIBLIB_VERSION="1.1.0" */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -4967,10 +4967,11 @@ int gribCheckFiletype(int fileID)
 }
 
 
-int gribFileSeek(int fileID, long *offset)
+int gribFileSeekOld(int fileID, long *offset)
 {
   /* position file pointer after GRIB */
   static char func[] = "gribFileSeek";
+  int ch;
   int buffersize = 4096;
   unsigned char buffer[4096];
   int retry = 4096;
@@ -4981,17 +4982,17 @@ int gribFileSeek(int fileID, long *offset)
 
   fileptr = filePtr(fileID);
 
-  buffer[0] = filePtrGetc(fileptr);
-  buffer[1] = filePtrGetc(fileptr);
-  buffer[2] = filePtrGetc(fileptr);
-  buffer[3] = filePtrGetc(fileptr);
+  ch = filePtrGetc(fileptr); if ( ch == EOF ) return (-1); buffer[0] = ch;
+  ch = filePtrGetc(fileptr); if ( ch == EOF ) return (-1); buffer[1] = ch;
+  ch = filePtrGetc(fileptr); if ( ch == EOF ) return (-1); buffer[2] = ch;
+  ch = filePtrGetc(fileptr); if ( ch == EOF ) return (-1); buffer[3] = ch;
   /*
   fileRead(fileID, buffer, 4);
   */
 
   while ( retry-- )
     {
-      for (i = 0; i < buffersize-4; i++)
+      for ( i = 0; i < buffersize-4; ++i )
 	{
 	  if (buffer[i  ] == 'G' && 
 	      buffer[i+1] == 'R' &&
@@ -5004,8 +5005,7 @@ int gribFileSeek(int fileID, long *offset)
 	    }
 	  else
 	    {
-	      if ( filePtrEOF(fileptr) ) return (-1);
-	      buffer[i+4] = filePtrGetc(fileptr);
+	      ch = filePtrGetc(fileptr); if ( ch == EOF ) return (-1); buffer[i+4] = ch;
 	      (*offset)++;
 	    }
 	}
@@ -5022,13 +5022,105 @@ int gribFileSeek(int fileID, long *offset)
 }
 
 
+int gribFileSeek(int fileID, long *offset)
+{
+  /* position file pointer after GRIB */
+  static char func[] = "gribFileSeek";
+  const long GRIB = 0x47524942;
+  long code = 0;
+  int ch;
+  int retry = 4096*4096;
+  void *fileptr;
+
+  *offset = 0;
+
+  fileptr = filePtr(fileID);
+
+  while ( retry-- )
+    {
+      ch = filePtrGetc(fileptr);
+      if ( ch == EOF ) return (-1);
+    
+      code = ( (code << 8) + ch ) & 0xFFFFFFFF;
+
+      if ( code == GRIB )
+	{
+	  if ( GRB_Debug )
+	    Message(func, "record offset = %d", (int) *offset);
+	  return (0);
+	}
+
+      (*offset)++;
+    }
+
+  if ( GRB_Debug )
+    Message(func, "record offset = %d", (int) *offset);
+
+  return (1);
+}
+
+
+int gribFileSeekTest(int fileID, long *offset)
+{
+  /* position file pointer after GRIB */
+  static char func[] = "gribFileSeek";
+  const long GRIB = 0x47524942;
+  long code = 0;
+  int ch;
+  int i = 0;
+  const int buffersize = 8;
+  unsigned char buffer[8];
+  int retry = 4096*4096;
+  void *fileptr;
+  int nread = 0;
+
+  *offset = 0;
+
+  fileptr = filePtr(fileID);
+
+  while ( retry-- )
+    {
+      if ( i >= nread )
+	{
+	  nread = (int) filePtrRead(fileptr, buffer, buffersize);
+	  if ( nread == 0 ) return (-1);
+	  i = 0;
+	}
+
+      ch = buffer[i++];
+      code = ( (code << 8) + ch ) & 0xFFFFFFFF;
+
+      if ( code == GRIB )
+	{
+	  /* printf("end: %d %d\n", nread, i); */
+	  if ( GRB_Debug )
+	    Message(func, "record offset = %d", (int) *offset);
+
+	  if ( i != nread ) fileSetPos(fileID, (off_t) i-nread, SEEK_CUR);
+
+	  return (0);
+	}
+
+      (*offset)++;
+    }
+
+  if ( GRB_Debug )
+    Message(func, "record offset = %d", (int) *offset);
+
+  return (1);
+}
+
+
 int gribReadSize(int fileID)
 {
   static char func[] = "gribReadSize";
   int gribversion, gribsize;
   off_t pos;
   void *fileptr;
-
+  /*
+  const int buffersize = 4;
+  unsigned char buffer[4];
+  */
   fileptr = filePtr(fileID);
 
   pos = fileGetPos(fileID); 
@@ -5036,7 +5128,13 @@ int gribReadSize(int fileID)
   gribsize = (filePtrGetc(fileptr) << 16) + (filePtrGetc(fileptr) << 8) + filePtrGetc(fileptr);
 
   gribversion = filePtrGetc(fileptr);
+  /*
+  filePtrRead(fileptr, buffer, buffersize);
 
+  gribsize = (buffer[0] << 16) + (buffer[1] << 8) + buffer[2];
+
+  gribversion = buffer[3];
+  */
   if ( gribsize == 24 )
     {
       if ( gribversion != 1 && gribversion != 2 ) gribversion = 0;
@@ -8166,7 +8264,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.0.7" " of ""Nov 27 2007"" ""08:44:46";
+static const char grb_libvers[] = "1.1.0" " of ""Jan  2 2008"" ""12:09:18";
 
 
 

@@ -100,6 +100,7 @@ typedef struct
   long       access;         /* file access                   */
   off_t      byteTrans;      /*                               */
   size_t     blockSize;      /* file block size               */
+  int        type;           /* file type ( 1:open 2:fopen )  */
   int        bufferType;     /* buffer type ( 1:std 2:mmap )  */
   size_t     bufferSize;     /* file buffer size              */
   size_t     mappedSize;     /* mmap buffer size              */
@@ -136,7 +137,9 @@ static size_t FileBufferSizeMin = MIN_BUF_SIZE;
 static long   FileBufferSizeEnv = -1;
 static int    FileBufferTypeEnv =  0;
 
-static int  FILE_Debug = 0;   /* If set to 1, debugging */
+static int    FileTypeEnv =  0;
+
+static int    FILE_Debug = 0;   /* If set to 1, debugging */
 
 
 static void file_table_print(void);
@@ -145,7 +148,7 @@ static void file_table_print(void);
  * A version string.
  */
 #undef   LIBVERSION
-#define  LIBVERSION      1.5.2
+#define  LIBVERSION      1.6.0
 #define  XSTRING(x)	 #x
 #define  STRING(x) 	 XSTRING(x)
 const char file_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
@@ -158,6 +161,7 @@ const char file_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
   01/09/2005  1.5.0 thread safe version
   06/11/2005  1.5.1 add filePtrEOF, filePtr, filePtrGetc
   03/02/2006  1.5.2 ansi C: define getpagesize and strdupx
+  27/12/2007  1.6.0 add FILE_TYPE_FOPEN
  */
 
 
@@ -276,6 +280,7 @@ static void file_init_entry(F_I_L_E *fileptr)
   fileptr->access        = 0;
   fileptr->position      = 0;
   fileptr->byteTrans     = 0;
+  fileptr->type          = 0;
   fileptr->bufferType    = 0;
   fileptr->bufferSize    = 0;
   fileptr->mappedSize    = 0;
@@ -385,8 +390,8 @@ int fileSetBufferType(int fileID, int type)
     {
       switch (type)
 	{
-	case FILE_TYPE_STD:
-	case FILE_TYPE_MMAP:
+	case FILE_BUFTYPE_STD:
+	case FILE_BUFTYPE_MMAP:
 	  fileptr->bufferType = type;
 	  break;
 	default:
@@ -395,7 +400,7 @@ int fileSetBufferType(int fileID, int type)
     }
 
 #if ! defined (HAVE_MMAP)
-  if ( type == FILE_TYPE_MMAP ) ret = 1;
+  if ( type == FILE_BUFTYPE_MMAP ) ret = 1;
 #endif
 
   return (ret);
@@ -496,7 +501,7 @@ off_t fileGetPos(int fileID)
 
   if ( fileptr )
     {
-      if ( fileptr->mode == 'r' )
+      if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
 	filepos = fileptr->position;
       else
 	filepos = ftell(fileptr->fp);
@@ -528,13 +533,13 @@ int fileSetPos(int fileID, off_t offset, int whence)
   switch (whence)
     {
     case SEEK_SET:
-      if ( fileptr->mode == 'r' )
+      if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
 	{
 	  position = offset;
 	  fileptr->position = position;
 	  if ( position < fileptr->bufferStart || position > fileptr->bufferEnd )
 	    {
-	      if ( fileptr->bufferType == FILE_TYPE_STD )
+	      if ( fileptr->bufferType == FILE_BUFTYPE_STD )
 		fileptr->bufferPos = position;
 	      else
 		fileptr->bufferPos = position - position % pagesize();
@@ -562,13 +567,13 @@ int fileSetPos(int fileID, off_t offset, int whence)
 	}
       break;
     case SEEK_CUR:
-      if ( fileptr->mode == 'r' )
+      if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
 	{
 	  fileptr->position += offset;
 	  position = fileptr->position;
 	  if ( position < fileptr->bufferStart || position > fileptr->bufferEnd )
 	    {
-	      if ( fileptr->bufferType == FILE_TYPE_STD )
+	      if ( fileptr->bufferType == FILE_BUFTYPE_STD )
 		fileptr->bufferPos = position;
 	      else
 		fileptr->bufferPos = position - position % pagesize();
@@ -751,8 +756,22 @@ static void file_initialize(void)
   if ( value >= 0 ) FileBufferSizeEnv = value;
 
   value = file_getenv("FILE_TYPE");
+  if ( value > 0 )
+    {
+      switch (value)
+	{
+	case FILE_TYPE_OPEN:
+	case FILE_TYPE_FOPEN:
+	  FileTypeEnv = value;
+	  break;
+	default:
+	  Warning(func, "File type %d not implemented!", value);
+	}
+    }
+
+  value = file_getenv("FILE_BUFTYPE");
 #if ! defined (HAVE_MMAP)
-  if ( value == FILE_TYPE_MMAP )
+  if ( value == FILE_BUFTYPE_MMAP )
     {
       Warning(func, "MMAP not available!");
       value = 0;
@@ -762,12 +781,12 @@ static void file_initialize(void)
     {
       switch (value)
 	{
-	case FILE_TYPE_STD:
-	case FILE_TYPE_MMAP:
+	case FILE_BUFTYPE_STD:
+	case FILE_BUFTYPE_MMAP:
 	  FileBufferTypeEnv = value;
 	  break;
 	default:
-	  Warning(func, "File type %d not implemented!", value);
+	  Warning(func, "File buffer type %d not implemented!", value);
 	}
     }
 
@@ -796,7 +815,7 @@ static void file_set_buffer(F_I_L_E *fileptr)
       if ( FileBufferTypeEnv )
 	fileptr->bufferType = FileBufferTypeEnv;
       else if ( fileptr->bufferType == 0 )
-	fileptr->bufferType = FILE_TYPE_STD;
+	fileptr->bufferType = FILE_BUFTYPE_STD;
 
       if ( FileBufferSizeEnv >= 0 )
 	buffersize = (size_t) FileBufferSizeEnv;
@@ -811,7 +830,7 @@ static void file_set_buffer(F_I_L_E *fileptr)
       if ( (size_t) fileptr->size < buffersize )
 	buffersize = (size_t) fileptr->size;
 
-      if ( fileptr->bufferType == FILE_TYPE_MMAP )
+      if ( fileptr->bufferType == FILE_BUFTYPE_MMAP )
 	{
 	  size_t blocksize = (size_t) pagesize();
 	  size_t minblocksize = 4 * blocksize;
@@ -823,7 +842,7 @@ static void file_set_buffer(F_I_L_E *fileptr)
     }
   else
     {
-      fileptr->bufferType = FILE_TYPE_STD;
+      fileptr->bufferType = FILE_BUFTYPE_STD;
 
       if ( FileBufferSizeEnv >= 0 )
 	buffersize = (size_t) FileBufferSizeEnv;
@@ -838,14 +857,14 @@ static void file_set_buffer(F_I_L_E *fileptr)
 
   if ( buffersize == 0 ) buffersize = 1;
 
-  if ( fileptr->bufferType == FILE_TYPE_STD )
+  if ( fileptr->bufferType == FILE_BUFTYPE_STD || fileptr->type == FILE_TYPE_FOPEN )
     {
       fileptr->buffer = (char *) malloc(buffersize);
       if ( fileptr->buffer == NULL )
 	SysError(func, "Allocation of file buffer failed!");
     }	
 
-  if ( fileptr->mode != 'r' )
+  if ( fileptr->type == FILE_TYPE_FOPEN )
     if ( setvbuf(fileptr->fp, fileptr->buffer, _IOFBF, buffersize) )
       SysError(func, "setvbuf failed");
 
@@ -874,7 +893,7 @@ static int file_fill_buffer(F_I_L_E *fileptr)
   fd = fileptr->fd;
 
 #if defined (HAVE_MMAP)
-  if ( fileptr->bufferType == FILE_TYPE_MMAP )
+  if ( fileptr->bufferType == FILE_BUFTYPE_MMAP )
     {
       if ( fileptr->bufferPos >= fileptr->size )
 	{
@@ -1014,7 +1033,7 @@ static size_t file_read_from_buffer(F_I_L_E *fileptr, void *ptr, size_t size)
       else
 	rsize = 0;
 
-      if ( file_fill_buffer(fileptr) == -1 ) break;
+      if ( file_fill_buffer(fileptr) == EOF ) break;
     }
 
   nread = size - offset;
@@ -1057,7 +1076,12 @@ int fileOpen(const char *filename, const char *mode)
 
   switch ( fmode )
     {
-    case 'r':  fd =  open(filename, O_RDONLY); break;
+    case 'r':
+      if ( FileTypeEnv == FILE_TYPE_FOPEN )
+	fp = fopen(filename, "r");
+      else
+	fd =  open(filename, O_RDONLY);
+      break;
     case 'x':  fp = fopen(filename, "r");      break;
     case 'w':  fp = fopen(filename, "w");      break;
     case 'a':  fp = fopen(filename, "a");      break;
@@ -1097,7 +1121,19 @@ int fileOpen(const char *filename, const char *mode)
       fileptr->name = strdupx(filename);
       fileptr->blockSize = (size_t) filestat.st_blksize;
 
+      if ( fmode == 'r' )
+	{
+	  if ( FileTypeEnv == FILE_TYPE_FOPEN )
+	    fileptr->type = FILE_TYPE_FOPEN;
+	  else
+	    fileptr->type = FILE_TYPE_OPEN;
+	}
+      else
+	fileptr->type = FILE_TYPE_FOPEN;
+
       if ( fmode == 'r' ) fileptr->size = filestat.st_size;
+
+      if ( fileptr->type == FILE_TYPE_FOPEN ) file_set_buffer(fileptr);
 
       if ( FILE_Debug )
 	Message(func, "File %s opened with ID %d", filename, fileID);      
@@ -1115,7 +1151,8 @@ int fileClose(int fileID)
   static char func[] = "fileClose";
   char *name;
   int ret;
-  char *ftname[] = {"unknown", "standard", "mmap"};
+  char *fbtname[] = {"unknown", "standard", "mmap"};
+  char *ftname[] = {"unknown", "open", "fopen"};
   F_I_L_E *fileptr;
 
   fileptr = file_to_pointer(fileID);
@@ -1136,29 +1173,36 @@ int fileClose(int fileID)
       fprintf(stderr, "____________________________________________\n");
       fprintf(stderr, " file ID          : %d\n",  fileID);
       fprintf(stderr, " file name        : %s\n",  fileptr->name);
-      if ( fileptr->mode == 'r' )
+      fprintf(stderr, " file type        : %d (%s)\n", fileptr->type, ftname[fileptr->type]);
+
+      if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
 	fprintf(stderr, " file descriptor  : %d\n",  fileptr->fd);
       else
 	fprintf(stderr, " file pointer     : %p\n",  (void *) fileptr->fp);
 
       fprintf(stderr, " file mode        : %c\n",  fileptr->mode);
-
+ 
       if ( sizeof(off_t) > sizeof(long) )
 	{
 	  fprintf(stderr, " file size        : %lld\n", (long long) fileptr->size);
-	  fprintf(stderr, " file position    : %lld\n", (long long) fileptr->position);
+	  if ( fileptr->type == FILE_TYPE_OPEN )
+	    fprintf(stderr, " file position    : %lld\n", (long long) fileptr->position);
 	  fprintf(stderr, " bytes transfered : %lld\n", (long long) fileptr->byteTrans);
 	}
       else
 	{
 	  fprintf(stderr, " file size        : %ld\n", (long) fileptr->size);
-	  fprintf(stderr, " file position    : %ld\n", (long) fileptr->position);
+	  if ( fileptr->type == FILE_TYPE_OPEN )
+	    fprintf(stderr, " file position    : %ld\n", (long) fileptr->position);
 	  fprintf(stderr, " bytes transfered : %ld\n", (long) fileptr->byteTrans);
 	}
 
       fprintf(stderr, " file access      : %ld\n", fileptr->access);
-      fprintf(stderr, " buffer type      : %d (%s)\n",  fileptr->bufferType, ftname[fileptr->bufferType]);
-      fprintf(stderr, " num buffer fill  : %ld\n", fileptr->bufferNumFill);
+      if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
+	{
+	  fprintf(stderr, " buffer type      : %d (%s)\n", fileptr->bufferType, fbtname[fileptr->bufferType]);
+	  fprintf(stderr, " num buffer fill  : %ld\n", fileptr->bufferNumFill);
+	}
       fprintf(stderr, " buffer size      : %lu\n", (unsigned long) fileptr->bufferSize);
       fprintf(stderr, " block size       : %lu\n", (unsigned long) fileptr->blockSize);
 #if defined (HAVE_MMAP)
@@ -1167,7 +1211,7 @@ int fileClose(int fileID)
       fprintf(stderr, "--------------------------------------------\n");
     }
 
-  if ( fileptr->mode == 'r' )
+  if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
     {
 #if defined (HAVE_MMAP)
       if ( fileptr->buffer && fileptr->mappedSize )
@@ -1198,26 +1242,38 @@ int fileClose(int fileID)
 }
 
 
-int fileGetc(int fileID)
+int filePtrGetc(void *vfileptr)
 {
-  int ivalue = -1;
+  int ivalue = EOF;
   int fillret = 0;
-  F_I_L_E *fileptr;
-
-  fileptr = file_to_pointer(fileID);
+  F_I_L_E *fileptr = (F_I_L_E *) vfileptr;
 
   if ( fileptr )
     {
-      if ( fileptr->bufferCnt == 0 ) fillret = file_fill_buffer(fileptr);
-
-      if ( fillret >= 0 )
+      if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
 	{
-	  ivalue = (unsigned char) *fileptr->bufferPtr++;
-	  fileptr->bufferCnt--;
+	  if ( fileptr->bufferCnt == 0 ) fillret = file_fill_buffer(fileptr);
 
-	  fileptr->position++;
-	  fileptr->byteTrans++;
-	  fileptr->access++;
+	  if ( fillret >= 0 )
+	    {
+	      ivalue = (unsigned char) *fileptr->bufferPtr++;
+	      fileptr->bufferCnt--;
+	      fileptr->position++;
+
+	      fileptr->byteTrans++;
+	      fileptr->access++;
+	    }
+	}
+      else
+	{
+	  ivalue = fgetc(fileptr->fp);
+	  if ( ivalue >= 0 )
+	    {
+	      fileptr->byteTrans++;
+	      fileptr->access++;
+	    }
+	  else
+	    fileptr->flag |= FILE_EOF;
 	}
     }
 
@@ -1225,28 +1281,40 @@ int fileGetc(int fileID)
 }
 
 
-int filePtrGetc(void *vfileptr)
+int fileGetc(int fileID)
 {
-  int ivalue = -1;
-  int fillret = 0;
+  int ivalue;
+  F_I_L_E *fileptr;
+
+  fileptr = file_to_pointer(fileID);
+
+  ivalue = filePtrGetc((void *)fileptr);
+
+  return (ivalue);
+}
+
+
+size_t filePtrRead(void *vfileptr, void *ptr, size_t size)
+{
+  static char func[] = "filePtrRead";
+  size_t nread = 0;
   F_I_L_E *fileptr = (F_I_L_E *) vfileptr;
 
   if ( fileptr )
     {
-      if ( fileptr->bufferCnt == 0 ) fillret = file_fill_buffer(fileptr);
+      if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
+	nread = file_read_from_buffer(fileptr, ptr, size);
+      else
+	nread = fread(ptr, 1, size, fileptr->fp);
 
-      if ( fillret >= 0 )
-	{
-	  ivalue = (unsigned char) *fileptr->bufferPtr++;
-	  fileptr->bufferCnt--;
-
-	  fileptr->position++;
-	  fileptr->byteTrans++;
-	  fileptr->access++;
-	}
+      fileptr->position  += nread;
+      fileptr->byteTrans += nread;
+      fileptr->access++;
     }
 
-  return (ivalue);
+  if ( FILE_Debug ) Message(func, "size %ld  nread %ld", size, nread);
+
+  return (nread);
 }
 
 
@@ -1260,7 +1328,10 @@ size_t fileRead(int fileID, void *ptr, size_t size)
 
   if ( fileptr )
     {
-      nread = file_read_from_buffer(fileptr, ptr, size);
+      if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
+	nread = file_read_from_buffer(fileptr, ptr, size);
+      else
+	nread = fread(ptr, 1, size, fileptr->fp);
 
       fileptr->position  += nread;
       fileptr->byteTrans += nread;
@@ -1283,7 +1354,7 @@ size_t fileWrite(int fileID, const void *ptr, size_t size)
 
   if ( fileptr )
     {
-      if ( fileptr->buffer == NULL ) file_set_buffer(fileptr);
+      /* if ( fileptr->buffer == NULL ) file_set_buffer(fileptr); */
 
       fp = fileptr->fp;
 

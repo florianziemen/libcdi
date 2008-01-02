@@ -5,10 +5,14 @@
 #include <sys/types.h>
 
 
-#define  FILE_UNDEFID   -1
+#define  FILE_UNDEFID      -1
 
-#define  FILE_TYPE_STD   1
-#define  FILE_TYPE_MMAP  2
+#define  FILE_TYPE_OPEN     1
+#define  FILE_TYPE_FOPEN    2
+
+/* buffer types for FILE_TYPE_OPEN */
+#define  FILE_BUFTYPE_STD   1
+#define  FILE_BUFTYPE_MMAP  2
 
 const
 char  *fileLibraryVersion(void);
@@ -38,6 +42,7 @@ int    fileSetPos(int fileID, off_t offset, int whence);
 int    fileGetc(int fileID);
 int    filePtrGetc(void *fileptr);
 
+size_t filePtrRead(void *fileptr, void *ptr, size_t size);
 size_t fileRead(int fileID, void *ptr, size_t size);
 size_t fileWrite(int fileID, const void *ptr, size_t size);
 
