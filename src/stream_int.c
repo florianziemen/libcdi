@@ -50,8 +50,6 @@ int CDI_Debug   = 0;    /* If set to 1, debugging           */
 
 int cdiDefaultLeveltype = -1;
 static int cdiDataUnreduced = 0;
-static int cdiCompressType  = 0;
-static int cdiCompressLevel = 0;
 
 
 long cdiGetenvInt(char *envName)
@@ -318,8 +316,8 @@ static void stream_init_entry(STREAM *streamptr)
   streamptr->vct.ilevID        = UNDEFID;
   streamptr->vct.mlevID        = UNDEFID;
   streamptr->unreduced         = cdiDataUnreduced;
-  streamptr->compressType      = cdiCompressType;
-  streamptr->compressLevel     = cdiCompressLevel;
+  streamptr->ztype             = COMPRESS_NONE;
+  streamptr->zlevel            = 0;
 
   basetimeInit(&streamptr->basetime);
 
@@ -436,13 +434,6 @@ int cdiDefGlobal(const char *string, int val)
     }
 
   return (ret);
-}
-
-
-void cdiDefCompress(int type, int level)
-{
-  cdiCompressType  = type;
-  cdiCompressLevel = level;
 }
 
 

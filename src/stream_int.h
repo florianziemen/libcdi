@@ -216,8 +216,8 @@ typedef struct {
   int       localatts;
   VCT       vct;
   int       unreduced;
-  int       compressType;
-  int       compressLevel;
+  int       ztype;
+  int       zlevel;
   int       curfile;
   int       nfiles;
   char    **fnames;

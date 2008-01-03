@@ -373,6 +373,24 @@ Define time step.
 Define the Vlist for a stream.
 
 
+\section*{\tt \htmlref{streamDefZlevel}{streamDefZlevel}}
+
+\begin{verbatim}
+    SUBROUTINE streamDefZlevel (INTEGER streamID, INTEGER zlevel)
+\end{verbatim}
+
+Define compression level.
+
+
+\section*{\tt \htmlref{streamDefZtype}{streamDefZtype}}
+
+\begin{verbatim}
+    SUBROUTINE streamDefZtype (INTEGER streamID, INTEGER ztype)
+\end{verbatim}
+
+Define compression type.
+
+
 \section*{\tt \htmlref{streamInqByteorder}{streamInqByteorder}}
 
 \begin{verbatim}
@@ -407,6 +425,24 @@ Get time step.
 \end{verbatim}
 
 Get the Vlist of a stream.
+
+
+\section*{\tt \htmlref{streamInqZlevel}{streamInqZlevel}}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqZlevel (INTEGER streamID)
+\end{verbatim}
+
+Get compression level.
+
+
+\section*{\tt \htmlref{streamInqZtype}{streamInqZtype}}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqZtype (INTEGER streamID)
+\end{verbatim}
+
+Get compression type.
 
 
 \section*{\tt \htmlref{streamOpenRead}{streamOpenRead}}

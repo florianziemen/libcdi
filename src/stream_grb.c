@@ -2290,7 +2290,7 @@ void grbWriteVarDP(int streamID, int varID, const double *data, int nmiss)
       
       nbytes = iword*sizeof(int);
 
-      if ( streamptr->compressType == COMPRESS_SZIP )
+      if ( streamptr->ztype == COMPRESS_SZIP )
 	{
 	  unsigned char *buffer;
 	  size_t buffersize;
@@ -2409,7 +2409,7 @@ void grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data
 
   nbytes = iword*sizeof(int);
 
-  if ( streamptr->compressType == COMPRESS_SZIP )
+  if ( streamptr->ztype == COMPRESS_SZIP )
     {
       unsigned char *buffer;
       size_t buffersize;
@@ -2474,7 +2474,7 @@ int grbCopyRecord(int streamID2, int streamID1)
   izip = gribGetZip(recsize, gribbuffer, &unzipsize);
   
   if ( izip == 0 )
-    if ( streamptr2->compressType == COMPRESS_SZIP )
+    if ( streamptr2->ztype == COMPRESS_SZIP )
       {
 	unsigned char *buffer;
 	size_t buffersize;
@@ -2601,7 +2601,7 @@ int grbWriteRecord(int streamID, const double *data, int nmiss)
 
   nbytes = iword*sizeof(int);
 
-  if ( streamptr->compressType == COMPRESS_SZIP )
+  if ( streamptr->ztype == COMPRESS_SZIP )
     {
       unsigned char *buffer;
       size_t buffersize;

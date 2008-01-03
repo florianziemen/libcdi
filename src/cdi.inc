@@ -48,6 +48,8 @@
 !
 !  Compress types
 !
+      INTEGER    COMPRESS_NONE         
+      PARAMETER (COMPRESS_NONE          =  0)
       INTEGER    COMPRESS_SZIP         
       PARAMETER (COMPRESS_SZIP          =  1)
       INTEGER    COMPRESS_GZIP         
@@ -267,11 +269,6 @@
 !                                     INTEGER         val)
       EXTERNAL        cdiDefGlobal
 
-!                     cdiDefCompress
-!                                    (INTEGER         type,
-!                                     INTEGER         level)
-      EXTERNAL        cdiDefCompress
-
 !
 !  STREAM control routines
 !
@@ -313,6 +310,24 @@
       INTEGER         streamInqByteorder
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqByteorder
+
+!                     streamDefZtype
+!                                    (INTEGER         streamID,
+!                                     INTEGER         ztype)
+      EXTERNAL        streamDefZtype
+
+!                     streamDefZlevel
+!                                    (INTEGER         streamID,
+!                                     INTEGER         zlevel)
+      EXTERNAL        streamDefZlevel
+
+      INTEGER         streamInqZtype
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamInqZtype
+
+      INTEGER         streamInqZlevel
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamInqZlevel
 
       INTEGER         streamDefTimestep
 !                                    (INTEGER         streamID,

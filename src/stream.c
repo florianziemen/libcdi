@@ -1909,3 +1909,59 @@ int streamInqVlist(int streamID)
 
   return (streamptr->vlistID);
 }
+
+
+void streamDefZtype(int streamID, int ztype)
+{
+  static char func[] = "streamDefZtype";
+  int nvars, varID;
+  int gridID, zaxisID;
+  STREAM *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(func, streamptr);
+
+  streamptr->ztype = ztype;
+}
+
+
+void streamDefZlevel(int streamID, int zlevel)
+{
+  static char func[] = "streamDefZlevel";
+  int nvars, varID;
+  int gridID, zaxisID;
+  STREAM *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(func, streamptr);
+
+  streamptr->zlevel = zlevel;
+}
+
+
+int streamInqZtype(int streamID)
+{
+  static char func[] = "streamInqZtype";
+  STREAM *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(func, streamptr);
+
+  return (streamptr->ztype);
+}
+
+
+int streamInqZlevel(int streamID)
+{
+  static char func[] = "streamInqZlevel";
+  STREAM *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(func, streamptr);
+
+  return (streamptr->zlevel);
+}

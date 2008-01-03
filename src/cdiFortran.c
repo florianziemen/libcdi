@@ -58,7 +58,6 @@ FCALLSCSUB0 (cdiPrintVersion, CDIPRINTVERSION, cdiprintversion)
 FCALLSCSUB1 (cdiDefMissval, CDIDEFMISSVAL, cdidefmissval, DOUBLE)
 FCALLSCFUN0 (DOUBLE, cdiInqMissval, CDIINQMISSVAL, cdiinqmissval)
 FCALLSCFUN2 (INT, cdiDefGlobal, CDIDEFGLOBAL, cdidefglobal, STRING, INT)
-FCALLSCSUB2 (cdiDefCompress, CDIDEFCOMPRESS, cdidefcompress, INT, INT)
 
 /*  STREAM control routines  */
 
@@ -71,6 +70,10 @@ FCALLSCFUN1 (INT, streamInqVlist, STREAMINQVLIST, streaminqvlist, INT)
 FCALLSCFUN1 (INT, streamInqFiletype, STREAMINQFILETYPE, streaminqfiletype, INT)
 FCALLSCSUB2 (streamDefByteorder, STREAMDEFBYTEORDER, streamdefbyteorder, INT, INT)
 FCALLSCFUN1 (INT, streamInqByteorder, STREAMINQBYTEORDER, streaminqbyteorder, INT)
+FCALLSCSUB2 (streamDefZtype, STREAMDEFZTYPE, streamdefztype, INT, INT)
+FCALLSCSUB2 (streamDefZlevel, STREAMDEFZLEVEL, streamdefzlevel, INT, INT)
+FCALLSCFUN1 (INT, streamInqZtype, STREAMINQZTYPE, streaminqztype, INT)
+FCALLSCFUN1 (INT, streamInqZlevel, STREAMINQZLEVEL, streaminqzlevel, INT)
 FCALLSCFUN2 (INT, streamDefTimestep, STREAMDEFTIMESTEP, streamdeftimestep, INT, INT)
 FCALLSCFUN2 (INT, streamInqTimestep, STREAMINQTIMESTEP, streaminqtimestep, INT, INT)
 FCALLSCFUN1 (STRING, streamFilename, STREAMFILENAME, streamfilename, INT)

@@ -29,13 +29,17 @@ extern int optind, opterr, optopt;
 
 char *Progname;
 
-int DefaultFileType = CDI_UNDEFID;
-int DefaultDataType = CDI_UNDEFID;
+int DefaultFileType  = CDI_UNDEFID;
+int DefaultDataType  = CDI_UNDEFID;
+int DefaultByteorder = CDI_UNDEFID;
+
+int Ztype  = COMPRESS_NONE;
+int Zlevel = 0;
 
 
 static void version(void)
 {
-  fprintf(stderr, "CDI version 1.6.1\n");
+  fprintf(stderr, "CDI version 1.6.2\n");
   cdiPrintVersion();
   fprintf(stderr, "\n");
 /*
@@ -51,6 +55,7 @@ static void version(void)
   1.5.1  21 Feb 2006 : add option -s for short info
   1.6.0   1 Aug 2006 : add option -z szip for SZIP compression of GRIB records
   1.6.1  27 Feb 2007 : short info with ltype for GENERIC zaxis
+  1.6.2   3 Jan 2008 : changes for CDI library version 1.1.0 (compress)
 */
 }
 
@@ -74,6 +79,7 @@ static void usage(void)
   fprintf(stderr, "\n");
 
   fprintf(stderr, "    -V             Print version number\n");
+  fprintf(stderr, "    -z szip        Compress GRIB records with szip\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "  Report bugs to <Uwe.Schulzweida@zmaw.de>\n");
 }
@@ -151,9 +157,6 @@ static void printInfo(int gridtype, int date, int time, int code, double level,
     }
 }
 
-
-#define  CDI_BIGENDIAN            0   /* Data type BIGENDIAN     */
-#define  CDI_LITTLEENDIAN         1   /* Data type LITTLEENDIAN  */
 
 void printFiletype(int streamID, int vlistID)
 {
@@ -644,38 +647,50 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 }
 
 
+#undef  IsBigendian
+#define IsBigendian()  ( u_byteorder.c[sizeof(long) - 1] )
+
+
 static void setDefaultDataType(char *datatypestr)
 {
+  static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
   int datatype = -1;
 
   if ( isdigit((int) *datatypestr) )
     {
       datatype = atoi(datatypestr);
-      datatypestr++;
+      if ( datatype < 10 )
+	datatypestr += 1;
+      else
+	datatypestr += 2;
 
-      if      ( datatype == 1 ) DefaultDataType = DATATYPE_PACK8;
-      else if ( datatype == 2 ) DefaultDataType = DATATYPE_PACK16;
-      else if ( datatype == 3 ) DefaultDataType = DATATYPE_PACK24;
-      else if ( datatype == 4 ) DefaultDataType = DATATYPE_FLT32;
-      else if ( datatype == 8 ) DefaultDataType = DATATYPE_FLT64;
+      if      ( datatype > 0 && datatype < 32 ) DefaultDataType = datatype;
+      else if ( datatype == 32 )
+	{
+	  if ( DefaultFileType == FILETYPE_GRB )
+	    DefaultDataType = DATATYPE_PACK32;
+	  else
+	    DefaultDataType = DATATYPE_FLT32;
+	}
+      else if ( datatype == 64 ) DefaultDataType = DATATYPE_FLT64;
       else
 	{
 	  fprintf(stderr, "Unsupported datatype %d!\n", datatype);
-	  fprintf(stderr, "Use 4/8 for filetype nc, srv, ext, ieg and 1/2/3 for grb.\n");
-	  exit(-1);
+	  fprintf(stderr, "Use 32/64 for filetype nc, srv, ext, ieg and 1-32 for grb.\n");
+	  exit(EXIT_FAILURE);
 	}
     }
 
-  if ( *datatypestr == 'z' || *datatypestr == 'Z' )
+  if ( *datatypestr == 'l' || *datatypestr == 'L' )
     {
-      int level = 6;
+      if ( IsBigendian() ) DefaultByteorder = CDI_LITTLEENDIAN;
       datatypestr++;
-      if ( isdigit((int) *datatypestr) )
-	{
-	  level = atoi(datatypestr);
-	  datatypestr++;	      
-	}
-      cdiDefCompress(COMPRESS_GZIP, level);
+    }
+
+  if ( *datatypestr == 'b' || *datatypestr == 'B' )
+    {
+      if ( ! IsBigendian() ) DefaultByteorder = CDI_BIGENDIAN;
+      datatypestr++;
     }
 }
 
@@ -743,9 +758,14 @@ void defineCompress(const char *arg)
   size_t len = strlen(arg);
 
   if      ( strncmp(arg, "szip", len) == 0 )
-    cdiDefCompress(COMPRESS_SZIP, 0);
+    {
+      Ztype = COMPRESS_SZIP;
+    }
   else if ( strncmp(arg, "gzip", len) == 0 )
-    cdiDefCompress(COMPRESS_GZIP, 6);
+    {
+      Ztype = COMPRESS_GZIP;
+      Zlevel = 6;
+    }
   else
     fprintf(stderr, "Compression %s unsupported!\n", arg);  
 }
@@ -811,9 +831,6 @@ int main(int argc, char *argv[])
 	  break;
 	case 'w':
 	  wTable = optarg;
-	  break;
-	case 'Z':
-	  cdiDefCompress(COMPRESS_GZIP, 6);
 	  break;
 	case 'z':
 	  defineCompress(optarg);
@@ -918,6 +935,15 @@ int main(int argc, char *argv[])
 	  streamID2 = streamOpenWrite(fname2, filetype);
 	  if ( streamID2 < 0 )
 	    return (handle_error(streamID2, "Open failed on %s", fname2));
+
+	  if ( DefaultByteorder != CDI_UNDEFID )
+	    streamDefByteorder(streamID2, DefaultByteorder);
+
+	  if ( Ztype != COMPRESS_NONE )
+	    {
+	      streamDefZtype(streamID2, Ztype);
+	      streamDefZlevel(streamID2, Zlevel);
+	    }
 
 	  streamDefVlist(streamID2, vlistID2);
 
