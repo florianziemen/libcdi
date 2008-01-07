@@ -6,6 +6,7 @@
 	  for Int, Flt and Txt
 	* Add support for Lambert grids [request: Patrick Samuelsson]
 	* Change cdiDefCompress to streamDefZtype/streamDefZlevel
+	* decode_timevalue: bug fix for rounding error [report: Veronika Gayler]
 	* Version 1.1.0 released
 	
 2007-10-22  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

@@ -847,7 +847,7 @@ void decode_timevalue(int timeunit, double timevalue, int *days, int *secs)
   else if ( timeunit == TUNIT_DAY )
     {
       *days = (int) timevalue;
-      *secs = (int) ((timevalue - *days)*86400);
+      *secs = (int) ((timevalue - *days)*86400 + 0.5);
       if ( *secs < 0 ) { *days -= 1; *secs += 86400; };
       /*
       {
