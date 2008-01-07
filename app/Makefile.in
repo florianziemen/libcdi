@@ -83,7 +83,9 @@ am__quote = @am__quote@
 install_sh = @install_sh@
 
 #
-bin_PROGRAMS = cdi createtable
+bin_PROGRAMS = cdi
+#
+noinst_PROGRAMS = createtable
 #
 cdi_SOURCES = cdi.c
 #
@@ -98,8 +100,9 @@ subdir = app
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/config.h
 CONFIG_CLEAN_FILES =
-bin_PROGRAMS = cdi$(EXEEXT) createtable$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS)
+bin_PROGRAMS = cdi$(EXEEXT)
+noinst_PROGRAMS = createtable$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_cdi_OBJECTS = cdi.$(OBJEXT)
 cdi_OBJECTS = $(am_cdi_OBJECTS)
@@ -159,6 +162,9 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 cdi$(EXEEXT): $(cdi_OBJECTS) $(cdi_DEPENDENCIES) 
 	@rm -f cdi$(EXEEXT)
 	$(LINK) $(cdi_LDFLAGS) $(cdi_OBJECTS) $(cdi_LDADD) $(LIBS)
@@ -287,7 +293,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-noinstPROGRAMS \
+	mostlyclean-am
 
 distclean: distclean-am
 
@@ -323,12 +330,12 @@ mostlyclean-am: mostlyclean-compile mostlyclean-generic
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-am clean clean-binPROGRAMS \
-	clean-generic distclean distclean-compile distclean-depend \
-	distclean-generic distclean-tags distdir dvi dvi-am info \
-	info-am install install-am install-binPROGRAMS install-data \
-	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	clean-generic clean-noinstPROGRAMS distclean distclean-compile \
+	distclean-depend distclean-generic distclean-tags distdir dvi \
+	dvi-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-exec install-exec-am \
+	install-info install-info-am install-man install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic tags uninstall uninstall-am \
 	uninstall-binPROGRAMS uninstall-info-am

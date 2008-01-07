@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 #
-bin_PROGRAMS = cdi_write cdi_read cdi_copy
+noinst_PROGRAMS = cdi_write cdi_read cdi_copy
 #
 cdi_write_SOURCES = cdi_write.c
 cdi_write_LDADD = ../src/libcdi.a $(LDFLAGS) -lm

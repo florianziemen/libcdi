@@ -1,6 +1,8 @@
 ## Process this file with automake to produce Makefile.in
 #
-bin_PROGRAMS = cdi createtable
+bin_PROGRAMS = cdi
+#
+noinst_PROGRAMS = createtable
 #
 cdi_SOURCES = cdi.c
 #
