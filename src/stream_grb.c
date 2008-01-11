@@ -1730,13 +1730,18 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
       decode_date(date, &year, &month, &day);
       decode_time(time, &hour, &minute);
       /*
-      printf("date time %d %d %g\n", date, time, value);
+      printf("date time %d %d\n", date, time);
       printf("year %d, month %d, day %d, hour %d, minute %d\n", year, month, day, hour, minute);
       */
       encode_juldaysec(year, month, day, hour, minute, &julday2, &secofday2);
 
       (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
-      ival = (int) ((days*86400.0 + secs)/factor);
+      /* ival = (int) ((days*86400.0 + secs)/factor); */
+
+      if ( (int) fmod(days*86400.0 + secs, factor) )
+	ival = -1;
+      else
+	ival = (int) ((days*86400.0 + secs)/factor);
       
       if ( ival < 0 || ival > 255 ) timetype = TAXIS_ABSOLUTE;
       
