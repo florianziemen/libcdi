@@ -1877,7 +1877,7 @@ void streamDefVlist(int streamID, int vlistID)
     }
   else
     {
-      Warning(func, "vlist allready defined for %s!", streamptr->filename);
+      Warning(func, "vlist already defined for %s!", streamptr->filename);
     }
 }
 

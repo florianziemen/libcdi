@@ -1470,7 +1470,7 @@ void gridDefMask(int gridID, int *mask)
   if ( gridptr->mask == NULL )
     gridptr->mask = (int *) malloc(size*sizeof(int));
   else if ( CDI_Debug )
-    Warning(func, "mask allready defined!");
+    Warning(func, "mask already defined!");
 
   for ( i = 0; i < size; i++ )
     gridptr->mask[i] = mask[i];
@@ -1564,7 +1564,7 @@ void gridDefXvals(int gridID, double *xvals)
   if ( gridptr->xvals == NULL )
     gridptr->xvals = (double *) malloc(size*sizeof(double));
   else if ( CDI_Debug )
-    Warning(func, "values allready defined!");
+    Warning(func, "values already defined!");
 
   for ( i = 0; i < size; i++ )
     gridptr->xvals[i] = xvals[i];
@@ -1658,7 +1658,7 @@ void gridDefYvals(int gridID, double *yvals)
   if ( gridptr->yvals == NULL )
     gridptr->yvals = (double *) malloc(size*sizeof(double));
   else if ( CDI_Debug )
-    Warning(func, "Values allready defined!");
+    Warning(func, "Values already defined!");
     
   for ( i = 0; i < size; i++ )
     gridptr->yvals[i] = yvals[i];
@@ -2639,7 +2639,7 @@ void gridDefArea(int gridID, double *area)
   if ( gridptr->area == NULL )
     gridptr->area = (double *) malloc(size*sizeof(double));
   else if ( CDI_Debug )
-    Warning(func, "values allready defined!");
+    Warning(func, "values already defined!");
 
   for ( i = 0; i < size; i++ ) gridptr->area[i] = area[i];
 }
@@ -2744,7 +2744,7 @@ void gridDefXbounds(int gridID, double *xbounds)
   if ( gridptr->xbounds == NULL )
     gridptr->xbounds = (double *) malloc(size*sizeof(double));
   else if ( CDI_Debug )
-    Warning(func, "values allready defined!");
+    Warning(func, "values already defined!");
 
   for ( i = 0; i < size; i++ )
     gridptr->xbounds[i] = xbounds[i];
@@ -2852,7 +2852,7 @@ void gridDefYbounds(int gridID, double *ybounds)
   if ( gridptr->ybounds == NULL )
     gridptr->ybounds = (double *) malloc(size*sizeof(double));
   else if ( CDI_Debug )
-    Warning(func, "values allready defined!");
+    Warning(func, "values already defined!");
 
   for ( i = 0; i < size; i++ )
     gridptr->ybounds[i] = ybounds[i];

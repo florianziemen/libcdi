@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Wed Jan  2 12:09:11 CET 2008 */
+/* Generated automatically from m214003 on Fri Jan 18 11:53:23 CET 2008 */
 
 /* GRIBLIB_VERSION="1.1.0" */
 
@@ -123,6 +123,7 @@ void  gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 
 #define  GET_INT3(a,b,c)    ((1-(int) ((unsigned) (a & 128) >> 6)) * (int) (((a & 127) << 16)+(b<<8)+c))
 #define  GET_INT2(a,b)      ((1-(int) ((unsigned) (a & 128) >> 6)) * (int) (((a & 127) << 8) + b))
+#define  GET_INT1(a)        ((1-(int) ((unsigned) (a & 128) >> 6)) * (int) (a))
 
 /* this requires a 32-bit default integer machine */
 #define  GET_UINT4(a,b,c,d) ((int) ((a << 24) + (b << 16) + (c << 8) + (d)))
@@ -151,7 +152,7 @@ void  gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 #define  PDS_Level1          (pds[10])
 #define  PDS_Level2	     (pds[11])
 #define  PDS_Level	     GET_UINT2(pds[10], pds[11])
-#define  PDS_Year            GET_UINT1(pds[12])
+#define  PDS_Year            GET_INT1(pds[12])
 #define  PDS_Month           GET_UINT1(pds[13])
 #define  PDS_Day             GET_UINT1(pds[14])
 #define  PDS_Hour            GET_UINT1(pds[15])
@@ -264,6 +265,7 @@ void  gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
                          (lGrib[z++] = (Value) >>  8), \
                          (lGrib[z++] = (Value)))
 
+#define Put1Int(Value)  {ival = Value; if ( ival < 0 ) ival =     256 - ival; Put1Byte(ival);}
 #define Put3Int(Value)  {ival = Value; if ( ival < 0 ) ival = 8388608 - ival; Put3Byte(ival);}
 
 #define Put1Real(Value)          \
@@ -2862,6 +2864,16 @@ void encodePDS(GRIBPACK *lpds, int pdsLen, int *isec1)
 {
   GRIBPACK *lGrib = lpds;
   int z = 0;
+  int ival, century, year;
+
+  century = ISEC1_Century;
+  year    = ISEC1_Year;
+
+  if ( century < 0 )
+    {
+      century = -century;
+      year    = -year;
+    }
 
   Put3Byte(pdsLen);               /*  0 Length of Block 1        */
   Put1Byte(ISEC1_CodeTable);      /*  3 Local table number       */
@@ -2894,7 +2906,7 @@ void encodePDS(GRIBPACK *lpds, int pdsLen, int *isec1)
     {
       Put2Byte(ISEC1_Level1);     /* 10 Level                    */    
     }
-  Put1Byte(ISEC1_Year);           /* 12 Year of Century          */
+  Put1Int(year);                  /* 12 Year of Century          */
   Put1Byte(ISEC1_Month);          /* 13 Month                    */
   Put1Byte(ISEC1_Day);            /* 14 Day                      */
   Put1Byte(ISEC1_Hour);           /* 15 Hour                     */
@@ -2935,7 +2947,7 @@ void encodePDS(GRIBPACK *lpds, int pdsLen, int *isec1)
     }
 
   Put1Byte(ISEC1_AvgMiss);            /* 23 Missing from averages    */
-  Put1Byte(ISEC1_Century);            /* 24 Century                  */
+  Put1Byte(century);                  /* 24 Century                  */
   Put1Byte(ISEC1_SubCenterID);        /* 25 Subcenter                */
   Put2Byte(ISEC1_DecScaleFactor);     /* 26 Decimal scale factor     */
 
@@ -3968,6 +3980,12 @@ static int decodePDS(unsigned char *pds, int *isec0, int *isec1)
       ISEC1_Century        = 1;
       ISEC1_SubCenterID    = 0;
       ISEC1_DecScaleFactor = 0;
+    }
+
+  if ( ISEC1_Year < 0 )
+    {
+      ISEC1_Year = -ISEC1_Year;
+      ISEC1_Century = -ISEC1_Century;
     }
 
   ISEC1_LocalFLag = 0;
@@ -8264,7 +8282,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.1.0" " of ""Jan  2 2008"" ""12:09:18";
+static const char grb_libvers[] = "1.1.0" " of ""Jan 18 2008"" ""11:53:23";
 
 
 

@@ -1021,7 +1021,7 @@ void zaxisDefVct(int zaxisID, int size, const double *vct)
     }
   else
     if ( zaxisptr->vctsize != size )
-      Warning(func, "VCT was allready defined");
+      Warning(func, "VCT was already defined");
 }
 
 
@@ -1064,7 +1064,7 @@ void zaxisDefLbounds(int zaxisID, double *lbounds)
   size = zaxisptr->size;
 
   if ( zaxisptr->lbounds != NULL )
-    Warning(func, "Lbounds allready defined for zaxisID = %d", zaxisID);
+    Warning(func, "Lbounds already defined for zaxisID = %d", zaxisID);
 
   zaxisptr->lbounds = (double *) malloc(size*sizeof(double));
   memcpy(zaxisptr->lbounds, lbounds, size*sizeof(double));
@@ -1084,7 +1084,7 @@ void zaxisDefUbounds(int zaxisID, double *ubounds)
   size = zaxisptr->size;
 
   if ( zaxisptr->ubounds != NULL )
-    Warning(func, "Ubounds allready defined for zaxisID = %d", zaxisID);
+    Warning(func, "Ubounds already defined for zaxisID = %d", zaxisID);
 
   zaxisptr->ubounds = (double *) malloc(size*sizeof(double));
   memcpy(zaxisptr->ubounds, ubounds, size*sizeof(double));
@@ -1104,7 +1104,7 @@ void zaxisDefWeights(int zaxisID, double *weights)
   size = zaxisptr->size;
 
   if ( zaxisptr->weights != NULL )
-    Warning(func, "Weights allready defined for zaxisID = %d", zaxisID);
+    Warning(func, "Weights already defined for zaxisID = %d", zaxisID);
 
   zaxisptr->weights = (double *) malloc(size*sizeof(double));
   memcpy(zaxisptr->weights, weights, size*sizeof(double));
