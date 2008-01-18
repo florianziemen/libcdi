@@ -1708,9 +1708,11 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
       rtime   = taxisInqRtime(timeID);
       decode_date(rdate, &year, &month, &day);
       decode_time(rtime, &hour, &minute);
+
       century =  year / 100;
 
       ISEC1_Year   = year - century*100;
+      if ( year < 0 ) ISEC1_Year = -ISEC1_Year;
       ISEC1_Month  = month;
       ISEC1_Day    = day;
       ISEC1_Hour   = hour;
@@ -1753,9 +1755,11 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
     {
       decode_date(date, &year, &month, &day);
       decode_time(time, &hour, &minute);
+
       century =  year / 100;
 
       ISEC1_Year     = year - century*100;
+      if ( year < 0 ) ISEC1_Year = -ISEC1_Year;
       ISEC1_Month    = month;
       ISEC1_Day      = day;
       ISEC1_Hour     = hour;

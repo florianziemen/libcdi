@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Fri Jan 18 11:53:23 CET 2008 */
+/* Generated automatically from m214003 on Fri Jan 18 14:07:14 CET 2008 */
 
 /* GRIBLIB_VERSION="1.1.0" */
 
@@ -123,7 +123,7 @@ void  gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 
 #define  GET_INT3(a,b,c)    ((1-(int) ((unsigned) (a & 128) >> 6)) * (int) (((a & 127) << 16)+(b<<8)+c))
 #define  GET_INT2(a,b)      ((1-(int) ((unsigned) (a & 128) >> 6)) * (int) (((a & 127) << 8) + b))
-#define  GET_INT1(a)        ((1-(int) ((unsigned) (a & 128) >> 6)) * (int) (a))
+#define  GET_INT1(a)        ((1-(int) ((unsigned) (a & 128) >> 6)) * (int) (a&127))
 
 /* this requires a 32-bit default integer machine */
 #define  GET_UINT4(a,b,c,d) ((int) ((a << 24) + (b << 16) + (c << 8) + (d)))
@@ -265,7 +265,7 @@ void  gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
                          (lGrib[z++] = (Value) >>  8), \
                          (lGrib[z++] = (Value)))
 
-#define Put1Int(Value)  {ival = Value; if ( ival < 0 ) ival =     256 - ival; Put1Byte(ival);}
+#define Put1Int(Value)  {ival = Value; if ( ival < 0 ) ival =     128 - ival; Put1Byte(ival);}
 #define Put3Int(Value)  {ival = Value; if ( ival < 0 ) ival = 8388608 - ival; Put3Byte(ival);}
 
 #define Put1Real(Value)          \
@@ -991,17 +991,19 @@ void gribDateTime(int *isec1, int *date, int *time)
   int ryear, rmonth, rday, rhour, rminute;
   int time_period;
   int julday, secofday, addsec;
+  int century;
 
-  ryear = ISEC1_Year;
+  century = ISEC1_Century - 1;
+  ryear   = ISEC1_Year;
 
-  if ( ISEC1_Century )
+  if ( century != 0 )
     {
       if ( ryear != 255 )
 	{
-	  if ( ISEC1_Century > 127 )
-	    ryear = ((ISEC1_Century-1-256)*100 + ISEC1_Year);
+	  if ( century < 0 )
+	    ryear = -(-century*100 + ISEC1_Year);
 	  else
-	    ryear = ((ISEC1_Century-1)*100 + ISEC1_Year);
+	    ryear =    century*100 + ISEC1_Year;
 	}
       else
 	ryear = 1;
@@ -3984,7 +3986,7 @@ static int decodePDS(unsigned char *pds, int *isec0, int *isec1)
 
   if ( ISEC1_Year < 0 )
     {
-      ISEC1_Year = -ISEC1_Year;
+      ISEC1_Year    = -ISEC1_Year;
       ISEC1_Century = -ISEC1_Century;
     }
 
@@ -8282,7 +8284,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.1.0" " of ""Jan 18 2008"" ""11:53:23";
+static const char grb_libvers[] = "1.1.0" " of ""Jan 18 2008"" ""14:07:14";
 
 
 
