@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Fri Jan 18 14:07:14 CET 2008 */
+/* Generated automatically from m214003 on Tue Jan 22 14:51:21 CET 2008 */
 
 /* GRIBLIB_VERSION="1.1.0" */
 
@@ -931,17 +931,30 @@ LABEL900:
 int gribRefDate(int *isec1)
 {
   int date, ryear, rmonth, rday;
+  int century;
 
-  ryear = ISEC1_Year;
-  if ( ryear != 255 )
+  century = ISEC1_Century;
+  if ( century < 0 ) century = -century;
+  century -= 1;
+
+  ryear   = ISEC1_Year;
+
+  /* if ( century != 0 ) */
     {
-      if ( ISEC1_Century > 127 )
-	ryear = ((ISEC1_Century-1-256)*100 + ISEC1_Year);
+      if ( ryear == 100 )
+	{
+	  ryear = 0;
+	  century += 1;
+	}
+
+      if ( ryear != 255 )
+	{
+	  ryear = century*100 + ryear;
+	  if ( ISEC1_Century < 0 ) ryear = -ryear;
+	}
       else
-	ryear = ((ISEC1_Century-1)*100 + ISEC1_Year);
+	ryear = 1;
     }
-  else
-    ryear = 1;
 
   rmonth  = ISEC1_Month;
   rday    = ISEC1_Day;
@@ -993,17 +1006,24 @@ void gribDateTime(int *isec1, int *date, int *time)
   int julday, secofday, addsec;
   int century;
 
-  century = ISEC1_Century - 1;
+  century = ISEC1_Century;
+  if ( century < 0 ) century = -century;
+  century -= 1;
+
   ryear   = ISEC1_Year;
 
-  if ( century != 0 )
+  /* if ( century != 0 ) */
     {
+      if ( ryear == 100 )
+	{
+	  ryear = 0;
+	  century += 1;
+	}
+
       if ( ryear != 255 )
 	{
-	  if ( century < 0 )
-	    ryear = -(-century*100 + ISEC1_Year);
-	  else
-	    ryear =    century*100 + ISEC1_Year;
+	  ryear = century*100 + ryear;
+	  if ( ISEC1_Century < 0 ) ryear = -ryear;
 	}
       else
 	ryear = 1;
@@ -8284,7 +8304,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.1.0" " of ""Jan 18 2008"" ""14:07:14";
+static const char grb_libvers[] = "1.1.0" " of ""Jan 22 2008"" ""14:51:21";
 
 
 

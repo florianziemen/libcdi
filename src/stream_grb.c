@@ -1711,8 +1711,23 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
 
       century =  year / 100;
 
-      ISEC1_Year   = year - century*100;
-      if ( year < 0 ) ISEC1_Year = -ISEC1_Year;
+      ISEC1_Year = year - century*100;
+
+      if ( year < 0 )
+	{
+	  century = -century;
+	  ISEC1_Year = -ISEC1_Year;
+	}
+
+      if ( ISEC1_Year == 0 )
+	{
+	  ISEC1_Year = 100;
+	  century -= 1;
+	}
+
+      century += 1;
+      if ( year < 0 ) century = -century;
+
       ISEC1_Month  = month;
       ISEC1_Day    = day;
       ISEC1_Hour   = hour;
@@ -1758,8 +1773,23 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
 
       century =  year / 100;
 
-      ISEC1_Year     = year - century*100;
-      if ( year < 0 ) ISEC1_Year = -ISEC1_Year;
+      ISEC1_Year = year - century*100;
+
+      if ( year < 0 )
+	{
+	  century = -century;
+	  ISEC1_Year = -ISEC1_Year;
+	}
+
+      if ( ISEC1_Year == 0 )
+	{
+	  ISEC1_Year = 100;
+	  century -= 1;
+	}
+
+      century += 1;
+      if ( year < 0 ) century = -century;
+
       ISEC1_Month    = month;
       ISEC1_Day      = day;
       ISEC1_Hour     = hour;
@@ -1778,7 +1808,7 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
   ISEC1_TimePeriod2    = 0;
   ISEC1_AvgNum         = numavg;
   ISEC1_AvgMiss        = 0;
-  ISEC1_Century        = century + 1;
+  ISEC1_Century        = century;
   ISEC1_DecScaleFactor = 0;
 }
 
