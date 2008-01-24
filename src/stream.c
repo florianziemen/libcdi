@@ -104,8 +104,9 @@ static int getFiletype(const char *filename, int *byteorder)
   int filetype = CDI_EUFTYPE;
   int fileID;
   int swap = 0;
+  int version;
   long recpos;
-  char buffer[4];
+  char buffer[8];
 
   fileID = fileOpen(filename, "r");
 
@@ -117,14 +118,18 @@ static int getFiletype(const char *filename, int *byteorder)
 	return (CDI_ESYSTEM);
     }
 
-  if ( fileRead(fileID, buffer, 4) != 4 ) return (CDI_EUFTYPE);
+  if ( fileRead(fileID, buffer, 8) != 8 ) return (CDI_EUFTYPE);
 
   fileRewind(fileID);
 
   if ( strncmp(buffer, "GRIB", 4) == 0 )
     {
-      filetype = FILETYPE_GRB;
-      if ( CDI_Debug ) Message(func, "found GRIB file = %s", filename);
+      version = buffer[7];
+      if ( version <= 1 )
+	{
+	  filetype = FILETYPE_GRB;
+	  if ( CDI_Debug ) Message(func, "found GRIB file = %s, version %d", filename);
+	}
     }
   else if ( strncmp(buffer, "CDF\001", 4) == 0 )
     {
@@ -161,10 +166,13 @@ static int getFiletype(const char *filename, int *byteorder)
       if ( CDI_Debug ) Message(func, "found IEG file = %s", filename);
     }
 #endif
-  else if ( gribFileSeek(fileID, &recpos) == 0 )
+  else if ( gribCheckSeek(fileID, &recpos, &version) == 0 )
     {
-      filetype = FILETYPE_GRB;
-      if ( CDI_Debug ) Message(func, "found seek GRIB file = %s", filename);
+      if ( version <= 1 )
+	{
+	  filetype = FILETYPE_GRB;
+	  if ( CDI_Debug ) Message(func, "found seek GRIB file = %s", filename);
+	}
     }
 
   fileClose(fileID);

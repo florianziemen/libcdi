@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Tue Jan 22 14:51:21 CET 2008 */
+/* Generated automatically from m214003 on Thu Jan 24 15:59:29 CET 2008 */
 
 /* GRIBLIB_VERSION="1.1.0" */
 
@@ -1341,7 +1341,10 @@ void gribPrintSec1(int *isec0, int *isec1)
   iyear = isec1[9];
   if ( iyear != 255 )
     {
-      iyear  = ((isec1[20]-1)*100 + isec1[9]);
+      int date, time;
+      /* iyear  = ((isec1[20]-1)*100 + isec1[9]); */
+      gribDateTime(isec1, &date, &time);
+      iyear = date/10000;
       fprintf(grprsm, " Year of reference time of data.      %9d  (%4d)\n", isec1[9], iyear);
     }
   else
@@ -5007,6 +5010,24 @@ int gribCheckFiletype(int fileID)
 }
 
 
+int gribCheckSeek(int fileID, long *offset, int *version)
+{
+  int ierr;
+  char buffer[4];
+
+  ierr = gribFileSeek(fileID, &offset);
+
+  *version = -1;
+  if ( !ierr )
+    {
+      if ( fileRead(fileID, buffer, 4) == 4 )
+	*version = buffer[3];
+    }
+
+  return (ierr);
+}
+
+
 int gribFileSeekOld(int fileID, long *offset)
 {
   /* position file pointer after GRIB */
@@ -7331,11 +7352,12 @@ void gribPrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
   unsigned char *is = NULL, *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
   int century, subcenter, decimalscale, nerr;
   int fc_num = 0;
+  int date;
 
   if ( header )
     {
       fprintf(stdout, 
-      "  Rec : PDS Tab Cen Sub Ver Grid Code LTyp Level1 Level2    Date  Time P1 P2 TU TR NAVE Scale FCnum\n");
+      "  Rec : PDS Tab Cen Sub Ver Grid Code LTyp Level1 Level2    Date  Time P1 P2 TU TR NAVE Scale FCnum CT\n");
 /*     ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+ */
       header = 0;
     }
@@ -7373,11 +7395,21 @@ void gribPrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
       if ( pds[40] == 1 )
 	fc_num = GET_UINT1(pds[49]);
 
-  fprintf(stdout, "%5d :%4d%4d%4d%4d%4d %4d %4d%4d%7d%7d %8d%6d%3d%3d%3d%3d%5d%6d%5d\n", nrec,
+  if ( PDS_Year < 0 )
+    {
+      date = (-PDS_Year)*10000+PDS_Month*100+PDS_Day;
+      century = -century;
+    }
+  else
+    {
+      date =    PDS_Year*10000+PDS_Month*100+PDS_Day;
+    }
+      
+  fprintf(stdout, "%5d :%4d%4d%4d%4d%4d %4d %4d%4d%7d%7d %8d%6d%3d%3d%3d%3d%5d%6d%5d%4d\n", nrec,
 	  PDS_Len,  PDS_CodeTable,   PDS_CenterID, subcenter, PDS_ModelID,
 	  PDS_GridDefinition, PDS_Parameter, PDS_LevelType, PDS_Level1, PDS_Level2,
-	  PDS_Date, PDS_Time, PDS_TimePeriod1, PDS_TimePeriod2, PDS_TimeUnit, PDS_TimeRange,
-	  PDS_AvgNum, decimalscale, fc_num);
+	  date, PDS_Time, PDS_TimePeriod1, PDS_TimePeriod2, PDS_TimeUnit, PDS_TimeRange,
+	  PDS_AvgNum, decimalscale, fc_num, century);
 }
 
 
@@ -8304,7 +8336,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.1.0" " of ""Jan 22 2008"" ""14:51:21";
+static const char grb_libvers[] = "1.1.0" " of ""Jan 24 2008"" ""15:59:29";
 
 
 
