@@ -217,6 +217,7 @@ int   gribRead(int fileID, unsigned char *buffer, size_t *buffersize);
 int   gribWrite(int fileID, unsigned char *buffer, size_t buffersize);
 off_t gribGetPos(int fileID);
 int   gribGetSize(int fileID);
+int   gribCheckSeek(int fileID, long *offset, int *version);
 int   gribFileSeek(int fileID, long *offset);
 int   gribReadSize(int fileID);
 int   gribVersion(unsigned char *buffer, size_t buffersize);

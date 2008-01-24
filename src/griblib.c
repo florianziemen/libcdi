@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Thu Jan 24 15:59:29 CET 2008 */
+/* Generated automatically from m214003 on Thu Jan 24 16:14:22 CET 2008 */
 
 /* GRIBLIB_VERSION="1.1.0" */
 
@@ -5015,7 +5015,7 @@ int gribCheckSeek(int fileID, long *offset, int *version)
   int ierr;
   char buffer[4];
 
-  ierr = gribFileSeek(fileID, &offset);
+  ierr = gribFileSeek(fileID, offset);
 
   *version = -1;
   if ( !ierr )
@@ -8336,7 +8336,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.1.0" " of ""Jan 24 2008"" ""15:59:29";
+static const char grb_libvers[] = "1.1.0" " of ""Jan 24 2008"" ""16:14:23";
 
 
 
