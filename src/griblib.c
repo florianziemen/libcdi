@@ -4959,7 +4959,7 @@ int gribOpen(const char *filename, const char *mode)
 #if defined (__sun)
   if ( fileID != FILE_UNDEFID && tolower(*mode) == 'r' )
     {
-      fileSetBufferType(fileID, FILE_TYPE_MMAP);
+      fileSetBufferType(fileID, FILE_BUFTYPE_MMAP);
     }
 #endif
 
