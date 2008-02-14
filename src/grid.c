@@ -2113,6 +2113,8 @@ static void grid_check_cyclic(GRID *gridptr)
     {
       if ( xbounds && xsize > 1 )
 	{
+	  double val1, val2;
+
 	  gridptr->isCyclic = TRUE;
 	  for ( j = 0; j < ysize; ++j )
 	    {
@@ -2121,9 +2123,19 @@ static void grid_check_cyclic(GRID *gridptr)
 	      nc = 0;
 	      for ( k1 = 0; k1 < 4; ++k1 )
 		{
+		  val1 = xbounds[i1+k1];
 		  for ( k2 = 0; k2 < 4; ++k2 )
 		    {
-		      if ( DBL_IS_EQUAL(xbounds[i1+k1], xbounds[i2+k2]) ) nc++;
+		      val2 = xbounds[i2+k2];
+		      
+		      if ( val1 < 0 && val2 > 300 ) val1 += 360;
+		      if ( val2 < 0 && val1 > 300 ) val2 += 360;
+		      		      
+		      if ( fabs(val1-val2) < 0.001 )
+			{
+			  nc++;
+			  break;
+			}
 		    }
 		}
 	      if ( nc != 2 )
