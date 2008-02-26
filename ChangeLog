@@ -1,5 +1,6 @@
 2008-04-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* cdfInqContents: check type of _FillValue
 	* grid_check_cyclic: bug fix
 	* Version 1.1.1 released
 

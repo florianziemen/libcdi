@@ -26,9 +26,9 @@ case "${HOSTNAME}" in
                     CC=g++ CFLAGS="-g -O2 -Wall -W -Wfloat-equal" CFINT=-Df2cFortran
 	;;
     gata)
-	./configure --prefix=$HOME/local/LINUX \
+	./configure --prefix=$HOME/local/etch-ia32 \
                     --with-netcdf=/client \
-                    CPPFLAGS="-DHAVE_LIBSZ -I$HOME/local/LINUX/include"  LIBS=$HOME/local/LINUX/lib/libsz.a \
+                    CPPFLAGS="-DHAVE_LIBSZ -I$HOME/local/etch-ia32/include"  LIBS=$HOME/local/etch-ia32/lib/libsz.a \
 	            CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal" CFINT=-Df2cFortran
 	;;
 # sparc-sun-solaris2.8

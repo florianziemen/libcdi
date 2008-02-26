@@ -2138,7 +2138,7 @@ static void grid_check_cyclic(GRID *gridptr)
 			}
 		    }
 		}
-	      if ( nc < 2 )
+	      if ( nc < 1 )
 		{
 		  gridptr->isCyclic = FALSE;
 		  break;

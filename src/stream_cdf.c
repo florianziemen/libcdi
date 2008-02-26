@@ -3506,23 +3506,29 @@ int cdfInqContents(int streamID)
 	    }
 	  else if ( strcmp(attname, "add_offset") == 0 )
 	    {
-	      cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].addoffset);
-	      /*
-	      if ( xtype != NC_BYTE && xtype != NC_SHORT && xtype != NC_INT )
-		if ( ncvars[ncvarid].addoffset != 0 )
-		  Warning(func, "attribute add_offset not supported for xtype %d\n", xtype);
-	      */
-	      cdfSetVar(ncvars, ncvarid, TRUE);
+	      if ( xtype != NC_CHAR )
+		{
+		  cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].addoffset);
+		  /*
+		    if ( xtype != NC_BYTE && xtype != NC_SHORT && xtype != NC_INT )
+		    if ( ncvars[ncvarid].addoffset != 0 )
+		    Warning(func, "attribute add_offset not supported for xtype %d\n", xtype);
+		  */
+		  cdfSetVar(ncvars, ncvarid, TRUE);
+		}
 	    }
 	  else if ( strcmp(attname, "scale_factor") == 0 )
 	    {
-	      cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].scalefactor);
-	      /*
-	      if ( xtype != NC_BYTE && xtype != NC_SHORT && xtype != NC_INT )
-		if ( ncvars[ncvarid].scalefactor != 1 )
-		  Warning(func, "attribute scale_factor not supported for xtype %d\n", xtype);
-	      */
-	      cdfSetVar(ncvars, ncvarid, TRUE);
+	      if ( xtype != NC_CHAR )
+		{
+		  cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].scalefactor);
+		  /*
+		    if ( xtype != NC_BYTE && xtype != NC_SHORT && xtype != NC_INT )
+		    if ( ncvars[ncvarid].scalefactor != 1 )
+		    Warning(func, "attribute scale_factor not supported for xtype %d\n", xtype);
+		  */
+		  cdfSetVar(ncvars, ncvarid, TRUE);
+		}
 	    }
 	  else if ( strcmp(attname, "bounds") == 0 )
 	    {
@@ -3676,9 +3682,12 @@ int cdfInqContents(int streamID)
 	  else if ( strcmp(attname, "_FillValue") == 0 || 
 		    strcmp(attname, "missing_value") == 0 )
 	    {
-	      cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].missval);
-	      ncvars[ncvarid].defmiss = TRUE;
-	      /* cdfSetVar(ncvars, ncvarid, TRUE); */
+	      if ( xtype != NC_CHAR )
+		{
+		  cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].missval);
+		  ncvars[ncvarid].defmiss = TRUE;
+		  /* cdfSetVar(ncvars, ncvarid, TRUE); */
+		}
 	    }
 	  else if ( strcmp(attname, "axis") == 0 )
 	    {
