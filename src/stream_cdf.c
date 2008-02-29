@@ -4255,6 +4255,19 @@ int cdfInqContents(int streamID)
 	    }
 	  else
 	    {
+	      if ( xvarid != UNDEFID && yvarid != UNDEFID )
+		{
+		  if ( ncvars[xvarid].ndims != ncvars[yvarid].ndims )
+		    {
+		      Warning(func, "Inconsistent grid structure for variable %s!",
+			      ncvars[ncvarid].name);
+		      ncvars[ncvarid].xvarid = UNDEFID;
+		      ncvars[ncvarid].yvarid = UNDEFID;
+		      xvarid = UNDEFID;
+		      yvarid = UNDEFID;
+		    }
+		}
+
 	      if ( xvarid != UNDEFID )
 		{
 		  islon = ncvars[xvarid].islon;

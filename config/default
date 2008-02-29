@@ -42,7 +42,7 @@ case "${HOSTNAME}" in
     executor | yang | yin)
 	./configure --prefix=$HOME/local/SUN64 \
                     --with-netcdf=/scratch/small/m214/m214089/local/SunOS64 \
-                    CC=cc CFLAGS="-g -mt -fast -xtarget=native -xarch=v9a"
+                    CC=cc CFLAGS="-g -mt -fast -xtarget=native -m64"
 	;;
 # sx6-nec-superux12.2
     cs*)

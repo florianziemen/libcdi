@@ -2205,13 +2205,23 @@ int gridCompare(int gridID, GRID grid)
 		    if ( ! (DBL_IS_EQUAL(grid.xfirst, 0) && DBL_IS_EQUAL(grid.xlast, 0) && DBL_IS_EQUAL(grid.xinc, 0)) &&
 			 ! (DBL_IS_EQUAL(grid.yfirst, 0) && DBL_IS_EQUAL(grid.ylast, 0) && DBL_IS_EQUAL(grid.yinc, 0)) &&
 			 !DBL_IS_EQUAL(grid.xfirst, grid.xlast) && !DBL_IS_EQUAL(grid.yfirst, grid.ylast) )
-		      if ( !DBL_IS_EQUAL(grid.xfirst, gridInqXval(gridID, 0)) ||
-			   !DBL_IS_EQUAL(grid.yfirst, gridInqYval(gridID, 0)) ||
-			   fabs(fabs(grid.xinc) - fabs(gridInqXinc(gridID))) > fabs(grid.xinc/1000) ||
-			   fabs(fabs(grid.yinc) - fabs(gridInqYinc(gridID))) > fabs(grid.yinc/1000) )
-			{
-			  differ = 1;
-			}
+		      {
+			if ( !DBL_IS_EQUAL(grid.xfirst, gridInqXval(gridID, 0)) ||
+			     !DBL_IS_EQUAL(grid.yfirst, gridInqYval(gridID, 0)))
+			  {
+			    differ = 1;
+			  }
+			if ( !differ && fabs(grid.xinc) > 0 &&
+			     fabs(fabs(grid.xinc) - fabs(gridInqXinc(gridID))) > fabs(grid.xinc/1000))
+			  {
+			    differ = 1;
+			  }
+			if ( !differ && fabs(grid.yinc) > 0 &&
+			     fabs(fabs(grid.yinc) - fabs(gridInqYinc(gridID))) > fabs(grid.yinc/1000))
+			  {
+			    differ = 1;
+			  }
+		      }
 		}
 	      else
 		differ = 1;		

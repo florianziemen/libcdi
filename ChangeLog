@@ -1,6 +1,8 @@
 2008-04-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* cdfInqContents: bug fix for inconsistent curvilinear grid [report: Holger Goettel]
 	* cdfInqContents: check type of _FillValue
+	* gridCompare: compare grid.yinc only if set
 	* grid_check_cyclic: bug fix
 	* Version 1.1.1 released
 
