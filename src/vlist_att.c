@@ -92,8 +92,11 @@ void fill_att(CDI_att *attp, int type, size_t nelems, size_t xsz, const void *xv
   attp->type = type;
   attp->nelems = nelems;
 
-  attp->xvalue = (void *) malloc(xsz);
-  memcpy(attp->xvalue, xvalue, xsz);
+  if ( xsz > 0 )
+    {
+      attp->xvalue = (void *) malloc(xsz);
+      memcpy(attp->xvalue, xvalue, xsz);
+    }
 }
 
 
@@ -246,7 +249,8 @@ int vlist_inq_att(int type, int vlistID, int varID, const char *name, size_t mxs
     {
       xsz = attp->xsz;
       if ( mxsz < xsz ) xsz = mxsz;
-      memcpy(xp, attp->xvalue, xsz);
+      if ( xsz > 0 )
+	memcpy(xp, attp->xvalue, xsz);
     }
   else
     {

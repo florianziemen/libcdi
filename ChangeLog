@@ -3,6 +3,7 @@
 	* cdfInqContents: bug fix for inconsistent curvilinear grid [report: Holger Goettel]
 	* cdfInqContents: check type of _FillValue
 	* gridCompare: compare grid.yinc only if set
+	* vlist_att.find_att: allocate attribute only if size > 0
 	* grid_check_cyclic: bug fix
 	* Version 1.1.1 released
 
