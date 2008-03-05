@@ -1,6 +1,7 @@
 2008-04-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cdfInqContents: bug fix for inconsistent curvilinear grid [report: Holger Goettel]
+	* cdfInqContents: bug fix for unsupported grids (dims > 2) [report: Wolfgang Langhans]
 	* cdfInqContents: check type of _FillValue
 	* gridCompare: compare grid.yinc only if set
 	* vlist_att.find_att: allocate attribute only if size > 0

@@ -4266,6 +4266,16 @@ int cdfInqContents(int streamID)
 		      xvarid = UNDEFID;
 		      yvarid = UNDEFID;
 		    }
+
+		  if ( ncvars[xvarid].ndims > 2 || ncvars[yvarid].ndims > 2 )
+		    {
+		      Warning(func, "Unsupported grid structure for variable %s (grid dims > 2)!",
+			      ncvars[ncvarid].name);
+		      ncvars[ncvarid].xvarid = UNDEFID;
+		      ncvars[ncvarid].yvarid = UNDEFID;
+		      xvarid = UNDEFID;
+		      yvarid = UNDEFID;
+		    }
 		}
 
 	      if ( xvarid != UNDEFID )
@@ -4283,6 +4293,7 @@ int cdfInqContents(int streamID)
 
 		  if ( ncvars[xvarid].xtype == NC_FLOAT ) grid.prec = DATATYPE_FLT32;
 		  grid.xvals = (double *) malloc(size*sizeof(double));
+		  fprintf(stderr, ">>>>> %d %d %d %s %s\n", ncvarid, xvarid, size, ncvars[ncvarid].name, ncvars[xvarid].name);
 		  cdf_get_var_double(fileID, xvarid, grid.xvals);
 		  strcpy(grid.xname, ncvars[xvarid].name);
 		  strcpy(grid.xlongname, ncvars[xvarid].longname);
