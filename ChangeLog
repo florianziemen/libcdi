@@ -5,6 +5,7 @@
 	* cdfInqContents: check type of _FillValue
 	* gridCompare: compare grid.yinc only if set
 	* vlist_att.find_att: allocate attribute only if size > 0
+	* grid_gme.c: add function areas to compute grid cell areas [Luis Kornblueh]
 	* grid_check_cyclic: bug fix
 	* Version 1.1.1 released
 

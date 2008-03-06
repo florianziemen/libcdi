@@ -194,7 +194,7 @@ struct geo cc2gc(struct cart *x)
   double tlt;
   double r;
 
-  if (x->x[0] == 0.0) {
+  if ( !(fabs(x->x[0]) > 0.0) ) {
     if (x->x[1] >= 0.0) {
       position.lon = 0.5*M_PI;
     } else {
@@ -213,7 +213,7 @@ struct geo cc2gc(struct cart *x)
 
   r = sqrt(x->x[0]*x->x[0] + x->x[1]*x->x[1]);
 
-  if (r == 0.0) {
+  if ( !(fabs(r) > 0.0) ) {
     if (x->x[2] > 0.0) {
       position.lat =  0.5*M_PI;
     } else {
@@ -1360,6 +1360,91 @@ void gme_grid(int gridsize, double *rlon, double *rlat,
 }
 
 
+double areas(struct cart *dv1, struct cart *dv2, struct cart *dv3)
+{
+  double a1, a2, a3;
+  double ca1, ca2, ca3;
+  double s12, s23, s31;
+
+  struct cart u12, u23, u31;
+
+  double areas;
+
+  /* compute cross products Uij = Vi X Vj */
+
+  u12.x[0] = dv1->x[1]*dv2->x[2] - dv1->x[2]*dv2->x[1];
+  u12.x[1] = dv1->x[2]*dv2->x[0] - dv1->x[0]*dv2->x[2];
+  u12.x[2] = dv1->x[0]*dv2->x[1] - dv1->x[1]*dv2->x[0];
+  
+  u23.x[0] = dv2->x[1]*dv3->x[2] - dv2->x[2]*dv3->x[1];
+  u23.x[1] = dv2->x[2]*dv3->x[0] - dv2->x[0]*dv3->x[2];
+  u23.x[2] = dv2->x[0]*dv3->x[1] - dv2->x[1]*dv3->x[0];
+  
+  u31.x[0] = dv3->x[1]*dv1->x[2] - dv3->x[2]*dv1->x[1];
+  u31.x[1] = dv3->x[2]*dv1->x[0] - dv3->x[0]*dv1->x[2];
+  u31.x[2] = dv3->x[0]*dv1->x[1] - dv3->x[1]*dv1->x[0];
+  
+  /* normalize Uij to unit vectors */
+  
+  s12 = u12.x[0]*u12.x[0]+u12.x[1]*u12.x[1]+u12.x[2]*u12.x[2];
+  s23 = u23.x[0]*u23.x[0]+u23.x[1]*u23.x[1]+u23.x[2]*u23.x[2];
+  s31 = u31.x[0]*u31.x[0]+u31.x[1]*u31.x[1]+u31.x[2]*u31.x[2];
+
+  /* test for a degenerate triangle associated with collinear vertices */
+  
+  if ( !(fabs(s12) > 0.0) || !(fabs(s23) > 0.0) || !(fabs(s31) > 0.0) ) {
+    areas = 0.0;
+    return areas;
+  }
+
+  s12 = sqrt(s12);
+  s23 = sqrt(s23);
+  s31 = sqrt(s31);
+  
+  u12.x[0] = u12.x[0]/s12; u12.x[1] = u12.x[1]/s12; u12.x[2] = u12.x[2]/s12;
+  u23.x[0] = u23.x[0]/s23; u23.x[1] = u23.x[1]/s23; u23.x[2] = u23.x[2]/s23;
+  u31.x[0] = u31.x[0]/s31; u31.x[1] = u31.x[1]/s31; u31.x[2] = u31.x[2]/s31;
+  
+  /*
+   *  Compute interior angles Ai as the dihedral angles between planes:
+   *  CA1 = cos(A1) = -<U12,U31>
+   *  CA2 = cos(A2) = -<U23,U12>
+   *  CA3 = cos(A3) = -<U31,U23>
+   */
+
+  ca1 = -( u12.x[0]*u31.x[0]+u12.x[1]*u31.x[1]+u12.x[2]*u31.x[2] );
+  ca2 = -( u23.x[0]*u12.x[0]+u23.x[1]*u12.x[1]+u23.x[2]*u12.x[2] );
+  ca3 = -( u31.x[0]*u23.x[0]+u31.x[1]*u23.x[1]+u31.x[2]*u23.x[2] );
+
+#if ! defined (fmax)
+#define fmax(a,b) ({double _a = (a), _b = (b); _a > _b ? _a : _b; })
+#endif
+#if ! defined (fmin)
+#define fmin(a,b) ({double _a = (a), _b = (b); _a < _b ? _a : _b; })
+#endif
+
+  ca1 = fmax(ca1, -1.0);
+  ca1 = fmin(ca1, +1.0);
+  ca2 = fmax(ca2, -1.0);
+  ca2 = fmin(ca2, +1.0);
+  ca3 = fmax(ca3, -1.0);
+  ca3 = fmin(ca3, +1.0);
+  
+  a1 = acos(ca1);
+  a2 = acos(ca2);
+  a3 = acos(ca3);
+  
+  /* compute AREAS = A1 + A2 + A3 - PI */
+  
+  areas = a1 + a2 + a3 - M_PI;
+
+  if ( areas < 0.0 ) {
+    areas = 0.0;
+  }
+
+  return areas;
+}
+
 /*
 int main(int argc, char *argv[])
 {
@@ -1367,6 +1452,8 @@ int main(int argc, char *argv[])
 
   double *xn, *rlat, *rlon;
   double *rlatx, *rlonx; 
+
+  double *area, total_area;
 
   int *mask;
 
@@ -1416,6 +1503,11 @@ int main(int argc, char *argv[])
 
   if ((mask = (int *) malloc((ni+1)*(ni+1)*nd*sizeof(int))) == NULL) {
     perror("malloc mask");
+    exit (-1);
+  } 
+
+  if (( area  = (double *) malloc((ni+1)*(ni+1)*nd*sizeof(double))) == NULL) {
+    perror("malloc area");
     exit (-1);
   } 
 
@@ -1493,6 +1585,54 @@ int main(int argc, char *argv[])
     fclose (out);
   }
 
+  {
+    struct geo p1, p2, p3;
+
+    struct cart c1, c2, c3;
+
+    int id1, id2, ioffset;
+    int jm, jl;
+    
+    id1 = ni+1;
+    id2 = id1*(ni+1);
+    ioffset = -(id1+id2);
+   
+    total_area = 0.0;
+
+    for (jd = 1; jd <= nd; jd++) {
+      for (j2 = 1; j2 <= ni+1; j2++) {
+	for (j1 = 0; j1 <= ni; j1++) {
+	  area[j1+id1*j2+id2*jd+ioffset] = 0.0;
+ 	  if (mask[j1+id1*j2+id2*jd+ioffset]) {
+	    p3.lon = poly[j1+id1*j2+id2*jd+ioffset].center.lon; 
+	    p3.lat = poly[j1+id1*j2+id2*jd+ioffset].center.lat;
+	    c3 = gc2cc(&p3);
+	    for (jm = 1; jm <= poly[j1+id1*j2+id2*jd+ioffset].type; jm++) {
+	      jl = jm-1;
+	      if (jm == poly[j1+id1*j2+id2*jd+ioffset].type) {
+		p1.lon = poly[j1+id1*j2+id2*jd+ioffset].boundary[0].lon;
+                p1.lat = poly[j1+id1*j2+id2*jd+ioffset].boundary[0].lat;
+		p2.lon = poly[j1+id1*j2+id2*jd+ioffset].boundary[jl].lon;
+                p2.lat = poly[j1+id1*j2+id2*jd+ioffset].boundary[jl].lat;
+		c1 = gc2cc(&p1);
+		c2 = gc2cc(&p2);
+	      } else {
+		p1.lon = poly[j1+id1*j2+id2*jd+ioffset].boundary[jl].lon;
+                p1.lat = poly[j1+id1*j2+id2*jd+ioffset].boundary[jl].lat;
+		p2.lon = poly[j1+id1*j2+id2*jd+ioffset].boundary[jl+1].lon;
+                p2.lat = poly[j1+id1*j2+id2*jd+ioffset].boundary[jl+1].lat;
+		c1 = gc2cc(&p1);
+		c2 = gc2cc(&p2);
+	      }
+	      area[j1+id1*j2+id2*jd+ioffset] = area[j1+id1*j2+id2*jd+ioffset] + areas(&c1, &c2, &c3);
+	    }
+	    total_area = total_area+area[j1+id1*j2+id2*jd+ioffset];
+	  }
+	}
+      } 
+    }
+  }
+
   free(poly);
   free(xn);
   free(rlon);
@@ -1500,6 +1640,7 @@ int main(int argc, char *argv[])
   free(rlonx);
   free(rlatx);
   free(mask);
+  free(area);
 
   return(0);
 }

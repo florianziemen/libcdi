@@ -4293,7 +4293,6 @@ int cdfInqContents(int streamID)
 
 		  if ( ncvars[xvarid].xtype == NC_FLOAT ) grid.prec = DATATYPE_FLT32;
 		  grid.xvals = (double *) malloc(size*sizeof(double));
-		  fprintf(stderr, ">>>>> %d %d %d %s %s\n", ncvarid, xvarid, size, ncvars[ncvarid].name, ncvars[xvarid].name);
 		  cdf_get_var_double(fileID, xvarid, grid.xvals);
 		  strcpy(grid.xname, ncvars[xvarid].name);
 		  strcpy(grid.xlongname, ncvars[xvarid].longname);

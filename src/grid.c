@@ -1427,13 +1427,10 @@ int gridInqMask(int gridID, int *mask)
 
   grid_check_ptr(func, gridptr);
 
-  if ( gridptr->type == GRID_CURVILINEAR )
-    size = gridptr->size;
-  else
-    size = gridptr->ysize;
+  size = gridptr->size;
 
   if ( CDI_Debug && size == 0 )
-    Warning(func, "size undefined for gridID = %d", gridID);
+    Warning(func, "Size undefined for gridID = %d", gridID);
     
   if ( mask && gridptr->mask )
     for ( i = 0; i < size; i++ )
@@ -1459,13 +1456,10 @@ void gridDefMask(int gridID, int *mask)
 
   gridtype = gridptr->type;
 
-  if ( gridtype == GRID_CELL || gridtype == GRID_CURVILINEAR )
-    size = gridptr->size;
-  else
-    size = gridptr->xsize;
+  size = gridptr->size;
 
   if ( size == 0 )
-    Error(func, "size undefined for gridID = %d", gridID);
+    Error(func, "Size undefined for gridID = %d", gridID);
     
   if ( gridptr->mask == NULL )
     gridptr->mask = (int *) malloc(size*sizeof(int));
