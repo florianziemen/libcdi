@@ -69,7 +69,8 @@ typedef struct {
   int      yvarid;
   int      zvarid;
   int      tvarid;
-  int      varids[4];
+  int      ncoordvars;
+  int      coordvarids[4];
   int      cellarea;
   int      calendar;
   int      tableID;
@@ -3142,15 +3143,13 @@ void printNCvars(NCVAR *ncvars, int nvars)
 	  axis[ndim++] = 'v';
 	  for ( i = 0; i < ncvars[ncvarid].ndims; i++ )
 	    {
-	      if ( ncvars[ncvarid].tvarid != -1 )
-		axis[ndim++] = iaxis[0];
-	      else if ( ncvars[ncvarid].zvarid != -1 )
-		axis[ndim++] = iaxis[1];
-	      else if ( ncvars[ncvarid].yvarid != -1 )
-		axis[ndim++] = iaxis[2];
-	      else if ( ncvars[ncvarid].xvarid != -1 )
-		axis[ndim++] = iaxis[3];
+	      /*
+	      if      ( ncvars[ncvarid].tvarid != -1 ) axis[ndim++] = iaxis[0];
+	      else if ( ncvars[ncvarid].zvarid != -1 ) axis[ndim++] = iaxis[1];
+	      else if ( ncvars[ncvarid].yvarid != -1 ) axis[ndim++] = iaxis[2];
+	      else if ( ncvars[ncvarid].xvarid != -1 ) axis[ndim++] = iaxis[3];
 	      else
+	      */
 		axis[ndim++] = '?';
 	    }
 	}
@@ -3169,7 +3168,7 @@ void printNCvars(NCVAR *ncvars, int nvars)
 
       axis[ndim++] = 0;
 
-      printf("%3d %3d %3d  %s %s\n", ncvarid, ncvars[ncvarid].isvar, ndim-2, axis, ncvars[ncvarid].name);
+      printf("%3d %3d %3d  %-4s %s\n", ncvarid, ncvars[ncvarid].isvar, ndim-2, axis, ncvars[ncvarid].name);
     }
 }
 
@@ -3264,50 +3263,51 @@ int cdfInqContents(int streamID)
   /* init ncvars */
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {      
-      ncvars[ncvarid].vartype      = UNDEFID;
-      ncvars[ncvarid].isvar        = UNDEFID;
-      ncvars[ncvarid].islon        = FALSE;
-      ncvars[ncvarid].islat        = FALSE;
-      ncvars[ncvarid].islev        = FALSE;
-      ncvars[ncvarid].warn         = FALSE;
-      ncvars[ncvarid].timeID       = TIME_CONSTANT;
-      ncvars[ncvarid].code         = UNDEFID;
-      ncvars[ncvarid].calendar     = FALSE;
-      ncvars[ncvarid].bounds       = UNDEFID;
-      ncvars[ncvarid].gridID       = UNDEFID;
-      ncvars[ncvarid].zaxisID      = UNDEFID;
-      ncvars[ncvarid].gridtype     = UNDEFID;
-      ncvars[ncvarid].zaxistype    = UNDEFID;
-      ncvars[ncvarid].xdim         = UNDEFID;
-      ncvars[ncvarid].ydim         = UNDEFID;
-      ncvars[ncvarid].zdim         = UNDEFID;
-      ncvars[ncvarid].xvarid       = UNDEFID;
-      ncvars[ncvarid].yvarid       = UNDEFID;
-      ncvars[ncvarid].zvarid       = UNDEFID;
-      ncvars[ncvarid].tvarid       = UNDEFID;
-      ncvars[ncvarid].varids[0]    = UNDEFID;
-      ncvars[ncvarid].varids[1]    = UNDEFID;
-      ncvars[ncvarid].varids[2]    = UNDEFID;
-      ncvars[ncvarid].varids[3]    = UNDEFID;
-      ncvars[ncvarid].cellarea     = UNDEFID;
-      ncvars[ncvarid].tableID      = UNDEFID;
-      ncvars[ncvarid].xtype        = 0;
-      ncvars[ncvarid].ndims        = 0;
-      ncvars[ncvarid].gmapid       = UNDEFID;
-      ncvars[ncvarid].vlen         = 0;
-      ncvars[ncvarid].vdata        = NULL;
-      ncvars[ncvarid].truncation   = 0;
-      ncvars[ncvarid].positive     = 0;
-      ncvars[ncvarid].defmiss      = 0;
-      ncvars[ncvarid].missval      = 0;
-      ncvars[ncvarid].addoffset    = 0;
-      ncvars[ncvarid].scalefactor  = 1;
-      ncvars[ncvarid].name[0]      = 0;
-      ncvars[ncvarid].longname[0]  = 0;
-      ncvars[ncvarid].stdname[0]   = 0;
-      ncvars[ncvarid].units[0]     = 0;
-      ncvars[ncvarid].natts        = 0;
-      ncvars[ncvarid].atts         = NULL;
+      ncvars[ncvarid].vartype         = UNDEFID;
+      ncvars[ncvarid].isvar           = UNDEFID;
+      ncvars[ncvarid].islon           = FALSE;
+      ncvars[ncvarid].islat           = FALSE;
+      ncvars[ncvarid].islev           = FALSE;
+      ncvars[ncvarid].warn            = FALSE;
+      ncvars[ncvarid].timeID          = TIME_CONSTANT;
+      ncvars[ncvarid].code            = UNDEFID;
+      ncvars[ncvarid].calendar        = FALSE;
+      ncvars[ncvarid].bounds          = UNDEFID;
+      ncvars[ncvarid].gridID          = UNDEFID;
+      ncvars[ncvarid].zaxisID         = UNDEFID;
+      ncvars[ncvarid].gridtype        = UNDEFID;
+      ncvars[ncvarid].zaxistype       = UNDEFID;
+      ncvars[ncvarid].xdim            = UNDEFID;
+      ncvars[ncvarid].ydim            = UNDEFID;
+      ncvars[ncvarid].zdim            = UNDEFID;
+      ncvars[ncvarid].xvarid          = UNDEFID;
+      ncvars[ncvarid].yvarid          = UNDEFID;
+      ncvars[ncvarid].zvarid          = UNDEFID;
+      ncvars[ncvarid].tvarid          = UNDEFID;
+      ncvars[ncvarid].ncoordvars      = 0;
+      ncvars[ncvarid].coordvarids[0]  = UNDEFID;
+      ncvars[ncvarid].coordvarids[1]  = UNDEFID;
+      ncvars[ncvarid].coordvarids[2]  = UNDEFID;
+      ncvars[ncvarid].coordvarids[3]  = UNDEFID;
+      ncvars[ncvarid].cellarea        = UNDEFID;
+      ncvars[ncvarid].tableID         = UNDEFID;
+      ncvars[ncvarid].xtype           = 0;
+      ncvars[ncvarid].ndims           = 0;
+      ncvars[ncvarid].gmapid          = UNDEFID;
+      ncvars[ncvarid].vlen            = 0;
+      ncvars[ncvarid].vdata           = NULL;
+      ncvars[ncvarid].truncation      = 0;
+      ncvars[ncvarid].positive        = 0;
+      ncvars[ncvarid].defmiss         = 0;
+      ncvars[ncvarid].missval         = 0;
+      ncvars[ncvarid].addoffset       = 0;
+      ncvars[ncvarid].scalefactor     = 1;
+      ncvars[ncvarid].name[0]         = 0;
+      ncvars[ncvarid].longname[0]     = 0;
+      ncvars[ncvarid].stdname[0]      = 0;
+      ncvars[ncvarid].units[0]        = 0;
+      ncvars[ncvarid].natts           = 0;
+      ncvars[ncvarid].atts            = NULL;
     }
 
   /* read global attributtes*/
@@ -3637,7 +3637,10 @@ int cdfInqContents(int streamID)
 		    {
 		      cdfSetVar(ncvars, dimvarid, FALSE);
 		      if ( cdiIgnoreAttCoordinates == FALSE )
-			ncvars[ncvarid].varids[i] = dimvarid;
+			{
+			  ncvars[ncvarid].coordvarids[i] = dimvarid;
+			  ncvars[ncvarid].ncoordvars++;
+			}
 		    }
 		  else
 		    Warning(func, "%s - %s", nc_strerror(status), varname);
@@ -3774,7 +3777,7 @@ int cdfInqContents(int streamID)
 	}
     }
 
-  /* printNCvars(ncvars, nvars); */
+  if ( CDI_Debug ) printNCvars(ncvars, nvars);
 
   /* find coordinate vars */
   for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
@@ -4067,7 +4070,7 @@ int cdfInqContents(int streamID)
 	}
     }
 
-  /* printNCvars(ncvars, nvars); */
+  if ( CDI_Debug ) printNCvars(ncvars, nvars);
 
   /*
   for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
@@ -4104,14 +4107,10 @@ int cdfInqContents(int streamID)
 	  for ( i = 0; i < ndims; i++ )
 	    {
 	      ncdimid = ncvars[ncvarid].dimids[i];
-	      if ( ncdims[ncdimid].dimtype == X_AXIS )
-		cdfSetDim(ncvars, ncvarid, i, X_AXIS);
-	      else if ( ncdims[ncdimid].dimtype == Y_AXIS )
-		cdfSetDim(ncvars, ncvarid, i, Y_AXIS);
-	      else if ( ncdims[ncdimid].dimtype == Z_AXIS )
-		cdfSetDim(ncvars, ncvarid, i, Z_AXIS);
-	      else if ( ncdims[ncdimid].dimtype == T_AXIS )
-		cdfSetDim(ncvars, ncvarid, i, T_AXIS);
+	      if      ( ncdims[ncdimid].dimtype == X_AXIS ) cdfSetDim(ncvars, ncvarid, i, X_AXIS);
+	      else if ( ncdims[ncdimid].dimtype == Y_AXIS ) cdfSetDim(ncvars, ncvarid, i, Y_AXIS);
+	      else if ( ncdims[ncdimid].dimtype == Z_AXIS ) cdfSetDim(ncvars, ncvarid, i, Z_AXIS);
+	      else if ( ncdims[ncdimid].dimtype == T_AXIS ) cdfSetDim(ncvars, ncvarid, i, T_AXIS);
 	    }
 
 	  if ( CDI_Debug )
@@ -4156,28 +4155,27 @@ int cdfInqContents(int streamID)
 	    }	    	  
 	}
     }
-  /* set coordinate varids (att: associate)  */
+
+  /* Set coordinate varids (att: associate)  */
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
-      if ( ncvars[ncvarid].isvar == TRUE )
+      if ( ncvars[ncvarid].isvar == TRUE && ncvars[ncvarid].ncoordvars )
 	{
 	  ndims = ncvars[ncvarid].ndims;
+	  ndims = ncvars[ncvarid].ncoordvars;
 	  for ( i = 0; i < ndims; i++ )
 	    {
-	      if ( ncvars[ncvarid].varids[i] != -1 )
-		{
-		  if ( ncvars[ncvars[ncvarid].varids[i]].islon )
-		    ncvars[ncvarid].xvarid = ncvars[ncvarid].varids[i];
-		  else if ( ncvars[ncvars[ncvarid].varids[i]].islat )
-		    ncvars[ncvarid].yvarid = ncvars[ncvarid].varids[i];
-		  else if ( ncvars[ncvars[ncvarid].varids[i]].islev )
-		    ncvars[ncvarid].zvarid = ncvars[ncvarid].varids[i];
-		}
+	      if ( ncvars[ncvars[ncvarid].coordvarids[i]].islon )
+		ncvars[ncvarid].xvarid = ncvars[ncvarid].coordvarids[i];
+	      else if ( ncvars[ncvars[ncvarid].coordvarids[i]].islat )
+		ncvars[ncvarid].yvarid = ncvars[ncvarid].coordvarids[i];
+	      else if ( ncvars[ncvars[ncvarid].coordvarids[i]].islev )
+		ncvars[ncvarid].zvarid = ncvars[ncvarid].coordvarids[i];
 	    }
 	}
     }
   
-  /* printNCvars(ncvars, nvars); */
+  if ( CDI_Debug ) printNCvars(ncvars, nvars);
 
   /* define grid */
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
@@ -4243,7 +4241,7 @@ int cdfInqContents(int streamID)
 
 	  memset(&grid, 0, sizeof(GRID));
 
-	  grid.prec = DATATYPE_FLT64;
+	  grid.prec  = DATATYPE_FLT64;
 	  grid.trunc = ncvars[ncvarid].truncation;
 	  
 	  if ( ncvars[ncvarid].gridtype == GRID_TRAJECTORY )
@@ -4310,6 +4308,7 @@ int cdfInqContents(int streamID)
 		      if ( i < (int) xsize ) xinc = 0;
 		    }
 		}
+
 	      if ( yvarid != UNDEFID )
 		{
 		  islat = ncvars[yvarid].islat;

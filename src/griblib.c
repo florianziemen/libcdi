@@ -1,7 +1,7 @@
 
-/* Generated automatically from m214003 on Thu Jan 24 16:14:22 CET 2008 */
+/* Generated automatically from m214003 on Sun Mar  9 10:42:35 CET 2008 */
 
-/* GRIBLIB_VERSION="1.1.0" */
+/* GRIBLIB_VERSION="1.1.1" */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -4289,7 +4289,8 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
   int locnd;
   int jlend, jlenc;
   int i;
-  int iflag, irep, lnil, jscale, imiss;
+  int bds_flag, bds_rep, jscale, imiss;
+  int bds_ubits;
   int ioff;
   int iexp, imant;
   int pcStart, pcScale;
@@ -4311,22 +4312,22 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
 
   /* 4 bit flag / 4 bit count of unused bits at end of block octet. */
 
-  iflag = BDS_Flag;
+  bds_flag = BDS_Flag;
 
-  bds_aflag = (iflag >> 4)&1; /* compress */
+  bds_aflag = (bds_flag >> 4)&1; /* compress */
 
   /* 0------- grid point           */
   /* 1------- spherical harmonics  */
 
-  irep  = iflag >> 7;
+  bds_rep  = bds_flag >> 7;
 
-  if ( irep == 0 ) isec4[2] = 0;
+  if ( bds_rep == 0 ) isec4[2] = 0;
   else             isec4[2] = 128;
 
   /* -0------  simple packing */
   /* -1------ complex packing */
 
-  cplx  = (iflag >> 6)&1;
+  cplx  = (bds_flag >> 6)&1;
 
   if ( cplx > 0 ) isec4[3] = 64;
   else            isec4[3] =  0;
@@ -4334,7 +4335,7 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
   /* ---0---- No additional flags */
   /* ---1---- No additional flags */
 
-  if ( (iflag >> 4)&1 )
+  if ( (bds_flag >> 4)&1 )
     { isec4[5] = 16; isec4[6] = BDS_Z; zoff = 12; }
   else
     { isec4[5] =  0; isec4[6] = 0;     zoff = 0; }
@@ -4344,7 +4345,8 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
 
   /* ----++++ number of unused bits at end of section) */
 
-  lnil  = iflag & 15;
+  bds_ubits = bds_flag & 15;
+  printf("bds_ubits %d\n", bds_ubits);
   
   /* scale factor (2 bytes) */;
 
@@ -4381,7 +4383,7 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
   /* if data is in spherical harmonic form, distinguish   */
   /* between simple/complex packing (cplx = 0/1)          */
 
-  if ( irep == 1 && cplx == 0 )
+  if ( bds_rep == 1 && cplx == 0 )
     {
       /*    no unpacked binary data present */
 
@@ -4402,9 +4404,9 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
 	}
     }
 
-  ioff = irep;
+  ioff = bds_rep;
 
-  if ( irep == 1 && cplx == 1 )
+  if ( bds_rep == 1 && cplx == 1 )
     {
       /*    scaling factor */
       isec4[16] = BDS_Power;
@@ -4440,7 +4442,7 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
       ioff = (jup+1)*(jup+2);
     }
 
-  /* decode data values to floating point and store in fsec4. */
+  /* Decode data values to floating point and store in fsec4. */
   /* first calculate the number of data values.                */
   /* Take into account that spherical harmonics can be packed  */
   /* simple (cplx = 0) or complex (cplx = 1)                   */
@@ -4454,7 +4456,7 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
       jlend = ISEC2_NumLon*ISEC2_NumLat;
     }
   else
-    jlend = (jlend * 8 - lnil) / ISEC4_NumBits;
+    jlend = (jlend * 8 - bds_ubits) / ISEC4_NumBits;
 
 
   ISEC4_NumValues        = jlend + ioff;
@@ -4463,14 +4465,14 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
   if ( bds_aflag )
     {
       /*
-      if ( irep == 0 ) 
+      if ( bds_rep == 0 ) 
 	ISEC4_NumValues = ISEC2_NumLon*ISEC2_NumLat;
       else
 	ISEC4_NumValues = (ISEC2_PentaJ+1)*(ISEC2_PentaJ+2);
       */
       ISEC4_NumValues = GET_UINT3(bds[17],bds[18],bds[19])*8/ISEC4_NumBits;
 
-      if ( irep == 1 ) ISEC4_NumValues++;
+      if ( bds_rep == 1 ) ISEC4_NumValues++;
     }
 
   if ( dfunc == 'J' ) return (bdsLen);
@@ -4570,7 +4572,7 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
 
   if ( lgrib ) free(lgrib);
 
-  if ( irep == 1 && cplx == 1 )
+  if ( bds_rep == 1 && cplx == 1 )
     {
       pcStart = isec4[19];
       pcScale = isec4[16];
@@ -7641,7 +7643,7 @@ int  gribBzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbuf
     char *dest, *source;
     int destLen, sourceLen;
     int bds_len, bds_nbits, bds_flag, bds_rep, bds_cplx, bds_aflag;
-    int lnil;
+    int bds_ubits;
     char tmpbuffer[1000000];
     char tmpbuffer2[1000000];
 
@@ -7785,8 +7787,8 @@ int  gribBzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbuf
 	
 	/* ----++++ number of unused bits at end of section) */
 
-	lnil  = bds_flag & 15;
-	BDS_Flag -= lnil;
+	bds_ubits  = bds_flag & 15;
+	BDS_Flag -= bds_ubits;
     
 	gribLenOld = ((int) ((dbuf[4]<<16)+(dbuf[5]<<8)+dbuf[6]));
 
@@ -7906,12 +7908,12 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
     SZ_com_t sz_param;          /* szip parameter block */
     unsigned char *dest, *source;
     size_t destLen, sourceLen;
-    int bds_len, bds_nbits, bds_flag, bds_rep, bds_cplx, bds_aflag;
-    int lnil;
+    int bds_len, bds_nbits, bds_flag, bds_rep, bds_cplx, bds_aflag, bds_ubits;
 
     bds_len   = BDS_Len;
     bds_nbits = BDS_NumBits;
     bds_flag  = BDS_Flag;
+    bds_ubits = bds_flag & 15;
     bds_rep   =  bds_flag >> 7;
     bds_cplx  = (bds_flag >> 6)&1;
     bds_aflag = (bds_flag >> 4)&1;
@@ -7952,11 +7954,11 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
       }
     else
       {
-	fprintf(stderr, "compression of complex packed spectral data unsupported!\n");
+	fprintf(stderr, "Compression of complex packed spectral data unsupported!\n");
 	return (rec_len);
       }
 
-    datsize = ((((bds_len - datstart)*8)/bds_nbits)*bds_nbits)/8;
+    datsize = ((((bds_len - datstart)*8-bds_ubits)/bds_nbits)*bds_nbits)/8;
 
     if ( datsize < MIN_SIZE ) return (rec_len);
     /*
@@ -8052,10 +8054,6 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
     /*
     fprintf(stderr, "sourceLen, destLen %d %d\n", sourceLen, destLen);
     */
-    /*
-    fprintf(stderr, "s>>> %d %d %d %d <<<\n", (int) source[0], (int)source[1], (int)source[2], (int)source[3]);
-    fprintf(stderr, "d>>> %d %d %d %d <<<\n", (int) dest[0], (int)dest[1], (int)dest[2], (int)dest[3]);
-    */
     
     if ( destLen < MIN_COMPRESS*sourceLen )
       {
@@ -8082,8 +8080,7 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
 	
 	/* ----++++ number of unused bits at end of section) */
 
-	lnil  = bds_flag & 15;
-	BDS_Flag -= lnil;
+	BDS_Flag -= bds_ubits;
     
 	gribLenOld = ((int) ((dbuf[4]<<16)+(dbuf[5]<<8)+dbuf[6]));
 
@@ -8232,7 +8229,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
   {
     int status;
     size_t tmpLen;
-    int lnil;
+    int bds_ubits;
     SZ_com_t sz_param;          /* szip parameter block */
 
     sz_param.options_mask        = OPTIONS_MASK;
@@ -8295,8 +8292,8 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 	free(pbuf);
       }
   
-    lnil  = BDS_Flag & 15;
-    BDS_Flag -= lnil;
+    bds_ubits  = BDS_Flag & 15;
+    BDS_Flag -= bds_ubits;
 
     if ( (bdsLen%2) == 1 )
       {
@@ -8336,12 +8333,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.1.0" " of ""Jan 24 2008"" ""16:14:23";
-
-
-
-
-
+static const char grb_libvers[] = "1.1.1" " of ""Mar  9 2008"" ""10:42:36";
 const char *
 gribLibraryVersion(void)
 {

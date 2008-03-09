@@ -1501,13 +1501,13 @@ int gridInqXvals(int gridID, double *xvals)
 
   grid_check_ptr(func, gridptr);
 
-  if ( gridptr->type == GRID_CURVILINEAR )
+  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_CELL )
     size = gridptr->size;
   else
     size = gridptr->xsize;
 
   if ( CDI_Debug && size == 0 )
-    Warning(func, "size undefined for gridID = %d", gridID);
+    Warning(func, "Size undefined for gridID = %d", gridID);
     
   if ( xvals && gridptr->xvals )
     for ( i = 0; i < size; i++ )
@@ -1553,7 +1553,7 @@ void gridDefXvals(int gridID, double *xvals)
     size = gridptr->xsize;
 
   if ( size == 0 )
-    Error(func, "size undefined for gridID = %d", gridID);
+    Error(func, "Size undefined for gridID = %d", gridID);
     
   if ( gridptr->xvals == NULL )
     gridptr->xvals = (double *) malloc(size*sizeof(double));
@@ -1595,7 +1595,7 @@ int gridInqYvals(int gridID, double *yvals)
 
   grid_check_ptr(func, gridptr);
 
-  if ( gridptr->type == GRID_CURVILINEAR )
+  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_CELL )
     size = gridptr->size;
   else
     size = gridptr->ysize;
