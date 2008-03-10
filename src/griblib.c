@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Sun Mar  9 10:42:35 CET 2008 */
+/* Generated automatically from m214003 on Mon Mar 10 12:43:34 CET 2008 */
 
 /* GRIBLIB_VERSION="1.1.1" */
 
@@ -4346,7 +4346,6 @@ static int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, d
   /* ----++++ number of unused bits at end of section) */
 
   bds_ubits = bds_flag & 15;
-  printf("bds_ubits %d\n", bds_ubits);
   
   /* scale factor (2 bytes) */;
 
@@ -8333,7 +8332,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.1.1" " of ""Mar  9 2008"" ""10:42:36";
+static const char grb_libvers[] = "1.1.1" " of ""Mar 10 2008"" ""12:43:34";
 const char *
 gribLibraryVersion(void)
 {
