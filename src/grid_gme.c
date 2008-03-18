@@ -1416,19 +1416,19 @@ double areas(struct cart *dv1, struct cart *dv2, struct cart *dv3)
   ca2 = -( u23.x[0]*u12.x[0]+u23.x[1]*u12.x[1]+u23.x[2]*u12.x[2] );
   ca3 = -( u31.x[0]*u23.x[0]+u31.x[1]*u23.x[1]+u31.x[2]*u23.x[2] );
 
-#if ! defined (fmax)
-#define fmax(a,b) ({double _a = (a), _b = (b); _a > _b ? _a : _b; })
+#if ! defined (FMAX)
+#define  FMAX(a,b)  ((a) > (b) ? (a) : (b))
 #endif
-#if ! defined (fmin)
-#define fmin(a,b) ({double _a = (a), _b = (b); _a < _b ? _a : _b; })
+#if ! defined (FMIN)
+#define  FMIN(a,b)  ((a) < (b) ? (a) : (b))
 #endif
 
-  ca1 = fmax(ca1, -1.0);
-  ca1 = fmin(ca1, +1.0);
-  ca2 = fmax(ca2, -1.0);
-  ca2 = fmin(ca2, +1.0);
-  ca3 = fmax(ca3, -1.0);
-  ca3 = fmin(ca3, +1.0);
+  ca1 = FMAX(ca1, -1.0);
+  ca1 = FMIN(ca1, +1.0);
+  ca2 = FMAX(ca2, -1.0);
+  ca2 = FMIN(ca2, +1.0);
+  ca3 = FMAX(ca3, -1.0);
+  ca3 = FMIN(ca3, +1.0);
   
   a1 = acos(ca1);
   a2 = acos(ca2);

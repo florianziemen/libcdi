@@ -11,6 +11,6 @@ cdi_read_LDADD = ../src/libcdi.a $(LDFLAGS) -lm
 cdi_copy_SOURCES = cdi_copy.c
 cdi_copy_LDADD = ../src/libcdi.a $(LDFLAGS) -lm
 #
-CPPFLAGS = -I$(top_srcdir)/src
+AM_CPPFLAGS = -I$(top_srcdir)/src
 #
 CLEANFILES  = `ls *~`

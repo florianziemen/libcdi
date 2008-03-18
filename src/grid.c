@@ -2976,7 +2976,7 @@ void gridPrint(int gridID, int opt)
       if ( gridptr->yname[0]     ) fprintf(fp, "yname     : %s\n", gridptr->yname);
       if ( gridptr->ylongname[0] ) fprintf(fp, "ylongname : %s\n", gridptr->ylongname);
       if ( gridptr->yunits[0]    ) fprintf(fp, "yunits    : %s\n", gridptr->yunits);
-      if ( type == GRID_CELL ) fprintf(fp, "nvertex   : %d\n", nvertex);
+      if ( type == GRID_CELL )     fprintf(fp, "nvertex   : %d\n", nvertex);
     }
 
   switch (type)
@@ -2998,8 +2998,11 @@ void gridPrint(int gridID, int opt)
 	    ydim = ysize;
 	  }
 
-	if ( xsize > 0 ) fprintf(fp, "xsize     : %d\n", xsize);
-	if ( ysize > 0 ) fprintf(fp, "ysize     : %d\n", ysize);
+	if ( type != GRID_CELL )
+	  {
+	    if ( xsize > 0 ) fprintf(fp, "xsize     : %d\n", xsize);
+	    if ( ysize > 0 ) fprintf(fp, "ysize     : %d\n", ysize);
+	  }
 
 	if ( gridptr->isRotated )
 	  {

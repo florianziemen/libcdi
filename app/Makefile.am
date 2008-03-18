@@ -12,6 +12,6 @@ createtable_SOURCES = createtable.c
 #
 createtable_LDADD = ../src/libcdi.a $(LDFLAGS) -lm
 #
-CPPFLAGS = -I$(top_srcdir)/src
+AM_CPPFLAGS = -I$(top_srcdir)/src
 #
 CLEANFILES  = `ls *~`

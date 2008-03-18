@@ -15,33 +15,34 @@ case "${HOSTNAME}" in
     ds*)
 	./configure --prefix=$HOME/local \
                     --with-netcdf=/pool/ia64/netcdf/netcdf-3.6.0-p1 \
-                    CPPFLAGS="-DHAVE_LIBSZ -I$HOME/local/include"  LIBS=$HOME/local/lib/libsz.a \
+                    --with-szlib=$HOME/local \
                     CC=icc CFLAGS="-g -O2 -Wall -fno-alias -DMIN_BUF_SIZE=4194304" CFINT=-Df2cFortran
 	;;
 # i686-suse-linux
     linux | laptop)
 	./configure --prefix=$HOME/local \
                     --with-netcdf=$HOME/local \
-                    CPPFLAGS="-DHAVE_LIBSZ -I$HOME/local/include"  LIBS=$HOME/local/lib/libsz.a \
+                    --with-szlib=$HOME/local \
                     CC=g++ CFLAGS="-g -O2 -Wall -W -Wfloat-equal" CFINT=-Df2cFortran
 	;;
     gata)
 	./configure --prefix=$HOME/local/etch-ia32 \
                     --with-netcdf=/client \
-                    CPPFLAGS="-DHAVE_LIBSZ -I$HOME/local/etch-ia32/include"  LIBS=$HOME/local/etch-ia32/lib/libsz.a \
+                    --with-szlib=$HOME/local/etch-ia32 \
 	            CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal" CFINT=-Df2cFortran
 	;;
 # sparc-sun-solaris2.8
     xxf)
 	./configure --prefix=$HOME/local/SUN \
                     --with-netcdf=/client \
-                    CPPFLAGS="-DHAVE_LIBSZ -I$HOME/local/SUN/include"  LIBS=$HOME/local/SUN/lib/libsz.a \
+                    --with-szlib=$HOME/local/solaris10 \
                     CC=cc CFLAGS="-fast"
 	;;
 # sparc-sun-solaris2.9
     executor | yang | yin)
 	./configure --prefix=$HOME/local/SUN64 \
                     --with-netcdf=/scratch/small/m214/m214089/local/SunOS64 \
+                    --with-szlib=$HOME/local/solaris10 \
                     CC=cc CFLAGS="-g -mt -fast -xtarget=native -m64"
 	;;
 # sx6-nec-superux12.2

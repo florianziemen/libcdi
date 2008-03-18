@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Mon Mar 10 12:43:34 CET 2008 */
+/* Generated automatically from m214003 on Mon Mar 17 11:13:55 CET 2008 */
 
 /* GRIBLIB_VERSION="1.1.1" */
 
@@ -7546,6 +7546,10 @@ void gribPrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
 	  BDS_Len, BDS_Flag, scale, refval, BDS_NumBits, cr);
 }
 
+#if defined (HAVE_CONFIG_H)
+#  include "config.h"
+#endif
+
 /* #define SZTEST */
 
 #if  defined  (HAVE_LIBSZ)
@@ -8150,7 +8154,7 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
 #else
   if ( libszwarn )
     {
-      Warning(func, "Decompression disabled, szlib not available!");
+      Warning(func, "Compression disabled, szlib not available!");
       libszwarn = 0;
     }
 #endif
@@ -8325,14 +8329,14 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 #else
   if ( libszwarn )
     {
-      Warning(func, "Compression disabled, szlib not available!");
+      Warning(func, "Decompression disabled, szlib not available!");
       libszwarn = 0;
     }
 #endif
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.1.1" " of ""Mar 10 2008"" ""12:43:34";
+static const char grb_libvers[] = "1.1.1" " of ""Mar 17 2008"" ""11:13:55";
 const char *
 gribLibraryVersion(void)
 {

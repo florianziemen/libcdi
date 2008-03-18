@@ -49,6 +49,7 @@ typedef struct {
 NCDIM;
 
 typedef struct {
+  int      ignore;
   int      vartype;
   int      isvar;
   int      islon;
@@ -3103,8 +3104,9 @@ void cdfSetVar(NCVAR *ncvars, int ncvarid, int isvar)
        ncvars[ncvarid].isvar != isvar   &&
        ncvars[ncvarid].warn  == FALSE )
     {
-      Warning(func, "Inconsistent variable definition for %s!", ncvars[ncvarid].name);
-
+      if ( ! ncvars[ncvarid].ignore )
+	Warning(func, "Inconsistent variable definition for %s!", ncvars[ncvarid].name);
+	
       ncvars[ncvarid].warn = TRUE;
       isvar = FALSE;
     }
@@ -3184,7 +3186,7 @@ int cdfInqContents(int streamID)
   int fileID;
   int nvdims, nvatts;
   int *dimidsp;
-  nc_type xtype;
+  nc_type xtype, atttype;
   size_t size = 0, xsize, ysize;
   size_t ntsteps;
   int timedimid = -1;
@@ -3263,6 +3265,7 @@ int cdfInqContents(int streamID)
   /* init ncvars */
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {      
+      ncvars[ncvarid].ignore          = FALSE;
       ncvars[ncvarid].vartype         = UNDEFID;
       ncvars[ncvarid].isvar           = UNDEFID;
       ncvars[ncvarid].islon           = FALSE;
@@ -3425,6 +3428,8 @@ int cdfInqContents(int streamID)
       for ( iatt = 0; iatt < nvatts; iatt++ )
 	{
 	  cdf_inq_attname(fileID, ncvarid, iatt, attname);
+	  cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
+	  cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
 	  
 	  if ( strcmp(attname, "long_name") == 0 )
 	    {
@@ -3460,14 +3465,12 @@ int cdfInqContents(int streamID)
 	    }
 	  else if ( strcmp(attname, "trunc_type") == 0 )
 	    {
-	      cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
 	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
 	      if ( strncmp(attstring, "Triangular", attlen) == 0 )
 		ncvars[ncvarid].gridtype = GRID_SPECTRAL;
 	    }
 	  else if ( strcmp(attname, "grid_type") == 0 )
 	    {
-	      cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
 	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
 
 	      if      ( strncmp(attstring, "gaussian", attlen) == 0 )
@@ -3506,26 +3509,26 @@ int cdfInqContents(int streamID)
 	    }
 	  else if ( strcmp(attname, "add_offset") == 0 )
 	    {
-	      if ( xtype != NC_CHAR )
+	      if ( atttype != NC_CHAR )
 		{
 		  cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].addoffset);
 		  /*
-		    if ( xtype != NC_BYTE && xtype != NC_SHORT && xtype != NC_INT )
+		    if ( atttype != NC_BYTE && atttype != NC_SHORT && atttype != NC_INT )
 		    if ( ncvars[ncvarid].addoffset != 0 )
-		    Warning(func, "attribute add_offset not supported for xtype %d\n", xtype);
+		    Warning(func, "attribute add_offset not supported for atttype %d\n", atttype);
 		  */
 		  cdfSetVar(ncvars, ncvarid, TRUE);
 		}
 	    }
 	  else if ( strcmp(attname, "scale_factor") == 0 )
 	    {
-	      if ( xtype != NC_CHAR )
+	      if ( atttype != NC_CHAR )
 		{
 		  cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].scalefactor);
 		  /*
-		    if ( xtype != NC_BYTE && xtype != NC_SHORT && xtype != NC_INT )
+		    if ( atttype != NC_BYTE && atttype != NC_SHORT && atttype != NC_INT )
 		    if ( ncvars[ncvarid].scalefactor != 1 )
-		    Warning(func, "attribute scale_factor not supported for xtype %d\n", xtype);
+		    Warning(func, "attribute scale_factor not supported for atttype %d\n", atttype);
 		  */
 		  cdfSetVar(ncvars, ncvarid, TRUE);
 		}
@@ -3669,7 +3672,6 @@ int cdfInqContents(int streamID)
 	    }
 	  else if ( strcmp(attname, "positive") == 0 )
 	    {	      
-	      cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
 	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
 
 	      if    ( strncmp(attstring, "down", attlen) == 0 ) ncvars[ncvarid].positive = -1;
@@ -3685,17 +3687,28 @@ int cdfInqContents(int streamID)
 	  else if ( strcmp(attname, "_FillValue") == 0 || 
 		    strcmp(attname, "missing_value") == 0 )
 	    {
-	      if ( xtype != NC_CHAR )
+	      if ( atttype != NC_CHAR )
 		{
 		  cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].missval);
 		  ncvars[ncvarid].defmiss = TRUE;
 		  /* cdfSetVar(ncvars, ncvarid, TRUE); */
 		}
 	    }
+	  else if ( strcmp(attname, "cdi") == 0 )
+	    {	      
+	      if ( atttype == NC_CHAR )
+		{
+		  cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+		  if ( strncmp(attstring, "ignore", attlen) == 0 )
+		    {
+		      ncvars[ncvarid].ignore = TRUE;
+		      cdfSetVar(ncvars, ncvarid, FALSE);
+		    }
+		}
+	    }
 	  else if ( strcmp(attname, "axis") == 0 )
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
-	      cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
 	      /* attlen = strlen(attstring); */
 	      /* check attlen */
 	      if ( (int) attlen != nvdims )
@@ -4011,6 +4024,8 @@ int cdfInqContents(int streamID)
 		   strcmp(ncvars[ncvarid].units, "degreeE")      == 0 ||
 		   strcmp(ncvars[ncvarid].units, "degreesE")     == 0 ||
 		  (strcmp(ncvars[ncvarid].units, "degrees")          == 0 &&
+                   strcmp(ncvars[ncvarid].stdname, "grid_longitude") == 0) ||
+		  (strcmp(ncvars[ncvarid].units, "radian")           == 0 &&
                    strcmp(ncvars[ncvarid].stdname, "grid_longitude") == 0) )
 		{
 		  ncvars[ncvarid].islon = TRUE;
@@ -4023,6 +4038,8 @@ int cdfInqContents(int streamID)
 			strcmp(ncvars[ncvarid].units, "degreeN")       == 0 ||
 			strcmp(ncvars[ncvarid].units, "degreesN")      == 0 ||
 		       (strcmp(ncvars[ncvarid].units, "degrees")         == 0 &&
+                        strcmp(ncvars[ncvarid].stdname, "grid_latitude") == 0) ||
+		       (strcmp(ncvars[ncvarid].units, "radian")          == 0 &&
                         strcmp(ncvars[ncvarid].stdname, "grid_latitude") == 0) )
 		{
 		  ncvars[ncvarid].islat = TRUE;
@@ -4287,6 +4304,20 @@ int cdfInqContents(int streamID)
 		  else
 		    {
 		      size = xsize;
+		      /* Check size of 1 dimensional coordinate variables */
+		      {
+			int dimid;
+			size_t dimsize;
+			dimid = ncvars[xvarid].dimids[0];
+			cdf_inq_dimlen(fileID, dimid, &dimsize);
+			if ( dimsize != size )
+			  {
+			    Warning(func, "Variable %s has unsupported array structure, skipped!",
+				    ncvars[ncvarid].name);
+			    ncvars[ncvarid].isvar = -1;
+			    continue;
+			  }
+		      }
 		    }
 
 		  if ( ncvars[xvarid].xtype == NC_FLOAT ) grid.prec = DATATYPE_FLT32;

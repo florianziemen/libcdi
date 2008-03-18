@@ -1,4 +1,4 @@
-# Process this file with autoconf to produce a configure script.
+#  Process this file with autoconf to produce a configure script.
 
 AC_INIT(cdi, 1.1.1, Uwe.Schulzweida@zmaw.de)
 
@@ -13,20 +13,20 @@ AC_CANONICAL_TARGET
 AM_CONFIG_HEADER(src/config.h)
 AM_INIT_AUTOMAKE
 
-# Checks for programs.
+#  Checks for programs.
 AC_PROG_CC
 AC_PROG_F77
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_CHECK_PROGS(AR, ar, [ar])
 
-# Check large file support on 32 bit systems
+#  Check large file support on 32 bit systems
 AC_SYS_LARGEFILE
 
-# Checks for library functions.
+#  Checks for library functions.
 AC_FUNC_MMAP
 
-# Checks for library malloc.
+#  Checks for library malloc.
 AC_CHECK_LIB(malloc, mallinfo)
 
 #  ----------------------------------------------------------------------
@@ -112,8 +112,8 @@ fi
 #  If the library path is specified then it must be preceded by a comma.
 #
 AC_ARG_WITH([netcdf],
-            [AC_HELP_STRING([--with-netcdf=DIR],
-                            [Use the netCDF library [default=no]])],,
+            [AC_HELP_STRING([--with-netcdf=<directory>],
+                            [Specify location of netCDF library. Configure will expect to find subdirs include and lib.])],,
             withval=no)
 
 case $withval in
@@ -194,7 +194,21 @@ fi
     ;;
 esac
 
-# Check C / Fortran interface
+#  ----------------------------------------------------------------------
+#  Compile interface with SZLIB library
+#
+AC_MSG_CHECKING([whether a location for the SZLIB library was specified])
+AC_ARG_WITH([szlib],
+            [AS_HELP_STRING([--with-szlib=<directory>],
+                            [Specify location of SZLIB library. Configure will expect to find subdirs include and lib.])],
+            [SZLIBDIR=$with_szlib])
+AC_MSG_RESULT([$SZLIBDIR])
+LDFLAGS="$LDFLAGS -L$SZLIBDIR/lib"
+CPPFLAGS="$CPPFLAGS -I$SZLIBDIR/include"
+AC_CHECK_LIB(sz, SZ_BufftoBuffCompress,, LDFLAGS="$LDFLAGS")
+AC_SUBST([SZLIBDIR], [$SZLIBDIR])
+
+#  Check C / Fortran interface
 UD_CHECK_CFINT([$srcdir/src/cfortran.h])
 
 AC_SUBST([CPPFLAGS])

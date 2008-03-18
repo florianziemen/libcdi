@@ -1,5 +1,8 @@
 2008-04-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+        * using GRIB library version 1.1.1
+	* configure: --with-szlib=<directory>
+	* cdfInqContents: support of lon/lat units radian
 	* cdfInqContents: bug fix for gridtype cell
 	* cdfInqContents: bug fix for inconsistent curvilinear grid [report: Holger Goettel]
 	* cdfInqContents: bug fix for unsupported grids (dims > 2) [report: Wolfgang Langhans]
