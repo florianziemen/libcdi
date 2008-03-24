@@ -19,6 +19,9 @@ size_t getpagesize(void);
 #include "error.h"
 #include "file.h"
 
+#if ! defined(O_BINARY)
+#define O_BINARY 0
+#endif
 
 #ifndef strdupx
 #ifndef strdup
@@ -36,11 +39,13 @@ char *strdup(const char *s);
 */
 #endif
 
+/*
 #if ! defined (HAVE_MMAP)
 #  if defined (__sun) || defined (__i386) || defined (__ia64)
 #    define HAVE_MMAP
 #  endif
 #endif
+*/
 
 #if defined (HAVE_MMAP)
 #  include <sys/mman.h> /* mmap() is defined in this header */
@@ -148,7 +153,7 @@ static void file_table_print(void);
  * A version string.
  */
 #undef   LIBVERSION
-#define  LIBVERSION      1.6.0
+#define  LIBVERSION      1.6.1
 #define  XSTRING(x)	 #x
 #define  STRING(x) 	 XSTRING(x)
 const char file_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
@@ -162,6 +167,9 @@ const char file_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
   06/11/2005  1.5.1 add filePtrEOF, filePtr, filePtrGetc
   03/02/2006  1.5.2 ansi C: define getpagesize and strdupx
   27/12/2007  1.6.0 add FILE_TYPE_FOPEN
+  24/03/2008  1.6.1 add O_BINARY if available
+                    remove default HAVE_MMAP
+                    use HAVE_STRUCT_STAT_ST_BLKSIZE
  */
 
 
@@ -1078,13 +1086,13 @@ int fileOpen(const char *filename, const char *mode)
     {
     case 'r':
       if ( FileTypeEnv == FILE_TYPE_FOPEN )
-	fp = fopen(filename, "r");
+	fp = fopen(filename, "rb");
       else
-	fd =  open(filename, O_RDONLY);
+	fd =  open(filename, O_RDONLY | O_BINARY);
       break;
-    case 'x':  fp = fopen(filename, "r");      break;
-    case 'w':  fp = fopen(filename, "w");      break;
-    case 'a':  fp = fopen(filename, "a");      break;
+    case 'x':  fp = fopen(filename, "rb");      break;
+    case 'w':  fp = fopen(filename, "wb");      break;
+    case 'a':  fp = fopen(filename, "ab");      break;
     default:   Error(func, "Mode %c unexpected\n", fmode);
     }
 
@@ -1119,7 +1127,11 @@ int fileOpen(const char *filename, const char *mode)
     {
       fileptr->mode = fmode;
       fileptr->name = strdupx(filename);
+#if defined (HAVE_STRUCT_STAT_ST_BLKSIZE)
       fileptr->blockSize = (size_t) filestat.st_blksize;
+#else
+      fileptr->blockSize = (size_t) 4096;
+#endif
 
       if ( fmode == 'r' )
 	{

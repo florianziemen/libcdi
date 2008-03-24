@@ -29,6 +29,9 @@ AC_FUNC_MMAP
 #  Checks for library malloc.
 AC_CHECK_LIB(malloc, mallinfo)
 
+# Checks for structures.
+AC_CHECK_MEMBERS([struct stat.st_blksize])
+
 #  ----------------------------------------------------------------------
 #  Compile interface with internal GRIB library
 #

@@ -47,7 +47,11 @@ void cdf_create(const char *path, int cmode, int *ncidp)
   if ( stat(basename, &filestat) != 0 )
     SysError(func, basename);
 
+#if defined (HAVE_STRUCT_STAT_ST_BLKSIZE)
   chunksizehint = (size_t) filestat.st_blksize * 4;
+#else
+  chunksizehint = (size_t) 4096 * 4;
+#endif
   if ( chunksizehint < ChunkSizeMin ) chunksizehint = ChunkSizeMin;
   initialsz = 0;
 
@@ -90,7 +94,11 @@ void cdf_open(const char *path, int omode, int *ncidp)
       if ( stat(path, &filestat) != 0 )
 	SysError(func, path);
 
+#if defined (HAVE_STRUCT_STAT_ST_BLKSIZE)
       chunksizehint = (size_t) filestat.st_blksize * 4;
+#else
+      chunksizehint = (size_t) 4096 * 4;
+#endif
       if ( chunksizehint < ChunkSizeMin ) chunksizehint = ChunkSizeMin;
 
       status = nc__open(path, omode, &chunksizehint, ncidp);
