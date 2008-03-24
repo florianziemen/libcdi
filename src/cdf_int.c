@@ -31,7 +31,8 @@ void cdf_create(const char *path, int cmode, int *ncidp)
   int status;
   int oldfill;
   struct stat filestat;
-  size_t initialsz, chunksizehint;
+  size_t initialsz, chunksizehint = 0;
+#if defined (HAVE_STRUCT_STAT_ST_BLKSIZE)
   char basename[1024];
   char *pend;
 
@@ -47,11 +48,9 @@ void cdf_create(const char *path, int cmode, int *ncidp)
   if ( stat(basename, &filestat) != 0 )
     SysError(func, basename);
 
-#if defined (HAVE_STRUCT_STAT_ST_BLKSIZE)
   chunksizehint = (size_t) filestat.st_blksize * 4;
-#else
-  chunksizehint = (size_t) 4096 * 4;
 #endif
+
   if ( chunksizehint < ChunkSizeMin ) chunksizehint = ChunkSizeMin;
   initialsz = 0;
 
