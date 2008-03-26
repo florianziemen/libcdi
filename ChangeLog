@@ -3,6 +3,7 @@
         * using GRIB library version 1.1.1
 	* configure: --with-szlib=<directory>
 	* configure: check stat.st_blksize [report: Klaus Wyser]
+	* update: echam5 code table
 	* fileOpen: add O_BINARY if available [report: Klaus Wyser]
 	* stream_cdf: add ICON grid support
 	* stream_srv: add support for GRID_CELL (bug fix)
