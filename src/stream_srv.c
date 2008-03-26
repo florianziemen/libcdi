@@ -218,6 +218,7 @@ int srvDefRecord(int streamID)
   header[1] = streamptr->record->level;
   header[2] = streamptr->record->date;
   header[3] = streamptr->record->time;
+
   xsize = gridInqXsize(gridID);
   ysize = gridInqYsize(gridID);
   if ( xsize == 0 || ysize == 0 )
@@ -225,6 +226,10 @@ int srvDefRecord(int streamID)
       xsize = gridInqSize(gridID);
       ysize = 1;
     }
+  if ( gridInqType(gridID) == GRID_CELL ) ysize = 1;
+  if ( gridInqSize(gridID) != xsize*ysize )
+    Error(func, "Internal problem with gridsize!");
+
   header[4] = xsize;
   header[5] = ysize;
   header[6] = 0;
@@ -953,6 +958,7 @@ void srvWriteVarDP(int streamID, int varID, const double *data)
   int zaxisID;
   double level;
   int header[8];
+  int xsize, ysize;
   int datatype;
   int tsID;
   int vlistID;
@@ -979,13 +985,20 @@ void srvWriteVarDP(int streamID, int varID, const double *data)
   header[0] = vlistInqVarCode(vlistID, varID);
   header[2] = streamptr->tsteps[tsID].taxis.vdate;
   header[3] = streamptr->tsteps[tsID].taxis.vtime;
-  header[4] = gridInqXsize(gridID);
-  header[5] = gridInqYsize(gridID);
-  if ( header[4] == 0 )
+
+  xsize = gridInqXsize(gridID);
+  ysize = gridInqYsize(gridID);
+  if ( xsize == 0 || ysize == 0 )
     {
-      header[4] = gridInqSize(gridID);
-      header[5] = 1;
+      xsize = gridInqSize(gridID);
+      ysize = 1;
     }
+  if ( gridInqType(gridID) == GRID_CELL ) ysize = 1;
+  if ( gridInqSize(gridID) != xsize*ysize )
+    Error(func, "Internal problem with gridsize!");
+
+  header[4] = xsize;
+  header[5] = ysize;
   header[6] = 0;
   header[7] = 0;
 
@@ -993,7 +1006,7 @@ void srvWriteVarDP(int streamID, int varID, const double *data)
 
   srvp->dprec = srvDefDatatype(datatype);
 
-  for ( levID = 0;  levID < nlevs; levID++ )
+  for ( levID = 0; levID < nlevs; levID++ )
     {
       level = zaxisInqLevel(zaxisID, levID);
 
@@ -1013,6 +1026,7 @@ void srvWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   int zaxisID;
   double level;
   int header[8];
+  int xsize, ysize;
   int datatype;
   int tsID;
   int vlistID;
@@ -1036,13 +1050,20 @@ void srvWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   header[1] = (int) level;
   header[2] = streamptr->tsteps[tsID].taxis.vdate;
   header[3] = streamptr->tsteps[tsID].taxis.vtime;
-  header[4] = gridInqXsize(gridID);
-  header[5] = gridInqYsize(gridID);
-  if ( header[4] == 0 )
+
+  xsize = gridInqXsize(gridID);
+  ysize = gridInqYsize(gridID);
+  if ( xsize == 0 || ysize == 0 )
     {
-      header[4] = gridInqSize(gridID);
-      header[5] = 1;
+      xsize = gridInqSize(gridID);
+      ysize = 1;
     }
+  if ( gridInqType(gridID) == GRID_CELL ) ysize = 1;
+  if ( gridInqSize(gridID) != xsize*ysize )
+    Error(func, "Internal problem with gridsize!");
+
+  header[4] = xsize;
+  header[5] = ysize;
   header[6] = 0;
   header[7] = 0;
 

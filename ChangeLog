@@ -4,6 +4,8 @@
 	* configure: --with-szlib=<directory>
 	* configure: check stat.st_blksize [report: Klaus Wyser]
 	* fileOpen: add O_BINARY if available [report: Klaus Wyser]
+	* stream_cdf: add ICON grid support
+	* stream_srv: add support for GRID_CELL (bug fix)
 	* cdfInqContents: support of lon/lat units radian
 	* cdfInqContents: bug fix for gridtype cell
 	* cdfInqContents: bug fix for inconsistent curvilinear grid [report: Holger Goettel]

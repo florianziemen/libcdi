@@ -1577,13 +1577,23 @@ void cdfDefGdim(int streamID, int gridID)
 void cdfDefCell(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  char axisname[6] = "cellX";
+  char axisname[] = "cellX";
+  char vertname[] = "nvX";
+  char xunits[256];
+  char xlongname[256];
+  char xstdname[256];
+  char yunits[256];
+  char ylongname[256];
+  char ystdname[256];
+  char xaxisname[256];
+  char yaxisname[256];
   int index, iz = 0;
   int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
   int ngrids;
   int fileID;
   int dimlen, dimlen0;
+  size_t len;
   int ncxvarid = UNDEFID, ncyvarid = UNDEFID;
   int ncbxvarid = UNDEFID, ncbyvarid = UNDEFID, ncavarid = UNDEFID;
   int nvertex, nvdimID = -1;
@@ -1602,6 +1612,15 @@ void cdfDefCell(int streamID, int gridID)
 
   dimlen = gridInqSize(gridID);
   gridindex = vlistGridIndex(vlistID, gridID);
+
+  gridInqXname(gridID, xaxisname);
+  gridInqXlongname(gridID, xlongname);
+  gridInqXstdname(gridID, xstdname);
+  gridInqXunits(gridID, xunits);
+  gridInqYname(gridID, yaxisname);
+  gridInqYlongname(gridID, ylongname);
+  gridInqYstdname(gridID, ystdname);
+  gridInqYunits(gridID, yunits);
 
   for ( index = 0; index < ngrids; index++ )
     {
@@ -1625,59 +1644,67 @@ void cdfDefCell(int streamID, int gridID)
 
   if ( dimID == UNDEFID )
     {
-      if ( iz == 0 ) axisname[4] = '\0';
-      else           sprintf(&axisname[4], "%1d", iz+1);
+      if ( iz == 0 )
+	{
+	  axisname[4] = '\0';
+	  vertname[2] = '\0';
+	}
+      else
+	{
+          sprintf(&axisname[4], "%1d", iz+1);
+          sprintf(&vertname[2], "%1d", iz+1);
+	}
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
       cdf_def_dim(fileID, axisname, dimlen, &dimID);
 
       nvertex = gridInqNvertex(gridID);
-      if ( nvertex > 0 ) cdf_def_dim(fileID, "nv", nvertex, &nvdimID);
+      if ( nvertex > 0 ) cdf_def_dim(fileID, vertname, nvertex, &nvdimID);
 	
       if ( gridInqXvalsPtr(gridID) )
 	{
-	  char xaxisname[] = "lon";
-	  char units[] = "degrees_east";
-	  char longname[] = "longitude";
-
 	  cdf_def_var(fileID, xaxisname, (nc_type) xtype, 1, &dimID, &ncxvarid);
-	  cdf_put_att_text(fileID, ncxvarid, "long_name", strlen(longname), longname);
-	  cdf_put_att_text(fileID, ncxvarid, "units", strlen(units), units);
+	  if ( (len = strlen(xlongname)) )
+	    cdf_put_att_text(fileID, ncxvarid, "long_name", len, xlongname);
+	  if ( (len = strlen(xunits)) )
+	    cdf_put_att_text(fileID, ncxvarid, "units", len, xunits);
+	  if ( (len = strlen(xstdname)) )
+	    cdf_put_att_text(fileID, ncxvarid, "standard_name", len, xstdname);
 
 	  streamptr->ncxvarID[gridindex] = ncxvarid;
 
 	  if ( nvdimID != UNDEFID && gridInqXboundsPtr(gridID) )
 	    {
-	      char bxaxisname[] = "lon_vertices";
+	      strcat(xaxisname, "_vertices");
 	      int dimIDs[2];
 	      dimIDs[0] = dimID;
 	      dimIDs[1] = nvdimID;
-	      cdf_def_var(fileID, bxaxisname, (nc_type) xtype, 2, dimIDs, &ncbxvarid);
-	      cdf_put_att_text(fileID, ncxvarid, "bounds", strlen(bxaxisname), bxaxisname);
+	      cdf_def_var(fileID, xaxisname, (nc_type) xtype, 2, dimIDs, &ncbxvarid);
+	      cdf_put_att_text(fileID, ncxvarid, "bounds", strlen(xaxisname), xaxisname);
 	    }
 	}
 
       if ( gridInqYvalsPtr(gridID) )
 	{
-	  char yaxisname[] = "lat";
-	  char units[] = "degrees_north";
-	  char longname[] = "latitude";
-
 	  cdf_def_var(fileID, yaxisname, (nc_type) xtype, 1, &dimID, &ncyvarid);
-	  cdf_put_att_text(fileID, ncyvarid, "long_name", strlen(longname), longname);
-	  cdf_put_att_text(fileID, ncyvarid, "units", strlen(units), units);
+	  if ( (len = strlen(ylongname)) )
+	    cdf_put_att_text(fileID, ncyvarid, "long_name", len, ylongname);
+	  if ( (len = strlen(yunits)) )
+	    cdf_put_att_text(fileID, ncyvarid, "units", len, yunits);
+	  if ( (len = strlen(ystdname)) )
+	    cdf_put_att_text(fileID, ncyvarid, "standard_name", len, ystdname);
 
 	  streamptr->ncyvarID[gridindex] = ncyvarid;
 
 	  if ( nvdimID != UNDEFID && gridInqYboundsPtr(gridID) )
 	    {
-	      char byaxisname[] = "lat_vertices";
+	      strcat(yaxisname, "_vertices");
 	      int dimIDs[2];
 	      dimIDs[0] = dimID;
 	      dimIDs[1] = nvdimID;
-	      cdf_def_var(fileID, byaxisname, (nc_type) xtype, 2, dimIDs, &ncbyvarid);
-	      cdf_put_att_text(fileID, ncyvarid, "bounds", strlen(byaxisname), byaxisname);
+	      cdf_def_var(fileID, yaxisname, (nc_type) xtype, 2, dimIDs, &ncbyvarid);
+	      cdf_put_att_text(fileID, ncyvarid, "bounds", strlen(yaxisname), yaxisname);
 	    }
 	}
 

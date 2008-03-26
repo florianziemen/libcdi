@@ -39,7 +39,7 @@ int Zlevel = 0;
 
 static void version(void)
 {
-  fprintf(stderr, "CDI version 1.6.2\n");
+  fprintf(stderr, "CDI version 1.6.3\n");
   cdiPrintVersion();
   fprintf(stderr, "\n");
 /*
@@ -56,6 +56,7 @@ static void version(void)
   1.6.0   1 Aug 2006 : add option -z szip for SZIP compression of GRIB records
   1.6.1  27 Feb 2007 : short info with ltype for GENERIC zaxis
   1.6.2   3 Jan 2008 : changes for CDI library version 1.1.0 (compress)
+  1.6.3  26 Mar 2008 : call streamDefTimestep also if ntsteps = 0 (buf fix)
 */
 }
 
@@ -974,7 +975,7 @@ int main(int argc, char *argv[])
       if ( Info || fname2 )
       while ( (nrecs = streamInqTimestep(streamID1, tsID)) > 0 )
 	{
-	  if ( fname2 && ntsteps != 0 )
+	  if ( fname2 /* && ntsteps != 0*/ )
 	    streamDefTimestep(streamID2, tsID);
 
 	  vdate = taxisInqVdate(taxisID);
