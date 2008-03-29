@@ -1193,7 +1193,8 @@ int fileClose(int fileID)
 	fprintf(stderr, " file pointer     : %p\n",  (void *) fileptr->fp);
 
       fprintf(stderr, " file mode        : %c\n",  fileptr->mode);
- 
+
+#if ! defined (_WIN32)
       if ( sizeof(off_t) > sizeof(long) )
 	{
 	  fprintf(stderr, " file size        : %lld\n", (long long) fileptr->size);
@@ -1202,6 +1203,7 @@ int fileClose(int fileID)
 	  fprintf(stderr, " bytes transfered : %lld\n", (long long) fileptr->byteTrans);
 	}
       else
+#endif
 	{
 	  fprintf(stderr, " file size        : %ld\n", (long) fileptr->size);
 	  if ( fileptr->type == FILE_TYPE_OPEN )
