@@ -1197,10 +1197,10 @@ int fileClose(int fileID)
       if ( sizeof(off_t) > sizeof(long) )
 	{
 #if defined (_WIN32)
-	  fprintf(stderr, " file size        : %l64d\n", (long long) fileptr->size);
+	  fprintf(stderr, " file size        : %I64d\n", (long long) fileptr->size);
 	  if ( fileptr->type == FILE_TYPE_OPEN )
-	    fprintf(stderr, " file position    : %l64d\n", (long long) fileptr->position);
-	  fprintf(stderr, " bytes transfered : %l64d\n", (long long) fileptr->byteTrans);
+	    fprintf(stderr, " file position    : %I64d\n", (long long) fileptr->position);
+	  fprintf(stderr, " bytes transfered : %I64d\n", (long long) fileptr->byteTrans);
 #else
 	  fprintf(stderr, " file size        : %lld\n", (long long) fileptr->size);
 	  if ( fileptr->type == FILE_TYPE_OPEN )
