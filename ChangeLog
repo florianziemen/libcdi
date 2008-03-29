@@ -5,6 +5,7 @@
 	* configure: check stat.st_blksize [report: Klaus Wyser]
 	* update: echam5 code table
 	* fileOpen: add O_BINARY if available [report: Klaus Wyser]
+	* file.c: _WIN32 support
 	* stream_cdf: add ICON grid support
 	* stream_srv: add support for GRID_CELL (bug fix)
 	* cdfInqContents: support of lon/lat units radian
