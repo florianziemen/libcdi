@@ -921,6 +921,12 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
   decode_date(rdate, &year, &month, &day);
   decode_time(rtime, &hour, &minute);
 
+  if ( timeunit == TUNIT_MONTH && calendar == CALENDAR_360DAYS )
+    {
+      timeunit = TUNIT_DAY;
+      timevalue *= 30;
+    }
+
   if ( timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR )
     {
       if ( timeunit == TUNIT_YEAR ) timevalue *= 12;
@@ -959,6 +965,7 @@ double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
   int rdate, rtime;
   double value;
   int timeunit;
+  int timeunit0;
   int calendar;
   int julday1, secofday1, julday2, secofday2, days, secs;
 
@@ -981,6 +988,13 @@ double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
   decode_date(vdate, &year, &month, &day);
   decode_time(vtime, &hour, &minute);
 
+  timeunit0 = timeunit;
+
+  if ( timeunit == TUNIT_MONTH && calendar == CALENDAR_360DAYS )
+    {
+      timeunit = TUNIT_DAY;
+    }
+
   if ( timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR )
     {
       value = (year-ryear)*12 - rmonth + month;
@@ -993,6 +1007,11 @@ double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
       julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
 
       encode_timevalue(days, secs, timeunit, &value);
+    }
+
+  if ( timeunit0 == TUNIT_MONTH && calendar == CALENDAR_360DAYS )
+    {
+      value /= 30;
     }
 
   return (value);

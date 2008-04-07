@@ -13,7 +13,7 @@
 
 void basetimeInit(BaseTime *basetime)
 {
-  static char func[] = "cdiInitTime";
+  static char func[] = "basetimeInit";
 
   if ( basetime == NULL )
     Error(func, "Internal problem! Basetime not allocated.");

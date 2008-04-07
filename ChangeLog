@@ -6,6 +6,7 @@
 	* update: echam5 code table
 	* fileOpen: add O_BINARY if available [report: Klaus Wyser]
 	* file.c: _WIN32 support
+	* taxis.c: add support for non integer timevalues (TUNIT_MONTH/CALENDAR_360DAYS)
 	* stream_cdf: add ICON grid support
 	* stream_srv: add support for GRID_CELL (bug fix)
 	* cdfInqContents: support of lon/lat units radian
