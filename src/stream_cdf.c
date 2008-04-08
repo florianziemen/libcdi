@@ -1676,10 +1676,10 @@ void cdfDefCell(int streamID, int gridID)
 
 	  if ( nvdimID != UNDEFID && gridInqXboundsPtr(gridID) )
 	    {
-	      strcat(xaxisname, "_vertices");
 	      int dimIDs[2];
 	      dimIDs[0] = dimID;
 	      dimIDs[1] = nvdimID;
+	      strcat(xaxisname, "_vertices");
 	      cdf_def_var(fileID, xaxisname, (nc_type) xtype, 2, dimIDs, &ncbxvarid);
 	      cdf_put_att_text(fileID, ncxvarid, "bounds", strlen(xaxisname), xaxisname);
 	    }
@@ -1699,10 +1699,10 @@ void cdfDefCell(int streamID, int gridID)
 
 	  if ( nvdimID != UNDEFID && gridInqYboundsPtr(gridID) )
 	    {
-	      strcat(yaxisname, "_vertices");
 	      int dimIDs[2];
 	      dimIDs[0] = dimID;
 	      dimIDs[1] = nvdimID;
+	      strcat(yaxisname, "_vertices");
 	      cdf_def_var(fileID, yaxisname, (nc_type) xtype, 2, dimIDs, &ncbyvarid);
 	      cdf_put_att_text(fileID, ncyvarid, "bounds", strlen(yaxisname), yaxisname);
 	    }
