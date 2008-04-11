@@ -63,7 +63,8 @@ typedef struct
   double   scalefactor;
   double   addoffset;
   LEVINFO *levinfo;
-  int      szip;
+  int      ztype;
+  int      zlevel;
   CDI_atts atts;
 }
 VARINFO;

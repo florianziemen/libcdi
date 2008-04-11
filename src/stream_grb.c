@@ -698,7 +698,7 @@ int grbInqTimeSize(int streamID)
 
 
 void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
-		  int *isec4, long recsize, off_t position, int prec, int szip)
+		  int *isec4, long recsize, off_t position, int prec, int ztype)
 {
   static char func[] = "grbAddRecord";
   int gridtype;
@@ -926,7 +926,7 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
   (*record).varID   = varID;
   (*record).levelID = levelID;
 
-  varDefSzip(varID, szip);
+  varDefZtype(varID, ztype);
 
   if ( varInqInst(varID) == UNDEFID )
     {
@@ -1055,7 +1055,7 @@ void grbScanTimestep1(int streamID)
   int rdate = 0, rtime = 0, tunit = 0, fcast = 0;
   TAXIS *taxis;
   int vlistID;
-  int szip;
+  int ztype;
   long unzipsize;
   COMPVAR compVar, compVar0;
   STREAM *streamptr;
@@ -1101,10 +1101,10 @@ void grbScanTimestep1(int streamID)
       status = gribRead(fileID, gribbuffer, &readsize);
       if ( status ) break;
 
-      szip = FALSE;
+      ztype = COMPRESS_NONE;
       if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
 	{
-	  szip = TRUE;
+	  ztype = COMPRESS_SZIP;
 	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
 	  if ( (long) buffersize < unzipsize )
 	    {
@@ -1185,7 +1185,7 @@ void grbScanTimestep1(int streamID)
       if ( CDI_Debug )
 	Message(func, "%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, rcode, level1, vdate, vtime);
 
-      grbAddRecord(streamID, rcode, isec1, isec2, fsec2, isec4, recsize, recpos, prec, szip);
+      grbAddRecord(streamID, rcode, isec1, isec2, fsec2, isec4, recsize, recpos, prec, ztype);
     }
 
   streamptr->rtsteps = 1;

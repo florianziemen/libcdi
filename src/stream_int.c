@@ -35,6 +35,7 @@ char *Filetypes[] = {
   "GRIB2",
   "netCDF",
   "netCDF2",
+  "netCDF4",
   "SERVICE",
   "EXTRA",
   "HDF5",

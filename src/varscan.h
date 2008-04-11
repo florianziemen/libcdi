@@ -17,7 +17,8 @@ int  varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lb
 		 double *levels1, double *levels2, int vctsize, double *vct, char *name,
 		 char *longname, char *units, int prec, int mode, int ltype);
 
-void varDefSzip(int varID, int szip);
+void varDefZtype(int varID, int ztype);
+void varDefZlevel(int varID, int zlevel);
 void varDefInst(int varID, int instID);
 int  varInqInst(int varID);
 void varDefModel(int varID, int modelID);

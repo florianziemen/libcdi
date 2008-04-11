@@ -1,5 +1,5 @@
 !
-! Fortran interface for CDI library version 1.1.0
+! Fortran interface for CDI library version 1.1.1
 !
 
       INTEGER    CDI_UNDEFID           
@@ -39,10 +39,12 @@
       PARAMETER (FILETYPE_NC            =  3)
       INTEGER    FILETYPE_NC2          
       PARAMETER (FILETYPE_NC2           =  4)
+      INTEGER    FILETYPE_NC4          
+      PARAMETER (FILETYPE_NC4           =  5)
       INTEGER    FILETYPE_SRV          
-      PARAMETER (FILETYPE_SRV           =  5)
+      PARAMETER (FILETYPE_SRV           =  6)
       INTEGER    FILETYPE_EXT          
-      PARAMETER (FILETYPE_EXT           =  6)
+      PARAMETER (FILETYPE_EXT           =  7)
       INTEGER    FILETYPE_IEG          
       PARAMETER (FILETYPE_IEG           =  8)
 !
@@ -56,6 +58,8 @@
       PARAMETER (COMPRESS_GZIP          =  2)
       INTEGER    COMPRESS_BZIP2        
       PARAMETER (COMPRESS_BZIP2         =  3)
+      INTEGER    COMPRESS_ZIP          
+      PARAMETER (COMPRESS_ZIP           =  4)
 !
 !  external data types
 !
@@ -612,16 +616,27 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarTime
 
-!                     vlistDefVarSzip
+!                     vlistDefVarZtype
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
-!                                     INTEGER         szip)
-      EXTERNAL        vlistDefVarSzip
+!                                     INTEGER         ztype)
+      EXTERNAL        vlistDefVarZtype
 
-      INTEGER         vlistInqVarSzip
+      INTEGER         vlistInqVarZtype
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarSzip
+      EXTERNAL        vlistInqVarZtype
+
+!                     vlistDefVarZlevel
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         zlevel)
+      EXTERNAL        vlistDefVarZlevel
+
+      INTEGER         vlistInqVarZlevel
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarZlevel
 
 !                     vlistDefVarCode
 !                                    (INTEGER         vlistID,

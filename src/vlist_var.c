@@ -35,7 +35,8 @@ static void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].units        = NULL;
   vlistptr->vars[varID].nlevs        = 0;
   vlistptr->vars[varID].levinfo      = NULL;
-  vlistptr->vars[varID].szip         = FALSE;
+  vlistptr->vars[varID].ztype        = COMPRESS_NONE;
+  vlistptr->vars[varID].zlevel       = 1;
   vlistptr->vars[varID].atts.nalloc  = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems  = 0;
 }
@@ -1262,9 +1263,9 @@ void vlistChangeVarGrid(int vlistID, int varID, int gridID)
 }
 
 
-void vlistDefVarSzip(int vlistID, int varID, int szip)
+void vlistDefVarZtype(int vlistID, int varID, int ztype)
 {
-  static char func[] = "vlistDefVarSzip";
+  static char func[] = "vlistDefVarZtype";
   int nvars, index;
   VLIST *vlistptr;
 
@@ -1272,13 +1273,13 @@ void vlistDefVarSzip(int vlistID, int varID, int szip)
 
   vlistCheckVarID(func, vlistID, varID);
 
-  vlistptr->vars[varID].szip = szip;
+  vlistptr->vars[varID].ztype = ztype;
 }
 
 
-int vlistInqVarSzip(int vlistID, int varID)
+int vlistInqVarZtype(int vlistID, int varID)
 {
-  static char func[] = "vlistInqVarSzip";
+  static char func[] = "vlistInqVarZtype";
   int nvars, index;
   VLIST *vlistptr;
 
@@ -1286,6 +1287,33 @@ int vlistInqVarSzip(int vlistID, int varID)
 
   vlistCheckVarID(func, vlistID, varID);
 
-  return (vlistptr->vars[varID].szip);
+  return (vlistptr->vars[varID].ztype);
 }
 
+
+void vlistDefVarZlevel(int vlistID, int varID, int zlevel)
+{
+  static char func[] = "vlistDefVarZlevel";
+  int nvars, index;
+  VLIST *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(func, vlistID, varID);
+
+  vlistptr->vars[varID].zlevel = zlevel;
+}
+
+
+int vlistInqVarZlevel(int vlistID, int varID)
+{
+  static char func[] = "vlistInqVarZlevel";
+  int nvars, index;
+  VLIST *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(func, vlistID, varID);
+
+  return (vlistptr->vars[varID].zlevel);
+}

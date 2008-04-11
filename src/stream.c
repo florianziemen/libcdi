@@ -464,7 +464,7 @@ int streamInqByteorder(int streamID)
 
 char *streamFilesuffix(int filetype)
 {
-  static char *fileSuffix[] = {"", ".grb", ".g2", ".nc", ".nc2", ".srv", ".ext", ".h5", ".ieg"};
+  static char *fileSuffix[] = {"", ".grb", ".g2", ".nc", ".nc2", ".nc4", ".srv", ".ext", ".h5", ".ieg"};
   int size = (int) (sizeof(fileSuffix)/sizeof(char *));
 
   if ( filetype > 0 && filetype < size )
@@ -557,6 +557,7 @@ int cdiInqContents(int streamID)
 #if  defined  (HAVE_LIBNETCDF)
     case FILETYPE_NC:
     case FILETYPE_NC2:
+    case FILETYPE_NC4:
       {
         status = cdfInqContents(streamID);
 	break;
@@ -649,7 +650,12 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	fileID = cdfOpen64(filename, filemode);
 	break;
       }
-#endif
+    case FILETYPE_NC4:
+      {
+	fileID = cdf4Open(filename, filemode);
+	break;
+      }
+ #endif
     default:
       {
 	if ( CDI_Debug ) Message(func, "%s support not compiled in!", strfiletype(filetype));
@@ -754,6 +760,11 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 	fileID = cdfOpen64(filename, "r");
 	break;
       }
+    case FILETYPE_NC4:
+      {
+	fileID = cdf4Open(filename, "r");
+	break;
+      }
 #endif
     default:
       {
@@ -820,6 +831,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 #if  defined  (HAVE_LIBNETCDF)
       case FILETYPE_NC:
       case FILETYPE_NC2:
+      case FILETYPE_NC4:
 	{
 	  cdfClose(fileID);
 	  break;
@@ -871,6 +883,11 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
     case FILETYPE_NC2:
       {
 	fileID = cdfOpen64(filename, filemode);
+	break;
+      }
+    case FILETYPE_NC4:
+      {
+	fileID = cdf4Open(filename, filemode);
 	break;
       }
 #endif
@@ -1112,6 +1129,7 @@ void streamClose(int streamID)
 #if  defined  (HAVE_LIBNETCDF)
       case FILETYPE_NC:
       case FILETYPE_NC2:
+      case FILETYPE_NC4:
 	{
 	  cdfClose(fileID);
 	  break;
@@ -1223,7 +1241,9 @@ int streamDefTimestep(int streamID, int tsID)
 
   streamptr->ntsteps = tsID + 1;
 
-  if ( (streamptr->filetype == FILETYPE_NC || streamptr->filetype == FILETYPE_NC2)
+  if ( (streamptr->filetype == FILETYPE_NC  ||
+	streamptr->filetype == FILETYPE_NC2 ||
+	streamptr->filetype == FILETYPE_NC4)
        && vlistHasTime(vlistID) )
     cdfDefTimestep(streamID, tsID);
 
@@ -1321,6 +1341,7 @@ int streamInqTimestep(int streamID, int tsID)
 #if  defined  (HAVE_LIBNETCDF)
     case FILETYPE_NC:
     case FILETYPE_NC2:
+    case FILETYPE_NC4:
       {
         nrecs = cdfInqTimestep(streamID, tsID);
 	break;
@@ -1409,6 +1430,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 #if  defined  (HAVE_LIBNETCDF)
     case FILETYPE_NC:
     case FILETYPE_NC2:
+    case FILETYPE_NC4:
       {
         cdfReadVarDP(streamID, varID, data, nmiss);
 	break;
@@ -1489,6 +1511,7 @@ void streamWriteVar(int streamID, int varID, double *data, int nmiss)
 #if  defined  (HAVE_LIBNETCDF)
     case FILETYPE_NC:
     case FILETYPE_NC2:
+    case FILETYPE_NC4:
       {
 	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
         cdfWriteVarDP(streamID, varID, data, nmiss);
@@ -1569,6 +1592,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
 #if  defined  (HAVE_LIBNETCDF)
     case FILETYPE_NC:
     case FILETYPE_NC2:
+    case FILETYPE_NC4:
       {
         ierr = cdfReadVarSliceDP(streamID, varID, levelID, data, nmiss);
 	break;
@@ -1649,6 +1673,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, double *data, int
 #if  defined  (HAVE_LIBNETCDF)
     case FILETYPE_NC:
     case FILETYPE_NC2:
+    case FILETYPE_NC4:
       {
 	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
         ierr = cdfWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
@@ -1879,7 +1904,9 @@ void streamDefVlist(int streamID, int vlistID)
 
       if ( streamptr->filemode == 'w' )
 	{
-	  if ( streamptr->filetype == FILETYPE_NC || streamptr->filetype == FILETYPE_NC2 )
+	  if ( streamptr->filetype == FILETYPE_NC  ||
+	       streamptr->filetype == FILETYPE_NC2 ||
+	       streamptr->filetype == FILETYPE_NC4 )
 	    cdfDefVars(streamID);
 	}
     }
@@ -1922,8 +1949,6 @@ int streamInqVlist(int streamID)
 void streamDefZtype(int streamID, int ztype)
 {
   static char func[] = "streamDefZtype";
-  int nvars, varID;
-  int gridID, zaxisID;
   STREAM *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -1937,8 +1962,6 @@ void streamDefZtype(int streamID, int ztype)
 void streamDefZlevel(int streamID, int zlevel)
 {
   static char func[] = "streamDefZlevel";
-  int nvars, varID;
-  int gridID, zaxisID;
   STREAM *streamptr;
 
   streamptr = stream_to_pointer(streamID);

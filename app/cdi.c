@@ -39,7 +39,7 @@ int Zlevel = 0;
 
 static void version(void)
 {
-  fprintf(stderr, "CDI version 1.6.3\n");
+  fprintf(stderr, "CDI version 1.7.0\n");
   cdiPrintVersion();
   fprintf(stderr, "\n");
 /*
@@ -57,6 +57,7 @@ static void version(void)
   1.6.1  27 Feb 2007 : short info with ltype for GENERIC zaxis
   1.6.2   3 Jan 2008 : changes for CDI library version 1.1.0 (compress)
   1.6.3  26 Mar 2008 : call streamDefTimestep also if ntsteps = 0 (buf fix)
+  1.7.0  11 Apr 2008 : add option -z zip for deflate compression of netCDF4 variables
 */
 }
 
@@ -70,7 +71,7 @@ static void usage(void)
   fprintf(stderr, "\n");
   fprintf(stderr, "  Options:\n");
   fprintf(stderr, "    -d             Print debugging information\n");
-  fprintf(stderr, "    -f <format>    Format of the output file. (grb, nc, nc2, src, ext or ieg)\n");
+  fprintf(stderr, "    -f <format>    Format of the output file. (grb, nc, nc2, nc4, src, ext or ieg)\n");
   fprintf(stderr, "    -s             give short information if ofile is missing\n");
   fprintf(stderr, "    -t <table>     Parameter table name/file\n");
   fprintf(stderr, "                   Predefined tables: ");
@@ -81,6 +82,7 @@ static void usage(void)
 
   fprintf(stderr, "    -V             Print version number\n");
   fprintf(stderr, "    -z szip        Compress GRIB records with szip\n");
+  fprintf(stderr, "        zip        Deflate compression of netCDF4 variables\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "  Report bugs to <Uwe.Schulzweida@zmaw.de>\n");
 }
@@ -176,6 +178,9 @@ void printFiletype(int streamID, int vlistID)
     case FILETYPE_NC2:
       printf("netCDF2");
       break;
+    case FILETYPE_NC4:
+      printf("netCDF4");
+      break;
     case FILETYPE_SRV:
       printf("SERVICE");
       break;
@@ -202,17 +207,22 @@ void printFiletype(int streamID, int vlistID)
 	}
     }
 
-  if ( filetype == FILETYPE_GRB )
+  if ( filetype == FILETYPE_GRB || filetype == FILETYPE_NC4 )
     {
       int nvars, varID;
+      int ztype;
 
       nvars = vlistNvars(vlistID);
 
       for ( varID = 0; varID < nvars; varID++ )
 	{
-	  if ( vlistInqVarSzip(vlistID, varID) )
+	  if ( ztype = vlistInqVarZtype(vlistID, varID) )
 	    {
-	      printf(" SZIP");
+	      if ( ztype == COMPRESS_SZIP )
+		printf(" SZIP");
+	      else if ( ztype == COMPRESS_ZIP )
+		printf(" ZIP");
+
 	      break;
 	    }
 	}
@@ -486,7 +496,7 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 
 	  fprintf(stdout, " %-3s", pstr);
 
-	  if ( vlistInqVarSzip(vlistID, varID) )
+	  if ( vlistInqVarZtype(vlistID, varID) )
 	    fprintf(stdout, "z");
 	  else
 	    fprintf(stdout, " ");
@@ -707,6 +717,7 @@ static void setDefaultFileType(char *filetypestr)
 
       if      ( strncmp(filetypestr, "grb", 3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_GRB; }
       else if ( strncmp(filetypestr, "nc2", 3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC2; }
+      else if ( strncmp(filetypestr, "nc4", 3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC4; }
       else if ( strncmp(filetypestr, "nc",  2)  == 0 ) { ftstr += 2; DefaultFileType = FILETYPE_NC;  }
       else if ( strncmp(filetypestr, "srv", 3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_SRV; }
       else if ( strncmp(filetypestr, "ext", 3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_EXT; }
@@ -714,7 +725,7 @@ static void setDefaultFileType(char *filetypestr)
       else
 	{
 	  fprintf(stderr, "Unsupported filetype %s!\n", filetypestr);
-	  fprintf(stderr, "Available filetypes: grb, nc, nc2, srv, ext and ieg\n");
+	  fprintf(stderr, "Available filetypes: grb, nc, nc2, nc4, srv, ext and ieg\n");
 	  exit(EXIT_FAILURE);
 	}
 
@@ -730,8 +741,8 @@ static void setDefaultFileType(char *filetypestr)
 	    {
 	      fprintf(stderr, "Unexpected character >%c< in file type >%s<!\n", *ftstr, filetypestr);
 	      fprintf(stderr, "Use format[_nbits] with:\n");
-	      fprintf(stderr, "    format = grb, nc, nc2, srv, ext or ieg\n");
-	      fprintf(stderr, "    nbits  = 32/64 for nc, nc2, srv, ext, ieg; 1 - 32 for grb\n");
+	      fprintf(stderr, "    format = grb, nc, nc2, nc4, srv, ext or ieg\n");
+	      fprintf(stderr, "    nbits  = 32/64 for nc, nc2, nc4, srv, ext, ieg; 1 - 32 for grb\n");
 	      exit(EXIT_FAILURE);
 	    }
 	}
@@ -769,6 +780,11 @@ void defineCompress(const char *arg)
     {
       Ztype = COMPRESS_GZIP;
       Zlevel = 6;
+    }
+  else if ( strncmp(arg, "zip", len) == 0 )
+    {
+      Ztype = COMPRESS_ZIP;
+      Zlevel = 1;
     }
   else
     fprintf(stderr, "Compression %s unsupported!\n", arg);  

@@ -1,3 +1,8 @@
+2008-08-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* add support for netCDF4 classic with deflate
+	* Version 1.1.2 released
+	
 2008-04-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
         * using GRIB library version 1.1.1

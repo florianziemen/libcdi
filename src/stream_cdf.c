@@ -515,6 +515,42 @@ void cdfReadGridTraj(int streamID, int gridID)
 }
 
 
+#if  defined  (HAVE_LIBNETCDF)
+void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
+{
+  static char func[] = "cdfDefVarDeflate";
+#if  defined  (NC_NETCDF4)
+  int retval;
+  /* Set chunking, shuffle, and deflate. */
+  int shuffle = 1;
+  int deflate = 1;
+
+  if ( deflate_level < 1 || deflate_level > 9 ) deflate_level = 1;
+
+  /*
+    if ((retval = nc_def_var_chunking(fileID, ncvarid, 0, &chunks[0])))
+    {
+    fprintf(stderr, "nc_def_var_chunking status = %d\n", retval);
+    exit(-1);
+    }
+  */
+  if ((retval = nc_def_var_deflate(ncid, ncvarid, shuffle, deflate, deflate_level)))
+    {
+      Error(func, "nc_def_var_deflate failed, status = %d\n", retval);
+    }
+#else
+  static int lwarn = TRUE;
+
+  if ( lwarn )
+    {
+      lwarn = FALSE;
+      Warning(func, "Compression failed, netCDF4 not available!");
+    }
+#endif
+}
+#endif
+
+
 void cdfDefMissval(int streamID, int varID, int dtype)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -2211,6 +2247,22 @@ int cdfDefVar(int streamID, int varID)
   xtype = cdfDefDatatype(vlistInqVarDatatype(vlistID, varID));
 
   cdf_def_var(fileID, name, (nc_type) xtype, ndims, dims, &ncvarid);
+
+  if ( streamptr->ztype == COMPRESS_ZIP )
+    {
+      if ( streamptr->filetype == FILETYPE_NC4 )
+	cdfDefVarDeflate(fileID, ncvarid, streamptr->zlevel);
+      else
+	{
+	  static int lwarn = TRUE;
+
+	  if ( lwarn )
+	    {
+	      lwarn = FALSE;
+	      Warning(func, "Compression is only available for netCDF4!");
+	    }
+	}
+    }
 
   if ( longname )
     cdf_put_att_text(fileID, ncvarid, "long_name", strlen(longname), longname);

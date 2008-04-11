@@ -43,7 +43,8 @@ typedef struct
   int         modelID;
   int         tableID;
   int         codetable;
-  int         szip;
+  int         ztype;
+  int         zlevel;
 }
 VARTABLE;
 
@@ -68,7 +69,8 @@ static void codeInitEntry(int varID, int code)
   vartable[varID].instID         = UNDEFID;
   vartable[varID].modelID        = UNDEFID;
   vartable[varID].tableID        = UNDEFID;
-  vartable[varID].szip           = FALSE;
+  vartable[varID].ztype          = COMPRESS_NONE;
+  vartable[varID].zlevel         = 1;
 }
 
 
@@ -325,7 +327,7 @@ void cdiGenVars(int streamID)
   int prec;
   int average;
   int lbounds;
-  int szip;
+  int ztype;
   char name[256], longname[256], units[256];
   double *dlevels = NULL;
   double *dlevels1 = NULL;
@@ -352,7 +354,7 @@ void cdiGenVars(int streamID)
       modelID   = vartable[varID].modelID;
       tableID   = vartable[varID].tableID;
       average   = vartable[varID].average;
-      szip      = vartable[varID].szip;
+      ztype     = vartable[varID].ztype;
 
       zaxisID = UNDEFID;
 
@@ -430,7 +432,7 @@ void cdiGenVars(int streamID)
       vlistDefVarCode(vlistID, varID, code);
       vlistDefVarDatatype(vlistID, varID, prec);
       vlistDefVarAverage(vlistID, varID, average);
-      vlistDefVarSzip(vlistID, varID, szip);
+      vlistDefVarZtype(vlistID, varID, ztype);
 
       if ( cdiDefaultTableID != UNDEFID )
 	{
@@ -712,10 +714,15 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
 }
 
 
-void varDefSzip(int varID, int szip)
+void varDefZtype(int varID, int ztype)
 {
-  if ( szip )
-    vartable[varID].szip = TRUE;
+  vartable[varID].ztype = ztype;
+}
+
+
+void varDefZlevel(int varID, int zlevel)
+{
+  vartable[varID].zlevel = zlevel;
 }
 
 

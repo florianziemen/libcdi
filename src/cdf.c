@@ -70,7 +70,7 @@ int cdfOpenFile(const char *filename, const char *mode, int version)
   int ncid = -1;
 #if  defined  (HAVE_LIBNETCDF)
   int fmode;
-  int writemode = NC_WRITE;
+  int writemode = NC_CLOBBER;
 
   if ( filename == NULL )
     ncid = CDI_EINVAL;
@@ -87,7 +87,10 @@ int cdfOpenFile(const char *filename, const char *mode, int version)
 	case 'W':
 	  fmode = 'w';
 #if  defined  (NC_64BIT_OFFSET)
-	  if ( version == 2 ) writemode = NC_WRITE | NC_64BIT_OFFSET;
+	  if ( version == 2 ) writemode = NC_CLOBBER | NC_64BIT_OFFSET;
+#endif
+#if  defined  (NC_NETCDF4)
+	  if ( version == 4 ) writemode = NC_CLOBBER | NC_NETCDF4 | NC_CLASSIC_MODEL;
 #endif
 	  cdf_create(filename, writemode, &ncid);
 	  cdfComment(ncid);
@@ -126,7 +129,7 @@ int cdfOpen(const char *filename, const char *mode)
 
 int cdfOpen64(const char *filename, const char *mode)
 {
-  static char func[] = "cdfOpen";
+  static char func[] = "cdfOpen64";
   int fileID = -1;
 
   if ( CDF_Debug )
@@ -135,16 +138,38 @@ int cdfOpen64(const char *filename, const char *mode)
 #if  defined  (HAVE_LIBNETCDF)
 #if  ! defined  (NC_64BIT_OFFSET)
   fileID = CDI_ELIBNAVAIL;
+  return (fileID);
 #endif
 #endif
 
-  if ( fileID != CDI_ELIBNAVAIL )
-    {
-      fileID = cdfOpenFile(filename, mode, 2);
+  fileID = cdfOpenFile(filename, mode, 2);
 
-      if ( CDF_Debug )
-	Message(func, "file %s opened with id %d", filename, fileID);
-    }
+  if ( CDF_Debug )
+    Message(func, "file %s opened with id %d", filename, fileID);
+
+  return (fileID);
+}
+
+
+int cdf4Open(const char *filename, const char *mode)
+{
+  static char func[] = "cdf4Open";
+  int fileID = -1;
+
+  if ( CDF_Debug )
+    Message(func, "open %s with mode %c", filename, *mode);
+
+#if  defined  (HAVE_LIBNETCDF)
+#if  ! defined  (NC_NETCDF4)
+  fileID = CDI_ELIBNAVAIL;
+  return (fileID);
+#endif
+#endif
+
+  fileID = cdfOpenFile(filename, mode, 4);
+
+  if ( CDF_Debug )
+    Message(func, "file %s opened with id %d", filename, fileID);
 
   return (fileID);
 }
