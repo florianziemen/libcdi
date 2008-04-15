@@ -143,6 +143,7 @@ static int getFiletype(const char *filename, int *byteorder)
     }
   else if ( strncmp(buffer+1, "HDF", 3) == 0 )
     {
+      filetype = FILETYPE_NC4;
       if ( CDI_Debug ) Message(func, "found HDF file = %s", filename);
     }
 #if  defined  (HAVE_LIBSERVICE)

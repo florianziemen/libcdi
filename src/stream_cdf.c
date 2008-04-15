@@ -85,6 +85,7 @@ typedef struct {
   int      dimtype[8];
   int      natts;
   int     *atts;
+  int      deflate;
   size_t   vlen;
   double  *vdata;
   double   missval;
@@ -527,16 +528,9 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 
   if ( deflate_level < 1 || deflate_level > 9 ) deflate_level = 1;
 
-  /*
-    if ((retval = nc_def_var_chunking(fileID, ncvarid, 0, &chunks[0])))
-    {
-    fprintf(stderr, "nc_def_var_chunking status = %d\n", retval);
-    exit(-1);
-    }
-  */
   if ((retval = nc_def_var_deflate(ncid, ncvarid, shuffle, deflate, deflate_level)))
     {
-      Error(func, "nc_def_var_deflate failed, status = %d\n", retval);
+      Error(func, "nc_def_var_deflate failed, status = %d", retval);
     }
 #else
   static int lwarn = TRUE;
@@ -2169,6 +2163,7 @@ int cdfDefVar(int streamID, int varID)
 #if  defined  (HAVE_LIBNETCDF)
   int fileID;
   int xid = UNDEFID, yid = UNDEFID, zid = UNDEFID, tid = UNDEFID;
+  size_t xsize = 0, ysize = 0;
   int code, gridID, zaxisID;
   char varname[9];
   char *name = NULL;
@@ -2176,6 +2171,7 @@ int cdfDefVar(int streamID, int varID)
   char *stdname = NULL;
   char *units = NULL;
   int dims[4];
+  int chunks[4];
   int tableID;
   int ndims = 0;
   int len;
@@ -2187,6 +2183,7 @@ int cdfDefVar(int streamID, int varID)
   int iax = 0;
   char axis[5];
   STREAM *streamptr;
+  int retval;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -2206,6 +2203,8 @@ int cdfDefVar(int streamID, int varID)
     {
       xid = streamptr->xdimID[gridindex];
       yid = streamptr->ydimID[gridindex];
+      cdf_inq_dimlen(fileID, xid, &xsize);
+      cdf_inq_dimlen(fileID, yid, &ysize);
     }
 
   zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
@@ -2216,13 +2215,22 @@ int cdfDefVar(int streamID, int varID)
   if ( timeID == TIME_VARIABLE )
     {
       if ( tid == UNDEFID ) Error(func, "Internal problem! Time undefined.");
+      chunks[ndims] = 1;
       dims[ndims++] = tid;
       axis[iax++] = 't';
     }
   if ( zid != UNDEFID ) axis[iax++] = 'z';
+  if ( zid != UNDEFID ) chunks[ndims] = 1;
   if ( zid != UNDEFID ) dims[ndims++] = zid;
+
+  if ( yid != UNDEFID ) chunks[ndims] = (int) ysize;
   if ( yid != UNDEFID ) dims[ndims++] = yid;
+
+  if ( xid != UNDEFID ) chunks[ndims] = (int) xsize;
   if ( xid != UNDEFID ) dims[ndims++] = xid;
+
+  if ( CDI_Debug ) 
+    fprintf(stderr, "chunks %d %d %d %d\n", chunks[0], chunks[1], chunks[2], chunks[3]);
 
   tableID  = vlistInqVarTable(vlistID, varID);
 
@@ -2248,10 +2256,19 @@ int cdfDefVar(int streamID, int varID)
 
   cdf_def_var(fileID, name, (nc_type) xtype, ndims, dims, &ncvarid);
 
+#if  defined  (NC_NETCDF4)
+  if ((retval = nc_def_var_chunking(fileID, ncvarid, 0, chunks)))
+    {
+      Error(func, "nc_def_var_chunking failed, status = %d", retval);
+    }
+#endif
+
   if ( streamptr->ztype == COMPRESS_ZIP )
     {
       if ( streamptr->filetype == FILETYPE_NC4 )
-	cdfDefVarDeflate(fileID, ncvarid, streamptr->zlevel);
+	{
+	  cdfDefVarDeflate(fileID, ncvarid, streamptr->zlevel);
+	}
       else
 	{
 	  static int lwarn = TRUE;
@@ -3390,6 +3407,7 @@ int cdfInqContents(int streamID)
       ncvars[ncvarid].units[0]        = 0;
       ncvars[ncvarid].natts           = 0;
       ncvars[ncvarid].atts            = NULL;
+      ncvars[ncvarid].deflate         = 0;
     }
 
   /* read global attributtes*/
@@ -3496,6 +3514,15 @@ int cdfInqContents(int streamID)
 
       ncvars[ncvarid].xtype = xtype;
       ncvars[ncvarid].ndims = nvdims;
+
+#if  defined  (NC_NETCDF4)
+      {
+        int shuffle, deflate, deflate_level;
+	nc_inq_var_deflate(fileID, ncvarid, &shuffle, &deflate, &deflate_level);
+	if ( deflate > 0 )
+	  ncvars[ncvarid].deflate = 1;
+      }
+#endif
 
       if ( nvdims > 0 )
 	if ( timedimid == dimidsp[0] )
@@ -4823,6 +4850,11 @@ int cdfInqContents(int streamID)
 
       varID = streamNewVar(streamID, ncvars[ncvarid].gridID, ncvars[ncvarid].zaxisID);
       varID = vlistDefVar(vlistID, ncvars[ncvarid].gridID, ncvars[ncvarid].zaxisID, ncvars[ncvarid].timeID);
+
+#if  defined  (NC_NETCDF4)
+      if ( ncvars[ncvarid].deflate )
+	vlistDefVarZtype(vlistID, varID, COMPRESS_ZIP);
+#endif
 
       streamptr->vars[varID1].level   = NULL;
       streamptr->vars[varID1].defmiss = 0;
