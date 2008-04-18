@@ -3319,6 +3319,7 @@ int cdfInqContents(int streamID)
   NCVAR *ncvars;
   int vlistID;
   STREAM *streamptr;
+  int format = 0;
 
   streamptr = stream_to_pointer(streamID);
   
@@ -3329,6 +3330,10 @@ int cdfInqContents(int streamID)
 
   if ( CDI_Debug )
     Message(func, "streamID = %d, fileID = %d", streamID, fileID);
+
+#if  defined  (NC_NETCDF4)
+  nc_inq_format(fileID, &format);
+#endif
 
   cdf_inq(fileID, &ndims , &nvars, &ngatts, &unlimdimid);
 
@@ -3517,12 +3522,13 @@ int cdfInqContents(int streamID)
       ncvars[ncvarid].ndims = nvdims;
 
 #if  defined  (NC_NETCDF4)
-      {
-        int shuffle, deflate, deflate_level;
-	nc_inq_var_deflate(fileID, ncvarid, &shuffle, &deflate, &deflate_level);
-	if ( deflate > 0 )
-	  ncvars[ncvarid].deflate = 1;
-      }
+      if ( format == NC_FORMAT_NETCDF4_CLASSIC )
+	{
+	  int shuffle, deflate, deflate_level;
+	  nc_inq_var_deflate(fileID, ncvarid, &shuffle, &deflate, &deflate_level);
+	  if ( deflate > 0 )
+	    ncvars[ncvarid].deflate = 1;
+	}
 #endif
 
       if ( nvdims > 0 )
