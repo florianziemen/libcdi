@@ -2257,10 +2257,11 @@ int cdfDefVar(int streamID, int varID)
   cdf_def_var(fileID, name, (nc_type) xtype, ndims, dims, &ncvarid);
 
 #if  defined  (NC_NETCDF4)
-  if ((retval = nc_def_var_chunking(fileID, ncvarid, 0, chunks)))
-    {
-      Error(func, "nc_def_var_chunking failed, status = %d", retval);
-    }
+  if ( streamptr->filetype == FILETYPE_NC4 )
+    if ((retval = nc_def_var_chunking(fileID, ncvarid, 0, chunks)))
+      {
+	Error(func, "nc_def_var_chunking failed, status = %d", retval);
+      }
 #endif
 
   if ( streamptr->ztype == COMPRESS_ZIP )

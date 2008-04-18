@@ -23,6 +23,24 @@ const char *cdfLibraryVersion(void)
 #endif
 }
 
+int H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum);
+
+const char *hdfLibraryVersion(void)
+{
+#if  defined  (HAVE_LIBNETCDF) && defined(NC_NETCDF4)
+  static char hdf_libvers[256];
+  unsigned majnum, minnum, relnum;
+
+  (void) H5get_libversion(&majnum, &minnum, &relnum);
+
+  sprintf(hdf_libvers, "%u.%u.%u", majnum, minnum, relnum);
+
+  return (hdf_libvers);
+#else
+  return (NULL);
+#endif
+}
+
 
 int CDF_Debug   = 0;    /* If set to 1, debugging           */
 
@@ -71,6 +89,7 @@ int cdfOpenFile(const char *filename, const char *mode, int version)
 #if  defined  (HAVE_LIBNETCDF)
   int fmode;
   int writemode = NC_CLOBBER;
+  int status;
 
   if ( filename == NULL )
     ncid = CDI_EINVAL;
@@ -81,7 +100,8 @@ int cdfOpenFile(const char *filename, const char *mode, int version)
 	case 'r':
 	case 'R':
 	  fmode = 'r';
-	  cdf_open(filename, NC_NOWRITE, &ncid);
+	  status = cdf_open(filename, NC_NOWRITE, &ncid);
+	  if ( status > 0 && ncid < 0 ) ncid = CDI_ESYSTEM;
 	  break;
 	case 'w':
 	case 'W':

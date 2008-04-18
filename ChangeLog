@@ -1,7 +1,7 @@
 2008-08-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* add support for netCDF4 classic with deflate
-	* Version 1.1.2 released
+	* add support for netCDF4 classic with deflate option
+	* Version 1.2.0 released
 	
 2008-04-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 

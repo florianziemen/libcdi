@@ -333,8 +333,8 @@ The function @func{streamInqFiletype} returns the filetype of a stream.
 @Result
 @func{streamInqFiletype} returns the type of the file format,
 one of the set of predefined CDI file format types.
-The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_NC},
-@func{FILETYPE_NC2}, @func{FILETYPE_SRV}, @func{FILETYPE_EXT} and @func{FILETYPE_IEG}.
+The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_NC}, @func{FILETYPE_NC2},
+@func{FILETYPE_NC4}, @func{FILETYPE_SRV}, @func{FILETYPE_EXT} and @func{FILETYPE_IEG}.
 
 @EndFunction
 */
@@ -1021,7 +1021,8 @@ int streamOpenAppend(const char *filename)
     @Item  path      The name of the new dataset
     @Item  filetype  The type of the file format, one of the set of predefined CDI file format types.
                      The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_NC},
-                     @func{FILETYPE_NC2}, @func{FILETYPE_SRV}, @func{FILETYPE_EXT} and @func{FILETYPE_IEG}.
+                     @func{FILETYPE_NC2}, @func{FILETYPE_NC4}, @func{FILETYPE_SRV},
+                     @func{FILETYPE_EXT} and @func{FILETYPE_IEG}.
 
 @Description
 The function @func{streamOpenWrite} creates a new datset.
@@ -1818,6 +1819,8 @@ void cdiDefTableID(int tableID)
 
 void cdiPrintVersion(void)
 {
+  const char *hdf_version;
+
   fprintf(stderr, "    CDI library version : %s\n", cdiLibraryVersion());
 #if  defined  (HAVE_LIBGRIB)
   fprintf(stderr, "   GRIB library version : %s\n", gribLibraryVersion());
@@ -1827,6 +1830,9 @@ void cdiPrintVersion(void)
   fprintf(stderr, " nc_dap library version : %s\n", cdfLibraryVersion());
 #  else
   fprintf(stderr, " netCDF library version : %s\n", cdfLibraryVersion());
+  hdf_version = hdfLibraryVersion();
+  if ( hdf_version )
+    fprintf(stderr, "   HDF5 library version : %s\n", hdf_version);
 #  endif
 #endif
 #if  defined  (HAVE_LIBSERVICE)

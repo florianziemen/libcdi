@@ -72,10 +72,10 @@ void cdf_create(const char *path, int cmode, int *ncidp)
 }
 
 
-void cdf_open(const char *path, int omode, int *ncidp)
+int cdf_open(const char *path, int omode, int *ncidp)
 {
   static char func[] = "cdf_open";
-  int status;
+  int status = 0;
   int dapfile = FALSE;
   struct stat filestat;
   size_t chunksizehint;
@@ -90,8 +90,7 @@ void cdf_open(const char *path, int omode, int *ncidp)
     }
   else
     {
-      if ( stat(path, &filestat) != 0 )
-	SysError(func, path);
+      if ( stat(path, &filestat) != 0 ) SysError(func, path);
 
 #if defined (HAVE_STRUCT_STAT_ST_BLKSIZE)
       chunksizehint = (size_t) filestat.st_blksize * 4;
@@ -102,15 +101,17 @@ void cdf_open(const char *path, int omode, int *ncidp)
 
       status = nc__open(path, omode, &chunksizehint, ncidp);
 
-      if ( CDF_Debug || status != NC_NOERR )
+      if ( CDF_Debug /* || status != NC_NOERR */ )
 	Message(func, "chunksizehint %d", chunksizehint);
     }
 
-  if ( CDF_Debug || status != NC_NOERR )
+  if ( CDF_Debug /* || status != NC_NOERR */ )
     Message(func, "ncid = %d  mode = %d  file = %s", *ncidp, omode, path);
 
   if ( CDF_Debug && status != NC_NOERR )
     Message(func, "%s", nc_strerror(status));
+
+  return (status);
 }
 
 
