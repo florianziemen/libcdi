@@ -24,8 +24,8 @@ ZaxistypeEntry[] = {
   {"lev",     "hybrid_half",              "level"},
   {"lev",     "pressure",                 "Pa"},
   {"height",  "height",                   "m"},
-  {"depth",   "depth below sea",          "m"},
-  {"depth",   "depth below land",         "cm"},
+  {"depth",   "depth_below_sea",          "m"},
+  {"depth",   "depth_below_land",         "cm"},
   {"lev",     "isentropic",               "K"},
   {"lev",     "trajectory",               ""},
   {"alt",     "altitude",                 "m"},
@@ -730,8 +730,9 @@ double zaxisInqLbound(int zaxisID, int index)
 
   zaxis_check_ptr(func, zaxisptr);
 
-  if ( index >= 0 && index < zaxisptr->size )
-    level = zaxisptr->lbounds[index];
+  if ( zaxisptr->lbounds )
+    if ( index >= 0 && index < zaxisptr->size )
+      level = zaxisptr->lbounds[index];
 
   return (level);
 }
@@ -747,8 +748,9 @@ double zaxisInqUbound(int zaxisID, int index)
 
   zaxis_check_ptr(func, zaxisptr);
 
-  if ( index >= 0 && index < zaxisptr->size )
-    level = zaxisptr->ubounds[index];
+  if ( zaxisptr->ubounds )
+    if ( index >= 0 && index < zaxisptr->size )
+      level = zaxisptr->ubounds[index];
 
   return (level);
 }
@@ -1062,11 +1064,14 @@ void zaxisDefLbounds(int zaxisID, double *lbounds)
   zaxis_check_ptr(func, zaxisptr);
 
   size = zaxisptr->size;
+  
+  if ( CDI_Debug )
+    if ( zaxisptr->lbounds != NULL )
+      Warning(func, "Lower bounds already defined for zaxisID = %d", zaxisID);
 
-  if ( zaxisptr->lbounds != NULL )
-    Warning(func, "Lbounds already defined for zaxisID = %d", zaxisID);
+  if ( zaxisptr->lbounds == NULL )
+    zaxisptr->lbounds = (double *) malloc(size*sizeof(double));
 
-  zaxisptr->lbounds = (double *) malloc(size*sizeof(double));
   memcpy(zaxisptr->lbounds, lbounds, size*sizeof(double));
 }
 
@@ -1083,10 +1088,13 @@ void zaxisDefUbounds(int zaxisID, double *ubounds)
 
   size = zaxisptr->size;
 
-  if ( zaxisptr->ubounds != NULL )
-    Warning(func, "Ubounds already defined for zaxisID = %d", zaxisID);
+  if ( CDI_Debug )
+    if ( zaxisptr->ubounds != NULL )
+      Warning(func, "Upper bounds already defined for zaxisID = %d", zaxisID);
 
-  zaxisptr->ubounds = (double *) malloc(size*sizeof(double));
+  if ( zaxisptr->ubounds == NULL )
+    zaxisptr->ubounds = (double *) malloc(size*sizeof(double));
+
   memcpy(zaxisptr->ubounds, ubounds, size*sizeof(double));
 }
 
@@ -1103,10 +1111,13 @@ void zaxisDefWeights(int zaxisID, double *weights)
 
   size = zaxisptr->size;
 
-  if ( zaxisptr->weights != NULL )
-    Warning(func, "Weights already defined for zaxisID = %d", zaxisID);
+  if ( CDI_Debug )
+    if ( zaxisptr->weights != NULL )
+      Warning(func, "Weights already defined for zaxisID = %d", zaxisID);
 
-  zaxisptr->weights = (double *) malloc(size*sizeof(double));
+  if ( zaxisptr->weights == NULL )
+    zaxisptr->weights = (double *) malloc(size*sizeof(double));
+
   memcpy(zaxisptr->weights, weights, size*sizeof(double));
 }
 

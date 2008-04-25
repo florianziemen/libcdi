@@ -1,6 +1,9 @@
 2008-08-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* add support for netCDF4 classic with deflate option
+	* streamClose: use taxisDestroy to release memory
+	* cdfInqContents: skip time variable with type = NC_CHAR
+	* ptaxisCopy: don't overwrite item 'self' (bug fix)
 	* Version 1.2.0 released
 	
 2008-04-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

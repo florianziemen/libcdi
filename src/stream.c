@@ -128,7 +128,7 @@ static int getFiletype(const char *filename, int *byteorder)
       if ( version <= 1 )
 	{
 	  filetype = FILETYPE_GRB;
-	  if ( CDI_Debug ) Message(func, "found GRIB file = %s, version %d", filename);
+	  if ( CDI_Debug ) Message(func, "found GRIB file = %s, version %d", filename, version);
 	}
     }
   else if ( strncmp(buffer, "CDF\001", 4) == 0 )
@@ -1183,6 +1183,11 @@ void streamClose(int streamID)
     }
 
   stream_delete_entry(streamptr);
+
+  if ( vlistInqTaxis(vlistID) != -1 )
+    {
+      taxisDestroy(vlistInqTaxis(vlistID));
+    }
 
   if ( vlistID != -1 )
     {

@@ -175,7 +175,7 @@ static int taxis_from_pointer(TAXIS *ptr)
       if ( _taxisAvail )
 	{
 	  newptr       = _taxisAvail;
-	  _taxisAvail   = _taxisAvail->next;
+	  _taxisAvail  = _taxisAvail->next;
 	  newptr->next = 0;
 	  idx	       = newptr->idx;
 	  newptr->ptr  = ptr;
@@ -231,6 +231,8 @@ static TAXIS *taxis_new_entry(void)
   taxisptr = (TAXIS *) malloc(sizeof(TAXIS));
 
   if ( taxisptr ) taxis_init_entry(taxisptr);
+
+  /*  fprintf(stderr, "self: %d %p\n", taxisptr->self, taxisptr); */
 
   return (taxisptr);
 }
@@ -370,6 +372,14 @@ int taxisCreate(int taxistype)
 */
 void taxisDestroy(int taxisID)
 {
+  static char func[] = "taxisDestroy";
+  TAXIS *taxisptr;
+
+  taxisptr = taxis_to_pointer(taxisID);
+
+  taxis_check_ptr(func, taxisptr);
+
+  taxis_delete_entry(taxisptr);
 }
 
 
@@ -1113,5 +1123,19 @@ void ptaxisInit(TAXIS *taxisptr)
 
 void ptaxisCopy(TAXIS *dest, TAXIS *source)
 {
-  memcpy(dest, source, sizeof(TAXIS));
+  /* memcpy(dest, source, sizeof(TAXIS)); */
+  dest->used       = source->used;  
+  dest->type       = source->type;
+  dest->vdate      = source->vdate;
+  dest->vtime      = source->vtime;
+  dest->rdate      = source->rdate;
+  dest->rtime      = source->rtime;
+  dest->calendar   = source->calendar;
+  dest->unit       = source->unit;
+  dest->numavg     = source->numavg;
+  dest->has_bounds = source->has_bounds;
+  dest->vdate_lb   = source->vdate_lb;
+  dest->vtime_lb   = source->vtime_lb;
+  dest->vdate_ub   = source->vdate_ub;
+  dest->vtime_ub   = source->vtime_ub;
 }

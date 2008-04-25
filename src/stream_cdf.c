@@ -50,7 +50,6 @@ NCDIM;
 
 typedef struct {
   int      ignore;
-  int      vartype;
   int      isvar;
   int      islon;
   int      islat;
@@ -3368,7 +3367,6 @@ int cdfInqContents(int streamID)
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {      
       ncvars[ncvarid].ignore          = FALSE;
-      ncvars[ncvarid].vartype         = UNDEFID;
       ncvars[ncvarid].isvar           = UNDEFID;
       ncvars[ncvarid].islon           = FALSE;
       ncvars[ncvarid].islat           = FALSE;
@@ -3932,7 +3930,9 @@ int cdfInqContents(int streamID)
       else
 	{
 	  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-	    if ( ncvars[ncvarid].ndims == 1 && timedimid == ncvars[ncvarid].dimids[0] )
+	    if ( ncvars[ncvarid].ndims == 1 &&
+		 timedimid == ncvars[ncvarid].dimids[0] &&
+		 ncvars[ncvarid].xtype != NC_CHAR )
 	      {
 		streamptr->basetime.ncvarid = ncvarid;
 		break;
