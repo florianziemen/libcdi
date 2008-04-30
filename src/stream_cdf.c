@@ -2202,8 +2202,8 @@ int cdfDefVar(int streamID, int varID)
     {
       xid = streamptr->xdimID[gridindex];
       yid = streamptr->ydimID[gridindex];
-      cdf_inq_dimlen(fileID, xid, &xsize);
-      cdf_inq_dimlen(fileID, yid, &ysize);
+      if ( xid != UNDEFID ) cdf_inq_dimlen(fileID, xid, &xsize);
+      if ( yid != UNDEFID ) cdf_inq_dimlen(fileID, yid, &ysize);
     }
 
   zaxisindex = vlistZaxisIndex(vlistID, zaxisID);

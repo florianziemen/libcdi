@@ -1,5 +1,5 @@
 !
-! Fortran interface for CDI library version 1.1.1
+! Fortran interface for CDI library version 1.2.0
 !
 
       INTEGER    CDI_UNDEFID           

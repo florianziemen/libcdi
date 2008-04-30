@@ -89,6 +89,7 @@ int cdfOpenFile(const char *filename, const char *mode, int version)
 #if  defined  (HAVE_LIBNETCDF)
   int fmode;
   int writemode = NC_CLOBBER;
+  int readmode = NC_NOWRITE;
   int status;
 
   if ( filename == NULL )
@@ -100,7 +101,7 @@ int cdfOpenFile(const char *filename, const char *mode, int version)
 	case 'r':
 	case 'R':
 	  fmode = 'r';
-	  status = cdf_open(filename, NC_NOWRITE, &ncid);
+	  status = cdf_open(filename, readmode, &ncid);
 	  if ( status > 0 && ncid < 0 ) ncid = CDI_ESYSTEM;
 	  break;
 	case 'w':
