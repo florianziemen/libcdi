@@ -103,6 +103,18 @@ int cdfOpenFile(const char *filename, const char *mode, int version)
 	  fmode = 'r';
 	  status = cdf_open(filename, readmode, &ncid);
 	  if ( status > 0 && ncid < 0 ) ncid = CDI_ESYSTEM;
+#if  defined  (NC_NETCDF4)
+	  else
+	    {
+	      int format;
+	      (void) nc_inq_format(ncid, &format);
+	      if ( format == NC_FORMAT_NETCDF4 )
+		{
+		  cdf_close(ncid);
+		  ncid = CDI_EUNC4;
+		}
+	    }
+#endif
 	  break;
 	case 'w':
 	case 'W':
