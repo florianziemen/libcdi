@@ -1184,13 +1184,14 @@ void streamClose(int streamID)
 
   stream_delete_entry(streamptr);
 
-  if ( vlistInqTaxis(vlistID) != -1 )
-    {
-      taxisDestroy(vlistInqTaxis(vlistID));
-    }
-
   if ( vlistID != -1 )
     {
+      if ( streamptr->filemode != 'w' )
+	if ( vlistInqTaxis(vlistID) != -1 )
+	  {
+	    taxisDestroy(vlistInqTaxis(vlistID));
+	  }
+
       vlistDestroy(vlistID);
     }
 }

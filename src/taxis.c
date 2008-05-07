@@ -1033,6 +1033,7 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
   static char func[] = "splitTimevalue";
   int vdate = 0, vtime = 0;
   int hour, minute;
+  int year, month, day;
 
   if ( timeunit == TUNIT_HOUR )
     {
@@ -1067,6 +1068,26 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
   else
     {
       Message(func, "Unsupported TIMEUNIT: %s!", tunitNamePtr(timeunit));
+    }
+
+  /* verify date and time */
+
+  decode_date(vdate, &year, &month, &day);
+  decode_time(vtime, &hour, &minute);
+
+  if ( month > 17 || day > 31 || hour > 23 || minute > 59 )
+    {
+      if ( (month  > 17 || day > 31) && (year < -9999 || year > 9999) ) year = 1;
+      if ( month  > 17 ) month  = 1;
+      if ( day    > 31 ) day    = 1;
+      if ( hour   > 23 ) hour   = 0;
+      if ( minute > 59 ) minute = 0;
+
+      vdate = encode_date(year, month, day);
+      vtime = encode_time(hour, minute);
+
+      Warning(func, "Reset wrong date/time to %4.4d-%2.2d-%2.2d %2.2d:%2.2d!",
+	      year, month, day, hour, minute);
     }
 
   *date = vdate;
