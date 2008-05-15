@@ -1182,8 +1182,6 @@ void streamClose(int streamID)
       free(streamptr->fnames);
     }
 
-  stream_delete_entry(streamptr);
-
   if ( vlistID != -1 )
     {
       if ( streamptr->filemode != 'w' )
@@ -1194,6 +1192,8 @@ void streamClose(int streamID)
 
       vlistDestroy(vlistID);
     }
+
+  stream_delete_entry(streamptr);
 }
 
 
