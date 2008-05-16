@@ -807,7 +807,7 @@ void vlistCat(int vlistID2, int vlistID1)
     @Item  vlistID1  Source variable list ID
 
 @Description
-Merge the variable list vlistID1 and the variable list vlistID2.
+Merge the variable list vlistID1 to the variable list vlistID2.
 
 @EndFunction
 */
@@ -861,14 +861,14 @@ void vlistMerge(int vlistID2, int vlistID1)
 	  nlevs = nlevs1 + nlevs2;
 
 	  vlistptr2->vars[varID].nlevs = nlevs;
-
-	  /* printf("var %d %d %d %d\n", varID, nlevs1, nlevs2, nlevs); */
-
+	  /*
+	  fprintf(stderr, "var %d %d %d %d %d\n", varID, nlevs1, nlevs2, nlevs, sizeof(LEVINFO));
+	  */
 	  vlistptr2->vars[varID].levinfo =
 	    (LEVINFO *) realloc(vlistptr2->vars[varID].levinfo, nlevs*sizeof(LEVINFO));
 
-	  memcpy(vlistptr2->vars[varID].levinfo+nlevs1,
-		 vlistptr1->vars[varID].levinfo, nlevs2*sizeof(LEVINFO));
+	  memcpy(vlistptr2->vars[varID].levinfo+nlevs2,
+		 vlistptr1->vars[varID].levinfo, nlevs1*sizeof(LEVINFO));
 	}
 
       lvar = (int *) malloc(nvars2*sizeof(int));
@@ -886,9 +886,9 @@ void vlistMerge(int vlistID2, int vlistID1)
 	  */
 	  nlevs1 = zaxisInqSize(zaxisID1);
 	  nlevs2 = zaxisInqSize(zaxisID2);
-
-	  /* printf("zaxis %d %d %d %d\n", zaxisID1, zaxisID2, nlevs1, nlevs2); */
-
+	  /*
+	  fprintf(stderr, "zaxis %d %d %d %d\n", zaxisID1, zaxisID2, nlevs1, nlevs2);
+	  */
 	  nlevs = nlevs1 + nlevs2;
 
 	  zaxisID = zaxisDuplicate(zaxisID2);
@@ -898,7 +898,10 @@ void vlistMerge(int vlistID2, int vlistID1)
 	  levels = (double *) malloc(nlevs1*sizeof(double));
 
 	  zaxisInqLevels(zaxisID1, levels);
-
+	  /*
+	  for ( levID = 0; levID < nlevs1; levID++ )
+	    fprintf(stderr, "%d %d %d %d %d %g\n", varID, levID, nlevs1, nlevs2, vlistptr2->vars[varID].nlevs, levels[levID]);
+	  */
 	  for ( levID = 0; levID < nlevs1; levID++ )
 	    zaxisDefLevel(zaxisID, nlevs2+levID, levels[levID]);
 
@@ -908,8 +911,8 @@ void vlistMerge(int vlistID2, int vlistID1)
 	    if ( vlistptr2->zaxisIDs[index] == zaxisID2 )
 	      vlistptr2->zaxisIDs[index] = zaxisID;
 
-	  for ( varID2 = varID+1; varID2 < nvars1; varID2++ )
-	    if ( vlistptr2->vars[varID2].zaxisID == zaxisID2 )
+	  for ( varID2 = 0; varID2 < nvars2; varID2++ )
+	    if ( lvar[varID2] = FALSE && vlistptr2->vars[varID2].zaxisID == zaxisID2 )
 	      {
 		vlistptr2->vars[varID2].zaxisID = zaxisID;
 		lvar[varID2] = TRUE;
