@@ -1,5 +1,6 @@
 2008-08-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+        * using GRIB library version 1.2.0
 	* add support for netCDF4 classic with deflate option
 	* streamClose: use taxisDestroy to release memory
 	* cdfInqContents: skip time variable with type = NC_CHAR

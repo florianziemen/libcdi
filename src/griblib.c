@@ -1,7 +1,7 @@
 
-/* Generated automatically from m214003 on Mon Mar 17 11:13:55 CET 2008 */
+/* Generated automatically from m214003 on Wed May 21 18:03:42 CEST 2008 */
 
-/* GRIBLIB_VERSION="1.1.1" */
+/* GRIBLIB_VERSION="1.2.0" */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -2729,7 +2729,7 @@ void encodeIS(GRIBPACK *lGrib, int *gribLen)
    */
 
   z = 7;   
-  Put1Byte(1); 
+  Put1Byte(1); /* grib version */
   z = 8;
 
   *gribLen = z;
@@ -2931,6 +2931,7 @@ void encodePDS(GRIBPACK *lpds, int pdsLen, int *isec1)
     {
       Put2Byte(ISEC1_Level1);     /* 10 Level                    */    
     }
+
   Put1Int(year);                  /* 12 Year of Century          */
   Put1Byte(ISEC1_Month);          /* 13 Month                    */
   Put1Byte(ISEC1_Day);            /* 14 Day                      */
@@ -3579,7 +3580,7 @@ void gribEncode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
   lpds = &lGrib[isLen];
   pdsLen = getPdsLen(isec1);
 
-  encodePDS(lpds, pdsLen, isec1);
+  encodePDS(lpds, pdsLen,  isec1);
   gribLen += pdsLen;
 
   encodeGDS(lGrib, &gribLen, isec2, fsec2);
@@ -3982,7 +3983,7 @@ static int decodePDS(unsigned char *pds, int *isec0, int *isec1)
       ISEC1_Level2 = 0;
     }
 
-  ISEC1_Year           = PDS_Year;
+  /* ISEC1_Year        = PDS_Year; */
   ISEC1_Month          = PDS_Month;
   ISEC1_Day            = PDS_Day;
   ISEC1_Hour           = PDS_Hour;
@@ -3996,13 +3997,25 @@ static int decodePDS(unsigned char *pds, int *isec0, int *isec1)
 
   if ( ISEC0_GRIB_Version == 1 )
     {
+      ISEC1_Year           = PDS_Year;
       ISEC1_Century        = PDS_Century;
       ISEC1_SubCenterID    = PDS_Subcenter;
       ISEC1_DecScaleFactor = PDS_DecimalScale;
     }
   else
     {
-      ISEC1_Century        = 1;
+      int year;
+      year                 = GET_UINT1(pds[12]);
+      if ( year <= 100 )
+	{
+	  ISEC1_Year       = year;
+	  ISEC1_Century    = 1;
+	}
+      else
+	{
+	  ISEC1_Year       = year%100;
+	  ISEC1_Century    = 1 + (year-ISEC1_Year)/100;
+	}
       ISEC1_SubCenterID    = 0;
       ISEC1_DecScaleFactor = 0;
     }
@@ -7353,7 +7366,7 @@ void gribPrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
   unsigned char *is = NULL, *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
   int century, subcenter, decimalscale, nerr;
   int fc_num = 0;
-  int date;
+  int year = 0, date;
 
   if ( header )
     {
@@ -7376,11 +7389,13 @@ void gribPrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
   switch(IS_GRIB_Version)
     {   
     case 0:
+      year                = GET_UINT1(pds[12]);
       century             = 1;
       subcenter           = 0;
       decimalscale        = 0;
       break;
     case 1:
+      year                = PDS_Year;
       century             = PDS_Century;
       subcenter           = PDS_Subcenter;
       decimalscale        = PDS_DecimalScale;
@@ -7396,14 +7411,14 @@ void gribPrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
       if ( pds[40] == 1 )
 	fc_num = GET_UINT1(pds[49]);
 
-  if ( PDS_Year < 0 )
+  if ( year < 0 )
     {
-      date = (-PDS_Year)*10000+PDS_Month*100+PDS_Day;
+      date = (-year)*10000+PDS_Month*100+PDS_Day;
       century = -century;
     }
   else
     {
-      date =    PDS_Year*10000+PDS_Month*100+PDS_Day;
+      date =    year*10000+PDS_Month*100+PDS_Day;
     }
       
   fprintf(stdout, "%5d :%4d%4d%4d%4d%4d %4d %4d%4d%7d%7d %8d%6d%3d%3d%3d%3d%5d%6d%5d%4d\n", nrec,
@@ -8336,7 +8351,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.1.1" " of ""Mar 17 2008"" ""11:13:55";
+static const char grb_libvers[] = "1.2.0" " of ""May 21 2008"" ""18:03:42";
 const char *
 gribLibraryVersion(void)
 {
