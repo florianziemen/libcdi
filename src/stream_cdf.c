@@ -288,11 +288,12 @@ int cdfInqDatatype(int xtype)
 {
   int datatype;
 
-  if      ( xtype == NC_BYTE  )  datatype = DATATYPE_INT8;
-  else if ( xtype == NC_SHORT )  datatype = DATATYPE_INT16;
-  else if ( xtype == NC_INT   )  datatype = DATATYPE_INT32;
-  else if ( xtype == NC_FLOAT )  datatype = DATATYPE_FLT32;
-  else                           datatype = DATATYPE_FLT64;
+  if      ( xtype == NC_BYTE   )  datatype = DATATYPE_INT8;
+  /* else if ( xtype == NC_CHAR   )  datatype = DATATYPE_UINT8; */
+  else if ( xtype == NC_SHORT  )  datatype = DATATYPE_INT16;
+  else if ( xtype == NC_INT    )  datatype = DATATYPE_INT32;
+  else if ( xtype == NC_DOUBLE )  datatype = DATATYPE_FLT64;
+  else                            datatype = DATATYPE_FLT32;
 
   return (datatype);
 }
@@ -304,6 +305,7 @@ int cdfDefDatatype(int datatype)
   int xtype;
 
   if      ( datatype == DATATYPE_INT8  )  xtype = NC_BYTE;
+  /* else if ( datatype == DATATYPE_UINT8 )  xtype = NC_CHAR; */
   else if ( datatype == DATATYPE_INT16 )  xtype = NC_SHORT;
   else if ( datatype == DATATYPE_INT32 )  xtype = NC_INT;
   else if ( datatype == DATATYPE_FLT64 )  xtype = NC_DOUBLE;
@@ -2673,7 +2675,8 @@ void cdfWriteVarDP(int streamID, int varID, double *data, int nmiss)
 	    }
 	}
 
-      if ( dtype == DATATYPE_INT8 || dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 )
+      if ( dtype == DATATYPE_UINT8 || dtype == DATATYPE_INT8 ||
+	   dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 )
 	{
 	  for ( i = 0; i < nvals; i++ ) data[i] = NINT(data[i]);
 	}
@@ -3001,7 +3004,8 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int n
 	    }
 	}
 
-      if ( dtype == DATATYPE_INT8 || dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 )
+      if ( dtype == DATATYPE_UINT8 || dtype == DATATYPE_INT8 ||
+	   dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 )
 	{
 	  for ( i = 0; i < nvals; i++ ) data[i] = NINT(data[i]);
 	}

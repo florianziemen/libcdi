@@ -489,6 +489,7 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 	  else if ( prec > 0 && prec <= 32  ) sprintf(pstr, "P%d", prec);
 	  else if ( prec == DATATYPE_FLT32  ) strcpy(pstr, "F32");
 	  else if ( prec == DATATYPE_FLT64  ) strcpy(pstr, "F64");
+	  else if ( prec == DATATYPE_UINT8  ) strcpy(pstr, "U8");
 	  else if ( prec == DATATYPE_INT8   ) strcpy(pstr, "I8");
 	  else if ( prec == DATATYPE_INT16  ) strcpy(pstr, "I16");
 	  else if ( prec == DATATYPE_INT32  ) strcpy(pstr, "I32");
@@ -668,30 +669,86 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 static void setDefaultDataType(char *datatypestr)
 {
   static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
-  int datatype = -1;
+  int nbits = -1;
+  enum {D_UINT, D_INT, D_FLT};
+  int dtype = -1;
+
+  if      ( *datatypestr == 'i' || *datatypestr == 'I' )
+    {
+      dtype = D_INT;
+      datatypestr++;
+    }
+  else if ( *datatypestr == 'u' || *datatypestr == 'U' )
+    {
+      dtype = D_UINT;
+      datatypestr++;
+    }
+  else if ( *datatypestr == 'f' || *datatypestr == 'F' )
+    {
+      dtype = D_FLT;
+      datatypestr++;
+    }
 
   if ( isdigit((int) *datatypestr) )
     {
-      datatype = atoi(datatypestr);
-      if ( datatype < 10 )
+      nbits = atoi(datatypestr);
+      if ( nbits < 10 )
 	datatypestr += 1;
       else
 	datatypestr += 2;
 
-      if      ( datatype > 0 && datatype < 32 ) DefaultDataType = datatype;
-      else if ( datatype == 32 )
+      if ( dtype == -1 )
 	{
-	  if ( DefaultFileType == FILETYPE_GRB )
-	    DefaultDataType = DATATYPE_PACK32;
+	  if      ( nbits > 0 && nbits < 32 ) DefaultDataType = nbits;
+	  else if ( nbits == 32 )
+	    {
+	      if ( DefaultFileType == FILETYPE_GRB )
+		DefaultDataType = DATATYPE_PACK32;
+	      else
+		DefaultDataType = DATATYPE_FLT32;
+	    }
+	  else if ( nbits == 64 ) DefaultDataType = DATATYPE_FLT64;
 	  else
-	    DefaultDataType = DATATYPE_FLT32;
+	    {
+	      fprintf(stderr, "Unsupported number of bits %d!\n", nbits);
+	      fprintf(stderr, "Use 32/64 for filetype nc, srv, ext, ieg and 1-32 for grb.\n");
+	      exit(EXIT_FAILURE);
+	    }
 	}
-      else if ( datatype == 64 ) DefaultDataType = DATATYPE_FLT64;
       else
 	{
-	  fprintf(stderr, "Unsupported datatype %d!\n", datatype);
-	  fprintf(stderr, "Use 32/64 for filetype nc, srv, ext, ieg and 1-32 for grb.\n");
-	  exit(EXIT_FAILURE);
+	  if ( dtype == D_INT )
+	    {
+	      if      ( nbits ==  8 ) DefaultDataType = DATATYPE_INT8;
+	      else if ( nbits == 16 ) DefaultDataType = DATATYPE_INT16;
+	      else if ( nbits == 32 ) DefaultDataType = DATATYPE_INT32;
+	      else
+		{
+		  fprintf(stderr, "Unsupported number of bits = %d for datatype INT!\n", nbits);
+		  exit(EXIT_FAILURE);
+		}
+	    }
+	  /*
+	  else if ( dtype == D_UINT )
+	    {
+	      if      ( nbits ==  8 ) DefaultDataType = DATATYPE_UINT8;
+	      else
+		{
+		  fprintf(stderr, "Unsupported number of bits = %d for datatype UINT!\n", nbits);
+		  exit(EXIT_FAILURE);
+		}
+	    }
+	  */
+	  else if ( dtype == D_FLT )
+	    {
+	      if      ( nbits == 32 ) DefaultDataType = DATATYPE_FLT32;
+	      else if ( nbits == 64 ) DefaultDataType = DATATYPE_FLT64;
+	      else
+		{
+		  fprintf(stderr, "Unsupported number of bits = %d for datatype FLT!\n", nbits);
+		  exit(EXIT_FAILURE);
+		}
+	    }
 	}
     }
 
