@@ -1817,6 +1817,7 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
 {
   static char func[] = "grbDefGrid";
   int gridtype;
+  static short lwarn = TRUE;
 
   memset(isec2, 0, 16*sizeof(int));
 
@@ -1853,6 +1854,11 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
+      if ( lwarn )
+	{
+	  lwarn = FALSE;
+	  Warning(func, "Curvilinear grids are unsupported in GRIB format! Create wrong GDS!");
+	}
       gridtype = GRID_LONLAT;
     }
 

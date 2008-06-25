@@ -5,6 +5,7 @@
 	* add datatype UINT8
 	* streamClose: use taxisDestroy to release memory
 	* cdfInqContents: skip time variable with type = NC_CHAR
+	* grbDefGrid: add warning for curvilinear grids
 	* ptaxisCopy: don't overwrite item 'self' (bug fix)
 	* Version 1.2.0 released
 	

@@ -3824,8 +3824,8 @@ int cdfInqContents(int streamID)
 	  else if ( strcmp(attname, "axis") == 0 )
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
-	      /* attlen = strlen(attstring); */
-	      /* check attlen */
+	      /* don't check attlen anymore because the meaning changed from COARDS to CF */
+	      /*
 	      if ( (int) attlen != nvdims )
 		{
 		  if ( (int)(attlen-1) == nvdims && attstring[attlen] == 0 ) attlen--;
@@ -3843,6 +3843,7 @@ int cdfInqContents(int streamID)
 		    }
 		}
 	      else
+	      */
 		{
 		  while ( attlen-- )
 		    {
