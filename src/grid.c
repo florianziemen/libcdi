@@ -2105,7 +2105,8 @@ static void grid_check_cyclic(GRID *gridptr)
 	  xinc = xvals[1] - xvals[0];
 	  x0 = 2*xvals[xsize-1]-xvals[xsize-2]-360;
 	  if ( ! DBL_IS_EQUAL(xvals[0], xvals[xsize-1]) )
-	    if ( DBL_IS_EQUAL(x0, xvals[0]) ) gridptr->isCyclic = TRUE;
+	    if ( fabs(x0 - xvals[0]) < 1.e-4 ) gridptr->isCyclic = TRUE;
+	  /*	    if ( DBL_IS_EQUAL(x0, xvals[0]) ) gridptr->isCyclic = TRUE; */
 	}
     }
   else if ( gridptr->type == GRID_CURVILINEAR )

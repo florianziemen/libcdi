@@ -58,10 +58,14 @@ char *strdup(const char *s);
 #endif
 
 #ifndef DBL_IS_EQUAL
+#if  defined  (HAVE_ISNAN)
+#  define DBL_IS_EQUAL(x,y) (isnan(x)||isnan(y)?(isnan(x)&&isnan(y)?1:0):!(fabs(x - y) > 0))
+#else
 /*
-#define DBL_IS_EQUAL(x,y) (fabs(x - y) <= 2.0*(y*DBL_EPSILON + DBL_MIN))
+#  define DBL_IS_EQUAL(x,y) (fabs(x - y) <= 2.0*(y*DBL_EPSILON + DBL_MIN))
 */
-#define DBL_IS_EQUAL(x,y) (!(fabs(x - y) > 0))
+#  define DBL_IS_EQUAL(x,y) (!(fabs(x - y) > 0))
+#endif
 #endif
 
 #ifndef INT

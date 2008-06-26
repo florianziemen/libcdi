@@ -2834,7 +2834,6 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   if ( vlistInqVarMissvalUsed(vlistID, varID) == TRUE  )
     {
       missval = vlistInqVarMissval(vlistID, varID);
-
       for ( i = 0; i < gridsize; i++ )
 	if ( DBL_IS_EQUAL(data[i], missval) ) *nmiss += 1;
     }

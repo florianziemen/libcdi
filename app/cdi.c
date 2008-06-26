@@ -1,3 +1,7 @@
+#if defined (HAVE_CONFIG_H)
+#  include "../src/config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -9,13 +13,17 @@
 #include "cdi.h"
 
 
-
 #ifndef DBL_IS_EQUAL
+#if  defined  (HAVE_ISNAN)
+#  define DBL_IS_EQUAL(x,y) (isnan(x)||isnan(y)?(isnan(x)&&isnan(y)?1:0):!(fabs(x - y) > 0))
+#else
 /*
-#define DBL_IS_EQUAL(x,y) (fabs(x - y) <= 2.0*(y*DBL_EPSILON + DBL_MIN))
+#  define DBL_IS_EQUAL(x,y) (fabs(x - y) <= 2.0*(y*DBL_EPSILON + DBL_MIN))
 */
-#define DBL_IS_EQUAL(x,y) (!(fabs(x - y) > 0))
+#  define DBL_IS_EQUAL(x,y) (!(fabs(x - y) > 0))
 #endif
+#endif
+
 
 void decode_date(int date, int *year, int *month, int *day);
 void decode_time(int time, int *hour, int *minute);
