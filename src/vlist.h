@@ -52,7 +52,8 @@ typedef struct
   int      instID;
   int      modelID;
   int      tableID;
-  int      average;
+  int      timave;
+  int      timaccu;
   int      func;
   int      missvalused;  /* TRUE if missval is defined */
   char    *name;

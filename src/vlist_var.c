@@ -19,7 +19,8 @@ static void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].code         = 0;
   vlistptr->vars[varID].timeID       = CDI_UNDEFID;
   vlistptr->vars[varID].datatype     = CDI_UNDEFID;
-  vlistptr->vars[varID].average      = 0;
+  vlistptr->vars[varID].timave       = 0;
+  vlistptr->vars[varID].timaccu      = 0;
   vlistptr->vars[varID].gridID       = CDI_UNDEFID;
   vlistptr->vars[varID].zaxisID      = CDI_UNDEFID;
   vlistptr->vars[varID].instID       = CDI_UNDEFID;
@@ -956,6 +957,7 @@ void vlistDefVarScalefactor(int vlistID, int varID, double scalefactor)
   vlistptr->vars[varID].scalefactor = scalefactor;
 }
 
+
 void vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
 {
   static char func[] = "vlistDefVarAddoffset";
@@ -968,23 +970,46 @@ void vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
   vlistptr->vars[varID].addoffset = addoffset;
 }
 
-void vlistDefVarAverage(int vlistID, int varID, int average)
+
+void vlistDefVarTimave(int vlistID, int varID, int timave)
 {
   VLIST *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistptr->vars[varID].average = average;
+  vlistptr->vars[varID].timave = timave;
 }
 
-int vlistInqVarAverage(int vlistID, int varID)
+
+int vlistInqVarTimave(int vlistID, int varID)
 {
   VLIST *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  return (vlistptr->vars[varID].average);
+  return (vlistptr->vars[varID].timave);
 }
+
+
+void vlistDefVarTimaccu(int vlistID, int varID, int timaccu)
+{
+  VLIST *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistptr->vars[varID].timaccu = timaccu;
+}
+
+
+int vlistInqVarTimaccu(int vlistID, int varID)
+{
+  VLIST *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  return (vlistptr->vars[varID].timaccu);
+}
+
 
 void vlistDestroyVarName(int vlistID, int varID)
 {

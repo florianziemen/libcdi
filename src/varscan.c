@@ -30,7 +30,8 @@ typedef struct
 {
   int         code;
   int         prec;
-  int         average;
+  int         timave;
+  int         timaccu;
   int         gridID;
   int         zaxistype;
   int         ltype;     /* GRIB level type */
@@ -59,7 +60,8 @@ static void codeInitEntry(int varID, int code)
 {
   vartable[varID].code           = code;
   vartable[varID].prec           = 0;
-  vartable[varID].average        = 0;
+  vartable[varID].timave         = 0;
+  vartable[varID].timaccu        = 0;
   vartable[varID].gridID         = UNDEFID;
   vartable[varID].zaxistype      = 0;
   vartable[varID].ltype          = 0;
@@ -264,7 +266,7 @@ void varAddRecord(int recID, int code, int gridID, int zaxistype, int lbounds,
       vartable[varID].zaxistype = zaxistype;
       vartable[varID].ltype     = ltype;
       vartable[varID].lbounds   = lbounds;
-      if ( numavg ) vartable[varID].average = 1;
+      if ( numavg ) vartable[varID].timave = 1;
       vartable[varID].codetable = codetable;
     }
   else
@@ -325,7 +327,7 @@ void cdiGenVars(int streamID)
   int instID, modelID, tableID;
   int code, nlevels, zaxistype, lindex, ltype;
   int prec;
-  int average;
+  int timave, timaccu;
   int lbounds;
   int ztype;
   char name[256], longname[256], units[256];
@@ -353,7 +355,8 @@ void cdiGenVars(int streamID)
       instID    = vartable[varID].instID;
       modelID   = vartable[varID].modelID;
       tableID   = vartable[varID].tableID;
-      average   = vartable[varID].average;
+      timave    = vartable[varID].timave;
+      timaccu   = vartable[varID].timaccu;
       ztype     = vartable[varID].ztype;
 
       zaxisID = UNDEFID;
@@ -431,7 +434,8 @@ void cdiGenVars(int streamID)
 
       vlistDefVarCode(vlistID, varID, code);
       vlistDefVarDatatype(vlistID, varID, prec);
-      vlistDefVarAverage(vlistID, varID, average);
+      vlistDefVarTimave(vlistID, varID, timave);
+      vlistDefVarTimaccu(vlistID, varID, timaccu);
       vlistDefVarZtype(vlistID, varID, ztype);
 
       if ( cdiDefaultTableID != UNDEFID )

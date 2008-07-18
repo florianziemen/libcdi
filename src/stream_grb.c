@@ -2278,7 +2278,7 @@ void grbWriteVarDP(int streamID, int varID, const double *data, int nmiss)
   code     = vlistInqVarCode(vlistID, varID);
   date     = streamptr->tsteps[tsID].taxis.vdate;
   time     = streamptr->tsteps[tsID].taxis.vtime;
-  if ( vlistInqVarAverage(vlistID, varID) )
+  if ( vlistInqVarTimave(vlistID, varID) )
     numavg = streamptr->tsteps[tsID].taxis.numavg;
   datasize = gridInqSize(gridID);
 
@@ -2404,7 +2404,7 @@ void grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data
   code     = vlistInqVarCode(vlistID, varID);
   date     = streamptr->tsteps[tsID].taxis.vdate;
   time     = streamptr->tsteps[tsID].taxis.vtime;
-  if ( vlistInqVarAverage(vlistID, varID) )
+  if ( vlistInqVarTimave(vlistID, varID) )
     numavg = streamptr->tsteps[tsID].taxis.numavg;
   datasize = gridInqSize(gridID);
 
@@ -2596,7 +2596,7 @@ int grbWriteRecord(int streamID, const double *data, int nmiss)
   code     = vlistInqVarCode(vlistID, varID);
   date     = streamptr->tsteps[tsID].taxis.vdate;
   time     = streamptr->tsteps[tsID].taxis.vtime;
-  if ( vlistInqVarAverage(vlistID, varID) )
+  if ( vlistInqVarTimave(vlistID, varID) )
     numavg = streamptr->tsteps[tsID].taxis.numavg;
   datasize = gridInqSize(gridID);
 

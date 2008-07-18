@@ -28,6 +28,8 @@
       PARAMETER (CDI_ELIBNAVAIL         = -22)
       INTEGER    CDI_EUFSTRUCT         
       PARAMETER (CDI_EUFSTRUCT          = -23)
+      INTEGER    CDI_EUNC4             
+      PARAMETER (CDI_EUNC4              = -24)
 !
 !  File types
 !
@@ -139,6 +141,12 @@
       PARAMETER (DATATYPE_INT16         = 216)
       INTEGER    DATATYPE_INT32        
       PARAMETER (DATATYPE_INT32         = 232)
+      INTEGER    DATATYPE_UINT8        
+      PARAMETER (DATATYPE_UINT8         = 308)
+      INTEGER    DATATYPE_UINT16       
+      PARAMETER (DATATYPE_UINT16        = 316)
+      INTEGER    DATATYPE_UINT32       
+      PARAMETER (DATATYPE_UINT32        = 332)
 !
 !  internal data types
 !
@@ -774,16 +782,27 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarAddoffset
 
-!                     vlistDefVarAverage
+!                     vlistDefVarTimave
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
-!                                     INTEGER         average)
-      EXTERNAL        vlistDefVarAverage
+!                                     INTEGER         timave)
+      EXTERNAL        vlistDefVarTimave
 
-      INTEGER         vlistInqVarAverage
+      INTEGER         vlistInqVarTimave
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarAverage
+      EXTERNAL        vlistInqVarTimave
+
+!                     vlistDefVarTimaccu
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         timaccu)
+      EXTERNAL        vlistDefVarTimaccu
+
+      INTEGER         vlistInqVarTimaccu
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarTimaccu
 
       INTEGER         vlistInqVarSize
 !                                    (INTEGER         vlistID,
@@ -1293,7 +1312,7 @@
 !
 !                     zaxisName
 !                                    (INTEGER         zaxistype,
-!                                     CHARACTER*(*)   gridname)
+!                                     CHARACTER*(*)   zaxisname)
       EXTERNAL        zaxisName
 
       INTEGER         zaxisCreate

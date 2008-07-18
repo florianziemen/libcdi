@@ -375,8 +375,10 @@ void    vlistDefVarScalefactor(int vlistID, int varID, double scalefactor);
 double  vlistInqVarScalefactor(int vlistID, int varID);
 void    vlistDefVarAddoffset(int vlistID, int varID, double addoffset);
 double  vlistInqVarAddoffset(int vlistID, int varID);
-void    vlistDefVarAverage(int vlistID, int varID, int average);
-int     vlistInqVarAverage(int vlistID, int varID);
+void    vlistDefVarTimave(int vlistID, int varID, int timave);
+int     vlistInqVarTimave(int vlistID, int varID);
+void    vlistDefVarTimaccu(int vlistID, int varID, int timaccu);
+int     vlistInqVarTimaccu(int vlistID, int varID);
 int     vlistInqVarSize(int vlistID, int varID);
 int     vlistInqVarID(int vlistID, int code);
 
