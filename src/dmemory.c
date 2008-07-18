@@ -15,7 +15,7 @@
 /*
 #  if defined (__sun) || defined (__i386) || defined (__ia64) || defined (SX)
 */
-#  if defined (__i386) || defined (__ia64) || defined (SX)
+#  if defined (__ia64) || defined (SX)
 #    define  HAVE_MALLOC_H
 #  endif
 #endif

@@ -6,6 +6,7 @@
 	* streamClose: use taxisDestroy to release memory
 	* cdfInqContents: skip time variable with type = NC_CHAR
 	* grbDefGrid: add warning for curvilinear grids
+	* grbDefGrid: set increment for zonal means [request: Helmut P. Frank]
 	* ptaxisCopy: don't overwrite item 'self' (bug fix)
 	* DBL_IS_EQUAL: check NaN with isnan
 	* Version 1.2.0 released

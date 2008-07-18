@@ -305,9 +305,11 @@ int cdfDefDatatype(int datatype)
   int xtype;
 
   if      ( datatype == DATATYPE_INT8  )  xtype = NC_BYTE;
-  /* else if ( datatype == DATATYPE_UINT8 )  xtype = NC_CHAR; */
+  else if ( datatype == DATATYPE_UINT8 )  xtype = NC_SHORT;
   else if ( datatype == DATATYPE_INT16 )  xtype = NC_SHORT;
+  else if ( datatype == DATATYPE_UINT16 ) xtype = NC_INT;
   else if ( datatype == DATATYPE_INT32 )  xtype = NC_INT;
+  else if ( datatype == DATATYPE_UINT32 ) xtype = NC_INT;
   else if ( datatype == DATATYPE_FLT64 )  xtype = NC_DOUBLE;
   else                                    xtype = NC_FLOAT;
 
