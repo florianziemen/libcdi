@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Wed May 21 18:03:42 CEST 2008 */
+/* Generated automatically from m214003 on Wed Jul 23 15:50:19 CEST 2008 */
 
 /* GRIBLIB_VERSION="1.2.0" */
 
@@ -3023,7 +3023,7 @@ void encodeGDS(GRIBPACK *lGrib, int *gribLen, int *isec2, double *fsec2)
   int gdslen = 32;
   unsigned lonIncr, latIncr;
 
-  if ( ISEC2_GridType == GTYPE_LAMBERT ) gdslen += 10;
+  if ( ISEC2_GridType == GTYPE_LCC ) gdslen += 10;
 
   if ( ISEC2_GridType == GTYPE_LATLON_ROT )  gdslen += 10;
 
@@ -3060,7 +3060,7 @@ void encodeGDS(GRIBPACK *lGrib, int *gribLen, int *isec2, double *fsec2)
       Put1Byte(ISEC2_GME_BFlag);
       PutnZero(5);
     }
-  else if ( ISEC2_GridType == GTYPE_LAMBERT )
+  else if ( ISEC2_GridType == GTYPE_LCC )
     {
       Put2Byte(ISEC2_NumLon);          /*  6- 7 Longitudes               */
 
@@ -4189,7 +4189,7 @@ static int decodeGDS(unsigned char  *gds, int *isec0, int *isec2, double *fsec2,
       iret = decodeGDS_LL(gds, gdspos, isec0, isec2, imisng);
       */
     }
-  else if ( ISEC2_GridType == GTYPE_LAMBERT )
+  else if ( ISEC2_GridType == GTYPE_LCC )
     {
       ISEC2_NumLon    = GDS_NumLon;
       ISEC2_NumLat    = GDS_NumLat;
@@ -8289,7 +8289,10 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 	else
 	  Warning(func, "SZ ERROR: %d code %3d level %3d", status, PDS_Parameter, PDS_Level2);
       }
-
+    /*
+    fprintf(stderr, "gribUnzip: sl = %ld  dl = %ld   tl = %ld\n",
+	    (long)sourceLen, (long)destLen,(long) tmpLen);
+    */
     if ( tmpLen != destLen )
       Warning(func, "unzip size differ: code %3d level %3d  ibuflen %ld ubuflen %ld\n",
 	      PDS_Parameter, PDS_Level2, (long) destLen, (long) tmpLen);
@@ -8351,7 +8354,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.2.0" " of ""May 21 2008"" ""18:03:42";
+static const char grb_libvers[] = "1.2.0" " of ""Jul 23 2008"" ""15:50:19";
 const char *
 gribLibraryVersion(void)
 {

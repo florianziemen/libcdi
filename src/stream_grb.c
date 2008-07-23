@@ -48,9 +48,9 @@ int gribGetGridType(int *isec2)
 	gridtype = GRID_LONLAT;
 	break;
       }
-    case  GTYPE_LAMBERT:
+    case  GTYPE_LCC:
       {
-	gridtype = GRID_LAMBERT;
+	gridtype = GRID_LCC;
 	break;
       }
     case  GTYPE_GAUSSIAN:
@@ -172,7 +172,7 @@ int grbInqRecord(int streamID, int *varID, int *levelID)
       }
     case GRID_SPECTRAL:
     case GRID_GME:
-    case GRID_LAMBERT:
+    case GRID_LCC:
       {
 	break;
       }
@@ -838,7 +838,7 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
 	  }
 	break;
       }
-    case GRID_LAMBERT:
+    case GRID_LCC:
       {
 	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
 	  Error(func, "wrong datasize! isec4len = %d isec2len = %d",
@@ -848,13 +848,13 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
 	grid.xsize = ISEC2_NumLon;
 	grid.ysize = ISEC2_NumLat;
 
-	grid.lam_xinc      = ISEC2_Xinc;
-	grid.lam_yinc      = ISEC2_Yinc;
-	grid.lam_originLon = ISEC2_FirstLon * 0.001;
-	grid.lam_originLat = ISEC2_FirstLat * 0.001;
-	grid.lam_lonParY   = ISEC2_LoV * 0.001;
-	grid.lam_lat1      = ISEC2_LatS1 * 0.001;
-	grid.lam_lat2      = ISEC2_LatS2 * 0.001;
+	grid.lcc_xinc      = ISEC2_Xinc;
+	grid.lcc_yinc      = ISEC2_Yinc;
+	grid.lcc_originLon = ISEC2_FirstLon * 0.001;
+	grid.lcc_originLat = ISEC2_FirstLat * 0.001;
+	grid.lcc_lonParY   = ISEC2_LoV * 0.001;
+	grid.lcc_lat1      = ISEC2_LatS1 * 0.001;
+	grid.lcc_lat2      = ISEC2_LatS2 * 0.001;
 
 	grid.xdef   = 0;	    
 	grid.ydef   = 0;
@@ -1940,7 +1940,7 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
 
 	break;
       }
-    case GRID_LAMBERT:
+    case GRID_LCC:
       {
 	double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
 	int xsize, ysize;
@@ -1948,9 +1948,9 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
 	xsize = gridInqXsize(gridID);
 	ysize = gridInqYsize(gridID);
 
-	gridInqLambert(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
+	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
 
-	ISEC2_GridType = GTYPE_LAMBERT;
+	ISEC2_GridType = GTYPE_LCC;
 	ISEC2_NumLon   = xsize;
 	ISEC2_NumLat   = ysize;
 	ISEC2_FirstLon = NINT(originLon * 1000);

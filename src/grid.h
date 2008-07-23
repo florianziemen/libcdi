@@ -15,14 +15,14 @@ typedef struct {
   double  xfirst, yfirst;
   double  xlast, ylast;
   double  xinc, yinc;
-  double  lam_originLon;          /* lambert                        */
-  double  lam_originLat;
-  double  lam_lonParY;
-  double  lam_lat1;
-  double  lam_lat2;
-  double  lam_xinc;
-  double  lam_yinc;
-  int     lam_defined;
+  double  lcc_originLon;          /* lambert conformal conic        */
+  double  lcc_originLat;
+  double  lcc_lonParY;
+  double  lcc_lat1;
+  double  lcc_lat2;
+  double  lcc_xinc;
+  double  lcc_yinc;
+  int     lcc_defined;
   double  xpole, ypole, angle;    /* rotated north pole             */
   int     isCyclic;               /* TRUE for global cyclic grids   */
   int     isRotated;              /* TRUE for rotated grids         */
@@ -70,7 +70,7 @@ double phs_to_ph(double phis, double rlas, double polphi);
 double rl_to_rls(double phi, double rla, double polphi, double pollam);
 double ph_to_phs(double phi, double rla, double polphi, double pollam);
 
-/* Lambert grid */
+/* Lambert Conformal grid */
 int W3FB12(double xi, double xj, double alat1, double elon1, double dx,
 	   double elonv, double alatan, double *alat, double *elon);
 #endif

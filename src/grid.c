@@ -32,7 +32,8 @@ char *Grids[] = {
   "trajectory",
   "cell",
   "curvilinear",
-  "lambert",
+  "lcc",
+  "laea",
 };
 
 
@@ -182,14 +183,14 @@ static void grid_init_entry(GRID *gridptr)
   gridptr->nrowlon      = 0;
   gridptr->xinc         = 0.0;
   gridptr->yinc         = 0.0;
-  gridptr->lam_originLon = 0.0;
-  gridptr->lam_originLat = 0.0;
-  gridptr->lam_lonParY  = 0.0;
-  gridptr->lam_lat1     = 0.0;
-  gridptr->lam_lat2     = 0.0;
-  gridptr->lam_xinc     = 0.0;
-  gridptr->lam_yinc     = 0.0;
-  gridptr->lam_defined  = FALSE;
+  gridptr->lcc_originLon = 0.0;
+  gridptr->lcc_originLat = 0.0;
+  gridptr->lcc_lonParY  = 0.0;
+  gridptr->lcc_lat1     = 0.0;
+  gridptr->lcc_lat2     = 0.0;
+  gridptr->lcc_xinc     = 0.0;
+  gridptr->lcc_yinc     = 0.0;
+  gridptr->lcc_defined  = FALSE;
   gridptr->trunc        = 0;
   gridptr->nvertex      = 0;
   gridptr->nd           = 0;
@@ -579,7 +580,7 @@ static void defineYvals(int gridID)
 @Parameter
     @Item  gridtype  The type of the grid, one of the set of predefined CDI grid types.
                      The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
-                     @func{GRID_LONLAT}, @func{GRID_LAMBERT}, @func{GRID_SPECTRAL},
+                     @func{GRID_LONLAT}, @func{GRID_LCC}, @func{GRID_SPECTRAL},
                      @func{GRID_GME}, @func{GRID_CURVILINEAR} and @func{GRID_CELL}.
     @Item  size      Number of gridpoints.
 
@@ -1072,7 +1073,7 @@ The function @func{gridInqType} returns the type of a Grid.
 @func{gridInqType} returns the type of the grid,
 one of the set of predefined CDI grid types.
 The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
-@func{GRID_LONLAT}, @func{GRID_LAMBERT}, @func{GRID_SPECTRAL}, @func{GRID_GME},
+@func{GRID_LONLAT}, @func{GRID_LCC}, @func{GRID_SPECTRAL}, @func{GRID_GME},
 @func{GRID_CURVILINEAR} and @func{GRID_CELL}.
 
 @EndFunction
@@ -2311,7 +2312,7 @@ int gridGenerate(GRID grid)
     case GRID_CELL:
     case GRID_CURVILINEAR:
     case GRID_GENERIC:
-    case GRID_LAMBERT:
+    case GRID_LCC:
       {
 	if ( grid.xsize > 0 ) gridDefXsize(gridID, grid.xsize);
 	if ( grid.ysize > 0 ) gridDefYsize(gridID, grid.ysize);
@@ -2374,9 +2375,9 @@ int gridGenerate(GRID grid)
 	    gridDefArea(gridID, grid.area);
 	  }
 
-	if ( grid.type == GRID_LAMBERT )
-	  gridDefLambert(gridID, grid.lam_originLon, grid.lam_originLat, grid.lam_lonParY,
-			 grid.lam_lat1, grid.lam_lat2, grid.lam_xinc, grid.lam_yinc);
+	if ( grid.type == GRID_LCC )
+	  gridDefLCC(gridID, grid.lcc_originLon, grid.lcc_originLat, grid.lcc_lonParY,
+			 grid.lcc_lat1, grid.lcc_lat2, grid.lcc_xinc, grid.lcc_yinc);
 
 	break;
       }
@@ -3148,10 +3149,10 @@ void gridPrint(int gridID, int opt)
 	free(rowlon);
 	break;
       }
-    case GRID_LAMBERT:
+    case GRID_LCC:
       {
 	double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
-	gridInqLambert(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
+	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
 
 	fprintf(fp, "xsize     : %d\n", xsize);
 	fprintf(fp, "ysize     : %d\n", ysize);
@@ -3416,7 +3417,7 @@ int gridToCurvilinear(int gridID1)
     {
     case GRID_LONLAT:
     case GRID_GAUSSIAN:
-    case GRID_LAMBERT:
+    case GRID_LCC:
       {
 	int i, j, nx, ny;
 	double *xvals = NULL, *yvals = NULL;
@@ -3434,23 +3435,23 @@ int gridToCurvilinear(int gridID1)
 	yvals2D = (double *) malloc(gridsize*sizeof(double));
 
 
-	if ( gridtype == GRID_LAMBERT )
+	if ( gridtype == GRID_LCC )
 	  {
 	    double xi, xj;
 	    double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
 	    double zlat, zlon;
 	    int status;
 
-	    gridInqLambert(gridID1, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
+	    gridInqLCC(gridID1, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
 	    /*
 	    while ( originLon < 0 ) originLon += 360;
 	    while ( lonParY   < 0 ) lonParY   += 360;
 	    */
 	    if ( ! DBL_IS_EQUAL(xincm, yincm) )
-	      Warning(func, "X and Y increment must be equal on Lambert grid (Xinc = %g, Yinc = %g)\n", 
+	      Warning(func, "X and Y increment must be equal on Lambert Conformal grid (Xinc = %g, Yinc = %g)\n", 
 		      xincm, yincm);
 	    if ( ! DBL_IS_EQUAL(lat1, lat2) )
-	      Warning(func, "Lat1 and Lat2 must be equal on Lambert grid (Lat1 = %g, Lat2 = %g)\n", 
+	      Warning(func, "Lat1 and Lat2 must be equal on Lambert Conformal grid (Lat1 = %g, Lat2 = %g)\n", 
 		      lat1, lat2);
 		
 	    for ( j = 0; j < ny; j++ )
@@ -3505,7 +3506,7 @@ int gridToCurvilinear(int gridID1)
 	free(xvals2D);
 	free(yvals2D);
 
-	if ( gridtype == GRID_LAMBERT )
+	if ( gridtype == GRID_LCC )
 	  {		
 	    double xi, xj;
 	    double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
@@ -3513,7 +3514,7 @@ int gridToCurvilinear(int gridID1)
 	    int status;
 	    int index;
 
-	    gridInqLambert(gridID1, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
+	    gridInqLCC(gridID1, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
 
 	    xbounds2D = (double *) malloc(4*gridsize*sizeof(double));
 	    ybounds2D = (double *) malloc(4*gridsize*sizeof(double));
@@ -3825,10 +3826,10 @@ const double *gridInqYvalsPtr(int gridID)
 
 
 /*
-@Function  gridDefLambert
-@Title     Define the parameter of a Lambert grid
+@Function  gridDefLCC
+@Title     Define the parameter of a Lambert Conformal Conic grid
 
-@Prototype void gridDefLambert(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc)
+@Prototype void gridDefLCC(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc)
 @Parameter
     @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}
     @Item  originLon Longitude of the first grid point
@@ -3840,39 +3841,39 @@ const double *gridInqYvalsPtr(int gridID)
     @Item  yinc      Y-direction grid lenght in meter
  
 @Description
-The function @func{gridDefLambert} defines the parameter of a Lambert grid.
+The function @func{gridDefLCC} defines the parameter of a Lambert Conformal Conic grid.
 
 @EndFunction
 */
-void gridDefLambert(int gridID, double originLon, double originLat, double lonParY,
+void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
 		    double lat1, double lat2, double xinc, double yinc)
 {
-  static char func[] = "gridDefLambert";
+  static char func[] = "gridDefLCC";
   GRID *gridptr;
 
   gridptr = grid_to_pointer(gridID);
 
-  if ( gridptr->type != GRID_LAMBERT )
-    Warning(func, "Lambert grid definition for %s grid not allowed!", gridNamePtr(gridptr->type));
+  if ( gridptr->type != GRID_LCC )
+    Warning(func, "Lambert Conformal grid definition for %s grid not allowed!", gridNamePtr(gridptr->type));
   else
     {
-      gridptr->lam_originLon = originLon;
-      gridptr->lam_originLat = originLat;
-      gridptr->lam_lonParY   = lonParY;
-      gridptr->lam_lat1      = lat1;
-      gridptr->lam_lat2      = lat2;
-      gridptr->lam_xinc      = xinc;
-      gridptr->lam_yinc      = yinc;
-      gridptr->lam_defined   = TRUE;
+      gridptr->lcc_originLon = originLon;
+      gridptr->lcc_originLat = originLat;
+      gridptr->lcc_lonParY   = lonParY;
+      gridptr->lcc_lat1      = lat1;
+      gridptr->lcc_lat2      = lat2;
+      gridptr->lcc_xinc      = xinc;
+      gridptr->lcc_yinc      = yinc;
+      gridptr->lcc_defined   = TRUE;
     }
 }
 
 
 /*
-@Function  gridInqLambert
-@Title     Get the parameter of a Lambert grid
+@Function  gridInqLCC
+@Title     Get the parameter of a Lambert Conformal Conic grid
 
-@Prototype void gridInqLambert(int gridID, double *originLon, double *originLat, double *lonParY, double *lat1, double *lat2, double *xinc, double *yinc)
+@Prototype void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonParY, double *lat1, double *lat2, double *xinc, double *yinc)
 @Parameter
     @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}
     @Item  originLon Longitude of the first grid point
@@ -3884,34 +3885,34 @@ void gridDefLambert(int gridID, double originLon, double originLat, double lonPa
     @Item  yinc      Y-direction grid lenght in meter
  
 @Description
-The function @func{gridInqLambert} returns the parameter of a Lambert grid.
+The function @func{gridInqLCC} returns the parameter of a Lambert Conformal Conic grid.
 
 @EndFunction
 */
-void gridInqLambert(int gridID, double *originLon, double *originLat, double *lonParY,
+void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonParY,
 		    double *lat1, double *lat2, double *xinc, double *yinc)
 {
-  static char func[] = "gridDefLambert";
+  static char func[] = "gridDefLCC";
   GRID *gridptr;
 
   gridptr = grid_to_pointer(gridID);
 
-  if ( gridptr->type != GRID_LAMBERT )
-    Warning(func, "Lambert grid definition for %s grid not available!", gridNamePtr(gridptr->type));
+  if ( gridptr->type != GRID_LCC )
+    Warning(func, "Lambert Conformal grid definition for %s grid not available!", gridNamePtr(gridptr->type));
   else
     {
-      if ( gridptr->lam_defined )
+      if ( gridptr->lcc_defined )
 	{
-	  *originLon = gridptr->lam_originLon;
-	  *originLat = gridptr->lam_originLat;
-	  *lonParY   = gridptr->lam_lonParY;
-	  *lat1      = gridptr->lam_lat1;
-	  *lat2      = gridptr->lam_lat2;
-	  *xinc      = gridptr->lam_xinc;
-	  *yinc      = gridptr->lam_yinc;
+	  *originLon = gridptr->lcc_originLon;
+	  *originLat = gridptr->lcc_originLat;
+	  *lonParY   = gridptr->lcc_lonParY;
+	  *lat1      = gridptr->lcc_lat1;
+	  *lat2      = gridptr->lcc_lat2;
+	  *xinc      = gridptr->lcc_xinc;
+	  *yinc      = gridptr->lcc_yinc;
 	}
       else
-	Warning(func, "Lambert grid undefined (gridID = %d)", gridID);
+	Warning(func, "Lambert Conformal grid undefined (gridID = %d)", gridID);
     }
 }
 

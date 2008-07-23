@@ -179,8 +179,10 @@
       PARAMETER (GRID_CELL              =  9)
       INTEGER    GRID_CURVILINEAR      
       PARAMETER (GRID_CURVILINEAR       = 10)
-      INTEGER    GRID_LAMBERT          
-      PARAMETER (GRID_LAMBERT           = 11)
+      INTEGER    GRID_LCC              
+      PARAMETER (GRID_LCC               = 11)
+      INTEGER    GRID_LAEA             
+      PARAMETER (GRID_LAEA              = 12)
 !
 !  ZAXIS types
 !
@@ -1210,7 +1212,7 @@
 !
 !  Lambert grid
 !
-!                     gridDefLambert
+!                     gridDefLCC
 !                                    (INTEGER         gridID,
 !                                     DOUBLEPRECISION originLon,
 !                                     DOUBLEPRECISION originLat,
@@ -1219,9 +1221,9 @@
 !                                     DOUBLEPRECISION lat2,
 !                                     DOUBLEPRECISION xinc,
 !                                     DOUBLEPRECISION yinc)
-      EXTERNAL        gridDefLambert
+      EXTERNAL        gridDefLCC
 
-!                     gridInqLambert
+!                     gridInqLCC
 !                                    (INTEGER         gridID,
 !                                     DOUBLEPRECISION originLon,
 !                                     DOUBLEPRECISION originLat,
@@ -1230,7 +1232,7 @@
 !                                     DOUBLEPRECISION lat2,
 !                                     DOUBLEPRECISION xinc,
 !                                     DOUBLEPRECISION yinc)
-      EXTERNAL        gridInqLambert
+      EXTERNAL        gridInqLCC
 
 !                     gridDefArea
 !                                    (INTEGER         gridID,

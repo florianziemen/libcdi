@@ -33,7 +33,7 @@
 #define  GTYPE_GAUSSIAN_ROT         14  /*  rotated gaussian grid                    */
 #define  GTYPE_GAUSSIAN_STR         24  /*  stretched gaussian grid                  */
 #define  GTYPE_GAUSSIAN_ROTSTR      34  /*  rotated and stretched gaussian grid      */
-#define  GTYPE_LAMBERT               3  /*  Lambert conformal                        */
+#define  GTYPE_LCC                   3  /*  Lambert conformal                        */
 #define  GTYPE_SPECTRAL             50  /*  spherical harmonics                      */
 #define  GTYPE_GME                 192  /*  hexagonal GME grid                       */
 
