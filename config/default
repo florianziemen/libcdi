@@ -43,7 +43,7 @@ case "${HOSTNAME}" in
 	./configure --prefix=$HOME/local/SUN64 \
                     --with-netcdf=/scratch/small/m214/m214089/local/SunOS64 \
                     --with-szlib=$HOME/local/solaris10 \
-                    CC=cc CFLAGS="-g -mt -fast -xtarget=native -m64"
+                    CC=cc CFLAGS="-g -mt -xO3 -xtarget=native -m64"
 	;;
 # sx6-nec-superux12.2
     cs*)

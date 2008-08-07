@@ -2151,6 +2151,12 @@ void cdfDefGrid(int streamID, int gridID)
     {
       cdfDefCell(streamID, gridID);
     }
+  /*
+  else if ( gridtype == GRID_LCC )
+    {
+      cdfDefLcc(streamID, gridID);
+    }
+  */
   else
     {
       Error(func, "%s grid unsupported!", gridNamePtr(gridtype));

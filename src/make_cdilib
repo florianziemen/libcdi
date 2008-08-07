@@ -72,7 +72,7 @@ c="dmemory.c         \
    ieglib.c          \
    grid_rot.c        \
    grid_gme.c        \
-   grid_lambert.c    \
+   grid_lcc.c        \
    grid.c            \
    zaxis.c           \
    cdf_int.c         \

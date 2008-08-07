@@ -31,7 +31,7 @@ libcdi_a_SOURCES = 	 \
 	grid.c           \
 	grid_rot.c       \
 	grid_gme.c       \
-	grid_lambert.c   \
+	grid_lcc.c       \
 	zaxis.c		 \
         stream.c         \
 	stream_var.c     \
