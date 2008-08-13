@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Wed Jul 23 15:50:19 CEST 2008 */
+/* Generated automatically from m214003 on Wed Aug 13 11:39:57 CEST 2008 */
 
 /* GRIBLIB_VERSION="1.2.0" */
 
@@ -8354,7 +8354,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.2.0" " of ""Jul 23 2008"" ""15:50:19";
+static const char grb_libvers[] = "1.2.0" " of ""Aug 13 2008"" ""11:39:57";
 const char *
 gribLibraryVersion(void)
 {

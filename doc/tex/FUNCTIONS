@@ -85,8 +85,6 @@ Function catalog:
    gridInqYlongname     Get the longname of a Y-axis
    gridDefYunits        Define the units of a Y-axis
    gridInqYunits        Get the units of a Y-axis
-   gridDefLambert       Define the parameter of a Lambert grid
-   gridInqLambert       Get the parameter of a Lambert grid
 -------------------------------------------------------------
    zaxis
 -------------------------------------------------------------

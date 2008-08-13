@@ -17,7 +17,7 @@ The function {\tt gridCreate} creates a horizontal Grid.
 \item[{\tt gridtype}]
 The type of the grid, one of the set of predefined {\CDI} grid types.
                      The valid {\CDI} grid types are {\tt GRID\_GENERIC}, {\tt GRID\_GAUSSIAN},
-                     {\tt GRID\_LONLAT}, {\tt GRID\_LAMBERT}, {\tt GRID\_SPECTRAL},
+                     {\tt GRID\_LONLAT}, {\tt GRID\_LCC}, {\tt GRID\_SPECTRAL},
                      {\tt GRID\_GME}, {\tt GRID\_CURVILINEAR} and {\tt GRID\_CELL}.
 \item[{\tt size}]
 Number of gridpoints.
@@ -124,7 +124,7 @@ Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}
 {\tt gridInqType} returns the type of the grid,
 one of the set of predefined {\CDI} grid types.
 The valid {\CDI} grid types are {\tt GRID\_GENERIC}, {\tt GRID\_GAUSSIAN},
-{\tt GRID\_LONLAT}, {\tt GRID\_LAMBERT}, {\tt GRID\_SPECTRAL}, {\tt GRID\_GME},
+{\tt GRID\_LONLAT}, {\tt GRID\_LCC}, {\tt GRID\_SPECTRAL}, {\tt GRID\_GME},
 {\tt GRID\_CURVILINEAR} and {\tt GRID\_CELL}.
 
 
@@ -769,77 +769,3 @@ Units of the Y-axis
 
 {\tt gridInqYunits} returns the units of the Y-axis to the parameter units.
 
-
-
-\subsection{Define the parameter of a Lambert grid: {\tt gridDefLambert}}
-\index{gridDefLambert}
-\label{gridDefLambert}
-
-The function {\tt gridDefLambert} defines the parameter of a Lambert grid.
-
-\subsubsection*{Usage}
-
-\begin{verbatim}
-    SUBROUTINE gridDefLambert(INTEGER gridID, REAL*8 originLon, REAL*8 originLat, 
-                              REAL*8 lonParY, REAL*8 lat1, REAL*8 lat2, REAL*8 xinc, 
-                              REAL*8 yinc)
-\end{verbatim}
-
-\hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\tt originLon\ }
-\item[{\tt gridID}]
-Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}
-\item[{\tt originLon}]
-Longitude of the first grid point
-\item[{\tt originLat}]
-Latitude of the first grid point
-\item[{\tt lonParY}]
-The East longitude of the meridian which is parallel to the Y-axis
-\item[{\tt lat1}]
-First latitude from the pole at which the secant cone cuts the sphere
-\item[{\tt lat2}]
-Second latitude at which the secant cone cuts the sphere
-\item[{\tt xinc}]
-X-direction grid lenght in meter
-\item[{\tt yinc}]
-Y-direction grid lenght in meter
- 
-\end{deflist}
-\end{minipage}
-
-
-\subsection{Get the parameter of a Lambert grid: {\tt gridInqLambert}}
-\index{gridInqLambert}
-\label{gridInqLambert}
-
-The function {\tt gridInqLambert} returns the parameter of a Lambert grid.
-
-\subsubsection*{Usage}
-
-\begin{verbatim}
-    SUBROUTINE gridInqLambert(INTEGER gridID, REAL*8 originLon, REAL*8 originLat, 
-                              REAL*8 lonParY, REAL*8 lat1, REAL*8 lat2, REAL*8 xinc, 
-                              REAL*8 yinc)
-\end{verbatim}
-
-\hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\tt originLon\ }
-\item[{\tt gridID}]
-Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}
-\item[{\tt originLon}]
-Longitude of the first grid point
-\item[{\tt originLat}]
-Latitude of the first grid point
-\item[{\tt lonParY}]
-The East longitude of the meridian which is parallel to the Y-axis
-\item[{\tt lat1}]
-First latitude from the pole at which the secant cone cuts the sphere
-\item[{\tt lat2}]
-Second latitude at which the secant cone cuts the sphere
-\item[{\tt xinc}]
-X-direction grid lenght in meter
-\item[{\tt yinc}]
-Y-direction grid lenght in meter
- 
-\end{deflist}
-\end{minipage}
