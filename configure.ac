@@ -1,6 +1,6 @@
 #  Process this file with autoconf to produce a configure script.
 
-AC_INIT(cdi, 1.2.0, Uwe.Schulzweida@zmaw.de)
+AC_INIT(cdi, 1.2.1, Uwe.Schulzweida@zmaw.de)
 
 CONFIG_ABORT=yes
 
@@ -208,11 +208,15 @@ AC_ARG_WITH([szlib],
             [AS_HELP_STRING([--with-szlib=<directory>],
                             [Specify location of SZLIB library. Configure will expect to find subdirs include and lib.])],
             [SZLIBDIR=$with_szlib])
-AC_MSG_RESULT([$SZLIBDIR])
-LDFLAGS="$LDFLAGS -L$SZLIBDIR/lib"
-CPPFLAGS="$CPPFLAGS -I$SZLIBDIR/include"
-AC_CHECK_LIB(sz, SZ_BufftoBuffCompress,, LDFLAGS="$LDFLAGS")
-AC_SUBST([SZLIBDIR], [$SZLIBDIR])
+if test -z "$SZLIBDIR" ; then
+  AC_MSG_RESULT([no])
+else
+  AC_MSG_RESULT([$SZLIBDIR])
+  LDFLAGS="$LDFLAGS -L$SZLIBDIR/lib"
+  CPPFLAGS="$CPPFLAGS -I$SZLIBDIR/include"
+  AC_CHECK_LIB(sz, SZ_BufftoBuffCompress, , LDFLAGS="$LDFLAGS")
+# AC_SUBST([SZLIBDIR], [$SZLIBDIR])
+fi
 
 #  Check C / Fortran interface
 UD_CHECK_CFINT([$srcdir/src/cfortran.h])

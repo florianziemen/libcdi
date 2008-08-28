@@ -1198,6 +1198,63 @@ void streamClose(int streamID)
 
 
 /*
+@Function  streamSync
+@Title     Synchronize an Open Dataset to Disk
+
+@Prototype  void streamSync(int streamID)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}
+
+@Description
+The function @func{streamSync} offers a way to synchronize the disk copy of a dataset with in-memory buffers.
+
+@EndFunction
+*/
+void streamSync(int streamID)
+{
+  static char func[] = "streamSync";
+  int filetype;
+  int fileID;
+  int vlistID;
+  STREAM *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(func, streamptr);
+
+  fileID   = streamptr->fileID;
+  filetype = streamptr->filetype;
+  vlistID  = streamInqVlist(streamID);
+
+  if ( fileID == CDI_UNDEFID )
+    Warning(func, "File %s not open!", streamptr->filename);
+  else
+    {
+      if ( streamptr->filemode == 'w' || streamptr->filemode == 'a' )
+	{
+	  switch (filetype)
+	    {
+#if  defined  (HAVE_LIBNETCDF)
+	    case FILETYPE_NC:
+	    case FILETYPE_NC2:
+	    case FILETYPE_NC4:
+	      {
+		void cdf_sync (int ncid);
+		cdf_sync(fileID);
+		break;
+	      }
+#endif
+	    default:
+	      {
+		break;
+	      }
+	    }
+	}
+    }
+}
+
+
+/*
 @Function  streamDefTimestep
 @Title     Define time step
 

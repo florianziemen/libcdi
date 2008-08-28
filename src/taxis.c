@@ -598,6 +598,19 @@ int taxisInqType(int taxisID)
 }
 
 
+int taxisHasBounds(int taxisID)
+{
+  static char func[] = "taxisHasBounds";
+  TAXIS *taxisptr;
+
+  taxisptr = taxis_to_pointer(taxisID);
+
+  taxis_check_ptr(func, taxisptr);
+
+  return (taxisptr->has_bounds);
+}
+
+
 void taxisCopyTimestep(int taxisID2, int taxisID1)
 {
   static char func[] = "taxisCopyTimestep";
@@ -655,6 +668,20 @@ int taxisInqVdate(int taxisID)
 }
 
 
+void taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub)
+{
+  static char func[] = "taxisInqVdateBounds";
+  TAXIS *taxisptr;
+
+  taxisptr = taxis_to_pointer(taxisID);
+
+  taxis_check_ptr(func, taxisptr);
+
+  *vdate_lb = taxisptr->vdate_lb;
+  *vdate_ub = taxisptr->vdate_ub;
+}
+
+
 /*
 @Function  taxisInqVtime
 @Title     Get the verification time
@@ -681,6 +708,20 @@ int taxisInqVtime(int taxisID)
   taxis_check_ptr(func, taxisptr);
 
   return (taxisptr->vtime);
+}
+
+
+void taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub)
+{
+  static char func[] = "taxisInqVtimeBounds";
+  TAXIS *taxisptr;
+
+  taxisptr = taxis_to_pointer(taxisID);
+
+  taxis_check_ptr(func, taxisptr);
+
+  *vtime_lb = taxisptr->vtime_lb;
+  *vtime_ub = taxisptr->vtime_ub;
 }
 
 

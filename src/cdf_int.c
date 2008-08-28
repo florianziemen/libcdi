@@ -151,6 +151,18 @@ void cdf_enddef(int ncid)
 }
 
 
+void cdf_sync(int ncid)
+{
+  static char func[] = "cdf_sync";
+  int status;
+
+  status = nc_sync(ncid);
+
+  if ( status != NC_NOERR )
+    Error(func, "%s", nc_strerror(status));
+}
+
+
 void cdf_inq(int ncid, int *ndimsp, int *nvarsp, int *ngattsp, int *unlimdimidp)
 {
   static char func[] = "cdf_inq";

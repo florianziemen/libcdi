@@ -1,5 +1,5 @@
 !
-! Fortran interface for CDI library version 1.2.0
+! Fortran interface for CDI library version 1.2.1
 !
 
       INTEGER    CDI_UNDEFID           
@@ -302,6 +302,10 @@
 !                     streamClose
 !                                    (INTEGER         streamID)
       EXTERNAL        streamClose
+
+!                     streamSync
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamSync
 
 !                     streamDefVlist
 !                                    (INTEGER         streamID,
@@ -1518,6 +1522,22 @@
 !                                    (INTEGER         taxisID,
 !                                     INTEGER         time)
       EXTERNAL        taxisDefRtime
+
+      INTEGER         taxisHasBounds
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisHasBounds
+
+!                     taxisInqVdateBounds
+!                                    (INTEGER         taxisID,
+!                                     INTEGER         vdate_lb,
+!                                     INTEGER         vdate_ub)
+      EXTERNAL        taxisInqVdateBounds
+
+!                     taxisInqVtimeBounds
+!                                    (INTEGER         taxisID,
+!                                     INTEGER         vtime_lb,
+!                                     INTEGER         vtime_ub)
+      EXTERNAL        taxisInqVtimeBounds
 
 !                     taxisDefCalendar
 !                                    (INTEGER         taxisID,
