@@ -678,6 +678,10 @@ void    taxisDefRtime(int taxisID, int time);
 
 int     taxisHasBounds(int taxisID);
 
+void    taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub);
+
+void    taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub);
+
 void    taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub);
 
 void    taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub);

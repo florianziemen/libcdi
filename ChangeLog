@@ -1,6 +1,7 @@
 2008-12-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* add new function: streamSync
+	* add new taxis functions: taxisXXXVdateBounds and taxisXXXVtimeBounds
 	* Version 1.2.1 released
 
 2008-08-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
