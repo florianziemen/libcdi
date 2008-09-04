@@ -402,6 +402,8 @@ int taxisDuplicate(int taxisID1)
 
   ptaxisCopy(taxisptr2, taxisptr1);
 
+  taxisptr2->has_bounds = FALSE;
+
   return (taxisID2);
 }
 
