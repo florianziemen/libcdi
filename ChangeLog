@@ -2,6 +2,8 @@
 
 	* add new function: streamSync
 	* add new taxis functions: taxisXXXVdateBounds and taxisXXXVtimeBounds
+	* cdfReadVarSliceDP: add swapxy support
+	* netcdf: support of timeunit 'year'
 	* Version 1.2.1 released
 
 2008-08-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

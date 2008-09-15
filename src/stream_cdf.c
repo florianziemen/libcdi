@@ -741,7 +741,9 @@ void cdfDefTime(int streamID)
   unitstr[0] = 0;
   if ( streamptr->tsteps[0].taxis.type == TAXIS_ABSOLUTE )
     {
-      if ( streamptr->tsteps[0].taxis.unit == TUNIT_MONTH )
+      if ( streamptr->tsteps[0].taxis.unit == TUNIT_YEAR )
+	sprintf(unitstr, "year as %s", "%Y.%f");
+      else if ( streamptr->tsteps[0].taxis.unit == TUNIT_MONTH )
 	sprintf(unitstr, "month as %s", "%Y%m.%f");
       else
 	sprintf(unitstr, "day as %s", "%Y%m%d.%f");
@@ -2719,6 +2721,7 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   int ndimsp;
   int dimids[9];
   int swapyz = FALSE;
+  int swapxy = FALSE;
   double missval;
   int laddoffset, lscalefactor;
   double addoffset, scalefactor;
@@ -2751,6 +2754,10 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   if ( gridInqType(gridID) == GRID_TRAJECTORY )
     {
       cdfReadGridTraj(streamID, gridID);
+    }
+  else if ( gridInqType(gridID) == GRID_CELL )
+    {
+      xid = streamptr->xdimID[gridindex];
     }
   else
     {
@@ -2788,6 +2795,20 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 	}
     }
 
+  if ( yid != UNDEFID && xid != UNDEFID )
+    {
+      if ( xid == dimids[ndimsp-1] && yid == dimids[ndimsp-2] )
+	swapxy = FALSE;
+      else if ( yid == dimids[ndimsp-1] && xid == dimids[ndimsp-2] )
+	swapxy = TRUE;
+      else
+	{
+	  char name[256];
+	  vlistInqVarName(vlistID, varID, name);
+	  Error(func, "Unsupported array structure for %s\n", name);
+	}
+    }
+
   if ( swapyz )
     {
       if ( yid != UNDEFID )
@@ -2804,6 +2825,14 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 	  count[ndims] = 1;
 	  ndims++;
 	}
+      if ( xid != UNDEFID )
+	{
+	  start[ndims] = 0;
+	  /* count[ndims] = gridInqXsize(gridID); */
+	  cdf_inq_dimlen(fileID, xid, &size);
+	  count[ndims] = size;
+	  ndims++;
+	}
     }
   else
     {
@@ -2813,23 +2842,45 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 	  count[ndims] = 1;
 	  ndims++;
 	}
-      if ( yid != UNDEFID )
-	{
-	  start[ndims] = 0;
-	  /* count[ndims] = gridInqYsize(gridID); */
-	  cdf_inq_dimlen(fileID, yid, &size);
-	  count[ndims] = size;
-	  ndims++;
-	}
-    }
 
-  if ( xid != UNDEFID )
-    {
-      start[ndims] = 0;
-      /* count[ndims] = gridInqXsize(gridID); */
-      cdf_inq_dimlen(fileID, xid, &size);
-      count[ndims] = size;
-      ndims++;
+      if ( swapxy )
+	{
+	  if ( xid != UNDEFID )
+	    {
+	      start[ndims] = 0;
+	      /* count[ndims] = gridInqXsize(gridID); */
+	      cdf_inq_dimlen(fileID, xid, &size);
+	      count[ndims] = size;
+	      ndims++;
+	    }
+	  if ( yid != UNDEFID )
+	    {
+	      start[ndims] = 0;
+	      /* count[ndims] = gridInqYsize(gridID); */
+	      cdf_inq_dimlen(fileID, yid, &size);
+	      count[ndims] = size;
+	      ndims++;
+	    }
+	}
+      else
+	{
+	  if ( yid != UNDEFID )
+	    {
+	      start[ndims] = 0;
+	      /* count[ndims] = gridInqYsize(gridID); */
+	      cdf_inq_dimlen(fileID, yid, &size);
+	      count[ndims] = size;
+	      ndims++;
+	    }
+	  if ( xid != UNDEFID )
+	    {
+	      start[ndims] = 0;
+	      /* count[ndims] = gridInqXsize(gridID); */
+	      cdf_inq_dimlen(fileID, xid, &size);
+	      count[ndims] = size;
+	      ndims++;
+	    }
+	}
     }
 
   if ( CDI_Debug )
@@ -4477,6 +4528,21 @@ int cdfInqContents(int streamID)
 		    {
 		      if ( (int) ysize == 0 ) size = xsize;
 		      else                    size = ysize;
+
+		      /* Check size of 1 dimensional coordinate variables */
+		      {
+			int dimid;
+			size_t dimsize;
+			dimid = ncvars[yvarid].dimids[0];
+			cdf_inq_dimlen(fileID, dimid, &dimsize);
+			if ( dimsize != size )
+			  {
+			    Warning(func, "Variable %s has unsupported array structure, skipped!",
+				    ncvars[ncvarid].name);
+			    ncvars[ncvarid].isvar = -1;
+			    continue;
+			  }
+		      }
 		    }
 
 		  if ( ncvars[yvarid].xtype == NC_FLOAT ) grid.prec = DATATYPE_FLT32;

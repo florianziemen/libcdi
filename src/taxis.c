@@ -1109,6 +1109,7 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
   int vdate = 0, vtime = 0;
   int hour, minute;
   int year, month, day;
+  static int lwarn = TRUE;
 
   if ( timeunit == TUNIT_HOUR )
     {
@@ -1140,9 +1141,18 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
       vdate = (int) timevalue*100;
       vtime = 0;
     }
+  else if ( timeunit == TUNIT_YEAR )
+    {
+      vdate = (int) timevalue*10000;
+      vtime = 0;
+    }
   else
     {
-      Message(func, "Unsupported TIMEUNIT: %s!", tunitNamePtr(timeunit));
+      if ( lwarn )
+	{
+	  Warning(func, "timeunit %s unsupported!", tunitNamePtr(timeunit));
+	  lwarn = FALSE;
+	}
     }
 
   /* verify date and time */
@@ -1185,7 +1195,14 @@ double encode_timeval(int date, int time, TAXIS *taxis)
 
   if ( taxis->type == TAXIS_ABSOLUTE )
     {
-      if ( taxis->unit == TUNIT_MONTH )
+      if ( taxis->unit == TUNIT_YEAR )
+	{
+	  int year, month, day;
+	  decode_date(date, &year, &month, &day);
+
+	  timevalue = year;
+	}
+      else if ( taxis->unit == TUNIT_MONTH )
 	{
 	  int year, month, day;
 	  decode_date(date, &year, &month, &day);
