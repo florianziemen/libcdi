@@ -3872,7 +3872,8 @@ int cdfInqContents(int streamID)
 	      if ( atttype == NC_CHAR )
 		{
 		  cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
-		  if ( strncmp(attstring, "ignore", attlen) == 0 )
+		  if ( strncmp(attstring, "ignore", attlen) == 0 ||
+		       strncmp(attstring, "Ignore", attlen) == 0 )
 		    {
 		      ncvars[ncvarid].ignore = TRUE;
 		      cdfSetVar(ncvars, ncvarid, FALSE);
