@@ -465,7 +465,7 @@ int streamInqByteorder(int streamID)
 
 char *streamFilesuffix(int filetype)
 {
-  static char *fileSuffix[] = {"", ".grb", ".g2", ".nc", ".nc2", ".nc4", ".srv", ".ext", ".h5", ".ieg"};
+  static char *fileSuffix[] = {"", ".grb", ".g2", ".nc", ".nc2", ".nc4", ".srv", ".ext", ".ieg", ".h5"};
   int size = (int) (sizeof(fileSuffix)/sizeof(char *));
 
   if ( filetype > 0 && filetype < size )

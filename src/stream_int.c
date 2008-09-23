@@ -38,8 +38,8 @@ char *Filetypes[] = {
   "netCDF4",
   "SERVICE",
   "EXTRA",
-  "HDF5",
   "IEG",
+  "HDF5",
 };
 
 #undef  UNDEFID

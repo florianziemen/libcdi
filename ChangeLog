@@ -4,6 +4,7 @@
 	* add new taxis functions: taxisXXXVdateBounds and taxisXXXVtimeBounds
 	* cdfReadVarSliceDP: add swapxy support
 	* cdfInqContents: support of grid stdname 'longitude' and 'latitude'
+	* streamFilesuffix: bug fix for IEG [report: Class Teichmann]
 	* netcdf: support of timeunit 'year'
 	* Version 1.2.1 released
 
