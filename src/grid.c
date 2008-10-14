@@ -2174,6 +2174,7 @@ int gridIsRotated(int gridID)
 
 int gridCompare(int gridID, GRID grid)
 {
+  static char func[] = "gridCompare";
   int differ = 1;
   int xsize, ysize;
 
@@ -2189,6 +2190,8 @@ int gridCompare(int gridID, GRID grid)
 	    {
 	      /*
 	      printf("gridID      %d\n", gridID);
+	      printf("grid.xdef   %d\n", grid.xdef);
+	      printf("grid.ydef   %d\n", grid.ydef);
 	      printf("grid.xsize  %d\n", grid.xsize);
 	      printf("grid.ysize  %d\n", grid.ysize);
 	      printf("grid.xfirst %f\n", grid.xfirst);
@@ -2203,26 +2206,56 @@ int gridCompare(int gridID, GRID grid)
 	      if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
 		{
 		  if ( grid.xdef == 2 && grid.ydef == 2 )
-		    if ( ! (DBL_IS_EQUAL(grid.xfirst, 0) && DBL_IS_EQUAL(grid.xlast, 0) && DBL_IS_EQUAL(grid.xinc, 0)) &&
-			 ! (DBL_IS_EQUAL(grid.yfirst, 0) && DBL_IS_EQUAL(grid.ylast, 0) && DBL_IS_EQUAL(grid.yinc, 0)) &&
-			 !DBL_IS_EQUAL(grid.xfirst, grid.xlast) && !DBL_IS_EQUAL(grid.yfirst, grid.ylast) )
-		      {
-			if ( !DBL_IS_EQUAL(grid.xfirst, gridInqXval(gridID, 0)) ||
-			     !DBL_IS_EQUAL(grid.yfirst, gridInqYval(gridID, 0)))
+		    {
+		      if ( ! (DBL_IS_EQUAL(grid.xfirst, 0) && DBL_IS_EQUAL(grid.xlast, 0) && DBL_IS_EQUAL(grid.xinc, 0)) &&
+			   ! (DBL_IS_EQUAL(grid.yfirst, 0) && DBL_IS_EQUAL(grid.ylast, 0) && DBL_IS_EQUAL(grid.yinc, 0)) &&
+			   !DBL_IS_EQUAL(grid.xfirst, grid.xlast) && !DBL_IS_EQUAL(grid.yfirst, grid.ylast) )
+			{
+			  if ( !DBL_IS_EQUAL(grid.xfirst, gridInqXval(gridID, 0)) ||
+			       !DBL_IS_EQUAL(grid.yfirst, gridInqYval(gridID, 0)))
+			    {
+			      differ = 1;
+			    }
+			  if ( !differ && fabs(grid.xinc) > 0 &&
+			       fabs(fabs(grid.xinc) - fabs(gridInqXinc(gridID))) > fabs(grid.xinc/1000))
+			    {
+			      differ = 1;
+			    }
+			  if ( !differ && fabs(grid.yinc) > 0 &&
+			       fabs(fabs(grid.yinc) - fabs(gridInqYinc(gridID))) > fabs(grid.yinc/1000))
+			    {
+			      differ = 1;
+			    }
+			}
+		    }
+		  else
+		    {
+		      int i;
+		      double *xvals, *yvals;
+
+		      xvals = (double *) malloc(xsize*sizeof(double));
+		      yvals = (double *) malloc(ysize*sizeof(double));
+
+		      gridInqXvals(gridID, xvals);
+		      gridInqYvals(gridID, yvals);
+
+		      for ( i = 0; i < xsize; ++i )
+			if ( fabs(grid.xvals[i] - xvals[i]) > 1.e-10 )
 			  {
 			    differ = 1;
+			    break;
 			  }
-			if ( !differ && fabs(grid.xinc) > 0 &&
-			     fabs(fabs(grid.xinc) - fabs(gridInqXinc(gridID))) > fabs(grid.xinc/1000))
+
+		      for ( i = 0; i < ysize; ++i )
+			if ( fabs(grid.yvals[i] - yvals[i]) > 1.e-10 )
 			  {
 			    differ = 1;
+			    break;
 			  }
-			if ( !differ && fabs(grid.yinc) > 0 &&
-			     fabs(fabs(grid.yinc) - fabs(gridInqYinc(gridID))) > fabs(grid.yinc/1000))
-			  {
-			    differ = 1;
-			  }
-		      }
+		  
+		      free(xvals);
+		      free(yvals);
+		    }
 		}
 	      else
 		differ = 1;		

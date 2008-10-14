@@ -5,6 +5,7 @@
 	* cdfReadVarSliceDP: add swapxy support
 	* cdfInqContents: support of grid stdname 'longitude' and 'latitude'
 	* streamFilesuffix: bug fix for IEG [report: Class Teichmann]
+	* gridCompare: bug fix for lonlat grids and type = 1 (cdfInqContents)
 	* netcdf: support of timeunit 'year'
 	* Version 1.2.1 released
 
