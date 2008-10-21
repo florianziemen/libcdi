@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 
 #include "config.h"
 
@@ -80,6 +81,18 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   int  funcargtype[20];
   int  funcargc;
   char *strsort[99999];
+  char timestr[30];
+  time_t date_and_time_in_sec;
+  struct tm *date_and_time;
+
+  date_and_time_in_sec = time(NULL);
+  timestr[0] = 0;
+
+  if ( date_and_time_in_sec != -1 )
+    {
+      date_and_time = localtime(&date_and_time_in_sec);
+      (void) strftime(timestr, sizeof(timestr), "%B %Y", date_and_time);
+    }
 
   /*
   for ( i = 0; i < 8; i++ ) strsort[i] = cname[i];
@@ -101,8 +114,13 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 
   /* fortran include */
 
+  fprintf(fpinc, "! This file was automatically created, don't edit!\n");
   fprintf(fpinc, "!\n");
   fprintf(fpinc, "! Fortran interface for CDI library version %s\n", VERSION);
+  fprintf(fpinc, "!\n");
+  fprintf(fpinc, "! Author:\n");
+  fprintf(fpinc, "! -------\n");
+  fprintf(fpinc, "! Uwe Schulzweida, MPI-MET, Hamburg,   %s\n", timestr);
   fprintf(fpinc, "!\n\n");
 
   /* fortran interface */

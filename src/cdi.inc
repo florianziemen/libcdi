@@ -1,5 +1,10 @@
+! This file was automatically created, don't edit!
 !
 ! Fortran interface for CDI library version 1.2.1
+!
+! Author:
+! -------
+! Uwe Schulzweida, MPI-MET, Hamburg,   October 2008
 !
 
       INTEGER    CDI_UNDEFID           
@@ -1526,6 +1531,18 @@
       INTEGER         taxisHasBounds
 !                                    (INTEGER         taxisID)
       EXTERNAL        taxisHasBounds
+
+!                     taxisDefVdateBounds
+!                                    (INTEGER         taxisID,
+!                                     INTEGER         vdate_lb,
+!                                     INTEGER         vdate_ub)
+      EXTERNAL        taxisDefVdateBounds
+
+!                     taxisDefVtimeBounds
+!                                    (INTEGER         taxisID,
+!                                     INTEGER         vtime_lb,
+!                                     INTEGER         vtime_ub)
+      EXTERNAL        taxisDefVtimeBounds
 
 !                     taxisInqVdateBounds
 !                                    (INTEGER         taxisID,
