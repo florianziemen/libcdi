@@ -1,7 +1,7 @@
 
-/* Generated automatically from m214003 on Wed Aug 13 11:39:57 CEST 2008 */
+/* Generated automatically from m214003 on Thu Oct 23 13:39:51 CEST 2008 */
 
-/* GRIBLIB_VERSION="1.2.0" */
+/* GRIBLIB_VERSION="1.2.1" */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -215,11 +215,14 @@ void  gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 #define  GDS_RotAngle        GET_Real(&(gds[38]))
 
 /* Lambert */
-#define  GDS_LoV             GET_INT3(gds[17], gds[18], gds[19])
-#define  GDS_Xinc            GET_INT3(gds[20], gds[21], gds[22])
-#define  GDS_Yinc            GET_INT3(gds[23], gds[24], gds[25])
-#define  GDS_LatS1           GET_INT3(gds[28], gds[29], gds[30])
-#define  GDS_LatS2           GET_INT3(gds[31], gds[32], gds[33])
+#define  GDS_Lambert_Lov     GET_INT3(gds[17], gds[18], gds[19])
+#define  GDS_Lambert_dx	     GET_INT3(gds[20], gds[21], gds[22])
+#define  GDS_Lambert_dy	     GET_INT3(gds[23], gds[24], gds[25])
+#define  GDS_Lambert_ProjFlag GET_UINT1(gds[26])
+#define  GDS_Lambert_LatS1   GET_INT3(gds[28], gds[29], gds[30])
+#define  GDS_Lambert_LatS2   GET_INT3(gds[31], gds[32], gds[33])
+#define  GDS_Lambert_LatSP   GET_INT3(gds[34], gds[35], gds[36])
+#define  GDS_Lambert_LonSP   GET_INT3(gds[37], gds[37], gds[37])
 
 /* Section 3: Bit Map Section (BMS) */
 
@@ -3068,14 +3071,16 @@ void encodeGDS(GRIBPACK *lGrib, int *gribLen, int *isec2, double *fsec2)
       Put3Int(ISEC2_FirstLat);
       Put3Int(ISEC2_FirstLon);
       Put1Byte(ISEC2_ResFlag);         /* 16    Resolution flag          */
-      Put3Int(ISEC2_LoV);              /* 17-19 */
-      Put3Int(ISEC2_Xinc);             /* 20-22 */
-      Put3Int(ISEC2_Yinc);             /* 23-25 */
-      PutnZero(1);
+      Put3Int(ISEC2_Lambert_Lov);      /* 17-19 */
+      Put3Int(ISEC2_Lambert_dx);       /* 20-22 */
+      Put3Int(ISEC2_Lambert_dy);       /* 23-25 */
+      Put1Byte(ISEC2_Lambert_ProjFlag);/* 26    Projection flag          */
       Put1Byte(ISEC2_ScanFlag);        /* 27    Scanning mode            */
-      Put3Int(ISEC2_LatS1);            /* 28-30 */  
-      Put3Int(ISEC2_LatS2);            /* 31-33 */
-      PutnZero(8);                     /* 34-41 */
+      Put3Int(ISEC2_Lambert_LatS1);    /* 28-30 */  
+      Put3Int(ISEC2_Lambert_LatS2);    /* 31-33 */
+      Put3Int(ISEC2_Lambert_LatSP);    /* 34-36 */  
+      Put3Int(ISEC2_Lambert_LonSP);    /* 37-39 */
+      PutnZero(2);                     /* 34-41 */
     }
   else if ( ISEC2_GridType == GTYPE_LATLON    ||
 	    ISEC2_GridType == GTYPE_GAUSSIAN  ||
@@ -4196,12 +4201,15 @@ static int decodeGDS(unsigned char  *gds, int *isec0, int *isec2, double *fsec2,
       ISEC2_FirstLat  = GDS_FirstLat;
       ISEC2_FirstLon  = GDS_FirstLon;
       ISEC2_ResFlag   = GDS_ResFlag;
-      ISEC2_LoV       = GDS_LoV;
-      ISEC2_Xinc      = GDS_Xinc;
-      ISEC2_Yinc      = GDS_Yinc;
-      ISEC2_LatS1     = GDS_LatS1;
-      ISEC2_LatS2     = GDS_LatS2;
-      ISEC2_ScanFlag  = GDS_ScanFlag;
+      ISEC2_Lambert_Lov   = GDS_Lambert_Lov;
+      ISEC2_Lambert_dx    = GDS_Lambert_dx;
+      ISEC2_Lambert_dy    = GDS_Lambert_dy;
+      ISEC2_Lambert_LatS1 = GDS_Lambert_LatS1;
+      ISEC2_Lambert_LatS2 = GDS_Lambert_LatS2;
+      ISEC2_Lambert_LatSP = GDS_Lambert_LatSP;
+      ISEC2_Lambert_LonSP = GDS_Lambert_LonSP;
+      ISEC2_Lambert_ProjFlag = GDS_Lambert_ProjFlag;
+      ISEC2_ScanFlag      = GDS_ScanFlag;
     }
   else if ( ISEC2_GridType == GTYPE_SPECTRAL )
     {
@@ -8354,7 +8362,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.2.0" " of ""Aug 13 2008"" ""11:39:57";
+static const char grb_libvers[] = "1.2.1" " of ""Oct 23 2008"" ""13:39:51";
 const char *
 gribLibraryVersion(void)
 {

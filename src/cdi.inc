@@ -1229,7 +1229,9 @@
 !                                     DOUBLEPRECISION lat1,
 !                                     DOUBLEPRECISION lat2,
 !                                     DOUBLEPRECISION xinc,
-!                                     DOUBLEPRECISION yinc)
+!                                     DOUBLEPRECISION yinc,
+!                                     INTEGER         projflag,
+!                                     INTEGER         scanflag)
       EXTERNAL        gridDefLCC
 
 !                     gridInqLCC
@@ -1240,7 +1242,9 @@
 !                                     DOUBLEPRECISION lat1,
 !                                     DOUBLEPRECISION lat2,
 !                                     DOUBLEPRECISION xinc,
-!                                     DOUBLEPRECISION yinc)
+!                                     DOUBLEPRECISION yinc,
+!                                     INTEGER         projflag,
+!                                     INTEGER         scanflag)
       EXTERNAL        gridInqLCC
 
 !                     gridDefArea

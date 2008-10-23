@@ -4,6 +4,7 @@
 	* add new taxis functions: taxisXXXVdateBounds and taxisXXXVtimeBounds
 	* cdfReadVarSliceDP: add swapxy support
 	* cdfInqContents: support of grid stdname 'longitude' and 'latitude'
+	* lambert grid: support of projection flag (bug fix) [report: Andrew Digby]
 	* streamFilesuffix: bug fix for IEG [report: Class Teichmann]
 	* gridCompare: bug fix for lonlat grids and type = 1 (cdfInqContents)
 	* netcdf: support of timeunit 'year'

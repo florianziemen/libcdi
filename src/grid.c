@@ -190,6 +190,8 @@ static void grid_init_entry(GRID *gridptr)
   gridptr->lcc_lat2     = 0.0;
   gridptr->lcc_xinc     = 0.0;
   gridptr->lcc_yinc     = 0.0;
+  gridptr->lcc_projflag = 0;
+  gridptr->lcc_scanflag = 0;
   gridptr->lcc_defined  = FALSE;
   gridptr->trunc        = 0;
   gridptr->nvertex      = 0;
@@ -2410,7 +2412,8 @@ int gridGenerate(GRID grid)
 
 	if ( grid.type == GRID_LCC )
 	  gridDefLCC(gridID, grid.lcc_originLon, grid.lcc_originLat, grid.lcc_lonParY,
-			 grid.lcc_lat1, grid.lcc_lat2, grid.lcc_xinc, grid.lcc_yinc);
+		     grid.lcc_lat1, grid.lcc_lat2, grid.lcc_xinc, grid.lcc_yinc,
+		     grid.lcc_projflag, grid.lcc_scanflag);
 
 	break;
       }
@@ -3185,7 +3188,9 @@ void gridPrint(int gridID, int opt)
     case GRID_LCC:
       {
 	double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
-	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
+	int projflag, scanflag;
+	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
+		   &projflag, &scanflag);
 
 	fprintf(fp, "xsize     : %d\n", xsize);
 	fprintf(fp, "ysize     : %d\n", ysize);
@@ -3197,6 +3202,10 @@ void gridPrint(int gridID, int opt)
 	fprintf(fp, "lat2      : %g\n", lat2);
 	fprintf(fp, "xinc      : %g\n", xincm);
 	fprintf(fp, "yinc      : %g\n", yincm);
+	if ( (projflag & 128) == 0 )
+	  fprintf(fp, "projection: northpole\n");
+	else
+	  fprintf(fp, "projection: southpole\n");
 
 	break;
       }
@@ -3473,9 +3482,11 @@ int gridToCurvilinear(int gridID1)
 	    double xi, xj;
 	    double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
 	    double zlat, zlon;
+	    int projflag, scanflag;
 	    int status;
 
-	    gridInqLCC(gridID1, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
+	    gridInqLCC(gridID1, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
+		       &projflag, &scanflag);
 	    /*
 	    while ( originLon < 0 ) originLon += 360;
 	    while ( lonParY   < 0 ) lonParY   += 360;
@@ -3544,10 +3555,12 @@ int gridToCurvilinear(int gridID1)
 	    double xi, xj;
 	    double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
 	    double zlat, zlon;
+	    int projflag, scanflag;
 	    int status;
 	    int index;
 
-	    gridInqLCC(gridID1, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
+	    gridInqLCC(gridID1, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
+		       &projflag, &scanflag);
 
 	    xbounds2D = (double *) malloc(4*gridsize*sizeof(double));
 	    ybounds2D = (double *) malloc(4*gridsize*sizeof(double));
@@ -3862,7 +3875,7 @@ const double *gridInqYvalsPtr(int gridID)
 @Function  gridDefLCC
 @Title     Define the parameter of a Lambert Conformal Conic grid
 
-@Prototype void gridDefLCC(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc)
+@Prototype void gridDefLCC(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc, int projflag, int scanflag)
 @Parameter
     @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}
     @Item  originLon Longitude of the first grid point
@@ -3872,6 +3885,8 @@ const double *gridInqYvalsPtr(int gridID)
     @Item  lat2      Second latitude at which the secant cone cuts the sphere
     @Item  xinc      X-direction grid lenght in meter
     @Item  yinc      Y-direction grid lenght in meter
+    @Item  projflag  Projection centre flag
+    @Item  scanflag  Scanning mode flag
  
 @Description
 The function @func{gridDefLCC} defines the parameter of a Lambert Conformal Conic grid.
@@ -3879,7 +3894,8 @@ The function @func{gridDefLCC} defines the parameter of a Lambert Conformal Coni
 @EndFunction
 */
 void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
-		    double lat1, double lat2, double xinc, double yinc)
+		double lat1, double lat2, double xinc, double yinc,
+		int projflag, int scanflag)
 {
   static char func[] = "gridDefLCC";
   GRID *gridptr;
@@ -3897,6 +3913,8 @@ void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
       gridptr->lcc_lat2      = lat2;
       gridptr->lcc_xinc      = xinc;
       gridptr->lcc_yinc      = yinc;
+      gridptr->lcc_projflag  = projflag;
+      gridptr->lcc_scanflag  = scanflag;
       gridptr->lcc_defined   = TRUE;
     }
 }
@@ -3906,7 +3924,7 @@ void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
 @Function  gridInqLCC
 @Title     Get the parameter of a Lambert Conformal Conic grid
 
-@Prototype void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonParY, double *lat1, double *lat2, double *xinc, double *yinc)
+@Prototype void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonParY, double *lat1, double *lat2, double *xinc, double *yinc, int *projflag, int *scanflag)
 @Parameter
     @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}
     @Item  originLon Longitude of the first grid point
@@ -3916,6 +3934,8 @@ void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
     @Item  lat2      Second latitude at which the secant cone cuts the sphere
     @Item  xinc      X-direction grid lenght in meter
     @Item  yinc      Y-direction grid lenght in meter
+    @Item  projflag  Projection centre flag
+    @Item  scanflag  Scanning mode flag
  
 @Description
 The function @func{gridInqLCC} returns the parameter of a Lambert Conformal Conic grid.
@@ -3923,7 +3943,8 @@ The function @func{gridInqLCC} returns the parameter of a Lambert Conformal Coni
 @EndFunction
 */
 void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonParY,
-		    double *lat1, double *lat2, double *xinc, double *yinc)
+		double *lat1, double *lat2, double *xinc, double *yinc,
+		int *projflag, int *scanflag)
 {
   static char func[] = "gridDefLCC";
   GRID *gridptr;
@@ -3943,6 +3964,8 @@ void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonPar
 	  *lat2      = gridptr->lcc_lat2;
 	  *xinc      = gridptr->lcc_xinc;
 	  *yinc      = gridptr->lcc_yinc;
+	  *projflag  = gridptr->lcc_projflag;
+	  *scanflag  = gridptr->lcc_scanflag;
 	}
       else
 	Warning(func, "Lambert Conformal grid undefined (gridID = %d)", gridID);

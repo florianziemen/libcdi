@@ -848,13 +848,15 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
 	grid.xsize = ISEC2_NumLon;
 	grid.ysize = ISEC2_NumLat;
 
-	grid.lcc_xinc      = ISEC2_Xinc;
-	grid.lcc_yinc      = ISEC2_Yinc;
+	grid.lcc_xinc      = ISEC2_Lambert_dx;
+	grid.lcc_yinc      = ISEC2_Lambert_dy;
 	grid.lcc_originLon = ISEC2_FirstLon * 0.001;
 	grid.lcc_originLat = ISEC2_FirstLat * 0.001;
-	grid.lcc_lonParY   = ISEC2_LoV * 0.001;
-	grid.lcc_lat1      = ISEC2_LatS1 * 0.001;
-	grid.lcc_lat2      = ISEC2_LatS2 * 0.001;
+	grid.lcc_lonParY   = ISEC2_Lambert_Lov * 0.001;
+	grid.lcc_lat1      = ISEC2_Lambert_LatS1 * 0.001;
+	grid.lcc_lat2      = ISEC2_Lambert_LatS2 * 0.001;
+	grid.lcc_projflag  = ISEC2_Lambert_ProjFlag;
+	grid.lcc_scanflag  = ISEC2_ScanFlag;
 
 	grid.xdef   = 0;	    
 	grid.ydef   = 0;
@@ -1944,24 +1946,28 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
       {
 	double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
 	int xsize, ysize;
+	int projflag, scanflag;
 
 	xsize = gridInqXsize(gridID);
 	ysize = gridInqYsize(gridID);
 
-	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm);
+	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
+		   &projflag, &scanflag);
 
 	ISEC2_GridType = GTYPE_LCC;
 	ISEC2_NumLon   = xsize;
 	ISEC2_NumLat   = ysize;
 	ISEC2_FirstLon = NINT(originLon * 1000);
 	ISEC2_FirstLat = NINT(originLat * 1000);
-	ISEC2_LoV      = NINT(lonParY * 1000);
-	ISEC2_LatS1    = NINT(lat1 * 1000);
-	ISEC2_LatS2    = NINT(lat2 * 1000);
-	ISEC2_Xinc     = NINT(xincm);
-	ISEC2_Yinc     = NINT(yincm);
-
-	ISEC2_ScanFlag = 2; /* scanning west to east, south to north */
+	ISEC2_Lambert_Lov    = NINT(lonParY * 1000);
+	ISEC2_Lambert_LatS1  = NINT(lat1 * 1000);
+	ISEC2_Lambert_LatS2  = NINT(lat2 * 1000);
+	ISEC2_Lambert_dx     = NINT(xincm);
+	ISEC2_Lambert_dy     = NINT(yincm);
+	ISEC2_Lambert_LatSP  = 0;
+	ISEC2_Lambert_LatSP  = 0;
+	ISEC2_Lambert_ProjFlag = projflag;
+	ISEC2_ScanFlag = scanflag;
 
 	break;
       }

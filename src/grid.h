@@ -22,6 +22,8 @@ typedef struct {
   double  lcc_lat2;
   double  lcc_xinc;
   double  lcc_yinc;
+  int     lcc_projflag;
+  int     lcc_scanflag;
   int     lcc_defined;
   double  xpole, ypole, angle;    /* rotated north pole             */
   int     isCyclic;               /* TRUE for global cyclic grids   */

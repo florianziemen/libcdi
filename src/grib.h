@@ -122,11 +122,14 @@
 #define  ISEC2_NumVCP               (isec2[11])  /*  Number of vertical coordinate parameters     */
 
 /* Lambert */
-#define  ISEC2_LoV                  (isec2[ 6])  /*  Orientation of the grid                      */
-#define  ISEC2_Xinc                 (isec2[ 8])  /*  X-direction grid length                      */
-#define  ISEC2_Yinc                 (isec2[ 9])  /*  Y-direction grid length                      */
-#define  ISEC2_LatS1                (isec2[13])  /*  First lat at which the secant cone cuts the sphere */
-#define  ISEC2_LatS2                (isec2[14])  /*  Second lat at which the secant cone cuts the sphere */
+#define  ISEC2_Lambert_Lov          (isec2[ 6])  /*  Orientation of the grid                      */
+#define  ISEC2_Lambert_dx           (isec2[ 8])  /*  X-direction grid length                      */
+#define  ISEC2_Lambert_dy           (isec2[ 9])  /*  Y-direction grid length                      */
+#define  ISEC2_Lambert_ProjFlag     (isec2[12])  /*  Projection centre flag                       */
+#define  ISEC2_Lambert_LatS1        (isec2[13])  /*  First lat at which the secant cone cuts the sphere */
+#define  ISEC2_Lambert_LatS2        (isec2[14])  /*  Second lat at which the secant cone cuts the sphere */
+#define  ISEC2_Lambert_LatSP        (isec2[19])  /*  Latitude of the southern pole                */
+#define  ISEC2_Lambert_LonSP        (isec2[20])  /*  Longitude of the southern pole               */
 
 
 #define  ISEC2_Reduced              (isec2[16])  /* 0: regular, 1: reduced grid                   */
