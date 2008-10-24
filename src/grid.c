@@ -3503,7 +3503,7 @@ int gridToCurvilinear(int gridID1)
 		{
 		  xi = i+1;
 		  xj = j+1;
-		  status = W3FB12(xi, xj, originLat, originLon, xincm, lonParY, lat1, &zlat,&zlon);
+		  status = W3FB12(xi, xj, originLat, originLon, xincm, lonParY, lat1, &zlat, &zlon);
 		  xvals2D[j*nx+i] = zlon;
 		  yvals2D[j*nx+i] = zlat;
 		}
