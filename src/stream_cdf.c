@@ -4505,10 +4505,11 @@ int cdfInqContents(int streamID)
 		  strcpy(grid.xname, ncvars[xvarid].name);
 		  strcpy(grid.xlongname, ncvars[xvarid].longname);
 		  strcpy(grid.xunits, ncvars[xvarid].units);
+		  /* don't change the name !!! 
 		  if ( (len = strlen(grid.xname)) > 2 )
 		    if ( grid.xname[len-2] == '_' && isdigit((int) grid.xname[len-1]) )
 		      grid.xname[len-2] = 0;
-
+		  */
 		  if ( islon && xsize > 1 )
 		    {
 		      xinc = fabs(grid.xvals[0] - grid.xvals[1]);
@@ -4554,10 +4555,11 @@ int cdfInqContents(int streamID)
 		  strcpy(grid.yname, ncvars[yvarid].name);
 		  strcpy(grid.ylongname, ncvars[yvarid].longname);
 		  strcpy(grid.yunits, ncvars[yvarid].units);
+		  /* don't change the name !!! 
 		  if ( (len = strlen(grid.yname)) > 2 )
 		    if ( grid.yname[len-2] == '_' && isdigit((int) grid.yname[len-1]) )
 		      grid.yname[len-2] = 0;
-
+		  */
 		  if ( islon && (int) ysize > 1 )
 		    {
 		      yinc = fabs(grid.yvals[0] - grid.yvals[1]);
@@ -4848,10 +4850,11 @@ int cdfInqContents(int streamID)
 	      plongname = ncvars[zvarid].longname;
 	      punits    = ncvars[zvarid].units;
 	      if ( ncvars[zvarid].xtype == NC_FLOAT ) zprec = DATATYPE_FLT32;
+	      /* don't change the name !!! 
 	      if ( (len = strlen(pname)) > 2 )
 		if ( pname[len-2] == '_' && isdigit((int) pname[len-1]) )
 		  pname[len-2] = 0;
-	      
+	      */
 	      cdf_get_var_double(fileID, zvarid, zvar);
 	    }
 	  else
