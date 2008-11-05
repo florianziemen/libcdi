@@ -1046,7 +1046,8 @@ void cdfDefXaxis(int streamID, int gridID)
   char longname[256];
   char stdname[256];
   char axisname[256];
-  int index, index2, iz = 0;
+  int index, iz = 0;
+  /*  int index2; */
   int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
   int dimIDs[2];
@@ -1098,16 +1099,60 @@ void cdfDefXaxis(int streamID, int gridID)
 		    dimID = streamptr->xdimID[index];
 		    break;
 		  }
+	      /*
 	      for ( index2 = 0; index2 < index; index2++ )
 		if ( streamptr->xdimID[index] == streamptr->xdimID[index2] )
 		  break;
 	      if ( index2 == index ) iz++;
+	      */
 	    }
 	}
     }
 
   if ( dimID == UNDEFID )
     {
+      char axisname0[256];
+      char axisname2[256];
+      int checkname = FALSE;
+      int status;
+
+      /* check that the name is not allready defined */
+      checkname = TRUE;
+      iz = 0;
+
+      while ( checkname ) 
+	{
+	  strcpy(axisname2, axisname);
+	  if ( iz ) sprintf(&axisname2[strlen(axisname2)], "_%d", iz+1);
+
+	  status = nc_inq_varid(fileID, axisname2, &ncvarid);
+	  if ( status != NC_NOERR )
+	    {
+	      if ( iz )
+		{
+		  /* check that the name does not exist for other grids */
+		  for ( index = 0; index < ngrids; index++ )
+		    {
+		      gridID0 = vlistGrid(vlistID, index);
+		      if ( gridID != gridID0 )
+			{
+			  gridInqXname(gridID0, axisname0);
+			  if ( strcmp(axisname0, axisname2) == 0 ) break;
+			}
+		    }
+		  if ( index == ngrids ) checkname = FALSE;
+		}
+	      else
+		{
+		  checkname = FALSE;
+		}
+	    }
+
+	  if ( checkname ) iz++;
+
+	  if ( iz > 99 ) break;
+	}
+
       if ( iz ) sprintf(&axisname[strlen(axisname)], "_%d", iz+1);
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
@@ -1165,7 +1210,8 @@ void cdfDefYaxis(int streamID, int gridID)
   char longname[256];
   char stdname[256];
   char axisname[256];
-  int index, index2, iz = 0;
+  int index, iz = 0;
+  /*  int index2; */
   int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
   int dimIDs[2];
@@ -1217,16 +1263,60 @@ void cdfDefYaxis(int streamID, int gridID)
 		    dimID = streamptr->ydimID[index];
 		    break;
 		  }
+	      /*
 	      for ( index2 = 0; index2 < index; index2++ )
 		if ( streamptr->ydimID[index] == streamptr->ydimID[index2] )
 		  break;
 	      if ( index2 == index ) iz++;
+	      */
 	    }
 	}
     }
 
   if ( dimID == UNDEFID )
     {
+      char axisname0[256];
+      char axisname2[256];
+      int checkname = FALSE;
+      int status;
+
+      /* check that the name is not allready defined */
+      checkname = TRUE;
+      iz = 0;
+
+      while ( checkname ) 
+	{
+	  strcpy(axisname2, axisname);
+	  if ( iz ) sprintf(&axisname2[strlen(axisname2)], "_%d", iz+1);
+
+	  status = nc_inq_varid(fileID, axisname2, &ncvarid);
+	  if ( status != NC_NOERR )
+	    {
+	      if ( iz )
+		{
+		  /* check that the name does not exist for other grids */
+		  for ( index = 0; index < ngrids; index++ )
+		    {
+		      gridID0 = vlistGrid(vlistID, index);
+		      if ( gridID != gridID0 )
+			{
+			  gridInqYname(gridID0, axisname0);
+			  if ( strcmp(axisname0, axisname2) == 0 ) break;
+			}
+		    }
+		  if ( index == ngrids ) checkname = FALSE;
+		}
+	      else
+		{
+		  checkname = FALSE;
+		}
+	    }
+
+	  if ( checkname ) iz++;
+
+	  if ( iz > 99 ) break;
+	}
+
       if ( iz ) sprintf(&axisname[strlen(axisname)], "_%d", iz+1);
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
@@ -1908,7 +1998,7 @@ void cdfDefVCT(int streamID, int zaxisID)
 void cdfDefZaxis(int streamID, int zaxisID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  char zaxisname0[256];
+  /*  char zaxisname0[256]; */
   char axisname[256];
   char longname[256];
   char units[256];
@@ -1945,7 +2035,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
   if ( dimlen == 1 && type == ZAXIS_SURFACE ) return;
 
   zaxisInqName(zaxisID, axisname);
-
+  /*
   for ( index = 0; index < nzaxis; index++ )
     {
       if ( streamptr->zaxisID[index] != UNDEFID )
@@ -1955,9 +2045,51 @@ void cdfDefZaxis(int streamID, int zaxisID)
 	  if ( strcmp(zaxisname0, axisname) == 0 ) ilevel++;
 	}
     }
-
+  */
   if ( dimID == UNDEFID )
     {
+      char axisname0[256];
+      char axisname2[256];
+      int checkname = FALSE;
+      int status;
+
+      /* check that the name is not allready defined */
+      checkname = TRUE;
+      ilevel = 0;
+
+      while ( checkname ) 
+	{
+	  strcpy(axisname2, axisname);
+	  if ( ilevel ) sprintf(&axisname2[strlen(axisname2)], "_%d", ilevel+1);
+
+	  status = nc_inq_varid(fileID, axisname2, &ncvarid);
+	  if ( status != NC_NOERR )
+	    {
+	      if ( ilevel )
+		{
+		  /* check that the name does not exist for other grids */
+		  for ( index = 0; index < nzaxis; index++ )
+		    {
+		      zaxisID0 = vlistZaxis(vlistID, index);
+		      if ( zaxisID != zaxisID0 )
+			{
+			  zaxisInqName(zaxisID0, axisname0);
+			  if ( strcmp(axisname0, axisname2) == 0 ) break;
+			}
+		    }
+		  if ( index == nzaxis ) checkname = FALSE;
+		}
+	      else
+		{
+		  checkname = FALSE;
+		}
+	    }
+
+	  if ( checkname ) ilevel++;
+
+	  if ( ilevel > 99 ) break;
+	}
+
       if ( ilevel ) sprintf(&axisname[strlen(axisname)], "_%1d", ilevel+1);
 
       if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
@@ -2255,8 +2387,32 @@ int cdfDefVar(int streamID, int varID)
   if ( units    == NULL )    units = tableInqParUnitsPtr(tableID, code);
   if ( name == NULL )
     {
+      int checkname;
+      int iz;
+      int status;
+
       if ( code < 0 ) code = -code;
+
       sprintf(varname, "var%d", code);
+
+      checkname = TRUE;
+      iz = 0;
+
+      while ( checkname ) 
+	{
+	  if ( iz ) sprintf(varname, "var%d_%d", code, iz+1);
+
+	  status = nc_inq_varid(fileID, varname, &ncvarid);
+	  if ( status != NC_NOERR )
+	    {
+	      checkname = FALSE;
+	    }
+
+	  if ( checkname ) iz++;
+
+	  if ( iz > 99 ) break;
+	}
+
       name = varname;
       code = 0;
     }
@@ -4505,7 +4661,8 @@ int cdfInqContents(int streamID)
 		  strcpy(grid.xname, ncvars[xvarid].name);
 		  strcpy(grid.xlongname, ncvars[xvarid].longname);
 		  strcpy(grid.xunits, ncvars[xvarid].units);
-		  /* don't change the name !!! 
+		  /* don't change the name !!! */
+		  /*
 		  if ( (len = strlen(grid.xname)) > 2 )
 		    if ( grid.xname[len-2] == '_' && isdigit((int) grid.xname[len-1]) )
 		      grid.xname[len-2] = 0;
@@ -4555,7 +4712,8 @@ int cdfInqContents(int streamID)
 		  strcpy(grid.yname, ncvars[yvarid].name);
 		  strcpy(grid.ylongname, ncvars[yvarid].longname);
 		  strcpy(grid.yunits, ncvars[yvarid].units);
-		  /* don't change the name !!! 
+		  /* don't change the name !!! */
+		  /*
 		  if ( (len = strlen(grid.yname)) > 2 )
 		    if ( grid.yname[len-2] == '_' && isdigit((int) grid.yname[len-1]) )
 		      grid.yname[len-2] = 0;
@@ -4850,7 +5008,8 @@ int cdfInqContents(int streamID)
 	      plongname = ncvars[zvarid].longname;
 	      punits    = ncvars[zvarid].units;
 	      if ( ncvars[zvarid].xtype == NC_FLOAT ) zprec = DATATYPE_FLT32;
-	      /* don't change the name !!! 
+	      /* don't change the name !!! */
+	      /*
 	      if ( (len = strlen(pname)) > 2 )
 		if ( pname[len-2] == '_' && isdigit((int) pname[len-1]) )
 		  pname[len-2] = 0;
