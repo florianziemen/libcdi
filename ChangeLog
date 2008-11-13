@@ -1,4 +1,4 @@
-2008-12-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+2008-11-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* add new function: streamSync
 	* add new taxis functions: taxisXXXVdateBounds and taxisXXXVtimeBounds
