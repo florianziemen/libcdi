@@ -4304,12 +4304,14 @@ int cdfInqContents(int streamID)
 	      else if ( strcmp(ncvars[ncvarid].units, "cm")  == 0 )
 		{
 		  if ( strcmp(ncvars[ncvarid].longname, "depth below land")         == 0 ||
+		       strcmp(ncvars[ncvarid].longname, "depth_below_land")         == 0 ||
 		       strcmp(ncvars[ncvarid].longname, "levels below the surface") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_LAND;
 		}
 	      else if ( strcmp(ncvars[ncvarid].units, "m")   == 0 )
 		{
-		  if ( strcmp(ncvars[ncvarid].longname, "depth below sea") == 0 )
+		  if ( strcmp(ncvars[ncvarid].longname, "depth_below_sea") == 0 ||
+		       strcmp(ncvars[ncvarid].longname, "depth below sea") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_SEA;
 		  else if ( strcmp(ncvars[ncvarid].longname, "height") == 0 ||
 			    strcmp(ncvars[ncvarid].longname, "height above the surface") == 0 )
@@ -4405,13 +4407,15 @@ int cdfInqContents(int streamID)
 	      else if ( strcmp(ncvars[ncvarid].units, "cm")  == 0 )
 		{
 		  if ( strcmp(ncvars[ncvarid].longname, "depth below land")         == 0 ||
+		       strcmp(ncvars[ncvarid].longname, "depth_below_land")         == 0 ||
 		       strcmp(ncvars[ncvarid].longname, "levels below the surface") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_LAND;
 		  continue;
 		}
 	      else if ( strcmp(ncvars[ncvarid].units, "m")   == 0 )
 		{
-		  if ( strcmp(ncvars[ncvarid].longname, "depth below sea") == 0 )
+		  if ( strcmp(ncvars[ncvarid].longname, "depth_below_sea") == 0 ||
+		       strcmp(ncvars[ncvarid].longname, "depth below sea") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_SEA;
 		  else if ( strcmp(ncvars[ncvarid].longname, "height") == 0 ||
 			    strcmp(ncvars[ncvarid].longname, "height above the surface") == 0 )
