@@ -30,6 +30,7 @@ ZaxistypeEntry[] = {
   {"lev",     "trajectory",               ""},
   {"alt",     "altitude",                 "m"},
   {"lev",     "sigma",                    "level"},
+  {"lev",     "meansea",                  "level"},
 };
 
 static int CDI_MaxZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]);

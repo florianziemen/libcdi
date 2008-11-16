@@ -342,6 +342,11 @@ int gribGetZaxisType(int grb_ltype)
 	zaxistype = ZAXIS_SURFACE;
 	break;
       }
+    case LTYPE_MEANSEA:
+      {
+	zaxistype = ZAXIS_MEANSEA;
+	break;
+      }
     case LTYPE_99:
     case LTYPE_ISOBARIC:
       {
@@ -2025,6 +2030,13 @@ void grbDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID
     case ZAXIS_SURFACE:
       {
 	ISEC1_LevelType = LTYPE_SURFACE;
+	ISEC1_Level1    = (int) zaxisInqLevel(zaxisID, levelID);
+	ISEC1_Level2    = 0;
+	break;
+      }
+    case ZAXIS_MEANSEA:
+      {
+	ISEC1_LevelType = LTYPE_MEANSEA;
 	ISEC1_Level1    = (int) zaxisInqLevel(zaxisID, levelID);
 	ISEC1_Level2    = 0;
 	break;

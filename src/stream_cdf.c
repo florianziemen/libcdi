@@ -2033,6 +2033,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
   type   = zaxisInqType(zaxisID);
 
   if ( dimlen == 1 && type == ZAXIS_SURFACE ) return;
+  if ( dimlen == 1 && type == ZAXIS_MEANSEA ) return;
 
   zaxisInqName(zaxisID, axisname);
   /*
