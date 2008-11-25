@@ -1,5 +1,6 @@
 2008-12-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* add support for GRID type SINUSOIDAL
 	* add support of GRIB level type MEANSEA
 	* cdf_inq_contents: check zaxis type "depth_blow_sea/land" (bug fix)
 

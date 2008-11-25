@@ -260,7 +260,7 @@ void extAddRecord(int streamID, int code, int level, int xysize,
   int tsID, recID, varID;
   int datatype;
   RECORD *record;
-  GRID grid;
+  grid_t grid;
   int vlistID;
   STREAM *streamptr;
 
@@ -276,7 +276,7 @@ void extAddRecord(int streamID, int code, int level, int xysize,
   (*record).code     = code;
   (*record).ilevel   = level;
 
-  memset(&grid, 0, sizeof(GRID));
+  memset(&grid, 0, sizeof(grid_t));
   grid.type  = GRID_GENERIC;
   grid.size  = xysize;
   grid.xsize = xysize;

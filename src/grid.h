@@ -48,7 +48,7 @@ typedef struct {
   char    xunits[256];
   char    yunits[256];
 }
-GRID;
+grid_t;
 
 
 const double *gridInqXvalsPtr(int gridID);
@@ -58,8 +58,8 @@ double *gridInqXboundsPtr(int gridID);
 double *gridInqYboundsPtr(int gridID);
 const double *gridInqAreaPtr(int gridID);
 
-int gridCompare(int gridID, GRID grid);
-int gridGenerate(GRID grid);
+int gridCompare(int gridID, grid_t grid);
+int gridGenerate(grid_t grid);
 
 /* GME grid */
 void gme_grid(int gridsize, double *rlon, double *rlat,

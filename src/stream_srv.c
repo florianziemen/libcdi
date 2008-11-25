@@ -278,7 +278,7 @@ void srvAddRecord(int streamID, int code, int level, int xsize, int ysize,
   int tsID, recID, varID;
   int datatype;
   RECORD *record;
-  GRID grid;
+  grid_t grid;
   int vlistID;
   STREAM *streamptr;
 
@@ -294,7 +294,7 @@ void srvAddRecord(int streamID, int code, int level, int xsize, int ysize,
   (*record).code     = code;
   (*record).ilevel   = level;
 
-  memset(&grid, 0, sizeof(GRID));
+  memset(&grid, 0, sizeof(grid_t));
   grid.type  = GRID_GENERIC; 
   grid.size  = xsize*ysize;
   grid.xsize = xsize;

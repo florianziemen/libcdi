@@ -715,7 +715,7 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
   int numavg;
   int lbounds = 0;
   RECORD *record;
-  GRID grid;
+  grid_t grid;
   int vlistID;
   STREAM *streamptr;
 
@@ -750,7 +750,7 @@ void grbAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,
       ISEC4_NumValues = ISEC2_NumLon*ISEC2_NumLat;
     }
 
-  memset(&grid, 0, sizeof(GRID));
+  memset(&grid, 0, sizeof(grid_t));
   switch (gridtype)
     {
     case GRID_LONLAT:

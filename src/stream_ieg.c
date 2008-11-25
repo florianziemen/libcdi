@@ -610,7 +610,7 @@ void iegAddRecord(int streamID, int code, int *pdb, int *gdb, double *vct,
   int gridtype;
   int lbounds = 0;
   RECORD *record;
-  GRID grid;
+  grid_t grid;
   int vlistID;
   STREAM *streamptr;
 
@@ -648,7 +648,7 @@ void iegAddRecord(int streamID, int code, int *pdb, int *gdb, double *vct,
   else
     gridtype = GRID_GENERIC;
 
-  memset(&grid, 0, sizeof(GRID));
+  memset(&grid, 0, sizeof(grid_t));
   grid.type  = gridtype; 
   grid.size  = IEG_G_NumLon(gdb)*IEG_G_NumLat(gdb);
   grid.xsize = IEG_G_NumLon(gdb);

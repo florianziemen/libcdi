@@ -513,7 +513,7 @@ void varDefVCT(size_t vctsize, double *vctptr)
 }
 
 
-int varDefGrid(int vlistID, GRID grid, int mode)
+int varDefGrid(int vlistID, grid_t grid, int mode)
 {
   /*
     mode: 0 search in vlist and grid table

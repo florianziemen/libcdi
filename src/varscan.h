@@ -12,7 +12,7 @@ void varAddRecord(int recID, int code, int gridID, int zaxistype, int lbounds,
 
 void varDefVCT(size_t vctsize, double *vctptr);
 
-int  varDefGrid(int vlistID, GRID grid, int mode);
+int  varDefGrid(int vlistID, grid_t grid, int mode);
 int  varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbounds,
 		 double *levels1, double *levels2, int vctsize, double *vct, char *name,
 		 char *longname, char *units, int prec, int mode, int ltype);

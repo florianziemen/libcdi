@@ -2227,6 +2227,38 @@ void cdfDefPole(int streamID, int gridID)
 }
 
 
+void cdfDefMapping(int streamID, int gridID)
+{
+#if  defined  (HAVE_LIBNETCDF)
+  int fileID;
+  int ncvarid = UNDEFID;
+  int ncerr;
+
+  if ( gridInqType(gridID) == GRID_SINUSOIDAL )
+    {
+      char varname[] = "sinusoidal";
+      char mapname[] = "sinusoidal";
+
+      fileID  = streamInqFileID(streamID);
+
+      cdf_redef(fileID);
+
+      ncerr = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
+      if ( ncerr == NC_NOERR )
+	{
+	  cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", strlen(mapname), mapname);
+	  /*
+	  cdf_put_att_double(fileID, ncvarid, "grid_north_pole_latitude", NC_DOUBLE, 1L, &ypole);
+	  cdf_put_att_double(fileID, ncvarid, "grid_north_pole_longitude", NC_DOUBLE, 1L, &xpole);
+	  */
+	}
+
+      cdf_enddef(fileID);
+    }
+#endif
+}
+
+
 void cdfDefGrid(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -2285,6 +2317,13 @@ void cdfDefGrid(int streamID, int gridID)
   else if ( gridtype == GRID_CELL )
     {
       cdfDefCell(streamID, gridID);
+    }
+  else if ( gridtype == GRID_SINUSOIDAL )
+    {
+      cdfDefXaxis(streamID, gridID);
+      cdfDefYaxis(streamID, gridID);
+
+      cdfDefMapping(streamID, gridID);
     }
   /*
   else if ( gridtype == GRID_LCC )
@@ -2482,6 +2521,12 @@ int cdfDefVar(int streamID, int varID)
   if ( gridIsRotated(gridID) )
     {
       char mapping[] = "rotated_pole";
+      cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
+    }
+
+  if ( gridInqType(gridID) == GRID_SINUSOIDAL )
+    {
+      char mapping[] = "sinusoidal";
       cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
     }
 
@@ -3518,7 +3563,7 @@ int cdfInqContents(int streamID)
   size_t len;
   int nc_nvars;
   int nvcth_id = UNDEFID, vcta_id = UNDEFID, vctb_id = UNDEFID;
-  GRID grid;
+  grid_t grid;
   int gridindex;
   int zaxisindex;
   size_t vctsize = 0;
@@ -3817,6 +3862,8 @@ int cdfInqContents(int streamID)
 		ncvars[ncvarid].gridtype = GRID_CELL;
 	      else if ( strncmp(attstring, "curvilinear", attlen) == 0 )
 		ncvars[ncvarid].gridtype = GRID_CURVILINEAR;
+	      else if ( strncmp(attstring, "sinusoidal", attlen) == 0 )
+		/* ncvars[ncvarid].gridtype = GRID_CURVILINEAR */;
 	      else
 		{
 		  static int warn = TRUE;
@@ -4596,7 +4643,7 @@ int cdfInqContents(int streamID)
 	  if ( ncvars[ncvarid].gridtype == UNDEFID || ncvars[ncvarid].gridtype == GRID_GENERIC )
 	    if ( ydimid == xdimid ) ncvars[ncvarid].gridtype = GRID_CELL;
 
-	  memset(&grid, 0, sizeof(GRID));
+	  memset(&grid, 0, sizeof(grid_t));
 
 	  grid.prec  = DATATYPE_FLT64;
 	  grid.trunc = ncvars[ncvarid].truncation;
@@ -4872,6 +4919,8 @@ int cdfInqContents(int streamID)
 
 		      if ( strcmp(attstring, "rotated_latitude_longitude") == 0 )
 			grid.isRotated = TRUE;
+		      else if ( strcmp(attstring, "sinusoidal") == 0 )
+			grid.type = GRID_SINUSOIDAL;
 		    }
 		  else if ( strcmp(attname, "grid_north_pole_latitude") == 0 )
 		    {
