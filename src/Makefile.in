@@ -65,8 +65,7 @@ am_libcdi_a_OBJECTS = cdiFortran.$(OBJEXT) cdi_error.$(OBJEXT) \
 	vlist_var.$(OBJEXT) vlist_att.$(OBJEXT) basetime.$(OBJEXT) \
 	stream_history.$(OBJEXT) stream_grb.$(OBJEXT) \
 	stream_cdf.$(OBJEXT) stream_srv.$(OBJEXT) stream_ext.$(OBJEXT) \
-	stream_ieg.$(OBJEXT) grid.$(OBJEXT) grid_rot.$(OBJEXT) \
-	grid_gme.$(OBJEXT) grid_lcc.$(OBJEXT) zaxis.$(OBJEXT) \
+	stream_ieg.$(OBJEXT) grid.$(OBJEXT) zaxis.$(OBJEXT) \
 	stream.$(OBJEXT) stream_var.$(OBJEXT) stream_record.$(OBJEXT) \
 	tsteps.$(OBJEXT) stream_int.$(OBJEXT) servicelib.$(OBJEXT) \
 	extralib.$(OBJEXT) ieglib.$(OBJEXT) cdf.$(OBJEXT) \
@@ -221,9 +220,6 @@ libcdi_a_SOURCES = \
 	stream_ext.c     \
 	stream_ieg.c     \
 	grid.c           \
-	grid_rot.c       \
-	grid_gme.c       \
-	grid_lcc.c       \
 	zaxis.c		 \
         stream.c         \
 	stream_var.c     \
@@ -378,9 +374,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/griblib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid_gme.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid_lcc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid_rot.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ieglib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/institution.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/model.Po@am__quote@

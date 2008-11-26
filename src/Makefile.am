@@ -29,9 +29,6 @@ libcdi_a_SOURCES = 	 \
 	stream_ext.c     \
 	stream_ieg.c     \
 	grid.c           \
-	grid_rot.c       \
-	grid_gme.c       \
-	grid_lcc.c       \
 	zaxis.c		 \
         stream.c         \
 	stream_var.c     \

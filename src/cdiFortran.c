@@ -275,10 +275,6 @@ FCALLSCFUN2 (INT, gridInqYbounds, GRIDINQYBOUNDS, gridinqybounds, INT, PDOUBLE)
 FCALLSCSUB3 (gridDefRowlon, GRIDDEFROWLON, griddefrowlon, INT, INT, PINT)
 FCALLSCSUB2 (gridInqRowlon, GRIDINQROWLON, gridinqrowlon, INT, PINT)
 FCALLSCSUB2 (gridChangeType, GRIDCHANGETYPE, gridchangetype, INT, INT)
-FCALLSCFUN1 (INT, gridToZonal, GRIDTOZONAL, gridtozonal, INT)
-FCALLSCFUN1 (INT, gridToMeridional, GRIDTOMERIDIONAL, gridtomeridional, INT)
-FCALLSCFUN1 (INT, gridToCell, GRIDTOCELL, gridtocell, INT)
-FCALLSCFUN1 (INT, gridToCurvilinear, GRIDTOCURVILINEAR, gridtocurvilinear, INT)
 
 /*  ZAXIS routines  */
 

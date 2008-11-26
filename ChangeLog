@@ -2,7 +2,10 @@
 
 	* add support for GRID type SINUSOIDAL
 	* add support of GRIB level type MEANSEA
+	* move grid_lcc, grid_gme, grid_rot code to CDO
+	* move gridToCurvilinear and gridToCell code to CDO
 	* cdf_inq_contents: check zaxis type "depth_blow_sea/land" (bug fix)
+	* Version 1.3.0 released
 
 2008-11-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 

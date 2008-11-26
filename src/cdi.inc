@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   October 2008
+! Uwe Schulzweida, MPI-MET, Hamburg,   November 2008
 !
 
       INTEGER    CDI_UNDEFID           
@@ -188,6 +188,8 @@
       PARAMETER (GRID_LCC               = 11)
       INTEGER    GRID_LAEA             
       PARAMETER (GRID_LAEA              = 12)
+      INTEGER    GRID_SINUSOIDAL       
+      PARAMETER (GRID_SINUSOIDAL        = 13)
 !
 !  ZAXIS types
 !
@@ -215,6 +217,8 @@
       PARAMETER (ZAXIS_ALTITUDE         = 10)
       INTEGER    ZAXIS_SIGMA           
       PARAMETER (ZAXIS_SIGMA            = 11)
+      INTEGER    ZAXIS_MEANSEA         
+      PARAMETER (ZAXIS_MEANSEA          = 12)
 !
 !  TAXIS types
 !
@@ -1305,22 +1309,6 @@
 !                                    (INTEGER         gridID,
 !                                     INTEGER         gridtype)
       EXTERNAL        gridChangeType
-
-      INTEGER         gridToZonal
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridToZonal
-
-      INTEGER         gridToMeridional
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridToMeridional
-
-      INTEGER         gridToCell
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridToCell
-
-      INTEGER         gridToCurvilinear
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridToCurvilinear
 
 !
 !  ZAXIS routines
