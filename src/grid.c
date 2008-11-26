@@ -3041,6 +3041,7 @@ void gridPrint(int gridID, int opt)
     case GRID_LONLAT:
     case GRID_GAUSSIAN:
     case GRID_GENERIC:
+    case GRID_SINUSOIDAL:
     case GRID_CURVILINEAR:
     case GRID_CELL:
       {
@@ -3071,7 +3072,8 @@ void gridPrint(int gridID, int opt)
 	  {
 	    double xfirst = 0.0, xinc = 0.0;
 
-	    if ( type == GRID_LONLAT || type == GRID_GAUSSIAN || type == GRID_GENERIC )
+	    if ( type == GRID_LONLAT || type == GRID_GAUSSIAN || 
+		 type == GRID_GENERIC || type == GRID_SINUSOIDAL )
 	      {
 		xfirst = gridInqXval(gridID, 0);
 		xinc   = gridInqXinc(gridID);
@@ -3117,7 +3119,7 @@ void gridPrint(int gridID, int opt)
 	  {
 	    double yfirst = 0.0, yinc = 0.0;
 
-	    if ( type == GRID_LONLAT || type == GRID_GENERIC )
+	    if ( type == GRID_LONLAT || type == GRID_GENERIC || type == GRID_SINUSOIDAL )
 	      {
 		yfirst = gridInqYval(gridID, 0);
 		yinc   = gridInqYinc(gridID);
