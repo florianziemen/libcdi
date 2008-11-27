@@ -2255,6 +2255,30 @@ void cdfDefMapping(int streamID, int gridID)
 
       cdf_enddef(fileID);
     }
+  else if ( gridInqType(gridID) == GRID_LAEA )
+    {
+      char varname[] = "laea";
+      char mapname[] = "lambert_azimuthal_equal_area";
+
+      fileID  = streamInqFileID(streamID);
+
+      cdf_redef(fileID);
+
+      ncerr = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
+      if ( ncerr == NC_NOERR )
+	{
+	  double a, lon_0, lat_0;
+
+	  gridInqLaea(gridID, &a, &lon_0, &lat_0);
+
+	  cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", strlen(mapname), mapname);
+	  cdf_put_att_double(fileID, ncvarid, "earth_radius", NC_DOUBLE, 1L, &a);
+	  cdf_put_att_double(fileID, ncvarid, "longitude_of_projection_origin", NC_DOUBLE, 1L, &lon_0);
+	  cdf_put_att_double(fileID, ncvarid, "latitude_of_projection_origin", NC_DOUBLE, 1L, &lat_0);
+	}
+
+      cdf_enddef(fileID);
+    }
 #endif
 }
 
@@ -2318,7 +2342,7 @@ void cdfDefGrid(int streamID, int gridID)
     {
       cdfDefCell(streamID, gridID);
     }
-  else if ( gridtype == GRID_SINUSOIDAL )
+  else if ( gridtype == GRID_SINUSOIDAL || gridtype == GRID_LAEA )
     {
       cdfDefXaxis(streamID, gridID);
       cdfDefYaxis(streamID, gridID);
@@ -2527,6 +2551,12 @@ int cdfDefVar(int streamID, int varID)
   if ( gridInqType(gridID) == GRID_SINUSOIDAL )
     {
       char mapping[] = "sinusoidal";
+      cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
+    }
+
+  if ( gridInqType(gridID) == GRID_LAEA )
+    {
+      char mapping[] = "laea";
       cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
     }
 
@@ -3863,7 +3893,9 @@ int cdfInqContents(int streamID)
 	      else if ( strncmp(attstring, "curvilinear", attlen) == 0 )
 		ncvars[ncvarid].gridtype = GRID_CURVILINEAR;
 	      else if ( strncmp(attstring, "sinusoidal", attlen) == 0 )
-		/* ncvars[ncvarid].gridtype = GRID_CURVILINEAR */;
+		;
+	      else if ( strncmp(attstring, "laea", attlen) == 0 )
+		;
 	      else
 		{
 		  static int warn = TRUE;
@@ -4921,6 +4953,8 @@ int cdfInqContents(int streamID)
 			grid.isRotated = TRUE;
 		      else if ( strcmp(attstring, "sinusoidal") == 0 )
 			grid.type = GRID_SINUSOIDAL;
+		      else if ( strcmp(attstring, "lambert_azimuthal_equal_area") == 0 )
+			grid.type = GRID_LAEA;
 		    }
 		  else if ( strcmp(attname, "grid_north_pole_latitude") == 0 )
 		    {
