@@ -15,7 +15,7 @@ typedef struct {
   double  xfirst, yfirst;
   double  xlast, ylast;
   double  xinc, yinc;
-  double  lcc_originLon;          /* lambert conformal conic        */
+  double  lcc_originLon;          /* Lambert Conformal Conic        */
   double  lcc_originLat;
   double  lcc_lonParY;
   double  lcc_lat1;
@@ -25,6 +25,10 @@ typedef struct {
   int     lcc_projflag;
   int     lcc_scanflag;
   int     lcc_defined;
+  double  laea_lon_0;             /* Lambert Azimuthal Equal Area   */
+  double  laea_lat_0;
+  double  laea_a;
+  int     laea_defined;
   double  xpole, ypole, angle;    /* rotated north pole             */
   int     isCyclic;               /* TRUE for global cyclic grids   */
   int     isRotated;              /* TRUE for rotated grids         */

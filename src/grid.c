@@ -194,6 +194,10 @@ static void grid_init_entry(grid_t *gridptr)
   gridptr->lcc_projflag = 0;
   gridptr->lcc_scanflag = 0;
   gridptr->lcc_defined  = FALSE;
+  gridptr->laea_lon_0   = 0.0;
+  gridptr->laea_lat_0   = 0.0;
+  gridptr->laea_a       = 0.0;
+  gridptr->laea_defined = FALSE;
   gridptr->trunc        = 0;
   gridptr->nvertex      = 0;
   gridptr->nd           = 0;
@@ -690,6 +694,7 @@ int gridCreate(int gridtype, int size)
 	break;
       }
     case GRID_SINUSOIDAL:
+    case GRID_LAEA:
       {
 	gridDefXname(gridID, "x");
 	gridDefYname(gridID, "y");
@@ -2362,6 +2367,7 @@ int gridGenerate(grid_t grid)
     case GRID_GENERIC:
     case GRID_LCC:
     case GRID_SINUSOIDAL:
+    case GRID_LAEA:
       {
 	if ( grid.xsize > 0 ) gridDefXsize(gridID, grid.xsize);
 	if ( grid.ysize > 0 ) gridDefYsize(gridID, grid.ysize);
@@ -3042,6 +3048,7 @@ void gridPrint(int gridID, int opt)
     case GRID_GAUSSIAN:
     case GRID_GENERIC:
     case GRID_SINUSOIDAL:
+    case GRID_LAEA:
     case GRID_CURVILINEAR:
     case GRID_CELL:
       {
@@ -3073,7 +3080,7 @@ void gridPrint(int gridID, int opt)
 	    double xfirst = 0.0, xinc = 0.0;
 
 	    if ( type == GRID_LONLAT || type == GRID_GAUSSIAN || 
-		 type == GRID_GENERIC || type == GRID_SINUSOIDAL )
+		 type == GRID_GENERIC || type == GRID_SINUSOIDAL || type == GRID_LAEA )
 	      {
 		xfirst = gridInqXval(gridID, 0);
 		xinc   = gridInqXinc(gridID);
@@ -3119,7 +3126,8 @@ void gridPrint(int gridID, int opt)
 	  {
 	    double yfirst = 0.0, yinc = 0.0;
 
-	    if ( type == GRID_LONLAT || type == GRID_GENERIC || type == GRID_SINUSOIDAL )
+	    if ( type == GRID_LONLAT || type == GRID_GENERIC ||
+		 type == GRID_SINUSOIDAL || type == GRID_LAEA )
 	      {
 		yfirst = gridInqYval(gridID, 0);
 		yinc   = gridInqYinc(gridID);
@@ -3295,7 +3303,8 @@ void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
   gridptr = grid_to_pointer(gridID);
 
   if ( gridptr->type != GRID_LCC )
-    Warning(func, "Lambert Conformal grid definition for %s grid not allowed!", gridNamePtr(gridptr->type));
+    Warning(func, "Definition of LAEA grid for %s grid not allowed!",
+	    gridNamePtr(gridptr->type));
   else
     {
       gridptr->lcc_originLon = originLon;
@@ -3338,13 +3347,14 @@ void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonPar
 		double *lat1, double *lat2, double *xinc, double *yinc,
 		int *projflag, int *scanflag)
 {
-  static char func[] = "gridDefLCC";
+  static char func[] = "gridInqLCC";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
 
   if ( gridptr->type != GRID_LCC )
-    Warning(func, "Lambert Conformal grid definition for %s grid not available!", gridNamePtr(gridptr->type));
+    Warning(func, "Inquire of LCC grid definition for %s grid not allowed!",
+	    gridNamePtr(gridptr->type));
   else
     {
       if ( gridptr->lcc_defined )
@@ -3364,3 +3374,45 @@ void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonPar
     }
 }
 
+void gridDefLaea(int gridID, double earth_radius, double lon_0, double lat_0)
+{
+  static char func[] = "gridDefLaea";
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  if ( gridptr->type != GRID_LAEA )
+    Warning(func, "Definition of LAEA grid for %s grid not allowed!",
+	    gridNamePtr(gridptr->type));
+  else
+    {
+      gridptr->laea_a       = earth_radius;
+      gridptr->laea_lon_0   = lon_0;
+      gridptr->laea_lat_0   = lat_0;
+      gridptr->laea_defined = TRUE;
+    }
+}
+
+
+void gridInqLaea(int gridID, double *earth_radius, double *lon_0, double *lat_0)
+{
+  static char func[] = "gridDefLaea";
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  if ( gridptr->type != GRID_LAEA )
+    Warning(func, "Inquire of LAEA grid definition for %s grid not allowed!",
+	    gridNamePtr(gridptr->type));
+  else
+    {
+      if ( gridptr->laea_defined )
+	{
+	  *earth_radius = gridptr->laea_a;
+	  *lon_0        = gridptr->laea_lon_0;
+	  *lat_0        = gridptr->laea_lat_0;
+	}
+      else
+	Warning(func, "LAEA grid undefined (gridID = %d)", gridID);
+    }
+}

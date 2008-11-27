@@ -1,6 +1,7 @@
 2009-01-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* add support for GRID type SINUSOIDAL
+	* add support for GRID type LAEA
 	* add support of GRIB level type MEANSEA
 	* move grid_lcc, grid_gme, grid_rot code to CDO
 	* move gridToCurvilinear and gridToCell code to CDO
