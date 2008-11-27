@@ -2430,6 +2430,9 @@ int gridGenerate(grid_t grid)
 	    gridDefArea(gridID, grid.area);
 	  }
 
+	if ( grid.type == GRID_LAEA )
+	  gridDefLaea(gridID, grid.laea_a, grid.laea_lon_0, grid.laea_lat_0);
+
 	if ( grid.type == GRID_LCC )
 	  gridDefLCC(gridID, grid.lcc_originLon, grid.lcc_originLat, grid.lcc_lonParY,
 		     grid.lcc_lat1, grid.lcc_lat2, grid.lcc_xinc, grid.lcc_yinc,

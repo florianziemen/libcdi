@@ -4956,6 +4956,18 @@ int cdfInqContents(int streamID)
 		      else if ( strcmp(attstring, "lambert_azimuthal_equal_area") == 0 )
 			grid.type = GRID_LAEA;
 		    }
+		  else if ( strcmp(attname, "earth_radius") == 0 )
+		    {
+		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &grid.laea_a);
+		    }
+		  else if ( strcmp(attname, "longitude_of_projection_origin") == 0 )
+		    {
+		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &grid.laea_lon_0);
+		    }
+		  else if ( strcmp(attname, "latitude_of_projection_origin") == 0 )
+		    {
+		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &grid.laea_lat_0);
+		    }
 		  else if ( strcmp(attname, "grid_north_pole_latitude") == 0 )
 		    {
 		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &grid.ypole);
