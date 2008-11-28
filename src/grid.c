@@ -3072,6 +3072,15 @@ void gridPrint(int gridID, int opt)
 	    if ( ysize > 0 ) fprintf(fp, "ysize     = %d\n", ysize);
 	  }
 
+	if ( type == GRID_LAEA )
+	  {
+	    double a, lon_0, lat_0;
+	    gridInqLaea(gridID, &a, &lon_0, &lat_0);
+	    fprintf(fp, "a         = %g\n", a);
+	    fprintf(fp, "lon_0     = %g\n", lon_0);
+	    fprintf(fp, "lat_0     = %g\n", lat_0);
+	  }
+
 	if ( gridptr->isRotated )
 	  {
 	    if ( xsize > 0 ) fprintf(fp, "xnpole    = %g\n", gridptr->xpole);
