@@ -23,15 +23,23 @@ const char *cdfLibraryVersion(void)
 #endif
 }
 
-int H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum);
+#if  (defined  (HAVE_LIBNETCDF) && defined(NC_NETCDF4)) || defined(HAVE_LIBHDF5)
+#if defined(__cplusplus)
+extern "C" {
+#endif
+  int H5get_libversion(unsigned *, unsigned *, unsigned *);
+#if defined(__cplusplus)
+}
+#endif
+#endif
 
 const char *hdfLibraryVersion(void)
 {
-#if  defined  (HAVE_LIBNETCDF) && defined(NC_NETCDF4)
+#if  (defined  (HAVE_LIBNETCDF) && defined(NC_NETCDF4)) || defined(HAVE_LIBHDF5)
   static char hdf_libvers[256];
   unsigned majnum, minnum, relnum;
 
-  (void) H5get_libversion(&majnum, &minnum, &relnum);
+  H5get_libversion(&majnum, &minnum, &relnum);
 
   sprintf(hdf_libvers, "%u.%u.%u", majnum, minnum, relnum);
 
