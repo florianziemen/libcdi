@@ -2,6 +2,8 @@
 #  include "config.h"
 #endif
 
+#include <limits.h>
+
 #include "dmemory.h"
 #include "cdi.h"
 #include "stream_int.h"
@@ -696,8 +698,34 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
 
   vlistCheckVarID(func, vlistID, varID);
 
-  vlistptr->vars[varID].datatype = datatype;  
+  vlistptr->vars[varID].datatype = datatype;
+  
+  if ( vlistptr->vars[varID].missvalused == FALSE )
+    {
+      switch (datatype)
+	{
+	case DATATYPE_INT8:
+	  vlistptr->vars[varID].missval =  SCHAR_MIN;
+	  break;
+	case DATATYPE_UINT8:
+	  vlistptr->vars[varID].missval =  UCHAR_MAX;
+	  break;
+	case DATATYPE_INT16:
+	  vlistptr->vars[varID].missval =  SHRT_MIN;
+	  break;
+	case DATATYPE_UINT16:
+	  vlistptr->vars[varID].missval =  USHRT_MAX;
+	  break;
+	case DATATYPE_INT32:
+	  vlistptr->vars[varID].missval =  INT_MIN;
+	  break;
+	case DATATYPE_UINT32:
+	  vlistptr->vars[varID].missval =  UINT_MAX;
+	  break;
+	}
+    }
 }
+
 
 void vlistDefVarInstitut(int vlistID, int varID, int instID)
 {
@@ -708,6 +736,7 @@ void vlistDefVarInstitut(int vlistID, int varID, int instID)
   vlistptr->vars[varID].instID = instID;
 }
 
+
 int vlistInqVarInstitut(int vlistID, int varID)
 {
   VLIST *vlistptr;
@@ -716,6 +745,7 @@ int vlistInqVarInstitut(int vlistID, int varID)
 
   return (vlistptr->vars[varID].instID);
 }
+
 
 void vlistDefVarModel(int vlistID, int varID, int modelID)
 {
@@ -726,6 +756,7 @@ void vlistDefVarModel(int vlistID, int varID, int modelID)
   vlistptr->vars[varID].modelID = modelID;
 }
 
+
 int vlistInqVarModel(int vlistID, int varID)
 {
   VLIST *vlistptr;
@@ -735,6 +766,7 @@ int vlistInqVarModel(int vlistID, int varID)
   return (vlistptr->vars[varID].modelID);
 }
 
+
 void vlistDefVarTable(int vlistID, int varID, int tableID)
 {
   VLIST *vlistptr;
@@ -743,6 +775,7 @@ void vlistDefVarTable(int vlistID, int varID, int tableID)
 
   vlistptr->vars[varID].tableID = tableID;
 }
+
 
 int vlistInqVarTable(int vlistID, int varID)
 {
@@ -944,6 +977,7 @@ void vlistDefVarMissval(int vlistID, int varID, double missval)
   vlistptr->vars[varID].missval = missval;
   vlistptr->vars[varID].missvalused = TRUE;
 }
+
 
 void vlistDefVarScalefactor(int vlistID, int varID, double scalefactor)
 {

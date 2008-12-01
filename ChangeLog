@@ -3,6 +3,7 @@
 	* add support for GRID type SINUSOIDAL
 	* add support for GRID type LAEA
 	* add support of GRIB level type MEANSEA
+	* set default missval of INT8/16/32 to SCHAR_MIN/SHRT_MIN/INT_MIN
 	* move grid_lcc, grid_gme, grid_rot code to CDO
 	* move gridToCurvilinear and gridToCell code to CDO
 	* cdf_inq_contents: check zaxis type "depth_blow_sea/land" (bug fix)
