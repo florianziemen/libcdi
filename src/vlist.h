@@ -33,6 +33,7 @@ typedef struct
 {
   int      flag;
   int      index;
+  int      mlevelID;
   int      flevelID;
 }
 LEVINFO;
@@ -43,6 +44,7 @@ typedef struct
   int      flag;
   int      nlevs;
   int      isUsed;
+  int      mvarID;
   int      fvarID;
   int      code;
   int      gridID;

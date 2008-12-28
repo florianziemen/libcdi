@@ -16,6 +16,7 @@ static void vlistvarInitEntry(int vlistID, int varID)
 
   vlistptr = vlist_to_pointer(vlistID);
 
+  vlistptr->vars[varID].mvarID       = varID;
   vlistptr->vars[varID].fvarID       = varID;
   vlistptr->vars[varID].flag         = 0;
   vlistptr->vars[varID].code         = 0;

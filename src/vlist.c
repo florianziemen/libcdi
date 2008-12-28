@@ -653,6 +653,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 		for ( levID = 0; levID < nlevs; levID++ )
 		  if ( vlistptr1->vars[varID].levinfo[levID].flag )
 		    {
+		      vlistptr1->vars[varID].levinfo[levID].mlevelID = levID2;
 		      vlistptr1->vars[varID].levinfo[levID].flevelID = levID2;
 		      levels[levID2++] = zaxisInqLevel(zaxisID, levID);
 		    }

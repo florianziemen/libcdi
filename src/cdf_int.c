@@ -17,22 +17,23 @@ extern int CDF_Verbose;
 extern int CDF_Debug;
 
 #if  defined  (HAVE_LIBNETCDF)
-
+/*
 #if ! defined (MIN_BUF_SIZE)
 #  define  MIN_BUF_SIZE  131072L
 #endif
 
 static size_t ChunkSizeMin = MIN_BUF_SIZE;
-
+*/
 
 void cdf_create(const char *path, int cmode, int *ncidp)
 {
   static char func[] = "cdf_create";
   int status;
   int oldfill;
-  struct stat filestat;
-  size_t initialsz, chunksizehint = 0;
+  size_t initialsz = 0, chunksizehint = 0;
+  /*
 #if defined (HAVE_STRUCT_STAT_ST_BLKSIZE)
+  struct stat filestat;
   char basename[1024];
   char *pend;
 
@@ -52,7 +53,10 @@ void cdf_create(const char *path, int cmode, int *ncidp)
 #endif
 
   if ( chunksizehint < ChunkSizeMin ) chunksizehint = ChunkSizeMin;
-  initialsz = 0;
+  */
+#if defined(__SX__) || defined(ES)
+  chunksizehint = 16777216; /* 16 MB */
+#endif
 
   status = nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
 
@@ -78,7 +82,7 @@ int cdf_open(const char *path, int omode, int *ncidp)
   int status = 0;
   int dapfile = FALSE;
   struct stat filestat;
-  size_t chunksizehint;
+  size_t chunksizehint = 0;
 
 #if  defined  (HAVE_LIBNC_DAP)
   if ( strncmp(path, "http:", 5) == 0 ) dapfile = TRUE;
@@ -94,18 +98,17 @@ int cdf_open(const char *path, int omode, int *ncidp)
 
 #if defined (HAVE_STRUCT_STAT_ST_BLKSIZE)
       chunksizehint = (size_t) filestat.st_blksize * 4;
-#else
-      chunksizehint = (size_t) 4096 * 4;
 #endif
+      /*
       if ( chunksizehint < ChunkSizeMin ) chunksizehint = ChunkSizeMin;
-
+      */
       status = nc__open(path, omode, &chunksizehint, ncidp);
 
-      if ( CDF_Debug /* || status != NC_NOERR */ )
+      if ( CDF_Debug )
 	Message(func, "chunksizehint %d", chunksizehint);
     }
 
-  if ( CDF_Debug /* || status != NC_NOERR */ )
+  if ( CDF_Debug )
     Message(func, "ncid = %d  mode = %d  file = %s", *ncidp, omode, path);
 
   if ( CDF_Debug && status != NC_NOERR )
