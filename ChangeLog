@@ -4,6 +4,7 @@
 	* add support for GRID type LAEA
 	* add support of GRIB level type MEANSEA
 	* cdf_create: don't set chunksizehint (bug fix) [report: Luis Kornblueh]
+	* change vlistFlagVar to vlistMergedVar
 	* set default missval of INT8/16/32 to SCHAR_MIN/SHRT_MIN/INT_MIN
 	* move grid_lcc, grid_gme, grid_rot code to CDO
 	* move gridToCurvilinear and gridToCell code to CDO

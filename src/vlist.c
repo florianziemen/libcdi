@@ -615,6 +615,8 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	    vlistptr1->vars[varID].fvarID = varID2;
 	    vlistptr2->vars[varID2].fvarID = varID;
 
+	    vlistptr2->vars[varID2].mvarID = varID2;
+
 	    if ( vlistptr1->vars[varID].name )
 	      vlistptr2->vars[varID2].name = strdupx(vlistptr1->vars[varID].name);
 
@@ -653,8 +655,8 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 		for ( levID = 0; levID < nlevs; levID++ )
 		  if ( vlistptr1->vars[varID].levinfo[levID].flag )
 		    {
-		      vlistptr1->vars[varID].levinfo[levID].mlevelID = levID2;
 		      vlistptr1->vars[varID].levinfo[levID].flevelID = levID2;
+		      vlistptr1->vars[varID].levinfo[levID].mlevelID = levID2;
 		      levels[levID2++] = zaxisInqLevel(zaxisID, levID);
 		    }
 
@@ -684,7 +686,11 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	    levID2 = 0;
 	    for ( levID = 0; levID < nlevs; levID++ )
 	      if ( vlistptr1->vars[varID].levinfo[levID].flag )
-		vlistptr2->vars[varID2].levinfo[levID2++].flevelID = levID;
+		{
+		  vlistptr2->vars[varID2].levinfo[levID2].flevelID = levID;
+		  vlistptr2->vars[varID2].levinfo[levID2].mlevelID = levID;
+		  levID2++;
+		}
 
 	    for ( index = 0; index <vlistptr2->ngrids; index++ )
 	      if (vlistptr2->gridIDs[index] == gridID ) break;
@@ -753,6 +759,9 @@ void vlistCat(int vlistID2, int vlistID1)
       varID2 = varID + nvars2;
       vlistptr1->vars[varID].fvarID = varID2;
       vlistptr2->vars[varID2].fvarID = varID;
+
+      vlistptr1->vars[varID].mvarID = varID2;
+      vlistptr2->vars[varID2].mvarID = varID;
 
       if ( vlistptr1->vars[varID].name )
 	vlistptr2->vars[varID2].name = strdupx(vlistptr1->vars[varID].name);
@@ -856,6 +865,9 @@ void vlistMerge(int vlistID2, int vlistID1)
 	  vlistptr1->vars[varID].fvarID = varID;
 	  vlistptr2->vars[varID].fvarID = varID;
 
+	  vlistptr1->vars[varID].mvarID = varID;
+	  vlistptr2->vars[varID].mvarID = varID;
+
 	  nlevs1 = vlistptr1->vars[varID].nlevs;
 	  nlevs2 = vlistptr2->vars[varID].nlevs;
 
@@ -913,7 +925,7 @@ void vlistMerge(int vlistID2, int vlistID1)
 	      vlistptr2->zaxisIDs[index] = zaxisID;
 
 	  for ( varID2 = 0; varID2 < nvars2; varID2++ )
-	    if ( lvar[varID2] = FALSE && vlistptr2->vars[varID2].zaxisID == zaxisID2 )
+	    if ( lvar[varID2] == FALSE && vlistptr2->vars[varID2].zaxisID == zaxisID2 )
 	      {
 		vlistptr2->vars[varID2].zaxisID = zaxisID;
 		lvar[varID2] = TRUE;
@@ -1062,7 +1074,7 @@ void vlistPrint(int vlistID)
 {
   static char func[] = "vlistPrint";
   int nvars, flag, index;
-  int varID, fvarID, flevID, levID;
+  int varID, fvarID, mvarID, flevID, mlevID, levID;
   int code, gridID, zaxisID, timeID, nlevs;
   int dtype;
   char *name, *longname, *units;
@@ -1109,21 +1121,23 @@ void vlistPrint(int vlistID)
 	}
 
       printf("\n");
-      printf(" varID  levID fvarID flevID  index  dtype  flag  level\n");
+      printf(" varID  levID fvarID flevID mvarID mlevID  index  dtype  flag  level\n");
       for ( varID = 0; varID < nvars; varID++ )
 	{
 	  nlevs    = vlistptr->vars[varID].nlevs;
 	  zaxisID  = vlistptr->vars[varID].zaxisID;
 	  fvarID   = vlistptr->vars[varID].fvarID;
+	  mvarID   = vlistptr->vars[varID].mvarID;
 	  dtype    = vlistptr->vars[varID].datatype;
 	  for ( levID = 0; levID < nlevs; levID++ )
 	    {
 	      flevID = vlistptr->vars[varID].levinfo[levID].flevelID;
+	      mlevID = vlistptr->vars[varID].levinfo[levID].mlevelID;
 	      index  = vlistptr->vars[varID].levinfo[levID].index;
 	      flag   = vlistptr->vars[varID].levinfo[levID].flag;
 	      level  = zaxisInqLevel(zaxisID, levID);
-	      printf("%6d %6d %6d %6d %6d %6d %5d  %.9g\n",
-		     varID, levID, fvarID, flevID, index, dtype, flag, level);
+	      printf("%6d %6d %6d %6d %6d %6d %6d %6d %5d  %.9g\n",
+		     varID, levID, fvarID, flevID, mvarID, mlevID, index, dtype, flag, level);
 	    }
 	}
     }
@@ -1462,6 +1476,7 @@ void vlistChangeZaxisIndex(int vlistID, int index, int zaxisID)
 	    for ( levID = 0; levID < nlevs; levID++ )
 	      {
 		vlistptr->vars[varID].levinfo[levID].flevelID = levID;
+		vlistptr->vars[varID].levinfo[levID].mlevelID = levID;
 		vlistptr->vars[varID].levinfo[levID].index    = -1;
 		vlistptr->vars[varID].levinfo[levID].flag     = FALSE;
 	      }
@@ -1507,6 +1522,7 @@ void vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2)
 	    for ( levID = 0; levID < nlevs; levID++ )
 	      {
 		vlistptr->vars[varID].levinfo[levID].flevelID = levID;
+		vlistptr->vars[varID].levinfo[levID].mlevelID = levID;
 		vlistptr->vars[varID].levinfo[levID].index    = -1;
 		vlistptr->vars[varID].levinfo[levID].flag     = FALSE;
 	      }

@@ -16,8 +16,8 @@ static void vlistvarInitEntry(int vlistID, int varID)
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistptr->vars[varID].mvarID       = varID;
   vlistptr->vars[varID].fvarID       = varID;
+  vlistptr->vars[varID].mvarID       = varID;
   vlistptr->vars[varID].flag         = 0;
   vlistptr->vars[varID].code         = 0;
   vlistptr->vars[varID].timeID       = CDI_UNDEFID;
@@ -205,6 +205,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
       vlistptr->vars[varID].levinfo[levID].flag     = 0;
       vlistptr->vars[varID].levinfo[levID].index    = -1;
       vlistptr->vars[varID].levinfo[levID].flevelID = levID;
+      vlistptr->vars[varID].levinfo[levID].mlevelID = levID;
     }
 
   vlistptr->vars[varID].nlevs = nlevs;
@@ -1197,23 +1198,23 @@ int vlistFindLevel(int vlistID, int fvarID, int flevelID)
 }
 
 
-int vlistFlagVar(int vlistID, int varID)
+int vlistMergedVar(int vlistID, int varID)
 {
   VLIST *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  return (vlistptr->vars[varID].fvarID);  
+  return (vlistptr->vars[varID].mvarID);  
 }
 
 
-int vlistFlagLevel(int vlistID, int varID, int levelID)
+int vlistMergedLevel(int vlistID, int varID, int levelID)
 {
   VLIST *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  return (vlistptr->vars[varID].levinfo[levelID].flevelID);  
+  return (vlistptr->vars[varID].levinfo[levelID].mlevelID);  
 }
 
 

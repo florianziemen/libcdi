@@ -224,7 +224,8 @@ void printFiletype(int streamID, int vlistID)
 
       for ( varID = 0; varID < nvars; varID++ )
 	{
-	  if ( ztype = vlistInqVarZtype(vlistID, varID) )
+	  ztype = vlistInqVarZtype(vlistID, varID);
+	  if ( ztype )
 	    {
 	      if ( ztype == COMPRESS_SZIP )
 		printf(" SZIP");
