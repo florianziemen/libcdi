@@ -178,10 +178,10 @@ FCALLSCSUB4 (vlistDefIndex, VLISTDEFINDEX, vlistdefindex, INT, INT, INT, INT)
 FCALLSCFUN3 (INT, vlistInqIndex, VLISTINQINDEX, vlistinqindex, INT, INT, INT)
 FCALLSCSUB4 (vlistDefFlag, VLISTDEFFLAG, vlistdefflag, INT, INT, INT, INT)
 FCALLSCFUN3 (INT, vlistInqFlag, VLISTINQFLAG, vlistinqflag, INT, INT, INT)
-FCALLSCFUN2 (INT, vlistMergedVar, VLISTMERGEDVAR, vlistmergedvar, INT, INT)
-FCALLSCFUN3 (INT, vlistMergedLevel, VLISTMERGEDLEVEL, vlistmergedlevel, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistFindVar, VLISTFINDVAR, vlistfindvar, INT, INT)
 FCALLSCFUN3 (INT, vlistFindLevel, VLISTFINDLEVEL, vlistfindlevel, INT, INT, INT)
+FCALLSCFUN2 (INT, vlistMergedVar, VLISTMERGEDVAR, vlistmergedvar, INT, INT)
+FCALLSCFUN3 (INT, vlistMergedLevel, VLISTMERGEDLEVEL, vlistmergedlevel, INT, INT, INT)
 
 /*  VLIST attributes  */
 
@@ -259,10 +259,15 @@ FCALLSCSUB2 (gridDefGMEni2, GRIDDEFGMENI2, griddefgmeni2, INT, INT)
 FCALLSCFUN1 (INT, gridInqGMEni3, GRIDINQGMENI3, gridinqgmeni3, INT)
 FCALLSCSUB2 (gridDefGMEni3, GRIDDEFGMENI3, griddefgmeni3, INT, INT)
 
-/*  Lambert grid  */
+/*  Lambert Conformal Conic grid  */
 
 FCALLSCSUB10 (gridDefLCC, GRIDDEFLCC, griddeflcc, INT, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, INT, INT)
 FCALLSCSUB10 (gridInqLCC, GRIDINQLCC, gridinqlcc, INT, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PINT, PINT)
+
+/*  Lambert Azimuthal Equal Area grid  */
+
+FCALLSCSUB4 (gridDefLaea, GRIDDEFLAEA, griddeflaea, INT, DOUBLE, DOUBLE, DOUBLE)
+FCALLSCSUB4 (gridInqLaea, GRIDINQLAEA, gridinqlaea, INT, PDOUBLE, PDOUBLE, PDOUBLE)
 FCALLSCSUB2 (gridDefArea, GRIDDEFAREA, griddefarea, INT, PDOUBLE)
 FCALLSCSUB2 (gridInqArea, GRIDINQAREA, gridinqarea, INT, PDOUBLE)
 FCALLSCFUN1 (INT, gridHasArea, GRIDHASAREA, gridhasarea, INT)

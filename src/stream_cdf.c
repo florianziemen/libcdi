@@ -1460,7 +1460,13 @@ void cdfDefLonLat2D(int streamID, int gridID)
       cdf_def_dim(fileID, ydimname, ydimlen, &ydimID);
 
       if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
-	cdf_def_dim(fileID, "nv", nvertex, &nvdimID);
+	{
+	  int status;
+
+	  status = nc_inq_dimid(fileID, "nv", &nvdimID);
+	  if ( status != NC_NOERR )
+	    cdf_def_dim(fileID, "nv", nvertex, &nvdimID);
+	}
 
       dimIDs[0] = ydimID;
       dimIDs[1] = xdimID;

@@ -1,10 +1,10 @@
 ! This file was automatically created, don't edit!
 !
-! Fortran interface for CDI library version 1.2.1
+! Fortran interface for CDI library version 1.3.0
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   November 2008
+! Uwe Schulzweida, MPI-MET, Hamburg,   January 2009
 !
 
       INTEGER    CDI_UNDEFID           
@@ -855,17 +855,6 @@
 !                                     INTEGER         levID)
       EXTERNAL        vlistInqFlag
 
-      INTEGER         vlistFlagVar
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistFlagVar
-
-      INTEGER         vlistFlagLevel
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     INTEGER         levelID)
-      EXTERNAL        vlistFlagLevel
-
       INTEGER         vlistFindVar
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         fvarID)
@@ -876,6 +865,17 @@
 !                                     INTEGER         fvarID,
 !                                     INTEGER         flevelID)
       EXTERNAL        vlistFindLevel
+
+      INTEGER         vlistMergedVar
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistMergedVar
+
+      INTEGER         vlistMergedLevel
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         levelID)
+      EXTERNAL        vlistMergedLevel
 
 !
 !  VLIST attributes
@@ -1223,7 +1223,7 @@
       EXTERNAL        gridDefGMEni3
 
 !
-!  Lambert grid
+!  Lambert Conformal Conic grid
 !
 !                     gridDefLCC
 !                                    (INTEGER         gridID,
@@ -1250,6 +1250,23 @@
 !                                     INTEGER         projflag,
 !                                     INTEGER         scanflag)
       EXTERNAL        gridInqLCC
+
+!
+!  Lambert Azimuthal Equal Area grid
+!
+!                     gridDefLaea
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION earth_radius,
+!                                     DOUBLEPRECISION lon_0,
+!                                     DOUBLEPRECISION lat_0)
+      EXTERNAL        gridDefLaea
+
+!                     gridInqLaea
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION earth_radius,
+!                                     DOUBLEPRECISION lon_0,
+!                                     DOUBLEPRECISION lat_0)
+      EXTERNAL        gridInqLaea
 
 !                     gridDefArea
 !                                    (INTEGER         gridID,
