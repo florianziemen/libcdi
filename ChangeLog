@@ -3,6 +3,7 @@
 	* add support for GRID type SINUSOIDAL
 	* add support for GRID type LAEA
 	* add support of GRIB level type MEANSEA
+	* gridCreate: CF stdname and units for curvilinear grids [report: Stephanie Legutke]
 	* cdf_create: don't set chunksizehint (bug fix) [report: Luis Kornblueh]
 	* change vlistFlagVar to vlistMergedVar
 	* set default missval of INT8/16/32 to SCHAR_MIN/SHRT_MIN/INT_MIN

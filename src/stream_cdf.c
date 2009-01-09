@@ -4345,7 +4345,10 @@ int cdfInqContents(int streamID)
 		   strcmp(ncvars[ncvarid].units, "degrees_E")    == 0 ||
 		   strcmp(ncvars[ncvarid].units, "degreeE")      == 0 ||
 		   strcmp(ncvars[ncvarid].units, "degreesE")     == 0 ||
+                   strcmp(ncvars[ncvarid].stdname, "longitude")  == 0 ||
 		  (strcmp(ncvars[ncvarid].units, "degrees")          == 0 &&
+                   strcmp(ncvars[ncvarid].stdname, "grid_longitude") == 0) ||
+		  (strcmp(ncvars[ncvarid].units, "radian")           == 0 &&
                    strcmp(ncvars[ncvarid].stdname, "grid_longitude") == 0) )
 		{
 		  ncvars[ncvarid].islon = TRUE;
@@ -4359,7 +4362,10 @@ int cdfInqContents(int streamID)
 			strcmp(ncvars[ncvarid].units, "degrees_N")     == 0 ||
 			strcmp(ncvars[ncvarid].units, "degreeN")       == 0 ||
 			strcmp(ncvars[ncvarid].units, "degreesN")      == 0 ||
+                        strcmp(ncvars[ncvarid].stdname, "latitude")    == 0 ||
 		       (strcmp(ncvars[ncvarid].units, "degrees")         == 0 &&
+                        strcmp(ncvars[ncvarid].stdname, "grid_latitude") == 0) ||
+		       (strcmp(ncvars[ncvarid].units, "radian")          == 0 &&
                         strcmp(ncvars[ncvarid].stdname, "grid_latitude") == 0) )
 		{
 		  ncvars[ncvarid].islat = TRUE;

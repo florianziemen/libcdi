@@ -664,6 +664,7 @@ int gridCreate(int gridtype, int size)
 	  }
 	gridDefXlongname(gridID, "longitude");
 	gridDefYlongname(gridID, "latitude");
+	/*
 	if ( gridtype == GRID_CURVILINEAR )
 	  {
 	    strcpy(gridptr->xstdname, "grid_longitude");
@@ -672,6 +673,7 @@ int gridCreate(int gridtype, int size)
 	    gridDefYunits(gridID, "degrees");
 	  }
 	else
+	*/
 	  {
 	    strcpy(gridptr->xstdname, "longitude");
 	    strcpy(gridptr->ystdname, "latitude");
@@ -683,6 +685,15 @@ int gridCreate(int gridtype, int size)
       }
     case GRID_GME:
     case GRID_CELL:
+      {
+	gridDefXname(gridID, "lon");
+	gridDefYname(gridID, "lat");
+	strcpy(gridptr->xstdname, "longitude");
+	strcpy(gridptr->ystdname, "latitude");
+	gridDefXunits(gridID, "degrees_east");
+	gridDefYunits(gridID, "degrees_north");
+	break;
+      }
     case GRID_GENERIC:
       {
 	gridDefXname(gridID, "x");
