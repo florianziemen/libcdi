@@ -1143,6 +1143,17 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
     }
   else if ( timeunit == TUNIT_YEAR )
     {
+      if ( timevalue < -214700 )
+	{
+	  Warning(func, "Year %g out of range, set to -214700", timevalue);
+	  timevalue = -214700;
+	}
+      else if ( timevalue > 214700 )
+	{
+	  Warning(func, "Year %g out of range, set to 214700", timevalue);
+	  timevalue = 214700;
+	}
+
       vdate = (int) timevalue*10000;
       vtime = 0;
     }

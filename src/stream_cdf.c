@@ -2285,6 +2285,40 @@ void cdfDefMapping(int streamID, int gridID)
 
       cdf_enddef(fileID);
     }
+  else if ( gridInqType(gridID) == GRID_LCC2 )
+    {
+      char varname[] = "Lambert_Conformal";
+      char mapname[] = "lambert_conformal_conic";
+
+      fileID  = streamInqFileID(streamID);
+
+      cdf_redef(fileID);
+
+      ncerr = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
+      if ( ncerr == NC_NOERR )
+	{
+	  double a, lon_0, lat_0, lat_1, lat_2;
+
+	  gridInqLcc2(gridID, &a, &lon_0, &lat_0, &lat_1, &lat_2);
+
+	  cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", strlen(mapname), mapname);
+	  if ( a > 0 )
+	    cdf_put_att_double(fileID, ncvarid, "earth_radius", NC_DOUBLE, 1L, &a);
+	  cdf_put_att_double(fileID, ncvarid, "longitude_of_central_meridian", NC_DOUBLE, 1L, &lon_0);
+	  cdf_put_att_double(fileID, ncvarid, "latitude_of_projection_origin", NC_DOUBLE, 1L, &lat_0);
+	  if ( DBL_IS_EQUAL(lat_1, lat_2) )
+	    cdf_put_att_double(fileID, ncvarid, "standard_parallel", NC_DOUBLE, 1L, &lat_1);
+	  else
+	    {
+	      double lat_1_2[2];
+	      lat_1_2[0] = lat_1;
+	      lat_1_2[1] = lat_2;
+	      cdf_put_att_double(fileID, ncvarid, "standard_parallel", NC_DOUBLE, 2L, lat_1_2);
+	    }
+	}
+
+      cdf_enddef(fileID);
+    }
 #endif
 }
 
@@ -2348,7 +2382,7 @@ void cdfDefGrid(int streamID, int gridID)
     {
       cdfDefCell(streamID, gridID);
     }
-  else if ( gridtype == GRID_SINUSOIDAL || gridtype == GRID_LAEA )
+  else if ( gridtype == GRID_SINUSOIDAL || gridtype == GRID_LAEA || gridtype == GRID_LCC2 )
     {
       cdfDefXaxis(streamID, gridID);
       cdfDefYaxis(streamID, gridID);
@@ -2563,6 +2597,12 @@ int cdfDefVar(int streamID, int varID)
   if ( gridInqType(gridID) == GRID_LAEA )
     {
       char mapping[] = "laea";
+      cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
+    }
+
+  if ( gridInqType(gridID) == GRID_LCC2 )
+    {
+      char mapping[] = "Lambert_Conformal";
       cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
     }
 
@@ -3594,6 +3634,7 @@ int cdfInqContents(int streamID)
   char attname[256];
   const int attstringlen = 8192; char attstring[8192];
   char *pname, *plongname, *punits;
+  double datt;
   int iatt, timehasunit = 0;
   int time_has_bounds = FALSE;
   size_t len;
@@ -3901,6 +3942,8 @@ int cdfInqContents(int streamID)
 	      else if ( strncmp(attstring, "sinusoidal", attlen) == 0 )
 		;
 	      else if ( strncmp(attstring, "laea", attlen) == 0 )
+		;
+	      else if ( strncmp(attstring, "lcc2", attlen) == 0 )
 		;
 	      else
 		{
@@ -4956,6 +4999,7 @@ int cdfInqContents(int streamID)
 	      for ( iatt = 0; iatt < nvatts; iatt++ )
 		{
 		  cdf_inq_attname(fileID, ncvars[ncvarid].gmapid, iatt, attname);
+		  cdf_inq_attlen(fileID, ncvars[ncvarid].gmapid, attname, &attlen);
 
 		  if ( strcmp(attname, "grid_mapping_name") == 0 )
 		    {
@@ -4967,18 +5011,44 @@ int cdfInqContents(int streamID)
 			grid.type = GRID_SINUSOIDAL;
 		      else if ( strcmp(attstring, "lambert_azimuthal_equal_area") == 0 )
 			grid.type = GRID_LAEA;
+		      else if ( strcmp(attstring, "lambert_conformal_conic") == 0 )
+			grid.type = GRID_LCC2;
 		    }
 		  else if ( strcmp(attname, "earth_radius") == 0 )
 		    {
-		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &grid.laea_a);
+		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &datt);
+		      grid.laea_a = datt;
+		      grid.lcc2_a = datt;
 		    }
 		  else if ( strcmp(attname, "longitude_of_projection_origin") == 0 )
 		    {
 		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &grid.laea_lon_0);
 		    }
+		  else if ( strcmp(attname, "longitude_of_central_meridian") == 0 )
+		    {
+		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &grid.lcc2_lon_0);
+		    }
 		  else if ( strcmp(attname, "latitude_of_projection_origin") == 0 )
 		    {
-		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &grid.laea_lat_0);
+		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &datt);
+		      grid.laea_lat_0 = datt;
+		      grid.lcc2_lat_0 = datt;
+		    }
+		  else if ( strcmp(attname, "standard_parallel") == 0 )
+		    {
+		      if ( attlen == 1 )
+			{
+			  cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &datt);
+			  grid.lcc2_lat_1 = datt;
+			  grid.lcc2_lat_2 = datt;
+			}
+		      else
+			{
+			  double datt2[2];
+			  cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 2, datt2);
+			  grid.lcc2_lat_1 = datt2[0];
+			  grid.lcc2_lat_2 = datt2[1];
+			}
 		    }
 		  else if ( strcmp(attname, "grid_north_pole_latitude") == 0 )
 		    {

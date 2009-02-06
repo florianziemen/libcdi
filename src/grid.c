@@ -33,8 +33,9 @@ char *Grids[] = {
   /*  9 */  "cell",
   /* 10 */  "curvilinear",
   /* 11 */  "lcc",
-  /* 12 */  "laea",
-  /* 13 */  "sinusoidal",
+  /* 12 */  "lcc2",
+  /* 13 */  "laea",
+  /* 14 */  "sinusoidal",
 };
 
 
@@ -194,6 +195,12 @@ static void grid_init_entry(grid_t *gridptr)
   gridptr->lcc_projflag = 0;
   gridptr->lcc_scanflag = 0;
   gridptr->lcc_defined  = FALSE;
+  gridptr->lcc2_lon_0   = 0.0;
+  gridptr->lcc2_lat_0   = 0.0;
+  gridptr->lcc2_lat_1   = 0.0;
+  gridptr->lcc2_lat_2   = 0.0;
+  gridptr->lcc2_a       = 0.0;
+  gridptr->lcc2_defined = FALSE;
   gridptr->laea_lon_0   = 0.0;
   gridptr->laea_lat_0   = 0.0;
   gridptr->laea_a       = 0.0;
@@ -704,6 +711,7 @@ int gridCreate(int gridtype, int size)
 	gridDefYunits(gridID, "degrees");
 	break;
       }
+    case GRID_LCC2:
     case GRID_SINUSOIDAL:
     case GRID_LAEA:
       {
@@ -2377,6 +2385,7 @@ int gridGenerate(grid_t grid)
     case GRID_CURVILINEAR:
     case GRID_GENERIC:
     case GRID_LCC:
+    case GRID_LCC2:
     case GRID_SINUSOIDAL:
     case GRID_LAEA:
       {
@@ -2443,6 +2452,9 @@ int gridGenerate(grid_t grid)
 
 	if ( grid.type == GRID_LAEA )
 	  gridDefLaea(gridID, grid.laea_a, grid.laea_lon_0, grid.laea_lat_0);
+
+	if ( grid.type == GRID_LCC2 )
+	  gridDefLcc2(gridID, grid.lcc2_a, grid.lcc2_lon_0, grid.lcc2_lat_0, grid.lcc2_lat_1, grid.lcc2_lat_2);
 
 	if ( grid.type == GRID_LCC )
 	  gridDefLCC(gridID, grid.lcc_originLon, grid.lcc_originLat, grid.lcc_lonParY,
@@ -3061,6 +3073,7 @@ void gridPrint(int gridID, int opt)
     case GRID_LONLAT:
     case GRID_GAUSSIAN:
     case GRID_GENERIC:
+    case GRID_LCC2:
     case GRID_SINUSOIDAL:
     case GRID_LAEA:
     case GRID_CURVILINEAR:
@@ -3092,6 +3105,17 @@ void gridPrint(int gridID, int opt)
 	    fprintf(fp, "lat_0     = %g\n", lat_0);
 	  }
 
+	if ( type == GRID_LCC2 )
+	  {
+	    double a, lon_0, lat_0, lat_1, lat_2;
+	    gridInqLcc2(gridID, &a, &lon_0, &lat_0, &lat_1, &lat_2);
+	    fprintf(fp, "a         = %g\n", a);
+	    fprintf(fp, "lon_0     = %g\n", lon_0);
+	    fprintf(fp, "lat_0     = %g\n", lat_0);
+	    fprintf(fp, "lat_1     = %g\n", lat_1);
+	    fprintf(fp, "lat_2     = %g\n", lat_2);
+	  }
+
 	if ( gridptr->isRotated )
 	  {
 	    if ( xsize > 0 ) fprintf(fp, "xnpole    = %g\n", gridptr->xpole);
@@ -3102,8 +3126,9 @@ void gridPrint(int gridID, int opt)
 	  {
 	    double xfirst = 0.0, xinc = 0.0;
 
-	    if ( type == GRID_LONLAT || type == GRID_GAUSSIAN || 
-		 type == GRID_GENERIC || type == GRID_SINUSOIDAL || type == GRID_LAEA )
+	    if ( type == GRID_LONLAT     || type == GRID_GAUSSIAN || 
+		 type == GRID_GENERIC    || type == GRID_LCC2     || 
+                 type == GRID_SINUSOIDAL || type == GRID_LAEA )
 	      {
 		xfirst = gridInqXval(gridID, 0);
 		xinc   = gridInqXinc(gridID);
@@ -3149,7 +3174,7 @@ void gridPrint(int gridID, int opt)
 	  {
 	    double yfirst = 0.0, yinc = 0.0;
 
-	    if ( type == GRID_LONLAT || type == GRID_GENERIC ||
+	    if ( type == GRID_LONLAT || type == GRID_GENERIC || type == GRID_LCC2 ||
 		 type == GRID_SINUSOIDAL || type == GRID_LAEA )
 	      {
 		yfirst = gridInqYval(gridID, 0);
@@ -3326,7 +3351,7 @@ void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
   gridptr = grid_to_pointer(gridID);
 
   if ( gridptr->type != GRID_LCC )
-    Warning(func, "Definition of LAEA grid for %s grid not allowed!",
+    Warning(func, "Definition of LCC grid for %s grid not allowed!",
 	    gridNamePtr(gridptr->type));
   else
     {
@@ -3397,6 +3422,53 @@ void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonPar
     }
 }
 
+void gridDefLcc2(int gridID, double earth_radius, double lon_0, double lat_0, double lat_1, double lat_2)
+{
+  static char func[] = "gridDefLcc2";
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  if ( gridptr->type != GRID_LCC2 )
+    Warning(func, "Definition of LCC2 grid for %s grid not allowed!",
+	    gridNamePtr(gridptr->type));
+  else
+    {
+      gridptr->lcc2_a       = earth_radius;
+      gridptr->lcc2_lon_0   = lon_0;
+      gridptr->lcc2_lat_0   = lat_0;
+      gridptr->lcc2_lat_1   = lat_1;
+      gridptr->lcc2_lat_2   = lat_2;
+      gridptr->lcc2_defined = TRUE;
+    }
+}
+
+
+void gridInqLcc2(int gridID, double *earth_radius, double *lon_0, double *lat_0, double *lat_1, double *lat_2)
+{
+  static char func[] = "gridInqLcc2";
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  if ( gridptr->type != GRID_LCC2 )
+    Warning(func, "Inquire of LCC2 grid definition for %s grid not allowed!",
+	    gridNamePtr(gridptr->type));
+  else
+    {
+      if ( gridptr->lcc2_defined )
+	{
+	  *earth_radius = gridptr->lcc2_a;
+	  *lon_0        = gridptr->lcc2_lon_0;
+	  *lat_0        = gridptr->lcc2_lat_0;
+	  *lat_1        = gridptr->lcc2_lat_1;
+	  *lat_2        = gridptr->lcc2_lat_2;
+	}
+      else
+	Warning(func, "LCC2 grid undefined (gridID = %d)", gridID);
+    }
+}
+
 void gridDefLaea(int gridID, double earth_radius, double lon_0, double lat_0)
 {
   static char func[] = "gridDefLaea";
@@ -3419,7 +3491,7 @@ void gridDefLaea(int gridID, double earth_radius, double lon_0, double lat_0)
 
 void gridInqLaea(int gridID, double *earth_radius, double *lon_0, double *lat_0)
 {
-  static char func[] = "gridDefLaea";
+  static char func[] = "gridInqLaea";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
