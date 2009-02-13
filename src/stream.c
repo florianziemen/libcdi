@@ -879,16 +879,19 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
     case FILETYPE_NC:
       {
 	fileID = cdfOpen(filename, filemode);
+	streamptr->ncmode = 2;
 	break;
       }
     case FILETYPE_NC2:
       {
 	fileID = cdfOpen64(filename, filemode);
+	streamptr->ncmode = 2;
 	break;
       }
     case FILETYPE_NC4:
       {
 	fileID = cdf4Open(filename, filemode);
+	streamptr->ncmode = 2;
 	break;
       }
 #endif
