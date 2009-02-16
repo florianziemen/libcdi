@@ -2,6 +2,8 @@
 
 AC_INIT(cdi, 1.3.1, Uwe.Schulzweida@zmaw.de)
 
+echo "configuring ${PACKAGE_NAME} ${PACKAGE_VERSION}"
+
 CONFIG_ABORT=yes
 
 AC_ARG_VAR(CFINT,  [C/Fortran interface preprocessor flag, e.g. -Df2cFortran]) 
@@ -227,3 +229,10 @@ AC_SUBST([CFINT])
 AC_SUBST([AR])
 
 AC_OUTPUT(Makefile src/Makefile app/Makefile tests/Makefile examples/Makefile)
+
+AC_MSG_NOTICE([
+
+  Configuration completed.
+
+    You can now say 'make' to compile the CDI package and 'make install' to install it afterwards.
+])

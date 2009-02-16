@@ -1773,6 +1773,8 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+echo "configuring ${PACKAGE_NAME} ${PACKAGE_VERSION}"
+
 CONFIG_ABORT=yes
 
 
@@ -7895,3 +7897,16 @@ if test "$no_create" != yes; then
   $ac_cs_success || { (exit 1); exit 1; }
 fi
 
+
+{ echo "$as_me:$LINENO:
+
+  Configuration completed.
+
+    You can now say 'make' to compile the CDI package and 'make install' to install it afterwards.
+" >&5
+echo "$as_me:
+
+  Configuration completed.
+
+    You can now say 'make' to compile the CDI package and 'make install' to install it afterwards.
+" >&6;}
