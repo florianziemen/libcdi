@@ -387,7 +387,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 	{
 	  calc_gaussaw(yvals, ysize, yfirst, ylast);
 
-	  if ( ! (DBL_IS_EQUAL(yfirst, 0) && DBL_IS_EQUAL(ylast, 0)) )
+	  if ( ! (IS_EQUAL(yfirst, 0) && IS_EQUAL(ylast, 0)) )
 	    if ( fabs(yvals[0] - yfirst) > 0.001 || fabs(yvals[ysize-1] - ylast) > 0.001 )
 	      {
 		double yinc = fabs(ylast-yfirst)/(ysize-1);
@@ -432,7 +432,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
     {
       if ( (! (fabs(yinc) > 0)) && ysize > 1 )
 	{
-	  if ( DBL_IS_EQUAL(yfirst, ylast) && !DBL_IS_EQUAL(yfirst, 0) ) ylast *= -1;
+	  if ( IS_EQUAL(yfirst, ylast) && IS_NOT_EQUAL(yfirst, 0) ) ylast *= -1;
 
 	  if ( yfirst > ylast )
 	    yinc = (yfirst-ylast)/(ysize-1);
@@ -2142,9 +2142,9 @@ static void grid_check_cyclic(grid_t *gridptr)
 	{
 	  xinc = xvals[1] - xvals[0];
 	  x0 = 2*xvals[xsize-1]-xvals[xsize-2]-360;
-	  if ( ! DBL_IS_EQUAL(xvals[0], xvals[xsize-1]) )
+	  if ( IS_NOT_EQUAL(xvals[0], xvals[xsize-1]) )
 	    if ( fabs(x0 - xvals[0]) < 1.e-4 ) gridptr->isCyclic = TRUE;
-	  /*	    if ( DBL_IS_EQUAL(x0, xvals[0]) ) gridptr->isCyclic = TRUE; */
+	  /*	    if ( IS_EQUAL(x0, xvals[0]) ) gridptr->isCyclic = TRUE; */
 	}
     }
   else if ( gridptr->type == GRID_CURVILINEAR )
@@ -2246,12 +2246,12 @@ int gridCompare(int gridID, grid_t grid)
 		{
 		  if ( grid.xdef == 2 && grid.ydef == 2 )
 		    {
-		      if ( ! (DBL_IS_EQUAL(grid.xfirst, 0) && DBL_IS_EQUAL(grid.xlast, 0) && DBL_IS_EQUAL(grid.xinc, 0)) &&
-			   ! (DBL_IS_EQUAL(grid.yfirst, 0) && DBL_IS_EQUAL(grid.ylast, 0) && DBL_IS_EQUAL(grid.yinc, 0)) &&
-			   !DBL_IS_EQUAL(grid.xfirst, grid.xlast) && !DBL_IS_EQUAL(grid.yfirst, grid.ylast) )
+		      if ( ! (IS_EQUAL(grid.xfirst, 0) && IS_EQUAL(grid.xlast, 0) && IS_EQUAL(grid.xinc, 0)) &&
+			   ! (IS_EQUAL(grid.yfirst, 0) && IS_EQUAL(grid.ylast, 0) && IS_EQUAL(grid.yinc, 0)) &&
+			   IS_NOT_EQUAL(grid.xfirst, grid.xlast) && IS_NOT_EQUAL(grid.yfirst, grid.ylast) )
 			{
-			  if ( !DBL_IS_EQUAL(grid.xfirst, gridInqXval(gridID, 0)) ||
-			       !DBL_IS_EQUAL(grid.yfirst, gridInqYval(gridID, 0)))
+			  if ( IS_NOT_EQUAL(grid.xfirst, gridInqXval(gridID, 0)) ||
+			       IS_NOT_EQUAL(grid.yfirst, gridInqYval(gridID, 0)))
 			    {
 			      differ = 1;
 			    }
@@ -2305,8 +2305,8 @@ int gridCompare(int gridID, grid_t grid)
 		{
 		  if ( grid.xdef == 2 && grid.ydef == 2 )
 		    {
-		      if ( ! (DBL_IS_EQUAL(grid.xfirst, 0) && DBL_IS_EQUAL(grid.xlast, 0) && DBL_IS_EQUAL(grid.xinc, 0)) &&
-			   ! (DBL_IS_EQUAL(grid.yfirst, 0) && DBL_IS_EQUAL(grid.ylast, 0)) )
+		      if ( ! (IS_EQUAL(grid.xfirst, 0) && IS_EQUAL(grid.xlast, 0) && IS_EQUAL(grid.xinc, 0)) &&
+			   ! (IS_EQUAL(grid.yfirst, 0) && IS_EQUAL(grid.ylast, 0)) )
 			if ( fabs(grid.xfirst - gridInqXval(gridID, 0)) > 0.001 ||
 			     fabs(grid.yfirst - gridInqYval(gridID, 0)) > 0.001 ||
 			     fabs(fabs(grid.xinc) - fabs(gridInqXinc(gridID))) > fabs(grid.xinc/1000))
@@ -2317,8 +2317,8 @@ int gridCompare(int gridID, grid_t grid)
 		  else
 		    {
 		      if ( grid.xvals && grid.yvals )
-			if ( !DBL_IS_EQUAL(grid.xvals[0], gridInqXval(gridID, 0)) ||
-			     !DBL_IS_EQUAL(grid.yvals[0], gridInqYval(gridID, 0)) ||
+			if ( IS_NOT_EQUAL(grid.xvals[0], gridInqXval(gridID, 0)) ||
+			     IS_NOT_EQUAL(grid.yvals[0], gridInqYval(gridID, 0)) ||
 			     fabs(fabs(grid.xvals[1]-grid.xvals[0]) - fabs(gridInqXinc(gridID)))
 			     > fabs(grid.xinc/1000))
 			  {
@@ -3134,7 +3134,7 @@ void gridPrint(int gridID, int opt)
 		xinc   = gridInqXinc(gridID);
 	      }
 
-	    if ( !DBL_IS_EQUAL(xinc, 0) && opt )
+	    if ( IS_NOT_EQUAL(xinc, 0) && opt )
 	      {
 	  	fprintf(fp, "xfirst    = %g\n", xfirst);
 		fprintf(fp, "xinc      = %g\n", xinc);
@@ -3181,7 +3181,7 @@ void gridPrint(int gridID, int opt)
 		yinc   = gridInqYinc(gridID);
 	      }
 
-	    if ( !DBL_IS_EQUAL(yinc, 0) && opt )
+	    if ( IS_NOT_EQUAL(yinc, 0) && opt )
 	      {
 	  	fprintf(fp, "yfirst    = %g\n", yfirst);
 		fprintf(fp, "yinc      = %g\n", yinc);

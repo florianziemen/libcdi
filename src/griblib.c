@@ -1,7 +1,7 @@
 
-/* Generated automatically from m214003 on Thu Oct 23 13:39:51 CEST 2008 */
+/* Generated automatically from m214003 on Tue Feb 17 11:26:33 CET 2009 */
 
-/* GRIBLIB_VERSION="1.2.1" */
+/* GRIBLIB_VERSION="1.2.2" */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -19,6 +19,10 @@
 
 #ifndef _GRIB_INT_H
 #define _GRIB_INT_H
+
+#if defined (HAVE_CONFIG_H)
+#  include "config.h"
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,10 +64,24 @@
 
 
 #ifndef DBL_IS_EQUAL
+#if  defined  (XXX_HAVE_ISNAN)
+#  define DBL_IS_NAN(x)     (isnan(x))
+#  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)?1:0):!(x < y || y < x))
+#elif  defined  (XXX_FP_NAN)
+#  define DBL_IS_NAN(x)     (fpclassify(x) == FP_NAN)
+#  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)?1:0):!(x < y || y < x))
+#else
+#  define DBL_IS_NAN(x)     ((x) != (x))
 /*
-#define DBL_IS_EQUAL(x,y) (fabs(x - y) <= 2.0*(y*DBL_EPSILON + DBL_MIN))
+#  define DBL_IS_EQUAL(x,y) (!(x < y || y < x))
 */
-#define DBL_IS_EQUAL(x,y) (!(fabs(x - y) > 0))
+#  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)?1:0):!(x < y || y < x))
+#endif
+#endif
+
+#ifndef IS_EQUAL
+#  define IS_NOT_EQUAL(x,y) (x < y || y < x)
+#  define IS_EQUAL(x,y)     (!IS_NOT_EQUAL(x,y))
 #endif
 
 
@@ -3334,7 +3352,7 @@ int encodeBDS(GRIBPACK *lGrib, int *gribLen, int decscale, int *isec2, int *isec
     {
       binscale = 0;
     }
-  else if ( (!DBL_IS_EQUAL(fmin, 0.0)) && (fabs(range/fmin) <= jpepsln) )
+  else if ( IS_NOT_EQUAL(fmin, 0.0) && (fabs(range/fmin) <= jpepsln) )
     {
       binscale = 0;
     }
@@ -8362,7 +8380,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.2.1" " of ""Oct 23 2008"" ""13:39:51";
+static const char grb_libvers[] = "1.2.2" " of ""Feb 17 2009"" ""11:26:33";
 const char *
 gribLibraryVersion(void)
 {

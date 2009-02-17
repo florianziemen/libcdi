@@ -1093,8 +1093,8 @@ void cdfDefXaxis(int streamID, int gridID)
 	    {
 	      dimlen0 = gridInqXsize(gridID0);
 	      if ( dimlen == dimlen0 )
-		if ( DBL_IS_EQUAL(gridInqXval(gridID0, 0), gridInqXval(gridID, 0)) &&
-		     DBL_IS_EQUAL(gridInqXval(gridID0, dimlen-1), gridInqXval(gridID, dimlen-1)) )
+		if ( IS_EQUAL(gridInqXval(gridID0, 0), gridInqXval(gridID, 0)) &&
+		     IS_EQUAL(gridInqXval(gridID0, dimlen-1), gridInqXval(gridID, dimlen-1)) )
 		  {
 		    dimID = streamptr->xdimID[index];
 		    break;
@@ -1257,8 +1257,8 @@ void cdfDefYaxis(int streamID, int gridID)
 	    {
 	      dimlen0 = gridInqYsize(gridID0);
 	      if ( dimlen == dimlen0 )
-		if ( DBL_IS_EQUAL(gridInqYval(gridID0, 0), gridInqYval(gridID, 0)) &&
-		     DBL_IS_EQUAL(gridInqYval(gridID0, dimlen-1), gridInqYval(gridID, dimlen-1)) )
+		if ( IS_EQUAL(gridInqYval(gridID0, 0), gridInqYval(gridID, 0)) &&
+		     IS_EQUAL(gridInqYval(gridID0, dimlen-1), gridInqYval(gridID, dimlen-1)) )
 		  {
 		    dimID = streamptr->ydimID[index];
 		    break;
@@ -1430,8 +1430,8 @@ void cdfDefLonLat2D(int streamID, int gridID)
 	    {
 	      dimlen0 = gridInqXsize(gridID0);
 	      if ( xdimlen == dimlen0 )
-		if ( DBL_IS_EQUAL(gridInqXval(gridID0, 0), gridInqXval(gridID, 0)) &&
-		     DBL_IS_EQUAL(gridInqXval(gridID0, xdimlen-1), gridInqXval(gridID, xdimlen-1)) )
+		if ( IS_EQUAL(gridInqXval(gridID0, 0), gridInqXval(gridID, 0)) &&
+		     IS_EQUAL(gridInqXval(gridID0, xdimlen-1), gridInqXval(gridID, xdimlen-1)) )
 		  {
 		    xdimID = streamptr->xdimID[index];
 		    break;
@@ -2306,7 +2306,7 @@ void cdfDefMapping(int streamID, int gridID)
 	    cdf_put_att_double(fileID, ncvarid, "earth_radius", NC_DOUBLE, 1L, &a);
 	  cdf_put_att_double(fileID, ncvarid, "longitude_of_central_meridian", NC_DOUBLE, 1L, &lon_0);
 	  cdf_put_att_double(fileID, ncvarid, "latitude_of_projection_origin", NC_DOUBLE, 1L, &lat_0);
-	  if ( DBL_IS_EQUAL(lat_1, lat_2) )
+	  if ( IS_EQUAL(lat_1, lat_2) )
 	    cdf_put_att_double(fileID, ncvarid, "standard_parallel", NC_DOUBLE, 1L, &lat_1);
 	  else
 	    {
@@ -2662,13 +2662,13 @@ int cdfDefVar(int streamID, int varID)
 
       addoffset    = vlistInqVarAddoffset(vlistID, varID);
       scalefactor  = vlistInqVarScalefactor(vlistID, varID);
-      laddoffset   = !DBL_IS_EQUAL(addoffset, 0);
-      lscalefactor = !DBL_IS_EQUAL(scalefactor, 1);
+      laddoffset   = IS_NOT_EQUAL(addoffset, 0);
+      lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
 
       if ( laddoffset || lscalefactor )
 	{
-	  if ( DBL_IS_EQUAL(addoffset, (double) ((float) addoffset)) &&
-	       DBL_IS_EQUAL(scalefactor, (double) ((float) scalefactor)) )
+	  if ( IS_EQUAL(addoffset, (double) ((float) addoffset)) &&
+	       IS_EQUAL(scalefactor, (double) ((float) scalefactor)) )
 	    {
 	      astype = NC_FLOAT;
 	    }
@@ -2794,8 +2794,8 @@ void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
 
   addoffset    = vlistInqVarAddoffset(vlistID, varID);
   scalefactor  = vlistInqVarScalefactor(vlistID, varID);
-  laddoffset   = !DBL_IS_EQUAL(addoffset, 0);
-  lscalefactor = !DBL_IS_EQUAL(scalefactor, 1);
+  laddoffset   = IS_NOT_EQUAL(addoffset, 0);
+  lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
 
   if ( laddoffset || lscalefactor )
     {
@@ -2933,8 +2933,8 @@ void cdfWriteVarDP(int streamID, int varID, double *data, int nmiss)
 
       addoffset    = vlistInqVarAddoffset(vlistID, varID);
       scalefactor  = vlistInqVarScalefactor(vlistID, varID);
-      laddoffset   = !DBL_IS_EQUAL(addoffset, 0);
-      lscalefactor = !DBL_IS_EQUAL(scalefactor, 1);
+      laddoffset   = IS_NOT_EQUAL(addoffset, 0);
+      lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
 
       nvals = gridInqSize(gridID)*zaxisInqSize(zaxisID);
 
@@ -3177,8 +3177,8 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 
   addoffset    = vlistInqVarAddoffset(vlistID, varID);
   scalefactor  = vlistInqVarScalefactor(vlistID, varID);
-  laddoffset   = !DBL_IS_EQUAL(addoffset, 0);
-  lscalefactor = !DBL_IS_EQUAL(scalefactor, 1);
+  laddoffset   = IS_NOT_EQUAL(addoffset, 0);
+  lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
 
   if ( laddoffset || lscalefactor )
     {
@@ -3310,8 +3310,8 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int n
 
       addoffset    = vlistInqVarAddoffset(vlistID, varID);
       scalefactor  = vlistInqVarScalefactor(vlistID, varID);
-      laddoffset   = !DBL_IS_EQUAL(addoffset, 0);
-      lscalefactor = !DBL_IS_EQUAL(scalefactor, 1);
+      laddoffset   = IS_NOT_EQUAL(addoffset, 0);
+      lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
 
       nvals = gridInqSize(gridID);
 
@@ -4879,7 +4879,7 @@ int cdfInqContents(int streamID)
 	      if ( islat && islon )
 		{
 		  int lgauss = FALSE;
-		  if ( DBL_IS_EQUAL(yinc, 0) && (int) ysize > 2 ) /* check if gaussian */
+		  if ( IS_EQUAL(yinc, 0) && (int) ysize > 2 ) /* check if gaussian */
 		    {
 		      double *yvals, *yw;
 		      yvals = (double *) malloc(ysize*sizeof(double));
@@ -5298,9 +5298,9 @@ int cdfInqContents(int streamID)
       if ( ncvars[ncvarid].longname[0] )      vlistDefVarLongname(vlistID, varID, ncvars[ncvarid].longname);
       if ( ncvars[ncvarid].stdname[0] )       vlistDefVarStdname(vlistID, varID, ncvars[ncvarid].stdname);
       if ( ncvars[ncvarid].units[0] )         vlistDefVarUnits(vlistID, varID, ncvars[ncvarid].units);
-      if ( !DBL_IS_EQUAL(ncvars[ncvarid].addoffset, 0) )
+      if ( IS_NOT_EQUAL(ncvars[ncvarid].addoffset, 0) )
 	vlistDefVarAddoffset(vlistID, varID, ncvars[ncvarid].addoffset);
-      if ( !DBL_IS_EQUAL(ncvars[ncvarid].scalefactor, 1) )
+      if ( IS_NOT_EQUAL(ncvars[ncvarid].scalefactor, 1) )
 	vlistDefVarScalefactor(vlistID, varID, ncvars[ncvarid].scalefactor);
 
       vlistDefVarDatatype(vlistID, varID, cdfInqDatatype(ncvars[ncvarid].xtype));

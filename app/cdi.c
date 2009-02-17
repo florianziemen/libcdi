@@ -14,14 +14,24 @@
 
 
 #ifndef DBL_IS_EQUAL
-#if  defined  (HAVE_ISNAN)
-#  define DBL_IS_EQUAL(x,y) (isnan(x)||isnan(y)?(isnan(x)&&isnan(y)?1:0):!(fabs(x - y) > 0))
+#if  defined  (XXX_HAVE_ISNAN)
+#  define DBL_IS_NAN(x)     (isnan(x))
+#  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)?1:0):!(x < y || y < x))
+#elif  defined  (XXX_FP_NAN)
+#  define DBL_IS_NAN(x)     (fpclassify(x) == FP_NAN)
+#  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)?1:0):!(x < y || y < x))
 #else
+#  define DBL_IS_NAN(x)     ((x) != (x))
 /*
-#  define DBL_IS_EQUAL(x,y) (fabs(x - y) <= 2.0*(y*DBL_EPSILON + DBL_MIN))
+#  define DBL_IS_EQUAL(x,y) (!(x < y || y < x))
 */
-#  define DBL_IS_EQUAL(x,y) (!(fabs(x - y) > 0))
+#  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)?1:0):!(x < y || y < x))
 #endif
+#endif
+
+#ifndef IS_EQUAL
+#  define IS_NOT_EQUAL(x,y) (x < y || y < x)
+#  define IS_EQUAL(x,y)     (!IS_NOT_EQUAL(x,y))
 #endif
 
 
@@ -135,7 +145,7 @@ static void printInfo(int gridtype, int date, int time, int code, double level,
 	  arrmax  = -1e50;
 	  for ( i = 0; i < datasize; i++ )
 	    {
-	      if ( fabs(data[i]-missval) > 0 )
+	      if ( !DBL_IS_EQUAL(data[i], missval) )
 		{
 		  if ( data[i] < arrmin ) arrmin = data[i];
 		  if ( data[i] > arrmax ) arrmax = data[i];
@@ -294,7 +304,7 @@ static void printGridInfo(int vlistID)
 	      fprintf(stdout, "size      : dim = %d  nlon = %d  nlat = %d\n", gridsize, xsize, ysize);
 	      fprintf(stdout, "%*s", nbyte0, "");
 	      fprintf(stdout, "%-9s : first = %.9g  last = %.9g", xname, xfirst, xlast);
-	      if ( !DBL_IS_EQUAL(xinc, 0) )
+	      if ( IS_NOT_EQUAL(xinc, 0) )
 		fprintf(stdout, "  inc = %.9g", xinc);
 	      fprintf(stdout, "  %s", xunits);
 	      if ( gridIsCircular(gridID) )
@@ -303,7 +313,7 @@ static void printGridInfo(int vlistID)
 	    }
 	  fprintf(stdout, "%*s", nbyte0, "");
 	  fprintf(stdout, "%-9s : first = %.9g  last = %.9g", yname, yfirst, ylast);
-	  if ( !DBL_IS_EQUAL(yinc, 0) && 
+	  if ( IS_NOT_EQUAL(yinc, 0) && 
 	       (gridtype == GRID_LONLAT || gridtype == GRID_SINUSOIDAL || gridtype == GRID_LAEA) )
 	    fprintf(stdout, "  inc = %.9g", yinc);
 	  fprintf(stdout, "  %s", yunits);
