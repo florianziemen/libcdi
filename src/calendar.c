@@ -59,12 +59,22 @@ int days_per_year(int calendar, int year)
 
   if ( dpy == 0 )
     {
-      if ( year == 1582 )
-	dpy = 355;
-      else if ( (year%4 == 0 && year%100 != 0) || year%400 == 0 )
-	dpy = 366;
+      if ( calendar == CALENDAR_STANDARD )
+	{
+	  if ( year == 1582 )
+	    dpy = 355;
+	  else if ( (year%4 == 0 && year%100 != 0) || year%400 == 0 )
+	    dpy = 366;
+	  else
+	    dpy = 365;
+	}
       else
-	dpy = 365;
+	{
+	  if ( (year%4 == 0 && year%100 != 0) || year%400 == 0 )
+	    dpy = 366;
+	  else
+	    dpy = 365;
+	}
     }
 
   daysperyear = dpy;
@@ -128,7 +138,7 @@ int date_to_calday(int calendar, int date)
   if ( dpy == 360 || dpy == 365 || dpy == 366 )
     calday = encode_day(dpy, year, month, day);
   else
-    calday = encode_julday(year, month, day);
+    calday = encode_julday(calendar, year, month, day);
 
   return (calday);
 }
@@ -145,7 +155,7 @@ int calday_to_date(int calendar, int calday)
   if ( dpy == 360 || dpy == 365 || dpy == 366 )
     decode_day(dpy, calday, &year, &month, &day);
   else
-    decode_julday(calday, &year, &month, &day);
+    decode_julday(calendar, calday, &year, &month, &day);
 
   date = encode_date(year, month, day);
 
@@ -162,7 +172,7 @@ void encode_caldaysec(int calendar, int year, int month, int day, int hour, int 
   if ( dpy == 360 || dpy == 365 || dpy == 366 )
     *julday = encode_day(dpy, year, month, day);
   else
-    *julday = encode_julday(year, month, day);
+    *julday = encode_julday(calendar, year, month, day);
 
   *secofday = (hour*60 + minute)*60;
 }
@@ -177,7 +187,7 @@ void decode_caldaysec(int calendar, int julday, int secofday, int *year, int *mo
   if ( dpy == 360 || dpy == 365 || dpy == 366 )
     decode_day(dpy, julday, year, month, day);
   else
-    decode_julday(julday, year, month, day);
+    decode_julday(calendar, julday, year, month, day);
 
   *hour   = secofday/3600;
   *minute = secofday/60 - *hour*60;

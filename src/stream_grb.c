@@ -1710,7 +1710,9 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
       int rdate, rtime;
       int julday1, secofday1, julday2, secofday2, days, secs;
       int ival;
+      int calendar;
       
+      calendar = taxisInqCalendar(timeID);
       rdate   = taxisInqRdate(timeID);
       rtime   = taxisInqRtime(timeID);
       decode_date(rdate, &year, &month, &day);
@@ -1742,7 +1744,7 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
       /*
       printf("year %d, month %d, day %d, hour %d, minute %d\n", year, month, day, hour, minute);
       */
-      encode_juldaysec(year, month, day, hour, minute, &julday1, &secofday1);
+      encode_juldaysec(calendar, year, month, day, hour, minute, &julday1, &secofday1);
 
       switch (taxisInqTunit(timeID))
 	{
@@ -1757,7 +1759,7 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
       printf("date time %d %d\n", date, time);
       printf("year %d, month %d, day %d, hour %d, minute %d\n", year, month, day, hour, minute);
       */
-      encode_juldaysec(year, month, day, hour, minute, &julday2, &secofday2);
+      encode_juldaysec(calendar, year, month, day, hour, minute, &julday2, &secofday2);
 
       (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
       /* ival = (int) ((days*86400.0 + secs)/factor); */

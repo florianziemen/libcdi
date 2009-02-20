@@ -13,20 +13,19 @@
 #include "cdi.h"
 
 
-#ifndef DBL_IS_EQUAL
-#if  defined  (XXX_HAVE_ISNAN)
+#ifndef DBL_IS_NAN
+#if  defined  (HAVE_ISNAN)
 #  define DBL_IS_NAN(x)     (isnan(x))
-#  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)?1:0):!(x < y || y < x))
-#elif  defined  (XXX_FP_NAN)
+#elif  defined  (FP_NAN)
 #  define DBL_IS_NAN(x)     (fpclassify(x) == FP_NAN)
-#  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)?1:0):!(x < y || y < x))
 #else
 #  define DBL_IS_NAN(x)     ((x) != (x))
-/*
-#  define DBL_IS_EQUAL(x,y) (!(x < y || y < x))
-*/
-#  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)?1:0):!(x < y || y < x))
 #endif
+#endif
+
+#ifndef DBL_IS_EQUAL
+/*#define DBL_IS_EQUAL(x,y) (!(x < y || y < x)) */
+#  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)?1:0):!(x < y || y < x))
 #endif
 
 #ifndef IS_EQUAL
@@ -660,8 +659,8 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 		    {
 		      if ( calendar == CALENDAR_STANDARD )
 			fprintf(stdout, "  Calendar = STANDARD");
-		      else if ( calendar == CALENDAR_NONE )
-			fprintf(stdout, "  Calendar = NONE");
+		      else if ( calendar == CALENDAR_PROLEPTIC )
+			fprintf(stdout, "  Calendar = PROLEPTIC");
 		      else if ( calendar == CALENDAR_360DAYS )
 			fprintf(stdout, "  Calendar = 360DAYS");
 		      else if ( calendar == CALENDAR_365DAYS )

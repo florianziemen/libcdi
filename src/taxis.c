@@ -10,9 +10,9 @@
 #include "stream_int.h"
 #include "calendar.h"
 
-int DefaultTimeType = TAXIS_ABSOLUTE;
-int DefaultTimeUnit = TUNIT_HOUR;
-int DefaultCalendar = CALENDAR_STANDARD;
+static int DefaultTimeType = TAXIS_ABSOLUTE;
+static int DefaultTimeUnit = TUNIT_HOUR;
+static int DefaultCalendar = CALENDAR_PROLEPTIC;
 
 
 char *Timeunits[] = {
@@ -214,6 +214,7 @@ void taxis_init_ptr(TAXIS *taxisptr)
   taxisptr->vdate_ub   = 0;
   taxisptr->vtime_ub   = 0;
 }
+
 
 void taxis_init_entry(TAXIS *taxisptr)
 {
@@ -537,8 +538,8 @@ void taxisDefRtime(int taxisID, int rtime)
 @Parameter
     @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
     @Item  calendar The type of the calendar, one of the set of predefined CDI calendar types.
-                    The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_360DAYS},
-                    @func{CALENDAR_365DAYS} and @func{CALENDAR_366DAYS}.
+                    The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_PROLEPTIC}, 
+                    @func{CALENDAR_360DAYS}, @func{CALENDAR_365DAYS} and @func{CALENDAR_366DAYS}.
 
 @Description
 The function @func{taxisDefCalendar} defines the calendar of a Time axis.
@@ -843,8 +844,8 @@ The function @func{taxisInqCalendar} returns the calendar of a Time axis.
 @Result
 @func{taxisInqCalendar} returns the type of the calendar,
 one of the set of predefined CDI calendar types.
-The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_360DAYS},
-@func{CALENDAR_365DAYS} and @func{CALENDAR_366DAYS}.
+The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_PROLEPRIC}, 
+@func{CALENDAR_360DAYS}, @func{CALENDAR_365DAYS} and @func{CALENDAR_366DAYS}.
 
 @EndFunction
 */

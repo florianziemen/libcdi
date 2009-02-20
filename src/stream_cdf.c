@@ -781,11 +781,12 @@ void cdfDefTime(int streamID)
     {
       calstr[0] = 0;
 
-      if      ( taxis->calendar == CALENDAR_NONE )      strcpy(calstr, "none");
+      if      ( taxis->calendar == CALENDAR_STANDARD )  strcpy(calstr, "standard");
+      else if ( taxis->calendar == CALENDAR_PROLEPTIC ) strcpy(calstr, "proleptic_gregorian");
+      else if ( taxis->calendar == CALENDAR_NONE )      strcpy(calstr, "none");
       else if ( taxis->calendar == CALENDAR_360DAYS )   strcpy(calstr, "360_day");
       else if ( taxis->calendar == CALENDAR_365DAYS )   strcpy(calstr, "365_day");
       else if ( taxis->calendar == CALENDAR_366DAYS )   strcpy(calstr, "366_day");
-      else if ( taxis->calendar == CALENDAR_PROLEPTIC ) strcpy(calstr, "proleptic_gregorian");
 
       len = strlen(calstr);
       if ( len )
@@ -5466,6 +5467,8 @@ int cdfInqContents(int streamID)
 	  calendar = CALENDAR_STANDARD;
 	else if ( strcmp(attstring, "none") == 0 )
 	  calendar = CALENDAR_NONE;
+	else if ( strncmp(attstring, "proleptic", 9) == 0 )
+	  calendar = CALENDAR_PROLEPTIC;
 	else if ( strncmp(attstring, "360", 3) == 0 )
 	  calendar = CALENDAR_360DAYS;
 	else if ( strncmp(attstring, "365", 3) == 0 ||
@@ -5474,8 +5477,6 @@ int cdfInqContents(int streamID)
 	else if ( strncmp(attstring, "366", 3)  == 0 ||
 		  strcmp(attstring, "all_leap") == 0 )
 	  calendar = CALENDAR_366DAYS;
-	else if ( strncmp(attstring, "proleptic", 9) == 0 )
-	  calendar = CALENDAR_PROLEPTIC;
 	else
 	  Warning(func, "calendar >%s< unsupported!", attstring);
       }
@@ -5492,6 +5493,17 @@ int cdfInqContents(int streamID)
 
       taxis->calendar = calendar;
       taxisDefCalendar(taxisID, calendar);
+    }
+  else
+    {/*
+      printf("cal %d %d %d\n", calendar, streamptr->tsteps[0].taxis.type, TAXIS_RELATIVE);
+      printf("inq1 %d\n", taxisInqCalendar(taxisID));
+     */
+      if ( streamptr->tsteps[0].taxis.type == TAXIS_RELATIVE )
+	taxisDefCalendar(taxisID, CALENDAR_STANDARD);
+      /*
+      printf("inq2 %d\n", taxisInqCalendar(taxisID));
+      */
     }
 
   vlistDefTaxis(vlistID, taxisID);

@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Tue Feb 17 11:26:33 CET 2009 */
+/* Generated automatically from m214003 on Tue Feb 17 15:08:43 CET 2009 */
 
 /* GRIBLIB_VERSION="1.2.2" */
 
@@ -63,20 +63,19 @@
 #endif
 
 
-#ifndef DBL_IS_EQUAL
-#if  defined  (XXX_HAVE_ISNAN)
+#ifndef DBL_IS_NAN
+#if  defined  (HAVE_ISNAN)
 #  define DBL_IS_NAN(x)     (isnan(x))
-#  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)?1:0):!(x < y || y < x))
-#elif  defined  (XXX_FP_NAN)
+#elif  defined  (FP_NAN)
 #  define DBL_IS_NAN(x)     (fpclassify(x) == FP_NAN)
-#  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)?1:0):!(x < y || y < x))
 #else
 #  define DBL_IS_NAN(x)     ((x) != (x))
-/*
-#  define DBL_IS_EQUAL(x,y) (!(x < y || y < x))
-*/
-#  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)?1:0):!(x < y || y < x))
 #endif
+#endif
+
+#ifndef DBL_IS_EQUAL
+/*#define DBL_IS_EQUAL(x,y) (!(x < y || y < x)) */
+#  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)?1:0):!(x < y || y < x))
 #endif
 
 #ifndef IS_EQUAL
@@ -1067,7 +1066,7 @@ void gribDateTime(int *isec1, int *date, int *time)
     {
       if ( ISEC1_TimeRange == 0 || ISEC1_TimeRange == 10 )
 	{
-	  encode_juldaysec(ryear, rmonth, rday, rhour, rminute, &julday, &secofday);
+	  encode_juldaysec(0, ryear, rmonth, rday, rhour, rminute, &julday, &secofday);
 
 	  addsec = 0;
 	  switch ( ISEC1_TimeUnit )
@@ -1085,7 +1084,7 @@ void gribDateTime(int *isec1, int *date, int *time)
 
 	  julday_add_seconds(addsec, &julday, &secofday);
 
-	  decode_juldaysec(julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute);
+	  decode_juldaysec(0, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute);
 	}
     }
   /*
@@ -8380,7 +8379,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.2.2" " of ""Feb 17 2009"" ""11:26:33";
+static const char grb_libvers[] = "1.2.2" " of ""Feb 17 2009"" ""15:08:43";
 const char *
 gribLibraryVersion(void)
 {
