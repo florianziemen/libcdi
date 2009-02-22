@@ -29,7 +29,7 @@ case "${HOSTNAME}" in
 	./configure --prefix=$HOME/local/etch-ia32 \
                     --with-netcdf=/client \
                     --with-szlib=$HOME/local/etch-ia32 \
-	            CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal" CFINT=-Df2cFortran
+	            CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -ansi -pedantic" CFINT=-Df2cFortran
 	;;
 # sparc-sun-solaris2.8
     xxf)
