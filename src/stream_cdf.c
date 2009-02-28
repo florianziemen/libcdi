@@ -5494,16 +5494,16 @@ int cdfInqContents(int streamID)
       taxis->calendar = calendar;
       taxisDefCalendar(taxisID, calendar);
     }
-  else
-    {/*
-      printf("cal %d %d %d\n", calendar, streamptr->tsteps[0].taxis.type, TAXIS_RELATIVE);
-      printf("inq1 %d\n", taxisInqCalendar(taxisID));
-     */
-      if ( streamptr->tsteps[0].taxis.type == TAXIS_RELATIVE )
-	taxisDefCalendar(taxisID, CALENDAR_STANDARD);
-      /*
-      printf("inq2 %d\n", taxisInqCalendar(taxisID));
-      */
+  else if ( streamptr->tsteps[0].taxis.type == TAXIS_RELATIVE )
+    {
+      TAXIS *taxis;
+
+      calendar = CALENDAR_STANDARD;
+
+      taxis = &streamptr->tsteps[0].taxis;
+
+      taxis->calendar = calendar;
+      taxisDefCalendar(taxisID, calendar);
     }
 
   vlistDefTaxis(vlistID, taxisID);

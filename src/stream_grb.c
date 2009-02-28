@@ -1211,6 +1211,7 @@ void grbScanTimestep1(int streamID)
     {
       taxisID = taxisCreate(TAXIS_ABSOLUTE);
       taxis->type  = TAXIS_ABSOLUTE;
+      taxis->unit  = tunit;
     }
 
   taxis->vdate = datetime0.date;
@@ -1804,7 +1805,13 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
       ISEC1_Hour     = hour;
       ISEC1_Minute   = minute;
 
-      ISEC1_TimeUnit = 0;
+      /* ISEC1_TimeUnit = 0; */
+      switch (taxisInqTunit(timeID))
+	{
+	case TUNIT_MINUTE:  ISEC1_TimeUnit = ISEC1_TABLE4_MINUTE; break;
+	case TUNIT_HOUR:    ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;   break;
+	case TUNIT_DAY:     ISEC1_TimeUnit = ISEC1_TABLE4_DAY;    break;
+	}
 
       if ( numavg > 0 )
 	ISEC1_TimeRange = 0;

@@ -1,5 +1,5 @@
 
-/* Generated automatically from m214003 on Tue Feb 17 15:08:43 CET 2009 */
+/* Generated automatically from m214003 on Wed Feb 25 14:24:51 CET 2009 */
 
 /* GRIBLIB_VERSION="1.2.2" */
 
@@ -1022,7 +1022,7 @@ void gribDateTime(int *isec1, int *date, int *time)
   static char func[] = "gribDateTime";
   static int lprint = TRUE;
   int ryear, rmonth, rday, rhour, rminute;
-  int time_period;
+  int time_period = 0;
   int julday, secofday, addsec;
   int century;
 
@@ -1059,33 +1059,32 @@ void gribDateTime(int *isec1, int *date, int *time)
 
   if ( ISEC1_TimeRange == 10 )
     time_period = (ISEC1_TimePeriod1<<8) + ISEC1_TimePeriod2;
-  else
+  else if ( ISEC1_TimeRange >=2 && ISEC1_TimeRange <= 5 )
+    time_period = ISEC1_TimePeriod2;
+  else if ( ISEC1_TimeRange == 0 )
     time_period = ISEC1_TimePeriod1;
 
   if ( time_period > 0 && rday > 0 )
     {
-      if ( ISEC1_TimeRange == 0 || ISEC1_TimeRange == 10 )
+      encode_juldaysec(0, ryear, rmonth, rday, rhour, rminute, &julday, &secofday);
+
+      addsec = 0;
+      switch ( ISEC1_TimeUnit )
 	{
-	  encode_juldaysec(0, ryear, rmonth, rday, rhour, rminute, &julday, &secofday);
-
-	  addsec = 0;
-	  switch ( ISEC1_TimeUnit )
+	case ISEC1_TABLE4_MINUTE:  addsec =    60 * time_period; break;
+	case ISEC1_TABLE4_HOUR:    addsec =  3600 * time_period; break;
+	case ISEC1_TABLE4_DAY:     addsec = 86400 * time_period; break;
+	default:
+	  if ( lprint )
 	    {
-	    case ISEC1_TABLE4_MINUTE:  addsec =    60 * time_period; break;
-	    case ISEC1_TABLE4_HOUR:    addsec =  3600 * time_period; break;
-	    case ISEC1_TABLE4_DAY:     addsec = 86400 * time_period; break;
-	    default:
-	      if ( lprint )
-		{
-		  gprintf(func, "Time unit %d unsupported", ISEC1_TimeUnit);
-		  lprint = FALSE;
-		}
+	      gprintf(func, "Time unit %d unsupported", ISEC1_TimeUnit);
+	      lprint = FALSE;
 	    }
-
-	  julday_add_seconds(addsec, &julday, &secofday);
-
-	  decode_juldaysec(0, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute);
 	}
+
+      julday_add_seconds(addsec, &julday, &secofday);
+
+      decode_juldaysec(0, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute);
     }
   /*
   printf("new %d/%d/%d %d:%d\n", ryear, rmonth, rday, rhour, rminute);
@@ -8379,7 +8378,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.2.2" " of ""Feb 17 2009"" ""15:08:43";
+static const char grb_libvers[] = "1.2.2" " of ""Feb 25 2009"" ""14:24:52";
 const char *
 gribLibraryVersion(void)
 {
