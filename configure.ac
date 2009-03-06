@@ -223,9 +223,9 @@ fi
 #  Check C / Fortran interface
 UD_CHECK_CFINT([$srcdir/src/cfortran.h])
 
-AC_SUBST([CPPFLAGS])
 AC_SUBST([FC],$F77)
 AC_SUBST([CFINT])
+AC_SUBST([CPPFLAGS])
 AC_SUBST([AR])
 
 AC_OUTPUT(Makefile src/Makefile app/Makefile tests/Makefile examples/Makefile)

@@ -2121,10 +2121,11 @@ void gridChangeType(int gridID, int gridtype)
 }
 
 
-static void grid_check_cyclic(grid_t *gridptr)
+static 
+void grid_check_cyclic(grid_t *gridptr)
 {
   int xsize, ysize, gridsize;
-  int i1, i2, j, k1, k2, nc;
+  int i1, i2, in, j, k1, k2, nc;
   double xinc, x0;
   const double *xvals, *xbounds;
 
@@ -2141,14 +2142,46 @@ static void grid_check_cyclic(grid_t *gridptr)
       if ( xvals && xsize > 1 )
 	{
 	  xinc = xvals[1] - xvals[0];
+	  if ( IS_EQUAL(xinc, 0) )
+	    xinc = (xvals[xsize-1] - xvals[0])/(xsize-1);
 	  x0 = 2*xvals[xsize-1]-xvals[xsize-2]-360;
 	  if ( IS_NOT_EQUAL(xvals[0], xvals[xsize-1]) )
-	    if ( fabs(x0 - xvals[0]) < 1.e-4 ) gridptr->isCyclic = TRUE;
-	  /*	    if ( IS_EQUAL(x0, xvals[0]) ) gridptr->isCyclic = TRUE; */
+	    if ( fabs(x0 - xvals[0]) < 0.01*xinc ) gridptr->isCyclic = TRUE;
 	}
     }
   else if ( gridptr->type == GRID_CURVILINEAR )
     {
+      if ( xvals && xsize > 1 )
+	{
+	  double val1, val2, valn;
+
+	  nc = 0;
+	  gridptr->isCyclic = FALSE;
+	  for ( j = 0; j < ysize; ++j )
+	    {
+	      i1 = j*xsize;
+	      i2 = j*xsize+1;
+	      in = j*xsize+(xsize-1);
+	      val1 = xvals[i1];
+	      val2 = xvals[i2];
+	      valn = xvals[in];
+
+	      xinc = fabs(val2-val1);
+
+	      if ( val1 < 1 && valn > 300 ) val1 += 360;
+	      if ( valn < 1 && val1 > 300 ) valn += 360;
+	      if ( val1 < -179 && valn > 120 ) val1 += 360;
+	      if ( valn < -179 && val1 > 120 ) valn += 360;
+
+	      if ( valn > val1 ) x0 = valn - xinc;
+	      else               x0 = valn + xinc;
+
+	      if ( fabs(x0-val1) < 0.5*xinc ) nc++;
+	    }
+
+	  if ( nc > 0.5*ysize ) gridptr->isCyclic = TRUE;
+	}
+
       if ( xbounds && xsize > 1 )
 	{
 	  double val1, val2;
