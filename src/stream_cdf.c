@@ -3070,11 +3070,11 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 	{
 	  char name[256];
 	  vlistInqVarName(vlistID, varID, name);
-	  Error(func, "Unsupported array structure for %s\n", name);
+	  Error(func, "Unsupported array structure for: %s", name);
 	}
     }
 
-  if ( yid != UNDEFID && xid != UNDEFID )
+  if ( swapyz == FALSE && yid != UNDEFID && xid != UNDEFID )
     {
       if ( xid == dimids[ndimsp-1] && yid == dimids[ndimsp-2] )
 	swapxy = FALSE;
@@ -3084,7 +3084,7 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 	{
 	  char name[256];
 	  vlistInqVarName(vlistID, varID, name);
-	  Error(func, "Unsupported array structure for %s\n", name);
+	  Error(func, "Unsupported array structure for: %s", name);
 	}
     }
 

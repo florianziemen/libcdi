@@ -1769,9 +1769,9 @@ double gridInqXinc(int gridID)
       if ( xsize > 1 )
 	{
 	  int i;
-	  xinc = fabs(xvals[0] - xvals[1]);
+	  xinc = fabs(xvals[xsize-1] - xvals[0])/(xsize-1);
 	  for ( i = 2; i < xsize; i++ )
-	    if ( fabs(fabs(xvals[i-1] - xvals[i]) - xinc) > (xinc/1000) ) break;
+	    if ( fabs(fabs(xvals[i-1] - xvals[i]) - xinc) > 0.01*xinc ) break;
 		  
 	  if ( i < xsize ) xinc = 0;
 	}
