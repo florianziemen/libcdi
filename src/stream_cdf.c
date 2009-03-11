@@ -3231,6 +3231,7 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int n
   int dtype;
   int vlistID;
   STREAM *streamptr;
+  extern int CDF_Debug;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -3314,12 +3315,12 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int n
       laddoffset   = IS_NOT_EQUAL(addoffset, 0);
       lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
 
+      missval      = vlistInqVarMissval(vlistID, varID);
+
       nvals = gridInqSize(gridID);
 
       if ( laddoffset || lscalefactor )
 	{
-	  missval = vlistInqVarMissval(vlistID, varID);
-
 	  if ( nmiss > 0 )
 	    {
 	      for ( i = 0; i < nvals; i++ )
@@ -3345,6 +3346,23 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int n
 	   dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 )
 	{
 	  for ( i = 0; i < nvals; i++ ) data[i] = NINT(data[i]);
+	}
+
+      if ( CDF_Debug )
+	{
+	  double fmin, fmax;
+	  fmin =  1.0e200;
+	  fmax = -1.0e200;
+	  for ( i = 1; i < nvals; ++i )
+	    {
+	      if ( !DBL_IS_EQUAL(data[i], missval) )
+		{
+		  if ( data[i] < fmin ) fmin = data[i];
+		  if ( data[i] > fmax ) fmax = data[i];
+		}
+	    }
+	  Message(func, "nvals = %d, nmiss = %d, missval = %g, minval = %g, maxval = %g",
+		  nvals, nmiss, missval, fmin, fmax);
 	}
     }
 

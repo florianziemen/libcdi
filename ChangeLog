@@ -1,5 +1,6 @@
 2009-03-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* using GRIB library version 1.3.0
 	* add support for NaN in DBL_IS_EQUAL
 	* add support for GRID type LCC2 (LCC PROJ.4 version)
 	* grbDefTime: define tunit also for absolute time [report: Pruek Pongprueksa]
@@ -7,7 +8,7 @@
 	* gridInqXinc: bug fix
 	* grid_check_cyclic: support for curvilinear grids without bounds
 	* streamOpenAppen: set ncmode to 2 (bug fix)
-	* Version 1.3.0 released
+	* Version 1.3.1 released
 
 2009-01-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
