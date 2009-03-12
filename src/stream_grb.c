@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <math.h>  /* modf */
+#include <math.h>   /* modf */
 #include <float.h>  /* FLT_EPSILON */
 #include <sys/types.h>
 
@@ -2101,7 +2101,7 @@ void grbDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID
 	  Warning(func, "pressure level of %f Pa is below 0.", level);
 
 	zaxisInqUnits(zaxisID, units);
-	if ( strncmp(units, "hPa", 3) == 0 ||  strncmp(units, "mb",2 ) == 0 )
+	if ( memcmp(units, "hPa", 3) == 0 || memcmp(units, "mb",2 ) == 0 )
 	  level = level*100;
 
 	ilevel = (int) level;

@@ -42,7 +42,7 @@ void cdf_create(const char *path, int cmode, int *ncidp)
     strcpy(basename, "./");
   else
     {
-      strncpy(basename, path, pend-path);
+      memcpy(basename, path, pend-path);
       basename[pend-path] = 0;
     }
 
@@ -85,7 +85,7 @@ int cdf_open(const char *path, int omode, int *ncidp)
   size_t chunksizehint = 0;
 
 #if  defined  (HAVE_LIBNC_DAP)
-  if ( strncmp(path, "http:", 5) == 0 ) dapfile = TRUE;
+  if ( memcmp(path, "http:", 5) == 0 ) dapfile = TRUE;
 #endif
 
   if ( dapfile )

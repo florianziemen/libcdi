@@ -137,7 +137,7 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
 		  if ( instituts[instID].name )
 		    {
 		      len = strlen(instituts[instID].name);
-		      if ( strncmp(instituts[instID].name, name, len) == 0 ) break;
+		      if ( memcmp(instituts[instID].name, name, len) == 0 ) break;
 		    }
 		}
 	    }
@@ -146,7 +146,7 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
 	      if ( instituts[instID].longname )
 		{
 		  len = strlen(instituts[instID].longname);
-		  if ( strncmp(instituts[instID].longname, longname, len) == 0 ) break;
+		  if ( memcmp(instituts[instID].longname, longname, len) == 0 ) break;
 		}
 	    }
 	  else

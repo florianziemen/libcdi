@@ -46,7 +46,7 @@ CDI_att *find_att(CDI_atts *attsp, const char *name)
     {
       attp = &(attsp->value[attid]);
       if ( attp->namesz == slen )
-	if ( strncmp(attp->name, name, slen) == 0)
+	if ( memcmp(attp->name, name, slen) == 0)
 	  {
 	    return (attp); /* Normal return */
 	  }

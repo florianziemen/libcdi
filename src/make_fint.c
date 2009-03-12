@@ -148,11 +148,11 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
       linelen -= 1;
       functype = ISVOID;
       funcargc = 0;
-      if ( strncmp(line, "int", 3)    == 0 || 
-	   strncmp(line, "void", 4)   == 0 ||
-	   strncmp(line, "char", 4)   == 0 ||
-	   strncmp(line, "const", 5)  == 0 ||
-	   strncmp(line, "double", 6) == 0 )
+      if ( memcmp(line, "int", 3)    == 0 || 
+	   memcmp(line, "void", 4)   == 0 ||
+	   memcmp(line, "char", 4)   == 0 ||
+	   memcmp(line, "const", 5)  == 0 ||
+	   memcmp(line, "double", 6) == 0 )
 	{
 	  /* printf("%s\n", line); */
 	  ii = 0;
@@ -165,32 +165,32 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	  line[ii] = 0;
 	  /* printf("%s\n", line); */
 	  pline = line;
-	  if ( strncmp(line, "int", 3) == 0 )
+	  if ( memcmp(line, "int", 3) == 0 )
 	    {
 	      functype = ISINT;
 	      pline += 3;
 	    }
-	  else if ( strncmp(line, "void", 4) == 0 )
+	  else if ( memcmp(line, "void", 4) == 0 )
 	    {
 	      functype = ISVOID;
 	      pline += 4;
 	    }
-	  else if ( strncmp(line, "double*", 7) == 0 )
+	  else if ( memcmp(line, "double*", 7) == 0 )
 	    {
 	      printf("skip: line %3d double *\n", lineno);
 	      continue;
 	    }
-	  else if ( strncmp(line, "double", 6) == 0 )
+	  else if ( memcmp(line, "double", 6) == 0 )
 	    {
 	      functype = ISDOUBLE;
 	      pline += 6;
 	    }
-	  else if ( strncmp(line, "char*", 5) == 0 )
+	  else if ( memcmp(line, "char*", 5) == 0 )
 	    {
 	      functype = ISCONSTSTRING;
 	      pline += 5;
 	    }
-	  else if ( strncmp(line, "constchar*", 10) == 0 )
+	  else if ( memcmp(line, "constchar*", 10) == 0 )
 	    {
 	      functype = ISCONSTSTRING;
 	      pline += 10;
@@ -203,7 +203,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 
 	  len = 0;
 	  while ( isalnum((int) pline[len]) ) len++;
-	  strncpy(funcname, pline, len);
+	  memcpy(funcname, pline, len);
 	  funcname[len] = 0;
 	  /* printf("%s\n", funcname);*/
 	  pline += len;
@@ -237,46 +237,46 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	  for ( i = 0; i < funcargc; i++ )
 	    {
 	      pline = funcargname[i];
-	      if ( strncmp(pline, "const", 5) == 0 &&
-		   strncmp(pline, "constchar*", 10) != 0 ) pline += 5;
+	      if ( memcmp(pline, "const", 5) == 0 &&
+		   memcmp(pline, "constchar*", 10) != 0 ) pline += 5;
 
-	      if ( strncmp(pline, "void", 4) == 0 )
+	      if ( memcmp(pline, "void", 4) == 0 )
 		{
 		  pline += 4;
 		  funcargtype[i] = ISVOID;
 		  funcargname[i] = pline;
 		}
-	      else if ( strncmp(pline, "constchar*", 10) == 0 )
+	      else if ( memcmp(pline, "constchar*", 10) == 0 )
 		{
 		  pline += 10;
 		  funcargtype[i] = ISSTRING;
 		  funcargname[i] = pline;
 		}
-	      else if ( strncmp(pline, "char*", 5) == 0 )
+	      else if ( memcmp(pline, "char*", 5) == 0 )
 		{
 		  pline += 5;
 		  funcargtype[i] = ISSTRINGP;
 		  funcargname[i] = pline;
 		}
-	      else if ( strncmp(pline, "int*", 4) == 0 )
+	      else if ( memcmp(pline, "int*", 4) == 0 )
 		{
 		  pline += 4;
 		  funcargtype[i] = ISINTP;
 		  funcargname[i] = pline;
 		}
-	      else if ( strncmp(pline, "int", 3) == 0 )
+	      else if ( memcmp(pline, "int", 3) == 0 )
 		{
 		  pline += 3;
 		  funcargtype[i] = ISINT;
 		  funcargname[i] = pline;
 		}
-	      else if ( strncmp(pline, "double*", 7) == 0 )
+	      else if ( memcmp(pline, "double*", 7) == 0 )
 		{
 		  pline += 7;
 		  funcargtype[i] = ISDOUBLEP;
 		  funcargname[i] = pline;
 		}
-	      else if ( strncmp(pline, "double", 6) == 0 )
+	      else if ( memcmp(pline, "double", 6) == 0 )
 		{
 		  pline += 6;
 		  funcargtype[i] = ISDOUBLE;
@@ -419,7 +419,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	      nfdoc++;
 	    }
 	}
-      else if ( strncmp(line, "#define", 7) == 0 )
+      else if ( memcmp(line, "#define", 7) == 0 )
 	{
 	  pline = line;
 	  pline += 7;
@@ -442,7 +442,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	  fprintf(fpinc, "      INTEGER    %-22s\n", parname);
 	  fprintf(fpinc, "      PARAMETER (%-22s = %2d)\n", parname, parvalue);
 	}
-      else if ( strncmp(line, "/*", 2) == 0 )
+      else if ( memcmp(line, "/*", 2) == 0 )
 	{
 	  int dpos = 0;
 	  pline = line;
@@ -573,8 +573,8 @@ int main(int argc, char *argv[])
   if ( cp == NULL ) len = strlen(fname);
   else              len = cp - fname;
   
-  strncpy(fnameinc, fname, len);
-  strncpy(fnameint, fname, len);
+  memcpy(fnameinc, fname, len);
+  memcpy(fnameint, fname, len);
 
   strcpy(fnameinc+len, ".inc");
   strcpy(fnameint+len, "Fortran.c");

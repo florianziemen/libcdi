@@ -311,9 +311,9 @@ int modelInq(int instID, int modelgribID, char *name)
 		  if ( modelptr->name )
 		    {
 		      len = strlen(modelptr->name);
-		      if ( strncmp(modelptr->name, name, len) == 0 ) break;
+		      if ( memcmp(modelptr->name, name, len) == 0 ) break;
 		      len = strlen(name);
-		      if ( strncmp(modelptr->name, name, len) == 0 ) break;
+		      if ( memcmp(modelptr->name, name, len) == 0 ) break;
 		    }
 		}
 	    }

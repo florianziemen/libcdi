@@ -112,7 +112,7 @@ static int getFiletype(const char *filename, int *byteorder)
 
   if ( fileID == CDI_UNDEFID )
     {
-      if ( strncmp(filename, "http:", 5) == 0 )
+      if ( memcmp(filename, "http:", 5) == 0 )
 	return (FILETYPE_NC);
       else
 	return (CDI_ESYSTEM);
@@ -122,7 +122,7 @@ static int getFiletype(const char *filename, int *byteorder)
 
   fileRewind(fileID);
 
-  if ( strncmp(buffer, "GRIB", 4) == 0 )
+  if ( memcmp(buffer, "GRIB", 4) == 0 )
     {
       version = buffer[7];
       if ( version <= 1 )
@@ -131,17 +131,17 @@ static int getFiletype(const char *filename, int *byteorder)
 	  if ( CDI_Debug ) Message(func, "found GRIB file = %s, version %d", filename, version);
 	}
     }
-  else if ( strncmp(buffer, "CDF\001", 4) == 0 )
+  else if ( memcmp(buffer, "CDF\001", 4) == 0 )
     {
       filetype = FILETYPE_NC;
       if ( CDI_Debug ) Message(func, "found CDF1 file = %s", filename);
     }
-  else if ( strncmp(buffer, "CDF\002", 4) == 0 )
+  else if ( memcmp(buffer, "CDF\002", 4) == 0 )
     {
       filetype = FILETYPE_NC2;
       if ( CDI_Debug ) Message(func, "found CDF2 file = %s", filename);
     }
-  else if ( strncmp(buffer+1, "HDF", 3) == 0 )
+  else if ( memcmp(buffer+1, "HDF", 3) == 0 )
     {
       filetype = FILETYPE_NC4;
       if ( CDI_Debug ) Message(func, "found HDF file = %s", filename);
@@ -225,8 +225,8 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
     {
       pch = &argument[i+1];
       len -= (i+1);
-      if ( len && ( strncmp(argument, "filelist:", i) == 0 || 
-		    strncmp(argument, "flist:", i) == 0 ) )
+      if ( len && ( memcmp(argument, "filelist:", i) == 0 || 
+		    memcmp(argument, "flist:", i) == 0 ) )
 	{
 	  for ( i = 0; i < len; ++i ) if ( pch[i] == ',' ) nfiles++;
 
@@ -282,7 +282,7 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 		}
 	    }
 	}
-      else if ( len && strncmp(argument, "ls:", i) == 0 )
+      else if ( len && memcmp(argument, "ls:", i) == 0 )
 	{
 	  char command[4096];
 	  FILE *pfp;

@@ -116,13 +116,13 @@ static int splitBasetime(char *timeunits, TAXIS *taxis)
 
   (*taxis).type = timetype;
 
-  if      ( strncmp(ptu, "sec",    3) == 0 ) timeunit = TUNIT_SECOND;
-  else if ( strncmp(ptu, "minute", 6) == 0 ) timeunit = TUNIT_MINUTE;
-  else if ( strncmp(ptu, "hour",   4) == 0 ) timeunit = TUNIT_HOUR;
-  else if ( strncmp(ptu, "day",    3) == 0 ) timeunit = TUNIT_DAY;
-  else if ( strncmp(ptu, "month",  5) == 0 ) timeunit = TUNIT_MONTH;
-  else if ( strncmp(ptu, "calendar_month", 14) == 0 ) timeunit = TUNIT_MONTH;
-  else if ( strncmp(ptu, "year",   4) == 0 ) timeunit = TUNIT_YEAR;
+  if      ( memcmp(ptu, "sec",    3) == 0 ) timeunit = TUNIT_SECOND;
+  else if ( memcmp(ptu, "minute", 6) == 0 ) timeunit = TUNIT_MINUTE;
+  else if ( memcmp(ptu, "hour",   4) == 0 ) timeunit = TUNIT_HOUR;
+  else if ( memcmp(ptu, "day",    3) == 0 ) timeunit = TUNIT_DAY;
+  else if ( memcmp(ptu, "month",  5) == 0 ) timeunit = TUNIT_MONTH;
+  else if ( memcmp(ptu, "calendar_month", 14) == 0 ) timeunit = TUNIT_MONTH;
+  else if ( memcmp(ptu, "year",   4) == 0 ) timeunit = TUNIT_YEAR;
   else
     {
       Message(func, "Unsupported TIMEUNIT: %s!", ptu);
@@ -134,9 +134,9 @@ static int splitBasetime(char *timeunits, TAXIS *taxis)
     {
       while (   isspace(*ptu) ) ptu++;
 
-      if ( strncmp(ptu, "as", 2) == 0 )
+      if ( memcmp(ptu, "as", 2) == 0 )
 	timetype = TAXIS_ABSOLUTE;
-      else if ( strncmp(ptu, "since", 5) == 0 )
+      else if ( memcmp(ptu, "since", 5) == 0 )
 	timetype = TAXIS_RELATIVE;
 
       while ( ! isspace(*ptu) && *ptu != 0 ) ptu++;
@@ -146,12 +146,12 @@ static int splitBasetime(char *timeunits, TAXIS *taxis)
 
 	  if ( timetype == TAXIS_ABSOLUTE )
 	    {
-	      if ( strncmp(ptu, "%y%m%d.%f", 9) != 0 && timeunit == TUNIT_DAY )
+	      if ( memcmp(ptu, "%y%m%d.%f", 9) != 0 && timeunit == TUNIT_DAY )
 		{
 		  Message(func, "Unsupported format %s for TIMEUNIT day!", ptu);
 		  timeunit = -1;
 		}
-	      else if ( strncmp(ptu, "%y%m.%f", 7) != 0 && timeunit == TUNIT_MONTH )
+	      else if ( memcmp(ptu, "%y%m.%f", 7) != 0 && timeunit == TUNIT_MONTH )
 		{
 		  Message(func, "Unsupported format %s for TIMEUNIT month!", ptu);
 		  timeunit = -1;
@@ -3511,7 +3511,7 @@ int cdfTimeDimID(int fileID, int ndims, int nvars)
   for ( dimid = 0; dimid < ndims; dimid++ )
     {
       cdf_inq_dimname(fileID, dimid, dimname);
-      if ( strncmp(dimname, "time", 4) == 0 ) break;
+      if ( memcmp(dimname, "time", 4) == 0 ) break;
     }
 
   if ( dimid == ndims ) dimid = UNDEFID;
@@ -3526,14 +3526,14 @@ int cdfTimeDimID(int fileID, int ndims, int nvars)
 	  for ( iatt = 0; iatt < nvatts; iatt++ )
 	    {
 	      cdf_inq_attname(fileID, varid, iatt, attname);
-	      if ( strncmp(attname, "units", 5) == 0 )
+	      if ( memcmp(attname, "units", 5) == 0 )
 		{
 		  cdfGetAttText(fileID, varid, "units", 256, timeunits);
-		  if ( strncmp(timeunits, "sec",    3) == 0 ||
-		       strncmp(timeunits, "minute", 6) == 0 ||
-		       strncmp(timeunits, "hour",   4) == 0 ||
-		       strncmp(timeunits, "day",    3) == 0 ||
-		       strncmp(timeunits, "month",  5) == 0 )
+		  if ( memcmp(timeunits, "sec",    3) == 0 ||
+		       memcmp(timeunits, "minute", 6) == 0 ||
+		       memcmp(timeunits, "hour",   4) == 0 ||
+		       memcmp(timeunits, "day",    3) == 0 ||
+		       memcmp(timeunits, "month",  5) == 0 )
 		    {
 		      dimid = dimids[0];
 		      break;
@@ -3788,29 +3788,29 @@ int cdfInqContents(int streamID)
 
 	  if ( attlen > 0 && attstring[0] != 0 )
 	    {
-	      if ( strcmp(attname, "history") == 0 )
+	      if ( memcmp(attname, "history", 7) == 0 )
 		{
 		  streamptr->historyID = iatt;
 		}
-	      else if ( strcmp(attname, "institution") == 0 )
+	      else if ( memcmp(attname, "institution", 11) == 0 )
 		{
 		  cdfGetAttText(fileID, NC_GLOBAL, attname, attstringlen-1, attstring);
 		  instID = institutInq(0, 0, NULL, attstring);
 		  if ( instID == UNDEFID )
 		    instID = institutDef(0, 0, NULL, attstring);
 		}
-	      else if ( strcmp(attname, "source") == 0 )
+	      else if ( memcmp(attname, "source", 6) == 0 )
 		{
 		  cdfGetAttText(fileID, NC_GLOBAL, attname, attstringlen-1, attstring);
 		  modelID = modelInq(-1, 0, attstring);
 		}
-	      else if ( strcmp(attname, "Conventions") == 0 )
+	      else if ( memcmp(attname, "Conventions", 11) == 0 )
 		{
 		}
-	      else if ( strcmp(attname, "CDI") == 0 )
+	      else if ( memcmp(attname, "CDI", 3) == 0 )
 		{
 		}
-	      else if ( strcmp(attname, "CDO") == 0 )
+	      else if ( memcmp(attname, "CDO", 3) == 0 )
 		{
 		}
 	      else
@@ -3902,28 +3902,28 @@ int cdfInqContents(int streamID)
 	  cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
 	  cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
 	  
-	  if ( strcmp(attname, "long_name") == 0 )
+	  if ( memcmp(attname, "long_name", 9) == 0 )
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, MAXNAMELEN, ncvars[ncvarid].longname);
       	    }
-	  else if ( strcmp(attname, "standard_name") == 0 )
+	  else if ( memcmp(attname, "standard_name", 13) == 0 )
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, MAXNAMELEN, ncvars[ncvarid].stdname);
       	    }
-	  else if ( strcmp(attname, "units") == 0 )
+	  else if ( memcmp(attname, "units", 5) == 0 )
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, MAXNAMELEN, ncvars[ncvarid].units);
       	    }
-	  else if ( strcmp(attname, "calendar") == 0 )
+	  else if ( memcmp(attname, "calendar", 8) == 0 )
 	    {
 	      ncvars[ncvarid].calendar = TRUE;
       	    }
-	  else if ( strcmp(attname, "code") == 0 )
+	  else if ( memcmp(attname, "code", 4) == 0 )
 	    {
 	      cdfGetAttInt(fileID, ncvarid, attname, 1, &ncvars[ncvarid].code);
 	      cdfSetVar(ncvars, ncvarid, TRUE);
 	    }
-	  else if ( strcmp(attname, "table") == 0 )
+	  else if ( memcmp(attname, "table", 5) == 0 )
 	    {
 	      cdfGetAttInt(fileID, ncvarid, attname, 1, &tablenum);
 	      if ( tablenum > 0 )
@@ -3934,35 +3934,35 @@ int cdfInqContents(int streamID)
 		}
 	      cdfSetVar(ncvars, ncvarid, TRUE);
 	    }
-	  else if ( strcmp(attname, "trunc_type") == 0 )
+	  else if ( memcmp(attname, "trunc_type", 10) == 0 )
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
-	      if ( strncmp(attstring, "Triangular", attlen) == 0 )
+	      if ( memcmp(attstring, "Triangular", attlen) == 0 )
 		ncvars[ncvarid].gridtype = GRID_SPECTRAL;
 	    }
-	  else if ( strcmp(attname, "grid_type") == 0 )
+	  else if ( memcmp(attname, "grid_type", 9) == 0 )
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
 
-	      if      ( strncmp(attstring, "gaussian", attlen) == 0 )
-		ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
-	      else if ( strncmp(attstring, "gaussian reduced", attlen) == 0 )
+	      if      ( memcmp(attstring, "gaussian reduced", 16) == 0 )
 		ncvars[ncvarid].gridtype = GRID_GAUSSIAN_REDUCED;
-	      else if ( strncmp(attstring, "spectral", 8) == 0 )
+	      else if ( memcmp(attstring, "gaussian", 8) == 0 )
+		ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
+	      else if ( memcmp(attstring, "spectral", 8) == 0 )
 		ncvars[ncvarid].gridtype = GRID_SPECTRAL;
-	      else if ( strncmp(attstring, "trajectory", attlen) == 0 )
+	      else if ( memcmp(attstring, "trajectory", 10) == 0 )
 		ncvars[ncvarid].gridtype = GRID_TRAJECTORY;
-	      else if ( strncmp(attstring, "generic", attlen) == 0 )
+	      else if ( memcmp(attstring, "generic", 7) == 0 )
 		ncvars[ncvarid].gridtype = GRID_GENERIC;
-	      else if ( strncmp(attstring, "cell", attlen) == 0 )
+	      else if ( memcmp(attstring, "cell", 4) == 0 )
 		ncvars[ncvarid].gridtype = GRID_CELL;
-	      else if ( strncmp(attstring, "curvilinear", attlen) == 0 )
+	      else if ( memcmp(attstring, "curvilinear", 11) == 0 )
 		ncvars[ncvarid].gridtype = GRID_CURVILINEAR;
-	      else if ( strncmp(attstring, "sinusoidal", attlen) == 0 )
+	      else if ( memcmp(attstring, "sinusoidal", 10) == 0 )
 		;
-	      else if ( strncmp(attstring, "laea", attlen) == 0 )
+	      else if ( memcmp(attstring, "laea", 4) == 0 )
 		;
-	      else if ( strncmp(attstring, "lcc2", attlen) == 0 )
+	      else if ( memcmp(attstring, "lcc2", 4) == 0 )
 		;
 	      else
 		{
@@ -3976,15 +3976,15 @@ int cdfInqContents(int streamID)
 
 	      cdfSetVar(ncvars, ncvarid, TRUE);
 	    }
-	  else if ( strcmp(attname, "trunc_count") == 0 )
+	  else if ( memcmp(attname, "trunc_count", 11) == 0 )
 	    {
 	      cdfGetAttInt(fileID, ncvarid, attname, 1, &ncvars[ncvarid].truncation);
 	    }
-	  else if ( strcmp(attname, "truncation") == 0 )
+	  else if ( memcmp(attname, "truncation", 10) == 0 )
 	    {
 	      cdfGetAttInt(fileID, ncvarid, attname, 1, &ncvars[ncvarid].truncation);
 	    }
-	  else if ( strcmp(attname, "add_offset") == 0 )
+	  else if ( memcmp(attname, "add_offset", 11) == 0 )
 	    {
 	      if ( atttype != NC_CHAR )
 		{
@@ -3997,7 +3997,7 @@ int cdfInqContents(int streamID)
 		  cdfSetVar(ncvars, ncvarid, TRUE);
 		}
 	    }
-	  else if ( strcmp(attname, "scale_factor") == 0 )
+	  else if ( memcmp(attname, "scale_factor", 12) == 0 )
 	    {
 	      if ( atttype != NC_CHAR )
 		{
@@ -4010,7 +4010,7 @@ int cdfInqContents(int streamID)
 		  cdfSetVar(ncvars, ncvarid, TRUE);
 		}
 	    }
-	  else if ( strcmp(attname, "bounds") == 0 )
+	  else if ( memcmp(attname, "bounds", 6) == 0 )
 	    {
 	      int status, ncboundsid;
 
@@ -4027,7 +4027,7 @@ int cdfInqContents(int streamID)
 	      else
 		Warning(func, "%s - %s", nc_strerror(status), attstring);
 	    }
-	  else if ( strcmp(attname, "cell_measures") == 0 )
+	  else if ( memcmp(attname, "cell_measures", 13) == 0 )
 	    {
 	      char *pstring, *cell_measures = NULL, *cell_var = NULL;
 
@@ -4046,7 +4046,7 @@ int cdfInqContents(int streamID)
 	      printf("cell_measures >%s<\n", cell_measures);
 	      printf("cell_var >%s<\n", cell_var);
 	      */
-	      if ( strcmp(cell_measures, "area") == 0 )
+	      if ( memcmp(cell_measures, "area", 4) == 0 )
 		{
 		  int status;
 		  int nc_cell_id;
@@ -4067,7 +4067,7 @@ int cdfInqContents(int streamID)
 	      cdfSetVar(ncvars, ncvarid, TRUE);
 	    }
 	  /*
-	  else if ( strcmp(attname, "coordinates") == 0 )
+	  else if ( memcmp(attname, "coordinates", 11) == 0 )
 	    {
 	      char *pstring, *xvarname = NULL, *yvarname = NULL;
 	      
@@ -4091,8 +4091,8 @@ int cdfInqContents(int streamID)
 	      cdfSetVar(ncvars, ncvarid, TRUE);
 	    }
 	  */
-	  else if ( strcmp(attname, "associate") == 0 || 
-		    strcmp(attname, "coordinates") == 0 )
+	  else if ( memcmp(attname, "associate", 9)  == 0 || 
+		    memcmp(attname, "coordinates", 11) == 0 )
 	    {
 	      int status;
 	      char *pstring, *varname = NULL;
@@ -4129,7 +4129,7 @@ int cdfInqContents(int streamID)
 		}
 	      cdfSetVar(ncvars, ncvarid, TRUE);
 	    }
-	  else if ( strcmp(attname, "grid_mapping") == 0 )
+	  else if ( memcmp(attname, "grid_mapping", 12) == 0 )
 	    {
 	      int status;
 	      int nc_gmap_id;
@@ -4147,12 +4147,12 @@ int cdfInqContents(int streamID)
 
 	      cdfSetVar(ncvars, ncvarid, TRUE);
 	    }
-	  else if ( strcmp(attname, "positive") == 0 )
+	  else if ( memcmp(attname, "positive", 8) == 0 )
 	    {	      
 	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
 
-	      if    ( strncmp(attstring, "down", attlen) == 0 ) ncvars[ncvarid].positive = -1;
-	      else if ( strncmp(attstring, "up", attlen) == 0 ) ncvars[ncvarid].positive = 1;
+	      if    ( memcmp(attstring, "down", 4) == 0 ) ncvars[ncvarid].positive = -1;
+	      else if ( memcmp(attstring, "up", 2) == 0 ) ncvars[ncvarid].positive = 1;
 
 	      if ( ncvars[ncvarid].ndims == 1 )
 		{
@@ -4161,8 +4161,8 @@ int cdfInqContents(int streamID)
 		  ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
 		}
 	    }
-	  else if ( strcmp(attname, "_FillValue") == 0 || 
-		    strcmp(attname, "missing_value") == 0 )
+	  else if ( memcmp(attname, "_FillValue", 10) == 0 || 
+		    memcmp(attname, "missing_value", 13) == 0 )
 	    {
 	      if ( atttype != NC_CHAR )
 		{
@@ -4171,20 +4171,20 @@ int cdfInqContents(int streamID)
 		  /* cdfSetVar(ncvars, ncvarid, TRUE); */
 		}
 	    }
-	  else if ( strcmp(attname, "cdi") == 0 )
+	  else if ( memcmp(attname, "cdi", 3) == 0 )
 	    {	      
 	      if ( atttype == NC_CHAR )
 		{
 		  cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
-		  if ( strncmp(attstring, "ignore", attlen) == 0 ||
-		       strncmp(attstring, "Ignore", attlen) == 0 )
+		  if ( memcmp(attstring, "ignore", 6) == 0 ||
+		       memcmp(attstring, "Ignore", 6) == 0 )
 		    {
 		      ncvars[ncvarid].ignore = TRUE;
 		      cdfSetVar(ncvars, ncvarid, FALSE);
 		    }
 		}
 	    }
-	  else if ( strcmp(attname, "axis") == 0 )
+	  else if ( memcmp(attname, "axis", 4) == 0 )
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
 	      /* don't check attlen anymore because the meaning changed from COARDS to CF */
@@ -4367,7 +4367,7 @@ int cdfInqContents(int streamID)
 
   /* verify coordinate vars (dimname == varname) */
   for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
-    {
+    {	      
       ncvarid = ncdims[ncdimid].ncvarid;
       if ( ncvarid != -1 )
 	{
@@ -4379,8 +4379,8 @@ int cdfInqContents(int streamID)
 
 	  if ( ncvars[ncvarid].longname[0] != 0 )
 	    {
-	      if ( strncmp(ncvars[ncvarid].longname, "Longitude", 9) == 0 ||
-		   strncmp(ncvars[ncvarid].longname, "longitude", 9) == 0 )
+	      if ( memcmp(ncvars[ncvarid].longname, "Longitude", 9) == 0 ||
+		   memcmp(ncvars[ncvarid].longname, "longitude", 9) == 0 )
 		{
 		  ncvars[ncvarid].islon = TRUE;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
@@ -4388,8 +4388,8 @@ int cdfInqContents(int streamID)
 		  ncdims[ncdimid].dimtype = X_AXIS;
 		  continue;
 		}
-	      else if ( strncmp(ncvars[ncvarid].longname, "Latitude", 8) == 0 || 
-			strncmp(ncvars[ncvarid].longname, "latitude", 8) == 0 )
+	      else if ( memcmp(ncvars[ncvarid].longname, "Latitude", 8) == 0 || 
+			memcmp(ncvars[ncvarid].longname, "latitude", 8) == 0 )
 		{
 		  ncvars[ncvarid].islat = TRUE;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
@@ -4400,45 +4400,45 @@ int cdfInqContents(int streamID)
 	    }
 
 	  if ( ncvars[ncvarid].units[0] != 0 )
-	    {
-	      if ( strcmp(ncvars[ncvarid].units, "degrees_east") == 0 ||
-		   strcmp(ncvars[ncvarid].units, "degree_east")  == 0 ||
-		   strcmp(ncvars[ncvarid].units, "degree_E")     == 0 ||
-		   strcmp(ncvars[ncvarid].units, "degrees_E")    == 0 ||
-		   strcmp(ncvars[ncvarid].units, "degreeE")      == 0 ||
-		   strcmp(ncvars[ncvarid].units, "degreesE")     == 0 ||
-                   strcmp(ncvars[ncvarid].stdname, "longitude")  == 0 ||
-		  (strcmp(ncvars[ncvarid].units, "degrees")          == 0 &&
-                   strcmp(ncvars[ncvarid].stdname, "grid_longitude") == 0) ||
-		  (strcmp(ncvars[ncvarid].units, "radian")           == 0 &&
-                   strcmp(ncvars[ncvarid].stdname, "grid_longitude") == 0) )
+	    {    
+	      if ( memcmp(ncvars[ncvarid].units, "degrees_east", 12) == 0 ||
+		   memcmp(ncvars[ncvarid].units, "degree_east", 11)  == 0 ||
+		   memcmp(ncvars[ncvarid].units, "degree_E", 8)      == 0 ||
+		   memcmp(ncvars[ncvarid].units, "degrees_E", 9)     == 0 ||
+		   memcmp(ncvars[ncvarid].units, "degreeE", 7)       == 0 ||
+		   memcmp(ncvars[ncvarid].units, "degreesE", 8)      == 0 ||
+                   memcmp(ncvars[ncvarid].stdname, "longitude", 9)   == 0 ||
+		  (memcmp(ncvars[ncvarid].units, "degrees", 7)           == 0 &&
+		   memcmp(ncvars[ncvarid].stdname, "grid_longitude", 14) == 0) ||
+		  (memcmp(ncvars[ncvarid].units, "radian", 6)            == 0 &&
+		   memcmp(ncvars[ncvarid].stdname, "grid_longitude", 14) == 0) )
 		{
 		  ncvars[ncvarid].islon = TRUE;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		  cdfSetDim(ncvars, ncvarid, 0, X_AXIS);
 		  ncdims[ncdimid].dimtype = X_AXIS;
 		}
-	      else if ( strcmp(ncvars[ncvarid].units, "degrees_north") == 0 ||
-			strcmp(ncvars[ncvarid].units, "degree_north")  == 0 ||
-			strcmp(ncvars[ncvarid].units, "degree_N")      == 0 ||
-			strcmp(ncvars[ncvarid].units, "degrees_N")     == 0 ||
-			strcmp(ncvars[ncvarid].units, "degreeN")       == 0 ||
-			strcmp(ncvars[ncvarid].units, "degreesN")      == 0 ||
-                        strcmp(ncvars[ncvarid].stdname, "latitude")    == 0 ||
-		       (strcmp(ncvars[ncvarid].units, "degrees")         == 0 &&
-                        strcmp(ncvars[ncvarid].stdname, "grid_latitude") == 0) ||
-		       (strcmp(ncvars[ncvarid].units, "radian")          == 0 &&
-                        strcmp(ncvars[ncvarid].stdname, "grid_latitude") == 0) )
+	      else if ( memcmp(ncvars[ncvarid].units, "degrees_north", 13) == 0 ||
+			memcmp(ncvars[ncvarid].units, "degree_north", 12)  == 0 ||
+			memcmp(ncvars[ncvarid].units, "degree_N", 8)       == 0 ||
+			memcmp(ncvars[ncvarid].units, "degrees_N", 9)      == 0 ||
+			memcmp(ncvars[ncvarid].units, "degreeN", 7)        == 0 ||
+			memcmp(ncvars[ncvarid].units, "degreesN", 8)       == 0 ||
+                        memcmp(ncvars[ncvarid].stdname, "latitude", 8)     == 0 ||
+	       	       (memcmp(ncvars[ncvarid].units, "degrees", 7)          == 0 &&
+			memcmp(ncvars[ncvarid].stdname, "grid_latitude", 13) == 0) ||
+	               (memcmp(ncvars[ncvarid].units, "radian", 6)           == 0 &&
+	           	memcmp(ncvars[ncvarid].stdname, "grid_latitude", 13) == 0) )
 		{
 		  ncvars[ncvarid].islat = TRUE;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		  cdfSetDim(ncvars, ncvarid, 0, Y_AXIS);
 		  ncdims[ncdimid].dimtype = Y_AXIS;
 		}
-	      else if ( strcmp(ncvars[ncvarid].units, "millibar") == 0 ||
-			strncmp(ncvars[ncvarid].units, "mb", 2)   == 0 ||
-			strcmp(ncvars[ncvarid].units, "hPa")      == 0 ||
-			strcmp(ncvars[ncvarid].units, "Pa")       == 0 )
+	      else if ( memcmp(ncvars[ncvarid].units, "millibar", 8) == 0 ||
+			memcmp(ncvars[ncvarid].units, "mb", 2)       == 0 ||
+			memcmp(ncvars[ncvarid].units, "hPa", 3)      == 0 ||
+			memcmp(ncvars[ncvarid].units, "Pa", 2)       == 0 )
 		{
 		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
 		}
@@ -4446,11 +4446,11 @@ int cdfInqContents(int streamID)
 		{
 		  if      ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer midpoints") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
-		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
+		  else if ( memcmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
 		  else if ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer interfaces") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
-		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
+		  else if ( memcmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
 		  else
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
@@ -4490,14 +4490,14 @@ int cdfInqContents(int streamID)
 	  /* not needed anymore for rotated grids */
 	  if ( ncvars[ncvarid].longname[0] != 0 )
 	    {
-	      if ( strncmp(ncvars[ncvarid].longname, "Longitude", 9) == 0 ||
-		   strncmp(ncvars[ncvarid].longname, "longitude", 9) == 0 )
+	      if ( memcmp(ncvars[ncvarid].longname, "Longitude", 9) == 0 ||
+		   memcmp(ncvars[ncvarid].longname, "longitude", 9) == 0 )
 		{
 		  ncvars[ncvarid].islon = TRUE;
 		  continue;
 		}
-	      else if ( strncmp(ncvars[ncvarid].longname, "Latitude", 8) == 0 || 
-			strncmp(ncvars[ncvarid].longname, "latitude", 8) == 0 )
+	      else if ( memcmp(ncvars[ncvarid].longname, "Latitude", 8) == 0 || 
+			memcmp(ncvars[ncvarid].longname, "latitude", 8) == 0 )
 		{
 		  ncvars[ncvarid].islat = TRUE;
 		  continue;
@@ -4506,40 +4506,40 @@ int cdfInqContents(int streamID)
 
 	  if ( ncvars[ncvarid].units[0] != 0 )
 	    {
-	      if ( strcmp(ncvars[ncvarid].units, "degrees_east") == 0 ||
-		   strcmp(ncvars[ncvarid].units, "degree_east")  == 0 ||
-		   strcmp(ncvars[ncvarid].units, "degree_E")     == 0 ||
-		   strcmp(ncvars[ncvarid].units, "degrees_E")    == 0 ||
-		   strcmp(ncvars[ncvarid].units, "degreeE")      == 0 ||
-		   strcmp(ncvars[ncvarid].units, "degreesE")     == 0 ||
-                   strcmp(ncvars[ncvarid].stdname, "longitude")  == 0 ||
-		  (strcmp(ncvars[ncvarid].units, "degrees")          == 0 &&
-                   strcmp(ncvars[ncvarid].stdname, "grid_longitude") == 0) ||
-		  (strcmp(ncvars[ncvarid].units, "radian")           == 0 &&
-                   strcmp(ncvars[ncvarid].stdname, "grid_longitude") == 0) )
+	      if ( memcmp(ncvars[ncvarid].units, "degrees_east", 12) == 0 ||
+		   memcmp(ncvars[ncvarid].units, "degree_east", 11)  == 0 ||
+		   memcmp(ncvars[ncvarid].units, "degree_E", 8)      == 0 ||
+		   memcmp(ncvars[ncvarid].units, "degrees_E", 9)     == 0 ||
+		   memcmp(ncvars[ncvarid].units, "degreeE", 7)       == 0 ||
+		   memcmp(ncvars[ncvarid].units, "degreesE", 8)      == 0 ||
+                   memcmp(ncvars[ncvarid].stdname, "longitude", 9)   == 0 ||
+		  (memcmp(ncvars[ncvarid].units, "degrees", 7)           == 0 &&
+		   memcmp(ncvars[ncvarid].stdname, "grid_longitude", 14) == 0) ||
+		  (memcmp(ncvars[ncvarid].units, "radian", 6)            == 0 &&
+		   memcmp(ncvars[ncvarid].stdname, "grid_longitude", 14) == 0) )
 		{
 		  ncvars[ncvarid].islon = TRUE;
 		  continue;
 		}
-	      else if ( strcmp(ncvars[ncvarid].units, "degrees_north") == 0 ||
-			strcmp(ncvars[ncvarid].units, "degree_north")  == 0 ||
-			strcmp(ncvars[ncvarid].units, "degree_N")      == 0 ||
-			strcmp(ncvars[ncvarid].units, "degrees_N")     == 0 ||
-			strcmp(ncvars[ncvarid].units, "degreeN")       == 0 ||
-			strcmp(ncvars[ncvarid].units, "degreesN")      == 0 ||
-                        strcmp(ncvars[ncvarid].stdname, "latitude")    == 0 ||
-		       (strcmp(ncvars[ncvarid].units, "degrees")         == 0 &&
-                        strcmp(ncvars[ncvarid].stdname, "grid_latitude") == 0) ||
-		       (strcmp(ncvars[ncvarid].units, "radian")          == 0 &&
-                        strcmp(ncvars[ncvarid].stdname, "grid_latitude") == 0) )
+	      else if ( memcmp(ncvars[ncvarid].units, "degrees_north", 13) == 0 ||
+			memcmp(ncvars[ncvarid].units, "degree_north", 12)  == 0 ||
+			memcmp(ncvars[ncvarid].units, "degree_N", 8)       == 0 ||
+			memcmp(ncvars[ncvarid].units, "degrees_N", 9)      == 0 ||
+			memcmp(ncvars[ncvarid].units, "degreeN", 7)        == 0 ||
+			memcmp(ncvars[ncvarid].units, "degreesN", 8)       == 0 ||
+                        memcmp(ncvars[ncvarid].stdname, "latitude", 8)     == 0 ||
+	       	       (memcmp(ncvars[ncvarid].units, "degrees", 7)          == 0 &&
+			memcmp(ncvars[ncvarid].stdname, "grid_latitude", 13) == 0) ||
+	               (memcmp(ncvars[ncvarid].units, "radian", 6)           == 0 &&
+	           	memcmp(ncvars[ncvarid].stdname, "grid_latitude", 13) == 0) )
 		{
 		  ncvars[ncvarid].islat = TRUE;
 		  continue;
 		}
-	      else if ( strcmp(ncvars[ncvarid].units, "millibar") == 0 ||
-			strncmp(ncvars[ncvarid].units, "mb", 2)   == 0 ||
-			strcmp(ncvars[ncvarid].units, "hPa")      == 0 ||
-			strcmp(ncvars[ncvarid].units, "Pa")       == 0 )
+	      else if ( memcmp(ncvars[ncvarid].units, "millibar", 8) == 0 ||
+			memcmp(ncvars[ncvarid].units, "mb", 2)       == 0 ||
+			memcmp(ncvars[ncvarid].units, "hPa", 3)      == 0 ||
+			memcmp(ncvars[ncvarid].units, "Pa", 2)       == 0 )
 		{
 		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
 		  continue;
@@ -4548,11 +4548,11 @@ int cdfInqContents(int streamID)
 		{
 		  if      ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer midpoints") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
-		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
+		  else if ( memcmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
 		  else if ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer interfaces") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
-		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
+		  else if ( memcmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
 		  else
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
@@ -5142,13 +5142,13 @@ int cdfInqContents(int streamID)
     {
       if ( ncvars[ncvarid].ndims == 1 )
 	{
-	  if ( strncmp(ncvars[ncvarid].name, "hyai", 4) == 0 )
+	  if ( memcmp(ncvars[ncvarid].name, "hyai", 4) == 0 )
 	    {
 	      vcta_id = ncvarid;
 	      nvcth_id = ncvars[ncvarid].dimids[0];
 	      continue;
 	    }
-	  if ( strncmp(ncvars[ncvarid].name, "hybi", 4) == 0 )
+	  if ( memcmp(ncvars[ncvarid].name, "hybi", 4) == 0 )
 	    {
 	      vctb_id = ncvarid;
 	      nvcth_id = ncvars[ncvarid].dimids[0];
@@ -5400,7 +5400,7 @@ int cdfInqContents(int streamID)
 	  pname = vlistInqVarNamePtr(vlistID, varID);
 	  len = strlen(pname);
 	  if ( len > 3 && isdigit((int) pname[3]) )
-	    if ( strncmp("var", pname, 3) == 0 )
+	    if ( memcmp("var", pname, 3) == 0 )
 	      {
 		vlistDefVarCode(vlistID, varID, atoi(pname+3));
 		vlistDestroyVarName(vlistID, varID);
@@ -5412,7 +5412,7 @@ int cdfInqContents(int streamID)
 	  pname = vlistInqVarNamePtr(vlistID, varID);
 	  len = strlen(pname);
 	  if ( len > 4 && isdigit((int) pname[4]) )
-	    if ( strncmp("code", pname, 4) == 0 )
+	    if ( memcmp("code", pname, 4) == 0 )
 	      {
 		vlistDefVarCode(vlistID, varID, atoi(pname+4));
 		vlistDestroyVarName(vlistID, varID);
@@ -5480,20 +5480,20 @@ int cdfInqContents(int streamID)
       {
 	cdfGetAttText(fileID, ncvarid, "calendar", attstringlen-1, attstring);
 
-	if ( strcmp(attstring, "standard")  == 0 ||
-	     strcmp(attstring, "gregorian") == 0 )
+	if ( memcmp(attstring, "standard", 8)  == 0 ||
+	     memcmp(attstring, "gregorian", 9) == 0 )
 	  calendar = CALENDAR_STANDARD;
-	else if ( strcmp(attstring, "none") == 0 )
+	else if ( memcmp(attstring, "none", 4) == 0 )
 	  calendar = CALENDAR_NONE;
-	else if ( strncmp(attstring, "proleptic", 9) == 0 )
+	else if ( memcmp(attstring, "proleptic", 9) == 0 )
 	  calendar = CALENDAR_PROLEPTIC;
-	else if ( strncmp(attstring, "360", 3) == 0 )
+	else if ( memcmp(attstring, "360", 3) == 0 )
 	  calendar = CALENDAR_360DAYS;
-	else if ( strncmp(attstring, "365", 3) == 0 ||
-		  strcmp(attstring, "noleap")  == 0 )
+	else if ( memcmp(attstring, "365", 3) == 0 ||
+		  memcmp(attstring, "noleap", 6)  == 0 )
 	  calendar = CALENDAR_365DAYS;
-	else if ( strncmp(attstring, "366", 3)  == 0 ||
-		  strcmp(attstring, "all_leap") == 0 )
+	else if ( memcmp(attstring, "366", 3)  == 0 ||
+		  memcmp(attstring, "all_leap", 8) == 0 )
 	  calendar = CALENDAR_366DAYS;
 	else
 	  Warning(func, "calendar >%s< unsupported!", attstring);

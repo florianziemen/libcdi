@@ -320,7 +320,7 @@ static int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
       len = strlen(file);
       if ( len > MAXNAME-1 ) len = MAXNAME-1;
     
-      (void) strncpy(memTable[memID].file, file, len);
+      (void) memcpy(memTable[memID].file, file, len);
       memTable[memID].file[len] = '\0';
     }
   else
@@ -333,7 +333,7 @@ static int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
       len = strlen(caller);
       if ( len > MAXNAME-1 ) len = MAXNAME-1;
 
-      (void) strncpy(memTable[memID].caller, caller, len);
+      (void) memcpy(memTable[memID].caller, caller, len);
       memTable[memID].caller[len] = '\0';
     }
   else
@@ -388,7 +388,7 @@ static int memListChangeEntry(void *ptrold, void *ptr, size_t size,
 	  len = strlen(file);
 	  if ( len > MAXNAME-1 ) len = MAXNAME-1;
 
-	  (void) strncpy(memTable[memID].file, file, len);
+	  (void) memcpy(memTable[memID].file, file, len);
 	  memTable[memID].file[len] = '\0';
 	}
       else
@@ -401,7 +401,7 @@ static int memListChangeEntry(void *ptrold, void *ptr, size_t size,
 	  len = strlen(caller);
 	  if ( len > MAXNAME-1 ) len = MAXNAME-1;
 
-	  (void) strncpy(memTable[memID].caller, caller, len);
+	  (void) memcpy(memTable[memID].caller, caller, len);
 	  memTable[memID].caller[len] = '\0';
 	}
       else

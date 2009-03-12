@@ -158,7 +158,7 @@ int decodeForm1(char *pline, char *name, char *longname, char *units)
   len = pline - pstart;
   if ( len > 0 )
     {
-      strncpy(name, pstart, len);
+      memcpy(name, pstart, len);
       name[len] = 0;
     }
   else
@@ -185,7 +185,7 @@ int decodeForm1(char *pline, char *name, char *longname, char *units)
       len = pend - pstart + 1;
       if ( len > 0 )
 	{
-	  strncpy(longname, pstart, len);
+	  memcpy(longname, pstart, len);
 	  longname[len] = 0;
 	}
       pstart = strrchr(pline, '[');
@@ -200,7 +200,7 @@ int decodeForm1(char *pline, char *name, char *longname, char *units)
 	  len = pend - pstart + 1;
 	  if ( len > 0 )
 	    {
-	      strncpy(units, pstart, len);
+	      memcpy(units, pstart, len);
 	      units[len] = 0;
 	    }	  
 	}
@@ -227,7 +227,7 @@ int decodeForm2(char *pline, char *name, char *longname, char *units)
       len = pend - pline;
       if ( len > 0 )
 	{
-	  strncpy(name, pline, len);
+	  memcpy(name, pline, len);
 	  name[len] = 0;
 	}
       return (0);
@@ -239,7 +239,7 @@ int decodeForm2(char *pline, char *name, char *longname, char *units)
       len = pend - pline + 1;
       if ( len > 0 )
 	{
-	  strncpy(name, pline, len);
+	  memcpy(name, pline, len);
 	  name[len] = 0;
 	}
     }
@@ -254,7 +254,7 @@ int decodeForm2(char *pline, char *name, char *longname, char *units)
   len = pend - pline + 1;
   if ( len > 0 )
     {
-      strncpy(longname, pline, len);
+      memcpy(longname, pline, len);
       longname[len] = 0;
     }
 
@@ -269,7 +269,7 @@ int decodeForm2(char *pline, char *name, char *longname, char *units)
       while ( isspace((int) *pend) ) pend--;
       len = pend - pline + 1;
       if ( len < 0 ) len = 0;
-      strncpy(units, pline, len);
+      memcpy(units, pline, len);
       units[len] = 0;
     }
 
@@ -429,7 +429,7 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 	    {
 	      /* len = strlen(parTable[tableID].name); */
 	      len = strlen(tablename);
-	      if ( strncmp(parTable[tableID].name, tablename, len) == 0 ) break;
+	      if ( memcmp(parTable[tableID].name, tablename, len) == 0 ) break;
 	    }
 	}
       if ( tableID == MAX_TABLE ) tableID = UNDEFID;
