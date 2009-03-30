@@ -23,7 +23,7 @@ const char *cdfLibraryVersion(void)
 #endif
 }
 
-#if  (defined  (HAVE_LIBNETCDF) && defined(NC_NETCDF4)) || defined(HAVE_LIBHDF5)
+#if  defined(HAVE_LIBHDF5)
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -35,7 +35,7 @@ extern "C" {
 
 const char *hdfLibraryVersion(void)
 {
-#if  (defined  (HAVE_LIBNETCDF) && defined(NC_NETCDF4)) || defined(HAVE_LIBHDF5)
+#if  defined(HAVE_LIBHDF5)
   static char hdf_libvers[256];
   unsigned majnum, minnum, relnum;
 
@@ -45,7 +45,7 @@ const char *hdfLibraryVersion(void)
 
   return (hdf_libvers);
 #else
-  return (NULL);
+  return ("library undefined");
 #endif
 }
 

@@ -23,6 +23,7 @@ char *Timeunits[] = {
   "days",
   "months",
   "years",
+  "quarter",
 };
 
 
@@ -953,7 +954,7 @@ void decode_timevalue(int timeunit, double timevalue, int *days, int *secs)
     }
 }
 
-
+static
 void encode_timevalue(int days, int secs, int timeunit, double *timevalue)
 {
   static char func[] = "encode_timevalue";
@@ -964,6 +965,10 @@ void encode_timevalue(int days, int secs, int timeunit, double *timevalue)
       *timevalue = days*86400. + secs;
     }
   else if ( timeunit == TUNIT_MINUTE )
+    {
+      *timevalue = days*1440. + secs/60.;
+    }
+  else if ( timeunit == TUNIT_QUARTER )
     {
       *timevalue = days*1440. + secs/60.;
     }
@@ -1049,7 +1054,7 @@ double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
   int ryear, rmonth;
   int year, month, day, hour, minute;
   int rdate, rtime;
-  double value;
+  double value = 0;
   int timeunit;
   int timeunit0;
   int calendar;

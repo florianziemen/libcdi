@@ -1236,13 +1236,13 @@ void zaxisPrint(int zaxisID)
   fprintf(fp, "#\n");
   fprintf(fp, "# zaxisID %d\n", zaxisID);
   fprintf(fp, "#\n");
-  fprintf(fp, "zaxistype : %s\n", zaxisNamePtr(type));
-  fprintf(fp, "size      : %d\n", nlevels);
-  if ( zaxisptr->name[0]     ) fprintf(fp, "name      : %s\n", zaxisptr->name);
-  if ( zaxisptr->longname[0] ) fprintf(fp, "longname  : %s\n", zaxisptr->longname);
-  if ( zaxisptr->units[0]    ) fprintf(fp, "units     : %s\n", zaxisptr->units);
+  fprintf(fp, "zaxistype = %s\n", zaxisNamePtr(type));
+  fprintf(fp, "size      = %d\n", nlevels);
+  if ( zaxisptr->name[0]     ) fprintf(fp, "name      = %s\n", zaxisptr->name);
+  if ( zaxisptr->longname[0] ) fprintf(fp, "longname  = %s\n", zaxisptr->longname);
+  if ( zaxisptr->units[0]    ) fprintf(fp, "units     = %s\n", zaxisptr->units);
 
-  nbyte0 = fprintf(fp, "levels    : ");
+  nbyte0 = fprintf(fp, "levels    = ");
   nbyte = nbyte0;
   for ( levelID = 0; levelID < nlevels; levelID++ )
     {
@@ -1261,7 +1261,7 @@ void zaxisPrint(int zaxisID)
     {
       double level1, level2;
       nbyte = nbyte0;
-      nbyte0 = fprintf(stdout, "%32s : ", "bounds");
+      nbyte0 = fprintf(stdout, "%32s = ", "bounds");
       for ( levelID = 0; levelID < nlevels; levelID++ )
 	{
 	  if ( nbyte > 80 )
@@ -1285,14 +1285,14 @@ void zaxisPrint(int zaxisID)
 
       vctsize = zaxisInqVctSize(zaxisID);
       vct     = zaxisInqVctPtr(zaxisID);
-      fprintf(stdout, "vctsize   : %d\n", vctsize);
+      fprintf(stdout, "vctsize   = %d\n", vctsize);
       if ( vctsize )
 	{
-	  nbyte0 = fprintf(stdout, "vct       : ");
+	  nbyte0 = fprintf(stdout, "vct       = ");
 	  nbyte = nbyte0;
 	  for ( i = 0; i < vctsize; i++ )
 	    {
-	      if ( nbyte > 70 )
+	      if ( nbyte > 70 || i == vctsize/2 )
 		{
 		  fprintf(stdout, "\n%*s", nbyte0, "");
 		  nbyte = nbyte0;
@@ -1301,7 +1301,7 @@ void zaxisPrint(int zaxisID)
 	    }
 	  fprintf(stdout, "\n");
 	  /*
-	  nbyte0 = fprintf(stdout, "vct_b     : ");
+	  nbyte0 = fprintf(stdout, "vct_b     = ");
 	  nbyte  = nbyte0;
 	  for ( i = 0; i < vctsize/2; i++ )
 	    {

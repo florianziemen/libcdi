@@ -816,7 +816,11 @@ void vlistDefVarName(int vlistID, int varID, const char *name)
 
   vlistCheckVarID(func, vlistID, varID);
 
-  if ( vlistptr->vars[varID].name ) free(vlistptr->vars[varID].name);
+  if ( vlistptr->vars[varID].name )
+    {
+      free(vlistptr->vars[varID].name);
+      vlistptr->vars[varID].name = 0;
+    }
 
   if ( name ) vlistptr->vars[varID].name = strdupx(name);
 }
@@ -846,7 +850,11 @@ void vlistDefVarLongname(int vlistID, int varID, const char *longname)
 
   vlistCheckVarID(func, vlistID, varID);
 
-  if ( vlistptr->vars[varID].longname ) free(vlistptr->vars[varID].longname);
+  if ( vlistptr->vars[varID].longname )
+    {
+      free(vlistptr->vars[varID].longname);
+      vlistptr->vars[varID].longname = 0;
+    }
 
   if ( longname ) vlistptr->vars[varID].longname = strdupx(longname);
 }
@@ -861,7 +869,11 @@ void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
 
   vlistCheckVarID(func, vlistID, varID);
 
-  if ( vlistptr->vars[varID].stdname ) free(vlistptr->vars[varID].stdname);
+  if ( vlistptr->vars[varID].stdname )
+    {
+      free(vlistptr->vars[varID].stdname);
+      vlistptr->vars[varID].stdname = 0;
+    }
 
   if ( stdname ) vlistptr->vars[varID].stdname = strdupx(stdname);
 }
@@ -891,7 +903,11 @@ void vlistDefVarUnits(int vlistID, int varID, const char *units)
 
   vlistCheckVarID(func, vlistID, varID);
 
-  if ( vlistptr->vars[varID].units ) free(vlistptr->vars[varID].units);
+  if ( vlistptr->vars[varID].units )
+    {
+      free(vlistptr->vars[varID].units);
+      vlistptr->vars[varID].units = 0;
+    }
 
   if ( units ) vlistptr->vars[varID].units = strdupx(units);
 }
@@ -1061,6 +1077,7 @@ void vlistDestroyVarName(int vlistID, int varID)
     }
 }
 
+
 void vlistDestroyVarLongname(int vlistID, int varID)
 {
   static char func[] = "vlistDestroyVarLongname";
@@ -1075,6 +1092,7 @@ void vlistDestroyVarLongname(int vlistID, int varID)
     }
 }
 
+
 void vlistDestroyVarStdname(int vlistID, int varID)
 {
   static char func[] = "vlistDestroyVarStdname";
@@ -1088,6 +1106,7 @@ void vlistDestroyVarStdname(int vlistID, int varID)
       vlistptr->vars[varID].stdname = NULL;
     }
 }
+
 
 void vlistDestroyVarUnits(int vlistID, int varID)
 {

@@ -427,9 +427,10 @@ int gribTimeUnit(int *isec1)
 
   switch ( ISEC1_TimeUnit )
     {
-    case ISEC1_TABLE4_MINUTE:  timeunit = TUNIT_MINUTE; break;
-    case ISEC1_TABLE4_HOUR:    timeunit = TUNIT_HOUR;   break;
-    case ISEC1_TABLE4_DAY:     timeunit = TUNIT_DAY;    break;
+    case ISEC1_TABLE4_MINUTE:  timeunit = TUNIT_MINUTE;  break;
+    case ISEC1_TABLE4_QUARTER: timeunit = TUNIT_QUARTER; break;
+    case ISEC1_TABLE4_HOUR:    timeunit = TUNIT_HOUR;    break;
+    case ISEC1_TABLE4_DAY:     timeunit = TUNIT_DAY;     break;
     default:
       if ( lprint )
 	{
@@ -1749,10 +1750,11 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
 
       switch (taxisInqTunit(timeID))
 	{
-	case TUNIT_MINUTE:  factor =    60; ISEC1_TimeUnit = ISEC1_TABLE4_MINUTE; break;
-	case TUNIT_HOUR:    factor =  3600; ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;   break;
-	case TUNIT_DAY:     factor = 86400; ISEC1_TimeUnit = ISEC1_TABLE4_DAY;    break;
-	default:            factor =  3600; ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;   break;
+	case TUNIT_MINUTE:  factor =    60; ISEC1_TimeUnit = ISEC1_TABLE4_MINUTE;  break;
+	case TUNIT_QUARTER: factor =   900; ISEC1_TimeUnit = ISEC1_TABLE4_QUARTER; break;
+	case TUNIT_HOUR:    factor =  3600; ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;    break;
+	case TUNIT_DAY:     factor = 86400; ISEC1_TimeUnit = ISEC1_TABLE4_DAY;     break;
+	default:            factor =  3600; ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;    break;
 	}
       decode_date(date, &year, &month, &day);
       decode_time(time, &hour, &minute);
@@ -1808,9 +1810,10 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
       /* ISEC1_TimeUnit = 0; */
       switch (taxisInqTunit(timeID))
 	{
-	case TUNIT_MINUTE:  ISEC1_TimeUnit = ISEC1_TABLE4_MINUTE; break;
-	case TUNIT_HOUR:    ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;   break;
-	case TUNIT_DAY:     ISEC1_TimeUnit = ISEC1_TABLE4_DAY;    break;
+	case TUNIT_MINUTE:  ISEC1_TimeUnit = ISEC1_TABLE4_MINUTE;  break;
+	case TUNIT_QUARTER: ISEC1_TimeUnit = ISEC1_TABLE4_QUARTER; break;
+	case TUNIT_HOUR:    ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;    break;
+	case TUNIT_DAY:     ISEC1_TimeUnit = ISEC1_TABLE4_DAY;     break;
 	}
 
       if ( numavg > 0 )

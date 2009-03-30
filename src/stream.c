@@ -1885,8 +1885,6 @@ void cdiDefTableID(int tableID)
 
 void cdiPrintVersion(void)
 {
-  const char *hdf_version;
-
   fprintf(stderr, "    CDI library version : %s\n", cdiLibraryVersion());
 #if  defined  (HAVE_LIBGRIB)
   fprintf(stderr, "   GRIB library version : %s\n", gribLibraryVersion());
@@ -1896,10 +1894,10 @@ void cdiPrintVersion(void)
   fprintf(stderr, " nc_dap library version : %s\n", cdfLibraryVersion());
 #  else
   fprintf(stderr, " netCDF library version : %s\n", cdfLibraryVersion());
-  hdf_version = hdfLibraryVersion();
-  if ( hdf_version )
-    fprintf(stderr, "   HDF5 library version : %s\n", hdf_version);
 #  endif
+#endif
+#if  defined  (HAVE_LIBHDF5)
+  fprintf(stderr, "   HDF5 library version : %s\n", hdfLibraryVersion());
 #endif
 #if  defined  (HAVE_LIBSERVICE)
   fprintf(stderr, "SERVICE library version : %s\n", srvLibraryVersion());

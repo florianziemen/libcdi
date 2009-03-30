@@ -47,9 +47,10 @@
 /*
  *  Macros for the product definition section ( Section 1 )
  */
-#define  ISEC1_TABLE4_MINUTE  0
-#define  ISEC1_TABLE4_HOUR    1
-#define  ISEC1_TABLE4_DAY     2
+#define  ISEC1_TABLE4_MINUTE    0
+#define  ISEC1_TABLE4_HOUR      1
+#define  ISEC1_TABLE4_DAY       2
+#define  ISEC1_TABLE4_QUARTER  13
 
 
 #define  ISEC1_CodeTable            (isec1[ 0])  /*  Version number of code table                 */

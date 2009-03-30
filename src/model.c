@@ -208,8 +208,8 @@ static void model_defaults(void)
   int instID;
 
   instID  = institutInq(  0,   0, "ECMWF", NULL);
-  (void)    modelDef(instID, 131, "ERA15");
-  (void)    modelDef(instID, 199, "ERA40");
+  /* (void)    modelDef(instID, 131, "ERA15"); */
+  /* (void)    modelDef(instID, 199, "ERA40"); */
 
   instID  = institutInq(  0,   0, "MPIMET", NULL);
   ECHAM5  = modelDef(instID,  64, "ECHAM5.4");
