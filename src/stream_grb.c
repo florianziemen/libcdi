@@ -22,6 +22,7 @@
 #undef  UNDEFID
 #define UNDEFID  CDI_UNDEFID
 
+extern int cdiInventoryMode;
 
 int _readline_(FILE *fp, char *line, int len);
 
@@ -456,6 +457,7 @@ int grbScanTimestep(int streamID)
   int status;
   int fileID;
   int rcode = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
+  DateTime datetime, datetime0;
   int tsID;
   int vrecID, recID;
   int warn_numavg = TRUE;
@@ -509,8 +511,11 @@ int grbScanTimestep(int streamID)
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
-      for ( rindex = 0; rindex <= nrecs; rindex++ )
+      rindex = 0;
+      while ( TRUE )
 	{
+	  if ( rindex > nrecs ) break;
+
 	  recsize = gribGetSize(fileID);
 	  recpos  = fileGetPos(fileID);
 	  if ( recsize == 0 )
@@ -572,6 +577,9 @@ int grbScanTimestep(int streamID)
 		}
 	      taxis->vdate = vdate;
 	      taxis->vtime = vtime;
+
+	      datetime0.date = vdate;
+	      datetime0.time = vtime;
 	    }
 
 	  if ( ISEC1_AvgNum )
@@ -591,6 +599,8 @@ int grbScanTimestep(int streamID)
 		}
 	    }
 	  
+	  datetime.date  = vdate;
+	  datetime.time  = vtime;
 	  compVar.code   = rcode;
           compVar.table  = ISEC1_CodeTable;
           compVar.level1 = level1;
@@ -604,18 +614,42 @@ int grbScanTimestep(int streamID)
 	      compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
 	      compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
 	      compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
-	      if ( memcmp(&compVar0, &compVar, sizeof(COMPVAR)) == 0 )
+
+	      if ( memcmp(&compVar0, &compVar, sizeof(COMPVAR)) == 0 ) break;
+	    }
+
+	  if ( vrecID == nrecs )
+	    {
+	      Warning(func, "Code %d level %d not available at timestep %d!",
+		      rcode, level1, tsID+1);
+
+	      if ( cdiInventoryMode == 1 )
+		return (CDI_EUFSTRUCT);
+	      else
+		continue;
+	    }
+
+	  if ( cdiInventoryMode == 1 )
+	    {
+	      streamptr->tsteps[tsID].records[recID].used = TRUE;
+	      streamptr->tsteps[tsID].recIDs[rindex] = recID;
+	    }
+	  else
+	    {
+	      if ( streamptr->tsteps[tsID].records[recID].used )
+		{
+		  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
+		  
+		  if ( CDI_Debug )
+		    Warning(func, "Code %d level %d already exist, skipped!", rcode, level1);
+
+		  continue;
+		}
+	      else
 		{
 		  streamptr->tsteps[tsID].records[recID].used = TRUE;
 		  streamptr->tsteps[tsID].recIDs[rindex] = recID;
-		  break;
-		}
-	    }
-	  if ( vrecID == nrecs )
-	    {
-	      Warning(func, "1 code %d level %d not found at timestep %d",
-		      rcode, level1, tsID+1);
-	      return (CDI_EUFSTRUCT);
+		}    
 	    }
 
 	  if ( CDI_Debug )
@@ -641,6 +675,8 @@ int grbScanTimestep(int streamID)
 
 	  if ( CDI_Debug )
 	    Message(func, "%4d %8d %4d %8d %8d %6d", rindex, (int)recpos, rcode, level1, vdate, vtime);
+
+	  rindex++;
 	}
 
       for ( vrecID = 0; vrecID < nrecs; vrecID++ )
@@ -651,7 +687,7 @@ int grbScanTimestep(int streamID)
 
       if ( vrecID < nrecs )
 	{
-	  Warning(func, "2 code %d level %d not found at timestep %d",
+	  Warning(func, "Code %d level %d not found at timestep %d!",
 		  streamptr->tsteps[tsID].records[recID].code,
 		  streamptr->tsteps[tsID].records[recID].ilevel,
 		  tsID+1);
@@ -1165,13 +1201,27 @@ void grbScanTimestep1(int streamID)
 
 	      if ( memcmp(&compVar0, &compVar, sizeof(COMPVAR)) == 0 ) break;
 	    }
-	  if ( recID < nrecs ) break;
-	  if ( warn_time )
-	    if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) )
-	      {
-		Warning(func, "Inconsistent verification time (code %d level %d)", rcode, level1);
-		warn_time = FALSE;
-	      }
+
+	  if ( cdiInventoryMode == 1 )
+	    {
+	      if ( recID < nrecs ) break;
+	      if ( warn_time )
+		if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 )
+		  {
+		    Warning(func, "Inconsistent verification time (code %d level %d)", rcode, level1);
+		    warn_time = FALSE;
+		  }
+	    }
+	  else
+	    {
+	      if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
+
+	      if ( recID < nrecs )
+		{
+		  Warning(func, "Code %d level %d already exist, skipped!", rcode, level1);
+		  continue;
+		}
+	    }
 	}
 
       if ( ISEC1_AvgNum )
@@ -1273,6 +1323,7 @@ int grbScanTimestep2(int streamID)
   int status;
   int fileID;
   int rcode = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
+  DateTime datetime, datetime0;
   int tsID;
   int varID, gridID;
   size_t readsize;
@@ -1280,7 +1331,6 @@ int grbScanTimestep2(int streamID)
   long recsize = 0;
   int warn_numavg = TRUE;
   int taxisID = -1;
-  int nextstep;
   TAXIS *taxis;
   int vlistID;
   long unzipsize;
@@ -1331,8 +1381,11 @@ int grbScanTimestep2(int streamID)
 	streamptr->tsteps[0].records[recID].size;
     }
 
-  for ( rindex = 0; rindex <= nrecords; rindex++ )
+  rindex = 0;
+  while ( TRUE )
     {
+      if ( rindex > nrecords ) break;
+
       recsize = gribGetSize(fileID);
       recpos  = fileGetPos(fileID);
       if ( recsize == 0 )
@@ -1386,6 +1439,9 @@ int grbScanTimestep2(int streamID)
 	    }
 	  taxis->vdate = vdate;
 	  taxis->vtime = vtime;
+
+	  datetime0.date = vdate;
+	  datetime0.time = vtime;
 	}
 
       if ( ISEC1_AvgNum )
@@ -1405,12 +1461,13 @@ int grbScanTimestep2(int streamID)
 	    }
 	}
 
+      datetime.date  = vdate;
+      datetime.time  = vtime;
       compVar.code   = rcode;
       compVar.table  = ISEC1_CodeTable;
       compVar.level1 = level1;
       compVar.level2 = level2;
       compVar.ltype  = ISEC1_LevelType;
-      nextstep = FALSE;
       for ( recID = 0; recID < nrecords; recID++ )
 	{
 	  compVar0.code   = streamptr->tsteps[tsID].records[recID].code;
@@ -1418,27 +1475,43 @@ int grbScanTimestep2(int streamID)
 	  compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
 	  compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
 	  compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
-	  if ( memcmp(&compVar0, &compVar, sizeof(COMPVAR)) == 0 )
-	    {
-	      if ( streamptr->tsteps[tsID].records[recID].used )
-		{
-		  nextstep = TRUE;
-		}
-	      else
-		{
-		  streamptr->tsteps[tsID].records[recID].used = TRUE;
-		  streamptr->tsteps[tsID].recIDs[rindex] = recID;
-		}
-	      break;
-	    }
+
+	  if ( memcmp(&compVar0, &compVar, sizeof(COMPVAR)) == 0 ) break;
 	}
+
       if ( recID == nrecords )
 	{
-	  Warning(func, "code %d level %d not found at timestep %d", rcode, level1, tsID+1);
+	  Warning(func, "Code %d level %d not found at timestep %d!", rcode, level1, tsID+1);
 	  return (CDI_EUFSTRUCT);
 	}
 
-      if ( nextstep ) break;
+      if ( cdiInventoryMode == 1 )
+	{
+	  if ( streamptr->tsteps[tsID].records[recID].used )
+	    {
+	      break;
+	    }
+	  else
+	    {
+	      streamptr->tsteps[tsID].records[recID].used = TRUE;
+	      streamptr->tsteps[tsID].recIDs[rindex] = recID;
+	    }    
+	}
+      else
+	{
+	  if ( streamptr->tsteps[tsID].records[recID].used )
+	    {
+	      if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
+
+	      Warning(func, "Code %d level %d already exist, skipped!", rcode, level1);
+	      continue;
+	    }
+	  else
+	    {
+	      streamptr->tsteps[tsID].records[recID].used = TRUE;
+	      streamptr->tsteps[tsID].recIDs[rindex] = recID;
+	    }    
+	}
 
       if ( CDI_Debug )
 	Message(func, "%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, rcode, level1, vdate, vtime);
@@ -1469,6 +1542,8 @@ int grbScanTimestep2(int streamID)
 	       IS_NOT_EQUAL(gridInqYval(gridID, 0),ISEC2_FirstLat*0.001) )
 	    gridChangeType(gridID, GRID_TRAJECTORY);
 	}
+
+      rindex++;
     }
 
   nrecs = 0;

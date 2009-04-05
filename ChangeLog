@@ -4,6 +4,7 @@
 	* add support for NaN in DBL_IS_EQUAL
 	* add support for GRID type LCC2 (LCC PROJ.4 version)
 	* add support for TUNIT_QUARTER (15 minutes)
+	* use env GRIB_INVENTORY_MODE=timestep to skip double entries
 	* grbDefTime: define tunit also for absolute time [report: Pruek Pongprueksa]
 	* change default calendar to CALENDAR_PROLEPTIC
 	* gridInqXinc: bug fix

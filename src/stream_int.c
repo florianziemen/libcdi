@@ -22,6 +22,7 @@ int cdiNcMissingValue = CDI_UNDEFID;
 int cdiSplitLtype105  = CDI_UNDEFID;
 
 int cdiIgnoreAttCoordinates = FALSE;
+int cdiInventoryMode        = 1;
 
 char *cdiPartabPath   = NULL;
 int   cdiPartabIntern = 1;
@@ -122,6 +123,17 @@ void cdiInitialize(void)
 
       envString = getenv("IGNORE_ATT_COORDINATES");
       if ( envString ) cdiIgnoreAttCoordinates = atoi(envString);
+
+      envString = getenv("GRIB_INVENTORY_MODE");
+      if ( envString )
+	{
+	  if ( strncmp(envString, "time", 4) == 0 )
+	    {
+	      cdiInventoryMode = 2;
+	      if ( CDI_Debug )
+		Message(func, "Inventory mode was set to timestep!");
+	    }
+	}
 
       envString = getenv("PARTAB_INTERN");
       if ( envString ) cdiPartabIntern = atoi(envString);
