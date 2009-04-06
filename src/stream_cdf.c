@@ -791,11 +791,12 @@ void cdfDefTime(int streamID)
 
       len = strlen(calstr);
       if ( len )
-	cdf_put_att_text(fileID, time_varid, "calendar", len, calstr);
+	{
+	  cdf_put_att_text(fileID, time_varid, "calendar", len, calstr);
 
-      if ( taxis->has_bounds )
-	if ( len )
-	  cdf_put_att_text(fileID, time_bndsid, "calendar", len, calstr);
+	  if ( taxis->has_bounds )
+	    cdf_put_att_text(fileID, time_bndsid, "calendar", len, calstr);
+	}
     }
 
   if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);

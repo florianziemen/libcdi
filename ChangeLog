@@ -6,6 +6,7 @@
 	* add support for TUNIT_QUARTER (15 minutes)
 	* use env GRIB_INVENTORY_MODE=timestep to skip double entries
 	* grbDefTime: define tunit also for absolute time [report: Pruek Pongprueksa]
+	* set default calendar with env CDI_DEFAULT_CALENDAR
 	* change default calendar to CALENDAR_PROLEPTIC
 	* gridInqXinc: bug fix
 	* grid_check_cyclic: support for curvilinear grids without bounds

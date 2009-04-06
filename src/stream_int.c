@@ -15,11 +15,13 @@
 #include "stream_int.h"
 
 
-int cdiDefaultInstID  = CDI_UNDEFID;
-int cdiDefaultModelID = CDI_UNDEFID;
-int cdiDefaultTableID = CDI_UNDEFID;
-int cdiNcMissingValue = CDI_UNDEFID;
-int cdiSplitLtype105  = CDI_UNDEFID;
+int cdiDefaultCalendar = CALENDAR_PROLEPTIC;
+
+int cdiDefaultInstID   = CDI_UNDEFID;
+int cdiDefaultModelID  = CDI_UNDEFID;
+int cdiDefaultTableID  = CDI_UNDEFID;
+int cdiNcMissingValue  = CDI_UNDEFID;
+int cdiSplitLtype105   = CDI_UNDEFID;
 
 int cdiIgnoreAttCoordinates = FALSE;
 int cdiInventoryMode        = 1;
@@ -133,6 +135,26 @@ void cdiInitialize(void)
 	      if ( CDI_Debug )
 		Message(func, "Inventory mode was set to timestep!");
 	    }
+	}
+
+      envString = getenv("CDI_CALENDAR");
+      if ( envString )
+	{
+	  if      ( strncmp(envString, "standard", 8) == 0 )
+	    cdiDefaultCalendar = CALENDAR_STANDARD;
+	  else if ( strncmp(envString, "proleptic", 9) == 0 )
+	    cdiDefaultCalendar = CALENDAR_PROLEPTIC;
+	  else if ( strncmp(envString, "360days", 7) == 0 )
+	    cdiDefaultCalendar = CALENDAR_360DAYS;
+	  else if ( strncmp(envString, "365days", 7) == 0 )
+	    cdiDefaultCalendar = CALENDAR_365DAYS;
+	  else if ( strncmp(envString, "366days", 7) == 0 )
+	    cdiDefaultCalendar = CALENDAR_366DAYS;
+	  else if ( strncmp(envString, "none", 4) == 0 )
+	    cdiDefaultCalendar = CALENDAR_NONE;
+
+	  if ( CDI_Debug )
+	    Message(func, "Default calendar set to %s!", envString);
 	}
 
       envString = getenv("PARTAB_INTERN");

@@ -10,9 +10,10 @@
 #include "stream_int.h"
 #include "calendar.h"
 
+extern int cdiDefaultCalendar;
+
 static int DefaultTimeType = TAXIS_ABSOLUTE;
 static int DefaultTimeUnit = TUNIT_HOUR;
-static int DefaultCalendar = CALENDAR_PROLEPTIC;
 
 
 char *Timeunits[] = {
@@ -206,7 +207,7 @@ void taxis_init_ptr(TAXIS *taxisptr)
   taxisptr->vtime      = 0;
   taxisptr->rdate      = CDI_UNDEFID;
   taxisptr->rtime      = 0;
-  taxisptr->calendar   = DefaultCalendar;
+  taxisptr->calendar   = cdiDefaultCalendar;
   taxisptr->unit       = DefaultTimeUnit;
   taxisptr->numavg     = 0;
   taxisptr->has_bounds = FALSE;
