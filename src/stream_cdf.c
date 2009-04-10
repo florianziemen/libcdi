@@ -2421,7 +2421,7 @@ int cdfDefVar(int streamID, int varID)
   char *stdname = NULL;
   char *units = NULL;
   int dims[4];
-  int chunks[4];
+  size_t chunks[4];
   int tableID;
   int ndims = 0;
   int len;
@@ -2473,14 +2473,15 @@ int cdfDefVar(int streamID, int varID)
   if ( zid != UNDEFID ) chunks[ndims] = 1;
   if ( zid != UNDEFID ) dims[ndims++] = zid;
 
-  if ( yid != UNDEFID ) chunks[ndims] = (int) ysize;
+  if ( yid != UNDEFID ) chunks[ndims] = ysize;
   if ( yid != UNDEFID ) dims[ndims++] = yid;
 
-  if ( xid != UNDEFID ) chunks[ndims] = (int) xsize;
+  if ( xid != UNDEFID ) chunks[ndims] = xsize;
   if ( xid != UNDEFID ) dims[ndims++] = xid;
 
   if ( CDI_Debug ) 
-    fprintf(stderr, "chunks %d %d %d %d\n", chunks[0], chunks[1], chunks[2], chunks[3]);
+    fprintf(stderr, "chunks %d %d %d %d\n", 
+	    (int)chunks[0], (int)chunks[1], (int)chunks[2], (int)chunks[3]);
 
   tableID  = vlistInqVarTable(vlistID, varID);
 
