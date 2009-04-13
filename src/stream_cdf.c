@@ -3580,7 +3580,7 @@ void cdfSetDim(NCVAR *ncvars, int ncvarid, int dimid, int dimtype)
   if ( ncvars[ncvarid].dimtype[dimid] != UNDEFID &&
        ncvars[ncvarid].dimtype[dimid] != dimtype )
     {
-      Warning(func, "Inconsistent dimension definition for %s! dimid %d  oldtype %d  newtype %d",
+      Warning(func, "Inconsistent dimension definition for %s! dimid = %d;  type = %d;  newtype = %d",
 	      ncvars[ncvarid].name, dimid, ncvars[ncvarid].dimtype[dimid], dimtype);
     }
 
