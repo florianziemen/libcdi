@@ -3948,7 +3948,7 @@ int cdfInqContents(int streamID)
 		ncvars[ncvarid].gridtype = GRID_GAUSSIAN_REDUCED;
 	      else if ( strcmp(attstring, "gaussian") == 0 )
 		ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
-	      else if ( strcmp(attstring, "spectral") == 0 )
+	      else if ( strncmp(attstring, "spectral", 8) == 0 )
 		ncvars[ncvarid].gridtype = GRID_SPECTRAL;
 	      else if ( strcmp(attstring, "trajectory") == 0 )
 		ncvars[ncvarid].gridtype = GRID_TRAJECTORY;
