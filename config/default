@@ -74,7 +74,7 @@ case "${HOSTNAME}" in
     hpca)
 	./configure --prefix=$HOME/local \
                     --with-netcdf=/usr/local/lib/netcdf-3.5.0/LP64 \
-	            CFLAGS="-q64 -q MAXMEM=-1" CFINT=-Dextname
+	            CFLAGS="-q64 -qmaxmem=-1" CFINT=-Dextname
 	;;
     *)
 	echo "configuration for hostname $HOSTNAME not found!"
