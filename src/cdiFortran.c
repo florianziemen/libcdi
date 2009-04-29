@@ -57,7 +57,7 @@ FCALLSCFUN0 (STRING, cdiLibraryVersion, CDILIBRARYVERSION, cdilibraryversion)
 FCALLSCSUB0 (cdiPrintVersion, CDIPRINTVERSION, cdiprintversion)
 FCALLSCSUB1 (cdiDefMissval, CDIDEFMISSVAL, cdidefmissval, DOUBLE)
 FCALLSCFUN0 (DOUBLE, cdiInqMissval, CDIINQMISSVAL, cdiinqmissval)
-FCALLSCFUN2 (INT, cdiDefGlobal, CDIDEFGLOBAL, cdidefglobal, STRING, INT)
+FCALLSCSUB2 (cdiDefGlobal, CDIDEFGLOBAL, cdidefglobal, STRING, INT)
 
 /*  STREAM control routines  */
 
@@ -259,10 +259,15 @@ FCALLSCSUB2 (gridDefGMEni2, GRIDDEFGMENI2, griddefgmeni2, INT, INT)
 FCALLSCFUN1 (INT, gridInqGMEni3, GRIDINQGMENI3, gridinqgmeni3, INT)
 FCALLSCSUB2 (gridDefGMEni3, GRIDDEFGMENI3, griddefgmeni3, INT, INT)
 
-/*  Lambert Conformal Conic grid  */
+/*  Lambert Conformal Conic grid (GRIB version)  */
 
 FCALLSCSUB10 (gridDefLCC, GRIDDEFLCC, griddeflcc, INT, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, INT, INT)
 FCALLSCSUB10 (gridInqLCC, GRIDINQLCC, gridinqlcc, INT, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PINT, PINT)
+
+/*  Lambert Conformal Conic 2 grid (PROJ version)  */
+
+FCALLSCSUB6 (gridDefLcc2, GRIDDEFLCC2, griddeflcc2, INT, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE)
+FCALLSCSUB6 (gridInqLcc2, GRIDINQLCC2, gridinqlcc2, INT, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE)
 
 /*  Lambert Azimuthal Equal Area grid  */
 

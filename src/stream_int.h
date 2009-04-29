@@ -231,6 +231,7 @@ typedef struct {
   int       localatts;
   VCT       vct;
   int       unreduced;
+  int       sortname;
   int       ztype;
   int       zlevel;
   int       curfile;

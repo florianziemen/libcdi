@@ -3456,15 +3456,18 @@ void cdfCreateRecords(int streamID, int tsID)
 	     streamptr->tsteps[0].records,
 	     nrecs*sizeof(RECORD));
 
-      recIDs = (int *) malloc(nvrecs*sizeof(int));
-      streamptr->tsteps[tsID].recIDs     = recIDs;
-      vrecID = 0;
-      for ( recID = 0; recID < nrecs; recID++ )
+      if ( nvrecs )
 	{
-	  varID = records[recID].varID;
-	  if ( vlistInqVarTime(vlistID, varID) == TIME_VARIABLE )
+	  recIDs = (int *) malloc(nvrecs*sizeof(int));
+	  streamptr->tsteps[tsID].recIDs     = recIDs;
+	  vrecID = 0;
+	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
-	      recIDs[vrecID++] = recID;
+	      varID = records[recID].varID;
+	      if ( vlistInqVarTime(vlistID, varID) == TIME_VARIABLE )
+		{
+		  recIDs[vrecID++] = recID;
+		}
 	    }
 	}
     }
@@ -3630,6 +3633,23 @@ void printNCvars(NCVAR *ncvars, int nvars)
 
       printf("%3d %3d %3d  %-4s %s\n", ncvarid, ncvars[ncvarid].isvar, ndim-2, axis, ncvars[ncvarid].name);
     }
+}
+
+typedef struct
+{
+  int      ncvarid;
+  char     name[128];
+}
+VarInfo;
+
+
+static
+int cmpvarname(const void *s1, const void *s2)
+{
+  VarInfo *x = (VarInfo *) s1;
+  VarInfo *y = (VarInfo *) s2;
+
+  return (strcmp(x->name, y->name));
 }
 
 
@@ -5326,6 +5346,31 @@ int cdfInqContents(int streamID)
 
   if ( nvars == 0 )
     return (CDI_EUFSTRUCT);
+
+  if ( streamptr->sortname )
+    {
+      int index;
+      VarInfo **varInfo;
+      varInfo    = (VarInfo **) malloc(nvars*sizeof(VarInfo *));
+      varInfo[0] = (VarInfo *)  malloc(nvars*sizeof(VarInfo));
+
+      for ( index = 1; index < nvars; index++ )
+	varInfo[index] = varInfo[0] + index;
+
+      for ( varID = 0; varID < nvars; varID++ )
+	{
+	  ncvarid = varids[varID];
+	  varInfo[varID]->ncvarid = ncvarid;
+	  strcpy(varInfo[varID]->name, ncvars[ncvarid].name);
+	}
+      qsort(varInfo[0], nvars, sizeof(VarInfo), cmpvarname);
+      for ( varID = 0; varID < nvars; varID++ )
+	{
+	  varids[varID] = varInfo[varID]->ncvarid;
+	}
+      free(varInfo[0]);
+      free(varInfo);
+    }
 
   for ( varID1 = 0; varID1 < nvars; varID1++ )
     {

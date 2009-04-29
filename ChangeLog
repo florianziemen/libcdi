@@ -1,3 +1,8 @@
+2009-??-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* add env CDI_SORTNAME to sort netCDF names
+	* Version 1.3.2 released
+
 2009-04-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* using GRIB library version 1.3.0

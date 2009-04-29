@@ -54,6 +54,7 @@ int CDI_Debug   = 0;    /* If set to 1, debugging           */
 
 int cdiDefaultLeveltype = -1;
 static int cdiDataUnreduced = 0;
+static int cdiSortName = 0;
 
 
 long cdiGetenvInt(char *envName)
@@ -111,10 +112,22 @@ void cdiInitialize(void)
       value = cdiGetenvInt("CD_REGULARGRID");
       if ( value >= 0 ) cdiDataUnreduced = (int) value;
 
+      value = cdiGetenvInt("CDI_REGULARGRID");
+      if ( value >= 0 ) cdiDataUnreduced = (int) value;
+
+      value = cdiGetenvInt("CDI_SORTNAME");
+      if ( value >= 0 ) cdiSortName = (int) value;
+
       value = cdiGetenvInt("CD_LEVELTYPE");
       if ( value >= 0 ) cdiDefaultLeveltype = (int) value;
 
+      value = cdiGetenvInt("CDI_LEVELTYPE");
+      if ( value >= 0 ) cdiDefaultLeveltype = (int) value;
+
       envString = getenv("CD_MISSVAL");
+      if ( envString ) cdiDefaultMissval = atof(envString);
+
+      envString = getenv("CDI_MISSVAL");
       if ( envString ) cdiDefaultMissval = atof(envString);
 
       envString = getenv("NC_MISSING_VALUE");
@@ -351,6 +364,7 @@ static void stream_init_entry(STREAM *streamptr)
   streamptr->vct.ilevID        = UNDEFID;
   streamptr->vct.mlevID        = UNDEFID;
   streamptr->unreduced         = cdiDataUnreduced;
+  streamptr->sortname          = cdiSortName;
   streamptr->ztype             = COMPRESS_NONE;
   streamptr->zlevel            = 0;
 
@@ -458,17 +472,22 @@ int streamSize(void)
 }
 
 
-int cdiDefGlobal(const char *string, int val)
+void cdiDefGlobal(const char *string, int val)
 {
-  int ret = 0;
+  static char func[] = "cdiDefGlobal";
 
-  if ( strcmp(string, "CD_REGULARGRID") == 0 )
+  if ( strcmp(string, "REGULARGRID") == 0 )
     {
       cdiDataUnreduced = val;
-      ret = 1;
     }
-
-  return (ret);
+  else if ( strcmp(string, "SORTNAME") == 0 )
+    {
+      cdiSortName = val;
+    }
+  else
+    {
+      Warning(func, "Unsupported global key: %s", string);
+    }
 }
 
 

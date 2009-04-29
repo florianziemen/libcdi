@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   January 2009
+! Uwe Schulzweida, MPI-MET, Hamburg,   April 2009
 !
 
       INTEGER    CDI_UNDEFID           
@@ -186,10 +186,12 @@
       PARAMETER (GRID_CURVILINEAR       = 10)
       INTEGER    GRID_LCC              
       PARAMETER (GRID_LCC               = 11)
+      INTEGER    GRID_LCC2             
+      PARAMETER (GRID_LCC2              = 12)
       INTEGER    GRID_LAEA             
-      PARAMETER (GRID_LAEA              = 12)
+      PARAMETER (GRID_LAEA              = 13)
       INTEGER    GRID_SINUSOIDAL       
-      PARAMETER (GRID_SINUSOIDAL        = 13)
+      PARAMETER (GRID_SINUSOIDAL        = 14)
 !
 !  ZAXIS types
 !
@@ -248,21 +250,23 @@
       PARAMETER (TUNIT_MONTH            =  5)
       INTEGER    TUNIT_YEAR            
       PARAMETER (TUNIT_YEAR             =  6)
+      INTEGER    TUNIT_QUARTER         
+      PARAMETER (TUNIT_QUARTER          =  7)
 !
 !  CALENDAR types
 !
       INTEGER    CALENDAR_STANDARD     
       PARAMETER (CALENDAR_STANDARD      =  0)
-      INTEGER    CALENDAR_NONE         
-      PARAMETER (CALENDAR_NONE          =  1)
+      INTEGER    CALENDAR_PROLEPTIC    
+      PARAMETER (CALENDAR_PROLEPTIC     =  1)
       INTEGER    CALENDAR_360DAYS      
       PARAMETER (CALENDAR_360DAYS       =  2)
       INTEGER    CALENDAR_365DAYS      
       PARAMETER (CALENDAR_365DAYS       =  3)
       INTEGER    CALENDAR_366DAYS      
       PARAMETER (CALENDAR_366DAYS       =  4)
-      INTEGER    CALENDAR_PROLEPTIC    
-      PARAMETER (CALENDAR_PROLEPTIC     =  5)
+      INTEGER    CALENDAR_NONE         
+      PARAMETER (CALENDAR_NONE          =  5)
 !
 !  CDI control routines
 !
@@ -287,7 +291,7 @@
       DOUBLEPRECISION cdiInqMissval
       EXTERNAL        cdiInqMissval
 
-      INTEGER         cdiDefGlobal
+!                     cdiDefGlobal
 !                                    (CHARACTER*(*)   string,
 !                                     INTEGER         val)
       EXTERNAL        cdiDefGlobal
@@ -1223,7 +1227,7 @@
       EXTERNAL        gridDefGMEni3
 
 !
-!  Lambert Conformal Conic grid
+!  Lambert Conformal Conic grid (GRIB version)
 !
 !                     gridDefLCC
 !                                    (INTEGER         gridID,
@@ -1250,6 +1254,27 @@
 !                                     INTEGER         projflag,
 !                                     INTEGER         scanflag)
       EXTERNAL        gridInqLCC
+
+!
+!  Lambert Conformal Conic 2 grid (PROJ version)
+!
+!                     gridDefLcc2
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION earth_radius,
+!                                     DOUBLEPRECISION lon_0,
+!                                     DOUBLEPRECISION lat_0,
+!                                     DOUBLEPRECISION lat_1,
+!                                     DOUBLEPRECISION lat_2)
+      EXTERNAL        gridDefLcc2
+
+!                     gridInqLcc2
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION earth_radius,
+!                                     DOUBLEPRECISION lon_0,
+!                                     DOUBLEPRECISION lat_0,
+!                                     DOUBLEPRECISION lat_1,
+!                                     DOUBLEPRECISION lat_2)
+      EXTERNAL        gridInqLcc2
 
 !
 !  Lambert Azimuthal Equal Area grid
