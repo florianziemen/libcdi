@@ -1249,6 +1249,7 @@ void streamSync(int streamID)
 #endif
 	    default:
 	      {
+		fileFlush(fileID);
 		break;
 	      }
 	    }
