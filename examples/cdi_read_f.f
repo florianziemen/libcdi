@@ -29,7 +29,7 @@
       varID1 = 0
       varID2 = 1
 
-!     Get the Time axis form the variable list
+!     Get the Time axis from the variable list
       taxisID = vlistInqTaxis(vlistID)
 
 !     Loop over the number of time steps

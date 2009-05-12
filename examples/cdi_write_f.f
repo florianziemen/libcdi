@@ -53,7 +53,7 @@
 !     Assign the Time axis to the variable list
       CALL vlistDefTaxis(vlistID, taxisID)
 
-!     Create a dataset in netCDF format
+!     Create a dataset in netCDF fromat
       streamID = streamOpenWrite("example.nc", FILETYPE_NC)
       IF ( streamID < 0 ) THEN
          WRITE(0,*) cdiStringError(streamID)
