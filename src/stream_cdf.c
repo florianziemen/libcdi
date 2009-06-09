@@ -2212,7 +2212,7 @@ void cdfDefPole(int streamID, int gridID)
   int fileID;
   int ncvarid = UNDEFID;
   int ncerr;
-  double xpole, ypole;
+  double xpole, ypole, angle;
   char varname[] = "rotated_pole";
   char mapname[] = "rotated_latitude_longitude";
 
@@ -2220,6 +2220,7 @@ void cdfDefPole(int streamID, int gridID)
 
   ypole = gridInqYpole(gridID);
   xpole = gridInqXpole(gridID);
+  angle = gridInqAngle(gridID);
 
   cdf_redef(fileID);
 
@@ -2229,6 +2230,8 @@ void cdfDefPole(int streamID, int gridID)
       cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", strlen(mapname), mapname);
       cdf_put_att_double(fileID, ncvarid, "grid_north_pole_latitude", NC_DOUBLE, 1L, &ypole);
       cdf_put_att_double(fileID, ncvarid, "grid_north_pole_longitude", NC_DOUBLE, 1L, &xpole);
+      if ( angle > 0 )
+	cdf_put_att_double(fileID, ncvarid, "north_pole_grid_longitude", NC_DOUBLE, 1L, &angle);
     }
 
   cdf_enddef(fileID);
@@ -2421,7 +2424,7 @@ int cdfDefVar(int streamID, int varID)
   char *stdname = NULL;
   char *units = NULL;
   int dims[4];
-  size_t chunks[4];
+  size_t chunks[4] = {0,0,0,0};
   int tableID;
   int ndims = 0;
   int len;
@@ -5129,9 +5132,11 @@ int cdfInqContents(int streamID)
 		    {
 		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &grid.xpole);
 		    }
+		  else if ( strcmp(attname, "north_pole_grid_longitude") == 0 )
+		    {
+		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &grid.angle);
+		    }
 		}
-
-	      grid.angle  = 0.0;
 	    }
 
 	  if ( CDI_Debug )

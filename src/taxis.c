@@ -1021,15 +1021,19 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
 
   if ( timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR )
     {
+      int nmon;
+
       if ( timeunit == TUNIT_YEAR ) timevalue *= 12;
 
       if ( (NINT(timevalue*10))%10 && lwarn )
 	{
-	  Warning(func, "Possible wrong calculation of date/time!\nTime offset must be integer for time unit MONTH and YEAR!");
+	  Warning(func, "Possible wrong calculation of date/time!\n"
+		  "Time offset isn't integer for time unit MONTH and YEAR!");
 	  lwarn = FALSE;
 	}
       
-      month += NINT(timevalue);
+      nmon = (int) (timevalue+0.001);
+      month += nmon;
 
       while ( month > 12 ) { month -= 12; year++; }
       while ( month <  1 ) { month += 12; year--; }

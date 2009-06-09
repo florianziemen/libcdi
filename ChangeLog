@@ -1,15 +1,17 @@
 2009-??-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* add env CDI_SORTNAME to sort netCDF names
+	* added env CDI_SORTNAME to sort netCDF names
+	* added support for rotated grids on south pole [request: Beate Geyer]
+	* timeval2vtime: bug fix for timeunit TUNIT_MONTH
 	* streamSync: extent to non netCDF files
 	* Version 1.3.2 released
 
 2009-04-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* using GRIB library version 1.3.0
-	* add support for NaN in DBL_IS_EQUAL
-	* add support for GRID type LCC2 (LCC PROJ.4 version)
-	* add support for TUNIT_QUARTER (15 minutes)
+	* added support for NaN in DBL_IS_EQUAL
+	* added support for GRID type LCC2 (LCC PROJ.4 version)
+	* added support for TUNIT_QUARTER (15 minutes)
 	* use env GRIB_INVENTORY_MODE=timestep to skip double entries
 	* grbDefTime: define tunit also for absolute time [report: Pruek Pongprueksa]
 	* set default calendar with env CDI_DEFAULT_CALENDAR
