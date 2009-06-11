@@ -1,10 +1,10 @@
 ! This file was automatically created, don't edit!
 !
-! Fortran interface for CDI library version 1.3.0
+! Fortran interface for CDI library version 1.3.2
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   April 2009
+! Uwe Schulzweida, MPI-MET, Hamburg,   June 2009
 !
 
       INTEGER    CDI_UNDEFID           
@@ -1177,6 +1177,15 @@
 !                                    (INTEGER         gridID,
 !                                     DOUBLEPRECISION angle)
       EXTERNAL        gridDefAngle
+
+      DOUBLEPRECISION gridInqNpole
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqNpole
+
+!                     gridDefNpole
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION npole)
+      EXTERNAL        gridDefNpole
 
 !                     gridDefTrunc
 !                                    (INTEGER         gridID,

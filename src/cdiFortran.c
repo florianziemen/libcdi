@@ -245,6 +245,8 @@ FCALLSCFUN1 (DOUBLE, gridInqYpole, GRIDINQYPOLE, gridinqypole, INT)
 FCALLSCSUB2 (gridDefYpole, GRIDDEFYPOLE, griddefypole, INT, DOUBLE)
 FCALLSCFUN1 (DOUBLE, gridInqAngle, GRIDINQANGLE, gridinqangle, INT)
 FCALLSCSUB2 (gridDefAngle, GRIDDEFANGLE, griddefangle, INT, DOUBLE)
+FCALLSCFUN1 (DOUBLE, gridInqNpole, GRIDINQNPOLE, gridinqnpole, INT)
+FCALLSCSUB2 (gridDefNpole, GRIDDEFNPOLE, griddefnpole, INT, DOUBLE)
 FCALLSCSUB2 (gridDefTrunc, GRIDDEFTRUNC, griddeftrunc, INT, INT)
 FCALLSCFUN1 (INT, gridInqTrunc, GRIDINQTRUNC, gridinqtrunc, INT)
 

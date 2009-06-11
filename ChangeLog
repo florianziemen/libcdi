@@ -1,4 +1,4 @@
-2009-??-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+2009-06-10  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added env CDI_SORTNAME to sort netCDF names
 	* added support for rotated grids on south pole [request: Beate Geyer]
