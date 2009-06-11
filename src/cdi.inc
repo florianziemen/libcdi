@@ -1178,15 +1178,6 @@
 !                                     DOUBLEPRECISION angle)
       EXTERNAL        gridDefAngle
 
-      DOUBLEPRECISION gridInqNpole
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridInqNpole
-
-!                     gridDefNpole
-!                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION npole)
-      EXTERNAL        gridDefNpole
-
 !                     gridDefTrunc
 !                                    (INTEGER         gridID,
 !                                     INTEGER         trunc)
