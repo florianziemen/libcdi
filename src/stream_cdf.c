@@ -5695,6 +5695,7 @@ int cdfInqTimestep(int streamID, int tsID)
 
 void cdfEndDef(int streamID)
 {
+#if  defined  (HAVE_LIBNETCDF)
   int varID, ncvarid;
   int nvars;
   int fileID;
@@ -5719,6 +5720,7 @@ void cdfEndDef(int streamID)
 
       streamptr->accessmode = 1;
     }
+#endif
 }
 
 
