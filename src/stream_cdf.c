@@ -2528,7 +2528,7 @@ int cdfDefVar(int streamID, int varID)
       code = 0;
     }
 
-  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+  /* if ( streamptr->ncmode == 2 ) cdf_redef(fileID); */
 
   xtype = cdfDefDatatype(vlistInqVarDatatype(vlistID, varID));
 
@@ -2695,7 +2695,7 @@ int cdfDefVar(int streamID, int varID)
   /* Attributes */
   defineAttributes(vlistID, varID, fileID, ncvarid);
 
-  if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
+  /* if ( streamptr->ncmode == 2 ) cdf_enddef(fileID); */
 
 #endif
   return (ncvarid);
@@ -5697,9 +5697,12 @@ void cdfEndDef(int streamID)
 {
   int varID, ncvarid;
   int nvars;
+  int fileID;
   STREAM *streamptr;
 
   streamptr = stream_to_pointer(streamID);
+
+  fileID  = streamInqFileID(streamID);
 
   cdfDefGlobalAtts(streamID);
   cdfDefLocalAtts(streamID);
@@ -5707,10 +5710,13 @@ void cdfEndDef(int streamID)
     {
       nvars =  streamptr->nvars;
 
+      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+
       for ( varID = 0; varID < nvars; varID++ )
-	{
-	  ncvarid = cdfDefVar(streamID, varID);
-	}
+	ncvarid = cdfDefVar(streamID, varID);
+
+      if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
+
       streamptr->accessmode = 1;
     }
 }

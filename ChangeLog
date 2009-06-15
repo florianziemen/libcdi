@@ -1,3 +1,8 @@
+2009-06-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* netCDF: reduced number of nc_enddef
+	* Version 1.3.3 released
+
 2009-06-10  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added env CDI_SORTNAME to sort netCDF names
@@ -5,7 +10,7 @@
 	* timeval2vtime: bug fix for timeunit TUNIT_MONTH
 	* streamSync: extent to non netCDF files
 	* Version 1.3.2 released
-
+	
 2009-04-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* using GRIB library version 1.3.0
