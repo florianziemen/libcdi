@@ -1775,7 +1775,7 @@ void grbDefCode(int *isec1, int code, int codetable)
 
 void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
 {
-  int year, month, day, hour, minute;
+  int year, month, day, hour, minute, second;
   int century = 0;
   int timetype = -1;
 
@@ -1793,7 +1793,7 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
       rdate   = taxisInqRdate(timeID);
       rtime   = taxisInqRtime(timeID);
       decode_date(rdate, &year, &month, &day);
-      decode_time(rtime, &hour, &minute);
+      decode_time(rtime, &hour, &minute, &second);
 
       century =  year / 100;
 
@@ -1832,7 +1832,7 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
 	default:            factor =  3600; ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;    break;
 	}
       decode_date(date, &year, &month, &day);
-      decode_time(time, &hour, &minute);
+      decode_time(time, &hour, &minute, &second);
       /*
       printf("date time %d %d\n", date, time);
       printf("year %d, month %d, day %d, hour %d, minute %d\n", year, month, day, hour, minute);
@@ -1856,7 +1856,7 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
   if ( timetype == TAXIS_ABSOLUTE )
     {
       decode_date(date, &year, &month, &day);
-      decode_time(time, &hour, &minute);
+      decode_time(time, &hour, &minute, &second);
 
       century =  year / 100;
 
@@ -2442,7 +2442,7 @@ void grbWriteVarDP(int streamID, int varID, const double *data, int nmiss)
       gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) &data[levelID*datasize],
 	       datasize, (int *) gribbuffer, gribsize, &iword, "C", &iret);
 
-      if ( iret ) Error(func, "Problem during GRIB encode (errno = %d)!", iret);;
+      if ( iret ) Error(func, "Problem during GRIB encode (errno = %d)!", iret);
       
       nbytes = iword*sizeof(int);
 
@@ -2561,7 +2561,7 @@ void grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
 	   datasize, (int *) gribbuffer, gribsize, &iword, "C", &iret);
 
-  if ( iret ) Error(func, "Problem during GRIB encode (errno = %d)!", iret);;
+  if ( iret ) Error(func, "Problem during GRIB encode (errno = %d)!", iret);
 
   nbytes = iword*sizeof(int);
 

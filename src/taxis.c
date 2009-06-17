@@ -995,7 +995,7 @@ void encode_timevalue(int days, int secs, int timeunit, double *timevalue)
 void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
 {
   static char func[] = "timeval2vtime";
-  int year, month, day, hour, minute;
+  int year, month, day, hour, minute, second;
   int rdate, rtime;
   int timeunit;
   int calendar;
@@ -1011,7 +1011,7 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
   rdate  = (*taxis).rdate;
   rtime  = (*taxis).rtime;
   decode_date(rdate, &year, &month, &day);
-  decode_time(rtime, &hour, &minute);
+  decode_time(rtime, &hour, &minute, &second);
 
   if ( timeunit == TUNIT_MONTH && calendar == CALENDAR_360DAYS )
     {
@@ -1050,14 +1050,14 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
     }
 
   *vdate = encode_date(year, month, day);
-  *vtime = encode_time(hour, minute);
+  *vtime = encode_time(hour, minute, second);
 }
 
 
 double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
 {
   int ryear, rmonth;
-  int year, month, day, hour, minute;
+  int year, month, day, hour, minute, second;
   int rdate, rtime;
   double value = 0;
   int timeunit;
@@ -1077,12 +1077,12 @@ double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
     }
 
   decode_date(rdate, &ryear, &rmonth, &day);
-  decode_time(rtime, &hour, &minute);
+  decode_time(rtime, &hour, &minute, &second);
 
   encode_caldaysec(calendar, ryear, rmonth, day, hour, minute, &julday1, &secofday1);
 
   decode_date(vdate, &year, &month, &day);
-  decode_time(vtime, &hour, &minute);
+  decode_time(vtime, &hour, &minute, &second);
 
   timeunit0 = timeunit;
 
@@ -1118,7 +1118,7 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
 {
   static char func[] = "splitTimevalue";
   int vdate = 0, vtime = 0;
-  int hour, minute;
+  int hour, minute, second;
   int year, month, day;
   static int lwarn = TRUE;
 
@@ -1129,11 +1129,12 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
       if ( vdate < 0 )
 	vtime = (int) (-(timevalue - vdate)*1440 + 0.01);
       else
-	vtime = (int) ((timevalue - vdate)*1440 + 0.01);
+	vtime = (int) ( (timevalue - vdate)*1440 + 0.01);
  
       hour   = vtime / 60;
       minute = vtime - hour*60;
-      vtime  = hour*100 + minute;
+      second = 0;
+      vtime  = encode_time(hour, minute, second);
     }
   else if ( timeunit == TUNIT_DAY )
     {
@@ -1141,11 +1142,12 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
       if ( vdate < 0 )
 	vtime = (int) (-(timevalue - vdate)*1440 + 0.01);
       else
-	vtime = (int) ((timevalue - vdate)*1440 + 0.01);
+	vtime = (int) ( (timevalue - vdate)*1440 + 0.01);
 
       hour   = vtime / 60;
       minute = vtime - hour*60;
-      vtime  = hour*100 + minute;
+      second = 0;
+      vtime  = encode_time(hour, minute, second);
     }
   else if ( timeunit == TUNIT_MONTH )
     {
@@ -1180,21 +1182,22 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
   /* verify date and time */
 
   decode_date(vdate, &year, &month, &day);
-  decode_time(vtime, &hour, &minute);
+  decode_time(vtime, &hour, &minute, &second);
 
-  if ( month > 17 || day > 31 || hour > 23 || minute > 59 )
+  if ( month > 17 || day > 31 || hour > 23 || minute > 59 || second > 59 )
     {
       if ( (month  > 17 || day > 31) && (year < -9999 || year > 9999) ) year = 1;
       if ( month  > 17 ) month  = 1;
       if ( day    > 31 ) day    = 1;
       if ( hour   > 23 ) hour   = 0;
       if ( minute > 59 ) minute = 0;
+      if ( second > 59 ) second = 0;
 
       vdate = encode_date(year, month, day);
-      vtime = encode_time(hour, minute);
+      vtime = encode_time(hour, minute, second);
 
-      Warning(func, "Reset wrong date/time to %4.4d-%2.2d-%2.2d %2.2d:%2.2d!",
-	      year, month, day, hour, minute);
+      Warning(func, "Reset wrong date/time to %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d!",
+	      year, month, day, hour, minute, second);
     }
 
   *date = vdate;
@@ -1240,7 +1243,7 @@ double encode_timeval(int date, int time, TAXIS *taxis)
 	  if ( date < 0 )
 	    timevalue = -(-date + (hour*60 + minute)/1440.);
 	  else
-	    timevalue = date + (hour*60 + minute)/1440.;
+	    timevalue =    date + (hour*60 + minute)/1440.;
 	}
     }
   else

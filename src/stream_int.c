@@ -504,7 +504,7 @@ double cdiInqMissval(void)
 {
   cdiInitialize();
 
-  return (cdiDefaultMissval);;
+  return (cdiDefaultMissval);
 }
 
 

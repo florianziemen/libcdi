@@ -35,7 +35,7 @@
 
 
 void decode_date(int date, int *year, int *month, int *day);
-void decode_time(int time, int *hour, int *minute);
+void decode_time(int time, int *hour, int *minute, int *second);
 
 
 int getopt(int argc, char *const argv[], const char *optstring);
@@ -110,21 +110,21 @@ static void printInfo(int gridtype, int date, int time, int code, double level,
 {
   static int rec = 0;
   int i, ivals = 0, imiss = 0;
-  int year, month, day, hour, minute;
+  int year, month, day, hour, minute, second;
   double arrmean, arrmin, arrmax;
  
   if ( ! rec )
   {
     fprintf(stdout, 
-    "   Rec :       Date  Time Code  Level    Size    Miss :     Minimum        Mean     Maximum\n");
+    "   Rec :       Date  Time    Code  Level    Size    Miss :     Minimum        Mean     Maximum\n");
 /*   ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+ */
   }
 
   decode_date(date, &year, &month, &day);
-  decode_time(time, &hour, &minute);
+  decode_time(time, &hour, &minute, &second);
 
-  fprintf(stdout, "%6d : %4.4d-%2.2d-%2.2d %2.2d:%2.2d %3d %7g ",
-	  ++rec, year, month, day, hour, minute, code, level);
+  fprintf(stdout, "%6d : %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d %3d %7g ",
+	  ++rec, year, month, day, hour, minute, second, code, level);
 
   fprintf(stdout, "%7d ", datasize);
 
@@ -472,7 +472,7 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
   double level;
   char *modelptr, *instptr;
   int prec;
-  int year, month, day, hour, minute;
+  int year, month, day, hour, minute, second;
   char pstr[4];
 
       printf("   File format: ");
@@ -630,10 +630,10 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 		  vtime = taxisInqRtime(taxisID);
 
 		  decode_date(vdate, &year, &month, &day);
-		  decode_time(vtime, &hour, &minute);
+		  decode_time(vtime, &hour, &minute, &second);
 
-		  fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d",
-			  year, month, day, hour, minute);
+		  fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d",
+			  year, month, day, hour, minute, second);
 		      
 		  unit = taxisInqTunit(taxisID);
 		  if ( unit != CDI_UNDEFID )
@@ -675,7 +675,7 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 		}
 	    }
 
-	  fprintf(stdout, "   YYYY-MM-DD hh:mm   YYYY-MM-DD hh:mm   YYYY-MM-DD hh:mm   YYYY-MM-DD hh:mm\n");
+	  fprintf(stdout, "  YYYY-MM-DD hh:mm:ss  YYYY-MM-DD hh:mm:ss  YYYY-MM-DD hh:mm:ss  YYYY-MM-DD hh:mm:ss\n");
 
 	  ntimeout = 0;
 	  tsID = 0;
@@ -691,9 +691,10 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 	      vtime = taxisInqVtime(taxisID);
 
 	      decode_date(vdate, &year, &month, &day);
-	      decode_time(vtime, &hour, &minute);
+	      decode_time(vtime, &hour, &minute, &second);
 
-	      fprintf(stdout, " %6.4d-%2.2d-%2.2d %2.2d:%2.2d", year, month, day, hour, minute);
+	      fprintf(stdout, " %5.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d",
+		      year, month, day, hour, minute, second);
 	      ntimeout++;
 	      tsID++;
 	    }

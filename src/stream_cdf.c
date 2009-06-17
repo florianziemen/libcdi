@@ -191,7 +191,7 @@ static int splitBasetime(char *timeunits, TAXIS *taxis)
 		}
 
 	      rdate = encode_date(year, month, day);
-	      rtime = encode_time(hour, minute);
+	      rtime = encode_time(hour, minute, second);
 	      (*taxis).rdate = rdate;
 	      (*taxis).rtime = rtime;
 
@@ -700,7 +700,7 @@ void cdfDefTime(int streamID)
   int time_varid;
   int time_bndsid;
   int dims[2];
-  int year, month, day, hour, minute;
+  int year, month, day, hour, minute, second;
   char unitstr[80];
   char calstr[80];
   size_t len;
@@ -763,11 +763,11 @@ void cdfDefTime(int streamID)
 	}
 
       decode_date(rdate, &year, &month, &day);
-      decode_time(rtime, &hour, &minute);
+      decode_time(rtime, &hour, &minute, &second);
 
       if ( timeunit == TUNIT_QUARTER ) timeunit = TUNIT_MINUTE;
-      sprintf(unitstr, "%s since %d-%02d-%02d %02d:%02d",
-	      tunitNamePtr(timeunit), year, month, day, hour, minute);
+      sprintf(unitstr, "%s since %d-%02d-%02d %02d:%02d:%02d",
+	      tunitNamePtr(timeunit), year, month, day, hour, minute, second);
     }
 
   len = strlen(unitstr);

@@ -203,7 +203,7 @@ int main(void)
   int vdate, vtime;
   int ijulinc;
   int i, j = 0;
-  int year, mon, day, hour, min;
+  int year, mon, day, hour, minute, second;
   int calday, secofday;
 
   /* 1 - Check valid range of years */
@@ -217,7 +217,7 @@ int main(void)
   for ( i = 0; i < nmin; i++ )
     {
       decode_date(vdate0, &year, &mon, &day);
-      decode_time(vtime0, &hour, &min);
+      decode_time(vtime0, &hour, &minute, &second);
 
       calday  = date_to_calday(calendar, vdate0);
       secofday = time_to_sec(vtime0);
@@ -231,7 +231,7 @@ int main(void)
 
       year++;
       vdate0 = encode_date(year, mon, day);
-      vtime0 = encode_time(hour, min);
+      vtime0 = encode_time(hour, minute, second);
     }
 
   printf("stop time: %8d %4d\n", vdate0, vtime0);
@@ -250,11 +250,11 @@ int main(void)
   for ( i = 0; i < nmin; i++ )
     {
       decode_date(vdate0, &year, &mon, &day);
-      decode_time(vtime0, &hour, &min);
+      decode_time(vtime0, &hour, &minute, &second);
 
-      if ( ++min >= 60 )
+      if ( ++minute >= 60 )
 	{
-	  min = 0;
+	  minute = 0;
 	  if ( ++hour >= 24 )
 	    {
 	      hour = 0;
@@ -271,7 +271,7 @@ int main(void)
 	}
 
       vdate0 = encode_date(year, mon, day);
-      vtime0 = encode_time(hour, min);
+      vtime0 = encode_time(hour, minute, second);
 
       julday_add_seconds(ijulinc, &calday, &secofday);
 

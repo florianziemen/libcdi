@@ -210,7 +210,7 @@ int iegGetZaxisType(int iegleveltype)
 
 void iegDefTime(int *pdb, int date, int time, int timeID)
 {
-  int year, month, day, hour, minute;
+  int year, month, day, hour, minute, second;
   int timetype = -1;
 
   if ( timeID != -1 ) timetype = taxisInqType(timeID);
@@ -218,7 +218,7 @@ void iegDefTime(int *pdb, int date, int time, int timeID)
   if ( timetype == TAXIS_ABSOLUTE || timetype == TAXIS_RELATIVE )
     {
       decode_date(date, &year, &month, &day);
-      decode_time(time, &hour, &minute);
+      decode_time(time, &hour, &minute, &second);
 
       IEG_P_Year(pdb)     = year;
       IEG_P_Month(pdb)    = month;
@@ -754,7 +754,7 @@ void iegDateTime(int *pdb, int *date, int *time)
   if ( rminute == -1 ) rminute = 0;
 
   *date = encode_date(ryear, rmonth, rday);
-  *time = encode_time(rhour, rminute);
+  *time = encode_time(rhour, rminute, 0);
 }
 
 
