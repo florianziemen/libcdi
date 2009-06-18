@@ -163,7 +163,8 @@ int calday_to_date(int calendar, int calday)
 }
 
 
-void encode_caldaysec(int calendar, int year, int month, int day, int hour, int minute, int *julday, int *secofday)
+void encode_caldaysec(int calendar, int year, int month, int day, int hour, int minute, int second,
+		      int *julday, int *secofday)
 {
   int dpy;
 
@@ -174,11 +175,12 @@ void encode_caldaysec(int calendar, int year, int month, int day, int hour, int 
   else
     *julday = encode_julday(calendar, year, month, day);
 
-  *secofday = (hour*60 + minute)*60;
+  *secofday = hour*3600 + minute*60 + second;
 }
 
 
-void decode_caldaysec(int calendar, int julday, int secofday, int *year, int *month, int *day, int *hour, int *minute)
+void decode_caldaysec(int calendar, int julday, int secofday, 
+		      int *year, int *month, int *day, int *hour, int *minute, int *second)
 {
   int dpy;
 
@@ -191,6 +193,7 @@ void decode_caldaysec(int calendar, int julday, int secofday, int *year, int *mo
 
   *hour   = secofday/3600;
   *minute = secofday/60 - *hour*60;
+  *second = secofday - *hour*3600 - *minute*60;
 }
 
 
@@ -210,7 +213,7 @@ int main(void)
 
   nmin = 11000;
   vdate0 = -80001201;
-  vtime0 = 1205;
+  vtime0 = 120500;
 
   printf("start time: %8d %4d\n", vdate0, vtime0);
 
@@ -295,27 +298,27 @@ int main(void)
   int calendar = CALENDAR_STANDARD;
   int i;
   int calday, secofday;
-  int year, month, day, hour, minute;
+  int year, month, day, hour, minute, second;
   int value = 30;
   int factor = 86400;
   
   calendar = CALENDAR_360DAYS;
 
-  year=1979; month=1; day=15; hour=12; minute=30;
+  year=1979; month=1; day=15; hour=12; minute=30; second = 0;
 
   printf("calendar = %d\n", calendar);
-  printf("%d/%02d/%02d %02d:%02d\n", year, month, day, hour, minute);
+  printf("%d/%02d/%02d %02d:%02d:%02d\n", year, month, day, hour, minute, second);
 
-  encode_caldaysec(calendar, year, month, day, hour, minute, &calday, &secofday);
+  encode_caldaysec(calendar, year, month, day, hour, minute, second, &calday, &secofday);
 
-  decode_caldaysec(calendar, calday, secofday, &year, &month, &day, &hour, &minute);
-  printf("%d/%02d/%02d %02d:%02d   %d %d\n", year, month, day, hour, minute, calday, secofday);
+  decode_caldaysec(calendar, calday, secofday, &year, &month, &day, &hour, &minute, &second);
+  printf("%d/%02d/%02d %02d:%02d:%02d   %d %d\n", year, month, day, hour, minute, second, calday, secofday);
 
   for ( i = 0; i < 420; i++ )
     {
 
-      decode_caldaysec(calendar, calday, secofday, &year, &month, &day, &hour, &minute);
-      printf("%2d %d/%02d/%02d %02d:%02d\n", i, year, month, day, hour, minute);
+      decode_caldaysec(calendar, calday, secofday, &year, &month, &day, &hour, &minute, &second);
+      printf("%2d %d/%02d/%02d %02d:%02d:%02d\n", i, year, month, day, hour, minute, second);
       julday_add_seconds(value*factor, &calday, &secofday);
     }
 

@@ -184,8 +184,10 @@ static int splitBasetime(char *timeunits, TAXIS *taxis)
 			{
 			  ptu++;
 			  second = atoi(ptu);
+			  /*
 			  if ( second != 0 )
 			    Message(func, "Seconds not supported in time units!");
+			  */
 			}
 		    }
 		}

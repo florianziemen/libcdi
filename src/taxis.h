@@ -3,6 +3,8 @@
 
 
 typedef struct {
+  /* Date format  YYYYMMDD */
+  /* Time format    hhmmss */
   int     self;
   int     used;
   int     type;           /* time type             */

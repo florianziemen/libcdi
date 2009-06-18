@@ -32,9 +32,12 @@ int encode_date(int year, int month, int day)
 
 void decode_time(int time, int *hour, int *minute, int *second)
 {
-  *hour   = time / 100;
-  *minute = time - *hour*100;
-  *second = 0;
+  int itime;
+
+  *hour   = time / 10000;
+  itime = time - *hour*10000;
+  *minute = itime / 100;
+  *second = itime - *minute*100;
 }
 
 
@@ -42,7 +45,7 @@ int encode_time(int hour, int minute, int second)
 {
   int time;
 
-  time = hour*100 + minute;
+  time = hour*10000 + minute*100 + second;
 
   return (time);
 }
@@ -159,7 +162,7 @@ int time_to_sec(int time)
 
   decode_time(time, &hour, &minute, &second);
 
-  secofday = (hour*60 + minute)*60 + second;
+  secofday = hour*3600 + minute*60 + second;
 
   return (secofday);
 }
@@ -168,12 +171,13 @@ int time_to_sec(int time)
 int sec_to_time(int secofday)
 {
   int time;
-  int hour, minute;
+  int hour, minute, second;
 
   hour   = secofday/3600;
   minute = secofday/60 - hour*60;
+  second = secofday - hour*3600 - minute*60;
 
-  time = hour*100 + minute;
+  time = encode_time(hour, minute, second);
 
   return (time);
 }
@@ -261,7 +265,7 @@ int main(void)
 
   nmin = 11000;
   vdate0 = -80001201;
-  vtime0 = 1205;
+  vtime0 = 120500;
 
   printf("start time: %8d %4d\n", vdate0, vtime0);
 

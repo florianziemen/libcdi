@@ -334,7 +334,7 @@ int taxisID;
 taxisID = taxisCreate(TAXIS_RELATIVE);
 taxisDefCalendar(taxisID, CALENDAR_STANDARD);
 taxisDefRdate(taxisID, 19870101);
-taxisDefRtime(taxisID, 1200);
+taxisDefRtime(taxisID, 120000);
    ...
 @EndSource
 @EndFunction
@@ -458,7 +458,7 @@ void taxisDefVdate(int taxisID, int vdate)
 @Prototype void taxisDefVtime(int taxisID, int vtime)
 @Parameter
     @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
-    @Item  vtime    Verification time (hhmm)
+    @Item  vtime    Verification time (hhmmss)
 
 @Description
 The function @func{taxisDefVtime} defines the verification time of a Time axis.
@@ -512,7 +512,7 @@ void taxisDefRdate(int taxisID, int rdate)
 @Prototype void taxisDefRtime(int taxisID, int rtime)
 @Parameter
     @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
-    @Item  rtime    Reference time (hhmm)
+    @Item  rtime    Reference time (hhmmss)
 
 @Description
 The function @func{taxisDefVdate} defines the reference time of a Time axis.
@@ -1040,13 +1040,13 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
     }
   else
     {
-      encode_caldaysec(calendar, year, month, day, hour, minute, &julday, &secofday);
+      encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday, &secofday);
 
       decode_timevalue(timeunit, timevalue, &days, &secs);
 
       julday_add(days, secs, &julday, &secofday);
 
-      decode_caldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute);
+      decode_caldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute, &second);
     }
 
   *vdate = encode_date(year, month, day);
@@ -1079,7 +1079,7 @@ double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
   decode_date(rdate, &ryear, &rmonth, &day);
   decode_time(rtime, &hour, &minute, &second);
 
-  encode_caldaysec(calendar, ryear, rmonth, day, hour, minute, &julday1, &secofday1);
+  encode_caldaysec(calendar, ryear, rmonth, day, hour, minute, second, &julday1, &secofday1);
 
   decode_date(vdate, &year, &month, &day);
   decode_time(vtime, &hour, &minute, &second);
@@ -1098,7 +1098,7 @@ double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
     }
   else
     {
-      encode_caldaysec(calendar, year, month, day, hour, minute, &julday2, &secofday2);
+      encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday2, &secofday2);
 
       julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
 
@@ -1120,33 +1120,34 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
   int vdate = 0, vtime = 0;
   int hour, minute, second;
   int year, month, day;
+  int days, daysec;
   static int lwarn = TRUE;
 
   if ( timeunit == TUNIT_HOUR )
     {
       timevalue /= 24;
-      vdate = (int) timevalue;
+      days = (int) timevalue;
       if ( vdate < 0 )
-	vtime = (int) (-(timevalue - vdate)*1440 + 0.01);
+	daysec = (int) (-(timevalue - days)*86400 + 0.01);
       else
-	vtime = (int) ( (timevalue - vdate)*1440 + 0.01);
+	daysec = (int) ( (timevalue - days)*86400 + 0.01);
  
-      hour   = vtime / 60;
-      minute = vtime - hour*60;
-      second = 0;
+      hour   = daysec / 3600;
+      minute = daysec - hour*3600;
+      second = daysec - hour*3600 - minute*60;
       vtime  = encode_time(hour, minute, second);
     }
   else if ( timeunit == TUNIT_DAY )
     {
-      vdate = (int) timevalue;
+      days = (int) timevalue;
       if ( vdate < 0 )
-	vtime = (int) (-(timevalue - vdate)*1440 + 0.01);
+	daysec = (int) (-(timevalue - days)*86400 + 0.01);
       else
-	vtime = (int) ( (timevalue - vdate)*1440 + 0.01);
+	daysec = (int) ( (timevalue - days)*86400 + 0.01);
 
-      hour   = vtime / 60;
-      minute = vtime - hour*60;
-      second = 0;
+      hour   = daysec / 3600;
+      minute = daysec - hour*3600;
+      second = daysec - hour*3600 - minute*60;
       vtime  = encode_time(hour, minute, second);
     }
   else if ( timeunit == TUNIT_MONTH )
