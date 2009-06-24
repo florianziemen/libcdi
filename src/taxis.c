@@ -1120,34 +1120,34 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
   int vdate = 0, vtime = 0;
   int hour, minute, second;
   int year, month, day;
-  int days, daysec;
+  int daysec;
   static int lwarn = TRUE;
 
   if ( timeunit == TUNIT_HOUR )
     {
       timevalue /= 24;
-      days = (int) timevalue;
+      vdate = (int) timevalue;
       if ( vdate < 0 )
-	daysec = (int) (-(timevalue - days)*86400 + 0.01);
+	daysec = (int) (-(timevalue - vdate)*86400 + 0.01);
       else
-	daysec = (int) ( (timevalue - days)*86400 + 0.01);
+	daysec = (int) ( (timevalue - vdate)*86400 + 0.01);
  
-      hour   = daysec / 3600;
-      minute = daysec - hour*3600;
-      second = daysec - hour*3600 - minute*60;
+      hour   =  daysec / 3600;
+      minute = (daysec - hour*3600)/60;
+      second =  daysec - hour*3600 - minute*60;
       vtime  = encode_time(hour, minute, second);
     }
   else if ( timeunit == TUNIT_DAY )
     {
-      days = (int) timevalue;
+      vdate = (int) timevalue;
       if ( vdate < 0 )
-	daysec = (int) (-(timevalue - days)*86400 + 0.01);
+	daysec = (int) (-(timevalue - vdate)*86400 + 0.01);
       else
-	daysec = (int) ( (timevalue - days)*86400 + 0.01);
+	daysec = (int) ( (timevalue - vdate)*86400 + 0.01);
 
-      hour   = daysec / 3600;
-      minute = daysec - hour*3600;
-      second = daysec - hour*3600 - minute*60;
+      hour   =  daysec / 3600;
+      minute = (daysec - hour*3600)/60;
+      second =  daysec - hour*3600 - minute*60;
       vtime  = encode_time(hour, minute, second);
     }
   else if ( timeunit == TUNIT_MONTH )
