@@ -1239,12 +1239,12 @@ double encode_timeval(int date, int time, TAXIS *taxis)
 	}
       else
 	{
-	  int hour   = time / 100;
-	  int minute = time - hour*100;
+	  int hour, minute, second;
+	  decode_time(time, &hour, &minute, &second);
 	  if ( date < 0 )
-	    timevalue = -(-date + (hour*60 + minute)/1440.);
+	    timevalue = -(-date + (hour*3600 + minute*60 + second)/86400.);
 	  else
-	    timevalue =    date + (hour*60 + minute)/1440.;
+	    timevalue =    date + (hour*3600 + minute*60 + second)/86400.;
 	}
     }
   else
