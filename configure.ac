@@ -79,6 +79,42 @@ else
 fi
 
 #  ----------------------------------------------------------------------
+#  Compile application with JASPER library
+#
+AC_MSG_CHECKING([whether a location for the JASPER library was specified])
+AC_ARG_WITH([jasper],
+            [AS_HELP_STRING([--with-jasper=<directory>],
+                            [Specify location of JASPER library. You must specify its location if GRIB_API was built with JASPER. Configure will expect to find subdirs include and lib.])],
+            [JASPERDIR=$with_jasper])
+if test -z "$JASPERDIR" ; then
+  AC_MSG_RESULT([no])
+else
+  AC_MSG_RESULT([$JASPERDIR])
+  LDFLAGS="$LDFLAGS -L$JASPERDIR/lib"
+  CPPFLAGS="$CPPFLAGS -I$JASPERDIR/include"
+  AC_CHECK_LIB(jasper, jas_init, , LDFLAGS="$LDFLAGS")
+# AC_SUBST([JASPERDIR], [$JASPERDIR])
+fi
+
+#  ----------------------------------------------------------------------
+#  Compile application with GRIB_API library
+#
+AC_MSG_CHECKING([whether a location for the GRIB_API library was specified])
+AC_ARG_WITH([grib_api],
+            [AS_HELP_STRING([--with-grib_api=<directory>],
+                            [Specify location of GRIB_API library. Configure will expect to find subdirs include and lib.])],
+            [GRIB_APIDIR=$with_grib_api])
+if test -z "$GRIB_APIDIR" ; then
+  AC_MSG_RESULT([no])
+else
+  AC_MSG_RESULT([$GRIB_APIDIR])
+  LDFLAGS="$LDFLAGS -L$GRIB_APIDIR/lib"
+  CPPFLAGS="$CPPFLAGS -I$GRIB_APIDIR/include"
+  AC_CHECK_LIB(grib_api, grib_get_message, , LDFLAGS="$LDFLAGS")
+# AC_SUBST([GRIB_APIDIR], [$GRIB_APIDIR])
+fi
+
+#  ----------------------------------------------------------------------
 #  Compile application with HDF5 library
 #
 AC_MSG_CHECKING([whether a location for the HDF5 library was specified])
@@ -108,7 +144,6 @@ else
 #      AC_MSG_ERROR([Can't find the hdf5 high-level library. The high-level library is required for netCDF-4.])
 #    fi
   fi
-
 fi
 
 #  ----------------------------------------------------------------------

@@ -15,6 +15,7 @@
 #include "stream_ieg.h"
 #include "file.h"
 #include "grib.h"
+#include "gribapi.h"
 #include "cdf.h"
 #include "service.h"
 #include "extra.h"
@@ -50,6 +51,9 @@ void cdiDebug(int level)
   if ( level == 1 || level & 16 )
     {
 #if  defined  (HAVE_LIBGRIB)
+      gribSetDebug(1);
+#endif
+#if  defined  (HAVE_LIBGRIB_API)
       gribSetDebug(1);
 #endif
 #if  defined  (HAVE_LIBNETCDF)
@@ -173,6 +177,11 @@ static int getFiletype(const char *filename, int *byteorder)
 	{
 	  filetype = FILETYPE_GRB;
 	  if ( CDI_Debug ) Message(func, "found seek GRIB file = %s", filename);
+	}
+      if ( version == 2 )
+	{
+	  filetype = FILETYPE_GRB2;
+	  if ( CDI_Debug ) Message(func, "found seek GRIB2 file = %s", filename);
 	}
     }
 
@@ -333,7 +342,7 @@ The function @func{streamInqFiletype} returns the filetype of a stream.
 @Result
 @func{streamInqFiletype} returns the type of the file format,
 one of the set of predefined CDI file format types.
-The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_NC}, @func{FILETYPE_NC2},
+The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_GRB2}, @func{FILETYPE_NC}, @func{FILETYPE_NC2},
 @func{FILETYPE_NC4}, @func{FILETYPE_SRV}, @func{FILETYPE_EXT} and @func{FILETYPE_IEG}.
 
 @EndFunction
@@ -534,6 +543,13 @@ int cdiInqContents(int streamID)
 	break;
       }
 #endif
+#if  defined  (HAVE_LIBGRIB_API)
+    case FILETYPE_GRB2:
+      {
+        /* status = grb2InqContents(streamID); */
+	break;
+      }
+#endif
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
@@ -603,6 +619,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
+    case FILETYPE_GRB2:
       {
         fileID = gribOpen(filename, filemode);
 	record = (Record *) malloc(sizeof(Record));
@@ -713,6 +730,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
+    case FILETYPE_GRB2:
       {
         fileID = gribOpen(filename, "r");
 	record = (Record *) malloc(sizeof(Record));
@@ -803,6 +821,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
       case FILETYPE_GRB:
+      case FILETYPE_GRB2:
 	{
 	  gribClose(fileID);
 	  break;
@@ -849,6 +868,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
+    case FILETYPE_GRB2:
       {
         fileID = gribOpen(filename, filemode);
 	break;
@@ -1023,7 +1043,7 @@ int streamOpenAppend(const char *filename)
 @Parameter
     @Item  path      The name of the new dataset
     @Item  filetype  The type of the file format, one of the set of predefined CDI file format types.
-                     The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_NC},
+                     The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_GRB2}, @func{FILETYPE_NC},
                      @func{FILETYPE_NC2}, @func{FILETYPE_NC4}, @func{FILETYPE_SRV},
                      @func{FILETYPE_EXT} and @func{FILETYPE_IEG}.
 
@@ -1102,6 +1122,7 @@ void streamClose(int streamID)
       {
 #if  defined  (HAVE_LIBGRIB)
       case FILETYPE_GRB:
+      case FILETYPE_GRB2:
 	{
 	  gribClose(fileID);
 	  break;
@@ -1386,6 +1407,13 @@ int streamInqTimestep(int streamID, int tsID)
 	break;
       }
 #endif
+#if  defined  (HAVE_LIBGRIB_API)
+    case FILETYPE_GRB2:
+      {
+	/* nrecs = grb2InqTimestep(streamID, tsID);*/
+	break;
+      }
+#endif
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
@@ -1475,6 +1503,13 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 	break;
       }
 #endif
+#if  defined  (HAVE_LIBGRIB_API)
+    case FILETYPE_GRB2:
+      {
+        /*grbReadVarDP(streamID, varID, data, nmiss);*/
+	break;
+      }
+#endif
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
@@ -1553,6 +1588,13 @@ void streamWriteVar(int streamID, int varID, double *data, int nmiss)
     case FILETYPE_GRB:
       {
         grbWriteVarDP(streamID, varID, data, nmiss);
+	break;
+      }
+#endif
+#if  defined  (HAVE_LIBGRIB_API)
+    case FILETYPE_GRB2:
+      {
+        /*grb2WriteVarDP(streamID, varID, data, nmiss);*/
 	break;
       }
 #endif
@@ -1637,6 +1679,13 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
 	break;
       }
 #endif
+#if  defined  (HAVE_LIBGRIB_API)
+    case FILETYPE_GRB2:
+      {
+        /* grb2ReadVarSliceDP(streamID, varID, levelID, data, nmiss);*/
+	break;
+      }
+#endif
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
@@ -1715,6 +1764,13 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, double *data, int
     case FILETYPE_GRB:
       {
         grbWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
+	break;
+      }
+#endif
+#if  defined  (HAVE_LIBGRIB_API)
+    case FILETYPE_GRB2:
+      {
+        /* grb2WriteVarSliceDP(streamID, varID, levelID, data, nmiss); */
 	break;
       }
 #endif
@@ -1886,30 +1942,33 @@ void cdiDefTableID(int tableID)
 
 void cdiPrintVersion(void)
 {
-  fprintf(stderr, "    CDI library version : %s\n", cdiLibraryVersion());
+  fprintf(stderr, "     CDI library version : %s\n", cdiLibraryVersion());
 #if  defined  (HAVE_LIBGRIB)
-  fprintf(stderr, "   GRIB library version : %s\n", gribLibraryVersion());
+  fprintf(stderr, "    GRIB library version : %s\n", gribLibraryVersion());
+#endif
+#if  defined  (HAVE_LIBGRIB_API)
+  fprintf(stderr, "GRIB_API library version : %s\n", gribapiLibraryVersion());
 #endif
 #if  defined  (HAVE_LIBNETCDF)
 #  if  defined  (HAVE_LIBNC_DAP)
-  fprintf(stderr, " nc_dap library version : %s\n", cdfLibraryVersion());
+  fprintf(stderr, "  nc_dap library version : %s\n", cdfLibraryVersion());
 #  else
-  fprintf(stderr, " netCDF library version : %s\n", cdfLibraryVersion());
+  fprintf(stderr, "  netCDF library version : %s\n", cdfLibraryVersion());
 #  endif
 #endif
 #if  defined  (HAVE_LIBHDF5)
-  fprintf(stderr, "   HDF5 library version : %s\n", hdfLibraryVersion());
+  fprintf(stderr, "    HDF5 library version : %s\n", hdfLibraryVersion());
 #endif
 #if  defined  (HAVE_LIBSERVICE)
-  fprintf(stderr, "SERVICE library version : %s\n", srvLibraryVersion());
+  fprintf(stderr, " SERVICE library version : %s\n", srvLibraryVersion());
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-  fprintf(stderr, "  EXTRA library version : %s\n", extLibraryVersion());
+  fprintf(stderr, "   EXTRA library version : %s\n", extLibraryVersion());
 #endif
 #if  defined  (HAVE_LIBIEG)
-  fprintf(stderr, "    IEG library version : %s\n", iegLibraryVersion());
+  fprintf(stderr, "     IEG library version : %s\n", iegLibraryVersion());
 #endif
-  fprintf(stderr, "   FILE library version : %s\n", fileLibraryVersion());
+  fprintf(stderr, "    FILE library version : %s\n", fileLibraryVersion());
 }
 
 

@@ -110,6 +110,8 @@ src/extralib.c -text
 src/file.c -text
 src/file.h -text
 src/grib.h -text
+src/gribapi.c -text
+src/gribapi.h -text
 src/griblib.c -text
 src/grid.c -text
 src/grid.h -text

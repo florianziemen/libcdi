@@ -88,7 +88,7 @@ static void usage(void)
   fprintf(stderr, "\n");
   fprintf(stderr, "  Options:\n");
   fprintf(stderr, "    -d             Print debugging information\n");
-  fprintf(stderr, "    -f <format>    Format of the output file. (grb, nc, nc2, nc4, src, ext or ieg)\n");
+  fprintf(stderr, "    -f <format>    Format of the output file. (grb, grb2, nc, nc2, nc4, src, ext or ieg)\n");
   fprintf(stderr, "    -s             give short information if ofile is missing\n");
   fprintf(stderr, "    -t <table>     Parameter table name/file\n");
   fprintf(stderr, "                   Predefined tables: ");
@@ -188,6 +188,9 @@ void printFiletype(int streamID, int vlistID)
     {
     case FILETYPE_GRB:
       printf("GRIB");
+      break;
+    case FILETYPE_GRB2:
+      printf("GRIB2");
       break;
     case FILETYPE_NC:
       printf("netCDF");
@@ -813,17 +816,18 @@ static void setDefaultFileType(char *filetypestr)
     {
       char *ftstr = filetypestr;
 
-      if      ( strncmp(filetypestr, "grb", 3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_GRB; }
-      else if ( strncmp(filetypestr, "nc2", 3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC2; }
-      else if ( strncmp(filetypestr, "nc4", 3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC4; }
-      else if ( strncmp(filetypestr, "nc",  2)  == 0 ) { ftstr += 2; DefaultFileType = FILETYPE_NC;  }
-      else if ( strncmp(filetypestr, "srv", 3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_SRV; }
-      else if ( strncmp(filetypestr, "ext", 3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_EXT; }
-      else if ( strncmp(filetypestr, "ieg", 3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_IEG; }
+      if      ( strncmp(filetypestr, "grb2", 4)  == 0 ) { ftstr += 4; DefaultFileType = FILETYPE_GRB2;}
+      else if ( strncmp(filetypestr, "grb",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC2; }
+      else if ( strncmp(filetypestr, "nc2",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC2; }
+      else if ( strncmp(filetypestr, "nc4",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC4; }
+      else if ( strncmp(filetypestr, "nc",   2)  == 0 ) { ftstr += 2; DefaultFileType = FILETYPE_NC;  }
+      else if ( strncmp(filetypestr, "srv",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_SRV; }
+      else if ( strncmp(filetypestr, "ext",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_EXT; }
+      else if ( strncmp(filetypestr, "ieg",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_IEG; }
       else
 	{
 	  fprintf(stderr, "Unsupported filetype %s!\n", filetypestr);
-	  fprintf(stderr, "Available filetypes: grb, nc, nc2, nc4, srv, ext and ieg\n");
+	  fprintf(stderr, "Available filetypes: grb, grb2, nc, nc2, nc4, srv, ext and ieg\n");
 	  exit(EXIT_FAILURE);
 	}
 
@@ -839,8 +843,8 @@ static void setDefaultFileType(char *filetypestr)
 	    {
 	      fprintf(stderr, "Unexpected character >%c< in file type >%s<!\n", *ftstr, filetypestr);
 	      fprintf(stderr, "Use format[_nbits] with:\n");
-	      fprintf(stderr, "    format = grb, nc, nc2, nc4, srv, ext or ieg\n");
-	      fprintf(stderr, "    nbits  = 32/64 for nc, nc2, nc4, srv, ext, ieg; 1 - 32 for grb\n");
+	      fprintf(stderr, "    format = grb, grb2, nc, nc2, nc4, srv, ext or ieg\n");
+	      fprintf(stderr, "    nbits  = 32/64 for nc, nc2, nc4, srv, ext, ieg; 1 - 32 for grb, grb2\n");
 	      exit(EXIT_FAILURE);
 	    }
 	}

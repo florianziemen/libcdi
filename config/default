@@ -21,6 +21,8 @@ case "${HOSTNAME}" in
 # i686-suse-linux
     linux | laptop)
 	./configure --prefix=$HOME/local \
+                    --with-jasper=/usr/lib \
+                    --with-grib_api=$HOME/local \
                     --with-netcdf=$HOME/local \
                     --with-szlib=$HOME/local \
                     CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -ansi -pedantic" CFINT=-Df2cFortran

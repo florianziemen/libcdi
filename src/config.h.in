@@ -18,6 +18,9 @@
 /* Define to 1 for GRIB interface */
 #undef HAVE_LIBGRIB
 
+/* Define to 1 if you have the `grib_api' library (-lgrib_api). */
+#undef HAVE_LIBGRIB_API
+
 /* Define to 1 if you have the `hdf5' library (-lhdf5). */
 #undef HAVE_LIBHDF5
 
@@ -26,6 +29,9 @@
 
 /* Define to 1 for IEG interface */
 #undef HAVE_LIBIEG
+
+/* Define to 1 if you have the `jasper' library (-ljasper). */
+#undef HAVE_LIBJASPER
 
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM

@@ -70,7 +70,7 @@ am_libcdi_a_OBJECTS = cdiFortran.$(OBJEXT) cdi_error.$(OBJEXT) \
 	tsteps.$(OBJEXT) stream_int.$(OBJEXT) servicelib.$(OBJEXT) \
 	extralib.$(OBJEXT) ieglib.$(OBJEXT) cdf.$(OBJEXT) \
 	cdf_int.$(OBJEXT) file.$(OBJEXT) binary.$(OBJEXT) \
-	swap.$(OBJEXT) griblib.$(OBJEXT)
+	swap.$(OBJEXT) griblib.$(OBJEXT) gribapi.$(OBJEXT)
 libcdi_a_OBJECTS = $(am_libcdi_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -235,6 +235,7 @@ libcdi_a_SOURCES = \
 	binary.c	 \
         swap.c       	 \
 	griblib.c  	 \
+	gribapi.c  	 \
 	cfortran.h       \
 	binary.h	 \
 	cdf.h	 	 \
@@ -260,6 +261,7 @@ libcdi_a_SOURCES = \
 	stream_int.h	 \
 	basetime.h	 \
 	grib.h	 	 \
+	gribapi.h	 \
 	grid.h	 	 \
 	service.h	 \
 	swap.h	 	 \
@@ -372,6 +374,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extralib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gribapi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/griblib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ieglib.Po@am__quote@
