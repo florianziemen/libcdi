@@ -21,7 +21,7 @@ case "${HOSTNAME}" in
 # i686-suse-linux
     linux | laptop)
 	./configure --prefix=$HOME/local \
-                    --with-jasper=/usr/lib \
+                    --with-jasper=/usr \
                     --with-grib_api=$HOME/local \
                     --with-netcdf=$HOME/local \
                     --with-szlib=$HOME/local \
@@ -29,6 +29,8 @@ case "${HOSTNAME}" in
 	;;
     gata)
 	./configure --prefix=$HOME/local/etch-ia32 \
+                    --with-jasper=/usr \
+                    --with-grib_api=/scratch/local2/m214003/local \
                     --with-netcdf=/client \
                     --with-szlib=$HOME/local/etch-ia32 \
 	            CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -ansi -pedantic" CFINT=-Df2cFortran
