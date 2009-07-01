@@ -25,7 +25,7 @@ case "${HOSTNAME}" in
                     --with-grib_api=$HOME/local \
                     --with-netcdf=$HOME/local \
                     --with-szlib=$HOME/local \
-                    CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -ansi -pedantic" CFINT=-Df2cFortran
+                    CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -pedantic" CFINT=-Df2cFortran
 	;;
     gata)
 	./configure --prefix=$HOME/local/etch-ia32 \
@@ -33,7 +33,7 @@ case "${HOSTNAME}" in
                     --with-grib_api=/scratch/local2/m214003/local \
                     --with-netcdf=/client \
                     --with-szlib=$HOME/local/etch-ia32 \
-	            CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -ansi -pedantic" CFINT=-Df2cFortran
+	            CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -pedantic" CFINT=-Df2cFortran
 	;;
 # sparc-sun-solaris2.8
     xxf)

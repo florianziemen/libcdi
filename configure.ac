@@ -16,7 +16,8 @@ AM_CONFIG_HEADER(src/config.h)
 AM_INIT_AUTOMAKE
 
 #  Checks for programs.
-AC_PROG_CC
+AC_PROG_CC([gcc c99])
+AC_PROG_CC_C99
 AC_PROG_F77
 AC_PROG_RANLIB
 AC_PROG_INSTALL
@@ -320,6 +321,13 @@ AC_SUBST([CPPFLAGS])
 AC_SUBST([AR])
 
 AC_OUTPUT(Makefile src/Makefile app/Makefile tests/Makefile examples/Makefile)
+
+if test "$ac_cv_prog_cc_c99" = "no" ; then
+AC_MSG_NOTICE([
+
+  Warning: The C compiler does not accept ANSI C99 source code!
+])
+fi
 
 AC_MSG_NOTICE([
 
