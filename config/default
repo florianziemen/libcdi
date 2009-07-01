@@ -74,12 +74,6 @@ case "${HOSTNAME}" in
 	            --with-netcdf=$HOME/PROJ \
 	            CC=vcc CFLAGS="-O -Wv,-m3 -K4"
 	;;
-# alphaev56-dec-osf5.1
-    hpca)
-	./configure --prefix=$HOME/local \
-                    --with-netcdf=/usr/local/lib/netcdf-3.5.0/LP64 \
-	            CFLAGS="-q64 -qmaxmem=-1" CFINT=-Dextname
-	;;
 # powerpc-ibm-aix5.3.0.0
     blizzard*)
 	./configure --prefix=$HOME/local \
@@ -87,7 +81,7 @@ case "${HOSTNAME}" in
                     --with-hdf5=/sw/aix53/hdf5-1.8.2 \
                     --with-szlib=/sw/aix53/szip-2.1 \
                     AR="ar -X 64" CFINT=-Dextname \
- 	            CC=xlc_r CFLAGS="-g -O4 -q64 -qlargepage -blpdata -DHAVE_MMAP"
+ 	            CC=xlc_r CFLAGS="-g -O3 -q64 -qmaxmem=-1 -qarch=auto -qtune=auto -DHAVE_MMAP"
 	;;
     *)
 	echo "configuration for hostname $HOSTNAME not found!"
