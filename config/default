@@ -81,7 +81,7 @@ case "${HOSTNAME}" in
                     --with-hdf5=/sw/aix53/hdf5-1.8.2 \
                     --with-szlib=/sw/aix53/szip-2.1 \
                     AR="ar -X 64" CFINT=-Dextname \
- 	            CC=xlc_r CFLAGS="-g -O3 -q64 -qmaxmem=-1 -qarch=auto -qtune=auto -DHAVE_MMAP"
+ 	            CC=xlc_r CFLAGS="-g -O3 -q64 -qhot -qarch=auto -qtune=auto -DHAVE_MMAP"
 	;;
     *)
 	echo "configuration for hostname $HOSTNAME not found!"
