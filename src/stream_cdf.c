@@ -2356,7 +2356,12 @@ void cdfDefGrid(int streamID, int gridID)
        gridtype == GRID_LONLAT   ||
        gridtype == GRID_GENERIC )
     {
-      if ( gridInqXsize(gridID) == 0 || gridInqYsize(gridID) == 0 )
+      if ( gridtype == GRID_GENERIC && size == 1 && 
+	   gridInqXsize(gridID) == 0 && gridInqYsize(gridID) == 0 )
+	{
+	  /* no grid information */
+	}
+      else if ( gridInqXsize(gridID) == 0 || gridInqYsize(gridID) == 0 )
 	{
 	  cdfDefGdim(streamID, gridID);
 	}
@@ -4696,7 +4701,7 @@ int cdfInqContents(int streamID)
     {
       if ( ncvars[ncvarid].isvar == TRUE && ncvars[ncvarid].ncoordvars )
 	{
-	  ndims = ncvars[ncvarid].ndims;
+	  /* ndims = ncvars[ncvarid].ndims; */
 	  ndims = ncvars[ncvarid].ncoordvars;
 	  for ( i = 0; i < ndims; i++ )
 	    {
@@ -5063,9 +5068,19 @@ int cdfInqContents(int streamID)
 
 	  if ( grid.size == 0 )
 	    {
-	      Warning(func, "Variable %s has unsupported grid, skipped!", ncvars[ncvarid].name);
-	      ncvars[ncvarid].isvar = -1;
-	      continue;
+	      if ( ncvars[ncvarid].ndims == 1 && ncvars[ncvarid].dimtype[0] == T_AXIS )
+		{
+		  grid.type  = GRID_GENERIC;
+		  grid.size  = 1;
+		  grid.xsize = 0;
+		  grid.ysize = 0;
+		}
+	      else
+		{
+		  Warning(func, "Variable %s has unsupported grid, skipped!", ncvars[ncvarid].name);
+		  ncvars[ncvarid].isvar = -1;
+		  continue;
+		}
 	    }
 
 	  if ( ncvars[ncvarid].gmapid >= 0 && ncvars[ncvarid].gridtype != GRID_CURVILINEAR )

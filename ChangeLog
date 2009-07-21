@@ -1,9 +1,10 @@
 2009-??-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 	
 	* using GRIB library version 1.4.0
-	* change C compiler to ANSI C99
+	* changed C compiler to ANSI C99
 	* changed time format from hhmm to hhmmss
 	* changed encode/decode_time to seconds
+	* added support for netCDF timeseries without grid
 	* Version 1.4.0 released
 
 2009-06-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
