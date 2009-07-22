@@ -5068,7 +5068,9 @@ int cdfInqContents(int streamID)
 
 	  if ( grid.size == 0 )
 	    {
-	      if ( ncvars[ncvarid].ndims == 1 && ncvars[ncvarid].dimtype[0] == T_AXIS )
+	      if ( (ncvars[ncvarid].ndims == 1 && ncvars[ncvarid].dimtype[0] == T_AXIS) ||
+		   (ncvars[ncvarid].ndims == 2 && ncvars[ncvarid].dimtype[0] == T_AXIS &&
+		    ncvars[ncvarid].dimtype[1] == Z_AXIS) )
 		{
 		  grid.type  = GRID_GENERIC;
 		  grid.size  = 1;
