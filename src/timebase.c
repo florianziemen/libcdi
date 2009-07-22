@@ -35,7 +35,7 @@ void decode_time(int time, int *hour, int *minute, int *second)
   int itime;
 
   *hour   = time / 10000;
-  itime = time - *hour*10000;
+  itime   = time - *hour*10000;
   *minute = itime / 100;
   *second = itime - *minute*100;
 }
@@ -182,35 +182,39 @@ int sec_to_time(int secofday)
   return (time);
 }
 
+static
+void adjust_seconds(int *julday, int *secofday)
+{
+  int secperday = 86400;
+
+  while ( *secofday >= secperday ) 
+    { 
+      *secofday -= secperday; 
+      (*julday)++;
+    }
+
+  while ( *secofday <  0 ) 
+    { 
+      *secofday += secperday;
+      (*julday)--;
+    }
+}
+
 
 void julday_add_seconds(int seconds, int *julday, int *secofday)
 {
-  int days;
-
   *secofday += seconds;
 
-  days = *secofday/86400;
-
-  *secofday -= days*86400;
-
-  *julday += days;
+  adjust_seconds(julday, secofday);
 }
 
 /* add days and secs to julday/secofday */
 void julday_add(int days, int secs, int *julday, int *secofday)
 {
-  int mdays;
-
-  *julday += days;
+  *julday   += days;
   *secofday += secs;
 
-  mdays = *secofday/86400;
-
-  if ( mdays > 0 )
-    {
-      *julday += mdays;
-      *secofday -= mdays*86400;
-    }
+  adjust_seconds(julday, secofday);
 }
 
 /* subtract julday1/secofday1 from julday2/secofday2 and returns the result in seconds */
@@ -221,11 +225,7 @@ double julday_sub(int julday1, int secofday1, int julday2, int secofday2, int *d
   *days = julday2 - julday1;
   *secs = secofday2 - secofday1;
 
-  if ( *secs < 0 )
-    {
-      *days -= 1;
-      *secs += 86400;
-    }
+  adjust_seconds(days, secs);
 
   seconds = *days*86400. + *secs;
 

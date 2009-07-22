@@ -2,7 +2,7 @@
 #define  _TIMEBASE_H
 
 /* date format:  YYYYMMDD */
-/* time format:  hhmm     */
+/* time format:  hhmmss   */
 
 void decode_date(int date, int *year, int *month, int *day);
 int  encode_date(int year, int month, int day);
