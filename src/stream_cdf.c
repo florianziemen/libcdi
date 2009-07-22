@@ -3615,15 +3615,14 @@ void printNCvars(NCVAR *ncvars, int nvars)
 	{
 	  axis[ndim++] = 'v';
 	  for ( i = 0; i < ncvars[ncvarid].ndims; i++ )
-	    {
-	      /*
+	    {/*
 	      if      ( ncvars[ncvarid].tvarid != -1 ) axis[ndim++] = iaxis[0];
 	      else if ( ncvars[ncvarid].zvarid != -1 ) axis[ndim++] = iaxis[1];
 	      else if ( ncvars[ncvarid].yvarid != -1 ) axis[ndim++] = iaxis[2];
 	      else if ( ncvars[ncvarid].xvarid != -1 ) axis[ndim++] = iaxis[3];
 	      else
-	      */
-		axis[ndim++] = '?';
+	     */
+	      axis[ndim++] = '?';
 	    }
 	}
       else
@@ -4308,8 +4307,9 @@ int cdfInqContents(int streamID)
 	{
 	  if ( ncvars[ncvarid].ndims == 1 )
 	    {
-	      if ( ncvars[ncvarid].isvar != TRUE )
-		cdfSetVar(ncvars, ncvarid, FALSE);
+	      // if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
+	      if ( ncvars[ncvarid].isvar != FALSE ) cdfSetVar(ncvars, ncvarid, TRUE);
+
 	      if ( ncdimid == ncvars[ncvarid].dimids[0] && ncdims[ncdimid].ncvarid == UNDEFID )
 		if ( strcmp(ncvars[ncvarid].name, ncdims[ncdimid].name) == 0 )
 		  {
