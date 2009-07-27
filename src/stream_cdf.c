@@ -3563,7 +3563,163 @@ int cdfTimeDimID(int fileID, int ndims, int nvars)
   return (dimid);
 }
 
+static
+void init_ncdims(long ndims, NCDIM *ncdims)
+{
+  long ncdimid;
 
+  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
+    {
+      ncdims[ncdimid].ncvarid      = UNDEFID;
+      ncdims[ncdimid].dimtype      = UNDEFID;
+      ncdims[ncdimid].len          = 0;
+      ncdims[ncdimid].name[0]      = 0;
+    }
+}
+
+static
+void init_ncvars(long nvars, NCVAR *ncvars)
+{
+  long ncvarid;
+
+  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+    {      
+      ncvars[ncvarid].ignore          = FALSE;
+      ncvars[ncvarid].isvar           = UNDEFID;
+      ncvars[ncvarid].islon           = FALSE;
+      ncvars[ncvarid].islat           = FALSE;
+      ncvars[ncvarid].islev           = FALSE;
+      ncvars[ncvarid].warn            = FALSE;
+      ncvars[ncvarid].timeID          = TIME_CONSTANT;
+      ncvars[ncvarid].code            = UNDEFID;
+      ncvars[ncvarid].calendar        = FALSE;
+      ncvars[ncvarid].bounds          = UNDEFID;
+      ncvars[ncvarid].gridID          = UNDEFID;
+      ncvars[ncvarid].zaxisID         = UNDEFID;
+      ncvars[ncvarid].gridtype        = UNDEFID;
+      ncvars[ncvarid].zaxistype       = UNDEFID;
+      ncvars[ncvarid].xdim            = UNDEFID;
+      ncvars[ncvarid].ydim            = UNDEFID;
+      ncvars[ncvarid].zdim            = UNDEFID;
+      ncvars[ncvarid].xvarid          = UNDEFID;
+      ncvars[ncvarid].yvarid          = UNDEFID;
+      ncvars[ncvarid].zvarid          = UNDEFID;
+      ncvars[ncvarid].tvarid          = UNDEFID;
+      ncvars[ncvarid].ncoordvars      = 0;
+      ncvars[ncvarid].coordvarids[0]  = UNDEFID;
+      ncvars[ncvarid].coordvarids[1]  = UNDEFID;
+      ncvars[ncvarid].coordvarids[2]  = UNDEFID;
+      ncvars[ncvarid].coordvarids[3]  = UNDEFID;
+      ncvars[ncvarid].cellarea        = UNDEFID;
+      ncvars[ncvarid].tableID         = UNDEFID;
+      ncvars[ncvarid].xtype           = 0;
+      ncvars[ncvarid].ndims           = 0;
+      ncvars[ncvarid].gmapid          = UNDEFID;
+      ncvars[ncvarid].vlen            = 0;
+      ncvars[ncvarid].vdata           = NULL;
+      ncvars[ncvarid].truncation      = 0;
+      ncvars[ncvarid].positive        = 0;
+      ncvars[ncvarid].defmiss         = 0;
+      ncvars[ncvarid].missval         = 0;
+      ncvars[ncvarid].addoffset       = 0;
+      ncvars[ncvarid].scalefactor     = 1;
+      ncvars[ncvarid].name[0]         = 0;
+      ncvars[ncvarid].longname[0]     = 0;
+      ncvars[ncvarid].stdname[0]      = 0;
+      ncvars[ncvarid].units[0]        = 0;
+      ncvars[ncvarid].natts           = 0;
+      ncvars[ncvarid].atts            = NULL;
+      ncvars[ncvarid].deflate         = 0;
+    }
+}
+
+static
+int isLonAxis(const char *units, const char *stdname)
+{
+  int lunit = FALSE;
+
+  if ( memcmp(units, "degrees_east", 12) == 0 ||
+       memcmp(units, "degree_east", 11)  == 0 ||
+       memcmp(units, "degree_E", 8)      == 0 ||
+       memcmp(units, "degrees_E", 9)     == 0 ||
+       memcmp(units, "degreeE", 7)       == 0 ||
+       memcmp(units, "degreesE", 8)      == 0 ||
+       memcmp(stdname, "longitude", 9)   == 0 ||
+       (memcmp(units, "degrees", 7)           == 0 &&
+	memcmp(stdname, "grid_longitude", 14) == 0) ||
+       (memcmp(units, "radian", 6)            == 0 &&
+	memcmp(stdname, "grid_longitude", 14) == 0) )
+    {
+      lunit = TRUE;
+    }
+
+  return (lunit);
+}
+
+static
+int isLatAxis(const char *units, const char *stdname)
+{
+  int lunit = FALSE;
+
+  if ( memcmp(units, "degrees_north", 13) == 0 ||
+       memcmp(units, "degree_north", 12)  == 0 ||
+       memcmp(units, "degree_N", 8)       == 0 ||
+       memcmp(units, "degrees_N", 9)      == 0 ||
+       memcmp(units, "degreeN", 7)        == 0 ||
+       memcmp(units, "degreesN", 8)       == 0 ||
+       memcmp(stdname, "latitude", 8)     == 0 ||
+       (memcmp(units, "degrees", 7)          == 0 &&
+	memcmp(stdname, "grid_latitude", 13) == 0) ||
+       (memcmp(units, "radian", 6)           == 0 &&
+	memcmp(stdname, "grid_latitude", 13) == 0) )
+    {
+      lunit = TRUE;
+    }
+
+  return (lunit);
+}
+
+static
+int isGaussGrid(long ysize, double yinc, double *yvals)
+{
+  static char func[] = "isGaussGrid";
+  int lgauss = FALSE;
+  long i;
+  double *yv, *yw;
+
+  if ( IS_EQUAL(yinc, 0) && ysize > 2 ) /* check if gaussian */
+    {
+      yv = (double *) malloc(ysize*sizeof(double));
+      yw = (double *) malloc(ysize*sizeof(double));
+      gaussaw(yv, yw, ysize);
+      free(yw);
+      for ( i = 0; i < ysize; i++ )
+	yv[i] = asin(yv[i])/M_PI*180.0;
+
+      for ( i = 0; i < ysize; i++ )
+	if ( fabs(yv[i] - yvals[i]) >
+	     ((yv[0] - yv[1])/500) ) break;
+		      
+      if ( i == ysize ) lgauss = TRUE;
+
+      /* check S->N */
+      if ( lgauss == FALSE )
+	{		  
+	  for ( i = 0; i < ysize; i++ )
+	    if ( fabs(yv[i] - yvals[ysize-i-1]) >
+		 ((yv[0] - yv[1])/500) ) break;
+      
+	  if ( i == ysize ) lgauss = TRUE;
+	}
+
+      free(yv);
+    }
+
+  return (lgauss);
+}
+
+
+static
 void cdfSetVar(NCVAR *ncvars, int ncvarid, int isvar)
 {
   static char func[] = "cdfSetVar";
@@ -3600,7 +3756,7 @@ void cdfSetDim(NCVAR *ncvars, int ncvarid, int dimid, int dimtype)
   ncvars[ncvarid].dimtype[dimid] = dimtype;
 }
 
-
+static
 void printNCvars(NCVAR *ncvars, int nvars)
 {
   char axis[6];
@@ -3746,65 +3902,8 @@ int cdfInqContents(int streamID)
       return (CDI_EUFSTRUCT);
     }
 
-  /* init ncdims */
-  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
-    {
-      ncdims[ncdimid].ncvarid      = UNDEFID;
-      ncdims[ncdimid].dimtype      = UNDEFID;
-      ncdims[ncdimid].len          = 0;
-      ncdims[ncdimid].name[0]      = 0;
-    }
-
-  /* init ncvars */
-  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-    {      
-      ncvars[ncvarid].ignore          = FALSE;
-      ncvars[ncvarid].isvar           = UNDEFID;
-      ncvars[ncvarid].islon           = FALSE;
-      ncvars[ncvarid].islat           = FALSE;
-      ncvars[ncvarid].islev           = FALSE;
-      ncvars[ncvarid].warn            = FALSE;
-      ncvars[ncvarid].timeID          = TIME_CONSTANT;
-      ncvars[ncvarid].code            = UNDEFID;
-      ncvars[ncvarid].calendar        = FALSE;
-      ncvars[ncvarid].bounds          = UNDEFID;
-      ncvars[ncvarid].gridID          = UNDEFID;
-      ncvars[ncvarid].zaxisID         = UNDEFID;
-      ncvars[ncvarid].gridtype        = UNDEFID;
-      ncvars[ncvarid].zaxistype       = UNDEFID;
-      ncvars[ncvarid].xdim            = UNDEFID;
-      ncvars[ncvarid].ydim            = UNDEFID;
-      ncvars[ncvarid].zdim            = UNDEFID;
-      ncvars[ncvarid].xvarid          = UNDEFID;
-      ncvars[ncvarid].yvarid          = UNDEFID;
-      ncvars[ncvarid].zvarid          = UNDEFID;
-      ncvars[ncvarid].tvarid          = UNDEFID;
-      ncvars[ncvarid].ncoordvars      = 0;
-      ncvars[ncvarid].coordvarids[0]  = UNDEFID;
-      ncvars[ncvarid].coordvarids[1]  = UNDEFID;
-      ncvars[ncvarid].coordvarids[2]  = UNDEFID;
-      ncvars[ncvarid].coordvarids[3]  = UNDEFID;
-      ncvars[ncvarid].cellarea        = UNDEFID;
-      ncvars[ncvarid].tableID         = UNDEFID;
-      ncvars[ncvarid].xtype           = 0;
-      ncvars[ncvarid].ndims           = 0;
-      ncvars[ncvarid].gmapid          = UNDEFID;
-      ncvars[ncvarid].vlen            = 0;
-      ncvars[ncvarid].vdata           = NULL;
-      ncvars[ncvarid].truncation      = 0;
-      ncvars[ncvarid].positive        = 0;
-      ncvars[ncvarid].defmiss         = 0;
-      ncvars[ncvarid].missval         = 0;
-      ncvars[ncvarid].addoffset       = 0;
-      ncvars[ncvarid].scalefactor     = 1;
-      ncvars[ncvarid].name[0]         = 0;
-      ncvars[ncvarid].longname[0]     = 0;
-      ncvars[ncvarid].stdname[0]      = 0;
-      ncvars[ncvarid].units[0]        = 0;
-      ncvars[ncvarid].natts           = 0;
-      ncvars[ncvarid].atts            = NULL;
-      ncvars[ncvarid].deflate         = 0;
-    }
+  init_ncdims(ndims, ncdims);
+  init_ncvars(nvars, ncvars);
 
   /* read global attributtes*/
   for ( iatt = 0; iatt < ngatts; iatt++ )
@@ -4307,7 +4406,7 @@ int cdfInqContents(int streamID)
 	{
 	  if ( ncvars[ncvarid].ndims == 1 )
 	    {
-	      // if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
+	      //if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
 	      if ( ncvars[ncvarid].isvar != FALSE ) cdfSetVar(ncvars, ncvarid, TRUE);
 
 	      if ( ncdimid == ncvars[ncvarid].dimids[0] && ncdims[ncdimid].ncvarid == UNDEFID )
@@ -4431,34 +4530,14 @@ int cdfInqContents(int streamID)
 
 	  if ( ncvars[ncvarid].units[0] != 0 )
 	    {    
-	      if ( memcmp(ncvars[ncvarid].units, "degrees_east", 12) == 0 ||
-		   memcmp(ncvars[ncvarid].units, "degree_east", 11)  == 0 ||
-		   memcmp(ncvars[ncvarid].units, "degree_E", 8)      == 0 ||
-		   memcmp(ncvars[ncvarid].units, "degrees_E", 9)     == 0 ||
-		   memcmp(ncvars[ncvarid].units, "degreeE", 7)       == 0 ||
-		   memcmp(ncvars[ncvarid].units, "degreesE", 8)      == 0 ||
-                   memcmp(ncvars[ncvarid].stdname, "longitude", 9)   == 0 ||
-		  (memcmp(ncvars[ncvarid].units, "degrees", 7)           == 0 &&
-		   memcmp(ncvars[ncvarid].stdname, "grid_longitude", 14) == 0) ||
-		  (memcmp(ncvars[ncvarid].units, "radian", 6)            == 0 &&
-		   memcmp(ncvars[ncvarid].stdname, "grid_longitude", 14) == 0) )
+	      if ( isLonAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
 		  ncvars[ncvarid].islon = TRUE;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		  cdfSetDim(ncvars, ncvarid, 0, X_AXIS);
 		  ncdims[ncdimid].dimtype = X_AXIS;
 		}
-	      else if ( memcmp(ncvars[ncvarid].units, "degrees_north", 13) == 0 ||
-			memcmp(ncvars[ncvarid].units, "degree_north", 12)  == 0 ||
-			memcmp(ncvars[ncvarid].units, "degree_N", 8)       == 0 ||
-			memcmp(ncvars[ncvarid].units, "degrees_N", 9)      == 0 ||
-			memcmp(ncvars[ncvarid].units, "degreeN", 7)        == 0 ||
-			memcmp(ncvars[ncvarid].units, "degreesN", 8)       == 0 ||
-                        memcmp(ncvars[ncvarid].stdname, "latitude", 8)     == 0 ||
-	       	       (memcmp(ncvars[ncvarid].units, "degrees", 7)          == 0 &&
-			memcmp(ncvars[ncvarid].stdname, "grid_latitude", 13) == 0) ||
-	               (memcmp(ncvars[ncvarid].units, "radian", 6)           == 0 &&
-	           	memcmp(ncvars[ncvarid].stdname, "grid_latitude", 13) == 0) )
+	      else if ( isLatAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
 		  ncvars[ncvarid].islat = TRUE;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
@@ -4536,32 +4615,12 @@ int cdfInqContents(int streamID)
 
 	  if ( ncvars[ncvarid].units[0] != 0 )
 	    {
-	      if ( memcmp(ncvars[ncvarid].units, "degrees_east", 12) == 0 ||
-		   memcmp(ncvars[ncvarid].units, "degree_east", 11)  == 0 ||
-		   memcmp(ncvars[ncvarid].units, "degree_E", 8)      == 0 ||
-		   memcmp(ncvars[ncvarid].units, "degrees_E", 9)     == 0 ||
-		   memcmp(ncvars[ncvarid].units, "degreeE", 7)       == 0 ||
-		   memcmp(ncvars[ncvarid].units, "degreesE", 8)      == 0 ||
-                   memcmp(ncvars[ncvarid].stdname, "longitude", 9)   == 0 ||
-		  (memcmp(ncvars[ncvarid].units, "degrees", 7)           == 0 &&
-		   memcmp(ncvars[ncvarid].stdname, "grid_longitude", 14) == 0) ||
-		  (memcmp(ncvars[ncvarid].units, "radian", 6)            == 0 &&
-		   memcmp(ncvars[ncvarid].stdname, "grid_longitude", 14) == 0) )
+	      if ( isLonAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
 		  ncvars[ncvarid].islon = TRUE;
 		  continue;
 		}
-	      else if ( memcmp(ncvars[ncvarid].units, "degrees_north", 13) == 0 ||
-			memcmp(ncvars[ncvarid].units, "degree_north", 12)  == 0 ||
-			memcmp(ncvars[ncvarid].units, "degree_N", 8)       == 0 ||
-			memcmp(ncvars[ncvarid].units, "degrees_N", 9)      == 0 ||
-			memcmp(ncvars[ncvarid].units, "degreeN", 7)        == 0 ||
-			memcmp(ncvars[ncvarid].units, "degreesN", 8)       == 0 ||
-                        memcmp(ncvars[ncvarid].stdname, "latitude", 8)     == 0 ||
-	       	       (memcmp(ncvars[ncvarid].units, "degrees", 7)          == 0 &&
-			memcmp(ncvars[ncvarid].stdname, "grid_latitude", 13) == 0) ||
-	               (memcmp(ncvars[ncvarid].units, "radian", 6)           == 0 &&
-	           	memcmp(ncvars[ncvarid].stdname, "grid_latitude", 13) == 0) )
+	      else if ( isLatAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
 		  ncvars[ncvarid].islat = TRUE;
 		  continue;
@@ -4959,37 +5018,7 @@ int cdfInqContents(int streamID)
 	    {
 	      if ( islat && islon )
 		{
-		  int lgauss = FALSE;
-		  if ( IS_EQUAL(yinc, 0) && (int) ysize > 2 ) /* check if gaussian */
-		    {
-		      double *yvals, *yw;
-		      yvals = (double *) malloc(ysize*sizeof(double));
-		      yw    = (double *) malloc(ysize*sizeof(double));
-		      gaussaw(yvals, yw, ysize);
-		      free(yw);
-		      for ( i = 0; i < (int) ysize; i++ )
-			yvals[i] = asin(yvals[i])/M_PI*180.0;
-
-		      for ( i = 0; i < (int) ysize; i++ )
-			if ( fabs(yvals[i] - grid.yvals[i]) >
-			     ((yvals[0] - yvals[1])/500) ) break;
-		      
-		      if ( i == (int) ysize ) lgauss = TRUE;
-
-		      /* check S->N */
-		      if ( lgauss == FALSE )
-			{		  
-			  for ( i = 0; i < (int) ysize; i++ )
-			    if ( fabs(yvals[i] - grid.yvals[ysize-i-1]) >
-				 ((yvals[0] - yvals[1])/500) ) break;
-		      
-			  if ( i == (int) ysize ) lgauss = TRUE;
-			}
-
-		      free(yvals);
-		    }
-
-		  if ( lgauss )
+		  if ( isGaussGrid(ysize, yinc, grid.yvals) )
 		    ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
 		  else
 		    ncvars[ncvarid].gridtype = GRID_LONLAT;
