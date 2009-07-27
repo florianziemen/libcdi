@@ -254,7 +254,7 @@ void iegDefGrid(int *gdb, int gridID)
       gridtype = GRID_LONLAT;
     }
 
-  if ( gridtype == GRID_LONLAT )
+  if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN )
     {
       int nlon, nlat;
 
@@ -262,7 +262,9 @@ void iegDefGrid(int *gdb, int gridID)
 
       nlat = (int) gridInqYsize(gridID);
 
-      if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
+      if ( gridtype == GRID_GAUSSIAN )
+	IEG_G_GridType(gdb) = 4;
+      else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
 	IEG_G_GridType(gdb) = 10;
       else
 	IEG_G_GridType(gdb) = 0;
@@ -277,9 +279,14 @@ void iegDefGrid(int *gdb, int gridID)
       if ( fabs(gridInqXinc(gridID)*1000 - IEG_G_LonIncr(gdb)) > FLT_EPSILON )
 	IEG_G_LonIncr(gdb) = 0;
 
-      IEG_G_LatIncr(gdb) = NINT(gridInqYinc(gridID)*1000);
-      if ( fabs(gridInqYinc(gridID)*1000 - IEG_G_LatIncr(gdb)) > FLT_EPSILON )
-	IEG_G_LatIncr(gdb) = 0;
+      if ( gridtype == GRID_GAUSSIAN )
+	IEG_G_LatIncr(gdb) = nlat/2;
+      else
+	{
+	  IEG_G_LatIncr(gdb) = NINT(gridInqYinc(gridID)*1000);
+	  if ( fabs(gridInqYinc(gridID)*1000 - IEG_G_LatIncr(gdb)) > FLT_EPSILON )
+	    IEG_G_LatIncr(gdb) = 0;
+	}
 
       if ( gridIsRotated(gridID) )
 	{
@@ -645,6 +652,8 @@ void iegAddRecord(int streamID, int code, int *pdb, int *gdb, double *vct,
 
   if ( IEG_G_GridType(gdb) == 0 || IEG_G_GridType(gdb) == 10 )
     gridtype = GRID_LONLAT;
+  if ( IEG_G_GridType(gdb) == 4 )
+    gridtype = GRID_GAUSSIAN;
   else
     gridtype = GRID_GENERIC;
 
