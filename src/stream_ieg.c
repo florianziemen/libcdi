@@ -286,7 +286,20 @@ void iegDefGrid(int *gdb, int gridID)
 	  IEG_G_LatIncr(gdb) = NINT(gridInqYinc(gridID)*1000);
 	  if ( fabs(gridInqYinc(gridID)*1000 - IEG_G_LatIncr(gdb)) > FLT_EPSILON )
 	    IEG_G_LatIncr(gdb) = 0;
+
+	  if ( IEG_G_LatIncr(gdb) < 0 ) IEG_G_LatIncr(gdb) = -IEG_G_LatIncr(gdb);
 	}
+
+      if ( IEG_G_NumLon(gdb) > 1 && IEG_G_NumLat(gdb) == 1 ) 
+	if ( IEG_G_LonIncr(gdb) != 0 && IEG_G_LatIncr(gdb) == 0 ) IEG_G_LatIncr(gdb) = IEG_G_LonIncr(gdb);
+
+      if ( IEG_G_NumLon(gdb) == 1 && IEG_G_NumLat(gdb) > 1 ) 
+	if ( IEG_G_LonIncr(gdb) == 0 && IEG_G_LatIncr(gdb) != 0 ) IEG_G_LonIncr(gdb) = IEG_G_LatIncr(gdb);
+
+      if ( IEG_G_LatIncr(gdb) == 0 || IEG_G_LonIncr(gdb) == 0 )
+	IEG_G_ResFlag(gdb) = 0;
+      else
+	IEG_G_ResFlag(gdb) = 128;
 
       if ( gridIsRotated(gridID) )
 	{
@@ -304,7 +317,6 @@ void iegDefGrid(int *gdb, int gridID)
       Error(func, "%s grid unsupported!", gridNamePtr(gridtype));
     }
 
-  IEG_G_ResFlag(gdb) = 128;
   IEG_G_ScanFlag(gdb) = 64;
 }
 
@@ -662,6 +674,49 @@ void iegAddRecord(int streamID, int code, int *pdb, int *gdb, double *vct,
   grid.size  = IEG_G_NumLon(gdb)*IEG_G_NumLat(gdb);
   grid.xsize = IEG_G_NumLon(gdb);
   grid.ysize = IEG_G_NumLat(gdb);
+  grid.xinc  = 0;
+  grid.yinc  = 0;
+  grid.xdef  = 0;
+  /* if ( IEG_G_FirstLon != 0 || IEG_G_LastLon != 0 ) */
+  {
+    if ( grid.xsize > 1 )
+      {
+	if ( IEG_G_ResFlag(gdb) && IEG_G_LonIncr(gdb) > 0 )
+	  grid.xinc = IEG_G_LonIncr(gdb) * 0.001;
+	else
+	  grid.xinc = (IEG_G_LastLon(gdb) - IEG_G_FirstLon(gdb)) * 0.001 / (grid.xsize - 1);
+
+	/* correct xinc if necessary */
+	if ( IEG_G_FirstLon(gdb) == 0 && IEG_G_LastLon(gdb) > 354000 )
+	  {
+	    double xinc = 360. / grid.xsize;
+	    
+	    if ( fabs(grid.xinc-xinc) > 0.0 )
+	      {
+		grid.xinc = xinc;
+		if ( CDI_Debug ) Message(func, "set xinc to %g", grid.xinc);
+	      }
+	  }
+      }
+    grid.xfirst = IEG_G_FirstLon(gdb) * 0.001;
+    grid.xlast  = IEG_G_LastLon(gdb)  * 0.001;
+    grid.xdef   = 2;	    
+  }
+  grid.ydef  = 0;
+  /* if ( IEG_G_FirstLat != 0 || IEG_G_LastLat != 0 ) */
+  {
+    if ( grid.ysize > 1 )
+      {
+	if ( IEG_G_ResFlag(gdb) && IEG_G_LatIncr(gdb) > 0 )
+	  grid.yinc = IEG_G_LatIncr(gdb) * 0.001;
+	else
+	  grid.yinc = (IEG_G_LastLat(gdb) - IEG_G_FirstLat(gdb)) * 0.001 / (grid.ysize - 1);
+      }
+    grid.yfirst = IEG_G_FirstLat(gdb) * 0.001;
+    grid.ylast  = IEG_G_LastLat(gdb)  * 0.001;
+    grid.ydef   = 2;	    
+  }
+  /*
   grid.xfirst= IEG_G_FirstLon(gdb) * 0.001;
   grid.xlast = IEG_G_LastLon(gdb) * 0.001;
   grid.xinc  = IEG_G_LonIncr(gdb) * 0.001;
@@ -669,7 +724,8 @@ void iegAddRecord(int streamID, int code, int *pdb, int *gdb, double *vct,
   grid.yfirst= IEG_G_FirstLat(gdb) * 0.001;
   grid.ylast = IEG_G_LastLat(gdb) * 0.001;
   grid.yinc  = IEG_G_LatIncr(gdb) * 0.001;
-  grid.ydef  = 2;	    
+  grid.ydef  = 2;
+  */
   grid.xvals = NULL;
   grid.yvals = NULL;
 
