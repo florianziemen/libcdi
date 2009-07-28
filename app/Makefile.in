@@ -171,7 +171,7 @@ target_vendor = @target_vendor@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 #
-cdi_SOURCES = cdi.c
+cdi_SOURCES = cdi.c printinfo.h
 #
 cdi_LDADD = ../src/libcdi.a $(LDFLAGS) -lm
 #

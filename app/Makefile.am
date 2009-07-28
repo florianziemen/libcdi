@@ -4,7 +4,7 @@ bin_PROGRAMS = cdi
 #
 noinst_PROGRAMS = createtable
 #
-cdi_SOURCES = cdi.c
+cdi_SOURCES = cdi.c printinfo.h
 #
 cdi_LDADD = ../src/libcdi.a $(LDFLAGS) -lm
 #

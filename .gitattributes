@@ -13,6 +13,7 @@ app/Makefile.am -text
 app/Makefile.in -text
 app/cdi.c -text
 app/createtable.c -text
+app/printinfo.h -text
 config/config.guess -text
 config/config.sub -text
 config/default -text
