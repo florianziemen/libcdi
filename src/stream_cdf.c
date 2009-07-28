@@ -4406,8 +4406,14 @@ int cdfInqContents(int streamID)
 	{
 	  if ( ncvars[ncvarid].ndims == 1 )
 	    {
-	      //if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
-	      if ( ncvars[ncvarid].isvar != FALSE ) cdfSetVar(ncvars, ncvarid, TRUE);
+	      if ( timedimid != UNDEFID && timedimid == ncvars[ncvarid].dimids[0] )
+		{
+		  if ( ncvars[ncvarid].isvar != FALSE ) cdfSetVar(ncvars, ncvarid, TRUE);
+		}
+	      else
+		{
+		  if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
+		}
 
 	      if ( ncdimid == ncvars[ncvarid].dimids[0] && ncdims[ncdimid].ncvarid == UNDEFID )
 		if ( strcmp(ncvars[ncvarid].name, ncdims[ncdimid].name) == 0 )
