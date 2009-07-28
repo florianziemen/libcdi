@@ -2361,14 +2361,14 @@ void cdfDefGrid(int streamID, int gridID)
 	{
 	  /* no grid information */
 	}
-      else if ( gridInqXsize(gridID) == 0 || gridInqYsize(gridID) == 0 )
+      else if ( gridtype == GRID_GENERIC && (gridInqXsize(gridID) == 0 || gridInqYsize(gridID) == 0) )
 	{
 	  cdfDefGdim(streamID, gridID);
 	}
       else
 	{
-	  cdfDefXaxis(streamID, gridID);
-	  cdfDefYaxis(streamID, gridID);
+	  if ( gridInqXsize(gridID) > 0 ) cdfDefXaxis(streamID, gridID);
+	  if ( gridInqYsize(gridID) > 0 ) cdfDefYaxis(streamID, gridID);
 	}
 
       if ( gridIsRotated(gridID) ) cdfDefPole(streamID, gridID);
@@ -4406,8 +4406,8 @@ int cdfInqContents(int streamID)
 	{
 	  if ( ncvars[ncvarid].ndims == 1 )
 	    {
-	      if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
-	      //if ( ncvars[ncvarid].isvar != FALSE ) cdfSetVar(ncvars, ncvarid, TRUE);
+	      //if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
+	      if ( ncvars[ncvarid].isvar != FALSE ) cdfSetVar(ncvars, ncvarid, TRUE);
 
 	      if ( ncdimid == ncvars[ncvarid].dimids[0] && ncdims[ncdimid].ncvarid == UNDEFID )
 		if ( strcmp(ncvars[ncvarid].name, ncdims[ncdimid].name) == 0 )
@@ -5022,6 +5022,17 @@ int cdfInqContents(int streamID)
 		    ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
 		  else
 		    ncvars[ncvarid].gridtype = GRID_LONLAT;
+		}
+	      else if ( islat && !islon && xsize == 0 )
+		{
+		  if ( isGaussGrid(ysize, yinc, grid.yvals) )
+		    ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
+		  else
+		    ncvars[ncvarid].gridtype = GRID_LONLAT;
+		}
+	      else if ( islon && !islat && ysize == 0 )
+		{
+		  ncvars[ncvarid].gridtype = GRID_LONLAT;
 		}
 	      else
 		ncvars[ncvarid].gridtype = GRID_GENERIC;
