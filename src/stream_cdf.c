@@ -97,42 +97,95 @@ typedef struct {
 }
 NCVAR;
 
+static
+int get_timeunit(int len, char *ptu)
+{
+  int timeunit = -1;
 
-static int splitBasetime(char *timeunits, TAXIS *taxis)
+  if ( len > 2 )
+    {
+      if      ( memcmp(ptu, "sec",    3) == 0 )          timeunit = TUNIT_SECOND;
+      else if ( memcmp(ptu, "minute", 6) == 0 )          timeunit = TUNIT_MINUTE;
+      else if ( memcmp(ptu, "hour",   4) == 0 )          timeunit = TUNIT_HOUR;
+      else if ( memcmp(ptu, "day",    3) == 0 )          timeunit = TUNIT_DAY;
+      else if ( memcmp(ptu, "month",  5) == 0 )          timeunit = TUNIT_MONTH;
+      else if ( memcmp(ptu, "calendar_month", 14) == 0 ) timeunit = TUNIT_MONTH;
+      else if ( memcmp(ptu, "year",   4) == 0 )          timeunit = TUNIT_YEAR;
+    }
+
+  return (timeunit);
+}
+
+static
+int isTimeUnits(const char *timeunits)
+{
+  static char func[] = "isTimeUnits";
+  int len, i;
+  char *ptu, *tu;
+  int timetype = -1;
+  int timeunit;
+  int status = FALSE;
+
+  len = (int) strlen(timeunits);
+  tu = (char *) malloc((len+1)*sizeof(char));
+  memcpy(tu, timeunits, (len+1)*sizeof(char));
+  ptu = tu;
+
+  for ( i = 0; i < len; i++ ) ptu[i] = tolower((int) ptu[i]);
+
+  timeunit = get_timeunit(len, ptu);
+  if ( timeunit != -1 )
+    {
+
+      while ( ! isspace(*ptu) && *ptu != 0 ) ptu++;
+      if ( *ptu )
+	{
+	  while ( isspace(*ptu) ) ptu++;
+	  
+	  if ( memcmp(ptu, "as", 2) == 0 )
+	    timetype = TAXIS_ABSOLUTE;
+	  else if ( memcmp(ptu, "since", 5) == 0 )
+	    timetype = TAXIS_RELATIVE;
+
+	  if ( timetype != -1 ) status = TRUE;
+	}
+    }
+
+  free(tu);
+
+  return (status);
+}
+
+static
+int splitBasetime(const char *timeunits, TAXIS *taxis)
 {
   static char func[] = "splitBasetime";
   int len, i;
-  char *ptu;
+  char *ptu, *tu;
   int year, month, day;
   int hour = 0, minute = 0, second = 0;
   int timetype = TAXIS_ABSOLUTE;
   int rdate = -1, rtime = -1;
-  int timeunit = -1;
+  int timeunit;
 
-  ptu = timeunits;
   len = (int) strlen(timeunits);
+  tu = (char *) malloc((len+1)*sizeof(char));
+  memcpy(tu, timeunits, (len+1)*sizeof(char));
+  ptu = tu;
 
   for ( i = 0; i < len; i++ ) ptu[i] = tolower((int) ptu[i]);
 
-  (*taxis).type = timetype;
-
-  if      ( memcmp(ptu, "sec",    3) == 0 ) timeunit = TUNIT_SECOND;
-  else if ( memcmp(ptu, "minute", 6) == 0 ) timeunit = TUNIT_MINUTE;
-  else if ( memcmp(ptu, "hour",   4) == 0 ) timeunit = TUNIT_HOUR;
-  else if ( memcmp(ptu, "day",    3) == 0 ) timeunit = TUNIT_DAY;
-  else if ( memcmp(ptu, "month",  5) == 0 ) timeunit = TUNIT_MONTH;
-  else if ( memcmp(ptu, "calendar_month", 14) == 0 ) timeunit = TUNIT_MONTH;
-  else if ( memcmp(ptu, "year",   4) == 0 ) timeunit = TUNIT_YEAR;
-  else
+  timeunit = get_timeunit(len, ptu);
+  if ( timeunit == -1 )
     {
-      Message(func, "Unsupported TIMEUNIT: %s!", ptu);
+      Message(func, "Unsupported TIMEUNIT: %s!", timeunits);
       return (1);
     }
 
   while ( ! isspace(*ptu) && *ptu != 0 ) ptu++;
   if ( *ptu )
     {
-      while (   isspace(*ptu) ) ptu++;
+      while ( isspace(*ptu) ) ptu++;
 
       if ( memcmp(ptu, "as", 2) == 0 )
 	timetype = TAXIS_ABSOLUTE;
@@ -142,7 +195,7 @@ static int splitBasetime(char *timeunits, TAXIS *taxis)
       while ( ! isspace(*ptu) && *ptu != 0 ) ptu++;
       if ( *ptu )
 	{
-	  while (   isspace(*ptu) ) ptu++;
+	  while ( isspace(*ptu) ) ptu++;
 
 	  if ( timetype == TAXIS_ABSOLUTE )
 	    {
@@ -206,6 +259,8 @@ static int splitBasetime(char *timeunits, TAXIS *taxis)
   (*taxis).type = timetype;
   (*taxis).unit = timeunit;
 
+  free(tu);
+
   if ( CDI_Debug )
     Message(func, "timetype = %d  unit = %d", timetype, timeunit);
 
@@ -214,7 +269,8 @@ static int splitBasetime(char *timeunits, TAXIS *taxis)
 
 
 #if  defined  (HAVE_LIBNETCDF)
-static void cdfGetAttInt(int fileID, int ncvarid, char *attname, int attlen, int *attint)
+static
+void cdfGetAttInt(int fileID, int ncvarid, char *attname, int attlen, int *attint)
 {
   static char func[] = "cdfGetAttInt";
   size_t nc_attlen;
@@ -262,7 +318,8 @@ static void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, 
 #endif
 
 #if  defined  (HAVE_LIBNETCDF)
-static void cdfGetAttText(int fileID, int ncvarid, char *attname, int attlen, char *atttext)
+static
+void cdfGetAttText(int fileID, int ncvarid, char *attname, int attlen, char *atttext)
 {
   size_t nc_attlen;
   char attbuf[65636];
@@ -3801,6 +3858,7 @@ void printNCvars(NCVAR *ncvars, int nvars)
     }
 }
 
+
 typedef struct
 {
   int      ncvarid;
@@ -4496,7 +4554,6 @@ int cdfInqContents(int streamID)
 	{
 	  if ( ncvars[ncvarid].ndims == 1 )
 	    {
-	      /*
 	      if ( timedimid != UNDEFID && timedimid == ncvars[ncvarid].dimids[0] )
 		{
 		  if ( ncvars[ncvarid].isvar != FALSE ) cdfSetVar(ncvars, ncvarid, TRUE);
@@ -4505,8 +4562,7 @@ int cdfInqContents(int streamID)
 		{
 		  if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
 		}
-	      */
-	      if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
+	      // if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
 
 	      if ( ncdimid == ncvars[ncvarid].dimids[0] && ncdims[ncdimid].ncvarid == UNDEFID )
 		if ( strcmp(ncvars[ncvarid].name, ncdims[ncdimid].name) == 0 )
@@ -4518,22 +4574,39 @@ int cdfInqContents(int streamID)
 	}
     }
 
-  /* find time var */
+  /* find time vars */
   if ( timedimid != UNDEFID )
     {
+      int ltimevar = FALSE;
+
       if ( ncdims[timedimid].ncvarid != UNDEFID )
-	streamptr->basetime.ncvarid = ncdims[timedimid].ncvarid;
-      else
 	{
-	  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-	    if ( ncvars[ncvarid].ndims == 1 &&
-		 timedimid == ncvars[ncvarid].dimids[0] &&
-		 ncvars[ncvarid].xtype != NC_CHAR )
+	  streamptr->basetime.ncvarid = ncdims[timedimid].ncvarid;
+	  ltimevar = TRUE;
+	}
+
+      for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+	if ( ncvarid != streamptr->basetime.ncvarid &&
+	     ncvars[ncvarid].ndims == 1 &&
+	     timedimid == ncvars[ncvarid].dimids[0] &&
+	     ncvars[ncvarid].xtype != NC_CHAR &&
+	     isTimeUnits(ncvars[ncvarid].units) )
+	  {
+	    ncvars[ncvarid].isvar = FALSE;
+
+	    if ( !ltimevar )
 	      {
 		streamptr->basetime.ncvarid = ncvarid;
-		break;
+		ltimevar = TRUE;
+		if ( CDI_Debug ) 
+		  fprintf(stderr, "timevar %s\n", ncvars[ncvarid].name);
 	      }
-	}
+	    else
+	      {
+		if ( CDI_Debug )
+		  fprintf(stderr, "skip timevar %s\n", ncvars[ncvarid].name);
+	      }
+	  }
 
       /* time varID */
       ncvarid = streamptr->basetime.ncvarid;
