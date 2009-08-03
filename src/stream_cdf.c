@@ -3511,6 +3511,7 @@ void cdfCreateRecords(int streamID, int tsID)
 #endif
 }
 
+
 int cdfTimeDimID(int fileID, int ndims, int nvars)
 {
   int dimid = 0;
@@ -3817,183 +3818,24 @@ int cmpvarname(const void *s1, const void *s2)
   return (strcmp(x->name, y->name));
 }
 
-
-int cdfInqContents(int streamID)
+static
+void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
+		       int timedimid, int modelID, int format)
 {
-#if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfInqContents";
-  int ndims, nvars, ngatts, unlimdimid;
-  int varID, ncvarid, ncvarid2;
+  static char func[] = "scanAttributes";
+  int ncvarid;
   int ncdimid;
-  int varID1;
-  int fileID;
   int nvdims, nvatts;
   int *dimidsp;
   nc_type xtype, atttype;
-  size_t size = 0, xsize, ysize;
-  size_t ntsteps;
-  int timedimid = -1;
-  int *varids;
-  int nvarids;
   size_t attlen;
-  int  ilev;
   char name[256];
   char attname[256];
   const int attstringlen = 8192; char attstring[8192];
-  char *pname, *plongname, *punits;
-  double datt;
-  int iatt, timehasunit = 0;
-  int time_has_bounds = FALSE;
-  size_t len;
-  int nc_nvars;
-  int nvcth_id = UNDEFID, vcta_id = UNDEFID, vctb_id = UNDEFID;
-  grid_t grid;
-  int gridindex;
-  int zaxisindex;
-  size_t vctsize = 0;
-  int tablenum, tableID;
-  double *vct = NULL;
-  int instID  = UNDEFID;
-  int modelID = UNDEFID;
-  int code;
-  int taxisID;
+  int iatt;
   int i;
-  int nbdims;
-  size_t nvertex;
-  int zprec;
-  int calendar = UNDEFID;
-  NCDIM *ncdims;
-  NCVAR *ncvars;
-  int vlistID;
-  STREAM *streamptr;
-  int format = 0;
+  int tablenum;
 
-  streamptr = stream_to_pointer(streamID);
-  
-  stream_check_ptr(func, streamptr);
-
-  vlistID = streamInqVlist(streamID);
-  fileID  = streamInqFileID(streamID);
-
-  if ( CDI_Debug )
-    Message(func, "streamID = %d, fileID = %d", streamID, fileID);
-
-#if  defined  (NC_NETCDF4)
-  nc_inq_format(fileID, &format);
-#endif
-
-  cdf_inq(fileID, &ndims , &nvars, &ngatts, &unlimdimid);
-
-  /* alloc ncdims */
-  if ( ndims > 0 )
-    ncdims = (NCDIM *) malloc(ndims*sizeof(NCDIM));
-  else
-    {
-      Warning(func, "ndims = %d", ndims);
-      return (CDI_EUFSTRUCT);
-    }
-  
-  /* alloc ncvars */
-  if ( nvars > 0 )
-    ncvars = (NCVAR *) malloc(nvars*sizeof(NCVAR));
-  else
-    {
-      Warning(func, "nvars = %d", nvars);
-      return (CDI_EUFSTRUCT);
-    }
-
-  init_ncdims(ndims, ncdims);
-  init_ncvars(nvars, ncvars);
-
-  /* read global attributtes*/
-  for ( iatt = 0; iatt < ngatts; iatt++ )
-    {
-      cdf_inq_attname(fileID, NC_GLOBAL, iatt, attname);
-      cdf_inq_atttype(fileID, NC_GLOBAL, attname, &xtype);
-      cdf_inq_attlen(fileID, NC_GLOBAL, attname, &attlen);
-
-      if ( xtype == NC_CHAR )
-	{
-	  cdfGetAttText(fileID, NC_GLOBAL, attname, attstringlen-1, attstring);
-	  attstring[attlen+1] = 0;
-
-	  if ( attlen > 0 && attstring[0] != 0 )
-	    {
-	      if ( strcmp(attname, "history") == 0 )
-		{
-		  streamptr->historyID = iatt;
-		}
-	      else if ( strcmp(attname, "institution") == 0 )
-		{
-		  instID = institutInq(0, 0, NULL, attstring);
-		  if ( instID == UNDEFID )
-		    instID = institutDef(0, 0, NULL, attstring);
-		}
-	      else if ( strcmp(attname, "source") == 0 )
-		{
-		  modelID = modelInq(-1, 0, attstring);
-		}
-	      else if ( strcmp(attname, "Conventions") == 0 )
-		{
-		}
-	      else if ( strcmp(attname, "CDI") == 0 )
-		{
-		}
-	      else if ( strcmp(attname, "CDO") == 0 )
-		{
-		}
-	      else
-		{
-		  vlistDefAttTxt(vlistID, CDI_GLOBAL, attname, (int)attlen, attstring);
-		}
-	    }
-	}
-      else if ( xtype == NC_INT || xtype == NC_SHORT )
-	{
-	  int *attint;
-	  attint = (int *) malloc(attlen*sizeof(int));
-	  cdfGetAttInt(fileID, NC_GLOBAL, attname, attlen, attint);
-	  vlistDefAttInt(vlistID, CDI_GLOBAL, attname, (int)attlen, attint);
-	  free(attint);
-	}
-      else if ( xtype == NC_FLOAT || xtype == NC_DOUBLE )
-	{
-	  double *attflt;
-	  attflt = (double *) malloc(attlen*sizeof(double));
-	  cdfGetAttDouble(fileID, NC_GLOBAL, attname, attlen, attflt);
-	  vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, (int)attlen, attflt);
-	  free(attflt);
-	}
-    }
-
-  /* find time dim */
-  if ( unlimdimid >= 0 )
-    timedimid = unlimdimid;
-  else
-    timedimid = cdfTimeDimID(fileID, ndims, nvars);
-
-  streamptr->basetime.ncdimid = timedimid;
-
-  if ( timedimid != UNDEFID )
-    cdf_inq_dimlen(fileID, timedimid, &ntsteps);
-  else
-    ntsteps = 0;
-
-  streamptr->ntsteps = ntsteps;
-
-  if ( CDI_Debug )
-    Message(func, "time dimid = %d", streamptr->basetime.ncdimid);
-
-  /* read ncdims */
-  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
-    {
-      cdf_inq_dimlen(fileID, ncdimid, &ncdims[ncdimid].len);
-      cdf_inq_dimname(fileID, ncdimid, ncdims[ncdimid].name);
-      if ( timedimid == ncdimid )
-	ncdims[ncdimid].dimtype = T_AXIS;
-    }
-
-  /* read ncvars */
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
       dimidsp = ncvars[ncvarid].dimids;
@@ -4396,6 +4238,254 @@ int cdfInqContents(int streamID)
 	    }
 	}
     }
+}
+
+static
+void setDimType(int nvars, NCVAR *ncvars, NCDIM *ncdims)
+{
+  static char func[] = "setDimType";
+  int ndims;
+  int ncvarid, ncdimid;
+  int i;
+
+  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+    {
+      if ( ncvars[ncvarid].isvar == TRUE )
+	{
+	  int lxdim = 0, lydim = 0, lzdim = 0, ltdim = 0;
+	  ndims = ncvars[ncvarid].ndims;
+	  for ( i = 0; i < ndims; i++ )
+	    {
+	      ncdimid = ncvars[ncvarid].dimids[i];
+	      if      ( ncdims[ncdimid].dimtype == X_AXIS ) cdfSetDim(ncvars, ncvarid, i, X_AXIS);
+	      else if ( ncdims[ncdimid].dimtype == Y_AXIS ) cdfSetDim(ncvars, ncvarid, i, Y_AXIS);
+	      else if ( ncdims[ncdimid].dimtype == Z_AXIS ) cdfSetDim(ncvars, ncvarid, i, Z_AXIS);
+	      else if ( ncdims[ncdimid].dimtype == T_AXIS ) cdfSetDim(ncvars, ncvarid, i, T_AXIS);
+	    }
+
+	  if ( CDI_Debug )
+	    {
+	      Message(func, "var %d %s", ncvarid, ncvars[ncvarid].name);
+	      for ( i = 0; i < ndims; i++ )
+		printf("  dim %d type %d  ", i, ncvars[ncvarid].dimtype[i]);
+	      printf("\n");
+	    }
+
+	  for ( i = 0; i < ndims; i++ )
+	    {
+	      if      ( ncvars[ncvarid].dimtype[i] == X_AXIS ) lxdim = TRUE;
+	      else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS ) lydim = TRUE;
+	      else if ( ncvars[ncvarid].dimtype[i] == Z_AXIS ) lzdim = TRUE;
+	      else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = TRUE;
+	    }
+
+	  for ( i = ndims-1; i >= 0; i-- )
+	    {
+	      if ( ncvars[ncvarid].dimtype[i] == -1 )
+		{
+		  /*
+		  printf("undef dim: %d %d %d %d %d\n", i, lxdim, lydim, lzdim, ltdim);
+		  */
+		  if ( lxdim == FALSE )
+		    {
+		      cdfSetDim(ncvars, ncvarid, i, X_AXIS);
+		      lxdim = TRUE;
+		    }
+		  else if ( lydim == FALSE )
+		    {
+		      cdfSetDim(ncvars, ncvarid, i, Y_AXIS);
+		      lydim = TRUE;
+		    }
+		  else if ( lzdim == FALSE )
+		    {
+		      cdfSetDim(ncvars, ncvarid, i, Z_AXIS);
+		      lzdim = TRUE;
+		    }
+		}
+	    }	    	  
+	}
+    }
+}
+
+
+int cdfInqContents(int streamID)
+{
+#if  defined  (HAVE_LIBNETCDF)
+  static char func[] = "cdfInqContents";
+  int ndims, nvars, ngatts, unlimdimid;
+  int varID, ncvarid, ncvarid2;
+  int ncdimid;
+  int varID1;
+  int fileID;
+  int nvatts;
+  nc_type xtype;
+  size_t size = 0, xsize, ysize;
+  size_t ntsteps;
+  int timedimid = -1;
+  int *varids;
+  int nvarids;
+  size_t attlen;
+  int  ilev;
+  char name[256];
+  char attname[256];
+  const int attstringlen = 8192; char attstring[8192];
+  char *pname, *plongname, *punits;
+  double datt;
+  int iatt, timehasunits = FALSE;
+  int time_has_bounds = FALSE;
+  size_t len;
+  int nc_nvars;
+  int nvcth_id = UNDEFID, vcta_id = UNDEFID, vctb_id = UNDEFID;
+  grid_t grid;
+  int gridindex;
+  int zaxisindex;
+  size_t vctsize = 0;
+  int tableID;
+  double *vct = NULL;
+  int instID  = UNDEFID;
+  int modelID = UNDEFID;
+  int code;
+  int taxisID;
+  int i;
+  int nbdims;
+  size_t nvertex;
+  int zprec;
+  int calendar = UNDEFID;
+  NCDIM *ncdims;
+  NCVAR *ncvars;
+  int vlistID;
+  STREAM *streamptr;
+  int format = 0;
+
+  streamptr = stream_to_pointer(streamID);
+  
+  stream_check_ptr(func, streamptr);
+
+  vlistID = streamInqVlist(streamID);
+  fileID  = streamInqFileID(streamID);
+
+  if ( CDI_Debug )
+    Message(func, "streamID = %d, fileID = %d", streamID, fileID);
+
+#if  defined  (NC_NETCDF4)
+  nc_inq_format(fileID, &format);
+#endif
+
+  cdf_inq(fileID, &ndims , &nvars, &ngatts, &unlimdimid);
+
+  /* alloc ncdims */
+  if ( ndims > 0 )
+    ncdims = (NCDIM *) malloc(ndims*sizeof(NCDIM));
+  else
+    {
+      Warning(func, "ndims = %d", ndims);
+      return (CDI_EUFSTRUCT);
+    }
+  
+  /* alloc ncvars */
+  if ( nvars > 0 )
+    ncvars = (NCVAR *) malloc(nvars*sizeof(NCVAR));
+  else
+    {
+      Warning(func, "nvars = %d", nvars);
+      return (CDI_EUFSTRUCT);
+    }
+
+  init_ncdims(ndims, ncdims);
+  init_ncvars(nvars, ncvars);
+
+  /* read global attributtes*/
+  for ( iatt = 0; iatt < ngatts; iatt++ )
+    {
+      cdf_inq_attname(fileID, NC_GLOBAL, iatt, attname);
+      cdf_inq_atttype(fileID, NC_GLOBAL, attname, &xtype);
+      cdf_inq_attlen(fileID, NC_GLOBAL, attname, &attlen);
+
+      if ( xtype == NC_CHAR )
+	{
+	  cdfGetAttText(fileID, NC_GLOBAL, attname, attstringlen-1, attstring);
+	  attstring[attlen+1] = 0;
+
+	  if ( attlen > 0 && attstring[0] != 0 )
+	    {
+	      if ( strcmp(attname, "history") == 0 )
+		{
+		  streamptr->historyID = iatt;
+		}
+	      else if ( strcmp(attname, "institution") == 0 )
+		{
+		  instID = institutInq(0, 0, NULL, attstring);
+		  if ( instID == UNDEFID )
+		    instID = institutDef(0, 0, NULL, attstring);
+		}
+	      else if ( strcmp(attname, "source") == 0 )
+		{
+		  modelID = modelInq(-1, 0, attstring);
+		}
+	      else if ( strcmp(attname, "Conventions") == 0 )
+		{
+		}
+	      else if ( strcmp(attname, "CDI") == 0 )
+		{
+		}
+	      else if ( strcmp(attname, "CDO") == 0 )
+		{
+		}
+	      else
+		{
+		  vlistDefAttTxt(vlistID, CDI_GLOBAL, attname, (int)attlen, attstring);
+		}
+	    }
+	}
+      else if ( xtype == NC_INT || xtype == NC_SHORT )
+	{
+	  int *attint;
+	  attint = (int *) malloc(attlen*sizeof(int));
+	  cdfGetAttInt(fileID, NC_GLOBAL, attname, attlen, attint);
+	  vlistDefAttInt(vlistID, CDI_GLOBAL, attname, (int)attlen, attint);
+	  free(attint);
+	}
+      else if ( xtype == NC_FLOAT || xtype == NC_DOUBLE )
+	{
+	  double *attflt;
+	  attflt = (double *) malloc(attlen*sizeof(double));
+	  cdfGetAttDouble(fileID, NC_GLOBAL, attname, attlen, attflt);
+	  vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, (int)attlen, attflt);
+	  free(attflt);
+	}
+    }
+
+  /* find time dim */
+  if ( unlimdimid >= 0 )
+    timedimid = unlimdimid;
+  else
+    timedimid = cdfTimeDimID(fileID, ndims, nvars);
+
+  streamptr->basetime.ncdimid = timedimid;
+
+  if ( timedimid != UNDEFID )
+    cdf_inq_dimlen(fileID, timedimid, &ntsteps);
+  else
+    ntsteps = 0;
+
+  streamptr->ntsteps = ntsteps;
+
+  if ( CDI_Debug )
+    Message(func, "time dimid = %d", streamptr->basetime.ncdimid);
+
+  /* read ncdims */
+  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
+    {
+      cdf_inq_dimlen(fileID, ncdimid, &ncdims[ncdimid].len);
+      cdf_inq_dimname(fileID, ncdimid, ncdims[ncdimid].name);
+      if ( timedimid == ncdimid )
+	ncdims[ncdimid].dimtype = T_AXIS;
+    }
+
+
+  /* scan var attributes */
+  scanVarAttributes(fileID, nvars, ncvars, ncdims, timedimid, modelID, format);
+
 
   if ( CDI_Debug ) printNCvars(ncvars, nvars);
 
@@ -4406,6 +4496,7 @@ int cdfInqContents(int streamID)
 	{
 	  if ( ncvars[ncvarid].ndims == 1 )
 	    {
+	      /*
 	      if ( timedimid != UNDEFID && timedimid == ncvars[ncvarid].dimids[0] )
 		{
 		  if ( ncvars[ncvarid].isvar != FALSE ) cdfSetVar(ncvars, ncvarid, TRUE);
@@ -4414,6 +4505,8 @@ int cdfInqContents(int streamID)
 		{
 		  if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
 		}
+	      */
+	      if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
 
 	      if ( ncdimid == ncvars[ncvarid].dimids[0] && ncdims[ncdimid].ncvarid == UNDEFID )
 		if ( strcmp(ncvars[ncvarid].name, ncdims[ncdimid].name) == 0 )
@@ -4450,7 +4543,7 @@ int cdfInqContents(int streamID)
       else
 	{
 	  if ( ncvars[ncvarid].units[0] != 0 )
-	    timehasunit = TRUE;
+	    timehasunits = TRUE;
 
 	  if ( ncvars[ncvarid].bounds != UNDEFID )
 	    {
@@ -4703,63 +4796,7 @@ int cdfInqContents(int streamID)
     }
   */
   /* set dim type */
-  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-    {
-      if ( ncvars[ncvarid].isvar == TRUE )
-	{
-	  int lxdim = 0, lydim = 0, lzdim = 0, ltdim = 0;
-	  ndims = ncvars[ncvarid].ndims;
-	  for ( i = 0; i < ndims; i++ )
-	    {
-	      ncdimid = ncvars[ncvarid].dimids[i];
-	      if      ( ncdims[ncdimid].dimtype == X_AXIS ) cdfSetDim(ncvars, ncvarid, i, X_AXIS);
-	      else if ( ncdims[ncdimid].dimtype == Y_AXIS ) cdfSetDim(ncvars, ncvarid, i, Y_AXIS);
-	      else if ( ncdims[ncdimid].dimtype == Z_AXIS ) cdfSetDim(ncvars, ncvarid, i, Z_AXIS);
-	      else if ( ncdims[ncdimid].dimtype == T_AXIS ) cdfSetDim(ncvars, ncvarid, i, T_AXIS);
-	    }
-
-	  if ( CDI_Debug )
-	    {
-	      Message(func, "var %d %s", ncvarid, ncvars[ncvarid].name);
-	      for ( i = 0; i < ndims; i++ )
-		printf("  dim %d type %d  ", i, ncvars[ncvarid].dimtype[i]);
-	      printf("\n");
-	    }
-
-	  for ( i = 0; i < ndims; i++ )
-	    {
-	      if      ( ncvars[ncvarid].dimtype[i] == X_AXIS ) lxdim = TRUE;
-	      else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS ) lydim = TRUE;
-	      else if ( ncvars[ncvarid].dimtype[i] == Z_AXIS ) lzdim = TRUE;
-	      else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = TRUE;
-	    }
-
-	  for ( i = ndims-1; i >= 0; i-- )
-	    {
-	      if ( ncvars[ncvarid].dimtype[i] == -1 )
-		{
-		  /*
-		  printf("undef dim: %d %d %d %d %d\n", i, lxdim, lydim, lzdim, ltdim);
-		  */
-		  if ( lxdim == FALSE )
-		    {
-		      cdfSetDim(ncvars, ncvarid, i, X_AXIS);
-		      lxdim = TRUE;
-		    }
-		  else if ( lydim == FALSE )
-		    {
-		      cdfSetDim(ncvars, ncvarid, i, Y_AXIS);
-		      lydim = TRUE;
-		    }
-		  else if ( lzdim == FALSE )
-		    {
-		      cdfSetDim(ncvars, ncvarid, i, Z_AXIS);
-		      lzdim = TRUE;
-		    }
-		}
-	    }	    	  
-	}
-    }
+  setDimType(nvars, ncvars, ncdims);
 
   /* Set coordinate varids (att: associate)  */
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
@@ -5609,7 +5646,7 @@ int cdfInqContents(int streamID)
   /* time varID */
   ncvarid = streamptr->basetime.ncvarid;
 
-  if ( timehasunit )
+  if ( timehasunits )
     {
       TAXIS *taxis;
       taxis = &streamptr->tsteps[0].taxis;

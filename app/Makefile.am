@@ -6,11 +6,11 @@ noinst_PROGRAMS = createtable
 #
 cdi_SOURCES = cdi.c printinfo.h
 #
-cdi_LDADD = ../src/libcdi.a $(LDFLAGS) -lm
+cdi_LDADD = ../src/libcdi.a $(LDFLAGS)
 #
 createtable_SOURCES = createtable.c
 #
-createtable_LDADD = ../src/libcdi.a $(LDFLAGS) -lm
+createtable_LDADD = ../src/libcdi.a $(LDFLAGS)
 #
 AM_CPPFLAGS = -I$(top_srcdir)/src
 #
