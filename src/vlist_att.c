@@ -76,6 +76,7 @@ CDI_att *new_att(CDI_atts *attsp, const char *name)
   attp->name = (char *) malloc(slen+1);
   memcpy(attp->name, name, slen+1);
   attp->namesz = slen;
+  attp->xvalue = NULL;
 
   return (attp);
 }
@@ -94,7 +95,7 @@ void fill_att(CDI_att *attp, int type, size_t nelems, size_t xsz, const void *xv
 
   if ( xsz > 0 )
     {
-      attp->xvalue = (void *) malloc(xsz);
+      attp->xvalue = (void *) realloc(attp->xvalue, xsz);
       memcpy(attp->xvalue, xvalue, xsz);
     }
 }
@@ -210,16 +211,12 @@ int vlist_def_att(int type, int vlistID, int varID, const char *name, size_t len
   assert(attsp != NULL);
 
   attp = find_att(attsp, name);
-  if ( attp != NULL ) /* name in use */
-    {
-    }
-  else
-    {
-      attp = new_att(attsp, name);
-      if ( attp != NULL )
-	fill_att(attp, type, len, xsz, xp);
-    }
+  if ( attp == NULL )
+    attp = new_att(attsp, name);
 
+  if ( attp != NULL )
+    fill_att(attp, type, len, xsz, xp);
+  
   return (status);
 }
 
