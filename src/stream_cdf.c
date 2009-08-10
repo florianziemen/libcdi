@@ -3876,6 +3876,7 @@ int cmpvarname(const void *s1, const void *s2)
   return (strcmp(x->name, y->name));
 }
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 		       int timedimid, int modelID, int format)
@@ -4297,6 +4298,7 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 	}
     }
 }
+#endif
 
 static
 void setDimType(int nvars, NCVAR *ncvars, NCDIM *ncdims)
