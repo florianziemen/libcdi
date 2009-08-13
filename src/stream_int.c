@@ -224,7 +224,7 @@ static pthread_mutex_t _stream_mutex;
 
 typedef struct _streamPtrToIdx {
   int idx;
-  STREAM *ptr;
+  stream_t *ptr;
   struct _streamPtrToIdx *next;
 } streamPtrToIdx;
 
@@ -268,10 +268,10 @@ static void stream_init_pointer(void)
 }
 
 
-STREAM *stream_to_pointer(int idx)
+stream_t *stream_to_pointer(int idx)
 {
   static char func[] = "stream_to_pointer";
-  STREAM *streamptr = NULL;
+  stream_t *streamptr = NULL;
 
   STREAM_INIT
 
@@ -291,7 +291,7 @@ STREAM *stream_to_pointer(int idx)
 
 
 /* Create an index from a pointer */
-static int stream_from_pointer(STREAM *ptr)
+static int stream_from_pointer(stream_t *ptr)
 {
   static char func[] = "stream_from_pointer";
   int      idx = -1;
@@ -324,7 +324,7 @@ static int stream_from_pointer(STREAM *ptr)
 }
 
 
-static void stream_init_entry(STREAM *streamptr)
+static void stream_init_entry(stream_t *streamptr)
 {
   int i;
 
@@ -383,16 +383,16 @@ static void stream_init_entry(STREAM *streamptr)
 }
 
 
-STREAM *stream_new_entry(void)
+stream_t *stream_new_entry(void)
 {
   static char func[] = "stream_new_entry";
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   cdiInitialize(); /* ***************** make MT version !!! */
 
   STREAM_INIT
 
-  streamptr = (STREAM *) malloc(sizeof(STREAM));
+  streamptr = (stream_t *) malloc(sizeof(stream_t));
 
   if ( streamptr ) stream_init_entry(streamptr);
 
@@ -400,7 +400,7 @@ STREAM *stream_new_entry(void)
 }
 
 
-void stream_delete_entry(STREAM *streamptr)
+void stream_delete_entry(stream_t *streamptr)
 {
   static char func[] = "stream_delete_entry";
   int idx;
@@ -447,7 +447,7 @@ static void stream_initialize(void)
 }
 
 
-void stream_check_ptr(const char *func, STREAM *streamptr)
+void stream_check_ptr(const char *func, stream_t *streamptr)
 {
   if ( streamptr == NULL )
     Error(func, "stream undefined!");
@@ -513,7 +513,7 @@ void cdiCheckContents(int streamID)
   static char func[] = "cdiCheckContents";
   int index, nzaxis, zaxisID;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -534,7 +534,7 @@ void cdiCheckContents(int streamID)
 
 int streamInqFileID(int streamID)
 {
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -545,7 +545,7 @@ int streamInqFileID(int streamID)
 void streamDefineTaxis(int streamID)
 {
   static char func[] = "streamDefineTaxis";
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -581,7 +581,7 @@ void streamDefineTaxis(int streamID)
 
 void streamDefDimgroupID(int streamID, int dimgroupID)
 {
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -591,7 +591,7 @@ void streamDefDimgroupID(int streamID, int dimgroupID)
 
 int streamInqDimgroupID(int streamID)
 {
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -602,7 +602,7 @@ int streamInqDimgroupID(int streamID)
 void cdiDefAccesstype(int streamID, int type)
 {
   static char func[] = "cdiDefAccesstype";
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -625,7 +625,7 @@ void cdiDefAccesstype(int streamID, int type)
 
 int cdiInqAccesstype(int streamID)
 {
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 

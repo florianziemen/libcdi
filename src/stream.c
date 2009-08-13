@@ -134,6 +134,11 @@ static int getFiletype(const char *filename, int *byteorder)
 	  filetype = FILETYPE_GRB;
 	  if ( CDI_Debug ) Message(func, "found GRIB file = %s, version %d", filename, version);
 	}
+      else if ( version == 2 )
+	{
+	  filetype = FILETYPE_GRB2;
+	  if ( CDI_Debug ) Message(func, "found GRIB2 file = %s", filename);
+	}
     }
   else if ( memcmp(buffer, "CDF\001", 4) == 0 )
     {
@@ -178,7 +183,7 @@ static int getFiletype(const char *filename, int *byteorder)
 	  filetype = FILETYPE_GRB;
 	  if ( CDI_Debug ) Message(func, "found seek GRIB file = %s", filename);
 	}
-      if ( version == 2 )
+      else if ( version == 2 )
 	{
 	  filetype = FILETYPE_GRB2;
 	  if ( CDI_Debug ) Message(func, "found seek GRIB2 file = %s", filename);
@@ -350,7 +355,7 @@ The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_GRB2}, @
 int streamInqFiletype(int streamID)
 {
   static char func[] = "streamInqFiletype";
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -398,7 +403,7 @@ void streamDefByteorder(int streamID, int byteorder)
 {
   static char func[] = "streamDefByteorder";
   int filetype, fileID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -462,7 +467,7 @@ The valid CDI byte order types are @func{CDI_BIGENDIAN} and @func{CDI_LITTLEENDI
 int streamInqByteorder(int streamID)
 {
   static char func[] = "streamInqByteorder";
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -487,7 +492,7 @@ char *streamFilesuffix(int filetype)
 char *streamFilename(int streamID)
 {
   static char func[] = "streamFilename";
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -502,7 +507,7 @@ int cdiInqTimeSize(int streamID)
   static char func[] = "cdiInqTimeSize";
   int ntsteps;
   int tsID = 0, nrecs;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -526,7 +531,7 @@ int cdiInqContents(int streamID)
   int vlistID;
   int taxisID;
   int status = 0;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -546,7 +551,9 @@ int cdiInqContents(int streamID)
 #if  defined  (HAVE_LIBGRIB_API)
     case FILETYPE_GRB2:
       {
-        /* status = grb2InqContents(streamID); */
+	Message(func, "%s unsupported!", strfiletype(filetype));
+	status = CDI_ELIBNAVAIL;
+	/*	status = grb2InqContents(streamID); */
 	break;
       }
 #endif
@@ -608,7 +615,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
   int streamID = CDI_ESYSTEM;
   int status;
   Record *record = NULL;
-  STREAM *streamptr = NULL;
+  stream_t *streamptr = NULL;
 
   if ( CDI_Debug )
     Message(func, "Open %s mode %c file %s", strfiletype(filetype), (int) *filemode, filename);
@@ -719,7 +726,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
   int streamID = CDI_ESYSTEM;
   int status;
   Record *record = NULL;
-  STREAM *streamptr = NULL;
+  stream_t *streamptr = NULL;
 
   if ( CDI_Debug )
     Message(func, "Open %s mode %c file %s", strfiletype(filetype), (int) *filemode, filename);
@@ -977,7 +984,7 @@ int streamOpenRead(const char *filenames)
   int num_fnames;
   char *fnames[MAX_FNAMES];
   const char *filename;
-  STREAM *streamptr = NULL;
+  stream_t *streamptr = NULL;
 
   num_fnames = get_fnames(filenames, fnames, MAX_FNAMES);
 
@@ -1019,7 +1026,7 @@ int streamOpenAppend(const char *filename)
 {
   int filetype, byteorder;
   int streamID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   filetype = getFiletype(filename, &byteorder);
 
@@ -1102,7 +1109,7 @@ void streamClose(int streamID)
   int fileID;
   int index;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1240,7 +1247,7 @@ void streamSync(int streamID)
   int filetype;
   int fileID;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1302,7 +1309,7 @@ int streamDefTimestep(int streamID, int tsID)
   int newtsID;
   int taxisID;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1367,7 +1374,7 @@ int streamInqTimestep(int streamID, int tsID)
   int nrecs = 0;
   int taxisID;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1481,7 +1488,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 {
   static char func[] = "streamReadVar";
   int filetype;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1569,7 +1576,7 @@ void streamWriteVar(int streamID, int varID, double *data, int nmiss)
 {
   static char func[] = "streamWriteVar";
   int filetype;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1660,7 +1667,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
   static char func[] = "streamReadVarSlice";
   int filetype;
   int ierr = 0;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1747,7 +1754,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, double *data, int
   static char func[] = "streamWriteVarSlice";
   int filetype;
   int ierr = 0;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1828,7 +1835,7 @@ void streamWriteContents(int streamID, char *cname)
   int i;
   off_t recpos, position;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1975,7 +1982,7 @@ void cdiPrintVersion(void)
 int streamNtsteps(int streamID)
 {
   static char func[] = "streamNtsteps";
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1987,7 +1994,7 @@ int streamNtsteps(int streamID)
 off_t   streamNvals(int streamID)
 {
   static char func[] = "streamNvals";
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -2015,7 +2022,7 @@ void streamDefVlist(int streamID, int vlistID)
   static char func[] = "streamDefVlist";
   int nvars, varID;
   int gridID, zaxisID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -2067,7 +2074,7 @@ The function @func{streamInqVlist} returns the variable list of a stream.
 int streamInqVlist(int streamID)
 {
   static char func[] = "streamInqVlist";
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
   
@@ -2080,7 +2087,7 @@ int streamInqVlist(int streamID)
 void streamDefZtype(int streamID, int ztype)
 {
   static char func[] = "streamDefZtype";
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -2093,7 +2100,7 @@ void streamDefZtype(int streamID, int ztype)
 void streamDefZlevel(int streamID, int zlevel)
 {
   static char func[] = "streamDefZlevel";
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -2106,7 +2113,7 @@ void streamDefZlevel(int streamID, int zlevel)
 int streamInqZtype(int streamID)
 {
   static char func[] = "streamInqZtype";
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -2119,7 +2126,7 @@ int streamInqZtype(int streamID)
 int streamInqZlevel(int streamID)
 {
   static char func[] = "streamInqZlevel";
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 

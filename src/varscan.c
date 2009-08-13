@@ -335,7 +335,7 @@ void cdiGenVars(int streamID)
   double *dlevels1 = NULL;
   double *dlevels2 = NULL;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 

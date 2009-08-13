@@ -68,7 +68,7 @@ int iegInqRecord(int streamID, int *varID, int *levelID)
   int zaxisID = -1;
   int vlistID;
   IEGREC *iegp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -113,7 +113,7 @@ int iegReadRecord(int streamID, double *data, int *nmiss)
   int i, size;
   double missval;
   IEGREC *iegp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -499,8 +499,8 @@ int iegCopyRecord(int streamID2, int streamID1)
   off_t recpos;
   int status = 0;
   char *buffer;
-  STREAM *streamptr1;
-  STREAM *streamptr2;
+  stream_t *streamptr1;
+  stream_t *streamptr2;
 
   streamptr1 = stream_to_pointer(streamID1);
   streamptr2 = stream_to_pointer(streamID2);
@@ -543,7 +543,7 @@ int iegDefRecord(int streamID)
   int varID, levelID, tsID, zaxisID;
   int byteorder;
   IEGREC *iegp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -590,7 +590,7 @@ int iegWriteRecord(int streamID, const double *data)
   int i, gridsize, gridID;
   double refval;
   IEGREC *iegp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -631,7 +631,7 @@ void iegAddRecord(int streamID, int code, int *pdb, int *gdb, double *vct,
   RECORD *record;
   grid_t grid;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -780,7 +780,7 @@ void iegCmpRecord(int streamID, int tsID, int recID, off_t position, int code,
   int varID = 0;
   int levelID = 0;
   RECORD *record;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -841,7 +841,7 @@ void iegScanTimestep1(int streamID)
   int vlistID;
   IEGCOMPVAR compVar, compVar0;
   IEGREC *iegp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -979,7 +979,7 @@ int iegScanTimestep2(int streamID)
   int vlistID;
   IEGCOMPVAR compVar, compVar0;
   IEGREC *iegp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1130,7 +1130,7 @@ int iegInqContents(int streamID)
   static char func[] = "iegInqContents";
   int fileID;
   int status = 0;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1164,7 +1164,7 @@ int iegScanTimestep(int streamID)
   int rindex, nrecs = 0;
   IEGCOMPVAR compVar, compVar0;
   IEGREC *iegp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1282,7 +1282,7 @@ int iegInqTimestep(int streamID, int tsID)
 {
   static char func[] = "iegInqTimestep";
   int ntsteps, nrecs;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1324,7 +1324,7 @@ void iegReadVarDP(int streamID, int varID, double *data, int *nmiss)
   int status;
   double missval;
   IEGREC *iegp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1374,7 +1374,7 @@ void iegReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   int status;
   double missval;
   IEGREC *iegp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1424,7 +1424,7 @@ void iegWriteVarDP(int streamID, int varID, const double *data)
   int i;
   int code, date, time, datasize;
   IEGREC *iegp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1479,7 +1479,7 @@ void iegWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   int vlistID;
   int code, date, time, datasize;
   IEGREC *iegp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 

@@ -67,7 +67,7 @@ int extInqRecord(int streamID, int *varID, int *levelID)
   int header[4];
   int vlistID;
   EXTREC *extp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -112,7 +112,7 @@ int extReadRecord(int streamID, double *data, int *nmiss)
   int i, size;
   double missval;
   EXTREC *extp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -162,8 +162,8 @@ int extCopyRecord(int streamID2, int streamID1)
   off_t recpos;
   int status = 0;
   char *buffer;
-  STREAM *streamptr1;
-  STREAM *streamptr2;
+  stream_t *streamptr1;
+  stream_t *streamptr2;
 
   streamptr1 = stream_to_pointer(streamID1);
   streamptr2 = stream_to_pointer(streamID2);
@@ -203,7 +203,7 @@ int extDefRecord(int streamID)
   int status = 0;
   int datatype;
   EXTREC *extp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -234,7 +234,7 @@ int extWriteRecord(int streamID, const double *data)
   int fileID;
   int status = 0;
   EXTREC *extp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -262,7 +262,7 @@ void extAddRecord(int streamID, int code, int level, int xysize,
   RECORD *record;
   grid_t grid;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -314,7 +314,7 @@ void extCmpRecord(int streamID, int tsID, int recID, off_t position, int code,
   int varID = 0;
   int levelID = 0;
   RECORD *record;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -358,7 +358,7 @@ void extScanTimestep1(int streamID)
   int vlistID;
   EXTCOMPVAR compVar, compVar0;
   EXTREC *extp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -496,7 +496,7 @@ int extScanTimestep2(int streamID)
   int vlistID;
   EXTCOMPVAR compVar, compVar0;
   EXTREC *extp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -645,7 +645,7 @@ int extInqContents(int streamID)
   static char func[] = "extInqContents";
   int fileID;
   int status = 0;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -681,7 +681,7 @@ int extScanTimestep(int streamID)
   int rindex, nrecs = 0;
   EXTCOMPVAR compVar, compVar0;
   EXTREC *extp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -799,7 +799,7 @@ int extInqTimestep(int streamID, int tsID)
 {
   static char func[] = "extInqTimestep";
   int ntsteps, nrecs;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -842,7 +842,7 @@ void extReadVarDP(int streamID, int varID, double *data, int *nmiss)
   int status;
   double missval;
   EXTREC *extp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -894,7 +894,7 @@ void extReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   int status;
   double missval;
   EXTREC *extp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -944,7 +944,7 @@ void extWriteVarDP(int streamID, int varID, const double *data)
   int tsID;
   int vlistID;
   EXTREC *extp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -995,7 +995,7 @@ void extWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   int tsID;
   int vlistID;
   EXTREC *extp;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 

@@ -432,8 +432,8 @@ int cdfCopyRecord(int streamID2, int streamID1)
   int nmiss;
   int ierr = 0;
   int vlistID1, vlistID2;
-  STREAM *streamptr1;
-  STREAM *streamptr2;
+  stream_t *streamptr1;
+  stream_t *streamptr2;
 
   streamptr1 = stream_to_pointer(streamID1);
   streamptr2 = stream_to_pointer(streamID2);
@@ -473,7 +473,7 @@ int cdfInqRecord(int streamID, int *varID, int *levelID)
 {
   static char func[] = "cdfInqRecord";
   int tsID, recID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -505,7 +505,7 @@ int cdfDefRecord(int streamID)
 {
   static char func[] = "cdfDefRecord";
   int ierr = 0;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -525,7 +525,7 @@ void cdfWriteGridTraj(int streamID, int gridID)
   size_t index;
   double xlon, xlat;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -555,7 +555,7 @@ void cdfReadGridTraj(int streamID, int gridID)
   size_t index;
   double xlon, xlat;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -610,7 +610,7 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 void cdfDefMissval(int streamID, int varID, int dtype)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -648,7 +648,7 @@ void cdfWriteRecord(int streamID, double *data, int nmiss)
   static char func[] = "cdfWriteRecord";
   int varID;
   int levelID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -667,7 +667,7 @@ int cdfReadRecord(int streamID, double *data, int *nmiss)
   static char func[] = "cdfReadRecord";
   int ierr = 0;
   int levelID, varID, tsID, recID, vrecID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -694,7 +694,7 @@ void cdfDefTimeValue(int streamID, int tsID)
   int ncvarid;
   size_t index;
   TAXIS *taxis;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -764,7 +764,7 @@ void cdfDefTime(int streamID)
   char calstr[80];
   size_t len;
   TAXIS *taxis;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -874,7 +874,7 @@ void cdfDefComplex(int streamID, int gridID)
   int fileID;
   int dimlen;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -929,7 +929,7 @@ void cdfDefSpc(int streamID, int gridID)
   int fileID;
   int dimlen, dimlen0;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -995,7 +995,7 @@ void cdfDefTrajLon(int streamID, int gridID)
   int ncvarid;
   int vlistID;
   int xtype = NC_DOUBLE;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1055,7 +1055,7 @@ void cdfDefTrajLat(int streamID, int gridID)
   int ncvarid;
   int vlistID;
   int xtype = NC_DOUBLE;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1121,7 +1121,7 @@ void cdfDefXaxis(int streamID, int gridID)
   int nvertex = 2, nvdimID = -1;
   int vlistID;
   int xtype = NC_DOUBLE;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1285,7 +1285,7 @@ void cdfDefYaxis(int streamID, int gridID)
   int nvdimID = -1;
   int vlistID;
   int xtype = NC_DOUBLE;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1455,7 +1455,7 @@ void cdfDefLonLat2D(int streamID, int gridID)
   int nvertex = 4, nvdimID = -1;
   int vlistID;
   int xtype = NC_DOUBLE;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1624,7 +1624,7 @@ void cdfDefRgrid(int streamID, int gridID)
   int dimlen, dimlen0;
   int vlistID;
   int lwarn = TRUE;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1694,7 +1694,7 @@ void cdfDefGdim(int streamID, int gridID)
   int fileID;
   int dimlen, dimlen0;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1792,7 +1792,7 @@ void cdfDefCell(int streamID, int gridID)
   int nvertex, nvdimID = -1;
   int vlistID;
   int xtype = NC_DOUBLE;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1937,7 +1937,7 @@ void cdfDefVCT(int streamID, int zaxisID)
 #if  defined  (HAVE_LIBNETCDF)
   static char func[] = "cdfDefVCT";
   int type;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -2084,7 +2084,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
   int vlistID;
   int zaxisindex;
   int xtype = NC_DOUBLE;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -2395,7 +2395,7 @@ void cdfDefGrid(int streamID, int gridID)
   int gridtype, size;
   int gridindex;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -2499,7 +2499,7 @@ int cdfDefVar(int streamID, int varID)
   int vlistID;
   int iax = 0;
   char axis[5];
-  STREAM *streamptr;
+  stream_t *streamptr;
   int retval;
 
   streamptr = stream_to_pointer(streamID);
@@ -2788,7 +2788,7 @@ void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
   double missval;
   int laddoffset, lscalefactor;
   double addoffset, scalefactor;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -2916,7 +2916,7 @@ void cdfWriteVarDP(int streamID, int varID, double *data, int nmiss)
   int i;
   int dtype;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -3074,7 +3074,7 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   double missval;
   int laddoffset, lscalefactor;
   double addoffset, scalefactor;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -3300,7 +3300,7 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int n
   int i;
   int dtype;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
   extern int CDF_Debug;
 
   streamptr = stream_to_pointer(streamID);
@@ -3451,7 +3451,7 @@ void cdfCreateRecords(int streamID, int tsID)
   RECORD *records = NULL;
   int *recIDs = NULL;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -4414,7 +4414,7 @@ int cdfInqContents(int streamID)
   NCDIM *ncdims;
   NCVAR *ncvars;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
   int format = 0;
 
   streamptr = stream_to_pointer(streamID);
@@ -5815,7 +5815,7 @@ int cdfInqTimestep(int streamID, int tsID)
   int fileID;
   size_t index;
   TAXIS *taxis;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -5876,7 +5876,7 @@ void cdfEndDef(int streamID)
   int varID, ncvarid;
   int nvars;
   int fileID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -5908,7 +5908,7 @@ void cdfDefInstitut(int streamID)
   char *longname;
   size_t len;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -5937,7 +5937,7 @@ void cdfDefSource(int streamID)
   char *longname;
   size_t len;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -5965,7 +5965,7 @@ void cdfDefGlobalAtts(int streamID)
 #if  defined  (HAVE_LIBNETCDF)
   int fileID, vlistID;
   VLIST *vlistptr;
-  STREAM *streamptr;
+  stream_t *streamptr;
   int natts;
 
   streamptr = stream_to_pointer(streamID);
@@ -6001,7 +6001,7 @@ void cdfDefLocalAtts(int streamID)
   size_t len;
   int ncvarid;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -6038,7 +6038,7 @@ void cdfDefHistory(int streamID, int size, char *history)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int ncid;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -6052,7 +6052,7 @@ int cdfInqHistorySize(int streamID)
   size_t size = 0;
 #if  defined  (HAVE_LIBNETCDF)
   int ncid;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -6069,7 +6069,7 @@ void cdfInqHistoryString(int streamID, char *history)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int ncid;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -6090,7 +6090,7 @@ void cdfDefVars(int streamID)
   /*
   int  ncvarid;
   */
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 

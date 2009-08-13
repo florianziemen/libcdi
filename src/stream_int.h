@@ -238,7 +238,7 @@ typedef struct {
   int       nfiles;
   char    **fnames;
 }
-STREAM;
+stream_t;
 
 
 extern int CDI_Debug;      /* If set to 1, debuggig (default 0)            */
@@ -253,10 +253,10 @@ extern int cdiSplitLtype105;
 extern char *cdiPartabPath;
 extern int   cdiPartabIntern;
 
-STREAM *stream_to_pointer(int idx);
-STREAM *stream_new_entry(void);
-void stream_delete_entry(STREAM *streamptr);
-void stream_check_ptr(const char *func, STREAM *streamptr);
+stream_t *stream_to_pointer(int idx);
+stream_t *stream_new_entry(void);
+void stream_delete_entry(stream_t *streamptr);
+void stream_check_ptr(const char *func, stream_t *streamptr);
 
 int     streamInqFileID(int streamID);
 

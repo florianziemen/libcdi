@@ -35,7 +35,7 @@ int recordNewEntry(int streamID, int tsID)
   int recordID = 0;
   int recordSize;
   RECORD *records;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -102,7 +102,7 @@ int recordNewEntry(int streamID, int tsID)
 void cdiInitRecord(int streamID)
 {
   static char func[] = "cdiInitRecord";
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -132,7 +132,7 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
   int rec = 0;
   int recID, tsID, rindex;
   int lindex;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -208,7 +208,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
   int code, gridID, zaxisID, level;
   int tsID;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -297,7 +297,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
   static char func[] = "streamReadRecord";
   int status = 0;
   int filetype;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -360,7 +360,7 @@ void streamWriteRecord(int streamID, double *data, int nmiss)
   static char func[] = "streamWriteRecord";
   int status = 0;
   int filetype;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -421,8 +421,8 @@ void streamCopyRecord(int streamID2, int streamID1)
   static char func[] = "streamCopyRecord";
   int status = 0;
   int filetype = CDI_UNDEFID, filetype1, filetype2;
-  STREAM *streamptr1;
-  STREAM *streamptr2;
+  stream_t *streamptr1;
+  stream_t *streamptr2;
 
   streamptr1 = stream_to_pointer(streamID1);
   streamptr2 = stream_to_pointer(streamID2);
@@ -471,7 +471,7 @@ void cdiCreateRecords(int streamID, int tsID)
   int nvars, varID, recID;
   RECORD *records;
   int vlistID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 

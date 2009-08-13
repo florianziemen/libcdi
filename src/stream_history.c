@@ -11,7 +11,7 @@
 void streamDefHistory(int streamID, int length, const char *history)
 {
   static char func[] = "streamDefHistory";
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -36,7 +36,7 @@ void streamDefHistory(int streamID, int length, const char *history)
 int streamInqHistorySize(int streamID)
 {
   int size = 0;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -51,7 +51,7 @@ int streamInqHistorySize(int streamID)
 
 void streamInqHistoryString(int streamID, char *history)
 {
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 

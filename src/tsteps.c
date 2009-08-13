@@ -10,7 +10,7 @@
 
 static void tstepsInitEntry(int streamID, int tsID)
 {
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -32,7 +32,7 @@ int tstepsNewEntry(int streamID)
   int tsID = 0;
   int tstepsTableSize;
   TSTEPS *tstepsTable;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -70,7 +70,7 @@ void cdiCreateTimesteps(int streamID)
   static char func[] = "cdiCreateTimesteps";
   int ntsteps;
   int tsID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 

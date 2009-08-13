@@ -5,8 +5,6 @@
 #  include "grib.h"
 #endif
 
-int   grbScanTimestep(int streamID);
-int   grbInqTimeSize(int streamID);
 int   grbInqContents(int streamID);
 int   grbInqTimestep(int streamID, int tsID);
 
@@ -20,6 +18,6 @@ void  grbReadVarDP(int streamID, int varID, double *data, int *nmiss);
 void  grbWriteVarDP(int streamID, int varID, const double *data, int nmiss);
 
 void  grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *nmiss);
-void  grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data, int nmiss);
+int   grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data, int nmiss);
 
 #endif  /* _STREAM_GRB_H */

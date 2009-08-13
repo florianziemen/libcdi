@@ -13,7 +13,7 @@
 
 static void streamvarInitEntry(int streamID, int varID)
 {
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -37,7 +37,7 @@ static int streamvarNewEntry(int streamID)
   int varID = 0;
   int streamvarSize;
   SVARINFO *streamvar;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -109,7 +109,7 @@ int streamNewVar(int streamID, int gridID, int zaxisID)
   int *lindex;
   int nlevs;
   int levID;
-  STREAM *streamptr;
+  stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
