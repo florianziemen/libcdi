@@ -1,8 +1,8 @@
 #ifndef _STREAM_GRB_H
 #define _STREAM_GRB_H
 
-#ifndef _GRIB_H
-#  include "grib.h"
+#ifndef _CGRIBEX_H
+#  include "cgribex.h"
 #endif
 
 int   grbInqContents(int streamID);

@@ -43,7 +43,7 @@ libcdi_a_SOURCES = 	 \
 	file.c         	 \
 	binary.c	 \
         swap.c       	 \
-	griblib.c  	 \
+	cgribexlib.c  	 \
 	gribapi.c  	 \
 	cfortran.h       \
 	binary.h	 \
@@ -69,7 +69,7 @@ libcdi_a_SOURCES = 	 \
 	stream_ieg.h	 \
 	stream_int.h	 \
 	basetime.h	 \
-	grib.h	 	 \
+	cgribex.h	 \
 	gribapi.h	 \
 	grid.h	 	 \
 	service.h	 \

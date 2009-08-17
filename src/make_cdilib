@@ -86,14 +86,14 @@ c="dmemory.c         \
    stream_record.c   \
    tsteps.c          \
    file.c            \
-   griblib.c         \
+   cgribexlib.c      \
    gribapi.c         \
    swap.c            \
    binary.c          \
    cdf.c             \
 "
 
-h="cdi_limits.h taxis.h error.h dtypes.h file.h grib.h gribapi.h service.h extra.h \
+h="cdi_limits.h taxis.h error.h dtypes.h file.h cgribex.h gribapi.h service.h extra.h \
    ieg.h cdi.h timebase.h calendar.h \
    basetime.h stream_int.h stream_grb.h  datetime.h stream_cdf.h \
    tablepar.h table.h util.h grid.h varscan.h binary.h swap.h \

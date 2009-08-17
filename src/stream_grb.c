@@ -11,7 +11,7 @@
 #include "dmemory.h"
 #include "cdi.h"
 #include "stream_int.h"
-#include "grib.h"
+#include "cgribex.h"
 #include "file.h"
 #include "varscan.h"
 #include "datetime.h"
@@ -1152,12 +1152,12 @@ void grbScanTimestep1(int streamID)
       level1   = ISEC1_Level1;
       level2   = ISEC1_Level2;
 
+      gribDateTime(isec1, &vdate, &vtime);
+
       if ( ISEC4_NumBits > 0 && ISEC4_NumBits <= 32 )
 	prec = ISEC4_NumBits;
       else
         prec = DATATYPE_PACK;
-
-      gribDateTime(isec1, &vdate, &vtime);
 
       if ( nrecs == 0 )
 	{
@@ -1738,20 +1738,20 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
 }
 
 static
-void grbDefInstitut(int *isec1, int center, int subcenter)
+void cgribexDefInstitut(int *isec1, int center, int subcenter)
 {
   ISEC1_CenterID    = center;
   ISEC1_SubCenterID = subcenter;
 }
 
 static
-void grbDefModel(int *isec1, int model)
+void cgribexDefModel(int *isec1, int model)
 {
   ISEC1_ModelID = model;
 }
 
 static
-void grbDefCode(int *isec1, int code, int codetable)
+void cgribexDefCode(int *isec1, int code, int codetable)
 {
   ISEC1_CodeTable = codetable;
   if ( code < 0 ) code = -code;
@@ -1759,7 +1759,7 @@ void grbDefCode(int *isec1, int code, int codetable)
 }
 
 static
-void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
+void cgribexDefTime(int *isec1, int date, int time, int numavg, int timeID)
 {
   int year, month, day, hour, minute, second;
   int century = 0;
@@ -1893,9 +1893,9 @@ void grbDefTime(int *isec1, int date, int time, int numavg, int timeID)
 }
 
 static
-void grbDefGrid(int *isec1, int *isec2, int gridID)
+void cgribexDefGrid(int *isec1, int *isec2, int gridID)
 {
-  static char func[] = "grbDefGrid";
+  static char func[] = "cgribexDefGrid";
   int gridtype;
   static short lwarn = TRUE;
 
@@ -2079,9 +2079,9 @@ void grbDefGrid(int *isec1, int *isec2, int gridID)
 }
 
 static
-void grbDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
+void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
 {
-  static char func[] = "grbDefLevel";
+  static char func[] = "cgribexDefLevel";
   double level;
   int ilevel, zaxistype, ltype;
   static int warning = 1;
@@ -2278,12 +2278,12 @@ void grbDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID
 }
 
 static
-void grbDefMask(int *isec3)
+void cgribexDefMask(int *isec3)
 {
 }
 
 static
-void grbDefData(int datatype, int *isec4, int gridID)
+void cgribexDefData(int datatype, int *isec4, int gridID)
 {
   ISEC4_NumValues = gridInqSize(gridID);
 
@@ -2301,14 +2301,14 @@ void grbDefData(int datatype, int *isec4, int gridID)
 }
 
 static
-void grbDefaultSec0(int *isec0)
+void cgribexDefaultSec0(int *isec0)
 {
   ISEC0_GRIB_Len     = 0;
   ISEC0_GRIB_Version = 0;
 }
 
 static
-void grbDefaultSec1(int *isec1)
+void cgribexDefaultSec1(int *isec1)
 {
   ISEC1_CenterID    = 0;
   ISEC1_SubCenterID = 0;
@@ -2316,7 +2316,7 @@ void grbDefaultSec1(int *isec1)
 }
 
 static
-void grbDefaultSec4(int *isec4)
+void cgribexDefaultSec4(int *isec4)
 {
   isec4[2] = 0;
   isec4[3] = 0;
@@ -2380,9 +2380,9 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   gribbuffer = (unsigned char *) malloc(gribbuffersize);
   gribsize   = gribbuffersize / sizeof(int);
 
-  grbDefaultSec0(isec0);
-  grbDefaultSec1(isec1);
-  grbDefaultSec4(isec4);
+  cgribexDefaultSec0(isec0);
+  cgribexDefaultSec1(isec1);
+  cgribexDefaultSec4(isec4);
 
   if ( vlistInqInstitut(vlistID) != UNDEFID )
     instID = vlistInqInstitut(vlistID);
@@ -2394,7 +2394,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
       int center, subcenter;
       center    = institutInqCenter(instID);
       subcenter = institutInqSubcenter(instID);
-      grbDefInstitut(isec1, center, subcenter);
+      cgribexDefInstitut(isec1, center, subcenter);
     }
 
   if ( vlistInqModel(vlistID) != UNDEFID )
@@ -2403,17 +2403,17 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
     modelID = vlistInqVarModel(vlistID, varID);
 
   if ( modelID != UNDEFID )
-    grbDefModel(isec1, modelInqGribID(modelID));
+    cgribexDefModel(isec1, modelInqGribID(modelID));
 
   tableID = vlistInqVarTable(vlistID, varID);
   datatype = vlistInqVarDatatype(vlistID, varID);
 
-  grbDefCode(isec1, code, tableInqNum(tableID));
-  grbDefTime(isec1, date, time, numavg, vlistInqTaxis(vlistID));
-  grbDefGrid(isec1, isec2, gridID);
-  grbDefLevel(isec1, isec2, fsec2, zaxisID, levelID);
-  grbDefMask(isec3);
-  grbDefData(datatype, isec4, gridID);
+  cgribexDefCode(isec1, code, tableInqNum(tableID));
+  cgribexDefTime(isec1, date, time, numavg, vlistInqTaxis(vlistID));
+  cgribexDefGrid(isec1, isec2, gridID);
+  cgribexDefLevel(isec1, isec2, fsec2, zaxisID, levelID);
+  cgribexDefMask(isec3);
+  cgribexDefData(datatype, isec4, gridID);
 
   if ( nmiss > 0 )
     {

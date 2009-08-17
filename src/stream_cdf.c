@@ -1543,6 +1543,9 @@ void cdfDefLonLat2D(int streamID, int gridID)
 	  if ( (len = strlen(xstdname)) )
 	    cdf_put_att_text(fileID, ncxvarid, "standard_name", len, xstdname);
 
+	  /* attribute for Panoply */
+	  cdf_put_att_text(fileID, ncxvarid, "_CoordinateAxisType", 3, "Lon");
+
 	  streamptr->ncxvarID[gridindex] = ncxvarid;
 
 	  if ( gridInqXboundsPtr(gridID) )
@@ -1565,6 +1568,9 @@ void cdfDefLonLat2D(int streamID, int gridID)
 	    cdf_put_att_text(fileID, ncyvarid, "units", len, yunits);
 	  if ( (len = strlen(ystdname)) )
 	    cdf_put_att_text(fileID, ncyvarid, "standard_name", len, ystdname);
+
+	  /* attribute for Panoply */
+	  cdf_put_att_text(fileID, ncyvarid, "_CoordinateAxisType", 3, "Lat");
 
 	  streamptr->ncyvarID[gridindex] = ncyvarid;
 

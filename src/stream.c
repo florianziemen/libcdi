@@ -14,7 +14,7 @@
 #include "stream_ext.h"
 #include "stream_ieg.h"
 #include "file.h"
-#include "grib.h"
+#include "cgribex.h"
 #include "gribapi.h"
 #include "cdf.h"
 #include "service.h"
@@ -1951,7 +1951,7 @@ void cdiPrintVersion(void)
 {
   fprintf(stderr, "     CDI library version : %s\n", cdiLibraryVersion());
 #if  defined  (HAVE_LIBGRIB)
-  fprintf(stderr, "    GRIB library version : %s\n", gribLibraryVersion());
+  fprintf(stderr, "C_GRIBEX library version : %s\n", cgribexLibraryVersion());
 #endif
 #if  defined  (HAVE_LIBGRIB_API)
   fprintf(stderr, "GRIB_API library version : %s\n", gribapiLibraryVersion());
