@@ -10,7 +10,7 @@
 #include "cdi.h"
 #include "cdf_int.h"
 #include "stream_int.h"
-#include "stream_grb.h"
+#include "stream_cgribex.h"
 #include "stream_cdf.h"
 #include "stream_srv.h"
 #include "stream_ext.h"
@@ -228,8 +228,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
   gridID  = vlistInqVarGrid(vlistID, varID);
   zaxisID = vlistInqVarZaxis(vlistID, varID);
   code    = vlistInqVarCode(vlistID, varID);
-
-  level = (int) zaxisInqLevel(zaxisID, levelID);
+  level   = (int) zaxisInqLevel(zaxisID, levelID);
 
   streamptr->record->varID    = varID;
   streamptr->record->levelID  = levelID;
@@ -247,6 +246,13 @@ void streamDefRecord(int streamID, int varID, int levelID)
     {
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
+      {
+        status = grbDefRecord(streamID);
+	break;
+      }
+#endif
+#if  defined  (HAVE_LIBGRIB_API)
+    case FILETYPE_GRB2:
       {
         status = grbDefRecord(streamID);
 	break;

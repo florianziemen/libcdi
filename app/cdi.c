@@ -55,7 +55,8 @@ int Ztype  = COMPRESS_NONE;
 int Zlevel = 0;
 
 
-static void version(void)
+static
+void version(void)
 {
   fprintf(stderr, "CDI version 1.7.0\n");
   cdiPrintVersion();
@@ -79,7 +80,8 @@ static void version(void)
 */
 }
 
-static void usage(void)
+static
+void usage(void)
 {
   char *name;
   int id;
@@ -106,8 +108,9 @@ static void usage(void)
 }
 
 
-static void printInfo(int gridtype, int date, int time, int code, double level,
-		      int datasize, int nmiss, double missval, const double *data)
+static
+void printInfo(int gridtype, int date, int time, int code, double level,
+	       int datasize, int nmiss, double missval, const double *data)
 {
   static int rec = 0;
   int i, ivals = 0, imiss = 0;
@@ -179,7 +182,8 @@ static void printInfo(int gridtype, int date, int time, int code, double level,
 }
 
 
-static void printShortinfo(int streamID, int vlistID, int vardis)
+static
+void printShortinfo(int streamID, int vlistID, int vardis)
 {
   int varID;
   int gridsize = 0;
@@ -433,7 +437,8 @@ static void printShortinfo(int streamID, int vlistID, int vardis)
 #define IsBigendian()  ( u_byteorder.c[sizeof(long) - 1] )
 
 
-static void setDefaultDataType(char *datatypestr)
+static
+void setDefaultDataType(char *datatypestr)
 {
   static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
   int nbits = -1;
@@ -532,21 +537,21 @@ static void setDefaultDataType(char *datatypestr)
     }
 }
 
-
-static void setDefaultFileType(char *filetypestr)
+static
+void setDefaultFileType(char *filetypestr)
 {
   if ( filetypestr )
     {
       char *ftstr = filetypestr;
 
-      if      ( strncmp(filetypestr, "grb2", 4)  == 0 ) { ftstr += 4; DefaultFileType = FILETYPE_GRB2;}
-      else if ( strncmp(filetypestr, "grb",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC2; }
-      else if ( strncmp(filetypestr, "nc2",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC2; }
-      else if ( strncmp(filetypestr, "nc4",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC4; }
-      else if ( strncmp(filetypestr, "nc",   2)  == 0 ) { ftstr += 2; DefaultFileType = FILETYPE_NC;  }
-      else if ( strncmp(filetypestr, "srv",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_SRV; }
-      else if ( strncmp(filetypestr, "ext",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_EXT; }
-      else if ( strncmp(filetypestr, "ieg",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_IEG; }
+      if      ( memcmp(filetypestr, "grb2", 4)  == 0 ) { ftstr += 4; DefaultFileType = FILETYPE_GRB2;}
+      else if ( memcmp(filetypestr, "grb",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_GRB; }
+      else if ( memcmp(filetypestr, "nc2",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC2; }
+      else if ( memcmp(filetypestr, "nc4",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC4; }
+      else if ( memcmp(filetypestr, "nc",   2)  == 0 ) { ftstr += 2; DefaultFileType = FILETYPE_NC;  }
+      else if ( memcmp(filetypestr, "srv",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_SRV; }
+      else if ( memcmp(filetypestr, "ext",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_EXT; }
+      else if ( memcmp(filetypestr, "ieg",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_IEG; }
       else
 	{
 	  fprintf(stderr, "Unsupported filetype %s!\n", filetypestr);

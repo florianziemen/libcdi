@@ -1310,6 +1310,7 @@ Optional Features:
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
   --disable-largefile     omit support for large files
+  --enable-grib           GRIB support [default=yes]
   --enable-dap            Build OPeNDAP/DODS-enabled clients if possible
                           [default=no]
 
@@ -1333,7 +1334,7 @@ Optional Packages:
                           expect to find subdirs include and lib.
   --with-hdf5=<directory> Specify location of HDF5 library. Configure will
                           expect to find subdirs include and lib.
-  --with-grib             Use the internal GRIB library [default=yes]
+  --with-cgribex          Use the GRIB library [default=yes]
   --with-service          Use the internal SERVICE library [default=yes]
   --with-extra            Use the internal EXTRA library [default=yes]
   --with-ieg              Use the internal IEG library [default=yes]
@@ -6242,18 +6243,17 @@ fi
 fi
 
 #  ----------------------------------------------------------------------
-#  Compile interface with internal GRIB library
-#
+#  Enable GRIB support
 
-# Check whether --with-grib was given.
-if test "${with_grib+set}" = set; then
-  withval=$with_grib;
+# Check whether --enable-grib was given.
+if test "${enable_grib+set}" = set; then
+  enableval=$enable_grib; enable_grib=${enableval}
 else
-  with_grib="yes"
+  enable_grib=yes
 fi
 
 
-if test "${with_grib}" = "yes" ; then
+if test "${enable_grib}" = "yes"; then
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_LIBGRIB 1
@@ -6263,8 +6263,33 @@ fi
 
 { echo "$as_me:$LINENO: checking for GRIB support" >&5
 echo $ECHO_N "checking for GRIB support... $ECHO_C" >&6; }
-{ echo "$as_me:$LINENO: result: $with_grib" >&5
-echo "${ECHO_T}$with_grib" >&6; }
+{ echo "$as_me:$LINENO: result: $enable_grib" >&5
+echo "${ECHO_T}$enable_grib" >&6; }
+
+#  ----------------------------------------------------------------------
+#  Compile interface with internal CGRIBEX library
+#
+
+# Check whether --with-cgribex was given.
+if test "${with_cgribex+set}" = set; then
+  withval=$with_cgribex;
+else
+  with_cgribex="yes"
+fi
+
+
+if test "${with_cgribex}" = "yes" ; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBCGRIBEX 1
+_ACEOF
+
+fi
+
+{ echo "$as_me:$LINENO: checking for CGRIBEX support" >&5
+echo $ECHO_N "checking for CGRIBEX support... $ECHO_C" >&6; }
+{ echo "$as_me:$LINENO: result: $with_cgribex" >&5
+echo "${ECHO_T}$with_cgribex" >&6; }
 
 #  ----------------------------------------------------------------------
 #  Compile interface with internal SERVICE library

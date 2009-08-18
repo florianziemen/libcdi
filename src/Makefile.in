@@ -63,7 +63,7 @@ am_libcdi_a_OBJECTS = cdiFortran.$(OBJEXT) cdi_error.$(OBJEXT) \
 	table.$(OBJEXT) util.$(OBJEXT) varscan.$(OBJEXT) \
 	calendar.$(OBJEXT) timebase.$(OBJEXT) vlist.$(OBJEXT) \
 	vlist_var.$(OBJEXT) vlist_att.$(OBJEXT) basetime.$(OBJEXT) \
-	stream_history.$(OBJEXT) stream_grb.$(OBJEXT) \
+	stream_history.$(OBJEXT) stream_cgribex.$(OBJEXT) \
 	stream_cdf.$(OBJEXT) stream_srv.$(OBJEXT) stream_ext.$(OBJEXT) \
 	stream_ieg.$(OBJEXT) grid.$(OBJEXT) zaxis.$(OBJEXT) \
 	stream.$(OBJEXT) stream_var.$(OBJEXT) stream_record.$(OBJEXT) \
@@ -214,7 +214,7 @@ libcdi_a_SOURCES = \
 	vlist_att.c 	 \
 	basetime.c     	 \
 	stream_history.c \
-	stream_grb.c     \
+	stream_cgribex.c \
 	stream_cdf.c     \
 	stream_srv.c     \
 	stream_ext.c     \
@@ -253,7 +253,7 @@ libcdi_a_SOURCES = \
 	timebase.h	 \
 	vlist.h	         \
 	taxis.h	         \
-	stream_grb.h	 \
+	stream_cgribex.h \
 	stream_cdf.h	 \
 	stream_srv.h	 \
 	stream_ext.h	 \
@@ -383,8 +383,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/servicelib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cdf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cgribex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_ext.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_grb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_history.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_ieg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_int.Po@am__quote@

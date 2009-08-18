@@ -128,10 +128,10 @@ src/servicelib.c -text
 src/stream.c -text
 src/stream_cdf.c -text
 src/stream_cdf.h -text
+src/stream_cgribex.c -text
+src/stream_cgribex.h -text
 src/stream_ext.c -text
 src/stream_ext.h -text
-src/stream_grb.c -text
-src/stream_grb.h -text
 src/stream_history.c -text
 src/stream_ieg.c -text
 src/stream_ieg.h -text

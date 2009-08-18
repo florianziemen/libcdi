@@ -148,18 +148,30 @@ else
 fi
 
 #  ----------------------------------------------------------------------
-#  Compile interface with internal GRIB library
-#
-AC_ARG_WITH([grib],
-            [AC_HELP_STRING([--with-grib], [Use the internal GRIB library [default=yes]])],,
-             with_grib="yes")
+#  Enable GRIB support
 
-if test "${with_grib}" = "yes" ; then
-  AC_DEFINE(HAVE_LIBGRIB, [1], [Define to 1 for GRIB interface])
+AC_ARG_ENABLE(grib,AS_HELP_STRING([--enable-grib],[GRIB support [[default=yes]]]),enable_grib=${enableval},enable_grib=yes)
+
+if test "${enable_grib}" = "yes"; then
+  AC_DEFINE(HAVE_LIBGRIB, [1], [Define to 1 for GRIB support])
 fi
 
 AC_MSG_CHECKING([for GRIB support])
-AC_MSG_RESULT($with_grib)
+AC_MSG_RESULT($enable_grib)
+
+#  ----------------------------------------------------------------------
+#  Compile interface with internal CGRIBEX library
+#
+AC_ARG_WITH([cgribex],
+            [AC_HELP_STRING([--with-cgribex], [Use the GRIB library [default=yes]])],,
+             with_cgribex="yes")
+
+if test "${with_cgribex}" = "yes" ; then
+  AC_DEFINE(HAVE_LIBCGRIBEX, [1], [Define to 1 for GRIB1 decoding/encoding with cgribex])
+fi
+
+AC_MSG_CHECKING([for CGRIBEX support])
+AC_MSG_RESULT($with_cgribex)
 
 #  ----------------------------------------------------------------------
 #  Compile interface with internal SERVICE library
