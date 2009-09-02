@@ -24,6 +24,8 @@ libcdi_a_SOURCES = 	 \
 	basetime.c     	 \
 	stream_history.c \
 	stream_cgribex.c \
+	stream_gribapi.c \
+	stream_grb.c     \
 	stream_cdf.c     \
 	stream_srv.c     \
 	stream_ext.c     \
@@ -63,6 +65,8 @@ libcdi_a_SOURCES = 	 \
 	vlist.h	         \
 	taxis.h	         \
 	stream_cgribex.h \
+	stream_gribapi.h \
+	stream_grb.h     \
 	stream_cdf.h	 \
 	stream_srv.h	 \
 	stream_ext.h	 \

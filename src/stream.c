@@ -8,7 +8,7 @@
 #include "cdi.h"
 #include "stream_int.h"
 #include "cdf.h"
-#include "stream_cgribex.h"
+#include "stream_grb.h"
 #include "stream_cdf.h"
 #include "stream_srv.h"
 #include "stream_ext.h"
@@ -51,9 +51,6 @@ void cdiDebug(int level)
   if ( level == 1 || level & 16 )
     {
 #if  defined  (HAVE_LIBGRIB)
-      gribSetDebug(1);
-#endif
-#if  defined  (HAVE_LIBGRIB_API)
       gribSetDebug(1);
 #endif
 #if  defined  (HAVE_LIBNETCDF)
@@ -543,17 +540,9 @@ int cdiInqContents(int streamID)
     {
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
-      {
-        status = grbInqContents(streamID);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBGRIB_API)
     case FILETYPE_GRB2:
       {
-	Message(func, "%s unsupported!", strfiletype(filetype));
-	status = CDI_ELIBNAVAIL;
-	/*	status = grb2InqContents(streamID); */
+        status = grbInqContents(streamID);
 	break;
       }
 #endif
@@ -1409,15 +1398,9 @@ int streamInqTimestep(int streamID, int tsID)
     {
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
-      {
-        nrecs = grbInqTimestep(streamID, tsID);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBGRIB_API)
     case FILETYPE_GRB2:
       {
-	/* nrecs = grb2InqTimestep(streamID, tsID);*/
+        nrecs = grbInqTimestep(streamID, tsID);
 	break;
       }
 #endif
@@ -1505,15 +1488,9 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
     {
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
-      {
-        grbReadVarDP(streamID, varID, data, nmiss);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBGRIB_API)
     case FILETYPE_GRB2:
       {
-        /*grbReadVarDP(streamID, varID, data, nmiss);*/
+        grbReadVarDP(streamID, varID, data, nmiss);
 	break;
       }
 #endif
@@ -1593,15 +1570,9 @@ void streamWriteVar(int streamID, int varID, double *data, int nmiss)
     {
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
-      {
-        grbWriteVarDP(streamID, varID, data, nmiss);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBGRIB_API)
     case FILETYPE_GRB2:
       {
-        /*grb2WriteVarDP(streamID, varID, data, nmiss);*/
+        grbWriteVarDP(streamID, varID, data, nmiss);
 	break;
       }
 #endif
@@ -1681,15 +1652,9 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
     {
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
-      {
-        grbReadVarSliceDP(streamID, varID, levelID, data, nmiss);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBGRIB_API)
     case FILETYPE_GRB2:
       {
-        /* grb2ReadVarSliceDP(streamID, varID, levelID, data, nmiss);*/
+        grbReadVarSliceDP(streamID, varID, levelID, data, nmiss);
 	break;
       }
 #endif
@@ -1769,15 +1734,9 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, double *data, int
     {
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
-      {
-        grbWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBGRIB_API)
     case FILETYPE_GRB2:
       {
-        /* grb2WriteVarSliceDP(streamID, varID, levelID, data, nmiss); */
+        grbWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
 	break;
       }
 #endif

@@ -1,23 +1,16 @@
-#ifndef _STREAM_GRB_H
-#define _STREAM_GRB_H
+#ifndef _STREAM_CGRIBEX_H
+#define _STREAM_CGRIBEX_H
 
-#ifndef _CGRIBEX_H
-#  include "cgribex.h"
-#endif
+int cgribexInqRecord(int streamID, int *varID, int *levelID);
 
-int   grbInqContents(int streamID);
-int   grbInqTimestep(int streamID, int tsID);
+void cgribexScanTimestep1(int streamID);
+int cgribexScanTimestep2(int streamID);
+int cgribexScanTimestep(int streamID);
 
-int   grbInqRecord(int streamID, int *varID, int *levelID);
-int   grbDefRecord(int streamID);
-int   grbWriteRecord(int streamID, const double *data, int nmiss);
-int   grbReadRecord(int streamID, double *data, int *nmiss);
-int   grbCopyRecord(int streamIDdest, int streamIDsrc);
+int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
+		  int unreduced, int *nmiss, int *zip);
 
-void  grbReadVarDP(int streamID, int varID, double *data, int *nmiss);
-void  grbWriteVarDP(int streamID, int varID, const double *data, int nmiss);
+size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int date, int time, int numavg, 
+		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize);
 
-void  grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *nmiss);
-int   grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data, int nmiss);
-
-#endif  /* _STREAM_GRB_H */
+#endif  /* _STREAM_CGRIBEX_H */

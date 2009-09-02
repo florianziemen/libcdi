@@ -71,7 +71,6 @@ static int _file_init = FALSE;
 
 #if  defined  (HAVE_LIBPTHREAD)
 #include <pthread.h>
-#include "pthread_debug.h"
 
 static pthread_once_t _file_init_thread = PTHREAD_ONCE_INIT;
 static pthread_mutex_t _file_mutex;

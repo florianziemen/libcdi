@@ -3,7 +3,7 @@
 #endif
 
 #if  defined  (HAVE_LIBGRIB_API)
-#  include "grib_api.h"
+#  include <grib_api.h>
 #endif
 
 #include <stdio.h>

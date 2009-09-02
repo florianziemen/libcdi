@@ -43,8 +43,25 @@ cat > ${PROG} << EOR
 #include <fcntl.h>
 #include <unistd.h>
 
+#if  defined  (HAVE_LIBGRIB_API)
+#  include <grib_api.h>
+#endif
+
+#if defined (HAVE_MMAP)
+#  include <sys/mman.h> /* mmap() is defined in this header */
+#endif
+
+#if  defined  (HAVE_LIBPTHREAD)
+#  include <pthread.h>
+#endif
+
+#if  defined  (HAVE_LIBSZ)
+#  include <szlib.h>
+#endif
+
 #if ! defined (HAVE_CONFIG_H)
 #  define  HAVE_LIBGRIB      1
+#  define  HAVE_LIBCGRIBEX   1
 #  define  HAVE_LIBSERVICE   1
 #  define  HAVE_LIBEXTRA     1
 #  define  HAVE_LIBIEG       1
@@ -77,6 +94,8 @@ c="dmemory.c         \
    stream_int.c      \
    stream.c          \
    stream_history.c  \
+   stream_cgribex.c  \
+   stream_gribapi.c  \
    stream_grb.c      \
    stream_srv.c      \
    stream_ext.c      \
@@ -94,14 +113,14 @@ c="dmemory.c         \
 "
 
 h="cdi_limits.h taxis.h error.h dtypes.h file.h cgribex.h gribapi.h service.h extra.h \
-   ieg.h cdi.h timebase.h calendar.h \
-   basetime.h stream_int.h stream_grb.h  datetime.h stream_cdf.h \
+   ieg.h cdi.h timebase.h calendar.h basetime.h datetime.h stream_int.h \
+   stream_cgribex.h  stream_gribapi.h  stream_grb.h  stream_cdf.h \
    tablepar.h table.h util.h grid.h varscan.h binary.h swap.h \
    service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \
    cdf.h vlist.h"
 
 cat $h >> ${PROG}
-cat $c | grep -v '#include' >> ${PROG}
+cat $c | grep -v '#include' | grep -v '#  include' >> ${PROG}
 
 if test -f config.h ; then
    cpp -P -DHAVE_CONFIG_H  version.c >>  ${PROG}
