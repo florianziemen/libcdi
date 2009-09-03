@@ -1,5 +1,5 @@
-#ifndef _GRIB_H
-#define _GRIB_H
+#ifndef _CGRIBEX_H
+#define _CGRIBEX_H
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -72,7 +72,7 @@
 #define  ISEC1_TimePeriod2          (isec1[16])  /*  P2 Time period                               */
 #define  ISEC1_TimeRange            (isec1[17])  /*  Time range indicator                         */
 #define  ISEC1_AvgNum               (isec1[18])  /*  Number of products included in an average    */
-#define  ISEC1_AvgMiss              (isec1[19])  /*  Number of products missing form an average   */
+#define  ISEC1_AvgMiss              (isec1[19])  /*  Number of products missing from an average   */
 #define  ISEC1_Century              (isec1[20])  /*  Century                                      */
 #define  ISEC1_SubCenterID          (isec1[21])  /*  Subcenter identifier                         */
 #define  ISEC1_DecScaleFactor       (isec1[22])  /*  Decimal scale factor                         */
@@ -179,7 +179,7 @@ void  gribExDP(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
                int kleng, int *kword, char *hoper, int *kret);
 
 
-const char *gribLibraryVersion(void);
+const char *cgribexLibraryVersion(void);
 
 void  gribDebug(int debug);
 
@@ -205,8 +205,11 @@ void  gribPrintGDS(int nrec, long recpos, long recsize, unsigned char *gribbuffe
 void  gribPrintBMS(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
 void  gribPrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
 
-int gribSections(unsigned char *gribbuffer, long recsize, unsigned char **pdsp,
-		 unsigned char **gdsp, unsigned char **bmsp, unsigned char **bdsp);
+int grib1Sections(unsigned char *gribbuffer, long recsize, unsigned char **pdsp,
+		  unsigned char **gdsp, unsigned char **bmsp, unsigned char **bdsp);
+int grib2Sections(unsigned char *gribbuffer, long recsize, unsigned char **idsp,
+		  unsigned char **lusp, unsigned char **gdsp, unsigned char **pdsp,
+		  unsigned char **drsp, unsigned char **bmsp, unsigned char **bdsp);
 
 int   gribGetZip(long recsize, unsigned char *gribbuffer, long *urecsize);
 
@@ -226,6 +229,7 @@ int   gribFileSeek(int fileID, long *offset);
 int   gribReadSize(int fileID);
 int   gribVersion(unsigned char *buffer, size_t buffersize);
 
-int gribGinfo(long recpos, long recsize, unsigned char *gribbuffer, int *intnum, float *fltnum);
+int   gribGinfo(long recpos, long recsize, unsigned char *gribbuffer, int *intnum, float *fltnum);
 
-#endif  /* _GRIB_H */
+#endif  /* _CGRIBEX_H */ 
+
