@@ -98,6 +98,8 @@ src/cdi_error.c -text
 src/cdi_limits.h -text
 src/cfortran.doc -text
 src/cfortran.h -text
+src/cgribex.h -text
+src/cgribexlib.c -text
 src/config.h.in -text
 src/datetime.h -text
 src/dmemory.c -text
@@ -110,10 +112,8 @@ src/extra.h -text
 src/extralib.c -text
 src/file.c -text
 src/file.h -text
-src/grib.h -text
 src/gribapi.c -text
 src/gribapi.h -text
-src/griblib.c -text
 src/grid.c -text
 src/grid.h -text
 src/ieg.h -text
