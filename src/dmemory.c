@@ -91,8 +91,8 @@ static void memInternalProblem(const char *caller, const char *fmt, ...)
 static void memError(const char *caller, const char *file, int line, size_t size)
 {
   printf("\n");
-  fprintf(stderr, "Error (%s) : Allocation of %ld bytes failed. [ line %d file %s ]\n",
-	  caller, (long) size, line, file);
+  fprintf(stderr, "Error (%s) : Allocation of %lu bytes failed. [ line %d file %s ]\n",
+	  caller, (unsigned long) size, line, file);
 
   if ( errno )
     perror("System error message ");
@@ -121,7 +121,7 @@ static void memListPrintEntry(int mtype, int item, size_t size, void *ptr,
     }
 
    fprintf(stderr, "memory item %3d ", item);
-   fprintf(stderr, "(%6u byte) ", (unsigned) size);
+   fprintf(stderr, "(%6lu byte) ", (unsigned long) size);
    fprintf(stderr, "at %p", ptr);
    if ( file != NULL )
      {
