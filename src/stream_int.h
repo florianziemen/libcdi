@@ -58,7 +58,11 @@ char *strdup(const char *s);
 #endif
 
 
-/* performance problems on IBM
+#if defined (__ibm__) /* performance problems on IBM */
+#ifndef DBL_IS_NAN
+#  define DBL_IS_NAN(x)     ((x) != (x))
+#endif
+#else
 #ifndef DBL_IS_NAN
 #if  defined  (HAVE_ISNAN)
 #  define DBL_IS_NAN(x)     (isnan(x))
@@ -68,10 +72,6 @@ char *strdup(const char *s);
 #  define DBL_IS_NAN(x)     ((x) != (x))
 #endif
 #endif
-*/
-
-#ifndef DBL_IS_NAN
-#  define DBL_IS_NAN(x)     ((x) != (x))
 #endif
 
 #ifndef DBL_IS_EQUAL

@@ -29,7 +29,6 @@
 #define UNDEFID  CDI_UNDEFID
 
 
-void cdfDefTime(int streamID);
 void cdfDefGlobalAtts(int streamID);
 void cdfDefLocalAtts(int streamID);
 
@@ -517,6 +516,7 @@ int cdfDefRecord(int streamID)
   return (ierr);
 }
 
+static
 void cdfWriteGridTraj(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -546,7 +546,7 @@ void cdfWriteGridTraj(int streamID, int gridID)
 #endif
 }
 
-
+static
 void cdfReadGridTraj(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -579,6 +579,7 @@ void cdfReadGridTraj(int streamID, int gridID)
 
 
 #if  defined  (HAVE_LIBNETCDF)
+static
 void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 {
   static char func[] = "cdfDefVarDeflate";
@@ -606,7 +607,7 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 }
 #endif
 
-
+static
 void cdfDefMissval(int streamID, int varID, int dtype)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -642,6 +643,7 @@ void cdfDefMissval(int streamID, int varID, int dtype)
 #endif
 }
 
+
 void cdfWriteRecord(int streamID, double *data, int nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -661,6 +663,7 @@ void cdfWriteRecord(int streamID, double *data, int nmiss)
   cdfWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
 #endif
 }
+
 
 int cdfReadRecord(int streamID, double *data, int *nmiss)
 {
@@ -739,19 +742,7 @@ printf("fileID = %d %d %d %f\n", fileID, time_varid, index, timevalue);
 #endif
 }
 
-
-void cdfDefTimestep(int streamID, int tsID)
-{
-  int vlistID;
-
-  vlistID = streamInqVlist(streamID);
-
-  if ( vlistHasTime(vlistID) ) cdfDefTime(streamID);
-
-  cdfDefTimeValue(streamID, tsID);
-}
-
-
+static
 void cdfDefTime(int streamID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -863,6 +854,18 @@ void cdfDefTime(int streamID)
 }
 
 
+void cdfDefTimestep(int streamID, int tsID)
+{
+  int vlistID;
+
+  vlistID = streamInqVlist(streamID);
+
+  if ( vlistHasTime(vlistID) ) cdfDefTime(streamID);
+
+  cdfDefTimeValue(streamID, tsID);
+}
+
+static
 void cdfDefComplex(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -915,6 +918,7 @@ void cdfDefComplex(int streamID, int gridID)
 #endif
 }
 
+static
 void cdfDefSpc(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -979,6 +983,7 @@ void cdfDefSpc(int streamID, int gridID)
 #endif
 }
 
+static
 void cdfDefTrajLon(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -1039,6 +1044,7 @@ void cdfDefTrajLon(int streamID, int gridID)
 #endif
 }
 
+static
 void cdfDefTrajLat(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
