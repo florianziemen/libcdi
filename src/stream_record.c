@@ -355,7 +355,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
 }
 
 
-void streamWriteRecord(int streamID, double *data, int nmiss)
+void streamWriteRecord(int streamID, const double *data, int nmiss)
 {
   static char func[] = "streamWriteRecord";
   int status = 0;

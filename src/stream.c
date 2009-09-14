@@ -1549,7 +1549,7 @@ The function streamWriteVar writes the values of one time step of a variable
 to an open dataset.
 @EndFunction
 */
-void streamWriteVar(int streamID, int varID, double *data, int nmiss)
+void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 {
   static char func[] = "streamWriteVar";
   int filetype;
@@ -1714,7 +1714,7 @@ The function streamWriteVarSlice writes the values of a horizontal slice of a
 variable to an open dataset.
 @EndFunction
 */
-void streamWriteVarSlice(int streamID, int varID, int levelID, double *data, int nmiss)
+void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
 {
   static char func[] = "streamWriteVarSlice";
   int filetype;

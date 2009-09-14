@@ -13,12 +13,12 @@ void   cdfEndDef(int streamID);
 int    cdfDefRecord(int streamID);
 int    cdfCopyRecord(int streamIDdest, int streamIDsrc);
 int    cdfReadRecord(int streamID, double *data, int *nmiss);
-void   cdfWriteRecord(int streamID, double *data, int nmiss);
+void   cdfWriteRecord(int streamID, const double *data, int nmiss);
 
 void   cdfReadVarDP(int streamID, int varID, double *data, int *nmiss);
-void   cdfWriteVarDP(int streamID, int varID, double *data, int nmiss);
+void   cdfWriteVarDP(int streamID, int varID, const double *data, int nmiss);
 
 int    cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *nmiss);
-int    cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int nmiss);
+int    cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data, int nmiss);
 
 #endif

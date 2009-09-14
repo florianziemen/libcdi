@@ -232,13 +232,13 @@ off_t   streamNvals(int streamID);
 void    streamReadVar(int streamID, int varID, double *data, int *nmiss);
 
 /*      streamWriteVar: Write a variable */
-void    streamWriteVar(int streamID, int varID, double *data, int nmiss);
+void    streamWriteVar(int streamID, int varID, const double *data, int nmiss);
 
 /*      streamReadVarSlice: Read a horizontal slice of a variable */
 void    streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss);
 
 /*      streamWriteVarSlice: Write a horizontal slice of a variable */
-void    streamWriteVarSlice(int streamID, int varID, int levelID, double *data, int nmiss);
+void    streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss);
 
 
 /* STREAM record I/O routines */
@@ -246,7 +246,7 @@ void    streamWriteVarSlice(int streamID, int varID, int levelID, double *data, 
 void    streamInqRecord(int streamID, int *varID, int *levelID);
 void    streamDefRecord(int streamID, int  varID, int  levelID);
 void    streamReadRecord(int streamID, double *data, int *nmiss);
-void    streamWriteRecord(int streamID, double *data, int nmiss);
+void    streamWriteRecord(int streamID, const double *data, int nmiss);
 void    streamCopyRecord(int streamIDdest, int streamIDsrc);
 
 void    streamInqGinfo(int streamID, int *intnum, float *fltnum);

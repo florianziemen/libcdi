@@ -644,7 +644,7 @@ void cdfDefMissval(int streamID, int varID, int dtype)
 }
 
 
-void cdfWriteRecord(int streamID, double *data, int nmiss)
+void cdfWriteRecord(int streamID, const double *data, int nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
   static char func[] = "cdfWriteRecord";
@@ -2908,7 +2908,8 @@ void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
 #endif
 }
 
-void cdfWriteVarDP(int streamID, int varID, double *data, int nmiss)
+
+void cdfWriteVarDP(int streamID, int varID, const double *data, int nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
   static char func[] = "cdfWriteVarDP";
@@ -2928,6 +2929,7 @@ void cdfWriteVarDP(int streamID, int varID, double *data, int nmiss)
   int i;
   int dtype;
   int vlistID;
+  double *mdata = NULL;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -3019,11 +3021,14 @@ void cdfWriteVarDP(int streamID, int varID, double *data, int nmiss)
       laddoffset   = IS_NOT_EQUAL(addoffset, 0);
       lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
 
+      missval = vlistInqVarMissval(vlistID, varID);
+
       nvals = gridInqSize(gridID)*zaxisInqSize(zaxisID);
 
       if ( laddoffset || lscalefactor )
 	{
-	  missval = vlistInqVarMissval(vlistID, varID);
+	  mdata = (double *) malloc(nvals*sizeof(double));
+	  memcpy(mdata, data, nvals*sizeof(double));
 
 	  if ( nmiss > 0 )
 	    {
@@ -3031,8 +3036,8 @@ void cdfWriteVarDP(int streamID, int varID, double *data, int nmiss)
 		{
 		  if ( !DBL_IS_EQUAL(data[i], missval) )
 		    {
-		      if ( laddoffset )   data[i] -= addoffset;
-		      if ( lscalefactor ) data[i] /= scalefactor;
+		      if ( laddoffset )   mdata[i] -= addoffset;
+		      if ( lscalefactor ) mdata[i] /= scalefactor;
 		    }
 		}
 	    }
@@ -3040,8 +3045,8 @@ void cdfWriteVarDP(int streamID, int varID, double *data, int nmiss)
 	    {
 	      for ( i = 0; i < nvals; i++ )
 		{
-		  if ( laddoffset )   data[i] -= addoffset;
-		  if ( lscalefactor ) data[i] /= scalefactor;
+		  if ( laddoffset )   mdata[i] -= addoffset;
+		  if ( lscalefactor ) mdata[i] /= scalefactor;
 		}
 	    }
 	}
@@ -3049,11 +3054,24 @@ void cdfWriteVarDP(int streamID, int varID, double *data, int nmiss)
       if ( dtype == DATATYPE_UINT8 || dtype == DATATYPE_INT8 ||
 	   dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 )
 	{
-	  for ( i = 0; i < nvals; i++ ) data[i] = NINT(data[i]);
+	  if ( mdata )
+	    {
+	      for ( i = 0; i < nvals; i++ ) mdata[i] = NINT(mdata[i]);
+	    }
+	  else
+	    {
+	      mdata = (double *) malloc(nvals*sizeof(double));
+	      for ( i = 0; i < nvals; i++ ) mdata[i] = NINT(data[i]);
+	    }
 	}
     }
 
-  cdf_put_vara_double(fileID, ncvarid, start, count, data);
+  if ( mdata )
+    cdf_put_vara_double(fileID, ncvarid, start, count, mdata);
+  else
+    cdf_put_vara_double(fileID, ncvarid, start, count, data);
+
+  if ( mdata ) free(mdata);
 #endif
 }
 
@@ -3292,7 +3310,8 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   return (0);
 }
 
-int cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int nmiss)
+
+int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data, int nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
   static char func[] = "cdfWriteVarSliceDP";
@@ -3312,6 +3331,7 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int n
   int i;
   int dtype;
   int vlistID;
+  double *mdata = NULL;
   stream_t *streamptr;
   extern int CDF_Debug;
 
@@ -3403,14 +3423,17 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int n
 
       if ( laddoffset || lscalefactor )
 	{
+	  mdata = (double *) malloc(nvals*sizeof(double));
+	  memcpy(mdata, data, nvals*sizeof(double));
+
 	  if ( nmiss > 0 )
 	    {
 	      for ( i = 0; i < nvals; i++ )
 		{
-		  if ( !DBL_IS_EQUAL(data[i], missval) )
+		  if ( !DBL_IS_EQUAL(mdata[i], missval) )
 		    {
-		      if ( laddoffset )   data[i] -= addoffset;
-		      if ( lscalefactor ) data[i] /= scalefactor;
+		      if ( laddoffset )   mdata[i] -= addoffset;
+		      if ( lscalefactor ) mdata[i] /= scalefactor;
 		    }
 		}
 	    }
@@ -3418,8 +3441,8 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int n
 	    {
 	      for ( i = 0; i < nvals; i++ )
 		{
-		  if ( laddoffset )   data[i] -= addoffset;
-		  if ( lscalefactor ) data[i] /= scalefactor;
+		  if ( laddoffset )   mdata[i] -= addoffset;
+		  if ( lscalefactor ) mdata[i] /= scalefactor;
 		}
 	    }
 	}
@@ -3427,7 +3450,15 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int n
       if ( dtype == DATATYPE_UINT8 || dtype == DATATYPE_INT8 ||
 	   dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 )
 	{
-	  for ( i = 0; i < nvals; i++ ) data[i] = NINT(data[i]);
+	  if ( mdata )
+	    {
+	      for ( i = 0; i < nvals; i++ ) mdata[i] = NINT(mdata[i]);
+	    }
+	  else
+	    {
+	      mdata = (double *) malloc(nvals*sizeof(double));
+	      for ( i = 0; i < nvals; i++ ) mdata[i] = NINT(data[i]);
+	    }
 	}
 
       if ( CDF_Debug )
@@ -3435,7 +3466,7 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int n
 	  double fmin, fmax;
 	  fmin =  1.0e200;
 	  fmax = -1.0e200;
-	  for ( i = 1; i < nvals; ++i )
+	  for ( i = 0; i < nvals; ++i )
 	    {
 	      if ( !DBL_IS_EQUAL(data[i], missval) )
 		{
@@ -3448,8 +3479,12 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, double *data, int n
 	}
     }
 
-  cdf_put_vara_double(fileID, ncvarid, start, count, data);
+  if ( mdata )
+    cdf_put_vara_double(fileID, ncvarid, start, count, mdata);
+  else
+    cdf_put_vara_double(fileID, ncvarid, start, count, data);
 
+  if ( mdata ) free(mdata);
 #endif
   return (0);
 }

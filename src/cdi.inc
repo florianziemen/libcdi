@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   June 2009
+! Uwe Schulzweida, MPI-MET, Hamburg,   September 2009
 !
 
       INTEGER    CDI_UNDEFID           
@@ -40,8 +40,8 @@
 !
       INTEGER    FILETYPE_GRB          
       PARAMETER (FILETYPE_GRB           =  1)
-      INTEGER    FILETYPE_GB2          
-      PARAMETER (FILETYPE_GB2           =  2)
+      INTEGER    FILETYPE_GRB2         
+      PARAMETER (FILETYPE_GRB2          =  2)
       INTEGER    FILETYPE_NC           
       PARAMETER (FILETYPE_NC            =  3)
       INTEGER    FILETYPE_NC2          
