@@ -778,7 +778,7 @@ The function @func{gridDefXname} defines the name of a X-axis.
 
 @EndFunction
 */
-void gridDefXname(int gridID, char *xname)
+void gridDefXname(int gridID, const char *xname)
 {
   grid_t *gridptr;
 
@@ -803,7 +803,7 @@ The function @func{gridDefXlongname} defines the longname of a X-axis.
 
 @EndFunction
 */
-void gridDefXlongname(int gridID, char *xlongname)
+void gridDefXlongname(int gridID, const char *xlongname)
 {
   grid_t *gridptr;
 
@@ -828,7 +828,7 @@ The function @func{gridDefXunits} defines the units of a X-axis.
 
 @EndFunction
 */
-void gridDefXunits(int gridID, char *xunits)
+void gridDefXunits(int gridID, const char *xunits)
 {
   grid_t *gridptr;
 
@@ -853,7 +853,7 @@ The function @func{gridDefYname} defines the name of a Y-axis.
 
 @EndFunction
 */
-void gridDefYname(int gridID, char *yname)
+void gridDefYname(int gridID, const char *yname)
 {
   grid_t *gridptr;
 
@@ -878,7 +878,7 @@ The function @func{gridDefYlongname} defines the longname of a Y-axis.
 
 @EndFunction
 */
-void gridDefYlongname(int gridID, char *ylongname)
+void gridDefYlongname(int gridID, const char *ylongname)
 {
   grid_t *gridptr;
 
@@ -903,7 +903,7 @@ The function @func{gridDefYunits} defines the units of a Y-axis.
 
 @EndFunction
 */
-void gridDefYunits(int gridID, char *yunits)
+void gridDefYunits(int gridID, const char *yunits)
 {
   grid_t *gridptr;
 
@@ -1417,7 +1417,7 @@ int gridInqYsize(int gridID)
 
 @EndFunction
 */
-void gridDefRowlon(int gridID, int nrowlon, int *rowlon)
+void gridDefRowlon(int gridID, int nrowlon, const int *rowlon)
 {
   static char func[] = "gridDefRowlon";
   grid_t *gridptr;
@@ -1484,7 +1484,7 @@ int gridInqMask(int gridID, int *mask)
 }
 
 
-void gridDefMask(int gridID, int *mask)
+void gridDefMask(int gridID, const int *mask)
 {
   static char func[] = "gridDefMask";
   int size;
@@ -1565,7 +1565,7 @@ int gridInqXvals(int gridID, double *xvals)
 @Function  gridDefXvals
 @Title     Define the values of a X-axis
 
-@Prototype void gridDefXvals(int gridID, double *xvals)
+@Prototype void gridDefXvals(int gridID, const double *xvals)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
     @Item  xvals    X-values of the grid
@@ -1575,7 +1575,7 @@ The function @func{gridDefXvals} defines all values of the X-axis.
 
 @EndFunction
 */
-void gridDefXvals(int gridID, double *xvals)
+void gridDefXvals(int gridID, const double *xvals)
 {
   static char func[] = "gridDefXvals";
   int size;
@@ -1659,7 +1659,7 @@ int gridInqYvals(int gridID, double *yvals)
 @Function  gridDefYvals
 @Title     Define the values of a Y-axis
 
-@Prototype void gridDefYvals(int gridID, double *yvals)
+@Prototype void gridDefYvals(int gridID, const double *yvals)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
     @Item  yvals    Y-values of the grid
@@ -1669,7 +1669,7 @@ The function @func{gridDefYvals} defines all values of the Y-axis.
 
 @EndFunction
 */
-void gridDefYvals(int gridID, double *yvals)
+void gridDefYvals(int gridID, const double *yvals)
 {
   static char func[] = "gridDefYvals";
   int size;
@@ -2758,7 +2758,7 @@ void gridCompress(int gridID)
 }
 
 
-void gridDefArea(int gridID, double *area)
+void gridDefArea(int gridID, const double *area)
 {
   static char func[] = "gridDefArea";
   int size;
@@ -2845,7 +2845,7 @@ int gridInqNvertex(int gridID)
 @Function  gridDefXbounds
 @Title     Define the bounds of a X-axis
 
-@Prototype void gridDefXbounds(int gridID, double *xbounds)
+@Prototype void gridDefXbounds(int gridID, const double *xbounds)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
     @Item  xbounds  X-bounds of the grid
@@ -2855,7 +2855,7 @@ The function @func{gridDefXbounds} defines all bounds of the X-axis.
 
 @EndFunction
 */
-void gridDefXbounds(int gridID, double *xbounds)
+void gridDefXbounds(int gridID, const double *xbounds)
 {
   static char func[] = "gridDefXbounds";
   int size;
@@ -2953,7 +2953,7 @@ double *gridInqXboundsPtr(int gridID)
 @Function  gridDefYbounds
 @Title     Define the bounds of a Y-axis
 
-@Prototype void gridDefYbounds(int gridID, double *ybounds)
+@Prototype void gridDefYbounds(int gridID, const double *ybounds)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
     @Item  ybounds  Y-bounds of the grid
@@ -2963,7 +2963,7 @@ The function @func{gridDefYbounds} defines all bounds of the Y-axis.
 
 @EndFunction
 */
-void gridDefYbounds(int gridID, double *ybounds)
+void gridDefYbounds(int gridID, const double *ybounds)
 {
   static char func[] = "gridDefYbounds";
   int size;

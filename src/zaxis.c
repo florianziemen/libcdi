@@ -628,7 +628,7 @@ int zaxisInqLtype(int zaxisID)
 @Function  zaxisDefLevels
 @Title     Define the levels of a Z-axis
 
-@Prototype void zaxisDefLevels(int zaxisID, double *levels)
+@Prototype void zaxisDefLevels(int zaxisID, const double *levels)
 @Parameter
     @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
     @Item  levels   All levels of the Z-axis
@@ -638,7 +638,7 @@ The function @func{zaxisDefLevels} defines the levels of a Z-axis.
 
 @EndFunction
 */
-void zaxisDefLevels(int zaxisID, double *levels)
+void zaxisDefLevels(int zaxisID, const double *levels)
 {
   static char func[] = "zaxisDefLevels";
   int ilev;
@@ -1054,7 +1054,7 @@ const double *zaxisInqVctPtr(int zaxisID)
 }
 
 
-void zaxisDefLbounds(int zaxisID, double *lbounds)
+void zaxisDefLbounds(int zaxisID, const double *lbounds)
 {
   static char func[] = "zaxisDefLbounds";
   size_t size;
@@ -1077,7 +1077,7 @@ void zaxisDefLbounds(int zaxisID, double *lbounds)
 }
 
 
-void zaxisDefUbounds(int zaxisID, double *ubounds)
+void zaxisDefUbounds(int zaxisID, const double *ubounds)
 {
   static char func[] = "zaxisDefUbounds";
   size_t size;
@@ -1100,7 +1100,7 @@ void zaxisDefUbounds(int zaxisID, double *ubounds)
 }
 
 
-void zaxisDefWeights(int zaxisID, double *weights)
+void zaxisDefWeights(int zaxisID, const double *weights)
 {
   static char func[] = "zaxisDefWeights";
   size_t size;
