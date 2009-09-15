@@ -12,7 +12,7 @@ Create a horizontal Grid
 \section*{\tt \htmlref{gridDefXbounds}{gridDefXbounds}}
 
 \begin{verbatim}
-    SUBROUTINE gridDefXbounds(INTEGER gridID, REAL*8 xbounds)
+    SUBROUTINE gridDefXbounds(INTEGER gridID, const REAL*8 xbounds)
 \end{verbatim}
 
 Define the bounds of a X-axis
@@ -57,7 +57,7 @@ Define the units of a X-axis
 \section*{\tt \htmlref{gridDefXvals}{gridDefXvals}}
 
 \begin{verbatim}
-    SUBROUTINE gridDefXvals(INTEGER gridID, REAL*8 xvals)
+    SUBROUTINE gridDefXvals(INTEGER gridID, const REAL*8 xvals)
 \end{verbatim}
 
 Define the values of a X-axis
@@ -66,7 +66,7 @@ Define the values of a X-axis
 \section*{\tt \htmlref{gridDefYbounds}{gridDefYbounds}}
 
 \begin{verbatim}
-    SUBROUTINE gridDefYbounds(INTEGER gridID, REAL*8 ybounds)
+    SUBROUTINE gridDefYbounds(INTEGER gridID, const REAL*8 ybounds)
 \end{verbatim}
 
 Define the bounds of a Y-axis
@@ -111,7 +111,7 @@ Define the units of a Y-axis
 \section*{\tt \htmlref{gridDefYvals}{gridDefYvals}}
 
 \begin{verbatim}
-    SUBROUTINE gridDefYvals(INTEGER gridID, REAL*8 yvals)
+    SUBROUTINE gridDefYvals(INTEGER gridID, const REAL*8 yvals)
 \end{verbatim}
 
 Define the values of a Y-axis
@@ -374,7 +374,7 @@ Read a horizontal slice of a variable
 \section*{\tt \htmlref{streamWriteVar}{streamWriteVar}}
 
 \begin{verbatim}
-    SUBROUTINE streamWriteVar(INTEGER streamID, INTEGER varID, REAL*8 data, 
+    SUBROUTINE streamWriteVar(INTEGER streamID, INTEGER varID, const REAL*8 data, 
                               INTEGER nmiss)
 \end{verbatim}
 
@@ -385,7 +385,7 @@ Write a variable
 
 \begin{verbatim}
     SUBROUTINE streamWriteVarSlice(INTEGER streamID, INTEGER varID, INTEGER levelID, 
-                                   REAL*8 data, INTEGER nmiss)
+                                   const REAL*8 data, INTEGER nmiss)
 \end{verbatim}
 
 Write a horizontal slice of a variable
@@ -748,7 +748,7 @@ Create a vertical Z-axis
 \section*{\tt \htmlref{zaxisDefLevels}{zaxisDefLevels}}
 
 \begin{verbatim}
-    SUBROUTINE zaxisDefLevels(INTEGER zaxisID, REAL*8 levels)
+    SUBROUTINE zaxisDefLevels(INTEGER zaxisID, const REAL*8 levels)
 \end{verbatim}
 
 Define the levels of a Z-axis

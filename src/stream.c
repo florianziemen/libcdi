@@ -1537,7 +1537,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 @Function  streamWriteVar
 @Title     Write a variable
 
-@Prototype void streamWriteVar(int streamID, int varID, double *data, int nmiss)
+@Prototype void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 @Parameter
     @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
     @Item  varID     Variable identifier
@@ -1701,7 +1701,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
 @Function  streamWriteVarSlice
 @Title     Write a horizontal slice of a variable
 
-@Prototype void streamWriteVarSlice(int streamID, int varID, int levelID, double *data, int nmiss)
+@Prototype void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
 @Parameter
     @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
     @Item  varID     Variable identifier

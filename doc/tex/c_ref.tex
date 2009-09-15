@@ -12,7 +12,7 @@ Create a horizontal Grid
 \section*{\tt \htmlref{gridDefXbounds}{gridDefXbounds}}
 
 \begin{verbatim}
-    void gridDefXbounds(int gridID, double *xbounds);
+    void gridDefXbounds(int gridID, const double *xbounds);
 \end{verbatim}
 
 Define the bounds of a X-axis
@@ -57,7 +57,7 @@ Define the units of a X-axis
 \section*{\tt \htmlref{gridDefXvals}{gridDefXvals}}
 
 \begin{verbatim}
-    void gridDefXvals(int gridID, double *xvals);
+    void gridDefXvals(int gridID, const double *xvals);
 \end{verbatim}
 
 Define the values of a X-axis
@@ -66,7 +66,7 @@ Define the values of a X-axis
 \section*{\tt \htmlref{gridDefYbounds}{gridDefYbounds}}
 
 \begin{verbatim}
-    void gridDefYbounds(int gridID, double *ybounds);
+    void gridDefYbounds(int gridID, const double *ybounds);
 \end{verbatim}
 
 Define the bounds of a Y-axis
@@ -111,7 +111,7 @@ Define the units of a Y-axis
 \section*{\tt \htmlref{gridDefYvals}{gridDefYvals}}
 
 \begin{verbatim}
-    void gridDefYvals(int gridID, double *yvals);
+    void gridDefYvals(int gridID, const double *yvals);
 \end{verbatim}
 
 Define the values of a Y-axis
@@ -373,7 +373,7 @@ Read a horizontal slice of a variable
 \section*{\tt \htmlref{streamWriteVar}{streamWriteVar}}
 
 \begin{verbatim}
-    void streamWriteVar(int streamID, int varID, double *data, int nmiss);
+    void streamWriteVar(int streamID, int varID, const double *data, int nmiss);
 \end{verbatim}
 
 Write a variable
@@ -382,7 +382,7 @@ Write a variable
 \section*{\tt \htmlref{streamWriteVarSlice}{streamWriteVarSlice}}
 
 \begin{verbatim}
-    void streamWriteVarSlice(int streamID, int varID, int levelID, double *data, 
+    void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, 
                              int nmiss);
 \end{verbatim}
 
@@ -743,7 +743,7 @@ Create a vertical Z-axis
 \section*{\tt \htmlref{zaxisDefLevels}{zaxisDefLevels}}
 
 \begin{verbatim}
-    void zaxisDefLevels(int zaxisID, double *levels);
+    void zaxisDefLevels(int zaxisID, const double *levels);
 \end{verbatim}
 
 Define the levels of a Z-axis

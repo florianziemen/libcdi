@@ -40,7 +40,7 @@ with a standard calendar.
     taxisID = taxisCreate(TAXIS_RELATIVE)
     taxisDefCalendar(taxisID, CALENDAR_STANDARD)
     taxisDefRdate(taxisID, 19870101)
-    taxisDefRtime(taxisID, 1200)
+    taxisDefRtime(taxisID, 120000)
        ...
 \end{lstlisting}
 
@@ -129,7 +129,7 @@ The function {\tt taxisDefVdate} defines the reference time of a Time axis.
 \item[{\tt taxisID}]
 Time axis ID, from a previous call to {\htmlref{\tt taxisCreate}{taxisCreate}}
 \item[{\tt rtime}]
-Reference time (hhmm)
+Reference time (hhmmss)
 
 \end{deflist}
 \end{minipage}
@@ -227,7 +227,7 @@ The function {\tt taxisDefVtime} defines the verification time of a Time axis.
 \item[{\tt taxisID}]
 Time axis ID, from a previous call to {\htmlref{\tt taxisCreate}{taxisCreate}}
 \item[{\tt vtime}]
-Verification time (hhmm)
+Verification time (hhmmss)
 
 \end{deflist}
 \end{minipage}
