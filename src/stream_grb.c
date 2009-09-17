@@ -13,7 +13,7 @@
 #include "file.h"
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
 
-
+/*
 int grbInqRecord(int streamID, int *varID, int *levelID)
 {
   int status;
@@ -22,7 +22,7 @@ int grbInqRecord(int streamID, int *varID, int *levelID)
 
   return (status);
 }
-
+*/
 
 int grbDefRecord(int streamID)
 {

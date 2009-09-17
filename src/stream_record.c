@@ -311,6 +311,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
     {
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
+    case FILETYPE_GRB2:
       {
         status = grbReadRecord(streamID, data, nmiss);
 	break;

@@ -202,6 +202,7 @@ int cgribexGetTimeUnit(int *isec1)
   return (timeunit);
 }
 
+/*
 int cgribexInqRecord(int streamID, int *varID, int *levelID)
 {
   static char func[] = "cgribexInqRecord";
@@ -209,15 +210,15 @@ int cgribexInqRecord(int streamID, int *varID, int *levelID)
   int fileID;
   void *gribbuffer;
   int iret = 0, iword = 0;
-  int isec4size = 0;
-  int isec0[2], isec1[4096], isec2[4096], isec3[2], isec4[512];
-  double fsec2[512], fsec3[2], *fsec4 = NULL;
   int gridID = -1, zaxisID = -1;
   int gridtype;
   int gribsize;
   size_t readsize;
   int vlistID;
   stream_t *streamptr;
+  int isec4size = 0;
+  int isec0[2], isec1[4096], isec2[4096], isec3[2], isec4[512];
+  double fsec2[512], fsec3[2], *fsec4 = NULL;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -233,6 +234,7 @@ int cgribexInqRecord(int streamID, int *varID, int *levelID)
   if ( gribsize == 0 ) return (0);
 
   gribbuffer = streamptr->record->buffer;
+  printf("size = %d\n", streamptr->record->buffersize);
   gribbuffer = realloc(gribbuffer, gribsize);
 
   streamptr->record->buffer = gribbuffer;
@@ -302,6 +304,7 @@ int cgribexInqRecord(int streamID, int *varID, int *levelID)
 
   return (status);
 }
+*/
 
 static
 void cgribexAddRecord(int streamID, int code, int *isec1, int *isec2, double *fsec2,

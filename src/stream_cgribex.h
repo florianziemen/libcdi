@@ -1,8 +1,6 @@
 #ifndef _STREAM_CGRIBEX_H
 #define _STREAM_CGRIBEX_H
 
-int cgribexInqRecord(int streamID, int *varID, int *levelID);
-
 void cgribexScanTimestep1(int streamID);
 int cgribexScanTimestep2(int streamID);
 int cgribexScanTimestep(int streamID);

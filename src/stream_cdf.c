@@ -5030,20 +5030,28 @@ int cdfInqContents(int streamID)
 		    }
 
 		  if ( ncvars[xvarid].ndims > 2 || ncvars[yvarid].ndims > 2 )
-		    {
-		      Warning(func, "Unsupported grid structure for variable %s (grid dims > 2)!",
-			      ncvars[ncvarid].name);
-		      ncvars[ncvarid].xvarid = UNDEFID;
-		      ncvars[ncvarid].yvarid = UNDEFID;
-		      xvarid = UNDEFID;
-		      yvarid = UNDEFID;
+		    {                           
+		      if ( ncvars[xvarid].ndims == 3 && ncvars[xvarid].dimids[0] == timedimid &&
+			   ncvars[yvarid].ndims == 3 && ncvars[yvarid].dimids[0] == timedimid )
+			{
+			}
+		      else
+			{
+			  Warning(func, "Unsupported grid structure for variable %s (grid dims > 2)!",
+				  ncvars[ncvarid].name);
+			  ncvars[ncvarid].xvarid = UNDEFID;
+			  ncvars[ncvarid].yvarid = UNDEFID;
+			  xvarid = UNDEFID;
+			  yvarid = UNDEFID;
+			}
 		    }
 		}
 
 	      if ( xvarid != UNDEFID )
 		{
 		  islon = ncvars[xvarid].islon;
-		  if ( ncvars[xvarid].ndims == 2 )
+		  ndims = ncvars[xvarid].ndims;
+		  if ( ndims == 2 || ndims == 3 )
 		    {
 		      ncvars[ncvarid].gridtype = GRID_CURVILINEAR;
 		      size = xsize*ysize;
@@ -5051,9 +5059,9 @@ int cdfInqContents(int streamID)
 		      {
 			int dimid;
 			size_t dimsize1, dimsize2;
-			dimid = ncvars[xvarid].dimids[0];
+			dimid = ncvars[xvarid].dimids[ndims-2];
 			cdf_inq_dimlen(fileID, dimid, &dimsize1);
-			dimid = ncvars[xvarid].dimids[1];
+			dimid = ncvars[xvarid].dimids[ndims-1];
 			cdf_inq_dimlen(fileID, dimid, &dimsize2);
 			if ( dimsize1*dimsize2 != size )
 			  {
@@ -5108,7 +5116,8 @@ int cdfInqContents(int streamID)
 	      if ( yvarid != UNDEFID )
 		{
 		  islat = ncvars[yvarid].islat;
-		  if ( ncvars[yvarid].ndims == 2 )
+		  ndims = ncvars[yvarid].ndims;
+		  if ( ndims == 2 || ndims == 3 )
 		    {
 		      ncvars[ncvarid].gridtype = GRID_CURVILINEAR;
 		      size = xsize*ysize;
@@ -5116,9 +5125,9 @@ int cdfInqContents(int streamID)
 		      {
 			int dimid;
 			size_t dimsize1, dimsize2;
-			dimid = ncvars[xvarid].dimids[0];
+			dimid = ncvars[xvarid].dimids[ndims-2];
 			cdf_inq_dimlen(fileID, dimid, &dimsize1);
-			dimid = ncvars[xvarid].dimids[1];
+			dimid = ncvars[xvarid].dimids[ndims-1];
 			cdf_inq_dimlen(fileID, dimid, &dimsize2);
 			if ( dimsize1*dimsize2 != size )
 			  {

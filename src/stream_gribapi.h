@@ -1,8 +1,6 @@
 #ifndef _STREAM_GRIBAPI_H
 #define _STREAM_GRIBAPI_H
 
-int gribapiInqRecord(int streamID, int *varID, int *levelID);
-
 void gribapiScanTimestep1(int streamID);
 int gribapiScanTimestep2(int streamID);
 int gribapiScanTimestep(int streamID);
