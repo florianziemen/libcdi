@@ -13,6 +13,25 @@
 #include "file.h"
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
 
+
+int grbBitsPerValue(int datatype)
+{
+  int bitsPerValue = 16;
+
+  if ( datatype != CDI_UNDEFID )
+    {
+      if ( datatype > 0 && datatype <= 32 )
+	bitsPerValue = datatype;
+      else if ( datatype == DATATYPE_FLT64 )
+	bitsPerValue = 24;
+      else
+	bitsPerValue = 16;
+    }
+
+  return (bitsPerValue);
+}
+
+
 /*
 int grbInqRecord(int streamID, int *varID, int *levelID)
 {

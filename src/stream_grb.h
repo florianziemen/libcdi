@@ -1,6 +1,8 @@
 #ifndef _STREAM_GRB_H
 #define _STREAM_GRB_H
 
+int   grbBitsPerValue(int datatype);
+
 int   grbInqContents(int streamID);
 int   grbInqTimestep(int streamID, int tsID);
 

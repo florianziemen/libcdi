@@ -12,6 +12,7 @@
 #include "varscan.h"
 #include "datetime.h"
 #include "vlist.h"
+#include "stream_grb.h"
 
 #if  defined  (HAVE_LIBCGRIBEX)
 #  include "cgribex.h"
@@ -2037,7 +2038,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	level = zaxisInqLevel(zaxisID, levelID);
 
 	ilevel = (int) level;
-	ISEC1_LevelType = 113;
+	ISEC1_LevelType = LTYPE_ISENTROPIC;
 	ISEC1_Level1    = ilevel;
 	ISEC1_Level2    = 0;
 
@@ -2065,24 +2066,6 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 static
 void cgribexDefMask(int *isec3)
 {
-}
-
-static
-void cgribexDefData(int datatype, int *isec4, int gridID)
-{
-  ISEC4_NumValues = gridInqSize(gridID);
-
-  if ( datatype != CDI_UNDEFID )
-    {
-      if ( datatype > 0 && datatype <= 32 )
-	ISEC4_NumBits = datatype;
-      else if ( datatype == DATATYPE_FLT64 )
-	ISEC4_NumBits = 24;
-      else
-	ISEC4_NumBits = 16;
-    }
-  else
-    ISEC4_NumBits = 16;
 }
 
 static
@@ -2151,7 +2134,9 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   cgribexDefGrid(isec1, isec2, gridID);
   cgribexDefLevel(isec1, isec2, fsec2, zaxisID, levelID);
   cgribexDefMask(isec3);
-  cgribexDefData(datatype, isec4, gridID);
+
+  ISEC4_NumBits   = grbBitsPerValue(datatype);
+  ISEC4_NumValues = gridInqSize(gridID);
 
   if ( nmiss > 0 )
     {

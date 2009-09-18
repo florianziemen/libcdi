@@ -10,6 +10,7 @@
 #include "varscan.h"
 #include "datetime.h"
 #include "vlist.h"
+#include "stream_grb.h"
 
 #include "gribapi.h"
 
@@ -452,26 +453,25 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
 
   if ( varInqInst(varID) == CDI_UNDEFID )
     {
-      /*
-      int center, subcenter, instID;
-      center    = ISEC1_CenterID;
-      subcenter = ISEC1_SubCenterID;
-      instID    = institutInq(center, subcenter, NULL, NULL);
+      long center, subcenter;
+      int instID;
+      GRIB_CHECK(grib_get_long(gh, "centre", &center), 0);
+      GRIB_CHECK(grib_get_long(gh, "subCentre", &subcenter), 0);
+      instID    = institutInq((int)center, (int)subcenter, NULL, NULL);
       if ( instID == CDI_UNDEFID )
-	instID = institutDef(center, subcenter, NULL, NULL);
+	instID = institutDef((int)center, (int)subcenter, NULL, NULL);
       varDefInst(varID, instID);
-      */
     }
 
   if ( varInqModel(varID) == CDI_UNDEFID )
     {
-      /*
       int modelID;
-      modelID = modelInq(varInqInst(varID), ISEC1_ModelID, NULL);
+      long processID;
+      GRIB_CHECK(grib_get_long(gh, "generatingProcessIdentifier", &processID), 0);
+      modelID = modelInq(varInqInst(varID), processID, NULL);
       if ( modelID == CDI_UNDEFID )
-	modelID = modelDef(varInqInst(varID), ISEC1_ModelID, NULL);
+	modelID = modelDef(varInqInst(varID), processID, NULL);
       varDefModel(varID, modelID);
-      */
     }
 
   if ( varInqTable(varID) == CDI_UNDEFID )
@@ -590,6 +590,7 @@ void gribapiScanTimestep1(int streamID)
   int leveltype;
   long editionNumber;
   long lpar;
+  int bitsPerValue;
   double dlevel = 0;
 
   streamptr = stream_to_pointer(streamID);
@@ -689,13 +690,13 @@ void gribapiScanTimestep1(int streamID)
       GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
       vtime = (int) lpar*100;
 
-      prec = 16;
-      /*
-      if ( ISEC4_NumBits > 0 && ISEC4_NumBits <= 32 )
-	prec = ISEC4_NumBits;
+      GRIB_CHECK(grib_get_long(gh,"bitsPerValue", &lpar),0);
+      bitsPerValue = (int) lpar;
+      if ( bitsPerValue > 0 && bitsPerValue <= 32 )
+	prec = bitsPerValue;
       else
         prec = DATATYPE_PACK;
-      */
+
       if ( nrecs == 0 )
 	{
 	  datetime0.date = vdate;
@@ -1579,7 +1580,7 @@ void gribapiDefCode(grib_handle *gh, int code, int codetable)
   //ISEC1_CodeTable = codetable;
   if ( code < 0 ) code = -code;
   // GRIB_CHECK(grib_set_long(gh, "indicatorOfParameter", code), 0);
-  GRIB_CHECK(grib_set_long(gh, "parameterCategory", 3), 0);
+  GRIB_CHECK(grib_set_long(gh, "parameterCategory", 255), 0);
   GRIB_CHECK(grib_set_long(gh, "parameterNumber", code), 0);
 }
 
@@ -1764,6 +1765,9 @@ void gribapiDefGrid(grib_handle *gh, int gridID)
 	GRIB_CHECK(grib_set_long(gh, "J", trunc), 0);
 	GRIB_CHECK(grib_set_long(gh, "K", trunc), 0);
 	GRIB_CHECK(grib_set_long(gh, "M", trunc), 0);
+
+	GRIB_CHECK(grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
+	GRIB_CHECK(grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
 
 	GRIB_CHECK(grib_set_string(gh, "typeOfPacking", "spectral_simple", &len), 0);
 	/*
@@ -1970,24 +1974,6 @@ void gribapiDefLevel(grib_handle *gh, int code, int zaxisID, int levelID)
       }
     }
 }
-
-static
-long grbBitsPerValue(int datatype)
-{
-  long bitsPerValue = 16;
-
-  if ( datatype != CDI_UNDEFID )
-    {
-      if ( datatype > 0 && datatype <= 32 )
-	bitsPerValue = datatype;
-      else if ( datatype == DATATYPE_FLT64 )
-	bitsPerValue = 24;
-      else
-	bitsPerValue = 16;
-    }
-
-  return (bitsPerValue);
-}
 #endif
 
 
@@ -2000,12 +1986,14 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   size_t recsize = 0;
   void *dummy = NULL;
   long edition = 2;
+  int datatype;
   int code, tableID;
   long bitsPerValue;
   grib_handle *gh = NULL;
 
   code    = vlistInqVarCode(vlistID, varID);
   tableID = vlistInqVarTable(vlistID, varID);
+  datatype = vlistInqVarDatatype(vlistID, varID);
 
   gh = grib_handle_new_from_template(NULL, "GRIB2");
   if ( gh == NULL ) Error(func, "grib_handle_new_from_template failed!");
@@ -2022,7 +2010,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   // GRIB_CHECK(grib_set_double(gh, "missingValue", GRIB_MISSVAL), 0);
 
-  bitsPerValue = grbBitsPerValue(vlistInqVarDatatype(vlistID, varID));
+  bitsPerValue = grbBitsPerValue(datatype);
   GRIB_CHECK(grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
 
   GRIB_CHECK(grib_set_double_array(gh, "values", data, datasize), 0);
