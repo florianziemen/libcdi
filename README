@@ -33,9 +33,9 @@ Installation:
 Porting:
 
      This library was designed for maximum portability. It is written entirely
-     in ANSI C, and will compile on most UNIX platforms.
+     in ANSI C99, and will compile on most UNIX platforms.
 
-     The FORTRAN interface is using the cfortran.h macros from
+     The FORTRAN 77 interface is using the cfortran.h macros from
      http://www-zeus.desy.de/~burow/cfortran/
      
 Contact:
