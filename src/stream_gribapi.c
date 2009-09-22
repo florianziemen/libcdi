@@ -27,6 +27,7 @@ extern int cdiInventoryMode;
 typedef struct {
   int code;
   int table;
+  int discipline;
   int level1;
   int level2;
   int ltype;
@@ -181,7 +182,7 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
   int leveltype;
   double dlevel;
   long lpar;
-  int codetable;
+  int table_num;
   int status;
   long numberOfPoints;
   size_t datasize;
@@ -192,6 +193,9 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
   tsID    = streamptr->curTsID;
   recID   = recordNewEntry(streamID, tsID);
   record  = &streamptr->tsteps[tsID].records[recID];
+
+  GRIB_CHECK(grib_get_long(gh, "parameterCategory", &lpar), 0);
+  table_num = (int) lpar;
 
   // numavg  = ISEC1_AvgNum;
   numavg  = 0;
@@ -221,8 +225,7 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
   (*record).size     = recsize;
   (*record).position = position;
   (*record).code     = code;
-  // (*record).table    = ISEC1_CodeTable;
-  (*record).table    = 0;
+  (*record).table    = table_num;
   (*record).ilevel   = level1;
   (*record).ilevel2  = level2;
   (*record).ltype    = leveltype;
@@ -427,12 +430,14 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
   if ( zaxistype == ZAXIS_HYBRID )
     {
       int vctsize;
+      size_t dummy;
       double *vctptr;
 
       GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
       vctsize = lpar;
       vctptr = (double *) malloc(vctsize*sizeof(double));
-      GRIB_CHECK(grib_get_double_array(gh, "pv", vctptr, &lpar), 0);
+      dummy = vctsize;
+      GRIB_CHECK(grib_get_double_array(gh, "pv", vctptr, &dummy), 0);
       varDefVCT(vctsize, vctptr);
       free(vctptr);
     }
@@ -442,9 +447,8 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
   if ( prec > 32 ) prec = DATATYPE_PACK32;
   if ( prec <  0 ) prec = DATATYPE_PACK;
 
-  codetable = 0;
   varAddRecord(recID, code, gridID, zaxistype, lbounds, level1, level2,
-	       prec, &varID, &levelID, numavg, codetable, leveltype);
+	       prec, &varID, &levelID, numavg, table_num, leveltype);
 
   (*record).varID   = varID;
   (*record).levelID = levelID;
@@ -478,7 +482,7 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
     {
       int tableID;
 
-      //tableID = tableInq(varInqModel(varID), ISEC1_CodeTable, NULL);
+      tableID = tableInq(varInqModel(varID), table_num, NULL);
       /*
       if ( tableID == CDI_UNDEFID && cdiPartabPath )
 	{
@@ -542,11 +546,9 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
 	    }
 	}
       */
-      /*
       if ( tableID == CDI_UNDEFID )
-	tableID = tableDef(varInqModel(varID), ISEC1_CodeTable, NULL);
+	tableID = tableDef(varInqModel(varID), table_num, NULL);
       varDefTable(varID, tableID);
-      */
     }
 
   streamptr->tsteps[tsID].nallrecs++;
@@ -568,6 +570,7 @@ void gribapiScanTimestep1(int streamID)
   int iret = 0, ipunp = 0, iword = 0;
   int status;
   int fileID;
+  int table_num = 0;
   int rcode = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0;
   int tsID;
@@ -592,6 +595,7 @@ void gribapiScanTimestep1(int streamID)
   long lpar;
   int bitsPerValue;
   double dlevel = 0;
+  int warn_lpar = TRUE;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -665,6 +669,15 @@ void gribapiScanTimestep1(int streamID)
 	}
       else
 	{
+	  GRIB_CHECK(grib_get_long(gh, "discipline", &lpar), 0);
+	  if ( lpar != 255 && warn_lpar )
+	    {
+	      Warning(func, "GRIB2 discipline %ld unsupported!", lpar);
+	      warn_lpar = FALSE;
+	    }
+	  GRIB_CHECK(grib_get_long(gh, "parameterCategory", &lpar), 0);
+	  table_num = (int) lpar;
+
 	  GRIB_CHECK(grib_get_long(gh, "parameterNumber", &lpar), 0);
 	  rcode = (int) lpar;
 	  status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar);
@@ -717,8 +730,8 @@ void gribapiScanTimestep1(int streamID)
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
 	  compVar.code   = rcode;
-          // compVar.table  = ISEC1_CodeTable;
-	  compVar.table  = 0;
+	  compVar.table  = table_num;
+	  compVar.discipline = 0;
           compVar.level1 = level1;
           compVar.level2 = level2;
 	  compVar.ltype  = leveltype;
@@ -727,6 +740,7 @@ void gribapiScanTimestep1(int streamID)
 	    {
 	      compVar0.code   = streamptr->tsteps[0].records[recID].code;
 	      compVar0.table  = streamptr->tsteps[0].records[recID].table;
+	      compVar0.discipline  = 0;
 	      compVar0.level1 = streamptr->tsteps[0].records[recID].ilevel;
 	      compVar0.level2 = streamptr->tsteps[0].records[recID].ilevel2;
 	      compVar0.ltype  = streamptr->tsteps[0].records[recID].ltype;
@@ -856,6 +870,7 @@ int gribapiScanTimestep2(int streamID)
   long buffersize = 0;
   int iret = 0, ipunp = 0, iword = 0;
   int fileID;
+  int table_num = 0;
   int rcode = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0;
   int tsID;
@@ -971,6 +986,9 @@ int gribapiScanTimestep2(int streamID)
 	}
       else
 	{
+	  GRIB_CHECK(grib_get_long(gh, "parameterCategory", &lpar), 0);
+	  table_num = (int) lpar;
+
 	  GRIB_CHECK(grib_get_long(gh, "parameterNumber", &lpar), 0);
 	  rcode = (int) lpar;
 	  status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar);
@@ -1037,8 +1055,8 @@ int gribapiScanTimestep2(int streamID)
       datetime.date  = vdate;
       datetime.time  = vtime;
       compVar.code   = rcode;
-      // compVar.table  = ISEC1_CodeTable;
-      compVar.table  = 0;
+      compVar.table  = table_num;
+      compVar.discipline = 0;
       compVar.level1 = level1;
       compVar.level2 = level2;
       compVar.ltype  = leveltype;
@@ -1046,6 +1064,7 @@ int gribapiScanTimestep2(int streamID)
 	{
 	  compVar0.code   = streamptr->tsteps[tsID].records[recID].code;
 	  compVar0.table  = streamptr->tsteps[tsID].records[recID].table;
+	  compVar0.discipline = 0;
 	  compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
 	  compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
 	  compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
@@ -1094,6 +1113,7 @@ int gribapiScanTimestep2(int streamID)
 
       compVar0.code   = streamptr->tsteps[tsID].records[recID].code;
       compVar0.table  = streamptr->tsteps[tsID].records[recID].table;
+      compVar0.discipline = 0;
       compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
       compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
       compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
@@ -1169,6 +1189,7 @@ int gribapiScanTimestep(int streamID)
   long buffersize = 0;
   int iret = 0, ipunp = 0, iword = 0;
   int fileID;
+  int table_num = 0;
   int rcode = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0;
   int tsID;
@@ -1285,6 +1306,9 @@ int gribapiScanTimestep(int streamID)
 	    }
 	  else
 	    {
+	      GRIB_CHECK(grib_get_long(gh, "parameterCategory", &lpar), 0);
+	      table_num = (int) lpar;
+
 	      GRIB_CHECK(grib_get_long(gh, "parameterNumber", &lpar), 0);
 	      rcode = (int) lpar;
 	      status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar);
@@ -1354,8 +1378,8 @@ int gribapiScanTimestep(int streamID)
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
 	  compVar.code   = rcode;
-	  // compVar.table  = ISEC1_CodeTable;
-	  compVar.table  = 0;
+	  compVar.table  = table_num;
+	  compVar.discipline = 0;
           compVar.level1 = level1;
           compVar.level2 = level2;
           compVar.ltype  = leveltype;
@@ -1364,6 +1388,7 @@ int gribapiScanTimestep(int streamID)
 	      recID   = streamptr->tsteps[1].recIDs[vrecID];
 	      compVar0.code   = streamptr->tsteps[tsID].records[recID].code;
 	      compVar0.table  = streamptr->tsteps[tsID].records[recID].table;
+	      compVar0.discipline = 0;
 	      compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
 	      compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
 	      compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
@@ -1410,6 +1435,7 @@ int gribapiScanTimestep(int streamID)
 
 	  compVar0.code   = streamptr->tsteps[tsID].records[recID].code;
 	  compVar0.table  = streamptr->tsteps[tsID].records[recID].table;
+	  compVar0.discipline = 0;
 	  compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
 	  compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
 	  compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
@@ -1580,7 +1606,8 @@ void gribapiDefCode(grib_handle *gh, int code, int codetable)
   //ISEC1_CodeTable = codetable;
   if ( code < 0 ) code = -code;
   // GRIB_CHECK(grib_set_long(gh, "indicatorOfParameter", code), 0);
-  GRIB_CHECK(grib_set_long(gh, "parameterCategory", 255), 0);
+  GRIB_CHECK(grib_set_long(gh, "discipline", 255), 0);
+  GRIB_CHECK(grib_set_long(gh, "parameterCategory", codetable), 0);
   GRIB_CHECK(grib_set_long(gh, "parameterNumber", code), 0);
 }
 
