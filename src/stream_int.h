@@ -146,17 +146,18 @@ typedef struct
   int       ilevel;
   int       ilevel2;
   int       ltype;
+  int       discip;
   short     table;
   short     used;
   short     code;
   short     varID;
   short     levelID;
 }
-RECORD;
+record_t;
 
 
 typedef struct {
-  RECORD   *records;
+  record_t *records;
   int       recordSize;  /* number of allocated records           */
   int      *recIDs;      /* IDs of non constant records           */
   int       nrecs;       /* number of used records                */
@@ -292,7 +293,7 @@ int     recordNewEntry(int streamID, int tsID);
 
 void    cdiCreateTimesteps(int streamID);
 
-void    recordInitEntry(RECORD *record);
+void    recordInitEntry(record_t *record);
 
 void    cdiCheckZaxis(int zaxisID);
 

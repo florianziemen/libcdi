@@ -8,7 +8,9 @@
 	* cdfDefLonLat2D: added attributes for Panoply
 	* added support for netCDF timeseries without grid
 	* added support for netCDF timeseries with only one grid axis
+	* gribDefLevel: bug fix for pressure level units millibar
 	* julday_add_seconds: bug fix for adjusting negative seconds
+	* stream_cdf:cdfReadVarSliceDP: bug fix for swapxy
 	* Version 1.4.0 released
 
 2009-06-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

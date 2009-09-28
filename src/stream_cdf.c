@@ -3086,7 +3086,7 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   int xid = UNDEFID, yid = UNDEFID, zid = UNDEFID;
   int ncvarid;
   int tsID;
-  int gridsize;
+  int gridsize, xsize, ysize;
   size_t size;
   size_t start[4];
   size_t count[4];
@@ -3096,7 +3096,7 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   int gridindex;
   int zaxisindex;
   int vlistID;
-  int i;
+  int i, j;
   int ndimsp;
   int dimids[9];
   int swapyz = FALSE;
@@ -3126,6 +3126,8 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   timeID  = vlistInqVarTime(vlistID, varID);
 
   gridsize = gridInqSize(gridID);
+  xsize = gridInqXsize(gridID);
+  ysize = gridInqYsize(gridID);
       
   streamptr->numvals += gridsize;
 
@@ -3268,10 +3270,22 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 
   cdf_get_vara_double(fileID, ncvarid, start, count, data);
 
+  if ( swapxy )
+    {
+      double *tdata;
+      tdata = (double *) malloc(gridsize*sizeof(double));
+      memcpy(tdata, data, gridsize*sizeof(double));
+      for ( j = 0; j < ysize; ++j )
+	for ( i = 0; i < xsize; ++i )
+	  data[j*xsize+i] = tdata[i*ysize+j];
+      free(tdata);
+    }
+
   *nmiss = 0;
   if ( vlistInqVarMissvalUsed(vlistID, varID) == TRUE  )
     {
       missval = vlistInqVarMissval(vlistID, varID);
+      // printf("XXX %31.0f %31.0f %31.0f %31.0f\n", missval, (float)data[0]);
       for ( i = 0; i < gridsize; i++ )
 	if ( DBL_IS_EQUAL(data[i], missval) ) *nmiss += 1;
     }
@@ -3495,7 +3509,7 @@ void cdfCreateRecords(int streamID, int tsID)
   static char func[] = "cdfCreateRecords";
   int varID, levelID, recID, vrecID, zaxisID;
   int nvars, nlev, nrecs, nvrecs;
-  RECORD *records = NULL;
+  record_t *records = NULL;
   int *recIDs = NULL;
   int vlistID;
   stream_t *streamptr;
@@ -3515,7 +3529,7 @@ void cdfCreateRecords(int streamID, int tsID)
 
       streamptr->nrecs += nrecs;
 
-      if ( nrecs > 0 ) records = (RECORD *) malloc(nrecs*sizeof(RECORD));
+      if ( nrecs > 0 ) records = (record_t *) malloc(nrecs*sizeof(record_t));
       streamptr->tsteps[tsID].records    = records;
       streamptr->tsteps[tsID].nrecs      = nrecs;
       streamptr->tsteps[tsID].nallrecs   = nrecs;
@@ -3559,7 +3573,7 @@ void cdfCreateRecords(int streamID, int tsID)
 
       streamptr->nrecs += nvrecs;
 
-      records = (RECORD *) malloc(nrecs*sizeof(RECORD));
+      records = (record_t *) malloc(nrecs*sizeof(record_t));
       streamptr->tsteps[tsID].records    = records;
       streamptr->tsteps[tsID].nrecs      = nvrecs;
       streamptr->tsteps[tsID].nallrecs   = nrecs;
@@ -3568,7 +3582,7 @@ void cdfCreateRecords(int streamID, int tsID)
 
       memcpy(streamptr->tsteps[tsID].records,
 	     streamptr->tsteps[0].records,
-	     nrecs*sizeof(RECORD));
+	     nrecs*sizeof(record_t));
 
       if ( nvrecs )
 	{
@@ -3594,7 +3608,7 @@ void cdfCreateRecords(int streamID, int tsID)
 
       streamptr->nrecs += nvrecs;
 
-      records = (RECORD *) malloc(nrecs*sizeof(RECORD));
+      records = (record_t *) malloc(nrecs*sizeof(record_t));
       streamptr->tsteps[tsID].records    = records;
       streamptr->tsteps[tsID].nrecs      = nvrecs;
       streamptr->tsteps[tsID].nallrecs   = nrecs;
@@ -3603,7 +3617,7 @@ void cdfCreateRecords(int streamID, int tsID)
 
       memcpy(streamptr->tsteps[tsID].records,
 	     streamptr->tsteps[0].records,
-	     nrecs*sizeof(RECORD));
+	     nrecs*sizeof(record_t));
 
       recIDs = (int *) malloc(nvrecs*sizeof(int));
       streamptr->tsteps[tsID].recIDs     = recIDs;

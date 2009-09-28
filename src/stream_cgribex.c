@@ -275,7 +275,7 @@ int cgribexInqRecord(int streamID, int *varID, int *levelID)
     case GRID_GAUSSIAN:
       {
 	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-	  Error(func, "wrong datasize! isec4len = %d isec2len = %d",
+	  Error(func, "numberOfPoints (%d) and gridSize (%d) differ!",
 		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
 	break;
       }
@@ -287,7 +287,7 @@ int cgribexInqRecord(int streamID, int *varID, int *levelID)
       }
     default:
       {
-	Error(func, "%s grid unsupported", gridNamePtr(gridtype));
+	Error(func, "%s grid unsupported!", gridNamePtr(gridtype));
 	break;
       }
     }
@@ -320,7 +320,7 @@ void cgribexAddRecord(int streamID, int code, int *isec1, int *isec2, double *fs
   int level1, level2;
   int numavg;
   int lbounds = 0;
-  RECORD *record;
+  record_t *record;
   grid_t grid;
   int vlistID;
   stream_t *streamptr;
@@ -363,7 +363,7 @@ void cgribexAddRecord(int streamID, int code, int *isec1, int *isec2, double *fs
     case GRID_GAUSSIAN:
       {
 	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-	  Error(func, "wrong datasize! isec4len = %d isec2len = %d",
+	  Error(func, "numberOfPoints (%d) and gridSize (%d) differ!",
 		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
 	grid.size  = ISEC4_NumValues;
 	grid.xsize = ISEC2_NumLon;
@@ -452,7 +452,7 @@ void cgribexAddRecord(int streamID, int code, int *isec1, int *isec2, double *fs
     case GRID_LCC:
       {
 	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-	  Error(func, "wrong datasize! isec4len = %d isec2len = %d",
+	  Error(func, "numberOfPoints (%d) and gridSize (%d) differ!",
 		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
 
 	grid.size  = ISEC4_NumValues;
@@ -498,7 +498,7 @@ void cgribexAddRecord(int streamID, int code, int *isec1, int *isec2, double *fs
       }
     default:
       {
-	Error(func, "%s grid unsupported", gridNamePtr(gridtype));
+	Error(func, "%s grid unsupported!", gridNamePtr(gridtype));
 	break;
       }
     }
@@ -845,7 +845,7 @@ void cgribexScanTimestep1(int streamID)
     {
       streamptr->tsteps[0].recordSize = nrecords;
       streamptr->tsteps[0].records =
-      (RECORD *) realloc(streamptr->tsteps[0].records, nrecords*sizeof(RECORD));
+      (record_t *) realloc(streamptr->tsteps[0].records, nrecords*sizeof(record_t));
     }
 
   streamptr->tsteps[0].recIDs = (int *) malloc(nrecords*sizeof(int));
@@ -1948,11 +1948,10 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 
 	level = zaxisInqLevel(zaxisID, levelID);
 	if ( level < 0 )
-	  Warning(func, "pressure level of %f Pa is below 0.", level);
+	  Warning(func, "Pressure level of %f Pa is below zero!", level);
 
 	zaxisInqUnits(zaxisID, units);
-	if ( memcmp(units, "hPa", 3) == 0 || memcmp(units, "mb",2 ) == 0 )
-	  level = level*100;
+	if ( memcmp(units, "Pa", 3) != 0 ) level *= 100;
 
 	ilevel = (int) level;
 	if ( level < 32768 && (level < 100 || modf(level/100, &dum) > 0) )

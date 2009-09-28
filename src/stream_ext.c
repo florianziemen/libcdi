@@ -259,7 +259,7 @@ void extAddRecord(int streamID, int code, int level, int xysize,
   int levelID = 0;
   int tsID, recID, varID;
   int datatype;
-  RECORD *record;
+  record_t *record;
   grid_t grid;
   int vlistID;
   stream_t *streamptr;
@@ -313,7 +313,7 @@ void extCmpRecord(int streamID, int tsID, int recID, off_t position, int code,
   static char func[] = "extCmpRecord";
   int varID = 0;
   int levelID = 0;
-  RECORD *record;
+  record_t *record;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -446,7 +446,7 @@ void extScanTimestep1(int streamID)
     {
       streamptr->tsteps[0].recordSize = nrecords;
       streamptr->tsteps[0].records =
-      (RECORD *) realloc(streamptr->tsteps[0].records, nrecords*sizeof(RECORD));
+      (record_t *) realloc(streamptr->tsteps[0].records, nrecords*sizeof(record_t));
     }
 
   streamptr->tsteps[0].recIDs = (int *) malloc(nrecords*sizeof(int));

@@ -17,7 +17,7 @@
 #include "stream_ieg.h"
 
 
-void recordInitEntry(RECORD *record)
+void recordInitEntry(record_t *record)
 {
   (*record).position = CDI_UNDEFID;
   (*record).size     = 0;
@@ -34,7 +34,7 @@ int recordNewEntry(int streamID, int tsID)
   static char func[] = "recordNewEntry";
   int recordID = 0;
   int recordSize;
-  RECORD *records;
+  record_t *records;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -49,11 +49,11 @@ int recordNewEntry(int streamID, int tsID)
     {
       int i;
       recordSize = 1;   /*  <<<<----  */
-      records = (RECORD *) malloc(recordSize*sizeof(RECORD));
+      records = (record_t *) malloc(recordSize*sizeof(record_t));
       if ( records == NULL )
 	{
           Message(func, "recordSize = %d", recordSize);
-	  SysError(func, "Allocation of RECORDTABLE failed");
+	  SysError(func, "Allocation of record_tTABLE failed");
 	}
 
       for ( i = 0; i < recordSize; i++ )
@@ -75,11 +75,11 @@ int recordNewEntry(int streamID, int tsID)
       int i;
 
       recordSize = 2*recordSize;
-      records    = (RECORD *) realloc(records, recordSize*sizeof(RECORD));
+      records    = (record_t *) realloc(records, recordSize*sizeof(record_t));
       if ( records == NULL )
 	{
           Message(func, "recordSize = %d", recordSize);
-	  SysError(func, "Reallocation of RECORDTABLE failed");
+	  SysError(func, "Reallocation of record_tTABLE failed");
 	}
       recordID = recordSize/2;
 
@@ -471,7 +471,7 @@ void cdiCreateRecords(int streamID, int tsID)
   static char func[] = "cdiCreateRecords";
   int nrecords, maxrecords;
   int nvars, varID, recID;
-  RECORD *records;
+  record_t *records;
   int vlistID;
   stream_t *streamptr;
 
@@ -514,7 +514,7 @@ void cdiCreateRecords(int streamID, int tsID)
     nrecords = streamptr->tsteps[1].nallrecs;
 
   if ( maxrecords > 0 )
-    records = (RECORD *) malloc(maxrecords*sizeof(RECORD));
+    records = (record_t *) malloc(maxrecords*sizeof(record_t));
   else
     records = NULL;
 
@@ -531,7 +531,7 @@ void cdiCreateRecords(int streamID, int tsID)
     {
       memcpy(streamptr->tsteps[tsID].records,
 	     streamptr->tsteps[0].records,
-	     maxrecords*sizeof(RECORD));
+	     maxrecords*sizeof(record_t));
 
       for ( recID = 0; recID < maxrecords; recID++ )
 	{
