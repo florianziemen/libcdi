@@ -36,11 +36,10 @@ typedef struct {
 
 #if  defined  (HAVE_LIBGRIB_API)
 static
-int gribapiGetGridType(grib_handle *gh)
+int gribapiGetGridType(grib_handle *gh, int gribgridtype)
 {
   /*  static char func[] = "gribapiGetGridType"; */
   int gridtype = 0;
-  int gribgridtype;
   long lpar;
 
   GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
@@ -89,6 +88,21 @@ int gribapiGetGridType(grib_handle *gh)
   return (gridtype);
 }
 #endif
+
+static
+int gribapiGetIsRotated(int gribgridtype)
+{
+  /*  static char func[] = "cgribexGetIsRotated"; */
+  int isRotated = 0;
+
+  if ( gribgridtype == GRIBAPI_GTYPE_LATLON_ROT )
+    {
+      isRotated = 1;
+    }
+
+  return (isRotated);
+}
+
 
 #if  defined  (HAVE_LIBGRIB_API)
 static
@@ -167,6 +181,7 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
 		      long recsize, off_t position, int prec, int ztype)
 {
   static char func[] = "gribapiAddRecord";
+  int gribgridtype;
   int gridtype;
   int zaxistype;
   int gridID = CDI_UNDEFID, varID;
@@ -235,7 +250,9 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
   (*record).ilevel2  = level2;
   (*record).ltype    = leveltype;
 
-  gridtype = gribapiGetGridType(gh);
+  GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
+  gribgridtype = (int) lpar;
+  gridtype = gribapiGetGridType(gh, gribgridtype);
   /*
   if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
     {
@@ -398,14 +415,28 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
 	grid.ni3   = ISEC2_GME_NI3;
 	break;
       }
+      */
     case GRID_GENERIC:
       {
-	grid.size  = ISEC4_NumValues;
-	grid.xsize = 0;
-	grid.ysize = 0;
+	int nlon = 0, nlat = 0;
+
+	if ( grib_get_long(gh, "Ni", &lpar) == 0 ) nlon = lpar;
+	if ( grib_get_long(gh, "Nj", &lpar) == 0 ) nlat = lpar;
+
+	grid.size  = numberOfPoints;
+	if ( nlon && nlat )
+	  {
+	    grid.xsize = nlon;
+	    grid.ysize = nlat;
+	  }
+	else
+	  {
+	    grid.xsize = 0;
+	    grid.ysize = 0;
+	  }
+
 	break;
       }
-      */
     default:
       {
 	Error(func, "%s grid unsupported!", gridNamePtr(gridtype));
@@ -414,15 +445,17 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
     }
 
   grid.isRotated = FALSE;
-  /*
-  if ( cgribexGetIsRotated(isec2) )
+  if ( gribapiGetIsRotated(gribgridtype) )
     {
       grid.isRotated = TRUE;
-      grid.ypole     = - ISEC2_LatSP * 0.001;
-      grid.xpole     =   ISEC2_LonSP * 0.001 - 180;
-      grid.angle     = 0;
+      GRIB_CHECK(grib_get_double(gh, "latitudeOfSouthernPoleInDegrees",  &grid.ypole), 0);
+      GRIB_CHECK(grib_get_double(gh, "longitudeOfSouthernPoleInDegrees", &grid.xpole), 0);
+      GRIB_CHECK(grib_get_double(gh, "angleOfRotation", &grid.angle), 0);
+      /* change from south to north pole */
+      grid.ypole = -grid.ypole;
+      grid.xpole =  grid.xpole - 180;
     }
-  */
+
   grid.xvals = NULL;
   grid.yvals = NULL;
   grid.type  = gridtype;
@@ -1750,13 +1783,20 @@ void gribapiDefGrid(grib_handle *gh, int gridID)
 	  ISEC2_ResFlag = 0;
 	else
 	  ISEC2_ResFlag = 128;
-
+	*/
 	if ( gridIsRotated(gridID) )
 	  {
-	    ISEC2_LatSP = - NINT(gridInqYpole(gridID) * 1000);
-	    ISEC2_LonSP =   NINT((gridInqXpole(gridID) + 180) * 1000);
+	    double xpole, ypole, angle;
+	    xpole = gridInqXpole(gridID);
+	    ypole = gridInqYpole(gridID);
+	    angle = gridInqAngle(gridID);
+	    /* change from noth to south pole */
+	    ypole = -ypole;
+	    xpole =  xpole + 180;
+	    GRIB_CHECK(grib_set_double(gh, "latitudeOfSouthernPoleInDegrees",  ypole), 0);
+	    GRIB_CHECK(grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", xpole), 0);
+	    GRIB_CHECK(grib_set_double(gh, "angleOfRotation", angle), 0);
 	  }
-	*/
 
 	/* East -> West */
 	//if ( ISEC2_LastLon < ISEC2_FirstLon ) ISEC2_ScanFlag += 128;
@@ -2048,7 +2088,11 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   gribapiDefGrid(gh, gridID);
   gribapiDefLevel(gh, code, zaxisID, levelID);
 
-  // GRIB_CHECK(grib_set_double(gh, "missingValue", GRIB_MISSVAL), 0);
+  if ( nmiss > 0 )
+    {
+      GRIB_CHECK(grib_set_long(gh, "bitmapPresent", 1), 0);
+      GRIB_CHECK(grib_set_double(gh, "missingValue", vlistInqVarMissval(vlistID, varID)), 0);
+    }
 
   bitsPerValue = grbBitsPerValue(datatype);
   GRIB_CHECK(grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
