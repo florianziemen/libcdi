@@ -1,6 +1,7 @@
 2009-??-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 	
 	* using GRIB library version 1.4.0
+	* added GRIB2 support (testversion) via grib_api(1.8.0)
 	* changed C compiler to ANSI C99
 	* changed time format from hhmm to hhmmss
 	* changed encode/decode_time to seconds
