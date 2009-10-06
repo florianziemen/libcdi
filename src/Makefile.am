@@ -87,6 +87,6 @@ cdiFortran.o: cdiFortran.c
 	source='$<' object='$@' libtool=no \
 	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' \
 	$(CCDEPMODE) $(depcomp) \
-	$(COMPILE) $(CFINT) $(REAL4) -c `test -f '$<' || echo '$(srcdir)/'`$<
+	$(COMPILE) $(CFINT) -c `test -f '$<' || echo '$(srcdir)/'`$<
 #
 CLEANFILES  = `ls *~`
