@@ -3992,15 +3992,15 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 	  cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
 	  cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
 	  
-	  if ( strcmp(attname, "long_name") == 0 )
+	  if ( strcmp(attname, "long_name") == 0 && atttype == NC_CHAR )
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, MAXNAMELEN, ncvars[ncvarid].longname);
       	    }
-	  else if ( strcmp(attname, "standard_name") == 0 )
+	  else if ( strcmp(attname, "standard_name") == 0 && atttype == NC_CHAR )
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, MAXNAMELEN, ncvars[ncvarid].stdname);
       	    }
-	  else if ( strcmp(attname, "units") == 0 )
+	  else if ( strcmp(attname, "units") == 0 && atttype == NC_CHAR )
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, MAXNAMELEN, ncvars[ncvarid].units);
       	    }
@@ -4008,12 +4008,12 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 	    {
 	      ncvars[ncvarid].calendar = TRUE;
       	    }
-	  else if ( strcmp(attname, "code") == 0 )
+	  else if ( strcmp(attname, "code") == 0 && atttype != NC_CHAR )
 	    {
 	      cdfGetAttInt(fileID, ncvarid, attname, 1, &ncvars[ncvarid].code);
 	      cdfSetVar(ncvars, ncvarid, TRUE);
 	    }
-	  else if ( strcmp(attname, "table") == 0 )
+	  else if ( strcmp(attname, "table") == 0 && atttype != NC_CHAR )
 	    {
 	      cdfGetAttInt(fileID, ncvarid, attname, 1, &tablenum);
 	      if ( tablenum > 0 )
@@ -4024,13 +4024,13 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 		}
 	      cdfSetVar(ncvars, ncvarid, TRUE);
 	    }
-	  else if ( strcmp(attname, "trunc_type") == 0 )
+	  else if ( strcmp(attname, "trunc_type") == 0 && atttype == NC_CHAR )
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
 	      if ( memcmp(attstring, "Triangular", attlen) == 0 )
 		ncvars[ncvarid].gridtype = GRID_SPECTRAL;
 	    }
-	  else if ( strcmp(attname, "grid_type") == 0 )
+	  else if ( strcmp(attname, "grid_type") == 0 && atttype == NC_CHAR )
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
 
@@ -4066,15 +4066,15 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 
 	      cdfSetVar(ncvars, ncvarid, TRUE);
 	    }
-	  else if ( strcmp(attname, "trunc_count") == 0 )
+	  else if ( strcmp(attname, "trunc_count") == 0 && atttype != NC_CHAR )
 	    {
 	      cdfGetAttInt(fileID, ncvarid, attname, 1, &ncvars[ncvarid].truncation);
 	    }
-	  else if ( strcmp(attname, "truncation") == 0 )
+	  else if ( strcmp(attname, "truncation") == 0 && atttype != NC_CHAR )
 	    {
 	      cdfGetAttInt(fileID, ncvarid, attname, 1, &ncvars[ncvarid].truncation);
 	    }
-	  else if ( strcmp(attname, "add_offset") == 0 )
+	  else if ( strcmp(attname, "add_offset") == 0 && atttype != NC_CHAR )
 	    {
 	      if ( atttype != NC_CHAR )
 		{
@@ -4087,7 +4087,7 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 		  cdfSetVar(ncvars, ncvarid, TRUE);
 		}
 	    }
-	  else if ( strcmp(attname, "scale_factor") == 0 )
+	  else if ( strcmp(attname, "scale_factor") == 0 && atttype != NC_CHAR )
 	    {
 	      if ( atttype != NC_CHAR )
 		{
@@ -4100,7 +4100,7 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 		  cdfSetVar(ncvars, ncvarid, TRUE);
 		}
 	    }
-	  else if ( strcmp(attname, "bounds") == 0 )
+	  else if ( strcmp(attname, "bounds") == 0 && atttype == NC_CHAR )
 	    {
 	      int status, ncboundsid;
 
@@ -4117,7 +4117,7 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 	      else
 		Warning(func, "%s - %s", nc_strerror(status), attstring);
 	    }
-	  else if ( strcmp(attname, "cell_measures") == 0 )
+	  else if ( strcmp(attname, "cell_measures") == 0 && atttype == NC_CHAR )
 	    {
 	      char *pstring, *cell_measures = NULL, *cell_var = NULL;
 
@@ -4219,7 +4219,7 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 		}
 	      cdfSetVar(ncvars, ncvarid, TRUE);
 	    }
-	  else if ( strcmp(attname, "grid_mapping") == 0 )
+	  else if ( strcmp(attname, "grid_mapping") == 0 && atttype == NC_CHAR )
 	    {
 	      int status;
 	      int nc_gmap_id;
@@ -4237,7 +4237,7 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 
 	      cdfSetVar(ncvars, ncvarid, TRUE);
 	    }
-	  else if ( strcmp(attname, "positive") == 0 )
+	  else if ( strcmp(attname, "positive") == 0 && atttype == NC_CHAR )
 	    {	      
 	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
 
@@ -4274,7 +4274,7 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 		    }
 		}
 	    }
-	  else if ( strcmp(attname, "axis") == 0 )
+	  else if ( strcmp(attname, "axis") == 0 && atttype == NC_CHAR )
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
 	      /* don't check attlen anymore because the meaning changed from COARDS to CF */

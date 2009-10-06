@@ -1,3 +1,7 @@
+2009-10-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdtInqContents: check attribute type
+	
 2009-10-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 	
 	* using GRIB library version 1.4.0
