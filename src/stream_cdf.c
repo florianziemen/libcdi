@@ -5831,7 +5831,14 @@ int cdfInqContents(int streamID)
   if ( streamptr->tsteps[0].taxis.type == TAXIS_RELATIVE )
     taxisID = taxisCreate(TAXIS_RELATIVE);
   else
-    taxisID = taxisCreate(TAXIS_ABSOLUTE);
+    {
+      taxisID = taxisCreate(TAXIS_ABSOLUTE);
+      if ( !timehasunits )
+	{
+	  taxisDefTunit(taxisID, TUNIT_DAY);
+	  streamptr->tsteps[0].taxis.unit = TUNIT_DAY;
+	}
+    }
 
   if ( calendar != UNDEFID )
     {
