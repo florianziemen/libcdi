@@ -1,6 +1,7 @@
 2009-10-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cdtInqContents: check attribute type
+	* cdtInqContents: set default time units to DAYS
 	
 2009-10-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 	
