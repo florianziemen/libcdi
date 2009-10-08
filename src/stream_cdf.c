@@ -4781,6 +4781,7 @@ int cdfInqContents(int streamID)
 		}
 	      else if ( memcmp(ncvars[ncvarid].units, "millibar", 8) == 0 ||
 			memcmp(ncvars[ncvarid].units, "mb", 2)       == 0 ||
+			memcmp(ncvars[ncvarid].units, "hectopas", 8) == 0 ||
 			memcmp(ncvars[ncvarid].units, "hPa", 3)      == 0 ||
 			memcmp(ncvars[ncvarid].units, "Pa", 2)       == 0 )
 		{
@@ -4862,6 +4863,7 @@ int cdfInqContents(int streamID)
 		}
 	      else if ( memcmp(ncvars[ncvarid].units, "millibar", 8) == 0 ||
 			memcmp(ncvars[ncvarid].units, "mb", 2)       == 0 ||
+			memcmp(ncvars[ncvarid].units, "hectopas", 8) == 0 ||
 			memcmp(ncvars[ncvarid].units, "hPa", 3)      == 0 ||
 			memcmp(ncvars[ncvarid].units, "Pa", 2)       == 0 )
 		{
