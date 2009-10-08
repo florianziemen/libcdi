@@ -152,7 +152,7 @@ int iegReadRecord(int streamID, double *data, int *nmiss)
   return (1);
 }
 
-
+static
 int iegGetZaxisType(int iegleveltype)
 {
   int leveltype = 0;
@@ -236,7 +236,7 @@ void iegDefTime(int *pdb, int date, int time, int timeID)
   pdb[5] = 128;
 }
 
-
+static
 void iegDefGrid(int *gdb, int gridID)
 {
   static char func[] = "iegDefGrid";
@@ -320,7 +320,7 @@ void iegDefGrid(int *gdb, int gridID)
   IEG_G_ScanFlag(gdb) = 64;
 }
 
-
+static
 void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 {
   static char func[] = "iegDefLevel";
@@ -615,7 +615,7 @@ int iegWriteRecord(int streamID, const double *data)
   return (status);
 }
 
-
+static
 void iegAddRecord(int streamID, int code, int *pdb, int *gdb, double *vct,
 		  long recsize, off_t position, int prec)
 {
@@ -664,7 +664,7 @@ void iegAddRecord(int streamID, int code, int *pdb, int *gdb, double *vct,
 
   if ( IEG_G_GridType(gdb) == 0 || IEG_G_GridType(gdb) == 10 )
     gridtype = GRID_LONLAT;
-  if ( IEG_G_GridType(gdb) == 4 )
+  else if ( IEG_G_GridType(gdb) == 4 )
     gridtype = GRID_GAUSSIAN;
   else
     gridtype = GRID_GENERIC;
@@ -772,7 +772,7 @@ void iegAddRecord(int streamID, int code, int *pdb, int *gdb, double *vct,
 	    varID, gridID, levelID);
 }
 
-
+static
 void iegCmpRecord(int streamID, int tsID, int recID, off_t position, int code,
 		  int level, int xsize, int ysize)
 {
@@ -803,7 +803,7 @@ void iegCmpRecord(int streamID, int tsID, int recID, off_t position, int code,
     Message(func, "varID = %d levelID = %d", varID, levelID);
 }
 
-
+static
 void iegDateTime(int *pdb, int *date, int *time)
 {
   int ryear, rmonth, rday, rhour, rminute;

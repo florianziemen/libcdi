@@ -1,3 +1,7 @@
+2009-10-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* IEG format: bug fix for lonlat grids [report: Philip Lorenz]
+
 2009-10-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cdtInqContents: check attribute type
