@@ -601,7 +601,45 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
   if ( lwarn )
     {
       lwarn = FALSE;
-      Warning(func, "Compression failed, netCDF4 not available!");
+      Warning(func, "Deflate compression failed, netCDF4 not available!");
+    }
+#endif
+}
+#endif
+
+#if  defined  (HAVE_LIBNETCDF)
+static
+void cdfDefVarSzip(int ncid, int ncvarid)
+{
+  static char func[] = "cdfDefVarSzip";
+#if  defined  (NC_NETCDF4) && defined (NC_SZIP_NN_OPTION_MASK)
+  int retval;
+  /* Set options_mask and bits_per_pixel. */
+  int options_mask = 32;
+  int bits_per_pixel = 16;
+
+  if ((retval = nc_def_var_szip(ncid, ncvarid, options_mask, bits_per_pixel)))
+    {
+      if ( retval == NC_EINVAL )
+	{
+	  static int lwarn = TRUE;
+
+	  if ( lwarn )
+	    {
+	      lwarn = FALSE;
+	      Warning(func, "netCDF4/Szip compression not compiled in!");
+	    }	  
+	}
+      else
+	Error(func, "nc_def_var_szip failed, status = %d", retval);
+    }
+#else
+  static int lwarn = TRUE;
+
+  if ( lwarn )
+    {
+      lwarn = FALSE;
+      Warning(func, "netCDF4/Szip compression not available!");
     }
 #endif
 }
@@ -2631,7 +2669,35 @@ int cdfDefVar(int streamID, int varID)
 	  if ( lwarn )
 	    {
 	      lwarn = FALSE;
-	      Warning(func, "Compression is only available for netCDF4!");
+	      Warning(func, "Deflate compression is only available for netCDF4!");
+	    }
+	}
+    }
+
+  if ( streamptr->ztype == COMPRESS_SZIP )
+    {
+      if ( streamptr->filetype == FILETYPE_NC4 )
+	{
+#if defined (NC_SZIP_NN_OPTION_MASK)
+	  cdfDefVarSzip(fileID, ncvarid);
+#else
+	  static int lwarn = TRUE;
+
+	  if ( lwarn )
+	    {
+	      lwarn = FALSE;
+	      Warning(func, "netCDF4/SZIP compression not available!");
+	    }
+#endif
+	}
+      else
+	{
+	  static int lwarn = TRUE;
+
+	  if ( lwarn )
+	    {
+	      lwarn = FALSE;
+	      Warning(func, "SZIP compression is only available for netCDF4!");
 	    }
 	}
     }

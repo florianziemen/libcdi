@@ -29,9 +29,10 @@ case "${HOSTNAME}" in
 	;;
     gata)
 	./configure --prefix=$HOME/local/etch-ia32 \
-                    --with-jasper=/usr \
+                    --with-jasper=$HOME/local/etch-ia32 \
                     --with-grib_api=/scratch/local2/m214003/local \
-                    --with-netcdf=/client \
+                    --with-netcdf=/scratch/local2/m214003/local \
+                    --with-hdf5=/sw/etch-ia32/hdf5-1.8.2 \
                     --with-szlib=$HOME/local/etch-ia32 \
 	            CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -pedantic" CFINT=-Df2cFortran
 	;;
