@@ -1910,7 +1910,7 @@ void cdiPrintVersion(void)
 {
   fprintf(stderr, "     CDI library version : %s\n", cdiLibraryVersion());
 #if  defined  (HAVE_LIBGRIB)
-  fprintf(stderr, "C_GRIBEX library version : %s\n", cgribexLibraryVersion());
+  fprintf(stderr, " CGRIBEX library version : %s\n", cgribexLibraryVersion());
 #endif
 #if  defined  (HAVE_LIBGRIB_API)
   fprintf(stderr, "GRIB_API library version : %s\n", gribapiLibraryVersion());

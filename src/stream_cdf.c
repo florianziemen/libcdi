@@ -608,6 +608,7 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 #endif
 
 #if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefVarSzip(int ncid, int ncvarid)
 {
@@ -615,7 +616,7 @@ void cdfDefVarSzip(int ncid, int ncvarid)
 #if  defined  (NC_NETCDF4) && defined (NC_SZIP_NN_OPTION_MASK)
   int retval;
   /* Set options_mask and bits_per_pixel. */
-  int options_mask = 32;
+  int options_mask = NC_SZIP_NN_OPTION_MASK;
   int bits_per_pixel = 16;
 
   if ((retval = nc_def_var_szip(ncid, ncvarid, options_mask, bits_per_pixel)))
