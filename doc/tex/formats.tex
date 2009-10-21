@@ -166,14 +166,9 @@ The meaning of the variables are:
 \section{IEG}
 
 IEG is the standard binary output format of the regional model \htmlref{REMO}{REMO}.
-It is simple an unpacked GRIB format. The product and grid
+It is simple an unpacked GRIB edition 1 format. The product and grid
 description section are coded with 4 byte integer values and the
 data section can have 4 or 8 byte IEEE floating point values.
 The header and the data section have the standard Fortran blocking
 for binary data records.
-{\CDI} supports only data on an rotated grid for the IEG format.
-
-%%% Local Variables: 
-%%% mode: latex
-%%% TeX-master: t
-%%% End: 
+{\CDI} supports only data on Gaussian and LonLat grids for the IEG format.

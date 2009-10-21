@@ -4610,9 +4610,11 @@ int cdfInqContents(int streamID)
 		{
 		  modelID = modelInq(-1, 0, attstring);
 		}
+	      /*
 	      else if ( strcmp(attname, "Conventions") == 0 )
 		{
 		}
+	      */
 	      else if ( strcmp(attname, "CDI") == 0 )
 		{
 		}
