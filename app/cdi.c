@@ -695,7 +695,7 @@ int main(int argc, char *argv[])
   if ( optind < argc ) fname2 = argv[optind++];
   if ( optind < argc ) 
     {
-       fprintf(stderr, "optind: %d argc: %d\n", optind, argc);
+      fprintf(stderr, "optind: %d argc: %d\n", optind, argc);
     }
 
   if ( Debug || Version ) version();
