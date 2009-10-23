@@ -1162,6 +1162,7 @@ void cdfDefXaxis(int streamID, int gridID)
   int fileID;
   int dimlen, dimlen0;
   size_t len;
+  int ncdimid;
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
   int nvertex = 2, nvdimID = -1;
   int vlistID;
@@ -1232,7 +1233,8 @@ void cdfDefXaxis(int streamID, int gridID)
 	  strcpy(axisname2, axisname);
 	  if ( iz ) sprintf(&axisname2[strlen(axisname2)], "_%d", iz+1);
 
-	  status = nc_inq_varid(fileID, axisname2, &ncvarid);
+	  //status = nc_inq_varid(fileID, axisname2, &ncvarid);
+	  status = nc_inq_dimid(fileID, axisname2, &ncdimid);
 	  if ( status != NC_NOERR )
 	    {
 	      if ( iz )
@@ -1326,6 +1328,7 @@ void cdfDefYaxis(int streamID, int gridID)
   int fileID;
   int dimlen, dimlen0;
   size_t len;
+  int ncdimid;
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
   int nvdimID = -1;
   int vlistID;
@@ -1396,7 +1399,8 @@ void cdfDefYaxis(int streamID, int gridID)
 	  strcpy(axisname2, axisname);
 	  if ( iz ) sprintf(&axisname2[strlen(axisname2)], "_%d", iz+1);
 
-	  status = nc_inq_varid(fileID, axisname2, &ncvarid);
+	  //status = nc_inq_varid(fileID, axisname2, &ncvarid);
+	  status = nc_inq_varid(fileID, axisname2, &ncdimid);
 	  if ( status != NC_NOERR )
 	    {
 	      if ( iz )
