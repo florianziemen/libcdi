@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 
+#include "dmemory.h"
 #include "cdi.h"
 #include "stream_int.h"
 #include "file.h"
@@ -202,6 +203,8 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
   long numberOfPoints;
   size_t datasize;
   int discip = 0;
+  char name[256], longname[256], units[256];
+  size_t vlen; 
 
   streamptr = stream_to_pointer(streamID);
 
@@ -472,11 +475,14 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
 
       GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
       vctsize = lpar;
-      vctptr = (double *) malloc(vctsize*sizeof(double));
-      dummy = vctsize;
-      GRIB_CHECK(grib_get_double_array(gh, "pv", vctptr, &dummy), 0);
-      varDefVCT(vctsize, vctptr);
-      free(vctptr);
+      if ( vctsize > 0 )
+	{
+	  vctptr = (double *) malloc(vctsize*sizeof(double));
+	  dummy = vctsize;
+	  GRIB_CHECK(grib_get_double_array(gh, "pv", vctptr, &dummy), 0);
+	  varDefVCT(vctsize, vctptr);
+	  free(vctptr);
+	}
     }
 
   //lbounds = cgribexGetZaxisHasBounds(ISEC1_LevelType);
@@ -484,8 +490,20 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
   if ( prec > 32 ) prec = DATATYPE_PACK32;
   if ( prec <  0 ) prec = DATATYPE_PACK;
 
+  vlen = 256;
+  GRIB_CHECK(grib_get_string(gh, "shortName", name, &vlen), 0);
+  if ( vlen == 8 && memcmp(name, "unknown", vlen) == 0 ) name[0] = 0;
+  vlen = 256;
+  GRIB_CHECK(grib_get_string(gh, "name", longname, &vlen), 0);
+  if ( vlen == 8 && memcmp(longname, "unknown", vlen) == 0 ) longname[0] = 0;
+  vlen = 256;
+  GRIB_CHECK(grib_get_string(gh, "units", units, &vlen), 0);
+  if ( vlen == 8 && memcmp(units, "unknown", vlen) == 0 ) units[0] = 0;
+  // fprintf(stderr, "code %d name %s %s %s\n", code, name, longname, units); 
+
   varAddRecord(recID, code, gridID, zaxistype, lbounds, level1, level2,
-	       prec, &varID, &levelID, numavg, table_num, leveltype);
+	       prec, &varID, &levelID, numavg, table_num, leveltype,
+	       name, longname, units);
 
   (*record).varID   = varID;
   (*record).levelID = levelID;

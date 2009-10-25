@@ -534,7 +534,7 @@ void cgribexAddRecord(int streamID, int code, int *isec1, int *isec2, double *fs
   if ( prec <  0 ) prec = DATATYPE_PACK;
 
   varAddRecord(recID, code, gridID, zaxistype, lbounds, level1, level2,
-	       prec, &varID, &levelID, numavg, ISEC1_CodeTable, ISEC1_LevelType);
+	       prec, &varID, &levelID, numavg, ISEC1_CodeTable, ISEC1_LevelType, NULL, NULL, NULL);
 
   (*record).varID   = varID;
   (*record).levelID = levelID;

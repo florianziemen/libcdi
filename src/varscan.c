@@ -46,6 +46,9 @@ typedef struct
   int         codetable;
   int         ztype;
   int         zlevel;
+  char       *name;
+  char       *longname;
+  char       *units;
 }
 VARTABLE;
 
@@ -56,7 +59,8 @@ static int varTablesize = 0;
 int nvars = 0;
 
 
-static void codeInitEntry(int varID, int code)
+static
+void codeInitEntry(int varID, int code)
 {
   vartable[varID].code           = code;
   vartable[varID].prec           = 0;
@@ -73,10 +77,14 @@ static void codeInitEntry(int varID, int code)
   vartable[varID].tableID        = UNDEFID;
   vartable[varID].ztype          = COMPRESS_NONE;
   vartable[varID].zlevel         = 1;
+  vartable[varID].name           = NULL;
+  vartable[varID].longname       = NULL;
+  vartable[varID].units          = NULL;
 }
 
 
-static int varGetEntry(int code, int zaxistype, int codetable, int ltype)
+static
+int varGetEntry(int code, int zaxistype, int codetable, int ltype)
 {
   int varID;
 
@@ -102,6 +110,10 @@ void varFree(void)
     {
       if ( vartable[varID].levelTable )
 	free(vartable[varID].levelTable);
+
+      if ( vartable[varID].name )     free(vartable[varID].name);
+      if ( vartable[varID].longname ) free(vartable[varID].longname);
+      if ( vartable[varID].units )    free(vartable[varID].units);
     }
 
   if ( vartable )
@@ -223,7 +235,7 @@ int codeNewEntry (int code)
   /*
     If the table overflows, double its size.
   */
-  if( varID == varTablesize )
+  if ( varID == varTablesize )
     {
       int i;
 
@@ -248,7 +260,8 @@ int codeNewEntry (int code)
 
 void varAddRecord(int recID, int code, int gridID, int zaxistype, int lbounds,
 		  int level1, int level2, int prec, int *pvarID, int *plevelID,
-		  int numavg, int codetable, int ltype)
+		  int numavg, int codetable, int ltype,
+		  const char *name, const char *longname, const char *units)
 {
   static char func[] = "varAddRecord";
   int varID = UNDEFID;
@@ -268,6 +281,10 @@ void varAddRecord(int recID, int code, int gridID, int zaxistype, int lbounds,
       vartable[varID].lbounds   = lbounds;
       if ( numavg ) vartable[varID].timave = 1;
       vartable[varID].codetable = codetable;
+
+      if ( name )     if ( name[0] )     vartable[varID].name     = strdup(name);
+      if ( longname ) if ( longname[0] ) vartable[varID].longname = strdup(longname);
+      if ( units )    if ( units[0] )    vartable[varID].units    = strdup(units);
     }
   else
     {
@@ -437,6 +454,10 @@ void cdiGenVars(int streamID)
       vlistDefVarTimave(vlistID, varID, timave);
       vlistDefVarTimaccu(vlistID, varID, timaccu);
       vlistDefVarZtype(vlistID, varID, ztype);
+
+      if ( vartable[varID].name )     vlistDefVarName(vlistID, varID, vartable[varID].name);
+      if ( vartable[varID].longname ) vlistDefVarLongname(vlistID, varID, vartable[varID].longname);
+      if ( vartable[varID].units )    vlistDefVarUnits(vlistID, varID, vartable[varID].units);
 
       if ( cdiDefaultTableID != UNDEFID )
 	{
