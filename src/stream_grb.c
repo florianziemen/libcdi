@@ -479,15 +479,18 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
 
 void grbWriteVarDP(int streamID, int varID, const double *data, int nmiss)
 {
-  int vlistID, zaxisID, levelID, nlevs;
+  int vlistID, gridID, zaxisID, levelID, nlevs;
+  int gridsize;
 
-  vlistID = streamInqVlist(streamID);
-  zaxisID = vlistInqVarZaxis(vlistID, varID);
-  nlevs   = zaxisInqSize(zaxisID);
+  vlistID  = streamInqVlist(streamID);
+  gridID   = vlistInqVarGrid(vlistID, varID);
+  gridsize = gridInqSize(gridID);
+  zaxisID  = vlistInqVarZaxis(vlistID, varID);
+  nlevs    = zaxisInqSize(zaxisID);
 
   for ( levelID = 0; levelID < nlevs; levelID++ )
     {
-      grbWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
+      grbWriteVarSliceDP(streamID, varID, levelID, data+levelID*gridsize, nmiss);
     }
 }
 

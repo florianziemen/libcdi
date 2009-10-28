@@ -1,3 +1,8 @@
+2009-10-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* grbWriteVar: bug fix
+	* Version 1.4.0.2 released
+
 2009-10-23  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* stream_cdf:cdfDefXaxis: bug fix for multi generic grids [report: Uwe Mikolajewicz]

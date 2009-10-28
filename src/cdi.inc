@@ -1,10 +1,10 @@
 ! This file was automatically created, don't edit!
 !
-! Fortran interface for CDI library version 1.3.2
+! Fortran interface for CDI library version 1.4.1
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   September 2009
+! Uwe Schulzweida, MPI-MET, Hamburg,   October 2009
 !
 
       INTEGER    CDI_UNDEFID           
