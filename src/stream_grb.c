@@ -372,7 +372,7 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
 
 static
 size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, int zaxisID, int date, int time, int numavg, 
-		 long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize)
+		 long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize, int ljpeg)
 {
   size_t nbytes;
 
@@ -384,7 +384,7 @@ size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, 
   else
     {
       nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID, date, time, numavg, 
-			     datasize, data, nmiss, gribbuffer, gribbuffersize);
+			     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg);
     }
 
   return (nbytes);
@@ -397,6 +397,7 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
   size_t nbytes = 0;
   unsigned char *buffer;
   size_t buffersize;
+  static int lszip_warn = 1;
 
   buffersize = gribbuffersize;
   buffer = (unsigned char *) malloc(buffersize);
@@ -409,7 +410,8 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
     }
   else
     {
-      Warning(func, "Szip compression of GRIB2 not implemented!");
+      if ( lszip_warn ) Warning(func, "Szip compression of GRIB2 records not implemented!");
+      lszip_warn = 0;
       nbytes = gribbuffersize;
     }
       
@@ -436,6 +438,8 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   size_t nbytes;
   int filetype;
   stream_t *streamptr;
+  int ljpeg = 0;
+  int ljpeg_warn = 1;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -462,8 +466,19 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   gribbuffersize = datasize*4+3000;
   gribbuffer = (unsigned char *) malloc(gribbuffersize);
 
+  if ( streamptr->ztype == COMPRESS_JPEG )
+    {
+      if ( filetype == FILETYPE_GRB2 )
+	ljpeg = 1;
+      else
+	{
+	  if ( ljpeg_warn ) Warning(func, "Jpeg compression of GRIB1 records not available!");
+	  ljpeg_warn = 0;
+	}
+    }
+
   nbytes = grbEncode(filetype, varID, levelID, vlistID, gridID, zaxisID, date, time, numavg, 
-		     datasize, data, nmiss, gribbuffer, gribbuffersize);
+		     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg);
 
   if ( streamptr->ztype == COMPRESS_SZIP )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);

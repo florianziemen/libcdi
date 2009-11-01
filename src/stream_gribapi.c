@@ -692,7 +692,7 @@ void gribapiScanTimestep1(int streamID)
       if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
 	{
 	  ztype = COMPRESS_SZIP;
-	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
+	  unzipsize += 100;
 	  if ( (long) buffersize < unzipsize )
 	    {
 	      buffersize = unzipsize;
@@ -725,6 +725,12 @@ void gribapiScanTimestep1(int streamID)
 	}
       else
 	{
+	  size_t len = 256;
+	  char typeOfPacking[256];
+	  GRIB_CHECK(grib_get_string(gh, "typeOfPacking", typeOfPacking, &len), 0);
+	  // fprintf(stderr, "typeOfPacking %d %s\n", len, typeOfPacking);
+	  if ( strncmp(typeOfPacking, "grid_jpeg", len) == 0 ) ztype = COMPRESS_JPEG;
+	  
 	  GRIB_CHECK(grib_get_long(gh, "discipline", &lpar), 0);
 	  discip = (int) lpar;
 	  /*
@@ -1686,7 +1692,7 @@ void gribapiDefTime(grib_handle *gh , int date, int time, int numavg, int timeID
 }
 
 static
-void gribapiDefGrid(grib_handle *gh, int gridID)
+void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 {
   static char func[] = "gribapiDefGrid";
   int gridtype;
@@ -1822,7 +1828,10 @@ void gribapiDefGrid(grib_handle *gh, int gridID)
 	/* South -> North */
 	//if ( ISEC2_LastLat > ISEC2_FirstLat ) ISEC2_ScanFlag += 64;
 
-	GRIB_CHECK(grib_set_string(gh, "typeOfPacking", "grid_simple", &len), 0);
+	if ( ljpeg )
+	  GRIB_CHECK(grib_set_string(gh, "typeOfPacking", "grid_jpeg", &len), 0);
+	else
+	  GRIB_CHECK(grib_set_string(gh, "typeOfPacking", "grid_simple", &len), 0);
 
 	break;
       }
@@ -2076,7 +2085,7 @@ void gribapiDefLevel(grib_handle *gh, int code, int zaxisID, int levelID)
 
 
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int date, int time, int numavg, 
-		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize)
+		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize, int ljpeg)
 {
   static char func[] = "gribapiEncode";
   size_t nbytes = 0;
@@ -2103,7 +2112,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   gribapiDefCode(gh, code, tableInqNum(tableID));
   gribapiDefTime(gh, date, time, numavg, vlistInqTaxis(vlistID));
-  gribapiDefGrid(gh, gridID);
+  gribapiDefGrid(gh, gridID, ljpeg);
   gribapiDefLevel(gh, code, zaxisID, levelID);
 
   if ( nmiss > 0 )

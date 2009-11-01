@@ -58,7 +58,7 @@ int Zlevel = 0;
 static
 void version(void)
 {
-  fprintf(stderr, "CDI version 1.7.0\n");
+  fprintf(stderr, "CDI version 1.7.1\n");
   cdiPrintVersion();
   fprintf(stderr, "\n");
 /*
@@ -77,6 +77,7 @@ void version(void)
   1.6.2   3 Jan 2008 : changes for CDI library version 1.1.0 (compress)
   1.6.3  26 Mar 2008 : call streamDefTimestep also if ntsteps = 0 (buf fix)
   1.7.0  11 Apr 2008 : add option -z zip for deflate compression of netCDF4 variables
+  1.7.1   1 Nov 2009 : add option -z jpeg for JPEG compression of GRIB2 records
 */
 }
 
@@ -101,7 +102,8 @@ void usage(void)
   fprintf(stderr, "\n");
 
   fprintf(stderr, "    -V             Print version number\n");
-  fprintf(stderr, "    -z szip        Compress GRIB records with szip\n");
+  fprintf(stderr, "    -z szip        SZIP compression of GRIB1 records\n");
+  fprintf(stderr, "       jpeg        JPEG compression of GRIB2 records\n");
   fprintf(stderr, "        zip        Deflate compression of netCDF4 variables\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "  Report bugs to <Uwe.Schulzweida@zmaw.de>\n");
@@ -545,6 +547,7 @@ void setDefaultFileType(char *filetypestr)
       char *ftstr = filetypestr;
 
       if      ( memcmp(filetypestr, "grb2", 4)  == 0 ) { ftstr += 4; DefaultFileType = FILETYPE_GRB2;}
+      else if ( memcmp(filetypestr, "grb1", 4)  == 0 ) { ftstr += 4; DefaultFileType = FILETYPE_GRB; }
       else if ( memcmp(filetypestr, "grb",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_GRB; }
       else if ( memcmp(filetypestr, "nc2",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC2; }
       else if ( memcmp(filetypestr, "nc4",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC4; }
@@ -606,6 +609,10 @@ void defineCompress(const char *arg)
     {
       Ztype = COMPRESS_SZIP;
     }
+  else if ( strncmp(arg, "jpeg", len) == 0 )
+    {
+      Ztype = COMPRESS_JPEG;
+    }
   else if ( strncmp(arg, "gzip", len) == 0 )
     {
       Ztype = COMPRESS_GZIP;
@@ -617,7 +624,7 @@ void defineCompress(const char *arg)
       Zlevel = 1;
     }
   else
-    fprintf(stderr, "Compression %s unsupported!\n", arg);  
+    fprintf(stderr, "%s compression unsupported!\n", arg);
 }
 
 

@@ -9,6 +9,6 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
 		  int unreduced, int *nmiss, int *zip);
 
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int date, int time, int numavg, 
-		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize);
+		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize, int ljpeg);
 
 #endif  /* _STREAM_GRIBAPI_H */
