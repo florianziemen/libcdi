@@ -38,14 +38,20 @@ vlistDefVarName     vlist_var
 vlistInqVarName     vlist_var
 vlistDefVarLongname vlist_var
 vlistInqVarLongname vlist_var
- vlistDefVarStdname  vlist_var
- vlistInqVarStdname  vlist_var
+vlistDefVarStdname  vlist_var
+vlistInqVarStdname  vlist_var
 vlistDefVarUnits    vlist_var
 vlistInqVarUnits    vlist_var
 vlistDefVarDatatype vlist_var
 vlistInqVarDatatype vlist_var
 vlistDefVarMissval  vlist_var
 vlistInqVarMissval  vlist_var
+vlistDefAttInt      vlist_att
+vlistInqAttInt      vlist_att
+vlistDefAttFlt      vlist_att
+vlistInqAttFlt      vlist_att
+vlistDefAttTxt      vlist_att
+vlistInqAttTxt      vlist_att
 gridCreate          grid
 gridDestroy         grid
 gridDuplicate       grid

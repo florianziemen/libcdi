@@ -411,12 +411,18 @@ int     vlistInqAtt(int vlistID, int varID, int attrnum, char *name, int *typep,
 
 int     vlistDelAtt(int vlistID, int varID, const char *name);
 
+/*      vlistDefAttInt: Define an integer attribute */
 int     vlistDefAttInt(int vlistID, int varID, const char *name, int len, const int *ip);
+/*      vlistDefAttInt: Define a floating point attribute */
 int     vlistDefAttFlt(int vlistID, int varID, const char *name, int len, const double *dp);
+/*      vlistDefAttInt: Define a text attribute */
 int     vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp);
 
+/*      vlistInqAttInt: Get the value(s) of an integer attribute */
 int     vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int *ip);
+/*      vlistInqAttInt: Get the value(s) of a floating point attribute */
 int     vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double *dp);
+/*      vlistInqAttInt: Get the value(s) of a text attribute */
 int     vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp);
 
 

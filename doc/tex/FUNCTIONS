@@ -56,6 +56,15 @@ Function catalog:
    vlistDefVarMissval   Define the missing value of a Variable
    vlistInqVarMissval   Get the missing value of a Variable
 -------------------------------------------------------------
+   vlist_att
+-------------------------------------------------------------
+   vlistDefAttInt       Define an integer attribute
+   vlistInqAttInt       Get the value(s) of an integer attribute
+   vlistDefAttFlt       Define a floating point attribute
+   vlistInqAttFlt       Get the value(s) of a floating point attribute
+   vlistDefAttTxt       Define a text attribute
+   vlistInqAttTxt       Get the value(s) of a text attribute
+-------------------------------------------------------------
    grid
 -------------------------------------------------------------
    gridCreate           Create a horizontal Grid

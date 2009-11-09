@@ -282,6 +282,24 @@ int vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2)
 }
 
 
+/*
+@Function  vlistDefAttInt
+@Title     Define an integer attribute
+
+@Prototype int vlistDefAttInt(int vlistID, int varID, const char *name, int len, const int *ip)
+
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier, or CDI_GLOBAL for a global attribute
+    @Item  name     Attribute name
+    @Item  len      Number of values provided for the attribute
+    @Item  ip       Pointer to one or more integer values
+
+@Description
+The function @func{vlistDefAttInt} defines an integer attribute.
+
+@EndFunction
+*/
 int vlistDefAttInt(int vlistID, int varID, const char *name, int len, const int *ip)
 {
   int status;
@@ -292,6 +310,24 @@ int vlistDefAttInt(int vlistID, int varID, const char *name, int len, const int 
 }
 
 
+/*
+@Function  vlistDefAttFlt
+@Title     Define a floating point attribute
+
+@Prototype int vlistDefAttFlt(int vlistID, int varID, const char *name, int len, const double *dp)
+
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier, or CDI_GLOBAL for a global attribute
+    @Item  name     Attribute name
+    @Item  len      Number of values provided for the attribute
+    @Item  dp       Pointer to one or more floating point values
+
+@Description
+The function @func{vlistDefAttFlt} defines a floating point attribute.
+
+@EndFunction
+*/
 int vlistDefAttFlt(int vlistID, int varID, const char *name, int len, const double *dp)
 {
   int status;
@@ -302,6 +338,24 @@ int vlistDefAttFlt(int vlistID, int varID, const char *name, int len, const doub
 }
 
 
+/*
+@Function  vlistDefAttTxt
+@Title     Define a text attribute
+
+@Prototype int vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp)
+
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier, or CDI_GLOBAL for a global attribute
+    @Item  name     Attribute name
+    @Item  len      Number of values provided for the attribute
+    @Item  tp       Pointer to one or more character values
+
+@Description
+The function @func{vlistDefAttTxt} defines a text attribute.
+
+@EndFunction
+*/
 int vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp)
 {
   int status;
@@ -312,7 +366,23 @@ int vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char
 }
 
 
+/*
+@Function  vlistInqAttInt
+@Title     Get the value(s) of an integer attribute
 
+@Prototype int vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int *ip)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier, or CDI_GLOBAL for a global attribute
+    @Item  name     Attribute name
+    @Item  mlen     Number of allocated values provided for the attribute
+    @Item  ip       Pointer location for returned integer attribute value(s)
+
+@Description
+The function @func{vlistInqAttInt} gets the values(s) of an integer attribute.
+
+@EndFunction
+*/
 int vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int *ip)
 {
   int status = CDI_NOERR;
@@ -323,6 +393,23 @@ int vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int *ip)
 }
 
 
+/*
+@Function  vlistInqAttFlt
+@Title     Get the value(s) of a floating point attribute
+
+@Prototype int vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, int *dp)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier, or CDI_GLOBAL for a global attribute
+    @Item  name     Attribute name
+    @Item  mlen     Number of allocated values provided for the attribute
+    @Item  dp       Pointer location for returned floating point attribute value(s)
+
+@Description
+The function @func{vlistInqAttFlt} gets the values(s) of a floating point attribute.
+
+@EndFunction
+*/
 int vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double *dp)
 {
   int status = CDI_NOERR;
@@ -333,6 +420,23 @@ int vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double *d
 }
 
 
+/*
+@Function  vlistInqAttTxt
+@Title     Get the value(s) of a text attribute
+
+@Prototype int vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, int *tp)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier, or CDI_GLOBAL for a global attribute
+    @Item  name     Attribute name
+    @Item  mlen     Number of allocated values provided for the attribute
+    @Item  tp       Pointer location for returned text attribute value(s)
+
+@Description
+The function @func{vlistInqAttTxt} gets the values(s) of a text attribute.
+
+@EndFunction
+*/
 int vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp)
 {
   int status = CDI_NOERR;
