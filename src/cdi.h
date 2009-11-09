@@ -358,15 +358,17 @@ void    vlistDefVarName(int vlistID, int varID, const char *name);
 /*      vlistInqVarName: Get the name of a Variable */
 void    vlistInqVarName(int vlistID, int varID, char *name);
 
+/*      vlistDefVarStdname: Define the standard name of a Variable */
+void    vlistDefVarStdname(int vlistID, int varID, const char *stdname);
+
+/*      vlistInqVarStdname: Get the standard name of a Variable */
+void    vlistInqVarStdname(int vlistID, int varID, char *stdname);
+
 /*      vlistDefVarLongname: Define the long name of a Variable */
 void    vlistDefVarLongname(int vlistID, int varID, const char *longname);
 
-void    vlistDefVarStdname(int vlistID, int varID, const char *stdname);
-
 /*      vlistInqVarLongname: Get the long name of a Variable */
 void    vlistInqVarLongname(int vlistID, int varID, char *longname);
-
-void    vlistInqVarStdname(int vlistID, int varID, char *stdname);
 
 /*      vlistDefVarUnits: Define the units of a Variable */
 void    vlistDefVarUnits(int vlistID, int varID, const char *units);

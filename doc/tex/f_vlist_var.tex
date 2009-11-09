@@ -275,6 +275,63 @@ Variable description
 
 
 
+\subsection{Define the standard name of a Variable: {\tt vlistDefVarStdname}}
+\index{vlistDefVarStdname}
+\label{vlistDefVarStdname}
+
+The function {\tt vlistDefVarStdname} defines the standard name of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarStdname(INTEGER vlistID, INTEGER varID, 
+                                  CHARACTER*(*) stdname)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+\item[{\tt varID}]
+Variable identifier
+\item[{\tt stdname}]
+Standard name of the variable
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the standard name of a Variable: {\tt vlistInqVarStdname}}
+\index{vlistInqVarStdname}
+\label{vlistInqVarStdname}
+
+The function {\tt vlistInqVarStdname} returns the standard name of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistInqVarStdname(INTEGER vlistID, INTEGER varID, 
+                                  CHARACTER*(*) stdname)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+\item[{\tt varID}]
+Variable identifier
+\item[{\tt stdname}]
+Variable standard name
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistInqVarName} returns the standard name of the variable to the parameter stdname.
+
+
+
 \subsection{Define the units of a Variable: {\tt vlistDefVarUnits}}
 \index{vlistDefVarUnits}
 \label{vlistDefVarUnits}

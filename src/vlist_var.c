@@ -528,6 +528,24 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
 }
 
 
+/*
+@Function  vlistInqVarStdname
+@Title     Get the standard name of a Variable
+
+@Prototype void vlistInqVarStdname(int vlistID, int varID, char *stdname)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier
+    @Item  stdname  Variable standard name
+
+@Description
+The function @func{vlistInqVarStdname} returns the standard name of a variable.
+
+@Result
+@func{vlistInqVarName} returns the standard name of the variable to the parameter stdname.
+
+@EndFunction
+*/
 void vlistInqVarStdname(int vlistID, int varID, char *stdname)
 {
   static char func[] = "vlistInqVarStdname";
@@ -860,6 +878,21 @@ void vlistDefVarLongname(int vlistID, int varID, const char *longname)
 }
 
 
+/*
+@Function  vlistDefVarStdname
+@Title     Define the standard name of a Variable
+
+@Prototype void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier
+    @Item  stdname  Standard name of the variable
+
+@Description
+The function @func{vlistDefVarStdname} defines the standard name of a variable.
+
+@EndFunction
+*/
 void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
 {
   static char func[] = "vlistDefVarStdname";

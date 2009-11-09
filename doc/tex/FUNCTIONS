@@ -47,6 +47,8 @@ Function catalog:
    vlistInqVarName      Get the name of a Variable
    vlistDefVarLongname  Define the long name of a Variable
    vlistInqVarLongname  Get the longname of a Variable
+   vlistDefVarStdname   Define the standard name of a Variable
+   vlistInqVarStdname   Get the standard name of a Variable
    vlistDefVarUnits     Define the units of a Variable
    vlistInqVarUnits     Get the units of a Variable
    vlistDefVarDatatype  Define the data type of a Variable
