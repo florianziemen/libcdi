@@ -669,6 +669,16 @@ Destroy a variable list
 Duplicate a variable list
 
 
+\section*{\tt \htmlref{vlistInqAtt}{vlistInqAtt}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqAtt(INTEGER vlistID, INTEGER varID, INTEGER attnum, 
+                                 CHARACTER*(*) name, INTEGER typep, INTEGER lenp)
+\end{verbatim}
+
+Get information about an attribute
+
+
 \section*{\tt \htmlref{vlistInqAttFlt}{vlistInqAttFlt}}
 
 \begin{verbatim}
@@ -697,6 +707,15 @@ Get the value(s) of an integer attribute
 \end{verbatim}
 
 Get the value(s) of a text attribute
+
+
+\section*{\tt \htmlref{vlistInqNatts}{vlistInqNatts}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqNatts(INTEGER vlistID, INTEGER varID, INTEGER nattsp)
+\end{verbatim}
+
+Get number of variable attributes
 
 
 \section*{\tt \htmlref{vlistInqTaxis}{vlistInqTaxis}}

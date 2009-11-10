@@ -101,6 +101,21 @@ void fill_att(CDI_att *attp, int type, size_t nelems, size_t xsz, const void *xv
 }
 
 
+/*
+@Function  vlistInqNatts
+@Title     Get number of variable attributes
+
+@Prototype int vlistInqNatts(int vlistID, int varID, int *nattsp)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier, or CDI_GLOBAL for a global attribute
+    @Item  nattsp   Pointer to location for returned number of variable attributes
+
+@Description
+The function @func{vlistInqNatts} gets the number of variable attributes assigned to this variable.
+
+@EndFunction
+*/
 int vlistInqNatts(int vlistID, int varID, int *nattsp)
 {
   static char func[] = "vlistInqNatts";
@@ -119,6 +134,24 @@ int vlistInqNatts(int vlistID, int varID, int *nattsp)
 }
 
 
+/*
+@Function  vlistInqAtt
+@Title     Get information about an attribute
+
+@Prototype int vlistInqAtt(int vlistID, int varID, int attnum, char *name, int *typep, int *lenp)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  varID    Variable identifier, or CDI_GLOBAL for a global attribute
+    @Item  attnum   Attribute number (from 0 to natts-1)
+    @Item  name     Pointer to the location for the returned attribute name
+    @Item  typep    Pointer to location for returned attribute type
+    @Item  lenp     Pointer to location for returned attribute number
+
+@Description
+The function @func{vlistInqNatts} gets information about an attribute.
+
+@EndFunction
+*/
 int vlistInqAtt(int vlistID, int varID, int attnum, char *name, int *typep, int *lenp)
 {
   static char func[] = "vlistInqAtt";

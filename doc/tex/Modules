@@ -46,6 +46,9 @@ vlistDefVarDatatype vlist_var
 vlistInqVarDatatype vlist_var
 vlistDefVarMissval  vlist_var
 vlistInqVarMissval  vlist_var
+vlistInqNatts       vlist_att
+vlistInqAtt         vlist_att
+vlistDelAtt         vlist_att
 vlistDefAttInt      vlist_att
 vlistInqAttInt      vlist_att
 vlistDefAttFlt      vlist_att

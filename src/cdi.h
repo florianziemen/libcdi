@@ -405,10 +405,10 @@ int     vlistMergedLevel(int vlistID, int varID, int levelID);
 
 /* VLIST attributes */
 
+/*      vlistInqNatts: Get number of variable attributes assigned to this variable */
 int     vlistInqNatts(int vlistID, int varID, int *nattsp);
-
+/*      vlistInqAtt: Get information about an attribute */
 int     vlistInqAtt(int vlistID, int varID, int attrnum, char *name, int *typep, int *lenp);
-
 int     vlistDelAtt(int vlistID, int varID, const char *name);
 
 /*      vlistDefAttInt: Define an integer attribute */
