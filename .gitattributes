@@ -77,10 +77,13 @@ examples/cdi_copy_file.c -text
 examples/cdi_read.c -text
 examples/cdi_read_example.f90 -text
 examples/cdi_read_f.f -text
+examples/cdi_read_f2003.f90 -text
 examples/cdi_read_records.c -text
 examples/cdi_write.c -text
 examples/cdi_write_f.f -text
+examples/cdi_write_f2003.f90 -text
 examples/compf -text
+m4/acx_sl_mod_suffix.m4 -text
 src/Makefile.am -text
 src/Makefile.in -text
 src/basetime.c -text
@@ -124,6 +127,7 @@ src/institution.c -text
 src/lock.h -text
 src/make_cdilib -text
 src/make_fint.c -text
+src/mo_cdi.f90 -text
 src/model.c -text
 src/service.h -text
 src/servicelib.c -text
