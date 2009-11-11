@@ -274,11 +274,18 @@ foreach $key (@sorted_func)  {
   $cproto = $hrefproto{$key};
   $title  = $hreftitle{$key};
 
-  printcfdoc ("\n\n\\section*{\\tt \\htmlref{$key}{$key}}\n\n");
+  printcfdoc ("\n\n\\section*{\\tt ");
+  printcfdoc ("\\ifpdf\n");
+  printcfdoc ("\\hyperref[$key]{$key}\n");
+  printcfdoc ("\\else\n");
+  printcfdoc ("$key\n");
+  printcfdoc ("\\fi\n");
+  printcfdoc ("}\n");
   printcfdoc ("\\begin{verbatim}\n");
   printproto ($cproto);
   printcfdoc ("\\end{verbatim}\n");
   printcfdoc ("\n$title\n");
+  printcfdoc ("\\ifpdfoutput{}{(\\ref{$key})}\n");
 }
 
 sub printproto {

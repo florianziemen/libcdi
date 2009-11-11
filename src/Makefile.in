@@ -34,12 +34,15 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
+#
+@CREATE_ISOC_TRUE@am__append_1 = mo_cdi.$(FCMODEXT)
+@CREATE_ISOC_TRUE@am__append_2 = mo_cdi.o cdilib.o
 subdir = src
-DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
+DIST_COMMON = $(am__include_HEADERS_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/acx_sl_mod_suffix.m4 \
+	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
@@ -82,6 +85,7 @@ CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libcdi_a_SOURCES)
 DIST_SOURCES = $(libcdi_a_SOURCES)
+am__include_HEADERS_DIST = cdi.h cdi.inc mo_cdi.$(FCMODEXT)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
@@ -110,6 +114,8 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FC = @FC@
+FCFLAGS = @FCFLAGS@
+FCMODEXT = @FCMODEXT@
 FFLAGS = @FFLAGS@
 GREP = @GREP@
 INSTALL = @INSTALL@
@@ -142,6 +148,7 @@ abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_F77 = @ac_ct_F77@
+ac_ct_FC = @ac_ct_FC@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
@@ -192,9 +199,11 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 #
+BUILT_SOURCES = cdilib.c
+#
 lib_LIBRARIES = libcdi.a
 #
-include_HEADERS = cdi.h cdi.inc
+include_HEADERS = cdi.h cdi.inc $(am__append_1)
 #
 libcdi_a_SOURCES = \
         cdiFortran.c   	 \
@@ -275,9 +284,10 @@ libcdi_a_SOURCES = \
 	util.h	 	 \
 	varscan.h
 
+LOCALTARGETS = $(am__append_2)
 #
-CLEANFILES = `ls *~`
-all: config.h
+CLEANFILES = `ls *~` mo_cdi.$(FCMODEXT)
+all: $(BUILT_SOURCES) config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
@@ -517,13 +527,15 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-am
-all-am: Makefile $(LIBRARIES) $(HEADERS) config.h
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
+all-am: Makefile $(LIBRARIES) $(HEADERS) config.h all-local
 installdirs:
 	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -548,6 +560,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-generic clean-libLIBRARIES mostlyclean-am
@@ -568,7 +581,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-includeHEADERS
+install-data-am: install-data-local install-includeHEADERS
 
 install-dvi: install-dvi-am
 
@@ -607,12 +620,13 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES
 
 .MAKE: install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLIBRARIES ctags distclean distclean-compile \
-	distclean-generic distclean-hdr distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
+.PHONY: CTAGS GTAGS all all-am all-local check check-am clean \
+	clean-generic clean-libLIBRARIES ctags distclean \
+	distclean-compile distclean-generic distclean-hdr \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am \
+	install-data-local install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am \
 	install-includeHEADERS install-info install-info-am \
 	install-libLIBRARIES install-man install-pdf install-pdf-am \
 	install-ps install-ps-am install-strip installcheck \
@@ -626,7 +640,27 @@ cdiFortran.o: cdiFortran.c
 	source='$<' object='$@' libtool=no \
 	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' \
 	$(CCDEPMODE) $(depcomp) \
-	$(COMPILE) $(CFINT) -c `test -f '$<' || echo '$(srcdir)/'`$<
+	$(COMPILE) $(CFINT) $(REAL4) -c `test -f '$<' || echo '$(srcdir)/'`$<
+#
+cdilib.c:
+	./make_cdilib
+#
+cdilib.o: cdilib.c
+	$(COMPILE) $(CFINT) $(REAL4) -c $<
+#
+all-local: $(LOCALTARGETS) 
+#
+install-data-local: $(LOCALTARGETS)
+	 @for f in $(LOCALTARGETS) ; do \
+	   echo " $(INSTALL_DATA) $$f \"$(DESTDIR)$(libdir)/$$f\""; \
+	   $(INSTALL_DATA) $$f "$(DESTDIR)$(libdir)/$$f" ; \
+	 done
+#
+mo_cdi.o: mo_cdi.f90
+	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) mo_cdi.f90
+#
+mo_cdi.$(FCMODEXT): mo_cdi.f90
+	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) mo_cdi.f90
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -3,7 +3,7 @@
 
 \section{GRIB edition 1}
 
-\htmlref{GRIB}{GRIB} (GRIdded Binary) is a standard format designed by the
+GRIB \cite{GRIB} (GRIdded Binary) is a standard format designed by the
 World Meteorological Organization (WMO) to support the efficient 
 transmission and storage of gridded meteorological data.
 
@@ -76,7 +76,7 @@ data representation and level types are implemented: \\
 
 \section{NetCDF}
 
-\htmlref{NetCDF}{NetCDF} (Network Common Data Form) is an interface for array-oriented data
+NetCDF \cite{NetCDF} (Network Common Data Form) is an interface for array-oriented data
 access and a library that provides an implementation of the interface.
 The netCDF library also defines a machine-independent format for 
 representing scientific data. Together, the interface, library, and 
@@ -95,7 +95,7 @@ of the {\CDI} library (see \htmlref{Build}{build}).
 \section{SERVICE}
 
 SERVICE is the binary exchange format of the atmospheric general
-circulation model \htmlref{ECHAM}{ECHAM}.
+circulation model ECHAM \cite{ECHAM}.
 It has a header section with 8 integer values followed by the data section.
 The header and the data section have the standard Fortran blocking
 for binary data records.
@@ -132,12 +132,11 @@ The meaning of the variables are:
 
 \section{EXTRA}
 
-EXTRA is the standard binary output format of the ocean model \htmlref{MPIOM}{MPIOM}.
-It has a header section with 4 integer values followed by the data section.
-The header and the data section have the standard Fortran blocking
-for binary data records.
-An EXTRA record can have an accuracy of 4 or 8 bytes and 
-the byteorder can be little or big endian.
+EXTRA is the standard binary output format of the ocean model MPIOM
+\cite{MPIOM}. It has a header section with 4 integer values followed by the
+data section. The header and the data section have the standard Fortran
+blocking for binary data records. An EXTRA record can have an accuracy of 4 or
+8 bytes and the byteorder can be little or big endian.
 The following Fortran code example can be used to read an
 EXTRA record with an accuracy of 4 bytes:
 
@@ -165,7 +164,7 @@ The meaning of the variables are:
 
 \section{IEG}
 
-IEG is the standard binary output format of the regional model \htmlref{REMO}{REMO}.
+IEG is the standard binary output format of the regional model REMO \cite{REMO}.
 It is simple an unpacked GRIB edition 1 format. The product and grid
 description section are coded with 4 byte integer values and the
 data section can have 4 or 8 byte IEEE floating point values.

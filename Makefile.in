@@ -39,8 +39,8 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	config/depcomp config/install-sh config/missing \
 	config/mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/acx_sl_mod_suffix.m4 \
+	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -96,6 +96,8 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FC = @FC@
+FCFLAGS = @FCFLAGS@
+FCMODEXT = @FCMODEXT@
 FFLAGS = @FFLAGS@
 GREP = @GREP@
 INSTALL = @INSTALL@
@@ -128,6 +130,7 @@ abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_F77 = @ac_ct_F77@
+ac_ct_FC = @ac_ct_FC@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
@@ -181,6 +184,8 @@ top_srcdir = @top_srcdir@
 SUBDIRS = src app examples tests
 #
 EXTRA_DIST = config/default doc/cdi_cman.pdf doc/cdi_fman.pdf src/cfortran.doc
+#
+ACLOCAL_AMFLAGS = -I m4
 #
 CLEANFILES = `ls *~`
 all: all-recursive

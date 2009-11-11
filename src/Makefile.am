@@ -1,8 +1,14 @@
 ## Process this file with automake to produce Makefile.in
 #
+BUILT_SOURCES = cdilib.c
+#
 lib_LIBRARIES = libcdi.a
 #
 include_HEADERS = cdi.h cdi.inc
+#
+if CREATE_ISOC
+include_HEADERS += mo_cdi.$(FCMODEXT)
+endif
 #
 libcdi_a_SOURCES = 	 \
         cdiFortran.c   	 \
@@ -87,6 +93,32 @@ cdiFortran.o: cdiFortran.c
 	source='$<' object='$@' libtool=no \
 	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' \
 	$(CCDEPMODE) $(depcomp) \
-	$(COMPILE) $(CFINT) -c `test -f '$<' || echo '$(srcdir)/'`$<
+	$(COMPILE) $(CFINT) $(REAL4) -c `test -f '$<' || echo '$(srcdir)/'`$<
 #
-CLEANFILES  = `ls *~`
+cdilib.c:
+	./make_cdilib
+#
+cdilib.o: cdilib.c
+	$(COMPILE) $(CFINT) $(REAL4) -c $<
+#
+all-local: $(LOCALTARGETS) 
+
+LOCALTARGETS = 
+
+if CREATE_ISOC
+LOCALTARGETS += mo_cdi.o cdilib.o
+endif
+#
+install-data-local: $(LOCALTARGETS)
+	 @for f in $(LOCALTARGETS) ; do \
+	   echo " $(INSTALL_DATA) $$f \"$(DESTDIR)$(libdir)/$$f\""; \
+	   $(INSTALL_DATA) $$f "$(DESTDIR)$(libdir)/$$f" ; \
+	 done
+#
+mo_cdi.o: mo_cdi.f90
+	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) mo_cdi.f90
+#
+mo_cdi.$(FCMODEXT): mo_cdi.f90
+	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) mo_cdi.f90
+#
+CLEANFILES  = `ls *~` mo_cdi.$(FCMODEXT)

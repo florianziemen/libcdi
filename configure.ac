@@ -189,6 +189,22 @@ AC_MSG_CHECKING([for SERVICE support])
 AC_MSG_RESULT($with_service)
 
 #  ----------------------------------------------------------------------
+#  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
+#
+AC_ARG_ENABLE(iso-c-interface,
+              AS_HELP_STRING([--enable-iso-c-interface],
+                             [Create Fortran Interface via iso_c_bindings facility of F2003 [[default=no]]]).
+              ,enable_isoc=${enableval},enable_isoc=no)
+AM_CONDITIONAL([CREATE_ISOC],[test $enable_isoc = 'yes'])
+if test "${enable_isoc}" = "yes"; then
+  AC_PROG_FC
+else
+  AC_SUBST([FC],$F77)
+fi
+#  Check the module extension of the fortran compiler
+ACX_SL_FC_MOD_SUFFIX(,[FCMODEXT=mod])
+
+#  ----------------------------------------------------------------------
 #  Compile interface with internal EXTRA library
 #
 AC_ARG_WITH([extra],
@@ -327,7 +343,6 @@ esac
 #  Check C / Fortran interface
 UD_CHECK_CFINT([$srcdir/src/cfortran.h])
 
-AC_SUBST([FC],$F77)
 AC_SUBST([CFINT])
 AC_SUBST([CPPFLAGS])
 AC_SUBST([AR])

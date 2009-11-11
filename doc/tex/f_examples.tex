@@ -55,9 +55,9 @@ data:
 \end{lstlisting}
 
 
-\section{Read a dataset}
+\section{\label{example_read}Read a dataset}
 
-This example reads the netCDF file {\tt example.nc} from \htmlref{Appendix B.1}{example_write}.
+This example reads the netCDF file {\tt example.nc} from \htmlref{Appendix \ref{example_write}}{example_write}.
 
 \lstinputlisting[language=Fortran, frame=single, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
 {../../examples/cdi_read_f.f}
@@ -71,3 +71,21 @@ to {\tt FILETYPE\_GRB}.
 
 \lstinputlisting[language=Fortran, frame=single, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
 {../../examples/cdi_copy_f.f}
+
+\section{\label{examples_f2003}Fortran 2003: mo\_cdi and iso\_c\_binding}
+
+This is the Fortran 2003 version of the reading and writing examples above.
+The main differenc to {\tt cfortran.h} is the
+character handling. Here {\tt CHARACTER(type=c\_char)} is used instead of
+{\tt CHARACTER}. Additionally plain fortran charcters and character variables
+have to be convertet to C charcters by
+\begin{itemize}
+\item appending {\tt '\textbackslash 0'} with {\tt //C\_NULL\_CHAR} 
+\item prepending {\tt C\_CHAR\_} to plain charcters
+\item take {\tt ctrim} from {\tt mo\_cdi} for {\tt CHARACTER(type=c\_char)} variables
+\end{itemize}
+
+\lstinputlisting[language=Fortran, frame=single, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+{../../examples/cdi_read_f2003.f90}
+\lstinputlisting[language=Fortran, frame=single, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+{../../examples/cdi_write_f2003.f90}

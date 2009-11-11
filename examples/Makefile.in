@@ -34,17 +34,20 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 noinst_PROGRAMS = cdi_write$(EXEEXT) cdi_read$(EXEEXT) \
-	cdi_copy$(EXEEXT)
+	cdi_copy$(EXEEXT) $(am__EXEEXT_1)
+@CREATE_ISOC_TRUE@am__append_1 = cdi_read_f2003 cdi_write_f2003
 subdir = examples
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/acx_sl_mod_suffix.m4 \
+	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/config.h
 CONFIG_CLEAN_FILES =
+@CREATE_ISOC_TRUE@am__EXEEXT_1 = cdi_read_f2003$(EXEEXT) \
+@CREATE_ISOC_TRUE@	cdi_write_f2003$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_cdi_copy_OBJECTS = cdi_copy.$(OBJEXT)
 cdi_copy_OBJECTS = $(am_cdi_copy_OBJECTS)
@@ -53,9 +56,15 @@ cdi_copy_DEPENDENCIES = ../src/libcdi.a $(am__DEPENDENCIES_1)
 am_cdi_read_OBJECTS = cdi_read.$(OBJEXT)
 cdi_read_OBJECTS = $(am_cdi_read_OBJECTS)
 cdi_read_DEPENDENCIES = ../src/libcdi.a $(am__DEPENDENCIES_1)
+cdi_read_f2003_SOURCES = cdi_read_f2003.c
+cdi_read_f2003_OBJECTS = cdi_read_f2003.$(OBJEXT)
+cdi_read_f2003_LDADD = $(LDADD)
 am_cdi_write_OBJECTS = cdi_write.$(OBJEXT)
 cdi_write_OBJECTS = $(am_cdi_write_OBJECTS)
 cdi_write_DEPENDENCIES = ../src/libcdi.a $(am__DEPENDENCIES_1)
+cdi_write_f2003_SOURCES = cdi_write_f2003.c
+cdi_write_f2003_OBJECTS = cdi_write_f2003.$(OBJEXT)
+cdi_write_f2003_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)/src@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -63,9 +72,10 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(cdi_copy_SOURCES) $(cdi_read_SOURCES) $(cdi_write_SOURCES)
+SOURCES = $(cdi_copy_SOURCES) $(cdi_read_SOURCES) cdi_read_f2003.c \
+	$(cdi_write_SOURCES) cdi_write_f2003.c
 DIST_SOURCES = $(cdi_copy_SOURCES) $(cdi_read_SOURCES) \
-	$(cdi_write_SOURCES)
+	cdi_read_f2003.c $(cdi_write_SOURCES) cdi_write_f2003.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -92,6 +102,8 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FC = @FC@
+FCFLAGS = @FCFLAGS@
+FCMODEXT = @FCMODEXT@
 FFLAGS = @FFLAGS@
 GREP = @GREP@
 INSTALL = @INSTALL@
@@ -124,6 +136,7 @@ abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_F77 = @ac_ct_F77@
+ac_ct_FC = @ac_ct_FC@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
@@ -239,7 +252,9 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_copy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_read.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_read_f2003.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_write.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_write_f2003.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -430,6 +445,12 @@ uninstall-am:
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am
 
+#
+cdi_read_f2003: cdi_read_f2003.f90
+	$(FC) $(AM_FCFLAGS) $(FCFLAGS) $(FCFLAGS_f90) $@.f90 ../src/cdilib.o ../src/mo_cdi.o -I../src $(LDFLAGS) $(LIBS) -o $@
+#
+cdi_write_f2003: cdi_write_f2003.f90
+	$(FC) $(AM_FCFLAGS) $(FCFLAGS) $(FCFLAGS_f90) $@.f90 ../src/cdilib.o ../src/mo_cdi.o -I../src $(LDFLAGS) $(LIBS) -o $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
