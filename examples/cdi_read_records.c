@@ -21,6 +21,17 @@ typedef struct {
 read_arg_t;
 
 
+typedef struct {
+  int varID, levelID, nmiss;
+  double *array;
+  int array_size;
+  int recID, nrecs;
+  read_arg_t read_arg;
+  void *iothread;
+}
+par_io_t;
+
+
 typedef struct work_st{
   void (*routine) (void*);
   void *arg;
@@ -32,7 +43,6 @@ typedef struct {
   double *array;
   int array_size;
   int recID, nrecs;
-  read_arg_t read_arg;
   int shutdown;
   int used;
   work_t *work;
@@ -46,23 +56,12 @@ typedef struct {
 } iothread_t;
 
 
-typedef struct {
-  int varID, levelID, nmiss;
-  double *array;
-  int array_size;
-  int recID, nrecs;
-  read_arg_t read_arg;
-  iothread_t *iothread;
-}
-par_io_t;
-
-
 void readRecord(void *arg)
 {
+  read_arg_t *read_arg = (read_arg_t *) arg;
   int streamID;
   int *varID, *levelID, *nmiss;
   double *array;
-  read_arg_t *read_arg = (read_arg_t *) arg;
 
   streamID = read_arg->streamID;
   varID    = read_arg->varID;
@@ -153,7 +152,7 @@ iothread_t *create_iothread()
   pthread_attr_setdetachstate(&(iothread->attr), PTHREAD_CREATE_JOINABLE);
 
   iothread->shutdown = 0;
-  iothread->used = 0;
+  iothread->used     = 0;
 
   //make thread
   if ( pthread_create(&(iothread->thrID), &(iothread->attr), do_work, (void *)iothread) )
@@ -168,8 +167,10 @@ iothread_t *create_iothread()
 
 
 #if  defined  (HAVE_LIBPTHREAD)
-void check_iothread(iothread_t *iothread)
+void check_iothread(void *p)
 {
+  iothread_t *iothread = (iothread_t *) p;
+
   pthread_mutex_lock(&(iothread->lock));
 
   while ( iothread->used == 1 )
@@ -186,8 +187,9 @@ void check_iothread(iothread_t *iothread)
 #if  defined  (HAVE_LIBPTHREAD)
 typedef void (*dispatch_fn)(void *);
 
-void dispatch(iothread_t *iothread, dispatch_fn dispatch_to_here, void *arg)
+void dispatch(void *p, dispatch_fn dispatch_to_here, void *arg)
 {
+  iothread_t *iothread = (iothread_t *) p;
   work_t *work;
 
   //make a work element.  
@@ -203,26 +205,31 @@ void dispatch(iothread_t *iothread, dispatch_fn dispatch_to_here, void *arg)
 
   pthread_mutex_lock(&(iothread->lock));
 
-  if ( iothread->used == 0 )
-    {
-      iothread->work = work;
-      pthread_cond_signal(&(iothread->not_empty));
-    } 
+  if ( iothread->used == 1 )
+    fprintf(stderr, "dispatch: Internal synchronization problem!\n");
 
+  iothread->work = work;
   iothread->used = 1;
+  pthread_cond_signal(&(iothread->not_empty));
 
   pthread_mutex_unlock(&(iothread->lock));
 }
 #endif
 
 #if  defined  (HAVE_LIBPTHREAD)
-void destroy_iothread(iothread_t *iothread)
+void destroy_iothread(void *p)
 {
+  iothread_t *iothread = (iothread_t *) p;
   int status;
 
   pthread_mutex_lock(&(iothread->lock));
+
+  if ( iothread->used == 1 )
+    fprintf(stderr, "destroy_iothread: Internal synchronization problem!\n");
+
   iothread->shutdown = 1;
   pthread_cond_signal(&(iothread->not_empty));
+
   pthread_mutex_unlock(&(iothread->lock));
 
   status = pthread_join(iothread->thrID, NULL);
@@ -237,7 +244,7 @@ void destroy_iothread(iothread_t *iothread)
   pthread_cond_destroy(&(iothread->not_empty));
   pthread_attr_destroy(&(iothread->attr));
 
-  //free(iothread);
+  free(iothread);
 }
 #endif
 

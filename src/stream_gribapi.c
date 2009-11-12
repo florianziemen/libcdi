@@ -1922,6 +1922,7 @@ void gribapiDefLevel(grib_handle *gh, int code, int zaxisID, int levelID)
     {
       zaxistype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, zaxistype);
+      zaxisDefUnits(zaxisID, "Pa");
     }
 
   // ISEC2_NumVCP = 0;

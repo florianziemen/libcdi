@@ -1880,6 +1880,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
     {
       zaxistype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, zaxistype);
+      zaxisDefUnits(zaxisID, "Pa");
     }
 
   ISEC2_NumVCP = 0;
@@ -1951,7 +1952,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	  Warning(func, "Pressure level of %f Pa is below zero!", level);
 
 	zaxisInqUnits(zaxisID, units);
-	if ( memcmp(units, "Pa", 3) != 0 ) level *= 100;
+	if ( memcmp(units, "Pa", 2) != 0 ) level *= 100;
 
 	ilevel = (int) level;
 	if ( level < 32768 && (level < 100 || modf(level/100, &dum) > 0) )

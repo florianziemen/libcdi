@@ -335,6 +335,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
     {
       leveltype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, leveltype);
+      zaxisDefUnits(zaxisID, "Pa");
     }
 
   /*  IEG_G_NumVCP(gdb) = 0; */
