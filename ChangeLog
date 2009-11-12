@@ -1,6 +1,11 @@
 2009-11-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* set units to "Pa" if changing zaxis to "pressure" (bug fix) [report: Chao Li]
+
+2009-11-12  Ralf Mueller  <Ralf.Mueller@zmaw.de>
+
+	* Added Fortran Interface via iso_c_bindings facility of F2003
+	  --enable-iso-c-interface
 	
 2009-11-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
