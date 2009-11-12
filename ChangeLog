@@ -1,6 +1,6 @@
 2009-11-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* set units to "Pa" if changing zaxis to "pressure" (bug fix) [report: ]
+	* set units to "Pa" if changing zaxis to "pressure" (bug fix) [report: Chao Li]
 	
 2009-11-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
