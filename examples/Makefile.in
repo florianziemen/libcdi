@@ -56,14 +56,14 @@ cdi_copy_DEPENDENCIES = ../src/libcdi.a $(am__DEPENDENCIES_1)
 am_cdi_read_OBJECTS = cdi_read.$(OBJEXT)
 cdi_read_OBJECTS = $(am_cdi_read_OBJECTS)
 cdi_read_DEPENDENCIES = ../src/libcdi.a $(am__DEPENDENCIES_1)
-cdi_read_f2003_SOURCES = cdi_read_f2003.c
-cdi_read_f2003_OBJECTS = cdi_read_f2003.$(OBJEXT)
+am_cdi_read_f2003_OBJECTS = cdi_read_f2003.$(OBJEXT)
+cdi_read_f2003_OBJECTS = $(am_cdi_read_f2003_OBJECTS)
 cdi_read_f2003_LDADD = $(LDADD)
 am_cdi_write_OBJECTS = cdi_write.$(OBJEXT)
 cdi_write_OBJECTS = $(am_cdi_write_OBJECTS)
 cdi_write_DEPENDENCIES = ../src/libcdi.a $(am__DEPENDENCIES_1)
-cdi_write_f2003_SOURCES = cdi_write_f2003.c
-cdi_write_f2003_OBJECTS = cdi_write_f2003.$(OBJEXT)
+am_cdi_write_f2003_OBJECTS = cdi_write_f2003.$(OBJEXT)
+cdi_write_f2003_OBJECTS = $(am_cdi_write_f2003_OBJECTS)
 cdi_write_f2003_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)/src@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -72,10 +72,16 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(cdi_copy_SOURCES) $(cdi_read_SOURCES) cdi_read_f2003.c \
-	$(cdi_write_SOURCES) cdi_write_f2003.c
+FCCOMPILE = $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+FCLD = $(FC)
+FCLINK = $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o \
+	$@
+SOURCES = $(cdi_copy_SOURCES) $(cdi_read_SOURCES) \
+	$(cdi_read_f2003_SOURCES) $(cdi_write_SOURCES) \
+	$(cdi_write_f2003_SOURCES)
 DIST_SOURCES = $(cdi_copy_SOURCES) $(cdi_read_SOURCES) \
-	cdi_read_f2003.c $(cdi_write_SOURCES) cdi_write_f2003.c
+	$(cdi_read_f2003_SOURCES) $(cdi_write_SOURCES) \
+	$(cdi_write_f2003_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -185,6 +191,9 @@ target_os = @target_os@
 target_vendor = @target_vendor@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+
+#
+EXTRA_DIST = cdi_read_f2003.f90 cdi_write_f2003.f90
 #
 cdi_write_SOURCES = cdi_write.c
 cdi_write_LDADD = ../src/libcdi.a $(LDFLAGS)
@@ -195,13 +204,16 @@ cdi_read_LDADD = ../src/libcdi.a $(LDFLAGS)
 cdi_copy_SOURCES = cdi_copy.c
 cdi_copy_LDADD = ../src/libcdi.a $(LDFLAGS)
 #
+cdi_read_f2003_SOURCES = cdi_read_f2003.f90
+cdi_write_f2003_SOURCES = cdi_write_f2003.f90
+#
 AM_CPPFLAGS = -I$(top_srcdir)/src
 #
 CLEANFILES = `ls *~`
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .o .obj
+.SUFFIXES: .c .f90 .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -252,9 +264,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_copy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_read.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_read_f2003.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_write.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_write_f2003.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -269,6 +279,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+.f90.o:
+	$(FCCOMPILE) -c -o $@ $<
+
+.f90.obj:
+	$(FCCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \

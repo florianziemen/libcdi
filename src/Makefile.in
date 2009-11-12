@@ -34,11 +34,11 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-#
 @CREATE_ISOC_TRUE@am__append_1 = mo_cdi.$(FCMODEXT)
 @CREATE_ISOC_TRUE@am__append_2 = mo_cdi.o cdilib.o
+@CREATE_ISOC_TRUE@am__append_3 = mo_cdi.$(FCMODEXT)
 subdir = src
-DIST_COMMON = $(am__include_HEADERS_DIST) $(srcdir)/Makefile.am \
+DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_sl_mod_suffix.m4 \
@@ -54,7 +54,8 @@ am__vpath_adj = case $$p in \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)" \
+	"$(DESTDIR)$(includedir)"
 libLIBRARIES_INSTALL = $(INSTALL_DATA)
 LIBRARIES = $(lib_LIBRARIES)
 ARFLAGS = cru
@@ -85,9 +86,9 @@ CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libcdi_a_SOURCES)
 DIST_SOURCES = $(libcdi_a_SOURCES)
-am__include_HEADERS_DIST = cdi.h cdi.inc mo_cdi.$(FCMODEXT)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
-HEADERS = $(include_HEADERS)
+nodist_includeHEADERS_INSTALL = $(INSTALL_HEADER)
+HEADERS = $(include_HEADERS) $(nodist_include_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -199,11 +200,16 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 #
-BUILT_SOURCES = cdilib.c
+EXTRA_DIST = make_cdilib mo_cdi.f90
+#
+@CREATE_ISOC_TRUE@BUILT_SOURCES = cdilib.c
 #
 lib_LIBRARIES = libcdi.a
 #
-include_HEADERS = cdi.h cdi.inc $(am__append_1)
+include_HEADERS = cdi.h cdi.inc
+#
+nodistdir = .
+nodist_include_HEADERS = $(am__append_1)
 #
 libcdi_a_SOURCES = \
         cdiFortran.c   	 \
@@ -286,7 +292,7 @@ libcdi_a_SOURCES = \
 
 LOCALTARGETS = $(am__append_2)
 #
-CLEANFILES = `ls *~` mo_cdi.$(FCMODEXT)
+CLEANFILES = `ls *~` $(am__append_3)
 all: $(BUILT_SOURCES) config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -451,6 +457,23 @@ uninstall-includeHEADERS:
 	  echo " rm -f '$(DESTDIR)$(includedir)/$$f'"; \
 	  rm -f "$(DESTDIR)$(includedir)/$$f"; \
 	done
+install-nodist_includeHEADERS: $(nodist_include_HEADERS)
+	@$(NORMAL_INSTALL)
+	test -z "$(includedir)" || $(MKDIR_P) "$(DESTDIR)$(includedir)"
+	@list='$(nodist_include_HEADERS)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(nodist_includeHEADERS_INSTALL) '$$d$$p' '$(DESTDIR)$(includedir)/$$f'"; \
+	  $(nodist_includeHEADERS_INSTALL) "$$d$$p" "$(DESTDIR)$(includedir)/$$f"; \
+	done
+
+uninstall-nodist_includeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nodist_include_HEADERS)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(includedir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(includedir)/$$f"; \
+	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -531,7 +554,7 @@ check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(LIBRARIES) $(HEADERS) config.h all-local
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -581,7 +604,8 @@ info: info-am
 
 info-am:
 
-install-data-am: install-data-local install-includeHEADERS
+install-data-am: install-data-local install-includeHEADERS \
+	install-nodist_includeHEADERS
 
 install-dvi: install-dvi-am
 
@@ -616,7 +640,8 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES
+uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
+	uninstall-nodist_includeHEADERS
 
 .MAKE: install-am install-strip
 
@@ -628,12 +653,13 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES
 	install-data-local install-dvi install-dvi-am install-exec \
 	install-exec-am install-html install-html-am \
 	install-includeHEADERS install-info install-info-am \
-	install-libLIBRARIES install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-includeHEADERS uninstall-libLIBRARIES
+	install-libLIBRARIES install-man install-nodist_includeHEADERS \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-includeHEADERS \
+	uninstall-libLIBRARIES uninstall-nodist_includeHEADERS
 
 #
 cdiFortran.o: cdiFortran.c
@@ -642,11 +668,11 @@ cdiFortran.o: cdiFortran.c
 	$(CCDEPMODE) $(depcomp) \
 	$(COMPILE) $(CFINT) $(REAL4) -c `test -f '$<' || echo '$(srcdir)/'`$<
 #
-cdilib.c:
-	./make_cdilib
+@CREATE_ISOC_TRUE@cdilib.c:
+@CREATE_ISOC_TRUE@	./make_cdilib
 #
-cdilib.o: cdilib.c
-	$(COMPILE) $(CFINT) $(REAL4) -c $<
+@CREATE_ISOC_TRUE@cdilib.o: cdilib.c
+@CREATE_ISOC_TRUE@	$(COMPILE) $(CFINT) $(REAL4) -c $<
 #
 all-local: $(LOCALTARGETS) 
 #

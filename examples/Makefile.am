@@ -1,6 +1,8 @@
 ## Process this file with automake to produce Makefile.in
 #
-  noinst_PROGRAMS = cdi_write cdi_read cdi_copy
+EXTRA_DIST = cdi_read_f2003.f90 cdi_write_f2003.f90
+#
+noinst_PROGRAMS = cdi_write cdi_read cdi_copy
 if CREATE_ISOC
   noinst_PROGRAMS += cdi_read_f2003 cdi_write_f2003
 endif
@@ -13,6 +15,9 @@ cdi_read_LDADD = ../src/libcdi.a $(LDFLAGS)
 #
 cdi_copy_SOURCES = cdi_copy.c
 cdi_copy_LDADD = ../src/libcdi.a $(LDFLAGS)
+#
+cdi_read_f2003_SOURCES = cdi_read_f2003.f90
+cdi_write_f2003_SOURCES = cdi_write_f2003.f90
 #
 AM_CPPFLAGS = -I$(top_srcdir)/src
 #

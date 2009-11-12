@@ -1,13 +1,19 @@
 ## Process this file with automake to produce Makefile.in
 #
+EXTRA_DIST = make_cdilib mo_cdi.f90
+#
+if CREATE_ISOC
 BUILT_SOURCES = cdilib.c
+endif
 #
 lib_LIBRARIES = libcdi.a
 #
 include_HEADERS = cdi.h cdi.inc
 #
+nodistdir = .
+nodist_include_HEADERS =
 if CREATE_ISOC
-include_HEADERS += mo_cdi.$(FCMODEXT)
+  nodist_include_HEADERS += mo_cdi.$(FCMODEXT)
 endif
 #
 libcdi_a_SOURCES = 	 \
@@ -95,11 +101,13 @@ cdiFortran.o: cdiFortran.c
 	$(CCDEPMODE) $(depcomp) \
 	$(COMPILE) $(CFINT) $(REAL4) -c `test -f '$<' || echo '$(srcdir)/'`$<
 #
+if CREATE_ISOC
 cdilib.c:
 	./make_cdilib
 #
 cdilib.o: cdilib.c
 	$(COMPILE) $(CFINT) $(REAL4) -c $<
+endif
 #
 all-local: $(LOCALTARGETS) 
 
@@ -121,4 +129,7 @@ mo_cdi.o: mo_cdi.f90
 mo_cdi.$(FCMODEXT): mo_cdi.f90
 	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) mo_cdi.f90
 #
-CLEANFILES  = `ls *~` mo_cdi.$(FCMODEXT)
+CLEANFILES  = `ls *~`
+if CREATE_ISOC
+CLEANFILES += mo_cdi.$(FCMODEXT)
+endif
