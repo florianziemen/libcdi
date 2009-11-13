@@ -34,7 +34,7 @@ Define the precision of a Grid.
 \section*{\tt \htmlref{gridDefXbounds}{gridDefXbounds}}
 
 \begin{verbatim}
-    void gridDefXbounds (intgridID, double *xbounds);
+    void gridDefXbounds (intgridID, double *xbounds_vec);
 \end{verbatim}
 
 Define the bounds of a X-axis.
@@ -79,7 +79,7 @@ Define the units of a X-axis.
 \section*{\tt \htmlref{gridDefXvals}{gridDefXvals}}
 
 \begin{verbatim}
-    void gridDefXvals (intgridID, double *xvals);
+    void gridDefXvals (intgridID, double *xvals_vec);
 \end{verbatim}
 
 Define the values of a X-axis.
@@ -88,7 +88,7 @@ Define the values of a X-axis.
 \section*{\tt \htmlref{gridDefYbounds}{gridDefYbounds}}
 
 \begin{verbatim}
-    void gridDefYbounds (intgridID, double *ybounds);
+    void gridDefYbounds (intgridID, double *ybounds_vec);
 \end{verbatim}
 
 Define the bounds of a Y-axis.
@@ -133,7 +133,7 @@ Define the units of a Y-axis.
 \section*{\tt \htmlref{gridDefYvals}{gridDefYvals}}
 
 \begin{verbatim}
-    void gridDefYvals (intgridID, double *yvals);
+    void gridDefYvals (intgridID, double *yvals_vec);
 \end{verbatim}
 
 Define the values of a Y-axis.
@@ -196,7 +196,7 @@ Get the type of a Grid.
 \section*{\tt \htmlref{gridInqXbounds}{gridInqXbounds}}
 
 \begin{verbatim}
-    int gridInqXbounds (intgridID, double *xbounds);
+    int gridInqXbounds (intgridID, double *xbounds_vec);
 \end{verbatim}
 
 Get the bounds of a X-axis.
@@ -259,7 +259,7 @@ Get one value of a X-axis.
 \section*{\tt \htmlref{gridInqXvals}{gridInqXvals}}
 
 \begin{verbatim}
-    int gridInqXvals (intgridID, double *xvals);
+    int gridInqXvals (intgridID, double *xvals_vec);
 \end{verbatim}
 
 Get all values of a X-axis.
@@ -268,7 +268,7 @@ Get all values of a X-axis.
 \section*{\tt \htmlref{gridInqYbounds}{gridInqYbounds}}
 
 \begin{verbatim}
-    int gridInqYbounds (intgridID, double *ybounds);
+    int gridInqYbounds (intgridID, double *ybounds_vec);
 \end{verbatim}
 
 Get the bounds of a Y-axis.
@@ -331,7 +331,7 @@ Get one value of a Y-axis.
 \section*{\tt \htmlref{gridInqYvals}{gridInqYvals}}
 
 \begin{verbatim}
-    int gridInqYvals (intgridID, double *yvals);
+    int gridInqYvals (intgridID, double *yvals_vec);
 \end{verbatim}
 
 Get all values of a Y-axis.
@@ -466,7 +466,7 @@ Create a new dataset.
 \section*{\tt \htmlref{streamReadVar}{streamReadVar}}
 
 \begin{verbatim}
-    void streamReadVar (intstreamID, intvarID, double *data, int *nmiss);
+    void streamReadVar (intstreamID, intvarID, double *data_vec, int *nmiss);
 \end{verbatim}
 
 Read a variable.
@@ -475,7 +475,7 @@ Read a variable.
 \section*{\tt \htmlref{streamReadVarSlice}{streamReadVarSlice}}
 
 \begin{verbatim}
-    void streamReadVarSlice (intstreamID, intvarID, intlevelID, double *data, 
+    void streamReadVarSlice (intstreamID, intvarID, intlevelID, double *data_vec, 
                              int *nmiss);
 \end{verbatim}
 
@@ -494,7 +494,7 @@ Synchronize an Open Dataset to Disk.
 \section*{\tt \htmlref{streamWriteVar}{streamWriteVar}}
 
 \begin{verbatim}
-    void streamWriteVar (intstreamID, intvarID, double *data, intnmiss);
+    void streamWriteVar (intstreamID, intvarID, double *data_vec, intnmiss);
 \end{verbatim}
 
 Write a variable.
@@ -503,7 +503,7 @@ Write a variable.
 \section*{\tt \htmlref{streamWriteVarSlice}{streamWriteVarSlice}}
 
 \begin{verbatim}
-    void streamWriteVarSlice (intstreamID, intvarID, intlevelID, double *data, 
+    void streamWriteVarSlice (intstreamID, intvarID, intlevelID, double *data_vec, 
                               intnmiss);
 \end{verbatim}
 
@@ -654,6 +654,15 @@ Copy some entries of a variable list.
 Create a variable list.
 
 
+\section*{\tt \htmlref{vlistDefAttInt}{vlistDefAttInt}}
+
+\begin{verbatim}
+    int vlistDefAttInt (intvlistID, intvarID, char *name, intlen, int *ip_vec);
+\end{verbatim}
+
+Define an integer attribute.
+
+
 \section*{\tt \htmlref{vlistDefTaxis}{vlistDefTaxis}}
 
 \begin{verbatim}
@@ -717,6 +726,15 @@ Define the missing value of a Variable.
 Define the name of a Variable.
 
 
+\section*{\tt \htmlref{vlistDefVarStdname}{vlistDefVarStdname}}
+
+\begin{verbatim}
+    void vlistDefVarStdname (intvlistID, intvarID, char *stdname);
+\end{verbatim}
+
+Define the standard name of a Variable.
+
+
 \section*{\tt \htmlref{vlistDefVarUnits}{vlistDefVarUnits}}
 
 \begin{verbatim}
@@ -742,6 +760,34 @@ Destroy a variable list.
 \end{verbatim}
 
 Duplicate a variable list.
+
+
+\section*{\tt \htmlref{vlistInqAtt}{vlistInqAtt}}
+
+\begin{verbatim}
+    int vlistInqAtt (intvlistID, intvarID, intattrnum, char *name, int *typep, 
+                     int *lenp);
+\end{verbatim}
+
+Get information about an attribute.
+
+
+\section*{\tt \htmlref{vlistInqAttInt}{vlistInqAttInt}}
+
+\begin{verbatim}
+    int vlistInqAttInt (intvlistID, intvarID, char *name, intmlen, int *ip_vec);
+\end{verbatim}
+
+Get the value(s) of an integer attribute.
+
+
+\section*{\tt \htmlref{vlistInqNatts}{vlistInqNatts}}
+
+\begin{verbatim}
+    int vlistInqNatts (intvlistID, intvarID, int *nattsp);
+\end{verbatim}
+
+Get number of variable attributes assigned to this variable.
 
 
 \section*{\tt \htmlref{vlistInqTaxis}{vlistInqTaxis}}
@@ -796,6 +842,15 @@ Get the missing value of a Variable.
 \end{verbatim}
 
 Get the name of a Variable.
+
+
+\section*{\tt \htmlref{vlistInqVarStdname}{vlistInqVarStdname}}
+
+\begin{verbatim}
+    void vlistInqVarStdname (intvlistID, intvarID, char *stdname);
+\end{verbatim}
+
+Get the standard name of a Variable.
 
 
 \section*{\tt \htmlref{vlistInqVarUnits}{vlistInqVarUnits}}
@@ -864,7 +919,7 @@ Define one level of a Z-axis.
 \section*{\tt \htmlref{zaxisDefLevels}{zaxisDefLevels}}
 
 \begin{verbatim}
-    void zaxisDefLevels (intzaxisID, double *levels);
+    void zaxisDefLevels (intzaxisID, double *levels_vec);
 \end{verbatim}
 
 Define the levels of a Z-axis.
@@ -927,7 +982,7 @@ Get one level of a Z-axis.
 \section*{\tt \htmlref{zaxisInqLevels}{zaxisInqLevels}}
 
 \begin{verbatim}
-    void zaxisInqLevels (intzaxisID, double *levels);
+    void zaxisInqLevels (intzaxisID, double *levels_vec);
 \end{verbatim}
 
 Get all levels of a Z-axis.
