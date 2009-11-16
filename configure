@@ -7443,7 +7443,7 @@ else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-	ud_c_cfint=yes
+	ud_c_cfint=no
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext

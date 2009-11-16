@@ -11,7 +11,7 @@ AC_DEFUN([UD_CHECK_CFINT],
       CFLAGS="$CFLAGS $CFINT"
       AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include "$1"],[])],
         [ud_c_cfint=yes],
-        [ud_c_cfint=yes])
+        [ud_c_cfint=no])
       CFLAGS=$ud_save_CFLAGS
       AC_LANG_POP([C])])
    AS_IF([test x$ud_c_cfint = xyes],
