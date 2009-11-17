@@ -19,6 +19,7 @@ config/config.sub -text
 config/default -text
 config/depcomp -text
 config/install-sh -text
+config/interface.rb -text
 config/missing -text
 config/mkinstalldirs -text
 /configure -text

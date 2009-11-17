@@ -6,6 +6,10 @@
 # pretty generic script -- just echos, cats and greps.
 #
 #
+srcdir=./
+if [ ! -z $1 ] ; then
+srcdir=$1
+fi
 PROG=cdilib.c
 echo "combining source code into one module"
 echo "output is ${PROG}"
@@ -119,12 +123,21 @@ h="cdi_limits.h taxis.h error.h dtypes.h file.h cgribex.h gribapi.h service.h ex
    service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \
    cdf.h vlist.h"
 
-cat $h >> ${PROG}
-cat $c | grep -v '#include' | grep -v '#  include' >> ${PROG}
+#cat $h >> ${PROG}
+#cat $c | grep -v '#include' | grep -v '#  include' >> ${PROG}
 
-if test -f config.h ; then
-   cpp -P -DHAVE_CONFIG_H  version.c >>  ${PROG}
-   CDIVERSION=`grep PACKAGE_VERSION config.h | cut -f3 -d" "`
+for hfile in $h ; do
+  cat $srcdir/$hfile  >> ${PROG}
+done
+
+for cfile in $c ; do
+  cat $srcdir/$cfile | grep -v '#include' | grep -v '#  include' >> ${PROG}
+done
+
+
+if test -f  config.h ; then
+   cpp -P -DHAVE_CONFIG_H  -I./ $srcdir/version.c >>  ${PROG}
+   CDIVERSION=`grep PACKAGE_VERSION  config.h | cut -f3 -d" "`
 else
    echo "error: missing config.h"
 fi
@@ -137,9 +150,9 @@ echo "#undef malloc" >>  ${PROG}
 echo "#undef calloc" >>  ${PROG}
 echo "#undef free" >>  ${PROG}
 echo "#undef DOUBLE_PRECISION" >>  ${PROG}
-cat cfortran.h  >>  ${PROG}
+cat $srcdir/cfortran.h  >>  ${PROG}
 echo "#endif" >>  ${PROG}
-cat cdiFortran.c >>  ${PROG}
+cat $srcdir/cdiFortran.c >>  ${PROG}
 
 echo "#undef realloc" >>  ${PROG}
 echo "#undef malloc" >>  ${PROG}

@@ -2,9 +2,7 @@
 #
 EXTRA_DIST = make_cdilib mo_cdi.f90
 #
-if CREATE_ISOC
-BUILT_SOURCES = cdilib.c
-endif
+#BUILT_SOURCES = cdilib.c
 #
 lib_LIBRARIES = libcdi.a
 #
@@ -101,20 +99,18 @@ cdiFortran.o: cdiFortran.c
 	$(CCDEPMODE) $(depcomp) \
 	$(COMPILE) $(CFINT) $(REAL4) -c `test -f '$<' || echo '$(srcdir)/'`$<
 #
-if CREATE_ISOC
 cdilib.c:
-	./make_cdilib
+	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src
 #
 cdilib.o: cdilib.c
 	$(COMPILE) $(CFINT) $(REAL4) -c $<
-endif
 #
 all-local: $(LOCALTARGETS) 
 
-LOCALTARGETS = 
+LOCALTARGETS = cdilib.o
 
 if CREATE_ISOC
-LOCALTARGETS += mo_cdi.o cdilib.o
+LOCALTARGETS += mo_cdi.o
 endif
 #
 install-data-local: $(LOCALTARGETS)
@@ -130,6 +126,7 @@ mo_cdi.$(FCMODEXT): mo_cdi.f90
 	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) mo_cdi.f90
 #
 CLEANFILES  = `ls *~`
+CLEANFILES += cdilib.c
 if CREATE_ISOC
 CLEANFILES += mo_cdi.$(FCMODEXT)
 endif

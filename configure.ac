@@ -18,10 +18,13 @@ AM_INIT_AUTOMAKE
 #  Checks for programs.
 AC_PROG_CC([gcc c99])
 AC_PROG_CC_C99
+AC_PROG_CXX
 AC_PROG_F77
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_CHECK_PROGS(AR, ar, [ar])
+AC_CHECK_PROG(SED,sed,sed,false)
+AC_CHECK_PROG(GREP,grep,grep,false)
 
 #  Check large file support on 32 bit systems
 AC_SYS_LARGEFILE
@@ -204,6 +207,91 @@ fi
 #  Check the module extension of the fortran compiler
 ACX_SL_FC_MOD_SUFFIX(,[FCMODEXT=mod])
 
+# -----------------------------------
+# Check for SWIG - Generator for script-language bindings
+AC_ARG_ENABLE(swig,
+  [AS_HELP_STRING([--enable-swig],[use swig to create extra bindings [default=no]])],
+  [],[enable_swig=no])
+
+if test "x$enable_swig" != "xyes"; then
+  use_swig="no (disabled)"
+else
+  AC_CHECK_PROG(SWIG,swig,swig)
+  if test "x$SWIG" = "x"; then
+    use_swig="No (swig not available)"
+  else
+    use_swig="Yes"
+  fi
+fi
+AM_CONDITIONAL(WITH_SWIG, [test "x$SWIG" != "x"])
+
+#  ----------------------------------------------------------------------
+#  Create the Ruby Interface via swig
+#
+AC_ARG_ENABLE(ruby,
+  [AS_HELP_STRING([--enable-ruby],[ruby language bindings [default=no]])],
+  [], [enable_ruby=no])
+
+if test "x$enable_ruby" != "xyes"; then
+  use_ruby="No (disabled)"
+else
+  AC_CHECK_PROG(RUBY,ruby,ruby)
+  RUBY_INCLUDES="-I$($RUBY config/interface.rb)"
+  save_CPPFLAGS=$CPPFLAGS
+  CPPFLAGS="$CPPFLAGS $RUBY_INCLUDES"
+  AC_CHECK_HEADER(ruby.h,,[
+                           use_ruby="No (missing header)"
+                           RUBY=
+                           ])
+  CPPFLAGS=$save_CPPFLAGS
+  if test "x$RUBY" = "x"; then
+    use_ruby="No (ruby not available)"
+  else
+    use_ruby="Yes"
+    if test "x$use_swig" != "xYes"; then
+      echo "Ruby bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage"
+    else
+      if test `$SWIG -help 2>&1 | $GREP -c '\-ruby *- Generate'` = 0; then
+        use_ruby="No (swig does not support -ruby option)"
+      fi
+    fi
+  fi
+fi
+AM_CONDITIONAL(WITH_RUBY, [test "x$use_ruby" = "xYes"])
+
+#  ----------------------------------------------------------------------
+#  Create the Ruby Interface via swig
+#
+AC_ARG_ENABLE(python,
+  [AS_HELP_STRING([--enable-python],[python language bindings [default=no]])],
+  [], [enable_python=no])
+
+if test "x$enable_python" != "xyes"; then
+  use_python="No (disabled)"
+else
+  AC_CHECK_PROG(PYTHON,python,python)
+  PYTHON_INCLUDES="-I$($PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_lib(1,1)' | $SED 's/lib/include/')"
+  save_CPPFLAGS=$CPPFLAGS
+  CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
+  AC_CHECK_HEADER(Python.h,,[
+                             use_python="No (missing header)"
+                             PYTHON=
+                             ])
+  CPPFLAGS=$save_CPPFLAGS
+  if test "x$PYTHON" = "x"; then
+    use_python="No (python not available)"
+  else
+    use_python="Yes"
+    if test "x$use_swig" != "xYes"; then
+      echo "Python bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage"
+    else
+      if test `$SWIG -help 2>&1 | $GREP -c '\-python *- Generate'` = 0; then
+        use_python="No (swig does not support -python option)"
+      fi
+    fi
+  fi
+fi
+AM_CONDITIONAL(WITH_PYTHON, [test "x$use_python" = "xYes"])
 #  ----------------------------------------------------------------------
 #  Compile interface with internal EXTRA library
 #
@@ -347,7 +435,7 @@ AC_SUBST([CFINT])
 AC_SUBST([CPPFLAGS])
 AC_SUBST([AR])
 
-AC_OUTPUT(Makefile src/Makefile app/Makefile tests/Makefile examples/Makefile)
+AC_OUTPUT(Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile)
 
 if test "$ac_cv_prog_cc_c99" = "no" ; then
 AC_MSG_NOTICE([

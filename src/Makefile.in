@@ -35,7 +35,7 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 @CREATE_ISOC_TRUE@am__append_1 = mo_cdi.$(FCMODEXT)
-@CREATE_ISOC_TRUE@am__append_2 = mo_cdi.o cdilib.o
+@CREATE_ISOC_TRUE@am__append_2 = mo_cdi.o
 @CREATE_ISOC_TRUE@am__append_3 = mo_cdi.$(FCMODEXT)
 subdir = src
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
@@ -105,6 +105,9 @@ CFINT = @CFINT@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
+CXX = @CXX@
+CXXDEPMODE = @CXXDEPMODE@
+CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
@@ -138,16 +141,21 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PYTHON = @PYTHON@
 RANLIB = @RANLIB@
+RUBY = @RUBY@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+SWIG = @SWIG@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_CC = @ac_ct_CC@
+ac_ct_CXX = @ac_ct_CXX@
 ac_ct_F77 = @ac_ct_F77@
 ac_ct_FC = @ac_ct_FC@
 am__include = @am__include@
@@ -202,7 +210,7 @@ top_srcdir = @top_srcdir@
 #
 EXTRA_DIST = make_cdilib mo_cdi.f90
 #
-@CREATE_ISOC_TRUE@BUILT_SOURCES = cdilib.c
+#BUILT_SOURCES = cdilib.c
 #
 lib_LIBRARIES = libcdi.a
 #
@@ -290,10 +298,10 @@ libcdi_a_SOURCES = \
 	util.h	 	 \
 	varscan.h
 
-LOCALTARGETS = $(am__append_2)
+LOCALTARGETS = cdilib.o $(am__append_2)
 #
-CLEANFILES = `ls *~` $(am__append_3)
-all: $(BUILT_SOURCES) config.h
+CLEANFILES = `ls *~` cdilib.c $(am__append_3)
+all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
@@ -550,15 +558,13 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) check-am
+check: check-am
 all-am: Makefile $(LIBRARIES) $(HEADERS) config.h all-local
 installdirs:
 	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-am
+install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -583,7 +589,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-generic clean-libLIBRARIES mostlyclean-am
@@ -668,11 +673,11 @@ cdiFortran.o: cdiFortran.c
 	$(CCDEPMODE) $(depcomp) \
 	$(COMPILE) $(CFINT) $(REAL4) -c `test -f '$<' || echo '$(srcdir)/'`$<
 #
-@CREATE_ISOC_TRUE@cdilib.c:
-@CREATE_ISOC_TRUE@	./make_cdilib
+cdilib.c:
+	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src
 #
-@CREATE_ISOC_TRUE@cdilib.o: cdilib.c
-@CREATE_ISOC_TRUE@	$(COMPILE) $(CFINT) $(REAL4) -c $<
+cdilib.o: cdilib.c
+	$(COMPILE) $(CFINT) $(REAL4) -c $<
 #
 all-local: $(LOCALTARGETS) 
 #
