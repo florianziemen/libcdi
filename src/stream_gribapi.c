@@ -745,6 +745,7 @@ void gribapiScanTimestep1(int streamID)
 
 	  GRIB_CHECK(grib_get_long(gh, "parameterNumber", &lpar), 0);
 	  rcode = (int) lpar;
+
 	  status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar);
 	  if ( status == 0 )
 	    {

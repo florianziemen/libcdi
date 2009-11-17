@@ -33,14 +33,14 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
+@CREATE_INTERFACES_TRUE@am__append_1 = help
 bin_PROGRAMS =
 noinst_PROGRAMS = $(am__EXEEXT_1)
-@WITH_RUBY_TRUE@am__append_1 = CdiInfo
+@CREATE_INTERFACES_TRUE@am__append_2 = CdiInfo
 #
-@WITH_RUBY_TRUE@am__append_2 = rubyObj
-@WITH_PYTHON_FALSE@@WITH_RUBY_TRUE@am__append_3 = help
+@WITH_RUBY_TRUE@am__append_3 = rubyObj
 # =========================================================
-@WITH_PYTHON_TRUE@am__append_4 = pythonObj help
+@WITH_PYTHON_TRUE@am__append_4 = pythonObj
 subdir = interfaces
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -53,7 +53,7 @@ CONFIG_HEADER = $(top_builddir)/src/config.h
 CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-@WITH_RUBY_TRUE@am__EXEEXT_1 = CdiInfo$(EXEEXT)
+@CREATE_INTERFACES_TRUE@am__EXEEXT_1 = CdiInfo$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_CdiInfo_OBJECTS = CdiInfo.$(OBJEXT) cdi.$(OBJEXT)
 CdiInfo_OBJECTS = $(am_CdiInfo_OBJECTS)
@@ -191,7 +191,7 @@ top_srcdir = @top_srcdir@
 #
 SWIGCDILIB = cdilib.i
 SWIGCDIOBJ = cdiobj.i
-BINDINGS = $(am__append_2) $(am__append_3) $(am__append_4)
+BINDINGS = $(am__append_1) $(am__append_3) $(am__append_4)
 #
 CdiInfo_SOURCES = CdiInfo.cpp cdi.cpp
 #

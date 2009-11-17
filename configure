@@ -732,6 +732,8 @@ WITH_RUBY_FALSE
 PYTHON
 WITH_PYTHON_TRUE
 WITH_PYTHON_FALSE
+CREATE_INTERFACES_TRUE
+CREATE_INTERFACES_FALSE
 LIBOBJS
 LTLIBOBJS'
 ac_subst_files=''
@@ -7782,6 +7784,15 @@ else
 fi
 
 #  ----------------------------------------------------------------------
+ if test  "x$use_ruby" = "xYes" -o "x$use_python" = "xYes"; then
+  CREATE_INTERFACES_TRUE=
+  CREATE_INTERFACES_FALSE='#'
+else
+  CREATE_INTERFACES_TRUE='#'
+  CREATE_INTERFACES_FALSE=
+fi
+
+#  ----------------------------------------------------------------------
 #  Compile interface with internal EXTRA library
 #
 
@@ -8688,6 +8699,13 @@ echo "$as_me: error: conditional \"WITH_PYTHON\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${CREATE_INTERFACES_TRUE}" && test -z "${CREATE_INTERFACES_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"CREATE_INTERFACES\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"CREATE_INTERFACES\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 
 : ${CONFIG_STATUS=./config.status}
 ac_clean_files_save=$ac_clean_files
@@ -9384,11 +9402,13 @@ WITH_RUBY_FALSE!$WITH_RUBY_FALSE$ac_delim
 PYTHON!$PYTHON$ac_delim
 WITH_PYTHON_TRUE!$WITH_PYTHON_TRUE$ac_delim
 WITH_PYTHON_FALSE!$WITH_PYTHON_FALSE$ac_delim
+CREATE_INTERFACES_TRUE!$CREATE_INTERFACES_TRUE$ac_delim
+CREATE_INTERFACES_FALSE!$CREATE_INTERFACES_FALSE$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 23; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 25; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

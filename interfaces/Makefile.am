@@ -3,11 +3,14 @@
 SWIGCDILIB = cdilib.i
 SWIGCDIOBJ = cdiobj.i
 BINDINGS =
+if CREATE_INTERFACES
+BINDINGS += help
+endif
 #
 bin_PROGRAMS =
 #
 noinst_PROGRAMS = 
-if WITH_RUBY
+if CREATE_INTERFACES
 noinst_PROGRAMS += CdiInfo
 endif
 #
@@ -17,10 +20,6 @@ CdiInfo_LDADD = ../src/cdilib.o $(LDFLAGS) $(LIBS)
 #
 if WITH_RUBY
 BINDINGS += rubyObj
-if WITH_PYTHON
-else
-BINDINGS += help
-endif
 # Ruby ====================================================
 rubyLibMakefile:
 	cd ruby; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I../../src" ruby extconfLib.rb
@@ -55,7 +54,7 @@ rubyObjInstall: rubyObj
 endif
 # =========================================================
 if WITH_PYTHON
-BINDINGS += pythonObj help
+BINDINGS += pythonObj
 # Python ==================================================
 pythonLibWrapper: cdilib.i
 if WITH_SWIG

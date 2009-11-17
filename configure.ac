@@ -293,6 +293,8 @@ else
 fi
 AM_CONDITIONAL(WITH_PYTHON, [test "x$use_python" = "xYes"])
 #  ----------------------------------------------------------------------
+AM_CONDITIONAL(CREATE_INTERFACES, [test  "x$use_ruby" = "xYes" -o "x$use_python" = "xYes"])
+#  ----------------------------------------------------------------------
 #  Compile interface with internal EXTRA library
 #
 AC_ARG_WITH([extra],

@@ -2537,7 +2537,7 @@ int cdfDefVar(int streamID, int varID)
   int xid = UNDEFID, yid = UNDEFID, zid = UNDEFID, tid = UNDEFID;
   size_t xsize = 0, ysize = 0;
   int code, gridID, zaxisID;
-  char varname[9];
+  char varname[256];
   char *name = NULL;
   char *longname = NULL;
   char *stdname = NULL;
@@ -2615,7 +2615,39 @@ int cdfDefVar(int streamID, int varID)
   if ( name     == NULL )     name = tableInqParNamePtr(tableID, code);
   if ( longname == NULL ) longname = tableInqParLongnamePtr(tableID, code);
   if ( units    == NULL )    units = tableInqParUnitsPtr(tableID, code);
-  if ( name == NULL )
+  if ( name )
+    {
+      int checkname;
+      int iz;
+      int status;
+
+      sprintf(varname, "%s", name);
+
+      checkname = TRUE;
+      iz = 0;
+
+      while ( checkname ) 
+	{
+	  if ( iz ) sprintf(varname, "%s_%d", name, iz+1);
+
+	  status = nc_inq_varid(fileID, varname, &ncvarid);
+	  if ( status != NC_NOERR )
+	    {
+	      checkname = FALSE;
+	    }
+
+	  if ( checkname ) iz++;
+
+	  if ( iz > 99 )
+	    Error(func, "Double entry of variable name '%s'!", name);
+	}
+
+      if ( strcmp(name, varname) != 0 )
+	Warning(func, "Changed double entry of variable name '%s' to '%s'!", name, varname);
+
+      name = varname;
+    }
+  else
     {
       int checkname;
       int iz;
