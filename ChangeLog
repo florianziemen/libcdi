@@ -1,6 +1,7 @@
 2009-11-17  Ralf Mueller  <Ralf.Mueller@zmaw.de>
 
 	* Added ruby and python interfaces
+	  --enable-ruby  --enable-python 
 	
 2009-11-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
