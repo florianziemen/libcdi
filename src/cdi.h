@@ -333,6 +333,12 @@ int     vlistInqVarZtype(int vlistID, int varID);
 void    vlistDefVarZlevel(int vlistID, int varID, int zlevel);
 int     vlistInqVarZlevel(int vlistID, int varID);
 
+/*      vlistDefVarParam: Define the parameter number of a Variable */
+void    vlistDefVarParam(int vlistID, int varID, int param);
+
+/*      vlistInqVarParam: Get the parameter number of a Variable */
+int     vlistInqVarParam(int vlistID, int varID);
+
 /*      vlistDefVarCode: Define the code number of a Variable */
 void    vlistDefVarCode(int vlistID, int varID, int code);
 

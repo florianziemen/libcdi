@@ -546,7 +546,7 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
   int ngrids;
   int gridID = UNDEFID;
   int index;
-  VLIST *vlistptr;
+  vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -662,7 +662,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
   int zaxisID = UNDEFID;
   int index;
   int zaxisglobdefined = 0;
-  VLIST *vlistptr;
+  vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 

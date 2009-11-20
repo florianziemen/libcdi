@@ -6148,7 +6148,7 @@ void cdfDefGlobalAtts(int streamID)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int fileID, vlistID;
-  VLIST *vlistptr;
+  vlist_t *vlistptr;
   stream_t *streamptr;
   int natts;
 

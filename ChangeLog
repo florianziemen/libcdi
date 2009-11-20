@@ -1,3 +1,7 @@
+2009-11-20  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added function vlistDefVarParam/vlistInqVarParam
+
 2009-11-17  Ralf Mueller  <Ralf.Mueller@zmaw.de>
 
 	* Added ruby and python interfaces

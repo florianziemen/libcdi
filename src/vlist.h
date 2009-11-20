@@ -46,6 +46,7 @@ typedef struct
   int      isUsed;
   int      mvarID;
   int      fvarID;
+  int      param;
   int      code;
   int      gridID;
   int      zaxisID;
@@ -92,26 +93,26 @@ typedef struct
   VARINFO *vars;
   CDI_atts atts;
 }
-VLIST;
+vlist_t;
 
 
-VLIST  *vlist_to_pointer(int vlistID);
-void    vlistCheckVarID(char *func, int vlistID, int varID);
-int     vlistNlock(int vlistID);
-void    vlistLock(int vlistID);
-void    vlistUnlock(int vlistID);
-char   *vlistInqVarNamePtr(int vlistID, int varID);
-char   *vlistInqVarLongnamePtr(int vlistID, int varID);
-char   *vlistInqVarStdnamePtr(int vlistID, int varID);
-char   *vlistInqVarUnitsPtr(int vlistID, int varID);
-void    vlistDestroyVarName(int vlistID, int varID);
-void    vlistDestroyVarLongname(int vlistID, int varID);
-void    vlistDestroyVarUnits(int vlistID, int varID);
-void    vlistDefVarTime(int vlistID, int varID, int timeID);
-int     vlistInqVarMissvalUsed(int vlistID, int varID);
-int     vlistHasTime(int vlistID);
+vlist_t *vlist_to_pointer(int vlistID);
+void     vlistCheckVarID(char *func, int vlistID, int varID);
+int      vlistNlock(int vlistID);
+void     vlistLock(int vlistID);
+void     vlistUnlock(int vlistID);
+char    *vlistInqVarNamePtr(int vlistID, int varID);
+char    *vlistInqVarLongnamePtr(int vlistID, int varID);
+char    *vlistInqVarStdnamePtr(int vlistID, int varID);
+char    *vlistInqVarUnitsPtr(int vlistID, int varID);
+void     vlistDestroyVarName(int vlistID, int varID);
+void     vlistDestroyVarLongname(int vlistID, int varID);
+void     vlistDestroyVarUnits(int vlistID, int varID);
+void     vlistDefVarTime(int vlistID, int varID, int timeID);
+int      vlistInqVarMissvalUsed(int vlistID, int varID);
+int      vlistHasTime(int vlistID);
 
-int     vlistDelAtts(int vlistID, int varID);
-int     vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2);
+int      vlistDelAtts(int vlistID, int varID);
+int      vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2);
 
 #endif  /* _VLIST_H */

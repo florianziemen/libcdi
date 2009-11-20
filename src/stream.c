@@ -694,7 +694,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 
       if ( streamptr->filemode == 'r' )
 	{
-	  VLIST *vlistptr;
+	  vlist_t *vlistptr;
 	  streamptr->vlistID = vlistCreate();
 	  /* cdiReadByteorder(streamID); */
 	  status = cdiInqContents(streamID);
@@ -795,7 +795,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
     }
   else
     {
-      VLIST *vlistptr;
+      vlist_t *vlistptr;
       streamptr = stream_new_entry();
       streamID = streamptr->self;
 
