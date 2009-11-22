@@ -108,7 +108,7 @@ typedef struct
   int       recsize;
   int       size;
   int       dataread;
-  int       code;
+  int       param;
   int       level;
   int       date;
   int       time;
@@ -143,13 +143,11 @@ typedef struct
   off_t     position;
   size_t    size;
   int       zip;
+  int       param;
   int       ilevel;
   int       ilevel2;
   int       ltype;
-  int       discip;
-  short     table;
   short     used;
-  short     code;
   short     varID;
   short     levelID;
 }

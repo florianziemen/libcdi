@@ -35,8 +35,8 @@
 
 #include "printinfo.h"
 
-void decode_date(int date, int *year, int *month, int *day);
-void decode_time(int time, int *hour, int *minute, int *second);
+void cdiDecodeDate(int date, int *year, int *month, int *day);
+void cdiDecodeTime(int time, int *hour, int *minute, int *second);
 
 
 int getopt(int argc, char *const argv[], const char *optstring);
@@ -126,8 +126,8 @@ void printInfo(int gridtype, int date, int time, int code, double level,
 /*   ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+ */
   }
 
-  decode_date(date, &year, &month, &day);
-  decode_time(time, &hour, &minute, &second);
+  cdiDecodeDate(date, &year, &month, &day);
+  cdiDecodeTime(time, &hour, &minute, &second);
 
   fprintf(stdout, "%6d : %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d %3d %7g ",
 	  ++rec, year, month, day, hour, minute, second, code, level);
@@ -361,8 +361,8 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 		  vdate = taxisInqRdate(taxisID);
 		  vtime = taxisInqRtime(taxisID);
 
-		  decode_date(vdate, &year, &month, &day);
-		  decode_time(vtime, &hour, &minute, &second);
+		  cdiDecodeDate(vdate, &year, &month, &day);
+		  cdiDecodeTime(vtime, &hour, &minute, &second);
 
 		  fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d",
 			  year, month, day, hour, minute, second);
@@ -422,8 +422,8 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	      vdate = taxisInqVdate(taxisID);
 	      vtime = taxisInqVtime(taxisID);
 
-	      decode_date(vdate, &year, &month, &day);
-	      decode_time(vtime, &hour, &minute, &second);
+	      cdiDecodeDate(vdate, &year, &month, &day);
+	      cdiDecodeTime(vtime, &hour, &minute, &second);
 
 	      fprintf(stdout, " %5.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d",
 		      year, month, day, hour, minute, second);

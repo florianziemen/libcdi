@@ -1003,7 +1003,7 @@ int gribRefDate(int *isec1)
   rmonth  = ISEC1_Month;
   rday    = ISEC1_Day;
 
-  date = encode_date(ryear, rmonth, rday);
+  date = cdiEncodeDate(ryear, rmonth, rday);
 
   return (date) ;
 }
@@ -1016,7 +1016,7 @@ int gribRefTime(int *isec1)
   rhour   = ISEC1_Hour;
   rminute = ISEC1_Minute;
 
-  time = encode_time(rhour, rminute, 0);
+  time = cdiEncodeTime(rhour, rminute, 0);
 
   return (time) ;
 }
@@ -1114,8 +1114,8 @@ void gribDateTime(int *isec1, int *date, int *time)
   /*
   printf("new %d/%d/%d %d:%d\n", ryear, rmonth, rday, rhour, rminute);
   */
-  *date = encode_date(ryear, rmonth, rday);
-  *time = encode_time(rhour, rminute, 0);
+  *date = cdiEncodeDate(ryear, rmonth, rday);
+  *time = cdiEncodeTime(rhour, rminute, 0);
 
   return;
 }

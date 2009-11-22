@@ -21,7 +21,7 @@ void recordInitEntry(record_t *record)
 {
   (*record).position = CDI_UNDEFID;
   (*record).size     = 0;
-  (*record).code     = 0;
+  (*record).param    = CDI_UNDEFPARAM;
   (*record).ilevel   = CDI_UNDEFID;
   (*record).used     = FALSE;
   (*record).varID    = CDI_UNDEFID;
@@ -111,7 +111,7 @@ void cdiInitRecord(int streamID)
   streamptr->record->used       = 0;
   streamptr->record->nrec       = 0;
   streamptr->record->dataread   = 1;
-  streamptr->record->code       = 0;
+  streamptr->record->param      = CDI_UNDEFPARAM;
   streamptr->record->level      = 0;
   streamptr->record->date       = 0;
   streamptr->record->time       = 0;
@@ -205,7 +205,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
   static char func[] = "streamDefRecord";
   int status = 0;
   int filetype;
-  int code, gridID, zaxisID, level;
+  int param, gridID, zaxisID, level;
   int tsID;
   int vlistID;
   stream_t *streamptr;
@@ -227,12 +227,12 @@ void streamDefRecord(int streamID, int varID, int levelID)
   vlistID = streamInqVlist(streamID);
   gridID  = vlistInqVarGrid(vlistID, varID);
   zaxisID = vlistInqVarZaxis(vlistID, varID);
-  code    = vlistInqVarCode(vlistID, varID);
+  param   = vlistInqVarParam(vlistID, varID);
   level   = (int) zaxisInqLevel(zaxisID, levelID);
 
   streamptr->record->varID    = varID;
   streamptr->record->levelID  = levelID;
-  streamptr->record->code     = code;
+  streamptr->record->param    = param;
   streamptr->record->level    = level;
   streamptr->record->date     = streamptr->tsteps[tsID].taxis.vdate;
   streamptr->record->time     = streamptr->tsteps[tsID].taxis.vtime;

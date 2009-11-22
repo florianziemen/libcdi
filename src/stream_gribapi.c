@@ -26,9 +26,7 @@
 extern int cdiInventoryMode;
 
 typedef struct {
-  int code;
-  int table;
-  int discip;
+  int param;
   int level1;
   int level2;
   int ltype;
@@ -178,7 +176,7 @@ int gribapiGetZaxisType(int grb_ltype)
 
 #if  defined  (HAVE_LIBGRIB_API)
 static
-void gribapiAddRecord(int streamID, int code, grib_handle *gh,
+void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 		      long recsize, off_t position, int prec, int ztype)
 {
   static char func[] = "gribapiAddRecord";
@@ -198,11 +196,9 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
   int leveltype;
   double dlevel;
   long lpar;
-  int table_num;
   int status;
   long numberOfPoints;
   size_t datasize;
-  int discip = 0;
   char name[256], longname[256], units[256];
   size_t vlen; 
 
@@ -212,12 +208,6 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
   tsID    = streamptr->curTsID;
   recID   = recordNewEntry(streamID, tsID);
   record  = &streamptr->tsteps[tsID].records[recID];
-
-  GRIB_CHECK(grib_get_long(gh, "discipline", &lpar), 0);
-  discip = (int) lpar;
-
-  GRIB_CHECK(grib_get_long(gh, "parameterCategory", &lpar), 0);
-  table_num = (int) lpar;
 
   // numavg  = ISEC1_AvgNum;
   numavg  = 0;
@@ -242,13 +232,11 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
   level1 = (int) dlevel;
   level2 = 0;
 
-  /* fprintf(stderr, "code %d %d %d %d\n", code, level1, level2, ISEC1_LevelType); */
+  /* fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, ISEC1_LevelType); */
 
   (*record).size     = recsize;
   (*record).position = position;
-  (*record).code     = code;
-  (*record).table    = table_num;
-  (*record).discip   = discip;
+  (*record).param    = param;
   (*record).ilevel   = level1;
   (*record).ilevel2  = level2;
   (*record).ltype    = leveltype;
@@ -296,6 +284,8 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
 	GRIB_CHECK(grib_get_double(gh, "iDirectionIncrementInDegrees", &grid.xinc), 0);
 	if ( gridtype == GRID_LONLAT )
 	  GRIB_CHECK(grib_get_double(gh, "jDirectionIncrementInDegrees", &grid.yinc), 0);
+
+	if ( IS_EQUAL(grid.xinc, GRIB_MISSING_DOUBLE) ) grid.xinc = 0;
 
         if ( IS_NOT_EQUAL(grid.xfirst, 0) || IS_NOT_EQUAL(grid.xlast, 0) )
 	  {
@@ -499,10 +489,10 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
   vlen = 256;
   GRIB_CHECK(grib_get_string(gh, "units", units, &vlen), 0);
   if ( vlen == 8 && memcmp(units, "unknown", vlen) == 0 ) units[0] = 0;
-  // fprintf(stderr, "code %d name %s %s %s\n", code, name, longname, units); 
+  // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units); 
 
-  varAddRecord(recID, code, gridID, zaxistype, lbounds, level1, level2,
-	       prec, &varID, &levelID, numavg, table_num, leveltype,
+  varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2,
+	       prec, &varID, &levelID, numavg, leveltype,
 	       name, longname, units);
 
   (*record).varID   = varID;
@@ -535,83 +525,29 @@ void gribapiAddRecord(int streamID, int code, grib_handle *gh,
 
   if ( varInqTable(varID) == CDI_UNDEFID )
     {
-      int tableID;
+      int pdis, pcat, pnum;
 
-      tableID = tableInq(varInqModel(varID), table_num, NULL);
-      /*
-      if ( tableID == CDI_UNDEFID && cdiPartabPath )
+      cdiDecodeParam(param, &pdis, &pcat, &pnum);
+
+      if ( pdis == 255 )
 	{
-	  char line[8192];
-	  char command[4096];
-	  FILE *pfp;
-	  int nfiles;
-	  int max_partab = 4096;
-	  char *fnames[4096];
-	  int cen, sub, ver, tab, nf, fi;
-	  int icen, isub, iver, itab;
+	  int tableID;
+	  int tabnum = pcat;
 
-	  icen = ISEC1_CenterID;
-          isub = ISEC1_SubCenterID;
-          iver = ISEC1_ModelID;
-          itab = ISEC1_CodeTable;
-	  
-	  sprintf(command, "cd %s 2> /dev/null; ls * 2> /dev/null", cdiPartabPath);
+	  tableID = tableInq(varInqModel(varID), tabnum, NULL);
 
-	  pfp = popen(command, "r");
-	  if ( pfp == NULL )
-	    SysError(func, "popen %s failed", command);
-	  
-	  nfiles = 0;
-	  while ( _readline_(pfp, line, 8192) )
-	    {
-	      cen = -1; sub = -1; ver = -1; tab = -1;
-	      nf = sscanf(line, "Cen%d_Sub%d_Ver%d_Tab%d", &cen, &sub, &ver, &tab);
-	      printf("%d %d %d %d %d\n", nf, cen, sub, ver, tab);
-	      if ( nfiles >= max_partab )
-		{
-		  Warning(func, "Too many parameter tables (limit: %d)", max_partab);
-		  break;
-		}
-	      fnames[nfiles++] = strdupx(line);
-	      printf("test: %s\n", line);
-	    }
-
-	  pclose(pfp);
-
-	  if ( nfiles )
-	    {
-	      cen = -1; sub = -1; ver = -1; tab = -1;
-	      for ( fi = 0; fi < nfiles; ++fi )
-		{
-		  nf = sscanf(fnames[fi], "Cen%d_Sub%d_Ver%d_Tab%d", &cen, &sub, &ver, &tab);
-		  if ( nf == 4 && cen == icen && sub == isub && ver == iver && tab == itab ) goto END_LABEL;
-		}
-	      for ( fi = 0; fi < nfiles; ++fi )
-		{
-		  nf = sscanf(fnames[fi], "Cen%d_Sub%d_Tab%d", &cen, &sub, &tab);
-		  if ( nf == 3 && cen == icen && sub == isub && tab == itab ) goto END_LABEL;
-		}
-
-	    END_LABEL:
-
-	      if ( fi < nfiles )
-		{
-		  printf("found table %s\n", fnames[fi]);
-		}
-	    }
+	  if ( tableID == CDI_UNDEFID )
+	    tableID = tableDef(varInqModel(varID), tabnum, NULL);
+	  varDefTable(varID, tableID);
 	}
-      */
-      if ( tableID == CDI_UNDEFID )
-	tableID = tableDef(varInqModel(varID), table_num, NULL);
-      varDefTable(varID, tableID);
     }
 
   streamptr->tsteps[tsID].nallrecs++;
   streamptr->nrecs++;
 
   if ( CDI_Debug )
-    Message(func, "varID = %d  code = %d  zaxistype = %d  gridID = %d  levelID = %d",
-	    varID, code, zaxistype, gridID, levelID);
+    Message(func, "varID = %d  param = %d  zaxistype = %d  gridID = %d  levelID = %d",
+	    varID, param, zaxistype, gridID, levelID);
 }
 #endif
 
@@ -625,8 +561,9 @@ void gribapiScanTimestep1(int streamID)
   int iret = 0, ipunp = 0, iword = 0;
   int status;
   int fileID;
-  int table_num = 0;
+  int rtabnum = 0;
   int rcode = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
+  int param = 0;
   DateTime datetime, datetime0;
   int tsID;
   int varID;
@@ -646,12 +583,11 @@ void gribapiScanTimestep1(int streamID)
   stream_t *streamptr;
   grib_handle *gh = NULL;
   int leveltype;
-  int discip = 0;
+  int pdis = 0, pcat = 0, pnum = 0;
   long editionNumber;
   long lpar;
   int bitsPerValue;
   double dlevel = 0;
-  int warn_lpar = TRUE;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -707,8 +643,13 @@ void gribapiScanTimestep1(int streamID)
 
       if ( editionNumber <= 1 )
 	{
+	  GRIB_CHECK(grib_get_long(gh, "table2Version", &lpar), 0);
+	  rtabnum = (int) lpar;
 	  GRIB_CHECK(grib_get_long(gh, "indicatorOfParameter", &lpar), 0);
 	  rcode = (int) lpar;
+
+	  param = cdiEncodeParam(255, rtabnum, rcode);
+
 	  status = grib_get_long(gh, "indicatorOfTypeOfLevel", &lpar);
 	  if ( status == 0 )
 	    {
@@ -732,19 +673,15 @@ void gribapiScanTimestep1(int streamID)
 	  if ( strncmp(typeOfPacking, "grid_jpeg", len) == 0 ) ztype = COMPRESS_JPEG;
 	  
 	  GRIB_CHECK(grib_get_long(gh, "discipline", &lpar), 0);
-	  discip = (int) lpar;
-	  /*
-	  if ( lpar != 255 && warn_lpar )
-	    {
-	      Warning(func, "GRIB2 key >discipline< unsupported!", lpar);
-	      warn_lpar = FALSE;
-	    }
-	  */
+	  pdis = (int) lpar;
+
 	  GRIB_CHECK(grib_get_long(gh, "parameterCategory", &lpar), 0);
-	  table_num = (int) lpar;
+	  pcat = (int) lpar;
 
 	  GRIB_CHECK(grib_get_long(gh, "parameterNumber", &lpar), 0);
-	  rcode = (int) lpar;
+	  pnum = (int) lpar;
+
+	  param = cdiEncodeParam(pdis, pcat, pnum);
 
 	  status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar);
 	  if ( status == 0 )
@@ -795,18 +732,15 @@ void gribapiScanTimestep1(int streamID)
 	{
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
-	  compVar.code   = rcode;
-	  compVar.table  = table_num;
-	  compVar.discip = discip;
+
+	  compVar.param  = param;
           compVar.level1 = level1;
           compVar.level2 = level2;
 	  compVar.ltype  = leveltype;
 
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
-	      compVar0.code   = streamptr->tsteps[0].records[recID].code;
-	      compVar0.table  = streamptr->tsteps[0].records[recID].table;
-	      compVar0.discip = streamptr->tsteps[0].records[recID].discip;
+	      compVar0.param  = streamptr->tsteps[0].records[recID].param;
 	      compVar0.level1 = streamptr->tsteps[0].records[recID].ilevel;
 	      compVar0.level2 = streamptr->tsteps[0].records[recID].ilevel2;
 	      compVar0.ltype  = streamptr->tsteps[0].records[recID].ltype;
@@ -820,7 +754,7 @@ void gribapiScanTimestep1(int streamID)
 	      if ( warn_time )
 		if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 )
 		  {
-		    Warning(func, "Inconsistent verification time (code %d level %d)", rcode, level1);
+		    Warning(func, "Inconsistent verification time (param %d level %d)", param, level1);
 		    warn_time = FALSE;
 		  }
 	    }
@@ -830,7 +764,7 @@ void gribapiScanTimestep1(int streamID)
 
 	      if ( recID < nrecs )
 		{
-		  Warning(func, "Code %d level %d already exist, skipped!", rcode, level1);
+		  Warning(func, "Param %d level %d already exist, skipped!", param, level1);
 		  continue;
 		}
 	    }
@@ -853,9 +787,9 @@ void gribapiScanTimestep1(int streamID)
       nrecs++;
 
       if ( CDI_Debug )
-	Message(func, "%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, rcode, level1, vdate, vtime);
+	Message(func, "%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
 
-      gribapiAddRecord(streamID, rcode, gh, recsize, recpos, prec, ztype);
+      gribapiAddRecord(streamID, param, gh, recsize, recpos, prec, ztype);
     }
 
   streamptr->rtsteps = 1;
@@ -936,7 +870,7 @@ int gribapiScanTimestep2(int streamID)
   long buffersize = 0;
   int iret = 0, ipunp = 0, iword = 0;
   int fileID;
-  int table_num = 0;
+  int rtabnum = 0;
   int rcode = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0;
   int tsID;
@@ -953,7 +887,8 @@ int gribapiScanTimestep2(int streamID)
   stream_t *streamptr;
   grib_handle *gh = NULL;
   int leveltype;
-  int discip = 0;
+  int pdis = 0, pcat = 0, pnum = 0;
+  int param = 0;
   long editionNumber;
   long lpar;
   double dlevel = 0;
@@ -1035,8 +970,13 @@ int gribapiScanTimestep2(int streamID)
 
       if ( editionNumber <= 1 )
 	{
+	  GRIB_CHECK(grib_get_long(gh, "table2Version", &lpar), 0);
+	  rtabnum = (int) lpar;
 	  GRIB_CHECK(grib_get_long(gh, "indicatorOfParameter", &lpar), 0);
 	  rcode = (int) lpar;
+
+	  param = cdiEncodeParam(255, rtabnum, rcode);
+
 	  status = grib_get_long(gh, "indicatorOfTypeOfLevel", &lpar);
 	  if ( status == 0 )
 	    {
@@ -1054,13 +994,16 @@ int gribapiScanTimestep2(int streamID)
       else
 	{
 	  GRIB_CHECK(grib_get_long(gh, "discipline", &lpar), 0);
-	  discip = (int) lpar;
+	  pdis = (int) lpar;
 
 	  GRIB_CHECK(grib_get_long(gh, "parameterCategory", &lpar), 0);
-	  table_num = (int) lpar;
+	  pcat = (int) lpar;
 
 	  GRIB_CHECK(grib_get_long(gh, "parameterNumber", &lpar), 0);
-	  rcode = (int) lpar;
+	  pnum = (int) lpar;
+
+	  param = cdiEncodeParam(pdis, pcat, pnum);
+
 	  status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar);
 	  if ( status == 0 )
 	    {
@@ -1124,17 +1067,13 @@ int gribapiScanTimestep2(int streamID)
       */
       datetime.date  = vdate;
       datetime.time  = vtime;
-      compVar.code   = rcode;
-      compVar.table  = table_num;
-      compVar.discip = discip;
+      compVar.param  = param;
       compVar.level1 = level1;
       compVar.level2 = level2;
       compVar.ltype  = leveltype;
       for ( recID = 0; recID < nrecords; recID++ )
 	{
-	  compVar0.code   = streamptr->tsteps[tsID].records[recID].code;
-	  compVar0.table  = streamptr->tsteps[tsID].records[recID].table;
-	  compVar0.discip = streamptr->tsteps[tsID].records[recID].discip;
+	  compVar0.param = streamptr->tsteps[tsID].records[recID].param;
 	  compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
 	  compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
 	  compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
@@ -1144,7 +1083,7 @@ int gribapiScanTimestep2(int streamID)
 
       if ( recID == nrecords )
 	{
-	  Warning(func, "Code %d level %d not found at timestep %d!", rcode, level1, tsID+1);
+	  Warning(func, "Param %d level %d not found at timestep %d!", param, level1, tsID+1);
 	  return (CDI_EUFSTRUCT);
 	}
 
@@ -1166,7 +1105,7 @@ int gribapiScanTimestep2(int streamID)
 	    {
 	      if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
 
-	      Warning(func, "Code %d level %d already exist, skipped!", rcode, level1);
+	      Warning(func, "Param %d level %d already exist, skipped!", param, level1);
 	      continue;
 	    }
 	  else
@@ -1177,22 +1116,20 @@ int gribapiScanTimestep2(int streamID)
 	}
 
       if ( CDI_Debug )
-	Message(func, "%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, rcode, level1, vdate, vtime);
+	Message(func, "%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
-      compVar0.code   = streamptr->tsteps[tsID].records[recID].code;
-      compVar0.table  = streamptr->tsteps[tsID].records[recID].table;
-      compVar0.discip = streamptr->tsteps[tsID].records[recID].discip;
+      compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
       compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
       compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
       compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
 
       if ( memcmp(&compVar0, &compVar, sizeof(compvar2_t)) != 0 )
 	{
-	  Message(func, "tsID = %d recID = %d code = %3d new %3d  level = %3d new %3d",
+	  Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
-		  streamptr->tsteps[tsID].records[recID].code, rcode,
+		  streamptr->tsteps[tsID].records[recID].param, param,
 		  streamptr->tsteps[tsID].records[recID].ilevel, level1);
 	  return (CDI_EUFSTRUCT);
 	}
@@ -1259,7 +1196,7 @@ int gribapiScanTimestep(int streamID)
   long buffersize = 0;
   int iret = 0, ipunp = 0, iword = 0;
   int fileID;
-  int table_num = 0;
+  int rtabnum = 0;
   int rcode = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0;
   int tsID;
@@ -1275,7 +1212,8 @@ int gribapiScanTimestep(int streamID)
   stream_t *streamptr;
   grib_handle *gh = NULL;
   int leveltype;
-  int discip = 0;
+  int pdis = 0, pcat = 0, pnum = 0;
+  int param = 0;
   long editionNumber;
   long lpar;
   double dlevel = 0;
@@ -1359,8 +1297,13 @@ int gribapiScanTimestep(int streamID)
 
 	  if ( editionNumber <= 1 )
 	    {
+	      GRIB_CHECK(grib_get_long(gh, "table2Version", &lpar), 0);
+	      rtabnum = (int) lpar;
 	      GRIB_CHECK(grib_get_long(gh, "indicatorOfParameter", &lpar), 0);
 	      rcode = (int) lpar;
+
+	      param = cdiEncodeParam(255, rtabnum, rcode);
+
 	      status = grib_get_long(gh, "indicatorOfTypeOfLevel", &lpar);
 	      if ( status == 0 )
 		{
@@ -1378,13 +1321,16 @@ int gribapiScanTimestep(int streamID)
 	  else
 	    {
 	      GRIB_CHECK(grib_get_long(gh, "discipline", &lpar), 0);
-	      discip = (int) lpar;
+	      pdis = (int) lpar;
 
 	      GRIB_CHECK(grib_get_long(gh, "parameterCategory", &lpar), 0);
-	      table_num = (int) lpar;
+	      pcat = (int) lpar;
 
 	      GRIB_CHECK(grib_get_long(gh, "parameterNumber", &lpar), 0);
-	      rcode = (int) lpar;
+	      pnum = (int) lpar;
+
+	      param = cdiEncodeParam(pdis, pcat, pnum);
+
 	      status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar);
 	      if ( status == 0 )
 		{
@@ -1451,18 +1397,14 @@ int gribapiScanTimestep(int streamID)
 	  */
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
-	  compVar.code   = rcode;
-	  compVar.table  = table_num;
-	  compVar.discip = discip;
+	  compVar.param  = param;
           compVar.level1 = level1;
           compVar.level2 = level2;
           compVar.ltype  = leveltype;
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
 	      recID   = streamptr->tsteps[1].recIDs[vrecID];
-	      compVar0.code   = streamptr->tsteps[tsID].records[recID].code;
-	      compVar0.table  = streamptr->tsteps[tsID].records[recID].table;
-	      compVar0.discip = streamptr->tsteps[tsID].records[recID].discip;
+	      compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
 	      compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
 	      compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
 	      compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
@@ -1472,8 +1414,7 @@ int gribapiScanTimestep(int streamID)
 
 	  if ( vrecID == nrecs )
 	    {
-	      Warning(func, "Code %d level %d not available at timestep %d!",
-		      rcode, level1, tsID+1);
+	      Warning(func, "Param %d level %d not available at timestep %d!", param, level1, tsID+1);
 
 	      if ( cdiInventoryMode == 1 )
 		return (CDI_EUFSTRUCT);
@@ -1493,7 +1434,7 @@ int gribapiScanTimestep(int streamID)
 		  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
 		  
 		  if ( CDI_Debug )
-		    Warning(func, "Code %d level %d already exist, skipped!", rcode, level1);
+		    Warning(func, "Param %d level %d already exist, skipped!", param, level1);
 
 		  continue;
 		}
@@ -1505,20 +1446,18 @@ int gribapiScanTimestep(int streamID)
 	    }
 
 	  if ( CDI_Debug )
-	    Message(func, "%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, rcode, level1, vdate, vtime);
+	    Message(func, "%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
 
-	  compVar0.code   = streamptr->tsteps[tsID].records[recID].code;
-	  compVar0.table  = streamptr->tsteps[tsID].records[recID].table;
-	  compVar0.discip = streamptr->tsteps[tsID].records[recID].discip;
+	  compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
 	  compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
 	  compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
 	  compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
 
 	  if ( memcmp(&compVar0, &compVar, sizeof(compvar2_t)) != 0 )
 	    {
-	      Message(func, "tsID = %d recID = %d code = %3d new %3d  level = %3d new %3d",
+	      Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,
-		      streamptr->tsteps[tsID].records[recID].code, rcode,
+		      streamptr->tsteps[tsID].records[recID].param, param,
 		      streamptr->tsteps[tsID].records[recID].ilevel, level1);
 	      Error(func, "Invalid, unsupported or inconsistent record structure");
 	    }
@@ -1527,7 +1466,7 @@ int gribapiScanTimestep(int streamID)
 	  streamptr->tsteps[tsID].records[recID].size = recsize;
 
 	  if ( CDI_Debug )
-	    Message(func, "%4d %8d %4d %8d %8d %6d", rindex, (int)recpos, rcode, level1, vdate, vtime);
+	    Message(func, "%4d %8d %4d %8d %8d %6d", rindex, (int)recpos, param, level1, vdate, vtime);
 
 	  rindex++;
 	}
@@ -1540,8 +1479,8 @@ int gribapiScanTimestep(int streamID)
 
       if ( vrecID < nrecs )
 	{
-	  Warning(func, "Code %d level %d not found at timestep %d!",
-		  streamptr->tsteps[tsID].records[recID].code,
+	  Warning(func, "Param %d level %d not found at timestep %d!",
+		  streamptr->tsteps[tsID].records[recID].param,
 		  streamptr->tsteps[tsID].records[recID].ilevel,
 		  tsID+1);
 	  return (CDI_EUFSTRUCT);
@@ -1675,14 +1614,18 @@ void gribapiDefModel(grib_handle *gh, int vlistID, int varID)
 }
 
 static
-void gribapiDefCode(grib_handle *gh, int code, int codetable)
+void gribapiDefParam(grib_handle *gh, int param)
 {
+  int pdis, pcat, pnum;
+
+  cdiDecodeParam(param, &pdis, &pcat, &pnum);
+
   //ISEC1_CodeTable = codetable;
-  if ( code < 0 ) code = -code;
+  if ( pnum < 0 ) pnum = -pnum;
   // GRIB_CHECK(grib_set_long(gh, "indicatorOfParameter", code), 0);
-  GRIB_CHECK(grib_set_long(gh, "discipline", 255), 0);
-  GRIB_CHECK(grib_set_long(gh, "parameterCategory", codetable), 0);
-  GRIB_CHECK(grib_set_long(gh, "parameterNumber", code), 0);
+  GRIB_CHECK(grib_set_long(gh, "discipline",        pdis), 0);
+  GRIB_CHECK(grib_set_long(gh, "parameterCategory", pcat), 0);
+  GRIB_CHECK(grib_set_long(gh, "parameterNumber",   pnum), 0);
 }
 
 static
@@ -1909,7 +1852,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 }
 
 static
-void gribapiDefLevel(grib_handle *gh, int code, int zaxisID, int levelID)
+void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 {
   static char func[] = "gribapiDefLevel";
   double level;
@@ -1974,7 +1917,7 @@ void gribapiDefLevel(grib_handle *gh, int code, int zaxisID, int levelID)
 	vctsize = zaxisInqVctSize(zaxisID);
 	if ( vctsize == 0 && warning )
 	  {
-	    Warning(func, "VCT missing. ( code = %d, zaxisID = %d )", code, zaxisID);
+	    Warning(func, "VCT missing. ( param = %d, zaxisID = %d )", param, zaxisID);
 	    warning = 0;
 	  }
 	GRIB_CHECK(grib_set_long(gh, "PVPresent", 1), 0);
@@ -2096,13 +2039,17 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   void *dummy = NULL;
   long edition = 2;
   int datatype;
-  int code, tableID;
+  int code, tabnum;
+  int param;
   long bitsPerValue;
   grib_handle *gh = NULL;
 
-  code    = vlistInqVarCode(vlistID, varID);
-  tableID = vlistInqVarTable(vlistID, varID);
+  param    = vlistInqVarParam(vlistID, varID);
+  code     = vlistInqVarCode(vlistID, varID);
+  tabnum   = tableInqNum(vlistInqVarTable(vlistID, varID));
   datatype = vlistInqVarDatatype(vlistID, varID);
+
+  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(255, tabnum, code);
 
   gh = grib_handle_new_from_template(NULL, "GRIB2");
   if ( gh == NULL ) Error(func, "grib_handle_new_from_template failed!");
@@ -2112,10 +2059,10 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   gribapiDefInstitut(gh, vlistID, varID);
   gribapiDefModel(gh, vlistID, varID);
 
-  gribapiDefCode(gh, code, tableInqNum(tableID));
+  gribapiDefParam(gh, param);
   gribapiDefTime(gh, date, time, numavg, vlistInqTaxis(vlistID));
   gribapiDefGrid(gh, gridID, ljpeg);
-  gribapiDefLevel(gh, code, zaxisID, levelID);
+  gribapiDefLevel(gh, param, zaxisID, levelID);
 
   if ( nmiss > 0 )
     {

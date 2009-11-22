@@ -4,53 +4,6 @@
 #include "cdi.h"
 
 
-void decode_date(int date, int *year, int *month, int *day)
-{
-  int idate;
-
-  *year  =  date / 10000;
-  idate  = date - *year*10000;
-  if ( idate < 0 ) idate = -idate;
-  *month = idate / 100;
-  *day   = idate - *month*100;
-}
-
-
-int encode_date(int year, int month, int day)
-{
-  int date;
-  int iyear;
-
-  iyear = year;
-  if ( iyear < 0 ) iyear = -iyear;
-  date = iyear*10000 + month*100 + day;
-  if ( year < 0 ) date = -date;
-
-  return (date);
-}
-
-
-void decode_time(int time, int *hour, int *minute, int *second)
-{
-  int itime;
-
-  *hour   = time / 10000;
-  itime   = time - *hour*10000;
-  *minute = itime / 100;
-  *second = itime - *minute*100;
-}
-
-
-int encode_time(int hour, int minute, int second)
-{
-  int time;
-
-  time = hour*10000 + minute*100 + second;
-
-  return (time);
-}
-
-
 /* convert Julian date into year, months, day */
 void decode_julday(int calendar,
 		   int julday,	/* Julian day number to convert */
@@ -134,7 +87,7 @@ int date_to_julday(int calendar, int date)
   int julday;
   int year, month, day;
 
-  decode_date(date, &year, &month, &day);
+  cdiDecodeDate(date, &year, &month, &day);
 
   julday = encode_julday(calendar, year, month, day);
 
@@ -149,7 +102,7 @@ int julday_to_date(int calendar, int julday)
 
   decode_julday(calendar, julday, &year, &month, &day);
 
-  date = encode_date(year, month, day);
+  date = cdiEncodeDate(year, month, day);
 
   return (date);
 }
@@ -160,7 +113,7 @@ int time_to_sec(int time)
   int secofday;
   int hour, minute, second;
 
-  decode_time(time, &hour, &minute, &second);
+  cdiDecodeTime(time, &hour, &minute, &second);
 
   secofday = hour*3600 + minute*60 + second;
 
@@ -177,7 +130,7 @@ int sec_to_time(int secofday)
   minute = secofday/60 - hour*60;
   second = secofday - hour*3600 - minute*60;
 
-  time = encode_time(hour, minute, second);
+  time = cdiEncodeTime(hour, minute, second);
 
   return (time);
 }
@@ -271,8 +224,8 @@ int main(void)
 
   for ( i = 0; i < nmin; i++ )
     {
-      decode_date(vdate0, &year, &mon, &day);
-      decode_time(vtime0, &hour, &minute, &second);
+      cdiDecodeDate(vdate0, &year, &mon, &day);
+      cdiDecodeTime(vtime0, &hour, &minute, &second);
 
       julday  = date_to_julday(calendar, vdate0);
       secofday = time_to_sec(vtime0);
@@ -285,8 +238,8 @@ int main(void)
 	       ++j, vdate0, vtime0, vdate, vtime, julday, secofday);
 
       year++;
-      vdate0 = encode_date(year, mon, day);
-      vtime0 = encode_time(hour, minute, second);
+      vdate0 = cdiEncodeDate(year, mon, day);
+      vtime0 = cdiEncodeTime(hour, minute, second);
     }
 
   printf("stop time: %8d %4d\n", vdate0, vtime0);
@@ -304,8 +257,8 @@ int main(void)
   secofday = time_to_sec(vtime0);
   for ( i = 0; i < nmin; i++ )
     {
-      decode_date(vdate0, &year, &mon, &day);
-      decode_time(vtime0, &hour, &minute, &second);
+      cdiDecodeDate(vdate0, &year, &mon, &day);
+      cdiDecodeTime(vtime0, &hour, &minute, &second);
 
       if ( ++minute >= 60 )
 	{
@@ -325,8 +278,8 @@ int main(void)
 	    }
 	}
 
-      vdate0 = encode_date(year, mon, day);
-      vtime0 = encode_time(hour, minute, second);
+      vdate0 = cdiEncodeDate(year, mon, day);
+      vtime0 = cdiEncodeTime(hour, minute, second);
 
       julday_add_seconds(ijulinc, &julday, &secofday);
 

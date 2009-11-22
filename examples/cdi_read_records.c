@@ -380,7 +380,7 @@ int main(int argc, char *argv[])
 	  fmin  =  1.e33;
 	  fmax  = -1.e33;
 	  fmean = 0;
-	  // for ( int j = 0; j < 4; ++j )
+	  for ( int j = 0; j < 2; ++j )
 	  for ( i = 0; i < gridsize; ++i )
 	    {
 	      if ( data[i] < fmin ) fmin = data[i];

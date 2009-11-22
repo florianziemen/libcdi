@@ -17,6 +17,7 @@ endif
 libcdi_a_SOURCES = 	 \
         cdiFortran.c   	 \
 	cdi_error.c      \
+	cdi_util.c       \
 	taxis.c          \
 	error.c        	 \
 	version.c      	 \

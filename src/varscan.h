@@ -6,9 +6,9 @@
 #endif
 
 
-void varAddRecord(int recID, int code, int gridID, int zaxistype, int lbounds,
+void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 		  int level1, int level2, int prec, int *pvarID, int *plevelID,
-		  int numavg, int codetable, int ltype,
+		  int numavg, int ltype,
 		  const char *name, const char *longname, const char *units);
 
 void varDefVCT(size_t vctsize, double *vctptr);

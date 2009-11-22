@@ -903,9 +903,9 @@ TAXIS *taxisPtr(int taxisID)
 }
 
 
-void decode_timevalue(int timeunit, double timevalue, int *days, int *secs)
+void cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
 {
-  static char func[] = "decode_timevalue";
+  static char func[] = "cdiDecodeTimevalue";
   static int lwarn = TRUE;
 
   if ( timeunit == TUNIT_MINUTE )
@@ -956,9 +956,9 @@ void decode_timevalue(int timeunit, double timevalue, int *days, int *secs)
 }
 
 static
-void encode_timevalue(int days, int secs, int timeunit, double *timevalue)
+void cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
 {
-  static char func[] = "encode_timevalue";
+  static char func[] = "cdiEncodeTimevalue";
   static int lwarn = TRUE;
 
   if ( timeunit == TUNIT_SECOND )
@@ -1010,8 +1010,8 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
 
   rdate  = (*taxis).rdate;
   rtime  = (*taxis).rtime;
-  decode_date(rdate, &year, &month, &day);
-  decode_time(rtime, &hour, &minute, &second);
+  cdiDecodeDate(rdate, &year, &month, &day);
+  cdiDecodeTime(rtime, &hour, &minute, &second);
 
   if ( timeunit == TUNIT_MONTH && calendar == CALENDAR_360DAYS )
     {
@@ -1042,15 +1042,15 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
     {
       encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday, &secofday);
 
-      decode_timevalue(timeunit, timevalue, &days, &secs);
+      cdiDecodeTimevalue(timeunit, timevalue, &days, &secs);
 
       julday_add(days, secs, &julday, &secofday);
 
       decode_caldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute, &second);
     }
 
-  *vdate = encode_date(year, month, day);
-  *vtime = encode_time(hour, minute, second);
+  *vdate = cdiEncodeDate(year, month, day);
+  *vtime = cdiEncodeTime(hour, minute, second);
 }
 
 
@@ -1076,13 +1076,13 @@ double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
       rtime  = (*taxis).vtime;
     }
 
-  decode_date(rdate, &ryear, &rmonth, &day);
-  decode_time(rtime, &hour, &minute, &second);
+  cdiDecodeDate(rdate, &ryear, &rmonth, &day);
+  cdiDecodeTime(rtime, &hour, &minute, &second);
 
   encode_caldaysec(calendar, ryear, rmonth, day, hour, minute, second, &julday1, &secofday1);
 
-  decode_date(vdate, &year, &month, &day);
-  decode_time(vtime, &hour, &minute, &second);
+  cdiDecodeDate(vdate, &year, &month, &day);
+  cdiDecodeTime(vtime, &hour, &minute, &second);
 
   timeunit0 = timeunit;
 
@@ -1102,7 +1102,7 @@ double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
 
       julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
 
-      encode_timevalue(days, secs, timeunit, &value);
+      cdiEncodeTimevalue(days, secs, timeunit, &value);
     }
 
   if ( timeunit0 == TUNIT_MONTH && calendar == CALENDAR_360DAYS )
@@ -1135,7 +1135,7 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
       hour   =  daysec / 3600;
       minute = (daysec - hour*3600)/60;
       second =  daysec - hour*3600 - minute*60;
-      vtime  = encode_time(hour, minute, second);
+      vtime  = cdiEncodeTime(hour, minute, second);
     }
   else if ( timeunit == TUNIT_DAY )
     {
@@ -1148,7 +1148,7 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
       hour   =  daysec / 3600;
       minute = (daysec - hour*3600)/60;
       second =  daysec - hour*3600 - minute*60;
-      vtime  = encode_time(hour, minute, second);
+      vtime  = cdiEncodeTime(hour, minute, second);
     }
   else if ( timeunit == TUNIT_MONTH )
     {
@@ -1182,8 +1182,8 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
 
   /* verify date and time */
 
-  decode_date(vdate, &year, &month, &day);
-  decode_time(vtime, &hour, &minute, &second);
+  cdiDecodeDate(vdate, &year, &month, &day);
+  cdiDecodeTime(vtime, &hour, &minute, &second);
 
   if ( month > 17 || day > 31 || hour > 23 || minute > 59 || second > 59 )
     {
@@ -1194,8 +1194,8 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
       if ( minute > 59 ) minute = 0;
       if ( second > 59 ) second = 0;
 
-      vdate = encode_date(year, month, day);
-      vtime = encode_time(hour, minute, second);
+      vdate = cdiEncodeDate(year, month, day);
+      vtime = cdiEncodeTime(hour, minute, second);
 
       Warning(func, "Reset wrong date/time to %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d!",
 	      year, month, day, hour, minute, second);
@@ -1206,7 +1206,7 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
 }
 
 
-void decode_timeval(double timevalue, TAXIS *taxis, int *date, int *time)
+void cdiDecodeTimeval(double timevalue, TAXIS *taxis, int *date, int *time)
 {
   if ( taxis->type == TAXIS_ABSOLUTE )
     splitTimevalue(timevalue, taxis->unit, date, time);
@@ -1215,7 +1215,7 @@ void decode_timeval(double timevalue, TAXIS *taxis, int *date, int *time)
 }
 
 
-double encode_timeval(int date, int time, TAXIS *taxis)
+double cdiEncodeTimeval(int date, int time, TAXIS *taxis)
 {
   double timevalue;
 
@@ -1224,14 +1224,14 @@ double encode_timeval(int date, int time, TAXIS *taxis)
       if ( taxis->unit == TUNIT_YEAR )
 	{
 	  int year, month, day;
-	  decode_date(date, &year, &month, &day);
+	  cdiDecodeDate(date, &year, &month, &day);
 
 	  timevalue = year;
 	}
       else if ( taxis->unit == TUNIT_MONTH )
 	{
 	  int year, month, day;
-	  decode_date(date, &year, &month, &day);
+	  cdiDecodeDate(date, &year, &month, &day);
 	  if ( day == 0 )
 	    timevalue = date/100;
 	  else
@@ -1240,7 +1240,7 @@ double encode_timeval(int date, int time, TAXIS *taxis)
       else
 	{
 	  int hour, minute, second;
-	  decode_time(time, &hour, &minute, &second);
+	  cdiDecodeTime(time, &hour, &minute, &second);
 	  if ( date < 0 )
 	    timevalue = -(-date + (hour*3600 + minute*60 + second)/86400.);
 	  else

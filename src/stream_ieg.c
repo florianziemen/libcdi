@@ -29,7 +29,7 @@
 
 
 typedef struct {
-  int code;
+  int param;
   int level;
 } IEGCOMPVAR; 
 
@@ -64,7 +64,7 @@ int iegInqRecord(int streamID, int *varID, int *levelID)
   static char func[] = "iegInqRecord";
   int status;
   int fileID;
-  int icode, ilevel;
+  int iparam, ilevel;
   int zaxisID = -1;
   int vlistID;
   IEGREC *iegp;
@@ -84,15 +84,15 @@ int iegInqRecord(int streamID, int *varID, int *levelID)
   status = iegRead(fileID, iegp);
   if ( status != 0 ) return (0);
 
-  icode  = IEG_P_Parameter(iegp->ipdb);
+  iparam  = IEG_P_Parameter(iegp->ipdb);
   if ( IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER )
     ilevel = IEG_P_Level1(iegp->ipdb);
   else
     ilevel = IEG_P_Level2(iegp->ipdb);
 
-  *varID = vlistInqVarID(vlistID, icode);
+  *varID = vlistInqVarID(vlistID, iparam);
 
-  if ( *varID == UNDEFID ) Error(func, "code %d undefined", icode);
+  if ( *varID == UNDEFID ) Error(func, "param %d undefined", iparam);
 
   zaxisID = vlistInqVarZaxis(vlistID, *varID);
 
@@ -217,8 +217,8 @@ void iegDefTime(int *pdb, int date, int time, int timeID)
 
   if ( timetype == TAXIS_ABSOLUTE || timetype == TAXIS_RELATIVE )
     {
-      decode_date(date, &year, &month, &day);
-      decode_time(time, &hour, &minute, &second);
+      cdiDecodeDate(date, &year, &month, &day);
+      cdiDecodeTime(time, &hour, &minute, &second);
 
       IEG_P_Year(pdb)     = year;
       IEG_P_Month(pdb)    = month;
@@ -541,6 +541,7 @@ int iegDefRecord(int streamID)
   int date, time;
   int datatype;
   int i;
+  int param, pdis, pcat, pnum;
   int varID, levelID, tsID, zaxisID;
   int byteorder;
   IEGREC *iegp;
@@ -567,7 +568,10 @@ int iegDefRecord(int streamID)
 
   iegp->byteswap = getByteswap(byteorder);
 
-  IEG_P_Parameter(iegp->ipdb) = vlistInqVarCode(vlistID, varID);
+  param =  vlistInqVarParam(vlistID, varID);
+  cdiDecodeParam(param, &pdis, &pcat, &pnum);
+  IEG_P_Parameter(iegp->ipdb) = pnum;
+  if ( pdis == 255 ) IEG_P_CodeTable(iegp->ipdb) = pcat;
   date     = streamptr->tsteps[tsID].taxis.vdate;
   time     = streamptr->tsteps[tsID].taxis.vtime;
 
@@ -617,7 +621,7 @@ int iegWriteRecord(int streamID, const double *data)
 }
 
 static
-void iegAddRecord(int streamID, int code, int *pdb, int *gdb, double *vct,
+void iegAddRecord(int streamID, int param, int *pdb, int *gdb, double *vct,
 		  long recsize, off_t position, int prec)
 {
   static char func[] = "iegAddRecord";
@@ -653,12 +657,11 @@ void iegAddRecord(int streamID, int code, int *pdb, int *gdb, double *vct,
       if ( IEG_P_LevelType(pdb) == 100 ) level1 *= 100;
     }
   /*
-  fprintf(stderr, "%d %d %d %d\n", code, IEG_P_LevelType(pdb), IEG_P_Level1(pdb), IEG_P_Level2(pdb));
+  fprintf(stderr, "%d %d %d %d\n", param, IEG_P_LevelType(pdb), IEG_P_Level1(pdb), IEG_P_Level2(pdb));
   */
   (*record).size     = recsize;
   (*record).position = position;
-  (*record).code     = code;
-  (*record).table    = IEG_P_CodeTable(pdb);
+  (*record).param    = param;
   (*record).ilevel   = level1;
   (*record).ilevel2  = level2;
   (*record).ltype    = IEG_P_LevelType(pdb);
@@ -759,8 +762,8 @@ void iegAddRecord(int streamID, int code, int *pdb, int *gdb, double *vct,
 
   datatype = iegInqDatatype(prec);
 
-  varAddRecord(recID, code, gridID, leveltype, lbounds, level1, level2,
-	       datatype, &varID, &levelID, 0, 0, 0, NULL, NULL, NULL);
+  varAddRecord(recID, param, gridID, leveltype, lbounds, level1, level2,
+	       datatype, &varID, &levelID, 0, 0, NULL, NULL, NULL);
 
   (*record).varID   = varID;
   (*record).levelID = levelID;
@@ -774,7 +777,7 @@ void iegAddRecord(int streamID, int code, int *pdb, int *gdb, double *vct,
 }
 
 static
-void iegCmpRecord(int streamID, int tsID, int recID, off_t position, int code,
+void iegCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
 		  int level, int xsize, int ysize)
 {
   static char func[] = "iegCmpRecord";
@@ -787,7 +790,7 @@ void iegCmpRecord(int streamID, int tsID, int recID, off_t position, int code,
 
   record  = &streamptr->tsteps[tsID].records[recID];
 
-  if ( code != (*record).code || level != (*record).ilevel )
+  if ( param != (*record).param || level != (*record).ilevel )
     Error(func, "inconsistent timestep");
 
   (*record).position = position;
@@ -819,8 +822,8 @@ void iegDateTime(int *pdb, int *date, int *time)
 
   if ( rminute == -1 ) rminute = 0;
 
-  *date = encode_date(ryear, rmonth, rday);
-  *time = encode_time(rhour, rminute, 0);
+  *date = cdiEncodeDate(ryear, rmonth, rday);
+  *time = cdiEncodeTime(rhour, rminute, 0);
 }
 
 
@@ -830,6 +833,8 @@ void iegScanTimestep1(int streamID)
   int prec = 0;
   int status;
   int fileID;
+  int tabnum;
+  int param = 0;
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0;
   int tsID;
@@ -873,6 +878,9 @@ void iegScanTimestep1(int streamID)
 
       prec   = iegp->dprec;
       rcode  = IEG_P_Parameter(iegp->ipdb);
+      tabnum = IEG_P_CodeTable(iegp->ipdb);
+      param  = cdiEncodeParam(255, tabnum, rcode);
+
       if ( IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER )
 	rlevel = IEG_P_Level1(iegp->ipdb);
       else
@@ -891,26 +899,26 @@ void iegScanTimestep1(int streamID)
 	{
 	  datetime.date = vdate;
 	  datetime.time = vtime;
-	  compVar.code  = rcode;
+	  compVar.param = param;
           compVar.level = rlevel;
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
-	      compVar0.code  = streamptr->tsteps[0].records[recID].code;
+	      compVar0.param = streamptr->tsteps[0].records[recID].param;
 	      compVar0.level = streamptr->tsteps[0].records[recID].ilevel;
 
 	      if ( memcmp(&compVar0, &compVar, sizeof(IEGCOMPVAR)) == 0 ) break;
 	    }
 	  if ( recID < nrecs ) break;
 	  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) )
-	    Warning(func, "Inconsistent verification time for code %d level %d", rcode, rlevel);
+	    Warning(func, "Inconsistent verification time for param %d level %d", param, rlevel);
 	}
 
       nrecs++;
 
       if ( CDI_Debug )
-	Message(func, "%4d%8d%4d%8d%8d%6d", nrecs, (int)recpos, rcode, rlevel, vdate, vtime);
+	Message(func, "%4d%8d%4d%8d%8d%6d", nrecs, (int)recpos, param, rlevel, vdate, vtime);
 
-      iegAddRecord(streamID, rcode, iegp->ipdb, iegp->igdb, iegp->vct, recsize, recpos, prec);
+      iegAddRecord(streamID, param, iegp->ipdb, iegp->igdb, iegp->vct, recsize, recpos, prec);
     }
 
   streamptr->rtsteps = 1;
@@ -969,6 +977,8 @@ int iegScanTimestep2(int streamID)
   static char func[] = "iegScanTimestep2";
   int status;
   int fileID;
+  int tabnum;
+  int param = 0;
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
   int tsID;
   int varID;
@@ -1029,6 +1039,9 @@ int iegScanTimestep2(int streamID)
       recsize = fileGetPos(fileID) - recpos;
 
       rcode  = IEG_P_Parameter(iegp->ipdb);
+      tabnum = IEG_P_CodeTable(iegp->ipdb);
+      param  = cdiEncodeParam(255, tabnum, rcode);
+
       if ( IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER )
 	rlevel = IEG_P_Level1(iegp->ipdb);
       else
@@ -1045,12 +1058,12 @@ int iegScanTimestep2(int streamID)
 	  taxis->vtime = vtime;
 	}
 
-      compVar.code  = rcode;
+      compVar.param = param;
       compVar.level = rlevel;
       nextstep = FALSE;
       for ( recID = 0; recID < nrecords; recID++ )
 	{
-	  compVar0.code  = streamptr->tsteps[tsID].records[recID].code;
+	  compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
 	  compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
 	  if ( memcmp(&compVar0, &compVar, sizeof(IEGCOMPVAR)) == 0 )
@@ -1069,25 +1082,25 @@ int iegScanTimestep2(int streamID)
 	}
       if ( recID == nrecords )
 	{
-	  Warning(func, "code %d level %d not found at timestep %d", rcode, rlevel, tsID+1);
+	  Warning(func, "param %d level %d not found at timestep %d", param, rlevel, tsID+1);
 	  return (CDI_EUFSTRUCT);
 	}
 
       if ( nextstep ) break;
 
       if ( CDI_Debug )
-	Message(func, "%4d%8d%4d%8d%8d%6d", rindex+1, (int)recpos, rcode, rlevel, vdate, vtime);
+	Message(func, "%4d%8d%4d%8d%8d%6d", rindex+1, (int)recpos, param, rlevel, vdate, vtime);
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
-      compVar0.code  = streamptr->tsteps[tsID].records[recID].code;
+      compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
       compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
       if ( memcmp(&compVar0, &compVar, sizeof(IEGCOMPVAR)) != 0 )
 	{
-	  Message(func, "tsID = %d recID = %d code = %3d new %3d  level = %3d new %3d",
+	  Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
-		  streamptr->tsteps[tsID].records[recID].code, rcode,
+		  streamptr->tsteps[tsID].records[recID].param, param,
 		  streamptr->tsteps[tsID].records[recID].ilevel, rlevel);
 	  return (CDI_EUFSTRUCT);
 	}
@@ -1157,6 +1170,8 @@ int iegScanTimestep(int streamID)
   int status;
   int fileID;
   int tsID;
+  int tabnum;
+  int param = 0;
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
   long recsize = 0;
   off_t recpos = 0;
@@ -1213,6 +1228,9 @@ int iegScanTimestep(int streamID)
 	  recsize = fileGetPos(fileID) - recpos;
 
 	  rcode  = IEG_P_Parameter(iegp->ipdb);
+	  tabnum = IEG_P_CodeTable(iegp->ipdb);
+	  param  = cdiEncodeParam(255, tabnum, rcode);
+
 	  if ( IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER )
 	    rlevel = IEG_P_Level1(iegp->ipdb);
 	  else
@@ -1232,16 +1250,16 @@ int iegScanTimestep(int streamID)
 	      taxis->vtime = vtime;
 	    }
 
-	  compVar.code  = rcode;
+	  compVar.param = param;
           compVar.level = rlevel;
-	  compVar0.code  = streamptr->tsteps[tsID].records[recID].code;
+	  compVar0.param = streamptr->tsteps[tsID].records[recID].param;
 	  compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
 	  if ( memcmp(&compVar0, &compVar, sizeof(IEGCOMPVAR)) != 0 )
 	    {
-	      Message(func, "tsID = %d recID = %d code = %3d new %3d  level = %3d new %3d",
+	      Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,
-		      streamptr->tsteps[tsID].records[recID].code, rcode,
+		      streamptr->tsteps[tsID].records[recID].param, param,
 		      streamptr->tsteps[tsID].records[recID].ilevel, rlevel);
 	      Error(func, "Invalid, unsupported or inconsistent record structure");
 	    }
@@ -1250,7 +1268,7 @@ int iegScanTimestep(int streamID)
 	  streamptr->tsteps[tsID].records[recID].size = recsize;
 
 	  if ( CDI_Debug )
-	    Message(func, "%4d%8d%4d%8d%8d%6d", rindex, (int)recpos, rcode, rlevel, vdate, vtime);
+	    Message(func, "%4d%8d%4d%8d%8d%6d", rindex, (int)recpos, param, rlevel, vdate, vtime);
 	}
 
       streamptr->rtsteps++;
@@ -1423,7 +1441,9 @@ void iegWriteVarDP(int streamID, int varID, const double *data)
   int tsID;
   int vlistID;
   int i;
-  int code, date, time, datasize;
+  int date, time;
+  int param, pdis, pcat, pnum;
+  double refval;
   IEGREC *iegp;
   stream_t *streamptr;
 
@@ -1448,10 +1468,15 @@ void iegWriteVarDP(int streamID, int varID, const double *data)
   if ( CDI_Debug )
     Message(func, "nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
 
-  code     = vlistInqVarCode(vlistID, varID);
+  param    = vlistInqVarParam(vlistID, varID);
+  cdiDecodeParam(param, &pdis, &pcat, &pnum);
+  IEG_P_Parameter(iegp->ipdb) = pnum;
+  if ( pdis == 255 ) IEG_P_CodeTable(iegp->ipdb) = pcat;
   date     = streamptr->tsteps[tsID].taxis.vdate;
   time     = streamptr->tsteps[tsID].taxis.vtime;
-  datasize = gridInqSize(gridID);
+
+  iegDefTime(iegp->ipdb, date, time, vlistInqTaxis(vlistID));
+  iegDefGrid(iegp->igdb, gridID);
 
   datatype = vlistInqVarDatatype(vlistID, varID);
 
@@ -1459,7 +1484,13 @@ void iegWriteVarDP(int streamID, int varID, const double *data)
 
   for ( levID = 0;  levID < nlevs; levID++ )
     {
-      level = zaxisInqLevel(zaxisID, levID);
+      iegDefLevel(iegp->ipdb, iegp->igdb, iegp->vct, zaxisID, levID);
+
+      refval = data[0];
+      for ( i = 1; i < gridsize; i++ )
+	if ( data[levID*gridsize+i] < refval ) refval = data[levID*gridsize+i];
+
+      iegp->refval = refval;
 
       /*  header[1] = (int) level; */
       iegDefDataDP(iegp, &data[levID*gridsize]);
@@ -1478,7 +1509,7 @@ void iegWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   int datatype;
   int tsID;
   int vlistID;
-  int code, date, time, datasize;
+  int param, date, time, datasize;
   IEGREC *iegp;
   stream_t *streamptr;
 
@@ -1495,7 +1526,7 @@ void iegWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   if ( CDI_Debug )
     Message(func, "gridID = %d zaxisID = %d", gridID, zaxisID);
 
-  code = vlistInqVarCode(vlistID, varID);
+  param = vlistInqVarParam(vlistID, varID);
   date = streamptr->tsteps[tsID].taxis.vdate;
   time = streamptr->tsteps[tsID].taxis.vtime;
   datasize = gridInqSize(gridID);

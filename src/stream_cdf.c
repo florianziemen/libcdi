@@ -244,8 +244,8 @@ int splitBasetime(const char *timeunits, TAXIS *taxis)
 		    }
 		}
 
-	      rdate = encode_date(year, month, day);
-	      rtime = encode_time(hour, minute, second);
+	      rdate = cdiEncodeDate(year, month, day);
+	      rtime = cdiEncodeTime(hour, minute, second);
 	      (*taxis).rdate = rdate;
 	      (*taxis).rtime = rtime;
 
@@ -755,7 +755,7 @@ void cdfDefTimeValue(int streamID, int tsID)
 
   index = tsID;
 
-  timevalue = encode_timeval(taxis->vdate, taxis->vtime, &streamptr->tsteps[0].taxis);
+  timevalue = cdiEncodeTimeval(taxis->vdate, taxis->vtime, &streamptr->tsteps[0].taxis);
   if ( CDI_Debug ) Message(func, "tsID = %d  timevalue = %f", tsID, timevalue);
 
   ncvarid = streamptr->basetime.ncvarid;
@@ -767,11 +767,11 @@ void cdfDefTimeValue(int streamID, int tsID)
 
       ncvarid = streamptr->basetime.ncvarboundsid;
 
-      timevalue = encode_timeval(taxis->vdate_lb, taxis->vtime_lb, &streamptr->tsteps[0].taxis);
+      timevalue = cdiEncodeTimeval(taxis->vdate_lb, taxis->vtime_lb, &streamptr->tsteps[0].taxis);
       start[0] = tsID; count[0] = 1; start[1] = 0; count[1] = 1;
       cdf_put_vara_double(fileID, ncvarid, start, count, &timevalue);
 
-      timevalue = encode_timeval(taxis->vdate_ub, taxis->vtime_ub, &streamptr->tsteps[0].taxis);
+      timevalue = cdiEncodeTimeval(taxis->vdate_ub, taxis->vtime_ub, &streamptr->tsteps[0].taxis);
       start[0] = tsID; count[0] = 1; start[1] = 1; count[1] = 1;
       cdf_put_vara_double(fileID, ncvarid, start, count, &timevalue);
     }
@@ -851,8 +851,8 @@ void cdfDefTime(int streamID)
 	  rtime  = taxis->vtime;
 	}
 
-      decode_date(rdate, &year, &month, &day);
-      decode_time(rtime, &hour, &minute, &second);
+      cdiDecodeDate(rdate, &year, &month, &day);
+      cdiDecodeTime(rtime, &hour, &minute, &second);
 
       if ( timeunit == TUNIT_QUARTER ) timeunit = TUNIT_MINUTE;
       sprintf(unitstr, "%s since %d-%02d-%02d %02d:%02d:%02d",
@@ -6027,7 +6027,7 @@ int cdfInqTimestep(int streamID, int tsID)
 	  index  = tsID;
 	  cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
 
-	  decode_timeval(timevalue, taxis, &taxis->vdate, &taxis->vtime);
+	  cdiDecodeTimeval(timevalue, taxis, &taxis->vdate, &taxis->vtime);
 
 	  nctimeboundsid = streamptr->basetime.ncvarboundsid;
 	  if ( nctimeboundsid != UNDEFID )
@@ -6036,12 +6036,12 @@ int cdfInqTimestep(int streamID, int tsID)
 	      start[0] = tsID; count[0] = 1; start[1] = 0; count[1] = 1;
 	      cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
 
-	      decode_timeval(timevalue, taxis, &taxis->vdate_lb, &taxis->vtime_lb);
+	      cdiDecodeTimeval(timevalue, taxis, &taxis->vdate_lb, &taxis->vtime_lb);
 
 	      start[0] = tsID; count[0] = 1; start[1] = 1; count[1] = 1;
 	      cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
 
-	      decode_timeval(timevalue, taxis, &taxis->vdate_ub, &taxis->vtime_ub);
+	      cdiDecodeTimeval(timevalue, taxis, &taxis->vdate_ub, &taxis->vtime_ub);
 	    }
 	}
     }

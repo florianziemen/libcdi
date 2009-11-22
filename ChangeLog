@@ -1,3 +1,7 @@
+2009-11-22  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* change code/tabnum to param
+	
 2009-11-20  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added function vlistDefVarParam/vlistInqVarParam

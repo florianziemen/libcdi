@@ -62,20 +62,21 @@ ARFLAGS = cru
 libcdi_a_AR = $(AR) $(ARFLAGS)
 libcdi_a_LIBADD =
 am_libcdi_a_OBJECTS = cdiFortran.$(OBJEXT) cdi_error.$(OBJEXT) \
-	taxis.$(OBJEXT) error.$(OBJEXT) version.$(OBJEXT) \
-	dmemory.$(OBJEXT) model.$(OBJEXT) institution.$(OBJEXT) \
-	table.$(OBJEXT) util.$(OBJEXT) varscan.$(OBJEXT) \
-	calendar.$(OBJEXT) timebase.$(OBJEXT) vlist.$(OBJEXT) \
-	vlist_var.$(OBJEXT) vlist_att.$(OBJEXT) basetime.$(OBJEXT) \
-	stream_history.$(OBJEXT) stream_cgribex.$(OBJEXT) \
-	stream_gribapi.$(OBJEXT) stream_grb.$(OBJEXT) \
-	stream_cdf.$(OBJEXT) stream_srv.$(OBJEXT) stream_ext.$(OBJEXT) \
-	stream_ieg.$(OBJEXT) grid.$(OBJEXT) zaxis.$(OBJEXT) \
-	stream.$(OBJEXT) stream_var.$(OBJEXT) stream_record.$(OBJEXT) \
-	tsteps.$(OBJEXT) stream_int.$(OBJEXT) servicelib.$(OBJEXT) \
-	extralib.$(OBJEXT) ieglib.$(OBJEXT) cdf.$(OBJEXT) \
-	cdf_int.$(OBJEXT) file.$(OBJEXT) binary.$(OBJEXT) \
-	swap.$(OBJEXT) cgribexlib.$(OBJEXT) gribapi.$(OBJEXT)
+	cdi_util.$(OBJEXT) taxis.$(OBJEXT) error.$(OBJEXT) \
+	version.$(OBJEXT) dmemory.$(OBJEXT) model.$(OBJEXT) \
+	institution.$(OBJEXT) table.$(OBJEXT) util.$(OBJEXT) \
+	varscan.$(OBJEXT) calendar.$(OBJEXT) timebase.$(OBJEXT) \
+	vlist.$(OBJEXT) vlist_var.$(OBJEXT) vlist_att.$(OBJEXT) \
+	basetime.$(OBJEXT) stream_history.$(OBJEXT) \
+	stream_cgribex.$(OBJEXT) stream_gribapi.$(OBJEXT) \
+	stream_grb.$(OBJEXT) stream_cdf.$(OBJEXT) stream_srv.$(OBJEXT) \
+	stream_ext.$(OBJEXT) stream_ieg.$(OBJEXT) grid.$(OBJEXT) \
+	zaxis.$(OBJEXT) stream.$(OBJEXT) stream_var.$(OBJEXT) \
+	stream_record.$(OBJEXT) tsteps.$(OBJEXT) stream_int.$(OBJEXT) \
+	servicelib.$(OBJEXT) extralib.$(OBJEXT) ieglib.$(OBJEXT) \
+	cdf.$(OBJEXT) cdf_int.$(OBJEXT) file.$(OBJEXT) \
+	binary.$(OBJEXT) swap.$(OBJEXT) cgribexlib.$(OBJEXT) \
+	gribapi.$(OBJEXT)
 libcdi_a_OBJECTS = $(am_libcdi_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -222,6 +223,7 @@ nodist_include_HEADERS = $(am__append_1)
 libcdi_a_SOURCES = \
         cdiFortran.c   	 \
 	cdi_error.c      \
+	cdi_util.c       \
 	taxis.c          \
 	error.c        	 \
 	version.c      	 \
@@ -399,6 +401,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdf_int.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdiFortran.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_error.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cgribexlib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmemory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error.Po@am__quote@

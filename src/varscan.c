@@ -24,11 +24,11 @@ typedef struct
   int      recID;
   int      lindex;
 }
-LEVELTABLE;
+leveltable_t;
 
 typedef struct
 {
-  int         code;
+  int         param;
   int         prec;
   int         timave;
   int         timaccu;
@@ -39,30 +39,29 @@ typedef struct
   int         zaxisID;
   int         nlevels;
   int         levelTableSize;
-  LEVELTABLE *levelTable;
+  leveltable_t *levelTable;
   int         instID;
   int         modelID;
   int         tableID;
-  int         codetable;
   int         ztype;
   int         zlevel;
   char       *name;
   char       *longname;
   char       *units;
 }
-VARTABLE;
+vartable_t;
 
 
 int vartableInit = 0;
-VARTABLE *vartable;
+vartable_t *vartable;
 static int varTablesize = 0;
 int nvars = 0;
 
 
 static
-void codeInitEntry(int varID, int code)
+void paramInitEntry(int varID, int param)
 {
-  vartable[varID].code           = code;
+  vartable[varID].param          = param;
   vartable[varID].prec           = 0;
   vartable[varID].timave         = 0;
   vartable[varID].timaccu        = 0;
@@ -84,16 +83,15 @@ void codeInitEntry(int varID, int code)
 
 
 static
-int varGetEntry(int code, int zaxistype, int codetable, int ltype)
+int varGetEntry(int param, int zaxistype, int ltype)
 {
   int varID;
 
   for ( varID = 0; varID < varTablesize; varID++ )
     {
-      if ( vartable[varID].code      == code      &&
+      if ( vartable[varID].param     == param     &&
 	   vartable[varID].zaxistype == zaxistype &&
-	   vartable[varID].ltype     == ltype &&
-	   vartable[varID].codetable == codetable )
+	   vartable[varID].ltype     == ltype )
 	return (varID);
     }
 
@@ -135,7 +133,7 @@ int levelNewEntry(int varID, int level1, int level2)
   static char func[] = "levelNewEntry";
   int levelID = 0;
   int levelTableSize;
-  LEVELTABLE *levelTable;
+  leveltable_t *levelTable;
 
   levelTableSize = vartable[varID].levelTableSize;
   levelTable     = vartable[varID].levelTable;
@@ -149,11 +147,11 @@ int levelNewEntry(int varID, int level1, int level2)
       int i;
 
       levelTableSize = 2;
-      levelTable = (LEVELTABLE *) malloc(levelTableSize*sizeof(LEVELTABLE));
+      levelTable = (leveltable_t *) malloc(levelTableSize*sizeof(leveltable_t));
       if( levelTable == NULL )
 	{
           Message(func, "levelTableSize = %d", levelTableSize);
-	  SysError(func, "Allocation of LEVELTABLE failed");
+	  SysError(func, "Allocation of leveltable failed!");
 	}
 
       for( i = 0; i < levelTableSize; i++ )
@@ -175,11 +173,11 @@ int levelNewEntry(int varID, int level1, int level2)
       int i;
 
       levelTableSize = 2*levelTableSize;
-      levelTable = (LEVELTABLE *) realloc(levelTable, levelTableSize*sizeof(LEVELTABLE));
+      levelTable = (leveltable_t *) realloc(levelTable, levelTableSize*sizeof(leveltable_t));
       if( levelTable == NULL )
 	{
           Message(func, "levelTableSize = %d", levelTableSize);
-	  SysError(func, "Reallocation of LEVELTABLE failed");
+	  SysError(func, "Reallocation of leveltable failed");
 	}
       levelID = levelTableSize/2;
 
@@ -198,11 +196,11 @@ int levelNewEntry(int varID, int level1, int level2)
   return (levelID);
 }
 
-#define  UNDEF_CODE  -4711
+#define  UNDEF_PARAM  -4711
 
-int codeNewEntry (int code)
+int paramNewEntry (int param)
 {
-  static char func[] = "codeNewEntry";
+  static char func[] = "paramNewEntry";
   int varID = 0;
 
   /*
@@ -214,21 +212,21 @@ int codeNewEntry (int code)
       int i;
 
       varTablesize = 2;
-      vartable = (VARTABLE *) malloc(varTablesize*sizeof(VARTABLE));
+      vartable = (vartable_t *) malloc(varTablesize*sizeof(vartable_t));
       if( vartable == NULL )
 	{
           Message(func, "varTablesize = %d", varTablesize);
-	  SysError(func, "Allocation of VARTABLE failed");
+	  SysError(func, "Allocation of vartable failed");
 	}
 
       for( i = 0; i < varTablesize; i++ )
-	vartable[i].code = UNDEF_CODE;
+	vartable[i].param = UNDEF_PARAM;
     }
   else
     {
       while( varID < varTablesize )
 	{
-	  if ( vartable[varID].code == UNDEF_CODE ) break;
+	  if ( vartable[varID].param == UNDEF_PARAM ) break;
 	  varID++;
 	}
     }
@@ -240,27 +238,27 @@ int codeNewEntry (int code)
       int i;
 
       varTablesize = 2*varTablesize;
-      vartable = (VARTABLE *) realloc(vartable, varTablesize*sizeof(VARTABLE));
+      vartable = (vartable_t *) realloc(vartable, varTablesize*sizeof(vartable_t));
       if( vartable == NULL )
 	{
           Message(func, "varTablesize = %d", varTablesize);
-	  SysError(func, "Reallocation of VARTABLE failed");
+	  SysError(func, "Reallocation of vartable failed!");
 	}
       varID = varTablesize/2;
 
       for( i = varID; i < varTablesize; i++ )
-	vartable[i].code = UNDEF_CODE;
+	vartable[i].param = UNDEF_PARAM;
     }
 
-  codeInitEntry(varID, code);
+  paramInitEntry(varID, param);
 
   return (varID);
 }
 
 
-void varAddRecord(int recID, int code, int gridID, int zaxistype, int lbounds,
+void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 		  int level1, int level2, int prec, int *pvarID, int *plevelID,
-		  int numavg, int codetable, int ltype,
+		  int numavg, int ltype,
 		  const char *name, const char *longname, const char *units)
 {
   static char func[] = "varAddRecord";
@@ -268,19 +266,18 @@ void varAddRecord(int recID, int code, int gridID, int zaxistype, int lbounds,
   int levelID = -1;
 
   if ( ! (cdiSplitLtype105 == 1 && zaxistype == ZAXIS_HEIGHT) )
-    varID = varGetEntry(code, zaxistype, codetable, ltype);
+    varID = varGetEntry(param, zaxistype, ltype);
 
   if ( varID == UNDEFID )
     {
       nvars++;
-      varID = codeNewEntry(code);
+      varID = paramNewEntry(param);
       if ( prec > vartable[varID].prec ) vartable[varID].prec = prec;
       vartable[varID].gridID    = gridID;
       vartable[varID].zaxistype = zaxistype;
       vartable[varID].ltype     = ltype;
       vartable[varID].lbounds   = lbounds;
       if ( numavg ) vartable[varID].timave = 1;
-      vartable[varID].codetable = codetable;
 
       if ( name )     if ( name[0] )     vartable[varID].name     = strdup(name);
       if ( longname ) if ( longname[0] ) vartable[varID].longname = strdup(longname);
@@ -290,13 +287,13 @@ void varAddRecord(int recID, int code, int gridID, int zaxistype, int lbounds,
     {
       if ( vartable[varID].gridID != gridID )
 	{
-	  Message(func, "code = %d gridID = %d", code, gridID);
-	  Error(func, "horizontal grid must not change for same code");
+	  Message(func, "param = %d gridID = %d", param, gridID);
+	  Error(func, "horizontal grid must not change for same param");
 	}
       if ( vartable[varID].zaxistype != zaxistype )
 	{
-	  Message(func, "code = %d zaxistype = %d", code, zaxistype);
-	  Error(func, "zaxistype must not change for same code");
+	  Message(func, "param = %d zaxistype = %d", param, zaxistype);
+	  Error(func, "zaxistype must not change for same param");
 	}
     }
 
@@ -325,8 +322,8 @@ int dblcmp(const void *s1, const void *s2)
 int cmpLevelTable(const void *s1, const void *s2)
 {
   int cmp = 0;
-  LEVELTABLE *x = (LEVELTABLE *) s1;
-  LEVELTABLE *y = (LEVELTABLE *) s2;
+  leveltable_t *x = (leveltable_t *) s1;
+  leveltable_t *y = (leveltable_t *) s2;
   /*
   printf("%g %g  %d %d\n", x->leve11, y->level1, x, y);
   */
@@ -342,7 +339,7 @@ void cdiGenVars(int streamID)
   static char func[] = "cdiGenVars";
   int varID, gridID, zaxisID, levelID;
   int instID, modelID, tableID;
-  int code, nlevels, zaxistype, lindex, ltype;
+  int param, nlevels, zaxistype, lindex, ltype;
   int prec;
   int timave, timaccu;
   int lbounds;
@@ -361,7 +358,7 @@ void cdiGenVars(int streamID)
   for ( varID = 0; varID < nvars; varID++ )
     {
       gridID    = vartable[varID].gridID;
-      code      = vartable[varID].code;
+      param      = vartable[varID].param;
       nlevels   = vartable[varID].nlevels;
       ltype     = vartable[varID].ltype;
       zaxistype = vartable[varID].zaxistype;
@@ -416,7 +413,7 @@ void cdiGenVars(int streamID)
 		  qsort(dlevels, nlevels, sizeof(double), dblcmp);
 		  */
 		  qsort(vartable[varID].levelTable, nlevels, 
-			sizeof(LEVELTABLE), cmpLevelTable);
+			sizeof(leveltable_t), cmpLevelTable);
 
 		  if ( lbounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
 		    for ( levelID = 0; levelID < nlevels; levelID++ )
@@ -449,7 +446,7 @@ void cdiGenVars(int streamID)
       varID = streamNewVar(streamID, gridID, zaxisID);
       varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARIABLE);
 
-      vlistDefVarCode(vlistID, varID, code);
+      vlistDefVarParam(vlistID, varID, param);
       vlistDefVarDatatype(vlistID, varID, prec);
       vlistDefVarTimave(vlistID, varID, timave);
       vlistDefVarTimaccu(vlistID, varID, timaccu);
@@ -461,20 +458,22 @@ void cdiGenVars(int streamID)
 
       if ( cdiDefaultTableID != UNDEFID )
 	{
-	  if ( tableInqParNamePtr(cdiDefaultTableID, code) )
+	  int pdis, pcat, pnum;
+	  cdiDecodeParam(param, &pdis, &pcat, &pnum);
+	  if ( tableInqParNamePtr(cdiDefaultTableID, pnum) )
 	    {
 	      if ( tableID != UNDEFID )
 		{
-		  strcpy(name, tableInqParNamePtr(cdiDefaultTableID, code));
+		  strcpy(name, tableInqParNamePtr(cdiDefaultTableID, pnum));
 		  vlistDefVarName(vlistID, varID, name);
-		  if ( tableInqParLongnamePtr(cdiDefaultTableID, code) )
+		  if ( tableInqParLongnamePtr(cdiDefaultTableID, pnum) )
 		    {
-		      strcpy(longname, tableInqParLongnamePtr(cdiDefaultTableID, code));
+		      strcpy(longname, tableInqParLongnamePtr(cdiDefaultTableID, pnum));
 		      vlistDefVarLongname(vlistID, varID, longname);
 		    }
-		  if ( tableInqParUnitsPtr(cdiDefaultTableID, code) )
+		  if ( tableInqParUnitsPtr(cdiDefaultTableID, pnum) )
 		    {
-		      strcpy(units, tableInqParUnitsPtr(cdiDefaultTableID, code));
+		      strcpy(units, tableInqParUnitsPtr(cdiDefaultTableID, pnum));
 		      vlistDefVarUnits(vlistID, varID, units);
 		    }
 		}

@@ -95,6 +95,7 @@ c="dmemory.c         \
    zaxis.c           \
    cdf_int.c         \
    cdi_error.c       \
+   cdi_util.c        \
    stream_int.c      \
    stream.c          \
    stream_history.c  \
