@@ -111,26 +111,30 @@ void usage(void)
 
 
 static
-void printInfo(int gridtype, int date, int time, int code, double level,
-	       int datasize, int nmiss, double missval, const double *data)
+void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
+	       int datasize, int nmiss, double missval, const double *data, int vardis)
 {
   static int rec = 0;
   int i, ivals = 0, imiss = 0;
-  int year, month, day, hour, minute, second;
   double arrmean, arrmin, arrmax;
+  char vdatestr[32], vtimestr[32];
  
   if ( ! rec )
   {
-    fprintf(stdout, 
-    "   Rec :       Date  Time    Code  Level    Size    Miss :     Minimum        Mean     Maximum\n");
+    if ( vardis )
+      fprintf(stdout, 
+    "   Rec :       Date  Time    Varname      Level    Size    Miss :     Minimum        Mean     Maximum\n");
+/*   ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+ */
+    else
+      fprintf(stdout, 
+    "   Rec :       Date  Time    Param        Level    Size    Miss :     Minimum        Mean     Maximum\n");
 /*   ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+ */
   }
 
-  cdiDecodeDate(date, &year, &month, &day);
-  cdiDecodeTime(time, &hour, &minute, &second);
-
-  fprintf(stdout, "%6d : %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d %3d %7g ",
-	  ++rec, year, month, day, hour, minute, second, code, level);
+  date2str(vdate, vdatestr, sizeof(vdatestr));
+  time2str(vtime, vtimestr, sizeof(vtimestr));
+	  
+  fprintf(stdout, "%6d :%s %s %-10s %7g ", ++rec, vdatestr, vtimestr, varname, level);
 
   fprintf(stdout, "%7d ", datasize);
 
@@ -189,7 +193,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 {
   int varID;
   int gridsize = 0;
-  int gridID, zaxisID, code;
+  int gridID, zaxisID, code, tabnum, param;
   int zaxistype, ltype;
   int vdate, vtime;
   int nrecs, nvars, nzaxis, ntsteps;
@@ -206,24 +210,30 @@ void printShortinfo(int streamID, int vlistID, int vardis)
   int prec;
   int year, month, day, hour, minute, second;
   char pstr[4];
+  char paramstr[32];
 
       printf("   File format: ");
       printFiletype(streamID, vlistID);
 
       if ( vardis )
 	fprintf(stdout,
-		"   Var : Institut Source  Table   Time   Typ  Grid Size Num  Levels Num Varname\n");
+		"   Var : Institut Source   Varname     Time Typ  Grid Size Num  Levels Num\n");
       else
 	fprintf(stdout,
-		"   Var : Institut Source  Table Code   Time   Typ  Grid Size Num  Levels Num\n");
+		"   Var : Institut Source   Param       Time Typ  Grid Size Num  Levels Num\n");
 
       nvars = vlistNvars(vlistID);
 
       for ( varID = 0; varID < nvars; varID++ )
 	{
+	  param   = vlistInqVarParam(vlistID, varID);
 	  code    = vlistInqVarCode(vlistID, varID);
+	  tabnum  = tableInqNum(vlistInqVarTable(vlistID, varID));
 	  gridID  = vlistInqVarGrid(vlistID, varID);
 	  zaxisID = vlistInqVarZaxis(vlistID, varID);
+
+	  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(255, tabnum, code);
+	  param2str(param, paramstr, sizeof(paramstr));
 
 	  if ( vardis ) vlistInqVarName(vlistID, varID, varname);
 
@@ -243,16 +253,16 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  else
 	    fprintf(stdout, "unknown  ");
 
-	  fprintf(stdout, "%4d", tableInqNum(vlistInqVarTable(vlistID, varID)));
-
-	  if ( ! vardis )
-	    fprintf(stdout, "%5d", code);
+	  if ( vardis )
+	    fprintf(stdout, "%-12s", varname);
+	  else
+	    fprintf(stdout, "%-12s", paramstr);
 
 	  timeID = vlistInqVarTime(vlistID, varID);
 	  if ( timeID == TIME_CONSTANT )
-	    fprintf(stdout, " constant");
+	    fprintf(stdout, "con ");
 	  else
-	    fprintf(stdout, " variable");
+	    fprintf(stdout, "var ");
 
 	  prec = vlistInqVarDatatype(vlistID, varID);
 	  if      ( prec == DATATYPE_PACK   ) strcpy(pstr, "P0");
@@ -281,9 +291,6 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  levelsize = zaxisInqSize(zaxisID);
 	  fprintf(stdout, " %6d", levelsize);
 	  fprintf(stdout, " %3d", zaxisID + 1);
-	    
-	  if ( vardis )
-	    fprintf(stdout, "  %-10s", varname);
 
 	  fprintf(stdout, "\n");
 	}
@@ -647,6 +654,8 @@ int main(int argc, char *argv[])
   int varID;
   int itableID = CDI_UNDEFID, otableID = CDI_UNDEFID;
   int Info = 1;
+  char varname[128];
+  char paramstr[32];
 
   Progname = strrchr(argv[0], '/');
   if (Progname == 0) Progname = argv[0];
@@ -731,7 +740,8 @@ int main(int argc, char *argv[])
       int streamID1 = CDI_UNDEFID;
       int streamID2 = CDI_UNDEFID;
       int filetype;
-      int gridID, zaxisID, code;
+      int gridID, zaxisID;
+      int code, tabnum, param;
       int vdate, vtime;
       int nrecs, nvars;
       int levelID, levelsize;
@@ -846,10 +856,18 @@ int main(int argc, char *argv[])
 
 		  gridID  = vlistInqVarGrid(vlistID1, varID);
 		  zaxisID = vlistInqVarZaxis(vlistID1, varID);
+		  param   = vlistInqVarParam(vlistID1, varID);
 		  code    = vlistInqVarCode(vlistID1, varID);
+		  tabnum  = tableInqNum(vlistInqVarTable(vlistID1, varID));
+
+		  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(255, tabnum, code);
+		  param2str(param, paramstr, sizeof(paramstr));
+
+		  if ( Vardis ) vlistInqVarName(vlistID1, varID, varname);
+		  else          strcpy(varname, paramstr);
 		  /*
-		  printf("varID=%d, code=%d, gridID=%d, zaxisID=%d levelID=%d\n",
-			 varID, code, gridID, zaxisID, levelID);
+		  printf("varID=%d, param=%d, gridID=%d, zaxisID=%d levelID=%d\n",
+			 varID, param, gridID, zaxisID, levelID);
 		  */
 		  gridtype = gridInqType(gridID);
 		  gridsize = gridInqSize(gridID);
@@ -857,7 +875,7 @@ int main(int argc, char *argv[])
 		  missval  = vlistInqVarMissval(vlistID1, varID);
 		  
 		  if ( Info )
-		    printInfo(gridtype, vdate, vtime, code, level, gridsize, nmiss, missval, data);
+		    printInfo(gridtype, vdate, vtime, varname, level, gridsize, nmiss, missval, data, Vardis);
 
 		  if ( fname2 )
 		    {
@@ -877,10 +895,19 @@ int main(int argc, char *argv[])
 
 		  gridID  = vlistInqVarGrid(vlistID1, varID);
 		  zaxisID = vlistInqVarZaxis(vlistID1, varID);
+		  param   = vlistInqVarParam(vlistID1, varID);
 		  code    = vlistInqVarCode(vlistID1, varID);
+		  tabnum  = tableInqNum(vlistInqVarTable(vlistID1, varID));
+
+		  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(255, tabnum, code);
+		  param2str(param, paramstr, sizeof(paramstr));
+
+		  if ( Vardis ) vlistInqVarName(vlistID1, varID, varname);
+		  else          strcpy(varname, paramstr);
+
 		  if ( Debug )
-		    fprintf(stdout, "varID = %d code = %d gridID = %d zaxisID = %d\n",
-			    varID, code, gridID, zaxisID);
+		    fprintf(stdout, "varID = %d param = %d gridID = %d zaxisID = %d\n",
+			    varID, param, gridID, zaxisID);
 
 		  gridtype = gridInqType(gridID);
 		  gridsize = gridInqSize(gridID);
@@ -893,7 +920,7 @@ int main(int argc, char *argv[])
 		      streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
 
 		      if ( Info )
-			printInfo(gridtype, vdate, vtime, code, level, gridsize, nmiss, missval, data);
+			printInfo(gridtype, vdate, vtime, varname, level, gridsize, nmiss, missval, data, Vardis);
 
 		      if ( fname2 )
 			streamWriteVarSlice(streamID2, varID, levelID, data, nmiss);
