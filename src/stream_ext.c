@@ -62,7 +62,7 @@ int extInqRecord(int streamID, int *varID, int *levelID)
   static char func[] = "extInqRecord";
   int status;
   int fileID;
-  int iparam, ilevel;
+  int icode, ilevel;
   int zaxisID = -1;
   int header[4];
   int vlistID;
@@ -85,12 +85,12 @@ int extInqRecord(int streamID, int *varID, int *levelID)
 
   extInqHeader(extp, header);
 
-  iparam = header[1];
+  icode  = header[1];
   ilevel = header[2];
 
-  *varID = vlistInqVarID(vlistID, iparam);
+  *varID = vlistInqVarID(vlistID, icode);
 
-  if ( *varID == UNDEFID ) Error(func, "param %d undefined", iparam);
+  if ( *varID == UNDEFID ) Error(func, "Code %d undefined", icode);
 
   zaxisID = vlistInqVarZaxis(vlistID, *varID);
 
@@ -202,6 +202,7 @@ int extDefRecord(int streamID)
   int header[4];
   int status = 0;
   int datatype;
+  int pdis, pcat, pnum;
   EXTREC *extp;
   stream_t *streamptr;
 
@@ -213,8 +214,9 @@ int extDefRecord(int streamID)
   gridID = streamptr->record->gridID;
   extp   = streamptr->record->extp;
 
+  cdiDecodeParam(streamptr->record->param, &pdis, &pcat, &pnum);
   header[0] = streamptr->record->date;
-  header[1] = streamptr->record->param;
+  header[1] = pnum;
   header[2] = streamptr->record->level;
   header[3] = gridInqSize(gridID);
 
@@ -346,7 +348,8 @@ void extScanTimestep1(int streamID)
   int status;
   int fileID;
   int rxysize = 0;
-  int rparam = 0, rlevel = 0, vdate = 0, vtime = 0;
+  int param = 0;
+  int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0;
   int tsID;
   int varID;
@@ -392,9 +395,11 @@ void extScanTimestep1(int streamID)
       prec   = extp->dprec;
       vdate  = header[0];
       vtime  = 0;
-      rparam  = header[1];
+      rcode  = header[1];
       rlevel = header[2];
       rxysize = header[3];
+
+      param = cdiEncodeParam(255, 255, rcode);
 
       if ( nrecs == 0 )
 	{
@@ -405,7 +410,7 @@ void extScanTimestep1(int streamID)
 	{
 	  datetime.date = vdate;
 	  datetime.time = vtime;
-	  compVar.param  = rparam;
+	  compVar.param = param;
           compVar.level = rlevel;
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
@@ -416,15 +421,15 @@ void extScanTimestep1(int streamID)
 	    }
 	  if ( recID < nrecs ) break;
 	  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) )
-	    Warning(func, "Inconsistent verification time for param %d level %d", rparam, rlevel);
+	    Warning(func, "Inconsistent verification time for code %d level %d", rcode, rlevel);
 	}
 
       nrecs++;
 
       if ( CDI_Debug )
-	Message(func, "%4d%8d%4d%8d%8d%6d", nrecs, (int)recpos, rparam, rlevel, vdate, vtime);
+	Message(func, "%4d%8d%4d%8d%8d%6d", nrecs, (int)recpos, rcode, rlevel, vdate, vtime);
 
-      extAddRecord(streamID, rparam, rlevel, rxysize, recsize, recpos, prec);
+      extAddRecord(streamID, param, rlevel, rxysize, recsize, recpos, prec);
     }
 
   streamptr->rtsteps = 1;
@@ -485,7 +490,8 @@ int extScanTimestep2(int streamID)
   int status;
   int fileID;
   int rxysize = 0;
-  int rparam = 0, rlevel = 0, vdate = 0, vtime = 0;
+  int param = 0;
+  int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
   int tsID;
   int varID;
   long recsize;
@@ -548,9 +554,11 @@ int extScanTimestep2(int streamID)
 
       vdate  = header[0];
       vtime  = 0;
-      rparam  = header[1];
+      rcode  = header[1];
       rlevel = header[2];
       rxysize = header[3];
+
+      param = cdiEncodeParam(255, 255, rcode);
 
       if ( rindex == 0 )
 	{
@@ -559,7 +567,7 @@ int extScanTimestep2(int streamID)
 	  taxis->vtime = vtime;
 	}
 
-      compVar.param  = rparam;
+      compVar.param = param;
       compVar.level = rlevel;
       nextstep = FALSE;
       for ( recID = 0; recID < nrecords; recID++ )
@@ -583,14 +591,14 @@ int extScanTimestep2(int streamID)
 	}
       if ( recID == nrecords )
 	{
-	  Warning(func, "param %d level %d not found at timestep %d", rparam, rlevel, tsID+1);
+	  Warning(func, "Code %d level %d not found at timestep %d", rcode, rlevel, tsID+1);
 	  return (CDI_EUFSTRUCT);
 	}
 
       if ( nextstep ) break;
 
       if ( CDI_Debug )
-	Message(func, "%4d%8d%4d%8d%8d%6d", rindex+1, (int)recpos, rparam, rlevel, vdate, vtime);
+	Message(func, "%4d%8d%4d%8d%8d%6d", rindex+1, (int)recpos, rcode, rlevel, vdate, vtime);
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
@@ -601,7 +609,7 @@ int extScanTimestep2(int streamID)
 	{
 	  Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
-		  streamptr->tsteps[tsID].records[recID].param, rparam,
+		  streamptr->tsteps[tsID].records[recID].param, param,
 		  streamptr->tsteps[tsID].records[recID].ilevel, rlevel);
 	  return (CDI_EUFSTRUCT);
 	}
@@ -673,7 +681,8 @@ int extScanTimestep(int streamID)
   int fileID;
   int tsID;
   int rxysize = 0;
-  int rparam = 0, rlevel = 0, vdate = 0, vtime = 0;
+  int param = 0;
+  int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
   long recsize = 0;
   off_t recpos = 0;
   int recID;
@@ -732,9 +741,11 @@ int extScanTimestep(int streamID)
 
 	  vdate  = header[0];
 	  vtime  = 0;
-	  rparam  = header[1];
+	  rcode  = header[1];
 	  rlevel = header[2];
 	  rxysize = header[3];
+
+	  param = cdiEncodeParam(255, 255, rcode);
 
 	  if ( rindex == nrecs ) break;
 	  recID = streamptr->tsteps[tsID].recIDs[rindex];
@@ -746,18 +757,18 @@ int extScanTimestep(int streamID)
 	      taxis->vtime = vtime;
 	    }
 	  /*
-	  extCmpRecord(streamID, tsID, nrecs, recpos, rparam, rlevel, rxysize);
+	  extCmpRecord(streamID, tsID, nrecs, recpos, param, rlevel, rxysize);
 	  */
-	  compVar.param  = rparam;
-          compVar.level = rlevel;
-	  compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
+	  compVar.param  = param;
+          compVar.level  = rlevel;
+	  compVar0.param = streamptr->tsteps[tsID].records[recID].param;
 	  compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
 	  if ( memcmp(&compVar0, &compVar, sizeof(EXTCOMPVAR)) != 0 )
 	    {
 	      Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,
-		      streamptr->tsteps[tsID].records[recID].param, rparam,
+		      streamptr->tsteps[tsID].records[recID].param, param,
 		      streamptr->tsteps[tsID].records[recID].ilevel, rlevel);
 	      Error(func, "Invalid, unsupported or inconsistent record structure");
 	    }
@@ -766,7 +777,7 @@ int extScanTimestep(int streamID)
 	  streamptr->tsteps[tsID].records[recID].size = recsize;
 
 	  if ( CDI_Debug )
-	    Message(func, "%4d%8d%4d%8d%8d%6d", rindex, (int)recpos, rparam, rlevel, vdate, vtime);
+	    Message(func, "%4d%8d%4d%8d%8d%6d", rindex, (int)recpos, rcode, rlevel, vdate, vtime);
 	}
 
       streamptr->rtsteps++;
@@ -943,6 +954,7 @@ void extWriteVarDP(int streamID, int varID, const double *data)
   int datatype;
   int tsID;
   int vlistID;
+  int pdis, pcat, pnum;
   EXTREC *extp;
   stream_t *streamptr;
 
@@ -963,8 +975,10 @@ void extWriteVarDP(int streamID, int varID, const double *data)
   if ( CDI_Debug )
     Message(func, "nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
 
+  cdiDecodeParam(vlistInqVarParam(vlistID, varID), &pdis, &pcat, &pnum);
+
   header[0] = streamptr->tsteps[tsID].taxis.vdate;
-  header[1] = vlistInqVarParam(vlistID, varID);
+  header[1] = pnum;
   header[3] = gridInqSize(gridID);
 
   datatype = vlistInqVarDatatype(vlistID, varID);
@@ -994,6 +1008,7 @@ void extWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   int datatype;
   int tsID;
   int vlistID;
+  int pdis, pcat, pnum;
   EXTREC *extp;
   stream_t *streamptr;
 
@@ -1010,8 +1025,10 @@ void extWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   if ( CDI_Debug )
     Message(func, "gridID = %d zaxisID = %d", gridID, zaxisID);
 
+  cdiDecodeParam(vlistInqVarParam(vlistID, varID), &pdis, &pcat, &pnum);
+
   header[0] = streamptr->tsteps[tsID].taxis.vdate;
-  header[1] = vlistInqVarParam(vlistID, varID);
+  header[1] = pnum;
   header[2] = (int) level;
   header[3] = gridInqSize(gridID);
 

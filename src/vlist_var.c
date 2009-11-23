@@ -684,15 +684,20 @@ void vlistInqVarUnits(int vlistID, int varID, char *units)
 }
 
 
-int vlistInqVarID(int vlistID, int param)
+int vlistInqVarID(int vlistID, int code)
 {
   int varID;
   vlist_t *vlistptr;
+  int param, pdis, pcat, pnum;
 
   vlistptr = vlist_to_pointer(vlistID);
 
   for ( varID = 0; varID < vlistptr->nvars; varID++ )
-    if ( vlistptr->vars[varID].param == param ) break;
+    {
+      param = vlistptr->vars[varID].param;
+      cdiDecodeParam(param, &pdis, &pcat, &pnum);
+      if ( pnum == code ) break;
+    }
 
   if ( varID == vlistptr->nvars )
     {

@@ -64,7 +64,7 @@ int iegInqRecord(int streamID, int *varID, int *levelID)
   static char func[] = "iegInqRecord";
   int status;
   int fileID;
-  int iparam, ilevel;
+  int icode, ilevel;
   int zaxisID = -1;
   int vlistID;
   IEGREC *iegp;
@@ -84,15 +84,15 @@ int iegInqRecord(int streamID, int *varID, int *levelID)
   status = iegRead(fileID, iegp);
   if ( status != 0 ) return (0);
 
-  iparam  = IEG_P_Parameter(iegp->ipdb);
+  icode  = IEG_P_Parameter(iegp->ipdb);
   if ( IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER )
     ilevel = IEG_P_Level1(iegp->ipdb);
   else
     ilevel = IEG_P_Level2(iegp->ipdb);
 
-  *varID = vlistInqVarID(vlistID, iparam);
+  *varID = vlistInqVarID(vlistID, icode);
 
-  if ( *varID == UNDEFID ) Error(func, "param %d undefined", iparam);
+  if ( *varID == UNDEFID ) Error(func, "Code %d undefined", icode);
 
   zaxisID = vlistInqVarZaxis(vlistID, *varID);
 
@@ -1063,7 +1063,7 @@ int iegScanTimestep2(int streamID)
       nextstep = FALSE;
       for ( recID = 0; recID < nrecords; recID++ )
 	{
-	  compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
+	  compVar0.param = streamptr->tsteps[tsID].records[recID].param;
 	  compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
 	  if ( memcmp(&compVar0, &compVar, sizeof(IEGCOMPVAR)) == 0 )
@@ -1093,7 +1093,7 @@ int iegScanTimestep2(int streamID)
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
-      compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
+      compVar0.param = streamptr->tsteps[tsID].records[recID].param;
       compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
       if ( memcmp(&compVar0, &compVar, sizeof(IEGCOMPVAR)) != 0 )
