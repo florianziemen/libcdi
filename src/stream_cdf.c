@@ -56,6 +56,7 @@ typedef struct {
   int      warn;
   int      timeID;
   int      code;
+  int      tabnum;
   int      bounds;
   int      gridID;
   int      zaxisID;
@@ -3814,6 +3815,7 @@ void init_ncvars(long nvars, NCVAR *ncvars)
       ncvars[ncvarid].warn            = FALSE;
       ncvars[ncvarid].timeID          = TIME_CONSTANT;
       ncvars[ncvarid].code            = UNDEFID;
+      ncvars[ncvarid].tabnum          = 0;
       ncvars[ncvarid].calendar        = FALSE;
       ncvars[ncvarid].bounds          = UNDEFID;
       ncvars[ncvarid].gridID          = UNDEFID;
@@ -4121,6 +4123,7 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 	      cdfGetAttInt(fileID, ncvarid, attname, 1, &tablenum);
 	      if ( tablenum > 0 )
 		{
+		  ncvars[ncvarid].tabnum = tablenum;
 		  ncvars[ncvarid].tableID = tableInq(modelID, tablenum, NULL);
 		  if ( ncvars[ncvarid].tableID == CDI_UNDEFID )
 		    ncvars[ncvarid].tableID = tableDef(modelID, tablenum, NULL);
@@ -5750,6 +5753,12 @@ int cdfInqContents(int streamID)
 
       vlistDefVarName(vlistID, varID, ncvars[ncvarid].name);
       if ( ncvars[ncvarid].code != UNDEFID )  vlistDefVarCode(vlistID, varID, ncvars[ncvarid].code);
+      if ( ncvars[ncvarid].code != UNDEFID )
+	{
+	  int param;
+	  param = cdiEncodeParam(255, ncvars[ncvarid].tabnum, ncvars[ncvarid].code);
+	  vlistDefVarParam(vlistID, varID, param);
+	}
       if ( ncvars[ncvarid].longname[0] )      vlistDefVarLongname(vlistID, varID, ncvars[ncvarid].longname);
       if ( ncvars[ncvarid].stdname[0] )       vlistDefVarStdname(vlistID, varID, ncvars[ncvarid].stdname);
       if ( ncvars[ncvarid].units[0] )         vlistDefVarUnits(vlistID, varID, ncvars[ncvarid].units);
