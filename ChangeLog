@@ -1,7 +1,7 @@
 2009-11-25  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* using GRIB library version 1.4.1
-	  check max limit of binary scale vaule (bug fix)
+	  check max limit of binary scale value (bug fix)
 
 2009-11-22  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
