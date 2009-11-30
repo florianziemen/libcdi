@@ -3869,7 +3869,7 @@ int isLonAxis(const char *units, const char *stdname)
        memcmp(units, "degreeE", 7)       == 0 ||
        memcmp(units, "degreesE", 8)      == 0 ||
        memcmp(stdname, "longitude", 9)   == 0 ||
-       (memcmp(units, "degrees", 7)           == 0 &&
+       (memcmp(units, "degree", 6)            == 0 &&
 	memcmp(stdname, "grid_longitude", 14) == 0) ||
        (memcmp(units, "radian", 6)            == 0 &&
 	memcmp(stdname, "grid_longitude", 14) == 0) )
@@ -3892,7 +3892,7 @@ int isLatAxis(const char *units, const char *stdname)
        memcmp(units, "degreeN", 7)        == 0 ||
        memcmp(units, "degreesN", 8)       == 0 ||
        memcmp(stdname, "latitude", 8)     == 0 ||
-       (memcmp(units, "degrees", 7)          == 0 &&
+       (memcmp(units, "degree", 6)           == 0 &&
 	memcmp(stdname, "grid_latitude", 13) == 0) ||
        (memcmp(units, "radian", 6)           == 0 &&
 	memcmp(stdname, "grid_latitude", 13) == 0) )
@@ -4518,7 +4518,7 @@ void setDimType(int nvars, NCVAR *ncvars, NCDIM *ncdims)
 		      cdfSetDim(ncvars, ncvarid, i, X_AXIS);
 		      lxdim = TRUE;
 		    }
-		  else if ( lydim == FALSE )
+		  else if ( lydim == FALSE && ncvars[ncvarid].gridtype != GRID_CELL )
 		    {
 		      cdfSetDim(ncvars, ncvarid, i, Y_AXIS);
 		      lydim = TRUE;
@@ -5249,9 +5249,9 @@ int cdfInqContents(int streamID)
 		      {
 			int dimid;
 			size_t dimsize1, dimsize2;
-			dimid = ncvars[xvarid].dimids[ndims-2];
+			dimid = ncvars[yvarid].dimids[ndims-2];
 			cdf_inq_dimlen(fileID, dimid, &dimsize1);
-			dimid = ncvars[xvarid].dimids[ndims-1];
+			dimid = ncvars[yvarid].dimids[ndims-1];
 			cdf_inq_dimlen(fileID, dimid, &dimsize2);
 			if ( dimsize1*dimsize2 != size )
 			  {

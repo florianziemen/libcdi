@@ -1,3 +1,7 @@
+2009-11-30  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdfInqContents: bug fix for GRID_CELL with levels [report: Stephan Lorenz]
+
 2009-11-25  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* using GRIB library version 1.4.1
