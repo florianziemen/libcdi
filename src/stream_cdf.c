@@ -2306,7 +2306,9 @@ void cdfDefZaxis(int streamID, int zaxisID)
 	    cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
 	  if ( (len = strlen(units)) )
 	    cdf_put_att_text(fileID, ncvarid, "units", len, units);
-  
+
+	  cdf_put_att_text(fileID, ncvarid, "axis", 1, "z");
+	      
 	  cdf_enddef(fileID);
 	  streamptr->ncmode = 2;
 
@@ -4416,6 +4418,12 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 			{
 			  ncvars[ncvarid].zdim = dimidsp[attlen];
 			  cdfSetDim(ncvars, ncvarid, attlen, Z_AXIS);
+
+			  if ( ncvars[ncvarid].ndims == 1 )
+			    {
+			      cdfSetVar(ncvars, ncvarid, FALSE);
+			      ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
+			    }
 			}
 		      else if ( tolower((int) attstring[attlen]) == 'y' )
 			{
