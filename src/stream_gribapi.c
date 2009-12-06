@@ -1870,6 +1870,7 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
     }
 
   // ISEC2_NumVCP = 0;
+  // GRIB_CHECK(grib_set_long(gh, "PVPresent", 0), 0);
 
   switch (zaxistype)
     {
@@ -2029,8 +2030,28 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 #endif
 
 
+void *gribHandleNew()
+{
+  static char func[] = "gribHandleNew";
+  void *gh = NULL;
+
+  gh = (void *) grib_handle_new_from_template(NULL, "GRIB2");
+  if ( gh == NULL ) Error(func, "grib_handle_new_from_template failed!");
+
+  return (gh);
+}
+
+
+void gribHandleDelete(void *gh)
+{
+  grib_handle_delete(gh);
+}
+
+#define GRIBAPIENCODETEST 1
+
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int date, int time, int numavg, 
-		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize, int ljpeg)
+		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize,
+		     int ljpeg, void *gribHandle)
 {
   static char func[] = "gribapiEncode";
   size_t nbytes = 0;
@@ -2050,9 +2071,11 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   datatype = vlistInqVarDatatype(vlistID, varID);
 
   if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(255, tabnum, code);
-
-  gh = grib_handle_new_from_template(NULL, "GRIB2");
-  if ( gh == NULL ) Error(func, "grib_handle_new_from_template failed!");
+#if defined(GRIBAPIENCODETEST)
+  gh = (grib_handle *) gribHandleNew();
+#else
+  gh = gribHandle;
+#endif
   
   GRIB_CHECK(grib_set_long(gh, "editionNumber", edition), 0);
 
@@ -2085,7 +2108,9 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   /* get a copy of the coded message */
   GRIB_CHECK(grib_get_message_copy(gh, gribbuffer, &recsize), 0);
 
-  grib_handle_delete(gh);
+#if defined(GRIBAPIENCODETEST)
+  gribHandleDelete(gh);
+#endif
 
   nbytes = recsize;
 #else

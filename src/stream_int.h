@@ -242,6 +242,7 @@ typedef struct {
   int       curfile;
   int       nfiles;
   char    **fnames;
+  void     *gribHandle;
 }
 stream_t;
 

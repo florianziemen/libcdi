@@ -372,7 +372,8 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
 
 static
 size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, int zaxisID, int date, int time, int numavg, 
-		 long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize, int ljpeg)
+		 long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize,
+		 int ljpeg, void *gribHandle)
 {
   size_t nbytes;
 
@@ -384,7 +385,7 @@ size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, 
   else
     {
       nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID, date, time, numavg, 
-			     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg);
+			     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg, gribHandle);
     }
 
   return (nbytes);
@@ -478,7 +479,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
     }
 
   nbytes = grbEncode(filetype, varID, levelID, vlistID, gridID, zaxisID, date, time, numavg, 
-		     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg);
+		     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg, streamptr->gribHandle);
 
   if ( streamptr->ztype == COMPRESS_SZIP )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);

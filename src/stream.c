@@ -702,6 +702,10 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	  vlistptr = vlist_to_pointer(streamptr->vlistID);
 	  vlistptr->ntsteps = streamNtsteps(streamID);
 	}
+      else if ( streamptr->filemode == 'w' )
+	{
+	  if ( filetype == FILETYPE_GRB2 ) streamptr->gribHandle = gribHandleNew();
+	}
     }
  
   return (streamID);
@@ -1121,6 +1125,11 @@ void streamClose(int streamID)
       case FILETYPE_GRB2:
 	{
 	  gribClose(fileID);
+	  if ( streamptr->gribHandle )
+	    {
+	      gribHandleDelete(streamptr->gribHandle);
+	      streamptr->gribHandle = NULL;
+	    }
 	  break;
 	}
 #endif

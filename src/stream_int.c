@@ -380,6 +380,8 @@ static void stream_init_entry(stream_t *streamptr)
   streamptr->curfile           = 0;
   streamptr->nfiles            = 0;
   streamptr->fnames            = NULL;
+
+  streamptr->gribHandle        = NULL;
 }
 
 
