@@ -342,6 +342,20 @@ if test "${enable_dap}" = "yes"; then
 fi
 
 #  ----------------------------------------------------------------------
+# Compile with MPI support
+AC_ARG_ENABLE(mpi,AS_HELP_STRING([--enable-mpi],[Compile with MPI compiler [[default=no]]]),enable_mpi=${enableval},enable_mpi=no)
+
+if test "${enable_mpi}" = "yes"; then
+   if test "${host_os:0:3}" = "aix"; then
+      replace_cc="mpcc_r"
+   else
+      replace_cc="mpicc"
+   fi
+else
+      replace_cc=$CC	
+fi
+
+#  ----------------------------------------------------------------------
 #  Is the netcdf present? It has a header file `netcdf.h' and a library
 #  `-lnetcdf' and their locations might be specified with the `--with-netcdf'
 #  command-line switch. The value is an include path and/or a library path.
@@ -436,6 +450,10 @@ UD_CHECK_CFINT([$srcdir/src/cfortran.h])
 AC_SUBST([CFINT])
 AC_SUBST([CPPFLAGS])
 AC_SUBST([AR])
+
+if test "${replace_cc}" != ""; then
+    CC=$replace_cc
+fi
 
 AC_OUTPUT(Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile)
 
