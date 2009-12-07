@@ -146,17 +146,17 @@ fi
 
 echo "#if defined (HAVE_CF_INTERFACE)" >>  ${PROG}
 echo "#undef realloc" >>  ${PROG}
-echo "#undef malloc" >>  ${PROG}
-echo "#undef calloc" >>  ${PROG}
-echo "#undef free" >>  ${PROG}
+echo "#undef malloc"  >>  ${PROG}
+echo "#undef calloc"  >>  ${PROG}
+echo "#undef free"    >>  ${PROG}
 echo "#undef DOUBLE_PRECISION" >>  ${PROG}
-cat $srcdir/cfortran.h  >>  ${PROG}
+cat $srcdir/cfortran.h   >>  ${PROG}
 echo "#endif" >>  ${PROG}
 cat $srcdir/cdiFortran.c >>  ${PROG}
 
 echo "#undef realloc" >>  ${PROG}
-echo "#undef malloc" >>  ${PROG}
-echo "#undef calloc" >>  ${PROG}
-echo "#undef free" >>  ${PROG}
+echo "#undef malloc"  >>  ${PROG}
+echo "#undef calloc"  >>  ${PROG}
+echo "#undef free"    >>  ${PROG}
 
 exit

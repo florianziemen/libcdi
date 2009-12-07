@@ -1349,6 +1349,7 @@ Optional Features:
   --enable-python         python language bindings [default=no]
   --enable-dap            Build OPeNDAP/DODS-enabled clients if possible
                           [default=no]
+  --enable-mpi            Compile with MPI compiler [default=no]
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -7868,6 +7869,26 @@ echo "$as_me: error: couldn't find ncdap-config" >&2;}
 fi
 
 #  ----------------------------------------------------------------------
+# Compile with MPI support
+# Check whether --enable-mpi was given.
+if test "${enable_mpi+set}" = set; then
+  enableval=$enable_mpi; enable_mpi=${enableval}
+else
+  enable_mpi=no
+fi
+
+
+if test "${enable_mpi}" = "yes"; then
+   if test "${host_os:0:3}" = "aix"; then
+      replace_cc="mpcc_r"
+   else
+      replace_cc="mpicc"
+   fi
+else
+      replace_cc=$CC
+fi
+
+#  ----------------------------------------------------------------------
 #  Is the netcdf present? It has a header file `netcdf.h' and a library
 #  `-lnetcdf' and their locations might be specified with the `--with-netcdf'
 #  command-line switch. The value is an include path and/or a library path.
@@ -8551,6 +8572,10 @@ fi
 
 
 
+
+if test "${replace_cc}" != ""; then
+    CC=$replace_cc
+fi
 
 ac_config_files="$ac_config_files Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile"
 

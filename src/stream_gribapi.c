@@ -2035,8 +2035,10 @@ void *gribHandleNew()
   static char func[] = "gribHandleNew";
   void *gh = NULL;
 
+#if  defined  (HAVE_LIBGRIB_API)
   gh = (void *) grib_handle_new_from_template(NULL, "GRIB2");
   if ( gh == NULL ) Error(func, "grib_handle_new_from_template failed!");
+#endif
 
   return (gh);
 }
@@ -2044,7 +2046,9 @@ void *gribHandleNew()
 
 void gribHandleDelete(void *gh)
 {
+#if  defined  (HAVE_LIBGRIB_API)
   grib_handle_delete(gh);
+#endif
 }
 
 #define GRIBAPIENCODETEST 1
