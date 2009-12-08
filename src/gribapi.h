@@ -31,6 +31,7 @@
 #define  GRIBAPI_GTYPE_GME                 192  /*  hexagonal GME grid                       */
 
 const char *gribapiLibraryVersion(void);
+void gribapiDefHandles(int streamID);
 void *gribHandleNew();
 void gribHandleDelete(void *gh);
 

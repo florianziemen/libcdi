@@ -441,6 +441,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   stream_t *streamptr;
   int ljpeg = 0;
   int ljpeg_warn = 1;
+  void *gh = NULL;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -467,6 +468,13 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   gribbuffersize = datasize*4+3000;
   gribbuffer = (unsigned char *) malloc(gribbuffersize);
 
+  if ( filetype == FILETYPE_GRB2 )
+    {
+      int ngrids = vlistNgrids(vlistID);
+      int ghindex = ngrids*gridID + zaxisID;
+      gh = streamptr->gribHandle[ghindex];
+    }
+
   if ( streamptr->ztype == COMPRESS_JPEG )
     {
       if ( filetype == FILETYPE_GRB2 )
@@ -479,7 +487,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
     }
 
   nbytes = grbEncode(filetype, varID, levelID, vlistID, gridID, zaxisID, date, time, numavg, 
-		     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg, streamptr->gribHandle);
+		     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg, gh);
 
   if ( streamptr->ztype == COMPRESS_SZIP )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);

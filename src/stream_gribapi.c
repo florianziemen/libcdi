@@ -2051,7 +2051,7 @@ void gribHandleDelete(void *gh)
 #endif
 }
 
-#define GRIBAPIENCODETEST 1
+//#define GRIBAPIENCODETEST 1
 
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int date, int time, int numavg, 
 		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize,
@@ -2078,10 +2078,8 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(255, tabnum, code);
 #if defined(GRIBAPIENCODETEST)
   gh = (grib_handle *) gribHandleNew();
-  // gh = (grib_handle *) grib_handle_new_from_message_copy(NULL,_grib_template_GRIB2,184);
 #else
   gh = gribHandle;
-  // gh = grib_handle_clone(gribHandle);
 #endif
   
   GRIB_CHECK(grib_set_long(gh, "editionNumber", edition), 0);

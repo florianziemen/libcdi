@@ -702,10 +702,6 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	  vlistptr = vlist_to_pointer(streamptr->vlistID);
 	  vlistptr->ntsteps = streamNtsteps(streamID);
 	}
-      else if ( streamptr->filemode == 'w' )
-	{
-	  if ( filetype == FILETYPE_GRB2 ) streamptr->gribHandle = gribHandleNew();
-	}
     }
  
   return (streamID);
@@ -1125,10 +1121,17 @@ void streamClose(int streamID)
       case FILETYPE_GRB2:
 	{
 	  gribClose(fileID);
-	  if ( streamptr->gribHandle )
+	  if ( streamptr->gribHandleNums )
 	    {
-	      gribHandleDelete(streamptr->gribHandle);
+	      int i;
+	      for ( i = 0; i < streamptr->gribHandleNums; ++i )
+		{
+		  gribHandleDelete(streamptr->gribHandle[0]);
+		  streamptr->gribHandle[i] = NULL;
+		}
+	      free(streamptr->gribHandle);
 	      streamptr->gribHandle = NULL;
+	      streamptr->gribHandleNums = 0;
 	    }
 	  break;
 	}
@@ -2013,7 +2016,13 @@ void streamDefVlist(int streamID, int vlistID)
 	  if ( streamptr->filetype == FILETYPE_NC  ||
 	       streamptr->filetype == FILETYPE_NC2 ||
 	       streamptr->filetype == FILETYPE_NC4 )
-	    cdfDefVars(streamID);
+	    {
+	      cdfDefVars(streamID);
+	    }
+	  else if ( streamptr->filetype == FILETYPE_GRB2 )
+	    {
+	      gribapiDefHandles(streamID);
+	    }
 	}
     }
   else

@@ -8,6 +8,9 @@
 
 #include <stdio.h>
 
+#include "cdi.h"
+#include "stream_int.h"
+#include "gribapi.h"
 
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
@@ -30,3 +33,23 @@ const char *gribapiLibraryVersion(void)
 
   return (gribapi_libvers);
 }
+
+
+void gribapiDefHandles(int streamID)
+{
+  stream_t *streamptr = NULL;
+  int vlistID, ngrids, nzaxis, i;
+   
+  streamptr = stream_to_pointer(streamID);
+
+  vlistID = streamInqVlist(streamID);
+  ngrids = vlistNgrids(vlistID);
+  nzaxis = vlistNzaxis(vlistID);
+
+  streamptr->gribHandleNums = ngrids*nzaxis;
+  streamptr->gribHandle = (void **) malloc(streamptr->gribHandleNums*sizeof(void *));
+
+  for ( i = 0; i < streamptr->gribHandleNums; ++i )
+    streamptr->gribHandle[i] = gribHandleNew();
+}
+

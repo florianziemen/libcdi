@@ -241,7 +241,7 @@ typedef struct {
   int       nfiles;
   char    **fnames;
   int       gribHandleNums;
-  void     *gribHandle;
+  void    **gribHandle;
 }
 stream_t;
 
