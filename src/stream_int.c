@@ -339,8 +339,6 @@ static void stream_init_entry(stream_t *streamptr)
   streamptr->filemode          = 0;
   streamptr->numvals           = 0;
   streamptr->filename          = NULL;
-  streamptr->ctlname           = NULL;
-  streamptr->ctlfp             = NULL;
   streamptr->record            = NULL;
   streamptr->varsAllocated     = 0;
   streamptr->nrecs             = 0;

@@ -206,8 +206,6 @@ typedef struct {
   int       filemode;
   off_t     numvals;
   char     *filename;
-  char     *ctlname;
-  FILE     *ctlfp;
   Record   *record;
   int       nrecs;        /* number of records                  */
   int       nvars;        /* number of variables                */
@@ -242,6 +240,7 @@ typedef struct {
   int       curfile;
   int       nfiles;
   char    **fnames;
+  int       gribHandleNums;
   void     *gribHandle;
 }
 stream_t;

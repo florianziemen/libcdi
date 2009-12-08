@@ -400,8 +400,8 @@ void vlistCopy(int vlistID2, int vlistID1)
       int nvars = vlistptr1->nvars;
       int nlevs, varID;
 
-      vlistptr2->vars = (VARINFO *) malloc(nvars*sizeof(VARINFO));
-      memcpy(vlistptr2->vars, vlistptr1->vars, nvars*sizeof(VARINFO));
+      vlistptr2->vars = (var_t *) malloc(nvars*sizeof(var_t));
+      memcpy(vlistptr2->vars, vlistptr1->vars, nvars*sizeof(var_t));
 
       for ( varID = 0; varID < nvars; varID++ )
 	{
@@ -418,9 +418,9 @@ void vlistCopy(int vlistID2, int vlistID1)
 	    vlistptr2->vars[varID].units = strdupx(vlistptr1->vars[varID].units);
 
 	  nlevs = vlistptr1->vars[varID].nlevs;
-	  vlistptr2->vars[varID].levinfo = (LEVINFO *) malloc(nlevs*sizeof(LEVINFO));
+	  vlistptr2->vars[varID].levinfo = (levinfo_t *) malloc(nlevs*sizeof(levinfo_t));
 	  memcpy(vlistptr2->vars[varID].levinfo,
-		 vlistptr1->vars[varID].levinfo, nlevs*sizeof(LEVINFO));
+		 vlistptr1->vars[varID].levinfo, nlevs*sizeof(levinfo_t));
 
 	  vlistptr2->vars[varID].atts.nelems = 0;
 	  vlistCopyVarAtts(vlistID1, varID, vlistID2, varID);
@@ -598,7 +598,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
       vlistptr2->nvars = nvars2;
       if ( nvars2 > 0 )
-	vlistptr2->vars  = (VARINFO *) malloc(nvars2*sizeof(VARINFO));
+	vlistptr2->vars  = (var_t *) malloc(nvars2*sizeof(var_t));
       else
 	vlistptr2->vars  = NULL;
 
@@ -610,7 +610,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	    zaxisID = vlistptr1->vars[varID].zaxisID;
 	    gridID  = vlistptr1->vars[varID].gridID;
 
-	    memcpy(&vlistptr2->vars[varID2], &vlistptr1->vars[varID], sizeof(VARINFO));
+	    memcpy(&vlistptr2->vars[varID2], &vlistptr1->vars[varID], sizeof(var_t));
 
 	    vlistptr1->vars[varID].fvarID = varID2;
 	    vlistptr2->vars[varID2].fvarID = varID;
@@ -634,7 +634,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	    for ( levID = 0; levID < nlevs; levID++ )
 	      if ( vlistptr1->vars[varID].levinfo[levID].flag ) nlevs2++;
 
-	    vlistptr2->vars[varID2].levinfo = (LEVINFO *) malloc(nlevs2*sizeof(LEVINFO));
+	    vlistptr2->vars[varID2].levinfo = (levinfo_t *) malloc(nlevs2*sizeof(levinfo_t));
 
 	    vlistptr2->vars[varID2].atts.nelems = 0;
 	    vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
@@ -751,8 +751,8 @@ void vlistCat(int vlistID2, int vlistID1)
   nvars = nvars1 + nvars2;
   vlistptr2->nvars = nvars;
 
-  vlistptr2->vars = (VARINFO *) realloc(vlistptr2->vars, nvars*sizeof(VARINFO));
-  memcpy(vlistptr2->vars+nvars2, vlistptr1->vars, nvars1*sizeof(VARINFO));
+  vlistptr2->vars = (var_t *) realloc(vlistptr2->vars, nvars*sizeof(var_t));
+  memcpy(vlistptr2->vars+nvars2, vlistptr1->vars, nvars1*sizeof(var_t));
 
   for ( varID = 0; varID < nvars1; varID++ )
     {
@@ -776,8 +776,8 @@ void vlistCat(int vlistID2, int vlistID1)
 	vlistptr2->vars[varID2].units = strdupx(vlistptr1->vars[varID].units);
 
       nlevs = vlistptr1->vars[varID].nlevs;
-      vlistptr2->vars[varID2].levinfo = (LEVINFO *) malloc(nlevs*sizeof(LEVINFO));
-      memcpy(vlistptr2->vars[varID2].levinfo, vlistptr1->vars[varID].levinfo, nlevs*sizeof(LEVINFO));
+      vlistptr2->vars[varID2].levinfo = (levinfo_t *) malloc(nlevs*sizeof(levinfo_t));
+      memcpy(vlistptr2->vars[varID2].levinfo, vlistptr1->vars[varID].levinfo, nlevs*sizeof(levinfo_t));
 
       vlistptr2->vars[varID2].atts.nelems = 0;
       vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
@@ -875,13 +875,13 @@ void vlistMerge(int vlistID2, int vlistID1)
 
 	  vlistptr2->vars[varID].nlevs = nlevs;
 	  /*
-	  fprintf(stderr, "var %d %d %d %d %d\n", varID, nlevs1, nlevs2, nlevs, sizeof(LEVINFO));
+	  fprintf(stderr, "var %d %d %d %d %d\n", varID, nlevs1, nlevs2, nlevs, sizeof(levinfo_t));
 	  */
 	  vlistptr2->vars[varID].levinfo =
-	    (LEVINFO *) realloc(vlistptr2->vars[varID].levinfo, nlevs*sizeof(LEVINFO));
+	    (levinfo_t *) realloc(vlistptr2->vars[varID].levinfo, nlevs*sizeof(levinfo_t));
 
 	  memcpy(vlistptr2->vars[varID].levinfo+nlevs2,
-		 vlistptr1->vars[varID].levinfo, nlevs1*sizeof(LEVINFO));
+		 vlistptr1->vars[varID].levinfo, nlevs1*sizeof(levinfo_t));
 	}
 
       lvar = (int *) malloc(nvars2*sizeof(int));
@@ -1470,8 +1470,8 @@ void vlistChangeZaxisIndex(int vlistID, int index, int zaxisID)
 	if ( nlevs != vlistptr->vars[varID].nlevs )
 	  {
 	    vlistptr->vars[varID].nlevs   = nlevs;
-	    vlistptr->vars[varID].levinfo = (LEVINFO *) realloc(vlistptr->vars[varID].levinfo,
-								     nlevs*sizeof(LEVINFO));
+	    vlistptr->vars[varID].levinfo = (levinfo_t *) realloc(vlistptr->vars[varID].levinfo,
+								     nlevs*sizeof(levinfo_t));
 
 	    for ( levID = 0; levID < nlevs; levID++ )
 	      {
@@ -1516,8 +1516,8 @@ void vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2)
 	if ( nlevs != vlistptr->vars[varID].nlevs )
 	  {
 	    vlistptr->vars[varID].nlevs   = nlevs;
-	    vlistptr->vars[varID].levinfo = (LEVINFO *) realloc(vlistptr->vars[varID].levinfo,
-								     nlevs*sizeof(LEVINFO));
+	    vlistptr->vars[varID].levinfo = (levinfo_t *) realloc(vlistptr->vars[varID].levinfo,
+								     nlevs*sizeof(levinfo_t));
 
 	    for ( levID = 0; levID < nlevs; levID++ )
 	      {

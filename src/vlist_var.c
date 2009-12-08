@@ -50,7 +50,7 @@ static int vlistvarNewEntry(int vlistID)
   static char func[] = "vlistvarNewEntry";
   int varID = 0;
   int vlistvarSize;
-  VARINFO *vlistvar;
+  var_t *vlistvar;
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -66,11 +66,11 @@ static int vlistvarNewEntry(int vlistID)
       int i;
 
       vlistvarSize = 2;
-      vlistvar = (VARINFO *) malloc(vlistvarSize*sizeof(VARINFO));
+      vlistvar = (var_t *) malloc(vlistvarSize*sizeof(var_t));
       if ( vlistvar == NULL )
 	{
           Message(func, "vlistvarSize = %d", vlistvarSize);
-	  SysError(func, "Allocation of VARINFO failed");
+	  SysError(func, "Allocation of var_t failed");
 	}
 
       for ( i = 0; i < vlistvarSize; i++ )
@@ -92,11 +92,11 @@ static int vlistvarNewEntry(int vlistID)
       int i;
 
       vlistvarSize = 2*vlistvarSize;
-      vlistvar = (VARINFO *) realloc(vlistvar, vlistvarSize*sizeof(VARINFO));
+      vlistvar = (var_t *) realloc(vlistvar, vlistvarSize*sizeof(var_t));
       if ( vlistvar == NULL )
 	{
           Message(func, "vlistvarSize = %d", vlistvarSize);
-	  SysError(func, "Reallocation of VARINFO failed");
+	  SysError(func, "Reallocation of var_t failed");
 	}
       varID = vlistvarSize/2;
 
@@ -198,7 +198,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
 
   nlevs = zaxisInqSize(zaxisID);
 
-  vlistptr->vars[varID].levinfo = (LEVINFO *) malloc(nlevs*sizeof(LEVINFO));
+  vlistptr->vars[varID].levinfo = (levinfo_t *) malloc(nlevs*sizeof(levinfo_t));
 
   for ( levID = 0; levID < nlevs; levID++ )
     {

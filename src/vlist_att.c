@@ -10,10 +10,10 @@
 
 
 static
-CDI_atts *get_attsp(vlist_t *vlistptr, int varID)
+cdi_atts_t *get_attsp(vlist_t *vlistptr, int varID)
 {
   static char func[] = "get_attsp";
-  CDI_atts *attsp = NULL;
+  cdi_atts_t *attsp = NULL;
 
   if ( varID == CDI_GLOBAL )
     {
@@ -30,9 +30,9 @@ CDI_atts *get_attsp(vlist_t *vlistptr, int varID)
 
 
 static
-CDI_att *find_att(CDI_atts *attsp, const char *name)
+cdi_att_t *find_att(cdi_atts_t *attsp, const char *name)
 {
-  CDI_att *attp;
+  cdi_att_t *attp;
   size_t attid;
   size_t slen;
 
@@ -57,10 +57,10 @@ CDI_att *find_att(CDI_atts *attsp, const char *name)
 
 
 static
-CDI_att *new_att(CDI_atts *attsp, const char *name)
+cdi_att_t *new_att(cdi_atts_t *attsp, const char *name)
 {
   static char func[] = "new_att";
-  CDI_att *attp;
+  cdi_att_t *attp;
   size_t slen;
 
   assert(attsp != NULL);
@@ -83,7 +83,7 @@ CDI_att *new_att(CDI_atts *attsp, const char *name)
 
 
 static
-void fill_att(CDI_att *attp, int type, size_t nelems, size_t xsz, const void *xvalue)
+void fill_att(cdi_att_t *attp, int type, size_t nelems, size_t xsz, const void *xvalue)
 {
   static char func[] = "fill_att";
 
@@ -121,7 +121,7 @@ int vlistInqNatts(int vlistID, int varID, int *nattsp)
   static char func[] = "vlistInqNatts";
   int status = CDI_NOERR;
   vlist_t *vlistptr;
-  CDI_atts *attsp;
+  cdi_atts_t *attsp;
 
   vlistptr = vlist_to_pointer(vlistID);
   
@@ -157,8 +157,8 @@ int vlistInqAtt(int vlistID, int varID, int attnum, char *name, int *typep, int 
   static char func[] = "vlistInqAtt";
   int status = CDI_NOERR;
   vlist_t *vlistptr;
-  CDI_att *attp = NULL;
-  CDI_atts *attsp;
+  cdi_att_t *attp = NULL;
+  cdi_atts_t *attsp;
 
   assert(name != NULL);
 
@@ -192,8 +192,8 @@ int vlistDelAtts(int vlistID, int varID)
   static char func[] = "vlistDelAtts";
   int status = CDI_NOERR;
   vlist_t *vlistptr;
-  CDI_att *attp = NULL;
-  CDI_atts *attsp;
+  cdi_att_t *attp = NULL;
+  cdi_atts_t *attsp;
   int attid;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -230,8 +230,8 @@ int vlist_def_att(int type, int vlistID, int varID, const char *name, size_t len
   static char func[] = "vlist_def_att";
   int status = CDI_NOERR;
   vlist_t *vlistptr;
-  CDI_att *attp;
-  CDI_atts *attsp;
+  cdi_att_t *attp;
+  cdi_atts_t *attsp;
 
   if ( len != 0 && xp == NULL ) /* Null arg */
     {
@@ -260,8 +260,8 @@ int vlist_inq_att(int type, int vlistID, int varID, const char *name, size_t mxs
   static char func[] = "vlist_inq_att";
   int status = CDI_NOERR;
   vlist_t *vlistptr;
-  CDI_att *attp;
-  CDI_atts *attsp;
+  cdi_att_t *attp;
+  cdi_atts_t *attsp;
   size_t xsz;
 
   if ( mxsz != 0 && xp == NULL ) /* Null arg */
@@ -296,8 +296,8 @@ int vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2)
   static char func[] = "vlistCopyVarAtts";
   int status = CDI_NOERR;
   vlist_t *vlistptr1;
-  CDI_att *attp = NULL;
-  CDI_atts *attsp1;
+  cdi_att_t *attp = NULL;
+  cdi_atts_t *attsp1;
   int attid;
 
   vlistptr1 = vlist_to_pointer(vlistID1);

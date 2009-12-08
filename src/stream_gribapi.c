@@ -2036,8 +2036,8 @@ void *gribHandleNew()
   void *gh = NULL;
 
 #if  defined  (HAVE_LIBGRIB_API)
-  gh = (void *) grib_handle_new_from_template(NULL, "GRIB2");
-  if ( gh == NULL ) Error(func, "grib_handle_new_from_template failed!");
+  gh = (void *) grib_handle_new_from_samples(NULL, "GRIB2");
+  if ( gh == NULL ) Error(func, "grib_handle_new_from_samples failed!");
 #endif
 
   return (gh);
@@ -2068,6 +2068,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   int param;
   long bitsPerValue;
   grib_handle *gh = NULL;
+  // extern unsigned char _grib_template_GRIB2[];
 
   param    = vlistInqVarParam(vlistID, varID);
   code     = vlistInqVarCode(vlistID, varID);
@@ -2077,8 +2078,10 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(255, tabnum, code);
 #if defined(GRIBAPIENCODETEST)
   gh = (grib_handle *) gribHandleNew();
+  // gh = (grib_handle *) grib_handle_new_from_message_copy(NULL,_grib_template_GRIB2,184);
 #else
   gh = gribHandle;
+  // gh = grib_handle_clone(gribHandle);
 #endif
   
   GRIB_CHECK(grib_set_long(gh, "editionNumber", edition), 0);
