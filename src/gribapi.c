@@ -37,6 +37,7 @@ const char *gribapiLibraryVersion(void)
 
 void gribapiDefHandles(int streamID)
 {
+  static char func[] = "gribapiDefHandles";
   stream_t *streamptr = NULL;
   int vlistID, ngrids, nzaxis, i;
    

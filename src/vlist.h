@@ -5,8 +5,6 @@
 #  include "cdi_limits.h"
 #endif
 
-#define  MAX_ATTRIBUTES  256
-
 
 /*
  * CDI attribute
