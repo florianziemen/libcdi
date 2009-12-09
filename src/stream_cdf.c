@@ -2552,6 +2552,7 @@ int cdfDefVar(int streamID, int varID)
   int len;
   int timeID;
   int xtype;
+  int gridtype;
   int gridindex, zaxisindex;
   int tablenum;
   int vlistID;
@@ -2573,8 +2574,9 @@ int cdfDefVar(int streamID, int varID)
   timeID  = vlistInqVarTime(vlistID, varID);
   code    = vlistInqVarCode(vlistID, varID);
 
+  gridtype  = gridInqType(gridID);
   gridindex = vlistGridIndex(vlistID, gridID);
-  if ( gridInqType(gridID) != GRID_TRAJECTORY )
+  if ( gridtype != GRID_TRAJECTORY )
     {
       xid = streamptr->xdimID[gridindex];
       yid = streamptr->ydimID[gridindex];
@@ -2761,14 +2763,12 @@ int cdfDefVar(int streamID, int varID)
 	cdf_put_att_int(fileID, ncvarid, "table", NC_INT, 1L, &tablenum);
     }
 
-  if ( gridInqType(gridID) != GRID_GENERIC && 
-       gridInqType(gridID) != GRID_LONLAT  && 
-       gridInqType(gridID) != GRID_CURVILINEAR )
+  if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT  && 
+       gridtype != GRID_CURVILINEAR )
     {
-      len = strlen(gridNamePtr(gridInqType(gridID)));
+      len = strlen(gridNamePtr(gridtype));
       if ( len > 0 )
-	cdf_put_att_text(fileID, ncvarid, "grid_type", len,
-			 gridNamePtr(gridInqType(gridID)));
+	cdf_put_att_text(fileID, ncvarid, "grid_type", len, gridNamePtr(gridtype));
     }
 
   if ( gridIsRotated(gridID) )
@@ -2777,30 +2777,26 @@ int cdfDefVar(int streamID, int varID)
       cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
     }
 
-  if ( gridInqType(gridID) == GRID_SINUSOIDAL )
+  if ( gridtype == GRID_SINUSOIDAL )
     {
       char mapping[] = "sinusoidal";
       cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
     }
-
-  if ( gridInqType(gridID) == GRID_LAEA )
+  else if ( gridtype == GRID_LAEA )
     {
       char mapping[] = "laea";
       cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
     }
-
-  if ( gridInqType(gridID) == GRID_LCC2 )
+  else if ( gridtype == GRID_LCC2 )
     {
       char mapping[] = "Lambert_Conformal";
       cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
     }
-
-  if ( gridInqType(gridID) == GRID_TRAJECTORY )
+  else if ( gridtype == GRID_TRAJECTORY )
     {
       cdf_put_att_text(fileID, ncvarid, "coordinates", 9, "tlon tlat" );
     }
-
-  if ( gridInqType(gridID) == GRID_CELL || gridInqType(gridID) == GRID_CURVILINEAR )
+  else if ( gridtype == GRID_CELL || gridtype == GRID_CURVILINEAR )
     {
       char coordinates[256] = "";
       char cellarea[256] = "area: ";
@@ -2832,8 +2828,7 @@ int cdfDefVar(int streamID, int varID)
 	  cdf_put_att_text(fileID, ncvarid, "cell_measures", len, cellarea);
 	}
     }
-
-  if ( gridInqType(gridID) == GRID_SPECTRAL )
+  else if ( gridtype == GRID_SPECTRAL )
     {
       int gridTruncation = gridInqTrunc(gridID);
 
@@ -2871,6 +2866,9 @@ int cdfDefVar(int streamID, int varID)
       if ( lscalefactor )
 	cdf_put_att_double(fileID, ncvarid, "scale_factor", (nc_type) astype, 1L, &scalefactor);
     }
+
+  if ( vlistInqVarMissvalUsed(vlistID, varID) )
+    cdfDefMissval(streamID, varID, vlistInqVarDatatype(vlistID, varID));
 
   streamptr->vars[varID].ncvarid = ncvarid;
 

@@ -1,3 +1,7 @@
+2009-12-09  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdfDefVar: define attribute _FillValue if missval was defined (speed up)
+	
 2009-12-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* allocate gribHandle for every grid/zaxis combination (speed up for writing GRIB2)
