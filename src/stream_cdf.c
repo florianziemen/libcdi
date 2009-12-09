@@ -648,7 +648,7 @@ void cdfDefVarSzip(int ncid, int ncvarid)
 #endif
 
 static
-void cdfDefMissval(int streamID, int varID, int dtype)
+void cdfDefMissval(int streamID, int varID, int dtype, int lcheck)
 {
 #if  defined  (HAVE_LIBNETCDF)
   stream_t *streamptr;
@@ -667,7 +667,7 @@ void cdfDefMissval(int streamID, int varID, int dtype)
       fileID  = streamInqFileID(streamID);
       ncvarid = streamptr->vars[varID].ncvarid;
       missval = vlistInqVarMissval(vlistID, varID);
-      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+      if ( lcheck && streamptr->ncmode == 2 ) cdf_redef(fileID);
 
       xtype = cdfDefDatatype(dtype);
 
@@ -676,7 +676,7 @@ void cdfDefMissval(int streamID, int varID, int dtype)
       if ( cdiNcMissingValue == 1 )
 	cdf_put_att_double(fileID, ncvarid, "missing_value", (nc_type) xtype, 1L, &missval);
 
-      if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
+      if ( lcheck && streamptr->ncmode == 2 ) cdf_enddef(fileID);
 
       streamptr->vars[varID].defmiss = TRUE;
     }
@@ -2565,6 +2565,9 @@ int cdfDefVar(int streamID, int varID)
 
   fileID  = streamInqFileID(streamID);
 
+  if ( CDI_Debug )
+    Message(func, "streamID = %d, fileID = %d, varID = %d", streamID, fileID, varID);
+
   if ( streamptr->vars[varID].ncvarid != UNDEFID )
     return (streamptr->vars[varID].ncvarid);
 
@@ -2867,10 +2870,10 @@ int cdfDefVar(int streamID, int varID)
 	cdf_put_att_double(fileID, ncvarid, "scale_factor", (nc_type) astype, 1L, &scalefactor);
     }
 
-  if ( vlistInqVarMissvalUsed(vlistID, varID) )
-    cdfDefMissval(streamID, varID, vlistInqVarDatatype(vlistID, varID));
-
   streamptr->vars[varID].ncvarid = ncvarid;
+
+  if ( vlistInqVarMissvalUsed(vlistID, varID) )
+    cdfDefMissval(streamID, varID, vlistInqVarDatatype(vlistID, varID), 0);
 
   /* Attributes */
   defineAttributes(vlistID, varID, fileID, ncvarid);
@@ -3111,7 +3114,7 @@ void cdfWriteVarDP(int streamID, int varID, const double *data, int nmiss)
 
   dtype = vlistInqVarDatatype(vlistID, varID);
 
-  if ( nmiss > 0 ) cdfDefMissval(streamID, varID, dtype);
+  if ( nmiss > 0 ) cdfDefMissval(streamID, varID, dtype, 1);
 
   /*  if ( dtype == DATATYPE_INT8 || dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 ) */
     {
@@ -3521,7 +3524,7 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
 
   dtype = vlistInqVarDatatype(vlistID, varID);
 
-  if ( nmiss > 0 ) cdfDefMissval(streamID, varID, dtype);
+  if ( nmiss > 0 ) cdfDefMissval(streamID, varID, dtype, 1);
 
   /*  if ( dtype == DATATYPE_INT8 || dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 ) */
     {
