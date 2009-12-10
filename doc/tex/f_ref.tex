@@ -891,6 +891,56 @@ Create a variable list
 
 \section*{\tt 
 \ifpdf
+\hyperref[vlistDefAttFlt]{vlistDefAttFlt}
+\else
+vlistDefAttFlt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistDefAttFlt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER len, const REAL*8 dp)
+\end{verbatim}
+
+Define a floating point attribute
+\ifpdfoutput{}{(\ref{vlistDefAttFlt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefAttInt]{vlistDefAttInt}
+\else
+vlistDefAttInt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistDefAttInt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER len, 
+                                    const INTEGER ip)
+\end{verbatim}
+
+Define an integer attribute
+\ifpdfoutput{}{(\ref{vlistDefAttInt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefAttTxt]{vlistDefAttTxt}
+\else
+vlistDefAttTxt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistDefAttTxt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER len, 
+                                    CHARACTER*(*) tp)
+\end{verbatim}
+
+Define a text attribute
+\ifpdfoutput{}{(\ref{vlistDefAttTxt})}
+
+
+\section*{\tt 
+\ifpdf
 \hyperref[vlistDefTaxis]{vlistDefTaxis}
 \else
 vlistDefTaxis
@@ -998,6 +1048,22 @@ Define the name of a Variable
 
 \section*{\tt 
 \ifpdf
+\hyperref[vlistDefVarStdname]{vlistDefVarStdname}
+\else
+vlistDefVarStdname
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistDefVarStdname(INTEGER vlistID, INTEGER varID, 
+                                  CHARACTER*(*) stdname)
+\end{verbatim}
+
+Define the standard name of a Variable
+\ifpdfoutput{}{(\ref{vlistDefVarStdname})}
+
+
+\section*{\tt 
+\ifpdf
 \hyperref[vlistDefVarUnits]{vlistDefVarUnits}
 \else
 vlistDefVarUnits
@@ -1039,6 +1105,85 @@ vlistDuplicate
 
 Duplicate a variable list
 \ifpdfoutput{}{(\ref{vlistDuplicate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqAtt]{vlistInqAtt}
+\else
+vlistInqAtt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqAtt(INTEGER vlistID, INTEGER varID, INTEGER attnum, 
+                                 CHARACTER*(*) name, INTEGER typep, INTEGER lenp)
+\end{verbatim}
+
+Get information about an attribute
+\ifpdfoutput{}{(\ref{vlistInqAtt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqAttFlt]{vlistInqAttFlt}
+\else
+vlistInqAttFlt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqAttFlt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER mlen, INTEGER dp)
+\end{verbatim}
+
+Get the value(s) of a floating point attribute
+\ifpdfoutput{}{(\ref{vlistInqAttFlt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqAttInt]{vlistInqAttInt}
+\else
+vlistInqAttInt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqAttInt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER mlen, INTEGER ip)
+\end{verbatim}
+
+Get the value(s) of an integer attribute
+\ifpdfoutput{}{(\ref{vlistInqAttInt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqAttTxt]{vlistInqAttTxt}
+\else
+vlistInqAttTxt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqAttTxt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER mlen, INTEGER tp)
+\end{verbatim}
+
+Get the value(s) of a text attribute
+\ifpdfoutput{}{(\ref{vlistInqAttTxt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqNatts]{vlistInqNatts}
+\else
+vlistInqNatts
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqNatts(INTEGER vlistID, INTEGER varID, INTEGER nattsp)
+\end{verbatim}
+
+Get number of variable attributes
+\ifpdfoutput{}{(\ref{vlistInqNatts})}
 
 
 \section*{\tt 
@@ -1145,6 +1290,22 @@ vlistInqVarName
 
 Get the name of a Variable
 \ifpdfoutput{}{(\ref{vlistInqVarName})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarStdname]{vlistInqVarStdname}
+\else
+vlistInqVarStdname
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistInqVarStdname(INTEGER vlistID, INTEGER varID, 
+                                  CHARACTER*(*) stdname)
+\end{verbatim}
+
+Get the standard name of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarStdname})}
 
 
 \section*{\tt 
