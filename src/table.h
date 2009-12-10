@@ -190,7 +190,7 @@ static PAR echam5[] = {
   { 149, "velopot",    "velocity potential",                        "m^2/s"   },
   { 150, "xivi",       "vertically integrated cloud ice",           "kg/m^2"  },
   { 151, "slp",        "mean sea level pressure",                   "Pa"      },
-  { 152, "stp",        "log surface pressure",                       NULL     },
+  { 152, "lsp",        "log surface pressure",                       NULL     },
   { 153, "xl",         "cloud water",                               "kg/kg"   },
   { 154, "xi",         "cloud ice",                                 "kg/kg"   },
   { 155, "sd",         "divergence",                                "1/s"     },

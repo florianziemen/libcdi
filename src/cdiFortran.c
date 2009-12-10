@@ -59,6 +59,15 @@ FCALLSCSUB1 (cdiDefMissval, CDIDEFMISSVAL, cdidefmissval, DOUBLE)
 FCALLSCFUN0 (DOUBLE, cdiInqMissval, CDIINQMISSVAL, cdiinqmissval)
 FCALLSCSUB2 (cdiDefGlobal, CDIDEFGLOBAL, cdidefglobal, STRING, INT)
 
+/*  CDI converter routines  */
+
+FCALLSCSUB4 (cdiDecodeParam, CDIDECODEPARAM, cdidecodeparam, INT, PINT, PINT, PINT)
+FCALLSCFUN3 (INT, cdiEncodeParam, CDIENCODEPARAM, cdiencodeparam, INT, INT, INT)
+FCALLSCSUB4 (cdiDecodeDate, CDIDECODEDATE, cdidecodedate, INT, PINT, PINT, PINT)
+FCALLSCFUN3 (INT, cdiEncodeDate, CDIENCODEDATE, cdiencodedate, INT, INT, INT)
+FCALLSCSUB4 (cdiDecodeTime, CDIDECODETIME, cdidecodetime, INT, PINT, PINT, PINT)
+FCALLSCFUN3 (INT, cdiEncodeTime, CDIENCODETIME, cdiencodetime, INT, INT, INT)
+
 /*  STREAM control routines  */
 
 FCALLSCFUN1 (INT, streamOpenRead, STREAMOPENREAD, streamopenread, STRING)
@@ -144,6 +153,8 @@ FCALLSCSUB3 (vlistDefVarZtype, VLISTDEFVARZTYPE, vlistdefvarztype, INT, INT, INT
 FCALLSCFUN2 (INT, vlistInqVarZtype, VLISTINQVARZTYPE, vlistinqvarztype, INT, INT)
 FCALLSCSUB3 (vlistDefVarZlevel, VLISTDEFVARZLEVEL, vlistdefvarzlevel, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarZlevel, VLISTINQVARZLEVEL, vlistinqvarzlevel, INT, INT)
+FCALLSCSUB3 (vlistDefVarParam, VLISTDEFVARPARAM, vlistdefvarparam, INT, INT, INT)
+FCALLSCFUN2 (INT, vlistInqVarParam, VLISTINQVARPARAM, vlistinqvarparam, INT, INT)
 FCALLSCSUB3 (vlistDefVarCode, VLISTDEFVARCODE, vlistdefvarcode, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarCode, VLISTINQVARCODE, vlistinqvarcode, INT, INT)
 FCALLSCSUB3 (vlistDefVarDatatype, VLISTDEFVARDATATYPE, vlistdefvardatatype, INT, INT, INT)

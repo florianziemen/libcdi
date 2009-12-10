@@ -4,13 +4,15 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   November 2009
+! Uwe Schulzweida, MPI-MET, Hamburg,   December 2009
 !
 
       INTEGER    CDI_UNDEFID           
       PARAMETER (CDI_UNDEFID            = -1)
       INTEGER    CDI_GLOBAL            
       PARAMETER (CDI_GLOBAL             = -1)
+      INTEGER    CDI_UNDEFPARAM        
+      PARAMETER (CDI_UNDEFPARAM         = 2147483647)
 !
 !  Byte order
 !
@@ -297,6 +299,48 @@
 !                                    (CHARACTER*(*)   string,
 !                                     INTEGER         val)
       EXTERNAL        cdiDefGlobal
+
+!
+!  CDI converter routines
+!
+!                     cdiDecodeParam
+!                                    (INTEGER         param,
+!                                     INTEGER         dis,
+!                                     INTEGER         cat,
+!                                     INTEGER         num)
+      EXTERNAL        cdiDecodeParam
+
+      INTEGER         cdiEncodeParam
+!                                    (INTEGER         dis,
+!                                     INTEGER         cat,
+!                                     INTEGER         num)
+      EXTERNAL        cdiEncodeParam
+
+!                     cdiDecodeDate
+!                                    (INTEGER         date,
+!                                     INTEGER         year,
+!                                     INTEGER         month,
+!                                     INTEGER         day)
+      EXTERNAL        cdiDecodeDate
+
+      INTEGER         cdiEncodeDate
+!                                    (INTEGER         year,
+!                                     INTEGER         month,
+!                                     INTEGER         day)
+      EXTERNAL        cdiEncodeDate
+
+!                     cdiDecodeTime
+!                                    (INTEGER         time,
+!                                     INTEGER         hour,
+!                                     INTEGER         minute,
+!                                     INTEGER         second)
+      EXTERNAL        cdiDecodeTime
+
+      INTEGER         cdiEncodeTime
+!                                    (INTEGER         hour,
+!                                     INTEGER         minute,
+!                                     INTEGER         second)
+      EXTERNAL        cdiEncodeTime
 
 !
 !  STREAM control routines
@@ -666,6 +710,17 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarZlevel
+
+!                     vlistDefVarParam
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         param)
+      EXTERNAL        vlistDefVarParam
+
+      INTEGER         vlistInqVarParam
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarParam
 
 !                     vlistDefVarCode
 !                                    (INTEGER         vlistID,
