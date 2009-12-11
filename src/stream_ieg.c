@@ -569,7 +569,7 @@ int iegDefRecord(int streamID)
   iegp->byteswap = getByteswap(byteorder);
 
   param =  vlistInqVarParam(vlistID, varID);
-  cdiDecodeParam(param, &pdis, &pcat, &pnum);
+  cdiDecodeParam(param, &pnum, &pcat, &pdis);
   IEG_P_Parameter(iegp->ipdb) = pnum;
   if ( pdis == 255 ) IEG_P_CodeTable(iegp->ipdb) = pcat;
   date     = streamptr->tsteps[tsID].taxis.vdate;
@@ -879,7 +879,7 @@ void iegScanTimestep1(int streamID)
       prec   = iegp->dprec;
       rcode  = IEG_P_Parameter(iegp->ipdb);
       tabnum = IEG_P_CodeTable(iegp->ipdb);
-      param  = cdiEncodeParam(255, tabnum, rcode);
+      param  = cdiEncodeParam(rcode, tabnum, 255);
 
       if ( IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER )
 	rlevel = IEG_P_Level1(iegp->ipdb);
@@ -1040,7 +1040,7 @@ int iegScanTimestep2(int streamID)
 
       rcode  = IEG_P_Parameter(iegp->ipdb);
       tabnum = IEG_P_CodeTable(iegp->ipdb);
-      param  = cdiEncodeParam(255, tabnum, rcode);
+      param  = cdiEncodeParam(rcode, tabnum, 255);
 
       if ( IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER )
 	rlevel = IEG_P_Level1(iegp->ipdb);
@@ -1229,7 +1229,7 @@ int iegScanTimestep(int streamID)
 
 	  rcode  = IEG_P_Parameter(iegp->ipdb);
 	  tabnum = IEG_P_CodeTable(iegp->ipdb);
-	  param  = cdiEncodeParam(255, tabnum, rcode);
+	  param  = cdiEncodeParam(rcode, tabnum, 255);
 
 	  if ( IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER )
 	    rlevel = IEG_P_Level1(iegp->ipdb);
@@ -1469,7 +1469,7 @@ void iegWriteVarDP(int streamID, int varID, const double *data)
     Message(func, "nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
 
   param    = vlistInqVarParam(vlistID, varID);
-  cdiDecodeParam(param, &pdis, &pcat, &pnum);
+  cdiDecodeParam(param, &pnum, &pcat, &pdis);
   IEG_P_Parameter(iegp->ipdb) = pnum;
   if ( pdis == 255 ) IEG_P_CodeTable(iegp->ipdb) = pcat;
   date     = streamptr->tsteps[tsID].taxis.vdate;

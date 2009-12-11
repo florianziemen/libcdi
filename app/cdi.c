@@ -232,7 +232,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  gridID  = vlistInqVarGrid(vlistID, varID);
 	  zaxisID = vlistInqVarZaxis(vlistID, varID);
 
-	  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(255, tabnum, code);
+	  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(code, tabnum, 255);
 	  param2str(param, paramstr, sizeof(paramstr));
 
 	  if ( vardis ) vlistInqVarName(vlistID, varID, varname);
@@ -860,7 +860,7 @@ int main(int argc, char *argv[])
 		  code    = vlistInqVarCode(vlistID1, varID);
 		  tabnum  = tableInqNum(vlistInqVarTable(vlistID1, varID));
 
-		  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(255, tabnum, code);
+		  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(code, tabnum, 255);
 		  param2str(param, paramstr, sizeof(paramstr));
 
 		  if ( Vardis ) vlistInqVarName(vlistID1, varID, varname);
@@ -899,7 +899,7 @@ int main(int argc, char *argv[])
 		  code    = vlistInqVarCode(vlistID1, varID);
 		  tabnum  = tableInqNum(vlistInqVarTable(vlistID1, varID));
 
-		  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(255, tabnum, code);
+		  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(code, tabnum, 255);
 		  param2str(param, paramstr, sizeof(paramstr));
 
 		  if ( Vardis ) vlistInqVarName(vlistID1, varID, varname);

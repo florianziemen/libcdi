@@ -1248,6 +1248,7 @@ void streamSync(int streamID)
   int filetype;
   int fileID;
   int vlistID;
+  int nvars;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -1257,9 +1258,14 @@ void streamSync(int streamID)
   fileID   = streamptr->fileID;
   filetype = streamptr->filetype;
   vlistID  = streamInqVlist(streamID);
+  nvars    = vlistNvars(vlistID);
 
   if ( fileID == CDI_UNDEFID )
     Warning(func, "File %s not open!", streamptr->filename);
+  else if ( vlistID == CDI_UNDEFID )
+    Warning(func, "Vlist undefined for file %s!", streamptr->filename);
+  else if ( nvars == 0 )
+    Warning(func, "No variables defined!");
   else
     {
       if ( streamptr->filemode == 'w' || streamptr->filemode == 'a' )
@@ -1271,8 +1277,8 @@ void streamSync(int streamID)
 	    case FILETYPE_NC2:
 	    case FILETYPE_NC4:
 	      {
-		void cdf_sync (int ncid);
-		cdf_sync(fileID);
+		void cdf_sync(int ncid);
+		if ( streamptr->ncmode == 2 ) cdf_sync(fileID);
 		break;
 	      }
 #endif

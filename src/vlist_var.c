@@ -234,7 +234,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
       vlistptr->nzaxis++;
     }
 
-  vlistptr->vars[varID].param = cdiEncodeParam(255, 255, -(varID + 1));
+  vlistptr->vars[varID].param = cdiEncodeParam(-(varID + 1), 255, 255);
 
   return (varID);
 }
@@ -292,7 +292,7 @@ void vlistDefVarCode(int vlistID, int varID, int code)
 
   vlistCheckVarID(func, vlistID, varID);
 
-  vlistptr->vars[varID].param = cdiEncodeParam(255, 255, code);
+  vlistptr->vars[varID].param = cdiEncodeParam(code, 255, 255);
 }
 
 
@@ -447,7 +447,7 @@ int vlistInqVarCode(int vlistID, int varID)
   vlistCheckVarID(func, vlistID, varID);
 
   param = vlistptr->vars[varID].param;
-  cdiDecodeParam(param, &pdis, &pcat, &pnum);
+  cdiDecodeParam(param, &pnum, &pcat, &pdis);
   code = pnum;
 
   if ( code < 0 && vlistptr->vars[varID].tableID != -1 && vlistptr->vars[varID].name != NULL )
@@ -541,7 +541,7 @@ void vlistInqVarName(int vlistID, int varID, char *name)
   if ( vlistptr->vars[varID].name == NULL )
     {
       param = vlistptr->vars[varID].param;
-      cdiDecodeParam(param, &pdis, &pcat, &pnum);
+      cdiDecodeParam(param, &pnum, &pcat, &pdis);
       code = pnum;
       tableID = vlistptr->vars[varID].tableID;
       if ( tableInqParName(tableID, code, name) != 0 )
@@ -587,7 +587,7 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
   if ( vlistptr->vars[varID].longname == NULL )
     {
       param = vlistptr->vars[varID].param;
-      cdiDecodeParam(param, &pdis, &pcat, &pnum);
+      cdiDecodeParam(param, &pnum, &pcat, &pdis);
       code = pnum;
       tableID = vlistptr->vars[varID].tableID;
       if ( tableInqParLongname(tableID, code, longname) != 0 )
@@ -671,7 +671,7 @@ void vlistInqVarUnits(int vlistID, int varID, char *units)
   if ( vlistptr->vars[varID].units == NULL )
     {
       param = vlistptr->vars[varID].param;
-      cdiDecodeParam(param, &pdis, &pcat, &pnum);
+      cdiDecodeParam(param, &pnum, &pcat, &pdis);
       code = pnum;
       tableID = vlistptr->vars[varID].tableID;
       if ( tableInqParUnits(tableID, code, units) != 0 )
@@ -695,7 +695,7 @@ int vlistInqVarID(int vlistID, int code)
   for ( varID = 0; varID < vlistptr->nvars; varID++ )
     {
       param = vlistptr->vars[varID].param;
-      cdiDecodeParam(param, &pdis, &pcat, &pnum);
+      cdiDecodeParam(param, &pnum, &pcat, &pdis);
       if ( pnum == code ) break;
     }
 

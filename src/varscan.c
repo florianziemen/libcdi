@@ -459,7 +459,7 @@ void cdiGenVars(int streamID)
       if ( cdiDefaultTableID != UNDEFID )
 	{
 	  int pdis, pcat, pnum;
-	  cdiDecodeParam(param, &pdis, &pcat, &pnum);
+	  cdiDecodeParam(param, &pnum, &pcat, &pdis);
 	  if ( tableInqParNamePtr(cdiDefaultTableID, pnum) )
 	    {
 	      if ( tableID != UNDEFID )

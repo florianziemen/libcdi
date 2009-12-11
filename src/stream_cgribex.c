@@ -563,7 +563,7 @@ void cgribexScanTimestep1(int streamID)
       gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
 	       ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);
 
-      param = cdiEncodeParam(255, ISEC1_CodeTable, ISEC1_Parameter);
+      param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
       if ( ISEC1_LevelType == 100 ) ISEC1_Level1 *= 100;
       if ( ISEC1_LevelType ==  99 ) ISEC1_LevelType = 100;
       level1   = ISEC1_Level1;
@@ -818,7 +818,7 @@ int cgribexScanTimestep2(int streamID)
       gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
 	       ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);
 
-      param = cdiEncodeParam(255, ISEC1_CodeTable, ISEC1_Parameter);
+      param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
       if ( ISEC1_LevelType == 100 ) ISEC1_Level1 *= 100;
       if ( ISEC1_LevelType ==  99 ) ISEC1_LevelType = 100;
       level1    = ISEC1_Level1;
@@ -1087,7 +1087,7 @@ int cgribexScanTimestep(int streamID)
 	  gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
 		   ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);
 
-	  param = cdiEncodeParam(255, ISEC1_CodeTable, ISEC1_Parameter);
+	  param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
 	  if ( ISEC1_LevelType == 100 ) ISEC1_Level1 *= 100;
 	  if ( ISEC1_LevelType ==  99 ) ISEC1_LevelType = 100;
 	  level1   = ISEC1_Level1;
@@ -1370,7 +1370,7 @@ void cgribexDefParam(int *isec1, int param)
   int pdis, pcat, pnum;
   static int lwarn = TRUE;
 
-  cdiDecodeParam(param, &pdis, &pcat, &pnum);
+  cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
   if ( pdis != 255 && lwarn )
     {
@@ -1961,7 +1961,7 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   code     = vlistInqVarCode(vlistID, varID);
   tabnum   = tableInqNum(vlistInqVarTable(vlistID, varID));
 
-  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(255, tabnum, code);
+  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(code, tabnum, 255);
 
   cgribexDefaultSec0(isec0);
   cgribexDefaultSec1(isec1);

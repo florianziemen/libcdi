@@ -527,7 +527,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
     {
       int pdis, pcat, pnum;
 
-      cdiDecodeParam(param, &pdis, &pcat, &pnum);
+      cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
       if ( pdis == 255 )
 	{
@@ -648,7 +648,7 @@ void gribapiScanTimestep1(int streamID)
 	  GRIB_CHECK(grib_get_long(gh, "indicatorOfParameter", &lpar), 0);
 	  rcode = (int) lpar;
 
-	  param = cdiEncodeParam(255, rtabnum, rcode);
+	  param = cdiEncodeParam(rcode, rtabnum, 255);
 
 	  status = grib_get_long(gh, "indicatorOfTypeOfLevel", &lpar);
 	  if ( status == 0 )
@@ -681,7 +681,7 @@ void gribapiScanTimestep1(int streamID)
 	  GRIB_CHECK(grib_get_long(gh, "parameterNumber", &lpar), 0);
 	  pnum = (int) lpar;
 
-	  param = cdiEncodeParam(pdis, pcat, pnum);
+	  param = cdiEncodeParam(pnum, pcat, pdis);
 
 	  status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar);
 	  if ( status == 0 )
@@ -975,7 +975,7 @@ int gribapiScanTimestep2(int streamID)
 	  GRIB_CHECK(grib_get_long(gh, "indicatorOfParameter", &lpar), 0);
 	  rcode = (int) lpar;
 
-	  param = cdiEncodeParam(255, rtabnum, rcode);
+	  param = cdiEncodeParam(rcode, rtabnum, 255);
 
 	  status = grib_get_long(gh, "indicatorOfTypeOfLevel", &lpar);
 	  if ( status == 0 )
@@ -1002,7 +1002,7 @@ int gribapiScanTimestep2(int streamID)
 	  GRIB_CHECK(grib_get_long(gh, "parameterNumber", &lpar), 0);
 	  pnum = (int) lpar;
 
-	  param = cdiEncodeParam(pdis, pcat, pnum);
+	  param = cdiEncodeParam(pnum, pcat, pdis);
 
 	  status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar);
 	  if ( status == 0 )
@@ -1302,7 +1302,7 @@ int gribapiScanTimestep(int streamID)
 	      GRIB_CHECK(grib_get_long(gh, "indicatorOfParameter", &lpar), 0);
 	      rcode = (int) lpar;
 
-	      param = cdiEncodeParam(255, rtabnum, rcode);
+	      param = cdiEncodeParam(rcode, rtabnum, 255);
 
 	      status = grib_get_long(gh, "indicatorOfTypeOfLevel", &lpar);
 	      if ( status == 0 )
@@ -1329,7 +1329,7 @@ int gribapiScanTimestep(int streamID)
 	      GRIB_CHECK(grib_get_long(gh, "parameterNumber", &lpar), 0);
 	      pnum = (int) lpar;
 
-	      param = cdiEncodeParam(pdis, pcat, pnum);
+	      param = cdiEncodeParam(pnum, pcat, pdis);
 
 	      status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar);
 	      if ( status == 0 )
@@ -1618,7 +1618,7 @@ void gribapiDefParam(grib_handle *gh, int param)
 {
   int pdis, pcat, pnum;
 
-  cdiDecodeParam(param, &pdis, &pcat, &pnum);
+  cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
   //ISEC1_CodeTable = codetable;
   if ( pnum < 0 ) pnum = -pnum;
@@ -2051,7 +2051,7 @@ void gribHandleDelete(void *gh)
 #endif
 }
 
-//#define GRIBAPIENCODETEST 1
+/* #define GRIBAPIENCODETEST 1 */
 
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int date, int time, int numavg, 
 		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize,
@@ -2075,7 +2075,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   tabnum   = tableInqNum(vlistInqVarTable(vlistID, varID));
   datatype = vlistInqVarDatatype(vlistID, varID);
 
-  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(255, tabnum, code);
+  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(code, tabnum, 255);
 #if defined(GRIBAPIENCODETEST)
   gh = (grib_handle *) gribHandleNew();
 #else

@@ -5765,7 +5765,7 @@ int cdfInqContents(int streamID)
       if ( ncvars[ncvarid].code != UNDEFID )
 	{
 	  int param;
-	  param = cdiEncodeParam(255, ncvars[ncvarid].tabnum, ncvars[ncvarid].code);
+	  param = cdiEncodeParam(ncvars[ncvarid].code, ncvars[ncvarid].tabnum, 255);
 	  vlistDefVarParam(vlistID, varID, param);
 	}
       if ( ncvars[ncvarid].longname[0] )      vlistDefVarLongname(vlistID, varID, ncvars[ncvarid].longname);

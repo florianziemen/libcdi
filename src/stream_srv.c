@@ -215,7 +215,7 @@ int srvDefRecord(int streamID)
   gridID = streamptr->record->gridID;
   srvp   = streamptr->record->srvp;
 
-  cdiDecodeParam(streamptr->record->param, &pdis, &pcat, &pnum);
+  cdiDecodeParam(streamptr->record->param, &pnum, &pcat, &pdis);
   header[0] = pnum;
   header[1] = streamptr->record->level;
   header[2] = streamptr->record->date;
@@ -418,7 +418,7 @@ void srvScanTimestep1(int streamID)
       rxsize = header[4];
       rysize = header[5];
 
-      param = cdiEncodeParam(255, 255, rcode);
+      param = cdiEncodeParam(rcode, 255, 255);
 
       if ( nrecs == 0 )
 	{
@@ -575,7 +575,7 @@ int srvScanTimestep2(int streamID)
       vdate  = header[2];
       vtime  = header[3];
 
-      param = cdiEncodeParam(255, 255, rcode);
+      param = cdiEncodeParam(rcode, 255, 255);
 
       if ( rindex == 0 )
 	{
@@ -763,7 +763,7 @@ int srvScanTimestep(int streamID)
 	  rxsize = header[4];
 	  rysize = header[5];
 
-	  param = cdiEncodeParam(255, 255, rcode);
+	  param = cdiEncodeParam(rcode, 255, 255);
 
 	  if ( rindex == nrecs ) break;
 	  recID = streamptr->tsteps[tsID].recIDs[rindex];
@@ -994,7 +994,7 @@ void srvWriteVarDP(int streamID, int varID, const double *data)
   if ( CDI_Debug )
     Message(func, "nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
 
-  cdiDecodeParam(vlistInqVarParam(vlistID, varID), &pdis, &pcat, &pnum);
+  cdiDecodeParam(vlistInqVarParam(vlistID, varID), &pnum, &pcat, &pdis);
 
   header[0] = pnum;
   header[2] = streamptr->tsteps[tsID].taxis.vdate;
@@ -1061,7 +1061,7 @@ void srvWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   if ( CDI_Debug )
     Message(func, "gridID = %d zaxisID = %d", gridID, zaxisID);
 
-  cdiDecodeParam(vlistInqVarParam(vlistID, varID), &pdis, &pcat, &pnum);
+  cdiDecodeParam(vlistInqVarParam(vlistID, varID), &pnum, &pcat, &pdis);
 
   header[0] = pnum;
   header[1] = (int) level;

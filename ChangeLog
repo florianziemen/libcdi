@@ -1,3 +1,7 @@
+2009-12-11  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* streamSync: check that vlist has variables to sync [report: Martin Schultz]
+	
 2009-12-09  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cdfDefVar: define attribute _FillValue if missval was defined (speed up)

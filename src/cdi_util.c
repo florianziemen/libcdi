@@ -1,22 +1,25 @@
 
-void cdiDecodeParam(int param, int *pdis, int *pcat, int *pnum)
+void cdiDecodeParam(int param, int *pnum, int *pcat, int *pdis)
 {
   int iparam;
 
   iparam = param;
   if ( param < 0 ) iparam = -iparam;
-  *pdis  =  iparam / 1000000;
-  iparam  = iparam - *pdis*1000000;
+  *pdis  = iparam / 1000000;
+  iparam = iparam - *pdis*1000000;
   *pcat = iparam / 1000;
   *pnum = iparam - *pcat*1000;
   if ( param < 0 ) *pnum = -(*pnum);
 }
 
 
-int cdiEncodeParam(int pdis, int pcat, int pnum)
+int cdiEncodeParam(int pnum, int pcat, int pdis)
 {
   int param;
   int inum;
+
+  if ( pcat < 0 ) pcat = 255;
+  if ( pdis < 0 ) pdis = 255;
 
   inum = pnum;
   if ( pnum < 0 ) inum = -pnum;
