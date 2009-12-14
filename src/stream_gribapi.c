@@ -2108,7 +2108,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   //recsize += 512; /* add some space for possible filling */
 
   if ( recsize > gribbuffersize )
-    Error(func, "Internal problem: GRIB buffer to small (size = %ld, needed = %ld", gribbuffersize, recsize);
+    Error(func, "Internal problem: GRIB buffer too small (size = %ld, needed = %ld", gribbuffersize, recsize);
 
   /* get a copy of the coded message */
   GRIB_CHECK(grib_get_message_copy(gh, gribbuffer, &recsize), 0);

@@ -378,7 +378,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 	    /*	    IEG_G_NumVCP(gdb) = 0; */
 	    if ( vct_warning )
 	      {
-		Warning(func, "VCT size of %d is to large (maximum is 100). Set to 0!", vctsize);
+		Warning(func, "VCT size of %d is too large (maximum is 100). Set to 0!", vctsize);
 		vct_warning = 0;
 	      }
 	  }

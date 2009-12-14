@@ -1771,7 +1771,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	    ISEC2_NumVCP = 0;
 	    if ( vct_warning )
 	      {
-		Warning(func, "VCT size of %d is to large (maximum is 255). Set to 0!", vctsize);
+		Warning(func, "VCT size of %d is too large (maximum is 255). Set to 0!", vctsize);
 		vct_warning = 0;
 	      }
 	  }
