@@ -471,7 +471,9 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   if ( filetype == FILETYPE_GRB2 )
     {
       int ngrids = vlistNgrids(vlistID);
-      int ghindex = ngrids*gridID + zaxisID;
+      int ghindex = ngrids*vlistGridIndex(vlistID, gridID) + vlistZaxisIndex(vlistID, zaxisID);
+      if ( ghindex >= streamptr->gribHandleNums )
+	Error(func, "Internal problem, grib handle not found!");
       gh = streamptr->gribHandle[ghindex];
     }
 

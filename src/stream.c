@@ -816,48 +816,48 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
   switch (filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
-      case FILETYPE_GRB:
-      case FILETYPE_GRB2:
-	{
-	  gribClose(fileID);
-	  break;
-	}
+    case FILETYPE_GRB:
+    case FILETYPE_GRB2:
+      {
+	gribClose(fileID);
+	break;
+      }
 #endif
 #if  defined  (HAVE_LIBSERVICE)
-      case FILETYPE_SRV:
-	{
-	  fileClose(fileID);
-	  break;
-	}
+    case FILETYPE_SRV:
+      {
+	fileClose(fileID);
+	break;
+      }
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-      case FILETYPE_EXT:
-	{
-	  fileClose(fileID);
-	  break;
-	}
+    case FILETYPE_EXT:
+      {
+	fileClose(fileID);
+	break;
+      }
 #endif
 #if  defined  (HAVE_LIBIEG)
-      case FILETYPE_IEG:
-	{
-	  fileClose(fileID);
-	  break;
-	}
+    case FILETYPE_IEG:
+      {
+	fileClose(fileID);
+	break;
+      }
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-      case FILETYPE_NC:
-      case FILETYPE_NC2:
-      case FILETYPE_NC4:
-	{
-	  cdfClose(fileID);
-	  break;
-	}
+    case FILETYPE_NC:
+    case FILETYPE_NC2:
+    case FILETYPE_NC4:
+      {
+	cdfClose(fileID);
+	break;
+      }
 #endif
-      default:
-	{
-	  if ( CDI_Debug ) Message(func, "%s support not compiled in!", strfiletype(filetype));
-	  return (CDI_ELIBNAVAIL);
-	}
+    default:
+      {
+	if ( CDI_Debug ) Message(func, "%s support not compiled in!", strfiletype(filetype));
+	return (CDI_ELIBNAVAIL);
+      }
     }
 
   switch (filetype)

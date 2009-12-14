@@ -438,34 +438,44 @@ void streamCopyRecord(int streamID2, int streamID1)
   byteorder1 = streamptr1->byteorder;
   byteorder2 = streamptr2->byteorder;
 
-  if ( filetype1  == filetype2 &&
-       byteorder1 == byteorder2 ) filetype = filetype2;
+  if ( filetype1  == filetype2 ) filetype = filetype2;
 
-  if ( filetype == FILETYPE_GRB )
+  switch (filetype)
     {
-      status = grbCopyRecord(streamID2, streamID1);
-    }
+#if  defined  (HAVE_LIBGRIB)
+    case FILETYPE_GRB:
+    case FILETYPE_GRB2:
+      {
+	status = grbCopyRecord(streamID2, streamID1);
+	break;
+      }
+#endif
 #if  defined  (HAVE_LIBSERVICE)
-  else if ( filetype == FILETYPE_SRV )
-    {
-      status = srvCopyRecord(streamID2, streamID1);
-    }
+    case FILETYPE_SRV:
+      {
+	status = srvCopyRecord(streamID2, streamID1);
+	break;
+      }
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-  else if ( filetype == FILETYPE_EXT )
-    {
-      status = extCopyRecord(streamID2, streamID1);
-    }
+    case FILETYPE_EXT:
+      {
+	status = extCopyRecord(streamID2, streamID1);
+	break;
+      }
 #endif
 #if  defined  (HAVE_LIBIEG)
-  else if ( filetype == FILETYPE_IEG )
-    {
-      status = iegCopyRecord(streamID2, streamID1);
-    }
+    case FILETYPE_IEG:
+      {
+	status = iegCopyRecord(streamID2, streamID1);
+	break;
+      }
 #endif
-  else
-    {
-      status = cdfCopyRecord(streamID2, streamID1);
+    default:
+      {
+	status = cdfCopyRecord(streamID2, streamID1);
+	break;
+      }
     }
 }
 

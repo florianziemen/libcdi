@@ -305,15 +305,15 @@
 !
 !                     cdiDecodeParam
 !                                    (INTEGER         param,
-!                                     INTEGER         dis,
-!                                     INTEGER         cat,
-!                                     INTEGER         num)
+!                                     INTEGER         pnum,
+!                                     INTEGER         pcat,
+!                                     INTEGER         pdis)
       EXTERNAL        cdiDecodeParam
 
       INTEGER         cdiEncodeParam
-!                                    (INTEGER         dis,
-!                                     INTEGER         cat,
-!                                     INTEGER         num)
+!                                    (INTEGER         pnum,
+!                                     INTEGER         pcat,
+!                                     INTEGER         pdis)
       EXTERNAL        cdiEncodeParam
 
 !                     cdiDecodeDate
