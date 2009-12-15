@@ -37,6 +37,7 @@ doc/tex/c_ref.tex -text
 doc/tex/c_stream.tex -text
 doc/tex/c_taxis.tex -text
 doc/tex/c_vlist.tex -text
+doc/tex/c_vlist_att.tex -text
 doc/tex/c_vlist_var.tex -text
 doc/tex/c_zaxis.tex -text
 doc/tex/cdi_cman.tex -text
@@ -51,6 +52,7 @@ doc/tex/f_ref.tex -text
 doc/tex/f_stream.tex -text
 doc/tex/f_taxis.tex -text
 doc/tex/f_vlist.tex -text
+doc/tex/f_vlist_att.tex -text
 doc/tex/f_vlist_var.tex -text
 doc/tex/f_zaxis.tex -text
 doc/tex/formats.tex -text
