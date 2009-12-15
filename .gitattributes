@@ -28,6 +28,7 @@ doc/cdi_cman.pdf -text
 doc/cdi_fman.pdf -text
 doc/tex/FUNCTIONS -text
 doc/tex/Modules -text
+doc/tex/attribute.tex -text
 doc/tex/bib.tex -text
 doc/tex/c_examples.tex -text
 doc/tex/c_grid.tex -text
