@@ -1323,7 +1323,16 @@ size_t filePtrRead(void *vfileptr, void *ptr, size_t size)
       if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
 	nread = file_read_from_buffer(fileptr, ptr, size);
       else
-	nread = fread(ptr, 1, size, fileptr->fp);
+	{
+	  nread = fread(ptr, 1, size, fileptr->fp);
+	  if ( nread != size )
+	    {
+	      if ( nread == 0 )
+		fileptr->flag |= FILE_EOF;
+	      else
+		fileptr->flag |= FILE_ERROR;
+	    }
+	}
 
       fileptr->position  += nread;
       fileptr->byteTrans += nread;
@@ -1349,7 +1358,16 @@ size_t fileRead(int fileID, void *ptr, size_t size)
       if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
 	nread = file_read_from_buffer(fileptr, ptr, size);
       else
-	nread = fread(ptr, 1, size, fileptr->fp);
+	{
+	  nread = fread(ptr, 1, size, fileptr->fp);
+	  if ( nread != size )
+	    {
+	      if ( nread == 0 )
+		fileptr->flag |= FILE_EOF;
+	      else
+		fileptr->flag |= FILE_ERROR;
+	    }
+	}
 
       fileptr->position  += nread;
       fileptr->byteTrans += nread;

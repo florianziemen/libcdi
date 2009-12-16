@@ -67,14 +67,15 @@ UINT64 get_SUINT64(unsigned char *x)
 size_t binReadF77Block(int fileID, int byteswap)
 {
   unsigned char f77block[4];
-  size_t blocklen;
+  size_t blocklen = 0;
 
-  fileRead(fileID, f77block, 4);
-
-  if ( byteswap )
-    blocklen = get_SUINT32(f77block);
-  else
-    blocklen =  get_UINT32(f77block);
+  if ( fileRead(fileID, f77block, 4) == 4 )
+    {
+      if ( byteswap )
+	blocklen = get_SUINT32(f77block);
+      else
+	blocklen =  get_UINT32(f77block);
+    }
 
   return (blocklen);
 }

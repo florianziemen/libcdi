@@ -1,3 +1,9 @@
+2009-12-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* fileRead: check result of fread
+	* binReadF77Block: check result of fileRead
+	* Version 1.4.1 released
+
 2009-12-11  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* streamSync: check that vlist has variables to sync [report: Martin Schultz]
