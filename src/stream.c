@@ -424,7 +424,7 @@ void streamDefByteorder(int streamID, int byteorder)
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
-	EXTREC *extp = streamptr->record->extp;
+	extrec_t *extp = streamptr->record->extp;
 	extp->byteswap = getByteswap(byteorder);
 
 	break;

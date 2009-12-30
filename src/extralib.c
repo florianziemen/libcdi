@@ -16,15 +16,15 @@
 #include "swap.h"
 
 
-#define SINGLE_PRECISION  4
-#define DOUBLE_PRECISION  8
+#define  SINGLE_PRECISION    4
+#define  DOUBLE_PRECISION    8
 
-#define EXT_HEADER_LEN  4
+#define  EXT_HEADER_LEN      4
 
 
-static int initExtLib = 0;
-static int extDefaultHprec = 0;
-static int extDefaultDprec = 0;
+static int initExtLib       = 0;
+static int extDefaultPrec   = 0;
+static int extDefaultNumber = EXT_REAL;
 
 
 /*
@@ -32,7 +32,7 @@ static int extDefaultDprec = 0;
  */
 
 #undef  LIBVERSION
-#define LIBVERSION      1.0.2
+#define LIBVERSION      1.2.0
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char ext_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
@@ -67,33 +67,31 @@ void extLibInit()
   envString = getenv(envName);
   if ( envString )
     {
-      int pos;
-      int nrun;
-      if ( strlen(envString) == 2 ) nrun = 1;
-      else                          nrun = 2;
+      int pos = 0;
 
-      pos = 0;
-      while ( nrun-- )
+      if ( strlen(envString) == 2  )
 	{
 	  switch ( tolower((int) envString[pos]) )
 	    {
-	    case 'i':
+	    case 'r':
 	      {
+		extDefaultNumber = EXT_REAL;
 		switch ( (int) envString[pos+1] )
 		  {
-		  case '4': extDefaultHprec = SINGLE_PRECISION; break;
-		  case '8': extDefaultHprec = DOUBLE_PRECISION; break;
+		  case '4': extDefaultPrec = SINGLE_PRECISION; break;
+		  case '8': extDefaultPrec = DOUBLE_PRECISION; break;
 		  default:
 		    Message(func, "Invalid digit in %s: %s", envName, envString);
 		  }
-		break;
+		break;		
 	      }
-	    case 'r':
+	    case 'c':
 	      {
+		extDefaultNumber = EXT_COMP;
 		switch ( (int) envString[pos+1] )
 		  {
-		  case '4': extDefaultDprec = SINGLE_PRECISION; break;
-		  case '8': extDefaultDprec = DOUBLE_PRECISION; break;
+		  case '4': extDefaultPrec = SINGLE_PRECISION; break;
+		  case '8': extDefaultPrec = DOUBLE_PRECISION; break;
 		  default:
 		    Message(func, "Invalid digit in %s: %s", envName, envString);
 		  }
@@ -102,44 +100,44 @@ void extLibInit()
 	    default:
 	      Message(func, "Invalid character in %s: %s", envName, envString);
 	    }
-	  pos += 2;
 	}
     }
 
   initExtLib = 1;
 }
 
-
-void extInit(EXTREC *extp)
+static
+void extInit(extrec_t *extp)
 {
   extp->checked    = 0;
   extp->byteswap   = 0;
-  extp->hprec      = 0;
-  extp->dprec      = 0;
+  extp->prec       = 0;
+  extp->number     = extDefaultNumber;
   extp->datasize   = 0;
   extp->buffersize = 0;
   extp->buffer     = NULL;
 }
 
 
-EXTREC *extNew(void)
+void *extNew(void)
 {
   static char func[] = "extNew";
-  EXTREC *extp;
+  extrec_t *extp;
 
   if ( ! initExtLib ) extLibInit();
 
-  extp = (EXTREC *) malloc(sizeof(EXTREC));
+  extp = (extrec_t *) malloc(sizeof(extrec_t));
 
   extInit(extp);
 
-  return (extp);
+  return ((void*)extp);
 }
 
 
-void extDelete(EXTREC *extp)
+void extDelete(void *ext)
 {
   static char func[] = "extDelete";
+  extrec_t *extp = (extrec_t *) ext;
 
   if ( extp )
     {
@@ -202,8 +200,8 @@ int extCheckFiletype(int fileID, int *swap)
 
   fileRewind(fileID);
 
-  if      ( data && dimxy*fact == data ) found = 1;
-  else if ( data && dimxy*8    == data ) found = 1;
+  if      ( data && dimxy*fact   == data ) found = 1;
+  else if ( data && dimxy*fact*2 == data ) found = 1;
 
   if ( EXT_Debug )
     {
@@ -215,58 +213,56 @@ int extCheckFiletype(int fileID, int *swap)
 }
 
 
-int extInqHeader(EXTREC *extp, int *header)
+int extInqHeader(void *ext, int *header)
 {
   static char func[] = "extInqHeader";
+  extrec_t *extp = (extrec_t *) ext;
   size_t i;
-
 
   for ( i = 0; i < EXT_HEADER_LEN; i++ )
     header[i] = extp->header[i];
   
-  if ( EXT_Debug )
-    Message(func, "datasize = %lu", extp->datasize);
+  if ( EXT_Debug ) Message(func, "datasize = %lu", extp->datasize);
 
   return (0);
 }
 
 
-int extDefHeader(EXTREC *extp, const int *header)
+int extDefHeader(void *ext, const int *header)
 {
   static char func[] = "extDefHeader";
+  extrec_t *extp = (extrec_t *) ext;
   size_t i;
-
 
   for ( i = 0; i < EXT_HEADER_LEN; i++ )
     extp->header[i] = header[i];
   
   extp->datasize = header[3];
+  if ( extp->number == EXT_COMP ) extp->datasize *= 2;
 
-  if ( EXT_Debug )
-    Message(func, "datasize = %lu", extp->datasize);
+  if ( EXT_Debug ) Message(func, "datasize = %lu", extp->datasize);
 
   return (0);
 }
 
 
-int extInqData(EXTREC *extp, int prec, void *data)
+int extInqData(void *ext, int prec, void *data)
 {
   static char func[] = "extInqData";
+  extrec_t *extp = (extrec_t *) ext;
   size_t datasize;
   size_t i;
   int ierr = 0;
-  int dprec;
+  int rprec, number;
   void *buffer;
   int byteswap = extp->byteswap;
 
-
   datasize = extp->datasize;
+  buffer   = extp->buffer;
+  rprec    = extp->prec;
+  number   = extp->number;
 
-  buffer = extp->buffer;
-
-  dprec = extp->dprec;
-
-  switch ( dprec )
+  switch ( rprec )
     {
     case SINGLE_PRECISION:
       {
@@ -274,10 +270,10 @@ int extInqData(EXTREC *extp, int prec, void *data)
 	  {
 	    if ( byteswap ) swap4byte(buffer, datasize);
 
-	    if ( dprec == prec )
+	    if ( rprec == prec )
 	      memcpy(data, buffer, datasize*sizeof(FLT32));
 	    else
-	      for (i = 0; i < datasize; i++)
+	      for ( i = 0; i < datasize; ++i )
 		((double *) data)[i] = (double) ((float *) buffer)[i];
 	  }
 	else
@@ -291,10 +287,10 @@ int extInqData(EXTREC *extp, int prec, void *data)
 	  {
 	    if ( byteswap ) swap8byte(buffer, datasize);
 
-	    if ( dprec == prec )
+	    if ( rprec == prec )
 	      memcpy(data, buffer, datasize*sizeof(FLT64));
 	    else
-	      for (i = 0; i < datasize; i++)
+	      for ( i = 0; i < datasize; ++i )
 		((float *) data)[i] = (float) ((double *) buffer)[i];
 	  }
 	else
@@ -304,7 +300,7 @@ int extInqData(EXTREC *extp, int prec, void *data)
 	break;
     default:
       {
-	Error(func, "unexpected data precision %d", dprec);
+	Error(func, "unexpected data precision %d", rprec);
       }
     }
 
@@ -312,48 +308,42 @@ int extInqData(EXTREC *extp, int prec, void *data)
 }
 
 
-int extInqDataSP(EXTREC *extp, float *data)
+int extInqDataSP(void *ext, float *data)
 {
-  return (extInqData(extp, SINGLE_PRECISION, (void *) data));
+  return (extInqData(ext, SINGLE_PRECISION, (void *) data));
 }
 
 
-int extInqDataDP(EXTREC *extp, double *data)
+int extInqDataDP(void *ext, double *data)
 {
-  return (extInqData(extp, DOUBLE_PRECISION, (void *) data));
+  return (extInqData(ext, DOUBLE_PRECISION, (void *) data));
 }
 
 
-int extDefData(EXTREC *extp, int prec, const void *data)
+int extDefData(void *ext, int prec, const void *data)
 {
   static char func[] = "extDefData";
+  extrec_t *extp = (extrec_t *) ext;
   size_t datasize;
   size_t blocklen;
   size_t buffersize;
   size_t i;
-  int dprec, hprec;
+  int rprec;
   int *header;
   void *buffer;
 
+  if ( extDefaultPrec ) rprec = extDefaultPrec;
+  else                  rprec = extp->prec;
 
-  if ( extDefaultDprec ) dprec = extDefaultDprec;
-  else                   dprec = extp->dprec;
+  if ( ! rprec ) rprec = prec;
 
-  if ( ! dprec ) dprec = prec;
-
-  extp->dprec = dprec;
-
-  if ( extDefaultHprec ) hprec = extDefaultHprec;
-  else                   hprec = extp->hprec;
-
-  if ( ! hprec ) hprec = dprec;
-  
-  extp->hprec = hprec;
+  extp->prec = rprec;
 
   header = extp->header;
 
   datasize = header[3];
-  blocklen = datasize * dprec;
+  if ( extp->number == EXT_COMP ) datasize *= 2;
+  blocklen = datasize * rprec;
 
   extp->datasize = datasize;
 
@@ -370,11 +360,11 @@ int extDefData(EXTREC *extp, int prec, const void *data)
   else
     buffer = extp->buffer;
 
-  switch ( dprec )
+  switch ( rprec )
     {
     case SINGLE_PRECISION:
       {
-	if ( dprec == prec )
+	if ( rprec == prec )
 	  memcpy(buffer, data, datasize*sizeof(FLT32));
 	else
 	  for (i = 0; i < datasize; i++)
@@ -384,7 +374,7 @@ int extDefData(EXTREC *extp, int prec, const void *data)
       }
     case DOUBLE_PRECISION:
       {
-	if ( dprec == prec )
+	if ( rprec == prec )
 	  memcpy(buffer, data, datasize*sizeof(FLT64));
 	else
 	  for (i = 0; i < datasize; i++)
@@ -394,7 +384,7 @@ int extDefData(EXTREC *extp, int prec, const void *data)
       }
     default:
       {
-	Error(func, "unexpected data precision %d", dprec);
+	Error(func, "unexpected data precision %d", rprec);
       }
     }
 
@@ -402,22 +392,22 @@ int extDefData(EXTREC *extp, int prec, const void *data)
 }
 
 
-int extDefDataSP(EXTREC *extp, const float *data)
+int extDefDataSP(void *ext, const float *data)
 {
-  return (extDefData(extp, SINGLE_PRECISION, (void *) data));
+  return (extDefData(ext, SINGLE_PRECISION, (void *) data));
 }
 
 
-int extDefDataDP(EXTREC *extp, const double *data)
+int extDefDataDP(void *ext, const double *data)
 {
-  return (extDefData(extp, DOUBLE_PRECISION, (void *) data));
+  return (extDefData(ext, DOUBLE_PRECISION, (void *) data));
 }
 
 
-int extRead(int fileID, EXTREC *extp)
+int extRead(int fileID, void *ext)
 {
   static char func[] = "extRead";
-  size_t datasize;
+  extrec_t *extp = (extrec_t *) ext;
   size_t blocklen, blocklen2;
   size_t i;
   char tempheader[32];
@@ -446,7 +436,7 @@ int extRead(int fileID, EXTREC *extp)
 
   hprec = blocklen / EXT_HEADER_LEN;
 
-  extp->hprec = hprec;
+  extp->prec = hprec;
 
   switch ( hprec )
     {
@@ -484,8 +474,7 @@ int extRead(int fileID, EXTREC *extp)
 
   extp->datasize = extp->header[3];
 
-  if ( EXT_Debug )
-    Message(func, "datasize = %lu", extp->datasize);
+  if ( EXT_Debug ) Message(func, "datasize = %lu", extp->datasize);
 
   blocklen = binReadF77Block(fileID, byteswap);
 
@@ -502,11 +491,18 @@ int extRead(int fileID, EXTREC *extp)
   else
     buffer = extp->buffer;
 
-  datasize = extp->datasize;
+  dprec = blocklen / extp->datasize;
 
-  dprec = blocklen / datasize;
-
-  extp->dprec = dprec;
+  if ( dprec == hprec )
+    {
+      extp->number = EXT_REAL;
+    }
+  else if ( dprec == 2*hprec )
+    {
+      dprec /= 2;
+      extp->datasize *= 2;
+      extp->number = EXT_COMP;
+    }
 
   if ( dprec != SINGLE_PRECISION && dprec != DOUBLE_PRECISION )
     {
@@ -528,29 +524,30 @@ int extRead(int fileID, EXTREC *extp)
 }
 
 
-int extWrite(int fileID, EXTREC *extp)
+int extWrite(int fileID, void *ext)
 {
   static char func[] = "extWrite";
+  extrec_t *extp = (extrec_t *) ext;
   size_t datasize;
   size_t blocklen;
   size_t i;
-  int dprec, hprec;
+  int rprec, number;
   char tempheader[32];
   int *header;
   void *buffer;
   int byteswap = extp->byteswap;
 
 
-  dprec  = extp->dprec;
-  hprec  = extp->hprec;
+  rprec  = extp->prec;
+  number = extp->number;
   header = extp->header;
 
   /* write header record */
-  blocklen = EXT_HEADER_LEN * hprec;
+  blocklen = EXT_HEADER_LEN * rprec;
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
-  switch ( hprec )
+  switch ( rprec )
     {
     case SINGLE_PRECISION:
       {
@@ -572,14 +569,15 @@ int extWrite(int fileID, EXTREC *extp)
       }
     default:
       {
-	Error(func, "unexpected header precision %d", hprec);
+	Error(func, "unexpected header precision %d", rprec);
       }
     }
   
   binWriteF77Block(fileID, byteswap, blocklen);
 
   datasize = header[3];
-  blocklen = datasize * dprec;
+  if ( number == EXT_COMP ) datasize *= 2;
+  blocklen = datasize * rprec;
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
@@ -587,7 +585,7 @@ int extWrite(int fileID, EXTREC *extp)
 
   buffer = extp->buffer;
 
-  switch ( dprec )
+  switch ( rprec )
     {
     case SINGLE_PRECISION:
       {
@@ -601,7 +599,7 @@ int extWrite(int fileID, EXTREC *extp)
       }
     default:
       {
-	Error(func, "unexpected data precision %d", dprec);
+	Error(func, "unexpected data precision %d", rprec);
       }
     }
 

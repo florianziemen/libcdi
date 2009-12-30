@@ -29,9 +29,9 @@
 typedef struct {
   int param;
   int level;
-} EXTCOMPVAR; 
+} extcompvar_t; 
 
-
+static
 int extInqDatatype(int prec)
 {
   int datatype;
@@ -42,7 +42,7 @@ int extInqDatatype(int prec)
   return (datatype);
 }
 
-
+static
 int extDefDatatype(int datatype)
 {
   int prec;
@@ -56,7 +56,7 @@ int extDefDatatype(int datatype)
   return (prec);
 }
 
-
+/* not used
 int extInqRecord(int streamID, int *varID, int *levelID)
 {
   static char func[] = "extInqRecord";
@@ -66,7 +66,7 @@ int extInqRecord(int streamID, int *varID, int *levelID)
   int zaxisID = -1;
   int header[4];
   int vlistID;
-  EXTREC *extp;
+  extrec_t *extp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -98,7 +98,7 @@ int extInqRecord(int streamID, int *varID, int *levelID)
   
   return (1);
 }
-
+*/
 
 int extReadRecord(int streamID, double *data, int *nmiss)
 {
@@ -111,7 +111,7 @@ int extReadRecord(int streamID, double *data, int *nmiss)
   int varID, gridID;
   int i, size;
   double missval;
-  EXTREC *extp;
+  extrec_t *extp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -201,9 +201,8 @@ int extDefRecord(int streamID)
   int gridID;
   int header[4];
   int status = 0;
-  int datatype;
   int pdis, pcat, pnum;
-  EXTREC *extp;
+  extrec_t *extp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -220,9 +219,7 @@ int extDefRecord(int streamID)
   header[2] = streamptr->record->level;
   header[3] = gridInqSize(gridID);
 
-  datatype = streamptr->record->prec;
-
-  extp->dprec = extDefDatatype(datatype);
+  extp->prec = extDefDatatype(streamptr->record->prec);
 
   extDefHeader(extp, header);
 
@@ -235,7 +232,7 @@ int extWriteRecord(int streamID, const double *data)
   static char func[] = "extWriteRecord";
   int fileID;
   int status = 0;
-  EXTREC *extp;
+  extrec_t *extp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -252,15 +249,15 @@ int extWriteRecord(int streamID, const double *data)
   return (status);
 }
 
+static
 void extAddRecord(int streamID, int param, int level, int xysize,
-		  long recsize, off_t position, int prec)
+		  long recsize, off_t position, int prec, int number)
 {
   static char func[] = "extAddRecord";
   int leveltype;
   int gridID = UNDEFID;
   int levelID = 0;
   int tsID, recID, varID;
-  int datatype;
   record_t *record;
   grid_t grid;
   int vlistID;
@@ -292,10 +289,8 @@ void extAddRecord(int streamID, int param, int level, int xysize,
   */
   leveltype = ZAXIS_GENERIC;
 
-  datatype = extInqDatatype(prec);
-
   varAddRecord(recID, param, gridID, leveltype, 0, level, 0,
-	       datatype, &varID, &levelID, 0, 0, NULL, NULL, NULL);
+	       extInqDatatype(prec), number, &varID, &levelID, 0, 0, NULL, NULL, NULL);
 
   (*record).varID   = varID;
   (*record).levelID = levelID;
@@ -344,7 +339,6 @@ void extScanTimestep1(int streamID)
 {  
   static char func[] = "extScanTimestep1";
   int header[4];
-  int prec = 0;
   int status;
   int fileID;
   int rxysize = 0;
@@ -359,8 +353,8 @@ void extScanTimestep1(int streamID)
   int taxisID = -1;
   TAXIS *taxis;
   int vlistID;
-  EXTCOMPVAR compVar, compVar0;
-  EXTREC *extp;
+  extcompvar_t compVar, compVar0;
+  extrec_t *extp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -392,11 +386,10 @@ void extScanTimestep1(int streamID)
 
       extInqHeader(extp, header);
 
-      prec   = extp->dprec;
-      vdate  = header[0];
-      vtime  = 0;
-      rcode  = header[1];
-      rlevel = header[2];
+      vdate   = header[0];
+      vtime   = 0;
+      rcode   = header[1];
+      rlevel  = header[2];
       rxysize = header[3];
 
       param = cdiEncodeParam(rcode, 255, 255);
@@ -417,7 +410,7 @@ void extScanTimestep1(int streamID)
 	      compVar0.param  = streamptr->tsteps[0].records[recID].param;
 	      compVar0.level = streamptr->tsteps[0].records[recID].ilevel;
 
-	      if ( memcmp(&compVar0, &compVar, sizeof(EXTCOMPVAR)) == 0 ) break;
+	      if ( memcmp(&compVar0, &compVar, sizeof(extcompvar_t)) == 0 ) break;
 	    }
 	  if ( recID < nrecs ) break;
 	  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) )
@@ -429,7 +422,7 @@ void extScanTimestep1(int streamID)
       if ( CDI_Debug )
 	Message(func, "%4d%8d%4d%8d%8d%6d", nrecs, (int)recpos, rcode, rlevel, vdate, vtime);
 
-      extAddRecord(streamID, param, rlevel, rxysize, recsize, recpos, prec);
+      extAddRecord(streamID, param, rlevel, rxysize, recsize, recpos, extp->prec, extp->number);
     }
 
   streamptr->rtsteps = 1;
@@ -500,8 +493,8 @@ int extScanTimestep2(int streamID)
   int nextstep;
   TAXIS *taxis;
   int vlistID;
-  EXTCOMPVAR compVar, compVar0;
-  EXTREC *extp;
+  extcompvar_t compVar, compVar0;
+  extrec_t *extp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -575,7 +568,7 @@ int extScanTimestep2(int streamID)
 	  compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
 	  compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
-	  if ( memcmp(&compVar0, &compVar, sizeof(EXTCOMPVAR)) == 0 )
+	  if ( memcmp(&compVar0, &compVar, sizeof(extcompvar_t)) == 0 )
 	    {
 	      if ( streamptr->tsteps[tsID].records[recID].used )
 		{
@@ -605,7 +598,7 @@ int extScanTimestep2(int streamID)
       compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
       compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
-      if ( memcmp(&compVar0, &compVar, sizeof(EXTCOMPVAR)) != 0 )
+      if ( memcmp(&compVar0, &compVar, sizeof(extcompvar_t)) != 0 )
 	{
 	  Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
@@ -688,8 +681,8 @@ int extScanTimestep(int streamID)
   int recID;
   TAXIS *taxis;
   int rindex, nrecs = 0;
-  EXTCOMPVAR compVar, compVar0;
-  EXTREC *extp;
+  extcompvar_t compVar, compVar0;
+  extrec_t *extp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -764,7 +757,7 @@ int extScanTimestep(int streamID)
 	  compVar0.param = streamptr->tsteps[tsID].records[recID].param;
 	  compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
-	  if ( memcmp(&compVar0, &compVar, sizeof(EXTCOMPVAR)) != 0 )
+	  if ( memcmp(&compVar0, &compVar, sizeof(extcompvar_t)) != 0 )
 	    {
 	      Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,
@@ -852,7 +845,7 @@ void extReadVarDP(int streamID, int varID, double *data, int *nmiss)
   int i;
   int status;
   double missval;
-  EXTREC *extp;
+  extrec_t *extp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -904,7 +897,7 @@ void extReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   int i;
   int status;
   double missval;
-  EXTREC *extp;
+  extrec_t *extp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -951,11 +944,10 @@ void extWriteVarDP(int streamID, int varID, const double *data)
   int zaxisID;
   double level;
   int header[4];
-  int datatype;
   int tsID;
   int vlistID;
   int pdis, pcat, pnum;
-  EXTREC *extp;
+  extrec_t *extp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -981,9 +973,7 @@ void extWriteVarDP(int streamID, int varID, const double *data)
   header[1] = pnum;
   header[3] = gridInqSize(gridID);
 
-  datatype = vlistInqVarDatatype(vlistID, varID);
-
-  extp->dprec = extDefDatatype(datatype);
+  extp->prec = extDefDatatype(vlistInqVarDatatype(vlistID, varID));
 
   for ( levID = 0;  levID < nlevs; levID++ )
     {
@@ -1005,11 +995,10 @@ void extWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   int zaxisID;
   double level;
   int header[4];
-  int datatype;
   int tsID;
   int vlistID;
   int pdis, pcat, pnum;
-  EXTREC *extp;
+  extrec_t *extp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -1032,9 +1021,7 @@ void extWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   header[2] = (int) level;
   header[3] = gridInqSize(gridID);
 
-  datatype = vlistInqVarDatatype(vlistID, varID);
-
-  extp->dprec = extDefDatatype(datatype);
+  extp->prec = extDefDatatype(vlistInqVarDatatype(vlistID, varID));
 
   extDefHeader(extp, header);
   extDefDataDP(extp, data);

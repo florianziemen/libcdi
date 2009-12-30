@@ -129,7 +129,7 @@ typedef struct
   SRVREC   *srvp;
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-  EXTREC   *extp;
+  extrec_t *extp;
 #endif
 #if  defined  (HAVE_LIBIEG)
   IEGREC   *iegp;

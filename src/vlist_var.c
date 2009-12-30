@@ -22,6 +22,7 @@ static void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].param        = CDI_UNDEFPARAM;
   vlistptr->vars[varID].timeID       = CDI_UNDEFID;
   vlistptr->vars[varID].datatype     = CDI_UNDEFID;
+  vlistptr->vars[varID].number       = CDI_REAL;
   vlistptr->vars[varID].timave       = 0;
   vlistptr->vars[varID].timaccu      = 0;
   vlistptr->vars[varID].gridID       = CDI_UNDEFID;
@@ -821,6 +822,35 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
 	  break;
 	}
     }
+}
+
+
+int vlistInqVarNumber(int vlistID, int varID)
+{
+  static char func[] = "vlistInqVarNumber";
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(func, vlistID, varID);
+
+  return (vlistptr->vars[varID].number);
+}
+
+
+void vlistDefVarNumber(int vlistID, int varID, int number)
+{
+  static char func[] = "vlistDefVarNumber";
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(func, vlistID, varID);
+
+  if ( number != CDI_REAL && number != CDI_COMP )
+    Error(func, "Argument number = %d not allowed!", number);
+
+  vlistptr->vars[varID].number = number;
 }
 
 

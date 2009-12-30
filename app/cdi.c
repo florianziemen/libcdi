@@ -112,7 +112,7 @@ void usage(void)
 
 static
 void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
-	       int datasize, int nmiss, double missval, const double *data, int vardis)
+	       int datasize, int number, int nmiss, double missval, const double *data, int vardis)
 {
   static int rec = 0;
   int i, ivals = 0, imiss = 0;
@@ -124,11 +124,11 @@ void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
     if ( vardis )
       fprintf(stdout, 
     "   Rec :       Date  Time    Varname      Level    Size    Miss :     Minimum        Mean     Maximum\n");
-/*   ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+ */
+/*   ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0----+ */
     else
       fprintf(stdout, 
     "   Rec :       Date  Time    Param        Level    Size    Miss :     Minimum        Mean     Maximum\n");
-/*   ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+ */
+/*   ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0----+ */
   }
 
   date2str(vdate, vdatestr, sizeof(vdatestr));
@@ -139,6 +139,7 @@ void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
   fprintf(stdout, "%7d ", datasize);
 
   fprintf(stdout, "%7d :", nmiss);
+
   /*
   if ( gridtype == GRID_SPECTRAL )
     {
@@ -146,6 +147,7 @@ void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
     }
   else
   */
+  if ( number == CDI_REAL )
     {
       if ( nmiss > 0 )
 	{
@@ -185,6 +187,31 @@ void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
       if ( imiss != nmiss && nmiss > 0 )
 	fprintf(stdout, "Found %d of %d missing values!\n", imiss, nmiss);
     }
+  else
+    {
+      int nvals_r = 0, nvals_i = 0;
+      double arrsum_r, arrsum_i, arrmean_r = 0, arrmean_i = 0;
+      arrsum_r = 0;
+      arrsum_i = 0;
+
+      for ( i = 0; i < datasize; i++ )
+	{
+	  if ( !DBL_IS_EQUAL(data[i*2], missval) )
+	    {
+	      arrsum_r += data[i*2];
+	      nvals_r++;
+	    }
+	  if ( !DBL_IS_EQUAL(data[i*2+1], missval) )
+	    {
+	      arrsum_i += data[i*2+1];
+	      nvals_i++;
+	    }
+	}
+
+      if ( nvals_r > 0 ) arrmean_r = arrsum_r / nvals_r;
+      if ( nvals_i > 0 ) arrmean_i = arrsum_i / nvals_i;
+      fprintf(stdout, "  -  (%#12.5g,%#12.5g)  -\n", arrmean_r, arrmean_i);
+    }
 }
 
 
@@ -207,7 +234,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
   char units[128];
   double level;
   char *modelptr, *instptr;
-  int prec;
+  int prec, number;
   int year, month, day, hour, minute, second;
   char pstr[4];
   char paramstr[32];
@@ -265,17 +292,27 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	    fprintf(stdout, "var ");
 
 	  prec = vlistInqVarDatatype(vlistID, varID);
-	  if      ( prec == DATATYPE_PACK   ) strcpy(pstr, "P0");
-	  else if ( prec > 0 && prec <= 32  ) sprintf(pstr, "P%d", prec);
-	  else if ( prec == DATATYPE_FLT32  ) strcpy(pstr, "F32");
-	  else if ( prec == DATATYPE_FLT64  ) strcpy(pstr, "F64");
-	  else if ( prec == DATATYPE_INT8   ) strcpy(pstr, "I8");
-	  else if ( prec == DATATYPE_INT16  ) strcpy(pstr, "I16");
-	  else if ( prec == DATATYPE_INT32  ) strcpy(pstr, "I32");
-	  else if ( prec == DATATYPE_UINT8  ) strcpy(pstr, "U8");
-	  else if ( prec == DATATYPE_UINT16 ) strcpy(pstr, "U16");
-	  else if ( prec == DATATYPE_UINT32 ) strcpy(pstr, "U32");
-	  else                                strcpy(pstr, "-1");
+	  number = vlistInqVarNumber(vlistID, varID);
+	  if ( number == CDI_REAL )
+	    {
+	      if      ( prec == DATATYPE_PACK   ) strcpy(pstr, "P0");
+	      else if ( prec > 0 && prec <= 32  ) sprintf(pstr, "P%d", prec);
+	      else if ( prec == DATATYPE_FLT32  ) strcpy(pstr, "F32");
+	      else if ( prec == DATATYPE_FLT64  ) strcpy(pstr, "F64");
+	      else if ( prec == DATATYPE_INT8   ) strcpy(pstr, "I8");
+	      else if ( prec == DATATYPE_INT16  ) strcpy(pstr, "I16");
+	      else if ( prec == DATATYPE_INT32  ) strcpy(pstr, "I32");
+	      else if ( prec == DATATYPE_UINT8  ) strcpy(pstr, "U8");
+	      else if ( prec == DATATYPE_UINT16 ) strcpy(pstr, "U16");
+	      else if ( prec == DATATYPE_UINT32 ) strcpy(pstr, "U32");
+	      else                                strcpy(pstr, "-1");
+	    }
+	  else
+	    {
+	      if      ( prec == DATATYPE_FLT32  ) strcpy(pstr, "C32");
+	      else if ( prec == DATATYPE_FLT64  ) strcpy(pstr, "C64");
+	      else                                strcpy(pstr, "-2");
+	    }
 
 	  fprintf(stdout, " %-3s", pstr);
 
@@ -746,7 +783,7 @@ int main(int argc, char *argv[])
       int nrecs, nvars;
       int levelID, levelsize;
       int nts = 0;
-      int gridsize = 0;
+      int gridsize = 0, number;
       int recID;
       int tsID;
       int ntsteps = 0;
@@ -816,7 +853,8 @@ int main(int argc, char *argv[])
 
 	  if ( otableID == CDI_UNDEFID ) otableID = itableID;
 	}
-
+      
+      if ( vlistNumber(vlistID1) != CDI_REAL ) datasize *= 2;
       data = (double *) malloc(datasize*sizeof(double));
 
       /*
@@ -873,9 +911,10 @@ int main(int argc, char *argv[])
 		  gridsize = gridInqSize(gridID);
 		  level    = zaxisInqLevel(zaxisID, levelID);
 		  missval  = vlistInqVarMissval(vlistID1, varID);
+		  number   = vlistInqVarNumber(vlistID1, varID);
 		  
 		  if ( Info )
-		    printInfo(gridtype, vdate, vtime, varname, level, gridsize, nmiss, missval, data, Vardis);
+		    printInfo(gridtype, vdate, vtime, varname, level, gridsize, number, nmiss, missval, data, Vardis);
 
 		  if ( fname2 )
 		    {
@@ -912,6 +951,7 @@ int main(int argc, char *argv[])
 		  gridtype = gridInqType(gridID);
 		  gridsize = gridInqSize(gridID);
 		  missval  = vlistInqVarMissval(vlistID1, varID);
+		  number   = vlistInqVarNumber(vlistID1, varID);
 
 		  levelsize = zaxisInqSize(zaxisID);
 		  for ( levelID = 0; levelID < levelsize; levelID++ )
@@ -920,7 +960,7 @@ int main(int argc, char *argv[])
 		      streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
 
 		      if ( Info )
-			printInfo(gridtype, vdate, vtime, varname, level, gridsize, nmiss, missval, data, Vardis);
+			printInfo(gridtype, vdate, vtime, varname, level, gridsize, number, nmiss, missval, data, Vardis);
 
 		      if ( fname2 )
 			streamWriteVarSlice(streamID2, varID, levelID, data, nmiss);

@@ -969,6 +969,7 @@ int vlistNvars(int vlistID)
   return (vlistptr->nvars);
 }
 
+
 int vlistNrecs(int vlistID)
 {
   static char func[] = "vlistNrecs";
@@ -983,6 +984,28 @@ int vlistNrecs(int vlistID)
     nrecs +=  vlistptr->vars[varID].nlevs;
 
   return (nrecs);
+}
+
+
+int vlistNumber(int vlistID)
+{
+  static char func[] = "vlistNumber";
+  int varID, number;
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlist_check_ptr(func, vlistptr);
+
+  number = vlistptr->vars[0].number;
+  for ( varID = 1; varID < vlistptr->nvars; varID++ )
+    if ( vlistptr->vars[varID].number != number )
+      {
+	number = CDI_BOTH;
+	break;
+      }
+
+  return (number);
 }
 
 

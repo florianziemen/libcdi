@@ -1,3 +1,7 @@
+2009-12-29  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* using EXSE library version 1.2.0
+
 2009-12-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* fileRead: check result of fread

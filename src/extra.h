@@ -1,18 +1,21 @@
 #ifndef _EXTRA_H
 #define _EXTRA_H
 
+#define  EXT_REAL   1
+#define  EXT_COMP   2
+
 
 typedef struct {
   int    checked;
   int    byteswap;
   int    header[4];
-  int    hprec;      /* header precision */
-  int    dprec;      /* data   precision */
+  int    prec;      /* single or double precison */
+  int    number;    /* real or complex */
   size_t datasize;
   size_t buffersize;
   void  *buffer;
 }
-EXTREC;
+extrec_t;
 
 
 const char *extLibraryVersion(void);
@@ -21,18 +24,18 @@ void extDebug(int debug);
 
 int  extCheckFiletype(int fileID, int *swap);
 
-EXTREC *extNew(void);
-void extDelete(EXTREC *extp);
+void *extNew(void);
+void extDelete(void *ext);
 
-int  extRead(int fileID, EXTREC *extp);
-int  extWrite(int fileID, EXTREC *extp);
+int  extRead(int fileID, void *ext);
+int  extWrite(int fileID, void *ext);
 
-int  extInqHeader(EXTREC *extp, int *header);
-int  extInqDataSP(EXTREC *extp, float *data);
-int  extInqDataDP(EXTREC *extp, double *data);
+int  extInqHeader(void *ext, int *header);
+int  extInqDataSP(void *ext, float *data);
+int  extInqDataDP(void *ext, double *data);
 
-int  extDefHeader(EXTREC *extp, const int *header);
-int  extDefDataSP(EXTREC *extp, const float *data);
-int  extDefDataDP(EXTREC *extp, const double *data);
+int  extDefHeader(void *ext, const int *header);
+int  extDefDataSP(void *ext, const float *data);
+int  extDefDataDP(void *ext, const double *data);
 
 #endif  /* _EXTRA_H */
