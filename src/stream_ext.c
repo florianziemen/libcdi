@@ -209,9 +209,9 @@ int extDefRecord(int streamID)
 
   stream_check_ptr(func, streamptr);
 
-  fileID = streamInqFileID(streamID);
-  gridID = streamptr->record->gridID;
-  extp   = streamptr->record->extp;
+  fileID   = streamInqFileID(streamID);
+  gridID   = streamptr->record->gridID;
+  extp     = streamptr->record->extp;
 
   cdiDecodeParam(streamptr->record->param, &pnum, &pcat, &pdis);
   header[0] = streamptr->record->date;
@@ -219,7 +219,8 @@ int extDefRecord(int streamID)
   header[2] = streamptr->record->level;
   header[3] = gridInqSize(gridID);
 
-  extp->prec = extDefDatatype(streamptr->record->prec);
+  extp->prec   = extDefDatatype(streamptr->record->prec);
+  extp->number = streamptr->record->number;
 
   extDefHeader(extp, header);
 
@@ -973,7 +974,8 @@ void extWriteVarDP(int streamID, int varID, const double *data)
   header[1] = pnum;
   header[3] = gridInqSize(gridID);
 
-  extp->prec = extDefDatatype(vlistInqVarDatatype(vlistID, varID));
+  extp->prec   = extDefDatatype(vlistInqVarDatatype(vlistID, varID));
+  extp->number = vlistInqVarNumber(vlistID, varID);
 
   for ( levID = 0;  levID < nlevs; levID++ )
     {
@@ -1021,7 +1023,8 @@ void extWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   header[2] = (int) level;
   header[3] = gridInqSize(gridID);
 
-  extp->prec = extDefDatatype(vlistInqVarDatatype(vlistID, varID));
+  extp->prec   = extDefDatatype(vlistInqVarDatatype(vlistID, varID));
+  extp->number = vlistInqVarNumber(vlistID, varID);
 
   extDefHeader(extp, header);
   extDefDataDP(extp, data);

@@ -239,6 +239,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
   streamptr->record->gridID   = gridID;
   streamptr->record->zaxisID  = zaxisID;
   streamptr->record->prec     = vlistInqVarDatatype(vlistID, varID);
+  streamptr->record->number   = vlistInqVarNumber(vlistID, varID);
 
   filetype = streamptr->filetype;
 
