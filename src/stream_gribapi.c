@@ -492,7 +492,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
   // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units); 
 
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2,
-	       prec, CDI_REAL, &varID, &levelID, numavg, leveltype,
+	       prec, &varID, &levelID, numavg, leveltype,
 	       name, longname, units);
 
   (*record).varID   = varID;

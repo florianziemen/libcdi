@@ -120,7 +120,6 @@ typedef struct
   int       levelID;
   int       recid;
   int       prec;
-  int       number;
   int       sec0[2];
   int       sec1[1024];
   int       sec2[4096];

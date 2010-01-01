@@ -32,28 +32,41 @@ typedef struct {
 } extcompvar_t; 
 
 static
-int extInqDatatype(int prec)
+int extInqDatatype(int prec, int number)
 {
   int datatype;
 
-  if ( prec == DOUBLE_PRECISION ) datatype = DATATYPE_FLT64;
-  else                            datatype = DATATYPE_FLT32;
+  if ( number == 2 )
+    {
+      if ( prec == DOUBLE_PRECISION ) datatype = DATATYPE_CPX64;
+      else                            datatype = DATATYPE_CPX32;
+    }
+  else
+    {
+      if ( prec == DOUBLE_PRECISION ) datatype = DATATYPE_FLT64;
+      else                            datatype = DATATYPE_FLT32;
+    }
 
   return (datatype);
 }
 
 static
-int extDefDatatype(int datatype)
+void extDefDatatype(int datatype, int *prec, int *number)
 {
-  int prec;
 
-  if ( datatype != DATATYPE_FLT32 && datatype != DATATYPE_FLT64 )
+  if ( datatype != DATATYPE_FLT32 && datatype != DATATYPE_FLT64 &&
+       datatype != DATATYPE_CPX32 && datatype != DATATYPE_CPX64 )
     datatype = DATATYPE_FLT32;
 
-  if ( datatype == DATATYPE_FLT64 ) prec = DOUBLE_PRECISION;
-  else                              prec = SINGLE_PRECISION;
+  if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
+    *number = 2;
+  else
+    *number = 1;
 
-  return (prec);
+  if ( datatype == DATATYPE_FLT64 || datatype == DATATYPE_CPX64 )
+    *prec = DOUBLE_PRECISION;
+  else 
+    *prec = SINGLE_PRECISION;
 }
 
 /* not used
@@ -219,8 +232,7 @@ int extDefRecord(int streamID)
   header[2] = streamptr->record->level;
   header[3] = gridInqSize(gridID);
 
-  extp->prec   = extDefDatatype(streamptr->record->prec);
-  extp->number = streamptr->record->number;
+  extDefDatatype(streamptr->record->prec, &extp->prec, &extp->number);
 
   extDefHeader(extp, header);
 
@@ -291,7 +303,7 @@ void extAddRecord(int streamID, int param, int level, int xysize,
   leveltype = ZAXIS_GENERIC;
 
   varAddRecord(recID, param, gridID, leveltype, 0, level, 0,
-	       extInqDatatype(prec), number, &varID, &levelID, 0, 0, NULL, NULL, NULL);
+	       extInqDatatype(prec, number), &varID, &levelID, 0, 0, NULL, NULL, NULL);
 
   (*record).varID   = varID;
   (*record).levelID = levelID;
@@ -974,8 +986,7 @@ void extWriteVarDP(int streamID, int varID, const double *data)
   header[1] = pnum;
   header[3] = gridInqSize(gridID);
 
-  extp->prec   = extDefDatatype(vlistInqVarDatatype(vlistID, varID));
-  extp->number = vlistInqVarNumber(vlistID, varID);
+  extDefDatatype(vlistInqVarDatatype(vlistID, varID), &extp->prec, &extp->number);
 
   for ( levID = 0;  levID < nlevs; levID++ )
     {
@@ -1023,8 +1034,7 @@ void extWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   header[2] = (int) level;
   header[3] = gridInqSize(gridID);
 
-  extp->prec   = extDefDatatype(vlistInqVarDatatype(vlistID, varID));
-  extp->number = vlistInqVarNumber(vlistID, varID);
+  extDefDatatype(vlistInqVarDatatype(vlistID, varID), &extp->prec, &extp->number);
 
   extDefHeader(extp, header);
   extDefDataDP(extp, data);

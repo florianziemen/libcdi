@@ -763,7 +763,7 @@ void iegAddRecord(int streamID, int param, int *pdb, int *gdb, double *vct,
   datatype = iegInqDatatype(prec);
 
   varAddRecord(recID, param, gridID, leveltype, lbounds, level1, level2,
-	       datatype, CDI_REAL, &varID, &levelID, 0, 0, NULL, NULL, NULL);
+	       datatype, &varID, &levelID, 0, 0, NULL, NULL, NULL);
 
   (*record).varID   = varID;
   (*record).levelID = levelID;

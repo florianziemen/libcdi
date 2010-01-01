@@ -112,12 +112,18 @@ void usage(void)
 
 static
 void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
-	       int datasize, int number, int nmiss, double missval, const double *data, int vardis)
+	       int datasize, int datatype, int nmiss, double missval, const double *data, int vardis)
 {
   static int rec = 0;
   int i, ivals = 0, imiss = 0;
+  int number;
   double arrmean, arrmin, arrmax;
   char vdatestr[32], vtimestr[32];
+
+  if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
+    number = CDI_COMP;
+  else
+    number = CDI_REAL;
  
   if ( ! rec )
   {
@@ -234,7 +240,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
   char units[128];
   double level;
   char *modelptr, *instptr;
-  int prec, number;
+  int datatype;
   int year, month, day, hour, minute, second;
   char pstr[4];
   char paramstr[32];
@@ -291,28 +297,21 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  else
 	    fprintf(stdout, "var ");
 
-	  prec = vlistInqVarDatatype(vlistID, varID);
-	  number = vlistInqVarNumber(vlistID, varID);
-	  if ( number == CDI_REAL )
-	    {
-	      if      ( prec == DATATYPE_PACK   ) strcpy(pstr, "P0");
-	      else if ( prec > 0 && prec <= 32  ) sprintf(pstr, "P%d", prec);
-	      else if ( prec == DATATYPE_FLT32  ) strcpy(pstr, "F32");
-	      else if ( prec == DATATYPE_FLT64  ) strcpy(pstr, "F64");
-	      else if ( prec == DATATYPE_INT8   ) strcpy(pstr, "I8");
-	      else if ( prec == DATATYPE_INT16  ) strcpy(pstr, "I16");
-	      else if ( prec == DATATYPE_INT32  ) strcpy(pstr, "I32");
-	      else if ( prec == DATATYPE_UINT8  ) strcpy(pstr, "U8");
-	      else if ( prec == DATATYPE_UINT16 ) strcpy(pstr, "U16");
-	      else if ( prec == DATATYPE_UINT32 ) strcpy(pstr, "U32");
-	      else                                strcpy(pstr, "-1");
-	    }
-	  else
-	    {
-	      if      ( prec == DATATYPE_FLT32  ) strcpy(pstr, "C32");
-	      else if ( prec == DATATYPE_FLT64  ) strcpy(pstr, "C64");
-	      else                                strcpy(pstr, "-2");
-	    }
+	  datatype = vlistInqVarDatatype(vlistID, varID);
+	  
+	  if      ( datatype == DATATYPE_PACK   ) strcpy(pstr, "P0");
+	  else if ( datatype > 0 && datatype <= 32  ) sprintf(pstr, "P%d", datatype);
+	  else if ( datatype == DATATYPE_CPX32  ) strcpy(pstr, "C32");
+	  else if ( datatype == DATATYPE_CPX64  ) strcpy(pstr, "C64");
+	  else if ( datatype == DATATYPE_FLT32  ) strcpy(pstr, "F32");
+	  else if ( datatype == DATATYPE_FLT64  ) strcpy(pstr, "F64");
+	  else if ( datatype == DATATYPE_INT8   ) strcpy(pstr, "I8");
+	  else if ( datatype == DATATYPE_INT16  ) strcpy(pstr, "I16");
+	  else if ( datatype == DATATYPE_INT32  ) strcpy(pstr, "I32");
+	  else if ( datatype == DATATYPE_UINT8  ) strcpy(pstr, "U8");
+	  else if ( datatype == DATATYPE_UINT16 ) strcpy(pstr, "U16");
+	  else if ( datatype == DATATYPE_UINT32 ) strcpy(pstr, "U32");
+	  else                                    strcpy(pstr, "-1");
 
 	  fprintf(stdout, " %-3s", pstr);
 
@@ -773,6 +772,7 @@ int main(int argc, char *argv[])
       double missval;
       double level;
       int nmiss;
+      int datatype;
       int datasize = 0;
       int streamID1 = CDI_UNDEFID;
       int streamID2 = CDI_UNDEFID;
@@ -783,7 +783,7 @@ int main(int argc, char *argv[])
       int nrecs, nvars;
       int levelID, levelsize;
       int nts = 0;
-      int gridsize = 0, number;
+      int gridsize = 0;
       int recID;
       int tsID;
       int ntsteps = 0;
@@ -892,12 +892,13 @@ int main(int argc, char *argv[])
 		  streamInqRecord(streamID1, &varID, &levelID);
 		  streamReadRecord(streamID1, data, &nmiss);
 
-		  gridID  = vlistInqVarGrid(vlistID1, varID);
-		  zaxisID = vlistInqVarZaxis(vlistID1, varID);
-		  param   = vlistInqVarParam(vlistID1, varID);
-		  code    = vlistInqVarCode(vlistID1, varID);
-		  tabnum  = tableInqNum(vlistInqVarTable(vlistID1, varID));
-
+		  datatype = vlistInqVarDatatype(vlistID1, varID);
+		  gridID   = vlistInqVarGrid(vlistID1, varID);
+		  zaxisID  = vlistInqVarZaxis(vlistID1, varID);
+		  param    = vlistInqVarParam(vlistID1, varID);
+		  code     = vlistInqVarCode(vlistID1, varID);
+		  tabnum   = tableInqNum(vlistInqVarTable(vlistID1, varID));
+ 
 		  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(code, tabnum, 255);
 		  param2str(param, paramstr, sizeof(paramstr));
 
@@ -911,10 +912,9 @@ int main(int argc, char *argv[])
 		  gridsize = gridInqSize(gridID);
 		  level    = zaxisInqLevel(zaxisID, levelID);
 		  missval  = vlistInqVarMissval(vlistID1, varID);
-		  number   = vlistInqVarNumber(vlistID1, varID);
 		  
 		  if ( Info )
-		    printInfo(gridtype, vdate, vtime, varname, level, gridsize, number, nmiss, missval, data, Vardis);
+		    printInfo(gridtype, vdate, vtime, varname, level, gridsize, datatype, nmiss, missval, data, Vardis);
 
 		  if ( fname2 )
 		    {
@@ -932,11 +932,12 @@ int main(int argc, char *argv[])
 		{
 		  if ( vlistInqVarTime(vlistID1, varID) == TIME_CONSTANT && tsID > 0 ) continue;
 
-		  gridID  = vlistInqVarGrid(vlistID1, varID);
-		  zaxisID = vlistInqVarZaxis(vlistID1, varID);
-		  param   = vlistInqVarParam(vlistID1, varID);
-		  code    = vlistInqVarCode(vlistID1, varID);
-		  tabnum  = tableInqNum(vlistInqVarTable(vlistID1, varID));
+		  datatype = vlistInqVarDatatype(vlistID1, varID);
+		  gridID   = vlistInqVarGrid(vlistID1, varID);
+		  zaxisID  = vlistInqVarZaxis(vlistID1, varID);
+		  param    = vlistInqVarParam(vlistID1, varID);
+		  code     = vlistInqVarCode(vlistID1, varID);
+		  tabnum   = tableInqNum(vlistInqVarTable(vlistID1, varID));
 
 		  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(code, tabnum, 255);
 		  param2str(param, paramstr, sizeof(paramstr));
@@ -951,7 +952,6 @@ int main(int argc, char *argv[])
 		  gridtype = gridInqType(gridID);
 		  gridsize = gridInqSize(gridID);
 		  missval  = vlistInqVarMissval(vlistID1, varID);
-		  number   = vlistInqVarNumber(vlistID1, varID);
 
 		  levelsize = zaxisInqSize(zaxisID);
 		  for ( levelID = 0; levelID < levelsize; levelID++ )
@@ -960,7 +960,7 @@ int main(int argc, char *argv[])
 		      streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
 
 		      if ( Info )
-			printInfo(gridtype, vdate, vtime, varname, level, gridsize, number, nmiss, missval, data, Vardis);
+			printInfo(gridtype, vdate, vtime, varname, level, gridsize, datatype, nmiss, missval, data, Vardis);
 
 		      if ( fname2 )
 			streamWriteVarSlice(streamID2, varID, levelID, data, nmiss);

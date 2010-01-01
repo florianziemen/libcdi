@@ -990,20 +990,33 @@ int vlistNrecs(int vlistID)
 int vlistNumber(int vlistID)
 {
   static char func[] = "vlistNumber";
-  int varID, number;
+  int varID, number, number2, datatype;
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
   vlist_check_ptr(func, vlistptr);
 
-  number = vlistptr->vars[0].number;
+  datatype = vlistptr->vars[0].datatype;
+  if (  datatype== DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
+    number = CDI_COMP;
+  else
+    number = CDI_REAL;
+
   for ( varID = 1; varID < vlistptr->nvars; varID++ )
-    if ( vlistptr->vars[varID].number != number )
-      {
-	number = CDI_BOTH;
-	break;
-      }
+    {
+      datatype = vlistptr->vars[varID].datatype;
+      if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
+	number2 = CDI_COMP;
+      else
+	number2 = CDI_REAL;
+
+      if ( number2 != number )
+	{
+	  number = CDI_BOTH;
+	  break;
+	}
+    }
 
   return (number);
 }

@@ -50,7 +50,6 @@ typedef struct
   int         zaxisID;
   int         timeID;    /* TIME_VARIABLE or TIME_CONSTANT */
   int         datatype;  /* DATATYPE_PACKX for GRIB data, else DATATYPE_FLT32 or DATATYPE_FLT64 */
-  int         number;    /* CDI_REAL_NUMBER or CDI_COMP_NUMBER */
   int         instID;
   int         modelID;
   int         tableID;
