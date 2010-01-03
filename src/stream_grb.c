@@ -16,7 +16,11 @@
 
 int grbBitsPerValue(int datatype)
 {
+  static char func[] = "grbBitsPerValue";
   int bitsPerValue = 16;
+
+  if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
+    Error(func, "CDI/GRIB library does not support complex numbers!");
 
   if ( datatype != CDI_UNDEFID )
     {

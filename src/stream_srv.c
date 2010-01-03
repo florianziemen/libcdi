@@ -45,7 +45,11 @@ int srvInqDatatype(int prec)
 
 int srvDefDatatype(int datatype)
 {
+  static char func[] = "srvDefDatatype";
   int prec;
+
+  if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
+    Error(func, "CDI/SERVICE library does not support complex numbers!");
 
   if ( datatype != DATATYPE_FLT32 && datatype != DATATYPE_FLT64 )
     datatype = DATATYPE_FLT32;

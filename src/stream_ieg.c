@@ -47,7 +47,11 @@ int iegInqDatatype(int prec)
 
 int iegDefDatatype(int datatype)
 {
+  static char func[] = "iegDefDatatype";
   int prec;
+
+  if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
+    Error(func, "CDI/IEG library does not support complex numbers!");
 
   if ( datatype != DATATYPE_FLT32 && datatype != DATATYPE_FLT64 )
     datatype = DATATYPE_FLT32;
