@@ -20,7 +20,7 @@
 #define DOUBLE_PRECISION  8
 
 
-static int initIegLib = 0;
+static int initIegLib      = 0;
 static int iegDefaultDprec = 0;
 
 
@@ -29,7 +29,7 @@ static int iegDefaultDprec = 0;
  */
 
 #undef  LIBVERSION
-#define LIBVERSION      1.0.2
+#define LIBVERSION      1.2.0
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char ieg_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
@@ -97,7 +97,7 @@ void iegDebug(int debug)
 }
 
 
-void iegInit(IEGREC *iegp)
+void iegInit(iegrec_t *iegp)
 {
   iegp->checked    = 0;
   iegp->byteswap   = 0;
@@ -109,7 +109,7 @@ void iegInit(IEGREC *iegp)
 }
 
 
-void iegInitMem(IEGREC *iegp)
+void iegInitMem(iegrec_t *iegp)
 {
   memset(iegp->ipdb, 0, sizeof(iegp->ipdb));
   memset(iegp->igdb, 0, sizeof(iegp->igdb));
@@ -117,14 +117,14 @@ void iegInitMem(IEGREC *iegp)
 }
 
 
-IEGREC *iegNew(void)
+iegrec_t *iegNew(void)
 {
   static char func[] = "iegNew";
-  IEGREC *iegp;
+  iegrec_t *iegp;
 
   if ( ! initIegLib ) iegLibInit();
 
-  iegp = (IEGREC *) malloc(sizeof(IEGREC));
+  iegp = (iegrec_t *) malloc(sizeof(iegrec_t));
 
   iegInit(iegp);
   iegInitMem(iegp);
@@ -133,7 +133,7 @@ IEGREC *iegNew(void)
 }
 
 
-void iegDelete(IEGREC *iegp)
+void iegDelete(iegrec_t *iegp)
 {
   static char func[] = "iegDelete";
 
@@ -215,7 +215,7 @@ int iegCheckFiletype(int fileID, int *swap)
 }
 
 
-void iegCopyMeta(IEGREC *diegp, IEGREC *siegp)
+void iegCopyMeta(iegrec_t *diegp, iegrec_t *siegp)
 {
   /*  diegp->byteswap = siegp->byteswap; */
   diegp->dprec    = siegp->dprec;
@@ -227,7 +227,7 @@ void iegCopyMeta(IEGREC *diegp, IEGREC *siegp)
 }
 
 
-int iegInqData(IEGREC *iegp, int prec, void *data)
+int iegInqData(iegrec_t *iegp, int prec, void *data)
 {
   static char func[] = "iegInqData";
   size_t datasize;
@@ -290,19 +290,19 @@ int iegInqData(IEGREC *iegp, int prec, void *data)
 }
 
 
-int iegInqDataSP(IEGREC *iegp, float *data)
+int iegInqDataSP(iegrec_t *iegp, float *data)
 {
   return (iegInqData(iegp, SINGLE_PRECISION, (void *) data));
 }
 
 
-int iegInqDataDP(IEGREC *iegp, double *data)
+int iegInqDataDP(iegrec_t *iegp, double *data)
 {
   return (iegInqData(iegp, DOUBLE_PRECISION, (void *) data));
 }
 
 
-int iegDefData(IEGREC *iegp, int prec, const void *data)
+int iegDefData(iegrec_t *iegp, int prec, const void *data)
 {
   static char func[] = "iegDefData";
   size_t datasize;
@@ -370,19 +370,19 @@ int iegDefData(IEGREC *iegp, int prec, const void *data)
 }
 
 
-int iegDefDataSP(IEGREC *iegp, const float *data)
+int iegDefDataSP(iegrec_t *iegp, const float *data)
 {
   return (iegDefData(iegp, SINGLE_PRECISION, (void *) data));
 }
 
 
-int iegDefDataDP(IEGREC *iegp, const double *data)
+int iegDefDataDP(iegrec_t *iegp, const double *data)
 {
   return (iegDefData(iegp, DOUBLE_PRECISION, (void *) data));
 }
 
 
-int iegRead(int fileID, IEGREC *iegp)
+int iegRead(int fileID, iegrec_t *iegp)
 {
   static char func[] = "iegRead";
   size_t datasize;
@@ -526,7 +526,7 @@ int iegRead(int fileID, IEGREC *iegp)
 }
 
 
-int iegWrite(int fileID, IEGREC *iegp)
+int iegWrite(int fileID, iegrec_t *iegp)
 {
   static char func[] = "iegWrite";
   size_t datasize;

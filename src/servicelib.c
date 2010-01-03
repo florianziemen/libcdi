@@ -19,10 +19,10 @@
 #define SINGLE_PRECISION  4
 #define DOUBLE_PRECISION  8
 
-#define SRV_HEADER_LEN  8
+#define SRV_HEADER_LEN    8
 
 
-static int initSrvLib = 0;
+static int initSrvLib      = 0;
 static int srvDefaultHprec = 0;
 static int srvDefaultDprec = 0;
 
@@ -32,7 +32,7 @@ static int srvDefaultDprec = 0;
  */
 
 #undef  LIBVERSION
-#define LIBVERSION      1.0.2
+#define LIBVERSION      1.2.0
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char srv_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
@@ -110,7 +110,7 @@ void srvLibInit()
 }
 
 
-void srvInit(SRVREC *srvp)
+void srvInit(srvrec_t *srvp)
 {
   srvp->checked    = 0;
   srvp->byteswap   = 0;
@@ -122,14 +122,14 @@ void srvInit(SRVREC *srvp)
 }
 
 
-SRVREC *srvNew(void)
+srvrec_t *srvNew(void)
 {
   static char func[] = "srvNew";
-  SRVREC *srvp;
+  srvrec_t *srvp;
 
   if ( ! initSrvLib ) srvLibInit();
 
-  srvp = (SRVREC *) malloc(sizeof(SRVREC));
+  srvp = (srvrec_t *) malloc(sizeof(srvrec_t));
 
   srvInit(srvp);
 
@@ -137,7 +137,7 @@ SRVREC *srvNew(void)
 }
 
 
-void srvDelete(SRVREC *srvp)
+void srvDelete(srvrec_t *srvp)
 {
   static char func[] = "srvDelete";
 
@@ -219,7 +219,7 @@ int srvCheckFiletype(int fileID, int *swap)
 }
 
 
-int srvInqHeader(SRVREC *srvp, int *header)
+int srvInqHeader(srvrec_t *srvp, int *header)
 {
   static char func[] = "srvInqHeader";
   size_t i;
@@ -235,7 +235,7 @@ int srvInqHeader(SRVREC *srvp, int *header)
 }
 
 
-int srvDefHeader(SRVREC *srvp, const int *header)
+int srvDefHeader(srvrec_t *srvp, const int *header)
 {
   static char func[] = "srvDefHeader";
   size_t i;
@@ -253,7 +253,7 @@ int srvDefHeader(SRVREC *srvp, const int *header)
 }
 
 
-int srvInqData(SRVREC *srvp, int prec, void *data)
+int srvInqData(srvrec_t *srvp, int prec, void *data)
 {
   static char func[] = "srvInqData";
   size_t datasize;
@@ -316,19 +316,19 @@ int srvInqData(SRVREC *srvp, int prec, void *data)
 }
 
 
-int srvInqDataSP(SRVREC *srvp, float *data)
+int srvInqDataSP(srvrec_t *srvp, float *data)
 {
   return (srvInqData(srvp, SINGLE_PRECISION, (void *) data));
 }
 
 
-int srvInqDataDP(SRVREC *srvp, double *data)
+int srvInqDataDP(srvrec_t *srvp, double *data)
 {
   return (srvInqData(srvp, DOUBLE_PRECISION, (void *) data));
 }
 
 
-int srvDefData(SRVREC *srvp, int prec, const void *data)
+int srvDefData(srvrec_t *srvp, int prec, const void *data)
 {
   static char func[] = "srvDefData";
   size_t datasize;
@@ -406,19 +406,19 @@ int srvDefData(SRVREC *srvp, int prec, const void *data)
 }
 
 
-int srvDefDataSP(SRVREC *srvp, const float *data)
+int srvDefDataSP(srvrec_t *srvp, const float *data)
 {
   return (srvDefData(srvp, SINGLE_PRECISION, (void *) data));
 }
 
 
-int srvDefDataDP(SRVREC *srvp, const double *data)
+int srvDefDataDP(srvrec_t *srvp, const double *data)
 {
   return (srvDefData(srvp, DOUBLE_PRECISION, (void *) data));
 }
 
 
-int srvRead(int fileID, SRVREC *srvp)
+int srvRead(int fileID, srvrec_t *srvp)
 {
   static char func[] = "srvRead";
   size_t datasize;
@@ -532,7 +532,7 @@ int srvRead(int fileID, SRVREC *srvp)
 }
 
 
-int srvWrite(int fileID, SRVREC *srvp)
+int srvWrite(int fileID, srvrec_t *srvp)
 {
   static char func[] = "srvWrite";
   size_t datasize;
