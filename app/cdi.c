@@ -112,18 +112,12 @@ void usage(void)
 
 static
 void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
-	       int datasize, int datatype, int nmiss, double missval, const double *data, int vardis)
+	       int datasize, int number, int nmiss, double missval, const double *data, int vardis)
 {
   static int rec = 0;
   int i, ivals = 0, imiss = 0;
-  int number;
   double arrmean, arrmin, arrmax;
   char vdatestr[32], vtimestr[32];
-
-  if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
-    number = CDI_COMP;
-  else
-    number = CDI_REAL;
  
   if ( ! rec )
   {
@@ -772,7 +766,7 @@ int main(int argc, char *argv[])
       double missval;
       double level;
       int nmiss;
-      int datatype;
+      int number;
       int datasize = 0;
       int streamID1 = CDI_UNDEFID;
       int streamID2 = CDI_UNDEFID;
@@ -892,7 +886,7 @@ int main(int argc, char *argv[])
 		  streamInqRecord(streamID1, &varID, &levelID);
 		  streamReadRecord(streamID1, data, &nmiss);
 
-		  datatype = vlistInqVarDatatype(vlistID1, varID);
+		  number   = vlistInqVarNumber(vlistID1, varID);
 		  gridID   = vlistInqVarGrid(vlistID1, varID);
 		  zaxisID  = vlistInqVarZaxis(vlistID1, varID);
 		  param    = vlistInqVarParam(vlistID1, varID);
@@ -914,7 +908,7 @@ int main(int argc, char *argv[])
 		  missval  = vlistInqVarMissval(vlistID1, varID);
 		  
 		  if ( Info )
-		    printInfo(gridtype, vdate, vtime, varname, level, gridsize, datatype, nmiss, missval, data, Vardis);
+		    printInfo(gridtype, vdate, vtime, varname, level, gridsize, number, nmiss, missval, data, Vardis);
 
 		  if ( fname2 )
 		    {
@@ -932,7 +926,7 @@ int main(int argc, char *argv[])
 		{
 		  if ( vlistInqVarTime(vlistID1, varID) == TIME_CONSTANT && tsID > 0 ) continue;
 
-		  datatype = vlistInqVarDatatype(vlistID1, varID);
+		  number   = vlistInqVarNumber(vlistID1, varID);
 		  gridID   = vlistInqVarGrid(vlistID1, varID);
 		  zaxisID  = vlistInqVarZaxis(vlistID1, varID);
 		  param    = vlistInqVarParam(vlistID1, varID);
@@ -960,7 +954,7 @@ int main(int argc, char *argv[])
 		      streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
 
 		      if ( Info )
-			printInfo(gridtype, vdate, vtime, varname, level, gridsize, datatype, nmiss, missval, data, Vardis);
+			printInfo(gridtype, vdate, vtime, varname, level, gridsize, number, nmiss, missval, data, Vardis);
 
 		      if ( fname2 )
 			streamWriteVarSlice(streamID2, varID, levelID, data, nmiss);

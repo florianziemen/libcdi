@@ -768,6 +768,23 @@ int vlistInqVarDatatype(int vlistID, int varID)
 }
 
 
+int vlistInqVarNumber(int vlistID, int varID)
+{
+  static char func[] = "vlistInqVarNumber";
+  vlist_t *vlistptr;
+  int number = CDI_REAL;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(func, vlistID, varID);
+
+  if ( vlistptr->vars[varID].datatype == DATATYPE_CPX32 || vlistptr->vars[varID].datatype == DATATYPE_CPX64 )
+    number = CDI_COMP;
+
+  return (number);
+}
+
+
 /*
 @Function  vlistDefVarDatatype
 @Title     Define the data type of a Variable
