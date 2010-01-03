@@ -66,7 +66,7 @@ int srvInqRecord(int streamID, int *varID, int *levelID)
   int zaxisID = -1;
   int header[8];
   int vlistID;
-  SRVREC *srvp;
+  srvrec_t *srvp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -111,7 +111,7 @@ int srvReadRecord(int streamID, double *data, int *nmiss)
   int varID, gridID;
   int i, size;
   double missval;
-  SRVREC *srvp;
+  srvrec_t *srvp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -204,7 +204,7 @@ int srvDefRecord(int streamID)
   int xsize, ysize;
   int datatype;
   int pdis, pcat, pnum;
-  SRVREC *srvp;
+  srvrec_t *srvp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -252,7 +252,7 @@ int srvWriteRecord(int streamID, const double *data)
   static char func[] = "srvWriteRecord";
   int fileID;
   int status = 0;
-  SRVREC *srvp;
+  srvrec_t *srvp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -378,7 +378,7 @@ void srvScanTimestep1(int streamID)
   TAXIS *taxis;
   int vlistID;
   SRVCOMPVAR compVar, compVar0;
-  SRVREC *srvp;
+  srvrec_t *srvp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -519,7 +519,7 @@ int srvScanTimestep2(int streamID)
   TAXIS *taxis;
   int vlistID;
   SRVCOMPVAR compVar, compVar0;
-  SRVREC *srvp;
+  srvrec_t *srvp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -706,7 +706,7 @@ int srvScanTimestep(int streamID)
   TAXIS *taxis;
   int rindex, nrecs = 0;
   SRVCOMPVAR compVar, compVar0;
-  SRVREC *srvp;
+  srvrec_t *srvp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -870,7 +870,7 @@ void srvReadVarDP(int streamID, int varID, double *data, int *nmiss)
   int i;
   int status;
   double missval;
-  SRVREC *srvp;
+  srvrec_t *srvp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -922,7 +922,7 @@ void srvReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   int i;
   int status;
   double missval;
-  SRVREC *srvp;
+  srvrec_t *srvp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -974,7 +974,7 @@ void srvWriteVarDP(int streamID, int varID, const double *data)
   int tsID;
   int vlistID;
   int pdis, pcat, pnum;
-  SRVREC *srvp;
+  srvrec_t *srvp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -1045,7 +1045,7 @@ void srvWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   int tsID;
   int vlistID;
   int pdis, pcat, pnum;
-  SRVREC *srvp;
+  srvrec_t *srvp;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);

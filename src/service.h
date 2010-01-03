@@ -8,12 +8,11 @@ typedef struct {
   int    header[8];
   int    hprec;      /* header precision */
   int    dprec;      /* data   precision */
-  int    recnum;
   size_t datasize;
   size_t buffersize;
   void  *buffer;
 }
-SRVREC;
+srvrec_t;
 
 
 const char *srvLibraryVersion(void);
@@ -22,19 +21,19 @@ void srvDebug(int debug);
 
 int  srvCheckFiletype(int fileID, int *swap);
 
-SRVREC *srvNew(void);
-void srvDelete(SRVREC *srvp);
+srvrec_t *srvNew(void);
+void srvDelete(srvrec_t *srvp);
 
-int  srvRead(int fileID, SRVREC *srvp);
-int  srvWrite(int fileID, SRVREC *srvp);
+int  srvRead(int fileID, srvrec_t *srvp);
+int  srvWrite(int fileID, srvrec_t *srvp);
 
-int  srvInqHeader(SRVREC *srvp, int *header);
-int  srvInqDataSP(SRVREC *srvp, float *data);
-int  srvInqDataDP(SRVREC *srvp, double *data);
+int  srvInqHeader(srvrec_t *srvp, int *header);
+int  srvInqDataSP(srvrec_t *srvp, float *data);
+int  srvInqDataDP(srvrec_t *srvp, double *data);
 
-int  srvDefHeader(SRVREC *srvp, const int *header);
-int  srvDefDataSP(SRVREC *srvp, const float *data);
-int  srvDefDataDP(SRVREC *srvp, const double *data);
+int  srvDefHeader(srvrec_t *srvp, const int *header);
+int  srvDefDataSP(srvrec_t *srvp, const float *data);
+int  srvDefDataDP(srvrec_t *srvp, const double *data);
 
 
 #endif  /* _SERVICE_H */

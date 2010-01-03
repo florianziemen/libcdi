@@ -65,7 +65,7 @@ typedef struct {
   size_t buffersize;
   void  *buffer;
 }
-IEGREC;
+iegrec_t;
 
 
 const char *iegLibraryVersion(void);
@@ -73,22 +73,22 @@ const char *iegLibraryVersion(void);
 void iegDebug(int debug);
 int  iegCheckFiletype(int fileID, int *swap);
 
-IEGREC *iegNew(void);
-void iegDelete(IEGREC *iegp);
-void iegInit(IEGREC *iegp);
-void iegInitMem(IEGREC *iegp);
+iegrec_t *iegNew(void);
+void iegDelete(iegrec_t *iegp);
+void iegInit(iegrec_t *iegp);
+void iegInitMem(iegrec_t *iegp);
 
-int  iegRead(int fileID, IEGREC *iegp);
-int  iegWrite(int fileID, IEGREC *iegp);
+int  iegRead(int fileID, iegrec_t *iegp);
+int  iegWrite(int fileID, iegrec_t *iegp);
 
-void iegCopyMeta(IEGREC *diegp, IEGREC *siegp);
-int  iegInqHeader(IEGREC *iegp, int *header);
-int  iegInqDataSP(IEGREC *iegp, float *data);
-int  iegInqDataDP(IEGREC *iegp, double *data);
+void iegCopyMeta(iegrec_t *diegp, iegrec_t *siegp);
+int  iegInqHeader(iegrec_t *iegp, int *header);
+int  iegInqDataSP(iegrec_t *iegp, float *data);
+int  iegInqDataDP(iegrec_t *iegp, double *data);
 
-int  iegDefHeader(IEGREC *iegp, const int *header);
-int  iegDefDataSP(IEGREC *iegp, const float *data);
-int  iegDefDataDP(IEGREC *iegp, const double *data);
+int  iegDefHeader(iegrec_t *iegp, const int *header);
+int  iegDefDataSP(iegrec_t *iegp, const float *data);
+int  iegDefDataDP(iegrec_t *iegp, const double *data);
 
 
 #endif  /* _IEG_H */

@@ -415,7 +415,7 @@ void streamDefByteorder(int streamID, int byteorder)
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
-	SRVREC *srvp = streamptr->record->srvp;
+	srvrec_t *srvp = streamptr->record->srvp;
 	srvp->byteswap = getByteswap(byteorder);
 
 	break;
@@ -433,7 +433,7 @@ void streamDefByteorder(int streamID, int byteorder)
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
-	IEGREC *iegp = streamptr->record->iegp;
+	iegrec_t *iegp = streamptr->record->iegp;
 	iegp->byteswap = getByteswap(byteorder);
 
 	break;
