@@ -4781,13 +4781,20 @@ int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4,
 
   if ( bds_aflag )
     {
+      size_t len;
       /*
       if ( bds_rep == 0 ) 
 	ISEC4_NumValues = ISEC2_NumLon*ISEC2_NumLat;
       else
 	ISEC4_NumValues = (ISEC2_PentaJ+1)*(ISEC2_PentaJ+2);
       */
-      ISEC4_NumValues = GET_UINT3(bds[17],bds[18],bds[19])*8/ISEC4_NumBits;
+      /* ISEC4_NumValues = GET_UINT3(bds[17],bds[18],bds[19])*8/ISEC4_NumBits;*/
+      if ( gribrec_len(bds[14], bds[15], bds[16]) > JP23SET )
+	len = ((size_t) ((bds[17]<<16)+(bds[18]<<16)+(bds[19]<<8)+bds[20]));
+      else
+        len = ((size_t) ((bds[17]<<16)+(bds[18]<<8)+bds[19]));
+
+      ISEC4_NumValues = len*8/ISEC4_NumBits;
 
       if ( bds_rep == 1 ) ISEC4_NumValues++;
     }
@@ -9107,7 +9114,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.4.2" " of ""Jan  7 2010"" ""13:16:50";
+static const char grb_libvers[] = "1.4.2" " of ""Jan  7 2010"" ""13:59:13";
 const char *
 cgribexLibraryVersion(void)
 {

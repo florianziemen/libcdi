@@ -237,7 +237,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
 
   (*record).size     = recsize;
   (*record).position = position;
-  (*record).param     = param;
+  (*record).param    = param;
   (*record).ilevel   = level1;
   (*record).ilevel2  = level2;
   (*record).ltype    = ISEC1_LevelType;
