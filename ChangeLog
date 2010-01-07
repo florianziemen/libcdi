@@ -1,3 +1,7 @@
+2010-01-07  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* using CGRIBEX library version 1.4.2 (large record support)
+	
 2009-12-29  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* using EXSE library version 1.2.0
