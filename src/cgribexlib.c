@@ -3766,7 +3766,6 @@ void gribEncode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 
   if ( (size_t) gribLen > kleng*sizeof(int) )
     Error(func, "kgrib buffer too small! kleng = %d  gribLen = %d", kleng, gribLen);
-  printf("gribLen %d, *kword %d\n", gribLen, *kword);
 
 #if defined (VECTORCODE)
   (void) PACK_GRIB(lGrib, (unsigned char *)CGrib, gribLen, -1L);
@@ -3953,10 +3952,7 @@ void gribEncode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
   ISEC0_GRIB_Version = 1;
 
   *kword = gribLen / sizeof(int);
-  printf("gribLen %d, *kword %d\n", gribLen, *kword);
   if ( (size_t) gribLen != *kword * sizeof(int) ) *kword += 1;
-
-  printf("gribLen %d, *kword %d\n", gribLen, *kword);
 
   *kret = status;
 }
@@ -9111,7 +9107,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.4.2" " of ""Jan  7 2010"" ""11:25:14";
+static const char grb_libvers[] = "1.4.2" " of ""Jan  7 2010"" ""13:16:50";
 const char *
 cgribexLibraryVersion(void)
 {
