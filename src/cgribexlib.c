@@ -3257,25 +3257,21 @@ void encodeBMS(GRIBPACK *lGrib, long *gribLen, double *fsec3, int *isec4, double
   long fsec4size;
   long z = *gribLen;
   unsigned int *imask;
+  static int lmissvalinfo = 1;
   /*  unsigned int c, imask; */
+
+  if ( DBL_IS_NAN(FSEC3_MissVal) && lmissvalinfo)
+    {
+      lmissvalinfo = 0;
+      Message(func, "Missing value = NaN is unsupported!");
+    }
 
   bitmapSize = ISEC4_NumValues;
   imaskSize = ((bitmapSize+7)>>3)<<3;
   bitmap = &lGrib[z+6];
   fsec4size = 0;
-  /*
-  for ( i = 0; i < imaskSize/8; i++ ) bitmap[i] = 0;
 
-  for ( i = 0; i < imaskSize; i++ )
-    {
-      if ( data[i] != FSEC3_MissVal )
-	{
-	  data[fsec4size++] = data[i];
-	  bitmap[i/8] |= 1<<(7-(i&7));
-	}
-    }
-  */
-
+#if defined (VECTORCODE)
   imask = (unsigned int *) malloc(imaskSize*sizeof(int));
   memset(imask, 0, imaskSize*sizeof(int));
 
@@ -3290,7 +3286,7 @@ void encodeBMS(GRIBPACK *lGrib, long *gribLen, double *fsec3, int *isec4, double
 #endif
   for ( i = 0; i < bitmapSize; i++ )
     {
-      if ( !DBL_IS_EQUAL(data[i], FSEC3_MissVal) )
+      if ( IS_NOT_EQUAL(data[i], FSEC3_MissVal) )
 	{
 	  data[fsec4size++] = data[i];
 	  imask[i] = 1;
@@ -3315,6 +3311,18 @@ void encodeBMS(GRIBPACK *lGrib, long *gribLen, double *fsec3, int *isec4, double
     }
 
   free(imask);
+#else
+  for ( i = 0; i < imaskSize/8; i++ ) bitmap[i] = 0;
+
+  for ( i = 0; i < bitmapSize; i++ )
+    {
+      if ( IS_NOT_EQUAL(data[i], FSEC3_MissVal) )
+	{
+	  data[fsec4size++] = data[i];
+	  bitmap[i/8] |= 1<<(7-(i&7));
+	}
+    }
+#endif
 
   bmsLen = imaskSize/8 + 6;
   bmsUnusedBits = imaskSize - bitmapSize;
@@ -4856,10 +4864,18 @@ void gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
   int ldebug = FALSE;
   int llarge = FALSE, l_iorj = FALSE;
   int lsect2 = FALSE, lsect3 = FALSE;
+  static int lmissvalinfo = 1;
 
   *iret = 0;
 
   grsdef();
+
+  if ( DBL_IS_NAN(FSEC3_MissVal) && lmissvalinfo)
+    {
+      lmissvalinfo = 0;
+      FSEC3_MissVal = GRIB_MISSVAL;
+      Message(func, "Missing value = NaN is unsupported, set to %g!", GRIB_MISSVAL);
+    }
 
   ISEC2_Reduced = FALSE;
 
@@ -5142,7 +5158,7 @@ void gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 	  int j = 0;
 
 	  for ( i = 0; i < ISEC4_NumValues; i++ )
-	    if ( !DBL_IS_EQUAL(fsec4[i], FSEC3_MissVal) ) j++;
+	    if ( IS_NOT_EQUAL(fsec4[i], FSEC3_MissVal) ) j++;
 
 	  ISEC4_NumNonMissValues = j;
 	}
@@ -5883,12 +5899,12 @@ int rowina2(double *p, int ko, int ki, double *pw,
 	  ip = (int) zwt;
 
 	  /*    If the left value is missing, use the right value */
-	  if ( DBL_IS_EQUAL(pw[ip + 1 + pw_dim1], msval) )
+	  if ( IS_EQUAL(pw[ip + 1 + pw_dim1], msval) )
 	    {
 	      p[jl] = pw[ip + 2 + pw_dim1];
 	    }
 	  /*    If the right value is missing, use the left value */
-	  else if ( DBL_IS_EQUAL(pw[ip + 2 + pw_dim1], msval) )
+	  else if ( IS_EQUAL(pw[ip + 2 + pw_dim1], msval) )
 	    {
 	      p[jl] = pw[ip + 1 + pw_dim1];
 	    }
@@ -5916,7 +5932,7 @@ int rowina2(double *p, int ko, int ki, double *pw,
       i_1 = ki;
       for ( jl = 1; jl <= i_1; ++jl )
 	{
-          if ( DBL_IS_EQUAL(p[jl], msval) )
+          if ( IS_EQUAL(p[jl], msval) )
 	    {
 	      fprintf(stderr," ROWINA2: ");
 	      fprintf(stderr," Cubic interpolation not supported");
@@ -6117,12 +6133,12 @@ C     -----------------------------------------------------------------
 	  else
 	    {
 	      /*    If the left value is missing, use the right value */
-	      if ( DBL_IS_EQUAL(pw[ip + 1 + pw_dim1], msval) )
+	      if ( IS_EQUAL(pw[ip + 1 + pw_dim1], msval) )
 		{
 		  p[jl] = pw[ip + 2 + pw_dim1];
 		}
 	      /*    If the right value is missing, use the left value */
-	      else if ( DBL_IS_EQUAL(pw[ip + 2 + pw_dim1], msval) )
+	      else if ( IS_EQUAL(pw[ip + 2 + pw_dim1], msval) )
 		{
 		  p[jl] = pw[ip + 1 + pw_dim1];
 		}
@@ -6147,7 +6163,7 @@ C     -----------------------------------------------------------------
       i_1 = ki;
       for ( jl = 1; jl <= i_1; ++jl )
 	{
-          if ( DBL_IS_EQUAL(p[jl], msval) )
+          if ( IS_EQUAL(p[jl], msval) )
 	    {
 	      fprintf(stderr," ROWINA2: ");
 	      fprintf(stderr," Cubic interpolation not supported");
@@ -9114,7 +9130,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.4.2" " of ""Jan  8 2010"" ""13:31:36";
+static const char grb_libvers[] = "1.4.2" " of ""Jan  8 2010"" ""15:02:59";
 const char *
 cgribexLibraryVersion(void)
 {
