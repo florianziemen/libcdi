@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   December 2009
+! Uwe Schulzweida, MPI-MET, Hamburg,   January 2010
 !
 
       INTEGER    CDI_UNDEFID           
@@ -20,6 +20,12 @@
       PARAMETER (CDI_BIGENDIAN          =  0)
       INTEGER    CDI_LITTLEENDIAN      
       PARAMETER (CDI_LITTLEENDIAN       =  1)
+      INTEGER    CDI_REAL              
+      PARAMETER (CDI_REAL               =  1)
+      INTEGER    CDI_COMP              
+      PARAMETER (CDI_COMP               =  2)
+      INTEGER    CDI_BOTH              
+      PARAMETER (CDI_BOTH               =  3)
 !
 !  Error identifier
 !
@@ -140,6 +146,10 @@
       PARAMETER (DATATYPE_PACK31        = 31)
       INTEGER    DATATYPE_PACK32       
       PARAMETER (DATATYPE_PACK32        = 32)
+      INTEGER    DATATYPE_CPX32        
+      PARAMETER (DATATYPE_CPX32         = 64)
+      INTEGER    DATATYPE_CPX64        
+      PARAMETER (DATATYPE_CPX64         = 128)
       INTEGER    DATATYPE_FLT32        
       PARAMETER (DATATYPE_FLT32         = 132)
       INTEGER    DATATYPE_FLT64        
@@ -165,6 +175,8 @@
       PARAMETER (DATATYPE_FLT           = 252)
       INTEGER    DATATYPE_TXT          
       PARAMETER (DATATYPE_TXT           = 253)
+      INTEGER    DATATYPE_CPX          
+      PARAMETER (DATATYPE_CPX           = 254)
 !
 !  GRID types
 !
@@ -535,6 +547,10 @@
 !                                    (INTEGER         vlistID)
       EXTERNAL        vlistPrint
 
+      INTEGER         vlistNumber
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistNumber
+
       INTEGER         vlistNvars
 !                                    (INTEGER         vlistID)
       EXTERNAL        vlistNvars
@@ -743,6 +759,11 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarDatatype
+
+      INTEGER         vlistInqVarNumber
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarNumber
 
 !                     vlistDefVarInstitut
 !                                    (INTEGER         vlistID,
