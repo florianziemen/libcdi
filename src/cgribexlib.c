@@ -7725,6 +7725,7 @@ int gribGinfo(long recpos, long recsize, unsigned char *gribbuffer,
   int gribversion, grib1offset;
   long gribsize = 0;
   int dpos, bpos = 0;
+  int bdslen;
   float bsf;
 
   section = gribbuffer;
@@ -7774,12 +7775,15 @@ int gribGinfo(long recpos, long recsize, unsigned char *gribbuffer,
     }
 
   bds = bufpointer;
-  bufpointer += BDS_Len;
 
   dpos = recpos + gribsize + 11;
 
-  gribsize += BDS_Len;
+  bdslen = BDS_Len;
+  bdslen = correct_bdslen(bdslen, recsize, bds-gribbuffer);
+  bufpointer += bdslen;
+  gribsize += bdslen;
   gribsize += 4;
+
   if ( gribsize > recsize )
     {
       fprintf(stderr, "GRIB buffer size %ld too small! Min size = %ld\n", recsize, gribsize);
@@ -9135,7 +9139,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.4.2" " of ""Jan 12 2010"" ""09:23:10";
+static const char grb_libvers[] = "1.4.2" " of ""Jan 12 2010"" ""14:20:20";
 const char *
 cgribexLibraryVersion(void)
 {
