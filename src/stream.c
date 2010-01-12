@@ -1797,6 +1797,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
     }
 }
 
+
 void streamWriteContents(int streamID, char *cname)
 {
   static char func[] = "streamWriteContents";
