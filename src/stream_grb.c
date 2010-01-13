@@ -125,7 +125,7 @@ int grbReadRecord(int streamID, double *data, int *nmiss)
 
   grbDecode(filetype, gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, &zip, &missval);
 
-  if ( nmiss > 0 ) vlistDefVarMissval(vlistID, varID, missval);
+  if ( *nmiss > 0 ) vlistDefVarMissval(vlistID, varID, missval);
 
   streamptr->tsteps[tsID].records[recID].zip = zip;
 
@@ -373,7 +373,7 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
 
   grbDecode(filetype, gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, &zip, &missval);
 
-  if ( nmiss > 0 ) vlistDefVarMissval(vlistID, varID, missval);
+  if ( *nmiss > 0 ) vlistDefVarMissval(vlistID, varID, missval);
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
