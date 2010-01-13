@@ -4037,14 +4037,14 @@ typedef struct
   int      ncvarid;
   char     name[128];
 }
-VarInfo;
+varinfo_t;
 
 
 static
 int cmpvarname(const void *s1, const void *s2)
 {
-  VarInfo *x = (VarInfo *) s1;
-  VarInfo *y = (VarInfo *) s2;
+  varinfo_t *x = (varinfo_t *) s1;
+  varinfo_t *y = (varinfo_t *) s2;
 
   return (strcmp(x->name, y->name));
 }
@@ -5725,9 +5725,9 @@ int cdfInqContents(int streamID)
   if ( streamptr->sortname )
     {
       int index;
-      VarInfo **varInfo;
-      varInfo    = (VarInfo **) malloc(nvars*sizeof(VarInfo *));
-      varInfo[0] = (VarInfo *)  malloc(nvars*sizeof(VarInfo));
+      varinfo_t **varInfo;
+      varInfo    = (varinfo_t **) malloc(nvars*sizeof(varinfo_t *));
+      varInfo[0] = (varinfo_t *)  malloc(nvars*sizeof(varinfo_t));
 
       for ( index = 1; index < nvars; index++ )
 	varInfo[index] = varInfo[0] + index;
@@ -5738,7 +5738,7 @@ int cdfInqContents(int streamID)
 	  varInfo[varID]->ncvarid = ncvarid;
 	  strcpy(varInfo[varID]->name, ncvars[ncvarid].name);
 	}
-      qsort(varInfo[0], nvars, sizeof(VarInfo), cmpvarname);
+      qsort(varInfo[0], nvars, sizeof(varinfo_t), cmpvarname);
       for ( varID = 0; varID < nvars; varID++ )
 	{
 	  varids[varID] = varInfo[varID]->ncvarid;

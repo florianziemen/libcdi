@@ -227,6 +227,7 @@ static void model_defaults(void)
   (void)    modelDef(instID, 149, "GME");
 
   instID  = institutInq(  0,   0, "MCH", NULL);
+  //(void)  = modelDef(instID, 137, "COSMO");
   COSMO   = modelDef(instID, 255, "COSMO");
 
   instID  = institutInq(  0,   1, "NCEP", NULL);
