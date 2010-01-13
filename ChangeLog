@@ -1,7 +1,13 @@
 2010-01-07  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+2010-01-07  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* using CGRIBEX library version 1.4.2 (large record support)
 	
+2010-01-13 Oliver Fuhrer <oliver.fuhrer@meteoswiss.ch>
+
+	* added support for cosmo GRIB parameter tables
+	* added missing value support for cosmo GRIB files
+
 2009-12-29  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* using EXSE library version 1.2.0

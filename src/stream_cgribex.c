@@ -1256,7 +1256,7 @@ int cgribexScanTimestep(int streamID)
 
 
 int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
-		  int unreduced, int *nmiss, int *zip)
+		  int unreduced, int *nmiss, int *zip, double *missval)
 {
   static char func[] = "cgribexDecode";
   int status = 0;
@@ -1274,6 +1274,7 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
   else             strcpy(hoper, "D");
 
   FSEC3_MissVal = cdiDefaultMissval;
+  *missval = cdiDefaultMissval;
 
   if ( (izip = gribGetZip(gribsize, gribbuffer, &unzipsize)) > 0 )
     {
@@ -1320,6 +1321,37 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
     *nmiss = ISEC4_NumValues - ISEC4_NumNonMissValues;
   else
     *nmiss = 0;
+
+  /* 2010-01-13: Oliver Fuhrer */
+  if (ISEC1_CenterID == 215 ) {
+    int i;
+    double undef_pds, undef_eps;
+
+    if (isec1[34] != 0 && isec1[34] != 255) {
+      if (isec1[34] & 2) {
+        if (isec1[34] & 1) {
+          undef_pds = -0.99*pow(10.0,-isec1[35]);
+        } else {
+          undef_pds = +0.99*pow(10.0,-isec1[35]);
+        }
+        undef_eps = pow(10.0,-isec1[35]-1);
+      } else {
+        if (isec1[34] & 1) {
+          undef_pds = -0.99*pow(10.0,+isec1[35]);
+        } else {
+          undef_pds = +0.99*pow(10.0,+isec1[35]);
+        }
+        undef_eps = pow(10.0,isec1[35]-1);
+      }
+      for ( i = 0; i < gridsize; i++ )
+        if ( (abs(data[i]-undef_pds) < undef_eps) || IS_EQUAL(data[i],FSEC3_MissVal) ) {
+          data[i] = undef_pds;
+          (*nmiss)++;
+        }
+      FSEC3_MissVal = undef_pds;
+      *missval = undef_pds;
+    }
+  }
 #else
   Error(func, "CGRIBEX support not compiled in!");
 #endif

@@ -11,6 +11,7 @@
 
 int ECHAM4 = UNDEFID;
 int ECHAM5 = UNDEFID;
+int COSMO  = UNDEFID;
 
 typedef struct
 {
@@ -224,6 +225,9 @@ static void model_defaults(void)
 
   instID  = institutInq(  0,   0, "DWD", NULL);
   (void)    modelDef(instID, 149, "GME");
+
+  instID  = institutInq(  0,   0, "MCH", NULL);
+  COSMO   = modelDef(instID, 255, "COSMO");
 
   instID  = institutInq(  0,   1, "NCEP", NULL);
   (void)    modelDef(instID,  80, "T62L28MRF");

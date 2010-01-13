@@ -78,7 +78,7 @@
 #define  ISEC1_DecScaleFactor       (isec1[22])  /*  Decimal scale factor                         */
 #define  ISEC1_LocalFLag            (isec1[23])  /*  Flag field to indicate local use in isec1    */
 
-#define  ISEC1_ECMWF_LocalExtention (isec1[36])
+#define  ISEC1_ECMWF_LocalExtension (isec1[36])
 #define  ISEC1_ECMWF_Class          (isec1[37])
 
 
