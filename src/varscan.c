@@ -338,6 +338,7 @@ typedef struct
 {
   int      varid;
   int      param;
+  int      ltype;
 }
 param_t;
 
@@ -349,8 +350,22 @@ int cmpparam(const void *s1, const void *s2)
   param_t *x = (param_t *) s1;
   param_t *y = (param_t *) s2;
 
-  if      ( x->param < y->param ) cmp =  1;
-  else if ( x->param > y->param ) cmp = -1;
+  if      ( x->param > y->param ) cmp =  1;
+  else if ( x->param < y->param ) cmp = -1;
+
+  return (cmp);
+}
+
+
+static
+int cmpltype(const void *s1, const void *s2)
+{
+  int cmp = 0;
+  param_t *x = (param_t *) s1;
+  param_t *y = (param_t *) s2;
+
+  if      ( x->ltype > y->ltype ) cmp =  1;
+  else if ( x->ltype < y->ltype ) cmp = -1;
 
   return (cmp);
 }
@@ -395,7 +410,9 @@ void cdiGenVars(int streamID)
 	{
 	  varInfo[varid]->varid = varids[varid];
 	  varInfo[varid]->param = vartable[varid].param;
+	  varInfo[varid]->ltype = vartable[varid].ltype;
 	}
+      qsort(varInfo[0], nvars, sizeof(param_t), cmpltype);
       qsort(varInfo[0], nvars, sizeof(param_t), cmpparam);
       for ( varid = 0; varid < nvars; varid++ )
 	{
