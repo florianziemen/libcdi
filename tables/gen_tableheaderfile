@@ -1,0 +1,112 @@
+#!/bin/ksh
+#
+# gen_tables create the headerfile table.h
+# with all default tables from default_tables
+#
+DEFTABLES=default_tables
+OFILE=table.h
+PTFILES=""
+#
+#########################################
+#
+cat $DEFTABLES |&
+exec 3<&p
+#
+item=0
+while true ; do
+#
+read -u3 PTFILE[item]
+if [ -z ${PTFILE[item]} ] ; then break ; fi
+#
+PTFILES="${PTFILES} ${PTFILE[item]}"
+#
+item=`expr $item + 1`
+#
+done
+#
+NTABLES=$item
+#
+#########################################
+#
+rm -f $OFILE
+#
+cat >> $OFILE <<EOF
+#ifndef _TABLE_H
+#define _TABLE_H
+
+EOF
+#
+for TFILE in $PTFILES; do
+    echo "process: $TFILE"
+    rm -f ptfile
+    ../../cdi/app/createtable $TFILE ptfile
+    cat ptfile >> $OFILE
+done
+#
+cat >> $OFILE <<EOF
+
+void
+tableDefault(void)
+{
+  int tableID, instID, modelID;
+
+EOF
+#
+settabvar() {
+  val=`grep $2 $1 | cut -f 2 -d "="`
+  echo $val
+}
+#
+item=0
+while [ $item -lt $NTABLES ] ; do
+TFILE=${PTFILE[item]}
+echo "process: $TFILE"
+#
+TABLE_ID=`settabvar ${TFILE}  "TABLE_ID"`
+TABLE_NA=`settabvar ${TFILE}  "TABLE_NA"`
+TABLE_MO=`settabvar ${TFILE}  "TABLE_MO"`
+TABLE_IN=`settabvar ${TFILE}  "TABLE_IN"`
+TABLE_CE=`settabvar ${TFILE}  "TABLE_CE"`
+TABLE_SU=`settabvar ${TFILE}  "TABLE_SU"`
+#
+if [ -z $TABLE_ID ] ; then TABLE_ID=0; fi
+if [ -z $TABLE_NA ] ; then TABLE_NA=$TFILE; fi
+#if [ -z $TABLE_MO ] ; then TABLE_MO=NULL; fi
+if [ -z $TABLE_CE ] ; then TABLE_CE=0; fi
+if [ -z $TABLE_SU ] ; then TABLE_SU=0; fi
+#
+echo "ID = $TABLE_ID name=$TABLE_NA model=$TABLE_MO inistitut=$TABLE_IN center=$TABLE_CE subcenter=$TABLE_SU"
+TABLENAME=`echo ${TFILE} | sed -e "s/\./_/g" `
+#
+cat >> $OFILE <<EOF
+
+  /*
+   *  define table : ${TFILE}
+   */
+
+  instID  = institutInq(${TABLE_CE}, ${TABLE_SU}, "${TABLE_IN}", NULL);
+  if ( instID == -1 )
+    instID  = institutDef(${TABLE_CE}, ${TABLE_SU}, "${TABLE_IN}", NULL);
+
+  modelID = modelInq(instID, 0, "${TABLE_MO}");
+  if ( modelID == -1 )
+    modelID = modelDef(instID, 0, "${TABLE_MO}");
+
+  tableID = tableDef(modelID, ${TABLE_ID}, "${TABLE_NA}");
+
+  tableLink(tableID, ${TABLENAME}, sizeof(${TABLENAME}) / sizeof(PAR));
+EOF
+#
+item=`expr $item + 1`
+#
+done
+#
+cat >> $OFILE <<EOF
+}
+
+#endif  /* _TABLE_H */
+EOF
+#
+rm -f ptfile
+#
+exit

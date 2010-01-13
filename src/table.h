@@ -718,6 +718,333 @@ static PAR remo[] = {
   { 260, "PRECIP",    "total precipitation",                                            NULL           },
 };
 
+static PAR cosmo002[] = {
+  {   1, "P",         "pressure",                                          "Pa"         },
+  {   2, "PMSL",      "mean sea level pressure",                           "Pa"         },
+  {   3, "DPSDT",     "surface pressure change",                           "Pa s-1"     },
+  {   6, "FI",        "geopotential",                                      "m2 s-2"     },
+  {   8, "HH",        "height",                                            "m"          },
+  {  10, "TO3",       "vertical integrated ozone content",                 "Dobson"     },
+  {  11, "T",         "temperature",                                       "K"          },
+  {  15, "TMAX",      "2m maximum temperature",                            "K"          },
+  {  16, "TMIN",      "2m minimum temperature",                            "K"          },
+  {  17, "TD",        "2m dew point temperature",                          "K"          },
+  {  31, "DD",        "undefined",                                         "undefined"  },
+  {  32, "FF",        "undefined",                                         "undefined"  },
+  {  33, "U",         "U-component of wind",                               "m s-1"      },
+  {  34, "V",         "V-component of wind",                               "m s-1"      },
+  {  39, "OMEGA",     "omega",                                             "Pa s-1"     },
+  {  40, "W",         "vertical wind velocity",                            "m s-1"      },
+  {  51, "QV",        "specific humidity",                                 "kg kg-1"    },
+  {  52, "RELHUM",    "relative humidity",                                 "%"          },
+  {  54, "TQV",       "precipitable water",                                "kg m-2"     },
+  {  57, "AEVAP",     "surface evaporation",                               "kg m-2"     },
+  {  58, "TQI",       "vertical integrated cloud ice",                     "kg m-2"     },
+  {  59, "TOT_PR",    "total precipitation rate",                          "kg m-2 s-1" },
+  {  61, "TOT_PREC",  "total precipitation amount",                        "kg m-2"     },
+  {  65, "W_SNOW",    "surface snow amount",                               "m"          },
+  {  66, "H_SNOW",    "thickness of snow",                                 "m"          },
+  {  71, "CLCT",      "total cloud cover",                                 "1"          },
+  {  72, "CLC_CON",   "convective cloud area fraction",                    "1"          },
+  {  73, "CLCL",      "low cloud cover",                                   "1"          },
+  {  74, "CLCM",      "medium cloud cover",                                "1"          },
+  {  75, "CLCH",      "high cloud cover",                                  "1"          },
+  {  76, "TQC",       "vertical integrated cloud water",                   "kg m-2"     },
+  {  78, "SNOW_CON",  "convective snowfall",                               "kg m-2"     },
+  {  79, "SNOW_GSP",  "large scale snowfall",                              "kg m-2"     },
+  {  81, "FR_LAND",   "land-sea fraction",                                 "1"          },
+  {  83, "Z0",        "surface roughness length",                          "m"          },
+  {  84, "ALB_RAD",   "surface albedo",                                    "1"          },
+  {  85, "TSOIL",     "soil surface temperature",                          "K"          },
+  {  86, "WSOIL",     "water content of 1. soil layer",                    "m"          },
+  {  87, "PLCOV",     "vegetation area fraction",                          "1"          },
+  {  90, "RUNOFF",    "subsurface runoff",                                 "kg m-2"     },
+  {  91, "FR_ICE",    "sea ice area fraction",                             "1"          },
+  {  92, "H_ICE",     "sea ice thickness",                                 "m"          },
+  { 111, "ASOB",      "averaged surface net downward shortwave radiation", "W m-2"      },
+  { 112, "ATHB",      "averaged surface net downward longwave radiation",  "W m-2"      },
+  { 113, "ASOB",      "averaged TOA net downward shortwave radiation",     "W m-2"      },
+  { 114, "ATHB",      "averaged TOA outgoing longwave radiation",          "W m-2"      },
+  { 115, "ASWDIR",    "direct downward sw radiation at the surface",       "W m-2"      },
+  { 116, "ASWDIFD",   "diffuse downward sw radiation at the surface",      "W m-2"      },
+  { 117, "ASWDIFU",   "diffuse upwnward sw radiation at the surface",      "W m-2"      },
+  { 118, "ALWD",      "downward lw radiation at the surface",              "W m-2"      },
+  { 119, "ALWU",      "upward lw radiation at the surface",                "W m-2"      },
+  { 121, "ALHFL",     "averaged surface latent heat flux",                 "W m-2"      },
+  { 122, "ASHFL",     "averaged surface sensible heat flux",               "W m-2"      },
+  { 124, "AUMFL",     "averaged eastward stress",                          "Pa"         },
+  { 125, "AVMFL",     "averaged northward stress",                         "Pa"         },
+  { 128, "SUNSH",     "undefined",                                         "undefined"  },
+  { 129, "SUNSH2",    "undefined",                                         "undefined"  },
+  { 130, "SUN_SUM",   "undefined",                                         "undefined"  },
+  { 131, "SUN_SUM2",  "undefined",                                         "undefined"  },
+  { 133, "FCOR",      "undefined",                                         "undefined"  },
+  { 134, "SKYVIEW",   "sky-view factor",                                   "1"          },
+  { 137, "SWDIR_COR", "topo correction of direct solar radiarion",         "1"          },
+};
+
+static PAR cosmo201[] = {
+  {   5, "APAB",      "&",                                                         "W m-2"      },
+  {  13, "SOHR_RAD",  "&",                                                         "K s-1"      },
+  {  14, "THHR_RAD",  "&",                                                         "K s-1"      },
+  {  20, "DURSUN",    "duration of sunshine",                                      "s"          },
+  {  29, "CLC",       "cloud area fraction",                                       "1"          },
+  {  30, "CLC_SGS",   "grid scale cloud area fraction",                            "1"          },
+  {  31, "QC",        "specific cloud liquid water content",                       "kg kg-1"    },
+  {  33, "QI",        "specific cloud ice content",                                "kg kg-1"    },
+  {  35, "QR",        "specific rain content",                                     "kg kg-1"    },
+  {  36, "QS",        "specific snow content",                                     "kg kg-1"    },
+  {  37, "TQR",       "total rain water content vertically integrated",            "kg m-2"     },
+  {  38, "TQS",       "total snow content vertically integrated",                  "kg m-2"     },
+  {  39, "QG",        "specific graupel content",                                  "kg kg-1"    },
+  {  40, "TQG",       "total graupel content vertically integrated",               "kg m-2"     },
+  {  41, "TWATER",    "cloud condensed water content",                             "kg m-2"     },
+  {  42, "TDIV_HUM",  "atmosphere water divergence",                               "kg m-2"     },
+  {  43, "QC_RAD",    "sub scale specific cloud liquid water content",             "kg kg-1"    },
+  {  44, "QI_RAD",    "sub scale specific cloud ice content",                      "kg kg-1"    },
+  {  61, "CLW_CON",   "convective cloud liquid water",                             "1"          },
+  {  68, "HBAS_CON",  "height of convective cloud base",                           "m"          },
+  {  69, "HTOP_CON",  "height of convective cloud top",                            "m"          },
+  {  70, "HBAS_CONI", "height of convective cloud base",                           "m"          },
+  {  71, "HTOP_CONI", "height of convective cloud top",                            "m"          },
+  {  72, "BAS_CON",   "index of convective cloud base",                            "1"          },
+  {  73, "TOP_CON",   "index of convective cloud top",                             "1"          },
+  {  74, "DT_CON",    "convective tendency of temperature",                        "K s-1"      },
+  {  75, "DQV_CON",   "convective tendency of specific humidity",                  "s-1"        },
+  {  78, "DU_CON",    "convective tendency of u-wind component",                   "m s-2"      },
+  {  79, "DV_CON",    "convective tendency of v-wind component",                   "m s-2"      },
+  {  82, "HTOP_DC",   "height of dry convection top",                              "m"          },
+  {  84, "HZEROCL",   "height of freezing level",                                  "m"          },
+  {  85, "SNOWLMT",   "height of the snow fall limit in m above sea level",        "m"          },
+  {  86, "HCBAS",     "height of cloud base",                                      "m"          },
+  {  87, "HCTOP",     "height of cloud top",                                       "m"          },
+  {  91, "C_T_LK",    "&",                                                         "1"          },
+  {  92, "GAMSO_LK",  "&",                                                         "m-1"        },
+  {  93, "DP_BS_LK",  "&",                                                         "m"          },
+  {  94, "H_B1_LK",   "&",                                                         "m"          },
+  {  95, "H_ML_LK",   "&",                                                         "m"          },
+  {  96, "DEPTH_LK",  "lake depth",                                                "m"          },
+  {  97, "FETCH_LK",  "wind fetch over lake",                                      "m"          },
+  {  99, "QRS",       "precipitation water (water loading)",                       "1"          },
+  { 100, "PRR_GSP",   "mass flux density of large scale rainfall",                 "kg m-2 s-1" },
+  { 101, "PRS_GSP",   "mass flux density of large scale snowfall",                 "kg m-2 s-1" },
+  { 102, "RAIN_GSP",  "large scale rainfall",                                      "kg m-2"     },
+  { 111, "PRR_CON",   "mass flux density of convective rainfall",                  "kg m-2 s-1" },
+  { 112, "PRS_CON",   "mass flux density of convective snowfall",                  "kg m-2 s-1" },
+  { 113, "RAIN_CON",  "convective rainfall",                                       "kg m-2"     },
+  { 129, "FRESHSNW",  "freshness of snow",                                         "undefined"  },
+  { 131, "PRG_GSP",   "mass flux density of large scale graupel",                  "kg m-2 s-1" },
+  { 132, "GRAU_GSP",  "large scale graupel",                                       "kg m-2"     },
+  { 133, "RHO_SNOW",  "density of snow",                                           "kg m-3"     },
+  { 139, "PP",        "deviation from reference pressure",                         "Pa"         },
+  { 140, "RCLD",      "standard deviation of saturation deficit",                  "undefined"  },
+  { 143, "CAPE_MU",   "cape of most unstable parcel",                              "J kg-1"     },
+  { 144, "CIN_MU",    "convective inhibition of most unstable parcel",             "J kg-1"     },
+  { 145, "CAPE_ML",   "cape of mean surface layer parcel",                         "J kg-1"     },
+  { 146, "CIN_ML",    "convective inhibition of mean surface layer parcel",        "J kg-1"     },
+  { 147, "TKE_CON",   "convective turbulent kinetic energy",                       "undefined"  },
+  { 148, "TKETENS",   "tendency of turbulent kinetic energy",                      "undefined"  },
+  { 152, "TKE",       "turbulent kinetic energy",                                  "m2 s-2"     },
+  { 153, "TKVM",      "diffusion coefficient of momentum",                         "m2 s-1"     },
+  { 154, "TKVH",      "diffusion coefficient of heat",                             "m2 s-1"     },
+  { 170, "TCM",       "drag coefficient of momentum",                              "1"          },
+  { 171, "TCH",       "drag coefficient of heat",                                  "1"          },
+  { 187, "VMAX",      "maximum turbulent wind gust in 10m",                        "m s-1"      },
+  { 190, "TSOIL",     "&",                                                         "K"          },
+  { 191, "TSOIL",     "&",                                                         "K"          },
+  { 192, "TSOIL",     "&",                                                         "K"          },
+  { 193, "TSOIL",     "mixed layer temperature",                                   "K"          },
+  { 194, "TSOIL",     "mean temperature of water column",                          "K"          },
+  { 197, "TSOIL",     "soil temperature",                                          "K"          },
+  { 198, "W_SO",      "soil water content",                                        "m"          },
+  { 199, "W_SO_ICE",  "soil frozen water content",                                 "m"          },
+  { 200, "W_I",       "canopy water amount",                                       "m"          },
+  { 203, "TSOIL",     "snow surface temperature",                                  "K"          },
+  { 215, "TSOIL",     "temperature of ice upper surface",                          "K"          },
+  { 230, "dBZ",       "unattenuated radar reflectivity in Rayleigh approximation", "1"          },
+  { 240, "MFLX_CON",  "convective mass flux density",                              "kg m-2 s-1" },
+  { 241, "CAPE_CON",  "&",                                                         "J kg-1"     },
+  { 243, "QCVG_CON",  "&",                                                         "s-1"        },
+};
+
+static PAR cosmo202[] = {
+  {  46, "SSO_STDH",  "standard deviation of subgrid scale height",                "m"         },
+  {  47, "SSO_GAMMA", "anisotropy of topography",                                  "-"         },
+  {  48, "SSO_THETA", "angle between principal axis of orography and global east", "-"         },
+  {  49, "SSO_SIGMA", "mean slope of subgrid scale orography",                     "-"         },
+  {  55, "FR_LAKE",   "fraction of inland lake water",                             "1"         },
+  {  57, "SOILTYP",   "soil type",                                                 "1"         },
+  {  61, "LAI",       "leaf area index",                                           "1"         },
+  {  62, "ROOTDP",    "root depth",                                                "m"         },
+  {  64, "HMO3",      "air pressure at ozone maximum",                             "Pa"        },
+  {  65, "VIO3",      "vertical integrated ozone amount",                          "Pa"        },
+  {  67, "PLCOV_MX",  "vegetation area fraction maximum",                          "1"         },
+  {  68, "PLCOV_MN",  "vegetation area fraction minimum",                          "1"         },
+  {  69, "LAI_MX",    "leaf area index maximum",                                   "1"         },
+  {  70, "LAI_MN",    "leaf area index minimum",                                   "1"         },
+  {  75, "FOR_E",     "ground fraction covered by evergreen forest",               "-"         },
+  {  76, "FOR_D",     "ground fraction covered by deciduous forest",               "-"         },
+  { 104, "DQVDT",     "tendency of water vapor",                                   "s-1"       },
+  { 105, "QVSFLX",    "surface flux of water vapour",                              "s-1m-2"    },
+  { 113, "FC",        "coriolis parameter",                                        "s-1"       },
+  { 114, "RLAT",      "latitude",                                                  "radian"    },
+  { 115, "RLON",      "longitude",                                                 "radian"    },
+  { 121, "ZTD",       "integrated total atmospheric refractivity",                 "undefined" },
+  { 122, "ZWD",       "integrated wet atmospheric refractivity",                   "undefined" },
+  { 123, "ZHD",       "integrated dry atmospheric refractivity",                   "undefined" },
+  { 180, "O3",        "ozone mass mixing ratio",                                   "kg kg-1"   },
+  { 200, "I131a",     "undefined",                                                 "undefined" },
+  { 201, "I131a_DD",  "undefined",                                                 "undefined" },
+  { 202, "I131a_WD",  "undefined",                                                 "undefined" },
+  { 203, "Cs137",     "undefined",                                                 "undefined" },
+  { 204, "Cs137_DD",  "undefined",                                                 "undefined" },
+  { 205, "Cs137_WD",  "undefined",                                                 "undefined" },
+  { 206, "Te132",     "undefined",                                                 "undefined" },
+  { 207, "Te132_DD",  "undefined",                                                 "undefined" },
+  { 208, "Te132_WD",  "undefined",                                                 "undefined" },
+  { 209, "Zr95",      "undefined",                                                 "undefined" },
+  { 210, "Zr95_DD",   "undefined",                                                 "undefined" },
+  { 211, "Zr95_WD",   "undefined",                                                 "undefined" },
+  { 212, "Kr85",      "undefined",                                                 "undefined" },
+  { 213, "Kr85_DD",   "undefined",                                                 "undefined" },
+  { 214, "Kr85_WD",   "undefined",                                                 "undefined" },
+  { 215, "TRACER",    "undefined",                                                 "undefined" },
+  { 216, "TRACER_DD", "undefined",                                                 "undefined" },
+  { 217, "TRACER_WD", "undefined",                                                 "undefined" },
+  { 218, "Xe133",     "undefined",                                                 "undefined" },
+  { 219, "Xe133_DD",  "undefined",                                                 "undefined" },
+  { 220, "Xe133_WD",  "undefined",                                                 "undefined" },
+  { 221, "I131g",     "undefined",                                                 "undefined" },
+  { 222, "I131g_DD",  "undefined",                                                 "undefined" },
+  { 223, "I131g_WD",  "undefined",                                                 "undefined" },
+  { 224, "I131o",     "undefined",                                                 "undefined" },
+  { 225, "I131o_DD",  "undefined",                                                 "undefined" },
+  { 226, "I131o_WD",  "undefined",                                                 "undefined" },
+  { 227, "Ba140",     "undefined",                                                 "undefined" },
+  { 228, "Ba140_DD",  "undefined",                                                 "undefined" },
+  { 229, "Ba140_WD",  "undefined",                                                 "undefined" },
+  { 230, "Sr90",      "undefined",                                                 "undefined" },
+  { 231, "Sr90_DD",   "undefined",                                                 "undefined" },
+  { 232, "Sr90_WD",   "undefined",                                                 "undefined" },
+  { 233, "Ru103",     "undefined",                                                 "undefined" },
+  { 234, "Ru103_DD",  "undefined",                                                 "undefined" },
+  { 235, "Ru103_WD",  "undefined",                                                 "undefined" },
+};
+
+static PAR cosmo203[] = {
+  { 135, "LCL_ML",   "undefined",                  "undefined" },
+  { 136, "LFC_ML",   "undefined",                  "undefined" },
+  { 137, "CAPE_3KM", "undefined",                  "undefined" },
+  { 138, "SWISS00",  "swiss00 index",              "1"         },
+  { 139, "SWISS12",  "swiss12 index",              "1"         },
+  { 147, "SLI",      "surface lifted index",       "K"         },
+  { 149, "SI",       "showalter index",            "K"         },
+  { 155, "BRN",      "undefined",                  "undefined" },
+  { 156, "HPBL",     "undefined",                  "undefined" },
+  { 203, "CLDEPTH",  "normalized cloud depth",     "1"         },
+  { 204, "CLCT_MOD", "modified_total_cloud_cover", "1"         },
+};
+
+static PAR cosmo205[] = {
+  {   1, "SYNME5", "synthetic satellite images Meteosat5", "-" },
+  {   2, "SYNME6", "synthetic satellite images Meteosat6", "-" },
+  {   3, "SYNME7", "synthetic satellite images Meteosat7", "-" },
+  {   4, "SYNMSG", "synthetic satellite images MSG",       "-" },
+};
+
+static PAR cosmo250[] = {
+  {   1, "QNH",       "sea level air pressure",                                         "hPa"                                },
+  {  11, "TSOIL",     "2m temperature",                                                 "K"                                  },
+  {  12, "TSOIL",     "2m temperature",                                                 "K"                                  },
+  {  13, "D_T_2M_K",  "kalman correction to 2m temperature",                            "K"                                  },
+  {  14, "TSOIL",     "2m temperature",                                                 "K"                                  },
+  {  15, "TSOIL",     "2m temperature",                                                 "K"                                  },
+  {  16, "RH_ICE",    "relative humidity over ice",                                     "%"                                  },
+  {  17, "TD",        "dew point temperature",                                          "K"                                  },
+  {  18, "D_TD",      "dew point depression",                                           "K"                                  },
+  {  19, "THETAE",    "equivalent potential temperature",                               "K"                                  },
+  {  20, "TD_2M_K",   "2m dew point temperature",                                       "K"                                  },
+  {  21, "D_TD_2M_K", "kalman correction to 2m dew point temperature",                  "K"                                  },
+  {  22, "TD_2M_OLD", "2m dew point temperature",                                       "K"                                  },
+  {  23, "TD_2M_BUZ", "2m dew point temperature",                                       "K"                                  },
+  {  24, "HI",        "heat index",                                                     "Fahrenheit"                         },
+  {  25, "DURSUN_M",  "maximum duration of sunshine",                                   "s"                                  },
+  {  26, "DURSUN_R",  "relative duration of sunshine",                                  "%"                                  },
+  {  52, "RH_2M_K",   "2m relative humidity",                                           "%"                                  },
+  {  53, "D_RH_2M_K", "kalman correction to 2m relative humidity",                      "%"                                  },
+  {  58, "CLI_RATIO", "cloud ice ratio (Qi/Qc+Qi)",                                     "%"                                  },
+  {  61, "TOT_SNOW",  "total precipitation in snow",                                    "kg/m**2"                            },
+  {  62, "TOT_RAIN",  "total precipitation in rain",                                    "kg/m**2"                            },
+  {  63, "TOT_CON",   "total convective precipitation",                                 "kg/m**2"                            },
+  {  64, "TOT_GSP",   "total large scale precipitation",                                "kg/m**2"                            },
+  {  65, "SNOW_%",    "percentage of precipitation in snow",                            "%"                                  },
+  {  66, "CONV_%",    "percentage of convective precipitation",                         "%"                                  },
+  {  67, "VORTP_ABS", "absolute",                                                       "VORTP_ABS 67 -1 absolute vorticity" },
+  {  68, "VORTP_REL", "relative",                                                       "VORTP_REL 68 -1 relative vorticity" },
+  {  70, "PDIFF_CON", "pressure difference between cloud base and cloud top",           "Pa"                                 },
+  {  71, "TTOP_CON",  "temperature at cloud top",                                       "K"                                  },
+  {  80, "GEM",       "emissivity of the ground",                                       "%"                                  },
+  {  82, "Z0LOC",     "local surface roughness length",                                 "m"                                  },
+  { 110, "LUM",       "luminosity",                                                     "klux"                               },
+  { 111, "GLOB",      "global shortwave radiation at surface",                          "W/m**2"                             },
+  { 112, "LW_IN_TG",  "incoming longwave radiation at surface",                         "W/m**2"                             },
+  { 113, "LW_IN_TS",  "incoming longwave radiation at surface",                         "W/m**2"                             },
+  { 114, "LW_IN_T2M", "incoming longwave radiation at surface",                         "W/m**2"                             },
+  { 115, "SWISS_WE",  "Swiss",                                                          "SWISS_WE 115 1 Swiss coordinates"   },
+  { 116, "SWISS_SN",  "Swiss",                                                          "SWISS_SN 116 1 Swiss coordinates"   },
+  { 150, "KOINDEX",   "KO index",                                                       "K"                                  },
+  { 151, "TTINDEX",   "total-totals index",                                             "K"                                  },
+  { 152, "DCI",       "deep convection index",                                          "K"                                  },
+  { 153, "SWEAT",     "severe weather thread index",                                    "undefined"                          },
+  { 154, "ADEDO2",    "adedokun 2 index",                                               "K"                                  },
+  { 160, "C_TSTORM",  "thunderstorm index using AdaBoost classifier",                   "undefined"                          },
+  { 161, "CN_TSTORM", "thunderstorm probabilty using AdaBoost classifier",              "%"                                  },
+  { 200, "WSHEARL",   "wind shear between surface and 3 km asl",                        "1/s"                                },
+  { 201, "WSHEARM",   "wind shear between surface and 6 km asl",                        "1/s"                                },
+  { 202, "WSHEARU",   "wind shear between 3 km (or surface) and 6 km asl",              "1/s"                                },
+  { 211, "VWIN",      "maximum OLD turbulent wind gust in 10m",                         "m s-1"                              },
+  { 212, "VW10M_20",  "maximum 10m wind speed",                                         "m s-1"                              },
+  { 213, "VW10M_25",  "duration of VWIN_10M above 25 knots",                            "s"                                  },
+  { 214, "VW10M_30",  "duration of VWIN_10M above 30 knots",                            "s"                                  },
+  { 215, "VW10M_35",  "duration of VWIN_10M above 35 knots",                            "s"                                  },
+  { 216, "VW10M_40",  "duration of VWIN_10M above 40 knots",                            "s"                                  },
+  { 217, "VW10M_45",  "duration of VWIN_10M above 45 knots",                            "s"                                  },
+  { 218, "VW10M_50",  "duration of VWIN_10M above 50 knots",                            "s"                                  },
+  { 219, "VOLD",      "maximum turbulent wind gust in 10m",                             "m s-1"                              },
+  { 220, "VJPS",      "maximum turbulent wind gust in 10m",                             "m s-1"                              },
+  { 221, "VBRA",      "maximum Brasseur turbulent wind gust in 10m",                    "m s-1"                              },
+  { 222, "VB10M_20",  "duration of VBRA_10M above 20 knots",                            "s"                                  },
+  { 223, "VB10M_25",  "duration of VBRA_10M above 25 knots",                            "s"                                  },
+  { 224, "VB10M_30",  "duration of VBRA_10M above 30 knots",                            "s"                                  },
+  { 225, "VB10M_35",  "duration of VBRA_10M above 35 knots",                            "s"                                  },
+  { 226, "VB10M_40",  "duration of VBRA_10M above 40 knots",                            "s"                                  },
+  { 227, "VB10M_45",  "duration of VBRA_10M above 45 knots",                            "s"                                  },
+  { 228, "VB10M_50",  "duration of VBRA_10M above 50 knots",                            "s"                                  },
+  { 231, "VCON",      "maximum convective wind gust in 10m",                            "m s-1"                              },
+  { 232, "VC10M_20",  "duration of VCON_10M above 20 knots",                            "s"                                  },
+  { 233, "VC10M_25",  "duration of VCON_10M above 25 knots",                            "s"                                  },
+  { 234, "VC10M_30",  "duration of VCON_10M above 30 knots",                            "s"                                  },
+  { 235, "VC10M_35",  "duration of VCON_10M above 35 knots",                            "s"                                  },
+  { 236, "VC10M_40",  "duration of VCON_10M above 40 knots",                            "s"                                  },
+  { 237, "VC10M_45",  "duration of VCON_10M above 45 knots",                            "s"                                  },
+  { 238, "VC10M_50",  "duration of VCON_10M above 50 knots",                            "s"                                  },
+  { 241, "FMAX",      "maximum wind speed at k=ke",                                     "m s-1"                              },
+  { 242, "USTARMAX",  "maximal u*=SQRT(Drag_coef)*fmax_10m",                            "m s-1"                              },
+  { 243, "GLOB_DIF",  "global diffuse shortwave radiation at the surface",              "W/m**2"                             },
+  { 244, "GLOB_DIR",  "global direct (beam) shortwave radiation at the surface",        "W/m**2"                             },
+  { 245, "GLOB_vE",   "global shortwave radiation on a vertical surface facing east",   "W/m**2"                             },
+  { 246, "GLOB_vS",   "global shortwave radiation on a vertical surface facing south",  "W/m**2"                             },
+  { 247, "GLOB_vW",   "global shortwave radiation on a vertical surface facing west",   "W/m**2"                             },
+  { 248, "GLOB_vN",   "global shortwave radiation on a vertical surface facing north",  "W/m**2"                             },
+  { 249, "LW_TG_vS",  "incoming longwave radiation on a vertical surface facing south", "W/m**2"                             },
+  { 250, "ENTH",      "enthalpy",                                                       "kJ/kg"                              },
+  { 251, "ENTH",      "enthalpy",                                                       "kJ/kg"                              },
+  { 252, "MIXRAT",    "mixing ratio",                                                   "g/kg"                               },
+  { 253, "MIXRAT",    "mixing ratio",                                                   "g/kg"                               },
+  { 254, "TW",        "wet bulb temperature",                                           "degC"                               },
+  { 255, "TW",        "wet bulb temperature",                                           "degC"                               },
+};
+
 
 void
 tableDefault(void)
@@ -804,6 +1131,102 @@ tableDefault(void)
   tableID = tableDef(modelID, 128, "remo");
 
   tableLink(tableID, remo, sizeof(remo) / sizeof(PAR));
+
+  /*
+   *  define table : cosmo002
+   */
+
+  instID  = institutInq(0, 0, "MCH", NULL);
+  if ( instID == -1 )
+    instID  = institutDef(0, 0, "MCH", NULL);
+
+  modelID = modelInq(instID, 0, "COSMO");
+  if ( modelID == -1 )
+    modelID = modelDef(instID, 0, "COSMO");
+
+  tableID = tableDef(modelID, 002, "cosmo002");
+
+  tableLink(tableID, cosmo002, sizeof(cosmo002) / sizeof(PAR));
+
+  /*
+   *  define table : cosmo201
+   */
+
+  instID  = institutInq(0, 0, "MCH", NULL);
+  if ( instID == -1 )
+    instID  = institutDef(0, 0, "MCH", NULL);
+
+  modelID = modelInq(instID, 0, "COSMO");
+  if ( modelID == -1 )
+    modelID = modelDef(instID, 0, "COSMO");
+
+  tableID = tableDef(modelID, 201, "cosmo201");
+
+  tableLink(tableID, cosmo201, sizeof(cosmo201) / sizeof(PAR));
+
+  /*
+   *  define table : cosmo202
+   */
+
+  instID  = institutInq(0, 0, "MCH", NULL);
+  if ( instID == -1 )
+    instID  = institutDef(0, 0, "MCH", NULL);
+
+  modelID = modelInq(instID, 0, "COSMO");
+  if ( modelID == -1 )
+    modelID = modelDef(instID, 0, "COSMO");
+
+  tableID = tableDef(modelID, 202, "cosmo202");
+
+  tableLink(tableID, cosmo202, sizeof(cosmo202) / sizeof(PAR));
+
+  /*
+   *  define table : cosmo203
+   */
+
+  instID  = institutInq(0, 0, "MCH", NULL);
+  if ( instID == -1 )
+    instID  = institutDef(0, 0, "MCH", NULL);
+
+  modelID = modelInq(instID, 0, "COSMO");
+  if ( modelID == -1 )
+    modelID = modelDef(instID, 0, "COSMO");
+
+  tableID = tableDef(modelID, 203, "cosmo203");
+
+  tableLink(tableID, cosmo203, sizeof(cosmo203) / sizeof(PAR));
+
+  /*
+   *  define table : cosmo205
+   */
+
+  instID  = institutInq(0, 0, "MCH", NULL);
+  if ( instID == -1 )
+    instID  = institutDef(0, 0, "MCH", NULL);
+
+  modelID = modelInq(instID, 0, "COSMO");
+  if ( modelID == -1 )
+    modelID = modelDef(instID, 0, "COSMO");
+
+  tableID = tableDef(modelID, 205, "cosmo205");
+
+  tableLink(tableID, cosmo205, sizeof(cosmo205) / sizeof(PAR));
+
+  /*
+   *  define table : cosmo250
+   */
+
+  instID  = institutInq(0, 0, "MCH", NULL);
+  if ( instID == -1 )
+    instID  = institutDef(0, 0, "MCH", NULL);
+
+  modelID = modelInq(instID, 0, "COSMO");
+  if ( modelID == -1 )
+    modelID = modelDef(instID, 0, "COSMO");
+
+  tableID = tableDef(modelID, 250, "cosmo250");
+
+  tableLink(tableID, cosmo250, sizeof(cosmo250) / sizeof(PAR));
 }
 
 #endif  /* _TABLE_H */
