@@ -2858,7 +2858,7 @@ int cdfDefVar(int streamID, int varID)
 
       if ( laddoffset || lscalefactor )
 	{
-	  if ( IS_EQUAL(addoffset, (double) ((float) addoffset)) &&
+	  if ( IS_EQUAL(addoffset,   (double) ((float) addoffset)) &&
 	       IS_EQUAL(scalefactor, (double) ((float) scalefactor)) )
 	    {
 	      astype = NC_FLOAT;
@@ -2867,11 +2867,11 @@ int cdfDefVar(int streamID, int varID)
 	  if ( xtype == (int) NC_FLOAT ) astype = NC_FLOAT;
 	}
 
-      if ( laddoffset )
-	cdf_put_att_double(fileID, ncvarid, "add_offset", (nc_type) astype, 1L, &addoffset);
-
-      if ( lscalefactor )
-	cdf_put_att_double(fileID, ncvarid, "scale_factor", (nc_type) astype, 1L, &scalefactor);
+      if ( laddoffset || lscalefactor )
+	{
+	  cdf_put_att_double(fileID, ncvarid, "add_offset",   (nc_type) astype, 1L, &addoffset);
+	  cdf_put_att_double(fileID, ncvarid, "scale_factor", (nc_type) astype, 1L, &scalefactor);
+	}
     }
 
   streamptr->vars[varID].ncvarid = ncvarid;

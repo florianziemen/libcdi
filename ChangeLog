@@ -1,3 +1,7 @@
+2010-01-14  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdfDefVar: define add_offset and scale_factor always together
+	
 2010-01-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added optional sorting of parameters
