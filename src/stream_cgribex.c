@@ -1396,7 +1396,7 @@ void cgribexDefModel(int *isec1, int vlistID, int varID)
 }
 
 static
-void cgribexDefParam(int *isec1, int param)
+void cgribexDefParam(int *isec1, int param, int tabnum)
 {
   static char func[] = "cgribexDefParam";
   int pdis, pcat, pnum;
@@ -1411,6 +1411,8 @@ void cgribexDefParam(int *isec1, int param)
     }
     
   if ( pnum < 0 ) pnum = -pnum;
+
+  if ( pcat == 255 ) pcat = tabnum;
 
   ISEC1_CodeTable = pcat;
   ISEC1_Parameter = pnum;
@@ -2004,7 +2006,7 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   datatype = vlistInqVarDatatype(vlistID, varID);
 
-  cgribexDefParam(isec1, param);
+  cgribexDefParam(isec1, param, tabnum);
   cgribexDefTime(isec1, date, time, numavg, vlistInqTaxis(vlistID));
   cgribexDefGrid(isec1, isec2, gridID);
   cgribexDefLevel(isec1, isec2, fsec2, zaxisID, levelID);

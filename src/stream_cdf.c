@@ -6128,9 +6128,12 @@ void cdfDefInstitut(int streamID)
       if ( longname )
 	{
 	  len = strlen(longname);
-	  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-	  cdf_put_att_text(fileID, NC_GLOBAL, "institution", len, longname);
-	  if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
+	  if ( len > 0 )
+	    {
+	      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+	      cdf_put_att_text(fileID, NC_GLOBAL, "institution", len, longname);
+	      if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
+	    }
 	}
     }
 #endif
@@ -6157,9 +6160,12 @@ void cdfDefSource(int streamID)
       if ( longname )
 	{
 	  len = strlen(longname);
-	  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-	  cdf_put_att_text(fileID, NC_GLOBAL, "source", len, longname);
-	  if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
+	  if ( len > 0 )
+	    {
+	      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+	      cdf_put_att_text(fileID, NC_GLOBAL, "source", len, longname);
+	      if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
+	    }
 	}
     }
 #endif
