@@ -4872,12 +4872,13 @@ void gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 
   grsdef();
 
-  if ( DBL_IS_NAN(FSEC3_MissVal) && lmissvalinfo)
-    {
-      lmissvalinfo = 0;
-      FSEC3_MissVal = GRIB_MISSVAL;
-      Message(func, "Missing value = NaN is unsupported, set to %g!", GRIB_MISSVAL);
-    }
+  if ( dfunc != 'L' && dfunc != 'J' )
+    if ( DBL_IS_NAN(FSEC3_MissVal) && lmissvalinfo )
+      {
+	lmissvalinfo = 0;
+	FSEC3_MissVal = GRIB_MISSVAL;
+	Message(func, "Missing value = NaN is unsupported, set to %g!", GRIB_MISSVAL);
+      }
 
   ISEC2_Reduced = FALSE;
 
@@ -9136,7 +9137,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.4.2" " of ""Jan 15 2010"" ""12:14:26";
+static const char grb_libvers[] = "1.4.2" " of ""Jan 15 2010"" ""13:10:36";
 const char *
 cgribexLibraryVersion(void)
 {
