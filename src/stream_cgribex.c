@@ -204,8 +204,8 @@ int cgribexGetTimeUnit(int *isec1)
 
 
 static
-void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *fsec2,
-		      int *isec4, long recsize, off_t position, int prec, int ztype)
+void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
+		      int *isec4, long recsize, off_t position, int prec, int ztype, int lmv)
 {
   static char func[] = "cgribexAddRecord";
   int gridtype;
@@ -436,6 +436,8 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
 
   varDefZtype(varID, ztype);
 
+  if ( lmv ) varDefMissval(varID, FSEC3_MissVal);
+
   if ( varInqInst(varID) == CDI_UNDEFID )
     {
       int center, subcenter, instID;
@@ -475,16 +477,63 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
 	    varID, param, zaxistype, gridID, levelID);
 }
 
+static
+void MCH_get_undef(int *isec1, double *undef_pds, double *undef_eps)
+{
+  /* 2010-01-13: Oliver Fuhrer */
+  if ( ISEC1_CenterID == 215 ) {
+    if (isec1[34] != 0 && isec1[34] != 255) {
+      if (isec1[34] & 2) {
+        if (isec1[34] & 1) {
+          *undef_pds = -0.99*pow(10.0,-isec1[35]);
+        } else {
+          *undef_pds = +0.99*pow(10.0,-isec1[35]);
+        }
+        *undef_eps = pow(10.0,-isec1[35]-1);
+      } else {
+        if (isec1[34] & 1) {
+          *undef_pds = -0.99*pow(10.0,+isec1[35]);
+        } else {
+          *undef_pds = +0.99*pow(10.0,+isec1[35]);
+        }
+        *undef_eps = pow(10.0,isec1[35]-1);
+      }
+    }
+  }
+}
+
+static
+void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
+			 int *isec3, double *fsec3, int *isec4, double *fsec4, 
+			 int *gribbuffer, int recsize, int *lmv)
+{
+  int iret = 0, ipunp = 0, iword = 0;
+
+  gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
+	   ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);
+
+  *lmv = 0;
+
+  if ( ISEC1_CenterID == 215 && (isec1[34] != 0 && isec1[34] != 255) )
+    {
+      double undef_pds, undef_eps;
+
+      MCH_get_undef(isec1, &undef_pds, &undef_eps);
+      FSEC3_MissVal = undef_pds;
+      *lmv = 1;
+    }
+}
+
 
 void cgribexScanTimestep1(int streamID)
 {
   static char func[] = "cgribexScanTimestep1";
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
+  int lmv = 0;
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
   long buffersize = 0;
-  int iret = 0, ipunp = 0, iword = 0;
   int status;
   int fileID;
   int param = 0;
@@ -560,8 +609,8 @@ void cgribexScanTimestep1(int streamID)
 	    }
 	}
 
-      gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
-	       ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);
+      cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
+			  (int *) gribbuffer, recsize, &lmv);
 
       param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
       if ( ISEC1_LevelType == 100 ) ISEC1_Level1 *= 100;
@@ -644,7 +693,8 @@ void cgribexScanTimestep1(int streamID)
       if ( CDI_Debug )
 	Message(func, "%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
 
-      cgribexAddRecord(streamID, param, isec1, isec2, fsec2, isec4, recsize, recpos, prec, ztype);
+      cgribexAddRecord(streamID, param, isec1, isec2, fsec2, fsec3,
+		       isec4, recsize, recpos, prec, ztype, lmv);
     }
 
   streamptr->rtsteps = 1;
@@ -717,10 +767,10 @@ int cgribexScanTimestep2(int streamID)
   static char func[] = "cgribexScanTimestep2";
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
+  int lmv = 0;
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
   long buffersize = 0;
-  int iret = 0, ipunp = 0, iword = 0;
   int status;
   int fileID;
   int param = 0;
@@ -815,8 +865,8 @@ int cgribexScanTimestep2(int streamID)
 	    }
 	}
 
-      gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
-	       ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);
+      cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
+			  (int *) gribbuffer, recsize, &lmv);
 
       param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
       if ( ISEC1_LevelType == 100 ) ISEC1_Level1 *= 100;
@@ -984,11 +1034,11 @@ int cgribexScanTimestep(int streamID)
   static char func[] = "cgribexScanTimestep";
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
+  int lmv = 0;
   long recsize = 0;
   off_t recpos = 0;
   unsigned char *gribbuffer;
   long buffersize = 0;
-  int iret = 0, ipunp = 0, iword = 0;
   int status;
   int fileID;
   int param = 0;
@@ -1084,8 +1134,8 @@ int cgribexScanTimestep(int streamID)
 		}
 	    }
 
-	  gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
-		   ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);
+	  cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
+			      (int *) gribbuffer, recsize, &lmv);
 
 	  param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
 	  if ( ISEC1_LevelType == 100 ) ISEC1_Level1 *= 100;
@@ -1256,7 +1306,7 @@ int cgribexScanTimestep(int streamID)
 
 
 int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
-		  int unreduced, int *nmiss, int *zip, double *missval)
+		  int unreduced, int *nmiss, int *zip, double missval)
 {
   static char func[] = "cgribexDecode";
   int status = 0;
@@ -1273,45 +1323,44 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
   if ( unreduced ) strcpy(hoper, "R");
   else             strcpy(hoper, "D");
 
-  FSEC3_MissVal = cdiDefaultMissval;
-  *missval = cdiDefaultMissval;
+  FSEC3_MissVal = missval;
 
   if ( (izip = gribGetZip(gribsize, gribbuffer, &unzipsize)) > 0 )
     {
-          *zip = izip;
-	  if ( izip == 128 ) /* szip */
+      *zip = izip;
+      if ( izip == 128 ) /* szip */
+	{
+	  unsigned char *itmpbuffer = NULL;
+	  size_t itmpbuffersize = 0;
+
+	  if ( unzipsize < (long) gribsize )
 	    {
-	      unsigned char *itmpbuffer = NULL;
-	      size_t itmpbuffersize = 0;
-
-	      if ( unzipsize < (long) gribsize )
-		{
-		  fprintf(stderr, "Decompressed size smaller than compressed size (in %d; out %ld)!\n",
-			  gribsize, unzipsize);
-		  return (status);
-		}
-
-	      if ( itmpbuffersize < (size_t) gribsize )
-		{
-		  itmpbuffersize = gribsize;
-		  itmpbuffer = (unsigned char *) realloc(itmpbuffer, itmpbuffersize);
-		}
-
-	      memcpy(itmpbuffer, gribbuffer, itmpbuffersize);
-
-	      unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
-
-	      gribsize = gribUnzip(gribbuffer, unzipsize, itmpbuffer, gribsize);
-
-	      if ( gribsize <= 0 )
-		Error(func, "Decompression problem!\n");
-	   
-	      free(itmpbuffer);
+	      fprintf(stderr, "Decompressed size smaller than compressed size (in %d; out %ld)!\n",
+		      gribsize, unzipsize);
+	      return (status);
 	    }
-	  else
+
+	  if ( itmpbuffersize < (size_t) gribsize )
 	    {
-	      Error(func, "Decompression for %d not implemented!\n", izip);
+	      itmpbuffersize = gribsize;
+	      itmpbuffer = (unsigned char *) realloc(itmpbuffer, itmpbuffersize);
 	    }
+
+	  memcpy(itmpbuffer, gribbuffer, itmpbuffersize);
+
+	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
+
+	  gribsize = gribUnzip(gribbuffer, unzipsize, itmpbuffer, gribsize);
+
+	  if ( gribsize <= 0 )
+	    Error(func, "Decompression problem!\n");
+	  
+	  free(itmpbuffer);
+	}
+      else
+	{
+	  Error(func, "Decompression for %d not implemented!\n", izip);
+	}
     }
 
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, data,
@@ -1322,36 +1371,20 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
   else
     *nmiss = 0;
 
-  /* 2010-01-13: Oliver Fuhrer */
-  if (ISEC1_CenterID == 215 ) {
-    int i;
-    double undef_pds, undef_eps;
+  if ( ISEC1_CenterID == 215 && (isec1[34] != 0 && isec1[34] != 255) )
+    {
+      double undef_pds, undef_eps;
+      int i;
 
-    if (isec1[34] != 0 && isec1[34] != 255) {
-      if (isec1[34] & 2) {
-        if (isec1[34] & 1) {
-          undef_pds = -0.99*pow(10.0,-isec1[35]);
-        } else {
-          undef_pds = +0.99*pow(10.0,-isec1[35]);
-        }
-        undef_eps = pow(10.0,-isec1[35]-1);
-      } else {
-        if (isec1[34] & 1) {
-          undef_pds = -0.99*pow(10.0,+isec1[35]);
-        } else {
-          undef_pds = +0.99*pow(10.0,+isec1[35]);
-        }
-        undef_eps = pow(10.0,isec1[35]-1);
-      }
+      MCH_get_undef(isec1, &undef_pds, &undef_eps);
+
+      *nmiss = 0;
       for ( i = 0; i < gridsize; i++ )
         if ( (abs(data[i]-undef_pds) < undef_eps) || IS_EQUAL(data[i],FSEC3_MissVal) ) {
-          data[i] = undef_pds;
+          data[i] = missval;
           (*nmiss)++;
         }
-      FSEC3_MissVal = undef_pds;
-      *missval = undef_pds;
     }
-  }
 #else
   Error(func, "CGRIBEX support not compiled in!");
 #endif

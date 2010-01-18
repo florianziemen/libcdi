@@ -67,7 +67,7 @@ int grbDefRecord(int streamID)
 
 static
 int grbDecode(int filetype, unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
-	      int unreduced, int *nmiss, int *zip, double *missval)
+	      int unreduced, int *nmiss, int *zip, double missval)
 {
   //static char func[] = "grbDecode";
   int status = 0;
@@ -123,9 +123,10 @@ int grbReadRecord(int streamID, double *data, int *nmiss)
 
   fileRead(fileID, gribbuffer, (size_t) recsize);
 
-  grbDecode(filetype, gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, &zip, &missval);
+  printf("missval = %g\n", vlistInqVarMissval(vlistID, varID));
+  missval = vlistInqVarMissval(vlistID, varID);
 
-  if ( *nmiss > 0 ) vlistDefVarMissval(vlistID, varID, missval);
+  grbDecode(filetype, gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, &zip, missval);
 
   streamptr->tsteps[tsID].records[recID].zip = zip;
 
@@ -310,10 +311,10 @@ void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
 
       fileRead(fileID, gribbuffer, recsize);
 
-      grbDecode(filetype, gribbuffer, recsize, &data[levelID*gridsize], gridsize, 
-		streamptr->unreduced, &imiss, &zip, &missval);
+      missval = vlistInqVarMissval(vlistID, varID);
 
-      if ( imiss > 0 ) vlistDefVarMissval(vlistID, varID, missval);
+      grbDecode(filetype, gribbuffer, recsize, &data[levelID*gridsize], gridsize, 
+		streamptr->unreduced, &imiss, &zip, missval);
 
       *nmiss += imiss;
 
@@ -371,9 +372,9 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
 
   fileRead(fileID, gribbuffer, recsize);
 
-  grbDecode(filetype, gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, &zip, &missval);
+  missval = vlistInqVarMissval(vlistID, varID);
 
-  if ( *nmiss > 0 ) vlistDefVarMissval(vlistID, varID, missval);
+  grbDecode(filetype, gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, &zip, missval);
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 

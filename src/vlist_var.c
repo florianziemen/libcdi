@@ -287,12 +287,17 @@ void vlistDefVarCode(int vlistID, int varID, int code)
 {
   static char func[] = "vlistDefVarCode";
   vlist_t *vlistptr;
+  int param, pnum, pcat, pdis;
 
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(func, vlistID, varID);
 
-  vlistptr->vars[varID].param = cdiEncodeParam(code, 255, 255);
+  param = vlistptr->vars[varID].param;
+
+  cdiDecodeParam(param, &pnum, &pcat, &pdis);
+  
+  vlistptr->vars[varID].param = cdiEncodeParam(code, pcat, pdis);
 }
 
 
@@ -888,6 +893,18 @@ void vlistDefVarTable(int vlistID, int varID, int tableID)
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistptr->vars[varID].tableID = tableID;
+
+  {
+    int param, pnum, pcat, pdis;
+    int tablenum;
+    tablenum = tableInqNum(tableID);
+
+    param = vlistptr->vars[varID].param;
+
+    cdiDecodeParam(param, &pnum, &pcat, &pdis);
+  
+    vlistptr->vars[varID].param = cdiEncodeParam(pnum, tablenum, pdis);
+  }
 }
 
 

@@ -1521,7 +1521,7 @@ int gribapiScanTimestep(int streamID)
 
 
 int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
-		  int unreduced, int *nmiss, int *zip, double *missval)
+		  int unreduced, int *nmiss, int *zip, double missval)
 {
   static char func[] = "gribapiDecode";
   int status = 0;
@@ -1544,8 +1544,7 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
 
   recsize = gribsize;
   gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
-  GRIB_CHECK(grib_set_double(gh, "missingValue", GRIB_MISSVAL), 0);
-  *missval = GRIB_MISSVAL;
+  GRIB_CHECK(grib_set_double(gh, "missingValue", missval), 0);
 
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 

@@ -18,8 +18,8 @@ int cdiEncodeParam(int pnum, int pcat, int pdis)
   int param;
   int inum;
 
-  if ( pcat < 0 ) pcat = 255;
-  if ( pdis < 0 ) pdis = 255;
+  if ( pcat < 0 || pcat > 255 ) pcat = 255;
+  if ( pdis < 0 || pdis > 255 ) pdis = 255;
 
   inum = pnum;
   if ( pnum < 0 ) inum = -pnum;

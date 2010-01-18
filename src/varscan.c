@@ -45,6 +45,8 @@ typedef struct
   int         tableID;
   int         ztype;
   int         zlevel;
+  int         lmissval;
+  double      missval;
   char       *name;
   char       *longname;
   char       *units;
@@ -76,6 +78,8 @@ void paramInitEntry(int varID, int param)
   vartable[varID].tableID        = UNDEFID;
   vartable[varID].ztype          = COMPRESS_NONE;
   vartable[varID].zlevel         = 1;
+  vartable[varID].lmissval       = 0;
+  vartable[varID].missval        = 0;
   vartable[varID].name           = NULL;
   vartable[varID].longname       = NULL;
   vartable[varID].units          = NULL;
@@ -522,6 +526,8 @@ void cdiGenVars(int streamID)
       vlistDefVarTimaccu(vlistID, varID, timaccu);
       vlistDefVarZtype(vlistID, varID, ztype);
 
+      if ( vartable[varid].lmissval ) vlistDefVarMissval(vlistID, varID, vartable[varid].missval);
+
       if ( vartable[varid].name )     vlistDefVarName(vlistID, varID, vartable[varid].name);
       if ( vartable[varid].longname ) vlistDefVarLongname(vlistID, varID, vartable[varid].longname);
       if ( vartable[varid].units )    vlistDefVarUnits(vlistID, varID, vartable[varid].units);
@@ -810,6 +816,13 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
     }
 
   return (zaxisID);
+}
+
+
+void varDefMissval(int varID, double missval)
+{
+  vartable[varID].lmissval = 1;
+  vartable[varID].missval = missval;
 }
 
 

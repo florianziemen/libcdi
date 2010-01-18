@@ -5858,23 +5858,21 @@ int cdfInqContents(int streamID)
 	  pname = vlistInqVarNamePtr(vlistID, varID);
 	  len = strlen(pname);
 	  if ( len > 3 && isdigit((int) pname[3]) )
-	    if ( memcmp("var", pname, 3) == 0 )
-	      {
-		vlistDefVarCode(vlistID, varID, atoi(pname+3));
-		vlistDestroyVarName(vlistID, varID);
-	      }
-	}
-      if ( vlistInqVarCode(vlistID, varID) == -varID-1 )
-	{
-	  char *pname;
-	  pname = vlistInqVarNamePtr(vlistID, varID);
-	  len = strlen(pname);
-	  if ( len > 4 && isdigit((int) pname[4]) )
-	    if ( memcmp("code", pname, 4) == 0 )
-	      {
-		vlistDefVarCode(vlistID, varID, atoi(pname+4));
-		vlistDestroyVarName(vlistID, varID);
-	      }
+	    {
+	      if ( memcmp("var", pname, 3) == 0 )
+		{
+		  vlistDefVarCode(vlistID, varID, atoi(pname+3));
+		  vlistDestroyVarName(vlistID, varID);
+		}
+	    }
+	  else if ( len > 4 && isdigit((int) pname[4]) )
+	    {
+	      if ( memcmp("code", pname, 4) == 0 )
+		{
+		  vlistDefVarCode(vlistID, varID, atoi(pname+4));
+		  vlistDestroyVarName(vlistID, varID);
+		}
+	    }
 	}
     }
 
