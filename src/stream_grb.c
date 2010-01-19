@@ -123,7 +123,6 @@ int grbReadRecord(int streamID, double *data, int *nmiss)
 
   fileRead(fileID, gribbuffer, (size_t) recsize);
 
-  printf("missval = %g\n", vlistInqVarMissval(vlistID, varID));
   missval = vlistInqVarMissval(vlistID, varID);
 
   grbDecode(filetype, gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, &zip, missval);
