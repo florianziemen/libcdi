@@ -660,9 +660,7 @@ void iegAddRecord(int streamID, int param, int *pdb, int *gdb, double *vct,
       level2 = 0;
       if ( IEG_P_LevelType(pdb) == 100 ) level1 *= 100;
     }
-  /*
-  fprintf(stderr, "%d %d %d %d\n", param, IEG_P_LevelType(pdb), IEG_P_Level1(pdb), IEG_P_Level2(pdb));
-  */
+
   (*record).size     = recsize;
   (*record).position = position;
   (*record).param    = param;
@@ -1086,7 +1084,9 @@ int iegScanTimestep2(int streamID)
 	}
       if ( recID == nrecords )
 	{
-	  Warning(func, "param %d level %d not found at timestep %d", param, rlevel, tsID+1);
+	  char paramstr[32];
+	  cdiParamToString(param, paramstr, sizeof(paramstr));
+	  Warning(func, "param %s level %d not defined at timestep 1", paramstr, rlevel);
 	  return (CDI_EUFSTRUCT);
 	}
 
