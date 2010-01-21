@@ -658,7 +658,9 @@ void cgribexScanTimestep1(int streamID)
 	      if ( warn_time )
 		if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 )
 		  {
-		    Warning(func, "Inconsistent verification time (param %d level %d)", param, level1);
+		    char paramstr[32];
+		    cdiParamToString(param, paramstr, sizeof(paramstr));
+		    Warning(func, "Inconsistent verification time (param=%s level=%d)", paramstr, level1);
 		    warn_time = FALSE;
 		  }
 	    }
@@ -668,7 +670,9 @@ void cgribexScanTimestep1(int streamID)
 
 	      if ( recID < nrecs )
 		{
-		  Warning(func, "Param %d level %d already exist, skipped!", param, level1);
+		  char paramstr[32];
+		  cdiParamToString(param, paramstr, sizeof(paramstr));
+		  Warning(func, "Param=%s level=%d already exist, skipped!", paramstr, level1);
 		  continue;
 		}
 	    }
@@ -931,7 +935,9 @@ int cgribexScanTimestep2(int streamID)
 
       if ( recID == nrecords )
 	{
-	  Warning(func, "Param %d level %d not defined at timestep 1!", param, level1);
+	  char paramstr[32];
+	  cdiParamToString(param, paramstr, sizeof(paramstr));
+	  Warning(func, "Param=%s level=%d not defined at timestep 1!", paramstr, level1);
 	  return (CDI_EUFSTRUCT);
 	}
 
@@ -951,9 +957,12 @@ int cgribexScanTimestep2(int streamID)
 	{
 	  if ( streamptr->tsteps[tsID].records[recID].used )
 	    {
+	      char paramstr[32];
+	      cdiParamToString(param, paramstr, sizeof(paramstr));
+
 	      if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
 
-	      Warning(func, "Param %d level %d already exist, skipped!", param, level1);
+	      Warning(func, "Param=%s level=%d already exist, skipped!", paramstr, level1);
 	      continue;
 	    }
 	  else
@@ -1204,7 +1213,9 @@ int cgribexScanTimestep(int streamID)
 
 	  if ( vrecID == nrecs )
 	    {
-	      Warning(func, "Param %d level %d not available at timestep %d!", param, level1, tsID+1);
+	      char paramstr[32];
+	      cdiParamToString(param, paramstr, sizeof(paramstr));
+	      Warning(func, "Param=%s level=%d not available at timestep %d!", paramstr, level1, tsID+1);
 
 	      if ( cdiInventoryMode == 1 )
 		return (CDI_EUFSTRUCT);
@@ -1221,10 +1232,13 @@ int cgribexScanTimestep(int streamID)
 	    {
 	      if ( streamptr->tsteps[tsID].records[recID].used )
 		{
+		  char paramstr[32];
+		  cdiParamToString(param, paramstr, sizeof(paramstr));
+
 		  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
 		  
 		  if ( CDI_Debug )
-		    Warning(func, "Param %d level %d already exist, skipped!", param, level1);
+		    Warning(func, "Param=%s level=%d already exist, skipped!", paramstr, level1);
 
 		  continue;
 		}
@@ -1269,10 +1283,10 @@ int cgribexScanTimestep(int streamID)
 
       if ( vrecID < nrecs )
 	{
-	  Warning(func, "Param %d level %d not found at timestep %d!",
-		  streamptr->tsteps[tsID].records[recID].param,
-		  streamptr->tsteps[tsID].records[recID].ilevel,
-		  tsID+1);
+	  char paramstr[32];
+	  cdiParamToString(streamptr->tsteps[tsID].records[recID].param, paramstr, sizeof(paramstr));
+	  Warning(func, "Param=%s level=%d not found at timestep %d!",
+		  paramstr, streamptr->tsteps[tsID].records[recID].ilevel, tsID+1);
 	  return (CDI_EUFSTRUCT);
 	}
 
@@ -1439,7 +1453,9 @@ void cgribexDefParam(int *isec1, int param, int tabnum)
 
   if ( pdis != 255 && lwarn )
     {
-      Warning(func, "Can not convert GRIB2 parameter number (%d) to GRIB1", param);
+      char paramstr[32];
+      cdiParamToString(param, paramstr, sizeof(paramstr));
+      Warning(func, "Can not convert GRIB2 parameter (%s) to GRIB1!", paramstr);
       lwarn = FALSE;
     }
     
