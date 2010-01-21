@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 void cdiDecodeParam(int param, int *pnum, int *pcat, int *pdis)
 {
   unsigned int *uparam = (unsigned int *) &param;
@@ -71,4 +73,24 @@ int cdiEncodeTime(int hour, int minute, int second)
   time = hour*10000 + minute*100 + second;
 
   return (time);
+}
+
+
+void cdiParamToString(int param, char *paramstr, int maxlen)
+{
+  static char func[] = "cdiParamToString";
+  int dis, cat, num;
+  int len;
+
+  cdiDecodeParam(param, &num, &cat, &dis);
+
+  if ( dis == 255 && (cat == 255 || cat == 0 ) )
+    len = sprintf(paramstr, "%d", num);
+  else  if ( dis == 255 )
+    len = sprintf(paramstr, "%d.%d", num, cat);
+  else
+    len = sprintf(paramstr, "%d.%d.%d", num, cat, dis);
+
+  if ( len > ( maxlen-1) )
+    fprintf(stderr, "Internal problem (%s): size of input string is too small!\n", func);
 }
