@@ -931,7 +931,7 @@ int cgribexScanTimestep2(int streamID)
 
       if ( recID == nrecords )
 	{
-	  Warning(func, "Param %d level %d not found at timestep %d!", param, level1, tsID+1);
+	  Warning(func, "Param %d level %d not defined at timestep 1!", param, level1);
 	  return (CDI_EUFSTRUCT);
 	}
 
