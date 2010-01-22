@@ -156,6 +156,15 @@ extern "C" {
 #define  TUNIT_YEAR               6
 #define  TUNIT_QUARTER            7
 
+/* TSTEP types */
+
+#define  TSTEP_INSTANT            1
+#define  TSTEP_AVG                2
+#define  TSTEP_ACCUM              3
+#define  TSTEP_MAX                4
+#define  TSTEP_MIN                5
+#define  TSTEP_DIFF               6
+
 /* CALENDAR types */
 
 #define  CALENDAR_STANDARD        0  /* don't change this value (used also in griblib)! */
