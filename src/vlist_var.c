@@ -19,7 +19,7 @@ static void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].fvarID       = varID;
   vlistptr->vars[varID].mvarID       = varID;
   vlistptr->vars[varID].flag         = 0;
-  vlistptr->vars[varID].param        = CDI_UNDEFPARAM;
+  vlistptr->vars[varID].param        = 0;
   vlistptr->vars[varID].timeID       = CDI_UNDEFID;
   vlistptr->vars[varID].datatype     = CDI_UNDEFID;
   vlistptr->vars[varID].timave       = 0;

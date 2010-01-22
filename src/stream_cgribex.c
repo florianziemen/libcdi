@@ -1443,7 +1443,7 @@ void cgribexDefModel(int *isec1, int vlistID, int varID)
 }
 
 static
-void cgribexDefParam(int *isec1, int param, int tabnum)
+void cgribexDefParam(int *isec1, int param)
 {
   static char func[] = "cgribexDefParam";
   int pdis, pcat, pnum;
@@ -1460,8 +1460,6 @@ void cgribexDefParam(int *isec1, int param, int tabnum)
     }
     
   if ( pnum < 0 ) pnum = -pnum;
-
-  if ( pcat == 255 ) pcat = tabnum;
 
   ISEC1_CodeTable = pcat;
   ISEC1_Parameter = pnum;
@@ -2033,7 +2031,6 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   int isec0[2], isec1[4096], isec2[4096], isec3[2], isec4[512];
   double fsec2[512], fsec3[2];
   int datatype;
-  int code, tabnum;
   int param;
 
   memset(isec1, 0, 32*sizeof(int));
@@ -2041,10 +2038,6 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   gribsize = gribbuffersize / sizeof(int);
   param    = vlistInqVarParam(vlistID, varID);
-  code     = vlistInqVarCode(vlistID, varID);
-  tabnum   = tableInqNum(vlistInqVarTable(vlistID, varID));
-
-  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(code, tabnum, 255);
 
   cgribexDefaultSec0(isec0);
   cgribexDefaultSec1(isec1);
@@ -2055,7 +2048,7 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   datatype = vlistInqVarDatatype(vlistID, varID);
 
-  cgribexDefParam(isec1, param, tabnum);
+  cgribexDefParam(isec1, param);
   cgribexDefTime(isec1, date, time, numavg, vlistInqTaxis(vlistID));
   cgribexDefGrid(isec1, isec2, gridID);
   cgribexDefLevel(isec1, isec2, fsec2, zaxisID, levelID);

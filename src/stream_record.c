@@ -21,7 +21,7 @@ void recordInitEntry(record_t *record)
 {
   (*record).position = CDI_UNDEFID;
   (*record).size     = 0;
-  (*record).param    = CDI_UNDEFPARAM;
+  (*record).param    = 0;
   (*record).ilevel   = CDI_UNDEFID;
   (*record).used     = FALSE;
   (*record).varID    = CDI_UNDEFID;
@@ -111,7 +111,7 @@ void cdiInitRecord(int streamID)
   streamptr->record->used       = 0;
   streamptr->record->nrec       = 0;
   streamptr->record->dataread   = 1;
-  streamptr->record->param      = CDI_UNDEFPARAM;
+  streamptr->record->param      = 0;
   streamptr->record->level      = 0;
   streamptr->record->date       = 0;
   streamptr->record->time       = 0;

@@ -220,7 +220,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 {
   int varID;
   int gridsize = 0;
-  int gridID, zaxisID, code, tabnum, param;
+  int gridID, zaxisID, param;
   int zaxistype, ltype;
   int vdate, vtime;
   int nrecs, nvars, nzaxis, ntsteps;
@@ -254,12 +254,9 @@ void printShortinfo(int streamID, int vlistID, int vardis)
       for ( varID = 0; varID < nvars; varID++ )
 	{
 	  param   = vlistInqVarParam(vlistID, varID);
-	  code    = vlistInqVarCode(vlistID, varID);
-	  tabnum  = tableInqNum(vlistInqVarTable(vlistID, varID));
 	  gridID  = vlistInqVarGrid(vlistID, varID);
 	  zaxisID = vlistInqVarZaxis(vlistID, varID);
 
-	  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(code, tabnum, 255);
 	  cdiParamToString(param, paramstr, sizeof(paramstr));
 
 	  if ( vardis ) vlistInqVarName(vlistID, varID, varname);
@@ -772,7 +769,7 @@ int main(int argc, char *argv[])
       int streamID2 = CDI_UNDEFID;
       int filetype;
       int gridID, zaxisID;
-      int code, tabnum, param;
+      int param;
       int vdate, vtime;
       int nrecs, nvars;
       int levelID, levelsize;
@@ -890,10 +887,7 @@ int main(int argc, char *argv[])
 		  gridID   = vlistInqVarGrid(vlistID1, varID);
 		  zaxisID  = vlistInqVarZaxis(vlistID1, varID);
 		  param    = vlistInqVarParam(vlistID1, varID);
-		  code     = vlistInqVarCode(vlistID1, varID);
-		  tabnum   = tableInqNum(vlistInqVarTable(vlistID1, varID));
  
-		  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(code, tabnum, 255);
 		  cdiParamToString(param, paramstr, sizeof(paramstr));
 
 		  if ( Vardis ) vlistInqVarName(vlistID1, varID, varname);
@@ -930,10 +924,7 @@ int main(int argc, char *argv[])
 		  gridID   = vlistInqVarGrid(vlistID1, varID);
 		  zaxisID  = vlistInqVarZaxis(vlistID1, varID);
 		  param    = vlistInqVarParam(vlistID1, varID);
-		  code     = vlistInqVarCode(vlistID1, varID);
-		  tabnum   = tableInqNum(vlistInqVarTable(vlistID1, varID));
 
-		  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(code, tabnum, 255);
 		  cdiParamToString(param, paramstr, sizeof(paramstr));
 
 		  if ( Vardis ) vlistInqVarName(vlistID1, varID, varname);

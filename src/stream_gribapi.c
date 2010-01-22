@@ -2080,18 +2080,14 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   void *dummy = NULL;
   long edition = 2;
   int datatype;
-  int code, tabnum;
   int param;
   long bitsPerValue;
   grib_handle *gh = NULL;
   // extern unsigned char _grib_template_GRIB2[];
 
   param    = vlistInqVarParam(vlistID, varID);
-  code     = vlistInqVarCode(vlistID, varID);
-  tabnum   = tableInqNum(vlistInqVarTable(vlistID, varID));
   datatype = vlistInqVarDatatype(vlistID, varID);
 
-  if ( param == CDI_UNDEFPARAM ) param = cdiEncodeParam(code, tabnum, 255);
 #if defined(GRIBAPIENCODETEST)
   gh = (grib_handle *) gribHandleNew();
 #else
