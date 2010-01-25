@@ -1,6 +1,6 @@
 2010-01-25  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* added GRIB1 support for timerange 1,2,3,4,5
+	* added support for timerange 1,2,3,4,5 (GRIB1)
 
 2010-01-14  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
