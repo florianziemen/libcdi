@@ -1652,7 +1652,7 @@ void cgribexDefTime(int *isec1, int date, int time, int tsteptype, int numavg, i
 	case TUNIT_QUARTER: ISEC1_TimeUnit = ISEC1_TABLE4_QUARTER; break;
 	case TUNIT_HOUR:    ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;    break;
 	case TUNIT_DAY:     ISEC1_TimeUnit = ISEC1_TABLE4_DAY;     break;
-	case default:       ISEC1_TimeUnit = ISEC1_TABLE4_MINUTE;  break;
+	default:            ISEC1_TimeUnit = ISEC1_TABLE4_MINUTE;  break;
 	}
 
       /*
