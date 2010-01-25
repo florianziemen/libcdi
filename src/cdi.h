@@ -164,10 +164,13 @@ extern "C" {
 #define  TSTEP_MAX                4
 #define  TSTEP_MIN                5
 #define  TSTEP_DIFF               6
+#define  TSTEP_RANGE              7
+#define  TSTEP_INSTANT2           8
+#define  TSTEP_INSTANT3           9
 
 /* CALENDAR types */
 
-#define  CALENDAR_STANDARD        0  /* don't change this value (used also in griblib)! */
+#define  CALENDAR_STANDARD        0  /* don't change this value (used also in cgribexlib)! */
 #define  CALENDAR_PROLEPTIC       1
 #define  CALENDAR_360DAYS         2
 #define  CALENDAR_365DAYS         3
@@ -432,10 +435,14 @@ void    vlistDefVarScalefactor(int vlistID, int varID, double scalefactor);
 double  vlistInqVarScalefactor(int vlistID, int varID);
 void    vlistDefVarAddoffset(int vlistID, int varID, double addoffset);
 double  vlistInqVarAddoffset(int vlistID, int varID);
+
+void    vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
+int     vlistInqVarTsteptype(int vlistID, int varID);
 void    vlistDefVarTimave(int vlistID, int varID, int timave);
 int     vlistInqVarTimave(int vlistID, int varID);
 void    vlistDefVarTimaccu(int vlistID, int varID, int timaccu);
 int     vlistInqVarTimaccu(int vlistID, int varID);
+
 int     vlistInqVarSize(int vlistID, int varID);
 int     vlistInqVarID(int vlistID, int code);
 

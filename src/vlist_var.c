@@ -22,6 +22,7 @@ static void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].param        = 0;
   vlistptr->vars[varID].timeID       = CDI_UNDEFID;
   vlistptr->vars[varID].datatype     = CDI_UNDEFID;
+  vlistptr->vars[varID].tsteptype    = TSTEP_INSTANT;
   vlistptr->vars[varID].timave       = 0;
   vlistptr->vars[varID].timaccu      = 0;
   vlistptr->vars[varID].gridID       = CDI_UNDEFID;
@@ -1164,6 +1165,26 @@ void vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
   vlistCheckVarID(func, vlistID, varID);
 
   vlistptr->vars[varID].addoffset = addoffset;
+}
+
+
+void vlistDefVarTsteptype(int vlistID, int varID, int tsteptype)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistptr->vars[varID].tsteptype = tsteptype;
+}
+
+
+int vlistInqVarTsteptype(int vlistID, int varID)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  return (vlistptr->vars[varID].tsteptype);
 }
 
 

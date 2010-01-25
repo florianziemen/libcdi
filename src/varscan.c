@@ -30,6 +30,7 @@ typedef struct
 {
   int         param;
   int         prec;
+  int         tsteptype;
   int         timave;
   int         timaccu;
   int         gridID;
@@ -65,6 +66,7 @@ void paramInitEntry(int varID, int param)
 {
   vartable[varID].param          = param;
   vartable[varID].prec           = 0;
+  vartable[varID].tsteptype      = TSTEP_INSTANT;
   vartable[varID].timave         = 0;
   vartable[varID].timaccu        = 0;
   vartable[varID].gridID         = UNDEFID;
@@ -262,7 +264,7 @@ int paramNewEntry (int param)
 
 void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 		  int level1, int level2, int prec,
-		  int *pvarID, int *plevelID, int numavg, int ltype,
+		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype,
 		  const char *name, const char *longname, const char *units)
 {
   static char func[] = "varAddRecord";
@@ -281,6 +283,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
       vartable[varID].zaxistype = zaxistype;
       vartable[varID].ltype     = ltype;
       vartable[varID].lbounds   = lbounds;
+      if ( tsteptype > 0 ) vartable[varID].tsteptype = tsteptype;
       if ( numavg ) vartable[varID].timave = 1;
 
       if ( name )     if ( name[0] )     vartable[varID].name     = strdup(name);
@@ -382,6 +385,7 @@ void cdiGenVars(int streamID)
   int instID, modelID, tableID;
   int param, nlevels, zaxistype, lindex, ltype;
   int prec;
+  int tsteptype;
   int timave, timaccu;
   int lbounds;
   int ztype;
@@ -442,6 +446,7 @@ void cdiGenVars(int streamID)
       instID    = vartable[varid].instID;
       modelID   = vartable[varid].modelID;
       tableID   = vartable[varid].tableID;
+      tsteptype = vartable[varid].tsteptype;
       timave    = vartable[varid].timave;
       timaccu   = vartable[varid].timaccu;
       ztype     = vartable[varid].ztype;
@@ -522,6 +527,7 @@ void cdiGenVars(int streamID)
 
       vlistDefVarParam(vlistID, varID, param);
       vlistDefVarDatatype(vlistID, varID, prec);
+      vlistDefVarTsteptype(vlistID, varID, tsteptype);
       vlistDefVarTimave(vlistID, varID, timave);
       vlistDefVarTimaccu(vlistID, varID, timaccu);
       vlistDefVarZtype(vlistID, varID, ztype);

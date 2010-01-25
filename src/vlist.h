@@ -53,10 +53,11 @@ typedef struct
   int         instID;
   int         modelID;
   int         tableID;
+  int         tsteptype; /* Time step type: TSTEP_INSTANT, TSTEP_AVG ... */
   int         timave;
   int         timaccu;
   int         func;
-  int         missvalused;  /* TRUE if missval is defined */
+  int         missvalused; /* TRUE if missval is defined */
   char       *name;
   char       *longname;
   char       *stdname;

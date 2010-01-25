@@ -381,7 +381,8 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
 }
 
 static
-size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, int zaxisID, int date, int time, int numavg, 
+size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
+		 int date, int time, int tsteptype, int numavg, 
 		 long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize,
 		 int ljpeg, void *gribHandle)
 {
@@ -389,7 +390,7 @@ size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, 
 
   if ( filetype == FILETYPE_GRB )
     {
-      nbytes = cgribexEncode(varID, levelID, vlistID, gridID, zaxisID, date, time, numavg, 
+      nbytes = cgribexEncode(varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, 
 			     datasize, data, nmiss, gribbuffer, gribbuffersize);
     }
   else
@@ -445,6 +446,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   int tsID;
   int vlistID;
   int date, time;
+  int tsteptype;
   int numavg = 0;
   size_t nbytes;
   int filetype;
@@ -457,16 +459,17 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
 
   stream_check_ptr(func, streamptr);
 
-  filetype = streamptr->filetype;
+  filetype  = streamptr->filetype;
 
-  fileID   = streamInqFileID(streamID);
-  vlistID  = streamInqVlist(streamID);
-  gridID   = vlistInqVarGrid(vlistID, varID);
-  zaxisID  = vlistInqVarZaxis(vlistID, varID);
+  fileID    = streamInqFileID(streamID);
+  vlistID   = streamInqVlist(streamID);
+  gridID    = vlistInqVarGrid(vlistID, varID);
+  zaxisID   = vlistInqVarZaxis(vlistID, varID);
+  tsteptype = vlistInqVarTsteptype(vlistID, varID);
 
-  tsID     = streamptr->curTsID;
-  date     = streamptr->tsteps[tsID].taxis.vdate;
-  time     = streamptr->tsteps[tsID].taxis.vtime;
+  tsID      = streamptr->curTsID;
+  date      = streamptr->tsteps[tsID].taxis.vdate;
+  time      = streamptr->tsteps[tsID].taxis.vtime;
   if ( vlistInqVarTimave(vlistID, varID) )
     numavg = streamptr->tsteps[tsID].taxis.numavg;
 
@@ -498,7 +501,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
 	}
     }
 
-  nbytes = grbEncode(filetype, varID, levelID, vlistID, gridID, zaxisID, date, time, numavg, 
+  nbytes = grbEncode(filetype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, 
 		     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg, gh);
 
   if ( streamptr->ztype == COMPRESS_SZIP )

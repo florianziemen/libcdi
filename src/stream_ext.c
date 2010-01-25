@@ -303,7 +303,7 @@ void extAddRecord(int streamID, int param, int level, int xysize,
   leveltype = ZAXIS_GENERIC;
 
   varAddRecord(recID, param, gridID, leveltype, 0, level, 0,
-	       extInqDatatype(prec, number), &varID, &levelID, 0, 0, NULL, NULL, NULL);
+	       extInqDatatype(prec, number), &varID, &levelID, 0, 0, 0, NULL, NULL, NULL);
 
   (*record).varID   = varID;
   (*record).levelID = levelID;

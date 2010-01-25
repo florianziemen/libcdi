@@ -202,6 +202,44 @@ int cgribexGetTimeUnit(int *isec1)
   return (timeunit);
 }
 
+static
+int cgribexTimeIsFC(int *isec1)
+{
+  int isFC = TRUE;
+
+  if ( ISEC1_TimeRange == 10 && ISEC1_TimePeriod1 == 0 && ISEC1_TimePeriod2 == 0 )
+    isFC = FALSE;
+
+  return (isFC);
+}
+
+static
+int cgribexGetTsteptype(int timerange)
+{
+  static char func[] = "cgribexGetTsteptype";
+  int tsteptype = 0;
+  static int lprint = TRUE;
+
+  switch ( timerange )
+    {
+    case  0:  tsteptype = TSTEP_INSTANT;  break;
+    case  1:  tsteptype = TSTEP_INSTANT2; break;
+    case  2:  tsteptype = TSTEP_RANGE;    break;
+    case  3:  tsteptype = TSTEP_AVG;      break;
+    case  4:  tsteptype = TSTEP_ACCUM;    break;
+    case  5:  tsteptype = TSTEP_DIFF;     break;
+    case 10:  tsteptype = TSTEP_INSTANT3; break;
+    default:
+      if ( lprint )
+	{
+	  Message(func, "Time range %d unsupported", timerange);
+	  lprint = FALSE;
+	}
+    }
+
+  return (tsteptype);
+}
+
 
 static
 void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
@@ -215,6 +253,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
   int tsID, recID;
   int level1, level2;
   int numavg;
+  int tsteptype;
   int lbounds = 0;
   record_t *record;
   grid_t grid;
@@ -228,7 +267,8 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
   recID   = recordNewEntry(streamID, tsID);
   record  = &streamptr->tsteps[tsID].records[recID];
 
-  numavg  = ISEC1_AvgNum;
+  tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
+  numavg    = ISEC1_AvgNum;
 
   level1  = ISEC1_Level1;
   level2  = ISEC1_Level2;
@@ -429,7 +469,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
   if ( prec <  0 ) prec = DATATYPE_PACK;
 
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2,
-	       prec, &varID, &levelID, numavg, ISEC1_LevelType, NULL, NULL, NULL);
+	       prec, &varID, &levelID, tsteptype, numavg, ISEC1_LevelType, NULL, NULL, NULL);
 
   (*record).varID   = varID;
   (*record).levelID = levelID;
@@ -632,7 +672,7 @@ void cgribexScanTimestep1(int streamID)
 	  rdate = gribRefDate(isec1);
 	  rtime = gribRefTime(isec1);
 	  tunit = cgribexGetTimeUnit(isec1);
-	  fcast = gribTimeIsFC(isec1);
+	  fcast = cgribexTimeIsFC(isec1);
 	}
       else
 	{
@@ -786,6 +826,7 @@ int cgribexScanTimestep2(int streamID)
   int nrecords, nrecs, recID, rindex;
   long recsize = 0;
   int warn_numavg = TRUE;
+  int tsteptype;
   int taxisID = -1;
   TAXIS *taxis;
   int vlistID;
@@ -885,13 +926,14 @@ int cgribexScanTimestep2(int streamID)
 	  if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 	    {
 	      taxis->type  = TAXIS_RELATIVE;
+	      taxis->unit  = cgribexGetTimeUnit(isec1);
 	      taxis->rdate = gribRefDate(isec1);
 	      taxis->rtime = gribRefTime(isec1);
-	      taxis->unit  = cgribexGetTimeUnit(isec1);
 	    }
 	  else
 	    {
 	      taxis->type  = TAXIS_ABSOLUTE;
+	      taxis->unit  = cgribexGetTimeUnit(isec1);
 	    }
 	  taxis->vdate = vdate;
 	  taxis->vtime = vtime;
@@ -899,6 +941,8 @@ int cgribexScanTimestep2(int streamID)
 	  datetime0.date = vdate;
 	  datetime0.time = vtime;
 	}
+
+      tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
 
       if ( ISEC1_AvgNum )
 	{
@@ -1000,6 +1044,9 @@ int cgribexScanTimestep2(int streamID)
 	       IS_NOT_EQUAL(gridInqYval(gridID, 0),ISEC2_FirstLat*0.001) )
 	    gridChangeType(gridID, GRID_TRAJECTORY);
 	}
+
+      if ( tsteptype != vlistInqVarTsteptype(vlistID, varID) )
+	vlistDefVarTsteptype(vlistID, varID, tsteptype);
 
       rindex++;
     }
@@ -1162,13 +1209,14 @@ int cgribexScanTimestep(int streamID)
 	      if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 		{
 		  taxis->type  = TAXIS_RELATIVE;
+		  taxis->unit  = cgribexGetTimeUnit(isec1);
 		  taxis->rdate = gribRefDate(isec1);
 		  taxis->rtime = gribRefTime(isec1);
-		  taxis->unit  = cgribexGetTimeUnit(isec1);
 		}
 	      else
 		{
 		  taxis->type  = TAXIS_ABSOLUTE;
+		  taxis->unit  = cgribexGetTimeUnit(isec1);
 		}
 	      taxis->vdate = vdate;
 	      taxis->vtime = vtime;
@@ -1466,25 +1514,26 @@ void cgribexDefParam(int *isec1, int param)
 }
 
 static
-void cgribexDefTime(int *isec1, int date, int time, int numavg, int timeID)
+void cgribexDefTime(int *isec1, int date, int time, int tsteptype, int numavg, int taxisID)
 {
   int year, month, day, hour, minute, second;
   int century = 0;
   int timetype = -1;
+  int timerange = 0;
 
-  if ( timeID != -1 ) timetype = taxisInqType(timeID);
+  if ( taxisID != -1 ) timetype = taxisInqType(taxisID);
 
   if ( timetype == TAXIS_RELATIVE )
     {
       int factor = 1;
       int rdate, rtime;
       int julday1, secofday1, julday2, secofday2, days, secs;
-      int ival;
+      int ip, ip1 = 0, ip2 = 0;
       int calendar;
       
-      calendar = taxisInqCalendar(timeID);
-      rdate   = taxisInqRdate(timeID);
-      rtime   = taxisInqRtime(timeID);
+      calendar = taxisInqCalendar(taxisID);
+      rdate    = taxisInqRdate(taxisID);
+      rtime    = taxisInqRtime(taxisID);
       cdiDecodeDate(rdate, &year, &month, &day);
       cdiDecodeTime(rtime, &hour, &minute, &second);
 
@@ -1516,7 +1565,7 @@ void cgribexDefTime(int *isec1, int date, int time, int numavg, int timeID)
       */
       encode_juldaysec(calendar, year, month, day, hour, minute, &julday1, &secofday1);
 
-      switch (taxisInqTunit(timeID))
+      switch (taxisInqTunit(taxisID))
 	{
 	case TUNIT_MINUTE:  factor =    60; ISEC1_TimeUnit = ISEC1_TABLE4_MINUTE;  break;
 	case TUNIT_QUARTER: factor =   900; ISEC1_TimeUnit = ISEC1_TABLE4_QUARTER; break;
@@ -1533,17 +1582,38 @@ void cgribexDefTime(int *isec1, int date, int time, int numavg, int timeID)
       encode_juldaysec(calendar, year, month, day, hour, minute, &julday2, &secofday2);
 
       (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
-      /* ival = (int) ((days*86400.0 + secs)/factor); */
+      /* ip = (int) ((days*86400.0 + secs)/factor); */
 
       if ( (int) fmod(days*86400.0 + secs, factor) )
-	ival = -1;
+	ip = -1;
       else
-	ival = (int) ((days*86400.0 + secs)/factor);
+	ip = (int) ((days*86400.0 + secs)/factor);
       
-      if ( ival < 0 || ival > 255 ) timetype = TAXIS_ABSOLUTE;
+      switch ( tsteptype )
+	{
+	case TSTEP_INSTANT:  timerange =  0; ip1 = ip; ip2 = 0;  break;
+	case TSTEP_INSTANT2: timerange =  1; ip1 = 0;  ip2 = 0;  break;
+	case TSTEP_RANGE:    timerange =  2; ip1 = 0;  ip2 = ip; break;
+	case TSTEP_AVG:      timerange =  3; ip1 = 0;  ip2 = ip; break;
+	case TSTEP_ACCUM:    timerange =  4; ip1 = 0;  ip2 = ip; break;
+	case TSTEP_DIFF:     timerange =  5; ip1 = 0;  ip2 = ip; break;
+	case TSTEP_INSTANT3:
+	default:             timerange = 10; ip1 = ip; ip2 = 0;  break;
+	}
+      // printf("timerange: %d %d %d\n", timerange, ip1, ip2);
+  
+      if ( timerange == 10 )
+	{
+	  if ( ip < 0 || ip > 0xffff ) timetype = TAXIS_ABSOLUTE;
+	}
+      else
+	{
+	  if ( ip < 0 || ip > 0xff   ) timetype = TAXIS_ABSOLUTE;
+	}
       
-      ISEC1_TimeRange = 0;
-      ISEC1_TimePeriod1 = ival;
+      ISEC1_TimeRange   = timerange;
+      ISEC1_TimePeriod1 = ip1;
+      ISEC1_TimePeriod2 = ip2;
     }
 
   if ( timetype == TAXIS_ABSOLUTE )
@@ -1576,23 +1646,26 @@ void cgribexDefTime(int *isec1, int date, int time, int numavg, int timeID)
       ISEC1_Minute   = minute;
 
       /* ISEC1_TimeUnit = 0; */
-      switch (taxisInqTunit(timeID))
+      switch (taxisInqTunit(taxisID))
 	{
 	case TUNIT_MINUTE:  ISEC1_TimeUnit = ISEC1_TABLE4_MINUTE;  break;
 	case TUNIT_QUARTER: ISEC1_TimeUnit = ISEC1_TABLE4_QUARTER; break;
 	case TUNIT_HOUR:    ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;    break;
 	case TUNIT_DAY:     ISEC1_TimeUnit = ISEC1_TABLE4_DAY;     break;
+	case default:       ISEC1_TimeUnit = ISEC1_TABLE4_MINUTE;  break;
 	}
 
+      /*
       if ( numavg > 0 )
 	ISEC1_TimeRange = 0;
       else
-	ISEC1_TimeRange = 10;
+      */
+      ISEC1_TimeRange   = 10;
 
       ISEC1_TimePeriod1 = 0;
+      ISEC1_TimePeriod2 = 0;
     }
 
-  ISEC1_TimePeriod2    = 0;
   ISEC1_AvgNum         = numavg;
   ISEC1_AvgMiss        = 0;
   ISEC1_Century        = century;
@@ -2020,7 +2093,8 @@ void cgribexDefaultSec4(int *isec4)
 #endif
 
 
-size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int date, int time, int numavg, 
+size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
+		     int date, int time, int tsteptype, int numavg, 
 		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize)
 {
   static char func[] = "cgribexEncode";
@@ -2049,7 +2123,7 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   datatype = vlistInqVarDatatype(vlistID, varID);
 
   cgribexDefParam(isec1, param);
-  cgribexDefTime(isec1, date, time, numavg, vlistInqTaxis(vlistID));
+  cgribexDefTime(isec1, date, time, tsteptype, numavg, vlistInqTaxis(vlistID));
   cgribexDefGrid(isec1, isec2, gridID);
   cgribexDefLevel(isec1, isec2, fsec2, zaxisID, levelID);
   cgribexDefMask(isec3);
