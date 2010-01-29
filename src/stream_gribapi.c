@@ -176,6 +176,114 @@ int gribapiGetZaxisType(int grb_ltype)
 
 #if  defined  (HAVE_LIBGRIB_API)
 static
+int gribapiGetTimeUnits(grib_handle *gh)
+{
+  static char func[] = "gribapiGetTimeUnits";
+  int timeunits = -1;
+  int stepunits;
+  long lpar;
+  static int lprint = TRUE;
+
+  GRIB_CHECK(grib_get_long(gh, "stepUnits", &lpar), 0);
+  stepunits = (int) lpar;
+
+  switch ( stepunits )
+    {
+    case 0:  timeunits = TUNIT_MINUTE;  break;
+    case 1:  timeunits = TUNIT_HOUR;    break;
+    case 2:  timeunits = TUNIT_DAY;     break;
+    case 3:  timeunits = TUNIT_MONTH;   break;
+    case 4:  timeunits = TUNIT_YEAR;    break;
+    default:
+      if ( lprint )
+	{
+	  Message(func, "Step units %d unsupported", stepunits);
+	  lprint = FALSE;
+	}
+    }
+
+  return (timeunits);
+}
+#endif
+
+#if  defined  (HAVE_LIBGRIB_API)
+static
+int gribapiTimeIsFC(grib_handle *gh)
+{
+  int isFC = TRUE;
+  long sigofrtime;
+
+  GRIB_CHECK(grib_get_long(gh, "significanceOfReferenceTime", &sigofrtime), 0);
+
+  if ( sigofrtime == 3 ) isFC = FALSE;
+
+  return (isFC);
+}
+#endif
+
+#if  defined  (HAVE_LIBGRIB_API)
+static
+int gribapiGetTsteptype(grib_handle *gh)
+{
+  static char func[] = "gribapiGetTsteptype";
+  int tsteptype = 0;
+  int timerange;
+  long lpar;
+  static int lprint = TRUE;
+
+  if ( gribapiTimeIsFC(gh) )
+    {
+      GRIB_CHECK(grib_get_long(gh, "stepType", &lpar), 0);
+      timerange = (int) lpar;
+
+      // printf("timerange %d\n", timerange);
+
+      switch ( timerange )
+	{
+	case  0:  tsteptype = TSTEP_AVG;    break;
+	case  1:  tsteptype = TSTEP_ACCUM;  break;
+	case  2:  tsteptype = TSTEP_MIN;    break;
+	case  3:  tsteptype = TSTEP_MAX;    break;
+	case  4:  tsteptype = TSTEP_DIFF;   break;
+	default:
+	  if ( lprint )
+	    {
+	      Message(func, "Time range %d unsupported", timerange);
+	      lprint = FALSE;
+	    }
+	}
+    }
+
+  return (tsteptype);
+}
+#endif
+
+#if  defined  (HAVE_LIBGRIB_API)
+void gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
+{
+  long lpar;
+  long sigofrtime;
+
+  GRIB_CHECK(grib_get_long(gh, "significanceOfReferenceTime", &sigofrtime), 0);
+  if ( sigofrtime == 3 )
+    {
+      GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
+      *vdate = (int) lpar;
+      GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
+      *vtime = (int) lpar*100;
+    }
+  else
+    {
+      GRIB_CHECK(grib_get_long(gh, "validityDate", &lpar), 0);
+      *vdate = (int) lpar;
+      GRIB_CHECK(grib_get_long(gh, "validityTime", &lpar), 0);
+      *vtime = (int) lpar*100;
+    }
+}
+#endif
+
+#if  defined  (HAVE_LIBGRIB_API)
+static
 void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 		      long recsize, off_t position, int prec, int ztype)
 {
@@ -188,6 +296,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
   int tsID, recID;
   int level1, level2;
   int numavg;
+  int tsteptype;
   int lbounds = 0;
   record_t *record;
   grid_t grid;
@@ -209,6 +318,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
   recID   = recordNewEntry(streamID, tsID);
   record  = &streamptr->tsteps[tsID].records[recID];
 
+  tsteptype = gribapiGetTsteptype(gh);
   // numavg  = ISEC1_AvgNum;
   numavg  = 0;
   /*
@@ -516,11 +626,14 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
     {
       int modelID;
       long processID;
-      GRIB_CHECK(grib_get_long(gh, "generatingProcessIdentifier", &processID), 0);
-      modelID = modelInq(varInqInst(varID), processID, NULL);
-      if ( modelID == CDI_UNDEFID )
-	modelID = modelDef(varInqInst(varID), processID, NULL);
-      varDefModel(varID, modelID);
+      status = grib_get_long(gh, "generatingProcessIdentifier", &processID);
+      if ( status == 0 )
+	{
+	  modelID = modelInq(varInqInst(varID), processID, NULL);
+	  if ( modelID == CDI_UNDEFID )
+	    modelID = modelDef(varInqInst(varID), processID, NULL);
+	  varDefModel(varID, modelID);
+	}
     }
 
   if ( varInqTable(varID) == CDI_UNDEFID )
@@ -562,7 +675,8 @@ void gribapiScanTimestep1(int streamID)
   int status;
   int fileID;
   int rtabnum = 0;
-  int rcode = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
+  int rcode = 0, level1 = 0, level2 = 0;
+  int vdate = 0, vtime = 0;
   int param = 0;
   DateTime datetime, datetime0;
   int tsID;
@@ -701,10 +815,10 @@ void gribapiScanTimestep1(int streamID)
       level1 = (int) dlevel;
       level2 = 0;
 
-      GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
-      vdate = (int) lpar;
-      GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
-      vtime = (int) lpar*100;
+      gribapiGetValidityDateTime(gh, &vdate, &vtime);
+      /*
+      printf("%d %d %d.%d.%d\n", vdate, vtime, pnum, pcat, pdis);
+      */
 
       GRIB_CHECK(grib_get_long(gh,"bitsPerValue", &lpar),0);
       bitsPerValue = (int) lpar;
@@ -717,16 +831,12 @@ void gribapiScanTimestep1(int streamID)
 	{
 	  datetime0.date = vdate;
 	  datetime0.time = vtime;
-	  rdate = 0;
-	  rtime = 0;
-	  tunit = 0;
-	  fcast = 0;
-	  /*
-	  rdate = gribRefDate(isec1);
-	  rtime = gribRefTime(isec1);
-	  tunit = cgribexGetTimeUnit(isec1);
-	  fcast = gribTimeIsFC(isec1);
-	  */
+	  GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
+	  rdate = (int) lpar;
+	  GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
+	  rtime = (int) lpar*100;
+	  fcast = gribapiTimeIsFC(gh);
+	  if ( fcast ) tunit = gribapiGetTimeUnits(gh);
 	}
       else
 	{
@@ -812,7 +922,6 @@ void gribapiScanTimestep1(int streamID)
     {
       taxisID = taxisCreate(TAXIS_ABSOLUTE);
       taxis->type  = TAXIS_ABSOLUTE;
-      taxis->unit  = tunit;
     }
 
   taxis->vdate = datetime0.date;
@@ -883,6 +992,7 @@ int gribapiScanTimestep2(int streamID)
   int nrecords, nrecs, recID, rindex;
   long recsize = 0;
   int warn_numavg = TRUE;
+  int tsteptype;
   int taxisID = -1;
   TAXIS *taxis;
   int vlistID;
@@ -1026,24 +1136,18 @@ int gribapiScanTimestep2(int streamID)
       level1 = (int) dlevel;
       level2 = 0;
 
-      GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
-      vdate = (int) lpar;
-      GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
-      vtime = (int) lpar*100;
+      gribapiGetValidityDateTime(gh, &vdate, &vtime);
 
       if ( rindex == 0 )
 	{
 	  if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 	    {
 	      taxis->type  = TAXIS_RELATIVE;
-	      taxis->rdate = 0;
-	      taxis->rtime = 0;
-	      taxis->unit  = 0;
-	      /*
-	      taxis->rdate = gribRefDate(isec1);
-	      taxis->rtime = gribRefTime(isec1);
-	      taxis->unit  = cgribexGetTimeUnit(isec1);
-	      */
+	      GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
+	      taxis->rdate = (int) lpar;
+	      GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
+	      taxis->rtime = (int) lpar*100;
+	      taxis->unit  = gribapiGetTimeUnits(gh);
 	    }
 	  else
 	    {
@@ -1055,6 +1159,8 @@ int gribapiScanTimestep2(int streamID)
 	  datetime0.date = vdate;
 	  datetime0.time = vtime;
 	}
+
+      tsteptype = gribapiGetTsteptype(gh);
       /*
       if ( ISEC1_AvgNum )
 	{
@@ -1089,7 +1195,7 @@ int gribapiScanTimestep2(int streamID)
 	{
 	  char paramstr[32];
 	  cdiParamToString(param, paramstr, sizeof(paramstr));
-	  Warning(func, "Param=%s level=%d not defined at timestep 1!", param, level1);
+	  Warning(func, "Param=%s level=%d not defined at timestep 1!", paramstr, level1);
 	  return (CDI_EUFSTRUCT);
 	}
 
@@ -1154,6 +1260,9 @@ int gribapiScanTimestep2(int streamID)
 	    gridChangeType(gridID, GRID_TRAJECTORY);
 	}
       */
+      if ( tsteptype != vlistInqVarTsteptype(vlistID, varID) )
+	vlistDefVarTsteptype(vlistID, varID, tsteptype);
+
       rindex++;
     }
 
@@ -1358,10 +1467,7 @@ int gribapiScanTimestep(int streamID)
 	  level1 = (int) dlevel;
 	  level2 = 0;
 
-	  GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
-	  vdate = (int) lpar;
-	  GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
-	  vtime = (int) lpar*100;
+	  gribapiGetValidityDateTime(gh, &vdate, &vtime);
 
 	  if ( rindex == nrecs ) break;
 
@@ -1371,14 +1477,11 @@ int gribapiScanTimestep(int streamID)
 	      if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 		{
 		  taxis->type  = TAXIS_RELATIVE;
-		  taxis->rdate = 0;
-		  taxis->rtime = 0;
-		  taxis->unit  = 0;
-		  /*
-		    taxis->rdate = gribRefDate(isec1);
-		    taxis->rtime = gribRefTime(isec1);
-		    taxis->unit  = cgribexGetTimeUnit(isec1);
-		  */
+		  GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
+		  taxis->rdate = (int) lpar;
+		  GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
+		  taxis->rtime = (int) lpar*100;
+		  taxis->unit  = gribapiGetTimeUnits(gh);
 		}
 	      else
 		{
@@ -1591,7 +1694,6 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
   return (status);
 }
 
-
 #if  defined  (HAVE_LIBGRIB_API)
 static
 void gribapiDefInstitut(grib_handle *gh, int vlistID, int varID)
@@ -1612,7 +1714,9 @@ void gribapiDefInstitut(grib_handle *gh, int vlistID, int varID)
       GRIB_CHECK(grib_set_long(gh, "subCentre", subcenter), 0);
     }
 }
+#endif
 
+#if  defined  (HAVE_LIBGRIB_API)
 static
 void gribapiDefModel(grib_handle *gh, int vlistID, int varID)
 {
@@ -1626,7 +1730,9 @@ void gribapiDefModel(grib_handle *gh, int vlistID, int varID)
   if ( modelID != CDI_UNDEFID )
     GRIB_CHECK(grib_set_long(gh, "generatingProcessIdentifier", modelInqGribID(modelID)), 0);
 }
+#endif
 
+#if  defined  (HAVE_LIBGRIB_API)
 static
 void gribapiDefParam(grib_handle *gh, int param)
 {
@@ -1641,14 +1747,120 @@ void gribapiDefParam(grib_handle *gh, int param)
   GRIB_CHECK(grib_set_long(gh, "parameterCategory", pcat), 0);
   GRIB_CHECK(grib_set_long(gh, "parameterNumber",   pnum), 0);
 }
+#endif
 
+#if  defined  (HAVE_LIBGRIB_API)
 static
-void gribapiDefTime(grib_handle *gh , int date, int time, int numavg, int timeID)
+int gribapiDefTimerange(int tsteptype, int factor, int calendar,
+			int rdate, int rtime, int vdate, int vtime, int *pip)
 {
+  int timerange = -1;
+  int year, month, day, hour, minute, second;
+  int julday1, secofday1, julday2, secofday2, days, secs;
+  int ip = 0;
+
+  cdiDecodeDate(rdate, &year, &month, &day);
+  cdiDecodeTime(rtime, &hour, &minute, &second);
+  encode_juldaysec(calendar, year, month, day, hour, minute, &julday1, &secofday1);
+
+  cdiDecodeDate(vdate, &year, &month, &day);
+  cdiDecodeTime(vtime, &hour, &minute, &second);
+  encode_juldaysec(calendar, year, month, day, hour, minute, &julday2, &secofday2);
+  
+  (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
+
+  if ( !(int) fmod(days*86400.0 + secs, factor) )
+    {
+      ip = (int) ((days*86400.0 + secs)/factor);
+
+      switch ( tsteptype )
+	{
+	case TSTEP_AVG:    timerange =  0;  break;
+	case TSTEP_ACCUM:  timerange =  1;  break;
+	case TSTEP_MIN:    timerange =  2;  break;
+	case TSTEP_MAX:    timerange =  3;  break;
+	case TSTEP_DIFF:   timerange =  4;  break;
+	default:           timerange =  0;  break;
+	}
+    }
+
+  *pip = ip;
+
+  return (timerange);
+}
+#endif
+
+#if  defined  (HAVE_LIBGRIB_API)
+static
+int gribapiDefDateTime(grib_handle *gh, int timeunit, int date, int time)
+{
+  int factor = 1;
+  int stepunits = 0;
+
   GRIB_CHECK(grib_set_long(gh, "dataDate", date), 0);
   GRIB_CHECK(grib_set_long(gh, "dataTime", time/100), 0);
-}
 
+  switch (timeunit)
+    {
+    case TUNIT_MINUTE:  factor =    60; stepunits = 0;  break;
+    case TUNIT_HOUR:    factor =  3600; stepunits = 1;  break;
+    case TUNIT_DAY:     factor = 86400; stepunits = 2;  break;
+    default:            factor =  3600; stepunits = 1;  break;
+    }
+
+  GRIB_CHECK(grib_set_long(gh, "stepUnits", stepunits), 0);  
+
+  return (factor);
+}
+#endif
+
+#if  defined  (HAVE_LIBGRIB_API)
+static
+void gribapiDefTime(grib_handle *gh , int vdate, int vtime, int tsteptype, int numavg, int taxisID)
+{
+  int timetype = -1;
+  int timerange = 0;
+  int timeunit;
+
+  if ( taxisID != -1 ) timetype = taxisInqType(taxisID);
+
+  timeunit = taxisInqTunit(taxisID);
+
+  if ( timetype == TAXIS_RELATIVE )
+    {
+      int factor = 1;
+      int rdate, rtime;
+      int ip = 0;
+      int calendar;
+      
+      calendar = taxisInqCalendar(taxisID);
+      rdate    = taxisInqRdate(taxisID);
+      rtime    = taxisInqRtime(taxisID);
+
+      factor = gribapiDefDateTime(gh, timeunit, rdate, rtime);
+      
+      timerange = gribapiDefTimerange(tsteptype, factor, calendar,
+				      rdate, rtime, vdate, vtime, &ip);
+      // printf("timerange: %d %d\n", timerange, ip);
+
+      if ( ip > 0 )
+	{
+	  GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
+	  //GRIB_CHECK(grib_set_long(gh, "stepType", timerange), 0);
+	  GRIB_CHECK(grib_set_long(gh, "stepRange", ip), 0);
+	}
+    }
+
+  if ( timetype == TAXIS_ABSOLUTE )
+    {
+      (void) gribapiDefDateTime(gh, timeunit, vdate, vtime);
+
+      // GRIB_CHECK(grib_set_long(gh, "stepType", timerange), 0);
+    }
+}
+#endif
+
+#if  defined  (HAVE_LIBGRIB_API)
 static
 void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 {
@@ -1864,7 +2076,9 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
       Error(func, "%s grid unsupported!", gridNamePtr(gridtype));
     }
 }
+#endif
 
+#if  defined  (HAVE_LIBGRIB_API)
 static
 void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 {
@@ -2069,7 +2283,8 @@ void gribHandleDelete(void *gh)
 
 /* #define GRIBAPIENCODETEST 1 */
 
-size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int date, int time, int numavg, 
+size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
+		     int vdate, int vtime, int tsteptype, int numavg, 
 		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize,
 		     int ljpeg, void *gribHandle)
 {
@@ -2100,7 +2315,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   gribapiDefModel(gh, vlistID, varID);
 
   gribapiDefParam(gh, param);
-  gribapiDefTime(gh, date, time, numavg, vlistInqTaxis(vlistID));
+  gribapiDefTime(gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID));
   gribapiDefGrid(gh, gridID, ljpeg);
   gribapiDefLevel(gh, param, zaxisID, levelID);
 

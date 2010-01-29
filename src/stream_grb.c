@@ -390,12 +390,14 @@ size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, 
 
   if ( filetype == FILETYPE_GRB )
     {
-      nbytes = cgribexEncode(varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, 
+      nbytes = cgribexEncode(varID, levelID, vlistID, gridID, zaxisID,
+			     date, time, tsteptype, numavg, 
 			     datasize, data, nmiss, gribbuffer, gribbuffersize);
     }
   else
     {
-      nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID, date, time, numavg, 
+      nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID,
+			     date, time, tsteptype, numavg, 
 			     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg, gribHandle);
     }
 
