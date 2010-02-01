@@ -2655,7 +2655,12 @@ int cdfDefVar(int streamID, int varID)
 	}
 
       if ( strcmp(name, varname) != 0 )
-	Warning(func, "Changed double entry of variable name '%s' to '%s'!", name, varname);
+	{
+	  if ( iz == 1 )
+	    Warning(func, "Changed double entry of variable name '%s' to '%s'!", name, varname);
+	  else
+	    Warning(func, "Changed multiple entry of variable name '%s' to '%s'!", name, varname);
+	}
 
       name = varname;
     }
@@ -2865,10 +2870,7 @@ int cdfDefVar(int streamID, int varID)
 	    }
 
 	  if ( xtype == (int) NC_FLOAT ) astype = NC_FLOAT;
-	}
 
-      if ( laddoffset || lscalefactor )
-	{
 	  cdf_put_att_double(fileID, ncvarid, "add_offset",   (nc_type) astype, 1L, &addoffset);
 	  cdf_put_att_double(fileID, ncvarid, "scale_factor", (nc_type) astype, 1L, &scalefactor);
 	}
