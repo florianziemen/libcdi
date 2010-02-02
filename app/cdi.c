@@ -152,8 +152,8 @@ void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
       if ( nmiss > 0 )
 	{
 	  arrmean = 0;
-	  arrmin  =  1e50;
-	  arrmax  = -1e50;
+	  arrmin  =  1.e300;
+	  arrmax  = -1.e300;
 	  for ( i = 0; i < datasize; i++ )
 	    {
 	      if ( !DBL_IS_EQUAL(data[i], missval) )
