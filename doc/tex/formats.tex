@@ -166,8 +166,10 @@ The meaning of the variables are:
 
 IEG is the standard binary output format of the regional model REMO \cite{REMO}.
 It is simple an unpacked GRIB edition 1 format. The product and grid
-description section are coded with 4 byte integer values and the
+description sections are coded with 4 byte integer values and the
 data section can have 4 or 8 byte IEEE floating point values.
 The header and the data section have the standard Fortran blocking
-for binary data records.
+for binary data records. The IEG format has a fixed size of 100 for the
+vertical coordinate table. That means it is not possible to store more
+than 50 model levels with this format.
 {\CDI} supports only data on Gaussian and LonLat grids for the IEG format.
