@@ -39,13 +39,6 @@ char *strdup(const char *s);
 */
 #endif
 
-/*
-#if ! defined (HAVE_MMAP)
-#  if defined (__sun) || defined (__i386) || defined (__ia64)
-#    define HAVE_MMAP
-#  endif
-#endif
-*/
 
 #if defined (HAVE_MMAP)
 #  include <sys/mman.h> /* mmap() is defined in this header */
