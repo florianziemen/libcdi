@@ -250,8 +250,10 @@ static void printGridInfo(int vlistID)
 	}
       else if ( gridtype == GRID_SPECTRAL )
 	{
-	  fprintf(stdout, "size      : dim = %d  truncation = %d  spc = %d\n",
+	  fprintf(stdout, "size      : dim = %d  truncation = %d  spc = %d",
 		  gridsize, trunc, gridsize/2);
+	  fprintf(stdout, "  complexPacking = %d", gridInqComplexPacking(gridID));
+	  fprintf(stdout, "\n");
 	}
       else if ( gridtype == GRID_GME )
 	{

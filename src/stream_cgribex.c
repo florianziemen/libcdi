@@ -89,7 +89,6 @@ int cgribexGetIsRotated(int *isec2)
   return (isRotated);
 }
 
-
 static
 int cgribexGetZaxisType(int grb_ltype)
 {
@@ -413,6 +412,11 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
       {
 	grid.size  = ISEC4_NumValues;
 	grid.trunc = ISEC2_PentaJ;
+	if ( ISEC2_RepMode == 2 )
+	  grid.lcomplex = 1;
+	else
+	  grid.lcomplex = 0;
+
 	break;
       }
     case GRID_GME:
@@ -1827,7 +1831,10 @@ void cgribexDefGrid(int *isec1, int *isec2, int gridID)
 	ISEC2_PentaK   = ISEC2_PentaJ;
 	ISEC2_PentaM   = ISEC2_PentaJ;
 	ISEC2_RepType  = 1;
-	ISEC2_RepMode  = 1;
+	if ( gridInqComplexPacking(gridID) )
+	  ISEC2_RepMode  = 2;
+	else
+	  ISEC2_RepMode  = 1;
 	break;
       }
     case GRID_GME:

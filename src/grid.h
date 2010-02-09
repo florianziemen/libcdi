@@ -49,6 +49,7 @@ typedef struct {
   int     xsize;
   int     ysize;
   int     locked;
+  int     lcomplex;
   char    xname[256];
   char    yname[256];
   char    xlongname[256];

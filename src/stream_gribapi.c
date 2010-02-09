@@ -506,6 +506,11 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 	grid.size  = datasize;
 	GRIB_CHECK(grib_get_long(gh, "J", &lpar), 0);
 	grid.trunc = lpar;
+	GRIB_CHECK(grib_get_long(gh, "complexPacking", &lpar), 0);
+	if ( lpar )
+	  grid.lcomplex = 1;
+	else
+	  grid.lcomplex = 0;
 	break;
       }
       /*
@@ -2049,11 +2054,11 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	GRIB_CHECK(grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
 	GRIB_CHECK(grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
 
-	GRIB_CHECK(grib_set_string(gh, "typeOfPacking", "spectral_simple", &len), 0);
-	/*
-	ISEC2_RepType  = 1;
-	ISEC2_RepMode  = 1;
-	*/
+	if ( gridInqComplexPacking(gridID) )
+	  GRIB_CHECK(grib_set_long(gh, "complexPacking", 1), 0);
+	else
+	  GRIB_CHECK(grib_set_long(gh, "complexPacking", 0), 0);
+
 	break;
       }
       /*

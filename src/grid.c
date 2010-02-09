@@ -53,17 +53,17 @@ static int _grid_init = FALSE;
 static pthread_once_t _grid_init_thread = PTHREAD_ONCE_INIT;
 static pthread_mutex_t _grid_mutex;
 
-#  define GRID_LOCK           pthread_mutex_lock(&_grid_mutex);
-#  define GRID_UNLOCK         pthread_mutex_unlock(&_grid_mutex);
-#  define GRID_INIT                               \
-   if ( _grid_init == FALSE ) pthread_once(&_grid_init_thread, grid_initialize);
+#  define GRID_LOCK()         pthread_mutex_lock(&_grid_mutex)
+#  define GRID_UNLOCK()       pthread_mutex_unlock(&_grid_mutex)
+#  define GRID_INIT()                               \
+   if ( _grid_init == FALSE ) pthread_once(&_grid_init_thread, grid_initialize)
 
 #else
 
-#  define GRID_LOCK
-#  define GRID_UNLOCK
-#  define GRID_INIT                               \
-   if ( _grid_init == FALSE ) grid_initialize();
+#  define GRID_LOCK()
+#  define GRID_UNLOCK()
+#  define GRID_INIT()                               \
+   if ( _grid_init == FALSE ) grid_initialize()
 
 #endif
 
@@ -79,7 +79,8 @@ static gridPtrToIdx *_gridList  = NULL;
 static gridPtrToIdx *_gridAvail = NULL;
 
 
-static void grid_list_new(void)
+static
+void grid_list_new(void)
 {
   static char func[] = "grid_list_new";
 
@@ -88,16 +89,16 @@ static void grid_list_new(void)
   _gridList = (gridPtrToIdx *) malloc(_grid_max*sizeof(gridPtrToIdx));
 }
 
-
-static void grid_list_delete(void)
+static
+void grid_list_delete(void)
 {
   static char func[] = "grid_list_delete";
 
   if ( _gridList ) free(_gridList);
 }
 
-
-static void grid_init_pointer(void)
+static
+void grid_init_pointer(void)
 {
   int  i;
   
@@ -113,21 +114,21 @@ static void grid_init_pointer(void)
   _gridAvail = _gridList;
 }
 
-
+static
 grid_t *grid_to_pointer(int idx)
 {
   static char func[] = "grid_to_pointer";
   grid_t *gridptr = NULL;
 
-  GRID_INIT
+  GRID_INIT();
 
   if ( idx >= 0 && idx < _grid_max )
     {
-      GRID_LOCK
+      GRID_LOCK();
 
       gridptr = _gridList[idx].ptr;
 
-      GRID_UNLOCK
+      GRID_UNLOCK();
     }
   else
     Error(func, "grid index %d undefined!", idx);
@@ -135,9 +136,9 @@ grid_t *grid_to_pointer(int idx)
   return (gridptr);
 }
 
-
 /* Create an index from a pointer */
-static int grid_from_pointer(grid_t *ptr)
+static
+int grid_from_pointer(grid_t *ptr)
 {
   static char func[] = "grid_from_pointer";
   int      idx = -1;
@@ -145,7 +146,7 @@ static int grid_from_pointer(grid_t *ptr)
 
   if ( ptr )
     {
-      GRID_LOCK
+      GRID_LOCK();
 
       if ( _gridAvail )
 	{
@@ -161,7 +162,7 @@ static int grid_from_pointer(grid_t *ptr)
       else
 	Warning(func, "Too many open grids (limit is %d)!", _grid_max);
 
-      GRID_UNLOCK
+      GRID_UNLOCK();
     }
   else
     Error(func, "Internal problem (pointer %p undefined)", ptr);
@@ -169,8 +170,8 @@ static int grid_from_pointer(grid_t *ptr)
   return (idx);
 }
 
-
-static void grid_init_entry(grid_t *gridptr)
+static
+void grid_init_entry(grid_t *gridptr)
 {
   gridptr->self         = grid_from_pointer(gridptr);
 
@@ -221,6 +222,7 @@ static void grid_init_entry(grid_t *gridptr)
   gridptr->ypole        = 0.0;
   gridptr->angle        = 0.0;
   gridptr->locked       = FALSE;
+  gridptr->lcomplex     = 0;
   gridptr->xname[0]     = 0;
   gridptr->yname[0]     = 0;
   gridptr->xlongname[0] = 0;
@@ -231,8 +233,8 @@ static void grid_init_entry(grid_t *gridptr)
   gridptr->ystdname[0]  = 0;
 }
 
-
-static grid_t *grid_new_entry(void)
+static
+grid_t *grid_new_entry(void)
 {
   static char func[] = "grid_new_entry";
   grid_t *gridptr;
@@ -244,15 +246,15 @@ static grid_t *grid_new_entry(void)
   return (gridptr);
 }
 
-
-static void grid_delete_entry(grid_t *gridptr)
+static
+void grid_delete_entry(grid_t *gridptr)
 {
   static char func[] = "grid_delete_entry";
   int idx;
 
   idx = gridptr->self;
 
-  GRID_LOCK
+  GRID_LOCK();
 
   free(gridptr);
 
@@ -260,14 +262,14 @@ static void grid_delete_entry(grid_t *gridptr)
   _gridList[idx].ptr  = 0;
   _gridAvail          = &_gridList[idx];
 
-  GRID_UNLOCK
+  GRID_UNLOCK();
 
   if ( GRID_Debug )
     Message(func, "Removed idx %d from grid list", idx);
 }
 
-
-static void grid_initialize(void)
+static
+void grid_initialize(void)
 {
   char *env;
 
@@ -282,17 +284,17 @@ static void grid_initialize(void)
   grid_list_new();
   atexit(grid_list_delete);
 
-  GRID_LOCK
+  GRID_LOCK();
 
   grid_init_pointer();
 
-  GRID_UNLOCK
+  GRID_UNLOCK();
 
   _grid_init = TRUE;
 }
 
-
-static void grid_copy(grid_t *gridptr2, grid_t *gridptr1)
+static
+void grid_copy(grid_t *gridptr2, grid_t *gridptr1)
 {
   int gridID2;
 
@@ -301,8 +303,8 @@ static void grid_copy(grid_t *gridptr2, grid_t *gridptr1)
   gridptr2->self = gridID2;
 }
 
-
-static void grid_check_ptr(const char *func, grid_t *gridptr)
+static
+void grid_check_ptr(const char *func, grid_t *gridptr)
 {
   if ( gridptr == NULL )
     Error(func, "grid undefined!");
@@ -314,14 +316,14 @@ int gridSize(void)
   int gridsize = 0;
   int i;
   
-  GRID_INIT
+  GRID_INIT();
 
-  GRID_LOCK
+  GRID_LOCK();
 
   for ( i = 0; i < _grid_max; i++ )
     if ( _gridList[i].ptr ) gridsize++;
 
-  GRID_UNLOCK
+  GRID_UNLOCK();
 
   return (gridsize);
 }
@@ -635,7 +637,7 @@ int gridCreate(int gridtype, int size)
   if ( CDI_Debug )
     Message(func, "gridtype: %d size: %d", gridtype, size);
 
-  GRID_INIT
+  GRID_INIT();
 
   gridptr = grid_new_entry();
   if ( ! gridptr ) Error(func, "No memory");
@@ -2522,6 +2524,7 @@ int gridGenerate(grid_t grid)
     case GRID_SPECTRAL:
       {
 	gridDefTrunc(gridID, grid.trunc);
+	if ( grid.lcomplex ) gridDefComplexPacking(gridID, 1);
 	break;
       }
     case GRID_GME:
@@ -3544,4 +3547,27 @@ void gridInqLaea(int gridID, double *earth_radius, double *lon_0, double *lat_0)
       else
 	Warning(func, "LAEA grid undefined (gridID = %d)", gridID);
     }
+}
+
+
+void gridDefComplexPacking(int gridID, int lcomplex)
+{
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  gridptr->lcomplex = lcomplex;
+}
+
+
+int gridInqComplexPacking(int gridID)
+{
+  int lcomplex;
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  lcomplex = gridptr->lcomplex;
+
+  return (lcomplex);
 }
