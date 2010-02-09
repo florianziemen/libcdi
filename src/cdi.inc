@@ -4,15 +4,13 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   January 2010
+! Uwe Schulzweida, MPI-MET, Hamburg,   February 2010
 !
 
       INTEGER    CDI_UNDEFID           
       PARAMETER (CDI_UNDEFID            = -1)
       INTEGER    CDI_GLOBAL            
       PARAMETER (CDI_GLOBAL             = -1)
-      INTEGER    CDI_UNDEFPARAM        
-      PARAMETER (CDI_UNDEFPARAM         = 2147483647)
 !
 !  Byte order
 !
@@ -269,6 +267,27 @@
       INTEGER    TUNIT_QUARTER         
       PARAMETER (TUNIT_QUARTER          =  7)
 !
+!  TSTEP types
+!
+      INTEGER    TSTEP_INSTANT         
+      PARAMETER (TSTEP_INSTANT          =  1)
+      INTEGER    TSTEP_AVG             
+      PARAMETER (TSTEP_AVG              =  2)
+      INTEGER    TSTEP_ACCUM           
+      PARAMETER (TSTEP_ACCUM            =  3)
+      INTEGER    TSTEP_MAX             
+      PARAMETER (TSTEP_MAX              =  4)
+      INTEGER    TSTEP_MIN             
+      PARAMETER (TSTEP_MIN              =  5)
+      INTEGER    TSTEP_DIFF            
+      PARAMETER (TSTEP_DIFF             =  6)
+      INTEGER    TSTEP_RANGE           
+      PARAMETER (TSTEP_RANGE            =  7)
+      INTEGER    TSTEP_INSTANT2        
+      PARAMETER (TSTEP_INSTANT2         =  8)
+      INTEGER    TSTEP_INSTANT3        
+      PARAMETER (TSTEP_INSTANT3         =  9)
+!
 !  CALENDAR types
 !
       INTEGER    CALENDAR_STANDARD     
@@ -315,6 +334,15 @@
 !
 !  CDI converter routines
 !
+!
+!  parameter
+!
+!                     cdiParamToString
+!                                    (INTEGER         param,
+!                                     CHARACTER*(*)   paramstr,
+!                                     INTEGER         maxlen)
+      EXTERNAL        cdiParamToString
+
 !                     cdiDecodeParam
 !                                    (INTEGER         param,
 !                                     INTEGER         pnum,
@@ -878,6 +906,17 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarAddoffset
+
+!                     vlistDefVarTsteptype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         tsteptype)
+      EXTERNAL        vlistDefVarTsteptype
+
+      INTEGER         vlistInqVarTsteptype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarTsteptype
 
 !                     vlistDefVarTimave
 !                                    (INTEGER         vlistID,

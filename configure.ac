@@ -1,6 +1,6 @@
 #  Process this file with autoconf to produce a configure script.
 
-AC_INIT(cdi, 1.4.1.6, Uwe.Schulzweida@zmaw.de)
+AC_INIT(cdi, 1.4.2, Uwe.Schulzweida@zmaw.de)
 
 echo "configuring ${PACKAGE_NAME} ${PACKAGE_VERSION}"
 
