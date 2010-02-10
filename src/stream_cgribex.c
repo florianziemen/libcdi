@@ -1668,7 +1668,7 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 }
 
 static
-void cgribexDefGrid(int *isec1, int *isec2, int gridID)
+void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 {
   static char func[] = "cgribexDefGrid";
   int gridtype;
@@ -1832,9 +1832,15 @@ void cgribexDefGrid(int *isec1, int *isec2, int gridID)
 	ISEC2_PentaM   = ISEC2_PentaJ;
 	ISEC2_RepType  = 1;
 	if ( gridInqComplexPacking(gridID) )
-	  ISEC2_RepMode  = 2;
+	  {
+	    ISEC2_RepMode  = 2;
+	    isec4[3]       = 64;
+	  }
 	else
-	  ISEC2_RepMode  = 1;
+	  {
+	    ISEC2_RepMode  = 1;
+	    isec4[3]       = 0;
+	  }
 	break;
       }
     case GRID_GME:
@@ -2122,12 +2128,12 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   cgribexDefParam(isec1, param);
   cgribexDefTime(isec1, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID));
-  cgribexDefGrid(isec1, isec2, gridID);
+  cgribexDefGrid(isec1, isec2, isec4, gridID);
   cgribexDefLevel(isec1, isec2, fsec2, zaxisID, levelID);
   cgribexDefMask(isec3);
 
-  ISEC4_NumBits   = grbBitsPerValue(datatype);
   ISEC4_NumValues = gridInqSize(gridID);
+  ISEC4_NumBits   = grbBitsPerValue(datatype);
 
   if ( nmiss > 0 )
     {
