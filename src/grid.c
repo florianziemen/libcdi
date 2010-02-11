@@ -1176,8 +1176,8 @@ int gridInqSize(int gridID)
   return (size);
 }
 
-
-static int nsp2trunc(int nsp)
+static
+int nsp2trunc(int nsp)
 {
   /*  nsp = (trunc+1)*(trunc+1)              */
   /*      => trunc^2 + 3*trunc - (x-2) = 0   */
@@ -1187,7 +1187,7 @@ static int nsp2trunc(int nsp)
   /*         p = 3 and q = - (x-2)           */
   int trunc;
 
-  trunc = (int) (sqrt(nsp*4.0 + 1) - 3) / 2;
+  trunc = (int) (sqrt(nsp*4 + 1.) - 3) / 2;
 
   return (trunc);
 }
