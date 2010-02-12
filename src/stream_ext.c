@@ -155,12 +155,24 @@ int extReadRecord(int streamID, double *data, int *nmiss)
   streamptr->numvals += size;
 
   *nmiss = 0;
-  for ( i = 0; i < size; i++ )
-    if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
-      {
-	data[i] = missval;
-	(*nmiss)++;
-      }
+  if ( vlistInqVarNumber(vlistID, varID) == CDI_REAL )
+    {
+      for ( i = 0; i < size; i++ )
+	if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
+	  {
+	    data[i] = missval;
+	    (*nmiss)++;
+	  }
+    }
+  else
+    {
+      for ( i = 0; i < 2*size; i+=2 )
+	if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
+	  {
+	    data[i] = missval;
+	    (*nmiss)++;
+	  }
+    }
 
   return (1);
 }
@@ -889,12 +901,24 @@ void extReadVarDP(int streamID, int varID, double *data, int *nmiss)
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
   *nmiss = 0;
-  for ( i = 0; i < nlevs*gridsize; i++ )
-    if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
-      {
-	data[i] = missval;
-	(*nmiss)++;
-      }
+  if ( vlistInqVarNumber(vlistID, varID) == CDI_REAL )
+    {
+      for ( i = 0; i < nlevs*gridsize; i++ )
+	if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
+	  {
+	    data[i] = missval;
+	    (*nmiss)++;
+	  }
+    }
+  else
+    {
+      for ( i = 0; i < 2*nlevs*gridsize; i+=2 )
+	if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
+	  {
+	    data[i] = missval;
+	    (*nmiss)++;
+	  }
+    }
 }
 
 
@@ -940,12 +964,24 @@ void extReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
   *nmiss = 0;
-  for ( i = 0; i < gridsize; i++ )
-    if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
-      {
-	data[i] = missval;
-	(*nmiss)++;
-      }
+  if ( vlistInqVarNumber(vlistID, varID) == CDI_REAL )
+    {
+      for ( i = 0; i < gridsize; i++ )
+	if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
+	  {
+	    data[i] = missval;
+	    (*nmiss)++;
+	  }
+    }
+  else
+    {
+      for ( i = 0; i < 2*gridsize; i+=2 )
+	if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
+	  {
+	    data[i] = missval;
+	    (*nmiss)++;
+	  }
+    }
 }
 
 

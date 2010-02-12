@@ -183,9 +183,6 @@ void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
       if ( datasize > 0 ) arrmean /= datasize;
 
       fprintf(stdout, "%#12.5g%#12.5g%#12.5g\n", arrmin, arrmean, arrmax);
-
-      if ( imiss != nmiss && nmiss > 0 )
-	fprintf(stdout, "Found %d of %d missing values!\n", imiss, nmiss);
     }
   else
     {
@@ -208,10 +205,15 @@ void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
 	    }
 	}
 
+      imiss = datasize - nvals_r;
+
       if ( nvals_r > 0 ) arrmean_r = arrsum_r / nvals_r;
       if ( nvals_i > 0 ) arrmean_i = arrsum_i / nvals_i;
       fprintf(stdout, "  -  (%#12.5g,%#12.5g)  -\n", arrmean_r, arrmean_i);
     }
+
+  if ( imiss != nmiss && nmiss > 0 )
+    fprintf(stdout, "Found %d of %d missing values!\n", imiss, nmiss);
 }
 
 
