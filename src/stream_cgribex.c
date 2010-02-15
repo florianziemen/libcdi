@@ -2151,7 +2151,11 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
     }
 
   if ( isec4[2] == 128 && isec4[3] == 64 )
-    isec4[16] = (int) (1000*calculate_pfactor(data, ISEC2_PentaJ, isec4[17]));
+    {
+      isec4[16] = (int) (1000*calculate_pfactor(data, ISEC2_PentaJ, isec4[17]));
+      if ( isec4[16] < -10000 ) isec4[16] = -10000;
+      if ( isec4[16] >  10000 ) isec4[16] =  10000;
+    }
   //printf("isec4[16] %d\n", isec4[16]);
 
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,

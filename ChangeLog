@@ -1,3 +1,7 @@
+2010-02-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cgribexDefTime: bug fix for timerange = -1
+
 2010-02-10  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added support for complex packing of spectral data in GRIB
