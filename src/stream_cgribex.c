@@ -1553,7 +1553,7 @@ int cgribexDefTimerange(int tsteptype, int factor, int calendar,
 
   *pip1 = ip1;
   *pip2 = ip2;
-  //  printf("timerange %d %d %d\n", timerange, ip1, ip2);
+
   return (timerange);
 }
 
@@ -1631,16 +1631,20 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
       
       timerange = cgribexDefTimerange(tsteptype, factor, calendar,
 				      rdate, rtime, vdate, vtime, &ip1, &ip2);
-  
+
+      if ( timerange == -1 )
+	{
+	  timetype = TAXIS_ABSOLUTE;
+	}
       if ( timerange == 10 )
 	{
-	  if ( ip1 < 0 || ip1 > 0xffff ) timetype = TAXIS_ABSOLUTE;
-	  if ( ip2 < 0 || ip2 > 0xffff ) timetype = TAXIS_ABSOLUTE;
+	  if ( ip1 < 0 || ip1 > 0xFFFF ) timetype = TAXIS_ABSOLUTE;
+	  if ( ip2 < 0 || ip2 > 0xFFFF ) timetype = TAXIS_ABSOLUTE;
 	}
       else
 	{
-	  if ( ip1 < 0 || ip1 > 0xff   ) timetype = TAXIS_ABSOLUTE;
-	  if ( ip2 < 0 || ip2 > 0xff   ) timetype = TAXIS_ABSOLUTE;
+	  if ( ip1 < 0 || ip1 > 0xFF   ) timetype = TAXIS_ABSOLUTE;
+	  if ( ip2 < 0 || ip2 > 0xFF   ) timetype = TAXIS_ABSOLUTE;
 	}
       
       ISEC1_TimeRange   = timerange;
