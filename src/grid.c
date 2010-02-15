@@ -1862,6 +1862,9 @@ void gridDefXpole(int gridID, double xpole)
 
   gridptr = grid_to_pointer(gridID);
 
+  if ( memcmp(gridptr->xstdname, "grid", 4) != 0 )
+    strcpy(gridptr->xstdname, "grid_longitude");
+
   gridptr->isRotated = TRUE;
   gridptr->xpole = xpole;
 }
@@ -1902,6 +1905,9 @@ void gridDefYpole(int gridID, double ypole)
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
+
+  if ( memcmp(gridptr->ystdname, "grid", 4) != 0 )
+    strcpy(gridptr->ystdname, "grid_latitude");
 
   gridptr->isRotated = TRUE;
   gridptr->ypole = ypole;
