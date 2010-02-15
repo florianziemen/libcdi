@@ -1553,7 +1553,7 @@ int cgribexDefTimerange(int tsteptype, int factor, int calendar,
 
   *pip1 = ip1;
   *pip2 = ip2;
-
+  //  printf("timerange %d %d %d\n", timerange, ip1, ip2);
   return (timerange);
 }
 
@@ -1831,10 +1831,15 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	ISEC2_PentaK   = ISEC2_PentaJ;
 	ISEC2_PentaM   = ISEC2_PentaJ;
 	ISEC2_RepType  = 1;
+	isec4[2]       = 128;
 	if ( gridInqComplexPacking(gridID) )
 	  {
 	    ISEC2_RepMode  = 2;
 	    isec4[3]       = 64;
+	    isec4[16]      = 0;
+	    isec4[17]      = 20;
+	    isec4[18]      = 20;
+	    isec4[19]      = 20;
 	  }
 	else
 	  {
@@ -2140,6 +2145,10 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       FSEC3_MissVal = vlistInqVarMissval(vlistID, varID);
       ISEC1_Sec2Or3Flag |= 64;
     }
+
+  if ( isec4[2] == 128 && isec4[3] == 64 )
+    isec4[16] = (int) (1000*calculate_pfactor(data, ISEC2_PentaJ, isec4[17]));
+  //printf("isec4[16] %d\n", isec4[16]);
 
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
 	   datasize, (int *) gribbuffer, gribsize, &iword, "C", &iret);

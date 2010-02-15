@@ -299,7 +299,8 @@ void  gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 #define  BDS_RefValue       decfp2((int)bds[ 6], GET_UINT3(bds[ 7], bds[ 8], bds[ 9]))
 #define  BDS_NumBits        ((int) bds[10])
 #define  BDS_RealCoef       decfp2((int)bds[zoff+11], GET_UINT3(bds[zoff+12], bds[zoff+13], bds[zoff+14]))
-#define  BDS_Power          GET_INT2(bds[13], bds[14])
+#define  BDS_PackData       ((int) ((bds[zoff+11]<<8) + bds[zoff+12]))
+#define  BDS_Power          GET_INT2(bds[zoff+13], bds[zoff+14])
 #define  BDS_Z              (bds[13])
 
 /* GRIB1 Section 5: End Section (ES) */
@@ -4645,6 +4646,7 @@ int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4,
 	}
       else /* complex packed spherical harmonics */
 	{
+	  isec4[15] = BDS_PackData;
 	  /*    scaling factor */
 	  isec4[16] = BDS_Power;
 
@@ -8851,7 +8853,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.4.3" " of ""Feb 15 2010"" ""11:31:39";
+static const char grb_libvers[] = "1.4.3" " of ""Feb 15 2010"" ""13:50:31";
 const char *
 cgribexLibraryVersion(void)
 {
