@@ -1872,6 +1872,8 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
   static char func[] = "gribapiDefGrid";
   int gridtype;
   static short lwarn = TRUE;
+  size_t len;
+  const char *mesg;
 
   // ISEC1_Sec2Or3Flag = 128;
   
@@ -1927,7 +1929,6 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
       {
 	int nlon = 0, nlat;
 	double latIncr;
-	size_t len;
 
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
@@ -2004,9 +2005,15 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	//if ( ISEC2_LastLat > ISEC2_FirstLat ) ISEC2_ScanFlag += 64;
 
 	if ( ljpeg )
-	  GRIB_CHECK(grib_set_string(gh, "typeOfPacking", "grid_jpeg", &len), 0);
+	  {
+	    mesg = "grid_jpeg"; len = strlen(mesg);
+	    GRIB_CHECK(grib_set_string(gh, "typeOfPacking", mesg, &len), 0);
+	  }
 	else
-	  GRIB_CHECK(grib_set_string(gh, "typeOfPacking", "grid_simple", &len), 0);
+	  {
+	    mesg = "grid_simple"; len = strlen(mesg);
+	    GRIB_CHECK(grib_set_string(gh, "typeOfPacking", mesg, &len), 0);
+	  }
 
 	break;
       }
@@ -2044,7 +2051,6 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
     case GRID_SPECTRAL:
       {
 	int trunc = gridInqTrunc(gridID);
-	size_t len = 15;
 
 	GRIB_CHECK(grib_set_long(gh, "gridDefinitionTemplateNumber", GRIBAPI_GTYPE_SPECTRAL), 0);
 	GRIB_CHECK(grib_set_long(gh, "J", trunc), 0);
@@ -2055,9 +2061,20 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	GRIB_CHECK(grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
 
 	if ( gridInqComplexPacking(gridID) )
-	  GRIB_CHECK(grib_set_long(gh, "complexPacking", 1), 0);
+	  {
+	    mesg = "spectral_complex"; len = strlen(mesg);
+	    GRIB_CHECK(grib_set_string(gh, "typeOfPacking", mesg, &len), 0);
+	    /*
+	    GRIB_CHECK(grib_set_long(gh, "JS", 20), 0);
+	    GRIB_CHECK(grib_set_long(gh, "KS", 20), 0);
+	    GRIB_CHECK(grib_set_long(gh, "MS", 20), 0);
+	    */
+	  }
 	else
-	  GRIB_CHECK(grib_set_long(gh, "complexPacking", 0), 0);
+	  {
+	    mesg = "spectral_simple"; len = strlen(mesg);
+	    GRIB_CHECK(grib_set_string(gh, "typeOfPacking", mesg, &len), 0);
+	  }
 
 	break;
       }

@@ -1,5 +1,6 @@
 2010-02-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* rotated grid: correct standard name [report: Michael Boettinger]
 	* cgribexDefTime: bug fix for timerange = -1
 
 2010-02-10  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

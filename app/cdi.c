@@ -690,7 +690,7 @@ int main(int argc, char *argv[])
   if (Progname == 0) Progname = argv[0];
   else               Progname++;
 
-  while ( (c = getopt(argc, argv, "f:t:w:z:cdhlmqrsvVZ")) != EOF )
+  while ( (c = getopt(argc, argv, "f:t:w:z:cdhlmqRrsvVZ")) != EOF )
     {
       switch (c)
 	{
@@ -700,23 +700,23 @@ int main(int argc, char *argv[])
 	case 'f':
 	  setDefaultFileType(optarg);
 	  break;
-	case 'r':
-	  Record = 1;
-	  break;
+	case 'h':
+	  usage();
+	  exit (0);
 	case 'l':
 	  Longinfo = 1;
 	  break;
 	case 'm':
 	  Move = 1;
 	  break;
-	case 'v':
-	  Vardis = 1;
-	  break;
-	case 'V':
-	  Version = 1;
-	  break;
 	case 'q':
 	  Quiet = 1;
+	  break;
+	case 'R':
+	  cdiDefGlobal("REGULARGRID", 1);
+	  break;
+	case 'r':
+	  Record = 1;
 	  break;
 	case 's':
 	  Shortinfo = 1;
@@ -724,15 +724,18 @@ int main(int argc, char *argv[])
 	case 't':
 	  rTable = optarg;
 	  break;
+	case 'v':
+	  Vardis = 1;
+	  break;
+	case 'V':
+	  Version = 1;
+	  break;
 	case 'w':
 	  wTable = optarg;
 	  break;
 	case 'z':
 	  defineCompress(optarg);
 	  break;
-	case 'h':
-	  usage();
-	  exit (0);
 	}
     }
 
