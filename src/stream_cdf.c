@@ -13,7 +13,7 @@
 
 #include "cdi.h"
 #include "basetime.h"
-#include "util.h"  /* gaussaw */
+#include "gaussgrid.h"
 #include "stream_int.h"
 #include "stream_cdf.h"
 #include "cdf_int.h"

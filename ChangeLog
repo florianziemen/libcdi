@@ -1,3 +1,7 @@
+2010-02-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* gauaw: new code to calculate gaussian grid [Luis Kornblueh]
+	
 2010-02-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* rotated grid: correct standard name [report: Michael Boettinger]

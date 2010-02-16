@@ -8,7 +8,7 @@
 #include "cdi.h"
 #include "stream_int.h"
 #include "grid.h"
-#include "util.h"
+#include "gaussgrid.h"
 
 
 #ifndef  RAD2DEG
@@ -350,10 +350,10 @@ void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *x
     xvals[i] = xfirst + i*xinc;
 }
 
-
-void calc_gaussaw(double *yvals, int ysize, double yfirst, double ylast)
+static
+void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 {
-  static char func[] = "calc_gaussaw";
+  static char func[] = "calc_gaussgrid";
   double *yw;
   int yhsize;
   int i;
@@ -387,7 +387,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
     {
       if ( ysize > 2 )
 	{
-	  calc_gaussaw(yvals, ysize, yfirst, ylast);
+	  calc_gaussgrid(yvals, ysize, yfirst, ylast);
 
 	  if ( ! (IS_EQUAL(yfirst, 0) && IS_EQUAL(ylast, 0)) )
 	    if ( fabs(yvals[0] - yfirst) > 0.001 || fabs(yvals[ysize-1] - ylast) > 0.001 )
@@ -399,7 +399,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 		ny -= ny%2;
 		/* printf("%g %g %g %g %g %d\n", ylast, yfirst, ylast-yfirst,yinc, 180/yinc, ny); */
 		ytmp   = (double *) malloc(ny*sizeof(double));
-		calc_gaussaw(ytmp, ny, yfirst, ylast);
+		calc_gaussgrid(ytmp, ny, yfirst, ylast);
 		for ( i = 0; i < (ny-ysize); i++ )
 		  if ( fabs(ytmp[i] - yfirst) < 0.001 ) break;
 

@@ -149,6 +149,8 @@ src/extra.h -text
 src/extralib.c -text
 src/file.c -text
 src/file.h -text
+src/gaussgrid.c -text
+src/gaussgrid.h -text
 src/gribapi.c -text
 src/gribapi.h -text
 src/grid.c -text
@@ -194,7 +196,6 @@ src/timebase.c -text
 src/timebase.h -text
 src/tsteps.c -text
 src/util.c -text
-src/util.h -text
 src/varscan.c -text
 src/varscan.h -text
 src/version.c -text

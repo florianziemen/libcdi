@@ -25,6 +25,7 @@ libcdi_a_SOURCES = 	 \
 	model.c        	 \
 	institution.c  	 \
 	table.c        	 \
+	gaussgrid.c      \
 	util.c         	 \
 	varscan.c      	 \
 	calendar.c 	 \
@@ -91,7 +92,7 @@ libcdi_a_SOURCES = 	 \
 	swap.h	 	 \
 	table.h	 	 \
 	tablepar.h	 \
-	util.h	 	 \
+	gaussgrid.h	 \
 	varscan.h
 #
 cdiFortran.o: cdiFortran.c
