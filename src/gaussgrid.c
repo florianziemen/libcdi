@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "dmemory.h"
+
 static
 void cpledn(int kn, int kodd, double *pfn, double pdx, int kflag, 
             double *pw, double *pdxn, double *pxmod)
@@ -102,14 +104,13 @@ void gawl(double *pfn, double *pl, double *pw, int kn, int *kiter)
 static
 void gauaw(int kn, double *pl, double *pw)
 {
-
   /*
    * 1.0 Initialize Fourier coefficients for ordinary Legendre polynomials
    *
    * Belousov, Swarztrauber, and ECHAM use zfn(0,0) = sqrt(2)
    * IFS normalisation chosen to be 0.5*Integral(Pnm**2) = 1 (zfn(0,0) = 2.0)
    */
-
+  static const char *func = "gauaw";
   double *zfn, *zfnlat;
 
   double z, zfnn;
