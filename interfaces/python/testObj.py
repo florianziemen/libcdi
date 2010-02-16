@@ -1,6 +1,6 @@
 import CdiObj
 
-ifile = "../testdata/mulval.nc"
+ifile = "../testdata/mulval.grb"
 
 cdi = CdiObj.Cdi(ifile)
 
@@ -28,7 +28,7 @@ for k in range(cdi.variables.size()):
   print cdi.variables[k].longname,' ',cdi.variables[k].units
 
 print "#========== VAR ======================================#"
-var = cdi.variables[9]
+var = cdi.variables[1]
 var.readField()
 val = var.getField()
 i=0; print 'val[',i,'] = ',val[i]

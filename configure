@@ -1345,8 +1345,9 @@ Optional Features:
                           of F2003 [default=no].
 
   --enable-swig           use swig to create extra bindings [default=no]
-  --enable-ruby           ruby language bindings [default=no]
-  --enable-python         python language bindings [default=no]
+                          (EXPERIMENTAL)
+  --enable-ruby           ruby language bindings [default=no] (EXPERIMENTAL)
+  --enable-python         python language bindings [default=no] (EXPERIMENTAL)
   --enable-dap            Build OPeNDAP/DODS-enabled clients if possible
                           [default=no]
   --enable-mpi            Compile with MPI compiler [default=no]

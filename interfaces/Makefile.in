@@ -68,6 +68,10 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(CdiInfo_SOURCES)
 DIST_SOURCES = $(CdiInfo_SOURCES)
 ETAGS = etags
@@ -192,8 +196,12 @@ top_srcdir = @top_srcdir@
 SWIGCDILIB = cdilib.i
 SWIGCDIOBJ = cdiobj.i
 BINDINGS = $(am__append_1) $(am__append_3) $(am__append_4)
+EXTRA_DIST = $(SWIGCDIOBJ) $(SWIGCDILIB) ruby/cdilib_wrap.c \
+	ruby/cdiobj_wrap.cpp ruby/testLib.rb ruby/testObj.rb \
+	python/cdilib_wrap.c python/cdiobj_wrap.cpp python/testLib.py \
+	python/testObj.py
 #
-CdiInfo_SOURCES = CdiInfo.cpp cdi.cpp
+CdiInfo_SOURCES = CdiInfo.cpp cdi.cpp cdi.hpp
 #
 CdiInfo_LDADD = ../src/cdilib.o $(LDFLAGS) $(LIBS)
 #
@@ -515,6 +523,8 @@ uninstall-am: uninstall-binPROGRAMS
 @WITH_PYTHON_TRUE@	@cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I../" python setupObj.py install
 # =========================================================
 help:
+	@echo "#=====================================================#"
+	@echo "# EXPERIMENTAL FEATURE ===============================#"
 	@echo "#=====================================================#"
 	@echo "Bindings for: python ruby"
 	@echo "(please exchange <lang> with the corresponding language)"

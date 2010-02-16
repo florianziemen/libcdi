@@ -2,7 +2,10 @@
 #
 SWIGCDILIB = cdilib.i
 SWIGCDIOBJ = cdiobj.i
-BINDINGS =
+BINDINGS   =
+EXTRA_DIST = $(SWIGCDIOBJ) $(SWIGCDILIB)
+EXTRA_DIST += ruby/cdilib_wrap.c ruby/cdiobj_wrap.cpp ruby/testLib.rb ruby/testObj.rb
+EXTRA_DIST += python/cdilib_wrap.c python/cdiobj_wrap.cpp python/testLib.py python/testObj.py
 if CREATE_INTERFACES
 BINDINGS += help
 endif
@@ -14,7 +17,7 @@ if CREATE_INTERFACES
 noinst_PROGRAMS += CdiInfo
 endif
 #
-CdiInfo_SOURCES = CdiInfo.cpp cdi.cpp
+CdiInfo_SOURCES = CdiInfo.cpp cdi.cpp cdi.hpp
 #
 CdiInfo_LDADD = ../src/cdilib.o $(LDFLAGS) $(LIBS)
 #
@@ -83,6 +86,8 @@ pythonObjInstall: pythonObj
 endif
 # =========================================================
 help:
+	@echo "#=====================================================#"
+	@echo "# EXPERIMENTAL FEATURE ===============================#"
 	@echo "#=====================================================#"
 	@echo "Bindings for: python ruby"
 	@echo "(please exchange <lang> with the corresponding language)"

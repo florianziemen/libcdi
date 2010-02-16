@@ -210,7 +210,7 @@ ACX_SL_FC_MOD_SUFFIX(,[FCMODEXT=mod])
 # -----------------------------------
 # Check for SWIG - Generator for script-language bindings
 AC_ARG_ENABLE(swig,
-  [AS_HELP_STRING([--enable-swig],[use swig to create extra bindings [default=no]])],
+  [AS_HELP_STRING([--enable-swig],[use swig to create extra bindings [default=no] (EXPERIMENTAL)])],
   [],[enable_swig=no])
 
 if test "x$enable_swig" != "xyes"; then
@@ -229,7 +229,7 @@ AM_CONDITIONAL(WITH_SWIG, [test "x$SWIG" != "x"])
 #  Create the Ruby Interface via swig
 #
 AC_ARG_ENABLE(ruby,
-  [AS_HELP_STRING([--enable-ruby],[ruby language bindings [default=no]])],
+  [AS_HELP_STRING([--enable-ruby],[ruby language bindings [default=no] (EXPERIMENTAL)])],
   [], [enable_ruby=no])
 
 if test "x$enable_ruby" != "xyes"; then
@@ -263,7 +263,7 @@ AM_CONDITIONAL(WITH_RUBY, [test "x$use_ruby" = "xYes"])
 #  Create the Ruby Interface via swig
 #
 AC_ARG_ENABLE(python,
-  [AS_HELP_STRING([--enable-python],[python language bindings [default=no]])],
+  [AS_HELP_STRING([--enable-python],[python language bindings [default=no] (EXPERIMENTAL)])],
   [], [enable_python=no])
 
 if test "x$enable_python" != "xyes"; then

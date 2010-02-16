@@ -2,8 +2,9 @@ require 'CdiObj'
 include CdiObj
 require "pp"
 
-ifile = ARGV[0].nil? ? "../testdata/mulval.nc" : ARGV[0]
+ifile = ARGV[0].nil? ? "../testdata/mulval.grb" : ARGV[0]
 
+puts "Reading file: #{ifile}"
 cdi = Cdi.new(ifile);
 
 puts "Stream: #{cdi.streamID} vlistID:#{cdi.vlistID} nvars:#{cdi.nvars}"
@@ -48,9 +49,9 @@ puts cdi.variables.collect {|v| v.longname }.join("-")
 puts cdi.variables.collect {|v| v.units }.join("-")
 
 puts "#========== CDI.VAR ======================================#"
-varname = cdi.variables[12].name
-pp cdi.methods.sort
-var_ = cdi.variables[12]
+varname = cdi.variables[1].name
+#pp cdi.methods.sort
+var_ = cdi.variables[1]
 val = var_.getField()
 i=0; puts "val[#{i}] = #{val[i]}"
 puts "#=====================================================#"
