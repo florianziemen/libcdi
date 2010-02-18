@@ -2062,9 +2062,17 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 
 	if ( gridInqComplexPacking(gridID) )
 	  {
-	    mesg = "spectral_complex"; len = strlen(mesg);
+	    static int lwarncomplex = 1;
+	    if ( lwarncomplex )
+	      {
+		Warning(func, "GRIB2 complex packing not implemented, using simple packing!");
+		lwarncomplex = 0;
+	      }
+	    mesg = "spectral_simple"; len = strlen(mesg);
 	    GRIB_CHECK(grib_set_string(gh, "typeOfPacking", mesg, &len), 0);
 	    /*
+	    mesg = "spectral_complex"; len = strlen(mesg);
+	    GRIB_CHECK(grib_set_string(gh, "typeOfPacking", mesg, &len), 0);
 	    GRIB_CHECK(grib_set_long(gh, "JS", 20), 0);
 	    GRIB_CHECK(grib_set_long(gh, "KS", 20), 0);
 	    GRIB_CHECK(grib_set_long(gh, "MS", 20), 0);
