@@ -1757,13 +1757,22 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	ISEC2_NumLat   = nlat;
 	ISEC2_FirstLat = NINT(gridInqYval(gridID,      0)*1000);
 	ISEC2_LastLat  = NINT(gridInqYval(gridID, nlat-1)*1000);
-	ISEC2_FirstLon = NINT(gridInqXval(gridID,      0)*1000);
-	ISEC2_LastLon  = NINT(gridInqXval(gridID, nlon-1)*1000);
-	ISEC2_LonIncr  = NINT(gridInqXinc(gridID)*1000);
+	if ( gridtype == GRID_GAUSSIAN_REDUCED )
+	  {
+	    ISEC2_FirstLon = 0;
+	    ISEC2_LastLon  = NINT(1000*(360.-360./(nlat*2)));
+	    ISEC2_LonIncr  = NINT(1000*360./(nlat*2));
+	  }
+	else
+	  {
+	    ISEC2_FirstLon = NINT(gridInqXval(gridID,      0)*1000);
+	    ISEC2_LastLon  = NINT(gridInqXval(gridID, nlon-1)*1000);
+	    ISEC2_LonIncr  = NINT(gridInqXinc(gridID)*1000);
+	  }
 	if ( fabs(gridInqXinc(gridID)*1000 - ISEC2_LonIncr) > FLT_EPSILON )
 	  ISEC2_LonIncr = 0;
 
-	if ( gridtype == GRID_GAUSSIAN )
+	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
 	  ISEC2_NumPar = nlat/2;
 	else
 	  {

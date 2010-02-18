@@ -1,3 +1,7 @@
+2010-02-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* grib1: bug fix for description of gaussian reduced grids [report: Kaus Wyser]
+
 2010-02-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* gauaw: new code to calculate gaussian grid [Luis Kornblueh]
