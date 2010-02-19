@@ -55,6 +55,7 @@ int CDI_Debug   = 0;    /* If set to 1, debugging           */
 int cdiDefaultLeveltype = -1;
 static int cdiDataUnreduced = 0;
 static int cdiSortName = 0;
+static int cdiHaveMissval = 0;
 
 
 long cdiGetenvInt(char *envName)
@@ -117,6 +118,9 @@ void cdiInitialize(void)
 
       value = cdiGetenvInt("CDI_SORTNAME");
       if ( value >= 0 ) cdiSortName = (int) value;
+
+      value = cdiGetenvInt("CDI_HAVE_MISSVAL");
+      if ( value >= 0 ) cdiHaveMissval = (int) value;
 
       value = cdiGetenvInt("CD_LEVELTYPE");
       if ( value >= 0 ) cdiDefaultLeveltype = (int) value;
@@ -363,6 +367,7 @@ static void stream_init_entry(stream_t *streamptr)
   streamptr->vct.mlevID        = UNDEFID;
   streamptr->unreduced         = cdiDataUnreduced;
   streamptr->sortname          = cdiSortName;
+  streamptr->have_missval      = cdiHaveMissval;
   streamptr->ztype             = COMPRESS_NONE;
   streamptr->zlevel            = 0;
 
@@ -485,6 +490,10 @@ void cdiDefGlobal(const char *string, int val)
     {
       cdiSortName = val;
     }
+  else if ( strcmp(string, "HAVE_MISSVAL") == 0 )
+    {
+      cdiHaveMissval = val;
+    }
   else
     {
       Warning(func, "Unsupported global key: %s", string);
@@ -497,7 +506,6 @@ void cdiDefMissval(double missval)
   cdiInitialize();
 
   cdiDefaultMissval = missval;
-
 }
 
 

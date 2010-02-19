@@ -2016,6 +2016,8 @@ void streamDefVlist(int streamID, int vlistID)
 	  gridID  = vlistInqVarGrid(vlistID, varID);
 	  zaxisID = vlistInqVarZaxis(vlistID, varID);
 	  streamNewVar(streamID, gridID, zaxisID);
+	  if ( streamptr->have_missval )
+	    vlistDefVarMissval(vlistID, varID, vlistInqVarMissval(vlistID, varID));
 	}
 
       if ( streamptr->filemode == 'w' )

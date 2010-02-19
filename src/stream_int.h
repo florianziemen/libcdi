@@ -235,6 +235,7 @@ typedef struct {
   VCT       vct;
   int       unreduced;
   int       sortname;
+  int       have_missval;
   int       ztype;
   int       zlevel;
   int       curfile;

@@ -690,7 +690,7 @@ int main(int argc, char *argv[])
   if (Progname == 0) Progname = argv[0];
   else               Progname++;
 
-  while ( (c = getopt(argc, argv, "f:t:w:z:cdhlmqRrsvVZ")) != EOF )
+  while ( (c = getopt(argc, argv, "f:t:w:z:cdhlMmqRrsvVZ")) != EOF )
     {
       switch (c)
 	{
@@ -705,6 +705,9 @@ int main(int argc, char *argv[])
 	  exit (0);
 	case 'l':
 	  Longinfo = 1;
+	  break;
+	case 'M':
+	  cdiDefGlobal("HAVE_MISSVAL", 1);
 	  break;
 	case 'm':
 	  Move = 1;
