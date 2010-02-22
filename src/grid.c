@@ -3206,6 +3206,7 @@ void gridPrint(int gridID, int opt)
     case GRID_SPECTRAL:
       {
 	fprintf(fp, "truncation = %d\n", trunc);
+	fprintf(fp, "complexpacking = %d\n", gridInqComplexPacking(gridID));
 	break;
       }
     case GRID_GME:
