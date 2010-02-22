@@ -1845,7 +1845,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	ISEC2_PentaM   = ISEC2_PentaJ;
 	ISEC2_RepType  = 1;
 	isec4[2]       = 128;
-	if ( gridInqComplexPacking(gridID) )
+	if ( gridInqComplexPacking(gridID) && ISEC2_PentaJ >= 21 )
 	  {
 	    ISEC2_RepMode  = 2;
 	    isec4[3]       = 64;

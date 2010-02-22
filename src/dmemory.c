@@ -12,7 +12,7 @@
 
 #if ! defined (HAVE_CONFIG_H)
 #if ! defined (HAVE_MALLOC_H)
-#  if defined defined (SX)
+#  if defined (SX)
 #    define  HAVE_MALLOC_H
 #  endif
 #endif

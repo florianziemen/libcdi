@@ -1,6 +1,6 @@
 ! This file was automatically created, don't edit!
 !
-! Fortran interface for CDI library version 1.4.1
+! Fortran interface for CDI library version 1.4.3
 !
 ! Author:
 ! -------
@@ -1468,6 +1468,15 @@
 !                                    (INTEGER         gridID,
 !                                     INTEGER         gridtype)
       EXTERNAL        gridChangeType
+
+!                     gridDefComplexPacking
+!                                    (INTEGER         gridID,
+!                                     INTEGER         lpack)
+      EXTERNAL        gridDefComplexPacking
+
+      INTEGER         gridInqComplexPacking
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqComplexPacking
 
 !
 !  ZAXIS routines

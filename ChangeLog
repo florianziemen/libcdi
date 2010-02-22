@@ -1,6 +1,10 @@
+2010-02-22  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.4.3 released
+
 2010-02-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* grib1: bug fix for description of gaussian reduced grids [report: Kaus Wyser]
+	* grib1: bug fix for description of gaussian reduced grids [report: Klaus Wyser]
 
 2010-02-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
