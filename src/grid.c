@@ -314,7 +314,7 @@ void grid_check_ptr(const char *func, grid_t *gridptr)
 int gridSize(void)
 {
   int gridsize = 0;
-  int i;
+  long i;
   
   GRID_INIT();
 
@@ -331,7 +331,7 @@ int gridSize(void)
 
 void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *xvals)
 {
-  int i;
+  long i;
 
   if ( (! (fabs(xinc) > 0)) && xsize > 1 )
     {
@@ -355,8 +355,8 @@ void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 {
   static char func[] = "calc_gaussgrid";
   double *yw;
-  int yhsize;
-  int i;
+  long yhsize;
+  long i;
 
   yw = (double *) malloc(ysize*sizeof(double));
   gaussaw(yvals, yw, ysize);
@@ -381,7 +381,7 @@ void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals)
 {
   static char func[] = "gridGenYvals";
-  int i;
+  long i;
 
   if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
     {
@@ -1343,7 +1343,7 @@ int gridInqMask(int gridID, int *mask)
 {
   static char func[] = "gridInqMask";
   int size;
-  int i;
+  long i;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1368,9 +1368,9 @@ int gridInqMask(int gridID, int *mask)
 void gridDefMask(int gridID, const int *mask)
 {
   static char func[] = "gridDefMask";
-  int size;
   int gridtype;
-  int i;
+  long size;
+  long i;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1417,7 +1417,7 @@ int gridInqXvals(int gridID, double *xvals)
 {
   static char func[] = "gridInqXvals";
   int size;
-  int i;
+  long i;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1459,9 +1459,9 @@ The function @func{gridDefXvals} defines all values of the X-axis.
 void gridDefXvals(int gridID, const double *xvals)
 {
   static char func[] = "gridDefXvals";
-  int size;
   int gridtype;
-  int i;
+  long size;
+  long i;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1511,7 +1511,7 @@ int gridInqYvals(int gridID, double *yvals)
 {
   static char func[] = "gridInqYvals";
   int size;
-  int i;
+  long i;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1553,9 +1553,9 @@ The function @func{gridDefYvals} defines all values of the Y-axis.
 void gridDefYvals(int gridID, const double *yvals)
 {
   static char func[] = "gridDefYvals";
-  int size;
   int gridtype;
-  int i;
+  long size;
+  long i;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1649,7 +1649,7 @@ double gridInqXinc(int gridID)
 
       if ( xsize > 1 )
 	{
-	  int i;
+	  long i;
 	  xinc = fabs(xvals[xsize-1] - xvals[0])/(xsize-1);
 	  for ( i = 2; i < xsize; i++ )
 	    if ( fabs(fabs(xvals[i-1] - xvals[i]) - xinc) > 0.01*xinc ) break;
@@ -1691,7 +1691,7 @@ double gridInqYinc(int gridID)
 
       if ( ysize > 1 )
 	{
-	  int i;
+	  long i;
 	  yinc = fabs(yvals[1] - yvals[0]);
 	  for ( i = 2; i < ysize; i++ )
 	    if ( fabs(fabs(yvals[i] - yvals[i-1]) - yinc) > (yinc/1000) ) break;
@@ -2012,7 +2012,7 @@ static
 void grid_check_cyclic(grid_t *gridptr)
 {
   int xsize, ysize, gridsize;
-  int i1, i2, in, j, k1, k2, nc;
+  long i1, i2, in, j, k1, k2, nc;
   double xinc, x0;
   const double *xvals, *xbounds;
 
@@ -2189,7 +2189,7 @@ int gridCompare(int gridID, grid_t grid)
 		    }
 		  else
 		    {
-		      int i;
+		      long i;
 		      double *xvals, *yvals;
 
 		      xvals = (double *) malloc(xsize*sizeof(double));
@@ -2592,7 +2592,7 @@ void gridCompress(int gridID)
     {
       if ( gridptr->mask != NULL )
 	{
-	  int i, j, iv, nv;
+	  long i, j, iv, nv;
 
 	  nv = gridptr->nvertex;
 
@@ -2649,8 +2649,8 @@ void gridCompress(int gridID)
 void gridDefArea(int gridID, const double *area)
 {
   static char func[] = "gridDefArea";
-  int size;
-  int i;
+  long size;
+  long i;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -2673,8 +2673,8 @@ void gridDefArea(int gridID, const double *area)
 
 void gridInqArea(int gridID, double *area)
 {
-  int size;
-  int i;
+  long size;
+  long i;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -2746,8 +2746,8 @@ The function @func{gridDefXbounds} defines all bounds of the X-axis.
 void gridDefXbounds(int gridID, const double *xbounds)
 {
   static char func[] = "gridDefXbounds";
-  int size;
-  int i, nvertex;
+  long size;
+  long i, nvertex;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -2799,8 +2799,8 @@ Otherwise, 0 is returned and @func{xbounds} is empty.
 int gridInqXbounds(int gridID, double *xbounds)
 {
   static char func[] = "gridInqXbounds";
-  int size;
-  int i, nvertex;
+  long size;
+  long i, nvertex;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -2823,7 +2823,7 @@ int gridInqXbounds(int gridID, double *xbounds)
 
   if ( gridptr->xbounds == NULL ) size = 0;
 
-  return (size);
+  return ((int)size);
 }
 
 
@@ -2854,8 +2854,8 @@ The function @func{gridDefYbounds} defines all bounds of the Y-axis.
 void gridDefYbounds(int gridID, const double *ybounds)
 {
   static char func[] = "gridDefYbounds";
-  int size;
-  int i, nvertex;
+  long size;
+  long i, nvertex;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -2907,8 +2907,8 @@ Otherwise, 0 is returned and @func{ybounds} is empty.
 int gridInqYbounds(int gridID, double *ybounds)
 {
   static char func[] = "gridInqYbounds";
-  int size;
-  int i, nvertex;
+  long size;
+  long i, nvertex;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -2931,7 +2931,7 @@ int gridInqYbounds(int gridID, double *ybounds)
 
   if ( gridptr->ybounds == NULL ) size = 0;
 
-  return (size);
+  return ((int)size);
 }
 
 
