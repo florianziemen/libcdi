@@ -622,6 +622,22 @@ int gridCreate(int gridtype, int size)
 */
 void gridDestroy(int gridID)
 {
+  static char *func = "gridDestroy";
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+  
+  grid_check_ptr(func, gridptr);
+
+  if ( gridptr->mask    ) free(gridptr->mask);
+  if ( gridptr->xvals   ) free(gridptr->xvals);
+  if ( gridptr->yvals   ) free(gridptr->yvals);
+  if ( gridptr->area    ) free(gridptr->area);
+  if ( gridptr->xbounds ) free(gridptr->xbounds);
+  if ( gridptr->ybounds ) free(gridptr->ybounds);
+  if ( gridptr->rowlon  ) free(gridptr->rowlon);
+
+  grid_delete_entry(gridptr);
 }
 
 
