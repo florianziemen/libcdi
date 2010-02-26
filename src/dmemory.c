@@ -58,19 +58,20 @@ static MemTable *memTable;
 static int     memTableSize  = 0;
 static long    memAccess     = 0;
 
-static size_t  MemObjs    = 0;
-static size_t  MaxMemObjs = 0;
-static size_t  MemUsed    = 0;
-static size_t  MaxMemUsed = 0;
+static size_t  MemObjs       = 0;
+static size_t  MaxMemObjs    = 0;
+static size_t  MemUsed       = 0;
+static size_t  MaxMemUsed    = 0;
 
-static int     MEM_Debug  = 0;   /* If set to 1, debugging */
+static int     MEM_Debug     = 0;   /* If set to 1, debugging */
 
 void memDebug(int debug)
 {
   MEM_Debug = debug;
 }
 
-static void memInternalProblem(const char *caller, const char *fmt, ...)
+static
+void memInternalProblem(const char *caller, const char *fmt, ...)
 {
   va_list args;
 	
@@ -86,8 +87,8 @@ static void memInternalProblem(const char *caller, const char *fmt, ...)
   exit(EXIT_FAILURE);
 }
 
-
-static void memError(const char *caller, const char *file, int line, size_t size)
+static
+void memError(const char *caller, const char *file, int line, size_t size)
 {
   printf("\n");
   fprintf(stderr, "Error (%s) : Allocation of %lu bytes failed. [ line %d file %s ]\n",
@@ -99,9 +100,9 @@ static void memError(const char *caller, const char *file, int line, size_t size
   exit(EXIT_FAILURE);
 }
 
-
-static void memListPrintEntry(int mtype, int item, size_t size, void *ptr,
-			      const char *caller, const char *file, int line)
+static
+void memListPrintEntry(int mtype, int item, size_t size, void *ptr,
+		       const char *caller, const char *file, int line)
 {
   switch (mtype)
     {
@@ -132,8 +133,8 @@ static void memListPrintEntry(int mtype, int item, size_t size, void *ptr,
    fprintf(stderr, "]\n");
 }
 
-
-static void memListPrintTable(void)
+static
+void memListPrintTable(void)
 {
   int memID, item, item1, item2 = 0;
 
@@ -191,8 +192,8 @@ static void memListPrintTable(void)
     }
 }
 
-
-static void memGetDebugLevel(void)
+static
+void memGetDebugLevel(void)
 {
   char *debugLevel;
 
@@ -208,8 +209,8 @@ static void memGetDebugLevel(void)
     }
 }
 
-
-static void memInit(void)
+static
+void memInit(void)
 {
   static int initDebugLevel = 0;
 
@@ -220,8 +221,8 @@ static void memInit(void)
     }  
 }
 
-
-static int memListDeleteEntry(void *ptr, size_t *size)
+static
+int memListDeleteEntry(void *ptr, size_t *size)
 {
   int memID = 0;
   int item = UNDEFID;
@@ -244,8 +245,8 @@ static int memListDeleteEntry(void *ptr, size_t *size)
   return (item);
 }
 
-
-static void memTableInitEntry(int memID)
+static
+void memTableInitEntry(int memID)
 {
   static char func[] = "memTableInitEntry";
 
@@ -260,9 +261,9 @@ static void memTableInitEntry(int memID)
   memTable[memID].line   = UNDEFID;
 }
 
-
-static int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
-			   const char *caller, const char *file, int line)
+static
+int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
+		    const char *caller, const char *file, int line)
 {
   static char func[] = "memListNewEntry";
   static int item = 0;
@@ -348,9 +349,9 @@ static int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
   return (item++);
 }
 
-
-static int memListChangeEntry(void *ptrold, void *ptr, size_t size,
-			      const char *caller, const char *file, int line)
+static
+int memListChangeEntry(void *ptrold, void *ptr, size_t size,
+		       const char *caller, const char *file, int line)
 {
   static char func[] = "memListChangeEntry";
   int item = UNDEFID;
@@ -546,17 +547,22 @@ size_t memTotal(void)
   size_t memtotal = 0;
 #if  defined  (HAVE_MALLINFO)
   struct mallinfo meminfo = mallinfo();
-  /*
-  printf("arena      %d\n", meminfo.arena);
-  printf("ordblks    %d\n", meminfo.ordblks);
-  printf("smblks     %d\n", meminfo.smblks);
-  printf("usmblks    %d\n", meminfo.usmblks);
-  printf("fsmblks    %d\n", meminfo.fsmblks);
-  printf("uordblks   %d\n", meminfo.uordblks);
-  printf("fordblks   %d\n", meminfo.fordblks);
-  printf("Memory in use: %d bytes\n", meminfo.usmblks + meminfo.uordblks);
-  printf("Total heap size: %d bytes\n", meminfo.arena);
-  */
+  if ( MEM_Debug )
+    {
+      fprintf(stderr, "arena      %8ld (non-mmapped space allocated from system)\n", (unsigned long) meminfo.arena);
+      fprintf(stderr, "ordblks    %8ld (number of free chunks)\n", (unsigned long) meminfo.ordblks);
+      fprintf(stderr, "smblks     %8ld (number of fastbin blocks)\n", (unsigned long) meminfo.smblks);
+      fprintf(stderr, "hblks      %8ld (number of mmapped regions)\n", (unsigned long) meminfo.hblks);
+      fprintf(stderr, "hblkhd     %8ld (space in mmapped regions)\n", (unsigned long) meminfo.hblkhd);
+      fprintf(stderr, "usmblks    %8ld (maximum total allocated space)\n", (unsigned long) meminfo.usmblks);
+      fprintf(stderr, "fsmblks    %8ld (maximum total allocated space)\n", (unsigned long) meminfo.fsmblks);
+      fprintf(stderr, "uordblks   %8ld (total allocated space)\n", (unsigned long) meminfo.uordblks);
+      fprintf(stderr, "fordblks   %8ld (total free space)\n", (unsigned long) meminfo.fordblks);
+      fprintf(stderr, "Memory in use:   %8ld bytes\n", (unsigned long) meminfo.usmblks + meminfo.uordblks);
+      fprintf(stderr, "Total heap size: %8ld bytes\n", (unsigned long) meminfo.arena);
+
+      /* malloc_stats(); */
+    }
   memtotal = meminfo.arena;
 #endif
 
