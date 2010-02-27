@@ -1358,8 +1358,7 @@ void gridInqRowlon(int gridID, int *rowlon)
 int gridInqMask(int gridID, int *mask)
 {
   static char func[] = "gridInqMask";
-  int size;
-  long i;
+  long size;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1372,8 +1371,7 @@ int gridInqMask(int gridID, int *mask)
     Warning(func, "Size undefined for gridID = %d", gridID);
     
   if ( mask && gridptr->mask )
-    for ( i = 0; i < size; i++ )
-      mask[i] =  gridptr->mask[i];
+    memcpy(mask, gridptr->mask, size*sizeof(double));
 
   if ( gridptr->mask == NULL ) size = 0;
 
@@ -1386,7 +1384,6 @@ void gridDefMask(int gridID, const int *mask)
   static char func[] = "gridDefMask";
   int gridtype;
   long size;
-  long i;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1405,8 +1402,7 @@ void gridDefMask(int gridID, const int *mask)
   else if ( CDI_Debug )
     Warning(func, "mask already defined!");
 
-  for ( i = 0; i < size; i++ )
-    gridptr->mask[i] = mask[i];
+  memcpy(gridptr->mask, mask, size*sizeof(double));
 }
 
 
@@ -1432,8 +1428,7 @@ Otherwise, 0 is returned and @func{xvals} is empty.
 int gridInqXvals(int gridID, double *xvals)
 {
   static char func[] = "gridInqXvals";
-  int size;
-  long i;
+  long size;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1449,8 +1444,7 @@ int gridInqXvals(int gridID, double *xvals)
     Warning(func, "Size undefined for gridID = %d", gridID);
     
   if ( xvals && gridptr->xvals )
-    for ( i = 0; i < size; i++ )
-      xvals[i] = gridptr->xvals[i];
+    memcpy(xvals, gridptr->xvals, size*sizeof(double));
 
   if ( gridptr->xvals == NULL ) size = 0;
 
@@ -1477,7 +1471,6 @@ void gridDefXvals(int gridID, const double *xvals)
   static char func[] = "gridDefXvals";
   int gridtype;
   long size;
-  long i;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1499,8 +1492,7 @@ void gridDefXvals(int gridID, const double *xvals)
   else if ( CDI_Debug )
     Warning(func, "values already defined!");
 
-  for ( i = 0; i < size; i++ )
-    gridptr->xvals[i] = xvals[i];
+  memcpy(gridptr->xvals, xvals, size*sizeof(double));
 }
 
 
@@ -1526,8 +1518,7 @@ Otherwise, 0 is returned and @func{yvals} is empty.
 int gridInqYvals(int gridID, double *yvals)
 {
   static char func[] = "gridInqYvals";
-  int size;
-  long i;
+  long size;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1543,8 +1534,7 @@ int gridInqYvals(int gridID, double *yvals)
     Warning(func, "Size undefined for gridID = %d!", gridID);
     
   if ( yvals && gridptr->yvals )
-    for ( i = 0; i < size; i++ )
-      yvals[i] =  gridptr->yvals[i];
+    memcpy(yvals, gridptr->yvals, size*sizeof(double));
 
   if ( gridptr->yvals == NULL ) size = 0;
 
@@ -1571,7 +1561,6 @@ void gridDefYvals(int gridID, const double *yvals)
   static char func[] = "gridDefYvals";
   int gridtype;
   long size;
-  long i;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1593,8 +1582,7 @@ void gridDefYvals(int gridID, const double *yvals)
   else if ( CDI_Debug )
     Warning(func, "Values already defined!");
     
-  for ( i = 0; i < size; i++ )
-    gridptr->yvals[i] = yvals[i];
+  memcpy(gridptr->yvals, yvals, size*sizeof(double));
 }
 
 
@@ -2666,7 +2654,6 @@ void gridDefArea(int gridID, const double *area)
 {
   static char func[] = "gridDefArea";
   long size;
-  long i;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -2683,14 +2670,13 @@ void gridDefArea(int gridID, const double *area)
   else if ( CDI_Debug )
     Warning(func, "values already defined!");
 
-  for ( i = 0; i < size; i++ ) gridptr->area[i] = area[i];
+  memcpy(gridptr->area, area, size*sizeof(double));
 }
 
 
 void gridInqArea(int gridID, double *area)
 {
   long size;
-  long i;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -2698,7 +2684,7 @@ void gridInqArea(int gridID, double *area)
   size = gridptr->size;
 
   if ( gridptr->area )
-    for ( i = 0; i < size; i++ ) area[i] = gridptr->area[i];
+    memcpy(area, gridptr->area, size*sizeof(double));
 }
 
 
@@ -2763,7 +2749,7 @@ void gridDefXbounds(int gridID, const double *xbounds)
 {
   static char func[] = "gridDefXbounds";
   long size;
-  long i, nvertex;
+  long nvertex;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -2788,8 +2774,7 @@ void gridDefXbounds(int gridID, const double *xbounds)
   else if ( CDI_Debug )
     Warning(func, "values already defined!");
 
-  for ( i = 0; i < size; i++ )
-    gridptr->xbounds[i] = xbounds[i];
+  memcpy(gridptr->xbounds, xbounds, size*sizeof(double));
 }
 
 
@@ -2816,7 +2801,7 @@ int gridInqXbounds(int gridID, double *xbounds)
 {
   static char func[] = "gridInqXbounds";
   long size;
-  long i, nvertex;
+  long nvertex;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -2834,8 +2819,7 @@ int gridInqXbounds(int gridID, double *xbounds)
     Warning(func, "size undefined for gridID = %d", gridID);
 
   if ( xbounds && gridptr->xbounds )
-    for ( i = 0; i < size; i++ )
-      xbounds[i] = gridptr->xbounds[i];
+    memcpy(xbounds, gridptr->xbounds, size*sizeof(double));
 
   if ( gridptr->xbounds == NULL ) size = 0;
 
@@ -2871,7 +2855,7 @@ void gridDefYbounds(int gridID, const double *ybounds)
 {
   static char func[] = "gridDefYbounds";
   long size;
-  long i, nvertex;
+  long nvertex;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -2896,8 +2880,7 @@ void gridDefYbounds(int gridID, const double *ybounds)
   else if ( CDI_Debug )
     Warning(func, "values already defined!");
 
-  for ( i = 0; i < size; i++ )
-    gridptr->ybounds[i] = ybounds[i];
+  memcpy(gridptr->ybounds, ybounds, size*sizeof(double));
 }
 
 
@@ -2924,7 +2907,7 @@ int gridInqYbounds(int gridID, double *ybounds)
 {
   static char func[] = "gridInqYbounds";
   long size;
-  long i, nvertex;
+  long nvertex;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -2942,8 +2925,7 @@ int gridInqYbounds(int gridID, double *ybounds)
     Warning(func, "size undefined for gridID = %d", gridID);
 
   if ( ybounds && gridptr->ybounds )
-    for ( i = 0; i < size; i++ )
-      ybounds[i] = gridptr->ybounds[i];
+    memcpy(ybounds, gridptr->ybounds, size*sizeof(double));
 
   if ( gridptr->ybounds == NULL ) size = 0;
 

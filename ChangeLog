@@ -1,3 +1,7 @@
+2010-02-27  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* grid.c: replace for loops by memcpy (speed up)
+
 2010-02-25  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* implementation of gridDestroy
