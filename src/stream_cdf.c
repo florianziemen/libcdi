@@ -2550,13 +2550,14 @@ int cdfDefVar(int streamID, int varID)
   char *stdname = NULL;
   char *units = NULL;
   int dims[4];
+  int lchunk = FALSE;
   size_t chunks[4] = {0,0,0,0};
   int tableID;
   int ndims = 0;
   int len;
   int timeID;
   int xtype;
-  int gridtype;
+  int gridtype, gridsize;
   int gridindex, zaxisindex;
   int tablenum;
   int vlistID;
@@ -2581,6 +2582,8 @@ int cdfDefVar(int streamID, int varID)
   timeID  = vlistInqVarTime(vlistID, varID);
   code    = vlistInqVarCode(vlistID, varID);
 
+  gridsize  = gridInqSize(gridID);
+  if ( gridsize > 1 ) lchunk = TRUE;
   gridtype  = gridInqType(gridID);
   gridindex = vlistGridIndex(vlistID, gridID);
   if ( gridtype != GRID_TRAJECTORY )
@@ -2603,6 +2606,7 @@ int cdfDefVar(int streamID, int varID)
       dims[ndims++] = tid;
       axis[iax++] = 't';
     }
+
   if ( zid != UNDEFID ) axis[iax++] = 'z';
   if ( zid != UNDEFID ) chunks[ndims] = 1;
   if ( zid != UNDEFID ) dims[ndims++] = zid;
@@ -2703,16 +2707,16 @@ int cdfDefVar(int streamID, int varID)
   cdf_def_var(fileID, name, (nc_type) xtype, ndims, dims, &ncvarid);
 
 #if  defined  (NC_NETCDF4)
-  if ( streamptr->filetype == FILETYPE_NC4 )
-    if ((retval = nc_def_var_chunking(fileID, ncvarid, 0, chunks)))
-      {
+  if ( lchunk && streamptr->filetype == FILETYPE_NC4 )
+    {
+      if ( (retval = nc_def_var_chunking(fileID, ncvarid, 0, chunks)) )
 	Error(func, "nc_def_var_chunking failed, status = %d", retval);
-      }
+    }
 #endif
 
   if ( streamptr->ztype == COMPRESS_ZIP )
     {
-      if ( streamptr->filetype == FILETYPE_NC4 )
+      if ( lchunk && streamptr->filetype == FILETYPE_NC4 )
 	{
 	  cdfDefVarDeflate(fileID, ncvarid, streamptr->zlevel);
 	}
@@ -2730,7 +2734,7 @@ int cdfDefVar(int streamID, int varID)
 
   if ( streamptr->ztype == COMPRESS_SZIP )
     {
-      if ( streamptr->filetype == FILETYPE_NC4 )
+      if ( lchunk && streamptr->filetype == FILETYPE_NC4 )
 	{
 #if defined (NC_SZIP_NN_OPTION_MASK)
 	  cdfDefVarSzip(fileID, ncvarid);
