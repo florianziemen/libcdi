@@ -50,11 +50,10 @@ binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_cdi_OBJECTS = cdi.$(OBJEXT)
 cdi_OBJECTS = $(am_cdi_OBJECTS)
-am__DEPENDENCIES_1 =
-cdi_DEPENDENCIES = ../src/libcdi.a $(am__DEPENDENCIES_1)
+cdi_DEPENDENCIES = ../src/libcdi.a
 am_createtable_OBJECTS = createtable.$(OBJEXT)
 createtable_OBJECTS = $(am_createtable_OBJECTS)
-createtable_DEPENDENCIES = ../src/libcdi.a $(am__DEPENDENCIES_1)
+createtable_DEPENDENCIES = ../src/libcdi.a
 DEFAULT_INCLUDES = -I. -I$(top_builddir)/src@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -184,11 +183,11 @@ top_srcdir = @top_srcdir@
 #
 cdi_SOURCES = cdi.c printinfo.h
 #
-cdi_LDADD = ../src/libcdi.a $(LDFLAGS)
+cdi_LDADD = ../src/libcdi.a
 #
 createtable_SOURCES = createtable.c
 #
-createtable_LDADD = ../src/libcdi.a $(LDFLAGS)
+createtable_LDADD = ../src/libcdi.a
 #
 AM_CPPFLAGS = -I$(top_srcdir)/src
 #
