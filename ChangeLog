@@ -1,6 +1,10 @@
+2010-03-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdfDefGrid: check whether the variable or dimension name already exist
+	
 2010-02-27  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* grid.c: replace for loops by memcpy (speed up)
+        * grid.c: replace for loops by memcpy (speed up)
 
 2010-02-25  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 

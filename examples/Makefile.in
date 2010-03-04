@@ -51,17 +51,16 @@ CONFIG_CLEAN_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
 am_cdi_copy_OBJECTS = cdi_copy.$(OBJEXT)
 cdi_copy_OBJECTS = $(am_cdi_copy_OBJECTS)
-am__DEPENDENCIES_1 =
-cdi_copy_DEPENDENCIES = ../src/libcdi.a $(am__DEPENDENCIES_1)
+cdi_copy_DEPENDENCIES = ../src/libcdi.a
 am_cdi_read_OBJECTS = cdi_read.$(OBJEXT)
 cdi_read_OBJECTS = $(am_cdi_read_OBJECTS)
-cdi_read_DEPENDENCIES = ../src/libcdi.a $(am__DEPENDENCIES_1)
+cdi_read_DEPENDENCIES = ../src/libcdi.a
 am_cdi_read_f2003_OBJECTS = cdi_read_f2003.$(OBJEXT)
 cdi_read_f2003_OBJECTS = $(am_cdi_read_f2003_OBJECTS)
 cdi_read_f2003_LDADD = $(LDADD)
 am_cdi_write_OBJECTS = cdi_write.$(OBJEXT)
 cdi_write_OBJECTS = $(am_cdi_write_OBJECTS)
-cdi_write_DEPENDENCIES = ../src/libcdi.a $(am__DEPENDENCIES_1)
+cdi_write_DEPENDENCIES = ../src/libcdi.a
 am_cdi_write_f2003_OBJECTS = cdi_write_f2003.$(OBJEXT)
 cdi_write_f2003_OBJECTS = $(am_cdi_write_f2003_OBJECTS)
 cdi_write_f2003_LDADD = $(LDADD)
@@ -204,13 +203,13 @@ top_srcdir = @top_srcdir@
 EXTRA_DIST = cdi_read_f2003.f90 cdi_write_f2003.f90
 #
 cdi_write_SOURCES = cdi_write.c
-cdi_write_LDADD = ../src/libcdi.a $(LDFLAGS)
+cdi_write_LDADD = ../src/libcdi.a
 #
 cdi_read_SOURCES = cdi_read.c
-cdi_read_LDADD = ../src/libcdi.a $(LDFLAGS)
+cdi_read_LDADD = ../src/libcdi.a
 #
 cdi_copy_SOURCES = cdi_copy.c
-cdi_copy_LDADD = ../src/libcdi.a $(LDFLAGS)
+cdi_copy_LDADD = ../src/libcdi.a
 #
 cdi_read_f2003_SOURCES = cdi_read_f2003.f90
 cdi_write_f2003_SOURCES = cdi_write_f2003.f90

@@ -8,13 +8,13 @@ if CREATE_ISOC
 endif
 #
 cdi_write_SOURCES = cdi_write.c
-cdi_write_LDADD = ../src/libcdi.a $(LDFLAGS)
+cdi_write_LDADD = ../src/libcdi.a
 #
 cdi_read_SOURCES = cdi_read.c
-cdi_read_LDADD = ../src/libcdi.a $(LDFLAGS)
+cdi_read_LDADD = ../src/libcdi.a
 #
 cdi_copy_SOURCES = cdi_copy.c
-cdi_copy_LDADD = ../src/libcdi.a $(LDFLAGS)
+cdi_copy_LDADD = ../src/libcdi.a
 #
 cdi_read_f2003_SOURCES = cdi_read_f2003.f90
 cdi_write_f2003_SOURCES = cdi_write_f2003.f90

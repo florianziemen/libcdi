@@ -343,6 +343,7 @@ void cdfGetAttText(int fileID, int ncvarid, char *attname, int attlen, char *att
 #endif
 
 #if  defined  (HAVE_LIBNETCDF)
+static
 int cdfInqDatatype(int xtype)
 {
   int datatype;
@@ -359,6 +360,7 @@ int cdfInqDatatype(int xtype)
 #endif
 
 #if  defined  (HAVE_LIBNETCDF)
+static
 int cdfDefDatatype(int datatype)
 {
   static char func[] = "cdfDefDatatype";
@@ -382,6 +384,7 @@ int cdfDefDatatype(int datatype)
 
 
 #if  defined  (HAVE_LIBNETCDF)
+static
 void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
 {
   static char func[] = "defineAttributes";
@@ -731,7 +734,7 @@ int cdfReadRecord(int streamID, double *data, int *nmiss)
   return (ierr);
 }
 
-
+static
 void cdfDefTimeValue(int streamID, int tsID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -1149,7 +1152,69 @@ void cdfDefTrajLat(int streamID, int gridID)
 #endif
 }
 
+#if  defined  (HAVE_LIBNETCDF)
+static
+void checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID, int ngrids, int mode)
+{
+  int iz, index;
+  int gridID0;
+  int ncdimid;
+  char axisname0[256];
+  char axisname2[256];
+  int checkname;
+  int status;
 
+  /* check that the name is not allready defined */
+  checkname = TRUE;
+  iz = 0;
+
+  while ( checkname ) 
+    {
+      strcpy(axisname2, axisname);
+      if ( iz ) sprintf(&axisname2[strlen(axisname2)], "_%d", iz+1);
+
+      //status = nc_inq_varid(fileID, axisname2, &ncvarid);
+      if ( type == 'V' ) /* type Var oder Dim */
+	status = nc_inq_varid(fileID, axisname2, &ncdimid);
+      else
+	status = nc_inq_dimid(fileID, axisname2, &ncdimid);
+
+      if ( status != NC_NOERR )
+	{
+	  if ( iz )
+	    {
+	      /* check that the name does not exist for other grids */
+	      for ( index = 0; index < ngrids; index++ )
+		{
+		  gridID0 = vlistGrid(vlistID, index);
+		  if ( gridID != gridID0 )
+		    {
+		      if ( mode == 'X' ) /* mode X or Y */
+			gridInqXname(gridID0, axisname0);
+		      else
+			gridInqYname(gridID0, axisname0);
+
+		      if ( strcmp(axisname0, axisname2) == 0 ) break;
+		    }
+		}
+	      if ( index == ngrids ) checkname = FALSE;
+	    }
+	  else
+	    {
+	      checkname = FALSE;
+	    }
+	}
+
+      if ( checkname ) iz++;
+      
+      if ( iz > 99 ) break;
+    }
+  
+  if ( iz ) sprintf(&axisname[strlen(axisname)], "_%d", iz+1);
+}
+#endif
+
+static
 void cdfDefXaxis(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -1158,7 +1223,7 @@ void cdfDefXaxis(int streamID, int gridID)
   char longname[256];
   char stdname[256];
   char axisname[256];
-  int index, iz = 0;
+  int index;
   /*  int index2; */
   int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
@@ -1167,7 +1232,6 @@ void cdfDefXaxis(int streamID, int gridID)
   int fileID;
   int dimlen, dimlen0;
   size_t len;
-  int ncdimid;
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
   int nvertex = 2, nvdimID = -1;
   int vlistID;
@@ -1224,50 +1288,7 @@ void cdfDefXaxis(int streamID, int gridID)
 
   if ( dimID == UNDEFID )
     {
-      char axisname0[256];
-      char axisname2[256];
-      int checkname = FALSE;
-      int status;
-
-      /* check that the name is not allready defined */
-      checkname = TRUE;
-      iz = 0;
-
-      while ( checkname ) 
-	{
-	  strcpy(axisname2, axisname);
-	  if ( iz ) sprintf(&axisname2[strlen(axisname2)], "_%d", iz+1);
-
-	  //status = nc_inq_varid(fileID, axisname2, &ncvarid);
-	  status = nc_inq_dimid(fileID, axisname2, &ncdimid);
-	  if ( status != NC_NOERR )
-	    {
-	      if ( iz )
-		{
-		  /* check that the name does not exist for other grids */
-		  for ( index = 0; index < ngrids; index++ )
-		    {
-		      gridID0 = vlistGrid(vlistID, index);
-		      if ( gridID != gridID0 )
-			{
-			  gridInqXname(gridID0, axisname0);
-			  if ( strcmp(axisname0, axisname2) == 0 ) break;
-			}
-		    }
-		  if ( index == ngrids ) checkname = FALSE;
-		}
-	      else
-		{
-		  checkname = FALSE;
-		}
-	    }
-
-	  if ( checkname ) iz++;
-
-	  if ( iz > 99 ) break;
-	}
-
-      if ( iz ) sprintf(&axisname[strlen(axisname)], "_%d", iz+1);
+      checkGridName('V', axisname, fileID, vlistID, gridID, ngrids, 'X');
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
@@ -1316,6 +1337,7 @@ void cdfDefXaxis(int streamID, int gridID)
 #endif
 }
 
+static
 void cdfDefYaxis(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -1324,7 +1346,7 @@ void cdfDefYaxis(int streamID, int gridID)
   char longname[256];
   char stdname[256];
   char axisname[256];
-  int index, iz = 0;
+  int index;
   /*  int index2; */
   int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
@@ -1333,7 +1355,6 @@ void cdfDefYaxis(int streamID, int gridID)
   int fileID;
   int dimlen, dimlen0;
   size_t len;
-  int ncdimid;
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
   int nvdimID = -1;
   int vlistID;
@@ -1390,50 +1411,7 @@ void cdfDefYaxis(int streamID, int gridID)
 
   if ( dimID == UNDEFID )
     {
-      char axisname0[256];
-      char axisname2[256];
-      int checkname = FALSE;
-      int status;
-
-      /* check that the name is not allready defined */
-      checkname = TRUE;
-      iz = 0;
-
-      while ( checkname ) 
-	{
-	  strcpy(axisname2, axisname);
-	  if ( iz ) sprintf(&axisname2[strlen(axisname2)], "_%d", iz+1);
-
-	  //status = nc_inq_varid(fileID, axisname2, &ncvarid);
-	  status = nc_inq_varid(fileID, axisname2, &ncdimid);
-	  if ( status != NC_NOERR )
-	    {
-	      if ( iz )
-		{
-		  /* check that the name does not exist for other grids */
-		  for ( index = 0; index < ngrids; index++ )
-		    {
-		      gridID0 = vlistGrid(vlistID, index);
-		      if ( gridID != gridID0 )
-			{
-			  gridInqYname(gridID0, axisname0);
-			  if ( strcmp(axisname0, axisname2) == 0 ) break;
-			}
-		    }
-		  if ( index == ngrids ) checkname = FALSE;
-		}
-	      else
-		{
-		  checkname = FALSE;
-		}
-	    }
-
-	  if ( checkname ) iz++;
-
-	  if ( iz > 99 ) break;
-	}
-
-      if ( iz ) sprintf(&axisname[strlen(axisname)], "_%d", iz+1);
+      checkGridName('V', axisname, fileID, vlistID, gridID, ngrids, 'Y');
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
@@ -1481,7 +1459,7 @@ void cdfDefYaxis(int streamID, int gridID)
 #endif
 }
 
-
+static
 void cdfDefLonLat2D(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -1495,7 +1473,7 @@ void cdfDefLonLat2D(int streamID, int gridID)
   char yaxisname[256];
   char xdimname[4] = "x";
   char ydimname[4] = "y";
-  int index, index2, iz = 0;
+  int index;
   int gridID0, gridtype0, gridindex;
   int xdimID = UNDEFID;
   int ydimID = UNDEFID;
@@ -1552,23 +1530,22 @@ void cdfDefLonLat2D(int streamID, int gridID)
 		    xdimID = streamptr->xdimID[index];
 		    break;
 		  }
+	      /*
 	      for ( index2 = 0; index2 < index; index2++ )
 		if ( streamptr->xdimID[index] == streamptr->xdimID[index2] )
 		  break;
 	      if ( index2 == index ) iz++;
+	      */
 	    }
 	}
     }
 
   if ( xdimID == UNDEFID )
     {
-      if ( iz )
-	{
-	  sprintf(&xaxisname[strlen(xaxisname)], "_%d", iz+1);
-	  sprintf(&yaxisname[strlen(yaxisname)], "_%d", iz+1);
-	  sprintf(&xdimname[1], "_%d", iz+1);
-	  sprintf(&ydimname[1], "_%d", iz+1);
-	}
+      checkGridName('V', xaxisname, fileID, vlistID, gridID, ngrids, 'X');
+      checkGridName('V', yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
+      checkGridName('D', xdimname, fileID, vlistID, gridID, ngrids, 'X');
+      checkGridName('D', ydimname, fileID, vlistID, gridID, ngrids, 'Y');
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
@@ -1670,7 +1647,7 @@ void cdfDefLonLat2D(int streamID, int gridID)
 #endif
 }
 
-
+static
 void cdfDefRgrid(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -1742,7 +1719,7 @@ void cdfDefRgrid(int streamID, int gridID)
 #endif
 }
 
-
+static
 void cdfDefGdim(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -1826,7 +1803,7 @@ void cdfDefGdim(int streamID, int gridID)
 #endif
 }
 
-
+static
 void cdfDefCell(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -1991,7 +1968,7 @@ void cdfDefCell(int streamID, int gridID)
 #endif
 }
 
-
+static
 void cdfDefVCT(int streamID, int zaxisID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -2122,7 +2099,7 @@ void cdfDefVCT(int streamID, int zaxisID)
 #endif
 }
 
-
+static
 void cdfDefZaxis(int streamID, int zaxisID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -2326,7 +2303,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
 #endif
 }
 
-
+static
 void cdfDefPole(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -2359,7 +2336,7 @@ void cdfDefPole(int streamID, int gridID)
 #endif
 }
 
-
+static
 void cdfDefMapping(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -2449,7 +2426,7 @@ void cdfDefMapping(int streamID, int gridID)
 #endif
 }
 
-
+static
 void cdfDefGrid(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -2534,7 +2511,7 @@ void cdfDefGrid(int streamID, int gridID)
 #endif
 }
 
-
+static
 int cdfDefVar(int streamID, int varID)
 {
   static char func[] = "cdfDefVar";
@@ -3746,7 +3723,7 @@ void cdfCreateRecords(int streamID, int tsID)
 #endif
 }
 
-
+static
 int cdfTimeDimID(int fileID, int ndims, int nvars)
 {
   int dimid = 0;
@@ -3978,7 +3955,7 @@ void cdfSetVar(NCVAR *ncvars, int ncvarid, int isvar)
   ncvars[ncvarid].isvar = isvar;
 }
 
-
+static
 void cdfSetDim(NCVAR *ncvars, int ncvarid, int dimid, int dimtype)
 {
   static char func[] = "cdfSetDim";
