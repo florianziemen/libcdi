@@ -26,7 +26,7 @@ case "${HOSTNAME}" in
                     --with-netcdf=$HOME/local \
                     --with-hdf5=$HOME/local \
                     --with-szlib=$HOME/local \
-                    CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -pedantic" CFINT=-Df2cFortran
+                    CC=colorgcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -pedantic" CFINT=-Df2cFortran
 	;;
     gata)
 	./configure --prefix=$HOME/local/etch-ia32 \
