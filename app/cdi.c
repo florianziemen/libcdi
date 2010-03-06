@@ -106,7 +106,7 @@ void usage(void)
   fprintf(stderr, "       jpeg        JPEG compression of GRIB2 records\n");
   fprintf(stderr, "        zip        Deflate compression of netCDF4 variables\n");
   fprintf(stderr, "\n");
-  fprintf(stderr, "  Report bugs to <Uwe.Schulzweida@zmaw.de>\n");
+  fprintf(stderr, "  Report bugs to <http://code.zmaw.de/projects/cdi>\n");
 }
 
 

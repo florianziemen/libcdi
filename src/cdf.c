@@ -63,7 +63,7 @@ void cdfDebug(int debug)
     Message(func, "debug level %d", debug);
 }
 
-
+static
 void cdfComment(int ncid)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -82,7 +82,7 @@ void cdfComment(int ncid)
 	strcat(comment, "??");
       else
 	strncat(comment, cdiLibraryVersion(), size);
-  /*  strcat(comment, " available from http://.../software/cdi.html"); */
+      strcat(comment, " (http://code.zmaw.de/projects/cdi)");
     }
 
   cdf_put_att_text(ncid, NC_GLOBAL, "CDI", strlen(comment), comment);
