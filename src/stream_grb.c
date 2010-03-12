@@ -13,6 +13,15 @@
 #include "file.h"
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
 
+/* begin deike */
+
+#ifndef NOMPI
+#include "pio.h"               
+extern pioInfo *pioinfo;
+#endif
+
+/* end deike */
+
 
 int grbBitsPerValue(int datatype)
 {
@@ -509,7 +518,19 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   if ( streamptr->ztype == COMPRESS_SZIP )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
-  nwrite = fileWrite(fileID, gribbuffer, nbytes);
+  /* begin deike */
+
+#ifndef NOMPI
+  if ( pioinfo->type != PIO_NONE )
+    nwrite = pioFileWrite ( fileID, tsID, gribbuffer, nbytes );
+  else
+      nwrite = fileWrite(fileID, gribbuffer, nbytes); 
+#else
+  nwrite = fileWrite(fileID, gribbuffer, nbytes); 
+#endif
+
+  /* end deike */
+
   if ( nwrite != nbytes ) perror(func);
 
   if ( gribbuffer ) free(gribbuffer);

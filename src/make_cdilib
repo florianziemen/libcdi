@@ -47,6 +47,11 @@ cat > ${PROG} << EOR
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <stdbool.h>
+#ifndef NOMPI
+#include "mpi.h"
+#endif 
+
 #if  defined  (HAVE_LIBGRIB_API)
 #  include <grib_api.h>
 #endif
@@ -74,7 +79,6 @@ cat > ${PROG} << EOR
 EOR
 
 c="dmemory.c         \
-   dmemory.h         \
    taxis.c           \
    error.c           \
    timebase.c        \
@@ -116,14 +120,17 @@ c="dmemory.c         \
    swap.c            \
    binary.c          \
    cdf.c             \
-"
+   pio_dbuffer.c     \	
+   pio_queue.c       \
+   pio.c             \
+   pio_posixfpguardsendrecv.c"
 
 h="cdi_limits.h taxis.h error.h dtypes.h file.h cgribex.h gribapi.h service.h extra.h \
    ieg.h cdi.h timebase.h calendar.h basetime.h datetime.h stream_int.h \
    stream_cgribex.h  stream_gribapi.h  stream_grb.h  stream_cdf.h \
    tablepar.h table.h gaussgrid.h grid.h varscan.h binary.h swap.h \
    service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \
-   cdf.h vlist.h"
+   cdf.h vlist.h pio.h pio_impl.h"
 
 #cat $h >> ${PROG}
 #cat $c | grep -v '#include' | grep -v '#  include' >> ${PROG}

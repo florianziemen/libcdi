@@ -1,10 +1,10 @@
 ! This file was automatically created, don't edit!
 !
-! Fortran interface for CDI library version 1.4.3
+! Fortran interface for CDI library version 1.4.3.1
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   February 2010
+! Uwe Schulzweida, MPI-MET, Hamburg,   March 2010
 !
 
       INTEGER    CDI_UNDEFID           
@@ -302,6 +302,19 @@
       PARAMETER (CALENDAR_366DAYS       =  4)
       INTEGER    CALENDAR_NONE         
       PARAMETER (CALENDAR_NONE          =  5)
+      INTEGER    PIO_NONE              
+      PARAMETER (PIO_NONE               =  0)
+      INTEGER    PIO_POSIX_FPGUARD_SENDRECV
+      PARAMETER (PIO_POSIX_FPGUARD_SENDRECV =  1)
+      INTEGER         pioInit
+!                                    (INTEGER         ,
+!                                     INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        pioInit
+
+!                     pioFinalize
+      EXTERNAL        pioFinalize
+
 !
 !  CDI control routines
 !

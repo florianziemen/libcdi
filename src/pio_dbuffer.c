@@ -1,0 +1,123 @@
+#define _XOPEN_SOURCE 600
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <errno.h>
+#include <unistd.h>
+#include <string.h>
+
+#ifndef NOMPI
+#include "pio_impl.h"
+
+bool ldebug    = false;
+
+
+int dbuffer_init ( struct dBuffer **dbuffer, size_t size )
+{
+  struct dBuffer *db;
+  int status;
+  size_t pagesize;
+
+  pagesize = ( size_t ) sysconf ( _SC_PAGESIZE );
+  if ( ldebug ) 
+    fprintf ( stdout, "dbuffer_init(): pagesize = %zu bytes, size = %zu \n", pagesize, size );
+
+  if ( dbuffer == NULL || size < pagesize )
+    {
+      return 1;
+    }
+  
+  db = ( struct dBuffer * ) malloc ( sizeof ( struct dBuffer ));
+  if ( db == NULL )
+    {
+      perror ( "Not enough memory" );
+      return 1;
+    }
+  
+  db->size = pagesize;
+  while ( db->size < size )
+    {
+      db->size <<= 1;
+      if ( ldebug ) 
+	fprintf ( stdout,"size correction: %zu\n", db->size );
+    }
+  
+  db->wr_pointer = 0;
+
+  if ( ( status = posix_memalign ( ( void ** ) &db->buffer, pagesize, 
+				   sizeof ( char ) * ( db->size ))) != 0 ) 
+    {
+      switch ( status )
+	{
+	case EINVAL:
+	  fprintf ( stderr, 
+		    "The alignment argument was not a power of two, or was not a multiple of sizeof(void *).\n" );
+	  break;
+	case ENOMEM:
+	  fprintf ( stderr, 
+		    "There was insufficient memory to fulfill the allocation request.\n" );
+	  break;
+	}
+    }
+  *dbuffer = db;
+  
+  return 0;
+}
+
+void dbuffer_cleanup ( struct dBuffer **dbuffer )
+{
+  struct dBuffer *db;
+
+  db = *dbuffer;
+
+  free ( db->buffer );
+  free ( db );
+
+  return;
+}
+
+size_t dbuffer_data_size ( struct dBuffer *dbuffer )
+{
+  size_t data_size;
+
+  data_size = ( size_t )( dbuffer->wr_pointer & ( dbuffer->size-1 ));
+
+  return data_size;
+}
+
+size_t dbuffer_free ( struct dBuffer *dbuffer )
+{
+  size_t free_size;
+
+  free_size = ( size_t )( dbuffer->size - 1 - dbuffer_data_size ( dbuffer ));
+
+  return free_size;
+}
+
+int dbuffer_reset ( struct dBuffer *dbuffer )
+{
+  dbuffer->wr_pointer = 0;
+  
+  return 0;
+}
+
+int dbuffer_push ( struct dBuffer *dbuffer, unsigned char *buffer, size_t len )
+{
+  size_t space_left;
+  size_t wr_ptr;
+
+  space_left = dbuffer_free ( dbuffer );
+  if ( len > space_left )
+    {
+      return 1; /* not enough space left */
+    }
+  
+  wr_ptr = dbuffer->wr_pointer;
+  memcpy ( dbuffer->buffer + wr_ptr, buffer, len );
+  dbuffer->wr_pointer = wr_ptr + len;
+
+  return 0;
+}
+
+#endif

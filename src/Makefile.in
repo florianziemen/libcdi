@@ -76,7 +76,9 @@ am_libcdi_a_OBJECTS = cdiFortran.$(OBJEXT) cdi_error.$(OBJEXT) \
 	tsteps.$(OBJEXT) stream_int.$(OBJEXT) servicelib.$(OBJEXT) \
 	extralib.$(OBJEXT) ieglib.$(OBJEXT) cdf.$(OBJEXT) \
 	cdf_int.$(OBJEXT) file.$(OBJEXT) binary.$(OBJEXT) \
-	swap.$(OBJEXT) cgribexlib.$(OBJEXT) gribapi.$(OBJEXT)
+	swap.$(OBJEXT) cgribexlib.$(OBJEXT) gribapi.$(OBJEXT) \
+	pio_dbuffer.$(OBJEXT) pio_queue.$(OBJEXT) pio.$(OBJEXT) \
+	pio_posixfpguardsendrecv.$(OBJEXT)
 libcdi_a_OBJECTS = $(am_libcdi_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -205,6 +207,7 @@ target_alias = @target_alias@
 target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
+top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
@@ -299,7 +302,13 @@ libcdi_a_SOURCES = \
 	table.h	 	 \
 	tablepar.h	 \
 	gaussgrid.h	 \
-	varscan.h
+	varscan.h        \
+	pio_dbuffer.c    \
+	pio_queue.c      \
+	pio.c            \
+	pio_posixfpguardsendrecv.c \
+	pio.h            \
+	pio_impl.h 
 
 LOCALTARGETS = cdilib.o $(am__append_2)
 #
@@ -414,6 +423,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ieglib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/institution.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/model.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_dbuffer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixfpguardsendrecv.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/servicelib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cdf.Po@am__quote@

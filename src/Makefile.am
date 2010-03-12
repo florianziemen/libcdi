@@ -93,7 +93,13 @@ libcdi_a_SOURCES = 	 \
 	table.h	 	 \
 	tablepar.h	 \
 	gaussgrid.h	 \
-	varscan.h
+	varscan.h        \
+	pio_dbuffer.c    \
+	pio_queue.c      \
+	pio.c            \
+	pio_posixfpguardsendrecv.c \
+	pio.h            \
+	pio_impl.h 
 #
 cdiFortran.o: cdiFortran.c
 	source='$<' object='$@' libtool=no \

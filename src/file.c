@@ -19,6 +19,16 @@ size_t getpagesize(void);
 #include "error.h"
 #include "file.h"
 
+/* begin deike */
+
+#ifndef NOMPI
+#include "pio.h"
+#include "cdi.h"
+extern pioInfo *pioinfo;
+#endif
+
+/* end deike */
+
 #if ! defined(O_BINARY)
 #define O_BINARY 0
 #endif
@@ -1070,6 +1080,13 @@ int fileOpen(const char *filename, const char *mode)
   struct stat filestat;
   F_I_L_E *fileptr = NULL;
 
+  /* begin deike */
+#ifndef NOMPI
+  if ( memcmp ( mode, "w", 1 ) == 0 && pioinfo->type != PIO_NONE )
+    return pioFileOpenW ( filename );
+#endif
+  /* end deike */
+
   FILE_INIT
 
   fmode = tolower((int) mode[0]);
@@ -1158,6 +1175,13 @@ int fileClose(int fileID)
   char *fbtname[] = {"unknown", "standard", "mmap"};
   char *ftname[] = {"unknown", "open", "fopen"};
   F_I_L_E *fileptr;
+
+  /* begin deike */
+#ifndef NOMPI
+  if ( pioinfo->type != PIO_NONE )
+      return pioFileClose ( fileID );
+#endif
+  /* end deike */
 
   fileptr = file_to_pointer(fileID);
 
