@@ -1,0 +1,240 @@
+! TODO varId (:,:) RESTRICTED TO SIZESSTREAMS(1) 
+
+  !* on blizzard 
+ !* configure: change to #/bin/bash
+  !* >> CC=xlc_r ./configure --enable-mpi --prefix=$HOME/local --with-netcdf=/sw/aix61/netcdf-4.0.1-ibm --with-hdf5=/sw/aix61/hdf5-1.8.4-patch1 --with-szlib=/sw/aix53/szip-2.1 AR="ar -X 64" CFINT=-Dextname CFLAGS="-g -O3 -q64 -qhot -qarch=auto -qtune=auto -DHAVE_MMAP -qcpluscmt"
+  !* >> make clean
+  !* >> make -k -j4
+  !* >> mpxlf95_r -o cdi_write_f_somefiles -I../src  cdi_write_f_somefiles.F90  -L../src -lcdi -qextname -L/sw/aix53/szip-2.1/lib -lsz -L/sw/aix61/netcdf-4.0.1-ibm/lib -lnetcdf  -L/sw/aix61/hdf5-1.8.4-patch1/lib -lhdf5_hl -lhdf5 -lz
+  !* >> llsubmit cdi_write_f_somefiles.job
+  !* >> llq | grep m300050
+
+
+      PROGRAM CDIWRITE
+
+      IMPLICIT NONE
+
+      INCLUDE 'cdi.inc'
+
+#ifndef NOMPI 
+      INCLUDE 'mpif.h'
+#endif
+
+      INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(12,307) 
+
+      INTEGER, PARAMETER :: PTYPE = PIO_POSIX_FPGUARD_SENDRECV
+
+      INTEGER, PARAMETER :: NLON  = 38   ! Number of longitudes 384
+      INTEGER, PARAMETER :: NLAT  = 19   ! Number of latitudes  192
+      INTEGER, PARAMETER :: NLEV  =  1   ! Number of levels      96
+      INTEGER, PARAMETER :: NTIME =  3   ! Number of time steps 124
+      INTEGER, PARAMETER :: NFILES = 2   ! Number of files        7
+      INTEGER, PARAMETER :: SIZESSTREAMS ( NFILES ) = (/ 35, 35 /)
+      CHARACTER*(*), PARAMETER :: filenames ( NFILES ) = (/ 'dat1.grb', 'dat2.grb' /)
+
+      INTEGER, PARAMETER :: ddebug = 1
+      INTEGER :: pioComm
+
+      REAL(dp):: lons(NLON), lats(NLAT), levs(NLEV)
+
+      INTEGER :: gridID, zaxisID, taxisID
+      INTEGER :: vlistID ( NFILES ), streamID ( NFILES )
+
+      INTEGER :: i, j, nmiss
+      INTEGER :: varIDs ( SIZESSTREAMS ( 1 ), NFILES )
+      REAL(dp):: var(NLON*NLAT*NLEV)
+      INTEGER :: collectingData
+      INTEGER :: ncollectors, sID, tsID, rank
+      INTEGER :: lstreamfirst ( NFILES ), lstreamlast ( NFILES )
+
+      INTEGER :: error, status
+
+      REAL(dp) :: startTime, stopTime
+      REAL(dp) :: accumOpen, accumClose, accumWrite
+
+#ifndef NOMPI
+      CALL MPI_INIT ( error )
+      CALL MPI_COMM_DUP ( MPI_COMM_WORLD, pioComm, error )
+      CALL MPI_COMM_RANK ( MPI_COMM_WORLD, rank, error )
+#endif
+
+      nmiss = 0
+      collectingData = 1
+
+      CALL initCoords ()
+
+#ifndef NOMPI
+      collectingData =  pioInit( PTYPE, pioComm, ncollectors )
+      IF ( collectingData /= 1 ) THEN
+         GO TO 1
+      END IF
+
+      IF ( ddebug == 1 .AND. rank == 0 ) THEN
+         write ( *, * ) 'NLON=',NLON,', NLAT=',NLAT,', NLEV=',NLEV,', NTIME=',NTIME
+         write ( *, * ) 'SIZESSTREAMS(1)=',SIZESSTREAMS(1), 'total amount=', NLON * NLAT * NLEV * NTIME * SIZESSTREAMS(1) * 8,' bytes per file';
+      END IF
+#endif
+
+!     Create a regular lon/lat grid
+      gridID = gridCreate ( GRID_LONLAT, NLON*NLAT )
+      CALL gridDefXsize ( gridID, NLON )
+      CALL gridDefYsize ( gridID, NLAT )
+      CALL gridDefXvals ( gridID, lons )
+      CALL gridDefYvals ( gridID, lats )
+
+!     Create a pressure level Z-axis
+      zaxisID = zaxisCreate ( ZAXIS_PRESSURE, NLEV )
+      CALL zaxisDefLevels ( zaxisID, levs )
+ 
+!     Create a variable list
+      DO i = 1, NFILES
+         vlistID ( i )  = vlistCreate()
+      END DO
+
+      DO i = 1, NFILES
+         DO j = 1, SIZESSTREAMS ( 1 )
+                                !     Define the variables
+            varIDs ( j, i ) = vlistDefVar ( vlistID ( i ), gridID, zaxisID, TIME_VARIABLE )
+            
+                                !     Define the variable names
+            CALL vlistDefVarName ( vlistID ( i ), varIDs ( j, i ), "varname")
+         END DO
+      END DO
+      
+!     Create a Time axis
+      taxisID = taxisCreate(TAXIS_ABSOLUTE)
+
+!     Assign the Time axis to the variable list
+      DO i = 1, NFILES
+         CALL vlistDefTaxis ( vlistID ( i ), taxisID)
+      END DO
+
+!     Create a dataset in netCDF fromat
+      DO i = 1, NFILES
+         streamID ( i ) = streamOpenWrite ( filenames ( i ), FILETYPE_GRB )
+         IF ( streamID ( i ) < 0 ) THEN
+            WRITE(0,*) cdiStringError ( streamID ( i ))
+#ifndef NOMPI
+            CALL MPI_ABORT ( pioComm, 1, error )
+#else
+            STOP
+#endif
+         END IF
+      END DO
+
+!     Assign the variable list to the dataset
+      DO i = 1, NFILES
+#ifndef NOMPI
+         IF ( PTYPE /= PIO_NONE ) THEN
+            CALL initLocalstream ( ncollectors, SIZESSTREAMS ( i ), lstreamfirst ( i ), lstreamlast ( i ))
+         ELSE 
+            lstreamfirst ( i ) = 1
+            lstreamlast ( i )  = SIZESSTREAMS ( i )
+         END IF
+#else
+         lstreamfirst ( i ) = 1
+         lstreamlast ( i )  = SIZESSTREAMS ( i )
+#endif
+         CALL streamDefVlist ( streamID ( i ), vlistID ( i ))
+      END DO
+
+!     Loop over the number of time steps
+      DO tsID = 0, NTIME-1
+!        Set the verification date to 1985-01-01 + tsID
+         CALL taxisDefVdate ( taxisID, 19850101+tsID )
+!        Set the verification time to 12:00:00
+         CALL taxisDefVtime ( taxisID, 120000 )
+         DO i = 1, NFILES
+!        Define the time step
+            status = streamDefTimestep ( streamID ( i ), tsID )
+            DO sID = lstreamfirst ( i ), lstreamlast ( i )
+!        Init var
+               DO j = 1, NLON*NLAT*NLEV
+                  var ( j ) = 100.0 * ( sID + 1 ) + tsID + 1.0
+               END DO
+
+!        Write var
+               CALL streamWriteVar ( streamID ( i ), varIDs ( sID, i ), var, nmiss)
+            END DO
+         END DO
+      END DO
+
+!     Close the output stream
+      DO i = 1, NFILES
+         CALL streamClose ( streamID ( i ))
+      END DO
+
+!     Destroy the objects
+      DO i = 1, NFILES
+         CALL vlistDestroy ( vlistID ( i ))
+      END DO
+
+      CALL taxisDestroy(taxisID)
+      CALL zaxisDestroy(zaxisID)
+      CALL gridDestroy(gridID)
+
+#ifndef NOMPI 
+ 1    CALL pioFinalize ()
+      CALL MPI_FINALIZE ( error ) 
+#endif
+
+CONTAINS
+
+      !********************************************
+      
+      SUBROUTINE initCoords
+
+      INTEGER      :: i
+      REAL ( dp )  :: dist
+
+      DO i = 1, NLON
+         lons ( i ) = 360.0 / NLON * (  i - 1 )
+      END DO
+
+      dist = 180.0 / NLAT
+
+      lats ( 1 ) = -90 + dist / 2.0;
+
+      DO i = 2, NLAT
+         lats ( i ) = lats ( i - 1 ) + dist
+      END DO
+
+      DO i = 1, NLEV
+         levs ( i ) = 101300.0 / NLEV * i
+      END DO
+
+      END SUBROUTINE initCoords
+
+      !********************************************
+
+      SUBROUTINE initLocalstream ( npes, sizestream, ifirst, ilast )
+
+      INTEGER, INTENT  ( IN ) :: npes, sizestream
+      INTEGER, INTENT ( OUT ) :: ifirst, ilast
+
+      INTEGER :: rank, error, rest, lrecords
+
+      CALL MPI_COMM_RANK ( pioComm, rank, error )
+ 
+      lrecords = sizestream / npes
+      rest     = MOD ( sizestream, npes )
+      ifirst   = rank * lrecords + 1
+      
+      IF ( rest /= 0 ) THEN
+         IF ( rank < rest ) THEN
+            lrecords = lrecords + 1
+            ifirst = ifirst + rank
+         ELSE
+            ifirst = ifirst + rest
+         END IF    
+      END IF
+
+      ilast = ifirst + lrecords - 1
+
+      IF ( ddebug == 1 ) THEN
+         write ( *, * ) 'pe', rank, 'has', lrecords, 'out of ', sizestream, 'records to write. ifirst=', ifirst, ', ilast=', ilast
+      END IF
+      
+      END SUBROUTINE initLocalstream
+
+      END

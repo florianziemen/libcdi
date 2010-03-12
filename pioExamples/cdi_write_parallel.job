@@ -1,0 +1,63 @@
+#! /bin/bash
+#-----------------------------------------------------------------------------
+# @ shell                = /bin/bash
+# @ job_type             = parallel
+# @ node_usage           = not_shared
+# @ network.MPI          = sn_all,not_shared,us
+# @ rset                 = rset_mcm_affinity
+# @ mcm_affinity_options = mcm_distribute
+# @ node                 = 1
+# @ tasks_per_node       = 4
+# @ resources            = ConsumableMemory(3000mb)
+# @ task_affinity        = core
+# @ wall_clock_limit     = 01:00:00
+# @ job_name             = cdi_write_parallel
+# @ output               = $(job_name).o$(jobid)
+# @ error                = $(output)
+# @ notification         = error
+# @ account_no           = bk0521
+# @ queue
+#-----------------------------------------------------------------------------
+#
+# . /usr/lpp/ppe.hpct/env_sh
+#
+# export PROFILE_BY_CALLSITE=YES
+# export TRACE_ALL_EVENTS=NO
+# export OUTPUT_ALL_TASKS=YES
+# export TRACEBACK_LEVEL=2
+#
+# it's MANDATORY to set MP_SINGLE_THREAD=NO, MPI-IO requires this !
+#
+export MP_SINGLE_THREAD=NO
+#
+# general options
+#
+export MEMORY_AFFINITY=MCM
+export MP_SHARED_MEMORY=YES
+export MP_BUFFER_MEM=32M,256M
+export MP_LABELIO=yes
+export MP_RDMA_MTU=4k
+export MP_FIFO_MTU=4k
+export MP_SHM_ATTACH_THRESH=500000
+#
+# critical parameters that affect MPI-IO performance
+#
+export MP_RFIFO_SIZE=16M          # without BULK_XFER you should set this to the max of 16M
+export MP_USE_BULK_XFER=YES       # gives a large boost for transfer sizes >= 1M
+export MP_BULK_MIN_MSG_SIZE=128k  # limit BULK_XFER for msg sizes > 128 kB
+export MP_S_IOAGENT_CNT=1         # 1/2 x - 1 x the number of total nodes seem to be OK
+export MP_IO_BUFFER_SIZE=128M     # 128M for 1-4 IO Agents, reduce for more than 4 agents
+#
+#-----------------------------------------------------------------------------
+#
+if [[ ! -d /scratch/m/m300050/cdi_io ]]; then 
+ mkdir /scratch/m/m300050/cdi_pio
+fi
+#
+cd /scratch/m/m300050/cdi_pio
+poe /pf/m/m300050/cdi_pio/cdi-pio/exampleModel/cdi_write_parallel
+#
+#-----------------------------------------------------------------------------
+exit
+#-----------------------------------------------------------------------------
+

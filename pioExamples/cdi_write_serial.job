@@ -1,0 +1,31 @@
+#!/bin/bash
+#
+#---------------------------------------
+# serial job
+#---------------------------------------
+#
+# @ shell            = /bin/bash                      
+# @ job_type         = serial
+# @ job_name         = cdi_write_serial                   
+# @ resources        = ConsumableCpus(1) ConsumableMemory(3000mb)
+# @ wall_clock_limit = 01:00:00 
+# @ output           = $(job_name).o$(jobid)
+# @ error            = $(output)
+# @ notification     = error
+# @ account_no       = bk0521                 
+# @ queue                                
+#
+#----------------------------------------------------------------------------- 
+#
+#-----------------------------------------------------------------------------
+#
+if [[ ! -d /scratch/m/m300050/cdi_io ]]; then 
+ mkdir /scratch/m/m300050/cdi_pio
+fi
+#
+cd /scratch/m/m300050/cdi_pio
+/pf/m/m300050/cdi_pio/cdi-pio/exampleModel/cdi_write_serial
+#
+#-----------------------------------------------------------------------------
+exit
+#-----------------------------------------------------------------------------
