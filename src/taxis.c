@@ -616,6 +616,19 @@ int taxisHasBounds(int taxisID)
 }
 
 
+void taxisDeleteBounds(int taxisID)
+{
+  static char func[] = "taxisDeleteBounds";
+  TAXIS *taxisptr;
+
+  taxisptr = taxis_to_pointer(taxisID);
+
+  taxis_check_ptr(func, taxisptr);
+
+  taxisptr->has_bounds = FALSE;
+}
+
+
 void taxisCopyTimestep(int taxisID2, int taxisID1)
 {
   static char func[] = "taxisCopyTimestep";

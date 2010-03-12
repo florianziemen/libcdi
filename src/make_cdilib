@@ -155,9 +155,4 @@ cat $srcdir/cfortran.h   >>  ${PROG}
 echo "#endif" >>  ${PROG}
 cat $srcdir/cdiFortran.c >>  ${PROG}
 
-echo "#undef realloc" >>  ${PROG}
-echo "#undef malloc"  >>  ${PROG}
-echo "#undef calloc"  >>  ${PROG}
-echo "#undef free"    >>  ${PROG}
-
 exit
