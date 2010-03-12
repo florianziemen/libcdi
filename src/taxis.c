@@ -1034,22 +1034,37 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
 
   if ( timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR )
     {
-      int nmon;
+      int nmon/*, nday */;
+      /* double fmon; */
 
-      if ( timeunit == TUNIT_YEAR ) timevalue *= 12;
+      if ( timeunit == TUNIT_YEAR )
+	{
+	  timeunit = TUNIT_MONTH;
+	  timevalue *= 12;
+	}
 
       if ( (NINT(timevalue*10))%10 && lwarn )
 	{
 	  Warning(func, "Possible wrong calculation of date/time!\n"
-		  "Time offset isn't integer for time unit MONTH and YEAR!");
+		  "Time offset have to be integer for time unit MONTH and YEAR!");
 	  lwarn = FALSE;
 	}
       
       nmon = (int) (timevalue+0.001);
+      /*
+      nmon = (int) timevalue;
+      fmon = timevalue - nmon;
+      printf("timevalue %g, nmon %d, fmon %g\n", timevalue, nmon, fmon);
+      */
       month += nmon;
 
       while ( month > 12 ) { month -= 12; year++; }
       while ( month <  1 ) { month += 12; year--; }
+      /*
+      nday = days_per_month(calendar, year, month);
+      printf(" year %d, month %d, nday %d\n", year, month, nday);
+      timeunit = TUNIT_DAY;
+      */
     }
   else
     {
