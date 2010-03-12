@@ -121,7 +121,7 @@ void gauaw(int kn, double *pl, double *pw)
 
   iter   = (int *)    malloc(kn*sizeof(int));
   zfn    = (double *) malloc((kn+1)*(kn+1)*sizeof(double));
-  zfnlat = (double *) malloc((kn/2+1)*sizeof(double));  
+  zfnlat = (double *) malloc((kn/2+1+1)*sizeof(double));  
 
   zfn[0] = M_SQRT2;
   for (jn = 1; jn <= kn; jn++)

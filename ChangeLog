@@ -1,3 +1,7 @@
+2010-03-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* gauaw: bug fix for allocation of zfnlat for odd number of nlat
+
 2010-03-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cdfDefGrid: check whether the variable or dimension name already exist
