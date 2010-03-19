@@ -1004,6 +1004,7 @@ void cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
     }
 }
 
+int days_per_month(int calendar, int year, int month);
 
 void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
 {
@@ -1034,8 +1035,7 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
 
   if ( timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR )
     {
-      int nmon/*, nday */;
-      /* double fmon; */
+      static int lold = FALSE;
 
       if ( timeunit == TUNIT_YEAR )
 	{
@@ -1043,30 +1043,44 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
 	  timevalue *= 12;
 	}
 
-      if ( (NINT(timevalue*10))%10 && lwarn )
+      if ( lold )
 	{
-	  Warning(func, "Possible wrong calculation of date/time!\n"
-		  "Time offset have to be integer for time unit MONTH and YEAR!");
-	  lwarn = FALSE;
-	}
-      
-      nmon = (int) (timevalue+0.001);
-      /*
-      nmon = (int) timevalue;
-      fmon = timevalue - nmon;
-      printf("timevalue %g, nmon %d, fmon %g\n", timevalue, nmon, fmon);
-      */
-      month += nmon;
+	  int nmon;
 
-      while ( month > 12 ) { month -= 12; year++; }
-      while ( month <  1 ) { month += 12; year--; }
-      /*
-      nday = days_per_month(calendar, year, month);
-      printf(" year %d, month %d, nday %d\n", year, month, nday);
-      timeunit = TUNIT_DAY;
-      */
+	  if ( (NINT(timevalue*10))%10 && lwarn )
+	    {
+	      Warning(func, "Possible wrong calculation of date/time!\n"
+		      "Non integer time offset unsupported for time unit MONTH and YEAR!");
+	      lwarn = FALSE;
+	    }
+
+	  nmon = (int) (timevalue+0.001);
+
+	  month += nmon;
+	  
+	  while ( month > 12 ) { month -= 12; year++; }
+	  while ( month <  1 ) { month += 12; year--; }
+	}
+      else
+	{
+	  int nmon, dpm;
+	  double fmon;
+	  
+	  nmon = (int) timevalue;
+	  fmon = timevalue - nmon;
+	  
+	  month += nmon;
+	  
+	  while ( month > 12 ) { month -= 12; year++; }
+	  while ( month <  1 ) { month += 12; year--; }
+
+	  dpm = days_per_month(calendar, year, month);
+	  timeunit = TUNIT_DAY;
+	  timevalue = fmon*dpm;
+	}
     }
-  else
+
+  if ( timeunit != TUNIT_MONTH && timeunit != TUNIT_YEAR )
     {
       encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday, &secofday);
 
@@ -1121,7 +1135,24 @@ double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
 
   if ( timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR )
     {
+      int nmonth, dpm;
+
+      dpm = days_per_month(calendar, year, month);
+
       value = (year-ryear)*12 - rmonth + month;
+
+      nmonth = (int) value;
+      month -= nmonth;
+
+      while ( month > 12 ) { month -= 12; year++; }
+      while ( month <  1 ) { month += 12; year--; }
+
+      encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday2, &secofday2);
+
+      julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
+
+      value += (days+secs/86400.)/dpm;
+
       if ( timeunit == TUNIT_YEAR ) value = NINT(value/12);
     }
   else

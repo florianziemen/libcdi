@@ -1,3 +1,7 @@
+2010-03-19  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added support for non integer time units MONTH
+
 2010-03-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* gauaw: bug fix for allocation of zfnlat for odd number of nlat
