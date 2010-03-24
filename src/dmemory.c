@@ -19,12 +19,6 @@
 #endif
 
 #if  defined  (HAVE_MALLOC_H)
-#if ! defined (HAVE_MALLINFO)
-#  define  HAVE_MALLINFO
-#endif
-#endif
-
-#if  defined  (HAVE_MALLOC_H)
 #    include <malloc.h>
 #endif
 
