@@ -1,7 +1,7 @@
 ! TODO varId (:,:) RESTRICTED TO SIZESSTREAMS(1) 
 
   !* on blizzard 
- !* configure: change to #/bin/bash
+ 
   !* >> CC=xlc_r ./configure --enable-mpi --prefix=$HOME/local --with-netcdf=/sw/aix61/netcdf-4.0.1-ibm --with-hdf5=/sw/aix61/hdf5-1.8.4-patch1 --with-szlib=/sw/aix53/szip-2.1 AR="ar -X 64" CFINT=-Dextname CFLAGS="-g -O3 -q64 -qhot -qarch=auto -qtune=auto -DHAVE_MMAP -qcpluscmt"
   !* >> make clean
   !* >> make -k -j4
@@ -26,11 +26,11 @@
 
       INTEGER, PARAMETER :: NLON  = 38   ! Number of longitudes 384
       INTEGER, PARAMETER :: NLAT  = 19   ! Number of latitudes  192
-      INTEGER, PARAMETER :: NLEV  =  1   ! Number of levels      96
-      INTEGER, PARAMETER :: NTIME =  3   ! Number of time steps 124
-      INTEGER, PARAMETER :: NFILES = 2   ! Number of files        7
-      INTEGER, PARAMETER :: SIZESSTREAMS ( NFILES ) = (/ 35, 35 /)
-      CHARACTER*(*), PARAMETER :: filenames ( NFILES ) = (/ 'dat1.grb', 'dat2.grb' /)
+      INTEGER, PARAMETER :: NLEV  =  2   ! Number of levels      96
+      INTEGER, PARAMETER :: NTIME =  2   ! Number of time steps 124
+      INTEGER, PARAMETER :: NFILES = 10   ! Number of files        7
+      INTEGER, PARAMETER :: SIZESSTREAMS ( NFILES ) = (/ 35, 35, 35, 35, 35, 35, 35, 35, 35, 35 /)
+      CHARACTER*(*), PARAMETER :: filenames ( NFILES ) = (/ 'dat1.grb', 'dat2.grb',  'dat3.grb', 'dat4.grb', 'dat5.grb', 'dat6.grb',  'dat7.grb', 'dat8.grb',  'dat9.grb', 'dat0.grb' /)
 
       INTEGER, PARAMETER :: ddebug = 1
       INTEGER :: pioComm
@@ -57,6 +57,10 @@
       CALL MPI_COMM_DUP ( MPI_COMM_WORLD, pioComm, error )
       CALL MPI_COMM_RANK ( MPI_COMM_WORLD, rank, error )
 #endif
+
+      accumOpen  = 0.0
+      accumClose = 0.0
+      accumWrite = 0.0
 
       nmiss = 0
       collectingData = 1
@@ -109,7 +113,13 @@
          CALL vlistDefTaxis ( vlistID ( i ), taxisID)
       END DO
 
-!     Create a dataset in netCDF fromat
+#ifndef NOMPI
+      startTime = MPI_WTIME()
+#else
+      CALL CPU_TIME ( startTime )
+#endif
+      
+!     Create a dataset in GRB fromat
       DO i = 1, NFILES
          streamID ( i ) = streamOpenWrite ( filenames ( i ), FILETYPE_GRB )
          IF ( streamID ( i ) < 0 ) THEN
@@ -121,6 +131,16 @@
 #endif
          END IF
       END DO
+
+#ifndef NOMPI
+      stopTime = MPI_WTIME()
+#else
+      CALL CPU_TIME ( stopTime )
+#endif
+      
+      accumOpen = stopTime - startTime
+
+
 
 !     Assign the variable list to the dataset
       DO i = 1, NFILES
@@ -153,16 +173,46 @@
                   var ( j ) = 100.0 * ( sID + 1 ) + tsID + 1.0
                END DO
 
+
+#ifndef NOMPI
+               startTime = MPI_WTIME()
+#else
+               CALL CPU_TIME ( startTime )
+#endif
+               
 !        Write var
                CALL streamWriteVar ( streamID ( i ), varIDs ( sID, i ), var, nmiss)
-            END DO
+
+#ifndef NOMPI
+               stopTime = MPI_WTIME()
+#else
+               CALL CPU_TIME ( stopTime )
+#endif
+
+               accumWrite = accumWrite + stopTime - startTime
+               
+             END DO
          END DO
       END DO
 
-!     Close the output stream
+#ifndef NOMPI
+      startTime = MPI_WTIME()
+#else
+      CALL CPU_TIME ( startTime )
+#endif
+
+!     Close the output stream  
       DO i = 1, NFILES
          CALL streamClose ( streamID ( i ))
       END DO
+
+#ifndef NOMPI
+      stopTime = MPI_WTIME()
+#else
+      CALL CPU_TIME ( stopTime )
+#endif
+      
+      accumClose = stopTime - startTime
 
 !     Destroy the objects
       DO i = 1, NFILES
@@ -174,8 +224,37 @@
       CALL gridDestroy(gridID)
 
 #ifndef NOMPI 
- 1    CALL pioFinalize ()
-      CALL MPI_FINALIZE ( error ) 
+1     IF ( ddebug == 1 ) THEN
+        write ( *, * ) 'pe', rank,'in main() at label "finish"' 
+      END IF
+
+      IF ( rank == 0 ) THEN
+        CALL MPI_REDUCE ( MPI_IN_PLACE, accumOpen,  1, MPI_DOUBLE, MPI_MAX, 0, pioComm, error )
+        CALL MPI_REDUCE ( MPI_IN_PLACE, accumWrite, 1, MPI_DOUBLE, MPI_MAX, 0, pioComm, error )
+        CALL MPI_REDUCE ( MPI_IN_PLACE, accumClose, 1, MPI_DOUBLE, MPI_MAX, 0, pioComm, error )
+      ELSE        
+        CALL MPI_REDUCE (    accumOpen, accumOpen,  1, MPI_DOUBLE, MPI_MAX, 0, pioComm, error )
+        CALL MPI_REDUCE (   accumWrite, accumWrite, 1, MPI_DOUBLE, MPI_MAX, 0, pioComm, error )
+        CALL MPI_REDUCE (   accumClose, accumClose, 1, MPI_DOUBLE, MPI_MAX, 0, pioComm, error )      
+      END IF
+  
+  if ( rank == 0 ) THEN
+    write ( *, * ) '------------------------------------------------------------------'
+    write ( *, * ) 'Maximum open  time:', accumOpen,  's'
+    write ( *, * ) 'Maximum write time:', accumWrite, 's'
+    write ( *, * ) 'Maximum close time:', accumClose, 's'
+    write ( *, * ) '------------------------------------------------------------------'
+  END IF
+
+  CALL pioFinalize ()
+  CALL MPI_FINALIZE ( error ) 
+  
+#else
+  write ( *, * ) '------------------------------------------------------------------'
+  write ( *, * ) 'Open  time:',  accumOpen, 's'
+  write ( *, * ) 'Write time:', accumWrite, 's'
+  write ( *, * ) 'Close time:', accumClose, 's'
+  write ( *, * ) '------------------------------------------------------------------'
 #endif
 
 CONTAINS

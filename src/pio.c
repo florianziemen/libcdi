@@ -10,9 +10,10 @@
 #include "pio.h"
 #include "pio_impl.h"
 
-bool ddebug = false;
+bool ddebug = true;
 
-long initial_buffer_size = 128 * 1024; //16 * 1024 * 1024, 4 KB <= x < 256 MB 
+long initial_buffer_size = 16 * 1024 * 1024; 
+/* 16 * 1024 * 1024, 4 KB <= x < 256 MB */
 
 double startTime;
 double accumProbe   = 0.0;
@@ -44,6 +45,26 @@ void check_mpi ( int line, int iret )
 
 /***************************************************************/
 
+int setTag ( int ID, int sc )
+{
+  return ID * 1000 + sc;
+}
+
+/***************************************************************/
+
+rTag * getTag ( int tag )
+{
+  rTag *rtag;
+
+  rtag = ( rTag * ) malloc ( sizeof ( rTag ));
+  rtag->id = tag / 1000;
+  rtag->command = tag % 1000;
+
+  return rtag;
+}
+
+/***************************************************************/
+
 size_t pioFileWrite ( int id, int tsId, const void *buffer, size_t len )
 {
   size_t iret;
@@ -52,6 +73,9 @@ size_t pioFileWrite ( int id, int tsId, const void *buffer, size_t len )
     {
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fwPOSIXFPGUARDSENDRECV ( id, tsId, buffer, len );
+      break;
+    case PIO_POSIX_ASYNCH:
+      iret = fwPOSIXASYNCH ( id, tsId, buffer, len );
       break;
     }
 
@@ -69,6 +93,9 @@ int pioFileClose ( int id )
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fcPOSIXFPGUARDSENDRECV ( id );
       break;
+    case PIO_POSIX_ASYNCH:
+      iret = fcPOSIXASYNCH ( id );
+      break;
     }
 
   return iret;
@@ -84,6 +111,9 @@ int pioFileOpenW ( const char *filename )
     {
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fowPOSIXFPGUARDSENDRECV ( filename );
+      break;
+    case PIO_POSIX_ASYNCH:
+      iret = fowPOSIXASYNCH ( filename );
       break;
     }
   
@@ -122,6 +152,9 @@ int pioInit ( int ptype, int comm, int *ncollectors )
     {
     case PIO_POSIX_FPGUARD_SENDRECV:
       collectingData = initPOSIXFPGUARDSENDRECV ( ncollectors );
+      break;
+    case PIO_POSIX_ASYNCH:
+      collectingData = initPOSIXASYNCH ( ncollectors );
       break;
     }
 

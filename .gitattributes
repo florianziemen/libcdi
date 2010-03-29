@@ -171,6 +171,7 @@ src/pio.c -text
 src/pio.h -text
 src/pio_dbuffer.c -text
 src/pio_impl.h -text
+src/pio_posixasynch.c -text
 src/pio_posixfpguardsendrecv.c -text
 src/pio_queue.c -text
 src/service.h -text

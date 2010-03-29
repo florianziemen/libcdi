@@ -47,6 +47,7 @@ cat > ${PROG} << EOR
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <aio.h>
 #include <stdbool.h>
 #ifndef NOMPI
 #include "mpi.h"
@@ -123,7 +124,8 @@ c="dmemory.c         \
    pio_dbuffer.c     \	
    pio_queue.c       \
    pio.c             \
-   pio_posixfpguardsendrecv.c"
+   pio_posixfpguardsendrecv.c\
+   pio_posixasynch.c"
 
 h="cdi_limits.h taxis.h error.h dtypes.h file.h cgribex.h gribapi.h service.h extra.h \
    ieg.h cdi.h timebase.h calendar.h basetime.h datetime.h stream_int.h \

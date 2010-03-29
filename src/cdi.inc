@@ -306,6 +306,8 @@
       PARAMETER (PIO_NONE               =  0)
       INTEGER    PIO_POSIX_FPGUARD_SENDRECV
       PARAMETER (PIO_POSIX_FPGUARD_SENDRECV =  1)
+      INTEGER    PIO_POSIX_ASYNCH      
+      PARAMETER (PIO_POSIX_ASYNCH       =  2)
       INTEGER         pioInit
 !                                    (INTEGER         ,
 !                                     INTEGER         ,

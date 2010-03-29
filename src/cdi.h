@@ -183,6 +183,8 @@ extern "C" {
 #ifndef NOMPI  
 #define  PIO_NONE                    0
 #define  PIO_POSIX_FPGUARD_SENDRECV  1
+#define  PIO_POSIX_ASYNCH            2
+
 
 int     pioInit ( int, int, int* );
 void    pioFinalize ( void );

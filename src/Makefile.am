@@ -97,6 +97,7 @@ libcdi_a_SOURCES = 	 \
 	pio_dbuffer.c    \
 	pio_queue.c      \
 	pio.c            \
+	pio_posixasynch.c\
 	pio_posixfpguardsendrecv.c \
 	pio.h            \
 	pio_impl.h 

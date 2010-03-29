@@ -9,7 +9,6 @@
 #include "pio_impl.h"
 
 extern bool ddebug;
-extern bool ldebug;
 
 extern double startTime;
 extern double accumProbe;
@@ -43,30 +42,6 @@ typedef struct
 } pioOpenFileGuard;
 
 static queue *openFiles;
-
-typedef struct
-{
-  int id;
-  int command;
-} rTag;
-
-/***************************************************************/
-
-int setTag ( int ID, int sc )
-{
-  return ID * 1000 + sc;
-}
-
-rTag *getTag ( int tag )
-{
-  rTag *rtag;
-
-  rtag = ( rTag * ) malloc ( sizeof ( rTag ));
-  rtag->id = tag / 1000;
-  rtag->command = tag % 1000;
-
-  return rtag;
-}
 
 /***************************************************************/
   
@@ -119,6 +94,8 @@ static pioOpenFile *initOpenFile ( const char *key, size_t bs)
   return of;
 }
 
+/***************************************************************/
+
 pioOpenFileGuard *initOpenFileGuard ( int key, int nc )
 {
   pioOpenFileGuard *ofg;
@@ -137,6 +114,8 @@ pioOpenFileGuard *initOpenFileGuard ( int key, int nc )
   return ofg;
 }
 
+/***************************************************************/
+
 int destroyOpenFile ( void *v )
 {
   int iret = 0;
@@ -145,7 +124,7 @@ int destroyOpenFile ( void *v )
   /* close file */
   
   if ( ddebug )
-    fprintf ( stdout, "pe%d in pioFileClose(): name=%s, close file\n", 
+    fprintf ( stdout, "pe%d in destroyOpenFile(): name=%s, close file\n", 
 	      pioinfo->rank, of->name );
        
   if (( iret = fclose ( of->fp )) == EOF )
@@ -158,7 +137,7 @@ int destroyOpenFile ( void *v )
   /* file closed, cleanup */
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d in pioFileClose(): name=%s, file closed, cleanup ...\n", 
+    fprintf ( stdout, "pe%d in destroyOpenFile(): name=%s, file closed, cleanup ...\n", 
 	      pioinfo->rank, of->name );
   
   dbuffer_cleanup ( &( of->db1 ));
@@ -170,6 +149,8 @@ int destroyOpenFile ( void *v )
   return iret;
 }
 
+/***************************************************************/
+
 int destroyOpenFileGuard ( void *v )
 {
   int iret = 0;
@@ -180,6 +161,8 @@ int destroyOpenFileGuard ( void *v )
 
   return iret;
 }
+
+/***************************************************************/
 
 bool compareKeyOpenFile ( void *v1, void *v2 )
 {
@@ -197,6 +180,8 @@ bool compareKeyOpenFile ( void *v1, void *v2 )
   return ret;
 }
 
+/***************************************************************/
+
 bool compareKeyOpenFileGuard ( void *v1, void *v2 )
 {
   pioOpenFileGuard *ofg1, *ofg2;
@@ -205,7 +190,7 @@ bool compareKeyOpenFileGuard ( void *v1, void *v2 )
   ofg1 = ( pioOpenFileGuard * ) v1;
   ofg2 = ( pioOpenFileGuard * ) v2;
 
-  ret = ( ofg1 == ofg2 );
+  ret = ( ofg1->ID == ofg2->ID );
 
   return ret;
 }
