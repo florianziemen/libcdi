@@ -1,12 +1,7 @@
-/* todo key, node->idx überdenken: 
-   - hier und in fpguardsendrecv falsch, für specialRank node->idx nicht gleich fileID, ->queueKey2Val (), 
-   - doch, denn mpi guarantees order ( but not fairness )
-   - !!! no other key but node->idx !!! pio_queue ändern: 
-   - konstruktor mit equals-fkt, für insert and key2val fkt nutzen*/
-/* todo README erfgänzen:
-   - alle Collector pes müssen streamOpenWrite für in derselben Reihenfolge aufrufen.
-   - sind einmal alle Ausgabedateien geschlossen, beendet sich der specialRank PE. */
-/* error ergänzen: nPrefetchStreams == 0 */
+/* 
+   todo  
+   README: specialRank Pe closes down, when all output files are closed    
+*/
 
 #ifndef NOMPI
 
@@ -48,7 +43,6 @@ typedef struct
 
 typedef struct 
 {
-  int ID;
   char *name;
   size_t size;
   struct dBuffer *fb;
@@ -73,7 +67,7 @@ char *token = "%";
 
 /***************************************************************/
 
-static pioOpenFileCollector *initOpenFileCollector ( const char *key, size_t bs )
+static pioOpenFileCollector *initOpenFileCollector ( const char *filename, size_t bs )
 {
   pioOpenFileCollector *ofc;
   size_t len;
@@ -81,13 +75,14 @@ static pioOpenFileCollector *initOpenFileCollector ( const char *key, size_t bs 
 
   if ( ddebug )
     fprintf ( stdout, "pe%d initOpenFileCollector (): filename=%s, buffersize=%d, in\n",
-	pioinfo->rank, key, bs );
+	pioinfo->rank, filename, bs );
 
   ofc = ( pioOpenFileCollector * ) malloc ( sizeof ( pioOpenFileCollector ));
   memset ( ofc, 0, sizeof ( pioOpenFileCollector ));
-  len = strlen ( key );
+
+  len = strlen ( filename );
   ofc->name = ( char * ) malloc (( len ) * sizeof ( char ));
-  strcpy ( ofc->name, key );
+  strcpy ( ofc->name, filename );
   ofc->size = bs;
 
   /* init output buffer */
@@ -118,20 +113,19 @@ static pioOpenFileCollector *initOpenFileCollector ( const char *key, size_t bs 
 }
 /***************************************************************/ 
 
-static pioOpenFileWriter *initOpenFileWriter ( int key, char *filename, 
+static pioOpenFileWriter *initOpenFileWriter ( char *filename, 
 					       size_t bs, int nc )
 {
   pioOpenFileWriter *ofw;
   int i;
 
-  //if ( ddebug )
-       fprintf ( stdout, "### pe%d initOpenFileWriter (): key=%d, filename=%s, buffersize=%d, ncollectors=%d, nPrefetchStreams=%d, in\n",
-	      pioinfo->rank, key, filename, bs, nc, nPrefStreams );
+  if ( ddebug )
+       fprintf ( stdout, "### pe%d initOpenFileWriter (): filename=%s, buffersize=%d, ncollectors=%d, nPrefetchStreams=%d, in\n",
+	      pioinfo->rank, filename, bs, nc, nPrefStreams );
 
   ofw = ( pioOpenFileWriter * ) malloc ( sizeof ( pioOpenFileWriter ));
   memset ( ofw, 0, sizeof ( pioOpenFileWriter ));
 
-  ofw->ID = key;
   ofw->name = ( char * ) malloc (( strlen ( filename )) * sizeof ( char ));
   strcpy ( ofw->name, filename );
   ofw->size = bs;
@@ -166,8 +160,8 @@ static pioOpenFileWriter *initOpenFileWriter ( int key, char *filename,
   ofw->nfinished = ( bool * ) malloc ( nc * sizeof ( bool ));
 
   if ( ddebug )
-    fprintf ( stdout, "### pe%d initOpenFileWriter (), enqueued id=%d, name=%s, opened file, return\n",
-	pioinfo->rank, ofw->ID, ofw->name );
+    fprintf ( stdout, "### pe%d initOpenFileWriter (), name=%s, opened file, return\n",
+	pioinfo->rank, ofw->name );
 
   return ofw;
 }
@@ -264,7 +258,7 @@ int destroyOpenFileWriter ( void *v )
 
 /***************************************************************/
 
-bool compareKeyOpenFileCollector ( void *v1, void *v2 )
+bool compareNamesDBPOSIXASYNCH  ( void *v1, void *v2 )
 {
   pioOpenFileCollector *ofc1, *ofc2;
   size_t len;
@@ -276,21 +270,6 @@ bool compareKeyOpenFileCollector ( void *v1, void *v2 )
   len = strlen ( ofc1->name );
   bret = ( len == strlen ( ofc2->name ) && 
 	  memcmp ( ofc1->name, ofc2->name, len ) == 0 );
-
-  return bret;
-}
-
-/***************************************************************/
-
-bool compareKeyOpenFileWriter ( void *v1, void *v2 )
-{
-  pioOpenFileWriter *ofw1, *ofw2;
-  bool bret;
-
-  ofw1 = ( pioOpenFileWriter * ) v1;
-  ofw2 = ( pioOpenFileWriter * ) v2;
-
-  bret = ( ofw1->ID == ofw2->ID );
 
   return bret;
 }
@@ -384,7 +363,7 @@ void pwPOSIXASYNCH ( int ncollectors )
   queue *openFilesWriter;
   long amount, buffersize;
   char *messageBuffer, *pMB, *filename, *temp;
-  int messagesize, i, source, tag;
+  int messagesize, source, tag, i, len;
   rTag *rtag;
   MPI_Status status;
 
@@ -392,7 +371,7 @@ void pwPOSIXASYNCH ( int ncollectors )
     fprintf(stdout, "### pe%d pwPOSIXASYNCH (), ncollectors=%d, in\n", 
 	    pioinfo->rank, ncollectors);
  
-  openFilesWriter = queueInit ( destroyOpenFileWriter, compareKeyOpenFileWriter );
+  openFilesWriter = queueInit ( destroyOpenFileWriter, compareNamesDBPOSIXASYNCH );
   
   for ( ;; )
     {
@@ -436,12 +415,20 @@ void pwPOSIXASYNCH ( int ncollectors )
 	  if ( !(ofw = ( pioOpenFileWriter * ) queueIdx2val ( openFilesWriter, 
 							     rtag->id )))
 	    {
-	      ofw = ( pioOpenFileWriter * ) initOpenFileWriter ( rtag->id, 
-								 filename, 
+	      ofw = ( pioOpenFileWriter * ) initOpenFileWriter ( filename, 
 								 buffersize,  
 							       ncollectors );
-	      queuePush ( openFilesWriter, ofw );
+	      queuePush ( openFilesWriter, ofw, 1, rtag->id );
 	    }
+	  else
+	    if ((( len = strlen ( filename )) != strlen ( ofw->name )) || 
+		memcmp ( filename, ofw->name, len ) != 0 )
+	      {
+		fprintf ( stderr, "pe%d, id=%d, filename not consistant\n",
+			  pioinfo->rank, rtag->id);
+		MPI_Abort ( pioinfo->comm, 1 );
+	      }
+		 
 
 	  ofw->currOpIndex = ofw->nextOpIndex;
 	  ofw->nextOpIndex = ( ofw->nextOpIndex + 1 ) % nPrefStreams;
@@ -463,7 +450,7 @@ void pwPOSIXASYNCH ( int ncollectors )
 	  if ( ddebug )
 	    fprintf ( stdout, "### pe%d, command: %s, id=%d, name=%s\n", 
 		      pioinfo->rank, command2charP [ rtag->command ], 
-		      ofw->ID, ofw->name );
+		      rtag->id, ofw->name );
 
 	  ofw->currOpIndex = ofw->nextOpIndex;
 	  ofw->nextOpIndex = ( ofw->nextOpIndex + 1 ) % nPrefStreams;
@@ -484,7 +471,7 @@ void pwPOSIXASYNCH ( int ncollectors )
 	  if ( ddebug )
 	    fprintf ( stdout, "### pe%d, command %s, id=%d, name=%s\n", 
 		      pioinfo->rank, command2charP [ rtag->command ], 
-		      ofw->ID, ofw->name );
+		      rtag->id, ofw->name );
 
 	  ofw->currOpIndex = ofw->nextOpIndex;
 	  ofw->nextOpIndex = ( ofw->nextOpIndex + 1 ) % nPrefStreams;
@@ -713,7 +700,7 @@ int fowPOSIXASYNCH ( const char *filename )
     }
 
   ofc = initOpenFileCollector ( filename, buffersize );
-  queuePush ( openFilesCollector, ofc );
+  queuePush ( openFilesCollector, ofc, 0 );
   id = openFilesCollector->tail->idx;
 
   if ( ddebug )
@@ -778,7 +765,7 @@ int initPOSIXASYNCH ( int *ncollectors )
     }
   else
     openFilesCollector = queueInit ( destroyOpenFileCollector, 
-				     compareKeyOpenFileCollector );
+				     compareNamesDBPOSIXASYNCH );
 
   return collectingData;
 }

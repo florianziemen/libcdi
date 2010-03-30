@@ -1,3 +1,9 @@
+/* 
+   todo 
+   build in control, for consistance of pairs filename / filenumber 
+   ( pioOpenFile member name, recv in tmpbuffer, if(!uniqueName(q,v,n))abort )
+*/
+
 #ifndef NOMPI
 
 #include <stdbool.h>
@@ -35,7 +41,6 @@ typedef struct
 
 typedef struct 
 {
-  int ID;
   long offset;
   bool finished;
   bool *nfinished;
@@ -103,7 +108,6 @@ pioOpenFileGuard *initOpenFileGuard ( int key, int nc )
 
   ofg = ( pioOpenFileGuard * ) malloc ( sizeof ( pioOpenFileGuard ));
   memset ( ofg, 0, sizeof ( pioOpenFileGuard ));
-  ofg->ID = key;
   ofg->offset = 0;
   ofg->finished = false;
   ofg->nfinished = ( bool * ) malloc ( nc * sizeof ( bool ));
@@ -164,7 +168,7 @@ int destroyOpenFileGuard ( void *v )
 
 /***************************************************************/
 
-bool compareKeyOpenFile ( void *v1, void *v2 )
+bool compareNamesPOSIXFPGUARDSENDRECV ( void *v1, void *v2 )
 {
   pioOpenFile *of1, *of2;
   size_t len;
@@ -176,21 +180,6 @@ bool compareKeyOpenFile ( void *v1, void *v2 )
   len = strlen ( of1->name );
   ret = ( len == strlen ( of2->name ) && 
 	  memcmp ( of1->name, of2->name, len ) == 0 );
-
-  return ret;
-}
-
-/***************************************************************/
-
-bool compareKeyOpenFileGuard ( void *v1, void *v2 )
-{
-  pioOpenFileGuard *ofg1, *ofg2;
-  bool ret;
-
-  ofg1 = ( pioOpenFileGuard * ) v1;
-  ofg2 = ( pioOpenFileGuard * ) v2;
-
-  ret = ( ofg1->ID == ofg2->ID );
 
   return ret;
 }
@@ -210,7 +199,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
     fprintf(stdout, "pe%d in fpGuard(), ncollectors=%d\n", 
 	    pioinfo->rank, ncollectors);
  
-  openFilesGuard = queueInit ( destroyOpenFileGuard, compareKeyOpenFileGuard );
+  openFilesGuard = queueInit ( destroyOpenFileGuard, NULL );
   
   for ( ;; )
     {
@@ -233,7 +222,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 	    {
 	      ofg = ( pioOpenFileGuard * ) initOpenFileGuard ( rtag->id, 
 							       ncollectors );
-	      queuePush ( openFilesGuard, ofg );
+	      queuePush ( openFilesGuard, ofg, 1, rtag->id );
 	    }
 
 	  if ( ddebug )
@@ -519,7 +508,7 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
   /* init and enqueue file element */ 
 
   of = initOpenFile ( filename, buffer_size );
-  queuePush ( openFiles, of );
+  queuePush ( openFiles, of, 0 );
 
   if ( ddebug )
     fprintf ( stdout, 
@@ -568,7 +557,7 @@ int initPOSIXFPGUARDSENDRECV ( int *ncollectors )
       collectingData = 0;
     }
   else
-    openFiles = queueInit ( destroyOpenFile, compareKeyOpenFile );
+    openFiles = queueInit ( destroyOpenFile, compareNamesPOSIXFPGUARDSENDRECV );
     
 
   return collectingData;

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #ifndef NOMPI
 #include "pio_impl.h"
@@ -43,26 +44,38 @@ void queueDestroy ( queue *q )
   return;
 }
 
-void queuePush ( queue *q, void *v )
+void queuePush ( queue *q, void *v, int noCollector, ... )
 {
   node *newNode, *curr;
   size_t len;
+  va_list ap;
+  int id;
+ 
+  va_start(ap, noCollector);
+ 
+  if ( noCollector ) 
+    id = va_arg( ap, int );
+
+  va_end(ap);
 
   // ensure unique key values
  
-  curr = q->head; 
+  curr = q->head;   
       
   while ( curr )
     { 
-      if (( *( q->keyCompare )) ( v, curr->val ))
+      if (( !noCollector &&  ( *( q->keyCompare )) ( v, curr->val )) ||
+	  (  noCollector &&  ( id == curr->idx )))
 	return;
+      
       curr = curr->next;
-    } 
+    }  
   
   newNode = ( node * ) malloc (sizeof ( node ));
-  newNode->idx = q->count;
+  newNode->idx = noCollector ? id : q->count;
   newNode->val = v;
   newNode->next = NULL;
+ 
 
   if ( q->tail != NULL)
     q->tail->next = newNode;

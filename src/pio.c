@@ -10,7 +10,7 @@
 #include "pio.h"
 #include "pio_impl.h"
 
-bool ddebug = true;
+bool ddebug = false;
 
 long initial_buffer_size = 16 * 1024 * 1024; 
 /* 16 * 1024 * 1024, 4 KB <= x < 256 MB */

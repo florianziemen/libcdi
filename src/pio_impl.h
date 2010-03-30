@@ -2,6 +2,7 @@
 #define _PIO_IMPL_H
 
 #include <stdbool.h>
+//#include <stdarg.h>
 
 #ifndef NOMPI
 #include "mpi.h"
@@ -71,7 +72,7 @@ size_t dbuffer_free ( struct dBuffer * );
 /* pio_queue.c */
 queue * queueInit ( valDestroyFunction, keyCompareFunction );
 void queueDestroy ( queue * );
-void queuePush ( queue *, void * );
+void queuePush ( queue *, void *, int, ... );
 void * queueIdx2val ( queue *, int );
 int queueDelNode ( queue *, int );
 
