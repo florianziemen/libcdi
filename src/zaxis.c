@@ -1132,7 +1132,7 @@ void zaxisChangeType(int zaxisID, int zaxistype)
 
   zaxis_check_ptr(func, zaxisptr);
 
-  Message(func, "Change zaxis type from %s to %s\n",
+  Message(func, "Changed zaxis type from %s to %s\n",
 	  zaxisNamePtr(zaxisptr->type),
 	  zaxisNamePtr(zaxistype));
   

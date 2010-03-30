@@ -1,3 +1,7 @@
+2010-03-30  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* vlistCat: correct temporary parameter numbers
+
 2010-03-19  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added support for non integer time units MONTH

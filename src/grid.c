@@ -2004,7 +2004,7 @@ void gridChangeType(int gridID, int gridtype)
 
   gridptr = grid_to_pointer(gridID);
 
-  Message(func, "Change grid type from %s to %s\n",
+  Message(func, "Changed grid type from %s to %s\n",
 	  gridNamePtr(gridptr->type),
 	  gridNamePtr(gridtype));
   

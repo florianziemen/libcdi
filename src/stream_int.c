@@ -624,9 +624,9 @@ void cdiDefAccesstype(int streamID, int type)
       if ( streamptr->accesstype != type )
 	{
 	  if ( streamptr->accesstype == TYPE_REC )
-	    Error(func, "Change access type from REC to VAR not allowed!");
+	    Error(func, "Changing access type from REC to VAR not allowed!");
 	  else
-	    Error(func, "Change access type from VAR to REC not allowed!");
+	    Error(func, "Changing access type from VAR to REC not allowed!");
 	}
     }
 }

@@ -763,6 +763,14 @@ void vlistCat(int vlistID2, int vlistID1)
       vlistptr1->vars[varID].mvarID = varID2;
       vlistptr2->vars[varID2].mvarID = varID;
 
+      if ( vlistptr1->vars[varID].param < 0 )
+	{
+	  int pnum, pcat, pdis;
+	  cdiDecodeParam(vlistptr1->vars[varID].param, &pnum, &pcat, &pdis);
+	  pnum=-(varID2+1);
+	  vlistptr2->vars[varID2].param = cdiEncodeParam(pnum, pcat, pdis);
+	}
+
       if ( vlistptr1->vars[varID].name )
 	vlistptr2->vars[varID2].name = strdupx(vlistptr1->vars[varID].name);
 
@@ -852,7 +860,7 @@ void vlistMerge(int vlistID2, int vlistID1)
 	    }
 	  else
 	    {
-	      if ( vlistptr1->vars[varID].code != vlistptr2->vars[varID].code )
+	      if ( vlistptr1->vars[varID].param != vlistptr2->vars[varID].param )
 		break;
 	    }
 	}
@@ -1111,8 +1119,9 @@ void vlistPrint(int vlistID)
   static char func[] = "vlistPrint";
   int nvars, flag, index;
   int varID, fvarID, mvarID, flevID, mlevID, levID;
-  int code, gridID, zaxisID, timeID, nlevs;
+  int param, gridID, zaxisID, timeID, nlevs;
   int dtype;
+  char paramstr[32];
   char *name, *longname, *units;
   double level;
   vlist_t *vlistptr;
@@ -1137,10 +1146,10 @@ void vlistPrint(int vlistID)
 
   if ( nvars > 0 )
     {
-      printf(" varID   code gridID zaxisID timeID nlevel flag  name     longname\n");
+      printf(" varID param    gridID zaxisID timeID nlevel flag  name     longname\n");
       for ( varID = 0; varID < nvars; varID++ )
 	{
-	  code     = vlistptr->vars[varID].code;
+	  param    = vlistptr->vars[varID].param;
 	  gridID   = vlistptr->vars[varID].gridID;
 	  zaxisID  = vlistptr->vars[varID].zaxisID;
 	  timeID   = vlistptr->vars[varID].timeID;
@@ -1149,8 +1158,10 @@ void vlistPrint(int vlistID)
 	  longname = vlistptr->vars[varID].longname;
 	  units    = vlistptr->vars[varID].units;
 	  flag     = vlistptr->vars[varID].flag;
-	  printf("%6d %6d %6d %6d %6d %6d %5d  %-8s %s",
-		 varID, code, gridID, zaxisID, timeID, nlevs, flag,
+
+	  cdiParamToString(param, paramstr, sizeof(paramstr));
+	  printf("%6d %-8s %6d %6d %6d %6d %5d  %-8s %s",
+		 varID, paramstr, gridID, zaxisID, timeID, nlevs, flag,
 		 name ? name : "", longname ? longname : "");
 	  if ( units ) printf("   [%s]", units);
 	  printf("\n");

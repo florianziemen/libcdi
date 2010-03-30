@@ -45,7 +45,6 @@ typedef struct
   int         mvarID;
   int         fvarID;
   int         param;
-  int         code;
   int         gridID;
   int         zaxisID;
   int         timeID;    /* TIME_VARIABLE or TIME_CONSTANT */
