@@ -1632,11 +1632,11 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
       timerange = cgribexDefTimerange(tsteptype, factor, calendar,
 				      rdate, rtime, vdate, vtime, &ip1, &ip2);
 
-      if ( timerange == -1 )
+      if ( timerange == -1 || timerange == 3 )
 	{
 	  timetype = TAXIS_ABSOLUTE;
 	}
-      if ( timerange == 10 )
+      else if ( timerange == 10 )
 	{
 	  if ( ip1 < 0 || ip1 > 0xFFFF ) timetype = TAXIS_ABSOLUTE;
 	  if ( ip2 < 0 || ip2 > 0xFFFF ) timetype = TAXIS_ABSOLUTE;
@@ -1661,7 +1661,9 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 	ISEC1_TimeRange = 0;
       else
       */
-      ISEC1_TimeRange   = 10;
+      if ( ISEC1_TimeRange != 3 )
+	ISEC1_TimeRange   = 10;
+
       ISEC1_TimePeriod1 = 0;
       ISEC1_TimePeriod2 = 0;
     }

@@ -1,3 +1,8 @@
+2010-03-31  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+        * cgribexDefTime: bug fix for timerange=3
+	* using CGRIBEX library version 1.4.4
+
 2010-03-30  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* vlistCat: correct temporary parameter numbers
