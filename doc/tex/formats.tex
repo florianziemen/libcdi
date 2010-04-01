@@ -82,7 +82,9 @@ The netCDF library also defines a machine-independent format for
 representing scientific data. Together, the interface, library, and 
 format support the creation, access, and sharing of scientific data.
 
-{\CDI} supports only 2D, 3D and 4D arrays and the attributes should follow the
+{\CDI} only supports the classic data model of netCDF and arrays up to 4 dimensions.
+These dimensions should only be used by the horizontal and vertical grid and the time.
+The netCDF attributes should follow the
 \href{http://ftp.unidata.ucar.edu/software/netcdf/docs/conventions.html}
      {GDT, COARDS or CF Conventions}.
 NetCDF is an external library and not part of {\CDI}. To use netCDF with
