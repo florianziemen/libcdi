@@ -2506,7 +2506,7 @@ void cdfDefGrid(int streamID, int gridID)
   */
   else
     {
-      Error(func, "%s grid unsupported!", gridNamePtr(gridtype));
+      Error(func, "Unsupported grid type: %s", gridNamePtr(gridtype));
     }
 #endif
 }

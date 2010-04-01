@@ -437,7 +437,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
       }
     default:
       {
-	Error(func, "%s grid unsupported!", gridNamePtr(gridtype));
+	Error(func, "Unsupported grid type: %s", gridNamePtr(gridtype));
 	break;
       }
     }
@@ -1702,7 +1702,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	  gridtype = GRID_GAUSSIAN;
 	  gridChangeType(gridID, gridtype);
 	}
-      else if ( xsize == 1 && ysize == 1 )
+      else if ( (xsize == 1 && ysize == 1) || (xsize == 0 && ysize == 0) )
 	{
 	  gridtype = GRID_LONLAT;
 	  gridChangeType(gridID, gridtype);
@@ -1735,6 +1735,8 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
     case GRID_TRAJECTORY:
       {
 	int nlon = 0, nlat;
+	double xfirst = 0, xlast = 0, xinc = 0;
+	double yfirst = 0, ylast = 0, yinc = 0;
 
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
@@ -1745,9 +1747,30 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	else
 	  {
 	    nlon = gridInqXsize(gridID);
+	    if ( nlon == 0 )
+	      {
+		nlon = 1;
+	      }
+	    else
+	      {
+		xfirst = gridInqXval(gridID,      0);
+		xlast  = gridInqXval(gridID, nlon-1);
+		xinc   = gridInqXinc(gridID);
+	      }
 	  }
 
 	nlat = gridInqYsize(gridID);
+	if ( nlat == 0 )
+	  {
+	    nlat = 1;
+	  }
+	else
+	  {
+	    yfirst = gridInqYval(gridID,      0);
+	    ylast  = gridInqYval(gridID, nlat-1);
+	    yinc   = gridInqYinc(gridID);
+	  }
+
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
 	  ISEC2_GridType = GTYPE_GAUSSIAN;
 	else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
@@ -1757,8 +1780,8 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 
 	ISEC2_NumLon   = nlon;
 	ISEC2_NumLat   = nlat;
-	ISEC2_FirstLat = NINT(gridInqYval(gridID,      0)*1000);
-	ISEC2_LastLat  = NINT(gridInqYval(gridID, nlat-1)*1000);
+	ISEC2_FirstLat = NINT(yfirst*1000);
+	ISEC2_LastLat  = NINT(ylast*1000);
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
 	    ISEC2_FirstLon = 0;
@@ -1767,19 +1790,19 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	  }
 	else
 	  {
-	    ISEC2_FirstLon = NINT(gridInqXval(gridID,      0)*1000);
-	    ISEC2_LastLon  = NINT(gridInqXval(gridID, nlon-1)*1000);
-	    ISEC2_LonIncr  = NINT(gridInqXinc(gridID)*1000);
+	    ISEC2_FirstLon = NINT(xfirst*1000);
+	    ISEC2_LastLon  = NINT(xlast*1000);
+	    ISEC2_LonIncr  = NINT(xinc*1000);
 	  }
-	if ( fabs(gridInqXinc(gridID)*1000 - ISEC2_LonIncr) > FLT_EPSILON )
+	if ( fabs(xinc*1000 - ISEC2_LonIncr) > FLT_EPSILON )
 	  ISEC2_LonIncr = 0;
 
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
 	  ISEC2_NumPar = nlat/2;
 	else
 	  {
-	    ISEC2_LatIncr = NINT(gridInqYinc(gridID)*1000);
-	    if ( fabs(gridInqYinc(gridID)*1000 - ISEC2_LatIncr) > FLT_EPSILON )
+	    ISEC2_LatIncr = NINT(yinc*1000);
+	    if ( fabs(yinc*1000 - ISEC2_LatIncr) > FLT_EPSILON )
 	      ISEC2_LatIncr = 0;
 
 	    if ( ISEC2_LatIncr < 0 ) ISEC2_LatIncr = -ISEC2_LatIncr;
@@ -1878,7 +1901,10 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	break;
       }
     default:
-      Error(func, "%s grid unsupported!", gridNamePtr(gridtype));
+      {
+	Warning(func, "The GRIB library can not store fields on the used grid!");
+	Error(func, "Unsupported grid type: %s", gridNamePtr(gridtype));
+      }
     }
 }
 
@@ -2075,7 +2101,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       }
     default:
       {
-	Error(func, "zaxistype >%s< unsupported", zaxisNamePtr(zaxistype));
+	Error(func, "Unsupported zaxis type: %s", zaxisNamePtr(zaxistype));
 	break;
       }
     }

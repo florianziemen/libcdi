@@ -2645,7 +2645,7 @@ void gridCompress(int gridID)
 	}
     }
   else
-    Warning(func, "%s grid unsupported!", gridNamePtr(gridtype));
+    Warning(func, "Unsupported grid type: %s", gridNamePtr(gridtype));
     
 }
 
@@ -3214,7 +3214,7 @@ void gridPrint(int gridID, int opt)
       }
    default:
       {
-	fprintf(stderr, "%s grid unsupported\n", gridNamePtr(type));
+	fprintf(stderr, "Unsupported grid type: %s\n", gridNamePtr(type));
       }
     }
 }

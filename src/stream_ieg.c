@@ -250,8 +250,28 @@ void iegDefGrid(int *gdb, int gridID)
 
   if ( gridtype == GRID_GENERIC )
     {
-      gridtype = GRID_LONLAT;
-      gridChangeType(gridID, gridtype);
+      int xsize, ysize;
+
+      xsize = gridInqXsize(gridID);
+      ysize = gridInqYsize(gridID);
+
+      if ( (ysize == 32  || ysize == 48 || ysize == 64 ||
+	    ysize == 96  || ysize == 160) && 
+	   (xsize == 2*ysize || xsize == 1) )
+	{
+	  gridtype = GRID_GAUSSIAN;
+	  gridChangeType(gridID, gridtype);
+	}
+      else if ( (xsize == 1 && ysize == 1) || (xsize == 0 && ysize == 0) )
+	{
+	  gridtype = GRID_LONLAT;
+	  gridChangeType(gridID, gridtype);
+	}
+      else if ( gridInqXvals(gridID, NULL) && gridInqYvals(gridID, NULL) )
+	{
+	  gridtype = GRID_LONLAT;
+	  gridChangeType(gridID, gridtype);
+	}
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
@@ -261,10 +281,33 @@ void iegDefGrid(int *gdb, int gridID)
   if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN )
     {
       int nlon, nlat;
+      double xfirst = 0, xlast = 0, xinc = 0;
+      double yfirst = 0, ylast = 0, yinc = 0;
 
       nlon = (int) gridInqXsize(gridID);
-
       nlat = (int) gridInqYsize(gridID);
+
+      if ( nlon == 0 )
+	{
+	  nlon = 1;
+	}
+      else
+	{
+	  xfirst = gridInqXval(gridID,      0);
+	  xlast  = gridInqXval(gridID, nlon-1);
+	  xinc   = gridInqXinc(gridID);
+	}
+
+      if ( nlat == 0 )
+	{
+	  nlat = 1;
+	}
+      else
+	{
+	  yfirst = gridInqYval(gridID,      0);
+	  ylast  = gridInqYval(gridID, nlat-1);
+	  yinc   = gridInqYinc(gridID);
+	}
 
       if ( gridtype == GRID_GAUSSIAN )
 	IEG_G_GridType(gdb) = 4;
@@ -275,20 +318,20 @@ void iegDefGrid(int *gdb, int gridID)
 
       IEG_G_NumLon(gdb)   = nlon;
       IEG_G_NumLat(gdb)   = nlat;
-      IEG_G_FirstLat(gdb) = NINT(gridInqYval(gridID,      0)*1000);
-      IEG_G_LastLat(gdb)  = NINT(gridInqYval(gridID, nlat-1)*1000);
-      IEG_G_FirstLon(gdb) = NINT(gridInqXval(gridID,      0)*1000);
-      IEG_G_LastLon(gdb)  = NINT(gridInqXval(gridID, nlon-1)*1000);
-      IEG_G_LonIncr(gdb)  = NINT(gridInqXinc(gridID)*1000);
-      if ( fabs(gridInqXinc(gridID)*1000 - IEG_G_LonIncr(gdb)) > FLT_EPSILON )
+      IEG_G_FirstLat(gdb) = NINT(yfirst*1000);
+      IEG_G_LastLat(gdb)  = NINT(ylast*1000);
+      IEG_G_FirstLon(gdb) = NINT(xfirst*1000);
+      IEG_G_LastLon(gdb)  = NINT(xlast*1000);
+      IEG_G_LonIncr(gdb)  = NINT(xinc*1000);
+      if ( fabs(xinc*1000 - IEG_G_LonIncr(gdb)) > FLT_EPSILON )
 	IEG_G_LonIncr(gdb) = 0;
 
       if ( gridtype == GRID_GAUSSIAN )
 	IEG_G_LatIncr(gdb) = nlat/2;
       else
 	{
-	  IEG_G_LatIncr(gdb) = NINT(gridInqYinc(gridID)*1000);
-	  if ( fabs(gridInqYinc(gridID)*1000 - IEG_G_LatIncr(gdb)) > FLT_EPSILON )
+	  IEG_G_LatIncr(gdb) = NINT(yinc*1000);
+	  if ( fabs(yinc*1000 - IEG_G_LatIncr(gdb)) > FLT_EPSILON )
 	    IEG_G_LatIncr(gdb) = 0;
 
 	  if ( IEG_G_LatIncr(gdb) < 0 ) IEG_G_LatIncr(gdb) = -IEG_G_LatIncr(gdb);
@@ -318,7 +361,7 @@ void iegDefGrid(int *gdb, int gridID)
     }
   else
     {
-      Error(func, "%s grid unsupported!", gridNamePtr(gridtype));
+      Error(func, "Unsupported grid type: %s", gridNamePtr(gridtype));
     }
 
   IEG_G_ScanFlag(gdb) = 64;
@@ -488,7 +531,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
       }
     default:
       {
-	Error(func, "leveltype >%s< unsupported", zaxisNamePtr(leveltype));
+	Error(func, "Unsupported zaxis type: %s", zaxisNamePtr(leveltype));
 	break;
       }
     }

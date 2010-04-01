@@ -547,7 +547,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
       }
     default:
       {
-	Error(func, "%s grid unsupported!", gridNamePtr(gridtype));
+	Error(func, "Unsupported grid type: %s", gridNamePtr(gridtype));
 	break;
       }
     }
@@ -1895,7 +1895,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	  gridtype = GRID_GAUSSIAN;
 	  gridChangeType(gridID, gridtype);
 	}
-      else if ( xsize == 1 && ysize == 1 )
+      else if ( (xsize == 1 && ysize == 1) || (xsize == 0 && ysize == 0) )
 	{
 	  gridtype = GRID_LONLAT;
 	  gridChangeType(gridID, gridtype);
@@ -1928,6 +1928,8 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
     case GRID_TRAJECTORY:
       {
 	int nlon = 0, nlat;
+	double xfirst = 0, xlast = 0, xinc = 0;
+	double yfirst = 0, ylast = 0, yinc = 0;
 	double latIncr;
 
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
@@ -1939,9 +1941,30 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	else
 	  {
 	    nlon = gridInqXsize(gridID);
+	    if ( nlon == 0 )
+	      {
+		nlon = 1;
+	      }
+	    else
+	      {
+		xfirst = gridInqXval(gridID,      0);
+		xlast  = gridInqXval(gridID, nlon-1);
+		xinc   = gridInqXinc(gridID);
+	      }
 	  }
 
 	nlat = gridInqYsize(gridID);
+	if ( nlat == 0 )
+	  {
+	    nlat = 1;
+	  }
+	else
+	  {
+	    yfirst = gridInqYval(gridID,      0);
+	    ylast  = gridInqYval(gridID, nlat-1);
+	    yinc   = gridInqYinc(gridID);
+	  }
+
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
 	  GRIB_CHECK(grib_set_long(gh, "gridDefinitionTemplateNumber", GRIBAPI_GTYPE_GAUSSIAN), 0);
 	else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
@@ -1951,24 +1974,24 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 
 	GRIB_CHECK(grib_set_long(gh, "Ni", nlon), 0);
 	GRIB_CHECK(grib_set_long(gh, "Nj", nlat), 0);
-	GRIB_CHECK(grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", gridInqXval(gridID,      0)), 0);
-	GRIB_CHECK(grib_set_double(gh, "longitudeOfLastGridPointInDegrees",  gridInqXval(gridID, nlon-1)), 0);
-	GRIB_CHECK(grib_set_double(gh, "latitudeOfFirstGridPointInDegrees",  gridInqYval(gridID,      0)), 0);
-	GRIB_CHECK(grib_set_double(gh, "latitudeOfLastGridPointInDegrees",   gridInqYval(gridID, nlat-1)), 0);
-	GRIB_CHECK(grib_set_double(gh, "iDirectionIncrementInDegrees", gridInqXinc(gridID)), 0);
+	GRIB_CHECK(grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xfirst), 0);
+	GRIB_CHECK(grib_set_double(gh, "longitudeOfLastGridPointInDegrees",  xlast), 0);
+	GRIB_CHECK(grib_set_double(gh, "latitudeOfFirstGridPointInDegrees",  yfirst), 0);
+	GRIB_CHECK(grib_set_double(gh, "latitudeOfLastGridPointInDegrees",   ylast), 0);
+	GRIB_CHECK(grib_set_double(gh, "iDirectionIncrementInDegrees", xinc), 0);
 	/*
-	if ( fabs(gridInqXinc(gridID)*1000 - ISEC2_LonIncr) > FLT_EPSILON )
+	if ( fabs(xinc*1000 - ISEC2_LonIncr) > FLT_EPSILON )
 	  ISEC2_LonIncr = 0;
 	*/
 	if ( gridtype == GRID_GAUSSIAN )
 	  GRIB_CHECK(grib_set_long(gh, "numberOfParallelsBetweenAPoleAndTheEquator", nlat/2), 0);
 	else
 	  {
-	    latIncr = gridInqYinc(gridID);
+	    latIncr = yinc;
 	    if ( latIncr < 0 ) latIncr = -latIncr;
 	    GRIB_CHECK(grib_set_double(gh, "jDirectionIncrementInDegrees", latIncr), 0);
 	    /*
-	    if ( fabs(gridInqYinc(gridID)*1000 - ISEC2_LatIncr) > FLT_EPSILON )
+	    if ( fabs(yinc*1000 - ISEC2_LatIncr) > FLT_EPSILON )
 	      ISEC2_LatIncr = 0;
 	    */
 	  }
@@ -2103,7 +2126,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
       }
       */
     default:
-      Error(func, "%s grid unsupported!", gridNamePtr(gridtype));
+      Error(func, "Unsupported grid type: %s", gridNamePtr(gridtype));
     }
 }
 #endif
@@ -2282,7 +2305,7 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
       }
     default:
       {
-	Error(func, "zaxistype >%s< unsupported", zaxisNamePtr(zaxistype));
+	Error(func, "Unsupported zaxis type: %s", zaxisNamePtr(zaxistype));
 	break;
       }
     }
