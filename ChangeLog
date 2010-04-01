@@ -1,6 +1,10 @@
+2010-04-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* vlistMerge: added support to merge levels
+
 2010-03-31  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-        * cgribexDefTime: bug fix for timerange=3
+        * cgribexDefTime: bug fix for timerange=3 [report: Veronika Gayler]
 	* using CGRIBEX library version 1.4.4
 
 2010-03-30  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

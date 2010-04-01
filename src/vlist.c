@@ -890,6 +890,11 @@ void vlistMerge(int vlistID2, int vlistID1)
 
 	  memcpy(vlistptr2->vars[varID].levinfo+nlevs2,
 		 vlistptr1->vars[varID].levinfo, nlevs1*sizeof(levinfo_t));
+
+	  for ( levID = 0; levID < nlevs1; levID++ )
+	    {
+	      vlistptr1->vars[varID].levinfo[levID].mlevelID = nlevs2 + levID;
+	    }
 	}
 
       lvar = (int *) malloc(nvars2*sizeof(int));
