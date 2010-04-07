@@ -12,8 +12,10 @@
 
 bool ddebug = false;
 
-long initial_buffer_size = 16 * 1024 * 1024; 
-/* 16 * 1024 * 1024, 4 KB <= x < 256 MB */
+long initial_buffersize = 16 * 1024 * 1024;
+/*  4 KB <= x < 256 MB */ 
+/* 16 * 1024 * 1024; */
+/* 4 * 1024; */
 
 double startTime;
 double accumProbe   = 0.0;
@@ -24,6 +26,10 @@ double accumWait    = 0.0;
 double accumWrite   = 0.0;
 
 pioInfo *pioinfo;
+
+MPI_Request request = MPI_REQUEST_NULL;
+
+char *token = "%";
 
 /*****************************************************************************/
 
@@ -71,11 +77,17 @@ size_t pioFileWrite ( int id, int tsId, const void *buffer, size_t len )
 
   switch ( pioinfo->type )
     {
-    case PIO_POSIX_FPGUARD_SENDRECV:
-      iret = fwPOSIXFPGUARDSENDRECV ( id, tsId, buffer, len );
+    case PIO_MPI_NONB:
+      iret = fwMPINONB ( id, tsId, buffer, len );
       break;
     case PIO_POSIX_ASYNCH:
       iret = fwPOSIXASYNCH ( id, tsId, buffer, len );
+      break;
+    case PIO_POSIX_FPGUARD_SENDRECV:
+      iret = fwPOSIXFPGUARDSENDRECV ( id, tsId, buffer, len );
+      break;
+    case PIO_POSIX_NONB:
+      iret = fwPOSIXNONB ( id, tsId, buffer, len );
       break;
     }
 
@@ -90,11 +102,17 @@ int pioFileClose ( int id )
   
   switch ( pioinfo->type )
     {
-    case PIO_POSIX_FPGUARD_SENDRECV:
-      iret = fcPOSIXFPGUARDSENDRECV ( id );
+    case PIO_MPI_NONB:
+      iret = fcMPINONB ( id );
       break;
     case PIO_POSIX_ASYNCH:
       iret = fcPOSIXASYNCH ( id );
+      break;
+    case PIO_POSIX_FPGUARD_SENDRECV:
+      iret = fcPOSIXFPGUARDSENDRECV ( id );
+      break;
+    case PIO_POSIX_NONB:
+      iret = fcPOSIXNONB ( id );
       break;
     }
 
@@ -109,11 +127,17 @@ int pioFileOpenW ( const char *filename )
   
   switch ( pioinfo->type )
     {
-    case PIO_POSIX_FPGUARD_SENDRECV:
-      iret = fowPOSIXFPGUARDSENDRECV ( filename );
+    case PIO_MPI_NONB:
+      iret = fowMPINONB ( filename );
       break;
     case PIO_POSIX_ASYNCH:
       iret = fowPOSIXASYNCH ( filename );
+      break;
+    case PIO_POSIX_FPGUARD_SENDRECV:
+      iret = fowPOSIXFPGUARDSENDRECV ( filename );
+      break;
+    case PIO_POSIX_NONB:
+      iret = fowPOSIXNONB ( filename );
       break;
     }
   
@@ -145,16 +169,22 @@ int pioInit ( int ptype, int comm, int *ncollectors )
 
   if ( ddebug && pioinfo->rank == 0 )
     fprintf ( stdout, 
-	      "pe%d in pioDefPtype(), ptype=%d, initial_buffer_size=%ld: init pioinfo ...\n", 
-	      pioinfo->rank, pioinfo->type, initial_buffer_size );
+	      "pe%d in pioDefPtype(), ptype=%d, initial_buffersize=%ld: init pioinfo ...\n", 
+	      pioinfo->rank, pioinfo->type, initial_buffersize );
 
   switch ( pioinfo->type )
     {
-    case PIO_POSIX_FPGUARD_SENDRECV:
-      collectingData = initPOSIXFPGUARDSENDRECV ( ncollectors );
+    case PIO_MPI_NONB:
+      collectingData = initMPINONB ( ncollectors );
       break;
     case PIO_POSIX_ASYNCH:
       collectingData = initPOSIXASYNCH ( ncollectors );
+      break;
+    case PIO_POSIX_FPGUARD_SENDRECV:
+      collectingData = initPOSIXFPGUARDSENDRECV ( ncollectors );
+      break;
+    case PIO_POSIX_NONB:
+      collectingData = initPOSIXNONB ( ncollectors );
       break;
     }
 
@@ -171,3 +201,4 @@ void pioFinalize ()
 }
 
 #endif
+

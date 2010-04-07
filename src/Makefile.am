@@ -94,11 +94,13 @@ libcdi_a_SOURCES = 	 \
 	tablepar.h	 \
 	gaussgrid.h	 \
 	varscan.h        \
-	pio_dbuffer.c    \
-	pio_queue.c      \
 	pio.c            \
+	pio_dbuffer.c    \
+	pio_mpinonb.c    \
+	pio_queue.c      \
 	pio_posixasynch.c\
 	pio_posixfpguardsendrecv.c \
+	pio_posixnonb.c  \
 	pio.h            \
 	pio_impl.h 
 #

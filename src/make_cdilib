@@ -120,12 +120,14 @@ c="dmemory.c         \
    gribapi.c         \
    swap.c            \
    binary.c          \
-   cdf.c             \
-   pio_dbuffer.c     \	
-   pio_queue.c       \
+   cdf.c             \	
    pio.c             \
+   pio_dbuffer.c     \
+   pio_mpinonb.c     \ 	
+   pio_posixasynch.c \
    pio_posixfpguardsendrecv.c\
-   pio_posixasynch.c"
+   pio_posixnonb.c   \	
+   pio_queue.c"
 
 h="cdi_limits.h taxis.h error.h dtypes.h file.h cgribex.h gribapi.h service.h extra.h \
    ieg.h cdi.h timebase.h calendar.h basetime.h datetime.h stream_int.h \

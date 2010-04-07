@@ -77,8 +77,9 @@ am_libcdi_a_OBJECTS = cdiFortran.$(OBJEXT) cdi_error.$(OBJEXT) \
 	extralib.$(OBJEXT) ieglib.$(OBJEXT) cdf.$(OBJEXT) \
 	cdf_int.$(OBJEXT) file.$(OBJEXT) binary.$(OBJEXT) \
 	swap.$(OBJEXT) cgribexlib.$(OBJEXT) gribapi.$(OBJEXT) \
-	pio_dbuffer.$(OBJEXT) pio_queue.$(OBJEXT) pio.$(OBJEXT) \
-	pio_posixasynch.$(OBJEXT) pio_posixfpguardsendrecv.$(OBJEXT)
+	pio.$(OBJEXT) pio_dbuffer.$(OBJEXT) pio_mpinonb.$(OBJEXT) \
+	pio_queue.$(OBJEXT) pio_posixasynch.$(OBJEXT) \
+	pio_posixfpguardsendrecv.$(OBJEXT) pio_posixnonb.$(OBJEXT)
 libcdi_a_OBJECTS = $(am_libcdi_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -303,11 +304,13 @@ libcdi_a_SOURCES = \
 	tablepar.h	 \
 	gaussgrid.h	 \
 	varscan.h        \
-	pio_dbuffer.c    \
-	pio_queue.c      \
 	pio.c            \
+	pio_dbuffer.c    \
+	pio_mpinonb.c    \
+	pio_queue.c      \
 	pio_posixasynch.c\
 	pio_posixfpguardsendrecv.c \
+	pio_posixnonb.c  \
 	pio.h            \
 	pio_impl.h 
 
@@ -426,8 +429,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/model.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_dbuffer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_mpinonb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixasynch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixfpguardsendrecv.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixnonb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/servicelib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream.Po@am__quote@

@@ -44,7 +44,7 @@ void queueDestroy ( queue *q )
   return;
 }
 
-void queuePush ( queue *q, void *v, int noCollector, ... )
+int queuePush ( queue *q, void *v, int noCollector, ... )
 {
   node *newNode, *curr;
   size_t len;
@@ -66,7 +66,7 @@ void queuePush ( queue *q, void *v, int noCollector, ... )
     { 
       if (( !noCollector &&  ( *( q->keyCompare )) ( v, curr->val )) ||
 	  (  noCollector &&  ( id == curr->idx )))
-	return;
+	return -1;
       
       curr = curr->next;
     }  
@@ -85,7 +85,7 @@ void queuePush ( queue *q, void *v, int noCollector, ... )
   q->tail = newNode; 
   q->count  ++;
   
-  return;
+  return newNode->idx;
 }
 
 void *queueIdx2val ( queue *q, int id )
