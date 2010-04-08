@@ -1,15 +1,5 @@
 ! TODO varId (:,:) RESTRICTED TO SIZESSTREAMS(1) 
 
-  !* on blizzard 
- 
-  !* >> CC=xlc_r ./configure --enable-mpi --prefix=$HOME/local --with-netcdf=/sw/aix61/netcdf-4.0.1-ibm --with-hdf5=/sw/aix61/hdf5-1.8.4-patch1 --with-szlib=/sw/aix53/szip-2.1 AR="ar -X 64" CFINT=-Dextname CFLAGS="-g -O3 -q64 -qhot -qarch=auto -qtune=auto -DHAVE_MMAP -qcpluscmt"
-  !* >> make clean
-  !* >> make -k -j4
-  !* >> mpxlf95_r -o cdi_write_f_somefiles -I../src  cdi_write_f_somefiles.F90  -L../src -lcdi -qextname -L/sw/aix53/szip-2.1/lib -lsz -L/sw/aix61/netcdf-4.0.1-ibm/lib -lnetcdf  -L/sw/aix61/hdf5-1.8.4-patch1/lib -lhdf5_hl -lhdf5 -lz
-  !* >> llsubmit cdi_write_f_somefiles.job
-  !* >> llq | grep m300050
-
-
       PROGRAM CDIWRITE
 
       IMPLICIT NONE
@@ -22,17 +12,18 @@
 
       INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(12,307) 
 
-      INTEGER, PARAMETER :: PTYPE = PIO_MPI_NONB
+      INTEGER, PARAMETER :: PTYPE = PIO_POSIX_FPGUARD_SENDRECV
 
-      INTEGER, PARAMETER :: NLON  = 38   ! Number of longitudes 384
-      INTEGER, PARAMETER :: NLAT  = 19   ! Number of latitudes  192
-      INTEGER, PARAMETER :: NLEV  =  2   ! Number of levels      96
-      INTEGER, PARAMETER :: NTIME =  2   ! Number of time steps 124
+
+      INTEGER, PARAMETER :: NLON  = 384   ! Number of longitudes 384
+      INTEGER, PARAMETER :: NLAT  = 192   ! Number of latitudes  192
+      INTEGER, PARAMETER :: NLEV  =  96   ! Number of levels      96
+      INTEGER, PARAMETER :: NTIME =  10   ! Number of time steps 124
       INTEGER, PARAMETER :: NFILES = 10   ! Number of files        7
       INTEGER, PARAMETER :: SIZESSTREAMS ( NFILES ) = (/ 35, 35, 35, 35, 35, 35, 35, 35, 35, 35 /)
-      CHARACTER*(*), PARAMETER :: filenames ( NFILES ) = (/ 'dat1.grb', 'dat2.grb',  'dat3.grb', 'dat4.grb', 'dat5.grb', 'dat6.grb',  'dat7.grb', 'dat8.grb',  'dat9.grb', 'dat0.grb' /)
+      CHARACTER*(*), PARAMETER :: filenames ( NFILES ) = (/ 'dat0.grb', 'dat1.grb', 'dat2.grb',  'dat3.grb', 'dat4.grb', 'dat5.grb', 'dat6.grb', 'dat7.grb', 'dat8.grb', 'dat9.grb' /)
 
-      INTEGER, PARAMETER :: ddebug = 1
+      INTEGER, PARAMETER :: ddebug = 0
       INTEGER :: pioComm
 
       REAL(dp):: lons(NLON), lats(NLAT), levs(NLEV)
@@ -239,6 +230,7 @@
       END IF
   
   if ( rank == 0 ) THEN
+    write ( *, * ) 'ptype=', PTYPE
     write ( *, * ) '------------------------------------------------------------------'
     write ( *, * ) 'Maximum open  time:', accumOpen,  's'
     write ( *, * ) 'Maximum write time:', accumWrite, 's'
@@ -250,6 +242,7 @@
   CALL MPI_FINALIZE ( error ) 
   
 #else
+  write ( *, * ) 'ptype=', PIO_NONE
   write ( *, * ) '------------------------------------------------------------------'
   write ( *, * ) 'Open  time:',  accumOpen, 's'
   write ( *, * ) 'Write time:', accumWrite, 's'

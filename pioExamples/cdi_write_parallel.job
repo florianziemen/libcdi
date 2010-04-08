@@ -7,10 +7,10 @@
 # @ rset                 = rset_mcm_affinity
 # @ mcm_affinity_options = mcm_distribute
 # @ node                 = 1
-# @ tasks_per_node       = 4
+# @ tasks_per_node       = 16
 # @ resources            = ConsumableMemory(3000mb)
 # @ task_affinity        = core
-# @ wall_clock_limit     = 01:00:00
+# @ wall_clock_limit     = 00:10:00
 # @ job_name             = cdi_write_parallel
 # @ output               = $(job_name).o$(jobid)
 # @ error                = $(output)
