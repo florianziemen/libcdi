@@ -50,6 +50,9 @@
 #define  ISEC1_TABLE4_MINUTE    0
 #define  ISEC1_TABLE4_HOUR      1
 #define  ISEC1_TABLE4_DAY       2
+#define  ISEC1_TABLE4_3HOURS   10
+#define  ISEC1_TABLE4_6HOURS   11
+#define  ISEC1_TABLE4_12HOURS  12
 #define  ISEC1_TABLE4_QUARTER  13
 
 
