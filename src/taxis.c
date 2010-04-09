@@ -25,6 +25,9 @@ char *Timeunits[] = {
   "months",
   "years",
   "quarter",
+  "3hours",
+  "6hours",
+  "12hours",
 };
 
 
@@ -54,6 +57,12 @@ void taxis_defaults(void)
 	DefaultTimeUnit = TUNIT_MINUTE;
       else if ( strcmp(timeunit, "hour") == 0 )
 	DefaultTimeUnit = TUNIT_HOUR;
+      else if ( strcmp(timeunit, "3hours") == 0 )
+	DefaultTimeUnit = TUNIT_3HOURS;
+      else if ( strcmp(timeunit, "6hours") == 0 )
+	DefaultTimeUnit = TUNIT_6HOURS;
+      else if ( strcmp(timeunit, "12hours") == 0 )
+	DefaultTimeUnit = TUNIT_12HOURS;
       else if ( strcmp(timeunit, "day") == 0 )
 	DefaultTimeUnit = TUNIT_DAY;
       else if ( strcmp(timeunit, "month") == 0 )
@@ -978,15 +987,15 @@ void cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
     {
       *timevalue = days*86400. + secs;
     }
-  else if ( timeunit == TUNIT_MINUTE )
+  else if ( timeunit == TUNIT_MINUTE ||
+	    timeunit == TUNIT_QUARTER )
     {
       *timevalue = days*1440. + secs/60.;
     }
-  else if ( timeunit == TUNIT_QUARTER )
-    {
-      *timevalue = days*1440. + secs/60.;
-    }
-  else if ( timeunit == TUNIT_HOUR )
+  else if ( timeunit == TUNIT_HOUR   ||
+	    timeunit == TUNIT_3HOURS ||
+	    timeunit == TUNIT_6HOURS ||
+	    timeunit == TUNIT_12HOURS )
     {
       *timevalue = days*24. + secs/3600.;
     }

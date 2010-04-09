@@ -180,26 +180,26 @@ int gribapiGetTimeUnits(grib_handle *gh)
 {
   static char func[] = "gribapiGetTimeUnits";
   int timeunits = -1;
-  int stepunits;
   long lpar;
+  size_t len = 8;
+  char stepunits[8];
   static int lprint = TRUE;
 
-  GRIB_CHECK(grib_get_long(gh, "stepUnits", &lpar), 0);
-  stepunits = (int) lpar;
+  GRIB_CHECK(grib_get_string(gh, "stepUnits", stepunits, &len), 0);
 
-  switch ( stepunits )
+  if      ( memcmp(stepunits, "s",   len-1) == 0 ) timeunits = TUNIT_SECOND;
+  else if ( memcmp(stepunits, "m",   len-1) == 0 ) timeunits = TUNIT_MINUTE;
+  else if ( memcmp(stepunits, "h",   len-1) == 0 ) timeunits = TUNIT_HOUR;
+  else if ( memcmp(stepunits, "3h",  len-1) == 0 ) timeunits = TUNIT_3HOURS;
+  else if ( memcmp(stepunits, "6h",  len-1) == 0 ) timeunits = TUNIT_6HOURS;
+  else if ( memcmp(stepunits, "12h", len-1) == 0 ) timeunits = TUNIT_12HOURS;
+  else if ( memcmp(stepunits, "D",   len-1) == 0 ) timeunits = TUNIT_DAY;
+  else if ( memcmp(stepunits, "M",   len-1) == 0 ) timeunits = TUNIT_MONTH;
+  else if ( memcmp(stepunits, "Y",   len-1) == 0 ) timeunits = TUNIT_YEAR;
+  else if ( lprint )
     {
-    case 0:  timeunits = TUNIT_MINUTE;  break;
-    case 1:  timeunits = TUNIT_HOUR;    break;
-    case 2:  timeunits = TUNIT_DAY;     break;
-    case 3:  timeunits = TUNIT_MONTH;   break;
-    case 4:  timeunits = TUNIT_YEAR;    break;
-    default:
-      if ( lprint )
-	{
-	  Message(func, "Step units %d unsupported", stepunits);
-	  lprint = FALSE;
-	}
+      Message(func, "Step units >%s< unsupported!", stepunits);
+      lprint = FALSE;
     }
 
   return (timeunits);
@@ -1800,20 +1800,26 @@ static
 int gribapiDefDateTime(grib_handle *gh, int timeunit, int date, int time)
 {
   int factor = 1;
-  int stepunits = 0;
+  char stepunits[8];
+  size_t len;
 
   GRIB_CHECK(grib_set_long(gh, "dataDate", date), 0);
   GRIB_CHECK(grib_set_long(gh, "dataTime", time/100), 0);
 
   switch (timeunit)
     {
-    case TUNIT_MINUTE:  factor =    60; stepunits = 0;  break;
-    case TUNIT_HOUR:    factor =  3600; stepunits = 1;  break;
-    case TUNIT_DAY:     factor = 86400; stepunits = 2;  break;
-    default:            factor =  3600; stepunits = 1;  break;
+    case TUNIT_SECOND:  factor =     1; strcpy(stepunits, "s");   break;
+    case TUNIT_MINUTE:  factor =    60; strcpy(stepunits, "m");   break;
+    case TUNIT_HOUR:    factor =  3600; strcpy(stepunits, "h");   break;
+    case TUNIT_3HOURS:  factor = 10800; strcpy(stepunits, "3h");  break;
+    case TUNIT_6HOURS:  factor = 21600; strcpy(stepunits, "6h");  break;
+    case TUNIT_12HOURS: factor = 43200; strcpy(stepunits, "12h"); break;
+    case TUNIT_DAY:     factor = 86400; strcpy(stepunits, "D");   break;
+    default:            factor =  3600; strcpy(stepunits, "h");   break;
     }
 
-  GRIB_CHECK(grib_set_long(gh, "stepUnits", stepunits), 0);  
+  len = strlen(stepunits)+1;
+  GRIB_CHECK(grib_set_string(gh, "stepUnits", stepunits, &len), 0);  
 
   return (factor);
 }

@@ -189,6 +189,9 @@ int cgribexGetTimeUnit(int *isec1)
     case ISEC1_TABLE4_MINUTE:  timeunit = TUNIT_MINUTE;  break;
     case ISEC1_TABLE4_QUARTER: timeunit = TUNIT_QUARTER; break;
     case ISEC1_TABLE4_HOUR:    timeunit = TUNIT_HOUR;    break;
+    case ISEC1_TABLE4_3HOURS:  timeunit = TUNIT_3HOURS;  break;
+    case ISEC1_TABLE4_6HOURS:  timeunit = TUNIT_6HOURS;  break;
+    case ISEC1_TABLE4_12HOURS: timeunit = TUNIT_12HOURS; break;
     case ISEC1_TABLE4_DAY:     timeunit = TUNIT_DAY;     break;
     default:
       if ( lprint )
@@ -1598,6 +1601,9 @@ int cgribexDefDateTime(int *isec1, int timeunit, int date, int time)
     case TUNIT_MINUTE:  factor =    60; ISEC1_TimeUnit = ISEC1_TABLE4_MINUTE;  break;
     case TUNIT_QUARTER: factor =   900; ISEC1_TimeUnit = ISEC1_TABLE4_QUARTER; break;
     case TUNIT_HOUR:    factor =  3600; ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;    break;
+    case TUNIT_3HOURS:  factor = 10800; ISEC1_TimeUnit = ISEC1_TABLE4_3HOURS;  break;
+    case TUNIT_6HOURS:  factor = 21600; ISEC1_TimeUnit = ISEC1_TABLE4_6HOURS;  break;
+    case TUNIT_12HOURS: factor = 43200; ISEC1_TimeUnit = ISEC1_TABLE4_12HOURS; break;
     case TUNIT_DAY:     factor = 86400; ISEC1_TimeUnit = ISEC1_TABLE4_DAY;     break;
     default:            factor =  3600; ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;    break;
     }
