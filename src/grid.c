@@ -1371,7 +1371,7 @@ int gridInqMask(int gridID, int *mask)
     Warning(func, "Size undefined for gridID = %d", gridID);
     
   if ( mask && gridptr->mask )
-    memcpy(mask, gridptr->mask, size*sizeof(double));
+    memcpy(mask, gridptr->mask, size*sizeof(int));
 
   if ( gridptr->mask == NULL ) size = 0;
 
@@ -1402,7 +1402,7 @@ void gridDefMask(int gridID, const int *mask)
   else if ( CDI_Debug )
     Warning(func, "mask already defined!");
 
-  memcpy(gridptr->mask, mask, size*sizeof(double));
+  memcpy(gridptr->mask, mask, size*sizeof(int));
 }
 
 

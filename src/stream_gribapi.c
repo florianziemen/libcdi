@@ -1818,7 +1818,7 @@ int gribapiDefDateTime(grib_handle *gh, int timeunit, int date, int time)
     default:            factor =  3600; strcpy(stepunits, "h");   break;
     }
 
-  len = strlen(stepunits)+1;
+  len = strlen(stepunits) + 1;
   GRIB_CHECK(grib_set_string(gh, "stepUnits", stepunits, &len), 0);  
 
   return (factor);
