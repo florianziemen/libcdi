@@ -1550,7 +1550,7 @@ int cgribexDefTimerange(int tsteptype, int factor, int calendar,
 	case TSTEP_ACCUM:    timerange =  4; ip1 = 0;  ip2 = ip; break;
 	case TSTEP_DIFF:     timerange =  5; ip1 = 0;  ip2 = ip; break;
 	case TSTEP_INSTANT3:
-	default:             timerange = 10; ip1 = ip; ip2 = 0;  break;
+	default:             timerange = 10; ip1 = ip/256; ip2 = ip%256;  break;
 	}
     }
 
@@ -1642,11 +1642,13 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 	{
 	  timetype = TAXIS_ABSOLUTE;
 	}
+      /*
       else if ( timerange == 10 )
 	{
 	  if ( ip1 < 0 || ip1 > 0xFFFF ) timetype = TAXIS_ABSOLUTE;
 	  if ( ip2 < 0 || ip2 > 0xFFFF ) timetype = TAXIS_ABSOLUTE;
 	}
+      */
       else
 	{
 	  if ( ip1 < 0 || ip1 > 0xFF   ) timetype = TAXIS_ABSOLUTE;
