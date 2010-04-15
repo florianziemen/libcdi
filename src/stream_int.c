@@ -211,17 +211,17 @@ static int _stream_init = FALSE;
 static pthread_once_t _stream_init_thread = PTHREAD_ONCE_INIT;
 static pthread_mutex_t _stream_mutex;
 
-#  define STREAM_LOCK           pthread_mutex_lock(&_stream_mutex);
-#  define STREAM_UNLOCK         pthread_mutex_unlock(&_stream_mutex);
-#  define STREAM_INIT                               \
-   if ( _stream_init == FALSE ) pthread_once(&_stream_init_thread, stream_initialize);
+#  define STREAM_LOCK()         pthread_mutex_lock(&_stream_mutex)
+#  define STREAM_UNLOCK()       pthread_mutex_unlock(&_stream_mutex)
+#  define STREAM_INIT()        \
+   if ( _stream_init == FALSE ) pthread_once(&_stream_init_thread, stream_initialize)
 
 #else
 
-#  define STREAM_LOCK
-#  define STREAM_UNLOCK
-#  define STREAM_INIT                               \
-   if ( _stream_init == FALSE ) stream_initialize();
+#  define STREAM_LOCK()
+#  define STREAM_UNLOCK()
+#  define STREAM_INIT()        \
+   if ( _stream_init == FALSE ) stream_initialize()
 
 #endif
 
@@ -236,8 +236,8 @@ typedef struct _streamPtrToIdx {
 static streamPtrToIdx *_streamList  = NULL;
 static streamPtrToIdx *_streamAvail = NULL;
 
-
-static void stream_list_new(void)
+static
+void stream_list_new(void)
 {
   static char func[] = "stream_list_new";
 
@@ -246,16 +246,16 @@ static void stream_list_new(void)
   _streamList = (streamPtrToIdx *) malloc(_stream_max*sizeof(streamPtrToIdx));
 }
 
-
-static void stream_list_delete(void)
+static
+void stream_list_delete(void)
 {
   static char func[] = "stream_list_delete";
 
   if ( _streamList ) free(_streamList);
 }
 
-
-static void stream_init_pointer(void)
+static
+void stream_init_pointer(void)
 {
   int  i;
   
@@ -263,7 +263,7 @@ static void stream_init_pointer(void)
     {
       _streamList[i].next = _streamList + i + 1;
       _streamList[i].idx  = i;
-      _streamList[i].ptr  = 0;
+      _streamList[i].ptr  = NULL;
     }
 
   _streamList[_stream_max-1].next = 0;
@@ -277,15 +277,15 @@ stream_t *stream_to_pointer(int idx)
   static char func[] = "stream_to_pointer";
   stream_t *streamptr = NULL;
 
-  STREAM_INIT
+  STREAM_INIT();
 
   if ( idx >= 0 && idx < _stream_max )
     {
-      STREAM_LOCK
+      STREAM_LOCK();
 
       streamptr = _streamList[idx].ptr;
 
-      STREAM_UNLOCK
+      STREAM_UNLOCK();
     }
   else
     Error(func, "stream index %d undefined!", idx);
@@ -293,22 +293,23 @@ stream_t *stream_to_pointer(int idx)
   return (streamptr);
 }
 
-
-/* Create an index from a pointer */
-static int stream_from_pointer(stream_t *ptr)
+/* Create an index from a pointer (add the pointer to the stream list) */
+static
+int stream_from_pointer(stream_t *ptr)
 {
   static char func[] = "stream_from_pointer";
-  int      idx = -1;
-  streamPtrToIdx *newptr;
+  int idx = -1;
 
   if ( ptr )
     {
-      STREAM_LOCK
+      STREAM_LOCK();
 
       if ( _streamAvail )
 	{
+	  streamPtrToIdx *newptr;
+
 	  newptr       = _streamAvail;
-	  _streamAvail   = _streamAvail->next;
+	  _streamAvail = _streamAvail->next;
 	  newptr->next = 0;
 	  idx	       = newptr->idx;
 	  newptr->ptr  = ptr;
@@ -319,7 +320,7 @@ static int stream_from_pointer(stream_t *ptr)
       else
 	Warning(func, "Too many open streams (limit is %d)!", _stream_max);
 
-      STREAM_UNLOCK
+      STREAM_UNLOCK();
     }
   else
     Error(func, "Internal problem (pointer %p undefined)", ptr);
@@ -327,12 +328,12 @@ static int stream_from_pointer(stream_t *ptr)
   return (idx);
 }
 
-
-static void stream_init_entry(stream_t *streamptr)
+static
+void stream_init_entry(stream_t *streamptr)
 {
   int i;
 
-  streamptr->self         = stream_from_pointer(streamptr);
+  streamptr->self              = stream_from_pointer(streamptr);
 
   streamptr->accesstype        = UNDEFID;
   streamptr->accessmode        = 0;
@@ -396,7 +397,7 @@ stream_t *stream_new_entry(void)
 
   cdiInitialize(); /* ***************** make MT version !!! */
 
-  STREAM_INIT
+  STREAM_INIT();
 
   streamptr = (stream_t *) malloc(sizeof(stream_t));
 
@@ -413,7 +414,7 @@ void stream_delete_entry(stream_t *streamptr)
 
   idx = streamptr->self;
 
-  STREAM_LOCK
+  STREAM_LOCK();
 
   free(streamptr);
 
@@ -421,14 +422,15 @@ void stream_delete_entry(stream_t *streamptr)
   _streamList[idx].ptr  = 0;
   _streamAvail          = &_streamList[idx];
 
-  STREAM_UNLOCK
+  STREAM_UNLOCK();
 
   if ( STREAM_Debug )
     Message(func, "Removed idx %d from stream list", idx);
 }
 
 
-static void stream_initialize(void)
+static
+void stream_initialize(void)
 {
   char *env;
 
@@ -443,11 +445,11 @@ static void stream_initialize(void)
   stream_list_new();
   atexit(stream_list_delete);
 
-  STREAM_LOCK
+  STREAM_LOCK();
 
   stream_init_pointer();
 
-  STREAM_UNLOCK
+  STREAM_UNLOCK();
 
   _stream_init = TRUE;
 }
@@ -465,14 +467,14 @@ int streamSize(void)
   int streamsize = 0;
   int i;
   
-  STREAM_INIT
+  STREAM_INIT();
 
-  STREAM_LOCK
+  STREAM_LOCK();
 
   for ( i = 0; i < _stream_max; i++ )
     if ( _streamList[i].ptr ) streamsize++;
 
-  STREAM_UNLOCK
+  STREAM_UNLOCK();
 
   return (streamsize);
 }

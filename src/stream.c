@@ -1109,7 +1109,7 @@ void streamClose(int streamID)
 
   fileID   = streamptr->fileID;
   filetype = streamptr->filetype;
-  vlistID  = streamInqVlist(streamID);
+  vlistID  = streamptr->vlistID;
 
   if ( fileID == CDI_UNDEFID )
     Warning(func, "File %s not open!", streamptr->filename);

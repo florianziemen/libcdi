@@ -55,14 +55,14 @@ static pthread_mutex_t _grid_mutex;
 
 #  define GRID_LOCK()         pthread_mutex_lock(&_grid_mutex)
 #  define GRID_UNLOCK()       pthread_mutex_unlock(&_grid_mutex)
-#  define GRID_INIT()                               \
+#  define GRID_INIT()        \
    if ( _grid_init == FALSE ) pthread_once(&_grid_init_thread, grid_initialize)
 
 #else
 
 #  define GRID_LOCK()
 #  define GRID_UNLOCK()
-#  define GRID_INIT()                               \
+#  define GRID_INIT()        \
    if ( _grid_init == FALSE ) grid_initialize()
 
 #endif
