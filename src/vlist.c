@@ -11,76 +11,107 @@
 
 static int  VLIST_Debug = 0;   /* If set to 1, debugging */
 
+static int _vlist_min = MIN_VLISTS;
 static int _vlist_max = MAX_VLISTS;
 
 static void vlist_initialize(void);
 
 static int _vlist_init = FALSE;
-
 #if  defined  (HAVE_LIBPTHREAD)
 #  include <pthread.h>
 
 static pthread_once_t _vlist_init_thread = PTHREAD_ONCE_INIT;
 static pthread_mutex_t _vlist_mutex;
 
-#  define VLIST_LOCK           pthread_mutex_lock(&_vlist_mutex);
-#  define VLIST_UNLOCK         pthread_mutex_unlock(&_vlist_mutex);
-#  define VLIST_INIT                               \
-   if ( _vlist_init == FALSE ) pthread_once(&_vlist_init_thread, vlist_initialize);
+#  define VLIST_LOCK()         pthread_mutex_lock(&_vlist_mutex)
+#  define VLIST_UNLOCK()       pthread_mutex_unlock(&_vlist_mutex)
+#  define VLIST_INIT()        \
+   if ( _vlist_init == FALSE ) pthread_once(&_vlist_init_thread, vlist_initialize)
 
 #else
 
-#  define VLIST_LOCK
-#  define VLIST_UNLOCK
-#  define VLIST_INIT                               \
-   if ( _vlist_init == FALSE ) vlist_initialize();
+#  define VLIST_LOCK()
+#  define VLIST_UNLOCK()
+#  define VLIST_INIT() 	      \
+   if ( _vlist_init == FALSE ) vlist_initialize()
 
 #endif
 
 
 typedef struct _vlistPtrToIdx {
-  int idx;
+  int      idx;
+  int      next;
   vlist_t *ptr;
-  struct _vlistPtrToIdx *next;
 } vlistPtrToIdx;
 
 
 static vlistPtrToIdx *_vlistList  = NULL;
-static vlistPtrToIdx *_vlistAvail = NULL;
+static int            _vlistAvail = -1;
 
-
-static void vlist_list_new(void)
+static
+void vlist_list_new(void)
 {
   static char func[] = "vlist_list_new";
 
   assert(_vlistList == NULL);
 
-  _vlistList = (vlistPtrToIdx *) malloc(_vlist_max*sizeof(vlistPtrToIdx));
+  _vlistList = (vlistPtrToIdx *) malloc(_vlist_min*sizeof(vlistPtrToIdx));
 }
 
-
-static void vlist_list_delete(void)
+static
+void vlist_list_delete(void)
 {
   static char func[] = "vlist_list_delete";
 
   if ( _vlistList ) free(_vlistList);
 }
 
-
-static void vlist_init_pointer(void)
+static
+void vlist_init_pointer(void)
 {
   int  i;
   
-  for ( i = 0; i < _vlist_max; i++ )
+  for ( i = 0; i < _vlist_min; i++ )
     {
-      _vlistList[i].next = _vlistList + i + 1;
       _vlistList[i].idx  = i;
-      _vlistList[i].ptr  = 0;
+      _vlistList[i].next = i + 1;
+      _vlistList[i].ptr  = NULL;
     }
 
-  _vlistList[_vlist_max-1].next = 0;
+  _vlistList[_vlist_min-1].next = -1;
 
-  _vlistAvail = _vlistList;
+  _vlistAvail = 0;
+}
+
+static
+void vlist_list_extend(void)
+{
+  static char func[] = "vlist_list_extend";
+  int nvlists;
+  int i;
+
+  assert(_vlistList != NULL);
+
+  nvlists = _vlist_min + MIN_VLISTS;
+
+  if ( nvlists <= _vlist_max)
+    {
+      _vlistList = (vlistPtrToIdx *) realloc(_vlistList, nvlists*sizeof(vlistPtrToIdx));
+  
+      for ( i = _vlist_min; i < nvlists; ++i )
+	{
+	  _vlistList[i].idx  = i;
+	  _vlistList[i].next = i + 1;
+	  _vlistList[i].ptr  = NULL;
+	}
+
+      _vlistAvail = _vlist_min;
+      _vlistList[_vlist_min-1].next = _vlist_min;
+      _vlist_min = nvlists;
+      _vlistList[_vlist_min-1].next = -1;
+    }
+  else
+    Warning(func, "Too many open vlists (limit is %d)!", _vlist_max);
 }
 
 
@@ -89,15 +120,15 @@ vlist_t *vlist_to_pointer(int idx)
   static char func[] = "vlist_to_pointer";
   vlist_t *vlistptr = NULL;
 
-  VLIST_INIT
+  VLIST_INIT();
 
-  if ( idx >= 0 && idx < _vlist_max )
+  if ( idx >= 0 && idx < _vlist_min )
     {
-      VLIST_LOCK
+      VLIST_LOCK();
 
       vlistptr = _vlistList[idx].ptr;
 
-      VLIST_UNLOCK
+      VLIST_UNLOCK();
     }
   else
     Error(func, "vlist index %d undefined!", idx);
@@ -111,27 +142,28 @@ static int vlist_from_pointer(vlist_t *ptr)
 {
   static char func[] = "vlist_from_pointer";
   int      idx = -1;
-  vlistPtrToIdx *newptr;
 
   if ( ptr )
     {
-      VLIST_LOCK
+      VLIST_LOCK();
 
-      if ( _vlistAvail )
+      if ( _vlistAvail < 0 ) vlist_list_extend();
+
+      if ( _vlistAvail >= 0 )
 	{
-	  newptr       = _vlistAvail;
-	  _vlistAvail  = _vlistAvail->next;
-	  newptr->next = 0;
+	  vlistPtrToIdx *newptr;
+
+	  newptr       = &_vlistList[_vlistAvail];
+	  _vlistAvail  = newptr->next;
+	  newptr->next = -1;
 	  idx	       = newptr->idx;
 	  newptr->ptr  = ptr;
       
 	  if ( VLIST_Debug )
 	    Message(func, "Pointer %p has idx %d from vlist list", ptr, idx);
 	}
-      else
-	Warning(func, "Too many open vlists (limit is %d)!", _vlist_max);
 
-      VLIST_UNLOCK
+      VLIST_UNLOCK();
     }
   else
     Error(func, "Internal problem (pointer %p undefined)", ptr);
@@ -180,15 +212,15 @@ static void vlist_delete_entry(vlist_t *vlistptr)
 
   idx = vlistptr->self;
 
-  VLIST_LOCK
+  VLIST_LOCK();
 
   free(vlistptr);
 
   _vlistList[idx].next = _vlistAvail;
   _vlistList[idx].ptr  = 0;
-  _vlistAvail          = &_vlistList[idx];
+  _vlistAvail          = idx;
 
-  VLIST_UNLOCK
+  VLIST_UNLOCK();
 
   if ( VLIST_Debug )
     Message(func, "Removed idx %d from vlist list", idx);
@@ -210,11 +242,11 @@ static void vlist_initialize(void)
   vlist_list_new();
   atexit(vlist_list_delete);
 
-  VLIST_LOCK
+  VLIST_LOCK();
 
   vlist_init_pointer();
 
-  VLIST_UNLOCK
+  VLIST_UNLOCK();
 
   _vlist_init = TRUE;
 }
@@ -230,8 +262,8 @@ static void vlist_copy(vlist_t *vlistptr2, vlist_t *vlistptr1)
   vlistptr2->self = vlistID2;
 }
 
-
-static void vlist_check_ptr(const char *func, vlist_t *vlistptr)
+static
+void vlist_check_ptr(const char *func, vlist_t *vlistptr)
 {
   if ( vlistptr == NULL )
     Error(func, "vlist undefined!");
@@ -269,7 +301,7 @@ int vlistCreate(void)
   int vlistID = 0;
   vlist_t *vlistptr;
 
-  VLIST_INIT
+  VLIST_INIT();
 
   vlistptr = vlist_new_entry();
   if ( ! vlistptr ) Error(func, "No memory");

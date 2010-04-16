@@ -3,11 +3,11 @@
 
 #define  MIN_STREAMS    1024  /* minimum number of streams                    */
 #define  MAX_STREAMS   65536  /* maximum number of streams                    */
-#define  MIN_VLISTS     4096  /* minimum number of vlists                     */
-#define  MAX_VLISTS     4096  /* maximum number of vlists                     */
-#define  MAX_GRIDS      1024  /* maximum number of grids                      */
-#define  MAX_ZAXIS      1024  /* maximum number of zaxis                      */
+#define  MIN_VLISTS     1024  /* minimum number of vlists                     */
+#define  MAX_VLISTS    65536  /* maximum number of vlists                     */
 #define  MAX_TAXIS      4096  /* maximum number of taxis                      */
+#define  MAX_ZAXIS      1024  /* maximum number of zaxis                      */
+#define  MAX_GRIDS      1024  /* maximum number of grids                      */
 #define  MAX_INSTS      1024  /* maximum number of instituts                  */
 #define  MAX_MODELS     1024  /* maximum number of models                     */
 #define  MAX_GRIDS_PS    128  /* maximum number of different grids per stream */

@@ -228,8 +228,8 @@ static pthread_mutex_t _stream_mutex;
 
 
 typedef struct _streamPtrToIdx {
-  int idx;
-  int next;
+  int       idx;
+  int       next;
   stream_t *ptr;
 } streamPtrToIdx;
 
