@@ -323,7 +323,7 @@ void taxis_initialize(void)
 
   taxis_init_pointer();
   
-  TAXIS_UNLOCK()
+  TAXIS_UNLOCK();
 
   _taxis_init = TRUE;
 
