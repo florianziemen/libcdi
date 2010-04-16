@@ -596,7 +596,7 @@ void cgribexScanTimestep1(int streamID)
   int warn_numavg = TRUE;
   int taxisID = -1;
   int rdate = 0, rtime = 0, tunit = 0, fcast = 0;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int vlistID;
   int ztype;
   long unzipsize;
@@ -835,7 +835,7 @@ int cgribexScanTimestep2(int streamID)
   int warn_numavg = TRUE;
   int tsteptype;
   int taxisID = -1;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int vlistID;
   long unzipsize;
   compvar_t compVar, compVar0;
@@ -1111,7 +1111,7 @@ int cgribexScanTimestep(int streamID)
   int warn_numavg = TRUE;
   size_t readsize;
   int taxisID = -1;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int vlistID;
   int rindex, nrecs = 0;
   long unzipsize;

@@ -376,7 +376,7 @@ void extScanTimestep1(int streamID)
   off_t recpos;
   int nrecords, nrecs, recID;
   int taxisID = -1;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int vlistID;
   extcompvar_t compVar, compVar0;
   extrec_t *extp;
@@ -516,7 +516,7 @@ int extScanTimestep2(int streamID)
   off_t recpos = 0;
   int nrecords, nrecs, recID, rindex;
   int nextstep;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int vlistID;
   extcompvar_t compVar, compVar0;
   extrec_t *extp;
@@ -704,7 +704,7 @@ int extScanTimestep(int streamID)
   long recsize = 0;
   off_t recpos = 0;
   int recID;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int rindex, nrecs = 0;
   extcompvar_t compVar, compVar0;
   extrec_t *extp;

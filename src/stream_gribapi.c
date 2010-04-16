@@ -694,7 +694,7 @@ void gribapiScanTimestep1(int streamID)
   int warn_numavg = TRUE;
   int taxisID = -1;
   int rdate = 0, rtime = 0, tunit = 0, fcast = 0;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int vlistID;
   int ztype;
   long unzipsize;
@@ -999,7 +999,7 @@ int gribapiScanTimestep2(int streamID)
   int warn_numavg = TRUE;
   int tsteptype;
   int taxisID = -1;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int vlistID;
   long unzipsize;
   compvar2_t compVar, compVar0;
@@ -1327,7 +1327,7 @@ int gribapiScanTimestep(int streamID)
   int warn_numavg = TRUE;
   size_t readsize;
   int taxisID = -1;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int vlistID;
   int rindex, nrecs = 0;
   long unzipsize;

@@ -209,7 +209,7 @@ static int _stream_init = FALSE;
 #if  defined  (HAVE_LIBPTHREAD)
 #  include <pthread.h>
 
-static pthread_once_t _stream_init_thread = PTHREAD_ONCE_INIT;
+static pthread_once_t  _stream_init_thread = PTHREAD_ONCE_INIT;
 static pthread_mutex_t _stream_mutex;
 
 #  define STREAM_LOCK()         pthread_mutex_lock(&_stream_mutex)
@@ -408,7 +408,7 @@ void stream_init_entry(stream_t *streamptr)
 
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->xdimID[i]   = UNDEFID;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ydimID[i]   = UNDEFID;
-  for ( i = 0; i < MAX_ZAXIS_PS; i++ ) streamptr->zaxisID[i]  = UNDEFID;
+  for ( i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->zaxisID[i]  = UNDEFID;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncxvarID[i] = UNDEFID;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncyvarID[i] = UNDEFID;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncavarID[i] = UNDEFID;

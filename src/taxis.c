@@ -77,7 +77,8 @@ void taxis_defaults(void)
 
 static int  TAXIS_Debug = 0;   /* If set to 1, debugging */
 
-static int _taxis_max = MAX_TAXIS;
+static int _taxis_min = MIN_TAXES;
+static int _taxis_max = MAX_TAXES;
 
 static void taxis_initialize(void);
 
@@ -86,84 +87,115 @@ static int _taxis_init = FALSE;
 #if  defined  (HAVE_LIBPTHREAD)
 #  include <pthread.h>
 
-static pthread_once_t _taxis_init_thread = PTHREAD_ONCE_INIT;
+static pthread_once_t  _taxis_init_thread = PTHREAD_ONCE_INIT;
 static pthread_mutex_t _taxis_mutex;
 
-#  define TAXIS_LOCK           pthread_mutex_lock(&_taxis_mutex);
-#  define TAXIS_UNLOCK         pthread_mutex_unlock(&_taxis_mutex);
-#  define TAXIS_INIT                               \
-   if ( _taxis_init == FALSE ) pthread_once(&_taxis_init_thread, taxis_initialize);
+#  define TAXIS_LOCK()         pthread_mutex_lock(&_taxis_mutex)
+#  define TAXIS_UNLOCK()       pthread_mutex_unlock(&_taxis_mutex)
+#  define TAXIS_INIT()	      \
+   if ( _taxis_init == FALSE ) pthread_once(&_taxis_init_thread, taxis_initialize)
 
 #else
 
-#  define TAXIS_LOCK
-#  define TAXIS_UNLOCK
-#  define TAXIS_INIT                               \
-   if ( _taxis_init == FALSE ) taxis_initialize();
+#  define TAXIS_LOCK()
+#  define TAXIS_UNLOCK()
+#  define TAXIS_INIT()	      \
+   if ( _taxis_init == FALSE ) taxis_initialize()
 
 #endif
 
 
 typedef struct _taxisPtrToIdx {
-  int idx;
-  TAXIS *ptr;
-  struct _taxisPtrToIdx *next;
+  int      idx;
+  int      next;
+  taxis_t *ptr;
 } taxisPtrToIdx;
 
 
 static taxisPtrToIdx *_taxisList  = NULL;
-static taxisPtrToIdx *_taxisAvail = NULL;
+static int            _taxisAvail = -1;
 
-
-static void taxis_list_new(void)
+static
+void taxis_list_new(void)
 {
   static char func[] = "taxis_list_new";
 
   assert(_taxisList == NULL);
 
-  _taxisList = (taxisPtrToIdx *) malloc(_taxis_max*sizeof(taxisPtrToIdx));
+  _taxisList = (taxisPtrToIdx *) malloc(_taxis_min*sizeof(taxisPtrToIdx));
 }
 
-
-static void taxis_list_delete(void)
+static
+void taxis_list_delete(void)
 {
   static char func[] = "taxis_list_delete";
 
   if ( _taxisList ) free(_taxisList);
 }
 
-
-static void taxis_init_pointer(void)
+static
+void taxis_init_pointer(void)
 {
   int  i;
   
-  for ( i = 0; i < _taxis_max; i++ )
+  for ( i = 0; i < _taxis_min; ++i )
     {
-      _taxisList[i].next = _taxisList + i + 1;
       _taxisList[i].idx  = i;
-      _taxisList[i].ptr  = 0;
+      _taxisList[i].next = i + 1;
+      _taxisList[i].ptr  = NULL;
     }
 
-  _taxisList[_taxis_max-1].next = 0;
+  _taxisList[_taxis_min-1].next = -1;
 
-  _taxisAvail = _taxisList;
+  _taxisAvail = 0;
+}
+
+static
+void taxis_list_extend(void)
+{
+  static char func[] = "taxis_list_extend";
+  int ntaxis;
+  int i;
+
+  assert(_taxisList != NULL);
+
+  ntaxis = _taxis_min + MIN_TAXES;
+
+  if ( ntaxis <= _taxis_max)
+    {
+      _taxisList = (taxisPtrToIdx *) realloc(_taxisList, ntaxis*sizeof(taxisPtrToIdx));
+  
+      for ( i = _taxis_min; i < ntaxis; ++i )
+	{
+	  _taxisList[i].idx  = i;
+	  _taxisList[i].next = i + 1;
+	  _taxisList[i].ptr  = NULL;
+	}
+
+      _taxisAvail = _taxis_min;
+      _taxisList[_taxis_min-1].next = _taxis_min;
+      _taxis_min = ntaxis;
+      _taxisList[_taxis_min-1].next = -1;
+    }
+  else
+    Warning(func, "Too many open taxes (limit is %d)!", _taxis_max);
 }
 
 
-TAXIS *taxis_to_pointer(int idx)
+taxis_t *taxis_to_pointer(int idx)
 {
   static char func[] = "taxis_to_pointer";
-  TAXIS *taxisptr = NULL;
+  taxis_t *taxisptr = NULL;
 
-  TAXIS_INIT
+  TAXIS_INIT();
 
-  if ( idx >= 0 && idx < _taxis_max )
+  if ( idx >= 0 && idx < _taxis_min )
     {
-      TAXIS_LOCK
+      TAXIS_LOCK();
 
       taxisptr = _taxisList[idx].ptr;
 
-      TAXIS_UNLOCK
+      TAXIS_UNLOCK();
     }
   else
     Error(func, "taxis index %d undefined!", idx);
@@ -173,31 +205,33 @@ TAXIS *taxis_to_pointer(int idx)
 
 
 /* Create an index from a pointer */
-static int taxis_from_pointer(TAXIS *ptr)
+static
+int taxis_from_pointer(taxis_t *ptr)
 {
   static char func[] = "taxis_from_pointer";
   int      idx = -1;
-  taxisPtrToIdx *newptr;
 
   if ( ptr )
     {
-      TAXIS_LOCK
+      TAXIS_LOCK();
 
-      if ( _taxisAvail )
+      if ( _taxisAvail < 0 ) taxis_list_extend();
+
+      if ( _taxisAvail >= 0 )
 	{
-	  newptr       = _taxisAvail;
-	  _taxisAvail  = _taxisAvail->next;
-	  newptr->next = 0;
+	  taxisPtrToIdx *newptr;
+
+	  newptr       = &_taxisList[_taxisAvail];
+	  _taxisAvail  = newptr->next;
+	  newptr->next = -1;
 	  idx	       = newptr->idx;
 	  newptr->ptr  = ptr;
       
 	  if ( TAXIS_Debug )
 	    Message(func, "Pointer %p has idx %d from taxis list", ptr, idx);
 	}
-      else
-	Warning(func, "Too many open taxis (limit is %d)!", _taxis_max);
 
-      TAXIS_UNLOCK
+      TAXIS_UNLOCK();
     }
   else
     Error(func, "Internal problem (pointer %p undefined)", ptr);
@@ -206,7 +240,7 @@ static int taxis_from_pointer(TAXIS *ptr)
 }
 
 
-void taxis_init_ptr(TAXIS *taxisptr)
+void taxis_init_ptr(taxis_t *taxisptr)
 {
   taxisptr->self       = -1;
 
@@ -227,52 +261,50 @@ void taxis_init_ptr(TAXIS *taxisptr)
 }
 
 
-void taxis_init_entry(TAXIS *taxisptr)
+void taxis_init_entry(taxis_t *taxisptr)
 {
   taxis_init_ptr(taxisptr);
 
   taxisptr->self       = taxis_from_pointer(taxisptr);
 }
 
-
-static TAXIS *taxis_new_entry(void)
+static
+taxis_t *taxis_new_entry(void)
 {
   static char func[] = "taxis_new_entry";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
-  taxisptr = (TAXIS *) malloc(sizeof(TAXIS));
+  taxisptr = (taxis_t *) malloc(sizeof(taxis_t));
 
   if ( taxisptr ) taxis_init_entry(taxisptr);
-
-  /*  fprintf(stderr, "self: %d %p\n", taxisptr->self, taxisptr); */
 
   return (taxisptr);
 }
 
-
-static void taxis_delete_entry(TAXIS *taxisptr)
+static
+void taxis_delete_entry(taxis_t *taxisptr)
 {
   static char func[] = "taxis_delete_entry";
   int idx;
 
   idx = taxisptr->self;
 
-  TAXIS_LOCK
+  TAXIS_LOCK();
 
   free(taxisptr);
 
   _taxisList[idx].next = _taxisAvail;
   _taxisList[idx].ptr  = 0;
-  _taxisAvail          = &_taxisList[idx];
+  _taxisAvail          = idx;
 
-  TAXIS_UNLOCK
+  TAXIS_UNLOCK();
 
   if ( TAXIS_Debug )
     Message(func, "Removed idx %d from taxis list", idx);
 }
 
-
-static void taxis_initialize(void)
+static
+void taxis_initialize(void)
 {
   char *env;
 
@@ -287,29 +319,29 @@ static void taxis_initialize(void)
   taxis_list_new();
   atexit(taxis_list_delete);
 
-  TAXIS_LOCK
+  TAXIS_LOCK();
 
   taxis_init_pointer();
   
-  TAXIS_UNLOCK
+  TAXIS_UNLOCK()
 
   _taxis_init = TRUE;
 
   taxis_defaults();
 }
 
-
-static void taxis_copy(TAXIS *taxisptr2, TAXIS *taxisptr1)
+static
+void taxis_copy(taxis_t *taxisptr2, taxis_t *taxisptr1)
 {
   int taxisID2;
 
   taxisID2 = taxisptr2->self;
-  memcpy(taxisptr2, taxisptr1, sizeof(TAXIS));
+  memcpy(taxisptr2, taxisptr1, sizeof(taxis_t));
   taxisptr2->self = taxisID2;
 }
 
-
-static void taxis_check_ptr(const char *func, TAXIS *taxisptr)
+static
+void taxis_check_ptr(const char *func, taxis_t *taxisptr)
 {
   if ( taxisptr == NULL )
     Error(func, "taxis undefined!");
@@ -352,12 +384,12 @@ int taxisCreate(int taxistype)
 {
   static char func[] = "taxisCreate";
   int taxisID;
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   if ( CDI_Debug )
     Message(func, "taxistype: %d", taxistype);
 
-  TAXIS_INIT
+  TAXIS_INIT();
 
   taxisptr = taxis_new_entry();
   if ( ! taxisptr ) Error(func, "No memory");
@@ -385,7 +417,7 @@ int taxisCreate(int taxistype)
 void taxisDestroy(int taxisID)
 {
   static char func[] = "taxisDestroy";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -399,8 +431,8 @@ int taxisDuplicate(int taxisID1)
 {
   static char func[] = "taxisDuplicate";
   int taxisID2;
-  TAXIS *taxisptr1;
-  TAXIS *taxisptr2;
+  taxis_t *taxisptr1;
+  taxis_t *taxisptr2;
 
   taxisptr1 = taxis_to_pointer(taxisID1);
 
@@ -423,7 +455,7 @@ int taxisDuplicate(int taxisID1)
 void taxisDefType(int taxisID, int type)
 {
   static char func[] = "taxisDefType";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -450,7 +482,7 @@ The function @func{taxisDefVdate} defines the verification date of a Time axis.
 void taxisDefVdate(int taxisID, int vdate)
 {
   static char func[] = "taxisDefVdate";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -477,7 +509,7 @@ The function @func{taxisDefVtime} defines the verification time of a Time axis.
 void taxisDefVtime(int taxisID, int vtime)
 {
   static char func[] = "taxisDefVtime";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -504,7 +536,7 @@ The function @func{taxisDefVdate} defines the reference date of a Time axis.
 void taxisDefRdate(int taxisID, int rdate)
 {
   static char func[] = "taxisDefRdate";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -531,7 +563,7 @@ The function @func{taxisDefVdate} defines the reference time of a Time axis.
 void taxisDefRtime(int taxisID, int rtime)
 {
   static char func[] = "taxisDefRtime";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -560,7 +592,7 @@ The function @func{taxisDefCalendar} defines the calendar of a Time axis.
 void taxisDefCalendar(int taxisID, int calendar)
 {
   static char func[] = "taxisDefCalendar";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -573,7 +605,7 @@ void taxisDefCalendar(int taxisID, int calendar)
 void taxisDefTunit(int taxisID, int unit)
 {
   static char func[] = "taxisDefTunit";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -585,7 +617,7 @@ void taxisDefTunit(int taxisID, int unit)
 void taxisDefNumavg(int taxisID, int numavg)
 {
   static char func[] = "taxisDefNumavg";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -602,7 +634,7 @@ The valid CDI time types are TAXIS_ABSOLUTE and TAXIS_RELATIVE.
 int taxisInqType(int taxisID)
 {
   static char func[] = "taxisInqType";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -615,7 +647,7 @@ int taxisInqType(int taxisID)
 int taxisHasBounds(int taxisID)
 {
   static char func[] = "taxisHasBounds";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -628,7 +660,7 @@ int taxisHasBounds(int taxisID)
 void taxisDeleteBounds(int taxisID)
 {
   static char func[] = "taxisDeleteBounds";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -641,8 +673,8 @@ void taxisDeleteBounds(int taxisID)
 void taxisCopyTimestep(int taxisID2, int taxisID1)
 {
   static char func[] = "taxisCopyTimestep";
-  TAXIS *taxisptr1;
-  TAXIS *taxisptr2;
+  taxis_t *taxisptr1;
+  taxis_t *taxisptr2;
 
   taxisptr1 = taxis_to_pointer(taxisID1);
   taxisptr2 = taxis_to_pointer(taxisID2);
@@ -685,7 +717,7 @@ The function @func{taxisInqVdate} returns the verification date of a Time axis.
 int taxisInqVdate(int taxisID)
 {
   static char func[] = "taxisInqVdate";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -698,7 +730,7 @@ int taxisInqVdate(int taxisID)
 void taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub)
 {
   static char func[] = "taxisInqVdateBounds";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -712,7 +744,7 @@ void taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub)
 void taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub)
 {
   static char func[] = "taxisDefVdateBounds";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -744,7 +776,7 @@ The function @func{taxisInqVtime} returns the verification time of a Time axis.
 int taxisInqVtime(int taxisID)
 {
   static char func[] = "taxisInqVtime";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -757,7 +789,7 @@ int taxisInqVtime(int taxisID)
 void taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub)
 {
   static char func[] = "taxisInqVtimeBounds";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -771,7 +803,7 @@ void taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub)
 void taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub)
 {
   static char func[] = "taxisDefVtimeBounds";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -803,7 +835,7 @@ The function @func{taxisInqRdate} returns the reference date of a Time axis.
 int taxisInqRdate(int taxisID)
 {
   static char func[] = "taxisInqRdate";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -838,7 +870,7 @@ The function @func{taxisInqRtime} returns the reference time of a Time axis.
 int taxisInqRtime(int taxisID)
 {
   static char func[] = "taxisInqRtime";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -876,7 +908,7 @@ The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_PROLEP
 int taxisInqCalendar(int taxisID)
 {
   static char func[] = "taxisInqCalendar";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -889,7 +921,7 @@ int taxisInqCalendar(int taxisID)
 int taxisInqTunit(int taxisID)
 {
   static char func[] = "taxisInqTunit";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -902,7 +934,7 @@ int taxisInqTunit(int taxisID)
 int taxisInqNumavg(int taxisID)
 {
   static char func[] = "taxisInqNumavg";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -912,10 +944,10 @@ int taxisInqNumavg(int taxisID)
 }
 
 
-TAXIS *taxisPtr(int taxisID)
+taxis_t *taxisPtr(int taxisID)
 {
   static char func[] = "taxisPtr";
-  TAXIS *taxisptr;
+  taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
@@ -1015,7 +1047,7 @@ void cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
 
 int days_per_month(int calendar, int year, int month);
 
-void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
+void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
 {
   static char func[] = "timeval2vtime";
   int year, month, day, hour, minute, second;
@@ -1105,7 +1137,7 @@ void timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime)
 }
 
 
-double vtime2timeval(int vdate, int vtime, TAXIS *taxis)
+double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
 {
   int ryear, rmonth;
   int year, month, day, hour, minute, second;
@@ -1274,7 +1306,7 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
 }
 
 
-void cdiDecodeTimeval(double timevalue, TAXIS *taxis, int *date, int *time)
+void cdiDecodeTimeval(double timevalue, taxis_t *taxis, int *date, int *time)
 {
   if ( taxis->type == TAXIS_ABSOLUTE )
     splitTimevalue(timevalue, taxis->unit, date, time);
@@ -1283,7 +1315,7 @@ void cdiDecodeTimeval(double timevalue, TAXIS *taxis, int *date, int *time)
 }
 
 
-double cdiEncodeTimeval(int date, int time, TAXIS *taxis)
+double cdiEncodeTimeval(int date, int time, taxis_t *taxis)
 {
   double timevalue;
 
@@ -1322,15 +1354,15 @@ double cdiEncodeTimeval(int date, int time, TAXIS *taxis)
 }
 
 
-void ptaxisInit(TAXIS *taxisptr)
+void ptaxisInit(taxis_t *taxisptr)
 {
   taxis_init_ptr(taxisptr);
 }
 
 
-void ptaxisCopy(TAXIS *dest, TAXIS *source)
+void ptaxisCopy(taxis_t *dest, taxis_t *source)
 {
-  /* memcpy(dest, source, sizeof(TAXIS)); */
+  /* memcpy(dest, source, sizeof(taxis_t)); */
   dest->used       = source->used;  
   dest->type       = source->type;
   dest->vdate      = source->vdate;

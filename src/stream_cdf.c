@@ -157,7 +157,7 @@ int isTimeUnits(const char *timeunits)
 }
 
 static
-int splitBasetime(const char *timeunits, TAXIS *taxis)
+int splitBasetime(const char *timeunits, taxis_t *taxis)
 {
   static char func[] = "splitBasetime";
   int len, i;
@@ -743,7 +743,7 @@ void cdfDefTimeValue(int streamID, int tsID)
   double timevalue;
   int ncvarid;
   size_t index;
-  TAXIS *taxis;
+  taxis_t *taxis;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -801,7 +801,7 @@ void cdfDefTime(int streamID)
   char unitstr[80];
   char calstr[80];
   size_t len;
-  TAXIS *taxis;
+  taxis_t *taxis;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -5903,7 +5903,7 @@ int cdfInqContents(int streamID)
 
   if ( timehasunits )
     {
-      TAXIS *taxis;
+      taxis_t *taxis;
       taxis = &streamptr->tsteps[0].taxis;
 
       cdfGetAttText(fileID, ncvarid, "units", attstringlen-1, attstring);
@@ -5952,7 +5952,7 @@ int cdfInqContents(int streamID)
 
   if ( calendar != UNDEFID )
     {
-      TAXIS *taxis;
+      taxis_t *taxis;
       taxis = &streamptr->tsteps[0].taxis;
 
       taxis->calendar = calendar;
@@ -5960,7 +5960,7 @@ int cdfInqContents(int streamID)
     }
   else if ( streamptr->tsteps[0].taxis.type == TAXIS_RELATIVE )
     {
-      TAXIS *taxis;
+      taxis_t *taxis;
 
       calendar = CALENDAR_STANDARD;
 
@@ -6001,7 +6001,7 @@ int cdfInqTimestep(int streamID, int tsID)
   int nctimeboundsid;
   int fileID;
   size_t index;
-  TAXIS *taxis;
+  taxis_t *taxis;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);

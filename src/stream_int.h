@@ -165,7 +165,7 @@ typedef struct {
   int       curRecID;    /* current record ID                     */
   long      next;
   off_t     position;    /* timestep file position                */
-  TAXIS     taxis;
+  taxis_t   taxis;
 }
 TSTEPS;
 
@@ -225,7 +225,7 @@ typedef struct {
   int       vlistID;
   int       xdimID[MAX_GRIDS_PS];
   int       ydimID[MAX_GRIDS_PS];
-  int       zaxisID[MAX_ZAXIS_PS];
+  int       zaxisID[MAX_ZAXES_PS];
   int       ncxvarID[MAX_GRIDS_PS];
   int       ncyvarID[MAX_GRIDS_PS];
   int       ncavarID[MAX_GRIDS_PS];

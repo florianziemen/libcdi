@@ -87,7 +87,7 @@ typedef struct
   int         modelID;
   int         varsAllocated;
   int         gridIDs[MAX_GRIDS_PS];
-  int         zaxisIDs[MAX_ZAXIS_PS];
+  int         zaxisIDs[MAX_ZAXES_PS];
   var_t      *vars;
   cdi_atts_t  atts;
 }

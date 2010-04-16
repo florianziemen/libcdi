@@ -2,6 +2,7 @@
 
 	* MAX_STREAMS: change static size of 4096 to dynamic range of 1024 - 65536
 	* MAX_VLISTS:  change static size of 4096 to dynamic range of 1024 - 65536
+	* MAX_TAXES:   change static size of 4096 to dynamic range of 1024 - 65536
 	
 2010-04-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 

@@ -60,7 +60,7 @@ ZAXIS;
 
 static int  ZAXIS_Debug = 0;   /* If set to 1, debugging */
 
-static int _zaxis_max = MAX_ZAXIS;
+static int _zaxis_max = MAX_ZAXES;
 
 static void zaxis_initialize(void);
 

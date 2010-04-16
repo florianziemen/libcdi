@@ -20,7 +20,7 @@ static int _vlist_init = FALSE;
 #if  defined  (HAVE_LIBPTHREAD)
 #  include <pthread.h>
 
-static pthread_once_t _vlist_init_thread = PTHREAD_ONCE_INIT;
+static pthread_once_t  _vlist_init_thread = PTHREAD_ONCE_INIT;
 static pthread_mutex_t _vlist_mutex;
 
 #  define VLIST_LOCK()         pthread_mutex_lock(&_vlist_mutex)
@@ -71,7 +71,7 @@ void vlist_init_pointer(void)
 {
   int  i;
   
-  for ( i = 0; i < _vlist_min; i++ )
+  for ( i = 0; i < _vlist_min; ++i )
     {
       _vlistList[i].idx  = i;
       _vlistList[i].next = i + 1;
@@ -191,8 +191,8 @@ static void vlist_init_entry(vlist_t *vlistptr)
   vlistptr->atts.nelems    = 0;
 }
 
-
-static vlist_t *vlist_new_entry(void)
+static
+vlist_t *vlist_new_entry(void)
 {
   static char func[] = "vlist_new_entry";
   vlist_t *vlistptr;
@@ -204,8 +204,8 @@ static vlist_t *vlist_new_entry(void)
   return (vlistptr);
 }
 
-
-static void vlist_delete_entry(vlist_t *vlistptr)
+static
+void vlist_delete_entry(vlist_t *vlistptr)
 {
   static char func[] = "vlist_delete_entry";
   int idx;
@@ -226,8 +226,8 @@ static void vlist_delete_entry(vlist_t *vlistptr)
     Message(func, "Removed idx %d from vlist list", idx);
 }
 
-
-static void vlist_initialize(void)
+static
+void vlist_initialize(void)
 {
   char *env;
 
@@ -251,8 +251,8 @@ static void vlist_initialize(void)
   _vlist_init = TRUE;
 }
 
-
-static void vlist_copy(vlist_t *vlistptr2, vlist_t *vlistptr1)
+static
+void vlist_copy(vlist_t *vlistptr2, vlist_t *vlistptr1)
 {
   int vlistID2;
 
@@ -743,8 +743,8 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	    if ( index ==vlistptr2->nzaxis )
 	      {
 		vlistptr2->zaxisIDs[vlistptr2->nzaxis++] = zaxisID;
-		if (vlistptr2->nzaxis >= MAX_ZAXIS_PS )
-		  Error(func, "Internal Problem! More than %d zaxis.", MAX_ZAXIS_PS);
+		if (vlistptr2->nzaxis >= MAX_ZAXES_PS )
+		  Error(func, "Internal Problem! More than %d zaxis.", MAX_ZAXES_PS);
 	      }
 
 	    varID2++;
@@ -843,8 +843,8 @@ void vlistCat(int vlistID2, int vlistID1)
       if ( index == vlistptr2->nzaxis )
 	{
 	  vlistptr2->zaxisIDs[vlistptr2->nzaxis++] = zaxisID;
-	  if ( vlistptr2->nzaxis >= MAX_ZAXIS_PS )
-	    Error(func, "Internal Problem! More than %d zaxis.", MAX_ZAXIS_PS);
+	  if ( vlistptr2->nzaxis >= MAX_ZAXES_PS )
+	    Error(func, "Internal Problem! More than %d zaxis.", MAX_ZAXES_PS);
 	}
     }
 }

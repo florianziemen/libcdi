@@ -228,8 +228,8 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
 
   if ( index == vlistptr->nzaxis )
     {
-      if ( vlistptr->nzaxis + 1 >= MAX_ZAXIS_PS )
-	Error(func, "Maximum of %d zaxis reached", MAX_ZAXIS_PS);
+      if ( vlistptr->nzaxis + 1 >= MAX_ZAXES_PS )
+	Error(func, "Maximum of %d zaxis reached", MAX_ZAXES_PS);
 
       vlistptr->zaxisIDs[vlistptr->nzaxis] = zaxisID;
       vlistptr->nzaxis++;
@@ -1456,8 +1456,8 @@ void vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
 
       if ( index == vlistptr->nzaxis )
 	{
-	  if ( vlistptr->nzaxis + 1 >= MAX_ZAXIS_PS )
-	    Error(func, "Maximum of %d zaxis reached", MAX_ZAXIS_PS);
+	  if ( vlistptr->nzaxis + 1 >= MAX_ZAXES_PS )
+	    Error(func, "Maximum of %d zaxis reached", MAX_ZAXES_PS);
 
 	  vlistptr->zaxisIDs[vlistptr->nzaxis] = zaxisID;
 	  vlistptr->nzaxis++;
