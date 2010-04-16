@@ -1,3 +1,7 @@
+2010-04-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* change fixed size of MAX_STREAMS=4096 to MIN_STREAMS=1024 and MAX_STREAMS=65536
+	
 2010-04-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cgribexDefTime: bug fix for GRIB time range 10

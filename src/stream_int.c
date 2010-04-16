@@ -199,6 +199,7 @@ char *strfiletype(int filetype)
 
 static int  STREAM_Debug = 0;   /* If set to 1, debugging */
 
+static int _stream_min = MIN_STREAMS;
 static int _stream_max = MAX_STREAMS;
 
 static void stream_initialize(void);
@@ -228,13 +229,13 @@ static pthread_mutex_t _stream_mutex;
 
 typedef struct _streamPtrToIdx {
   int idx;
+  int next;
   stream_t *ptr;
-  struct _streamPtrToIdx *next;
 } streamPtrToIdx;
 
 
 static streamPtrToIdx *_streamList  = NULL;
-static streamPtrToIdx *_streamAvail = NULL;
+static int             _streamAvail = -1;
 
 static
 void stream_list_new(void)
@@ -243,7 +244,7 @@ void stream_list_new(void)
 
   assert(_streamList == NULL);
 
-  _streamList = (streamPtrToIdx *) malloc(_stream_max*sizeof(streamPtrToIdx));
+  _streamList = (streamPtrToIdx *) malloc(_stream_min*sizeof(streamPtrToIdx));
 }
 
 static
@@ -257,18 +258,49 @@ void stream_list_delete(void)
 static
 void stream_init_pointer(void)
 {
-  int  i;
+  int i;
   
-  for ( i = 0; i < _stream_max; i++ )
+  for ( i = 0; i < _stream_min; ++i )
     {
-      _streamList[i].next = _streamList + i + 1;
       _streamList[i].idx  = i;
+      _streamList[i].next = i + 1;
       _streamList[i].ptr  = NULL;
     }
 
-  _streamList[_stream_max-1].next = 0;
+  _streamList[_stream_min-1].next = -1;
 
-  _streamAvail = _streamList;
+  _streamAvail = 0;
+}
+
+static
+void stream_list_extend(void)
+{
+  static char func[] = "stream_list_extend";
+  int nstreams;
+  int i;
+
+  assert(_streamList != NULL);
+
+  nstreams = _stream_min + MIN_STREAMS;
+
+  if ( nstreams <= _stream_max)
+    {
+      _streamList = (streamPtrToIdx *) realloc(_streamList, nstreams*sizeof(streamPtrToIdx));
+  
+      for ( i = _stream_min; i < nstreams; ++i )
+	{
+	  _streamList[i].idx  = i;
+	  _streamList[i].next = i + 1;
+	  _streamList[i].ptr  = NULL;
+	}
+
+      _streamAvail = _stream_min;
+      _streamList[_stream_min-1].next = _stream_min;
+      _stream_min = nstreams;
+      _streamList[_stream_min-1].next = -1;
+    }
+  else
+    Warning(func, "Too many open streams (limit is %d)!", _stream_max);
 }
 
 
@@ -279,7 +311,7 @@ stream_t *stream_to_pointer(int idx)
 
   STREAM_INIT();
 
-  if ( idx >= 0 && idx < _stream_max )
+  if ( idx >= 0 && idx < _stream_min )
     {
       STREAM_LOCK();
 
@@ -304,21 +336,21 @@ int stream_from_pointer(stream_t *ptr)
     {
       STREAM_LOCK();
 
-      if ( _streamAvail )
+      if ( _streamAvail < 0 ) stream_list_extend();
+
+      if ( _streamAvail >= 0 )
 	{
 	  streamPtrToIdx *newptr;
 
-	  newptr       = _streamAvail;
-	  _streamAvail = _streamAvail->next;
-	  newptr->next = 0;
+	  newptr       = &_streamList[_streamAvail];
+	  _streamAvail = newptr->next;
+	  newptr->next = -1;
 	  idx	       = newptr->idx;
 	  newptr->ptr  = ptr;
       
 	  if ( STREAM_Debug )
 	    Message(func, "Pointer %p has idx %d from stream list", ptr, idx);
 	}
-      else
-	Warning(func, "Too many open streams (limit is %d)!", _stream_max);
 
       STREAM_UNLOCK();
     }
@@ -420,7 +452,7 @@ void stream_delete_entry(stream_t *streamptr)
 
   _streamList[idx].next = _streamAvail;
   _streamList[idx].ptr  = 0;
-  _streamAvail          = &_streamList[idx];
+  _streamAvail          = idx;
 
   STREAM_UNLOCK();
 
@@ -471,7 +503,7 @@ int streamSize(void)
 
   STREAM_LOCK();
 
-  for ( i = 0; i < _stream_max; i++ )
+  for ( i = 0; i < _stream_min; i++ )
     if ( _streamList[i].ptr ) streamsize++;
 
   STREAM_UNLOCK();

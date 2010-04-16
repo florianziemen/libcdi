@@ -276,7 +276,7 @@ int vlistCreate(void)
 
   vlistID = vlistptr->self;
 
-  vlistLock(vlistID);
+  if ( vlistID >= 0 ) vlistLock(vlistID);
 
   return (vlistID);
 }
@@ -327,6 +327,7 @@ void vlistDestroy(int vlistID)
     }
 }
 
+
 int vlistNlock(int vlistID)
 {
   static char func[] = "vlistNlock";
@@ -338,6 +339,7 @@ int vlistNlock(int vlistID)
 
   return (vlistptr->nlock);
 }
+
 
 void vlistLock(int vlistID)
 {
@@ -351,6 +353,7 @@ void vlistLock(int vlistID)
   vlistptr->nlock++;
   /*  Message(func, "vlistID %d nlock %d", vlistID, vlistptr->nlock); */
 }
+
 
 void vlistUnlock(int vlistID)
 {
