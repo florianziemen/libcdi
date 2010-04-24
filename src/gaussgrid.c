@@ -5,6 +5,12 @@
 
 #include "dmemory.h"
 
+
+#ifndef  M_SQRT2
+#define  M_SQRT2     1.41421356237309504880
+#endif
+
+
 static
 void cpledn(int kn, int kodd, double *pfn, double pdx, int kflag, 
             double *pw, double *pdxn, double *pxmod)
