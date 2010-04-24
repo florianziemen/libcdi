@@ -3894,6 +3894,24 @@ int isLatAxis(const char *units, const char *stdname)
 }
 
 static
+int unitsIsPressure(const char *units)
+{
+  int lunit = FALSE;
+
+  if ( memcmp(units, "millibar", 8) == 0 ||
+       memcmp(units, "mb", 2)       == 0 ||
+       memcmp(units, "hectopas", 8) == 0 ||
+       memcmp(units, "hPa", 3)      == 0 ||
+       memcmp(units, "Pa", 2)       == 0 )
+    {
+      lunit = TRUE;
+    }
+
+  return (lunit);
+}
+
+
+static
 int isGaussGrid(long ysize, double yinc, double *yvals)
 {
   static char func[] = "isGaussGrid";
@@ -4883,11 +4901,7 @@ int cdfInqContents(int streamID)
 		  cdfSetDim(ncvars, ncvarid, 0, Y_AXIS);
 		  ncdims[ncdimid].dimtype = Y_AXIS;
 		}
-	      else if ( memcmp(ncvars[ncvarid].units, "millibar", 8) == 0 ||
-			memcmp(ncvars[ncvarid].units, "mb", 2)       == 0 ||
-			memcmp(ncvars[ncvarid].units, "hectopas", 8) == 0 ||
-			memcmp(ncvars[ncvarid].units, "hPa", 3)      == 0 ||
-			memcmp(ncvars[ncvarid].units, "Pa", 2)       == 0 )
+	      else if ( unitsIsPressure(ncvars[ncvarid].units) )
 		{
 		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
 		}
@@ -4965,11 +4979,7 @@ int cdfInqContents(int streamID)
 		  ncvars[ncvarid].islat = TRUE;
 		  continue;
 		}
-	      else if ( memcmp(ncvars[ncvarid].units, "millibar", 8) == 0 ||
-			memcmp(ncvars[ncvarid].units, "mb", 2)       == 0 ||
-			memcmp(ncvars[ncvarid].units, "hectopas", 8) == 0 ||
-			memcmp(ncvars[ncvarid].units, "hPa", 3)      == 0 ||
-			memcmp(ncvars[ncvarid].units, "Pa", 2)       == 0 )
+	      else if ( unitsIsPressure(ncvars[ncvarid].units) )
 		{
 		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
 		  continue;
