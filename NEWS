@@ -1,1 +1,15 @@
- 
+CDI NEWS
+--------
+
+Version 1.4.4 (29 April 2010):
+
+   New features:
+
+      * MAX_STREAMS: changed fixed size of 4096 to dynamic range of 1024 - 65536
+      * added support for GRIB1 time units 3hours and 6hours
+      * added support for non integer time units MONTH
+      * vlistMerge: added support to merge levels
+
+   Fixed bugs:
+      * gauaw: bug fix for allocation of zfnlat for odd number of nlat
+      * cgribexDefTime: bug fix for GRIB1 time range 3 and 10
