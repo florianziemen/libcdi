@@ -503,14 +503,23 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
       */
     case GRID_SPECTRAL:
       {
+	size_t len = 256;
+	char typeOfPacking[256];
+	GRIB_CHECK(grib_get_string(gh, "typeOfPacking", typeOfPacking, &len), 0);
+	// fprintf(stderr, "typeOfPacking %d %s\n", len, typeOfPacking);
+	grid.lcomplex = 0;
+	if ( strncmp(typeOfPacking, "spectral_complex", len) == 0 ) grid.lcomplex = 1;
+
 	grid.size  = datasize;
 	GRIB_CHECK(grib_get_long(gh, "J", &lpar), 0);
 	grid.trunc = lpar;
+	/*
 	GRIB_CHECK(grib_get_long(gh, "complexPacking", &lpar), 0);
 	if ( lpar )
 	  grid.lcomplex = 1;
 	else
 	  grid.lcomplex = 0;
+	*/
 	break;
       }
       /*
