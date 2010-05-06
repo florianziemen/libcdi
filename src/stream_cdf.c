@@ -1697,8 +1697,8 @@ void cdfDefRgrid(int streamID, int gridID)
     {
       if ( lwarn )
 	{
-	  Warning(func, "Writing a netCDF file with data on a gaussian reduced grid.");
-	  Warning(func, "The reading of this grid is unsupported!");
+	  Warning(func, "Creating a netCDF file with data on a gaussian reduced grid.");
+	  Warning(func, "The further processing of the resulting file is unsupported!");
 	  lwarn = FALSE;
 	}
 
