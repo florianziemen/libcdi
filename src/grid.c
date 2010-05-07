@@ -398,15 +398,18 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 		int ny = (int) (180./yinc + 0.5);
 		ny -= ny%2;
 		/* printf("%g %g %g %g %g %d\n", ylast, yfirst, ylast-yfirst,yinc, 180/yinc, ny); */
-		ytmp   = (double *) malloc(ny*sizeof(double));
-		calc_gaussgrid(ytmp, ny, yfirst, ylast);
-		for ( i = 0; i < (ny-ysize); i++ )
-		  if ( fabs(ytmp[i] - yfirst) < 0.001 ) break;
+		if ( ny < 4096 )
+		  {
+		    ytmp   = (double *) malloc(ny*sizeof(double));
+		    calc_gaussgrid(ytmp, ny, yfirst, ylast);
+		    for ( i = 0; i < (ny-ysize); i++ )
+		      if ( fabs(ytmp[i] - yfirst) < 0.001 ) break;
 
-		nstart = i;
+		    nstart = i;
 
-		if ( (nstart+ysize-1) < ny )
-		  if ( fabs(ytmp[nstart+ysize-1] - ylast) < 0.001 ) lfound = 1;
+		    if ( (nstart+ysize-1) < ny )
+		      if ( fabs(ytmp[nstart+ysize-1] - ylast) < 0.001 ) lfound = 1;
+		  }
 
 		if ( lfound )
 		  {
@@ -420,7 +423,8 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 		    yvals[ysize-1] = ylast;
 		  }
 
-		free(ytmp);
+		if ( ny < 4096 )
+		  free(ytmp);
 	      }
 	}
       else

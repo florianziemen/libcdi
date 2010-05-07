@@ -1,3 +1,7 @@
+2010-05-07  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* gridGenYvals: bug fix for nlat > 4096 [report: Thomas Bergmann]
+
 2010-04-29  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Version 1.4.4 released
