@@ -918,7 +918,12 @@ void gribapiScanTimestep1(int streamID)
 	Message(func, "%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
 
       gribapiAddRecord(streamID, param, gh, recsize, recpos, prec, ztype);
+
+      grib_handle_delete(gh);
+      gh = NULL;
     }
+
+  if ( gh ) grib_handle_delete(gh);
 
   streamptr->rtsteps = 1;
 
@@ -1277,8 +1282,13 @@ int gribapiScanTimestep2(int streamID)
       if ( tsteptype != vlistInqVarTsteptype(vlistID, varID) )
 	vlistDefVarTsteptype(vlistID, varID, tsteptype);
 
+      grib_handle_delete(gh);
+      gh = NULL;
+      
       rindex++;
     }
+  
+  if ( gh ) grib_handle_delete(gh);
 
   nrecs = 0;
   for ( recID = 0; recID < nrecords; recID++ )
@@ -1599,8 +1609,13 @@ int gribapiScanTimestep(int streamID)
 	  if ( CDI_Debug )
 	    Message(func, "%4d %8d %4d %8d %8d %6d", rindex, (int)recpos, param, level1, vdate, vtime);
 
+	  grib_handle_delete(gh);
+	  gh = NULL;
+
 	  rindex++;
 	}
+
+      if ( gh ) grib_handle_delete(gh);
 
       for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	{
@@ -1701,6 +1716,9 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
       *nmiss = (int) lpar;
       // printf("gridtype %d, nmiss %d\n", gridtype, nmiss);
     }
+
+  grib_handle_delete(gh);
+
 #else
   Error(func, "GRIB_API support not compiled in!");
 #endif
