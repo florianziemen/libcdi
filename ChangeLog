@@ -1,3 +1,7 @@
+2010-05-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_cdf: added support for uppercase attributes [request: Patrick Brockmann]
+	
 2010-05-07  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* gridGenYvals: bug fix for nlat > 4096 [report: Thomas Bergmann]

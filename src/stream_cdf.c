@@ -98,6 +98,19 @@ typedef struct {
 NCVAR;
 
 static
+void strtolower(char *str)
+{
+  int i, len;
+
+  if ( str )
+    {
+      len = (int) strlen(str);
+      for ( i = 0; i < len; i++ )
+	str[i] = tolower((int) str[i]);
+    }
+}
+
+static
 int get_timeunit(int len, char *ptu)
 {
   int timeunit = -1;
@@ -3758,6 +3771,8 @@ int cdfTimeDimID(int fileID, int ndims, int nvars)
 	      if ( memcmp(attname, "units", 5) == 0 )
 		{
 		  cdfGetAttText(fileID, varid, "units", 256, timeunits);
+		  strtolower(timeunits);
+
 		  if ( memcmp(timeunits, "sec",    3) == 0 ||
 		       memcmp(timeunits, "minute", 6) == 0 ||
 		       memcmp(timeunits, "hour",   4) == 0 ||
@@ -4147,6 +4162,7 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 	  else if ( strcmp(attname, "grid_type") == 0 && atttype == NC_CHAR )
 	    {
 	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+	      strtolower(attstring);
 
 	      if      ( strcmp(attstring, "gaussian reduced") == 0 )
 		ncvars[ncvarid].gridtype = GRID_GAUSSIAN_REDUCED;
@@ -4354,6 +4370,7 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 	  else if ( strcmp(attname, "positive") == 0 && atttype == NC_CHAR )
 	    {	      
 	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+	      strtolower(attstring);
 
 	      if    ( memcmp(attstring, "down", 4) == 0 ) ncvars[ncvarid].positive = -1;
 	      else if ( memcmp(attstring, "up", 2) == 0 ) ncvars[ncvarid].positive = 1;
@@ -4380,8 +4397,9 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 	      if ( atttype == NC_CHAR )
 		{
 		  cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
-		  if ( memcmp(attstring, "ignore", 6) == 0 ||
-		       memcmp(attstring, "Ignore", 6) == 0 )
+		  strtolower(attstring);
+
+		  if ( memcmp(attstring, "ignore", 6) == 0 )
 		    {
 		      ncvars[ncvarid].ignore = TRUE;
 		      cdfSetVar(ncvars, ncvarid, FALSE);
@@ -5441,6 +5459,7 @@ int cdfInqContents(int streamID)
 		  if ( strcmp(attname, "grid_mapping_name") == 0 )
 		    {
 		      cdfGetAttText(fileID, ncvars[ncvarid].gmapid, attname, attstringlen-1, attstring);
+		      strtolower(attstring);
 
 		      if ( strcmp(attstring, "rotated_latitude_longitude") == 0 )
 			grid.isRotated = TRUE;
@@ -5928,6 +5947,7 @@ int cdfInqContents(int streamID)
     if ( ncvars[ncvarid].calendar == TRUE )
       {
 	cdfGetAttText(fileID, ncvarid, "calendar", attstringlen-1, attstring);
+	strtolower(attstring);
 
 	if ( memcmp(attstring, "standard", 8)  == 0 ||
 	     memcmp(attstring, "gregorian", 9) == 0 )
