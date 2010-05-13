@@ -1167,7 +1167,7 @@ void cdfDefTrajLat(int streamID, int gridID)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
-void checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID, int ngrids, int mode)
+int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID, int ngrids, int mode)
 {
   int iz, index;
   int gridID0;
@@ -1177,7 +1177,7 @@ void checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID
   int checkname;
   int status;
 
-  /* check that the name is not allready defined */
+  /* check that the name is not already defined */
   checkname = TRUE;
   iz = 0;
 
@@ -1224,6 +1224,8 @@ void checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID
     }
   
   if ( iz ) sprintf(&axisname[strlen(axisname)], "_%d", iz+1);
+
+  return (iz);
 }
 #endif
 
@@ -1301,7 +1303,10 @@ void cdfDefXaxis(int streamID, int gridID)
 
   if ( dimID == UNDEFID )
     {
-      checkGridName('V', axisname, fileID, vlistID, gridID, ngrids, 'X');
+      int status;
+      status = checkGridName('V', axisname, fileID, vlistID, gridID, ngrids, 'X');
+      if ( status == 0 )
+	status = checkGridName('D', axisname, fileID, vlistID, gridID, ngrids, 'X');
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
@@ -1424,7 +1429,10 @@ void cdfDefYaxis(int streamID, int gridID)
 
   if ( dimID == UNDEFID )
     {
-      checkGridName('V', axisname, fileID, vlistID, gridID, ngrids, 'Y');
+      int status;
+      status = checkGridName('V', axisname, fileID, vlistID, gridID, ngrids, 'Y');
+      if ( status == 0 )
+	status = checkGridName('D', axisname, fileID, vlistID, gridID, ngrids, 'Y');
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
@@ -1555,10 +1563,11 @@ void cdfDefLonLat2D(int streamID, int gridID)
 
   if ( xdimID == UNDEFID )
     {
-      checkGridName('V', xaxisname, fileID, vlistID, gridID, ngrids, 'X');
-      checkGridName('V', yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
-      checkGridName('D', xdimname, fileID, vlistID, gridID, ngrids, 'X');
-      checkGridName('D', ydimname, fileID, vlistID, gridID, ngrids, 'Y');
+      int status;
+      status = checkGridName('V', xaxisname, fileID, vlistID, gridID, ngrids, 'X');
+      status = checkGridName('V', yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
+      status = checkGridName('D', xdimname, fileID, vlistID, gridID, ngrids, 'X');
+      status = checkGridName('D', ydimname, fileID, vlistID, gridID, ngrids, 'Y');
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
@@ -2172,7 +2181,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
       int checkname = FALSE;
       int status;
 
-      /* check that the name is not allready defined */
+      /* check that the name is not already defined */
       checkname = TRUE;
       ilevel = 0;
 

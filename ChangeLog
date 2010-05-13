@@ -1,3 +1,7 @@
+2010-05-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdfDefXYaxis: check also dimnames (bug fix) [report: Mikhail Itkin]
+	
 2010-05-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* stream_cdf: added support for uppercase attributes [request: Patrick Brockmann]
