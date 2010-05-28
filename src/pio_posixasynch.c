@@ -158,6 +158,10 @@ static bFiledataPA *initBFiledataPA ( char *filename,
   bfd->finished = false;
   bfd->nfinished = ( bool * ) malloc ( nc * sizeof ( bool ));
 
+  for ( i = 0; i < nc; i++ )
+    *( bfd->nfinished + i ) = true;
+
+
   if ( ddebug )
     fprintf ( stdout, "### pe%d initBFiledataPA (), name=%s, opened file, return\n",
 	pioinfo->rank, bfd->name );
@@ -450,6 +454,8 @@ void pwPOSIXASYNCH ( int ncollectors )
 			  pioinfo->rank, rtag->id);
 		MPI_Abort ( pioinfo->comm, 1 );
 	      }
+
+	  *( bfd->nfinished + source ) = false;
 		 
 
 	  bfd->currOpIndex = bfd->nextOpIndex;

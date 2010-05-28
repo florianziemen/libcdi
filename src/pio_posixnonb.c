@@ -126,6 +126,10 @@ static bFiledataP * initBFiledataP ( char *filename,
   bfp->finished = false;
   bfp->nfinished = ( bool * ) malloc ( nc * sizeof ( bool ));
 
+  for ( i = 0; i < nc; i++ )
+    *( bfp->nfinished + i ) = true;
+
+
   if ( ddebug )
     fprintf ( stdout, "### pe%d initFiledataBP (), name=%s, opened file, return\n",
 	pioinfo->rank, bfp->name );
@@ -331,6 +335,8 @@ void pwPOSIXNONB ( int ncollectors )
 		MPI_Abort ( pioinfo->comm, 1 );
 	      }
 
+	  *( bfd->nfinished + source ) = false;
+
 	  memcpy ( bfd->fb->buffer, pMB, ( int ) amount );
 
 	  writeP ( bfd, amount );
@@ -344,7 +350,7 @@ void pwPOSIXNONB ( int ncollectors )
 	  if ( ! ( bfd = ( bFiledataP * ) queueIdx2val ( bibBFiledataP,  
 							 rtag->id )))
 	      {
-		fprintf ( stderr, "pe%d, id=%d not in file queue\n",
+		fprintf ( stderr, "pe%d, id=%d not in file queue, 1\n",
 			  pioinfo->rank, rtag->id);
 		MPI_Abort ( pioinfo->comm, 1 );
 	      }
@@ -368,7 +374,7 @@ void pwPOSIXNONB ( int ncollectors )
 	  if ( ! ( bfd = ( bFiledataP * ) queueIdx2val ( bibBFiledataP,  
 							 rtag->id )))
 	      {
-		fprintf ( stderr, "pe%d, id=%d not in file queue\n",
+		fprintf ( stderr, "pe%d, id=%d not in file queue, 2\n",
 			  pioinfo->rank, rtag->id);
 		MPI_Abort ( pioinfo->comm, 1 );
 	      }

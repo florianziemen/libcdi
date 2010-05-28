@@ -113,7 +113,7 @@ bFiledataPF * initBFiledataPF ( int key, int nc )
   bfd->nfinished = ( bool * ) malloc ( nc * sizeof ( bool ));
 
   for ( i = 0; i < nc; i++ )
-    *( bfd->nfinished + i ) = false;
+    *( bfd->nfinished + i ) = true;
 
   return bfd;
 }
@@ -231,6 +231,8 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 	      } 
 	    }
 
+	  *( bfd->nfinished + source ) = false;
+
 	  if ( ddebug )
 	    fprintf ( stdout, "pe%d in fpGuard(), id=%d, command=%d ( %s ), send offset=%ld\n", 
 		      pioinfo->rank, rtag->id, rtag->command, 
@@ -321,7 +323,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 	      queueDelNode ( bibBFiledataPF, rtag->id );
 	      if ( !bibBFiledataPF->head )
 		{
-		  free ( bibBFiledataPF );
+		  queueDestroy ( bibBFiledataPF );
 		  return;
 		}
 	    }	      
