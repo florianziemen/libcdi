@@ -155,6 +155,8 @@ void writeMPINONB ( aFiledataM *of, int id )
   
   amount = ( int ) dbuffer_data_size ( of->db );
 
+  if ( amount == 0 ) return;
+
   if ( ddebug ) 
     fprintf ( stdout, "pe%d writeMPINONB(): Write buffer, size %zu bytes, in\n", 
 	      pioinfo->rank, amount );

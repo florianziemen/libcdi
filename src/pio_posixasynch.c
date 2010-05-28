@@ -62,7 +62,7 @@ typedef struct
 
 static queue *bibAFiledataPA;
 
-int nPrefStreams = 10;
+int nPrefStreams = 5;
 
 /***************************************************************/
 

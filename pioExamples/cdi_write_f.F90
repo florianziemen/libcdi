@@ -11,9 +11,10 @@
 #endif
 
       INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(12,307) 
-
-      INTEGER, PARAMETER :: PTYPE = PIO_POSIX_FPGUARD_SENDRECV
-
+ 
+      INTEGER, PARAMETER :: nPtypes = 4
+      INTEGER :: PTYPE, numarg, iargc, iarg
+      CHARACTER ( len = 80 ) :: arg    
 
       INTEGER, PARAMETER :: NLON  = 384   ! Number of longitudes 384
       INTEGER, PARAMETER :: NLAT  = 192   ! Number of latitudes  192
@@ -47,6 +48,23 @@
       CALL MPI_INIT ( error )
       CALL MPI_COMM_DUP ( MPI_COMM_WORLD, pioComm, error )
       CALL MPI_COMM_RANK ( MPI_COMM_WORLD, rank, error )
+
+      PTYPE = -1
+      
+      numarg = iargc ()
+      
+      IF ( numarg /= 1 ) THEN
+        CALL MPI_ABORT ( pioComm, 1, error )
+      END IF
+      
+      CALL getarg ( 1, arg )
+      iarg = iachar ( arg )
+      
+      IF ( iarg < 48 .OR. iarg > 48 + nPtypes ) THEN
+        CALL MPI_ABORT ( pioComm, 1, error )
+      ELSE
+        PTYPE = iarg - 48
+      END IF
 #endif
 
       accumOpen  = 0.0
@@ -65,8 +83,9 @@
       END IF
 
       IF ( ddebug == 1 .AND. rank == 0 ) THEN
-         write ( *, * ) 'NLON=',NLON,', NLAT=',NLAT,', NLEV=',NLEV,', NTIME=',NTIME
-         write ( *, * ) 'SIZESSTREAMS(1)=',SIZESSTREAMS(1), 'total amount=', NLON * NLAT * NLEV * NTIME * SIZESSTREAMS(1) * 8,' bytes per file';
+         write ( *, * ) 'NLON=',NLON,', NLAT=',NLAT,', NLEV=',NLEV,', NTIME=',NTIME,','
+         write ( *, * ) ' SIZESSTREAMS(1)=',SIZESSTREAMS(1), ', total amount='
+         write ( *, '( 2x, I12, 2x, a5 )' ) NLON * NLAT * NLEV * NTIME * SIZESSTREAMS(1) * 8,' bytes';
       END IF
 #endif
 
@@ -111,6 +130,7 @@
 #endif
       
 !     Create a dataset in GRB fromat
+
       DO i = 1, NFILES
          streamID ( i ) = streamOpenWrite ( filenames ( i ), FILETYPE_GRB )
          IF ( streamID ( i ) < 0 ) THEN
@@ -149,6 +169,8 @@
          CALL streamDefVlist ( streamID ( i ), vlistID ( i ))
       END DO
 
+      CALL initVar ( var, 1, 1 )
+
 !     Loop over the number of time steps
       DO tsID = 0, NTIME-1
 !        Set the verification date to 1985-01-01 + tsID
@@ -159,16 +181,10 @@
 !        Define the time step
             status = streamDefTimestep ( streamID ( i ), tsID )
             DO sID = lstreamfirst ( i ), lstreamlast ( i )
-!        Init var
-               DO j = 1, NLON*NLAT*NLEV
-                  var ( j ) = 100.0 * ( sID + 1 ) + tsID + 1.0
-               END DO
-
-
 #ifndef NOMPI
-               startTime = MPI_WTIME()
+              startTime = MPI_WTIME()
 #else
-               CALL CPU_TIME ( startTime )
+              CALL CPU_TIME ( startTime )
 #endif
                
 !        Write var
@@ -229,14 +245,14 @@
         CALL MPI_REDUCE (   accumClose, accumClose, 1, MPI_DOUBLE, MPI_MAX, 0, pioComm, error )      
       END IF
   
-  if ( rank == 0 ) THEN
-    write ( *, * ) 'ptype=', PTYPE
-    write ( *, * ) '------------------------------------------------------------------'
-    write ( *, * ) 'Maximum open  time:', accumOpen,  's'
-    write ( *, * ) 'Maximum write time:', accumWrite, 's'
-    write ( *, * ) 'Maximum close time:', accumClose, 's'
-    write ( *, * ) '------------------------------------------------------------------'
-  END IF
+      IF ( rank == 0 ) THEN
+        write ( *, * ) 'ptype=', PTYPE
+        write ( *, * ) '------------------------------------------------------------------'
+        write ( *, * ) 'Maximum open  time:', accumOpen,  's'
+        write ( *, * ) 'Maximum write time:', accumWrite, 's'
+        write ( *, * ) 'Maximum close time:', accumClose, 's'
+        write ( *, * ) '------------------------------------------------------------------'
+      END IF
 
   CALL pioFinalize ()
   CALL MPI_FINALIZE ( error ) 
@@ -251,6 +267,20 @@
 #endif
 
 CONTAINS
+
+      !********************************************
+      
+      SUBROUTINE initVar ( argVar, argSID, argTSID )
+
+      REAL(dp), INTENT ( INOUT ) :: argVar(NLON*NLAT*NLEV)
+      INTEGER , INTENT ( IN ) :: argSID, argTSID
+      INTEGER :: j
+
+      DO j = 1, NLON*NLAT*NLEV
+        argVar ( j ) = 100.0 * ( argSID + 1 ) + argTSID + 1.0
+      END DO
+        
+      END SUBROUTINE initVar
 
       !********************************************
       

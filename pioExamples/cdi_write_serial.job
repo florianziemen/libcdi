@@ -19,7 +19,7 @@
 #
 #-----------------------------------------------------------------------------
 #
-if [[ ! -d /scratch/m/m300050/cdi_io ]]; then 
+if [[ ! -d /scratch/m/m300050/cdi_pio ]]; then 
  mkdir /scratch/m/m300050/cdi_pio
 fi
 #

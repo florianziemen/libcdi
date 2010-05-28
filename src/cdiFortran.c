@@ -50,9 +50,10 @@
 
 
 /*  CALENDAR types  */
-
+#ifndef NOMPI 
 FCALLSCFUN3 (INT, pioInit, PIOINIT, pioinit, INT, INT, PINT)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
+#endif
 
 /*  CDI control routines  */
 

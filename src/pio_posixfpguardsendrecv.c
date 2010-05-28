@@ -482,7 +482,7 @@ int fcPOSIXFPGUARDSENDRECV ( int id )
       if ( ddebug )
 	fprintf ( stdout, "pe%d in fileClose (): cleanup queue \n", 
 		  pioinfo->rank );
-      free ( bibAFiledataPF );
+      queueDestroy ( bibAFiledataPF );
     }
 
   return iret;

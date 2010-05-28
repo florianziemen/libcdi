@@ -7,7 +7,7 @@
 # @ rset                 = rset_mcm_affinity
 # @ mcm_affinity_options = mcm_distribute
 # @ node                 = 1
-# @ tasks_per_node       = 16
+# @ tasks_per_node       = 8
 # @ resources            = ConsumableMemory(3000mb)
 # @ task_affinity        = core
 # @ wall_clock_limit     = 00:10:00
@@ -50,12 +50,12 @@ export MP_IO_BUFFER_SIZE=128M     # 128M for 1-4 IO Agents, reduce for more than
 #
 #-----------------------------------------------------------------------------
 #
-if [[ ! -d /scratch/m/m300050/cdi_io ]]; then 
+if [[ ! -d /scratch/m/m300050/cdi_pio ]]; then 
  mkdir /scratch/m/m300050/cdi_pio
 fi
 #
 cd /scratch/m/m300050/cdi_pio
-poe /pf/m/m300050/cdi_pio/cdi-pio/pioExamples/cdi_write_parallel
+poe /pf/m/m300050/cdi_pio/cdi-pio/pioExamples/cdi_write_parallel 1
 #
 #-----------------------------------------------------------------------------
 exit

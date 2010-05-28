@@ -148,7 +148,7 @@ int pioFileOpenW ( const char *filename )
 
 int pioInit ( int ptype, int comm, int *ncollectors )
 {
-  int collectingData;
+  int collectingData = 1;
   int size;
 
   pioinfo = ( pioInfo * ) malloc ( sizeof ( pioInfo ));
