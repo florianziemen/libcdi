@@ -294,13 +294,17 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
     {
       if ( vartable[varID].gridID != gridID )
 	{
-	  Message(func, "param = %d gridID = %d", param, gridID);
-	  Error(func, "horizontal grid must not change for same param");
+	  char paramstr[32];
+	  cdiParamToString(param, paramstr, sizeof(paramstr));	  
+	  Message(func, "param = %s gridID = %d", paramstr, gridID);
+	  Error(func, "horizontal grid must not change for same param!");
 	}
       if ( vartable[varID].zaxistype != zaxistype )
 	{
-	  Message(func, "param = %d zaxistype = %d", param, zaxistype);
-	  Error(func, "zaxistype must not change for same param");
+	  char paramstr[32];
+	  cdiParamToString(param, paramstr, sizeof(paramstr));	  
+	  Message(func, "param = %s zaxistype = %d", paramstr, zaxistype);
+	  Error(func, "zaxistype must not change for same param!");
 	}
     }
 
