@@ -125,6 +125,8 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 
   /* fortran interface */
 
+  fprintf(fpint, "/* Automatically created with make_cfint.c, don't edit! */\n");
+  fprintf(fpint, "\n");
   fprintf(fpint, "#if ! defined (_CDI_H)\n");
   fprintf(fpint, "#  include \"cdi.h\"\n");
   fprintf(fpint, "#endif\n");

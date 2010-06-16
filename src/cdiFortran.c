@@ -1,3 +1,5 @@
+/* Automatically created with make_cfint.c, don't edit! */
+
 #if ! defined (_CDI_H)
 #  include "cdi.h"
 #endif
