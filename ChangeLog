@@ -1,8 +1,12 @@
-2010-06-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+2010-06-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* using CGRIBEX library version 1.4.5
 	* Version 1.4.5 released
 
+2010-05-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_history: added NC4 support [report: Etienne Tourigny]
+	
 2010-05-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cdfDefXYaxis: check also dimnames (bug fix) [report: Mikhail Itkin]

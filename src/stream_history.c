@@ -15,7 +15,9 @@ void streamDefHistory(int streamID, int length, const char *history)
 
   streamptr = stream_to_pointer(streamID);
 
-  if ( streamptr->filetype == FILETYPE_NC || streamptr->filetype == FILETYPE_NC2 )
+  if ( streamptr->filetype == FILETYPE_NC  ||
+       streamptr->filetype == FILETYPE_NC2 ||
+       streamptr->filetype == FILETYPE_NC4 )
     {
       char *histstring;
       size_t len;
@@ -40,7 +42,9 @@ int streamInqHistorySize(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  if ( streamptr->filetype == FILETYPE_NC || streamptr->filetype == FILETYPE_NC2 )
+  if ( streamptr->filetype == FILETYPE_NC  ||
+       streamptr->filetype == FILETYPE_NC2 ||
+       streamptr->filetype == FILETYPE_NC4 )
     {
       size = cdfInqHistorySize(streamID);
     }
@@ -55,7 +59,9 @@ void streamInqHistoryString(int streamID, char *history)
 
   streamptr = stream_to_pointer(streamID);
 
-  if ( streamptr->filetype == FILETYPE_NC || streamptr->filetype == FILETYPE_NC2 )
+  if ( streamptr->filetype == FILETYPE_NC  ||
+       streamptr->filetype == FILETYPE_NC2 ||
+       streamptr->filetype == FILETYPE_NC4 )
     {
       cdfInqHistoryString(streamID, history);
     }
