@@ -4284,7 +4284,8 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 		  if ( status == NC_NOERR )
 		    {
 		      ncvars[ncvarid].cellarea = nc_cell_id;
-		      cdfSetVar(ncvars, ncvars[ncvarid].cellarea, FALSE);
+		      /* ncvars[nc_cell_id].isvar = UNDEFID; */
+		      cdfSetVar(ncvars, nc_cell_id, FALSE);
 		    }
 		  else
 		    Warning(func, "%s - %s", nc_strerror(status), cell_var);
@@ -4356,6 +4357,7 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 
 		  if ( lstop ) break;
 		}
+
 	      cdfSetVar(ncvars, ncvarid, TRUE);
 	    }
 	  else if ( strcmp(attname, "grid_mapping") == 0 && atttype == NC_CHAR )

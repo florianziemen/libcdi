@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   February 2010
+! Uwe Schulzweida, MPI-MET, Hamburg,   June 2010
 !
 
       INTEGER    CDI_UNDEFID           
@@ -41,6 +41,8 @@
       PARAMETER (CDI_EUFSTRUCT          = -23)
       INTEGER    CDI_EUNC4             
       PARAMETER (CDI_EUNC4              = -24)
+      INTEGER    CDI_ELIMIT            
+      PARAMETER (CDI_ELIMIT             = -99)
 !
 !  File types
 !
@@ -266,6 +268,12 @@
       PARAMETER (TUNIT_YEAR             =  6)
       INTEGER    TUNIT_QUARTER         
       PARAMETER (TUNIT_QUARTER          =  7)
+      INTEGER    TUNIT_3HOURS          
+      PARAMETER (TUNIT_3HOURS           =  8)
+      INTEGER    TUNIT_6HOURS          
+      PARAMETER (TUNIT_6HOURS           =  9)
+      INTEGER    TUNIT_12HOURS         
+      PARAMETER (TUNIT_12HOURS          = 10)
 !
 !  TSTEP types
 !
@@ -1691,6 +1699,10 @@
       INTEGER         taxisHasBounds
 !                                    (INTEGER         taxisID)
       EXTERNAL        taxisHasBounds
+
+!                     taxisDeleteBounds
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisDeleteBounds
 
 !                     taxisDefVdateBounds
 !                                    (INTEGER         taxisID,
