@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "mpi.h"
 
@@ -12,9 +13,12 @@
 
 bool ddebug = false;
 
+const char *token_NODE = "p";
+
 long initial_buffersize = 16 * 1024 * 1024;
 /*  4 KB <= x < 256 MB */ 
 /* 16 * 1024 * 1024; */
+/* 256 * 1024; */
 /* 4 * 1024; */
 
 double startTime;
@@ -146,15 +150,30 @@ int pioFileOpenW ( const char *filename )
 
 /***************************************************************/
 
-int pioInit ( int ptype, int comm, int *ncollectors )
+int pioInit ( int ptype, int comm, int *color, int *colors, int nnodes, int *pioComm, int *ncollectors )
 {
   int collectingData = 1;
-  int size;
+  int key, rank, size, npes_node;
+  int *allcolors;
+  int i,j,k,curr;
+
+  char *cpuName, *temp;
+
 
   pioinfo = ( pioInfo * ) malloc ( sizeof ( pioInfo ));
-
   pioinfo->type = ptype;
-  pioinfo->comm  = ( MPI_Comm ) comm;
+
+  cpuName = (char * ) malloc ( 80 * sizeof(char));
+  gethostname(cpuName,80);
+  temp = strtok ( cpuName, token_NODE );
+  *color = atoi ( temp );
+  MPI_Comm_size (( MPI_Comm ) comm, &size );
+  MPI_Comm_rank (( MPI_Comm ) comm, &rank );
+  npes_node = size/nnodes;
+  key = rank % npes_node;
+  MPI_Comm_split (( MPI_Comm ) comm, *color, key, ( MPI_Comm *) pioComm );
+
+  pioinfo->comm  = ( MPI_Comm ) *pioComm;
   MPI_Comm_rank ( pioinfo->comm, &( pioinfo->rank ));
   MPI_Comm_size ( pioinfo->comm, &( pioinfo->size ));
 
@@ -165,6 +184,30 @@ int pioInit ( int ptype, int comm, int *ncollectors )
       fprintf ( stderr, "PTYPE = %d, npe = %d\n", 
 		pioinfo->type , pioinfo->size );
       MPI_Abort ( pioinfo->comm, 1 );
+    }
+
+  if ( ddebug )
+    fprintf (stdout, 
+	     "pe%d in pioDefPtype(), size=%d, nnodes=%d, cpuName=%s, color=%d,npes_node=%d, key=%d\n", 
+	     rank,size, nnodes,cpuName, *color, npes_node, key);
+
+  allcolors = (int * ) malloc ( size * sizeof(int));
+  MPI_Allgather ( color, 1, MPI_INTEGER, allcolors, 1, MPI_INTEGER, ( MPI_Comm )comm );
+
+  k = 0;
+  for ( i = 0; i < size; i++ )
+    {
+      curr = allcolors[i] ;
+      if ( curr == -1 ) 
+	continue;
+      else
+	{
+	  *( colors + k ) = allcolors[i];
+	  k++;
+	  if ( k == nnodes ) break;
+	}
+      for ( j = i + 1; j < size; j++ )
+	if ( allcolors[j] == curr ) allcolors[j] = -1;
     }
 
   if ( ddebug && pioinfo->rank == 0 )
@@ -187,6 +230,9 @@ int pioInit ( int ptype, int comm, int *ncollectors )
       collectingData = initPOSIXNONB ( ncollectors );
       break;
     }
+
+  free ( allcolors );
+  free ( cpuName );
 
   return collectingData;
 }

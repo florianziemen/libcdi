@@ -117,6 +117,7 @@ interfaces/testdata/mulval.nc -text
 m4/acx_sl_mod_suffix.m4 -text
 pioExamples/README -text
 pioExamples/cdi_write_f.F90 -text
+pioExamples/cdi_write_more_nodes.F90 -text
 pioExamples/cdi_write_parallel.job -text
 pioExamples/cdi_write_serial.job -text
 src/Makefile.am -text

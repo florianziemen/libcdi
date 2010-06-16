@@ -55,7 +55,7 @@ if [[ ! -d /scratch/m/m300050/cdi_pio ]]; then
 fi
 #
 cd /scratch/m/m300050/cdi_pio
-poe /pf/m/m300050/cdi_pio/cdi-pio/pioExamples/cdi_write_parallel 2
+poe /pf/m/m300050/cdi_pio/cdi-pio/pioExamples/cdi_write_parallel 4
 #
 #-----------------------------------------------------------------------------
 exit

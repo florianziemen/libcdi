@@ -51,7 +51,7 @@
 
 /*  CALENDAR types  */
 #ifndef NOMPI 
-FCALLSCFUN3 (INT, pioInit, PIOINIT, pioinit, INT, INT, PINT)
+FCALLSCFUN7 (INT, pioInit, PIOINIT, pioinit, INT, INT, PINT, PINT, INT, PINT, PINT)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
 #endif
 

@@ -16,10 +16,10 @@
       INTEGER :: PTYPE, numarg, iargc, iarg
       CHARACTER ( len = 80 ) :: arg    
 
-      INTEGER, PARAMETER :: NLON  = 384   ! Number of longitudes 384
-      INTEGER, PARAMETER :: NLAT  = 192   ! Number of latitudes  192
-      INTEGER, PARAMETER :: NLEV  =  96   ! Number of levels      96
-      INTEGER, PARAMETER :: NTIME =  10   ! Number of time steps 124
+      INTEGER, PARAMETER :: NLON  = 38   ! Number of longitudes 384
+      INTEGER, PARAMETER :: NLAT  = 19   ! Number of latitudes  192
+      INTEGER, PARAMETER :: NLEV  =  9   ! Number of levels      96
+      INTEGER, PARAMETER :: NTIME =  2   ! Number of time steps 124
       INTEGER, PARAMETER :: NFILES = 10   ! Number of files        7
       INTEGER, PARAMETER :: SIZESSTREAMS ( NFILES ) = (/ 35, 35, 35, 35, 35, 35, 35, 35, 35, 35 /)
       CHARACTER*(*), PARAMETER :: filenames ( NFILES ) = (/ 'dat0.grb', 'dat1.grb', 'dat2.grb',  'dat3.grb', 'dat4.grb', 'dat5.grb', 'dat6.grb', 'dat7.grb', 'dat8.grb', 'dat9.grb' /)
