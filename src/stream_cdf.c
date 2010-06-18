@@ -3215,6 +3215,7 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   int i, j;
   int ndimsp;
   int dimids[9];
+  int swapyxz = FALSE;
   int swapyz = FALSE;
   int swapxy = FALSE;
   double missval;
@@ -3278,7 +3279,13 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   cdf_inq_varndims(fileID, ncvarid, &ndimsp);
   cdf_inq_vardimid(fileID, ncvarid, dimids);
 
-  if ( zid != UNDEFID && yid != UNDEFID )
+  if ( zid != UNDEFID && yid != UNDEFID && xid != UNDEFID )
+    {
+      if ( yid == dimids[ndims] && xid == dimids[ndims+1] && zid == dimids[ndims+2] )
+	swapyxz = TRUE;
+    }
+
+  if ( swapyxz == FALSE && zid != UNDEFID && yid != UNDEFID )
     {
       if ( zid == dimids[ndims] && yid == dimids[ndims+1] )
 	swapyz = FALSE;
@@ -3292,7 +3299,7 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 	}
     }
 
-  if ( swapyz == FALSE && yid != UNDEFID && xid != UNDEFID )
+  if ( swapyxz == FALSE && swapyz == FALSE && yid != UNDEFID && xid != UNDEFID )
     {
       if ( xid == dimids[ndimsp-1] && yid == dimids[ndimsp-2] )
 	swapxy = FALSE;
@@ -3328,6 +3335,31 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 	  /* count[ndims] = gridInqXsize(gridID); */
 	  cdf_inq_dimlen(fileID, xid, &size);
 	  count[ndims] = size;
+	  ndims++;
+	}
+    }
+  else if ( swapyxz )
+    {
+      if ( yid != UNDEFID )
+	{
+	  start[ndims] = 0;
+	  /* count[ndims] = gridInqYsize(gridID); */
+	  cdf_inq_dimlen(fileID, yid, &size);
+	  count[ndims] = size;
+	  ndims++;
+	}
+      if ( xid != UNDEFID )
+	{
+	  start[ndims] = 0;
+	  /* count[ndims] = gridInqXsize(gridID); */
+	  cdf_inq_dimlen(fileID, xid, &size);
+	  count[ndims] = size;
+	  ndims++;
+	}
+      if ( zid != UNDEFID )
+	{
+	  start[ndims] = levelID;
+	  count[ndims] = 1;
 	  ndims++;
 	}
     }
@@ -4626,6 +4658,7 @@ int cdfInqContents(int streamID)
   int vlistID;
   stream_t *streamptr;
   int format = 0;
+  int ucla_les = FALSE;
 
   streamptr = stream_to_pointer(streamID);
   
@@ -4691,6 +4724,11 @@ int cdfInqContents(int streamID)
 	      else if ( strcmp(attname, "source") == 0 )
 		{
 		  modelID = modelInq(-1, 0, attstring);
+		}
+	      else if ( strcmp(attname, "Source") == 0 )
+		{
+		  if ( strncmp(attstring, "UCLA-LES", 8) == 0 )
+		    ucla_les = TRUE;
 		}
 	      /*
 	      else if ( strcmp(attname, "Conventions") == 0 )
@@ -5051,6 +5089,22 @@ int cdfInqContents(int streamID)
 
   if ( CDI_Debug ) printNCvars(ncvars, nvars);
 
+  if ( ucla_les == TRUE )
+    {
+      for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
+	{
+	  ncvarid = ncdims[ncdimid].ncvarid;
+	  if ( ncvarid != -1 )
+	    {
+	      if ( ncdims[ncdimid].dimtype == UNDEFID && ncvars[ncvarid].units[0] == 'm' )
+		{
+		  if      ( ncvars[ncvarid].name[0] == 'x' ) ncdims[ncdimid].dimtype = X_AXIS;
+		  else if ( ncvars[ncvarid].name[0] == 'y' ) ncdims[ncdimid].dimtype = Y_AXIS;
+		  else if ( ncvars[ncvarid].name[0] == 'z' ) ncdims[ncdimid].dimtype = Z_AXIS;
+		}
+	    }
+	}
+    }
   /*
   for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
     {
