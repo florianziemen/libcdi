@@ -95,6 +95,7 @@ interfaces/cdi.cpp -text
 interfaces/cdi.hpp -text
 interfaces/cdilib.i -text
 interfaces/cdiobj.i -text
+interfaces/f2003/bindGen.rb -text
 interfaces/python/CdiLib.py -text
 interfaces/python/CdiObj.py -text
 interfaces/python/cdilib_wrap.c -text
