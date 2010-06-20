@@ -2227,6 +2227,46 @@ int gridCompare(int gridID, grid_t grid)
 	      else
 		differ = 1;		
 	    }
+	  else if ( grid.type == GRID_GENERIC )
+	    {
+	      if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
+		{
+		  if ( grid.xdef == 1 && grid.ydef == 1 )
+		    {
+		      if ( grid.xvals && grid.yvals &&
+			   gridInqXvals(gridID, NULL) && gridInqYvals(gridID, NULL) )
+			{
+			  long i;
+			  double *xvals, *yvals;
+
+			  xvals = (double *) malloc(xsize*sizeof(double));
+			  yvals = (double *) malloc(ysize*sizeof(double));
+
+			  gridInqXvals(gridID, xvals);
+			  gridInqYvals(gridID, yvals);
+
+			  for ( i = 0; i < xsize; ++i )
+			    if ( fabs(grid.xvals[i] - xvals[i]) > 1.e-10 )
+			      {
+				differ = 1;
+				break;
+			      }
+
+			  for ( i = 0; i < ysize; ++i )
+			    if ( fabs(grid.yvals[i] - yvals[i]) > 1.e-10 )
+			      {
+				differ = 1;
+				break;
+			      }
+			  
+			  free(xvals);
+			  free(yvals);
+			}
+		    }
+		}
+	      else
+		differ = 1;		
+	    }
 	  else if ( grid.type == GRID_GAUSSIAN )
 	    {
 	      if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
