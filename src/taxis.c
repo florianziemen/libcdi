@@ -1214,6 +1214,28 @@ double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
 }
 
 
+void conv_timeval(double timevalue, int *rvdate, int *rvtime)
+{
+  int vdate = 0, vtime = 0;
+  int hour, minute, second;
+  int daysec;
+
+  vdate = (int) timevalue;
+  if ( vdate < 0 )
+    daysec = (int) (-(timevalue - vdate)*86400 + 0.01);
+  else
+    daysec = (int) ( (timevalue - vdate)*86400 + 0.01);
+  
+  hour   =  daysec / 3600;
+  minute = (daysec - hour*3600)/60;
+  second =  daysec - hour*3600 - minute*60;
+  vtime  = cdiEncodeTime(hour, minute, second);
+
+  *rvdate = vdate;
+  *rvtime = vtime;
+}
+
+
 void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
 {
   static char func[] = "splitTimevalue";
@@ -1223,32 +1245,19 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
   int daysec;
   static int lwarn = TRUE;
 
-  if ( timeunit == TUNIT_HOUR )
+  if ( timeunit == TUNIT_SECOND )
+    {
+      timevalue /= 86400;
+      conv_timeval(timevalue, &vdate, &vtime);
+    }
+  else if ( timeunit == TUNIT_HOUR )
     {
       timevalue /= 24;
-      vdate = (int) timevalue;
-      if ( vdate < 0 )
-	daysec = (int) (-(timevalue - vdate)*86400 + 0.01);
-      else
-	daysec = (int) ( (timevalue - vdate)*86400 + 0.01);
- 
-      hour   =  daysec / 3600;
-      minute = (daysec - hour*3600)/60;
-      second =  daysec - hour*3600 - minute*60;
-      vtime  = cdiEncodeTime(hour, minute, second);
+      conv_timeval(timevalue, &vdate, &vtime);
     }
   else if ( timeunit == TUNIT_DAY )
     {
-      vdate = (int) timevalue;
-      if ( vdate < 0 )
-	daysec = (int) (-(timevalue - vdate)*86400 + 0.01);
-      else
-	daysec = (int) ( (timevalue - vdate)*86400 + 0.01);
-
-      hour   =  daysec / 3600;
-      minute = (daysec - hour*3600)/60;
-      second =  daysec - hour*3600 - minute*60;
-      vtime  = cdiEncodeTime(hour, minute, second);
+      conv_timeval(timevalue, &vdate, &vtime);
     }
   else if ( timeunit == TUNIT_MONTH )
     {

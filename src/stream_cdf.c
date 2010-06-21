@@ -125,6 +125,10 @@ int get_timeunit(int len, char *ptu)
       else if ( memcmp(ptu, "calendar_month", 14) == 0 ) timeunit = TUNIT_MONTH;
       else if ( memcmp(ptu, "year",   4) == 0 )          timeunit = TUNIT_YEAR;
     }
+  else if ( len == 1 )
+    {
+      if ( ptu[0] == 's' ) timeunit = TUNIT_SECOND;
+    }
 
   return (timeunit);
 }
