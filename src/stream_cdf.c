@@ -5486,6 +5486,7 @@ int cdfInqContents(int streamID)
 	    case GRID_SPECTRAL:
 	      {
 		grid.size = size;
+		grid.lcomplex = 1;
 		break;
 	      }
 	    case GRID_TRAJECTORY:
