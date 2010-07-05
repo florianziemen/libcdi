@@ -1,3 +1,7 @@
+2010-07-05 Edi Kirk <E.Kirk@gmx.de>
+
+	* GRIB1 decode: Correct ZeroShiftError of simple packed spherical harmonics
+
 2010-07-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cdfInqContents: use complex packing for spectral data [report: Edi Kirk]
