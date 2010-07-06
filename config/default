@@ -37,7 +37,7 @@ case "${HOSTNAME}" in
                     --with-zlib=/sw/etch-ia32/zlib-1.2.3 \
                     --with-szlib=$HOME/local/etch-ia32 \
                     LIBS=-ljpeg \
-	            CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -pedantic" CFINT=-Df2cFortran
+	            CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -pedantic"
 	;;
 # sparc-sun-solaris2.8
     xxf)

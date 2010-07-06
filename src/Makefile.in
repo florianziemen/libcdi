@@ -678,13 +678,13 @@ cdiFortran.o: cdiFortran.c
 	source='$<' object='$@' libtool=no \
 	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' \
 	$(CCDEPMODE) $(depcomp) \
-	$(COMPILE) $(CFINT) $(REAL4) -c `test -f '$<' || echo '$(srcdir)/'`$<
+	$(COMPILE) $(CFINT) -c `test -f '$<' || echo '$(srcdir)/'`$<
 #
 cdilib.c:
 	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src
 #
 cdilib.o: cdilib.c
-	$(COMPILE) $(CFINT) $(REAL4) -c $<
+	$(COMPILE) $(CFINT) -c $<
 #
 all-local: $(LOCALTARGETS) 
 #
