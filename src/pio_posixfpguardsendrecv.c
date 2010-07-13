@@ -6,8 +6,8 @@
 
 #ifndef NOMPI
 
-#include <stdbool.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "mpi.h"
@@ -308,7 +308,8 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 		      pioinfo->rank, rtag->id, rtag->command, 
 		      command2charP [ rtag->command ], amount, bfd->offset );
 
-	  bfd->nfinished[source] = true;	  
+
+	  bfd->nfinished[source] = true;  
 	  bfd->finished          = true;
 	  
 	  for ( i = 0; i < ncollectors; i++ )
@@ -326,7 +327,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 		  queueDestroy ( bibBFiledataPF );
 		  return;
 		}
-	    }	      
+	    }      
 	}
     }
 }   
@@ -466,7 +467,7 @@ int fcPOSIXFPGUARDSENDRECV ( int id )
   int iret;
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d in fileClose (%id ): write buffer, close file and cleanup\n", 
+    fprintf ( stdout, "pe%d in fileClose (%d ): write buffer, close file and cleanup, --- holle 0\n", 
 	      pioinfo->rank, id );
 
   afd = ( aFiledataPF * ) queueIdx2val ( bibAFiledataPF, id );
@@ -528,6 +529,7 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
   /* init and enqueue file element */ 
 
   afd = initAFiledataPF ( filename, buffersize );
+
   if (( id = queuePush ( bibAFiledataPF, afd, 0 )) < 0 )
     {   
       fprintf ( stderr, "Filename %s not unique\n", afd->name );
@@ -559,7 +561,7 @@ int initPOSIXFPGUARDSENDRECV ( int *ncollectors )
 
   if ( ddebug )
     fprintf ( stdout, 
-	      "pe%d in initPOSIXFPGUARDSENDREC()\n", pioinfo->rank );
+	      "pe%d in initPOSIXFPGUARDSENDRECV()\n", pioinfo->rank );
 
   *ncollectors = pioinfo->size - 1;
   pioinfo->specialRank = pioinfo->size - 1;

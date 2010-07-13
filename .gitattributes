@@ -118,6 +118,7 @@ m4/acx_sl_mod_suffix.m4 -text
 pioExamples/README -text
 pioExamples/cdi_write_f.F90 -text
 pioExamples/cdi_write_more_nodes.F90 -text
+pioExamples/cdi_write_more_nodes.job -text
 pioExamples/cdi_write_parallel.job -text
 pioExamples/cdi_write_serial.job -text
 src/Makefile.am -text
@@ -175,6 +176,8 @@ src/pio_impl.h -text
 src/pio_mpinonb.c -text
 src/pio_posixasynch.c -text
 src/pio_posixfpguardsendrecv.c -text
+src/pio_posixfpguardthread.c -text
+src/pio_posixfpguardthreadrefuse.c -text
 src/pio_posixnonb.c -text
 src/pio_queue.c -text
 src/service.h -text

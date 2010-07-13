@@ -38,11 +38,13 @@ status quo:
 
 ptypes available:
 
-PIO_NONE                    0
-PIO_MPI_NONB                1
-PIO_POSIX_ASYNCH            2
-PIO_POSIX_FPGUARD_SENDRECV  3
-PIO_POSIX_NONB              4
+PIO_NONE                           0
+PIO_MPI_NONB                       1
+PIO_POSIX_ASYNCH                   2
+PIO_POSIX_FPGUARD_SENDRECV         3
+PIO_POSIX_FPGUARD_THREAD           4
+PIO_POSIX_FPGUARD_THREAD_REFUSE    5
+PIO_POSIX_NONB                     6
 
 initial_buffer_size = 16 * 1024 * 1024 bytes
 

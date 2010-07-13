@@ -12,12 +12,13 @@ typedef enum
   IO_Close_file,
   IO_Get_fp,
   IO_Set_fp,
-  IO_Send_buffer
+  IO_Send_buffer,
+  IO_Finalize
 } IO_Server_command;
 
-const char * command2charP[5] = {"IO_Open_file", "IO_Close_file",
+const char * command2charP[6] = {"IO_Open_file", "IO_Close_file",
 				"IO_Get_fp","IO_Set_fp",
-				"IO_Send_buffer"};
+				 "IO_Send_buffer", "IO_Finalize"};
 
 struct dBuffer
 {
@@ -91,6 +92,22 @@ int  fowPOSIXFPGUARDSENDRECV ( const char * );
 int   fcPOSIXFPGUARDSENDRECV ( int );
 size_t   fwPOSIXFPGUARDSENDRECV ( int, int, const void *, size_t );
 int initPOSIXFPGUARDSENDRECV ( int * );
+
+/* pio_posixfpguardthread.c */
+void * fpgPOSIXFPGUARDTHREAD ( void * );
+int  fowPOSIXFPGUARDTHREAD ( const char * );
+int   fcPOSIXFPGUARDTHREAD ( int );
+size_t   fwPOSIXFPGUARDTHREAD ( int, int, const void *, size_t );
+int initPOSIXFPGUARDTHREAD ( int * );
+void finalizePOSIXFPGUARDTHREAD ( void );
+
+/* pio_posixfpguardthreadrefuse.c */
+void * fpgPOSIXFPGUARDTHREADREFUSE ( void * );
+int  fowPOSIXFPGUARDTHREADREFUSE ( const char * );
+int   fcPOSIXFPGUARDTHREADREFUSE  ( int );
+size_t   fwPOSIXFPGUARDTHREADREFUSE  ( int, int, const void *, size_t );
+int initPOSIXFPGUARDTHREADREFUSE  ( int * );
+void finalizePOSIXFPGUARDTHREADREFUSE  ( void );
 
 /* pio_posixnonb.c */
 void pwPOSIXNONB ( int );

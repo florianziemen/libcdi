@@ -156,7 +156,7 @@ END MODULE loadbalancing
 
       INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(12,307) 
  
-      INTEGER, PARAMETER :: nPtypes = 4
+      INTEGER, PARAMETER :: nPtypes = 6
       INTEGER, PARAMETER :: MAXNODES = 249
 
       INTEGER, PARAMETER :: ddebug = 0
@@ -193,10 +193,13 @@ END MODULE loadbalancing
       
       REAL(dp) :: startTime, stopTime
       REAL(dp) :: accumOpen, accumClose, accumWrite
+      INTEGER REQUIRED, PROVIDED, IERROR
 
 
 #ifndef NOMPI
-      CALL MPI_INIT ( error )
+      !CALL MPI_INIT ( error )29
+      CALL MPI_INIT_THREAD(REQUIRED, PROVIDED, IERROR)
+
       CALL MPI_COMM_DUP ( MPI_COMM_WORLD, pioComm, error )
       CALL MPI_COMM_RANK ( MPI_COMM_WORLD, rank, error )
 

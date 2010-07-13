@@ -18,14 +18,17 @@ const char *token_NODE = "p";
 long initial_buffersize = 16 * 1024 * 1024;
 /*  4 KB <= x < 256 MB */ 
 /* 16 * 1024 * 1024; */
-/* 256 * 1024; */
+/* 16 * 1024; */
 /* 4 * 1024; */
+
+int tagKey = 100;
 
 double startTime;
 double accumProbe   = 0.0;
 double accumRecv    = 0.0;
 double accumSend    = 0.0;
 double accumSuspend = 0.0;
+
 double accumWait    = 0.0;
 double accumWrite   = 0.0;
 
@@ -57,7 +60,7 @@ void check_mpi ( int line, int iret )
 
 int setTag ( int ID, int sc )
 {
-  return ID * 1000 + sc;
+  return ID * tagKey + sc;
 }
 
 /***************************************************************/
@@ -67,8 +70,8 @@ rTag * getTag ( int tag )
   rTag *rtag;
 
   rtag = ( rTag * ) malloc ( sizeof ( rTag ));
-  rtag->id = tag / 1000;
-  rtag->command = tag % 1000;
+  rtag->id = tag / tagKey;
+  rtag->command = tag % tagKey;
 
   return rtag;
 }
@@ -89,6 +92,12 @@ size_t pioFileWrite ( int id, int tsId, const void *buffer, size_t len )
       break;
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fwPOSIXFPGUARDSENDRECV ( id, tsId, buffer, len );
+      break;
+    case PIO_POSIX_FPGUARD_THREAD:
+      iret = fwPOSIXFPGUARDTHREAD ( id, tsId, buffer, len );
+      break;
+    case PIO_POSIX_FPGUARD_THREAD_REFUSE:
+      iret = fwPOSIXFPGUARDTHREADREFUSE ( id, tsId, buffer, len );
       break;
     case PIO_POSIX_NONB:
       iret = fwPOSIXNONB ( id, tsId, buffer, len );
@@ -115,6 +124,12 @@ int pioFileClose ( int id )
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fcPOSIXFPGUARDSENDRECV ( id );
       break;
+    case PIO_POSIX_FPGUARD_THREAD:
+      iret = fcPOSIXFPGUARDTHREAD ( id );
+      break;
+    case PIO_POSIX_FPGUARD_THREAD_REFUSE:
+      iret = fcPOSIXFPGUARDTHREADREFUSE ( id );
+      break;
     case PIO_POSIX_NONB:
       iret = fcPOSIXNONB ( id );
       break;
@@ -139,6 +154,12 @@ int pioFileOpenW ( const char *filename )
       break;
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fowPOSIXFPGUARDSENDRECV ( filename );
+      break;
+    case PIO_POSIX_FPGUARD_THREAD:
+      iret = fowPOSIXFPGUARDTHREAD ( filename );
+      break;
+    case PIO_POSIX_FPGUARD_THREAD_REFUSE:
+      iret = fowPOSIXFPGUARDTHREADREFUSE ( filename );
       break;
     case PIO_POSIX_NONB:
       iret = fowPOSIXNONB ( filename );
@@ -174,6 +195,7 @@ int pioInit ( int ptype, int comm, int *color, int *colors, int nnodes, int *pio
   MPI_Comm_split (( MPI_Comm ) comm, *color, key, ( MPI_Comm *) pioComm );
 
   pioinfo->comm  = ( MPI_Comm ) *pioComm;
+  pioinfo->color = *color;
   MPI_Comm_rank ( pioinfo->comm, &( pioinfo->rank ));
   MPI_Comm_size ( pioinfo->comm, &( pioinfo->size ));
 
@@ -226,6 +248,12 @@ int pioInit ( int ptype, int comm, int *color, int *colors, int nnodes, int *pio
     case PIO_POSIX_FPGUARD_SENDRECV:
       collectingData = initPOSIXFPGUARDSENDRECV ( ncollectors );
       break;
+    case PIO_POSIX_FPGUARD_THREAD:
+      collectingData = initPOSIXFPGUARDTHREAD ( ncollectors );
+      break;
+    case PIO_POSIX_FPGUARD_THREAD_REFUSE:
+      collectingData = initPOSIXFPGUARDTHREADREFUSE ( ncollectors );
+      break;
     case PIO_POSIX_NONB:
       collectingData = initPOSIXNONB ( ncollectors );
       break;
@@ -241,6 +269,13 @@ int pioInit ( int ptype, int comm, int *color, int *colors, int nnodes, int *pio
 
 void pioFinalize ()
 {
+  switch ( pioinfo->type )
+    {
+    case PIO_POSIX_FPGUARD_THREAD:
+      finalizePOSIXFPGUARDTHREAD ();
+      break;
+    }
+
   free ( pioinfo );
 
   return;

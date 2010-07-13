@@ -8,6 +8,7 @@
 typedef struct{
   int type;
   MPI_Comm comm;
+  int color;
   int size;
   int rank;
   int specialRank;
