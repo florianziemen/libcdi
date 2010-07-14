@@ -418,10 +418,8 @@ AC_OUTPUT(Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile 
 
 #  ----------------------------------------------------------------------
 #  Show configuration
-AS_ECHO(["#======================================================================="])
 AC_MSG_NOTICE([CDI is configured with the following options:])
 cat config.settings
-AS_ECHO(["#======================================================================="])
 
 AS_IF([test "$ac_cv_prog_cc_c99" = "no"],
       [AC_MSG_NOTICE([
