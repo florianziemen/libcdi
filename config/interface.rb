@@ -1,2 +1,2 @@
 require 'rbconfig'
-puts Config::expand(Config::MAKEFILE_CONFIG["archdir"])
+puts Config::expand(Config::MAKEFILE_CONFIG["rubyhdrdir"])
