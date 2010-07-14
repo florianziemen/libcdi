@@ -1,5 +1,70 @@
 #!/usr/bin/env ruby
-require 'optparse'
+#== Synopsis
+# Create Fortran iso-c-bindings form a given c header file
+# 
+#== Usage
+#   binGen.rb <headerFile> <fortranLibraryFile> [<modName>] [--help|--debug]  
+#
+# headerFile:
+#   A general c header file: function prototypes and '#defines' with numerical
+#   value will be taken for the fortran module construction. Furthermore there
+#   are some restrictions to what is provided in fortran: Currently internal
+#   datatypes and (arrays|pointers) to internal datatypes are supported, i.e.
+#   no arrays of pointers, no pointer to pointers, no typedefs
+#
+# fortranLibraryFile:
+#   file name for generated bindings
+#
+# modName:
+#   This will be the name of the Fortran module, so it has to obey the fortran 
+#   restriction for module names. default: mo_cdi
+#  
+#== Author
+# Ralf Mueller, ralf.mueller@zmaw.de
+#
+#== RESTRICTIONS:
+# ONLY SUPPORT FOR INTERNAL DATATYPES AND (ARRAYS|POINTERS) TO INTERNAL
+# DATATYPES, I.E. NO ARRAYS OF POINTERS, NO POINTER TO POINTERS, NO TYPEDEFS
+#
+#=== Special: naming convention
+# Pointers can have different sizes, which cannot be detetermined by parsing a
+# function prototype. Therefor a convention according the parameter names can
+# be used to take this decision precisely:
+# * Pointers to numbers are expected to be scalars unless the name of the
+#   parameter end with '_vec'
+# * Pointers to char are allways referenced as vectors
+#
+#== LICENSE: 
+# BSD License
+#
+#  Copyright (c) 2009, Ralf Mueller (ralf.mueller@zmaw.de)
+#  All rights reserved.
+#  
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions are met:
+#  
+#      * Redistributions of source code must retain the above copyright notice,
+#        this list of conditions and the following disclaimer.
+#  
+#      * Redistributions in binary form must reproduce the above copyright
+#        notice, this list of conditions and the following disclaimer in the
+#        documentation and/or other materials provided with the distribution.
+#  
+#      * The names of its contributors may not be used to endorse or promote
+#        products derived from this software without specific prior written
+#        permission.
+#  
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+#  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+#  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+#  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+#  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+#  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+#  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
 ################################################################
 # CONFIGURATION:
 CFTypeInfo             = {
@@ -292,86 +357,18 @@ end
 ################################################################################
 if __FILE__ == $0
 require 'optparse'
+require 'rdoc/usage'
 require 'pp'
 
-debug = false
-OptionParser.new do |opts|
+  debug = false
+  opts  = OptionParser.new
+  opts.on("-h","--help")  {RDoc::usage}
   opts.on("-d","--debug") {debug = true}
-  opts.on_tail("--help","-h","-H","Display this help message.") do
-    puts <<-'END'
-#== Synopsis
-# Create Fortran iso-c-bindings form a given c header file
-# 
-#== Usage
-#   binGen.rb <headerFile> <fortranLibraryFile> [<modName>] [--help|--debug]  
-#
-# headerFile:
-#   A general c header file: function prototypes and '#defines' with numerical
-#   value will be taken for the fortran module construction. Furthermore there
-#   are some restrictions to what is provided in fortran: Currently internal
-#   datatypes and (arrays|pointers) to internal datatypes are supported, i.e.
-#   no arrays of pointers, no pointer to pointers, no typedefs
-#
-# fortranLibraryFile:
-#   file name for generated bindings
-#
-# modName:
-#   This will be the name of the Fortran module, so it has to obey the fortran 
-#   restriction for module names. default: mo_cdi
-#  
-#== Author
-# Ralf Mueller, ralf.mueller@zmaw.de
-#
-#== RESTRICTIONS:
-# ONLY SUPPORT FOR INTERNAL DATATYPES AND (ARRAYS|POINTERS) TO INTERNAL
-# DATATYPES, I.E. NO ARRAYS OF POINTERS, NO POINTER TO POINTERS, NO TYPEDEFS
-#
-#=== Special: naming convention
-# Pointers can have different sizes, which cannot be detetermined by parsing a
-# function prototype. Therefor a convention according the parameter names can
-# be used to take this decision precisely:
-# * Pointers to numbers are expected to be scalars unless the name of the
-#   parameter end with '_vec'
-# * Pointers to char are allways referenced as vectors
-#
-#== LICENSE: 
-# BSD License
-#
-#  Copyright (c) 2009, Ralf Mueller (ralf.mueller@zmaw.de)
-#  All rights reserved.
-#  
-#  Redistribution and use in source and binary forms, with or without
-#  modification, are permitted provided that the following conditions are met:
-#  
-#      * Redistributions of source code must retain the above copyright notice,
-#        this list of conditions and the following disclaimer.
-#  
-#      * Redistributions in binary form must reproduce the above copyright
-#        notice, this list of conditions and the following disclaimer in the
-#        documentation and/or other materials provided with the distribution.
-#  
-#      * The names of its contributors may not be used to endorse or promote
-#        products derived from this software without specific prior written
-#        permission.
-#  
-#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-#  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-#  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
-#  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-#  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-#  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-#  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-#  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-#  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-END
-  exit
-  end
-end.parse!
+  opts.parse(ARGV)
 
   if ARGV[1] == nil
     warn 'no outputile given'
+    RDoc::usage
     exit
   end
 

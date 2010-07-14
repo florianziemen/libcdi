@@ -166,6 +166,7 @@
 
 
 
+void  gribFixZSE(int flag);
 void  gribSetDebug(int debug);
 void  gribSetRound(int round);
 void  gribSetRefDP(double refval);

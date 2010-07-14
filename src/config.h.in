@@ -3,26 +3,14 @@
 /* Define if C / Fortran interface cfortran.h works */
 #undef HAVE_CF_INTERFACE
 
-/* Define to 1 if you have the <dlfcn.h> header file. */
-#undef HAVE_DLFCN_H
-
 /* Define to 1 if you have the `getpagesize' function. */
 #undef HAVE_GETPAGESIZE
-
-/* Define to 1 if you have the <grib_api.h> header file. */
-#undef HAVE_GRIB_API_H
-
-/* Define to 1 if you have the <hdf5.h> header file. */
-#undef HAVE_HDF5_H
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
 /* Define to 1 if you have the `isnan' function. */
 #undef HAVE_ISNAN
-
-/* Define to 1 if you have the <jasper.h> header file. */
-#undef HAVE_JASPER_H
 
 /* Define to 1 for GRIB1 decoding/encoding with cgribex */
 #undef HAVE_LIBCGRIBEX
@@ -33,14 +21,20 @@
 /* Define to 1 for GRIB support */
 #undef HAVE_LIBGRIB
 
-/* GRIB_API library is present if defined to 1 */
+/* Define to 1 if you have the `grib_api' library (-lgrib_api). */
 #undef HAVE_LIBGRIB_API
 
-/* Define to 1 for HDF5 support */
+/* Define to 1 if you have the `hdf5' library (-lhdf5). */
 #undef HAVE_LIBHDF5
+
+/* Define to 1 if you have the `hdf5_hl' library (-lhdf5_hl). */
+#undef HAVE_LIBHDF5_HL
 
 /* Define to 1 for IEG interface */
 #undef HAVE_LIBIEG
+
+/* Define to 1 if you have the `jasper' library (-ljasper). */
+#undef HAVE_LIBJASPER
 
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
@@ -48,16 +42,16 @@
 /* Define to 1 if you have the `malloc' library (-lmalloc). */
 #undef HAVE_LIBMALLOC
 
-/* Define to 1 for NETCDF support */
-#undef HAVE_LIBNETCDF
+/* Define to 1 if you have the `nc-dap' library (-lnc-dap). */
+#undef HAVE_LIBNC_DAP
 
-/* Define to 1 if you have the `pthread' library (-lpthread). */
-#undef HAVE_LIBPTHREAD
+/* Define to 1 if you have the `netcdf' library (-lnetcdf). */
+#undef HAVE_LIBNETCDF
 
 /* Define to 1 for SERVICE interface */
 #undef HAVE_LIBSERVICE
 
-/* Define to 1 for SZIP support */
+/* Define to 1 if you have the `sz' library (-lsz). */
 #undef HAVE_LIBSZ
 
 /* Define to 1 if you have the `mallinfo' function. */
@@ -75,9 +69,6 @@
 /* Define to 1 if you have the <netcdf.h> header file. */
 #undef HAVE_NETCDF_H
 
-/* Define to 1 if you have the <pthread.h> header file. */
-#undef HAVE_PTHREAD_H
-
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 
@@ -90,11 +81,8 @@
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
-/* Define to 1 if `st_blksize' is a member of `struct stat'. */
+/* Define to 1 if `struct stat' is a member of `st_blksize'. */
 #undef HAVE_STRUCT_STAT_ST_BLKSIZE
-
-/* Define to 1 if you have the <sys/param.h> header file. */
-#undef HAVE_SYS_PARAM_H
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
@@ -102,24 +90,8 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
-/* Define to 1 for SZIP support */
-#undef HAVE_SZLIB
-
-/* Define to 1 if you have the <szlib.h> header file. */
-#undef HAVE_SZLIB_H
-
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
-
-/* Define to 1 if you have the <zlib.h> header file. */
-#undef HAVE_ZLIB_H
-
-/* Host name */
-#undef HOST_NAME
-
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
-#undef LT_OBJDIR
 
 /* Name of package */
 #undef PACKAGE
@@ -144,12 +116,6 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
-
-/* System type */
-#undef SYSTEM_TYPE
-
-/* User name */
-#undef USER_NAME
 
 /* Version number of package */
 #undef VERSION

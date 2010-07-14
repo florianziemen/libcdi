@@ -7,24 +7,24 @@ if CREATE_ISOC
   noinst_PROGRAMS += cdi_read_f2003 cdi_write_f2003
 endif
 #
-AM_CPPFLAGS             = -I$(top_srcdir)/src
-AM_FCFLAGS              = $(AM_CPPFLAGS)
+cdi_write_SOURCES = cdi_write.c
+cdi_write_LDADD = ../src/libcdi.a
 #
-cdi_write_SOURCES       = cdi_write.c
-cdi_write_LDADD         = $(top_builddir)/src/libcdi.la
+cdi_read_SOURCES = cdi_read.c
+cdi_read_LDADD = ../src/libcdi.a
 #
-cdi_read_SOURCES        = cdi_read.c
-cdi_read_LDADD          = $(top_builddir)/src/libcdi.la
+cdi_copy_SOURCES = cdi_copy.c
+cdi_copy_LDADD = ../src/libcdi.a
 #
-cdi_copy_SOURCES        = cdi_copy.c
-cdi_copy_LDADD          = $(top_builddir)/src/libcdi.la
-#
-cdi_read_f2003_SOURCES  = cdi_read_f2003.f90
-cdi_read_f2003_LDADD   = $(top_builddir)/src/libcdi.la $(top_builddir)/src/mo_cdi.o
-cdi_read_f2003_LDFLAGS = -all-static
-
+cdi_read_f2003_SOURCES = cdi_read_f2003.f90
 cdi_write_f2003_SOURCES = cdi_write_f2003.f90
-cdi_write_f2003_LDADD   = $(top_builddir)/src/libcdi.la $(top_builddir)/src/mo_cdi.o
-cdi_write_f2003_LDFLAGS = -all-static
-
+#
+AM_CPPFLAGS = -I$(top_srcdir)/src
+#
+cdi_read_f2003: cdi_read_f2003.f90
+	$(FC) $(AM_FCFLAGS) $(FCFLAGS) $(FCFLAGS_f90) $@.f90 ../src/cdilib.o ../src/mo_cdi.o -I../src $(LDFLAGS) $(LIBS) -o $@
+#
+cdi_write_f2003: cdi_write_f2003.f90
+	$(FC) $(AM_FCFLAGS) $(FCFLAGS) $(FCFLAGS_f90) $@.f90 ../src/cdilib.o ../src/mo_cdi.o -I../src $(LDFLAGS) $(LIBS) -o $@
+#
 CLEANFILES  = `ls *~`

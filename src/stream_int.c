@@ -14,6 +14,9 @@
 #include "cdi.h"
 #include "stream_int.h"
 
+#if  defined  (HAVE_LIBCGRIBEX)
+#include "cgribex.h"
+#endif
 
 int cdiDefaultCalendar = CALENDAR_PROLEPTIC;
 
@@ -109,6 +112,10 @@ void cdiInitialize(void)
   if ( ! Init_CDI )
     {
       Init_CDI = TRUE;
+
+#if  defined  (HAVE_LIBCGRIBEX)
+      gribFixZSE(1); /* Fix ZeroShiftError of simple packed spherical harmonics */
+#endif
 
       value = cdiGetenvInt("CD_REGULARGRID");
       if ( value >= 0 ) cdiDataUnreduced = (int) value;
