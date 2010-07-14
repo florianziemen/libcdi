@@ -5,6 +5,8 @@
    "CFLAGS"   : "@CFLAGS@",
    "LDFLAGS"  : "@LDFLAGS@",
    "LIBS"     : "@LIBS@",
+   "FC"       : "@FC@",
+   "F77"      : "@F77@",
    "FCFLAGS"  : "@FCFLAGS@",
    "LD"       : "@LD@",
    "NM"       : "@NM@",
