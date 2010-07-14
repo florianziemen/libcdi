@@ -3287,11 +3287,9 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
     {
       if ( yid == dimids[ndims] && xid == dimids[ndims+1] && zid == dimids[ndims+2] )
 	swapyxz = TRUE;
-      if ( zid == dimids[ndims] && xid == dimids[ndims+1] && yid == dimids[ndims+2] )
-	swapxy = TRUE;
     }
 
-  if ( swapyxz == FALSE && swapxy == FALSE && zid != UNDEFID && yid != UNDEFID )
+  if ( swapyxz == FALSE && zid != UNDEFID && yid != UNDEFID )
     {
       if ( zid == dimids[ndims] && yid == dimids[ndims+1] )
 	swapyz = FALSE;
@@ -5165,11 +5163,9 @@ int cdfInqContents(int streamID)
     {
       if ( ncvars[ncvarid].isvar && ncvars[ncvarid].gridID == UNDEFID )
 	{
-	  int xdimids[2] = {-1,-1}, ydimids[2] = {-1,-1};
 	  int xdimid = -1, ydimid = -1;
 	  int xvarid = -1, yvarid = -1;
 	  int islon = 0, islat = 0;
-	  int nxdims = 0, nydims = 0;
 	  double xinc = 0, yinc = 0;
 
 	  xsize = 0;
@@ -5178,32 +5174,10 @@ int cdfInqContents(int streamID)
 	  ndims = ncvars[ncvarid].ndims;
 	  for ( i = 0; i < ndims; i++ )
 	    {
-	      if ( ncvars[ncvarid].dimtype[i] == X_AXIS && nxdims < 2 )
-		{
-		  xdimids[nxdims] = ncvars[ncvarid].dimids[i];
-		  nxdims++;
-		}
-	      else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS && nydims < 2 )
-		{
-		  ydimids[nydims] = ncvars[ncvarid].dimids[i];
-		  nydims++;
-		}	       
-	    }
-
-	  if ( nxdims == 2 )
-	    {
-	      xdimid = xdimids[1];
-	      ydimid = xdimids[0];
-	    }
-	  else if ( nydims == 2 )
-	    {
-	      xdimid = ydimids[1];
-	      ydimid = ydimids[0];
-	    }
-	  else
-	    {
-	      xdimid = xdimids[0];
-	      ydimid = ydimids[0];
+	      if ( ncvars[ncvarid].dimtype[i] == X_AXIS )
+		xdimid = ncvars[ncvarid].dimids[i];
+	      else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS )
+		ydimid = ncvars[ncvarid].dimids[i];
 	    }
 
 	  if ( ncvars[ncvarid].xvarid != UNDEFID )
@@ -5512,7 +5486,6 @@ int cdfInqContents(int streamID)
 	    case GRID_SPECTRAL:
 	      {
 		grid.size = size;
-		grid.lcomplex = 1;
 		break;
 	      }
 	    case GRID_TRAJECTORY:

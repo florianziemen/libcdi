@@ -3,132 +3,124 @@
 EXTRA_DIST = make_cdilib mo_cdi.f90
 #
 #BUILT_SOURCES = cdilib.c
-#
-lib_LIBRARIES = libcdi.a
-#
+
+lib_LTLIBRARIES = libcdi.la
+
 include_HEADERS = cdi.h cdi.inc
-#
-nodistdir = .
-nodist_include_HEADERS =
 if CREATE_ISOC
-  nodist_include_HEADERS += mo_cdi.$(FCMODEXT)
+  include_HEADERS += mo_cdi.mod
 endif
-#
-libcdi_a_SOURCES = 	 \
-        cdiFortran.c   	 \
-	cdi_error.c      \
-	cdi_util.c       \
-	taxis.c          \
-	error.c        	 \
-	version.c      	 \
-	dmemory.c      	 \
-	model.c        	 \
-	institution.c  	 \
-	table.c        	 \
-	gaussgrid.c      \
-	util.c         	 \
-	varscan.c      	 \
-	calendar.c 	 \
-	timebase.c 	 \
-	vlist.c 	 \
-	vlist_var.c 	 \
-	vlist_att.c 	 \
+
+libcdi_la_SOURCES = 	 \
 	basetime.c     	 \
-	stream_history.c \
-	stream_cgribex.c \
-	stream_gribapi.c \
-	stream_grb.c     \
-	stream_cdf.c     \
-	stream_srv.c     \
-	stream_ext.c     \
-	stream_ieg.c     \
-	grid.c           \
-	zaxis.c		 \
-        stream.c         \
-	stream_var.c     \
-	stream_record.c  \
-	tsteps.c         \
-	stream_int.c     \
-	servicelib.c     \
-	extralib.c       \
-	ieglib.c         \
-	cdf.c            \
-	cdf_int.c	 \
-	file.c         	 \
+	basetime.h	 \
 	binary.c	 \
-        swap.c       	 \
-	cgribexlib.c  	 \
-	gribapi.c  	 \
-	cfortran.h       \
 	binary.h	 \
+	calendar.c 	 \
+	calendar.h	 \
+	cdf.c            \
 	cdf.h	 	 \
+	cdf_int.c	 \
 	cdf_int.h	 \
+	cdi.h	 	 \
+	cdi_error.c      \
+	cdi_limits.h	 \
+	cdi_util.c       \
+	cdiFortran.c     \
+	cfortran.h       \
+	cgribex.h	 \
+	cgribexlib.c  	 \
 	datetime.h	 \
+	dmemory.c      	 \
 	dmemory.h	 \
 	dtypes.h	 \
+	error.c        	 \
 	error.h	 	 \
 	extra.h	 	 \
-	ieg.h	 	 \
+	extralib.c       \
+	file.c         	 \
 	file.h	 	 \
-	cdi.h	 	 \
-	cdi_limits.h	 \
-	calendar.h	 \
-	timebase.h	 \
-	vlist.h	         \
-	taxis.h	         \
-	stream_cgribex.h \
-	stream_gribapi.h \
-	stream_grb.h     \
-	stream_cdf.h	 \
-	stream_srv.h	 \
-	stream_ext.h	 \
-	stream_ieg.h	 \
-	stream_int.h	 \
-	basetime.h	 \
-	cgribex.h	 \
+	gaussgrid.c      \
+	gaussgrid.h	 \
+	gribapi.c  	 \
 	gribapi.h	 \
+	grid.c           \
 	grid.h	 	 \
+	ieg.h	 	 \
+	ieglib.c         \
+	institution.c  	 \
+	model.c        	 \
 	service.h	 \
+	servicelib.c     \
+	stream_cdf.c     \
+	stream_cdf.h	 \
+	stream_cgribex.c \
+	stream_cgribex.h \
+	stream_ext.c     \
+	stream_ext.h	 \
+	stream_grb.c     \
+	stream_grb.h     \
+	stream_gribapi.c \
+	stream_gribapi.h \
+	stream_history.c \
+	stream_ieg.c     \
+	stream_ieg.h	 \
+	stream_int.c     \
+	stream_int.h	 \
+	stream_record.c  \
+	stream_srv.c     \
+	stream_srv.h	 \
+	stream_var.c     \
 	swap.h	 	 \
+	table.c        	 \
 	table.h	 	 \
 	tablepar.h	 \
-	gaussgrid.h	 \
-	varscan.h
-#
-cdiFortran.o: cdiFortran.c
-	source='$<' object='$@' libtool=no \
-	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' \
-	$(CCDEPMODE) $(depcomp) \
-	$(COMPILE) $(CFINT) -c `test -f '$<' || echo '$(srcdir)/'`$<
+	taxis.c          \
+	taxis.h	         \
+	timebase.c 	 \
+	timebase.h	 \
+	tsteps.c         \
+	util.c         	 \
+	varscan.c      	 \
+	varscan.h        \
+	version.c      	 \
+	vlist.c 	 \
+	vlist.h	         \
+	vlist_att.c 	 \
+	vlist_var.c 	 \
+	zaxis.c		 \
+        stream.c         \
+        swap.c
+
+libcdi_la_LIBADD  = @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@
+libcdi_la_LDFLAGS = -release @PACKAGE_VERSION@ @LDFLAGS@
 #
 cdilib.c:
 	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src
 #
 cdilib.o: cdilib.c
-	$(COMPILE) $(CFINT) -c $<
-#
-all-local: $(LOCALTARGETS) 
+	$(COMPILE) -c $<
 
-LOCALTARGETS = cdilib.o
+LOCALTARGETS = 
+#LOCALTARGETS = cdilib.o
 
 if CREATE_ISOC
-LOCALTARGETS += mo_cdi.o
+LOCALTARGETS += mo_cdi.o mo_cdi.$(FCMODEXT)
 endif
 #
-install-data-local: $(LOCALTARGETS)
-	 @for f in $(LOCALTARGETS) ; do \
-	   echo " $(INSTALL_DATA) $$f \"$(DESTDIR)$(libdir)/$$f\""; \
-	   $(INSTALL_DATA) $$f "$(DESTDIR)$(libdir)/$$f" ; \
-	 done
+mo_cdi.f90:
+	ruby $(top_srcdir)/interfaces/f2003/bindGen.rb cdi.h $@
 #
 mo_cdi.o: mo_cdi.f90
-	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) mo_cdi.f90
+	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) $<
 #
 mo_cdi.$(FCMODEXT): mo_cdi.f90
-	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) mo_cdi.f90
+	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) $<
+#
+all-local: $(LOCALTARGETS) 
 #
 CLEANFILES  = `ls *~`
 CLEANFILES += cdilib.c
 if CREATE_ISOC
-CLEANFILES += mo_cdi.$(FCMODEXT)
+CLEANFILES += $(top_builddir)/src/mo_cdi.$(FCMODEXT) $(top_builddir)/src/mo_cdi.o
 endif

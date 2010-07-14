@@ -10,12 +10,16 @@ module mo_cdi
       integer :: CDI_GLOBAL = -1
       integer :: CDI_BIGENDIAN = 0
       integer :: CDI_LITTLEENDIAN = 1
+      integer :: CDI_REAL = 1
+      integer :: CDI_COMP = 2
+      integer :: CDI_BOTH = 3
       integer :: CDI_ESYSTEM = -10
       integer :: CDI_EINVAL = -20
       integer :: CDI_EUFTYPE = -21
       integer :: CDI_ELIBNAVAIL = -22
       integer :: CDI_EUFSTRUCT = -23
       integer :: CDI_EUNC4 = -24
+      integer :: CDI_ELIMIT = -99
       integer :: FILETYPE_GRB = 1
       integer :: FILETYPE_GRB2 = 2
       integer :: FILETYPE_NC = 3
@@ -29,6 +33,7 @@ module mo_cdi
       integer :: COMPRESS_GZIP = 2
       integer :: COMPRESS_BZIP2 = 3
       integer :: COMPRESS_ZIP = 4
+      integer :: COMPRESS_JPEG = 5
       integer :: DATATYPE_PACK = 0
       integer :: DATATYPE_PACK1 = 1
       integer :: DATATYPE_PACK2 = 2
@@ -62,6 +67,8 @@ module mo_cdi
       integer :: DATATYPE_PACK30 = 30
       integer :: DATATYPE_PACK31 = 31
       integer :: DATATYPE_PACK32 = 32
+      integer :: DATATYPE_CPX32 = 64
+      integer :: DATATYPE_CPX64 = 128
       integer :: DATATYPE_FLT32 = 132
       integer :: DATATYPE_FLT64 = 164
       integer :: DATATYPE_INT8 = 208
@@ -73,6 +80,7 @@ module mo_cdi
       integer :: DATATYPE_INT = 251
       integer :: DATATYPE_FLT = 252
       integer :: DATATYPE_TXT = 253
+      integer :: DATATYPE_CPX = 254
       integer :: GRID_GENERIC = 1
       integer :: GRID_GAUSSIAN = 2
       integer :: GRID_GAUSSIAN_REDUCED = 3
@@ -111,6 +119,18 @@ module mo_cdi
       integer :: TUNIT_MONTH = 5
       integer :: TUNIT_YEAR = 6
       integer :: TUNIT_QUARTER = 7
+      integer :: TUNIT_3HOURS = 8
+      integer :: TUNIT_6HOURS = 9
+      integer :: TUNIT_12HOURS = 10
+      integer :: TSTEP_INSTANT = 1
+      integer :: TSTEP_AVG = 2
+      integer :: TSTEP_ACCUM = 3
+      integer :: TSTEP_MAX = 4
+      integer :: TSTEP_MIN = 5
+      integer :: TSTEP_DIFF = 6
+      integer :: TSTEP_RANGE = 7
+      integer :: TSTEP_INSTANT2 = 8
+      integer :: TSTEP_INSTANT3 = 9
       integer :: CALENDAR_STANDARD = 0
       integer :: CALENDAR_PROLEPTIC = 1
       integer :: CALENDAR_360DAYS = 2
@@ -162,6 +182,72 @@ module mo_cdi
           character(c_char), dimension(*) :: string
           integer(c_int), value :: val
        end subroutine cdiDefGlobal
+      end interface
+  
+      interface
+        subroutine cdiParamToString(param,paramstr,maxlen) bind(c,name='cdiParamToString')
+          import :: c_int,c_char
+          integer(c_int), value :: param
+          character(c_char), dimension(*) :: paramstr
+          integer(c_int), value :: maxlen
+       end subroutine cdiParamToString
+      end interface
+  
+      interface
+        subroutine cdiDecodeParam(param,pnum,pcat,pdis) bind(c,name='cdiDecodeParam')
+          import :: c_int
+          integer(c_int), value :: param
+          integer(c_int), intent(out) :: pnum
+          integer(c_int), intent(out) :: pcat
+          integer(c_int), intent(out) :: pdis
+       end subroutine cdiDecodeParam
+      end interface
+  
+      interface
+        integer(c_int) function cdiEncodeParam(pnum,pcat,pdis) bind(c,name='cdiEncodeParam')
+          import :: c_int
+          integer(c_int), value :: pnum
+          integer(c_int), value :: pcat
+          integer(c_int), value :: pdis
+       end function cdiEncodeParam
+      end interface
+  
+      interface
+        subroutine cdiDecodeDate(date,year,month,day) bind(c,name='cdiDecodeDate')
+          import :: c_int
+          integer(c_int), value :: date
+          integer(c_int), intent(out) :: year
+          integer(c_int), intent(out) :: month
+          integer(c_int), intent(out) :: day
+       end subroutine cdiDecodeDate
+      end interface
+  
+      interface
+        integer(c_int) function cdiEncodeDate(year,month,day) bind(c,name='cdiEncodeDate')
+          import :: c_int
+          integer(c_int), value :: year
+          integer(c_int), value :: month
+          integer(c_int), value :: day
+       end function cdiEncodeDate
+      end interface
+  
+      interface
+        subroutine cdiDecodeTime(time,hour,minute,second) bind(c,name='cdiDecodeTime')
+          import :: c_int
+          integer(c_int), value :: time
+          integer(c_int), intent(out) :: hour
+          integer(c_int), intent(out) :: minute
+          integer(c_int), intent(out) :: second
+       end subroutine cdiDecodeTime
+      end interface
+  
+      interface
+        integer(c_int) function cdiEncodeTime(hour,minute,second) bind(c,name='cdiEncodeTime')
+          import :: c_int
+          integer(c_int), value :: hour
+          integer(c_int), value :: minute
+          integer(c_int), value :: second
+       end function cdiEncodeTime
       end interface
   
       interface
@@ -305,43 +391,43 @@ module mo_cdi
       end interface
   
       interface
-        subroutine streamReadVar(streamID,varID,data,nmiss) bind(c,name='streamReadVar')
+        subroutine streamReadVar(streamID,varID,data_vec,nmiss) bind(c,name='streamReadVar')
           import :: c_int,c_double
           integer(c_int), value :: streamID
           integer(c_int), value :: varID
-          real(c_double), intent(out),dimension(*) :: data
+          real(c_double), intent(out),dimension(*) :: data_vec
           integer(c_int), intent(out) :: nmiss
        end subroutine streamReadVar
       end interface
   
       interface
-        subroutine streamWriteVar(streamID,varID,data,nmiss) bind(c,name='streamWriteVar')
+        subroutine streamWriteVar(streamID,varID,data_vec,nmiss) bind(c,name='streamWriteVar')
           import :: c_int,c_double
           integer(c_int), value :: streamID
           integer(c_int), value :: varID
-          real(c_double), intent(in),dimension(*) :: data
+          real(c_double), intent(in),dimension(*) :: data_vec
           integer(c_int), value :: nmiss
        end subroutine streamWriteVar
       end interface
   
       interface
-        subroutine streamReadVarSlice(streamID,varID,levelID,data,nmiss) bind(c,name='streamReadVarSlice')
+        subroutine streamReadVarSlice(streamID,varID,levelID,data_vec,nmiss) bind(c,name='streamReadVarSlice')
           import :: c_int,c_double
           integer(c_int), value :: streamID
           integer(c_int), value :: varID
           integer(c_int), value :: levelID
-          real(c_double), intent(out),dimension(*) :: data
+          real(c_double), intent(out),dimension(*) :: data_vec
           integer(c_int), intent(out) :: nmiss
        end subroutine streamReadVarSlice
       end interface
   
       interface
-        subroutine streamWriteVarSlice(streamID,varID,levelID,data,nmiss) bind(c,name='streamWriteVarSlice')
+        subroutine streamWriteVarSlice(streamID,varID,levelID,data_vec,nmiss) bind(c,name='streamWriteVarSlice')
           import :: c_int,c_double
           integer(c_int), value :: streamID
           integer(c_int), value :: varID
           integer(c_int), value :: levelID
-          real(c_double), intent(in),dimension(*) :: data
+          real(c_double), intent(in),dimension(*) :: data_vec
           integer(c_int), value :: nmiss
        end subroutine streamWriteVarSlice
       end interface
@@ -365,19 +451,19 @@ module mo_cdi
       end interface
   
       interface
-        subroutine streamReadRecord(streamID,data,nmiss) bind(c,name='streamReadRecord')
+        subroutine streamReadRecord(streamID,data_vec,nmiss) bind(c,name='streamReadRecord')
           import :: c_int,c_double
           integer(c_int), value :: streamID
-          real(c_double), intent(out),dimension(*) :: data
+          real(c_double), intent(out),dimension(*) :: data_vec
           integer(c_int), intent(out) :: nmiss
        end subroutine streamReadRecord
       end interface
   
       interface
-        subroutine streamWriteRecord(streamID,data,nmiss) bind(c,name='streamWriteRecord')
+        subroutine streamWriteRecord(streamID,data_vec,nmiss) bind(c,name='streamWriteRecord')
           import :: c_int,c_double
           integer(c_int), value :: streamID
-          real(c_double), intent(in),dimension(*) :: data
+          real(c_double), intent(in),dimension(*) :: data_vec
           integer(c_int), value :: nmiss
        end subroutine streamWriteRecord
       end interface
@@ -395,7 +481,7 @@ module mo_cdi
           import :: c_int,c_float
           integer(c_int), value :: streamID
           integer(c_int), intent(out) :: intnum
-          real(c_float), intent(out),dimension(*) :: fltnum
+          real(c_float), intent(out) :: fltnum
        end subroutine streamInqGinfo
       end interface
   
@@ -463,6 +549,13 @@ module mo_cdi
           import :: c_int
           integer(c_int), value :: vlistID
        end subroutine vlistPrint
+      end interface
+  
+      interface
+        integer(c_int) function vlistNumber(vlistID) bind(c,name='vlistNumber')
+          import :: c_int
+          integer(c_int), value :: vlistID
+       end function vlistNumber
       end interface
   
       interface
@@ -741,6 +834,23 @@ module mo_cdi
       end interface
   
       interface
+        subroutine vlistDefVarParam(vlistID,varID,param) bind(c,name='vlistDefVarParam')
+          import :: c_int
+          integer(c_int), value :: vlistID
+          integer(c_int), value :: varID
+          integer(c_int), value :: param
+       end subroutine vlistDefVarParam
+      end interface
+  
+      interface
+        integer(c_int) function vlistInqVarParam(vlistID,varID) bind(c,name='vlistInqVarParam')
+          import :: c_int
+          integer(c_int), value :: vlistID
+          integer(c_int), value :: varID
+       end function vlistInqVarParam
+      end interface
+  
+      interface
         subroutine vlistDefVarCode(vlistID,varID,code) bind(c,name='vlistDefVarCode')
           import :: c_int
           integer(c_int), value :: vlistID
@@ -772,6 +882,14 @@ module mo_cdi
           integer(c_int), value :: vlistID
           integer(c_int), value :: varID
        end function vlistInqVarDatatype
+      end interface
+  
+      interface
+        integer(c_int) function vlistInqVarNumber(vlistID,varID) bind(c,name='vlistInqVarNumber')
+          import :: c_int
+          integer(c_int), value :: vlistID
+          integer(c_int), value :: varID
+       end function vlistInqVarNumber
       end interface
   
       interface
@@ -844,15 +962,6 @@ module mo_cdi
       end interface
   
       interface
-        subroutine vlistDefVarLongname(vlistID,varID,longname) bind(c,name='vlistDefVarLongname')
-          import :: c_int,c_char
-          integer(c_int), value :: vlistID
-          integer(c_int), value :: varID
-          character(c_char), dimension(*) :: longname
-       end subroutine vlistDefVarLongname
-      end interface
-  
-      interface
         subroutine vlistDefVarStdname(vlistID,varID,stdname) bind(c,name='vlistDefVarStdname')
           import :: c_int,c_char
           integer(c_int), value :: vlistID
@@ -862,21 +971,30 @@ module mo_cdi
       end interface
   
       interface
-        subroutine vlistInqVarLongname(vlistID,varID,longname) bind(c,name='vlistInqVarLongname')
-          import :: c_int,c_char
-          integer(c_int), value :: vlistID
-          integer(c_int), value :: varID
-          character(c_char), dimension(*) :: longname
-       end subroutine vlistInqVarLongname
-      end interface
-  
-      interface
         subroutine vlistInqVarStdname(vlistID,varID,stdname) bind(c,name='vlistInqVarStdname')
           import :: c_int,c_char
           integer(c_int), value :: vlistID
           integer(c_int), value :: varID
           character(c_char), dimension(*) :: stdname
        end subroutine vlistInqVarStdname
+      end interface
+  
+      interface
+        subroutine vlistDefVarLongname(vlistID,varID,longname) bind(c,name='vlistDefVarLongname')
+          import :: c_int,c_char
+          integer(c_int), value :: vlistID
+          integer(c_int), value :: varID
+          character(c_char), dimension(*) :: longname
+       end subroutine vlistDefVarLongname
+      end interface
+  
+      interface
+        subroutine vlistInqVarLongname(vlistID,varID,longname) bind(c,name='vlistInqVarLongname')
+          import :: c_int,c_char
+          integer(c_int), value :: vlistID
+          integer(c_int), value :: varID
+          character(c_char), dimension(*) :: longname
+       end subroutine vlistInqVarLongname
       end interface
   
       interface
@@ -946,6 +1064,23 @@ module mo_cdi
           integer(c_int), value :: vlistID
           integer(c_int), value :: varID
        end function vlistInqVarAddoffset
+      end interface
+  
+      interface
+        subroutine vlistDefVarTsteptype(vlistID,varID,tsteptype) bind(c,name='vlistDefVarTsteptype')
+          import :: c_int
+          integer(c_int), value :: vlistID
+          integer(c_int), value :: varID
+          integer(c_int), value :: tsteptype
+       end subroutine vlistDefVarTsteptype
+      end interface
+  
+      interface
+        integer(c_int) function vlistInqVarTsteptype(vlistID,varID) bind(c,name='vlistInqVarTsteptype')
+          import :: c_int
+          integer(c_int), value :: vlistID
+          integer(c_int), value :: varID
+       end function vlistInqVarTsteptype
       end interface
   
       interface
@@ -1101,24 +1236,24 @@ module mo_cdi
       end interface
   
       interface
-        integer(c_int) function vlistDefAttInt(vlistID,varID,name,len,ip) bind(c,name='vlistDefAttInt')
+        integer(c_int) function vlistDefAttInt(vlistID,varID,name,len,ip_vec) bind(c,name='vlistDefAttInt')
           import :: c_int,c_char
           integer(c_int), value :: vlistID
           integer(c_int), value :: varID
           character(c_char), dimension(*) :: name
           integer(c_int), value :: len
-          integer(c_int), intent(in) :: ip
+          integer(c_int), intent(in),dimension(*) :: ip_vec
        end function vlistDefAttInt
       end interface
   
       interface
-        integer(c_int) function vlistDefAttFlt(vlistID,varID,name,len,dp) bind(c,name='vlistDefAttFlt')
+        integer(c_int) function vlistDefAttFlt(vlistID,varID,name,len,dp_vec) bind(c,name='vlistDefAttFlt')
           import :: c_int,c_char,c_double
           integer(c_int), value :: vlistID
           integer(c_int), value :: varID
           character(c_char), dimension(*) :: name
           integer(c_int), value :: len
-          real(c_double), intent(in),dimension(*) :: dp
+          real(c_double), intent(in),dimension(*) :: dp_vec
        end function vlistDefAttFlt
       end interface
   
@@ -1134,24 +1269,24 @@ module mo_cdi
       end interface
   
       interface
-        integer(c_int) function vlistInqAttInt(vlistID,varID,name,mlen,ip) bind(c,name='vlistInqAttInt')
+        integer(c_int) function vlistInqAttInt(vlistID,varID,name,mlen,ip_vec) bind(c,name='vlistInqAttInt')
           import :: c_int,c_char
           integer(c_int), value :: vlistID
           integer(c_int), value :: varID
           character(c_char), dimension(*) :: name
           integer(c_int), value :: mlen
-          integer(c_int), intent(out) :: ip
+          integer(c_int), intent(out),dimension(*) :: ip_vec
        end function vlistInqAttInt
       end interface
   
       interface
-        integer(c_int) function vlistInqAttFlt(vlistID,varID,name,mlen,dp) bind(c,name='vlistInqAttFlt')
+        integer(c_int) function vlistInqAttFlt(vlistID,varID,name,mlen,dp_vec) bind(c,name='vlistInqAttFlt')
           import :: c_int,c_char,c_double
           integer(c_int), value :: vlistID
           integer(c_int), value :: varID
           character(c_char), dimension(*) :: name
           integer(c_int), value :: mlen
-          real(c_double), intent(out),dimension(*) :: dp
+          real(c_double), intent(out),dimension(*) :: dp_vec
        end function vlistInqAttFlt
       end interface
   
@@ -1189,18 +1324,18 @@ module mo_cdi
       end interface
   
       interface
-        subroutine gridDefMask(gridID,mask) bind(c,name='gridDefMask')
+        subroutine gridDefMask(gridID,mask_vec) bind(c,name='gridDefMask')
           import :: c_int
           integer(c_int), value :: gridID
-          integer(c_int), intent(in) :: mask
+          integer(c_int), intent(in),dimension(*) :: mask_vec
        end subroutine gridDefMask
       end interface
   
       interface
-        integer(c_int) function gridInqMask(gridID,mask) bind(c,name='gridInqMask')
+        integer(c_int) function gridInqMask(gridID,mask_vec) bind(c,name='gridInqMask')
           import :: c_int
           integer(c_int), value :: gridID
-          integer(c_int), intent(out) :: mask
+          integer(c_int), intent(out),dimension(*) :: mask_vec
        end function gridInqMask
       end interface
   
@@ -1285,34 +1420,34 @@ module mo_cdi
       end interface
   
       interface
-        subroutine gridDefXvals(gridID,xvals) bind(c,name='gridDefXvals')
+        subroutine gridDefXvals(gridID,xvals_vec) bind(c,name='gridDefXvals')
           import :: c_int,c_double
           integer(c_int), value :: gridID
-          real(c_double), intent(in),dimension(*) :: xvals
+          real(c_double), intent(in),dimension(*) :: xvals_vec
        end subroutine gridDefXvals
       end interface
   
       interface
-        integer(c_int) function gridInqXvals(gridID,xvals) bind(c,name='gridInqXvals')
+        integer(c_int) function gridInqXvals(gridID,xvals_vec) bind(c,name='gridInqXvals')
           import :: c_int,c_double
           integer(c_int), value :: gridID
-          real(c_double), intent(out),dimension(*) :: xvals
+          real(c_double), intent(out),dimension(*) :: xvals_vec
        end function gridInqXvals
       end interface
   
       interface
-        subroutine gridDefYvals(gridID,yvals) bind(c,name='gridDefYvals')
+        subroutine gridDefYvals(gridID,yvals_vec) bind(c,name='gridDefYvals')
           import :: c_int,c_double
           integer(c_int), value :: gridID
-          real(c_double), intent(in),dimension(*) :: yvals
+          real(c_double), intent(in),dimension(*) :: yvals_vec
        end subroutine gridDefYvals
       end interface
   
       interface
-        integer(c_int) function gridInqYvals(gridID,yvals) bind(c,name='gridInqYvals')
+        integer(c_int) function gridInqYvals(gridID,yvals_vec) bind(c,name='gridInqYvals')
           import :: c_int,c_double
           integer(c_int), value :: gridID
-          real(c_double), intent(out),dimension(*) :: yvals
+          real(c_double), intent(out),dimension(*) :: yvals_vec
        end function gridInqYvals
       end interface
   
@@ -1627,13 +1762,13 @@ module mo_cdi
         subroutine gridInqLCC(gridID,originLon,originLat,lonParY,lat1,lat2,xinc,yinc,projflag,scanflag) bind(c,name='gridInqLCC')
           import :: c_int,c_double
           integer(c_int), value :: gridID
-          real(c_double), intent(out),dimension(*) :: originLon
-          real(c_double), intent(out),dimension(*) :: originLat
-          real(c_double), intent(out),dimension(*) :: lonParY
-          real(c_double), intent(out),dimension(*) :: lat1
-          real(c_double), intent(out),dimension(*) :: lat2
-          real(c_double), intent(out),dimension(*) :: xinc
-          real(c_double), intent(out),dimension(*) :: yinc
+          real(c_double), intent(out) :: originLon
+          real(c_double), intent(out) :: originLat
+          real(c_double), intent(out) :: lonParY
+          real(c_double), intent(out) :: lat1
+          real(c_double), intent(out) :: lat2
+          real(c_double), intent(out) :: xinc
+          real(c_double), intent(out) :: yinc
           integer(c_int), intent(out) :: projflag
           integer(c_int), intent(out) :: scanflag
        end subroutine gridInqLCC
@@ -1655,11 +1790,11 @@ module mo_cdi
         subroutine gridInqLcc2(gridID,earth_radius,lon_0,lat_0,lat_1,lat_2) bind(c,name='gridInqLcc2')
           import :: c_int,c_double
           integer(c_int), value :: gridID
-          real(c_double), intent(out),dimension(*) :: earth_radius
-          real(c_double), intent(out),dimension(*) :: lon_0
-          real(c_double), intent(out),dimension(*) :: lat_0
-          real(c_double), intent(out),dimension(*) :: lat_1
-          real(c_double), intent(out),dimension(*) :: lat_2
+          real(c_double), intent(out) :: earth_radius
+          real(c_double), intent(out) :: lon_0
+          real(c_double), intent(out) :: lat_0
+          real(c_double), intent(out) :: lat_1
+          real(c_double), intent(out) :: lat_2
        end subroutine gridInqLcc2
       end interface
   
@@ -1677,25 +1812,25 @@ module mo_cdi
         subroutine gridInqLaea(gridID,earth_radius,lon_0,lat_0) bind(c,name='gridInqLaea')
           import :: c_int,c_double
           integer(c_int), value :: gridID
-          real(c_double), intent(out),dimension(*) :: earth_radius
-          real(c_double), intent(out),dimension(*) :: lon_0
-          real(c_double), intent(out),dimension(*) :: lat_0
+          real(c_double), intent(out) :: earth_radius
+          real(c_double), intent(out) :: lon_0
+          real(c_double), intent(out) :: lat_0
        end subroutine gridInqLaea
       end interface
   
       interface
-        subroutine gridDefArea(gridID,area) bind(c,name='gridDefArea')
+        subroutine gridDefArea(gridID,area_vec) bind(c,name='gridDefArea')
           import :: c_int,c_double
           integer(c_int), value :: gridID
-          real(c_double), intent(in),dimension(*) :: area
+          real(c_double), intent(in),dimension(*) :: area_vec
        end subroutine gridDefArea
       end interface
   
       interface
-        subroutine gridInqArea(gridID,area) bind(c,name='gridInqArea')
+        subroutine gridInqArea(gridID,area_vec) bind(c,name='gridInqArea')
           import :: c_int,c_double
           integer(c_int), value :: gridID
-          real(c_double), intent(out),dimension(*) :: area
+          real(c_double), intent(out),dimension(*) :: area_vec
        end subroutine gridInqArea
       end interface
   
@@ -1722,51 +1857,51 @@ module mo_cdi
       end interface
   
       interface
-        subroutine gridDefXbounds(gridID,xbounds) bind(c,name='gridDefXbounds')
+        subroutine gridDefXbounds(gridID,xbounds_vec) bind(c,name='gridDefXbounds')
           import :: c_int,c_double
           integer(c_int), value :: gridID
-          real(c_double), intent(in),dimension(*) :: xbounds
+          real(c_double), intent(in),dimension(*) :: xbounds_vec
        end subroutine gridDefXbounds
       end interface
   
       interface
-        integer(c_int) function gridInqXbounds(gridID,xbounds) bind(c,name='gridInqXbounds')
+        integer(c_int) function gridInqXbounds(gridID,xbounds_vec) bind(c,name='gridInqXbounds')
           import :: c_int,c_double
           integer(c_int), value :: gridID
-          real(c_double), intent(out),dimension(*) :: xbounds
+          real(c_double), intent(out),dimension(*) :: xbounds_vec
        end function gridInqXbounds
       end interface
   
       interface
-        subroutine gridDefYbounds(gridID,ybounds) bind(c,name='gridDefYbounds')
+        subroutine gridDefYbounds(gridID,ybounds_vec) bind(c,name='gridDefYbounds')
           import :: c_int,c_double
           integer(c_int), value :: gridID
-          real(c_double), intent(in),dimension(*) :: ybounds
+          real(c_double), intent(in),dimension(*) :: ybounds_vec
        end subroutine gridDefYbounds
       end interface
   
       interface
-        integer(c_int) function gridInqYbounds(gridID,ybounds) bind(c,name='gridInqYbounds')
+        integer(c_int) function gridInqYbounds(gridID,ybounds_vec) bind(c,name='gridInqYbounds')
           import :: c_int,c_double
           integer(c_int), value :: gridID
-          real(c_double), intent(out),dimension(*) :: ybounds
+          real(c_double), intent(out),dimension(*) :: ybounds_vec
        end function gridInqYbounds
       end interface
   
       interface
-        subroutine gridDefRowlon(gridID,nrowlon,rowlon) bind(c,name='gridDefRowlon')
+        subroutine gridDefRowlon(gridID,nrowlon,rowlon_vec) bind(c,name='gridDefRowlon')
           import :: c_int
           integer(c_int), value :: gridID
           integer(c_int), value :: nrowlon
-          integer(c_int), intent(in) :: rowlon
+          integer(c_int), intent(in),dimension(*) :: rowlon_vec
        end subroutine gridDefRowlon
       end interface
   
       interface
-        subroutine gridInqRowlon(gridID,rowlon) bind(c,name='gridInqRowlon')
+        subroutine gridInqRowlon(gridID,rowlon_vec) bind(c,name='gridInqRowlon')
           import :: c_int
           integer(c_int), value :: gridID
-          integer(c_int), intent(out) :: rowlon
+          integer(c_int), intent(out),dimension(*) :: rowlon_vec
        end subroutine gridInqRowlon
       end interface
   
@@ -1776,6 +1911,21 @@ module mo_cdi
           integer(c_int), value :: gridID
           integer(c_int), value :: gridtype
        end subroutine gridChangeType
+      end interface
+  
+      interface
+        subroutine gridDefComplexPacking(gridID,lpack) bind(c,name='gridDefComplexPacking')
+          import :: c_int
+          integer(c_int), value :: gridID
+          integer(c_int), value :: lpack
+       end subroutine gridDefComplexPacking
+      end interface
+  
+      interface
+        integer(c_int) function gridInqComplexPacking(gridID) bind(c,name='gridInqComplexPacking')
+          import :: c_int
+          integer(c_int), value :: gridID
+       end function gridInqComplexPacking
       end interface
   
       interface
@@ -1844,18 +1994,18 @@ module mo_cdi
       end interface
   
       interface
-        subroutine zaxisDefLevels(zaxisID,levels) bind(c,name='zaxisDefLevels')
+        subroutine zaxisDefLevels(zaxisID,levels_vec) bind(c,name='zaxisDefLevels')
           import :: c_int,c_double
           integer(c_int), value :: zaxisID
-          real(c_double), intent(in),dimension(*) :: levels
+          real(c_double), intent(in),dimension(*) :: levels_vec
        end subroutine zaxisDefLevels
       end interface
   
       interface
-        subroutine zaxisInqLevels(zaxisID,levels) bind(c,name='zaxisInqLevels')
+        subroutine zaxisInqLevels(zaxisID,levels_vec) bind(c,name='zaxisInqLevels')
           import :: c_int,c_double
           integer(c_int), value :: zaxisID
-          real(c_double), intent(out),dimension(*) :: levels
+          real(c_double), intent(out),dimension(*) :: levels_vec
        end subroutine zaxisInqLevels
       end interface
   
@@ -1962,11 +2112,11 @@ module mo_cdi
       end interface
   
       interface
-        subroutine zaxisDefVct(zaxisID,size,vct) bind(c,name='zaxisDefVct')
+        subroutine zaxisDefVct(zaxisID,size,vct_vec) bind(c,name='zaxisDefVct')
           import :: c_int,c_double
           integer(c_int), value :: zaxisID
           integer(c_int), value :: size
-          real(c_double), intent(in),dimension(*) :: vct
+          real(c_double), intent(in),dimension(*) :: vct_vec
        end subroutine zaxisDefVct
       end interface
   
@@ -1985,26 +2135,26 @@ module mo_cdi
       end interface
   
       interface
-        integer(c_int) function zaxisInqLbounds(zaxisID,lbounds) bind(c,name='zaxisInqLbounds')
+        integer(c_int) function zaxisInqLbounds(zaxisID,lbounds_vec) bind(c,name='zaxisInqLbounds')
           import :: c_int,c_double
           integer(c_int), value :: zaxisID
-          real(c_double), intent(out),dimension(*) :: lbounds
+          real(c_double), intent(out),dimension(*) :: lbounds_vec
        end function zaxisInqLbounds
       end interface
   
       interface
-        integer(c_int) function zaxisInqUbounds(zaxisID,ubounds) bind(c,name='zaxisInqUbounds')
+        integer(c_int) function zaxisInqUbounds(zaxisID,ubounds_vec) bind(c,name='zaxisInqUbounds')
           import :: c_int,c_double
           integer(c_int), value :: zaxisID
-          real(c_double), intent(out),dimension(*) :: ubounds
+          real(c_double), intent(out),dimension(*) :: ubounds_vec
        end function zaxisInqUbounds
       end interface
   
       interface
-        integer(c_int) function zaxisInqWeights(zaxisID,weights) bind(c,name='zaxisInqWeights')
+        integer(c_int) function zaxisInqWeights(zaxisID,weights_vec) bind(c,name='zaxisInqWeights')
           import :: c_int,c_double
           integer(c_int), value :: zaxisID
-          real(c_double), intent(out),dimension(*) :: weights
+          real(c_double), intent(out),dimension(*) :: weights_vec
        end function zaxisInqWeights
       end interface
   
@@ -2025,26 +2175,26 @@ module mo_cdi
       end interface
   
       interface
-        subroutine zaxisDefLbounds(zaxisID,lbounds) bind(c,name='zaxisDefLbounds')
+        subroutine zaxisDefLbounds(zaxisID,lbounds_vec) bind(c,name='zaxisDefLbounds')
           import :: c_int,c_double
           integer(c_int), value :: zaxisID
-          real(c_double), intent(in),dimension(*) :: lbounds
+          real(c_double), intent(in),dimension(*) :: lbounds_vec
        end subroutine zaxisDefLbounds
       end interface
   
       interface
-        subroutine zaxisDefUbounds(zaxisID,ubounds) bind(c,name='zaxisDefUbounds')
+        subroutine zaxisDefUbounds(zaxisID,ubounds_vec) bind(c,name='zaxisDefUbounds')
           import :: c_int,c_double
           integer(c_int), value :: zaxisID
-          real(c_double), intent(in),dimension(*) :: ubounds
+          real(c_double), intent(in),dimension(*) :: ubounds_vec
        end subroutine zaxisDefUbounds
       end interface
   
       interface
-        subroutine zaxisDefWeights(zaxisID,weights) bind(c,name='zaxisDefWeights')
+        subroutine zaxisDefWeights(zaxisID,weights_vec) bind(c,name='zaxisDefWeights')
           import :: c_int,c_double
           integer(c_int), value :: zaxisID
-          real(c_double), intent(in),dimension(*) :: weights
+          real(c_double), intent(in),dimension(*) :: weights_vec
        end subroutine zaxisDefWeights
       end interface
   
@@ -2130,6 +2280,13 @@ module mo_cdi
           import :: c_int
           integer(c_int), value :: taxisID
        end function taxisHasBounds
+      end interface
+  
+      interface
+        subroutine taxisDeleteBounds(taxisID) bind(c,name='taxisDeleteBounds')
+          import :: c_int
+          integer(c_int), value :: taxisID
+       end subroutine taxisDeleteBounds
       end interface
   
       interface
@@ -2529,6 +2686,13 @@ module mo_cdi
       public :: cdiDefMissval
       public :: cdiInqMissval
       public :: cdiDefGlobal
+      public :: cdiParamToString
+      public :: cdiDecodeParam
+      public :: cdiEncodeParam
+      public :: cdiDecodeDate
+      public :: cdiEncodeDate
+      public :: cdiDecodeTime
+      public :: cdiEncodeTime
       public :: streamOpenRead
       public :: streamOpenWrite
       public :: streamOpenAppend
@@ -2567,6 +2731,7 @@ module mo_cdi
       public :: vlistCat
       public :: vlistMerge
       public :: vlistPrint
+      public :: vlistNumber
       public :: vlistNvars
       public :: vlistNgrids
       public :: vlistNzaxis
@@ -2601,10 +2766,13 @@ module mo_cdi
       public :: vlistInqVarZtype
       public :: vlistDefVarZlevel
       public :: vlistInqVarZlevel
+      public :: vlistDefVarParam
+      public :: vlistInqVarParam
       public :: vlistDefVarCode
       public :: vlistInqVarCode
       public :: vlistDefVarDatatype
       public :: vlistInqVarDatatype
+      public :: vlistInqVarNumber
       public :: vlistDefVarInstitut
       public :: vlistInqVarInstitut
       public :: vlistDefVarModel
@@ -2613,10 +2781,10 @@ module mo_cdi
       public :: vlistInqVarTable
       public :: vlistDefVarName
       public :: vlistInqVarName
-      public :: vlistDefVarLongname
       public :: vlistDefVarStdname
-      public :: vlistInqVarLongname
       public :: vlistInqVarStdname
+      public :: vlistDefVarLongname
+      public :: vlistInqVarLongname
       public :: vlistDefVarUnits
       public :: vlistInqVarUnits
       public :: vlistDefVarMissval
@@ -2625,6 +2793,8 @@ module mo_cdi
       public :: vlistInqVarScalefactor
       public :: vlistDefVarAddoffset
       public :: vlistInqVarAddoffset
+      public :: vlistDefVarTsteptype
+      public :: vlistInqVarTsteptype
       public :: vlistDefVarTimave
       public :: vlistInqVarTimave
       public :: vlistDefVarTimaccu
@@ -2724,6 +2894,8 @@ module mo_cdi
       public :: gridDefRowlon
       public :: gridInqRowlon
       public :: gridChangeType
+      public :: gridDefComplexPacking
+      public :: gridInqComplexPacking
       public :: zaxisName
       public :: zaxisCreate
       public :: zaxisDestroy
@@ -2770,6 +2942,7 @@ module mo_cdi
       public :: taxisDefRdate
       public :: taxisDefRtime
       public :: taxisHasBounds
+      public :: taxisDeleteBounds
       public :: taxisDefVdateBounds
       public :: taxisDefVtimeBounds
       public :: taxisInqVdateBounds
@@ -2825,12 +2998,16 @@ module mo_cdi
       public :: CDI_GLOBAL
       public :: CDI_BIGENDIAN
       public :: CDI_LITTLEENDIAN
+      public :: CDI_REAL
+      public :: CDI_COMP
+      public :: CDI_BOTH
       public :: CDI_ESYSTEM
       public :: CDI_EINVAL
       public :: CDI_EUFTYPE
       public :: CDI_ELIBNAVAIL
       public :: CDI_EUFSTRUCT
       public :: CDI_EUNC4
+      public :: CDI_ELIMIT
       public :: FILETYPE_GRB
       public :: FILETYPE_GRB2
       public :: FILETYPE_NC
@@ -2844,6 +3021,7 @@ module mo_cdi
       public :: COMPRESS_GZIP
       public :: COMPRESS_BZIP2
       public :: COMPRESS_ZIP
+      public :: COMPRESS_JPEG
       public :: DATATYPE_PACK
       public :: DATATYPE_PACK1
       public :: DATATYPE_PACK2
@@ -2877,6 +3055,8 @@ module mo_cdi
       public :: DATATYPE_PACK30
       public :: DATATYPE_PACK31
       public :: DATATYPE_PACK32
+      public :: DATATYPE_CPX32
+      public :: DATATYPE_CPX64
       public :: DATATYPE_FLT32
       public :: DATATYPE_FLT64
       public :: DATATYPE_INT8
@@ -2888,6 +3068,7 @@ module mo_cdi
       public :: DATATYPE_INT
       public :: DATATYPE_FLT
       public :: DATATYPE_TXT
+      public :: DATATYPE_CPX
       public :: GRID_GENERIC
       public :: GRID_GAUSSIAN
       public :: GRID_GAUSSIAN_REDUCED
@@ -2926,6 +3107,18 @@ module mo_cdi
       public :: TUNIT_MONTH
       public :: TUNIT_YEAR
       public :: TUNIT_QUARTER
+      public :: TUNIT_3HOURS
+      public :: TUNIT_6HOURS
+      public :: TUNIT_12HOURS
+      public :: TSTEP_INSTANT
+      public :: TSTEP_AVG
+      public :: TSTEP_ACCUM
+      public :: TSTEP_MAX
+      public :: TSTEP_MIN
+      public :: TSTEP_DIFF
+      public :: TSTEP_RANGE
+      public :: TSTEP_INSTANT2
+      public :: TSTEP_INSTANT3
       public :: CALENDAR_STANDARD
       public :: CALENDAR_PROLEPTIC
       public :: CALENDAR_360DAYS
@@ -2953,5 +3146,3 @@ contains
 
 end module mo_cdi
   
- 
- 

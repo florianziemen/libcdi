@@ -1,20 +1,3 @@
-2010-07-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
-
-	* cdfInqContents: fix problem of wrong stdname for grid description [report: Michael Boettinger]
-	* Version 1.4.5.1 released
-
-2010-07-05 Edi Kirk <E.Kirk@gmx.de>
-
-	* GRIB1 decode: Correct ZeroShiftError of simple packed spherical harmonics
-
-2010-07-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
-
-	* cdfInqContents: use complex packing for spectral data [report: Edi Kirk]
-
-2010-06-30  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
-
-	* using CGRIBEX library version 1.4.5.1 (szip bug fix for 24 bit data)
-
 2010-06-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* using CGRIBEX library version 1.4.5

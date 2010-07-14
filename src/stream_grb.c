@@ -413,10 +413,10 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
   size_t buffersize;
   static int lszip_warn = 1;
 
-  buffersize = gribbuffersize + 1000; /* compressed record can be greater than source record */
+  buffersize = gribbuffersize;
   buffer = (unsigned char *) malloc(buffersize);
 
-  /*  memcpy(buffer, gribbuffer, gribbuffersize); */
+  memcpy(buffer, gribbuffer, gribbuffersize);
   
   if ( filetype == FILETYPE_GRB )
     {

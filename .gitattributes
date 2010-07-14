@@ -14,12 +14,15 @@ app/Makefile.in -text
 app/cdi.c -text
 app/createtable.c -text
 app/printinfo.h -text
+/config.settings.in -text
+config/compile -text
 config/config.guess -text
 config/config.sub -text
 config/default -text
 config/depcomp -text
 config/install-sh -text
 config/interface.rb -text
+config/ltmain.sh -text
 config/missing -text
 config/mkinstalldirs -text
 /configure -text
@@ -117,6 +120,11 @@ interfaces/testdata/gridTest.nc -text
 interfaces/testdata/mulval.grb -text
 interfaces/testdata/mulval.nc -text
 m4/acx_sl_mod_suffix.m4 -text
+m4/libtool.m4 -text
+m4/ltoptions.m4 -text
+m4/ltsugar.m4 -text
+m4/ltversion.m4 -text
+m4/lt~obsolete.m4 -text
 src/Makefile.am -text
 src/Makefile.in -text
 src/basetime.c -text
