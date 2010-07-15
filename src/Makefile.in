@@ -88,9 +88,6 @@ am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	tsteps.lo util.lo varscan.lo version.lo vlist.lo vlist_att.lo \
 	vlist_var.lo zaxis.lo stream.lo swap.lo
 libcdi_la_OBJECTS = $(am_libcdi_la_OBJECTS)
-libcdi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(libcdi_la_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -348,7 +345,6 @@ libcdi_la_SOURCES = \
         swap.c
 
 libcdi_la_LIBADD = @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@
-libcdi_la_LDFLAGS = -release @PACKAGE_VERSION@ @LDFLAGS@
 LOCALTARGETS = $(am__append_2)
 #
 CLEANFILES = `ls *~` cdilib.c $(am__append_3)
@@ -436,7 +432,7 @@ clean-libLTLIBRARIES:
 	  rm -f "$${dir}/so_locations"; \
 	done
 libcdi.la: $(libcdi_la_OBJECTS) $(libcdi_la_DEPENDENCIES) 
-	$(libcdi_la_LINK) -rpath $(libdir) $(libcdi_la_OBJECTS) $(libcdi_la_LIBADD) $(LIBS)
+	$(LINK) -rpath $(libdir) $(libcdi_la_OBJECTS) $(libcdi_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

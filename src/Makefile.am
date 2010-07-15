@@ -93,7 +93,6 @@ libcdi_la_SOURCES = 	 \
         swap.c
 
 libcdi_la_LIBADD  = @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@
-libcdi_la_LDFLAGS = -release @PACKAGE_VERSION@ @LDFLAGS@
 #
 cdilib.c:
 	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src

@@ -26978,11 +26978,9 @@ fi
 
 #  ----------------------------------------------------------------------
 #  Show configuration
-$as_echo "#======================================================================="
 { $as_echo "$as_me:${as_lineno-$LINENO}: CDI is configured with the following options:" >&5
 $as_echo "$as_me: CDI is configured with the following options:" >&6;}
 cat config.settings
-$as_echo "#======================================================================="
 
 if test "$ac_cv_prog_cc_c99" = "no"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}:
