@@ -270,8 +270,7 @@ AC_ARG_WITH([grib_api],
                                  AC_SEARCH_LIBS([grib_get_message],
                                                 [grib_api],
                                                 [AC_DEFINE([HAVE_LIBGRIB_API],[1],[GRIB_API library is present if defined to 1])],
-                                                [AC_MSG_ERROR([Could not link to grib_api library])],
-                                                [-lopenjpeg])
+                                                [AC_MSG_ERROR([Could not link to grib_api library])])
                                  AC_SUBST([GRIB_API_LDFLAGS],[" -L$GRIB_API_ROOT/lib -lgrib_api"])
                                  AC_SUBST([GRIB_API_INCLUDE],[" -I$GRIB_API_ROOT/include"])],
                                 [AC_MSG_ERROR([$GRIB_API_ROOT is not a directory! GRIB_API suppressed])])])],
