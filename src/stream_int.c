@@ -180,6 +180,7 @@ void cdiInitialize(void)
 	  if ( CDI_Debug )
 	    Message(func, "Default calendar set to %s!", envString);
 	}
+      gribSetCalendar(cdiDefaultCalendar);
 
       envString = getenv("PARTAB_INTERN");
       if ( envString ) cdiPartabIntern = atoi(envString);
