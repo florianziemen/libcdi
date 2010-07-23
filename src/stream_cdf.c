@@ -3817,7 +3817,7 @@ int cdfTimeDimID(int fileID, int ndims, int nvars)
 	      cdf_inq_attname(fileID, varid, iatt, attname);
 	      if ( memcmp(attname, "units", 5) == 0 )
 		{
-		  cdfGetAttText(fileID, varid, "units", 256, timeunits);
+		  cdfGetAttText(fileID, varid, "units", sizeof(timeunits), timeunits);
 		  strtolower(timeunits);
 
 		  if ( memcmp(timeunits, "sec",    3) == 0 ||
@@ -4713,7 +4713,6 @@ int cdfInqContents(int streamID)
       if ( xtype == NC_CHAR )
 	{
 	  cdfGetAttText(fileID, NC_GLOBAL, attname, attstringlen-1, attstring);
-	  attstring[attlen+1] = 0;
 
 	  if ( attlen > 0 && attstring[0] != 0 )
 	    {
@@ -5940,7 +5939,7 @@ int cdfInqContents(int streamID)
 	      else if ( attrtype == NC_CHAR )
 		{
 		  cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
-		  attstring[attlen] = 0;
+		  attlen = 1 + strlen(attstring);
 		  vlistDefAttTxt(vlistID, varID, attname, (int)attlen, attstring);
 		  if ( CDI_Debug )
 		    printf("txt: %s.%s = %s\n", ncvars[ncvarid].name, attname, attstring);
