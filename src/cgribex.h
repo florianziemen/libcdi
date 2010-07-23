@@ -186,7 +186,7 @@ void  gribExDP(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 const char *cgribexLibraryVersion(void);
 
 void  gribDebug(int debug);
-
+void  gribSetCalendar(int calendar);
 
 void  gribDateTime(int *isec1, int *date, int *time);
 int   gribRefDate(int *isec1);
@@ -208,6 +208,8 @@ void  gribPrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffe
 void  gribPrintGDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
 void  gribPrintBMS(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
 void  gribPrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
+void  gribCheck1(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
+void  gribRepair1(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
 
 int grib1Sections(unsigned char *gribbuffer, long recsize, unsigned char **pdsp,
 		  unsigned char **gdsp, unsigned char **bmsp, unsigned char **bdsp);
