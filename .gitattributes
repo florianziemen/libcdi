@@ -223,6 +223,7 @@ tables/cosmo250 -text
 tables/default_tables -text
 tables/echam4 -text
 tables/echam5 -text
+tables/echam6 -text
 tables/ecmwf -text
 tables/gen_tableheaderfile -text
 tables/mpiom1 -text

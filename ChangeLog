@@ -1,3 +1,7 @@
+2010-07-26  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added ECHAM6 GRIB1 code table
+
 2010-07-23  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cdfInqContents: fixed out of bounds access to attstring [report: Heiner Widmann]
