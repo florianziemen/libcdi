@@ -852,7 +852,7 @@ void iegCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
     Message(func, "varID = %d levelID = %d", varID, levelID);
 }
 
-static
+
 void iegDateTime(int *pdb, int *date, int *time)
 {
   int ryear, rmonth, rday, rhour, rminute;
