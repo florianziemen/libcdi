@@ -1726,7 +1726,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
       if ( lwarn )
 	{
 	  lwarn = FALSE;
-	  Warning(func, "Curvilinear grids are unsupported in GRIB format! Created wrong GDS!");
+	  Warning(func, "Curvilinear grids are unsupported in GRIB1! Created wrong GDS!");
 	}
       gridtype = GRID_LONLAT;
     }
@@ -1910,7 +1910,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
       }
     default:
       {
-	Warning(func, "The GRIB library can not store fields on the used grid!");
+	Warning(func, "The CGRIBEX library can not store fields on the used grid!");
 	Error(func, "Unsupported grid type: %s", gridNamePtr(gridtype));
       }
     }

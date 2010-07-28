@@ -77,6 +77,11 @@ int gribapiGetGridType(grib_handle *gh, int gribgridtype)
 	gridtype = GRID_GME;
 	break;
       }
+    case  GRIBAPI_GTYPE_CELL:
+      {
+	gridtype = GRID_CELL;
+	break;
+      }
     default:
       {
 	gridtype = GRID_GENERIC;
@@ -522,17 +527,27 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 	*/
 	break;
       }
-      /*
     case GRID_GME:
       {
-	grid.size  = ISEC4_NumValues;
-	grid.nd    = ISEC2_GME_ND;
-	grid.ni    = ISEC2_GME_NI;
-	grid.ni2   = ISEC2_GME_NI2;
-	grid.ni3   = ISEC2_GME_NI3;
+	grid.size  = numberOfPoints;
+	if ( grib_get_long(gh, "nd", &lpar) == 0 ) grid.nd  = lpar;
+	if ( grib_get_long(gh, "Ni", &lpar) == 0 ) grid.ni  = lpar;
+	if ( grib_get_long(gh, "n2", &lpar) == 0 ) grid.ni2 = lpar;
+	if ( grib_get_long(gh, "n3", &lpar) == 0 ) grid.ni3 = lpar;
+
 	break;
       }
-      */
+    case GRID_CELL:
+      {
+	int n1 = 0, n2 = 0;
+	grid.size  = numberOfPoints;
+	if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )        n1 = lpar;
+	if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 ) n2 = lpar;
+
+	gridtype = GRID_GENERIC;
+
+	break;
+      }
     case GRID_GENERIC:
       {
 	int nlon = 0, nlat = 0;
@@ -2142,22 +2157,29 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 
 	break;
       }
-      /*
     case GRID_GME:
       {
-	ISEC2_GridType   = GRIBAPI_GTYPE_GME;
-	ISEC2_GME_ND     = gridInqGMEnd(gridID);
-	ISEC2_GME_NI     = gridInqGMEni(gridID);
-	ISEC2_GME_NI2    = gridInqGMEni2(gridID);
-	ISEC2_GME_NI3    = gridInqGMEni3(gridID);
-	ISEC2_GME_AFlag  = 0;
-	ISEC2_GME_LatPP  = 90000;
-	ISEC2_GME_LonPP  = 0;
-	ISEC2_GME_LonMPL = 0;
-	ISEC2_GME_BFlag  = 0;
+	GRIB_CHECK(grib_set_long(gh, "gridDefinitionTemplateNumber", GRIBAPI_GTYPE_GME), 0);
+	GRIB_CHECK(grib_set_long(gh, "nd", gridInqGMEnd(gridID)), 0);
+	GRIB_CHECK(grib_set_long(gh, "Ni", gridInqGMEni(gridID)), 0);
+	GRIB_CHECK(grib_set_long(gh, "n2", gridInqGMEni2(gridID)), 0);
+	GRIB_CHECK(grib_set_long(gh, "n3", gridInqGMEni3(gridID)), 0);
+	GRIB_CHECK(grib_set_long(gh, "latitudeOfThePolePointOfTheIcosahedronOnTheSphere", 90000), 0);
+	GRIB_CHECK(grib_set_long(gh, "longitudeOfThePolePointOfTheIcosahedronOnTheSphere", 0), 0);
+
+	GRIB_CHECK(grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
+	GRIB_CHECK(grib_set_long(gh, "totalNumberOfGridPoints", gridInqSize(gridID)), 0);
+
 	break;
       }
-      */
+    case GRID_CELL:
+      {
+	GRIB_CHECK(grib_set_long(gh, "gridDefinitionTemplateNumber", GRIBAPI_GTYPE_CELL), 0);
+	GRIB_CHECK(grib_set_long(gh, "numberOfGridUsed", 0), 0);
+	GRIB_CHECK(grib_set_long(gh, "numberOfGridInReference", 0), 0);	
+
+	break;
+      }
     default:
       Error(func, "Unsupported grid type: %s", gridNamePtr(gridtype));
     }

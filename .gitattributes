@@ -228,6 +228,7 @@ tables/ecmwf -text
 tables/gen_tableheaderfile -text
 tables/mpiom1 -text
 tables/remo -text
+tables/template.3.101.def -text
 tables/wmo_001 -text
 tests/Makefile.am -text
 tests/Makefile.in -text

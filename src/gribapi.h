@@ -28,7 +28,8 @@
 #define  GRIBAPI_GTYPE_GAUSSIAN_ROTSTR      43  /*  rotated and stretched gaussian grid      */
 #define  GRIBAPI_GTYPE_LCC                  30  /*  Lambert conformal                        */
 #define  GRIBAPI_GTYPE_SPECTRAL             50  /*  spherical harmonics                      */
-#define  GRIBAPI_GTYPE_GME                 192  /*  hexagonal GME grid                       */
+#define  GRIBAPI_GTYPE_GME                 100  /*  hexagonal GME grid                       */
+#define  GRIBAPI_GTYPE_CELL                101  /*  General Unstructured Grid                */
 
 const char *gribapiLibraryVersion(void);
 void gribapiDefHandles(int streamID);
