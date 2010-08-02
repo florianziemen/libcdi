@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   June 2010
+! Uwe Schulzweida, MPI-MET, Hamburg,   August 2010
 !
 
       INTEGER    CDI_UNDEFID           
@@ -1094,15 +1094,15 @@
 !                                    (INTEGER         gridID)
       EXTERNAL        gridCompress
 
-!                     gridDefMask
+!                     gridDefMaskGME
 !                                    (INTEGER         gridID,
 !                                     INTEGER         mask_vec)
-      EXTERNAL        gridDefMask
+      EXTERNAL        gridDefMaskGME
 
-      INTEGER         gridInqMask
+      INTEGER         gridInqMaskGME
 !                                    (INTEGER         gridID,
 !                                     INTEGER         mask_vec)
-      EXTERNAL        gridInqMask
+      EXTERNAL        gridInqMaskGME
 
 !                     gridPrint
 !                                    (INTEGER         gridID,

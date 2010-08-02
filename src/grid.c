@@ -177,6 +177,7 @@ void grid_init_entry(grid_t *gridptr)
 
   gridptr->type         = CDI_UNDEFID;
   gridptr->mask         = NULL;
+  gridptr->mask_gme     = NULL;
   gridptr->xvals        = NULL;
   gridptr->yvals        = NULL;
   gridptr->area         = NULL;
@@ -633,13 +634,14 @@ void gridDestroy(int gridID)
   
   grid_check_ptr(func, gridptr);
 
-  if ( gridptr->mask    ) free(gridptr->mask);
-  if ( gridptr->xvals   ) free(gridptr->xvals);
-  if ( gridptr->yvals   ) free(gridptr->yvals);
-  if ( gridptr->area    ) free(gridptr->area);
-  if ( gridptr->xbounds ) free(gridptr->xbounds);
-  if ( gridptr->ybounds ) free(gridptr->ybounds);
-  if ( gridptr->rowlon  ) free(gridptr->rowlon);
+  if ( gridptr->mask     ) free(gridptr->mask);
+  if ( gridptr->mask_gme ) free(gridptr->mask_gme);
+  if ( gridptr->xvals    ) free(gridptr->xvals);
+  if ( gridptr->yvals    ) free(gridptr->yvals);
+  if ( gridptr->area     ) free(gridptr->area);
+  if ( gridptr->xbounds  ) free(gridptr->xbounds);
+  if ( gridptr->ybounds  ) free(gridptr->ybounds);
+  if ( gridptr->rowlon   ) free(gridptr->rowlon);
 
   grid_delete_entry(gridptr);
 }
@@ -1362,7 +1364,7 @@ void gridInqRowlon(int gridID, int *rowlon)
 int gridInqMask(int gridID, int *mask)
 {
   static char func[] = "gridInqMask";
-  long size;
+  long size, i;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1375,7 +1377,8 @@ int gridInqMask(int gridID, int *mask)
     Warning(func, "Size undefined for gridID = %d", gridID);
     
   if ( mask && gridptr->mask )
-    memcpy(mask, gridptr->mask, size*sizeof(int));
+    for ( i = 0; i < size; ++i )
+      mask[i] = gridptr->mask[i];
 
   if ( gridptr->mask == NULL ) size = 0;
 
@@ -1387,7 +1390,7 @@ void gridDefMask(int gridID, const int *mask)
 {
   static char func[] = "gridDefMask";
   int gridtype;
-  long size;
+  long size, i;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1402,11 +1405,65 @@ void gridDefMask(int gridID, const int *mask)
     Error(func, "Size undefined for gridID = %d", gridID);
     
   if ( gridptr->mask == NULL )
-    gridptr->mask = (int *) malloc(size*sizeof(int));
+    gridptr->mask = (mask_t *) malloc(size*sizeof(mask_t));
   else if ( CDI_Debug )
     Warning(func, "mask already defined!");
 
-  memcpy(gridptr->mask, mask, size*sizeof(int));
+  for ( i = 0; i < size; ++i )
+    gridptr->mask[i] = mask[i];
+}
+
+
+int gridInqMaskGME(int gridID, int *mask)
+{
+  static char func[] = "gridInqMaskGME";
+  long size, i;
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  grid_check_ptr(func, gridptr);
+
+  size = gridptr->size;
+
+  if ( CDI_Debug && size == 0 )
+    Warning(func, "Size undefined for gridID = %d", gridID);
+    
+  if ( mask && gridptr->mask_gme )
+    for ( i = 0; i < size; ++i )
+      mask[i] = gridptr->mask_gme[i];
+
+  if ( gridptr->mask_gme == NULL ) size = 0;
+
+  return (size);
+}
+
+
+void gridDefMaskGME(int gridID, const int *mask)
+{
+  static char func[] = "gridDefMaskGME";
+  int gridtype;
+  long size, i;
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  grid_check_ptr(func, gridptr);
+
+  gridtype = gridptr->type;
+
+  size = gridptr->size;
+
+  if ( size == 0 )
+    Error(func, "Size undefined for gridID = %d", gridID);
+    
+  if ( gridptr->mask_gme == NULL )
+    gridptr->mask_gme = (mask_t *) malloc(size*sizeof(mask_t));
+  else if ( CDI_Debug )
+    Warning(func, "mask already defined!");
+
+  for ( i = 0; i < size; ++i )
+    gridptr->mask_gme[i] = mask[i];
 }
 
 
@@ -2617,8 +2674,16 @@ int gridDuplicate(int gridID)
     {
       size = gridsize;
 
-      gridptrnew->mask = (int *) malloc(size*sizeof(int));
-      memcpy(gridptrnew->mask, gridptr->mask, size*sizeof(int));
+      gridptrnew->mask = (mask_t *) malloc(size*sizeof(mask_t));
+      memcpy(gridptrnew->mask, gridptr->mask, size*sizeof(mask_t));
+    }
+
+  if ( gridptr->mask_gme != NULL )
+    {
+      size = gridsize;
+
+      gridptrnew->mask_gme = (mask_t *) malloc(size*sizeof(mask_t));
+      memcpy(gridptrnew->mask_gme, gridptr->mask_gme, size*sizeof(mask_t));
     }
 
   return (gridIDnew);
@@ -2638,7 +2703,7 @@ void gridCompress(int gridID)
 
   if ( gridtype == GRID_CELL )
     {
-      if ( gridptr->mask != NULL )
+      if ( gridptr->mask_gme != NULL )
 	{
 	  long i, j, iv, nv;
 
@@ -2647,7 +2712,7 @@ void gridCompress(int gridID)
 	  j = 0;
 	  for ( i = 0; i < gridsize; i++ )
 	    {
-	      if ( gridptr->mask[i] )
+	      if ( gridptr->mask_gme[i] )
 		{
 		  if ( gridptr->xvals != NULL ) gridptr->xvals[j] = gridptr->xvals[i];
 		  if ( gridptr->yvals != NULL ) gridptr->yvals[j] = gridptr->yvals[i];
@@ -2684,8 +2749,8 @@ void gridCompress(int gridID)
 	  if ( gridptr->ybounds )
 	    gridptr->ybounds = (double *) realloc(gridptr->ybounds, nv*gridsize*sizeof(double));
 
-	  free(gridptr->mask);
-	  gridptr->mask = NULL;
+	  free(gridptr->mask_gme);
+	  gridptr->mask_gme = NULL;
 	}
     }
   else
@@ -2995,7 +3060,7 @@ void gridPrint(int gridID, int opt)
   int gridsize, xsize, ysize, xdim, ydim;
   int trunc;
   int nbyte0, nbyte;
-  int index;
+  int i;
   int nvertex, iv;
   const double *area    = gridInqAreaPtr(gridID);
   const double *xvals   = gridInqXvalsPtr(gridID);
@@ -3107,7 +3172,7 @@ void gridPrint(int gridID, int opt)
 	      {
 		nbyte0 = fprintf(fp, "xvals     = ");
 		nbyte = nbyte0;
-		for ( index = 0; index < xdim; index++ )
+		for ( i = 0; i < xdim; i++ )
 		  {
 		    if ( nbyte > 80 )
 		      {
@@ -3115,7 +3180,7 @@ void gridPrint(int gridID, int opt)
 			fprintf(fp, "%*s", nbyte0, "");
 			nbyte = nbyte0;
 		      }
-		    nbyte += fprintf(fp, "%.9g ", xvals[index]);
+		    nbyte += fprintf(fp, "%.9g ", xvals[i]);
 		  }
 		fprintf(fp, "\n");
 	      }
@@ -3124,12 +3189,12 @@ void gridPrint(int gridID, int opt)
 	if ( xbounds )
 	  {
 	    nbyte0 = fprintf(fp, "xbounds   = ");
-	    for ( index = 0; index < xdim; index++ )
+	    for ( i = 0; i < xdim; i++ )
 	      {
-		if ( index ) fprintf(fp, "%*s", nbyte0, "");
+		if ( i ) fprintf(fp, "%*s", nbyte0, "");
 
 		for ( iv = 0; iv < nvertex; iv++ )
-		  fprintf(fp, "%.9g ", xbounds[index*nvertex+iv]);
+		  fprintf(fp, "%.9g ", xbounds[i*nvertex+iv]);
 		fprintf(fp, "\n");
 	      }
 	  }
@@ -3154,7 +3219,7 @@ void gridPrint(int gridID, int opt)
 	      {
 		nbyte0 = fprintf(fp, "yvals     = ");
 		nbyte = nbyte0;
-		for ( index = 0; index < ydim; index++ )
+		for ( i = 0; i < ydim; i++ )
 		  {
 		    if ( nbyte > 80 )
 		      {
@@ -3162,7 +3227,7 @@ void gridPrint(int gridID, int opt)
 			fprintf(fp, "%*s", nbyte0, "");
 			nbyte = nbyte0;
 		      }
-		    nbyte += fprintf(fp, "%.9g ", yvals[index]);
+		    nbyte += fprintf(fp, "%.9g ", yvals[i]);
 		  }
 		fprintf(fp, "\n");
 	      }
@@ -3171,12 +3236,12 @@ void gridPrint(int gridID, int opt)
 	if ( ybounds )
 	  {
 	    nbyte0 = fprintf(fp, "ybounds   = ");
-	    for ( index = 0; index < ydim; index++ )
+	    for ( i = 0; i < ydim; i++ )
 	      {
-		if ( index ) fprintf(fp, "%*s", nbyte0, "");
+		if ( i ) fprintf(fp, "%*s", nbyte0, "");
 
 		for ( iv = 0; iv < nvertex; iv++ )
-		  fprintf(fp, "%.9g ", ybounds[index*nvertex+iv]);
+		  fprintf(fp, "%.9g ", ybounds[i*nvertex+iv]);
 		fprintf(fp, "\n");
 	      }
 	  }
@@ -3185,7 +3250,7 @@ void gridPrint(int gridID, int opt)
 	  {
 	    nbyte0 = fprintf(fp, "area      = ");
 	    nbyte  = nbyte0;
-	    for ( index = 0; index < gridsize; index++ )
+	    for ( i = 0; i < gridsize; i++ )
 	      {
 		if ( nbyte > 80 )
 		  {
@@ -3193,7 +3258,7 @@ void gridPrint(int gridID, int opt)
 		    fprintf(fp, "%*s", nbyte0, "");
 		    nbyte = nbyte0;
 		  }
-		nbyte += fprintf(fp, "%.9g ", area[index]);
+		nbyte += fprintf(fp, "%.9g ", area[i]);
 	      }
 	    fprintf(fp, "\n");
 	  }
@@ -3207,7 +3272,7 @@ void gridPrint(int gridID, int opt)
 	nbyte  = nbyte0;
 	rowlon = (int *) malloc(ysize*sizeof(int));
 	gridInqRowlon(gridID, rowlon);
-	for ( index = 0; index < ysize; index++ )
+	for ( i = 0; i < ysize; i++ )
 	  {
 	    if ( nbyte > 80 )
 	      {
@@ -3215,7 +3280,7 @@ void gridPrint(int gridID, int opt)
 		fprintf(fp, "%*s", nbyte0, "");
 		nbyte = nbyte0;
 	      }
-	    nbyte += fprintf(fp, "%d ", rowlon[index]);
+	    nbyte += fprintf(fp, "%d ", rowlon[i]);
 	  }
 	fprintf(fp, "\n");
 	free(rowlon);
@@ -3260,6 +3325,23 @@ void gridPrint(int gridID, int opt)
       {
 	fprintf(stderr, "Unsupported grid type: %s\n", gridNamePtr(type));
       }
+    }
+
+  if ( gridptr->mask )
+    {
+      nbyte0 = fprintf(fp, "mask      = ");
+      nbyte  = nbyte0;
+      for ( i = 0; i < gridsize; i++ )
+	{
+	  if ( nbyte > 80 )
+	    {
+	      fprintf(fp, "\n");
+	      fprintf(fp, "%*s", nbyte0, "");
+	      nbyte = nbyte0;
+	    }
+	  nbyte += fprintf(fp, "%d ", (int) gridptr->mask[i]);
+	}
+      fprintf(fp, "\n");
     }
 }
 

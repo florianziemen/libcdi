@@ -1,12 +1,14 @@
 #ifndef _GRID_H
 #define _GRID_H
 
+typedef unsigned char mask_t;
 
 typedef struct {
   int     self;
   int     type;                   /* grid type                      */
   int     prec;                   /* grid precision                 */
-  int    *mask;
+  mask_t *mask;
+  mask_t *mask_gme;
   double *xvals;
   double *yvals;
   double *area;
