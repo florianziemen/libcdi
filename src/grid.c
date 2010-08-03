@@ -1389,7 +1389,6 @@ int gridInqMask(int gridID, int *mask)
 void gridDefMask(int gridID, const int *mask)
 {
   static char func[] = "gridDefMask";
-  int gridtype;
   long size, i;
   grid_t *gridptr;
 
@@ -1397,20 +1396,29 @@ void gridDefMask(int gridID, const int *mask)
 
   grid_check_ptr(func, gridptr);
 
-  gridtype = gridptr->type;
-
   size = gridptr->size;
 
   if ( size == 0 )
     Error(func, "Size undefined for gridID = %d", gridID);
-    
-  if ( gridptr->mask == NULL )
-    gridptr->mask = (mask_t *) malloc(size*sizeof(mask_t));
-  else if ( CDI_Debug )
-    Warning(func, "mask already defined!");
 
-  for ( i = 0; i < size; ++i )
-    gridptr->mask[i] = mask[i];
+  if ( mask == NULL )
+    {
+      if ( gridptr->mask )
+	{
+	  free(gridptr->mask);
+	  gridptr->mask = NULL;
+	}
+    }
+  else
+    {
+      if ( gridptr->mask == NULL )
+	gridptr->mask = (mask_t *) malloc(size*sizeof(mask_t));
+      else if ( CDI_Debug )
+	Warning(func, "grid mask already defined!");
+
+      for ( i = 0; i < size; ++i )
+	gridptr->mask[i] = mask[i];
+    }
 }
 
 
@@ -1442,15 +1450,12 @@ int gridInqMaskGME(int gridID, int *mask)
 void gridDefMaskGME(int gridID, const int *mask)
 {
   static char func[] = "gridDefMaskGME";
-  int gridtype;
   long size, i;
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
 
   grid_check_ptr(func, gridptr);
-
-  gridtype = gridptr->type;
 
   size = gridptr->size;
 
