@@ -11,6 +11,14 @@ fi
 set -x
 #
 case "${HOSTNAME}" in
+# i386-apple-darwin10
+    hama*)
+	./configure --prefix=$HOME/local \
+                    --with-netcdf=/opt/local \
+                    --with-hdf5=/opt/local \
+                    --with-szlib=/opt/local \
+	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O2"
+	;;
 # ia64-nec-linux
     ds*)
 	./configure --prefix=$HOME/local \
