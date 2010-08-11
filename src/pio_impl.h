@@ -16,10 +16,6 @@ typedef enum
   IO_Finalize
 } IO_Server_command;
 
-const char * command2charP[6] = {"IO_Open_file", "IO_Close_file",
-				"IO_Get_fp","IO_Set_fp",
-				 "IO_Send_buffer", "IO_Finalize"};
-
 struct dBuffer
 {
   size_t wr_pointer;
@@ -55,8 +51,11 @@ typedef struct
 } rTag;
 
 /* pio.c */
+void check_mpi ( int, int );
+void check_mpi_status ( int, MPI_Comm *, MPI_Status *, int );
 int setTag ( int, int );
 rTag * getTag ( int );
+void ungetTag ( rTag * );
 
 /* pio_dbuffer.c */
 int dbuffer_init ( struct dBuffer **, size_t );

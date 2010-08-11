@@ -9,6 +9,7 @@
 #include "pio_impl.h"
 
 extern bool ddebug; 
+extern char * command2charP[6];
 
 extern double startTime;
 extern double accumProbe;
@@ -31,6 +32,7 @@ typedef struct
   struct dBuffer *db;
   MPI_File fh;
   MPI_Request request;
+  bool finished;
 } aFiledataM;
 
 static queue *bibAFiledataM;
@@ -44,7 +46,7 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   int status;
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d initAFiledataMPINONB (): filename=%s, buffersize=%d, in\n",
+    fprintf ( stdout, "pe%d initAFiledataMPINONB (): filename=%s, buffersize=%zu, in\n",
 	pioinfo->rank, filename, bs );
 
   of = ( aFiledataM * ) malloc ( sizeof ( aFiledataM ));
@@ -79,6 +81,7 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
 		  MPI_INFO_NULL, &( of->fh ));
 
   of->request = MPI_REQUEST_NULL;
+  of->finished = false;
 
   if ( ddebug )
     fprintf ( stdout, "pe%d initAFiledataMPINONB (), enqueued name=%s, opened file, return\n",
@@ -147,8 +150,7 @@ bool compareNamesMPINONB  ( void *v1, void *v2 )
 
 void writeMPINONB ( aFiledataM *of, int id )
 {
-  int iret, amount;
-  MPI_Offset displ;
+  int amount;
   MPI_Status status;
 
   /* write buffer */
@@ -158,7 +160,7 @@ void writeMPINONB ( aFiledataM *of, int id )
   if ( amount == 0 ) return;
 
   if ( ddebug ) 
-    fprintf ( stdout, "pe%d writeMPINONB(): Write buffer, size %zu bytes, in\n", 
+    fprintf ( stdout, "pe%d writeMPINONB(): Write buffer, size %d bytes, in\n", 
 	      pioinfo->rank, amount );
   
   MPI_Wait ( & ( of->request ), &status );

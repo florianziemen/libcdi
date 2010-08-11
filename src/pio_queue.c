@@ -24,7 +24,6 @@ queue *queueInit ( valDestroyFunction vD, keyCompareFunction kC )
 void queueDestroy ( queue *q )
 {
   node *curr, *succ;
-  int i;
 
   if ( q->head )
     {
@@ -47,7 +46,6 @@ void queueDestroy ( queue *q )
 int queuePush ( queue *q, void *v, int noCollector, ... )
 {
   node *newNode, *curr;
-  size_t len;
   va_list ap;
   int id;
  
@@ -118,12 +116,14 @@ int queueDelNode ( queue *q, int id ) // error
       if ( pred == q->tail ) q->tail = NULL; 
       q->head = curr;
       iret = ( *( q->valDestroy )) ( pred->val );
+
       free ( pred );   
       return iret;
     }
 
   while ( curr )
     {
+      
       if ( curr->idx == id ) break;
       pred = curr;
       curr = curr->next;

@@ -11,13 +11,17 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include "mpi.h"
 #include "pio.h"
 #include "pio_impl.h"
 
 extern bool ddebug;
+extern char * command2charP[6];
 
 extern double startTime;
 extern double accumProbe;

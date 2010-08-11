@@ -19,7 +19,10 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include "mpi.h"
 #include "pio.h"
@@ -29,6 +32,7 @@ int maxNFiles = 100;
 extern int tagKey;
 
 extern bool ddebug;
+extern char * command2charP[6];
 
 extern double startTime;
 extern double accumProbe;

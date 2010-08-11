@@ -1,4 +1,6 @@
-! mpxlf95_r -o cdi_write_parallel -I../src  cdi_write_f.F90  -L../src -lcdi -qextname -L/sw/aix53/szip-2.1/lib -lsz -L/sw/aix61/netcdf-4.0.1-ibm/lib -lnetcdf  -L/sw/aix61/hdf5-1.8.4-patch1/lib -lhdf5_hl -lhdf5 -lz
+! mpxlf95_r -o cdi_write_parallel -I../src  cdi_write_f.F90  -L../src -lcdi 
+!-qextname -L/sw/aix53/szip-2.1/lib -lsz -L/sw/aix61/netcdf-4.0.1-ibm/lib
+! -lnetcdf  -L/sw/aix61/hdf5-1.8.4-patch1/lib -lhdf5_hl -lhdf5 -lz
 
 
 ! TODO 
@@ -40,6 +42,7 @@ INTEGER :: i,j
 !... init
 
 problemMapping = INITVALUE1
+
 load = INITVALUE2
 
 
@@ -62,7 +65,7 @@ prbl: DO i = 1,nProblems
     IF(capacityLeft<=TOLERANCE)THEN
       problemMapping(sortedProblems(i,2)) = j
       load(j) = load(j)+sortedProblems(i,1)
-      WRITE(*,*)'1. loop used!'
+      WRITE(*,*)'MAIN: 1. loop used!'
       EXIT fit
     ENDIF
   ENDDO fit
@@ -109,7 +112,7 @@ INTEGER, INTENT(inout) :: A(:,:)
 INTEGER:: pivot(1,2),temp(1,2)
 INTEGER :: n,pivotIndex,currIndex
 
-IF(SIZE(A,2)/=2) STOP 'error: subroutine iQsort(A), dimension(A,2) has to be 2.'
+IF(SIZE(A,2)/=2) STOP 'MAIN: error: subroutine iQsort(A), dimension(A,2) has to be 2.'
 
 n = SIZE(A,1)
 IF(n<=1)RETURN
@@ -156,7 +159,7 @@ END MODULE loadbalancing
 
       INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(12,307) 
  
-      INTEGER, PARAMETER :: nPtypes = 6
+      INTEGER, PARAMETER :: MAXTYPES = 6  
       INTEGER, PARAMETER :: MAXNODES = 249
 
       INTEGER, PARAMETER :: ddebug = 0
@@ -166,9 +169,12 @@ END MODULE loadbalancing
       INTEGER, PARAMETER :: NLEV  =  96   ! Number of levels      96
       INTEGER, PARAMETER :: NTIME =  10   ! Number of time steps 124
       INTEGER, PARAMETER :: NFILES = 10   ! Number of files        7
-      INTEGER, PARAMETER :: SIZESSTREAMS ( NFILES ) = (/ 35, 35, 35, 35, 35, 35, 35, 35, 35, 35 /)
+      INTEGER, PARAMETER :: SIZESSTREAMS ( NFILES ) = (/ 35, 35, 35, 35, 35, &
+        35, 35, 35, 35, 35 /)
 
-      CHARACTER*(*), PARAMETER :: filenames ( NFILES ) = (/ 'dat0.grb', 'dat1.grb', 'dat2.grb',  'dat3.grb', 'dat4.grb', 'dat5.grb', 'dat6.grb', 'dat7.grb', 'dat8.grb', 'dat9.grb' /)
+      CHARACTER*(*), PARAMETER :: filenames ( NFILES ) = (/ 'dat0.grb', &
+        'dat1.grb', 'dat2.grb',  'dat3.grb', 'dat4.grb', 'dat5.grb', 'dat6.grb', &
+        'dat7.grb', 'dat8.grb', 'dat9.grb' /)
 
       REAL(dp):: lons(NLON), lats(NLAT), levs(NLEV)
       REAL(dp):: var(NLON*NLAT*NLEV)
@@ -182,64 +188,37 @@ END MODULE loadbalancing
       INTEGER :: collectingData, ncollectors
       INTEGER :: sID, tsID, i, j, nmiss
 
-      INTEGER :: PTYPE, numarg, iargc, iarg, length, factor
+      INTEGER :: PTYPE
       INTEGER :: NNODES, NFILES_NODE
-      INTEGER :: mapping ( NFILES ), mycolor, mynode
+      INTEGER :: mapping ( NFILES ), mycolor
       INTEGER, ALLOCATABLE ::  colors ( : )
       INTEGER, ALLOCATABLE :: SIZESSTREAMS_NODE ( : )
 
-      CHARACTER ( len = 80 ) :: arg 
+      CHARACTER :: arg 
       CHARACTER(len=8), ALLOCATABLE :: FILENAMES_NODE ( : ) 
+      CHARACTER(len=8) :: name
       
       REAL(dp) :: startTime, stopTime
       REAL(dp) :: accumOpen, accumClose, accumWrite
-      INTEGER REQUIRED, PROVIDED, IERROR
 
 
 #ifndef NOMPI
-      !CALL MPI_INIT ( error )29
-      CALL MPI_INIT_THREAD(REQUIRED, PROVIDED, IERROR)
-
+      CALL MPI_INIT ( error )
       CALL MPI_COMM_DUP ( MPI_COMM_WORLD, pioComm, error )
-      CALL MPI_COMM_RANK ( MPI_COMM_WORLD, rank, error )
+      CALL MPI_COMM_RANK ( pioComm, rank, error )
+      CALL MPI_COMM_SET_NAME ( pioComm, "pioComm", error )
 
-      PTYPE = -1
-      
-      numarg = iargc ()
-      
-      IF ( numarg /= 2 ) THEN
-        CALL MPI_ABORT ( pioComm, 1, error )
-      END IF
-      
-      CALL getarg ( 1, arg )
-      iarg = IACHAR ( arg ) - 48
-      length = LEN_TRIM ( arg )
-      
-      IF ( length /= 1 .OR. iarg < 0 .OR. iarg > nPtypes ) THEN
-        CALL MPI_ABORT ( pioComm, 1, error )
-      ELSE
-        PTYPE = iarg
-      END IF
-      
-      CALL getarg ( 2, arg )
-      length = LEN_TRIM ( arg )
-      IF ( length > 3 ) CALL MPI_ABORT ( pioComm, 1, error ) 
+      CALL MPI_ERRHANDLER_SET ( pioComm, MPI_ERRORS_RETURN, error )
 
-      factor = 1
-      NNODES = 0
-      
-      DO i = length, 1, -1
-        iarg = IACHAR(arg(i:)) - 48
-        IF ( iarg < 0  .OR. iarg > 9 ) THEN
-          STOP
-        ELSE
-          NNODES = NNODES + factor * iarg
-          factor = factor * 10
-        END IF
-      END DO
-      
-      IF ( NNODES < 1 .OR. NNODES > NFILES ) CALL MPI_ABORT ( pioComm, 1, error )
+      CALL readArgs( PTYPE, NNODES )
+
+      IF ( ddebug == 1 ) THEN
+        CALL MPI_COMM_GET_NAME ( pioComm, name, i, error )
+        WRITE ( *, * ) 'MAIN: pe', rank, ', comm=', name, &
+          ', PTYPE=', PTYPE, ', NNODES=', NNODES
+      END IF
 #else
+      PTYPE  = 0
       NNODES = 1
 #endif
 
@@ -248,7 +227,8 @@ END MODULE loadbalancing
         CALL mapProblems ( SIZESSTREAMS, mapping, NFILES, NNODES  )
       
         IF ( ddebug == 1 ) THEN
-          WRITE (*, *) 'SIZESSTREAMS=', SIZESSTREAMS, 'mapping=', mapping, ', NNODES=',NNODES
+          WRITE (*, *) 'MAIN: SIZESSTREAMS=', SIZESSTREAMS, 'mapping=', mapping, ', &
+            NNODES=',NNODES
         END IF
       END IF
       CALL MPI_BCAST ( mapping, NFILES, MPI_INTEGER, 0, pioComm, error )
@@ -256,7 +236,7 @@ END MODULE loadbalancing
       CALL mapProblems ( SIZESSTREAMS, mapping, NFILES, NNODES  )
       
       IF ( ddebug == 1 ) THEN
-        WRITE (*, *) 'SIZESSTREAMS=', SIZESSTREAMS, 'mapping=', mapping, ', NNODES=',NNODES
+        WRITE (*, *) 'MAIN: SIZESSTREAMS=', SIZESSTREAMS, 'mapping=', mapping
       END IF
 #endif
 
@@ -268,13 +248,15 @@ END MODULE loadbalancing
       collectingData = 1
 
       CALL initCoords ()
-
 #ifndef NOMPI
       ALLOCATE ( colors ( NNODES ), stat=status )
-      collectingData =  pioInit( PTYPE, pioComm,  mycolor, colors, NNODES, pioComm_NODE, ncollectors )
+
+      collectingData =  pioInit( PTYPE, pioComm, mycolor, NNODES, &
+        pioComm_NODE, ncollectors )
 
       IF ( ddebug == 1 ) THEN
-        WRITE (*,*) 'MAIN: pioComm=', pioComm, 'pioComm_NODE=', pioComm_NODE, 'rank=',rank,'mycolor=', mycolor, 'colors=', colors, 'ncollectors=', ncollectors
+        WRITE ( *, * ) 'MAIN: rank=', rank, ', mycolor=', mycolor, &
+          ', ncollectors=', ncollectors
       END IF
 
       IF ( collectingData /= 1 ) THEN
@@ -282,26 +264,21 @@ END MODULE loadbalancing
       END IF
 
       IF ( ddebug == 1 .AND. rank == 0 ) THEN
-         WRITE ( *, * ) 'NLON=',NLON,', NLAT=',NLAT,', NLEV=',NLEV,', NTIME=',NTIME,','
-         WRITE ( *, * ) ' SIZESSTREAMS(1)=',SIZESSTREAMS(1), ', total amount raw='
-         WRITE ( *, '( 2x, F9.3, 2x, a5 )' ) NLON * NLAT * NLEV * NTIME * SIZESSTREAMS(1) /(1024*1024),' MB';
+         WRITE ( *, * ) 'MAIN: NLON=',NLON,', NLAT=',NLAT,', NLEV=',NLEV,', NTIME=',NTIME,','
+         WRITE ( *, * ) 'MAIN: SIZESSTREAMS(1)=',SIZESSTREAMS(1), ', total amount raw='
+         !WRITE ( *, '( 2x, F9.3, 2x, a5 )' ) &
+          ! NLON * NLAT * NLEV * NTIME * SIZESSTREAMS(1) /(1024*1024),' MB';
       END IF
-
-      DO i = 1, NNODES
-        IF ( colors ( i ) == mycolor ) THEN 
-          mynode = i
-        END IF
-      END DO
 
       NFILES_NODE = 0
 
       DO i = 1, NFILES
-        IF ( mapping ( i ) == mynode ) THEN
+        IF ( mapping ( i ) == mycolor ) THEN
           NFILES_NODE = NFILES_NODE + 1
         END IF
       END DO
 #else 
-      mynode = 1
+      mycolor = 1
       NFILES_NODE = NFILES
 #endif
 
@@ -311,7 +288,7 @@ END MODULE loadbalancing
       j = 1
 
       DO i = 1, NFILES
-        IF ( mapping ( i ) == mynode ) THEN
+        IF ( mapping ( i ) == mycolor ) THEN
           SIZESSTREAMS_NODE ( j ) = SIZESSTREAMS ( i )
           FILENAMES_NODE ( j ) = filenames ( i )
           j = j + 1
@@ -319,7 +296,10 @@ END MODULE loadbalancing
       END DO
       
       IF ( ddebug == 1 ) THEN
-        WRITE ( *, * ) 'mynode=', mynode, ', NFILES_NODE=', NFILES_NODE, ', SIZESSTREAMS_NODE=',SIZESSTREAMS_NODE, ', FILENAMES_NODE=', FILENAMES_NODE 
+        WRITE ( *, * ) 'MAIN: mycolor=', mycolor, ', NFILES_NODE=', NFILES_NODE, &
+          ', SIZESSTREAMS_NODE=',SIZESSTREAMS_NODE
+        WRITE ( *, * ) 'MAIN: mycolor=', mycolor, ', NFILES_NODE=', NFILES_NODE, &
+          ', FILENAMES_NODE=', FILENAMES_NODE 
       END IF
 
       ALLOCATE ( vlistID ( NFILES_NODE ), stat = status )
@@ -390,13 +370,12 @@ END MODULE loadbalancing
       
       accumOpen = stopTime - startTime
 
-
-
 !     Assign the variable list to the dataset
       DO i = 1, NFILES_NODE
 #ifndef NOMPI
          IF ( PTYPE /= PIO_NONE ) THEN
-            CALL initLocalstream ( ncollectors, SIZESSTREAMS_NODE ( i ), lstreamfirst ( i ), lstreamlast ( i ))
+            CALL initLocalstream ( ncollectors, SIZESSTREAMS_NODE ( i ), &
+              lstreamfirst ( i ), lstreamlast ( i ))
          ELSE 
             lstreamfirst ( i ) = 1
             lstreamlast ( i )  = SIZESSTREAMS_NODE ( i )
@@ -480,41 +459,92 @@ END MODULE loadbalancing
 
 #ifndef NOMPI 
 1     IF ( ddebug == 1 ) THEN
-        WRITE ( *, * ) 'pe', rank,'in main() at label "finish"' 
+        WRITE ( *, * ) 'MAIN: pe', rank,'in main() at label "finish"' 
       END IF
 
+      DEALLOCATE ( colors, stat = status )
+      
       IF ( rank == 0 ) THEN
-        CALL MPI_REDUCE ( MPI_IN_PLACE, accumOpen,  1, MPI_DOUBLE, MPI_MAX, 0, pioComm, error )
-        CALL MPI_REDUCE ( MPI_IN_PLACE, accumWrite, 1, MPI_DOUBLE, MPI_MAX, 0, pioComm, error )
-        CALL MPI_REDUCE ( MPI_IN_PLACE, accumClose, 1, MPI_DOUBLE, MPI_MAX, 0, pioComm, error )
+        CALL MPI_REDUCE ( MPI_IN_PLACE, accumOpen,  1, MPI_DOUBLE_PRECISION, &
+          MPI_MAX, 0, pioComm, error )
+        CALL MPI_REDUCE ( MPI_IN_PLACE, accumWrite, 1, MPI_DOUBLE_PRECISION, &
+          MPI_MAX, 0, pioComm, error )
+        CALL MPI_REDUCE ( MPI_IN_PLACE, accumClose, 1, MPI_DOUBLE_PRECISION, &
+          MPI_MAX, 0, pioComm, error )
       ELSE        
-        CALL MPI_REDUCE (    accumOpen, accumOpen,  1, MPI_DOUBLE, MPI_MAX, 0, pioComm, error )
-        CALL MPI_REDUCE (   accumWrite, accumWrite, 1, MPI_DOUBLE, MPI_MAX, 0, pioComm, error )
-        CALL MPI_REDUCE (   accumClose, accumClose, 1, MPI_DOUBLE, MPI_MAX, 0, pioComm, error )      
+        CALL MPI_REDUCE (    accumOpen, accumOpen,  1, MPI_DOUBLE_PRECISION, &
+          MPI_MAX, 0, pioComm, error )
+        CALL MPI_REDUCE (   accumWrite, accumWrite, 1, MPI_DOUBLE_PRECISION, &
+          MPI_MAX, 0, pioComm, error )
+        CALL MPI_REDUCE (   accumClose, accumClose, 1, MPI_DOUBLE_PRECISION, &
+          MPI_MAX, 0, pioComm, error )      
       END IF
   
       IF ( rank == 0 ) THEN
-        WRITE ( *, * ) 'ptype=', PTYPE
+        WRITE ( *, * ) 'MAIN: ptype=', PTYPE
         WRITE ( *, * ) '------------------------------------------------------------------'
-        WRITE ( *, * ) 'Maximum open  time:', accumOpen,  's'
-        WRITE ( *, * ) 'Maximum write time:', accumWrite, 's'
-        WRITE ( *, * ) 'Maximum close time:', accumClose, 's'
+        WRITE ( *, * ) 'MAIN: Maximum open  time:', accumOpen,  's'
+        WRITE ( *, * ) 'MAIN: Maximum write time:', accumWrite, 's'
+        WRITE ( *, * ) 'MAIN: Maximum close time:', accumClose, 's'
         WRITE ( *, * ) '------------------------------------------------------------------'
       END IF
 
   CALL pioFinalize ()
+  CALL MPI_COMM_FREE ( pioComm, error )
   CALL MPI_FINALIZE ( error ) 
   
 #else
-  WRITE ( *, * ) 'ptype=', PIO_NONE
+  WRITE ( *, * ) 'MAIN: ptype=', PIO_NONE
   WRITE ( *, * ) '------------------------------------------------------------------'
-  WRITE ( *, * ) 'Open  time:',  accumOpen, 's'
-  WRITE ( *, * ) 'Write time:', accumWrite, 's'
-  WRITE ( *, * ) 'Close time:', accumClose, 's'
+  WRITE ( *, * ) 'MAIN: Open  time:',  accumOpen, 's'
+  WRITE ( *, * ) 'MAIN: Write time:', accumWrite, 's'
+  WRITE ( *, * ) 'MAIN: Close time:', accumClose, 's'
   WRITE ( *, * ) '------------------------------------------------------------------'
 #endif
 
 CONTAINS
+
+      !********************************************
+
+      SUBROUTINE readArgs ( argMode, argNodes )
+
+        INTEGER, INTENT ( OUT ) :: argMode, argNodes
+        INTEGER :: numarg, inum, length
+      
+        numarg = command_argument_count ()    
+      
+        IF ( numarg /= 2 ) CALL MPI_ABORT ( pioComm, 1, error )
+        
+        argMode = 0     
+        CALL get_command_argument ( 1, value = arg )
+        length = LEN_TRIM ( arg )
+        
+        IF ( length > 9 ) CALL MPI_ABORT ( pioComm, 1, error )
+        
+        DO i = 1, length
+          inum = IACHAR ( arg ( i : i )) - 48  
+          IF ( inum < 0 .OR. inum > 9 ) CALL MPI_ABORT ( pioComm, 1, error )
+          argMode = argMode + inum * 10 ** ( length - i )
+        END DO
+        
+        IF ( argMode > MAXTYPES ) CALL MPI_ABORT ( pioComm, 1, error )
+        
+        argNodes = 0
+        CALL get_command_argument ( 2, value = arg )
+        length = LEN_TRIM ( arg )
+        
+        IF ( length > 9 ) CALL MPI_ABORT ( pioComm, 1, error )
+        
+        DO i = 1, length
+          inum = IACHAR ( arg ( i : i )) - 48  
+          IF ( inum < 0 .OR. inum > 9 ) CALL MPI_ABORT ( pioComm, 1, error )
+          argNodes = argNodes + inum * 10 ** ( length - i )
+        END DO
+        
+        IF ( argNodes < 1 .OR. argNodes > NFILES .OR. argNodes > MAXNODES) & 
+          CALL MPI_ABORT ( pioComm, 1, error )
+        
+      END SUBROUTINE readArgs
 
       !********************************************
       
@@ -582,7 +612,7 @@ CONTAINS
       ilast = ifirst + lrecords - 1
 
       IF ( ddebug == 1 ) THEN
-         WRITE ( *, * ) 'pe', rank, 'has', lrecords, 'out of ', sizestream, 'records to write. ifirst=', ifirst, ', ilast=', ilast
+         WRITE ( *, * ) 'MAIN: pe', rank, 'has', lrecords, 'out of ', sizestream, 'records to write. ifirst=', ifirst, ', ilast=', ilast
       END IF
       
       END SUBROUTINE initLocalstream

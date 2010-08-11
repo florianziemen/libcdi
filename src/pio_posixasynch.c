@@ -11,13 +11,17 @@
 #include <errno.h>
 
 #include <aio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include "mpi.h"
 #include "pio.h"
 #include "pio_impl.h"
 
 extern bool ddebug;
+extern char * command2charP[6];
 
 extern double startTime;
 extern double accumProbe;
@@ -31,9 +35,9 @@ extern long initial_buffersize;
 
 extern pioInfo *pioinfo;
 
-extern MPI_Request request;
-
 extern char *token;
+
+static MPI_Request requestA = MPI_REQUEST_NULL;
 
 typedef struct 
 {
@@ -567,13 +571,13 @@ void sendPA ( aFiledataPA *afd, int id )
   if ( ddebug )
     startTime = MPI_Wtime ();
 
-  MPI_Wait (&request, &status);
+  MPI_Wait (&requestA, &status);
 
   if ( ddebug )
     accumWait +=  ( MPI_Wtime () - startTime );
 
   MPI_Isend ( afd->db->buffer, amount, MPI_CHAR, pioinfo->specialRank, 
-	      tag, pioinfo->comm, &request ); 
+	      tag, pioinfo->comm, &requestA ); 
 
   /* change outputBuffer */
   

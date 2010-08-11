@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   May 2010
+! Uwe Schulzweida, MPI-MET, Hamburg,   August 2010
 !
 
       INTEGER    CDI_UNDEFID           
@@ -302,6 +302,9 @@
       PARAMETER (CALENDAR_366DAYS       =  4)
       INTEGER    CALENDAR_NONE         
       PARAMETER (CALENDAR_NONE          =  5)
+!
+!  #ifndef NOMPI
+!
       INTEGER    PIO_NONE              
       PARAMETER (PIO_NONE               =  0)
       INTEGER    PIO_MPI_NONB          
@@ -310,10 +313,17 @@
       PARAMETER (PIO_POSIX_ASYNCH       =  2)
       INTEGER    PIO_POSIX_FPGUARD_SENDRECV
       PARAMETER (PIO_POSIX_FPGUARD_SENDRECV =  3)
+      INTEGER    PIO_POSIX_FPGUARD_THREAD
+      PARAMETER (PIO_POSIX_FPGUARD_THREAD =  4)
+      INTEGER    PIO_POSIX_FPGUARD_THREAD_REFUSE
+      PARAMETER (PIO_POSIX_FPGUARD_THREAD_REFUSE =  5)
       INTEGER    PIO_POSIX_NONB        
-      PARAMETER (PIO_POSIX_NONB         =  4)
+      PARAMETER (PIO_POSIX_NONB         =  6)
       INTEGER         pioInit
 !                                    (INTEGER         ,
+!                                     INTEGER         ,
+!                                     INTEGER         ,
+!                                     INTEGER         ,
 !                                     INTEGER         ,
 !                                     INTEGER         )
       EXTERNAL        pioInit

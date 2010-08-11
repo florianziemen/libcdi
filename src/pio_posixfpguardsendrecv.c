@@ -15,6 +15,7 @@
 #include "pio_impl.h"
 
 extern bool ddebug;
+extern char * command2charP[6];
 
 extern double startTime;
 extern double accumProbe;
@@ -467,7 +468,7 @@ int fcPOSIXFPGUARDSENDRECV ( int id )
   int iret;
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d in fileClose (%d ): write buffer, close file and cleanup, --- holle 0\n", 
+    fprintf ( stdout, "pe%d in fileClose (%d ): write buffer, close file and cleanup\n", 
 	      pioinfo->rank, id );
 
   afd = ( aFiledataPF * ) queueIdx2val ( bibAFiledataPF, id );

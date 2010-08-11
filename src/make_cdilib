@@ -126,6 +126,8 @@ c="dmemory.c         \
    pio_mpinonb.c     \ 	
    pio_posixasynch.c \
    pio_posixfpguardsendrecv.c\
+   pio_posixfpguardthread.c\
+   pio_posixfpguardthreadrefuse.c\
    pio_posixnonb.c   \	
    pio_queue.c"
 
