@@ -321,6 +321,7 @@ int pioInit ( int ptype, int commF, int *color, int nnodes, int *pioComm, int *n
 {
 
   int collectingData = 1;
+  int rank;
 
 #ifndef NOMPI
 
@@ -342,6 +343,24 @@ int pioInit ( int ptype, int commF, int *color, int nnodes, int *pioComm, int *n
     {
       fprintf ( stderr, "4. arg of pioInit is no valid no for nnodes\n");
       MPI_Abort ( MPI_COMM_WORLD, 1 );
+    }
+
+
+  if ( !(( ptype == PIO_NONE && nnodes == 1 ) ||
+	 ( ptype == PIO_MPI_NONB ) ||
+	 ( ptype == PIO_POSIX_FPGUARD_SENDRECV && nnodes == 1 ) ||
+	 ( ptype == PIO_POSIX_NONB && nnodes == 1 )))
+    {
+      MPI_Comm_rank ( comm, &rank );     
+      if ( rank == 0 )
+	fprintf ( stderr, "\n\npioInit(): arg(1) PTYPE=%d and arg(4) NNODES=%d are not valid. \
+\nPossible combinations are:\
+\nptype = PIO_NONE (:=0), \t\t  nnodes = 1\
+\nptype = PIO_MPI_NONB (:=1)\
+\nptype = PIO_POSIX_FPGUARD_SENDRECV (:=3), \t nnodes = 1\
+\nptype = PIO_POSIX_NONB (:=6), \t\t nnodes = 1\n\n\n",
+		ptype, nnodes );
+      MPI_Abort ( comm, 1 );
     }
 
   if (( pioinfo = ( pioInfo * ) malloc ( sizeof ( pioInfo ))) == NULL )
