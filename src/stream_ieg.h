@@ -5,7 +5,6 @@
 #  include "ieg.h"
 #endif
 
-int    iegScanTimestep(int streamID);
 int    iegInqContents(int streamID);
 int    iegInqTimestep(int streamID, int tsID);
 

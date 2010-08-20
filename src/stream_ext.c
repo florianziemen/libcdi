@@ -359,7 +359,7 @@ void extCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
     Message(func, "varID = %d levelID = %d", varID, levelID);
 }
 
-
+static
 void extScanTimestep1(int streamID)
 {  
   static char func[] = "extScanTimestep1";
@@ -500,7 +500,7 @@ void extScanTimestep1(int streamID)
     }
 }
 
-
+static
 int extScanTimestep2(int streamID)
 {  
   static char func[] = "extScanTimestep2";
@@ -690,7 +690,7 @@ int extInqContents(int streamID)
   return (status);
 }
 
-
+static
 int extScanTimestep(int streamID)
 {
   static char func[] = "extScanTimestep";
@@ -765,7 +765,8 @@ int extScanTimestep(int streamID)
 
 	  param = cdiEncodeParam(rcode, 255, 255);
 
-	  if ( rindex == nrecs ) break;
+	  // if ( rindex == nrecs ) break; gcc-4.4 internal compiler error
+	  if ( rindex == nrecs ) continue;
 	  recID = streamptr->tsteps[tsID].recIDs[rindex];
 
 	  if ( rindex == 0 )

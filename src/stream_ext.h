@@ -5,7 +5,6 @@
 #  include "extra.h"
 #endif
 
-int    extScanTimestep(int streamID);
 int    extInqContents(int streamID);
 int    extInqTimestep(int streamID, int tsID);
 

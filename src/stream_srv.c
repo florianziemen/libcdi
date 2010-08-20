@@ -361,7 +361,7 @@ void srvCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
     Message(func, "varID = %d levelID = %d", varID, levelID);
 }
 
-
+static
 void srvScanTimestep1(int streamID)
 {  
   static char func[] = "srvScanTimestep1";
@@ -505,7 +505,7 @@ void srvScanTimestep1(int streamID)
     }
 }
 
-
+static
 int srvScanTimestep2(int streamID)
 {  
   static char func[] = "srvScanTimestep2";
@@ -693,7 +693,7 @@ int srvInqContents(int streamID)
   return (status);
 }
 
-
+static
 int srvScanTimestep(int streamID)
 {
   static char func[] = "srvScanTimestep";
@@ -769,7 +769,8 @@ int srvScanTimestep(int streamID)
 
 	  param = cdiEncodeParam(rcode, 255, 255);
 
-	  if ( rindex == nrecs ) break;
+	  // if ( rindex == nrecs ) break; gcc-4.4 internal compiler error
+	  if ( rindex == nrecs ) continue;
 	  recID = streamptr->tsteps[tsID].recIDs[rindex];
 
 	  if ( rindex == 0 )

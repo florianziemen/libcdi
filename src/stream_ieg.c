@@ -871,7 +871,7 @@ void iegDateTime(int *pdb, int *date, int *time)
   *time = cdiEncodeTime(rhour, rminute, 0);
 }
 
-
+static
 void iegScanTimestep1(int streamID)
 {  
   static char func[] = "iegScanTimestep1";
@@ -1016,7 +1016,7 @@ void iegScanTimestep1(int streamID)
     }
 }
 
-
+static
 int iegScanTimestep2(int streamID)
 {  
   static char func[] = "iegScanTimestep2";
@@ -1210,7 +1210,7 @@ int iegInqContents(int streamID)
   return (status);
 }
 
-
+static
 int iegScanTimestep(int streamID)
 {
   static char func[] = "iegScanTimestep";
@@ -1287,7 +1287,8 @@ int iegScanTimestep(int streamID)
 
 	  iegDateTime(iegp->ipdb, &vdate, &vtime);
 
-	  if ( rindex == nrecs ) break;
+	  // if ( rindex == nrecs ) break; gcc-4.4 internal compiler error
+	  if ( rindex == nrecs ) continue;
 	  recID = streamptr->tsteps[tsID].recIDs[rindex];
 
 	  if ( rindex == 0 )
