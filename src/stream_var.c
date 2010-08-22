@@ -33,7 +33,7 @@ static void streamvarInitEntry(int streamID, int varID)
 
 static int streamvarNewEntry(int streamID)
 {
-  static char func[] = "streamvarNewEntry";
+  static const char *func = "streamvarNewEntry";
   int varID = 0;
   int streamvarSize;
   SVARINFO *streamvar;
@@ -103,7 +103,7 @@ static int streamvarNewEntry(int streamID)
 
 int streamNewVar(int streamID, int gridID, int zaxisID)
 {
-  static char func[] = "streamNewVar";
+  static const char *func = "streamNewVar";
   int varID;
   int *level;
   int *lindex;

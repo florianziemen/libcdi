@@ -178,7 +178,7 @@ static filePtrToIdx *_fileAvail = NULL;
 
 static void file_list_new(void)
 {
-  static char func[] = "file_list_new";
+  static const char *func = "file_list_new";
 
   assert(_fileList == NULL);
 
@@ -188,7 +188,7 @@ static void file_list_new(void)
 
 static void file_list_delete(void)
 {
-  static char func[] = "file_list_delete";
+  static const char *func = "file_list_delete";
 
   if ( _fileList ) free(_fileList);
 }
@@ -213,7 +213,7 @@ static void file_init_pointer(void)
 
 static F_I_L_E *file_to_pointer(int idx)
 {
-  static char func[] = "file_to_pointer";
+  static const char *func = "file_to_pointer";
   F_I_L_E *fileptr = NULL;
 
   FILE_INIT
@@ -236,7 +236,7 @@ static F_I_L_E *file_to_pointer(int idx)
 /* Create an index from a pointer */
 static int file_from_pointer(F_I_L_E *ptr)
 {
-  static char func[] = "file_from_pointer";
+  static const char *func = "file_from_pointer";
   int      idx = -1;
   filePtrToIdx *newptr;
 
@@ -296,7 +296,7 @@ static void file_init_entry(F_I_L_E *fileptr)
 
 static F_I_L_E *file_new_entry(void)
 {
-  static char func[] = "file_new_entry";
+  static const char *func = "file_new_entry";
   F_I_L_E *fileptr;
 
   fileptr = (F_I_L_E *) malloc(sizeof(F_I_L_E));
@@ -309,7 +309,7 @@ static F_I_L_E *file_new_entry(void)
 
 static void file_delete_entry(F_I_L_E *fileptr)
 {
-  static char func[] = "file_delete_entry";
+  static const char *func = "file_delete_entry";
   int idx;
 
   idx = fileptr->self;
@@ -352,7 +352,7 @@ static int pagesize(void)
 
 void fileDebug(int debug)
 {
-  static char func[] = "fileDebug";
+  static const char *func = "fileDebug";
 
   FILE_Debug = debug;
 
@@ -380,7 +380,7 @@ static void file_pointer_info(char *func, int fileID)
 
 int fileSetBufferType(int fileID, int type)
 {
-  static char func[] = "fileSetBufferType";
+  static const char *func = "fileSetBufferType";
   int ret = 0;
   F_I_L_E *fileptr;
 
@@ -493,7 +493,7 @@ void fileRewind(int fileID)
 
 off_t fileGetPos(int fileID)
 {
-  static char func[] = "fileGetPos";
+  static const char *func = "fileGetPos";
   off_t filepos = 0;
   F_I_L_E *fileptr;
 
@@ -515,7 +515,7 @@ off_t fileGetPos(int fileID)
 
 int fileSetPos(int fileID, off_t offset, int whence)
 {
-  static char func[] = "fileSetPos";
+  static const char *func = "fileSetPos";
   int status = 0;
   off_t position;
   F_I_L_E *fileptr;
@@ -693,7 +693,7 @@ int fileInqMode(int fileID)
 
 static long file_getenv(char *envName)
 {
-  static char func[] = "file_getenv";
+  static const char *func = "file_getenv";
   char *envString;
   long envValue = -1;
   long fact = 1;
@@ -733,7 +733,7 @@ static long file_getenv(char *envName)
 
 static void file_initialize(void)
 {
-  static char func[] = "file_initialize";
+  static const char *func = "file_initialize";
   long value;
 
 #if  defined  (HAVE_LIBPTHREAD)
@@ -807,7 +807,7 @@ static void file_initialize(void)
 
 static void file_set_buffer(F_I_L_E *fileptr)
 {
-  static char func[] = "file_set_buffer";
+  static const char *func = "file_set_buffer";
   size_t buffersize = 0;
 
   if ( fileptr->mode == 'r' )
@@ -874,7 +874,7 @@ static void file_set_buffer(F_I_L_E *fileptr)
 
 static int file_fill_buffer(F_I_L_E *fileptr)
 {
-  static char func[] = "file_fill_buffer";
+  static const char *func = "file_fill_buffer";
   long nread;
   int fd;
   int ret;
@@ -980,7 +980,7 @@ static int file_fill_buffer(F_I_L_E *fileptr)
 
 static void file_copy_from_buffer(F_I_L_E *fileptr, void *ptr, size_t size)
 {
-  static char func[] = "file_copy_from_buffer";
+  static const char *func = "file_copy_from_buffer";
 
   if ( FILE_Debug )
     Message(func, "size = %ld  Cnt = %ld", size, fileptr->bufferCnt);
@@ -1007,7 +1007,7 @@ static void file_copy_from_buffer(F_I_L_E *fileptr, void *ptr, size_t size)
 
 static size_t file_read_from_buffer(F_I_L_E *fileptr, void *ptr, size_t size)
 {
-  static char func[] = "file_read_from_buffer";
+  static const char *func = "file_read_from_buffer";
   size_t nread, rsize;
   size_t offset = 0;
 
@@ -1062,7 +1062,7 @@ void fileSetBufferSize(int fileID, long buffersize)
  */
 int fileOpen(const char *filename, const char *mode)
 {
-  static char func[] = "fileOpen";
+  static const char *func = "fileOpen";
   FILE *fp = NULL;    /* file pointer    (used for write) */
   int fd = -1;        /* file descriptor (used for read)  */
   int fileID = FILE_UNDEFID;
@@ -1152,7 +1152,7 @@ int fileOpen(const char *filename, const char *mode)
  */
 int fileClose(int fileID)
 {
-  static char func[] = "fileClose";
+  static const char *func = "fileClose";
   char *name;
   int ret;
   char *fbtname[] = {"unknown", "standard", "mmap"};
@@ -1307,7 +1307,7 @@ int fileGetc(int fileID)
 
 size_t filePtrRead(void *vfileptr, void *ptr, size_t size)
 {
-  static char func[] = "filePtrRead";
+  static const char *func = "filePtrRead";
   size_t nread = 0;
   F_I_L_E *fileptr = (F_I_L_E *) vfileptr;
 
@@ -1340,7 +1340,7 @@ size_t filePtrRead(void *vfileptr, void *ptr, size_t size)
 
 size_t fileRead(int fileID, void *ptr, size_t size)
 {
-  static char func[] = "fileRead";
+  static const char *func = "fileRead";
   size_t nread = 0;
   F_I_L_E *fileptr;
 

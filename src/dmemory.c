@@ -242,7 +242,7 @@ int memListDeleteEntry(void *ptr, size_t *size)
 static
 void memTableInitEntry(int memID)
 {
-  static char func[] = "memTableInitEntry";
+  static const char *func = "memTableInitEntry";
 
   if ( memID < 0 || memID >= memTableSize )
     memInternalProblem(func, "memID %d undefined!", memID);
@@ -259,7 +259,7 @@ static
 int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
 		    const char *caller, const char *file, int line)
 {
-  static char func[] = "memListNewEntry";
+  static const char *func = "memListNewEntry";
   static int item = 0;
   size_t memSize = 0;
   int memID = 0;
@@ -347,7 +347,7 @@ static
 int memListChangeEntry(void *ptrold, void *ptr, size_t size,
 		       const char *caller, const char *file, int line)
 {
-  static char func[] = "memListChangeEntry";
+  static const char *func = "memListChangeEntry";
   int item = UNDEFID;
   int memID = 0;
   size_t len;
@@ -512,7 +512,7 @@ void *Realloc(const char *caller, const char *file, int line, void *ptrold, size
 
 void Free(const char *caller, const char *file, int line, void *ptr)
 {
-  static char func[] = "Free";
+  static const char *func = "Free";
   int item;
   size_t size;
 

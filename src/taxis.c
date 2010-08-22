@@ -47,7 +47,7 @@ char *tunitNamePtr(int unitID)
 
 void taxis_defaults(void)
 {
-  static char func[] = "taxis_defaults";
+  static const char *func = "taxis_defaults";
   char *timeunit;
 
   timeunit = getenv("TIMEUNIT");
@@ -118,7 +118,7 @@ static int            _taxisAvail = -1;
 static
 void taxis_list_new(void)
 {
-  static char func[] = "taxis_list_new";
+  static const char *func = "taxis_list_new";
 
   assert(_taxisList == NULL);
 
@@ -128,7 +128,7 @@ void taxis_list_new(void)
 static
 void taxis_list_delete(void)
 {
-  static char func[] = "taxis_list_delete";
+  static const char *func = "taxis_list_delete";
 
   if ( _taxisList ) free(_taxisList);
 }
@@ -153,7 +153,7 @@ void taxis_init_pointer(void)
 static
 void taxis_list_extend(void)
 {
-  static char func[] = "taxis_list_extend";
+  static const char *func = "taxis_list_extend";
   int ntaxis;
   int i;
 
@@ -184,7 +184,7 @@ void taxis_list_extend(void)
 
 taxis_t *taxis_to_pointer(int idx)
 {
-  static char func[] = "taxis_to_pointer";
+  static const char *func = "taxis_to_pointer";
   taxis_t *taxisptr = NULL;
 
   TAXIS_INIT();
@@ -208,7 +208,7 @@ taxis_t *taxis_to_pointer(int idx)
 static
 int taxis_from_pointer(taxis_t *ptr)
 {
-  static char func[] = "taxis_from_pointer";
+  static const char *func = "taxis_from_pointer";
   int      idx = -1;
 
   if ( ptr )
@@ -271,7 +271,7 @@ void taxis_init_entry(taxis_t *taxisptr)
 static
 taxis_t *taxis_new_entry(void)
 {
-  static char func[] = "taxis_new_entry";
+  static const char *func = "taxis_new_entry";
   taxis_t *taxisptr;
 
   taxisptr = (taxis_t *) malloc(sizeof(taxis_t));
@@ -284,7 +284,7 @@ taxis_t *taxis_new_entry(void)
 static
 void taxis_delete_entry(taxis_t *taxisptr)
 {
-  static char func[] = "taxis_delete_entry";
+  static const char *func = "taxis_delete_entry";
   int idx;
 
   idx = taxisptr->self;
@@ -382,7 +382,7 @@ taxisDefRtime(taxisID, 120000);
 */
 int taxisCreate(int taxistype)
 {
-  static char func[] = "taxisCreate";
+  static const char *func = "taxisCreate";
   int taxisID;
   taxis_t *taxisptr;
 
@@ -416,7 +416,7 @@ int taxisCreate(int taxistype)
 */
 void taxisDestroy(int taxisID)
 {
-  static char func[] = "taxisDestroy";
+  static const char *func = "taxisDestroy";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -429,7 +429,7 @@ void taxisDestroy(int taxisID)
 
 int taxisDuplicate(int taxisID1)
 {
-  static char func[] = "taxisDuplicate";
+  static const char *func = "taxisDuplicate";
   int taxisID2;
   taxis_t *taxisptr1;
   taxis_t *taxisptr2;
@@ -454,7 +454,7 @@ int taxisDuplicate(int taxisID1)
 
 void taxisDefType(int taxisID, int type)
 {
-  static char func[] = "taxisDefType";
+  static const char *func = "taxisDefType";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -481,7 +481,7 @@ The function @func{taxisDefVdate} defines the verification date of a Time axis.
 */
 void taxisDefVdate(int taxisID, int vdate)
 {
-  static char func[] = "taxisDefVdate";
+  static const char *func = "taxisDefVdate";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -508,7 +508,7 @@ The function @func{taxisDefVtime} defines the verification time of a Time axis.
 */
 void taxisDefVtime(int taxisID, int vtime)
 {
-  static char func[] = "taxisDefVtime";
+  static const char *func = "taxisDefVtime";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -535,7 +535,7 @@ The function @func{taxisDefVdate} defines the reference date of a Time axis.
 */
 void taxisDefRdate(int taxisID, int rdate)
 {
-  static char func[] = "taxisDefRdate";
+  static const char *func = "taxisDefRdate";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -562,7 +562,7 @@ The function @func{taxisDefVdate} defines the reference time of a Time axis.
 */
 void taxisDefRtime(int taxisID, int rtime)
 {
-  static char func[] = "taxisDefRtime";
+  static const char *func = "taxisDefRtime";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -591,7 +591,7 @@ The function @func{taxisDefCalendar} defines the calendar of a Time axis.
 */
 void taxisDefCalendar(int taxisID, int calendar)
 {
-  static char func[] = "taxisDefCalendar";
+  static const char *func = "taxisDefCalendar";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -604,7 +604,7 @@ void taxisDefCalendar(int taxisID, int calendar)
 
 void taxisDefTunit(int taxisID, int unit)
 {
-  static char func[] = "taxisDefTunit";
+  static const char *func = "taxisDefTunit";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -616,7 +616,7 @@ void taxisDefTunit(int taxisID, int unit)
 
 void taxisDefNumavg(int taxisID, int numavg)
 {
-  static char func[] = "taxisDefNumavg";
+  static const char *func = "taxisDefNumavg";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -633,7 +633,7 @@ The valid CDI time types are TAXIS_ABSOLUTE and TAXIS_RELATIVE.
 */
 int taxisInqType(int taxisID)
 {
-  static char func[] = "taxisInqType";
+  static const char *func = "taxisInqType";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -646,7 +646,7 @@ int taxisInqType(int taxisID)
 
 int taxisHasBounds(int taxisID)
 {
-  static char func[] = "taxisHasBounds";
+  static const char *func = "taxisHasBounds";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -659,7 +659,7 @@ int taxisHasBounds(int taxisID)
 
 void taxisDeleteBounds(int taxisID)
 {
-  static char func[] = "taxisDeleteBounds";
+  static const char *func = "taxisDeleteBounds";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -672,7 +672,7 @@ void taxisDeleteBounds(int taxisID)
 
 void taxisCopyTimestep(int taxisID2, int taxisID1)
 {
-  static char func[] = "taxisCopyTimestep";
+  static const char *func = "taxisCopyTimestep";
   taxis_t *taxisptr1;
   taxis_t *taxisptr2;
 
@@ -716,7 +716,7 @@ The function @func{taxisInqVdate} returns the verification date of a Time axis.
 */
 int taxisInqVdate(int taxisID)
 {
-  static char func[] = "taxisInqVdate";
+  static const char *func = "taxisInqVdate";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -729,7 +729,7 @@ int taxisInqVdate(int taxisID)
 
 void taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub)
 {
-  static char func[] = "taxisInqVdateBounds";
+  static const char *func = "taxisInqVdateBounds";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -743,7 +743,7 @@ void taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub)
 
 void taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub)
 {
-  static char func[] = "taxisDefVdateBounds";
+  static const char *func = "taxisDefVdateBounds";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -775,7 +775,7 @@ The function @func{taxisInqVtime} returns the verification time of a Time axis.
 */
 int taxisInqVtime(int taxisID)
 {
-  static char func[] = "taxisInqVtime";
+  static const char *func = "taxisInqVtime";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -788,7 +788,7 @@ int taxisInqVtime(int taxisID)
 
 void taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub)
 {
-  static char func[] = "taxisInqVtimeBounds";
+  static const char *func = "taxisInqVtimeBounds";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -802,7 +802,7 @@ void taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub)
 
 void taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub)
 {
-  static char func[] = "taxisDefVtimeBounds";
+  static const char *func = "taxisDefVtimeBounds";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -834,7 +834,7 @@ The function @func{taxisInqRdate} returns the reference date of a Time axis.
 */
 int taxisInqRdate(int taxisID)
 {
-  static char func[] = "taxisInqRdate";
+  static const char *func = "taxisInqRdate";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -869,7 +869,7 @@ The function @func{taxisInqRtime} returns the reference time of a Time axis.
 */
 int taxisInqRtime(int taxisID)
 {
-  static char func[] = "taxisInqRtime";
+  static const char *func = "taxisInqRtime";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -907,7 +907,7 @@ The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_PROLEP
 */
 int taxisInqCalendar(int taxisID)
 {
-  static char func[] = "taxisInqCalendar";
+  static const char *func = "taxisInqCalendar";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -920,7 +920,7 @@ int taxisInqCalendar(int taxisID)
 
 int taxisInqTunit(int taxisID)
 {
-  static char func[] = "taxisInqTunit";
+  static const char *func = "taxisInqTunit";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -933,7 +933,7 @@ int taxisInqTunit(int taxisID)
 
 int taxisInqNumavg(int taxisID)
 {
-  static char func[] = "taxisInqNumavg";
+  static const char *func = "taxisInqNumavg";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -946,7 +946,7 @@ int taxisInqNumavg(int taxisID)
 
 taxis_t *taxisPtr(int taxisID)
 {
-  static char func[] = "taxisPtr";
+  static const char *func = "taxisPtr";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
@@ -959,7 +959,7 @@ taxis_t *taxisPtr(int taxisID)
 
 void cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
 {
-  static char func[] = "cdiDecodeTimevalue";
+  static const char *func = "cdiDecodeTimevalue";
   static int lwarn = TRUE;
 
   if ( timeunit == TUNIT_MINUTE )
@@ -1012,7 +1012,7 @@ void cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
 static
 void cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
 {
-  static char func[] = "cdiEncodeTimevalue";
+  static const char *func = "cdiEncodeTimevalue";
   static int lwarn = TRUE;
 
   if ( timeunit == TUNIT_SECOND )
@@ -1049,7 +1049,7 @@ int days_per_month(int calendar, int year, int month);
 
 void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
 {
-  static char func[] = "timeval2vtime";
+  static const char *func = "timeval2vtime";
   int year, month, day, hour, minute, second;
   int rdate, rtime;
   int timeunit;
@@ -1238,7 +1238,7 @@ void conv_timeval(double timevalue, int *rvdate, int *rvtime)
 
 void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
 {
-  static char func[] = "splitTimevalue";
+  static const char *func = "splitTimevalue";
   int vdate = 0, vtime = 0;
   int hour, minute, second;
   int year, month, day;

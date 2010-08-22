@@ -63,7 +63,7 @@ static int cdiHaveMissval = 0;
 
 long cdiGetenvInt(char *envName)
 {
-  static char func[] = "cdiGetenv";
+  static const char *func = "cdiGetenv";
   char *envString;
   long envValue = -1;
   long fact = 1;
@@ -104,7 +104,7 @@ long cdiGetenvInt(char *envName)
 
 void cdiInitialize(void)
 {
-  static char func[] = "cdiInitialize";
+  static const char *func = "cdiInitialize";
   static int Init_CDI = FALSE;
   char *envString;
   long value;
@@ -248,7 +248,7 @@ static int             _streamAvail = -1;
 static
 void stream_list_new(void)
 {
-  static char func[] = "stream_list_new";
+  static const char *func = "stream_list_new";
 
   assert(_streamList == NULL);
 
@@ -258,7 +258,7 @@ void stream_list_new(void)
 static
 void stream_list_delete(void)
 {
-  static char func[] = "stream_list_delete";
+  static const char *func = "stream_list_delete";
 
   if ( _streamList ) free(_streamList);
 }
@@ -283,7 +283,7 @@ void stream_init_pointer(void)
 static
 void stream_list_extend(void)
 {
-  static char func[] = "stream_list_extend";
+  static const char *func = "stream_list_extend";
   int nstreams;
   int i;
 
@@ -314,7 +314,7 @@ void stream_list_extend(void)
 
 stream_t *stream_to_pointer(int idx)
 {
-  static char func[] = "stream_to_pointer";
+  static const char *func = "stream_to_pointer";
   stream_t *streamptr = NULL;
 
   STREAM_INIT();
@@ -337,7 +337,7 @@ stream_t *stream_to_pointer(int idx)
 static
 int stream_from_pointer(stream_t *ptr)
 {
-  static char func[] = "stream_from_pointer";
+  static const char *func = "stream_from_pointer";
   int idx = -1;
 
   if ( ptr )
@@ -432,7 +432,7 @@ void stream_init_entry(stream_t *streamptr)
 
 stream_t *stream_new_entry(void)
 {
-  static char func[] = "stream_new_entry";
+  static const char *func = "stream_new_entry";
   stream_t *streamptr;
 
   cdiInitialize(); /* ***************** make MT version !!! */
@@ -449,7 +449,7 @@ stream_t *stream_new_entry(void)
 
 void stream_delete_entry(stream_t *streamptr)
 {
-  static char func[] = "stream_delete_entry";
+  static const char *func = "stream_delete_entry";
   int idx;
 
   idx = streamptr->self;
@@ -522,7 +522,7 @@ int streamSize(void)
 
 void cdiDefGlobal(const char *string, int val)
 {
-  static char func[] = "cdiDefGlobal";
+  static const char *func = "cdiDefGlobal";
 
   if ( strcmp(string, "REGULARGRID") == 0 )
     {
@@ -561,7 +561,7 @@ double cdiInqMissval(void)
 
 void cdiCheckContents(int streamID)
 {
-  static char func[] = "cdiCheckContents";
+  static const char *func = "cdiCheckContents";
   int index, nzaxis, zaxisID;
   int vlistID;
   stream_t *streamptr;
@@ -595,7 +595,7 @@ int streamInqFileID(int streamID)
 
 void streamDefineTaxis(int streamID)
 {
-  static char func[] = "streamDefineTaxis";
+  static const char *func = "streamDefineTaxis";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -652,7 +652,7 @@ int streamInqDimgroupID(int streamID)
 
 void cdiDefAccesstype(int streamID, int type)
 {
-  static char func[] = "cdiDefAccesstype";
+  static const char *func = "cdiDefAccesstype";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);

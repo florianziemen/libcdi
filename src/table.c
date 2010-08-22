@@ -44,7 +44,7 @@ void tableDefNum(int tableID, int tablenum);
 void tableDefEntry(int tableID, int id, const char *name,
 		   const char *longname, const char *units)
 {
-  static char func[] = "tableDefEntry";
+  static const char *func = "tableDefEntry";
   int item;
 
   item = parTable[tableID].npars++;
@@ -91,7 +91,7 @@ void parTableInitEntry(int tableID)
 
 void tableGetPath(void)
 {
-  static char func[] = "tableGetPath";
+  static const char *func = "tableGetPath";
   char *path;
 
   path = getenv("TABLEPATH");
@@ -114,7 +114,7 @@ void parTableInit(void)
 
 int tableNewEntry()
 {
-  static char func[] = "tableNewEntry";
+  static const char *func = "tableNewEntry";
   int tableID = 0;
   static int init = 0;
 
@@ -337,7 +337,7 @@ int tableRead(const char *tablefile)
 
 int tableFromEnv(int modelID, int tablenum)
 {
-  static char func[] = "tableFromEnv";
+  static const char *func = "tableFromEnv";
   int tableID = UNDEFID;
   char tablename[256] = {'\0'};
   int tablenamefound = 0;
@@ -408,7 +408,7 @@ int tableFromEnv(int modelID, int tablenum)
 
 int tableInq(int modelID, int tablenum, const char *tablename)
 {
-  static char func[] = "tableInq";
+  static const char *func = "tableInq";
   int tableID = UNDEFID;
   int modelID2 = UNDEFID, i, len;
   char tablefile[256] = {'\0'};
@@ -488,7 +488,7 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 
 int tableDef(int modelID, int tablenum, const char *tablename)
 {
-  static char func[] = "tableDef";
+  static const char *func = "tableDef";
   int tableID = UNDEFID;
 
   if ( ! ParTableInit ) parTableInit();
@@ -543,7 +543,7 @@ int tableInqModel(int tableID)
 
 void partabCheckID(int item)
 {
-  static char func[] = "partabCheckID";
+  static const char *func = "partabCheckID";
 
   if ( item < 0 || item >= parTableSize )
     Error(func, "item %d undefined!", item);
@@ -554,7 +554,7 @@ void partabCheckID(int item)
 
 char *tableInqNamePtr(int tableID)
 {
-  static char func[] = "tableInqNamePtr";
+  static const char *func = "tableInqNamePtr";
   char *tablename = NULL;
 
   if ( CDI_Debug )
@@ -571,7 +571,7 @@ char *tableInqNamePtr(int tableID)
 
 void tableWrite(const char *ptfile, int tableID)
 {
-  static char func[] = "tableWrite";
+  static const char *func = "tableWrite";
   int item, npars;
   int lenname, lenlname, lenunits;
   int maxname = 4, maxlname = 10, maxunits = 2;
@@ -679,7 +679,7 @@ void tableWrite(const char *ptfile, int tableID)
 
 void tableWriteC(const char *filename, int tableID)
 {
-  static char func[] = "tableWriteC";
+  static const char *func = "tableWriteC";
   char chelp[] = "";
   int item, npars;
   int lenname, lenlname, lenunits;

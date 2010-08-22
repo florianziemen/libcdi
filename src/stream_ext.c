@@ -72,7 +72,7 @@ void extDefDatatype(int datatype, int *prec, int *number)
 /* not used
 int extInqRecord(int streamID, int *varID, int *levelID)
 {
-  static char func[] = "extInqRecord";
+  static const char *func = "extInqRecord";
   int status;
   int fileID;
   int icode, ilevel;
@@ -115,7 +115,7 @@ int extInqRecord(int streamID, int *varID, int *levelID)
 
 int extReadRecord(int streamID, double *data, int *nmiss)
 {
-  static char func[] = "extReadRecord";
+  static const char *func = "extReadRecord";
   int vlistID, fileID;
   int status;
   int recID, vrecID, tsID;
@@ -180,7 +180,7 @@ int extReadRecord(int streamID, double *data, int *nmiss)
 
 int extCopyRecord(int streamID2, int streamID1)
 {
-  static char func[] = "extCopyRecord";
+  static const char *func = "extCopyRecord";
   int fileID1, fileID2;
   int tsID, recID, vrecID;
   long recsize;
@@ -221,7 +221,7 @@ int extCopyRecord(int streamID2, int streamID1)
 
 int extDefRecord(int streamID)
 {
-  static char func[] = "extDefRecord";
+  static const char *func = "extDefRecord";
   int fileID;
   int gridID;
   int header[4];
@@ -254,7 +254,7 @@ int extDefRecord(int streamID)
 
 int extWriteRecord(int streamID, const double *data)
 {
-  static char func[] = "extWriteRecord";
+  static const char *func = "extWriteRecord";
   int fileID;
   int status = 0;
   extrec_t *extp;
@@ -278,7 +278,7 @@ static
 void extAddRecord(int streamID, int param, int level, int xysize,
 		  long recsize, off_t position, int prec, int number)
 {
-  static char func[] = "extAddRecord";
+  static const char *func = "extAddRecord";
   int leveltype;
   int gridID = UNDEFID;
   int levelID = 0;
@@ -332,7 +332,7 @@ void extAddRecord(int streamID, int param, int level, int xysize,
 void extCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
 		  int level, int xysize)
 {
-  static char func[] = "extCmpRecord";
+  static const char *func = "extCmpRecord";
   int varID = 0;
   int levelID = 0;
   record_t *record;
@@ -362,7 +362,7 @@ void extCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
 static
 void extScanTimestep1(int streamID)
 {  
-  static char func[] = "extScanTimestep1";
+  static const char *func = "extScanTimestep1";
   int header[4];
   int status;
   int fileID;
@@ -503,7 +503,7 @@ void extScanTimestep1(int streamID)
 static
 int extScanTimestep2(int streamID)
 {  
-  static char func[] = "extScanTimestep2";
+  static const char *func = "extScanTimestep2";
   int header[4];
   int status;
   int fileID;
@@ -668,7 +668,7 @@ int extScanTimestep2(int streamID)
 
 int extInqContents(int streamID)
 {
-  static char func[] = "extInqContents";
+  static const char *func = "extInqContents";
   int fileID;
   int status = 0;
   stream_t *streamptr;
@@ -693,7 +693,7 @@ int extInqContents(int streamID)
 static
 int extScanTimestep(int streamID)
 {
-  static char func[] = "extScanTimestep";
+  static const char *func = "extScanTimestep";
   int header[4];
   int status;
   int fileID;
@@ -827,7 +827,7 @@ int extScanTimestep(int streamID)
 
 int extInqTimestep(int streamID, int tsID)
 {
-  static char func[] = "extInqTimestep";
+  static const char *func = "extInqTimestep";
   int ntsteps, nrecs;
   stream_t *streamptr;
 
@@ -861,7 +861,7 @@ int extInqTimestep(int streamID, int tsID)
 
 void extReadVarDP(int streamID, int varID, double *data, int *nmiss)
 {
-  static char func[] = "extReadVarDP";
+  static const char *func = "extReadVarDP";
   int vlistID, fileID;
   int levID, nlevs, gridID, gridsize;
   off_t recpos, currentfilepos;
@@ -925,7 +925,7 @@ void extReadVarDP(int streamID, int varID, double *data, int *nmiss)
 
 void extReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nmiss)
 {
-  static char func[] = "extReadVarSliceDP";
+  static const char *func = "extReadVarSliceDP";
   int vlistID, fileID;
   int nlevs, gridID, gridsize;
   off_t recpos, currentfilepos;
@@ -988,7 +988,7 @@ void extReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
 
 void extWriteVarDP(int streamID, int varID, const double *data)
 {
-  static char func[] = "extWriteVarDP";
+  static const char *func = "extWriteVarDP";
   int fileID;
   int levID, nlevs, gridID, gridsize;
   int zaxisID;
@@ -1039,7 +1039,7 @@ void extWriteVarDP(int streamID, int varID, const double *data)
 
 void extWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
 {
-  static char func[] = "extWriteVarSliceDP";
+  static const char *func = "extWriteVarSliceDP";
   int fileID;
   int gridID;
   int zaxisID;

@@ -31,7 +31,7 @@ void recordInitEntry(record_t *record)
 
 int recordNewEntry(int streamID, int tsID)
 {
-  static char func[] = "recordNewEntry";
+  static const char *func = "recordNewEntry";
   int recordID = 0;
   int recordSize;
   record_t *records;
@@ -101,7 +101,7 @@ int recordNewEntry(int streamID, int tsID)
 
 void cdiInitRecord(int streamID)
 {
-  static char func[] = "cdiInitRecord";
+  static const char *func = "cdiInitRecord";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -128,7 +128,7 @@ void cdiInitRecord(int streamID)
 
 void streamInqRecord(int streamID, int *varID, int *levelID)
 {
-  static char func[] = "streamInqRecord";
+  static const char *func = "streamInqRecord";
   int rec = 0;
   int recID, tsID, rindex;
   int lindex;
@@ -202,7 +202,7 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
 
 void streamDefRecord(int streamID, int varID, int levelID)
 {
-  static char func[] = "streamDefRecord";
+  static const char *func = "streamDefRecord";
   int status = 0;
   int filetype;
   int param, gridID, zaxisID, level;
@@ -294,7 +294,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
 
 void streamReadRecord(int streamID, double *data, int *nmiss)
 {
-  static char func[] = "streamReadRecord";
+  static const char *func = "streamReadRecord";
   int status = 0;
   int filetype;
   stream_t *streamptr;
@@ -358,7 +358,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
 
 void streamWriteRecord(int streamID, const double *data, int nmiss)
 {
-  static char func[] = "streamWriteRecord";
+  static const char *func = "streamWriteRecord";
   int status = 0;
   int filetype;
   stream_t *streamptr;
@@ -420,7 +420,7 @@ void streamWriteRecord(int streamID, const double *data, int nmiss)
 
 void streamCopyRecord(int streamID2, int streamID1)
 {
-  static char func[] = "streamCopyRecord";
+  static const char *func = "streamCopyRecord";
   int status = 0;
   int filetype = CDI_UNDEFID, filetype1, filetype2;
   int byteorder1, byteorder2;
@@ -482,7 +482,7 @@ void streamCopyRecord(int streamID2, int streamID1)
 
 void cdiCreateRecords(int streamID, int tsID)
 {
-  static char func[] = "cdiCreateRecords";
+  static const char *func = "cdiCreateRecords";
   int nrecords, maxrecords;
   int nvars, varID, recID;
   record_t *records;

@@ -48,7 +48,7 @@ int SRV_Debug = 0;    /* If set to 1, debugging */
 
 void srvDebug(int debug)
 {
-  static char func[] = "srvDebug";
+  static const char *func = "srvDebug";
 
   SRV_Debug = debug;
 
@@ -59,7 +59,7 @@ void srvDebug(int debug)
 
 void srvLibInit()
 {
-  static char func[] = "srvLibInit";
+  static const char *func = "srvLibInit";
   char *envString;
   char *envName = "SRV_PRECISION";
 
@@ -124,7 +124,7 @@ void srvInit(srvrec_t *srvp)
 
 srvrec_t *srvNew(void)
 {
-  static char func[] = "srvNew";
+  static const char *func = "srvNew";
   srvrec_t *srvp;
 
   if ( ! initSrvLib ) srvLibInit();
@@ -139,7 +139,7 @@ srvrec_t *srvNew(void)
 
 void srvDelete(srvrec_t *srvp)
 {
-  static char func[] = "srvDelete";
+  static const char *func = "srvDelete";
 
   if ( srvp )
     {
@@ -151,7 +151,7 @@ void srvDelete(srvrec_t *srvp)
 
 int srvCheckFiletype(int fileID, int *swap)
 {
-  static char func[] = "srvCheckFiletype";
+  static const char *func = "srvCheckFiletype";
   size_t blocklen = 0;
   size_t sblocklen = 0;
   size_t data = 0;
@@ -221,7 +221,7 @@ int srvCheckFiletype(int fileID, int *swap)
 
 int srvInqHeader(srvrec_t *srvp, int *header)
 {
-  static char func[] = "srvInqHeader";
+  static const char *func = "srvInqHeader";
   size_t i;
 
 
@@ -237,7 +237,7 @@ int srvInqHeader(srvrec_t *srvp, int *header)
 
 int srvDefHeader(srvrec_t *srvp, const int *header)
 {
-  static char func[] = "srvDefHeader";
+  static const char *func = "srvDefHeader";
   size_t i;
 
 
@@ -255,7 +255,7 @@ int srvDefHeader(srvrec_t *srvp, const int *header)
 
 int srvInqData(srvrec_t *srvp, int prec, void *data)
 {
-  static char func[] = "srvInqData";
+  static const char *func = "srvInqData";
   size_t datasize;
   size_t i;
   int ierr = 0;
@@ -330,7 +330,7 @@ int srvInqDataDP(srvrec_t *srvp, double *data)
 
 int srvDefData(srvrec_t *srvp, int prec, const void *data)
 {
-  static char func[] = "srvDefData";
+  static const char *func = "srvDefData";
   size_t datasize;
   size_t blocklen;
   size_t buffersize;
@@ -420,7 +420,7 @@ int srvDefDataDP(srvrec_t *srvp, const double *data)
 
 int srvRead(int fileID, srvrec_t *srvp)
 {
-  static char func[] = "srvRead";
+  static const char *func = "srvRead";
   size_t datasize;
   size_t blocklen, blocklen2;
   size_t i;
@@ -534,7 +534,7 @@ int srvRead(int fileID, srvrec_t *srvp)
 
 int srvWrite(int fileID, srvrec_t *srvp)
 {
-  static char func[] = "srvWrite";
+  static const char *func = "srvWrite";
   size_t datasize;
   size_t blocklen;
   size_t i;

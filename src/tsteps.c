@@ -28,7 +28,7 @@ static void tstepsInitEntry(int streamID, int tsID)
 
 int tstepsNewEntry(int streamID)
 {
-  static char func[] = "tstepsNewEntry";
+  static const char *func = "tstepsNewEntry";
   int tsID = 0;
   int tstepsTableSize;
   TSTEPS *tstepsTable;
@@ -67,7 +67,7 @@ int tstepsNewEntry(int streamID)
 
 void cdiCreateTimesteps(int streamID)
 {
-  static char func[] = "cdiCreateTimesteps";
+  static const char *func = "cdiCreateTimesteps";
   int ntsteps;
   int tsID;
   stream_t *streamptr;

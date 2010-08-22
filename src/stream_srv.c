@@ -45,7 +45,7 @@ int srvInqDatatype(int prec)
 
 int srvDefDatatype(int datatype)
 {
-  static char func[] = "srvDefDatatype";
+  static const char *func = "srvDefDatatype";
   int prec;
 
   if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
@@ -63,7 +63,7 @@ int srvDefDatatype(int datatype)
 
 int srvInqRecord(int streamID, int *varID, int *levelID)
 {
-  static char func[] = "srvInqRecord";
+  static const char *func = "srvInqRecord";
   int status;
   int fileID;
   int icode, ilevel;
@@ -106,7 +106,7 @@ int srvInqRecord(int streamID, int *varID, int *levelID)
 
 int srvReadRecord(int streamID, double *data, int *nmiss)
 {
-  static char func[] = "srvReadRecord";
+  static const char *func = "srvReadRecord";
   int vlistID, fileID;
   int status;
   int recID, vrecID, tsID;
@@ -159,7 +159,7 @@ int srvReadRecord(int streamID, double *data, int *nmiss)
 
 int srvCopyRecord(int streamID2, int streamID1)
 {
-  static char func[] = "srvCopyRecord";
+  static const char *func = "srvCopyRecord";
   int fileID1, fileID2;
   int tsID, recID, vrecID;
   long recsize;
@@ -200,7 +200,7 @@ int srvCopyRecord(int streamID2, int streamID1)
 
 int srvDefRecord(int streamID)
 {
-  static char func[] = "srvDefRecord";
+  static const char *func = "srvDefRecord";
   int fileID;
   int gridID;
   int header[8];
@@ -253,7 +253,7 @@ int srvDefRecord(int streamID)
 
 int srvWriteRecord(int streamID, const double *data)
 {
-  static char func[] = "srvWriteRecord";
+  static const char *func = "srvWriteRecord";
   int fileID;
   int status = 0;
   srvrec_t *srvp;
@@ -277,7 +277,7 @@ int srvWriteRecord(int streamID, const double *data)
 void srvAddRecord(int streamID, int param, int level, int xsize, int ysize,
 		  long recsize, off_t position, int prec)
 {
-  static char func[] = "srvAddRecord";
+  static const char *func = "srvAddRecord";
   int leveltype;
   int gridID = UNDEFID;
   int levelID = 0;
@@ -334,7 +334,7 @@ void srvAddRecord(int streamID, int param, int level, int xsize, int ysize,
 void srvCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
 		  int level, int xsize, int ysize)
 {
-  static char func[] = "srvCmpRecord";
+  static const char *func = "srvCmpRecord";
   int varID = 0;
   int levelID = 0;
   record_t *record;
@@ -364,7 +364,7 @@ void srvCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
 static
 void srvScanTimestep1(int streamID)
 {  
-  static char func[] = "srvScanTimestep1";
+  static const char *func = "srvScanTimestep1";
   int header[8];
   int prec = 0;
   int status;
@@ -508,7 +508,7 @@ void srvScanTimestep1(int streamID)
 static
 int srvScanTimestep2(int streamID)
 {  
-  static char func[] = "srvScanTimestep2";
+  static const char *func = "srvScanTimestep2";
   int header[8];
   int status;
   int fileID;
@@ -671,7 +671,7 @@ int srvScanTimestep2(int streamID)
 
 int srvInqContents(int streamID)
 {
-  static char func[] = "srvInqContents";
+  static const char *func = "srvInqContents";
   int fileID;
   int status = 0;
   stream_t *streamptr;
@@ -696,7 +696,7 @@ int srvInqContents(int streamID)
 static
 int srvScanTimestep(int streamID)
 {
-  static char func[] = "srvScanTimestep";
+  static const char *func = "srvScanTimestep";
   int header[8];
   int status;
   int fileID;
@@ -831,7 +831,7 @@ int srvScanTimestep(int streamID)
 
 int srvInqTimestep(int streamID, int tsID)
 {
-  static char func[] = "srvInqTimestep";
+  static const char *func = "srvInqTimestep";
   int ntsteps, nrecs;
   stream_t *streamptr;
 
@@ -865,7 +865,7 @@ int srvInqTimestep(int streamID, int tsID)
 
 void srvReadVarDP(int streamID, int varID, double *data, int *nmiss)
 {
-  static char func[] = "srvReadVarDP";
+  static const char *func = "srvReadVarDP";
   int vlistID, fileID;
   int levID, nlevs, gridID, gridsize;
   off_t recpos, currentfilepos;
@@ -917,7 +917,7 @@ void srvReadVarDP(int streamID, int varID, double *data, int *nmiss)
 
 void srvReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nmiss)
 {
-  static char func[] = "srvReadVarSliceDP";
+  static const char *func = "srvReadVarSliceDP";
   int vlistID, fileID;
   int nlevs, gridID, gridsize;
   off_t recpos, currentfilepos;
@@ -968,7 +968,7 @@ void srvReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
 
 void srvWriteVarDP(int streamID, int varID, const double *data)
 {
-  static char func[] = "srvWriteVarDP";
+  static const char *func = "srvWriteVarDP";
   int fileID;
   int levID, nlevs, gridID, gridsize;
   int zaxisID;
@@ -1039,7 +1039,7 @@ void srvWriteVarDP(int streamID, int varID, const double *data)
 
 void srvWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
 {
-  static char func[] = "srvWriteVarSliceDP";
+  static const char *func = "srvWriteVarSliceDP";
   int fileID;
   int gridID;
   int zaxisID;

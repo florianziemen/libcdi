@@ -38,7 +38,7 @@ void cdiPrintDefaults(void)
 
 void cdiDebug(int level)
 {
-  static char func[] = "cdiDebug";
+  static const char *func = "cdiDebug";
 
   if ( level == 1 || level &  2 ) CDI_Debug = 1;
 
@@ -101,7 +101,7 @@ static int getByteorder(int byteswap)
 
 static int getFiletype(const char *filename, int *byteorder)
 {
-  static char func[] = "getFiletype";
+  static const char *func = "getFiletype";
   int filetype = CDI_EUFTYPE;
   int fileID;
   int swap = 0;
@@ -220,7 +220,7 @@ int _readline_(FILE *fp, char *line, int len)
 
 int get_fnames(const char *argument, char *fnames[], int max_fnames)
 {
-  static char func[] = "get_fnames";
+  static const char *func = "get_fnames";
   int num_fnames = 0;
   int len;
   int nfiles = 0;
@@ -351,7 +351,7 @@ The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_GRB2}, @
 */
 int streamInqFiletype(int streamID)
 {
-  static char func[] = "streamInqFiletype";
+  static const char *func = "streamInqFiletype";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -398,7 +398,7 @@ with the file format type @func{FILETYPE_SRV}, @func{FILETYPE_EXT} or @func{FILE
 */
 void streamDefByteorder(int streamID, int byteorder)
 {
-  static char func[] = "streamDefByteorder";
+  static const char *func = "streamDefByteorder";
   int filetype, fileID;
   stream_t *streamptr;
 
@@ -463,7 +463,7 @@ The valid CDI byte order types are @func{CDI_BIGENDIAN} and @func{CDI_LITTLEENDI
 */
 int streamInqByteorder(int streamID)
 {
-  static char func[] = "streamInqByteorder";
+  static const char *func = "streamInqByteorder";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -488,7 +488,7 @@ char *streamFilesuffix(int filetype)
 
 char *streamFilename(int streamID)
 {
-  static char func[] = "streamFilename";
+  static const char *func = "streamFilename";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -501,7 +501,7 @@ char *streamFilename(int streamID)
 
 int cdiInqTimeSize(int streamID)
 {
-  static char func[] = "cdiInqTimeSize";
+  static const char *func = "cdiInqTimeSize";
   int ntsteps;
   int tsID = 0, nrecs;
   stream_t *streamptr;
@@ -523,7 +523,7 @@ int cdiInqTimeSize(int streamID)
 
 int cdiInqContents(int streamID)
 {
-  static char func[] = "cdiInqContents";
+  static const char *func = "cdiInqContents";
   int filetype;
   int vlistID;
   int taxisID;
@@ -599,7 +599,7 @@ int cdiInqContents(int streamID)
 
 int streamOpen(const char *filename, const char *filemode, int filetype)
 {
-  static char func[] = "streamOpen";
+  static const char *func = "streamOpen";
   int fileID = CDI_UNDEFID;
   int streamID = CDI_ESYSTEM;
   int status;
@@ -716,7 +716,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 
 int streamOpenA(const char *filename, const char *filemode, int filetype)
 {
-  static char func[] = "streamOpenA";
+  static const char *func = "streamOpenA";
   int fileID = CDI_UNDEFID;
   int streamID = CDI_ESYSTEM;
   int status;
@@ -973,7 +973,7 @@ if ( streamID < 0 ) handle_error(streamID);
 */
 int streamOpenRead(const char *filenames)
 {
-  static char func[] = "streamOpenRead";
+  static const char *func = "streamOpenRead";
   int filetype, byteorder;
   int streamID;
   int num_fnames;
@@ -1099,7 +1099,7 @@ The function @func{streamClose} closes an open dataset.
 */
 void streamClose(int streamID)
 {
-  static char func[] = "streamClose";
+  static const char *func = "streamClose";
   int filetype;
   int fileID;
   int index;
@@ -1250,7 +1250,7 @@ The function @func{streamSync} offers a way to synchronize the disk copy of a da
 */
 void streamSync(int streamID)
 {
-  static char func[] = "streamSync";
+  static const char *func = "streamSync";
   int filetype;
   int fileID;
   int vlistID;
@@ -1318,7 +1318,7 @@ The function @func{streamDefTimestep} defines the time step of a stream.
 */
 int streamDefTimestep(int streamID, int tsID)
 {
-  static char func[] = "streamDefTimestep";
+  static const char *func = "streamDefTimestep";
   int newtsID;
   int taxisID;
   int vlistID;
@@ -1382,7 +1382,7 @@ The function @func{streamInqTimestep} returns the time step of a stream.
 */
 int streamInqTimestep(int streamID, int tsID)
 {
-  static char func[] = "streamInqTimestep";
+  static const char *func = "streamInqTimestep";
   int filetype;
   int nrecs = 0;
   int taxisID;
@@ -1493,7 +1493,7 @@ from an open dataset.
 */
 void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 {
-  static char func[] = "streamReadVar";
+  static const char *func = "streamReadVar";
   int filetype;
   stream_t *streamptr;
 
@@ -1575,7 +1575,7 @@ to an open dataset.
 */
 void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 {
-  static char func[] = "streamWriteVar";
+  static const char *func = "streamWriteVar";
   int filetype;
   stream_t *streamptr;
 
@@ -1659,7 +1659,7 @@ from an open dataset.
 */
 void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
 {
-  static char func[] = "streamReadVarSlice";
+  static const char *func = "streamReadVarSlice";
   int filetype;
   int ierr = 0;
   stream_t *streamptr;
@@ -1740,7 +1740,7 @@ variable to an open dataset.
 */
 void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
 {
-  static char func[] = "streamWriteVarSlice";
+  static const char *func = "streamWriteVarSlice";
   int filetype;
   int ierr = 0;
   stream_t *streamptr;
@@ -1806,7 +1806,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
 
 void streamWriteContents(int streamID, char *cname)
 {
-  static char func[] = "streamWriteContents";
+  static const char *func = "streamWriteContents";
   FILE *cnp;
   int tsID, recID, varID, levelID;
   long recsize;
@@ -1965,7 +1965,7 @@ void cdiPrintVersion(void)
 
 int streamNtsteps(int streamID)
 {
-  static char func[] = "streamNtsteps";
+  static const char *func = "streamNtsteps";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -1977,7 +1977,7 @@ int streamNtsteps(int streamID)
 
 off_t   streamNvals(int streamID)
 {
-  static char func[] = "streamNvals";
+  static const char *func = "streamNvals";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -2003,7 +2003,7 @@ The function @func{streamDefVlist} defines the variable list of a stream.
 */
 void streamDefVlist(int streamID, int vlistID)
 {
-  static char func[] = "streamDefVlist";
+  static const char *func = "streamDefVlist";
   int nvars, varID;
   int gridID, zaxisID;
   stream_t *streamptr;
@@ -2065,7 +2065,7 @@ The function @func{streamInqVlist} returns the variable list of a stream.
 */
 int streamInqVlist(int streamID)
 {
-  static char func[] = "streamInqVlist";
+  static const char *func = "streamInqVlist";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -2078,7 +2078,7 @@ int streamInqVlist(int streamID)
 
 void streamDefZtype(int streamID, int ztype)
 {
-  static char func[] = "streamDefZtype";
+  static const char *func = "streamDefZtype";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -2091,7 +2091,7 @@ void streamDefZtype(int streamID, int ztype)
 
 void streamDefZlevel(int streamID, int zlevel)
 {
-  static char func[] = "streamDefZlevel";
+  static const char *func = "streamDefZlevel";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -2104,7 +2104,7 @@ void streamDefZlevel(int streamID, int zlevel)
 
 int streamInqZtype(int streamID)
 {
-  static char func[] = "streamInqZtype";
+  static const char *func = "streamInqZtype";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -2117,7 +2117,7 @@ int streamInqZtype(int streamID)
 
 int streamInqZlevel(int streamID)
 {
-  static char func[] = "streamInqZlevel";
+  static const char *func = "streamInqZlevel";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);

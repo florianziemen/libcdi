@@ -36,7 +36,7 @@ void institutsInit(void);
 
 void institutsInitEntry(int instID)
 {
-  static char func[] = "institutsInitEntry";
+  static const char *func = "institutsInitEntry";
 
   if ( instID < 0 || instID >= institutsSize )
     Error(func, "instID %d undefined!", instID);
@@ -51,7 +51,7 @@ void institutsInitEntry(int instID)
 
 int institutsNewEntry(void)
 {
-  static char func[] = "institutsNewEntry";
+  static const char *func = "institutsNewEntry";
   int instID = 0;
 
   /*
@@ -166,7 +166,7 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
 
 int institutDef(int center, int subcenter, const char *name, const char *longname)
 {
-  static char func[] = "institutDef";
+  static const char *func = "institutDef";
   int instID;
 
   if ( ! InstitutsInit ) institutsInit();
@@ -201,7 +201,7 @@ void institutionCheckID(char *func, int instID)
 
 int institutInqCenter(int instID)
 {
-  static char func[] = "institutInqCenter";
+  static const char *func = "institutInqCenter";
   int center = UNDEFID;
 
   if ( ! InstitutsInit ) institutsInit();
@@ -219,7 +219,7 @@ int institutInqCenter(int instID)
 
 int institutInqSubcenter(int instID)
 {
-  static char func[] = "institutInqSubcenter";
+  static const char *func = "institutInqSubcenter";
   int subcenter = UNDEFID;
 
   if ( ! InstitutsInit ) institutsInit();
@@ -237,7 +237,7 @@ int institutInqSubcenter(int instID)
 
 char *institutInqNamePtr(int instID)
 {
-  static char func[] = "institutInqNamePtr";
+  static const char *func = "institutInqNamePtr";
   char *name = NULL;
 
   if ( ! InstitutsInit ) institutsInit();
@@ -256,7 +256,7 @@ char *institutInqNamePtr(int instID)
 
 char *institutInqLongnamePtr(int instID)
 {
-  static char func[] = "institutInqLongnamePtr";
+  static const char *func = "institutInqLongnamePtr";
   char *name = NULL;
 
   if ( ! InstitutsInit ) institutsInit();

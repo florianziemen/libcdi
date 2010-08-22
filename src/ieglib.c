@@ -46,7 +46,7 @@ int IEG_Debug = 0;    /* If set to 1, debugging */
 
 void iegLibInit()
 {
-  static char func[] = "iegLibInit";
+  static const char *func = "iegLibInit";
   char *envString;
   char *envName = "IEG_PRECISION";
 
@@ -88,7 +88,7 @@ void iegLibInit()
 
 void iegDebug(int debug)
 {
-  static char func[] = "iegDebug";
+  static const char *func = "iegDebug";
 
   IEG_Debug = debug;
 
@@ -119,7 +119,7 @@ void iegInitMem(iegrec_t *iegp)
 
 iegrec_t *iegNew(void)
 {
-  static char func[] = "iegNew";
+  static const char *func = "iegNew";
   iegrec_t *iegp;
 
   if ( ! initIegLib ) iegLibInit();
@@ -135,7 +135,7 @@ iegrec_t *iegNew(void)
 
 void iegDelete(iegrec_t *iegp)
 {
-  static char func[] = "iegDelete";
+  static const char *func = "iegDelete";
 
   if ( iegp )
     {
@@ -147,7 +147,7 @@ void iegDelete(iegrec_t *iegp)
 
 int iegCheckFiletype(int fileID, int *swap)
 {
-  static char func[] = "iegCheckFiletype";
+  static const char *func = "iegCheckFiletype";
   size_t blocklen = 0;
   size_t sblocklen = 0;
   size_t data = 0;
@@ -229,7 +229,7 @@ void iegCopyMeta(iegrec_t *diegp, iegrec_t *siegp)
 
 int iegInqData(iegrec_t *iegp, int prec, void *data)
 {
-  static char func[] = "iegInqData";
+  static const char *func = "iegInqData";
   size_t datasize;
   size_t i;
   int ierr = 0;
@@ -304,7 +304,7 @@ int iegInqDataDP(iegrec_t *iegp, double *data)
 
 int iegDefData(iegrec_t *iegp, int prec, const void *data)
 {
-  static char func[] = "iegDefData";
+  static const char *func = "iegDefData";
   size_t datasize;
   size_t blocklen;
   size_t buffersize;
@@ -384,7 +384,7 @@ int iegDefDataDP(iegrec_t *iegp, const double *data)
 
 int iegRead(int fileID, iegrec_t *iegp)
 {
-  static char func[] = "iegRead";
+  static const char *func = "iegRead";
   size_t datasize;
   size_t blocklen, blocklen2;
   size_t i;
@@ -528,7 +528,7 @@ int iegRead(int fileID, iegrec_t *iegp)
 
 int iegWrite(int fileID, iegrec_t *iegp)
 {
-  static char func[] = "iegWrite";
+  static const char *func = "iegWrite";
   size_t datasize;
   size_t blocklen;
   size_t i;

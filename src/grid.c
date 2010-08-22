@@ -82,7 +82,7 @@ static gridPtrToIdx *_gridAvail = NULL;
 static
 void grid_list_new(void)
 {
-  static char func[] = "grid_list_new";
+  static const char *func = "grid_list_new";
 
   assert(_gridList == NULL);
 
@@ -92,7 +92,7 @@ void grid_list_new(void)
 static
 void grid_list_delete(void)
 {
-  static char func[] = "grid_list_delete";
+  static const char *func = "grid_list_delete";
 
   if ( _gridList ) free(_gridList);
 }
@@ -117,7 +117,7 @@ void grid_init_pointer(void)
 static
 grid_t *grid_to_pointer(int idx)
 {
-  static char func[] = "grid_to_pointer";
+  static const char *func = "grid_to_pointer";
   grid_t *gridptr = NULL;
 
   GRID_INIT();
@@ -140,7 +140,7 @@ grid_t *grid_to_pointer(int idx)
 static
 int grid_from_pointer(grid_t *ptr)
 {
-  static char func[] = "grid_from_pointer";
+  static const char *func = "grid_from_pointer";
   int      idx = -1;
   gridPtrToIdx *newptr;
 
@@ -237,7 +237,7 @@ void grid_init_entry(grid_t *gridptr)
 static
 grid_t *grid_new_entry(void)
 {
-  static char func[] = "grid_new_entry";
+  static const char *func = "grid_new_entry";
   grid_t *gridptr;
 
   gridptr = (grid_t *) malloc(sizeof(grid_t));
@@ -250,7 +250,7 @@ grid_t *grid_new_entry(void)
 static
 void grid_delete_entry(grid_t *gridptr)
 {
-  static char func[] = "grid_delete_entry";
+  static const char *func = "grid_delete_entry";
   int idx;
 
   idx = gridptr->self;
@@ -354,7 +354,7 @@ void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *x
 static
 void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 {
-  static char func[] = "calc_gaussgrid";
+  static const char *func = "calc_gaussgrid";
   double *yw;
   long yhsize;
   long i;
@@ -381,7 +381,7 @@ void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 
 void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals)
 {
-  static char func[] = "gridGenYvals";
+  static const char *func = "gridGenYvals";
   long i;
 
   if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
@@ -514,7 +514,7 @@ gridDefYvals(gridID, lats);
 */
 int gridCreate(int gridtype, int size)
 {
-  static char func[] = "gridCreate";
+  static const char *func = "gridCreate";
   int gridID;
   grid_t *gridptr;
 
@@ -1020,7 +1020,7 @@ The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
 */
 int gridInqType(int gridID)
 {
-  static char func[] = "gridInqType";
+  static const char *func = "gridInqType";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1049,7 +1049,7 @@ The function @func{gridInqSize} returns the size of a Grid.
 */
 int gridInqSize(int gridID)
 {
-  static char func[] = "gridInqSize";
+  static const char *func = "gridInqSize";
   int size = 0;
   grid_t *gridptr;
 
@@ -1096,7 +1096,7 @@ int nsp2trunc(int nsp)
 
 int gridInqTrunc(int gridID)
 {
-  static char func[] = "gridInqTrunc";
+  static const char *func = "gridInqTrunc";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1119,7 +1119,7 @@ int gridInqTrunc(int gridID)
 
 void gridDefTrunc(int gridID, int trunc)
 {
-  static char func[] = "gridDefTrunc";
+  static const char *func = "gridDefTrunc";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1146,7 +1146,7 @@ The function @func{gridDefXsize} defines the number of values of a X-axis.
 */
 void gridDefXsize(int gridID, int xsize)
 {
-  static char func[] = "gridDefXsize";
+  static const char *func = "gridDefXsize";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1180,7 +1180,7 @@ void gridDefXsize(int gridID, int xsize)
 */
 void gridDefPrec(int gridID, int prec)
 {
-  static char func[] = "gridDefPrec";
+  static const char *func = "gridDefPrec";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1203,7 +1203,7 @@ void gridDefPrec(int gridID, int prec)
 */
 int gridInqPrec(int gridID)
 {
-  static char func[] = "gridInqPrec";
+  static const char *func = "gridInqPrec";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1232,7 +1232,7 @@ The function @func{gridInqXsize} returns the number of values of a X-axis.
 */
 int gridInqXsize(int gridID)
 {
-  static char func[] = "gridInqXsize";
+  static const char *func = "gridInqXsize";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1259,7 +1259,7 @@ The function @func{gridDefYsize} defines the number of values of a Y-axis.
 */
 void gridDefYsize(int gridID, int ysize)
 {
-  static char func[] = "gridDefYsize";
+  static const char *func = "gridDefYsize";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1299,7 +1299,7 @@ The function @func{gridInqYsize} returns the number of values of a Y-axis.
 */
 int gridInqYsize(int gridID)
 {
-  static char func[] = "gridInqYsize";
+  static const char *func = "gridInqYsize";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1322,7 +1322,7 @@ int gridInqYsize(int gridID)
 */
 void gridDefRowlon(int gridID, int nrowlon, const int *rowlon)
 {
-  static char func[] = "gridDefRowlon";
+  static const char *func = "gridDefRowlon";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1348,7 +1348,7 @@ void gridDefRowlon(int gridID, int nrowlon, const int *rowlon)
 */
 void gridInqRowlon(int gridID, int *rowlon)
 {
-  static char func[] = "gridInqRowlon";
+  static const char *func = "gridInqRowlon";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1363,7 +1363,7 @@ void gridInqRowlon(int gridID, int *rowlon)
 
 int gridInqMask(int gridID, int *mask)
 {
-  static char func[] = "gridInqMask";
+  static const char *func = "gridInqMask";
   long size, i;
   grid_t *gridptr;
 
@@ -1388,7 +1388,7 @@ int gridInqMask(int gridID, int *mask)
 
 void gridDefMask(int gridID, const int *mask)
 {
-  static char func[] = "gridDefMask";
+  static const char *func = "gridDefMask";
   long size, i;
   grid_t *gridptr;
 
@@ -1424,7 +1424,7 @@ void gridDefMask(int gridID, const int *mask)
 
 int gridInqMaskGME(int gridID, int *mask)
 {
-  static char func[] = "gridInqMaskGME";
+  static const char *func = "gridInqMaskGME";
   long size, i;
   grid_t *gridptr;
 
@@ -1449,7 +1449,7 @@ int gridInqMaskGME(int gridID, int *mask)
 
 void gridDefMaskGME(int gridID, const int *mask)
 {
-  static char func[] = "gridDefMaskGME";
+  static const char *func = "gridDefMaskGME";
   long size, i;
   grid_t *gridptr;
 
@@ -1493,7 +1493,7 @@ Otherwise, 0 is returned and @func{xvals} is empty.
 */
 int gridInqXvals(int gridID, double *xvals)
 {
-  static char func[] = "gridInqXvals";
+  static const char *func = "gridInqXvals";
   long size;
   grid_t *gridptr;
 
@@ -1534,7 +1534,7 @@ The function @func{gridDefXvals} defines all values of the X-axis.
 */
 void gridDefXvals(int gridID, const double *xvals)
 {
-  static char func[] = "gridDefXvals";
+  static const char *func = "gridDefXvals";
   int gridtype;
   long size;
   grid_t *gridptr;
@@ -1583,7 +1583,7 @@ Otherwise, 0 is returned and @func{yvals} is empty.
 */
 int gridInqYvals(int gridID, double *yvals)
 {
-  static char func[] = "gridInqYvals";
+  static const char *func = "gridInqYvals";
   long size;
   grid_t *gridptr;
 
@@ -1624,7 +1624,7 @@ The function @func{gridDefYvals} defines all values of the Y-axis.
 */
 void gridDefYvals(int gridID, const double *yvals)
 {
-  static char func[] = "gridDefYvals";
+  static const char *func = "gridDefYvals";
   int gridtype;
   long size;
   grid_t *gridptr;
@@ -2065,7 +2065,7 @@ void gridDefGMEni3(int gridID, int ni3)
 */
 void gridChangeType(int gridID, int gridtype)
 {
-  static char func[] = "gridChangeType";
+  static const char *func = "gridChangeType";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -2203,7 +2203,7 @@ int gridIsRotated(int gridID)
 
 int gridCompare(int gridID, grid_t grid)
 {
-  static char func[] = "gridCompare";
+  static const char *func = "gridCompare";
   int differ = 1;
   int xsize, ysize;
 
@@ -2397,7 +2397,7 @@ int gridCompare(int gridID, grid_t grid)
 
 int gridGenerate(grid_t grid)
 {
-  static char func[] = "gridGenerate";
+  static const char *func = "gridGenerate";
   int gridID;
   grid_t *gridptr;
 
@@ -2586,7 +2586,7 @@ The function @func{gridDuplicate} duplicates a horizontal Grid.
 */
 int gridDuplicate(int gridID)
 {
-  static char func[] = "gridDuplicate";
+  static const char *func = "gridDuplicate";
   int gridIDnew;
   int gridtype, gridsize;
   int nrowlon;
@@ -2697,7 +2697,7 @@ int gridDuplicate(int gridID)
 
 void gridCompress(int gridID)
 {
-  static char func[] = "gridCompress";
+  static const char *func = "gridCompress";
   int gridtype, gridsize;
   grid_t *gridptr;
 
@@ -2766,7 +2766,7 @@ void gridCompress(int gridID)
 
 void gridDefArea(int gridID, const double *area)
 {
-  static char func[] = "gridDefArea";
+  static const char *func = "gridDefArea";
   long size;
   grid_t *gridptr;
 
@@ -2861,7 +2861,7 @@ The function @func{gridDefXbounds} defines all bounds of the X-axis.
 */
 void gridDefXbounds(int gridID, const double *xbounds)
 {
-  static char func[] = "gridDefXbounds";
+  static const char *func = "gridDefXbounds";
   long size;
   long nvertex;
   grid_t *gridptr;
@@ -2913,7 +2913,7 @@ Otherwise, 0 is returned and @func{xbounds} is empty.
 */
 int gridInqXbounds(int gridID, double *xbounds)
 {
-  static char func[] = "gridInqXbounds";
+  static const char *func = "gridInqXbounds";
   long size;
   long nvertex;
   grid_t *gridptr;
@@ -2967,7 +2967,7 @@ The function @func{gridDefYbounds} defines all bounds of the Y-axis.
 */
 void gridDefYbounds(int gridID, const double *ybounds)
 {
-  static char func[] = "gridDefYbounds";
+  static const char *func = "gridDefYbounds";
   long size;
   long nvertex;
   grid_t *gridptr;
@@ -3019,7 +3019,7 @@ Otherwise, 0 is returned and @func{ybounds} is empty.
 */
 int gridInqYbounds(int gridID, double *ybounds)
 {
-  static char func[] = "gridInqYbounds";
+  static const char *func = "gridInqYbounds";
   long size;
   long nvertex;
   grid_t *gridptr;
@@ -3059,7 +3059,7 @@ double *gridInqYboundsPtr(int gridID)
 
 void gridPrint(int gridID, int opt)
 {
-  static char func[] = "gridPrint";
+  static const char *func = "gridPrint";
   FILE *fp = stdout;
   int type;
   int gridsize, xsize, ysize, xdim, ydim;
@@ -3397,7 +3397,7 @@ void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
 		double lat1, double lat2, double xinc, double yinc,
 		int projflag, int scanflag)
 {
-  static char func[] = "gridDefLCC";
+  static const char *func = "gridDefLCC";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -3447,7 +3447,7 @@ void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonPar
 		double *lat1, double *lat2, double *xinc, double *yinc,
 		int *projflag, int *scanflag)
 {
-  static char func[] = "gridInqLCC";
+  static const char *func = "gridInqLCC";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -3476,7 +3476,7 @@ void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonPar
 
 void gridDefLcc2(int gridID, double earth_radius, double lon_0, double lat_0, double lat_1, double lat_2)
 {
-  static char func[] = "gridDefLcc2";
+  static const char *func = "gridDefLcc2";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -3498,7 +3498,7 @@ void gridDefLcc2(int gridID, double earth_radius, double lon_0, double lat_0, do
 
 void gridInqLcc2(int gridID, double *earth_radius, double *lon_0, double *lat_0, double *lat_1, double *lat_2)
 {
-  static char func[] = "gridInqLcc2";
+  static const char *func = "gridInqLcc2";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -3523,7 +3523,7 @@ void gridInqLcc2(int gridID, double *earth_radius, double *lon_0, double *lat_0,
 
 void gridDefLaea(int gridID, double earth_radius, double lon_0, double lat_0)
 {
-  static char func[] = "gridDefLaea";
+  static const char *func = "gridDefLaea";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -3543,7 +3543,7 @@ void gridDefLaea(int gridID, double earth_radius, double lon_0, double lat_0)
 
 void gridInqLaea(int gridID, double *earth_radius, double *lon_0, double *lat_0)
 {
-  static char func[] = "gridInqLaea";
+  static const char *func = "gridInqLaea";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);

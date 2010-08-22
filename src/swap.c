@@ -9,7 +9,7 @@
 
 void swap4byte(void *ptr, size_t size)
 {
-  static char func[] = "swap4byte";
+  static const char *func = "swap4byte";
   INT32 *ptrtmp;
   int nval;
 
@@ -34,7 +34,7 @@ void swap4byte(void *ptr, size_t size)
 
 void swap8byte(void *ptr, size_t size)
 {
-  static char func[] = "swap8byte";
+  static const char *func = "swap8byte";
   INT64 *ptrtmp;
   int nval;
 

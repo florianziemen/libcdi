@@ -16,7 +16,7 @@
 
 int grbBitsPerValue(int datatype)
 {
-  static char func[] = "grbBitsPerValue";
+  static const char *func = "grbBitsPerValue";
   int bitsPerValue = 16;
 
   if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
@@ -49,7 +49,7 @@ int grbInqRecord(int streamID, int *varID, int *levelID)
 
 int grbDefRecord(int streamID)
 {
-  static char func[] = "grbDefRecord";
+  static const char *func = "grbDefRecord";
   int fileID;
   int gridID;
   int status = 0;
@@ -69,7 +69,7 @@ static
 int grbDecode(int filetype, unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
 	      int unreduced, int *nmiss, int *zip, double missval)
 {
-  //static char func[] = "grbDecode";
+  //static const char *func = "grbDecode";
   int status = 0;
 
   if ( filetype == FILETYPE_GRB )
@@ -83,7 +83,7 @@ int grbDecode(int filetype, unsigned char *gribbuffer, int gribsize, double *dat
 
 int grbReadRecord(int streamID, double *data, int *nmiss)
 {
-  static char func[] = "grbReadRecord";
+  static const char *func = "grbReadRecord";
   int status = 0;
   unsigned char *gribbuffer;
   int fileID;
@@ -198,7 +198,7 @@ int grbScanTimestep(int streamID)
 
 int grbInqContents(int streamID)
 {
-  static char func[] = "grbInqContents";
+  static const char *func = "grbInqContents";
   int fileID;
   int status = 0;
   stream_t *streamptr;
@@ -223,7 +223,7 @@ int grbInqContents(int streamID)
 
 int grbInqTimestep(int streamID, int tsID)
 {
-  static char func[] = "grbInqTimestep";
+  static const char *func = "grbInqTimestep";
   int ntsteps, nrecs;
   stream_t *streamptr;
 
@@ -264,7 +264,7 @@ int grbInqTimestep(int streamID, int tsID)
 
 void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
 {
-  static char func[] = "grbReadVarDP";
+  static const char *func = "grbReadVarDP";
   int fileID;
   int levelID, nlevs, gridID, gridsize;
   unsigned char *gribbuffer;
@@ -326,7 +326,7 @@ void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
 
 void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *nmiss)
 {
-  static char func[] = "grbReadVarSliceDP";
+  static const char *func = "grbReadVarSliceDP";
   int fileID;
   int gridID, gridsize;
   unsigned char *gribbuffer;
@@ -407,7 +407,7 @@ size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, 
 static
 size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
 {
-  static char func[] = "grbSzip";
+  static const char *func = "grbSzip";
   size_t nbytes = 0;
   unsigned char *buffer;
   size_t buffersize;
@@ -437,7 +437,7 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
 
 int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data, int nmiss)
 {
-  static char func[] = "grbWriteVarSliceDP";
+  static const char *func = "grbWriteVarSliceDP";
   size_t nwrite;
   int fileID;
   int gridID;
@@ -538,7 +538,7 @@ void grbWriteVarDP(int streamID, int varID, const double *data, int nmiss)
 
 int grbCopyRecord(int streamID2, int streamID1)
 {
-  static char func[] = "grbCopyRecord";
+  static const char *func = "grbCopyRecord";
   int fileID1, fileID2;
   int tsID, recID, vrecID;
   long recsize;
@@ -599,7 +599,7 @@ int grbCopyRecord(int streamID2, int streamID1)
 
 int grbWriteRecord(int streamID, const double *data, int nmiss)
 {
-  static char func[] = "grbWriteRecord";
+  static const char *func = "grbWriteRecord";
   int status = 0;
   int varID, levelID;
   stream_t *streamptr;
@@ -619,7 +619,7 @@ int grbWriteRecord(int streamID, const double *data, int nmiss)
 
 void streamInqGinfo(int streamID, int *intnum, float *fltnum)
 {
-  static char func[] = "streamInqGinfo";
+  static const char *func = "streamInqGinfo";
   int recID, vrecID, tsID;
   int filetype;
   void *gribbuffer;

@@ -78,7 +78,7 @@ int cdiEncodeTime(int hour, int minute, int second)
 
 void cdiParamToString(int param, char *paramstr, int maxlen)
 {
-  static char func[] = "cdiParamToString";
+  static const char *func = "cdiParamToString";
   int dis, cat, num;
   int len;
 

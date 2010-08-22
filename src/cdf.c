@@ -55,7 +55,7 @@ int CDF_Debug   = 0;    /* If set to 1, debugging           */
 
 void cdfDebug(int debug)
 {
-  static char func[] = "cdfDebug";
+  static const char *func = "cdfDebug";
 
   CDF_Debug = debug;
 
@@ -153,7 +153,7 @@ int cdfOpenFile(const char *filename, const char *mode, int version)
 
 int cdfOpen(const char *filename, const char *mode)
 {
-  static char func[] = "cdfOpen";
+  static const char *func = "cdfOpen";
   int fileID = 0;
 
   if ( CDF_Debug )
@@ -170,7 +170,7 @@ int cdfOpen(const char *filename, const char *mode)
 
 int cdfOpen64(const char *filename, const char *mode)
 {
-  static char func[] = "cdfOpen64";
+  static const char *func = "cdfOpen64";
   int fileID = -1;
 
   if ( CDF_Debug )
@@ -194,7 +194,7 @@ int cdfOpen64(const char *filename, const char *mode)
 
 int cdf4Open(const char *filename, const char *mode)
 {
-  static char func[] = "cdf4Open";
+  static const char *func = "cdf4Open";
   int fileID = -1;
 
   if ( CDF_Debug )

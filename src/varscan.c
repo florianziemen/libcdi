@@ -107,7 +107,7 @@ int varGetEntry(int param, int zaxistype, int ltype)
 
 void varFree(void)
 {
-  static char func[] = "varFree";
+  static const char *func = "varFree";
   int varID;
 
   for ( varID = 0; varID < nvars; varID++ )
@@ -136,7 +136,7 @@ void varFree(void)
 
 int levelNewEntry(int varID, int level1, int level2)
 {
-  static char func[] = "levelNewEntry";
+  static const char *func = "levelNewEntry";
   int levelID = 0;
   int levelTableSize;
   leveltable_t *levelTable;
@@ -206,7 +206,7 @@ int levelNewEntry(int varID, int level1, int level2)
 
 int paramNewEntry (int param)
 {
-  static char func[] = "paramNewEntry";
+  static const char *func = "paramNewEntry";
   int varID = 0;
 
   /*
@@ -267,7 +267,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype,
 		  const char *name, const char *longname, const char *units)
 {
-  static char func[] = "varAddRecord";
+  static const char *func = "varAddRecord";
   int varID = UNDEFID;
   int levelID = -1;
 
@@ -384,7 +384,7 @@ int cmpltype(const void *s1, const void *s2)
 
 void cdiGenVars(int streamID)
 {
-  static char func[] = "cdiGenVars";
+  static const char *func = "cdiGenVars";
   int varID, gridID, zaxisID, levelID;
   int instID, modelID, tableID;
   int param, nlevels, zaxistype, lindex, ltype;
@@ -613,7 +613,7 @@ void cdiGenVars(int streamID)
 
 void varDefVCT(size_t vctsize, double *vctptr)
 {
-  static char func[] = "varDefVCT";
+  static const char *func = "varDefVCT";
 
   if ( Vct == NULL && vctptr != NULL && vctsize > 0 )
     {
@@ -630,7 +630,7 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
     mode: 0 search in vlist and grid table
           1 search in grid table
    */
-  static char func[] = "varDefGrid";
+  static const char *func = "varDefGrid";
   int gridglobdefined = 0;
   int griddefined;
   int ngrids;
@@ -746,7 +746,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
     mode: 0 search in vlist and zaxis table
           1 search in zaxis table
    */
-  static char func[] = "varDefZaxis";
+  static const char *func = "varDefZaxis";
   int zaxisdefined;
   int nzaxis;
   int zaxisID = UNDEFID;

@@ -31,7 +31,7 @@ typedef struct {
 static
 int cgribexGetGridType(int *isec2)
 {
-  /*  static char func[] = "cgribexGetGridType"; */
+  /*  static const char *func = "cgribexGetGridType"; */
   int gridtype = 0;
 
   switch (ISEC2_GridType)
@@ -78,7 +78,7 @@ int cgribexGetGridType(int *isec2)
 static
 int cgribexGetIsRotated(int *isec2)
 {
-  /*  static char func[] = "cgribexGetIsRotated"; */
+  /*  static const char *func = "cgribexGetIsRotated"; */
   int isRotated = 0;
 
   if ( ISEC2_GridType == 10 )
@@ -180,7 +180,7 @@ int cgribexGetZaxisHasBounds(int grb_ltype)
 static
 int cgribexGetTimeUnit(int *isec1)
 {
-  static char func[] = "cgribexGetTimeUnit";
+  static const char *func = "cgribexGetTimeUnit";
   int timeunit = -1;
   static int lprint = TRUE;
 
@@ -218,7 +218,7 @@ int cgribexTimeIsFC(int *isec1)
 static
 int cgribexGetTsteptype(int timerange)
 {
-  static char func[] = "cgribexGetTsteptype";
+  static const char *func = "cgribexGetTsteptype";
   int tsteptype = 0;
   static int lprint = TRUE;
 
@@ -247,7 +247,7 @@ static
 void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
 		      int *isec4, long recsize, off_t position, int prec, int ztype, int lmv)
 {
-  static char func[] = "cgribexAddRecord";
+  static const char *func = "cgribexAddRecord";
   int gridtype;
   int zaxistype;
   int gridID = CDI_UNDEFID, varID;
@@ -574,7 +574,7 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
 
 void cgribexScanTimestep1(int streamID)
 {
-  static char func[] = "cgribexScanTimestep1";
+  static const char *func = "cgribexScanTimestep1";
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0;
@@ -815,7 +815,7 @@ void cgribexScanTimestep1(int streamID)
 
 int cgribexScanTimestep2(int streamID)
 {
-  static char func[] = "cgribexScanTimestep2";
+  static const char *func = "cgribexScanTimestep2";
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0;
@@ -1093,7 +1093,7 @@ int cgribexScanTimestep2(int streamID)
 
 int cgribexScanTimestep(int streamID)
 {
-  static char func[] = "cgribexScanTimestep";
+  static const char *func = "cgribexScanTimestep";
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0;
@@ -1375,7 +1375,7 @@ int cgribexScanTimestep(int streamID)
 int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
 		  int unreduced, int *nmiss, int *zip, double missval)
 {
-  static char func[] = "cgribexDecode";
+  static const char *func = "cgribexDecode";
   int status = 0;
 #if  defined  (HAVE_LIBCGRIBEX)
   int iret = 0, iword = 0;
@@ -1498,7 +1498,7 @@ void cgribexDefModel(int *isec1, int vlistID, int varID)
 static
 void cgribexDefParam(int *isec1, int param)
 {
-  static char func[] = "cgribexDefParam";
+  static const char *func = "cgribexDefParam";
   int pdis, pcat, pnum;
   static int lwarn = TRUE;
 
@@ -1684,7 +1684,7 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 static
 void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 {
-  static char func[] = "cgribexDefGrid";
+  static const char *func = "cgribexDefGrid";
   int gridtype;
   static short lwarn = TRUE;
 
@@ -1919,7 +1919,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 static
 void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
 {
-  static char func[] = "cgribexDefLevel";
+  static const char *func = "cgribexDefLevel";
   double level;
   int ilevel, zaxistype, ltype;
   static int warning = 1;
@@ -2155,7 +2155,7 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 		     int vdate, int vtime, int tsteptype, int numavg, 
 		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize)
 {
-  static char func[] = "cgribexEncode";
+  static const char *func = "cgribexEncode";
   size_t nbytes = 0;
 #if  defined  (HAVE_LIBCGRIBEX)
   long gribsize;

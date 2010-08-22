@@ -51,7 +51,7 @@ static int            _vlistAvail = -1;
 static
 void vlist_list_new(void)
 {
-  static char func[] = "vlist_list_new";
+  static const char *func = "vlist_list_new";
 
   assert(_vlistList == NULL);
 
@@ -61,7 +61,7 @@ void vlist_list_new(void)
 static
 void vlist_list_delete(void)
 {
-  static char func[] = "vlist_list_delete";
+  static const char *func = "vlist_list_delete";
 
   if ( _vlistList ) free(_vlistList);
 }
@@ -86,7 +86,7 @@ void vlist_init_pointer(void)
 static
 void vlist_list_extend(void)
 {
-  static char func[] = "vlist_list_extend";
+  static const char *func = "vlist_list_extend";
   int nvlists;
   int i;
 
@@ -117,7 +117,7 @@ void vlist_list_extend(void)
 
 vlist_t *vlist_to_pointer(int idx)
 {
-  static char func[] = "vlist_to_pointer";
+  static const char *func = "vlist_to_pointer";
   vlist_t *vlistptr = NULL;
 
   VLIST_INIT();
@@ -140,7 +140,7 @@ vlist_t *vlist_to_pointer(int idx)
 /* Create an index from a pointer */
 static int vlist_from_pointer(vlist_t *ptr)
 {
-  static char func[] = "vlist_from_pointer";
+  static const char *func = "vlist_from_pointer";
   int      idx = -1;
 
   if ( ptr )
@@ -194,7 +194,7 @@ static void vlist_init_entry(vlist_t *vlistptr)
 static
 vlist_t *vlist_new_entry(void)
 {
-  static char func[] = "vlist_new_entry";
+  static const char *func = "vlist_new_entry";
   vlist_t *vlistptr;
 
   vlistptr = (vlist_t *) malloc(sizeof(vlist_t));
@@ -207,7 +207,7 @@ vlist_t *vlist_new_entry(void)
 static
 void vlist_delete_entry(vlist_t *vlistptr)
 {
-  static char func[] = "vlist_delete_entry";
+  static const char *func = "vlist_delete_entry";
   int idx;
 
   idx = vlistptr->self;
@@ -297,7 +297,7 @@ vlistDestroy(vlistID);
 */
 int vlistCreate(void)
 {
-  static char func[] = "vlistCreate";
+  static const char *func = "vlistCreate";
   int vlistID = 0;
   vlist_t *vlistptr;
 
@@ -326,7 +326,7 @@ int vlistCreate(void)
 */
 void vlistDestroy(int vlistID)
 {
-  static char func[] = "vlistDestroy";
+  static const char *func = "vlistDestroy";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -362,7 +362,7 @@ void vlistDestroy(int vlistID)
 
 int vlistNlock(int vlistID)
 {
-  static char func[] = "vlistNlock";
+  static const char *func = "vlistNlock";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -375,7 +375,7 @@ int vlistNlock(int vlistID)
 
 void vlistLock(int vlistID)
 {
-  static char func[] = "vlistLock";
+  static const char *func = "vlistLock";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -389,7 +389,7 @@ void vlistLock(int vlistID)
 
 void vlistUnlock(int vlistID)
 {
-  static char func[] = "vlistUnlock";
+  static const char *func = "vlistUnlock";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -417,7 +417,7 @@ The function @func{vlistCopy} copies all entries from vlistID1 to vlistID2.
 */
 void vlistCopy(int vlistID2, int vlistID1)
 {
-  static char func[] = "vlistCopy";
+  static const char *func = "vlistCopy";
   vlist_t *vlistptr1, *vlistptr2;
 
   vlistptr1 = vlist_to_pointer(vlistID1);
@@ -484,7 +484,7 @@ The function @func{vlistDuplicate} duplicates the variable list from vlistID1.
 */
 int vlistDuplicate(int vlistID)
 {
-  static char func[] = "vlistDuplicate";
+  static const char *func = "vlistDuplicate";
   int vlistIDnew;
   vlist_t *vlistptr;
 
@@ -521,7 +521,7 @@ void vlistClearFlag(int vlistID)
 int vlistInqZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbounds, double *levels2,
 		  int vctsize, const double *vct)
 {
-  static char func[] = "vlistInqZaxis";
+  static const char *func = "vlistInqZaxis";
   int zaxisdefined;
   int nzaxis;
   int zaxisID = CDI_UNDEFID;
@@ -604,7 +604,7 @@ The function @func{vlistCopyFlag} copies all entries with a flag from vlistID1 t
 */
 void vlistCopyFlag(int vlistID2, int vlistID1)
 {
-  static char func[] = "vlistCopyFlag";
+  static const char *func = "vlistCopyFlag";
   vlist_t *vlistptr1, *vlistptr2;
 
   vlistptr1 = vlist_to_pointer(vlistID1);
@@ -769,7 +769,7 @@ Concatenate the variable list vlistID1 at the end of vlistID2.
 */
 void vlistCat(int vlistID2, int vlistID1)
 {
-  static char func[] = "vlistCat";
+  static const char *func = "vlistCat";
   int nvars, nvars1, nvars2;
   int varID, varID2, nlevs;
   int index, gridID, zaxisID;
@@ -866,7 +866,7 @@ Merge the variable list vlistID1 to the variable list vlistID2.
 */
 void vlistMerge(int vlistID2, int vlistID1)
 {
-  static char func[] = "vlistMerge";
+  static const char *func = "vlistMerge";
   int nvars1, nvars2;
   int varID = 0, varID2, levID, nlevs, nlevs1, nlevs2;
   int index, zaxisID;
@@ -1007,7 +1007,7 @@ The function @func{vlistNvars} returns the number of variables in the variable l
 */
 int vlistNvars(int vlistID)
 {
-  static char func[] = "vlistNvars";
+  static const char *func = "vlistNvars";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -1020,7 +1020,7 @@ int vlistNvars(int vlistID)
 
 int vlistNrecs(int vlistID)
 {
-  static char func[] = "vlistNrecs";
+  static const char *func = "vlistNrecs";
   int varID, nrecs = 0;
   vlist_t *vlistptr;
 
@@ -1037,7 +1037,7 @@ int vlistNrecs(int vlistID)
 
 int vlistNumber(int vlistID)
 {
-  static char func[] = "vlistNumber";
+  static const char *func = "vlistNumber";
   int varID, number, number2, datatype;
   vlist_t *vlistptr;
 
@@ -1088,7 +1088,7 @@ The function @func{vlistNgrids} returns the number of grids in the variable list
 */
 int vlistNgrids(int vlistID)
 {
-  static char func[] = "vlistNgrids";
+  static const char *func = "vlistNgrids";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -1117,7 +1117,7 @@ The function @func{vlistNzaxis} returns the number of zaxis in the variable list
 */
 int vlistNzaxis(int vlistID)
 {
-  static char func[] = "vlistNzaxis";
+  static const char *func = "vlistNzaxis";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -1130,7 +1130,7 @@ int vlistNzaxis(int vlistID)
 
 void vlistDefNtsteps(int vlistID, int nts)
 {
-  static char func[] = "vlistDefNtsteps";
+  static const char *func = "vlistDefNtsteps";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -1143,7 +1143,7 @@ void vlistDefNtsteps(int vlistID, int nts)
 
 int vlistNtsteps(int vlistID)
 {
-  static char func[] = "vlistNtsteps";
+  static const char *func = "vlistNtsteps";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -1156,7 +1156,7 @@ int vlistNtsteps(int vlistID)
 
 void vlistPrint(int vlistID)
 {
-  static char func[] = "vlistPrint";
+  static const char *func = "vlistPrint";
   int nvars, flag, index;
   int varID, fvarID, mvarID, flevID, mlevID, levID;
   int param, gridID, zaxisID, timeID, nlevs;
@@ -1247,7 +1247,7 @@ The function @func{vlistDefTaxis} defines the time axis of a variable list.
 */
 void vlistDefTaxis(int vlistID, int taxisID)
 {
-  static char func[] = "vlistDefTaxis";
+  static const char *func = "vlistDefTaxis";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -1276,7 +1276,7 @@ The function @func{vlistInqTaxis} returns the time axis of a variable list.
 */
 int vlistInqTaxis(int vlistID)
 {
-  static char func[] = "vlistInqTaxis";
+  static const char *func = "vlistInqTaxis";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -1288,7 +1288,7 @@ int vlistInqTaxis(int vlistID)
 
 void  vlistDefTable(int vlistID, int tableID)
 {
-  static char func[] = "vlistDefTable";
+  static const char *func = "vlistDefTable";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -1300,7 +1300,7 @@ void  vlistDefTable(int vlistID, int tableID)
 
 int vlistInqTable(int vlistID)
 {
-  static char func[] = "vlistInqTable";
+  static const char *func = "vlistInqTable";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -1312,7 +1312,7 @@ int vlistInqTable(int vlistID)
 
 void vlistDefInstitut(int vlistID, int instID)
 {
-  static char func[] = "vlistDefInstitut";
+  static const char *func = "vlistDefInstitut";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -1324,7 +1324,7 @@ void vlistDefInstitut(int vlistID, int instID)
 
 int vlistInqInstitut(int vlistID)
 {
-  static char func[] = "vlistInqInstitut";
+  static const char *func = "vlistInqInstitut";
   int varID, instID;
   vlist_t *vlistptr;
 
@@ -1353,7 +1353,7 @@ int vlistInqInstitut(int vlistID)
 
 void vlistDefModel(int vlistID, int modelID)
 {
-  static char func[] = "vlistDefModel";
+  static const char *func = "vlistDefModel";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -1365,7 +1365,7 @@ void vlistDefModel(int vlistID, int modelID)
 
 int vlistInqModel(int vlistID)
 {
-  static char func[] = "vlistInqModel";
+  static const char *func = "vlistInqModel";
   int varID, modelID;
   vlist_t *vlistptr;
 
@@ -1394,7 +1394,7 @@ int vlistInqModel(int vlistID)
 
 int vlistGridsizeMax(int vlistID)
 {
-  static char func[] = "vlistGridsizeMax";
+  static const char *func = "vlistGridsizeMax";
   int gridsize, gridsizemax = 0;
   int gridID, index;
   vlist_t *vlistptr;
@@ -1415,7 +1415,7 @@ int vlistGridsizeMax(int vlistID)
 
 int vlistGrid(int vlistID, int index)
 {
-  static char func[] = "vlistGrid";
+  static const char *func = "vlistGrid";
   int gridID = CDI_UNDEFID;
   vlist_t *vlistptr;
 
@@ -1432,7 +1432,7 @@ int vlistGrid(int vlistID, int index)
 
 int vlistGridIndex(int vlistID, int gridID)
 {
-  static char func[] = "vlistGridIndex";
+  static const char *func = "vlistGridIndex";
   int index;
   vlist_t *vlistptr;
 
@@ -1451,7 +1451,7 @@ int vlistGridIndex(int vlistID, int gridID)
 
 void vlistChangeGridIndex(int vlistID, int index, int gridID)
 {
-  static char func[] = "vlistChangeGridIndex";
+  static const char *func = "vlistChangeGridIndex";
   int gridIDold;
   int varID, nvars;
   vlist_t *vlistptr;
@@ -1472,7 +1472,7 @@ void vlistChangeGridIndex(int vlistID, int index, int gridID)
 
 void vlistChangeGrid(int vlistID, int gridID1, int gridID2)
 {
-  static char func[] = "vlistChangeGrid";
+  static const char *func = "vlistChangeGrid";
   int varID, nvars;
   int index, ngrids;
   vlist_t *vlistptr;
@@ -1500,7 +1500,7 @@ void vlistChangeGrid(int vlistID, int gridID1, int gridID2)
 
 int vlistZaxis(int vlistID, int index)
 {
-  static char func[] = "vlistZaxis";
+  static const char *func = "vlistZaxis";
   int zaxisID = CDI_UNDEFID;
   vlist_t *vlistptr;
 
@@ -1516,7 +1516,7 @@ int vlistZaxis(int vlistID, int index)
 
 int vlistZaxisIndex(int vlistID, int zaxisID)
 {
-  static char func[] = "vlistZaxisIndex";
+  static const char *func = "vlistZaxisIndex";
   int index;
   vlist_t *vlistptr;
 
@@ -1534,7 +1534,7 @@ int vlistZaxisIndex(int vlistID, int zaxisID)
 
 void vlistChangeZaxisIndex(int vlistID, int index, int zaxisID)
 {
-  static char func[] = "vlistChangeZaxisIndex";
+  static const char *func = "vlistChangeZaxisIndex";
   int zaxisIDold;
   int varID, nvars;
   int nlevs, levID;
@@ -1573,7 +1573,7 @@ void vlistChangeZaxisIndex(int vlistID, int index, int zaxisID)
 
 void vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2)
 {
-  static char func[] = "vlistChangeZaxis";
+  static const char *func = "vlistChangeZaxis";
   int varID, nvars;
   int index, nzaxis;
   int nlevs, levID;
@@ -1620,7 +1620,7 @@ void vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2)
 
 int vlistHasTime(int vlistID)
 {
-  static char func[] = "vlistHasTime";
+  static const char *func = "vlistHasTime";
   int varID;
   int hastime = FALSE;
   vlist_t *vlistptr;

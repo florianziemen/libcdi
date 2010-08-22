@@ -67,7 +67,7 @@ static modelPtrToIdx *_modelAvail = NULL;
 
 static void model_list_new(void)
 {
-  static char func[] = "model_list_new";
+  static const char *func = "model_list_new";
 
   assert(_modelList == NULL);
 
@@ -77,7 +77,7 @@ static void model_list_new(void)
 
 static void model_list_delete(void)
 {
-  static char func[] = "model_list_delete";
+  static const char *func = "model_list_delete";
 
   if ( _modelList ) free(_modelList);
 }
@@ -102,7 +102,7 @@ static void model_init_pointer(void)
 
 MODEL *model_to_pointer(int idx)
 {
-  static char func[] = "model_to_pointer";
+  static const char *func = "model_to_pointer";
   MODEL *modelptr = NULL;
 
   MODEL_INIT
@@ -125,7 +125,7 @@ MODEL *model_to_pointer(int idx)
 /* Create an index from a pointer */
 static int model_from_pointer(MODEL *ptr)
 {
-  static char func[] = "model_from_pointer";
+  static const char *func = "model_from_pointer";
   int      idx = -1;
   modelPtrToIdx *newptr;
 
@@ -170,7 +170,7 @@ static void model_init_entry(MODEL *modelptr)
 
 static MODEL *model_new_entry(void)
 {
-  static char func[] = "model_new_entry";
+  static const char *func = "model_new_entry";
   MODEL *modelptr;
 
   modelptr = (MODEL *) malloc(sizeof(MODEL));
@@ -183,7 +183,7 @@ static MODEL *model_new_entry(void)
 
 static void model_delete_entry(MODEL *modelptr)
 {
-  static char func[] = "model_delete_entry";
+  static const char *func = "model_delete_entry";
   int idx;
 
   idx = modelptr->self;
@@ -338,7 +338,7 @@ int modelInq(int instID, int modelgribID, char *name)
 
 int modelDef(int instID, int modelgribID, const char *name)
 {
-  static char func[] = "modelDef";
+  static const char *func = "modelDef";
   int modelID = UNDEFID;
   MODEL *modelptr;
 
@@ -366,7 +366,7 @@ int modelDef(int instID, int modelgribID, const char *name)
 
 int modelInqInstitut(int modelID)
 {
-  static char func[] = "modelInqInstitut";
+  static const char *func = "modelInqInstitut";
   int instID = UNDEFID;
   MODEL *modelptr;
 
@@ -387,7 +387,7 @@ int modelInqInstitut(int modelID)
 
 int modelInqGribID(int modelID)
 {
-  static char func[] = "modelInqGribID";
+  static const char *func = "modelInqGribID";
   int modelgribID = UNDEFID;
   MODEL *modelptr;
 
@@ -408,7 +408,7 @@ int modelInqGribID(int modelID)
 
 char *modelInqNamePtr(int modelID)
 {
-  static char func[] = "modelInqNamePtr";
+  static const char *func = "modelInqNamePtr";
   char *name = NULL;
   MODEL *modelptr;
 

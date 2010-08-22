@@ -47,7 +47,7 @@ int iegInqDatatype(int prec)
 
 int iegDefDatatype(int datatype)
 {
-  static char func[] = "iegDefDatatype";
+  static const char *func = "iegDefDatatype";
   int prec;
 
   if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
@@ -65,7 +65,7 @@ int iegDefDatatype(int datatype)
 
 int iegInqRecord(int streamID, int *varID, int *levelID)
 {
-  static char func[] = "iegInqRecord";
+  static const char *func = "iegInqRecord";
   int status;
   int fileID;
   int icode, ilevel;
@@ -108,7 +108,7 @@ int iegInqRecord(int streamID, int *varID, int *levelID)
 
 int iegReadRecord(int streamID, double *data, int *nmiss)
 {
-  static char func[] = "iegReadRecord";
+  static const char *func = "iegReadRecord";
   int vlistID, fileID;
   int status;
   int recID, vrecID, tsID;
@@ -243,7 +243,7 @@ void iegDefTime(int *pdb, int date, int time, int timeID)
 static
 void iegDefGrid(int *gdb, int gridID)
 {
-  static char func[] = "iegDefGrid";
+  static const char *func = "iegDefGrid";
   int gridtype;
 
   gridtype = gridInqType(gridID);
@@ -370,7 +370,7 @@ void iegDefGrid(int *gdb, int gridID)
 static
 void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 {
-  static char func[] = "iegDefLevel";
+  static const char *func = "iegDefLevel";
   double level;
   int ilevel, leveltype;
   static int warning = 1;
@@ -540,7 +540,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 
 int iegCopyRecord(int streamID2, int streamID1)
 {
-  static char func[] = "iegCopyRecord";
+  static const char *func = "iegCopyRecord";
   int fileID1, fileID2;
   int tsID, recID, vrecID;
   long recsize;
@@ -581,7 +581,7 @@ int iegCopyRecord(int streamID2, int streamID1)
 
 int iegDefRecord(int streamID)
 {
-  static char func[] = "iegDefRecord";
+  static const char *func = "iegDefRecord";
   int status = 0;
   int fileID, vlistID;
   int gridID;
@@ -636,7 +636,7 @@ int iegDefRecord(int streamID)
 
 int iegWriteRecord(int streamID, const double *data)
 {
-  static char func[] = "iegWriteRecord";
+  static const char *func = "iegWriteRecord";
   int fileID;
   int status = 0;
   int i, gridsize, gridID;
@@ -671,7 +671,7 @@ static
 void iegAddRecord(int streamID, int param, int *pdb, int *gdb, double *vct,
 		  long recsize, off_t position, int prec)
 {
-  static char func[] = "iegAddRecord";
+  static const char *func = "iegAddRecord";
   int leveltype;
   int gridID = UNDEFID;
   int levelID = 0;
@@ -825,7 +825,7 @@ static
 void iegCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
 		  int level, int xsize, int ysize)
 {
-  static char func[] = "iegCmpRecord";
+  static const char *func = "iegCmpRecord";
   int varID = 0;
   int levelID = 0;
   record_t *record;
@@ -874,7 +874,7 @@ void iegDateTime(int *pdb, int *date, int *time)
 static
 void iegScanTimestep1(int streamID)
 {  
-  static char func[] = "iegScanTimestep1";
+  static const char *func = "iegScanTimestep1";
   int prec = 0;
   int status;
   int fileID;
@@ -1019,7 +1019,7 @@ void iegScanTimestep1(int streamID)
 static
 int iegScanTimestep2(int streamID)
 {  
-  static char func[] = "iegScanTimestep2";
+  static const char *func = "iegScanTimestep2";
   int status;
   int fileID;
   int tabnum;
@@ -1188,7 +1188,7 @@ int iegScanTimestep2(int streamID)
 
 int iegInqContents(int streamID)
 {
-  static char func[] = "iegInqContents";
+  static const char *func = "iegInqContents";
   int fileID;
   int status = 0;
   stream_t *streamptr;
@@ -1213,7 +1213,7 @@ int iegInqContents(int streamID)
 static
 int iegScanTimestep(int streamID)
 {
-  static char func[] = "iegScanTimestep";
+  static const char *func = "iegScanTimestep";
   int status;
   int fileID;
   int tsID;
@@ -1347,7 +1347,7 @@ int iegScanTimestep(int streamID)
 
 int iegInqTimestep(int streamID, int tsID)
 {
-  static char func[] = "iegInqTimestep";
+  static const char *func = "iegInqTimestep";
   int ntsteps, nrecs;
   stream_t *streamptr;
 
@@ -1381,7 +1381,7 @@ int iegInqTimestep(int streamID, int tsID)
 
 void iegReadVarDP(int streamID, int varID, double *data, int *nmiss)
 {
-  static char func[] = "iegReadVarDP";
+  static const char *func = "iegReadVarDP";
   int vlistID, fileID;
   int levID, nlevs, gridID, gridsize;
   off_t recpos, currentfilepos;
@@ -1431,7 +1431,7 @@ void iegReadVarDP(int streamID, int varID, double *data, int *nmiss)
 
 void iegReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nmiss)
 {
-  static char func[] = "iegReadVarSliceDP";
+  static const char *func = "iegReadVarSliceDP";
   int vlistID, fileID;
   int nlevs, gridID, gridsize;
   off_t recpos, currentfilepos;
@@ -1480,7 +1480,7 @@ void iegReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
 
 void iegWriteVarDP(int streamID, int varID, const double *data)
 {
-  static char func[] = "iegWriteVarDP";
+  static const char *func = "iegWriteVarDP";
   int fileID;
   int levID, nlevs, gridID, gridsize;
   int zaxisID;
@@ -1549,7 +1549,7 @@ void iegWriteVarDP(int streamID, int varID, const double *data)
 
 void iegWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
 {
-  static char func[] = "iegWriteVarSliceDP";
+  static const char *func = "iegWriteVarSliceDP";
   int fileID;
   int gridID;
   int zaxisID;

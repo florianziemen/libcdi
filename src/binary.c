@@ -83,7 +83,7 @@ size_t binReadF77Block(int fileID, int byteswap)
 
 void binWriteF77Block(int fileID, int byteswap, size_t blocksize)
 {
-  static char func[] = "binWriteF77Block";
+  static const char *func = "binWriteF77Block";
   static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
   unsigned char f77block[4];
 
@@ -129,7 +129,7 @@ void binWriteF77Block(int fileID, int byteswap, size_t blocksize)
 
 int binReadInt32(int fileID, int byteswap, size_t size, INT32 *ptr)
 {
-  static char func[] = "binReadInt32";
+  static const char *func = "binReadInt32";
 
   if ( sizeof(INT32) == 4 )
     {
@@ -147,7 +147,7 @@ int binReadInt32(int fileID, int byteswap, size_t size, INT32 *ptr)
 
 int binReadInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
 {
-  static char func[] = "binReadInt64";
+  static const char *func = "binReadInt64";
 
   if ( sizeof(INT64) == 8 )
     {
@@ -165,7 +165,7 @@ int binReadInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
 
 int binReadFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr)
 {
-  static char func[] = "binReadFlt32";
+  static const char *func = "binReadFlt32";
 
   if ( sizeof(FLT32) == 4 )
     {
@@ -183,7 +183,7 @@ int binReadFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr)
 
 int binReadFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr)
 {
-  static char func[] = "binReadFlt64";
+  static const char *func = "binReadFlt64";
 
   if ( sizeof(FLT64) == 8 )
     {
@@ -201,7 +201,7 @@ int binReadFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr)
 
 int binWriteInt32(int fileID, int byteswap, size_t size, INT32 *ptr)
 {
-  static char func[] = "binWriteInt32";
+  static const char *func = "binWriteInt32";
 
   if ( sizeof(INT32) == 4 )
     {
@@ -219,7 +219,7 @@ int binWriteInt32(int fileID, int byteswap, size_t size, INT32 *ptr)
 
 int binWriteInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
 {
-  static char func[] = "binWriteInt64";
+  static const char *func = "binWriteInt64";
 
   if ( sizeof(INT64) == 8 )
     {
@@ -237,7 +237,7 @@ int binWriteInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
 
 int binWriteFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr)
 {
-  static char func[] = "binWriteFlt32";
+  static const char *func = "binWriteFlt32";
 
   if ( sizeof(FLT32) == 4 )
     {
@@ -255,7 +255,7 @@ int binWriteFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr)
 
 int binWriteFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr)
 {
-  static char func[] = "binWriteFlt64";
+  static const char *func = "binWriteFlt64";
 
   if ( sizeof(FLT64) == 8 )
     {

@@ -37,7 +37,7 @@ typedef struct {
 static
 int gribapiGetGridType(grib_handle *gh, int gribgridtype)
 {
-  /*  static char func[] = "gribapiGetGridType"; */
+  /*  static const char *func = "gribapiGetGridType"; */
   int gridtype = 0;
   long lpar;
 
@@ -96,7 +96,7 @@ int gribapiGetGridType(grib_handle *gh, int gribgridtype)
 static
 int gribapiGetIsRotated(int gribgridtype)
 {
-  /*  static char func[] = "cgribexGetIsRotated"; */
+  /*  static const char *func = "cgribexGetIsRotated"; */
   int isRotated = 0;
 
   if ( gribgridtype == GRIBAPI_GTYPE_LATLON_ROT )
@@ -183,7 +183,7 @@ int gribapiGetZaxisType(int grb_ltype)
 static
 int gribapiGetTimeUnits(grib_handle *gh)
 {
-  static char func[] = "gribapiGetTimeUnits";
+  static const char *func = "gribapiGetTimeUnits";
   int timeunits = -1;
   long lpar;
   size_t len = 8;
@@ -230,7 +230,7 @@ int gribapiTimeIsFC(grib_handle *gh)
 static
 int gribapiGetTsteptype(grib_handle *gh)
 {
-  static char func[] = "gribapiGetTsteptype";
+  static const char *func = "gribapiGetTsteptype";
   int tsteptype = 0;
   int timerange;
   long lpar;
@@ -292,7 +292,7 @@ static
 void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 		      long recsize, off_t position, int prec, int ztype)
 {
-  static char func[] = "gribapiAddRecord";
+  static const char *func = "gribapiAddRecord";
   int gribgridtype;
   int gridtype;
   int zaxistype;
@@ -1684,7 +1684,7 @@ int gribapiScanTimestep(int streamID)
 int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
 		  int unreduced, int *nmiss, int *zip, double missval)
 {
-  static char func[] = "gribapiDecode";
+  static const char *func = "gribapiDecode";
   int status = 0;
 #if  defined  (HAVE_LIBGRIB_API)
   long lpar;
@@ -1917,7 +1917,7 @@ void gribapiDefTime(grib_handle *gh , int vdate, int vtime, int tsteptype, int n
 static
 void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 {
-  static char func[] = "gribapiDefGrid";
+  static const char *func = "gribapiDefGrid";
   int gridtype;
   static short lwarn = TRUE;
   size_t len;
@@ -2190,7 +2190,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 static
 void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 {
-  static char func[] = "gribapiDefLevel";
+  static const char *func = "gribapiDefLevel";
   double level;
   int zaxistype, ltype;
   static int warning = 1;
@@ -2370,7 +2370,7 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 
 void *gribHandleNew()
 {
-  static char func[] = "gribHandleNew";
+  static const char *func = "gribHandleNew";
   void *gh = NULL;
 
 #if  defined  (HAVE_LIBGRIB_API)
@@ -2396,7 +2396,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize,
 		     int ljpeg, void *gribHandle)
 {
-  static char func[] = "gribapiEncode";
+  static const char *func = "gribapiEncode";
   size_t nbytes = 0;
 #if  defined  (HAVE_LIBGRIB_API)
   size_t recsize = 0;

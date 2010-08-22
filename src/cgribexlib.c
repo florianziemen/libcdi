@@ -695,7 +695,7 @@ void confp3(double pval, int *kexp, int *kmant, int kbits, int kround)
         - replace 1.0 / pow(16.0, (double)(iexp - 70)) by rpow16m70tab[iexp]
   */
 
-  static char func[] = "confp3";
+  static const char *func = "confp3";
   double zval, rpowref;
   double zref, zeps;
   int iexp, isign;
@@ -944,7 +944,7 @@ double decfp2(int kexp, int kmant)
         - replace pow(16.0, (double)(iexp - 64)) by pow16m64tab[iexp]
   */
 
-  static char func[] = "decfp2";
+  static const char *func = "decfp2";
   double pval;
   int iexp, isign;
   extern int GRB_Debug;
@@ -1076,7 +1076,7 @@ int gribTimeIsFC(int *isec1)
 
 void gribDateTime(int *isec1, int *date, int *time)
 {
-  static char func[] = "gribDateTime";
+  static const char *func = "gribDateTime";
   static int lprint = TRUE;
   int ryear, rmonth, rday, rhour, rminute, second;
   int time_period = 0;
@@ -1161,7 +1161,7 @@ void gribDateTime(int *isec1, int *date, int *time)
 
 void gprintf(const char *caller, const char *fmt, ...)
 {
-  static char func[] = "gprintf";
+  static const char *func = "gprintf";
   va_list args;
 
   if ( grprsm == NULL ) Error(func, "GRIBEX initialization missing!\n");
@@ -1181,7 +1181,7 @@ gribExDP(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 	 double *fsec3, int *isec4, double *fsec4, int klenp, int *kgrib,
 	 int kleng, int *kword, char *hoper, int *kret)
 {
-  static char func[] = "gribExDP";
+  static const char *func = "gribExDP";
   int yfunc = *hoper;
 
   if ( yfunc == 'D' || yfunc == 'J' || yfunc == 'R' )
@@ -1207,7 +1207,7 @@ gribExSP(int *isec0, int *isec1, int *isec2, float *fsec2sp, int *isec3,
 	 float *fsec3sp, int *isec4, float *fsec4sp, int klenp, int *kgrib,
 	 int kleng, int *kword, char *hoper, int *kret)
 {
-  static char func[] = "gribExSP";
+  static const char *func = "gribExSP";
   int inum, j;
   double fsec2dp[1024];
   double fsec3dp[2];
@@ -1281,7 +1281,7 @@ int GRB_Fix_ZSE  = 0;    /* Fix ZeroShiftError of simple packed spherical harmon
 
 void gribSetDebug(int debug)
 {
-  static char func[] = "gribDebug";
+  static const char *func = "gribDebug";
 
   GRB_Debug = debug;
 
@@ -1291,7 +1291,7 @@ void gribSetDebug(int debug)
 
 void gribFixZSE(int flag)
 {
-  static char func[] = "gribFixZSE";
+  static const char *func = "gribFixZSE";
 
   GRB_Fix_ZSE = flag;
 
@@ -2523,7 +2523,7 @@ void gribPrintSec2DP(int *isec0, int *isec2, double *fsec2)
 
 void gribPrintSec2SP(int *isec0, int *isec2, float  *fsec2sp)
 {
-  static char func[] = "grprs2sp";
+  static const char *func = "grprs2sp";
   int inum;
   int j;
   double *fsec2;
@@ -2970,7 +2970,7 @@ void encodePDS_DWD_local_Extension_253(GRIBPACK *lGrib, long *zs, int *isec1)
 static
 void encodePDS_ECMWF_local_Extension_1(GRIBPACK *lGrib, long *zs, int *isec1)
 {
-  // static char func[] = "encodePDS_ECMWF_local_Extension_1";
+  // static const char *func = "encodePDS_ECMWF_local_Extension_1";
   // int isvn;
   long localextlen, i;
   long z = *zs;
@@ -3123,7 +3123,7 @@ void encodePDS(GRIBPACK *lpds, long pdsLen, int *isec1)
 static
 void encodeGDS(GRIBPACK *lGrib, long *gribLen, int *isec2, double *fsec2)
 {
-  static char func[] = "encodeGDS";
+  static const char *func = "encodeGDS";
   long z = *gribLen;
   int exponent, mantissa;
   long i;
@@ -3256,7 +3256,7 @@ void encodeGDS(GRIBPACK *lGrib, long *gribLen, int *isec2, double *fsec2)
 static
 void encodeBMS(GRIBPACK *lGrib, long *gribLen, double *fsec3, int *isec4, double *data, long *datasize)
 {
-  static char func[] = "encodeBMS";
+  static const char *func = "encodeBMS";
   GRIBPACK *bitmap;
   long bitmapSize;
   long imaskSize;
@@ -3398,7 +3398,7 @@ static
 void encode_double_array(int NumBits, long PackStart, long datasize, GRIBPACK *lGrib,
 			 const double *data, double zref, double factor, long *gz)
 {
-  static char func[] = "encode_double_array";
+  static const char *func = "encode_double_array";
   long i, z = *gz;
   unsigned int ipval;
 
@@ -3512,7 +3512,7 @@ int encodeBDS(GRIBPACK *lGrib, long *gribLen, int decscale, int *isec2, int *ise
   /* Uwe Schulzweida, 11/04/2003 : Check that number of bits per value is not exceeded */
   /* Uwe Schulzweida,  6/05/2003 : Copy result to fpval to prevent integer overflow */
 
-  static char func[] = "encodeBDS";
+  static const char *func = "encodeBDS";
   long z = *gribLen;
   long i, jloop;
   int ival;
@@ -3786,7 +3786,7 @@ void gribEncode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 		double *fsec3, int *isec4, double *fsec4, int klenp, int *kgrib,
 		int kleng, int *kword, int efunc, int *kret)
 {
-  static char func[] = "gribEncode";
+  static const char *func = "gribEncode";
   long gribLen = 0; /* Counter of GRIB length for output */
   long isLen, pdsLen;
   GRIBPACK *lpds;
@@ -3899,7 +3899,7 @@ void gribEncode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 
 int gribVersion(unsigned char *is, size_t buffersize)
 {
-  static char func[] = "gribVersion";
+  static const char *func = "gribVersion";
 
   if ( buffersize < 8 )
     Error(func, "Buffer too small (current size %d)!\n", (int) buffersize);
@@ -3921,7 +3921,7 @@ double GET_Real(unsigned char *grib)
 static 
 int decodeIS(unsigned char *is, int *isec0, int *iret)
 {
-  static char func[] = "decodeIS";
+  static const char *func = "decodeIS";
   int isLen = 0;
   int grib1offset;
   int lgrib = FALSE, lbudg = FALSE, ltide = FALSE;
@@ -4040,7 +4040,7 @@ void decodePDS_DWD_local_Extension_253(unsigned char *pds, int *isec1)
 static 
 int decodePDS(unsigned char *pds, int *isec0, int *isec1)
 {
-  static char func[] = "decodePDS";
+  static const char *func = "decodePDS";
   int pdsLen;
 
   pdsLen = PDS_Len;
@@ -4170,7 +4170,7 @@ int decodePDS(unsigned char *pds, int *isec0, int *isec1)
 static 
 int decodeGDS(unsigned char  *gds, int *isec0, int *isec2, double *fsec2, int dfunc)
 {
-  static char func[] = "decodeGDS";
+  static const char *func = "decodeGDS";
   int imisng;
   int  ReducedGrid = FALSE, VertCoorTab = FALSE;
   int  locnv = 0, locnl;
@@ -4425,7 +4425,7 @@ void decode_double_array(unsigned char *igrib, long jlend, long jlenc, int NumBi
   long i;
   double dval;
 #if defined (VECTORCODE)
-  static char func[] = "decode_double_array";
+  static const char *func = "decode_double_array";
   GRIBPACK *lgrib = NULL;
 
   if ( NumBits ==  8 || NumBits == 16 ||
@@ -4531,7 +4531,7 @@ static
 int decodeBDS(int decscale, unsigned char *bds, int *isec2, int *isec4, 
 	      double *fsec4, int fsec4len, int dfunc, int bdsLenIn, int llarge, int *iret)
 {
-  static char func[] = "decodeBDS";
+  static const char *func = "decodeBDS";
   unsigned char *igrib;
   int lspherc = FALSE, lcomplex = FALSE;
   int lcompress;
@@ -4796,7 +4796,7 @@ void gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 		double *fsec3, int *isec4, double *fsec4, int fsec4len, int *kgrib,
 		int kleng, int *kword, int dfunc, int *iret)
 {
-  static char func[] = "gribDecode";
+  static const char *func = "gribDecode";
   UCHAR *is = NULL, *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
   int isLen = 0, pdsLen = 0, gdsLen = 0, bmsLen = 0, bdsLen = 0, esLen = 0;
   int gribLen = 0;
@@ -5203,7 +5203,7 @@ off_t gribGetPos(int fileID)
 
 int gribCheckFiletype(int fileID)
 {
-  static char func[] = "gribCheckFiletype";
+  static const char *func = "gribCheckFiletype";
   int ierr;
   int found = 0;
   char buffer[4];
@@ -5253,7 +5253,7 @@ int gribCheckSeek(int fileID, long *offset, int *version)
 int gribFileSeekOld(int fileID, long *offset)
 {
   /* position file pointer after GRIB */
-  static char func[] = "gribFileSeek";
+  static const char *func = "gribFileSeek";
   int ch;
   int buffersize = 4096;
   unsigned char buffer[4096];
@@ -5308,7 +5308,7 @@ int gribFileSeekOld(int fileID, long *offset)
 int gribFileSeek(int fileID, long *offset)
 {
   /* position file pointer after GRIB */
-  static char func[] = "gribFileSeek";
+  static const char *func = "gribFileSeek";
   const long GRIB = 0x47524942;
   long code = 0;
   int ch;
@@ -5346,7 +5346,7 @@ int gribFileSeek(int fileID, long *offset)
 int gribFileSeekTest(int fileID, long *offset)
 {
   /* position file pointer after GRIB */
-  static char func[] = "gribFileSeek";
+  static const char *func = "gribFileSeek";
   const long GRIB = 0x47524942;
   long code = 0;
   int ch;
@@ -5396,7 +5396,7 @@ int gribFileSeekTest(int fileID, long *offset)
 
 int gribReadSize(int fileID)
 {
-  static char func[] = "gribReadSize";
+  static const char *func = "gribReadSize";
   int gribversion, gribsize;
   int b1, b2, b3;
   off_t pos;
@@ -5510,7 +5510,7 @@ int gribReadSize(int fileID)
 
 int gribGetSize(int fileID)
 {
-  static char func[] = "gribGetSize";
+  static const char *func = "gribGetSize";
   int recsize;
   long offset;
   int ierr;
@@ -5539,7 +5539,7 @@ int gribGetSize(int fileID)
 
 int gribRead(int fileID, unsigned char *buffer, size_t *buffersize)
 {
-  static char func[] = "gribRead";
+  static const char *func = "gribRead";
   long offset;
   int ierr = 0;
   size_t nread, recsize, recsize0;
@@ -5589,7 +5589,7 @@ int gribRead(int fileID, unsigned char *buffer, size_t *buffersize)
 
 int gribWrite(int fileID, unsigned char *buffer, size_t buffersize)
 {
-  static char func[] = "gribWrite";
+  static const char *func = "gribWrite";
   int  nwrite = 0;
 
   if( (nwrite = fileWrite(fileID, buffer, buffersize)) != (int) buffersize )
@@ -5623,7 +5623,7 @@ int gribrec_len(int b1, int b2, int b3)
 /* calculate_pfactor: source code from grib_api-1.8.0 */
 double calculate_pfactor(const double* spectralField, long fieldTruncation, long subsetTruncation)
 {
-  static char func[] = "calculate_pfactor";
+  static const char *func = "calculate_pfactor";
   /*long n_vals = ((fieldTruncation+1)*(fieldTruncation+2));*/
   long loop, index, m, n = 0;
   double pFactor, zeps = 1.0e-15;
@@ -5732,7 +5732,7 @@ double calculate_pfactor(const double* spectralField, long fieldTruncation, long
 
 void scaleComplex(double *fpdata, int pcStart, int pcScale, int trunc, int inv)
 {
-  static char func[] = "scaleComplex";
+  static const char *func = "scaleComplex";
   double power;
   double *scale = (double *) malloc((trunc+1)*sizeof(double));
   int  n, m;
@@ -5793,7 +5793,7 @@ void scaleComplex(double *fpdata, int pcStart, int pcScale, int trunc, int inv)
 
 void scatterComplex(double *fpdata, int pcStart, int trunc, int nsp)
 {
-  static char func[] = "scatterComplex";
+  static const char *func = "scatterComplex";
   double *fphelp = (double *) malloc(nsp*sizeof(double));
   int  m, n;
   int  index, inext;
@@ -5833,7 +5833,7 @@ void scatterComplex(double *fpdata, int pcStart, int trunc, int nsp)
 
 void gatherComplex(double *fpdata, int pcStart, int trunc, int nsp)
 {
-  static char func[] = "gatherComplex";
+  static const char *func = "gatherComplex";
   double *fphelp = (double *) malloc(nsp*sizeof(double));
   int  m, n;
   int  index, inext;
@@ -6320,7 +6320,7 @@ L900:
 int qu2reg2(double *pfield, int *kpoint, int klat, int klon,
 	    double *ztemp, double msval, int *kret)
 {
-   static char func[] = "qu2reg2";
+   static const char *func = "qu2reg2";
 
    /* System generated locals */
    int i_1, i_2;
@@ -6579,7 +6579,7 @@ C     Fix message for longitude number out of bounds, and routine
 C     name in title and formats.
 C
 */
-   static char func[] = "qu2reg3";
+   static const char *func = "qu2reg3";
 
    /* System generated locals */
    int i_1, i_2;
@@ -6797,7 +6797,7 @@ C     Reverse defaults for NEXT2O and NLOC2O, for consistency with
 C     version 13.023 of software .
 C
   */
-  static char func[] = "grsdef";
+  static const char *func = "grsdef";
   /*
 C     ----------------------------------------------------------------
 C*    Section 0 . Definition of variables.
@@ -7497,7 +7497,7 @@ void ref2ibm(double *pref, int kbits)
 
   */
 
-  static char func[] = "ref2ibm";
+  static const char *func = "ref2ibm";
   static int itrnd;
   static int kexp, kmant;
   static double ztemp, zdumm;
@@ -8393,7 +8393,7 @@ void gribCheck1(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
 static
 void repair1(unsigned char *gbuf, long gbufsize)
 {
-  static char func[] = "repair1";
+  static const char *func = "repair1";
   long i;
   int nerr;
   unsigned char *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
@@ -8565,7 +8565,7 @@ int gribGetZip(long recsize, unsigned char *gribbuffer, long *urecsize)
 
 int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize)
 {
-  static char func[] = "gribZip";
+  static const char *func = "gribZip";
   int nerr;
   int gribLen;
   int rec_len;
@@ -8845,7 +8845,7 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
 
 int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize)
 {
-  static char func[] = "gribUnzip";
+  static const char *func = "gribUnzip";
 #if ! defined  (HAVE_LIBSZ)
   static int libszwarn = 1;
 #endif

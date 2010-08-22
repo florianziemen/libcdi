@@ -136,7 +136,7 @@ int get_timeunit(int len, char *ptu)
 static
 int isTimeUnits(const char *timeunits)
 {
-  static char func[] = "isTimeUnits";
+  static const char *func = "isTimeUnits";
   int len, i;
   char *ptu, *tu;
   int timetype = -1;
@@ -176,7 +176,7 @@ int isTimeUnits(const char *timeunits)
 static
 int splitBasetime(const char *timeunits, taxis_t *taxis)
 {
-  static char func[] = "splitBasetime";
+  static const char *func = "splitBasetime";
   int len, i;
   char *ptu, *tu;
   int year, month, day;
@@ -289,7 +289,7 @@ int splitBasetime(const char *timeunits, taxis_t *taxis)
 static
 void cdfGetAttInt(int fileID, int ncvarid, char *attname, int attlen, int *attint)
 {
-  static char func[] = "cdfGetAttInt";
+  static const char *func = "cdfGetAttInt";
   size_t nc_attlen;
   int *pintatt;
 
@@ -313,7 +313,7 @@ void cdfGetAttInt(int fileID, int ncvarid, char *attname, int attlen, int *attin
 #if  defined  (HAVE_LIBNETCDF)
 static void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double *attdouble)
 {
-  static char func[] = "cdfGetAttDouble";
+  static const char *func = "cdfGetAttDouble";
   size_t nc_attlen;
   double *pdoubleatt;
 
@@ -380,7 +380,7 @@ int cdfInqDatatype(int xtype)
 static
 int cdfDefDatatype(int datatype)
 {
-  static char func[] = "cdfDefDatatype";
+  static const char *func = "cdfDefDatatype";
   int xtype;
 
   if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
@@ -404,7 +404,7 @@ int cdfDefDatatype(int datatype)
 static
 void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
 {
-  static char func[] = "defineAttributes";
+  static const char *func = "defineAttributes";
   int natts, iatt;
   int atttype, attlen;
   size_t len;
@@ -448,7 +448,7 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
 
 int cdfCopyRecord(int streamID2, int streamID1)
 {
-  static char func[] = "cdfCopyRecord";
+  static const char *func = "cdfCopyRecord";
   double *data;
   int datasize;
   int tsID1, tsID2, recID1, recID2;
@@ -495,7 +495,7 @@ int cdfCopyRecord(int streamID2, int streamID1)
 /* not used
 int cdfInqRecord(int streamID, int *varID, int *levelID)
 {
-  static char func[] = "cdfInqRecord";
+  static const char *func = "cdfInqRecord";
   int tsID, recID;
   stream_t *streamptr;
 
@@ -527,7 +527,7 @@ int cdfInqRecord(int streamID, int *varID, int *levelID)
 */
 int cdfDefRecord(int streamID)
 {
-  static char func[] = "cdfDefRecord";
+  static const char *func = "cdfDefRecord";
   int ierr = 0;
   stream_t *streamptr;
 
@@ -607,7 +607,7 @@ void cdfReadGridTraj(int streamID, int gridID)
 static
 void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 {
-  static char func[] = "cdfDefVarDeflate";
+  static const char *func = "cdfDefVarDeflate";
 #if  defined  (NC_NETCDF4)
   int retval;
   /* Set chunking, shuffle, and deflate. */
@@ -637,7 +637,7 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 static
 void cdfDefVarSzip(int ncid, int ncvarid)
 {
-  static char func[] = "cdfDefVarSzip";
+  static const char *func = "cdfDefVarSzip";
 #if  defined  (NC_NETCDF4) && defined (NC_SZIP_NN_OPTION_MASK)
   int retval;
   /* Set options_mask and bits_per_pixel. */
@@ -711,7 +711,7 @@ void cdfDefVarMissval(int streamID, int varID, int dtype, int lcheck)
 void cdfWriteRecord(int streamID, const double *data, int nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfWriteRecord";
+  static const char *func = "cdfWriteRecord";
   int varID;
   int levelID;
   stream_t *streamptr;
@@ -731,7 +731,7 @@ void cdfWriteRecord(int streamID, const double *data, int nmiss)
 
 int cdfReadRecord(int streamID, double *data, int *nmiss)
 {
-  static char func[] = "cdfReadRecord";
+  static const char *func = "cdfReadRecord";
   int ierr = 0;
   int levelID, varID, tsID, recID, vrecID;
   stream_t *streamptr;
@@ -755,7 +755,7 @@ static
 void cdfDefTimeValue(int streamID, int tsID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfDefTimeValue";
+  static const char *func = "cdfDefTimeValue";
   int fileID;
   double timevalue;
   int ncvarid;
@@ -1051,7 +1051,7 @@ static
 void cdfDefTrajLon(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfDefTrajLon";
+  static const char *func = "cdfDefTrajLon";
   char units[256];
   char longname[256];
   char stdname[256];
@@ -1112,7 +1112,7 @@ static
 void cdfDefTrajLat(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfDefTrajLat";
+  static const char *func = "cdfDefTrajLat";
   char units[] = "degrees_north";
   char longname[] = "latitude";
   char stdname[] = "latitude";
@@ -1237,7 +1237,7 @@ static
 void cdfDefXaxis(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfDefXaxis";
+  static const char *func = "cdfDefXaxis";
   char units[256];
   char longname[256];
   char stdname[256];
@@ -1363,7 +1363,7 @@ static
 void cdfDefYaxis(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfDefYaxis";
+  static const char *func = "cdfDefYaxis";
   char units[256];
   char longname[256];
   char stdname[256];
@@ -1677,7 +1677,7 @@ static
 void cdfDefRgrid(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfDefRgrid";
+  static const char *func = "cdfDefRgrid";
   char axisname[7] = "rgridX";
   int index, iz = 0;
   int gridID0, gridtype0, gridindex;
@@ -1998,7 +1998,7 @@ static
 void cdfDefVCT(int streamID, int zaxisID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfDefVCT";
+  static const char *func = "cdfDefVCT";
   int type;
   stream_t *streamptr;
 
@@ -2456,7 +2456,7 @@ static
 void cdfDefGrid(int streamID, int gridID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfDefGrid";
+  static const char *func = "cdfDefGrid";
   int gridtype, size;
   int gridindex;
   int vlistID;
@@ -2540,7 +2540,7 @@ void cdfDefGrid(int streamID, int gridID)
 static
 int cdfDefVar(int streamID, int varID)
 {
-  static char func[] = "cdfDefVar";
+  static const char *func = "cdfDefVar";
   int ncvarid = -1;
 #if  defined  (HAVE_LIBNETCDF)
   int fileID;
@@ -2901,7 +2901,7 @@ int cdfDefVar(int streamID, int varID)
 void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfReadVarDP";
+  static const char *func = "cdfReadVarDP";
   int fileID;
   int gridID;
   int zaxisID;
@@ -3032,7 +3032,7 @@ void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
 void cdfWriteVarDP(int streamID, int varID, const double *data, int nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfWriteVarDP";
+  static const char *func = "cdfWriteVarDP";
   int fileID;
   int gridID;
   int zaxisID;
@@ -3199,7 +3199,7 @@ void cdfWriteVarDP(int streamID, int varID, const double *data, int nmiss)
 int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfReadVarSliceDP";
+  static const char *func = "cdfReadVarSliceDP";
   int fileID;
   int gridID;
   int zaxisID;
@@ -3482,7 +3482,7 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data, int nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfWriteVarSliceDP";
+  static const char *func = "cdfWriteVarSliceDP";
   int fileID;
   int gridID;
   int zaxisID;
@@ -3660,7 +3660,7 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
 void cdfCreateRecords(int streamID, int tsID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfCreateRecords";
+  static const char *func = "cdfCreateRecords";
   int varID, levelID, recID, vrecID, zaxisID;
   int nvars, nlev, nrecs, nvrecs;
   record_t *records = NULL;
@@ -3976,7 +3976,7 @@ int unitsIsPressure(const char *units)
 static
 int isGaussGrid(long ysize, double yinc, double *yvals)
 {
-  static char func[] = "isGaussGrid";
+  static const char *func = "isGaussGrid";
   int lgauss = FALSE;
   long i;
   double *yv, *yw;
@@ -4016,7 +4016,7 @@ int isGaussGrid(long ysize, double yinc, double *yvals)
 static
 void cdfSetVar(NCVAR *ncvars, int ncvarid, int isvar)
 {
-  static char func[] = "cdfSetVar";
+  static const char *func = "cdfSetVar";
 
   if ( isvar != TRUE && isvar != FALSE )
     Error(func, "Internal problem! var %s undefined", ncvars[ncvarid].name);
@@ -4038,7 +4038,7 @@ void cdfSetVar(NCVAR *ncvars, int ncvarid, int isvar)
 static
 void cdfSetDim(NCVAR *ncvars, int ncvarid, int dimid, int dimtype)
 {
-  static char func[] = "cdfSetDim";
+  static const char *func = "cdfSetDim";
 
   if ( ncvars[ncvarid].dimtype[dimid] != UNDEFID &&
        ncvars[ncvarid].dimtype[dimid] != dimtype )
@@ -4117,7 +4117,7 @@ static
 void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 		       int timedimid, int modelID, int format)
 {
-  static char func[] = "scanAttributes";
+  static const char *func = "scanAttributes";
   int ncvarid;
   int ncdimid;
   int nvdims, nvatts;
@@ -4551,7 +4551,7 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 static
 void setDimType(int nvars, NCVAR *ncvars, NCDIM *ncdims)
 {
-  static char func[] = "setDimType";
+  static const char *func = "setDimType";
   int ndims;
   int ncvarid, ncdimid;
   int i;
@@ -4619,7 +4619,7 @@ void setDimType(int nvars, NCVAR *ncvars, NCDIM *ncdims)
 int cdfInqContents(int streamID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfInqContents";
+  static const char *func = "cdfInqContents";
   int ndims, nvars, ngatts, unlimdimid;
   int varID, ncvarid, ncvarid2;
   int ncdimid;
@@ -6118,7 +6118,7 @@ int cdfInqContents(int streamID)
 
 int cdfInqTimestep(int streamID, int tsID)
 {
-  static char func[] = "cdfInqTimestep";
+  static const char *func = "cdfInqTimestep";
   long nrecs = 0;
 #if  defined  (HAVE_LIBNETCDF)
   double timevalue;
@@ -6402,7 +6402,7 @@ void cdfInqHistoryString(int streamID, char *history)
 void cdfDefVars(int streamID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static char func[] = "cdfDefVars";
+  static const char *func = "cdfDefVars";
   int index, gridID, zaxisID, vlistID;
   int nvars, ngrids, nzaxis;
   /*

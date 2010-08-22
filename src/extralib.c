@@ -48,7 +48,7 @@ int EXT_Debug = 0;    /* If set to 1, debugging */
 
 void extDebug(int debug)
 {
-  static char func[] = "extDebug";
+  static const char *func = "extDebug";
 
   EXT_Debug = debug;
 
@@ -59,7 +59,7 @@ void extDebug(int debug)
 
 void extLibInit()
 {
-  static char func[] = "extLibInit";
+  static const char *func = "extLibInit";
   char *envString;
   char *envName = "EXT_PRECISION";
 
@@ -121,7 +121,7 @@ void extInit(extrec_t *extp)
 
 void *extNew(void)
 {
-  static char func[] = "extNew";
+  static const char *func = "extNew";
   extrec_t *extp;
 
   if ( ! initExtLib ) extLibInit();
@@ -136,7 +136,7 @@ void *extNew(void)
 
 void extDelete(void *ext)
 {
-  static char func[] = "extDelete";
+  static const char *func = "extDelete";
   extrec_t *extp = (extrec_t *) ext;
 
   if ( extp )
@@ -149,7 +149,7 @@ void extDelete(void *ext)
 
 int extCheckFiletype(int fileID, int *swap)
 {
-  static char func[] = "extCheckFiletype";
+  static const char *func = "extCheckFiletype";
   size_t blocklen = 0;
   size_t sblocklen = 0;
   size_t data =  0;
@@ -215,7 +215,7 @@ int extCheckFiletype(int fileID, int *swap)
 
 int extInqHeader(void *ext, int *header)
 {
-  static char func[] = "extInqHeader";
+  static const char *func = "extInqHeader";
   extrec_t *extp = (extrec_t *) ext;
   size_t i;
 
@@ -230,7 +230,7 @@ int extInqHeader(void *ext, int *header)
 
 int extDefHeader(void *ext, const int *header)
 {
-  static char func[] = "extDefHeader";
+  static const char *func = "extDefHeader";
   extrec_t *extp = (extrec_t *) ext;
   size_t i;
 
@@ -248,7 +248,7 @@ int extDefHeader(void *ext, const int *header)
 
 int extInqData(void *ext, int prec, void *data)
 {
-  static char func[] = "extInqData";
+  static const char *func = "extInqData";
   extrec_t *extp = (extrec_t *) ext;
   size_t datasize;
   size_t i;
@@ -322,7 +322,7 @@ int extInqDataDP(void *ext, double *data)
 
 int extDefData(void *ext, int prec, const void *data)
 {
-  static char func[] = "extDefData";
+  static const char *func = "extDefData";
   extrec_t *extp = (extrec_t *) ext;
   size_t datasize;
   size_t blocklen;
@@ -406,7 +406,7 @@ int extDefDataDP(void *ext, const double *data)
 
 int extRead(int fileID, void *ext)
 {
-  static char func[] = "extRead";
+  static const char *func = "extRead";
   extrec_t *extp = (extrec_t *) ext;
   size_t blocklen, blocklen2;
   size_t i;
@@ -526,7 +526,7 @@ int extRead(int fileID, void *ext)
 
 int extWrite(int fileID, void *ext)
 {
-  static char func[] = "extWrite";
+  static const char *func = "extWrite";
   extrec_t *extp = (extrec_t *) ext;
   size_t datasize;
   size_t blocklen;
