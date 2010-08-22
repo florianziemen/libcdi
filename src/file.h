@@ -42,8 +42,8 @@ int    fileSetPos(int fileID, off_t offset, int whence);
 int    fileGetc(int fileID);
 int    filePtrGetc(void *fileptr);
 
-size_t filePtrRead(void *fileptr, void *ptr, size_t size);
-size_t fileRead(int fileID, void *ptr, size_t size);
-size_t fileWrite(int fileID, const void *ptr, size_t size);
+size_t filePtrRead(void *fileptr, void *restrict ptr, size_t size);
+size_t fileRead(int fileID, void *restrict ptr, size_t size);
+size_t fileWrite(int fileID, const void *restrict ptr, size_t size);
 
 #endif  /* _FILE_H */
