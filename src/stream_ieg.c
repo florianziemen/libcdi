@@ -1287,7 +1287,7 @@ int iegScanTimestep(int streamID)
 
 	  iegDateTime(iegp->ipdb, &vdate, &vtime);
 
-	  // if ( rindex == nrecs ) break; gcc-4.4 internal compiler error
+	  // if ( rindex == nrecs ) break; gcc-4.5 internal compiler error
 	  if ( rindex == nrecs ) continue;
 	  recID = streamptr->tsteps[tsID].recIDs[rindex];
 

@@ -769,7 +769,7 @@ int srvScanTimestep(int streamID)
 
 	  param = cdiEncodeParam(rcode, 255, 255);
 
-	  // if ( rindex == nrecs ) break; gcc-4.4 internal compiler error
+	  // if ( rindex == nrecs ) break; gcc-4.5 internal compiler error
 	  if ( rindex == nrecs ) continue;
 	  recID = streamptr->tsteps[tsID].recIDs[rindex];
 
