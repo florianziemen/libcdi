@@ -115,7 +115,7 @@ static int vlistvarNewEntry(int vlistID)
   return (varID);
 }
 
-void vlistCheckVarID(char *func, int vlistID, int varID)
+void vlistCheckVarID(const char *func, int vlistID, int varID)
 {
   vlist_t *vlistptr;
 

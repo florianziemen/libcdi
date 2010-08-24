@@ -95,7 +95,7 @@ vlist_t;
 
 
 vlist_t *vlist_to_pointer(int vlistID);
-void     vlistCheckVarID(char *func, int vlistID, int varID);
+void     vlistCheckVarID(const char *func, int vlistID, int varID);
 int      vlistNlock(int vlistID);
 void     vlistLock(int vlistID);
 void     vlistUnlock(int vlistID);

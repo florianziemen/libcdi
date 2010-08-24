@@ -189,7 +189,7 @@ int institutDef(int center, int subcenter, const char *name, const char *longnam
 }
 
 
-void institutionCheckID(char *func, int instID)
+void institutionCheckID(const char *func, int instID)
 {
   if ( instID < 0 || instID >= institutsSize )
     Error(func, "instID %d undefined!", instID);
