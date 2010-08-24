@@ -21939,6 +21939,9 @@ else
 fi
 
 #  ----------------------------------------------------------------------
+# Add basic configure options
+
+#  ----------------------------------------------------------------------
 #  Checks for pthread library
 
 # Check whether --with-threads was given.
@@ -23455,6 +23458,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_ieg" >&5
 $as_echo "$enable_ieg" >&6; }
 ENABLE_IEG=$enable_ieg
+
 
 #  ----------------------------------------------------------------------
 # Compile with MPI support
