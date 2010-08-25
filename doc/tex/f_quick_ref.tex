@@ -656,14 +656,37 @@ Copy some entries of a variable list.
 Create a variable list.
 
 
+\section*{\tt \htmlref{vlistDefAttFlt}{vlistDefAttFlt}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistDefAttFlt (INTEGER vlistID, INTEGER varID, 
+                                     CHARACTER*(*) name, INTEGER type, INTEGER len, 
+                                     DOUBLEPRECISION dp_vec)
+\end{verbatim}
+
+Define a floating point attribute.
+
+
 \section*{\tt \htmlref{vlistDefAttInt}{vlistDefAttInt}}
 
 \begin{verbatim}
     INTEGER FUNCTION vlistDefAttInt (INTEGER vlistID, INTEGER varID, 
-                                     CHARACTER*(*) name, INTEGER len, INTEGER ip_vec)
+                                     CHARACTER*(*) name, INTEGER type, INTEGER len, 
+                                     INTEGER ip_vec)
 \end{verbatim}
 
 Define an integer attribute.
+
+
+\section*{\tt \htmlref{vlistDefAttTxt}{vlistDefAttTxt}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistDefAttTxt (INTEGER vlistID, INTEGER varID, 
+                                     CHARACTER*(*) name, INTEGER len, 
+                                     CHARACTER*(*) tp)
+\end{verbatim}
+
+Define a text attribute.
 
 
 \section*{\tt \htmlref{vlistDefTaxis}{vlistDefTaxis}}
@@ -788,6 +811,17 @@ Duplicate a variable list.
 Get information about an attribute.
 
 
+\section*{\tt \htmlref{vlistInqAttFlt}{vlistInqAttFlt}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqAttFlt (INTEGER vlistID, INTEGER varID, 
+                                     CHARACTER*(*) name, INTEGER mlen, 
+                                     DOUBLEPRECISION dp_vec)
+\end{verbatim}
+
+Get the value(s) of a floating point attribute.
+
+
 \section*{\tt \htmlref{vlistInqAttInt}{vlistInqAttInt}}
 
 \begin{verbatim}
@@ -797,6 +831,17 @@ Get information about an attribute.
 \end{verbatim}
 
 Get the value(s) of an integer attribute.
+
+
+\section*{\tt \htmlref{vlistInqAttTxt}{vlistInqAttTxt}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqAttTxt (INTEGER vlistID, INTEGER varID, 
+                                     CHARACTER*(*) name, INTEGER mlen, 
+                                     CHARACTER*(*) tp)
+\end{verbatim}
+
+Get the value(s) of a text attribute.
 
 
 \section*{\tt \htmlref{vlistInqNatts}{vlistInqNatts}}

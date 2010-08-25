@@ -898,7 +898,8 @@ vlistDefAttFlt
 }
 \begin{verbatim}
     INTEGER FUNCTION vlistDefAttFlt(INTEGER vlistID, INTEGER varID, 
-                                    CHARACTER*(*) name, INTEGER len, const REAL*8 dp)
+                                    CHARACTER*(*) name, INTEGER type, INTEGER len, 
+                                    const REAL*8 dp)
 \end{verbatim}
 
 Define a floating point attribute
@@ -914,7 +915,7 @@ vlistDefAttInt
 }
 \begin{verbatim}
     INTEGER FUNCTION vlistDefAttInt(INTEGER vlistID, INTEGER varID, 
-                                    CHARACTER*(*) name, INTEGER len, 
+                                    CHARACTER*(*) name, INTEGER type, INTEGER len, 
                                     const INTEGER ip)
 \end{verbatim}
 
