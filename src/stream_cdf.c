@@ -423,22 +423,28 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
 	  len = attlen;
 	  cdf_put_att_text(fileID, ncvarID, attname, len, atttxt);
 	}
-      else if ( atttype == DATATYPE_INT )
+      else if ( atttype == DATATYPE_INT16 || atttype == DATATYPE_INT32 )
 	{
 	  int *attint;
 	  attint = (int *) malloc(attlen*sizeof(int));
 	  vlistInqAttInt(vlistID, varID, attname, attlen, &attint[0]);
 	  len = attlen;
-	  cdf_put_att_int(fileID, ncvarID, attname, NC_INT, len, attint);
+	  if ( atttype == DATATYPE_INT16 )
+	    cdf_put_att_int(fileID, ncvarID, attname, NC_SHORT, len, attint);
+	  else
+	    cdf_put_att_int(fileID, ncvarID, attname, NC_INT, len, attint);
 	  free(attint);
 	}
-      else if ( atttype == DATATYPE_FLT )
+      else if ( atttype == DATATYPE_FLT32 || atttype == DATATYPE_FLT64 )
 	{
 	  double *attflt;
 	  attflt = (double *) malloc(attlen*sizeof(double));
 	  vlistInqAttFlt(vlistID, varID, attname, attlen, attflt);
 	  len = attlen;
-	  cdf_put_att_double(fileID, ncvarID, attname, NC_DOUBLE, len, attflt);
+	  if ( atttype == DATATYPE_FLT32 )
+	    cdf_put_att_double(fileID, ncvarID, attname, NC_FLOAT, len, attflt);
+	  else
+	    cdf_put_att_double(fileID, ncvarID, attname, NC_DOUBLE, len, attflt);
 	  free(attflt);
 	}
     }
@@ -4752,12 +4758,15 @@ int cdfInqContents(int streamID)
 		}
 	    }
 	}
-      else if ( xtype == NC_INT || xtype == NC_SHORT )
+      else if ( xtype == NC_SHORT || xtype == NC_INT )
 	{
 	  int *attint;
 	  attint = (int *) malloc(attlen*sizeof(int));
 	  cdfGetAttInt(fileID, NC_GLOBAL, attname, attlen, attint);
-	  vlistDefAttInt(vlistID, CDI_GLOBAL, attname, (int)attlen, attint);
+	  if ( xtype == NC_SHORT )
+	    vlistDefAttInt(vlistID, CDI_GLOBAL, attname, DATATYPE_INT16, (int)attlen, attint);
+	  else
+	    vlistDefAttInt(vlistID, CDI_GLOBAL, attname, DATATYPE_INT32, (int)attlen, attint);
 	  free(attint);
 	}
       else if ( xtype == NC_FLOAT || xtype == NC_DOUBLE )
@@ -4765,7 +4774,10 @@ int cdfInqContents(int streamID)
 	  double *attflt;
 	  attflt = (double *) malloc(attlen*sizeof(double));
 	  cdfGetAttDouble(fileID, NC_GLOBAL, attname, attlen, attflt);
-	  vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, (int)attlen, attflt);
+	  if ( xtype == NC_FLOAT )
+	    vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, DATATYPE_FLT32, (int)attlen, attflt);
+	  else
+	    vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, DATATYPE_FLT64, (int)attlen, attflt);
 	  free(attflt);
 	}
     }
@@ -5916,12 +5928,15 @@ int cdfInqContents(int streamID)
 	      cdf_inq_attname(fileID, ncvarid, attnum, attname);
 	      cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
 	      cdf_inq_atttype(fileID, ncvarid, attname, &attrtype);
-	      if ( attrtype == NC_INT || attrtype == NC_SHORT )
+	      if ( attrtype == NC_SHORT || attrtype == NC_INT )
 		{
 		  int *attint;
 		  attint = (int *) malloc(attlen*sizeof(int));
 		  cdfGetAttInt(fileID, ncvarid, attname, attlen, attint);
-		  vlistDefAttInt(vlistID, varID, attname, (int)attlen, attint);
+		  if ( attrtype == NC_SHORT )
+		    vlistDefAttInt(vlistID, varID, attname, DATATYPE_INT16, (int)attlen, attint);
+		  else
+		    vlistDefAttInt(vlistID, varID, attname, DATATYPE_INT32, (int)attlen, attint);
 		  if ( CDI_Debug )
 		    printf("int: %s.%s = %d\n", ncvars[ncvarid].name, attname, attint[0]);
 		  free(attint);
@@ -5931,7 +5946,10 @@ int cdfInqContents(int streamID)
 		  double *attflt;
 		  attflt = (double *) malloc(attlen*sizeof(double));
 		  cdfGetAttDouble(fileID, ncvarid, attname, attlen, attflt);
-		  vlistDefAttFlt(vlistID, varID, attname, (int)attlen, attflt);
+		  if ( attrtype == NC_FLOAT )
+		    vlistDefAttFlt(vlistID, varID, attname, DATATYPE_FLT32, (int)attlen, attflt);
+		  else
+		    vlistDefAttFlt(vlistID, varID, attname, DATATYPE_FLT64, (int)attlen, attflt);
 		  if ( CDI_Debug )
 		    printf("flt: %s.%s = %g\n", ncvars[ncvarid].name, attname, attflt[0]);
 		  free(attflt);

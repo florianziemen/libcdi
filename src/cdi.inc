@@ -1034,6 +1034,7 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
+!                                     INTEGER         type,
 !                                     INTEGER         len,
 !                                     INTEGER         ip_vec)
       EXTERNAL        vlistDefAttInt
@@ -1042,6 +1043,7 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
+!                                     INTEGER         type,
 !                                     INTEGER         len,
 !                                     DOUBLEPRECISION dp_vec)
       EXTERNAL        vlistDefAttFlt
@@ -1103,6 +1105,16 @@
 !                                    (INTEGER         gridID,
 !                                     INTEGER         mask_vec)
       EXTERNAL        gridInqMaskGME
+
+!                     gridDefMask
+!                                    (INTEGER         gridID,
+!                                     INTEGER         mask_vec)
+      EXTERNAL        gridDefMask
+
+      INTEGER         gridInqMask
+!                                    (INTEGER         gridID,
+!                                     INTEGER         mask_vec)
+      EXTERNAL        gridInqMask
 
 !                     gridPrint
 !                                    (INTEGER         gridID,

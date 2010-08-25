@@ -12,7 +12,7 @@
 static
 cdi_atts_t *get_attsp(vlist_t *vlistptr, int varID)
 {
-  static const char *func = "get_attsp";
+  // static const char *func = "get_attsp";
   cdi_atts_t *attsp = NULL;
 
   if ( varID == CDI_GLOBAL )
@@ -27,7 +27,6 @@ cdi_atts_t *get_attsp(vlist_t *vlistptr, int varID)
 
   return (attsp);
 }
-
 
 static
 cdi_att_t *find_att(cdi_atts_t *attsp, const char *name)
@@ -55,7 +54,6 @@ cdi_att_t *find_att(cdi_atts_t *attsp, const char *name)
   return (NULL);
 }
 
-
 static
 cdi_att_t *new_att(cdi_atts_t *attsp, const char *name)
 {
@@ -81,17 +79,17 @@ cdi_att_t *new_att(cdi_atts_t *attsp, const char *name)
   return (attp);
 }
 
-
 static
-void fill_att(cdi_att_t *attp, int type, size_t nelems, size_t xsz, const void *xvalue)
+void fill_att(cdi_att_t *attp, int indtype, int exdtype, size_t nelems, size_t xsz, const void *xvalue)
 {
   static const char *func = "fill_att";
 
   assert(attp != NULL);
 
   attp->xsz = xsz;
-  attp->type = type;
-  attp->nelems = nelems;
+  attp->indtype = indtype;
+  attp->exdtype = exdtype;
+  attp->nelems  = nelems;
 
   if ( xsz > 0 )
     {
@@ -99,7 +97,6 @@ void fill_att(cdi_att_t *attp, int type, size_t nelems, size_t xsz, const void *
       memcpy(attp->xvalue, xvalue, xsz);
     }
 }
-
 
 /*
 @Function  vlistInqNatts
@@ -118,7 +115,7 @@ The function @func{vlistInqNatts} gets the number of variable attributes assigne
 */
 int vlistInqNatts(int vlistID, int varID, int *nattsp)
 {
-  static const char *func = "vlistInqNatts";
+  // static const char *func = "vlistInqNatts";
   int status = CDI_NOERR;
   vlist_t *vlistptr;
   cdi_atts_t *attsp;
@@ -132,7 +129,6 @@ int vlistInqNatts(int vlistID, int varID, int *nattsp)
 
   return (status);
 }
-
 
 /*
 @Function  vlistInqAtt
@@ -154,7 +150,7 @@ The function @func{vlistInqNatts} gets information about an attribute.
 */
 int vlistInqAtt(int vlistID, int varID, int attnum, char *name, int *typep, int *lenp)
 {
-  static const char *func = "vlistInqAtt";
+  // static const char *func = "vlistInqAtt";
   int status = CDI_NOERR;
   vlist_t *vlistptr;
   cdi_att_t *attp = NULL;
@@ -173,7 +169,7 @@ int vlistInqAtt(int vlistID, int varID, int attnum, char *name, int *typep, int 
   if ( attp != NULL ) /* name in use */
     {
       memcpy(name, attp->name, attp->namesz+1);
-      *typep  = attp->type;
+      *typep  = attp->exdtype;
       *lenp   = attp->nelems;
     }
   else
@@ -223,11 +219,10 @@ int vlistDelAtt(int vlistID, int varID, const char *name)
   return (status);
 }
 
-
 static
-int vlist_def_att(int type, int vlistID, int varID, const char *name, size_t len, size_t xsz, const void *xp)
+int vlist_def_att(int indtype, int exdtype, int vlistID, int varID, const char *name, size_t len, size_t xsz, const void *xp)
 {
-  static const char *func = "vlist_def_att";
+  // static const char *func = "vlist_def_att";
   int status = CDI_NOERR;
   vlist_t *vlistptr;
   cdi_att_t *attp;
@@ -248,14 +243,13 @@ int vlist_def_att(int type, int vlistID, int varID, const char *name, size_t len
     attp = new_att(attsp, name);
 
   if ( attp != NULL )
-    fill_att(attp, type, len, xsz, xp);
+    fill_att(attp, indtype, exdtype, len, xsz, xp);
   
   return (status);
 }
 
-
 static
-int vlist_inq_att(int type, int vlistID, int varID, const char *name, size_t mxsz, void *xp)
+int vlist_inq_att(int indtype, int vlistID, int varID, const char *name, size_t mxsz, void *xp)
 {
   static const char *func = "vlist_inq_att";
   int status = CDI_NOERR;
@@ -277,10 +271,17 @@ int vlist_inq_att(int type, int vlistID, int varID, const char *name, size_t mxs
   attp = find_att(attsp, name);
   if ( attp != NULL ) /* name in use */
     {
-      xsz = attp->xsz;
-      if ( mxsz < xsz ) xsz = mxsz;
-      if ( xsz > 0 )
-	memcpy(xp, attp->xvalue, xsz);
+      if ( attp->indtype == indtype )
+	{
+	  xsz = attp->xsz;
+	  if ( mxsz < xsz ) xsz = mxsz;
+	  if ( xsz > 0 )
+	    memcpy(xp, attp->xvalue, xsz);
+	}
+      else
+	{
+	  Warning(func, "Attribute %s has wrong data type!", name);
+	}
     }
   else
     {
@@ -293,7 +294,7 @@ int vlist_inq_att(int type, int vlistID, int varID, const char *name, size_t mxs
 
 int vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2)
 {
-  static const char *func = "vlistCopyVarAtts";
+  // static const char *func = "vlistCopyVarAtts";
   int status = CDI_NOERR;
   vlist_t *vlistptr1;
   cdi_att_t *attp = NULL;
@@ -308,23 +309,23 @@ int vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2)
   for ( attid = 0; attid < (int)attsp1->nelems; attid++ )
     {
       attp = &(attsp1->value[attid]);
-      vlist_def_att(attp->type, vlistID2, varID_2, attp->name, attp->nelems, attp->xsz, attp->xvalue);
+      vlist_def_att(attp->indtype, attp->exdtype, vlistID2, varID_2, attp->name, attp->nelems, attp->xsz, attp->xvalue);
     }
 
   return (status);
 }
 
-
 /*
 @Function  vlistDefAttInt
 @Title     Define an integer attribute
 
-@Prototype int vlistDefAttInt(int vlistID, int varID, const char *name, int len, const int *ip)
+@Prototype int vlistDefAttInt(int vlistID, int varID, const char *name, int type, int len, const int *ip)
 
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
     @Item  varID    Variable identifier, or CDI_GLOBAL for a global attribute
     @Item  name     Attribute name
+    @Item  type     External data type (DATATYPE_INT16 or DATATYPE_INT32)
     @Item  len      Number of values provided for the attribute
     @Item  ip       Pointer to one or more integer values
 
@@ -333,26 +334,26 @@ The function @func{vlistDefAttInt} defines an integer attribute.
 
 @EndFunction
 */
-int vlistDefAttInt(int vlistID, int varID, const char *name, int len, const int *ip)
+int vlistDefAttInt(int vlistID, int varID, const char *name, int type, int len, const int *ip)
 {
   int status;
 
-  status = vlist_def_att(DATATYPE_INT, vlistID, varID, name, (size_t) len, len*sizeof(int), (const void *) ip);
+  status = vlist_def_att(DATATYPE_INT, type, vlistID, varID, name, (size_t) len, len*sizeof(int), (const void *) ip);
 
   return (status);
 }
-
 
 /*
 @Function  vlistDefAttFlt
 @Title     Define a floating point attribute
 
-@Prototype int vlistDefAttFlt(int vlistID, int varID, const char *name, int len, const double *dp)
+@Prototype int vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, const double *dp)
 
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
     @Item  varID    Variable identifier, or CDI_GLOBAL for a global attribute
     @Item  name     Attribute name
+    @Item  type     External data type (DATATYPE_FLT32 or DATATYPE_FLT64)
     @Item  len      Number of values provided for the attribute
     @Item  dp       Pointer to one or more floating point values
 
@@ -361,15 +362,14 @@ The function @func{vlistDefAttFlt} defines a floating point attribute.
 
 @EndFunction
 */
-int vlistDefAttFlt(int vlistID, int varID, const char *name, int len, const double *dp)
+int vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, const double *dp)
 {
   int status;
 
-  status = vlist_def_att(DATATYPE_FLT, vlistID, varID, name, (size_t) len, len*sizeof(double), (const void *) dp);
+  status = vlist_def_att(DATATYPE_FLT, type, vlistID, varID, name, (size_t) len, len*sizeof(double), (const void *) dp);
 
   return (status);
 }
-
 
 /*
 @Function  vlistDefAttTxt
@@ -393,11 +393,10 @@ int vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char
 {
   int status;
 
-  status = vlist_def_att(DATATYPE_TXT, vlistID, varID, name, (size_t) len, len*sizeof(char), (const void *) tp);
+  status = vlist_def_att(DATATYPE_TXT, DATATYPE_TXT, vlistID, varID, name, (size_t) len, len*sizeof(char), (const void *) tp);
 
   return (status);
 }
-
 
 /*
 @Function  vlistInqAttInt
@@ -425,7 +424,6 @@ int vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int *ip)
   return (CDI_NOERR);
 }
 
-
 /*
 @Function  vlistInqAttFlt
 @Title     Get the value(s) of a floating point attribute
@@ -451,7 +449,6 @@ int vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double *d
 
   return (status);
 }
-
 
 /*
 @Function  vlistInqAttTxt
