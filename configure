@@ -22165,6 +22165,8 @@ ac_res=$ac_cv_search_deflate
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
+$as_echo "#define HAVE_LIBZ 1" >>confdefs.h
+
 fi
 
                             ZLIB_LDFLAGS=" -lz"
@@ -22239,6 +22241,8 @@ ac_res=$ac_cv_search_deflate
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
+$as_echo "#define HAVE_LIBZ 1" >>confdefs.h
+
 fi
 
                           ZLIB_LDFLAGS=" -L$ZLIB_ROOT/lib -lz"
@@ -22312,6 +22316,8 @@ $as_echo "$ac_cv_search_deflate" >&6; }
 ac_res=$ac_cv_search_deflate
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+$as_echo "#define HAVE_LIBZ 1" >>confdefs.h
 
 fi
 
@@ -22478,7 +22484,7 @@ ac_res=$ac_cv_search_SZ_BufftoBuffCompress
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
-$as_echo "#define HAVE_SZLIB 1" >>confdefs.h
+$as_echo "#define HAVE_LIBSZ 1" >>confdefs.h
 
 else
   as_fn_error $? "Could not link to szlib" "$LINENO" 5
@@ -23082,6 +23088,8 @@ ac_res=$ac_cv_search_jas_init
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
+$as_echo "#define HAVE_LIBJASPER 1" >>confdefs.h
+
 else
   as_fn_error $? "Could not link to jasper library! Required for GRIB_API" "$LINENO" 5
 fi
@@ -23146,6 +23154,8 @@ $as_echo "$ac_cv_search_jas_init" >&6; }
 ac_res=$ac_cv_search_jas_init
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+$as_echo "#define HAVE_LIBJASPER 1" >>confdefs.h
 
 else
   as_fn_error $? "Could not link to jasper library! Required for GRIB_API" "$LINENO" 5

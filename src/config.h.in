@@ -42,6 +42,9 @@
 /* Define to 1 for IEG interface */
 #undef HAVE_LIBIEG
 
+/* Define to 1 for JPEG compression for GRIB2 */
+#undef HAVE_LIBJASPER
+
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
@@ -59,6 +62,9 @@
 
 /* Define to 1 for SZIP support */
 #undef HAVE_LIBSZ
+
+/* Define 1 for ZLIB support */
+#undef HAVE_LIBZ
 
 /* Define to 1 if you have the `mallinfo' function. */
 #undef HAVE_MALLINFO
@@ -101,9 +107,6 @@
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
-
-/* Define to 1 for SZIP support */
-#undef HAVE_SZLIB
 
 /* Define to 1 if you have the <szlib.h> header file. */
 #undef HAVE_SZLIB_H
