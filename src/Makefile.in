@@ -35,12 +35,11 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@CREATE_ISOC_TRUE@am__append_1 = mo_cdi.mod
 #LOCALTARGETS = cdilib.o
-@CREATE_ISOC_TRUE@am__append_2 = mo_cdi.o mo_cdi.$(FCMODEXT)
-@CREATE_ISOC_TRUE@am__append_3 = $(top_builddir)/src/mo_cdi.$(FCMODEXT) $(top_builddir)/src/mo_cdi.o
+@CREATE_ISOC_TRUE@am__append_1 = mo_cdi.o mo_cdi.$(FCMODEXT)
+@CREATE_ISOC_TRUE@am__append_2 = $(top_builddir)/src/mo_cdi.$(FCMODEXT) $(top_builddir)/src/mo_cdi.o
 subdir = src
-DIST_COMMON = $(am__include_HEADERS_DIST) $(srcdir)/Makefile.am \
+DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_options.m4 \
@@ -104,7 +103,6 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libcdi_la_SOURCES)
 DIST_SOURCES = $(libcdi_la_SOURCES)
-am__include_HEADERS_DIST = cdi.h cdi.inc mo_cdi.mod
 HEADERS = $(include_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -260,10 +258,8 @@ top_srcdir = @top_srcdir@
 
 #
 EXTRA_DIST = make_cdilib mo_cdi.f90
-#
-#BUILT_SOURCES = cdilib.c
 lib_LTLIBRARIES = libcdi.la
-include_HEADERS = cdi.h cdi.inc $(am__append_1)
+include_HEADERS = cdi.h cdi.inc
 libcdi_la_SOURCES = \
 	basetime.c     	 \
 	basetime.h	 \
@@ -346,9 +342,9 @@ libcdi_la_SOURCES = \
         swap.c
 
 libcdi_la_LIBADD = @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@
-LOCALTARGETS = $(am__append_2)
+LOCALTARGETS = $(am__append_1)
 #
-CLEANFILES = `ls *~` cdilib.c $(am__append_3)
+CLEANFILES = `ls *~` cdilib.c $(am__append_2)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 

@@ -1,15 +1,10 @@
 ## Process this file with automake to produce Makefile.in
 #
 EXTRA_DIST = make_cdilib mo_cdi.f90
-#
-#BUILT_SOURCES = cdilib.c
 
 lib_LTLIBRARIES = libcdi.la
 
 include_HEADERS = cdi.h cdi.inc
-if CREATE_ISOC
-  include_HEADERS += mo_cdi.mod
-endif
 
 libcdi_la_SOURCES = 	 \
 	basetime.c     	 \
