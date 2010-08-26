@@ -702,11 +702,21 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 		    nvct = zaxisInqVctSize(zaxisID);
 		    vct  = zaxisInqVctPtr(zaxisID);
 		  }
-		lbounds = 0;     /* <------------ have to define */
-		levels2 = NULL;  /* <------------ have to define */
+		lbounds  = 0;     /* <------------ have to define */
+		levels2  = NULL;  /* <------------ have to define */
 		zaxisID2 = vlistInqZaxis(vlistID2, zaxisType, nlevs2, levels, lbounds, levels2, nvct, vct);
-
 		free(levels);
+
+		{
+		  char ctemp[256];
+		  zaxisInqName(zaxisID, ctemp);
+		  zaxisDefName(zaxisID, ctemp);
+		  zaxisInqLongname(zaxisID, ctemp);
+		  zaxisDefLongname(zaxisID, ctemp);
+		  zaxisInqUnits(zaxisID, ctemp);
+		  zaxisDefUnits(zaxisID, ctemp);
+		}
+
 		zaxisID = zaxisID2;
 		vlistptr2->vars[varID2].zaxisID = zaxisID2;
 		vlistptr2->vars[varID2].nlevs   = nlevs2;
@@ -730,17 +740,17 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	    for ( index = 0; index <vlistptr2->ngrids; index++ )
 	      if (vlistptr2->gridIDs[index] == gridID ) break;
 
-	    if ( index ==vlistptr2->ngrids )
+	    if ( index == vlistptr2->ngrids )
 	      {
 		vlistptr2->gridIDs[vlistptr2->ngrids++] = gridID;
 		if (vlistptr2->ngrids >= MAX_GRIDS_PS )
 		  Error(func, "Internal Problem! More than %d grids.", MAX_GRIDS_PS);
 	      }
 
-	    for ( index = 0; index <vlistptr2->nzaxis; index++ )
-	      if (vlistptr2->zaxisIDs[index] == zaxisID ) break;
+	    for ( index = 0; index < vlistptr2->nzaxis; index++ )
+	      if ( vlistptr2->zaxisIDs[index] == zaxisID ) break;
 
-	    if ( index ==vlistptr2->nzaxis )
+	    if ( index == vlistptr2->nzaxis )
 	      {
 		vlistptr2->zaxisIDs[vlistptr2->nzaxis++] = zaxisID;
 		if (vlistptr2->nzaxis >= MAX_ZAXES_PS )
