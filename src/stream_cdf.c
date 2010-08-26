@@ -1335,6 +1335,8 @@ void cdfDefXaxis(int streamID, int gridID)
 	  if ( (len = strlen(stdname)) )
 	    cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
 
+	  cdf_put_att_text(fileID, ncvarid, "axis", 1, "x");
+
 	  if ( gridInqXboundsPtr(gridID) )
 	    {
 	      strcat(axisname, "_bounds");
@@ -1460,6 +1462,8 @@ void cdfDefYaxis(int streamID, int gridID)
 	    cdf_put_att_text(fileID, ncvarid, "units", len, units);
 	  if ( (len = strlen(stdname)) )
 	    cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
+
+	  cdf_put_att_text(fileID, ncvarid, "axis", 1, "y");
 
 	  if ( gridInqYboundsPtr(gridID) )
 	    {
