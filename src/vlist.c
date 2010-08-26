@@ -710,11 +710,11 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 		{
 		  char ctemp[256];
 		  zaxisInqName(zaxisID, ctemp);
-		  zaxisDefName(zaxisID, ctemp);
+		  zaxisDefName(zaxisID2, ctemp);
 		  zaxisInqLongname(zaxisID, ctemp);
-		  zaxisDefLongname(zaxisID, ctemp);
+		  zaxisDefLongname(zaxisID2, ctemp);
 		  zaxisInqUnits(zaxisID, ctemp);
-		  zaxisDefUnits(zaxisID, ctemp);
+		  zaxisDefUnits(zaxisID2, ctemp);
 		}
 
 		zaxisID = zaxisID2;
