@@ -11,6 +11,7 @@
 #include "cdi.h"
 #include "stream_int.h"
 #include "gribapi.h"
+#include "dmemory.h"
 
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
