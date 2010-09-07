@@ -767,9 +767,9 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
+with_pic
 enable_shared
 enable_static
-with_pic
 enable_fast_install
 enable_dependency_tracking
 with_gnu_ld
@@ -7229,6 +7229,21 @@ done
 
 # Set options
 
+# Check whether --with-pic was given.
+if test "${with_pic+set}" = set; then :
+  withval=$with_pic; pic_mode="$withval"
+else
+  pic_mode=default
+fi
+
+
+test -z "$pic_mode" && pic_mode=yes
+
+
+
+
+
+
 
 
         enable_dlopen=no
@@ -7293,22 +7308,6 @@ fi
 
 
 
-
-
-
-
-
-
-
-# Check whether --with-pic was given.
-if test "${with_pic+set}" = set; then :
-  withval=$with_pic; pic_mode="$withval"
-else
-  pic_mode=default
-fi
-
-
-test -z "$pic_mode" && pic_mode=default
 
 
 
@@ -24607,9 +24606,9 @@ double_quote_subst='$double_quote_subst'
 delay_variable_subst='$delay_variable_subst'
 macro_version='`$ECHO "$macro_version" | $SED "$delay_single_quote_subst"`'
 macro_revision='`$ECHO "$macro_revision" | $SED "$delay_single_quote_subst"`'
+pic_mode='`$ECHO "$pic_mode" | $SED "$delay_single_quote_subst"`'
 enable_shared='`$ECHO "$enable_shared" | $SED "$delay_single_quote_subst"`'
 enable_static='`$ECHO "$enable_static" | $SED "$delay_single_quote_subst"`'
-pic_mode='`$ECHO "$pic_mode" | $SED "$delay_single_quote_subst"`'
 enable_fast_install='`$ECHO "$enable_fast_install" | $SED "$delay_single_quote_subst"`'
 SHELL='`$ECHO "$SHELL" | $SED "$delay_single_quote_subst"`'
 ECHO='`$ECHO "$ECHO" | $SED "$delay_single_quote_subst"`'
@@ -25896,14 +25895,14 @@ available_tags="FC F77 CXX "
 macro_version=$macro_version
 macro_revision=$macro_revision
 
+# What type of objects to build.
+pic_mode=$pic_mode
+
 # Whether or not to build shared libraries.
 build_libtool_libs=$enable_shared
 
 # Whether or not to build static libraries.
 build_old_libs=$enable_static
-
-# What type of objects to build.
-pic_mode=$pic_mode
 
 # Whether or not to optimize for fast installation.
 fast_install=$enable_fast_install

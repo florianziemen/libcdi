@@ -31,7 +31,7 @@ AM_CONFIG_HEADER([src/config.h])
 
 # Set up libtool.
 AC_MSG_NOTICE([setting up libtool])
-LT_INIT
+LT_INIT([pic-only])
 
 # Check building environment
 AC_CHECK_TOOL([CC],[gcc],[:])
