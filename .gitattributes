@@ -14,7 +14,7 @@ app/Makefile.in -text
 app/cdi.c -text
 app/createtable.c -text
 app/printinfo.h -text
-/config.settings.in -text
+/cdi.settings.in -text
 config/compile -text
 config/config.guess -text
 config/config.sub -text

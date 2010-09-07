@@ -23864,7 +23864,7 @@ if test "x${replace_cc}" != "x"; then :
   CC=$replace_cc
 fi
 
-ac_config_files="$ac_config_files Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile config.settings"
+ac_config_files="$ac_config_files Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile cdi.settings"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -25150,7 +25150,7 @@ do
     "app/Makefile") CONFIG_FILES="$CONFIG_FILES app/Makefile" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "examples/Makefile") CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;
-    "config.settings") CONFIG_FILES="$CONFIG_FILES config.settings" ;;
+    "cdi.settings") CONFIG_FILES="$CONFIG_FILES cdi.settings" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -27006,7 +27006,7 @@ fi
 #  Show configuration
 { $as_echo "$as_me:${as_lineno-$LINENO}: CDI is configured with the following options:" >&5
 $as_echo "$as_me: CDI is configured with the following options:" >&6;}
-cat config.settings
+cat cdi.settings
 
 if test "$ac_cv_prog_cc_c99" = "no"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}:

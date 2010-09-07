@@ -164,12 +164,12 @@ AC_SUBST([CPPFLAGS])
 
 AS_IF([test "x${replace_cc}" != "x"],[CC=$replace_cc])
 
-AC_OUTPUT(Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile config.settings)
+AC_OUTPUT(Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile cdi.settings)
 
 #  ----------------------------------------------------------------------
 #  Show configuration
 AC_MSG_NOTICE([CDI is configured with the following options:])
-cat config.settings
+cat cdi.settings
 
 AS_IF([test "$ac_cv_prog_cc_c99" = "no"],
       [AC_MSG_NOTICE([

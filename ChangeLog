@@ -1,3 +1,9 @@
+2010-09-07  Ralf Mueller <ralf.mueller@zmaw.de>
+
+	* use libtool 2.2.10 for compiling + linking
+	* create shared + static library by default
+	* build CDI configuration file: cdi.settings
+
 2010-09-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* using CGRIBEX library version 1.4.6
