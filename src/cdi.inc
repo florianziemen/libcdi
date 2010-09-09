@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   August 2010
+! Uwe Schulzweida, MPI-MET, Hamburg,   September 2010
 !
 
       INTEGER    CDI_UNDEFID           
