@@ -3630,7 +3630,7 @@ int encodeBDS(GRIBPACK *lGrib, long *gribLen, int decscale, int *isec2, int *ise
 
   *datstart = bds_head + bds_ext;
 
-  numBits = ISEC4_NumBits;
+  nbpv = numBits = ISEC4_NumBits;
 
   if ( lspherc && lcomplex )
     {
@@ -3665,14 +3665,14 @@ int encodeBDS(GRIBPACK *lGrib, long *gribLen, int decscale, int *isec2, int *ise
 
   if ( GRB_Const && !lspherc )
     {
-      if ( IS_EQUAL(fmin, fmax) ) numBits = 0;
+      if ( IS_EQUAL(fmin, fmax) ) nbpv = 0;
     }
 
 
-  blockLength = (*datstart) + (numBits*(datasize - PackStart) + 7)/8;
+  blockLength = (*datstart) + (nbpv*(datasize - PackStart) + 7)/8;
   if ( (blockLength%2) == 1 ) blockLength++;
 
-  unused_bits = blockLength*8 - (*datstart)*8 - numBits*(datasize - PackStart);
+  unused_bits = blockLength*8 - (*datstart)*8 - nbpv*(datasize - PackStart);
 
   Flag += unused_bits;
 
@@ -3681,7 +3681,6 @@ int encodeBDS(GRIBPACK *lGrib, long *gribLen, int decscale, int *isec2, int *ise
     Adjust number of bits per value if full integer length to
     avoid hitting most significant bit (sign bit).
   */
-  nbpv = numBits;
   /* if( nbpv == ibits ) nbpv = nbpv - 1; */
   /*
     Calculate the binary scaling factor to spread the range of
@@ -3794,9 +3793,9 @@ int encodeBDS(GRIBPACK *lGrib, long *gribLen, int decscale, int *isec2, int *ise
 	}
     }
 
-  *datsize  = ((datasize-PackStart)*numBits + 7)/8;
+  *datsize  = ((datasize-PackStart)*nbpv + 7)/8;
 
-  encode_double_array(numBits, PackStart, datasize, lGrib, 
+  encode_double_array(nbpv, PackStart, datasize, lGrib, 
 		      data, zref, factor, &z);
 
   if ( unused_bits >= 8 )
@@ -9118,7 +9117,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.4.6" " of ""Sep  9 2010"" ""10:26:38";
+static const char grb_libvers[] = "1.4.6" " of ""Sep  9 2010"" ""13:13:52";
 const char *
 cgribexLibraryVersion(void)
 {

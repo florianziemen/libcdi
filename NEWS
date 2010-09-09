@@ -1,10 +1,16 @@
 CDI NEWS
 --------
 
-Version 1.4.6 (29 April 2010):
+Version 1.4.6 (10 September 2010):
 
    New features:
+      * GRIB1: use packing only for non constant fields
       * Added support for attribute type int16 and float32
+      * use libtool 2.2.10 for compiling + linking
+
+Version 1.4.5.1 (29 April 2010):
+
+   New features:
       * Added support for grid mask
       * GRIB1 decode: Correct ZeroShiftError of simple packed spherical harmonics
 

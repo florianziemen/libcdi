@@ -114,7 +114,8 @@ void cdiInitialize(void)
       Init_CDI = TRUE;
 
 #if  defined  (HAVE_LIBCGRIBEX)
-      gribFixZSE(1); /* Fix ZeroShiftError of simple packed spherical harmonics */
+      gribFixZSE(1);   /* 1: Fix ZeroShiftError of simple packed spherical harmonics */
+      gribSetConst(1); /* 1: Don't pack constant fields on regular grids */
 #endif
 
       value = cdiGetenvInt("CD_REGULARGRID");
