@@ -166,8 +166,9 @@
 
 
 
-void  gribFixZSE(int flag);
-void  gribSetDebug(int debug);
+void  gribFixZSE(int flag);     /* 1: Fix ZeroShiftError of simple packed spherical harmonics */
+void  gribSetConst(int flag);   /* 1: Don't pack constant fields on regular grids */
+void  gribSetDebug(int debug);  /* 1: Debugging */
 void  gribSetRound(int round);
 void  gribSetRefDP(double refval);
 void  gribSetRefSP(float  refval);
