@@ -838,7 +838,8 @@ void varDefMissval(int varID, double missval)
 
 void varDefZtype(int varID, int ztype)
 {
-  vartable[varID].ztype = ztype;
+  if ( vartable[varID].ztype == COMPRESS_NONE )
+    vartable[varID].ztype = ztype;
 }
 
 

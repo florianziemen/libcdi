@@ -1,14 +1,18 @@
+2010-09-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* using CGRIBEX library version 1.4.6
+	* Version 1.4.6 released
+
+2010-09-09  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* varDefZtype: bug fix [report: Stephanie Legutke]
+	
 2010-09-07  Ralf Mueller <ralf.mueller@zmaw.de>
 
 	* use libtool 2.2.10 for compiling + linking
 	* create shared + static library with PIC support by default
 	  (positions independant code)
 	* build CDI configuration file: cdi.settings
-
-2010-09-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
-
-	* using CGRIBEX library version 1.4.6
-	* Version 1.4.6 released
 
 2010-09-03  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
