@@ -16,7 +16,7 @@ case "${HOSTNAME}" in
 	./configure --prefix=$HOME/local \
                     --with-netcdf=/opt/local \
                     --with-hdf5=/opt/local \
-                    --with-szlib=/opt/local \
+                    --with-szlib=$HOME/local \
 	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O2 -Df2cFortran"
 	;;
 # ia64-nec-linux
