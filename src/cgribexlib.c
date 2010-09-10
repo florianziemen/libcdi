@@ -8497,7 +8497,7 @@ void repair1(unsigned char *gbuf, long gbufsize)
 
   datstart = bds_head + bds_ext;
 
-  source = (char *) bds + datstart;
+  source = bds + datstart;
 
   sourceLen = ((((bds_len - datstart)*8-bds_ubits)/bds_nbits)*bds_nbits)/8;
 
@@ -9118,7 +9118,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.4.6" " of ""Sep 10 2010"" ""10:53:41";
+static const char grb_libvers[] = "1.4.6" " of ""Sep 10 2010"" ""14:26:42";
 const char *
 cgribexLibraryVersion(void)
 {
