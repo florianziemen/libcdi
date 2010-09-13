@@ -1723,7 +1723,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
-      if ( lwarn )
+      if ( lwarn && gridInqSize(gridID) > 1 )
 	{
 	  lwarn = FALSE;
 	  Warning(func, "Curvilinear grids are unsupported in GRIB1! Created wrong GDS!");

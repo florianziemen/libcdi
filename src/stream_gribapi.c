@@ -1956,7 +1956,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
-      if ( lwarn )
+      if ( lwarn && gridInqSize(gridID) > 1 )
 	{
 	  lwarn = FALSE;
 	  Warning(func, "Curvilinear grids are unsupported in GRIB format! Created wrong GDS!");
