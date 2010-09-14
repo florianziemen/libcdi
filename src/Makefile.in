@@ -35,7 +35,6 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-#LOCALTARGETS = cdilib.o
 @CREATE_ISOC_TRUE@am__append_1 = mo_cdi.o mo_cdi.$(FCMODEXT)
 @CREATE_ISOC_TRUE@am__append_2 = $(top_builddir)/src/mo_cdi.$(FCMODEXT) $(top_builddir)/src/mo_cdi.o
 subdir = src

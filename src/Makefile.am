@@ -2,7 +2,7 @@
 #
 EXTRA_DIST = make_cdilib mo_cdi.f90
 
-lib_LTLIBRARIES = libcdi.la
+lib_LTLIBRARIES    = libcdi.la
 
 include_HEADERS = cdi.h cdi.inc
 
@@ -95,9 +95,7 @@ cdilib.c:
 cdilib.o: cdilib.c
 	$(COMPILE) -c $<
 
-LOCALTARGETS = 
-#LOCALTARGETS = cdilib.o
-
+LOCALTARGETS  = 
 if CREATE_ISOC
 LOCALTARGETS += mo_cdi.o mo_cdi.$(FCMODEXT)
 endif
