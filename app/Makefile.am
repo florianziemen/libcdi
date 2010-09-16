@@ -4,12 +4,14 @@ bin_PROGRAMS    =
 noinst_PROGRAMS =
 if ENABLE_CDI_LIB
   bin_PROGRAMS    += cdi
+if CREATE_ALL_STATIC
+  bin_PROGRAMS    += cdi_static
+endif
 else
   noinst_PROGRAMS += cdi
-endif
-#
 if CREATE_ALL_STATIC
-bin_PROGRAMS       += cdi_static
+  noinst_PROGRAMS += cdi_static
+endif
 endif
 #
 noinst_PROGRAMS    += createtable

@@ -3,7 +3,7 @@
 EXTRA_DIST = make_cdilib mo_cdi.f90
 
 if ENABLE_CDI_LIB
-  lib_LTLIBRARIES    = libcdi.la
+  lib_LTLIBRARIES = libcdi.la
   include_HEADERS = cdi.h cdi.inc
 else
   noinst_LTLIBRARIES = libcdi.la
