@@ -45,7 +45,7 @@ typedef struct {
   size_t  len;
   char    name[MAXNAMELEN];
 }
-NCDIM;
+ncdim_t;
 
 typedef struct {
   int      ignore;
@@ -95,7 +95,7 @@ typedef struct {
   char     stdname[MAXNAMELEN];
   char     units[MAXNAMELEN];
 }
-NCVAR;
+ncvar_t;
 
 static
 void strtolower(char *str)
@@ -2439,13 +2439,13 @@ void cdfDefMapping(int streamID, int gridID)
       ncerr = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
       if ( ncerr == NC_NOERR )
         {
-          double a, lon_0, lat_0, lat_1, lat_2;
+          double radius, lon_0, lat_0, lat_1, lat_2;
 
-          gridInqLcc2(gridID, &a, &lon_0, &lat_0, &lat_1, &lat_2);
+          gridInqLcc2(gridID, &radius, &lon_0, &lat_0, &lat_1, &lat_2);
 
           cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", strlen(mapname), mapname);
-          if ( a > 0 )
-            cdf_put_att_double(fileID, ncvarid, "earth_radius", NC_DOUBLE, 1L, &a);
+          if ( radius > 0 )
+            cdf_put_att_double(fileID, ncvarid, "earth_radius", NC_DOUBLE, 1L, &radius);
           cdf_put_att_double(fileID, ncvarid, "longitude_of_central_meridian", NC_DOUBLE, 1L, &lon_0);
           cdf_put_att_double(fileID, ncvarid, "latitude_of_projection_origin", NC_DOUBLE, 1L, &lat_0);
           if ( IS_EQUAL(lat_1, lat_2) )
@@ -3851,7 +3851,7 @@ int cdfTimeDimID(int fileID, int ndims, int nvars)
 }
 
 static
-void init_ncdims(long ndims, NCDIM *ncdims)
+void init_ncdims(long ndims, ncdim_t *ncdims)
 {
   long ncdimid;
 
@@ -3865,7 +3865,7 @@ void init_ncdims(long ndims, NCDIM *ncdims)
 }
 
 static
-void init_ncvars(long nvars, NCVAR *ncvars)
+void init_ncvars(long nvars, ncvar_t *ncvars)
 {
   long ncvarid;
 
@@ -4026,7 +4026,7 @@ int isGaussGrid(long ysize, double yinc, double *yvals)
 
 
 static
-void cdfSetVar(NCVAR *ncvars, int ncvarid, int isvar)
+void cdfSetVar(ncvar_t *ncvars, int ncvarid, int isvar)
 {
   static const char *func = "cdfSetVar";
 
@@ -4048,7 +4048,7 @@ void cdfSetVar(NCVAR *ncvars, int ncvarid, int isvar)
 }
 
 static
-void cdfSetDim(NCVAR *ncvars, int ncvarid, int dimid, int dimtype)
+void cdfSetDim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
 {
   static const char *func = "cdfSetDim";
 
@@ -4063,7 +4063,7 @@ void cdfSetDim(NCVAR *ncvars, int ncvarid, int dimid, int dimtype)
 }
 
 static
-void printNCvars(NCVAR *ncvars, int nvars)
+void printNCvars(ncvar_t *ncvars, int nvars)
 {
   char axis[6];
   int ncvarid, i;
@@ -4126,7 +4126,7 @@ int cmpvarname(const void *s1, const void *s2)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
-void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
+void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                        int timedimid, int modelID, int format)
 {
   static const char *func = "scanVarAttributes";
@@ -4563,7 +4563,7 @@ void scanVarAttributes(int fileID, int nvars, NCVAR *ncvars, NCDIM *ncdims,
 #endif
 
 static
-void setDimType(int nvars, NCVAR *ncvars, NCDIM *ncdims)
+void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 {
   static const char *func = "setDimType";
   int ndims;
@@ -4673,8 +4673,8 @@ int cdfInqContents(int streamID)
   size_t nvertex;
   int zprec;
   int calendar = UNDEFID;
-  NCDIM *ncdims;
-  NCVAR *ncvars;
+  ncdim_t *ncdims;
+  ncvar_t *ncvars;
   int vlistID;
   stream_t *streamptr;
   int format = 0;
@@ -4698,7 +4698,7 @@ int cdfInqContents(int streamID)
 
   /* alloc ncdims */
   if ( ndims > 0 )
-    ncdims = (NCDIM *) malloc(ndims*sizeof(NCDIM));
+    ncdims = (ncdim_t *) malloc(ndims*sizeof(ncdim_t));
   else
     {
       Warning(func, "ndims = %d", ndims);
@@ -4707,7 +4707,7 @@ int cdfInqContents(int streamID)
   
   /* alloc ncvars */
   if ( nvars > 0 )
-    ncvars = (NCVAR *) malloc(nvars*sizeof(NCVAR));
+    ncvars = (ncvar_t *) malloc(nvars*sizeof(ncvar_t));
   else
     {
       Warning(func, "nvars = %d", nvars);
