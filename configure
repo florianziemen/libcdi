@@ -604,6 +604,7 @@ ac_includes_default="\
 #endif"
 
 ac_header_list=
+enable_option_checking=no
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
@@ -623,6 +624,12 @@ FCMODCASE
 FCMODEXT
 CREATE_ISOC_FALSE
 CREATE_ISOC_TRUE
+subdirs
+ENABLE_CDI_LIB
+ENABLE_CDI_LIB_FALSE
+ENABLE_CDI_LIB_TRUE
+PROJ_INCLUDE
+PROJ_LDFLAGS
 ENABLE_IEG
 ENABLE_EXTRA
 ENABLE_SERVICE
@@ -788,6 +795,8 @@ enable_cgribex
 enable_service
 enable_extra
 enable_ieg
+with_proj
+enable_cdi_lib
 enable_mpi
 enable_iso_c_interface
 enable_swig
@@ -812,7 +821,7 @@ CXXFLAGS
 CCC
 CXXCPP
 FCMODEXT'
-
+ac_subdirs_all='libcdi'
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -1446,6 +1455,8 @@ Optional Features:
   --enable-service        Use the service library [default=yes]
   --enable-extra          Use the extra library [default=yes]
   --enable-ieg            Use the ieg library [default=yes]
+  --enable-cdi-lib        build + install a CDI library [default=no] and link
+                          CDO to it |CDO build only|
   --enable-mpi            Compile with MPI compiler [default=no]
   --enable-iso-c-interface
                           Create Fortran Interface via iso_c_bindings facility
@@ -1478,10 +1489,12 @@ Optional Packages:
   --with-jasper=<directory>
                           Specify location of JASPER library. You must specify
                           its location if GRIB_API was built with JASPER.
-  --with-jasper=<yes|no|directory>
+  --with-grib-api=<yes|no|directory>
                           library for grib2 compression; if a directory is
                           given, it will be used as a value for
                           --with-jasper-root
+  --with-proj=<directory> Specify location of PROJ library for cartographic
+                          projections.
 
 Some influential environment variables:
   CC          C compiler command
@@ -21940,6 +21953,8 @@ fi
 #  ----------------------------------------------------------------------
 # Add basic configure options
 
+
+
 #  ----------------------------------------------------------------------
 #  Checks for pthread library
 
@@ -23468,6 +23483,229 @@ fi
 $as_echo "$enable_ieg" >&6; }
 ENABLE_IEG=$enable_ieg
 
+#  ----------------------------------------------------------------------
+#  Checks for PROJ.4 library
+
+# Check whether --with-proj was given.
+if test "${with_proj+set}" = set; then :
+  withval=$with_proj; case "$with_proj" in #(
+  no) :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj library" >&5
+$as_echo_n "checking for proj library... " >&6; }
+                           { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
+$as_echo "suppressed" >&6; } ;; #(
+  yes) :
+    for ac_header in projects.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "projects.h" "ac_cv_header_projects_h" "$ac_includes_default"
+if test "x$ac_cv_header_projects_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PROJECTS_H 1
+_ACEOF
+
+fi
+
+done
+
+                            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing pj_init" >&5
+$as_echo_n "checking for library containing pj_init... " >&6; }
+if test "${ac_cv_search_pj_init+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pj_init ();
+int
+main ()
+{
+return pj_init ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' proj; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_pj_init=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if test "${ac_cv_search_pj_init+set}" = set; then :
+  break
+fi
+done
+if test "${ac_cv_search_pj_init+set}" = set; then :
+
+else
+  ac_cv_search_pj_init=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_pj_init" >&5
+$as_echo "$ac_cv_search_pj_init" >&6; }
+ac_res=$ac_cv_search_pj_init
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+$as_echo "#define HAVE_LIBPROJ 1" >>confdefs.h
+
+else
+  as_fn_error $? "Could not link to PROJ library!" "$LINENO" 5
+fi
+
+                            PROJ_LDFLAGS=" -lproj"
+
+                            PROJ_INCLUDE=""
+ ;; #(
+  *) :
+    PROJ_ROOT=$with_proj
+                          if test -d "$PROJ_ROOT"; then :
+  LDFLAGS="$LDFLAGS -L$PROJ_ROOT/lib"
+                                 CPPFLAGS="$CPPFLAGS -I$PROJ_ROOT/include"
+                                 for ac_header in projects.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "projects.h" "ac_cv_header_projects_h" "$ac_includes_default"
+if test "x$ac_cv_header_projects_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PROJECTS_H 1
+_ACEOF
+
+fi
+
+done
+
+                                 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing pj_init" >&5
+$as_echo_n "checking for library containing pj_init... " >&6; }
+if test "${ac_cv_search_pj_init+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pj_init ();
+int
+main ()
+{
+return pj_init ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' proj; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_pj_init=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if test "${ac_cv_search_pj_init+set}" = set; then :
+  break
+fi
+done
+if test "${ac_cv_search_pj_init+set}" = set; then :
+
+else
+  ac_cv_search_pj_init=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_pj_init" >&5
+$as_echo "$ac_cv_search_pj_init" >&6; }
+ac_res=$ac_cv_search_pj_init
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+$as_echo "#define HAVE_LIBPROJ 1" >>confdefs.h
+
+else
+  as_fn_error $? "Could not link to PROJ library!" "$LINENO" 5
+fi
+
+                                 PROJ_LDFLAGS=" -L$PROJ_ROOT/lib -lproj"
+
+                                 PROJ_INCLUDE=" -I$PROJ_ROOT/include"
+
+else
+  as_fn_error $? "$PROJ_ROOT is not a directory! PROJ suppressed" "$LINENO" 5
+fi ;; #(
+  *) :
+     ;;
+esac
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for the PROJ library" >&5
+$as_echo_n "checking for the PROJ library... " >&6; }
+             { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
+$as_echo "suppressed" >&6; }
+fi
+
+#  ----------------------------------------------------------------------
+#  How to build CDI into CDI?
+INTERNAL_CDI_DIR=libcdi
+# At the moment, there are two possible CDI bindings
+# (default)             linking directly to CDI's object files in ./libcdi/src
+# (--enable-cdi-lib) build and link to a shared CDI library
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for build a separate CDI library and link CDO to it |valid for CDO build only|" >&5
+$as_echo_n "checking for build a separate CDI library and link CDO to it |valid for CDO build only|... " >&6; }
+# Check whether --enable-cdi-lib was given.
+if test "${enable_cdi_lib+set}" = set; then :
+  enableval=$enable_cdi_lib; if test "x$enable_cdi_lib" != "xno"; then :
+  enable_cdi_lib=yes
+else
+  enable_cdi_lib=no
+fi
+else
+  enable_cdi_lib=no
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_cdi_lib" >&5
+$as_echo "$enable_cdi_lib" >&6; }
+# save CDI binding mode for later automake use
+ if test x$enable_cdi_lib = 'xyes'; then
+  ENABLE_CDI_LIB_TRUE=
+  ENABLE_CDI_LIB_FALSE='#'
+else
+  ENABLE_CDI_LIB_TRUE='#'
+  ENABLE_CDI_LIB_FALSE=
+fi
+
+# create shell variables for the representation of configure results
+if test x$enable_cdi_lib = 'xno'; then :
+  ENABLE_CDI_LIB=false
+
+else
+  ENABLE_CDI_LIB=true
+
+fi
+# scan libcdi for CDI as a subproject
+subdirs="$subdirs libcdi"
+
 
 #  ----------------------------------------------------------------------
 # Compile with MPI support
@@ -23985,6 +24223,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CREATE_ALL_STATIC_TRUE}" && test -z "${CREATE_ALL_STATIC_FALSE}"; then
   as_fn_error $? "conditional \"CREATE_ALL_STATIC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ENABLE_CDI_LIB_TRUE}" && test -z "${ENABLE_CDI_LIB_FALSE}"; then
+  as_fn_error $? "conditional \"ENABLE_CDI_LIB\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CREATE_ISOC_TRUE}" && test -z "${CREATE_ISOC_FALSE}"; then
@@ -26994,6 +27236,151 @@ if test "$no_create" != yes; then
   # Use ||, not &&, to avoid exiting from the if with $? = 1, which
   # would make configure fail if this is the last instruction.
   $ac_cs_success || as_fn_exit 1
+fi
+
+#
+# CONFIG_SUBDIRS section.
+#
+if test "$no_recursion" != yes; then
+
+  # Remove --cache-file, --srcdir, and --disable-option-checking arguments
+  # so they do not pile up.
+  ac_sub_configure_args=
+  ac_prev=
+  eval "set x $ac_configure_args"
+  shift
+  for ac_arg
+  do
+    if test -n "$ac_prev"; then
+      ac_prev=
+      continue
+    fi
+    case $ac_arg in
+    -cache-file | --cache-file | --cache-fil | --cache-fi \
+    | --cache-f | --cache- | --cache | --cach | --cac | --ca | --c)
+      ac_prev=cache_file ;;
+    -cache-file=* | --cache-file=* | --cache-fil=* | --cache-fi=* \
+    | --cache-f=* | --cache-=* | --cache=* | --cach=* | --cac=* | --ca=* \
+    | --c=*)
+      ;;
+    --config-cache | -C)
+      ;;
+    -srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
+      ac_prev=srcdir ;;
+    -srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
+      ;;
+    -prefix | --prefix | --prefi | --pref | --pre | --pr | --p)
+      ac_prev=prefix ;;
+    -prefix=* | --prefix=* | --prefi=* | --pref=* | --pre=* | --pr=* | --p=*)
+      ;;
+    --disable-option-checking)
+      ;;
+    *)
+      case $ac_arg in
+      *\'*) ac_arg=`$as_echo "$ac_arg" | sed "s/'/'\\\\\\\\''/g"` ;;
+      esac
+      as_fn_append ac_sub_configure_args " '$ac_arg'" ;;
+    esac
+  done
+
+  # Always prepend --prefix to ensure using the same prefix
+  # in subdir configurations.
+  ac_arg="--prefix=$prefix"
+  case $ac_arg in
+  *\'*) ac_arg=`$as_echo "$ac_arg" | sed "s/'/'\\\\\\\\''/g"` ;;
+  esac
+  ac_sub_configure_args="'$ac_arg' $ac_sub_configure_args"
+
+  # Pass --silent
+  if test "$silent" = yes; then
+    ac_sub_configure_args="--silent $ac_sub_configure_args"
+  fi
+
+  # Always prepend --disable-option-checking to silence warnings, since
+  # different subdirs can have different --enable and --with options.
+  ac_sub_configure_args="--disable-option-checking $ac_sub_configure_args"
+
+  ac_popdir=`pwd`
+  for ac_dir in : $subdirs; do test "x$ac_dir" = x: && continue
+
+    # Do not complain, so a configure script can configure whichever
+    # parts of a large source tree are present.
+    test -d "$srcdir/$ac_dir" || continue
+
+    ac_msg="=== configuring in $ac_dir (`pwd`/$ac_dir)"
+    $as_echo "$as_me:${as_lineno-$LINENO}: $ac_msg" >&5
+    $as_echo "$ac_msg" >&6
+    as_dir="$ac_dir"; as_fn_mkdir_p
+    ac_builddir=.
+
+case "$ac_dir" in
+.) ac_dir_suffix= ac_top_builddir_sub=. ac_top_build_prefix= ;;
+*)
+  ac_dir_suffix=/`$as_echo "$ac_dir" | sed 's|^\.[\\/]||'`
+  # A ".." for each directory in $ac_dir_suffix.
+  ac_top_builddir_sub=`$as_echo "$ac_dir_suffix" | sed 's|/[^\\/]*|/..|g;s|/||'`
+  case $ac_top_builddir_sub in
+  "") ac_top_builddir_sub=. ac_top_build_prefix= ;;
+  *)  ac_top_build_prefix=$ac_top_builddir_sub/ ;;
+  esac ;;
+esac
+ac_abs_top_builddir=$ac_pwd
+ac_abs_builddir=$ac_pwd$ac_dir_suffix
+# for backward compatibility:
+ac_top_builddir=$ac_top_build_prefix
+
+case $srcdir in
+  .)  # We are building in place.
+    ac_srcdir=.
+    ac_top_srcdir=$ac_top_builddir_sub
+    ac_abs_top_srcdir=$ac_pwd ;;
+  [\\/]* | ?:[\\/]* )  # Absolute name.
+    ac_srcdir=$srcdir$ac_dir_suffix;
+    ac_top_srcdir=$srcdir
+    ac_abs_top_srcdir=$srcdir ;;
+  *) # Relative name.
+    ac_srcdir=$ac_top_build_prefix$srcdir$ac_dir_suffix
+    ac_top_srcdir=$ac_top_build_prefix$srcdir
+    ac_abs_top_srcdir=$ac_pwd/$srcdir ;;
+esac
+ac_abs_srcdir=$ac_abs_top_srcdir$ac_dir_suffix
+
+
+    cd "$ac_dir"
+
+    # Check for guested configure; otherwise get Cygnus style configure.
+    if test -f "$ac_srcdir/configure.gnu"; then
+      ac_sub_configure=$ac_srcdir/configure.gnu
+    elif test -f "$ac_srcdir/configure"; then
+      ac_sub_configure=$ac_srcdir/configure
+    elif test -f "$ac_srcdir/configure.in"; then
+      # This should be Cygnus configure.
+      ac_sub_configure=$ac_aux_dir/configure
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: no configuration information is in $ac_dir" >&5
+$as_echo "$as_me: WARNING: no configuration information is in $ac_dir" >&2;}
+      ac_sub_configure=
+    fi
+
+    # The recursion is here.
+    if test -n "$ac_sub_configure"; then
+      # Make the cache file name correct relative to the subdirectory.
+      case $cache_file in
+      [\\/]* | ?:[\\/]* ) ac_sub_cache_file=$cache_file ;;
+      *) # Relative name.
+	ac_sub_cache_file=$ac_top_build_prefix$cache_file ;;
+      esac
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: running $SHELL $ac_sub_configure $ac_sub_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_srcdir" >&5
+$as_echo "$as_me: running $SHELL $ac_sub_configure $ac_sub_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_srcdir" >&6;}
+      # The eval makes quoting arguments work.
+      eval "\$SHELL \"\$ac_sub_configure\" $ac_sub_configure_args \
+	   --cache-file=\"\$ac_sub_cache_file\" --srcdir=\"\$ac_srcdir\"" ||
+	as_fn_error $? "$ac_sub_configure failed for $ac_dir" "$LINENO" 5
+    fi
+
+    cd "$ac_popdir"
+  done
 fi
 if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unrecognized options: $ac_unrecognized_opts" >&5

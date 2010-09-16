@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 #
-DISTCHECK_CONFIGURE_FLAGS = 
+DISTCHECK_CONFIGURE_FLAGS =  --enable-cdi-lib
 #
 SUBDIRS = src interfaces app examples tests
 #

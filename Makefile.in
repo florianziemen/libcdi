@@ -135,6 +135,7 @@ ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
+ENABLE_CDI_LIB = @ENABLE_CDI_LIB@
 ENABLE_CGRIBEX = @ENABLE_CGRIBEX@
 ENABLE_EXTRA = @ENABLE_EXTRA@
 ENABLE_GRIB = @ENABLE_GRIB@
@@ -186,6 +187,8 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PROJ_INCLUDE = @PROJ_INCLUDE@
+PROJ_LDFLAGS = @PROJ_LDFLAGS@
 PYTHON = @PYTHON@
 RANLIB = @RANLIB@
 RUBY = @RUBY@
@@ -251,6 +254,7 @@ psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
+subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
@@ -258,7 +262,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 #
-DISTCHECK_CONFIGURE_FLAGS = 
+DISTCHECK_CONFIGURE_FLAGS = --enable-cdi-lib
 #
 SUBDIRS = src interfaces app examples tests
 #

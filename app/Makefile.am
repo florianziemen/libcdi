@@ -1,11 +1,18 @@
 ## Process this file with automake to produce Makefile.in
 #
-bin_PROGRAMS        = cdi
+bin_PROGRAMS    =
+noinst_PROGRAMS =
+if ENABLE_CDI_LIB
+  bin_PROGRAMS    += cdi
+else
+  noinst_PROGRAMS += cdi
+endif
+#
 if CREATE_ALL_STATIC
 bin_PROGRAMS       += cdi_static
 endif
 #
-noinst_PROGRAMS     = createtable
+noinst_PROGRAMS    += createtable
 #
 cdi_SOURCES         = cdi.c printinfo.h
 cdi_LDADD           = $(top_builddir)/src/libcdi.la

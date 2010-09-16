@@ -2,9 +2,13 @@
 #
 EXTRA_DIST = make_cdilib mo_cdi.f90
 
-lib_LTLIBRARIES    = libcdi.la
+if ENABLE_CDI_LIB
+  lib_LTLIBRARIES    = libcdi.la
+  include_HEADERS = cdi.h cdi.inc
+else
+  noinst_LTLIBRARIES = libcdi.la
+endif
 
-include_HEADERS = cdi.h cdi.inc
 
 libcdi_la_SOURCES = 	 \
 	basetime.c     	 \

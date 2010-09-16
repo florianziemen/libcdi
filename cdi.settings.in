@@ -18,11 +18,12 @@
    "RANLIB"   : "@RANLIB@",
    "INSTALL"  : "@INSTALL@",
   },
-  "grib"     : "@ENABLE_GRIB@",
-  "cgribex"  : "@ENABLE_CGRIBEX@",
-  "service"  : "@ENABLE_SERVICE@",
-  "extra"    : "@ENABLE_EXTRA@",
-  "ieg"      : "@ENABLE_IEG@",
+  "enable_cdi_lib" : @ENABLE_CDI_LIB@,
+  "grib"           : "@ENABLE_GRIB@",
+  "cgribex"        : "@ENABLE_CGRIBEX@",
+  "service"        : "@ENABLE_SERVICE@",
+  "extra"          : "@ENABLE_EXTRA@",
+  "ieg"            : "@ENABLE_IEG@",
   "threads"    : {
     "lib"      : "@THREADS_LDFLAGS@",
     "include"  : "@THREADS_INCLUDE@"
