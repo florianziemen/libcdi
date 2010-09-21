@@ -19,7 +19,7 @@ endif
 #
 CdiInfo_SOURCES = CdiInfo.cpp cdi.cpp cdi.hpp
 #
-locallibs     = $(top_builddir)/src/libcdi.la @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@
+locallibs     = $(top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@
 CdiInfo_LDADD = $(top_builddir)/src/libcdi.la @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS) $(LIBS) 
 #
 if WITH_RUBY
@@ -77,7 +77,7 @@ if WITH_SWIG
 endif
 
 pythonObj: pythonObjWrapper
-	cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(locallibs) $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py build_ext --inplace
+	cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="../$(locallibs) $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py build_ext --inplace
 
 pythonObjTest: pythonObj
 	@cd python; python testObj.py

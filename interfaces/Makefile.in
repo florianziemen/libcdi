@@ -255,7 +255,7 @@ EXTRA_DIST = $(SWIGCDIOBJ) $(SWIGCDILIB) ruby/cdilib_wrap.c \
 #
 CdiInfo_SOURCES = CdiInfo.cpp cdi.cpp cdi.hpp
 #
-locallibs = $(top_builddir)/src/libcdi.la @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@
+locallibs = $(top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@
 CdiInfo_LDADD = $(top_builddir)/src/libcdi.la @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS) $(LIBS) 
 #
 AM_CPPFLAGS = -I$(top_srcdir)/src
@@ -631,7 +631,7 @@ uninstall-am: uninstall-binPROGRAMS
 @WITH_PYTHON_TRUE@@WITH_SWIG_TRUE@	$(SWIG) -python -c++ -module CdiObj -o python/cdiobj_wrap.cpp $(AM_CPPFLAGS) cdiobj.i
 
 @WITH_PYTHON_TRUE@pythonObj: pythonObjWrapper
-@WITH_PYTHON_TRUE@	cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(locallibs) $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py build_ext --inplace
+@WITH_PYTHON_TRUE@	cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="../$(locallibs) $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py build_ext --inplace
 
 @WITH_PYTHON_TRUE@pythonObjTest: pythonObj
 @WITH_PYTHON_TRUE@	@cd python; python testObj.py
