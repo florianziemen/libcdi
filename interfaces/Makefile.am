@@ -11,16 +11,23 @@ BINDINGS += help
 endif
 #
 bin_PROGRAMS =
-#
 noinst_PROGRAMS = 
+noinst_LTLIBRARIES = 
 if CREATE_INTERFACES
 noinst_PROGRAMS += CdiInfo
+noinst_LTLIBRARIES += libcdipp.la
 endif
 #
-CdiInfo_SOURCES = CdiInfo.cpp cdi.cpp cdi.hpp
-#
 locallibs     = $(top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@
-CdiInfo_LDADD = $(top_builddir)/src/libcdi.la @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS) $(LIBS) 
+
+libcdipp_la_SOURCES = cdi.cpp cdi.hpp
+libcdipp_la_LIBADD = $(top_builddir)/src/libcdi.la 
+libcdipp_la_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS)
+
+CdiInfo_SOURCES = CdiInfo.cpp
+CdiInfo_LDADD = $(top_builddir)/interfaces/libcdipp.la 
+CdiInfo_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS)
+#
 #
 if WITH_RUBY
 BINDINGS += rubyObj

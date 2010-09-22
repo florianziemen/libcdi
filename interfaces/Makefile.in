@@ -15,6 +15,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -38,10 +39,12 @@ host_triplet = @host@
 bin_PROGRAMS =
 noinst_PROGRAMS = $(am__EXEEXT_1)
 @CREATE_INTERFACES_TRUE@am__append_2 = CdiInfo
+@CREATE_INTERFACES_TRUE@am__append_3 = libcdipp.la
 #
-@WITH_RUBY_TRUE@am__append_3 = rubyObj
+#
+@WITH_RUBY_TRUE@am__append_4 = rubyObj
 # =========================================================
-@WITH_PYTHON_TRUE@am__append_4 = pythonObj
+@WITH_PYTHON_TRUE@am__append_5 = pythonObj
 subdir = interfaces
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -57,14 +60,23 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
+LTLIBRARIES = $(noinst_LTLIBRARIES)
+libcdipp_la_DEPENDENCIES = $(top_builddir)/src/libcdi.la
+am_libcdipp_la_OBJECTS = cdi.lo
+libcdipp_la_OBJECTS = $(am_libcdipp_la_OBJECTS)
+libcdipp_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(libcdipp_la_LDFLAGS) $(LDFLAGS) -o $@
+@CREATE_INTERFACES_TRUE@am_libcdipp_la_rpath =
 am__installdirs = "$(DESTDIR)$(bindir)"
 @CREATE_INTERFACES_TRUE@am__EXEEXT_1 = CdiInfo$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
-am_CdiInfo_OBJECTS = CdiInfo.$(OBJEXT) cdi.$(OBJEXT)
+am_CdiInfo_OBJECTS = CdiInfo.$(OBJEXT)
 CdiInfo_OBJECTS = $(am_CdiInfo_OBJECTS)
-am__DEPENDENCIES_1 =
-CdiInfo_DEPENDENCIES = $(top_builddir)/src/libcdi.la @LTLIBOBJS@ \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+CdiInfo_DEPENDENCIES = $(top_builddir)/interfaces/libcdipp.la
+CdiInfo_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(CdiInfo_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -87,8 +99,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(CdiInfo_SOURCES)
-DIST_SOURCES = $(CdiInfo_SOURCES)
+SOURCES = $(libcdipp_la_SOURCES) $(CdiInfo_SOURCES)
+DIST_SOURCES = $(libcdipp_la_SOURCES) $(CdiInfo_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -247,16 +259,20 @@ top_srcdir = @top_srcdir@
 #
 SWIGCDILIB = cdilib.i
 SWIGCDIOBJ = cdiobj.i
-BINDINGS = $(am__append_1) $(am__append_3) $(am__append_4)
+BINDINGS = $(am__append_1) $(am__append_4) $(am__append_5)
 EXTRA_DIST = $(SWIGCDIOBJ) $(SWIGCDILIB) ruby/cdilib_wrap.c \
 	ruby/cdiobj_wrap.cpp ruby/testLib.rb ruby/testObj.rb \
 	python/cdilib_wrap.c python/cdiobj_wrap.cpp python/testLib.py \
 	python/testObj.py
-#
-CdiInfo_SOURCES = CdiInfo.cpp cdi.cpp cdi.hpp
+noinst_LTLIBRARIES = $(am__append_3)
 #
 locallibs = $(top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@
-CdiInfo_LDADD = $(top_builddir)/src/libcdi.la @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS) $(LIBS) 
+libcdipp_la_SOURCES = cdi.cpp cdi.hpp
+libcdipp_la_LIBADD = $(top_builddir)/src/libcdi.la 
+libcdipp_la_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS)
+CdiInfo_SOURCES = CdiInfo.cpp
+CdiInfo_LDADD = $(top_builddir)/interfaces/libcdipp.la 
+CdiInfo_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS)
 #
 AM_CPPFLAGS = -I$(top_srcdir)/src
 #
@@ -295,6 +311,17 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
+	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
+	  test "$$dir" != "$$p" || dir=.; \
+	  echo "rm -f \"$${dir}/so_locations\""; \
+	  rm -f "$${dir}/so_locations"; \
+	done
+libcdipp.la: $(libcdipp_la_OBJECTS) $(libcdipp_la_DEPENDENCIES) 
+	$(libcdipp_la_LINK) $(am_libcdipp_la_rpath) $(libcdipp_la_OBJECTS) $(libcdipp_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
@@ -349,7 +376,7 @@ clean-noinstPROGRAMS:
 	rm -f $$list
 CdiInfo$(EXEEXT): $(CdiInfo_OBJECTS) $(CdiInfo_DEPENDENCIES) 
 	@rm -f CdiInfo$(EXEEXT)
-	$(CXXLINK) $(CdiInfo_OBJECTS) $(CdiInfo_LDADD) $(LIBS)
+	$(CdiInfo_LINK) $(CdiInfo_OBJECTS) $(CdiInfo_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -358,7 +385,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CdiInfo.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi.Plo@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -471,7 +498,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS) all-local
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) all-local
 installdirs:
 	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -505,7 +532,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstPROGRAMS mostlyclean-am
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -577,18 +604,18 @@ uninstall-am: uninstall-binPROGRAMS
 
 .PHONY: CTAGS GTAGS all all-am all-local check check-am clean \
 	clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstPROGRAMS ctags distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-binPROGRAMS
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS ctags distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-binPROGRAMS install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-binPROGRAMS
 
 # Ruby ====================================================
 @WITH_RUBY_TRUE@rubyLibMakefile:
