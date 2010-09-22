@@ -1,2 +1,6 @@
-require 'rbconfig'
-puts Config::expand(Config::MAKEFILE_CONFIG["rubyhdrdir"])
+require 'mkmf'
+if RUBY_VERSION[0,3] == '1.8'
+  puts "-I#{Config::expand(CONFIG['rubyhdrdir'])}"
+else
+  puts "-I#{Config::expand(CONFIG['rubyhdrdir'])} -I#{Config::expand(CONFIG['rubyhdrdir'])}/#{Config::expand(CONFIG['arch'])}"
+end
