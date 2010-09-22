@@ -77,7 +77,7 @@ if WITH_SWIG
 endif
 
 pythonObj: pythonObjWrapper
-	cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="../$(locallibs) $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py build_ext --inplace
+	cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py build_ext --inplace
 
 pythonObjTest: pythonObj
 	@cd python; python testObj.py

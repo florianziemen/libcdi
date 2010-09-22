@@ -6,9 +6,10 @@ cdiobj_module = Extension('_CdiObj',
                   sources=['cdiobj_wrap.cpp'],
                   extra_compile_args = INCFLAGS,
                   library_dirs = LDFLAGS,
-#                  extra_objects = ['../../src/cdilib.o','../cdi.o'],
+                  extra_objects = ['../cdi.o'],
+                  runtime_library_dirs = ['../../src/.libs'],
                   extra_link_args = LIBS,
-                  libraries    = ['stdc++'],
+                  libraries    = ['cdi','stdc++'],
                   language = 'c++',
                   )
 

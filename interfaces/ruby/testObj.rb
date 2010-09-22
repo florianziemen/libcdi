@@ -1,4 +1,4 @@
-require 'CdiObj'
+require './CdiObj'
 include CdiObj
 require "pp"
 
@@ -50,10 +50,10 @@ puts cdi.variables.collect {|v| v.units }.join("-")
 
 puts "#========== CDI.VAR ======================================#"
 varname = cdi.variables[1].name
-#pp cdi.methods.sort
+pp cdi.methods.sort
 var_ = cdi.variables[1]
-val = var_.getField()
-i=0; puts "val[#{i}] = #{val[i]}"
+#val = var_.getField()
+#i=0; puts "val[#{i}] = #{val[i]}"
 puts "#=====================================================#"
 name ="tsurf"
 newvar = cdi.var[name]

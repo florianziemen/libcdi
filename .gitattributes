@@ -103,7 +103,6 @@ interfaces/python/CdiLib.py -text
 interfaces/python/CdiObj.py -text
 interfaces/python/cdilib_wrap.c -text
 interfaces/python/cdiobj_wrap.cpp -text
-interfaces/python/make.sh -text
 interfaces/python/setup.py -text
 interfaces/python/setupLib.py -text
 interfaces/python/setupObj.py -text
