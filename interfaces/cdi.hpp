@@ -13,10 +13,9 @@ class CdiGrid {
     int gridID;
     int type, size, xsize, ysize, prec, ncorner;
     bool hasBounds;
-    double *xvals   , *yvals;
-    float  *xvalsF  , *yvalsF;
-    double *xbounds , *ybounds;
-    float  *xboundsF, *yboundsF;
+    double *xvals , *yvals , *xbnds , *ybnds;
+    float  *xvalsF, *yvalsF, *xbndsF, *ybndsF;
+    std::vector<double> xvalues, yvalues, xbounds, ybounds;
 
     std::string xname, xlongname, xstdname, xunits;
     std::string yname, ylongname, ystdname, yunits;      
@@ -50,7 +49,8 @@ class CdiZaxis {
 
     int zaxisID;
     int type, ltype, size, prec;
-    double *levels, *lbounds, *ubounds, *weights;
+    double *plevels, *plbounds, *pubounds, *pweights;
+    vector<double> levels, lbounds, ubounds, weights;
     std::string name, longname, units;
 };
 

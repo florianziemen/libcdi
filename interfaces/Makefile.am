@@ -112,6 +112,6 @@ help:
 #
 AM_CPPFLAGS = -I$(top_srcdir)/src
 #
-all-local: $(BINDINGS)
+#all-local: $(BINDINGS)
 #
 CLEANFILES  = `ls *~`

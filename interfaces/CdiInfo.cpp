@@ -9,6 +9,7 @@ int main() {
 
   Cdi info("./testdata/mulval.nc");
  
+  std::cout << "#===============================" << std::endl;
   for (int i = 0; i < info.nvars; i++)
     std::cout << info.codes[i] << ' ';
   std::cout << std::endl;
@@ -30,11 +31,15 @@ int main() {
   std::cout << "Gridname:%s" << std::endl;
   std::cout << var.grid.name << std::endl;
   std::cout << "GridBounds: NumberOfCorners = " << var.grid.ncorner <<  std::endl;
-//  std::cout << "xbounds " << var.grid.xbounds[0] << ' ' << var.grid.xbounds[1000] << ' ';
-//  std::cout << "ybounds " << var.grid.ybounds[0] << ' ' << var.grid.ybounds[1000] << std::endl;
-//  var.grid.readFloatBounds();
-//  std::cout << "xboundsF " << var.grid.xboundsF[0] << ' ' << var.grid.xboundsF[1000] << ' ';
-//  std::cout << "yboundsF " << var.grid.yboundsF[0] << ' ' << var.grid.yboundsF[1000] << std::endl;
+  std::cout << "xvals "   << var.grid.xvals[0]       << std::endl;
+  std::cout << "yvals "   << var.grid.yvals[0]       << std::endl;
+  std::cout << "xvalues " << var.grid.xvalues[0] << std::endl;
+/*   std::cout << "yvalues " << var.grid.yvalues.back() << std::endl;
+ */
+/*   var.grid.readFloatBounds();
+ *   std::cout << "xboundsF " << var.grid.xboundsF[0] << ' ' << var.grid.xboundsF[1000] << ' ';
+ *   std::cout << "yboundsF " << var.grid.yboundsF[0] << ' ' << var.grid.yboundsF[1000] << std::endl;
+ */
   std::cout << "#===============================" << std::endl;
   printf("Stream:%d\n"         , var.streamID);
   printf("Taxis (unit):%d\n"   , var.taxis.unit);

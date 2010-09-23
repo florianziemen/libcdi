@@ -25948,9 +25948,327 @@ fail:
 
 
 SWIGINTERN VALUE
-_wrap_CdiGrid_xbounds_set(int argc, VALUE *argv, VALUE self) {
+_wrap_CdiGrid_xbnds_set(int argc, VALUE *argv, VALUE self) {
   CdiGrid *arg1 = (CdiGrid *) 0 ;
   double *arg2 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","xbnds", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "double *","xbnds", 2, argv[0] )); 
+  }
+  arg2 = reinterpret_cast< double * >(argp2);
+  if (arg1) (arg1)->xbnds = arg2;
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_xbnds_get(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","xbnds", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  result = (double *) ((arg1)->xbnds);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_ybnds_set(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  double *arg2 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","ybnds", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "double *","ybnds", 2, argv[0] )); 
+  }
+  arg2 = reinterpret_cast< double * >(argp2);
+  if (arg1) (arg1)->ybnds = arg2;
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_ybnds_get(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","ybnds", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  result = (double *) ((arg1)->ybnds);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_xbndsF_set(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  float *arg2 = (float *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","xbndsF", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "float *","xbndsF", 2, argv[0] )); 
+  }
+  arg2 = reinterpret_cast< float * >(argp2);
+  if (arg1) (arg1)->xbndsF = arg2;
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_xbndsF_get(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","xbndsF", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  result = (float *) ((arg1)->xbndsF);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_ybndsF_set(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  float *arg2 = (float *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","ybndsF", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "float *","ybndsF", 2, argv[0] )); 
+  }
+  arg2 = reinterpret_cast< float * >(argp2);
+  if (arg1) (arg1)->ybndsF = arg2;
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_ybndsF_get(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","ybndsF", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  result = (float *) ((arg1)->ybndsF);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_xvalues_set(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","xvalues", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::vector< double,std::allocator< double > > *","xvalues", 2, argv[0] )); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->xvalues = *arg2;
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_xvalues_get(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","xvalues", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->xvalues);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_yvalues_set(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","yvalues", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::vector< double,std::allocator< double > > *","yvalues", 2, argv[0] )); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->yvalues = *arg2;
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_yvalues_get(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","yvalues", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->yvalues);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_xbounds_set(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -25964,12 +26282,12 @@ _wrap_CdiGrid_xbounds_set(int argc, VALUE *argv, VALUE self) {
     SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","xbounds", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "double *","xbounds", 2, argv[0] )); 
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::vector< double,std::allocator< double > > *","xbounds", 2, argv[0] )); 
   }
-  arg2 = reinterpret_cast< double * >(argp2);
-  if (arg1) (arg1)->xbounds = arg2;
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->xbounds = *arg2;
   return Qnil;
 fail:
   return Qnil;
@@ -25981,7 +26299,7 @@ _wrap_CdiGrid_xbounds_get(int argc, VALUE *argv, VALUE self) {
   CdiGrid *arg1 = (CdiGrid *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  double *result = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
   VALUE vresult = Qnil;
   
   if ((argc < 0) || (argc > 0)) {
@@ -25992,8 +26310,8 @@ _wrap_CdiGrid_xbounds_get(int argc, VALUE *argv, VALUE self) {
     SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","xbounds", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (double *) ((arg1)->xbounds);
-  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->xbounds);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   return vresult;
 fail:
   return Qnil;
@@ -26003,7 +26321,7 @@ fail:
 SWIGINTERN VALUE
 _wrap_CdiGrid_ybounds_set(int argc, VALUE *argv, VALUE self) {
   CdiGrid *arg1 = (CdiGrid *) 0 ;
-  double *arg2 = (double *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -26017,12 +26335,12 @@ _wrap_CdiGrid_ybounds_set(int argc, VALUE *argv, VALUE self) {
     SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","ybounds", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "double *","ybounds", 2, argv[0] )); 
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::vector< double,std::allocator< double > > *","ybounds", 2, argv[0] )); 
   }
-  arg2 = reinterpret_cast< double * >(argp2);
-  if (arg1) (arg1)->ybounds = arg2;
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->ybounds = *arg2;
   return Qnil;
 fail:
   return Qnil;
@@ -26034,7 +26352,7 @@ _wrap_CdiGrid_ybounds_get(int argc, VALUE *argv, VALUE self) {
   CdiGrid *arg1 = (CdiGrid *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  double *result = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
   VALUE vresult = Qnil;
   
   if ((argc < 0) || (argc > 0)) {
@@ -26045,114 +26363,8 @@ _wrap_CdiGrid_ybounds_get(int argc, VALUE *argv, VALUE self) {
     SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","ybounds", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (double *) ((arg1)->ybounds);
-  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
-  return vresult;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_CdiGrid_xboundsF_set(int argc, VALUE *argv, VALUE self) {
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  float *arg2 = (float *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  
-  if ((argc < 1) || (argc > 1)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","xboundsF", 1, self )); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "float *","xboundsF", 2, argv[0] )); 
-  }
-  arg2 = reinterpret_cast< float * >(argp2);
-  if (arg1) (arg1)->xboundsF = arg2;
-  return Qnil;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_CdiGrid_xboundsF_get(int argc, VALUE *argv, VALUE self) {
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  float *result = 0 ;
-  VALUE vresult = Qnil;
-  
-  if ((argc < 0) || (argc > 0)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","xboundsF", 1, self )); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (float *) ((arg1)->xboundsF);
-  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
-  return vresult;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_CdiGrid_yboundsF_set(int argc, VALUE *argv, VALUE self) {
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  float *arg2 = (float *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  
-  if ((argc < 1) || (argc > 1)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","yboundsF", 1, self )); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "float *","yboundsF", 2, argv[0] )); 
-  }
-  arg2 = reinterpret_cast< float * >(argp2);
-  if (arg1) (arg1)->yboundsF = arg2;
-  return Qnil;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_CdiGrid_yboundsF_get(int argc, VALUE *argv, VALUE self) {
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  float *result = 0 ;
-  VALUE vresult = Qnil;
-  
-  if ((argc < 0) || (argc > 0)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","yboundsF", 1, self )); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (float *) ((arg1)->yboundsF);
-  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->ybounds);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   return vresult;
 fail:
   return Qnil;
@@ -27867,9 +28079,221 @@ fail:
 
 
 SWIGINTERN VALUE
-_wrap_CdiZaxis_levels_set(int argc, VALUE *argv, VALUE self) {
+_wrap_CdiZaxis_plevels_set(int argc, VALUE *argv, VALUE self) {
   CdiZaxis *arg1 = (CdiZaxis *) 0 ;
   double *arg2 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiZaxis, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiZaxis *","plevels", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiZaxis * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "double *","plevels", 2, argv[0] )); 
+  }
+  arg2 = reinterpret_cast< double * >(argp2);
+  if (arg1) (arg1)->plevels = arg2;
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiZaxis_plevels_get(int argc, VALUE *argv, VALUE self) {
+  CdiZaxis *arg1 = (CdiZaxis *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiZaxis, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiZaxis *","plevels", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiZaxis * >(argp1);
+  result = (double *) ((arg1)->plevels);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiZaxis_plbounds_set(int argc, VALUE *argv, VALUE self) {
+  CdiZaxis *arg1 = (CdiZaxis *) 0 ;
+  double *arg2 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiZaxis, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiZaxis *","plbounds", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiZaxis * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "double *","plbounds", 2, argv[0] )); 
+  }
+  arg2 = reinterpret_cast< double * >(argp2);
+  if (arg1) (arg1)->plbounds = arg2;
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiZaxis_plbounds_get(int argc, VALUE *argv, VALUE self) {
+  CdiZaxis *arg1 = (CdiZaxis *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiZaxis, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiZaxis *","plbounds", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiZaxis * >(argp1);
+  result = (double *) ((arg1)->plbounds);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiZaxis_pubounds_set(int argc, VALUE *argv, VALUE self) {
+  CdiZaxis *arg1 = (CdiZaxis *) 0 ;
+  double *arg2 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiZaxis, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiZaxis *","pubounds", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiZaxis * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "double *","pubounds", 2, argv[0] )); 
+  }
+  arg2 = reinterpret_cast< double * >(argp2);
+  if (arg1) (arg1)->pubounds = arg2;
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiZaxis_pubounds_get(int argc, VALUE *argv, VALUE self) {
+  CdiZaxis *arg1 = (CdiZaxis *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiZaxis, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiZaxis *","pubounds", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiZaxis * >(argp1);
+  result = (double *) ((arg1)->pubounds);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiZaxis_pweights_set(int argc, VALUE *argv, VALUE self) {
+  CdiZaxis *arg1 = (CdiZaxis *) 0 ;
+  double *arg2 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiZaxis, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiZaxis *","pweights", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiZaxis * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "double *","pweights", 2, argv[0] )); 
+  }
+  arg2 = reinterpret_cast< double * >(argp2);
+  if (arg1) (arg1)->pweights = arg2;
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiZaxis_pweights_get(int argc, VALUE *argv, VALUE self) {
+  CdiZaxis *arg1 = (CdiZaxis *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiZaxis, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiZaxis *","pweights", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiZaxis * >(argp1);
+  result = (double *) ((arg1)->pweights);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiZaxis_levels_set(int argc, VALUE *argv, VALUE self) {
+  CdiZaxis *arg1 = (CdiZaxis *) 0 ;
+  std::vector< double > *arg2 = (std::vector< double > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -27883,12 +28307,12 @@ _wrap_CdiZaxis_levels_set(int argc, VALUE *argv, VALUE self) {
     SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiZaxis *","levels", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiZaxis * >(argp1);
-  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "double *","levels", 2, argv[0] )); 
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::vector< double > *","levels", 2, argv[0] )); 
   }
-  arg2 = reinterpret_cast< double * >(argp2);
-  if (arg1) (arg1)->levels = arg2;
+  arg2 = reinterpret_cast< std::vector< double > * >(argp2);
+  if (arg1) (arg1)->levels = *arg2;
   return Qnil;
 fail:
   return Qnil;
@@ -27900,7 +28324,7 @@ _wrap_CdiZaxis_levels_get(int argc, VALUE *argv, VALUE self) {
   CdiZaxis *arg1 = (CdiZaxis *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  double *result = 0 ;
+  std::vector< double > *result = 0 ;
   VALUE vresult = Qnil;
   
   if ((argc < 0) || (argc > 0)) {
@@ -27911,8 +28335,8 @@ _wrap_CdiZaxis_levels_get(int argc, VALUE *argv, VALUE self) {
     SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiZaxis *","levels", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiZaxis * >(argp1);
-  result = (double *) ((arg1)->levels);
-  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  result = (std::vector< double > *)& ((arg1)->levels);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   return vresult;
 fail:
   return Qnil;
@@ -27922,7 +28346,7 @@ fail:
 SWIGINTERN VALUE
 _wrap_CdiZaxis_lbounds_set(int argc, VALUE *argv, VALUE self) {
   CdiZaxis *arg1 = (CdiZaxis *) 0 ;
-  double *arg2 = (double *) 0 ;
+  std::vector< double > *arg2 = (std::vector< double > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -27936,12 +28360,12 @@ _wrap_CdiZaxis_lbounds_set(int argc, VALUE *argv, VALUE self) {
     SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiZaxis *","lbounds", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiZaxis * >(argp1);
-  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "double *","lbounds", 2, argv[0] )); 
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::vector< double > *","lbounds", 2, argv[0] )); 
   }
-  arg2 = reinterpret_cast< double * >(argp2);
-  if (arg1) (arg1)->lbounds = arg2;
+  arg2 = reinterpret_cast< std::vector< double > * >(argp2);
+  if (arg1) (arg1)->lbounds = *arg2;
   return Qnil;
 fail:
   return Qnil;
@@ -27953,7 +28377,7 @@ _wrap_CdiZaxis_lbounds_get(int argc, VALUE *argv, VALUE self) {
   CdiZaxis *arg1 = (CdiZaxis *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  double *result = 0 ;
+  std::vector< double > *result = 0 ;
   VALUE vresult = Qnil;
   
   if ((argc < 0) || (argc > 0)) {
@@ -27964,8 +28388,8 @@ _wrap_CdiZaxis_lbounds_get(int argc, VALUE *argv, VALUE self) {
     SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiZaxis *","lbounds", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiZaxis * >(argp1);
-  result = (double *) ((arg1)->lbounds);
-  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  result = (std::vector< double > *)& ((arg1)->lbounds);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   return vresult;
 fail:
   return Qnil;
@@ -27975,7 +28399,7 @@ fail:
 SWIGINTERN VALUE
 _wrap_CdiZaxis_ubounds_set(int argc, VALUE *argv, VALUE self) {
   CdiZaxis *arg1 = (CdiZaxis *) 0 ;
-  double *arg2 = (double *) 0 ;
+  std::vector< double > *arg2 = (std::vector< double > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -27989,12 +28413,12 @@ _wrap_CdiZaxis_ubounds_set(int argc, VALUE *argv, VALUE self) {
     SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiZaxis *","ubounds", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiZaxis * >(argp1);
-  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "double *","ubounds", 2, argv[0] )); 
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::vector< double > *","ubounds", 2, argv[0] )); 
   }
-  arg2 = reinterpret_cast< double * >(argp2);
-  if (arg1) (arg1)->ubounds = arg2;
+  arg2 = reinterpret_cast< std::vector< double > * >(argp2);
+  if (arg1) (arg1)->ubounds = *arg2;
   return Qnil;
 fail:
   return Qnil;
@@ -28006,7 +28430,7 @@ _wrap_CdiZaxis_ubounds_get(int argc, VALUE *argv, VALUE self) {
   CdiZaxis *arg1 = (CdiZaxis *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  double *result = 0 ;
+  std::vector< double > *result = 0 ;
   VALUE vresult = Qnil;
   
   if ((argc < 0) || (argc > 0)) {
@@ -28017,8 +28441,8 @@ _wrap_CdiZaxis_ubounds_get(int argc, VALUE *argv, VALUE self) {
     SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiZaxis *","ubounds", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiZaxis * >(argp1);
-  result = (double *) ((arg1)->ubounds);
-  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  result = (std::vector< double > *)& ((arg1)->ubounds);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   return vresult;
 fail:
   return Qnil;
@@ -28028,7 +28452,7 @@ fail:
 SWIGINTERN VALUE
 _wrap_CdiZaxis_weights_set(int argc, VALUE *argv, VALUE self) {
   CdiZaxis *arg1 = (CdiZaxis *) 0 ;
-  double *arg2 = (double *) 0 ;
+  std::vector< double > *arg2 = (std::vector< double > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -28042,12 +28466,12 @@ _wrap_CdiZaxis_weights_set(int argc, VALUE *argv, VALUE self) {
     SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiZaxis *","weights", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiZaxis * >(argp1);
-  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "double *","weights", 2, argv[0] )); 
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::vector< double > *","weights", 2, argv[0] )); 
   }
-  arg2 = reinterpret_cast< double * >(argp2);
-  if (arg1) (arg1)->weights = arg2;
+  arg2 = reinterpret_cast< std::vector< double > * >(argp2);
+  if (arg1) (arg1)->weights = *arg2;
   return Qnil;
 fail:
   return Qnil;
@@ -28059,7 +28483,7 @@ _wrap_CdiZaxis_weights_get(int argc, VALUE *argv, VALUE self) {
   CdiZaxis *arg1 = (CdiZaxis *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  double *result = 0 ;
+  std::vector< double > *result = 0 ;
   VALUE vresult = Qnil;
   
   if ((argc < 0) || (argc > 0)) {
@@ -28070,8 +28494,8 @@ _wrap_CdiZaxis_weights_get(int argc, VALUE *argv, VALUE self) {
     SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiZaxis *","weights", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiZaxis * >(argp1);
-  result = (double *) ((arg1)->weights);
-  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  result = (std::vector< double > *)& ((arg1)->weights);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   return vresult;
 fail:
   return Qnil;
@@ -31665,14 +32089,22 @@ SWIGEXPORT void Init_CdiObj(void) {
   rb_define_method(SwigClassCdiGrid.klass, "xvalsF", VALUEFUNC(_wrap_CdiGrid_xvalsF_get), -1);
   rb_define_method(SwigClassCdiGrid.klass, "yvalsF=", VALUEFUNC(_wrap_CdiGrid_yvalsF_set), -1);
   rb_define_method(SwigClassCdiGrid.klass, "yvalsF", VALUEFUNC(_wrap_CdiGrid_yvalsF_get), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "xbnds=", VALUEFUNC(_wrap_CdiGrid_xbnds_set), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "xbnds", VALUEFUNC(_wrap_CdiGrid_xbnds_get), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "ybnds=", VALUEFUNC(_wrap_CdiGrid_ybnds_set), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "ybnds", VALUEFUNC(_wrap_CdiGrid_ybnds_get), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "xbndsF=", VALUEFUNC(_wrap_CdiGrid_xbndsF_set), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "xbndsF", VALUEFUNC(_wrap_CdiGrid_xbndsF_get), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "ybndsF=", VALUEFUNC(_wrap_CdiGrid_ybndsF_set), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "ybndsF", VALUEFUNC(_wrap_CdiGrid_ybndsF_get), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "xvalues=", VALUEFUNC(_wrap_CdiGrid_xvalues_set), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "xvalues", VALUEFUNC(_wrap_CdiGrid_xvalues_get), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "yvalues=", VALUEFUNC(_wrap_CdiGrid_yvalues_set), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "yvalues", VALUEFUNC(_wrap_CdiGrid_yvalues_get), -1);
   rb_define_method(SwigClassCdiGrid.klass, "xbounds=", VALUEFUNC(_wrap_CdiGrid_xbounds_set), -1);
   rb_define_method(SwigClassCdiGrid.klass, "xbounds", VALUEFUNC(_wrap_CdiGrid_xbounds_get), -1);
   rb_define_method(SwigClassCdiGrid.klass, "ybounds=", VALUEFUNC(_wrap_CdiGrid_ybounds_set), -1);
   rb_define_method(SwigClassCdiGrid.klass, "ybounds", VALUEFUNC(_wrap_CdiGrid_ybounds_get), -1);
-  rb_define_method(SwigClassCdiGrid.klass, "xboundsF=", VALUEFUNC(_wrap_CdiGrid_xboundsF_set), -1);
-  rb_define_method(SwigClassCdiGrid.klass, "xboundsF", VALUEFUNC(_wrap_CdiGrid_xboundsF_get), -1);
-  rb_define_method(SwigClassCdiGrid.klass, "yboundsF=", VALUEFUNC(_wrap_CdiGrid_yboundsF_set), -1);
-  rb_define_method(SwigClassCdiGrid.klass, "yboundsF", VALUEFUNC(_wrap_CdiGrid_yboundsF_get), -1);
   rb_define_method(SwigClassCdiGrid.klass, "xname=", VALUEFUNC(_wrap_CdiGrid_xname_set), -1);
   rb_define_method(SwigClassCdiGrid.klass, "xname", VALUEFUNC(_wrap_CdiGrid_xname_get), -1);
   rb_define_method(SwigClassCdiGrid.klass, "xlongname=", VALUEFUNC(_wrap_CdiGrid_xlongname_set), -1);
@@ -31743,6 +32175,14 @@ SWIGEXPORT void Init_CdiObj(void) {
   rb_define_method(SwigClassCdiZaxis.klass, "size", VALUEFUNC(_wrap_CdiZaxis_size_get), -1);
   rb_define_method(SwigClassCdiZaxis.klass, "prec=", VALUEFUNC(_wrap_CdiZaxis_prec_set), -1);
   rb_define_method(SwigClassCdiZaxis.klass, "prec", VALUEFUNC(_wrap_CdiZaxis_prec_get), -1);
+  rb_define_method(SwigClassCdiZaxis.klass, "plevels=", VALUEFUNC(_wrap_CdiZaxis_plevels_set), -1);
+  rb_define_method(SwigClassCdiZaxis.klass, "plevels", VALUEFUNC(_wrap_CdiZaxis_plevels_get), -1);
+  rb_define_method(SwigClassCdiZaxis.klass, "plbounds=", VALUEFUNC(_wrap_CdiZaxis_plbounds_set), -1);
+  rb_define_method(SwigClassCdiZaxis.klass, "plbounds", VALUEFUNC(_wrap_CdiZaxis_plbounds_get), -1);
+  rb_define_method(SwigClassCdiZaxis.klass, "pubounds=", VALUEFUNC(_wrap_CdiZaxis_pubounds_set), -1);
+  rb_define_method(SwigClassCdiZaxis.klass, "pubounds", VALUEFUNC(_wrap_CdiZaxis_pubounds_get), -1);
+  rb_define_method(SwigClassCdiZaxis.klass, "pweights=", VALUEFUNC(_wrap_CdiZaxis_pweights_set), -1);
+  rb_define_method(SwigClassCdiZaxis.klass, "pweights", VALUEFUNC(_wrap_CdiZaxis_pweights_get), -1);
   rb_define_method(SwigClassCdiZaxis.klass, "levels=", VALUEFUNC(_wrap_CdiZaxis_levels_set), -1);
   rb_define_method(SwigClassCdiZaxis.klass, "levels", VALUEFUNC(_wrap_CdiZaxis_levels_get), -1);
   rb_define_method(SwigClassCdiZaxis.klass, "lbounds=", VALUEFUNC(_wrap_CdiZaxis_lbounds_set), -1);

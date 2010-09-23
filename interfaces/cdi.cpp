@@ -22,14 +22,23 @@ CdiGrid::CdiGrid(int gridid) {
   gridID = gridid;
   type   = gridInqType(gridID);
   strcpy(_name,gridNamePtr(type));
+
   size   = gridInqSize(gridID);
   xsize  = gridInqXsize(gridID);
   ysize  = gridInqXsize(gridID);
   xvals  = (double *) malloc(xsize*sizeof(double));
   yvals  = (double *) malloc(ysize*sizeof(double));
   prec   = gridInqPrec(gridID);
-  gridInqXvals(gridID    , xvals);
-  gridInqYvals(gridID    , yvals);
+  gridInqXvals(gridID, xvals);
+  gridInqYvals(gridID, yvals);
+  xvalues.resize(xsize);
+  yvalues.resize(ysize);
+  std::copy(xvals, xvals + xsize, xvalues.begin());
+  std::copy(yvals, yvals + ysize, yvalues.begin());
+  std::cout << xvalues.back() << std::endl;
+  std::cout << yvalues.back() << std::endl;
+
+
   gridInqXname(gridID    , _xname);
   gridInqXlongname(gridID, _xlongname);
   gridInqXstdname(gridID , _xstdname);
@@ -52,10 +61,14 @@ CdiGrid::CdiGrid(int gridid) {
   {
     ncorner  = ( gridInqType(gridID) == GRID_CELL ) ? gridInqNvertex(gridID) : 4;
     ncorner *= size;
-    xbounds  = (double *) malloc((ncorner*size)*sizeof(double));
-    ybounds  = (double *) malloc((ncorner*size)*sizeof(double));
-    gridInqYbounds(gridID, xbounds);
-    gridInqXbounds(gridID, ybounds);
+    xbnds  = (double *) malloc((ncorner*size)*sizeof(double));
+    ybnds  = (double *) malloc((ncorner*size)*sizeof(double));
+    gridInqYbounds(gridID, xbnds);
+    gridInqXbounds(gridID, ybnds);
+    xbounds.resize(ncorner*size);
+    ybounds.resize(ncorner*size);
+    std::copy(xbnds, xbnds + ncorner*size, xbounds.begin());
+    std::copy(ybnds, ybnds + ncorner*size, ybounds.begin());
   }
   else
     ncorner = 0;
@@ -67,10 +80,10 @@ CdiGrid::readFloatBounds()
 {
   if (hasBounds)
   {
-    xboundsF = (float *) malloc(ncorner*size*sizeof(float));
-    yboundsF = (float *) malloc(ncorner*size*sizeof(float));
-    xboundsF = (float *) xbounds;
-    yboundsF = (float *) ybounds;
+    xbndsF = (float *) malloc(ncorner*size*sizeof(float));
+    ybndsF = (float *) malloc(ncorner*size*sizeof(float));
+    xbndsF = (float *) xbnds;
+    ybndsF = (float *) ybnds;
   }
   else
     std::cout << "No bounds available." << std::endl;
@@ -113,27 +126,31 @@ CdiTaxis::~CdiTaxis() { if (taxisID >= 0) taxisID = -1; }
  */
 CdiZaxis::CdiZaxis() { zaxisID = -1; }
 CdiZaxis::CdiZaxis(int zaxisid) {
-  char _name[CHARSIZE], _longname[CHARSIZE], _units[CHARSIZE];
+  char name[CHARSIZE], longname[CHARSIZE], units[CHARSIZE];
 
   zaxisID = zaxisid;
   size    = zaxisInqSize(zaxisID);
   prec    = zaxisInqPrec(zaxisID);
   type    = zaxisInqType(zaxisID);
   ltype   = zaxisInqLtype(zaxisID);
-  levels  = (double *) malloc(size*sizeof(double));
-  lbounds = (double *) malloc(size*sizeof(double));
-  ubounds = (double *) malloc(size*sizeof(double));
-  weights = (double *) malloc(size*sizeof(double));
-  zaxisInqLevels(zaxisID  , levels);
-  zaxisInqLbounds(zaxisID , lbounds);
-  zaxisInqUbounds(zaxisID , ubounds);
-  zaxisInqWeights(zaxisID , weights);
-  zaxisInqName(zaxisid    , _name);
-  zaxisInqLongname(zaxisid, _longname);
-  zaxisInqUnits(zaxisid   , _units);
-  name     = _name;
-  longname = _longname;
-  units    = _units;
+
+  plevels  = (double *) malloc(size*sizeof(double));
+  plbounds = (double *) malloc(size*sizeof(double));
+  pubounds = (double *) malloc(size*sizeof(double));
+  pweights = (double *) malloc(size*sizeof(double));
+  zaxisInqLevels(zaxisID  ,plevels);
+  zaxisInqLbounds(zaxisID ,plbounds);
+  zaxisInqUbounds(zaxisID ,pubounds);
+  zaxisInqWeights(zaxisID ,pweights);
+  levels.resize(size); lbounds.resize(size); ubounds.resize(size); weights.resize(size);
+  std::copy(plevels,plevels+size,levels.begin());
+  std::copy(plbounds,plbounds+size,lbounds.begin());
+  std::copy(pubounds,pubounds+size,ubounds.begin());
+  std::copy(pweights,pweights+size,weights.begin());
+
+  zaxisInqName(zaxisid    ,name);
+  zaxisInqLongname(zaxisid,longname);
+  zaxisInqUnits(zaxisid   ,units);
 }
 CdiZaxis::~CdiZaxis() { if (zaxisID >= 0) zaxisID = -1; }
 /* } */
