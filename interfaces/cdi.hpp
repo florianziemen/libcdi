@@ -2,6 +2,8 @@
 #include <map>
 #define CHARSIZE      128
 
+using namespace std;
+
 class CdiGrid {
   public:
     CdiGrid();
@@ -63,10 +65,8 @@ class CdiVariable {
     int    streamID;
     std::string  name, longname, units, stdname;
     double missval;
-    double *field;
-    double **fieldWithLevel;
-    float  *fieldF;
-    float  **fieldWithLevelF;
+            vector<double>   values;
+    vector< vector<double> > valuesWithLevel;
 
 
     CdiGrid  grid;
@@ -74,11 +74,12 @@ class CdiVariable {
     CdiTaxis taxis;
 
     void sinfo();
-    void readField(); 
-    void readFieldWithLevel(int tsID = 0);
-    void readFieldF();
-    void readFieldWithLevelF(int tsID = 0);
-    std::vector<double> getField();
+    void getValues(); 
+    void getValuesWithLevel(int tsID = 0);
+            vector<float>   getFValues();
+    vector< vector<float> > getFValuesWithLevel(int tsID = 0);
+                   double  *getValuesAsPointer();
+                   double **getValuesWithLevelAsPointer(int tsID = 0);
 };
 
 class Cdi {

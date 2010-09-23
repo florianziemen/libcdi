@@ -189,6 +189,53 @@ class DoubleVector(_object):
 DoubleVector_swigregister = _CdiObj.DoubleVector_swigregister
 DoubleVector_swigregister(DoubleVector)
 
+class DoubleDoubleVector(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, DoubleDoubleVector, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, DoubleDoubleVector, name)
+    __repr__ = _swig_repr
+    def iterator(self): return _CdiObj.DoubleDoubleVector_iterator(self)
+    def __iter__(self): return self.iterator()
+    def __nonzero__(self): return _CdiObj.DoubleDoubleVector___nonzero__(self)
+    def __bool__(self): return _CdiObj.DoubleDoubleVector___bool__(self)
+    def __len__(self): return _CdiObj.DoubleDoubleVector___len__(self)
+    def pop(self): return _CdiObj.DoubleDoubleVector_pop(self)
+    def __getslice__(self, *args): return _CdiObj.DoubleDoubleVector___getslice__(self, *args)
+    def __setslice__(self, *args): return _CdiObj.DoubleDoubleVector___setslice__(self, *args)
+    def __delslice__(self, *args): return _CdiObj.DoubleDoubleVector___delslice__(self, *args)
+    def __delitem__(self, *args): return _CdiObj.DoubleDoubleVector___delitem__(self, *args)
+    def __getitem__(self, *args): return _CdiObj.DoubleDoubleVector___getitem__(self, *args)
+    def __setitem__(self, *args): return _CdiObj.DoubleDoubleVector___setitem__(self, *args)
+    def append(self, *args): return _CdiObj.DoubleDoubleVector_append(self, *args)
+    def empty(self): return _CdiObj.DoubleDoubleVector_empty(self)
+    def size(self): return _CdiObj.DoubleDoubleVector_size(self)
+    def clear(self): return _CdiObj.DoubleDoubleVector_clear(self)
+    def swap(self, *args): return _CdiObj.DoubleDoubleVector_swap(self, *args)
+    def get_allocator(self): return _CdiObj.DoubleDoubleVector_get_allocator(self)
+    def begin(self): return _CdiObj.DoubleDoubleVector_begin(self)
+    def end(self): return _CdiObj.DoubleDoubleVector_end(self)
+    def rbegin(self): return _CdiObj.DoubleDoubleVector_rbegin(self)
+    def rend(self): return _CdiObj.DoubleDoubleVector_rend(self)
+    def pop_back(self): return _CdiObj.DoubleDoubleVector_pop_back(self)
+    def erase(self, *args): return _CdiObj.DoubleDoubleVector_erase(self, *args)
+    def __init__(self, *args): 
+        this = _CdiObj.new_DoubleDoubleVector(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    def push_back(self, *args): return _CdiObj.DoubleDoubleVector_push_back(self, *args)
+    def front(self): return _CdiObj.DoubleDoubleVector_front(self)
+    def back(self): return _CdiObj.DoubleDoubleVector_back(self)
+    def assign(self, *args): return _CdiObj.DoubleDoubleVector_assign(self, *args)
+    def resize(self, *args): return _CdiObj.DoubleDoubleVector_resize(self, *args)
+    def insert(self, *args): return _CdiObj.DoubleDoubleVector_insert(self, *args)
+    def reserve(self, *args): return _CdiObj.DoubleDoubleVector_reserve(self, *args)
+    def capacity(self): return _CdiObj.DoubleDoubleVector_capacity(self)
+    __swig_destroy__ = _CdiObj.delete_DoubleDoubleVector
+    __del__ = lambda self : None;
+DoubleDoubleVector_swigregister = _CdiObj.DoubleDoubleVector_swigregister
+DoubleDoubleVector_swigregister(DoubleDoubleVector)
+
 class StringVector(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, StringVector, name, value)
@@ -727,18 +774,12 @@ class CdiVariable(_object):
     __swig_setmethods__["missval"] = _CdiObj.CdiVariable_missval_set
     __swig_getmethods__["missval"] = _CdiObj.CdiVariable_missval_get
     if _newclass:missval = _swig_property(_CdiObj.CdiVariable_missval_get, _CdiObj.CdiVariable_missval_set)
-    __swig_setmethods__["field"] = _CdiObj.CdiVariable_field_set
-    __swig_getmethods__["field"] = _CdiObj.CdiVariable_field_get
-    if _newclass:field = _swig_property(_CdiObj.CdiVariable_field_get, _CdiObj.CdiVariable_field_set)
-    __swig_setmethods__["fieldWithLevel"] = _CdiObj.CdiVariable_fieldWithLevel_set
-    __swig_getmethods__["fieldWithLevel"] = _CdiObj.CdiVariable_fieldWithLevel_get
-    if _newclass:fieldWithLevel = _swig_property(_CdiObj.CdiVariable_fieldWithLevel_get, _CdiObj.CdiVariable_fieldWithLevel_set)
-    __swig_setmethods__["fieldF"] = _CdiObj.CdiVariable_fieldF_set
-    __swig_getmethods__["fieldF"] = _CdiObj.CdiVariable_fieldF_get
-    if _newclass:fieldF = _swig_property(_CdiObj.CdiVariable_fieldF_get, _CdiObj.CdiVariable_fieldF_set)
-    __swig_setmethods__["fieldWithLevelF"] = _CdiObj.CdiVariable_fieldWithLevelF_set
-    __swig_getmethods__["fieldWithLevelF"] = _CdiObj.CdiVariable_fieldWithLevelF_get
-    if _newclass:fieldWithLevelF = _swig_property(_CdiObj.CdiVariable_fieldWithLevelF_get, _CdiObj.CdiVariable_fieldWithLevelF_set)
+    __swig_setmethods__["values"] = _CdiObj.CdiVariable_values_set
+    __swig_getmethods__["values"] = _CdiObj.CdiVariable_values_get
+    if _newclass:values = _swig_property(_CdiObj.CdiVariable_values_get, _CdiObj.CdiVariable_values_set)
+    __swig_setmethods__["valuesWithLevel"] = _CdiObj.CdiVariable_valuesWithLevel_set
+    __swig_getmethods__["valuesWithLevel"] = _CdiObj.CdiVariable_valuesWithLevel_get
+    if _newclass:valuesWithLevel = _swig_property(_CdiObj.CdiVariable_valuesWithLevel_get, _CdiObj.CdiVariable_valuesWithLevel_set)
     __swig_setmethods__["grid"] = _CdiObj.CdiVariable_grid_set
     __swig_getmethods__["grid"] = _CdiObj.CdiVariable_grid_get
     if _newclass:grid = _swig_property(_CdiObj.CdiVariable_grid_get, _CdiObj.CdiVariable_grid_set)
@@ -749,11 +790,12 @@ class CdiVariable(_object):
     __swig_getmethods__["taxis"] = _CdiObj.CdiVariable_taxis_get
     if _newclass:taxis = _swig_property(_CdiObj.CdiVariable_taxis_get, _CdiObj.CdiVariable_taxis_set)
     def sinfo(self): return _CdiObj.CdiVariable_sinfo(self)
-    def readField(self): return _CdiObj.CdiVariable_readField(self)
-    def readFieldWithLevel(self, tsID = 0): return _CdiObj.CdiVariable_readFieldWithLevel(self, tsID)
-    def readFieldF(self): return _CdiObj.CdiVariable_readFieldF(self)
-    def readFieldWithLevelF(self, tsID = 0): return _CdiObj.CdiVariable_readFieldWithLevelF(self, tsID)
-    def getField(self): return _CdiObj.CdiVariable_getField(self)
+    def getValues(self): return _CdiObj.CdiVariable_getValues(self)
+    def getValuesWithLevel(self, tsID = 0): return _CdiObj.CdiVariable_getValuesWithLevel(self, tsID)
+    def getFValues(self): return _CdiObj.CdiVariable_getFValues(self)
+    def getFValuesWithLevel(self, tsID = 0): return _CdiObj.CdiVariable_getFValuesWithLevel(self, tsID)
+    def getValuesAsPointer(self): return _CdiObj.CdiVariable_getValuesAsPointer(self)
+    def getValuesWithLevelAsPointer(self, tsID = 0): return _CdiObj.CdiVariable_getValuesWithLevelAsPointer(self, tsID)
 CdiVariable_swigregister = _CdiObj.CdiVariable_swigregister
 CdiVariable_swigregister(CdiVariable)
 

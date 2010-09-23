@@ -29,9 +29,14 @@ for k in range(cdi.variables.size()):
 
 print "#========== VAR ======================================#"
 var = cdi.variables[1]
-var.readField()
-val = var.getField()
+var.getValues()
+val = var.values
 i=0; print 'val[',i,'] = ',val[i]
+i=1; print 'val[',i,'] = ',val[i]
+i=2; print 'val[',i,'] = ',val[i]
+i=3; print 'val[',i,'] = ',val[i]
+i=4; print 'val[',i,'] = ',val[i]
+i=5; print 'val[',i,'] = ',val[i]
 print "#=====================================================#"
 name ="tsurf"
 newvar = cdi.var[name]

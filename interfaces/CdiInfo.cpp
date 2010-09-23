@@ -47,22 +47,33 @@ int main() {
   printf("Zaxis (prec):%d\n"   , var.zaxis.prec);
   printf("Zaxis (levels): varno:%f -1:%f\n", var.zaxis.levels[varno], var.zaxis.levels[var.zaxis.size-1]);
 
-  var.readField();
-  var.readFieldF();
-  var.readFieldWithLevel();
-  var.readFieldWithLevelF();
-  std::cout << "field[0]  = " << var.field[0] << ' ';
-  std::cout << "field[-1] = " << var.field[var.grid.size-1] << std::endl;
-  std::cout << "fieldF[0]  = " << var.fieldF[0] << ' ';
-  std::cout << "fieldF[-1] = " << var.fieldF[var.grid.size-1] << std::endl;
+  std::cout << "# field values ================" << std::endl;
+  var.getValues();
+  std::cout << "values[0]  = " << var.values[0] <<  std::endl;
+  std::cout << "values.back() = " << var.values.back() <<  std::endl;
+  std::cout << "# field values on different levels ================" << std::endl;
+  var.getValuesWithLevel();
   for ( int ilev=0; ilev < var.zaxis.size; ilev++)
   {
     std::cout << "Level:" << ilev << std::endl;
-    std::cout << "fieldWithLevel[" << ilev << "][0]  = " << var.fieldWithLevel[ilev][0] << ' ';
-    std::cout << "fieldWithLevel[" << ilev << "][-1] = " << var.fieldWithLevel[ilev][var.grid.size-1] << std::endl;
-    std::cout << "fieldWithLevelF[" << ilev << "][0]  = " << var.fieldWithLevelF[ilev][0] << ' ';
-    std::cout << "fieldWithLevelF[" << ilev << "][-1] = " << var.fieldWithLevelF[ilev][var.grid.size-1] << std::endl;
+    std::cout << "valuesWithLevel["  << ilev << "][0]  = " << var.valuesWithLevel[ilev][0] << ' ';
+    std::cout << "valuesWithLevel["  << ilev << "][-1] = " << var.valuesWithLevel[ilev][var.grid.size-1] << std::endl;
   }
+  std::cout << "# field values (FLOAT) ================" << std::endl;
+  vector<float> floats;
+  floats = var.getFValues();
+  std::cout << "floats[0]  = " << floats[0] <<  std::endl;
+  std::cout << "floats.back() = " << floats.back() <<  std::endl;
+
+  std::cout << "# field values on different levels (FLOAT) ================" << std::endl;
+  vector< vector<float> > floatsWithLevel;
+  floatsWithLevel = var.getFValuesWithLevel();
+  for (int i = 0 ; i < floatsWithLevel.size();++i)
+  {
+    std::cout << "floatsWithLevel[" << i << "] = " << floatsWithLevel[i].front() << ' ' << floatsWithLevel[i].back() << std::endl;
+  }
+
+
   std::cout << "#===============================" << std::endl;
   std::cout << "#== Reading from the var map ===" << std::endl;
   _name = info.variables[varno+10].name;
@@ -75,6 +86,7 @@ int main() {
   std::cout << "#==== zdim Name:" << var.zaxis.name << std::endl;
   std::cout << "#==== zlevels:  " << var.zaxis.size << std::endl;
   std::cout << "#===============================" << std::endl;
+
 
   return 0;
 }

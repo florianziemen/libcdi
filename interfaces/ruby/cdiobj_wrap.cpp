@@ -1829,50 +1829,53 @@ int SWIG_Ruby_arity( VALUE proc, int minimal )
 #define SWIGTYPE_p_key_type swig_types[10]
 #define SWIGTYPE_p_mapped_type swig_types[11]
 #define SWIGTYPE_p_p_double swig_types[12]
-#define SWIGTYPE_p_p_float swig_types[13]
-#define SWIGTYPE_p_p_void swig_types[14]
-#define SWIGTYPE_p_size_type swig_types[15]
-#define SWIGTYPE_p_std__lessT_int_t swig_types[16]
-#define SWIGTYPE_p_std__lessT_std__string_t swig_types[17]
-#define SWIGTYPE_p_std__mapT_int_CdiGrid_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiGrid_t_t_t swig_types[18]
-#define SWIGTYPE_p_std__mapT_int_CdiGrid_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiGrid_t_t_t__allocator_type swig_types[19]
-#define SWIGTYPE_p_std__mapT_int_CdiGrid_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiGrid_t_t_t__const_iterator swig_types[20]
-#define SWIGTYPE_p_std__mapT_int_CdiGrid_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiGrid_t_t_t__const_reverse_iterator swig_types[21]
-#define SWIGTYPE_p_std__mapT_int_CdiGrid_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiGrid_t_t_t__iterator swig_types[22]
-#define SWIGTYPE_p_std__mapT_int_CdiGrid_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiGrid_t_t_t__mapped_type swig_types[23]
-#define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t swig_types[24]
-#define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__allocator_type swig_types[25]
-#define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__const_iterator swig_types[26]
-#define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__const_reverse_iterator swig_types[27]
-#define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__iterator swig_types[28]
-#define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type swig_types[29]
-#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t swig_types[30]
-#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type swig_types[31]
-#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__const_iterator swig_types[32]
-#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__const_reverse_iterator swig_types[33]
-#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__iterator swig_types[34]
-#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__mapped_type swig_types[35]
-#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t swig_types[36]
-#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__allocator_type swig_types[37]
-#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__const_iterator swig_types[38]
-#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__const_reverse_iterator swig_types[39]
-#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__iterator swig_types[40]
-#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type swig_types[41]
-#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t swig_types[42]
-#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__allocator_type swig_types[43]
-#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type swig_types[44]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[45]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type swig_types[46]
+#define SWIGTYPE_p_p_void swig_types[13]
+#define SWIGTYPE_p_size_type swig_types[14]
+#define SWIGTYPE_p_std__lessT_int_t swig_types[15]
+#define SWIGTYPE_p_std__lessT_std__string_t swig_types[16]
+#define SWIGTYPE_p_std__mapT_int_CdiGrid_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiGrid_t_t_t swig_types[17]
+#define SWIGTYPE_p_std__mapT_int_CdiGrid_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiGrid_t_t_t__allocator_type swig_types[18]
+#define SWIGTYPE_p_std__mapT_int_CdiGrid_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiGrid_t_t_t__const_iterator swig_types[19]
+#define SWIGTYPE_p_std__mapT_int_CdiGrid_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiGrid_t_t_t__const_reverse_iterator swig_types[20]
+#define SWIGTYPE_p_std__mapT_int_CdiGrid_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiGrid_t_t_t__iterator swig_types[21]
+#define SWIGTYPE_p_std__mapT_int_CdiGrid_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiGrid_t_t_t__mapped_type swig_types[22]
+#define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t swig_types[23]
+#define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__allocator_type swig_types[24]
+#define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__const_iterator swig_types[25]
+#define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__const_reverse_iterator swig_types[26]
+#define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__iterator swig_types[27]
+#define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type swig_types[28]
+#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t swig_types[29]
+#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type swig_types[30]
+#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__const_iterator swig_types[31]
+#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__const_reverse_iterator swig_types[32]
+#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__iterator swig_types[33]
+#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__mapped_type swig_types[34]
+#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t swig_types[35]
+#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__allocator_type swig_types[36]
+#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__const_iterator swig_types[37]
+#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__const_reverse_iterator swig_types[38]
+#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__iterator swig_types[39]
+#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type swig_types[40]
+#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t swig_types[41]
+#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__allocator_type swig_types[42]
+#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type swig_types[43]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[44]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type swig_types[45]
+#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[46]
 #define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[47]
 #define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t__allocator_type swig_types[48]
 #define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[49]
 #define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t__allocator_type swig_types[50]
-#define SWIGTYPE_p_swig__ConstIterator swig_types[51]
-#define SWIGTYPE_p_swig__GC_VALUE swig_types[52]
-#define SWIGTYPE_p_swig__Iterator swig_types[53]
-#define SWIGTYPE_p_value_type swig_types[54]
-static swig_type_info *swig_types[56];
-static swig_module_info swig_module = {swig_types, 55, 0, 0, 0, 0};
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[51]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t__allocator_type swig_types[52]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t swig_types[53]
+#define SWIGTYPE_p_swig__ConstIterator swig_types[54]
+#define SWIGTYPE_p_swig__GC_VALUE swig_types[55]
+#define SWIGTYPE_p_swig__Iterator swig_types[56]
+#define SWIGTYPE_p_value_type swig_types[57]
+static swig_type_info *swig_types[59];
+static swig_module_info swig_module = {swig_types, 58, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -4773,6 +4776,318 @@ SWIGINTERN VALUE std_vector_Sl_double_Sg____delete__(std::vector< double > *self
       r = rb_yield(Qnil);
     return r;
   }
+
+      namespace swig {
+	template <>  struct traits<std::vector<std::vector< double,std::allocator< double > >, std::allocator< std::vector< double,std::allocator< double > > > > > {
+	  typedef pointer_category category;
+	  static const char* type_name() {
+	    return "std::vector<" "std::vector< double,std::allocator< double > >" "," "std::allocator< std::vector< double,std::allocator< double > > >" " >";
+	  }
+	};
+      }
+    
+SWIGINTERN std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *std_vector_Sl_std_vector_Sl_double_Sg__Sg__dup(std::vector< std::vector< double > > *self){
+      return new std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >(*self);
+    }
+SWIGINTERN VALUE std_vector_Sl_std_vector_Sl_double_Sg__Sg__inspect(std::vector< std::vector< double > > *self){
+      std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::const_iterator i = self->begin();
+      std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::const_iterator e = self->end();
+      const char *type_name = swig::type_name< std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > >();
+      VALUE str = rb_str_new2(type_name);
+      str = rb_str_cat2( str, " [" );
+      bool comma = false;
+      VALUE tmp;
+      for ( ; i != e; ++i, comma = true )
+	{
+	  if (comma) str = rb_str_cat2( str, "," );
+	  tmp = swig::from< std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type >( *i );
+	  tmp = rb_inspect( tmp );
+	  str = rb_str_buf_append( str, tmp );
+	}
+      str = rb_str_cat2( str, "]" );
+      return str;
+    }
+SWIGINTERN VALUE std_vector_Sl_std_vector_Sl_double_Sg__Sg__to_a(std::vector< std::vector< double > > *self){
+      std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::const_iterator i = self->begin();
+      std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::const_iterator e = self->end();
+      VALUE ary = rb_ary_new2( std::distance( i, e ) );
+      VALUE tmp;
+      for ( ; i != e; ++i )
+	{
+	  tmp = swig::from< std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type >( *i );
+	  rb_ary_push( ary, tmp );
+	}
+      return ary;
+    }
+SWIGINTERN VALUE std_vector_Sl_std_vector_Sl_double_Sg__Sg__to_s(std::vector< std::vector< double > > *self){
+      std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::iterator i = self->begin();
+      std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::iterator e = self->end();
+      VALUE str = rb_str_new2( "" );
+      VALUE tmp;
+      for ( ; i != e; ++i )
+	{
+	  tmp = swig::from< std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type >( *i );
+	  tmp = rb_obj_as_string( tmp );
+	  str = rb_str_buf_append( str, tmp );
+	}
+      return str;
+    }
+SWIGINTERN VALUE std_vector_Sl_std_vector_Sl_double_Sg__Sg__slice(std::vector< std::vector< double > > *self,std::vector< std::vector< double > >::difference_type i,std::vector< std::vector< double > >::difference_type j){
+	if ( j <= 0 ) return Qnil;
+	std::size_t len = self->size();
+	if ( i < 0 ) i = len - i;
+	j += i;
+	if ( static_cast<std::size_t>(j) >= len ) j = len-1;
+
+	VALUE r = Qnil;
+	try {
+	  r = swig::from< const std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >* >( swig::getslice(self, i, j) );
+	}
+	catch( std::out_of_range )
+	  {
+	  }
+	return r;
+      }
+SWIGINTERN std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *std_vector_Sl_std_vector_Sl_double_Sg__Sg__each(std::vector< std::vector< double > > *self){
+	if ( !rb_block_given_p() )
+	  rb_raise( rb_eArgError, "no block given");
+
+	VALUE r;
+	std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::const_iterator i = self->begin();
+	std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::const_iterator e = self->end();
+	for ( ; i != e; ++i )
+	  {
+	    r = swig::from< std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type >(*i);
+	    rb_yield(r);
+	  }
+	
+	return self;
+      }
+SWIGINTERN std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *std_vector_Sl_std_vector_Sl_double_Sg__Sg__select(std::vector< std::vector< double > > *self){
+      if ( !rb_block_given_p() )
+	rb_raise( rb_eArgError, "no block given" );
+
+      std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >* r = new std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >;
+      std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::const_iterator i = self->begin();
+      std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::const_iterator e = self->end();
+      for ( ; i != e; ++i )
+	{
+	  VALUE v = swig::from< std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type >(*i);
+	  if ( RTEST( rb_yield(v) ) )
+	    self->insert( r->end(), *i);
+	}
+	
+      return r;
+    }
+SWIGINTERN std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *std_vector_Sl_std_vector_Sl_double_Sg__Sg__reject_bang(std::vector< std::vector< double > > *self){
+      if ( !rb_block_given_p() )
+	rb_raise( rb_eArgError, "no block given" );
+
+      std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::iterator i = self->begin();
+      std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::iterator e = self->end();
+      for ( ; i != e; )
+	{
+	  VALUE r = swig::from< std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type >(*i);
+	  if ( RTEST( rb_yield(r) ) ) {
+	    self->erase(i++);
+            e = self->end();
+	  } else {
+	    ++i;
+          }
+	}
+	
+      return self;
+    }
+SWIGINTERN VALUE std_vector_Sl_std_vector_Sl_double_Sg__Sg__delete_at(std::vector< std::vector< double > > *self,std::vector< std::vector< double > >::difference_type i){
+      VALUE r = Qnil;
+      try {
+	std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::iterator at = swig::getpos(self, i);
+	r = swig::from< std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type >( *(at) );
+	self->erase(at); 
+      }
+      catch (std::out_of_range)
+	{
+	}
+      return r;
+    }
+SWIGINTERN VALUE std_vector_Sl_std_vector_Sl_double_Sg__Sg____delete2__(std::vector< std::vector< double > > *self,std::vector< std::vector< double > >::value_type const &i){
+      VALUE r = Qnil;
+      return r;
+    }
+SWIGINTERN VALUE std_vector_Sl_std_vector_Sl_double_Sg__Sg__pop(std::vector< std::vector< double > > *self){
+      if (self->empty()) return Qnil;
+      std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type x = self->back();
+      self->pop_back();
+      return swig::from< std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type >( x );
+    }
+SWIGINTERN std::vector< std::vector< double > >::value_type const std_vector_Sl_std_vector_Sl_double_Sg__Sg__push(std::vector< std::vector< double > > *self,std::vector< std::vector< double > >::value_type const &e){
+      self->push_back( e );
+      return e;
+    }
+SWIGINTERN std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *std_vector_Sl_std_vector_Sl_double_Sg__Sg__reject(std::vector< std::vector< double > > *self){
+      if ( !rb_block_given_p() )
+	rb_raise( rb_eArgError, "no block given" );
+
+      std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >* r = new std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >;
+      std::remove_copy_if( self->begin(), self->end(),              
+			   std::back_inserter(*r),
+			   swig::yield< std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type >() );
+      return r;
+    }
+SWIGINTERN VALUE std_vector_Sl_std_vector_Sl_double_Sg__Sg__at(std::vector< std::vector< double > > const *self,std::vector< std::vector< double > >::difference_type i){
+      VALUE r = Qnil;
+      try {
+	r = swig::from< std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type >( *(swig::cgetpos(self, i)) );
+      }
+      catch( std::out_of_range )
+	{
+	}
+      return r;
+    }
+SWIGINTERN VALUE std_vector_Sl_std_vector_Sl_double_Sg__Sg____getitem____SWIG_0(std::vector< std::vector< double > > const *self,std::vector< std::vector< double > >::difference_type i,std::vector< std::vector< double > >::difference_type j){
+      if ( j <= 0 ) return Qnil;
+      std::size_t len = self->size();
+      if ( i < 0 ) i = len - i;
+      j += i; if ( static_cast<std::size_t>(j) >= len ) j = len-1;
+
+      VALUE r = Qnil;
+      try {
+	r = swig::from< const std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >* >( swig::getslice(self, i, j) );
+      }
+      catch( std::out_of_range )
+	{
+	}
+      return r;
+    }
+SWIGINTERN VALUE std_vector_Sl_std_vector_Sl_double_Sg__Sg____getitem____SWIG_1(std::vector< std::vector< double > > const *self,std::vector< std::vector< double > >::difference_type i){
+      VALUE r = Qnil;
+      try {
+	r = swig::from< std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type >( *(swig::cgetpos(self, i)) );
+      }
+      catch( std::out_of_range )
+	{
+	}
+      return r;
+    }
+SWIGINTERN VALUE std_vector_Sl_std_vector_Sl_double_Sg__Sg____getitem____SWIG_2(std::vector< std::vector< double > > const *self,VALUE i){
+      if ( rb_obj_is_kind_of( i, rb_cRange ) == Qfalse )
+	{
+	  rb_raise( rb_eTypeError, "not a valid index or range" );
+	}
+
+      VALUE r = Qnil;
+      static ID id_end   = rb_intern("end");
+      static ID id_start = rb_intern("begin");
+      static ID id_noend = rb_intern("exclude_end?");
+
+      VALUE start = rb_funcall( i, id_start, 0 );
+      VALUE end   = rb_funcall( i, id_end, 0 );
+      bool  noend = ( rb_funcall( i, id_noend, 0 ) == Qtrue );
+
+      int len = self->size();
+
+      int s = NUM2INT( start );
+      if ( s < 0 ) s = len + s;
+      else if ( s >= len ) return Qnil;
+
+      int e = NUM2INT( end );
+      if ( e < 0 ) e = len + e;
+
+      if ( e < s ) return Qnil; //std::swap( s, e );
+
+      if ( noend ) e -= 1;
+      if ( e >= len ) e = len - 1;
+
+      return swig::from< std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >* >( swig::getslice(self, s, e+1) );
+    }
+SWIGINTERN VALUE std_vector_Sl_std_vector_Sl_double_Sg__Sg____setitem____SWIG_0(std::vector< std::vector< double > > *self,std::vector< std::vector< double > >::difference_type i,std::vector< std::vector< double > >::value_type const &x){
+	std::size_t len = self->size();
+	if ( i < 0 ) i = len - i;
+	else if ( static_cast<std::size_t>(i) >= len )
+	  self->resize( i+1, x );
+	else
+	  *(swig::getpos(self,i)) = x;
+
+	return swig::from< std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type >( x );
+      }
+SWIGINTERN VALUE std_vector_Sl_std_vector_Sl_double_Sg__Sg____setitem____SWIG_1(std::vector< std::vector< double > > *self,std::vector< std::vector< double > >::difference_type i,std::vector< std::vector< double > >::difference_type j,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &v){
+
+      if ( j <= 0 ) return Qnil;
+      std::size_t len = self->size();
+      if ( i < 0 ) i = len - i;
+      j += i; 
+      if ( static_cast<std::size_t>(j) >= len ) {
+	self->resize( j+1, *(v.begin()) );
+	j = len-1;
+      }
+
+      VALUE r = Qnil;
+      swig::setslice(self, i, j, v);
+      r = swig::from< const std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >* >( &v );
+      return r;
+    }
+SWIGINTERN VALUE std_vector_Sl_std_vector_Sl_double_Sg__Sg__shift(std::vector< std::vector< double > > *self){
+      if (self->empty()) return Qnil;
+      std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type x = self->front();
+      self->erase( self->begin() );
+      return swig::from< std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type >( x );
+    }
+SWIGINTERN std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *std_vector_Sl_std_vector_Sl_double_Sg__Sg__insert__SWIG_0(std::vector< std::vector< double > > *self,std::vector< std::vector< double > >::difference_type pos,int argc,VALUE *argv,...){
+      std::size_t len = self->size();
+      std::size_t   i = swig::check_index( pos, len, true );
+      std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::iterator start;
+
+      VALUE elem = argv[0];
+      int idx = 0;
+      try {
+	std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type val = swig::as<std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type>( elem, true );
+	if ( i >= len ) {
+	  self->resize(i-1, val);
+	  return self;
+	}
+	start = self->begin();
+	std::advance( start, i );
+	self->insert( start++, val );
+
+	for ( ++idx; idx < argc; ++idx )
+	  {
+	    elem = argv[idx];
+	    val = swig::as<std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type>( elem );
+	    self->insert( start++, val );
+	  }
+
+      } 
+      catch( std::invalid_argument )
+	{
+	  rb_raise( rb_eArgError, "%s",
+		    Ruby_Format_TypeError( "", 
+					   swig::type_name<std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type>(),
+					   __FUNCTION__, idx+2, elem ));
+	}
+
+
+      return self;
+    }
+SWIGINTERN std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *std_vector_Sl_std_vector_Sl_double_Sg__Sg__unshift(std::vector< std::vector< double > > *self,int argc,VALUE *argv,...){
+      for ( int idx = argc-1; idx >= 0; --idx )
+	{
+	  std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::iterator start = self->begin();
+	  VALUE elem = argv[idx];
+	  try {
+	    std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type val = swig::as<std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type>( elem, true );
+	    self->insert( start, val );
+	  }
+	  catch( std::invalid_argument )
+	    {
+	      rb_raise( rb_eArgError, "%s",
+			Ruby_Format_TypeError( "", 
+					       swig::type_name<std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >::value_type>(),
+					       __FUNCTION__, idx+2, elem ));
+	    }
+	}
+
+      return self;
+    }
 
 SWIGINTERN swig_type_info*
 SWIG_pchar_descriptor(void)
@@ -12575,6 +12890,2186 @@ fail:
 
 SWIGINTERN void
 free_std_vector_Sl_double_Sg_(std::vector< double > *arg1) {
+    delete arg1;
+}
+
+swig_class SwigClassDoubleDoubleVector;
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.dup
+
+  call-seq:
+    dup -> DoubleDoubleVector
+
+Create a duplicate of the class and unfreeze it if needed.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_dup(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","dup", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)std_vector_Sl_std_vector_Sl_double_Sg__Sg__dup(arg1);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.inspect
+
+  call-seq:
+    inspect -> VALUE
+
+Inspect class and its contents.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_inspect(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","inspect", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = (VALUE)std_vector_Sl_std_vector_Sl_double_Sg__Sg__inspect(arg1);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.to_a
+
+  call-seq:
+    to_a -> VALUE
+
+Convert DoubleDoubleVector to an Array.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_to_a(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","to_a", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = (VALUE)std_vector_Sl_std_vector_Sl_double_Sg__Sg__to_a(arg1);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.to_s
+
+  call-seq:
+    to_s -> VALUE
+
+Convert class to a String representation.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_to_s(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","to_s", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = (VALUE)std_vector_Sl_std_vector_Sl_double_Sg__Sg__to_s(arg1);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.slice
+
+  call-seq:
+    slice(i, j) -> VALUE
+
+Return a slice (portion of) the DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_slice(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::difference_type arg2 ;
+  std::vector< std::vector< double > >::difference_type arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  ptrdiff_t val2 ;
+  int ecode2 = 0 ;
+  ptrdiff_t val3 ;
+  int ecode3 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 2) || (argc > 2)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 2)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","slice", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  ecode2 = SWIG_AsVal_ptrdiff_t(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::difference_type","slice", 2, argv[0] ));
+  } 
+  arg2 = static_cast< std::vector< std::vector< double > >::difference_type >(val2);
+  ecode3 = SWIG_AsVal_ptrdiff_t(argv[1], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::difference_type","slice", 3, argv[1] ));
+  } 
+  arg3 = static_cast< std::vector< std::vector< double > >::difference_type >(val3);
+  result = (VALUE)std_vector_Sl_std_vector_Sl_double_Sg__Sg__slice(arg1,arg2,arg3);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.each
+
+  call-seq:
+    each -> DoubleDoubleVector
+
+Iterate thru each element in the DoubleDoubleVector.  A block must be provided.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_each(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","each", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)std_vector_Sl_std_vector_Sl_double_Sg__Sg__each(arg1);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.select
+
+  call-seq:
+    select -> DoubleDoubleVector
+
+Iterate thru each element in the DoubleDoubleVector and select those that match a condition.  A block must be provided.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_select(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","select", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)std_vector_Sl_std_vector_Sl_double_Sg__Sg__select(arg1);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.reject!
+
+  call-seq:
+    reject! -> DoubleDoubleVector
+
+Iterate thru each element in the DoubleDoubleVector and reject those that fail a condition.  A block must be provided.  DoubleDoubleVector is modified in place.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_rejectN___(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","reject_bang", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)std_vector_Sl_std_vector_Sl_double_Sg__Sg__reject_bang(arg1);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.delete_at
+
+  call-seq:
+    delete_at(i) -> VALUE
+
+Delete an element at a certain index.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_delete_at(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::difference_type arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  ptrdiff_t val2 ;
+  int ecode2 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","delete_at", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  ecode2 = SWIG_AsVal_ptrdiff_t(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::difference_type","delete_at", 2, argv[0] ));
+  } 
+  arg2 = static_cast< std::vector< std::vector< double > >::difference_type >(val2);
+  result = (VALUE)std_vector_Sl_std_vector_Sl_double_Sg__Sg__delete_at(arg1,arg2);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector___delete2__(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::value_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","__delete2__", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  {
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res2 = swig::asptr(argv[0], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::value_type const &","__delete2__", 2, argv[0] )); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::vector< std::vector< double > >::value_type const &","__delete2__", 2, argv[0])); 
+    }
+    arg2 = ptr;
+  }
+  result = (VALUE)std_vector_Sl_std_vector_Sl_double_Sg__Sg____delete2__(arg1,(std::vector< double,std::allocator< double > > const &)*arg2);
+  vresult = result;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return vresult;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.pop
+
+  call-seq:
+    pop -> VALUE
+
+Remove and return element at the end of the DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_pop(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","pop", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = (VALUE)std_vector_Sl_std_vector_Sl_double_Sg__Sg__pop(arg1);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.push
+
+  call-seq:
+    push(e) -> value_type
+
+Add an element at the end of the DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_push(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::value_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  std::vector< std::vector< double > >::value_type result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","push", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  {
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res2 = swig::asptr(argv[0], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::value_type const &","push", 2, argv[0] )); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::vector< std::vector< double > >::value_type const &","push", 2, argv[0])); 
+    }
+    arg2 = ptr;
+  }
+  result = std_vector_Sl_std_vector_Sl_double_Sg__Sg__push(arg1,(std::vector< double,std::allocator< double > > const &)*arg2);
+  vresult = swig::from(static_cast< std::vector<double,std::allocator< double > > >(result));
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return vresult;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.reject
+
+  call-seq:
+    reject -> DoubleDoubleVector
+
+Iterate thru each element in the DoubleDoubleVector and reject those that fail a condition returning a new DoubleDoubleVector.  A block must be provided.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_reject(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","reject", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)std_vector_Sl_std_vector_Sl_double_Sg__Sg__reject(arg1);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.at
+
+  call-seq:
+    at(i) -> VALUE
+
+Return element at a certain index.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_at(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::difference_type arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  ptrdiff_t val2 ;
+  int ecode2 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > const *","at", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  ecode2 = SWIG_AsVal_ptrdiff_t(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::difference_type","at", 2, argv[0] ));
+  } 
+  arg2 = static_cast< std::vector< std::vector< double > >::difference_type >(val2);
+  result = (VALUE)std_vector_Sl_std_vector_Sl_double_Sg__Sg__at((std::vector< std::vector< double > > const *)arg1,arg2);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.[]
+
+  call-seq:
+    [](i, j) -> VALUE
+    [](i) -> VALUE
+    [](i) -> VALUE
+
+Element accessor/slicing.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector___getitem____SWIG_0(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::difference_type arg2 ;
+  std::vector< std::vector< double > >::difference_type arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  ptrdiff_t val2 ;
+  int ecode2 = 0 ;
+  ptrdiff_t val3 ;
+  int ecode3 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 2) || (argc > 2)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 2)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > const *","__getitem__", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  ecode2 = SWIG_AsVal_ptrdiff_t(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::difference_type","__getitem__", 2, argv[0] ));
+  } 
+  arg2 = static_cast< std::vector< std::vector< double > >::difference_type >(val2);
+  ecode3 = SWIG_AsVal_ptrdiff_t(argv[1], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::difference_type","__getitem__", 3, argv[1] ));
+  } 
+  arg3 = static_cast< std::vector< std::vector< double > >::difference_type >(val3);
+  result = (VALUE)std_vector_Sl_std_vector_Sl_double_Sg__Sg____getitem____SWIG_0((std::vector< std::vector< double > > const *)arg1,arg2,arg3);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector___getitem____SWIG_1(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::difference_type arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  ptrdiff_t val2 ;
+  int ecode2 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > const *","__getitem__", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  ecode2 = SWIG_AsVal_ptrdiff_t(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::difference_type","__getitem__", 2, argv[0] ));
+  } 
+  arg2 = static_cast< std::vector< std::vector< double > >::difference_type >(val2);
+  result = (VALUE)std_vector_Sl_std_vector_Sl_double_Sg__Sg____getitem____SWIG_1((std::vector< std::vector< double > > const *)arg1,arg2);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector___getitem____SWIG_2(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  VALUE arg2 = (VALUE) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > const *","__getitem__", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  arg2 = argv[0];
+  result = (VALUE)std_vector_Sl_std_vector_Sl_double_Sg__Sg____getitem____SWIG_2((std::vector< std::vector< double > > const *)arg1,arg2);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE _wrap_DoubleDoubleVector___getitem__(int nargs, VALUE *args, VALUE self) {
+  int argc;
+  VALUE argv[4];
+  int ii;
+  
+  argc = nargs + 1;
+  argv[0] = self;
+  if (argc > 4) SWIG_fail;
+  for (ii = 1; (ii < argc); ++ii) {
+    argv[ii] = args[ii-1];
+  }
+  if (argc == 2) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_ptrdiff_t(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_DoubleDoubleVector___getitem____SWIG_1(nargs, args, self);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      _v = (argv[1] != 0);
+      if (_v) {
+        return _wrap_DoubleDoubleVector___getitem____SWIG_2(nargs, args, self);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_ptrdiff_t(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_ptrdiff_t(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_DoubleDoubleVector___getitem____SWIG_0(nargs, args, self);
+        }
+      }
+    }
+  }
+  
+fail:
+  Ruby_Format_OverloadedError( argc, 4, "__getitem__", 
+    "    VALUE __getitem__(std::vector< std::vector< double > >::difference_type i, std::vector< std::vector< double > >::difference_type j)\n"
+    "    VALUE __getitem__(std::vector< std::vector< double > >::difference_type i)\n"
+    "    VALUE __getitem__(VALUE i)\n");
+  
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.[]=
+
+  call-seq:
+    []=(i, x) -> VALUE
+    []=(i, j, v) -> VALUE
+
+Element setter/slicing.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector___setitem____SWIG_0(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::difference_type arg2 ;
+  std::vector< std::vector< double > >::value_type *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  ptrdiff_t val2 ;
+  int ecode2 = 0 ;
+  int res3 = SWIG_OLDOBJ ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 2) || (argc > 2)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 2)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","__setitem__", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  ecode2 = SWIG_AsVal_ptrdiff_t(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::difference_type","__setitem__", 2, argv[0] ));
+  } 
+  arg2 = static_cast< std::vector< std::vector< double > >::difference_type >(val2);
+  {
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res3 = swig::asptr(argv[1], &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::value_type const &","__setitem__", 3, argv[1] )); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::vector< std::vector< double > >::value_type const &","__setitem__", 3, argv[1])); 
+    }
+    arg3 = ptr;
+  }
+  result = (VALUE)std_vector_Sl_std_vector_Sl_double_Sg__Sg____setitem____SWIG_0(arg1,arg2,(std::vector< double,std::allocator< double > > const &)*arg3);
+  vresult = result;
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return vresult;
+fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector___setitem____SWIG_1(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::difference_type arg2 ;
+  std::vector< std::vector< double > >::difference_type arg3 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg4 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  ptrdiff_t val2 ;
+  int ecode2 = 0 ;
+  ptrdiff_t val3 ;
+  int ecode3 = 0 ;
+  int res4 = SWIG_OLDOBJ ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 3) || (argc > 3)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 3)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","__setitem__", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  ecode2 = SWIG_AsVal_ptrdiff_t(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::difference_type","__setitem__", 2, argv[0] ));
+  } 
+  arg2 = static_cast< std::vector< std::vector< double > >::difference_type >(val2);
+  ecode3 = SWIG_AsVal_ptrdiff_t(argv[1], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::difference_type","__setitem__", 3, argv[1] ));
+  } 
+  arg3 = static_cast< std::vector< std::vector< double > >::difference_type >(val3);
+  {
+    std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
+    res4 = swig::asptr(argv[2], &ptr);
+    if (!SWIG_IsOK(res4)) {
+      SWIG_exception_fail(SWIG_ArgError(res4), Ruby_Format_TypeError( "", "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &","__setitem__", 4, argv[2] )); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &","__setitem__", 4, argv[2])); 
+    }
+    arg4 = ptr;
+  }
+  try {
+    result = (VALUE)std_vector_Sl_std_vector_Sl_double_Sg__Sg____setitem____SWIG_1(arg1,arg2,arg3,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg4);
+  }
+  catch(std::invalid_argument &_e) {
+    SWIG_exception_fail(SWIG_ValueError, (&_e)->what());
+  }
+  
+  vresult = result;
+  if (SWIG_IsNewObj(res4)) delete arg4;
+  return vresult;
+fail:
+  if (SWIG_IsNewObj(res4)) delete arg4;
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE _wrap_DoubleDoubleVector___setitem__(int nargs, VALUE *args, VALUE self) {
+  int argc;
+  VALUE argv[5];
+  int ii;
+  
+  argc = nargs + 1;
+  argv[0] = self;
+  if (argc > 5) SWIG_fail;
+  for (ii = 1; (ii < argc); ++ii) {
+    argv[ii] = args[ii-1];
+  }
+  if (argc == 3) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_ptrdiff_t(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        int res = swig::asptr(argv[2], (std::vector<double,std::allocator< double > >**)(0));
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          return _wrap_DoubleDoubleVector___setitem____SWIG_0(nargs, args, self);
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_ptrdiff_t(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_ptrdiff_t(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          int res = swig::asptr(argv[3], (std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+          _v = SWIG_CheckState(res);
+          if (_v) {
+            return _wrap_DoubleDoubleVector___setitem____SWIG_1(nargs, args, self);
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  Ruby_Format_OverloadedError( argc, 5, "__setitem__", 
+    "    VALUE __setitem__(std::vector< std::vector< double > >::difference_type i, std::vector< std::vector< double > >::value_type const &x)\n"
+    "    VALUE __setitem__(std::vector< std::vector< double > >::difference_type i, std::vector< std::vector< double > >::difference_type j, std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &v)\n");
+  
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.shift
+
+  call-seq:
+    shift -> VALUE
+
+Remove and return element at the beginning of the DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_shift(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","shift", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = (VALUE)std_vector_Sl_std_vector_Sl_double_Sg__Sg__shift(arg1);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.insert
+
+  call-seq:
+    insert(pos, argc, ?) -> DoubleDoubleVector
+    insert(pos, x) -> iterator
+    insert(pos, n, x)
+
+Insert one or more new elements in the DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_insert__SWIG_0(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::difference_type arg2 ;
+  int arg3 ;
+  VALUE *arg4 = (VALUE *) 0 ;
+  void *arg5 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  ptrdiff_t val2 ;
+  int ecode2 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if (argc < 2) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 2)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","insert", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  ecode2 = SWIG_AsVal_ptrdiff_t(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::difference_type","insert", 2, argv[0] ));
+  } 
+  arg2 = static_cast< std::vector< std::vector< double > >::difference_type >(val2);
+  {
+    arg3 = argc - 1;
+    arg4 = argv + 1;
+  }
+  result = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)std_vector_Sl_std_vector_Sl_double_Sg__Sg__insert__SWIG_0(arg1,arg2,arg3,arg4,arg5);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.unshift
+
+  call-seq:
+    unshift(argc, ?) -> DoubleDoubleVector
+
+Add one or more elements at the beginning of the DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_unshift(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  int arg2 ;
+  VALUE *arg3 = (VALUE *) 0 ;
+  void *arg4 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if (argc < 1) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","unshift", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  {
+    arg2 = argc;
+    arg3 = argv;
+  }
+  result = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)std_vector_Sl_std_vector_Sl_double_Sg__Sg__unshift(arg1,arg2,arg3,arg4);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_new_DoubleDoubleVector__SWIG_0(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *result = 0 ;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  result = (std::vector< std::vector< double > > *)new std::vector< std::vector< double > >();
+  DATA_PTR(self) = result;
+  return self;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_new_DoubleDoubleVector__SWIG_1(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double,std::allocator< double > > > *arg1 = 0 ;
+  int res1 = SWIG_OLDOBJ ;
+  std::vector< std::vector< double > > *result = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  {
+    std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
+    res1 = swig::asptr(argv[0], &ptr);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double,std::allocator< double > > > const &","std::vector<(std::vector<(double)>)>", 1, argv[0] )); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::vector< std::vector< double,std::allocator< double > > > const &","std::vector<(std::vector<(double)>)>", 1, argv[0])); 
+    }
+    arg1 = ptr;
+  }
+  result = (std::vector< std::vector< double > > *)new std::vector< std::vector< double > >((std::vector< std::vector< double,std::allocator< double > > > const &)*arg1);
+  DATA_PTR(self) = result;
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  return self;
+fail:
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.empty?
+
+  call-seq:
+    empty? -> bool
+
+Check if the DoubleDoubleVector is empty or not.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_emptyq___(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > const *","empty", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = (bool)((std::vector< std::vector< double > > const *)arg1)->empty();
+  vresult = SWIG_From_bool(static_cast< bool >(result));
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.size
+
+  call-seq:
+    size -> size_type
+
+Size or Length of the DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_size(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double > >::size_type result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > const *","size", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = ((std::vector< std::vector< double > > const *)arg1)->size();
+  vresult = SWIG_From_size_t(static_cast< size_t >(result));
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.clear
+
+  call-seq:
+    clear
+
+Clear DoubleDoubleVector contents.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_clear(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","clear", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  (arg1)->clear();
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_swap(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double,std::allocator< double > > > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","swap", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], &argp2, SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t,  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::vector< std::vector< double,std::allocator< double > > > &","swap", 2, argv[0] )); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::vector< std::vector< double,std::allocator< double > > > &","swap", 2, argv[0])); 
+  }
+  arg2 = reinterpret_cast< std::vector< std::vector< double,std::allocator< double > > > * >(argp2);
+  (arg1)->swap(*arg2);
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_get_allocator(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  SwigValueWrapper< std::allocator< std::vector< double,std::allocator< double > > > > result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > const *","get_allocator", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = ((std::vector< std::vector< double > > const *)arg1)->get_allocator();
+  vresult = SWIG_NewPointerObj((new std::vector< std::vector< double > >::allocator_type(static_cast< const std::vector< std::vector< double > >::allocator_type& >(result))), SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t__allocator_type, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.begin
+
+  call-seq:
+    begin -> const_iterator
+
+Return an iterator to the beginning of the DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_begin(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double > >::const_iterator result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > const *","begin", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = ((std::vector< std::vector< double > > const *)arg1)->begin();
+  vresult = SWIG_NewPointerObj(swig::make_const_iterator(static_cast< const std::vector< std::vector< double > >::const_iterator & >(result),
+      self),
+    swig::ConstIterator::descriptor(),SWIG_POINTER_OWN);
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.end
+
+  call-seq:
+    end -> const_iterator
+
+Return an iterator to past the end of the DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_end(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double > >::const_iterator result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > const *","end", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = ((std::vector< std::vector< double > > const *)arg1)->end();
+  vresult = SWIG_NewPointerObj(swig::make_const_iterator(static_cast< const std::vector< std::vector< double > >::const_iterator & >(result),
+      self),
+    swig::ConstIterator::descriptor(),SWIG_POINTER_OWN);
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.rbegin
+
+  call-seq:
+    rbegin -> const_reverse_iterator
+
+Return a reverse iterator to the beginning (the end) of the DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_rbegin(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double > >::const_reverse_iterator result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > const *","rbegin", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = ((std::vector< std::vector< double > > const *)arg1)->rbegin();
+  vresult = SWIG_NewPointerObj(swig::make_const_iterator(static_cast< const std::vector< std::vector< double > >::const_reverse_iterator & >(result),
+      self),
+    swig::ConstIterator::descriptor(),SWIG_POINTER_OWN);
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.rend
+
+  call-seq:
+    rend -> const_reverse_iterator
+
+Return a reverse iterator to past the end (past the beginning) of the DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_rend(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double > >::const_reverse_iterator result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > const *","rend", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = ((std::vector< std::vector< double > > const *)arg1)->rend();
+  vresult = SWIG_NewPointerObj(swig::make_const_iterator(static_cast< const std::vector< std::vector< double > >::const_reverse_iterator & >(result),
+      self),
+    swig::ConstIterator::descriptor(),SWIG_POINTER_OWN);
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_new_DoubleDoubleVector__SWIG_2(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > >::size_type arg1 ;
+  size_t val1 ;
+  int ecode1 = 0 ;
+  std::vector< std::vector< double > > *result = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  ecode1 = SWIG_AsVal_size_t(argv[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::size_type","std::vector<(std::vector<(double)>)>", 1, argv[0] ));
+  } 
+  arg1 = static_cast< std::vector< std::vector< double > >::size_type >(val1);
+  result = (std::vector< std::vector< double > > *)new std::vector< std::vector< double > >(arg1);
+  DATA_PTR(self) = result;
+  return self;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.resize
+
+  call-seq:
+    resize(new_size)
+    resize(new_size, x)
+
+Resize the size of the DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_resize__SWIG_0(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::size_type arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  size_t val2 ;
+  int ecode2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","resize", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  ecode2 = SWIG_AsVal_size_t(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::size_type","resize", 2, argv[0] ));
+  } 
+  arg2 = static_cast< std::vector< std::vector< double > >::size_type >(val2);
+  (arg1)->resize(arg2);
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.erase
+
+  call-seq:
+    erase(pos) -> iterator
+    erase(first, last) -> iterator
+
+Delete a portion of the DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_erase__SWIG_0(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::iterator arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  swig::Iterator *iter2 = 0 ;
+  int res2 ;
+  std::vector< std::vector< double > >::iterator result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","erase", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], SWIG_as_voidptrptr(&iter2), swig::Iterator::descriptor(), 0);
+  if (!SWIG_IsOK(res2) || !iter2) {
+    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::iterator","erase", 2, argv[0] ));
+  } else {
+    swig::Iterator_T<std::vector< std::vector< double > >::iterator > *iter_t = dynamic_cast<swig::Iterator_T<std::vector< std::vector< double > >::iterator > *>(iter2);
+    if (iter_t) {
+      arg2 = iter_t->get_current();
+    } else {
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::iterator","erase", 2, argv[0] ));
+    }
+  }
+  result = (arg1)->erase(arg2);
+  vresult = SWIG_NewPointerObj(swig::make_nonconst_iterator(static_cast< const std::vector< std::vector< double > >::iterator & >(result),
+      self),
+    swig::Iterator::descriptor(),SWIG_POINTER_OWN);
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_erase__SWIG_1(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::iterator arg2 ;
+  std::vector< std::vector< double > >::iterator arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  swig::Iterator *iter2 = 0 ;
+  int res2 ;
+  swig::Iterator *iter3 = 0 ;
+  int res3 ;
+  std::vector< std::vector< double > >::iterator result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 2) || (argc > 2)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 2)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","erase", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], SWIG_as_voidptrptr(&iter2), swig::Iterator::descriptor(), 0);
+  if (!SWIG_IsOK(res2) || !iter2) {
+    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::iterator","erase", 2, argv[0] ));
+  } else {
+    swig::Iterator_T<std::vector< std::vector< double > >::iterator > *iter_t = dynamic_cast<swig::Iterator_T<std::vector< std::vector< double > >::iterator > *>(iter2);
+    if (iter_t) {
+      arg2 = iter_t->get_current();
+    } else {
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::iterator","erase", 2, argv[0] ));
+    }
+  }
+  res3 = SWIG_ConvertPtr(argv[1], SWIG_as_voidptrptr(&iter3), swig::Iterator::descriptor(), 0);
+  if (!SWIG_IsOK(res3) || !iter3) {
+    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::iterator","erase", 3, argv[1] ));
+  } else {
+    swig::Iterator_T<std::vector< std::vector< double > >::iterator > *iter_t = dynamic_cast<swig::Iterator_T<std::vector< std::vector< double > >::iterator > *>(iter3);
+    if (iter_t) {
+      arg3 = iter_t->get_current();
+    } else {
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::iterator","erase", 3, argv[1] ));
+    }
+  }
+  result = (arg1)->erase(arg2,arg3);
+  vresult = SWIG_NewPointerObj(swig::make_nonconst_iterator(static_cast< const std::vector< std::vector< double > >::iterator & >(result),
+      self),
+    swig::Iterator::descriptor(),SWIG_POINTER_OWN);
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE _wrap_DoubleDoubleVector_erase(int nargs, VALUE *args, VALUE self) {
+  int argc;
+  VALUE argv[4];
+  int ii;
+  
+  argc = nargs + 1;
+  argv[0] = self;
+  if (argc > 4) SWIG_fail;
+  for (ii = 1; (ii < argc); ++ii) {
+    argv[ii] = args[ii-1];
+  }
+  if (argc == 2) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      swig::ConstIterator *iter = 0;
+      int res = SWIG_ConvertPtr(argv[1], SWIG_as_voidptrptr(&iter), 
+        swig::Iterator::descriptor(), 0);
+      _v = (SWIG_IsOK(res) && iter && (dynamic_cast<swig::Iterator_T<std::vector< std::vector< double > >::iterator > *>(iter) != 0));
+      if (_v) {
+        return _wrap_DoubleDoubleVector_erase__SWIG_0(nargs, args, self);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      swig::ConstIterator *iter = 0;
+      int res = SWIG_ConvertPtr(argv[1], SWIG_as_voidptrptr(&iter), 
+        swig::Iterator::descriptor(), 0);
+      _v = (SWIG_IsOK(res) && iter && (dynamic_cast<swig::Iterator_T<std::vector< std::vector< double > >::iterator > *>(iter) != 0));
+      if (_v) {
+        swig::ConstIterator *iter = 0;
+        int res = SWIG_ConvertPtr(argv[2], SWIG_as_voidptrptr(&iter), 
+          swig::Iterator::descriptor(), 0);
+        _v = (SWIG_IsOK(res) && iter && (dynamic_cast<swig::Iterator_T<std::vector< std::vector< double > >::iterator > *>(iter) != 0));
+        if (_v) {
+          return _wrap_DoubleDoubleVector_erase__SWIG_1(nargs, args, self);
+        }
+      }
+    }
+  }
+  
+fail:
+  Ruby_Format_OverloadedError( argc, 4, "DoubleDoubleVector.erase", 
+    "    std::vector< std::vector< double > >::iterator DoubleDoubleVector.erase(std::vector< std::vector< double > >::iterator pos)\n"
+    "    std::vector< std::vector< double > >::iterator DoubleDoubleVector.erase(std::vector< std::vector< double > >::iterator first, std::vector< std::vector< double > >::iterator last)\n");
+  
+  return Qnil;
+}
+
+
+#ifdef HAVE_RB_DEFINE_ALLOC_FUNC
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_allocate(VALUE self) {
+#else
+  SWIGINTERN VALUE
+  _wrap_DoubleDoubleVector_allocate(int argc, VALUE *argv, VALUE self) {
+#endif
+    
+    
+    VALUE vresult = SWIG_NewClassInstance(self, SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t);
+#ifndef HAVE_RB_DEFINE_ALLOC_FUNC
+    rb_obj_call_init(vresult, argc, argv);
+#endif
+    return vresult;
+  }
+  
+
+SWIGINTERN VALUE
+_wrap_new_DoubleDoubleVector__SWIG_3(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > >::size_type arg1 ;
+  std::vector< std::vector< double > >::value_type *arg2 = 0 ;
+  size_t val1 ;
+  int ecode1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  std::vector< std::vector< double > > *result = 0 ;
+  
+  if ((argc < 2) || (argc > 2)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 2)",argc); SWIG_fail;
+  }
+  ecode1 = SWIG_AsVal_size_t(argv[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::size_type","std::vector<(std::vector<(double)>)>", 1, argv[0] ));
+  } 
+  arg1 = static_cast< std::vector< std::vector< double > >::size_type >(val1);
+  {
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res2 = swig::asptr(argv[1], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::value_type const &","std::vector<(std::vector<(double)>)>", 2, argv[1] )); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::vector< std::vector< double > >::value_type const &","std::vector<(std::vector<(double)>)>", 2, argv[1])); 
+    }
+    arg2 = ptr;
+  }
+  result = (std::vector< std::vector< double > > *)new std::vector< std::vector< double > >(arg1,(std::vector< std::vector< double > >::value_type const &)*arg2);
+  DATA_PTR(self) = result;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return self;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE _wrap_new_DoubleDoubleVector(int nargs, VALUE *args, VALUE self) {
+  int argc;
+  VALUE argv[2];
+  int ii;
+  
+  argc = nargs;
+  if (argc > 2) SWIG_fail;
+  for (ii = 0; (ii < argc); ++ii) {
+    argv[ii] = args[ii];
+  }
+  if (argc == 0) {
+    return _wrap_new_DoubleDoubleVector__SWIG_0(nargs, args, self);
+  }
+  if (argc == 1) {
+    int _v;
+    {
+      int res = SWIG_AsVal_size_t(argv[0], NULL);
+      _v = SWIG_CheckState(res);
+    }
+    if (_v) {
+      return _wrap_new_DoubleDoubleVector__SWIG_2(nargs, args, self);
+    }
+  }
+  if (argc == 1) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_DoubleDoubleVector__SWIG_1(nargs, args, self);
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    {
+      int res = SWIG_AsVal_size_t(argv[0], NULL);
+      _v = SWIG_CheckState(res);
+    }
+    if (_v) {
+      int res = swig::asptr(argv[1], (std::vector<double,std::allocator< double > >**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_new_DoubleDoubleVector__SWIG_3(nargs, args, self);
+      }
+    }
+  }
+  
+fail:
+  Ruby_Format_OverloadedError( argc, 2, "DoubleDoubleVector.new", 
+    "    DoubleDoubleVector.new()\n"
+    "    DoubleDoubleVector.new(std::vector< std::vector< double,std::allocator< double > > > const &)\n"
+    "    DoubleDoubleVector.new(std::vector< std::vector< double > >::size_type size)\n"
+    "    DoubleDoubleVector.new(std::vector< std::vector< double > >::size_type size, std::vector< std::vector< double > >::value_type const &value)\n");
+  
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.front
+
+  call-seq:
+    front -> value_type
+
+Return the first element in DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_front(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double > >::value_type *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > const *","front", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = (std::vector< std::vector< double > >::value_type *) &((std::vector< std::vector< double > > const *)arg1)->front();
+  vresult = swig::from(static_cast< std::vector<double,std::allocator< double > > >(*result));
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.back
+
+  call-seq:
+    back -> value_type
+
+Return the last element in DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_back(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double > >::value_type *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > const *","back", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = (std::vector< std::vector< double > >::value_type *) &((std::vector< std::vector< double > > const *)arg1)->back();
+  vresult = swig::from(static_cast< std::vector<double,std::allocator< double > > >(*result));
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.assign
+
+  call-seq:
+    assign(n, x)
+
+Assign a new DoubleDoubleVector or portion of it.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_assign(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::size_type arg2 ;
+  std::vector< std::vector< double > >::value_type *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  size_t val2 ;
+  int ecode2 = 0 ;
+  int res3 = SWIG_OLDOBJ ;
+  
+  if ((argc < 2) || (argc > 2)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 2)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","assign", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  ecode2 = SWIG_AsVal_size_t(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::size_type","assign", 2, argv[0] ));
+  } 
+  arg2 = static_cast< std::vector< std::vector< double > >::size_type >(val2);
+  {
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res3 = swig::asptr(argv[1], &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::value_type const &","assign", 3, argv[1] )); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::vector< std::vector< double > >::value_type const &","assign", 3, argv[1])); 
+    }
+    arg3 = ptr;
+  }
+  (arg1)->assign(arg2,(std::vector< std::vector< double > >::value_type const &)*arg3);
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return Qnil;
+fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.resize
+
+  call-seq:
+    resize(new_size)
+    resize(new_size, x)
+
+Resize the size of the DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_resize__SWIG_1(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::size_type arg2 ;
+  std::vector< std::vector< double > >::value_type *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  size_t val2 ;
+  int ecode2 = 0 ;
+  int res3 = SWIG_OLDOBJ ;
+  
+  if ((argc < 2) || (argc > 2)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 2)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","resize", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  ecode2 = SWIG_AsVal_size_t(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::size_type","resize", 2, argv[0] ));
+  } 
+  arg2 = static_cast< std::vector< std::vector< double > >::size_type >(val2);
+  {
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res3 = swig::asptr(argv[1], &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::value_type const &","resize", 3, argv[1] )); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::vector< std::vector< double > >::value_type const &","resize", 3, argv[1])); 
+    }
+    arg3 = ptr;
+  }
+  (arg1)->resize(arg2,(std::vector< std::vector< double > >::value_type const &)*arg3);
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return Qnil;
+fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE _wrap_DoubleDoubleVector_resize(int nargs, VALUE *args, VALUE self) {
+  int argc;
+  VALUE argv[4];
+  int ii;
+  
+  argc = nargs + 1;
+  argv[0] = self;
+  if (argc > 4) SWIG_fail;
+  for (ii = 1; (ii < argc); ++ii) {
+    argv[ii] = args[ii-1];
+  }
+  if (argc == 2) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_size_t(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_DoubleDoubleVector_resize__SWIG_0(nargs, args, self);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_size_t(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        int res = swig::asptr(argv[2], (std::vector<double,std::allocator< double > >**)(0));
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          return _wrap_DoubleDoubleVector_resize__SWIG_1(nargs, args, self);
+        }
+      }
+    }
+  }
+  
+fail:
+  Ruby_Format_OverloadedError( argc, 4, "DoubleDoubleVector.resize", 
+    "    void DoubleDoubleVector.resize(std::vector< std::vector< double > >::size_type new_size)\n"
+    "    void DoubleDoubleVector.resize(std::vector< std::vector< double > >::size_type new_size, std::vector< std::vector< double > >::value_type const &x)\n");
+  
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.insert
+
+  call-seq:
+    insert(pos, argc, ?) -> DoubleDoubleVector
+    insert(pos, x) -> iterator
+    insert(pos, n, x)
+
+Insert one or more new elements in the DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_insert__SWIG_1(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::iterator arg2 ;
+  std::vector< std::vector< double > >::value_type *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  swig::Iterator *iter2 = 0 ;
+  int res2 ;
+  int res3 = SWIG_OLDOBJ ;
+  std::vector< std::vector< double > >::iterator result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 2) || (argc > 2)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 2)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","insert", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], SWIG_as_voidptrptr(&iter2), swig::Iterator::descriptor(), 0);
+  if (!SWIG_IsOK(res2) || !iter2) {
+    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::iterator","insert", 2, argv[0] ));
+  } else {
+    swig::Iterator_T<std::vector< std::vector< double > >::iterator > *iter_t = dynamic_cast<swig::Iterator_T<std::vector< std::vector< double > >::iterator > *>(iter2);
+    if (iter_t) {
+      arg2 = iter_t->get_current();
+    } else {
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::iterator","insert", 2, argv[0] ));
+    }
+  }
+  {
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res3 = swig::asptr(argv[1], &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::value_type const &","insert", 3, argv[1] )); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::vector< std::vector< double > >::value_type const &","insert", 3, argv[1])); 
+    }
+    arg3 = ptr;
+  }
+  result = (arg1)->insert(arg2,(std::vector< std::vector< double > >::value_type const &)*arg3);
+  vresult = SWIG_NewPointerObj(swig::make_nonconst_iterator(static_cast< const std::vector< std::vector< double > >::iterator & >(result),
+      self),
+    swig::Iterator::descriptor(),SWIG_POINTER_OWN);
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return vresult;
+fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_insert__SWIG_2(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::iterator arg2 ;
+  std::vector< std::vector< double > >::size_type arg3 ;
+  std::vector< std::vector< double > >::value_type *arg4 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  swig::Iterator *iter2 = 0 ;
+  int res2 ;
+  size_t val3 ;
+  int ecode3 = 0 ;
+  int res4 = SWIG_OLDOBJ ;
+  
+  if ((argc < 3) || (argc > 3)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 3)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","insert", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], SWIG_as_voidptrptr(&iter2), swig::Iterator::descriptor(), 0);
+  if (!SWIG_IsOK(res2) || !iter2) {
+    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::iterator","insert", 2, argv[0] ));
+  } else {
+    swig::Iterator_T<std::vector< std::vector< double > >::iterator > *iter_t = dynamic_cast<swig::Iterator_T<std::vector< std::vector< double > >::iterator > *>(iter2);
+    if (iter_t) {
+      arg2 = iter_t->get_current();
+    } else {
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::iterator","insert", 2, argv[0] ));
+    }
+  }
+  ecode3 = SWIG_AsVal_size_t(argv[1], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::size_type","insert", 3, argv[1] ));
+  } 
+  arg3 = static_cast< std::vector< std::vector< double > >::size_type >(val3);
+  {
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res4 = swig::asptr(argv[2], &ptr);
+    if (!SWIG_IsOK(res4)) {
+      SWIG_exception_fail(SWIG_ArgError(res4), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::value_type const &","insert", 4, argv[2] )); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::vector< std::vector< double > >::value_type const &","insert", 4, argv[2])); 
+    }
+    arg4 = ptr;
+  }
+  (arg1)->insert(arg2,arg3,(std::vector< std::vector< double > >::value_type const &)*arg4);
+  if (SWIG_IsNewObj(res4)) delete arg4;
+  return Qnil;
+fail:
+  if (SWIG_IsNewObj(res4)) delete arg4;
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE _wrap_DoubleDoubleVector_insert(int nargs, VALUE *args, VALUE self) {
+  int argc;
+  VALUE argv[5];
+  int ii;
+  
+  argc = nargs + 1;
+  argv[0] = self;
+  if (argc > 5) SWIG_fail;
+  for (ii = 1; (ii < argc); ++ii) {
+    argv[ii] = args[ii-1];
+  }
+  if (argc == 3) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      swig::ConstIterator *iter = 0;
+      int res = SWIG_ConvertPtr(argv[1], SWIG_as_voidptrptr(&iter), 
+        swig::Iterator::descriptor(), 0);
+      _v = (SWIG_IsOK(res) && iter && (dynamic_cast<swig::Iterator_T<std::vector< std::vector< double > >::iterator > *>(iter) != 0));
+      if (_v) {
+        int res = swig::asptr(argv[2], (std::vector<double,std::allocator< double > >**)(0));
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          return _wrap_DoubleDoubleVector_insert__SWIG_1(nargs, args, self);
+        }
+      }
+    }
+  }
+  if (argc >= 3) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_ptrdiff_t(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          if (argc <= 3) {
+            return _wrap_DoubleDoubleVector_insert__SWIG_0(nargs, args, self);
+          }
+          return _wrap_DoubleDoubleVector_insert__SWIG_0(nargs, args, self);
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector<std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      swig::ConstIterator *iter = 0;
+      int res = SWIG_ConvertPtr(argv[1], SWIG_as_voidptrptr(&iter), 
+        swig::Iterator::descriptor(), 0);
+      _v = (SWIG_IsOK(res) && iter && (dynamic_cast<swig::Iterator_T<std::vector< std::vector< double > >::iterator > *>(iter) != 0));
+      if (_v) {
+        {
+          int res = SWIG_AsVal_size_t(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          int res = swig::asptr(argv[3], (std::vector<double,std::allocator< double > >**)(0));
+          _v = SWIG_CheckState(res);
+          if (_v) {
+            return _wrap_DoubleDoubleVector_insert__SWIG_2(nargs, args, self);
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  Ruby_Format_OverloadedError( argc, 5, "insert", 
+    "    void insert(std::vector< std::vector< double > >::difference_type pos, int argc, VALUE *argv, ...)\n"
+    "    void insert(std::vector< std::vector< double > >::iterator pos, std::vector< std::vector< double > >::value_type const &x)\n"
+    "    void insert(std::vector< std::vector< double > >::iterator pos, std::vector< std::vector< double > >::size_type n, std::vector< std::vector< double > >::value_type const &x)\n");
+  
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.reserve
+
+  call-seq:
+    reserve(n)
+
+Reserve memory in the DoubleDoubleVector for a number of elements.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_reserve(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double > >::size_type arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  size_t val2 ;
+  int ecode2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","reserve", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  ecode2 = SWIG_AsVal_size_t(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::vector< std::vector< double > >::size_type","reserve", 2, argv[0] ));
+  } 
+  arg2 = static_cast< std::vector< std::vector< double > >::size_type >(val2);
+  (arg1)->reserve(arg2);
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::DoubleDoubleVector.capacity
+
+  call-seq:
+    capacity -> size_type
+
+Reserved capacity of the DoubleDoubleVector.
+*/
+SWIGINTERN VALUE
+_wrap_DoubleDoubleVector_capacity(int argc, VALUE *argv, VALUE self) {
+  std::vector< std::vector< double > > *arg1 = (std::vector< std::vector< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double > >::size_type result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > const *","capacity", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::vector< double > > * >(argp1);
+  result = ((std::vector< std::vector< double > > const *)arg1)->capacity();
+  vresult = SWIG_From_size_t(static_cast< size_t >(result));
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN void
+free_std_vector_Sl_std_vector_Sl_double_Sg__Sg_(std::vector< std::vector< double > > *arg1) {
     delete arg1;
 }
 
@@ -26727,10 +29222,28 @@ fail:
 }
 
 
+
+/*
+  Document-method: CdiObj::CdiVariable.values
+
+  call-seq:
+    values -> DoubleVector
+
+Return an Array of value elements.
+*/
+
+/*
+  Document-method: CdiObj::CdiVariable.values=
+
+  call-seq:
+    values=(x) -> DoubleVector
+
+Return an Array of value elements.
+*/
 SWIGINTERN VALUE
-_wrap_CdiVariable_field_set(int argc, VALUE *argv, VALUE self) {
+_wrap_CdiVariable_values_set(int argc, VALUE *argv, VALUE self) {
   CdiVariable *arg1 = (CdiVariable *) 0 ;
-  double *arg2 = (double *) 0 ;
+  std::vector< double > *arg2 = (std::vector< double > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -26741,15 +29254,15 @@ _wrap_CdiVariable_field_set(int argc, VALUE *argv, VALUE self) {
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","field", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","values", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "double *","field", 2, argv[0] )); 
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::vector< double > *","values", 2, argv[0] )); 
   }
-  arg2 = reinterpret_cast< double * >(argp2);
-  if (arg1) (arg1)->field = arg2;
+  arg2 = reinterpret_cast< std::vector< double > * >(argp2);
+  if (arg1) (arg1)->values = *arg2;
   return Qnil;
 fail:
   return Qnil;
@@ -26757,11 +29270,11 @@ fail:
 
 
 SWIGINTERN VALUE
-_wrap_CdiVariable_field_get(int argc, VALUE *argv, VALUE self) {
+_wrap_CdiVariable_values_get(int argc, VALUE *argv, VALUE self) {
   CdiVariable *arg1 = (CdiVariable *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  double *result = 0 ;
+  std::vector< double > *result = 0 ;
   VALUE vresult = Qnil;
   
   if ((argc < 0) || (argc > 0)) {
@@ -26769,11 +29282,11 @@ _wrap_CdiVariable_field_get(int argc, VALUE *argv, VALUE self) {
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","field", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","values", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  result = (double *) ((arg1)->field);
-  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  result = (std::vector< double > *)& ((arg1)->values);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   return vresult;
 fail:
   return Qnil;
@@ -26781,9 +29294,9 @@ fail:
 
 
 SWIGINTERN VALUE
-_wrap_CdiVariable_fieldWithLevel_set(int argc, VALUE *argv, VALUE self) {
+_wrap_CdiVariable_valuesWithLevel_set(int argc, VALUE *argv, VALUE self) {
   CdiVariable *arg1 = (CdiVariable *) 0 ;
-  double **arg2 = (double **) 0 ;
+  std::vector< std::vector< double > > *arg2 = (std::vector< std::vector< double > > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -26794,15 +29307,15 @@ _wrap_CdiVariable_fieldWithLevel_set(int argc, VALUE *argv, VALUE self) {
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","fieldWithLevel", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","valuesWithLevel", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_p_double, 0 |  0 );
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "double **","fieldWithLevel", 2, argv[0] )); 
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::vector< std::vector< double > > *","valuesWithLevel", 2, argv[0] )); 
   }
-  arg2 = reinterpret_cast< double ** >(argp2);
-  if (arg1) (arg1)->fieldWithLevel = arg2;
+  arg2 = reinterpret_cast< std::vector< std::vector< double > > * >(argp2);
+  if (arg1) (arg1)->valuesWithLevel = *arg2;
   return Qnil;
 fail:
   return Qnil;
@@ -26810,11 +29323,11 @@ fail:
 
 
 SWIGINTERN VALUE
-_wrap_CdiVariable_fieldWithLevel_get(int argc, VALUE *argv, VALUE self) {
+_wrap_CdiVariable_valuesWithLevel_get(int argc, VALUE *argv, VALUE self) {
   CdiVariable *arg1 = (CdiVariable *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  double **result = 0 ;
+  std::vector< std::vector< double > > *result = 0 ;
   VALUE vresult = Qnil;
   
   if ((argc < 0) || (argc > 0)) {
@@ -26822,117 +29335,11 @@ _wrap_CdiVariable_fieldWithLevel_get(int argc, VALUE *argv, VALUE self) {
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","fieldWithLevel", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","valuesWithLevel", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  result = (double **) ((arg1)->fieldWithLevel);
-  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p_double, 0 |  0 );
-  return vresult;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_CdiVariable_fieldF_set(int argc, VALUE *argv, VALUE self) {
-  CdiVariable *arg1 = (CdiVariable *) 0 ;
-  float *arg2 = (float *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  
-  if ((argc < 1) || (argc > 1)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","fieldF", 1, self )); 
-  }
-  arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "float *","fieldF", 2, argv[0] )); 
-  }
-  arg2 = reinterpret_cast< float * >(argp2);
-  if (arg1) (arg1)->fieldF = arg2;
-  return Qnil;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_CdiVariable_fieldF_get(int argc, VALUE *argv, VALUE self) {
-  CdiVariable *arg1 = (CdiVariable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  float *result = 0 ;
-  VALUE vresult = Qnil;
-  
-  if ((argc < 0) || (argc > 0)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","fieldF", 1, self )); 
-  }
-  arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  result = (float *) ((arg1)->fieldF);
-  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
-  return vresult;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_CdiVariable_fieldWithLevelF_set(int argc, VALUE *argv, VALUE self) {
-  CdiVariable *arg1 = (CdiVariable *) 0 ;
-  float **arg2 = (float **) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  
-  if ((argc < 1) || (argc > 1)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","fieldWithLevelF", 1, self )); 
-  }
-  arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_p_float, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "float **","fieldWithLevelF", 2, argv[0] )); 
-  }
-  arg2 = reinterpret_cast< float ** >(argp2);
-  if (arg1) (arg1)->fieldWithLevelF = arg2;
-  return Qnil;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_CdiVariable_fieldWithLevelF_get(int argc, VALUE *argv, VALUE self) {
-  CdiVariable *arg1 = (CdiVariable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  float **result = 0 ;
-  VALUE vresult = Qnil;
-  
-  if ((argc < 0) || (argc > 0)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","fieldWithLevelF", 1, self )); 
-  }
-  arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  result = (float **) ((arg1)->fieldWithLevelF);
-  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p_float, 0 |  0 );
+  result = (std::vector< std::vector< double > > *)& ((arg1)->valuesWithLevel);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
   return vresult;
 fail:
   return Qnil;
@@ -27120,7 +29527,7 @@ fail:
 
 
 SWIGINTERN VALUE
-_wrap_CdiVariable_readField(int argc, VALUE *argv, VALUE self) {
+_wrap_CdiVariable_getValues(int argc, VALUE *argv, VALUE self) {
   CdiVariable *arg1 = (CdiVariable *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -27130,10 +29537,10 @@ _wrap_CdiVariable_readField(int argc, VALUE *argv, VALUE self) {
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","readField", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","getValues", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  (arg1)->readField();
+  (arg1)->getValues();
   return Qnil;
 fail:
   return Qnil;
@@ -27141,7 +29548,7 @@ fail:
 
 
 SWIGINTERN VALUE
-_wrap_CdiVariable_readFieldWithLevel__SWIG_0(int argc, VALUE *argv, VALUE self) {
+_wrap_CdiVariable_getValuesWithLevel__SWIG_0(int argc, VALUE *argv, VALUE self) {
   CdiVariable *arg1 = (CdiVariable *) 0 ;
   int arg2 ;
   void *argp1 = 0 ;
@@ -27154,15 +29561,15 @@ _wrap_CdiVariable_readFieldWithLevel__SWIG_0(int argc, VALUE *argv, VALUE self) 
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","readFieldWithLevel", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","getValuesWithLevel", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiVariable * >(argp1);
   ecode2 = SWIG_AsVal_int(argv[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "int","readFieldWithLevel", 2, argv[0] ));
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "int","getValuesWithLevel", 2, argv[0] ));
   } 
   arg2 = static_cast< int >(val2);
-  (arg1)->readFieldWithLevel(arg2);
+  (arg1)->getValuesWithLevel(arg2);
   return Qnil;
 fail:
   return Qnil;
@@ -27170,7 +29577,7 @@ fail:
 
 
 SWIGINTERN VALUE
-_wrap_CdiVariable_readFieldWithLevel__SWIG_1(int argc, VALUE *argv, VALUE self) {
+_wrap_CdiVariable_getValuesWithLevel__SWIG_1(int argc, VALUE *argv, VALUE self) {
   CdiVariable *arg1 = (CdiVariable *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -27180,17 +29587,17 @@ _wrap_CdiVariable_readFieldWithLevel__SWIG_1(int argc, VALUE *argv, VALUE self) 
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","readFieldWithLevel", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","getValuesWithLevel", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  (arg1)->readFieldWithLevel();
+  (arg1)->getValuesWithLevel();
   return Qnil;
 fail:
   return Qnil;
 }
 
 
-SWIGINTERN VALUE _wrap_CdiVariable_readFieldWithLevel(int nargs, VALUE *args, VALUE self) {
+SWIGINTERN VALUE _wrap_CdiVariable_getValuesWithLevel(int nargs, VALUE *args, VALUE self) {
   int argc;
   VALUE argv[3];
   int ii;
@@ -27207,7 +29614,7 @@ SWIGINTERN VALUE _wrap_CdiVariable_readFieldWithLevel(int nargs, VALUE *args, VA
     int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_CdiVariable, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      return _wrap_CdiVariable_readFieldWithLevel__SWIG_1(nargs, args, self);
+      return _wrap_CdiVariable_getValuesWithLevel__SWIG_1(nargs, args, self);
     }
   }
   if (argc == 2) {
@@ -27221,142 +29628,26 @@ SWIGINTERN VALUE _wrap_CdiVariable_readFieldWithLevel(int nargs, VALUE *args, VA
         _v = SWIG_CheckState(res);
       }
       if (_v) {
-        return _wrap_CdiVariable_readFieldWithLevel__SWIG_0(nargs, args, self);
+        return _wrap_CdiVariable_getValuesWithLevel__SWIG_0(nargs, args, self);
       }
     }
   }
   
 fail:
-  Ruby_Format_OverloadedError( argc, 3, "CdiVariable.readFieldWithLevel", 
-    "    void CdiVariable.readFieldWithLevel(int tsID)\n"
-    "    void CdiVariable.readFieldWithLevel()\n");
+  Ruby_Format_OverloadedError( argc, 3, "CdiVariable.getValuesWithLevel", 
+    "    void CdiVariable.getValuesWithLevel(int tsID)\n"
+    "    void CdiVariable.getValuesWithLevel()\n");
   
   return Qnil;
 }
 
 
 SWIGINTERN VALUE
-_wrap_CdiVariable_readFieldF(int argc, VALUE *argv, VALUE self) {
+_wrap_CdiVariable_getFValues(int argc, VALUE *argv, VALUE self) {
   CdiVariable *arg1 = (CdiVariable *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  
-  if ((argc < 0) || (argc > 0)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","readFieldF", 1, self )); 
-  }
-  arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  (arg1)->readFieldF();
-  return Qnil;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_CdiVariable_readFieldWithLevelF__SWIG_0(int argc, VALUE *argv, VALUE self) {
-  CdiVariable *arg1 = (CdiVariable *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  
-  if ((argc < 1) || (argc > 1)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","readFieldWithLevelF", 1, self )); 
-  }
-  arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  ecode2 = SWIG_AsVal_int(argv[0], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "int","readFieldWithLevelF", 2, argv[0] ));
-  } 
-  arg2 = static_cast< int >(val2);
-  (arg1)->readFieldWithLevelF(arg2);
-  return Qnil;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_CdiVariable_readFieldWithLevelF__SWIG_1(int argc, VALUE *argv, VALUE self) {
-  CdiVariable *arg1 = (CdiVariable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  
-  if ((argc < 0) || (argc > 0)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","readFieldWithLevelF", 1, self )); 
-  }
-  arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  (arg1)->readFieldWithLevelF();
-  return Qnil;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE _wrap_CdiVariable_readFieldWithLevelF(int nargs, VALUE *args, VALUE self) {
-  int argc;
-  VALUE argv[3];
-  int ii;
-  
-  argc = nargs + 1;
-  argv[0] = self;
-  if (argc > 3) SWIG_fail;
-  for (ii = 1; (ii < argc); ++ii) {
-    argv[ii] = args[ii-1];
-  }
-  if (argc == 1) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_CdiVariable, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      return _wrap_CdiVariable_readFieldWithLevelF__SWIG_1(nargs, args, self);
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_CdiVariable, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        return _wrap_CdiVariable_readFieldWithLevelF__SWIG_0(nargs, args, self);
-      }
-    }
-  }
-  
-fail:
-  Ruby_Format_OverloadedError( argc, 3, "CdiVariable.readFieldWithLevelF", 
-    "    void CdiVariable.readFieldWithLevelF(int tsID)\n"
-    "    void CdiVariable.readFieldWithLevelF()\n");
-  
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_CdiVariable_getField(int argc, VALUE *argv, VALUE self) {
-  CdiVariable *arg1 = (CdiVariable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::vector< double,std::allocator< double > > result;
+  SwigValueWrapper< std::vector< float > > result;
   VALUE vresult = Qnil;
   
   if ((argc < 0) || (argc > 0)) {
@@ -27364,13 +29655,239 @@ _wrap_CdiVariable_getField(int argc, VALUE *argv, VALUE self) {
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","getField", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","getFValues", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  result = (arg1)->getField();
-  vresult = swig::from(static_cast< std::vector<double,std::allocator< double > > >(result));
+  result = (arg1)->getFValues();
+  vresult = SWIG_NewPointerObj((new std::vector< float >(static_cast< const std::vector< float >& >(result))), SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t, SWIG_POINTER_OWN |  0 );
   return vresult;
 fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiVariable_getFValuesWithLevel__SWIG_0(int argc, VALUE *argv, VALUE self) {
+  CdiVariable *arg1 = (CdiVariable *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  SwigValueWrapper< std::vector< std::vector< float > > > result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","getFValuesWithLevel", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiVariable * >(argp1);
+  ecode2 = SWIG_AsVal_int(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "int","getFValuesWithLevel", 2, argv[0] ));
+  } 
+  arg2 = static_cast< int >(val2);
+  result = (arg1)->getFValuesWithLevel(arg2);
+  vresult = SWIG_NewPointerObj((new std::vector< std::vector< float > >(static_cast< const std::vector< std::vector< float > >& >(result))), SWIGTYPE_p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiVariable_getFValuesWithLevel__SWIG_1(int argc, VALUE *argv, VALUE self) {
+  CdiVariable *arg1 = (CdiVariable *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  SwigValueWrapper< std::vector< std::vector< float > > > result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","getFValuesWithLevel", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiVariable * >(argp1);
+  result = (arg1)->getFValuesWithLevel();
+  vresult = SWIG_NewPointerObj((new std::vector< std::vector< float > >(static_cast< const std::vector< std::vector< float > >& >(result))), SWIGTYPE_p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE _wrap_CdiVariable_getFValuesWithLevel(int nargs, VALUE *args, VALUE self) {
+  int argc;
+  VALUE argv[3];
+  int ii;
+  
+  argc = nargs + 1;
+  argv[0] = self;
+  if (argc > 3) SWIG_fail;
+  for (ii = 1; (ii < argc); ++ii) {
+    argv[ii] = args[ii-1];
+  }
+  if (argc == 1) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_CdiVariable, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_CdiVariable_getFValuesWithLevel__SWIG_1(nargs, args, self);
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_CdiVariable, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_CdiVariable_getFValuesWithLevel__SWIG_0(nargs, args, self);
+      }
+    }
+  }
+  
+fail:
+  Ruby_Format_OverloadedError( argc, 3, "CdiVariable.getFValuesWithLevel", 
+    "    std::vector< std::vector< float > > CdiVariable.getFValuesWithLevel(int tsID)\n"
+    "    std::vector< std::vector< float > > CdiVariable.getFValuesWithLevel()\n");
+  
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiVariable_getValuesAsPointer(int argc, VALUE *argv, VALUE self) {
+  CdiVariable *arg1 = (CdiVariable *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","getValuesAsPointer", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiVariable * >(argp1);
+  result = (double *)(arg1)->getValuesAsPointer();
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiVariable_getValuesWithLevelAsPointer__SWIG_0(int argc, VALUE *argv, VALUE self) {
+  CdiVariable *arg1 = (CdiVariable *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  double **result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","getValuesWithLevelAsPointer", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiVariable * >(argp1);
+  ecode2 = SWIG_AsVal_int(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "int","getValuesWithLevelAsPointer", 2, argv[0] ));
+  } 
+  arg2 = static_cast< int >(val2);
+  result = (double **)(arg1)->getValuesWithLevelAsPointer(arg2);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p_double, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiVariable_getValuesWithLevelAsPointer__SWIG_1(int argc, VALUE *argv, VALUE self) {
+  CdiVariable *arg1 = (CdiVariable *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double **result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","getValuesWithLevelAsPointer", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiVariable * >(argp1);
+  result = (double **)(arg1)->getValuesWithLevelAsPointer();
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p_double, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE _wrap_CdiVariable_getValuesWithLevelAsPointer(int nargs, VALUE *args, VALUE self) {
+  int argc;
+  VALUE argv[3];
+  int ii;
+  
+  argc = nargs + 1;
+  argv[0] = self;
+  if (argc > 3) SWIG_fail;
+  for (ii = 1; (ii < argc); ++ii) {
+    argv[ii] = args[ii-1];
+  }
+  if (argc == 1) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_CdiVariable, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_CdiVariable_getValuesWithLevelAsPointer__SWIG_1(nargs, args, self);
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_CdiVariable, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_CdiVariable_getValuesWithLevelAsPointer__SWIG_0(nargs, args, self);
+      }
+    }
+  }
+  
+fail:
+  Ruby_Format_OverloadedError( argc, 3, "CdiVariable.getValuesWithLevelAsPointer", 
+    "    double ** CdiVariable.getValuesWithLevelAsPointer(int tsID)\n"
+    "    double ** CdiVariable.getValuesWithLevelAsPointer()\n");
+  
   return Qnil;
 }
 
@@ -28186,7 +30703,6 @@ static swig_type_info _swigt__p_float = {"_p_float", "float *", 0, 0, (void*)0, 
 static swig_type_info _swigt__p_key_type = {"_p_key_type", "key_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_mapped_type = {"_p_mapped_type", "mapped_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_double = {"_p_p_double", "double **", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_p_float = {"_p_p_float", "float **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_void = {"_p_p_void", "void **|VALUE *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_size_type = {"_p_size_type", "size_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__lessT_int_t = {"_p_std__lessT_int_t", "std::less< int > *", 0, 0, (void*)0, 0};
@@ -28220,10 +30736,14 @@ static swig_type_info _swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVari
 static swig_type_info _swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type = {"_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type", "std::vector< CdiVariable >::value_type *|CdiVariable *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_double_std__allocatorT_double_t_t = {"_p_std__vectorT_double_std__allocatorT_double_t_t", "std::vector< double,std::allocator< double > > *|std::vector< double > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type = {"_p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type", "std::vector< double >::allocator_type *|std::allocator< double > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__vectorT_float_std__allocatorT_float_t_t = {"_p_std__vectorT_float_std__allocatorT_float_t_t", "std::vector< float > *|std::vector< float,std::allocator< float > > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_int_std__allocatorT_int_t_t = {"_p_std__vectorT_int_std__allocatorT_int_t_t", "std::vector< int,std::allocator< int > > *|std::vector< int > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_int_std__allocatorT_int_t_t__allocator_type = {"_p_std__vectorT_int_std__allocatorT_int_t_t__allocator_type", "std::vector< int >::allocator_type *|std::allocator< int > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t = {"_p_std__vectorT_std__string_std__allocatorT_std__string_t_t", "std::vector< std::string,std::allocator< std::string > > *|std::vector< std::string > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t__allocator_type = {"_p_std__vectorT_std__string_std__allocatorT_std__string_t_t__allocator_type", "std::vector< std::string >::allocator_type *|std::allocator< std::string > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t = {"_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t", "std::vector< std::vector< double > > *|std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *|std::vector< std::vector< double,std::allocator< double > > > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t__allocator_type = {"_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t__allocator_type", "std::vector< std::vector< double > >::allocator_type *|std::allocator< std::vector< double,std::allocator< double > > > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t = {"_p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t", "std::vector< std::vector< float,std::allocator< float > >,std::allocator< std::vector< float,std::allocator< float > > > > *|std::vector< std::vector< float > > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_swig__ConstIterator = {"_p_swig__ConstIterator", "swig::ConstIterator *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_swig__GC_VALUE = {"_p_swig__GC_VALUE", "swig::GC_VALUE *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_swig__Iterator = {"_p_swig__Iterator", "swig::Iterator *", 0, 0, (void*)0, 0};
@@ -28243,7 +30763,6 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_key_type,
   &_swigt__p_mapped_type,
   &_swigt__p_p_double,
-  &_swigt__p_p_float,
   &_swigt__p_p_void,
   &_swigt__p_size_type,
   &_swigt__p_std__lessT_int_t,
@@ -28277,10 +30796,14 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type,
   &_swigt__p_std__vectorT_double_std__allocatorT_double_t_t,
   &_swigt__p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type,
+  &_swigt__p_std__vectorT_float_std__allocatorT_float_t_t,
   &_swigt__p_std__vectorT_int_std__allocatorT_int_t_t,
   &_swigt__p_std__vectorT_int_std__allocatorT_int_t_t__allocator_type,
   &_swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t,
   &_swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t__allocator_type,
+  &_swigt__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t,
+  &_swigt__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t__allocator_type,
+  &_swigt__p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t,
   &_swigt__p_swig__ConstIterator,
   &_swigt__p_swig__GC_VALUE,
   &_swigt__p_swig__Iterator,
@@ -28300,7 +30823,6 @@ static swig_cast_info _swigc__p_float[] = {  {&_swigt__p_float, 0, 0, 0},{0, 0, 
 static swig_cast_info _swigc__p_key_type[] = {  {&_swigt__p_key_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_mapped_type[] = {  {&_swigt__p_mapped_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_double[] = {  {&_swigt__p_p_double, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_p_float[] = {  {&_swigt__p_p_float, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_void[] = {  {&_swigt__p_p_void, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_size_type[] = {  {&_swigt__p_size_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__lessT_int_t[] = {  {&_swigt__p_std__lessT_int_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -28334,10 +30856,14 @@ static swig_cast_info _swigc__p_std__vectorT_CdiVariable_std__allocatorT_CdiVari
 static swig_cast_info _swigc__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type[] = {  {&_swigt__p_CdiVariable, 0, 0, 0},  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type, 0, 0, 0},  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_double_std__allocatorT_double_t_t[] = {  {&_swigt__p_std__vectorT_double_std__allocatorT_double_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type[] = {  {&_swigt__p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__vectorT_float_std__allocatorT_float_t_t[] = {  {&_swigt__p_std__vectorT_float_std__allocatorT_float_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_int_std__allocatorT_int_t_t[] = {  {&_swigt__p_std__vectorT_int_std__allocatorT_int_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_int_std__allocatorT_int_t_t__allocator_type[] = {  {&_swigt__p_std__vectorT_int_std__allocatorT_int_t_t__allocator_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_std__string_std__allocatorT_std__string_t_t[] = {  {&_swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_std__string_std__allocatorT_std__string_t_t__allocator_type[] = {  {&_swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t__allocator_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t[] = {  {&_swigt__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t__allocator_type[] = {  {&_swigt__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t__allocator_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t[] = {  {&_swigt__p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_swig__ConstIterator[] = {  {&_swigt__p_swig__ConstIterator, 0, 0, 0},  {&_swigt__p_swig__Iterator, _p_swig__IteratorTo_p_swig__ConstIterator, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_swig__GC_VALUE[] = {  {&_swigt__p_swig__GC_VALUE, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_swig__Iterator[] = {  {&_swigt__p_swig__Iterator, 0, 0, 0},{0, 0, 0, 0}};
@@ -28357,7 +30883,6 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_key_type,
   _swigc__p_mapped_type,
   _swigc__p_p_double,
-  _swigc__p_p_float,
   _swigc__p_p_void,
   _swigc__p_size_type,
   _swigc__p_std__lessT_int_t,
@@ -28391,10 +30916,14 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type,
   _swigc__p_std__vectorT_double_std__allocatorT_double_t_t,
   _swigc__p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type,
+  _swigc__p_std__vectorT_float_std__allocatorT_float_t_t,
   _swigc__p_std__vectorT_int_std__allocatorT_int_t_t,
   _swigc__p_std__vectorT_int_std__allocatorT_int_t_t__allocator_type,
   _swigc__p_std__vectorT_std__string_std__allocatorT_std__string_t_t,
   _swigc__p_std__vectorT_std__string_std__allocatorT_std__string_t_t__allocator_type,
+  _swigc__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t,
+  _swigc__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t__allocator_type,
+  _swigc__p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t,
   _swigc__p_swig__ConstIterator,
   _swigc__p_swig__GC_VALUE,
   _swigc__p_swig__Iterator,
@@ -28798,6 +31327,52 @@ SWIGEXPORT void Init_CdiObj(void) {
   SwigClassDoubleVector.mark = 0;
   SwigClassDoubleVector.destroy = (void (*)(void *)) free_std_vector_Sl_double_Sg_;
   SwigClassDoubleVector.trackObjects = 0;
+  
+  SwigClassDoubleDoubleVector.klass = rb_define_class_under(mCdiObj, "DoubleDoubleVector", rb_cObject);
+  SWIG_TypeClientData(SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, (void *) &SwigClassDoubleDoubleVector);
+  rb_include_module(SwigClassDoubleDoubleVector.klass, rb_eval_string("Enumerable"));
+  rb_define_alloc_func(SwigClassDoubleDoubleVector.klass, _wrap_DoubleDoubleVector_allocate);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "initialize", VALUEFUNC(_wrap_new_DoubleDoubleVector), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "dup", VALUEFUNC(_wrap_DoubleDoubleVector_dup), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "inspect", VALUEFUNC(_wrap_DoubleDoubleVector_inspect), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "to_a", VALUEFUNC(_wrap_DoubleDoubleVector_to_a), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "to_s", VALUEFUNC(_wrap_DoubleDoubleVector_to_s), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "slice", VALUEFUNC(_wrap_DoubleDoubleVector_slice), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "each", VALUEFUNC(_wrap_DoubleDoubleVector_each), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "select", VALUEFUNC(_wrap_DoubleDoubleVector_select), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "reject!", VALUEFUNC(_wrap_DoubleDoubleVector_rejectN___), -1);
+  rb_define_alias(SwigClassDoubleDoubleVector.klass, "delete_if", "reject!");
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "delete_at", VALUEFUNC(_wrap_DoubleDoubleVector_delete_at), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "__delete2__", VALUEFUNC(_wrap_DoubleDoubleVector___delete2__), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "pop", VALUEFUNC(_wrap_DoubleDoubleVector_pop), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "push", VALUEFUNC(_wrap_DoubleDoubleVector_push), -1);
+  rb_define_alias(SwigClassDoubleDoubleVector.klass, "<<", "push");
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "reject", VALUEFUNC(_wrap_DoubleDoubleVector_reject), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "at", VALUEFUNC(_wrap_DoubleDoubleVector_at), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "[]", VALUEFUNC(_wrap_DoubleDoubleVector___getitem__), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "[]=", VALUEFUNC(_wrap_DoubleDoubleVector___setitem__), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "shift", VALUEFUNC(_wrap_DoubleDoubleVector_shift), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "unshift", VALUEFUNC(_wrap_DoubleDoubleVector_unshift), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "empty?", VALUEFUNC(_wrap_DoubleDoubleVector_emptyq___), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "size", VALUEFUNC(_wrap_DoubleDoubleVector_size), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "clear", VALUEFUNC(_wrap_DoubleDoubleVector_clear), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "swap", VALUEFUNC(_wrap_DoubleDoubleVector_swap), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "get_allocator", VALUEFUNC(_wrap_DoubleDoubleVector_get_allocator), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "begin", VALUEFUNC(_wrap_DoubleDoubleVector_begin), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "end", VALUEFUNC(_wrap_DoubleDoubleVector_end), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "rbegin", VALUEFUNC(_wrap_DoubleDoubleVector_rbegin), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "rend", VALUEFUNC(_wrap_DoubleDoubleVector_rend), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "erase", VALUEFUNC(_wrap_DoubleDoubleVector_erase), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "front", VALUEFUNC(_wrap_DoubleDoubleVector_front), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "back", VALUEFUNC(_wrap_DoubleDoubleVector_back), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "assign", VALUEFUNC(_wrap_DoubleDoubleVector_assign), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "resize", VALUEFUNC(_wrap_DoubleDoubleVector_resize), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "insert", VALUEFUNC(_wrap_DoubleDoubleVector_insert), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "reserve", VALUEFUNC(_wrap_DoubleDoubleVector_reserve), -1);
+  rb_define_method(SwigClassDoubleDoubleVector.klass, "capacity", VALUEFUNC(_wrap_DoubleDoubleVector_capacity), -1);
+  SwigClassDoubleDoubleVector.mark = 0;
+  SwigClassDoubleDoubleVector.destroy = (void (*)(void *)) free_std_vector_Sl_std_vector_Sl_double_Sg__Sg_;
+  SwigClassDoubleDoubleVector.trackObjects = 0;
   
   SwigClassStringVector.klass = rb_define_class_under(mCdiObj, "StringVector", rb_cObject);
   SWIG_TypeClientData(SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, (void *) &SwigClassStringVector);
@@ -29220,14 +31795,10 @@ SWIGEXPORT void Init_CdiObj(void) {
   rb_define_method(SwigClassCdiVariable.klass, "stdname", VALUEFUNC(_wrap_CdiVariable_stdname_get), -1);
   rb_define_method(SwigClassCdiVariable.klass, "missval=", VALUEFUNC(_wrap_CdiVariable_missval_set), -1);
   rb_define_method(SwigClassCdiVariable.klass, "missval", VALUEFUNC(_wrap_CdiVariable_missval_get), -1);
-  rb_define_method(SwigClassCdiVariable.klass, "field=", VALUEFUNC(_wrap_CdiVariable_field_set), -1);
-  rb_define_method(SwigClassCdiVariable.klass, "field", VALUEFUNC(_wrap_CdiVariable_field_get), -1);
-  rb_define_method(SwigClassCdiVariable.klass, "fieldWithLevel=", VALUEFUNC(_wrap_CdiVariable_fieldWithLevel_set), -1);
-  rb_define_method(SwigClassCdiVariable.klass, "fieldWithLevel", VALUEFUNC(_wrap_CdiVariable_fieldWithLevel_get), -1);
-  rb_define_method(SwigClassCdiVariable.klass, "fieldF=", VALUEFUNC(_wrap_CdiVariable_fieldF_set), -1);
-  rb_define_method(SwigClassCdiVariable.klass, "fieldF", VALUEFUNC(_wrap_CdiVariable_fieldF_get), -1);
-  rb_define_method(SwigClassCdiVariable.klass, "fieldWithLevelF=", VALUEFUNC(_wrap_CdiVariable_fieldWithLevelF_set), -1);
-  rb_define_method(SwigClassCdiVariable.klass, "fieldWithLevelF", VALUEFUNC(_wrap_CdiVariable_fieldWithLevelF_get), -1);
+  rb_define_method(SwigClassCdiVariable.klass, "values=", VALUEFUNC(_wrap_CdiVariable_values_set), -1);
+  rb_define_method(SwigClassCdiVariable.klass, "values", VALUEFUNC(_wrap_CdiVariable_values_get), -1);
+  rb_define_method(SwigClassCdiVariable.klass, "valuesWithLevel=", VALUEFUNC(_wrap_CdiVariable_valuesWithLevel_set), -1);
+  rb_define_method(SwigClassCdiVariable.klass, "valuesWithLevel", VALUEFUNC(_wrap_CdiVariable_valuesWithLevel_get), -1);
   rb_define_method(SwigClassCdiVariable.klass, "grid=", VALUEFUNC(_wrap_CdiVariable_grid_set), -1);
   rb_define_method(SwigClassCdiVariable.klass, "grid", VALUEFUNC(_wrap_CdiVariable_grid_get), -1);
   rb_define_method(SwigClassCdiVariable.klass, "zaxis=", VALUEFUNC(_wrap_CdiVariable_zaxis_set), -1);
@@ -29235,11 +31806,12 @@ SWIGEXPORT void Init_CdiObj(void) {
   rb_define_method(SwigClassCdiVariable.klass, "taxis=", VALUEFUNC(_wrap_CdiVariable_taxis_set), -1);
   rb_define_method(SwigClassCdiVariable.klass, "taxis", VALUEFUNC(_wrap_CdiVariable_taxis_get), -1);
   rb_define_method(SwigClassCdiVariable.klass, "sinfo", VALUEFUNC(_wrap_CdiVariable_sinfo), -1);
-  rb_define_method(SwigClassCdiVariable.klass, "readField", VALUEFUNC(_wrap_CdiVariable_readField), -1);
-  rb_define_method(SwigClassCdiVariable.klass, "readFieldWithLevel", VALUEFUNC(_wrap_CdiVariable_readFieldWithLevel), -1);
-  rb_define_method(SwigClassCdiVariable.klass, "readFieldF", VALUEFUNC(_wrap_CdiVariable_readFieldF), -1);
-  rb_define_method(SwigClassCdiVariable.klass, "readFieldWithLevelF", VALUEFUNC(_wrap_CdiVariable_readFieldWithLevelF), -1);
-  rb_define_method(SwigClassCdiVariable.klass, "getField", VALUEFUNC(_wrap_CdiVariable_getField), -1);
+  rb_define_method(SwigClassCdiVariable.klass, "getValues", VALUEFUNC(_wrap_CdiVariable_getValues), -1);
+  rb_define_method(SwigClassCdiVariable.klass, "getValuesWithLevel", VALUEFUNC(_wrap_CdiVariable_getValuesWithLevel), -1);
+  rb_define_method(SwigClassCdiVariable.klass, "getFValues", VALUEFUNC(_wrap_CdiVariable_getFValues), -1);
+  rb_define_method(SwigClassCdiVariable.klass, "getFValuesWithLevel", VALUEFUNC(_wrap_CdiVariable_getFValuesWithLevel), -1);
+  rb_define_method(SwigClassCdiVariable.klass, "getValuesAsPointer", VALUEFUNC(_wrap_CdiVariable_getValuesAsPointer), -1);
+  rb_define_method(SwigClassCdiVariable.klass, "getValuesWithLevelAsPointer", VALUEFUNC(_wrap_CdiVariable_getValuesWithLevelAsPointer), -1);
   SwigClassCdiVariable.mark = 0;
   SwigClassCdiVariable.destroy = (void (*)(void *)) free_CdiVariable;
   SwigClassCdiVariable.trackObjects = 0;

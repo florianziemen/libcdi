@@ -52,9 +52,10 @@ puts "#========== CDI.VAR ======================================#"
 varname = cdi.variables[1].name
 pp cdi.methods.sort
 var_ = cdi.variables[1]
-var_.readField()
-val = var_.getField()
+var_.getValues
+val = var_.values
 i=0; puts "val[#{i}] = #{val[i]}"
+pp val[-5..-1]
 puts "#=====================================================#"
 name ="tsurf"
 newvar = cdi.var[name]

@@ -7,6 +7,7 @@
 namespace std {
    %template(IntVector)    vector<int>;
    %template(DoubleVector) vector<double>;
+   %template(DoubleDoubleVector) vector< vector<double> >;
    %template(StringVector) vector<string>;
    %template(VarsVector)   vector<CdiVariable>;
    %template(VarsMap)      map<string,CdiVariable>;

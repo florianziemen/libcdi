@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <malloc.h>
-#include <iostream>
 #include <string.h>
+#include <iostream>
+#include <algorithm>
 #include <vector>
 #include <map>
 
@@ -166,80 +167,81 @@ CdiVariable::~CdiVariable(){ size = -1; }
 void
 CdiVariable::sinfo() { std::cout << name << " (" << longname << ")|units: " << units << "|size:"<< size <<  std::endl; }
 
-void
-CdiVariable::readField()
+double *
+CdiVariable::getValuesAsPointer()
 {
   int levelID = 0, tsID = 0, nmiss;
   int vdate, vtime, nrecs;
+  double *field;
 
   nrecs = streamInqTimestep(streamID, tsID);
   vdate = taxisInqVdate(taxisID);
   vtime = taxisInqVtime(taxisID);
   field = (double *) malloc(grid.size*sizeof(double));
-
   streamReadVarSlice(streamID, varID, levelID, field, &nmiss);
+
+  return field;
 }
 
-std::vector<double>
-CdiVariable::getField()
+double **
+CdiVariable::getValuesWithLevelAsPointer(int tsID)
 {
-  std::vector<double> dvector;
-  for (int i = 0; i< size; i++)
-    dvector.push_back(field[i]);
-
-  return dvector;
-}
-
-void
-CdiVariable::readFieldWithLevel(int tsID) {
   int    levelID, nmiss, nrecs;
-  double *_field;
+  double **fieldWithLevel, *field;
 
   nrecs          = streamInqTimestep(streamID, tsID);
   fieldWithLevel = (double **) malloc(zaxis.size*sizeof(double *));
-  _field         = (double *)  malloc(grid.size*sizeof(double));
-
+  field          = (double *)  malloc(grid.size*sizeof(double));
   for (levelID = 0; levelID < zaxis.size; levelID++)
   {
-    streamReadVarSlice(streamID, varID, levelID, _field, &nmiss);
-    fieldWithLevel[levelID] = _field;
+    streamReadVarSlice(streamID, varID, levelID, field, &nmiss);
+    fieldWithLevel[levelID] = field;
   }
+  return fieldWithLevel;
 }
 
 void
-CdiVariable::readFieldF()
+CdiVariable::getValues()
 {
-  int levelID = 0, tsID = 0, nmiss;
-  int vdate, vtime;
-
-  int nrecs;
-
-  nrecs = streamInqTimestep(streamID, tsID);
-  vdate = taxisInqVdate(taxisID);
-  vtime = taxisInqVtime(taxisID);
-  field = (double *) malloc(grid.size*sizeof(double));
-
-  streamReadVarSlice(streamID, varID, levelID, field, &nmiss);
-
-  fieldF = (float *) field;
+  double *field = getValuesAsPointer();
+  values.resize(grid.size);
+  std::copy(field, field + grid.size, values.begin());
 }
 
 void
-CdiVariable::readFieldWithLevelF(int tsID)
-{
-  int    levelID, nmiss, nrecs;
-  double *_field;
+CdiVariable::getValuesWithLevel(int tsID) {
+  double **fieldWithLevel = getValuesWithLevelAsPointer(tsID);
 
-  nrecs           = streamInqTimestep(streamID, tsID);
-  fieldWithLevelF = (float **) malloc(zaxis.size*sizeof(float *));
-  _field          = (double *) malloc(grid.size*sizeof(double));
-
-  for (levelID = 0; levelID < zaxis.size; levelID++)
+  valuesWithLevel.resize(zaxis.size);
+  for (int levelID = 0; levelID < zaxis.size; levelID++)
   {
-    streamReadVarSlice(streamID, varID, levelID, _field, &nmiss);
-    fieldWithLevelF[levelID] = (float *) _field;
+    valuesWithLevel[levelID].resize(grid.size);
+    std::copy(fieldWithLevel[levelID], fieldWithLevel[levelID] + grid.size, valuesWithLevel[levelID].begin());
   }
 }
+
+vector<float>
+CdiVariable::getFValues()
+{
+  if (values.empty()) getValues();
+  vector<float> retval(values.begin(),values.end());
+  return retval;
+}
+
+
+vector< vector<float> >
+CdiVariable::getFValuesWithLevel(int tsID)
+{
+  if (valuesWithLevel.empty()) getValuesWithLevel();
+  vector< vector<float> > retval;
+  for (vector< vector<double> >::const_iterator it = valuesWithLevel.begin(); it != valuesWithLevel.end(); it++)
+  {
+    vector<float> fvalues((*it).begin(),(*it).end());
+    retval.push_back(fvalues);
+  }
+  return retval;
+}
+
 /* } */
 
 /*
