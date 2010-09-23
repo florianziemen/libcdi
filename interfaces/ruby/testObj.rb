@@ -52,6 +52,7 @@ puts "#========== CDI.VAR ======================================#"
 varname = cdi.variables[1].name
 pp cdi.methods.sort
 var_ = cdi.variables[1]
+var_.readField()
 val = var_.getField()
 i=0; puts "val[#{i}] = #{val[i]}"
 puts "#=====================================================#"
