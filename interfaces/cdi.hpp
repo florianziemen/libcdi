@@ -73,7 +73,7 @@ class CdiVariable {
     CdiZaxis zaxis;
     CdiTaxis taxis;
 
-    void print();
+    void sinfo();
     void readField(); 
     void readFieldWithLevel(int tsID = 0);
     void readFieldF();

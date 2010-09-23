@@ -27099,7 +27099,7 @@ fail:
 
 
 SWIGINTERN VALUE
-_wrap_CdiVariable_print(int argc, VALUE *argv, VALUE self) {
+_wrap_CdiVariable_sinfo(int argc, VALUE *argv, VALUE self) {
   CdiVariable *arg1 = (CdiVariable *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -27109,10 +27109,10 @@ _wrap_CdiVariable_print(int argc, VALUE *argv, VALUE self) {
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","print", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiVariable *","sinfo", 1, self )); 
   }
   arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  (arg1)->print();
+  (arg1)->sinfo();
   return Qnil;
 fail:
   return Qnil;
@@ -29234,7 +29234,7 @@ SWIGEXPORT void Init_CdiObj(void) {
   rb_define_method(SwigClassCdiVariable.klass, "zaxis", VALUEFUNC(_wrap_CdiVariable_zaxis_get), -1);
   rb_define_method(SwigClassCdiVariable.klass, "taxis=", VALUEFUNC(_wrap_CdiVariable_taxis_set), -1);
   rb_define_method(SwigClassCdiVariable.klass, "taxis", VALUEFUNC(_wrap_CdiVariable_taxis_get), -1);
-  rb_define_method(SwigClassCdiVariable.klass, "print", VALUEFUNC(_wrap_CdiVariable_print), -1);
+  rb_define_method(SwigClassCdiVariable.klass, "sinfo", VALUEFUNC(_wrap_CdiVariable_sinfo), -1);
   rb_define_method(SwigClassCdiVariable.klass, "readField", VALUEFUNC(_wrap_CdiVariable_readField), -1);
   rb_define_method(SwigClassCdiVariable.klass, "readFieldWithLevel", VALUEFUNC(_wrap_CdiVariable_readFieldWithLevel), -1);
   rb_define_method(SwigClassCdiVariable.klass, "readFieldF", VALUEFUNC(_wrap_CdiVariable_readFieldF), -1);

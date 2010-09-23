@@ -164,7 +164,7 @@ CdiVariable::CdiVariable(int streamid,int vlistid, int varid) {
 CdiVariable::~CdiVariable(){ size = -1; }
 
 void
-CdiVariable::print() { std::cout << name << " (" << longname << ")|units: " << units << "|size:"<< size <<  std::endl; }
+CdiVariable::sinfo() { std::cout << name << " (" << longname << ")|units: " << units << "|size:"<< size <<  std::endl; }
 
 void
 CdiVariable::readField()

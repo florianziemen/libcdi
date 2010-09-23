@@ -24,7 +24,7 @@ int main() {
   std::cout << "first grid:" << info.grids[0].size << std::endl;
   std::cout << "#===============================" << std::endl;
   varno = 2;
-  info.variables[varno].print(); 
+  info.variables[varno].sinfo(); 
   var = info.variables[varno];
   std::cout << "#===============================" << std::endl;
   std::cout << "Gridname:%s" << std::endl;

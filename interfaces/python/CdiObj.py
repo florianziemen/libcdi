@@ -748,7 +748,7 @@ class CdiVariable(_object):
     __swig_setmethods__["taxis"] = _CdiObj.CdiVariable_taxis_set
     __swig_getmethods__["taxis"] = _CdiObj.CdiVariable_taxis_get
     if _newclass:taxis = _swig_property(_CdiObj.CdiVariable_taxis_get, _CdiObj.CdiVariable_taxis_set)
-    def _print(self): return _CdiObj.CdiVariable__print(self)
+    def sinfo(self): return _CdiObj.CdiVariable_sinfo(self)
     def readField(self): return _CdiObj.CdiVariable_readField(self)
     def readFieldWithLevel(self, tsID = 0): return _CdiObj.CdiVariable_readFieldWithLevel(self, tsID)
     def readFieldF(self): return _CdiObj.CdiVariable_readFieldF(self)

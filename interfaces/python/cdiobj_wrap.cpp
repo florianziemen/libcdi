@@ -21855,20 +21855,20 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_CdiVariable__print(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_CdiVariable_sinfo(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CdiVariable *arg1 = (CdiVariable *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:CdiVariable__print",&obj0)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"O:CdiVariable_sinfo",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiVariable__print" "', argument " "1"" of type '" "CdiVariable *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiVariable_sinfo" "', argument " "1"" of type '" "CdiVariable *""'"); 
   }
   arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  (arg1)->print();
+  (arg1)->sinfo();
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -23353,7 +23353,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"CdiVariable_zaxis_get", _wrap_CdiVariable_zaxis_get, METH_VARARGS, NULL},
 	 { (char *)"CdiVariable_taxis_set", _wrap_CdiVariable_taxis_set, METH_VARARGS, NULL},
 	 { (char *)"CdiVariable_taxis_get", _wrap_CdiVariable_taxis_get, METH_VARARGS, NULL},
-	 { (char *)"CdiVariable__print", _wrap_CdiVariable__print, METH_VARARGS, NULL},
+	 { (char *)"CdiVariable_sinfo", _wrap_CdiVariable_sinfo, METH_VARARGS, NULL},
 	 { (char *)"CdiVariable_readField", _wrap_CdiVariable_readField, METH_VARARGS, NULL},
 	 { (char *)"CdiVariable_readFieldWithLevel", _wrap_CdiVariable_readFieldWithLevel, METH_VARARGS, NULL},
 	 { (char *)"CdiVariable_readFieldF", _wrap_CdiVariable_readFieldF, METH_VARARGS, NULL},
