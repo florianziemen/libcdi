@@ -6,8 +6,8 @@
 #include <vector>
 #include <map>
 
-#include "cdi.hpp"
 #include "cdi.h"
+#include "cdi.hpp"
 
 /*
  * CdiGrid
@@ -19,25 +19,60 @@ CdiGrid::CdiGrid(int gridid) {
   char _xname[CHARSIZE], _xlongname[CHARSIZE], _xstdname[CHARSIZE], _xunits[CHARSIZE];
   char _yname[CHARSIZE], _ylongname[CHARSIZE], _ystdname[CHARSIZE], _yunits[CHARSIZE];      
 
+  hasXYValues = true;
+
   gridID = gridid;
   type   = gridInqType(gridID);
   strcpy(_name,gridNamePtr(type));
+  name = _name;
 
   size   = gridInqSize(gridID);
   xsize  = gridInqXsize(gridID);
   ysize  = gridInqXsize(gridID);
-  xvals  = (double *) malloc(xsize*sizeof(double));
-  yvals  = (double *) malloc(ysize*sizeof(double));
-  prec   = gridInqPrec(gridID);
-  gridInqXvals(gridID, xvals);
-  gridInqYvals(gridID, yvals);
   xvalues.resize(xsize);
   yvalues.resize(ysize);
-  std::copy(xvals, xvals + xsize, xvalues.begin());
-  std::copy(yvals, yvals + ysize, yvalues.begin());
-  std::cout << xvalues.back() << std::endl;
-  std::cout << yvalues.back() << std::endl;
+  std::cout << "(gridID:" << gridID<< ") xsize: " << xsize << " ysize:" << ysize << std::endl;
 
+  if ( xsize == 0 || ysize == 0) hasXYValues =  false;
+  if ( hasXYValues )
+  {
+    xvals  = (double *) malloc(xsize*sizeof(double));
+    yvals  = (double *) malloc(ysize*sizeof(double));
+    gridInqXvals(gridID, xvals);
+    gridInqYvals(gridID, yvals);
+
+    std::copy(xvals, xvals + xsize, xvalues.begin());
+    std::copy(yvals, yvals + ysize, yvalues.begin());
+  }
+  else
+  {
+    xvals = NULL, yvals = NULL;
+    std::cout << "grid " << gridID << " has no XYValues" << std::endl;
+  }
+  hasBounds = (gridInqXbounds(gridID,NULL) && gridInqYbounds(gridID,NULL));
+  if (hasBounds)
+  {
+    ncorner  = ( gridInqType(gridID) == GRID_CELL ) ? gridInqNvertex(gridID) : 4;
+    ncorner *= size;
+    xbnds  = (double *) malloc((ncorner*size)*sizeof(double));
+    ybnds  = (double *) malloc((ncorner*size)*sizeof(double));
+    gridInqYbounds(gridID, xbnds);
+    gridInqXbounds(gridID, ybnds);
+    xbounds.resize(ncorner*size);
+    ybounds.resize(ncorner*size);
+    std::copy(xbnds, xbnds + ncorner*size, xbounds.begin());
+    std::copy(ybnds, ybnds + ncorner*size, ybounds.begin());
+  }
+  else
+  {
+    ncorner = 0;
+    xbnds = NULL;
+    ybnds = NULL;
+    xbounds.resize(ncorner*size);
+    ybounds.resize(ncorner*size);
+  }
+
+  prec   = gridInqPrec(gridID);
 
   gridInqXname(gridID    , _xname);
   gridInqXlongname(gridID, _xlongname);
@@ -56,22 +91,6 @@ CdiGrid::CdiGrid(int gridid) {
   ystdname  = _ystdname;
   yunits    = _yunits;
 
-  hasBounds = (gridInqXbounds(gridID,NULL) && gridInqYbounds(gridID,NULL));
-  if (hasBounds)
-  {
-    ncorner  = ( gridInqType(gridID) == GRID_CELL ) ? gridInqNvertex(gridID) : 4;
-    ncorner *= size;
-    xbnds  = (double *) malloc((ncorner*size)*sizeof(double));
-    ybnds  = (double *) malloc((ncorner*size)*sizeof(double));
-    gridInqYbounds(gridID, xbnds);
-    gridInqXbounds(gridID, ybnds);
-    xbounds.resize(ncorner*size);
-    ybounds.resize(ncorner*size);
-    std::copy(xbnds, xbnds + ncorner*size, xbounds.begin());
-    std::copy(ybnds, ybnds + ncorner*size, ybounds.begin());
-  }
-  else
-    ncorner = 0;
 }
 CdiGrid::~CdiGrid() { gridID = -1; }
 
@@ -165,6 +184,7 @@ CdiVariable::CdiVariable(int streamid,int vlistid, int varid) {
   streamID = streamid;
   vlistID  = vlistid;
   varID    = varid;
+  code     = vlistInqVarCode(vlistID, varID);
   vlistInqVar(vlistID        , varID, &gridID    , &zaxisID, &timeID);
   vlistInqVarName(vlistID    , varID, _name);
   vlistInqVarLongname(vlistID, varID, _longname);
@@ -182,7 +202,7 @@ CdiVariable::CdiVariable(int streamid,int vlistid, int varid) {
 CdiVariable::~CdiVariable(){ size = -1; }
 
 void
-CdiVariable::sinfo() { std::cout << name << " (" << longname << ")|units: " << units << "|size:"<< size <<  std::endl; }
+CdiVariable::sinfo() { std::cout << name << " (" << longname << ",code:" << code << ")|units: " << units << "|size:"<< size <<  "|gridID:" << gridID << std::endl; }
 
 double *
 CdiVariable::getValuesAsPointer()
@@ -292,6 +312,7 @@ Cdi::getTaxes() {
   int taxisID;
   ntaxes         = 1;
   taxisID        = vlistInqTaxis(vlistID);
+/* DEBUG     std::cout << "getTaxes : taxisID=" << taxisID << std::endl; */
   taxes[taxisID] = CdiTaxis(vlistID);
 }
 
@@ -302,6 +323,7 @@ Cdi::getZaxes() {
   for (int i = 0; i < nzaxes; i++)
   {
     zaxisID        = vlistZaxis(vlistID, i);
+//    std::cout << "getZaxes : zaxisID=" << zaxisID << std::endl;
     zaxes[zaxisID] = CdiZaxis(zaxisID);
   }
 }
@@ -313,6 +335,7 @@ Cdi::getGrids() {
   for (int i = 0; i < ngrids; i++)
   {
     gridID        = vlistGrid(vlistID, i);
+//    std::cout << "getGrids : gridID=" << gridID << std::endl;
     grids[gridID] = CdiGrid(gridID);
   }
 }
@@ -320,11 +343,12 @@ Cdi::getGrids() {
 void
 Cdi::getVars() {
   char name[CHARSIZE];
-  int varID;
-  std::cout << vlistID << std::endl;
+  int varID, code;
+//  std::cout << vlistID << std::endl;
   for (varID = 0; varID < nvars; varID++)
   {
-    codes.push_back(vlistInqVarCode(vlistID, varID));
+    code = vlistInqVarCode(vlistID, varID);
+    codes.push_back(code);
 
     vlistInqVarName(vlistID, varID, name);
     varnames.push_back(name);
@@ -336,7 +360,8 @@ Cdi::getVars() {
   
     variables.push_back(_var);
 
-    var[name] = _var;
+    var[name]       = _var;
+    varByCode[code] = _var;
   }
 }
 /* } */

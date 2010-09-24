@@ -12,10 +12,11 @@ class CdiGrid {
 
     int gridID;
     int type, size, xsize, ysize, prec, ncorner;
-    bool hasBounds;
+    bool hasXYValues, hasBounds;
     double *xvals , *yvals , *xbnds , *ybnds;
     float  *xvalsF, *yvalsF, *xbndsF, *ybndsF;
     std::vector<double> xvalues, yvalues, xbounds, ybounds;
+
 
     std::string xname, xlongname, xstdname, xunits;
     std::string yname, ylongname, ystdname, yunits;      
@@ -94,6 +95,7 @@ class Cdi {
     
     std::vector<CdiVariable>           variables;
     std::map<std::string, CdiVariable> var;
+    std::map<int,         CdiVariable> varByCode;
     std::map<int        , CdiTaxis>    taxes;
     std::map<int        , CdiZaxis>    zaxes;
     std::map<int        , CdiGrid>     grids;

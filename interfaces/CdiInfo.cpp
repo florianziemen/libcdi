@@ -23,23 +23,48 @@ int main() {
     std::cout << (*iter).first << ' ';
   };std::cout << std::endl;
   std::cout << "first grid:" << info.grids[0].size << std::endl;
+  if ( info.grids[0].hasXYValues )
+    for (int k = 0; k < info.grids[0].xsize; k++)
+      std::cout << info.grids[0].xvalues[k] << ' ';
+  else
+    std::cout << "No XValues!" << std::endl;
+  std::cout << std::endl;
+  std::cout << "second grid:" << info.grids[1].size << std::endl;
+  if ( info.grids[1].hasXYValues )
+    for (int k = 0; k < info.grids[1].xsize; k++)
+      std::cout << info.grids[1].xvalues[k] << ' ';
+  else
+    std::cout << "No XValues!" << std::endl;
+  std::cout << std::endl;
   std::cout << "#===============================" << std::endl;
-  varno = 2;
+  varno = 4;
   info.variables[varno].sinfo(); 
   var = info.variables[varno];
+  var = info.var["tsurf"];
+  var = info.varByCode[176];
+  var.sinfo();
   std::cout << "#===============================" << std::endl;
-  std::cout << "Gridname:%s" << std::endl;
-  std::cout << var.grid.name << std::endl;
+  std::cout << "Gridname:" << var.grid.name << std::endl;
   std::cout << "GridBounds: NumberOfCorners = " << var.grid.ncorner <<  std::endl;
+  if ( var.grid.hasXYValues ) {
   std::cout << "xvals "   << var.grid.xvals[0]       << std::endl;
   std::cout << "yvals "   << var.grid.yvals[0]       << std::endl;
   std::cout << "xvalues " << var.grid.xvalues[0] << std::endl;
-/*   std::cout << "yvalues " << var.grid.yvalues.back() << std::endl;
- */
-/*   var.grid.readFloatBounds();
- *   std::cout << "xboundsF " << var.grid.xboundsF[0] << ' ' << var.grid.xboundsF[1000] << ' ';
- *   std::cout << "yboundsF " << var.grid.yboundsF[0] << ' ' << var.grid.yboundsF[1000] << std::endl;
- */
+  std::cout << "xvalues " << var.grid.xvalues.front() << std::endl;
+  std::cout << "xvalues " << var.grid.xvalues.back() << std::endl;
+  }
+  else
+    std::cout << "no grid values available" << std::endl;
+  if ( var.grid.hasBounds ) {
+  std::cout << "xbnds "   << var.grid.xbnds[0]       << std::endl;
+  std::cout << "ybnds "   << var.grid.ybnds[0]       << std::endl;
+  std::cout << "xbounds " << var.grid.xbounds[0] << std::endl;
+  std::cout << "xbounds " << var.grid.xbounds.front() << std::endl;
+  std::cout << "xbounds " << var.grid.xbounds.back() << std::endl;
+  }
+  else
+    std::cout << "no grid bounds available" << std::endl;
+
   std::cout << "#===============================" << std::endl;
   printf("Stream:%d\n"         , var.streamID);
   printf("Taxis (unit):%d\n"   , var.taxis.unit);
@@ -82,9 +107,10 @@ int main() {
   std::cout << "#===============================" << std::endl;
   std::cout << "#== Reading from the var map ===" << std::endl;
   _name = info.variables[varno+10].name;
-  std::cout << "#== Use var: " << _name << " ==== (varno " << varno+10 << ")" << std::endl;
+  std::cout << "#== Use var: " << _name << " ==== (code " << info.variables[varno+10].code << ")" << std::endl;
   var = info.var[_name];
   std::cout << "#==== longname: " << var.longname << std::endl;
+  std::cout << "#==== code:     " << var.code << std::endl;
   std::cout << "#==== size:     " << var.size << std::endl;
   std::cout << "#==== gridtype: " << var.grid.type << std::endl;
   std::cout << "#==== unit:     " << var.units << std::endl;
