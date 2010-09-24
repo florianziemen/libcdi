@@ -11,6 +11,7 @@ namespace std {
    %template(StringVector) vector<string>;
    %template(VarsVector)   vector<CdiVariable>;
    %template(VarsMap)      map<string,CdiVariable>;
+   %template(VarsByCode)   map<int,CdiVariable>;
    %template(TaxesMap)     map<int,CdiTaxis>;
    %template(ZaxesMap)     map<int,CdiZaxis>;
    %template(GridsMap)     map<int,CdiGrid>;

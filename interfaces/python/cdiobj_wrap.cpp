@@ -2706,29 +2706,32 @@ SWIG_Python_MustGetPtr(PyObject *obj, swig_type_info *ty, int argnum, int flags)
 #define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t swig_types[21]
 #define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__allocator_type swig_types[22]
 #define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type swig_types[23]
-#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t swig_types[24]
-#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type swig_types[25]
-#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__mapped_type swig_types[26]
-#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t swig_types[27]
-#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__allocator_type swig_types[28]
-#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type swig_types[29]
-#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t swig_types[30]
-#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__allocator_type swig_types[31]
-#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type swig_types[32]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[33]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type swig_types[34]
-#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[35]
-#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[36]
-#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t__allocator_type swig_types[37]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[38]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t__allocator_type swig_types[39]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[40]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t__allocator_type swig_types[41]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t swig_types[42]
-#define SWIGTYPE_p_swig__SwigPyIterator swig_types[43]
-#define SWIGTYPE_p_value_type swig_types[44]
-static swig_type_info *swig_types[46];
-static swig_module_info swig_module = {swig_types, 45, 0, 0, 0, 0};
+#define SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t swig_types[24]
+#define SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__allocator_type swig_types[25]
+#define SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type swig_types[26]
+#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t swig_types[27]
+#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type swig_types[28]
+#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__mapped_type swig_types[29]
+#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t swig_types[30]
+#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__allocator_type swig_types[31]
+#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type swig_types[32]
+#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t swig_types[33]
+#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__allocator_type swig_types[34]
+#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type swig_types[35]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[36]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type swig_types[37]
+#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[38]
+#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[39]
+#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t__allocator_type swig_types[40]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[41]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t__allocator_type swig_types[42]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[43]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t__allocator_type swig_types[44]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t swig_types[45]
+#define SWIGTYPE_p_swig__SwigPyIterator swig_types[46]
+#define SWIGTYPE_p_value_type swig_types[47]
+static swig_type_info *swig_types[49];
+static swig_module_info swig_module = {swig_types, 48, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -5208,6 +5211,122 @@ SWIGINTERN swig::SwigPyIterator *std_map_Sl_std_string_Sc_CdiVariable_Sg__value_
       return swig::make_output_value_iterator(self->begin(), self->begin(), self->end(), *PYTHON_SELF);
     }
 SWIGINTERN void std_map_Sl_std_string_Sc_CdiVariable_Sg____setitem__(std::map< std::string,CdiVariable > *self,std::map< std::string,CdiVariable >::key_type const &key,std::map< std::string,CdiVariable >::mapped_type const &x){
+      (*self)[key] = x;
+    }
+
+      namespace swig {
+	template <>  struct traits<std::pair< int, CdiVariable > > {
+	  typedef pointer_category category;
+	  static const char* type_name() {
+	    return "std::pair<" "int" "," "CdiVariable" " >";
+	  }
+	};
+      }
+    
+
+      namespace swig {
+	template <>  struct traits<std::map<int, CdiVariable, std::less< int >, std::allocator< std::pair< int const,CdiVariable > > > > {
+	  typedef pointer_category category;
+	  static const char* type_name() {
+	    return "std::map<" "int" "," "CdiVariable" "," "std::less< int >" "," "std::allocator< std::pair< int const,CdiVariable > >" " >";
+	  }
+	};
+      }
+    
+SWIGINTERN swig::SwigPyIterator *std_map_Sl_int_Sc_CdiVariable_Sg__iterator(std::map< int,CdiVariable > *self,PyObject **PYTHON_SELF){
+      return swig::make_output_iterator(self->begin(), self->begin(), self->end(), *PYTHON_SELF);
+    }
+SWIGINTERN bool std_map_Sl_int_Sc_CdiVariable_Sg____nonzero__(std::map< int,CdiVariable > const *self){
+      return !(self->empty());
+    }
+SWIGINTERN bool std_map_Sl_int_Sc_CdiVariable_Sg____bool__(std::map< int,CdiVariable > const *self){
+      return !(self->empty());
+    }
+SWIGINTERN std::map< int,CdiVariable >::size_type std_map_Sl_int_Sc_CdiVariable_Sg____len__(std::map< int,CdiVariable > const *self){
+      return self->size();
+    }
+SWIGINTERN std::map< int,CdiVariable >::mapped_type std_map_Sl_int_Sc_CdiVariable_Sg____getitem__(std::map< int,CdiVariable > const *self,std::map< int,CdiVariable >::key_type const &key){
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator i = self->find(key);
+      if (i != self->end())
+	return i->second;
+      else
+	throw std::out_of_range("key not found");
+    }
+SWIGINTERN void std_map_Sl_int_Sc_CdiVariable_Sg____delitem__(std::map< int,CdiVariable > *self,std::map< int,CdiVariable >::key_type const &key){
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::iterator i = self->find(key);
+      if (i != self->end())
+	self->erase(i);
+      else
+	throw std::out_of_range("key not found");
+    }
+SWIGINTERN bool std_map_Sl_int_Sc_CdiVariable_Sg__has_key(std::map< int,CdiVariable > const *self,std::map< int,CdiVariable >::key_type const &key){
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator i = self->find(key);
+      return i != self->end();
+    }
+SWIGINTERN PyObject *std_map_Sl_int_Sc_CdiVariable_Sg__keys(std::map< int,CdiVariable > *self){
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::size_type size = self->size();
+      int pysize = (size <= (std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::size_type) INT_MAX) ? (int) size : -1;
+      SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+      if (pysize < 0) {
+	PyErr_SetString(PyExc_OverflowError,
+			"map size not valid in python");
+	SWIG_PYTHON_THREAD_END_BLOCK;
+	return NULL;
+      }
+      PyObject* keyList = PyList_New(pysize);
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator i = self->begin();
+      for (int j = 0; j < pysize; ++i, ++j) {
+	PyList_SET_ITEM(keyList, j, swig::from(i->first));
+      }
+      SWIG_PYTHON_THREAD_END_BLOCK;
+      return keyList;
+    }
+SWIGINTERN PyObject *std_map_Sl_int_Sc_CdiVariable_Sg__values(std::map< int,CdiVariable > *self){
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::size_type size = self->size();
+      int pysize = (size <= (std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::size_type) INT_MAX) ? (int) size : -1;
+      SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+      if (pysize < 0) {
+	PyErr_SetString(PyExc_OverflowError,
+			"map size not valid in python");
+	SWIG_PYTHON_THREAD_END_BLOCK;
+	return NULL;
+      }
+      PyObject* valList = PyList_New(pysize);
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator i = self->begin();
+      for (int j = 0; j < pysize; ++i, ++j) {
+	PyList_SET_ITEM(valList, j, swig::from(i->second));
+      }
+      SWIG_PYTHON_THREAD_END_BLOCK;
+      return valList;
+    }
+SWIGINTERN PyObject *std_map_Sl_int_Sc_CdiVariable_Sg__items(std::map< int,CdiVariable > *self){
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::size_type size = self->size();
+      int pysize = (size <= (std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::size_type) INT_MAX) ? (int) size : -1;
+      SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+      if (pysize < 0) {
+	PyErr_SetString(PyExc_OverflowError,
+			"map size not valid in python");
+	SWIG_PYTHON_THREAD_END_BLOCK;
+	return NULL;
+      }    
+      PyObject* itemList = PyList_New(pysize);
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator i = self->begin();
+      for (int j = 0; j < pysize; ++i, ++j) {
+	PyList_SET_ITEM(itemList, j, swig::from(*i));
+      }
+      SWIG_PYTHON_THREAD_END_BLOCK;
+      return itemList;
+    }
+SWIGINTERN bool std_map_Sl_int_Sc_CdiVariable_Sg____contains__(std::map< int,CdiVariable > *self,std::map< int,CdiVariable >::key_type const &key){
+      return self->find(key) != self->end();
+    }
+SWIGINTERN swig::SwigPyIterator *std_map_Sl_int_Sc_CdiVariable_Sg__key_iterator(std::map< int,CdiVariable > *self,PyObject **PYTHON_SELF){
+      return swig::make_output_key_iterator(self->begin(), self->begin(), self->end(), *PYTHON_SELF);
+    }
+SWIGINTERN swig::SwigPyIterator *std_map_Sl_int_Sc_CdiVariable_Sg__value_iterator(std::map< int,CdiVariable > *self,PyObject **PYTHON_SELF){
+      return swig::make_output_value_iterator(self->begin(), self->begin(), self->end(), *PYTHON_SELF);
+    }
+SWIGINTERN void std_map_Sl_int_Sc_CdiVariable_Sg____setitem__(std::map< int,CdiVariable > *self,std::map< int,CdiVariable >::key_type const &key,std::map< int,CdiVariable >::mapped_type const &x){
       (*self)[key] = x;
     }
 
@@ -16215,6 +16334,1071 @@ SWIGINTERN PyObject *VarsMap_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObje
   return SWIG_Py_Void();
 }
 
+SWIGINTERN PyObject *_wrap_new_VarsByCode__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::less< int > *arg1 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::map< int,CdiVariable > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:new_VarsByCode",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_std__lessT_int_t,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_VarsByCode" "', argument " "1"" of type '" "std::less< int > const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_VarsByCode" "', argument " "1"" of type '" "std::less< int > const &""'"); 
+  }
+  arg1 = reinterpret_cast< std::less< int > * >(argp1);
+  result = (std::map< int,CdiVariable > *)new std::map< int,CdiVariable >((std::less< int > const &)*arg1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_iterator(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  PyObject **arg2 = (PyObject **) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  swig::SwigPyIterator *result = 0 ;
+  
+  arg2 = &obj0;
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode_iterator",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_iterator" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (swig::SwigPyIterator *)std_map_Sl_int_Sc_CdiVariable_Sg__iterator(arg1,arg2);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode___nonzero__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode___nonzero__",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode___nonzero__" "', argument " "1"" of type '" "std::map< int,CdiVariable > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (bool)std_map_Sl_int_Sc_CdiVariable_Sg____nonzero__((std::map< int,CdiVariable > const *)arg1);
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode___bool__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode___bool__",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode___bool__" "', argument " "1"" of type '" "std::map< int,CdiVariable > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (bool)std_map_Sl_int_Sc_CdiVariable_Sg____bool__((std::map< int,CdiVariable > const *)arg1);
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode___len__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::map< int,CdiVariable >::size_type result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode___len__",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode___len__" "', argument " "1"" of type '" "std::map< int,CdiVariable > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = std_map_Sl_int_Sc_CdiVariable_Sg____len__((std::map< int,CdiVariable > const *)arg1);
+  resultobj = SWIG_From_size_t(static_cast< size_t >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode___getitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  std::map< int,CdiVariable >::mapped_type result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:VarsByCode___getitem__",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode___getitem__" "', argument " "1"" of type '" "std::map< int,CdiVariable > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VarsByCode___getitem__" "', argument " "2"" of type '" "std::map< int,CdiVariable >::key_type""'");
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  try {
+    result = std_map_Sl_int_Sc_CdiVariable_Sg____getitem__((std::map< int,CdiVariable > const *)arg1,(int const &)*arg2);
+  }
+  catch(std::out_of_range &_e) {
+    SWIG_exception_fail(SWIG_IndexError, (&_e)->what());
+  }
+  
+  resultobj = SWIG_NewPointerObj((new std::map< int,CdiVariable >::mapped_type(static_cast< const std::map< int,CdiVariable >::mapped_type& >(result))), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode___delitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:VarsByCode___delitem__",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode___delitem__" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VarsByCode___delitem__" "', argument " "2"" of type '" "std::map< int,CdiVariable >::key_type""'");
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  try {
+    std_map_Sl_int_Sc_CdiVariable_Sg____delitem__(arg1,(int const &)*arg2);
+  }
+  catch(std::out_of_range &_e) {
+    SWIG_exception_fail(SWIG_IndexError, (&_e)->what());
+  }
+  
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_has_key(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:VarsByCode_has_key",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_has_key" "', argument " "1"" of type '" "std::map< int,CdiVariable > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VarsByCode_has_key" "', argument " "2"" of type '" "std::map< int,CdiVariable >::key_type""'");
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  result = (bool)std_map_Sl_int_Sc_CdiVariable_Sg__has_key((std::map< int,CdiVariable > const *)arg1,(int const &)*arg2);
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_keys(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode_keys",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_keys" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (PyObject *)std_map_Sl_int_Sc_CdiVariable_Sg__keys(arg1);
+  resultobj = result;
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_values(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode_values",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_values" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (PyObject *)std_map_Sl_int_Sc_CdiVariable_Sg__values(arg1);
+  resultobj = result;
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_items(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode_items",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_items" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (PyObject *)std_map_Sl_int_Sc_CdiVariable_Sg__items(arg1);
+  resultobj = result;
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode___contains__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:VarsByCode___contains__",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode___contains__" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VarsByCode___contains__" "', argument " "2"" of type '" "std::map< int,CdiVariable >::key_type""'");
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  result = (bool)std_map_Sl_int_Sc_CdiVariable_Sg____contains__(arg1,(int const &)*arg2);
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_key_iterator(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  PyObject **arg2 = (PyObject **) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  swig::SwigPyIterator *result = 0 ;
+  
+  arg2 = &obj0;
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode_key_iterator",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_key_iterator" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (swig::SwigPyIterator *)std_map_Sl_int_Sc_CdiVariable_Sg__key_iterator(arg1,arg2);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_value_iterator(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  PyObject **arg2 = (PyObject **) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  swig::SwigPyIterator *result = 0 ;
+  
+  arg2 = &obj0;
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode_value_iterator",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_value_iterator" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (swig::SwigPyIterator *)std_map_Sl_int_Sc_CdiVariable_Sg__value_iterator(arg1,arg2);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_swig__SwigPyIterator, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode___setitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  std::map< int,CdiVariable >::mapped_type *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:VarsByCode___setitem__",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode___setitem__" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VarsByCode___setitem__" "', argument " "2"" of type '" "std::map< int,CdiVariable >::key_type""'");
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type,  0  | 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "VarsByCode___setitem__" "', argument " "3"" of type '" "std::map< int,CdiVariable >::mapped_type const &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "VarsByCode___setitem__" "', argument " "3"" of type '" "std::map< int,CdiVariable >::mapped_type const &""'"); 
+  }
+  arg3 = reinterpret_cast< std::map< int,CdiVariable >::mapped_type * >(argp3);
+  try {
+    std_map_Sl_int_Sc_CdiVariable_Sg____setitem__(arg1,(int const &)*arg2,(CdiVariable const &)*arg3);
+  }
+  catch(std::out_of_range &_e) {
+    SWIG_exception_fail(SWIG_IndexError, (&_e)->what());
+  }
+  
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_VarsByCode__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_VarsByCode")) SWIG_fail;
+  result = (std::map< int,CdiVariable > *)new std::map< int,CdiVariable >();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_VarsByCode__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = 0 ;
+  int res1 = SWIG_OLDOBJ ;
+  PyObject * obj0 = 0 ;
+  std::map< int,CdiVariable > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:new_VarsByCode",&obj0)) SWIG_fail;
+  {
+    std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *ptr = (std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *)0;
+    res1 = swig::asptr(obj0, &ptr);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_VarsByCode" "', argument " "1"" of type '" "std::map< int,CdiVariable > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_VarsByCode" "', argument " "1"" of type '" "std::map< int,CdiVariable > const &""'"); 
+    }
+    arg1 = ptr;
+  }
+  result = (std::map< int,CdiVariable > *)new std::map< int,CdiVariable >((std::map< int,CdiVariable > const &)*arg1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, SWIG_POINTER_NEW |  0 );
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_VarsByCode(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[2];
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = (int)PyObject_Length(args);
+  for (ii = 0; (ii < argc) && (ii < 1); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 0) {
+    return _wrap_new_VarsByCode__SWIG_1(self, args);
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_std__lessT_int_t, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_VarsByCode__SWIG_0(self, args);
+    }
+  }
+  if (argc == 1) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_VarsByCode__SWIG_2(self, args);
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'new_VarsByCode'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    std::map< int,CdiVariable >(std::less< int > const &)\n"
+    "    std::map< int,CdiVariable >()\n"
+    "    std::map< int,CdiVariable >(std::map< int,CdiVariable > const &)\n");
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_empty(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode_empty",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_empty" "', argument " "1"" of type '" "std::map< int,CdiVariable > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (bool)((std::map< int,CdiVariable > const *)arg1)->empty();
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_size(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::map< int,CdiVariable >::size_type result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode_size",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_size" "', argument " "1"" of type '" "std::map< int,CdiVariable > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = ((std::map< int,CdiVariable > const *)arg1)->size();
+  resultobj = SWIG_From_size_t(static_cast< size_t >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_clear(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode_clear",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_clear" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  (arg1)->clear();
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_swap(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:VarsByCode_swap",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_swap" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t,  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "VarsByCode_swap" "', argument " "2"" of type '" "std::map< int,CdiVariable > &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "VarsByCode_swap" "', argument " "2"" of type '" "std::map< int,CdiVariable > &""'"); 
+  }
+  arg2 = reinterpret_cast< std::map< int,CdiVariable > * >(argp2);
+  (arg1)->swap(*arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_get_allocator(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  SwigValueWrapper< std::allocator< std::pair< int const,CdiVariable > > > result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode_get_allocator",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_get_allocator" "', argument " "1"" of type '" "std::map< int,CdiVariable > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = ((std::map< int,CdiVariable > const *)arg1)->get_allocator();
+  resultobj = SWIG_NewPointerObj((new std::map< int,CdiVariable >::allocator_type(static_cast< const std::map< int,CdiVariable >::allocator_type& >(result))), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__allocator_type, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_begin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::map< int,CdiVariable >::const_iterator result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode_begin",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_begin" "', argument " "1"" of type '" "std::map< int,CdiVariable > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = ((std::map< int,CdiVariable > const *)arg1)->begin();
+  resultobj = SWIG_NewPointerObj(swig::make_output_iterator(static_cast< const std::map< int,CdiVariable >::const_iterator & >(result)),
+    swig::SwigPyIterator::descriptor(),SWIG_POINTER_OWN);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_end(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::map< int,CdiVariable >::const_iterator result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode_end",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_end" "', argument " "1"" of type '" "std::map< int,CdiVariable > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = ((std::map< int,CdiVariable > const *)arg1)->end();
+  resultobj = SWIG_NewPointerObj(swig::make_output_iterator(static_cast< const std::map< int,CdiVariable >::const_iterator & >(result)),
+    swig::SwigPyIterator::descriptor(),SWIG_POINTER_OWN);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_rbegin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::map< int,CdiVariable >::const_reverse_iterator result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode_rbegin",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_rbegin" "', argument " "1"" of type '" "std::map< int,CdiVariable > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = ((std::map< int,CdiVariable > const *)arg1)->rbegin();
+  resultobj = SWIG_NewPointerObj(swig::make_output_iterator(static_cast< const std::map< int,CdiVariable >::const_reverse_iterator & >(result)),
+    swig::SwigPyIterator::descriptor(),SWIG_POINTER_OWN);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_rend(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::map< int,CdiVariable >::const_reverse_iterator result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VarsByCode_rend",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_rend" "', argument " "1"" of type '" "std::map< int,CdiVariable > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = ((std::map< int,CdiVariable > const *)arg1)->rend();
+  resultobj = SWIG_NewPointerObj(swig::make_output_iterator(static_cast< const std::map< int,CdiVariable >::const_reverse_iterator & >(result)),
+    swig::SwigPyIterator::descriptor(),SWIG_POINTER_OWN);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_erase__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  std::map< int,CdiVariable >::size_type result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:VarsByCode_erase",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_erase" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VarsByCode_erase" "', argument " "2"" of type '" "std::map< int,CdiVariable >::key_type""'");
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  result = (arg1)->erase((std::map< int,CdiVariable >::key_type const &)*arg2);
+  resultobj = SWIG_From_size_t(static_cast< size_t >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_count(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  std::map< int,CdiVariable >::size_type result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:VarsByCode_count",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_count" "', argument " "1"" of type '" "std::map< int,CdiVariable > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VarsByCode_count" "', argument " "2"" of type '" "std::map< int,CdiVariable >::key_type""'");
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  result = ((std::map< int,CdiVariable > const *)arg1)->count((std::map< int,CdiVariable >::key_type const &)*arg2);
+  resultobj = SWIG_From_size_t(static_cast< size_t >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_erase__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::iterator arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  swig::SwigPyIterator *iter2 = 0 ;
+  int res2 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:VarsByCode_erase",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_erase" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, SWIG_as_voidptrptr(&iter2), swig::SwigPyIterator::descriptor(), 0);
+  if (!SWIG_IsOK(res2) || !iter2) {
+    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "VarsByCode_erase" "', argument " "2"" of type '" "std::map< int,CdiVariable >::iterator""'");
+  } else {
+    swig::SwigPyIterator_T<std::map< int,CdiVariable >::iterator > *iter_t = dynamic_cast<swig::SwigPyIterator_T<std::map< int,CdiVariable >::iterator > *>(iter2);
+    if (iter_t) {
+      arg2 = iter_t->get_current();
+    } else {
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "VarsByCode_erase" "', argument " "2"" of type '" "std::map< int,CdiVariable >::iterator""'");
+    }
+  }
+  (arg1)->erase(arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_erase__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::iterator arg2 ;
+  std::map< int,CdiVariable >::iterator arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  swig::SwigPyIterator *iter2 = 0 ;
+  int res2 ;
+  swig::SwigPyIterator *iter3 = 0 ;
+  int res3 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:VarsByCode_erase",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_erase" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, SWIG_as_voidptrptr(&iter2), swig::SwigPyIterator::descriptor(), 0);
+  if (!SWIG_IsOK(res2) || !iter2) {
+    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "VarsByCode_erase" "', argument " "2"" of type '" "std::map< int,CdiVariable >::iterator""'");
+  } else {
+    swig::SwigPyIterator_T<std::map< int,CdiVariable >::iterator > *iter_t = dynamic_cast<swig::SwigPyIterator_T<std::map< int,CdiVariable >::iterator > *>(iter2);
+    if (iter_t) {
+      arg2 = iter_t->get_current();
+    } else {
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "VarsByCode_erase" "', argument " "2"" of type '" "std::map< int,CdiVariable >::iterator""'");
+    }
+  }
+  res3 = SWIG_ConvertPtr(obj2, SWIG_as_voidptrptr(&iter3), swig::SwigPyIterator::descriptor(), 0);
+  if (!SWIG_IsOK(res3) || !iter3) {
+    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "VarsByCode_erase" "', argument " "3"" of type '" "std::map< int,CdiVariable >::iterator""'");
+  } else {
+    swig::SwigPyIterator_T<std::map< int,CdiVariable >::iterator > *iter_t = dynamic_cast<swig::SwigPyIterator_T<std::map< int,CdiVariable >::iterator > *>(iter3);
+    if (iter_t) {
+      arg3 = iter_t->get_current();
+    } else {
+      SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "VarsByCode_erase" "', argument " "3"" of type '" "std::map< int,CdiVariable >::iterator""'");
+    }
+  }
+  (arg1)->erase(arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_erase(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[4];
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = (int)PyObject_Length(args);
+  for (ii = 0; (ii < argc) && (ii < 3); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 2) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      swig::SwigPyIterator *iter = 0;
+      int res = SWIG_ConvertPtr(argv[1], SWIG_as_voidptrptr(&iter), swig::SwigPyIterator::descriptor(), 0);
+      _v = (SWIG_IsOK(res) && iter && (dynamic_cast<swig::SwigPyIterator_T<std::map< int,CdiVariable >::iterator > *>(iter) != 0));
+      if (_v) {
+        return _wrap_VarsByCode_erase__SWIG_1(self, args);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_VarsByCode_erase__SWIG_0(self, args);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      swig::SwigPyIterator *iter = 0;
+      int res = SWIG_ConvertPtr(argv[1], SWIG_as_voidptrptr(&iter), swig::SwigPyIterator::descriptor(), 0);
+      _v = (SWIG_IsOK(res) && iter && (dynamic_cast<swig::SwigPyIterator_T<std::map< int,CdiVariable >::iterator > *>(iter) != 0));
+      if (_v) {
+        swig::SwigPyIterator *iter = 0;
+        int res = SWIG_ConvertPtr(argv[2], SWIG_as_voidptrptr(&iter), swig::SwigPyIterator::descriptor(), 0);
+        _v = (SWIG_IsOK(res) && iter && (dynamic_cast<swig::SwigPyIterator_T<std::map< int,CdiVariable >::iterator > *>(iter) != 0));
+        if (_v) {
+          return _wrap_VarsByCode_erase__SWIG_2(self, args);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'VarsByCode_erase'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    erase(std::map< int,CdiVariable > *,std::map< int,CdiVariable >::key_type const &)\n"
+    "    erase(std::map< int,CdiVariable > *,std::map< int,CdiVariable >::iterator)\n"
+    "    erase(std::map< int,CdiVariable > *,std::map< int,CdiVariable >::iterator,std::map< int,CdiVariable >::iterator)\n");
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_find(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  std::map< int,CdiVariable >::iterator result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:VarsByCode_find",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_find" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VarsByCode_find" "', argument " "2"" of type '" "std::map< int,CdiVariable >::key_type""'");
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  result = (arg1)->find((std::map< int,CdiVariable >::key_type const &)*arg2);
+  resultobj = SWIG_NewPointerObj(swig::make_output_iterator(static_cast< const std::map< int,CdiVariable >::iterator & >(result)),
+    swig::SwigPyIterator::descriptor(),SWIG_POINTER_OWN);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_lower_bound(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  std::map< int,CdiVariable >::iterator result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:VarsByCode_lower_bound",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_lower_bound" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VarsByCode_lower_bound" "', argument " "2"" of type '" "std::map< int,CdiVariable >::key_type""'");
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  result = (arg1)->lower_bound((std::map< int,CdiVariable >::key_type const &)*arg2);
+  resultobj = SWIG_NewPointerObj(swig::make_output_iterator(static_cast< const std::map< int,CdiVariable >::iterator & >(result)),
+    swig::SwigPyIterator::descriptor(),SWIG_POINTER_OWN);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VarsByCode_upper_bound(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  std::map< int,CdiVariable >::iterator result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:VarsByCode_upper_bound",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VarsByCode_upper_bound" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VarsByCode_upper_bound" "', argument " "2"" of type '" "std::map< int,CdiVariable >::key_type""'");
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  result = (arg1)->upper_bound((std::map< int,CdiVariable >::key_type const &)*arg2);
+  resultobj = SWIG_NewPointerObj(swig::make_output_iterator(static_cast< const std::map< int,CdiVariable >::iterator & >(result)),
+    swig::SwigPyIterator::descriptor(),SWIG_POINTER_OWN);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_VarsByCode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_VarsByCode",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_VarsByCode" "', argument " "1"" of type '" "std::map< int,CdiVariable > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  delete arg1;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *VarsByCode_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
 SWIGINTERN PyObject *_wrap_new_TaxesMap__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   std::less< int > *arg1 = 0 ;
@@ -19863,6 +21047,58 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_CdiGrid_hasXYValues_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:CdiGrid_hasXYValues_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_hasXYValues_set" "', argument " "1"" of type '" "CdiGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  ecode2 = SWIG_AsVal_bool(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "CdiGrid_hasXYValues_set" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  if (arg1) (arg1)->hasXYValues = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CdiGrid_hasXYValues_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_hasXYValues_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_hasXYValues_get" "', argument " "1"" of type '" "CdiGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  result = (bool) ((arg1)->hasXYValues);
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_CdiGrid_hasBounds_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CdiGrid *arg1 = (CdiGrid *) 0 ;
@@ -20019,110 +21255,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_CdiGrid_xvalsF_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  float *arg2 = (float *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:CdiGrid_xvalsF_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_xvalsF_set" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiGrid_xvalsF_set" "', argument " "2"" of type '" "float *""'"); 
-  }
-  arg2 = reinterpret_cast< float * >(argp2);
-  if (arg1) (arg1)->xvalsF = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_xvalsF_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  float *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_xvalsF_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_xvalsF_get" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (float *) ((arg1)->xvalsF);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_yvalsF_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  float *arg2 = (float *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:CdiGrid_yvalsF_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_yvalsF_set" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiGrid_yvalsF_set" "', argument " "2"" of type '" "float *""'"); 
-  }
-  arg2 = reinterpret_cast< float * >(argp2);
-  if (arg1) (arg1)->yvalsF = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_yvalsF_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  float *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_yvalsF_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_yvalsF_get" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (float *) ((arg1)->yvalsF);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_CdiGrid_xbnds_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CdiGrid *arg1 = (CdiGrid *) 0 ;
@@ -20221,6 +21353,110 @@ SWIGINTERN PyObject *_wrap_CdiGrid_ybnds_get(PyObject *SWIGUNUSEDPARM(self), PyO
   arg1 = reinterpret_cast< CdiGrid * >(argp1);
   result = (double *) ((arg1)->ybnds);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CdiGrid_xvalsF_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  float *arg2 = (float *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:CdiGrid_xvalsF_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_xvalsF_set" "', argument " "1"" of type '" "CdiGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiGrid_xvalsF_set" "', argument " "2"" of type '" "float *""'"); 
+  }
+  arg2 = reinterpret_cast< float * >(argp2);
+  if (arg1) (arg1)->xvalsF = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CdiGrid_xvalsF_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  float *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_xvalsF_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_xvalsF_get" "', argument " "1"" of type '" "CdiGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  result = (float *) ((arg1)->xvalsF);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CdiGrid_yvalsF_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  float *arg2 = (float *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:CdiGrid_yvalsF_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_yvalsF_set" "', argument " "1"" of type '" "CdiGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiGrid_yvalsF_set" "', argument " "2"" of type '" "float *""'"); 
+  }
+  arg2 = reinterpret_cast< float * >(argp2);
+  if (arg1) (arg1)->yvalsF = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CdiGrid_yvalsF_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  float *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_yvalsF_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_yvalsF_get" "', argument " "1"" of type '" "CdiGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  result = (float *) ((arg1)->yvalsF);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -24991,6 +26227,58 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Cdi_varByCode_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Cdi *arg1 = (Cdi *) 0 ;
+  std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *arg2 = (std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Cdi_varByCode_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Cdi, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Cdi_varByCode_set" "', argument " "1"" of type '" "Cdi *""'"); 
+  }
+  arg1 = reinterpret_cast< Cdi * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Cdi_varByCode_set" "', argument " "2"" of type '" "std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > * >(argp2);
+  if (arg1) (arg1)->varByCode = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Cdi_varByCode_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Cdi *arg1 = (Cdi *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Cdi_varByCode_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Cdi, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Cdi_varByCode_get" "', argument " "1"" of type '" "Cdi *""'"); 
+  }
+  arg1 = reinterpret_cast< Cdi * >(argp1);
+  result = (std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *)& ((arg1)->varByCode);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Cdi_taxes_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Cdi *arg1 = (Cdi *) 0 ;
@@ -25375,6 +26663,37 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"VarsMap_upper_bound", _wrap_VarsMap_upper_bound, METH_VARARGS, NULL},
 	 { (char *)"delete_VarsMap", _wrap_delete_VarsMap, METH_VARARGS, NULL},
 	 { (char *)"VarsMap_swigregister", VarsMap_swigregister, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_iterator", _wrap_VarsByCode_iterator, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode___nonzero__", _wrap_VarsByCode___nonzero__, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode___bool__", _wrap_VarsByCode___bool__, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode___len__", _wrap_VarsByCode___len__, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode___getitem__", _wrap_VarsByCode___getitem__, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode___delitem__", _wrap_VarsByCode___delitem__, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_has_key", _wrap_VarsByCode_has_key, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_keys", _wrap_VarsByCode_keys, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_values", _wrap_VarsByCode_values, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_items", _wrap_VarsByCode_items, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode___contains__", _wrap_VarsByCode___contains__, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_key_iterator", _wrap_VarsByCode_key_iterator, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_value_iterator", _wrap_VarsByCode_value_iterator, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode___setitem__", _wrap_VarsByCode___setitem__, METH_VARARGS, NULL},
+	 { (char *)"new_VarsByCode", _wrap_new_VarsByCode, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_empty", _wrap_VarsByCode_empty, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_size", _wrap_VarsByCode_size, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_clear", _wrap_VarsByCode_clear, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_swap", _wrap_VarsByCode_swap, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_get_allocator", _wrap_VarsByCode_get_allocator, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_begin", _wrap_VarsByCode_begin, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_end", _wrap_VarsByCode_end, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_rbegin", _wrap_VarsByCode_rbegin, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_rend", _wrap_VarsByCode_rend, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_count", _wrap_VarsByCode_count, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_erase", _wrap_VarsByCode_erase, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_find", _wrap_VarsByCode_find, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_lower_bound", _wrap_VarsByCode_lower_bound, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_upper_bound", _wrap_VarsByCode_upper_bound, METH_VARARGS, NULL},
+	 { (char *)"delete_VarsByCode", _wrap_delete_VarsByCode, METH_VARARGS, NULL},
+	 { (char *)"VarsByCode_swigregister", VarsByCode_swigregister, METH_VARARGS, NULL},
 	 { (char *)"TaxesMap_iterator", _wrap_TaxesMap_iterator, METH_VARARGS, NULL},
 	 { (char *)"TaxesMap___nonzero__", _wrap_TaxesMap___nonzero__, METH_VARARGS, NULL},
 	 { (char *)"TaxesMap___bool__", _wrap_TaxesMap___bool__, METH_VARARGS, NULL},
@@ -25484,20 +26803,22 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"CdiGrid_prec_get", _wrap_CdiGrid_prec_get, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_ncorner_set", _wrap_CdiGrid_ncorner_set, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_ncorner_get", _wrap_CdiGrid_ncorner_get, METH_VARARGS, NULL},
+	 { (char *)"CdiGrid_hasXYValues_set", _wrap_CdiGrid_hasXYValues_set, METH_VARARGS, NULL},
+	 { (char *)"CdiGrid_hasXYValues_get", _wrap_CdiGrid_hasXYValues_get, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_hasBounds_set", _wrap_CdiGrid_hasBounds_set, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_hasBounds_get", _wrap_CdiGrid_hasBounds_get, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_xvals_set", _wrap_CdiGrid_xvals_set, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_xvals_get", _wrap_CdiGrid_xvals_get, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_yvals_set", _wrap_CdiGrid_yvals_set, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_yvals_get", _wrap_CdiGrid_yvals_get, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_xvalsF_set", _wrap_CdiGrid_xvalsF_set, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_xvalsF_get", _wrap_CdiGrid_xvalsF_get, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_yvalsF_set", _wrap_CdiGrid_yvalsF_set, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_yvalsF_get", _wrap_CdiGrid_yvalsF_get, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_xbnds_set", _wrap_CdiGrid_xbnds_set, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_xbnds_get", _wrap_CdiGrid_xbnds_get, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_ybnds_set", _wrap_CdiGrid_ybnds_set, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_ybnds_get", _wrap_CdiGrid_ybnds_get, METH_VARARGS, NULL},
+	 { (char *)"CdiGrid_xvalsF_set", _wrap_CdiGrid_xvalsF_set, METH_VARARGS, NULL},
+	 { (char *)"CdiGrid_xvalsF_get", _wrap_CdiGrid_xvalsF_get, METH_VARARGS, NULL},
+	 { (char *)"CdiGrid_yvalsF_set", _wrap_CdiGrid_yvalsF_set, METH_VARARGS, NULL},
+	 { (char *)"CdiGrid_yvalsF_get", _wrap_CdiGrid_yvalsF_get, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_xbndsF_set", _wrap_CdiGrid_xbndsF_set, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_xbndsF_get", _wrap_CdiGrid_xbndsF_get, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_ybndsF_set", _wrap_CdiGrid_ybndsF_set, METH_VARARGS, NULL},
@@ -25667,6 +26988,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Cdi_variables_get", _wrap_Cdi_variables_get, METH_VARARGS, NULL},
 	 { (char *)"Cdi_var_set", _wrap_Cdi_var_set, METH_VARARGS, NULL},
 	 { (char *)"Cdi_var_get", _wrap_Cdi_var_get, METH_VARARGS, NULL},
+	 { (char *)"Cdi_varByCode_set", _wrap_Cdi_varByCode_set, METH_VARARGS, NULL},
+	 { (char *)"Cdi_varByCode_get", _wrap_Cdi_varByCode_get, METH_VARARGS, NULL},
 	 { (char *)"Cdi_taxes_set", _wrap_Cdi_taxes_set, METH_VARARGS, NULL},
 	 { (char *)"Cdi_taxes_get", _wrap_Cdi_taxes_get, METH_VARARGS, NULL},
 	 { (char *)"Cdi_zaxes_set", _wrap_Cdi_zaxes_set, METH_VARARGS, NULL},
@@ -25704,6 +27027,9 @@ static swig_type_info _swigt__p_std__mapT_int_CdiGrid_std__lessT_int_t_std__allo
 static swig_type_info _swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t = {"_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t", "std::map< int,CdiTaxis > *|std::map< int,CdiTaxis,std::less< int >,std::allocator< std::pair< int const,CdiTaxis > > > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__allocator_type = {"_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__allocator_type", "std::map< int,CdiTaxis >::allocator_type *|std::allocator< std::pair< int const,CdiTaxis > > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type = {"_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type", "std::map< int,CdiTaxis >::mapped_type *|CdiTaxis *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t = {"_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t", "std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *|std::map< int,CdiVariable > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__allocator_type = {"_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__allocator_type", "std::map< int,CdiVariable >::allocator_type *|std::allocator< std::pair< int const,CdiVariable > > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type = {"_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type", "std::map< int,CdiVariable >::mapped_type *|CdiVariable *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t = {"_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t", "std::map< int,CdiZaxis > *|std::map< int,CdiZaxis,std::less< int >,std::allocator< std::pair< int const,CdiZaxis > > > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type = {"_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type", "std::map< int,CdiZaxis >::allocator_type *|std::allocator< std::pair< int const,CdiZaxis > > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__mapped_type = {"_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__mapped_type", "std::map< int,CdiZaxis >::mapped_type *|CdiZaxis *", 0, 0, (void*)0, 0};
@@ -25751,6 +27077,9 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t,
   &_swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__allocator_type,
   &_swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type,
+  &_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t,
+  &_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__allocator_type,
+  &_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type,
   &_swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t,
   &_swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type,
   &_swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__mapped_type,
@@ -25777,7 +27106,7 @@ static swig_type_info *swig_type_initial[] = {
 static swig_cast_info _swigc__p_Cdi[] = {  {&_swigt__p_Cdi, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_CdiGrid[] = {  {&_swigt__p_std__mapT_int_CdiGrid_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiGrid_t_t_t__mapped_type, 0, 0, 0},  {&_swigt__p_CdiGrid, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_CdiTaxis[] = {  {&_swigt__p_CdiTaxis, 0, 0, 0},  {&_swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_CdiVariable[] = {  {&_swigt__p_CdiVariable, 0, 0, 0},  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type, 0, 0, 0},  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_CdiVariable[] = {  {&_swigt__p_CdiVariable, 0, 0, 0},  {&_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type, 0, 0, 0},  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_CdiZaxis[] = {  {&_swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__mapped_type, 0, 0, 0},  {&_swigt__p_CdiZaxis, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_allocator_type[] = {  {&_swigt__p_allocator_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
@@ -25798,15 +27127,18 @@ static swig_cast_info _swigc__p_std__mapT_int_CdiGrid_std__lessT_int_t_std__allo
 static swig_cast_info _swigc__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t[] = {  {&_swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__allocator_type[] = {  {&_swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__allocator_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type[] = {  {&_swigt__p_CdiTaxis, 0, 0, 0},  {&_swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t[] = {  {&_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__allocator_type[] = {  {&_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__allocator_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type[] = {  {&_swigt__p_CdiVariable, 0, 0, 0},  {&_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type, 0, 0, 0},  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t[] = {  {&_swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type[] = {  {&_swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__mapped_type[] = {  {&_swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__mapped_type, 0, 0, 0},  {&_swigt__p_CdiZaxis, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t[] = {  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__allocator_type[] = {  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__allocator_type, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type[] = {  {&_swigt__p_CdiVariable, 0, 0, 0},  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type, 0, 0, 0},  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type[] = {  {&_swigt__p_CdiVariable, 0, 0, 0},  {&_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type, 0, 0, 0},  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t[] = {  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__allocator_type[] = {  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__allocator_type, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type[] = {  {&_swigt__p_CdiVariable, 0, 0, 0},  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type, 0, 0, 0},  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type[] = {  {&_swigt__p_CdiVariable, 0, 0, 0},  {&_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type, 0, 0, 0},  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_double_std__allocatorT_double_t_t[] = {  {&_swigt__p_std__vectorT_double_std__allocatorT_double_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type[] = {  {&_swigt__p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_float_std__allocatorT_float_t_t[] = {  {&_swigt__p_std__vectorT_float_std__allocatorT_float_t_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -25845,6 +27177,9 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t,
   _swigc__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__allocator_type,
   _swigc__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type,
+  _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t,
+  _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__allocator_type,
+  _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type,
   _swigc__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t,
   _swigc__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type,
   _swigc__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__mapped_type,

@@ -378,6 +378,54 @@ class VarsMap(_object):
 VarsMap_swigregister = _CdiObj.VarsMap_swigregister
 VarsMap_swigregister(VarsMap)
 
+class VarsByCode(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, VarsByCode, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, VarsByCode, name)
+    __repr__ = _swig_repr
+    def iterator(self): return _CdiObj.VarsByCode_iterator(self)
+    def __iter__(self): return self.iterator()
+    def __nonzero__(self): return _CdiObj.VarsByCode___nonzero__(self)
+    def __bool__(self): return _CdiObj.VarsByCode___bool__(self)
+    def __len__(self): return _CdiObj.VarsByCode___len__(self)
+    def __getitem__(self, *args): return _CdiObj.VarsByCode___getitem__(self, *args)
+    def __delitem__(self, *args): return _CdiObj.VarsByCode___delitem__(self, *args)
+    def has_key(self, *args): return _CdiObj.VarsByCode_has_key(self, *args)
+    def keys(self): return _CdiObj.VarsByCode_keys(self)
+    def values(self): return _CdiObj.VarsByCode_values(self)
+    def items(self): return _CdiObj.VarsByCode_items(self)
+    def __contains__(self, *args): return _CdiObj.VarsByCode___contains__(self, *args)
+    def key_iterator(self): return _CdiObj.VarsByCode_key_iterator(self)
+    def value_iterator(self): return _CdiObj.VarsByCode_value_iterator(self)
+    def __iter__(self): return self.key_iterator()
+    def iterkeys(self): return self.key_iterator()
+    def itervalues(self): return self.value_iterator()
+    def iteritems(self): return self.iterator()
+    def __setitem__(self, *args): return _CdiObj.VarsByCode___setitem__(self, *args)
+    def __init__(self, *args): 
+        this = _CdiObj.new_VarsByCode(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    def empty(self): return _CdiObj.VarsByCode_empty(self)
+    def size(self): return _CdiObj.VarsByCode_size(self)
+    def clear(self): return _CdiObj.VarsByCode_clear(self)
+    def swap(self, *args): return _CdiObj.VarsByCode_swap(self, *args)
+    def get_allocator(self): return _CdiObj.VarsByCode_get_allocator(self)
+    def begin(self): return _CdiObj.VarsByCode_begin(self)
+    def end(self): return _CdiObj.VarsByCode_end(self)
+    def rbegin(self): return _CdiObj.VarsByCode_rbegin(self)
+    def rend(self): return _CdiObj.VarsByCode_rend(self)
+    def count(self, *args): return _CdiObj.VarsByCode_count(self, *args)
+    def erase(self, *args): return _CdiObj.VarsByCode_erase(self, *args)
+    def find(self, *args): return _CdiObj.VarsByCode_find(self, *args)
+    def lower_bound(self, *args): return _CdiObj.VarsByCode_lower_bound(self, *args)
+    def upper_bound(self, *args): return _CdiObj.VarsByCode_upper_bound(self, *args)
+    __swig_destroy__ = _CdiObj.delete_VarsByCode
+    __del__ = lambda self : None;
+VarsByCode_swigregister = _CdiObj.VarsByCode_swigregister
+VarsByCode_swigregister(VarsByCode)
+
 class TaxesMap(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, TaxesMap, name, value)
@@ -556,6 +604,9 @@ class CdiGrid(_object):
     __swig_setmethods__["ncorner"] = _CdiObj.CdiGrid_ncorner_set
     __swig_getmethods__["ncorner"] = _CdiObj.CdiGrid_ncorner_get
     if _newclass:ncorner = _swig_property(_CdiObj.CdiGrid_ncorner_get, _CdiObj.CdiGrid_ncorner_set)
+    __swig_setmethods__["hasXYValues"] = _CdiObj.CdiGrid_hasXYValues_set
+    __swig_getmethods__["hasXYValues"] = _CdiObj.CdiGrid_hasXYValues_get
+    if _newclass:hasXYValues = _swig_property(_CdiObj.CdiGrid_hasXYValues_get, _CdiObj.CdiGrid_hasXYValues_set)
     __swig_setmethods__["hasBounds"] = _CdiObj.CdiGrid_hasBounds_set
     __swig_getmethods__["hasBounds"] = _CdiObj.CdiGrid_hasBounds_get
     if _newclass:hasBounds = _swig_property(_CdiObj.CdiGrid_hasBounds_get, _CdiObj.CdiGrid_hasBounds_set)
@@ -565,18 +616,18 @@ class CdiGrid(_object):
     __swig_setmethods__["yvals"] = _CdiObj.CdiGrid_yvals_set
     __swig_getmethods__["yvals"] = _CdiObj.CdiGrid_yvals_get
     if _newclass:yvals = _swig_property(_CdiObj.CdiGrid_yvals_get, _CdiObj.CdiGrid_yvals_set)
-    __swig_setmethods__["xvalsF"] = _CdiObj.CdiGrid_xvalsF_set
-    __swig_getmethods__["xvalsF"] = _CdiObj.CdiGrid_xvalsF_get
-    if _newclass:xvalsF = _swig_property(_CdiObj.CdiGrid_xvalsF_get, _CdiObj.CdiGrid_xvalsF_set)
-    __swig_setmethods__["yvalsF"] = _CdiObj.CdiGrid_yvalsF_set
-    __swig_getmethods__["yvalsF"] = _CdiObj.CdiGrid_yvalsF_get
-    if _newclass:yvalsF = _swig_property(_CdiObj.CdiGrid_yvalsF_get, _CdiObj.CdiGrid_yvalsF_set)
     __swig_setmethods__["xbnds"] = _CdiObj.CdiGrid_xbnds_set
     __swig_getmethods__["xbnds"] = _CdiObj.CdiGrid_xbnds_get
     if _newclass:xbnds = _swig_property(_CdiObj.CdiGrid_xbnds_get, _CdiObj.CdiGrid_xbnds_set)
     __swig_setmethods__["ybnds"] = _CdiObj.CdiGrid_ybnds_set
     __swig_getmethods__["ybnds"] = _CdiObj.CdiGrid_ybnds_get
     if _newclass:ybnds = _swig_property(_CdiObj.CdiGrid_ybnds_get, _CdiObj.CdiGrid_ybnds_set)
+    __swig_setmethods__["xvalsF"] = _CdiObj.CdiGrid_xvalsF_set
+    __swig_getmethods__["xvalsF"] = _CdiObj.CdiGrid_xvalsF_get
+    if _newclass:xvalsF = _swig_property(_CdiObj.CdiGrid_xvalsF_get, _CdiObj.CdiGrid_xvalsF_set)
+    __swig_setmethods__["yvalsF"] = _CdiObj.CdiGrid_yvalsF_set
+    __swig_getmethods__["yvalsF"] = _CdiObj.CdiGrid_yvalsF_get
+    if _newclass:yvalsF = _swig_property(_CdiObj.CdiGrid_yvalsF_get, _CdiObj.CdiGrid_yvalsF_set)
     __swig_setmethods__["xbndsF"] = _CdiObj.CdiGrid_xbndsF_set
     __swig_getmethods__["xbndsF"] = _CdiObj.CdiGrid_xbndsF_get
     if _newclass:xbndsF = _swig_property(_CdiObj.CdiGrid_xbndsF_get, _CdiObj.CdiGrid_xbndsF_set)
@@ -868,6 +919,9 @@ class Cdi(_object):
     __swig_setmethods__["var"] = _CdiObj.Cdi_var_set
     __swig_getmethods__["var"] = _CdiObj.Cdi_var_get
     if _newclass:var = _swig_property(_CdiObj.Cdi_var_get, _CdiObj.Cdi_var_set)
+    __swig_setmethods__["varByCode"] = _CdiObj.Cdi_varByCode_set
+    __swig_getmethods__["varByCode"] = _CdiObj.Cdi_varByCode_get
+    if _newclass:varByCode = _swig_property(_CdiObj.Cdi_varByCode_get, _CdiObj.Cdi_varByCode_set)
     __swig_setmethods__["taxes"] = _CdiObj.Cdi_taxes_set
     __swig_getmethods__["taxes"] = _CdiObj.Cdi_taxes_get
     if _newclass:taxes = _swig_property(_CdiObj.Cdi_taxes_get, _CdiObj.Cdi_taxes_set)

@@ -1845,37 +1845,43 @@ int SWIG_Ruby_arity( VALUE proc, int minimal )
 #define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__const_reverse_iterator swig_types[26]
 #define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__iterator swig_types[27]
 #define SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type swig_types[28]
-#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t swig_types[29]
-#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type swig_types[30]
-#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__const_iterator swig_types[31]
-#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__const_reverse_iterator swig_types[32]
-#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__iterator swig_types[33]
-#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__mapped_type swig_types[34]
-#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t swig_types[35]
-#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__allocator_type swig_types[36]
-#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__const_iterator swig_types[37]
-#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__const_reverse_iterator swig_types[38]
-#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__iterator swig_types[39]
-#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type swig_types[40]
-#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t swig_types[41]
-#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__allocator_type swig_types[42]
-#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type swig_types[43]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[44]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type swig_types[45]
-#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[46]
-#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[47]
-#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t__allocator_type swig_types[48]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[49]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t__allocator_type swig_types[50]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[51]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t__allocator_type swig_types[52]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t swig_types[53]
-#define SWIGTYPE_p_swig__ConstIterator swig_types[54]
-#define SWIGTYPE_p_swig__GC_VALUE swig_types[55]
-#define SWIGTYPE_p_swig__Iterator swig_types[56]
-#define SWIGTYPE_p_value_type swig_types[57]
-static swig_type_info *swig_types[59];
-static swig_module_info swig_module = {swig_types, 58, 0, 0, 0, 0};
+#define SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t swig_types[29]
+#define SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__allocator_type swig_types[30]
+#define SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_iterator swig_types[31]
+#define SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_reverse_iterator swig_types[32]
+#define SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__iterator swig_types[33]
+#define SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type swig_types[34]
+#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t swig_types[35]
+#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type swig_types[36]
+#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__const_iterator swig_types[37]
+#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__const_reverse_iterator swig_types[38]
+#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__iterator swig_types[39]
+#define SWIGTYPE_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__mapped_type swig_types[40]
+#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t swig_types[41]
+#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__allocator_type swig_types[42]
+#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__const_iterator swig_types[43]
+#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__const_reverse_iterator swig_types[44]
+#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__iterator swig_types[45]
+#define SWIGTYPE_p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type swig_types[46]
+#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t swig_types[47]
+#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__allocator_type swig_types[48]
+#define SWIGTYPE_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type swig_types[49]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[50]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type swig_types[51]
+#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[52]
+#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[53]
+#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t__allocator_type swig_types[54]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[55]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t__allocator_type swig_types[56]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[57]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t__allocator_type swig_types[58]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t swig_types[59]
+#define SWIGTYPE_p_swig__ConstIterator swig_types[60]
+#define SWIGTYPE_p_swig__GC_VALUE swig_types[61]
+#define SWIGTYPE_p_swig__Iterator swig_types[62]
+#define SWIGTYPE_p_value_type swig_types[63]
+static swig_type_info *swig_types[65];
+static swig_module_info swig_module = {swig_types, 64, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -6400,6 +6406,248 @@ SWIGINTERN VALUE std_map_Sl_std_string_Sc_CdiVariable_Sg__to_s(std::map< std::st
 	  // @todo: improve -- this should just be swig::from(*i)
 	  tmp = swig::from< std::pair<std::map<std::string,CdiVariable,std::less< std::string >,std::allocator< std::pair< std::string const,CdiVariable > > >::key_type, 
 	    std::map<std::string,CdiVariable,std::less< std::string >,std::allocator< std::pair< std::string const,CdiVariable > > >::mapped_type> >( *i );
+	  tmp = rb_obj_as_string( tmp );
+	  str = rb_str_buf_append( str, tmp );
+	}
+      return str;
+    }
+
+      namespace swig {
+	template <>  struct traits<std::pair< int, CdiVariable > > {
+	  typedef pointer_category category;
+	  static const char* type_name() {
+	    return "std::pair<" "int" "," "CdiVariable" " >";
+	  }
+	};
+      }
+    
+
+      namespace swig {
+	template <>  struct traits<std::map<int, CdiVariable, std::less< int >, std::allocator< std::pair< int const,CdiVariable > > > > {
+	  typedef pointer_category category;
+	  static const char* type_name() {
+	    return "std::map<" "int" "," "CdiVariable" "," "std::less< int >" "," "std::allocator< std::pair< int const,CdiVariable > >" " >";
+	  }
+	};
+      }
+    
+SWIGINTERN std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *std_map_Sl_int_Sc_CdiVariable_Sg__dup(std::map< int,CdiVariable > *self){
+      return new std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >(*self);
+    }
+SWIGINTERN VALUE std_map_Sl_int_Sc_CdiVariable_Sg____delete__(std::map< int,CdiVariable > *self,std::map< int,CdiVariable >::key_type const &key){
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::iterator i = self->find(key);
+      if (i != self->end()) {
+	self->erase(i);
+	return swig::from( key );
+      }
+      else {
+	return Qnil;
+      }
+    }
+SWIGINTERN bool std_map_Sl_int_Sc_CdiVariable_Sg__has_key(std::map< int,CdiVariable > const *self,std::map< int,CdiVariable >::key_type const &key){
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator i = self->find(key);
+      return i != self->end();
+    }
+SWIGINTERN VALUE std_map_Sl_int_Sc_CdiVariable_Sg__keys(std::map< int,CdiVariable > *self){
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::size_type size = self->size();
+      int rubysize = (size <= (std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::size_type) INT_MAX) ? (int) size : -1;
+      if (rubysize < 0) {
+	SWIG_RUBY_THREAD_BEGIN_BLOCK;
+	rb_raise(rb_eRuntimeError, "map size not valid in Ruby");
+	SWIG_RUBY_THREAD_END_BLOCK;
+	return Qnil;
+      }
+      VALUE ary = rb_ary_new2(rubysize);
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator i = self->begin();
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator e = self->end();
+      for ( ; i != e; ++i ) {
+	rb_ary_push( ary, swig::from(i->first) );
+      }
+      return ary;
+    }
+SWIGINTERN std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *std_map_Sl_int_Sc_CdiVariable_Sg__each(std::map< int,CdiVariable > *self){
+	if ( !rb_block_given_p() )
+	  rb_raise( rb_eArgError, "no block given");
+
+	VALUE k, v;
+	std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::iterator i = self->begin();
+	std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::iterator e = self->end();
+	for ( ; i != e; ++i )
+	  {
+	    const std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::key_type&    key = i->first;
+	    const std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::mapped_type& val = i->second;
+
+	    k = swig::from<std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::key_type>(key);
+	    v = swig::from<std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::mapped_type>(val);
+	    rb_yield_values(2, k, v);
+	  }
+	
+	return self;
+      }
+SWIGINTERN std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *std_map_Sl_int_Sc_CdiVariable_Sg__select(std::map< int,CdiVariable > *self){
+      if ( !rb_block_given_p() )
+	rb_raise( rb_eArgError, "no block given" );
+
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >* r = new std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >;
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::iterator i = self->begin();
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::iterator e = self->end();
+      for ( ; i != e; ++i )
+	{
+	  VALUE k = swig::from<std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::key_type>(i->first);
+	  VALUE v = swig::from<std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::mapped_type>(i->second);
+	  if ( RTEST( rb_yield_values(2, k, v) ) )
+	    self->insert(r->end(), *i);
+	}
+	
+      return r;
+    }
+SWIGINTERN VALUE std_map_Sl_int_Sc_CdiVariable_Sg__values_at(std::map< int,CdiVariable > *self,int argc,VALUE *argv,...){
+    
+    VALUE r = rb_ary_new();
+    ID   id = rb_intern("[]");
+    swig_type_info* type = swig::type_info< std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > >();
+    VALUE me = SWIG_NewPointerObj( self, type, 0 );
+    for ( int i = 0; i < argc; ++i )
+      {
+	VALUE key = argv[i];
+	VALUE tmp = rb_funcall( me, id, 1, key );
+	rb_ary_push( r, tmp );
+      }
+    
+    return r;
+  }
+SWIGINTERN std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *std_map_Sl_int_Sc_CdiVariable_Sg__each_key(std::map< int,CdiVariable > *self){
+	if ( !rb_block_given_p() )
+	  rb_raise( rb_eArgError, "no block given");
+
+	VALUE r;
+	std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::iterator i = self->begin();
+	std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::iterator e = self->end();
+	for ( ; i != e; ++i )
+	  {
+	    r = swig::from( i->first );
+	    rb_yield(r);
+	  }
+	
+	return self;
+      }
+SWIGINTERN VALUE std_map_Sl_int_Sc_CdiVariable_Sg__values(std::map< int,CdiVariable > *self){
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::size_type size = self->size();
+      int rubysize = (size <= (std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::size_type) INT_MAX) ? (int) size : -1;
+      if (rubysize < 0) {
+	SWIG_RUBY_THREAD_BEGIN_BLOCK;
+	rb_raise(rb_eRuntimeError, "map size not valid in Ruby");
+	SWIG_RUBY_THREAD_END_BLOCK;
+	return Qnil;
+      }
+      VALUE ary = rb_ary_new2(rubysize);
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator i = self->begin();
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator e = self->end();
+      for ( ; i != e; ++i ) {
+	rb_ary_push( ary, swig::from(i->second) );
+      }
+      return ary;
+    }
+SWIGINTERN std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *std_map_Sl_int_Sc_CdiVariable_Sg__each_value(std::map< int,CdiVariable > *self){
+	if ( !rb_block_given_p() )
+	  rb_raise( rb_eArgError, "no block given");
+
+	VALUE r;
+	std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::iterator i = self->begin();
+	std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::iterator e = self->end();
+	for ( ; i != e; ++i )
+	  {
+	    r = swig::from( i->second );
+	    rb_yield(r);
+	  }
+	
+	return self;
+      }
+SWIGINTERN VALUE std_map_Sl_int_Sc_CdiVariable_Sg__entries(std::map< int,CdiVariable > *self){
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::size_type size = self->size();
+      int rubysize = (size <= (std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::size_type) INT_MAX) ? (int) size : -1;
+      if (rubysize < 0) {
+	SWIG_RUBY_THREAD_BEGIN_BLOCK;
+	rb_raise(rb_eRuntimeError, "map size not valid in Ruby");
+	SWIG_RUBY_THREAD_END_BLOCK;
+	return Qnil;
+      }
+      VALUE ary = rb_ary_new2(rubysize);
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator i = self->begin();
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator e = self->end();
+      for ( ; i != e; ++i ) {
+	rb_ary_push( ary, swig::from<std::pair<std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::key_type, 
+		     std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::mapped_type> >(*i) );
+      }
+      return ary;
+    }
+SWIGINTERN bool std_map_Sl_int_Sc_CdiVariable_Sg____contains__(std::map< int,CdiVariable > *self,std::map< int,CdiVariable >::key_type const &key){
+      return self->find(key) != self->end();
+    }
+SWIGINTERN swig::ConstIterator *std_map_Sl_int_Sc_CdiVariable_Sg__key_iterator(std::map< int,CdiVariable > *self,VALUE *RUBY_SELF){
+      return swig::make_output_key_iterator(self->begin(), self->begin(), 
+					    self->end(), *RUBY_SELF);
+    }
+SWIGINTERN swig::ConstIterator *std_map_Sl_int_Sc_CdiVariable_Sg__value_iterator(std::map< int,CdiVariable > *self,VALUE *RUBY_SELF){
+      return swig::make_output_value_iterator(self->begin(), self->begin(), 
+					      self->end(), *RUBY_SELF);
+    }
+SWIGINTERN VALUE std_map_Sl_int_Sc_CdiVariable_Sg____getitem__(std::map< int,CdiVariable > const *self,std::map< int,CdiVariable >::key_type const &key){
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator i = self->find(key);
+      if ( i != self->end() )
+	return swig::from<std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::mapped_type>( i->second );
+      else
+	return Qnil;
+    }
+SWIGINTERN void std_map_Sl_int_Sc_CdiVariable_Sg____setitem__(std::map< int,CdiVariable > *self,std::map< int,CdiVariable >::key_type const &key,std::map< int,CdiVariable >::mapped_type const &x){
+      (*self)[key] = x;
+    }
+SWIGINTERN VALUE std_map_Sl_int_Sc_CdiVariable_Sg__inspect(std::map< int,CdiVariable > *self){
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator i = self->begin();
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator e = self->end();
+      const char *type_name = swig::type_name< std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > >();
+      VALUE str = rb_str_new2( type_name );
+      str = rb_str_cat2( str, " {" );
+      bool comma = false;
+      VALUE tmp;
+      for ( ; i != e; ++i, comma = true )
+	{
+	  if (comma) str = rb_str_cat2( str, "," );
+	  tmp = swig::from< std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::key_type >( i->first );
+	  tmp = rb_inspect( tmp );
+	  str = rb_str_buf_append( str, tmp );
+	  str = rb_str_cat2( str, "=>" );
+	  tmp = swig::from< std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::mapped_type >( i->second );
+	  tmp = rb_inspect( tmp );
+	  str = rb_str_buf_append( str, tmp );
+	}
+      str = rb_str_cat2( str, "}" );
+      return str;
+    }
+SWIGINTERN VALUE std_map_Sl_int_Sc_CdiVariable_Sg__to_a(std::map< int,CdiVariable > *self){
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator i = self->begin();
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator e = self->end();
+      VALUE ary = rb_ary_new2( std::distance( i, e ) );
+      VALUE tmp;
+      for ( ; i != e; ++i )
+	{
+	  // @todo: improve -- this should just be swig::from(*i)
+	  tmp = swig::from< std::pair<std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::key_type, 
+	    std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::mapped_type> >( *i );
+	  rb_ary_push( ary, tmp );
+	}
+      return ary;
+    }
+SWIGINTERN VALUE std_map_Sl_int_Sc_CdiVariable_Sg__to_s(std::map< int,CdiVariable > *self){
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::iterator i = self->begin();
+      std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::iterator e = self->end();
+      VALUE str = rb_str_new2( "" );
+      VALUE tmp;
+      for ( ; i != e; ++i )
+	{
+	  // @todo: improve -- this should just be swig::from(*i)
+	  tmp = swig::from< std::pair<std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::key_type, 
+	    std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::mapped_type> >( *i );
 	  tmp = rb_obj_as_string( tmp );
 	  str = rb_str_buf_append( str, tmp );
 	}
@@ -20944,6 +21192,1424 @@ free_std_map_Sl_std_string_Sc_CdiVariable_Sg_(std::map< std::string,CdiVariable 
     delete arg1;
 }
 
+swig_class SwigClassVarsByCode;
+
+SWIGINTERN VALUE
+_wrap_new_VarsByCode__SWIG_0(int argc, VALUE *argv, VALUE self) {
+  std::less< int > *arg1 = 0 ;
+  void *argp1 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable > *result = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(argv[0], &argp1, SWIGTYPE_p_std__lessT_int_t,  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::less< int > const &","std::map<(int,CdiVariable)>", 1, argv[0] )); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::less< int > const &","std::map<(int,CdiVariable)>", 1, argv[0])); 
+  }
+  arg1 = reinterpret_cast< std::less< int > * >(argp1);
+  result = (std::map< int,CdiVariable > *)new std::map< int,CdiVariable >((std::less< int > const &)*arg1);
+  DATA_PTR(self) = result;
+  return self;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.dup
+
+  call-seq:
+    dup -> VarsByCode
+
+Create a duplicate of the class and unfreeze it if needed.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_dup(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","dup", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *)std_map_Sl_int_Sc_CdiVariable_Sg__dup(arg1);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.delete
+
+  call-seq:
+    delete(key) -> VALUE
+
+Delete a matching element.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_delete(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","__delete__", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::map< int,CdiVariable >::key_type","__delete__", 2, argv[0] ));
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  result = (VALUE)std_map_Sl_int_Sc_CdiVariable_Sg____delete__(arg1,(int const &)*arg2);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_VarsByCode_has_keyq___(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  bool result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > const *","has_key", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::map< int,CdiVariable >::key_type","has_key", 2, argv[0] ));
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  result = (bool)std_map_Sl_int_Sc_CdiVariable_Sg__has_key((std::map< int,CdiVariable > const *)arg1,(int const &)*arg2);
+  vresult = SWIG_From_bool(static_cast< bool >(result));
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.keys
+
+  call-seq:
+    keys -> VALUE
+
+Return an Array of key elements.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_keys(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","keys", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (VALUE)std_map_Sl_int_Sc_CdiVariable_Sg__keys(arg1);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.each
+
+  call-seq:
+    each -> VarsByCode
+
+Iterate thru each element in the VarsByCode.  A block must be provided.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_each(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","each", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *)std_map_Sl_int_Sc_CdiVariable_Sg__each(arg1);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.select
+
+  call-seq:
+    select -> VarsByCode
+
+Iterate thru each element in the VarsByCode and select those that match a condition.  A block must be provided.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_select(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","select", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *)std_map_Sl_int_Sc_CdiVariable_Sg__select(arg1);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.values_at
+
+  call-seq:
+    values_at(argc, ?) -> VALUE
+
+Return an Array of value elements matching the conditions.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_values_at(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  int arg2 ;
+  VALUE *arg3 = (VALUE *) 0 ;
+  void *arg4 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if (argc < 1) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","values_at", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  {
+    arg2 = argc;
+    arg3 = argv;
+  }
+  result = (VALUE)std_map_Sl_int_Sc_CdiVariable_Sg__values_at(arg1,arg2,arg3,arg4);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.each_key
+
+  call-seq:
+    each_key -> VarsByCode
+
+Iterate thru each key element in the VarsByCode.  A block must be provided.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_each_key(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","each_key", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *)std_map_Sl_int_Sc_CdiVariable_Sg__each_key(arg1);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.values
+
+  call-seq:
+    values -> VALUE
+
+Return an Array of value elements.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_values(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","values", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (VALUE)std_map_Sl_int_Sc_CdiVariable_Sg__values(arg1);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.each_value
+
+  call-seq:
+    each_value -> VarsByCode
+
+Iterate thru each key element in the VarsByCode.  A block must be provided.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_each_value(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","each_value", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *)std_map_Sl_int_Sc_CdiVariable_Sg__each_value(arg1);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_VarsByCode_entries(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","entries", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (VALUE)std_map_Sl_int_Sc_CdiVariable_Sg__entries(arg1);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_VarsByCode_includeq___(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  bool result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","__contains__", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::map< int,CdiVariable >::key_type","__contains__", 2, argv[0] ));
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  result = (bool)std_map_Sl_int_Sc_CdiVariable_Sg____contains__(arg1,(int const &)*arg2);
+  vresult = SWIG_From_bool(static_cast< bool >(result));
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_VarsByCode_key_iterator(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  VALUE *arg2 = (VALUE *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  swig::ConstIterator *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  arg2 = &self;
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","key_iterator", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (swig::ConstIterator *)std_map_Sl_int_Sc_CdiVariable_Sg__key_iterator(arg1,arg2);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_swig__ConstIterator, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_VarsByCode_value_iterator(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  VALUE *arg2 = (VALUE *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  swig::ConstIterator *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  arg2 = &self;
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","value_iterator", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (swig::ConstIterator *)std_map_Sl_int_Sc_CdiVariable_Sg__value_iterator(arg1,arg2);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_swig__ConstIterator, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.[]
+
+  call-seq:
+    [](key) -> VALUE
+
+Element accessor/slicing.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode___getitem__(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > const *","__getitem__", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::map< int,CdiVariable >::key_type","__getitem__", 2, argv[0] ));
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  result = (VALUE)std_map_Sl_int_Sc_CdiVariable_Sg____getitem__((std::map< int,CdiVariable > const *)arg1,(int const &)*arg2);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.[]=
+
+  call-seq:
+    []=(key, x)
+
+Element setter/slicing.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode___setitem__(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  std::map< int,CdiVariable >::mapped_type *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  void *argp3 ;
+  int res3 = 0 ;
+  
+  if ((argc < 2) || (argc > 2)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 2)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","__setitem__", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::map< int,CdiVariable >::key_type","__setitem__", 2, argv[0] ));
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  res3 = SWIG_ConvertPtr(argv[1], &argp3, SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type,  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::map< int,CdiVariable >::mapped_type const &","__setitem__", 3, argv[1] )); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::map< int,CdiVariable >::mapped_type const &","__setitem__", 3, argv[1])); 
+  }
+  arg3 = reinterpret_cast< std::map< int,CdiVariable >::mapped_type * >(argp3);
+  try {
+    std_map_Sl_int_Sc_CdiVariable_Sg____setitem__(arg1,(int const &)*arg2,(CdiVariable const &)*arg3);
+  }
+  catch(std::out_of_range &_e) {
+    SWIG_exception_fail(SWIG_IndexError, (&_e)->what());
+  }
+  
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.inspect
+
+  call-seq:
+    inspect -> VALUE
+
+Inspect class and its contents.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_inspect(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","inspect", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (VALUE)std_map_Sl_int_Sc_CdiVariable_Sg__inspect(arg1);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.to_a
+
+  call-seq:
+    to_a -> VALUE
+
+Convert VarsByCode to an Array.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_to_a(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","to_a", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (VALUE)std_map_Sl_int_Sc_CdiVariable_Sg__to_a(arg1);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.to_s
+
+  call-seq:
+    to_s -> VALUE
+
+Convert class to a String representation.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_to_s(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  VALUE result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","to_s", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (VALUE)std_map_Sl_int_Sc_CdiVariable_Sg__to_s(arg1);
+  vresult = result;
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_new_VarsByCode__SWIG_1(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *result = 0 ;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  result = (std::map< int,CdiVariable > *)new std::map< int,CdiVariable >();
+  DATA_PTR(self) = result;
+  return self;
+fail:
+  return Qnil;
+}
+
+
+#ifdef HAVE_RB_DEFINE_ALLOC_FUNC
+SWIGINTERN VALUE
+_wrap_VarsByCode_allocate(VALUE self) {
+#else
+  SWIGINTERN VALUE
+  _wrap_VarsByCode_allocate(int argc, VALUE *argv, VALUE self) {
+#endif
+    
+    
+    VALUE vresult = SWIG_NewClassInstance(self, SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t);
+#ifndef HAVE_RB_DEFINE_ALLOC_FUNC
+    rb_obj_call_init(vresult, argc, argv);
+#endif
+    return vresult;
+  }
+  
+
+SWIGINTERN VALUE
+_wrap_new_VarsByCode__SWIG_2(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = 0 ;
+  int res1 = SWIG_OLDOBJ ;
+  std::map< int,CdiVariable > *result = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  {
+    std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *ptr = (std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *)0;
+    res1 = swig::asptr(argv[0], &ptr);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > const &","std::map<(int,CdiVariable)>", 1, argv[0] )); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::map< int,CdiVariable > const &","std::map<(int,CdiVariable)>", 1, argv[0])); 
+    }
+    arg1 = ptr;
+  }
+  result = (std::map< int,CdiVariable > *)new std::map< int,CdiVariable >((std::map< int,CdiVariable > const &)*arg1);
+  DATA_PTR(self) = result;
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  return self;
+fail:
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE _wrap_new_VarsByCode(int nargs, VALUE *args, VALUE self) {
+  int argc;
+  VALUE argv[1];
+  int ii;
+  
+  argc = nargs;
+  if (argc > 1) SWIG_fail;
+  for (ii = 0; (ii < argc); ++ii) {
+    argv[ii] = args[ii];
+  }
+  if (argc == 0) {
+    return _wrap_new_VarsByCode__SWIG_1(nargs, args, self);
+  }
+  if (argc == 1) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_std__lessT_int_t, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_VarsByCode__SWIG_0(nargs, args, self);
+    }
+  }
+  if (argc == 1) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_VarsByCode__SWIG_2(nargs, args, self);
+    }
+  }
+  
+fail:
+  Ruby_Format_OverloadedError( argc, 1, "VarsByCode.new", 
+    "    VarsByCode.new(std::less< int > const &)\n"
+    "    VarsByCode.new()\n"
+    "    VarsByCode.new(std::map< int,CdiVariable > const &)\n");
+  
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.empty?
+
+  call-seq:
+    empty? -> bool
+
+Check if the VarsByCode is empty or not.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_emptyq___(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > const *","empty", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = (bool)((std::map< int,CdiVariable > const *)arg1)->empty();
+  vresult = SWIG_From_bool(static_cast< bool >(result));
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.size
+
+  call-seq:
+    size -> size_type
+
+Size or Length of the VarsByCode.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_size(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::size_type result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > const *","size", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = ((std::map< int,CdiVariable > const *)arg1)->size();
+  vresult = SWIG_From_size_t(static_cast< size_t >(result));
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.clear
+
+  call-seq:
+    clear
+
+Clear VarsByCode contents.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_clear(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","clear", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  (arg1)->clear();
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_VarsByCode_swap(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","swap", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], &argp2, SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t,  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > &","swap", 2, argv[0] )); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::map< int,CdiVariable > &","swap", 2, argv[0])); 
+  }
+  arg2 = reinterpret_cast< std::map< int,CdiVariable > * >(argp2);
+  (arg1)->swap(*arg2);
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_VarsByCode_get_allocator(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  SwigValueWrapper< std::allocator< std::pair< int const,CdiVariable > > > result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > const *","get_allocator", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = ((std::map< int,CdiVariable > const *)arg1)->get_allocator();
+  vresult = SWIG_NewPointerObj((new std::map< int,CdiVariable >::allocator_type(static_cast< const std::map< int,CdiVariable >::allocator_type& >(result))), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__allocator_type, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.begin
+
+  call-seq:
+    begin -> const_iterator
+
+Return an iterator to the beginning of the VarsByCode.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_begin(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::const_iterator result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > const *","begin", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = ((std::map< int,CdiVariable > const *)arg1)->begin();
+  vresult = SWIG_NewPointerObj((new std::map< int,CdiVariable >::const_iterator(static_cast< const std::map< int,CdiVariable >::const_iterator& >(result))), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_iterator, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.end
+
+  call-seq:
+    end -> const_iterator
+
+Return an iterator to past the end of the VarsByCode.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_end(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::const_iterator result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > const *","end", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = ((std::map< int,CdiVariable > const *)arg1)->end();
+  vresult = SWIG_NewPointerObj((new std::map< int,CdiVariable >::const_iterator(static_cast< const std::map< int,CdiVariable >::const_iterator& >(result))), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_iterator, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.rbegin
+
+  call-seq:
+    rbegin -> const_reverse_iterator
+
+Return a reverse iterator to the beginning (the end) of the VarsByCode.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_rbegin(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::const_reverse_iterator result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > const *","rbegin", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = ((std::map< int,CdiVariable > const *)arg1)->rbegin();
+  vresult = SWIG_NewPointerObj((new std::map< int,CdiVariable >::const_reverse_iterator(static_cast< const std::map< int,CdiVariable >::const_reverse_iterator& >(result))), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_reverse_iterator, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.rend
+
+  call-seq:
+    rend -> const_reverse_iterator
+
+Return a reverse iterator to past the end (past the beginning) of the VarsByCode.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_rend(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::const_reverse_iterator result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > const *","rend", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  result = ((std::map< int,CdiVariable > const *)arg1)->rend();
+  vresult = SWIG_NewPointerObj((new std::map< int,CdiVariable >::const_reverse_iterator(static_cast< const std::map< int,CdiVariable >::const_reverse_iterator& >(result))), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_reverse_iterator, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.erase
+
+  call-seq:
+    erase(x) -> size_type
+    erase(position)
+    erase(first, last)
+
+Delete a portion of the VarsByCode.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_erase__SWIG_0(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  std::map< int,CdiVariable >::size_type result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","erase", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::map< int,CdiVariable >::key_type","erase", 2, argv[0] ));
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  result = (arg1)->erase((std::map< int,CdiVariable >::key_type const &)*arg2);
+  vresult = SWIG_From_size_t(static_cast< size_t >(result));
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_VarsByCode_count(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  std::map< int,CdiVariable >::size_type result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > const *","count", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::map< int,CdiVariable >::key_type","count", 2, argv[0] ));
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  result = ((std::map< int,CdiVariable > const *)arg1)->count((std::map< int,CdiVariable >::key_type const &)*arg2);
+  vresult = SWIG_From_size_t(static_cast< size_t >(result));
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_VarsByCode_erase__SWIG_1(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::iterator arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 ;
+  int res2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","erase", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  {
+    res2 = SWIG_ConvertPtr(argv[0], &argp2, SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__iterator,  0 );
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::map< int,CdiVariable >::iterator","erase", 2, argv[0] )); 
+    }  
+    if (!argp2) {
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::map< int,CdiVariable >::iterator","erase", 2, argv[0]));
+    } else {
+      arg2 = *(reinterpret_cast< std::map< int,CdiVariable >::iterator * >(argp2));
+    }
+  }
+  (arg1)->erase(arg2);
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_VarsByCode_erase__SWIG_2(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::iterator arg2 ;
+  std::map< int,CdiVariable >::iterator arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 ;
+  int res2 = 0 ;
+  void *argp3 ;
+  int res3 = 0 ;
+  
+  if ((argc < 2) || (argc > 2)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 2)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","erase", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  {
+    res2 = SWIG_ConvertPtr(argv[0], &argp2, SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__iterator,  0 );
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::map< int,CdiVariable >::iterator","erase", 2, argv[0] )); 
+    }  
+    if (!argp2) {
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::map< int,CdiVariable >::iterator","erase", 2, argv[0]));
+    } else {
+      arg2 = *(reinterpret_cast< std::map< int,CdiVariable >::iterator * >(argp2));
+    }
+  }
+  {
+    res3 = SWIG_ConvertPtr(argv[1], &argp3, SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__iterator,  0 );
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::map< int,CdiVariable >::iterator","erase", 3, argv[1] )); 
+    }  
+    if (!argp3) {
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::map< int,CdiVariable >::iterator","erase", 3, argv[1]));
+    } else {
+      arg3 = *(reinterpret_cast< std::map< int,CdiVariable >::iterator * >(argp3));
+    }
+  }
+  (arg1)->erase(arg2,arg3);
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE _wrap_VarsByCode_erase(int nargs, VALUE *args, VALUE self) {
+  int argc;
+  VALUE argv[4];
+  int ii;
+  
+  argc = nargs + 1;
+  argv[0] = self;
+  if (argc > 4) SWIG_fail;
+  for (ii = 1; (ii < argc); ++ii) {
+    argv[ii] = args[ii-1];
+  }
+  if (argc == 2) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      void *vptr = 0;
+      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__iterator, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_VarsByCode_erase__SWIG_1(nargs, args, self);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_VarsByCode_erase__SWIG_0(nargs, args, self);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::map<int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      void *vptr = 0;
+      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__iterator, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        void *vptr = 0;
+        int res = SWIG_ConvertPtr(argv[2], &vptr, SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__iterator, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          return _wrap_VarsByCode_erase__SWIG_2(nargs, args, self);
+        }
+      }
+    }
+  }
+  
+fail:
+  Ruby_Format_OverloadedError( argc, 4, "VarsByCode.erase", 
+    "    void VarsByCode.erase(std::map< int,CdiVariable >::key_type const &x)\n"
+    "    void VarsByCode.erase(std::map< int,CdiVariable >::iterator position)\n"
+    "    void VarsByCode.erase(std::map< int,CdiVariable >::iterator first, std::map< int,CdiVariable >::iterator last)\n");
+  
+  return Qnil;
+}
+
+
+
+/*
+  Document-method: CdiObj::VarsByCode.find
+
+  call-seq:
+    find(x) -> iterator
+
+Find an element in the class.
+*/
+SWIGINTERN VALUE
+_wrap_VarsByCode_find(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  std::map< int,CdiVariable >::iterator result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","find", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::map< int,CdiVariable >::key_type","find", 2, argv[0] ));
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  result = (arg1)->find((std::map< int,CdiVariable >::key_type const &)*arg2);
+  vresult = SWIG_NewPointerObj((new std::map< int,CdiVariable >::iterator(static_cast< const std::map< int,CdiVariable >::iterator& >(result))), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__iterator, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_VarsByCode_lower_bound(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  std::map< int,CdiVariable >::iterator result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","lower_bound", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::map< int,CdiVariable >::key_type","lower_bound", 2, argv[0] ));
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  result = (arg1)->lower_bound((std::map< int,CdiVariable >::key_type const &)*arg2);
+  vresult = SWIG_NewPointerObj((new std::map< int,CdiVariable >::iterator(static_cast< const std::map< int,CdiVariable >::iterator& >(result))), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__iterator, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_VarsByCode_upper_bound(int argc, VALUE *argv, VALUE self) {
+  std::map< int,CdiVariable > *arg1 = (std::map< int,CdiVariable > *) 0 ;
+  std::map< int,CdiVariable >::key_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable >::key_type temp2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  std::map< int,CdiVariable >::iterator result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "std::map< int,CdiVariable > *","upper_bound", 1, self )); 
+  }
+  arg1 = reinterpret_cast< std::map< int,CdiVariable > * >(argp1);
+  ecode2 = SWIG_AsVal_int(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "std::map< int,CdiVariable >::key_type","upper_bound", 2, argv[0] ));
+  } 
+  temp2 = static_cast< std::map< int,CdiVariable >::key_type >(val2);
+  arg2 = &temp2;
+  result = (arg1)->upper_bound((std::map< int,CdiVariable >::key_type const &)*arg2);
+  vresult = SWIG_NewPointerObj((new std::map< int,CdiVariable >::iterator(static_cast< const std::map< int,CdiVariable >::iterator& >(result))), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__iterator, SWIG_POINTER_OWN |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN void
+free_std_map_Sl_int_Sc_CdiVariable_Sg_(std::map< int,CdiVariable > *arg1) {
+    delete arg1;
+}
+
 swig_class SwigClassTaxesMap;
 
 SWIGINTERN VALUE
@@ -25683,6 +27349,59 @@ fail:
 
 
 SWIGINTERN VALUE
+_wrap_CdiGrid_hasXYValues_set(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","hasXYValues", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  ecode2 = SWIG_AsVal_bool(argv[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), Ruby_Format_TypeError( "", "bool","hasXYValues", 2, argv[0] ));
+  } 
+  arg2 = static_cast< bool >(val2);
+  if (arg1) (arg1)->hasXYValues = arg2;
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_hasXYValues_get(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool result;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","hasXYValues", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  result = (bool) ((arg1)->hasXYValues);
+  vresult = SWIG_From_bool(static_cast< bool >(result));
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
 _wrap_CdiGrid_hasBounds_set(int argc, VALUE *argv, VALUE self) {
   CdiGrid *arg1 = (CdiGrid *) 0 ;
   bool arg2 ;
@@ -25842,112 +27561,6 @@ fail:
 
 
 SWIGINTERN VALUE
-_wrap_CdiGrid_xvalsF_set(int argc, VALUE *argv, VALUE self) {
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  float *arg2 = (float *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  
-  if ((argc < 1) || (argc > 1)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","xvalsF", 1, self )); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "float *","xvalsF", 2, argv[0] )); 
-  }
-  arg2 = reinterpret_cast< float * >(argp2);
-  if (arg1) (arg1)->xvalsF = arg2;
-  return Qnil;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_CdiGrid_xvalsF_get(int argc, VALUE *argv, VALUE self) {
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  float *result = 0 ;
-  VALUE vresult = Qnil;
-  
-  if ((argc < 0) || (argc > 0)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","xvalsF", 1, self )); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (float *) ((arg1)->xvalsF);
-  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
-  return vresult;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_CdiGrid_yvalsF_set(int argc, VALUE *argv, VALUE self) {
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  float *arg2 = (float *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  
-  if ((argc < 1) || (argc > 1)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","yvalsF", 1, self )); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "float *","yvalsF", 2, argv[0] )); 
-  }
-  arg2 = reinterpret_cast< float * >(argp2);
-  if (arg1) (arg1)->yvalsF = arg2;
-  return Qnil;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
-_wrap_CdiGrid_yvalsF_get(int argc, VALUE *argv, VALUE self) {
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  float *result = 0 ;
-  VALUE vresult = Qnil;
-  
-  if ((argc < 0) || (argc > 0)) {
-    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","yvalsF", 1, self )); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (float *) ((arg1)->yvalsF);
-  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
-  return vresult;
-fail:
-  return Qnil;
-}
-
-
-SWIGINTERN VALUE
 _wrap_CdiGrid_xbnds_set(int argc, VALUE *argv, VALUE self) {
   CdiGrid *arg1 = (CdiGrid *) 0 ;
   double *arg2 = (double *) 0 ;
@@ -26047,6 +27660,112 @@ _wrap_CdiGrid_ybnds_get(int argc, VALUE *argv, VALUE self) {
   arg1 = reinterpret_cast< CdiGrid * >(argp1);
   result = (double *) ((arg1)->ybnds);
   vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_xvalsF_set(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  float *arg2 = (float *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","xvalsF", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "float *","xvalsF", 2, argv[0] )); 
+  }
+  arg2 = reinterpret_cast< float * >(argp2);
+  if (arg1) (arg1)->xvalsF = arg2;
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_xvalsF_get(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","xvalsF", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  result = (float *) ((arg1)->xvalsF);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_yvalsF_set(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  float *arg2 = (float *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","yvalsF", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "float *","yvalsF", 2, argv[0] )); 
+  }
+  arg2 = reinterpret_cast< float * >(argp2);
+  if (arg1) (arg1)->yvalsF = arg2;
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_CdiGrid_yvalsF_get(int argc, VALUE *argv, VALUE self) {
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "CdiGrid *","yvalsF", 1, self )); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  result = (float *) ((arg1)->yvalsF);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
   return vresult;
 fail:
   return Qnil;
@@ -30950,6 +32669,59 @@ fail:
 
 
 SWIGINTERN VALUE
+_wrap_Cdi_varByCode_set(int argc, VALUE *argv, VALUE self) {
+  Cdi *arg1 = (Cdi *) 0 ;
+  std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *arg2 = (std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((argc < 1) || (argc > 1)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Cdi, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "Cdi *","varByCode", 1, self )); 
+  }
+  arg1 = reinterpret_cast< Cdi * >(argp1);
+  res2 = SWIG_ConvertPtr(argv[0], &argp2,SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), Ruby_Format_TypeError( "", "std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *","varByCode", 2, argv[0] )); 
+  }
+  arg2 = reinterpret_cast< std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > * >(argp2);
+  if (arg1) (arg1)->varByCode = *arg2;
+  return Qnil;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
+_wrap_Cdi_varByCode_get(int argc, VALUE *argv, VALUE self) {
+  Cdi *arg1 = (Cdi *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *result = 0 ;
+  VALUE vresult = Qnil;
+  
+  if ((argc < 0) || (argc > 0)) {
+    rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Cdi, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "Cdi *","varByCode", 1, self )); 
+  }
+  arg1 = reinterpret_cast< Cdi * >(argp1);
+  result = (std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *)& ((arg1)->varByCode);
+  vresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0 |  0 );
+  return vresult;
+fail:
+  return Qnil;
+}
+
+
+SWIGINTERN VALUE
 _wrap_Cdi_taxes_set(int argc, VALUE *argv, VALUE self) {
   Cdi *arg1 = (Cdi *) 0 ;
   std::map< int,CdiTaxis,std::less< int >,std::allocator< std::pair< int const,CdiTaxis > > > *arg2 = (std::map< int,CdiTaxis,std::less< int >,std::allocator< std::pair< int const,CdiTaxis > > > *) 0 ;
@@ -31143,6 +32915,12 @@ static swig_type_info _swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__all
 static swig_type_info _swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__const_reverse_iterator = {"_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__const_reverse_iterator", "std::map< int,CdiTaxis >::const_reverse_iterator *|std::map< int,CdiTaxis,std::less< int >,std::allocator< std::pair< int const,CdiTaxis > > >::const_reverse_iterator *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__iterator = {"_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__iterator", "std::map< int,CdiTaxis >::iterator *|std::map< int,CdiTaxis,std::less< int >,std::allocator< std::pair< int const,CdiTaxis > > >::iterator *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type = {"_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type", "std::map< int,CdiTaxis >::mapped_type *|CdiTaxis *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t = {"_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t", "std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > > *|std::map< int,CdiVariable > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__allocator_type = {"_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__allocator_type", "std::map< int,CdiVariable >::allocator_type *|std::allocator< std::pair< int const,CdiVariable > > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_iterator = {"_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_iterator", "std::map< int,CdiVariable >::const_iterator *|std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_iterator *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_reverse_iterator = {"_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_reverse_iterator", "std::map< int,CdiVariable >::const_reverse_iterator *|std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::const_reverse_iterator *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__iterator = {"_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__iterator", "std::map< int,CdiVariable >::iterator *|std::map< int,CdiVariable,std::less< int >,std::allocator< std::pair< int const,CdiVariable > > >::iterator *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type = {"_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type", "std::map< int,CdiVariable >::mapped_type *|CdiVariable *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t = {"_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t", "std::map< int,CdiZaxis > *|std::map< int,CdiZaxis,std::less< int >,std::allocator< std::pair< int const,CdiZaxis > > > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type = {"_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type", "std::map< int,CdiZaxis >::allocator_type *|std::allocator< std::pair< int const,CdiZaxis > > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__const_iterator = {"_p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__const_iterator", "std::map< int,CdiZaxis >::const_iterator *|std::map< int,CdiZaxis,std::less< int >,std::allocator< std::pair< int const,CdiZaxis > > >::const_iterator *", 0, 0, (void*)0, 0};
@@ -31203,6 +32981,12 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__const_reverse_iterator,
   &_swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__iterator,
   &_swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type,
+  &_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t,
+  &_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__allocator_type,
+  &_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_iterator,
+  &_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_reverse_iterator,
+  &_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__iterator,
+  &_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type,
   &_swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t,
   &_swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type,
   &_swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__const_iterator,
@@ -31237,7 +33021,7 @@ static swig_type_info *swig_type_initial[] = {
 static swig_cast_info _swigc__p_Cdi[] = {  {&_swigt__p_Cdi, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_CdiGrid[] = {  {&_swigt__p_std__mapT_int_CdiGrid_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiGrid_t_t_t__mapped_type, 0, 0, 0},  {&_swigt__p_CdiGrid, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_CdiTaxis[] = {  {&_swigt__p_CdiTaxis, 0, 0, 0},  {&_swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_CdiVariable[] = {  {&_swigt__p_CdiVariable, 0, 0, 0},  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type, 0, 0, 0},  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_CdiVariable[] = {  {&_swigt__p_CdiVariable, 0, 0, 0},  {&_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type, 0, 0, 0},  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_CdiZaxis[] = {  {&_swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__mapped_type, 0, 0, 0},  {&_swigt__p_CdiZaxis, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_allocator_type[] = {  {&_swigt__p_allocator_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
@@ -31263,6 +33047,12 @@ static swig_cast_info _swigc__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__all
 static swig_cast_info _swigc__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__const_reverse_iterator[] = {  {&_swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__const_reverse_iterator, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__iterator[] = {  {&_swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__iterator, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type[] = {  {&_swigt__p_CdiTaxis, 0, 0, 0},  {&_swigt__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t[] = {  {&_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__allocator_type[] = {  {&_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__allocator_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_iterator[] = {  {&_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_iterator, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_reverse_iterator[] = {  {&_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_reverse_iterator, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__iterator[] = {  {&_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__iterator, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type[] = {  {&_swigt__p_CdiVariable, 0, 0, 0},  {&_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type, 0, 0, 0},  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t[] = {  {&_swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type[] = {  {&_swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__const_iterator[] = {  {&_swigt__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__const_iterator, 0, 0, 0},{0, 0, 0, 0}};
@@ -31274,10 +33064,10 @@ static swig_cast_info _swigc__p_std__mapT_std__string_CdiVariable_std__lessT_std
 static swig_cast_info _swigc__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__const_iterator[] = {  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__const_iterator, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__const_reverse_iterator[] = {  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__const_reverse_iterator, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__iterator[] = {  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__iterator, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type[] = {  {&_swigt__p_CdiVariable, 0, 0, 0},  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type, 0, 0, 0},  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type[] = {  {&_swigt__p_CdiVariable, 0, 0, 0},  {&_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type, 0, 0, 0},  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t[] = {  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__allocator_type[] = {  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__allocator_type, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type[] = {  {&_swigt__p_CdiVariable, 0, 0, 0},  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type, 0, 0, 0},  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type[] = {  {&_swigt__p_CdiVariable, 0, 0, 0},  {&_swigt__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},  {&_swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type, 0, 0, 0},  {&_swigt__p_std__mapT_std__string_CdiVariable_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_CdiVariable_t_t_t__mapped_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_double_std__allocatorT_double_t_t[] = {  {&_swigt__p_std__vectorT_double_std__allocatorT_double_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type[] = {  {&_swigt__p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_float_std__allocatorT_float_t_t[] = {  {&_swigt__p_std__vectorT_float_std__allocatorT_float_t_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -31323,6 +33113,12 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__const_reverse_iterator,
   _swigc__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__iterator,
   _swigc__p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t__mapped_type,
+  _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t,
+  _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__allocator_type,
+  _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_iterator,
+  _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__const_reverse_iterator,
+  _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__iterator,
+  _swigc__p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t__mapped_type,
   _swigc__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t,
   _swigc__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__allocator_type,
   _swigc__p_std__mapT_int_CdiZaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiZaxis_t_t_t__const_iterator,
@@ -31934,6 +33730,48 @@ SWIGEXPORT void Init_CdiObj(void) {
   SwigClassVarsMap.destroy = (void (*)(void *)) free_std_map_Sl_std_string_Sc_CdiVariable_Sg_;
   SwigClassVarsMap.trackObjects = 0;
   
+  SwigClassVarsByCode.klass = rb_define_class_under(mCdiObj, "VarsByCode", rb_cObject);
+  SWIG_TypeClientData(SWIGTYPE_p_std__mapT_int_CdiVariable_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiVariable_t_t_t, (void *) &SwigClassVarsByCode);
+  rb_include_module(SwigClassVarsByCode.klass, rb_eval_string("Enumerable"));
+  rb_define_alloc_func(SwigClassVarsByCode.klass, _wrap_VarsByCode_allocate);
+  rb_define_method(SwigClassVarsByCode.klass, "initialize", VALUEFUNC(_wrap_new_VarsByCode), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "dup", VALUEFUNC(_wrap_VarsByCode_dup), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "delete", VALUEFUNC(_wrap_VarsByCode_delete), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "has_key?", VALUEFUNC(_wrap_VarsByCode_has_keyq___), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "keys", VALUEFUNC(_wrap_VarsByCode_keys), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "each", VALUEFUNC(_wrap_VarsByCode_each), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "select", VALUEFUNC(_wrap_VarsByCode_select), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "values_at", VALUEFUNC(_wrap_VarsByCode_values_at), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "each_key", VALUEFUNC(_wrap_VarsByCode_each_key), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "values", VALUEFUNC(_wrap_VarsByCode_values), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "each_value", VALUEFUNC(_wrap_VarsByCode_each_value), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "entries", VALUEFUNC(_wrap_VarsByCode_entries), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "include?", VALUEFUNC(_wrap_VarsByCode_includeq___), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "key_iterator", VALUEFUNC(_wrap_VarsByCode_key_iterator), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "value_iterator", VALUEFUNC(_wrap_VarsByCode_value_iterator), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "[]", VALUEFUNC(_wrap_VarsByCode___getitem__), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "[]=", VALUEFUNC(_wrap_VarsByCode___setitem__), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "inspect", VALUEFUNC(_wrap_VarsByCode_inspect), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "to_a", VALUEFUNC(_wrap_VarsByCode_to_a), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "to_s", VALUEFUNC(_wrap_VarsByCode_to_s), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "empty?", VALUEFUNC(_wrap_VarsByCode_emptyq___), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "size", VALUEFUNC(_wrap_VarsByCode_size), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "clear", VALUEFUNC(_wrap_VarsByCode_clear), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "swap", VALUEFUNC(_wrap_VarsByCode_swap), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "get_allocator", VALUEFUNC(_wrap_VarsByCode_get_allocator), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "begin", VALUEFUNC(_wrap_VarsByCode_begin), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "end", VALUEFUNC(_wrap_VarsByCode_end), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "rbegin", VALUEFUNC(_wrap_VarsByCode_rbegin), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "rend", VALUEFUNC(_wrap_VarsByCode_rend), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "count", VALUEFUNC(_wrap_VarsByCode_count), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "erase", VALUEFUNC(_wrap_VarsByCode_erase), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "find", VALUEFUNC(_wrap_VarsByCode_find), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "lower_bound", VALUEFUNC(_wrap_VarsByCode_lower_bound), -1);
+  rb_define_method(SwigClassVarsByCode.klass, "upper_bound", VALUEFUNC(_wrap_VarsByCode_upper_bound), -1);
+  SwigClassVarsByCode.mark = 0;
+  SwigClassVarsByCode.destroy = (void (*)(void *)) free_std_map_Sl_int_Sc_CdiVariable_Sg_;
+  SwigClassVarsByCode.trackObjects = 0;
+  
   SwigClassTaxesMap.klass = rb_define_class_under(mCdiObj, "TaxesMap", rb_cObject);
   SWIG_TypeClientData(SWIGTYPE_p_std__mapT_int_CdiTaxis_std__lessT_int_t_std__allocatorT_std__pairT_int_const_CdiTaxis_t_t_t, (void *) &SwigClassTaxesMap);
   rb_include_module(SwigClassTaxesMap.klass, rb_eval_string("Enumerable"));
@@ -32079,20 +33917,22 @@ SWIGEXPORT void Init_CdiObj(void) {
   rb_define_method(SwigClassCdiGrid.klass, "prec", VALUEFUNC(_wrap_CdiGrid_prec_get), -1);
   rb_define_method(SwigClassCdiGrid.klass, "ncorner=", VALUEFUNC(_wrap_CdiGrid_ncorner_set), -1);
   rb_define_method(SwigClassCdiGrid.klass, "ncorner", VALUEFUNC(_wrap_CdiGrid_ncorner_get), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "hasXYValues=", VALUEFUNC(_wrap_CdiGrid_hasXYValues_set), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "hasXYValues", VALUEFUNC(_wrap_CdiGrid_hasXYValues_get), -1);
   rb_define_method(SwigClassCdiGrid.klass, "hasBounds=", VALUEFUNC(_wrap_CdiGrid_hasBounds_set), -1);
   rb_define_method(SwigClassCdiGrid.klass, "hasBounds", VALUEFUNC(_wrap_CdiGrid_hasBounds_get), -1);
   rb_define_method(SwigClassCdiGrid.klass, "xvals=", VALUEFUNC(_wrap_CdiGrid_xvals_set), -1);
   rb_define_method(SwigClassCdiGrid.klass, "xvals", VALUEFUNC(_wrap_CdiGrid_xvals_get), -1);
   rb_define_method(SwigClassCdiGrid.klass, "yvals=", VALUEFUNC(_wrap_CdiGrid_yvals_set), -1);
   rb_define_method(SwigClassCdiGrid.klass, "yvals", VALUEFUNC(_wrap_CdiGrid_yvals_get), -1);
-  rb_define_method(SwigClassCdiGrid.klass, "xvalsF=", VALUEFUNC(_wrap_CdiGrid_xvalsF_set), -1);
-  rb_define_method(SwigClassCdiGrid.klass, "xvalsF", VALUEFUNC(_wrap_CdiGrid_xvalsF_get), -1);
-  rb_define_method(SwigClassCdiGrid.klass, "yvalsF=", VALUEFUNC(_wrap_CdiGrid_yvalsF_set), -1);
-  rb_define_method(SwigClassCdiGrid.klass, "yvalsF", VALUEFUNC(_wrap_CdiGrid_yvalsF_get), -1);
   rb_define_method(SwigClassCdiGrid.klass, "xbnds=", VALUEFUNC(_wrap_CdiGrid_xbnds_set), -1);
   rb_define_method(SwigClassCdiGrid.klass, "xbnds", VALUEFUNC(_wrap_CdiGrid_xbnds_get), -1);
   rb_define_method(SwigClassCdiGrid.klass, "ybnds=", VALUEFUNC(_wrap_CdiGrid_ybnds_set), -1);
   rb_define_method(SwigClassCdiGrid.klass, "ybnds", VALUEFUNC(_wrap_CdiGrid_ybnds_get), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "xvalsF=", VALUEFUNC(_wrap_CdiGrid_xvalsF_set), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "xvalsF", VALUEFUNC(_wrap_CdiGrid_xvalsF_get), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "yvalsF=", VALUEFUNC(_wrap_CdiGrid_yvalsF_set), -1);
+  rb_define_method(SwigClassCdiGrid.klass, "yvalsF", VALUEFUNC(_wrap_CdiGrid_yvalsF_get), -1);
   rb_define_method(SwigClassCdiGrid.klass, "xbndsF=", VALUEFUNC(_wrap_CdiGrid_xbndsF_set), -1);
   rb_define_method(SwigClassCdiGrid.klass, "xbndsF", VALUEFUNC(_wrap_CdiGrid_xbndsF_get), -1);
   rb_define_method(SwigClassCdiGrid.klass, "ybndsF=", VALUEFUNC(_wrap_CdiGrid_ybndsF_set), -1);
@@ -32282,6 +34122,8 @@ SWIGEXPORT void Init_CdiObj(void) {
   rb_define_method(SwigClassCdi.klass, "variables", VALUEFUNC(_wrap_Cdi_variables_get), -1);
   rb_define_method(SwigClassCdi.klass, "var=", VALUEFUNC(_wrap_Cdi_var_set), -1);
   rb_define_method(SwigClassCdi.klass, "var", VALUEFUNC(_wrap_Cdi_var_get), -1);
+  rb_define_method(SwigClassCdi.klass, "varByCode=", VALUEFUNC(_wrap_Cdi_varByCode_set), -1);
+  rb_define_method(SwigClassCdi.klass, "varByCode", VALUEFUNC(_wrap_Cdi_varByCode_get), -1);
   rb_define_method(SwigClassCdi.klass, "taxes=", VALUEFUNC(_wrap_Cdi_taxes_set), -1);
   rb_define_method(SwigClassCdi.klass, "taxes", VALUEFUNC(_wrap_Cdi_taxes_get), -1);
   rb_define_method(SwigClassCdi.klass, "zaxes=", VALUEFUNC(_wrap_Cdi_zaxes_set), -1);
