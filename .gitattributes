@@ -106,6 +106,7 @@ interfaces/python/cdiobj_wrap.cpp -text
 interfaces/python/setup.py -text
 interfaces/python/setupLib.py -text
 interfaces/python/setupObj.py -text
+interfaces/python/table.py -text
 interfaces/python/testLib.py -text
 interfaces/python/testObj.py -text
 interfaces/ruby/cdilib_wrap.c -text
