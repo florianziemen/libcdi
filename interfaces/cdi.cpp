@@ -68,6 +68,7 @@ CdiGrid::CdiGrid(int gridid) {
     ncorner = 0;
     xbnds = NULL;
     ybnds = NULL;
+    std::cout << "grid " << gridID << " has no XYBounds" << std::endl;
     xbounds.resize(ncorner*size);
     ybounds.resize(ncorner*size);
   }
@@ -92,7 +93,14 @@ CdiGrid::CdiGrid(int gridid) {
   yunits    = _yunits;
 
 }
-CdiGrid::~CdiGrid() { gridID = -1; }
+CdiGrid::~CdiGrid() 
+{ 
+  gridID = -1;
+  if (xvals) free(xvals);
+  if (yvals) free(yvals);
+  if (xbnds) free(xbnds);
+  if (ybnds) free(ybnds);
+}
 
 void
 CdiGrid::readFloatBounds()
