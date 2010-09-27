@@ -17,63 +17,24 @@ CdiGrid::CdiGrid() { gridID = -1; }
 CdiGrid::CdiGrid(int gridid) {
   char _name[CHARSIZE];
   char _xname[CHARSIZE], _xlongname[CHARSIZE], _xstdname[CHARSIZE], _xunits[CHARSIZE];
-  char _yname[CHARSIZE], _ylongname[CHARSIZE], _ystdname[CHARSIZE], _yunits[CHARSIZE];      
-
-  hasXYValues = true;
+  char _yname[CHARSIZE], _ylongname[CHARSIZE], _ystdname[CHARSIZE], _yunits[CHARSIZE];
 
   gridID = gridid;
   type   = gridInqType(gridID);
   strcpy(_name,gridNamePtr(type));
   name = _name;
 
-  size   = gridInqSize(gridID);
-  xsize  = gridInqXsize(gridID);
-  ysize  = gridInqXsize(gridID);
+  size  = gridInqSize(gridID);
+  xsize = gridInqXsize(gridID);
+  ysize = gridInqYsize(gridID);
   xvalues.resize(xsize);
   yvalues.resize(ysize);
   std::cout << "(gridID:" << gridID<< ") xsize: " << xsize << " ysize:" << ysize << std::endl;
 
-  if ( xsize == 0 || ysize == 0) hasXYValues =  false;
-  if ( hasXYValues )
-  {
-    xvals  = (double *) malloc(xsize*sizeof(double));
-    yvals  = (double *) malloc(ysize*sizeof(double));
-    gridInqXvals(gridID, xvals);
-    gridInqYvals(gridID, yvals);
+  getValues();
+  getBounds();
 
-    std::copy(xvals, xvals + xsize, xvalues.begin());
-    std::copy(yvals, yvals + ysize, yvalues.begin());
-  }
-  else
-  {
-    xvals = NULL, yvals = NULL;
-    std::cout << "grid " << gridID << " has no XYValues" << std::endl;
-  }
-  hasBounds = (gridInqXbounds(gridID,NULL) && gridInqYbounds(gridID,NULL));
-  if (hasBounds)
-  {
-    ncorner  = ( gridInqType(gridID) == GRID_CELL ) ? gridInqNvertex(gridID) : 4;
-    ncorner *= size;
-    xbnds  = (double *) malloc((ncorner*size)*sizeof(double));
-    ybnds  = (double *) malloc((ncorner*size)*sizeof(double));
-    gridInqYbounds(gridID, xbnds);
-    gridInqXbounds(gridID, ybnds);
-    xbounds.resize(ncorner*size);
-    ybounds.resize(ncorner*size);
-    std::copy(xbnds, xbnds + ncorner*size, xbounds.begin());
-    std::copy(ybnds, ybnds + ncorner*size, ybounds.begin());
-  }
-  else
-  {
-    ncorner = 0;
-    xbnds = NULL;
-    ybnds = NULL;
-    std::cout << "grid " << gridID << " has no XYBounds" << std::endl;
-    xbounds.resize(ncorner*size);
-    ybounds.resize(ncorner*size);
-  }
-
-  prec   = gridInqPrec(gridID);
+  prec = gridInqPrec(gridID);
 
   gridInqXname(gridID    , _xname);
   gridInqXlongname(gridID, _xlongname);
@@ -93,37 +54,126 @@ CdiGrid::CdiGrid(int gridid) {
   yunits    = _yunits;
 
 }
-CdiGrid::~CdiGrid() 
-{ 
-  gridID = -1;
-  if (xvals) free(xvals);
-  if (yvals) free(yvals);
-  if (xbnds) free(xbnds);
-  if (ybnds) free(ybnds);
-}
+CdiGrid::~CdiGrid() { gridID = -1; }
 
-void
-CdiGrid::readFloatBounds()
+void CdiGrid::getValues()
+{
+  double *xvals, *yvals;
+
+  hasXValues = gridInqXvals(gridID, NULL);
+  hasYValues = gridInqYvals(gridID, NULL);
+  if ( hasXValues )
+  {
+    xvals = (double *) malloc(xsize*sizeof(double));
+
+    gridInqXvals(gridID, xvals);
+    std::copy(xvals, xvals + xsize, xvalues.begin());
+    free(xvals);
+  }
+  else
+  {
+    std::cout << "grid " << gridID << " has no YValues" << std::endl;
+  }
+
+  if ( hasYValues )
+  {
+    yvals = (double *) malloc(ysize*sizeof(double));
+    gridInqYvals(gridID, yvals);
+    std::copy(yvals, yvals + ysize, yvalues.begin());
+    free(yvals);
+  }
+  else
+  {
+    std::cout << "grid " << gridID << " has no YValues" << std::endl;
+  }
+}
+void CdiGrid::getBounds()
+{
+  double *xbnds, *ybnds;
+
+  hasBounds = (gridInqXbounds(gridID,NULL) && gridInqYbounds(gridID,NULL));
+  if (hasBounds)
+  {
+    ncorner  = ( gridInqType(gridID) == GRID_CELL ) ? gridInqNvertex(gridID) : 4;
+    ncorner *= size;
+    xbnds    = (double *) malloc((ncorner*size)*sizeof(double));
+    ybnds    = (double *) malloc((ncorner*size)*sizeof(double));
+    gridInqYbounds(gridID, xbnds);
+    gridInqXbounds(gridID, ybnds);
+    xbounds.resize(ncorner*size);
+    ybounds.resize(ncorner*size);
+    std::copy(xbnds, xbnds + ncorner*size, xbounds.begin());
+    std::copy(ybnds, ybnds + ncorner*size, ybounds.begin());
+    free(xbnds);
+    free(ybnds);
+  }
+  else
+  {
+    ncorner = 0;
+    std::cout << "grid " << gridID << " has no XYBounds" << std::endl;
+    xbounds.resize(ncorner*size);
+    ybounds.resize(ncorner*size);
+  }
+}
+/*
+ * pointer value functions {
+ */
+void CdiGrid::getValuesAsPointer(double *xvals, double *yvals)
 {
   if (hasBounds)
   {
-    xbndsF = (float *) malloc(ncorner*size*sizeof(float));
-    ybndsF = (float *) malloc(ncorner*size*sizeof(float));
-    xbndsF = (float *) xbnds;
-    ybndsF = (float *) ybnds;
+    std::copy(xvalues.begin(), xvalues.end(), xvals);
+    std::copy(yvalues.begin(), yvalues.end(), yvals);
   }
   else
-    std::cout << "No bounds available." << std::endl;
+  {
+    std::cout << "No Values available." << std::endl;
+  }
 }
 
 void
-CdiGrid::readFloatVals()
+CdiGrid::getBoundsAsPointer(double *xbnds, double *ybnds)
 {
-  xvalsF   = (float *) malloc(xsize*sizeof(float));
-  yvalsF   = (float *) malloc(ysize*sizeof(float));
-  xvalsF   = (float *) xvals;
-  yvalsF   = (float *) yvals;
+  if (hasBounds)
+  {
+    std::copy(xbounds.begin(), xbounds.end(), xbnds);
+    std::copy(ybounds.begin(), ybounds.end(), ybnds);
+  }
+  else
+  {
+    std::cout << "No bounds available." << std::endl;
+  }
 }
+  /* } */
+/*
+ * float pointer functions {
+ */
+void
+CdiGrid::getFloatVals(float *xvalsF, float *yvalsF)
+{
+  for (int i = 0; i < xsize; i++)
+    xvalsF[i] = (float) xvalues[i];
+  for (int i = 0; i < ysize; i++)
+    yvalsF[i] = (float) yvalues[i];
+}
+
+void
+CdiGrid::getFloatBounds(float *xbndsF, float *ybndsF)
+{
+  if (hasBounds)
+  {
+    for (int i = 0; i < ncorner*size; i++)
+    {
+      xbndsF[i] = (float) xbounds[i];
+      ybndsF[i] = (float) ybounds[i];
+    }
+  }
+  else
+  {
+    std::cout << "No bounds available." << std::endl;
+  }
+}
+  /* } */
 /* } */
 
 /*
@@ -304,23 +354,13 @@ Cdi::Cdi(const char *path)  {
   getVars();
 }
 
-Cdi::~Cdi() {
-  std::cout << "MSG from destructor:" << std::endl;
-  std::map<int,CdiGrid>::iterator each;
-  for (each = grids.begin(); each != grids.end(); ++each)
-  {
-    std::cout << (*each).second.size << " | ";
-  }
-  std::cout << std::endl;
-  std::cout << "Taxis Size: " << (*taxes.begin()).second.ntsteps << std::endl;
-}
+Cdi::~Cdi() {}
 
 void
 Cdi::getTaxes() {
   int taxisID;
   ntaxes         = 1;
   taxisID        = vlistInqTaxis(vlistID);
-/* DEBUG     std::cout << "getTaxes : taxisID=" << taxisID << std::endl; */
   taxes[taxisID] = CdiTaxis(vlistID);
 }
 

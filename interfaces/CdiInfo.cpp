@@ -1,3 +1,4 @@
+#include <malloc.h>
 #include <stdio.h>
 #include <iostream>
 #include "cdi.hpp"
@@ -7,7 +8,9 @@ int main() {
   std::string _name;
   CdiVariable var;
 
+  Cdi infoz("./python/zonavg-BOT.grb");
   Cdi info("./testdata/mulval.nc");
+  Cdi infot("./python/BOT.grb");
  
   std::cout << "#===============================" << std::endl;
   for (int i = 0; i < info.nvars; i++)
@@ -23,14 +26,14 @@ int main() {
     std::cout << (*iter).first << ' ';
   };std::cout << std::endl;
   std::cout << "first grid:" << info.grids[0].size << std::endl;
-  if ( info.grids[0].hasXYValues )
+  if ( info.grids[0].hasXValues )
     for (int k = 0; k < info.grids[0].xsize; k++)
       std::cout << info.grids[0].xvalues[k] << ' ';
   else
     std::cout << "No XValues!" << std::endl;
   std::cout << std::endl;
   std::cout << "second grid:" << info.grids[1].size << std::endl;
-  if ( info.grids[1].hasXYValues )
+  if ( info.grids[1].hasXValues )
     for (int k = 0; k < info.grids[1].xsize; k++)
       std::cout << info.grids[1].xvalues[k] << ' ';
   else
@@ -41,14 +44,17 @@ int main() {
   info.variables[varno].sinfo(); 
   var = info.variables[varno];
   var = info.var["tsurf"];
-  var = info.varByCode[176];
+  //var = info.varByCode[176];
   var.sinfo();
   std::cout << "#===============================" << std::endl;
   std::cout << "Gridname:" << var.grid.name << std::endl;
   std::cout << "GridBounds: NumberOfCorners = " << var.grid.ncorner <<  std::endl;
-  if ( var.grid.hasXYValues ) {
-  std::cout << "xvals "   << var.grid.xvals[0]       << std::endl;
-  std::cout << "yvals "   << var.grid.yvals[0]       << std::endl;
+  if ( var.grid.hasYValues ) {
+    float * xvals = (float *) malloc(var.grid.xsize*sizeof(float));
+    float * yvals = (float *) malloc(var.grid.ysize*sizeof(float));
+    var.grid.getFloatVals(xvals, yvals);
+  std::cout << "xvals "   << xvals[0]       << std::endl;
+  std::cout << "yvals "   << yvals[0]       << std::endl;
   std::cout << "xvalues " << var.grid.xvalues[0] << std::endl;
   std::cout << "xvalues " << var.grid.xvalues.front() << std::endl;
   std::cout << "xvalues " << var.grid.xvalues.back() << std::endl;
@@ -56,8 +62,11 @@ int main() {
   else
     std::cout << "no grid values available" << std::endl;
   if ( var.grid.hasBounds ) {
-  std::cout << "xbnds "   << var.grid.xbnds[0]       << std::endl;
-  std::cout << "ybnds "   << var.grid.ybnds[0]       << std::endl;
+    float * xbnds = (float *) malloc(var.grid.size*var.grid.ncorner*sizeof(float));
+    float * ybnds = (float *) malloc(var.grid.size*var.grid.ncorner*sizeof(float));
+    var.grid.getFloatBounds(xbnds, ybnds);
+  std::cout << "xbnds "   << xbnds[var.grid.size*var.grid.ncorner - 1]       << std::endl;
+  std::cout << "ybnds "   << ybnds[var.grid.size*var.grid.ncorner - 1]       << std::endl;
   std::cout << "xbounds " << var.grid.xbounds[0] << std::endl;
   std::cout << "xbounds " << var.grid.xbounds.front() << std::endl;
   std::cout << "xbounds " << var.grid.xbounds.back() << std::endl;
@@ -118,6 +127,14 @@ int main() {
   std::cout << "#==== zlevels:  " << var.zaxis.size << std::endl;
   std::cout << "#===============================" << std::endl;
 
+  var = infot.varByCode[176];
+  std::cout << var.name << std::endl;
+  std::cout << "grid XValues: "; vector<double> xv = var.grid.xvalues; for (int k = 0; k < xv.size(); k++) { std::cout << xv[k] << " ";} std::cout << std::endl;
+  std::cout << "grid YValues: "; vector<double> yv = var.grid.yvalues; for (int k = 0; k < yv.size(); k++) { std::cout << yv[k] << " ";} std::cout << std::endl;
+  var = infoz.varByCode[176];
+  std::cout << var.name << std::endl;
+  std::cout << "grid XValues: "; xv = var.grid.xvalues; for (int k = 0; k < xv.size(); k++) { std::cout << xv[k] << " ";} std::cout << std::endl;
+  std::cout << "grid YValues: "; yv = var.grid.yvalues; for (int k = 0; k < yv.size(); k++) { std::cout << yv[k] << " ";} std::cout << std::endl;
 
   return 0;
 }

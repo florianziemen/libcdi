@@ -12,9 +12,7 @@ class CdiGrid {
 
     int gridID;
     int type, size, xsize, ysize, prec, ncorner;
-    bool hasXYValues, hasBounds;
-    double *xvals , *yvals , *xbnds , *ybnds;
-    float  *xvalsF, *yvalsF, *xbndsF, *ybndsF;
+    bool hasXValues, hasYValues, hasBounds;
     std::vector<double> xvalues, yvalues, xbounds, ybounds;
 
 
@@ -22,8 +20,12 @@ class CdiGrid {
     std::string yname, ylongname, ystdname, yunits;      
     std::string name;
 
-    void readFloatBounds();
-    void readFloatVals();
+    void getValues();
+    void getBounds();
+    void getValuesAsPointer(double *xvals, double *yvals);
+    void getBoundsAsPointer(double *xbnds, double *ybnds);
+    void getFloatVals(float *xvals, float * yvals);
+    void getFloatBounds(float *xbnds, float *ybnds);
       
   private:
     void determineGrid(int gridID);
