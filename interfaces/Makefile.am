@@ -29,14 +29,14 @@ CdiInfo_LDADD = $(top_builddir)/interfaces/libcdipp.la
 CdiInfo_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS)
 #
 #
-if WITH_RUBY
+if ENABLE_RUBY
 BINDINGS += rubyObj
 # Ruby ====================================================
 rubyLibMakefile:
 	cd ruby; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(locallibs) $(LDFLAGS)" INCFLAGS="-I../../src" ruby extconfLib.rb
 
 rubyLibWrapper: cdilib.i
-if WITH_SWIG
+if ENABLE_SWIG
 	$(SWIG) -ruby -module CdiLib -o ruby/cdilib_wrap.c $(AM_CPPFLAGS) cdilib.i
 endif
 
@@ -50,7 +50,7 @@ rubyObjMakefile:
 	cd ruby; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I../" ruby extconfObj.rb
 
 rubyObjWrapper: cdiobj.i
-if WITH_SWIG
+if ENABLE_SWIG
 	$(SWIG) -ruby -c++ -module CdiObj -o ruby/cdiobj_wrap.cpp $(AM_CPPFLAGS) cdiobj.i
 endif
 
@@ -64,11 +64,11 @@ rubyObjInstall: rubyObj
 	@cd ruby; make install
 endif
 # =========================================================
-if WITH_PYTHON
+if ENABLE_PYTHON
 BINDINGS += pythonObj
 # Python ==================================================
 pythonLibWrapper: cdilib.i
-if WITH_SWIG
+if ENABLE_SWIG
 	$(SWIG) -python -module CdiLib -o python/cdilib_wrap.c $(AM_CPPFLAGS) cdilib.i
 endif
 
@@ -79,7 +79,7 @@ pythonLibTest: pythonLib
 	@cd python; python testLib.py
 # =========================================================
 pythonObjWrapper: cdiobj.i
-if WITH_SWIG
+if ENABLE_SWIG
 	$(SWIG) -python -c++ -module CdiObj -o python/cdiobj_wrap.cpp $(AM_CPPFLAGS) cdiobj.i
 endif
 

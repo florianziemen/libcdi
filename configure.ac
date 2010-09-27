@@ -111,28 +111,29 @@ AC_ARG_ENABLE(swig,
               [AS_HELP_STRING([--enable-swig],[use swig to create extra bindings [default=no] (EXPERIMENTAL)])],
               [AC_CHECK_PROG(SWIG,swig,swig)],
               [enable_swig=no])
-AM_CONDITIONAL(WITH_SWIG,[test "x$SWIG" != "x"])
+AM_CONDITIONAL(ENABLE_SWIG,[test "x$SWIG" != "x"])
 #  ----------------------------------------------------------------------
 #  Create the Ruby Interface via swig
 AC_ARG_ENABLE(ruby,
   [AS_HELP_STRING([--enable-ruby],[ruby language bindings [default=no] (EXPERIMENTAL)])],
   [AC_CHECK_PROG(RUBY,ruby,ruby)
-   RUBY_INCLUDES="-I$($RUBY config/interface.rb)"
+   RUBY_INCLUDES="$($RUBY config/interface.rb)"
    save_CPPFLAGS=$CPPFLAGS
    CPPFLAGS="$CPPFLAGS $RUBY_INCLUDES"
-   AC_CHECK_HEADER([ruby.h],,[
-                            enable_ruby=no
-                            RUBY=
-                           ])
+   AC_CHECK_HEADER([ruby.h],,[enable_ruby=no
+                              RUBY=
+                             ])
    CPPFLAGS=$save_CPPFLAGS
    AS_IF([test "x$RUBY" != "x"],
          [AS_IF([test "x$SWIG" = "x"],
-                [AC_MSG_NOTICE([Python bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage])])],
-                [AS_IF([test `$SWIG -help 2>&1 | $GREP -c '\-ruby *- Generate'` = 0],[AC_MSG_NOTICE([No (swig does not support -ruby option)])
-                                                                                        enable_ruby=no
-                                                                                       ])])],
+                [AC_MSG_NOTICE([Ruby bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage])])],
+                [AS_IF([test `$SWIG -help 2>&1 | $GREP -c '\-ruby *- Generate'` = 0],
+                       [AC_MSG_NOTICE([No (swig does not support -ruby option)])
+                        enable_ruby=no
+                       ])])],
   [enable_ruby=no])
-AM_CONDITIONAL(WITH_RUBY,[test "x$enable_ruby" != "xno"])
+AM_CONDITIONAL(ENABLE_RUBY,[test "x$enable_ruby" != "xno"])
+AS_IF([test "x$enable_ruby" != "xno"],[AC_SUBST([ENABLE_RUBY],[true])],[AC_SUBST([ENABLE_RUBY],[false])])
 #  ----------------------------------------------------------------------
 #  Create the Ruby Interface via swig
 AC_ARG_ENABLE(python,
@@ -141,19 +142,20 @@ AC_ARG_ENABLE(python,
    PYTHON_INCLUDES="-I$($PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_lib(1,1)' | $SED 's/lib/include/')"
    save_CPPFLAGS=$CPPFLAGS
    CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
-   AC_CHECK_HEADER([Python.h],,[
-                             enable_python="No (missing header)"
-                             PYTHON=
-                             ])
+   AC_CHECK_HEADER([Python.h],,[enable_python=no
+                                PYTHON=
+                               ])
    CPPFLAGS=$save_CPPFLAGS
    AS_IF([test "x$PYTHON" != "x"],
          [AS_IF([test "x$SWIG" = "x"],
                 [AC_MSG_NOTICE([Python bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage])])],
-                [AS_IF([test `$SWIG -help 2>&1 | $GREP -c '\-python *- Generate'` = 0],[AC_MSG_NOTICE([No (swig does not support -python option)])
-                                                                                        enable_python=no
-                                                                                       ])])],
+                [AS_IF([test `$SWIG -help 2>&1 | $GREP -c '\-python *- Generate'` = 0],
+                       [AC_MSG_NOTICE([No (swig does not support -python option)])
+                        enable_python=no
+                       ])])],
   [enable_python=no])
-AM_CONDITIONAL(WITH_PYTHON, [test "x$enable_python" = "xyes"])
+AM_CONDITIONAL(ENABLE_PYTHON, [test "x$enable_python" != "xno"])
+AS_IF([test "x$enable_python" != "xno"],[AC_SUBST([ENABLE_PYTHON],[true])],[AC_SUBST([ENABLE_PYTHON],[false])])
 #  ----------------------------------------------------------------------
 AM_CONDITIONAL(CREATE_INTERFACES, [test  "x$enable_ruby" = "xyes" -o "x$enable_python" = "xyes"])
 #  ----------------------------------------------------------------------

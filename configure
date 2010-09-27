@@ -610,14 +610,16 @@ LTLIBOBJS
 LIBOBJS
 CREATE_INTERFACES_FALSE
 CREATE_INTERFACES_TRUE
-WITH_PYTHON_FALSE
-WITH_PYTHON_TRUE
+ENABLE_PYTHON
+ENABLE_PYTHON_FALSE
+ENABLE_PYTHON_TRUE
 PYTHON
-WITH_RUBY_FALSE
-WITH_RUBY_TRUE
+ENABLE_RUBY
+ENABLE_RUBY_FALSE
+ENABLE_RUBY_TRUE
 RUBY
-WITH_SWIG_FALSE
-WITH_SWIG_TRUE
+ENABLE_SWIG_FALSE
+ENABLE_SWIG_TRUE
 SWIG
 FCMODCASE
 FCMODEXT
@@ -23850,11 +23852,11 @@ else
 fi
 
  if test "x$SWIG" != "x"; then
-  WITH_SWIG_TRUE=
-  WITH_SWIG_FALSE='#'
+  ENABLE_SWIG_TRUE=
+  ENABLE_SWIG_FALSE='#'
 else
-  WITH_SWIG_TRUE='#'
-  WITH_SWIG_FALSE=
+  ENABLE_SWIG_TRUE='#'
+  ENABLE_SWIG_FALSE=
 fi
 
 #  ----------------------------------------------------------------------
@@ -23898,16 +23900,15 @@ $as_echo "no" >&6; }
 fi
 
 
-   RUBY_INCLUDES="-I$($RUBY config/interface.rb)"
+   RUBY_INCLUDES="$($RUBY config/interface.rb)"
    save_CPPFLAGS=$CPPFLAGS
    CPPFLAGS="$CPPFLAGS $RUBY_INCLUDES"
    ac_fn_c_check_header_mongrel "$LINENO" "ruby.h" "ac_cv_header_ruby_h" "$ac_includes_default"
 if test "x$ac_cv_header_ruby_h" = x""yes; then :
 
 else
-
-                            enable_ruby=no
-                            RUBY=
+  enable_ruby=no
+                              RUBY=
 
 fi
 
@@ -23915,14 +23916,14 @@ fi
    CPPFLAGS=$save_CPPFLAGS
    if test "x$RUBY" != "x"; then :
   if test "x$SWIG" = "x"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: Python bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage" >&5
-$as_echo "$as_me: Python bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage" >&6;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Ruby bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage" >&5
+$as_echo "$as_me: Ruby bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage" >&6;}
 fi
 else
   if test `$SWIG -help 2>&1 | $GREP -c '\-ruby *- Generate'` = 0; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: No (swig does not support -ruby option)" >&5
 $as_echo "$as_me: No (swig does not support -ruby option)" >&6;}
-                                                                                        enable_ruby=no
+                        enable_ruby=no
 
 fi
 fi
@@ -23931,13 +23932,20 @@ else
 fi
 
  if test "x$enable_ruby" != "xno"; then
-  WITH_RUBY_TRUE=
-  WITH_RUBY_FALSE='#'
+  ENABLE_RUBY_TRUE=
+  ENABLE_RUBY_FALSE='#'
 else
-  WITH_RUBY_TRUE='#'
-  WITH_RUBY_FALSE=
+  ENABLE_RUBY_TRUE='#'
+  ENABLE_RUBY_FALSE=
 fi
 
+if test "x$enable_ruby" != "xno"; then :
+  ENABLE_RUBY=true
+
+else
+  ENABLE_RUBY=false
+
+fi
 #  ----------------------------------------------------------------------
 #  Create the Ruby Interface via swig
 # Check whether --enable-python was given.
@@ -23986,9 +23994,8 @@ fi
 if test "x$ac_cv_header_Python_h" = x""yes; then :
 
 else
-
-                             enable_python="No (missing header)"
-                             PYTHON=
+  enable_python=no
+                                PYTHON=
 
 fi
 
@@ -24003,7 +24010,7 @@ else
   if test `$SWIG -help 2>&1 | $GREP -c '\-python *- Generate'` = 0; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: No (swig does not support -python option)" >&5
 $as_echo "$as_me: No (swig does not support -python option)" >&6;}
-                                                                                        enable_python=no
+                        enable_python=no
 
 fi
 fi
@@ -24011,14 +24018,21 @@ else
   enable_python=no
 fi
 
- if test "x$enable_python" = "xyes"; then
-  WITH_PYTHON_TRUE=
-  WITH_PYTHON_FALSE='#'
+ if test "x$enable_python" != "xno"; then
+  ENABLE_PYTHON_TRUE=
+  ENABLE_PYTHON_FALSE='#'
 else
-  WITH_PYTHON_TRUE='#'
-  WITH_PYTHON_FALSE=
+  ENABLE_PYTHON_TRUE='#'
+  ENABLE_PYTHON_FALSE=
 fi
 
+if test "x$enable_python" != "xno"; then :
+  ENABLE_PYTHON=true
+
+else
+  ENABLE_PYTHON=false
+
+fi
 #  ----------------------------------------------------------------------
  if test  "x$enable_ruby" = "xyes" -o "x$enable_python" = "xyes"; then
   CREATE_INTERFACES_TRUE=
@@ -24212,16 +24226,16 @@ if test -z "${CREATE_ISOC_TRUE}" && test -z "${CREATE_ISOC_FALSE}"; then
   as_fn_error $? "conditional \"CREATE_ISOC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${WITH_SWIG_TRUE}" && test -z "${WITH_SWIG_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_SWIG\" was never defined.
+if test -z "${ENABLE_SWIG_TRUE}" && test -z "${ENABLE_SWIG_FALSE}"; then
+  as_fn_error $? "conditional \"ENABLE_SWIG\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${WITH_RUBY_TRUE}" && test -z "${WITH_RUBY_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_RUBY\" was never defined.
+if test -z "${ENABLE_RUBY_TRUE}" && test -z "${ENABLE_RUBY_FALSE}"; then
+  as_fn_error $? "conditional \"ENABLE_RUBY\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${WITH_PYTHON_TRUE}" && test -z "${WITH_PYTHON_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_PYTHON\" was never defined.
+if test -z "${ENABLE_PYTHON_TRUE}" && test -z "${ENABLE_PYTHON_FALSE}"; then
+  as_fn_error $? "conditional \"ENABLE_PYTHON\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CREATE_INTERFACES_TRUE}" && test -z "${CREATE_INTERFACES_FALSE}"; then

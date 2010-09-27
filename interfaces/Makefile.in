@@ -42,9 +42,9 @@ noinst_PROGRAMS = $(am__EXEEXT_1)
 @CREATE_INTERFACES_TRUE@am__append_3 = libcdipp.la
 #
 #
-@WITH_RUBY_TRUE@am__append_4 = rubyObj
+@ENABLE_RUBY_TRUE@am__append_4 = rubyObj
 # =========================================================
-@WITH_PYTHON_TRUE@am__append_5 = pythonObj
+@ENABLE_PYTHON_TRUE@am__append_5 = pythonObj
 subdir = interfaces
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -136,6 +136,8 @@ ENABLE_CGRIBEX = @ENABLE_CGRIBEX@
 ENABLE_EXTRA = @ENABLE_EXTRA@
 ENABLE_GRIB = @ENABLE_GRIB@
 ENABLE_IEG = @ENABLE_IEG@
+ENABLE_PYTHON = @ENABLE_PYTHON@
+ENABLE_RUBY = @ENABLE_RUBY@
 ENABLE_SERVICE = @ENABLE_SERVICE@
 EXEEXT = @EXEEXT@
 F77 = @F77@
@@ -620,53 +622,53 @@ uninstall-am: uninstall-binPROGRAMS
 	uninstall-binPROGRAMS
 
 # Ruby ====================================================
-@WITH_RUBY_TRUE@rubyLibMakefile:
-@WITH_RUBY_TRUE@	cd ruby; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(locallibs) $(LDFLAGS)" INCFLAGS="-I../../src" ruby extconfLib.rb
+@ENABLE_RUBY_TRUE@rubyLibMakefile:
+@ENABLE_RUBY_TRUE@	cd ruby; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(locallibs) $(LDFLAGS)" INCFLAGS="-I../../src" ruby extconfLib.rb
 
-@WITH_RUBY_TRUE@rubyLibWrapper: cdilib.i
-@WITH_RUBY_TRUE@@WITH_SWIG_TRUE@	$(SWIG) -ruby -module CdiLib -o ruby/cdilib_wrap.c $(AM_CPPFLAGS) cdilib.i
+@ENABLE_RUBY_TRUE@rubyLibWrapper: cdilib.i
+@ENABLE_RUBY_TRUE@@ENABLE_SWIG_TRUE@	$(SWIG) -ruby -module CdiLib -o ruby/cdilib_wrap.c $(AM_CPPFLAGS) cdilib.i
 
-@WITH_RUBY_TRUE@rubyLib: rubyLibWrapper rubyLibMakefile
-@WITH_RUBY_TRUE@	@cd ruby; make
+@ENABLE_RUBY_TRUE@rubyLib: rubyLibWrapper rubyLibMakefile
+@ENABLE_RUBY_TRUE@	@cd ruby; make
 
-@WITH_RUBY_TRUE@rubyLibTest: rubyLib
-@WITH_RUBY_TRUE@	@cd ruby; ruby testLib.rb
+@ENABLE_RUBY_TRUE@rubyLibTest: rubyLib
+@ENABLE_RUBY_TRUE@	@cd ruby; ruby testLib.rb
 # =========================================================
-@WITH_RUBY_TRUE@rubyObjMakefile:
-@WITH_RUBY_TRUE@	cd ruby; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I../" ruby extconfObj.rb
+@ENABLE_RUBY_TRUE@rubyObjMakefile:
+@ENABLE_RUBY_TRUE@	cd ruby; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I../" ruby extconfObj.rb
 
-@WITH_RUBY_TRUE@rubyObjWrapper: cdiobj.i
-@WITH_RUBY_TRUE@@WITH_SWIG_TRUE@	$(SWIG) -ruby -c++ -module CdiObj -o ruby/cdiobj_wrap.cpp $(AM_CPPFLAGS) cdiobj.i
+@ENABLE_RUBY_TRUE@rubyObjWrapper: cdiobj.i
+@ENABLE_RUBY_TRUE@@ENABLE_SWIG_TRUE@	$(SWIG) -ruby -c++ -module CdiObj -o ruby/cdiobj_wrap.cpp $(AM_CPPFLAGS) cdiobj.i
 
-@WITH_RUBY_TRUE@rubyObj: rubyObjWrapper rubyObjMakefile
-@WITH_RUBY_TRUE@	@cd ruby; make
+@ENABLE_RUBY_TRUE@rubyObj: rubyObjWrapper rubyObjMakefile
+@ENABLE_RUBY_TRUE@	@cd ruby; make
 
-@WITH_RUBY_TRUE@rubyObjTest: rubyObj
-@WITH_RUBY_TRUE@	@cd ruby; ruby testObj.rb
+@ENABLE_RUBY_TRUE@rubyObjTest: rubyObj
+@ENABLE_RUBY_TRUE@	@cd ruby; ruby testObj.rb
 
-@WITH_RUBY_TRUE@rubyObjInstall: rubyObj
-@WITH_RUBY_TRUE@	@cd ruby; make install
+@ENABLE_RUBY_TRUE@rubyObjInstall: rubyObj
+@ENABLE_RUBY_TRUE@	@cd ruby; make install
 # Python ==================================================
-@WITH_PYTHON_TRUE@pythonLibWrapper: cdilib.i
-@WITH_PYTHON_TRUE@@WITH_SWIG_TRUE@	$(SWIG) -python -module CdiLib -o python/cdilib_wrap.c $(AM_CPPFLAGS) cdilib.i
+@ENABLE_PYTHON_TRUE@pythonLibWrapper: cdilib.i
+@ENABLE_PYTHON_TRUE@@ENABLE_SWIG_TRUE@	$(SWIG) -python -module CdiLib -o python/cdilib_wrap.c $(AM_CPPFLAGS) cdilib.i
 
-@WITH_PYTHON_TRUE@pythonLib: pythonLibWrapper
-@WITH_PYTHON_TRUE@	@cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I../../src" python setupLib.py build_ext --inplace
+@ENABLE_PYTHON_TRUE@pythonLib: pythonLibWrapper
+@ENABLE_PYTHON_TRUE@	@cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I../../src" python setupLib.py build_ext --inplace
 
-@WITH_PYTHON_TRUE@pythonLibTest: pythonLib
-@WITH_PYTHON_TRUE@	@cd python; python testLib.py
+@ENABLE_PYTHON_TRUE@pythonLibTest: pythonLib
+@ENABLE_PYTHON_TRUE@	@cd python; python testLib.py
 # =========================================================
-@WITH_PYTHON_TRUE@pythonObjWrapper: cdiobj.i
-@WITH_PYTHON_TRUE@@WITH_SWIG_TRUE@	$(SWIG) -python -c++ -module CdiObj -o python/cdiobj_wrap.cpp $(AM_CPPFLAGS) cdiobj.i
+@ENABLE_PYTHON_TRUE@pythonObjWrapper: cdiobj.i
+@ENABLE_PYTHON_TRUE@@ENABLE_SWIG_TRUE@	$(SWIG) -python -c++ -module CdiObj -o python/cdiobj_wrap.cpp $(AM_CPPFLAGS) cdiobj.i
 
-@WITH_PYTHON_TRUE@pythonObj: pythonObjWrapper
-@WITH_PYTHON_TRUE@	cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py build_ext --inplace
+@ENABLE_PYTHON_TRUE@pythonObj: pythonObjWrapper
+@ENABLE_PYTHON_TRUE@	cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py build_ext --inplace
 
-@WITH_PYTHON_TRUE@pythonObjTest: pythonObj
-@WITH_PYTHON_TRUE@	@cd python; python testObj.py
+@ENABLE_PYTHON_TRUE@pythonObjTest: pythonObj
+@ENABLE_PYTHON_TRUE@	@cd python; python testObj.py
 
-@WITH_PYTHON_TRUE@pythonObjInstall: pythonObj
-@WITH_PYTHON_TRUE@	@cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(locallibs) $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py install
+@ENABLE_PYTHON_TRUE@pythonObjInstall: pythonObj
+@ENABLE_PYTHON_TRUE@	@cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(locallibs) $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py install
 # =========================================================
 help:
 	@echo "#=====================================================#"
