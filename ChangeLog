@@ -1,3 +1,7 @@
+2010-09-27  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+        * cdfDefTime: bug fix for time units 3HOURS, 6HOURS, 12HOURS
+	
 2010-09-17  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* using CGRIBEX library version 1.4.6

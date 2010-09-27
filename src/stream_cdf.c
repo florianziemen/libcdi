@@ -886,6 +886,10 @@ void cdfDefTime(int streamID)
       cdiDecodeTime(rtime, &hour, &minute, &second);
 
       if ( timeunit == TUNIT_QUARTER ) timeunit = TUNIT_MINUTE;
+      if ( timeunit == TUNIT_3HOURS  ||
+	   timeunit == TUNIT_6HOURS  ||
+	   timeunit == TUNIT_12HOURS ) timeunit = TUNIT_HOUR;
+
       sprintf(unitstr, "%s since %d-%02d-%02d %02d:%02d:%02d",
               tunitNamePtr(timeunit), year, month, day, hour, minute, second);
     }
