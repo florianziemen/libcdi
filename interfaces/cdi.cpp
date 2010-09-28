@@ -87,6 +87,7 @@ void CdiGrid::getValues()
     std::cout << "grid " << gridID << " has no YValues" << std::endl;
   }
 }
+
 void CdiGrid::getBounds()
 {
   double *xbnds, *ybnds;
@@ -292,6 +293,7 @@ CdiVariable::getValuesWithLevelAsPointer(int tsID)
     streamReadVarSlice(streamID, varID, levelID, field, &nmiss);
     fieldWithLevel[levelID] = field;
   }
+  free(field);
   return fieldWithLevel;
 }
 
@@ -301,6 +303,7 @@ CdiVariable::getValues()
   double *field = getValuesAsPointer();
   values.resize(grid.size);
   std::copy(field, field + grid.size, values.begin());
+  free(field);
 }
 
 void
@@ -313,6 +316,7 @@ CdiVariable::getValuesWithLevel(int tsID) {
     valuesWithLevel[levelID].resize(grid.size);
     std::copy(fieldWithLevel[levelID], fieldWithLevel[levelID] + grid.size, valuesWithLevel[levelID].begin());
   }
+  free(fieldWithLevel);
 }
 
 vector<float>

@@ -73,19 +73,20 @@ int main() {
   }
   else
     std::cout << "no grid bounds available" << std::endl;
+  {
+    std::cout << "#===============================" << std::endl;
+    printf("Stream:%d\n"         , var.streamID);
+    printf("Taxis (unit):%d\n"   , var.taxis.unit);
+    printf("Taxis (ntsteps):%d\n", var.taxis.ntsteps);
+    printf("Taxis (type):%d\n"   , var.taxis.type);
+    printf("Zaxis (unit):%d\n"   , var.taxis.unit);
+    printf("Zaxis (levels):%d\n" , var.zaxis.size);
+    printf("Zaxis (type):%d\n"   , var.zaxis.type);
+    printf("Zaxis (ltype):%d\n"  , var.zaxis.ltype);
+    printf("Zaxis (prec):%d\n"   , var.zaxis.prec);
+    printf("Zaxis (levels): varno:%f -1:%f\n", var.zaxis.levels[varno], var.zaxis.levels[var.zaxis.size-1]);
 
-  std::cout << "#===============================" << std::endl;
-  printf("Stream:%d\n"         , var.streamID);
-  printf("Taxis (unit):%d\n"   , var.taxis.unit);
-  printf("Taxis (ntsteps):%d\n", var.taxis.ntsteps);
-  printf("Taxis (type):%d\n"   , var.taxis.type);
-  printf("Zaxis (unit):%d\n"   , var.taxis.unit);
-  printf("Zaxis (levels):%d\n" , var.zaxis.size);
-  printf("Zaxis (type):%d\n"   , var.zaxis.type);
-  printf("Zaxis (ltype):%d\n"  , var.zaxis.ltype);
-  printf("Zaxis (prec):%d\n"   , var.zaxis.prec);
-  printf("Zaxis (levels): varno:%f -1:%f\n", var.zaxis.levels[varno], var.zaxis.levels[var.zaxis.size-1]);
-
+  }
   std::cout << "# field values ================" << std::endl;
   var.getValues();
   std::cout << "values[0]  = " << var.values[0] <<  std::endl;

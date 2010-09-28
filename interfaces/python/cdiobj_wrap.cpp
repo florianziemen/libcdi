@@ -21047,7 +21047,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_CdiGrid_hasXYValues_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_CdiGrid_hasXValues_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CdiGrid *arg1 = (CdiGrid *) 0 ;
   bool arg2 ;
@@ -21058,18 +21058,18 @@ SWIGINTERN PyObject *_wrap_CdiGrid_hasXYValues_set(PyObject *SWIGUNUSEDPARM(self
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:CdiGrid_hasXYValues_set",&obj0,&obj1)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OO:CdiGrid_hasXValues_set",&obj0,&obj1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_hasXYValues_set" "', argument " "1"" of type '" "CdiGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_hasXValues_set" "', argument " "1"" of type '" "CdiGrid *""'"); 
   }
   arg1 = reinterpret_cast< CdiGrid * >(argp1);
   ecode2 = SWIG_AsVal_bool(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "CdiGrid_hasXYValues_set" "', argument " "2"" of type '" "bool""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "CdiGrid_hasXValues_set" "', argument " "2"" of type '" "bool""'");
   } 
   arg2 = static_cast< bool >(val2);
-  if (arg1) (arg1)->hasXYValues = arg2;
+  if (arg1) (arg1)->hasXValues = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -21077,7 +21077,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_CdiGrid_hasXYValues_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_CdiGrid_hasXValues_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CdiGrid *arg1 = (CdiGrid *) 0 ;
   void *argp1 = 0 ;
@@ -21085,13 +21085,65 @@ SWIGINTERN PyObject *_wrap_CdiGrid_hasXYValues_get(PyObject *SWIGUNUSEDPARM(self
   PyObject * obj0 = 0 ;
   bool result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_hasXYValues_get",&obj0)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_hasXValues_get",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_hasXYValues_get" "', argument " "1"" of type '" "CdiGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_hasXValues_get" "', argument " "1"" of type '" "CdiGrid *""'"); 
   }
   arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (bool) ((arg1)->hasXYValues);
+  result = (bool) ((arg1)->hasXValues);
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CdiGrid_hasYValues_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:CdiGrid_hasYValues_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_hasYValues_set" "', argument " "1"" of type '" "CdiGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  ecode2 = SWIG_AsVal_bool(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "CdiGrid_hasYValues_set" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  if (arg1) (arg1)->hasYValues = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CdiGrid_hasYValues_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_hasYValues_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_hasYValues_get" "', argument " "1"" of type '" "CdiGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  result = (bool) ((arg1)->hasYValues);
   resultobj = SWIG_From_bool(static_cast< bool >(result));
   return resultobj;
 fail:
@@ -21145,422 +21197,6 @@ SWIGINTERN PyObject *_wrap_CdiGrid_hasBounds_get(PyObject *SWIGUNUSEDPARM(self),
   arg1 = reinterpret_cast< CdiGrid * >(argp1);
   result = (bool) ((arg1)->hasBounds);
   resultobj = SWIG_From_bool(static_cast< bool >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_xvals_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  double *arg2 = (double *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:CdiGrid_xvals_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_xvals_set" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiGrid_xvals_set" "', argument " "2"" of type '" "double *""'"); 
-  }
-  arg2 = reinterpret_cast< double * >(argp2);
-  if (arg1) (arg1)->xvals = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_xvals_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  double *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_xvals_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_xvals_get" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (double *) ((arg1)->xvals);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_yvals_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  double *arg2 = (double *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:CdiGrid_yvals_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_yvals_set" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiGrid_yvals_set" "', argument " "2"" of type '" "double *""'"); 
-  }
-  arg2 = reinterpret_cast< double * >(argp2);
-  if (arg1) (arg1)->yvals = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_yvals_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  double *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_yvals_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_yvals_get" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (double *) ((arg1)->yvals);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_xbnds_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  double *arg2 = (double *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:CdiGrid_xbnds_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_xbnds_set" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiGrid_xbnds_set" "', argument " "2"" of type '" "double *""'"); 
-  }
-  arg2 = reinterpret_cast< double * >(argp2);
-  if (arg1) (arg1)->xbnds = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_xbnds_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  double *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_xbnds_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_xbnds_get" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (double *) ((arg1)->xbnds);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_ybnds_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  double *arg2 = (double *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:CdiGrid_ybnds_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_ybnds_set" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiGrid_ybnds_set" "', argument " "2"" of type '" "double *""'"); 
-  }
-  arg2 = reinterpret_cast< double * >(argp2);
-  if (arg1) (arg1)->ybnds = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_ybnds_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  double *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_ybnds_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_ybnds_get" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (double *) ((arg1)->ybnds);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_xvalsF_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  float *arg2 = (float *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:CdiGrid_xvalsF_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_xvalsF_set" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiGrid_xvalsF_set" "', argument " "2"" of type '" "float *""'"); 
-  }
-  arg2 = reinterpret_cast< float * >(argp2);
-  if (arg1) (arg1)->xvalsF = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_xvalsF_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  float *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_xvalsF_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_xvalsF_get" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (float *) ((arg1)->xvalsF);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_yvalsF_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  float *arg2 = (float *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:CdiGrid_yvalsF_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_yvalsF_set" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiGrid_yvalsF_set" "', argument " "2"" of type '" "float *""'"); 
-  }
-  arg2 = reinterpret_cast< float * >(argp2);
-  if (arg1) (arg1)->yvalsF = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_yvalsF_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  float *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_yvalsF_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_yvalsF_get" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (float *) ((arg1)->yvalsF);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_xbndsF_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  float *arg2 = (float *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:CdiGrid_xbndsF_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_xbndsF_set" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiGrid_xbndsF_set" "', argument " "2"" of type '" "float *""'"); 
-  }
-  arg2 = reinterpret_cast< float * >(argp2);
-  if (arg1) (arg1)->xbndsF = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_xbndsF_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  float *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_xbndsF_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_xbndsF_get" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (float *) ((arg1)->xbndsF);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_ybndsF_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  float *arg2 = (float *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:CdiGrid_ybndsF_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_ybndsF_set" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_float, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiGrid_ybndsF_set" "', argument " "2"" of type '" "float *""'"); 
-  }
-  arg2 = reinterpret_cast< float * >(argp2);
-  if (arg1) (arg1)->ybndsF = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_CdiGrid_ybndsF_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CdiGrid *arg1 = (CdiGrid *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  float *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_ybndsF_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_ybndsF_get" "', argument " "1"" of type '" "CdiGrid *""'"); 
-  }
-  arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  result = (float *) ((arg1)->ybndsF);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -22306,20 +21942,20 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_CdiGrid_readFloatBounds(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_CdiGrid_getValues(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CdiGrid *arg1 = (CdiGrid *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_readFloatBounds",&obj0)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_getValues",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_readFloatBounds" "', argument " "1"" of type '" "CdiGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_getValues" "', argument " "1"" of type '" "CdiGrid *""'"); 
   }
   arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  (arg1)->readFloatBounds();
+  (arg1)->getValues();
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -22327,20 +21963,176 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_CdiGrid_readFloatVals(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_CdiGrid_getBounds(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CdiGrid *arg1 = (CdiGrid *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_readFloatVals",&obj0)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"O:CdiGrid_getBounds",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_readFloatVals" "', argument " "1"" of type '" "CdiGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_getBounds" "', argument " "1"" of type '" "CdiGrid *""'"); 
   }
   arg1 = reinterpret_cast< CdiGrid * >(argp1);
-  (arg1)->readFloatVals();
+  (arg1)->getBounds();
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CdiGrid_getValuesAsPointer(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  double *arg2 = (double *) 0 ;
+  double *arg3 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:CdiGrid_getValuesAsPointer",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_getValuesAsPointer" "', argument " "1"" of type '" "CdiGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiGrid_getValuesAsPointer" "', argument " "2"" of type '" "double *""'"); 
+  }
+  arg2 = reinterpret_cast< double * >(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "CdiGrid_getValuesAsPointer" "', argument " "3"" of type '" "double *""'"); 
+  }
+  arg3 = reinterpret_cast< double * >(argp3);
+  (arg1)->getValuesAsPointer(arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CdiGrid_getBoundsAsPointer(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  double *arg2 = (double *) 0 ;
+  double *arg3 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:CdiGrid_getBoundsAsPointer",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_getBoundsAsPointer" "', argument " "1"" of type '" "CdiGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiGrid_getBoundsAsPointer" "', argument " "2"" of type '" "double *""'"); 
+  }
+  arg2 = reinterpret_cast< double * >(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "CdiGrid_getBoundsAsPointer" "', argument " "3"" of type '" "double *""'"); 
+  }
+  arg3 = reinterpret_cast< double * >(argp3);
+  (arg1)->getBoundsAsPointer(arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CdiGrid_getFloatVals(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  float *arg2 = (float *) 0 ;
+  float *arg3 = (float *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:CdiGrid_getFloatVals",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_getFloatVals" "', argument " "1"" of type '" "CdiGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_float, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiGrid_getFloatVals" "', argument " "2"" of type '" "float *""'"); 
+  }
+  arg2 = reinterpret_cast< float * >(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_float, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "CdiGrid_getFloatVals" "', argument " "3"" of type '" "float *""'"); 
+  }
+  arg3 = reinterpret_cast< float * >(argp3);
+  (arg1)->getFloatVals(arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CdiGrid_getFloatBounds(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  CdiGrid *arg1 = (CdiGrid *) 0 ;
+  float *arg2 = (float *) 0 ;
+  float *arg3 = (float *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:CdiGrid_getFloatBounds",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiGrid_getFloatBounds" "', argument " "1"" of type '" "CdiGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< CdiGrid * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_float, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiGrid_getFloatBounds" "', argument " "2"" of type '" "float *""'"); 
+  }
+  arg2 = reinterpret_cast< float * >(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_float, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "CdiGrid_getFloatBounds" "', argument " "3"" of type '" "float *""'"); 
+  }
+  arg3 = reinterpret_cast< float * >(argp3);
+  (arg1)->getFloatBounds(arg2,arg3);
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -26803,26 +26595,12 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"CdiGrid_prec_get", _wrap_CdiGrid_prec_get, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_ncorner_set", _wrap_CdiGrid_ncorner_set, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_ncorner_get", _wrap_CdiGrid_ncorner_get, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_hasXYValues_set", _wrap_CdiGrid_hasXYValues_set, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_hasXYValues_get", _wrap_CdiGrid_hasXYValues_get, METH_VARARGS, NULL},
+	 { (char *)"CdiGrid_hasXValues_set", _wrap_CdiGrid_hasXValues_set, METH_VARARGS, NULL},
+	 { (char *)"CdiGrid_hasXValues_get", _wrap_CdiGrid_hasXValues_get, METH_VARARGS, NULL},
+	 { (char *)"CdiGrid_hasYValues_set", _wrap_CdiGrid_hasYValues_set, METH_VARARGS, NULL},
+	 { (char *)"CdiGrid_hasYValues_get", _wrap_CdiGrid_hasYValues_get, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_hasBounds_set", _wrap_CdiGrid_hasBounds_set, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_hasBounds_get", _wrap_CdiGrid_hasBounds_get, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_xvals_set", _wrap_CdiGrid_xvals_set, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_xvals_get", _wrap_CdiGrid_xvals_get, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_yvals_set", _wrap_CdiGrid_yvals_set, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_yvals_get", _wrap_CdiGrid_yvals_get, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_xbnds_set", _wrap_CdiGrid_xbnds_set, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_xbnds_get", _wrap_CdiGrid_xbnds_get, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_ybnds_set", _wrap_CdiGrid_ybnds_set, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_ybnds_get", _wrap_CdiGrid_ybnds_get, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_xvalsF_set", _wrap_CdiGrid_xvalsF_set, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_xvalsF_get", _wrap_CdiGrid_xvalsF_get, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_yvalsF_set", _wrap_CdiGrid_yvalsF_set, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_yvalsF_get", _wrap_CdiGrid_yvalsF_get, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_xbndsF_set", _wrap_CdiGrid_xbndsF_set, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_xbndsF_get", _wrap_CdiGrid_xbndsF_get, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_ybndsF_set", _wrap_CdiGrid_ybndsF_set, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_ybndsF_get", _wrap_CdiGrid_ybndsF_get, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_xvalues_set", _wrap_CdiGrid_xvalues_set, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_xvalues_get", _wrap_CdiGrid_xvalues_get, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_yvalues_set", _wrap_CdiGrid_yvalues_set, METH_VARARGS, NULL},
@@ -26849,8 +26627,12 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"CdiGrid_yunits_get", _wrap_CdiGrid_yunits_get, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_name_set", _wrap_CdiGrid_name_set, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_name_get", _wrap_CdiGrid_name_get, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_readFloatBounds", _wrap_CdiGrid_readFloatBounds, METH_VARARGS, NULL},
-	 { (char *)"CdiGrid_readFloatVals", _wrap_CdiGrid_readFloatVals, METH_VARARGS, NULL},
+	 { (char *)"CdiGrid_getValues", _wrap_CdiGrid_getValues, METH_VARARGS, NULL},
+	 { (char *)"CdiGrid_getBounds", _wrap_CdiGrid_getBounds, METH_VARARGS, NULL},
+	 { (char *)"CdiGrid_getValuesAsPointer", _wrap_CdiGrid_getValuesAsPointer, METH_VARARGS, NULL},
+	 { (char *)"CdiGrid_getBoundsAsPointer", _wrap_CdiGrid_getBoundsAsPointer, METH_VARARGS, NULL},
+	 { (char *)"CdiGrid_getFloatVals", _wrap_CdiGrid_getFloatVals, METH_VARARGS, NULL},
+	 { (char *)"CdiGrid_getFloatBounds", _wrap_CdiGrid_getFloatBounds, METH_VARARGS, NULL},
 	 { (char *)"CdiGrid_swigregister", CdiGrid_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_CdiTaxis", _wrap_new_CdiTaxis, METH_VARARGS, NULL},
 	 { (char *)"delete_CdiTaxis", _wrap_delete_CdiTaxis, METH_VARARGS, NULL},

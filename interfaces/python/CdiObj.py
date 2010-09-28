@@ -604,36 +604,15 @@ class CdiGrid(_object):
     __swig_setmethods__["ncorner"] = _CdiObj.CdiGrid_ncorner_set
     __swig_getmethods__["ncorner"] = _CdiObj.CdiGrid_ncorner_get
     if _newclass:ncorner = _swig_property(_CdiObj.CdiGrid_ncorner_get, _CdiObj.CdiGrid_ncorner_set)
-    __swig_setmethods__["hasXYValues"] = _CdiObj.CdiGrid_hasXYValues_set
-    __swig_getmethods__["hasXYValues"] = _CdiObj.CdiGrid_hasXYValues_get
-    if _newclass:hasXYValues = _swig_property(_CdiObj.CdiGrid_hasXYValues_get, _CdiObj.CdiGrid_hasXYValues_set)
+    __swig_setmethods__["hasXValues"] = _CdiObj.CdiGrid_hasXValues_set
+    __swig_getmethods__["hasXValues"] = _CdiObj.CdiGrid_hasXValues_get
+    if _newclass:hasXValues = _swig_property(_CdiObj.CdiGrid_hasXValues_get, _CdiObj.CdiGrid_hasXValues_set)
+    __swig_setmethods__["hasYValues"] = _CdiObj.CdiGrid_hasYValues_set
+    __swig_getmethods__["hasYValues"] = _CdiObj.CdiGrid_hasYValues_get
+    if _newclass:hasYValues = _swig_property(_CdiObj.CdiGrid_hasYValues_get, _CdiObj.CdiGrid_hasYValues_set)
     __swig_setmethods__["hasBounds"] = _CdiObj.CdiGrid_hasBounds_set
     __swig_getmethods__["hasBounds"] = _CdiObj.CdiGrid_hasBounds_get
     if _newclass:hasBounds = _swig_property(_CdiObj.CdiGrid_hasBounds_get, _CdiObj.CdiGrid_hasBounds_set)
-    __swig_setmethods__["xvals"] = _CdiObj.CdiGrid_xvals_set
-    __swig_getmethods__["xvals"] = _CdiObj.CdiGrid_xvals_get
-    if _newclass:xvals = _swig_property(_CdiObj.CdiGrid_xvals_get, _CdiObj.CdiGrid_xvals_set)
-    __swig_setmethods__["yvals"] = _CdiObj.CdiGrid_yvals_set
-    __swig_getmethods__["yvals"] = _CdiObj.CdiGrid_yvals_get
-    if _newclass:yvals = _swig_property(_CdiObj.CdiGrid_yvals_get, _CdiObj.CdiGrid_yvals_set)
-    __swig_setmethods__["xbnds"] = _CdiObj.CdiGrid_xbnds_set
-    __swig_getmethods__["xbnds"] = _CdiObj.CdiGrid_xbnds_get
-    if _newclass:xbnds = _swig_property(_CdiObj.CdiGrid_xbnds_get, _CdiObj.CdiGrid_xbnds_set)
-    __swig_setmethods__["ybnds"] = _CdiObj.CdiGrid_ybnds_set
-    __swig_getmethods__["ybnds"] = _CdiObj.CdiGrid_ybnds_get
-    if _newclass:ybnds = _swig_property(_CdiObj.CdiGrid_ybnds_get, _CdiObj.CdiGrid_ybnds_set)
-    __swig_setmethods__["xvalsF"] = _CdiObj.CdiGrid_xvalsF_set
-    __swig_getmethods__["xvalsF"] = _CdiObj.CdiGrid_xvalsF_get
-    if _newclass:xvalsF = _swig_property(_CdiObj.CdiGrid_xvalsF_get, _CdiObj.CdiGrid_xvalsF_set)
-    __swig_setmethods__["yvalsF"] = _CdiObj.CdiGrid_yvalsF_set
-    __swig_getmethods__["yvalsF"] = _CdiObj.CdiGrid_yvalsF_get
-    if _newclass:yvalsF = _swig_property(_CdiObj.CdiGrid_yvalsF_get, _CdiObj.CdiGrid_yvalsF_set)
-    __swig_setmethods__["xbndsF"] = _CdiObj.CdiGrid_xbndsF_set
-    __swig_getmethods__["xbndsF"] = _CdiObj.CdiGrid_xbndsF_get
-    if _newclass:xbndsF = _swig_property(_CdiObj.CdiGrid_xbndsF_get, _CdiObj.CdiGrid_xbndsF_set)
-    __swig_setmethods__["ybndsF"] = _CdiObj.CdiGrid_ybndsF_set
-    __swig_getmethods__["ybndsF"] = _CdiObj.CdiGrid_ybndsF_get
-    if _newclass:ybndsF = _swig_property(_CdiObj.CdiGrid_ybndsF_get, _CdiObj.CdiGrid_ybndsF_set)
     __swig_setmethods__["xvalues"] = _CdiObj.CdiGrid_xvalues_set
     __swig_getmethods__["xvalues"] = _CdiObj.CdiGrid_xvalues_get
     if _newclass:xvalues = _swig_property(_CdiObj.CdiGrid_xvalues_get, _CdiObj.CdiGrid_xvalues_set)
@@ -673,8 +652,12 @@ class CdiGrid(_object):
     __swig_setmethods__["name"] = _CdiObj.CdiGrid_name_set
     __swig_getmethods__["name"] = _CdiObj.CdiGrid_name_get
     if _newclass:name = _swig_property(_CdiObj.CdiGrid_name_get, _CdiObj.CdiGrid_name_set)
-    def readFloatBounds(self): return _CdiObj.CdiGrid_readFloatBounds(self)
-    def readFloatVals(self): return _CdiObj.CdiGrid_readFloatVals(self)
+    def getValues(self): return _CdiObj.CdiGrid_getValues(self)
+    def getBounds(self): return _CdiObj.CdiGrid_getBounds(self)
+    def getValuesAsPointer(self, *args): return _CdiObj.CdiGrid_getValuesAsPointer(self, *args)
+    def getBoundsAsPointer(self, *args): return _CdiObj.CdiGrid_getBoundsAsPointer(self, *args)
+    def getFloatVals(self, *args): return _CdiObj.CdiGrid_getFloatVals(self, *args)
+    def getFloatBounds(self, *args): return _CdiObj.CdiGrid_getFloatBounds(self, *args)
 CdiGrid_swigregister = _CdiObj.CdiGrid_swigregister
 CdiGrid_swigregister(CdiGrid)
 
