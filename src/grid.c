@@ -2200,10 +2200,52 @@ int gridIsRotated(int gridID)
   return ( gridptr->isRotated );
 }
 
+static
+void compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yvals0, int *differ)
+{
+  static const char *func = "compareXYvals";
+  long i;
+
+  if ( gridInqXvals(gridID, NULL) )
+    {
+      double *xvals;
+
+      xvals = (double *) malloc(xsize*sizeof(double));
+
+      gridInqXvals(gridID, xvals);
+
+      for ( i = 0; i < xsize; ++i )
+	if ( fabs(xvals0[i] - xvals[i]) > 1.e-10 )
+	  {
+	    *differ = 1;
+	    break;
+	  }
+  
+      free(xvals);
+    }
+
+  if ( gridInqYvals(gridID, NULL) )
+    {
+      double *yvals;
+
+      yvals = (double *) malloc(ysize*sizeof(double));
+
+      gridInqYvals(gridID, yvals);
+
+      for ( i = 0; i < ysize; ++i )
+	if ( fabs(yvals0[i] - yvals[i]) > 1.e-10 )
+	  {
+	    *differ = 1;
+	    break;
+	  }
+      
+      free(yvals);
+    }
+}
+
 
 int gridCompare(int gridID, grid_t grid)
 {
-  static const char *func = "gridCompare";
   int differ = 1;
   int xsize, ysize;
 
@@ -2259,31 +2301,8 @@ int gridCompare(int gridID, grid_t grid)
 		    }
 		  else
 		    {
-		      long i;
-		      double *xvals, *yvals;
-
-		      xvals = (double *) malloc(xsize*sizeof(double));
-		      yvals = (double *) malloc(ysize*sizeof(double));
-
-		      gridInqXvals(gridID, xvals);
-		      gridInqYvals(gridID, yvals);
-
-		      for ( i = 0; i < xsize; ++i )
-			if ( fabs(grid.xvals[i] - xvals[i]) > 1.e-10 )
-			  {
-			    differ = 1;
-			    break;
-			  }
-
-		      for ( i = 0; i < ysize; ++i )
-			if ( fabs(grid.yvals[i] - yvals[i]) > 1.e-10 )
-			  {
-			    differ = 1;
-			    break;
-			  }
-		  
-		      free(xvals);
-		      free(yvals);
+		      if ( grid.xvals && grid.yvals )
+			compareXYvals(gridID, xsize, ysize, grid.xvals, grid.yvals, &differ);
 		    }
 		}
 	      else
@@ -2295,35 +2314,8 @@ int gridCompare(int gridID, grid_t grid)
 		{
 		  if ( grid.xdef == 1 && grid.ydef == 1 )
 		    {
-		      if ( grid.xvals && grid.yvals &&
-			   gridInqXvals(gridID, NULL) && gridInqYvals(gridID, NULL) )
-			{
-			  long i;
-			  double *xvals, *yvals;
-
-			  xvals = (double *) malloc(xsize*sizeof(double));
-			  yvals = (double *) malloc(ysize*sizeof(double));
-
-			  gridInqXvals(gridID, xvals);
-			  gridInqYvals(gridID, yvals);
-
-			  for ( i = 0; i < xsize; ++i )
-			    if ( fabs(grid.xvals[i] - xvals[i]) > 1.e-10 )
-			      {
-				differ = 1;
-				break;
-			      }
-
-			  for ( i = 0; i < ysize; ++i )
-			    if ( fabs(grid.yvals[i] - yvals[i]) > 1.e-10 )
-			      {
-				differ = 1;
-				break;
-			      }
-			  
-			  free(xvals);
-			  free(yvals);
-			}
+		      if ( grid.xvals && grid.yvals )
+			compareXYvals(gridID, xsize, ysize, grid.xvals, grid.yvals, &differ);
 		    }
 		}
 	      else
@@ -2347,13 +2339,7 @@ int gridCompare(int gridID, grid_t grid)
 		  else
 		    {
 		      if ( grid.xvals && grid.yvals )
-			if ( IS_NOT_EQUAL(grid.xvals[0], gridInqXval(gridID, 0)) ||
-			     IS_NOT_EQUAL(grid.yvals[0], gridInqYval(gridID, 0)) ||
-			     fabs(fabs(grid.xvals[1]-grid.xvals[0]) - fabs(gridInqXinc(gridID)))
-			     > fabs(grid.xinc/1000))
-			  {
-			    differ = 1;
-			  }
+			compareXYvals(gridID, xsize, ysize, grid.xvals, grid.yvals, &differ);
 		    }
 		}
 	      else

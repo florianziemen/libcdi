@@ -631,7 +631,7 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
           1 search in grid table
    */
   static const char *func = "varDefGrid";
-  int gridglobdefined = 0;
+  int gridglobdefined = FALSE;
   int griddefined;
   int ngrids;
   int gridID = UNDEFID;
@@ -640,7 +640,7 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  griddefined = 0;
+  griddefined = FALSE;
   ngrids = vlistptr->ngrids;
 
   if ( mode == 0 )
@@ -652,7 +652,7 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
 
 	if ( gridCompare(gridID, grid) == 0 )
 	  {
-	    griddefined = 1;
+	    griddefined = TRUE;
 	    break;
 	  }
       }
@@ -664,7 +664,7 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
 	{
 	  if ( gridCompare(gridID, grid) == 0 )
 	    {
-	      gridglobdefined = 1;
+	      gridglobdefined = TRUE;
 	      break;
 	    }
 	}
