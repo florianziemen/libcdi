@@ -18,18 +18,20 @@ def htmlSkel(experiment):
     </html>
   ''']
 
-def tableSkel(code,northVal,southVal,globalVal):
-   return ["<table id=\"detail_table\" class=\"detail\"> <!--       <col style=\"width: 40px;\"> <col style=\"width: 80px;\"> <col style=\"width: 80px;\"> <col style=\"width: 80px;\">-->" +
-       "<thead align=\"left\"><tr align=\"right\"><th>Code</th><th>North</th><th>South</th><th>Global</th></tr></thead>" +
-       "<tbody>" +
-          "<tr  align=\"right\" title=\"Click to expand/collapse\" style=\"cursor: pointer;\" class=\"parent\" id=\"row%d\" >" % code +
+def tableSkel():
+  return ["<table border='1' id=\"detail_table\" class=\"detail\"> <!--       <col style=\"width: 40px;\"> <col style=\"width: 80px;\"> <col style=\"width: 80px;\"> <col style=\"width: 80px;\">-->" +
+          "<thead align=\"left\"><tr align=\"right\"><th>Code</th><th>North</th><th>South</th><th>Global</th></tr></thead>",
+          '</table>']
+
+def tableRow(code,northVal,southVal,globalVal):
+  return ["<tr  align=\"right\" title=\"Click to expand/collapse\" style=\"cursor: pointer;\" class=\"parent\" id=\"row%d\" >" % code +
           "<td  rowspan=\"2\" valign=\"top\">%d</td><td>%3.3f</td><td>%3.3f</td><td>%3.3f</td>" % (code,northVal, southVal, globalVal) +
           '</tr>' + 
           "<tr style=\"display: none;\" class=\"child-row%d\">" % code + 
           '<td colspan="3">', 
           '</td></tr></table>']
 
-def generate_html_table(headers, rows):
+def generateSubTable(headers, rows):
   html = []
 
   if len(headers) > 0:
@@ -63,8 +65,10 @@ cdi = CdiObj.Cdi(zonalfile)
 
 html = []
 htmlStart, htmlEnd = htmlSkel('tableTest')
+tableStart, tableEnd = tableSkel()
 
 html.append(htmlStart)
+html.append(tableStart)
 
 for code in cdi.codes:
 
@@ -79,16 +83,17 @@ for code in cdi.codes:
   print 'North  Mean:     ',vals[northInd].mean()
   print 'South  Mean:     ',vals[southInd].mean()
   
-  codeTableStart, codeTableEnd = tableSkel(code,vals[northInd].mean(), vals[southInd].mean(), vals.mean())
+  codeTableStart, codeTableEnd = tableRow(code,vals[northInd].mean(), vals[southInd].mean(), vals.mean())
   
   html.append(codeTableStart)
 
-  vtable  = generate_html_table(lats[southInd],[vals[southInd]])
-  vtable += generate_html_table(lats[northInd],[vals[northInd]])
+  vtable  = generateSubTable(lats[southInd],[vals[southInd]])
+  vtable += generateSubTable(lats[northInd],[vals[northInd]])
 
   html.append(vtable)
   html.append(codeTableEnd)
 
+html.append(tableEnd)
 html.append(htmlEnd)
 
 f = open('testTable.html', 'w')
