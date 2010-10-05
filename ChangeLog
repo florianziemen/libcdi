@@ -1,3 +1,7 @@
+2010-10-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdfOpenFile: switch off checking of netCDF4 format
+	
 2010-09-27  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
         * cdfDefTime: bug fix for time units 3HOURS, 6HOURS, 12HOURS
