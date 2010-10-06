@@ -1,8 +1,12 @@
+//pio_posixnonb.c:693: warning: pointer targets in passing argument 2 of ‘strncpy’ differ in signedness
+
+
 #ifndef NOMPI
 
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "mpi.h"
 #include "pio.h"
@@ -64,11 +68,11 @@ static aFiledataP *initAFiledataP ( const char *filename, size_t bs )
     fprintf ( stdout, "pe%d initFiledataAP (): filename=%s, buffersize=%zu, in\n",
 	pioinfo->rank, filename, bs );
 
-  afp = ( aFiledataP * ) malloc ( sizeof ( aFiledataP ));
+  afp = ( aFiledataP * ) xmalloc ( sizeof ( aFiledataP ));
   memset ( afp, 0, sizeof ( aFiledataP ));
 
   len = strlen ( filename );
-  afp->name = ( char * ) malloc (( len + 1) * sizeof ( char ));
+  afp->name = ( char * ) xmalloc (( len + 1) * sizeof ( char ));
   strcpy ( afp->name, filename );
   afp->size = bs;
 
@@ -112,10 +116,10 @@ static bFiledataP * initBFiledataP ( char *filename,
        fprintf ( stdout, "### pe%d initFiledataBP (): filename=%s, buffersize=%zu, ncollectors=%d, in\n",
 	      pioinfo->rank, filename, bs, nc );
 
-  bfp = ( bFiledataP * ) malloc ( sizeof (  bFiledataP ));
+  bfp = ( bFiledataP * ) xmalloc ( sizeof (  bFiledataP ));
   memset ( bfp, 0, sizeof (  bFiledataP ));
 
-  bfp->name = ( char * ) malloc (( strlen ( filename ) + 1 ) * sizeof ( char ));
+  bfp->name = ( char * ) xmalloc (( strlen ( filename ) + 1 ) * sizeof ( char ));
   strcpy ( bfp->name, filename );
   bfp->size = bs;
 
@@ -129,7 +133,7 @@ static bFiledataP * initBFiledataP ( char *filename,
   dbuffer_init ( & ( bfp->fb ), ( size_t )( bfp->size ));
 
   bfp->finished = false;
-  bfp->nfinished = ( bool * ) malloc ( nc * sizeof ( bool ));
+  bfp->nfinished = ( bool * ) xmalloc ( nc * sizeof ( bool ));
 
   for ( i = 0; i < nc; i++ )
     *( bfp->nfinished + i ) = true;
@@ -154,9 +158,8 @@ int destroyAFiledataP ( void *v )
     fprintf ( stdout, "pe%d destroyAFiledataP(): name=%s, cleanup, in\n", 
 	      pioinfo->rank, afp->name );
 
-  //if ( afp->request != MPI_REQUEST_NULL )
-    check_mpi_status ( __LINE__, &( pioinfo->comm ), &status,
-		       MPI_Wait ( &( afp->request ), &status ));
+  check_mpi_status ( __LINE__, &( pioinfo->comm ), &status,
+		     MPI_Wait ( &( afp->request ), &status ));
   
   dbuffer_cleanup ( &( afp->db1 ));
   dbuffer_cleanup ( &( afp->db2 ));
@@ -321,6 +324,8 @@ void pwPOSIXNONB ( int ncollectors )
 	{
       	case IO_Open_file:
 
+	  //messageBuffer = ( char *) xmalloc ( messagesize  * sizeof ( char ));
+	  
 	  if (( messageBuffer = ( char *) malloc ( messagesize  * sizeof ( char ))) == NULL )
 	    {
 	      perror ( "### malloc of messageBuffer failed" );
@@ -331,6 +336,7 @@ void pwPOSIXNONB ( int ncollectors )
 
 	  check_mpi(__LINE__, MPI_Recv ( messageBuffer, messagesize, MPI_CHAR, source, 
 					 tag, pioinfo->comm, &status ));
+
 	  if ( ddebug )
 	    fprintf ( stdout, "### pe%d pwPOSIXNONB (), after recv, in loop\n",
 		      pioinfo->rank ); 
@@ -690,8 +696,8 @@ int fowPOSIXNONB ( const char *filename )
   if ( ddebug )
     {
       l = strlen ( filename ) + strlen ( message ) + 2; 
-      temp = ( char * ) malloc (( l + 1 ) * sizeof ( char ));
-      strncpy ( temp, afd->db->buffer, ( size_t ) l );
+      temp = ( char * ) xmalloc (( l + 1 ) * sizeof ( char ));
+      strncpy ( temp, ( char * ) afd->db->buffer, ( size_t ) l );
       *( temp + l )  = '\0';
       fprintf ( stdout, 
 		"pe%d fowPOSIXNONB(): name=%s, put Open file message on buffer:\n%s,\t return \n", 
@@ -713,7 +719,8 @@ int initPOSIXNONB ( int *ncollectors )
   if ( pioinfo->size < 2 )
     {
       fprintf ( stderr, 
-		"PTYPE PIO_POSIX_*  or PIO_MPI_FPGUARD should be used with at least 2 pes.\n" );
+		"PTYPE PIO_POSIX_*  or PIO_MPI_FPGUARD "
+		"should be used with at least 2 pes.\n" );
       MPI_Abort ( pioinfo->comm, 1 );
     }
 

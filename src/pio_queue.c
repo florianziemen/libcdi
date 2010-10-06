@@ -11,7 +11,12 @@ queue *queueInit ( valDestroyFunction vD, keyCompareFunction kC )
 {
   queue *myq;
 
-  myq = ( queue * ) malloc ( sizeof ( queue ));
+  if (( myq = ( queue * ) malloc ( sizeof ( queue ))) == NULL )
+    {
+      perror ( "pio_queue: queueInit: Not enough memory" );
+      return 1;
+    }
+
   myq->head = NULL;
   myq->tail = NULL;
   myq->valDestroy = vD;
@@ -69,7 +74,12 @@ int queuePush ( queue *q, void *v, int noCollector, ... )
       curr = curr->next;
     }  
   
-  newNode = ( node * ) malloc (sizeof ( node ));
+  if (( newNode = ( node * ) malloc (sizeof ( node ))) == NULL )    
+    {
+      perror ( "pio_queue: queuePush (): Not enough memory" );
+      return 1;
+    }
+
   newNode->idx = noCollector ? id : q->count;
   newNode->val = v;
   newNode->next = NULL;

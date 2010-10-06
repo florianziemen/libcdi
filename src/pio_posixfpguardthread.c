@@ -1,7 +1,8 @@
 /* 
    todo 
-   build in control, for consistance of pairs filename / filenumber 
-   ( pioOpenFile member name, recv in tmpbuffer, if(!uniqueName(q,v,n))abort )
+   does mpi_barrier work with threads?
+   mutexes for each filedatas offset
+   mutex for queue
 */
 
 #ifndef NOMPI
@@ -68,17 +69,18 @@ static aFiledataPFT *initAFiledataPFT( const char *key, size_t bs)
   size_t len;
   int status;
 
-  afd = ( aFiledataPFT * ) malloc ( sizeof ( aFiledataPFT ));
+  afd = ( aFiledataPFT * ) xmalloc ( sizeof ( aFiledataPFT ));
   memset ( afd, 0, sizeof ( aFiledataPFT ));
   len = strlen ( key );
-  afd->name = ( char * ) malloc (( len ) * sizeof ( char ));
+  afd->name = ( char * ) xmalloc (( len ) * sizeof ( char ));
   strcpy ( afd->name, key );
   afd->size = bs;
 
   /* init output buffer */
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d in initAFiledataPF(): name=%s, init output buffer\n", 
+    fprintf ( stdout, 
+	      "pe%d in initAFiledataPF(): name=%s, init output buffer\n", 
 	      pioinfo->rank, afd->name );
    
   if (( status = dbuffer_init ( &( afd->db1 ), afd->size )) == 1 )
@@ -96,7 +98,8 @@ static aFiledataPFT *initAFiledataPFT( const char *key, size_t bs)
   /* open file */ 
   
   if ( ddebug )
-    fprintf ( stdout, "pe%d in initAFiledataPF(): name=%s, open file\n", 
+    fprintf ( stdout, 
+	      "pe%d in initAFiledataPF(): name=%s, open file\n", 
 	      pioinfo->rank, afd->name );
 
   if ( ( afd->fd = open ( afd->name, O_CREAT | O_WRONLY, 0666 )) == -1 ) 
@@ -107,7 +110,8 @@ static aFiledataPFT *initAFiledataPFT( const char *key, size_t bs)
     }
   
   if ( ddebug )
-    fprintf ( stdout, "pe%d in initAFiledataPF() has opened file %s\n", 
+    fprintf ( stdout, 
+	      "pe%d in initAFiledataPF() has opened file %s\n", 
 	      pioinfo->rank, afd->name );
 
   afd->command = IO_Open_file;
@@ -122,11 +126,11 @@ bFiledataPFT * initBFiledataPFT ( int key, int nc )
   bFiledataPFT *bfd;
   int i;
 
-  bfd = ( bFiledataPFT * ) malloc ( sizeof ( bFiledataPFT ));
+  bfd = ( bFiledataPFT * ) xmalloc ( sizeof ( bFiledataPFT ));
   memset ( bfd, 0, sizeof ( bFiledataPFT ));
   bfd->offset = 0;
   bfd->finished = false;
-  bfd->nfinished = ( bool * ) malloc ( nc * sizeof ( bool ));
+  bfd->nfinished = ( bool * ) xmalloc ( nc * sizeof ( bool ));
 
   for ( i = 0; i < nc; i++ )
     *( bfd->nfinished + i ) = true;
@@ -144,7 +148,8 @@ int destroyAFiledataPFT ( void *v )
   /* close file */
   
   if ( ddebug )
-    fprintf ( stdout, "pe%d in destroyAFiledataPFT(): name=%s, close file\n", 
+    fprintf ( stdout, 
+	      "pe%d in destroyAFiledataPFT(): name=%s, close file\n", 
 	      pioinfo->rank, afd->name );
        
   if (( iret = close ( afd->fd )) == -1 )
@@ -157,7 +162,8 @@ int destroyAFiledataPFT ( void *v )
   /* file closed, cleanup */
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d in destroyAFiledataPFT(): name=%s, file closed, cleanup ...\n", 
+    fprintf ( stdout, 
+	      "pe%d in destroyAFiledataPFT(): name=%s, file closed, cleanup ...\n", 
 	      pioinfo->rank, afd->name );
   
   dbuffer_cleanup ( &( afd->db1 ));
@@ -202,13 +208,17 @@ bool compareNamesAPFT ( void *v1, void *v2 )
 
 /***************************************************************/
 
-long rmwOffset ( long *bfdOffset, long amount, long *offsetNew )
+long rmwOffset ( long *bfdOffset, long amount, long *offsetNew, int tid )
 {
   long offsetOld;
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d in rmwOffset, amount=%Ld\n", 
-	      pioinfo->rank, amount );
+    if ( tid )
+      fprintf ( stdout, "#### pe%d, thread, in rmwOffset, amount=%ld\n", 
+		pioinfo->rank, amount );
+    else
+      fprintf ( stdout, "pe%d in rmwOffset, amount=%ld\n", 
+		pioinfo->rank, amount );
   
   pthread_mutex_lock ( &offsetMutex );
   offsetOld = *bfdOffset;
@@ -217,8 +227,14 @@ long rmwOffset ( long *bfdOffset, long amount, long *offsetNew )
   pthread_mutex_unlock ( &offsetMutex );
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d in rmwOffset, offsetOld=%Ld, offsetNew=%Ld\n", 
-	      pioinfo->rank, offsetOld, *offsetNew );
+    if ( tid )
+      fprintf ( stdout, 
+		"#### pe%d, thread, in rmwOffset, offsetOld=%ld, offsetNew=%ld\n", 
+		pioinfo->rank, offsetOld, *offsetNew );
+    else
+      fprintf ( stdout, 
+		"pe%d in rmwOffset, offsetOld=%ld, offsetNew=%ld\n", 
+		pioinfo->rank, offsetOld, *offsetNew );
 
   return offsetOld;
 }
@@ -239,19 +255,21 @@ void communicateOffset ( MPI_Status *statusF, long *bfdOffset )
 	  
   if ( ddebug )
     fprintf ( stdout, 
-	      "#### pe%d in communicateOffset(), id=%d, command=%d ( %s ), received amount=%d from pe%d\n", 
+	      "#### pe%d, thread, in communicateOffset(), id=%d "
+	      "command=%d ( %s ), received amount=%ld from pe%d\n", 
 	      pioinfo->rank, rtagF->id, rtagF->command, 
 	      command2charP [ rtagF->command ], amount, source );
 
-  offsetOld = rmwOffset ( bfdOffset, amount, &offsetNew );
+  offsetOld = rmwOffset ( bfdOffset, amount, &offsetNew, 1 );
   
   MPI_Send (  &offsetOld, 1, MPI_LONG, source, tag, pioinfo->comm );
 
   if ( ddebug )
     fprintf ( stdout, 
-	      "#### pe%d in communicateOffset(), id=%d, command=%d ( %s ), sent offset=%Ld, set offset=%ld\n", 
+	      "#### pe%d, thread, in communicateOffset(), id=%d, "
+	      "command=%d ( %s ), sent offset=%ld to pe%d, set offset=%ld\n", 
 	      pioinfo->rank, rtagF->id, rtagF->command, 
-	      command2charP [ rtagF->command ], offsetOld, offsetNew );
+	      command2charP [ rtagF->command ], offsetOld,source, offsetNew );
   
   return;
 }
@@ -264,7 +282,6 @@ void* fpgPOSIXFPGUARDTHREAD ( void* ncoll )
   rTag *rtag;
   MPI_Status status;
   bFiledataPFT *bfd; 
-  long amount, offsetF;
 
   int ncollectors;
 
@@ -278,14 +295,19 @@ void* fpgPOSIXFPGUARDTHREAD ( void* ncoll )
   
   for ( ;; )
     {
+      if ( ddebug )
+	fprintf ( stdout, "#### pe%d, thread, in fpGuard () before MPI_Probe () \n",
+		  pioinfo->rank );
+      
       MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, pioinfo->comm, &status );
       source = status.MPI_SOURCE;
       rtag   = getTag ( status.MPI_TAG ); 
 
       if ( ddebug )
 	fprintf ( stdout, 
-		  "#### pe%d, color=%d,  in fpGuard (): receive message from source=%d, id=%d, command=%d ( %s )\n",
-		  pioinfo->rank, pioinfo->color, source, rtag->id, rtag->command, 
+		  "#### pe%d, thread, in fpGuard (): "
+		  "before receive message from source=%d, id=%d, command=%d ( %s )\n",
+		  pioinfo->rank, source, rtag->id, rtag->command, 
 		  command2charP [ rtag->command ]);
       
       switch ( rtag->command )
@@ -300,7 +322,8 @@ void* fpgPOSIXFPGUARDTHREAD ( void* ncoll )
 
 	      if (( iret = queuePush ( bibBFiledataPF, bfd, 1, rtag->id )) != rtag->id )
 	      {
-		fprintf ( stderr, "pe%d, fileID=%d not unique\n",
+		fprintf ( stderr, "#### pe%d, thread, in fpGuard (): "
+			  "fileID=%d not unique\n",
 			  pioinfo->rank, rtag->id);
 		MPI_Abort ( pioinfo->comm, 1 );
 	      } 
@@ -317,7 +340,8 @@ void* fpgPOSIXFPGUARDTHREAD ( void* ncoll )
 	  if ( ! ( bfd = ( bFiledataPFT * ) queueIdx2val ( bibBFiledataPF,  
 							  rtag->id )))
 	      {
-		fprintf ( stderr, "pe%d, id=%d not in file queue\n",
+		fprintf ( stderr, "#### pe%d, thread, in fpGuard: "
+			  "id=%d not in file queue\n",
 			  pioinfo->rank, rtag->id);
 		MPI_Abort ( pioinfo->comm, 1 );
 	      }
@@ -331,7 +355,8 @@ void* fpgPOSIXFPGUARDTHREAD ( void* ncoll )
 	  if ( ! ( bfd = ( bFiledataPFT * ) queueIdx2val ( bibBFiledataPF,  
 							  rtag->id )))
 	      {
-		fprintf ( stderr, "pe%d, id=%d not in file queue\n",
+		fprintf ( stderr, "#### pe%d, thread, in fpGuard: "
+			  "id=%d not in file queue\n",
 			  pioinfo->rank, rtag->id);
 		MPI_Abort ( pioinfo->comm, 1 );
 	      }
@@ -383,7 +408,9 @@ long bibBFiledataPFAccess ( aFiledataPFT* afd, int id )
   amount = dbuffer_data_size ( afd->db );
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d in bibBFiledataPFAccess(), id=%d, amount=%Ld, command=%d(%s)\n",
+    fprintf ( stdout, 
+	      "pe%d in bibBFiledataPFAccess(), id=%d, amount=%ld, "
+	      "command=%d(%s)\n",
 	      pioinfo->rank, id, amount, afd->command,
 	      command2charP [ afd->command ]);
 	      
@@ -400,7 +427,7 @@ long bibBFiledataPFAccess ( aFiledataPFT* afd, int id )
 	  
 	  if (( iret = queuePush ( bibBFiledataPF, bfd, 1, id )) != id )
 	    {
-	      fprintf ( stderr, "pe%d, fileID=%d not unique\n",
+	      fprintf ( stderr, "pe%d fileID=%d not unique\n",
 			pioinfo->rank, id);
 	      MPI_Abort ( pioinfo->comm, 1 );
 	    } 
@@ -408,7 +435,7 @@ long bibBFiledataPFAccess ( aFiledataPFT* afd, int id )
       
       *( bfd->nfinished + pioinfo->rank ) = false;
       
-      offsetF =  rmwOffset ( &( bfd->offset ), amount, &offsetNew);
+      offsetF =  rmwOffset ( &( bfd->offset ), amount, &offsetNew, 0 );
       
       break;
       
@@ -417,12 +444,12 @@ long bibBFiledataPFAccess ( aFiledataPFT* afd, int id )
       if ( ! ( bfd = ( bFiledataPFT * ) queueIdx2val ( bibBFiledataPF,  
 						       id )))
 	{
-	  fprintf ( stderr, "pe%d, id=%d not in file queue\n",
+	  fprintf ( stderr, "pe%d id=%d not in file queue\n",
 		    pioinfo->rank, id);
 	  MPI_Abort ( pioinfo->comm, 1 );
 	}
       
-      offsetF =  rmwOffset ( &( bfd->offset ), amount, &offsetNew);
+      offsetF =  rmwOffset ( &( bfd->offset ), amount, &offsetNew, 0 );
       
       break;
       
@@ -431,12 +458,12 @@ long bibBFiledataPFAccess ( aFiledataPFT* afd, int id )
       if ( ! ( bfd = ( bFiledataPFT * ) queueIdx2val ( bibBFiledataPF,  
 						       id )))
 	{
-	  fprintf ( stderr, "pe%d, id=%d not in file queue\n",
+	  fprintf ( stderr, "pe%d id=%d not in file queue\n",
 		    pioinfo->rank, id);
 	  MPI_Abort ( pioinfo->comm, 1 );
 	}
       
-      offsetF =  rmwOffset ( &( bfd->offset ), amount, &offsetNew);
+      offsetF =  rmwOffset ( &( bfd->offset ), amount, &offsetNew, 0 );
       
       bfd->nfinished[pioinfo->rank] = true;	  
       bfd->finished          = true;
@@ -482,11 +509,22 @@ void writePFT ( aFiledataPFT *afd, int id )
     }
   else
     {
-      MPI_Send (  &amountC, 1, MPI_LONG, pioinfo->specialRank, tagC, pioinfo->comm ); 
-      MPI_Recv (  &offsetC, 1, MPI_LONG, pioinfo->specialRank, tagC, pioinfo->comm, &statusC );
+      if ( ddebug )
+	fprintf ( stdout, "pe%d in writePFT before send amount=%ld for id%d\n",
+		  pioinfo->rank, amountC, id );
+
+      MPI_Send (  &amountC, 1, MPI_LONG, pioinfo->specialRank, tagC, 
+		  pioinfo->comm ); 
+      if ( ddebug )
+	fprintf ( stdout, "pe%d in writePFT before recv offset\n",
+		  pioinfo->rank );
+
+      MPI_Recv (  &offsetC, 1, MPI_LONG, pioinfo->specialRank, tagC, 
+		  pioinfo->comm, &statusC );
       if ( ddebug )
 	fprintf ( stdout, 
-		  "pe%d in writePFT (), id=%d, command=%d, send amountC=%zu, received offsetC=%ld\n", 
+		  "pe%d in writePFT (), id=%d, command=%d, send amountC=%ld, "
+		  "received offsetC=%ld\n", 
 		  pioinfo->rank, id, afd->command, amountC, offsetC );      
     }
 
@@ -494,7 +532,8 @@ void writePFT ( aFiledataPFT *afd, int id )
   
   if (( error = lseek ( afd->fd, offsetC, SEEK_SET )) != offsetC )
     {
-      fprintf ( stdout, "pe%d error=%Ld\n", error );
+      fprintf ( stderr, "pe%d error=%ld\n", 
+		pioinfo->rank, error );
       perror ( "Error seeking fd" );
       MPI_Abort ( pioinfo->comm, 1 );
     }	  
@@ -503,8 +542,8 @@ void writePFT ( aFiledataPFT *afd, int id )
 	write ( afd->fd, afd->db->buffer, amountC )) !=
       amountC )
     {
-      fprintf ( stdout, 
-		"pe%d, id=%d, expect to write %16d byte, written %16d byte.\n", 
+      fprintf ( stderr, 
+		"pe%d id=%d, expect to write %ld byte, written %ld byte.\n", 
 		pioinfo->rank, id, amountC, written );
       perror ( "Error writing data" );
       MPI_Abort ( pioinfo->comm, 1 );
@@ -512,7 +551,7 @@ void writePFT ( aFiledataPFT *afd, int id )
 
   if ( ddebug )
     fprintf ( stdout, 
-	      "pe%d in writePFT (), written %d bytes in file %d with offsetC %ld\n", 
+	      "pe%d in writePFT (), written %ld bytes in file %d with offsetC %ld\n", 
 	      pioinfo->rank, written, id, offsetC ); 
   
   /* change outputBuffer */
@@ -556,6 +595,7 @@ size_t fwPOSIXFPGUARDTHREAD( int id, int tsId, const void *buffer, size_t len )
       if ( ddebug )
 	fprintf ( stdout, "pe%d in fileWriter (): tsId = %d, flush buffer\n", 
 		  pioinfo->rank, tsId );
+
       curr = bibAFiledataPFT->head;
       while ( curr ) 
 	{
@@ -563,6 +603,11 @@ size_t fwPOSIXFPGUARDTHREAD( int id, int tsId, const void *buffer, size_t len )
 	  curr = curr->next;
 	}
       oldTsId = tsId;
+
+      if ( ddebug )
+	fprintf ( stdout, "pe%d in fileWriter (): tsId = %d, before barrier\n", 
+		  pioinfo->rank, tsId );
+
       MPI_Barrier ( pioinfo->collectorComm ); 
     }                                          
 
@@ -571,7 +616,8 @@ size_t fwPOSIXFPGUARDTHREAD( int id, int tsId, const void *buffer, size_t len )
 
   if ( ddebug )
     fprintf ( stdout, 
-	      "pe%d in fileWriter (): id = %d, tsId = %d, pushed data on buffer, filled = %d\n", 
+	      "pe%d in fileWriter (): id = %d, tsId = %d, "
+	      "pushed data on buffer, filled = %d\n", 
 	      pioinfo->rank, id, tsId, filled ); 
 
   if ( filled == 1 ) 
@@ -588,7 +634,7 @@ size_t fwPOSIXFPGUARDTHREAD( int id, int tsId, const void *buffer, size_t len )
   
   if ( error == 1 )
     {
-      fprintf ( stderr, "pe%d, id=%d, problem filling output buffer ...\n",
+      fprintf ( stderr, "pe%d id=%d, problem filling output buffer ...\n",
 		pioinfo->rank, id);
       MPI_Abort ( pioinfo->comm, 1 );
     }
@@ -644,7 +690,8 @@ int fowPOSIXFPGUARDTHREAD ( const char *filename )
     {
       if ( ddebug && pioinfo->rank == 0)
 	fprintf ( stdout, 
-		  "pe%d in pioFileOpenW(): name=%s, broadcast buffersize to collectors ...\n", 
+		  "pe%d in pioFileOpenW(): name=%s, "
+		  "broadcast buffersize to collectors ...\n", 
 		  pioinfo->rank, filename );
       
       bcastRank = 0;
@@ -674,7 +721,8 @@ int fowPOSIXFPGUARDTHREAD ( const char *filename )
 
   if ( ddebug )
     fprintf ( stdout, 
-	      "pe%d in pioFileOpenW(): name=%s, init and enqueued aFiledataPFT, return id = %d\n", 
+	      "pe%d in pioFileOpenW(): name=%s, "
+	      "init and enqueued aFiledataPFT, return id = %d\n", 
 	      pioinfo->rank, filename, id );
   
   return id;
@@ -685,20 +733,20 @@ int fowPOSIXFPGUARDTHREAD ( const char *filename )
 int initPOSIXFPGUARDTHREAD ( int *ncollectors )
 {
   int collectingData = 1;
-  MPI_Group streamGroup, collectorGroup;
-  int ioRanks[1];
   int rc = 0;
 
   if ( pioinfo->size < 2 )
     {
       fprintf ( stderr, 
-		"PTYPE PIO_POSIX_B  or PIO_MPI_FPGUARD should be used with at least 2 pes.\n" );
+		"PTYPE PIO_POSIX_B  or PIO_MPI_FPGUARD "
+		"should be used with at least 2 pes.\n" );
       MPI_Abort ( pioinfo->comm, 1 );
     }
 
   if ( ddebug )
     fprintf ( stdout, 
-	      "pe%d in initPOSIXFPGUARDSENDREC()\n", pioinfo->rank );
+	      "pe%d in initPOSIXFPGUARDSENDREC()\n", 
+	      pioinfo->rank );
 
   *ncollectors = pioinfo->size;
   pioinfo->specialRank = pioinfo->size - 1;
@@ -710,7 +758,8 @@ int initPOSIXFPGUARDTHREAD ( int *ncollectors )
     {
       if ( ddebug )
 	fprintf ( stdout, 
-		  "pe%d in initPOSIXFPGUARDTHREAD(): create thread with fpGuard(), ncollectors = %d ...\n", 
+		  "pe%d in initPOSIXFPGUARDTHREAD(): "
+		  "create thread with fpGuard(), ncollectors = %d ...\n", 
 		  pioinfo->rank, *ncollectors );
       
       pthread_mutex_init( &offsetMutex, NULL ); 
@@ -721,7 +770,8 @@ int initPOSIXFPGUARDTHREAD ( int *ncollectors )
 			    ( void *) ncollectors );
       if (rc)
 	{
-	  fprintf ( stderr, "ERROR; return code from pthread_create() is %d\n", rc);
+	  fprintf ( stderr, 
+		    "ERROR; return code from pthread_create() is %d\n", rc);
 	  MPI_Abort ( pioinfo->comm, 1 );
 	}
     }

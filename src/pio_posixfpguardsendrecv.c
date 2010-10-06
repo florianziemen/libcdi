@@ -57,10 +57,10 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   size_t len;
   int status;
 
-  afd = ( aFiledataPF * ) malloc ( sizeof ( aFiledataPF ));
+  afd = ( aFiledataPF * ) xmalloc ( sizeof ( aFiledataPF ));
   memset ( afd, 0, sizeof ( aFiledataPF ));
   len = strlen ( key );
-  afd->name = ( char * ) malloc (( len ) * sizeof ( char ));
+  afd->name = ( char * ) xmalloc (( len ) * sizeof ( char ));
   strcpy ( afd->name, key );
   afd->size = bs;
 
@@ -107,11 +107,11 @@ bFiledataPF * initBFiledataPF ( int key, int nc )
   bFiledataPF *bfd;
   int i;
 
-  bfd = ( bFiledataPF * ) malloc ( sizeof ( bFiledataPF ));
+  bfd = ( bFiledataPF * ) xmalloc ( sizeof ( bFiledataPF ));
   memset ( bfd, 0, sizeof ( bFiledataPF ));
   bfd->offset = 0;
   bfd->finished = false;
-  bfd->nfinished = ( bool * ) malloc ( nc * sizeof ( bool ));
+  bfd->nfinished = ( bool * ) xmalloc ( nc * sizeof ( bool ));
 
   for ( i = 0; i < nc; i++ )
     *( bfd->nfinished + i ) = true;
@@ -369,7 +369,7 @@ void writePF ( aFiledataPF *afd, int id )
       amount )
     {
       fprintf ( stdout, 
-		"pe%d, id=%d, expect to write %16d byte, written %16d byte.\n", 
+		"pe%d, id=%d, expect to write %16zu byte, written %16zu byte.\n", 
 		pioinfo->rank, id, amount, written );
       perror ( "Error writing data" );
       MPI_Abort ( pioinfo->comm, 1 );
@@ -377,7 +377,7 @@ void writePF ( aFiledataPF *afd, int id )
 
   if ( ddebug )
     fprintf ( stdout, 
-	      "pe%d in writePF (), written %d bytes in file %d with offset %ld\n", 
+	      "pe%d in writePF (), written %zu bytes in file %d with offset %ld\n", 
 	      pioinfo->rank, written, id, offset ); 
   
   /* change outputBuffer */

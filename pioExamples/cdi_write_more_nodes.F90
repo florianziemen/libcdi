@@ -90,7 +90,6 @@ prbl: DO i = 1,nProblems
   load(currIndex) = load(currIndex)+sortedProblems(i,1)
 ENDDO prbl
 
-
 !write(*,*)
 !write(*,'(1X,F9.2)') mean
 !write(*,*)
@@ -101,7 +100,6 @@ ENDDO prbl
 !write(*,'(1X,10I4)') sortedProblems
 !write(*,*)
 !WRITE(*,'(1X,10I4)') problemMapping
-
 
 CONTAINS
 
@@ -167,7 +165,7 @@ END MODULE loadbalancing
       INTEGER, PARAMETER :: NLON  = 384   ! Number of longitudes 384
       INTEGER, PARAMETER :: NLAT  = 192   ! Number of latitudes  192
       INTEGER, PARAMETER :: NLEV  =  96   ! Number of levels      96
-      INTEGER, PARAMETER :: NTIME =  10   ! Number of time steps 124
+      INTEGER, PARAMETER :: NTIME =  10  ! Number of time steps 124
       INTEGER, PARAMETER :: NFILES = 10   ! Number of files        7
       INTEGER, PARAMETER :: SIZESSTREAMS ( NFILES ) = (/ 35, 35, 35, 35, 35, &
         35, 35, 35, 35, 35 /)
@@ -183,20 +181,23 @@ END MODULE loadbalancing
       INTEGER, ALLOCATABLE :: lstreamfirst ( : ), lstreamlast ( : )
       INTEGER, ALLOCATABLE :: varIDs ( :, : )
 
-      INTEGER :: pioComm, pioComm_NODE, rank, error, status
+#ifndef NOMPI
+      INTEGER :: pioComm, pioComm_NODE, rank, error
+      INTEGER :: ncollectors
+      CHARACTER(len=8) :: name
+#endif
+
+      INTEGER :: status
       INTEGER :: gridID, zaxisID, taxisID
-      INTEGER :: collectingData, ncollectors
+      INTEGER :: collectingData
       INTEGER :: sID, tsID, i, j, nmiss
 
       INTEGER :: PTYPE
       INTEGER :: NNODES, NFILES_NODE
       INTEGER :: mapping ( NFILES ), mycolor
-      INTEGER, ALLOCATABLE ::  colors ( : )
       INTEGER, ALLOCATABLE :: SIZESSTREAMS_NODE ( : )
-
-      CHARACTER :: arg 
+ 
       CHARACTER(len=8), ALLOCATABLE :: FILENAMES_NODE ( : ) 
-      CHARACTER(len=8) :: name
       
       REAL(dp) :: startTime, stopTime
       REAL(dp) :: accumOpen, accumClose, accumWrite
@@ -249,7 +250,6 @@ END MODULE loadbalancing
 
       CALL initCoords ()
 #ifndef NOMPI
-      ALLOCATE ( colors ( NNODES ), stat=status )
 
       collectingData =  pioInit( PTYPE, pioComm, mycolor, NNODES, &
         pioComm_NODE, ncollectors )
@@ -461,8 +461,6 @@ END MODULE loadbalancing
 1     IF ( ddebug == 1 ) THEN
         WRITE ( *, * ) 'MAIN: pe', rank,'in main() at label "finish"' 
       END IF
-
-      DEALLOCATE ( colors, stat = status )
       
       IF ( rank == 0 ) THEN
         CALL MPI_REDUCE ( MPI_IN_PLACE, accumOpen,  1, MPI_DOUBLE_PRECISION, &
@@ -505,11 +503,12 @@ END MODULE loadbalancing
 CONTAINS
 
       !********************************************
-
+#ifndef NOMPI
       SUBROUTINE readArgs ( argMode, argNodes )
 
         INTEGER, INTENT ( OUT ) :: argMode, argNodes
         INTEGER :: numarg, inum, length
+        CHARACTER :: arg
       
         numarg = command_argument_count ()    
       
@@ -545,6 +544,7 @@ CONTAINS
           CALL MPI_ABORT ( pioComm, 1, error )
         
       END SUBROUTINE readArgs
+#endif
 
       !********************************************
       
@@ -586,7 +586,7 @@ CONTAINS
       END SUBROUTINE initCoords
 
       !********************************************
-
+#ifndef NOMPI
       SUBROUTINE initLocalstream ( npes, sizestream, ifirst, ilast )
 
       INTEGER, INTENT  ( IN ) :: npes, sizestream
@@ -616,5 +616,5 @@ CONTAINS
       END IF
       
       END SUBROUTINE initLocalstream
-
+#endif
       END

@@ -49,11 +49,11 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
     fprintf ( stdout, "pe%d initAFiledataMPINONB (): filename=%s, buffersize=%zu, in\n",
 	pioinfo->rank, filename, bs );
 
-  of = ( aFiledataM * ) malloc ( sizeof ( aFiledataM ));
+  of = ( aFiledataM * ) xmalloc ( sizeof ( aFiledataM ));
   memset ( of, 0, sizeof ( aFiledataM ));
 
   len = strlen ( filename );
-  of->name = ( char * ) malloc (( len ) * sizeof ( char ));
+  of->name = ( char * ) xmalloc (( len ) * sizeof ( char ));
   strcpy ( of->name, filename );
   of->size = bs;
 

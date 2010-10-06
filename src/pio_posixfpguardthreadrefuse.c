@@ -77,10 +77,10 @@ static aFiledataPFTR *initAFiledataPFTR( const char *key, size_t bs)
   size_t len;
   int status;
 
-  afd = ( aFiledataPFTR * ) malloc ( sizeof ( aFiledataPFTR ));
+  afd = ( aFiledataPFTR * ) xmalloc ( sizeof ( aFiledataPFTR ));
   memset ( afd, 0, sizeof ( aFiledataPFTR ));
   len = strlen ( key );
-  afd->name = ( char * ) malloc (( len ) * sizeof ( char ));
+  afd->name = ( char * ) xmalloc (( len ) * sizeof ( char ));
   strcpy ( afd->name, key );
   afd->size = bs;
 
@@ -131,11 +131,11 @@ bFiledataPFTR * initBFiledataPFTR ( int key, int nc )
   bFiledataPFTR *bfd;
   int i;
 
-  bfd = ( bFiledataPFTR * ) malloc ( sizeof ( bFiledataPFTR ));
+  bfd = ( bFiledataPFTR * ) xmalloc ( sizeof ( bFiledataPFTR ));
   memset ( bfd, 0, sizeof ( bFiledataPFTR ));
   bfd->offset = 0;
   bfd->finished = false;
-  bfd->nfinished = ( bool * ) malloc ( nc * sizeof ( bool ));
+  bfd->nfinished = ( bool * ) xmalloc ( nc * sizeof ( bool ));
 
   for ( i = 0; i < nc; i++ )
     *( bfd->nfinished + i ) = true;

@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   August 2010
+! Uwe Schulzweida, MPI-MET, Hamburg,   October 2010
 !
 
       INTEGER    CDI_UNDEFID           
@@ -309,16 +309,16 @@
       PARAMETER (PIO_NONE               =  0)
       INTEGER    PIO_MPI_NONB          
       PARAMETER (PIO_MPI_NONB           =  1)
+      INTEGER    PIO_POSIX_NONB        
+      PARAMETER (PIO_POSIX_NONB         =  2)
       INTEGER    PIO_POSIX_ASYNCH      
-      PARAMETER (PIO_POSIX_ASYNCH       =  2)
+      PARAMETER (PIO_POSIX_ASYNCH       =  3)
       INTEGER    PIO_POSIX_FPGUARD_SENDRECV
-      PARAMETER (PIO_POSIX_FPGUARD_SENDRECV =  3)
-      INTEGER    PIO_POSIX_FPGUARD_THREAD
-      PARAMETER (PIO_POSIX_FPGUARD_THREAD =  4)
+      PARAMETER (PIO_POSIX_FPGUARD_SENDRECV =  4)
       INTEGER    PIO_POSIX_FPGUARD_THREAD_REFUSE
       PARAMETER (PIO_POSIX_FPGUARD_THREAD_REFUSE =  5)
-      INTEGER    PIO_POSIX_NONB        
-      PARAMETER (PIO_POSIX_NONB         =  6)
+      INTEGER    PIO_POSIX_FPGUARD_THREAD
+      PARAMETER (PIO_POSIX_FPGUARD_THREAD =  6)
       INTEGER         pioInit
 !                                    (INTEGER         ,
 !                                     INTEGER         ,
