@@ -4161,7 +4161,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
       ncvars[ncvarid].ndims = nvdims;
 
 #if  defined  (NC_NETCDF4)
-      if ( format == NC_FORMAT_NETCDF4_CLASSIC )
+      if ( format == NC_FORMAT_NETCDF4_CLASSIC || format == NC_FORMAT_NETCDF4 )
         {
           int shuffle, deflate, deflate_level;
           nc_inq_var_deflate(fileID, ncvarid, &shuffle, &deflate, &deflate_level);
