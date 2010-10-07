@@ -4959,15 +4959,18 @@ int cdfInqContents(int streamID)
 	  continue;
 	}
 
+      if ( ncvars[ncvarid].xtype == NC_CHAR )
+	{
+	  ncvars[ncvarid].isvar = 0;
+	  continue;
+	}
+
       if ( cdfInqDatatype(ncvars[ncvarid].xtype) == -1 )
 	{
 	  ncvars[ncvarid].isvar = 0;
 	  Warning(func, "Variable %s has an unsupported data type, skipped!", ncvars[ncvarid].name);
 	  continue;
 	}
-
-      if ( ncvars[ncvarid].xtype == NC_CHAR )
-	ncvars[ncvarid].isvar = 0;
     }
 
   /* verify coordinate vars (dimname == varname) */
