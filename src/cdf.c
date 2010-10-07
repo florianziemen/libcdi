@@ -133,7 +133,7 @@ int cdfOpenFile(const char *filename, const char *mode, int version)
 	  if ( version == 2 ) writemode = NC_CLOBBER | NC_64BIT_OFFSET;
 #endif
 #if  defined  (NC_NETCDF4)
-	  if ( version == 4 ) writemode = NC_CLOBBER | NC_NETCDF4 | NC_CLASSIC_MODEL;
+	  if ( version == 4 ) writemode = NC_CLOBBER | NC_NETCDF4 /*| NC_CLASSIC_MODEL*/;
 #endif
 	  cdf_create(filename, writemode, &ncid);
 	  cdfComment(ncid);

@@ -1,6 +1,7 @@
 2010-10-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* cdfOpenFile: switch off checking of netCDF4 format
+	* cdfOpenFile: create netCDF4 files without NC_CLASSIC_MODEL
+	* cdfOpenFile: switch off checking of netCDF4 format (read)
 	
 2010-09-27  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 

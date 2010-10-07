@@ -363,14 +363,22 @@ void cdfGetAttText(int fileID, int ncvarid, char *attname, int attlen, char *att
 static
 int cdfInqDatatype(int xtype)
 {
-  int datatype;
+  int datatype = -1;
 
   if      ( xtype == NC_BYTE   )  datatype = DATATYPE_INT8;
   /* else if ( xtype == NC_CHAR   )  datatype = DATATYPE_UINT8; */
   else if ( xtype == NC_SHORT  )  datatype = DATATYPE_INT16;
   else if ( xtype == NC_INT    )  datatype = DATATYPE_INT32;
+  else if ( xtype == NC_FLOAT  )  datatype = DATATYPE_FLT32;
   else if ( xtype == NC_DOUBLE )  datatype = DATATYPE_FLT64;
-  else                            datatype = DATATYPE_FLT32;
+#if  defined  (NC_NETCDF4)
+  else if ( xtype == NC_LONG   )  datatype = DATATYPE_INT32;
+  else if ( xtype == NC_UBYTE  )  datatype = DATATYPE_UINT8;
+  else if ( xtype == NC_USHORT )  datatype = DATATYPE_UINT16;
+  else if ( xtype == NC_UINT   )  datatype = DATATYPE_UINT32;
+  else if ( xtype == NC_INT64  )  datatype = DATATYPE_FLT64;
+  else if ( xtype == NC_UINT64 )  datatype = DATATYPE_FLT64;
+#endif
 
   return (datatype);
 }
@@ -387,11 +395,17 @@ int cdfDefDatatype(int datatype)
     Error(func, "CDI/netCDF library does not support complex numbers!");
 
   if      ( datatype == DATATYPE_INT8   ) xtype = NC_BYTE;
-  else if ( datatype == DATATYPE_UINT8  ) xtype = NC_SHORT;
   else if ( datatype == DATATYPE_INT16  ) xtype = NC_SHORT;
-  else if ( datatype == DATATYPE_UINT16 ) xtype = NC_INT;
   else if ( datatype == DATATYPE_INT32  ) xtype = NC_INT;
+#if  defined  (NC_NETCDF4)
+  else if ( datatype == DATATYPE_UINT8  ) xtype = NC_UBYTE;
+  else if ( datatype == DATATYPE_UINT16 ) xtype = NC_USHORT;
+  else if ( datatype == DATATYPE_UINT32 ) xtype = NC_UINT;
+#else
+  else if ( datatype == DATATYPE_UINT8  ) xtype = NC_SHORT;
+  else if ( datatype == DATATYPE_UINT16 ) xtype = NC_INT;
   else if ( datatype == DATATYPE_UINT32 ) xtype = NC_INT;
+#endif
   else if ( datatype == DATATYPE_FLT64  ) xtype = NC_DOUBLE;
   else                                    xtype = NC_FLOAT;
 
@@ -4934,6 +4948,7 @@ int cdfInqContents(int streamID)
 	{
 	  ncvars[ncvarid].isvar = 0;
 	  Warning(func, "Variable %s has unknown type, skipped!", ncvars[ncvarid].name);
+	  continue;
 	}
 
       if ( ncvars[ncvarid].ndims > 4 )
@@ -4941,6 +4956,14 @@ int cdfInqContents(int streamID)
 	  ncvars[ncvarid].isvar = 0;
 	  Warning(func, "%d dimensional variables unsupported. Skip variable %s",
 		ncvars[ncvarid].ndims, ncvars[ncvarid].name);
+	  continue;
+	}
+
+      if ( cdfInqDatatype(ncvars[ncvarid].xtype) == -1 )
+	{
+	  ncvars[ncvarid].isvar = 0;
+	  Warning(func, "Variable %s has an unsupported data type, skipped!", ncvars[ncvarid].name);
+	  continue;
 	}
 
       if ( ncvars[ncvarid].xtype == NC_CHAR )
