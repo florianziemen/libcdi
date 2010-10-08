@@ -418,14 +418,7 @@ void pwPOSIXASYNCH ( int ncollectors )
 	{
       	case IO_Open_file:
 
-	  //messageBuffer = ( char *) xmalloc ( messagesize * sizeof ( char ));
-
-	  if (( messageBuffer = ( char *) malloc ( messagesize  * sizeof ( char ))) == NULL )
-	    {
-	      perror ( "### malloc of messageBuffer failed" );
-	      MPI_Abort ( pioinfo->comm, 1 );
-	    }
-
+	  messageBuffer = ( char *) xmalloc ( messagesize * sizeof ( char ));
 	  pMB = messageBuffer;
 
 	  MPI_Recv ( messageBuffer, messagesize, MPI_CHAR, source, 
@@ -783,9 +776,9 @@ int fowPOSIXASYNCH ( const char *filename )
 
 /***************************************************************/
 
-int initPOSIXASYNCH ( int *ncollectors )  
+int initPOSIXASYNCH ()  
 {
-  int collectingData = 1;
+  int collectingData = 1, ncollectors;
   MPI_Group streamGroup, collectorGroup;
   int ioRanks[1];
 
@@ -802,8 +795,8 @@ int initPOSIXASYNCH ( int *ncollectors )
       MPI_Abort ( pioinfo->comm, 1 );
     }
 
-  *ncollectors = pioinfo->size - 1;
   pioinfo->specialRank = pioinfo->size - 1;
+  ncollectors = pioinfo->size - 1; 
   
   ioRanks[0] = pioinfo->specialRank;
   MPI_Comm_group ( pioinfo->comm, &streamGroup );
@@ -815,9 +808,9 @@ int initPOSIXASYNCH ( int *ncollectors )
     {
       if ( ddebug )
 	fprintf ( stdout, 
-		  "### pe%d pioInit (): Call posixWriter(), ncollectors = %d ...\n", 
-		  pioinfo->rank, *ncollectors );
-      pwPOSIXASYNCH ( *ncollectors );
+		  "### pe%d pioInit (): Call posixWriter() ...\n", 
+		  pioinfo->rank );
+      pwPOSIXASYNCH ( ncollectors );
       collectingData = 0;
     }
   else

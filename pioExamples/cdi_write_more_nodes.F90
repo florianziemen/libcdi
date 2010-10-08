@@ -568,7 +568,7 @@ CONTAINS
       REAL ( dp )  :: dist
 
       DO i = 1, NLON
-         lons ( i ) = 360.0 / NLON * (  i - 1 )
+         lons ( i ) = ( 360.0 / NLON ) * (  i - 1 )
       END DO
 
       dist = 180.0 / NLAT

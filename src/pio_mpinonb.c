@@ -340,11 +340,11 @@ int fowMPINONB ( const char *filename )
 
 /***************************************************************/
 
-int initMPINONB ( int *ncollectors )
+int initMPINONB ()
 {
   int collectingData = 1;
 
-  *ncollectors = pioinfo->size;
+  MPI_Comm_dup ( pioinfo->comm, &( pioinfo->collectorComm ));
 
   bibAFiledataM = queueInit ( destroyAFiledataMPINONB, compareNamesMPINONB );
 	    

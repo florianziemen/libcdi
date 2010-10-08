@@ -1,0 +1,48 @@
+MPIROOT        = /sw/sles10-x64/ofed/openmpi-1.4.0-nag52
+MPI_LIB        = -L$(MPIROOT)/lib -Wl,-pthread -lmpi_f90 -lmpi_f77 -lmpi -lopen-rte -lopen-pal -lrdmacm -libverbs -lnuma -ldl -Wl,--export-dynamic -lnsl -lutil -lm -ldl
+MPI_INCLUDE    = -I$(MPIROOT)/include
+
+NETCDFROOT     = /sw/sles10-x64/netcdf-4.0.1
+NETCDF_LIB     = -L$(NETCDFROOT)/lib -lnetcdf
+NETCDF_INCLUDE = -I$(NETCDFROOT)/include
+
+HDF5ROOT       = /sw/sles10-x64/hdf5-1.8.2
+HDF5_LIB       = -L$(HDF5ROOT)/lib -lhdf5_hl -lhdf5
+HDF5_INCLUDE   = -I$(HDF5ROOT)/include
+
+SZIPROOT       = /sw/sles10-x64/szip-2.1
+SZIP_LIB       = -L$(SZIPROOT)/lib -lsz
+SZIP_INCLUDE   = -I$(SZIPROOT)/include
+
+ZLIBROOT       = /sw/sles10-x64/zlib-1.2.3
+ZLIB_LIB       = -L$(ZLIBROOT)/lib -lz
+ZLIB_INCLUDE   = -I$(ZLIBROOT)/include
+
+CDILIBROOT     = ..
+CDILIB_LIB     = -L$(CDILIBROOT)/lib -lcdi_parallel
+CDILIB_INCLUDE = -I$(CDILIBROOT)/include
+
+INCLUDES       = $(CDILIB_INCLUDE) $(MPI_INCLUDE) $(NETCDF_INCLUDE) $(HDF5_INCLUDE) $(SZIP_INCLUDE) $(ZLIB_INCLUDE) -g 
+#LIBS           = $(CDILIB_LIB) $(MPI_LIB) $(NETCDF_LIB) $(HDF5_LIB) $(SZIP_LIB) $(ZLIB_LIB) -laio -lrt
+LIBS           = $(CDILIB_LIB) $(MPI_LIB) $(NETCDF_LIB) $(HDF5_LIB) $(SZIP_LIB) $(ZLIB_LIB) -laio -lrt -lpthread
+
+SRCS           = pio_write.F90
+
+OBJS           = pio_write.o
+
+FC             = nagfor
+FFLAGS         = $(INCLUDES) -mismatch_all -w=uep
+LDFLAGS        = $(INCLUDES)
+
+%.o: %.F90
+	$(FC) $(FFLAGS) -c $<
+
+all: pio_write_parallel
+
+pio_write_parallel: $(OBJS)
+	$(FC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+
+pio_write.o: pio_write.F90 
+
+clean: 
+	-rm -f pio_write_parallel *.o *.mod

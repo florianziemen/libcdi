@@ -189,7 +189,7 @@ extern "C" {
 #define  PIO_POSIX_FPGUARD_THREAD_REFUSE    5
 #define  PIO_POSIX_FPGUARD_THREAD           6
 
-int     pioInit ( int, int, int*, int, int*, int* );
+int     pioInit ( int, int, int*, int*, int* );
 void    pioFinalize ( void );
   /*#endif*/
 

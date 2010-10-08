@@ -14,7 +14,7 @@ queue *queueInit ( valDestroyFunction vD, keyCompareFunction kC )
   if (( myq = ( queue * ) malloc ( sizeof ( queue ))) == NULL )
     {
       perror ( "pio_queue: queueInit: Not enough memory" );
-      return 1;
+      return NULL;
     }
 
   myq->head = NULL;

@@ -53,6 +53,7 @@ typedef struct
 /* pio.c */
 void check_mpi ( int, int );
 void check_mpi_status ( int, MPI_Comm *, MPI_Status *, int );
+void * xmalloc ( size_t );
 int setTag ( int, int );
 rTag * getTag ( int );
 void ungetTag ( rTag * );
@@ -76,28 +77,28 @@ int queueDelNode ( queue *, int );
 int fowMPINONB ( const char * );
 int fcMPINONB ( int );
 size_t fwMPINONB( int, int, const void *, size_t );
-int initMPINONB ( int * );
+int initMPINONB ( void );
 
 /* pio_posixasynch.c */
 void pwPOSIXASYNCH ( int );
 int fowPOSIXASYNCH ( const char * );
 int fcPOSIXASYNCH ( int );
 size_t fwPOSIXASYNCH( int, int, const void *, size_t );
-int initPOSIXASYNCH ( int * );
+int initPOSIXASYNCH ( void );
 
 /* pio_posixfpguardsendrecv.c */
 void fpgPOSIXFPGUARDSENDRECV ( int );
 int  fowPOSIXFPGUARDSENDRECV ( const char * );
 int   fcPOSIXFPGUARDSENDRECV ( int );
 size_t   fwPOSIXFPGUARDSENDRECV ( int, int, const void *, size_t );
-int initPOSIXFPGUARDSENDRECV ( int * );
+int initPOSIXFPGUARDSENDRECV ( void );
 
 /* pio_posixfpguardthread.c */
 void * fpgPOSIXFPGUARDTHREAD ( void * );
 int  fowPOSIXFPGUARDTHREAD ( const char * );
 int   fcPOSIXFPGUARDTHREAD ( int );
 size_t   fwPOSIXFPGUARDTHREAD ( int, int, const void *, size_t );
-int initPOSIXFPGUARDTHREAD ( int * );
+int initPOSIXFPGUARDTHREAD ( void );
 void finalizePOSIXFPGUARDTHREAD ( void );
 
 /* pio_posixfpguardthreadrefuse.c */
@@ -105,7 +106,7 @@ void * fpgPOSIXFPGUARDTHREADREFUSE ( void * );
 int  fowPOSIXFPGUARDTHREADREFUSE ( const char * );
 int   fcPOSIXFPGUARDTHREADREFUSE  ( int );
 size_t   fwPOSIXFPGUARDTHREADREFUSE  ( int, int, const void *, size_t );
-int initPOSIXFPGUARDTHREADREFUSE  ( int * );
+int initPOSIXFPGUARDTHREADREFUSE  ( void );
 void finalizePOSIXFPGUARDTHREADREFUSE  ( void );
 
 /* pio_posixnonb.c */
@@ -113,7 +114,7 @@ void pwPOSIXNONB ( int );
 int fowPOSIXNONB ( const char * );
 int fcPOSIXNONB ( int );
 size_t fwPOSIXNONB( int, int, const void *, size_t );
-int initPOSIXNONB ( int * );
+int initPOSIXNONB ( void );
 
 #endif
 #endif

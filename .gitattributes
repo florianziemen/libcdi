@@ -22,6 +22,7 @@ config/install-sh -text
 config/interface.rb -text
 config/missing -text
 config/mkinstalldirs -text
+/config_tornado.sh -text
 /configure -text
 /configure.ac -text
 doc/cdi_cman.pdf -text
@@ -115,12 +116,18 @@ interfaces/testdata/gridTest.nc -text
 interfaces/testdata/mulval.grb -text
 interfaces/testdata/mulval.nc -text
 m4/acx_sl_mod_suffix.m4 -text
+pioExamples/Makefile_tornado_parallel -text
+pioExamples/Makefile_tornado_serial -text
 pioExamples/README -text
 pioExamples/cdi_write_f.F90 -text
 pioExamples/cdi_write_more_nodes.F90 -text
 pioExamples/cdi_write_more_nodes.job -text
 pioExamples/cdi_write_parallel.job -text
 pioExamples/cdi_write_serial.job -text
+pioExamples/pio_write.F90 -text
+pioExamples/write_tornado_parallel.job -text
+pioExamples/write_tornado_ps.job -text
+pioExamples/write_tornado_serial.job -text
 src/Makefile.am -text
 src/Makefile.in -text
 src/basetime.c -text

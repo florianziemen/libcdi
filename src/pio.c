@@ -238,7 +238,7 @@ static int cmpr ( const void *a, const void *b )
 /***************************************************************/
 
 void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color, 
-			  int nnodes, int * myComm2F )
+			  int *nnodes )
 {
   int size, rank, len, npes_node, key, test, i, j;
 
@@ -283,34 +283,31 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
   *color = 0;
   i = 0;
   j = 0;
-  while ( ++j <= nnodes )
+  while ( i < size )
     {
       curr = allHosts[i];
+      j++;
       if (( test = strcmp ( myHost, curr )) == 0 ) *color = j;
-      while (( ++i < size ) && 
-	     (( test = strcmp ( allHosts[i], curr )) == 0));;    
-    } 
+      while (( i < size ) &&
+	     (( test = strcmp ( allHosts[i], curr )) == 0))
+	i++;
+    }
 
-  if ( *color <= 0 || *color > nnodes )
+  *nnodes = j;
+      
+  if ( *color == 0 )
     {
-      fprintf ( stderr, "color not set correctly\n" );
+      fprintf ( stderr, "Color is not set correctly\n" );
       MPI_Abort ( commF2C, 1 );
     }
   
-  npes_node = size/nnodes;
+  npes_node = size / ( * nnodes );
   key = rank % npes_node;
 
   check_mpi(__LINE__, 
 	    MPI_Comm_split ( commF2C, *color, key, myComm));
   check_mpi(__LINE__, 
 	    MPI_Errhandler_set ( *myComm, MPI_ERRORS_RETURN ));
-
-  *myComm2F = MPI_COMM_NULL;
-  if (( *myComm2F = MPI_Comm_c2f ( *myComm )) == 0 )
-    {
-      fprintf ( stderr, "mpi_comm_c2f didn't succeed\n");
-      MPI_Abort ( commF2C , 1 );
-    }
 
   free ( allHosts0 );
   free ( allHosts );
@@ -328,10 +325,12 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
 
 /***************************************************************/
 
-int pioInit ( int ptype, int commF, int *color, int nnodes, int *pioComm, int *ncollectors )
+int pioInit ( int ptype, int commF, int *color, int *nnodes, int *pioCollComm2F )
 {
 
   int collectingData = 1;
+  *nnodes = 1;
+  *color = 1;
 
 #ifndef NOMPI
 
@@ -348,9 +347,9 @@ int pioInit ( int ptype, int commF, int *color, int nnodes, int *pioComm, int *n
       MPI_Abort ( comm, 1 );
     }
 
-  check_mpi (__LINE__, MPI_Comm_size ( comm, &size ));
+  check_mpi ( __LINE__, MPI_Comm_size ( comm, &size ));
 
-  check_mpi (__LINE__, MPI_Comm_rank ( comm, &rank ));
+  check_mpi ( __LINE__, MPI_Comm_rank ( comm, &rank ));
 
   if ( ptype < 0 || ptype > maxPtype )
     {
@@ -359,31 +358,24 @@ int pioInit ( int ptype, int commF, int *color, int nnodes, int *pioComm, int *n
       MPI_Abort ( comm, 1 );
     }
 
-  if ( nnodes < 1 || nnodes > maxNnodes )
-    {
-      if ( rank == 0 )
-	fprintf ( stderr, "4. arg of pioInit is no valid no for nnodes\n");
-      MPI_Abort ( comm, 1 );
-    }
+  pioinfo = ( pioInfo * ) xmalloc ( sizeof ( pioInfo ));
+
+  pioinfo->type = ptype; 
+  setPioCommunicator ( & ( pioinfo->comm ), comm, color, nnodes );
 
   if ( ptype == PIO_NONE && 
-       ( size != 1 || nnodes != 1 ))
+       ( size != 1 || *nnodes != 1 ))
     {   
       if ( rank == 0 )
 	fprintf ( stderr, 
 		  "\n\npioInit(): combination of "
-		  "arg(1) PTYPE=%d, arg(4) NNODES=%d and npe=%d is not valid.\n"
+		  "arg(1) PTYPE=%d, NNODES=%d and npe=%d is not valid.\n"
 		  "Possible modus is:\n"						
 		  "ptype = PIO_NONE (:=0), \t\t nnodes = 1,\t\t  npe = 1\n\n",
-		  ptype, nnodes, size );
+		  ptype, *nnodes, size );
       MPI_Abort ( comm, 1 );
     }
 
-  pioinfo = ( pioInfo * ) xmalloc ( sizeof ( pioInfo ));
-
-  pioinfo->type = ptype; 
-  pioinfo->collectorComm = MPI_COMM_NULL;
-  setPioCommunicator ( & ( pioinfo->comm ), comm, color, nnodes, pioComm );
   pioinfo->color = *color;
   MPI_Comm_rank ( pioinfo->comm, &( pioinfo->rank ));
   MPI_Comm_size ( pioinfo->comm, &( pioinfo->size ));
@@ -394,26 +386,39 @@ int pioInit ( int ptype, int commF, int *color, int nnodes, int *pioComm, int *n
 	      "after init pioinfo ...\n", 
 	      pioinfo->rank, pioinfo->type, initial_buffersize );
 
+  pioinfo->collectorComm = MPI_COMM_NULL;
+
   switch ( pioinfo->type )
     {
+    case PIO_NONE:
+      collectingData = 1;
+      MPI_Comm_dup ( pioinfo->comm, &( pioinfo->collectorComm ));
+      break;
     case PIO_MPI_NONB:
-      collectingData = initMPINONB ( ncollectors );
+      collectingData = initMPINONB ();
       break;
     case PIO_POSIX_ASYNCH:
-      collectingData = initPOSIXASYNCH ( ncollectors );
+      collectingData = initPOSIXASYNCH ();
       break;
     case PIO_POSIX_FPGUARD_SENDRECV:
-      collectingData = initPOSIXFPGUARDSENDRECV ( ncollectors );
+      collectingData = initPOSIXFPGUARDSENDRECV ();
       break;
     case PIO_POSIX_FPGUARD_THREAD:
-      collectingData = initPOSIXFPGUARDTHREAD ( ncollectors );
+      collectingData = initPOSIXFPGUARDTHREAD ();
       break;
     case PIO_POSIX_FPGUARD_THREAD_REFUSE:
-      collectingData = initPOSIXFPGUARDTHREADREFUSE ( ncollectors );
+      collectingData = initPOSIXFPGUARDTHREADREFUSE ();
       break;
     case PIO_POSIX_NONB:      
-      collectingData = initPOSIXNONB ( ncollectors );
+      collectingData = initPOSIXNONB ();
       break;
+    }
+
+  *pioCollComm2F  = 0;
+  if (( *pioCollComm2F = MPI_Comm_c2f ( pioinfo->collectorComm )) == 0 )
+    {
+      fprintf ( stderr, "mpi_comm_c2f didn't succeed\n");
+      MPI_Abort ( comm, 1 );
     }
 
 #endif

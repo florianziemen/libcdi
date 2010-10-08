@@ -1,4 +1,4 @@
-/* 
+ /* 
    error with 1 node and 32 tasks: invalid communicator
               2 nodes and 16 tasks: -"-
 
@@ -626,9 +626,9 @@ int fowPOSIXFPGUARDTHREADREFUSE ( const char *filename )
 
 /***************************************************************/
 
-int initPOSIXFPGUARDTHREADREFUSE ( int *ncollectors )
+int initPOSIXFPGUARDTHREADREFUSE ()
 {
-  int collectingData = 1;
+  int collectingData = 1, ncollectors;
   MPI_Group streamGroup, collectorGroup;
   int ioRanks[1];
   int rc = 0;
@@ -644,7 +644,7 @@ int initPOSIXFPGUARDTHREADREFUSE ( int *ncollectors )
     fprintf ( stdout, 
 	      "pe%d in initPOSIXFPGUARDSENDREC()\n", pioinfo->rank );
 
-  *ncollectors = pioinfo->size;
+  ncollectors = pioinfo->size;
   pioinfo->specialRank = pioinfo->size - 1;
 
   pioinfo->collectorComm = pioinfo->comm;
@@ -655,12 +655,12 @@ int initPOSIXFPGUARDTHREADREFUSE ( int *ncollectors )
       if ( ddebug )
 	fprintf ( stdout, 
 		  "pe%d in initPOSIXFPGUARDTHREAD(): create thread with fpGuard(), ncollectors = %d ...\n", 
-		  pioinfo->rank, *ncollectors );
+		  pioinfo->rank, ncollectors );
       pthread_attr_init(&attr );
       pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
       rc = pthread_create ( &thread, NULL, &fpgPOSIXFPGUARDTHREADREFUSE, 
-			    ( void *) ncollectors );
+			    ( void *) &ncollectors );
       if (rc)
 	{
 	  fprintf ( stderr, "ERROR; return code from pthread_create() is %d\n", rc);

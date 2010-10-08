@@ -547,9 +547,9 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
 
 /***************************************************************/
 
-int initPOSIXFPGUARDSENDRECV ( int *ncollectors )
+int initPOSIXFPGUARDSENDRECV ()
 {
-  int collectingData = 1;
+  int collectingData = 1, ncollectors;
   MPI_Group streamGroup, collectorGroup;
   int ioRanks[1];
 
@@ -564,7 +564,7 @@ int initPOSIXFPGUARDSENDRECV ( int *ncollectors )
     fprintf ( stdout, 
 	      "pe%d in initPOSIXFPGUARDSENDRECV()\n", pioinfo->rank );
 
-  *ncollectors = pioinfo->size - 1;
+  ncollectors = pioinfo->size - 1;
   pioinfo->specialRank = pioinfo->size - 1;
   
   ioRanks[0] = pioinfo->specialRank;
@@ -578,8 +578,8 @@ int initPOSIXFPGUARDSENDRECV ( int *ncollectors )
       if ( ddebug )
 	fprintf ( stdout, 
 		  "pe%d in initPOSIXFPGUARDSENDREC(): Call fpGuard(), ncollectors = %d ...\n", 
-		  pioinfo->rank, *ncollectors );
-      fpgPOSIXFPGUARDSENDRECV ( *ncollectors );
+		  pioinfo->rank, ncollectors );
+      fpgPOSIXFPGUARDSENDRECV ( ncollectors );
 
       collectingData = 0;
     }

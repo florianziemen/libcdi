@@ -379,7 +379,7 @@ void* fpgPOSIXFPGUARDTHREAD ( void* ncoll )
 	      if ( !bibBFiledataPF->head )
 		{
 		  queueDestroy ( bibBFiledataPF );
-		  return;
+		  return 0;
 		}
 	    }
 
@@ -387,7 +387,7 @@ void* fpgPOSIXFPGUARDTHREAD ( void* ncoll )
 
 	case IO_Finalize:
 
-	  return;
+	  return 0;
 
 	  break;
 	}
@@ -730,9 +730,9 @@ int fowPOSIXFPGUARDTHREAD ( const char *filename )
 
 /***************************************************************/
 
-int initPOSIXFPGUARDTHREAD ( int *ncollectors )
+int initPOSIXFPGUARDTHREAD ()
 {
-  int collectingData = 1;
+  int collectingData = 1, ncollectors;
   int rc = 0;
 
   if ( pioinfo->size < 2 )
@@ -748,7 +748,7 @@ int initPOSIXFPGUARDTHREAD ( int *ncollectors )
 	      "pe%d in initPOSIXFPGUARDSENDREC()\n", 
 	      pioinfo->rank );
 
-  *ncollectors = pioinfo->size;
+  ncollectors = pioinfo->size;
   pioinfo->specialRank = pioinfo->size - 1;
 
   pioinfo->collectorComm = pioinfo->comm;
@@ -760,14 +760,14 @@ int initPOSIXFPGUARDTHREAD ( int *ncollectors )
 	fprintf ( stdout, 
 		  "pe%d in initPOSIXFPGUARDTHREAD(): "
 		  "create thread with fpGuard(), ncollectors = %d ...\n", 
-		  pioinfo->rank, *ncollectors );
+		  pioinfo->rank, ncollectors );
       
       pthread_mutex_init( &offsetMutex, NULL ); 
       pthread_attr_init(&attr );
       pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
       rc = pthread_create ( &thread, NULL, &fpgPOSIXFPGUARDTHREAD, 
-			    ( void *) ncollectors );
+			    ( void *) &ncollectors );
       if (rc)
 	{
 	  fprintf ( stderr, 
