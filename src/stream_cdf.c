@@ -386,7 +386,7 @@ int cdfInqDatatype(int xtype)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
-int cdfDefDatatype(int datatype)
+int cdfDefDatatype(int datatype, int filetype)
 {
   static const char *func = "cdfDefDatatype";
   int xtype;
@@ -394,20 +394,35 @@ int cdfDefDatatype(int datatype)
   if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
     Error(func, "CDI/netCDF library does not support complex numbers!");
 
-  if      ( datatype == DATATYPE_INT8   ) xtype = NC_BYTE;
-  else if ( datatype == DATATYPE_INT16  ) xtype = NC_SHORT;
-  else if ( datatype == DATATYPE_INT32  ) xtype = NC_INT;
+  if ( filetype == FILETYPE_NC4 )
+    {
+      if      ( datatype == DATATYPE_INT8   ) xtype = NC_BYTE;
+      else if ( datatype == DATATYPE_INT16  ) xtype = NC_SHORT;
+      else if ( datatype == DATATYPE_INT32  ) xtype = NC_INT;
 #if  defined  (NC_NETCDF4)
-  else if ( datatype == DATATYPE_UINT8  ) xtype = NC_UBYTE;
-  else if ( datatype == DATATYPE_UINT16 ) xtype = NC_USHORT;
-  else if ( datatype == DATATYPE_UINT32 ) xtype = NC_UINT;
+      else if ( datatype == DATATYPE_UINT8  ) xtype = NC_UBYTE;
+      else if ( datatype == DATATYPE_UINT16 ) xtype = NC_USHORT;
+      else if ( datatype == DATATYPE_UINT32 ) xtype = NC_UINT;
 #else
-  else if ( datatype == DATATYPE_UINT8  ) xtype = NC_SHORT;
-  else if ( datatype == DATATYPE_UINT16 ) xtype = NC_INT;
-  else if ( datatype == DATATYPE_UINT32 ) xtype = NC_INT;
+      else if ( datatype == DATATYPE_UINT8  ) xtype = NC_SHORT;
+      else if ( datatype == DATATYPE_UINT16 ) xtype = NC_INT;
+      else if ( datatype == DATATYPE_UINT32 ) xtype = NC_INT;
 #endif
-  else if ( datatype == DATATYPE_FLT64  ) xtype = NC_DOUBLE;
-  else                                    xtype = NC_FLOAT;
+      else if ( datatype == DATATYPE_FLT64  ) xtype = NC_DOUBLE;
+      else                                    xtype = NC_FLOAT;
+    }
+  else
+    {
+      if      ( datatype == DATATYPE_INT8   ) xtype = NC_BYTE;
+      else if ( datatype == DATATYPE_INT16  ) xtype = NC_SHORT;
+      else if ( datatype == DATATYPE_INT32  ) xtype = NC_INT;
+      else if ( datatype == DATATYPE_UINT8  ) xtype = NC_SHORT;
+      else if ( datatype == DATATYPE_UINT16 ) xtype = NC_INT;
+      else if ( datatype == DATATYPE_UINT32 ) xtype = NC_INT;
+      else if ( datatype == DATATYPE_FLT64  ) xtype = NC_DOUBLE;
+      else                                    xtype = NC_FLOAT;
+    }
+
 
   return (xtype);
 }
@@ -713,7 +728,7 @@ void cdfDefVarMissval(int streamID, int varID, int dtype, int lcheck)
       missval = vlistInqVarMissval(vlistID, varID);
       if ( lcheck && streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      xtype = cdfDefDatatype(dtype);
+      xtype = cdfDefDatatype(dtype, streamptr->filetype);
 
       cdf_put_att_double(fileID, ncvarid, "_FillValue", (nc_type) xtype, 1L, &missval);
 
@@ -2735,7 +2750,7 @@ int cdfDefVar(int streamID, int varID)
 
   /* if ( streamptr->ncmode == 2 ) cdf_redef(fileID); */
 
-  xtype = cdfDefDatatype(vlistInqVarDatatype(vlistID, varID));
+  xtype = cdfDefDatatype(vlistInqVarDatatype(vlistID, varID), streamptr->filetype);
 
   cdf_def_var(fileID, name, (nc_type) xtype, ndims, dims, &ncvarid);
 
