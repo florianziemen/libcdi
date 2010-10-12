@@ -136,9 +136,9 @@ vlist_t *vlist_to_pointer(int idx)
   return (vlistptr);
 }
 
-
 /* Create an index from a pointer */
-static int vlist_from_pointer(vlist_t *ptr)
+static
+int vlist_from_pointer(vlist_t *ptr)
 {
   static const char *func = "vlist_from_pointer";
   int      idx = -1;
@@ -171,8 +171,8 @@ static int vlist_from_pointer(vlist_t *ptr)
   return (idx);
 }
 
-
-static void vlist_init_entry(vlist_t *vlistptr)
+static
+void vlist_init_entry(vlist_t *vlistptr)
 {
   vlistptr->self           = vlist_from_pointer(vlistptr);
 
@@ -269,7 +269,6 @@ void vlist_check_ptr(const char *func, vlist_t *vlistptr)
     Error(func, "vlist undefined!");
 }
 
-
 /*
 @Function  vlistCreate
 @Title     Create a variable list
@@ -312,7 +311,6 @@ int vlistCreate(void)
 
   return (vlistID);
 }
-
 
 /*
 @Function  vlistDestroy
@@ -400,7 +398,6 @@ void vlistUnlock(int vlistID)
   /*  Message(func, "vlistID %d nlock %d", vlistID, vlistptr->nlock); */
 }
 
-
 /*
 @Function  vlistCopy
 @Title     Copy a variable list
@@ -464,7 +461,6 @@ void vlistCopy(int vlistID2, int vlistID1)
 
   vlistptr2->nlock = 0;
 }
-
 
 /*
 @Function  vlistDuplicate
@@ -586,7 +582,6 @@ int vlistInqZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int l
 
   return (zaxisID);
 }
-
 
 /*
 @Function  vlistCopyFlag
@@ -762,7 +757,6 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
     }
 }
 
-
 /*
 @Function  vlistCat
 @Title     Concatenate two variable lists
@@ -858,7 +852,6 @@ void vlistCat(int vlistID2, int vlistID1)
 	}
     }
 }
-
 
 /*
 @Function  vlistMerge
@@ -998,7 +991,6 @@ void vlistMerge(int vlistID2, int vlistID1)
     }
 }
 
-
 /*
 @Function  vlistNvars
 @Title     Number of variables in a variable list
@@ -1079,7 +1071,6 @@ int vlistNumber(int vlistID)
   return (number);
 }
 
-
 /*
 @Function  vlistNgrids
 @Title     Number of grids in a variable list
@@ -1107,7 +1098,6 @@ int vlistNgrids(int vlistID)
 
   return (vlistptr->ngrids);
 }
-
 
 /*
 @Function  vlistNzaxis
@@ -1240,7 +1230,6 @@ void vlistPrint(int vlistID)
     }
 }
 
-
 /*
 @Function  vlistDefTaxis
 @Title     Define the time axis
@@ -1266,7 +1255,6 @@ void vlistDefTaxis(int vlistID, int taxisID)
 
   vlistptr->taxisID = taxisID;
 }
-
 
 /*
 @Function  vlistInqTaxis
@@ -1296,6 +1284,7 @@ int vlistInqTaxis(int vlistID)
   return (vlistptr->taxisID);
 }
 
+
 void  vlistDefTable(int vlistID, int tableID)
 {
   static const char *func = "vlistDefTable";
@@ -1307,6 +1296,7 @@ void  vlistDefTable(int vlistID, int tableID)
 
   vlistptr->tableID = tableID;
 }
+
 
 int vlistInqTable(int vlistID)
 {
@@ -1320,6 +1310,7 @@ int vlistInqTable(int vlistID)
   return (vlistptr->tableID);
 }
 
+
 void vlistDefInstitut(int vlistID, int instID)
 {
   static const char *func = "vlistDefInstitut";
@@ -1331,6 +1322,7 @@ void vlistDefInstitut(int vlistID, int instID)
 
   vlistptr->instID = instID;
 }
+
 
 int vlistInqInstitut(int vlistID)
 {
@@ -1361,6 +1353,7 @@ int vlistInqInstitut(int vlistID)
   return (instID);
 }
 
+
 void vlistDefModel(int vlistID, int modelID)
 {
   static const char *func = "vlistDefModel";
@@ -1372,6 +1365,7 @@ void vlistDefModel(int vlistID, int modelID)
 
   vlistptr->modelID = modelID;
 }
+
 
 int vlistInqModel(int vlistID)
 {
@@ -1402,6 +1396,7 @@ int vlistInqModel(int vlistID)
   return (modelID);
 }
 
+
 int vlistGridsizeMax(int vlistID)
 {
   static const char *func = "vlistGridsizeMax";
@@ -1422,6 +1417,7 @@ int vlistGridsizeMax(int vlistID)
   
   return (gridsizemax);
 }
+
 
 int vlistGrid(int vlistID, int index)
 {
@@ -1542,6 +1538,7 @@ int vlistZaxisIndex(int vlistID, int zaxisID)
   return (index);
 }
 
+
 void vlistChangeZaxisIndex(int vlistID, int index, int zaxisID)
 {
   static const char *func = "vlistChangeZaxisIndex";
@@ -1580,6 +1577,7 @@ void vlistChangeZaxisIndex(int vlistID, int index, int zaxisID)
 	  }
       }
 }
+
 
 void vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2)
 {
