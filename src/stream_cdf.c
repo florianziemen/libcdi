@@ -2059,9 +2059,7 @@ void cdfDefVCT(int streamID, int zaxisID)
       size_t start;
       size_t count = 1;      
       int ncdimid, ncdimid2;
-      int ncvarid, ncvarid2;
       int hyaiid, hybiid, hyamid, hybmid;
-      int *ilevels = NULL;
       const double *vctptr = zaxisInqVctPtr(zaxisID);
       double mval;
       char tmpname[256];
@@ -2083,48 +2081,18 @@ void cdfDefVCT(int streamID, int zaxisID)
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      cdf_def_dim(fileID, "mlev", mlev, &ncdimid);
-      cdf_def_dim(fileID, "ilev", ilev, &ncdimid2);
+      cdf_def_dim(fileID, "nhym", mlev, &ncdimid);
+      cdf_def_dim(fileID, "nhyi", ilev, &ncdimid2);
 
       streamptr->vct.mlev   = mlev;
       streamptr->vct.ilev   = ilev;
       streamptr->vct.mlevID = ncdimid;
       streamptr->vct.ilevID = ncdimid2;
 
-      cdf_def_var(fileID, "mlev", NC_INT,    1, &ncdimid,  &ncvarid);
-      cdf_def_var(fileID, "ilev", NC_INT,    1, &ncdimid2, &ncvarid2);
       cdf_def_var(fileID, "hyai", NC_DOUBLE, 1, &ncdimid2, &hyaiid);
       cdf_def_var(fileID, "hybi", NC_DOUBLE, 1, &ncdimid2, &hybiid);
       cdf_def_var(fileID, "hyam", NC_DOUBLE, 1, &ncdimid,  &hyamid);
       cdf_def_var(fileID, "hybm", NC_DOUBLE, 1, &ncdimid,  &hybmid);
-
-      strcpy(tmpname, "hybrid level at layer midpoints");
-      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
-      strcpy(tmpname, "hybrid_sigma_pressure");
-      cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(tmpname), tmpname);
-      strcpy(tmpname, "level");
-      cdf_put_att_text(fileID, ncvarid, "units", strlen(tmpname), tmpname);
-      strcpy(tmpname, "down");
-      cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
-      strcpy(tmpname, "hyam hybm (mlev=hyam+hybm*aps)");
-      cdf_put_att_text(fileID, ncvarid, "formula", strlen(tmpname), tmpname);
-      strcpy(tmpname, "ap: hyam b: hybm ps: aps");
-      cdf_put_att_text(fileID, ncvarid, "formula_terms", strlen(tmpname), tmpname);
-      strcpy(tmpname, "ilev");
-      cdf_put_att_text(fileID, ncvarid, "borders", strlen(tmpname), tmpname);
-
-      strcpy(tmpname, "hybrid level at layer interfaces");
-      cdf_put_att_text(fileID, ncvarid2, "long_name", strlen(tmpname), tmpname);
-      strcpy(tmpname, "hybrid_sigma_pressure");
-      cdf_put_att_text(fileID, ncvarid2, "standard_name", strlen(tmpname), tmpname);
-      strcpy(tmpname, "level");
-      cdf_put_att_text(fileID, ncvarid2, "units", strlen(tmpname), tmpname);
-      strcpy(tmpname, "down");
-      cdf_put_att_text(fileID, ncvarid2, "positive", strlen(tmpname), tmpname);
-      strcpy(tmpname, "hyai hybi (ilev=hyai+hybi*aps)");
-      cdf_put_att_text(fileID, ncvarid2, "formula", strlen(tmpname), tmpname);
-      strcpy(tmpname, "ap: hyai b: hybi ps: aps");
-      cdf_put_att_text(fileID, ncvarid2, "formula_terms", strlen(tmpname), tmpname);
 
       strcpy(tmpname, "hybrid A coefficient at layer interfaces");
       cdf_put_att_text(fileID, hyaiid, "long_name", strlen(tmpname), tmpname);
@@ -2145,14 +2113,6 @@ void cdfDefVCT(int streamID, int zaxisID)
 
       cdf_enddef(fileID);
       streamptr->ncmode = 2;
-
-      ilevels = (int *) malloc(ilev*sizeof(int));
-
-      for ( i = 0; i < ilev; i++ ) ilevels[i] = i+1;
-      cdf_put_var_int(fileID, ncvarid,  ilevels);
-      cdf_put_var_int(fileID, ncvarid2, ilevels);
-
-      free(ilevels);
 
       cdf_put_var_double(fileID, hyaiid, vctptr);
       cdf_put_var_double(fileID, hybiid, vctptr+ilev);
@@ -2271,67 +2231,58 @@ void cdfDefZaxis(int streamID, int zaxisID)
 
       if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
         {
-          int ilev = zaxisInqVctSize(zaxisID)/2;
-          int mlev = ilev - 1;
-
           if ( type == ZAXIS_HYBRID )
             {
-              if (  mlev != dimlen )
-                {
-                  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+	      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-                  cdf_def_dim(fileID, axisname, dimlen, &dimID);
-                  cdf_def_var(fileID, axisname, NC_INT, 1, &dimID,  &ncvarid);
+	      cdf_def_dim(fileID, axisname, dimlen, &dimID);
+	      cdf_def_var(fileID, axisname, NC_INT, 1, &dimID,  &ncvarid);
 
-                  strcpy(tmpname, "hybrid level at layer midpoints");
-                  cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
-                  strcpy(tmpname, "hybrid_sigma_pressure");
-                  cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(tmpname), tmpname);
-                  strcpy(tmpname, "level");
-                  cdf_put_att_text(fileID, ncvarid, "units", strlen(tmpname), tmpname);
-                  strcpy(tmpname, "down");
-                  cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
-                  strcpy(tmpname, "hyam hybm (mlev=hyam+hybm*aps)");
-                  cdf_put_att_text(fileID, ncvarid, "formula", strlen(tmpname), tmpname);
-                  strcpy(tmpname, "ap: hyam b: hybm ps: aps");
-                  cdf_put_att_text(fileID, ncvarid, "formula_terms", strlen(tmpname), tmpname);
-                  strcpy(tmpname, "ilev");
-                  cdf_put_att_text(fileID, ncvarid, "borders", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "hybrid level at layer midpoints");
+	      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "hybrid_sigma_pressure");
+	      cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "level");
+	      cdf_put_att_text(fileID, ncvarid, "units", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "down");
+	      cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "hyam hybm (mlev=hyam+hybm*aps)");
+	      cdf_put_att_text(fileID, ncvarid, "formula", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "ap: hyam b: hybm ps: aps");
+	      cdf_put_att_text(fileID, ncvarid, "formula_terms", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "ilev");
+	      cdf_put_att_text(fileID, ncvarid, "borders", strlen(tmpname), tmpname);
   
-                  cdf_enddef(fileID);
-                  streamptr->ncmode = 2;
+	      cdf_enddef(fileID);
+	      streamptr->ncmode = 2;
 
-                  cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
-                }
+	      cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
             }
 
           if ( type == ZAXIS_HYBRID_HALF )
             {
-              if ( ilev != dimlen )
-                {
-                  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+	      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-                  cdf_def_dim(fileID, axisname, dimlen, &dimID);
-                  cdf_def_var(fileID, axisname, NC_INT, 1, &dimID,  &ncvarid);
+	      cdf_def_dim(fileID, axisname, dimlen, &dimID);
+	      cdf_def_var(fileID, axisname, NC_INT, 1, &dimID,  &ncvarid);
 
-                  strcpy(tmpname, "hybrid level at layer interfaces");
-                  cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
-                  strcpy(tmpname, "hybrid_sigma_pressure");
-                  cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(tmpname), tmpname);
-                  strcpy(tmpname, "level");
-                  cdf_put_att_text(fileID, ncvarid, "units", strlen(tmpname), tmpname);
-                  strcpy(tmpname, "down");
-                  cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
-                  strcpy(tmpname, "hyai hybi (ilev=hyai+hybi*aps)");
-                  cdf_put_att_text(fileID, ncvarid, "formula", strlen(tmpname), tmpname);
-                  strcpy(tmpname, "ap: hyai b: hybi ps: aps");
-                  cdf_put_att_text(fileID, ncvarid, "formula_terms", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "hybrid level at layer interfaces");
+	      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "hybrid_sigma_pressure");
+	      cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "level");
+	      cdf_put_att_text(fileID, ncvarid, "units", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "down");
+	      cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "hyai hybi (ilev=hyai+hybi*aps)");
+	      cdf_put_att_text(fileID, ncvarid, "formula", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "ap: hyai b: hybi ps: aps");
+	      cdf_put_att_text(fileID, ncvarid, "formula_terms", strlen(tmpname), tmpname);
               
-                  cdf_enddef(fileID);
-                  streamptr->ncmode = 2;
+	      cdf_enddef(fileID);
+	      streamptr->ncmode = 2;
 
-                  cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
-                }
+	      cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
             }
 
           cdfDefVCT(streamID, zaxisID);

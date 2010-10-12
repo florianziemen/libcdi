@@ -1,3 +1,7 @@
+2010-10-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+        * cdfDefVCT: remove var mlev and ilev (bug fix) [report: Torsten Weber]
+
 2010-10-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cdfOpenFile: create netCDF4 files without NC_CLASSIC_MODEL
