@@ -2250,9 +2250,10 @@ void cdfDefZaxis(int streamID, int zaxisID)
 	      cdf_put_att_text(fileID, ncvarid, "formula", strlen(tmpname), tmpname);
 	      strcpy(tmpname, "ap: hyam b: hybm ps: aps");
 	      cdf_put_att_text(fileID, ncvarid, "formula_terms", strlen(tmpname), tmpname);
+	      /*
 	      strcpy(tmpname, "ilev");
 	      cdf_put_att_text(fileID, ncvarid, "borders", strlen(tmpname), tmpname);
-  
+	      */
 	      cdf_enddef(fileID);
 	      streamptr->ncmode = 2;
 
