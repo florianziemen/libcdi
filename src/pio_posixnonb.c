@@ -158,8 +158,8 @@ int destroyAFiledataP ( void *v )
     fprintf ( stdout, "pe%d destroyAFiledataP(): name=%s, cleanup, in\n", 
 	      pioinfo->rank, afp->name );
 
-  check_mpi_status ( __LINE__, &( pioinfo->comm ), &status,
-		     MPI_Wait ( &( afp->request ), &status ));
+  checkMPIstat ( MPI_Wait ( &( afp->request ), &status ), __FILE__, __LINE__, 
+		 pioinfo->rank, &status );
   
   dbuffer_cleanup ( &( afp->db1 ));
   dbuffer_cleanup ( &( afp->db2 ));
@@ -327,8 +327,8 @@ void pwPOSIXNONB ( int ncollectors )
 	  messageBuffer = ( char *) xmalloc ( messagesize  * sizeof ( char ));
     	  pMB = messageBuffer;
 
-	  check_mpi ( __LINE__, MPI_Recv ( messageBuffer, messagesize, MPI_CHAR, source, 
-					 tag, pioinfo->comm, &status ));
+	  MPI_Recv ( messageBuffer, messagesize, MPI_CHAR, source, 
+					 tag, pioinfo->comm, &status );
 
 	  if ( ddebug )
 	    fprintf ( stdout, "### pe%d pwPOSIXNONB (), after recv, in loop\n",
@@ -427,9 +427,8 @@ void pwPOSIXNONB ( int ncollectors )
 		      pioinfo->rank, command2charP [ rtag->command ], 
 		      rtag->id, bfd->name, amount );
 	  
-	  check_mpi( __LINE__,  
-		     MPI_Recv (  bfd->fb->buffer, amount, MPI_CHAR, source,  tag, 
-						 pioinfo->comm, &status ));	
+	  MPI_Recv (  bfd->fb->buffer, amount, MPI_CHAR, source,  tag, 
+						 pioinfo->comm, &status );	
 
 	  writeP ( bfd, amount );
 
@@ -486,16 +485,14 @@ void sendP ( aFiledataP *afd, int id )
 
   if ( ddebug ) startTime = MPI_Wtime ();
 
-  //if ( afd->request != MPI_REQUEST_NULL )
-    check_mpi_status ( __LINE__, &( pioinfo->comm ), &status,
-		       MPI_Wait ( &( afd->request ), &status ));
+  checkMPIstat (  MPI_Wait ( &( afd->request ), &status ), 
+		  __FILE__,  __LINE__, pioinfo->rank, &status );
 
   if ( ddebug )
     accumWait +=  ( MPI_Wtime () - startTime );
 
-  check_mpi ( __LINE__, 
-	      MPI_Isend ( afd->db->buffer, amount, MPI_CHAR, pioinfo->specialRank, 
-			  tag, pioinfo->comm, &( afd->request ))); 
+  MPI_Isend ( afd->db->buffer, amount, MPI_CHAR, pioinfo->specialRank, 
+			  tag, pioinfo->comm, &( afd->request )); 
 
   /* change outputBuffer */
   

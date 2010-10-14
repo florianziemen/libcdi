@@ -198,7 +198,6 @@ PROGRAM CDIWRITE
 #ifndef NOMPI
   CALL MPI_INIT ( error )
   CALL MPI_COMM_DUP ( MPI_COMM_WORLD, pioComm, error )
-  CALL MPI_ERRHANDLER_SET ( pioComm, MPI_ERRORS_RETURN, error )
   CALL MPI_COMM_RANK ( pioComm, rank, error )
   
   CALL readArgs( PTYPE )
@@ -206,6 +205,9 @@ PROGRAM CDIWRITE
   IF ( ddebug == 1 ) THEN
     WRITE ( *, * ) 'MAIN after readArgs: pe', rank, ', PTYPE=', PTYPE
   END IF
+#else
+  PTYPE = PIO_NONE
+  pioComm = 0
 #endif
   
   collectingData =  pioInit( PTYPE, pioComm, &
@@ -225,21 +227,21 @@ PROGRAM CDIWRITE
     GO TO 1
   END IF
   
-  CALL mapFilesOnNodes
+  CALL mapStreamsOnNodes
   
   IF ( ddebug == 1 ) THEN
 #ifndef NOMPI
-    WRITE ( *, * ) 'MAIN after mapFilesOnNodes: pe', rank, &
+    WRITE ( *, * ) 'MAIN after mapStreamsOnNodes: pe', rank, &
       ', nstreams_NODE=', nstreams_NODE, ', streamnames_NODE=', &
       streamnames_NODE, ', streamsizes_NODE=', streamsizes_NODE
 #else
-    WRITE ( *, * ) 'MAIN after mapFilesOnNodes: nstreams_NODE=', nstreams_NODE, &
+    WRITE ( *, * ) 'MAIN after mapStreamsOnNodes: nstreams_NODE=', nstreams_NODE, &
       ', streamnames_NODE=', streamnames_NODE, ', streamsizes_NODE=', &
       streamsizes_NODE
 #endif
   END IF
-  
-  CALL mapVarsOnPes 
+
+  CALL mapVarsOnPes
   
   IF ( ddebug == 1 ) THEN
 #ifndef NOMPI
@@ -464,31 +466,31 @@ CONTAINS
       
       numarg = command_argument_count ()    
       
-      IF ( numarg /= 1 ) CALL MPI_ABORT ( pioComm, 1, error )
-      
+      IF ( numarg /= 1 ) THEN
+        CALL MPI_ABORT ( pioComm, 1, error )
+      END IF
+
       argMode = 0     
       CALL get_command_argument ( 1, value = arg )
       length = LEN_TRIM ( arg )
-      
+
       IF ( length > 9 ) CALL MPI_ABORT ( pioComm, 1, error )
-      
+    
       DO i = 1, length
         inum = IACHAR ( arg ( i : i )) - 48  
         IF ( inum < 0 .OR. inum > 9 ) CALL MPI_ABORT ( pioComm, 1, error )
         argMode = argMode + inum * 10 ** ( length - i )
       END DO
-      
-      IF ( argMode > MAXTYPES ) CALL MPI_ABORT ( pioComm, 1, error )
     END IF
     
     CALL MPI_BCAST ( argMode, 1, MPI_INTEGER, 0, pioComm, error );
-    
+
   END SUBROUTINE readArgs
 #endif
   
   !********************************************
   
-  SUBROUTINE mapFilesOnNodes 
+  SUBROUTINE mapStreamsOnNodes 
     
 #ifndef NOMPI
     INTEGER :: mapping ( NSTREAMS )
@@ -511,9 +513,10 @@ CONTAINS
         END IF
       END DO
     END IF
-    
-    CALL MPI_BCAST ( nstreams_NODE, 1, MPI_INTEGER, 0, pioCollectorComm_NODE, error )
-    
+
+    IF ( PTYPE /= PIO_NONE ) THEN
+      CALL MPI_BCAST ( nstreams_NODE, 1, MPI_INTEGER, 0, pioCollectorComm_NODE, error )
+    END IF
 #else
     
     nstreams_NODE = NSTREAMS
@@ -536,20 +539,22 @@ CONTAINS
         END IF
       END DO
     END IF
-    
-    CALL MPI_BCAST ( streamsizes_NODE, nstreams_Node, MPI_INTEGER, &
-      0, pioCollectorComm_NODE, error )
-    
-    DO i = 1, nstreams_NODE
-      CALL MPI_BCAST ( streamnames_NODE ( i ), 8, MPI_CHARACTER, &
+
+    IF ( PTYPE /= PIO_NONE ) THEN
+      CALL MPI_BCAST ( streamsizes_NODE, nstreams_Node, MPI_INTEGER, &
         0, pioCollectorComm_NODE, error )
-    END DO
+      
+      DO i = 1, nstreams_NODE
+        CALL MPI_BCAST ( streamnames_NODE ( i ), 8, MPI_CHARACTER, &
+          0, pioCollectorComm_NODE, error )
+      END DO
+    END IF
 #else
     streamsizes_NODE = STREAMSIZES
     streamnames_NODE = STREAMNAMES
 #endif
     
-  END SUBROUTINE mapFilesOnNodes
+  END SUBROUTINE mapStreamsOnNodes
   
   !********************************************
   
@@ -559,13 +564,18 @@ CONTAINS
     ALLOCATE ( streamlasts_PE ( nstreams_NODE ), stat = status )
     
 #ifndef NOMPI
-    CALL MPI_COMM_SIZE ( pioCollectorComm_NODE, ncollectors_NODE, error )
-    
     IF ( PTYPE /= PIO_NONE ) THEN
-      DO i = 1, nstreams_NODE
-        CALL initLocalstream ( ncollectors_NODE, streamsizes_NODE ( i ), &
-          streamfirsts_PE ( i ), streamlasts_PE ( i ))
-      END DO
+      CALL MPI_COMM_SIZE ( pioCollectorComm_NODE, ncollectors_NODE, error )
+      
+      IF ( PTYPE /= PIO_NONE ) THEN
+        DO i = 1, nstreams_NODE
+          CALL initLocalstream ( ncollectors_NODE, streamsizes_NODE ( i ), &
+            streamfirsts_PE ( i ), streamlasts_PE ( i ))
+        END DO
+      ELSE
+        streamfirsts_PE = 1
+        streamlasts_PE = streamsizes_NODE
+      END IF
     ELSE
       streamfirsts_PE = 1
       streamlasts_PE = streamsizes_NODE
