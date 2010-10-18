@@ -2,25 +2,17 @@ import os, numpy
 import CdiObj
 
 def htmlSkel(experiment):
-  return ['<html> <head> <title>ECHAM Experiment: '+ experiment +'</title> <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script> </head>' +
+  return ['<html> <head> <title>ECHAM Experiment: '+ experiment +'</title></head>' +
   """<body>
-    <script>
-      $(function() {
-        $(\'tr.parent\')
-        .css("cursor","pointer")
-        .attr("title","Click to expand/collapse")
-        .click(function(){
-          $(this).siblings(\'.child-\'+this.id).toggle();
-        });
-        $(\'tr[@class^=child-]\').hide().children(\'td\');
-        });</script>""",
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script> 
+<script type="text/javascript" src="https://code.zmaw.de/files/cdo/html/tableFold.js"></script>""",
   '''</body>
     </html>
   ''']
 
 def tableSkel():
   return ["<table id=\"detail_table\" class=\"detail\"> <!--       <col style=\"width: 40px;\"> <col style=\"width: 80px;\"> <col style=\"width: 80px;\"> <col style=\"width: 80px;\">-->" +
-          "<thead align=\"left\"><tr align=\"left\"><th>Code</th><th>North</th><th>South</th><th colspan=\"1000\">Global</th></tr></thead>",
+          "<thead align=\"left\"><tr align=\"right\"><th>Code</th><th>North</th><th>South</th><th colspan=\"1000\">Global</th></tr></thead>",
           '</table>']
 
 def tableRow(code,northVal,southVal,globalVal):
