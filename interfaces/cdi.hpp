@@ -101,6 +101,8 @@ class Cdi {
     std::map<int        , CdiTaxis>    taxes;
     std::map<int        , CdiZaxis>    zaxes;
     std::map<int        , CdiGrid>     grids;
+
+    void griddes();
   private:
     void getTaxes();
     void getZaxes();

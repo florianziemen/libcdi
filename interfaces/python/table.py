@@ -20,15 +20,15 @@ def htmlSkel(experiment):
 
 def tableSkel():
   return ["<table border='1' id=\"detail_table\" class=\"detail\"> <!--       <col style=\"width: 40px;\"> <col style=\"width: 80px;\"> <col style=\"width: 80px;\"> <col style=\"width: 80px;\">-->" +
-          "<thead align=\"left\"><tr align=\"right\"><th>Code</th><th>North</th><th>South</th><th>Global</th></tr></thead>",
+          "<thead align=\"left\"><tr align=\"left\"><th>Code</th><th>North</th><th>South</th><th colspan=\"1000\">Global</th></tr></thead>",
           '</table>']
 
 def tableRow(code,northVal,southVal,globalVal):
   return ["<tr  align=\"right\" title=\"Click to expand/collapse\" style=\"cursor: pointer;\" class=\"parent\" id=\"row%d\" >" % code +
-          "<td  rowspan=\"2\" valign=\"top\">%d</td><td>%3.3f</td><td>%3.3f</td><td>%3.3f</td>" % (code,northVal, southVal, globalVal) +
+          "<td valign=\"top\">%d</td><td>%3.3f</td><td>%3.3f</td><td>%3.3f</td>" % (code,northVal, southVal, globalVal) +
           '</tr>' + 
           "<tr style=\"display: none;\" class=\"child-row%d\">" % code + 
-          '<td colspan="3">', 
+          '<td></td><td colspan="3">', 
           '</td></tr></table>']
 
 def generateSubTable(headers, rows):
@@ -48,7 +48,7 @@ def generateSubTable(headers, rows):
   html.append("</tr>")
 
   if html:
-    html  = ["<table>"] + html + ["</table>"]
+    html  = ["<table border=\"2\">"] + html + ["</table>"]
 
   return "".join(html)  
 
@@ -72,26 +72,27 @@ html.append(tableStart)
 
 for code in cdi.codes:
 
-  var = cdi.varByCode[code]
-  var.getValues()
-  vals = numpy.array(var.values)
-  lats = numpy.array(var.grid.yvalues)
-  northInd = numpy.where(lats >= 0)
-  southInd = numpy.where(lats <  0)
-  print 'Global Mean:     ',vals.mean()
-  print 'Global Max|Min:  ',vals.max(),'|',vals.min()
-  print 'North  Mean:     ',vals[northInd].mean()
-  print 'South  Mean:     ',vals[southInd].mean()
-  
-  codeTableStart, codeTableEnd = tableRow(code,vals[northInd].mean(), vals[southInd].mean(), vals.mean())
-  
-  html.append(codeTableStart)
+    var = cdi.varByCode[code]
+    var.getValues()
+    vals = numpy.array(var.values)
+    lats = numpy.array(var.grid.yvalues)
+    northInd = numpy.where(lats >= 0)
+    southInd = numpy.where(lats <  0)
+    print 'Global Mean:     ',vals.mean()
+    print 'Global Max|Min:  ',vals.max(),'|',vals.min()
+    print 'North  Mean:     ',vals[northInd].mean()
+    print 'South  Mean:     ',vals[southInd].mean()
+    
+    codeTableStart, codeTableEnd = tableRow(code,vals[northInd].mean(), vals[southInd].mean(), vals.mean())
+    
+    html.append(codeTableStart)
 
-  vtable  = generateSubTable(lats[southInd],[vals[southInd]])
-  vtable += generateSubTable(lats[northInd],[vals[northInd]])
+    vtable  = generateSubTable(lats[southInd],[vals[southInd]])
+  #  vtable += generateSubTable(lats[northInd],[vals[northInd]])
 
-  html.append(vtable)
-  html.append(codeTableEnd)
+    html.append(vtable)
+#    html.append(codeTableEnd)
+
 
 html.append(tableEnd)
 html.append(htmlEnd)

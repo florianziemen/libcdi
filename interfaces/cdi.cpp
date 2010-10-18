@@ -29,7 +29,7 @@ CdiGrid::CdiGrid(int gridid) {
   ysize = gridInqYsize(gridID);
   xvalues.resize(xsize);
   yvalues.resize(ysize);
-  std::cout << "(gridID:" << gridID<< ") xsize: " << xsize << " ysize:" << ysize << std::endl;
+//  std::cout << "(gridID:" << gridID<< ") xsize: " << xsize << " ysize:" << ysize << std::endl;
 
   getValues();
   getBounds();
@@ -415,5 +415,9 @@ Cdi::getVars() {
     var[name]       = _var;
     varByCode[code] = _var;
   }
+}
+
+void Cdi::griddes() {
+  //Cdo::griddes("|" + streamID);
 }
 /* } */
