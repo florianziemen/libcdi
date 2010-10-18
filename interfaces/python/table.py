@@ -1,5 +1,9 @@
-import os, numpy
+import os, numpy, getopt, sys
 import CdiObj
+
+
+def usage():
+  print "usage: ",sys.argv[0]," [-o outputFile] [-e experiementTag] [-v] inputFile"
 
 def htmlSkel(experiment):
   return ['<html> <head> <title>ECHAM Experiment: '+ experiment +'</title></head>' +
@@ -44,51 +48,82 @@ def generateSubTable(headers, rows):
 
   return "".join(html)  
 
-sourcefile  = "BOT.grb"
-zonalfile   = "zonavg-BOT.grb"
-cdoOperator = "zonavg"
-cmd         = ' '.join(['cdo',cdoOperator, sourcefile, zonalfile])
+if __name__ == '__main__':
 
-print cmd
+  try:
+    opts, args = getopt.getopt(sys.argv[1:], "ho:v", ["help", "output="])
+  except getopt.GetoptError, err:
+    #print help information and exit:
+    print str(err) # will print something like "option -a not recognized"
+    usage()
+    sys.exit(2)
 
-os.popen(cmd).read()
+  output  = 'table.html'
+  expName = '187'
+  verbose = False
+  for o, a in opts:
+    if o == "-v":
+      verbose = True
+    elif o in ("-h", "--help"):
+      usage()
+      sys.exit()
+    elif o in ("-o", "--output"):
+      output = a
+    elif o in ("-e", "--experiment"):
+      expName = a
+    else:
+      assert False, "unhandled option"
+  
+  sourcefile = args[0]
+  #TODO test if input file exists?
+  if verbose == True:
+    print 'Input:  ' + sourcefile
+    print 'Output: ' + output
+ 
+  cdoOperator = "zonavg"
+  zonalfile   = cdoOperator + "-" + sourcefile
+  cmd         = ' '.join(['cdo',cdoOperator, sourcefile, zonalfile])
 
-cdi = CdiObj.Cdi(zonalfile)
+  print cmd
 
-html = []
-htmlStart, htmlEnd = htmlSkel('tableTest')
-tableStart, tableEnd = tableSkel()
+  os.popen(cmd).read()
 
-html.append(htmlStart)
-html.append(tableStart)
+  cdi = CdiObj.Cdi(zonalfile)
 
-for code in cdi.codes:
+  html = []
+  htmlStart, htmlEnd = htmlSkel(expName)
+  tableStart, tableEnd = tableSkel()
 
-    var = cdi.varByCode[code]
-    var.getValues()
-    vals = numpy.array(var.values)
-    lats = numpy.array(var.grid.yvalues)
-    northInd = numpy.where(lats >= 0)
-    southInd = numpy.where(lats <  0)
-    print 'Global Mean:     ',vals.mean()
-    print 'Global Max|Min:  ',vals.max(),'|',vals.min()
-    print 'North  Mean:     ',vals[northInd].mean()
-    print 'South  Mean:     ',vals[southInd].mean()
-    
-    codeTableStart, codeTableEnd = tableRow(code,vals[northInd].mean(), vals[southInd].mean(), vals.mean())
-    
-    html.append(codeTableStart)
+  html.append(htmlStart)
+  html.append(tableStart)
 
-    tdata = numpy.array([lats[northInd],vals[northInd],lats[southInd],vals[southInd]]).transpose().tolist()
-    vtable  = generateSubTable(["latitude","values","latidute","values"],tdata)
+  for code in cdi.codes:
 
-    html.append(vtable)
-#    html.append(codeTableEnd)
+      var = cdi.varByCode[code]
+      var.getValues()
+      vals = numpy.array(var.values)
+      lats = numpy.array(var.grid.yvalues)
+      northInd = numpy.where(lats >= 0)
+      southInd = numpy.where(lats <  0)
+      if verbose == True:
+        print 'Global Mean:     ',vals.mean()
+        print 'Global Max|Min:  ',vals.max(),'|',vals.min()
+        print 'North  Mean:     ',vals[northInd].mean()
+        print 'South  Mean:     ',vals[southInd].mean()
+      
+      codeTableStart, codeTableEnd = tableRow(code,vals[northInd].mean(), vals[southInd].mean(), vals.mean())
+      
+      html.append(codeTableStart)
+
+      tdata = numpy.array([lats[northInd],vals[northInd],lats[southInd],vals[southInd]]).transpose().tolist()
+      vtable  = generateSubTable(["latitude","values","latidute","values"],tdata)
+
+      html.append(vtable)
 
 
-html.append(tableEnd)
-html.append(htmlEnd)
+  html.append(tableEnd)
+  html.append(htmlEnd)
 
-f = open('testTable.html', 'w')
-f.write("".join(html))
-f.close
+  f = open(output, 'w')
+  f.write("".join(html))
+  f.close
