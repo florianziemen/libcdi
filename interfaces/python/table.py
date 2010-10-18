@@ -19,7 +19,7 @@ def htmlSkel(experiment):
   ''']
 
 def tableSkel():
-  return ["<table border='1' id=\"detail_table\" class=\"detail\"> <!--       <col style=\"width: 40px;\"> <col style=\"width: 80px;\"> <col style=\"width: 80px;\"> <col style=\"width: 80px;\">-->" +
+  return ["<table id=\"detail_table\" class=\"detail\"> <!--       <col style=\"width: 40px;\"> <col style=\"width: 80px;\"> <col style=\"width: 80px;\"> <col style=\"width: 80px;\">-->" +
           "<thead align=\"left\"><tr align=\"left\"><th>Code</th><th>North</th><th>South</th><th colspan=\"1000\">Global</th></tr></thead>",
           '</table>']
 
@@ -37,18 +37,18 @@ def generateSubTable(headers, rows):
   if len(headers) > 0:
     html.append("<tr>")
   for header in headers:
-    html.append("<th>%3.3f</th>" % header)
+    html.append("<th>" + header + "</th>")
   html.append("</tr>")
 
   if len(rows) > 0:
     for row in rows:
       html.append("<tr>")
-  for cell in row:
-    html.append("<td>%3.3f</td>" % cell)
+      for cell in row:
+        html.append("<td>%3.3f</td>" % cell)
   html.append("</tr>")
 
   if html:
-    html  = ["<table border=\"2\">"] + html + ["</table>"]
+    html  = ["<table>"] + html + ["</table>"]
 
   return "".join(html)  
 
@@ -87,8 +87,8 @@ for code in cdi.codes:
     
     html.append(codeTableStart)
 
-    vtable  = generateSubTable(lats[southInd],[vals[southInd]])
-  #  vtable += generateSubTable(lats[northInd],[vals[northInd]])
+    tdata = numpy.array([lats[northInd],vals[northInd],lats[southInd],vals[southInd]]).transpose().tolist()
+    vtable  = generateSubTable(["latitude","values","latidute","values"],tdata)
 
     html.append(vtable)
 #    html.append(codeTableEnd)
