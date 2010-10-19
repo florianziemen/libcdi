@@ -308,7 +308,8 @@ PROGRAM CDIWRITE
     IF ( streamID ( i ) < 0 ) THEN
       WRITE(0,*) cdiStringError ( streamID ( i ))
 #ifndef NOMPI
-      CALL MPI_ABORT ( pioComm, 1, error )
+      CALL MPI_FINALIZE ( error )
+      STOP
 #else
       STOP
 #endif
@@ -467,18 +468,28 @@ CONTAINS
       numarg = command_argument_count ()    
       
       IF ( numarg /= 1 ) THEN
-        CALL MPI_ABORT ( pioComm, 1, error )
+        WRITE ( 0, * ) 'ERROR: ONE command line argument'
+        CALL MPI_FINALIZE ( error )
+        STOP
       END IF
 
       argMode = 0     
       CALL get_command_argument ( 1, value = arg )
       length = LEN_TRIM ( arg )
 
-      IF ( length > 9 ) CALL MPI_ABORT ( pioComm, 1, error )
+      IF ( length > 9 ) THEN
+        WRITE ( 0, * ) 'ERROR: command line argument NOT READABLE'
+        CALL MPI_FINALIZE ( error )
+        STOP
+      END IF
     
       DO i = 1, length
         inum = IACHAR ( arg ( i : i )) - 48  
-        IF ( inum < 0 .OR. inum > 9 ) CALL MPI_ABORT ( pioComm, 1, error )
+        IF ( inum < 0 .OR. inum > 9 ) THEN
+          WRITE ( 0, * ) 'ERROR: command line argument MODUS NOT VALID'
+          CALL MPI_FINALIZE ( error )
+          STOP
+        END IF
         argMode = argMode + inum * 10 ** ( length - i )
       END DO
     END IF

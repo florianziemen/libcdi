@@ -328,7 +328,8 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
   npes_node = size / ( * nnodes );
   key = rank % npes_node;
 
-  MPI_Comm_split ( commF2C, *color, key, myComm);
+  checkMPI ( MPI_Comm_split ( commF2C, *color, key, myComm),
+	     __FILE__, __LINE__, rank );
 
   free ( allHosts0 );
   free ( allHosts );

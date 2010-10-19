@@ -39,13 +39,49 @@ typedef struct
 
 static queue *bibAFiledataM;
 
+
+/***************************************************************/
+
+void errorMPINONB ( char *errorString, const char *filename, int line )
+{
+  node *curr;
+
+  fprintf ( stderr, "MPINONB ERROR, %s: line %d: pe%d, errorString: \"%s\"\n",
+	    filename, line, pioinfo->rank, errorString );
+
+  queueDestroy ( bibAFiledataM );
+  MPI_Barrier ( pioinfo->comm );
+  pioFinalize ();
+  MPI_Finalize ();
+  exit ( 1 );
+}
+
+/***************************************************************/
+
+void errorMPIMPINONB ( int iret, const char *filename, int line )
+{
+  node *curr;
+  char errorString[MPI_MAX_ERROR_STRING + 1];
+  int len;
+
+  fprintf ( stderr, "MPINONB ERROR MPI, %s: line %d: pe%d, errorString: \"%s\"\n",
+	    filename, line, pioinfo->rank, errorString );
+
+  queueDestroy ( bibAFiledataM );
+  MPI_Barrier ( pioinfo->comm );
+  pioFinalize ();
+  MPI_Finalize ();
+  exit ( 1 );
+}
+
 /***************************************************************/
 
 static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
 {
   aFiledataM *of;
   size_t len;
-  int status;
+  int iret;
+  char errorString[maxErrorString];
 
   if ( ddebug )
     fprintf ( stdout, "pe%d initAFiledataMPINONB (): filename=%s, buffersize=%zu, in\n",
@@ -65,24 +101,35 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
     fprintf ( stdout, "pe%d initOpenFileCollector(): name=%s, init output buffer\n", 
 	      pioinfo->rank, of->name );
    
-  if (( status = dbuffer_init ( &( of->db1 ), of->size )) == 1 )
-    errorPIO ( "dbuffer_init outputBuffer1", __FILE__, __LINE__, pioinfo->rank );
+  iret = dbuffer_init ( &( of->db1 ), of->size );
+  if ( iret == 1 )
+    {
+      sprintf ( errorString, "dbuffer_init did not succeed" );
+      errorMPINONB ( errorString, __FILE__, __LINE__ );
+    }
 
-  if (( status = dbuffer_init ( &( of->db2 ), of->size )) == 1 )
-    errorPIO ( "dbuffer_init outputBuffer2", __FILE__, __LINE__ , pioinfo->rank);
+  iret = dbuffer_init ( &( of->db2 ), of->size );
+  if ( iret == 1 )
+    {
+      sprintf ( errorString, "dbuffer_init did not succeed" );
+      errorMPINONB ( errorString, __FILE__, __LINE__ );
+    }
 
   of->db = of->db1;
 
   /* open file */ 
 
-  MPI_File_open ( pioinfo->comm, of->name, ( MPI_MODE_CREATE|MPI_MODE_WRONLY ), 
-		  MPI_INFO_NULL, &( of->fh ));
+  iret = MPI_File_open ( pioinfo->comm, of->name, ( MPI_MODE_CREATE|MPI_MODE_WRONLY ), 
+			 MPI_INFO_NULL, &( of->fh ));
+
+  if ( iret != MPI_SUCCESS ) 
+    errorMPIMPINONB ( iret, __FILE__, __LINE__ );
 
   of->request = MPI_REQUEST_NULL;
   of->finished = false;
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d initAFiledataMPINONB (), enqueued name=%s, opened file, return\n",
+    fprintf ( stdout, "pe%d initAFiledataMPINONB (), opened file, return\n",
 	pioinfo->rank, of->name );
   
   return of;
@@ -107,7 +154,7 @@ int destroyAFiledataMPINONB ( void *v )
   startTime = MPI_Wtime ();
   MPI_Wait ( & ( of->request ), &status ); 
   accumWait += ( MPI_Wtime () - startTime );
-  MPI_File_sync ( of->fh ); 
+  iret = MPI_File_sync ( of->fh ); 
   
   iret = MPI_File_close ( & ( of->fh ));
 
@@ -142,30 +189,6 @@ bool compareNamesMPINONB  ( void *v1, void *v2 )
 	  memcmp ( afm1->name, afm2->name, len ) == 0 );
 
   return bret;
-}
-
-/***************************************************************/
-
-void errorMPINONB ( char *errorString, const char *filename, int line, int rank )
-{
-  node *curr;
-
-  fprintf ( stderr, "PIONONB ERROR, %s: line %d: pe%d, errorString: \"%s\"\n",
-	    filename, line, rank, errorString );
-  
-  curr = bibAFiledataM->head;
-  while ( curr ) 
-    { 
-      destroyAFiledataMPINONB (( aFiledataM *) curr->val );
-      curr = curr->next;
-    }
-  free ( bibAFiledataM );
-
-  MPI_Barrier ( pioinfo->comm );
-
-  pioFinalize ();
-  MPI_Finalize ();
-  exit ( 1 );
 }
 
 /***************************************************************/
@@ -223,9 +246,6 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
   node *curr;
   char errorString[maxErrorString];
 
-  int iret;
-  MPI_Status status;
-
   flush = ( tsId != oldTsId ) ? 1 : 0;
 
   if ( flush == 1 ) 
@@ -247,7 +267,8 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
   filled = dbuffer_push ( of->db, ( unsigned char * ) buffer, len );
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d fileWriter (): id = %d, tsId = %d, pushed data on buffer, filled = %d\n", 
+    fprintf ( stdout, "pe%d fileWriter (): id = %d, tsId = %d,"
+	      " pushed data on buffer, filled = %d\n", 
 	      pioinfo->rank, id, tsId, filled ); 
 
   if ( filled == 1 ) 
@@ -261,13 +282,11 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
 	  error = dbuffer_push ( of->db, ( unsigned char * ) buffer, len );
 	}
     }
-
-  error = 1;
   
   if ( error == 1 )
     {
       sprintf ( errorString,"problem filling output buffer, id=%d", id );
-      errorMPINONB ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      errorMPINONB ( errorString, __FILE__, __LINE__ );
     }
   
   return len;
@@ -289,7 +308,7 @@ int fcMPINONB ( int id )
   if ( ! ( of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, id )))
     {
       sprintf ( errorString, "pio_queue, id=%d not found", id ); 
-      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      errorMPINONB ( errorString, __FILE__, __LINE__ );
     }
 
   writeMPINONB ( of, id );
@@ -323,12 +342,42 @@ int fcMPINONB ( int id )
 }
 
 /***************************************************************/
+// baustelle, in modi vereinheitlichen, kapseln in pio_queue.c
+void queueCheck ( queue *q, char *name )
+{
+  node *curr;
+  aFiledataM *afm;
+  size_t len;
+  char errorString[maxErrorString];
+ 
+  len = strlen ( name );
+  curr = q->head;   
+      
+  while ( curr )
+    { 
+      afm = ( aFiledataM * ) curr->val;
+      if ( len == strlen ( afm->name ) &&
+	   memcmp ( name, afm->name, len ) == 0 )
+	{
+	  sprintf ( errorString, "Filename %s is already enqueued\n", name );
+	  errorMPINONB ( errorString, __FILE__, __LINE__ );
+	  
+	  return ;
+	}
+      
+      curr = curr->next;
+    }  
+
+  return;
+}
+//
 
 int fowMPINONB ( const char *filename )
 {
   static aFiledataM *of;
   static long buffersize = 0; 
   int id, bcastRank = 0; 
+  char errorString[maxErrorString];
 
   /* broadcast buffersize to collectors ( just once, for all files )*/
   
@@ -350,11 +399,13 @@ int fowMPINONB ( const char *filename )
       MPI_Bcast ( &buffersize, 1, MPI_LONG, bcastRank, pioinfo->comm );
     }
 
+  queueCheck (  bibAFiledataM, filename );
   of = initAFiledataMPINONB ( filename, buffersize );
+
   if (( id = queuePush ( bibAFiledataM, of, 0 )) < 0 )
     {   
-      fprintf ( stderr, "Filename %s not unique\n", of->name );
-      MPI_Abort ( pioinfo->comm, 1 );
+      sprintf ( errorString, "Filename %s not unique\n", of->name );
+      errorMPINONB ( errorString, __FILE__, __LINE__ );
     }
 
   if ( ddebug )
@@ -374,6 +425,9 @@ int initMPINONB ()
   MPI_Comm_dup ( pioinfo->comm, &( pioinfo->collectorComm ));
 
   bibAFiledataM = queueInit ( destroyAFiledataMPINONB, compareNamesMPINONB );
+
+  if ( bibAFiledataM == NULL )
+     errorPIO ( "queueInit did not succeed", __FILE__, __LINE__, pioinfo->rank )
 	    
   return collectingData;
 }
