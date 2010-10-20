@@ -90,7 +90,7 @@ pythonObjTest: pythonObj
 	@cd python; python testObj.py
 
 pythonObjInstall: pythonObj
-	@cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(locallibs) $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py install
+	@cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS) -L/usr/local./" INCFLAGS="-I../" python setupObj.py install
 endif
 # =========================================================
 help:

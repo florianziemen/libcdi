@@ -668,7 +668,7 @@ uninstall-am: uninstall-binPROGRAMS
 @ENABLE_PYTHON_TRUE@	@cd python; python testObj.py
 
 @ENABLE_PYTHON_TRUE@pythonObjInstall: pythonObj
-@ENABLE_PYTHON_TRUE@	@cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(locallibs) $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py install
+@ENABLE_PYTHON_TRUE@	@cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS) -L/usr/local./" INCFLAGS="-I../" python setupObj.py install
 # =========================================================
 help:
 	@echo "#=====================================================#"
