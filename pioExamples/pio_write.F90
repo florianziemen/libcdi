@@ -308,8 +308,7 @@ PROGRAM CDIWRITE
     IF ( streamID ( i ) < 0 ) THEN
       WRITE(0,*) cdiStringError ( streamID ( i ))
 #ifndef NOMPI
-      CALL MPI_FINALIZE ( error )
-      STOP
+      CALL MPI_ABORT ( MPI_COMM_WORLD, 1 )
 #else
       STOP
 #endif
@@ -426,8 +425,8 @@ PROGRAM CDIWRITE
   
   IF ( rank == 0 ) THEN
     WRITE ( *, * ) 'MAIN: NNODES = ', NNODES, &
-      'ncollectors_NODE = ', ncollectors_NODE, &
-      'PTYPE = ', PTYPENAMES ( PTYPE + 1 )
+      ', ncollectors_NODE = ', ncollectors_NODE, &
+      ', PTYPE = ', PTYPENAMES ( PTYPE + 1 )
  
     WRITE ( *, * ) '------------------------------------------------------------------'
     WRITE ( *, * ) 'MAIN: Maximum open  time:', sumOPEN,  's'
@@ -468,9 +467,8 @@ CONTAINS
       numarg = command_argument_count ()    
       
       IF ( numarg /= 1 ) THEN
-        WRITE ( 0, * ) 'ERROR: ONE command line argument'
-        CALL MPI_FINALIZE ( error )
-        STOP
+        WRITE ( 0, * ) 'ERROR: command line argument, NUMBER EXACTLY ONE'
+        CALL MPI_ABORT ( MPI_COMM_WORLD, error )
       END IF
 
       argMode = 0     
@@ -478,17 +476,15 @@ CONTAINS
       length = LEN_TRIM ( arg )
 
       IF ( length > 9 ) THEN
-        WRITE ( 0, * ) 'ERROR: command line argument NOT READABLE'
-        CALL MPI_FINALIZE ( error )
-        STOP
+        WRITE ( 0, * ) 'ERROR: command line argument, NOT READABLE'
+        CALL MPI_ABORT ( MPI_COMM_WORLD, error )
       END IF
     
       DO i = 1, length
         inum = IACHAR ( arg ( i : i )) - 48  
         IF ( inum < 0 .OR. inum > 9 ) THEN
-          WRITE ( 0, * ) 'ERROR: command line argument MODUS NOT VALID'
-          CALL MPI_FINALIZE ( error )
-          STOP
+          WRITE ( 0, * ) 'ERROR: command line argument, MODUS NOT VALID'
+          CALL MPI_ABORT ( MPI_COMM_WORLD, error )
         END IF
         argMode = argMode + inum * 10 ** ( length - i )
       END DO

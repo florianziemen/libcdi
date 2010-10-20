@@ -11,6 +11,9 @@
 extern bool ddebug; 
 extern char * command2charP[6];
 
+extern long initial_buffersize;
+extern int maxErrorString;
+
 extern double startTime;
 extern double accumProbe;
 extern double accumRecv;
@@ -18,10 +21,6 @@ extern double accumSend;
 extern double accumSuspend;
 extern double accumWait;
 extern double accumWrite;
-
-extern int maxErrorString;
-
-extern long initial_buffersize;
 
 extern pioInfo *pioinfo;
 
@@ -42,36 +41,32 @@ static queue *bibAFiledataM;
 
 /***************************************************************/
 
-void errorMPINONB ( char *errorString, const char *filename, int line )
+void checkMPINONBcoll ( int iret, const char *filename, int line )
 {
-  node *curr;
+  char errorString1[MPI_MAX_ERROR_STRING + 1];
+  char errorString2[MPI_MAX_ERROR_STRING + 1];
+  int len, errorClass;   
 
-  fprintf ( stderr, "MPINONB ERROR, %s: line %d: pe%d, errorString: \"%s\"\n",
-	    filename, line, pioinfo->rank, errorString );
+  if ( iret != MPI_SUCCESS )
+    {
+      MPI_Error_class ( iret, &errorClass );
+      MPI_Error_string ( errorClass, errorString1, &len );
+      errorString1[len] = '\0';
+      MPI_Error_string ( iret, errorString2, &len);
+      errorString2[len] = '\0';
+      
+      fprintf ( stderr, "MPI ERROR, %s: line %d: pe%d,"
+		"errorClass: \"%s\""
+		"errorString: \"%s\"\n",
+		filename, line, pioinfo->rank, 
+		errorString1, errorString2);
+      
+      queueDestroy ( bibAFiledataM );
+      MPI_Barrier ( pioinfo->comm );
+      MPI_Abort ( MPI_COMM_WORLD, iret );
+    }
 
-  queueDestroy ( bibAFiledataM );
-  MPI_Barrier ( pioinfo->comm );
-  pioFinalize ();
-  MPI_Finalize ();
-  exit ( 1 );
-}
-
-/***************************************************************/
-
-void errorMPIMPINONB ( int iret, const char *filename, int line )
-{
-  node *curr;
-  char errorString[MPI_MAX_ERROR_STRING + 1];
-  int len;
-
-  fprintf ( stderr, "MPINONB ERROR MPI, %s: line %d: pe%d, errorString: \"%s\"\n",
-	    filename, line, pioinfo->rank, errorString );
-
-  queueDestroy ( bibAFiledataM );
-  MPI_Barrier ( pioinfo->comm );
-  pioFinalize ();
-  MPI_Finalize ();
-  exit ( 1 );
+  return;
 }
 
 /***************************************************************/
@@ -81,7 +76,6 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   aFiledataM *of;
   size_t len;
   int iret;
-  char errorString[maxErrorString];
 
   if ( ddebug )
     fprintf ( stdout, "pe%d initAFiledataMPINONB (): filename=%s, buffersize=%zu, in\n",
@@ -102,34 +96,25 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
 	      pioinfo->rank, of->name );
    
   iret = dbuffer_init ( &( of->db1 ), of->size );
-  if ( iret == 1 )
-    {
-      sprintf ( errorString, "dbuffer_init did not succeed" );
-      errorMPINONB ( errorString, __FILE__, __LINE__ );
-    }
+  iret += dbuffer_init ( &( of->db2 ), of->size );
 
-  iret = dbuffer_init ( &( of->db2 ), of->size );
-  if ( iret == 1 )
-    {
-      sprintf ( errorString, "dbuffer_init did not succeed" );
-      errorMPINONB ( errorString, __FILE__, __LINE__ );
-    }
+  if ( iret > 0 )
+    errorPIO ( "dbuffer_init did not succeed", __FILE__, __LINE__, pioinfo->rank );
 
   of->db = of->db1;
 
   /* open file */ 
 
-  iret = MPI_File_open ( pioinfo->comm, of->name, ( MPI_MODE_CREATE|MPI_MODE_WRONLY ), 
-			 MPI_INFO_NULL, &( of->fh ));
-
-  if ( iret != MPI_SUCCESS ) 
-    errorMPIMPINONB ( iret, __FILE__, __LINE__ );
+  checkMPINONBcoll ( MPI_File_open ( pioinfo->comm, of->name, 
+				     ( MPI_MODE_CREATE|MPI_MODE_WRONLY ), 
+				     MPI_INFO_NULL, &( of->fh )), 
+		     __FILE__, __LINE__ );
 
   of->request = MPI_REQUEST_NULL;
   of->finished = false;
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d initAFiledataMPINONB (), opened file, return\n",
+    fprintf ( stdout, "pe%d initAFiledataMPINONB (), opened file %s, return\n",
 	pioinfo->rank, of->name );
   
   return of;
@@ -285,8 +270,8 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
   
   if ( error == 1 )
     {
-      sprintf ( errorString,"problem filling output buffer, id=%d", id );
-      errorMPINONB ( errorString, __FILE__, __LINE__ );
+      sprintf ( errorString,"did not succeed filling output buffer, id=%d", id );
+      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
     }
   
   return len;
@@ -308,7 +293,7 @@ int fcMPINONB ( int id )
   if ( ! ( of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, id )))
     {
       sprintf ( errorString, "pio_queue, id=%d not found", id ); 
-      errorMPINONB ( errorString, __FILE__, __LINE__ );
+      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
     }
 
   writeMPINONB ( of, id );
@@ -343,7 +328,7 @@ int fcMPINONB ( int id )
 
 /***************************************************************/
 // baustelle, in modi vereinheitlichen, kapseln in pio_queue.c
-void queueCheck ( queue *q, char *name )
+void queueCheck ( queue *q, const char *name )
 {
   node *curr;
   aFiledataM *afm;
@@ -360,9 +345,8 @@ void queueCheck ( queue *q, char *name )
 	   memcmp ( name, afm->name, len ) == 0 )
 	{
 	  sprintf ( errorString, "Filename %s is already enqueued\n", name );
-	  errorMPINONB ( errorString, __FILE__, __LINE__ );
-	  
-	  return ;
+	  errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+	  return;
 	}
       
       curr = curr->next;
@@ -404,8 +388,8 @@ int fowMPINONB ( const char *filename )
 
   if (( id = queuePush ( bibAFiledataM, of, 0 )) < 0 )
     {   
-      sprintf ( errorString, "Filename %s not unique\n", of->name );
-      errorMPINONB ( errorString, __FILE__, __LINE__ );
+      sprintf ( errorString, "filename %s not unique", of->name );
+      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
     }
 
   if ( ddebug )
@@ -427,7 +411,7 @@ int initMPINONB ()
   bibAFiledataM = queueInit ( destroyAFiledataMPINONB, compareNamesMPINONB );
 
   if ( bibAFiledataM == NULL )
-     errorPIO ( "queueInit did not succeed", __FILE__, __LINE__, pioinfo->rank )
+    errorPIO ( "queueInit did not succeed", __FILE__, __LINE__, pioinfo->rank );
 	    
   return collectingData;
 }

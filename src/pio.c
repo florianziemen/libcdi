@@ -48,38 +48,34 @@ char *token = "%";
 
 void errorPIO ( char *errorString, const char *filename, int line, int rank )
 {
-  fprintf ( stderr, "PIO ERROR, %s: line %d: pe%d, errorString: \"%s\"\n",
-	    filename, line, rank, errorString );
-  MPI_Finalize ();
-  exit ( 1 );
-}
-
-/*****************************************************************************/
-
-void errorMPI ( char *errorString, const char *filename, int line, int rank )
-{
-  fprintf ( stderr, "MPI ERROR, %s: line %d: pe%d, errorString: \"%s\"\n",
-	    filename, line, rank, errorString );
-  MPI_Finalize ();
-  exit ( 1 );
+  fprintf ( stderr, "PIO ERROR, pe%d, %s, line %d, errorString: \"%s\"\n",
+	    rank, filename, line, errorString );
+  MPI_Abort ( MPI_COMM_WORLD, 1 );
 }
 
 /*****************************************************************************/
 
 void checkMPI ( int iret, const char *filename, int line, int rank )
 {
-  char errorString[MPI_MAX_ERROR_STRING + 1];
-  int len;
+  char errorString1[MPI_MAX_ERROR_STRING + 1];
+  char errorString2[MPI_MAX_ERROR_STRING + 1];
+  int len, errorClass;   
 
-  if  ( iret != MPI_SUCCESS ) 
+  if ( iret != MPI_SUCCESS )
     {
-      MPI_Error_string ( iret, errorString, &len ); 
-      errorString[len] = '\0';
-      fprintf ( stderr,"MPI ERROR, %s: line %d, pe%d, return value: %d,"
-		" MPI_Error_string: \"%s\"\n", 
-		filename, line, rank, iret, errorString ); 
-      MPI_Finalize ();
-      exit ( 1 );
+      MPI_Error_class ( iret, &errorClass );
+      MPI_Error_string ( errorClass, errorString1, &len );
+      errorString1[len] = '\0';
+      MPI_Error_string ( iret, errorString2, &len);
+      errorString2[len] = '\0';
+      
+      fprintf ( stderr, "MPI ERROR, pe%d, %s, line %d,"
+		"errorClass: \"%s\""
+		"errorString: \"%s\"\n",
+		rank, filename, line, 
+		errorString1, errorString2);
+
+      MPI_Abort ( MPI_COMM_WORLD, iret );
     }
 
   return;
@@ -107,10 +103,10 @@ void checkMPIstat ( int iret, const char *filename, int line, int rank,
 	default:
 	  MPI_Error_string ( status->MPI_ERROR, errorString, &len );
 	  errorString[len] = '\0';
-	  fprintf ( stderr,"MPI ERROR in request, line %d, pe%d, return value: %d,"
-		    "error_string: %s\n", line, iret, rank, errorString ); 
-	  MPI_Finalize ();
-	  exit ( 1 );
+	  fprintf ( stderr,"MPI ERROR in request, pe%d, %s, line %d,"
+		    "return value: %d, error_string: %s\n", 
+		    rank, filename, line, iret, errorString ); 
+	  MPI_Abort ( MPI_COMM_WORLD, iret );
 	}
     }
   else 
@@ -126,11 +122,8 @@ void * xmalloc ( size_t size )
   void * value = malloc ( size );
 
   if ( value == NULL )
-    {
-      fprintf ( stderr, "ERROR: malloc didn't succeed\n" );
-      MPI_Finalize ();
-      exit ( 1 );
-    }
+    errorPIO ( "malloc did not succeed", __FILE__, __LINE__, -1 );
+  
   return value;
 }
 
@@ -282,7 +275,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
   checkMPI (( MPI_Get_processor_name ( myHost, &len )), __FILE__, __LINE__, rank );
 
   if ( myHost[0] == '\0' ) 
-    errorPIO ( "Hostname is not set", __FILE__, __LINE__ , rank);
+    errorPIO ( "did not succeed to set hostname", __FILE__, __LINE__ , rank);
   
   if ( ddebug )
     {
@@ -363,35 +356,35 @@ int pioInit ( int ptype, int commF, int *color, int *nnodes, int *pioCollComm2F 
   comm = MPI_COMM_NULL;
 
   if (( comm = MPI_Comm_f2c (( MPI_Fint ) commF )) == NULL )
-    errorMPI ( "MPI_Comm_f2c didn't succeed", __FILE__, __LINE__, -1 );
-
+    errorPIO ( "MPI_Comm_f2c didn't succeed", __FILE__, __LINE__, -1 );
+  
   MPI_Comm_set_errhandler ( comm, MPI_ERRORS_RETURN );
   MPI_Comm_size ( comm, &size );
   MPI_Comm_rank ( comm, &rank );
-
+  
   if ( ptype < 0 || ptype > maxPtype ) 
     errorPIO ( "PIOTYPE is no valid modus", __FILE__, __LINE__, rank );
-
+  
   pioinfo = ( pioInfo * ) xmalloc ( sizeof ( pioInfo ));
-
+  
   pioinfo->type = ptype; 
   setPioCommunicator ( & ( pioinfo->comm ), comm, color, nnodes );
-
+  
   if (( pioinfo->type == PIO_NONE ) && ( *nnodes != size ))
     errorPIO ( "PIOTYPE, NNODES: not a valid combination", __FILE__, __LINE__, rank );
-
+  
   pioinfo->color = *color;
   MPI_Comm_rank ( pioinfo->comm, &( pioinfo->rank ));
   MPI_Comm_size ( pioinfo->comm, &( pioinfo->size ));
-
+  
   if ( ddebug && pioinfo->rank == 0 )
     fprintf ( stdout, 
 	      "pe%d in pioDefPtype(), ptype=%d, initial_buffersize=%ld: "
 	      "after init pioinfo ...\n", 
 	      pioinfo->rank, pioinfo->type, initial_buffersize );
-
+  
   pioinfo->collectorComm = MPI_COMM_NULL;
-
+  
   switch ( pioinfo->type )
     {
     case PIO_NONE:
@@ -417,16 +410,16 @@ int pioInit ( int ptype, int commF, int *color, int *nnodes, int *pioCollComm2F 
       collectingData = initPOSIXNONB ();
       break;
     }
-
+  
   *pioCollComm2F  = 0;
   if (( *pioCollComm2F = MPI_Comm_c2f ( pioinfo->collectorComm )) == 0 )
-    errorMPI ( "MPI_Comm_c2f didn't succeed\n", __FILE__, __LINE__ , rank);
-
+    errorPIO ( "MPI_Comm_c2f didn't succeed\n", __FILE__, __LINE__ , rank);
+  
 #endif
   
   if ( ddebug )
     fprintf ( stdout, "pe in pioinit out\n" );
-      
+  
   return collectingData;
 }
 

@@ -15,7 +15,9 @@
 extern bool ddebug;
 extern char * command2charP[6];
 
-extern long initial_buffersize; 
+extern long initial_buffersize;
+extern char *token;
+extern int maxErrorString; 
 
 extern double startTime;
 extern double accumProbe;
@@ -27,7 +29,6 @@ extern double accumWrite;
 
 extern pioInfo *pioinfo;
 
-extern char *token;
 
 typedef struct 
 {
@@ -62,7 +63,7 @@ static aFiledataP *initAFiledataP ( const char *filename, size_t bs )
 {
   aFiledataP *afp;
   size_t len;
-  int status;
+  int iret;
 
   if ( ddebug )
     fprintf ( stdout, "pe%d initFiledataAP (): filename=%s, buffersize=%zu, in\n",
@@ -81,17 +82,13 @@ static aFiledataP *initAFiledataP ( const char *filename, size_t bs )
   if ( ddebug )
     fprintf ( stdout, "pe%d initOpenFileCollector(): name=%s, init output buffer\n", 
 	      pioinfo->rank, afp->name );
-   
-  if (( status = dbuffer_init ( &( afp->db1 ), afp->size )) == 1 )
-    {
-      fprintf ( stderr, "dbuffer_init outputBuffer1: %d\n", status );
-      MPI_Abort ( pioinfo->comm, 1 );
-    }
-  if (( status = dbuffer_init ( &( afp->db2 ), afp->size )) == 1)
-    {
-      fprintf ( stderr, "dbuffer_init outputBuffer2: %d\n", status );
-      MPI_Abort ( pioinfo->comm, 1 );
-    }
+
+  iret = dbuffer_init ( &( afp->db1 ), afp->size );
+  iret += dbuffer_init ( &( afp->db2 ), afp->size );
+
+  if ( iret > 0 )
+    errorPIO ( "dbuffer_init did not succeed", __FILE__, __LINE__, pioinfo->rank );
+
   afp->db = afp->db1;
 
   afp->command = IO_Open_file;
@@ -111,6 +108,7 @@ static bFiledataP * initBFiledataP ( char *filename,
 {
   bFiledataP * bfp;
   int i;
+  char errorString[maxErrorString];
 
   if ( ddebug )
        fprintf ( stdout, "### pe%d initFiledataBP (): filename=%s, buffersize=%zu, ncollectors=%d, in\n",
@@ -125,9 +123,8 @@ static bFiledataP * initBFiledataP ( char *filename,
 
   if (( bfp->fp = fopen ( filename, "w" )) == NULL ) 
     {
-      fprintf ( stderr, "Failed to open %s:\n", bfp->name );
-      perror ( "System error message" );
-      MPI_Abort ( pioinfo->comm, 1 );
+      sprintf ( errorString, "Failed to open %s", bfp->name );
+      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
     }
 
   dbuffer_init ( & ( bfp->fb ), ( size_t )( bfp->size ));
@@ -180,6 +177,7 @@ int destroyBFiledataP ( void *v )
 {
   int iret = 0;
   bFiledataP *bfp = ( bFiledataP * ) v;
+  char errorString[maxErrorString];
 
   if ( ddebug )
     fprintf ( stdout, "pe%d destroyBFiledataP(): name=%s, cleanup, in\n", 
@@ -187,20 +185,10 @@ int destroyBFiledataP ( void *v )
 
   /* close file */
 
-  /* doesn't work on tornado. better fsync ( only with descriptor )
-  
-  if (( iret = fflush ( bfp->fp )) == EOF ) 
-    {
-      perror ( "### Problems writing buffer" );
-      MPI_Abort ( pioinfo->comm, 1 );
-    }
-  */
-
   if (( iret = fclose ( bfp->fp )) == EOF )
     {
-      fprintf ( stderr, "Failed to close %s:\n", bfp->name );
-      perror ( "System error message" );
-      MPI_Abort ( pioinfo->comm, 1 );
+      sprintf ( errorString, "Failed to close %s", bfp->name );
+      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
     }
 
   /* file closed, cleanup */
@@ -259,6 +247,7 @@ bool compareNamesBP  ( void *v1, void *v2 )
 void writeP ( bFiledataP *bfd, long amount )
 {
   long written;
+  char errorString[maxErrorString];
 
   if ( ddebug )
     fprintf ( stdout, "### pe%d writeP, name=%s, amount=%ld, in\n", 
@@ -267,8 +256,8 @@ void writeP ( bFiledataP *bfd, long amount )
   if (( written = fwrite ( bfd->fb->buffer, sizeof ( char ), amount, 
 			   bfd->fp )) != amount )
     {
-      perror ( "### Problems writing buffer" );
-      MPI_Abort ( pioinfo->comm, 1 );
+      sprintf ( errorString, "did not succeed writing buffer in %s", bfd->name );
+      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
     }
 
   if ( ddebug )
@@ -279,6 +268,34 @@ void writeP ( bFiledataP *bfd, long amount )
 }
 
 /***************************************************************/
+// baustelle, in modi vereinheitlichen, kapseln in pio_queue.c
+void queueCheckP ( queue *q, char *name )
+{
+  node *curr;
+  bFiledataP *bfd;
+  size_t len;
+  char errorString[maxErrorString];
+ 
+  len = strlen ( name );
+  curr = q->head;   
+      
+  while ( curr )
+    { 
+      bfd = ( bFiledataP * ) curr->val;
+      if ( len == strlen ( bfd->name ) &&
+	   memcmp ( name, bfd->name, len ) == 0 )
+	{
+	  sprintf ( errorString, "Filename %s is already enqueued\n", name );
+	  errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+	  return;
+	}
+      
+      curr = curr->next;
+    }  
+
+  return;
+}
+//
 
 void pwPOSIXNONB ( int ncollectors )
 {
@@ -290,6 +307,7 @@ void pwPOSIXNONB ( int ncollectors )
   int messagesize, source, tag, i, len, id;
   rTag *rtag = NULL;
   MPI_Status status;
+  char errorString[maxErrorString];
 
   if ( ddebug )
     fprintf(stdout, "### pe%d pwPOSIXNONB (), ncollectors=%d, in\n", 
@@ -307,10 +325,7 @@ void pwPOSIXNONB ( int ncollectors )
 
       if ( rtag ) ungetTag ( rtag );
       if (( rtag   = getTag ( tag )) == NULL )
-	{
-	  perror ( "### getTag () failed" );
-	  MPI_Abort ( pioinfo->comm, 1 );
-	} 
+	errorPIO ( "getTag () failed", __FILE__, __LINE__, pioinfo->rank );
 
       MPI_Get_count ( &status, MPI_CHAR, &messagesize );
 
@@ -351,23 +366,21 @@ void pwPOSIXNONB ( int ncollectors )
 	  if ( !(bfd = ( bFiledataP * ) queueIdx2val ( bibBFiledataP, 
 						       rtag->id )))
 	    {
-	      bfd = ( bFiledataP * ) initBFiledataP ( filename, 
-						      buffersize,  
-						      ncollectors );
+	      queueCheckP (  bibBFiledataP, filename );
+	      bfd = ( bFiledataP * ) initBFiledataP ( filename, buffersize, ncollectors );
+	      
 	      if (( id = queuePush ( bibBFiledataP, bfd, 1, rtag->id )) != rtag->id )
-		{
-		  fprintf ( stderr, "pe%d, fileID=%d not unique\n",
-			    pioinfo->rank, rtag->id);
-		  MPI_Abort ( pioinfo->comm, 1 );
-		} 	      
+		{   
+		  sprintf ( errorString, "fileID=%d not unique", rtag->id );
+		  errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+		}	      
 	    }
 	  else
 	    if ((( len = strlen ( filename )) != ( int ) strlen ( bfd->name )) || 
 		memcmp ( filename, bfd->name, len ) != 0 )
 	      {
-		fprintf ( stderr, "pe%d, id=%d, filename not consistant\n",
-			  pioinfo->rank, rtag->id);
-		MPI_Abort ( pioinfo->comm, 1 );
+		  sprintf ( errorString, "filename is not consistant, fileID=%d", rtag->id );
+		  errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
 	      }
 
 	  *( bfd->nfinished + source ) = false;
@@ -385,9 +398,8 @@ void pwPOSIXNONB ( int ncollectors )
 	  if ( ! ( bfd = ( bFiledataP * ) queueIdx2val ( bibBFiledataP,  
 							 rtag->id )))
 	      {
-		fprintf ( stderr, "pe%d, id=%d not in file queue, 1\n",
-			  pioinfo->rank, rtag->id);
-		MPI_Abort ( pioinfo->comm, 1 );
+		sprintf ( errorString, "fileID=%d is not in queue", rtag->id );
+		errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
 	      }
 
 	  amount = messagesize;
@@ -414,11 +426,10 @@ void pwPOSIXNONB ( int ncollectors )
 	  
 	  if ( ! ( bfd = ( bFiledataP * ) queueIdx2val ( bibBFiledataP,  
 							 rtag->id )))
-	      {
-		fprintf ( stderr, "pe%d, id=%d not in file queue, 2\n",
-			  pioinfo->rank, rtag->id);
-		MPI_Abort ( pioinfo->comm, 1 );
-	      }
+	    {
+	      sprintf ( errorString, "fileID=%d is not in queue", rtag->id );
+	      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+	    }
 
 	  amount = messagesize;
 
@@ -528,6 +539,7 @@ size_t fwPOSIXNONB ( int id, int tsId, const void *buffer, size_t len )
   int filled = 0;
   aFiledataP *afd;
   node *curr;
+  char errorString[maxErrorString];
 
   flush = ( tsId != oldTsId ) ? 1 : 0;
 
@@ -571,9 +583,8 @@ size_t fwPOSIXNONB ( int id, int tsId, const void *buffer, size_t len )
   
   if ( error == 1 )
     {
-      fprintf ( stderr, "pe%d, id=%d, problem filling output buffer ...\n",
-		pioinfo->rank, id);
-      MPI_Abort ( pioinfo->comm, 1 );
+      sprintf ( errorString,"did not succeed filling output buffer, id=%d", id );
+      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
     }
   
   return len;
@@ -637,6 +648,7 @@ int fowPOSIXNONB ( const char *filename )
   MPI_Comm bcastComm;
   size_t l;
   char *temp;
+  char errorString[maxErrorString];
 
   /* broadcast buffersize to collectors */
   
@@ -665,9 +677,9 @@ int fowPOSIXNONB ( const char *filename )
 
   afd = initAFiledataP ( filename, buffersize );
   if (( id = queuePush ( bibAFiledataP, afd, 0 )) < 0 )
-    {   
-      fprintf ( stderr, "Filename %s not unique\n", afd->name );
-      MPI_Abort ( pioinfo->comm, 1 );
+    {
+      sprintf ( errorString, "filename %s is not unique", afd->name );
+      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );   
     }
 
   if ( ddebug )
@@ -707,12 +719,8 @@ int initPOSIXNONB ()
   int specialRanks[1];
 
   if ( pioinfo->size < 2 )
-    {
-      fprintf ( stderr, 
-		"PTYPE PIO_POSIX_*  or PIO_MPI_FPGUARD "
-		"should be used with at least 2 pes.\n" );
-      MPI_Abort ( pioinfo->comm, 1 );
-    }
+    errorPIO ( "usage: #pes/#nodes >= 2", 
+	       __FILE__, __LINE__, pioinfo->rank );
 
   pioinfo->specialRank = pioinfo->size - 1;
   ncollectors = pioinfo->size - 1;
