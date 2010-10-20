@@ -3,7 +3,7 @@ import CdiObj
 
 
 def usage():
-  print "usage: ",sys.argv[0]," [-o outputFile] [-e experiementTag] [-v] inputFile"
+  print("usage: " + sys.argv[0] + " [-o outputFile] [-e experiementTag] [-v] inputFile")
 
 def htmlSkel(experiment):
   return ['<html> <head> <title>ECHAM Experiment: '+ experiment +'</title></head>' +
@@ -49,7 +49,6 @@ def generateSubTable(headers, rows):
   return "".join(html)  
 
 if __name__ == '__main__':
-
   try:
     opts, args = getopt.getopt(sys.argv[1:], "ho:v", ["help", "output="])
   except getopt.GetoptError, err:
