@@ -25,7 +25,7 @@ libcdipp_la_LIBADD = $(top_builddir)/src/libcdi.la
 libcdipp_la_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS)
 
 CdiInfo_SOURCES = CdiInfo.cpp
-CdiInfo_LDADD = $(top_builddir)/interfaces/libcdipp.la 
+CdiInfo_LDADD = libcdipp.la 
 CdiInfo_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS)
 #
 #

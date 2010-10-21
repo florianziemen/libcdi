@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <malloc.h>
-#include <string.h>
 #include <iostream>
 #include <algorithm>
 #include <vector>
@@ -261,7 +258,7 @@ CdiVariable::CdiVariable(int streamid,int vlistid, int varid) {
 CdiVariable::~CdiVariable(){ size = -1; }
 
 void
-CdiVariable::sinfo() { std::cout << name << " (" << longname << ",code:" << code << ")|units: " << units << "|size:"<< size <<  "|gridID:" << gridID << std::endl; }
+CdiVariable::sinfo() { std::cout << "code:"  << std::endl; }
 
 double *
 CdiVariable::getValuesAsPointer()
@@ -319,23 +316,23 @@ CdiVariable::getValuesWithLevel(int tsID) {
   free(fieldWithLevel);
 }
 
-vector<float>
+std::vector<float>
 CdiVariable::getFValues()
 {
   if (values.empty()) getValues();
-  vector<float> retval(values.begin(),values.end());
+  std::vector<float> retval(values.begin(),values.end());
   return retval;
 }
 
 
-vector< vector<float> >
+std::vector< std::vector<float> >
 CdiVariable::getFValuesWithLevel(int tsID)
 {
   if (valuesWithLevel.empty()) getValuesWithLevel();
-  vector< vector<float> > retval;
-  for (vector< vector<double> >::const_iterator it = valuesWithLevel.begin(); it != valuesWithLevel.end(); it++)
+  std::vector< std::vector<float> > retval;
+  for (std::vector< std::vector<double> >::const_iterator it = valuesWithLevel.begin(); it != valuesWithLevel.end(); it++)
   {
-    vector<float> fvalues((*it).begin(),(*it).end());
+    std::vector<float> fvalues((*it).begin(),(*it).end());
     retval.push_back(fvalues);
   }
   return retval;
@@ -412,8 +409,8 @@ Cdi::getVars() {
   
     variables.push_back(_var);
 
-    var[name]       = _var;
-    varByCode[code] = _var;
+    var[name] = _var;
+    varByCode[code]        = _var;
   }
 }
 

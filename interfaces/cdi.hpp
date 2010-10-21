@@ -1,8 +1,7 @@
+#include <string>
 #include <vector>
 #include <map>
 #define CHARSIZE      128
-
-using namespace std;
 
 class CdiGrid {
   public:
@@ -53,7 +52,7 @@ class CdiZaxis {
     int zaxisID;
     int type, ltype, size, prec;
     double *plevels, *plbounds, *pubounds, *pweights;
-    vector<double> levels, lbounds, ubounds, weights;
+    std::vector<double> levels, lbounds, ubounds, weights;
     std::string name, longname, units;
 };
 
@@ -68,8 +67,8 @@ class CdiVariable {
     int    streamID;
     std::string  name, longname, units, stdname;
     double missval;
-            vector<double>   values;
-    vector< vector<double> > valuesWithLevel;
+            std::vector<double>   values;
+    std::vector< std::vector<double> > valuesWithLevel;
 
 
     CdiGrid  grid;
@@ -79,10 +78,10 @@ class CdiVariable {
     void sinfo();
     void getValues(); 
     void getValuesWithLevel(int tsID = 0);
-            vector<float>   getFValues();
-    vector< vector<float> > getFValuesWithLevel(int tsID = 0);
-                   double  *getValuesAsPointer();
-                   double **getValuesWithLevelAsPointer(int tsID = 0);
+    std::vector<float>   getFValues();
+    std::vector< std::vector<float> > getFValuesWithLevel(int tsID = 0);
+    double  *getValuesAsPointer();
+    double **getValuesWithLevelAsPointer(int tsID = 0);
 };
 
 class Cdi {

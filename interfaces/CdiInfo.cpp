@@ -100,13 +100,13 @@ int main() {
     std::cout << "valuesWithLevel["  << ilev << "][-1] = " << var.valuesWithLevel[ilev][var.grid.size-1] << std::endl;
   }
   std::cout << "# field values (FLOAT) ================" << std::endl;
-  vector<float> floats;
+  std::vector<float> floats;
   floats = var.getFValues();
   std::cout << "floats[0]  = " << floats[0] <<  std::endl;
   std::cout << "floats.back() = " << floats.back() <<  std::endl;
 
   std::cout << "# field values on different levels (FLOAT) ================" << std::endl;
-  vector< vector<float> > floatsWithLevel;
+  std::vector< std::vector<float> > floatsWithLevel;
   floatsWithLevel = var.getFValuesWithLevel();
   for (int i = 0 ; i < floatsWithLevel.size();++i)
   {
@@ -130,8 +130,8 @@ int main() {
 
   var = infot.varByCode[176];
   std::cout << var.name << std::endl;
-  std::cout << "grid XValues: "; vector<double> xv = var.grid.xvalues; for (int k = 0; k < xv.size(); k++) { std::cout << xv[k] << " ";} std::cout << std::endl;
-  std::cout << "grid YValues: "; vector<double> yv = var.grid.yvalues; for (int k = 0; k < yv.size(); k++) { std::cout << yv[k] << " ";} std::cout << std::endl;
+  std::cout << "grid XValues: "; std::vector<double> xv = var.grid.xvalues; for (int k = 0; k < xv.size(); k++) { std::cout << xv[k] << " ";} std::cout << std::endl;
+  std::cout << "grid YValues: "; std::vector<double> yv = var.grid.yvalues; for (int k = 0; k < yv.size(); k++) { std::cout << yv[k] << " ";} std::cout << std::endl;
   var = infoz.varByCode[176];
   std::cout << var.name << std::endl;
   std::cout << "grid XValues: "; xv = var.grid.xvalues; for (int k = 0; k < xv.size(); k++) { std::cout << xv[k] << " ";} std::cout << std::endl;

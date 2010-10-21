@@ -73,7 +73,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_CdiInfo_OBJECTS = CdiInfo.$(OBJEXT)
 CdiInfo_OBJECTS = $(am_CdiInfo_OBJECTS)
-CdiInfo_DEPENDENCIES = $(top_builddir)/interfaces/libcdipp.la
+CdiInfo_DEPENDENCIES = libcdipp.la
 CdiInfo_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(CdiInfo_LDFLAGS) $(LDFLAGS) -o $@
@@ -273,7 +273,7 @@ libcdipp_la_SOURCES = cdi.cpp cdi.hpp
 libcdipp_la_LIBADD = $(top_builddir)/src/libcdi.la 
 libcdipp_la_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS)
 CdiInfo_SOURCES = CdiInfo.cpp
-CdiInfo_LDADD = $(top_builddir)/interfaces/libcdipp.la 
+CdiInfo_LDADD = libcdipp.la 
 CdiInfo_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS)
 #
 AM_CPPFLAGS = -I$(top_srcdir)/src
