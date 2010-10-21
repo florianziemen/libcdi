@@ -18,8 +18,8 @@ CdiGrid::CdiGrid(int gridid) {
 
   gridID = gridid;
   type   = gridInqType(gridID);
-  strcpy(_name,gridNamePtr(type));
-  name = _name;
+  /*  strcpy(_name,gridNamePtr(type)); */
+  name = std::string(gridNamePtr(type));
 
   size  = gridInqSize(gridID);
   xsize = gridInqXsize(gridID);
