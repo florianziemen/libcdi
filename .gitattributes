@@ -116,6 +116,7 @@ interfaces/testdata/gridTest.nc -text
 interfaces/testdata/mulval.grb -text
 interfaces/testdata/mulval.nc -text
 m4/acx_sl_mod_suffix.m4 -text
+pioExamples/Makefile_blizzard -text
 pioExamples/Makefile_tornado_parallel -text
 pioExamples/Makefile_tornado_serial -text
 pioExamples/README -text

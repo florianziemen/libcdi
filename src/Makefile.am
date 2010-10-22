@@ -4,7 +4,7 @@ EXTRA_DIST = make_cdilib mo_cdi.f90
 #
 #BUILT_SOURCES = cdilib.c
 #
-lib_LIBRARIES = libcdi.a
+lib_LIBRARIES = libcdi.a libcdi_serial.a libcdi_parallel.a
 #
 include_HEADERS = cdi.h cdi.inc
 #
@@ -106,6 +106,10 @@ libcdi_a_SOURCES = 	 \
 	pio.h            \
 	pio_impl.h 
 #
+libcdi_serial_a_SOURCES = $(libcdi_a_SOURCES)
+libcdi_serial_a_CPPFLAGS = -DNOMPI
+libcdi_parallel_a_SOURCES = $(libcdi_a_SOURCES)
+
 cdiFortran.o: cdiFortran.c
 	source='$<' object='$@' libtool=no \
 	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' \
