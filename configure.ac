@@ -52,6 +52,29 @@ AC_CHECK_FUNCS(isnan)
 #
 AC_CHECK_LIB(m, floor)
 
+
+#  ----------------------------------------------------------------------
+#  Checks for pthread library
+AC_ARG_WITH([threads],
+            [AC_HELP_STRING([--with-threads=<directory>],
+                            [Use the pthread library [default=yes]])],
+            [],
+            [with_threads=yes])
+AS_CASE([$with_threads],
+        [no],[AC_MSG_CHECKING([for pthread library])
+              AC_MSG_RESULT([suppressed])],
+        [yes],[AC_CHECK_HEADERS(pthread.h)
+               AC_CHECK_LIB([pthread],[pthread_create])
+               AC_SUBST([THREADS_LDFLAGS],[" -lpthread"])
+               AC_SUBST([THREADS_INCLUDE],[""])],
+        [*],[THREADS_ROOT=$with_threads
+             LDFLAGS="$LDFLAGS -L$THREADS_ROOT/lib"
+             CPPFLAGS="$CPPFLAGS -I$THREADS_ROOT/include"
+             AC_CHECK_HEADERS(pthread.h)
+             AC_CHECK_LIB([pthread],[pthread_create])
+             AC_SUBST([THREADS_LDFLAGS],[" -L$THREADS_ROOT/lib -lpthread"])
+             AC_SUBST([THREADS_INCLUDE],[" -I$THREADS_ROOT/include"])])
+
 #  ----------------------------------------------------------------------
 #  Compile application with ZLIB library
 #
