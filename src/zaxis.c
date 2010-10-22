@@ -1248,33 +1248,33 @@ void zaxisPrint(int zaxisID)
     {
       if ( nbyte > 80 )
 	{
-	  fprintf(stdout, "\n");
-	  fprintf(stdout, "%*s", nbyte0, "");
+	  fprintf(fp, "\n");
+	  fprintf(fp, "%*s", nbyte0, "");
 	  nbyte = nbyte0;
 	}
       level = zaxisInqLevel(zaxisID, levelID);
-      nbyte += fprintf(stdout, "%.9g ", level);
+      nbyte += fprintf(fp, "%.9g ", level);
     }
-  fprintf(stdout, "\n");
+  fprintf(fp, "\n");
 
   if ( zaxisptr->lbounds && zaxisptr->ubounds )
     {
       double level1, level2;
       nbyte = nbyte0;
-      nbyte0 = fprintf(stdout, "%32s = ", "bounds");
+      nbyte0 = fprintf(fp, "bounds    = ");
       for ( levelID = 0; levelID < nlevels; levelID++ )
 	{
 	  if ( nbyte > 80 )
 	    {
-	      fprintf(stdout, "\n");
-	      fprintf(stdout, "%*s", nbyte0, "");
+	      fprintf(fp, "\n");
+	      fprintf(fp, "%*s", nbyte0, "");
 	      nbyte = nbyte0;
 	    }
 	  level1 = zaxisInqLbound(zaxisID, levelID);
 	  level2 = zaxisInqUbound(zaxisID, levelID);
-	  nbyte += fprintf(stdout, "%.9g-%.9g ", level1, level2);
+	  nbyte += fprintf(fp, "%.9g-%.9g ", level1, level2);
 	}
-      fprintf(stdout, "\n");
+      fprintf(fp, "\n");
     }
 
   if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
@@ -1285,34 +1285,34 @@ void zaxisPrint(int zaxisID)
 
       vctsize = zaxisInqVctSize(zaxisID);
       vct     = zaxisInqVctPtr(zaxisID);
-      fprintf(stdout, "vctsize   = %d\n", vctsize);
+      fprintf(fp, "vctsize   = %d\n", vctsize);
       if ( vctsize )
 	{
-	  nbyte0 = fprintf(stdout, "vct       = ");
+	  nbyte0 = fprintf(fp, "vct       = ");
 	  nbyte = nbyte0;
 	  for ( i = 0; i < vctsize; i++ )
 	    {
 	      if ( nbyte > 70 || i == vctsize/2 )
 		{
-		  fprintf(stdout, "\n%*s", nbyte0, "");
+		  fprintf(fp, "\n%*s", nbyte0, "");
 		  nbyte = nbyte0;
 		}
-	      nbyte += fprintf(stdout, "%.9g ", vct[i]);
+	      nbyte += fprintf(fp, "%.9g ", vct[i]);
 	    }
-	  fprintf(stdout, "\n");
+	  fprintf(fp, "\n");
 	  /*
-	  nbyte0 = fprintf(stdout, "vct_b     = ");
+	  nbyte0 = fprintf(fp, "vct_b     = ");
 	  nbyte  = nbyte0;
 	  for ( i = 0; i < vctsize/2; i++ )
 	    {
 	      if ( nbyte > 70 )
 		{
-		  fprintf(stdout, "\n%*s", nbyte0, "");
+		  fprintf(fp, "\n%*s", nbyte0, "");
 		  nbyte = nbyte0;
 		}
-	      nbyte += fprintf(stdout, "%.9g ", vct[vctsize/2+i]);
+	      nbyte += fprintf(fp, "%.9g ", vct[vctsize/2+i]);
 	    }
-	  fprintf(stdout, "\n");
+	  fprintf(fp, "\n");
 	  */
 	}
     }
