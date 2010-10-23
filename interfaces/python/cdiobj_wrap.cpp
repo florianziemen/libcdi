@@ -23447,7 +23447,7 @@ fail:
 SWIGINTERN PyObject *_wrap_CdiZaxis_levels_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CdiZaxis *arg1 = (CdiZaxis *) 0 ;
-  std::vector< double > *arg2 = (std::vector< double > *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -23463,9 +23463,9 @@ SWIGINTERN PyObject *_wrap_CdiZaxis_levels_set(PyObject *SWIGUNUSEDPARM(self), P
   arg1 = reinterpret_cast< CdiZaxis * >(argp1);
   res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiZaxis_levels_set" "', argument " "2"" of type '" "std::vector< double > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiZaxis_levels_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
   }
-  arg2 = reinterpret_cast< std::vector< double > * >(argp2);
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
   if (arg1) (arg1)->levels = *arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -23480,7 +23480,7 @@ SWIGINTERN PyObject *_wrap_CdiZaxis_levels_get(PyObject *SWIGUNUSEDPARM(self), P
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
-  std::vector< double > *result = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
   
   if (!PyArg_ParseTuple(args,(char *)"O:CdiZaxis_levels_get",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiZaxis, 0 |  0 );
@@ -23488,7 +23488,7 @@ SWIGINTERN PyObject *_wrap_CdiZaxis_levels_get(PyObject *SWIGUNUSEDPARM(self), P
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiZaxis_levels_get" "', argument " "1"" of type '" "CdiZaxis *""'"); 
   }
   arg1 = reinterpret_cast< CdiZaxis * >(argp1);
-  result = (std::vector< double > *)& ((arg1)->levels);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->levels);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   return resultobj;
 fail:
@@ -23499,7 +23499,7 @@ fail:
 SWIGINTERN PyObject *_wrap_CdiZaxis_lbounds_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CdiZaxis *arg1 = (CdiZaxis *) 0 ;
-  std::vector< double > *arg2 = (std::vector< double > *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -23515,9 +23515,9 @@ SWIGINTERN PyObject *_wrap_CdiZaxis_lbounds_set(PyObject *SWIGUNUSEDPARM(self), 
   arg1 = reinterpret_cast< CdiZaxis * >(argp1);
   res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiZaxis_lbounds_set" "', argument " "2"" of type '" "std::vector< double > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiZaxis_lbounds_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
   }
-  arg2 = reinterpret_cast< std::vector< double > * >(argp2);
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
   if (arg1) (arg1)->lbounds = *arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -23532,7 +23532,7 @@ SWIGINTERN PyObject *_wrap_CdiZaxis_lbounds_get(PyObject *SWIGUNUSEDPARM(self), 
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
-  std::vector< double > *result = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
   
   if (!PyArg_ParseTuple(args,(char *)"O:CdiZaxis_lbounds_get",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiZaxis, 0 |  0 );
@@ -23540,7 +23540,7 @@ SWIGINTERN PyObject *_wrap_CdiZaxis_lbounds_get(PyObject *SWIGUNUSEDPARM(self), 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiZaxis_lbounds_get" "', argument " "1"" of type '" "CdiZaxis *""'"); 
   }
   arg1 = reinterpret_cast< CdiZaxis * >(argp1);
-  result = (std::vector< double > *)& ((arg1)->lbounds);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->lbounds);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   return resultobj;
 fail:
@@ -23551,7 +23551,7 @@ fail:
 SWIGINTERN PyObject *_wrap_CdiZaxis_ubounds_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CdiZaxis *arg1 = (CdiZaxis *) 0 ;
-  std::vector< double > *arg2 = (std::vector< double > *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -23567,9 +23567,9 @@ SWIGINTERN PyObject *_wrap_CdiZaxis_ubounds_set(PyObject *SWIGUNUSEDPARM(self), 
   arg1 = reinterpret_cast< CdiZaxis * >(argp1);
   res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiZaxis_ubounds_set" "', argument " "2"" of type '" "std::vector< double > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiZaxis_ubounds_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
   }
-  arg2 = reinterpret_cast< std::vector< double > * >(argp2);
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
   if (arg1) (arg1)->ubounds = *arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -23584,7 +23584,7 @@ SWIGINTERN PyObject *_wrap_CdiZaxis_ubounds_get(PyObject *SWIGUNUSEDPARM(self), 
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
-  std::vector< double > *result = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
   
   if (!PyArg_ParseTuple(args,(char *)"O:CdiZaxis_ubounds_get",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiZaxis, 0 |  0 );
@@ -23592,7 +23592,7 @@ SWIGINTERN PyObject *_wrap_CdiZaxis_ubounds_get(PyObject *SWIGUNUSEDPARM(self), 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiZaxis_ubounds_get" "', argument " "1"" of type '" "CdiZaxis *""'"); 
   }
   arg1 = reinterpret_cast< CdiZaxis * >(argp1);
-  result = (std::vector< double > *)& ((arg1)->ubounds);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->ubounds);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   return resultobj;
 fail:
@@ -23603,7 +23603,7 @@ fail:
 SWIGINTERN PyObject *_wrap_CdiZaxis_weights_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CdiZaxis *arg1 = (CdiZaxis *) 0 ;
-  std::vector< double > *arg2 = (std::vector< double > *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -23619,9 +23619,9 @@ SWIGINTERN PyObject *_wrap_CdiZaxis_weights_set(PyObject *SWIGUNUSEDPARM(self), 
   arg1 = reinterpret_cast< CdiZaxis * >(argp1);
   res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiZaxis_weights_set" "', argument " "2"" of type '" "std::vector< double > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiZaxis_weights_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
   }
-  arg2 = reinterpret_cast< std::vector< double > * >(argp2);
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
   if (arg1) (arg1)->weights = *arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -23636,7 +23636,7 @@ SWIGINTERN PyObject *_wrap_CdiZaxis_weights_get(PyObject *SWIGUNUSEDPARM(self), 
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
-  std::vector< double > *result = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
   
   if (!PyArg_ParseTuple(args,(char *)"O:CdiZaxis_weights_get",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiZaxis, 0 |  0 );
@@ -23644,7 +23644,7 @@ SWIGINTERN PyObject *_wrap_CdiZaxis_weights_get(PyObject *SWIGUNUSEDPARM(self), 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiZaxis_weights_get" "', argument " "1"" of type '" "CdiZaxis *""'"); 
   }
   arg1 = reinterpret_cast< CdiZaxis * >(argp1);
-  result = (std::vector< double > *)& ((arg1)->weights);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->weights);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   return resultobj;
 fail:
@@ -24766,7 +24766,7 @@ fail:
 SWIGINTERN PyObject *_wrap_CdiVariable_values_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CdiVariable *arg1 = (CdiVariable *) 0 ;
-  std::vector< double > *arg2 = (std::vector< double > *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -24782,9 +24782,9 @@ SWIGINTERN PyObject *_wrap_CdiVariable_values_set(PyObject *SWIGUNUSEDPARM(self)
   arg1 = reinterpret_cast< CdiVariable * >(argp1);
   res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiVariable_values_set" "', argument " "2"" of type '" "std::vector< double > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiVariable_values_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
   }
-  arg2 = reinterpret_cast< std::vector< double > * >(argp2);
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
   if (arg1) (arg1)->values = *arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -24799,7 +24799,7 @@ SWIGINTERN PyObject *_wrap_CdiVariable_values_get(PyObject *SWIGUNUSEDPARM(self)
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
-  std::vector< double > *result = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
   
   if (!PyArg_ParseTuple(args,(char *)"O:CdiVariable_values_get",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
@@ -24807,7 +24807,7 @@ SWIGINTERN PyObject *_wrap_CdiVariable_values_get(PyObject *SWIGUNUSEDPARM(self)
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiVariable_values_get" "', argument " "1"" of type '" "CdiVariable *""'"); 
   }
   arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  result = (std::vector< double > *)& ((arg1)->values);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->values);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   return resultobj;
 fail:
@@ -24818,7 +24818,7 @@ fail:
 SWIGINTERN PyObject *_wrap_CdiVariable_valuesWithLevel_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CdiVariable *arg1 = (CdiVariable *) 0 ;
-  std::vector< std::vector< double > > *arg2 = (std::vector< std::vector< double > > *) 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -24834,9 +24834,9 @@ SWIGINTERN PyObject *_wrap_CdiVariable_valuesWithLevel_set(PyObject *SWIGUNUSEDP
   arg1 = reinterpret_cast< CdiVariable * >(argp1);
   res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiVariable_valuesWithLevel_set" "', argument " "2"" of type '" "std::vector< std::vector< double > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CdiVariable_valuesWithLevel_set" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *""'"); 
   }
-  arg2 = reinterpret_cast< std::vector< std::vector< double > > * >(argp2);
+  arg2 = reinterpret_cast< std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > * >(argp2);
   if (arg1) (arg1)->valuesWithLevel = *arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -24851,7 +24851,7 @@ SWIGINTERN PyObject *_wrap_CdiVariable_valuesWithLevel_get(PyObject *SWIGUNUSEDP
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
-  std::vector< std::vector< double > > *result = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *result = 0 ;
   
   if (!PyArg_ParseTuple(args,(char *)"O:CdiVariable_valuesWithLevel_get",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
@@ -24859,7 +24859,7 @@ SWIGINTERN PyObject *_wrap_CdiVariable_valuesWithLevel_get(PyObject *SWIGUNUSEDP
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CdiVariable_valuesWithLevel_get" "', argument " "1"" of type '" "CdiVariable *""'"); 
   }
   arg1 = reinterpret_cast< CdiVariable * >(argp1);
-  result = (std::vector< std::vector< double > > *)& ((arg1)->valuesWithLevel);
+  result = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)& ((arg1)->valuesWithLevel);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
   return resultobj;
 fail:
@@ -25166,7 +25166,7 @@ SWIGINTERN PyObject *_wrap_CdiVariable_getFValues(PyObject *SWIGUNUSEDPARM(self)
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
-  SwigValueWrapper< std::vector< float > > result;
+  SwigValueWrapper< std::vector< float,std::allocator< float > > > result;
   
   if (!PyArg_ParseTuple(args,(char *)"O:CdiVariable_getFValues",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
@@ -25175,7 +25175,7 @@ SWIGINTERN PyObject *_wrap_CdiVariable_getFValues(PyObject *SWIGUNUSEDPARM(self)
   }
   arg1 = reinterpret_cast< CdiVariable * >(argp1);
   result = (arg1)->getFValues();
-  resultobj = SWIG_NewPointerObj((new std::vector< float >(static_cast< const std::vector< float >& >(result))), SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t, SWIG_POINTER_OWN |  0 );
+  resultobj = SWIG_NewPointerObj((new std::vector< float,std::allocator< float > >(static_cast< const std::vector< float,std::allocator< float > >& >(result))), SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -25192,7 +25192,7 @@ SWIGINTERN PyObject *_wrap_CdiVariable_getFValuesWithLevel__SWIG_0(PyObject *SWI
   int ecode2 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
-  SwigValueWrapper< std::vector< std::vector< float > > > result;
+  SwigValueWrapper< std::vector< std::vector< float,std::allocator< float > >,std::allocator< std::vector< float,std::allocator< float > > > > > result;
   
   if (!PyArg_ParseTuple(args,(char *)"OO:CdiVariable_getFValuesWithLevel",&obj0,&obj1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
@@ -25206,7 +25206,7 @@ SWIGINTERN PyObject *_wrap_CdiVariable_getFValuesWithLevel__SWIG_0(PyObject *SWI
   } 
   arg2 = static_cast< int >(val2);
   result = (arg1)->getFValuesWithLevel(arg2);
-  resultobj = SWIG_NewPointerObj((new std::vector< std::vector< float > >(static_cast< const std::vector< std::vector< float > >& >(result))), SWIGTYPE_p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t, SWIG_POINTER_OWN |  0 );
+  resultobj = SWIG_NewPointerObj((new std::vector< std::vector< float,std::allocator< float > >,std::allocator< std::vector< float,std::allocator< float > > > >(static_cast< const std::vector< std::vector< float,std::allocator< float > >,std::allocator< std::vector< float,std::allocator< float > > > >& >(result))), SWIGTYPE_p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -25219,7 +25219,7 @@ SWIGINTERN PyObject *_wrap_CdiVariable_getFValuesWithLevel__SWIG_1(PyObject *SWI
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
-  SwigValueWrapper< std::vector< std::vector< float > > > result;
+  SwigValueWrapper< std::vector< std::vector< float,std::allocator< float > >,std::allocator< std::vector< float,std::allocator< float > > > > > result;
   
   if (!PyArg_ParseTuple(args,(char *)"O:CdiVariable_getFValuesWithLevel",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CdiVariable, 0 |  0 );
@@ -25228,7 +25228,7 @@ SWIGINTERN PyObject *_wrap_CdiVariable_getFValuesWithLevel__SWIG_1(PyObject *SWI
   }
   arg1 = reinterpret_cast< CdiVariable * >(argp1);
   result = (arg1)->getFValuesWithLevel();
-  resultobj = SWIG_NewPointerObj((new std::vector< std::vector< float > >(static_cast< const std::vector< std::vector< float > >& >(result))), SWIGTYPE_p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t, SWIG_POINTER_OWN |  0 );
+  resultobj = SWIG_NewPointerObj((new std::vector< std::vector< float,std::allocator< float > >,std::allocator< std::vector< float,std::allocator< float > > > >(static_cast< const std::vector< std::vector< float,std::allocator< float > >,std::allocator< std::vector< float,std::allocator< float > > > >& >(result))), SWIGTYPE_p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -26849,14 +26849,14 @@ static swig_type_info _swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVari
 static swig_type_info _swigt__p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type = {"_p_std__vectorT_CdiVariable_std__allocatorT_CdiVariable_t_t__value_type", "std::vector< CdiVariable >::value_type *|CdiVariable *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_double_std__allocatorT_double_t_t = {"_p_std__vectorT_double_std__allocatorT_double_t_t", "std::vector< double,std::allocator< double > > *|std::vector< double > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type = {"_p_std__vectorT_double_std__allocatorT_double_t_t__allocator_type", "std::vector< double >::allocator_type *|std::allocator< double > *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__vectorT_float_std__allocatorT_float_t_t = {"_p_std__vectorT_float_std__allocatorT_float_t_t", "std::vector< float > *|std::vector< float,std::allocator< float > > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__vectorT_float_std__allocatorT_float_t_t = {"_p_std__vectorT_float_std__allocatorT_float_t_t", "std::vector< float,std::allocator< float > > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_int_std__allocatorT_int_t_t = {"_p_std__vectorT_int_std__allocatorT_int_t_t", "std::vector< int,std::allocator< int > > *|std::vector< int > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_int_std__allocatorT_int_t_t__allocator_type = {"_p_std__vectorT_int_std__allocatorT_int_t_t__allocator_type", "std::vector< int >::allocator_type *|std::allocator< int > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t = {"_p_std__vectorT_std__string_std__allocatorT_std__string_t_t", "std::vector< std::string,std::allocator< std::string > > *|std::vector< std::string > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t__allocator_type = {"_p_std__vectorT_std__string_std__allocatorT_std__string_t_t__allocator_type", "std::vector< std::string >::allocator_type *|std::allocator< std::string > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t = {"_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t", "std::vector< std::vector< double > > *|std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *|std::vector< std::vector< double,std::allocator< double > > > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t__allocator_type = {"_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t__allocator_type", "std::vector< std::vector< double > >::allocator_type *|std::allocator< std::vector< double,std::allocator< double > > > *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t = {"_p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t", "std::vector< std::vector< float,std::allocator< float > >,std::allocator< std::vector< float,std::allocator< float > > > > *|std::vector< std::vector< float > > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t = {"_p_std__vectorT_std__vectorT_float_std__allocatorT_float_t_t_std__allocatorT_std__vectorT_float_std__allocatorT_float_t_t_t_t", "std::vector< std::vector< float,std::allocator< float > >,std::allocator< std::vector< float,std::allocator< float > > > > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_swig__SwigPyIterator = {"_p_swig__SwigPyIterator", "swig::SwigPyIterator *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_value_type = {"_p_value_type", "value_type *", 0, 0, (void*)0, 0};
 
