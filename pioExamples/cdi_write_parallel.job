@@ -8,10 +8,10 @@
 # @ mcm_affinity_options = mcm_distribute
 # @ node                 = 1
 # @ tasks_per_node       = 8
-# @ resources            = ConsumableMemory(3000mb)
+# @ resources            = ConsumableMemory(5000mb)
 # @ task_affinity        = core
-# @ wall_clock_limit     = 00:10:00
-# @ job_name             = cdi_write_parallel
+# @ wall_clock_limit     = 00:15:00
+# @ job_name             = write
 # @ output               = $(job_name).o$(jobid)
 # @ error                = $(output)
 # @ notification         = error
@@ -55,7 +55,7 @@ if [[ ! -d /scratch/m/m300050/cdi_pio ]]; then
 fi
 #
 cd /scratch/m/m300050/cdi_pio
-poe /pf/m/m300050/cdi_pio/cdi-pio/pioExamples/cdi_write_parallel 1
+poe /pf/m/m300050/cdi_pio/cdi-pio/pioExamples/pio_write_parallel 2
 #
 #-----------------------------------------------------------------------------
 exit

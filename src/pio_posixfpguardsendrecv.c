@@ -197,9 +197,9 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
   if ( ddebug )
     fprintf(stdout, "pe%d in fpGuard(), ncollectors=%d\n", 
 	    pioinfo->rank, ncollectors);
- 
+
   bibBFiledataPF = queueInit ( destroyBFiledataPF, NULL );
-  
+
   for ( ;; )
     {
       MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, pioinfo->comm, &status );
@@ -215,7 +215,6 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
       switch ( rtag->command )
       	{
       	case IO_Open_file:
-
 	  if ( !(bfd = ( bFiledataPF * ) queueIdx2val ( bibBFiledataPF, 
 							     rtag->id )))
 	    {

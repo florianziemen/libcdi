@@ -226,7 +226,7 @@ PROGRAM CDIWRITE
   IF ( collectingData /= 1 ) THEN
     GO TO 1
   END IF
-  
+
   CALL mapStreamsOnNodes
   
   IF ( ddebug == 1 ) THEN
@@ -501,16 +501,30 @@ CONTAINS
     
 #ifndef NOMPI
     INTEGER :: mapping ( NSTREAMS )
-    INTEGER :: rank_NODE
-    
+    INTEGER :: rank_NODE, npes_NODE
+    INTEGER :: recvstatus ( MPI_STATUS_SIZE ), size, i        
+
+    CALL MPI_COMM_RANK ( pioCollectorComm_NODE, rank_NODE, error )
+    CALL MPI_COMM_SIZE ( pioComm, size, error )
+    npes_NODE = size / NNODES
+    IF ( rank_NODE /= MOD ( rank, npes_NODE )) THEN
+      WRITE ( *, * ) 'ERROR, ranks are not compatible'
+      CALL MPI_ABORT ( MPI_COMM_WORLD, 1 )
+    END IF
+
     IF ( rank == 0 ) THEN
       CALL mapProblems ( STREAMSIZES, mapping, NSTREAMS, NNODES  )
+      DO i = 2, NNODES
+      	 CALL MPI_SEND ( mapping, NSTREAMS, MPI_INTEGER, &
+          ( i - 1 ) * npes_NODE, 0, pioComm, error )
+      END DO	  
     END IF
-    
-    CALL MPI_BCAST ( mapping, NSTREAMS, MPI_INTEGER, 0, pioComm, error )
-    
-    CALL MPI_COMM_RANK ( pioCollectorComm_NODE, rank_NODE, error )
-    
+
+    IF ( rank /= 0 .AND. rank_NODE == 0 ) THEN
+      CALL MPI_RECV ( mapping, NSTREAMS, MPI_INTEGER, 0, 0, &
+        pioComm, recvstatus, error )
+    END IF
+
     IF ( rank_NODE  == 0 ) THEN
       nstreams_NODE = 0
       
@@ -522,7 +536,8 @@ CONTAINS
     END IF
 
     IF ( PTYPE /= PIO_NONE ) THEN
-      CALL MPI_BCAST ( nstreams_NODE, 1, MPI_INTEGER, 0, pioCollectorComm_NODE, error )
+      CALL MPI_BCAST ( nstreams_NODE, 1, MPI_INTEGER, 0, &
+        pioCollectorComm_NODE, error )
     END IF
 #else
     
@@ -573,17 +588,12 @@ CONTAINS
 #ifndef NOMPI
     IF ( PTYPE /= PIO_NONE ) THEN
       CALL MPI_COMM_SIZE ( pioCollectorComm_NODE, ncollectors_NODE, error )
-      
-      IF ( PTYPE /= PIO_NONE ) THEN
-        DO i = 1, nstreams_NODE
-          CALL initLocalstream ( ncollectors_NODE, streamsizes_NODE ( i ), &
-            streamfirsts_PE ( i ), streamlasts_PE ( i ))
-        END DO
-      ELSE
-        streamfirsts_PE = 1
-        streamlasts_PE = streamsizes_NODE
-      END IF
+      DO i = 1, nstreams_NODE
+        CALL initLocalstream ( ncollectors_NODE, streamsizes_NODE ( i ), &
+          streamfirsts_PE ( i ), streamlasts_PE ( i ))
+      END DO
     ELSE
+      ncollectors_NODE = 1
       streamfirsts_PE = 1
       streamlasts_PE = streamsizes_NODE
     END IF
