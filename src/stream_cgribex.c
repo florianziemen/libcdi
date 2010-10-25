@@ -628,6 +628,9 @@ void cgribexScanTimestep1(int streamID)
   while ( nskip-- > 0 )
     {
       recsize = gribGetSize(fileID);
+      if ( recsize == 0 )
+	Error(func, "Skipping of %d records failed!", cdiSkipRecords);
+
       recpos  = fileGetPos(fileID);
       fileSetPos(fileID, recsize, SEEK_CUR);
     }
@@ -640,6 +643,9 @@ void cgribexScanTimestep1(int streamID)
 
       if ( recsize == 0 )
 	{
+	  if ( nrecs == 0 )
+	    Error(func, "No GRIB records found!");
+
 	  streamptr->ntsteps = 1;
 	  break;
 	}
