@@ -602,6 +602,8 @@ void cgribexScanTimestep1(int streamID)
   long unzipsize;
   compvar_t compVar, compVar0;
   stream_t *streamptr;
+  extern int cdiSkipRecords;
+  int nskip = cdiSkipRecords;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -622,6 +624,13 @@ void cgribexScanTimestep1(int streamID)
     Error(func, "Internal problem! tstepsNewEntry returns %d", tsID);
 
   fileID = streamInqFileID(streamID);
+
+  while ( nskip-- > 0 )
+    {
+      recsize = gribGetSize(fileID);
+      recpos  = fileGetPos(fileID);
+      fileSetPos(fileID, recsize, SEEK_CUR);
+    }
 
   nrecs = 0;
   while ( TRUE )
@@ -729,7 +738,7 @@ void cgribexScanTimestep1(int streamID)
 	{
 	  if (  taxis->numavg && warn_numavg && (taxis->numavg != ISEC1_AvgNum) )
 	    {
-	      Message(func, "Change numavg from %d to %d not allowed!",
+	      Warning(func, "Changing numavg from %d to %d not supported!",
 		      taxis->numavg, ISEC1_AvgNum);
 	      warn_numavg = FALSE;
 	    }
@@ -956,7 +965,7 @@ int cgribexScanTimestep2(int streamID)
 		(taxis->numavg != ISEC1_AvgNum) )
 	    {
 	  /*
-	      Message(func, "change numavg from %d to %d not allowed!",
+	      Warning(func, "Changing numavg from %d to %d not supported!",
 		      taxis->numavg, ISEC1_AvgNum);
 	  */
 	      warn_numavg = FALSE;
@@ -1236,7 +1245,7 @@ int cgribexScanTimestep(int streamID)
 		   (taxis->numavg != ISEC1_AvgNum) )
 		{
 	      /*
-		  Message(func, "Change numavg from %d to %d not allowed!",
+	          Warning(func, "Changing numavg from %d to %d not supported!",
 			  streamptr->tsteps[tsID].taxis.numavg, ISEC1_AvgNum);
 	      */
 		  warn_numavg = FALSE;

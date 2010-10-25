@@ -27,6 +27,7 @@ int cdiNcMissingValue  = CDI_UNDEFID;
 int cdiSplitLtype105   = CDI_UNDEFID;
 
 int cdiIgnoreAttCoordinates = FALSE;
+int cdiSkipRecords          = 0;
 int cdiInventoryMode        = 1;
 
 char *cdiPartabPath   = NULL;
@@ -150,6 +151,13 @@ void cdiInitialize(void)
 
       envString = getenv("IGNORE_ATT_COORDINATES");
       if ( envString ) cdiIgnoreAttCoordinates = atoi(envString);
+
+      envString = getenv("CDI_SKIP_RECORDS");
+      if ( envString )
+	{
+	  cdiSkipRecords = atoi(envString);
+	  cdiSkipRecords = cdiSkipRecords > 0 ? cdiSkipRecords : 0;
+	}
 
       envString = getenv("GRIB_INVENTORY_MODE");
       if ( envString )
