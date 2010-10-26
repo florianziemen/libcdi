@@ -313,6 +313,9 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
 	    if ( grid.xsize > 1 )
 	      {
 		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
+		  if ( ISEC2_LonIncr*(grid.xsize-1) > 360000 ) ISEC2_LonIncr = 0;
+
+		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
 		  grid.xinc = ISEC2_LonIncr * 0.001;
 		else
 		  grid.xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid.xsize - 1);
@@ -338,6 +341,9 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
 	  {
 	    if ( grid.ysize > 1 )
 	      {
+		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
+		  if ( ISEC2_LatIncr*(grid.ysize-1) > 180000 ) ISEC2_LatIncr = 0;
+
 		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
 		  grid.yinc = ISEC2_LatIncr * 0.001;
 		else
