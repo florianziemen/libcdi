@@ -1,5 +1,6 @@
 2010-10-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* cdfDefZaxis: changed hybrid level type from int to float
 	* taxisCopyTimestep: added mutex_lock
 	
 2010-10-26  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

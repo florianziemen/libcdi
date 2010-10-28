@@ -2236,7 +2236,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
 	      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
 	      cdf_def_dim(fileID, axisname, dimlen, &dimID);
-	      cdf_def_var(fileID, axisname, NC_INT, 1, &dimID,  &ncvarid);
+	      cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID,  &ncvarid);
 
 	      strcpy(tmpname, "hybrid level at layer midpoints");
 	      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
@@ -2265,7 +2265,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
 	      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
 	      cdf_def_dim(fileID, axisname, dimlen, &dimID);
-	      cdf_def_var(fileID, axisname, NC_INT, 1, &dimID,  &ncvarid);
+	      cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID,  &ncvarid);
 
 	      strcpy(tmpname, "hybrid level at layer interfaces");
 	      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
