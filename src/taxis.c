@@ -682,6 +682,8 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
   taxis_check_ptr(func, taxisptr1);
   taxis_check_ptr(func, taxisptr2);
 
+  TAXIS_LOCK();
+
   taxisptr2->rdate = taxisptr1->rdate;
   taxisptr2->rtime = taxisptr1->rtime;
 
@@ -695,6 +697,8 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
       taxisptr2->vdate_ub = taxisptr1->vdate_ub;
       taxisptr2->vtime_ub = taxisptr1->vtime_ub;
     }
+
+  TAXIS_UNLOCK();
 }
 
 
@@ -1371,6 +1375,8 @@ void ptaxisInit(taxis_t *taxisptr)
 
 void ptaxisCopy(taxis_t *dest, taxis_t *source)
 {
+  TAXIS_LOCK();
+
   /* memcpy(dest, source, sizeof(taxis_t)); */
   dest->used       = source->used;  
   dest->type       = source->type;
@@ -1386,4 +1392,6 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->vtime_lb   = source->vtime_lb;
   dest->vdate_ub   = source->vdate_ub;
   dest->vtime_ub   = source->vtime_ub;
+
+  TAXIS_UNLOCK();
 }
