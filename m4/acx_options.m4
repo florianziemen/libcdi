@@ -280,7 +280,6 @@ AC_ARG_WITH([proj],
             [AC_MSG_CHECKING([for the PROJ library])
              AC_MSG_RESULT([suppressed])])
 #  ----------------------------------------------------------------------
-#  How to build CDI into CDO? 
 # At the moment, there are two possible CDI bindings
 # (default for CDO) linking directly to CDI's object files in ./libcdi/src
 # (default for CDI) build and link to a shared CDI library
@@ -289,4 +288,15 @@ AS_IF([test "x$CDO_DISABLE_CDILIB" = "x1"],[enable_cdi_lib=no],[enable_cdi_lib=y
 AM_CONDITIONAL([ENABLE_CDI_LIB],[test x$enable_cdi_lib = 'xyes'])
 # create shell variables for the representation of configure results
 AS_IF([test x$enable_cdi_lib = 'xno'],[AC_SUBST([ENABLE_CDI_LIB],[false])],[AC_SUBST([ENABLE_CDI_LIB],[true])])
+#  ----------------------------------------------------------------------
+#  Build a static CDI
+AC_MSG_CHECKING([for building an additional static CDI binary])
+AC_ARG_ENABLE([all-static],
+              [AS_HELP_STRING([--enable-all-static],[build a completely statically linked CDO binary [default=no]])],
+              [AS_IF([test "x$enable_all_static" != "xno"],
+                     [enable_all_static=yes],
+                     [enable_all_static=no])],
+              [enable_all_static=no])
+AC_MSG_RESULT([$enable_all_static])
+AM_CONDITIONAL([ENABLE_ALL_STATIC],[test x$enable_all_static = 'xyes'])
 ])

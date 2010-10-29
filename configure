@@ -625,6 +625,8 @@ FCMODCASE
 FCMODEXT
 CREATE_ISOC_FALSE
 CREATE_ISOC_TRUE
+ENABLE_ALL_STATIC_FALSE
+ENABLE_ALL_STATIC_TRUE
 ENABLE_CDI_LIB
 ENABLE_CDI_LIB_FALSE
 ENABLE_CDI_LIB_TRUE
@@ -647,8 +649,6 @@ SZLIB_LDFLAGS
 ZLIB_LDFLAGS
 THREADS_INCLUDE
 THREADS_LDFLAGS
-CREATE_ALL_STATIC_FALSE
-CREATE_ALL_STATIC_TRUE
 DLLTOOL
 AS
 CXXCPP
@@ -782,7 +782,6 @@ enable_dependency_tracking
 with_gnu_ld
 enable_libtool_lock
 enable_largefile
-enable_all_static
 with_threads
 with_zlib
 with_szlib
@@ -796,6 +795,7 @@ enable_service
 enable_extra
 enable_ieg
 with_proj
+enable_all_static
 enable_mpi
 enable_iso_c_interface
 enable_swig
@@ -1447,13 +1447,13 @@ Optional Features:
   --enable-dependency-tracking   do not reject slow dependency extractors
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-largefile     omit support for large files
-  --enable-all-static     Create an additional executable, which only
-                          statically linked [default=no]
   --enable-grib           GRIB support [default=yes]
   --enable-cgribex        Use the CGRIBEX library [default=yes]
   --enable-service        Use the service library [default=yes]
   --enable-extra          Use the extra library [default=yes]
   --enable-ieg            Use the ieg library [default=yes]
+  --enable-all-static     build a completely statically linked CDO binary
+                          [default=no]
   --enable-mpi            Compile with MPI compiler [default=no]
   --enable-iso-c-interface
                           Create Fortran Interface via iso_c_bindings facility
@@ -21931,23 +21931,6 @@ _ACEOF
 fi
 
 #  ----------------------------------------------------------------------
-#  Create a pure statically linked binary
-# Check whether --enable-all-static was given.
-if test "${enable_all_static+set}" = set; then :
-  enableval=$enable_all_static; enable_all_static=${enableval}
-else
-  enable_all_static=no
-fi
-
- if test x$enable_all_static != 'xno'; then
-  CREATE_ALL_STATIC_TRUE=
-  CREATE_ALL_STATIC_FALSE='#'
-else
-  CREATE_ALL_STATIC_TRUE='#'
-  CREATE_ALL_STATIC_FALSE=
-fi
-
-#  ----------------------------------------------------------------------
 # Add basic configure options
 
 #  ----------------------------------------------------------------------
@@ -23661,7 +23644,6 @@ $as_echo "suppressed" >&6; }
 fi
 
 #  ----------------------------------------------------------------------
-#  How to build CDI into CDO?
 # At the moment, there are two possible CDI bindings
 # (default for CDO) linking directly to CDI's object files in ./libcdi/src
 # (default for CDI) build and link to a shared CDI library
@@ -23687,6 +23669,31 @@ else
   ENABLE_CDI_LIB=true
 
 fi
+#  ----------------------------------------------------------------------
+#  Build a static CDI
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for building an additional static CDI binary" >&5
+$as_echo_n "checking for building an additional static CDI binary... " >&6; }
+# Check whether --enable-all-static was given.
+if test "${enable_all_static+set}" = set; then :
+  enableval=$enable_all_static; if test "x$enable_all_static" != "xno"; then :
+  enable_all_static=yes
+else
+  enable_all_static=no
+fi
+else
+  enable_all_static=no
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_all_static" >&5
+$as_echo "$enable_all_static" >&6; }
+ if test x$enable_all_static = 'xyes'; then
+  ENABLE_ALL_STATIC_TRUE=
+  ENABLE_ALL_STATIC_FALSE='#'
+else
+  ENABLE_ALL_STATIC_TRUE='#'
+  ENABLE_ALL_STATIC_FALSE=
+fi
+
 
 #  ----------------------------------------------------------------------
 # Compile with MPI support
@@ -24214,12 +24221,12 @@ if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCXX\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${CREATE_ALL_STATIC_TRUE}" && test -z "${CREATE_ALL_STATIC_FALSE}"; then
-  as_fn_error $? "conditional \"CREATE_ALL_STATIC\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 if test -z "${ENABLE_CDI_LIB_TRUE}" && test -z "${ENABLE_CDI_LIB_FALSE}"; then
   as_fn_error $? "conditional \"ENABLE_CDI_LIB\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ENABLE_ALL_STATIC_TRUE}" && test -z "${ENABLE_ALL_STATIC_FALSE}"; then
+  as_fn_error $? "conditional \"ENABLE_ALL_STATIC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CREATE_ISOC_TRUE}" && test -z "${CREATE_ISOC_FALSE}"; then

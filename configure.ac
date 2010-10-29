@@ -77,14 +77,6 @@ AC_CHECK_FUNCS(isnan)
 #  Check for math library
 AC_CHECK_LIB(m, floor)
 #  ----------------------------------------------------------------------
-#  Create a pure statically linked binary
-AC_ARG_ENABLE([all-static],
-              [AS_HELP_STRING([--enable-all-static],
-                             [Create an additional executable, which only statically linked [default=no]])],
-              [enable_all_static=${enableval}],
-              [enable_all_static=no])
-AM_CONDITIONAL([CREATE_ALL_STATIC],[test x$enable_all_static != 'xno'])
-#  ----------------------------------------------------------------------
 # Add basic configure options
 ACX_OPTIONS
 #  ----------------------------------------------------------------------
