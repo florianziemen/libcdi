@@ -4,27 +4,23 @@ bin_PROGRAMS    =
 noinst_PROGRAMS =
 if ENABLE_CDI_LIB
   bin_PROGRAMS    += cdi
-if CREATE_ALL_STATIC
-  bin_PROGRAMS    += cdi_static
-endif
 else
   noinst_PROGRAMS += cdi
-if CREATE_ALL_STATIC
-  noinst_PROGRAMS += cdi_static
-endif
 endif
 #
 noinst_PROGRAMS    += createtable
 #
 cdi_SOURCES         = cdi.c printinfo.h
 cdi_LDADD           = $(top_builddir)/src/libcdi.la
+if ENABLE_ALL_STATIC
+cdi_LDFLAGS         = -all-static
+endif
 #
-cdi_static_SOURCES  = cdi.c printinfo.h
-cdi_static_LDADD    = $(top_builddir)/src/libcdi.la
-cdi_static_LDFLAGS  = -all-static
-
 createtable_SOURCES = createtable.c
 createtable_LDADD   = $(top_builddir)/src/libcdi.la
+if ENABLE_ALL_STATIC
+createtable_LDFLAGS = -all-static
+endif
 #
 AM_CPPFLAGS         = -I$(top_srcdir)/src
 #

@@ -34,12 +34,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2)
-noinst_PROGRAMS = $(am__EXEEXT_3) $(am__EXEEXT_4) createtable$(EXEEXT)
+bin_PROGRAMS = $(am__EXEEXT_1)
+noinst_PROGRAMS = $(am__EXEEXT_2) createtable$(EXEEXT)
 @ENABLE_CDI_LIB_TRUE@am__append_1 = cdi
-@CREATE_ALL_STATIC_TRUE@@ENABLE_CDI_LIB_TRUE@am__append_2 = cdi_static
-@ENABLE_CDI_LIB_FALSE@am__append_3 = cdi
-@CREATE_ALL_STATIC_TRUE@@ENABLE_CDI_LIB_FALSE@am__append_4 = cdi_static
+@ENABLE_CDI_LIB_FALSE@am__append_2 = cdi
 subdir = app
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -56,23 +54,21 @@ CONFIG_HEADER = $(top_builddir)/src/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @ENABLE_CDI_LIB_TRUE@am__EXEEXT_1 = cdi$(EXEEXT)
-@CREATE_ALL_STATIC_TRUE@@ENABLE_CDI_LIB_TRUE@am__EXEEXT_2 = cdi_static$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
-@ENABLE_CDI_LIB_FALSE@am__EXEEXT_3 = cdi$(EXEEXT)
-@CREATE_ALL_STATIC_TRUE@@ENABLE_CDI_LIB_FALSE@am__EXEEXT_4 = cdi_static$(EXEEXT)
+@ENABLE_CDI_LIB_FALSE@am__EXEEXT_2 = cdi$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_cdi_OBJECTS = cdi.$(OBJEXT)
 cdi_OBJECTS = $(am_cdi_OBJECTS)
 cdi_DEPENDENCIES = $(top_builddir)/src/libcdi.la
-am_cdi_static_OBJECTS = cdi.$(OBJEXT)
-cdi_static_OBJECTS = $(am_cdi_static_OBJECTS)
-cdi_static_DEPENDENCIES = $(top_builddir)/src/libcdi.la
-cdi_static_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(cdi_static_LDFLAGS) $(LDFLAGS) -o $@
+cdi_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(cdi_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_createtable_OBJECTS = createtable.$(OBJEXT)
 createtable_OBJECTS = $(am_createtable_OBJECTS)
 createtable_DEPENDENCIES = $(top_builddir)/src/libcdi.la
+createtable_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(createtable_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -86,9 +82,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(cdi_SOURCES) $(cdi_static_SOURCES) $(createtable_SOURCES)
-DIST_SOURCES = $(cdi_SOURCES) $(cdi_static_SOURCES) \
-	$(createtable_SOURCES)
+SOURCES = $(cdi_SOURCES) $(createtable_SOURCES)
+DIST_SOURCES = $(cdi_SOURCES) $(createtable_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -248,12 +243,11 @@ top_srcdir = @top_srcdir@
 #
 cdi_SOURCES = cdi.c printinfo.h
 cdi_LDADD = $(top_builddir)/src/libcdi.la
+@ENABLE_ALL_STATIC_TRUE@cdi_LDFLAGS = -all-static
 #
-cdi_static_SOURCES = cdi.c printinfo.h
-cdi_static_LDADD = $(top_builddir)/src/libcdi.la
-cdi_static_LDFLAGS = -all-static
 createtable_SOURCES = createtable.c
 createtable_LDADD = $(top_builddir)/src/libcdi.la
+@ENABLE_ALL_STATIC_TRUE@createtable_LDFLAGS = -all-static
 #
 AM_CPPFLAGS = -I$(top_srcdir)/src
 #
@@ -346,13 +340,10 @@ clean-noinstPROGRAMS:
 	rm -f $$list
 cdi$(EXEEXT): $(cdi_OBJECTS) $(cdi_DEPENDENCIES) 
 	@rm -f cdi$(EXEEXT)
-	$(LINK) $(cdi_OBJECTS) $(cdi_LDADD) $(LIBS)
-cdi_static$(EXEEXT): $(cdi_static_OBJECTS) $(cdi_static_DEPENDENCIES) 
-	@rm -f cdi_static$(EXEEXT)
-	$(cdi_static_LINK) $(cdi_static_OBJECTS) $(cdi_static_LDADD) $(LIBS)
+	$(cdi_LINK) $(cdi_OBJECTS) $(cdi_LDADD) $(LIBS)
 createtable$(EXEEXT): $(createtable_OBJECTS) $(createtable_DEPENDENCIES) 
 	@rm -f createtable$(EXEEXT)
-	$(LINK) $(createtable_OBJECTS) $(createtable_LDADD) $(LIBS)
+	$(createtable_LINK) $(createtable_OBJECTS) $(createtable_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
