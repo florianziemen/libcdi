@@ -2370,7 +2370,6 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 
 void *gribHandleNew()
 {
-  static const char *func = "gribHandleNew";
   void *gh = NULL;
 
 #if  defined  (HAVE_LIBGRIB_API)

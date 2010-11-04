@@ -119,7 +119,6 @@ void gauaw(int kn, double *pl, double *pw)
    * Belousov, Swarztrauber, and ECHAM use zfn(0,0) = sqrt(2)
    * IFS normalisation chosen to be 0.5*Integral(Pnm**2) = 1 (zfn(0,0) = 2.0)
    */
-  static const char *func = "gauaw";
   double *zfn, *zfnlat;
 
   double z, zfnn;

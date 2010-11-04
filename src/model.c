@@ -67,8 +67,6 @@ static modelPtrToIdx *_modelAvail = NULL;
 
 static void model_list_new(void)
 {
-  static const char *func = "model_list_new";
-
   assert(_modelList == NULL);
 
   _modelList = (modelPtrToIdx *) malloc(_model_max*sizeof(modelPtrToIdx));
@@ -77,8 +75,6 @@ static void model_list_new(void)
 
 static void model_list_delete(void)
 {
-  static const char *func = "model_list_delete";
-
   if ( _modelList ) free(_modelList);
 }
 
@@ -170,7 +166,6 @@ static void model_init_entry(MODEL *modelptr)
 
 static MODEL *model_new_entry(void)
 {
-  static const char *func = "model_new_entry";
   MODEL *modelptr;
 
   modelptr = (MODEL *) malloc(sizeof(MODEL));

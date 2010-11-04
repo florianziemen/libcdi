@@ -82,8 +82,6 @@ static gridPtrToIdx *_gridAvail = NULL;
 static
 void grid_list_new(void)
 {
-  static const char *func = "grid_list_new";
-
   assert(_gridList == NULL);
 
   _gridList = (gridPtrToIdx *) malloc(_grid_max*sizeof(gridPtrToIdx));
@@ -92,8 +90,6 @@ void grid_list_new(void)
 static
 void grid_list_delete(void)
 {
-  static const char *func = "grid_list_delete";
-
   if ( _gridList ) free(_gridList);
 }
 
@@ -237,7 +233,6 @@ void grid_init_entry(grid_t *gridptr)
 static
 grid_t *grid_new_entry(void)
 {
-  static const char *func = "grid_new_entry";
   grid_t *gridptr;
 
   gridptr = (grid_t *) malloc(sizeof(grid_t));
@@ -355,7 +350,6 @@ void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *x
 static
 void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 {
-  static const char *func = "calc_gaussgrid";
   double *yw;
   long yhsize;
   long i;
@@ -628,7 +622,6 @@ int gridCreate(int gridtype, int size)
 */
 void gridDestroy(int gridID)
 {
-  static const char *func = "gridDestroy";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -1341,7 +1334,6 @@ int gridInqYsize(int gridID)
 */
 void gridDefRowlon(int gridID, int nrowlon, const int *rowlon)
 {
-  static const char *func = "gridDefRowlon";
   grid_t *gridptr;
 
   gridptr = grid_to_pointer(gridID);
@@ -2264,7 +2256,6 @@ int gridIsRotated(int gridID)
 static
 void compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yvals0, int *differ)
 {
-  static const char *func = "compareXYvals";
   long i;
 
   if ( gridInqXvals(gridID, NULL) )
@@ -2635,7 +2626,6 @@ The function @func{gridDuplicate} duplicates a horizontal Grid.
 */
 int gridDuplicate(int gridID)
 {
-  static const char *func = "gridDuplicate";
   int gridIDnew;
   int gridtype, gridsize;
   int nrowlon;
@@ -3134,7 +3124,6 @@ double *gridInqYboundsPtr(int gridID)
 
 void gridPrint(int gridID, int opt)
 {
-  static const char *func = "gridPrint";
   FILE *fp = stdout;
   int type;
   int gridsize, xsize, ysize, xdim, ydim;

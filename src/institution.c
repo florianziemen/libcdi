@@ -166,7 +166,6 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
 
 int institutDef(int center, int subcenter, const char *name, const char *longname)
 {
-  static const char *func = "institutDef";
   int instID;
 
   if ( ! InstitutsInit ) institutsInit();

@@ -10,7 +10,6 @@
 
 void streamDefHistory(int streamID, int length, const char *history)
 {
-  static const char *func = "streamDefHistory";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);

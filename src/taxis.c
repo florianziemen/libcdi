@@ -118,8 +118,6 @@ static int            _taxisAvail = -1;
 static
 void taxis_list_new(void)
 {
-  static const char *func = "taxis_list_new";
-
   assert(_taxisList == NULL);
 
   _taxisList = (taxisPtrToIdx *) malloc(_taxis_min*sizeof(taxisPtrToIdx));
@@ -128,8 +126,6 @@ void taxis_list_new(void)
 static
 void taxis_list_delete(void)
 {
-  static const char *func = "taxis_list_delete";
-
   if ( _taxisList ) free(_taxisList);
 }
 
@@ -271,7 +267,6 @@ void taxis_init_entry(taxis_t *taxisptr)
 static
 taxis_t *taxis_new_entry(void)
 {
-  static const char *func = "taxis_new_entry";
   taxis_t *taxisptr;
 
   taxisptr = (taxis_t *) malloc(sizeof(taxis_t));

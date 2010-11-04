@@ -101,7 +101,6 @@ int recordNewEntry(int streamID, int tsID)
 
 void cdiInitRecord(int streamID)
 {
-  static const char *func = "cdiInitRecord";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);

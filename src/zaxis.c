@@ -101,8 +101,6 @@ static zaxisPtrToIdx *_zaxisAvail = NULL;
 static
 void zaxis_list_new(void)
 {
-  static const char *func = "zaxis_list_new";
-
   assert(_zaxisList == NULL);
 
   _zaxisList = (zaxisPtrToIdx *) malloc(_zaxis_max*sizeof(zaxisPtrToIdx));
@@ -111,8 +109,6 @@ void zaxis_list_new(void)
 static
 void zaxis_list_delete(void)
 {
-  static const char *func = "zaxis_list_delete";
-
   if ( _zaxisList ) free(_zaxisList);
 }
 
@@ -213,7 +209,6 @@ void zaxis_init_entry(zaxis_t *zaxisptr)
 static
 zaxis_t *zaxis_new_entry(void)
 {
-  static const char *func = "zaxis_new_entry";
   zaxis_t *zaxisptr;
 
   zaxisptr = (zaxis_t *) malloc(sizeof(zaxis_t));
@@ -1142,7 +1137,6 @@ void zaxisChangeType(int zaxisID, int zaxistype)
 
 void zaxisResize(int zaxisID, int size)
 {
-  static const char *func = "zaxisResize";
   zaxis_t *zaxisptr;
 
   zaxisptr = zaxis_to_pointer(zaxisID);
@@ -1158,7 +1152,6 @@ void zaxisResize(int zaxisID, int size)
 
 int zaxisDuplicate(int zaxisID)
 {
-  static const char *func = "zaxisDuplicate";
   int zaxisIDnew;
   int zaxistype, zaxissize;
   int size;

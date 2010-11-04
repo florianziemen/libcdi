@@ -44,7 +44,6 @@ void tableDefNum(int tableID, int tablenum);
 void tableDefEntry(int tableID, int id, const char *name,
 		   const char *longname, const char *units)
 {
-  static const char *func = "tableDefEntry";
   int item;
 
   item = parTable[tableID].npars++;
@@ -91,7 +90,6 @@ void parTableInitEntry(int tableID)
 
 void tableGetPath(void)
 {
-  static const char *func = "tableGetPath";
   char *path;
 
   path = getenv("TABLEPATH");
@@ -337,7 +335,6 @@ int tableRead(const char *tablefile)
 
 int tableFromEnv(int modelID, int tablenum)
 {
-  static const char *func = "tableFromEnv";
   int tableID = UNDEFID;
   char tablename[256] = {'\0'};
   int tablenamefound = 0;
@@ -488,7 +485,6 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 
 int tableDef(int modelID, int tablenum, const char *tablename)
 {
-  static const char *func = "tableDef";
   int tableID = UNDEFID;
 
   if ( ! ParTableInit ) parTableInit();

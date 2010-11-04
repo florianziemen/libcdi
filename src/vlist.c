@@ -51,8 +51,6 @@ static int            _vlistAvail = -1;
 static
 void vlist_list_new(void)
 {
-  static const char *func = "vlist_list_new";
-
   assert(_vlistList == NULL);
 
   _vlistList = (vlistPtrToIdx *) malloc(_vlist_min*sizeof(vlistPtrToIdx));
@@ -61,8 +59,6 @@ void vlist_list_new(void)
 static
 void vlist_list_delete(void)
 {
-  static const char *func = "vlist_list_delete";
-
   if ( _vlistList ) free(_vlistList);
 }
 
@@ -194,7 +190,6 @@ void vlist_init_entry(vlist_t *vlistptr)
 static
 vlist_t *vlist_new_entry(void)
 {
-  static const char *func = "vlist_new_entry";
   vlist_t *vlistptr;
 
   vlistptr = (vlist_t *) malloc(sizeof(vlist_t));

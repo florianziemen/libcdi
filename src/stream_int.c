@@ -257,8 +257,6 @@ static int             _streamAvail = -1;
 static
 void stream_list_new(void)
 {
-  static const char *func = "stream_list_new";
-
   assert(_streamList == NULL);
 
   _streamList = (streamPtrToIdx *) malloc(_stream_min*sizeof(streamPtrToIdx));
@@ -441,7 +439,6 @@ void stream_init_entry(stream_t *streamptr)
 
 stream_t *stream_new_entry(void)
 {
-  static const char *func = "stream_new_entry";
   stream_t *streamptr;
 
   cdiInitialize(); /* ***************** make MT version !!! */

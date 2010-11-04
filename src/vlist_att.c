@@ -57,7 +57,6 @@ cdi_att_t *find_att(cdi_atts_t *attsp, const char *name)
 static
 cdi_att_t *new_att(cdi_atts_t *attsp, const char *name)
 {
-  static const char *func = "new_att";
   cdi_att_t *attp;
   size_t slen;
 
@@ -82,8 +81,6 @@ cdi_att_t *new_att(cdi_atts_t *attsp, const char *name)
 static
 void fill_att(cdi_att_t *attp, int indtype, int exdtype, size_t nelems, size_t xsz, const void *xvalue)
 {
-  static const char *func = "fill_att";
-
   assert(attp != NULL);
 
   attp->xsz = xsz;
@@ -185,7 +182,6 @@ int vlistInqAtt(int vlistID, int varID, int attnum, char *name, int *typep, int 
 
 int vlistDelAtts(int vlistID, int varID)
 {
-  static const char *func = "vlistDelAtts";
   int status = CDI_NOERR;
   vlist_t *vlistptr;
   cdi_att_t *attp = NULL;

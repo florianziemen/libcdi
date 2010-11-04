@@ -136,7 +136,6 @@ int get_timeunit(int len, char *ptu)
 static
 int isTimeUnits(const char *timeunits)
 {
-  static const char *func = "isTimeUnits";
   int len, i;
   char *ptu, *tu;
   int timetype = -1;
@@ -289,7 +288,6 @@ int splitBasetime(const char *timeunits, taxis_t *taxis)
 static
 void cdfGetAttInt(int fileID, int ncvarid, char *attname, int attlen, int *attint)
 {
-  static const char *func = "cdfGetAttInt";
   size_t nc_attlen;
   int *pintatt;
 
@@ -313,7 +311,6 @@ void cdfGetAttInt(int fileID, int ncvarid, char *attname, int attlen, int *attin
 #if  defined  (HAVE_LIBNETCDF)
 static void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double *attdouble)
 {
-  static const char *func = "cdfGetAttDouble";
   size_t nc_attlen;
   double *pdoubleatt;
 

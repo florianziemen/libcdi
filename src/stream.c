@@ -973,7 +973,6 @@ if ( streamID < 0 ) handle_error(streamID);
 */
 int streamOpenRead(const char *filenames)
 {
-  static const char *func = "streamOpenRead";
   int filetype, byteorder;
   int streamID;
   int num_fnames;

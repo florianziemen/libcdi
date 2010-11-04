@@ -1230,7 +1230,6 @@ int vlistInqVarTimaccu(int vlistID, int varID)
 
 void vlistDestroyVarName(int vlistID, int varID)
 {
-  static const char *func = "vlistDestroyVarName";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -1245,7 +1244,6 @@ void vlistDestroyVarName(int vlistID, int varID)
 
 void vlistDestroyVarLongname(int vlistID, int varID)
 {
-  static const char *func = "vlistDestroyVarLongname";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -1260,7 +1258,6 @@ void vlistDestroyVarLongname(int vlistID, int varID)
 
 void vlistDestroyVarStdname(int vlistID, int varID)
 {
-  static const char *func = "vlistDestroyVarStdname";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -1275,7 +1272,6 @@ void vlistDestroyVarStdname(int vlistID, int varID)
 
 void vlistDestroyVarUnits(int vlistID, int varID)
 {
-  static const char *func = "vlistDestroyVarUnits";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);

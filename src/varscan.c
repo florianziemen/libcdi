@@ -107,7 +107,6 @@ int varGetEntry(int param, int zaxistype, int ltype)
 
 void varFree(void)
 {
-  static const char *func = "varFree";
   int varID;
 
   for ( varID = 0; varID < nvars; varID++ )
@@ -613,8 +612,6 @@ void cdiGenVars(int streamID)
 
 void varDefVCT(size_t vctsize, double *vctptr)
 {
-  static const char *func = "varDefVCT";
-
   if ( Vct == NULL && vctptr != NULL && vctsize > 0 )
     {
       Vctsize = vctsize;
