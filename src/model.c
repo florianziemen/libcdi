@@ -21,8 +21,7 @@ typedef struct
   int      modelgribID;
   char    *name;
 }
-MODEL;
-
+model_t;
 
 
 static int  MODEL_Debug = 0;   /* If set to 1, debugging */
@@ -56,7 +55,7 @@ static pthread_mutex_t _model_mutex;
 
 typedef struct _modelPtrToIdx {
   int idx;
-  MODEL *ptr;
+  model_t *ptr;
   struct _modelPtrToIdx *next;
 } modelPtrToIdx;
 
@@ -65,21 +64,22 @@ static modelPtrToIdx *_modelList  = NULL;
 static modelPtrToIdx *_modelAvail = NULL;
 
 
-static void model_list_new(void)
+static
+void model_list_new(void)
 {
   assert(_modelList == NULL);
 
   _modelList = (modelPtrToIdx *) malloc(_model_max*sizeof(modelPtrToIdx));
 }
 
-
-static void model_list_delete(void)
+static
+void model_list_delete(void)
 {
   if ( _modelList ) free(_modelList);
 }
 
-
-static void model_init_pointer(void)
+static
+void model_init_pointer(void)
 {
   int  i;
   
@@ -95,11 +95,11 @@ static void model_init_pointer(void)
   _modelAvail = _modelList;
 }
 
-
-MODEL *model_to_pointer(int idx)
+static
+model_t *model_to_pointer(int idx)
 {
   static const char *func = "model_to_pointer";
-  MODEL *modelptr = NULL;
+  model_t *modelptr = NULL;
 
   MODEL_INIT
 
@@ -117,9 +117,9 @@ MODEL *model_to_pointer(int idx)
   return (modelptr);
 }
 
-
 /* Create an index from a pointer */
-static int model_from_pointer(MODEL *ptr)
+static
+int model_from_pointer(model_t *ptr)
 {
   static const char *func = "model_from_pointer";
   int      idx = -1;
@@ -151,8 +151,8 @@ static int model_from_pointer(MODEL *ptr)
   return (idx);
 }
 
-
-static void model_init_entry(MODEL *modelptr)
+static
+void model_init_entry(model_t *modelptr)
 {
   modelptr->self        = model_from_pointer(modelptr);
 
@@ -163,20 +163,20 @@ static void model_init_entry(MODEL *modelptr)
   modelptr->name        = NULL;
 }
 
-
-static MODEL *model_new_entry(void)
+static
+model_t *model_new_entry(void)
 {
-  MODEL *modelptr;
+  model_t *modelptr;
 
-  modelptr = (MODEL *) malloc(sizeof(MODEL));
+  modelptr = (model_t *) malloc(sizeof(model_t));
 
   if ( modelptr ) model_init_entry(modelptr);
 
   return (modelptr);
 }
 
-
-static void model_delete_entry(MODEL *modelptr)
+static
+void model_delete_entry(model_t *modelptr)
 {
   static const char *func = "model_delete_entry";
   int idx;
@@ -199,7 +199,8 @@ static void model_delete_entry(MODEL *modelptr)
 
 int modelDef(int instID, int modelgribID, const char *name);
 
-static void model_defaults(void)
+static
+void model_defaults(void)
 {
   int instID;
 
@@ -229,8 +230,8 @@ static void model_defaults(void)
   (void)    modelDef(instID,  80, "T62L28MRF");
 }
 
-
-static void model_initialize(void)
+static
+void model_initialize(void)
 {
   char *env;
 
@@ -256,13 +257,12 @@ static void model_initialize(void)
   model_defaults();
 }
 
-
-static void model_check_ptr(const char *func, MODEL *modelptr)
+static
+void model_check_ptr(const char *func, model_t *modelptr)
 {
   if ( modelptr == NULL )
     Error(func, "model undefined!");
 }
-
 
 int modelSize(void)
 {
@@ -288,7 +288,7 @@ int modelInq(int instID, int modelgribID, char *name)
   size_t len;
   int found;
   int model_size;
-  MODEL *modelptr;
+  model_t *modelptr;
 
   MODEL_INIT
 
@@ -335,7 +335,7 @@ int modelDef(int instID, int modelgribID, const char *name)
 {
   static const char *func = "modelDef";
   int modelID = UNDEFID;
-  MODEL *modelptr;
+  model_t *modelptr;
 
   MODEL_INIT
 
@@ -363,7 +363,7 @@ int modelInqInstitut(int modelID)
 {
   static const char *func = "modelInqInstitut";
   int instID = UNDEFID;
-  MODEL *modelptr;
+  model_t *modelptr;
 
   MODEL_INIT
 
@@ -384,7 +384,7 @@ int modelInqGribID(int modelID)
 {
   static const char *func = "modelInqGribID";
   int modelgribID = UNDEFID;
-  MODEL *modelptr;
+  model_t *modelptr;
 
   MODEL_INIT
 
@@ -405,7 +405,7 @@ char *modelInqNamePtr(int modelID)
 {
   static const char *func = "modelInqNamePtr";
   char *name = NULL;
-  MODEL *modelptr;
+  model_t *modelptr;
 
   MODEL_INIT
 
