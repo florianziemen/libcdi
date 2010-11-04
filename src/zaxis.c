@@ -98,7 +98,8 @@ static zaxisPtrToIdx *_zaxisList  = NULL;
 static zaxisPtrToIdx *_zaxisAvail = NULL;
 
 
-static void zaxis_list_new(void)
+static
+void zaxis_list_new(void)
 {
   static const char *func = "zaxis_list_new";
 
@@ -107,16 +108,16 @@ static void zaxis_list_new(void)
   _zaxisList = (zaxisPtrToIdx *) malloc(_zaxis_max*sizeof(zaxisPtrToIdx));
 }
 
-
-static void zaxis_list_delete(void)
+static
+void zaxis_list_delete(void)
 {
   static const char *func = "zaxis_list_delete";
 
   if ( _zaxisList ) free(_zaxisList);
 }
 
-
-static void zaxis_init_pointer(void)
+static
+void zaxis_init_pointer(void)
 {
   int  i;
   
@@ -154,9 +155,9 @@ ZAXIS *zaxis_to_pointer(int idx)
   return (zaxisptr);
 }
 
-
 /* Create an index from a pointer */
-static int zaxis_from_pointer(ZAXIS *ptr)
+static
+int zaxis_from_pointer(ZAXIS *ptr)
 {
   static const char *func = "zaxis_from_pointer";
   int      idx = -1;
@@ -188,8 +189,8 @@ static int zaxis_from_pointer(ZAXIS *ptr)
   return (idx);
 }
 
-
-static void zaxis_init_entry(ZAXIS *zaxisptr)
+static
+void zaxis_init_entry(ZAXIS *zaxisptr)
 {
   zaxisptr->self        = zaxis_from_pointer(zaxisptr);
 
@@ -209,8 +210,8 @@ static void zaxis_init_entry(ZAXIS *zaxisptr)
   zaxisptr->vct         = NULL;
 }
 
-
-static ZAXIS *zaxis_new_entry(void)
+static
+ZAXIS *zaxis_new_entry(void)
 {
   static const char *func = "zaxis_new_entry";
   ZAXIS *zaxisptr;
@@ -222,8 +223,8 @@ static ZAXIS *zaxis_new_entry(void)
   return (zaxisptr);
 }
 
-
-static void zaxis_delete_entry(ZAXIS *zaxisptr)
+static
+void zaxis_delete_entry(ZAXIS *zaxisptr)
 {
   static const char *func = "zaxis_delete_entry";
   int idx;
@@ -244,8 +245,8 @@ static void zaxis_delete_entry(ZAXIS *zaxisptr)
     Message(func, "Removed idx %d from zaxis list", idx);
 }
 
-
-static void zaxis_initialize(void)
+static
+void zaxis_initialize(void)
 {
   char *env;
 
@@ -269,8 +270,8 @@ static void zaxis_initialize(void)
   _zaxis_init = TRUE;
 }
 
-
-static void zaxis_copy(ZAXIS *zaxisptr2, ZAXIS *zaxisptr1)
+static
+void zaxis_copy(ZAXIS *zaxisptr2, ZAXIS *zaxisptr1)
 {
   int zaxisID2;
 
@@ -279,8 +280,8 @@ static void zaxis_copy(ZAXIS *zaxisptr2, ZAXIS *zaxisptr1)
   zaxisptr2->self = zaxisID2;
 }
 
-
-static void zaxis_check_ptr(const char *func, ZAXIS *zaxisptr)
+static
+ void zaxis_check_ptr(const char *func, ZAXIS *zaxisptr)
 {
   if ( zaxisptr == NULL )
     Error(func, "zaxis undefined!");

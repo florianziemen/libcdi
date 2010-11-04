@@ -695,7 +695,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 
 void gribapiScanTimestep1(int streamID)
 {
-  static char func [] = "gribapiScanTimestep1";
+  static const char *func = "gribapiScanTimestep1";
 #if  defined  (HAVE_LIBGRIB_API)
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
@@ -1009,7 +1009,7 @@ void gribapiScanTimestep1(int streamID)
 
 int gribapiScanTimestep2(int streamID)
 {
-  static char func [] = "gribapiScanTimestep2";
+  static const char *func = "gribapiScanTimestep2";
   int status = 0;
 #if  defined  (HAVE_LIBGRIB_API)
   off_t recpos = 0;
@@ -1344,7 +1344,7 @@ int gribapiScanTimestep2(int streamID)
 
 int gribapiScanTimestep(int streamID)
 {
-  static char func [] = "gribapiScanTimestep";
+  static const char *func = "gribapiScanTimestep";
   int status = 0;
 #if  defined  (HAVE_LIBGRIB_API)
   long recsize = 0;
