@@ -179,8 +179,6 @@ static filePtrToIdx *_fileAvail = NULL;
 static
 void file_list_new(void)
 {
-  static const char *func = "file_list_new";
-
   assert(_fileList == NULL);
 
   _fileList = (filePtrToIdx *) malloc(_file_max*sizeof(filePtrToIdx));
@@ -189,8 +187,6 @@ void file_list_new(void)
 static
 void file_list_delete(void)
 {
-  static const char *func = "file_list_delete";
-
   if ( _fileList ) free(_fileList);
 }
 
@@ -297,7 +293,6 @@ void file_init_entry(bfile_t *fileptr)
 static
 bfile_t *file_new_entry(void)
 {
-  static const char *func = "file_new_entry";
   bfile_t *fileptr;
 
   fileptr = (bfile_t *) malloc(sizeof(bfile_t));
