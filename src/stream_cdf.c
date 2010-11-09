@@ -6213,6 +6213,7 @@ int cdfInqTimestep(int streamID, int tsID)
 		sscanf(stvalue, "%d-%d-%d_%d:%d:%d", &year, &month, &day, &hour, &minute, &second);
 		taxis->vdate = cdiEncodeDate(year, month, day);
 		taxis->vtime = cdiEncodeTime(hour, minute, second);
+		taxis->type = TAXIS_ABSOLUTE;
 	      }
 	    }
 	  else
