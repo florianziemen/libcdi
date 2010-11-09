@@ -1,3 +1,7 @@
+2010-11-09  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added support for netCDF output from WRF model
+
 2010-10-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cdfDefZaxis: changed hybrid level type from int to float

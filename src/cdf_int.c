@@ -196,8 +196,8 @@ void cdf_def_dim(int ncid, const char *name, size_t len, int *dimidp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_inq_dimid(int ncid, const char *name, int *dimidp)
+
+void cdf_inq_dimid(int ncid, const char *name, int *dimidp)
 {
   static const char *func = "cdf_inq_dimid";
   int status;
@@ -211,8 +211,8 @@ cdf_inq_dimid(int ncid, const char *name, int *dimidp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_inq_dim(int ncid, int dimid, char *name, size_t * lengthp)
+
+void cdf_inq_dim(int ncid, int dimid, char *name, size_t * lengthp)
 {
   static const char *func = "cdf_inq_dim";
   int status;
@@ -227,8 +227,8 @@ cdf_inq_dim(int ncid, int dimid, char *name, size_t * lengthp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_inq_dimname(int ncid, int dimid, char *name)
+
+void cdf_inq_dimname(int ncid, int dimid, char *name)
 {
   static const char *func = "cdf_inq_dimname";
   int status;
@@ -242,8 +242,8 @@ cdf_inq_dimname(int ncid, int dimid, char *name)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_inq_dimlen(int ncid, int dimid, size_t * lengthp)
+
+void cdf_inq_dimlen(int ncid, int dimid, size_t * lengthp)
 {
   static const char *func = "cdf_inq_dimlen";
   int status;
@@ -257,8 +257,8 @@ cdf_inq_dimlen(int ncid, int dimid, size_t * lengthp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_def_var(int ncid, const char *name, nc_type xtype, int ndims,
+
+void cdf_def_var(int ncid, const char *name, nc_type xtype, int ndims,
 	    const int dimids[], int *varidp)
 {
   static const char *func = "cdf_def_var";
@@ -274,6 +274,7 @@ cdf_def_var(int ncid, const char *name, nc_type xtype, int ndims,
     Error(func, "%s", nc_strerror(status));
 }
 
+
 void cdf_inq_varid(int ncid, const char *name, int *varidp)
 {
   static const char *func = "cdf_inq_varid";
@@ -287,8 +288,9 @@ void cdf_inq_varid(int ncid, const char *name, int *varidp)
   if ( status != NC_NOERR )
     Error(func, "%s", nc_strerror(status));
 }
-void
-cdf_inq_nvars(int ncid, int *nvarsp)
+
+
+void cdf_inq_nvars(int ncid, int *nvarsp)
 {
   static const char *func = "cdf_inq_nvars";
   int status;
@@ -302,9 +304,9 @@ cdf_inq_nvars(int ncid, int *nvarsp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_inq_var(int ncid, int varid, char *name, nc_type *xtypep, int *ndimsp,
-	    int dimids[], int *nattsp)
+
+void cdf_inq_var(int ncid, int varid, char *name, nc_type *xtypep, int *ndimsp,
+		 int dimids[], int *nattsp)
 {
   static const char *func = "cdf_inq_var";
   int status;
@@ -319,8 +321,8 @@ cdf_inq_var(int ncid, int varid, char *name, nc_type *xtypep, int *ndimsp,
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_inq_varname(int ncid, int varid, char *name)
+
+void cdf_inq_varname(int ncid, int varid, char *name)
 {
   static const char *func = "cdf_inq_varname";
   int status;
@@ -334,8 +336,8 @@ cdf_inq_varname(int ncid, int varid, char *name)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_inq_vartype(int ncid, int varid, nc_type *xtypep)
+
+void cdf_inq_vartype(int ncid, int varid, nc_type *xtypep)
 {
   static const char *func = "cdf_inq_vartype";
   int status;
@@ -349,8 +351,8 @@ cdf_inq_vartype(int ncid, int varid, nc_type *xtypep)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_inq_varndims(int ncid, int varid, int *ndimsp)
+
+void cdf_inq_varndims(int ncid, int varid, int *ndimsp)
 {
   static const char *func = "cdf_inq_varndims";
   int status;
@@ -364,8 +366,8 @@ cdf_inq_varndims(int ncid, int varid, int *ndimsp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_inq_vardimid(int ncid, int varid, int dimids[])
+
+void cdf_inq_vardimid(int ncid, int varid, int dimids[])
 {
   static const char *func = "cdf_inq_vardimid";
   int status;
@@ -379,8 +381,8 @@ cdf_inq_vardimid(int ncid, int varid, int dimids[])
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_inq_varnatts(int ncid, int varid, int *nattsp)
+
+void cdf_inq_varnatts(int ncid, int varid, int *nattsp)
 {
   static const char *func = "cdf_inq_varnatts";
   int status;
@@ -394,8 +396,8 @@ cdf_inq_varnatts(int ncid, int varid, int *nattsp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_put_var_text(int ncid, int varid, const char *tp)
+
+void cdf_put_var_text(int ncid, int varid, const char *tp)
 {
   static const char *func = "cdf_put_var_text";
   int status;
@@ -410,8 +412,7 @@ cdf_put_var_text(int ncid, int varid, const char *tp)
 }
 
 
-void
-cdf_put_var_short(int ncid, int varid, const short *sp)
+void cdf_put_var_short(int ncid, int varid, const short *sp)
 {
   static const char *func = "cdf_put_var_short";
   int status;
@@ -425,8 +426,8 @@ cdf_put_var_short(int ncid, int varid, const short *sp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_put_var_int(int ncid, int varid, const int *ip)
+
+void cdf_put_var_int(int ncid, int varid, const int *ip)
 {
   static const char *func = "cdf_put_var_int";
   int status;
@@ -440,8 +441,8 @@ cdf_put_var_int(int ncid, int varid, const int *ip)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_put_var_long(int ncid, int varid, const long *lp)
+
+void cdf_put_var_long(int ncid, int varid, const long *lp)
 {
   static const char *func = "cdf_put_var_long";
   int status;
@@ -455,8 +456,8 @@ cdf_put_var_long(int ncid, int varid, const long *lp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_put_var_float(int ncid, int varid, const float *fp)
+
+void cdf_put_var_float(int ncid, int varid, const float *fp)
 {
   static const char *func = "cdf_put_var_float";
   int status;
@@ -470,9 +471,9 @@ cdf_put_var_float(int ncid, int varid, const float *fp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void 
-cdf_put_vara_double (int ncid, int varid, const size_t start[],
-		     const size_t count[], const double *dp)
+
+void  cdf_put_vara_double (int ncid, int varid, const size_t start[],
+			   const size_t count[], const double *dp)
 {
   static const char *func = "cdf_put_vara_double";
   int status;
@@ -486,9 +487,9 @@ cdf_put_vara_double (int ncid, int varid, const size_t start[],
     Error(func, "%s", nc_strerror(status));
 }
 
-void 
-cdf_get_vara_int (int ncid, int varid, const size_t start[],
-		  const size_t count[], int *dp)
+
+void  cdf_get_vara_int (int ncid, int varid, const size_t start[],
+			const size_t count[], int *dp)
 {
   static const char *func = "cdf_get_vara_int";
   int status;
@@ -502,9 +503,9 @@ cdf_get_vara_int (int ncid, int varid, const size_t start[],
     Error(func, "%s", nc_strerror(status));
 }
 
-void 
-cdf_get_vara_double (int ncid, int varid, const size_t start[],
-		     const size_t count[], double *dp)
+
+void  cdf_get_vara_double (int ncid, int varid, const size_t start[],
+			   const size_t count[], double *dp)
 {
   static const char *func = "cdf_get_vara_double";
   int status;
@@ -518,8 +519,24 @@ cdf_get_vara_double (int ncid, int varid, const size_t start[],
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_put_var_double (int ncid, int varid, const double *dp)
+
+void  cdf_get_vara_text(int ncid, int varid, const size_t start[],
+			const size_t count[], char *tp)
+{
+  static const char *func = "cdf_get_vara_text";
+  int status;
+
+  status = nc_get_vara_text(ncid, varid, start, count, tp);
+
+  if ( CDF_Debug || status != NC_NOERR )
+    Message(func, "ncid = %d varid = %d", ncid, varid);
+
+  if ( status != NC_NOERR )
+    Error(func, "%s", nc_strerror(status));
+}
+
+
+void cdf_put_var_double (int ncid, int varid, const double *dp)
 {
   static const char *func = "cdf_put_var_double";
   int status;
@@ -533,8 +550,23 @@ cdf_put_var_double (int ncid, int varid, const double *dp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void 
-cdf_get_var1_double(int ncid, int varid, const size_t index[], double *dp)
+
+void cdf_get_var1_text(int ncid, int varid, const size_t index[], char *tp)
+{
+  static const char *func = "cdf_get_var1_text";
+  int status;
+
+  status = nc_get_var1_text(ncid, varid, index, tp);
+
+  if ( CDF_Debug || status != NC_NOERR )
+    Message(func, "ncid = %d varid = %d", ncid, varid);
+
+  if ( status != NC_NOERR )
+    Error(func, "%s", nc_strerror(status));
+}
+
+
+void cdf_get_var1_double(int ncid, int varid, const size_t index[], double *dp)
 {
   static const char *func = "cdf_get_var1_double";
   int status;
@@ -548,8 +580,8 @@ cdf_get_var1_double(int ncid, int varid, const size_t index[], double *dp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_put_var1_double(int ncid, int varid, const size_t index[], const double *dp)
+
+void cdf_put_var1_double(int ncid, int varid, const size_t index[], const double *dp)
 {
   static const char *func = "cdf_put_var1_double";
   int status;
@@ -563,8 +595,8 @@ cdf_put_var1_double(int ncid, int varid, const size_t index[], const double *dp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_get_var_text(int ncid, int varid, char *tp)
+
+void cdf_get_var_text(int ncid, int varid, char *tp)
 {
   static const char *func = "cdf_get_var_text";
   int status;
@@ -578,8 +610,8 @@ cdf_get_var_text(int ncid, int varid, char *tp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_get_var_short(int ncid, int varid, short *sp)
+
+void cdf_get_var_short(int ncid, int varid, short *sp)
 {
   static const char *func = "cdf_get_var_short";
   int status;
@@ -593,8 +625,8 @@ cdf_get_var_short(int ncid, int varid, short *sp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_get_var_int(int ncid, int varid, int *ip)
+
+void cdf_get_var_int(int ncid, int varid, int *ip)
 {
   static const char *func = "cdf_get_var_int";
   int status;
@@ -608,8 +640,8 @@ cdf_get_var_int(int ncid, int varid, int *ip)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_get_var_long(int ncid, int varid, long *lp)
+
+void cdf_get_var_long(int ncid, int varid, long *lp)
 {
   static const char *func = "cdf_get_var_long";
   int status;
@@ -623,8 +655,8 @@ cdf_get_var_long(int ncid, int varid, long *lp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_get_var_float(int ncid, int varid, float *fp)
+
+void cdf_get_var_float(int ncid, int varid, float *fp)
 {
   static const char *func = "cdf_get_var_float";
   int status;
@@ -638,8 +670,8 @@ cdf_get_var_float(int ncid, int varid, float *fp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_get_var_double(int ncid, int varid, double *dp)
+
+void cdf_get_var_double(int ncid, int varid, double *dp)
 {
   static const char *func = "cdf_get_var_double";
   int status;
@@ -653,9 +685,9 @@ cdf_get_var_double(int ncid, int varid, double *dp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_copy_att(int ncid_in, int varid_in, const char *name, int ncid_out,
-	     int varid_out)
+
+void cdf_copy_att(int ncid_in, int varid_in, const char *name, int ncid_out,
+		  int varid_out)
 {
   static const char *func = "cdf_copy_att";
   int status;
@@ -670,9 +702,9 @@ cdf_copy_att(int ncid_in, int varid_in, const char *name, int ncid_out,
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_put_att_text(int ncid, int varid, const char *name, size_t len,
-		 const char *tp)
+
+void cdf_put_att_text(int ncid, int varid, const char *name, size_t len,
+		      const char *tp)
 {
   static const char *func = "cdf_put_att_text";
   int status;
@@ -687,9 +719,9 @@ cdf_put_att_text(int ncid, int varid, const char *name, size_t len,
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_put_att_int(int ncid, int varid, const char *name, nc_type xtype,
-		size_t len, const int *ip)
+
+void cdf_put_att_int(int ncid, int varid, const char *name, nc_type xtype,
+		     size_t len, const int *ip)
 {
   static const char *func = "cdf_put_att_int";
   int status;
@@ -704,9 +736,9 @@ cdf_put_att_int(int ncid, int varid, const char *name, nc_type xtype,
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_put_att_double(int ncid, int varid, const char *name, nc_type xtype,
-		   size_t len, const double *dp)
+
+void cdf_put_att_double(int ncid, int varid, const char *name, nc_type xtype,
+			size_t len, const double *dp)
 {
   static const char *func = "cdf_put_att_double";
   int status;
@@ -720,8 +752,8 @@ cdf_put_att_double(int ncid, int varid, const char *name, nc_type xtype,
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_get_att_text(int ncid, int varid, char *name, char *tp)
+
+void cdf_get_att_text(int ncid, int varid, char *name, char *tp)
 {
   static const char *func = "cdf_get_att_text";
   int status;
@@ -735,8 +767,8 @@ cdf_get_att_text(int ncid, int varid, char *name, char *tp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_get_att_int(int ncid, int varid, char *name, int *ip)
+
+void cdf_get_att_int(int ncid, int varid, char *name, int *ip)
 {
   static const char *func = "cdf_get_att_int";
   int status;
@@ -750,6 +782,7 @@ cdf_get_att_int(int ncid, int varid, char *name, int *ip)
   if ( status != NC_NOERR )
     Error(func, "%s", nc_strerror(status));
 }
+
 
 void cdf_get_att_double(int ncid, int varid, char *name, double *dp)
 {
@@ -766,8 +799,9 @@ void cdf_get_att_double(int ncid, int varid, char *name, double *dp)
     Error(func, "%s", nc_strerror(status));
 }
 
+
 void cdf_inq_att(int ncid, int varid, const char *name, nc_type *xtypep,
-	    size_t *lenp)
+		 size_t *lenp)
 {
   static const char *func = "cdf_inq_att";
   int status;
@@ -781,8 +815,8 @@ void cdf_inq_att(int ncid, int varid, const char *name, nc_type *xtypep,
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_inq_atttype(int ncid, int varid, const char *name, nc_type * xtypep)
+
+void cdf_inq_atttype(int ncid, int varid, const char *name, nc_type * xtypep)
 {
   static const char *func = "cdf_inq_atttype";
   int status;
@@ -796,8 +830,8 @@ cdf_inq_atttype(int ncid, int varid, const char *name, nc_type * xtypep)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_inq_attlen(int ncid, int varid, const char *name, size_t * lenp)
+
+void cdf_inq_attlen(int ncid, int varid, const char *name, size_t * lenp)
 {
   static const char *func = "cdf_inq_attlen";
   int status;
@@ -812,8 +846,8 @@ cdf_inq_attlen(int ncid, int varid, const char *name, size_t * lenp)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_inq_attname(int ncid, int varid, int attnum, char *name)
+
+void cdf_inq_attname(int ncid, int varid, int attnum, char *name)
 {
   static const char *func = "cdf_inq_attname";
   int status;
@@ -828,8 +862,8 @@ cdf_inq_attname(int ncid, int varid, int attnum, char *name)
     Error(func, "%s", nc_strerror(status));
 }
 
-void
-cdf_inq_attid(int ncid, int varid, const char *name, int *attnump)
+
+void cdf_inq_attid(int ncid, int varid, const char *name, int *attnump)
 {
   static const char *func = "cdf_inq_attid";
   int status;

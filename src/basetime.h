@@ -6,6 +6,7 @@ typedef struct {
   int   ncvarid;
   int   ncdimid;
   int   ncvarboundsid;
+  int   lwrf;     /* TRUE for time axis in WRF format */
 }
 BaseTime;
 

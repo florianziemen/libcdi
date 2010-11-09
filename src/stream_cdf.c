@@ -430,7 +430,6 @@ int cdfDefDatatype(int datatype, int filetype)
 static
 void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
 {
-  static const char *func = "defineAttributes";
   int natts, iatt;
   int atttype, attlen;
   size_t len;
@@ -3654,7 +3653,6 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
 void cdfCreateRecords(int streamID, int tsID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static const char *func = "cdfCreateRecords";
   int varID, levelID, recID, vrecID, zaxisID;
   int nvars, nlev, nrecs, nvrecs;
   record_t *records = NULL;
@@ -3970,7 +3968,6 @@ int unitsIsPressure(const char *units)
 static
 int isGaussGrid(long ysize, double yinc, double *yvals)
 {
-  static const char *func = "isGaussGrid";
   int lgauss = FALSE;
   long i;
   double *yv, *yw;
@@ -4867,12 +4864,27 @@ int cdfInqContents(int streamID)
 	      }
 	  }
 
+      if ( ltimevar == FALSE ) /* search for WRF time description */
+	{
+	  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+	    if ( ncvarid != streamptr->basetime.ncvarid &&
+		 ncvars[ncvarid].ndims == 2 &&
+		 timedimid == ncvars[ncvarid].dimids[0] &&
+		 ncvars[ncvarid].xtype == NC_CHAR &&
+		 ncdims[ncvars[ncvarid].dimids[1]].len == 19 )
+	      {
+		streamptr->basetime.ncvarid = ncvarid;
+		streamptr->basetime.lwrf    = TRUE;
+		break;
+	      }
+	}
+
       /* time varID */
       ncvarid = streamptr->basetime.ncvarid;
 
       if ( ncvarid == UNDEFID )
-	Warning(func, "time variable not found!");
-      else
+	Warning(func, "Variable >time< not found!");
+      else if ( streamptr->basetime.lwrf == FALSE )
 	{
 	  if ( ncvars[ncvarid].units[0] != 0 )
 	    timehasunits = TRUE;
@@ -4882,7 +4894,7 @@ int cdfInqContents(int streamID)
 	      nbdims = ncvars[ncvars[ncvarid].bounds].ndims;
 	      if ( nbdims == 2 )
 		{
-		  cdf_inq_dimlen(fileID, ncvars[ncvars[ncvarid].bounds].dimids[nbdims-1], &len);
+		  len = ncdims[ncvars[ncvars[ncvarid].bounds].dimids[nbdims-1]].len;
 		  if ( (int)len == 2 && timedimid == ncvars[ncvars[ncvarid].bounds].dimids[0] )
 		    {
 		      time_has_bounds = TRUE;
@@ -5241,18 +5253,15 @@ int cdfInqContents(int streamID)
 	    yvarid = ncvars[ncvarid].yvarid;
 	  */
 
-	  if ( xdimid != UNDEFID )
-	    cdf_inq_dimlen(fileID, xdimid, &xsize);
-
-	  if ( ydimid != UNDEFID )
-	    cdf_inq_dimlen(fileID, ydimid, &ysize);
+	  if ( xdimid != UNDEFID ) xsize = ncdims[xdimid].len;
+	  if ( ydimid != UNDEFID ) ysize = ncdims[ydimid].len;
 
 	  if ( ydimid == UNDEFID && yvarid != UNDEFID )
 	    {
 	      if ( ncvars[yvarid].ndims == 1 )
 		{
 		  ydimid = ncvars[yvarid].dimids[0];
-		  cdf_inq_dimlen(fileID, ydimid, &ysize);
+		  ysize  = ncdims[ydimid].len;
 		}   
 	    }
 
@@ -5273,6 +5282,9 @@ int cdfInqContents(int streamID)
 	    }
 	  else
 	    {
+	      size_t start[3], count[3];
+	      int ltgrid = FALSE;
+
 	      if ( xvarid != UNDEFID && yvarid != UNDEFID )
 		{
 		  if ( ncvars[xvarid].ndims != ncvars[yvarid].ndims )
@@ -5290,6 +5302,10 @@ int cdfInqContents(int streamID)
 		      if ( ncvars[xvarid].ndims == 3 && ncvars[xvarid].dimids[0] == timedimid &&
 			   ncvars[yvarid].ndims == 3 && ncvars[yvarid].dimids[0] == timedimid )
 			{
+			  Warning(func, "Time varying grids unsupported, using grid at time step 1!");
+			  ltgrid = TRUE;
+			  start[0] = start[1] = start[2] = 0;
+			  count[0] = 1; count[1] = ysize; count[2] = xsize;
 			}
 		      else
 			{
@@ -5316,9 +5332,9 @@ int cdfInqContents(int streamID)
 			int dimid;
 			size_t dimsize1, dimsize2;
 			dimid = ncvars[xvarid].dimids[ndims-2];
-			cdf_inq_dimlen(fileID, dimid, &dimsize1);
+			dimsize1 = ncdims[dimid].len;
 			dimid = ncvars[xvarid].dimids[ndims-1];
-			cdf_inq_dimlen(fileID, dimid, &dimsize2);
+			dimsize2 = ncdims[dimid].len;
 			if ( dimsize1*dimsize2 != size )
 			  {
 			    Warning(func, "Variable %s has unsupported array structure, skipped!",
@@ -5336,7 +5352,7 @@ int cdfInqContents(int streamID)
 			int dimid;
 			size_t dimsize;
 			dimid = ncvars[xvarid].dimids[0];
-			cdf_inq_dimlen(fileID, dimid, &dimsize);
+			dimsize = ncdims[dimid].len;
 			if ( dimsize != size )
 			  {
 			    Warning(func, "Variable %s has unsupported array structure, skipped!",
@@ -5349,7 +5365,12 @@ int cdfInqContents(int streamID)
 
 		  if ( ncvars[xvarid].xtype == NC_FLOAT ) grid.prec = DATATYPE_FLT32;
 		  grid.xvals = (double *) malloc(size*sizeof(double));
-		  cdf_get_var_double(fileID, xvarid, grid.xvals);
+
+		  if ( ltgrid )
+		    cdf_get_vara_double(fileID, xvarid, start, count, grid.xvals);
+		  else
+		    cdf_get_var_double(fileID, xvarid, grid.xvals);
+
 		  strcpy(grid.xname, ncvars[xvarid].name);
 		  strcpy(grid.xlongname, ncvars[xvarid].longname);
 		  strcpy(grid.xunits, ncvars[xvarid].units);
@@ -5382,9 +5403,9 @@ int cdfInqContents(int streamID)
 			int dimid;
 			size_t dimsize1, dimsize2;
 			dimid = ncvars[yvarid].dimids[ndims-2];
-			cdf_inq_dimlen(fileID, dimid, &dimsize1);
+			dimsize1 = ncdims[dimid].len;
 			dimid = ncvars[yvarid].dimids[ndims-1];
-			cdf_inq_dimlen(fileID, dimid, &dimsize2);
+			dimsize2 = ncdims[dimid].len;
 			if ( dimsize1*dimsize2 != size )
 			  {
 			    Warning(func, "Variable %s has unsupported array structure, skipped!",
@@ -5404,7 +5425,7 @@ int cdfInqContents(int streamID)
 			int dimid;
 			size_t dimsize;
 			dimid = ncvars[yvarid].dimids[0];
-			cdf_inq_dimlen(fileID, dimid, &dimsize);
+			dimsize = ncdims[dimid].len;
 			if ( dimsize != size )
 			  {
 			    Warning(func, "Variable %s has unsupported array structure, skipped!",
@@ -5417,7 +5438,12 @@ int cdfInqContents(int streamID)
 
 		  if ( ncvars[yvarid].xtype == NC_FLOAT ) grid.prec = DATATYPE_FLT32;
 		  grid.yvals = (double *) malloc(size*sizeof(double));
-		  cdf_get_var_double(fileID, yvarid, grid.yvals);
+
+		  if ( ltgrid )
+		    cdf_get_vara_double(fileID, yvarid, start, count, grid.yvals);
+		  else
+		    cdf_get_var_double(fileID, yvarid, grid.yvals);
+
 		  strcpy(grid.yname, ncvars[yvarid].name);
 		  strcpy(grid.ylongname, ncvars[yvarid].longname);
 		  strcpy(grid.yunits, ncvars[yvarid].units);
@@ -5487,7 +5513,7 @@ int cdfInqContents(int streamID)
 			nbdims = ncvars[ncvars[xvarid].bounds].ndims;
 			if ( nbdims == 2 || nbdims == 3 )
 			  {
-			    cdf_inq_dimlen(fileID, ncvars[ncvars[xvarid].bounds].dimids[nbdims-1], &nvertex);
+			    nvertex = ncdims[ncvars[ncvars[xvarid].bounds].dimids[nbdims-1]].len;
 			    grid.nvertex = (int) nvertex;
 			    grid.xbounds = (double *) malloc(nvertex*size*sizeof(double));
 			    cdf_get_var_double(fileID, ncvars[xvarid].bounds, grid.xbounds);
@@ -5502,7 +5528,7 @@ int cdfInqContents(int streamID)
 			nbdims = ncvars[ncvars[yvarid].bounds].ndims;
 			if ( nbdims == 2 || nbdims == 3 )
 			  {
-			    cdf_inq_dimlen(fileID, ncvars[ncvars[yvarid].bounds].dimids[nbdims-1], &nvertex);
+			    nvertex = ncdims[ncvars[ncvars[yvarid].bounds].dimids[nbdims-1]].len;
 			    /*
 			    if ( nvertex != grid.nvertex )
 			      Warning(func, "nvertex problem! nvertex x %d, nvertex y %d",
@@ -5708,7 +5734,7 @@ int cdfInqContents(int streamID)
   /* read VCT */
   if ( nvcth_id != UNDEFID && vcta_id != UNDEFID && vctb_id != UNDEFID )
     {
-      cdf_inq_dimlen(fileID, nvcth_id, &vctsize);
+      vctsize = ncdims[nvcth_id].len;
       vctsize *= 2;
       vct = (double *) malloc(vctsize*sizeof(double));
       cdf_get_var_double(fileID, vcta_id, vct);
@@ -5734,10 +5760,10 @@ int cdfInqContents(int streamID)
 	    }
 
 	  if ( zdimid != UNDEFID )
-	    zvarid = ncdims[zdimid].ncvarid;
-
-	  if ( zdimid != UNDEFID )
-	    cdf_inq_dimlen(fileID, zdimid, &zsize);
+	    {
+	      zvarid = ncdims[zdimid].ncvarid;
+	      zsize  = ncdims[zdimid].len;
+	    }
 
 	  if ( CDI_Debug ) Message(func, "nlevs = %ld", zsize);
     
@@ -6173,9 +6199,27 @@ int cdfInqTimestep(int streamID, int tsID)
 	{
 	  fileID = streamInqFileID(streamID);
 	  index  = tsID;
-	  cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
 
-	  cdiDecodeTimeval(timevalue, taxis, &taxis->vdate, &taxis->vtime);
+	  if ( streamptr->basetime.lwrf )
+	    {
+	      size_t start[2], count[2];
+	      char stvalue[32];
+	      start[0] = index; start[1] = 0;
+	      count[0] = 1; count[1] = 19;
+	      cdf_get_vara_text(fileID, nctimevarid, start, count, stvalue);
+	      stvalue[19] = 0;
+	      {
+		int year, month, day, hour, minute, second;
+		sscanf(stvalue, "%d-%d-%d_%d:%d:%d", &year, &month, &day, &hour, &minute, &second);
+		taxis->vdate = cdiEncodeDate(year, month, day);
+		taxis->vtime = cdiEncodeTime(hour, minute, second);
+	      }
+	    }
+	  else
+	    {
+	      cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
+	      cdiDecodeTimeval(timevalue, taxis, &taxis->vdate, &taxis->vtime);
+	    }
 
 	  nctimeboundsid = streamptr->basetime.ncvarboundsid;
 	  if ( nctimeboundsid != UNDEFID )
