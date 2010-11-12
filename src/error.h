@@ -24,12 +24,14 @@ void  Message(const char *caller, const char *fmt, ...);
 #  define    Errorc(...)     Error(caller, __VA_ARGS__)
 #  define   Warning(...)   Warning(__func__, __VA_ARGS__)
 #  define   Message(...)   Message(__func__, __VA_ARGS__)
+#  define  Messagec(...)   Message(caller, __VA_ARGS__)
 #else
 #  define  SysError(...)  SysError((void *), __VA_ARGS__)
 #  define     Error(...)     Error((void *), __VA_ARGS__)
 #  define    Errorc(...)     Error((void *), __VA_ARGS__)
 #  define   Warning(...)   Warning((void *), __VA_ARGS__)
 #  define   Message(...)   Message((void *), __VA_ARGS__)
+#  define  Messagec(...)   Message((void *), __VA_ARGS__)
 #endif
 
 #endif  /* _ERROR_H */
