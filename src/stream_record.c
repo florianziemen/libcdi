@@ -31,7 +31,6 @@ void recordInitEntry(record_t *record)
 
 int recordNewEntry(int streamID, int tsID)
 {
-  static const char *func = "recordNewEntry";
   int recordID = 0;
   int recordSize;
   record_t *records;
@@ -52,8 +51,8 @@ int recordNewEntry(int streamID, int tsID)
       records = (record_t *) malloc(recordSize*sizeof(record_t));
       if ( records == NULL )
 	{
-          Message(func, "recordSize = %d", recordSize);
-	  SysError(func, "Allocation of record_tTABLE failed");
+          Message("recordSize = %d", recordSize);
+	  SysError("Allocation of record_tTABLE failed");
 	}
 
       for ( i = 0; i < recordSize; i++ )
@@ -78,8 +77,8 @@ int recordNewEntry(int streamID, int tsID)
       records    = (record_t *) realloc(records, recordSize*sizeof(record_t));
       if ( records == NULL )
 	{
-          Message(func, "recordSize = %d", recordSize);
-	  SysError(func, "Reallocation of record_tTABLE failed");
+          Message("recordSize = %d", recordSize);
+	  SysError("Reallocation of record_tTABLE failed");
 	}
       recordID = recordSize/2;
 
@@ -127,7 +126,6 @@ void cdiInitRecord(int streamID)
 
 void streamInqRecord(int streamID, int *varID, int *levelID)
 {
-  static const char *func = "streamInqRecord";
   int rec = 0;
   int recID, tsID, rindex;
   int lindex;
@@ -135,7 +133,7 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   cdiDefAccesstype(streamID, TYPE_REC);
 
@@ -145,12 +143,12 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
   rindex = streamptr->tsteps[tsID].curRecID + 1;
 
   if ( rindex >= streamptr->tsteps[tsID].nrecs )
-    Error(func, "record %d not available at timestep %d", rindex+1, tsID+1);
+    Error("record %d not available at timestep %d", rindex+1, tsID+1);
 
   recID  = streamptr->tsteps[tsID].recIDs[rindex];
 
   if ( recID == -1 || recID >= streamptr->tsteps[tsID].nallrecs )
-    Error(func, "Internal problem! tsID = %d recID = %d", tsID, recID);
+    Error("Internal problem! tsID = %d recID = %d", tsID, recID);
 
   *varID   = streamptr->tsteps[tsID].records[recID].varID;
   lindex   = streamptr->tsteps[tsID].records[recID].levelID;
@@ -158,7 +156,7 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
   *levelID = streamptr->vars[*varID].lindex[lindex];
 
   if ( CDI_Debug )
-    Message(func, "tsID = %d, recID = %d, varID = %d, levelID = %d\n",
+    Message("tsID = %d, recID = %d, varID = %d, levelID = %d\n",
 	    tsID, recID, *varID, *levelID);
 
   streamptr->curTsID = tsID;
@@ -191,7 +189,7 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
 #endif
     default:
       {
-	Error(func, "%s support not compiled in!", strfiletype(filetype));
+	Error("%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
@@ -201,7 +199,6 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
 
 void streamDefRecord(int streamID, int varID, int levelID)
 {
-  static const char *func = "streamDefRecord";
   int status = 0;
   int filetype;
   int param, gridID, zaxisID, level;
@@ -211,7 +208,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   tsID = streamptr->curTsID;
 
@@ -284,7 +281,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
 #endif
     default:
       {
-	Error(func, "%s support not compiled in!", strfiletype(filetype));
+	Error("%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
@@ -293,14 +290,13 @@ void streamDefRecord(int streamID, int varID, int levelID)
 
 void streamReadRecord(int streamID, double *data, int *nmiss)
 {
-  static const char *func = "streamReadRecord";
   int status = 0;
   int filetype;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
@@ -348,7 +344,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
 #endif
     default:
       {
-	Error(func, "%s support not compiled in!", strfiletype(filetype));
+	Error("%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
@@ -357,14 +353,13 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
 
 void streamWriteRecord(int streamID, const double *data, int nmiss)
 {
-  static const char *func = "streamWriteRecord";
   int status = 0;
   int filetype;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
@@ -410,7 +405,7 @@ void streamWriteRecord(int streamID, const double *data, int nmiss)
 #endif
     default:
       {
-	Error(func, "%s support not compiled in!", strfiletype(filetype));
+	Error("%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
@@ -419,7 +414,6 @@ void streamWriteRecord(int streamID, const double *data, int nmiss)
 
 void streamCopyRecord(int streamID2, int streamID1)
 {
-  static const char *func = "streamCopyRecord";
   int status = 0;
   int filetype = CDI_UNDEFID, filetype1, filetype2;
   int byteorder1, byteorder2;
@@ -429,8 +423,8 @@ void streamCopyRecord(int streamID2, int streamID1)
   streamptr1 = stream_to_pointer(streamID1);
   streamptr2 = stream_to_pointer(streamID2);
 
-  stream_check_ptr(func, streamptr1);
-  stream_check_ptr(func, streamptr2);
+  stream_check_ptr(__func__, streamptr1);
+  stream_check_ptr(__func__, streamptr2);
 
   filetype1 = streamptr1->filetype;
   filetype2 = streamptr2->filetype;
@@ -481,7 +475,6 @@ void streamCopyRecord(int streamID2, int streamID1)
 
 void cdiCreateRecords(int streamID, int tsID)
 {
-  static const char *func = "cdiCreateRecords";
   int nrecords, maxrecords;
   int nvars, varID, recID;
   record_t *records;
@@ -490,7 +483,7 @@ void cdiCreateRecords(int streamID, int tsID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   if ( streamptr->tsteps[tsID].records ) return;
 

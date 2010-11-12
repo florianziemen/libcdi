@@ -37,7 +37,6 @@ typedef struct {
 static
 int gribapiGetGridType(grib_handle *gh, int gribgridtype)
 {
-  /*  static const char *func = "gribapiGetGridType"; */
   int gridtype = 0;
   long lpar;
 
@@ -96,7 +95,6 @@ int gribapiGetGridType(grib_handle *gh, int gribgridtype)
 static
 int gribapiGetIsRotated(int gribgridtype)
 {
-  /*  static const char *func = "cgribexGetIsRotated"; */
   int isRotated = 0;
 
   if ( gribgridtype == GRIBAPI_GTYPE_LATLON_ROT )
@@ -183,7 +181,6 @@ int gribapiGetZaxisType(int grb_ltype)
 static
 int gribapiGetTimeUnits(grib_handle *gh)
 {
-  static const char *func = "gribapiGetTimeUnits";
   int timeunits = -1;
   long lpar;
   size_t len = 8;
@@ -203,7 +200,7 @@ int gribapiGetTimeUnits(grib_handle *gh)
   else if ( memcmp(stepunits, "Y",   len-1) == 0 ) timeunits = TUNIT_YEAR;
   else if ( lprint )
     {
-      Message(func, "Step units >%s< unsupported!", stepunits);
+      Message("Step units >%s< unsupported!", stepunits);
       lprint = FALSE;
     }
 
@@ -230,7 +227,6 @@ int gribapiTimeIsFC(grib_handle *gh)
 static
 int gribapiGetTsteptype(grib_handle *gh)
 {
-  static const char *func = "gribapiGetTsteptype";
   int tsteptype = 0;
   int timerange;
   long lpar;
@@ -253,7 +249,7 @@ int gribapiGetTsteptype(grib_handle *gh)
 	default:
 	  if ( lprint )
 	    {
-	      Message(func, "Time range %d unsupported", timerange);
+	      Message("Time range %d unsupported", timerange);
 	      lprint = FALSE;
 	    }
 	}
@@ -292,7 +288,6 @@ static
 void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 		      long recsize, off_t position, int prec, int ztype)
 {
-  static const char *func = "gribapiAddRecord";
   int gribgridtype;
   int gridtype;
   int zaxistype;
@@ -385,7 +380,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 	nlat = lpar;
 
 	if ( numberOfPoints != nlon*nlat )
-	  Error(func, "numberOfPoints (%d) and gridSize (%d) differ!",
+	  Error("numberOfPoints (%d) and gridSize (%d) differ!",
 		(int)numberOfPoints, nlon*nlat);
 	grid.size  = numberOfPoints;
 	grid.xsize = nlon;
@@ -421,7 +416,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 		    if ( fabs(grid.xinc-xinc) > 0.0 )
 		      {
 			grid.xinc = xinc;
-			if ( CDI_Debug ) Message(func, "set xinc to %g", grid.xinc);
+			if ( CDI_Debug ) Message("set xinc to %g", grid.xinc);
 		      }
 		  }
 		*/
@@ -483,7 +478,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
     case GRID_LCC:
       {
 	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-	  Error(func, "numberOfPoints (%d) and gridSize (%d) differ!",
+	  Error("numberOfPoints (%d) and gridSize (%d) differ!",
 		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
 
 	grid.size  = ISEC4_NumValues;
@@ -571,7 +566,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
       }
     default:
       {
-	Error(func, "Unsupported grid type: %s", gridNamePtr(gridtype));
+	Error("Unsupported grid type: %s", gridNamePtr(gridtype));
 	break;
       }
     }
@@ -688,14 +683,13 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
   streamptr->nrecs++;
 
   if ( CDI_Debug )
-    Message(func, "varID = %d  param = %d  zaxistype = %d  gridID = %d  levelID = %d",
+    Message("varID = %d  param = %d  zaxistype = %d  gridID = %d  levelID = %d",
 	    varID, param, zaxistype, gridID, levelID);
 }
 #endif
 
 void gribapiScanTimestep1(int streamID)
 {
-  static const char *func = "gribapiScanTimestep1";
 #if  defined  (HAVE_LIBGRIB_API)
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
@@ -734,7 +728,7 @@ void gribapiScanTimestep1(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 0;
 
@@ -742,7 +736,7 @@ void gribapiScanTimestep1(int streamID)
   taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( tsID != 0 )
-    Error(func, "Internal problem! tstepsNewEntry returns %d", tsID);
+    Error("Internal problem! tstepsNewEntry returns %d", tsID);
 
   fileID = streamInqFileID(streamID);
 
@@ -895,7 +889,7 @@ void gribapiScanTimestep1(int streamID)
 		  {
 		    char paramstr[32];
 		    cdiParamToString(param, paramstr, sizeof(paramstr));	    
-		    Warning(func, "Inconsistent verification time (param=%s level=%d)", paramstr, level1);
+		    Warning("Inconsistent verification time (param=%s level=%d)", paramstr, level1);
 		    warn_time = FALSE;
 		  }
 	    }
@@ -907,7 +901,7 @@ void gribapiScanTimestep1(int streamID)
 		{
 		  char paramstr[32];
 		  cdiParamToString(param, paramstr, sizeof(paramstr));
-		  Warning(func, "Param=%s level=%d already exist, skipped!", paramstr, level1);
+		  Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 		  continue;
 		}
 	    }
@@ -917,7 +911,7 @@ void gribapiScanTimestep1(int streamID)
 	{
 	  if (  taxis->numavg && warn_numavg && (taxis->numavg != ISEC1_AvgNum) )
 	    {
-	      Message(func, "Change numavg from %d to %d not allowed!",
+	      Message("Change numavg from %d to %d not allowed!",
 		      taxis->numavg, ISEC1_AvgNum);
 	      warn_numavg = FALSE;
 	    }
@@ -930,7 +924,7 @@ void gribapiScanTimestep1(int streamID)
       nrecs++;
 
       if ( CDI_Debug )
-	Message(func, "%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
+	Message("%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
 
       gribapiAddRecord(streamID, param, gh, recsize, recpos, prec, ztype);
 
@@ -984,7 +978,7 @@ void gribapiScanTimestep1(int streamID)
     {
       tsID = tstepsNewEntry(streamID);
       if ( tsID != streamptr->rtsteps )
-	Error(func, "Internal error. tsID = %d", tsID);
+	Error("Internal error. tsID = %d", tsID);
 
       streamptr->tsteps[tsID-1].next   = TRUE;
       streamptr->tsteps[tsID].position = recpos;
@@ -1002,14 +996,13 @@ void gribapiScanTimestep1(int streamID)
 	}
     }
 #else
-  Error(func, "GRIB_API support not compiled in!");
+  Error("GRIB_API support not compiled in!");
 #endif
 }
 
 
 int gribapiScanTimestep2(int streamID)
 {
-  static const char *func = "gribapiScanTimestep2";
   int status = 0;
 #if  defined  (HAVE_LIBGRIB_API)
   off_t recpos = 0;
@@ -1043,7 +1036,7 @@ int gribapiScanTimestep2(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 1;
 
@@ -1056,7 +1049,7 @@ int gribapiScanTimestep2(int streamID)
                                           
   tsID = streamptr->rtsteps;
   if ( tsID != 1 )
-    Error(func, "Internal problem! unexpeceted timestep %d", tsID+1);
+    Error("Internal problem! unexpeceted timestep %d", tsID+1);
 
   taxis = &streamptr->tsteps[tsID].taxis;
 
@@ -1229,7 +1222,7 @@ int gribapiScanTimestep2(int streamID)
 	{
 	  char paramstr[32];
 	  cdiParamToString(param, paramstr, sizeof(paramstr));
-	  Warning(func, "Param=%s level=%d not defined at timestep 1!", paramstr, level1);
+	  Warning("Param=%s level=%d not defined at timestep 1!", paramstr, level1);
 	  return (CDI_EUFSTRUCT);
 	}
 
@@ -1254,7 +1247,7 @@ int gribapiScanTimestep2(int streamID)
 
 	      if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
 
-	      Warning(func, "Param=%s level=%d already exist, skipped!", paramstr, level1);
+	      Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 	      continue;
 	    }
 	  else
@@ -1265,7 +1258,7 @@ int gribapiScanTimestep2(int streamID)
 	}
 
       if ( CDI_Debug )
-	Message(func, "%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
+	Message("%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
@@ -1276,7 +1269,7 @@ int gribapiScanTimestep2(int streamID)
 
       if ( memcmp(&compVar0, &compVar, sizeof(compvar2_t)) != 0 )
 	{
-	  Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
+	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
 		  streamptr->tsteps[tsID].records[recID].param, param,
 		  streamptr->tsteps[tsID].records[recID].ilevel, level1);
@@ -1326,7 +1319,7 @@ int gribapiScanTimestep2(int streamID)
     {
       tsID = tstepsNewEntry(streamID);
       if ( tsID != streamptr->rtsteps )
-	Error(func, "Internal error. tsID = %d", tsID);
+	Error("Internal error. tsID = %d", tsID);
 
       streamptr->tsteps[tsID-1].next   = TRUE;
       streamptr->tsteps[tsID].position = recpos;
@@ -1335,7 +1328,7 @@ int gribapiScanTimestep2(int streamID)
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;
 #else
-  Error(func, "GRIB_API support not compiled in!");
+  Error("GRIB_API support not compiled in!");
 #endif
 
   return (status);
@@ -1344,7 +1337,6 @@ int gribapiScanTimestep2(int streamID)
 
 int gribapiScanTimestep(int streamID)
 {
-  static const char *func = "gribapiScanTimestep";
   int status = 0;
 #if  defined  (HAVE_LIBGRIB_API)
   long recsize = 0;
@@ -1377,16 +1369,16 @@ int gribapiScanTimestep(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamInqVlist(streamID);
 
   if ( CDI_Debug )
     {
-      Message(func, "streamID = %d", streamID);
-      Message(func, "cts = %d", streamptr->curTsID);
-      Message(func, "rts = %d", streamptr->rtsteps);
-      Message(func, "nts = %d", streamptr->ntsteps);
+      Message("streamID = %d", streamID);
+      Message("cts = %d", streamptr->curTsID);
+      Message("rts = %d", streamptr->rtsteps);
+      Message("nts = %d", streamptr->ntsteps);
     }
 
   tsID  = streamptr->rtsteps;
@@ -1432,7 +1424,7 @@ int gribapiScanTimestep(int streamID)
 	  status = gribRead(fileID, gribbuffer, &readsize);
 	  if ( status )
 	    {
-	      Error(func, "Inconsistent timestep %d (GRIB record %d/%d)!\n", tsID+1, rindex+1,
+	      Error("Inconsistent timestep %d (GRIB record %d/%d)!\n", tsID+1, rindex+1,
 		    streamptr->tsteps[tsID].recordSize);
 	      break;
 	    }
@@ -1567,7 +1559,7 @@ int gribapiScanTimestep(int streamID)
 	    {
 	      char paramstr[32];
 	      cdiParamToString(param, paramstr, sizeof(paramstr));
-	      Warning(func, "Param=%s level=%d not available at timestep %d!", paramstr, level1, tsID+1);
+	      Warning("Param=%s level=%d not available at timestep %d!", paramstr, level1, tsID+1);
 
 	      if ( cdiInventoryMode == 1 )
 		return (CDI_EUFSTRUCT);
@@ -1590,7 +1582,7 @@ int gribapiScanTimestep(int streamID)
 		  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
 		  
 		  if ( CDI_Debug )
-		    Warning(func, "Param=%s level=%d already exist, skipped!", paramstr, level1);
+		    Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 
 		  continue;
 		}
@@ -1602,7 +1594,7 @@ int gribapiScanTimestep(int streamID)
 	    }
 
 	  if ( CDI_Debug )
-	    Message(func, "%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
+	    Message("%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
 
 	  compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
 	  compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
@@ -1611,18 +1603,18 @@ int gribapiScanTimestep(int streamID)
 
 	  if ( memcmp(&compVar0, &compVar, sizeof(compvar2_t)) != 0 )
 	    {
-	      Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
+	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,
 		      streamptr->tsteps[tsID].records[recID].param, param,
 		      streamptr->tsteps[tsID].records[recID].ilevel, level1);
-	      Error(func, "Invalid, unsupported or inconsistent record structure");
+	      Error("Invalid, unsupported or inconsistent record structure");
 	    }
 	  
 	  streamptr->tsteps[tsID].records[recID].position = recpos;
 	  streamptr->tsteps[tsID].records[recID].size = recsize;
 
 	  if ( CDI_Debug )
-	    Message(func, "%4d %8d %4d %8d %8d %6d", rindex, (int)recpos, param, level1, vdate, vtime);
+	    Message("%4d %8d %4d %8d %8d %6d", rindex, (int)recpos, param, level1, vdate, vtime);
 
 	  grib_handle_delete(gh);
 	  gh = NULL;
@@ -1642,7 +1634,7 @@ int gribapiScanTimestep(int streamID)
 	{
 	  char paramstr[32];
 	  cdiParamToString(streamptr->tsteps[tsID].records[recID].param, paramstr, sizeof(paramstr));
-	  Warning(func, "Param %d level %d not found at timestep %d!",
+	  Warning("Param %d level %d not found at timestep %d!",
 		  paramstr, streamptr->tsteps[tsID].records[recID].ilevel, tsID+1);
 	  return (CDI_EUFSTRUCT);
 	}
@@ -1653,7 +1645,7 @@ int gribapiScanTimestep(int streamID)
 	{
 	  tsID = tstepsNewEntry(streamID);
 	  if ( tsID != streamptr->rtsteps )
-	    Error(func, "Internal error. tsID = %d", tsID);
+	    Error("Internal error. tsID = %d", tsID);
 
 	  streamptr->tsteps[tsID-1].next   = 1;
 	  streamptr->tsteps[tsID].position = recpos;
@@ -1668,13 +1660,13 @@ int gribapiScanTimestep(int streamID)
 
   if ( nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs )
     {
-      Warning(func, "Incomplete timestep. Stop scanning at timestep %d.\n", tsID);
+      Warning("Incomplete timestep. Stop scanning at timestep %d.\n", tsID);
       streamptr->ntsteps = tsID;
     }
 
   status = streamptr->ntsteps;
 #else
-  Error(func, "GRIB_API support not compiled in!");
+  Error("GRIB_API support not compiled in!");
 #endif
 
   return (status);
@@ -1684,7 +1676,6 @@ int gribapiScanTimestep(int streamID)
 int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
 		  int unreduced, int *nmiss, int *zip, double missval)
 {
-  static const char *func = "gribapiDecode";
   int status = 0;
 #if  defined  (HAVE_LIBGRIB_API)
   long lpar;
@@ -1699,7 +1690,7 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
       if ( lwarn )
 	{
 	  lwarn = 0;
-	  Warning(func, "Conversion of gaussian reduced grids unsupported!\n");
+	  Warning("Conversion of gaussian reduced grids unsupported!\n");
 	}
     }
 
@@ -1716,7 +1707,7 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
   // printf("values_size = %d  numberOfPoints = %ld\n", datasize, numberOfPoints);
 
   if ( gridsize != (int) datasize )
-    Error(func, "Internal problem: gridsize(%d) != datasize(%d)!\n", gridsize, datasize);
+    Error("Internal problem: gridsize(%d) != datasize(%d)!\n", gridsize, datasize);
   dummy = datasize;
   GRIB_CHECK(grib_get_double_array(gh, "values", data, &dummy), 0);
 
@@ -1735,7 +1726,7 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
   grib_handle_delete(gh);
 
 #else
-  Error(func, "GRIB_API support not compiled in!");
+  Error("GRIB_API support not compiled in!");
 #endif
 
   return (status);
@@ -1917,7 +1908,6 @@ void gribapiDefTime(grib_handle *gh , int vdate, int vtime, int tsteptype, int n
 static
 void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 {
-  static const char *func = "gribapiDefGrid";
   int gridtype;
   static short lwarn = TRUE;
   size_t len;
@@ -1959,7 +1949,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
       if ( lwarn && gridInqSize(gridID) > 1 )
 	{
 	  lwarn = FALSE;
-	  Warning(func, "Curvilinear grids are unsupported in GRIB format! Created wrong GDS!");
+	  Warning("Curvilinear grids are unsupported in GRIB format! Created wrong GDS!");
 	}
       gridtype = GRID_LONLAT;
     }
@@ -2136,7 +2126,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	    static int lwarncomplex = 1;
 	    if ( lwarncomplex )
 	      {
-		Warning(func, "GRIB2 complex packing not implemented, using simple packing!");
+		Warning("GRIB2 complex packing not implemented, using simple packing!");
 		lwarncomplex = 0;
 	      }
 	    mesg = "spectral_simple"; len = strlen(mesg);
@@ -2181,7 +2171,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	break;
       }
     default:
-      Error(func, "Unsupported grid type: %s", gridNamePtr(gridtype));
+      Error("Unsupported grid type: %s", gridNamePtr(gridtype));
     }
 }
 #endif
@@ -2190,7 +2180,6 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 static
 void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 {
-  static const char *func = "gribapiDefLevel";
   double level;
   int zaxistype, ltype;
   static int warning = 1;
@@ -2240,7 +2229,7 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
 	  {
 	    GRIB_CHECK(grib_set_long(gh, "level", (long) zaxisInqLevel(zaxisID, levelID)), 0);
-	    Error(func, "hybrid_half model level code missing!");
+	    Error("hybrid_half model level code missing!");
 	    /*
 	    ISEC1_Level1    = (int) zaxisInqLbound(zaxisID, levelID);
 	    ISEC1_Level2    = (int) zaxisInqUbound(zaxisID, levelID);
@@ -2256,7 +2245,7 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 	  {
 	    char paramstr[32];
 	    cdiParamToString(param, paramstr, sizeof(paramstr));
-	    Warning(func, "VCT missing ( param = %s, zaxisID = %d )", paramstr, zaxisID);
+	    Warning("VCT missing ( param = %s, zaxisID = %d )", paramstr, zaxisID);
 	    warning = 0;
 	  }
 	GRIB_CHECK(grib_set_long(gh, "PVPresent", 1), 0);
@@ -2270,7 +2259,7 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 
 	level = zaxisInqLevel(zaxisID, levelID);
 	if ( level < 0 )
-	  Warning(func, "Pressure level of %f Pa is below zero!", level);
+	  Warning("Pressure level of %f Pa is below zero!", level);
 
 	zaxisInqUnits(zaxisID, units);
 	if ( memcmp(units, "Pa", 2) == 0 ) level /= 100;
@@ -2360,7 +2349,7 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
       }
     default:
       {
-	Error(func, "Unsupported zaxis type: %s", zaxisNamePtr(zaxistype));
+	Error("Unsupported zaxis type: %s", zaxisNamePtr(zaxistype));
 	break;
       }
     }
@@ -2370,12 +2359,11 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 
 void *gribHandleNew()
 {
-  static const char *func = "gribHandleNew";
   void *gh = NULL;
 
 #if  defined  (HAVE_LIBGRIB_API)
   gh = (void *) grib_handle_new_from_samples(NULL, "GRIB2");
-  if ( gh == NULL ) Error(func, "grib_handle_new_from_samples failed!");
+  if ( gh == NULL ) Error("grib_handle_new_from_samples failed!");
 #endif
 
   return (gh);
@@ -2396,7 +2384,6 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize,
 		     int ljpeg, void *gribHandle)
 {
-  static const char *func = "gribapiEncode";
   size_t nbytes = 0;
 #if  defined  (HAVE_LIBGRIB_API)
   size_t recsize = 0;
@@ -2443,7 +2430,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   //recsize += 512; /* add some space for possible filling */
 
   if ( recsize > gribbuffersize )
-    Error(func, "Internal problem: GRIB buffer too small (size = %ld, needed = %ld", gribbuffersize, recsize);
+    Error("Internal problem: GRIB buffer too small (size = %ld, needed = %ld", gribbuffersize, recsize);
 
   /* get a copy of the coded message */
   GRIB_CHECK(grib_get_message_copy(gh, gribbuffer, &recsize), 0);
@@ -2454,7 +2441,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   nbytes = recsize;
 #else
-  Error(func, "GRIB_API support not compiled in!");
+  Error("GRIB_API support not compiled in!");
 #endif
 
   return (nbytes);

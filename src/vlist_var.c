@@ -10,7 +10,8 @@
 #include "vlist.h"
 
 
-static void vlistvarInitEntry(int vlistID, int varID)
+static
+void vlistvarInitEntry(int vlistID, int varID)
 {
   vlist_t *vlistptr;
 
@@ -46,9 +47,9 @@ static void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].atts.nelems  = 0;
 }
 
-static int vlistvarNewEntry(int vlistID)
+static
+int vlistvarNewEntry(int vlistID)
 {
-  static const char *func = "vlistvarNewEntry";
   int varID = 0;
   int vlistvarSize;
   var_t *vlistvar;
@@ -70,8 +71,8 @@ static int vlistvarNewEntry(int vlistID)
       vlistvar = (var_t *) malloc(vlistvarSize*sizeof(var_t));
       if ( vlistvar == NULL )
 	{
-          Message(func, "vlistvarSize = %d", vlistvarSize);
-	  SysError(func, "Allocation of var_t failed");
+          Message("vlistvarSize = %d", vlistvarSize);
+	  SysError("Allocation of var_t failed");
 	}
 
       for ( i = 0; i < vlistvarSize; i++ )
@@ -96,8 +97,8 @@ static int vlistvarNewEntry(int vlistID)
       vlistvar = (var_t *) realloc(vlistvar, vlistvarSize*sizeof(var_t));
       if ( vlistvar == NULL )
 	{
-          Message(func, "vlistvarSize = %d", vlistvarSize);
-	  SysError(func, "Reallocation of var_t failed");
+          Message("vlistvarSize = %d", vlistvarSize);
+	  SysError("Reallocation of var_t failed");
 	}
       varID = vlistvarSize/2;
 
@@ -115,22 +116,22 @@ static int vlistvarNewEntry(int vlistID)
   return (varID);
 }
 
-void vlistCheckVarID(const char *func, int vlistID, int varID)
+static
+void vlistCheckVarID(const char *caller, int vlistID, int varID)
 {
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
   if ( vlistptr == NULL )
-    Error(func, "vlist undefined!");
+    Errorc("vlist undefined!");
 
   if ( varID < 0 || varID >= vlistptr->nvars )
-    Error(func, "varID %d undefined!", varID);
+    Errorc("varID %d undefined!", varID);
 
   if ( ! vlistptr->vars[varID].isUsed )
-    Error(func, "varID %d undefined!", varID);
+    Errorc("varID %d undefined!", varID);
 }
-
 
 /*
 @Function  vlistDefVar
@@ -171,7 +172,6 @@ vlistDestroy(vlistID);
 */
 int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
 {
-  static const char *func = "vlistDefVar";
   int varID;
   int nlevs;
   int levID;
@@ -181,7 +181,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
   vlistptr = vlist_to_pointer(vlistID);
 
   if ( CDI_Debug )
-    Message(func, "gridID = %d  zaxisID = %d  timeID = %d", gridID, zaxisID, timeID);
+    Message("gridID = %d  zaxisID = %d  timeID = %d", gridID, zaxisID, timeID);
 
   varID = vlistvarNewEntry(vlistID);
 
@@ -193,7 +193,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
 
   if ( timeID != TIME_VARIABLE && timeID != TIME_CONSTANT )
     {
-      Message(func, "unexpected timeID %d. Set to TIME_VARIABLE", timeID);
+      Message("unexpected timeID %d. Set to TIME_VARIABLE", timeID);
       vlistptr->vars[varID].timeID = TIME_VARIABLE;	  
     }
 
@@ -217,7 +217,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
   if ( index == vlistptr->ngrids )
     {
       if ( vlistptr->ngrids + 1 >= MAX_GRIDS_PS )
-	Error(func, "Maximum of %d grids reached", MAX_GRIDS_PS);
+	Error("Maximum of %d grids reached", MAX_GRIDS_PS);
 
       vlistptr->gridIDs[vlistptr->ngrids] = gridID;
       vlistptr->ngrids++;
@@ -229,7 +229,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
   if ( index == vlistptr->nzaxis )
     {
       if ( vlistptr->nzaxis + 1 >= MAX_ZAXES_PS )
-	Error(func, "Maximum of %d zaxis reached", MAX_ZAXES_PS);
+	Error("Maximum of %d zaxis reached", MAX_ZAXES_PS);
 
       vlistptr->zaxisIDs[vlistptr->nzaxis] = zaxisID;
       vlistptr->nzaxis++;
@@ -239,7 +239,6 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
 
   return (varID);
 }
-
 
 /*
 @Function  vlistDefVarParam
@@ -258,16 +257,14 @@ The function @func{vlistDefVarParam} defines the parameter number of a variable.
 */
 void vlistDefVarParam(int vlistID, int varID, int param)
 {
-  static const char *func = "vlistDefVarParam";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   vlistptr->vars[varID].param = param;
 }
-
 
 /*
 @Function  vlistDefVarCode
@@ -286,13 +283,12 @@ The function @func{vlistDefVarCode} defines the code number of a variable.
 */
 void vlistDefVarCode(int vlistID, int varID, int code)
 {
-  static const char *func = "vlistDefVarCode";
   vlist_t *vlistptr;
   int param, pnum, pcat, pdis;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   param = vlistptr->vars[varID].param;
 
@@ -304,12 +300,11 @@ void vlistDefVarCode(int vlistID, int varID, int code)
 
 void vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *timeID)
 {
-  static const char *func = "vlistInqVar";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   *gridID  = vlistptr->vars[varID].gridID;
   *zaxisID = vlistptr->vars[varID].zaxisID;
@@ -317,7 +312,6 @@ void vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *timeID)
 
   return;
 }
-
 
 /*
 @Function  vlistInqVarGrid
@@ -338,16 +332,14 @@ The function @func{vlistInqVarGrid} returns the grid ID of a variable.
 */
 int vlistInqVarGrid(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarGrid";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   return (vlistptr->vars[varID].gridID);
 }
-
 
 /*
 @Function  vlistInqVarZaxis
@@ -368,28 +360,25 @@ The function @func{vlistInqVarZaxis} returns the zaxis ID of a variable.
 */
 int vlistInqVarZaxis(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarZaxis";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   return (vlistptr->vars[varID].zaxisID);
 }
 
 int vlistInqVarTime(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarTime";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   return (vlistptr->vars[varID].timeID);
 }
-
 
 /*
 @Function  vlistInqVarParam
@@ -410,19 +399,17 @@ The function @func{vlistInqVarParam} returns the parameter number of a variable.
 */
 int vlistInqVarParam(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarParam";
   vlist_t *vlistptr;
   int param;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   param = vlistptr->vars[varID].param;
 
   return (param);
 }
-
 
 /*
 @Function  vlistInqVarCode
@@ -443,14 +430,13 @@ The function @func{vlistInqVarCode} returns the code number of a variable.
 */
 int vlistInqVarCode(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarCode";
   vlist_t *vlistptr;
   int param, code;
   int pdis, pcat, pnum;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   param = vlistptr->vars[varID].param;
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
@@ -467,52 +453,50 @@ int vlistInqVarCode(int vlistID, int varID)
 
 char *vlistInqVarNamePtr(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarNamePtr";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   return (vlistptr->vars[varID].name);
 }
 
+
 char *vlistInqVarLongnamePtr(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarLongnamePtr";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   return (vlistptr->vars[varID].longname);
 }
 
+
 char *vlistInqVarStdnamePtr(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarStdnamePtr";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   return (vlistptr->vars[varID].stdname);
 }
 
+
 char *vlistInqVarUnitsPtr(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarUnitsPtr";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   return (vlistptr->vars[varID].units);
 }
-
 
 /*
 @Function  vlistInqVarName
@@ -534,7 +518,6 @@ The function @func{vlistInqVarName} returns the name of a variable.
 */
 void vlistInqVarName(int vlistID, int varID, char *name)
 {
-  static const char *func = "vlistInqVarName";
   int tableID;
   int param, code;
   int pdis, pcat, pnum;
@@ -542,7 +525,7 @@ void vlistInqVarName(int vlistID, int varID, char *name)
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   if ( vlistptr->vars[varID].name == NULL )
     {
@@ -558,7 +541,6 @@ void vlistInqVarName(int vlistID, int varID, char *name)
 
   return;
 }
-
 
 /*
 @Function  vlistInqVarLongname
@@ -580,7 +562,6 @@ The function @func{vlistInqVarLongname} returns the longname of a variable.
 */
 void vlistInqVarLongname(int vlistID, int varID, char *longname)
 {
-  static const char *func = "vlistInqVarLongname";
   int tableID;
   int param, code;
   int pdis, pcat, pnum;
@@ -588,7 +569,7 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   if ( vlistptr->vars[varID].longname == NULL )
     {
@@ -604,7 +585,6 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
 
   return;
 }
-
 
 /*
 @Function  vlistInqVarStdname
@@ -626,12 +606,11 @@ The function @func{vlistInqVarStdname} returns the standard name of a variable.
 */
 void vlistInqVarStdname(int vlistID, int varID, char *stdname)
 {
-  static const char *func = "vlistInqVarStdname";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   if ( vlistptr->vars[varID].stdname == NULL )
     {
@@ -642,7 +621,6 @@ void vlistInqVarStdname(int vlistID, int varID, char *stdname)
 
   return;
 }
-
 
 /*
 @Function  vlistInqVarUnits
@@ -664,7 +642,6 @@ The function @func{vlistInqVarUnits} returns the units of a variable.
 */
 void vlistInqVarUnits(int vlistID, int varID, char *units)
 {
-  static const char *func = "vlistInqVarUnits";
   int tableID;
   int param, code;
   int pdis, pcat, pnum;
@@ -672,7 +649,7 @@ void vlistInqVarUnits(int vlistID, int varID, char *units)
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   if ( vlistptr->vars[varID].units == NULL )
     {
@@ -708,7 +685,7 @@ int vlistInqVarID(int vlistID, int code)
   if ( varID == vlistptr->nvars )
     {
       /*
-      Warning(func, "varID not found for param %d\n", param);
+      Warning("varID not found for param %d\n", param);
       */
       varID = CDI_UNDEFID;
     }
@@ -719,7 +696,6 @@ int vlistInqVarID(int vlistID, int code)
 
 int vlistInqVarSize(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarSize";
   int size;
   int zaxisID, gridID;
   int nlevs, gridsize;
@@ -728,7 +704,7 @@ int vlistInqVarSize(int vlistID, int varID)
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   vlistInqVar(vlistID, varID, &gridID, &zaxisID, &timeID);
 
@@ -740,7 +716,6 @@ int vlistInqVarSize(int vlistID, int varID)
 
   return (size);
 }
-
 
 /*
 @Function  vlistInqVarDatatype
@@ -763,12 +738,11 @@ The valid CDI data types are @func{DATATYPE_PACK8}, @func{DATATYPE_PACK16}, @fun
 */
 int vlistInqVarDatatype(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarDatatype";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   return (vlistptr->vars[varID].datatype);
 }
@@ -776,20 +750,18 @@ int vlistInqVarDatatype(int vlistID, int varID)
 
 int vlistInqVarNumber(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarNumber";
   vlist_t *vlistptr;
   int number = CDI_REAL;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   if ( vlistptr->vars[varID].datatype == DATATYPE_CPX32 || vlistptr->vars[varID].datatype == DATATYPE_CPX64 )
     number = CDI_COMP;
 
   return (number);
 }
-
 
 /*
 @Function  vlistDefVarDatatype
@@ -811,12 +783,11 @@ The function @func{vlistDefVarDatatype} defines the data type of a variable.
 */
 void vlistDefVarDatatype(int vlistID, int varID, int datatype)
 {
-  static const char *func = "vlistDefVarDatatype";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   vlistptr->vars[varID].datatype = datatype;
   
@@ -921,7 +892,6 @@ int vlistInqVarTable(int vlistID, int varID)
   return (tableID);
 }
 
-
 /*
 @Function  vlistDefVarName
 @Title     Define the name of a Variable
@@ -939,12 +909,11 @@ The function @func{vlistDefVarName} defines the name of a variable.
 */
 void vlistDefVarName(int vlistID, int varID, const char *name)
 {
-  static const char *func = "vlistDefVarName";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   if ( vlistptr->vars[varID].name )
     {
@@ -954,7 +923,6 @@ void vlistDefVarName(int vlistID, int varID, const char *name)
 
   if ( name ) vlistptr->vars[varID].name = strdupx(name);
 }
-
 
 /*
 @Function  vlistDefVarLongname
@@ -973,12 +941,11 @@ The function @func{vlistDefVarLongname} defines the long name of a variable.
 */
 void vlistDefVarLongname(int vlistID, int varID, const char *longname)
 {
-  static const char *func = "vlistDefVarLongname";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   if ( vlistptr->vars[varID].longname )
     {
@@ -988,7 +955,6 @@ void vlistDefVarLongname(int vlistID, int varID, const char *longname)
 
   if ( longname ) vlistptr->vars[varID].longname = strdupx(longname);
 }
-
 
 /*
 @Function  vlistDefVarStdname
@@ -1007,12 +973,11 @@ The function @func{vlistDefVarStdname} defines the standard name of a variable.
 */
 void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
 {
-  static const char *func = "vlistDefVarStdname";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   if ( vlistptr->vars[varID].stdname )
     {
@@ -1022,7 +987,6 @@ void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
 
   if ( stdname ) vlistptr->vars[varID].stdname = strdupx(stdname);
 }
-
 
 /*
 @Function  vlistDefVarUnits
@@ -1041,12 +1005,11 @@ The function @func{vlistDefVarUnits} defines the units of a variable.
 */
 void vlistDefVarUnits(int vlistID, int varID, const char *units)
 {
-  static const char *func = "vlistDefVarUnits";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   if ( vlistptr->vars[varID].units )
     {
@@ -1056,7 +1019,6 @@ void vlistDefVarUnits(int vlistID, int varID, const char *units)
 
   if ( units ) vlistptr->vars[varID].units = strdupx(units);
 }
-
 
 /*
 @Function  vlistInqVarMissval
@@ -1077,12 +1039,11 @@ The function @func{vlistInqVarMissval} returns the missing value of a variable.
 */
 double vlistInqVarMissval(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarMissval";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   return (vlistptr->vars[varID].missval);
 }
@@ -1090,28 +1051,26 @@ double vlistInqVarMissval(int vlistID, int varID)
 
 double vlistInqVarScalefactor(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarScalefactor";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   return (vlistptr->vars[varID].scalefactor);
 }
 
+
 double vlistInqVarAddoffset(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarAddoffset";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   return (vlistptr->vars[varID].addoffset);
 }
-
 
 /*
 @Function  vlistDefVarMissval
@@ -1130,12 +1089,11 @@ The function @func{vlistDefVarMissval} defines the missing value of a variable.
 */
 void vlistDefVarMissval(int vlistID, int varID, double missval)
 {
-  static const char *func = "vlistDefVarMissval";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   vlistptr->vars[varID].missval = missval;
   vlistptr->vars[varID].missvalused = TRUE;
@@ -1144,12 +1102,11 @@ void vlistDefVarMissval(int vlistID, int varID, double missval)
 
 void vlistDefVarScalefactor(int vlistID, int varID, double scalefactor)
 {
-  static const char *func = "vlistDefVarScalefactor";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   vlistptr->vars[varID].scalefactor = scalefactor;
 }
@@ -1157,12 +1114,11 @@ void vlistDefVarScalefactor(int vlistID, int varID, double scalefactor)
 
 void vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
 {
-  static const char *func = "vlistDefVarAddoffset";
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   vlistptr->vars[varID].addoffset = addoffset;
 }
@@ -1327,7 +1283,6 @@ int vlistInqFlag(int vlistID, int varID, int levID)
 
 int vlistFindVar(int vlistID, int fvarID)
 {
-  static const char *func = "vlistFindVar";
   int varID;
   vlist_t *vlistptr;
 
@@ -1341,7 +1296,7 @@ int vlistFindVar(int vlistID, int fvarID)
   if ( varID == vlistptr->nvars )
     {
       varID = -1;
-      Message(func, "varID not found for fvarID %d in vlistID %d!", fvarID, vlistID);
+      Message("varID not found for fvarID %d in vlistID %d!", fvarID, vlistID);
     }
 
   return (varID);  
@@ -1350,7 +1305,6 @@ int vlistFindVar(int vlistID, int fvarID)
 
 int vlistFindLevel(int vlistID, int fvarID, int flevelID)
 {
-  static const char *func = "vlistFindLevel";
   int varID;
   int levelID = -1;
   vlist_t *vlistptr;
@@ -1369,7 +1323,7 @@ int vlistFindLevel(int vlistID, int fvarID, int flevelID)
       if ( levelID == vlistptr->vars[varID].nlevs )
 	{
 	  levelID = -1;
-	  Message(func, "levelID not found for fvarID %d and levelID %d in vlistID %d!",
+	  Message("levelID not found for fvarID %d and levelID %d in vlistID %d!",
 		  fvarID, flevelID, vlistID);
 	}
     }
@@ -1420,19 +1374,18 @@ int vlistInqIndex(int vlistID, int varID, int levelID)
 
 void vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
 {
-  static const char *func = "vlistChangeVarZaxis";
   int nlevs1, nlevs2;
   int nvars, index;
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   nlevs1 = zaxisInqSize(vlistptr->vars[varID].zaxisID);
   nlevs2 = zaxisInqSize(zaxisID);
 
-  if ( nlevs1 != nlevs2 ) Error(func, "Number of levels must not change!");
+  if ( nlevs1 != nlevs2 ) Error("Number of levels must not change!");
 
   nvars = vlistptr->nvars;
   for ( index = 0; index < nvars; index++ )
@@ -1453,7 +1406,7 @@ void vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
       if ( index == vlistptr->nzaxis )
 	{
 	  if ( vlistptr->nzaxis + 1 >= MAX_ZAXES_PS )
-	    Error(func, "Maximum of %d zaxis reached", MAX_ZAXES_PS);
+	    Error("Maximum of %d zaxis reached", MAX_ZAXES_PS);
 
 	  vlistptr->zaxisIDs[vlistptr->nzaxis] = zaxisID;
 	  vlistptr->nzaxis++;
@@ -1466,13 +1419,12 @@ void vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
 
 void vlistChangeVarGrid(int vlistID, int varID, int gridID)
 {
-  static const char *func = "vlistChangeVarGrid";
   int nvars, index;
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   nvars = vlistptr->nvars;
   for ( index = 0; index < nvars; index++ )
@@ -1493,7 +1445,7 @@ void vlistChangeVarGrid(int vlistID, int varID, int gridID)
       if ( index == vlistptr->ngrids )
 	{
 	  if ( vlistptr->ngrids + 1 >= MAX_GRIDS_PS )
-	    Error(func, "Maximum of %d grids reached", MAX_GRIDS_PS);
+	    Error("Maximum of %d grids reached", MAX_GRIDS_PS);
 
 	  vlistptr->gridIDs[vlistptr->ngrids] = gridID;
 	  vlistptr->ngrids++;
@@ -1506,13 +1458,11 @@ void vlistChangeVarGrid(int vlistID, int varID, int gridID)
 
 void vlistDefVarZtype(int vlistID, int varID, int ztype)
 {
-  static const char *func = "vlistDefVarZtype";
-  int nvars, index;
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   vlistptr->vars[varID].ztype = ztype;
 }
@@ -1520,13 +1470,11 @@ void vlistDefVarZtype(int vlistID, int varID, int ztype)
 
 int vlistInqVarZtype(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarZtype";
-  int nvars, index;
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   return (vlistptr->vars[varID].ztype);
 }
@@ -1534,13 +1482,11 @@ int vlistInqVarZtype(int vlistID, int varID)
 
 void vlistDefVarZlevel(int vlistID, int varID, int zlevel)
 {
-  static const char *func = "vlistDefVarZlevel";
-  int nvars, index;
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   vlistptr->vars[varID].zlevel = zlevel;
 }
@@ -1548,13 +1494,11 @@ void vlistDefVarZlevel(int vlistID, int varID, int zlevel)
 
 int vlistInqVarZlevel(int vlistID, int varID)
 {
-  static const char *func = "vlistInqVarZlevel";
-  int nvars, index;
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistCheckVarID(func, vlistID, varID);
+  vlistCheckVarID(__func__, vlistID, varID);
 
   return (vlistptr->vars[varID].zlevel);
 }

@@ -31,7 +31,6 @@ typedef struct {
 static
 int cgribexGetGridType(int *isec2)
 {
-  /*  static const char *func = "cgribexGetGridType"; */
   int gridtype = 0;
 
   switch (ISEC2_GridType)
@@ -78,7 +77,6 @@ int cgribexGetGridType(int *isec2)
 static
 int cgribexGetIsRotated(int *isec2)
 {
-  /*  static const char *func = "cgribexGetIsRotated"; */
   int isRotated = 0;
 
   if ( ISEC2_GridType == 10 )
@@ -180,7 +178,6 @@ int cgribexGetZaxisHasBounds(int grb_ltype)
 static
 int cgribexGetTimeUnit(int *isec1)
 {
-  static const char *func = "cgribexGetTimeUnit";
   int timeunit = -1;
   static int lprint = TRUE;
 
@@ -196,7 +193,7 @@ int cgribexGetTimeUnit(int *isec1)
     default:
       if ( lprint )
 	{
-	  Message(func, "Time unit %d unsupported", ISEC1_TimeUnit);
+	  Message("Time unit %d unsupported", ISEC1_TimeUnit);
 	  lprint = FALSE;
 	}
     }
@@ -218,7 +215,6 @@ int cgribexTimeIsFC(int *isec1)
 static
 int cgribexGetTsteptype(int timerange)
 {
-  static const char *func = "cgribexGetTsteptype";
   int tsteptype = 0;
   static int lprint = TRUE;
 
@@ -234,7 +230,7 @@ int cgribexGetTsteptype(int timerange)
     default:
       if ( lprint )
 	{
-	  Message(func, "Time range %d unsupported", timerange);
+	  Message("Time range %d unsupported", timerange);
 	  lprint = FALSE;
 	}
     }
@@ -247,7 +243,6 @@ static
 void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
 		      int *isec4, long recsize, off_t position, int prec, int ztype, int lmv)
 {
-  static const char *func = "cgribexAddRecord";
   int gridtype;
   int zaxistype;
   int gridID = CDI_UNDEFID, varID;
@@ -300,7 +295,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
     case GRID_GAUSSIAN:
       {
 	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-	  Error(func, "numberOfPoints (%d) and gridSize (%d) differ!",
+	  Error("numberOfPoints (%d) and gridSize (%d) differ!",
 		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
 	grid.size  = ISEC4_NumValues;
 	grid.xsize = ISEC2_NumLon;
@@ -328,7 +323,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
 		    if ( fabs(grid.xinc-xinc) > 0.0 )
 		      {
 			grid.xinc = xinc;
-			if ( CDI_Debug ) Message(func, "set xinc to %g", grid.xinc);
+			if ( CDI_Debug ) Message("set xinc to %g", grid.xinc);
 		      }
 		  }
 	      }
@@ -395,7 +390,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
     case GRID_LCC:
       {
 	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-	  Error(func, "numberOfPoints (%d) and gridSize (%d) differ!",
+	  Error("numberOfPoints (%d) and gridSize (%d) differ!",
 		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
 
 	grid.size  = ISEC4_NumValues;
@@ -446,7 +441,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
       }
     default:
       {
-	Error(func, "Unsupported grid type: %s", gridNamePtr(gridtype));
+	Error("Unsupported grid type: %s", gridNamePtr(gridtype));
 	break;
       }
     }
@@ -526,7 +521,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
   streamptr->nrecs++;
 
   if ( CDI_Debug )
-    Message(func, "varID = %d  param = %d  zaxistype = %d  gridID = %d  levelID = %d",
+    Message("varID = %d  param = %d  zaxistype = %d  gridID = %d  levelID = %d",
 	    varID, param, zaxistype, gridID, levelID);
 }
 
@@ -580,7 +575,6 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
 
 void cgribexScanTimestep1(int streamID)
 {
-  static const char *func = "cgribexScanTimestep1";
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0;
@@ -613,7 +607,7 @@ void cgribexScanTimestep1(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 0;
 
@@ -627,7 +621,7 @@ void cgribexScanTimestep1(int streamID)
   taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( tsID != 0 )
-    Error(func, "Internal problem! tstepsNewEntry returns %d", tsID);
+    Error("Internal problem! tstepsNewEntry returns %d", tsID);
 
   fileID = streamInqFileID(streamID);
 
@@ -635,7 +629,7 @@ void cgribexScanTimestep1(int streamID)
     {
       recsize = gribGetSize(fileID);
       if ( recsize == 0 )
-	Error(func, "Skipping of %d records failed!", cdiSkipRecords);
+	Error("Skipping of %d records failed!", cdiSkipRecords);
 
       recpos  = fileGetPos(fileID);
       fileSetPos(fileID, recsize, SEEK_CUR);
@@ -650,7 +644,7 @@ void cgribexScanTimestep1(int streamID)
       if ( recsize == 0 )
 	{
 	  if ( nrecs == 0 )
-	    Error(func, "No GRIB records found!");
+	    Error("No GRIB records found!");
 
 	  streamptr->ntsteps = 1;
 	  break;
@@ -728,7 +722,7 @@ void cgribexScanTimestep1(int streamID)
 		  {
 		    char paramstr[32];
 		    cdiParamToString(param, paramstr, sizeof(paramstr));
-		    Warning(func, "Inconsistent verification time (param=%s level=%d)", paramstr, level1);
+		    Warning("Inconsistent verification time (param=%s level=%d)", paramstr, level1);
 		    warn_time = FALSE;
 		  }
 	    }
@@ -740,7 +734,7 @@ void cgribexScanTimestep1(int streamID)
 		{
 		  char paramstr[32];
 		  cdiParamToString(param, paramstr, sizeof(paramstr));
-		  Warning(func, "Param=%s level=%d already exist, skipped!", paramstr, level1);
+		  Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 		  continue;
 		}
 	    }
@@ -750,7 +744,7 @@ void cgribexScanTimestep1(int streamID)
 	{
 	  if (  taxis->numavg && warn_numavg && (taxis->numavg != ISEC1_AvgNum) )
 	    {
-	      Warning(func, "Changing numavg from %d to %d not supported!",
+	      Warning("Changing numavg from %d to %d not supported!",
 		      taxis->numavg, ISEC1_AvgNum);
 	      warn_numavg = FALSE;
 	    }
@@ -763,7 +757,7 @@ void cgribexScanTimestep1(int streamID)
       nrecs++;
 
       if ( CDI_Debug )
-	Message(func, "%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
+	Message("%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
 
       cgribexAddRecord(streamID, param, isec1, isec2, fsec2, fsec3,
 		       isec4, recsize, recpos, prec, ztype, lmv);
@@ -814,7 +808,7 @@ void cgribexScanTimestep1(int streamID)
     {
       tsID = tstepsNewEntry(streamID);
       if ( tsID != streamptr->rtsteps )
-	Error(func, "Internal error. tsID = %d", tsID);
+	Error("Internal error. tsID = %d", tsID);
 
       streamptr->tsteps[tsID-1].next   = TRUE;
       streamptr->tsteps[tsID].position = recpos;
@@ -836,7 +830,6 @@ void cgribexScanTimestep1(int streamID)
 
 int cgribexScanTimestep2(int streamID)
 {
-  static const char *func = "cgribexScanTimestep2";
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0;
@@ -864,7 +857,7 @@ int cgribexScanTimestep2(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 1;
 
@@ -883,7 +876,7 @@ int cgribexScanTimestep2(int streamID)
                                           
   tsID = streamptr->rtsteps;
   if ( tsID != 1 )
-    Error(func, "Internal problem! unexpeceted timestep %d", tsID+1);
+    Error("Internal problem! unexpeceted timestep %d", tsID+1);
 
   taxis = &streamptr->tsteps[tsID].taxis;
 
@@ -977,7 +970,7 @@ int cgribexScanTimestep2(int streamID)
 		(taxis->numavg != ISEC1_AvgNum) )
 	    {
 	  /*
-	      Warning(func, "Changing numavg from %d to %d not supported!",
+	      Warning("Changing numavg from %d to %d not supported!",
 		      taxis->numavg, ISEC1_AvgNum);
 	  */
 	      warn_numavg = FALSE;
@@ -1008,7 +1001,7 @@ int cgribexScanTimestep2(int streamID)
 	{
 	  char paramstr[32];
 	  cdiParamToString(param, paramstr, sizeof(paramstr));
-	  Warning(func, "Param=%s level=%d not defined at timestep 1!", paramstr, level1);
+	  Warning("Param=%s level=%d not defined at timestep 1!", paramstr, level1);
 	  return (CDI_EUFSTRUCT);
 	}
 
@@ -1033,7 +1026,7 @@ int cgribexScanTimestep2(int streamID)
 
 	      if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
 
-	      Warning(func, "Param=%s level=%d already exist, skipped!", paramstr, level1);
+	      Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 	      continue;
 	    }
 	  else
@@ -1044,7 +1037,7 @@ int cgribexScanTimestep2(int streamID)
 	}
 
       if ( CDI_Debug )
-	Message(func, "%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
+	Message("%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
@@ -1055,7 +1048,7 @@ int cgribexScanTimestep2(int streamID)
 
       if ( memcmp(&compVar0, &compVar, sizeof(compvar_t)) != 0 )
 	{
-	  Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
+	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
 		  streamptr->tsteps[tsID].records[recID].param, param,
 		  streamptr->tsteps[tsID].records[recID].ilevel, level1);
@@ -1099,7 +1092,7 @@ int cgribexScanTimestep2(int streamID)
     {
       tsID = tstepsNewEntry(streamID);
       if ( tsID != streamptr->rtsteps )
-	Error(func, "Internal error. tsID = %d", tsID);
+	Error("Internal error. tsID = %d", tsID);
 
       streamptr->tsteps[tsID-1].next   = TRUE;
       streamptr->tsteps[tsID].position = recpos;
@@ -1114,7 +1107,6 @@ int cgribexScanTimestep2(int streamID)
 
 int cgribexScanTimestep(int streamID)
 {
-  static const char *func = "cgribexScanTimestep";
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0;
@@ -1141,16 +1133,16 @@ int cgribexScanTimestep(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamInqVlist(streamID);
 
   if ( CDI_Debug )
     {
-      Message(func, "streamID = %d", streamID);
-      Message(func, "cts = %d", streamptr->curTsID);
-      Message(func, "rts = %d", streamptr->rtsteps);
-      Message(func, "nts = %d", streamptr->ntsteps);
+      Message("streamID = %d", streamID);
+      Message("cts = %d", streamptr->curTsID);
+      Message("rts = %d", streamptr->rtsteps);
+      Message("nts = %d", streamptr->ntsteps);
     }
 
   isec0 = streamptr->record->sec0;
@@ -1202,7 +1194,7 @@ int cgribexScanTimestep(int streamID)
 	  status = gribRead(fileID, gribbuffer, &readsize);
 	  if ( status )
 	    {
-	      Error(func, "Inconsistent timestep %d (GRIB record %d/%d)!\n", tsID+1, rindex+1,
+	      Error("Inconsistent timestep %d (GRIB record %d/%d)!\n", tsID+1, rindex+1,
 		    streamptr->tsteps[tsID].recordSize);
 	      break;
 	    }
@@ -1257,7 +1249,7 @@ int cgribexScanTimestep(int streamID)
 		   (taxis->numavg != ISEC1_AvgNum) )
 		{
 	      /*
-	          Warning(func, "Changing numavg from %d to %d not supported!",
+	          Warning("Changing numavg from %d to %d not supported!",
 			  streamptr->tsteps[tsID].taxis.numavg, ISEC1_AvgNum);
 	      */
 		  warn_numavg = FALSE;
@@ -1289,7 +1281,7 @@ int cgribexScanTimestep(int streamID)
 	    {
 	      char paramstr[32];
 	      cdiParamToString(param, paramstr, sizeof(paramstr));
-	      Warning(func, "Param=%s level=%d not available at timestep %d!", paramstr, level1, tsID+1);
+	      Warning("Param=%s level=%d not available at timestep %d!", paramstr, level1, tsID+1);
 
 	      if ( cdiInventoryMode == 1 )
 		return (CDI_EUFSTRUCT);
@@ -1312,7 +1304,7 @@ int cgribexScanTimestep(int streamID)
 		  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
 		  
 		  if ( CDI_Debug )
-		    Warning(func, "Param=%s level=%d already exist, skipped!", paramstr, level1);
+		    Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 
 		  continue;
 		}
@@ -1324,7 +1316,7 @@ int cgribexScanTimestep(int streamID)
 	    }
 
 	  if ( CDI_Debug )
-	    Message(func, "%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
+	    Message("%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
 
 	  compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
 	  compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
@@ -1333,18 +1325,18 @@ int cgribexScanTimestep(int streamID)
 
 	  if ( memcmp(&compVar0, &compVar, sizeof(compvar_t)) != 0 )
 	    {
-	      Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
+	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,
 		      streamptr->tsteps[tsID].records[recID].param, param,
 		      streamptr->tsteps[tsID].records[recID].ilevel, level1);
-	      Error(func, "Invalid, unsupported or inconsistent record structure");
+	      Error("Invalid, unsupported or inconsistent record structure");
 	    }
 	  
 	  streamptr->tsteps[tsID].records[recID].position = recpos;
 	  streamptr->tsteps[tsID].records[recID].size = recsize;
 
 	  if ( CDI_Debug )
-	    Message(func, "%4d %8d %4d %8d %8d %6d", rindex, (int)recpos, param, level1, vdate, vtime);
+	    Message("%4d %8d %4d %8d %8d %6d", rindex, (int)recpos, param, level1, vdate, vtime);
 
 	  rindex++;
 	}
@@ -1359,7 +1351,7 @@ int cgribexScanTimestep(int streamID)
 	{
 	  char paramstr[32];
 	  cdiParamToString(streamptr->tsteps[tsID].records[recID].param, paramstr, sizeof(paramstr));
-	  Warning(func, "Param=%s level=%d not found at timestep %d!",
+	  Warning("Param=%s level=%d not found at timestep %d!",
 		  paramstr, streamptr->tsteps[tsID].records[recID].ilevel, tsID+1);
 	  return (CDI_EUFSTRUCT);
 	}
@@ -1370,7 +1362,7 @@ int cgribexScanTimestep(int streamID)
 	{
 	  tsID = tstepsNewEntry(streamID);
 	  if ( tsID != streamptr->rtsteps )
-	    Error(func, "Internal error. tsID = %d", tsID);
+	    Error("Internal error. tsID = %d", tsID);
 
 	  streamptr->tsteps[tsID-1].next   = 1;
 	  streamptr->tsteps[tsID].position = recpos;
@@ -1385,7 +1377,7 @@ int cgribexScanTimestep(int streamID)
 
   if ( nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs )
     {
-      Warning(func, "Incomplete timestep. Stop scanning at timestep %d.\n", tsID);
+      Warning("Incomplete timestep. Stop scanning at timestep %d.\n", tsID);
       streamptr->ntsteps = tsID;
     }
 
@@ -1396,7 +1388,6 @@ int cgribexScanTimestep(int streamID)
 int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
 		  int unreduced, int *nmiss, int *zip, double missval)
 {
-  static const char *func = "cgribexDecode";
   int status = 0;
 #if  defined  (HAVE_LIBCGRIBEX)
   int iret = 0, iword = 0;
@@ -1441,13 +1432,13 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
 	  gribsize = gribUnzip(gribbuffer, unzipsize, itmpbuffer, gribsize);
 
 	  if ( gribsize <= 0 )
-	    Error(func, "Decompression problem!\n");
+	    Error("Decompression problem!\n");
 	  
 	  free(itmpbuffer);
 	}
       else
 	{
-	  Error(func, "Decompression for %d not implemented!\n", izip);
+	  Error("Decompression for %d not implemented!\n", izip);
 	}
     }
 
@@ -1474,7 +1465,7 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
         }
     }
 #else
-  Error(func, "CGRIBEX support not compiled in!");
+  Error("CGRIBEX support not compiled in!");
 #endif
 
   return (status);
@@ -1519,7 +1510,6 @@ void cgribexDefModel(int *isec1, int vlistID, int varID)
 static
 void cgribexDefParam(int *isec1, int param)
 {
-  static const char *func = "cgribexDefParam";
   int pdis, pcat, pnum;
   static int lwarn = TRUE;
 
@@ -1529,7 +1519,7 @@ void cgribexDefParam(int *isec1, int param)
     {
       char paramstr[32];
       cdiParamToString(param, paramstr, sizeof(paramstr));
-      Warning(func, "Can not convert GRIB2 parameter (%s) to GRIB1!", paramstr);
+      Warning("Can not convert GRIB2 parameter (%s) to GRIB1!", paramstr);
       lwarn = FALSE;
     }
     
@@ -1705,7 +1695,6 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 static
 void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 {
-  static const char *func = "cgribexDefGrid";
   int gridtype;
   static short lwarn = TRUE;
 
@@ -1747,7 +1736,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
       if ( lwarn && gridInqSize(gridID) > 1 )
 	{
 	  lwarn = FALSE;
-	  Warning(func, "Curvilinear grids are unsupported in GRIB1! Created wrong GDS!");
+	  Warning("Curvilinear grids are unsupported in GRIB1! Created wrong GDS!");
 	}
       gridtype = GRID_LONLAT;
     }
@@ -1931,8 +1920,8 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
       }
     default:
       {
-	Warning(func, "The CGRIBEX library can not store fields on the used grid!");
-	Error(func, "Unsupported grid type: %s", gridNamePtr(gridtype));
+	Warning("The CGRIBEX library can not store fields on the used grid!");
+	Error("Unsupported grid type: %s", gridNamePtr(gridtype));
       }
     }
 }
@@ -1940,7 +1929,6 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 static
 void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
 {
-  static const char *func = "cgribexDefLevel";
   double level;
   int ilevel, zaxistype, ltype;
   static int warning = 1;
@@ -1995,7 +1983,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	vctsize = zaxisInqVctSize(zaxisID);
 	if ( vctsize == 0 && warning )
 	  {
-	    Warning(func, "VCT missing. ( param = %d, zaxisID = %d )",
+	    Warning("VCT missing. ( param = %d, zaxisID = %d )",
 		    ISEC1_Parameter, zaxisID);
 	    warning = 0;
 	  }
@@ -2004,7 +1992,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	    ISEC2_NumVCP = 0;
 	    if ( vct_warning )
 	      {
-		Warning(func, "VCT size of %d is too large (maximum is 255). Set to 0!", vctsize);
+		Warning("VCT size of %d is too large (maximum is 255). Set to 0!", vctsize);
 		vct_warning = 0;
 	      }
 	  }
@@ -2022,7 +2010,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 
 	level = zaxisInqLevel(zaxisID, levelID);
 	if ( level < 0 )
-	  Warning(func, "Pressure level of %f Pa is below zero!", level);
+	  Warning("Pressure level of %f Pa is below zero!", level);
 
 	zaxisInqUnits(zaxisID, units);
 	if ( memcmp(units, "Pa", 2) != 0 ) level *= 100;
@@ -2130,7 +2118,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       }
     default:
       {
-	Error(func, "Unsupported zaxis type: %s", zaxisNamePtr(zaxistype));
+	Error("Unsupported zaxis type: %s", zaxisNamePtr(zaxistype));
 	break;
       }
     }
@@ -2176,7 +2164,6 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 		     int vdate, int vtime, int tsteptype, int numavg, 
 		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize)
 {
-  static const char *func = "cgribexEncode";
   size_t nbytes = 0;
 #if  defined  (HAVE_LIBCGRIBEX)
   long gribsize;
@@ -2227,11 +2214,11 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
 	   datasize, (int *) gribbuffer, gribsize, &iword, "C", &iret);
 
-  if ( iret ) Error(func, "Problem during GRIB encode (errno = %d)!", iret);
+  if ( iret ) Error("Problem during GRIB encode (errno = %d)!", iret);
 
   nbytes = iword*sizeof(int);
 #else
-  Error(func, "CGRIBEX support not compiled in!");
+  Error("CGRIBEX support not compiled in!");
 #endif
 
   return (nbytes);

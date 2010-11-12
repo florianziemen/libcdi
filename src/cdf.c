@@ -55,12 +55,10 @@ int CDF_Debug   = 0;    /* If set to 1, debugging           */
 
 void cdfDebug(int debug)
 {
-  static const char *func = "cdfDebug";
-
   CDF_Debug = debug;
 
   if ( CDF_Debug )
-    Message(func, "debug level %d", debug);
+    Message("debug level %d", debug);
 }
 
 static
@@ -155,16 +153,15 @@ int cdfOpenFile(const char *filename, const char *mode, int version)
 
 int cdfOpen(const char *filename, const char *mode)
 {
-  static const char *func = "cdfOpen";
   int fileID = 0;
 
   if ( CDF_Debug )
-    Message(func, "open %s with mode %c", filename, *mode);
+    Message("open %s with mode %c", filename, *mode);
 
   fileID = cdfOpenFile(filename, mode, 1);
 
   if ( CDF_Debug )
-    Message(func, "file %s opened with id %d", filename, fileID);
+    Message("file %s opened with id %d", filename, fileID);
 
   return (fileID);
 }
@@ -172,11 +169,10 @@ int cdfOpen(const char *filename, const char *mode)
 
 int cdfOpen64(const char *filename, const char *mode)
 {
-  static const char *func = "cdfOpen64";
   int fileID = -1;
 
   if ( CDF_Debug )
-    Message(func, "open %s with mode %c", filename, *mode);
+    Message("open %s with mode %c", filename, *mode);
 
 #if  defined  (HAVE_LIBNETCDF)
 #if  ! defined  (NC_64BIT_OFFSET)
@@ -188,7 +184,7 @@ int cdfOpen64(const char *filename, const char *mode)
   fileID = cdfOpenFile(filename, mode, 2);
 
   if ( CDF_Debug )
-    Message(func, "file %s opened with id %d", filename, fileID);
+    Message("file %s opened with id %d", filename, fileID);
 
   return (fileID);
 }
@@ -196,11 +192,10 @@ int cdfOpen64(const char *filename, const char *mode)
 
 int cdf4Open(const char *filename, const char *mode)
 {
-  static const char *func = "cdf4Open";
   int fileID = -1;
 
   if ( CDF_Debug )
-    Message(func, "open %s with mode %c", filename, *mode);
+    Message("open %s with mode %c", filename, *mode);
 
 #if  defined  (HAVE_LIBNETCDF)
 #if  ! defined  (NC_NETCDF4)
@@ -212,7 +207,7 @@ int cdf4Open(const char *filename, const char *mode)
   fileID = cdfOpenFile(filename, mode, 4);
 
   if ( CDF_Debug )
-    Message(func, "file %s opened with id %d", filename, fileID);
+    Message("file %s opened with id %d", filename, fileID);
 
   return (fileID);
 }

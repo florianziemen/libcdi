@@ -145,7 +145,7 @@ static void file_table_print(void);
  * A version string.
  */
 #undef   LIBVERSION
-#define  LIBVERSION      1.7.0
+#define  LIBVERSION      1.7.1
 #define  XSTRING(x)	 #x
 #define  STRING(x) 	 XSTRING(x)
 const char file_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
@@ -163,6 +163,7 @@ const char file_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
                     remove default HAVE_MMAP
                     use HAVE_STRUCT_STAT_ST_BLKSIZE
   22/08/2010  1.7.0 refactor
+  11/11/2010  1.7.1 update for changed interface of error.h
  */
 
 
@@ -210,7 +211,6 @@ void file_init_pointer(void)
 static
 bfile_t *file_to_pointer(int idx)
 {
-  static const char *func = "file_to_pointer";
   bfile_t *fileptr = NULL;
 
   FILE_INIT
@@ -224,7 +224,7 @@ bfile_t *file_to_pointer(int idx)
       FILE_UNLOCK
     }
   else
-    Error(func, "file index %d undefined!", idx);
+    Error("file index %d undefined!", idx);
 
   return (fileptr);
 }
@@ -233,7 +233,6 @@ bfile_t *file_to_pointer(int idx)
 static
 int file_from_pointer(bfile_t *ptr)
 {
-  static const char *func = "file_from_pointer";
   int      idx = -1;
   filePtrToIdx *newptr;
 
@@ -250,15 +249,15 @@ int file_from_pointer(bfile_t *ptr)
 	  newptr->ptr  = ptr;
       
 	  if ( FILE_Debug )
-	    Message(func, "Pointer %p has idx %d from file list", ptr, idx);
+	    Message("Pointer %p has idx %d from file list", ptr, idx);
 	}
       else
-	Warning(func, "Too many open files (limit is %d)!", _file_max);
+	Warning("Too many open files (limit is %d)!", _file_max);
 
       FILE_UNLOCK
     }
   else
-    Error(func, "Internal problem (pointer %p undefined)", ptr);
+    Error("Internal problem (pointer %p undefined)", ptr);
 
   return (idx);
 }
@@ -305,7 +304,6 @@ bfile_t *file_new_entry(void)
 static
 void file_delete_entry(bfile_t *fileptr)
 {
-  static const char *func = "file_delete_entry";
   int idx;
 
   idx = fileptr->self;
@@ -321,7 +319,7 @@ void file_delete_entry(bfile_t *fileptr)
   FILE_UNLOCK
 
   if ( FILE_Debug )
-    Message(func, "Removed idx %d from file list", idx);
+    Message("Removed idx %d from file list", idx);
 }
 
 
@@ -348,12 +346,10 @@ int pagesize(void)
 
 void fileDebug(int debug)
 {
-  static const char *func = "fileDebug";
-
   FILE_Debug = debug;
 
   if ( FILE_Debug )
-    Message(func, "Debug level %d", debug);
+    Message("Debug level %d", debug);
 }
 
 
@@ -367,16 +363,19 @@ void *filePtr(int fileID)
 }
 
 static
-void file_pointer_info(const char *func, int fileID)
+void file_pointer_info(const char *caller, int fileID)
 {
-  if ( FILE_Debug ) 
-    Message(func, "The fileID %d underlying pointer is not valid.", fileID);
+  if ( FILE_Debug )
+    {
+      fprintf(stdout, "%-18s : ", caller);
+      fprintf(stdout, "The fileID %d underlying pointer is not valid!", fileID);
+      fprintf(stdout, "\n");
+    }
 }
 
 
 int fileSetBufferType(int fileID, int type)
 {
-  static const char *func = "fileSetBufferType";
   int ret = 0;
   bfile_t *fileptr;
 
@@ -391,7 +390,7 @@ int fileSetBufferType(int fileID, int type)
 	  fileptr->bufferType = type;
 	  break;
 	default:
-	  Error(func, "File type %d not implemented!", type);
+	  Error("File type %d not implemented!", type);
 	}
     }
 
@@ -489,7 +488,6 @@ void fileRewind(int fileID)
 
 off_t fileGetPos(int fileID)
 {
-  static const char *func = "fileGetPos";
   off_t filepos = 0;
   bfile_t *fileptr;
 
@@ -503,7 +501,7 @@ off_t fileGetPos(int fileID)
 	filepos = ftell(fileptr->fp);
     }
 
-  if ( FILE_Debug ) Message(func, "Position %ld", filepos);
+  if ( FILE_Debug ) Message("Position %ld", filepos);
 
   return (filepos);
 }
@@ -511,18 +509,17 @@ off_t fileGetPos(int fileID)
 
 int fileSetPos(int fileID, off_t offset, int whence)
 {
-  static const char *func = "fileSetPos";
   int status = 0;
   off_t position;
   bfile_t *fileptr;
 
   fileptr = file_to_pointer(fileID);
 
-  if ( FILE_Debug ) Message(func, "Offset %8ld  Whence %3d", (long) offset, whence);
+  if ( FILE_Debug ) Message("Offset %8ld  Whence %3d", (long) offset, whence);
 
   if ( fileptr == 0 )
     {
-      file_pointer_info(func, fileID);
+      file_pointer_info(__func__, fileID);
       return (1);
     }
 
@@ -548,7 +545,7 @@ int fileSetPos(int fileID, off_t offset, int whence)
 	      if ( fileptr->bufferPos != fileptr->bufferEnd + 1 )
 		{
 		  if ( FILE_Debug )
-		    Message(func, "Reset buffer pos from %ld to %ld",
+		    Message("Reset buffer pos from %ld to %ld",
 			    fileptr->bufferPos, fileptr->bufferEnd + 1);
 			    
 		  fileptr->bufferPos = fileptr->bufferEnd + 1;
@@ -582,7 +579,7 @@ int fileSetPos(int fileID, off_t offset, int whence)
 	      if ( fileptr->bufferPos != fileptr->bufferEnd + 1 )
 		{
 		  if ( FILE_Debug )
-		    Message(func, "Reset buffer pos from %ld to %ld",
+		    Message("Reset buffer pos from %ld to %ld",
 			    fileptr->bufferPos, fileptr->bufferEnd + 1);
 			    
 		  fileptr->bufferPos = fileptr->bufferEnd + 1;
@@ -597,7 +594,7 @@ int fileSetPos(int fileID, off_t offset, int whence)
 	}
       break;
     default:
-      Error(func, "Whence = %d not implemented", whence);
+      Error("Whence = %d not implemented", whence);
     }
 
   if ( fileptr->position < fileptr->size )
@@ -689,7 +686,6 @@ int fileInqMode(int fileID)
 static
 long file_getenv(const char *envName)
 {
-  static const char *func = "file_getenv";
   char *envString;
   long envValue = -1;
   long fact = 1;
@@ -711,8 +707,8 @@ long file_getenv(const char *envName)
 		case 'g':  fact = 1073741824;  break;
 		default:
 		  fact = 0;
-		  Message(func, "Invalid number string in %s: %s", envName, envString);
-		  Warning(func, "%s must comprise only digits [0-9].",envName);
+		  Message("Invalid number string in %s: %s", envName, envString);
+		  Warning("%s must comprise only digits [0-9].",envName);
 		}
 	      break;
 	    }
@@ -720,7 +716,7 @@ long file_getenv(const char *envName)
 
       if ( fact ) envValue = fact*atol(envString);
 
-      if ( FILE_Debug ) Message(func, "Set %s to %ld", envName, envValue);
+      if ( FILE_Debug ) Message("Set %s to %ld", envName, envValue);
     }
 
   return (envValue);
@@ -729,7 +725,6 @@ long file_getenv(const char *envName)
 static
 void file_initialize(void)
 {
-  static const char *func = "file_initialize";
   long value;
 
 #if  defined  (HAVE_LIBPTHREAD)
@@ -744,7 +739,7 @@ void file_initialize(void)
   if ( value >= 0 ) _file_max = (int) value;
 
   if ( FILE_Debug )
-    Message(func, "FILE_MAX = %d", _file_max);
+    Message("FILE_MAX = %d", _file_max);
 
   FileInfo = (int) file_getenv("FILE_INFO");
 
@@ -761,7 +756,7 @@ void file_initialize(void)
 	  FileTypeEnv = value;
 	  break;
 	default:
-	  Warning(func, "File type %d not implemented!", value);
+	  Warning("File type %d not implemented!", value);
 	}
     }
 
@@ -769,7 +764,7 @@ void file_initialize(void)
 #if ! defined (HAVE_MMAP)
   if ( value == FILE_BUFTYPE_MMAP )
     {
-      Warning(func, "MMAP not available!");
+      Warning("MMAP not available!");
       value = 0;
     }
 #endif
@@ -782,7 +777,7 @@ void file_initialize(void)
 	  FileBufferTypeEnv = value;
 	  break;
 	default:
-	  Warning(func, "File buffer type %d not implemented!", value);
+	  Warning("File buffer type %d not implemented!", value);
 	}
     }
 
@@ -803,7 +798,6 @@ void file_initialize(void)
 static
 void file_set_buffer(bfile_t *fileptr)
 {
-  static const char *func = "file_set_buffer";
   size_t buffersize = 0;
 
   if ( fileptr->mode == 'r' )
@@ -857,12 +851,12 @@ void file_set_buffer(bfile_t *fileptr)
     {
       fileptr->buffer = (char *) malloc(buffersize);
       if ( fileptr->buffer == NULL )
-	SysError(func, "Allocation of file buffer failed!");
+	SysError("Allocation of file buffer failed!");
     }	
 
   if ( fileptr->type == FILE_TYPE_FOPEN )
     if ( setvbuf(fileptr->fp, fileptr->buffer, _IOFBF, buffersize) )
-      SysError(func, "setvbuf failed");
+      SysError("setvbuf failed!");
 
   fileptr->bufferSize = buffersize;
 }
@@ -870,7 +864,6 @@ void file_set_buffer(bfile_t *fileptr)
 static
 int file_fill_buffer(bfile_t *fileptr)
 {
-  static const char *func = "file_fill_buffer";
   long nread;
   int fd;
   int ret;
@@ -878,7 +871,7 @@ int file_fill_buffer(bfile_t *fileptr)
   off_t retseek;
   
   if ( FILE_Debug )
-    Message(func, "file ptr = %p  Cnt = %ld", fileptr, fileptr->bufferCnt);
+    Message("file ptr = %p  Cnt = %ld", fileptr, fileptr->bufferCnt);
 
   if ( (fileptr->flag & FILE_EOF) != 0 ) return (EOF);
 
@@ -905,7 +898,7 @@ int file_fill_buffer(bfile_t *fileptr)
 	    {
 	      ret = munmap(fileptr->buffer, fileptr->mappedSize);
 	      if ( ret == -1 )
-		SysError(func, "munmap error for read %s", fileptr->name);
+		SysError("munmap error for read %s", fileptr->name);
 	      fileptr->buffer = NULL;
 	    }
 
@@ -915,7 +908,7 @@ int file_fill_buffer(bfile_t *fileptr)
             (char *) mmap(0, (size_t) nread, PROT_READ, MAP_SHARED, fd, fileptr->bufferPos);
 
 	  if ( fileptr->buffer == (void *)-1 )
-	    SysError(func, "mmap error for read %s", fileptr->name);
+	    SysError("mmap error for read %s", fileptr->name);
 
 	  offset = fileptr->position - fileptr->bufferPos;
 	}
@@ -925,7 +918,7 @@ int file_fill_buffer(bfile_t *fileptr)
     {
       retseek = lseek(fileptr->fd, fileptr->bufferPos, SEEK_SET);
       if ( retseek == (off_t)-1 )
-	SysError(func, "lseek error at pos %ld file %s", (long) fileptr->bufferPos, fileptr->name);
+	SysError("lseek error at pos %ld file %s", (long) fileptr->bufferPos, fileptr->name);
 	
       nread = (long) read(fd, fileptr->buffer, fileptr->bufferSize);
     }
@@ -950,19 +943,19 @@ int file_fill_buffer(bfile_t *fileptr)
 
   if ( FILE_Debug )
     {
-      Message(func, "fileID = %d  Val     = %d",  fileptr->self, (int) fileptr->buffer[0]);
-      Message(func, "fileID = %d  Start   = %ld", fileptr->self, fileptr->bufferStart);
-      Message(func, "fileID = %d  End     = %ld", fileptr->self, fileptr->bufferEnd);
-      Message(func, "fileID = %d  nread   = %ld", fileptr->self, nread);
-      Message(func, "fileID = %d  offset  = %ld", fileptr->self, offset);
-      Message(func, "fileID = %d  Pos     = %ld", fileptr->self, fileptr->bufferPos);
-      Message(func, "fileID = %d  postion = %ld", fileptr->self, fileptr->position);
+      Message("fileID = %d  Val     = %d",  fileptr->self, (int) fileptr->buffer[0]);
+      Message("fileID = %d  Start   = %ld", fileptr->self, fileptr->bufferStart);
+      Message("fileID = %d  End     = %ld", fileptr->self, fileptr->bufferEnd);
+      Message("fileID = %d  nread   = %ld", fileptr->self, nread);
+      Message("fileID = %d  offset  = %ld", fileptr->self, offset);
+      Message("fileID = %d  Pos     = %ld", fileptr->self, fileptr->bufferPos);
+      Message("fileID = %d  postion = %ld", fileptr->self, fileptr->position);
     }
 
   if ( offset > 0 )
     {
       if ( offset > nread )
-	Error(func, "Internal problem with buffer handling. nread = %d offset = %d", nread, offset);
+	Error("Internal problem with buffer handling. nread = %d offset = %d", nread, offset);
 
       fileptr->bufferPtr += offset;
       fileptr->bufferCnt -= offset;
@@ -976,13 +969,11 @@ int file_fill_buffer(bfile_t *fileptr)
 static
 void file_copy_from_buffer(bfile_t *fileptr, void *ptr, size_t size)
 {
-  static const char *func = "file_copy_from_buffer";
-
   if ( FILE_Debug )
-    Message(func, "size = %ld  Cnt = %ld", size, fileptr->bufferCnt);
+    Message("size = %ld  Cnt = %ld", size, fileptr->bufferCnt);
 
   if ( fileptr->bufferCnt < size )
-    Error(func, "Buffer too small. bufferCnt = %d", fileptr->bufferCnt);
+    Error("Buffer too small. bufferCnt = %d", fileptr->bufferCnt);
 
   if ( size == 1 )
     {
@@ -1003,15 +994,14 @@ void file_copy_from_buffer(bfile_t *fileptr, void *ptr, size_t size)
 static
 size_t file_read_from_buffer(bfile_t *fileptr, void *ptr, size_t size)
 {
-  static const char *func = "file_read_from_buffer";
   size_t nread, rsize;
   size_t offset = 0;
 
   if ( FILE_Debug )
-    Message(func, "size = %ld  Cnt = %d", size, (int) fileptr->bufferCnt);
+    Message("size = %ld  Cnt = %d", size, (int) fileptr->bufferCnt);
 
   if ( ((int)fileptr->bufferCnt) < 0 )
-    Error(func, "Internal problem. bufferCnt = %d", (int) fileptr->bufferCnt);
+    Error("Internal problem. bufferCnt = %d", (int) fileptr->bufferCnt);
 
   rsize = size;
 
@@ -1058,7 +1048,6 @@ void fileSetBufferSize(int fileID, long buffersize)
  */
 int fileOpen(const char *filename, const char *mode)
 {
-  static const char *func = "fileOpen";
   FILE *fp = NULL;    /* file pointer    (used for write) */
   int fd = -1;        /* file descriptor (used for read)  */
   int fileID = FILE_UNDEFID;
@@ -1081,12 +1070,12 @@ int fileOpen(const char *filename, const char *mode)
     case 'x':  fp = fopen(filename, "rb");      break;
     case 'w':  fp = fopen(filename, "wb");      break;
     case 'a':  fp = fopen(filename, "ab");      break;
-    default:   Error(func, "Mode %c unexpected\n", fmode);
+    default:   Error("Mode %c unexpected!", fmode);
     }
 
   if ( FILE_Debug )
     if ( fp == NULL && fd == -1 )
-      Message(func, "Open failed on %s mode %c", filename, fmode);
+      Message("Open failed on %s mode %c", filename, fmode);
 
   if ( fp )
     {
@@ -1136,7 +1125,7 @@ int fileOpen(const char *filename, const char *mode)
       if ( fileptr->type == FILE_TYPE_FOPEN ) file_set_buffer(fileptr);
 
       if ( FILE_Debug )
-	Message(func, "File %s opened with ID %d", filename, fileID);      
+	Message("File %s opened with ID %d", filename, fileID);      
     }
 
   return (fileID);
@@ -1148,7 +1137,6 @@ int fileOpen(const char *filename, const char *mode)
  */
 int fileClose(int fileID)
 {
-  static const char *func = "fileClose";
   char *name;
   int ret;
   char *fbtname[] = {"unknown", "standard", "mmap"};
@@ -1159,14 +1147,14 @@ int fileClose(int fileID)
 
   if ( fileptr == NULL )
     {
-      file_pointer_info(func, fileID);
+      file_pointer_info(__func__, fileID);
       return (1);
     }
 
   name = fileptr->name;
 
   if ( FILE_Debug )
-    Message(func, "fileID = %d  filename = %s", fileID, name);
+    Message("fileID = %d  filename = %s", fileID, name);
 
   if ( FileInfo > 0 )
     {
@@ -1225,19 +1213,19 @@ int fileClose(int fileID)
 	{
 	  ret = munmap(fileptr->buffer, fileptr->mappedSize);
 	  if ( ret == -1 )
-	    SysError(func, "munmap error for close %s", fileptr->name);
+	    SysError("munmap error for close %s", fileptr->name);
 	  fileptr->buffer = NULL;
 	}
 #endif
       ret = close(fileptr->fd);
       if ( ret == -1 )
-	SysError(func, "EOF returned for close of %s\n", name);
+	SysError("EOF returned for close of %s!", name);
     }
   else
     {
       ret = fclose(fileptr->fp);
       if ( ret == EOF )
-	SysError(func, "EOF returned for close of %s\n", name);
+	SysError("EOF returned for close of %s!", name);
     }
 
   if ( fileptr->name )    free((void*) fileptr->name);
@@ -1303,7 +1291,6 @@ int fileGetc(int fileID)
 
 size_t filePtrRead(void *vfileptr, void *restrict ptr, size_t size)
 {
-  static const char *func = "filePtrRead";
   size_t nread = 0;
   bfile_t *fileptr = (bfile_t *) vfileptr;
 
@@ -1328,7 +1315,7 @@ size_t filePtrRead(void *vfileptr, void *restrict ptr, size_t size)
       fileptr->access++;
     }
 
-  if ( FILE_Debug ) Message(func, "size %ld  nread %ld", size, nread);
+  if ( FILE_Debug ) Message("size %ld  nread %ld", size, nread);
 
   return (nread);
 }
@@ -1336,7 +1323,6 @@ size_t filePtrRead(void *vfileptr, void *restrict ptr, size_t size)
 
 size_t fileRead(int fileID, void *restrict ptr, size_t size)
 {
-  static const char *func = "fileRead";
   size_t nread = 0;
   bfile_t *fileptr;
 
@@ -1363,7 +1349,7 @@ size_t fileRead(int fileID, void *restrict ptr, size_t size)
       fileptr->access++;
     }
 
-  if ( FILE_Debug ) Message(func, "size %ld  nread %ld", size, nread);
+  if ( FILE_Debug ) Message("size %ld  nread %ld", size, nread);
 
   return (nread);
 }

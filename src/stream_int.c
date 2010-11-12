@@ -64,7 +64,6 @@ static int cdiHaveMissval = 0;
 
 long cdiGetenvInt(char *envName)
 {
-  static const char *func = "cdiGetenv";
   char *envString;
   long envValue = -1;
   long fact = 1;
@@ -87,8 +86,8 @@ long cdiGetenvInt(char *envName)
 		case 'g':  fact = 1073741824;  break;
 		default:
 		  fact = 0;
-		  Message(func, "Invalid number string in %s: %s", envName, envString);
-		  Warning(func, "%s must comprise only digits [0-9].",envName);
+		  Message("Invalid number string in %s: %s", envName, envString);
+		  Warning("%s must comprise only digits [0-9].",envName);
 		}
 	      break;
 	    }
@@ -96,7 +95,7 @@ long cdiGetenvInt(char *envName)
 
       if ( fact ) envValue = fact*atol(envString);
 
-      if ( CDI_Debug ) Message(func, "set %s to %ld", envName, envValue);
+      if ( CDI_Debug ) Message("set %s to %ld", envName, envValue);
     }
 
   return (envValue);
@@ -105,7 +104,6 @@ long cdiGetenvInt(char *envName)
 
 void cdiInitialize(void)
 {
-  static const char *func = "cdiInitialize";
   static int Init_CDI = FALSE;
   char *envString;
   long value;
@@ -166,7 +164,7 @@ void cdiInitialize(void)
 	    {
 	      cdiInventoryMode = 2;
 	      if ( CDI_Debug )
-		Message(func, "Inventory mode was set to timestep!");
+		Message("Inventory mode was set to timestep!");
 	    }
 	}
 
@@ -187,7 +185,7 @@ void cdiInitialize(void)
 	    cdiDefaultCalendar = CALENDAR_NONE;
 
 	  if ( CDI_Debug )
-	    Message(func, "Default calendar set to %s!", envString);
+	    Message("Default calendar set to %s!", envString);
 	}
       gribSetCalendar(cdiDefaultCalendar);
 
@@ -265,8 +263,6 @@ void stream_list_new(void)
 static
 void stream_list_delete(void)
 {
-  static const char *func = "stream_list_delete";
-
   if ( _streamList ) free(_streamList);
 }
 
@@ -290,7 +286,6 @@ void stream_init_pointer(void)
 static
 void stream_list_extend(void)
 {
-  static const char *func = "stream_list_extend";
   int nstreams;
   int i;
 
@@ -315,13 +310,12 @@ void stream_list_extend(void)
       _streamList[_stream_min-1].next = -1;
     }
   else
-    Warning(func, "Too many open streams (limit is %d)!", _stream_max);
+    Warning("Too many open streams (limit is %d)!", _stream_max);
 }
 
 
 stream_t *stream_to_pointer(int idx)
 {
-  static const char *func = "stream_to_pointer";
   stream_t *streamptr = NULL;
 
   STREAM_INIT();
@@ -335,7 +329,7 @@ stream_t *stream_to_pointer(int idx)
       STREAM_UNLOCK();
     }
   else
-    Error(func, "stream index %d undefined!", idx);
+    Error("stream index %d undefined!", idx);
 
   return (streamptr);
 }
@@ -344,7 +338,6 @@ stream_t *stream_to_pointer(int idx)
 static
 int stream_from_pointer(stream_t *ptr)
 {
-  static const char *func = "stream_from_pointer";
   int idx = -1;
 
   if ( ptr )
@@ -364,13 +357,13 @@ int stream_from_pointer(stream_t *ptr)
 	  newptr->ptr  = ptr;
       
 	  if ( STREAM_Debug )
-	    Message(func, "Pointer %p has idx %d from stream list", ptr, idx);
+	    Message("Pointer %p has idx %d from stream list", ptr, idx);
 	}
 
       STREAM_UNLOCK();
     }
   else
-    Error(func, "Internal problem (pointer %p undefined)", ptr);
+    Error("Internal problem (pointer %p undefined)", ptr);
 
   return (idx);
 }
@@ -455,7 +448,6 @@ stream_t *stream_new_entry(void)
 
 void stream_delete_entry(stream_t *streamptr)
 {
-  static const char *func = "stream_delete_entry";
   int idx;
 
   idx = streamptr->self;
@@ -471,7 +463,7 @@ void stream_delete_entry(stream_t *streamptr)
   STREAM_UNLOCK();
 
   if ( STREAM_Debug )
-    Message(func, "Removed idx %d from stream list", idx);
+    Message("Removed idx %d from stream list", idx);
 }
 
 
@@ -501,10 +493,10 @@ void stream_initialize(void)
 }
 
 
-void stream_check_ptr(const char *func, stream_t *streamptr)
+void stream_check_ptr(const char *caller, stream_t *streamptr)
 {
   if ( streamptr == NULL )
-    Error(func, "stream undefined!");
+    Errorc("stream undefined!");
 }
 
 
@@ -528,8 +520,6 @@ int streamSize(void)
 
 void cdiDefGlobal(const char *string, int val)
 {
-  static const char *func = "cdiDefGlobal";
-
   if ( strcmp(string, "REGULARGRID") == 0 )
     {
       cdiDataUnreduced = val;
@@ -544,7 +534,7 @@ void cdiDefGlobal(const char *string, int val)
     }
   else
     {
-      Warning(func, "Unsupported global key: %s", string);
+      Warning("Unsupported global key: %s", string);
     }
 }
 
@@ -567,14 +557,13 @@ double cdiInqMissval(void)
 
 void cdiCheckContents(int streamID)
 {
-  static const char *func = "cdiCheckContents";
   int index, nzaxis, zaxisID;
   int vlistID;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamInqVlist(streamID);
   nzaxis = vlistNzaxis(vlistID);
@@ -601,7 +590,6 @@ int streamInqFileID(int streamID)
 
 void streamDefineTaxis(int streamID)
 {
-  static const char *func = "streamDefineTaxis";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -631,7 +619,7 @@ void streamDefineTaxis(int streamID)
 	  (void) streamDefTimestep(streamID, 0);
 	}
       else
-	Error(func, "time axis undefined");
+	Error("time axis undefined");
     }
 }
 
@@ -658,7 +646,6 @@ int streamInqDimgroupID(int streamID)
 
 void cdiDefAccesstype(int streamID, int type)
 {
-  static const char *func = "cdiDefAccesstype";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -672,9 +659,9 @@ void cdiDefAccesstype(int streamID, int type)
       if ( streamptr->accesstype != type )
 	{
 	  if ( streamptr->accesstype == TYPE_REC )
-	    Error(func, "Changing access type from REC to VAR not allowed!");
+	    Error("Changing access type from REC to VAR not allowed!");
 	  else
-	    Error(func, "Changing access type from VAR to REC not allowed!");
+	    Error("Changing access type from VAR to REC not allowed!");
 	}
     }
 }

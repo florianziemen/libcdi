@@ -262,7 +262,7 @@ extern int   cdiPartabIntern;
 stream_t *stream_to_pointer(int idx);
 stream_t *stream_new_entry(void);
 void stream_delete_entry(stream_t *streamptr);
-void stream_check_ptr(const char *func, stream_t *streamptr);
+void stream_check_ptr(const char *caller, stream_t *streamptr);
 
 int     streamInqFileID(int streamID);
 
@@ -270,7 +270,7 @@ int     zaxisInqLevelID(int zaxisID, double level);
 char   *gridNamePtr(int gridtype);
 char   *zaxisNamePtr(int leveltype);
 
-void    streamCheckID(const char *func, int streamID);
+void    streamCheckID(const char *caller, int streamID);
 
 void    streamDefineTaxis(int streamID);
 

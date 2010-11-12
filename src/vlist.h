@@ -59,7 +59,6 @@ typedef struct
   int         tsteptype; /* Time step type: TSTEP_INSTANT, TSTEP_AVG ... */
   int         timave;
   int         timaccu;
-  int         func;
   int         missvalused; /* TRUE if missval is defined */
   char       *name;
   char       *longname;
@@ -99,7 +98,6 @@ vlist_t;
 
 
 vlist_t *vlist_to_pointer(int vlistID);
-void     vlistCheckVarID(const char *func, int vlistID, int varID);
 int      vlistNlock(int vlistID);
 void     vlistLock(int vlistID);
 void     vlistUnlock(int vlistID);

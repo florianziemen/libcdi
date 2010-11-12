@@ -32,6 +32,7 @@ void SysError(const char *caller, const char *fmt, ...)
   exit(EXIT_FAILURE);
 }
 
+
 void Error(const char *caller, const char *fmt, ...)
 {
   va_list args;
@@ -48,6 +49,7 @@ void Error(const char *caller, const char *fmt, ...)
   if ( _ExitOnError ) exit(EXIT_FAILURE);
 }
 
+
 void Warning(const char *caller, const char *fmt, ...)
 {
   va_list args;
@@ -63,6 +65,7 @@ void Warning(const char *caller, const char *fmt, ...)
 
   va_end(args);
 }
+
 
 void Message(const char *caller, const char *fmt, ...)
 {

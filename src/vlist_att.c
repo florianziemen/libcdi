@@ -12,7 +12,6 @@
 static
 cdi_atts_t *get_attsp(vlist_t *vlistptr, int varID)
 {
-  // static const char *func = "get_attsp";
   cdi_atts_t *attsp = NULL;
 
   if ( varID == CDI_GLOBAL )
@@ -112,7 +111,6 @@ The function @func{vlistInqNatts} gets the number of variable attributes assigne
 */
 int vlistInqNatts(int vlistID, int varID, int *nattsp)
 {
-  // static const char *func = "vlistInqNatts";
   int status = CDI_NOERR;
   vlist_t *vlistptr;
   cdi_atts_t *attsp;
@@ -147,7 +145,6 @@ The function @func{vlistInqNatts} gets information about an attribute.
 */
 int vlistInqAtt(int vlistID, int varID, int attnum, char *name, int *typep, int *lenp)
 {
-  // static const char *func = "vlistInqAtt";
   int status = CDI_NOERR;
   vlist_t *vlistptr;
   cdi_att_t *attp = NULL;
@@ -218,7 +215,6 @@ int vlistDelAtt(int vlistID, int varID, const char *name)
 static
 int vlist_def_att(int indtype, int exdtype, int vlistID, int varID, const char *name, size_t len, size_t xsz, const void *xp)
 {
-  // static const char *func = "vlist_def_att";
   int status = CDI_NOERR;
   vlist_t *vlistptr;
   cdi_att_t *attp;
@@ -247,7 +243,6 @@ int vlist_def_att(int indtype, int exdtype, int vlistID, int varID, const char *
 static
 int vlist_inq_att(int indtype, int vlistID, int varID, const char *name, size_t mxsz, void *xp)
 {
-  static const char *func = "vlist_inq_att";
   int status = CDI_NOERR;
   vlist_t *vlistptr;
   cdi_att_t *attp;
@@ -276,12 +271,12 @@ int vlist_inq_att(int indtype, int vlistID, int varID, const char *name, size_t 
 	}
       else
 	{
-	  Warning(func, "Attribute %s has wrong data type!", name);
+	  Warning("Attribute %s has wrong data type!", name);
 	}
     }
   else
     {
-      Warning(func, "Internal problem, attribute %s not found!", name);
+      Warning("Internal problem, attribute %s not found!", name);
     }
 
   return (status);
@@ -290,7 +285,6 @@ int vlist_inq_att(int indtype, int vlistID, int varID, const char *name, size_t 
 
 int vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2)
 {
-  // static const char *func = "vlistCopyVarAtts";
   int status = CDI_NOERR;
   vlist_t *vlistptr1;
   cdi_att_t *attp = NULL;

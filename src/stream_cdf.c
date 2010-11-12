@@ -175,7 +175,6 @@ int isTimeUnits(const char *timeunits)
 static
 int splitBasetime(const char *timeunits, taxis_t *taxis)
 {
-  static const char *func = "splitBasetime";
   int len, i;
   char *ptu, *tu;
   int year, month, day;
@@ -194,7 +193,7 @@ int splitBasetime(const char *timeunits, taxis_t *taxis)
   timeunit = get_timeunit(len, ptu);
   if ( timeunit == -1 )
     {
-      Message(func, "Unsupported TIMEUNIT: %s!", timeunits);
+      Message("Unsupported TIMEUNIT: %s!", timeunits);
       return (1);
     }
 
@@ -217,12 +216,12 @@ int splitBasetime(const char *timeunits, taxis_t *taxis)
             {
               if ( memcmp(ptu, "%y%m%d.%f", 9) != 0 && timeunit == TUNIT_DAY )
                 {
-                  Message(func, "Unsupported format %s for TIMEUNIT day!", ptu);
+                  Message("Unsupported format %s for TIMEUNIT day!", ptu);
                   timeunit = -1;
                 }
               else if ( memcmp(ptu, "%y%m.%f", 7) != 0 && timeunit == TUNIT_MONTH )
                 {
-                  Message(func, "Unsupported format %s for TIMEUNIT month!", ptu);
+                  Message("Unsupported format %s for TIMEUNIT month!", ptu);
                   timeunit = -1;
                 }
             }
@@ -255,7 +254,7 @@ int splitBasetime(const char *timeunits, taxis_t *taxis)
                           second = atoi(ptu);
                           /*
                           if ( second != 0 )
-                            Message(func, "Seconds not supported in time units!");
+                            Message("Seconds not supported in time units!");
                           */
                         }
                     }
@@ -267,7 +266,7 @@ int splitBasetime(const char *timeunits, taxis_t *taxis)
               (*taxis).rtime = rtime;
 
               if ( CDI_Debug )
-                Message(func, "rdate = %d  rtime = %d", rdate, rtime);        
+                Message("rdate = %d  rtime = %d", rdate, rtime);        
             }
         }
     }
@@ -278,7 +277,7 @@ int splitBasetime(const char *timeunits, taxis_t *taxis)
   free(tu);
 
   if ( CDI_Debug )
-    Message(func, "timetype = %d  unit = %d", timetype, timeunit);
+    Message("timetype = %d  unit = %d", timetype, timeunit);
 
   return (0);
 }
@@ -385,11 +384,10 @@ int cdfInqDatatype(int xtype)
 static
 int cdfDefDatatype(int datatype, int filetype)
 {
-  static const char *func = "cdfDefDatatype";
   int xtype;
 
   if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
-    Error(func, "CDI/netCDF library does not support complex numbers!");
+    Error("CDI/netCDF library does not support complex numbers!");
 
   if ( filetype == FILETYPE_NC4 )
     {
@@ -479,7 +477,6 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
 
 int cdfCopyRecord(int streamID2, int streamID1)
 {
-  static const char *func = "cdfCopyRecord";
   double *data;
   int datasize;
   int tsID1, tsID2, recID1, recID2;
@@ -493,8 +490,8 @@ int cdfCopyRecord(int streamID2, int streamID1)
   streamptr1 = stream_to_pointer(streamID1);
   streamptr2 = stream_to_pointer(streamID2);
 
-  stream_check_ptr(func, streamptr1);
-  stream_check_ptr(func, streamptr2);
+  stream_check_ptr(__func__, streamptr1);
+  stream_check_ptr(__func__, streamptr2);
 
   vlistID1 = streamptr1->vlistID;
   vlistID2 = streamptr2->vlistID;
@@ -526,13 +523,12 @@ int cdfCopyRecord(int streamID2, int streamID1)
 /* not used
 int cdfInqRecord(int streamID, int *varID, int *levelID)
 {
-  static const char *func = "cdfInqRecord";
   int tsID, recID;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   recID = streamptr->tsteps[0].curRecID++;
   printf("cdfInqRecord recID %d %d\n", recID, streamptr->tsteps[0].curRecID);
@@ -551,31 +547,30 @@ int cdfInqRecord(int streamID, int *varID, int *levelID)
   streamptr->record->levelID = *levelID;
 
   if ( CDI_Debug )
-    Message(func, "recID = %d  varID = %d  levelID = %d", recID, *varID, *levelID);
+    Message("recID = %d  varID = %d  levelID = %d", recID, *varID, *levelID);
   
   return (recID+1);
 }
 */
 int cdfDefRecord(int streamID)
 {
-  static const char *func = "cdfDefRecord";
   int ierr = 0;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d", streamID);
+    Message("streamID = %d", streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   return (ierr);
 }
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfWriteGridTraj(int streamID, int gridID)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int tsID, fileID;
   int lonID, latID, gridindex;
   size_t index;
@@ -599,13 +594,13 @@ void cdfWriteGridTraj(int streamID, int gridID)
 
   cdf_put_var1_double(fileID, lonID, &index, &xlon);
   cdf_put_var1_double(fileID, latID, &index, &xlat);
-#endif
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfReadGridTraj(int streamID, int gridID)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int tsID, fileID;
   int lonID, latID, gridindex;
   size_t index;
@@ -630,15 +625,13 @@ void cdfReadGridTraj(int streamID, int gridID)
 
   gridDefXvals(gridID, &xlon);
   gridDefYvals(gridID, &xlat);
-#endif
 }
-
+#endif
 
 #if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 {
-  static const char *func = "cdfDefVarDeflate";
 #if  defined  (NC_NETCDF4)
   int retval;
   /* Set chunking, shuffle, and deflate. */
@@ -649,7 +642,7 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 
   if ((retval = nc_def_var_deflate(ncid, ncvarid, shuffle, deflate, deflate_level)))
     {
-      Error(func, "nc_def_var_deflate failed, status = %d", retval);
+      Error("nc_def_var_deflate failed, status = %d", retval);
     }
 #else
   static int lwarn = TRUE;
@@ -657,7 +650,7 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
   if ( lwarn )
     {
       lwarn = FALSE;
-      Warning(func, "Deflate compression failed, netCDF4 not available!");
+      Warning("Deflate compression failed, netCDF4 not available!");
     }
 #endif
 }
@@ -668,7 +661,6 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 static
 void cdfDefVarSzip(int ncid, int ncvarid)
 {
-  static const char *func = "cdfDefVarSzip";
 #if  defined  (NC_NETCDF4) && defined (NC_SZIP_NN_OPTION_MASK)
   int retval;
   /* Set options_mask and bits_per_pixel. */
@@ -684,11 +676,11 @@ void cdfDefVarSzip(int ncid, int ncvarid)
           if ( lwarn )
             {
               lwarn = FALSE;
-              Warning(func, "netCDF4/Szip compression not compiled in!");
+              Warning("netCDF4/Szip compression not compiled in!");
             }     
         }
       else
-        Error(func, "nc_def_var_szip failed, status = %d", retval);
+        Error("nc_def_var_szip failed, status = %d", retval);
     }
 #else
   static int lwarn = TRUE;
@@ -696,16 +688,16 @@ void cdfDefVarSzip(int ncid, int ncvarid)
   if ( lwarn )
     {
       lwarn = FALSE;
-      Warning(func, "netCDF4/Szip compression not available!");
+      Warning("netCDF4/Szip compression not available!");
     }
 #endif
 }
 #endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefVarMissval(int streamID, int varID, int dtype, int lcheck)
 {
-#if  defined  (HAVE_LIBNETCDF)
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -735,14 +727,12 @@ void cdfDefVarMissval(int streamID, int varID, int dtype, int lcheck)
 
       streamptr->vars[varID].defmiss = TRUE;
     }
-#endif
 }
-
+#endif
 
 void cdfWriteRecord(int streamID, const double *data, int nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static const char *func = "cdfWriteRecord";
   int varID;
   int levelID;
   stream_t *streamptr;
@@ -753,7 +743,7 @@ void cdfWriteRecord(int streamID, const double *data, int nmiss)
   levelID = streamptr->record->levelID;
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d  varID = %d", streamID, varID);
+    Message("streamID = %d  varID = %d", streamID, varID);
 
   cdfWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
 #endif
@@ -762,14 +752,13 @@ void cdfWriteRecord(int streamID, const double *data, int nmiss)
 
 int cdfReadRecord(int streamID, double *data, int *nmiss)
 {
-  static const char *func = "cdfReadRecord";
   int ierr = 0;
   int levelID, varID, tsID, recID, vrecID;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  if ( CDI_Debug ) Message(func, "streamID = %d", streamID);
+  if ( CDI_Debug ) Message("streamID = %d", streamID);
 
   tsID    = streamptr->curTsID;
   vrecID  = streamptr->tsteps[tsID].curRecID;
@@ -786,7 +775,6 @@ static
 void cdfDefTimeValue(int streamID, int tsID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static const char *func = "cdfDefTimeValue";
   int fileID;
   double timevalue;
   int ncvarid;
@@ -799,7 +787,7 @@ void cdfDefTimeValue(int streamID, int tsID)
   fileID = streamInqFileID(streamID);
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d, fileID = %d", streamID, fileID);
+    Message("streamID = %d, fileID = %d", streamID, fileID);
 
   taxis = &streamptr->tsteps[tsID].taxis;
 
@@ -812,7 +800,7 @@ void cdfDefTimeValue(int streamID, int tsID)
   index = tsID;
 
   timevalue = cdiEncodeTimeval(taxis->vdate, taxis->vtime, &streamptr->tsteps[0].taxis);
-  if ( CDI_Debug ) Message(func, "tsID = %d  timevalue = %f", tsID, timevalue);
+  if ( CDI_Debug ) Message("tsID = %d  timevalue = %f", tsID, timevalue);
 
   ncvarid = streamptr->basetime.ncvarid;
   cdf_put_var1_double(fileID, ncvarid, &index, &timevalue);
@@ -964,10 +952,10 @@ void cdfDefTimestep(int streamID, int tsID)
   cdfDefTimeValue(streamID, tsID);
 }
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefComplex(int streamID, int gridID)
 {
-#if  defined  (HAVE_LIBNETCDF)
   char axisname[] = "complex";
   int index;
   int dimID = UNDEFID;
@@ -1013,14 +1001,13 @@ void cdfDefComplex(int streamID, int gridID)
 
   gridindex = vlistGridIndex(vlistID, gridID);
   streamptr->xdimID[gridindex] = dimID;
-
-#endif
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefSpc(int streamID, int gridID)
 {
-#if  defined  (HAVE_LIBNETCDF)
   /*
   char longname[] = "Spherical harmonic coefficient";
   */
@@ -1078,15 +1065,13 @@ void cdfDefSpc(int streamID, int gridID)
 
   gridindex = vlistGridIndex(vlistID, gridID);
   streamptr->ydimID[gridindex] = dimID;
-
-#endif
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefTrajLon(int streamID, int gridID)
 {
-#if  defined  (HAVE_LIBNETCDF)
-  static const char *func = "cdfDefTrajLon";
   char units[256];
   char longname[256];
   char stdname[256];
@@ -1110,7 +1095,7 @@ void cdfDefTrajLon(int streamID, int gridID)
 
   gridtype = gridInqType(gridID);
   dimlen = gridInqXsize(gridID);
-  if ( dimlen != 1 ) Error(func, "Xsize isn't 1 for %s grid!", gridNamePtr(gridtype));
+  if ( dimlen != 1 ) Error("Xsize isn't 1 for %s grid!", gridNamePtr(gridtype));
 
   gridindex = vlistGridIndex(vlistID, gridID);
   ncvarid = streamptr->xdimID[gridindex];
@@ -1139,15 +1124,13 @@ void cdfDefTrajLon(int streamID, int gridID)
     }
 
   streamptr->xdimID[gridindex] = ncvarid; /* var ID for trajectory !!! */
-
-#endif
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefTrajLat(int streamID, int gridID)
 {
-#if  defined  (HAVE_LIBNETCDF)
-  static const char *func = "cdfDefTrajLat";
   char units[] = "degrees_north";
   char longname[] = "latitude";
   char stdname[] = "latitude";
@@ -1171,7 +1154,7 @@ void cdfDefTrajLat(int streamID, int gridID)
 
   gridtype = gridInqType(gridID);
   dimlen = gridInqYsize(gridID);
-  if ( dimlen != 1 ) Error(func, "Ysize isn't 1 for %s grid!", gridNamePtr(gridtype));
+  if ( dimlen != 1 ) Error("Ysize isn't 1 for %s grid!", gridNamePtr(gridtype));
 
   gridindex = vlistGridIndex(vlistID, gridID);
   ncvarid = streamptr->ydimID[gridindex];
@@ -1200,9 +1183,8 @@ void cdfDefTrajLat(int streamID, int gridID)
     }
 
   streamptr->ydimID[gridindex] = ncvarid; /* var ID for trajectory !!! */
-
-#endif
 }
+#endif
 
 #if  defined  (HAVE_LIBNETCDF)
 static
@@ -1268,11 +1250,10 @@ int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID,
 }
 #endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefXaxis(int streamID, int gridID)
 {
-#if  defined  (HAVE_LIBNETCDF)
-  static const char *func = "cdfDefXaxis";
   char units[256];
   char longname[256];
   char stdname[256];
@@ -1309,7 +1290,7 @@ void cdfDefXaxis(int streamID, int gridID)
   gridInqXstdname(gridID, stdname);
   gridInqXunits(gridID, units);
 
-  if ( axisname[0] == 0 ) Error(func, "axis name undefined!\n");
+  if ( axisname[0] == 0 ) Error("axis name undefined!\n");
 
   for ( index = 0; index < ngrids; index++ )
     {
@@ -1394,15 +1375,13 @@ void cdfDefXaxis(int streamID, int gridID)
     }
 
   streamptr->xdimID[gridindex] = dimID;
-
-#endif
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefYaxis(int streamID, int gridID)
 {
-#if  defined  (HAVE_LIBNETCDF)
-  static const char *func = "cdfDefYaxis";
   char units[256];
   char longname[256];
   char stdname[256];
@@ -1439,7 +1418,7 @@ void cdfDefYaxis(int streamID, int gridID)
   gridInqYstdname(gridID, stdname);
   gridInqYunits(gridID, units);
 
-  if ( axisname[0] == 0 ) Error(func, "axis name undefined!\n");
+  if ( axisname[0] == 0 ) Error("axis name undefined!\n");
 
   for ( index = 0; index < ngrids; index++ )
     {
@@ -1524,14 +1503,13 @@ void cdfDefYaxis(int streamID, int gridID)
     }
 
   streamptr->ydimID[gridindex] = dimID;
-
-#endif
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefLonLat2D(int streamID, int gridID)
 {
-#if  defined  (HAVE_LIBNETCDF)
   char xunits[256];
   char xlongname[256];
   char xstdname[256];
@@ -1710,15 +1688,13 @@ void cdfDefLonLat2D(int streamID, int gridID)
 
   streamptr->xdimID[gridindex] = xdimID;
   streamptr->ydimID[gridindex] = ydimID;
-
-#endif
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefRgrid(int streamID, int gridID)
 {
-#if  defined  (HAVE_LIBNETCDF)
-  static const char *func = "cdfDefRgrid";
   char axisname[7] = "rgridX";
   int index, iz = 0;
   int gridID0, gridtype0, gridindex;
@@ -1764,8 +1740,8 @@ void cdfDefRgrid(int streamID, int gridID)
     {
       if ( lwarn )
         {
-          Warning(func, "Creating a netCDF file with data on a gaussian reduced grid.");
-          Warning(func, "The further processing of the resulting file is unsupported!");
+          Warning("Creating a netCDF file with data on a gaussian reduced grid.");
+          Warning("The further processing of the resulting file is unsupported!");
           lwarn = FALSE;
         }
 
@@ -1782,14 +1758,13 @@ void cdfDefRgrid(int streamID, int gridID)
 
   gridindex = vlistGridIndex(vlistID, gridID);
   streamptr->xdimID[gridindex] = dimID;
-
-#endif
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefGdim(int streamID, int gridID)
 {
-#if  defined  (HAVE_LIBNETCDF)
   char axisname[7] = "gsizeX";
   int index, iz = 0;
   int gridID0, gridtype0, gridindex;
@@ -1866,14 +1841,13 @@ void cdfDefGdim(int streamID, int gridID)
 
   gridindex = vlistGridIndex(vlistID, gridID);
   streamptr->xdimID[gridindex] = dimID;
-
-#endif
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefCell(int streamID, int gridID)
 {
-#if  defined  (HAVE_LIBNETCDF)
   char axisname[] = "cellX";
   char vertname[] = "nvX";
   char xunits[256];
@@ -2031,15 +2005,13 @@ void cdfDefCell(int streamID, int gridID)
     }
 
   streamptr->xdimID[gridindex] = dimID;
-
-#endif
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefVCT(int streamID, int zaxisID)
 {
-#if  defined  (HAVE_LIBNETCDF)
-  static const char *func = "cdfDefVCT";
   int type;
   stream_t *streamptr;
 
@@ -2063,13 +2035,13 @@ void cdfDefVCT(int streamID, int zaxisID)
       if ( streamptr->vct.ilev > 0 )
         {
           if ( streamptr->vct.ilev != ilev )
-            Error(func, "more than one VCT for each file unsupported!");
+            Error("more than one VCT for each file unsupported!");
           return;
         }
 
       if ( ilev == 0 )
         {
-          Warning(func, "VCT missing");
+          Warning("VCT missing");
           return;
         }
 
@@ -2122,14 +2094,13 @@ void cdfDefVCT(int streamID, int zaxisID)
           cdf_put_vara_double(fileID, hybmid, &start, &count, &mval);     
         }
     }
-
-#endif
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefZaxis(int streamID, int zaxisID)
 {
-#if  defined  (HAVE_LIBNETCDF)
   /*  char zaxisname0[256]; */
   char axisname[256];
   char longname[256];
@@ -2318,14 +2289,13 @@ void cdfDefZaxis(int streamID, int zaxisID)
 
   if ( dimID != UNDEFID )
     streamptr->zaxisID[zaxisindex] = dimID;
-
-#endif
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefPole(int streamID, int gridID)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int fileID;
   int ncvarid = UNDEFID;
   int ncerr;
@@ -2352,13 +2322,13 @@ void cdfDefPole(int streamID, int gridID)
     }
 
   cdf_enddef(fileID);
-#endif
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefMapping(int streamID, int gridID)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int fileID;
   int ncvarid = UNDEFID;
   int ncerr;
@@ -2442,14 +2412,13 @@ void cdfDefMapping(int streamID, int gridID)
 
       cdf_enddef(fileID);
     }
-#endif
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefGrid(int streamID, int gridID)
 {
-#if  defined  (HAVE_LIBNETCDF)
-  static const char *func = "cdfDefGrid";
   int gridtype, size;
   int gridindex;
   int vlistID;
@@ -2465,7 +2434,7 @@ void cdfDefGrid(int streamID, int gridID)
   size     = gridInqSize(gridID);
 
   if ( CDI_Debug )
-    Message(func, "gridtype = %d  size = %d", gridtype, size);
+    Message("gridtype = %d  size = %d", gridtype, size);
 
   if ( gridtype == GRID_GAUSSIAN ||
        gridtype == GRID_LONLAT   ||
@@ -2525,17 +2494,16 @@ void cdfDefGrid(int streamID, int gridID)
   */
   else
     {
-      Error(func, "Unsupported grid type: %s", gridNamePtr(gridtype));
+      Error("Unsupported grid type: %s", gridNamePtr(gridtype));
     }
-#endif
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 int cdfDefVar(int streamID, int varID)
 {
-  static const char *func = "cdfDefVar";
   int ncvarid = -1;
-#if  defined  (HAVE_LIBNETCDF)
   int fileID;
   int xid = UNDEFID, yid = UNDEFID, zid = UNDEFID, tid = UNDEFID;
   size_t xsize = 0, ysize = 0;
@@ -2567,7 +2535,7 @@ int cdfDefVar(int streamID, int varID)
   fileID  = streamInqFileID(streamID);
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d, fileID = %d, varID = %d", streamID, fileID, varID);
+    Message("streamID = %d, fileID = %d, varID = %d", streamID, fileID, varID);
 
   if ( streamptr->vars[varID].ncvarid != UNDEFID )
     return (streamptr->vars[varID].ncvarid);
@@ -2597,7 +2565,7 @@ int cdfDefVar(int streamID, int varID)
 
   if ( timeID == TIME_VARIABLE )
     {
-      if ( tid == UNDEFID ) Error(func, "Internal problem! Time undefined.");
+      if ( tid == UNDEFID ) Error("Internal problem! Time undefined.");
       chunks[ndims] = 1;
       dims[ndims++] = tid;
       axis[iax++] = 'T';
@@ -2651,15 +2619,15 @@ int cdfDefVar(int streamID, int varID)
           if ( checkname ) iz++;
 
           if ( iz > 99 )
-            Error(func, "Double entry of variable name '%s'!", name);
+            Error("Double entry of variable name '%s'!", name);
         }
 
       if ( strcmp(name, varname) != 0 )
         {
           if ( iz == 1 )
-            Warning(func, "Changed double entry of variable name '%s' to '%s'!", name, varname);
+            Warning("Changed double entry of variable name '%s' to '%s'!", name, varname);
           else
-            Warning(func, "Changed multiple entry of variable name '%s' to '%s'!", name, varname);
+            Warning("Changed multiple entry of variable name '%s' to '%s'!", name, varname);
         }
 
       name = varname;
@@ -2706,7 +2674,7 @@ int cdfDefVar(int streamID, int varID)
   if ( lchunk && streamptr->filetype == FILETYPE_NC4 )
     {
       if ( (retval = nc_def_var_chunking(fileID, ncvarid, 0, chunks)) )
-        Error(func, "nc_def_var_chunking failed, status = %d", retval);
+        Error("nc_def_var_chunking failed, status = %d", retval);
     }
 #endif
 
@@ -2723,7 +2691,7 @@ int cdfDefVar(int streamID, int varID)
           if ( lwarn )
             {
               lwarn = FALSE;
-              Warning(func, "Deflate compression is only available for netCDF4!");
+              Warning("Deflate compression is only available for netCDF4!");
             }
         }
     }
@@ -2740,7 +2708,7 @@ int cdfDefVar(int streamID, int varID)
           if ( lwarn )
             {
               lwarn = FALSE;
-              Warning(func, "netCDF4/SZIP compression not available!");
+              Warning("netCDF4/SZIP compression not available!");
             }
 #endif
         }
@@ -2751,7 +2719,7 @@ int cdfDefVar(int streamID, int varID)
           if ( lwarn )
             {
               lwarn = FALSE;
-              Warning(func, "SZIP compression is only available for netCDF4!");
+              Warning("SZIP compression is only available for netCDF4!");
             }
         }
     }
@@ -2886,15 +2854,14 @@ int cdfDefVar(int streamID, int varID)
 
   /* if ( streamptr->ncmode == 2 ) cdf_enddef(fileID); */
 
-#endif
   return (ncvarid);
 }
+#endif
 
 
 void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static const char *func = "cdfReadVarDP";
   int fileID;
   int gridID;
   int zaxisID;
@@ -2918,14 +2885,14 @@ void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
   streamptr = stream_to_pointer(streamID);
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d  varID = %d", streamID, varID);
+    Message("streamID = %d  varID = %d", streamID, varID);
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
 
   tsID = streamptr->curTsID;
 
-  if ( CDI_Debug ) Message(func, "tsID = %d", tsID);
+  if ( CDI_Debug ) Message("tsID = %d", tsID);
 
   ncvarid = streamptr->vars[varID].ncvarid;
 
@@ -2974,7 +2941,7 @@ void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
 
   if ( CDI_Debug )
     for (idim = 0; idim < ndims; idim++)
-      Message(func, "dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+      Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
 
   cdf_get_vara_double(fileID, ncvarid, start, count, data);
 
@@ -3025,7 +2992,6 @@ void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
 void cdfWriteVarDP(int streamID, int varID, const double *data, int nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static const char *func = "cdfWriteVarDP";
   int fileID;
   int gridID;
   int zaxisID;
@@ -3048,14 +3014,14 @@ void cdfWriteVarDP(int streamID, int varID, const double *data, int nmiss)
   streamptr = stream_to_pointer(streamID);
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d  varID = %d", streamID, varID);
+    Message("streamID = %d  varID = %d", streamID, varID);
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
 
   ntsteps = streamptr->ntsteps;
   if ( CDI_Debug )
-    Message(func, "ntsteps = %d", ntsteps); 
+    Message("ntsteps = %d", ntsteps); 
 
   if ( vlistHasTime(vlistID) ) cdfDefTime(streamID);
 
@@ -3110,7 +3076,7 @@ void cdfWriteVarDP(int streamID, int varID, const double *data, int nmiss)
 
   if ( CDI_Debug )
     for (idim = 0; idim < ndims; idim++)
-      Message(func, "dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+      Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
 
   if ( streamptr->ncmode == 1 )
     {
@@ -3192,7 +3158,6 @@ void cdfWriteVarDP(int streamID, int varID, const double *data, int nmiss)
 int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static const char *func = "cdfReadVarSliceDP";
   int fileID;
   int gridID;
   int zaxisID;
@@ -3224,14 +3189,14 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d  varID = %d  levelID = %d", streamID, varID, levelID);
+    Message("streamID = %d  varID = %d  levelID = %d", streamID, varID, levelID);
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
 
   tsID = streamptr->curTsID;
   if ( CDI_Debug )
-    Message(func, "tsID = %d", tsID);
+    Message("tsID = %d", tsID);
 
   ncvarid = streamptr->vars[varID].ncvarid;
 
@@ -3294,7 +3259,7 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
         {
           char name[256];
           vlistInqVarName(vlistID, varID, name);
-          Error(func, "Unsupported array structure for: %s", name);
+          Error("Unsupported array structure for: %s", name);
         }
     }
 
@@ -3308,7 +3273,7 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
         {
           char name[256];
           vlistInqVarName(vlistID, varID, name);
-          Error(func, "Unsupported array structure for: %s", name);
+          Error("Unsupported array structure for: %s", name);
         }
     }
 
@@ -3413,7 +3378,7 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 
   if ( CDI_Debug )
     for (idim = 0; idim < ndims; idim++)
-      Message(func, "dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+      Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
 
   cdf_get_vara_double(fileID, ncvarid, start, count, data);
 
@@ -3475,7 +3440,6 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data, int nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static const char *func = "cdfWriteVarSliceDP";
   int fileID;
   int gridID;
   int zaxisID;
@@ -3499,13 +3463,13 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   streamptr = stream_to_pointer(streamID);
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d  varID = %d", streamID, varID);
+    Message("streamID = %d  varID = %d", streamID, varID);
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
 
   ntsteps = streamptr->ntsteps;
-  if ( CDI_Debug ) Message(func, "ntsteps = %d", ntsteps);
+  if ( CDI_Debug ) Message("ntsteps = %d", ntsteps);
 
   if ( vlistHasTime(vlistID) ) cdfDefTime(streamID);
 
@@ -3560,7 +3524,7 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
 
   if ( CDI_Debug )
     for (idim = 0; idim < ndims; idim++)
-      Message(func, "dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+      Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
 
   dtype = vlistInqVarDatatype(vlistID, varID);
 
@@ -3635,7 +3599,7 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
                   if ( data[i] > fmax ) fmax = data[i];
                 }
             }
-          Message(func, "nvals = %d, nmiss = %d, missval = %g, minval = %g, maxval = %g",
+          Message("nvals = %d, nmiss = %d, missval = %g, minval = %g, maxval = %g",
                   nvals, nmiss, missval, fmin, fmax);
         }
     }
@@ -3901,6 +3865,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
     }
 }
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 int isLonAxis(const char *units, const char *stdname)
 {
@@ -3923,7 +3888,9 @@ int isLonAxis(const char *units, const char *stdname)
 
   return (lunit);
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 int isLatAxis(const char *units, const char *stdname)
 {
@@ -3946,7 +3913,9 @@ int isLatAxis(const char *units, const char *stdname)
 
   return (lunit);
 }
+#endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 int unitsIsPressure(const char *units)
 {
@@ -3963,8 +3932,9 @@ int unitsIsPressure(const char *units)
 
   return (lunit);
 }
+#endif
 
-
+#if  defined  (HAVE_LIBNETCDF)
 static
 int isGaussGrid(long ysize, double yinc, double *yvals)
 {
@@ -4002,22 +3972,21 @@ int isGaussGrid(long ysize, double yinc, double *yvals)
 
   return (lgauss);
 }
+#endif
 
-
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfSetVar(ncvar_t *ncvars, int ncvarid, int isvar)
 {
-  static const char *func = "cdfSetVar";
-
   if ( isvar != TRUE && isvar != FALSE )
-    Error(func, "Internal problem! var %s undefined", ncvars[ncvarid].name);
+    Error("Internal problem! var %s undefined", ncvars[ncvarid].name);
 
   if ( ncvars[ncvarid].isvar != UNDEFID &&
        ncvars[ncvarid].isvar != isvar   &&
        ncvars[ncvarid].warn  == FALSE )
     {
       if ( ! ncvars[ncvarid].ignore )
-        Warning(func, "Inconsistent variable definition for %s!", ncvars[ncvarid].name);
+        Warning("Inconsistent variable definition for %s!", ncvars[ncvarid].name);
         
       ncvars[ncvarid].warn = TRUE;
       isvar = FALSE;
@@ -4025,16 +3994,15 @@ void cdfSetVar(ncvar_t *ncvars, int ncvarid, int isvar)
 
   ncvars[ncvarid].isvar = isvar;
 }
+#endif
 
 static
 void cdfSetDim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
 {
-  static const char *func = "cdfSetDim";
-
   if ( ncvars[ncvarid].dimtype[dimid] != UNDEFID &&
        ncvars[ncvarid].dimtype[dimid] != dimtype )
     {
-      Warning(func, "Inconsistent dimension definition for %s! dimid = %d;  type = %d;  newtype = %d",
+      Warning("Inconsistent dimension definition for %s! dimid = %d;  type = %d;  newtype = %d",
               ncvars[ncvarid].name, dimid, ncvars[ncvarid].dimtype[dimid], dimtype);
     }
 
@@ -4108,7 +4076,6 @@ static
 void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                        int timedimid, int modelID, int format)
 {
-  static const char *func = "scanVarAttributes";
   int ncvarid;
   int ncdimid;
   int nvdims, nvatts;
@@ -4228,7 +4195,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   if ( warn )
                     {
                       warn = FALSE;
-                      Warning(func, "Gridtype %s unsupported!", attstring);
+                      Warning("Gridtype %s unsupported!", attstring);
                     }
                 }
 
@@ -4250,7 +4217,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   /*
                     if ( atttype != NC_BYTE && atttype != NC_SHORT && atttype != NC_INT )
                     if ( ncvars[ncvarid].addoffset != 0 )
-                    Warning(func, "attribute add_offset not supported for atttype %d\n", atttype);
+                    Warning("attribute add_offset not supported for atttype %d\n", atttype);
                   */
                   cdfSetVar(ncvars, ncvarid, TRUE);
                 }
@@ -4263,7 +4230,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   /*
                     if ( atttype != NC_BYTE && atttype != NC_SHORT && atttype != NC_INT )
                     if ( ncvars[ncvarid].scalefactor != 1 )
-                    Warning(func, "attribute scale_factor not supported for atttype %d\n", atttype);
+                    Warning("attribute scale_factor not supported for atttype %d\n", atttype);
                   */
                   cdfSetVar(ncvars, ncvarid, TRUE);
                 }
@@ -4283,7 +4250,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   cdfSetVar(ncvars, ncvarid, FALSE);
                 }
               else
-                Warning(func, "%s - %s", nc_strerror(status), attstring);
+                Warning("%s - %s", nc_strerror(status), attstring);
             }
           else if ( strcmp(attname, "cell_measures") == 0 && atttype == NC_CHAR )
             {
@@ -4317,11 +4284,11 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                       cdfSetVar(ncvars, nc_cell_id, FALSE);
                     }
                   else
-                    Warning(func, "%s - %s", nc_strerror(status), cell_var);
+                    Warning("%s - %s", nc_strerror(status), cell_var);
                 }
               else
                 {
-                  Warning(func, "%s has unexpected contents: %s", attname, cell_measures);
+                  Warning("%s has unexpected contents: %s", attname, cell_measures);
                 }
               cdfSetVar(ncvars, ncvarid, TRUE);
             }
@@ -4382,7 +4349,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                         }
                     }
                   else
-                    Warning(func, "%s - %s", nc_strerror(status), varname);
+                    Warning("%s - %s", nc_strerror(status), varname);
 
                   if ( lstop ) break;
                 }
@@ -4403,7 +4370,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   cdfSetVar(ncvars, ncvars[ncvarid].gmapid, FALSE);
                 }
               else
-                Warning(func, "%s - %s", nc_strerror(status), attstring);
+                Warning("%s - %s", nc_strerror(status), attstring);
 
               cdfSetVar(ncvars, ncvarid, TRUE);
             }
@@ -4454,7 +4421,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 	      if ( (int) attlen > nvdims )
 		{
 		  if ( nvdims > 0 )
-		    Warning(func, "Unexpected axis attribute length for %s, ignored!", name);
+		    Warning("Unexpected axis attribute length for %s, ignored!", name);
 		}
 	      else
 		{
@@ -4464,7 +4431,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 		      if ( attstring[i] != '-' && attstring[i] != 't' && attstring[i] != 'z' &&
 			   attstring[i] != 'y' && attstring[i] != 'x' )
 			{
-			  Warning(func, "Unexpected character in axis attribute for %s, ignored!", name);
+			  Warning("Unexpected character in axis attribute for %s, ignored!", name);
 			  break;
 			}
 		    }
@@ -4476,7 +4443,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 			  if ( tolower((int) attstring[attlen]) == 't' )
 			    {
 			      if ( attlen != 0 )
-				Warning(func, "axis attribute 't' not on first position");
+				Warning("axis attribute 't' not on first position");
 			      cdfSetDim(ncvars, ncvarid, attlen, T_AXIS);
 			    }
 			  else if ( tolower((int) attstring[attlen]) == 'z' )
@@ -4544,7 +4511,6 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 static
 void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 {
-  static const char *func = "setDimType";
   int ndims;
   int ncvarid, ncdimid;
   int i;
@@ -4566,7 +4532,7 @@ void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 
 	  if ( CDI_Debug )
 	    {
-	      Message(func, "var %d %s", ncvarid, ncvars[ncvarid].name);
+	      Message("var %d %s", ncvarid, ncvars[ncvarid].name);
 	      for ( i = 0; i < ndims; i++ )
 		printf("  dim %d type %d  ", i, ncvars[ncvarid].dimtype[i]);
 	      printf("\n");
@@ -4612,7 +4578,6 @@ void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 int cdfInqContents(int streamID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static const char *func = "cdfInqContents";
   int ndims, nvars, ngatts, unlimdimid;
   int varID, ncvarid, ncvarid2;
   int ncdimid;
@@ -4661,13 +4626,13 @@ int cdfInqContents(int streamID)
 
   streamptr = stream_to_pointer(streamID);
   
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d, fileID = %d", streamID, fileID);
+    Message("streamID = %d, fileID = %d", streamID, fileID);
 
 #if  defined  (NC_NETCDF4)
   nc_inq_format(fileID, &format);
@@ -4680,7 +4645,7 @@ int cdfInqContents(int streamID)
     ncdims = (ncdim_t *) malloc(ndims*sizeof(ncdim_t));
   else
     {
-      Warning(func, "ndims = %d", ndims);
+      Warning("ndims = %d", ndims);
       return (CDI_EUFSTRUCT);
     }
   
@@ -4689,7 +4654,7 @@ int cdfInqContents(int streamID)
     ncvars = (ncvar_t *) malloc(nvars*sizeof(ncvar_t));
   else
     {
-      Warning(func, "nvars = %d", nvars);
+      Warning("nvars = %d", nvars);
       return (CDI_EUFSTRUCT);
     }
 
@@ -4785,7 +4750,7 @@ int cdfInqContents(int streamID)
   streamptr->ntsteps = ntsteps;
 
   if ( CDI_Debug )
-    Message(func, "time dimid = %d", streamptr->basetime.ncdimid);
+    Message("time dimid = %d", streamptr->basetime.ncdimid);
 
   /* read ncdims */
   for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
@@ -4883,7 +4848,7 @@ int cdfInqContents(int streamID)
       ncvarid = streamptr->basetime.ncvarid;
 
       if ( ncvarid == UNDEFID )
-	Warning(func, "Variable >time< not found!");
+	Warning("Variable >time< not found!");
       else if ( streamptr->basetime.lwrf == FALSE )
 	{
 	  if ( ncvars[ncvarid].units[0] != 0 )
@@ -4923,14 +4888,14 @@ int cdfInqContents(int streamID)
       if ( ncvars[ncvarid].isvar == -1 )
 	{
 	  ncvars[ncvarid].isvar = 0;
-	  Warning(func, "Variable %s has unknown type, skipped!", ncvars[ncvarid].name);
+	  Warning("Variable %s has unknown type, skipped!", ncvars[ncvarid].name);
 	  continue;
 	}
 
       if ( ncvars[ncvarid].ndims > 4 )
 	{
 	  ncvars[ncvarid].isvar = 0;
-	  Warning(func, "%d dimensional variables unsupported. Skip variable %s",
+	  Warning("%d dimensional variables unsupported. Skip variable %s",
 		ncvars[ncvarid].ndims, ncvars[ncvarid].name);
 	  continue;
 	}
@@ -4944,7 +4909,7 @@ int cdfInqContents(int streamID)
       if ( cdfInqDatatype(ncvars[ncvarid].xtype) == -1 )
 	{
 	  ncvars[ncvarid].isvar = 0;
-	  Warning(func, "Variable %s has an unsupported data type, skipped!", ncvars[ncvarid].name);
+	  Warning("Variable %s has an unsupported data type, skipped!", ncvars[ncvarid].name);
 	  continue;
 	}
     }
@@ -5276,9 +5241,9 @@ int cdfInqContents(int streamID)
 	  if ( ncvars[ncvarid].gridtype == GRID_TRAJECTORY )
 	    {
 	      if ( ncvars[ncvarid].xvarid == UNDEFID )
-		Error(func, "Longitude coordinate undefined for %s!", name);
+		Error("Longitude coordinate undefined for %s!", name);
 	      if ( ncvars[ncvarid].yvarid == UNDEFID )
-		Error(func, "Latitude coordinate undefined for %s!", name);
+		Error("Latitude coordinate undefined for %s!", name);
 	    }
 	  else
 	    {
@@ -5289,7 +5254,7 @@ int cdfInqContents(int streamID)
 		{
 		  if ( ncvars[xvarid].ndims != ncvars[yvarid].ndims )
 		    {
-		      Warning(func, "Inconsistent grid structure for variable %s!",
+		      Warning("Inconsistent grid structure for variable %s!",
 			      ncvars[ncvarid].name);
 		      ncvars[ncvarid].xvarid = UNDEFID;
 		      ncvars[ncvarid].yvarid = UNDEFID;
@@ -5302,14 +5267,14 @@ int cdfInqContents(int streamID)
 		      if ( ncvars[xvarid].ndims == 3 && ncvars[xvarid].dimids[0] == timedimid &&
 			   ncvars[yvarid].ndims == 3 && ncvars[yvarid].dimids[0] == timedimid )
 			{
-			  Warning(func, "Time varying grids unsupported, using grid at time step 1!");
+			  Warning("Time varying grids unsupported, using grid at time step 1!");
 			  ltgrid = TRUE;
 			  start[0] = start[1] = start[2] = 0;
 			  count[0] = 1; count[1] = ysize; count[2] = xsize;
 			}
 		      else
 			{
-			  Warning(func, "Unsupported grid structure for variable %s (grid dims > 2)!",
+			  Warning("Unsupported grid structure for variable %s (grid dims > 2)!",
 				  ncvars[ncvarid].name);
 			  ncvars[ncvarid].xvarid = UNDEFID;
 			  ncvars[ncvarid].yvarid = UNDEFID;
@@ -5337,7 +5302,7 @@ int cdfInqContents(int streamID)
 			dimsize2 = ncdims[dimid].len;
 			if ( dimsize1*dimsize2 != size )
 			  {
-			    Warning(func, "Variable %s has unsupported array structure, skipped!",
+			    Warning("Variable %s has unsupported array structure, skipped!",
 				    ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
@@ -5355,7 +5320,7 @@ int cdfInqContents(int streamID)
 			dimsize = ncdims[dimid].len;
 			if ( dimsize != size )
 			  {
-			    Warning(func, "Variable %s has unsupported array structure, skipped!",
+			    Warning("Variable %s has unsupported array structure, skipped!",
 				    ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
@@ -5408,7 +5373,7 @@ int cdfInqContents(int streamID)
 			dimsize2 = ncdims[dimid].len;
 			if ( dimsize1*dimsize2 != size )
 			  {
-			    Warning(func, "Variable %s has unsupported array structure, skipped!",
+			    Warning("Variable %s has unsupported array structure, skipped!",
 				    ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
@@ -5428,7 +5393,7 @@ int cdfInqContents(int streamID)
 			dimsize = ncdims[dimid].len;
 			if ( dimsize != size )
 			  {
-			    Warning(func, "Variable %s has unsupported array structure, skipped!",
+			    Warning("Variable %s has unsupported array structure, skipped!",
 				    ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
@@ -5531,7 +5496,7 @@ int cdfInqContents(int streamID)
 			    nvertex = ncdims[ncvars[ncvars[yvarid].bounds].dimids[nbdims-1]].len;
 			    /*
 			    if ( nvertex != grid.nvertex )
-			      Warning(func, "nvertex problem! nvertex x %d, nvertex y %d",
+			      Warning("nvertex problem! nvertex x %d, nvertex y %d",
 				      grid.nvertex, (int) nvertex);
 			    */
 			    grid.ybounds = (double *) malloc(nvertex*size*sizeof(double));
@@ -5576,7 +5541,7 @@ int cdfInqContents(int streamID)
 		}
 	      else
 		{
-		  Warning(func, "Variable %s has unsupported grid, skipped!", ncvars[ncvarid].name);
+		  Warning("Variable %s has unsupported grid, skipped!", ncvars[ncvarid].name);
 		  ncvars[ncvarid].isvar = -1;
 		  continue;
 		}
@@ -5657,7 +5622,7 @@ int cdfInqContents(int streamID)
 	    }
 
 	  if ( CDI_Debug )
-	    Message(func, "grid: type = %d, size = %d, nx = %d, ny %d",
+	    Message("grid: type = %d, size = %d, nx = %d, ny %d",
 		    grid.type, grid.size, grid.xsize, grid.ysize);
 
 	  ncvars[ncvarid].gridID = varDefGrid(vlistID, grid, 1);
@@ -5673,7 +5638,7 @@ int cdfInqContents(int streamID)
 	  if ( grid.area )    free(grid.area);
 
 	  if ( CDI_Debug )
-	    Message(func, "gridID %d %d %s", ncvars[ncvarid].gridID, ncvarid, ncvars[ncvarid].name);
+	    Message("gridID %d %d %s", ncvars[ncvarid].gridID, ncvarid, ncvars[ncvarid].name);
 
 	  for ( ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++ )
 	    if ( ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].gridID == UNDEFID )
@@ -5702,7 +5667,7 @@ int cdfInqContents(int streamID)
 		    if ( same_grid )
 		      {
 			if ( CDI_Debug )
-			  Message(func, "gridID %d %d %s",
+			  Message("gridID %d %d %s",
 				  ncvars[ncvarid].gridID, ncvarid2, ncvars[ncvarid2].name);
 			ncvars[ncvarid2].gridID = ncvars[ncvarid].gridID;
 		      }
@@ -5765,7 +5730,7 @@ int cdfInqContents(int streamID)
 	      zsize  = ncdims[zdimid].len;
 	    }
 
-	  if ( CDI_Debug ) Message(func, "nlevs = %ld", zsize);
+	  if ( CDI_Debug ) Message("nlevs = %ld", zsize);
     
 	  zvar = (double *) malloc(zsize*sizeof(double));
 
@@ -5822,7 +5787,7 @@ int cdfInqContents(int streamID)
 	  streamptr->zaxisID[zaxisindex]  = zdimid;	  
 
 	  if ( CDI_Debug )
-	    Message(func, "zaxisID %d %d %s", ncvars[ncvarid].zaxisID, ncvarid, ncvars[ncvarid].name);
+	    Message("zaxisID %d %d %s", ncvars[ncvarid].zaxisID, ncvarid, ncvars[ncvarid].name);
 
 	  for ( ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++ )
 	    if ( ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].zaxisID == UNDEFID )
@@ -5837,7 +5802,7 @@ int cdfInqContents(int streamID)
 		if ( zdimid == zdimid2 )
 		  {
 		    if ( CDI_Debug )
-		      Message(func, "zaxisID %d %d %s",
+		      Message("zaxisID %d %d %s",
 			      ncvars[ncvarid].zaxisID, ncvarid2, ncvars[ncvarid2].name);
 		    ncvars[ncvarid2].zaxisID = ncvars[ncvarid].zaxisID;
 		  }
@@ -5857,14 +5822,14 @@ int cdfInqContents(int streamID)
   nc_nvars = nvars;
 
   if ( CDI_Debug )
-    Message(func, "time varid = %d", streamptr->basetime.ncvarid);
+    Message("time varid = %d", streamptr->basetime.ncvarid);
 
   if ( CDI_Debug )
-    Message(func, "ntsteps = %d", streamptr->ntsteps);
+    Message("ntsteps = %d", streamptr->ntsteps);
 
   nvars = nvarids;
   if ( CDI_Debug )
-    Message(func, "nvars = %d", nvars);
+    Message("nvars = %d", nvars);
 
   if ( nvars == 0 )
     return (CDI_EUFSTRUCT);
@@ -5936,7 +5901,7 @@ int cdfInqContents(int streamID)
       if ( ncvars[ncvarid].defmiss == TRUE ) vlistDefVarMissval(vlistID, varID, ncvars[ncvarid].missval);
 
       if ( CDI_Debug )
-	Message(func, "varID = %d  gridID = %d  zaxisID = %d", varID,
+	Message("varID = %d  gridID = %d  zaxisID = %d", varID,
 		vlistInqVarGrid(vlistID, varID), vlistInqVarZaxis(vlistID, varID));
     }
 
@@ -6106,7 +6071,7 @@ int cdfInqContents(int streamID)
 		  memcmp(attstring, "all_leap", 8) == 0 )
 	  calendar = CALENDAR_366DAYS;
 	else
-	  Warning(func, "calendar >%s< unsupported!", attstring);
+	  Warning("calendar >%s< unsupported!", attstring);
       }
 
   if ( streamptr->tsteps[0].taxis.type == TAXIS_RELATIVE )
@@ -6164,7 +6129,6 @@ int cdfInqContents(int streamID)
 
 int cdfInqTimestep(int streamID, int tsID)
 {
-  static const char *func = "cdfInqTimestep";
   long nrecs = 0;
 #if  defined  (HAVE_LIBNETCDF)
   double timevalue;
@@ -6178,11 +6142,11 @@ int cdfInqTimestep(int streamID, int tsID)
   streamptr = stream_to_pointer(streamID);
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d  tsID = %d", streamID, tsID);
+    Message("streamID = %d  tsID = %d", streamID, tsID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
     
-  if ( tsID < 0 ) Error(func, "unexpected tsID = %d", tsID);
+  if ( tsID < 0 ) Error("unexpected tsID = %d", tsID);
 
   if ( tsID < streamptr->ntsteps && streamptr->ntsteps > 0 )
     {
@@ -6467,7 +6431,6 @@ void cdfInqHistoryString(int streamID, char *history)
 void cdfDefVars(int streamID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  static const char *func = "cdfDefVars";
   int index, gridID, zaxisID, vlistID;
   int nvars, ngrids, nzaxis;
   /*
@@ -6479,7 +6442,7 @@ void cdfDefVars(int streamID)
 
   vlistID = streamInqVlist(streamID);
   if ( vlistID == UNDEFID )
-    Error(func, "Internal problem! vlist undefined for streamID %d\n", streamID);
+    Error("Internal problem! vlist undefined for streamID %d\n", streamID);
 
   nvars  = vlistNvars(vlistID);
   ngrids = vlistNgrids(vlistID);

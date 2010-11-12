@@ -44,10 +44,9 @@ char *tunitNamePtr(int unitID)
   return (name);
 }
 
-
+static
 void taxis_defaults(void)
 {
-  static const char *func = "taxis_defaults";
   char *timeunit;
 
   timeunit = getenv("TIMEUNIT");
@@ -70,7 +69,7 @@ void taxis_defaults(void)
       else if ( strcmp(timeunit, "year") == 0 )
 	DefaultTimeUnit = TUNIT_YEAR;
       else
-	Warning(func, "Unsupported TIMEUNIT %s!", timeunit);
+	Warning("Unsupported TIMEUNIT %s!", timeunit);
     }
 }
 
@@ -149,7 +148,6 @@ void taxis_init_pointer(void)
 static
 void taxis_list_extend(void)
 {
-  static const char *func = "taxis_list_extend";
   int ntaxis;
   int i;
 
@@ -174,13 +172,12 @@ void taxis_list_extend(void)
       _taxisList[_taxis_min-1].next = -1;
     }
   else
-    Warning(func, "Too many open taxes (limit is %d)!", _taxis_max);
+    Warning("Too many open taxes (limit is %d)!", _taxis_max);
 }
 
-
+static
 taxis_t *taxis_to_pointer(int idx)
 {
-  static const char *func = "taxis_to_pointer";
   taxis_t *taxisptr = NULL;
 
   TAXIS_INIT();
@@ -194,7 +191,7 @@ taxis_t *taxis_to_pointer(int idx)
       TAXIS_UNLOCK();
     }
   else
-    Error(func, "taxis index %d undefined!", idx);
+    Error("taxis index %d undefined!", idx);
 
   return (taxisptr);
 }
@@ -204,7 +201,6 @@ taxis_t *taxis_to_pointer(int idx)
 static
 int taxis_from_pointer(taxis_t *ptr)
 {
-  static const char *func = "taxis_from_pointer";
   int      idx = -1;
 
   if ( ptr )
@@ -224,18 +220,18 @@ int taxis_from_pointer(taxis_t *ptr)
 	  newptr->ptr  = ptr;
       
 	  if ( TAXIS_Debug )
-	    Message(func, "Pointer %p has idx %d from taxis list", ptr, idx);
+	    Message("Pointer %p has idx %d from taxis list", ptr, idx);
 	}
 
       TAXIS_UNLOCK();
     }
   else
-    Error(func, "Internal problem (pointer %p undefined)", ptr);
+    Error("Internal problem (pointer %p undefined)", ptr);
 
   return (idx);
 }
 
-
+static
 void taxis_init_ptr(taxis_t *taxisptr)
 {
   taxisptr->self       = -1;
@@ -256,7 +252,7 @@ void taxis_init_ptr(taxis_t *taxisptr)
   taxisptr->vtime_ub   = 0;
 }
 
-
+static
 void taxis_init_entry(taxis_t *taxisptr)
 {
   taxis_init_ptr(taxisptr);
@@ -279,7 +275,6 @@ taxis_t *taxis_new_entry(void)
 static
 void taxis_delete_entry(taxis_t *taxisptr)
 {
-  static const char *func = "taxis_delete_entry";
   int idx;
 
   idx = taxisptr->self;
@@ -295,7 +290,7 @@ void taxis_delete_entry(taxis_t *taxisptr)
   TAXIS_UNLOCK();
 
   if ( TAXIS_Debug )
-    Message(func, "Removed idx %d from taxis list", idx);
+    Message("Removed idx %d from taxis list", idx);
 }
 
 static
@@ -336,12 +331,11 @@ void taxis_copy(taxis_t *taxisptr2, taxis_t *taxisptr1)
 }
 
 static
-void taxis_check_ptr(const char *func, taxis_t *taxisptr)
+void taxis_check_ptr(const char *caller, taxis_t *taxisptr)
 {
   if ( taxisptr == NULL )
-    Error(func, "taxis undefined!");
+    Errorc("taxis undefined!");
 }
-
 
 /*
 @Function  taxisCreate
@@ -377,27 +371,25 @@ taxisDefRtime(taxisID, 120000);
 */
 int taxisCreate(int taxistype)
 {
-  static const char *func = "taxisCreate";
   int taxisID;
   taxis_t *taxisptr;
 
   if ( CDI_Debug )
-    Message(func, "taxistype: %d", taxistype);
+    Message("taxistype: %d", taxistype);
 
   TAXIS_INIT();
 
   taxisptr = taxis_new_entry();
-  if ( ! taxisptr ) Error(func, "No memory");
+  if ( ! taxisptr ) Error("No memory");
 
   taxisID = taxisptr->self;
   taxisptr->type = taxistype;
 
   if ( CDI_Debug )
-    Message(func, "taxisID: %d", taxisID);
+    Message("taxisID: %d", taxisID);
 
   return (taxisID);
 }
-
 
 /*
 @Function  taxisDestroy
@@ -411,12 +403,11 @@ int taxisCreate(int taxistype)
 */
 void taxisDestroy(int taxisID)
 {
-  static const char *func = "taxisDestroy";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   taxis_delete_entry(taxisptr);
 }
@@ -424,7 +415,6 @@ void taxisDestroy(int taxisID)
 
 int taxisDuplicate(int taxisID1)
 {
-  static const char *func = "taxisDuplicate";
   int taxisID2;
   taxis_t *taxisptr1;
   taxis_t *taxisptr2;
@@ -432,12 +422,12 @@ int taxisDuplicate(int taxisID1)
   taxisptr1 = taxis_to_pointer(taxisID1);
 
   taxisptr2 = taxis_new_entry();
-  if ( ! taxisptr2 ) Error(func, "No memory");
+  if ( ! taxisptr2 ) Error("No memory");
 
   taxisID2 = taxisptr2->self;
 
   if ( CDI_Debug )
-    Message(func, "taxisID2: %d", taxisID2);
+    Message("taxisID2: %d", taxisID2);
 
   ptaxisCopy(taxisptr2, taxisptr1);
 
@@ -449,16 +439,14 @@ int taxisDuplicate(int taxisID1)
 
 void taxisDefType(int taxisID, int type)
 {
-  static const char *func = "taxisDefType";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   taxisptr->type = type;
 }
-
 
 /*
 @Function  taxisDefVdate
@@ -476,16 +464,14 @@ The function @func{taxisDefVdate} defines the verification date of a Time axis.
 */
 void taxisDefVdate(int taxisID, int vdate)
 {
-  static const char *func = "taxisDefVdate";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   taxisptr->vdate = vdate;
 }
-
 
 /*
 @Function  taxisDefVtime
@@ -503,16 +489,14 @@ The function @func{taxisDefVtime} defines the verification time of a Time axis.
 */
 void taxisDefVtime(int taxisID, int vtime)
 {
-  static const char *func = "taxisDefVtime";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   taxisptr->vtime = vtime;
 }
-
 
 /*
 @Function  taxisDefRdate
@@ -530,16 +514,14 @@ The function @func{taxisDefVdate} defines the reference date of a Time axis.
 */
 void taxisDefRdate(int taxisID, int rdate)
 {
-  static const char *func = "taxisDefRdate";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   taxisptr->rdate = rdate;
 }
-
 
 /*
 @Function  taxisDefRtime
@@ -557,16 +539,14 @@ The function @func{taxisDefVdate} defines the reference time of a Time axis.
 */
 void taxisDefRtime(int taxisID, int rtime)
 {
-  static const char *func = "taxisDefRtime";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   taxisptr->rtime = rtime;
 }
-
 
 /*
 @Function  taxisDefCalendar
@@ -586,12 +566,11 @@ The function @func{taxisDefCalendar} defines the calendar of a Time axis.
 */
 void taxisDefCalendar(int taxisID, int calendar)
 {
-  static const char *func = "taxisDefCalendar";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   taxisptr->calendar = calendar;
 }
@@ -599,24 +578,22 @@ void taxisDefCalendar(int taxisID, int calendar)
 
 void taxisDefTunit(int taxisID, int unit)
 {
-  static const char *func = "taxisDefTunit";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   taxisptr->unit = unit;
 }
 
 void taxisDefNumavg(int taxisID, int numavg)
 {
-  static const char *func = "taxisDefNumavg";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   taxisptr->numavg = numavg;
 }
@@ -628,12 +605,11 @@ The valid CDI time types are TAXIS_ABSOLUTE and TAXIS_RELATIVE.
 */
 int taxisInqType(int taxisID)
 {
-  static const char *func = "taxisInqType";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   return (taxisptr->type);
 }
@@ -641,12 +617,11 @@ int taxisInqType(int taxisID)
 
 int taxisHasBounds(int taxisID)
 {
-  static const char *func = "taxisHasBounds";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   return (taxisptr->has_bounds);
 }
@@ -654,12 +629,11 @@ int taxisHasBounds(int taxisID)
 
 void taxisDeleteBounds(int taxisID)
 {
-  static const char *func = "taxisDeleteBounds";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   taxisptr->has_bounds = FALSE;
 }
@@ -667,15 +641,14 @@ void taxisDeleteBounds(int taxisID)
 
 void taxisCopyTimestep(int taxisID2, int taxisID1)
 {
-  static const char *func = "taxisCopyTimestep";
   taxis_t *taxisptr1;
   taxis_t *taxisptr2;
 
   taxisptr1 = taxis_to_pointer(taxisID1);
   taxisptr2 = taxis_to_pointer(taxisID2);
 
-  taxis_check_ptr(func, taxisptr1);
-  taxis_check_ptr(func, taxisptr2);
+  taxis_check_ptr(__func__, taxisptr1);
+  taxis_check_ptr(__func__, taxisptr2);
 
   TAXIS_LOCK();
 
@@ -715,12 +688,11 @@ The function @func{taxisInqVdate} returns the verification date of a Time axis.
 */
 int taxisInqVdate(int taxisID)
 {
-  static const char *func = "taxisInqVdate";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   return (taxisptr->vdate);
 }
@@ -728,12 +700,11 @@ int taxisInqVdate(int taxisID)
 
 void taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub)
 {
-  static const char *func = "taxisInqVdateBounds";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   *vdate_lb = taxisptr->vdate_lb;
   *vdate_ub = taxisptr->vdate_ub;
@@ -742,19 +713,17 @@ void taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub)
 
 void taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub)
 {
-  static const char *func = "taxisDefVdateBounds";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   taxisptr->vdate_lb = vdate_lb;
   taxisptr->vdate_ub = vdate_ub;
  
   taxisptr->has_bounds = TRUE;
 }
-
 
 /*
 @Function  taxisInqVtime
@@ -774,12 +743,11 @@ The function @func{taxisInqVtime} returns the verification time of a Time axis.
 */
 int taxisInqVtime(int taxisID)
 {
-  static const char *func = "taxisInqVtime";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   return (taxisptr->vtime);
 }
@@ -787,12 +755,11 @@ int taxisInqVtime(int taxisID)
 
 void taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub)
 {
-  static const char *func = "taxisInqVtimeBounds";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   *vtime_lb = taxisptr->vtime_lb;
   *vtime_ub = taxisptr->vtime_ub;
@@ -801,12 +768,11 @@ void taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub)
 
 void taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub)
 {
-  static const char *func = "taxisDefVtimeBounds";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   taxisptr->vtime_lb = vtime_lb;
   taxisptr->vtime_ub = vtime_ub;
@@ -833,12 +799,11 @@ The function @func{taxisInqRdate} returns the reference date of a Time axis.
 */
 int taxisInqRdate(int taxisID)
 {
-  static const char *func = "taxisInqRdate";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   if ( taxisptr->rdate == -1 )
     {
@@ -868,12 +833,11 @@ The function @func{taxisInqRtime} returns the reference time of a Time axis.
 */
 int taxisInqRtime(int taxisID)
 {
-  static const char *func = "taxisInqRtime";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   if ( taxisptr->rdate == -1 )
     {
@@ -906,12 +870,11 @@ The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_PROLEP
 */
 int taxisInqCalendar(int taxisID)
 {
-  static const char *func = "taxisInqCalendar";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   return (taxisptr->calendar);
 }
@@ -919,12 +882,11 @@ int taxisInqCalendar(int taxisID)
 
 int taxisInqTunit(int taxisID)
 {
-  static const char *func = "taxisInqTunit";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   return (taxisptr->unit);
 }
@@ -932,12 +894,11 @@ int taxisInqTunit(int taxisID)
 
 int taxisInqNumavg(int taxisID)
 {
-  static const char *func = "taxisInqNumavg";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   return (taxisptr->numavg);
 }
@@ -945,12 +906,11 @@ int taxisInqNumavg(int taxisID)
 
 taxis_t *taxisPtr(int taxisID)
 {
-  static const char *func = "taxisPtr";
   taxis_t *taxisptr;
 
   taxisptr = taxis_to_pointer(taxisID);
 
-  taxis_check_ptr(func, taxisptr);
+  taxis_check_ptr(__func__, taxisptr);
 
   return (taxisptr);
 }
@@ -958,7 +918,6 @@ taxis_t *taxisPtr(int taxisID)
 
 void cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
 {
-  static const char *func = "cdiDecodeTimevalue";
   static int lwarn = TRUE;
 
   if ( timeunit == TUNIT_MINUTE )
@@ -1002,7 +961,7 @@ void cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
     {
       if ( lwarn )
 	{
-	  Warning(func, "timeunit %s unsupported!", tunitNamePtr(timeunit));
+	  Warning("timeunit %s unsupported!", tunitNamePtr(timeunit));
 	  lwarn = FALSE;
 	}
     }
@@ -1011,7 +970,6 @@ void cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
 static
 void cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
 {
-  static const char *func = "cdiEncodeTimevalue";
   static int lwarn = TRUE;
 
   if ( timeunit == TUNIT_SECOND )
@@ -1038,7 +996,7 @@ void cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
     {
       if ( lwarn )
 	{
-	  Warning(func, "timeunit %s unsupported!", tunitNamePtr(timeunit));
+	  Warning("timeunit %s unsupported!", tunitNamePtr(timeunit));
 	  lwarn = FALSE;
 	}
     }
@@ -1048,7 +1006,6 @@ int days_per_month(int calendar, int year, int month);
 
 void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
 {
-  static const char *func = "timeval2vtime";
   int year, month, day, hour, minute, second;
   int rdate, rtime;
   int timeunit;
@@ -1089,7 +1046,7 @@ void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
 
 	  if ( (NINT(timevalue*10))%10 && lwarn )
 	    {
-	      Warning(func, "Possible wrong calculation of date/time!\n"
+	      Warning("Possible wrong calculation of date/time!\n"
 		      "Non integer time offset unsupported for time unit MONTH and YEAR!");
 	      lwarn = FALSE;
 	    }
@@ -1237,11 +1194,9 @@ void conv_timeval(double timevalue, int *rvdate, int *rvtime)
 
 void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
 {
-  static const char *func = "splitTimevalue";
   int vdate = 0, vtime = 0;
   int hour, minute, second;
   int year, month, day;
-  int daysec;
   static int lwarn = TRUE;
 
   if ( timeunit == TUNIT_SECOND )
@@ -1267,12 +1222,12 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
     {
       if ( timevalue < -214700 )
 	{
-	  Warning(func, "Year %g out of range, set to -214700", timevalue);
+	  Warning("Year %g out of range, set to -214700", timevalue);
 	  timevalue = -214700;
 	}
       else if ( timevalue > 214700 )
 	{
-	  Warning(func, "Year %g out of range, set to 214700", timevalue);
+	  Warning("Year %g out of range, set to 214700", timevalue);
 	  timevalue = 214700;
 	}
 
@@ -1283,7 +1238,7 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
     {
       if ( lwarn )
 	{
-	  Warning(func, "timeunit %s unsupported!", tunitNamePtr(timeunit));
+	  Warning("timeunit %s unsupported!", tunitNamePtr(timeunit));
 	  lwarn = FALSE;
 	}
     }
@@ -1305,7 +1260,7 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
       vdate = cdiEncodeDate(year, month, day);
       vtime = cdiEncodeTime(hour, minute, second);
 
-      Warning(func, "Reset wrong date/time to %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d!",
+      Warning("Reset wrong date/time to %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d!",
 	      year, month, day, hour, minute, second);
     }
 

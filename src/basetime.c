@@ -13,10 +13,8 @@
 
 void basetimeInit(BaseTime *basetime)
 {
-  static const char *func = "basetimeInit";
-
   if ( basetime == NULL )
-    Error(func, "Internal problem! Basetime not allocated.");
+    Error("Internal problem! Basetime not allocated.");
 
   (*basetime).ncvarid       = UNDEFID;
   (*basetime).ncdimid       = UNDEFID;

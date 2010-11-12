@@ -28,7 +28,6 @@ static void tstepsInitEntry(int streamID, int tsID)
 
 int tstepsNewEntry(int streamID)
 {
-  static const char *func = "tstepsNewEntry";
   int tsID = 0;
   int tstepsTableSize;
   TSTEPS *tstepsTable;
@@ -50,8 +49,8 @@ int tstepsNewEntry(int streamID)
       tstepsTable = (TSTEPS *) realloc(tstepsTable, tstepsTableSize*sizeof(TSTEPS));
       if ( tstepsTable == NULL )
 	{
-          Message(func, "tstepsTableSize = %d", tstepsTableSize);
-	  SysError(func, "Reallocation of TSTEPS failed");
+          Message("tstepsTableSize = %d", tstepsTableSize);
+	  SysError("Reallocation of TSTEPS failed");
 	}
     }
 
@@ -67,7 +66,6 @@ int tstepsNewEntry(int streamID)
 
 void cdiCreateTimesteps(int streamID)
 {
-  static const char *func = "cdiCreateTimesteps";
   int ntsteps;
   int tsID;
   stream_t *streamptr;
@@ -82,7 +80,7 @@ void cdiCreateTimesteps(int streamID)
 
   streamptr->tsteps = (TSTEPS *) malloc(ntsteps*sizeof(TSTEPS));
   if ( streamptr->tsteps == NULL )
-    SysError(func, "Allocation of TSTEPS failed");
+    SysError("Allocation of TSTEPS failed");
 
   streamptr->tstepsTableSize = ntsteps;
   streamptr->tstepsNextID    = ntsteps;

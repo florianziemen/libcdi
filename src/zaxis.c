@@ -132,7 +132,6 @@ void zaxis_init_pointer(void)
 
 zaxis_t *zaxis_to_pointer(int idx)
 {
-  static const char *func = "zaxis_to_pointer";
   zaxis_t *zaxisptr = NULL;
 
   ZAXIS_INIT
@@ -146,7 +145,7 @@ zaxis_t *zaxis_to_pointer(int idx)
       ZAXIS_UNLOCK
     }
   else
-    Error(func, "zaxis index %d undefined!", idx);
+    Error("zaxis index %d undefined!", idx);
 
   return (zaxisptr);
 }
@@ -155,7 +154,6 @@ zaxis_t *zaxis_to_pointer(int idx)
 static
 int zaxis_from_pointer(zaxis_t *ptr)
 {
-  static const char *func = "zaxis_from_pointer";
   int      idx = -1;
   zaxisPtrToIdx *newptr;
 
@@ -172,15 +170,15 @@ int zaxis_from_pointer(zaxis_t *ptr)
 	  newptr->ptr  = ptr;
       
 	  if ( ZAXIS_Debug )
-	    Message(func, "Pointer %p has idx %d from zaxis list", ptr, idx);
+	    Message("Pointer %p has idx %d from zaxis list", ptr, idx);
 	}
       else
-	Warning(func, "Too many open zaxis (limit is %d)!", _zaxis_max);
+	Warning("Too many open zaxis (limit is %d)!", _zaxis_max);
 
       ZAXIS_UNLOCK
     }
   else
-    Error(func, "Internal problem (pointer %p undefined)", ptr);
+    Error("Internal problem (pointer %p undefined)", ptr);
 
   return (idx);
 }
@@ -221,7 +219,6 @@ zaxis_t *zaxis_new_entry(void)
 static
 void zaxis_delete_entry(zaxis_t *zaxisptr)
 {
-  static const char *func = "zaxis_delete_entry";
   int idx;
 
   idx = zaxisptr->self;
@@ -237,7 +234,7 @@ void zaxis_delete_entry(zaxis_t *zaxisptr)
   ZAXIS_UNLOCK
 
   if ( ZAXIS_Debug )
-    Message(func, "Removed idx %d from zaxis list", idx);
+    Message("Removed idx %d from zaxis list", idx);
 }
 
 static
@@ -276,10 +273,10 @@ void zaxis_copy(zaxis_t *zaxisptr2, zaxis_t *zaxisptr1)
 }
 
 static
-void zaxisCheckPtr(const char *func, int zaxisID, zaxis_t *zaxisptr)
+void zaxisCheckPtr(const char *caller, int zaxisID, zaxis_t *zaxisptr)
 {
   if ( zaxisptr == NULL )
-    Error(func, "zaxis %d undefined!", zaxisID);
+    Errorc("zaxis %d undefined!", zaxisID);
 }
 
 #define  zaxis_check_ptr(zaxisID, zaxisptr)  zaxisCheckPtr(__func__, zaxisID, zaxisptr)
@@ -339,19 +336,18 @@ zaxisDefLevels(zaxisID, levs);
 */
 int zaxisCreate(int zaxistype, int size)
 {
-  static const char *func = "zaxisCreate";
   int ilev;
   int zaxisID;
   double *vals;
   zaxis_t *zaxisptr;
 
   if ( CDI_Debug )
-    Message(func, "zaxistype: %d size: %d ", zaxistype, size);
+    Message("zaxistype: %d size: %d ", zaxistype, size);
 
   ZAXIS_INIT
 
   zaxisptr = zaxis_new_entry();
-  if ( ! zaxisptr ) Error(func, "No memory");
+  if ( ! zaxisptr ) Error("No memory");
 
   zaxisID = zaxisptr->self;
 
@@ -359,7 +355,7 @@ int zaxisCreate(int zaxistype, int size)
   zaxisptr->size = size;
 
   if ( zaxistype > CDI_MaxZaxistype )
-    Error(func, "Internal problem! zaxistype > CDI_MaxZaxistype");
+    Error("Internal problem! zaxistype > CDI_MaxZaxistype");
 
   zaxisDefName(zaxisID, ZaxistypeEntry[zaxistype].name);
   zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
@@ -374,7 +370,6 @@ int zaxisCreate(int zaxistype, int size)
 
   return (zaxisID);
 }
-
 
 /*
 @Function  zaxisDestroy
@@ -414,7 +409,6 @@ void zaxisName(int zaxistype, char *zaxisname)
   strcpy(zaxisname, zaxisNamePtr(zaxistype));
 }
 
-
 /*
 @Function  zaxisDefName
 @Title     Define the name of a Z-axis
@@ -440,7 +434,6 @@ void zaxisDefName(int zaxisID, const char *name)
   if ( name )
     strcpy(zaxisptr->name, name);
 }
-
 
 /*
 @Function  zaxisDefLongname
@@ -468,7 +461,6 @@ void zaxisDefLongname(int zaxisID, const char *longname)
     strcpy(zaxisptr->longname, longname);
 }
 
-
 /*
 @Function  zaxisDefUnits
 @Title     Define the units of a Z-axis
@@ -494,7 +486,6 @@ void zaxisDefUnits(int zaxisID, const char *units)
   if ( units )
     strcpy(zaxisptr->units, units);
 }
-
 
 /*
 @Function  zaxisInqName
@@ -524,7 +515,6 @@ void zaxisInqName(int zaxisID, char *name)
   strcpy(name, zaxisptr->name);
 }
 
-
 /*
 @Function  zaxisInqLongname
 @Title     Get the longname of a Z-axis
@@ -552,7 +542,6 @@ void zaxisInqLongname(int zaxisID, char *longname)
 
   strcpy(longname, zaxisptr->longname);
 }
-
 
 /*
 @Function  zaxisInqUnits
@@ -630,7 +619,6 @@ int zaxisInqLtype(int zaxisID)
   return (zaxisptr->ltype);
 }
 
-
 /*
 @Function  zaxisDefLevels
 @Title     Define the levels of a Z-axis
@@ -664,7 +652,6 @@ void zaxisDefLevels(int zaxisID, const double *levels)
     vals[ilev] = levels[ilev];
 }
 
-
 /*
 @Function  zaxisDefLevel
 @Title     Define one level of a Z-axis
@@ -691,7 +678,6 @@ void zaxisDefLevel(int zaxisID, int levelID, double level)
   if ( levelID >= 0 && levelID < zaxisptr->size )
     zaxisptr->vals[levelID] = level;
 }
-
 
 /*
 @Function  zaxisInqLevel
@@ -769,7 +755,6 @@ const double *zaxisInqLevelsPtr(int zaxisID)
 
   return ( zaxisptr->vals );
 }
-
 
 /*
 @Function  zaxisInqLevels
@@ -892,7 +877,6 @@ int zaxisInqLevelID(int zaxisID, double level)
   return (levelID);
 }
 
-
 /*
 @Function  zaxisInqType
 @Title     Get the type of a Z-axis
@@ -923,7 +907,6 @@ int zaxisInqType(int zaxisID)
 
   return (zaxisptr->type);
 }
-
 
 /*
 @Function  zaxisInqSize
@@ -958,7 +941,6 @@ int zaxisInqSize(int zaxisID)
 
 void cdiCheckZaxis(int zaxisID)
 {
-  static const char *func = "cdiCheckZaxis";
   int size, i, found;
   zaxis_t *zaxisptr;
 
@@ -997,7 +979,7 @@ void cdiCheckZaxis(int zaxisID)
 	  /* check consistent */
 	  if ( zaxisptr->direction == CDI_UNDEFID )
 	    {
-	      Warning(func, "direction undefined for zaxisID %d", zaxisID);
+	      Warning("direction undefined for zaxisID %d", zaxisID);
 	    }
 	}
     }
@@ -1006,7 +988,6 @@ void cdiCheckZaxis(int zaxisID)
 
 void zaxisDefVct(int zaxisID, int size, const double *vct)
 {
-  static const char *func = "zaxisDefVct";
   zaxis_t *zaxisptr;
 
   zaxisptr = zaxis_to_pointer(zaxisID);
@@ -1021,7 +1002,7 @@ void zaxisDefVct(int zaxisID, int size, const double *vct)
     }
   else
     if ( zaxisptr->vctsize != size )
-      Warning(func, "VCT was already defined");
+      Warning("VCT was already defined");
 }
 
 
@@ -1051,7 +1032,6 @@ const double *zaxisInqVctPtr(int zaxisID)
 
 void zaxisDefLbounds(int zaxisID, const double *lbounds)
 {
-  static const char *func = "zaxisDefLbounds";
   size_t size;
   zaxis_t *zaxisptr;
 
@@ -1063,7 +1043,7 @@ void zaxisDefLbounds(int zaxisID, const double *lbounds)
   
   if ( CDI_Debug )
     if ( zaxisptr->lbounds != NULL )
-      Warning(func, "Lower bounds already defined for zaxisID = %d", zaxisID);
+      Warning("Lower bounds already defined for zaxisID = %d", zaxisID);
 
   if ( zaxisptr->lbounds == NULL )
     zaxisptr->lbounds = (double *) malloc(size*sizeof(double));
@@ -1074,7 +1054,6 @@ void zaxisDefLbounds(int zaxisID, const double *lbounds)
 
 void zaxisDefUbounds(int zaxisID, const double *ubounds)
 {
-  static const char *func = "zaxisDefUbounds";
   size_t size;
   zaxis_t *zaxisptr;
 
@@ -1086,7 +1065,7 @@ void zaxisDefUbounds(int zaxisID, const double *ubounds)
 
   if ( CDI_Debug )
     if ( zaxisptr->ubounds != NULL )
-      Warning(func, "Upper bounds already defined for zaxisID = %d", zaxisID);
+      Warning("Upper bounds already defined for zaxisID = %d", zaxisID);
 
   if ( zaxisptr->ubounds == NULL )
     zaxisptr->ubounds = (double *) malloc(size*sizeof(double));
@@ -1097,7 +1076,6 @@ void zaxisDefUbounds(int zaxisID, const double *ubounds)
 
 void zaxisDefWeights(int zaxisID, const double *weights)
 {
-  static const char *func = "zaxisDefWeights";
   size_t size;
   zaxis_t *zaxisptr;
 
@@ -1109,7 +1087,7 @@ void zaxisDefWeights(int zaxisID, const double *weights)
 
   if ( CDI_Debug )
     if ( zaxisptr->weights != NULL )
-      Warning(func, "Weights already defined for zaxisID = %d", zaxisID);
+      Warning("Weights already defined for zaxisID = %d", zaxisID);
 
   if ( zaxisptr->weights == NULL )
     zaxisptr->weights = (double *) malloc(size*sizeof(double));
@@ -1120,14 +1098,13 @@ void zaxisDefWeights(int zaxisID, const double *weights)
 
 void zaxisChangeType(int zaxisID, int zaxistype)
 {
-  static const char *func = "zaxisChangeType";
   zaxis_t *zaxisptr;
 
   zaxisptr = zaxis_to_pointer(zaxisID);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  Message(func, "Changed zaxis type from %s to %s\n",
+  Message("Changed zaxis type from %s to %s\n",
 	  zaxisNamePtr(zaxisptr->type),
 	  zaxisNamePtr(zaxistype));
   

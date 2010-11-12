@@ -46,6 +46,7 @@ cat > ${PROG} << EOR
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <assert.h>
 
 #if  defined  (HAVE_LIBGRIB_API)
 #  include <grib_api.h>
@@ -77,6 +78,7 @@ c="dmemory.c         \
    dmemory.h         \
    error.c           \
    error.h           \
+   stream_int.h      \
    taxis.c           \
    timebase.c        \
    calendar.c        \
@@ -120,7 +122,7 @@ c="dmemory.c         \
 "
 
 h="cdi_limits.h taxis.h dtypes.h file.h cgribex.h gribapi.h service.h extra.h \
-   ieg.h cdi.h timebase.h calendar.h basetime.h datetime.h stream_int.h \
+   ieg.h cdi.h timebase.h calendar.h basetime.h datetime.h \
    stream_cgribex.h  stream_gribapi.h  stream_grb.h  stream_cdf.h \
    tablepar.h table.h gaussgrid.h grid.h varscan.h binary.h swap.h \
    service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \

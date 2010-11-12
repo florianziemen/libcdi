@@ -41,6 +41,7 @@ static char *tablePath = NULL;
 void tableDefModelID(int tableID, int modelID);
 void tableDefNum(int tableID, int tablenum);
 
+
 void tableDefEntry(int tableID, int id, const char *name,
 		   const char *longname, const char *units)
 {
@@ -112,7 +113,6 @@ void parTableInit(void)
 
 int tableNewEntry()
 {
-  static const char *func = "tableNewEntry";
   int tableID = 0;
   static int init = 0;
 
@@ -132,7 +132,7 @@ int tableNewEntry()
     }
 
   if ( tableID == parTableSize )
-    Error(func, "no more entries!");
+    Error("no more entries!");
 
   parTable[tableID].used = 1;
   parTableNum++;
@@ -348,7 +348,6 @@ int tableFromEnv(int modelID, int tablenum)
 	  sprintf(tablename+len, "_%03d", tablenum);
 	}
       tablenamefound = 1;
-      /* printf("%s: tablename = >%s<\n", func, tablename); */
     }
   else
     {
@@ -364,7 +363,6 @@ int tableFromEnv(int modelID, int tablenum)
 		  sprintf(tablename+len, "_%03d", tablenum);
 		}
 	      tablenamefound = 1;
-	      /* printf("%s: tablename = >%s<\n", func, tablename); */
 	    }
 	}
     }
@@ -405,7 +403,6 @@ int tableFromEnv(int modelID, int tablenum)
 
 int tableInq(int modelID, int tablenum, const char *tablename)
 {
-  static const char *func = "tableInq";
   int tableID = UNDEFID;
   int modelID2 = UNDEFID, i, len;
   char tablefile[256] = {'\0'};
@@ -431,7 +428,7 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 	}
       if ( tableID == MAX_TABLE ) tableID = UNDEFID;
       if ( CDI_Debug )
-	Message(func, "tableID = %d tablename = %s", tableID, tablename);
+	Message("tableID = %d tablename = %s", tableID, tablename);
     }
   else
     {
@@ -477,7 +474,7 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 
       if ( CDI_Debug )
 	if ( tablename )
-	  Message(func, "tableID = %d tablename = %s", tableID, tablename);
+	  Message("tableID = %d tablename = %s", tableID, tablename);
     }
 
   return (tableID);
@@ -539,22 +536,19 @@ int tableInqModel(int tableID)
 
 void partabCheckID(int item)
 {
-  static const char *func = "partabCheckID";
-
   if ( item < 0 || item >= parTableSize )
-    Error(func, "item %d undefined!", item);
+    Error("item %d undefined!", item);
 
   if ( ! parTable[item].name )
-    Error(func, "item %d name undefined!", item);
+    Error("item %d name undefined!", item);
 }
 
 char *tableInqNamePtr(int tableID)
 {
-  static const char *func = "tableInqNamePtr";
   char *tablename = NULL;
 
   if ( CDI_Debug )
-    Message(func, "tableID = %d", tableID);
+    Message("tableID = %d", tableID);
 
   if ( ! ParTableInit ) parTableInit();
 
@@ -567,7 +561,6 @@ char *tableInqNamePtr(int tableID)
 
 void tableWrite(const char *ptfile, int tableID)
 {
-  static const char *func = "tableWrite";
   int item, npars;
   int lenname, lenlname, lenunits;
   int maxname = 4, maxlname = 10, maxunits = 2;
@@ -578,11 +571,11 @@ void tableWrite(const char *ptfile, int tableID)
   char *instnameptr = NULL, *modelnameptr = NULL;
 
   if ( CDI_Debug )
-    Message(func, "write parameter table %d to %s", tableID, ptfile);
+    Message("write parameter table %d to %s", tableID, ptfile);
 
   if ( tableID == UNDEFID )
     {
-      Warning(func, "parameter table ID undefined");
+      Warning("parameter table ID undefined");
       return;
     }
 
@@ -675,7 +668,6 @@ void tableWrite(const char *ptfile, int tableID)
 
 void tableWriteC(const char *filename, int tableID)
 {
-  static const char *func = "tableWriteC";
   char chelp[] = "";
   int item, npars;
   int lenname, lenlname, lenunits;
@@ -685,11 +677,11 @@ void tableWriteC(const char *filename, int tableID)
   FILE *ptfp;
 
   if ( CDI_Debug )
-    Message(func, "write parameter table %d to %s", tableID, filename);
+    Message("write parameter table %d to %s", tableID, filename);
 
   if ( tableID == UNDEFID )
     {
-      Warning(func, "parameter table ID undefined");
+      Warning("parameter table ID undefined");
       return;
     }
 

@@ -29,7 +29,7 @@ static int iegDefaultDprec = 0;
  */
 
 #undef  LIBVERSION
-#define LIBVERSION      1.2.0
+#define LIBVERSION      1.3.0
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char ieg_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
@@ -46,7 +46,6 @@ int IEG_Debug = 0;    /* If set to 1, debugging */
 
 void iegLibInit()
 {
-  static const char *func = "iegLibInit";
   char *envString;
   char *envName = "IEG_PRECISION";
 
@@ -71,12 +70,12 @@ void iegLibInit()
 		  case '4': iegDefaultDprec = SINGLE_PRECISION; break;
 		  case '8': iegDefaultDprec = DOUBLE_PRECISION; break;
 		  default:
-		    Message(func, "Invalid digit in %s: %s", envName, envString);
+		    Message("Invalid digit in %s: %s", envName, envString);
 		  }
 		break;		
 	      }
 	    default:
-	      Message(func, "Invalid character in %s: %s", envName, envString);
+	      Message("Invalid character in %s: %s", envName, envString);
 	    }
 	  pos += 2;
 	}
@@ -88,12 +87,10 @@ void iegLibInit()
 
 void iegDebug(int debug)
 {
-  static const char *func = "iegDebug";
-
   IEG_Debug = debug;
 
   if ( IEG_Debug )
-    Message(func, "debug level %d", debug);
+    Message("debug level %d", debug);
 }
 
 
@@ -119,7 +116,6 @@ void iegInitMem(iegrec_t *iegp)
 
 iegrec_t *iegNew(void)
 {
-  static const char *func = "iegNew";
   iegrec_t *iegp;
 
   if ( ! initIegLib ) iegLibInit();
@@ -135,8 +131,6 @@ iegrec_t *iegNew(void)
 
 void iegDelete(iegrec_t *iegp)
 {
-  static const char *func = "iegDelete";
-
   if ( iegp )
     {
       if ( iegp->buffer ) free(iegp->buffer);
@@ -147,7 +141,6 @@ void iegDelete(iegrec_t *iegp)
 
 int iegCheckFiletype(int fileID, int *swap)
 {
-  static const char *func = "iegCheckFiletype";
   size_t blocklen = 0;
   size_t sblocklen = 0;
   size_t data = 0;
@@ -161,7 +154,7 @@ int iegCheckFiletype(int fileID, int *swap)
   sblocklen = get_SUINT32(buffer);
 
   if ( IEG_Debug )
-    Message(func, "blocklen = %d sblocklen = %d", blocklen, sblocklen);
+    Message("blocklen = %d sblocklen = %d", blocklen, sblocklen);
 
   if ( blocklen == 636 || blocklen == 640 )
     {
@@ -207,8 +200,8 @@ int iegCheckFiletype(int fileID, int *swap)
 
   if ( IEG_Debug )
     {
-      Message(func, "swap = %d fact = %d", *swap, fact);
-      Message(func, "dimx = %lu dimy = %lu data = %lu", dimx, dimy, data);
+      Message("swap = %d fact = %d", *swap, fact);
+      Message("dimx = %lu dimy = %lu data = %lu", dimx, dimy, data);
     }
 
   return (found);
@@ -229,7 +222,6 @@ void iegCopyMeta(iegrec_t *diegp, iegrec_t *siegp)
 
 int iegInqData(iegrec_t *iegp, int prec, void *data)
 {
-  static const char *func = "iegInqData";
   size_t datasize;
   size_t i;
   int ierr = 0;
@@ -260,7 +252,7 @@ int iegInqData(iegrec_t *iegp, int prec, void *data)
 	  }
 	else
 	  {
-	    Error(func, "not implemented for %d byte float", sizeof(FLT32));
+	    Error("not implemented for %d byte float", sizeof(FLT32));
 	  }	
 	break;
       }
@@ -277,12 +269,12 @@ int iegInqData(iegrec_t *iegp, int prec, void *data)
 	  }
 	else
 	  {
-	    Error(func, "not implemented for %d byte float", sizeof(FLT64));
+	    Error("not implemented for %d byte float", sizeof(FLT64));
 	  }	
 	break;
     default:
       {
-	Error(func, "unexpected data precision %d", dprec);
+	Error("unexpected data precision %d", dprec);
       }
     }
 
@@ -304,7 +296,6 @@ int iegInqDataDP(iegrec_t *iegp, double *data)
 
 int iegDefData(iegrec_t *iegp, int prec, const void *data)
 {
-  static const char *func = "iegDefData";
   size_t datasize;
   size_t blocklen;
   size_t buffersize;
@@ -362,7 +353,7 @@ int iegDefData(iegrec_t *iegp, int prec, const void *data)
       }
     default:
       {
-	Error(func, "unexpected data precision %d", dprec);
+	Error("unexpected data precision %d", dprec);
       }
     }
 
@@ -384,7 +375,6 @@ int iegDefDataDP(iegrec_t *iegp, const double *data)
 
 int iegRead(int fileID, iegrec_t *iegp)
 {
-  static const char *func = "iegRead";
   size_t datasize;
   size_t blocklen, blocklen2;
   size_t i;
@@ -398,7 +388,7 @@ int iegRead(int fileID, iegrec_t *iegp)
   if ( ! iegp->checked )
     {
       status = iegCheckFiletype(fileID, &iegp->byteswap);
-      if ( status == 0 ) Error(func, "Not a IEG file!");
+      if ( status == 0 ) Error("Not a IEG file!");
       iegp->checked = 1;
     }
 
@@ -410,7 +400,7 @@ int iegRead(int fileID, iegrec_t *iegp)
   if ( fileEOF(fileID) ) return (-1);
 
   if ( IEG_Debug )
-    Message(func, "blocklen = %lu", blocklen);
+    Message("blocklen = %lu", blocklen);
 
   if ( blocklen == 636 || blocklen == 640 )
     dprec = 4;
@@ -418,7 +408,7 @@ int iegRead(int fileID, iegrec_t *iegp)
     dprec = 8;
   else
     {
-      Warning(func, "unexpecteted header size %d!", (int) blocklen);
+      Warning("unexpecteted header size %d!", (int) blocklen);
       return (-1);
     }
 
@@ -479,14 +469,14 @@ int iegRead(int fileID, iegrec_t *iegp)
 
   if ( blocklen2 != blocklen )
     {
-      Warning(func, "header blocklen differ!");
+      Warning("header blocklen differ!");
       return (-1);
     }
 
   iegp->datasize = IEG_G_NumLon(iegp->igdb)*IEG_G_NumLat(iegp->igdb);
 
   if ( IEG_Debug )
-    Message(func, "datasize = %lu", iegp->datasize);
+    Message("datasize = %lu", iegp->datasize);
 
   blocklen = binReadF77Block(fileID, byteswap);
 
@@ -507,7 +497,7 @@ int iegRead(int fileID, iegrec_t *iegp)
 
   if ( dprec != (int) (blocklen/datasize) )
     {
-      Warning(func, "data precision differ! (h = %d; d = %d)",
+      Warning("data precision differ! (h = %d; d = %d)",
 	      (int) dprec, (int) (blocklen/datasize));
       return (-1);
     }
@@ -518,7 +508,7 @@ int iegRead(int fileID, iegrec_t *iegp)
 
   if ( blocklen2 != blocklen )
     {
-      Warning(func, "data blocklen differ!");
+      Warning("data blocklen differ!");
       return (-1);
     }
 
@@ -528,7 +518,6 @@ int iegRead(int fileID, iegrec_t *iegp)
 
 int iegWrite(int fileID, iegrec_t *iegp)
 {
-  static const char *func = "iegWrite";
   size_t datasize;
   size_t blocklen;
   size_t i;
@@ -602,7 +591,7 @@ int iegWrite(int fileID, iegrec_t *iegp)
       }
     default:
       {
-	Error(func, "unexpected data precision %d", dprec);
+	Error("unexpected data precision %d", dprec);
       }
     }
 

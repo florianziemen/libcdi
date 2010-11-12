@@ -98,7 +98,6 @@ void model_init_pointer(void)
 static
 model_t *model_to_pointer(int idx)
 {
-  static const char *func = "model_to_pointer";
   model_t *modelptr = NULL;
 
   MODEL_INIT
@@ -112,7 +111,7 @@ model_t *model_to_pointer(int idx)
       MODEL_UNLOCK
     }
   else
-    Error(func, "model index %d undefined!", idx);
+    Error("model index %d undefined!", idx);
 
   return (modelptr);
 }
@@ -121,7 +120,6 @@ model_t *model_to_pointer(int idx)
 static
 int model_from_pointer(model_t *ptr)
 {
-  static const char *func = "model_from_pointer";
   int      idx = -1;
   modelPtrToIdx *newptr;
 
@@ -138,15 +136,15 @@ int model_from_pointer(model_t *ptr)
 	  newptr->ptr  = ptr;
       
 	  if ( MODEL_Debug )
-	    Message(func, "Pointer %p has idx %d from model list", ptr, idx);
+	    Message("Pointer %p has idx %d from model list", ptr, idx);
 	}
       else
-	Warning(func, "Too many open models (limit is %d)!", _model_max);
+	Warning("Too many open models (limit is %d)!", _model_max);
 
       MODEL_UNLOCK
     }
   else
-    Error(func, "Internal problem (pointer %p undefined)", ptr);
+    Error("Internal problem (pointer %p undefined)", ptr);
 
   return (idx);
 }
@@ -178,7 +176,6 @@ model_t *model_new_entry(void)
 static
 void model_delete_entry(model_t *modelptr)
 {
-  static const char *func = "model_delete_entry";
   int idx;
 
   idx = modelptr->self;
@@ -194,7 +191,7 @@ void model_delete_entry(model_t *modelptr)
   MODEL_UNLOCK
 
   if ( MODEL_Debug )
-    Message(func, "Removed idx %d from model list", idx);
+    Message("Removed idx %d from model list", idx);
 }
 
 int modelDef(int instID, int modelgribID, const char *name);
@@ -258,10 +255,10 @@ void model_initialize(void)
 }
 
 static
-void model_check_ptr(const char *func, model_t *modelptr)
+void model_check_ptr(const char *caller, model_t *modelptr)
 {
   if ( modelptr == NULL )
-    Error(func, "model undefined!");
+    Errorc("model undefined!");
 }
 
 int modelSize(void)
@@ -333,7 +330,6 @@ int modelInq(int instID, int modelgribID, char *name)
 
 int modelDef(int instID, int modelgribID, const char *name)
 {
-  static const char *func = "modelDef";
   int modelID = UNDEFID;
   model_t *modelptr;
 
@@ -345,7 +341,7 @@ int modelDef(int instID, int modelgribID, const char *name)
   if ( modelID == UNDEFID )
     {
       modelptr = model_new_entry();
-      if ( ! modelptr ) Error(func, "No memory");
+      if ( ! modelptr ) Error("No memory");
 
       modelID = modelptr->self;
 
@@ -361,7 +357,6 @@ int modelDef(int instID, int modelgribID, const char *name)
 
 int modelInqInstitut(int modelID)
 {
-  static const char *func = "modelInqInstitut";
   int instID = UNDEFID;
   model_t *modelptr;
 
@@ -371,7 +366,7 @@ int modelInqInstitut(int modelID)
     {
       modelptr = model_to_pointer(modelID);
 
-      model_check_ptr(func, modelptr);
+      model_check_ptr(__func__, modelptr);
   
       instID = modelptr->instID;
     }
@@ -382,7 +377,6 @@ int modelInqInstitut(int modelID)
 
 int modelInqGribID(int modelID)
 {
-  static const char *func = "modelInqGribID";
   int modelgribID = UNDEFID;
   model_t *modelptr;
 
@@ -392,7 +386,7 @@ int modelInqGribID(int modelID)
     {
       modelptr = model_to_pointer(modelID);
 
-      model_check_ptr(func, modelptr);
+      model_check_ptr(__func__, modelptr);
   
       modelgribID = modelptr->modelgribID;
     }
@@ -403,7 +397,6 @@ int modelInqGribID(int modelID)
 
 char *modelInqNamePtr(int modelID)
 {
-  static const char *func = "modelInqNamePtr";
   char *name = NULL;
   model_t *modelptr;
 
@@ -413,7 +406,7 @@ char *modelInqNamePtr(int modelID)
     {
       modelptr = model_to_pointer(modelID);
 
-      model_check_ptr(func, modelptr);
+      model_check_ptr(__func__, modelptr);
   
       if ( modelptr->name )
 	name = modelptr->name;

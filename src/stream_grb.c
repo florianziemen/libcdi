@@ -16,11 +16,10 @@
 
 int grbBitsPerValue(int datatype)
 {
-  static const char *func = "grbBitsPerValue";
   int bitsPerValue = 16;
 
   if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
-    Error(func, "CDI/GRIB library does not support complex numbers!");
+    Error("CDI/GRIB library does not support complex numbers!");
 
   if ( datatype != CDI_UNDEFID )
     {
@@ -49,7 +48,6 @@ int grbInqRecord(int streamID, int *varID, int *levelID)
 
 int grbDefRecord(int streamID)
 {
-  static const char *func = "grbDefRecord";
   int fileID;
   int gridID;
   int status = 0;
@@ -57,7 +55,7 @@ int grbDefRecord(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   fileID = streamInqFileID(streamID);
   gridID = streamptr->record->gridID;
@@ -69,7 +67,6 @@ static
 int grbDecode(int filetype, unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
 	      int unreduced, int *nmiss, int *zip, double missval)
 {
-  //static const char *func = "grbDecode";
   int status = 0;
 
   if ( filetype == FILETYPE_GRB )
@@ -83,7 +80,6 @@ int grbDecode(int filetype, unsigned char *gribbuffer, int gribsize, double *dat
 
 int grbReadRecord(int streamID, double *data, int *nmiss)
 {
-  static const char *func = "grbReadRecord";
   int status = 0;
   unsigned char *gribbuffer;
   int fileID;
@@ -99,7 +95,7 @@ int grbReadRecord(int streamID, double *data, int *nmiss)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
@@ -198,14 +194,13 @@ int grbScanTimestep(int streamID)
 
 int grbInqContents(int streamID)
 {
-  static const char *func = "grbInqContents";
   int fileID;
   int status = 0;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   fileID = streamInqFileID(streamID);
 
@@ -223,19 +218,18 @@ int grbInqContents(int streamID)
 
 int grbInqTimestep(int streamID, int tsID)
 {
-  static const char *func = "grbInqTimestep";
   int ntsteps, nrecs;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   if ( tsID == 0 && streamptr->rtsteps == 0 )
-    Error(func, "Call to cdiInqContents missing!");
+    Error("Call to cdiInqContents missing!");
 
   if ( CDI_Debug )
-    Message(func, "tsid = %d rtsteps = %d", tsID, streamptr->rtsteps);
+    Message("tsid = %d rtsteps = %d", tsID, streamptr->rtsteps);
   
   ntsteps = CDI_UNDEFID;
   while ( (tsID + 1) > streamptr->rtsteps && ntsteps == CDI_UNDEFID )
@@ -264,7 +258,6 @@ int grbInqTimestep(int streamID, int tsID)
 
 void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
 {
-  static const char *func = "grbReadVarDP";
   int fileID;
   int levelID, nlevs, gridID, gridsize;
   unsigned char *gribbuffer;
@@ -280,7 +273,7 @@ void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
@@ -295,7 +288,7 @@ void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
   gridsize = gridInqSize(gridID);
 
   if ( CDI_Debug )
-    Message(func, "nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
+    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
 
   currentfilepos = fileGetPos(fileID);
 
@@ -326,7 +319,6 @@ void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
 
 void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *nmiss)
 {
-  static const char *func = "grbReadVarSliceDP";
   int fileID;
   int gridID, gridsize;
   unsigned char *gribbuffer;
@@ -341,7 +333,7 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
@@ -353,7 +345,7 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
   tsID     = streamptr->curTsID;
 
   if ( CDI_Debug )
-    Message(func, "gridID = %d gridsize = %d", gridID, gridsize);
+    Message("gridID = %d gridsize = %d", gridID, gridsize);
 
   fileID = streamInqFileID(streamID);
 
@@ -364,7 +356,7 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
   recsize = streamptr->tsteps[tsID].records[recID].size;
 
   if ( recsize == 0 )
-    Error(func, "Internal problem! Recordsize is zero for record %d at timestep %d",
+    Error("Internal problem! Recordsize is zero for record %d at timestep %d",
 	  recID+1, tsID+1);
 
   fileSetPos(fileID, recpos, SEEK_SET);
@@ -407,7 +399,6 @@ size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, 
 static
 size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
 {
-  static const char *func = "grbSzip";
   size_t nbytes = 0;
   unsigned char *buffer;
   size_t buffersize;
@@ -424,7 +415,7 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
     }
   else
     {
-      if ( lszip_warn ) Warning(func, "Szip compression of GRIB2 records not implemented!");
+      if ( lszip_warn ) Warning("Szip compression of GRIB2 records not implemented!");
       lszip_warn = 0;
       nbytes = gribbuffersize;
     }
@@ -437,7 +428,6 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
 
 int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data, int nmiss)
 {
-  static const char *func = "grbWriteVarSliceDP";
   size_t nwrite;
   int fileID;
   int gridID;
@@ -459,7 +449,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   filetype  = streamptr->filetype;
 
@@ -476,7 +466,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
     numavg = streamptr->tsteps[tsID].taxis.numavg;
 
   if ( CDI_Debug )
-    Message(func, "gridID = %d zaxisID = %d", gridID, zaxisID);
+    Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
   datasize = gridInqSize(gridID);
 
@@ -488,7 +478,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
       int ngrids = vlistNgrids(vlistID);
       int ghindex = ngrids*vlistGridIndex(vlistID, gridID) + vlistZaxisIndex(vlistID, zaxisID);
       if ( ghindex >= streamptr->gribHandleNums )
-	Error(func, "Internal problem, grib handle not found!");
+	Error("Internal problem, grib handle not found!");
       gh = streamptr->gribHandle[ghindex];
     }
 
@@ -498,7 +488,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
 	ljpeg = 1;
       else
 	{
-	  if ( ljpeg_warn ) Warning(func, "Jpeg compression of GRIB1 records not available!");
+	  if ( ljpeg_warn ) Warning("Jpeg compression of GRIB1 records not available!");
 	  ljpeg_warn = 0;
 	}
     }
@@ -510,7 +500,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
   nwrite = fileWrite(fileID, gribbuffer, nbytes);
-  if ( nwrite != nbytes ) perror(func);
+  if ( nwrite != nbytes ) perror(__func__);
 
   if ( gribbuffer ) free(gribbuffer);
 
@@ -538,7 +528,6 @@ void grbWriteVarDP(int streamID, int varID, const double *data, int nmiss)
 
 int grbCopyRecord(int streamID2, int streamID1)
 {
-  static const char *func = "grbCopyRecord";
   int fileID1, fileID2;
   int tsID, recID, vrecID;
   long recsize;
@@ -556,8 +545,8 @@ int grbCopyRecord(int streamID2, int streamID1)
   streamptr1 = stream_to_pointer(streamID1);
   streamptr2 = stream_to_pointer(streamID2);
 
-  stream_check_ptr(func, streamptr1);
-  stream_check_ptr(func, streamptr2);
+  stream_check_ptr(__func__, streamptr1);
+  stream_check_ptr(__func__, streamptr2);
 
   filetype = streamptr1->filetype;
 
@@ -589,7 +578,7 @@ int grbCopyRecord(int streamID2, int streamID1)
   while ( nbytes & 7 ) gribbuffer[nbytes++] = 0;
 
   nwrite = fileWrite(fileID2, gribbuffer, nbytes);
-  if ( nwrite != nbytes ) perror(func);
+  if ( nwrite != nbytes ) perror(__func__);
 
   free(gribbuffer);
 
@@ -599,14 +588,13 @@ int grbCopyRecord(int streamID2, int streamID1)
 
 int grbWriteRecord(int streamID, const double *data, int nmiss)
 {
-  static const char *func = "grbWriteRecord";
   int status = 0;
   int varID, levelID;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   varID   = streamptr->record->varID;
   levelID = streamptr->record->levelID;
@@ -619,7 +607,6 @@ int grbWriteRecord(int streamID, const double *data, int nmiss)
 
 void streamInqGinfo(int streamID, int *intnum, float *fltnum)
 {
-  static const char *func = "streamInqGinfo";
   int recID, vrecID, tsID;
   int filetype;
   void *gribbuffer;
@@ -631,7 +618,7 @@ void streamInqGinfo(int streamID, int *intnum, float *fltnum)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
@@ -648,7 +635,7 @@ void streamInqGinfo(int streamID, int *intnum, float *fltnum)
       gribbuffersize = streamptr->record->buffersize;
 
       if ( zip > 0 )
-	Error(func, "Compressed GRIB records unsupported!");
+	Error("Compressed GRIB records unsupported!");
       else
 	gribGinfo(recpos, gribbuffersize, (unsigned char *) gribbuffer, intnum, fltnum);
     }
