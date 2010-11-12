@@ -242,10 +242,8 @@ int memListDeleteEntry(void *ptr, size_t *size)
 static
 void memTableInitEntry(int memID)
 {
-  static const char *func = "memTableInitEntry";
-
   if ( memID < 0 || memID >= memTableSize )
-    memInternalProblem(func, "memID %d undefined!", memID);
+    memInternalProblem(__func__, "memID %d undefined!", memID);
 
   memTable[memID].ptr    = NULL;
   memTable[memID].item   = UNDEFID;
@@ -259,7 +257,6 @@ static
 int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
 		    const char *caller, const char *file, int line)
 {
-  static const char *func = "memListNewEntry";
   static int item = 0;
   size_t memSize = 0;
   int memID = 0;
@@ -275,7 +272,7 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
       memTableSize = 8;
       memSize  = memTableSize*sizeof(MemTable);
       memTable = (MemTable *) malloc(memSize);
-      if( memTable == NULL ) memError(func, __FILE__, __LINE__, memSize);
+      if( memTable == NULL ) memError(__func__, __FILE__, __LINE__, memSize);
 
       for( i = 0; i < memTableSize; i++ )
 	memTableInitEntry(i);
@@ -296,7 +293,7 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
       memTableSize = 2*memTableSize;
       memSize  = memTableSize*sizeof(MemTable);
       memTable = (MemTable *) realloc(memTable, memSize);
-      if( memTable == NULL ) memError(func, __FILE__, __LINE__, memSize);
+      if( memTable == NULL ) memError(__func__, __FILE__, __LINE__, memSize);
 
       for( i = memID; i < memTableSize; i++ )
 	memTableInitEntry(i);
@@ -347,7 +344,6 @@ static
 int memListChangeEntry(void *ptrold, void *ptr, size_t size,
 		       const char *caller, const char *file, int line)
 {
-  static const char *func = "memListChangeEntry";
   int item = UNDEFID;
   int memID = 0;
   size_t len;
@@ -363,7 +359,7 @@ int memListChangeEntry(void *ptrold, void *ptr, size_t size,
   if ( memID == memTableSize )
     {
       if ( ptrold != NULL )
-	memInternalProblem(func, "Item at %p not found.", ptrold);
+	memInternalProblem(__func__, "Item at %p not found.", ptrold);
     }
   else
     {
@@ -512,7 +508,6 @@ void *Realloc(const char *caller, const char *file, int line, void *ptrold, size
 
 void Free(const char *caller, const char *file, int line, void *ptr)
 {
-  static const char *func = "Free";
   int item;
   size_t size;
 
@@ -528,7 +523,7 @@ void Free(const char *caller, const char *file, int line, void *ptr)
 	{
 	  if ( ptr )
 	    fprintf(stderr, "%s info: memory entry at %p not found. [line %4d file %s (%s)]\n",
-		    func, ptr, line, file, caller);
+		    __func__, ptr, line, file, caller);
 	}
     }
 
