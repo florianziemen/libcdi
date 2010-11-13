@@ -1696,6 +1696,7 @@ static
 void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 {
   int gridtype;
+  int lcurvi = FALSE;
   static short lwarn = TRUE;
 
   memset(isec2, 0, 16*sizeof(int));
@@ -1739,6 +1740,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	  Warning("Curvilinear grids are unsupported in GRIB1! Created wrong GDS!");
 	}
       gridtype = GRID_LONLAT;
+      lcurvi = TRUE;
     }
 
   ISEC2_Reduced = FALSE;
@@ -1756,6 +1758,9 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	double xfirst = 0, xlast = 0, xinc = 0;
 	double yfirst = 0, ylast = 0, yinc = 0;
 
+	nlon = gridInqXsize(gridID);
+	nlat = gridInqYsize(gridID);
+
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
 	    ISEC2_Reduced = TRUE;
@@ -1764,7 +1769,6 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	  }
 	else
 	  {
-	    nlon = gridInqXsize(gridID);
 	    if ( nlon == 0 )
 	      {
 		nlon = 1;
@@ -1772,12 +1776,14 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	    else
 	      {
 		xfirst = gridInqXval(gridID,      0);
-		xlast  = gridInqXval(gridID, nlon-1);
+		if ( lcurvi )
+		  xlast  = gridInqXval(gridID, nlon*nlat-1);
+		else
+		  xlast  = gridInqXval(gridID, nlon-1);
 		xinc   = gridInqXinc(gridID);
 	      }
 	  }
 
-	nlat = gridInqYsize(gridID);
 	if ( nlat == 0 )
 	  {
 	    nlat = 1;
@@ -1785,8 +1791,12 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	else
 	  {
 	    yfirst = gridInqYval(gridID,      0);
-	    ylast  = gridInqYval(gridID, nlat-1);
+	    if ( lcurvi )
+	      ylast  = gridInqYval(gridID, nlon*nlat-1);
+	    else
+	      ylast  = gridInqYval(gridID, nlat-1);
 	    yinc   = gridInqYinc(gridID);
+	    if ( yinc < 0 ) yinc = -yinc;
 	  }
 
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
