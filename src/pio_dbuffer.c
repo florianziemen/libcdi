@@ -10,7 +10,7 @@
 #ifndef NOMPI
 #include "pio_impl.h"
 
-bool ldebug    = false;
+bool ldebug    =true;
 
 
 int dbuffer_init ( struct dBuffer **dbuffer, size_t size )
@@ -19,16 +19,22 @@ int dbuffer_init ( struct dBuffer **dbuffer, size_t size )
   int status;
   size_t pagesize;
 
+
+#ifndef _SX
   pagesize = ( size_t ) sysconf ( _SC_PAGESIZE );
+
   if ( ldebug ) 
     fprintf ( stdout, "dbuffer_init(): pagesize = %zu bytes, size = %zu \n", pagesize, size );
 
   if ( dbuffer == NULL || size < pagesize )
     {
+
+      fprintf ( stdout, "dbuffer_init: dbuffer=NULL\n" );
       return 1;
     }
-  
+
   db = ( struct dBuffer * ) malloc ( sizeof ( struct dBuffer ));
+
   if ( db == NULL )
     {
       perror ( "Not enough memory" );
@@ -60,6 +66,34 @@ int dbuffer_init ( struct dBuffer **dbuffer, size_t size )
 	  break;
 	}
     }
+#else
+
+  if ( dbuffer == NULL )
+    {
+      fprintf ( stdout, "dbuffer_init: dbuffer=NULL\n" );
+      return 1;
+    }
+
+  db = ( struct dBuffer * ) malloc ( sizeof ( struct dBuffer ));
+  
+  if ( db == NULL )
+    {
+      perror ( "Not enough memory" );
+      return 1;
+    }
+  
+  db->size = size;
+  
+  db->wr_pointer = 0;
+
+  db->buffer = ( unsigned char * ) malloc ( sizeof ( unsigned char ) * ( db->size ));
+  if ( db->buffer == NULL )
+  {
+      perror ( "Not enough memory" );
+      return 1 ;
+  }
+#endif
+
   *dbuffer = db;
   
   return 0;
