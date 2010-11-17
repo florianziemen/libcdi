@@ -179,8 +179,7 @@ extern "C" {
 
   /* deike */
 /* parallel io types, A: asynchronous, B: blocking */
-
-/*#ifndef NOMPI*/  
+  
 #define  PIO_NONE                           0
 #define  PIO_MPI_NONB                       1
 #define  PIO_POSIX_NONB                     2
@@ -191,7 +190,6 @@ extern "C" {
 
 int     pioInit ( int, int, int*, int*, int* );
 void    pioFinalize ( void );
-  /*#endif*/
 
 /* CDI control routines */
 

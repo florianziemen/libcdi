@@ -93,12 +93,12 @@ void checkMPIstat ( int iret, const char *filename, int line, int rank,
     {
       switch ( status->MPI_ERROR )
 	{
-	  fprintf ( stdout, "------- checking error in request ----------\n" );
+	  fprintf ( stderr, "------- checking error in request ----------\n" );
 	case MPI_SUCCESS :
-	  fprintf ( stdout, "-------- mpi_success -----------\n" );
+	  fprintf ( stderr, "-------- mpi_success -----------\n" );
 	  break;
 	case MPI_ERR_PENDING:
-	  fprintf ( stdout, "-------- mpi_err_pending ----------\n");
+	  fprintf ( stderr, "-------- mpi_err_pending ----------\n");
 	  break;
 	default:
 	  MPI_Error_string ( status->MPI_ERROR, errorString, &len );
@@ -166,9 +166,11 @@ size_t pioFileWrite ( int id, int tsId, const void *buffer, size_t len )
     case PIO_MPI_NONB:
       iret = fwMPINONB ( id, tsId, buffer, len );
       break;
+#ifndef _SX
     case PIO_POSIX_ASYNCH:
       iret = fwPOSIXASYNCH ( id, tsId, buffer, len );
       break;
+#endif
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fwPOSIXFPGUARDSENDRECV ( id, tsId, buffer, len );
       break;
@@ -197,9 +199,11 @@ int pioFileClose ( int id )
     case PIO_MPI_NONB:
       iret = fcMPINONB ( id );
       break;
+#ifndef _SX
     case PIO_POSIX_ASYNCH:
       iret = fcPOSIXASYNCH ( id );
       break;
+#endif
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fcPOSIXFPGUARDSENDRECV ( id );
       break;
@@ -228,9 +232,11 @@ int pioFileOpenW ( const char *filename )
     case PIO_MPI_NONB:
       iret = fowMPINONB ( filename );
       break;
+#ifndef _SX
     case PIO_POSIX_ASYNCH:
       iret = fowPOSIXASYNCH ( filename );
       break;
+#endif
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fowPOSIXFPGUARDSENDRECV ( filename );
       break;
@@ -276,14 +282,13 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
 
   if ( myHost[0] == '\0' ) 
     errorPIO ( "did not succeed to set hostname", __FILE__, __LINE__ , rank);
-  
+
   if ( ddebug )
     {
       strncpy ( hostname, myHost, len );
       hostname [ len ] = '\0';
-      fprintf ( stdout, "pe%d: myHost = %s\n", rank,  hostname );
+      fprintf ( stderr, "pe%d: myHost = %s\n", rank,  hostname );
     }
-  
   
   allHosts = ( char ** ) xmalloc ( size * sizeof ( char * ));
   allHosts[0] = ( char * ) xmalloc ( size * MPI_MAX_PROCESSOR_NAME * 
@@ -329,7 +334,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
   free ( myHost );
 
   if ( ddebug )
-    fprintf ( stdout, 
+    fprintf ( stderr, 
 	      "pe%d in setPioCommunicator, color=%d, before return\n", 
 	      rank, *color );
   
@@ -342,32 +347,38 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
 
 int pioInit ( int ptype, int commF, int *color, int *nnodes, int *pioCollComm2F )
 {
-
+#ifndef NOMPI
+  MPI_Comm comm;
+  int size, rank;
+#endif
   int collectingData = 1;
   *nnodes = 1;
   *color = 1;
   *pioCollComm2F = 0;
 
 #ifndef NOMPI
-
-  MPI_Comm comm;
-  int size, rank;
   
   comm = MPI_COMM_NULL;
 
   if (( comm = MPI_Comm_f2c (( MPI_Fint ) commF )) == NULL )
     errorPIO ( "MPI_Comm_f2c didn't succeed", __FILE__, __LINE__, -1 );
-  
+
   MPI_Comm_set_errhandler ( comm, MPI_ERRORS_RETURN );
   MPI_Comm_size ( comm, &size );
   MPI_Comm_rank ( comm, &rank );
   
   if ( ptype < 0 || ptype > maxPtype ) 
     errorPIO ( "PIOTYPE is no valid modus", __FILE__, __LINE__, rank );
+
+#ifdef _SX
+  if ( ptype ==  PIO_POSIX_ASYNCH )
+    errorPIO ( "PIO_POSIX_ASYNCH does not work on SX", __FILE__, __LINE__, rank );
+#endif
   
   pioinfo = ( pioInfo * ) xmalloc ( sizeof ( pioInfo ));
   
   pioinfo->type = ptype; 
+
   setPioCommunicator ( & ( pioinfo->comm ), comm, color, nnodes );
   
   if (( pioinfo->type == PIO_NONE ) && ( *nnodes != size ))
@@ -378,13 +389,13 @@ int pioInit ( int ptype, int commF, int *color, int *nnodes, int *pioCollComm2F 
   MPI_Comm_size ( pioinfo->comm, &( pioinfo->size ));
   
   if ( ddebug && pioinfo->rank == 0 )
-    fprintf ( stdout, 
-	      "pe%d in pioDefPtype(), ptype=%d, initial_buffersize=%ld: "
+    fprintf ( stderr, 
+	      "pe%d in pioInit(), ptype=%d, initial_buffersize=%ld: "
 	      "after init pioinfo ...\n", 
 	      pioinfo->rank, pioinfo->type, initial_buffersize );
   
   pioinfo->collectorComm = MPI_COMM_NULL;
-  
+
   switch ( pioinfo->type )
     {
     case PIO_NONE:
@@ -394,9 +405,11 @@ int pioInit ( int ptype, int commF, int *color, int *nnodes, int *pioCollComm2F 
     case PIO_MPI_NONB:
       collectingData = initMPINONB ();
       break;
+#ifndef _SX
     case PIO_POSIX_ASYNCH:
       collectingData = initPOSIXASYNCH ();
       break;
+#endif
     case PIO_POSIX_FPGUARD_SENDRECV:
       collectingData = initPOSIXFPGUARDSENDRECV ();
       break;
@@ -406,19 +419,21 @@ int pioInit ( int ptype, int commF, int *color, int *nnodes, int *pioCollComm2F 
     case PIO_POSIX_FPGUARD_THREAD_REFUSE:
       collectingData = initPOSIXFPGUARDTHREADREFUSE ();
       break;
-    case PIO_POSIX_NONB:      
+    case PIO_POSIX_NONB:
       collectingData = initPOSIXNONB ();
       break;
     }
   
-  *pioCollComm2F  = 0;
-  if (( *pioCollComm2F = MPI_Comm_c2f ( pioinfo->collectorComm )) == 0 )
-    errorPIO ( "MPI_Comm_c2f didn't succeed\n", __FILE__, __LINE__ , rank);
-  
+  /* ????? MPI_Comm_c2f hardwired to 0 ????
+   *pioCollComm2F  = 0;
+   if (( *pioCollComm2F = MPI_Comm_c2f ( pioinfo->collectorComm ) == 0 )
+   errorPIO ( "MPI_Comm_c2f didn't succeed\n", __FILE__, __LINE__ , rank);
+  */
+  *pioCollComm2F = MPI_Comm_c2f ( pioinfo->collectorComm );
 #endif
   
   if ( ddebug )
-    fprintf ( stdout, "pe in pioinit out\n" );
+    fprintf ( stderr, "pe in pioinit out\n" );
   
   return collectingData;
 }
