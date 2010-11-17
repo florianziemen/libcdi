@@ -32,7 +32,20 @@ xlc_r -DNOMPI -DHAVE_CF_INTERFACE -qlanglvl=stdc99 -g -O3 -q64 -qarch=auto -qtun
 xlf95_r -WF,-DNOMPI -o cdi_write_serial -I./ cdi_write_f.F90 cdilib_serial  -L/sw/aix53/szip-2.1/lib -lsz -L/sw/aix61/netcdf-4.0.1-ibm/lib -lnetcdf -L/sw/aix61/hdf5-1.8.4-patch1/lib -lhdf5_hl -lhdf5 -lz
 #
 ###############################################################################
-
+# on tornado
+##############################################################################
+# on nec
+#
+# ./configure --host=sx6 CC=sxmpicc CFLAGS="-Df2cFortran -size_t64" AR=/SX/opt/crosskit/r181/bin/sxar RANLIB=true
+# make clean
+# make
+# cd pioExamples
+# sxmpif90 -o pio_write pio_write.F90 -I../src -L../src -lcdi_parallel -lpthread -size_t64
+# cd /e/uscratch/extdkleb
+# nqsub write_nec_parallel.job
+# nqstat -u extdkleb
+#
+##############################################################################
 
 status quo:
 
@@ -40,21 +53,20 @@ ptypes available:
 
 PIO_NONE                           0
 PIO_MPI_NONB                       1
-PIO_POSIX_ASYNCH                   2
-PIO_POSIX_FPGUARD_SENDRECV         3
-PIO_POSIX_FPGUARD_THREAD           4
-PIO_POSIX_FPGUARD_THREAD_REFUSE    5
-PIO_POSIX_NONB                     6
+PIO_POSIX_NONB                     2
+PIO_POSIX_ASYNCH                   3
+PIO_POSIX_FPGUARD_SENDRECV         4
 
-initial_buffer_size = 16 * 1024 * 1024 bytes
+initial_buffer_size = 16 * 1024 * 1024 bytes   # in pio.c
 
-usage of parallel version:
+usage of parallel version, see example pioExamples/pio_write.F90:
 
-	define ptype
-	init mpi
-	init comm with only all i/o pes
+	init INTEGER PTYPE
+	init MPI
+	init INTEGER pioComm with only all i/o pes
+	INTEGER, OUT :: myNODE, NNODES, pioCollectorComm_NODE
 
-	call int isCollector =  pioInit ( int ptype, int comm, int *ncollectors )
+	call int isCollector =  pioInit ( PTYPE, pioComm, myNODE, NNODES, pioCollectorComm_NODE ) 
 
 	if ( isCollector )
 	{

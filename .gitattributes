@@ -126,6 +126,7 @@ pioExamples/cdi_write_more_nodes.job -text
 pioExamples/cdi_write_parallel.job -text
 pioExamples/cdi_write_serial.job -text
 pioExamples/pio_write.F90 -text
+pioExamples/write_nec_parallel.job -text
 pioExamples/write_tornado_parallel.job -text
 pioExamples/write_tornado_ps.job -text
 pioExamples/write_tornado_serial.job -text
