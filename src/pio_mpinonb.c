@@ -78,7 +78,7 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   int iret;
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d initAFiledataMPINONB (): filename=%s, buffersize=%zu, in\n",
+    fprintf ( stderr, "pe%d initAFiledataMPINONB (): filename=%s, buffersize=%zu, in\n",
 	pioinfo->rank, filename, bs );
 
   of = ( aFiledataM * ) xmalloc ( sizeof ( aFiledataM ));
@@ -92,7 +92,7 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   /* init output buffer */
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d initOpenFileCollector(): name=%s, init output buffer\n", 
+    fprintf ( stderr, "pe%d initOpenFileCollector(): name=%s, init output buffer\n", 
 	      pioinfo->rank, of->name );
    
   iret = dbuffer_init ( &( of->db1 ), of->size );
@@ -114,7 +114,7 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   of->finished = false;
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d initAFiledataMPINONB (), opened file %s, return\n",
+    fprintf ( stderr, "pe%d initAFiledataMPINONB (), opened file %s, return\n",
 	pioinfo->rank, of->name );
   
   return of;
@@ -131,7 +131,7 @@ int destroyAFiledataMPINONB ( void *v )
   of = (aFiledataM * ) v;
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d destroyAFiledataMPINONB(): name=%s, close file, in\n", 
+    fprintf ( stderr, "pe%d destroyAFiledataMPINONB(): name=%s, close file, in\n", 
 	      pioinfo->rank, of->name );
   
   /* close file */
@@ -152,7 +152,7 @@ int destroyAFiledataMPINONB ( void *v )
   free ( of );
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d destroyAFiledataMPINONB(), closed file, cleaned up, return\n", 
+    fprintf ( stderr, "pe%d destroyAFiledataMPINONB(), closed file, cleaned up, return\n", 
 	      pioinfo->rank );
 
   return iret == MPI_SUCCESS ? 0 : -1;
@@ -190,7 +190,7 @@ void writeMPINONB ( aFiledataM *of, int id )
   if ( amount == 0 ) return;
 
   if ( ddebug ) 
-    fprintf ( stdout, "pe%d writeMPINONB(): Write buffer, size %d bytes, in\n", 
+    fprintf ( stderr, "pe%d writeMPINONB(): Write buffer, size %d bytes, in\n", 
 	      pioinfo->rank, amount );
   
   MPI_Wait ( & ( of->request ), &status );
@@ -204,14 +204,14 @@ void writeMPINONB ( aFiledataM *of, int id )
   if ( of->db == of->db1 )
     {
       if ( ddebug ) 
-	fprintf ( stdout, "pe%d writeMPINONB (): id=%d, change to buffer 2 ...\n", 
+	fprintf ( stderr, "pe%d writeMPINONB (): id=%d, change to buffer 2 ...\n", 
 		  pioinfo->rank, id );
       of->db =  of->db2;
     }
   else 
     {
       if ( ddebug ) 
-	fprintf ( stdout, "pe%d writeMPINONB (): id=%d, change to buffer 1 ...\n", 
+	fprintf ( stderr, "pe%d writeMPINONB (): id=%d, change to buffer 1 ...\n", 
 		  pioinfo->rank, id );
       of->db =  of->db1;
     }
@@ -236,7 +236,7 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
   if ( flush == 1 ) 
     {
       if ( ddebug )
-	fprintf ( stdout, "pe%d fileWriter (): tsId = %d, flush buffer\n", 
+	fprintf ( stderr, "pe%d fileWriter (): tsId = %d, flush buffer\n", 
 		  pioinfo->rank, tsId );
       curr = bibAFiledataM->head;
       while ( curr ) 
@@ -252,7 +252,7 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
   filled = dbuffer_push ( of->db, ( unsigned char * ) buffer, len );
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d fileWriter (): id = %d, tsId = %d,"
+    fprintf ( stderr, "pe%d fileWriter (): id = %d, tsId = %d,"
 	      " pushed data on buffer, filled = %d\n", 
 	      pioinfo->rank, id, tsId, filled ); 
 
@@ -287,7 +287,7 @@ int fcMPINONB ( int id )
   char errorString[maxErrorString];
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d fileClose (%d ): write buffer, close file and cleanup, in\n", 
+    fprintf ( stderr, "pe%d fileClose (%d ): write buffer, close file and cleanup, in\n", 
 	      pioinfo->rank, id );
 
   if ( ! ( of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, id )))
@@ -305,7 +305,7 @@ int fcMPINONB ( int id )
   if ( !bibAFiledataM->head ) 
     {
       if ( ddebug )
-	fprintf ( stdout, "pe%d fileClose (): cleanup queue \n", 
+	fprintf ( stderr, "pe%d fileClose (): cleanup queue \n", 
 		  pioinfo->rank );
       free ( bibAFiledataM );
     }
@@ -316,10 +316,10 @@ int fcMPINONB ( int id )
     {
       MPI_Reduce ( &accumWait, &accumWaitMax, 
 		   1, MPI_DOUBLE, MPI_MAX, 0, pioinfo->comm  );
-      fprintf ( stdout, "pe%d pioFileClose(): Wait time %15.10lf s\n",
+      fprintf ( stderr, "pe%d pioFileClose(): Wait time %15.10lf s\n",
 		pioinfo->rank, accumWait );
       if ( pioinfo->rank == 0 )
-	fprintf ( stdout, "pe%d pioFileClose(): Max wait time %15.10lf s\n",
+	fprintf ( stderr, "pe%d pioFileClose(): Max wait time %15.10lf s\n",
 		  pioinfo->rank, accumWaitMax );
     }
 
@@ -368,7 +368,7 @@ int fowMPINONB ( const char *filename )
   if ( ! buffersize )
     {
       if ( ddebug )
-	fprintf ( stdout, 
+	fprintf ( stderr, 
 		  "pe%d fowMPINONB(): Broadcast buffersize to collectors ...\n", 
 		  pioinfo->rank );
       
@@ -393,7 +393,7 @@ int fowMPINONB ( const char *filename )
     }
 
   if ( ddebug )
-    fprintf ( stdout, 
+    fprintf ( stderr, 
 	      "pe%d fowMPINONB(): name=%s, init and enqueued aFiledataM, return id = %d\n", 
 	      pioinfo->rank, filename, id );
   
