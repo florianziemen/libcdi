@@ -4,6 +4,7 @@
 */
 
 #ifndef NOMPI
+#ifndef _SX
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -823,4 +824,5 @@ int initPOSIXASYNCH ()
   return collectingData;
 }
 
+#endif
 #endif
