@@ -193,7 +193,7 @@ PROGRAM CDIWRITE
   
   REAL(dp) :: timerSTART, timerSTOP
   REAL(dp) :: sumOPEN, sumCLOSE, sumWRITE
-  
+  REAL(dp) :: sumMaxOPEN, sumMaxCLOSE, sumMaxWRITE
   
 #ifndef NOMPI
   CALL MPI_INIT ( error )
@@ -203,22 +203,20 @@ PROGRAM CDIWRITE
   CALL readArgs( PTYPE )
   
   IF ( ddebug == 1 ) THEN
-    WRITE ( *, * ) 'MAIN after readArgs: pe', rank, ', PTYPE=', PTYPE
+    WRITE ( 0, * ) 'MAIN after readArgs: pe', rank, ', PTYPE=', PTYPE
   END IF
 #else
   PTYPE = PIO_NONE
   pioComm = 0
 #endif
-  
-  collectingData =  pioInit( PTYPE, pioComm, &
-    myNODE, NNODES, pioCollectorComm_NODE )
+
+  collectingData = pioInit ( PTYPE, pioComm, myNODE, NNODES, pioCollectorComm_NODE )
   
   IF ( ddebug == 1 ) THEN
 #ifndef NOMPI
-    WRITE ( *, * ) 'MAIN after pioInit: pe', rank, ', NNODES=', NNODES, &
-      ', myNODE=', myNODE
+    WRITE ( 0, * ) 'MAIN after pioInit: pe', rank, ', NNODES=', NNODES, ', myNODE=', myNODE
 #else
-    WRITE ( *, * ) 'MAIN after pioInit: NNODES=', NNODES, &
+    WRITE ( 0, * ) 'MAIN after pioInit: NNODES=', NNODES, &
       ', myNODE=', myNODE
 #endif
   END IF
@@ -231,11 +229,11 @@ PROGRAM CDIWRITE
   
   IF ( ddebug == 1 ) THEN
 #ifndef NOMPI
-    WRITE ( *, * ) 'MAIN after mapStreamsOnNodes: pe', rank, &
+    WRITE ( 0, * ) 'MAIN after mapStreamsOnNodes: pe', rank, &
       ', nstreams_NODE=', nstreams_NODE, ', streamnames_NODE=', &
       streamnames_NODE, ', streamsizes_NODE=', streamsizes_NODE
 #else
-    WRITE ( *, * ) 'MAIN after mapStreamsOnNodes: nstreams_NODE=', nstreams_NODE, &
+    WRITE ( 0, * ) 'MAIN after mapStreamsOnNodes: nstreams_NODE=', nstreams_NODE, &
       ', streamnames_NODE=', streamnames_NODE, ', streamsizes_NODE=', &
       streamsizes_NODE
 #endif
@@ -245,14 +243,14 @@ PROGRAM CDIWRITE
   
   IF ( ddebug == 1 ) THEN
 #ifndef NOMPI
-    WRITE ( *, * ) 'MAIN after mapVarsOnPes: pe', rank, ', streamfirsts_PE=', &
+    WRITE ( 0, * ) 'MAIN after mapVarsOnPes: pe', rank, ', streamfirsts_PE=', &
       streamfirsts_PE, 'streamlasts_PE=', streamlasts_PE     
 #else
-    WRITE ( *, * ) 'MAIN after mapVarsOnPes: streamfirsts_PE=', &
+    WRITE ( 0, * ) 'MAIN after mapVarsOnPes: streamfirsts_PE=', &
       streamfirsts_PE, 'streamlasts_PE=', streamlasts_PE 
 #endif
   END IF
-  
+
   CALL initCoords ()    
   
   ALLOCATE ( vlistID ( nstreams_NODE ), stat = status )
@@ -331,7 +329,7 @@ PROGRAM CDIWRITE
   END DO
   
   nmiss = 0
-  
+
   !     Loop over the number of time steps
   DO tsID = 0, NTIME-1
     !        Set the verification date to 1985-01-01 + tsID
@@ -362,13 +360,13 @@ PROGRAM CDIWRITE
       END DO
     END DO
   END DO
-  
+
 #ifndef NOMPI
   timerSTART = MPI_WTIME()
 #else
   CALL CPU_TIME ( timerSTART )
 #endif
-  
+
   !     Close the output stream  
   DO i = 1, nstreams_NODE
     CALL streamClose ( streamID ( i ))
@@ -396,7 +394,7 @@ PROGRAM CDIWRITE
   DEALLOCATE ( streamfirsts_PE, stat = status )
   DEALLOCATE ( streamlasts_PE, stat = status )
   DEALLOCATE ( vlistID, stat = status )
-  DEALLOCATE ( streamID, stat = status )
+  DEALLOCATE ( streamID, stat = status )  
   DEALLOCATE ( varIDs, stat = status )
   
 1 CALL pioFinalize ()
@@ -404,49 +402,43 @@ PROGRAM CDIWRITE
 #ifndef NOMPI 
   
   IF ( ddebug == 1 ) THEN
-    WRITE ( *, * ) 'MAIN : pe', rank, ' at label "finish"' 
+    WRITE ( 0, * ) 'MAIN : pe', rank, ' at label "finish"' 
   END IF
   
-  IF ( rank == 0 ) THEN
-    CALL MPI_REDUCE ( MPI_IN_PLACE, sumOPEN,  1, MPI_DOUBLE_PRECISION, &
-      MPI_MAX, 0, pioComm, error )
-    CALL MPI_REDUCE ( MPI_IN_PLACE, sumWRITE, 1, MPI_DOUBLE_PRECISION, &
-      MPI_MAX, 0, pioComm, error )
-    CALL MPI_REDUCE ( MPI_IN_PLACE, sumCLOSE, 1, MPI_DOUBLE_PRECISION, &
-      MPI_MAX, 0, pioComm, error )
-  ELSE        
-    CALL MPI_REDUCE (    sumOPEN, sumOPEN,  1, MPI_DOUBLE_PRECISION, &
-      MPI_MAX, 0, pioComm, error )
-    CALL MPI_REDUCE (   sumWRITE, sumWRITE, 1, MPI_DOUBLE_PRECISION, &
-      MPI_MAX, 0, pioComm, error )
-    CALL MPI_REDUCE (   sumCLOSE, sumCLOSE, 1, MPI_DOUBLE_PRECISION, &
-      MPI_MAX, 0, pioComm, error )      
-  END IF
+  Call MPI_REDUCE ( sumOPEN, sumMaxOPEN,  1, MPI_DOUBLE_PRECISION, &
+       MPI_MAX, 0, pioComm, error )
+  CALL MPI_REDUCE ( sumWRITE, sumMaxWRITE, 1, MPI_DOUBLE_PRECISION, &
+       MPI_MAX, 0, pioComm, error )
+  CALL MPI_REDUCE ( sumCLOSE, sumMaxCLOSE, 1, MPI_DOUBLE_PRECISION, &
+       MPI_MAX, 0, pioComm, error )
   
   IF ( rank == 0 ) THEN
-    WRITE ( *, * ) 'MAIN: NNODES = ', NNODES, &
+    WRITE ( 0, * ) 'MAIN: NNODES = ', NNODES, &
       ', ncollectors_NODE = ', ncollectors_NODE, &
       ', PTYPE = ', PTYPENAMES ( PTYPE + 1 )
  
-    WRITE ( *, * ) '------------------------------------------------------------------'
-    WRITE ( *, * ) 'MAIN: Maximum open  time:', sumOPEN,  's'
-    WRITE ( *, * ) 'MAIN: Maximum write time:', sumWRITE, 's'
-    WRITE ( *, * ) 'MAIN: Maximum close time:', sumCLOSE, 's'
-    WRITE ( *, * ) '------------------------------------------------------------------'
+    WRITE ( 0, * ) '------------------------------------------------------------------'
+    WRITE ( 0, * ) 'MAIN: Maximum open  time:', sumMaxOPEN,  's'
+    WRITE ( 0, * ) 'MAIN: Maximum write time:', sumMaxWRITE, 's'
+    WRITE ( 0, * ) 'MAIN: Maximum close time:', sumMaxCLOSE, 's'
+    WRITE ( 0, * ) '------------------------------------------------------------------'
   END IF
+
+  CALL FLUSH ( 0 )
   
   CALL MPI_COMM_FREE ( pioComm, error )
   CALL MPI_FINALIZE ( error )
   
 #else
+}  
+  WRITE ( 0, * ) 'MAIN: ptype = SERIAL'
+  WRITE ( 0, * ) '------------------------------------------------------------------'
+  WRITE ( 0, * ) 'MAIN: Open  time:',  sumOPEN, 's'
+  WRITE ( 0, * ) 'MAIN: Write time:', sumWRITE, 's'
+  WRITE ( 0, * ) 'MAIN: Close time:', sumCLOSE, 's'
+  WRITE ( 0, * ) '------------------------------------------------------------------'
   
-  WRITE ( *, * ) 'MAIN: ptype = SERIAL'
-  WRITE ( *, * ) '------------------------------------------------------------------'
-  WRITE ( *, * ) 'MAIN: Open  time:',  sumOPEN, 's'
-  WRITE ( *, * ) 'MAIN: Write time:', sumWRITE, 's'
-  WRITE ( *, * ) 'MAIN: Close time:', sumCLOSE, 's'
-  WRITE ( *, * ) '------------------------------------------------------------------'
-  
+  CALL FLUSH ( 0 )
 #endif
   
   
@@ -460,38 +452,55 @@ CONTAINS
     
     INTEGER, INTENT ( OUT ) :: argMode
     INTEGER :: numarg, inum, length
-    CHARACTER :: arg
+    
+#ifndef __SX__
+    INTEGER :: COMMAND_ARGUMENT_COUNT
+#else
+    INTEGER :: IARGC
+#endif 
+    
+    CHARACTER ( len = 32 ) :: arg
     
     IF ( rank == 0 ) THEN
-      
-      numarg = command_argument_count ()    
-      
-      IF ( numarg /= 1 ) THEN
-        WRITE ( 0, * ) 'ERROR: command line argument, NUMBER EXACTLY ONE'
-        CALL MPI_ABORT ( MPI_COMM_WORLD, error )
-      END IF
-
-      argMode = 0     
-      CALL get_command_argument ( 1, value = arg )
-      length = LEN_TRIM ( arg )
-
-      IF ( length > 9 ) THEN
-        WRITE ( 0, * ) 'ERROR: command line argument, NOT READABLE'
-        CALL MPI_ABORT ( MPI_COMM_WORLD, error )
-      END IF
-    
-      DO i = 1, length
-        inum = IACHAR ( arg ( i : i )) - 48  
-        IF ( inum < 0 .OR. inum > 9 ) THEN
-          WRITE ( 0, * ) 'ERROR: command line argument, MODUS NOT VALID'
+       
+#ifndef __SX__
+       numarg = COMMAND_ARGUMENT_COUNT ()  
+#else
+       numarg = IARGC ()
+#endif
+       
+       IF ( numarg /= 1 ) THEN
+          WRITE ( 0, * ) 'ERROR: command line argument, NUMBER EXACTLY ONE'
           CALL MPI_ABORT ( MPI_COMM_WORLD, error )
-        END IF
-        argMode = argMode + inum * 10 ** ( length - i )
-      END DO
+       END IF
+       
+#ifndef __SX__
+       CALL GET_COMMAND_ARGUMENT ( 1, arg )
+#else
+       CALL GETARG ( 1, arg )
+#endif
+       
+       length = LEN_TRIM ( arg )
+       
+       IF ( length > 9 ) THEN
+          WRITE ( 0, * ) 'ERROR: command line argument, NOT READABLE'
+          CALL MPI_ABORT ( MPI_COMM_WORLD, error )
+       END IF
+       
+       argMode = 0
+       
+       DO i = 1, length
+          inum = IACHAR ( arg ( i : i )) - 48  
+          IF ( inum < 0 .OR. inum > 9 ) THEN
+             WRITE ( 0, * ) 'ERROR: command line argument, MODUS NOT VALID'
+             CALL MPI_ABORT ( MPI_COMM_WORLD, error )
+          END IF
+          argMode = argMode + inum * 10 ** ( length - i )
+       END DO
     END IF
     
     CALL MPI_BCAST ( argMode, 1, MPI_INTEGER, 0, pioComm, error );
-
+    
   END SUBROUTINE readArgs
 #endif
   
@@ -501,43 +510,58 @@ CONTAINS
     
 #ifndef NOMPI
     INTEGER :: mapping ( NSTREAMS )
-    INTEGER :: rank_NODE, npes_NODE
+    INTEGER :: rank_NODE, ncollectors_NODE, npes_NODE, root_iNODE
     INTEGER :: recvstatus ( MPI_STATUS_SIZE ), size, i        
-
+    
     CALL MPI_COMM_RANK ( pioCollectorComm_NODE, rank_NODE, error )
+    CALL MPI_COMM_SIZE ( pioCollectorComm_NODE, ncollectors_NODE, error )
     CALL MPI_COMM_SIZE ( pioComm, size, error )
-    npes_NODE = size / NNODES
+    
+    IF ( ptype == PIO_NONE .OR. ptype == PIO_MPI_NONB ) THEN
+       npes_NODE = ncollectors_NODE
+    ELSE 
+       npes_NODE = ncollectors_NODE + 1
+    END IF
+    
+    i = size / NNODES
+    
+    IF ( npes_NODE /= i ) THEN
+       WRITE ( 0, * ) 'ERROR, for simplicity of testcase MPI distribute MPI', &
+            ' processes equally over physical nodes.'         
+       CALL MPI_ABORT ( MPI_COMM_WORLD, 1 )
+    END IF
+
     IF ( rank_NODE /= MOD ( rank, npes_NODE )) THEN
-      WRITE ( *, * ) 'ERROR, ranks are not compatible'
-      CALL MPI_ABORT ( MPI_COMM_WORLD, 1 )
+       WRITE ( 0, * ) 'ERROR, MAIN: ranks are not compatible'
+       CALL MPI_ABORT ( MPI_COMM_WORLD, 1 )
     END IF
 
     IF ( rank == 0 ) THEN
-      CALL mapProblems ( STREAMSIZES, mapping, NSTREAMS, NNODES  )
-      DO i = 2, NNODES
-      	 CALL MPI_SEND ( mapping, NSTREAMS, MPI_INTEGER, &
-          ( i - 1 ) * npes_NODE, 0, pioComm, error )
-      END DO	  
+       CALL mapProblems ( STREAMSIZES, mapping, NSTREAMS, NNODES  )
     END IF
-
-    IF ( rank /= 0 .AND. rank_NODE == 0 ) THEN
-      CALL MPI_RECV ( mapping, NSTREAMS, MPI_INTEGER, 0, 0, &
-        pioComm, recvstatus, error )
-    END IF
-
+    DO i = 2, NNODES
+       root_iNODE = ( i - 1 ) * npes_NODE
+       IF ( rank == 0 ) THEN
+          CALL MPI_SEND ( mapping, NSTREAMS, MPI_INTEGER, &
+               root_iNODE, 0, pioComm, error )
+       ELSE IF ( rank == root_iNODE ) THEN
+          CALL MPI_RECV ( mapping, NSTREAMS, MPI_INTEGER, 0, 0, &
+               pioComm, recvstatus, error )
+       END IF
+    END DO
+    
     IF ( rank_NODE  == 0 ) THEN
-      nstreams_NODE = 0
-      
-      DO i = 1, NSTREAMS
-        IF ( mapping ( i ) == myNODE ) THEN
-          nstreams_NODE = nstreams_NODE + 1
-        END IF
-      END DO
+       nstreams_NODE = 0      
+       DO i = 1, NSTREAMS
+          IF ( mapping ( i ) == myNODE ) THEN
+             nstreams_NODE = nstreams_NODE + 1
+          END IF
+       END DO
     END IF
-
+    
     IF ( PTYPE /= PIO_NONE ) THEN
-      CALL MPI_BCAST ( nstreams_NODE, 1, MPI_INTEGER, 0, &
-        pioCollectorComm_NODE, error )
+       CALL MPI_BCAST ( nstreams_NODE, 1, MPI_INTEGER, 0, &
+            pioCollectorComm_NODE, error )
     END IF
 #else
     
@@ -551,25 +575,25 @@ CONTAINS
 #ifndef NOMPI
     
     IF ( rank_NODE == 0 ) THEN
-      j = 1
-      
-      DO i = 1, NSTREAMS
-        IF ( mapping ( i ) == myNODE ) THEN
-          streamsizes_NODE ( j ) = STREAMSIZES ( i )
-          streamnames_NODE ( j ) = STREAMNAMES ( i )
-          j = j + 1
-        END IF
-      END DO
+       j = 1
+       
+       DO i = 1, NSTREAMS
+          IF ( mapping ( i ) == myNODE ) THEN
+             streamsizes_NODE ( j ) = STREAMSIZES ( i )
+             streamnames_NODE ( j ) = STREAMNAMES ( i )
+             j = j + 1
+          END IF
+       END DO
     END IF
-
+    
     IF ( PTYPE /= PIO_NONE ) THEN
-      CALL MPI_BCAST ( streamsizes_NODE, nstreams_Node, MPI_INTEGER, &
-        0, pioCollectorComm_NODE, error )
-      
-      DO i = 1, nstreams_NODE
-        CALL MPI_BCAST ( streamnames_NODE ( i ), 8, MPI_CHARACTER, &
-          0, pioCollectorComm_NODE, error )
-      END DO
+       CALL MPI_BCAST ( streamsizes_NODE, nstreams_Node, MPI_INTEGER, &
+            0, pioCollectorComm_NODE, error )
+       
+       DO i = 1, nstreams_NODE
+          CALL MPI_BCAST ( streamnames_NODE ( i ), 8, MPI_CHARACTER, &
+               0, pioCollectorComm_NODE, error )
+       END DO
     END IF
 #else
     streamsizes_NODE = STREAMSIZES
@@ -587,15 +611,15 @@ CONTAINS
     
 #ifndef NOMPI
     IF ( PTYPE /= PIO_NONE ) THEN
-      CALL MPI_COMM_SIZE ( pioCollectorComm_NODE, ncollectors_NODE, error )
-      DO i = 1, nstreams_NODE
-        CALL initLocalstream ( ncollectors_NODE, streamsizes_NODE ( i ), &
-          streamfirsts_PE ( i ), streamlasts_PE ( i ))
-      END DO
+       CALL MPI_COMM_SIZE ( pioCollectorComm_NODE, ncollectors_NODE, error )
+       DO i = 1, nstreams_NODE
+          CALL initLocalstream ( ncollectors_NODE, streamsizes_NODE ( i ), &
+               streamfirsts_PE ( i ), streamlasts_PE ( i ))
+       END DO
     ELSE
-      ncollectors_NODE = 1
-      streamfirsts_PE = 1
-      streamlasts_PE = streamsizes_NODE
+       ncollectors_NODE = 1
+       streamfirsts_PE = 1
+       streamlasts_PE = streamsizes_NODE
     END IF
 #else
     streamfirsts_PE = 1
@@ -613,11 +637,11 @@ CONTAINS
     INTEGER :: j
     
     DO j = 1, NLON*NLAT*NLEV
-      argVar ( j ) = 100.0 * ( argSID + 1 ) + argTSID + 1.0
+       argVar ( j ) = 100.0 * ( argSID + 1 ) + argTSID + 1.0
     END DO
     
   END SUBROUTINE initVar
-
+  
   !********************************************
   
   SUBROUTINE initCoords
@@ -626,7 +650,7 @@ CONTAINS
     REAL ( dp )  :: dist
     
     DO i = 1, NLON
-      LONS ( i ) = 360.0 / NLON * (  i - 1 )
+       LONS ( i ) = 360.0 / NLON * (  i - 1 )
     END DO
     
     dist = 180.0 / NLAT
@@ -634,11 +658,11 @@ CONTAINS
     LATS ( 1 ) = -90 + dist / 2.0;
     
     DO i = 2, NLAT
-      LATS ( i ) = LATS ( i - 1 ) + dist
+       LATS ( i ) = LATS ( i - 1 ) + dist
     END DO
     
     DO i = 1, NLEV
-      LEVS ( i ) = 101300.0 / NLEV * i
+       LEVS ( i ) = 101300.0 / NLEV * i
     END DO
     
   END SUBROUTINE initCoords
@@ -659,19 +683,19 @@ CONTAINS
     ifirst   = rank * lrecords + 1
     
     IF ( rest /= 0 ) THEN
-      IF ( rank < rest ) THEN
-        lrecords = lrecords + 1
-        ifirst = ifirst + rank
-      ELSE
-        ifirst = ifirst + rest
-      END IF
+       IF ( rank < rest ) THEN
+          lrecords = lrecords + 1
+          ifirst = ifirst + rank
+       ELSE
+          ifirst = ifirst + rest
+       END IF
     END IF
     
     ilast = ifirst + lrecords - 1
     
     IF ( ddebug == 1 ) THEN
-      WRITE ( *, * ) 'MAIN: pe', rank, 'has', lrecords, 'out of ', &
-        sizestream, 'records to write. ifirst=', ifirst, ', ilast=', ilast
+       WRITE ( 0, * ) 'MAIN: pe', rank, 'has', lrecords, 'out of ', &
+            sizestream, 'records to write. ifirst=', ifirst, ', ilast=', ilast
     END IF
     
   END SUBROUTINE initLocalstream
