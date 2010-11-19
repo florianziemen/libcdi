@@ -23705,10 +23705,10 @@ else
 fi
 
 if test "${enable_mpi}" = "yes"; then :
-  if test "${host_os:0:3}" = "aix"; then :
-  replace_cc="mpcc_r"
-else
+  if test "${host_os%???}" = "aix"; then :
   replace_cc="mpicc"
+else
+  replace_cc="mpcc_r"
 fi
 else
   replace_cc=$CC

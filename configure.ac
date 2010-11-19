@@ -83,9 +83,9 @@ ACX_OPTIONS
 # Compile with MPI support
 AC_ARG_ENABLE(mpi,AS_HELP_STRING([--enable-mpi],[Compile with MPI compiler [default=no]]),enable_mpi=${enableval},enable_mpi=no)
 AS_IF([test "${enable_mpi}" = "yes"],
-      [AS_IF([test "${host_os:0:3}" = "aix"],
-             [replace_cc="mpcc_r"],
-             [replace_cc="mpicc"])],
+      [AS_IF([test "${host_os%???}" = "aix"],
+             [replace_cc="mpicc"],
+             [replace_cc="mpcc_r"])],
       [replace_cc=$CC])
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
