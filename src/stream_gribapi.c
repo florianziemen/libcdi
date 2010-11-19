@@ -805,9 +805,13 @@ void gribapiScanTimestep1(int streamID)
 	{
 	  size_t len = 256;
 	  char typeOfPacking[256];
-	  GRIB_CHECK(grib_get_string(gh, "typeOfPacking", typeOfPacking, &len), 0);
-	  // fprintf(stderr, "typeOfPacking %d %s\n", len, typeOfPacking);
-	  if ( strncmp(typeOfPacking, "grid_jpeg", len) == 0 ) ztype = COMPRESS_JPEG;
+
+	  status = grib_get_string(gh, "typeOfPacking", typeOfPacking, &len);
+	  if ( status == 0 )
+	    {
+	      // fprintf(stderr, "typeOfPacking %d %s\n", len, typeOfPacking);
+	      if ( strncmp(typeOfPacking, "grid_jpeg", len) == 0 ) ztype = COMPRESS_JPEG;
+	    }
 	  
 	  GRIB_CHECK(grib_get_long(gh, "discipline", &lpar), 0);
 	  pdis = (int) lpar;
