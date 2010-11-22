@@ -1103,10 +1103,6 @@ void zaxisChangeType(int zaxisID, int zaxistype)
   zaxisptr = zaxis_to_pointer(zaxisID);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
-
-  Message("Changed zaxis type from %s to %s\n",
-	  zaxisNamePtr(zaxisptr->type),
-	  zaxisNamePtr(zaxistype));
   
   zaxisptr->type = zaxistype;
 }

@@ -375,6 +375,9 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 
   if ( leveltype == ZAXIS_GENERIC )
     {
+      Message("Changed zaxis type from %s to %s\n",
+	      zaxisNamePtr(leveltype),
+	      zaxisNamePtr(ZAXIS_PRESSURE));
       leveltype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, leveltype);
       zaxisDefUnits(zaxisID, "Pa");

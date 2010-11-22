@@ -1949,6 +1949,9 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 
   if ( zaxistype == ZAXIS_GENERIC && ltype == 0 )
     {
+      Message("Changed zaxis type from %s to %s\n",
+	      zaxisNamePtr(zaxistype),
+	      zaxisNamePtr(ZAXIS_PRESSURE));
       zaxistype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, zaxistype);
       zaxisDefUnits(zaxisID, "Pa");

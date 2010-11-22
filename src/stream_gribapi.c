@@ -2193,6 +2193,9 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 
   if ( zaxistype == ZAXIS_GENERIC && ltype == 0 )
     {
+      Message("Changed zaxis type from %s to %s\n",
+	      zaxisNamePtr(zaxistype),
+	      zaxisNamePtr(ZAXIS_PRESSURE));
       zaxistype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, zaxistype);
       zaxisDefUnits(zaxisID, "Pa");
