@@ -106,7 +106,7 @@ the byteorder can be little or big endian.
 The following Fortran code example can be used to read a 
 SERVICE record with an accuracy of 4 bytes:
 
-\begin{lstlisting}[backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+\begin{lstlisting}[language=Fortran, backgroundcolor=\color{zebg}, basicstyle=\small, columns=flexible]
    INTEGER*4 icode,ilevel,idate,itime,nlon,nlat,idispo1,idispo2
    REAL*4 field(mlon,mlat)
       ...
@@ -142,7 +142,7 @@ blocking for binary data records. An EXTRA record can have an accuracy of 4 or
 The following Fortran code example can be used to read an
 EXTRA record with an accuracy of 4 bytes:
 
-\begin{lstlisting}[backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+\begin{lstlisting}[language=Fortran, backgroundcolor=\color{zebg}, basicstyle=\small, columns=flexible]
    INTEGER*4 idate,icode,ilevel,nsize
    REAL*4 field(msize)
       ...

@@ -11,7 +11,7 @@ Here is an example using {\CDI} to write a netCDF dataset with
 on surface level and the second variable is a 3D field on 5 pressure
 levels. Both variables are on the same lon/lat grid. 
 
-\lstinputlisting[language=C, frame=single, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+\lstinputlisting[language=C, frame=single, backgroundcolor=\color{zebg}, basicstyle=\small, columns=flexible]
 {../../examples/cdi_write.c}
 
 
@@ -19,7 +19,7 @@ levels. Both variables are on the same lon/lat grid.
 
 This is the {\tt ncdump -h} output of the resulting netCDF file {\tt example.nc}.
 
-\begin{lstlisting}[frame=single, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+\begin{lstlisting}[frame=single, backgroundcolor=\color{zebg}, basicstyle=\small, columns=flexible]
 netcdf example {
 dimensions:
         lon = 12 ;
@@ -59,7 +59,7 @@ data:
 
 This example reads the netCDF file {\tt example.nc} from \htmlref{Appendix B.1}{example_write}.
 
-\lstinputlisting[language=C, frame=single, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+\lstinputlisting[language=C, frame=single, backgroundcolor=\color{zebg}, basicstyle=\small, columns=flexible]
 {../../examples/cdi_read.c}
 
 
@@ -69,5 +69,5 @@ This example reads the netCDF file {\tt example.nc} from \htmlref{Appendix B.1}{
 and writes the result to a GRIB dataset by simple setting the output file type
 to {\tt FILETYPE\_GRB}.
 
-\lstinputlisting[language=C, frame=single, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+\lstinputlisting[language=C, frame=single, backgroundcolor=\color{zebg}, basicstyle=\small, columns=flexible]
 {../../examples/cdi_copy.c}
