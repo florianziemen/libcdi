@@ -1,17 +1,17 @@
 #include <stdio.h>
 #include "cdi.h"
 
-#define  NLON   12 /* Number of longitudes */
-#define  NLAT    6 /* Number of latitudes  */
-#define  NLEV    5 /* Number of levels     */
-#define  NTIME   3 /* Number of time steps */
+int nlon = 12; /* Number of longitudes */
+int nlat =  6; /* Number of latitudes  */
+int nlev =  5; /* Number of levels     */
+int nts  =  3; /* Number of time steps */
 
 int main(void)
 {
   int taxisID, vlistID, varID1, varID2, streamID, tsID;
   int nmiss, vdate, vtime;
-  double var1[NLON*NLAT];
-  double var2[NLON*NLAT*NLEV];
+  double var1[nlon*nlat];
+  double var2[nlon*nlat*nlev];
 
 
   /* Open the dataset */
@@ -33,7 +33,7 @@ int main(void)
   taxisID = vlistInqTaxis(vlistID);
 
   /* Loop over the number of time steps */
-  for ( tsID = 0; tsID < NTIME; tsID++ )
+  for ( tsID = 0; tsID < nts; tsID++ )
     {
       /* Inquire the time step */
       streamInqTimestep(streamID, tsID);

@@ -38,16 +38,16 @@ Here is an example using {\tt gridCreate} to create a regular lon/lat Grid:
 
     INCLUDE 'cdi.h'
        ...
-    #define  NLON  12
-    #define  NLAT   6
+    #define  nlon  12
+    #define  nlat   6
        ...
-    REAL*8 lons(NLON) = (/0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330/)
-    REAL*8 lats(NLAT) = (/-75, -45, -15, 15, 45, 75/)
+    REAL*8 lons(nlon) = (/0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330/)
+    REAL*8 lats(nlat) = (/-75, -45, -15, 15, 45, 75/)
     INTEGER gridID
        ...
-    gridID = gridCreate(GRID_LONLAT, NLON*NLAT)
-    CALL gridDefXsize(gridID, NLON)
-    CALL gridDefYsize(gridID, NLAT)
+    gridID = gridCreate(GRID_LONLAT, nlon*nlat)
+    CALL gridDefXsize(gridID, nlon)
+    CALL gridDefYsize(gridID, nlat)
     CALL gridDefXvals(gridID, lons)
     CALL gridDefYvals(gridID, lats)
        ...

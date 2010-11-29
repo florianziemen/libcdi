@@ -4,16 +4,16 @@
 
       INCLUDE 'cdi.inc'
 
-      INTEGER NLON, NLAT, NLEV, NTIME
-      PARAMETER (NLON  = 12)   ! Number of longitudes
-      PARAMETER (NLAT  =  6)   ! Number of latitudes
-      PARAMETER (NLEV  =  5)   ! Number of levels
-      PARAMETER (NTIME =  3)   ! Number of time steps
+      INTEGER nlon, nlat, nlev, nts
+      PARAMETER (nlon = 12)   ! Number of longitudes
+      PARAMETER (nlat =  6)   ! Number of latitudes
+      PARAMETER (nlev =  5)   ! Number of levels
+      PARAMETER (nts  =  3)   ! Number of time steps
 
       INTEGER gridID, zaxisID1, zaxisID2, taxisID, tsID
       INTEGER vlistID1, vlistID2, varID1, varID2, streamID1, streamID2
       INTEGER i, nmiss, status, vdate, vtime
-      REAL*8 var1(NLON*NLAT), var2(NLON*NLAT*NLEV)
+      REAL*8 var1(nlon*nlat), var2(nlon*nlat*nlev)
 
 !     Open the input dataset
       streamID1 = streamOpenRead("example.nc")
@@ -44,7 +44,7 @@
       CALL streamDefVlist(streamID2, vlistID2)
 
 !     Loop over the number of time steps
-      DO tsID = 0, NTIME-1
+      DO tsID = 0, nts-1
 !        Inquire the input time step */
          status = streamInqTimestep(streamID1, tsID)
 

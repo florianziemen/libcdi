@@ -323,12 +323,12 @@ Here is an example using @func{zaxisCreate} to create a pressure level Z-axis:
 @Source
 #include "cdi.h"
    ...
-#define  NLEV    5
+#define  nlev    5
    ...
-double levs[NLEV] = {101300, 92500, 85000, 50000, 20000};
+double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
 int zaxisID;
    ...
-zaxisID = zaxisCreate(ZAXIS_PRESSURE, NLEV);
+zaxisID = zaxisCreate(ZAXIS_PRESSURE, nlev);
 zaxisDefLevels(zaxisID, levs);
    ...
 @EndSource

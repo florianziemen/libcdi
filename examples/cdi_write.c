@@ -1,27 +1,27 @@
 #include <stdio.h>
 #include "cdi.h"
 
-#define  NLON   12 /* Number of longitudes */
-#define  NLAT    6 /* Number of latitudes  */
-#define  NLEV    5 /* Number of levels     */
-#define  NTIME   3 /* Number of time steps */
+#define  nlon   12 /* Number of longitudes */
+#define  nlat    6 /* Number of latitudes  */
+#define  nlev    5 /* Number of levels     */
+#define  nts     3 /* Number of time steps */
 
 int main(void)
 {
   int gridID, zaxisID1, zaxisID2, taxisID;
   int vlistID, varID1, varID2, streamID, tsID;
   int i, nmiss = 0;
-  double lons[NLON] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
-  double lats[NLAT] = {-75, -45, -15, 15, 45, 75};
-  double levs[NLEV] = {101300, 92500, 85000, 50000, 20000};
-  double var1[NLON*NLAT];
-  double var2[NLON*NLAT*NLEV];
+  double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
+  double lats[nlat] = {-75, -45, -15, 15, 45, 75};
+  double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
+  double var1[nlon*nlat];
+  double var2[nlon*nlat*nlev];
 
 
   /* Create a regular lon/lat grid */
-  gridID = gridCreate(GRID_LONLAT, NLON*NLAT);
-  gridDefXsize(gridID, NLON);
-  gridDefYsize(gridID, NLAT);
+  gridID = gridCreate(GRID_LONLAT, nlon*nlat);
+  gridDefXsize(gridID, nlon);
+  gridDefYsize(gridID, nlat);
   gridDefXvals(gridID, lons);
   gridDefYvals(gridID, lats);
 
@@ -29,7 +29,7 @@ int main(void)
   zaxisID1 = zaxisCreate(ZAXIS_SURFACE, 1);
 
   /* Create a pressure level Z-axis */
-  zaxisID2 = zaxisCreate(ZAXIS_PRESSURE, NLEV);
+  zaxisID2 = zaxisCreate(ZAXIS_PRESSURE, nlev);
   zaxisDefLevels(zaxisID2, levs);
  
   /* Create a variable list */
@@ -61,7 +61,7 @@ int main(void)
   streamDefVlist(streamID, vlistID);
 
   /* Loop over the number of time steps */
-  for ( tsID = 0; tsID < NTIME; tsID++ )
+  for ( tsID = 0; tsID < nts; tsID++ )
     {
       /* Set the verification date to 1985-01-01 + tsID */
       taxisDefVdate(taxisID, 19850101+tsID);
@@ -71,8 +71,8 @@ int main(void)
       streamDefTimestep(streamID, tsID);
 
       /* Init var1 and var2 */
-      for ( i = 0; i < NLON*NLAT;      i++ ) var1[i] = 1.1;
-      for ( i = 0; i < NLON*NLAT*NLEV; i++ ) var2[i] = 2.2;
+      for ( i = 0; i < nlon*nlat;      i++ ) var1[i] = 1.1;
+      for ( i = 0; i < nlon*nlat*nlev; i++ ) var2[i] = 2.2;
 
       /* Write var1 and var2 */
       streamWriteVar(streamID, varID1, var1, nmiss);

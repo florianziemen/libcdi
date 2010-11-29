@@ -38,12 +38,12 @@ Here is an example using {\tt zaxisCreate} to create a pressure level Z-axis:
 
     INCLUDE 'cdi.h'
        ...
-    #define  NLEV    5
+    #define  nlev    5
        ...
-    REAL*8 levs(NLEV) = (/101300, 92500, 85000, 50000, 20000/)
+    REAL*8 levs(nlev) = (/101300, 92500, 85000, 50000, 20000/)
     INTEGER zaxisID
        ...
-    zaxisID = zaxisCreate(ZAXIS_PRESSURE, NLEV)
+    zaxisID = zaxisCreate(ZAXIS_PRESSURE, nlev)
     CALL zaxisDefLevels(zaxisID, levs)
        ...
 \end{lstlisting}
