@@ -3869,7 +3869,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
 static
 int isLonAxis(const char *units, const char *stdname)
 {
-  int lunit = FALSE;
+  int status = FALSE;
 
   if ( memcmp(units, "degrees_east", 12) == 0 ||
        memcmp(units, "degree_east", 11)  == 0 ||
@@ -3883,10 +3883,10 @@ int isLonAxis(const char *units, const char *stdname)
        (memcmp(units, "radian", 6)            == 0 &&
         memcmp(stdname, "grid_longitude", 14) == 0) )
     {
-      lunit = TRUE;
+      status = TRUE;
     }
 
-  return (lunit);
+  return (status);
 }
 #endif
 
@@ -3894,7 +3894,7 @@ int isLonAxis(const char *units, const char *stdname)
 static
 int isLatAxis(const char *units, const char *stdname)
 {
-  int lunit = FALSE;
+  int status = FALSE;
 
   if ( memcmp(units, "degrees_north", 13) == 0 ||
        memcmp(units, "degree_north", 12)  == 0 ||
@@ -3908,10 +3908,55 @@ int isLatAxis(const char *units, const char *stdname)
        (memcmp(units, "radian", 6)           == 0 &&
         memcmp(stdname, "grid_latitude", 13) == 0) )
     {
-      lunit = TRUE;
+      status = TRUE;
     }
 
-  return (lunit);
+  return (status);
+}
+#endif
+
+#if  defined  (HAVE_LIBNETCDF)
+static
+int isDBLAxis(const char *longname)
+{
+  int status = FALSE;
+
+  if ( strcmp(longname, "depth below land")         == 0 ||
+       strcmp(longname, "depth_below_land")         == 0 ||
+       strcmp(longname, "levels below the surface") == 0 )
+    {
+      status = TRUE;
+    }
+
+  return (status);
+}
+
+static
+int isDBSAxis(const char *longname)
+{
+  int status = FALSE;
+
+  if ( strcmp(longname, "depth_below_sea") == 0 ||
+       strcmp(longname, "depth below sea") == 0 )
+    {
+      status = TRUE;
+    }
+
+  return (status);
+}
+
+static
+int isHeightAxis(const char *longname)
+{
+  int status = FALSE;
+
+  if ( strcmp(longname, "height") == 0 ||
+       strcmp(longname, "height above the surface") == 0 )
+    {
+      status = TRUE;
+    }
+
+  return (status);
 }
 #endif
 
@@ -3919,7 +3964,7 @@ int isLatAxis(const char *units, const char *stdname)
 static
 int unitsIsPressure(const char *units)
 {
-  int lunit = FALSE;
+  int status = FALSE;
 
   if ( memcmp(units, "millibar", 8) == 0 ||
        memcmp(units, "mb", 2)       == 0 ||
@@ -3927,10 +3972,10 @@ int unitsIsPressure(const char *units)
        memcmp(units, "hPa", 3)      == 0 ||
        memcmp(units, "Pa", 2)       == 0 )
     {
-      lunit = TRUE;
+      status = TRUE;
     }
 
-  return (lunit);
+  return (status);
 }
 #endif
 
@@ -4647,18 +4692,14 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 		}
 	      else if ( strcmp(ncvars[ncvarid].units, "cm")  == 0 )
 		{
-		  if ( strcmp(ncvars[ncvarid].longname, "depth below land")         == 0 ||
-		       strcmp(ncvars[ncvarid].longname, "depth_below_land")         == 0 ||
-		       strcmp(ncvars[ncvarid].longname, "levels below the surface") == 0 )
+		  if ( isDBLAxis(ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_LAND;
 		}
 	      else if ( strcmp(ncvars[ncvarid].units, "m")   == 0 )
 		{
-		  if ( strcmp(ncvars[ncvarid].longname, "depth_below_sea") == 0 ||
-		       strcmp(ncvars[ncvarid].longname, "depth below sea") == 0 )
+		  if ( isDBSAxis(ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_SEA;
-		  else if ( strcmp(ncvars[ncvarid].longname, "height") == 0 ||
-			    strcmp(ncvars[ncvarid].longname, "height above the surface") == 0 )
+		  else if ( isHeightAxis(ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HEIGHT;
 		}
 	    }
@@ -4733,19 +4774,15 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		}
 	      else if ( strcmp(ncvars[ncvarid].units, "cm")  == 0 )
 		{
-		  if ( strcmp(ncvars[ncvarid].longname, "depth below land")         == 0 ||
-		       strcmp(ncvars[ncvarid].longname, "depth_below_land")         == 0 ||
-		       strcmp(ncvars[ncvarid].longname, "levels below the surface") == 0 )
+		  if ( isDBLAxis(ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_LAND;
 		  continue;
 		}
 	      else if ( strcmp(ncvars[ncvarid].units, "m")   == 0 )
 		{
-		  if ( strcmp(ncvars[ncvarid].longname, "depth_below_sea") == 0 ||
-		       strcmp(ncvars[ncvarid].longname, "depth below sea") == 0 )
+		  if ( isDBSAxis(ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_SEA;
-		  else if ( strcmp(ncvars[ncvarid].longname, "height") == 0 ||
-			    strcmp(ncvars[ncvarid].longname, "height above the surface") == 0 )
+		  else if ( isHeightAxis(ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HEIGHT;
 		  continue;
 		}
