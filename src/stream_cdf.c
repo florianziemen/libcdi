@@ -4574,347 +4574,13 @@ void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
     }
 }
 
-
-int cdfInqContents(int streamID)
-{
 #if  defined  (HAVE_LIBNETCDF)
-  int ndims, nvars, ngatts, unlimdimid;
-  int varID, ncvarid, ncvarid2;
-  int ncdimid;
-  int varID1;
-  int fileID;
-  int nvatts;
-  nc_type xtype;
-  size_t size = 0, xsize, ysize;
-  size_t ntsteps;
-  int timedimid = -1;
-  int *varids;
-  int nvarids;
-  size_t attlen;
-  int  ilev;
-  char name[256];
-  char attname[256];
-  const int attstringlen = 8192; char attstring[8192];
-  char *pname, *plongname, *punits;
-  double datt;
-  int iatt, timehasunits = FALSE;
-  int time_has_bounds = FALSE;
-  size_t len;
-  int nc_nvars;
-  int nvcth_id = UNDEFID, vcta_id = UNDEFID, vctb_id = UNDEFID;
-  grid_t grid;
-  int gridindex;
-  int zaxisindex;
-  size_t vctsize = 0;
-  int tableID;
-  double *vct = NULL;
-  int instID  = UNDEFID;
-  int modelID = UNDEFID;
-  int code;
-  int taxisID;
-  int i;
-  int nbdims;
-  size_t nvertex;
-  int zprec;
-  int calendar = UNDEFID;
-  ncdim_t *ncdims;
-  ncvar_t *ncvars;
-  int vlistID;
-  stream_t *streamptr;
-  int format = 0;
-  int ucla_les = FALSE;
+/* verify coordinate vars - first scan (dimname == varname) */
+static
+void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int timedimid)
+{
+  int ncdimid, ncvarid;
 
-  streamptr = stream_to_pointer(streamID);
-  
-  stream_check_ptr(__func__, streamptr);
-
-  vlistID = streamInqVlist(streamID);
-  fileID  = streamInqFileID(streamID);
-
-  if ( CDI_Debug )
-    Message("streamID = %d, fileID = %d", streamID, fileID);
-
-#if  defined  (NC_NETCDF4)
-  nc_inq_format(fileID, &format);
-#endif
-
-  cdf_inq(fileID, &ndims , &nvars, &ngatts, &unlimdimid);
-
-  /* alloc ncdims */
-  if ( ndims > 0 )
-    ncdims = (ncdim_t *) malloc(ndims*sizeof(ncdim_t));
-  else
-    {
-      Warning("ndims = %d", ndims);
-      return (CDI_EUFSTRUCT);
-    }
-  
-  /* alloc ncvars */
-  if ( nvars > 0 )
-    ncvars = (ncvar_t *) malloc(nvars*sizeof(ncvar_t));
-  else
-    {
-      Warning("nvars = %d", nvars);
-      return (CDI_EUFSTRUCT);
-    }
-
-  init_ncdims(ndims, ncdims);
-  init_ncvars(nvars, ncvars);
-
-  /* read global attributtes*/
-  for ( iatt = 0; iatt < ngatts; iatt++ )
-    {
-      cdf_inq_attname(fileID, NC_GLOBAL, iatt, attname);
-      cdf_inq_atttype(fileID, NC_GLOBAL, attname, &xtype);
-      cdf_inq_attlen(fileID, NC_GLOBAL, attname, &attlen);
-
-      if ( xtype == NC_CHAR )
-	{
-	  cdfGetAttText(fileID, NC_GLOBAL, attname, attstringlen-1, attstring);
-
-	  if ( attlen > 0 && attstring[0] != 0 )
-	    {
-	      if ( strcmp(attname, "history") == 0 )
-		{
-		  streamptr->historyID = iatt;
-		}
-	      else if ( strcmp(attname, "institution") == 0 )
-		{
-		  instID = institutInq(0, 0, NULL, attstring);
-		  if ( instID == UNDEFID )
-		    instID = institutDef(0, 0, NULL, attstring);
-		}
-	      else if ( strcmp(attname, "source") == 0 )
-		{
-		  modelID = modelInq(-1, 0, attstring);
-		}
-	      else if ( strcmp(attname, "Source") == 0 )
-		{
-		  if ( strncmp(attstring, "UCLA-LES", 8) == 0 )
-		    ucla_les = TRUE;
-		}
-	      /*
-	      else if ( strcmp(attname, "Conventions") == 0 )
-		{
-		}
-	      */
-	      else if ( strcmp(attname, "CDI") == 0 )
-		{
-		}
-	      else if ( strcmp(attname, "CDO") == 0 )
-		{
-		}
-	      else
-		{
-		  vlistDefAttTxt(vlistID, CDI_GLOBAL, attname, (int)attlen, attstring);
-		}
-	    }
-	}
-      else if ( xtype == NC_SHORT || xtype == NC_INT )
-	{
-	  int *attint;
-	  attint = (int *) malloc(attlen*sizeof(int));
-	  cdfGetAttInt(fileID, NC_GLOBAL, attname, attlen, attint);
-	  if ( xtype == NC_SHORT )
-	    vlistDefAttInt(vlistID, CDI_GLOBAL, attname, DATATYPE_INT16, (int)attlen, attint);
-	  else
-	    vlistDefAttInt(vlistID, CDI_GLOBAL, attname, DATATYPE_INT32, (int)attlen, attint);
-	  free(attint);
-	}
-      else if ( xtype == NC_FLOAT || xtype == NC_DOUBLE )
-	{
-	  double *attflt;
-	  attflt = (double *) malloc(attlen*sizeof(double));
-	  cdfGetAttDouble(fileID, NC_GLOBAL, attname, attlen, attflt);
-	  if ( xtype == NC_FLOAT )
-	    vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, DATATYPE_FLT32, (int)attlen, attflt);
-	  else
-	    vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, DATATYPE_FLT64, (int)attlen, attflt);
-	  free(attflt);
-	}
-    }
-
-  /* find time dim */
-  if ( unlimdimid >= 0 )
-    timedimid = unlimdimid;
-  else
-    timedimid = cdfTimeDimID(fileID, ndims, nvars);
-
-  streamptr->basetime.ncdimid = timedimid;
-
-  if ( timedimid != UNDEFID )
-    cdf_inq_dimlen(fileID, timedimid, &ntsteps);
-  else
-    ntsteps = 0;
-
-  streamptr->ntsteps = ntsteps;
-
-  if ( CDI_Debug )
-    Message("time dimid = %d", streamptr->basetime.ncdimid);
-
-  /* read ncdims */
-  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
-    {
-      cdf_inq_dimlen(fileID, ncdimid, &ncdims[ncdimid].len);
-      cdf_inq_dimname(fileID, ncdimid, ncdims[ncdimid].name);
-      if ( timedimid == ncdimid )
-	ncdims[ncdimid].dimtype = T_AXIS;
-    }
-
-
-  /* scan var attributes */
-  scanVarAttributes(fileID, nvars, ncvars, ncdims, timedimid, modelID, format);
-
-
-  if ( CDI_Debug ) printNCvars(ncvars, nvars);
-
-  /* find coordinate vars */
-  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
-    {
-      for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-	{
-	  if ( ncvars[ncvarid].ndims == 1 )
-	    {
-	      if ( timedimid != UNDEFID && timedimid == ncvars[ncvarid].dimids[0] )
-		{
-		  if ( ncvars[ncvarid].isvar != FALSE ) cdfSetVar(ncvars, ncvarid, TRUE);
-		}
-	      else
-		{
-		  if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
-		}
-	      // if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
-
-	      if ( ncdimid == ncvars[ncvarid].dimids[0] && ncdims[ncdimid].ncvarid == UNDEFID )
-		if ( strcmp(ncvars[ncvarid].name, ncdims[ncdimid].name) == 0 )
-		  {
-		    ncdims[ncdimid].ncvarid = ncvarid;
-		    ncvars[ncvarid].isvar = FALSE;
-		  }
-	    }
-	}
-    }
-
-  /* find time vars */
-  if ( timedimid != UNDEFID )
-    {
-      int ltimevar = FALSE;
-
-      if ( ncdims[timedimid].ncvarid != UNDEFID )
-	{
-	  streamptr->basetime.ncvarid = ncdims[timedimid].ncvarid;
-	  ltimevar = TRUE;
-	}
-
-      for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-	if ( ncvarid != streamptr->basetime.ncvarid &&
-	     ncvars[ncvarid].ndims == 1 &&
-	     timedimid == ncvars[ncvarid].dimids[0] &&
-	     ncvars[ncvarid].xtype != NC_CHAR &&
-	     isTimeUnits(ncvars[ncvarid].units) )
-	  {
-	    ncvars[ncvarid].isvar = FALSE;
-
-	    if ( !ltimevar )
-	      {
-		streamptr->basetime.ncvarid = ncvarid;
-		ltimevar = TRUE;
-		if ( CDI_Debug ) 
-		  fprintf(stderr, "timevar %s\n", ncvars[ncvarid].name);
-	      }
-	    else
-	      {
-		if ( CDI_Debug )
-		  fprintf(stderr, "skip timevar %s\n", ncvars[ncvarid].name);
-	      }
-	  }
-
-      if ( ltimevar == FALSE ) /* search for WRF time description */
-	{
-	  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-	    if ( ncvarid != streamptr->basetime.ncvarid &&
-		 ncvars[ncvarid].ndims == 2 &&
-		 timedimid == ncvars[ncvarid].dimids[0] &&
-		 ncvars[ncvarid].xtype == NC_CHAR &&
-		 ncdims[ncvars[ncvarid].dimids[1]].len == 19 )
-	      {
-		streamptr->basetime.ncvarid = ncvarid;
-		streamptr->basetime.lwrf    = TRUE;
-		break;
-	      }
-	}
-
-      /* time varID */
-      ncvarid = streamptr->basetime.ncvarid;
-
-      if ( ncvarid == UNDEFID )
-	Warning("Variable >time< not found!");
-      else if ( streamptr->basetime.lwrf == FALSE )
-	{
-	  if ( ncvars[ncvarid].units[0] != 0 )
-	    timehasunits = TRUE;
-
-	  if ( ncvars[ncvarid].bounds != UNDEFID )
-	    {
-	      nbdims = ncvars[ncvars[ncvarid].bounds].ndims;
-	      if ( nbdims == 2 )
-		{
-		  len = ncdims[ncvars[ncvars[ncvarid].bounds].dimids[nbdims-1]].len;
-		  if ( (int)len == 2 && timedimid == ncvars[ncvars[ncvarid].bounds].dimids[0] )
-		    {
-		      time_has_bounds = TRUE;
-		      streamptr->basetime.ncvarboundsid = ncvars[ncvarid].bounds;
-		    }
-		}
-	    }
-	}
-    }
-
-  /* check ncvars */
-  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-    {
-      if ( timedimid != UNDEFID )
-	if ( ncvars[ncvarid].isvar == -1 &&
-	     ncvars[ncvarid].ndims > 1   &&
-	     timedimid == ncvars[ncvarid].dimids[0] )
-	  cdfSetVar(ncvars, ncvarid, TRUE);
-
-      if ( ncvars[ncvarid].isvar == -1 && ncvars[ncvarid].ndims == 0 )
-	cdfSetVar(ncvars, ncvarid, FALSE);
-
-      if ( ncvars[ncvarid].isvar == -1 && ncvars[ncvarid].ndims > 1 )
-	cdfSetVar(ncvars, ncvarid, TRUE);
-	  
-      if ( ncvars[ncvarid].isvar == -1 )
-	{
-	  ncvars[ncvarid].isvar = 0;
-	  Warning("Variable %s has unknown type, skipped!", ncvars[ncvarid].name);
-	  continue;
-	}
-
-      if ( ncvars[ncvarid].ndims > 4 )
-	{
-	  ncvars[ncvarid].isvar = 0;
-	  Warning("%d dimensional variables unsupported. Skip variable %s",
-		ncvars[ncvarid].ndims, ncvars[ncvarid].name);
-	  continue;
-	}
-
-      if ( ncvars[ncvarid].xtype == NC_CHAR )
-	{
-	  ncvars[ncvarid].isvar = 0;
-	  continue;
-	}
-
-      if ( cdfInqDatatype(ncvars[ncvarid].xtype) == -1 )
-	{
-	  ncvars[ncvarid].isvar = 0;
-	  Warning("Variable %s has an unsupported data type, skipped!", ncvars[ncvarid].name);
-	  continue;
-	}
-    }
-
-  /* verify coordinate vars (dimname == varname) */
   for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
     {	      
       ncvarid = ncdims[ncdimid].ncvarid;
@@ -4926,10 +4592,9 @@ int cdfInqContents(int streamID)
 	      continue;
 	    }
 
-	  if ( ncvars[ncvarid].longname[0] != 0 )
+	  if ( ncvars[ncvarid].longname[0] != 0 && ncvars[ncvarid].longname[1] != 0 )
 	    {
-	      if ( memcmp(ncvars[ncvarid].longname, "Longitude", 9) == 0 ||
-		   memcmp(ncvars[ncvarid].longname, "longitude", 9) == 0 )
+	      if ( memcmp(ncvars[ncvarid].longname+1, "ongitude", 8) == 0 )
 		{
 		  ncvars[ncvarid].islon = TRUE;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
@@ -4937,8 +4602,7 @@ int cdfInqContents(int streamID)
 		  ncdims[ncdimid].dimtype = X_AXIS;
 		  continue;
 		}
-	      else if ( memcmp(ncvars[ncvarid].longname, "Latitude", 8) == 0 || 
-			memcmp(ncvars[ncvarid].longname, "latitude", 8) == 0 )
+	      else if ( memcmp(ncvars[ncvarid].longname+1, "atitude", 7) == 0 )
 		{
 		  ncvars[ncvarid].islat = TRUE;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
@@ -5007,23 +4671,29 @@ int cdfInqContents(int streamID)
 	    }
 	}
     }
+}
+#endif
 
-  /* verify coordinate vars */
+#if  defined  (HAVE_LIBNETCDF)
+/* verify coordinate vars - second scan (all other variables) */
+static
+void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
+{
+  int ncvarid;
+
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
       if ( ncvars[ncvarid].isvar == 0 )
 	{
 	  /* not needed anymore for rotated grids */
-	  if ( ncvars[ncvarid].longname[0] != 0 )
+	  if ( ncvars[ncvarid].longname[0] != 0 && ncvars[ncvarid].longname[1] != 0 )
 	    {
-	      if ( memcmp(ncvars[ncvarid].longname, "Longitude", 9) == 0 ||
-		   memcmp(ncvars[ncvarid].longname, "longitude", 9) == 0 )
+	      if ( memcmp(ncvars[ncvarid].longname+1, "ongitude", 8) == 0 )
 		{
 		  ncvars[ncvarid].islon = TRUE;
 		  continue;
 		}
-	      else if ( memcmp(ncvars[ncvarid].longname, "Latitude", 8) == 0 || 
-			memcmp(ncvars[ncvarid].longname, "latitude", 8) == 0 )
+	      else if ( memcmp(ncvars[ncvarid].longname+1, "atitude", 7) == 0 )
 		{
 		  ncvars[ncvarid].islat = TRUE;
 		  continue;
@@ -5082,75 +4752,30 @@ int cdfInqContents(int streamID)
 	    }
 	}
     }
+}
+#endif
 
-  if ( CDI_Debug ) printNCvars(ncvars, nvars);
+#if  defined  (HAVE_LIBNETCDF)
+/* define input grids */
+static
+void define_igrids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid)
+{
+  int ncvarid, ncvarid2;
+  int ndims;
+  int nbdims;
+  int i;
+  int nvatts;
+  size_t nvertex;
+  grid_t grid;
+  int gridindex;
+  size_t size = 0, xsize, ysize;
+  char name[256];
+  int iatt;
+  size_t attlen;
+  char attname[256];
+  const int attstringlen = 8192; char attstring[8192];
+  double datt;
 
-  if ( ucla_les == TRUE )
-    {
-      for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
-	{
-	  ncvarid = ncdims[ncdimid].ncvarid;
-	  if ( ncvarid != -1 )
-	    {
-	      if ( ncdims[ncdimid].dimtype == UNDEFID && ncvars[ncvarid].units[0] == 'm' )
-		{
-		  if      ( ncvars[ncvarid].name[0] == 'x' ) ncdims[ncdimid].dimtype = X_AXIS;
-		  else if ( ncvars[ncvarid].name[0] == 'y' ) ncdims[ncdimid].dimtype = Y_AXIS;
-		  else if ( ncvars[ncvarid].name[0] == 'z' ) ncdims[ncdimid].dimtype = Z_AXIS;
-		}
-	    }
-	}
-    }
-  /*
-  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
-    {
-      ncvarid = ncdims[ncdimid].ncvarid;
-      if ( ncvarid != -1 )
-	{
-	  printf("coord var %d %s %s\n", ncvarid, ncvars[ncvarid].name, ncvars[ncvarid].units);
-	  if ( ncdims[ncdimid].dimtype == X_AXIS )
-	    printf("coord var %d %s is x dim\n", ncvarid, ncvars[ncvarid].name);
-	  if ( ncdims[ncdimid].dimtype == Y_AXIS )
-	    printf("coord var %d %s is y dim\n", ncvarid, ncvars[ncvarid].name);
-	  if ( ncdims[ncdimid].dimtype == Z_AXIS )
-	    printf("coord var %d %s is z dim\n", ncvarid, ncvars[ncvarid].name);
-	  if ( ncdims[ncdimid].dimtype == T_AXIS )
-	    printf("coord var %d %s is t dim\n", ncvarid, ncvars[ncvarid].name);
-
-	  if ( ncvars[ncvarid].islon )
-	    printf("coord var %d %s is lon\n", ncvarid, ncvars[ncvarid].name);
-	  if ( ncvars[ncvarid].islat )
-	    printf("coord var %d %s is lat\n", ncvarid, ncvars[ncvarid].name);
-	  if ( ncvars[ncvarid].islev )
-	    printf("coord var %d %s is lev\n", ncvarid, ncvars[ncvarid].name);
-	}
-    }
-  */
-  /* set dim type */
-  setDimType(nvars, ncvars, ncdims);
-
-  /* Set coordinate varids (att: associate)  */
-  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-    {
-      if ( ncvars[ncvarid].isvar == TRUE && ncvars[ncvarid].ncoordvars )
-	{
-	  /* ndims = ncvars[ncvarid].ndims; */
-	  ndims = ncvars[ncvarid].ncoordvars;
-	  for ( i = 0; i < ndims; i++ )
-	    {
-	      if ( ncvars[ncvars[ncvarid].coordvarids[i]].islon )
-		ncvars[ncvarid].xvarid = ncvars[ncvarid].coordvarids[i];
-	      else if ( ncvars[ncvars[ncvarid].coordvarids[i]].islat )
-		ncvars[ncvarid].yvarid = ncvars[ncvarid].coordvarids[i];
-	      else if ( ncvars[ncvars[ncvarid].coordvarids[i]].islev )
-		ncvars[ncvarid].zvarid = ncvars[ncvarid].coordvarids[i];
-	    }
-	}
-    }
-  
-  if ( CDI_Debug ) printNCvars(ncvars, nvars);
-
-  /* define grid */
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
       if ( ncvars[ncvarid].isvar && ncvars[ncvarid].gridID == UNDEFID )
@@ -5675,6 +5300,419 @@ int cdfInqContents(int streamID)
 	      }
 	}
     }
+}
+#endif
+
+int cdfInqContents(int streamID)
+{
+#if  defined  (HAVE_LIBNETCDF)
+  int ndims, nvars, ngatts, unlimdimid;
+  int varID, ncvarid, ncvarid2;
+  int ncdimid;
+  int varID1;
+  int fileID;
+  int nvatts;
+  nc_type xtype;
+  size_t ntsteps;
+  int timedimid = -1;
+  int *varids;
+  int nvarids;
+  int  ilev;
+  size_t attlen;
+  char attname[256];
+  const int attstringlen = 8192; char attstring[8192];
+  char *pname, *plongname, *punits;
+  int iatt, timehasunits = FALSE;
+  int time_has_bounds = FALSE;
+  size_t len;
+  int nc_nvars;
+  int nvcth_id = UNDEFID, vcta_id = UNDEFID, vctb_id = UNDEFID;
+  int zaxisindex;
+  size_t vctsize = 0;
+  int tableID;
+  double *vct = NULL;
+  int instID  = UNDEFID;
+  int modelID = UNDEFID;
+  int code;
+  int taxisID;
+  int i;
+  int nbdims;
+  int zprec;
+  int calendar = UNDEFID;
+  ncdim_t *ncdims;
+  ncvar_t *ncvars;
+  int vlistID;
+  stream_t *streamptr;
+  int format = 0;
+  int ucla_les = FALSE;
+
+  streamptr = stream_to_pointer(streamID);
+  
+  stream_check_ptr(__func__, streamptr);
+
+  vlistID = streamInqVlist(streamID);
+  fileID  = streamInqFileID(streamID);
+
+  if ( CDI_Debug )
+    Message("streamID = %d, fileID = %d", streamID, fileID);
+
+#if  defined  (NC_NETCDF4)
+  nc_inq_format(fileID, &format);
+#endif
+
+  cdf_inq(fileID, &ndims , &nvars, &ngatts, &unlimdimid);
+
+  /* alloc ncdims */
+  if ( ndims > 0 )
+    ncdims = (ncdim_t *) malloc(ndims*sizeof(ncdim_t));
+  else
+    {
+      Warning("ndims = %d", ndims);
+      return (CDI_EUFSTRUCT);
+    }
+  
+  /* alloc ncvars */
+  if ( nvars > 0 )
+    ncvars = (ncvar_t *) malloc(nvars*sizeof(ncvar_t));
+  else
+    {
+      Warning("nvars = %d", nvars);
+      return (CDI_EUFSTRUCT);
+    }
+
+  init_ncdims(ndims, ncdims);
+  init_ncvars(nvars, ncvars);
+
+  /* read global attributtes*/
+  for ( iatt = 0; iatt < ngatts; iatt++ )
+    {
+      cdf_inq_attname(fileID, NC_GLOBAL, iatt, attname);
+      cdf_inq_atttype(fileID, NC_GLOBAL, attname, &xtype);
+      cdf_inq_attlen(fileID, NC_GLOBAL, attname, &attlen);
+
+      if ( xtype == NC_CHAR )
+	{
+	  cdfGetAttText(fileID, NC_GLOBAL, attname, attstringlen-1, attstring);
+
+	  if ( attlen > 0 && attstring[0] != 0 )
+	    {
+	      if ( strcmp(attname, "history") == 0 )
+		{
+		  streamptr->historyID = iatt;
+		}
+	      else if ( strcmp(attname, "institution") == 0 )
+		{
+		  instID = institutInq(0, 0, NULL, attstring);
+		  if ( instID == UNDEFID )
+		    instID = institutDef(0, 0, NULL, attstring);
+		}
+	      else if ( strcmp(attname, "source") == 0 )
+		{
+		  modelID = modelInq(-1, 0, attstring);
+		}
+	      else if ( strcmp(attname, "Source") == 0 )
+		{
+		  if ( strncmp(attstring, "UCLA-LES", 8) == 0 )
+		    ucla_les = TRUE;
+		}
+	      /*
+	      else if ( strcmp(attname, "Conventions") == 0 )
+		{
+		}
+	      */
+	      else if ( strcmp(attname, "CDI") == 0 )
+		{
+		}
+	      else if ( strcmp(attname, "CDO") == 0 )
+		{
+		}
+	      else
+		{
+		  vlistDefAttTxt(vlistID, CDI_GLOBAL, attname, (int)attlen, attstring);
+		}
+	    }
+	}
+      else if ( xtype == NC_SHORT || xtype == NC_INT )
+	{
+	  int *attint;
+	  attint = (int *) malloc(attlen*sizeof(int));
+	  cdfGetAttInt(fileID, NC_GLOBAL, attname, attlen, attint);
+	  if ( xtype == NC_SHORT )
+	    vlistDefAttInt(vlistID, CDI_GLOBAL, attname, DATATYPE_INT16, (int)attlen, attint);
+	  else
+	    vlistDefAttInt(vlistID, CDI_GLOBAL, attname, DATATYPE_INT32, (int)attlen, attint);
+	  free(attint);
+	}
+      else if ( xtype == NC_FLOAT || xtype == NC_DOUBLE )
+	{
+	  double *attflt;
+	  attflt = (double *) malloc(attlen*sizeof(double));
+	  cdfGetAttDouble(fileID, NC_GLOBAL, attname, attlen, attflt);
+	  if ( xtype == NC_FLOAT )
+	    vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, DATATYPE_FLT32, (int)attlen, attflt);
+	  else
+	    vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, DATATYPE_FLT64, (int)attlen, attflt);
+	  free(attflt);
+	}
+    }
+
+  /* find time dim */
+  if ( unlimdimid >= 0 )
+    timedimid = unlimdimid;
+  else
+    timedimid = cdfTimeDimID(fileID, ndims, nvars);
+
+  streamptr->basetime.ncdimid = timedimid;
+
+  if ( timedimid != UNDEFID )
+    cdf_inq_dimlen(fileID, timedimid, &ntsteps);
+  else
+    ntsteps = 0;
+
+  streamptr->ntsteps = ntsteps;
+
+  if ( CDI_Debug )
+    Message("time dimid = %d", streamptr->basetime.ncdimid);
+
+  /* read ncdims */
+  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
+    {
+      cdf_inq_dimlen(fileID, ncdimid, &ncdims[ncdimid].len);
+      cdf_inq_dimname(fileID, ncdimid, ncdims[ncdimid].name);
+      if ( timedimid == ncdimid )
+	ncdims[ncdimid].dimtype = T_AXIS;
+    }
+
+
+  /* scan var attributes */
+  scanVarAttributes(fileID, nvars, ncvars, ncdims, timedimid, modelID, format);
+
+
+  if ( CDI_Debug ) printNCvars(ncvars, nvars);
+
+  /* find coordinate vars */
+  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
+    {
+      for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+	{
+	  if ( ncvars[ncvarid].ndims == 1 )
+	    {
+	      if ( timedimid != UNDEFID && timedimid == ncvars[ncvarid].dimids[0] )
+		{
+		  if ( ncvars[ncvarid].isvar != FALSE ) cdfSetVar(ncvars, ncvarid, TRUE);
+		}
+	      else
+		{
+		  if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
+		}
+	      // if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
+
+	      if ( ncdimid == ncvars[ncvarid].dimids[0] && ncdims[ncdimid].ncvarid == UNDEFID )
+		if ( strcmp(ncvars[ncvarid].name, ncdims[ncdimid].name) == 0 )
+		  {
+		    ncdims[ncdimid].ncvarid = ncvarid;
+		    ncvars[ncvarid].isvar = FALSE;
+		  }
+	    }
+	}
+    }
+
+  /* find time vars */
+  if ( timedimid != UNDEFID )
+    {
+      int ltimevar = FALSE;
+
+      if ( ncdims[timedimid].ncvarid != UNDEFID )
+	{
+	  streamptr->basetime.ncvarid = ncdims[timedimid].ncvarid;
+	  ltimevar = TRUE;
+	}
+
+      for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+	if ( ncvarid != streamptr->basetime.ncvarid &&
+	     ncvars[ncvarid].ndims == 1 &&
+	     timedimid == ncvars[ncvarid].dimids[0] &&
+	     ncvars[ncvarid].xtype != NC_CHAR &&
+	     isTimeUnits(ncvars[ncvarid].units) )
+	  {
+	    ncvars[ncvarid].isvar = FALSE;
+
+	    if ( !ltimevar )
+	      {
+		streamptr->basetime.ncvarid = ncvarid;
+		ltimevar = TRUE;
+		if ( CDI_Debug ) 
+		  fprintf(stderr, "timevar %s\n", ncvars[ncvarid].name);
+	      }
+	    else
+	      {
+		if ( CDI_Debug )
+		  fprintf(stderr, "skip timevar %s\n", ncvars[ncvarid].name);
+	      }
+	  }
+
+      if ( ltimevar == FALSE ) /* search for WRF time description */
+	{
+	  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+	    if ( ncvarid != streamptr->basetime.ncvarid &&
+		 ncvars[ncvarid].ndims == 2 &&
+		 timedimid == ncvars[ncvarid].dimids[0] &&
+		 ncvars[ncvarid].xtype == NC_CHAR &&
+		 ncdims[ncvars[ncvarid].dimids[1]].len == 19 )
+	      {
+		streamptr->basetime.ncvarid = ncvarid;
+		streamptr->basetime.lwrf    = TRUE;
+		break;
+	      }
+	}
+
+      /* time varID */
+      ncvarid = streamptr->basetime.ncvarid;
+
+      if ( ncvarid == UNDEFID )
+	Warning("Variable >time< not found!");
+      else if ( streamptr->basetime.lwrf == FALSE )
+	{
+	  if ( ncvars[ncvarid].units[0] != 0 )
+	    timehasunits = TRUE;
+
+	  if ( ncvars[ncvarid].bounds != UNDEFID )
+	    {
+	      nbdims = ncvars[ncvars[ncvarid].bounds].ndims;
+	      if ( nbdims == 2 )
+		{
+		  len = ncdims[ncvars[ncvars[ncvarid].bounds].dimids[nbdims-1]].len;
+		  if ( (int)len == 2 && timedimid == ncvars[ncvars[ncvarid].bounds].dimids[0] )
+		    {
+		      time_has_bounds = TRUE;
+		      streamptr->basetime.ncvarboundsid = ncvars[ncvarid].bounds;
+		    }
+		}
+	    }
+	}
+    }
+
+  /* check ncvars */
+  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+    {
+      if ( timedimid != UNDEFID )
+	if ( ncvars[ncvarid].isvar == -1 &&
+	     ncvars[ncvarid].ndims > 1   &&
+	     timedimid == ncvars[ncvarid].dimids[0] )
+	  cdfSetVar(ncvars, ncvarid, TRUE);
+
+      if ( ncvars[ncvarid].isvar == -1 && ncvars[ncvarid].ndims == 0 )
+	cdfSetVar(ncvars, ncvarid, FALSE);
+
+      if ( ncvars[ncvarid].isvar == -1 && ncvars[ncvarid].ndims > 1 )
+	cdfSetVar(ncvars, ncvarid, TRUE);
+	  
+      if ( ncvars[ncvarid].isvar == -1 )
+	{
+	  ncvars[ncvarid].isvar = 0;
+	  Warning("Variable %s has unknown type, skipped!", ncvars[ncvarid].name);
+	  continue;
+	}
+
+      if ( ncvars[ncvarid].ndims > 4 )
+	{
+	  ncvars[ncvarid].isvar = 0;
+	  Warning("%d dimensional variables unsupported. Skip variable %s",
+		ncvars[ncvarid].ndims, ncvars[ncvarid].name);
+	  continue;
+	}
+
+      if ( ncvars[ncvarid].xtype == NC_CHAR )
+	{
+	  ncvars[ncvarid].isvar = 0;
+	  continue;
+	}
+
+      if ( cdfInqDatatype(ncvars[ncvarid].xtype) == -1 )
+	{
+	  ncvars[ncvarid].isvar = 0;
+	  Warning("Variable %s has an unsupported data type, skipped!", ncvars[ncvarid].name);
+	  continue;
+	}
+    }
+
+  /* verify coordinate vars - first scan (dimname == varname) */
+  verify_coordinate_vars_1(ndims, ncdims, ncvars, timedimid);
+
+  /* verify coordinate vars - second scan (all other variables) */
+  verify_coordinate_vars_2(nvars, ncvars);
+
+  if ( CDI_Debug ) printNCvars(ncvars, nvars);
+
+  if ( ucla_les == TRUE )
+    {
+      for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
+	{
+	  ncvarid = ncdims[ncdimid].ncvarid;
+	  if ( ncvarid != -1 )
+	    {
+	      if ( ncdims[ncdimid].dimtype == UNDEFID && ncvars[ncvarid].units[0] == 'm' )
+		{
+		  if      ( ncvars[ncvarid].name[0] == 'x' ) ncdims[ncdimid].dimtype = X_AXIS;
+		  else if ( ncvars[ncvarid].name[0] == 'y' ) ncdims[ncdimid].dimtype = Y_AXIS;
+		  else if ( ncvars[ncvarid].name[0] == 'z' ) ncdims[ncdimid].dimtype = Z_AXIS;
+		}
+	    }
+	}
+    }
+  /*
+  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
+    {
+      ncvarid = ncdims[ncdimid].ncvarid;
+      if ( ncvarid != -1 )
+	{
+	  printf("coord var %d %s %s\n", ncvarid, ncvars[ncvarid].name, ncvars[ncvarid].units);
+	  if ( ncdims[ncdimid].dimtype == X_AXIS )
+	    printf("coord var %d %s is x dim\n", ncvarid, ncvars[ncvarid].name);
+	  if ( ncdims[ncdimid].dimtype == Y_AXIS )
+	    printf("coord var %d %s is y dim\n", ncvarid, ncvars[ncvarid].name);
+	  if ( ncdims[ncdimid].dimtype == Z_AXIS )
+	    printf("coord var %d %s is z dim\n", ncvarid, ncvars[ncvarid].name);
+	  if ( ncdims[ncdimid].dimtype == T_AXIS )
+	    printf("coord var %d %s is t dim\n", ncvarid, ncvars[ncvarid].name);
+
+	  if ( ncvars[ncvarid].islon )
+	    printf("coord var %d %s is lon\n", ncvarid, ncvars[ncvarid].name);
+	  if ( ncvars[ncvarid].islat )
+	    printf("coord var %d %s is lat\n", ncvarid, ncvars[ncvarid].name);
+	  if ( ncvars[ncvarid].islev )
+	    printf("coord var %d %s is lev\n", ncvarid, ncvars[ncvarid].name);
+	}
+    }
+  */
+  /* set dim type */
+  setDimType(nvars, ncvars, ncdims);
+
+  /* Set coordinate varids (att: associate)  */
+  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+    {
+      if ( ncvars[ncvarid].isvar == TRUE && ncvars[ncvarid].ncoordvars )
+	{
+	  /* ndims = ncvars[ncvarid].ndims; */
+	  ndims = ncvars[ncvarid].ncoordvars;
+	  for ( i = 0; i < ndims; i++ )
+	    {
+	      if ( ncvars[ncvars[ncvarid].coordvarids[i]].islon )
+		ncvars[ncvarid].xvarid = ncvars[ncvarid].coordvarids[i];
+	      else if ( ncvars[ncvars[ncvarid].coordvarids[i]].islat )
+		ncvars[ncvarid].yvarid = ncvars[ncvarid].coordvarids[i];
+	      else if ( ncvars[ncvars[ncvarid].coordvarids[i]].islev )
+		ncvars[ncvarid].zvarid = ncvars[ncvarid].coordvarids[i];
+	    }
+	}
+    }
+  
+  if ( CDI_Debug ) printNCvars(ncvars, nvars);
+
+
+  /* define grid */
+  define_igrids(streamptr, fileID, vlistID, ncdims, nvars, ncvars, timedimid);
+
 
   /* find VCT */
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
