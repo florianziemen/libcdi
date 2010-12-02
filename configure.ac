@@ -28,6 +28,7 @@ AC_SUBST([SYSTEM_TYPE],["$ac_cv_build"])
 
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER([src/config.h])
+AM_MAINTAINER_MODE([disable])
 
 # Set up libtool.
 AC_MSG_NOTICE([setting up libtool])
