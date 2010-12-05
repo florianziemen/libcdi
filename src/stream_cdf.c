@@ -5420,7 +5420,7 @@ int cdfInqContents(int streamID)
   init_ncdims(ndims, ncdims);
   init_ncvars(nvars, ncvars);
 
-  /* read global attributtes*/
+  /* read global attributtes */
   for ( iatt = 0; iatt < ngatts; iatt++ )
     {
       cdf_inq_attname(fileID, NC_GLOBAL, iatt, attname);

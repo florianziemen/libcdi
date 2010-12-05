@@ -847,12 +847,14 @@ void gribapiScanTimestep1(int streamID)
       printf("%d %d %d.%d.%d\n", vdate, vtime, pnum, pcat, pdis);
       */
 
-      GRIB_CHECK(grib_get_long(gh,"bitsPerValue", &lpar),0);
-      bitsPerValue = (int) lpar;
-      if ( bitsPerValue > 0 && bitsPerValue <= 32 )
-	prec = bitsPerValue;
-      else
-        prec = DATATYPE_PACK;
+      prec = DATATYPE_PACK;
+      status = grib_get_long(gh,"bitsPerValue", &lpar);
+      if ( status == 0 )
+	{
+	  bitsPerValue = (int) lpar;
+	  if ( bitsPerValue > 0 && bitsPerValue <= 32 )
+	    prec = bitsPerValue;
+	}
 
       if ( nrecs == 0 )
 	{
