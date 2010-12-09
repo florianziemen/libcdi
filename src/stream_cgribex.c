@@ -1709,8 +1709,9 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 
   if ( gridtype == GRID_GENERIC )
     {
-      int xsize, ysize;
+      int xsize, ysize, gridsize;
 
+      gridsize = gridInqSize(gridID);
       xsize = gridInqXsize(gridID);
       ysize = gridInqYsize(gridID);
 
@@ -1721,7 +1722,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	  gridtype = GRID_GAUSSIAN;
 	  gridChangeType(gridID, gridtype);
 	}
-      else if ( (xsize == 1 && ysize == 1) || (xsize == 0 && ysize == 0) )
+      else if ( gridsize == 1 )
 	{
 	  gridtype = GRID_LONLAT;
 	  gridChangeType(gridID, gridtype);

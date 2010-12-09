@@ -1927,8 +1927,9 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 
   if ( gridtype == GRID_GENERIC )
     {
-      int xsize, ysize;
+      int xsize, ysize, gridsize;
 
+      gridsize = gridInqSize(gridID);
       xsize = gridInqXsize(gridID);
       ysize = gridInqYsize(gridID);
 
@@ -1939,7 +1940,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	  gridtype = GRID_GAUSSIAN;
 	  gridChangeType(gridID, gridtype);
 	}
-      else if ( (xsize == 1 && ysize == 1) || (xsize == 0 && ysize == 0) )
+      else if ( gridsize == 1 )
 	{
 	  gridtype = GRID_LONLAT;
 	  gridChangeType(gridID, gridtype);
