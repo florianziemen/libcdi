@@ -237,8 +237,8 @@ while (<MOFILE>) {
 	$kword = uc($kword);
 	if ( "$kword" eq "\@SOURCE" ) {
 #	  printcfdoc ("\\begin{verbatim}\n");
-	  printcsrc ("\\begin{lstlisting}[language=C, backgroundcolor=\\color{zebg}, basicstyle=\\small, columns=flexible]\n");
-	  printfsrc ("\\begin{lstlisting}[language=Fortran, backgroundcolor=\\color{zebg}, basicstyle=\\small, columns=flexible]\n");
+	  printcsrc ("\\begin{lstlisting}[language=C, backgroundcolor=\\color{pyellow}, basicstyle=\\small, columns=flexible]\n");
+	  printfsrc ("\\begin{lstlisting}[language=Fortran, backgroundcolor=\\color{pyellow}, basicstyle=\\small, columns=flexible]\n");
 	  $source = 1;
 	  next;
 	}

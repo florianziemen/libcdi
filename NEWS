@@ -13,7 +13,7 @@ Version 1.4.6 (17 September 2010):
       * Added support for attribute type int16 and float32
       * use libtool 2.2.10 for compiling + linking
 
-Version 1.4.5.1 (29 April 2010):
+Version 1.4.5.1 (5 July 2010):
 
    New features:
       * Added support for grid mask
