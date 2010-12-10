@@ -25,7 +25,7 @@
       nmiss = 0
 
 !     Create a regular lon/lat grid
-      gridID = gridCreate(GRID_LOnlat, nlon*nlat)
+      gridID = gridCreate(GRID_LONLAT, nlon*nlat)
       CALL gridDefXsize(gridID, nlon)
       CALL gridDefYsize(gridID, nlat)
       CALL gridDefXvals(gridID, lons)
