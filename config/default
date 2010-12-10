@@ -14,6 +14,7 @@ case "${HOSTNAME}" in
 # i386-apple-darwin10
     hama*)
 	./configure --prefix=$HOME/local \
+                    --enable-maintainer-mode \
                     --with-netcdf=/opt/local \
                     --with-hdf5=/opt/local \
                     --with-szlib=$HOME/local \
@@ -28,18 +29,10 @@ case "${HOSTNAME}" in
                     --with-szlib=$HOME/local \
                     CC=icc CFLAGS="-g -O2 -Wall -fno-alias -DMIN_BUF_SIZE=4194304 -Df2cFortran"
 	;;
-# i686-suse-linux
-    linux | laptop)
-	./configure --prefix=$HOME/local \
-                    --with-jasper=/usr \
-                    --with-grib_api=$HOME/local \
-                    --with-netcdf=$HOME/local \
-                    --with-hdf5=$HOME/local \
-                    --with-szlib=$HOME/local \
-                    CC=colorgcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -pedantic -Df2cFortran"
-	;;
-    gata)
+# i686-linux
+    etch-ia32 | gata)
 	./configure --prefix=$HOME/local/etch-ia32 \
+                    --enable-maintainer-mode \
                     --with-jasper=/sw/etch-ia32/jasper-1.900.1 \
                     --with-grib_api=$HOME/local/etch-ia32/grib_api-1.9.5 \
 	            --with-netcdf=/sw/etch-ia32/netcdf-4.0.1 \
@@ -56,13 +49,6 @@ case "${HOSTNAME}" in
                      --with-szlib=$HOME/src/cdo/branches/libs4cdo/build-split/szip-2.1 \
                       --with-proj=$HOME/src/cdo/branches/libs4cdo/build-split/proj-4.6.1 \
 	            CC=gcc CFLAGS="-g -O2 -Wall"
-	;;
-# sparc-sun-solaris2.8
-    xxf)
-	./configure --prefix=$HOME/local/SUN \
-                    --with-netcdf=/client \
-                    --with-szlib=$HOME/local/solaris10 \
-                    CC=cc CFLAGS="-fast"
 	;;
 # sparc-sun-solaris2.9
     executor | yang | yin)
