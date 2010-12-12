@@ -189,15 +189,17 @@ int gribapiGetTimeUnits(grib_handle *gh)
 
   GRIB_CHECK(grib_get_string(gh, "stepUnits", stepunits, &len), 0);
 
-  if      ( memcmp(stepunits, "s",   len-1) == 0 ) timeunits = TUNIT_SECOND;
-  else if ( memcmp(stepunits, "m",   len-1) == 0 ) timeunits = TUNIT_MINUTE;
-  else if ( memcmp(stepunits, "h",   len-1) == 0 ) timeunits = TUNIT_HOUR;
-  else if ( memcmp(stepunits, "3h",  len-1) == 0 ) timeunits = TUNIT_3HOURS;
-  else if ( memcmp(stepunits, "6h",  len-1) == 0 ) timeunits = TUNIT_6HOURS;
-  else if ( memcmp(stepunits, "12h", len-1) == 0 ) timeunits = TUNIT_12HOURS;
-  else if ( memcmp(stepunits, "D",   len-1) == 0 ) timeunits = TUNIT_DAY;
-  else if ( memcmp(stepunits, "M",   len-1) == 0 ) timeunits = TUNIT_MONTH;
-  else if ( memcmp(stepunits, "Y",   len-1) == 0 ) timeunits = TUNIT_YEAR;
+  len--;
+
+  if      ( memcmp(stepunits, "s",   len) == 0 ) timeunits = TUNIT_SECOND;
+  else if ( memcmp(stepunits, "m",   len) == 0 ) timeunits = TUNIT_MINUTE;
+  else if ( memcmp(stepunits, "h",   len) == 0 ) timeunits = TUNIT_HOUR;
+  else if ( memcmp(stepunits, "3h",  len) == 0 ) timeunits = TUNIT_3HOURS;
+  else if ( memcmp(stepunits, "6h",  len) == 0 ) timeunits = TUNIT_6HOURS;
+  else if ( memcmp(stepunits, "12h", len) == 0 ) timeunits = TUNIT_12HOURS;
+  else if ( memcmp(stepunits, "D",   len) == 0 ) timeunits = TUNIT_DAY;
+  else if ( memcmp(stepunits, "M",   len) == 0 ) timeunits = TUNIT_MONTH;
+  else if ( memcmp(stepunits, "Y",   len) == 0 ) timeunits = TUNIT_YEAR;
   else if ( lprint )
     {
       Message("Step units >%s< unsupported!", stepunits);

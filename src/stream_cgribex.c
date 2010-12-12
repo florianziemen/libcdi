@@ -2161,15 +2161,9 @@ void cgribexDefaultSec1(int *isec1)
 static
 void cgribexDefaultSec4(int *isec4)
 {
-  isec4[2] = 0;
-  isec4[3] = 0;
-  isec4[4] = 0;
-  isec4[5] = 0;
-  isec4[6] = 0;
-  isec4[7] = 0;
-  isec4[8] = 0;
-  isec4[9] = 0;
-  isec4[10] = 0;
+  long i;
+
+  for ( i = 2; i <= 10; ++i ) isec4[i] = 0;
 }
 #endif
 
