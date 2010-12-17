@@ -587,6 +587,7 @@ void taxisDefTunit(int taxisID, int unit)
   taxisptr->unit = unit;
 }
 
+
 void taxisDefNumavg(int taxisID, int numavg)
 {
   taxis_t *taxisptr;
@@ -668,7 +669,6 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
 
   TAXIS_UNLOCK();
 }
-
 
 /*
 @Function  taxisInqVdate
@@ -1021,6 +1021,9 @@ void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
 
   rdate  = (*taxis).rdate;
   rtime  = (*taxis).rtime;
+
+  if ( rdate == 0 && rtime == 0 && DBL_IS_EQUAL(timevalue, 0) ) return;
+
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
 
@@ -1114,6 +1117,8 @@ double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
       rdate  = (*taxis).vdate;
       rtime  = (*taxis).vtime;
     }
+
+  if ( rdate == 0 && rtime == 0 && vdate == 0 && vtime == 0 ) return(value);
 
   cdiDecodeDate(rdate, &ryear, &rmonth, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);

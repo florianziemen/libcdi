@@ -35,9 +35,10 @@ int days_per_month(int calendar, int year, int month)
 
   if ( month >= 1 && month <= 12 )
     dayspermonth = dpm[month-1];
+  /*
   else
     fprintf(stderr, "days_per_month: month %d out of range\n", month);
-
+  */
   if ( dpy == 0 && month == 2 )
     {
       if ( (year%4 == 0 && year%100 != 0) || year%400 == 0 )
