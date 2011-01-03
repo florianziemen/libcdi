@@ -363,7 +363,7 @@ int taxisID;
    ...
 taxisID = taxisCreate(TAXIS_RELATIVE);
 taxisDefCalendar(taxisID, CALENDAR_STANDARD);
-taxisDefRdate(taxisID, 19870101);
+taxisDefRdate(taxisID, 19850101);
 taxisDefRtime(taxisID, 120000);
    ...
 @EndSource

@@ -70,8 +70,8 @@
       DO tsID = 0, nts-1
 !        Set the verification date to 1985-01-01 + tsID
          CALL taxisDefVdate(taxisID, 19850101+tsID)
-!        Set the verification time to 12:00
-         CALL taxisDefVtime(taxisID, 1200)
+!        Set the verification time to 12:00:00
+         CALL taxisDefVtime(taxisID, 120000)
 !        Define the time step
          status = streamDefTimestep(streamID, tsID)
 
