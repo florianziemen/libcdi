@@ -1,10 +1,10 @@
 CDI NEWS
 --------
 
-Version 1.4.7 (?? December 2010):
+Version 1.4.7 (3 January 2011):
 
    New features:
-      * added support for netCDF output from WRF model
+      * improved support for netCDF output from WRF model
 
 Version 1.4.6 (17 September 2010):
 

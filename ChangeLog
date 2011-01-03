@@ -1,6 +1,11 @@
+2011-01-03  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* using CGRIBEX library version 1.4.7
+	* Version 1.4.7 released
+
 2010-11-09  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* added support for netCDF output from WRF model
+	* improved support for netCDF output from WRF model
 
 2010-10-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
