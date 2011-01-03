@@ -573,7 +573,7 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
 }
 
 
-void cgribexScanTimestep1(int streamID)
+int cgribexScanTimestep1(int streamID)
 {
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
@@ -765,6 +765,8 @@ void cgribexScanTimestep1(int streamID)
 
   streamptr->rtsteps = 1;
 
+  if ( nrecs == 0 ) return (CDI_EUFSTRUCT);
+
   cdiGenVars(streamID);
 
   if ( fcast )
@@ -825,6 +827,8 @@ void cgribexScanTimestep1(int streamID)
 	    }
 	}
     }
+
+  return (0);
 }
 
 

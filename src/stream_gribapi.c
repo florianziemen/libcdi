@@ -690,7 +690,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 }
 #endif
 
-void gribapiScanTimestep1(int streamID)
+int gribapiScanTimestep1(int streamID)
 {
 #if  defined  (HAVE_LIBGRIB_API)
   off_t recpos = 0;
@@ -944,6 +944,8 @@ void gribapiScanTimestep1(int streamID)
 
   streamptr->rtsteps = 1;
 
+  if ( nrecs == 0 ) return (CDI_EUFSTRUCT);
+
   cdiGenVars(streamID);
 
   if ( fcast )
@@ -1006,6 +1008,8 @@ void gribapiScanTimestep1(int streamID)
 #else
   Error("GRIB_API support not compiled in!");
 #endif
+
+  return (0);
 }
 
 

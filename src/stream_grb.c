@@ -129,8 +129,9 @@ int grbReadRecord(int streamID, double *data, int *nmiss)
 }
 
 static
-void grbScanTimestep1(int streamID)
+int grbScanTimestep1(int streamID)
 {
+  int status;
   int filetype;
   stream_t *streamptr;
 
@@ -139,12 +140,14 @@ void grbScanTimestep1(int streamID)
 
   if ( filetype == FILETYPE_GRB )
     {
-      cgribexScanTimestep1(streamID);
+      status = cgribexScanTimestep1(streamID);
     }
   else
     {
-      gribapiScanTimestep1(streamID);
+      status = gribapiScanTimestep1(streamID);
     }
+
+  return (status);
 }
 
 static
@@ -206,9 +209,9 @@ int grbInqContents(int streamID)
 
   streamptr->curTsID = 0;
 
-  grbScanTimestep1(streamID);
+  status = grbScanTimestep1(streamID);
  
-  if ( streamptr->ntsteps == -1 ) status = grbScanTimestep2(streamID);
+  if ( status == 0 && streamptr->ntsteps == -1 ) status = grbScanTimestep2(streamID);
 
   fileSetPos(fileID, 0, SEEK_SET);
 

@@ -1,7 +1,7 @@
 #ifndef _STREAM_CGRIBEX_H
 #define _STREAM_CGRIBEX_H
 
-void cgribexScanTimestep1(int streamID);
+int cgribexScanTimestep1(int streamID);
 int cgribexScanTimestep2(int streamID);
 int cgribexScanTimestep(int streamID);
 
