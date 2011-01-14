@@ -1757,11 +1757,19 @@ void gribapiDefInstitut(grib_handle *gh, int vlistID, int varID)
 
   if ( instID != CDI_UNDEFID )
     {
-      int center, subcenter;
+      long center, subcenter;
+      long center0, subcenter0;
+
       center    = institutInqCenter(instID);
       subcenter = institutInqSubcenter(instID);
-      GRIB_CHECK(grib_set_long(gh, "centre", center), 0);
-      GRIB_CHECK(grib_set_long(gh, "subCentre", subcenter), 0);
+
+      GRIB_CHECK(grib_get_long(gh, "centre", &center0), 0);
+      GRIB_CHECK(grib_get_long(gh, "subCentre", &subcenter0), 0);
+      
+      if ( center != center0 )
+	GRIB_CHECK(grib_set_long(gh, "centre", center), 0);
+      if ( subcenter != subcenter0 )
+	GRIB_CHECK(grib_set_long(gh, "subCentre", subcenter), 0);
     }
 }
 #endif
@@ -2136,18 +2144,9 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 
 	if ( gridInqComplexPacking(gridID) )
 	  {
-	    static int lwarncomplex = 1;
-	    if ( lwarncomplex )
-	      {
-		Warning("GRIB2 complex packing not implemented, using simple packing!");
-		lwarncomplex = 0;
-	      }
-	    mesg = "spectral_simple"; len = strlen(mesg);
-	    GRIB_CHECK(grib_set_string(gh, "packingType", mesg, &len), 0);
-	    /*
 	    mesg = "spectral_complex"; len = strlen(mesg);
 	    GRIB_CHECK(grib_set_string(gh, "packingType", mesg, &len), 0);
-	    
+	    /*
 	    GRIB_CHECK(grib_set_long(gh, "JS", 20), 0);
 	    GRIB_CHECK(grib_set_long(gh, "KS", 20), 0);
 	    GRIB_CHECK(grib_set_long(gh, "MS", 20), 0);
@@ -2428,6 +2427,11 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   gribapiDefParam(gh, param);
   gribapiDefTime(gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID));
+
+  /* bitsPerValue have to be defined befor call to DefGrid (complex packing) */
+  bitsPerValue = grbBitsPerValue(datatype);
+  GRIB_CHECK(grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
+
   gribapiDefGrid(gh, gridID, ljpeg);
   gribapiDefLevel(gh, param, zaxisID, levelID);
 
@@ -2436,9 +2440,6 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(grib_set_long(gh, "bitmapPresent", 1), 0);
       GRIB_CHECK(grib_set_double(gh, "missingValue", vlistInqVarMissval(vlistID, varID)), 0);
     }
-
-  bitsPerValue = grbBitsPerValue(datatype);
-  GRIB_CHECK(grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
 
   GRIB_CHECK(grib_set_double_array(gh, "values", data, datasize), 0);
 
