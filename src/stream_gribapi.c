@@ -13,12 +13,10 @@
 #include "vlist.h"
 #include "stream_grb.h"
 
-#include "gribapi.h"
 
 #if  defined  (HAVE_LIBGRIB_API)
-#  if  defined  (HAVE_LIBCGRIBEX)
 #  include "cgribex.h"      /* gribGetSize, gribRead, gribGetZip */
-#  endif
+#  include "gribapi.h"
 #  include "grib_api.h"
 #endif
 
@@ -778,7 +776,7 @@ int gribapiScanTimestep1(int streamID)
 	}
 
       gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
-      GRIB_CHECK(grib_set_double(gh, "missingValue", GRIB_MISSVAL), 0);
+      GRIB_CHECK(grib_set_double(gh, "missingValue", GRIBAPI_MISSVAL), 0);
 
       GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
@@ -1019,6 +1017,7 @@ int gribapiScanTimestep2(int streamID)
 {
   int rstatus = 0;
 #if  defined  (HAVE_LIBGRIB_API)
+  int status;
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
   long buffersize = 0;
@@ -1119,7 +1118,7 @@ int gribapiScanTimestep2(int streamID)
 	}
 
       gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
-      GRIB_CHECK(grib_set_double(gh, "missingValue", GRIB_MISSVAL), 0);
+      GRIB_CHECK(grib_set_double(gh, "missingValue", GRIBAPI_MISSVAL), 0);
 
       GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
@@ -1351,6 +1350,7 @@ int gribapiScanTimestep(int streamID)
 {
   int rstatus = 0;
 #if  defined  (HAVE_LIBGRIB_API)
+  int status = 0;
   long recsize = 0;
   off_t recpos = 0;
   unsigned char *gribbuffer;
@@ -1433,8 +1433,8 @@ int gribapiScanTimestep(int streamID)
 	    }
 
 	  readsize = recsize;
-	  status = gribRead(fileID, gribbuffer, &readsize);
-	  if ( status )
+	  rstatus = gribRead(fileID, gribbuffer, &readsize);
+	  if ( rstatus )
 	    {
 	      Error("Inconsistent timestep %d (GRIB record %d/%d)!\n", tsID+1, rindex+1,
 		    streamptr->tsteps[tsID].recordSize);
@@ -1452,7 +1452,7 @@ int gribapiScanTimestep(int streamID)
 	    }
 
 	  gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
-	  GRIB_CHECK(grib_set_double(gh, "missingValue", GRIB_MISSVAL), 0);
+	  GRIB_CHECK(grib_set_double(gh, "missingValue", GRIBAPI_MISSVAL), 0);
 
 	  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
