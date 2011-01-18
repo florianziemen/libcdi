@@ -1022,7 +1022,7 @@ void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
   rdate  = (*taxis).rdate;
   rtime  = (*taxis).rtime;
 
-  if ( rdate == 0 && rtime == 0 && DBL_IS_EQUAL(timevalue, 0) ) return;
+  if ( rdate == 0 && rtime == 0 && DBL_IS_EQUAL(timevalue, 0.) ) return;
 
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
