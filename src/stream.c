@@ -175,12 +175,12 @@ static int getFiletype(const char *filename, int *byteorder)
       if ( version <= 1 )
 	{
 	  filetype = FILETYPE_GRB;
-	  if ( CDI_Debug ) Message("found seek GRIB file = %s", filename);
+	  if ( CDI_Debug ) Message("found seeked GRIB file = %s", filename);
 	}
       else if ( version == 2 )
 	{
 	  filetype = FILETYPE_GRB2;
-	  if ( CDI_Debug ) Message("found seek GRIB2 file = %s", filename);
+	  if ( CDI_Debug ) Message("found seeked GRIB2 file = %s", filename);
 	}
     }
 
@@ -1899,7 +1899,7 @@ void cdiDefTableID(int tableID)
 void cdiPrintVersion(void)
 {
   fprintf(stderr, "     CDI library version : %s\n", cdiLibraryVersion());
-#if  defined  (HAVE_LIBGRIB)
+#if  defined  (HAVE_LIBCGRIBEX)
   fprintf(stderr, " CGRIBEX library version : %s\n", cgribexLibraryVersion());
 #endif
 #if  defined  (HAVE_LIBGRIB_API)
