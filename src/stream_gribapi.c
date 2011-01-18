@@ -2186,7 +2186,9 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	break;
       }
     default:
-      Error("Unsupported grid type: %s", gridNamePtr(gridtype));
+      {
+	Error("Unsupported grid type: %s", gridNamePtr(gridtype));
+      }
     }
 }
 #endif
