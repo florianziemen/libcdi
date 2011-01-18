@@ -28,6 +28,7 @@ typedef struct {
 } compvar_t; 
 
 
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexGetGridType(int *isec2)
 {
@@ -73,7 +74,9 @@ int cgribexGetGridType(int *isec2)
 
   return (gridtype);
 }
+#endif
 
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexGetIsRotated(int *isec2)
 {
@@ -86,7 +89,9 @@ int cgribexGetIsRotated(int *isec2)
 
   return (isRotated);
 }
+#endif
 
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexGetZaxisType(int grb_ltype)
 {
@@ -156,7 +161,9 @@ int cgribexGetZaxisType(int grb_ltype)
 
   return (zaxistype);
 }
+#endif
 
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexGetZaxisHasBounds(int grb_ltype)
 {
@@ -174,7 +181,9 @@ int cgribexGetZaxisHasBounds(int grb_ltype)
 
   return (lbounds);
 }
+#endif
 
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexGetTimeUnit(int *isec1)
 {
@@ -200,7 +209,9 @@ int cgribexGetTimeUnit(int *isec1)
 
   return (timeunit);
 }
+#endif
 
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexTimeIsFC(int *isec1)
 {
@@ -211,7 +222,9 @@ int cgribexTimeIsFC(int *isec1)
 
   return (isFC);
 }
+#endif
 
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexGetTsteptype(int timerange)
 {
@@ -237,8 +250,9 @@ int cgribexGetTsteptype(int timerange)
 
   return (tsteptype);
 }
+#endif
 
-
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
 		      int *isec4, long recsize, off_t position, int prec, int ztype, int lmv)
@@ -524,7 +538,9 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
     Message("varID = %d  param = %d  zaxistype = %d  gridID = %d  levelID = %d",
 	    varID, param, zaxistype, gridID, levelID);
 }
+#endif
 
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 void MCH_get_undef(int *isec1, double *undef_pds, double *undef_eps)
 {
@@ -549,7 +565,9 @@ void MCH_get_undef(int *isec1, double *undef_pds, double *undef_eps)
     }
   }
 }
+#endif
 
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
 			 int *isec3, double *fsec3, int *isec4, double *fsec4, 
@@ -571,17 +589,18 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
       *lmv = 1;
     }
 }
-
+#endif
 
 int cgribexScanTimestep1(int streamID)
 {
+#if  defined  (HAVE_LIBCGRIBEX)
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0;
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
   long buffersize = 0;
-  int status;
+  int rstatus;
   int fileID;
   int param = 0;
   int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
@@ -656,8 +675,8 @@ int cgribexScanTimestep1(int streamID)
 	}
 
       readsize = recsize;
-      status = gribRead(fileID, gribbuffer, &readsize);
-      if ( status ) break;
+      rstatus = gribRead(fileID, gribbuffer, &readsize);
+      if ( rstatus ) break;
 
       ztype = COMPRESS_NONE;
       if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
@@ -827,6 +846,9 @@ int cgribexScanTimestep1(int streamID)
 	    }
 	}
     }
+#else
+  Error("CGRIBEX support not compiled in!");
+#endif
 
   return (0);
 }
@@ -834,13 +856,14 @@ int cgribexScanTimestep1(int streamID)
 
 int cgribexScanTimestep2(int streamID)
 {
+  int rstatus = 0;
+#if  defined  (HAVE_LIBCGRIBEX)
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0;
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
   long buffersize = 0;
-  int status;
   int fileID;
   int param = 0;
   int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
@@ -922,8 +945,8 @@ int cgribexScanTimestep2(int streamID)
 	}
 
       readsize = recsize;
-      status = gribRead(fileID, gribbuffer, &readsize);
-      if ( status ) break;
+      rstatus = gribRead(fileID, gribbuffer, &readsize);
+      if ( rstatus ) break;
 
       if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
 	{
@@ -1104,13 +1127,16 @@ int cgribexScanTimestep2(int streamID)
 
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;
+#endif
 
-  return (0);
+  return (rstatus);
 }
 
 
 int cgribexScanTimestep(int streamID)
 {
+  int rstatus = 0;
+#if  defined  (HAVE_LIBCGRIBEX)
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0;
@@ -1118,7 +1144,6 @@ int cgribexScanTimestep(int streamID)
   off_t recpos = 0;
   unsigned char *gribbuffer;
   long buffersize = 0;
-  int status;
   int fileID;
   int param = 0;
   int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
@@ -1195,8 +1220,8 @@ int cgribexScanTimestep(int streamID)
 	    }
 
 	  readsize = recsize;
-	  status = gribRead(fileID, gribbuffer, &readsize);
-	  if ( status )
+	  rstatus = gribRead(fileID, gribbuffer, &readsize);
+	  if ( rstatus )
 	    {
 	      Error("Inconsistent timestep %d (GRIB record %d/%d)!\n", tsID+1, rindex+1,
 		    streamptr->tsteps[tsID].recordSize);
@@ -1385,7 +1410,10 @@ int cgribexScanTimestep(int streamID)
       streamptr->ntsteps = tsID;
     }
 
-  return (streamptr->ntsteps);
+  rstatus = streamptr->ntsteps;
+#endif
+
+  return (rstatus);
 }
 
 

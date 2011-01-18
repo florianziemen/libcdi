@@ -92,6 +92,7 @@ int gribapiGetGridType(grib_handle *gh, int gribgridtype)
 }
 #endif
 
+#if  defined  (HAVE_LIBGRIB_API)
 static
 int gribapiGetIsRotated(int gribgridtype)
 {
@@ -104,7 +105,7 @@ int gribapiGetIsRotated(int gribgridtype)
 
   return (isRotated);
 }
-
+#endif
 
 #if  defined  (HAVE_LIBGRIB_API)
 static
@@ -697,6 +698,7 @@ int gribapiScanTimestep1(int streamID)
   unsigned char *gribbuffer = NULL;
   long buffersize = 0;
   int iret = 0, ipunp = 0, iword = 0;
+  int rstatus;
   int status;
   int fileID;
   int rtabnum = 0;
@@ -760,8 +762,8 @@ int gribapiScanTimestep1(int streamID)
 	}
 
       readsize = recsize;
-      status = gribRead(fileID, gribbuffer, &readsize);
-      if ( status ) break;
+      rstatus = gribRead(fileID, gribbuffer, &readsize);
+      if ( rstatus ) break;
 
       ztype = COMPRESS_NONE;
       if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
@@ -1015,7 +1017,7 @@ int gribapiScanTimestep1(int streamID)
 
 int gribapiScanTimestep2(int streamID)
 {
-  int status = 0;
+  int rstatus = 0;
 #if  defined  (HAVE_LIBGRIB_API)
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
@@ -1103,8 +1105,8 @@ int gribapiScanTimestep2(int streamID)
 	}
 
       readsize = recsize;
-      status = gribRead(fileID, gribbuffer, &readsize);
-      if ( status ) break;
+      rstatus = gribRead(fileID, gribbuffer, &readsize);
+      if ( rstatus ) break;
 
       if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
 	{
@@ -1339,17 +1341,15 @@ int gribapiScanTimestep2(int streamID)
 
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;
-#else
-  Error("GRIB_API support not compiled in!");
 #endif
 
-  return (status);
+  return (rstatus);
 }
 
 
 int gribapiScanTimestep(int streamID)
 {
-  int status = 0;
+  int rstatus = 0;
 #if  defined  (HAVE_LIBGRIB_API)
   long recsize = 0;
   off_t recpos = 0;
@@ -1676,12 +1676,12 @@ int gribapiScanTimestep(int streamID)
       streamptr->ntsteps = tsID;
     }
 
-  status = streamptr->ntsteps;
+  rstatus = streamptr->ntsteps;
 #else
   Error("GRIB_API support not compiled in!");
 #endif
 
-  return (status);
+  return (rstatus);
 }
 
 
