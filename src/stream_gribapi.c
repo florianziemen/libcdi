@@ -1947,8 +1947,10 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
       xsize = gridInqXsize(gridID);
       ysize = gridInqYsize(gridID);
 
-      if ( (ysize == 32  || ysize == 48 || ysize == 64 ||
-	    ysize == 96  || ysize == 160) && 
+      if ( (ysize ==  32 || ysize ==  48 || ysize ==  64 ||
+	    ysize ==  96 || ysize == 160 || ysize == 192 ||
+	    ysize == 240 || ysize == 320 || ysize == 384 ||
+	    ysize == 480 || ysize == 768 ) && 
 	   (xsize == 2*ysize || xsize == 1) )
 	{
 	  gridtype = GRID_GAUSSIAN;
