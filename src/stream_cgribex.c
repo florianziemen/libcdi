@@ -477,7 +477,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
 
   zaxistype = cgribexGetZaxisType(ISEC1_LevelType);
 
-  if ( zaxistype == ZAXIS_HYBRID )
+  if ( zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF )
     {
       int vctsize = ISEC2_NumVCP;
       double *vctptr = &fsec2[10];

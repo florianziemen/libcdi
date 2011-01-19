@@ -107,10 +107,16 @@ int gribapiGetIsRotated(int gribgridtype)
 
 #if  defined  (HAVE_LIBGRIB_API)
 static
-int gribapiGetZaxisType(int grb_ltype)
+int gribapiGetZaxisType(grib_handle *gh, int grb_ltype)
 {
   int zaxistype = 0;
-
+  /*
+  {
+    size_t len = 256;
+    char parkey[256];
+    GRIB_CHECK(grib_get_string(gh, "typeOfLevel", parkey, &len), 0);
+  }
+  */
   switch ( grb_ltype )
     {
     case GRIBAPI_LTYPE_SURFACE:
@@ -144,13 +150,13 @@ int gribapiGetZaxisType(int grb_ltype)
 	break;
       }
     case GRIBAPI_LTYPE_HYBRID:
-      //case GRIBAPI_LTYPE_HYBRID_LAYER:
+      // case GRIBAPI_LTYPE_HYBRID_LAYER:
       {
 	zaxistype = ZAXIS_HYBRID;
 	break;
       }
     case GRIBAPI_LTYPE_LANDDEPTH:
-      //case GRIBAPI_LTYPE_LANDDEPTH_LAYER:
+      // case GRIBAPI_LTYPE_LANDDEPTH_LAYER:
       {
 	zaxistype = ZAXIS_DEPTH_BELOW_LAND;
 	break;
@@ -303,6 +309,7 @@ static
 void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 		      long recsize, off_t position, int prec, int ztype)
 {
+  long editionNumber;
   int gribgridtype;
   int gridtype;
   int zaxistype;
@@ -336,28 +343,46 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
   tsteptype = gribapiGetTsteptype(gh);
   // numavg  = ISEC1_AvgNum;
   numavg  = 0;
-  /*
-  level1  = ISEC1_Level1;
-  level2  = ISEC1_Level2;
-  */
-  status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar);
-  if ( status == 0 )
+
+  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
+
+  if ( editionNumber <= 1 )
     {
-      leveltype = (int) lpar;
-      GRIB_CHECK(grib_get_double(gh, "level", &dlevel), 0);
-      if ( leveltype == 100 ) dlevel *= 100;
-      if ( dlevel < -2.e9 || dlevel > 2.e9 ) dlevel = 0;
+      status = grib_get_long(gh, "indicatorOfTypeOfLevel", &lpar);
+      if ( status == 0 )
+	{
+	  leveltype = (int) lpar;
+	  GRIB_CHECK(grib_get_double(gh, "level", &dlevel), 0);
+	  if ( leveltype == 100 ) dlevel *= 100;
+	  if ( dlevel < -2.e9 || dlevel > 2.e9 ) dlevel = 0;
+	}
+      else 
+	{
+	  leveltype = 0;
+	  dlevel = 0;
+	}
     }
-  else 
+  else
     {
-      leveltype = 0;
-      dlevel = 0;
+      status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar);
+      if ( status == 0 )
+	{
+	  leveltype = (int) lpar;
+	  GRIB_CHECK(grib_get_double(gh, "level", &dlevel), 0);
+	  if ( leveltype == 100 ) dlevel *= 100;
+	  if ( dlevel < -2.e9 || dlevel > 2.e9 ) dlevel = 0;
+	}
+      else 
+	{
+	  leveltype = 0;
+	  dlevel = 0;
+	}
     }
 
   level1 = (int) dlevel;
   level2 = 0;
 
-  /* fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, ISEC1_LevelType); */
+  // fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, leveltype);
 
   (*record).size     = recsize;
   (*record).position = position;
@@ -417,25 +442,27 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 	    if ( grid.xsize > 1 )
 	      {
 		if ( (grid.xfirst > grid.xlast) && (grid.xfirst >= 180) ) grid.xfirst -= 360;
-		/*
-		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
-		  grid.xinc = ISEC2_LonIncr;
-		else
-		  grid.xinc = (ISEC2_LastLon - ISEC2_FirstLon) / (grid.xsize - 1);
-		*/
-		/* correct xinc if necessary */
-		/*
-		if ( ISEC2_FirstLon == 0 && ISEC2_LastLon > 354 )
-		  {
-		    double xinc = 360. / grid.xsize;
 
-		    if ( fabs(grid.xinc-xinc) > 0.0 )
+		if ( editionNumber <= 1 )
+		  {
+		    /*
+		      if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
+		      grid.xinc = ISEC2_LonIncr;
+		      else
+		      grid.xinc = (ISEC2_LastLon - ISEC2_FirstLon) / (grid.xsize - 1);
+		    */
+		    /* correct xinc if necessary */
+		    if ( IS_EQUAL(grid.xfirst, 0) && grid.xlast > 354 )
 		      {
-			grid.xinc = xinc;
-			if ( CDI_Debug ) Message("set xinc to %g", grid.xinc);
+			double xinc = 360. / grid.xsize;
+		      
+			if ( fabs(grid.xinc-xinc) > 0.0 )
+			  {
+			    grid.xinc = xinc;
+			    if ( CDI_Debug ) Message("set xinc to %g", grid.xinc);
+			  }
 		      }
 		  }
-		*/
 	      }
 	    grid.xdef   = 2;	    
 	  }
@@ -444,12 +471,15 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 	  {
 	    if ( grid.ysize > 1 )
 	      {
-		/*
-		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
-		  grid.yinc = ISEC2_LatIncr;
-		else
-		  grid.yinc = (ISEC2_LastLat - ISEC2_FirstLat) / (grid.ysize - 1);
-		*/
+		if ( editionNumber <= 1 )
+		  {
+		    /*
+		      if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
+		      grid.yinc = ISEC2_LatIncr;
+		      else
+		      grid.yinc = (ISEC2_LastLat - ISEC2_FirstLat) / (grid.ysize - 1);
+		    */
+		  }
 	      }
 	    grid.ydef   = 2;	    
 	  }
@@ -522,20 +552,13 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 	size_t len = 256;
 	char typeOfPacking[256];
 	GRIB_CHECK(grib_get_string(gh, "packingType", typeOfPacking, &len), 0);
-	// fprintf(stderr, "packingType %d %s\n", len, typeOfPacking);
 	grid.lcomplex = 0;
 	if ( strncmp(typeOfPacking, "spectral_complex", len) == 0 ) grid.lcomplex = 1;
 
 	grid.size  = datasize;
 	GRIB_CHECK(grib_get_long(gh, "J", &lpar), 0);
 	grid.trunc = lpar;
-	/*
-	GRIB_CHECK(grib_get_long(gh, "complexPacking", &lpar), 0);
-	if ( lpar )
-	  grid.lcomplex = 1;
-	else
-	  grid.lcomplex = 0;
-	*/
+
 	break;
       }
     case GRID_GME:
@@ -605,9 +628,9 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 
   gridID = varDefGrid(vlistID, grid, 0);
 
-  zaxistype = gribapiGetZaxisType(leveltype);
+  zaxistype = gribapiGetZaxisType(gh, leveltype);
 
-  if ( zaxistype == ZAXIS_HYBRID )
+  if ( zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF )
     {
       int vctsize;
       size_t dummy;
@@ -861,9 +884,8 @@ int gribapiScanTimestep1(int streamID)
 
       gribapiGetValidityDateTime(gh, &vdate, &vtime);
       /*
-      printf("%d %d %d.%d.%d\n", vdate, vtime, pnum, pcat, pdis);
+      printf("%d %d %d.%d.%d %d %g\n", vdate, vtime, pnum, pcat, pdis, leveltype, dlevel);
       */
-
       prec = DATATYPE_PACK;
       status = grib_get_long(gh,"bitsPerValue", &lpar);
       if ( status == 0 )
@@ -900,7 +922,10 @@ int gribapiScanTimestep1(int streamID)
 	      compVar0.level1 = streamptr->tsteps[0].records[recID].ilevel;
 	      compVar0.level2 = streamptr->tsteps[0].records[recID].ilevel2;
 	      compVar0.ltype  = streamptr->tsteps[0].records[recID].ltype;
-
+	      /*
+	      printf("var0: %d %d %d %d %d\n", recID, compVar0.param, compVar0.level1, compVar0.level2, compVar0.ltype);
+	      printf("var1: %d %d %d %d %d\n", recID, compVar.param, compVar.level1, compVar.level2, compVar.ltype);
+	      */
 	      if ( memcmp(&compVar0, &compVar, sizeof(compvar2_t)) == 0 ) break;
 	    }
 
