@@ -1996,7 +1996,8 @@ void streamDefVlist(int streamID, int vlistID)
 	    {
 	      cdfDefVars(streamID);
 	    }
-	  else if ( streamptr->filetype == FILETYPE_GRB2 )
+	  else if ( streamptr->filetype == FILETYPE_GRB  ||
+		    streamptr->filetype == FILETYPE_GRB2 )
 	    {
 	      gribapiDefHandles(streamID);
 	    }

@@ -213,12 +213,19 @@ int gribapiGetTimeUnits(grib_handle *gh)
 static
 int gribapiTimeIsFC(grib_handle *gh)
 {
+  long editionNumber;
   int isFC = TRUE;
-  long sigofrtime;
 
-  GRIB_CHECK(grib_get_long(gh, "significanceOfReferenceTime", &sigofrtime), 0);
+  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
-  if ( sigofrtime == 3 ) isFC = FALSE;
+  if ( editionNumber == 2 )
+    {
+      long sigofrtime;
+
+      GRIB_CHECK(grib_get_long(gh, "significanceOfReferenceTime", &sigofrtime), 0);
+
+      if ( sigofrtime == 3 ) isFC = FALSE;
+    }
 
   return (isFC);
 }
@@ -264,9 +271,16 @@ int gribapiGetTsteptype(grib_handle *gh)
 void gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
 {
   long lpar;
-  long sigofrtime;
+  long sigofrtime = 3;
+  long editionNumber;
 
-  GRIB_CHECK(grib_get_long(gh, "significanceOfReferenceTime", &sigofrtime), 0);
+  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
+
+  if ( editionNumber == 2 )
+    {
+      GRIB_CHECK(grib_get_long(gh, "significanceOfReferenceTime", &sigofrtime), 0);
+    }
+
   if ( sigofrtime == 3 )
     {
       GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
@@ -402,6 +416,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 	  {
 	    if ( grid.xsize > 1 )
 	      {
+		if ( (grid.xfirst > grid.xlast) && (grid.xfirst >= 180) ) grid.xfirst -= 360;
 		/*
 		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
 		  grid.xinc = ISEC2_LonIncr;

@@ -38,19 +38,27 @@ const char *gribapiLibraryVersion(void)
 
 void gribapiDefHandles(int streamID)
 {
-  stream_t *streamptr = NULL;
+  stream_t *streamptr;
   int vlistID, ngrids, nzaxis, i;
    
   streamptr = stream_to_pointer(streamID);
 
-  vlistID = streamInqVlist(streamID);
-  ngrids = vlistNgrids(vlistID);
-  nzaxis = vlistNzaxis(vlistID);
+#if  defined  (HAVE_LIBCGRIBEX)
+  if ( streamptr->filetype == FILETYPE_GRB )
+    {
+    }
+  else
+#endif
+    {
+      vlistID = streamInqVlist(streamID);
+      ngrids = vlistNgrids(vlistID);
+      nzaxis = vlistNzaxis(vlistID);
 
-  streamptr->gribHandleNums = ngrids*nzaxis;
-  streamptr->gribHandle = (void **) malloc(streamptr->gribHandleNums*sizeof(void *));
+      streamptr->gribHandleNums = ngrids*nzaxis;
+      streamptr->gribHandle = (void **) malloc(streamptr->gribHandleNums*sizeof(void *));
 
-  for ( i = 0; i < streamptr->gribHandleNums; ++i )
-    streamptr->gribHandle[i] = gribHandleNew();
+      for ( i = 0; i < streamptr->gribHandleNums; ++i )
+	streamptr->gribHandle[i] = gribHandleNew();
+    }
 }
 

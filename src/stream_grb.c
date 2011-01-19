@@ -69,9 +69,11 @@ int grbDecode(int filetype, unsigned char *gribbuffer, int gribsize, double *dat
 {
   int status = 0;
 
+#if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
     status = cgribexDecode(gribbuffer, gribsize, data, gridsize, unreduced, nmiss, zip, missval);
   else
+#endif
     status = gribapiDecode(gribbuffer, gribsize, data, gridsize, unreduced, nmiss, zip, missval);
  
   return (status);
@@ -138,11 +140,13 @@ int grbScanTimestep1(int streamID)
   streamptr = stream_to_pointer(streamID);
   filetype  = streamptr->filetype;
 
+#if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
     {
       status = cgribexScanTimestep1(streamID);
     }
   else
+#endif
     {
       status = gribapiScanTimestep1(streamID);
     }
@@ -160,11 +164,13 @@ int grbScanTimestep2(int streamID)
   streamptr = stream_to_pointer(streamID);
   filetype  = streamptr->filetype;
 
+#if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
     {
       status = cgribexScanTimestep2(streamID);
     }
   else
+#endif
     {
       status = gribapiScanTimestep2(streamID);
     }
@@ -182,11 +188,13 @@ int grbScanTimestep(int streamID)
   streamptr = stream_to_pointer(streamID);
   filetype  = streamptr->filetype;
 
+#if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
     {
       status = cgribexScanTimestep(streamID);
     }
   else
+#endif
     {
       status = gribapiScanTimestep(streamID);
     }
@@ -383,6 +391,7 @@ size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, 
 {
   size_t nbytes;
 
+#if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
     {
       nbytes = cgribexEncode(varID, levelID, vlistID, gridID, zaxisID,
@@ -390,6 +399,7 @@ size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, 
 			     datasize, data, nmiss, gribbuffer, gribbuffersize);
     }
   else
+#endif
     {
       nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID,
 			     date, time, tsteptype, numavg, 
@@ -476,7 +486,12 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   gribbuffersize = datasize*4+3000;
   gribbuffer = (unsigned char *) malloc(gribbuffersize);
 
-  if ( filetype == FILETYPE_GRB2 )
+#if  defined  (HAVE_LIBCGRIBEX)
+  if ( filetype == FILETYPE_GRB )
+    {
+    }
+  else
+#endif
     {
       int ngrids = vlistNgrids(vlistID);
       int ghindex = ngrids*vlistGridIndex(vlistID, gridID) + vlistZaxisIndex(vlistID, zaxisID);
@@ -488,7 +503,9 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   if ( streamptr->ztype == COMPRESS_JPEG )
     {
       if ( filetype == FILETYPE_GRB2 )
-	ljpeg = 1;
+	{
+	  ljpeg = 1;
+	}
       else
 	{
 	  if ( ljpeg_warn ) Warning("Jpeg compression of GRIB1 records not available!");
