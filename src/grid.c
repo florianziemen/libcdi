@@ -2555,6 +2555,12 @@ int gridGenerate(grid_t grid)
 	gridDefGMEni3(gridID, grid.ni3);
 	break;
       }
+    case GRID_NUMBER:
+      {
+	gridDefNumber(gridID, grid.number);
+	gridDefPosition(gridID, grid.position);
+	break;
+      }
       /*
     case GRID_GENERIC:
       {
