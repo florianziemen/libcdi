@@ -1899,7 +1899,7 @@ void cdfDefCell(int streamID, int gridID)
         {
           gridID0 = vlistGrid(vlistID, index);
           gridtype0 = gridInqType(gridID0);
-          if ( gridtype0 == GRID_CELL )
+          if ( gridtype0 == GRID_UNSTRUCTURED )
             {
               dimlen0 = gridInqSize(gridID0);
               if ( dimlen == dimlen0 )
@@ -2475,7 +2475,7 @@ void cdfDefGrid(int streamID, int gridID)
       cdfDefTrajLon(streamID, gridID);
       cdfDefTrajLat(streamID, gridID);
     }
-  else if ( gridtype == GRID_CELL )
+  else if ( gridtype == GRID_UNSTRUCTURED )
     {
       cdfDefCell(streamID, gridID);
     }
@@ -2776,7 +2776,7 @@ int cdfDefVar(int streamID, int varID)
     {
       cdf_put_att_text(fileID, ncvarid, "coordinates", 9, "tlon tlat" );
     }
-  else if ( gridtype == GRID_CELL || gridtype == GRID_CURVILINEAR )
+  else if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
     {
       char coordinates[256] = "";
       char cellarea[256] = "area: ";
@@ -3215,7 +3215,7 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
     {
       cdfReadGridTraj(streamID, gridID);
     }
-  else if ( gridInqType(gridID) == GRID_CELL )
+  else if ( gridInqType(gridID) == GRID_UNSTRUCTURED )
     {
       xid = streamptr->xdimID[gridindex];
     }
@@ -4225,7 +4225,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               else if ( strcmp(attstring, "generic") == 0 )
                 ncvars[ncvarid].gridtype = GRID_GENERIC;
               else if ( strcmp(attstring, "cell") == 0 )
-                ncvars[ncvarid].gridtype = GRID_CELL;
+                ncvars[ncvarid].gridtype = GRID_UNSTRUCTURED;
               else if ( strcmp(attstring, "curvilinear") == 0 )
                 ncvars[ncvarid].gridtype = GRID_CURVILINEAR;
               else if ( strcmp(attstring, "sinusoidal") == 0 )
@@ -4603,7 +4603,7 @@ void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 		      cdfSetDim(ncvars, ncvarid, i, X_AXIS);
 		      lxdim = TRUE;
 		    }
-		  else if ( lydim == FALSE && ncvars[ncvarid].gridtype != GRID_CELL )
+		  else if ( lydim == FALSE && ncvars[ncvarid].gridtype != GRID_UNSTRUCTURED )
 		    {
 		      cdfSetDim(ncvars, ncvarid, i, Y_AXIS);
 		      lydim = TRUE;
@@ -4893,7 +4893,7 @@ void define_igrids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncdims
 	    }
 
 	  if ( ncvars[ncvarid].gridtype == UNDEFID || ncvars[ncvarid].gridtype == GRID_GENERIC )
-	    if ( ydimid == xdimid ) ncvars[ncvarid].gridtype = GRID_CELL;
+	    if ( ydimid == xdimid ) ncvars[ncvarid].gridtype = GRID_UNSTRUCTURED;
 
 	  memset(&grid, 0, sizeof(grid_t));
 
@@ -5092,7 +5092,7 @@ void define_igrids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncdims
 
 	      if      ( (int) ysize == 0 ) size = xsize;
 	      else if ( (int) xsize == 0 ) size = ysize;
-	      else if ( ncvars[ncvarid].gridtype == GRID_CELL ) size = xsize; 
+	      else if ( ncvars[ncvarid].gridtype == GRID_UNSTRUCTURED ) size = xsize; 
 	      else                         size = xsize*ysize;
 	    }
 
@@ -5126,7 +5126,7 @@ void define_igrids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncdims
 	    case GRID_GENERIC:
 	    case GRID_LONLAT:
 	    case GRID_GAUSSIAN:
-	    case GRID_CELL:
+	    case GRID_UNSTRUCTURED:
 	    case GRID_CURVILINEAR:
 	      {
 		grid.size  = size;

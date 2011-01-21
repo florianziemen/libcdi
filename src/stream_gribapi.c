@@ -76,7 +76,7 @@ int gribapiGetGridType(grib_handle *gh, int gribgridtype)
       }
     case  GRIBAPI_GTYPE_CELL:
       {
-	gridtype = GRID_CELL;
+	gridtype = GRID_UNSTRUCTURED;
 	break;
       }
     default:
@@ -571,7 +571,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 
 	break;
       }
-    case GRID_CELL:
+    case GRID_UNSTRUCTURED:
       {
 	int n1 = 0, n2 = 0;
 	grid.size  = numberOfPoints;
@@ -2218,7 +2218,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 
 	break;
       }
-    case GRID_CELL:
+    case GRID_UNSTRUCTURED:
       {
 	static int warning = 1;
 	status = grib_set_long(gh, "gridDefinitionTemplateNumber", GRIBAPI_GTYPE_CELL);

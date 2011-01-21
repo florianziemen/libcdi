@@ -30,7 +30,7 @@ char *Grids[] = {
   /*  6 */  "fourier",
   /*  7 */  "gme",
   /*  8 */  "trajectory",
-  /*  9 */  "cell",
+  /*  9 */  "unstructured",
   /* 10 */  "curvilinear",
   /* 11 */  "lcc",
   /* 12 */  "lcc2",
@@ -472,7 +472,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
     @Item  gridtype  The type of the grid, one of the set of predefined CDI grid types.
                      The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
                      @func{GRID_LONLAT}, @func{GRID_LCC}, @func{GRID_SPECTRAL},
-                     @func{GRID_GME}, @func{GRID_CURVILINEAR} and @func{GRID_CELL}.
+                     @func{GRID_GME}, @func{GRID_CURVILINEAR} and @func{GRID_UNSTRUCTURED}.
     @Item  size      Number of gridpoints.
 
 @Description
@@ -524,7 +524,7 @@ int gridCreate(int gridtype, int size)
   gridptr->size = size;
 
   /*  if ( gridtype == GRID_GENERIC )     gridptr->xsize = size; */
-  if ( gridtype == GRID_CELL )        gridptr->xsize = size;
+  if ( gridtype == GRID_UNSTRUCTURED )        gridptr->xsize = size;
   if ( gridtype == GRID_CURVILINEAR ) gridptr->nvertex = 4;
 
   switch (gridtype)
@@ -567,7 +567,7 @@ int gridCreate(int gridtype, int size)
 	break;
       }
     case GRID_GME:
-    case GRID_CELL:
+    case GRID_UNSTRUCTURED:
       {
 	gridDefXname(gridID, "lon");
 	gridDefYname(gridID, "lat");
@@ -1029,7 +1029,7 @@ The function @func{gridInqType} returns the type of a Grid.
 one of the set of predefined CDI grid types.
 The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
 @func{GRID_LONLAT}, @func{GRID_LCC}, @func{GRID_SPECTRAL}, @func{GRID_GME},
-@func{GRID_CURVILINEAR} and @func{GRID_CELL}.
+@func{GRID_CURVILINEAR} and @func{GRID_UNSTRUCTURED}.
 
 @EndFunction
 */
@@ -1166,12 +1166,12 @@ void gridDefXsize(int gridID, int xsize)
   if ( xsize > gridInqSize(gridID) )
     Error("xsize %d is greater then gridsize %d", xsize, gridInqSize(gridID));
 
-  if ( gridInqType(gridID) == GRID_CELL && xsize != gridInqSize(gridID) )
+  if ( gridInqType(gridID) == GRID_UNSTRUCTURED && xsize != gridInqSize(gridID) )
     Error("xsize %d must be equal gridsize %d for gridtype CELL", xsize, gridInqSize(gridID));
 
   gridptr->xsize = xsize;
 
-  if ( gridInqType(gridID) != GRID_CELL && 
+  if ( gridInqType(gridID) != GRID_UNSTRUCTURED && 
        gridptr->xsize*gridptr->ysize > gridInqSize(gridID) )
     Error("inconsistent grid declaration! (xsize %d ysize %d gridsize %d)",
 	  gridptr->xsize, gridptr->ysize, gridInqSize(gridID));
@@ -1275,12 +1275,12 @@ void gridDefYsize(int gridID, int ysize)
   if ( ysize > gridInqSize(gridID) )
     Error("ysize %d is greater then gridsize %d", ysize, gridInqSize(gridID));
 
-  if ( gridInqType(gridID) == GRID_CELL && ysize != gridInqSize(gridID) )
+  if ( gridInqType(gridID) == GRID_UNSTRUCTURED && ysize != gridInqSize(gridID) )
     Error("ysize %d must be equal gridsize %d for gridtype CELL", ysize, gridInqSize(gridID));
 
   gridptr->ysize = ysize;
 
-  if ( gridInqType(gridID) != GRID_CELL && 
+  if ( gridInqType(gridID) != GRID_UNSTRUCTURED && 
        gridptr->xsize*gridptr->ysize > gridInqSize(gridID) )
     Error("inconsistent grid declaration! (xsize %d ysize %d gridsize %d)",
 	  gridptr->xsize, gridptr->ysize, gridInqSize(gridID));
@@ -1499,7 +1499,7 @@ int gridInqXvals(int gridID, double *xvals)
 
   grid_check_ptr(gridID, gridptr);
 
-  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_CELL )
+  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
     size = gridptr->size;
   else
     size = gridptr->xsize;
@@ -1542,7 +1542,7 @@ void gridDefXvals(int gridID, const double *xvals)
 
   gridtype = gridptr->type;
 
-  if ( gridtype == GRID_CELL || gridtype == GRID_CURVILINEAR )
+  if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
     size = gridptr->size;
   else
     size = gridptr->xsize;
@@ -1587,7 +1587,7 @@ int gridInqYvals(int gridID, double *yvals)
 
   grid_check_ptr(gridID, gridptr);
 
-  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_CELL )
+  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
     size = gridptr->size;
   else
     size = gridptr->ysize;
@@ -1630,7 +1630,7 @@ void gridDefYvals(int gridID, const double *yvals)
 
   gridtype = gridptr->type;
 
-  if ( gridtype == GRID_CELL || gridtype == GRID_CURVILINEAR )
+  if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
     size = gridptr->size;
   else
     size = gridptr->ysize;
@@ -2433,7 +2433,7 @@ int gridGenerate(grid_t grid)
     {
     case GRID_LONLAT:
     case GRID_GAUSSIAN:
-    case GRID_CELL:
+    case GRID_UNSTRUCTURED:
     case GRID_CURVILINEAR:
     case GRID_GENERIC:
     case GRID_LCC:
@@ -2644,7 +2644,7 @@ int gridDuplicate(int gridID)
 
   if ( gridptr->xvals != NULL )
     {
-      if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_CELL )
+      if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED )
 	size = gridsize;
       else
 	size = gridptr->xsize;
@@ -2655,7 +2655,7 @@ int gridDuplicate(int gridID)
 
   if ( gridptr->yvals != NULL )
     {
-      if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_CELL )
+      if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED )
 	size = gridsize;
       else
 	size = gridptr->ysize;
@@ -2666,7 +2666,7 @@ int gridDuplicate(int gridID)
 
   if ( gridptr->xbounds != NULL )
     {
-      if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_CELL )
+      if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED )
 	size = gridsize;
       else
 	size = gridptr->xsize;
@@ -2679,7 +2679,7 @@ int gridDuplicate(int gridID)
 
   if ( gridptr->ybounds != NULL )
     {
-      if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_CELL )
+      if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED )
 	size = gridsize;
       else
 	size = gridptr->ysize;
@@ -2730,7 +2730,7 @@ void gridCompress(int gridID)
   gridtype = gridInqType(gridID);
   gridsize = gridInqSize(gridID);
 
-  if ( gridtype == GRID_CELL )
+  if ( gridtype == GRID_UNSTRUCTURED )
     {
       if ( gridptr->mask_gme != NULL )
 	{
@@ -2909,7 +2909,7 @@ void gridDefXbounds(int gridID, const double *xbounds)
       return;
     }
 
-  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_CELL )
+  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
     size = nvertex*gridptr->size;
   else
     size = nvertex*gridptr->xsize;
@@ -2959,7 +2959,7 @@ int gridInqXbounds(int gridID, double *xbounds)
   if ( CDI_Debug && nvertex == 0 )
     Warning("nvertex undefined for gridID = %d", gridID);
 
-  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_CELL )
+  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
     size = nvertex*gridptr->size;
   else
     size = nvertex*gridptr->xsize;
@@ -3019,7 +3019,7 @@ void gridDefYbounds(int gridID, const double *ybounds)
       return;
     }
 
-  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_CELL )
+  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
     size = nvertex*gridptr->size;
   else
     size = nvertex*gridptr->ysize;
@@ -3069,7 +3069,7 @@ int gridInqYbounds(int gridID, double *ybounds)
   if ( CDI_Debug && nvertex == 0 )
     Warning("nvertex undefined for gridID = %d", gridID);
 
-  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_CELL )
+  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
     size = nvertex*gridptr->size;
   else
     size = nvertex*gridptr->ysize;
@@ -3140,7 +3140,7 @@ void gridPrint(int gridID, int opt)
       if ( gridptr->yname[0]     ) fprintf(fp, "yname     = %s\n", gridptr->yname);
       if ( gridptr->ylongname[0] ) fprintf(fp, "ylongname = %s\n", gridptr->ylongname);
       if ( gridptr->yunits[0]    ) fprintf(fp, "yunits    = %s\n", gridptr->yunits);
-      if ( type == GRID_CELL )     fprintf(fp, "nvertex   = %d\n", nvertex);
+      if ( type == GRID_UNSTRUCTURED )     fprintf(fp, "nvertex   = %d\n", nvertex);
     }
 
   switch (type)
@@ -3152,9 +3152,9 @@ void gridPrint(int gridID, int opt)
     case GRID_SINUSOIDAL:
     case GRID_LAEA:
     case GRID_CURVILINEAR:
-    case GRID_CELL:
+    case GRID_UNSTRUCTURED:
       {
-	if ( type == GRID_CURVILINEAR || type == GRID_CELL )
+	if ( type == GRID_CURVILINEAR || type == GRID_UNSTRUCTURED )
 	  {
 	    xdim = gridsize;
 	    ydim = gridsize;
@@ -3165,7 +3165,7 @@ void gridPrint(int gridID, int opt)
 	    ydim = ysize;
 	  }
 
-	if ( type != GRID_CELL )
+	if ( type != GRID_UNSTRUCTURED )
 	  {
 	    if ( xsize > 0 ) fprintf(fp, "xsize     = %d\n", xsize);
 	    if ( ysize > 0 ) fprintf(fp, "ysize     = %d\n", ysize);
