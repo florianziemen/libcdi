@@ -493,11 +493,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   else
 #endif
     {
-      int ngrids = vlistNgrids(vlistID);
-      int ghindex = ngrids*vlistGridIndex(vlistID, gridID) + vlistZaxisIndex(vlistID, zaxisID);
-      if ( ghindex >= streamptr->gribHandleNums )
-	Error("Internal problem, grib handle not found!");
-      gh = streamptr->gribHandle[ghindex];
+      gh = streamptr->gribHandle[varID];
     }
 
   if ( streamptr->ztype == COMPRESS_JPEG )

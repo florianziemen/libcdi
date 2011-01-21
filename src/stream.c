@@ -1107,17 +1107,16 @@ void streamClose(int streamID)
       case FILETYPE_GRB2:
 	{
 	  gribClose(fileID);
-	  if ( streamptr->gribHandleNums )
+	  if ( streamptr->gribHandle )
 	    {
 	      int i;
-	      for ( i = 0; i < streamptr->gribHandleNums; ++i )
+	      for ( i = 0; i < streamptr->nvars; ++i )
 		{
 		  gribHandleDelete(streamptr->gribHandle[0]);
 		  streamptr->gribHandle[i] = NULL;
 		}
 	      free(streamptr->gribHandle);
 	      streamptr->gribHandle = NULL;
-	      streamptr->gribHandleNums = 0;
 	    }
 	  break;
 	}

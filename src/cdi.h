@@ -114,7 +114,7 @@ extern "C" {
 #define  GRID_FOURIER             6
 #define  GRID_GME                 7  /* Icosahedral-hexagonal GME Grid */
 #define  GRID_TRAJECTORY          8
-#define  GRID_CELL                9
+#define  GRID_UNSTRUCTURED        9
 #define  GRID_CURVILINEAR        10
 #define  GRID_LCC                11  /* Lambert Conformal Conic (GRIB) */
 #define  GRID_LCC2               12  /* Lambert Conformal Conic (PROJ) */

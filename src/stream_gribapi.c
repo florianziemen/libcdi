@@ -1969,6 +1969,7 @@ static
 void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 {
   int gridtype;
+  int status;
   static short lwarn = TRUE;
   size_t len;
   const char *mesg;
@@ -2219,9 +2220,20 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
       }
     case GRID_CELL:
       {
-	GRIB_CHECK(grib_set_long(gh, "gridDefinitionTemplateNumber", GRIBAPI_GTYPE_CELL), 0);
-	GRIB_CHECK(grib_set_long(gh, "numberOfGridUsed", 0), 0);
-	GRIB_CHECK(grib_set_long(gh, "numberOfGridInReference", 0), 0);	
+	static int warning = 1;
+	status = grib_set_long(gh, "gridDefinitionTemplateNumber", GRIBAPI_GTYPE_CELL);
+	if ( status != 0 && warning )
+	  {
+	    warning = 0;
+	    Warning("Can not write grid number!");
+	    Warning("gridDefinitionTemplateNumber %d not found (grib2/template.3.%d.def)!",
+		    GRIBAPI_GTYPE_CELL, GRIBAPI_GTYPE_CELL);
+	  }
+	else
+	  {
+	    GRIB_CHECK(grib_set_long(gh, "numberOfGridUsed", 0), 0);
+	    GRIB_CHECK(grib_set_long(gh, "numberOfGridInReference", 0), 0);	
+	  }
 
 	break;
       }

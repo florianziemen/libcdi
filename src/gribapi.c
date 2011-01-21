@@ -39,7 +39,6 @@ const char *gribapiLibraryVersion(void)
 void gribapiDefHandles(int streamID)
 {
   stream_t *streamptr;
-  int vlistID, ngrids, nzaxis, i;
    
   streamptr = stream_to_pointer(streamID);
 
@@ -50,14 +49,11 @@ void gribapiDefHandles(int streamID)
   else
 #endif
     {
-      vlistID = streamInqVlist(streamID);
-      ngrids = vlistNgrids(vlistID);
-      nzaxis = vlistNzaxis(vlistID);
+      int i;
 
-      streamptr->gribHandleNums = ngrids*nzaxis;
-      streamptr->gribHandle = (void **) malloc(streamptr->gribHandleNums*sizeof(void *));
+      streamptr->gribHandle = (void **) malloc(streamptr->nvars*sizeof(void *));
 
-      for ( i = 0; i < streamptr->gribHandleNums; ++i )
+      for ( i = 0; i < streamptr->nvars; ++i )
 	streamptr->gribHandle[i] = gribHandleNew();
     }
 }

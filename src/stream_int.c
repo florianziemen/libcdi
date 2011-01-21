@@ -425,7 +425,6 @@ void stream_init_entry(stream_t *streamptr)
   streamptr->nfiles            = 0;
   streamptr->fnames            = NULL;
 
-  streamptr->gribHandleNums    = 0;
   streamptr->gribHandle        = NULL;
 }
 
