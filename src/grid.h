@@ -43,6 +43,7 @@ typedef struct {
   int     xdef;                   /* 0: undefined 1:xvals 2:x0+xinc */
   int     ydef;                   /* 0: undefined 1:yvals 2:y0+yinc */
   int     nd, ni, ni2, ni3;       /* parameter for GRID_GME         */
+  int     number, position;       /* parameter for GRID_NUMBER      */
   int     trunc;                  /* parameter for GRID_SPECTEAL    */
   int     nvertex;
   int    *rowlon;

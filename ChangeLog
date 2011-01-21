@@ -1,5 +1,6 @@
 2011-01-21  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* added grid type GRID_NUMBER
 	* changed grid name GRID_CELL to GRID_UNSTRUCTURED
 	
 2011-01-19  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

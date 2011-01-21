@@ -74,9 +74,9 @@ int gribapiGetGridType(grib_handle *gh, int gribgridtype)
 	gridtype = GRID_GME;
 	break;
       }
-    case  GRIBAPI_GTYPE_CELL:
+    case  GRIBAPI_GTYPE_NUMBER:
       {
-	gridtype = GRID_UNSTRUCTURED;
+	gridtype = GRID_NUMBER;
 	break;
       }
     default:
@@ -571,14 +571,11 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 
 	break;
       }
-    case GRID_UNSTRUCTURED:
+    case GRID_NUMBER:
       {
-	int n1 = 0, n2 = 0;
 	grid.size  = numberOfPoints;
-	if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )        n1 = lpar;
-	if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 ) n2 = lpar;
-
-	gridtype = GRID_GENERIC;
+	if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )        grid.number   = lpar;
+	if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 ) grid.position = lpar;
 
 	break;
       }
@@ -2218,21 +2215,21 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 
 	break;
       }
-    case GRID_UNSTRUCTURED:
+    case GRID_NUMBER:
       {
 	static int warning = 1;
-	status = grib_set_long(gh, "gridDefinitionTemplateNumber", GRIBAPI_GTYPE_CELL);
+	status = grib_set_long(gh, "gridDefinitionTemplateNumber", GRIBAPI_GTYPE_NUMBER);
 	if ( status != 0 && warning )
 	  {
 	    warning = 0;
 	    Warning("Can not write grid number!");
 	    Warning("gridDefinitionTemplateNumber %d not found (grib2/template.3.%d.def)!",
-		    GRIBAPI_GTYPE_CELL, GRIBAPI_GTYPE_CELL);
+		    GRIBAPI_GTYPE_NUMBER, GRIBAPI_GTYPE_NUMBER);
 	  }
 	else
 	  {
-	    GRIB_CHECK(grib_set_long(gh, "numberOfGridUsed", 0), 0);
-	    GRIB_CHECK(grib_set_long(gh, "numberOfGridInReference", 0), 0);	
+	    GRIB_CHECK(grib_set_long(gh, "numberOfGridUsed", gridInqNumber(gridID)), 0);
+	    GRIB_CHECK(grib_set_long(gh, "numberOfGridInReference", gridInqPosition(gridID)), 0);	
 	  }
 
 	break;

@@ -207,6 +207,8 @@ void grid_init_entry(grid_t *gridptr)
   gridptr->ni           = 0;
   gridptr->ni2          = 0;
   gridptr->ni3          = 0;
+  gridptr->number       = 0;
+  gridptr->position     = 0;
   gridptr->prec         = 0;
   gridptr->size         = 0;
   gridptr->xsize        = 0;
@@ -3134,13 +3136,13 @@ void gridPrint(int gridID, int opt)
 
   if ( type != GRID_GME )
     {
-      if ( gridptr->xname[0]     ) fprintf(fp, "xname     = %s\n", gridptr->xname);
-      if ( gridptr->xlongname[0] ) fprintf(fp, "xlongname = %s\n", gridptr->xlongname);
-      if ( gridptr->xunits[0]    ) fprintf(fp, "xunits    = %s\n", gridptr->xunits);
-      if ( gridptr->yname[0]     ) fprintf(fp, "yname     = %s\n", gridptr->yname);
-      if ( gridptr->ylongname[0] ) fprintf(fp, "ylongname = %s\n", gridptr->ylongname);
-      if ( gridptr->yunits[0]    ) fprintf(fp, "yunits    = %s\n", gridptr->yunits);
-      if ( type == GRID_UNSTRUCTURED )     fprintf(fp, "nvertex   = %d\n", nvertex);
+      if ( gridptr->xname[0]     )     fprintf(fp, "xname     = %s\n", gridptr->xname);
+      if ( gridptr->xlongname[0] )     fprintf(fp, "xlongname = %s\n", gridptr->xlongname);
+      if ( gridptr->xunits[0]    )     fprintf(fp, "xunits    = %s\n", gridptr->xunits);
+      if ( gridptr->yname[0]     )     fprintf(fp, "yname     = %s\n", gridptr->yname);
+      if ( gridptr->ylongname[0] )     fprintf(fp, "ylongname = %s\n", gridptr->ylongname);
+      if ( gridptr->yunits[0]    )     fprintf(fp, "yunits    = %s\n", gridptr->yunits);
+      if ( type == GRID_UNSTRUCTURED ) fprintf(fp, "nvertex   = %d\n", nvertex);
     }
 
   switch (type)
@@ -3366,6 +3368,12 @@ void gridPrint(int gridID, int opt)
     case GRID_GME:
       {
 	fprintf(fp, "ni        = %d\n", gridInqGMEni(gridID));
+	break;
+      }
+    case GRID_NUMBER:
+      {
+	fprintf(fp, "number    = %d\n", gridInqNumber(gridID));
+	fprintf(fp, "position  = %d\n", gridInqPosition(gridID));
 	break;
       }
    default:
@@ -3642,3 +3650,52 @@ int gridInqComplexPacking(int gridID)
 
   return (lcomplex);
 }
+
+
+int gridInqNumber(int gridID)
+{
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  grid_check_ptr(gridID, gridptr);
+
+  return (gridptr->number);
+}
+
+
+void gridDefNumber(int gridID, int number)
+{
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  grid_check_ptr(gridID, gridptr);
+
+  gridptr->number = number;
+}
+
+
+int gridInqPosition(int gridID)
+{
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  grid_check_ptr(gridID, gridptr);
+
+  return (gridptr->position);
+}
+
+
+void gridDefPosition(int gridID, int position)
+{
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  grid_check_ptr(gridID, gridptr);
+
+  gridptr->position = position;
+}
+

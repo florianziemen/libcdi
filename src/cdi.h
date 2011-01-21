@@ -120,6 +120,7 @@ extern "C" {
 #define  GRID_LCC2               12  /* Lambert Conformal Conic (PROJ) */
 #define  GRID_LAEA               13  /* Lambert Azimuthal Equal Area   */
 #define  GRID_SINUSOIDAL         14  /* Sinusoidal                     */
+#define  GRID_NUMBER             15
 
 /* ZAXIS types */
 
@@ -614,6 +615,13 @@ int     gridInqGMEni2(int gridID);
 void    gridDefGMEni2(int gridID, int ni2);
 int     gridInqGMEni3(int gridID);
 void    gridDefGMEni3(int gridID, int ni3);
+
+/* Number grid */
+int     gridInqNumber(int gridID);
+void    gridDefNumber(int gridID, int number);
+int     gridInqPosition(int gridID);
+void    gridDefPosition(int gridID, int position);
+
 
 /* Lambert Conformal Conic grid (GRIB version) */
 void gridDefLCC(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc, int projflag, int scanflag);
