@@ -36,6 +36,7 @@ char *Grids[] = {
   /* 12 */  "lcc2",
   /* 13 */  "laea",
   /* 14 */  "sinusoidal",
+  /* 15 */  "number",
 };
 
 
