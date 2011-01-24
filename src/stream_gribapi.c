@@ -1969,7 +1969,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
   int status;
   static short lwarn = TRUE;
   size_t len;
-  const char *mesg;
+  char *mesg;
 
   // ISEC1_Sec2Or3Flag = 128;
   
