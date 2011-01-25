@@ -6,36 +6,34 @@
 
 #define  GRIB_MISSVAL  -9.E33
 
-/* Level Types */
-#define  LTYPE_SURFACE               1
-#define  LTYPE_99                   99
-#define  LTYPE_ISOBARIC            100
-#define  LTYPE_MEANSEA             102
-#define  LTYPE_ALTITUDE            103
-#define  LTYPE_HEIGHT              105
-#define  LTYPE_SIGMA               107
-#define  LTYPE_HYBRID              109
-#define  LTYPE_HYBRID_LAYER        110
-#define  LTYPE_LANDDEPTH           111
-#define  LTYPE_LANDDEPTH_LAYER     112
-#define  LTYPE_ISENTROPIC          113
-#define  LTYPE_SEADEPTH            160
-#define  LTYPE_99_MARGIN          1000
+/* GRIB1 Level Types */
+#define  GRIB1_LTYPE_SURFACE               1
+#define  GRIB1_LTYPE_99                   99
+#define  GRIB1_LTYPE_ISOBARIC            100
+#define  GRIB1_LTYPE_MEANSEA             102
+#define  GRIB1_LTYPE_ALTITUDE            103
+#define  GRIB1_LTYPE_HEIGHT              105
+#define  GRIB1_LTYPE_SIGMA               107
+#define  GRIB1_LTYPE_HYBRID              109
+#define  GRIB1_LTYPE_HYBRID_LAYER        110
+#define  GRIB1_LTYPE_LANDDEPTH           111
+#define  GRIB1_LTYPE_LANDDEPTH_LAYER     112
+#define  GRIB1_LTYPE_ISENTROPIC          113
+#define  GRIB1_LTYPE_SEADEPTH            160
+#define  GRIB1_LTYPE_99_MARGIN          1000
 
-/*
- *  Data representation type (Grid Type) [Table 6]
- */
-#define  GTYPE_LATLON                0  /*  latitude/longitude                       */
-#define  GTYPE_LATLON_ROT           10  /*  rotated latitude/longitude               */
-#define  GTYPE_LATLON_STR           20  /*  stretched latitude/longitude             */
-#define  GTYPE_LATLON_ROTSTR        30  /*  rotated and stretched latitude/longitude */
-#define  GTYPE_GAUSSIAN              4  /*  gaussian grid                            */
-#define  GTYPE_GAUSSIAN_ROT         14  /*  rotated gaussian grid                    */
-#define  GTYPE_GAUSSIAN_STR         24  /*  stretched gaussian grid                  */
-#define  GTYPE_GAUSSIAN_ROTSTR      34  /*  rotated and stretched gaussian grid      */
-#define  GTYPE_LCC                   3  /*  Lambert conformal                        */
-#define  GTYPE_SPECTRAL             50  /*  spherical harmonics                      */
-#define  GTYPE_GME                 192  /*  hexagonal GME grid                       */
+/* GRIB1 Data representation type (Grid Type) [Table 6] */
+#define  GRIB1_GTYPE_LATLON                0  /*  latitude/longitude                       */
+#define  GRIB1_GTYPE_LATLON_ROT           10  /*  rotated latitude/longitude               */
+#define  GRIB1_GTYPE_LATLON_STR           20  /*  stretched latitude/longitude             */
+#define  GRIB1_GTYPE_LATLON_ROTSTR        30  /*  rotated and stretched latitude/longitude */
+#define  GRIB1_GTYPE_GAUSSIAN              4  /*  gaussian grid                            */
+#define  GRIB1_GTYPE_GAUSSIAN_ROT         14  /*  rotated gaussian grid                    */
+#define  GRIB1_GTYPE_GAUSSIAN_STR         24  /*  stretched gaussian grid                  */
+#define  GRIB1_GTYPE_GAUSSIAN_ROTSTR      34  /*  rotated and stretched gaussian grid      */
+#define  GRIB1_GTYPE_LCC                   3  /*  Lambert conformal                        */
+#define  GRIB1_GTYPE_SPECTRAL             50  /*  spherical harmonics                      */
+#define  GRIB1_GTYPE_GME                 192  /*  hexagonal GME grid                       */
 
 /*
  *  Macros for the indicator section ( Section 0 )

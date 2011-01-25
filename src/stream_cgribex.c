@@ -36,18 +36,18 @@ int cgribexGetGridType(int *isec2)
 
   switch (ISEC2_GridType)
     {
-    case  GTYPE_LATLON:
-    case  GTYPE_LATLON_ROT:
+    case  GRIB1_GTYPE_LATLON:
+    case  GRIB1_GTYPE_LATLON_ROT:
       {
 	gridtype = GRID_LONLAT;
 	break;
       }
-    case  GTYPE_LCC:
+    case  GRIB1_GTYPE_LCC:
       {
 	gridtype = GRID_LCC;
 	break;
       }
-    case  GTYPE_GAUSSIAN:
+    case  GRIB1_GTYPE_GAUSSIAN:
       {
 	if ( ISEC2_Reduced )
 	  gridtype = GRID_GAUSSIAN_REDUCED;
@@ -55,12 +55,12 @@ int cgribexGetGridType(int *isec2)
 	  gridtype = GRID_GAUSSIAN;
 	break;
       }
-    case  GTYPE_SPECTRAL:
+    case  GRIB1_GTYPE_SPECTRAL:
       {
 	gridtype = GRID_SPECTRAL;
 	break;
       }
-    case  GTYPE_GME:
+    case  GRIB1_GTYPE_GME:
       {
 	gridtype = GRID_GME;
 	break;
@@ -99,64 +99,20 @@ int cgribexGetZaxisType(int grb_ltype)
 
   switch ( grb_ltype )
     {
-    case LTYPE_SURFACE:
-      {
-	zaxistype = ZAXIS_SURFACE;
-	break;
-      }
-    case LTYPE_MEANSEA:
-      {
-	zaxistype = ZAXIS_MEANSEA;
-	break;
-      }
-    case LTYPE_99:
-    case LTYPE_ISOBARIC:
-      {
-	zaxistype = ZAXIS_PRESSURE;
-	break;
-      }
-    case LTYPE_HEIGHT:
-      {
-	zaxistype = ZAXIS_HEIGHT;
-	break;
-      }
-    case LTYPE_ALTITUDE:
-      {
-	zaxistype = ZAXIS_ALTITUDE;
-	break;
-      }
-    case LTYPE_SIGMA:
-      {
-	zaxistype = ZAXIS_SIGMA;
-	break;
-      }
-    case LTYPE_HYBRID:
-    case LTYPE_HYBRID_LAYER:
-      {
-	zaxistype = ZAXIS_HYBRID;
-	break;
-      }
-    case LTYPE_LANDDEPTH:
-    case LTYPE_LANDDEPTH_LAYER:
-      {
-	zaxistype = ZAXIS_DEPTH_BELOW_LAND;
-	break;
-      }
-    case LTYPE_ISENTROPIC:
-      {
-	zaxistype = ZAXIS_ISENTROPIC;
-	break;
-      }
-    case LTYPE_SEADEPTH:
-      {
-	zaxistype = ZAXIS_DEPTH_BELOW_SEA;
-	break;
-      }
-    default:
-      {
-	zaxistype = ZAXIS_GENERIC;
-	break;
-      }
+    case GRIB1_LTYPE_SURFACE:         { zaxistype = ZAXIS_SURFACE;           break; }
+    case GRIB1_LTYPE_MEANSEA:         { zaxistype = ZAXIS_MEANSEA;           break; }
+    case GRIB1_LTYPE_99:
+    case GRIB1_LTYPE_ISOBARIC:        { zaxistype = ZAXIS_PRESSURE;          break; }
+    case GRIB1_LTYPE_HEIGHT:          { zaxistype = ZAXIS_HEIGHT;            break; }
+    case GRIB1_LTYPE_ALTITUDE:        { zaxistype = ZAXIS_ALTITUDE;	       break; }
+    case GRIB1_LTYPE_SIGMA:           { zaxistype = ZAXIS_SIGMA;	       break; }
+    case GRIB1_LTYPE_HYBRID:
+    case GRIB1_LTYPE_HYBRID_LAYER:    { zaxistype = ZAXIS_HYBRID;	       break; }
+    case GRIB1_LTYPE_LANDDEPTH:
+    case GRIB1_LTYPE_LANDDEPTH_LAYER: { zaxistype = ZAXIS_DEPTH_BELOW_LAND;  break; }
+    case GRIB1_LTYPE_ISENTROPIC:      { zaxistype = ZAXIS_ISENTROPIC;	       break; }
+    case GRIB1_LTYPE_SEADEPTH:        { zaxistype = ZAXIS_DEPTH_BELOW_SEA;   break; }
+    default:                    { zaxistype = ZAXIS_GENERIC;           break; }
     }
 
   return (zaxistype);
@@ -171,8 +127,8 @@ int cgribexGetZaxisHasBounds(int grb_ltype)
 
   switch (grb_ltype)
     {
-    case LTYPE_HYBRID_LAYER:
-    case LTYPE_LANDDEPTH_LAYER:
+    case GRIB1_LTYPE_HYBRID_LAYER:
+    case GRIB1_LTYPE_LANDDEPTH_LAYER:
       {
 	lbounds = 1;
 	break;
@@ -1835,11 +1791,11 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	  }
 
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
-	  ISEC2_GridType = GTYPE_GAUSSIAN;
+	  ISEC2_GridType = GRIB1_GTYPE_GAUSSIAN;
 	else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
-	  ISEC2_GridType = GTYPE_LATLON_ROT;
+	  ISEC2_GridType = GRIB1_GTYPE_LATLON_ROT;
 	else
-	  ISEC2_GridType = GTYPE_LATLON;
+	  ISEC2_GridType = GRIB1_GTYPE_LATLON;
 
 	ISEC2_NumLon   = nlon;
 	ISEC2_NumLat   = nlat;
@@ -1908,7 +1864,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
 		   &projflag, &scanflag);
 
-	ISEC2_GridType = GTYPE_LCC;
+	ISEC2_GridType = GRIB1_GTYPE_LCC;
 	ISEC2_NumLon   = xsize;
 	ISEC2_NumLat   = ysize;
 	ISEC2_FirstLon = NINT(originLon * 1000);
@@ -1927,7 +1883,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
       }
     case GRID_SPECTRAL:
       {
-	ISEC2_GridType = GTYPE_SPECTRAL;
+	ISEC2_GridType = GRIB1_GTYPE_SPECTRAL;
 	ISEC2_PentaJ   = gridInqTrunc(gridID);
 	ISEC2_PentaK   = ISEC2_PentaJ;
 	ISEC2_PentaM   = ISEC2_PentaJ;
@@ -1951,7 +1907,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
       }
     case GRID_GME:
       {
-	ISEC2_GridType   = GTYPE_GME;
+	ISEC2_GridType   = GRIB1_GTYPE_GME;
 	ISEC2_GME_ND     = gridInqGMEnd(gridID);
 	ISEC2_GME_NI     = gridInqGMEni(gridID);
 	ISEC2_GME_NI2    = gridInqGMEni2(gridID);
@@ -1998,14 +1954,14 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
     {
     case ZAXIS_SURFACE:
       {
-	ISEC1_LevelType = LTYPE_SURFACE;
+	ISEC1_LevelType = GRIB1_LTYPE_SURFACE;
 	ISEC1_Level1    = (int) zaxisInqLevel(zaxisID, levelID);
 	ISEC1_Level2    = 0;
 	break;
       }
     case ZAXIS_MEANSEA:
       {
-	ISEC1_LevelType = LTYPE_MEANSEA;
+	ISEC1_LevelType = GRIB1_LTYPE_MEANSEA;
 	ISEC1_Level1    = (int) zaxisInqLevel(zaxisID, levelID);
 	ISEC1_Level2    = 0;
 	break;
@@ -2017,13 +1973,13 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
 	  {
-	    ISEC1_LevelType = LTYPE_HYBRID_LAYER;
+	    ISEC1_LevelType = GRIB1_LTYPE_HYBRID_LAYER;
 	    ISEC1_Level1    = (int) zaxisInqLbound(zaxisID, levelID);
 	    ISEC1_Level2    = (int) zaxisInqUbound(zaxisID, levelID);
 	  }
 	else
 	  {
-	    ISEC1_LevelType = LTYPE_HYBRID;
+	    ISEC1_LevelType = GRIB1_LTYPE_HYBRID;
 	    ISEC1_Level1    = (int) zaxisInqLevel(zaxisID, levelID);
 	    ISEC1_Level2    = 0;
 	  }
@@ -2066,13 +2022,13 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	ilevel = (int) level;
 	if ( level < 32768 && (level < 100 || modf(level/100, &dum) > 0) )
 	  {
-	    ISEC1_LevelType = LTYPE_99;
+	    ISEC1_LevelType = GRIB1_LTYPE_99;
 	    ISEC1_Level1    = ilevel;
 	    ISEC1_Level2    = 0;
 	  }
 	else
 	  {
-	    ISEC1_LevelType = LTYPE_ISOBARIC;
+	    ISEC1_LevelType = GRIB1_LTYPE_ISOBARIC;
 	    ISEC1_Level1    = ilevel/100;
 	    ISEC1_Level2    = 0;
 	  }
@@ -2083,7 +2039,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	level = zaxisInqLevel(zaxisID, levelID);
 
 	ilevel = (int) level;
-	ISEC1_LevelType = LTYPE_HEIGHT;
+	ISEC1_LevelType = GRIB1_LTYPE_HEIGHT;
 	ISEC1_Level1    = ilevel;
 	ISEC1_Level2    = 0;
 
@@ -2094,7 +2050,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	level = zaxisInqLevel(zaxisID, levelID);
 
 	ilevel = (int) level;
-	ISEC1_LevelType = LTYPE_ALTITUDE;
+	ISEC1_LevelType = GRIB1_LTYPE_ALTITUDE;
 	ISEC1_Level1    = ilevel;
 	ISEC1_Level2    = 0;
 
@@ -2105,7 +2061,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	level = zaxisInqLevel(zaxisID, levelID);
 
 	ilevel = (int) level;
-	ISEC1_LevelType = LTYPE_SIGMA;
+	ISEC1_LevelType = GRIB1_LTYPE_SIGMA;
 	ISEC1_Level1    = ilevel;
 	ISEC1_Level2    = 0;
 
@@ -2115,7 +2071,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       {
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
 	  {
-	    ISEC1_LevelType = LTYPE_LANDDEPTH_LAYER;
+	    ISEC1_LevelType = GRIB1_LTYPE_LANDDEPTH_LAYER;
 	    ISEC1_Level1    = (int) zaxisInqLbound(zaxisID, levelID);
 	    ISEC1_Level2    = (int) zaxisInqUbound(zaxisID, levelID);
 	  }
@@ -2124,7 +2080,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	    level = zaxisInqLevel(zaxisID, levelID);
 
 	    ilevel = (int) level;
-	    ISEC1_LevelType = LTYPE_LANDDEPTH;
+	    ISEC1_LevelType = GRIB1_LTYPE_LANDDEPTH;
 	    ISEC1_Level1    = ilevel;
 	    ISEC1_Level2    = 0;
 	  }
@@ -2136,7 +2092,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	level = zaxisInqLevel(zaxisID, levelID);
 
 	ilevel = (int) level;
-	ISEC1_LevelType = LTYPE_SEADEPTH;
+	ISEC1_LevelType = GRIB1_LTYPE_SEADEPTH;
 	ISEC1_Level1    = ilevel;
 	ISEC1_Level2    = 0;
 
@@ -2147,7 +2103,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	level = zaxisInqLevel(zaxisID, levelID);
 
 	ilevel = (int) level;
-	ISEC1_LevelType = LTYPE_ISENTROPIC;
+	ISEC1_LevelType = GRIB1_LTYPE_ISENTROPIC;
 	ISEC1_Level1    = ilevel;
 	ISEC1_Level2    = 0;
 
