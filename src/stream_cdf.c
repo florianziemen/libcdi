@@ -863,7 +863,9 @@ void cdfDefTime(int streamID)
     {
       /* fprintf(stderr, "time has bounds\n"); */
 
-      cdf_def_dim(fileID, "tbnds", 2, &dims[1]);
+      if ( nc_inq_dimid(fileID, "nb2", &dims[1]) != NC_NOERR )
+	cdf_def_dim(fileID, "nb2", 2, &dims[1]);
+
       cdf_def_var(fileID, "time_bnds", NC_DOUBLE, 2, dims, &time_bndsid);
 
       streamptr->basetime.ncvarboundsid = time_bndsid;
@@ -1268,7 +1270,7 @@ void cdfDefXaxis(int streamID, int gridID)
   int dimlen, dimlen0;
   size_t len;
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
-  int nvertex = 2, nvdimID = -1;
+  int nvertex = 2, nvdimID = UNDEFID;
   int vlistID;
   int xtype = NC_DOUBLE;
   stream_t *streamptr;
@@ -1334,8 +1336,8 @@ void cdfDefXaxis(int streamID, int gridID)
 
       if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
         {
-          if ( nc_inq_dimid(fileID, "nv", &nvdimID) != NC_NOERR )
-            cdf_def_dim(fileID, "nv", nvertex, &nvdimID);
+          if ( nc_inq_dimid(fileID, "nb2", &nvdimID) != NC_NOERR )
+            cdf_def_dim(fileID, "nb2", nvertex, &nvdimID);
         }
 
       if ( gridInqXvalsPtr(gridID) )
@@ -1350,9 +1352,9 @@ void cdfDefXaxis(int streamID, int gridID)
 
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "X");
 
-          if ( gridInqXboundsPtr(gridID) )
+          if ( gridInqXboundsPtr(gridID) && nvdimID != UNDEFID )
             {
-              strcat(axisname, "_bounds");
+              strcat(axisname, "_bnds");
               dimIDs[0] = dimID;
               dimIDs[1] = nvdimID;
               cdf_def_var(fileID, axisname, (nc_type) xtype, 2, dimIDs, &ncbvarid);
@@ -1396,7 +1398,7 @@ void cdfDefYaxis(int streamID, int gridID)
   int dimlen, dimlen0;
   size_t len;
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
-  int nvertex = 2, nvdimID = -1;
+  int nvertex = 2, nvdimID = UNDEFID;
   int vlistID;
   int xtype = NC_DOUBLE;
   stream_t *streamptr;
@@ -1462,8 +1464,8 @@ void cdfDefYaxis(int streamID, int gridID)
 
       if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
         {
-          if ( nc_inq_dimid(fileID, "nv", &nvdimID) != NC_NOERR )
-            cdf_def_dim(fileID, "nv", nvertex, &nvdimID);
+          if ( nc_inq_dimid(fileID, "nb2", &nvdimID) != NC_NOERR )
+            cdf_def_dim(fileID, "nb2", nvertex, &nvdimID);
         }
 
       if ( gridInqYvalsPtr(gridID) )
@@ -1478,9 +1480,9 @@ void cdfDefYaxis(int streamID, int gridID)
 
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "Y");
 
-          if ( gridInqYboundsPtr(gridID) )
+          if ( gridInqYboundsPtr(gridID) && nvdimID != UNDEFID )
             {
-              strcat(axisname, "_bounds");
+              strcat(axisname, "_bnds");
               dimIDs[0] = dimID;
               dimIDs[1] = nvdimID;
               cdf_def_var(fileID, axisname, (nc_type) xtype, 2, dimIDs, &ncbvarid);
@@ -1531,7 +1533,7 @@ void cdfDefLonLat2D(int streamID, int gridID)
   size_t len;
   int ncxvarid = UNDEFID, ncyvarid = UNDEFID;
   int ncbxvarid = UNDEFID, ncbyvarid = UNDEFID, ncavarid = UNDEFID;
-  int nvertex = 4, nvdimID = -1;
+  int nvertex = 4, nvdimID = UNDEFID;
   int vlistID;
   int xtype = NC_DOUBLE;
   stream_t *streamptr;
@@ -1602,8 +1604,8 @@ void cdfDefLonLat2D(int streamID, int gridID)
 
       if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
         {
-          if ( nc_inq_dimid(fileID, "nv", &nvdimID) != NC_NOERR )
-            cdf_def_dim(fileID, "nv", nvertex, &nvdimID);
+          if ( nc_inq_dimid(fileID, "nv4", &nvdimID) != NC_NOERR )
+            cdf_def_dim(fileID, "nv4", nvertex, &nvdimID);
         }
 
       dimIDs[0] = ydimID;
@@ -1624,9 +1626,9 @@ void cdfDefLonLat2D(int streamID, int gridID)
 
           streamptr->ncxvarID[gridindex] = ncxvarid;
 
-          if ( gridInqXboundsPtr(gridID) )
+          if ( gridInqXboundsPtr(gridID) && nvdimID != UNDEFID )
             {
-              strcat(xaxisname, "_bounds");
+              strcat(xaxisname, "_bnds");
               dimIDs[0] = ydimID;
               dimIDs[1] = xdimID;
               dimIDs[2] = nvdimID;
@@ -1650,9 +1652,9 @@ void cdfDefLonLat2D(int streamID, int gridID)
 
           streamptr->ncyvarID[gridindex] = ncyvarid;
 
-          if ( gridInqYboundsPtr(gridID) )
+          if ( gridInqYboundsPtr(gridID) && nvdimID != UNDEFID )
             {
-              strcat(yaxisname, "_bounds");
+              strcat(yaxisname, "_bnds");
               dimIDs[0] = ydimID;
               dimIDs[1] = xdimID;
               dimIDs[2] = nvdimID;
@@ -1867,7 +1869,7 @@ void cdfDefCell(int streamID, int gridID)
   size_t len;
   int ncxvarid = UNDEFID, ncyvarid = UNDEFID;
   int ncbxvarid = UNDEFID, ncbyvarid = UNDEFID, ncavarid = UNDEFID;
-  int nvertex, nvdimID = -1;
+  int nvertex, nvdimID = UNDEFID;
   int vlistID;
   int xtype = NC_DOUBLE;
   stream_t *streamptr;
@@ -1945,7 +1947,7 @@ void cdfDefCell(int streamID, int gridID)
 
           streamptr->ncxvarID[gridindex] = ncxvarid;
 
-          if ( nvdimID != UNDEFID && gridInqXboundsPtr(gridID) )
+          if ( gridInqXboundsPtr(gridID) && nvdimID != UNDEFID )
             {
               int dimIDs[2];
               dimIDs[0] = dimID;
@@ -1968,7 +1970,7 @@ void cdfDefCell(int streamID, int gridID)
 
           streamptr->ncyvarID[gridindex] = ncyvarid;
 
-          if ( nvdimID != UNDEFID && gridInqYboundsPtr(gridID) )
+          if ( gridInqYboundsPtr(gridID) && nvdimID != UNDEFID )
             {
               int dimIDs[2];
               dimIDs[0] = dimID;
@@ -2109,10 +2111,12 @@ void cdfDefZaxis(int streamID, int zaxisID)
   int index;
   int zaxisID0;
   int dimID = UNDEFID;
+  int dimIDs[2];
   int fileID;
   int dimlen;
   size_t len;
-  int ncvarid;
+  int ncvarid = UNDEFID, ncbvarid = UNDEFID;
+  int nvertex = 2, nvdimID = UNDEFID;
   int type;
   int nzaxis;
   int ilevel = 0;
@@ -2280,10 +2284,50 @@ void cdfDefZaxis(int streamID, int zaxisID)
 
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "Z");
               
+	  if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) ) 
+            {
+	      if ( nc_inq_dimid(fileID, "nb2", &nvdimID) != NC_NOERR )
+		cdf_def_dim(fileID, "nb2", nvertex, &nvdimID);
+
+	      if ( nvdimID != UNDEFID )
+		{
+		  strcat(axisname, "_bnds");
+		  dimIDs[0] = dimID;
+		  dimIDs[1] = nvdimID;
+		  cdf_def_var(fileID, axisname, (nc_type) xtype, 2, dimIDs, &ncbvarid);
+		  cdf_put_att_text(fileID, ncvarid, "bounds", strlen(axisname), axisname);
+		}
+	    }
+
           cdf_enddef(fileID);
           streamptr->ncmode = 2;
 
           cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
+	  
+          if ( ncbvarid != UNDEFID )
+	    {
+	      int i;
+	      double *zbounds, *lbounds, *ubounds;
+
+	      lbounds = (double *) malloc(dimlen*sizeof(double));
+	      ubounds = (double *) malloc(dimlen*sizeof(double));
+	      zbounds = (double *) malloc(2*dimlen*sizeof(double));
+
+	      zaxisInqLbounds(zaxisID, lbounds);
+	      zaxisInqUbounds(zaxisID, ubounds);
+
+	      for ( i = 0; i < dimlen; ++i )
+		{
+		  zbounds[2*i  ] = lbounds[i];
+		  zbounds[2*i+1] = ubounds[i];
+		}
+
+	      cdf_put_var_double(fileID, ncbvarid, zbounds);
+
+	      free(zbounds);
+	      free(ubounds);
+	      free(lbounds);
+	    }
         }
     }
 
