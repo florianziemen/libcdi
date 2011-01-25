@@ -93,34 +93,6 @@ int cgribexGetIsRotated(int *isec2)
 
 #if  defined  (HAVE_LIBCGRIBEX)
 static
-int cgribexGetZaxisType(int grb_ltype)
-{
-  int zaxistype = 0;
-
-  switch ( grb_ltype )
-    {
-    case GRIB1_LTYPE_SURFACE:         { zaxistype = ZAXIS_SURFACE;           break; }
-    case GRIB1_LTYPE_MEANSEA:         { zaxistype = ZAXIS_MEANSEA;           break; }
-    case GRIB1_LTYPE_99:
-    case GRIB1_LTYPE_ISOBARIC:        { zaxistype = ZAXIS_PRESSURE;          break; }
-    case GRIB1_LTYPE_HEIGHT:          { zaxistype = ZAXIS_HEIGHT;            break; }
-    case GRIB1_LTYPE_ALTITUDE:        { zaxistype = ZAXIS_ALTITUDE;	       break; }
-    case GRIB1_LTYPE_SIGMA:           { zaxistype = ZAXIS_SIGMA;	       break; }
-    case GRIB1_LTYPE_HYBRID:
-    case GRIB1_LTYPE_HYBRID_LAYER:    { zaxistype = ZAXIS_HYBRID;	       break; }
-    case GRIB1_LTYPE_LANDDEPTH:
-    case GRIB1_LTYPE_LANDDEPTH_LAYER: { zaxistype = ZAXIS_DEPTH_BELOW_LAND;  break; }
-    case GRIB1_LTYPE_ISENTROPIC:      { zaxistype = ZAXIS_ISENTROPIC;	       break; }
-    case GRIB1_LTYPE_SEADEPTH:        { zaxistype = ZAXIS_DEPTH_BELOW_SEA;   break; }
-    default:                    { zaxistype = ZAXIS_GENERIC;           break; }
-    }
-
-  return (zaxistype);
-}
-#endif
-
-#if  defined  (HAVE_LIBCGRIBEX)
-static
 int cgribexGetZaxisHasBounds(int grb_ltype)
 {
   int lbounds = 0;
@@ -431,7 +403,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
 
   gridID = varDefGrid(vlistID, grid, 0);
 
-  zaxistype = cgribexGetZaxisType(ISEC1_LevelType);
+  zaxistype = grib1ltypeToZaxisType(ISEC1_LevelType);
 
   if ( zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF )
     {

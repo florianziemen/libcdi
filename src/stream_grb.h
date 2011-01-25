@@ -18,4 +18,7 @@ void  grbWriteVarDP(int streamID, int varID, const double *data, int nmiss);
 void  grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *nmiss);
 int   grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data, int nmiss);
 
+int   grib1ltypeToZaxisType(int grib_ltype);
+int   grib2ltypeToZaxisType(int grib_ltype);
+
 #endif  /* _STREAM_GRB_H */

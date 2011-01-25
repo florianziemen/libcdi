@@ -12,6 +12,57 @@
 #include "stream_gribapi.h"
 #include "file.h"
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
+#include "gribapi.h"
+
+
+
+int grib1ltypeToZaxisType(int grib_ltype)
+{
+  int zaxistype = ZAXIS_GENERIC;
+
+  switch ( grib_ltype )
+    {
+    case GRIB1_LTYPE_SURFACE:         { zaxistype = ZAXIS_SURFACE;           break; }
+    case GRIB1_LTYPE_MEANSEA:         { zaxistype = ZAXIS_MEANSEA;           break; }
+    case GRIB1_LTYPE_99:
+    case GRIB1_LTYPE_ISOBARIC:        { zaxistype = ZAXIS_PRESSURE;          break; }
+    case GRIB1_LTYPE_HEIGHT:          { zaxistype = ZAXIS_HEIGHT;            break; }
+    case GRIB1_LTYPE_ALTITUDE:        { zaxistype = ZAXIS_ALTITUDE;	     break; }
+    case GRIB1_LTYPE_SIGMA:           { zaxistype = ZAXIS_SIGMA;	     break; }
+    case GRIB1_LTYPE_HYBRID:
+    case GRIB1_LTYPE_HYBRID_LAYER:    { zaxistype = ZAXIS_HYBRID;	     break; }
+    case GRIB1_LTYPE_LANDDEPTH:
+    case GRIB1_LTYPE_LANDDEPTH_LAYER: { zaxistype = ZAXIS_DEPTH_BELOW_LAND;  break; }
+    case GRIB1_LTYPE_ISENTROPIC:      { zaxistype = ZAXIS_ISENTROPIC;	     break; }
+    case GRIB1_LTYPE_SEADEPTH:        { zaxistype = ZAXIS_DEPTH_BELOW_SEA;   break; }
+    }
+
+  return (zaxistype);
+}
+
+
+int grib2ltypeToZaxisType(int grib_ltype)
+{
+  int zaxistype = ZAXIS_GENERIC;
+
+  switch ( grib_ltype )
+    {
+    case GRIB2_LTYPE_SURFACE:            { zaxistype = ZAXIS_SURFACE;           break; }
+    case GRIB2_LTYPE_MEANSEA:            { zaxistype = ZAXIS_MEANSEA;           break; }
+    case GRIB2_LTYPE_ISOBARIC:           { zaxistype = ZAXIS_PRESSURE;          break; }
+    case GRIB2_LTYPE_HEIGHT:             { zaxistype = ZAXIS_HEIGHT;            break; }
+    case GRIB2_LTYPE_ALTITUDE:           { zaxistype = ZAXIS_ALTITUDE;          break; }
+    case GRIB2_LTYPE_SIGMA:              { zaxistype = ZAXIS_SIGMA;             break; }
+    case GRIB2_LTYPE_HYBRID:
+ /* case GRIB2_LTYPE_HYBRID_LAYER: */    { zaxistype = ZAXIS_HYBRID;            break; }
+    case GRIB2_LTYPE_LANDDEPTH:
+ /* case GRIB2_LTYPE_LANDDEPTH_LAYER: */ { zaxistype = ZAXIS_DEPTH_BELOW_LAND;  break; }
+    case GRIB2_LTYPE_ISENTROPIC:         { zaxistype = ZAXIS_ISENTROPIC;        break; }
+    case GRIB2_LTYPE_SEADEPTH:           { zaxistype = ZAXIS_DEPTH_BELOW_SEA;   break; }
+    }
+
+  return (zaxistype);
+}
 
 
 int grbBitsPerValue(int datatype)
