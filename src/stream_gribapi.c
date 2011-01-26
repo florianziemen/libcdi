@@ -615,13 +615,18 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 
   vlen = 256;
   GRIB_CHECK(grib_get_string(gh, "shortName", name, &vlen), 0);
-  if ( vlen == 8 && memcmp(name, "unknown", vlen) == 0 ) name[0] = 0;
-  vlen = 256;
-  GRIB_CHECK(grib_get_string(gh, "name", longname, &vlen), 0);
-  if ( vlen == 8 && memcmp(longname, "unknown", vlen) == 0 ) longname[0] = 0;
-  vlen = 256;
-  GRIB_CHECK(grib_get_string(gh, "units", units, &vlen), 0);
-  if ( vlen == 8 && memcmp(units, "unknown", vlen) == 0 ) units[0] = 0;
+  if      ( vlen == 8 && memcmp(name, "unknown", vlen) == 0 ) name[0] = 0;
+  else if ( vlen == 2 && memcmp(name, "~", vlen)       == 0 ) name[0] = 0;
+
+  if ( name[0] != 0 )
+    {
+      vlen = 256;
+      GRIB_CHECK(grib_get_string(gh, "name", longname, &vlen), 0);
+      if ( vlen == 8 && memcmp(longname, "unknown", vlen) == 0 ) longname[0] = 0;
+      vlen = 256;
+      GRIB_CHECK(grib_get_string(gh, "units", units, &vlen), 0);
+      if ( vlen == 8 && memcmp(units, "unknown", vlen) == 0 ) units[0] = 0;
+    }
   // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units); 
 
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2,
@@ -1786,7 +1791,7 @@ void gribapiDefModel(grib_handle *gh, int vlistID, int varID)
 
 #if  defined  (HAVE_LIBGRIB_API)
 static
-void gribapiDefParam(grib_handle *gh, int param)
+void gribapiDefParam(grib_handle *gh, int param, const char *name)
 {
   int pdis, pcat, pnum;
 
@@ -1795,11 +1800,25 @@ void gribapiDefParam(grib_handle *gh, int param)
   //ISEC1_CodeTable = codetable;
   if ( pnum < 0 ) pnum = -pnum;
   // GRIB_CHECK(grib_set_long(gh, "indicatorOfParameter", code), 0);
-  GRIB_CHECK(grib_set_long(gh, "discipline",        pdis), 0);
-  GRIB_CHECK(grib_set_long(gh, "parameterCategory", pcat), 0);
-  GRIB_CHECK(grib_set_long(gh, "parameterNumber",   pnum), 0);
+  /*
+  if ( pdis == 255 )
+    {
+      size_t len;
+      int status;
+      len = strlen(name);
+      status = grib_set_string(gh, "shortName", name, &len);
+      if ( status != 0 )
+	printf("no match for shortName=%s\n", name);
+    }
+  else
+  */
+    {
+      GRIB_CHECK(grib_set_long(gh, "discipline",        pdis), 0);
+      GRIB_CHECK(grib_set_long(gh, "parameterCategory", pcat), 0);
+      GRIB_CHECK(grib_set_long(gh, "parameterNumber",   pnum), 0);
+    }
 
-  //printf("param: %d.%d.%d\n", pnum, pcat, pdis);
+  // printf("param: %d.%d.%d %s\n", pnum, pcat, pdis, name);
 }
 #endif
 
@@ -2424,11 +2443,13 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   int datatype;
   int param;
   long bitsPerValue;
+  char name[256];
   grib_handle *gh = NULL;
   // extern unsigned char _grib_template_GRIB2[];
 
   param    = vlistInqVarParam(vlistID, varID);
   datatype = vlistInqVarDatatype(vlistID, varID);
+  vlistInqVarName(vlistID, varID, name);
 
 #if defined(GRIBAPIENCODETEST)
   gh = (grib_handle *) gribHandleNew();
@@ -2441,7 +2462,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   gribapiDefInstitut(gh, vlistID, varID);
   gribapiDefModel(gh, vlistID, varID);
 
-  gribapiDefParam(gh, param);
+  gribapiDefParam(gh, param, name);
   gribapiDefTime(gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID));
 
   /* bitsPerValue have to be defined befor call to DefGrid (complex packing) */
