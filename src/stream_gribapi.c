@@ -33,57 +33,59 @@ typedef struct {
 
 #if  defined  (HAVE_LIBGRIB_API)
 static
-int gribapiGetGridType(grib_handle *gh, int gribgridtype)
+int gribapiGetGridType(grib_handle *gh)
 {
-  int gridtype = 0;
+  int gridtype = GRID_GENERIC;
+  int gribgridtype;
   long lpar;
+  /*
+  long editionNumber;
 
-  GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
-  gribgridtype = (int) lpar;
+  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
-  switch (gribgridtype)
+  if ( editionNumber <= 1 )
     {
-    case  GRIB2_GTYPE_LATLON:
-    case  GRIB2_GTYPE_LATLON_ROT:
-      {
-	gridtype = GRID_LONLAT;
-	break;
-      }
-    case  GRIB2_GTYPE_LCC:
-      {
-	gridtype = GRID_LCC;
-	break;
-      }
-    case  GRIB2_GTYPE_GAUSSIAN:
-      {
-	long lpar;
-	GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
-	if ( lpar < 0 )
-	  gridtype = GRID_GAUSSIAN_REDUCED;
-	else
-	  gridtype = GRID_GAUSSIAN;
-	break;
-      }
-    case  GRIB2_GTYPE_SPECTRAL:
-      {
-	gridtype = GRID_SPECTRAL;
-	break;
-      }
-    case  GRIB2_GTYPE_GME:
-      {
-	gridtype = GRID_GME;
-	break;
-      }
-    case  GRIB2_GTYPE_NUMBER:
-      {
-	gridtype = GRID_NUMBER;
-	break;
-      }
-    default:
-      {
-	gridtype = GRID_GENERIC;
-	break;
-      }
+      GRIB_CHECK(grib_get_long(gh, ">>>dataRepresentation<<<", &lpar), 0);
+      gribgridtype = (int) lpar;
+
+      switch (gribgridtype)
+	{
+	case  GRIB1_GTYPE_LATLON:
+	case  GRIB1_GTYPE_LATLON_ROT: { gridtype = GRID_LONLAT;   break; }
+	case  GRIB1_GTYPE_LCC:        { gridtype = GRID_LCC;      break; }
+	case  GRIB1_GTYPE_GAUSSIAN:   { GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
+					if ( lpar < 0 )
+	                                  gridtype = GRID_GAUSSIAN_REDUCED;
+                         	        else
+				          gridtype = GRID_GAUSSIAN;
+          	                        break;
+                                      }
+	case  GRIB1_GTYPE_SPECTRAL:   { gridtype = GRID_SPECTRAL; break; }
+	case  GRIB1_GTYPE_GME:        { gridtype = GRID_GME;      break; }
+	}
+    }
+  else
+  */
+    {
+      GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
+      gribgridtype = (int) lpar;
+
+      switch (gribgridtype)
+	{
+	case  GRIB2_GTYPE_LATLON:
+	case  GRIB2_GTYPE_LATLON_ROT: { gridtype = GRID_LONLAT;   break; }
+	case  GRIB2_GTYPE_LCC:        { gridtype = GRID_LCC;      break; }
+	case  GRIB2_GTYPE_GAUSSIAN:   { GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
+					if ( lpar < 0 )
+					  gridtype = GRID_GAUSSIAN_REDUCED;
+					else
+					  gridtype = GRID_GAUSSIAN;
+					break;
+                                      }
+	case  GRIB2_GTYPE_SPECTRAL:   { gridtype = GRID_SPECTRAL; break; }
+	case  GRIB2_GTYPE_GME:        { gridtype = GRID_GME;      break; }
+	case  GRIB2_GTYPE_NUMBER:     { gridtype = GRID_NUMBER;   break; }
+	}
     }
 
   return (gridtype);
@@ -92,13 +94,30 @@ int gribapiGetGridType(grib_handle *gh, int gribgridtype)
 
 #if  defined  (HAVE_LIBGRIB_API)
 static
-int gribapiGetIsRotated(int gribgridtype)
+int gribapiGetIsRotated(grib_handle *gh)
 {
   int isRotated = 0;
+  int gribgridtype;
+  long lpar;
+  /*
+  long editionNumber;
 
-  if ( gribgridtype == GRIB2_GTYPE_LATLON_ROT )
+  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
+
+  if ( editionNumber <= 1 )
     {
-      isRotated = 1;
+      GRIB_CHECK(grib_get_long(gh, ">>>dataRepresentation<<<", &lpar), 0);
+      gribgridtype = (int) lpar;
+
+      if ( gribgridtype == GRIB1_GTYPE_LATLON_ROT ) isRotated = 1;
+    }
+  else
+  */
+    {
+      GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
+      gribgridtype = (int) lpar;
+
+      if ( gribgridtype == GRIB2_GTYPE_LATLON_ROT ) isRotated = 1;
     }
 
   return (isRotated);
@@ -275,7 +294,6 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 		      long recsize, off_t position, int prec, int ztype)
 {
   long editionNumber;
-  int gribgridtype;
   int gridtype;
   int zaxistype;
   int gridID = CDI_UNDEFID, varID;
@@ -354,9 +372,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
   (*record).ilevel2  = level2;
   (*record).ltype    = leveltype;
 
-  GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
-  gribgridtype = (int) lpar;
-  gridtype = gribapiGetGridType(gh, gribgridtype);
+  gridtype = gribapiGetGridType(gh);
   /*
   if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
     {
@@ -571,7 +587,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
     }
 
   grid.isRotated = FALSE;
-  if ( gribapiGetIsRotated(gribgridtype) )
+  if ( gribapiGetIsRotated(gh) )
     {
       grid.isRotated = TRUE;
       GRIB_CHECK(grib_get_double(gh, "latitudeOfSouthernPoleInDegrees",  &grid.ypole), 0);
@@ -1794,28 +1810,46 @@ static
 void gribapiDefParam(grib_handle *gh, int param, const char *name)
 {
   int pdis, pcat, pnum;
+  long editionNumber;
 
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
-  //ISEC1_CodeTable = codetable;
-  if ( pnum < 0 ) pnum = -pnum;
-  // GRIB_CHECK(grib_set_long(gh, "indicatorOfParameter", code), 0);
-  /*
-  if ( pdis == 255 )
+  if ( pnum < 0 )
     {
       size_t len;
       int status;
       len = strlen(name);
       status = grib_set_string(gh, "shortName", name, &len);
       if ( status != 0 )
-	printf("no match for shortName=%s\n", name);
+	printf("status=%d; no match for shortName=%s\n", status, name);
     }
   else
-  */
     {
-      GRIB_CHECK(grib_set_long(gh, "discipline",        pdis), 0);
-      GRIB_CHECK(grib_set_long(gh, "parameterCategory", pcat), 0);
-      GRIB_CHECK(grib_set_long(gh, "parameterNumber",   pnum), 0);
+      if ( pnum < 0 ) pnum = -pnum;
+
+      GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
+
+      if ( editionNumber <= 1 )
+	{
+	  static int lwarn = TRUE;
+
+	  if ( pdis != 255 && lwarn )
+	    {
+	      char paramstr[32];
+	      cdiParamToString(param, paramstr, sizeof(paramstr));
+	      Warning("Can not convert GRIB2 parameter (%s) to GRIB1!", paramstr);
+	      lwarn = FALSE;
+	    }
+
+	  GRIB_CHECK(grib_set_long(gh, "table2Version",        pcat), 0);
+	  GRIB_CHECK(grib_set_long(gh, "indicatorOfParameter", pnum), 0);
+	}
+      else
+	{
+	  GRIB_CHECK(grib_set_long(gh, "discipline",        pdis), 0);
+	  GRIB_CHECK(grib_set_long(gh, "parameterCategory", pcat), 0);
+	  GRIB_CHECK(grib_set_long(gh, "parameterNumber",   pnum), 0);
+	}
     }
 
   // printf("param: %d.%d.%d %s\n", pnum, pcat, pdis, name);
@@ -1871,6 +1905,7 @@ int gribapiDefDateTime(grib_handle *gh, int timeunit, int date, int time)
   char stepunits[8];
   size_t len;
 
+  if ( date == 0 ) date = 10101;
   GRIB_CHECK(grib_set_long(gh, "dataDate", date), 0);
   GRIB_CHECK(grib_set_long(gh, "dataTime", time/100), 0);
 
@@ -1945,6 +1980,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 {
   int gridtype;
   int status;
+  long editionNumber;
   static short lwarn = TRUE;
   size_t len;
   char *mesg;
@@ -1952,6 +1988,11 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
   // ISEC1_Sec2Or3Flag = 128;
   
   gridtype = gridInqType(gridID);
+
+  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
+  if ( editionNumber <= 1 )
+    if ( gridtype == GRID_GME || gridtype == GRID_NUMBER )
+      gridtype = -1;
 
   // ISEC1_GridDefinition = 255;
 
@@ -2042,12 +2083,26 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	    yinc   = gridInqYinc(gridID);
 	  }
 
-	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
-	  GRIB_CHECK(grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_GAUSSIAN), 0);
+	if ( gridtype == GRID_GAUSSIAN )
+	  {
+	    mesg = "regular_gg"; len = strlen(mesg);
+	    GRIB_CHECK(grib_set_string(gh, "gridType", mesg, &len), 0);
+	  }
+	else if ( gridtype == GRID_GAUSSIAN_REDUCED )
+	  {
+	    mesg = "reduced_gg"; len = strlen(mesg);
+	    GRIB_CHECK(grib_set_string(gh, "gridType", mesg, &len), 0);
+	  }
 	else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
-	  GRIB_CHECK(grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_LATLON_ROT), 0);
+	  {
+	    mesg = "rotated_ll"; len = strlen(mesg);
+	    GRIB_CHECK(grib_set_string(gh, "gridType", mesg, &len), 0);
+	  }
 	else
-	  GRIB_CHECK(grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_LATLON), 0);
+	  {
+	    mesg = "regular_ll"; len = strlen(mesg);
+	    GRIB_CHECK(grib_set_string(gh, "gridType", mesg, &len), 0);
+	  }
 
 	GRIB_CHECK(grib_set_long(gh, "Ni", nlon), 0);
 	GRIB_CHECK(grib_set_long(gh, "Nj", nlat), 0);
@@ -2152,7 +2207,9 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
       {
 	int trunc = gridInqTrunc(gridID);
 
-	GRIB_CHECK(grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_SPECTRAL), 0);
+	mesg = "sh"; len = strlen(mesg);
+	GRIB_CHECK(grib_set_string(gh, "gridType", mesg, &len), 0);
+
 	GRIB_CHECK(grib_set_long(gh, "J", trunc), 0);
 	GRIB_CHECK(grib_set_long(gh, "K", trunc), 0);
 	GRIB_CHECK(grib_set_long(gh, "M", trunc), 0);
@@ -2181,12 +2238,13 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
     case GRID_GME:
       {
 	GRIB_CHECK(grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_GME), 0);
+
 	GRIB_CHECK(grib_set_long(gh, "nd", gridInqGMEnd(gridID)), 0);
 	GRIB_CHECK(grib_set_long(gh, "Ni", gridInqGMEni(gridID)), 0);
 	GRIB_CHECK(grib_set_long(gh, "n2", gridInqGMEni2(gridID)), 0);
 	GRIB_CHECK(grib_set_long(gh, "n3", gridInqGMEni3(gridID)), 0);
-	GRIB_CHECK(grib_set_long(gh, "latitudeOfThePolePointOfTheIcosahedronOnTheSphere", 90000), 0);
-	GRIB_CHECK(grib_set_long(gh, "longitudeOfThePolePointOfTheIcosahedronOnTheSphere", 0), 0);
+	GRIB_CHECK(grib_set_long(gh, "latitudeOfThePolePoint", 90000), 0);
+	GRIB_CHECK(grib_set_long(gh, "longitudeOfThePolePoint", 0), 0);
 
 	GRIB_CHECK(grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
 	GRIB_CHECK(grib_set_long(gh, "totalNumberOfGridPoints", gridInqSize(gridID)), 0);
@@ -2227,6 +2285,8 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
   double level;
   int zaxistype, ltype;
   static int warning = 1;
+  size_t len;
+  char *mesg;
 
   zaxistype = zaxisInqType(zaxisID);
   ltype = zaxisInqLtype(zaxisID);
@@ -2248,7 +2308,8 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
     {
     case ZAXIS_SURFACE:
       {
-	GRIB_CHECK(grib_set_long(gh, "typeOfFirstFixedSurface", GRIB2_LTYPE_SURFACE), 0);
+	mesg = "surface"; len = sizeof(mesg);
+	GRIB_CHECK(grib_set_string(gh, "typeOfLevel", mesg, &len), 0);
 	GRIB_CHECK(grib_set_long(gh, "level", (long) zaxisInqLevel(zaxisID, levelID)), 0);
 	break;
       }
@@ -2408,12 +2469,16 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 #endif
 
 
-void *gribHandleNew()
+void *gribHandleNew(int editionNumber)
 {
   void *gh = NULL;
 
 #if  defined  (HAVE_LIBGRIB_API)
-  gh = (void *) grib_handle_new_from_samples(NULL, "GRIB2");
+  if ( editionNumber == 1 )
+    gh = (void *) grib_handle_new_from_samples(NULL, "GRIB1");
+  else
+    gh = (void *) grib_handle_new_from_samples(NULL, "GRIB2");
+
   if ( gh == NULL ) Error("grib_handle_new_from_samples failed!");
 #endif
 
@@ -2439,7 +2504,6 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 #if  defined  (HAVE_LIBGRIB_API)
   size_t recsize = 0;
   void *dummy = NULL;
-  long edition = 2;
   int datatype;
   int param;
   long bitsPerValue;
@@ -2457,8 +2521,6 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   gh = gribHandle;
 #endif
   
-  GRIB_CHECK(grib_set_long(gh, "editionNumber", edition), 0);
-
   gribapiDefInstitut(gh, vlistID, varID);
   gribapiDefModel(gh, vlistID, varID);
 

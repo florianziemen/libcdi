@@ -32,44 +32,21 @@ typedef struct {
 static
 int cgribexGetGridType(int *isec2)
 {
-  int gridtype = 0;
+  int gridtype = GRID_GENERIC;
 
   switch (ISEC2_GridType)
     {
     case  GRIB1_GTYPE_LATLON:
-    case  GRIB1_GTYPE_LATLON_ROT:
-      {
-	gridtype = GRID_LONLAT;
-	break;
-      }
-    case  GRIB1_GTYPE_LCC:
-      {
-	gridtype = GRID_LCC;
-	break;
-      }
-    case  GRIB1_GTYPE_GAUSSIAN:
-      {
-	if ( ISEC2_Reduced )
-	  gridtype = GRID_GAUSSIAN_REDUCED;
-	else
-	  gridtype = GRID_GAUSSIAN;
-	break;
-      }
-    case  GRIB1_GTYPE_SPECTRAL:
-      {
-	gridtype = GRID_SPECTRAL;
-	break;
-      }
-    case  GRIB1_GTYPE_GME:
-      {
-	gridtype = GRID_GME;
-	break;
-      }
-    default:
-      {
-	gridtype = GRID_GENERIC;
-	break;
-      }
+    case  GRIB1_GTYPE_LATLON_ROT: { gridtype = GRID_LONLAT;   break; }
+    case  GRIB1_GTYPE_LCC:        { gridtype = GRID_LCC;      break; }
+    case  GRIB1_GTYPE_GAUSSIAN:   { if ( ISEC2_Reduced )
+	                              gridtype = GRID_GAUSSIAN_REDUCED;
+                         	    else
+				      gridtype = GRID_GAUSSIAN;
+          	                    break;
+                                  }
+    case  GRIB1_GTYPE_SPECTRAL:   { gridtype = GRID_SPECTRAL; break; }
+    case  GRIB1_GTYPE_GME:        { gridtype = GRID_GME;      break; }
     }
 
   return (gridtype);
@@ -82,7 +59,7 @@ int cgribexGetIsRotated(int *isec2)
 {
   int isRotated = 0;
 
-  if ( ISEC2_GridType == 10 )
+  if ( ISEC2_GridType == GRIB1_GTYPE_LATLON_ROT )
     {
       isRotated = 1;
     }

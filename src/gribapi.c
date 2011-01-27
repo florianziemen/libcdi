@@ -49,12 +49,13 @@ void gribapiDefHandles(int streamID)
   else
 #endif
     {
-      int i;
+      int i, editionNumber = 2;
+      if ( streamptr->filetype == FILETYPE_GRB ) editionNumber = 1;
 
       streamptr->gribHandle = (void **) malloc(streamptr->nvars*sizeof(void *));
 
       for ( i = 0; i < streamptr->nvars; ++i )
-	streamptr->gribHandle[i] = gribHandleNew();
+	streamptr->gribHandle[i] = gribHandleNew(editionNumber);
     }
 }
 

@@ -454,7 +454,8 @@ size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, 
     {
       nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID,
 			     date, time, tsteptype, numavg, 
-			     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg, gribHandle);
+			     datasize, data, nmiss, gribbuffer, gribbuffersize,
+			     ljpeg, gribHandle);
     }
 
   return (nbytes);

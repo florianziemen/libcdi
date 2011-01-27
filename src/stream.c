@@ -1112,7 +1112,7 @@ void streamClose(int streamID)
 	      int i;
 	      for ( i = 0; i < streamptr->nvars; ++i )
 		{
-		  gribHandleDelete(streamptr->gribHandle[0]);
+		  gribHandleDelete(streamptr->gribHandle[i]);
 		  streamptr->gribHandle[i] = NULL;
 		}
 	      free(streamptr->gribHandle);

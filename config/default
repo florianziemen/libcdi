@@ -33,6 +33,7 @@ case "${HOSTNAME}" in
     etch-ia32 | gata)
 	./configure --prefix=$HOME/local/etch-ia32 \
                     --enable-maintainer-mode \
+                    --enable-all-static \
                     --with-jasper=/sw/etch-ia32/jasper-1.900.1 \
                     --with-grib_api=$HOME/local/etch-ia32/grib_api-1.9.5 \
 	            --with-netcdf=/sw/etch-ia32/netcdf-4.0.1 \

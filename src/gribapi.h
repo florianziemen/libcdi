@@ -31,7 +31,7 @@
 
 const char *gribapiLibraryVersion(void);
 void gribapiDefHandles(int streamID);
-void *gribHandleNew();
+void *gribHandleNew(int editionNumber);
 void gribHandleDelete(void *gh);
 
 #endif  /* _GRIBAPI_H */
