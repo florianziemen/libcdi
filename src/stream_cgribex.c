@@ -1698,6 +1698,13 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	double xfirst = 0, xlast = 0, xinc = 0;
 	double yfirst = 0, ylast = 0, yinc = 0;
 
+	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
+	  ISEC2_GridType = GRIB1_GTYPE_GAUSSIAN;
+	else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
+	  ISEC2_GridType = GRIB1_GTYPE_LATLON_ROT;
+	else
+	  ISEC2_GridType = GRIB1_GTYPE_LATLON;
+
 	nlon = gridInqXsize(gridID);
 	nlat = gridInqYsize(gridID);
 
@@ -1738,13 +1745,6 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	    yinc   = gridInqYinc(gridID);
 	    if ( yinc < 0 ) yinc = -yinc;
 	  }
-
-	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
-	  ISEC2_GridType = GRIB1_GTYPE_GAUSSIAN;
-	else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
-	  ISEC2_GridType = GRIB1_GTYPE_LATLON_ROT;
-	else
-	  ISEC2_GridType = GRIB1_GTYPE_LATLON;
 
 	ISEC2_NumLon   = nlon;
 	ISEC2_NumLat   = nlat;
