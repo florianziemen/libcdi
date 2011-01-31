@@ -196,8 +196,8 @@
       PARAMETER (GRID_GME               =  7)
       INTEGER    GRID_TRAJECTORY       
       PARAMETER (GRID_TRAJECTORY        =  8)
-      INTEGER    GRID_CELL             
-      PARAMETER (GRID_CELL              =  9)
+      INTEGER    GRID_UNSTRUCTURED     
+      PARAMETER (GRID_UNSTRUCTURED      =  9)
       INTEGER    GRID_CURVILINEAR      
       PARAMETER (GRID_CURVILINEAR       = 10)
       INTEGER    GRID_LCC              
@@ -208,6 +208,8 @@
       PARAMETER (GRID_LAEA              = 13)
       INTEGER    GRID_SINUSOIDAL       
       PARAMETER (GRID_SINUSOIDAL        = 14)
+      INTEGER    GRID_NUMBER           
+      PARAMETER (GRID_NUMBER            = 15)
 !
 !  ZAXIS types
 !
@@ -1362,6 +1364,27 @@
 !                                    (INTEGER         gridID,
 !                                     INTEGER         ni3)
       EXTERNAL        gridDefGMEni3
+
+!
+!  Number grid
+!
+      INTEGER         gridInqNumber
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqNumber
+
+!                     gridDefNumber
+!                                    (INTEGER         gridID,
+!                                     INTEGER         number)
+      EXTERNAL        gridDefNumber
+
+      INTEGER         gridInqPosition
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqPosition
+
+!                     gridDefPosition
+!                                    (INTEGER         gridID,
+!                                     INTEGER         position)
+      EXTERNAL        gridDefPosition
 
 !
 !  Lambert Conformal Conic grid (GRIB version)
