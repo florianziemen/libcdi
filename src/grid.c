@@ -475,7 +475,8 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
     @Item  gridtype  The type of the grid, one of the set of predefined CDI grid types.
                      The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
                      @func{GRID_LONLAT}, @func{GRID_LCC}, @func{GRID_SPECTRAL},
-                     @func{GRID_GME}, @func{GRID_CURVILINEAR} and @func{GRID_UNSTRUCTURED}.
+                     @func{GRID_GME}, @func{GRID_CURVILINEAR}, @func{GRID_UNSTRUCTURED} and
+                     @func{GRID_NUMBER}
     @Item  size      Number of gridpoints.
 
 @Description
@@ -527,8 +528,8 @@ int gridCreate(int gridtype, int size)
   gridptr->size = size;
 
   /*  if ( gridtype == GRID_GENERIC )     gridptr->xsize = size; */
-  if ( gridtype == GRID_UNSTRUCTURED )        gridptr->xsize = size;
-  if ( gridtype == GRID_CURVILINEAR ) gridptr->nvertex = 4;
+  if ( gridtype == GRID_UNSTRUCTURED )  gridptr->xsize = size;
+  if ( gridtype == GRID_CURVILINEAR  )  gridptr->nvertex = 4;
 
   switch (gridtype)
     {
@@ -1032,7 +1033,7 @@ The function @func{gridInqType} returns the type of a Grid.
 one of the set of predefined CDI grid types.
 The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
 @func{GRID_LONLAT}, @func{GRID_LCC}, @func{GRID_SPECTRAL}, @func{GRID_GME},
-@func{GRID_CURVILINEAR} and @func{GRID_UNSTRUCTURED}.
+@func{GRID_CURVILINEAR}, @func{GRID_UNSTRUCTURED} and @func{GRID_NUMBER}.
 
 @EndFunction
 */

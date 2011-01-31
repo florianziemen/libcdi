@@ -106,21 +106,21 @@ extern "C" {
 
 /* GRID types */
 
-#define  GRID_GENERIC             1
-#define  GRID_GAUSSIAN            2
-#define  GRID_GAUSSIAN_REDUCED    3
-#define  GRID_LONLAT              4
-#define  GRID_SPECTRAL            5
-#define  GRID_FOURIER             6
-#define  GRID_GME                 7  /* Icosahedral-hexagonal GME Grid */
+#define  GRID_GENERIC             1  /* Generic grid                    */
+#define  GRID_GAUSSIAN            2  /* Regular Gaussian lon/lat grid   */
+#define  GRID_GAUSSIAN_REDUCED    3  /* Reduced Gaussian lon/lat grid   */
+#define  GRID_LONLAT              4  /* Regular longitude/latitude grid */
+#define  GRID_SPECTRAL            5  /* Spherical harmonic coefficients */
+#define  GRID_FOURIER             6  /* Fourier coefficients            */
+#define  GRID_GME                 7  /* Icosahedral-hexagonal GME grid  */
 #define  GRID_TRAJECTORY          8
-#define  GRID_UNSTRUCTURED        9
-#define  GRID_CURVILINEAR        10
-#define  GRID_LCC                11  /* Lambert Conformal Conic (GRIB) */
-#define  GRID_LCC2               12  /* Lambert Conformal Conic (PROJ) */
-#define  GRID_LAEA               13  /* Lambert Azimuthal Equal Area   */
-#define  GRID_SINUSOIDAL         14  /* Sinusoidal                     */
-#define  GRID_NUMBER             15
+#define  GRID_UNSTRUCTURED        9  /* General unstructured grid       */
+#define  GRID_CURVILINEAR        10  /* Curvilinear grid                */
+#define  GRID_LCC                11  /* Lambert Conformal Conic (GRIB)  */
+#define  GRID_LCC2               12  /* Lambert Conformal Conic (PROJ)  */
+#define  GRID_LAEA               13  /* Lambert Azimuthal Equal Area    */
+#define  GRID_SINUSOIDAL         14  /* Sinusoidal                      */
+#define  GRID_NUMBER             15  /* Number of grid                  */
 
 /* ZAXIS types */
 

@@ -732,7 +732,8 @@ The function @func{vlistInqVarDatatype} returns the data type of a variable.
 @Result
 @func{vlistInqVarDatatype} returns an identifier to the data type of the variable.
 The valid CDI data types are @func{DATATYPE_PACK8}, @func{DATATYPE_PACK16}, @func{DATATYPE_PACK24},
-@func{DATATYPE_FLT32} and @func{DATATYPE_FLT64}.
+@func{DATATYPE_FLT32}, @func{DATATYPE_FLT64}, @func{DATATYPE_INT8}, @func{DATATYPE_INT16} and 
+@func{DATATYPE_INT32}.
 
 @EndFunction
 */
@@ -757,7 +758,8 @@ int vlistInqVarNumber(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  if ( vlistptr->vars[varID].datatype == DATATYPE_CPX32 || vlistptr->vars[varID].datatype == DATATYPE_CPX64 )
+  if ( vlistptr->vars[varID].datatype == DATATYPE_CPX32 ||
+       vlistptr->vars[varID].datatype == DATATYPE_CPX64 )
     number = CDI_COMP;
 
   return (number);
@@ -773,8 +775,8 @@ int vlistInqVarNumber(int vlistID, int varID)
     @Item  varID    Variable identifier
     @Item  datatype The data type identifier.
                     The valid CDI data types are @func{DATATYPE_PACK8}, @func{DATATYPE_PACK16},
-                    @func{DATATYPE_PACK24}, @func{DATATYPE_FLT32} and @func{DATATYPE_FLT64}.
-
+                    @func{DATATYPE_PACK24}, @func{DATATYPE_FLT32}, @func{DATATYPE_FLT64},
+                    @func{DATATYPE_INT8}, @func{DATATYPE_INT16} and @func{DATATYPE_INT32}.
 
 @Description
 The function @func{vlistDefVarDatatype} defines the data type of a variable.
@@ -792,29 +794,15 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
   vlistptr->vars[varID].datatype = datatype;
   
   if ( vlistptr->vars[varID].missvalused == FALSE )
-    {
-      switch (datatype)
-	{
-	case DATATYPE_INT8:
-	  vlistptr->vars[varID].missval =  SCHAR_MIN;
-	  break;
-	case DATATYPE_UINT8:
-	  vlistptr->vars[varID].missval =  UCHAR_MAX;
-	  break;
-	case DATATYPE_INT16:
-	  vlistptr->vars[varID].missval =  SHRT_MIN;
-	  break;
-	case DATATYPE_UINT16:
-	  vlistptr->vars[varID].missval =  USHRT_MAX;
-	  break;
-	case DATATYPE_INT32:
-	  vlistptr->vars[varID].missval =  INT_MIN;
-	  break;
-	case DATATYPE_UINT32:
-	  vlistptr->vars[varID].missval =  UINT_MAX;
-	  break;
-	}
-    }
+    switch (datatype)
+      {
+      case DATATYPE_INT8:   vlistptr->vars[varID].missval = SCHAR_MIN; break;
+      case DATATYPE_UINT8:  vlistptr->vars[varID].missval = UCHAR_MAX; break;
+      case DATATYPE_INT16:  vlistptr->vars[varID].missval = SHRT_MIN;  break;
+      case DATATYPE_UINT16: vlistptr->vars[varID].missval = USHRT_MAX; break;
+      case DATATYPE_INT32:  vlistptr->vars[varID].missval = INT_MIN;   break;
+      case DATATYPE_UINT32: vlistptr->vars[varID].missval = UINT_MAX;  break;
+      }
 }
 
 
