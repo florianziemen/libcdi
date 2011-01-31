@@ -369,6 +369,7 @@ int vlistInqVarZaxis(int vlistID, int varID)
   return (vlistptr->vars[varID].zaxisID);
 }
 
+
 int vlistInqVarTime(int vlistID, int varID)
 {
   vlist_t *vlistptr;
@@ -512,7 +513,8 @@ char *vlistInqVarUnitsPtr(int vlistID, int varID)
 The function @func{vlistInqVarName} returns the name of a variable.
 
 @Result
-@func{vlistInqVarName} returns the name of the variable to the parameter name.
+@func{vlistInqVarName} returns the name of the variable to the parameter name if available,
+otherwise the result is an empty string.
 
 @EndFunction
 */
@@ -553,7 +555,8 @@ void vlistInqVarName(int vlistID, int varID, char *name)
     @Item  longname Variable description
 
 @Description
-The function @func{vlistInqVarLongname} returns the longname of a variable.
+The function @func{vlistInqVarLongname} returns the longname of a variable if available,
+otherwise the result is an empty string.
 
 @Result
 @func{vlistInqVaeLongname} returns the longname of the variable to the parameter longname.
@@ -597,7 +600,8 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
     @Item  stdname  Variable standard name
 
 @Description
-The function @func{vlistInqVarStdname} returns the standard name of a variable.
+The function @func{vlistInqVarStdname} returns the standard name of a variable if available,
+otherwise the result is an empty string.
 
 @Result
 @func{vlistInqVarName} returns the standard name of the variable to the parameter stdname.
@@ -633,7 +637,8 @@ void vlistInqVarStdname(int vlistID, int varID, char *stdname)
     @Item  units    Variable units
 
 @Description
-The function @func{vlistInqVarUnits} returns the units of a variable.
+The function @func{vlistInqVarUnits} returns the units of a variable if available,
+otherwise the result is an empty string.
 
 @Result
 @func{vlistInqVarUnits} returns the units of the variable to the parameter units.
