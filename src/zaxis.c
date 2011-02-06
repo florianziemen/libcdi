@@ -72,16 +72,16 @@ static int _zaxis_init = FALSE;
 static pthread_once_t _zaxis_init_thread = PTHREAD_ONCE_INIT;
 static pthread_mutex_t _zaxis_mutex;
 
-#  define ZAXIS_LOCK           pthread_mutex_lock(&_zaxis_mutex);
-#  define ZAXIS_UNLOCK         pthread_mutex_unlock(&_zaxis_mutex);
-#  define ZAXIS_INIT                               \
+#  define ZAXIS_LOCK()         pthread_mutex_lock(&_zaxis_mutex);
+#  define ZAXIS_UNLOCK()       pthread_mutex_unlock(&_zaxis_mutex);
+#  define ZAXIS_INIT()	      \
    if ( _zaxis_init == FALSE ) pthread_once(&_zaxis_init_thread, zaxis_initialize);
 
 #else
 
-#  define ZAXIS_LOCK
-#  define ZAXIS_UNLOCK
-#  define ZAXIS_INIT                               \
+#  define ZAXIS_LOCK()
+#  define ZAXIS_UNLOCK()
+#  define ZAXIS_INIT()	      \
    if ( _zaxis_init == FALSE ) zaxis_initialize();
 
 #endif
@@ -134,15 +134,15 @@ zaxis_t *zaxis_to_pointer(int idx)
 {
   zaxis_t *zaxisptr = NULL;
 
-  ZAXIS_INIT
+  ZAXIS_INIT();
 
   if ( idx >= 0 && idx < _zaxis_max )
     {
-      ZAXIS_LOCK
+      ZAXIS_LOCK();
 
       zaxisptr = _zaxisList[idx].ptr;
 
-      ZAXIS_UNLOCK
+      ZAXIS_UNLOCK();
     }
   else
     Error("zaxis index %d undefined!", idx);
@@ -159,7 +159,7 @@ int zaxis_from_pointer(zaxis_t *ptr)
 
   if ( ptr )
     {
-      ZAXIS_LOCK
+      ZAXIS_LOCK();
 
       if ( _zaxisAvail )
 	{
@@ -175,7 +175,7 @@ int zaxis_from_pointer(zaxis_t *ptr)
       else
 	Warning("Too many open zaxis (limit is %d)!", _zaxis_max);
 
-      ZAXIS_UNLOCK
+      ZAXIS_UNLOCK();
     }
   else
     Error("Internal problem (pointer %p undefined)", ptr);
@@ -223,7 +223,7 @@ void zaxis_delete_entry(zaxis_t *zaxisptr)
 
   idx = zaxisptr->self;
 
-  ZAXIS_LOCK
+  ZAXIS_LOCK();
 
   free(zaxisptr);
 
@@ -231,7 +231,7 @@ void zaxis_delete_entry(zaxis_t *zaxisptr)
   _zaxisList[idx].ptr  = 0;
   _zaxisAvail          = &_zaxisList[idx];
 
-  ZAXIS_UNLOCK
+  ZAXIS_UNLOCK();
 
   if ( ZAXIS_Debug )
     Message("Removed idx %d from zaxis list", idx);
@@ -253,11 +253,11 @@ void zaxis_initialize(void)
   zaxis_list_new();
   atexit(zaxis_list_delete);
 
-  ZAXIS_LOCK
+  ZAXIS_LOCK();
 
   zaxis_init_pointer();
 
-  ZAXIS_UNLOCK
+  ZAXIS_UNLOCK();
 
   _zaxis_init = TRUE;
 }
@@ -286,14 +286,14 @@ int zaxisSize(void)
   int zaxissize = 0;
   int i;
   
-  ZAXIS_INIT
+  ZAXIS_INIT();
 
-  ZAXIS_LOCK
+  ZAXIS_LOCK();
 
   for ( i = 0; i < _zaxis_max; i++ )
     if ( _zaxisList[i].ptr ) zaxissize++;
 
-  ZAXIS_UNLOCK
+  ZAXIS_UNLOCK();
 
   return (zaxissize);
 }
@@ -344,7 +344,7 @@ int zaxisCreate(int zaxistype, int size)
   if ( CDI_Debug )
     Message("zaxistype: %d size: %d ", zaxistype, size);
 
-  ZAXIS_INIT
+  ZAXIS_INIT();
 
   zaxisptr = zaxis_new_entry();
   if ( ! zaxisptr ) Error("No memory");
@@ -388,6 +388,10 @@ void zaxisDestroy(int zaxisID)
   zaxisptr = zaxis_to_pointer(zaxisID);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
+
+  if ( zaxisptr->vals ) free(zaxisptr->vals);
+
+  zaxis_delete_entry(zaxisptr);
 }
 
 

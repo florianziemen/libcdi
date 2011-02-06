@@ -335,7 +335,11 @@ void vlistDestroy(int vlistID)
 
       for ( varID = 0; varID < nvars; varID++ )
 	{
-	  if ( vlistptr->vars[varID].levinfo ) free(vlistptr->vars[varID].levinfo);
+	  if ( vlistptr->vars[varID].levinfo )  free(vlistptr->vars[varID].levinfo);
+	  if ( vlistptr->vars[varID].name )     free(vlistptr->vars[varID].name);
+	  if ( vlistptr->vars[varID].longname ) free(vlistptr->vars[varID].longname);
+	  if ( vlistptr->vars[varID].stdname )  free(vlistptr->vars[varID].stdname);
+	  if ( vlistptr->vars[varID].units )    free(vlistptr->vars[varID].units);
 
 	  vlistDelAtts(vlistID, varID);
 	}
