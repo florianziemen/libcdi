@@ -3389,7 +3389,7 @@ void gridPrint(int gridID, int opt)
 	  {
 	    char reference_link[8192];
 	    gridInqReference(gridID, reference_link);
-	    fprintf(fp, "path      = %d\n", reference_link);
+	    fprintf(fp, "path      = %s\n", reference_link);
 	  }
 	break;
       }
