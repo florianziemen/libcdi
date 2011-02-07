@@ -36,7 +36,7 @@ char *Grids[] = {
   /* 12 */  "lcc2",
   /* 13 */  "laea",
   /* 14 */  "sinusoidal",
-  /* 15 */  "number",
+  /* 15 */  "reference",
 };
 
 
@@ -210,6 +210,7 @@ void grid_init_entry(grid_t *gridptr)
   gridptr->ni3          = 0;
   gridptr->number       = 0;
   gridptr->position     = 0;
+  gridptr->reference    = NULL;
   gridptr->prec         = 0;
   gridptr->size         = 0;
   gridptr->xsize        = 0;
@@ -476,7 +477,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
                      The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
                      @func{GRID_LONLAT}, @func{GRID_LCC}, @func{GRID_SPECTRAL},
                      @func{GRID_GME}, @func{GRID_CURVILINEAR}, @func{GRID_UNSTRUCTURED} and
-                     @func{GRID_NUMBER}
+                     @func{GRID_REFERENCE}
     @Item  size      Number of gridpoints.
 
 @Description
@@ -627,14 +628,15 @@ void gridDestroy(int gridID)
   
   grid_check_ptr(gridID, gridptr);
 
-  if ( gridptr->mask     ) free(gridptr->mask);
-  if ( gridptr->mask_gme ) free(gridptr->mask_gme);
-  if ( gridptr->xvals    ) free(gridptr->xvals);
-  if ( gridptr->yvals    ) free(gridptr->yvals);
-  if ( gridptr->area     ) free(gridptr->area);
-  if ( gridptr->xbounds  ) free(gridptr->xbounds);
-  if ( gridptr->ybounds  ) free(gridptr->ybounds);
-  if ( gridptr->rowlon   ) free(gridptr->rowlon);
+  if ( gridptr->mask      ) free(gridptr->mask);
+  if ( gridptr->mask_gme  ) free(gridptr->mask_gme);
+  if ( gridptr->xvals     ) free(gridptr->xvals);
+  if ( gridptr->yvals     ) free(gridptr->yvals);
+  if ( gridptr->area      ) free(gridptr->area);
+  if ( gridptr->xbounds   ) free(gridptr->xbounds);
+  if ( gridptr->ybounds   ) free(gridptr->ybounds);
+  if ( gridptr->rowlon    ) free(gridptr->rowlon);
+  if ( gridptr->reference ) free(gridptr->reference);
 
   grid_delete_entry(gridptr);
 }
@@ -1033,7 +1035,7 @@ The function @func{gridInqType} returns the type of a Grid.
 one of the set of predefined CDI grid types.
 The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
 @func{GRID_LONLAT}, @func{GRID_LCC}, @func{GRID_SPECTRAL}, @func{GRID_GME},
-@func{GRID_CURVILINEAR}, @func{GRID_UNSTRUCTURED} and @func{GRID_NUMBER}.
+@func{GRID_CURVILINEAR}, @func{GRID_UNSTRUCTURED} and @func{GRID_REFERENCE}.
 
 @EndFunction
 */
@@ -2556,10 +2558,11 @@ int gridGenerate(grid_t grid)
 	gridDefGMEni3(gridID, grid.ni3);
 	break;
       }
-    case GRID_NUMBER:
+    case GRID_REFERENCE:
       {
 	gridDefNumber(gridID, grid.number);
 	gridDefPosition(gridID, grid.position);
+	if ( grid.reference ) gridDefReference(gridID, grid.reference);
 	break;
       }
       /*
@@ -3378,10 +3381,16 @@ void gridPrint(int gridID, int opt)
 	fprintf(fp, "ni        = %d\n", gridInqGMEni(gridID));
 	break;
       }
-    case GRID_NUMBER:
+    case GRID_REFERENCE:
       {
 	fprintf(fp, "number    = %d\n", gridInqNumber(gridID));
 	fprintf(fp, "position  = %d\n", gridInqPosition(gridID));
+	if ( gridInqReference(gridID, NULL) )
+	  {
+	    char reference_link[8192];
+	    gridInqReference(gridID, reference_link);
+	    fprintf(fp, "path      = %d\n", reference_link);
+	  }
 	break;
       }
    default:
@@ -3705,5 +3714,47 @@ void gridDefPosition(int gridID, int position)
   grid_check_ptr(gridID, gridptr);
 
   gridptr->position = position;
+}
+
+
+int gridInqReference(int gridID, char *reference)
+{
+  grid_t *gridptr;
+  int len = 0;
+
+  gridptr = grid_to_pointer(gridID);
+
+  grid_check_ptr(gridID, gridptr);
+
+  if ( gridptr->reference )
+    {
+      len = (int) strlen(gridptr->reference);
+
+      if ( reference )
+	strcpy(reference, gridptr->reference);
+    }
+
+  return (len);
+}
+
+
+void gridDefReference(int gridID, const char *reference)
+{
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  grid_check_ptr(gridID, gridptr);
+
+  if ( reference )
+    {
+      if ( gridptr->reference )
+	{
+	  free(gridptr->reference);
+	  gridptr->reference = NULL;
+	}
+
+      gridptr->reference = strdupx(reference);
+    }
 }
 

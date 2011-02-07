@@ -908,13 +908,16 @@ void vlistDefVarName(int vlistID, int varID, const char *name)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  if ( vlistptr->vars[varID].name )
+  if ( name )
     {
-      free(vlistptr->vars[varID].name);
-      vlistptr->vars[varID].name = 0;
-    }
+      if ( vlistptr->vars[varID].name )
+	{
+	  free(vlistptr->vars[varID].name);
+	  vlistptr->vars[varID].name = NULL;
+	}
 
-  if ( name ) vlistptr->vars[varID].name = strdupx(name);
+      vlistptr->vars[varID].name = strdupx(name);
+    }
 }
 
 /*
@@ -940,13 +943,16 @@ void vlistDefVarLongname(int vlistID, int varID, const char *longname)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  if ( vlistptr->vars[varID].longname )
+  if ( longname )
     {
-      free(vlistptr->vars[varID].longname);
-      vlistptr->vars[varID].longname = 0;
-    }
+      if ( vlistptr->vars[varID].longname )
+	{
+	  free(vlistptr->vars[varID].longname);
+	  vlistptr->vars[varID].longname = 0;
+	}
 
-  if ( longname ) vlistptr->vars[varID].longname = strdupx(longname);
+      vlistptr->vars[varID].longname = strdupx(longname);
+    }
 }
 
 /*
@@ -972,13 +978,16 @@ void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  if ( vlistptr->vars[varID].stdname )
+  if ( stdname )
     {
-      free(vlistptr->vars[varID].stdname);
-      vlistptr->vars[varID].stdname = 0;
-    }
+      if ( vlistptr->vars[varID].stdname )
+	{
+	  free(vlistptr->vars[varID].stdname);
+	  vlistptr->vars[varID].stdname = 0;
+	}
 
-  if ( stdname ) vlistptr->vars[varID].stdname = strdupx(stdname);
+      vlistptr->vars[varID].stdname = strdupx(stdname);
+    }
 }
 
 /*
@@ -1004,13 +1013,16 @@ void vlistDefVarUnits(int vlistID, int varID, const char *units)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  if ( vlistptr->vars[varID].units )
+  if ( units )
     {
-      free(vlistptr->vars[varID].units);
-      vlistptr->vars[varID].units = 0;
-    }
+      if ( vlistptr->vars[varID].units )
+	{
+	  free(vlistptr->vars[varID].units);
+	  vlistptr->vars[varID].units = 0;
+	}
 
-  if ( units ) vlistptr->vars[varID].units = strdupx(units);
+      vlistptr->vars[varID].units = strdupx(units);
+    }
 }
 
 /*

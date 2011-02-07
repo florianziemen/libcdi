@@ -1,6 +1,6 @@
 2011-02-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* vlistDestroy: fix memory leak [report: Luis Kornblueh]
+	* vlistDestroy: fix memory leak
 
 2011-01-25  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
@@ -8,7 +8,7 @@
 
 2011-01-21  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* added grid type GRID_NUMBER
+	* added grid type GRID_REFERENCE
 	* changed grid name GRID_CELL to GRID_UNSTRUCTURED
 
 2011-01-19  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

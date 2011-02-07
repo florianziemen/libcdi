@@ -107,7 +107,7 @@ int cgribexGetTimeUnit(int *isec1)
     default:
       if ( lprint )
 	{
-	  Message("Time unit %d unsupported", ISEC1_TimeUnit);
+	  Message("GRIB time unit %d unsupported!", ISEC1_TimeUnit);
 	  lprint = FALSE;
 	}
     }
@@ -148,7 +148,7 @@ int cgribexGetTsteptype(int timerange)
     default:
       if ( lprint )
 	{
-	  Message("Time range %d unsupported", timerange);
+	  Message("GRIB time range %d unsupported!", timerange);
 	  lprint = FALSE;
 	}
     }

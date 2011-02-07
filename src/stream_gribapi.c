@@ -84,7 +84,7 @@ int gribapiGetGridType(grib_handle *gh)
                                       }
 	case  GRIB2_GTYPE_SPECTRAL:   { gridtype = GRID_SPECTRAL; break; }
 	case  GRIB2_GTYPE_GME:        { gridtype = GRID_GME;      break; }
-	case  GRIB2_GTYPE_NUMBER:     { gridtype = GRID_NUMBER;   break; }
+	case  GRIB2_GTYPE_NUMBER:     { gridtype = GRID_REFERENCE;   break; }
 	}
     }
 
@@ -571,11 +571,17 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 
 	break;
       }
-    case GRID_NUMBER:
+    case GRID_REFERENCE:
       {
+	char reference_link[8192];
+	size_t len = sizeof(reference_link);
+	reference_link[0] = 0;
+
 	grid.size  = numberOfPoints;
 	if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )        grid.number   = lpar;
 	if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 ) grid.position = lpar;
+	if ( grib_get_string(gh, "gridDescriptionFile", reference_link, &len) == 0 )
+	  grid.reference = strdupx(reference_link);
 
 	break;
       }
@@ -2012,7 +2018,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
   if ( editionNumber <= 1 )
-    if ( gridtype == GRID_GME || gridtype == GRID_NUMBER )
+    if ( gridtype == GRID_GME || gridtype == GRID_REFERENCE )
       gridtype = -1;
 
   // ISEC1_GridDefinition = 255;
@@ -2284,14 +2290,14 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 
 	break;
       }
-    case GRID_NUMBER:
+    case GRID_REFERENCE:
       {
 	static int warning = 1;
 	status = grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_NUMBER);
 	if ( status != 0 && warning )
 	  {
 	    warning = 0;
-	    Warning("Can not write grid number!");
+	    Warning("Can not write reference grid!");
 	    Warning("gridDefinitionTemplateNumber %d not found (grib2/template.3.%d.def)!",
 		    GRIB2_GTYPE_NUMBER, GRIB2_GTYPE_NUMBER);
 	  }
