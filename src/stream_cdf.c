@@ -4270,6 +4270,8 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                 ncvars[ncvarid].gridtype = GRID_GENERIC;
               else if ( strcmp(attstring, "cell") == 0 )
                 ncvars[ncvarid].gridtype = GRID_UNSTRUCTURED;
+              else if ( strcmp(attstring, "unstructured") == 0 )
+                ncvars[ncvarid].gridtype = GRID_UNSTRUCTURED;
               else if ( strcmp(attstring, "curvilinear") == 0 )
                 ncvars[ncvarid].gridtype = GRID_CURVILINEAR;
               else if ( strcmp(attstring, "sinusoidal") == 0 )
