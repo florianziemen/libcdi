@@ -584,7 +584,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 	    if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 ) grid.position = lpar;
 	    if ( grib_get_string(gh, "gridDescriptionFile", reference_link, &len) == 0 )
 	      {
-		if ( strncmp(reference_link, "file:/", 6) == 0 )
+		if ( strncmp(reference_link, "file://", 7) == 0 )
 		  grid.reference = strdupx(reference_link);
 	      }
 	  }

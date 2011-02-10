@@ -959,19 +959,19 @@ int streamOpenRead(const char *filenames)
 {
   int filetype, byteorder;
   int streamID;
-  int num_fnames;
+  int num_fnames = 0;
   char *fnames[MAX_FNAMES];
   const char *filename;
   stream_t *streamptr = NULL;
 
-  num_fnames = get_fnames(filenames, fnames, MAX_FNAMES);
+  //num_fnames = get_fnames(filenames, fnames, MAX_FNAMES);
 
   if ( num_fnames == 0 )
     filename = filenames;
   else
     {
       int i; 
-      for ( i = 0; i < num_fnames; ++i) printf("fnames: %d %s\n", i, fnames[i]);
+      for ( i = 0; i < num_fnames; ++i ) printf("fnames: %d %s\n", i, fnames[i]);
       filename = fnames[0];
     }
 
