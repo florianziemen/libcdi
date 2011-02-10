@@ -578,10 +578,16 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 	reference_link[0] = 0;
 
 	grid.size  = numberOfPoints;
-	if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )        grid.number   = lpar;
-	if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 ) grid.position = lpar;
-	if ( grib_get_string(gh, "gridDescriptionFile", reference_link, &len) == 0 )
-	  grid.reference = strdupx(reference_link);
+	if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )
+	  {
+	    grid.number   = lpar;
+	    if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 ) grid.position = lpar;
+	    if ( grib_get_string(gh, "gridDescriptionFile", reference_link, &len) == 0 )
+	      {
+		if ( strncmp(reference_link, "file:/", 6) == 0 )
+		  grid.reference = strdupx(reference_link);
+	      }
+	  }
 
 	break;
       }
