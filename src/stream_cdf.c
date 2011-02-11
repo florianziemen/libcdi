@@ -6336,11 +6336,13 @@ int cdfInqTimestep(int streamID, int tsID)
 	      char stvalue[32];
 	      start[0] = index; start[1] = 0;
 	      count[0] = 1; count[1] = 19;
+	      stvalue[0] = 0;
 	      cdf_get_vara_text(fileID, nctimevarid, start, count, stvalue);
 	      stvalue[19] = 0;
 	      {
-		int year, month, day, hour, minute, second;
-		sscanf(stvalue, "%d-%d-%d_%d:%d:%d", &year, &month, &day, &hour, &minute, &second);
+		int year = 1, month = 1, day = 1 , hour = 0, minute = 0, second = 0;
+		if ( strlen(stvalue) == 19 )
+		  sscanf(stvalue, "%d-%d-%d_%d:%d:%d", &year, &month, &day, &hour, &minute, &second);
 		taxis->vdate = cdiEncodeDate(year, month, day);
 		taxis->vtime = cdiEncodeTime(hour, minute, second);
 		taxis->type = TAXIS_ABSOLUTE;
