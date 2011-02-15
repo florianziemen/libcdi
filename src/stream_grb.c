@@ -438,7 +438,7 @@ static
 size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		 int date, int time, int tsteptype, int numavg, 
 		 long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize,
-		 int ljpeg, void *gribHandle)
+		 int ljpeg, void *gribContainer)
 {
   size_t nbytes;
 
@@ -455,7 +455,7 @@ size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, 
       nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID,
 			     date, time, tsteptype, numavg, 
 			     datasize, data, nmiss, gribbuffer, gribbuffersize,
-			     ljpeg, gribHandle);
+			     ljpeg, gribContainer);
     }
 
   return (nbytes);
@@ -510,7 +510,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   stream_t *streamptr;
   int ljpeg = 0;
   int ljpeg_warn = 1;
-  void *gh = NULL;
+  void *gc = NULL;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -545,7 +545,8 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   else
 #endif
     {
-      gh = streamptr->gribHandle[varID];
+      gribContainer_t *gribContainers =  (gribContainer_t *) streamptr->gribContainers;
+      gc = (void *) &gribContainers[varID];
     }
 
   if ( streamptr->ztype == COMPRESS_JPEG )
@@ -556,13 +557,13 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
 	}
       else
 	{
-	  if ( ljpeg_warn ) Warning("Jpeg compression of GRIB1 records not available!");
+	  if ( ljpeg_warn ) Warning("JPEG compression of GRIB1 records not available!");
 	  ljpeg_warn = 0;
 	}
     }
 
   nbytes = grbEncode(filetype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, 
-		     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg, gh);
+		     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg, gc);
 
   if ( streamptr->ztype == COMPRESS_SZIP )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);

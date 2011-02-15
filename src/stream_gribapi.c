@@ -1858,7 +1858,7 @@ void gribapiDefParam(grib_handle *gh, int param, const char *name)
       len = strlen(name);
       status = grib_set_string(gh, "shortName", name, &len);
       if ( status != 0 )
-	printf("status=%d; no match for shortName=%s\n", status, name);
+	Warning("grib_api: No match for shortName=%s\n", name);
     }
   else
     {
@@ -2021,8 +2021,6 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
   static short lwarn = TRUE;
   size_t len;
   char *mesg;
-
-  // ISEC1_Sec2Or3Flag = 128;
   
   gridtype = gridInqType(gridID);
 
@@ -2030,8 +2028,6 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
   if ( editionNumber <= 1 )
     if ( gridtype == GRID_GME || gridtype == GRID_REFERENCE )
       gridtype = -1;
-
-  // ISEC1_GridDefinition = 255;
 
   if ( gridtype == GRID_GENERIC )
     {
@@ -2070,10 +2066,6 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	}
       gridtype = GRID_LONLAT;
     }
-
-  // ISEC2_Reduced = FALSE;
-
-  // ISEC2_ScanFlag = 0;
 
   switch (gridtype)
     {
@@ -2263,8 +2255,8 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	GRIB_CHECK(grib_set_long(gh, "K", trunc), 0);
 	GRIB_CHECK(grib_set_long(gh, "M", trunc), 0);
 
-	GRIB_CHECK(grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
-	GRIB_CHECK(grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
+	// GRIB_CHECK(grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
+	// GRIB_CHECK(grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
 
 	if ( gridInqComplexPacking(gridID) )
 	  {
@@ -2581,7 +2573,7 @@ void gribHandleDelete(void *gh)
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg, 
 		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize,
-		     int ljpeg, void *gribHandle)
+		     int ljpeg, void *gribContainer)
 {
   size_t nbytes = 0;
 #if  defined  (HAVE_LIBGRIB_API)
@@ -2592,6 +2584,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   long bitsPerValue;
   char name[256];
   grib_handle *gh = NULL;
+  gribContainer_t *gc = (gribContainer_t *) gribContainer;
   // extern unsigned char _grib_template_GRIB2[];
 
   param    = vlistInqVarParam(vlistID, varID);
@@ -2601,20 +2594,20 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 #if defined(GRIBAPIENCODETEST)
   gh = (grib_handle *) gribHandleNew();
 #else
-  gh = gribHandle;
+  gh = gc->gribHandle;
 #endif
   
-  gribapiDefInstitut(gh, vlistID, varID);
-  gribapiDefModel(gh, vlistID, varID);
+  if ( ! gc->init ) gribapiDefInstitut(gh, vlistID, varID);
+  if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
 
-  gribapiDefParam(gh, param, name);
+  if ( ! gc->init ) gribapiDefParam(gh, param, name);
   gribapiDefTime(gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID));
 
   /* bitsPerValue have to be defined befor call to DefGrid (complex packing) */
   bitsPerValue = grbBitsPerValue(datatype);
   GRIB_CHECK(grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
 
-  gribapiDefGrid(gh, gridID, ljpeg);
+  if ( ! gc->init ) gribapiDefGrid(gh, gridID, ljpeg);
   gribapiDefLevel(gh, param, zaxisID, levelID);
 
   if ( nmiss > 0 )
@@ -2638,6 +2631,8 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 #if defined(GRIBAPIENCODETEST)
   gribHandleDelete(gh);
 #endif
+
+  gc->init = TRUE;
 
   nbytes = recsize;
 #else

@@ -36,7 +36,7 @@ const char *gribapiLibraryVersion(void)
 }
 
 
-void gribapiDefHandles(int streamID)
+void gribContainersNew(int streamID)
 {
   stream_t *streamptr;
    
@@ -50,12 +50,38 @@ void gribapiDefHandles(int streamID)
 #endif
     {
       int i, editionNumber = 2;
+      gribContainer_t *gribContainers;
+
       if ( streamptr->filetype == FILETYPE_GRB ) editionNumber = 1;
 
-      streamptr->gribHandle = (void **) malloc(streamptr->nvars*sizeof(void *));
+      gribContainers = (gribContainer_t *) malloc(streamptr->nvars*sizeof(gribContainer_t));
+      streamptr->gribContainers = (void *) gribContainers;
 
       for ( i = 0; i < streamptr->nvars; ++i )
-	streamptr->gribHandle[i] = gribHandleNew(editionNumber);
+	{
+	  gribContainers[i].gribHandle = gribHandleNew(editionNumber);
+	  gribContainers[i].init = FALSE;
+	}
     }
 }
 
+
+void gribContainersDelete(int streamID)
+{
+  stream_t *streamptr;
+   
+  streamptr = stream_to_pointer(streamID);
+
+  if ( streamptr->gribContainers )
+    {
+      int i;
+      gribContainer_t *gribContainers = (gribContainer_t *) streamptr->gribContainers;
+
+      for ( i = 0; i < streamptr->nvars; ++i )
+	{
+	  gribHandleDelete(gribContainers[i].gribHandle);
+	}
+      free(streamptr->gribContainers);
+      streamptr->gribContainers = NULL;
+    }
+}

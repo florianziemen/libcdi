@@ -1107,17 +1107,7 @@ void streamClose(int streamID)
       case FILETYPE_GRB2:
 	{
 	  gribClose(fileID);
-	  if ( streamptr->gribHandle )
-	    {
-	      int i;
-	      for ( i = 0; i < streamptr->nvars; ++i )
-		{
-		  gribHandleDelete(streamptr->gribHandle[i]);
-		  streamptr->gribHandle[i] = NULL;
-		}
-	      free(streamptr->gribHandle);
-	      streamptr->gribHandle = NULL;
-	    }
+	  gribContainersDelete(streamID);
 	  break;
 	}
 #endif
@@ -1999,7 +1989,7 @@ void streamDefVlist(int streamID, int vlistID)
 	  else if ( streamptr->filetype == FILETYPE_GRB  ||
 		    streamptr->filetype == FILETYPE_GRB2 )
 	    {
-	      gribapiDefHandles(streamID);
+	      gribContainersNew(streamID);
 	    }
 	}
     }
