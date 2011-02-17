@@ -54,9 +54,6 @@
 /* Define to 1 for NETCDF support */
 #undef HAVE_LIBNETCDF
 
-/* Define to 1 for PROJ support */
-#undef HAVE_LIBPROJ
-
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD
 
@@ -83,9 +80,6 @@
 
 /* Define to 1 if you have the <netcdf.h> header file. */
 #undef HAVE_NETCDF_H
-
-/* Define to 1 if you have the <projects.h> header file. */
-#undef HAVE_PROJECTS_H
 
 /* Define to 1 if you have the <pthread.h> header file. */
 #undef HAVE_PTHREAD_H

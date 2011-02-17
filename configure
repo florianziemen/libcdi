@@ -630,8 +630,6 @@ ENABLE_ALL_STATIC_TRUE
 ENABLE_CDI_LIB
 ENABLE_CDI_LIB_FALSE
 ENABLE_CDI_LIB_TRUE
-PROJ_INCLUDE
-PROJ_LDFLAGS
 ENABLE_IEG
 ENABLE_EXTRA
 ENABLE_SERVICE
@@ -798,7 +796,6 @@ enable_cgribex
 enable_service
 enable_extra
 enable_ieg
-with_proj
 enable_all_static
 enable_mpi
 enable_iso_c_interface
@@ -1496,8 +1493,6 @@ Optional Packages:
                           library for grib2 compression; if a directory is
                           given, it will be used as a value for
                           --with-jasper-root
-  --with-proj=<directory> Specify location of PROJ library for cartographic
-                          projections.
 
 Some influential environment variables:
   CC          C compiler command
@@ -23492,186 +23487,31 @@ ENABLE_IEG=$enable_ieg
 
 #  ----------------------------------------------------------------------
 #  Checks for PROJ.4 library
-
-# Check whether --with-proj was given.
-if test "${with_proj+set}" = set; then :
-  withval=$with_proj; case "$with_proj" in #(
-  no) :
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj library" >&5
-$as_echo_n "checking for proj library... " >&6; }
-                           { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
-$as_echo "suppressed" >&6; } ;; #(
-  yes) :
-    for ac_header in projects.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "projects.h" "ac_cv_header_projects_h" "$ac_includes_default"
-if test "x$ac_cv_header_projects_h" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PROJECTS_H 1
-_ACEOF
-
-fi
-
-done
-
-                            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing pj_init" >&5
-$as_echo_n "checking for library containing pj_init... " >&6; }
-if test "${ac_cv_search_pj_init+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char pj_init ();
-int
-main ()
-{
-return pj_init ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' proj; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_pj_init=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if test "${ac_cv_search_pj_init+set}" = set; then :
-  break
-fi
-done
-if test "${ac_cv_search_pj_init+set}" = set; then :
-
-else
-  ac_cv_search_pj_init=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_pj_init" >&5
-$as_echo "$ac_cv_search_pj_init" >&6; }
-ac_res=$ac_cv_search_pj_init
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-$as_echo "#define HAVE_LIBPROJ 1" >>confdefs.h
-
-else
-  as_fn_error $? "Could not link to PROJ library!" "$LINENO" 5
-fi
-
-                            PROJ_LDFLAGS=" -lproj"
-
-                            PROJ_INCLUDE=""
- ;; #(
-  *) :
-    PROJ_ROOT=$with_proj
-                          if test -d "$PROJ_ROOT"; then :
-  LDFLAGS="$LDFLAGS -L$PROJ_ROOT/lib"
-                                 CPPFLAGS="$CPPFLAGS -I$PROJ_ROOT/include"
-                                 for ac_header in projects.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "projects.h" "ac_cv_header_projects_h" "$ac_includes_default"
-if test "x$ac_cv_header_projects_h" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PROJECTS_H 1
-_ACEOF
-
-fi
-
-done
-
-                                 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing pj_init" >&5
-$as_echo_n "checking for library containing pj_init... " >&6; }
-if test "${ac_cv_search_pj_init+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char pj_init ();
-int
-main ()
-{
-return pj_init ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' proj; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_pj_init=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if test "${ac_cv_search_pj_init+set}" = set; then :
-  break
-fi
-done
-if test "${ac_cv_search_pj_init+set}" = set; then :
-
-else
-  ac_cv_search_pj_init=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_pj_init" >&5
-$as_echo "$ac_cv_search_pj_init" >&6; }
-ac_res=$ac_cv_search_pj_init
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-$as_echo "#define HAVE_LIBPROJ 1" >>confdefs.h
-
-else
-  as_fn_error $? "Could not link to PROJ library!" "$LINENO" 5
-fi
-
-                                 PROJ_LDFLAGS=" -L$PROJ_ROOT/lib -lproj"
-
-                                 PROJ_INCLUDE=" -I$PROJ_ROOT/include"
-
-else
-  as_fn_error $? "$PROJ_ROOT is not a directory! PROJ suppressed" "$LINENO" 5
-fi ;; #(
-  *) :
-     ;;
-esac
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for the PROJ library" >&5
-$as_echo_n "checking for the PROJ library... " >&6; }
-             { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
-$as_echo "suppressed" >&6; }
-fi
-
+# AC_ARG_WITH([proj],
+#             [AS_HELP_STRING([--with-proj=<directory>],
+#                             [Specify location of PROJ library for cartographic projections.])],
+#             [AS_CASE(["$with_proj"],
+#                      [no],[AC_MSG_CHECKING([for proj library])
+#                            AC_MSG_RESULT([suppressed])],
+#                      [yes],[AC_CHECK_HEADERS([projects.h])
+#                             AC_SEARCH_LIBS([pj_init],[proj],[AC_DEFINE([HAVE_LIBPROJ],[1],[Define to 1 for PROJ support])],
+#                                            [AC_MSG_ERROR([Could not link to PROJ library!])])
+#                             AC_SUBST([PROJ_LDFLAGS],[" -lproj"])
+#                             AC_SUBST([PROJ_INCLUDE],[""])],
+#                      [*],[PROJ_ROOT=$with_proj
+#                           AS_IF([test -d "$PROJ_ROOT"],
+#                                 [LDFLAGS="$LDFLAGS -L$PROJ_ROOT/lib"
+#                                  CPPFLAGS="$CPPFLAGS -I$PROJ_ROOT/include"
+#                                  AC_CHECK_HEADERS([projects.h])
+#                                  AC_SEARCH_LIBS([pj_init],
+#                                                 [proj],
+#                                                 [AC_DEFINE([HAVE_LIBPROJ],[1],[Define to 1 for PROJ support])],
+#                                                 [AC_MSG_ERROR([Could not link to PROJ library!])])
+#                                  AC_SUBST([PROJ_LDFLAGS],[" -L$PROJ_ROOT/lib -lproj"])
+#                                  AC_SUBST([PROJ_INCLUDE],[" -I$PROJ_ROOT/include"])],
+#                                 [AC_MSG_ERROR([$PROJ_ROOT is not a directory! PROJ suppressed])])])],
+#             [AC_MSG_CHECKING([for the PROJ library])
+#              AC_MSG_RESULT([suppressed])])
 #  ----------------------------------------------------------------------
 # At the moment, there are two possible CDI bindings
 # (default for CDO) linking directly to CDI's object files in ./libcdi/src
