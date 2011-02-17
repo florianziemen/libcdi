@@ -1,11 +1,11 @@
-/* Automatically created with make_cfint.c, don't edit! */
-
-#if ! defined (_CDI_H)
-#  include "cdi.h"
-#endif
+/* Automatically created with make_fint.c, don't edit! */
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
+#endif
+
+#if ! defined (_CDI_H)
+#  include "cdi.h"
 #endif
 
 #if defined (HAVE_CF_INTERFACE)
@@ -285,12 +285,14 @@ FCALLSCSUB2 (gridDefGMEni2, GRIDDEFGMENI2, griddefgmeni2, INT, INT)
 FCALLSCFUN1 (INT, gridInqGMEni3, GRIDINQGMENI3, gridinqgmeni3, INT)
 FCALLSCSUB2 (gridDefGMEni3, GRIDDEFGMENI3, griddefgmeni3, INT, INT)
 
-/*  Number grid  */
+/*  Reference grid  */
 
 FCALLSCFUN1 (INT, gridInqNumber, GRIDINQNUMBER, gridinqnumber, INT)
 FCALLSCSUB2 (gridDefNumber, GRIDDEFNUMBER, griddefnumber, INT, INT)
 FCALLSCFUN1 (INT, gridInqPosition, GRIDINQPOSITION, gridinqposition, INT)
 FCALLSCSUB2 (gridDefPosition, GRIDDEFPOSITION, griddefposition, INT, INT)
+FCALLSCFUN2 (INT, gridInqReference, GRIDINQREFERENCE, gridinqreference, INT, PSTRING)
+FCALLSCSUB2 (gridDefReference, GRIDDEFREFERENCE, griddefreference, INT, STRING)
 
 /*  Lambert Conformal Conic grid (GRIB version)  */
 

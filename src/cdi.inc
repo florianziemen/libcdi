@@ -1,10 +1,10 @@
 ! This file was automatically created, don't edit!
 !
-! Fortran interface for CDI library version 1.4.7
+! Fortran interface for CDI library version 1.4.8
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   January 2011
+! Uwe Schulzweida, MPI-MET, Hamburg,   February 2011
 !
 
       INTEGER    CDI_UNDEFID           
@@ -208,8 +208,8 @@
       PARAMETER (GRID_LAEA              = 13)
       INTEGER    GRID_SINUSOIDAL       
       PARAMETER (GRID_SINUSOIDAL        = 14)
-      INTEGER    GRID_NUMBER           
-      PARAMETER (GRID_NUMBER            = 15)
+      INTEGER    GRID_REFERENCE        
+      PARAMETER (GRID_REFERENCE         = 15)
 !
 !  ZAXIS types
 !
@@ -1366,7 +1366,7 @@
       EXTERNAL        gridDefGMEni3
 
 !
-!  Number grid
+!  Reference grid
 !
       INTEGER         gridInqNumber
 !                                    (INTEGER         gridID)
@@ -1385,6 +1385,16 @@
 !                                    (INTEGER         gridID,
 !                                     INTEGER         position)
       EXTERNAL        gridDefPosition
+
+      INTEGER         gridInqReference
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   reference)
+      EXTERNAL        gridInqReference
+
+!                     gridDefReference
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   reference)
+      EXTERNAL        gridDefReference
 
 !
 !  Lambert Conformal Conic grid (GRIB version)
