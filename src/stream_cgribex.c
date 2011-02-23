@@ -36,7 +36,7 @@ int cgribexGetGridType(int *isec2)
 
   switch (ISEC2_GridType)
     {
-    case  GRIB1_GTYPE_LATLON:
+    case  GRIB1_GTYPE_LATLON:     { if ( ISEC2_Reduced )      break; }
     case  GRIB1_GTYPE_LATLON_ROT: { gridtype = GRID_LONLAT;   break; }
     case  GRIB1_GTYPE_LCC:        { gridtype = GRID_LCC;      break; }
     case  GRIB1_GTYPE_GAUSSIAN:   { if ( ISEC2_Reduced )
