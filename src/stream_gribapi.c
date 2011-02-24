@@ -38,34 +38,7 @@ int gribapiGetGridType(grib_handle *gh)
   int gridtype = GRID_GENERIC;
   int gribgridtype;
   long lpar;
-  /*
-  long editionNumber;
 
-  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
-
-  if ( editionNumber <= 1 )
-    {
-      GRIB_CHECK(grib_get_long(gh, ">>>dataRepresentation<<<", &lpar), 0);
-      gribgridtype = (int) lpar;
-
-      switch (gribgridtype)
-	{
-	case  GRIB1_GTYPE_LATLON:
-	case  GRIB1_GTYPE_LATLON_ROT: { gridtype = GRID_LONLAT;   break; }
-	case  GRIB1_GTYPE_LCC:        { gridtype = GRID_LCC;      break; }
-	case  GRIB1_GTYPE_GAUSSIAN:   { GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
-					if ( lpar < 0 )
-	                                  gridtype = GRID_GAUSSIAN_REDUCED;
-                         	        else
-				          gridtype = GRID_GAUSSIAN;
-          	                        break;
-                                      }
-	case  GRIB1_GTYPE_SPECTRAL:   { gridtype = GRID_SPECTRAL; break; }
-	case  GRIB1_GTYPE_GME:        { gridtype = GRID_GME;      break; }
-	}
-    }
-  else
-  */
     {
       GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
       gribgridtype = (int) lpar;
@@ -73,20 +46,20 @@ int gribapiGetGridType(grib_handle *gh)
       switch (gribgridtype)
 	{
 	case  GRIB2_GTYPE_LATLON:     { GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
-	                                if ( lpar < 0 ) break;
+	                                if ( lpar == GRIB_MISSING_LONG ) break;
                                       }
-	case  GRIB2_GTYPE_LATLON_ROT: { gridtype = GRID_LONLAT;   break; }
-	case  GRIB2_GTYPE_LCC:        { gridtype = GRID_LCC;      break; }
+	case  GRIB2_GTYPE_LATLON_ROT: { gridtype = GRID_LONLAT;    break; }
+	case  GRIB2_GTYPE_LCC:        { gridtype = GRID_LCC;       break; }
 	case  GRIB2_GTYPE_GAUSSIAN:   { GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
-					if ( lpar < 0 )
+					if ( lpar == GRIB_MISSING_LONG )
 					  gridtype = GRID_GAUSSIAN_REDUCED;
 					else
 					  gridtype = GRID_GAUSSIAN;
 					break;
                                       }
-	case  GRIB2_GTYPE_SPECTRAL:   { gridtype = GRID_SPECTRAL; break; }
-	case  GRIB2_GTYPE_GME:        { gridtype = GRID_GME;      break; }
-	case  GRIB2_GTYPE_NUMBER:     { gridtype = GRID_REFERENCE;   break; }
+	case  GRIB2_GTYPE_SPECTRAL:   { gridtype = GRID_SPECTRAL;  break; }
+	case  GRIB2_GTYPE_GME:        { gridtype = GRID_GME;       break; }
+	case  GRIB2_GTYPE_NUMBER:     { gridtype = GRID_REFERENCE; break; }
 	}
     }
 
@@ -101,20 +74,7 @@ int gribapiGetIsRotated(grib_handle *gh)
   int isRotated = 0;
   int gribgridtype;
   long lpar;
-  /*
-  long editionNumber;
 
-  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
-
-  if ( editionNumber <= 1 )
-    {
-      GRIB_CHECK(grib_get_long(gh, ">>>dataRepresentation<<<", &lpar), 0);
-      gribgridtype = (int) lpar;
-
-      if ( gribgridtype == GRIB1_GTYPE_LATLON_ROT ) isRotated = 1;
-    }
-  else
-  */
     {
       GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
       gribgridtype = (int) lpar;
