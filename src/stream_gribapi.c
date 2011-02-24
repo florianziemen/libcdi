@@ -46,12 +46,12 @@ int gribapiGetGridType(grib_handle *gh)
       switch (gribgridtype)
 	{
 	case  GRIB2_GTYPE_LATLON:     { GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
-	                                if ( lpar == GRIB_MISSING_LONG ) break;
+	                                if ( lpar == (long) GRIB_MISSING_LONG ) break;
                                       }
 	case  GRIB2_GTYPE_LATLON_ROT: { gridtype = GRID_LONLAT;    break; }
 	case  GRIB2_GTYPE_LCC:        { gridtype = GRID_LCC;       break; }
 	case  GRIB2_GTYPE_GAUSSIAN:   { GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
-					if ( lpar == GRIB_MISSING_LONG )
+	                                if ( lpar == (long) GRIB_MISSING_LONG )
 					  gridtype = GRID_GAUSSIAN_REDUCED;
 					else
 					  gridtype = GRID_GAUSSIAN;
