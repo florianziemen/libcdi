@@ -73,13 +73,11 @@ int gribapiGetGridType(grib_handle *gh)
       switch (gribgridtype)
 	{
 	case  GRIB2_GTYPE_LATLON:     { GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
-	    //  printf("lpar = %ld\n", lpar);
 	                                if ( lpar < 0 ) break;
                                       }
 	case  GRIB2_GTYPE_LATLON_ROT: { gridtype = GRID_LONLAT;   break; }
 	case  GRIB2_GTYPE_LCC:        { gridtype = GRID_LCC;      break; }
 	case  GRIB2_GTYPE_GAUSSIAN:   { GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
-	    //   printf("lpar = %ld\n", lpar);
 					if ( lpar < 0 )
 					  gridtype = GRID_GAUSSIAN_REDUCED;
 					else
@@ -603,7 +601,8 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 	if ( grib_get_long(gh, "Nj", &lpar) == 0 ) nlat = lpar;
 
 	grid.size  = numberOfPoints;
-	if ( nlon && nlat )
+
+	if ( nlon > 0 && nlat > 0 && nlon*nlat == grid.size )
 	  {
 	    grid.xsize = nlon;
 	    grid.ysize = nlat;

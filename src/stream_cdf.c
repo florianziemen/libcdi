@@ -4854,6 +4854,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
   size_t size = 0, xsize, ysize;
   char name[256];
   int iatt;
+  int ltwarn = TRUE;
   size_t attlen;
   char attname[256];
   const int attstringlen = 8192; char attstring[8192];
@@ -4975,8 +4976,10 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		      if ( ncvars[xvarid].ndims == 3 && ncvars[xvarid].dimids[0] == timedimid &&
 			   ncvars[yvarid].ndims == 3 && ncvars[yvarid].dimids[0] == timedimid )
 			{
-			  Warning("Time varying grids unsupported, using grid at time step 1!");
+			  if ( ltwarn )
+			    Warning("Time varying grids unsupported, using grid at time step 1!");
 			  ltgrid = TRUE;
+			  ltwarn = FALSE;
 			  start[0] = start[1] = start[2] = 0;
 			  count[0] = 1; count[1] = ysize; count[2] = xsize;
 			}

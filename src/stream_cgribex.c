@@ -159,10 +159,197 @@ int cgribexGetTsteptype(int timerange)
 
 #if  defined  (HAVE_LIBCGRIBEX)
 static
+void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid)
+{
+  int gridtype; 
+
+  gridtype = cgribexGetGridType(isec2);
+
+  if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
+    {
+      gridtype = GRID_GAUSSIAN;
+      ISEC2_NumLon = 2*ISEC2_NumLat;
+      ISEC4_NumValues = ISEC2_NumLon*ISEC2_NumLat;
+    }
+
+  memset(grid, 0, sizeof(grid_t));
+  switch (gridtype)
+    {
+    case GRID_LONLAT:
+    case GRID_GAUSSIAN:
+      {
+	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
+	  Error("numberOfPoints (%d) and gridSize (%d) differ!",
+		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
+	grid->size  = ISEC4_NumValues;
+	grid->xsize = ISEC2_NumLon;
+	grid->ysize = ISEC2_NumLat;
+	grid->xinc  = 0;
+	grid->yinc  = 0;
+	grid->xdef  = 0;
+	/* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
+	  {
+	    if ( grid->xsize > 1 )
+	      {
+		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
+		  if ( ISEC2_LonIncr*(grid->xsize-1) > 360000 ) ISEC2_LonIncr = 0;
+
+		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
+		  grid->xinc = ISEC2_LonIncr * 0.001;
+		else
+		  grid->xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->xsize - 1);
+
+		/* correct xinc if necessary */
+		if ( ISEC2_FirstLon == 0 && ISEC2_LastLon > 354000 )
+		  {
+		    double xinc = 360. / grid->xsize;
+
+		    if ( fabs(grid->xinc-xinc) > 0.0 )
+		      {
+			grid->xinc = xinc;
+			if ( CDI_Debug ) Message("set xinc to %g", grid->xinc);
+		      }
+		  }
+	      }
+	    grid->xfirst = ISEC2_FirstLon * 0.001;
+	    grid->xlast  = ISEC2_LastLon  * 0.001;
+	    grid->xdef   = 2;	    
+	  }
+	grid->ydef  = 0;
+	/* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
+	  {
+	    if ( grid->ysize > 1 )
+	      {
+		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
+		  if ( ISEC2_LatIncr*(grid->ysize-1) > 180000 ) ISEC2_LatIncr = 0;
+
+		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
+		  grid->yinc = ISEC2_LatIncr * 0.001;
+		else
+		  grid->yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->ysize - 1);
+	      }
+	    grid->yfirst = ISEC2_FirstLat * 0.001;
+	    grid->ylast  = ISEC2_LastLat  * 0.001;
+	    grid->ydef   = 2;	    
+	  }
+	break;
+      }
+    case GRID_GAUSSIAN_REDUCED:
+      {
+	grid->size   = ISEC4_NumValues;
+        grid->rowlon = ISEC2_RowLonPtr;
+	grid->ysize  = ISEC2_NumLat;
+	grid->xinc  = 0;
+	grid->yinc  = 0;
+	grid->xdef  = 0;
+	/* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
+	  {
+	    if ( grid->xsize > 1 )
+	      {
+		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
+		  grid->xinc = ISEC2_LonIncr * 0.001;
+		else
+		  grid->xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->xsize - 1);
+	      }
+	    grid->xfirst = ISEC2_FirstLon * 0.001;
+	    grid->xlast  = ISEC2_LastLon  * 0.001;
+	    grid->xdef   = 2;	    
+	  }
+	grid->ydef  = 0;
+	/* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
+	  {
+	    if ( grid->ysize > 1 )
+	      {
+		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
+		  grid->yinc = ISEC2_LatIncr * 0.001;
+		else
+		  grid->yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->ysize - 1);
+	      }
+	    grid->yfirst = ISEC2_FirstLat * 0.001;
+	    grid->ylast  = ISEC2_LastLat  * 0.001;
+	    grid->ydef   = 2;	    
+	  }
+	break;
+      }
+    case GRID_LCC:
+      {
+	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
+	  Error("numberOfPoints (%d) and gridSize (%d) differ!",
+		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
+
+	grid->size  = ISEC4_NumValues;
+	grid->xsize = ISEC2_NumLon;
+	grid->ysize = ISEC2_NumLat;
+
+	grid->lcc_xinc      = ISEC2_Lambert_dx;
+	grid->lcc_yinc      = ISEC2_Lambert_dy;
+	grid->lcc_originLon = ISEC2_FirstLon * 0.001;
+	grid->lcc_originLat = ISEC2_FirstLat * 0.001;
+	grid->lcc_lonParY   = ISEC2_Lambert_Lov * 0.001;
+	grid->lcc_lat1      = ISEC2_Lambert_LatS1 * 0.001;
+	grid->lcc_lat2      = ISEC2_Lambert_LatS2 * 0.001;
+	grid->lcc_projflag  = ISEC2_Lambert_ProjFlag;
+	grid->lcc_scanflag  = ISEC2_ScanFlag;
+
+	grid->xdef   = 0;	    
+	grid->ydef   = 0;
+
+	break;
+      }
+    case GRID_SPECTRAL:
+      {
+	grid->size  = ISEC4_NumValues;
+	grid->trunc = ISEC2_PentaJ;
+	if ( ISEC2_RepMode == 2 )
+	  grid->lcomplex = 1;
+	else
+	  grid->lcomplex = 0;
+
+	break;
+      }
+    case GRID_GME:
+      {
+	grid->size  = ISEC4_NumValues;
+	grid->nd    = ISEC2_GME_ND;
+	grid->ni    = ISEC2_GME_NI;
+	grid->ni2   = ISEC2_GME_NI2;
+	grid->ni3   = ISEC2_GME_NI3;
+	break;
+      }
+    case GRID_GENERIC:
+      {
+	grid->size  = ISEC4_NumValues;
+	grid->xsize = 0;
+	grid->ysize = 0;
+	break;
+      }
+    default:
+      {
+	Error("Unsupported grid type: %s", gridNamePtr(gridtype));
+	break;
+      }
+    }
+
+  grid->isRotated = FALSE;
+  if ( cgribexGetIsRotated(isec2) )
+    {
+      grid->isRotated = TRUE;
+      grid->ypole     = - ISEC2_LatSP * 0.001;
+      grid->xpole     =   ISEC2_LonSP * 0.001 - 180;
+      grid->angle     = 0;
+    }
+
+  grid->xvals = NULL;
+  grid->yvals = NULL;
+  grid->type  = gridtype;
+}
+#endif
+
+#if  defined  (HAVE_LIBCGRIBEX)
+static
 void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
 		      int *isec4, long recsize, off_t position, int prec, int ztype, int lmv)
 {
-  int gridtype;
   int zaxistype;
   int gridID = CDI_UNDEFID, varID;
   int levelID = 0;
@@ -198,185 +385,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
   (*record).ilevel2  = level2;
   (*record).ltype    = ISEC1_LevelType;
 
-  gridtype = cgribexGetGridType(isec2);
-
-  if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
-    {
-      gridtype = GRID_GAUSSIAN;
-      ISEC2_NumLon = 2*ISEC2_NumLat;
-      ISEC4_NumValues = ISEC2_NumLon*ISEC2_NumLat;
-    }
-
-  memset(&grid, 0, sizeof(grid_t));
-  switch (gridtype)
-    {
-    case GRID_LONLAT:
-    case GRID_GAUSSIAN:
-      {
-	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-	  Error("numberOfPoints (%d) and gridSize (%d) differ!",
-		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
-	grid.size  = ISEC4_NumValues;
-	grid.xsize = ISEC2_NumLon;
-	grid.ysize = ISEC2_NumLat;
-	grid.xinc  = 0;
-	grid.yinc  = 0;
-	grid.xdef  = 0;
-	/* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
-	  {
-	    if ( grid.xsize > 1 )
-	      {
-		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
-		  if ( ISEC2_LonIncr*(grid.xsize-1) > 360000 ) ISEC2_LonIncr = 0;
-
-		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
-		  grid.xinc = ISEC2_LonIncr * 0.001;
-		else
-		  grid.xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid.xsize - 1);
-
-		/* correct xinc if necessary */
-		if ( ISEC2_FirstLon == 0 && ISEC2_LastLon > 354000 )
-		  {
-		    double xinc = 360. / grid.xsize;
-
-		    if ( fabs(grid.xinc-xinc) > 0.0 )
-		      {
-			grid.xinc = xinc;
-			if ( CDI_Debug ) Message("set xinc to %g", grid.xinc);
-		      }
-		  }
-	      }
-	    grid.xfirst = ISEC2_FirstLon * 0.001;
-	    grid.xlast  = ISEC2_LastLon  * 0.001;
-	    grid.xdef   = 2;	    
-	  }
-	grid.ydef  = 0;
-	/* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
-	  {
-	    if ( grid.ysize > 1 )
-	      {
-		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
-		  if ( ISEC2_LatIncr*(grid.ysize-1) > 180000 ) ISEC2_LatIncr = 0;
-
-		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
-		  grid.yinc = ISEC2_LatIncr * 0.001;
-		else
-		  grid.yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid.ysize - 1);
-	      }
-	    grid.yfirst = ISEC2_FirstLat * 0.001;
-	    grid.ylast  = ISEC2_LastLat  * 0.001;
-	    grid.ydef   = 2;	    
-	  }
-	break;
-      }
-    case GRID_GAUSSIAN_REDUCED:
-      {
-	grid.size   = ISEC4_NumValues;
-        grid.rowlon = ISEC2_RowLonPtr;
-	grid.ysize  = ISEC2_NumLat;
-	grid.xinc  = 0;
-	grid.yinc  = 0;
-	grid.xdef  = 0;
-	/* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
-	  {
-	    if ( grid.xsize > 1 )
-	      {
-		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
-		  grid.xinc = ISEC2_LonIncr * 0.001;
-		else
-		  grid.xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid.xsize - 1);
-	      }
-	    grid.xfirst = ISEC2_FirstLon * 0.001;
-	    grid.xlast  = ISEC2_LastLon  * 0.001;
-	    grid.xdef   = 2;	    
-	  }
-	grid.ydef  = 0;
-	/* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
-	  {
-	    if ( grid.ysize > 1 )
-	      {
-		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
-		  grid.yinc = ISEC2_LatIncr * 0.001;
-		else
-		  grid.yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid.ysize - 1);
-	      }
-	    grid.yfirst = ISEC2_FirstLat * 0.001;
-	    grid.ylast  = ISEC2_LastLat  * 0.001;
-	    grid.ydef   = 2;	    
-	  }
-	break;
-      }
-    case GRID_LCC:
-      {
-	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-	  Error("numberOfPoints (%d) and gridSize (%d) differ!",
-		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
-
-	grid.size  = ISEC4_NumValues;
-	grid.xsize = ISEC2_NumLon;
-	grid.ysize = ISEC2_NumLat;
-
-	grid.lcc_xinc      = ISEC2_Lambert_dx;
-	grid.lcc_yinc      = ISEC2_Lambert_dy;
-	grid.lcc_originLon = ISEC2_FirstLon * 0.001;
-	grid.lcc_originLat = ISEC2_FirstLat * 0.001;
-	grid.lcc_lonParY   = ISEC2_Lambert_Lov * 0.001;
-	grid.lcc_lat1      = ISEC2_Lambert_LatS1 * 0.001;
-	grid.lcc_lat2      = ISEC2_Lambert_LatS2 * 0.001;
-	grid.lcc_projflag  = ISEC2_Lambert_ProjFlag;
-	grid.lcc_scanflag  = ISEC2_ScanFlag;
-
-	grid.xdef   = 0;	    
-	grid.ydef   = 0;
-
-	break;
-      }
-    case GRID_SPECTRAL:
-      {
-	grid.size  = ISEC4_NumValues;
-	grid.trunc = ISEC2_PentaJ;
-	if ( ISEC2_RepMode == 2 )
-	  grid.lcomplex = 1;
-	else
-	  grid.lcomplex = 0;
-
-	break;
-      }
-    case GRID_GME:
-      {
-	grid.size  = ISEC4_NumValues;
-	grid.nd    = ISEC2_GME_ND;
-	grid.ni    = ISEC2_GME_NI;
-	grid.ni2   = ISEC2_GME_NI2;
-	grid.ni3   = ISEC2_GME_NI3;
-	break;
-      }
-    case GRID_GENERIC:
-      {
-	grid.size  = ISEC4_NumValues;
-	grid.xsize = 0;
-	grid.ysize = 0;
-	break;
-      }
-    default:
-      {
-	Error("Unsupported grid type: %s", gridNamePtr(gridtype));
-	break;
-      }
-    }
-
-  grid.isRotated = FALSE;
-  if ( cgribexGetIsRotated(isec2) )
-    {
-      grid.isRotated = TRUE;
-      grid.ypole     = - ISEC2_LatSP * 0.001;
-      grid.xpole     =   ISEC2_LonSP * 0.001 - 180;
-      grid.angle     = 0;
-    }
-
-  grid.xvals = NULL;
-  grid.yvals = NULL;
-  grid.type  = gridtype;
+  cgribexGetGrid(streamptr, isec2, isec4, &grid);
 
   gridID = varDefGrid(vlistID, grid, 0);
 
