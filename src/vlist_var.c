@@ -690,7 +690,7 @@ int vlistInqVarID(int vlistID, int code)
   if ( varID == vlistptr->nvars )
     {
       /*
-      Warning("varID not found for param %d\n", param);
+      Warning("varID not found for param %d", param);
       */
       varID = CDI_UNDEFID;
     }

@@ -809,7 +809,7 @@ int srvScanTimestep(int streamID)
 
   if ( nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs )
     {
-      Warning("Incomplete timestep. Stop scanning at timestep %d.\n", tsID);
+      Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
       streamptr->ntsteps = tsID;
     }
 

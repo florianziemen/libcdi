@@ -1494,7 +1494,7 @@ int gribapiScanTimestep(int streamID)
 	  rstatus = gribRead(fileID, gribbuffer, &readsize);
 	  if ( rstatus )
 	    {
-	      Error("Inconsistent timestep %d (GRIB record %d/%d)!\n", tsID+1, rindex+1,
+	      Error("Inconsistent timestep %d (GRIB record %d/%d)!", tsID+1, rindex+1,
 		    streamptr->tsteps[tsID].recordSize);
 	      break;
 	    }
@@ -1728,7 +1728,7 @@ int gribapiScanTimestep(int streamID)
 
   if ( nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs )
     {
-      Warning("Incomplete timestep. Stop scanning at timestep %d.\n", tsID);
+      Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
       streamptr->ntsteps = tsID;
     }
 
@@ -1758,7 +1758,7 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
       if ( lwarn )
 	{
 	  lwarn = 0;
-	  Warning("Conversion of gaussian reduced grids unsupported!\n");
+	  Warning("Conversion of gaussian reduced grids unsupported!");
 	}
     }
 
@@ -1775,7 +1775,7 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
   // printf("values_size = %d  numberOfPoints = %ld\n", datasize, numberOfPoints);
 
   if ( gridsize != (int) datasize )
-    Error("Internal problem: gridsize(%d) != datasize(%d)!\n", gridsize, datasize);
+    Error("Internal problem: gridsize(%d) != datasize(%d)!", gridsize, datasize);
   dummy = datasize;
   GRIB_CHECK(grib_get_double_array(gh, "values", data, &dummy), 0);
 
@@ -1862,7 +1862,7 @@ void gribapiDefParam(grib_handle *gh, int param, const char *name)
       len = strlen(name);
       status = grib_set_string(gh, "shortName", name, &len);
       if ( status != 0 )
-	Warning("grib_api: No match for shortName=%s\n", name);
+	Warning("grib_api: No match for shortName=%s", name);
     }
   else
     {
@@ -2339,7 +2339,7 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 
   if ( zaxistype == ZAXIS_GENERIC && ltype == 0 )
     {
-      Message("Changed zaxis type from %s to %s\n",
+      Message("Changed zaxis type from %s to %s",
 	      zaxisNamePtr(zaxistype),
 	      zaxisNamePtr(ZAXIS_PRESSURE));
       zaxistype = ZAXIS_PRESSURE;

@@ -375,7 +375,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 
   if ( leveltype == ZAXIS_GENERIC )
     {
-      Message("Changed zaxis type from %s to %s\n",
+      Message("Changed zaxis type from %s to %s",
 	      zaxisNamePtr(leveltype),
 	      zaxisNamePtr(ZAXIS_PRESSURE));
       leveltype = ZAXIS_PRESSURE;
@@ -1326,7 +1326,7 @@ int iegScanTimestep(int streamID)
 
   if ( nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs )
     {
-      Warning("Incomplete timestep. Stop scanning at timestep %d.\n", tsID);
+      Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
       streamptr->ntsteps = tsID;
     }
 

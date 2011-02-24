@@ -1292,7 +1292,7 @@ void cdfDefXaxis(int streamID, int gridID)
   gridInqXstdname(gridID, stdname);
   gridInqXunits(gridID, units);
 
-  if ( axisname[0] == 0 ) Error("axis name undefined!\n");
+  if ( axisname[0] == 0 ) Error("axis name undefined!");
 
   for ( index = 0; index < ngrids; index++ )
     {
@@ -1420,7 +1420,7 @@ void cdfDefYaxis(int streamID, int gridID)
   gridInqYstdname(gridID, stdname);
   gridInqYunits(gridID, units);
 
-  if ( axisname[0] == 0 ) Error("axis name undefined!\n");
+  if ( axisname[0] == 0 ) Error("axis name undefined!");
 
   for ( index = 0; index < ngrids; index++ )
     {
@@ -4308,7 +4308,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   /*
                     if ( atttype != NC_BYTE && atttype != NC_SHORT && atttype != NC_INT )
                     if ( ncvars[ncvarid].addoffset != 0 )
-                    Warning("attribute add_offset not supported for atttype %d\n", atttype);
+                    Warning("attribute add_offset not supported for atttype %d", atttype);
                   */
                   cdfSetVar(ncvars, ncvarid, TRUE);
                 }
@@ -4321,7 +4321,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   /*
                     if ( atttype != NC_BYTE && atttype != NC_SHORT && atttype != NC_INT )
                     if ( ncvars[ncvarid].scalefactor != 1 )
-                    Warning("attribute scale_factor not supported for atttype %d\n", atttype);
+                    Warning("attribute scale_factor not supported for atttype %d", atttype);
                   */
                   cdfSetVar(ncvars, ncvarid, TRUE);
                 }
@@ -6610,7 +6610,7 @@ void cdfDefVars(int streamID)
 
   vlistID = streamInqVlist(streamID);
   if ( vlistID == UNDEFID )
-    Error("Internal problem! vlist undefined for streamID %d\n", streamID);
+    Error("Internal problem! vlist undefined for streamID %d", streamID);
 
   nvars  = vlistNvars(vlistID);
   ngrids = vlistNgrids(vlistID);

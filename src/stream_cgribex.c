@@ -1128,7 +1128,7 @@ int cgribexScanTimestep(int streamID)
 	  rstatus = gribRead(fileID, gribbuffer, &readsize);
 	  if ( rstatus )
 	    {
-	      Error("Inconsistent timestep %d (GRIB record %d/%d)!\n", tsID+1, rindex+1,
+	      Error("Inconsistent timestep %d (GRIB record %d/%d)!", tsID+1, rindex+1,
 		    streamptr->tsteps[tsID].recordSize);
 	      break;
 	    }
@@ -1311,7 +1311,7 @@ int cgribexScanTimestep(int streamID)
 
   if ( nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs )
     {
-      Warning("Incomplete timestep. Stop scanning at timestep %d.\n", tsID);
+      Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
       streamptr->ntsteps = tsID;
     }
 
@@ -1369,13 +1369,13 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
 	  gribsize = gribUnzip(gribbuffer, unzipsize, itmpbuffer, gribsize);
 
 	  if ( gribsize <= 0 )
-	    Error("Decompression problem!\n");
+	    Error("Decompression problem!");
 	  
 	  free(itmpbuffer);
 	}
       else
 	{
-	  Error("Decompression for %d not implemented!\n", izip);
+	  Error("Decompression for %d not implemented!", izip);
 	}
     }
 
@@ -1889,7 +1889,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 
   if ( zaxistype == ZAXIS_GENERIC && ltype == 0 )
     {
-      Message("Changed zaxis type from %s to %s\n",
+      Message("Changed zaxis type from %s to %s",
 	      zaxisNamePtr(zaxistype),
 	      zaxisNamePtr(ZAXIS_PRESSURE));
       zaxistype = ZAXIS_PRESSURE;
