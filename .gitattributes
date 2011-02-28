@@ -121,6 +121,7 @@ interfaces/testdata/mulval.grb -text
 interfaces/testdata/mulval.nc -text
 m4/acx_options.m4 -text
 m4/acx_sl_mod_suffix.m4 -text
+m4/ax_pthread.m4 -text
 m4/libtool.m4 -text
 m4/ltoptions.m4 -text
 m4/ltsugar.m4 -text

@@ -91,7 +91,8 @@ libcdi_la_SOURCES = 	 \
         stream.c         \
         swap.c
 
-libcdi_la_LIBADD  = @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@
+libcdi_la_CPPFLAGS  = @GRIB_API_INCLUDE@ @SZLIB_INCLUDE@ @HDF5_INCLUDE@ @NETCDF_INCLUDE@ @ZLIB_INCLUDE@
+libcdi_la_LIBADD    = @GRIB_API_LDFLAGS@ @SZLIB_LDFLAGS@ @HDF5_LDFLAGS@ @NETCDF_LDFLAGS@ @ZLIB_LDFLAGS@
 #
 cdilib.c:
 	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src
