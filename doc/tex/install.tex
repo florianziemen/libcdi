@@ -15,7 +15,7 @@ To take full advantage of {\CDI}'s features the following additional libraries s
       ({\tt http://www.unidata.ucar.edu/packages/netcdf/index.html})
       version 3 or higher.
       This is needed to read/write netCDF files with {\CDI}. 
-\item ECMWF \href{http://www.ecmwf.int/products/data/software/grib_api.html}{GRIB\_API}
+\item The ECMWF \href{http://www.ecmwf.int/products/data/software/grib_api.html}{GRIB\_API}
       ({\tt http://www.ecmwf.int/products/data/software/grib\_api.html})
       version 1.9.5 or higher.
       This library is needed to encode/decode GRIB2 records with {\CDI}. 
@@ -41,11 +41,10 @@ Compilation is now done by performing the following steps:
     ./configure
 \end{verbatim}
 
-Or optionally with netCDF and GRIB2 support:
+Or optionally with netCDF support:
  
 \begin{verbatim}
-    ./configure --with-netcdf=<netCDF root directory>  \
-                --with-gribapi=<GRIB_API root directory>
+    ./configure --with-netcdf=<netCDF root directory>
 \end{verbatim}
 
 For an overview of other configuration options use

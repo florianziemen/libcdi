@@ -18,8 +18,6 @@ case "${HOSTNAME}" in
                     --with-netcdf=/opt/local \
                     --with-hdf5=/opt/local \
                     --with-szlib=$HOME/local \
-                    --with-jasper=$HOME/local \
-                    --with-grib_api=$HOME/local/gribapi-1.9.5 \
 	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O2 -Df2cFortran"
 	;;
 # ia64-nec-linux

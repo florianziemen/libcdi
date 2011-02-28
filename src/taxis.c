@@ -863,7 +863,7 @@ The function @func{taxisInqCalendar} returns the calendar of a Time axis.
 @Result
 @func{taxisInqCalendar} returns the type of the calendar,
 one of the set of predefined CDI calendar types.
-The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_PROLEPRIC}, 
+The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_PROLEPTIC}, 
 @func{CALENDAR_360DAYS}, @func{CALENDAR_365DAYS} and @func{CALENDAR_366DAYS}.
 
 @EndFunction
