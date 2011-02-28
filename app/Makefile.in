@@ -246,7 +246,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 #
 cdi_SOURCES = cdi.c printinfo.h
-cdi_LDADD = $(top_builddir)/src/libcdi.la
+cdi_LDADD = $(top_builddir)/src/libcdi.la @LIBS@
 @ENABLE_ALL_STATIC_TRUE@cdi_LDFLAGS = -all-static
 #
 createtable_SOURCES = createtable.c
