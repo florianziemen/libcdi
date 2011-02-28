@@ -96,15 +96,12 @@ of the {\CDI} library (see \htmlref{Build}{build}).
 
 \section{SERVICE}
 
-SERVICE is the binary exchange format of the atmospheric general
-circulation model ECHAM \cite{ECHAM}.
+SERVICE is the binary exchange format of the atmospheric general circulation model ECHAM \cite{ECHAM}.
 It has a header section with 8 integer values followed by the data section.
-The header and the data section have the standard Fortran blocking
-for binary data records.
-A SERVICE record can have an accuracy of 4 or 8 bytes and 
-the byteorder can be little or big endian.
-The following Fortran code example can be used to read a 
-SERVICE record with an accuracy of 4 bytes:
+The header and the data section have the standard Fortran blocking for binary data records.
+A SERVICE record can have an accuracy of 4 or 8 bytes and the byteorder can be little or big endian.
+In {\CDI} the accuracy of the header and data section must be the same.
+The following Fortran code example can be used to read a SERVICE record with an accuracy of 4 bytes:
 
 \begin{lstlisting}[language=Fortran, backgroundcolor=\color{pyellow}, basicstyle=\small, columns=flexible]
    INTEGER*4 icode,ilevel,idate,itime,nlon,nlat,idispo1,idispo2
@@ -134,13 +131,12 @@ The meaning of the variables are:
 
 \section{EXTRA}
 
-EXTRA is the standard binary output format of the ocean model MPIOM
-\cite{MPIOM}. It has a header section with 4 integer values followed by the
-data section. The header and the data section have the standard Fortran
-blocking for binary data records. An EXTRA record can have an accuracy of 4 or
-8 bytes and the byteorder can be little or big endian.
-The following Fortran code example can be used to read an
-EXTRA record with an accuracy of 4 bytes:
+EXTRA is the standard binary output format of the ocean model MPIOM \cite{MPIOM}.
+It has a header section with 4 integer values followed by the data section. 
+The header and the data section have the standard Fortran blocking for binary data records.
+An EXTRA record can have an accuracy of 4 or 8 bytes and the byteorder can be little or big endian.
+In {\CDI} the accuracy of the header and data section must be the same.
+The following Fortran code example can be used to read an EXTRA record with an accuracy of 4 bytes:
 
 \begin{lstlisting}[language=Fortran, backgroundcolor=\color{pyellow}, basicstyle=\small, columns=flexible]
    INTEGER*4 idate,icode,ilevel,nsize

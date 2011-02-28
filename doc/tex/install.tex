@@ -8,14 +8,17 @@ First go to the \href{http://code.zmaw.de/projects/cdi/files}{\tt download} page
 ({\tt http://code.zmaw.de/projects/cdi/files}) to get the latest distribution,
 if you do not already have it.
 
-To take full advantage of {\CDI}'s features the following additional
-library should be installed:
+To take full advantage of {\CDI}'s features the following additional libraries should be installed:
 
 \begin{itemize}
 \item Unidata \href{http://www.unidata.ucar.edu/packages/netcdf/index.html}{netCDF} library
       ({\tt http://www.unidata.ucar.edu/packages/netcdf/index.html})
       version 3 or higher.
       This is needed to read/write netCDF files with {\CDI}. 
+\item ECMWF \href{http://www.ecmwf.int/products/data/software/grib_api.html}{GRIB\_API}
+      ({\tt http://www.ecmwf.int/products/data/software/grib\_api.html})
+      version 1.9.5 or higher.
+      This library is needed to encode/decode GRIB2 records with {\CDI}. 
 \end{itemize}
 
 
@@ -38,10 +41,11 @@ Compilation is now done by performing the following steps:
     ./configure
 \end{verbatim}
 
-Or with netCDF support:
+Or optionally with netCDF and GRIB2 support:
  
 \begin{verbatim}
-    ./configure --with-netcdf=<netCDF root directory>
+    ./configure --with-netcdf=<netCDF root directory>  \
+                --with-gribapi=<GRIB_API root directory>
 \end{verbatim}
 
 For an overview of other configuration options use
@@ -58,7 +62,7 @@ For an overview of other configuration options use
 
 \end{enumerate}
 
-The software should compile without problems and the library ({\tt libcdi.a}) 
+The software should compile without problems and the {\CDI} library ({\tt libcdi.a}) 
 should be available in the {\tt src} directory of the distribution.
 
 
