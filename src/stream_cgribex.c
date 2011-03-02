@@ -92,7 +92,7 @@ int cgribexGetZaxisHasBounds(int grb_ltype)
 static
 int cgribexGetTimeUnit(int *isec1)
 {
-  int timeunit = -1;
+  int timeunit = TUNIT_HOUR;
   static int lprint = TRUE;
 
   switch ( ISEC1_TimeUnit )
@@ -1539,8 +1539,8 @@ int cgribexDefDateTime(int *isec1, int timeunit, int date, int time)
 
   if ( ISEC1_Year == 0 )
     {
-      ISEC1_Year = 100;
       century -= 1;
+      ISEC1_Year = 100;
     }
 
   century += 1;

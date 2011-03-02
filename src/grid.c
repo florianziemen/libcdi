@@ -2359,6 +2359,10 @@ int gridCompare(int gridID, grid_t grid)
 			compareXYvals(gridID, xsize, ysize, grid.xvals, grid.yvals, &differ);
 		    }
 		}
+	      else if ( (grid.ysize == 0 || grid.ysize == 1) &&
+			grid.xsize == gridInqXsize(gridID)*gridInqYsize(gridID) )
+		{
+		}
 	      else
 		differ = 1;		
 	    }

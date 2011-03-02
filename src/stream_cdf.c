@@ -889,6 +889,7 @@ void cdfDefTime(int streamID)
       int timeunit;
 
       timeunit = taxis->unit;
+      if ( timeunit == -1 ) timeunit = TUNIT_HOUR;
       rdate    = taxis->rdate;
       rtime    = taxis->rtime;
       if ( rdate == -1 )
