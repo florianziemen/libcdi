@@ -2233,7 +2233,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	GRIB_CHECK(grib_set_long(gh, "M", trunc), 0);
 
 	// GRIB_CHECK(grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
-	// GRIB_CHECK(grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
+	GRIB_CHECK(grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
 
 	if ( gridInqComplexPacking(gridID) )
 	  {
