@@ -87,9 +87,11 @@ These dimensions should only be used by the horizontal and vertical grid and the
 The netCDF attributes should follow the
 \href{http://ftp.unidata.ucar.edu/software/netcdf/docs/conventions.html}
      {GDT, COARDS or CF Conventions}.
+
 NetCDF is an external library and not part of {\CDI}. To use netCDF with
 {\CDI} the netCDF library must be installed before the configuration
-of the {\CDI} library (see \htmlref{Build}{build}).
+of the {\CDI} library. Use the configure option {\tt --with-netcdf} to
+enable netCDF support (see \htmlref{Build}{build}).
 
 %\subsection{ncdap}
 
@@ -120,14 +122,17 @@ The meaning of the variables are:
 \item[{\tt icode}]    The code number
 \item[{\tt ilevel}]   The level
 \item[{\tt idate}]    The date as YYYYMMDD
-\item[{\tt itime}]    The time as hhmm
+\item[{\tt itime}]    The time as hhmmss
 \item[{\tt nlon}]     The number of longitudes
 \item[{\tt nlat}]     The number of latitides
 \item[{\tt idispo1}]  For the users disposal (Not used in {\CDI})
 \item[{\tt idispo2}]  For the users disposal (Not used in {\CDI})
 \end{deflist}
 \end{minipage}
+\vspace*{3mm}
 
+SERVICE is implemented in {\CDI} as an internal library and enabled per default.
+The configure option {\tt --disable-service} will disable the support for the SERVICE format.
 
 \section{EXTRA}
 
@@ -158,6 +163,10 @@ The meaning of the variables are:
 \item[{\tt nsize}]    The size of the field
 \end{deflist}
 \end{minipage}
+\vspace*{3mm}
+
+EXTRA is implemented in {\CDI} as an internal library and enabled per default.
+The configure option {\tt --disable-extra} will disable the support for the EXTRA format.
 
 
 \section{IEG}
@@ -171,3 +180,6 @@ for binary data records. The IEG format has a fixed size of 100 for the
 vertical coordinate table. That means it is not possible to store more
 than 50 model levels with this format.
 {\CDI} supports only data on Gaussian and LonLat grids for the IEG format.
+
+IEG is implemented in {\CDI} as an internal library and enabled per default.
+The configure option {\tt --disable-ieg} will disable the support for the IEG format.
