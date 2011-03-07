@@ -2177,7 +2177,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	/* South -> North */
 	//if ( ISEC2_LastLat > ISEC2_FirstLat ) ISEC2_ScanFlag += 64;
 
-	if ( ljpeg && editionNumber )
+	if ( ljpeg && editionNumber == 2 )
 	  {
 	    mesg = "grid_jpeg"; len = strlen(mesg);
 	    GRIB_CHECK(grib_set_string(gh, "packingType", mesg, &len), 0);
@@ -2233,10 +2233,10 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	GRIB_CHECK(grib_set_long(gh, "M", trunc), 0);
 
 	// GRIB_CHECK(grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
-	GRIB_CHECK(grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
 
 	if ( gridInqComplexPacking(gridID) )
 	  {
+	    if ( editionNumber == 2 ) GRIB_CHECK(grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
 	    mesg = "spectral_complex"; len = strlen(mesg);
 	    GRIB_CHECK(grib_set_string(gh, "packingType", mesg, &len), 0);
 	    /*
