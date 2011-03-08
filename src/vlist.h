@@ -1,6 +1,8 @@
 #ifndef _VLIST_H
 #define _VLIST_H
 
+#include <stddef.h>  /* size_t */
+
 #ifndef _CDI_LIMITS_H
 #  include "cdi_limits.h"
 #endif
@@ -15,7 +17,7 @@ typedef struct {
   char     *name;         /* attribute name                                 */
   int       indtype;	  /* internal data type of xvalue (INT, FLT or TXT) */
   int       exdtype;      /* external data type                             */
-                          /* indtype    exdtype                            */
+                          /* indtype    exdtype                             */
                           /* TXT        TXT                                 */
                           /* INT        INT16, INT32                        */
                           /* FLT        FLT32, FLT64                        */
