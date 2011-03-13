@@ -55,6 +55,7 @@ typedef struct {
   int      islev;
   int      warn;
   int      timeID;
+  int      param;
   int      code;
   int      tabnum;
   int      bounds;
@@ -2552,7 +2553,8 @@ int cdfDefVar(int streamID, int varID)
   int fileID;
   int xid = UNDEFID, yid = UNDEFID, zid = UNDEFID, tid = UNDEFID;
   size_t xsize = 0, ysize = 0;
-  int code, gridID, zaxisID;
+  int code, param, gridID, zaxisID;
+  int pnum, pcat, pdis;
   char varname[256];
   char *name = NULL;
   char *longname = NULL;
@@ -2590,6 +2592,8 @@ int cdfDefVar(int streamID, int varID)
   zaxisID = vlistInqVarZaxis(vlistID, varID);
   timeID  = vlistInqVarTime(vlistID, varID);
   code    = vlistInqVarCode(vlistID, varID);
+  param   = vlistInqVarParam(vlistID, varID);
+  cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
   gridsize  = gridInqSize(gridID);
   if ( gridsize > 1 ) lchunk = TRUE;
@@ -2682,23 +2686,27 @@ int cdfDefVar(int streamID, int varID)
       int checkname;
       int iz;
       int status;
+      char *varname2;
 
       if ( code < 0 ) code = -code;
+      if ( pnum < 0 ) pnum = -pnum;
 
-      sprintf(varname, "var%d", code);
+      if ( pdis == 255 )
+	sprintf(varname, "var%d", code);
+      else
+	sprintf(varname, "param%d.%d.%d", pnum, pcat, pdis);
+      
+      varname2 = varname+strlen(varname);
 
       checkname = TRUE;
       iz = 0;
 
       while ( checkname ) 
         {
-          if ( iz ) sprintf(varname, "var%d_%d", code, iz+1);
+          if ( iz ) sprintf(varname2, "_%d", iz+1);
 
           status = nc_inq_varid(fileID, varname, &ncvarid);
-          if ( status != NC_NOERR )
-            {
-              checkname = FALSE;
-            }
+          if ( status != NC_NOERR ) checkname = FALSE;
 
           if ( checkname ) iz++;
 
@@ -2707,6 +2715,7 @@ int cdfDefVar(int streamID, int varID)
 
       name = varname;
       code = 0;
+      pdis = 255;
     }
 
   /* if ( streamptr->ncmode == 2 ) cdf_redef(fileID); */
@@ -2778,8 +2787,15 @@ int cdfDefVar(int streamID, int varID)
   if ( units && *units )
     cdf_put_att_text(fileID, ncvarid, "units", strlen(units), units);
 
-  if ( code > 0 )
+  if ( code > 0 && pdis == 255 )
     cdf_put_att_int(fileID, ncvarid, "code", NC_INT, 1L, &code);
+
+  if ( pdis != 255 )
+    {
+      char paramstr[32];
+      cdiParamToString(param, paramstr, sizeof(paramstr));
+      cdf_put_att_text(fileID, ncvarid, "param", strlen(paramstr), paramstr);
+    }
 
   if ( tableID != UNDEFID )
     {
@@ -3867,6 +3883,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].islev           = FALSE;
       ncvars[ncvarid].warn            = FALSE;
       ncvars[ncvarid].timeID          = TIME_CONSTANT;
+      ncvars[ncvarid].param           = UNDEFID;
       ncvars[ncvarid].code            = UNDEFID;
       ncvars[ncvarid].tabnum          = 0;
       ncvars[ncvarid].calendar        = FALSE;
@@ -4230,6 +4247,15 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
           else if ( strcmp(attname, "calendar") == 0 )
             {
               ncvars[ncvarid].calendar = TRUE;
+            }
+          else if ( strcmp(attname, "param") == 0 && atttype == NC_CHAR )
+            {
+	      char paramstr[32];
+	      int pnum = 0, pcat = 255, pdis = 255;
+              cdfGetAttText(fileID, ncvarid, attname, sizeof(paramstr), paramstr);
+	      sscanf(paramstr, "%d.%d.%d", &pnum, &pcat, &pdis);
+	      ncvars[ncvarid].param = cdiEncodeParam(pnum, pcat, pdis);
+              cdfSetVar(ncvars, ncvarid, TRUE);
             }
           else if ( strcmp(attname, "code") == 0 && atttype != NC_CHAR )
             {
@@ -6047,6 +6073,7 @@ int cdfInqContents(int streamID)
       streamptr->vars[varID1].ncvarid = ncvarid;
 
       vlistDefVarName(vlistID, varID, ncvars[ncvarid].name);
+      if ( ncvars[ncvarid].param != UNDEFID ) vlistDefVarParam(vlistID, varID, ncvars[ncvarid].param);
       if ( ncvars[ncvarid].code != UNDEFID )  vlistDefVarCode(vlistID, varID, ncvars[ncvarid].code);
       if ( ncvars[ncvarid].code != UNDEFID )
 	{
@@ -6158,6 +6185,16 @@ int cdfInqContents(int streamID)
 	      if ( memcmp("code", pname, 4) == 0 )
 		{
 		  vlistDefVarCode(vlistID, varID, atoi(pname+4));
+		  vlistDestroyVarName(vlistID, varID);
+		}
+	    }
+	  else if ( len > 5 && isdigit((int) pname[5]) )
+	    {
+	      if ( memcmp("param", pname, 5) == 0 )
+		{
+		  int pnum = -1, pcat = 255, pdis = 255;
+		  sscanf(pname+5, "%d.%d.%d", &pnum, &pcat, &pdis);
+		  vlistDefVarParam(vlistID, varID, cdiEncodeParam(pnum, pcat, pdis));
 		  vlistDestroyVarName(vlistID, varID);
 		}
 	    }
