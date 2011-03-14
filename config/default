@@ -34,7 +34,7 @@ case "${HOSTNAME}" in
                     --enable-maintainer-mode \
                     --enable-all-static \
                     --with-jasper=/sw/etch-ia32/jasper-1.900.1 \
-                    --with-grib_api=$HOME/local/etch-ia32/grib_api-1.9.5 \
+                    --with-grib_api=$HOME/local/etch-ia32/grib_api-1.9.8 \
 	            --with-netcdf=/sw/etch-ia32/netcdf-4.0.1 \
 	            --with-hdf5=/sw/etch-ia32/hdf5-1.8.2 \
                     --with-zlib=/sw/etch-ia32/zlib-1.2.3 \
