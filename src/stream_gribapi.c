@@ -171,23 +171,27 @@ int gribapiGetTsteptype(grib_handle *gh)
 
   if ( gribapiTimeIsFC(gh) )
     {
-      GRIB_CHECK(grib_get_long(gh, "stepType", &lpar), 0);
-      timerange = (int) lpar;
-
-      // printf("timerange %d\n", timerange);
-
-      switch ( timerange )
+      int status;
+      status = grib_get_long(gh, "stepType", &lpar);
+      if ( status == 0 )
 	{
-	case  0:  tsteptype = TSTEP_AVG;    break;
-	case  1:  tsteptype = TSTEP_ACCUM;  break;
-	case  2:  tsteptype = TSTEP_MIN;    break;
-	case  3:  tsteptype = TSTEP_MAX;    break;
-	case  4:  tsteptype = TSTEP_DIFF;   break;
-	default:
-	  if ( lprint )
+	  timerange = (int) lpar;
+
+	  // printf("timerange %d\n", timerange);
+
+	  switch ( timerange )
 	    {
-	      Message("Time range %d unsupported", timerange);
-	      lprint = FALSE;
+	    case  0:  tsteptype = TSTEP_AVG;    break;
+	    case  1:  tsteptype = TSTEP_ACCUM;  break;
+	    case  2:  tsteptype = TSTEP_MIN;    break;
+	    case  3:  tsteptype = TSTEP_MAX;    break;
+	    case  4:  tsteptype = TSTEP_DIFF;   break;
+	    default:
+	      if ( lprint )
+		{
+		  Message("Time range %d unsupported", timerange);
+		  lprint = FALSE;
+		}
 	    }
 	}
     }
