@@ -521,7 +521,7 @@ otherwise the result is an empty string.
 void vlistInqVarName(int vlistID, int varID, char *name)
 {
   int tableID;
-  int param, code;
+  int param;
   int pdis, pcat, pnum;
   vlist_t *vlistptr;
 
@@ -533,10 +533,17 @@ void vlistInqVarName(int vlistID, int varID, char *name)
     {
       param = vlistptr->vars[varID].param;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
-      code = pnum;
-      tableID = vlistptr->vars[varID].tableID;
-      if ( tableInqParName(tableID, code, name) != 0 )
-	sprintf(name, "var%d", code);
+      if ( pdis == 255 )
+	{
+	  int code = pnum;
+	  tableID = vlistptr->vars[varID].tableID;
+	  if ( tableInqParName(tableID, code, name) != 0 )
+	    sprintf(name, "var%d", code);
+	}
+      else
+	{
+	  sprintf(name, "param%d.%d.%d", pnum, pcat, pdis);
+	}
     }  
   else
     strcpy(name, vlistptr->vars[varID].name);
@@ -566,7 +573,7 @@ otherwise the result is an empty string.
 void vlistInqVarLongname(int vlistID, int varID, char *longname)
 {
   int tableID;
-  int param, code;
+  int param;
   int pdis, pcat, pnum;
   vlist_t *vlistptr;
 
@@ -574,14 +581,19 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
+  longname[0] = '\0';
+
   if ( vlistptr->vars[varID].longname == NULL )
     {
       param = vlistptr->vars[varID].param;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
-      code = pnum;
-      tableID = vlistptr->vars[varID].tableID;
-      if ( tableInqParLongname(tableID, code, longname) != 0 )
-	longname[0] = '\0';
+      if ( pdis == 255 )
+	{
+	  int code = pnum;
+	  tableID = vlistptr->vars[varID].tableID;
+	  if ( tableInqParLongname(tableID, code, longname) != 0 )
+	    longname[0] = '\0';
+	}
     }  
   else
     strcpy(longname, vlistptr->vars[varID].longname);
@@ -648,7 +660,7 @@ otherwise the result is an empty string.
 void vlistInqVarUnits(int vlistID, int varID, char *units)
 {
   int tableID;
-  int param, code;
+  int param;
   int pdis, pcat, pnum;
   vlist_t *vlistptr;
 
@@ -656,14 +668,19 @@ void vlistInqVarUnits(int vlistID, int varID, char *units)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
+  units[0] = '\0';
+
   if ( vlistptr->vars[varID].units == NULL )
     {
       param = vlistptr->vars[varID].param;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
-      code = pnum;
-      tableID = vlistptr->vars[varID].tableID;
-      if ( tableInqParUnits(tableID, code, units) != 0 )
-	units[0] = '\0';
+      if ( pdis == 255 )
+	{
+	  int code = pnum;
+	  tableID = vlistptr->vars[varID].tableID;
+	  if ( tableInqParUnits(tableID, code, units) != 0 )
+	    units[0] = '\0';
+	}
     }  
   else
     strcpy(units, vlistptr->vars[varID].units);
@@ -671,7 +688,7 @@ void vlistInqVarUnits(int vlistID, int varID, char *units)
   return;
 }
 
-
+/* not used 
 int vlistInqVarID(int vlistID, int code)
 {
   int varID;
@@ -689,15 +706,12 @@ int vlistInqVarID(int vlistID, int code)
 
   if ( varID == vlistptr->nvars )
     {
-      /*
-      Warning("varID not found for param %d", param);
-      */
       varID = CDI_UNDEFID;
     }
 
   return (varID);
 }
-
+*/
 
 int vlistInqVarSize(int vlistID, int varID)
 {

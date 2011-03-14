@@ -6093,7 +6093,8 @@ int cdfInqContents(int streamID)
 
       vlistDefVarInstitut(vlistID, varID, instID);
       vlistDefVarModel(vlistID, varID, modelID);
-      vlistDefVarTable(vlistID, varID, ncvars[ncvarid].tableID);
+      if ( ncvars[ncvarid].tableID != UNDEFID )
+	vlistDefVarTable(vlistID, varID, ncvars[ncvarid].tableID);
 
       if ( ncvars[ncvarid].defmiss == TRUE ) vlistDefVarMissval(vlistID, varID, ncvars[ncvarid].missval);
 
