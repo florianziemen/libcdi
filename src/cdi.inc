@@ -955,11 +955,6 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarSize
 
-      INTEGER         vlistInqVarID
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         code)
-      EXTERNAL        vlistInqVarID
-
 !                     vlistDefIndex
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
