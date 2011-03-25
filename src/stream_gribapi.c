@@ -1461,6 +1461,9 @@ int gribapiScanTimestep(int streamID)
 	      streamptr->ntsteps = streamptr->rtsteps + 1;
 	      break;
 	    }
+
+	  if ( rindex >= nrecs ) break;
+
 	  if ( recsize > buffersize )
 	    {
 	      buffersize = recsize;

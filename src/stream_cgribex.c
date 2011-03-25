@@ -1133,6 +1133,8 @@ int cgribexScanTimestep(int streamID)
 	      gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
 	    }
 
+	  if ( rindex >= nrecs ) break;
+
 	  readsize = recsize;
 	  rstatus = gribRead(fileID, gribbuffer, &readsize);
 	  if ( rstatus )
