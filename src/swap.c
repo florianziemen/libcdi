@@ -9,7 +9,6 @@
 
 void swap4byte(void *ptr, size_t size)
 {
-  static char func[] = "swap4byte";
   INT32 *ptrtmp;
   int nval;
 
@@ -28,13 +27,12 @@ void swap4byte(void *ptr, size_t size)
     }
   else
     {
-      Error(func, "not implemented for %d byte data", sizeof(INT32));
+      Error("not implemented for %d byte data", sizeof(INT32));
     }
 }
 
 void swap8byte(void *ptr, size_t size)
 {
-  static char func[] = "swap8byte";
   INT64 *ptrtmp;
   int nval;
 
@@ -55,6 +53,6 @@ void swap8byte(void *ptr, size_t size)
     }
   else
     {
-      Error(func, "not implemented for %d byte data", sizeof(INT64));
+      Error("not implemented for %d byte data", sizeof(INT64));
     }
 }

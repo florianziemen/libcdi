@@ -21,15 +21,15 @@ typedef struct {
   int     vdate_ub;       /* upper bounds of vdate */
   int     vtime_ub;       /* upper bounds of vtime */
 }
-TAXIS;
+taxis_t;
 
-void    ptaxisInit(TAXIS *taxis);
-void    ptaxisCopy(TAXIS *dest, TAXIS *source);
-TAXIS  *taxisPtr(int timeID);
-void    cdiDecodeTimeval(double timevalue, TAXIS *taxis, int *date, int *time);
-double  cdiEncodeTimeval(int date, int time, TAXIS *taxis);
-void    timeval2vtime(double timevalue, TAXIS *taxis, int *vdate, int *vtime);
-double  vtime2timeval(int vdate, int vtime, TAXIS *taxis);
+void    ptaxisInit(taxis_t *taxis);
+void    ptaxisCopy(taxis_t *dest, taxis_t *source);
+taxis_t  *taxisPtr(int timeID);
+void    cdiDecodeTimeval(double timevalue, taxis_t *taxis, int *date, int *time);
+double  cdiEncodeTimeval(int date, int time, taxis_t *taxis);
+void    timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime);
+double  vtime2timeval(int vdate, int vtime, taxis_t *taxis);
 
 
 #endif  /* _TAXIS_H */

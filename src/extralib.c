@@ -32,7 +32,7 @@ static int extDefaultNumber = EXT_REAL;
  */
 
 #undef  LIBVERSION
-#define LIBVERSION      1.2.0
+#define LIBVERSION      1.3.0
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char ext_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
@@ -48,18 +48,15 @@ int EXT_Debug = 0;    /* If set to 1, debugging */
 
 void extDebug(int debug)
 {
-  static char func[] = "extDebug";
-
   EXT_Debug = debug;
 
   if ( EXT_Debug )
-    Message(func, "debug level %d", debug);
+    Message("debug level %d", debug);
 }
 
 
 void extLibInit()
 {
-  static char func[] = "extLibInit";
   char *envString;
   char *envName = "EXT_PRECISION";
 
@@ -81,7 +78,7 @@ void extLibInit()
 		  case '4': extDefaultPrec = SINGLE_PRECISION; break;
 		  case '8': extDefaultPrec = DOUBLE_PRECISION; break;
 		  default:
-		    Message(func, "Invalid digit in %s: %s", envName, envString);
+		    Message("Invalid digit in %s: %s", envName, envString);
 		  }
 		break;		
 	      }
@@ -93,12 +90,12 @@ void extLibInit()
 		  case '4': extDefaultPrec = SINGLE_PRECISION; break;
 		  case '8': extDefaultPrec = DOUBLE_PRECISION; break;
 		  default:
-		    Message(func, "Invalid digit in %s: %s", envName, envString);
+		    Message("Invalid digit in %s: %s", envName, envString);
 		  }
 		break;		
 	      }
 	    default:
-	      Message(func, "Invalid character in %s: %s", envName, envString);
+	      Message("Invalid character in %s: %s", envName, envString);
 	    }
 	}
     }
@@ -121,7 +118,6 @@ void extInit(extrec_t *extp)
 
 void *extNew(void)
 {
-  static char func[] = "extNew";
   extrec_t *extp;
 
   if ( ! initExtLib ) extLibInit();
@@ -136,7 +132,6 @@ void *extNew(void)
 
 void extDelete(void *ext)
 {
-  static char func[] = "extDelete";
   extrec_t *extp = (extrec_t *) ext;
 
   if ( extp )
@@ -149,7 +144,6 @@ void extDelete(void *ext)
 
 int extCheckFiletype(int fileID, int *swap)
 {
-  static char func[] = "extCheckFiletype";
   size_t blocklen = 0;
   size_t sblocklen = 0;
   size_t data =  0;
@@ -163,7 +157,7 @@ int extCheckFiletype(int fileID, int *swap)
   sblocklen = (size_t) get_SUINT32(buffer);
 
   if ( EXT_Debug )
-    Message(func, "blocklen = %d sblocklen = %d", blocklen, sblocklen);
+    Message("blocklen = %d sblocklen = %d", blocklen, sblocklen);
 
   if ( blocklen == 16 )
     {
@@ -205,8 +199,8 @@ int extCheckFiletype(int fileID, int *swap)
 
   if ( EXT_Debug )
     {
-      Message(func, "swap = %d fact = %d", *swap, fact);
-      Message(func, "dimxy = %lu data = %lu", dimxy, data);
+      Message("swap = %d fact = %d", *swap, fact);
+      Message("dimxy = %lu data = %lu", dimxy, data);
     }
 
   return (found);
@@ -215,14 +209,13 @@ int extCheckFiletype(int fileID, int *swap)
 
 int extInqHeader(void *ext, int *header)
 {
-  static char func[] = "extInqHeader";
   extrec_t *extp = (extrec_t *) ext;
   size_t i;
 
   for ( i = 0; i < EXT_HEADER_LEN; i++ )
     header[i] = extp->header[i];
   
-  if ( EXT_Debug ) Message(func, "datasize = %lu", extp->datasize);
+  if ( EXT_Debug ) Message("datasize = %lu", extp->datasize);
 
   return (0);
 }
@@ -230,7 +223,6 @@ int extInqHeader(void *ext, int *header)
 
 int extDefHeader(void *ext, const int *header)
 {
-  static char func[] = "extDefHeader";
   extrec_t *extp = (extrec_t *) ext;
   size_t i;
 
@@ -240,7 +232,7 @@ int extDefHeader(void *ext, const int *header)
   extp->datasize = header[3];
   if ( extp->number == EXT_COMP ) extp->datasize *= 2;
 
-  if ( EXT_Debug ) Message(func, "datasize = %lu", extp->datasize);
+  if ( EXT_Debug ) Message("datasize = %lu", extp->datasize);
 
   return (0);
 }
@@ -248,7 +240,6 @@ int extDefHeader(void *ext, const int *header)
 
 int extInqData(void *ext, int prec, void *data)
 {
-  static char func[] = "extInqData";
   extrec_t *extp = (extrec_t *) ext;
   size_t datasize;
   size_t i;
@@ -278,7 +269,7 @@ int extInqData(void *ext, int prec, void *data)
 	  }
 	else
 	  {
-	    Error(func, "not implemented for %d byte float", sizeof(FLT32));
+	    Error("not implemented for %d byte float", sizeof(FLT32));
 	  }	
 	break;
       }
@@ -295,12 +286,12 @@ int extInqData(void *ext, int prec, void *data)
 	  }
 	else
 	  {
-	    Error(func, "not implemented for %d byte float", sizeof(FLT64));
+	    Error("not implemented for %d byte float", sizeof(FLT64));
 	  }	
 	break;
     default:
       {
-	Error(func, "unexpected data precision %d", rprec);
+	Error("unexpected data precision %d", rprec);
       }
     }
 
@@ -322,7 +313,6 @@ int extInqDataDP(void *ext, double *data)
 
 int extDefData(void *ext, int prec, const void *data)
 {
-  static char func[] = "extDefData";
   extrec_t *extp = (extrec_t *) ext;
   size_t datasize;
   size_t blocklen;
@@ -384,7 +374,7 @@ int extDefData(void *ext, int prec, const void *data)
       }
     default:
       {
-	Error(func, "unexpected data precision %d", rprec);
+	Error("unexpected data precision %d", rprec);
       }
     }
 
@@ -406,7 +396,6 @@ int extDefDataDP(void *ext, const double *data)
 
 int extRead(int fileID, void *ext)
 {
-  static char func[] = "extRead";
   extrec_t *extp = (extrec_t *) ext;
   size_t blocklen, blocklen2;
   size_t i;
@@ -420,7 +409,7 @@ int extRead(int fileID, void *ext)
   if ( ! extp->checked )
     {
       status = extCheckFiletype(fileID, &extp->byteswap);
-      if ( status == 0 ) Error(func, "Not a EXTRA file!");
+      if ( status == 0 ) Error("Not a EXTRA file!");
       extp->checked = 1;
     }
 
@@ -432,7 +421,7 @@ int extRead(int fileID, void *ext)
   if ( fileEOF(fileID) ) return (-1);
 
   if ( EXT_Debug )
-    Message(func, "blocklen = %lu", blocklen);
+    Message("blocklen = %lu", blocklen);
 
   hprec = blocklen / EXT_HEADER_LEN;
 
@@ -460,7 +449,7 @@ int extRead(int fileID, void *ext)
       }
     default:
       {
-	Error(func, "unexpected header precision %d", hprec);
+	Error("unexpected header precision %d", hprec);
       }
     }
 
@@ -468,13 +457,13 @@ int extRead(int fileID, void *ext)
 
   if ( blocklen2 != blocklen )
     {
-      Warning(func, "header blocklen differ!");
+      Warning("header blocklen differ!");
       return (-1);
     }
 
   extp->datasize = extp->header[3];
 
-  if ( EXT_Debug ) Message(func, "datasize = %lu", extp->datasize);
+  if ( EXT_Debug ) Message("datasize = %lu", extp->datasize);
 
   blocklen = binReadF77Block(fileID, byteswap);
 
@@ -506,7 +495,7 @@ int extRead(int fileID, void *ext)
 
   if ( dprec != SINGLE_PRECISION && dprec != DOUBLE_PRECISION )
     {
-      Warning(func, "unexpected data precision %d", dprec);
+      Warning("unexpected data precision %d", dprec);
       return (-1);
     }
 
@@ -516,7 +505,7 @@ int extRead(int fileID, void *ext)
 
   if ( blocklen2 != blocklen )
     {
-      Warning(func, "data blocklen differ!");
+      Warning("data blocklen differ!");
       return (-1);
     }
 
@@ -526,7 +515,6 @@ int extRead(int fileID, void *ext)
 
 int extWrite(int fileID, void *ext)
 {
-  static char func[] = "extWrite";
   extrec_t *extp = (extrec_t *) ext;
   size_t datasize;
   size_t blocklen;
@@ -569,7 +557,7 @@ int extWrite(int fileID, void *ext)
       }
     default:
       {
-	Error(func, "unexpected header precision %d", rprec);
+	Error("unexpected header precision %d", rprec);
       }
     }
   
@@ -599,7 +587,7 @@ int extWrite(int fileID, void *ext)
       }
     default:
       {
-	Error(func, "unexpected data precision %d", rprec);
+	Error("unexpected data precision %d", rprec);
       }
     }
 

@@ -35,15 +35,17 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-target_triplet = @target@
-@CREATE_ISOC_TRUE@am__append_1 = mo_cdi.$(FCMODEXT)
-@CREATE_ISOC_TRUE@am__append_2 = mo_cdi.o
-@CREATE_ISOC_TRUE@am__append_3 = mo_cdi.$(FCMODEXT)
+@CREATE_ISOC_TRUE@am__append_1 = mo_cdi.o mo_cdi.$(FCMODEXT)
+@CREATE_ISOC_TRUE@am__append_2 = $(top_builddir)/src/mo_cdi.$(FCMODEXT) $(top_builddir)/src/mo_cdi.o
 subdir = src
-DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
+DIST_COMMON = $(am__include_HEADERS_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/acx_sl_mod_suffix.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/acx_options.m4 \
+	$(top_srcdir)/m4/acx_sl_mod_suffix.m4 \
+	$(top_srcdir)/m4/ax_pthread.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -72,172 +74,120 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)" \
-	"$(DESTDIR)$(includedir)"
-LIBRARIES = $(lib_LIBRARIES)
-ARFLAGS = cru
-libcdi_a_AR = $(AR) $(ARFLAGS)
-libcdi_a_LIBADD =
-am_libcdi_a_OBJECTS = cdiFortran.$(OBJEXT) cdi_error.$(OBJEXT) \
-	cdi_util.$(OBJEXT) taxis.$(OBJEXT) error.$(OBJEXT) \
-	version.$(OBJEXT) dmemory.$(OBJEXT) model.$(OBJEXT) \
-	institution.$(OBJEXT) table.$(OBJEXT) gaussgrid.$(OBJEXT) \
-	util.$(OBJEXT) varscan.$(OBJEXT) calendar.$(OBJEXT) \
-	timebase.$(OBJEXT) vlist.$(OBJEXT) vlist_var.$(OBJEXT) \
-	vlist_att.$(OBJEXT) basetime.$(OBJEXT) \
-	stream_history.$(OBJEXT) stream_cgribex.$(OBJEXT) \
-	stream_gribapi.$(OBJEXT) stream_grb.$(OBJEXT) \
-	stream_cdf.$(OBJEXT) stream_srv.$(OBJEXT) stream_ext.$(OBJEXT) \
-	stream_ieg.$(OBJEXT) grid.$(OBJEXT) zaxis.$(OBJEXT) \
-	stream.$(OBJEXT) stream_var.$(OBJEXT) stream_record.$(OBJEXT) \
-	tsteps.$(OBJEXT) stream_int.$(OBJEXT) servicelib.$(OBJEXT) \
-	extralib.$(OBJEXT) ieglib.$(OBJEXT) cdf.$(OBJEXT) \
-	cdf_int.$(OBJEXT) file.$(OBJEXT) binary.$(OBJEXT) \
-	swap.$(OBJEXT) cgribexlib.$(OBJEXT) gribapi.$(OBJEXT) \
-	pio.$(OBJEXT) pio_dbuffer.$(OBJEXT) pio_mpinonb.$(OBJEXT) \
-	pio_queue.$(OBJEXT) pio_posixasynch.$(OBJEXT) \
-	pio_posixfpguardsendrecv.$(OBJEXT) \
-	pio_posixfpguardthread.$(OBJEXT) \
-	pio_posixfpguardthreadrefuse.$(OBJEXT) pio_posixnonb.$(OBJEXT)
-libcdi_a_OBJECTS = $(am_libcdi_a_OBJECTS)
-libcdi_parallel_a_AR = $(AR) $(ARFLAGS)
-libcdi_parallel_a_LIBADD =
-am__objects_1 = cdiFortran.$(OBJEXT) cdi_error.$(OBJEXT) \
-	cdi_util.$(OBJEXT) taxis.$(OBJEXT) error.$(OBJEXT) \
-	version.$(OBJEXT) dmemory.$(OBJEXT) model.$(OBJEXT) \
-	institution.$(OBJEXT) table.$(OBJEXT) gaussgrid.$(OBJEXT) \
-	util.$(OBJEXT) varscan.$(OBJEXT) calendar.$(OBJEXT) \
-	timebase.$(OBJEXT) vlist.$(OBJEXT) vlist_var.$(OBJEXT) \
-	vlist_att.$(OBJEXT) basetime.$(OBJEXT) \
-	stream_history.$(OBJEXT) stream_cgribex.$(OBJEXT) \
-	stream_gribapi.$(OBJEXT) stream_grb.$(OBJEXT) \
-	stream_cdf.$(OBJEXT) stream_srv.$(OBJEXT) stream_ext.$(OBJEXT) \
-	stream_ieg.$(OBJEXT) grid.$(OBJEXT) zaxis.$(OBJEXT) \
-	stream.$(OBJEXT) stream_var.$(OBJEXT) stream_record.$(OBJEXT) \
-	tsteps.$(OBJEXT) stream_int.$(OBJEXT) servicelib.$(OBJEXT) \
-	extralib.$(OBJEXT) ieglib.$(OBJEXT) cdf.$(OBJEXT) \
-	cdf_int.$(OBJEXT) file.$(OBJEXT) binary.$(OBJEXT) \
-	swap.$(OBJEXT) cgribexlib.$(OBJEXT) gribapi.$(OBJEXT) \
-	pio.$(OBJEXT) pio_dbuffer.$(OBJEXT) pio_mpinonb.$(OBJEXT) \
-	pio_queue.$(OBJEXT) pio_posixasynch.$(OBJEXT) \
-	pio_posixfpguardsendrecv.$(OBJEXT) \
-	pio_posixfpguardthread.$(OBJEXT) \
-	pio_posixfpguardthreadrefuse.$(OBJEXT) pio_posixnonb.$(OBJEXT)
-am_libcdi_parallel_a_OBJECTS = $(am__objects_1)
-libcdi_parallel_a_OBJECTS = $(am_libcdi_parallel_a_OBJECTS)
-libcdi_serial_a_AR = $(AR) $(ARFLAGS)
-libcdi_serial_a_LIBADD =
-am__objects_2 = libcdi_serial_a-cdiFortran.$(OBJEXT) \
-	libcdi_serial_a-cdi_error.$(OBJEXT) \
-	libcdi_serial_a-cdi_util.$(OBJEXT) \
-	libcdi_serial_a-taxis.$(OBJEXT) \
-	libcdi_serial_a-error.$(OBJEXT) \
-	libcdi_serial_a-version.$(OBJEXT) \
-	libcdi_serial_a-dmemory.$(OBJEXT) \
-	libcdi_serial_a-model.$(OBJEXT) \
-	libcdi_serial_a-institution.$(OBJEXT) \
-	libcdi_serial_a-table.$(OBJEXT) \
-	libcdi_serial_a-gaussgrid.$(OBJEXT) \
-	libcdi_serial_a-util.$(OBJEXT) \
-	libcdi_serial_a-varscan.$(OBJEXT) \
-	libcdi_serial_a-calendar.$(OBJEXT) \
-	libcdi_serial_a-timebase.$(OBJEXT) \
-	libcdi_serial_a-vlist.$(OBJEXT) \
-	libcdi_serial_a-vlist_var.$(OBJEXT) \
-	libcdi_serial_a-vlist_att.$(OBJEXT) \
-	libcdi_serial_a-basetime.$(OBJEXT) \
-	libcdi_serial_a-stream_history.$(OBJEXT) \
-	libcdi_serial_a-stream_cgribex.$(OBJEXT) \
-	libcdi_serial_a-stream_gribapi.$(OBJEXT) \
-	libcdi_serial_a-stream_grb.$(OBJEXT) \
-	libcdi_serial_a-stream_cdf.$(OBJEXT) \
-	libcdi_serial_a-stream_srv.$(OBJEXT) \
-	libcdi_serial_a-stream_ext.$(OBJEXT) \
-	libcdi_serial_a-stream_ieg.$(OBJEXT) \
-	libcdi_serial_a-grid.$(OBJEXT) libcdi_serial_a-zaxis.$(OBJEXT) \
-	libcdi_serial_a-stream.$(OBJEXT) \
-	libcdi_serial_a-stream_var.$(OBJEXT) \
-	libcdi_serial_a-stream_record.$(OBJEXT) \
-	libcdi_serial_a-tsteps.$(OBJEXT) \
-	libcdi_serial_a-stream_int.$(OBJEXT) \
-	libcdi_serial_a-servicelib.$(OBJEXT) \
-	libcdi_serial_a-extralib.$(OBJEXT) \
-	libcdi_serial_a-ieglib.$(OBJEXT) libcdi_serial_a-cdf.$(OBJEXT) \
-	libcdi_serial_a-cdf_int.$(OBJEXT) \
-	libcdi_serial_a-file.$(OBJEXT) \
-	libcdi_serial_a-binary.$(OBJEXT) \
-	libcdi_serial_a-swap.$(OBJEXT) \
-	libcdi_serial_a-cgribexlib.$(OBJEXT) \
-	libcdi_serial_a-gribapi.$(OBJEXT) \
-	libcdi_serial_a-pio.$(OBJEXT) \
-	libcdi_serial_a-pio_dbuffer.$(OBJEXT) \
-	libcdi_serial_a-pio_mpinonb.$(OBJEXT) \
-	libcdi_serial_a-pio_queue.$(OBJEXT) \
-	libcdi_serial_a-pio_posixasynch.$(OBJEXT) \
-	libcdi_serial_a-pio_posixfpguardsendrecv.$(OBJEXT) \
-	libcdi_serial_a-pio_posixfpguardthread.$(OBJEXT) \
-	libcdi_serial_a-pio_posixfpguardthreadrefuse.$(OBJEXT) \
-	libcdi_serial_a-pio_posixnonb.$(OBJEXT)
-am_libcdi_serial_a_OBJECTS = $(am__objects_2)
-libcdi_serial_a_OBJECTS = $(am_libcdi_serial_a_OBJECTS)
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
+LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
+libcdi_la_LIBADD =
+am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
+	cdf_int.lo cdi_error.lo cdi_util.lo cdiFortran.lo \
+	cgribexlib.lo dmemory.lo error.lo extralib.lo file.lo \
+	gaussgrid.lo gribapi.lo grid.lo ieglib.lo institution.lo \
+	model.lo pio.lo pio_dbuffer.lo pio_mpinonb.lo \
+	pio_posixasynch.lo pio_posixfpguardsendrecv.lo \
+	pio_posixfpguardthread.lo pio_posixfpguardthreadrefuse.lo \
+	pio_posixnonb.lo pio_queue.lo servicelib.lo stream_cdf.lo \
+	stream_cgribex.lo stream_ext.lo stream_grb.lo \
+	stream_gribapi.lo stream_history.lo stream_ieg.lo \
+	stream_int.lo stream_record.lo stream_srv.lo stream_var.lo \
+	table.lo taxis.lo timebase.lo tsteps.lo util.lo varscan.lo \
+	version.lo vlist.lo vlist_att.lo vlist_var.lo zaxis.lo \
+	stream.lo swap.lo
+libcdi_la_OBJECTS = $(am_libcdi_la_OBJECTS)
+@ENABLE_CDI_LIB_FALSE@am_libcdi_la_rpath =
+@ENABLE_CDI_LIB_TRUE@am_libcdi_la_rpath = -rpath $(libdir)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libcdi_a_SOURCES) $(libcdi_parallel_a_SOURCES) \
-	$(libcdi_serial_a_SOURCES)
-DIST_SOURCES = $(libcdi_a_SOURCES) $(libcdi_parallel_a_SOURCES) \
-	$(libcdi_serial_a_SOURCES)
-HEADERS = $(include_HEADERS) $(nodist_include_HEADERS)
+LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+SOURCES = $(libcdi_la_SOURCES)
+DIST_SOURCES = $(libcdi_la_SOURCES)
+am__include_HEADERS_DIST = cdi.h cdi.inc
+HEADERS = $(include_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AR = @AR@
+AS = @AS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
-CFINT = @CFINT@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
+CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
+DSYMUTIL = @DSYMUTIL@
+DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
+ENABLE_CDI_LIB = @ENABLE_CDI_LIB@
+ENABLE_CGRIBEX = @ENABLE_CGRIBEX@
+ENABLE_EXTRA = @ENABLE_EXTRA@
+ENABLE_GRIB = @ENABLE_GRIB@
+ENABLE_IEG = @ENABLE_IEG@
+ENABLE_PYTHON = @ENABLE_PYTHON@
+ENABLE_RUBY = @ENABLE_RUBY@
+ENABLE_SERVICE = @ENABLE_SERVICE@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FC = @FC@
 FCFLAGS = @FCFLAGS@
+FCMODCASE = @FCMODCASE@
 FCMODEXT = @FCMODEXT@
 FFLAGS = @FFLAGS@
+FGREP = @FGREP@
 GREP = @GREP@
+GRIB_API_INCLUDE = @GRIB_API_INCLUDE@
+GRIB_API_LDFLAGS = @GRIB_API_LDFLAGS@
+HDF5_INCLUDE = @HDF5_INCLUDE@
+HDF5_LDFLAGS = @HDF5_LDFLAGS@
+HOST_NAME = @HOST_NAME@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+JASPER_LDFLAGS = @JASPER_LDFLAGS@
+LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
+LIBTOOL = @LIBTOOL@
+LIPO = @LIPO@
+LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
+MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
+NETCDF_INCLUDE = @NETCDF_INCLUDE@
+NETCDF_LDFLAGS = @NETCDF_LDFLAGS@
+NM = @NM@
+NMEDIT = @NMEDIT@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
+OTOOL = @OTOOL@
+OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -246,6 +196,9 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PTHREAD_CC = @PTHREAD_CC@
+PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
+PTHREAD_LIBS = @PTHREAD_LIBS@
 PYTHON = @PYTHON@
 RANLIB = @RANLIB@
 RUBY = @RUBY@
@@ -254,15 +207,22 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 SWIG = @SWIG@
+SYSTEM_TYPE = @SYSTEM_TYPE@
+SZLIB_INCLUDE = @SZLIB_INCLUDE@
+SZLIB_LDFLAGS = @SZLIB_LDFLAGS@
 THREADS_INCLUDE = @THREADS_INCLUDE@
 THREADS_LDFLAGS = @THREADS_LDFLAGS@
+USER_NAME = @USER_NAME@
 VERSION = @VERSION@
+ZLIB_INCLUDE = @ZLIB_INCLUDE@
+ZLIB_LDFLAGS = @ZLIB_LDFLAGS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
+ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
 ac_ct_F77 = @ac_ct_F77@
 ac_ct_FC = @ac_ct_FC@
 am__include = @am__include@
@@ -270,6 +230,7 @@ am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
+ax_pthread_config = @ax_pthread_config@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -306,132 +267,117 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
-target = @target@
 target_alias = @target_alias@
-target_cpu = @target_cpu@
-target_os = @target_os@
-target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 #
 EXTRA_DIST = make_cdilib mo_cdi.f90
-#
-#BUILT_SOURCES = cdilib.c
-#
-lib_LIBRARIES = libcdi.a libcdi_serial.a libcdi_parallel.a
-#
-include_HEADERS = cdi.h cdi.inc
-#
-nodistdir = .
-nodist_include_HEADERS = $(am__append_1)
-#
-libcdi_a_SOURCES = \
-        cdiFortran.c   	 \
-	cdi_error.c      \
-	cdi_util.c       \
-	taxis.c          \
-	error.c        	 \
-	version.c      	 \
-	dmemory.c      	 \
-	model.c        	 \
-	institution.c  	 \
-	table.c        	 \
-	gaussgrid.c      \
-	util.c         	 \
-	varscan.c      	 \
-	calendar.c 	 \
-	timebase.c 	 \
-	vlist.c 	 \
-	vlist_var.c 	 \
-	vlist_att.c 	 \
+@ENABLE_CDI_LIB_TRUE@lib_LTLIBRARIES = libcdi.la
+@ENABLE_CDI_LIB_TRUE@include_HEADERS = cdi.h cdi.inc
+@ENABLE_CDI_LIB_FALSE@noinst_LTLIBRARIES = libcdi.la
+libcdi_la_SOURCES = \
 	basetime.c     	 \
-	stream_history.c \
-	stream_cgribex.c \
-	stream_gribapi.c \
-	stream_grb.c     \
-	stream_cdf.c     \
-	stream_srv.c     \
-	stream_ext.c     \
-	stream_ieg.c     \
-	grid.c           \
-	zaxis.c		 \
-        stream.c         \
-	stream_var.c     \
-	stream_record.c  \
-	tsteps.c         \
-	stream_int.c     \
-	servicelib.c     \
-	extralib.c       \
-	ieglib.c         \
-	cdf.c            \
-	cdf_int.c	 \
-	file.c         	 \
+	basetime.h	 \
 	binary.c	 \
-        swap.c       	 \
-	cgribexlib.c  	 \
-	gribapi.c  	 \
-	cfortran.h       \
 	binary.h	 \
+	calendar.c 	 \
+	calendar.h	 \
+	cdf.c            \
 	cdf.h	 	 \
+	cdf_int.c	 \
 	cdf_int.h	 \
+	cdi.h	 	 \
+	cdi_error.c      \
+	cdi_limits.h	 \
+	cdi_util.c       \
+	cdiFortran.c     \
+	cfortran.h       \
+	cgribex.h	 \
+	cgribexlib.c  	 \
 	datetime.h	 \
+	dmemory.c      	 \
 	dmemory.h	 \
 	dtypes.h	 \
+	error.c        	 \
 	error.h	 	 \
 	extra.h	 	 \
-	ieg.h	 	 \
+	extralib.c       \
+	file.c         	 \
 	file.h	 	 \
-	cdi.h	 	 \
-	cdi_limits.h	 \
-	calendar.h	 \
-	timebase.h	 \
-	vlist.h	         \
-	taxis.h	         \
-	stream_cgribex.h \
-	stream_gribapi.h \
-	stream_grb.h     \
-	stream_cdf.h	 \
-	stream_srv.h	 \
-	stream_ext.h	 \
-	stream_ieg.h	 \
-	stream_int.h	 \
-	basetime.h	 \
-	cgribex.h	 \
-	gribapi.h	 \
-	grid.h	 	 \
-	service.h	 \
-	swap.h	 	 \
-	table.h	 	 \
-	tablepar.h	 \
+	gaussgrid.c      \
 	gaussgrid.h	 \
-	varscan.h        \
+	gribapi.c  	 \
+	gribapi.h	 \
+	grid.c           \
+	grid.h	 	 \
+	ieg.h	 	 \
+	ieglib.c         \
+	institution.c  	 \
+	model.c        	 \
 	pio.c            \
+	pio.h            \
 	pio_dbuffer.c    \
+	pio_impl.h 	\
 	pio_mpinonb.c    \
-	pio_queue.c      \
 	pio_posixasynch.c\
 	pio_posixfpguardsendrecv.c \
 	pio_posixfpguardthread.c \
 	pio_posixfpguardthreadrefuse.c \
 	pio_posixnonb.c  \
-	pio.h            \
-	pio_impl.h 
+	pio_queue.c      \
+	service.h	 \
+	servicelib.c     \
+	stream_cdf.c     \
+	stream_cdf.h	 \
+	stream_cgribex.c \
+	stream_cgribex.h \
+	stream_ext.c     \
+	stream_ext.h	 \
+	stream_grb.c     \
+	stream_grb.h     \
+	stream_gribapi.c \
+	stream_gribapi.h \
+	stream_history.c \
+	stream_ieg.c     \
+	stream_ieg.h	 \
+	stream_int.c     \
+	stream_int.h	 \
+	stream_record.c  \
+	stream_srv.c     \
+	stream_srv.h	 \
+	stream_var.c     \
+	swap.h	 	 \
+	table.c        	 \
+	table.h	 	 \
+	tablepar.h	 \
+	taxis.c          \
+	taxis.h	         \
+	timebase.c 	 \
+	timebase.h	 \
+	tsteps.c         \
+	util.c         	 \
+	varscan.c      	 \
+	varscan.h        \
+	version.c      	 \
+	vlist.c 	 \
+	vlist.h	         \
+	vlist_att.c 	 \
+	vlist_var.c 	 \
+	zaxis.c		 \
+        stream.c         \
+        swap.c
 
+LOCALTARGETS = $(am__append_1)
 #
-libcdi_serial_a_SOURCES = $(libcdi_a_SOURCES)
-libcdi_serial_a_CPPFLAGS = -DNOMPI
-libcdi_parallel_a_SOURCES = $(libcdi_a_SOURCES)
-LOCALTARGETS = cdilib.o $(am__append_2)
-#
-CLEANFILES = `ls *~` cdilib.c $(am__append_3)
+CLEANFILES = `ls *~` cdilib.c $(am__append_2)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .o .obj
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+.SUFFIXES: .c .lo .o .obj
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -456,9 +402,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-$(top_srcdir)/configure:  $(am__configure_deps)
+$(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
+$(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 
@@ -471,57 +417,55 @@ config.h: stamp-h1
 stamp-h1: $(srcdir)/config.h.in $(top_builddir)/config.status
 	@rm -f stamp-h1
 	cd $(top_builddir) && $(SHELL) ./config.status src/config.h
-$(srcdir)/config.h.in:  $(am__configure_deps) 
+$(srcdir)/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
 	($(am__cd) $(top_srcdir) && $(AUTOHEADER))
 	rm -f stamp-h1
 	touch $@
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
-install-libLIBRARIES: $(lib_LIBRARIES)
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
 	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
-	@list='$(lib_LIBRARIES)'; test -n "$(libdir)" || list=; \
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
 	list2=; for p in $$list; do \
 	  if test -f $$p; then \
 	    list2="$$list2 $$p"; \
 	  else :; fi; \
 	done; \
 	test -z "$$list2" || { \
-	  echo " $(INSTALL_DATA) $$list2 '$(DESTDIR)$(libdir)'"; \
-	  $(INSTALL_DATA) $$list2 "$(DESTDIR)$(libdir)" || exit $$?; }
-	@$(POST_INSTALL)
-	@list='$(lib_LIBRARIES)'; test -n "$(libdir)" || list=; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(libdir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(libdir)"; \
+	}
+
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
 	for p in $$list; do \
-	  if test -f $$p; then \
-	    $(am__strip_dir) \
-	    echo " ( cd '$(DESTDIR)$(libdir)' && $(RANLIB) $$f )"; \
-	    ( cd "$(DESTDIR)$(libdir)" && $(RANLIB) $$f ) || exit $$?; \
-	  else :; fi; \
+	  $(am__strip_dir) \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$f"; \
 	done
 
-uninstall-libLIBRARIES:
-	@$(NORMAL_UNINSTALL)
-	@list='$(lib_LIBRARIES)'; test -n "$(libdir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(libdir)' && rm -f "$$files" )"; \
-	cd "$(DESTDIR)$(libdir)" && rm -f $$files
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
+	  test "$$dir" != "$$p" || dir=.; \
+	  echo "rm -f \"$${dir}/so_locations\""; \
+	  rm -f "$${dir}/so_locations"; \
+	done
 
-clean-libLIBRARIES:
-	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
-libcdi.a: $(libcdi_a_OBJECTS) $(libcdi_a_DEPENDENCIES) 
-	-rm -f libcdi.a
-	$(libcdi_a_AR) libcdi.a $(libcdi_a_OBJECTS) $(libcdi_a_LIBADD)
-	$(RANLIB) libcdi.a
-libcdi_parallel.a: $(libcdi_parallel_a_OBJECTS) $(libcdi_parallel_a_DEPENDENCIES) 
-	-rm -f libcdi_parallel.a
-	$(libcdi_parallel_a_AR) libcdi_parallel.a $(libcdi_parallel_a_OBJECTS) $(libcdi_parallel_a_LIBADD)
-	$(RANLIB) libcdi_parallel.a
-libcdi_serial.a: $(libcdi_serial_a_OBJECTS) $(libcdi_serial_a_DEPENDENCIES) 
-	-rm -f libcdi_serial.a
-	$(libcdi_serial_a_AR) libcdi_serial.a $(libcdi_serial_a_OBJECTS) $(libcdi_serial_a_LIBADD)
-	$(RANLIB) libcdi_serial.a
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
+	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
+	  test "$$dir" != "$$p" || dir=.; \
+	  echo "rm -f \"$${dir}/so_locations\""; \
+	  rm -f "$${dir}/so_locations"; \
+	done
+libcdi.la: $(libcdi_la_OBJECTS) $(libcdi_la_DEPENDENCIES) 
+	$(LINK) $(am_libcdi_la_rpath) $(libcdi_la_OBJECTS) $(libcdi_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -529,112 +473,59 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basetime.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calendar.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdf_int.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdiFortran.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_error.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_util.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cgribexlib.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmemory.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extralib.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gaussgrid.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gribapi.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ieglib.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/institution.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-basetime.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-binary.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-calendar.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-cdf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-cdf_int.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-cdiFortran.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-cdi_error.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-cdi_util.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-cgribexlib.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-dmemory.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-error.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-extralib.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-file.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-gaussgrid.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-gribapi.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-grid.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-ieglib.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-institution.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-model.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-pio.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-pio_dbuffer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-pio_mpinonb.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-pio_posixasynch.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-pio_posixfpguardsendrecv.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-pio_posixfpguardthread.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-pio_posixfpguardthreadrefuse.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-pio_posixnonb.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-pio_queue.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-servicelib.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-stream.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-stream_cdf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-stream_cgribex.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-stream_ext.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-stream_grb.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-stream_gribapi.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-stream_history.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-stream_ieg.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-stream_int.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-stream_record.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-stream_srv.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-stream_var.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-swap.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-table.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-taxis.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-timebase.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-tsteps.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-util.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-varscan.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-version.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-vlist.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-vlist_att.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-vlist_var.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcdi_serial_a-zaxis.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/model.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_dbuffer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_mpinonb.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixasynch.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixfpguardsendrecv.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixfpguardthread.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixfpguardthreadrefuse.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixnonb.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_queue.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/servicelib.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cdf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cgribex.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_ext.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_grb.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_gribapi.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_history.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_ieg.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_int.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_record.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_srv.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_var.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swap.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/table.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/taxis.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timebase.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tsteps.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/varscan.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vlist.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vlist_att.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vlist_var.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zaxis.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basetime.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calendar.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdf_int.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdiFortran.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_error.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cgribexlib.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmemory.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extralib.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gaussgrid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gribapi.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ieglib.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/institution.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/model.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_dbuffer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_mpinonb.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixasynch.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixfpguardsendrecv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixfpguardthread.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixfpguardthreadrefuse.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixnonb.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_queue.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/servicelib.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cdf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cgribex.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_ext.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_grb.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_gribapi.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_history.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_ieg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_int.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_record.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_srv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_var.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/table.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/taxis.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timebase.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tsteps.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/varscan.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vlist.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vlist_att.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vlist_var.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zaxis.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -650,747 +541,18 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
-libcdi_serial_a-cdiFortran.o: cdiFortran.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-cdiFortran.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-cdiFortran.Tpo -c -o libcdi_serial_a-cdiFortran.o `test -f 'cdiFortran.c' || echo '$(srcdir)/'`cdiFortran.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-cdiFortran.Tpo $(DEPDIR)/libcdi_serial_a-cdiFortran.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cdiFortran.c' object='libcdi_serial_a-cdiFortran.o' libtool=no @AMDEPBACKSLASH@
+.c.lo:
+@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-cdiFortran.o `test -f 'cdiFortran.c' || echo '$(srcdir)/'`cdiFortran.c
+@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
-libcdi_serial_a-cdiFortran.obj: cdiFortran.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-cdiFortran.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-cdiFortran.Tpo -c -o libcdi_serial_a-cdiFortran.obj `if test -f 'cdiFortran.c'; then $(CYGPATH_W) 'cdiFortran.c'; else $(CYGPATH_W) '$(srcdir)/cdiFortran.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-cdiFortran.Tpo $(DEPDIR)/libcdi_serial_a-cdiFortran.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cdiFortran.c' object='libcdi_serial_a-cdiFortran.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-cdiFortran.obj `if test -f 'cdiFortran.c'; then $(CYGPATH_W) 'cdiFortran.c'; else $(CYGPATH_W) '$(srcdir)/cdiFortran.c'; fi`
-
-libcdi_serial_a-cdi_error.o: cdi_error.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-cdi_error.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-cdi_error.Tpo -c -o libcdi_serial_a-cdi_error.o `test -f 'cdi_error.c' || echo '$(srcdir)/'`cdi_error.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-cdi_error.Tpo $(DEPDIR)/libcdi_serial_a-cdi_error.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cdi_error.c' object='libcdi_serial_a-cdi_error.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-cdi_error.o `test -f 'cdi_error.c' || echo '$(srcdir)/'`cdi_error.c
-
-libcdi_serial_a-cdi_error.obj: cdi_error.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-cdi_error.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-cdi_error.Tpo -c -o libcdi_serial_a-cdi_error.obj `if test -f 'cdi_error.c'; then $(CYGPATH_W) 'cdi_error.c'; else $(CYGPATH_W) '$(srcdir)/cdi_error.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-cdi_error.Tpo $(DEPDIR)/libcdi_serial_a-cdi_error.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cdi_error.c' object='libcdi_serial_a-cdi_error.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-cdi_error.obj `if test -f 'cdi_error.c'; then $(CYGPATH_W) 'cdi_error.c'; else $(CYGPATH_W) '$(srcdir)/cdi_error.c'; fi`
-
-libcdi_serial_a-cdi_util.o: cdi_util.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-cdi_util.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-cdi_util.Tpo -c -o libcdi_serial_a-cdi_util.o `test -f 'cdi_util.c' || echo '$(srcdir)/'`cdi_util.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-cdi_util.Tpo $(DEPDIR)/libcdi_serial_a-cdi_util.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cdi_util.c' object='libcdi_serial_a-cdi_util.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-cdi_util.o `test -f 'cdi_util.c' || echo '$(srcdir)/'`cdi_util.c
-
-libcdi_serial_a-cdi_util.obj: cdi_util.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-cdi_util.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-cdi_util.Tpo -c -o libcdi_serial_a-cdi_util.obj `if test -f 'cdi_util.c'; then $(CYGPATH_W) 'cdi_util.c'; else $(CYGPATH_W) '$(srcdir)/cdi_util.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-cdi_util.Tpo $(DEPDIR)/libcdi_serial_a-cdi_util.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cdi_util.c' object='libcdi_serial_a-cdi_util.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-cdi_util.obj `if test -f 'cdi_util.c'; then $(CYGPATH_W) 'cdi_util.c'; else $(CYGPATH_W) '$(srcdir)/cdi_util.c'; fi`
-
-libcdi_serial_a-taxis.o: taxis.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-taxis.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-taxis.Tpo -c -o libcdi_serial_a-taxis.o `test -f 'taxis.c' || echo '$(srcdir)/'`taxis.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-taxis.Tpo $(DEPDIR)/libcdi_serial_a-taxis.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='taxis.c' object='libcdi_serial_a-taxis.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-taxis.o `test -f 'taxis.c' || echo '$(srcdir)/'`taxis.c
-
-libcdi_serial_a-taxis.obj: taxis.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-taxis.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-taxis.Tpo -c -o libcdi_serial_a-taxis.obj `if test -f 'taxis.c'; then $(CYGPATH_W) 'taxis.c'; else $(CYGPATH_W) '$(srcdir)/taxis.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-taxis.Tpo $(DEPDIR)/libcdi_serial_a-taxis.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='taxis.c' object='libcdi_serial_a-taxis.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-taxis.obj `if test -f 'taxis.c'; then $(CYGPATH_W) 'taxis.c'; else $(CYGPATH_W) '$(srcdir)/taxis.c'; fi`
-
-libcdi_serial_a-error.o: error.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-error.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-error.Tpo -c -o libcdi_serial_a-error.o `test -f 'error.c' || echo '$(srcdir)/'`error.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-error.Tpo $(DEPDIR)/libcdi_serial_a-error.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='error.c' object='libcdi_serial_a-error.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-error.o `test -f 'error.c' || echo '$(srcdir)/'`error.c
-
-libcdi_serial_a-error.obj: error.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-error.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-error.Tpo -c -o libcdi_serial_a-error.obj `if test -f 'error.c'; then $(CYGPATH_W) 'error.c'; else $(CYGPATH_W) '$(srcdir)/error.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-error.Tpo $(DEPDIR)/libcdi_serial_a-error.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='error.c' object='libcdi_serial_a-error.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-error.obj `if test -f 'error.c'; then $(CYGPATH_W) 'error.c'; else $(CYGPATH_W) '$(srcdir)/error.c'; fi`
-
-libcdi_serial_a-version.o: version.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-version.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-version.Tpo -c -o libcdi_serial_a-version.o `test -f 'version.c' || echo '$(srcdir)/'`version.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-version.Tpo $(DEPDIR)/libcdi_serial_a-version.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='version.c' object='libcdi_serial_a-version.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-version.o `test -f 'version.c' || echo '$(srcdir)/'`version.c
-
-libcdi_serial_a-version.obj: version.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-version.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-version.Tpo -c -o libcdi_serial_a-version.obj `if test -f 'version.c'; then $(CYGPATH_W) 'version.c'; else $(CYGPATH_W) '$(srcdir)/version.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-version.Tpo $(DEPDIR)/libcdi_serial_a-version.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='version.c' object='libcdi_serial_a-version.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-version.obj `if test -f 'version.c'; then $(CYGPATH_W) 'version.c'; else $(CYGPATH_W) '$(srcdir)/version.c'; fi`
-
-libcdi_serial_a-dmemory.o: dmemory.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-dmemory.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-dmemory.Tpo -c -o libcdi_serial_a-dmemory.o `test -f 'dmemory.c' || echo '$(srcdir)/'`dmemory.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-dmemory.Tpo $(DEPDIR)/libcdi_serial_a-dmemory.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dmemory.c' object='libcdi_serial_a-dmemory.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-dmemory.o `test -f 'dmemory.c' || echo '$(srcdir)/'`dmemory.c
-
-libcdi_serial_a-dmemory.obj: dmemory.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-dmemory.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-dmemory.Tpo -c -o libcdi_serial_a-dmemory.obj `if test -f 'dmemory.c'; then $(CYGPATH_W) 'dmemory.c'; else $(CYGPATH_W) '$(srcdir)/dmemory.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-dmemory.Tpo $(DEPDIR)/libcdi_serial_a-dmemory.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dmemory.c' object='libcdi_serial_a-dmemory.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-dmemory.obj `if test -f 'dmemory.c'; then $(CYGPATH_W) 'dmemory.c'; else $(CYGPATH_W) '$(srcdir)/dmemory.c'; fi`
-
-libcdi_serial_a-model.o: model.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-model.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-model.Tpo -c -o libcdi_serial_a-model.o `test -f 'model.c' || echo '$(srcdir)/'`model.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-model.Tpo $(DEPDIR)/libcdi_serial_a-model.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='model.c' object='libcdi_serial_a-model.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-model.o `test -f 'model.c' || echo '$(srcdir)/'`model.c
-
-libcdi_serial_a-model.obj: model.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-model.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-model.Tpo -c -o libcdi_serial_a-model.obj `if test -f 'model.c'; then $(CYGPATH_W) 'model.c'; else $(CYGPATH_W) '$(srcdir)/model.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-model.Tpo $(DEPDIR)/libcdi_serial_a-model.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='model.c' object='libcdi_serial_a-model.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-model.obj `if test -f 'model.c'; then $(CYGPATH_W) 'model.c'; else $(CYGPATH_W) '$(srcdir)/model.c'; fi`
-
-libcdi_serial_a-institution.o: institution.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-institution.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-institution.Tpo -c -o libcdi_serial_a-institution.o `test -f 'institution.c' || echo '$(srcdir)/'`institution.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-institution.Tpo $(DEPDIR)/libcdi_serial_a-institution.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='institution.c' object='libcdi_serial_a-institution.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-institution.o `test -f 'institution.c' || echo '$(srcdir)/'`institution.c
-
-libcdi_serial_a-institution.obj: institution.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-institution.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-institution.Tpo -c -o libcdi_serial_a-institution.obj `if test -f 'institution.c'; then $(CYGPATH_W) 'institution.c'; else $(CYGPATH_W) '$(srcdir)/institution.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-institution.Tpo $(DEPDIR)/libcdi_serial_a-institution.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='institution.c' object='libcdi_serial_a-institution.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-institution.obj `if test -f 'institution.c'; then $(CYGPATH_W) 'institution.c'; else $(CYGPATH_W) '$(srcdir)/institution.c'; fi`
-
-libcdi_serial_a-table.o: table.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-table.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-table.Tpo -c -o libcdi_serial_a-table.o `test -f 'table.c' || echo '$(srcdir)/'`table.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-table.Tpo $(DEPDIR)/libcdi_serial_a-table.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='table.c' object='libcdi_serial_a-table.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-table.o `test -f 'table.c' || echo '$(srcdir)/'`table.c
-
-libcdi_serial_a-table.obj: table.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-table.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-table.Tpo -c -o libcdi_serial_a-table.obj `if test -f 'table.c'; then $(CYGPATH_W) 'table.c'; else $(CYGPATH_W) '$(srcdir)/table.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-table.Tpo $(DEPDIR)/libcdi_serial_a-table.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='table.c' object='libcdi_serial_a-table.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-table.obj `if test -f 'table.c'; then $(CYGPATH_W) 'table.c'; else $(CYGPATH_W) '$(srcdir)/table.c'; fi`
-
-libcdi_serial_a-gaussgrid.o: gaussgrid.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-gaussgrid.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-gaussgrid.Tpo -c -o libcdi_serial_a-gaussgrid.o `test -f 'gaussgrid.c' || echo '$(srcdir)/'`gaussgrid.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-gaussgrid.Tpo $(DEPDIR)/libcdi_serial_a-gaussgrid.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='gaussgrid.c' object='libcdi_serial_a-gaussgrid.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-gaussgrid.o `test -f 'gaussgrid.c' || echo '$(srcdir)/'`gaussgrid.c
-
-libcdi_serial_a-gaussgrid.obj: gaussgrid.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-gaussgrid.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-gaussgrid.Tpo -c -o libcdi_serial_a-gaussgrid.obj `if test -f 'gaussgrid.c'; then $(CYGPATH_W) 'gaussgrid.c'; else $(CYGPATH_W) '$(srcdir)/gaussgrid.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-gaussgrid.Tpo $(DEPDIR)/libcdi_serial_a-gaussgrid.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='gaussgrid.c' object='libcdi_serial_a-gaussgrid.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-gaussgrid.obj `if test -f 'gaussgrid.c'; then $(CYGPATH_W) 'gaussgrid.c'; else $(CYGPATH_W) '$(srcdir)/gaussgrid.c'; fi`
-
-libcdi_serial_a-util.o: util.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-util.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-util.Tpo -c -o libcdi_serial_a-util.o `test -f 'util.c' || echo '$(srcdir)/'`util.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-util.Tpo $(DEPDIR)/libcdi_serial_a-util.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='util.c' object='libcdi_serial_a-util.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-util.o `test -f 'util.c' || echo '$(srcdir)/'`util.c
-
-libcdi_serial_a-util.obj: util.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-util.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-util.Tpo -c -o libcdi_serial_a-util.obj `if test -f 'util.c'; then $(CYGPATH_W) 'util.c'; else $(CYGPATH_W) '$(srcdir)/util.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-util.Tpo $(DEPDIR)/libcdi_serial_a-util.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='util.c' object='libcdi_serial_a-util.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-util.obj `if test -f 'util.c'; then $(CYGPATH_W) 'util.c'; else $(CYGPATH_W) '$(srcdir)/util.c'; fi`
-
-libcdi_serial_a-varscan.o: varscan.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-varscan.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-varscan.Tpo -c -o libcdi_serial_a-varscan.o `test -f 'varscan.c' || echo '$(srcdir)/'`varscan.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-varscan.Tpo $(DEPDIR)/libcdi_serial_a-varscan.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='varscan.c' object='libcdi_serial_a-varscan.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-varscan.o `test -f 'varscan.c' || echo '$(srcdir)/'`varscan.c
-
-libcdi_serial_a-varscan.obj: varscan.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-varscan.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-varscan.Tpo -c -o libcdi_serial_a-varscan.obj `if test -f 'varscan.c'; then $(CYGPATH_W) 'varscan.c'; else $(CYGPATH_W) '$(srcdir)/varscan.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-varscan.Tpo $(DEPDIR)/libcdi_serial_a-varscan.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='varscan.c' object='libcdi_serial_a-varscan.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-varscan.obj `if test -f 'varscan.c'; then $(CYGPATH_W) 'varscan.c'; else $(CYGPATH_W) '$(srcdir)/varscan.c'; fi`
-
-libcdi_serial_a-calendar.o: calendar.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-calendar.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-calendar.Tpo -c -o libcdi_serial_a-calendar.o `test -f 'calendar.c' || echo '$(srcdir)/'`calendar.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-calendar.Tpo $(DEPDIR)/libcdi_serial_a-calendar.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='calendar.c' object='libcdi_serial_a-calendar.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-calendar.o `test -f 'calendar.c' || echo '$(srcdir)/'`calendar.c
-
-libcdi_serial_a-calendar.obj: calendar.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-calendar.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-calendar.Tpo -c -o libcdi_serial_a-calendar.obj `if test -f 'calendar.c'; then $(CYGPATH_W) 'calendar.c'; else $(CYGPATH_W) '$(srcdir)/calendar.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-calendar.Tpo $(DEPDIR)/libcdi_serial_a-calendar.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='calendar.c' object='libcdi_serial_a-calendar.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-calendar.obj `if test -f 'calendar.c'; then $(CYGPATH_W) 'calendar.c'; else $(CYGPATH_W) '$(srcdir)/calendar.c'; fi`
-
-libcdi_serial_a-timebase.o: timebase.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-timebase.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-timebase.Tpo -c -o libcdi_serial_a-timebase.o `test -f 'timebase.c' || echo '$(srcdir)/'`timebase.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-timebase.Tpo $(DEPDIR)/libcdi_serial_a-timebase.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='timebase.c' object='libcdi_serial_a-timebase.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-timebase.o `test -f 'timebase.c' || echo '$(srcdir)/'`timebase.c
-
-libcdi_serial_a-timebase.obj: timebase.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-timebase.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-timebase.Tpo -c -o libcdi_serial_a-timebase.obj `if test -f 'timebase.c'; then $(CYGPATH_W) 'timebase.c'; else $(CYGPATH_W) '$(srcdir)/timebase.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-timebase.Tpo $(DEPDIR)/libcdi_serial_a-timebase.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='timebase.c' object='libcdi_serial_a-timebase.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-timebase.obj `if test -f 'timebase.c'; then $(CYGPATH_W) 'timebase.c'; else $(CYGPATH_W) '$(srcdir)/timebase.c'; fi`
-
-libcdi_serial_a-vlist.o: vlist.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-vlist.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-vlist.Tpo -c -o libcdi_serial_a-vlist.o `test -f 'vlist.c' || echo '$(srcdir)/'`vlist.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-vlist.Tpo $(DEPDIR)/libcdi_serial_a-vlist.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='vlist.c' object='libcdi_serial_a-vlist.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-vlist.o `test -f 'vlist.c' || echo '$(srcdir)/'`vlist.c
-
-libcdi_serial_a-vlist.obj: vlist.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-vlist.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-vlist.Tpo -c -o libcdi_serial_a-vlist.obj `if test -f 'vlist.c'; then $(CYGPATH_W) 'vlist.c'; else $(CYGPATH_W) '$(srcdir)/vlist.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-vlist.Tpo $(DEPDIR)/libcdi_serial_a-vlist.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='vlist.c' object='libcdi_serial_a-vlist.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-vlist.obj `if test -f 'vlist.c'; then $(CYGPATH_W) 'vlist.c'; else $(CYGPATH_W) '$(srcdir)/vlist.c'; fi`
-
-libcdi_serial_a-vlist_var.o: vlist_var.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-vlist_var.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-vlist_var.Tpo -c -o libcdi_serial_a-vlist_var.o `test -f 'vlist_var.c' || echo '$(srcdir)/'`vlist_var.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-vlist_var.Tpo $(DEPDIR)/libcdi_serial_a-vlist_var.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='vlist_var.c' object='libcdi_serial_a-vlist_var.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-vlist_var.o `test -f 'vlist_var.c' || echo '$(srcdir)/'`vlist_var.c
-
-libcdi_serial_a-vlist_var.obj: vlist_var.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-vlist_var.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-vlist_var.Tpo -c -o libcdi_serial_a-vlist_var.obj `if test -f 'vlist_var.c'; then $(CYGPATH_W) 'vlist_var.c'; else $(CYGPATH_W) '$(srcdir)/vlist_var.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-vlist_var.Tpo $(DEPDIR)/libcdi_serial_a-vlist_var.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='vlist_var.c' object='libcdi_serial_a-vlist_var.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-vlist_var.obj `if test -f 'vlist_var.c'; then $(CYGPATH_W) 'vlist_var.c'; else $(CYGPATH_W) '$(srcdir)/vlist_var.c'; fi`
-
-libcdi_serial_a-vlist_att.o: vlist_att.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-vlist_att.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-vlist_att.Tpo -c -o libcdi_serial_a-vlist_att.o `test -f 'vlist_att.c' || echo '$(srcdir)/'`vlist_att.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-vlist_att.Tpo $(DEPDIR)/libcdi_serial_a-vlist_att.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='vlist_att.c' object='libcdi_serial_a-vlist_att.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-vlist_att.o `test -f 'vlist_att.c' || echo '$(srcdir)/'`vlist_att.c
-
-libcdi_serial_a-vlist_att.obj: vlist_att.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-vlist_att.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-vlist_att.Tpo -c -o libcdi_serial_a-vlist_att.obj `if test -f 'vlist_att.c'; then $(CYGPATH_W) 'vlist_att.c'; else $(CYGPATH_W) '$(srcdir)/vlist_att.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-vlist_att.Tpo $(DEPDIR)/libcdi_serial_a-vlist_att.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='vlist_att.c' object='libcdi_serial_a-vlist_att.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-vlist_att.obj `if test -f 'vlist_att.c'; then $(CYGPATH_W) 'vlist_att.c'; else $(CYGPATH_W) '$(srcdir)/vlist_att.c'; fi`
-
-libcdi_serial_a-basetime.o: basetime.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-basetime.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-basetime.Tpo -c -o libcdi_serial_a-basetime.o `test -f 'basetime.c' || echo '$(srcdir)/'`basetime.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-basetime.Tpo $(DEPDIR)/libcdi_serial_a-basetime.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='basetime.c' object='libcdi_serial_a-basetime.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-basetime.o `test -f 'basetime.c' || echo '$(srcdir)/'`basetime.c
-
-libcdi_serial_a-basetime.obj: basetime.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-basetime.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-basetime.Tpo -c -o libcdi_serial_a-basetime.obj `if test -f 'basetime.c'; then $(CYGPATH_W) 'basetime.c'; else $(CYGPATH_W) '$(srcdir)/basetime.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-basetime.Tpo $(DEPDIR)/libcdi_serial_a-basetime.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='basetime.c' object='libcdi_serial_a-basetime.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-basetime.obj `if test -f 'basetime.c'; then $(CYGPATH_W) 'basetime.c'; else $(CYGPATH_W) '$(srcdir)/basetime.c'; fi`
-
-libcdi_serial_a-stream_history.o: stream_history.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_history.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_history.Tpo -c -o libcdi_serial_a-stream_history.o `test -f 'stream_history.c' || echo '$(srcdir)/'`stream_history.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_history.Tpo $(DEPDIR)/libcdi_serial_a-stream_history.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_history.c' object='libcdi_serial_a-stream_history.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_history.o `test -f 'stream_history.c' || echo '$(srcdir)/'`stream_history.c
-
-libcdi_serial_a-stream_history.obj: stream_history.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_history.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_history.Tpo -c -o libcdi_serial_a-stream_history.obj `if test -f 'stream_history.c'; then $(CYGPATH_W) 'stream_history.c'; else $(CYGPATH_W) '$(srcdir)/stream_history.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_history.Tpo $(DEPDIR)/libcdi_serial_a-stream_history.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_history.c' object='libcdi_serial_a-stream_history.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_history.obj `if test -f 'stream_history.c'; then $(CYGPATH_W) 'stream_history.c'; else $(CYGPATH_W) '$(srcdir)/stream_history.c'; fi`
-
-libcdi_serial_a-stream_cgribex.o: stream_cgribex.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_cgribex.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_cgribex.Tpo -c -o libcdi_serial_a-stream_cgribex.o `test -f 'stream_cgribex.c' || echo '$(srcdir)/'`stream_cgribex.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_cgribex.Tpo $(DEPDIR)/libcdi_serial_a-stream_cgribex.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_cgribex.c' object='libcdi_serial_a-stream_cgribex.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_cgribex.o `test -f 'stream_cgribex.c' || echo '$(srcdir)/'`stream_cgribex.c
-
-libcdi_serial_a-stream_cgribex.obj: stream_cgribex.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_cgribex.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_cgribex.Tpo -c -o libcdi_serial_a-stream_cgribex.obj `if test -f 'stream_cgribex.c'; then $(CYGPATH_W) 'stream_cgribex.c'; else $(CYGPATH_W) '$(srcdir)/stream_cgribex.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_cgribex.Tpo $(DEPDIR)/libcdi_serial_a-stream_cgribex.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_cgribex.c' object='libcdi_serial_a-stream_cgribex.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_cgribex.obj `if test -f 'stream_cgribex.c'; then $(CYGPATH_W) 'stream_cgribex.c'; else $(CYGPATH_W) '$(srcdir)/stream_cgribex.c'; fi`
-
-libcdi_serial_a-stream_gribapi.o: stream_gribapi.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_gribapi.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_gribapi.Tpo -c -o libcdi_serial_a-stream_gribapi.o `test -f 'stream_gribapi.c' || echo '$(srcdir)/'`stream_gribapi.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_gribapi.Tpo $(DEPDIR)/libcdi_serial_a-stream_gribapi.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_gribapi.c' object='libcdi_serial_a-stream_gribapi.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_gribapi.o `test -f 'stream_gribapi.c' || echo '$(srcdir)/'`stream_gribapi.c
-
-libcdi_serial_a-stream_gribapi.obj: stream_gribapi.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_gribapi.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_gribapi.Tpo -c -o libcdi_serial_a-stream_gribapi.obj `if test -f 'stream_gribapi.c'; then $(CYGPATH_W) 'stream_gribapi.c'; else $(CYGPATH_W) '$(srcdir)/stream_gribapi.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_gribapi.Tpo $(DEPDIR)/libcdi_serial_a-stream_gribapi.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_gribapi.c' object='libcdi_serial_a-stream_gribapi.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_gribapi.obj `if test -f 'stream_gribapi.c'; then $(CYGPATH_W) 'stream_gribapi.c'; else $(CYGPATH_W) '$(srcdir)/stream_gribapi.c'; fi`
-
-libcdi_serial_a-stream_grb.o: stream_grb.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_grb.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_grb.Tpo -c -o libcdi_serial_a-stream_grb.o `test -f 'stream_grb.c' || echo '$(srcdir)/'`stream_grb.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_grb.Tpo $(DEPDIR)/libcdi_serial_a-stream_grb.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_grb.c' object='libcdi_serial_a-stream_grb.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_grb.o `test -f 'stream_grb.c' || echo '$(srcdir)/'`stream_grb.c
-
-libcdi_serial_a-stream_grb.obj: stream_grb.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_grb.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_grb.Tpo -c -o libcdi_serial_a-stream_grb.obj `if test -f 'stream_grb.c'; then $(CYGPATH_W) 'stream_grb.c'; else $(CYGPATH_W) '$(srcdir)/stream_grb.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_grb.Tpo $(DEPDIR)/libcdi_serial_a-stream_grb.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_grb.c' object='libcdi_serial_a-stream_grb.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_grb.obj `if test -f 'stream_grb.c'; then $(CYGPATH_W) 'stream_grb.c'; else $(CYGPATH_W) '$(srcdir)/stream_grb.c'; fi`
-
-libcdi_serial_a-stream_cdf.o: stream_cdf.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_cdf.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_cdf.Tpo -c -o libcdi_serial_a-stream_cdf.o `test -f 'stream_cdf.c' || echo '$(srcdir)/'`stream_cdf.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_cdf.Tpo $(DEPDIR)/libcdi_serial_a-stream_cdf.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_cdf.c' object='libcdi_serial_a-stream_cdf.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_cdf.o `test -f 'stream_cdf.c' || echo '$(srcdir)/'`stream_cdf.c
-
-libcdi_serial_a-stream_cdf.obj: stream_cdf.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_cdf.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_cdf.Tpo -c -o libcdi_serial_a-stream_cdf.obj `if test -f 'stream_cdf.c'; then $(CYGPATH_W) 'stream_cdf.c'; else $(CYGPATH_W) '$(srcdir)/stream_cdf.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_cdf.Tpo $(DEPDIR)/libcdi_serial_a-stream_cdf.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_cdf.c' object='libcdi_serial_a-stream_cdf.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_cdf.obj `if test -f 'stream_cdf.c'; then $(CYGPATH_W) 'stream_cdf.c'; else $(CYGPATH_W) '$(srcdir)/stream_cdf.c'; fi`
-
-libcdi_serial_a-stream_srv.o: stream_srv.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_srv.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_srv.Tpo -c -o libcdi_serial_a-stream_srv.o `test -f 'stream_srv.c' || echo '$(srcdir)/'`stream_srv.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_srv.Tpo $(DEPDIR)/libcdi_serial_a-stream_srv.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_srv.c' object='libcdi_serial_a-stream_srv.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_srv.o `test -f 'stream_srv.c' || echo '$(srcdir)/'`stream_srv.c
-
-libcdi_serial_a-stream_srv.obj: stream_srv.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_srv.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_srv.Tpo -c -o libcdi_serial_a-stream_srv.obj `if test -f 'stream_srv.c'; then $(CYGPATH_W) 'stream_srv.c'; else $(CYGPATH_W) '$(srcdir)/stream_srv.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_srv.Tpo $(DEPDIR)/libcdi_serial_a-stream_srv.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_srv.c' object='libcdi_serial_a-stream_srv.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_srv.obj `if test -f 'stream_srv.c'; then $(CYGPATH_W) 'stream_srv.c'; else $(CYGPATH_W) '$(srcdir)/stream_srv.c'; fi`
-
-libcdi_serial_a-stream_ext.o: stream_ext.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_ext.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_ext.Tpo -c -o libcdi_serial_a-stream_ext.o `test -f 'stream_ext.c' || echo '$(srcdir)/'`stream_ext.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_ext.Tpo $(DEPDIR)/libcdi_serial_a-stream_ext.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_ext.c' object='libcdi_serial_a-stream_ext.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_ext.o `test -f 'stream_ext.c' || echo '$(srcdir)/'`stream_ext.c
-
-libcdi_serial_a-stream_ext.obj: stream_ext.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_ext.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_ext.Tpo -c -o libcdi_serial_a-stream_ext.obj `if test -f 'stream_ext.c'; then $(CYGPATH_W) 'stream_ext.c'; else $(CYGPATH_W) '$(srcdir)/stream_ext.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_ext.Tpo $(DEPDIR)/libcdi_serial_a-stream_ext.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_ext.c' object='libcdi_serial_a-stream_ext.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_ext.obj `if test -f 'stream_ext.c'; then $(CYGPATH_W) 'stream_ext.c'; else $(CYGPATH_W) '$(srcdir)/stream_ext.c'; fi`
-
-libcdi_serial_a-stream_ieg.o: stream_ieg.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_ieg.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_ieg.Tpo -c -o libcdi_serial_a-stream_ieg.o `test -f 'stream_ieg.c' || echo '$(srcdir)/'`stream_ieg.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_ieg.Tpo $(DEPDIR)/libcdi_serial_a-stream_ieg.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_ieg.c' object='libcdi_serial_a-stream_ieg.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_ieg.o `test -f 'stream_ieg.c' || echo '$(srcdir)/'`stream_ieg.c
-
-libcdi_serial_a-stream_ieg.obj: stream_ieg.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_ieg.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_ieg.Tpo -c -o libcdi_serial_a-stream_ieg.obj `if test -f 'stream_ieg.c'; then $(CYGPATH_W) 'stream_ieg.c'; else $(CYGPATH_W) '$(srcdir)/stream_ieg.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_ieg.Tpo $(DEPDIR)/libcdi_serial_a-stream_ieg.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_ieg.c' object='libcdi_serial_a-stream_ieg.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_ieg.obj `if test -f 'stream_ieg.c'; then $(CYGPATH_W) 'stream_ieg.c'; else $(CYGPATH_W) '$(srcdir)/stream_ieg.c'; fi`
-
-libcdi_serial_a-grid.o: grid.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-grid.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-grid.Tpo -c -o libcdi_serial_a-grid.o `test -f 'grid.c' || echo '$(srcdir)/'`grid.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-grid.Tpo $(DEPDIR)/libcdi_serial_a-grid.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='grid.c' object='libcdi_serial_a-grid.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-grid.o `test -f 'grid.c' || echo '$(srcdir)/'`grid.c
-
-libcdi_serial_a-grid.obj: grid.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-grid.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-grid.Tpo -c -o libcdi_serial_a-grid.obj `if test -f 'grid.c'; then $(CYGPATH_W) 'grid.c'; else $(CYGPATH_W) '$(srcdir)/grid.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-grid.Tpo $(DEPDIR)/libcdi_serial_a-grid.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='grid.c' object='libcdi_serial_a-grid.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-grid.obj `if test -f 'grid.c'; then $(CYGPATH_W) 'grid.c'; else $(CYGPATH_W) '$(srcdir)/grid.c'; fi`
-
-libcdi_serial_a-zaxis.o: zaxis.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-zaxis.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-zaxis.Tpo -c -o libcdi_serial_a-zaxis.o `test -f 'zaxis.c' || echo '$(srcdir)/'`zaxis.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-zaxis.Tpo $(DEPDIR)/libcdi_serial_a-zaxis.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='zaxis.c' object='libcdi_serial_a-zaxis.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-zaxis.o `test -f 'zaxis.c' || echo '$(srcdir)/'`zaxis.c
-
-libcdi_serial_a-zaxis.obj: zaxis.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-zaxis.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-zaxis.Tpo -c -o libcdi_serial_a-zaxis.obj `if test -f 'zaxis.c'; then $(CYGPATH_W) 'zaxis.c'; else $(CYGPATH_W) '$(srcdir)/zaxis.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-zaxis.Tpo $(DEPDIR)/libcdi_serial_a-zaxis.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='zaxis.c' object='libcdi_serial_a-zaxis.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-zaxis.obj `if test -f 'zaxis.c'; then $(CYGPATH_W) 'zaxis.c'; else $(CYGPATH_W) '$(srcdir)/zaxis.c'; fi`
-
-libcdi_serial_a-stream.o: stream.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream.Tpo -c -o libcdi_serial_a-stream.o `test -f 'stream.c' || echo '$(srcdir)/'`stream.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream.Tpo $(DEPDIR)/libcdi_serial_a-stream.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream.c' object='libcdi_serial_a-stream.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream.o `test -f 'stream.c' || echo '$(srcdir)/'`stream.c
-
-libcdi_serial_a-stream.obj: stream.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream.Tpo -c -o libcdi_serial_a-stream.obj `if test -f 'stream.c'; then $(CYGPATH_W) 'stream.c'; else $(CYGPATH_W) '$(srcdir)/stream.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream.Tpo $(DEPDIR)/libcdi_serial_a-stream.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream.c' object='libcdi_serial_a-stream.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream.obj `if test -f 'stream.c'; then $(CYGPATH_W) 'stream.c'; else $(CYGPATH_W) '$(srcdir)/stream.c'; fi`
-
-libcdi_serial_a-stream_var.o: stream_var.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_var.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_var.Tpo -c -o libcdi_serial_a-stream_var.o `test -f 'stream_var.c' || echo '$(srcdir)/'`stream_var.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_var.Tpo $(DEPDIR)/libcdi_serial_a-stream_var.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_var.c' object='libcdi_serial_a-stream_var.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_var.o `test -f 'stream_var.c' || echo '$(srcdir)/'`stream_var.c
-
-libcdi_serial_a-stream_var.obj: stream_var.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_var.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_var.Tpo -c -o libcdi_serial_a-stream_var.obj `if test -f 'stream_var.c'; then $(CYGPATH_W) 'stream_var.c'; else $(CYGPATH_W) '$(srcdir)/stream_var.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_var.Tpo $(DEPDIR)/libcdi_serial_a-stream_var.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_var.c' object='libcdi_serial_a-stream_var.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_var.obj `if test -f 'stream_var.c'; then $(CYGPATH_W) 'stream_var.c'; else $(CYGPATH_W) '$(srcdir)/stream_var.c'; fi`
-
-libcdi_serial_a-stream_record.o: stream_record.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_record.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_record.Tpo -c -o libcdi_serial_a-stream_record.o `test -f 'stream_record.c' || echo '$(srcdir)/'`stream_record.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_record.Tpo $(DEPDIR)/libcdi_serial_a-stream_record.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_record.c' object='libcdi_serial_a-stream_record.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_record.o `test -f 'stream_record.c' || echo '$(srcdir)/'`stream_record.c
-
-libcdi_serial_a-stream_record.obj: stream_record.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_record.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_record.Tpo -c -o libcdi_serial_a-stream_record.obj `if test -f 'stream_record.c'; then $(CYGPATH_W) 'stream_record.c'; else $(CYGPATH_W) '$(srcdir)/stream_record.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_record.Tpo $(DEPDIR)/libcdi_serial_a-stream_record.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_record.c' object='libcdi_serial_a-stream_record.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_record.obj `if test -f 'stream_record.c'; then $(CYGPATH_W) 'stream_record.c'; else $(CYGPATH_W) '$(srcdir)/stream_record.c'; fi`
-
-libcdi_serial_a-tsteps.o: tsteps.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-tsteps.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-tsteps.Tpo -c -o libcdi_serial_a-tsteps.o `test -f 'tsteps.c' || echo '$(srcdir)/'`tsteps.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-tsteps.Tpo $(DEPDIR)/libcdi_serial_a-tsteps.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='tsteps.c' object='libcdi_serial_a-tsteps.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-tsteps.o `test -f 'tsteps.c' || echo '$(srcdir)/'`tsteps.c
-
-libcdi_serial_a-tsteps.obj: tsteps.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-tsteps.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-tsteps.Tpo -c -o libcdi_serial_a-tsteps.obj `if test -f 'tsteps.c'; then $(CYGPATH_W) 'tsteps.c'; else $(CYGPATH_W) '$(srcdir)/tsteps.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-tsteps.Tpo $(DEPDIR)/libcdi_serial_a-tsteps.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='tsteps.c' object='libcdi_serial_a-tsteps.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-tsteps.obj `if test -f 'tsteps.c'; then $(CYGPATH_W) 'tsteps.c'; else $(CYGPATH_W) '$(srcdir)/tsteps.c'; fi`
-
-libcdi_serial_a-stream_int.o: stream_int.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_int.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_int.Tpo -c -o libcdi_serial_a-stream_int.o `test -f 'stream_int.c' || echo '$(srcdir)/'`stream_int.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_int.Tpo $(DEPDIR)/libcdi_serial_a-stream_int.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_int.c' object='libcdi_serial_a-stream_int.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_int.o `test -f 'stream_int.c' || echo '$(srcdir)/'`stream_int.c
-
-libcdi_serial_a-stream_int.obj: stream_int.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-stream_int.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-stream_int.Tpo -c -o libcdi_serial_a-stream_int.obj `if test -f 'stream_int.c'; then $(CYGPATH_W) 'stream_int.c'; else $(CYGPATH_W) '$(srcdir)/stream_int.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-stream_int.Tpo $(DEPDIR)/libcdi_serial_a-stream_int.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stream_int.c' object='libcdi_serial_a-stream_int.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-stream_int.obj `if test -f 'stream_int.c'; then $(CYGPATH_W) 'stream_int.c'; else $(CYGPATH_W) '$(srcdir)/stream_int.c'; fi`
-
-libcdi_serial_a-servicelib.o: servicelib.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-servicelib.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-servicelib.Tpo -c -o libcdi_serial_a-servicelib.o `test -f 'servicelib.c' || echo '$(srcdir)/'`servicelib.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-servicelib.Tpo $(DEPDIR)/libcdi_serial_a-servicelib.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='servicelib.c' object='libcdi_serial_a-servicelib.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-servicelib.o `test -f 'servicelib.c' || echo '$(srcdir)/'`servicelib.c
-
-libcdi_serial_a-servicelib.obj: servicelib.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-servicelib.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-servicelib.Tpo -c -o libcdi_serial_a-servicelib.obj `if test -f 'servicelib.c'; then $(CYGPATH_W) 'servicelib.c'; else $(CYGPATH_W) '$(srcdir)/servicelib.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-servicelib.Tpo $(DEPDIR)/libcdi_serial_a-servicelib.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='servicelib.c' object='libcdi_serial_a-servicelib.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-servicelib.obj `if test -f 'servicelib.c'; then $(CYGPATH_W) 'servicelib.c'; else $(CYGPATH_W) '$(srcdir)/servicelib.c'; fi`
-
-libcdi_serial_a-extralib.o: extralib.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-extralib.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-extralib.Tpo -c -o libcdi_serial_a-extralib.o `test -f 'extralib.c' || echo '$(srcdir)/'`extralib.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-extralib.Tpo $(DEPDIR)/libcdi_serial_a-extralib.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='extralib.c' object='libcdi_serial_a-extralib.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-extralib.o `test -f 'extralib.c' || echo '$(srcdir)/'`extralib.c
-
-libcdi_serial_a-extralib.obj: extralib.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-extralib.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-extralib.Tpo -c -o libcdi_serial_a-extralib.obj `if test -f 'extralib.c'; then $(CYGPATH_W) 'extralib.c'; else $(CYGPATH_W) '$(srcdir)/extralib.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-extralib.Tpo $(DEPDIR)/libcdi_serial_a-extralib.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='extralib.c' object='libcdi_serial_a-extralib.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-extralib.obj `if test -f 'extralib.c'; then $(CYGPATH_W) 'extralib.c'; else $(CYGPATH_W) '$(srcdir)/extralib.c'; fi`
-
-libcdi_serial_a-ieglib.o: ieglib.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-ieglib.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-ieglib.Tpo -c -o libcdi_serial_a-ieglib.o `test -f 'ieglib.c' || echo '$(srcdir)/'`ieglib.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-ieglib.Tpo $(DEPDIR)/libcdi_serial_a-ieglib.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ieglib.c' object='libcdi_serial_a-ieglib.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-ieglib.o `test -f 'ieglib.c' || echo '$(srcdir)/'`ieglib.c
-
-libcdi_serial_a-ieglib.obj: ieglib.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-ieglib.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-ieglib.Tpo -c -o libcdi_serial_a-ieglib.obj `if test -f 'ieglib.c'; then $(CYGPATH_W) 'ieglib.c'; else $(CYGPATH_W) '$(srcdir)/ieglib.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-ieglib.Tpo $(DEPDIR)/libcdi_serial_a-ieglib.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ieglib.c' object='libcdi_serial_a-ieglib.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-ieglib.obj `if test -f 'ieglib.c'; then $(CYGPATH_W) 'ieglib.c'; else $(CYGPATH_W) '$(srcdir)/ieglib.c'; fi`
-
-libcdi_serial_a-cdf.o: cdf.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-cdf.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-cdf.Tpo -c -o libcdi_serial_a-cdf.o `test -f 'cdf.c' || echo '$(srcdir)/'`cdf.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-cdf.Tpo $(DEPDIR)/libcdi_serial_a-cdf.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cdf.c' object='libcdi_serial_a-cdf.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-cdf.o `test -f 'cdf.c' || echo '$(srcdir)/'`cdf.c
-
-libcdi_serial_a-cdf.obj: cdf.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-cdf.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-cdf.Tpo -c -o libcdi_serial_a-cdf.obj `if test -f 'cdf.c'; then $(CYGPATH_W) 'cdf.c'; else $(CYGPATH_W) '$(srcdir)/cdf.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-cdf.Tpo $(DEPDIR)/libcdi_serial_a-cdf.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cdf.c' object='libcdi_serial_a-cdf.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-cdf.obj `if test -f 'cdf.c'; then $(CYGPATH_W) 'cdf.c'; else $(CYGPATH_W) '$(srcdir)/cdf.c'; fi`
-
-libcdi_serial_a-cdf_int.o: cdf_int.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-cdf_int.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-cdf_int.Tpo -c -o libcdi_serial_a-cdf_int.o `test -f 'cdf_int.c' || echo '$(srcdir)/'`cdf_int.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-cdf_int.Tpo $(DEPDIR)/libcdi_serial_a-cdf_int.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cdf_int.c' object='libcdi_serial_a-cdf_int.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-cdf_int.o `test -f 'cdf_int.c' || echo '$(srcdir)/'`cdf_int.c
-
-libcdi_serial_a-cdf_int.obj: cdf_int.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-cdf_int.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-cdf_int.Tpo -c -o libcdi_serial_a-cdf_int.obj `if test -f 'cdf_int.c'; then $(CYGPATH_W) 'cdf_int.c'; else $(CYGPATH_W) '$(srcdir)/cdf_int.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-cdf_int.Tpo $(DEPDIR)/libcdi_serial_a-cdf_int.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cdf_int.c' object='libcdi_serial_a-cdf_int.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-cdf_int.obj `if test -f 'cdf_int.c'; then $(CYGPATH_W) 'cdf_int.c'; else $(CYGPATH_W) '$(srcdir)/cdf_int.c'; fi`
-
-libcdi_serial_a-file.o: file.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-file.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-file.Tpo -c -o libcdi_serial_a-file.o `test -f 'file.c' || echo '$(srcdir)/'`file.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-file.Tpo $(DEPDIR)/libcdi_serial_a-file.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='file.c' object='libcdi_serial_a-file.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-file.o `test -f 'file.c' || echo '$(srcdir)/'`file.c
-
-libcdi_serial_a-file.obj: file.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-file.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-file.Tpo -c -o libcdi_serial_a-file.obj `if test -f 'file.c'; then $(CYGPATH_W) 'file.c'; else $(CYGPATH_W) '$(srcdir)/file.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-file.Tpo $(DEPDIR)/libcdi_serial_a-file.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='file.c' object='libcdi_serial_a-file.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-file.obj `if test -f 'file.c'; then $(CYGPATH_W) 'file.c'; else $(CYGPATH_W) '$(srcdir)/file.c'; fi`
-
-libcdi_serial_a-binary.o: binary.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-binary.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-binary.Tpo -c -o libcdi_serial_a-binary.o `test -f 'binary.c' || echo '$(srcdir)/'`binary.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-binary.Tpo $(DEPDIR)/libcdi_serial_a-binary.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='binary.c' object='libcdi_serial_a-binary.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-binary.o `test -f 'binary.c' || echo '$(srcdir)/'`binary.c
-
-libcdi_serial_a-binary.obj: binary.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-binary.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-binary.Tpo -c -o libcdi_serial_a-binary.obj `if test -f 'binary.c'; then $(CYGPATH_W) 'binary.c'; else $(CYGPATH_W) '$(srcdir)/binary.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-binary.Tpo $(DEPDIR)/libcdi_serial_a-binary.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='binary.c' object='libcdi_serial_a-binary.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-binary.obj `if test -f 'binary.c'; then $(CYGPATH_W) 'binary.c'; else $(CYGPATH_W) '$(srcdir)/binary.c'; fi`
-
-libcdi_serial_a-swap.o: swap.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-swap.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-swap.Tpo -c -o libcdi_serial_a-swap.o `test -f 'swap.c' || echo '$(srcdir)/'`swap.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-swap.Tpo $(DEPDIR)/libcdi_serial_a-swap.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='swap.c' object='libcdi_serial_a-swap.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-swap.o `test -f 'swap.c' || echo '$(srcdir)/'`swap.c
-
-libcdi_serial_a-swap.obj: swap.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-swap.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-swap.Tpo -c -o libcdi_serial_a-swap.obj `if test -f 'swap.c'; then $(CYGPATH_W) 'swap.c'; else $(CYGPATH_W) '$(srcdir)/swap.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-swap.Tpo $(DEPDIR)/libcdi_serial_a-swap.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='swap.c' object='libcdi_serial_a-swap.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-swap.obj `if test -f 'swap.c'; then $(CYGPATH_W) 'swap.c'; else $(CYGPATH_W) '$(srcdir)/swap.c'; fi`
-
-libcdi_serial_a-cgribexlib.o: cgribexlib.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-cgribexlib.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-cgribexlib.Tpo -c -o libcdi_serial_a-cgribexlib.o `test -f 'cgribexlib.c' || echo '$(srcdir)/'`cgribexlib.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-cgribexlib.Tpo $(DEPDIR)/libcdi_serial_a-cgribexlib.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cgribexlib.c' object='libcdi_serial_a-cgribexlib.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-cgribexlib.o `test -f 'cgribexlib.c' || echo '$(srcdir)/'`cgribexlib.c
-
-libcdi_serial_a-cgribexlib.obj: cgribexlib.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-cgribexlib.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-cgribexlib.Tpo -c -o libcdi_serial_a-cgribexlib.obj `if test -f 'cgribexlib.c'; then $(CYGPATH_W) 'cgribexlib.c'; else $(CYGPATH_W) '$(srcdir)/cgribexlib.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-cgribexlib.Tpo $(DEPDIR)/libcdi_serial_a-cgribexlib.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cgribexlib.c' object='libcdi_serial_a-cgribexlib.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-cgribexlib.obj `if test -f 'cgribexlib.c'; then $(CYGPATH_W) 'cgribexlib.c'; else $(CYGPATH_W) '$(srcdir)/cgribexlib.c'; fi`
-
-libcdi_serial_a-gribapi.o: gribapi.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-gribapi.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-gribapi.Tpo -c -o libcdi_serial_a-gribapi.o `test -f 'gribapi.c' || echo '$(srcdir)/'`gribapi.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-gribapi.Tpo $(DEPDIR)/libcdi_serial_a-gribapi.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='gribapi.c' object='libcdi_serial_a-gribapi.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-gribapi.o `test -f 'gribapi.c' || echo '$(srcdir)/'`gribapi.c
-
-libcdi_serial_a-gribapi.obj: gribapi.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-gribapi.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-gribapi.Tpo -c -o libcdi_serial_a-gribapi.obj `if test -f 'gribapi.c'; then $(CYGPATH_W) 'gribapi.c'; else $(CYGPATH_W) '$(srcdir)/gribapi.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-gribapi.Tpo $(DEPDIR)/libcdi_serial_a-gribapi.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='gribapi.c' object='libcdi_serial_a-gribapi.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-gribapi.obj `if test -f 'gribapi.c'; then $(CYGPATH_W) 'gribapi.c'; else $(CYGPATH_W) '$(srcdir)/gribapi.c'; fi`
-
-libcdi_serial_a-pio.o: pio.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio.Tpo -c -o libcdi_serial_a-pio.o `test -f 'pio.c' || echo '$(srcdir)/'`pio.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio.Tpo $(DEPDIR)/libcdi_serial_a-pio.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio.c' object='libcdi_serial_a-pio.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio.o `test -f 'pio.c' || echo '$(srcdir)/'`pio.c
-
-libcdi_serial_a-pio.obj: pio.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio.Tpo -c -o libcdi_serial_a-pio.obj `if test -f 'pio.c'; then $(CYGPATH_W) 'pio.c'; else $(CYGPATH_W) '$(srcdir)/pio.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio.Tpo $(DEPDIR)/libcdi_serial_a-pio.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio.c' object='libcdi_serial_a-pio.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio.obj `if test -f 'pio.c'; then $(CYGPATH_W) 'pio.c'; else $(CYGPATH_W) '$(srcdir)/pio.c'; fi`
-
-libcdi_serial_a-pio_dbuffer.o: pio_dbuffer.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio_dbuffer.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio_dbuffer.Tpo -c -o libcdi_serial_a-pio_dbuffer.o `test -f 'pio_dbuffer.c' || echo '$(srcdir)/'`pio_dbuffer.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio_dbuffer.Tpo $(DEPDIR)/libcdi_serial_a-pio_dbuffer.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio_dbuffer.c' object='libcdi_serial_a-pio_dbuffer.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio_dbuffer.o `test -f 'pio_dbuffer.c' || echo '$(srcdir)/'`pio_dbuffer.c
-
-libcdi_serial_a-pio_dbuffer.obj: pio_dbuffer.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio_dbuffer.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio_dbuffer.Tpo -c -o libcdi_serial_a-pio_dbuffer.obj `if test -f 'pio_dbuffer.c'; then $(CYGPATH_W) 'pio_dbuffer.c'; else $(CYGPATH_W) '$(srcdir)/pio_dbuffer.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio_dbuffer.Tpo $(DEPDIR)/libcdi_serial_a-pio_dbuffer.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio_dbuffer.c' object='libcdi_serial_a-pio_dbuffer.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio_dbuffer.obj `if test -f 'pio_dbuffer.c'; then $(CYGPATH_W) 'pio_dbuffer.c'; else $(CYGPATH_W) '$(srcdir)/pio_dbuffer.c'; fi`
-
-libcdi_serial_a-pio_mpinonb.o: pio_mpinonb.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio_mpinonb.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio_mpinonb.Tpo -c -o libcdi_serial_a-pio_mpinonb.o `test -f 'pio_mpinonb.c' || echo '$(srcdir)/'`pio_mpinonb.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio_mpinonb.Tpo $(DEPDIR)/libcdi_serial_a-pio_mpinonb.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio_mpinonb.c' object='libcdi_serial_a-pio_mpinonb.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio_mpinonb.o `test -f 'pio_mpinonb.c' || echo '$(srcdir)/'`pio_mpinonb.c
-
-libcdi_serial_a-pio_mpinonb.obj: pio_mpinonb.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio_mpinonb.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio_mpinonb.Tpo -c -o libcdi_serial_a-pio_mpinonb.obj `if test -f 'pio_mpinonb.c'; then $(CYGPATH_W) 'pio_mpinonb.c'; else $(CYGPATH_W) '$(srcdir)/pio_mpinonb.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio_mpinonb.Tpo $(DEPDIR)/libcdi_serial_a-pio_mpinonb.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio_mpinonb.c' object='libcdi_serial_a-pio_mpinonb.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio_mpinonb.obj `if test -f 'pio_mpinonb.c'; then $(CYGPATH_W) 'pio_mpinonb.c'; else $(CYGPATH_W) '$(srcdir)/pio_mpinonb.c'; fi`
-
-libcdi_serial_a-pio_queue.o: pio_queue.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio_queue.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio_queue.Tpo -c -o libcdi_serial_a-pio_queue.o `test -f 'pio_queue.c' || echo '$(srcdir)/'`pio_queue.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio_queue.Tpo $(DEPDIR)/libcdi_serial_a-pio_queue.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio_queue.c' object='libcdi_serial_a-pio_queue.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio_queue.o `test -f 'pio_queue.c' || echo '$(srcdir)/'`pio_queue.c
-
-libcdi_serial_a-pio_queue.obj: pio_queue.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio_queue.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio_queue.Tpo -c -o libcdi_serial_a-pio_queue.obj `if test -f 'pio_queue.c'; then $(CYGPATH_W) 'pio_queue.c'; else $(CYGPATH_W) '$(srcdir)/pio_queue.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio_queue.Tpo $(DEPDIR)/libcdi_serial_a-pio_queue.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio_queue.c' object='libcdi_serial_a-pio_queue.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio_queue.obj `if test -f 'pio_queue.c'; then $(CYGPATH_W) 'pio_queue.c'; else $(CYGPATH_W) '$(srcdir)/pio_queue.c'; fi`
-
-libcdi_serial_a-pio_posixasynch.o: pio_posixasynch.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio_posixasynch.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio_posixasynch.Tpo -c -o libcdi_serial_a-pio_posixasynch.o `test -f 'pio_posixasynch.c' || echo '$(srcdir)/'`pio_posixasynch.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio_posixasynch.Tpo $(DEPDIR)/libcdi_serial_a-pio_posixasynch.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio_posixasynch.c' object='libcdi_serial_a-pio_posixasynch.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio_posixasynch.o `test -f 'pio_posixasynch.c' || echo '$(srcdir)/'`pio_posixasynch.c
-
-libcdi_serial_a-pio_posixasynch.obj: pio_posixasynch.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio_posixasynch.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio_posixasynch.Tpo -c -o libcdi_serial_a-pio_posixasynch.obj `if test -f 'pio_posixasynch.c'; then $(CYGPATH_W) 'pio_posixasynch.c'; else $(CYGPATH_W) '$(srcdir)/pio_posixasynch.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio_posixasynch.Tpo $(DEPDIR)/libcdi_serial_a-pio_posixasynch.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio_posixasynch.c' object='libcdi_serial_a-pio_posixasynch.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio_posixasynch.obj `if test -f 'pio_posixasynch.c'; then $(CYGPATH_W) 'pio_posixasynch.c'; else $(CYGPATH_W) '$(srcdir)/pio_posixasynch.c'; fi`
-
-libcdi_serial_a-pio_posixfpguardsendrecv.o: pio_posixfpguardsendrecv.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio_posixfpguardsendrecv.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio_posixfpguardsendrecv.Tpo -c -o libcdi_serial_a-pio_posixfpguardsendrecv.o `test -f 'pio_posixfpguardsendrecv.c' || echo '$(srcdir)/'`pio_posixfpguardsendrecv.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio_posixfpguardsendrecv.Tpo $(DEPDIR)/libcdi_serial_a-pio_posixfpguardsendrecv.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio_posixfpguardsendrecv.c' object='libcdi_serial_a-pio_posixfpguardsendrecv.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio_posixfpguardsendrecv.o `test -f 'pio_posixfpguardsendrecv.c' || echo '$(srcdir)/'`pio_posixfpguardsendrecv.c
+mostlyclean-libtool:
+	-rm -f *.lo
 
-libcdi_serial_a-pio_posixfpguardsendrecv.obj: pio_posixfpguardsendrecv.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio_posixfpguardsendrecv.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio_posixfpguardsendrecv.Tpo -c -o libcdi_serial_a-pio_posixfpguardsendrecv.obj `if test -f 'pio_posixfpguardsendrecv.c'; then $(CYGPATH_W) 'pio_posixfpguardsendrecv.c'; else $(CYGPATH_W) '$(srcdir)/pio_posixfpguardsendrecv.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio_posixfpguardsendrecv.Tpo $(DEPDIR)/libcdi_serial_a-pio_posixfpguardsendrecv.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio_posixfpguardsendrecv.c' object='libcdi_serial_a-pio_posixfpguardsendrecv.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio_posixfpguardsendrecv.obj `if test -f 'pio_posixfpguardsendrecv.c'; then $(CYGPATH_W) 'pio_posixfpguardsendrecv.c'; else $(CYGPATH_W) '$(srcdir)/pio_posixfpguardsendrecv.c'; fi`
-
-libcdi_serial_a-pio_posixfpguardthread.o: pio_posixfpguardthread.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio_posixfpguardthread.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio_posixfpguardthread.Tpo -c -o libcdi_serial_a-pio_posixfpguardthread.o `test -f 'pio_posixfpguardthread.c' || echo '$(srcdir)/'`pio_posixfpguardthread.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio_posixfpguardthread.Tpo $(DEPDIR)/libcdi_serial_a-pio_posixfpguardthread.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio_posixfpguardthread.c' object='libcdi_serial_a-pio_posixfpguardthread.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio_posixfpguardthread.o `test -f 'pio_posixfpguardthread.c' || echo '$(srcdir)/'`pio_posixfpguardthread.c
-
-libcdi_serial_a-pio_posixfpguardthread.obj: pio_posixfpguardthread.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio_posixfpguardthread.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio_posixfpguardthread.Tpo -c -o libcdi_serial_a-pio_posixfpguardthread.obj `if test -f 'pio_posixfpguardthread.c'; then $(CYGPATH_W) 'pio_posixfpguardthread.c'; else $(CYGPATH_W) '$(srcdir)/pio_posixfpguardthread.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio_posixfpguardthread.Tpo $(DEPDIR)/libcdi_serial_a-pio_posixfpguardthread.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio_posixfpguardthread.c' object='libcdi_serial_a-pio_posixfpguardthread.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio_posixfpguardthread.obj `if test -f 'pio_posixfpguardthread.c'; then $(CYGPATH_W) 'pio_posixfpguardthread.c'; else $(CYGPATH_W) '$(srcdir)/pio_posixfpguardthread.c'; fi`
-
-libcdi_serial_a-pio_posixfpguardthreadrefuse.o: pio_posixfpguardthreadrefuse.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio_posixfpguardthreadrefuse.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio_posixfpguardthreadrefuse.Tpo -c -o libcdi_serial_a-pio_posixfpguardthreadrefuse.o `test -f 'pio_posixfpguardthreadrefuse.c' || echo '$(srcdir)/'`pio_posixfpguardthreadrefuse.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio_posixfpguardthreadrefuse.Tpo $(DEPDIR)/libcdi_serial_a-pio_posixfpguardthreadrefuse.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio_posixfpguardthreadrefuse.c' object='libcdi_serial_a-pio_posixfpguardthreadrefuse.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio_posixfpguardthreadrefuse.o `test -f 'pio_posixfpguardthreadrefuse.c' || echo '$(srcdir)/'`pio_posixfpguardthreadrefuse.c
-
-libcdi_serial_a-pio_posixfpguardthreadrefuse.obj: pio_posixfpguardthreadrefuse.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio_posixfpguardthreadrefuse.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio_posixfpguardthreadrefuse.Tpo -c -o libcdi_serial_a-pio_posixfpguardthreadrefuse.obj `if test -f 'pio_posixfpguardthreadrefuse.c'; then $(CYGPATH_W) 'pio_posixfpguardthreadrefuse.c'; else $(CYGPATH_W) '$(srcdir)/pio_posixfpguardthreadrefuse.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio_posixfpguardthreadrefuse.Tpo $(DEPDIR)/libcdi_serial_a-pio_posixfpguardthreadrefuse.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio_posixfpguardthreadrefuse.c' object='libcdi_serial_a-pio_posixfpguardthreadrefuse.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio_posixfpguardthreadrefuse.obj `if test -f 'pio_posixfpguardthreadrefuse.c'; then $(CYGPATH_W) 'pio_posixfpguardthreadrefuse.c'; else $(CYGPATH_W) '$(srcdir)/pio_posixfpguardthreadrefuse.c'; fi`
-
-libcdi_serial_a-pio_posixnonb.o: pio_posixnonb.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio_posixnonb.o -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio_posixnonb.Tpo -c -o libcdi_serial_a-pio_posixnonb.o `test -f 'pio_posixnonb.c' || echo '$(srcdir)/'`pio_posixnonb.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio_posixnonb.Tpo $(DEPDIR)/libcdi_serial_a-pio_posixnonb.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio_posixnonb.c' object='libcdi_serial_a-pio_posixnonb.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio_posixnonb.o `test -f 'pio_posixnonb.c' || echo '$(srcdir)/'`pio_posixnonb.c
-
-libcdi_serial_a-pio_posixnonb.obj: pio_posixnonb.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcdi_serial_a-pio_posixnonb.obj -MD -MP -MF $(DEPDIR)/libcdi_serial_a-pio_posixnonb.Tpo -c -o libcdi_serial_a-pio_posixnonb.obj `if test -f 'pio_posixnonb.c'; then $(CYGPATH_W) 'pio_posixnonb.c'; else $(CYGPATH_W) '$(srcdir)/pio_posixnonb.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libcdi_serial_a-pio_posixnonb.Tpo $(DEPDIR)/libcdi_serial_a-pio_posixnonb.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pio_posixnonb.c' object='libcdi_serial_a-pio_posixnonb.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcdi_serial_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcdi_serial_a-pio_posixnonb.obj `if test -f 'pio_posixnonb.c'; then $(CYGPATH_W) 'pio_posixnonb.c'; else $(CYGPATH_W) '$(srcdir)/pio_posixnonb.c'; fi`
+clean-libtool:
+	-rm -rf .libs _libs
 install-includeHEADERS: $(include_HEADERS)
 	@$(NORMAL_INSTALL)
 	test -z "$(includedir)" || $(MKDIR_P) "$(DESTDIR)$(includedir)"
@@ -1407,26 +569,6 @@ install-includeHEADERS: $(include_HEADERS)
 uninstall-includeHEADERS:
 	@$(NORMAL_UNINSTALL)
 	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(includedir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(includedir)" && rm -f $$files
-install-nodist_includeHEADERS: $(nodist_include_HEADERS)
-	@$(NORMAL_INSTALL)
-	test -z "$(includedir)" || $(MKDIR_P) "$(DESTDIR)$(includedir)"
-	@list='$(nodist_include_HEADERS)'; test -n "$(includedir)" || list=; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(includedir)'"; \
-	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(includedir)" || exit $$?; \
-	done
-
-uninstall-nodist_includeHEADERS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(nodist_include_HEADERS)'; test -n "$(includedir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(includedir)' && rm -f" $$files ")"; \
@@ -1516,9 +658,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LIBRARIES) $(HEADERS) config.h all-local
+all-am: Makefile $(LTLIBRARIES) $(HEADERS) config.h all-local
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)" "$(DESTDIR)$(includedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -1549,7 +691,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLIBRARIES mostlyclean-am
+clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
+	clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -1569,14 +712,13 @@ info: info-am
 
 info-am:
 
-install-data-am: install-data-local install-includeHEADERS \
-	install-nodist_includeHEADERS
+install-data-am: install-includeHEADERS
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-libLIBRARIES
+install-exec-am: install-libLTLIBRARIES
 
 install-html: install-html-am
 
@@ -1605,7 +747,8 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 pdf: pdf-am
 
@@ -1615,53 +758,46 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
-	uninstall-nodist_includeHEADERS
+uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
 
 .MAKE: all install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am all-local check check-am clean \
-	clean-generic clean-libLIBRARIES ctags distclean \
-	distclean-compile distclean-generic distclean-hdr \
+	clean-generic clean-libLTLIBRARIES clean-libtool \
+	clean-noinstLTLIBRARIES ctags distclean distclean-compile \
+	distclean-generic distclean-hdr distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am \
-	install-data-local install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am \
-	install-includeHEADERS install-info install-info-am \
-	install-libLIBRARIES install-man install-nodist_includeHEADERS \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-includeHEADERS install-info \
+	install-info-am install-libLTLIBRARIES install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am uninstall-includeHEADERS \
-	uninstall-libLIBRARIES uninstall-nodist_includeHEADERS
+	uninstall-libLTLIBRARIES
 
 
-cdiFortran.o: cdiFortran.c
-	source='$<' object='$@' libtool=no \
-	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' \
-	$(CCDEPMODE) $(depcomp) \
-	$(COMPILE) $(CFINT) $(REAL4) -c `test -f '$<' || echo '$(srcdir)/'`$<
+#libcdi_la_CPPFLAGS  = @CPPFLAGS@
+#libcdi_la_LIBADD    = @LDFLAGS@
 #
 cdilib.c:
 	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src
 #
 cdilib.o: cdilib.c
-	$(COMPILE) $(CFINT) $(REAL4) -c $<
+	$(COMPILE) -c $<
 #
-all-local: $(LOCALTARGETS) 
-#
-install-data-local: $(LOCALTARGETS)
-	 @for f in $(LOCALTARGETS) ; do \
-	   echo " $(INSTALL_DATA) $$f \"$(DESTDIR)$(libdir)/$$f\""; \
-	   $(INSTALL_DATA) $$f "$(DESTDIR)$(libdir)/$$f" ; \
-	 done
+mo_cdi.f90:
+	ruby $(top_srcdir)/interfaces/f2003/bindGen.rb cdi.h $@
 #
 mo_cdi.o: mo_cdi.f90
-	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) mo_cdi.f90
+	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) $<
 #
 mo_cdi.$(FCMODEXT): mo_cdi.f90
-	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) mo_cdi.f90
+	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) $<
+#
+all-local: $(LOCALTARGETS) 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

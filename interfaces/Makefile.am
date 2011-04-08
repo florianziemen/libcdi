@@ -11,24 +11,32 @@ BINDINGS += help
 endif
 #
 bin_PROGRAMS =
-#
 noinst_PROGRAMS = 
+noinst_LTLIBRARIES = 
 if CREATE_INTERFACES
 noinst_PROGRAMS += CdiInfo
+noinst_LTLIBRARIES += libcdipp.la
 endif
 #
-CdiInfo_SOURCES = CdiInfo.cpp cdi.cpp cdi.hpp
+locallibs     = $(top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@
+
+libcdipp_la_SOURCES = cdi.cpp cdi.hpp
+libcdipp_la_LIBADD = $(top_builddir)/src/libcdi.la 
+libcdipp_la_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS)
+
+CdiInfo_SOURCES = CdiInfo.cpp
+CdiInfo_LDADD = libcdipp.la 
+CdiInfo_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS)
 #
-CdiInfo_LDADD = ../src/cdilib.o $(LDFLAGS) $(LIBS)
 #
-if WITH_RUBY
+if ENABLE_RUBY
 BINDINGS += rubyObj
 # Ruby ====================================================
 rubyLibMakefile:
-	cd ruby; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I../../src" ruby extconfLib.rb
+	cd ruby; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(locallibs) $(LDFLAGS)" INCFLAGS="-I../../src" ruby extconfLib.rb
 
 rubyLibWrapper: cdilib.i
-if WITH_SWIG
+if ENABLE_SWIG
 	$(SWIG) -ruby -module CdiLib -o ruby/cdilib_wrap.c $(AM_CPPFLAGS) cdilib.i
 endif
 
@@ -42,7 +50,7 @@ rubyObjMakefile:
 	cd ruby; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I../" ruby extconfObj.rb
 
 rubyObjWrapper: cdiobj.i
-if WITH_SWIG
+if ENABLE_SWIG
 	$(SWIG) -ruby -c++ -module CdiObj -o ruby/cdiobj_wrap.cpp $(AM_CPPFLAGS) cdiobj.i
 endif
 
@@ -56,11 +64,11 @@ rubyObjInstall: rubyObj
 	@cd ruby; make install
 endif
 # =========================================================
-if WITH_PYTHON
+if ENABLE_PYTHON
 BINDINGS += pythonObj
 # Python ==================================================
 pythonLibWrapper: cdilib.i
-if WITH_SWIG
+if ENABLE_SWIG
 	$(SWIG) -python -module CdiLib -o python/cdilib_wrap.c $(AM_CPPFLAGS) cdilib.i
 endif
 
@@ -71,18 +79,18 @@ pythonLibTest: pythonLib
 	@cd python; python testLib.py
 # =========================================================
 pythonObjWrapper: cdiobj.i
-if WITH_SWIG
+if ENABLE_SWIG
 	$(SWIG) -python -c++ -module CdiObj -o python/cdiobj_wrap.cpp $(AM_CPPFLAGS) cdiobj.i
 endif
 
 pythonObj: pythonObjWrapper
-	cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I../" python setupObj.py build_ext --inplace
+	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py build_ext --inplace
 
 pythonObjTest: pythonObj
 	@cd python; python testObj.py
 
 pythonObjInstall: pythonObj
-	@cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I../" python setupObj.py install
+	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py install
 endif
 # =========================================================
 help:
@@ -104,6 +112,6 @@ help:
 #
 AM_CPPFLAGS = -I$(top_srcdir)/src
 #
-all-local: $(BINDINGS)
+#all-local: $(BINDINGS)
 #
 CLEANFILES  = `ls *~`

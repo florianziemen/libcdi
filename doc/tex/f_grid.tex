@@ -18,7 +18,8 @@ The function {\tt gridCreate} creates a horizontal Grid.
 The type of the grid, one of the set of predefined {\CDI} grid types.
                      The valid {\CDI} grid types are {\tt GRID\_GENERIC}, {\tt GRID\_GAUSSIAN},
                      {\tt GRID\_LONLAT}, {\tt GRID\_LCC}, {\tt GRID\_SPECTRAL},
-                     {\tt GRID\_GME}, {\tt GRID\_CURVILINEAR} and {\tt GRID\_CELL}.
+                     {\tt GRID\_GME}, {\tt GRID\_CURVILINEAR}, {\tt GRID\_UNSTRUCTURED} and
+                     {\tt GRID\_REFERENCE}
 \item[{\tt size}]
 Number of gridpoints.
 
@@ -34,20 +35,20 @@ Number of gridpoints.
 
 Here is an example using {\tt gridCreate} to create a regular lon/lat Grid:
 
-\begin{lstlisting}[language=Fortran, backgroundcolor=\color{zebg}, basicstyle=\footnotesize]
+\begin{lstlisting}[language=Fortran, backgroundcolor=\color{pyellow}, basicstyle=\small, columns=flexible]
 
     INCLUDE 'cdi.h'
        ...
-    #define  NLON  12
-    #define  NLAT   6
+    #define  nlon  12
+    #define  nlat   6
        ...
-    REAL*8 lons(NLON) = (/0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330/)
-    REAL*8 lats(NLAT) = (/-75, -45, -15, 15, 45, 75/)
+    REAL*8 lons(nlon) = (/0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330/)
+    REAL*8 lats(nlat) = (/-75, -45, -15, 15, 45, 75/)
     INTEGER gridID
        ...
-    gridID = gridCreate(GRID_LONLAT, NLON*NLAT)
-    CALL gridDefXsize(gridID, NLON)
-    CALL gridDefYsize(gridID, NLAT)
+    gridID = gridCreate(GRID_LONLAT, nlon*nlat)
+    CALL gridDefXsize(gridID, nlon)
+    CALL gridDefYsize(gridID, nlat)
     CALL gridDefXvals(gridID, lons)
     CALL gridDefYvals(gridID, lats)
        ...
@@ -125,7 +126,7 @@ Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}
 one of the set of predefined {\CDI} grid types.
 The valid {\CDI} grid types are {\tt GRID\_GENERIC}, {\tt GRID\_GAUSSIAN},
 {\tt GRID\_LONLAT}, {\tt GRID\_LCC}, {\tt GRID\_SPECTRAL}, {\tt GRID\_GME},
-{\tt GRID\_CURVILINEAR} and {\tt GRID\_CELL}.
+{\tt GRID\_CURVILINEAR}, {\tt GRID\_UNSTRUCTURED} and {\tt GRID\_REFERENCE}.
 
 
 

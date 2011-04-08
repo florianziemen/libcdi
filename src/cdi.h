@@ -1,3 +1,9 @@
+/*
+  CDI C header file
+
+  This is the only file that must be included to use the CDI library from C.
+*/
+
 #ifndef  _CDI_H
 #define  _CDI_H
 
@@ -8,16 +14,16 @@ extern "C" {
 #endif
 
 #define  CDI_UNDEFID             -1
-#define  CDI_GLOBAL              -1   /* Global var ID for vlist  */
+#define  CDI_GLOBAL              -1   /* Global var ID for vlist              */
 
 /* Byte order */
 
-#define  CDI_BIGENDIAN            0   /* Byte order BIGENDIAN     */
-#define  CDI_LITTLEENDIAN         1   /* Byte order LITTLEENDIAN  */
+#define  CDI_BIGENDIAN            0   /* Byte order BIGENDIAN                 */
+#define  CDI_LITTLEENDIAN         1   /* Byte order LITTLEENDIAN              */
 
-#define  CDI_REAL                 1   /* Real numbers             */
-#define  CDI_COMP                 2   /* Complex numbers          */
-#define  CDI_BOTH                 3   /* Both numbers             */
+#define  CDI_REAL                 1   /* Real numbers                         */
+#define  CDI_COMP                 2   /* Complex numbers                      */
+#define  CDI_BOTH                 3   /* Both numbers                         */
 
 /* Error identifier */
 
@@ -28,6 +34,7 @@ extern "C" {
 #define  CDI_ELIBNAVAIL         -22   /* xxx library not available            */
 #define  CDI_EUFSTRUCT          -23   /* Unsupported file structure           */
 #define  CDI_EUNC4              -24   /* Unsupported netCDF4 structure        */
+#define  CDI_ELIMIT             -99   /* Internal limits exceeded             */
 
 /* File types */
 
@@ -105,36 +112,37 @@ extern "C" {
 
 /* GRID types */
 
-#define  GRID_GENERIC             1
-#define  GRID_GAUSSIAN            2
-#define  GRID_GAUSSIAN_REDUCED    3
-#define  GRID_LONLAT              4
-#define  GRID_SPECTRAL            5
-#define  GRID_FOURIER             6
-#define  GRID_GME                 7  /* Icosahedral-hexagonal GME Grid */
-#define  GRID_TRAJECTORY          8
-#define  GRID_CELL                9
-#define  GRID_CURVILINEAR        10
-#define  GRID_LCC                11  /* Lambert Conformal Conic (GRIB) */
-#define  GRID_LCC2               12  /* Lambert Conformal Conic (PROJ) */
-#define  GRID_LAEA               13  /* Lambert Azimuthal Equal Area   */
-#define  GRID_SINUSOIDAL         14  /* Sinusoidal                     */
+#define  GRID_GENERIC             1  /* Generic grid                            */
+#define  GRID_GAUSSIAN            2  /* Regular Gaussian lon/lat grid           */
+#define  GRID_GAUSSIAN_REDUCED    3  /* Reduced Gaussian lon/lat grid           */
+#define  GRID_LONLAT              4  /* Regular longitude/latitude grid         */
+#define  GRID_SPECTRAL            5  /* Spherical harmonic coefficients         */
+#define  GRID_FOURIER             6  /* Fourier coefficients                    */
+#define  GRID_GME                 7  /* Icosahedral-hexagonal GME grid          */
+#define  GRID_TRAJECTORY          8  /* Trajectory                              */
+#define  GRID_UNSTRUCTURED        9  /* General unstructured grid               */
+#define  GRID_CURVILINEAR        10  /* Curvilinear grid                        */
+#define  GRID_LCC                11  /* Lambert Conformal Conic (GRIB)          */
+#define  GRID_LCC2               12  /* Lambert Conformal Conic (PROJ)          */
+#define  GRID_LAEA               13  /* Lambert Azimuthal Equal Area            */
+#define  GRID_SINUSOIDAL         14  /* Sinusoidal                              */
+#define  GRID_REFERENCE          15  /* Reference to the grid                   */
 
 /* ZAXIS types */
 
-#define  ZAXIS_SURFACE            0
-#define  ZAXIS_GENERIC            1
-#define  ZAXIS_HYBRID             2
-#define  ZAXIS_HYBRID_HALF        3
-#define  ZAXIS_PRESSURE           4
-#define  ZAXIS_HEIGHT             5
-#define  ZAXIS_DEPTH_BELOW_SEA    6
-#define  ZAXIS_DEPTH_BELOW_LAND   7
-#define  ZAXIS_ISENTROPIC         8
-#define  ZAXIS_TRAJECTORY         9
-#define  ZAXIS_ALTITUDE          10
-#define  ZAXIS_SIGMA             11
-#define  ZAXIS_MEANSEA           12
+#define  ZAXIS_SURFACE            0  /* Surface level                           */
+#define  ZAXIS_GENERIC            1  /* Generic level                           */
+#define  ZAXIS_HYBRID             2  /* Hybrid level                            */
+#define  ZAXIS_HYBRID_HALF        3  /* Hybrid half level                       */
+#define  ZAXIS_PRESSURE           4  /* Isobaric pressure level in Pascal       */
+#define  ZAXIS_HEIGHT             5  /* Height above ground in meters           */
+#define  ZAXIS_DEPTH_BELOW_SEA    6  /* Depth below sea level in meters         */
+#define  ZAXIS_DEPTH_BELOW_LAND   7  /* Depth below land surface in centimeters */
+#define  ZAXIS_ISENTROPIC         8  /* Isentropic                              */
+#define  ZAXIS_TRAJECTORY         9  /* Trajectory                              */
+#define  ZAXIS_ALTITUDE          10  /* Altitude above mean sea level in meters */
+#define  ZAXIS_SIGMA             11  /* Sigma level                             */
+#define  ZAXIS_MEANSEA           12  /* Mean sea level                          */
 
 /* TAXIS types */
 
@@ -155,6 +163,9 @@ extern "C" {
 #define  TUNIT_MONTH              5
 #define  TUNIT_YEAR               6
 #define  TUNIT_QUARTER            7
+#define  TUNIT_3HOURS             8
+#define  TUNIT_6HOURS             9
+#define  TUNIT_12HOURS           10
 
 /* TSTEP types */
 
@@ -457,7 +468,6 @@ void    vlistDefVarTimaccu(int vlistID, int varID, int timaccu);
 int     vlistInqVarTimaccu(int vlistID, int varID);
 
 int     vlistInqVarSize(int vlistID, int varID);
-int     vlistInqVarID(int vlistID, int code);
 
 void    vlistDefIndex(int vlistID, int varID, int levID, int index);
 int     vlistInqIndex(int vlistID, int varID, int levID);
@@ -478,17 +488,17 @@ int     vlistInqAtt(int vlistID, int varID, int attrnum, char *name, int *typep,
 int     vlistDelAtt(int vlistID, int varID, const char *name);
 
 /*      vlistDefAttInt: Define an integer attribute */
-int     vlistDefAttInt(int vlistID, int varID, const char *name, int len, const int *ip_vec);
-/*      vlistDefAttInt: Define a floating point attribute */
-int     vlistDefAttFlt(int vlistID, int varID, const char *name, int len, const double *dp_vec);
-/*      vlistDefAttInt: Define a text attribute */
+int     vlistDefAttInt(int vlistID, int varID, const char *name, int type, int len, const int *ip_vec);
+/*      vlistDefAttFlt: Define a floating point attribute */
+int     vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, const double *dp_vec);
+/*      vlistDefAttTxt: Define a text attribute */
 int     vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp);
 
 /*      vlistInqAttInt: Get the value(s) of an integer attribute */
 int     vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int *ip_vec);
-/*      vlistInqAttInt: Get the value(s) of a floating point attribute */
+/*      vlistInqAttFlt: Get the value(s) of a floating point attribute */
 int     vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double *dp_vec);
-/*      vlistInqAttInt: Get the value(s) of a text attribute */
+/*      vlistInqAttTxt: Get the value(s) of a text attribute */
 int     vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp);
 
 
@@ -498,6 +508,9 @@ void    gridName(int gridtype, char *gridname);
 char   *gridNamePtr(int gridtype);
 
 void    gridCompress(int gridID);
+
+void    gridDefMaskGME(int gridID, const int *mask_vec);
+int     gridInqMaskGME(int gridID, int *mask_vec);
 
 void    gridDefMask(int gridID, const int *mask_vec);
 int     gridInqMask(int gridID, int *mask_vec);
@@ -620,6 +633,15 @@ int     gridInqGMEni2(int gridID);
 void    gridDefGMEni2(int gridID, int ni2);
 int     gridInqGMEni3(int gridID);
 void    gridDefGMEni3(int gridID, int ni3);
+
+/* Reference grid */
+int     gridInqNumber(int gridID);
+void    gridDefNumber(int gridID, int number);
+int     gridInqPosition(int gridID);
+void    gridDefPosition(int gridID, int position);
+int     gridInqReference(int gridID, char *reference);
+void    gridDefReference(int gridID, const char *reference);
+
 
 /* Lambert Conformal Conic grid (GRIB version) */
 void gridDefLCC(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc, int projflag, int scanflag);
@@ -764,6 +786,8 @@ void    taxisDefRdate(int taxisID, int date);
 void    taxisDefRtime(int taxisID, int time);
 
 int     taxisHasBounds(int taxisID);
+
+void    taxisDeleteBounds(int taxisID);
 
 void    taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub);
 

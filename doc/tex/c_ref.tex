@@ -895,7 +895,7 @@ vlistDefAttFlt
 \fi
 }
 \begin{verbatim}
-    int vlistDefAttFlt(int vlistID, int varID, const char *name, int len, 
+    int vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, 
                        const double *dp);
 \end{verbatim}
 
@@ -911,7 +911,8 @@ vlistDefAttInt
 \fi
 }
 \begin{verbatim}
-    int vlistDefAttInt(int vlistID, int varID, const char *name, int len, const int *ip);
+    int vlistDefAttInt(int vlistID, int varID, const char *name, int type, int len, 
+                       const int *ip);
 \end{verbatim}
 
 Define an integer attribute

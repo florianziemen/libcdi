@@ -65,7 +65,8 @@ The function {\tt vlistDefAttInt} defines an integer attribute.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    int vlistDefAttInt(int vlistID, int varID, const char *name, int len, const int *ip);
+    int vlistDefAttInt(int vlistID, int varID, const char *name, int type, int len, 
+                       const int *ip);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -76,6 +77,8 @@ Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate
 Variable identifier, or CDI\_GLOBAL for a global attribute
 \item[{\tt name}]
 Attribute name
+\item[{\tt type}]
+External data type (DATATYPE\_INT16 or DATATYPE\_INT32)
 \item[{\tt len}]
 Number of values provided for the attribute
 \item[{\tt ip}]
@@ -123,7 +126,7 @@ The function {\tt vlistDefAttFlt} defines a floating point attribute.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    int vlistDefAttFlt(int vlistID, int varID, const char *name, int len, 
+    int vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, 
                        const double *dp);
 \end{verbatim}
 
@@ -135,6 +138,8 @@ Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate
 Variable identifier, or CDI\_GLOBAL for a global attribute
 \item[{\tt name}]
 Attribute name
+\item[{\tt type}]
+External data type (DATATYPE\_FLT32 or DATATYPE\_FLT64)
 \item[{\tt len}]
 Number of values provided for the attribute
 \item[{\tt dp}]

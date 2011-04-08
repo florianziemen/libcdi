@@ -27,8 +27,8 @@ char *strdup(const char *s);
 */
 #endif
 
-#ifndef M_PI
-#define M_PI		3.14159265358979323846	/* pi */
+#ifndef  M_PI
+#define  M_PI        3.14159265358979323846  /* pi */
 #endif
 
 
@@ -165,7 +165,7 @@ typedef struct {
   int       curRecID;    /* current record ID                     */
   long      next;
   off_t     position;    /* timestep file position                */
-  TAXIS     taxis;
+  taxis_t   taxis;
 }
 TSTEPS;
 
@@ -225,7 +225,7 @@ typedef struct {
   int       vlistID;
   int       xdimID[MAX_GRIDS_PS];
   int       ydimID[MAX_GRIDS_PS];
-  int       zaxisID[MAX_ZAXIS_PS];
+  int       zaxisID[MAX_ZAXES_PS];
   int       ncxvarID[MAX_GRIDS_PS];
   int       ncyvarID[MAX_GRIDS_PS];
   int       ncavarID[MAX_GRIDS_PS];
@@ -241,8 +241,7 @@ typedef struct {
   int       curfile;
   int       nfiles;
   char    **fnames;
-  int       gribHandleNums;
-  void    **gribHandle;
+  void     *gribContainers;
 }
 stream_t;
 
@@ -262,7 +261,7 @@ extern int   cdiPartabIntern;
 stream_t *stream_to_pointer(int idx);
 stream_t *stream_new_entry(void);
 void stream_delete_entry(stream_t *streamptr);
-void stream_check_ptr(const char *func, stream_t *streamptr);
+void stream_check_ptr(const char *caller, stream_t *streamptr);
 
 int     streamInqFileID(int streamID);
 
@@ -270,7 +269,7 @@ int     zaxisInqLevelID(int zaxisID, double level);
 char   *gridNamePtr(int gridtype);
 char   *zaxisNamePtr(int leveltype);
 
-void    streamCheckID(const char *func, int streamID);
+void    streamCheckID(const char *caller, int streamID);
 
 void    streamDefineTaxis(int streamID);
 

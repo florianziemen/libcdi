@@ -53,6 +53,7 @@ cat > ${PROG} << EOR
 #ifndef NOMPI
 #include "mpi.h"
 #endif 
+#include <assert.h>
 
 #if  defined  (HAVE_LIBGRIB_API)
 #  include <grib_api.h>
@@ -81,8 +82,11 @@ cat > ${PROG} << EOR
 EOR
 
 c="dmemory.c         \
-   taxis.c           \
+   dmemory.h         \
    error.c           \
+   error.h           \
+   stream_int.h      \
+   taxis.c           \
    timebase.c        \
    calendar.c        \
    model.c           \
@@ -132,8 +136,8 @@ c="dmemory.c         \
    pio_posixnonb.c   \	
    pio_queue.c"
 
-h="cdi_limits.h taxis.h error.h dtypes.h file.h cgribex.h gribapi.h service.h extra.h \
-   ieg.h cdi.h timebase.h calendar.h basetime.h datetime.h stream_int.h \
+h="cdi_limits.h taxis.h dtypes.h file.h cgribex.h gribapi.h service.h extra.h \
+   ieg.h cdi.h timebase.h calendar.h basetime.h datetime.h \
    stream_cgribex.h  stream_gribapi.h  stream_grb.h  stream_cdf.h \
    tablepar.h table.h gaussgrid.h grid.h varscan.h binary.h swap.h \
    service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \
@@ -168,10 +172,5 @@ echo "#undef DOUBLE_PRECISION" >>  ${PROG}
 cat $srcdir/cfortran.h   >>  ${PROG}
 echo "#endif" >>  ${PROG}
 cat $srcdir/cdiFortran.c >>  ${PROG}
-
-echo "#undef realloc" >>  ${PROG}
-echo "#undef malloc"  >>  ${PROG}
-echo "#undef calloc"  >>  ${PROG}
-echo "#undef free"    >>  ${PROG}
 
 exit

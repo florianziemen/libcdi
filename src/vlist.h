@@ -1,6 +1,8 @@
 #ifndef _VLIST_H
 #define _VLIST_H
 
+#include <stddef.h>  /* size_t */
+
 #ifndef _CDI_LIMITS_H
 #  include "cdi_limits.h"
 #endif
@@ -10,13 +12,17 @@
  * CDI attribute
  */
 typedef struct {
-  size_t    xsz;	  /* amount of space at xvalue             */
-  size_t    namesz;       /* size of name                          */
-  char     *name;         /* attribute name                        */
-  int       type;	  /* data type of xvalue (INT, FLT or TXT) */
-  int       nctype;
-  size_t    nelems;    	  /* number of elements                    */
-  void     *xvalue;       /* the actual data                       */
+  size_t    xsz;	  /* amount of space at xvalue                      */
+  size_t    namesz;       /* size of name                                   */
+  char     *name;         /* attribute name                                 */
+  int       indtype;	  /* internal data type of xvalue (INT, FLT or TXT) */
+  int       exdtype;      /* external data type                             */
+                          /* indtype    exdtype                             */
+                          /* TXT        TXT                                 */
+                          /* INT        INT16, INT32                        */
+                          /* FLT        FLT32, FLT64                        */
+  size_t    nelems;    	  /* number of elements                             */
+  void     *xvalue;       /* the actual data                                */
 } cdi_att_t;
 
 
@@ -45,7 +51,6 @@ typedef struct
   int         mvarID;
   int         fvarID;
   int         param;
-  int         code;
   int         gridID;
   int         zaxisID;
   int         timeID;    /* TIME_VARIABLE or TIME_CONSTANT */
@@ -56,7 +61,6 @@ typedef struct
   int         tsteptype; /* Time step type: TSTEP_INSTANT, TSTEP_AVG ... */
   int         timave;
   int         timaccu;
-  int         func;
   int         missvalused; /* TRUE if missval is defined */
   char       *name;
   char       *longname;
@@ -88,7 +92,7 @@ typedef struct
   int         modelID;
   int         varsAllocated;
   int         gridIDs[MAX_GRIDS_PS];
-  int         zaxisIDs[MAX_ZAXIS_PS];
+  int         zaxisIDs[MAX_ZAXES_PS];
   var_t      *vars;
   cdi_atts_t  atts;
 }
@@ -96,7 +100,6 @@ vlist_t;
 
 
 vlist_t *vlist_to_pointer(int vlistID);
-void     vlistCheckVarID(char *func, int vlistID, int varID);
 int      vlistNlock(int vlistID);
 void     vlistLock(int vlistID);
 void     vlistUnlock(int vlistID);

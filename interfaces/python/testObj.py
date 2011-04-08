@@ -27,13 +27,21 @@ print "#========== VARIABLEcdi.NAMES =================================#"
 for k in range(cdi.variables.size()):
   print cdi.variables[k].longname,' ',cdi.variables[k].units
 
-print "#========== VAR ======================================#"
+print "#========== VAR by index ======================================#"
 var = cdi.variables[1]
-var.readField()
-val = var.getField()
+var.getValues()
+val = var.values
 i=0; print 'val[',i,'] = ',val[i]
-print "#=====================================================#"
+i=1; print 'val[',i,'] = ',val[i]
+i=2; print 'val[',i,'] = ',val[i]
+i=3; print 'val[',i,'] = ',val[i]
+i=4; print 'val[',i,'] = ',val[i]
+i=5; print 'val[',i,'] = ',val[i]
+print "#========= Var by name ===============================#"
 name ="tsurf"
 newvar = cdi.var[name]
 print "name ",name," var.name: ", newvar.name, " var.grids.xsize: " , newvar.grid.xsize
-print "#=====================================================#"
+print "#========= Var by code ===============================#"
+code = 169
+newvar = cdi.varByCode[code]
+newvar.sinfo()

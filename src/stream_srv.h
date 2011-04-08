@@ -5,7 +5,6 @@
 #  include "service.h"
 #endif
 
-int    srvScanTimestep(int streamID);
 int    srvInqContents(int streamID);
 int    srvInqTimestep(int streamID, int tsID);
 

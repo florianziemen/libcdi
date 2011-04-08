@@ -13,7 +13,7 @@ int _Verbose = 1;	/* If set to 1, errors are reported */
 int _Debug   = 0;       /* If set to 1, debugging           */
 
 
-void SysError(const char *caller, const char *fmt, ...)
+void SysError_(const char *caller, const char *fmt, ...)
 {
   va_list args;
 	
@@ -32,7 +32,8 @@ void SysError(const char *caller, const char *fmt, ...)
   exit(EXIT_FAILURE);
 }
 
-void Error(const char *caller, const char *fmt, ...)
+
+void Error_(const char *caller, const char *fmt, ...)
 {
   va_list args;
 	
@@ -48,7 +49,8 @@ void Error(const char *caller, const char *fmt, ...)
   if ( _ExitOnError ) exit(EXIT_FAILURE);
 }
 
-void Warning(const char *caller, const char *fmt, ...)
+
+void Warning_(const char *caller, const char *fmt, ...)
 {
   va_list args;
 	
@@ -64,7 +66,8 @@ void Warning(const char *caller, const char *fmt, ...)
   va_end(args);
 }
 
-void Message(const char *caller, const char *fmt, ...)
+
+void Message_(const char *caller, const char *fmt, ...)
 {
   va_list args;
 	

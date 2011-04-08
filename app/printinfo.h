@@ -3,7 +3,6 @@
 
 void date2str(int date, char *datestr, int maxlen)
 {
-  static char func[] = "date2str";
   int year, month, day;
   int len;
 
@@ -12,13 +11,12 @@ void date2str(int date, char *datestr, int maxlen)
   len = sprintf(datestr, DATE_FORMAT, year, month, day);
 
   if ( len > ( maxlen-1) )
-    fprintf(stderr, "Internal problem (%s): sizeof input string is too small!\n", func);
+    fprintf(stderr, "Internal problem (%s): sizeof input string is too small!\n", __func__);
 }
 
 
 void time2str(int time, char *timestr, int maxlen)
 {
-  static char func[] = "time2str";
   int hour, minute, second;
   int len;
 
@@ -27,7 +25,7 @@ void time2str(int time, char *timestr, int maxlen)
   len = sprintf(timestr, TIME_FORMAT, hour, minute, second);
 
   if ( len > ( maxlen-1) )
-    fprintf(stderr, "Internal problem (%s): sizeof input string is too small!\n", func);
+    fprintf(stderr, "Internal problem (%s): sizeof input string is too small!\n", __func__);
 }
 
 
@@ -125,10 +123,9 @@ void printFiletype(int streamID, int vlistID)
   printf("\n");
 }
 
-
-static void printGridInfo(int vlistID)
+static
+void printGridInfo(int vlistID)
 {
-  static char func[] = "printGridInfo";
   int ngrids, index;
   int gridID, gridtype, trunc, gridsize, xsize, ysize;
   int nbyte0;
@@ -228,6 +225,7 @@ static void printGridInfo(int vlistID)
 	      fprintf(stdout, "available :");
 	      if ( gridInqXbounds(gridID, NULL) ) fprintf(stdout, " xbounds");
 	      if ( gridInqYbounds(gridID, NULL) ) fprintf(stdout, " ybounds");
+	      if ( gridInqMask(gridID, NULL) )    fprintf(stdout, " mask");
 	      fprintf(stdout, "\n");
 	    }
 	  
@@ -262,7 +260,23 @@ static void printGridInfo(int vlistID)
 	  nd = gridInqGMEnd(gridID);
 	  fprintf(stdout, "size      : dim = %d  nd = %d  ni = %d\n", gridsize, nd, ni);
 	}
-      else if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_CELL )
+      else if ( gridtype == GRID_REFERENCE )
+	{
+	  int number, position;
+	  number   = gridInqNumber(gridID);
+	  position = gridInqPosition(gridID);
+	  fprintf(stdout, "size      : dim = %d\n", gridsize);
+	  fprintf(stdout, "%*s", nbyte0, "");
+	  fprintf(stdout, "grid      : number = %d  position = %d\n", number, position);
+	  if ( gridInqReference(gridID, NULL) )
+	    {
+	      char reference_link[8192];
+	      gridInqReference(gridID, reference_link);
+	      fprintf(stdout, "%*s", nbyte0, "");
+	      fprintf(stdout, "path      : %s\n", reference_link);
+	    }
+	}
+      else if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED )
 	{
 	  if ( gridtype == GRID_CURVILINEAR )
 	    fprintf(stdout, "size      : dim = %d  nx = %d  ny = %d\n", gridsize, xsize, ysize);
@@ -339,7 +353,7 @@ static void printGridInfo(int vlistID)
 	    }
 	}
 
-      if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_CELL ||
+      if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED ||
 	   gridtype == GRID_GENERIC || gridtype == GRID_LCC )
 	{
 	  if ( gridInqXvals(gridID, NULL) || gridInqYvals(gridID, NULL) || gridHasArea(gridID) ||
@@ -352,6 +366,7 @@ static void printGridInfo(int vlistID)
 	      if ( gridInqXbounds(gridID, NULL) ) fprintf(stdout, " xbounds");
 	      if ( gridInqYbounds(gridID, NULL) ) fprintf(stdout, " ybounds");
 	      if ( gridHasArea(gridID) )          fprintf(stdout, " area");
+	      if ( gridInqMask(gridID, NULL) )    fprintf(stdout, " mask");
 	      fprintf(stdout, "\n");
 	    }
 	}

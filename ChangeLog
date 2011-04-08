@@ -1,3 +1,190 @@
+2011-03-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* using CGRIBEX library version 1.5.0
+	* Version 1.5.0 released
+
+2011-03-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_cdf: added support for GRIB2 parameter identifier
+
+2011-03-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.4.8 released
+
+2011-02-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* vlistDestroy: fix memory leak
+
+2011-01-25  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added netCDF support for level bounds
+
+2011-01-21  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added grid type GRID_REFERENCE
+	* changed grid name GRID_CELL to GRID_UNSTRUCTURED
+
+2011-01-19  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added support to encode/decode GRIB1 with GRIB_API
+
+2011-01-03  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* using CGRIBEX library version 1.4.7
+	* Version 1.4.7 released
+
+2010-11-09  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* improved support for netCDF output from WRF model
+
+2010-10-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdfDefZaxis: changed hybrid level type from int to float
+	* taxisCopyTimestep: added mutex_lock
+	
+2010-10-26  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cgribexAddRecord: correct xinc/yinc if necessary [report: Anders Ullerstig]
+	
+2010-10-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+        * cdfDefVCT: remove var mlev and ilev (bug fix) [report: Torsten Weber]
+
+2010-10-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdfOpenFile: create netCDF4 files without NC_CLASSIC_MODEL
+	* cdfOpenFile: switch off checking of netCDF4 format (read)
+	
+2010-09-27  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+        * cdfDefTime: bug fix for time units 3HOURS, 6HOURS, 12HOURS
+	
+2010-09-17  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* using CGRIBEX library version 1.4.6
+	* Version 1.4.6 released
+
+2010-09-09  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* GRIB1: use packing only for non constant fields [request: Luis Kornblueh]
+	* varDefZtype: bug fix [report: Stephanie Legutke]
+	
+2010-09-07  Ralf Mueller <ralf.mueller@zmaw.de>
+
+	* use libtool 2.2.10 for compiling + linking
+	* create shared + static library with PIC support by default
+	  (positions independant code)
+	* build CDI configuration file: cdi.settings
+
+2010-09-03  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* check axis attribute (bug fix) [report: Cui Chen]
+	
+2010-08-26  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* vlistCopyFlag: copy zaxis meta data
+	
+2010-08-25  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Added support for attribute type int16 and float32 [Request: Don Murray]
+	
+2010-08-24  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+	
+	* Version 1.4.5.2 released [request: Luis Kornblueh]
+
+2010-08-02  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added grid mask support
+	
+2010-07-26  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added ECHAM6 GRIB1 code table
+
+2010-07-23  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdfInqContents: fixed out of bounds access to attstring [report: Heiner Widmann]
+	
+2010-07-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdfInqContents: fix problem of wrong stdname for grid description [report: Michael Boettinger]
+	* Version 1.4.5.1 released
+
+2010-07-05 Edi Kirk <E.Kirk@gmx.de>
+
+	* GRIB1 decode: Correct ZeroShiftError of simple packed spherical harmonics
+
+2010-07-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdfInqContents: use complex packing for spectral data [report: Edi Kirk]
+
+2010-06-30  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* using CGRIBEX library version 1.4.5.1 (szip bug fix for 24 bit data)
+
+2010-06-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* using CGRIBEX library version 1.4.5
+	* Version 1.4.5 released
+
+2010-05-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_history: added NC4 support [report: Etienne Tourigny]
+	
+2010-05-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdfDefXYaxis: check also dimnames (bug fix) [report: Mikhail Itkin]
+	
+2010-05-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_cdf: added support for uppercase attributes [request: Patrick Brockmann]
+	
+2010-05-07  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* gridGenYvals: bug fix for nlat > 4096 [report: Thomas Bergmann]
+
+2010-04-29  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.4.4 released
+
+2010-04-24  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* gaussgrid: define M_SQRT2 [report: alastair.mckinstry@ichec.ie]
+
+2010-04-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* MAX_STREAMS: changed fixed size of 4096 to dynamic range of 1024 - 65536
+	* MAX_VLISTS:  changed fixed size of 4096 to dynamic range of 1024 - 65536
+	* MAX_TAXES:   changed fixed size of 4096 to dynamic range of 1024 - 65536
+	
+2010-04-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cgribexDefTime: bug fix for GRIB time range 10
+	
+2010-04-09  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added support for GRIB time units 3hours and 6hours [request: Jaison-Thomas Ambadan]
+	
+2010-04-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* vlistMerge: added support to merge levels
+
+2010-03-31  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+        * cgribexDefTime: bug fix for timerange=3 [report: Veronika Gayler]
+	* using CGRIBEX library version 1.4.4
+
+2010-03-30  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* vlistCat: correct temporary parameter numbers
+
+2010-03-19  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added support for non integer time units MONTH
+
+2010-03-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* gauaw: bug fix for allocation of zfnlat for odd number of nlat
+
 2010-03-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cdfDefGrid: check whether the variable or dimension name already exist

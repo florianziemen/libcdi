@@ -6,36 +6,34 @@
 
 #define  GRIB_MISSVAL  -9.E33
 
-/* Level Types */
-#define  LTYPE_SURFACE               1
-#define  LTYPE_99                   99
-#define  LTYPE_ISOBARIC            100
-#define  LTYPE_MEANSEA             102
-#define  LTYPE_ALTITUDE            103
-#define  LTYPE_HEIGHT              105
-#define  LTYPE_SIGMA               107
-#define  LTYPE_HYBRID              109
-#define  LTYPE_HYBRID_LAYER        110
-#define  LTYPE_LANDDEPTH           111
-#define  LTYPE_LANDDEPTH_LAYER     112
-#define  LTYPE_ISENTROPIC          113
-#define  LTYPE_SEADEPTH            160
-#define  LTYPE_99_MARGIN          1000
+/* GRIB1 Level Types */
+#define  GRIB1_LTYPE_SURFACE               1
+#define  GRIB1_LTYPE_99                   99
+#define  GRIB1_LTYPE_ISOBARIC            100
+#define  GRIB1_LTYPE_MEANSEA             102
+#define  GRIB1_LTYPE_ALTITUDE            103
+#define  GRIB1_LTYPE_HEIGHT              105
+#define  GRIB1_LTYPE_SIGMA               107
+#define  GRIB1_LTYPE_HYBRID              109
+#define  GRIB1_LTYPE_HYBRID_LAYER        110
+#define  GRIB1_LTYPE_LANDDEPTH           111
+#define  GRIB1_LTYPE_LANDDEPTH_LAYER     112
+#define  GRIB1_LTYPE_ISENTROPIC          113
+#define  GRIB1_LTYPE_SEADEPTH            160
+#define  GRIB1_LTYPE_99_MARGIN          1000
 
-/*
- *  Data representation type (Grid Type) [Table 6]
- */
-#define  GTYPE_LATLON                0  /*  latitude/longitude                       */
-#define  GTYPE_LATLON_ROT           10  /*  rotated latitude/longitude               */
-#define  GTYPE_LATLON_STR           20  /*  stretched latitude/longitude             */
-#define  GTYPE_LATLON_ROTSTR        30  /*  rotated and stretched latitude/longitude */
-#define  GTYPE_GAUSSIAN              4  /*  gaussian grid                            */
-#define  GTYPE_GAUSSIAN_ROT         14  /*  rotated gaussian grid                    */
-#define  GTYPE_GAUSSIAN_STR         24  /*  stretched gaussian grid                  */
-#define  GTYPE_GAUSSIAN_ROTSTR      34  /*  rotated and stretched gaussian grid      */
-#define  GTYPE_LCC                   3  /*  Lambert conformal                        */
-#define  GTYPE_SPECTRAL             50  /*  spherical harmonics                      */
-#define  GTYPE_GME                 192  /*  hexagonal GME grid                       */
+/* GRIB1 Data representation type (Grid Type) [Table 6] */
+#define  GRIB1_GTYPE_LATLON                0  /*  latitude/longitude                       */
+#define  GRIB1_GTYPE_LATLON_ROT           10  /*  rotated latitude/longitude               */
+#define  GRIB1_GTYPE_LATLON_STR           20  /*  stretched latitude/longitude             */
+#define  GRIB1_GTYPE_LATLON_ROTSTR        30  /*  rotated and stretched latitude/longitude */
+#define  GRIB1_GTYPE_GAUSSIAN              4  /*  gaussian grid                            */
+#define  GRIB1_GTYPE_GAUSSIAN_ROT         14  /*  rotated gaussian grid                    */
+#define  GRIB1_GTYPE_GAUSSIAN_STR         24  /*  stretched gaussian grid                  */
+#define  GRIB1_GTYPE_GAUSSIAN_ROTSTR      34  /*  rotated and stretched gaussian grid      */
+#define  GRIB1_GTYPE_LCC                   3  /*  Lambert conformal                        */
+#define  GRIB1_GTYPE_SPECTRAL             50  /*  spherical harmonics                      */
+#define  GRIB1_GTYPE_GME                 192  /*  hexagonal GME grid                       */
 
 /*
  *  Macros for the indicator section ( Section 0 )
@@ -50,6 +48,9 @@
 #define  ISEC1_TABLE4_MINUTE    0
 #define  ISEC1_TABLE4_HOUR      1
 #define  ISEC1_TABLE4_DAY       2
+#define  ISEC1_TABLE4_3HOURS   10
+#define  ISEC1_TABLE4_6HOURS   11
+#define  ISEC1_TABLE4_12HOURS  12
 #define  ISEC1_TABLE4_QUARTER  13
 
 
@@ -163,7 +164,9 @@
 
 
 
-void  gribSetDebug(int debug);
+void  gribFixZSE(int flag);     /* 1: Fix ZeroShiftError of simple packed spherical harmonics */
+void  gribSetConst(int flag);   /* 1: Don't pack constant fields on regular grids */
+void  gribSetDebug(int debug);  /* 1: Debugging */
 void  gribSetRound(int round);
 void  gribSetRefDP(double refval);
 void  gribSetRefSP(float  refval);
@@ -182,7 +185,7 @@ void  gribExDP(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 const char *cgribexLibraryVersion(void);
 
 void  gribDebug(int debug);
-
+void  gribSetCalendar(int calendar);
 
 void  gribDateTime(int *isec1, int *date, int *time);
 int   gribRefDate(int *isec1);
@@ -204,6 +207,8 @@ void  gribPrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffe
 void  gribPrintGDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
 void  gribPrintBMS(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
 void  gribPrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
+void  gribCheck1(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
+void  gribRepair1(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
 
 int grib1Sections(unsigned char *gribbuffer, long recsize, unsigned char **pdsp,
 		  unsigned char **gdsp, unsigned char **bmsp, unsigned char **bdsp);

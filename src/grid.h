@@ -1,12 +1,14 @@
 #ifndef _GRID_H
 #define _GRID_H
 
+typedef unsigned char mask_t;
 
 typedef struct {
   int     self;
   int     type;                   /* grid type                      */
   int     prec;                   /* grid precision                 */
-  int    *mask;
+  mask_t *mask;
+  mask_t *mask_gme;
   double *xvals;
   double *yvals;
   double *area;
@@ -41,6 +43,8 @@ typedef struct {
   int     xdef;                   /* 0: undefined 1:xvals 2:x0+xinc */
   int     ydef;                   /* 0: undefined 1:yvals 2:y0+yinc */
   int     nd, ni, ni2, ni3;       /* parameter for GRID_GME         */
+  int     number, position;       /* parameter for GRID_REFERENCE   */
+  char   *reference;
   int     trunc;                  /* parameter for GRID_SPECTEAL    */
   int     nvertex;
   int    *rowlon;

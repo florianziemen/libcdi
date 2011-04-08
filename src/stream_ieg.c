@@ -47,11 +47,10 @@ int iegInqDatatype(int prec)
 
 int iegDefDatatype(int datatype)
 {
-  static char func[] = "iegDefDatatype";
   int prec;
 
   if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
-    Error(func, "CDI/IEG library does not support complex numbers!");
+    Error("CDI/IEG library does not support complex numbers!");
 
   if ( datatype != DATATYPE_FLT32 && datatype != DATATYPE_FLT64 )
     datatype = DATATYPE_FLT32;
@@ -62,10 +61,9 @@ int iegDefDatatype(int datatype)
   return (prec);
 }
 
-
+/* not used
 int iegInqRecord(int streamID, int *varID, int *levelID)
 {
-  static char func[] = "iegInqRecord";
   int status;
   int fileID;
   int icode, ilevel;
@@ -76,7 +74,7 @@ int iegInqRecord(int streamID, int *varID, int *levelID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
@@ -96,7 +94,7 @@ int iegInqRecord(int streamID, int *varID, int *levelID)
 
   *varID = vlistInqVarID(vlistID, icode);
 
-  if ( *varID == UNDEFID ) Error(func, "Code %d undefined", icode);
+  if ( *varID == UNDEFID ) Error("Code %d undefined", icode);
 
   zaxisID = vlistInqVarZaxis(vlistID, *varID);
 
@@ -104,11 +102,10 @@ int iegInqRecord(int streamID, int *varID, int *levelID)
   
   return (1);
 }
-
+*/
 
 int iegReadRecord(int streamID, double *data, int *nmiss)
 {
-  static char func[] = "iegReadRecord";
   int vlistID, fileID;
   int status;
   int recID, vrecID, tsID;
@@ -121,7 +118,7 @@ int iegReadRecord(int streamID, double *data, int *nmiss)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
@@ -243,15 +240,34 @@ void iegDefTime(int *pdb, int date, int time, int timeID)
 static
 void iegDefGrid(int *gdb, int gridID)
 {
-  static char func[] = "iegDefGrid";
   int gridtype;
 
   gridtype = gridInqType(gridID);
 
   if ( gridtype == GRID_GENERIC )
     {
-      gridtype = GRID_LONLAT;
-      gridChangeType(gridID, gridtype);
+      int xsize, ysize;
+
+      xsize = gridInqXsize(gridID);
+      ysize = gridInqYsize(gridID);
+
+      if ( (ysize == 32  || ysize == 48 || ysize == 64 ||
+	    ysize == 96  || ysize == 160) && 
+	   (xsize == 2*ysize || xsize == 1) )
+	{
+	  gridtype = GRID_GAUSSIAN;
+	  gridChangeType(gridID, gridtype);
+	}
+      else if ( (xsize == 1 && ysize == 1) || (xsize == 0 && ysize == 0) )
+	{
+	  gridtype = GRID_LONLAT;
+	  gridChangeType(gridID, gridtype);
+	}
+      else if ( gridInqXvals(gridID, NULL) && gridInqYvals(gridID, NULL) )
+	{
+	  gridtype = GRID_LONLAT;
+	  gridChangeType(gridID, gridtype);
+	}
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
@@ -261,10 +277,33 @@ void iegDefGrid(int *gdb, int gridID)
   if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN )
     {
       int nlon, nlat;
+      double xfirst = 0, xlast = 0, xinc = 0;
+      double yfirst = 0, ylast = 0, yinc = 0;
 
       nlon = (int) gridInqXsize(gridID);
-
       nlat = (int) gridInqYsize(gridID);
+
+      if ( nlon == 0 )
+	{
+	  nlon = 1;
+	}
+      else
+	{
+	  xfirst = gridInqXval(gridID,      0);
+	  xlast  = gridInqXval(gridID, nlon-1);
+	  xinc   = gridInqXinc(gridID);
+	}
+
+      if ( nlat == 0 )
+	{
+	  nlat = 1;
+	}
+      else
+	{
+	  yfirst = gridInqYval(gridID,      0);
+	  ylast  = gridInqYval(gridID, nlat-1);
+	  yinc   = gridInqYinc(gridID);
+	}
 
       if ( gridtype == GRID_GAUSSIAN )
 	IEG_G_GridType(gdb) = 4;
@@ -275,20 +314,20 @@ void iegDefGrid(int *gdb, int gridID)
 
       IEG_G_NumLon(gdb)   = nlon;
       IEG_G_NumLat(gdb)   = nlat;
-      IEG_G_FirstLat(gdb) = NINT(gridInqYval(gridID,      0)*1000);
-      IEG_G_LastLat(gdb)  = NINT(gridInqYval(gridID, nlat-1)*1000);
-      IEG_G_FirstLon(gdb) = NINT(gridInqXval(gridID,      0)*1000);
-      IEG_G_LastLon(gdb)  = NINT(gridInqXval(gridID, nlon-1)*1000);
-      IEG_G_LonIncr(gdb)  = NINT(gridInqXinc(gridID)*1000);
-      if ( fabs(gridInqXinc(gridID)*1000 - IEG_G_LonIncr(gdb)) > FLT_EPSILON )
+      IEG_G_FirstLat(gdb) = NINT(yfirst*1000);
+      IEG_G_LastLat(gdb)  = NINT(ylast*1000);
+      IEG_G_FirstLon(gdb) = NINT(xfirst*1000);
+      IEG_G_LastLon(gdb)  = NINT(xlast*1000);
+      IEG_G_LonIncr(gdb)  = NINT(xinc*1000);
+      if ( fabs(xinc*1000 - IEG_G_LonIncr(gdb)) > FLT_EPSILON )
 	IEG_G_LonIncr(gdb) = 0;
 
       if ( gridtype == GRID_GAUSSIAN )
 	IEG_G_LatIncr(gdb) = nlat/2;
       else
 	{
-	  IEG_G_LatIncr(gdb) = NINT(gridInqYinc(gridID)*1000);
-	  if ( fabs(gridInqYinc(gridID)*1000 - IEG_G_LatIncr(gdb)) > FLT_EPSILON )
+	  IEG_G_LatIncr(gdb) = NINT(yinc*1000);
+	  if ( fabs(yinc*1000 - IEG_G_LatIncr(gdb)) > FLT_EPSILON )
 	    IEG_G_LatIncr(gdb) = 0;
 
 	  if ( IEG_G_LatIncr(gdb) < 0 ) IEG_G_LatIncr(gdb) = -IEG_G_LatIncr(gdb);
@@ -318,7 +357,7 @@ void iegDefGrid(int *gdb, int gridID)
     }
   else
     {
-      Error(func, "%s grid unsupported!", gridNamePtr(gridtype));
+      Error("Unsupported grid type: %s", gridNamePtr(gridtype));
     }
 
   IEG_G_ScanFlag(gdb) = 64;
@@ -327,7 +366,6 @@ void iegDefGrid(int *gdb, int gridID)
 static
 void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 {
-  static char func[] = "iegDefLevel";
   double level;
   int ilevel, leveltype;
   static int warning = 1;
@@ -337,6 +375,9 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 
   if ( leveltype == ZAXIS_GENERIC )
     {
+      Message("Changed zaxis type from %s to %s",
+	      zaxisNamePtr(leveltype),
+	      zaxisNamePtr(ZAXIS_PRESSURE));
       leveltype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, leveltype);
       zaxisDefUnits(zaxisID, "Pa");
@@ -373,7 +414,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 	vctsize = zaxisInqVctSize(zaxisID);
 	if ( vctsize == 0 && warning )
 	  {
-	    Warning(func, "VCT missing. ( code = %d, zaxisID = %d )",
+	    Warning("VCT missing. ( code = %d, zaxisID = %d )",
 		    IEG_P_Parameter(pdb), zaxisID);
 	    warning = 0;
 	  }
@@ -382,7 +423,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 	    /*	    IEG_G_NumVCP(gdb) = 0; */
 	    if ( vct_warning )
 	      {
-		Warning(func, "VCT size of %d is too large (maximum is 100). Set to 0!", vctsize);
+		Warning("VCT size of %d is too large (maximum is 100). Set to 0!", vctsize);
 		vct_warning = 0;
 	      }
 	  }
@@ -401,7 +442,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 
 	level = zaxisInqLevel(zaxisID, levelID);
 	if ( level < 0 )
-	  Warning(func, "pressure level of %f Pa is below 0.", level);
+	  Warning("pressure level of %f Pa is below 0.", level);
 
 	zaxisInqUnits(zaxisID, units);
 	if ( memcmp(units, "hPa", 3) == 0 || memcmp(units, "mb",2 ) == 0 )
@@ -488,7 +529,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
       }
     default:
       {
-	Error(func, "leveltype >%s< unsupported", zaxisNamePtr(leveltype));
+	Error("Unsupported zaxis type: %s", zaxisNamePtr(leveltype));
 	break;
       }
     }
@@ -497,7 +538,6 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 
 int iegCopyRecord(int streamID2, int streamID1)
 {
-  static char func[] = "iegCopyRecord";
   int fileID1, fileID2;
   int tsID, recID, vrecID;
   long recsize;
@@ -510,8 +550,8 @@ int iegCopyRecord(int streamID2, int streamID1)
   streamptr1 = stream_to_pointer(streamID1);
   streamptr2 = stream_to_pointer(streamID2);
 
-  stream_check_ptr(func, streamptr1);
-  stream_check_ptr(func, streamptr2);
+  stream_check_ptr(__func__, streamptr1);
+  stream_check_ptr(__func__, streamptr2);
 
   fileID1 = streamInqFileID(streamID1);
   fileID2 = streamInqFileID(streamID2);
@@ -538,7 +578,6 @@ int iegCopyRecord(int streamID2, int streamID1)
 
 int iegDefRecord(int streamID)
 {
-  static char func[] = "iegDefRecord";
   int status = 0;
   int fileID, vlistID;
   int gridID;
@@ -553,7 +592,7 @@ int iegDefRecord(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   fileID  = streamInqFileID(streamID);
   vlistID = streamInqVlist(streamID);
@@ -593,7 +632,6 @@ int iegDefRecord(int streamID)
 
 int iegWriteRecord(int streamID, const double *data)
 {
-  static char func[] = "iegWriteRecord";
   int fileID;
   int status = 0;
   int i, gridsize, gridID;
@@ -603,7 +641,7 @@ int iegWriteRecord(int streamID, const double *data)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   fileID = streamInqFileID(streamID);
   iegp   = streamptr->record->iegp;
@@ -628,7 +666,6 @@ static
 void iegAddRecord(int streamID, int param, int *pdb, int *gdb, double *vct,
 		  long recsize, off_t position, int prec)
 {
-  static char func[] = "iegAddRecord";
   int leveltype;
   int gridID = UNDEFID;
   int levelID = 0;
@@ -700,7 +737,7 @@ void iegAddRecord(int streamID, int param, int *pdb, int *gdb, double *vct,
 	    if ( fabs(grid.xinc-xinc) > 0.0 )
 	      {
 		grid.xinc = xinc;
-		if ( CDI_Debug ) Message(func, "set xinc to %g", grid.xinc);
+		if ( CDI_Debug ) Message("set xinc to %g", grid.xinc);
 	      }
 	  }
       }
@@ -774,7 +811,7 @@ void iegAddRecord(int streamID, int param, int *pdb, int *gdb, double *vct,
   streamptr->nrecs++;
 
   if ( CDI_Debug )
-    Message(func, "varID = %d gridID = %d levelID = %d",
+    Message("varID = %d gridID = %d levelID = %d",
 	    varID, gridID, levelID);
 }
 
@@ -782,7 +819,6 @@ static
 void iegCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
 		  int level, int xsize, int ysize)
 {
-  static char func[] = "iegCmpRecord";
   int varID = 0;
   int levelID = 0;
   record_t *record;
@@ -793,7 +829,7 @@ void iegCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
   record  = &streamptr->tsteps[tsID].records[recID];
 
   if ( param != (*record).param || level != (*record).ilevel )
-    Error(func, "inconsistent timestep");
+    Error("inconsistent timestep");
 
   (*record).position = position;
   /*
@@ -806,10 +842,10 @@ void iegCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
   streamptr->nrecs++;
   */
   if ( CDI_Debug )
-    Message(func, "varID = %d levelID = %d", varID, levelID);
+    Message("varID = %d levelID = %d", varID, levelID);
 }
 
-static
+
 void iegDateTime(int *pdb, int *date, int *time)
 {
   int ryear, rmonth, rday, rhour, rminute;
@@ -828,10 +864,9 @@ void iegDateTime(int *pdb, int *date, int *time)
   *time = cdiEncodeTime(rhour, rminute, 0);
 }
 
-
+static
 void iegScanTimestep1(int streamID)
 {  
-  static char func[] = "iegScanTimestep1";
   int prec = 0;
   int status;
   int fileID;
@@ -845,7 +880,7 @@ void iegScanTimestep1(int streamID)
   off_t recpos;
   int nrecords, nrecs, recID;
   int taxisID = -1;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int vlistID;
   IEGCOMPVAR compVar, compVar0;
   iegrec_t *iegp;
@@ -853,7 +888,7 @@ void iegScanTimestep1(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 0;
 
@@ -862,7 +897,7 @@ void iegScanTimestep1(int streamID)
   taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( tsID != 0 )
-    Error(func, "Internal problem! tstepsNewEntry returns %d", tsID);
+    Error("Internal problem! tstepsNewEntry returns %d", tsID);
 
   fileID = streamInqFileID(streamID);
 
@@ -912,13 +947,13 @@ void iegScanTimestep1(int streamID)
 	    }
 	  if ( recID < nrecs ) break;
 	  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) )
-	    Warning(func, "Inconsistent verification time for param %d level %d", param, rlevel);
+	    Warning("Inconsistent verification time for param %d level %d", param, rlevel);
 	}
 
       nrecs++;
 
       if ( CDI_Debug )
-	Message(func, "%4d%8d%4d%8d%8d%6d", nrecs, (int)recpos, param, rlevel, vdate, vtime);
+	Message("%4d%8d%4d%8d%8d%6d", nrecs, (int)recpos, param, rlevel, vdate, vtime);
 
       iegAddRecord(streamID, param, iegp->ipdb, iegp->igdb, iegp->vct, recsize, recpos, prec);
     }
@@ -954,7 +989,7 @@ void iegScanTimestep1(int streamID)
     {
       tsID = tstepsNewEntry(streamID);
       if ( tsID != streamptr->rtsteps )
-	Error(func, "Internal error. tsID = %d", tsID);
+	Error("Internal error. tsID = %d", tsID);
 
       streamptr->tsteps[tsID-1].next   = TRUE;
       streamptr->tsteps[tsID].position = recpos;
@@ -973,10 +1008,9 @@ void iegScanTimestep1(int streamID)
     }
 }
 
-
+static
 int iegScanTimestep2(int streamID)
 {  
-  static char func[] = "iegScanTimestep2";
   int status;
   int fileID;
   int tabnum;
@@ -988,7 +1022,7 @@ int iegScanTimestep2(int streamID)
   off_t recpos = 0;
   int nrecords, nrecs, recID, rindex;
   int nextstep;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int vlistID;
   IEGCOMPVAR compVar, compVar0;
   iegrec_t *iegp;
@@ -996,7 +1030,7 @@ int iegScanTimestep2(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 1;
 
@@ -1006,7 +1040,7 @@ int iegScanTimestep2(int streamID)
 
   tsID = streamptr->rtsteps;
   if ( tsID != 1 )
-    Error(func, "Internal problem! unexpeceted timestep %d", tsID+1);
+    Error("Internal problem! unexpeceted timestep %d", tsID+1);
 
   taxis = &streamptr->tsteps[tsID].taxis;
 
@@ -1086,14 +1120,14 @@ int iegScanTimestep2(int streamID)
 	{
 	  char paramstr[32];
 	  cdiParamToString(param, paramstr, sizeof(paramstr));
-	  Warning(func, "param %s level %d not defined at timestep 1", paramstr, rlevel);
+	  Warning("param %s level %d not defined at timestep 1", paramstr, rlevel);
 	  return (CDI_EUFSTRUCT);
 	}
 
       if ( nextstep ) break;
 
       if ( CDI_Debug )
-	Message(func, "%4d%8d%4d%8d%8d%6d", rindex+1, (int)recpos, param, rlevel, vdate, vtime);
+	Message("%4d%8d%4d%8d%8d%6d", rindex+1, (int)recpos, param, rlevel, vdate, vtime);
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
@@ -1102,7 +1136,7 @@ int iegScanTimestep2(int streamID)
 
       if ( memcmp(&compVar0, &compVar, sizeof(IEGCOMPVAR)) != 0 )
 	{
-	  Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
+	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
 		  streamptr->tsteps[tsID].records[recID].param, param,
 		  streamptr->tsteps[tsID].records[recID].ilevel, rlevel);
@@ -1133,7 +1167,7 @@ int iegScanTimestep2(int streamID)
     {
       tsID = tstepsNewEntry(streamID);
       if ( tsID != streamptr->rtsteps )
-	Error(func, "Internal error. tsID = %d", tsID);
+	Error("Internal error. tsID = %d", tsID);
 
       streamptr->tsteps[tsID-1].next   = TRUE;
       streamptr->tsteps[tsID].position = recpos;
@@ -1145,14 +1179,13 @@ int iegScanTimestep2(int streamID)
 
 int iegInqContents(int streamID)
 {
-  static char func[] = "iegInqContents";
   int fileID;
   int status = 0;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   fileID = streamInqFileID(streamID);
 
@@ -1167,10 +1200,9 @@ int iegInqContents(int streamID)
   return (status);
 }
 
-
+static
 int iegScanTimestep(int streamID)
 {
-  static char func[] = "iegScanTimestep";
   int status;
   int fileID;
   int tsID;
@@ -1180,7 +1212,7 @@ int iegScanTimestep(int streamID)
   long recsize = 0;
   off_t recpos = 0;
   int recID;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int rindex, nrecs = 0;
   IEGCOMPVAR compVar, compVar0;
   iegrec_t *iegp;
@@ -1188,18 +1220,18 @@ int iegScanTimestep(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   if ( CDI_Debug )
     {
-      Message(func, "streamID = %d", streamID);
-      Message(func, "cts = %d", streamptr->curTsID);
-      Message(func, "rts = %d", streamptr->rtsteps);
-      Message(func, "nts = %d", streamptr->ntsteps);
+      Message("streamID = %d", streamID);
+      Message("cts = %d", streamptr->curTsID);
+      Message("rts = %d", streamptr->rtsteps);
+      Message("nts = %d", streamptr->ntsteps);
     }
 
   if ( streamptr->rtsteps == 0 )
-    Error(func, "Internal problem! Missing contents.");
+    Error("Internal problem! Missing contents.");
 
   iegp  = streamptr->record->iegp;
   tsID  = streamptr->rtsteps;
@@ -1244,7 +1276,8 @@ int iegScanTimestep(int streamID)
 
 	  iegDateTime(iegp->ipdb, &vdate, &vtime);
 
-	  if ( rindex == nrecs ) break;
+	  // if ( rindex == nrecs ) break; gcc-4.5 internal compiler error
+	  if ( rindex == nrecs ) continue;
 	  recID = streamptr->tsteps[tsID].recIDs[rindex];
 
 	  if ( rindex == 0 )
@@ -1261,18 +1294,18 @@ int iegScanTimestep(int streamID)
 
 	  if ( memcmp(&compVar0, &compVar, sizeof(IEGCOMPVAR)) != 0 )
 	    {
-	      Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
+	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,
 		      streamptr->tsteps[tsID].records[recID].param, param,
 		      streamptr->tsteps[tsID].records[recID].ilevel, rlevel);
-	      Error(func, "Invalid, unsupported or inconsistent record structure");
+	      Error("Invalid, unsupported or inconsistent record structure");
 	    }
 
 	  streamptr->tsteps[tsID].records[recID].position = recpos;
 	  streamptr->tsteps[tsID].records[recID].size = recsize;
 
 	  if ( CDI_Debug )
-	    Message(func, "%4d%8d%4d%8d%8d%6d", rindex, (int)recpos, param, rlevel, vdate, vtime);
+	    Message("%4d%8d%4d%8d%8d%6d", rindex, (int)recpos, param, rlevel, vdate, vtime);
 	}
 
       streamptr->rtsteps++;
@@ -1281,7 +1314,7 @@ int iegScanTimestep(int streamID)
 	{
 	  tsID = tstepsNewEntry(streamID);
 	  if ( tsID != streamptr->rtsteps )
-	    Error(func, "Internal error. tsID = %d", tsID);
+	    Error("Internal error. tsID = %d", tsID);
 
 	  streamptr->tsteps[tsID-1].next   = 1;
 	  streamptr->tsteps[tsID].position = recpos;
@@ -1293,7 +1326,7 @@ int iegScanTimestep(int streamID)
 
   if ( nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs )
     {
-      Warning(func, "Incomplete timestep. Stop scanning at timestep %d.\n", tsID);
+      Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
       streamptr->ntsteps = tsID;
     }
 
@@ -1303,19 +1336,18 @@ int iegScanTimestep(int streamID)
 
 int iegInqTimestep(int streamID, int tsID)
 {
-  static char func[] = "iegInqTimestep";
   int ntsteps, nrecs;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   if ( tsID == 0 && streamptr->rtsteps == 0 )
-    Error(func, "Call to cdiInqContents missing!");
+    Error("Call to cdiInqContents missing!");
 
   if ( CDI_Debug )
-    Message(func, "tsID = %d rtsteps = %d", tsID, streamptr->rtsteps);
+    Message("tsID = %d rtsteps = %d", tsID, streamptr->rtsteps);
   
   ntsteps = UNDEFID;
   while ( ( tsID + 1 ) > streamptr->rtsteps && ntsteps == UNDEFID )
@@ -1337,7 +1369,6 @@ int iegInqTimestep(int streamID, int tsID)
 
 void iegReadVarDP(int streamID, int varID, double *data, int *nmiss)
 {
-  static char func[] = "iegReadVarDP";
   int vlistID, fileID;
   int levID, nlevs, gridID, gridsize;
   off_t recpos, currentfilepos;
@@ -1361,7 +1392,7 @@ void iegReadVarDP(int streamID, int varID, double *data, int *nmiss)
   tsid     = streamptr->curTsID;
 
   if ( CDI_Debug )
-    Message(func, "nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
+    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
 
   currentfilepos = fileGetPos(fileID);
 
@@ -1387,7 +1418,6 @@ void iegReadVarDP(int streamID, int varID, double *data, int *nmiss)
 
 void iegReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nmiss)
 {
-  static char func[] = "iegReadVarSliceDP";
   int vlistID, fileID;
   int nlevs, gridID, gridsize;
   off_t recpos, currentfilepos;
@@ -1411,7 +1441,7 @@ void iegReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   tsid     = streamptr->curTsID;
 
   if ( CDI_Debug )
-    Message(func, "nlevs = %d gridID = %d gridsize = %d",
+    Message("nlevs = %d gridID = %d gridsize = %d",
 	     nlevs, gridID, gridsize);
 
   currentfilepos = fileGetPos(fileID);
@@ -1436,7 +1466,6 @@ void iegReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
 
 void iegWriteVarDP(int streamID, int varID, const double *data)
 {
-  static char func[] = "iegWriteVarDP";
   int fileID;
   int levID, nlevs, gridID, gridsize;
   int zaxisID;
@@ -1454,7 +1483,7 @@ void iegWriteVarDP(int streamID, int varID, const double *data)
   streamptr = stream_to_pointer(streamID);
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d  varID = %d", streamID, varID);
+    Message("streamID = %d  varID = %d", streamID, varID);
 
   iegp     = streamptr->record->iegp;
 
@@ -1470,7 +1499,7 @@ void iegWriteVarDP(int streamID, int varID, const double *data)
   nlevs    = zaxisInqSize(zaxisID);
 
   if ( CDI_Debug )
-    Message(func, "nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
+    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
 
   param    = vlistInqVarParam(vlistID, varID);
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
@@ -1505,7 +1534,6 @@ void iegWriteVarDP(int streamID, int varID, const double *data)
 
 void iegWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
 {
-  static char func[] = "iegWriteVarSliceDP";
   int fileID;
   int gridID;
   int zaxisID;
@@ -1528,7 +1556,7 @@ void iegWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   level    = zaxisInqLevel(zaxisID, levID);
 
   if ( CDI_Debug )
-    Message(func, "gridID = %d zaxisID = %d", gridID, zaxisID);
+    Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
   param = vlistInqVarParam(vlistID, varID);
   date = streamptr->tsteps[tsID].taxis.vdate;

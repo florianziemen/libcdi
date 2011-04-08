@@ -36,10 +36,8 @@ void institutsInit(void);
 
 void institutsInitEntry(int instID)
 {
-  static char func[] = "institutsInitEntry";
-
   if ( instID < 0 || instID >= institutsSize )
-    Error(func, "instID %d undefined!", instID);
+    Error("instID %d undefined!", instID);
 
   instituts[instID].used       = 0;
   instituts[instID].center     = UNDEFID;
@@ -51,7 +49,6 @@ void institutsInitEntry(int instID)
 
 int institutsNewEntry(void)
 {
-  static char func[] = "institutsNewEntry";
   int instID = 0;
 
   /*
@@ -66,8 +63,8 @@ int institutsNewEntry(void)
       instituts = (Institut *) malloc(institutsSize*sizeof(Institut));
       if( instituts == NULL )
 	{
-          Message(func, "institutsSize = %d", institutsSize);
-	  SysError(func, "Allocation of Institut failed");
+          Message("institutsSize = %d", institutsSize);
+	  SysError("Allocation of Institut failed");
 	}
 
       for( i = 0; i < institutsSize; i++ )
@@ -92,8 +89,8 @@ int institutsNewEntry(void)
       instituts = (Institut *) realloc(instituts, institutsSize*sizeof(Institut));
       if( instituts == NULL )
 	{
-          Message(func, "institutsSize = %d", institutsSize);
-	  SysError(func, "Reallocation of Institut failed");
+          Message("institutsSize = %d", institutsSize);
+	  SysError("Reallocation of Institut failed");
 	}
 
       for( i = instID; i < institutsSize; i++ )
@@ -166,7 +163,6 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
 
 int institutDef(int center, int subcenter, const char *name, const char *longname)
 {
-  static char func[] = "institutDef";
   int instID;
 
   if ( ! InstitutsInit ) institutsInit();
@@ -189,26 +185,25 @@ int institutDef(int center, int subcenter, const char *name, const char *longnam
 }
 
 
-void institutionCheckID(char *func, int instID)
+void institutionCheckID(const char *caller, int instID)
 {
   if ( instID < 0 || instID >= institutsSize )
-    Error(func, "instID %d undefined!", instID);
+    Errorc("instID %d undefined!", instID);
 
   if ( ! instituts[instID].used )
-    Error(func, "instID %d undefined!", instID);
+    Errorc("instID %d undefined!", instID);
 }
 
 
 int institutInqCenter(int instID)
 {
-  static char func[] = "institutInqCenter";
   int center = UNDEFID;
 
   if ( ! InstitutsInit ) institutsInit();
 
   if ( instID != UNDEFID )
     {
-      institutionCheckID(func, instID);
+      institutionCheckID(__func__, instID);
 
       center = instituts[instID].center;
     }
@@ -219,14 +214,13 @@ int institutInqCenter(int instID)
 
 int institutInqSubcenter(int instID)
 {
-  static char func[] = "institutInqSubcenter";
   int subcenter = UNDEFID;
 
   if ( ! InstitutsInit ) institutsInit();
 
   if ( instID != UNDEFID )
     {
-      institutionCheckID(func, instID);
+      institutionCheckID(__func__, instID);
 
       subcenter = instituts[instID].subcenter;
     }
@@ -237,14 +231,13 @@ int institutInqSubcenter(int instID)
 
 char *institutInqNamePtr(int instID)
 {
-  static char func[] = "institutInqNamePtr";
   char *name = NULL;
 
   if ( ! InstitutsInit ) institutsInit();
 
   if ( instID != UNDEFID )
     {
-      institutionCheckID(func, instID);
+      institutionCheckID(__func__, instID);
 
       if ( instituts[instID].name )
 	name = instituts[instID].name;
@@ -256,14 +249,13 @@ char *institutInqNamePtr(int instID)
 
 char *institutInqLongnamePtr(int instID)
 {
-  static char func[] = "institutInqLongnamePtr";
   char *name = NULL;
 
   if ( ! InstitutsInit ) institutsInit();
 
   if ( instID != UNDEFID )
     {
-      institutionCheckID(func, instID);
+      institutionCheckID(__func__, instID);
 
       if ( instituts[instID].longname )
 	name = instituts[instID].longname;

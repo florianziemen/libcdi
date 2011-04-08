@@ -654,13 +654,33 @@ Copy some entries of a variable list.
 Create a variable list.
 
 
+\section*{\tt \htmlref{vlistDefAttFlt}{vlistDefAttFlt}}
+
+\begin{verbatim}
+    int vlistDefAttFlt (intvlistID, intvarID, char *name, inttype, intlen, 
+                        double *dp_vec);
+\end{verbatim}
+
+Define a floating point attribute.
+
+
 \section*{\tt \htmlref{vlistDefAttInt}{vlistDefAttInt}}
 
 \begin{verbatim}
-    int vlistDefAttInt (intvlistID, intvarID, char *name, intlen, int *ip_vec);
+    int vlistDefAttInt (intvlistID, intvarID, char *name, inttype, intlen, 
+                        int *ip_vec);
 \end{verbatim}
 
 Define an integer attribute.
+
+
+\section*{\tt \htmlref{vlistDefAttTxt}{vlistDefAttTxt}}
+
+\begin{verbatim}
+    int vlistDefAttTxt (intvlistID, intvarID, char *name, intlen, char *tp);
+\end{verbatim}
+
+Define a text attribute.
 
 
 \section*{\tt \htmlref{vlistDefTaxis}{vlistDefTaxis}}
@@ -781,6 +801,15 @@ Duplicate a variable list.
 Get information about an attribute.
 
 
+\section*{\tt \htmlref{vlistInqAttFlt}{vlistInqAttFlt}}
+
+\begin{verbatim}
+    int vlistInqAttFlt (intvlistID, intvarID, char *name, intmlen, double *dp_vec);
+\end{verbatim}
+
+Get the value(s) of a floating point attribute.
+
+
 \section*{\tt \htmlref{vlistInqAttInt}{vlistInqAttInt}}
 
 \begin{verbatim}
@@ -788,6 +817,15 @@ Get information about an attribute.
 \end{verbatim}
 
 Get the value(s) of an integer attribute.
+
+
+\section*{\tt \htmlref{vlistInqAttTxt}{vlistInqAttTxt}}
+
+\begin{verbatim}
+    int vlistInqAttTxt (intvlistID, intvarID, char *name, intmlen, char *tp);
+\end{verbatim}
+
+Get the value(s) of a text attribute.
 
 
 \section*{\tt \htmlref{vlistInqNatts}{vlistInqNatts}}

@@ -1,10 +1,10 @@
-! This file was automatically created, don't edit!
+! This file was automatically generated, don't edit!
 !
 ! Fortran interface for CDI library version 1.4.3.1
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   October 2010
+! Uwe Schulzweida, MPI-MET, Hamburg,   April 2011
 !
 
       INTEGER    CDI_UNDEFID           
@@ -41,6 +41,8 @@
       PARAMETER (CDI_EUFSTRUCT          = -23)
       INTEGER    CDI_EUNC4             
       PARAMETER (CDI_EUNC4              = -24)
+      INTEGER    CDI_ELIMIT            
+      PARAMETER (CDI_ELIMIT             = -99)
 !
 !  File types
 !
@@ -194,8 +196,8 @@
       PARAMETER (GRID_GME               =  7)
       INTEGER    GRID_TRAJECTORY       
       PARAMETER (GRID_TRAJECTORY        =  8)
-      INTEGER    GRID_CELL             
-      PARAMETER (GRID_CELL              =  9)
+      INTEGER    GRID_UNSTRUCTURED     
+      PARAMETER (GRID_UNSTRUCTURED      =  9)
       INTEGER    GRID_CURVILINEAR      
       PARAMETER (GRID_CURVILINEAR       = 10)
       INTEGER    GRID_LCC              
@@ -206,6 +208,8 @@
       PARAMETER (GRID_LAEA              = 13)
       INTEGER    GRID_SINUSOIDAL       
       PARAMETER (GRID_SINUSOIDAL        = 14)
+      INTEGER    GRID_REFERENCE        
+      PARAMETER (GRID_REFERENCE         = 15)
 !
 !  ZAXIS types
 !
@@ -266,6 +270,12 @@
       PARAMETER (TUNIT_YEAR             =  6)
       INTEGER    TUNIT_QUARTER         
       PARAMETER (TUNIT_QUARTER          =  7)
+      INTEGER    TUNIT_3HOURS          
+      PARAMETER (TUNIT_3HOURS           =  8)
+      INTEGER    TUNIT_6HOURS          
+      PARAMETER (TUNIT_6HOURS           =  9)
+      INTEGER    TUNIT_12HOURS         
+      PARAMETER (TUNIT_12HOURS          = 10)
 !
 !  TSTEP types
 !
@@ -302,9 +312,6 @@
       PARAMETER (CALENDAR_366DAYS       =  4)
       INTEGER    CALENDAR_NONE         
       PARAMETER (CALENDAR_NONE          =  5)
-!
-!  #ifndef NOMPI
-!
       INTEGER    PIO_NONE              
       PARAMETER (PIO_NONE               =  0)
       INTEGER    PIO_MPI_NONB          
@@ -973,11 +980,6 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarSize
 
-      INTEGER         vlistInqVarID
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         code)
-      EXTERNAL        vlistInqVarID
-
 !                     vlistDefIndex
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
@@ -1054,6 +1056,7 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
+!                                     INTEGER         type,
 !                                     INTEGER         len,
 !                                     INTEGER         ip_vec)
       EXTERNAL        vlistDefAttInt
@@ -1062,6 +1065,7 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
+!                                     INTEGER         type,
 !                                     INTEGER         len,
 !                                     DOUBLEPRECISION dp_vec)
       EXTERNAL        vlistDefAttFlt
@@ -1113,6 +1117,16 @@
 !                     gridCompress
 !                                    (INTEGER         gridID)
       EXTERNAL        gridCompress
+
+!                     gridDefMaskGME
+!                                    (INTEGER         gridID,
+!                                     INTEGER         mask_vec)
+      EXTERNAL        gridDefMaskGME
+
+      INTEGER         gridInqMaskGME
+!                                    (INTEGER         gridID,
+!                                     INTEGER         mask_vec)
+      EXTERNAL        gridInqMaskGME
 
 !                     gridDefMask
 !                                    (INTEGER         gridID,
@@ -1370,6 +1384,37 @@
 !                                    (INTEGER         gridID,
 !                                     INTEGER         ni3)
       EXTERNAL        gridDefGMEni3
+
+!
+!  Reference grid
+!
+      INTEGER         gridInqNumber
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqNumber
+
+!                     gridDefNumber
+!                                    (INTEGER         gridID,
+!                                     INTEGER         number)
+      EXTERNAL        gridDefNumber
+
+      INTEGER         gridInqPosition
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqPosition
+
+!                     gridDefPosition
+!                                    (INTEGER         gridID,
+!                                     INTEGER         position)
+      EXTERNAL        gridDefPosition
+
+      INTEGER         gridInqReference
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   reference)
+      EXTERNAL        gridInqReference
+
+!                     gridDefReference
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   reference)
+      EXTERNAL        gridDefReference
 
 !
 !  Lambert Conformal Conic grid (GRIB version)
@@ -1719,6 +1764,10 @@
       INTEGER         taxisHasBounds
 !                                    (INTEGER         taxisID)
       EXTERNAL        taxisHasBounds
+
+!                     taxisDeleteBounds
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisDeleteBounds
 
 !                     taxisDefVdateBounds
 !                                    (INTEGER         taxisID,

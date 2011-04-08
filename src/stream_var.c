@@ -11,7 +11,8 @@
 #include "stream_int.h"
 
 
-static void streamvarInitEntry(int streamID, int varID)
+static
+void streamvarInitEntry(int streamID, int varID)
 {
   stream_t *streamptr;
 
@@ -30,10 +31,9 @@ static void streamvarInitEntry(int streamID, int varID)
   streamptr->vars[varID].nlevs        = 0;
 }
 
-
-static int streamvarNewEntry(int streamID)
+static
+int streamvarNewEntry(int streamID)
 {
-  static char func[] = "streamvarNewEntry";
   int varID = 0;
   int streamvarSize;
   SVARINFO *streamvar;
@@ -55,8 +55,8 @@ static int streamvarNewEntry(int streamID)
       streamvar = (SVARINFO *) malloc(streamvarSize*sizeof(SVARINFO));
       if ( streamvar == NULL )
 	{
-          Message(func, "streamvarSize = %d", streamvarSize);
-	  SysError(func, "Allocation of SVARINFO failed");
+          Message("streamvarSize = %d", streamvarSize);
+	  SysError("Allocation of SVARINFO failed");
 	}
 
       for ( i = 0; i < streamvarSize; i++ )
@@ -81,8 +81,8 @@ static int streamvarNewEntry(int streamID)
       streamvar = (SVARINFO *) realloc(streamvar, streamvarSize*sizeof(SVARINFO));
       if ( streamvar == NULL )
 	{
-          Message(func, "streamvarSize = %d", streamvarSize);
-	  SysError(func, "Reallocation of SVARINFO failed");
+          Message("streamvarSize = %d", streamvarSize);
+	  SysError("Reallocation of SVARINFO failed");
 	}
       varID = streamvarSize/2;
 
@@ -103,7 +103,6 @@ static int streamvarNewEntry(int streamID)
 
 int streamNewVar(int streamID, int gridID, int zaxisID)
 {
-  static char func[] = "streamNewVar";
   int varID;
   int *level;
   int *lindex;
@@ -114,7 +113,7 @@ int streamNewVar(int streamID, int gridID, int zaxisID)
   streamptr = stream_to_pointer(streamID);
 
   if ( CDI_Debug )
-    Message(func, "gridID = %d  zaxisID = %d", gridID, zaxisID);
+    Message("gridID = %d  zaxisID = %d", gridID, zaxisID);
 
   varID = streamvarNewEntry(streamID);
 

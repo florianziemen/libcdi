@@ -45,11 +45,10 @@ int srvInqDatatype(int prec)
 
 int srvDefDatatype(int datatype)
 {
-  static char func[] = "srvDefDatatype";
   int prec;
 
   if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
-    Error(func, "CDI/SERVICE library does not support complex numbers!");
+    Error("CDI/SERVICE library does not support complex numbers!");
 
   if ( datatype != DATATYPE_FLT32 && datatype != DATATYPE_FLT64 )
     datatype = DATATYPE_FLT32;
@@ -60,10 +59,9 @@ int srvDefDatatype(int datatype)
   return (prec);
 }
 
-
+/* not used
 int srvInqRecord(int streamID, int *varID, int *levelID)
 {
-  static char func[] = "srvInqRecord";
   int status;
   int fileID;
   int icode, ilevel;
@@ -75,7 +73,7 @@ int srvInqRecord(int streamID, int *varID, int *levelID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
@@ -94,7 +92,7 @@ int srvInqRecord(int streamID, int *varID, int *levelID)
 
   *varID = vlistInqVarID(vlistID, icode);
 
-  if ( *varID == UNDEFID ) Error(func, "Code %d undefined", icode);
+  if ( *varID == UNDEFID ) Error("Code %d undefined", icode);
 
   zaxisID = vlistInqVarZaxis(vlistID, *varID);
 
@@ -102,11 +100,10 @@ int srvInqRecord(int streamID, int *varID, int *levelID)
   
   return (1);
 }
-
+*/
 
 int srvReadRecord(int streamID, double *data, int *nmiss)
 {
-  static char func[] = "srvReadRecord";
   int vlistID, fileID;
   int status;
   int recID, vrecID, tsID;
@@ -120,7 +117,7 @@ int srvReadRecord(int streamID, double *data, int *nmiss)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
@@ -159,7 +156,6 @@ int srvReadRecord(int streamID, double *data, int *nmiss)
 
 int srvCopyRecord(int streamID2, int streamID1)
 {
-  static char func[] = "srvCopyRecord";
   int fileID1, fileID2;
   int tsID, recID, vrecID;
   long recsize;
@@ -172,8 +168,8 @@ int srvCopyRecord(int streamID2, int streamID1)
   streamptr1 = stream_to_pointer(streamID1);
   streamptr2 = stream_to_pointer(streamID2);
 
-  stream_check_ptr(func, streamptr1);
-  stream_check_ptr(func, streamptr2);
+  stream_check_ptr(__func__, streamptr1);
+  stream_check_ptr(__func__, streamptr2);
 
   fileID1 = streamInqFileID(streamID1);
   fileID2 = streamInqFileID(streamID2);
@@ -200,7 +196,6 @@ int srvCopyRecord(int streamID2, int streamID1)
 
 int srvDefRecord(int streamID)
 {
-  static char func[] = "srvDefRecord";
   int fileID;
   int gridID;
   int header[8];
@@ -213,7 +208,7 @@ int srvDefRecord(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   fileID = streamInqFileID(streamID);
   gridID = streamptr->record->gridID;
@@ -232,9 +227,9 @@ int srvDefRecord(int streamID)
       xsize = gridInqSize(gridID);
       ysize = 1;
     }
-  if ( gridInqType(gridID) == GRID_CELL ) ysize = 1;
+  if ( gridInqType(gridID) == GRID_UNSTRUCTURED ) ysize = 1;
   if ( gridInqSize(gridID) != xsize*ysize )
-    Error(func, "Internal problem with gridsize!");
+    Error("Internal problem with gridsize!");
 
   header[4] = xsize;
   header[5] = ysize;
@@ -253,7 +248,6 @@ int srvDefRecord(int streamID)
 
 int srvWriteRecord(int streamID, const double *data)
 {
-  static char func[] = "srvWriteRecord";
   int fileID;
   int status = 0;
   srvrec_t *srvp;
@@ -261,7 +255,7 @@ int srvWriteRecord(int streamID, const double *data)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   fileID = streamInqFileID(streamID);
   srvp   = streamptr->record->srvp;
@@ -277,7 +271,6 @@ int srvWriteRecord(int streamID, const double *data)
 void srvAddRecord(int streamID, int param, int level, int xsize, int ysize,
 		  long recsize, off_t position, int prec)
 {
-  static char func[] = "srvAddRecord";
   int leveltype;
   int gridID = UNDEFID;
   int levelID = 0;
@@ -326,7 +319,7 @@ void srvAddRecord(int streamID, int param, int level, int xsize, int ysize,
   streamptr->nrecs++;
 
   if ( CDI_Debug )
-    Message(func, "varID = %d gridID = %d levelID = %d",
+    Message("varID = %d gridID = %d levelID = %d",
 	    varID, gridID, levelID);
 }
 
@@ -334,7 +327,6 @@ void srvAddRecord(int streamID, int param, int level, int xsize, int ysize,
 void srvCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
 		  int level, int xsize, int ysize)
 {
-  static char func[] = "srvCmpRecord";
   int varID = 0;
   int levelID = 0;
   record_t *record;
@@ -345,7 +337,7 @@ void srvCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
   record  = &streamptr->tsteps[tsID].records[recID];
 
   if ( param != (*record).param || level != (*record).ilevel )
-    Error(func, "inconsistent timestep");
+    Error("inconsistent timestep");
 
   (*record).position = position;
   /*
@@ -358,13 +350,12 @@ void srvCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
   streamptr->nrecs++;
   */
   if ( CDI_Debug )
-    Message(func, "varID = %d levelID = %d", varID, levelID);
+    Message("varID = %d levelID = %d", varID, levelID);
 }
 
-
+static
 void srvScanTimestep1(int streamID)
 {  
-  static char func[] = "srvScanTimestep1";
   int header[8];
   int prec = 0;
   int status;
@@ -379,7 +370,7 @@ void srvScanTimestep1(int streamID)
   off_t recpos;
   int nrecords, nrecs, recID;
   int taxisID = -1;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int vlistID;
   SRVCOMPVAR compVar, compVar0;
   srvrec_t *srvp;
@@ -387,7 +378,7 @@ void srvScanTimestep1(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 0;
 
@@ -396,7 +387,7 @@ void srvScanTimestep1(int streamID)
   taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( tsID != 0 )
-    Error(func, "Internal problem! tstepsNewEntry returns %d", tsID);
+    Error("Internal problem! tstepsNewEntry returns %d", tsID);
 
   fileID = streamInqFileID(streamID);
 
@@ -444,13 +435,13 @@ void srvScanTimestep1(int streamID)
 	    }
 	  if ( recID < nrecs ) break;
 	  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) )
-	    Warning(func, "Inconsistent verification time for code %d level %d", rcode, rlevel);
+	    Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
 	}
 
       nrecs++;
 
       if ( CDI_Debug )
-	Message(func, "%4d%8d%4d%8d%8d%6d", nrecs, (int)recpos, rcode, rlevel, vdate, vtime);
+	Message("%4d%8d%4d%8d%8d%6d", nrecs, (int)recpos, rcode, rlevel, vdate, vtime);
 
       srvAddRecord(streamID, param, rlevel, rxsize, rysize, recsize, recpos, prec);
     }
@@ -486,7 +477,7 @@ void srvScanTimestep1(int streamID)
     {
       tsID = tstepsNewEntry(streamID);
       if ( tsID != streamptr->rtsteps )
-	Error(func, "Internal error. tsID = %d", tsID);
+	Error("Internal error. tsID = %d", tsID);
 
       streamptr->tsteps[tsID-1].next   = TRUE;
       streamptr->tsteps[tsID].position = recpos;
@@ -505,10 +496,9 @@ void srvScanTimestep1(int streamID)
     }
 }
 
-
+static
 int srvScanTimestep2(int streamID)
 {  
-  static char func[] = "srvScanTimestep2";
   int header[8];
   int status;
   int fileID;
@@ -520,7 +510,7 @@ int srvScanTimestep2(int streamID)
   off_t recpos = 0;
   int nrecords, nrecs, recID, rindex;
   int nextstep;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int vlistID;
   SRVCOMPVAR compVar, compVar0;
   srvrec_t *srvp;
@@ -528,7 +518,7 @@ int srvScanTimestep2(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 1;
 
@@ -538,7 +528,7 @@ int srvScanTimestep2(int streamID)
 
   tsID = streamptr->rtsteps;
   if ( tsID != 1 )
-    Error(func, "Internal problem! unexpeceted timestep %d", tsID+1);
+    Error("Internal problem! unexpeceted timestep %d", tsID+1);
 
   taxis = &streamptr->tsteps[tsID].taxis;
 
@@ -612,14 +602,14 @@ int srvScanTimestep2(int streamID)
 	}
       if ( recID == nrecords )
 	{
-	  Warning(func, "Code %d level %d not found at timestep %d", rcode, rlevel, tsID+1);
+	  Warning("Code %d level %d not found at timestep %d", rcode, rlevel, tsID+1);
 	  return (CDI_EUFSTRUCT);
 	}
 
       if ( nextstep ) break;
 
       if ( CDI_Debug )
-	Message(func, "%4d%8d%4d%8d%8d%6d", rindex+1, (int)recpos, rcode, rlevel, vdate, vtime);
+	Message("%4d%8d%4d%8d%8d%6d", rindex+1, (int)recpos, rcode, rlevel, vdate, vtime);
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
@@ -628,7 +618,7 @@ int srvScanTimestep2(int streamID)
 
       if ( memcmp(&compVar0, &compVar, sizeof(SRVCOMPVAR)) != 0 )
 	{
-	  Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
+	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
 		  streamptr->tsteps[tsID].records[recID].param, param,
 		  streamptr->tsteps[tsID].records[recID].ilevel, rlevel);
@@ -659,7 +649,7 @@ int srvScanTimestep2(int streamID)
     {
       tsID = tstepsNewEntry(streamID);
       if ( tsID != streamptr->rtsteps )
-	Error(func, "Internal error. tsID = %d", tsID);
+	Error("Internal error. tsID = %d", tsID);
 
       streamptr->tsteps[tsID-1].next   = TRUE;
       streamptr->tsteps[tsID].position = recpos;
@@ -671,14 +661,13 @@ int srvScanTimestep2(int streamID)
 
 int srvInqContents(int streamID)
 {
-  static char func[] = "srvInqContents";
   int fileID;
   int status = 0;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   fileID = streamInqFileID(streamID);
 
@@ -693,10 +682,9 @@ int srvInqContents(int streamID)
   return (status);
 }
 
-
+static
 int srvScanTimestep(int streamID)
 {
-  static char func[] = "srvScanTimestep";
   int header[8];
   int status;
   int fileID;
@@ -707,7 +695,7 @@ int srvScanTimestep(int streamID)
   long recsize = 0;
   off_t recpos = 0;
   int recID;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int rindex, nrecs = 0;
   SRVCOMPVAR compVar, compVar0;
   srvrec_t *srvp;
@@ -715,18 +703,18 @@ int srvScanTimestep(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   if ( CDI_Debug )
     {
-      Message(func, "streamID = %d", streamID);
-      Message(func, "cts = %d", streamptr->curTsID);
-      Message(func, "rts = %d", streamptr->rtsteps);
-      Message(func, "nts = %d", streamptr->ntsteps);
+      Message("streamID = %d", streamID);
+      Message("cts = %d", streamptr->curTsID);
+      Message("rts = %d", streamptr->rtsteps);
+      Message("nts = %d", streamptr->ntsteps);
     }
 
   if ( streamptr->rtsteps == 0 )
-    Error(func, "Internal problem! Missing contents.");
+    Error("Internal problem! Missing contents.");
 
   srvp  = streamptr->record->srvp;
   tsID  = streamptr->rtsteps;
@@ -769,7 +757,8 @@ int srvScanTimestep(int streamID)
 
 	  param = cdiEncodeParam(rcode, 255, 255);
 
-	  if ( rindex == nrecs ) break;
+	  // if ( rindex == nrecs ) break; gcc-4.5 internal compiler error
+	  if ( rindex == nrecs ) continue;
 	  recID = streamptr->tsteps[tsID].recIDs[rindex];
 
 	  if ( rindex == 0 )
@@ -788,18 +777,18 @@ int srvScanTimestep(int streamID)
 
 	  if ( memcmp(&compVar0, &compVar, sizeof(SRVCOMPVAR)) != 0 )
 	    {
-	      Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
+	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,
 		      streamptr->tsteps[tsID].records[recID].param, param,
 		      streamptr->tsteps[tsID].records[recID].ilevel, rlevel);
-	      Error(func, "Invalid, unsupported or inconsistent record structure");
+	      Error("Invalid, unsupported or inconsistent record structure");
 	    }
 
 	  streamptr->tsteps[tsID].records[recID].position = recpos;
 	  streamptr->tsteps[tsID].records[recID].size = recsize;
 
 	  if ( CDI_Debug )
-	    Message(func, "%4d%8d%4d%8d%8d%6d", rindex, (int)recpos, rcode, rlevel, vdate, vtime);
+	    Message("%4d%8d%4d%8d%8d%6d", rindex, (int)recpos, rcode, rlevel, vdate, vtime);
 	}
 
       streamptr->rtsteps++;
@@ -808,7 +797,7 @@ int srvScanTimestep(int streamID)
 	{
 	  tsID = tstepsNewEntry(streamID);
 	  if ( tsID != streamptr->rtsteps )
-	    Error(func, "Internal error. tsID = %d", tsID);
+	    Error("Internal error. tsID = %d", tsID);
 
 	  streamptr->tsteps[tsID-1].next   = 1;
 	  streamptr->tsteps[tsID].position = recpos;
@@ -820,7 +809,7 @@ int srvScanTimestep(int streamID)
 
   if ( nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs )
     {
-      Warning(func, "Incomplete timestep. Stop scanning at timestep %d.\n", tsID);
+      Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
       streamptr->ntsteps = tsID;
     }
 
@@ -830,19 +819,18 @@ int srvScanTimestep(int streamID)
 
 int srvInqTimestep(int streamID, int tsID)
 {
-  static char func[] = "srvInqTimestep";
   int ntsteps, nrecs;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   if ( tsID == 0 && streamptr->rtsteps == 0 )
-    Error(func, "Call to cdiInqContents missing!");
+    Error("Call to cdiInqContents missing!");
 
   if ( CDI_Debug )
-    Message(func, "tsID = %d rtsteps = %d", tsID, streamptr->rtsteps);
+    Message("tsID = %d rtsteps = %d", tsID, streamptr->rtsteps);
   
   ntsteps = UNDEFID;
   while ( ( tsID + 1 ) > streamptr->rtsteps && ntsteps == UNDEFID )
@@ -864,7 +852,6 @@ int srvInqTimestep(int streamID, int tsID)
 
 void srvReadVarDP(int streamID, int varID, double *data, int *nmiss)
 {
-  static char func[] = "srvReadVarDP";
   int vlistID, fileID;
   int levID, nlevs, gridID, gridsize;
   off_t recpos, currentfilepos;
@@ -889,7 +876,7 @@ void srvReadVarDP(int streamID, int varID, double *data, int *nmiss)
   tsid     = streamptr->curTsID;
 
   if ( CDI_Debug )
-    Message(func, "nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
+    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
 
   currentfilepos = fileGetPos(fileID);
 
@@ -916,7 +903,6 @@ void srvReadVarDP(int streamID, int varID, double *data, int *nmiss)
 
 void srvReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nmiss)
 {
-  static char func[] = "srvReadVarSliceDP";
   int vlistID, fileID;
   int nlevs, gridID, gridsize;
   off_t recpos, currentfilepos;
@@ -941,7 +927,7 @@ void srvReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   tsid     = streamptr->curTsID;
 
   if ( CDI_Debug )
-    Message(func, "nlevs = %d gridID = %d gridsize = %d",
+    Message("nlevs = %d gridID = %d gridsize = %d",
 	     nlevs, gridID, gridsize);
 
   currentfilepos = fileGetPos(fileID);
@@ -967,7 +953,6 @@ void srvReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
 
 void srvWriteVarDP(int streamID, int varID, const double *data)
 {
-  static char func[] = "srvWriteVarDP";
   int fileID;
   int levID, nlevs, gridID, gridsize;
   int zaxisID;
@@ -984,7 +969,7 @@ void srvWriteVarDP(int streamID, int varID, const double *data)
   streamptr = stream_to_pointer(streamID);
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d  varID = %d", streamID, varID);
+    Message("streamID = %d  varID = %d", streamID, varID);
 
   srvp     = streamptr->record->srvp;
   vlistID  = streamInqVlist(streamID);
@@ -996,7 +981,7 @@ void srvWriteVarDP(int streamID, int varID, const double *data)
   nlevs    = zaxisInqSize(zaxisID);
 
   if ( CDI_Debug )
-    Message(func, "nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
+    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
 
   cdiDecodeParam(vlistInqVarParam(vlistID, varID), &pnum, &pcat, &pdis);
 
@@ -1011,9 +996,9 @@ void srvWriteVarDP(int streamID, int varID, const double *data)
       xsize = gridInqSize(gridID);
       ysize = 1;
     }
-  if ( gridInqType(gridID) == GRID_CELL ) ysize = 1;
+  if ( gridInqType(gridID) == GRID_UNSTRUCTURED ) ysize = 1;
   if ( gridInqSize(gridID) != xsize*ysize )
-    Error(func, "Internal problem with gridsize!");
+    Error("Internal problem with gridsize!");
 
   header[4] = xsize;
   header[5] = ysize;
@@ -1038,7 +1023,6 @@ void srvWriteVarDP(int streamID, int varID, const double *data)
 
 void srvWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
 {
-  static char func[] = "srvWriteVarSliceDP";
   int fileID;
   int gridID;
   int zaxisID;
@@ -1063,7 +1047,7 @@ void srvWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   level    = zaxisInqLevel(zaxisID, levID);
 
   if ( CDI_Debug )
-    Message(func, "gridID = %d zaxisID = %d", gridID, zaxisID);
+    Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
   cdiDecodeParam(vlistInqVarParam(vlistID, varID), &pnum, &pcat, &pdis);
 
@@ -1079,9 +1063,9 @@ void srvWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
       xsize = gridInqSize(gridID);
       ysize = 1;
     }
-  if ( gridInqType(gridID) == GRID_CELL ) ysize = 1;
+  if ( gridInqType(gridID) == GRID_UNSTRUCTURED ) ysize = 1;
   if ( gridInqSize(gridID) != xsize*ysize )
-    Error(func, "Internal problem with gridsize!");
+    Error("Internal problem with gridsize!");
 
   header[4] = xsize;
   header[5] = ysize;

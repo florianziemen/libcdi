@@ -11,6 +11,7 @@
 #include "cdi.h"
 #include "stream_int.h"
 #include "gribapi.h"
+#include "dmemory.h"
 
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
@@ -35,22 +36,52 @@ const char *gribapiLibraryVersion(void)
 }
 
 
-void gribapiDefHandles(int streamID)
+void gribContainersNew(int streamID)
 {
-  static char func[] = "gribapiDefHandles";
-  stream_t *streamptr = NULL;
-  int vlistID, ngrids, nzaxis, i;
+  stream_t *streamptr;
    
   streamptr = stream_to_pointer(streamID);
 
-  vlistID = streamInqVlist(streamID);
-  ngrids = vlistNgrids(vlistID);
-  nzaxis = vlistNzaxis(vlistID);
+#if  defined  (HAVE_LIBCGRIBEX)
+  if ( streamptr->filetype == FILETYPE_GRB )
+    {
+    }
+  else
+#endif
+    {
+      int i, editionNumber = 2;
+      gribContainer_t *gribContainers;
 
-  streamptr->gribHandleNums = ngrids*nzaxis;
-  streamptr->gribHandle = (void **) malloc(streamptr->gribHandleNums*sizeof(void *));
+      if ( streamptr->filetype == FILETYPE_GRB ) editionNumber = 1;
 
-  for ( i = 0; i < streamptr->gribHandleNums; ++i )
-    streamptr->gribHandle[i] = gribHandleNew();
+      gribContainers = (gribContainer_t *) malloc(streamptr->nvars*sizeof(gribContainer_t));
+      streamptr->gribContainers = (void *) gribContainers;
+
+      for ( i = 0; i < streamptr->nvars; ++i )
+	{
+	  gribContainers[i].gribHandle = gribHandleNew(editionNumber);
+	  gribContainers[i].init = FALSE;
+	}
+    }
 }
 
+
+void gribContainersDelete(int streamID)
+{
+  stream_t *streamptr;
+   
+  streamptr = stream_to_pointer(streamID);
+
+  if ( streamptr->gribContainers )
+    {
+      int i;
+      gribContainer_t *gribContainers = (gribContainer_t *) streamptr->gribContainers;
+
+      for ( i = 0; i < streamptr->nvars; ++i )
+	{
+	  gribHandleDelete(gribContainers[i].gribHandle);
+	}
+      free(streamptr->gribContainers);
+      streamptr->gribContainers = NULL;
+    }
+}

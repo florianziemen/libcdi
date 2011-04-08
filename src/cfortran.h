@@ -94,6 +94,9 @@ only C calling FORTRAN subroutines will work using K&R style.*/
 #if defined(__linux__) && defined(__ia64__)
 #define f2cFortran
 #endif
+#if defined(__linux__) && defined(__x86_64__)
+#define f2cFortran
+#endif
 #if defined(lynx) || defined(VAXUltrix)
 #define f2cFortran    /* Lynx:      Only support f2c at the moment.
                          VAXUltrix: f77 behaves like f2c.

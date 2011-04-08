@@ -32,7 +32,7 @@ static int srvDefaultDprec = 0;
  */
 
 #undef  LIBVERSION
-#define LIBVERSION      1.2.0
+#define LIBVERSION      1.3.0
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char srv_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
@@ -48,18 +48,15 @@ int SRV_Debug = 0;    /* If set to 1, debugging */
 
 void srvDebug(int debug)
 {
-  static char func[] = "srvDebug";
-
   SRV_Debug = debug;
 
   if ( SRV_Debug )
-    Message(func, "debug level %d", debug);
+    Message("debug level %d", debug);
 }
 
 
 void srvLibInit()
 {
-  static char func[] = "srvLibInit";
   char *envString;
   char *envName = "SRV_PRECISION";
 
@@ -84,7 +81,7 @@ void srvLibInit()
 		  case '4': srvDefaultHprec = SINGLE_PRECISION; break;
 		  case '8': srvDefaultHprec = DOUBLE_PRECISION; break;
 		  default:
-		    Message(func, "Invalid digit in %s: %s", envName, envString);
+		    Message("Invalid digit in %s: %s", envName, envString);
 		  }
 		break;
 	      }
@@ -95,12 +92,12 @@ void srvLibInit()
 		  case '4': srvDefaultDprec = SINGLE_PRECISION; break;
 		  case '8': srvDefaultDprec = DOUBLE_PRECISION; break;
 		  default:
-		    Message(func, "Invalid digit in %s: %s", envName, envString);
+		    Message("Invalid digit in %s: %s", envName, envString);
 		  }
 		break;		
 	      }
 	    default:
-	      Message(func, "Invalid character in %s: %s", envName, envString);
+	      Message("Invalid character in %s: %s", envName, envString);
 	    }
 	  pos += 2;
 	}
@@ -124,7 +121,6 @@ void srvInit(srvrec_t *srvp)
 
 srvrec_t *srvNew(void)
 {
-  static char func[] = "srvNew";
   srvrec_t *srvp;
 
   if ( ! initSrvLib ) srvLibInit();
@@ -139,8 +135,6 @@ srvrec_t *srvNew(void)
 
 void srvDelete(srvrec_t *srvp)
 {
-  static char func[] = "srvDelete";
-
   if ( srvp )
     {
       if ( srvp->buffer ) free(srvp->buffer);
@@ -151,7 +145,6 @@ void srvDelete(srvrec_t *srvp)
 
 int srvCheckFiletype(int fileID, int *swap)
 {
-  static char func[] = "srvCheckFiletype";
   size_t blocklen = 0;
   size_t sblocklen = 0;
   size_t data = 0;
@@ -165,7 +158,7 @@ int srvCheckFiletype(int fileID, int *swap)
   sblocklen = (size_t) get_SUINT32(buffer);
 
   if ( SRV_Debug )
-    Message(func, "blocklen = %d sblocklen = %d", blocklen, sblocklen);
+    Message("blocklen = %d sblocklen = %d", blocklen, sblocklen);
 
   if ( blocklen == 32 )
     {
@@ -211,8 +204,8 @@ int srvCheckFiletype(int fileID, int *swap)
 
   if ( SRV_Debug )
     {
-      Message(func, "swap = %d fact = %d", *swap, fact);
-      Message(func, "dimx = %lu dimy = %lu data = %lu", dimx, dimy, data);
+      Message("swap = %d fact = %d", *swap, fact);
+      Message("dimx = %lu dimy = %lu data = %lu", dimx, dimy, data);
     }
 
   return (found);
@@ -221,15 +214,13 @@ int srvCheckFiletype(int fileID, int *swap)
 
 int srvInqHeader(srvrec_t *srvp, int *header)
 {
-  static char func[] = "srvInqHeader";
   size_t i;
-
 
   for ( i = 0; i < SRV_HEADER_LEN; i++ )
     header[i] = srvp->header[i];
   
   if ( SRV_Debug )
-    Message(func, "datasize = %lu", srvp->datasize);
+    Message("datasize = %lu", srvp->datasize);
 
   return (0);
 }
@@ -237,9 +228,7 @@ int srvInqHeader(srvrec_t *srvp, int *header)
 
 int srvDefHeader(srvrec_t *srvp, const int *header)
 {
-  static char func[] = "srvDefHeader";
   size_t i;
-
 
   for ( i = 0; i < SRV_HEADER_LEN; i++ )
     srvp->header[i] = header[i];
@@ -247,7 +236,7 @@ int srvDefHeader(srvrec_t *srvp, const int *header)
   srvp->datasize = header[4]*header[5];
 
   if ( SRV_Debug )
-    Message(func, "datasize = %lu", srvp->datasize);
+    Message("datasize = %lu", srvp->datasize);
 
   return (0);
 }
@@ -255,14 +244,12 @@ int srvDefHeader(srvrec_t *srvp, const int *header)
 
 int srvInqData(srvrec_t *srvp, int prec, void *data)
 {
-  static char func[] = "srvInqData";
   size_t datasize;
   size_t i;
   int ierr = 0;
   int dprec;
   void *buffer;
   int byteswap = srvp->byteswap;
-
 
   datasize = srvp->datasize;
 
@@ -286,7 +273,7 @@ int srvInqData(srvrec_t *srvp, int prec, void *data)
 	  }
 	else
 	  {
-	    Error(func, "not implemented for %d byte float", sizeof(FLT32));
+	    Error("not implemented for %d byte float", sizeof(FLT32));
 	  }	
 	break;
       }
@@ -303,12 +290,12 @@ int srvInqData(srvrec_t *srvp, int prec, void *data)
 	  }
 	else
 	  {
-	    Error(func, "not implemented for %d byte float", sizeof(FLT64));
+	    Error("not implemented for %d byte float", sizeof(FLT64));
 	  }	
 	break;
     default:
       {
-	Error(func, "unexpected data precision %d", dprec);
+	Error("unexpected data precision %d", dprec);
       }
     }
 
@@ -330,7 +317,6 @@ int srvInqDataDP(srvrec_t *srvp, double *data)
 
 int srvDefData(srvrec_t *srvp, int prec, const void *data)
 {
-  static char func[] = "srvDefData";
   size_t datasize;
   size_t blocklen;
   size_t buffersize;
@@ -338,7 +324,6 @@ int srvDefData(srvrec_t *srvp, int prec, const void *data)
   int dprec, hprec;
   int *header;
   void *buffer;
-
 
   if ( srvDefaultDprec ) dprec = srvDefaultDprec;
   else                   dprec = srvp->dprec;
@@ -398,7 +383,7 @@ int srvDefData(srvrec_t *srvp, int prec, const void *data)
       }
     default:
       {
-	Error(func, "unexpected data precision %d", dprec);
+	Error("unexpected data precision %d", dprec);
       }
     }
 
@@ -420,7 +405,6 @@ int srvDefDataDP(srvrec_t *srvp, const double *data)
 
 int srvRead(int fileID, srvrec_t *srvp)
 {
-  static char func[] = "srvRead";
   size_t datasize;
   size_t blocklen, blocklen2;
   size_t i;
@@ -434,7 +418,7 @@ int srvRead(int fileID, srvrec_t *srvp)
   if ( ! srvp->checked )
     {
       status = srvCheckFiletype(fileID, &srvp->byteswap);
-      if ( status == 0 ) Error(func, "Not a SERVICE file!");
+      if ( status == 0 ) Error("Not a SERVICE file!");
       srvp->checked = 1;
     }
 
@@ -446,7 +430,7 @@ int srvRead(int fileID, srvrec_t *srvp)
   if ( fileEOF(fileID) ) return (-1);
 
   if ( SRV_Debug )
-    Message(func, "blocklen = %lu", blocklen);
+    Message("blocklen = %lu", blocklen);
 
   hprec = blocklen / SRV_HEADER_LEN;
 
@@ -474,7 +458,7 @@ int srvRead(int fileID, srvrec_t *srvp)
       }
     default:
       {
-	Error(func, "unexpected header precision %d", hprec);
+	Error("unexpected header precision %d", hprec);
       }
     }
 
@@ -482,14 +466,14 @@ int srvRead(int fileID, srvrec_t *srvp)
 
   if ( blocklen2 != blocklen )
     {
-      Warning(func, "header blocklen differ!");
+      Warning("header blocklen differ!");
       return (-1);
     }
 
   srvp->datasize = srvp->header[4]*srvp->header[5];
 
   if ( SRV_Debug )
-    Message(func, "datasize = %lu", srvp->datasize);
+    Message("datasize = %lu", srvp->datasize);
 
   blocklen = binReadF77Block(fileID, byteswap);
 
@@ -514,7 +498,7 @@ int srvRead(int fileID, srvrec_t *srvp)
 
   if ( dprec != SINGLE_PRECISION && dprec != DOUBLE_PRECISION )
     {
-      Warning(func, "unexpected data precision %d", dprec);
+      Warning("unexpected data precision %d", dprec);
       return (-1);
     }
 
@@ -524,7 +508,7 @@ int srvRead(int fileID, srvrec_t *srvp)
 
   if ( blocklen2 != blocklen )
     {
-      Warning(func, "data blocklen differ!");
+      Warning("data blocklen differ!");
       return (-1);
     }
 
@@ -534,7 +518,6 @@ int srvRead(int fileID, srvrec_t *srvp)
 
 int srvWrite(int fileID, srvrec_t *srvp)
 {
-  static char func[] = "srvWrite";
   size_t datasize;
   size_t blocklen;
   size_t i;
@@ -543,7 +526,6 @@ int srvWrite(int fileID, srvrec_t *srvp)
   int *header;
   void *buffer;
   int byteswap = srvp->byteswap;
-
 
   dprec  = srvp->dprec;
   hprec  = srvp->hprec;
@@ -576,7 +558,7 @@ int srvWrite(int fileID, srvrec_t *srvp)
       }
     default:
       {
-	Error(func, "unexpected header precision %d", hprec);
+	Error("unexpected header precision %d", hprec);
       }
     }
   
@@ -605,7 +587,7 @@ int srvWrite(int fileID, srvrec_t *srvp)
       }
     default:
       {
-	Error(func, "unexpected data precision %d", dprec);
+	Error("unexpected data precision %d", dprec);
       }
     }
 

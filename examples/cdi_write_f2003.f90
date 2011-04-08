@@ -5,17 +5,17 @@
 
       IMPLICIT NONE
 
-      INTEGER NLON, NLAT, NLEV, NTIME
-      PARAMETER (NLON  = 12)   ! Number of longitudes
-      PARAMETER (NLAT  =  6)   ! Number of latitudes
-      PARAMETER (NLEV  =  5)   ! Number of levels
-      PARAMETER (NTIME =  3)   ! Number of time steps
+      INTEGER nlon, nlat, nlev, nts
+      PARAMETER (nlon = 12)   ! Number of longitudes
+      PARAMETER (nlat =  6)   ! Number of latitudes
+      PARAMETER (nlev =  5)   ! Number of levels
+      PARAMETER (nts  =  3)   ! Number of time steps
 
       INTEGER gridID, zaxisID1, zaxisID2, taxisID
       INTEGER vlistID, varID1, varID2, streamID, tsID
       INTEGER i, nmiss, status
-      DOUBLE PRECISION lons(NLON), lats(NLAT), levs(NLEV)
-      DOUBLE PRECISION var1(NLON*NLAT), var2(NLON*NLAT*NLEV)
+      DOUBLE PRECISION lons(nlon), lats(nlat), levs(nlev)
+      DOUBLE PRECISION var1(nlon*nlat), var2(nlon*nlat*nlev)
       CHARACTER(len=256) :: varname
 
       DATA lons /0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330/
@@ -25,9 +25,9 @@
       nmiss = 0
 
 !     Create a regular lon/lat grid
-      gridID = gridCreate(GRID_LONLAT, NLON*NLAT)
-      CALL gridDefXsize(gridID, NLON)
-      CALL gridDefYsize(gridID, NLAT)
+      gridID = gridCreate(GRID_LONLAT, nlon*nlat)
+      CALL gridDefXsize(gridID, nlon)
+      CALL gridDefYsize(gridID, nlat)
       CALL gridDefXvals(gridID, lons)
       CALL gridDefYvals(gridID, lats)
 
@@ -35,7 +35,7 @@
       zaxisID1 = zaxisCreate(ZAXIS_SURFACE, 1)
 
 !     Create a pressure level Z-axis
-      zaxisID2 = zaxisCreate(ZAXIS_PRESSURE, NLEV)
+      zaxisID2 = zaxisCreate(ZAXIS_PRESSURE, nlev)
       CALL zaxisDefLevels(zaxisID2, levs)
  
 !     Create a variable list
@@ -67,19 +67,19 @@
       CALL streamDefVlist(streamID, vlistID)
 
 !     Loop over the number of time steps
-      DO tsID = 0, NTIME-1
+      DO tsID = 0, nts-1
 !        Set the verification date to 1985-01-01 + tsID
          CALL taxisDefVdate(taxisID, 19850101+tsID)
-!        Set the verification time to 12:00
-         CALL taxisDefVtime(taxisID, 1200)
+!        Set the verification time to 12:00:00
+         CALL taxisDefVtime(taxisID, 120000)
 !        Define the time step
          status = streamDefTimestep(streamID, tsID)
 
 !        Init var1 and var2
-         DO i = 1, NLON*NLAT
+         DO i = 1, nlon*nlat
             var1(i) = 1.1
          END DO
-         DO i = 1, NLON*NLAT*NLEV
+         DO i = 1, nlon*nlat*nlev
             var2(i) = 2.2
          END DO
 

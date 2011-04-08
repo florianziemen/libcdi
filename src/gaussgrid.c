@@ -5,6 +5,15 @@
 
 #include "dmemory.h"
 
+#ifndef  M_PI
+#define  M_PI        3.14159265358979323846  /* pi */
+#endif
+
+#ifndef  M_SQRT2
+#define  M_SQRT2     1.41421356237309504880
+#endif
+
+
 static
 void cpledn(int kn, int kodd, double *pfn, double pdx, int kflag, 
             double *pw, double *pdxn, double *pxmod)
@@ -110,7 +119,6 @@ void gauaw(int kn, double *pl, double *pw)
    * Belousov, Swarztrauber, and ECHAM use zfn(0,0) = sqrt(2)
    * IFS normalisation chosen to be 0.5*Integral(Pnm**2) = 1 (zfn(0,0) = 2.0)
    */
-  static const char *func = "gauaw";
   double *zfn, *zfnlat;
 
   double z, zfnn;
@@ -121,7 +129,7 @@ void gauaw(int kn, double *pl, double *pw)
 
   iter   = (int *)    malloc(kn*sizeof(int));
   zfn    = (double *) malloc((kn+1)*(kn+1)*sizeof(double));
-  zfnlat = (double *) malloc((kn/2+1)*sizeof(double));  
+  zfnlat = (double *) malloc((kn/2+1+1)*sizeof(double));  
 
   zfn[0] = M_SQRT2;
   for (jn = 1; jn <= kn; jn++)

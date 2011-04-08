@@ -78,7 +78,6 @@ int cdiEncodeTime(int hour, int minute, int second)
 
 void cdiParamToString(int param, char *paramstr, int maxlen)
 {
-  static char func[] = "cdiParamToString";
   int dis, cat, num;
   int len;
 
@@ -92,5 +91,5 @@ void cdiParamToString(int param, char *paramstr, int maxlen)
     len = sprintf(paramstr, "%d.%d.%d", num, cat, dis);
 
   if ( len > ( maxlen-1) )
-    fprintf(stderr, "Internal problem (%s): size of input string is too small!\n", func);
+    fprintf(stderr, "Internal problem (%s): size of input string is too small!\n", __func__);
 }

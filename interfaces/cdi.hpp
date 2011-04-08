@@ -1,3 +1,4 @@
+#include <string>
 #include <vector>
 #include <map>
 #define CHARSIZE      128
@@ -10,18 +11,20 @@ class CdiGrid {
 
     int gridID;
     int type, size, xsize, ysize, prec, ncorner;
-    bool hasBounds;
-    double *xvals   , *yvals;
-    float  *xvalsF  , *yvalsF;
-    double *xbounds , *ybounds;
-    float  *xboundsF, *yboundsF;
+    bool hasXValues, hasYValues, hasBounds;
+    std::vector<double> xvalues, yvalues, xbounds, ybounds;
+
 
     std::string xname, xlongname, xstdname, xunits;
     std::string yname, ylongname, ystdname, yunits;      
     std::string name;
 
-    void readFloatBounds();
-    void readFloatVals();
+    void getValues();
+    void getBounds();
+    void getValuesAsPointer(double *xvals, double *yvals);
+    void getBoundsAsPointer(double *xbnds, double *ybnds);
+    void getFloatVals(float *xvals, float * yvals);
+    void getFloatBounds(float *xbnds, float *ybnds);
       
   private:
     void determineGrid(int gridID);
@@ -48,7 +51,8 @@ class CdiZaxis {
 
     int zaxisID;
     int type, ltype, size, prec;
-    double *levels, *lbounds, *ubounds, *weights;
+    double *plevels, *plbounds, *pubounds, *pweights;
+    std::vector<double> levels, lbounds, ubounds, weights;
     std::string name, longname, units;
 };
 
@@ -63,22 +67,21 @@ class CdiVariable {
     int    streamID;
     std::string  name, longname, units, stdname;
     double missval;
-    double *field;
-    double **fieldWithLevel;
-    float  *fieldF;
-    float  **fieldWithLevelF;
+            std::vector<double>   values;
+    std::vector< std::vector<double> > valuesWithLevel;
 
 
     CdiGrid  grid;
     CdiZaxis zaxis;
     CdiTaxis taxis;
 
-    void print();
-    void readField(); 
-    void readFieldWithLevel(int tsID = 0);
-    void readFieldF();
-    void readFieldWithLevelF(int tsID = 0);
-    std::vector<double> getField();
+    void sinfo();
+    void getValues(); 
+    void getValuesWithLevel(int tsID = 0);
+    std::vector<float>   getFValues();
+    std::vector< std::vector<float> > getFValuesWithLevel(int tsID = 0);
+    double  *getValuesAsPointer();
+    double **getValuesWithLevelAsPointer(int tsID = 0);
 };
 
 class Cdi {
@@ -93,9 +96,12 @@ class Cdi {
     
     std::vector<CdiVariable>           variables;
     std::map<std::string, CdiVariable> var;
+    std::map<int,         CdiVariable> varByCode;
     std::map<int        , CdiTaxis>    taxes;
     std::map<int        , CdiZaxis>    zaxes;
     std::map<int        , CdiGrid>     grids;
+
+    void griddes();
   private:
     void getTaxes();
     void getZaxes();

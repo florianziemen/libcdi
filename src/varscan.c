@@ -107,7 +107,6 @@ int varGetEntry(int param, int zaxistype, int ltype)
 
 void varFree(void)
 {
-  static char func[] = "varFree";
   int varID;
 
   for ( varID = 0; varID < nvars; varID++ )
@@ -136,7 +135,6 @@ void varFree(void)
 
 int levelNewEntry(int varID, int level1, int level2)
 {
-  static char func[] = "levelNewEntry";
   int levelID = 0;
   int levelTableSize;
   leveltable_t *levelTable;
@@ -156,8 +154,8 @@ int levelNewEntry(int varID, int level1, int level2)
       levelTable = (leveltable_t *) malloc(levelTableSize*sizeof(leveltable_t));
       if( levelTable == NULL )
 	{
-          Message(func, "levelTableSize = %d", levelTableSize);
-	  SysError(func, "Allocation of leveltable failed!");
+          Message("levelTableSize = %d", levelTableSize);
+	  SysError("Allocation of leveltable failed!");
 	}
 
       for( i = 0; i < levelTableSize; i++ )
@@ -182,8 +180,8 @@ int levelNewEntry(int varID, int level1, int level2)
       levelTable = (leveltable_t *) realloc(levelTable, levelTableSize*sizeof(leveltable_t));
       if( levelTable == NULL )
 	{
-          Message(func, "levelTableSize = %d", levelTableSize);
-	  SysError(func, "Reallocation of leveltable failed");
+          Message("levelTableSize = %d", levelTableSize);
+	  SysError("Reallocation of leveltable failed");
 	}
       levelID = levelTableSize/2;
 
@@ -206,7 +204,6 @@ int levelNewEntry(int varID, int level1, int level2)
 
 int paramNewEntry (int param)
 {
-  static char func[] = "paramNewEntry";
   int varID = 0;
 
   /*
@@ -221,8 +218,8 @@ int paramNewEntry (int param)
       vartable = (vartable_t *) malloc(varTablesize*sizeof(vartable_t));
       if( vartable == NULL )
 	{
-          Message(func, "varTablesize = %d", varTablesize);
-	  SysError(func, "Allocation of vartable failed");
+          Message("varTablesize = %d", varTablesize);
+	  SysError("Allocation of vartable failed");
 	}
 
       for( i = 0; i < varTablesize; i++ )
@@ -247,8 +244,8 @@ int paramNewEntry (int param)
       vartable = (vartable_t *) realloc(vartable, varTablesize*sizeof(vartable_t));
       if( vartable == NULL )
 	{
-          Message(func, "varTablesize = %d", varTablesize);
-	  SysError(func, "Reallocation of vartable failed!");
+          Message("varTablesize = %d", varTablesize);
+	  SysError("Reallocation of vartable failed!");
 	}
       varID = varTablesize/2;
 
@@ -267,7 +264,6 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype,
 		  const char *name, const char *longname, const char *units)
 {
-  static char func[] = "varAddRecord";
   int varID = UNDEFID;
   int levelID = -1;
 
@@ -294,13 +290,17 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
     {
       if ( vartable[varID].gridID != gridID )
 	{
-	  Message(func, "param = %d gridID = %d", param, gridID);
-	  Error(func, "horizontal grid must not change for same param");
+	  char paramstr[32];
+	  cdiParamToString(param, paramstr, sizeof(paramstr));	  
+	  Message("param = %s gridID = %d", paramstr, gridID);
+	  Error("horizontal grid must not change for same param!");
 	}
       if ( vartable[varID].zaxistype != zaxistype )
 	{
-	  Message(func, "param = %d zaxistype = %d", param, zaxistype);
-	  Error(func, "zaxistype must not change for same param");
+	  char paramstr[32];
+	  cdiParamToString(param, paramstr, sizeof(paramstr));	  
+	  Message("param = %s zaxistype = %d", paramstr, zaxistype);
+	  Error("zaxistype must not change for same param!");
 	}
     }
 
@@ -308,7 +308,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
   vartable[varID].levelTable[levelID].recID = recID;
 
   if ( CDI_Debug )
-    Message(func, "varID = %d  levelID = %d", varID, levelID);
+    Message("varID = %d  levelID = %d", varID, levelID);
 
   *pvarID   = varID;
   *plevelID = levelID;
@@ -380,7 +380,6 @@ int cmpltype(const void *s1, const void *s2)
 
 void cdiGenVars(int streamID)
 {
-  static char func[] = "cdiGenVars";
   int varID, gridID, zaxisID, levelID;
   int instID, modelID, tableID;
   int param, nlevels, zaxistype, lindex, ltype;
@@ -595,7 +594,7 @@ void cdiGenVars(int streamID)
 	    if ( levelID == vartable[varid].levelTable[lindex].lindex ) break;
 
 	  if ( lindex == nlevels )
-	    Error(func, "Internal problem! lindex not found.");
+	    Error("Internal problem! lindex not found.");
 
 	  streamptr->vars[varID].lindex[levelID] = lindex;
 	}
@@ -609,8 +608,6 @@ void cdiGenVars(int streamID)
 
 void varDefVCT(size_t vctsize, double *vctptr)
 {
-  static char func[] = "varDefVCT";
-
   if ( Vct == NULL && vctptr != NULL && vctsize > 0 )
     {
       Vctsize = vctsize;
@@ -626,8 +623,7 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
     mode: 0 search in vlist and grid table
           1 search in grid table
    */
-  static char func[] = "varDefGrid";
-  int gridglobdefined = 0;
+  int gridglobdefined = FALSE;
   int griddefined;
   int ngrids;
   int gridID = UNDEFID;
@@ -636,7 +632,7 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  griddefined = 0;
+  griddefined = FALSE;
   ngrids = vlistptr->ngrids;
 
   if ( mode == 0 )
@@ -644,11 +640,11 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
       {
 	gridID = vlistptr->gridIDs[index];
 	if ( gridID == UNDEFID )
-	  Error(func, "undefined gridID %d", gridID);
+	  Error("undefined gridID %d", gridID);
 
 	if ( gridCompare(gridID, grid) == 0 )
 	  {
-	    griddefined = 1;
+	    griddefined = TRUE;
 	    break;
 	  }
       }
@@ -660,7 +656,7 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
 	{
 	  if ( gridCompare(gridID, grid) == 0 )
 	    {
-	      gridglobdefined = 1;
+	      gridglobdefined = TRUE;
 	      break;
 	    }
 	}
@@ -742,7 +738,6 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
     mode: 0 search in vlist and zaxis table
           1 search in zaxis table
    */
-  static char func[] = "varDefZaxis";
   int zaxisdefined;
   int nzaxis;
   int zaxisID = UNDEFID;
@@ -806,7 +801,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
 	      if ( vctsize > 0 )
 		zaxisDefVct(zaxisID, vctsize, vct);
 	      else
-		Warning(func, "VCT missing");
+		Warning("VCT missing");
 	    }
 
 	  zaxisDefName(zaxisID, name);
@@ -834,7 +829,8 @@ void varDefMissval(int varID, double missval)
 
 void varDefZtype(int varID, int ztype)
 {
-  vartable[varID].ztype = ztype;
+  if ( vartable[varID].ztype == COMPRESS_NONE )
+    vartable[varID].ztype = ztype;
 }
 
 

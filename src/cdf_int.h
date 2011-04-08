@@ -51,8 +51,13 @@ void cdf_get_var_long   (int ncid, int varid, long *lp);
 void cdf_get_var_float  (int ncid, int varid, float *fp);
 void cdf_get_var_double (int ncid, int varid, double *dp);
 
+void cdf_get_var1_text(int ncid, int varid, const size_t index[], char *tp);
+
 void cdf_get_var1_double(int ncid, int varid, const size_t index[], double *dp);
 void cdf_put_var1_double(int ncid, int varid, const size_t index[], const double *dp);
+
+void cdf_get_vara_text(int ncid, int varid, const size_t start[],
+		       const size_t count[], char *tp);
 
 void cdf_get_vara_double(int ncid, int varid, const size_t start[],
                          const size_t count[], double *dp);

@@ -4,11 +4,14 @@ INCFLAGS = []
 CFLAGS   = []
 LDFLAGS  = []
 LIBS     = []
-if os.environ.has_key('INCFLAGS'):
-   INCFLAGS = string.split(os.environ['INCFLAGS'])
-if os.environ.has_key('CFLAGS'):
-   CFLAGS   = string.split(os.environ['CFLAGS'])
-if os.environ.has_key('LDFLAGS'):
-  LDFLAGS   = string.split(os.environ['LDFLAGS'])
-if os.environ.has_key('LIBS'):
-  LIBS      = string.split(os.environ['LIBS'])
+if 'INCFLAGS' in os.environ:
+   INCFLAGS = os.environ['INCFLAGS'].split()
+
+if 'CFLAGS' in os.environ:
+   CFLAGS  = os.environ['CFLAGS'].split()
+
+if 'LDFLAGS' in os.environ:
+   LDFLAGS  = os.environ['LDFLAGS'].split('-L')
+
+if 'LIBS' in os.environ:
+   LIBS     = os.environ['LIBS'].split()

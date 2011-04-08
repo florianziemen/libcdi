@@ -14,6 +14,9 @@
 #include "cdi.h"
 #include "stream_int.h"
 
+#if  defined  (HAVE_LIBCGRIBEX)
+#include "cgribex.h"
+#endif
 
 int cdiDefaultCalendar = CALENDAR_PROLEPTIC;
 
@@ -24,6 +27,7 @@ int cdiNcMissingValue  = CDI_UNDEFID;
 int cdiSplitLtype105   = CDI_UNDEFID;
 
 int cdiIgnoreAttCoordinates = FALSE;
+int cdiSkipRecords          = 0;
 int cdiInventoryMode        = 1;
 
 char *cdiPartabPath   = NULL;
@@ -60,7 +64,6 @@ static int cdiHaveMissval = 0;
 
 long cdiGetenvInt(char *envName)
 {
-  static char func[] = "cdiGetenv";
   char *envString;
   long envValue = -1;
   long fact = 1;
@@ -83,8 +86,8 @@ long cdiGetenvInt(char *envName)
 		case 'g':  fact = 1073741824;  break;
 		default:
 		  fact = 0;
-		  Message(func, "Invalid number string in %s: %s", envName, envString);
-		  Warning(func, "%s must comprise only digits [0-9].",envName);
+		  Message("Invalid number string in %s: %s", envName, envString);
+		  Warning("%s must comprise only digits [0-9].",envName);
 		}
 	      break;
 	    }
@@ -92,7 +95,7 @@ long cdiGetenvInt(char *envName)
 
       if ( fact ) envValue = fact*atol(envString);
 
-      if ( CDI_Debug ) Message(func, "set %s to %ld", envName, envValue);
+      if ( CDI_Debug ) Message("set %s to %ld", envName, envValue);
     }
 
   return (envValue);
@@ -101,7 +104,6 @@ long cdiGetenvInt(char *envName)
 
 void cdiInitialize(void)
 {
-  static char func[] = "cdiInitialize";
   static int Init_CDI = FALSE;
   char *envString;
   long value;
@@ -109,6 +111,11 @@ void cdiInitialize(void)
   if ( ! Init_CDI )
     {
       Init_CDI = TRUE;
+
+#if  defined  (HAVE_LIBCGRIBEX)
+      gribFixZSE(1);   // 1: Fix ZeroShiftError of simple packed spherical harmonics
+      gribSetConst(1); // 1: Don't pack constant fields on regular grids
+#endif
 
       value = cdiGetenvInt("CD_REGULARGRID");
       if ( value >= 0 ) cdiDataUnreduced = (int) value;
@@ -143,6 +150,13 @@ void cdiInitialize(void)
       envString = getenv("IGNORE_ATT_COORDINATES");
       if ( envString ) cdiIgnoreAttCoordinates = atoi(envString);
 
+      envString = getenv("CDI_SKIP_RECORDS");
+      if ( envString )
+	{
+	  cdiSkipRecords = atoi(envString);
+	  cdiSkipRecords = cdiSkipRecords > 0 ? cdiSkipRecords : 0;
+	}
+
       envString = getenv("GRIB_INVENTORY_MODE");
       if ( envString )
 	{
@@ -150,7 +164,7 @@ void cdiInitialize(void)
 	    {
 	      cdiInventoryMode = 2;
 	      if ( CDI_Debug )
-		Message(func, "Inventory mode was set to timestep!");
+		Message("Inventory mode was set to timestep!");
 	    }
 	}
 
@@ -171,8 +185,9 @@ void cdiInitialize(void)
 	    cdiDefaultCalendar = CALENDAR_NONE;
 
 	  if ( CDI_Debug )
-	    Message(func, "Default calendar set to %s!", envString);
+	    Message("Default calendar set to %s!", envString);
 	}
+      gribSetCalendar(cdiDefaultCalendar);
 
       envString = getenv("PARTAB_INTERN");
       if ( envString ) cdiPartabIntern = atoi(envString);
@@ -199,6 +214,7 @@ char *strfiletype(int filetype)
 
 static int  STREAM_Debug = 0;   /* If set to 1, debugging */
 
+static int _stream_min = MIN_STREAMS;
 static int _stream_max = MAX_STREAMS;
 
 static void stream_initialize(void);
@@ -208,131 +224,156 @@ static int _stream_init = FALSE;
 #if  defined  (HAVE_LIBPTHREAD)
 #  include <pthread.h>
 
-static pthread_once_t _stream_init_thread = PTHREAD_ONCE_INIT;
+static pthread_once_t  _stream_init_thread = PTHREAD_ONCE_INIT;
 static pthread_mutex_t _stream_mutex;
 
-#  define STREAM_LOCK           pthread_mutex_lock(&_stream_mutex);
-#  define STREAM_UNLOCK         pthread_mutex_unlock(&_stream_mutex);
-#  define STREAM_INIT                               \
-   if ( _stream_init == FALSE ) pthread_once(&_stream_init_thread, stream_initialize);
+#  define STREAM_LOCK()         pthread_mutex_lock(&_stream_mutex)
+#  define STREAM_UNLOCK()       pthread_mutex_unlock(&_stream_mutex)
+#  define STREAM_INIT()        \
+   if ( _stream_init == FALSE ) pthread_once(&_stream_init_thread, stream_initialize)
 
 #else
 
-#  define STREAM_LOCK
-#  define STREAM_UNLOCK
-#  define STREAM_INIT                               \
-   if ( _stream_init == FALSE ) stream_initialize();
+#  define STREAM_LOCK()
+#  define STREAM_UNLOCK()
+#  define STREAM_INIT()        \
+   if ( _stream_init == FALSE ) stream_initialize()
 
 #endif
 
 
 typedef struct _streamPtrToIdx {
-  int idx;
+  int       idx;
+  int       next;
   stream_t *ptr;
-  struct _streamPtrToIdx *next;
 } streamPtrToIdx;
 
 
 static streamPtrToIdx *_streamList  = NULL;
-static streamPtrToIdx *_streamAvail = NULL;
+static int             _streamAvail = -1;
 
-
-static void stream_list_new(void)
+static
+void stream_list_new(void)
 {
-  static char func[] = "stream_list_new";
-
   assert(_streamList == NULL);
 
-  _streamList = (streamPtrToIdx *) malloc(_stream_max*sizeof(streamPtrToIdx));
+  _streamList = (streamPtrToIdx *) malloc(_stream_min*sizeof(streamPtrToIdx));
 }
 
-
-static void stream_list_delete(void)
+static
+void stream_list_delete(void)
 {
-  static char func[] = "stream_list_delete";
-
   if ( _streamList ) free(_streamList);
 }
 
-
-static void stream_init_pointer(void)
+static
+void stream_init_pointer(void)
 {
-  int  i;
+  int i;
   
-  for ( i = 0; i < _stream_max; i++ )
+  for ( i = 0; i < _stream_min; ++i )
     {
-      _streamList[i].next = _streamList + i + 1;
       _streamList[i].idx  = i;
-      _streamList[i].ptr  = 0;
+      _streamList[i].next = i + 1;
+      _streamList[i].ptr  = NULL;
     }
 
-  _streamList[_stream_max-1].next = 0;
+  _streamList[_stream_min-1].next = -1;
 
-  _streamAvail = _streamList;
+  _streamAvail = 0;
+}
+
+static
+void stream_list_extend(void)
+{
+  int nstreams;
+  int i;
+
+  assert(_streamList != NULL);
+
+  nstreams = _stream_min + MIN_STREAMS;
+
+  if ( nstreams <= _stream_max)
+    {
+      _streamList = (streamPtrToIdx *) realloc(_streamList, nstreams*sizeof(streamPtrToIdx));
+  
+      for ( i = _stream_min; i < nstreams; ++i )
+	{
+	  _streamList[i].idx  = i;
+	  _streamList[i].next = i + 1;
+	  _streamList[i].ptr  = NULL;
+	}
+
+      _streamAvail = _stream_min;
+      _streamList[_stream_min-1].next = _stream_min;
+      _stream_min = nstreams;
+      _streamList[_stream_min-1].next = -1;
+    }
+  else
+    Warning("Too many open streams (limit is %d)!", _stream_max);
 }
 
 
 stream_t *stream_to_pointer(int idx)
 {
-  static char func[] = "stream_to_pointer";
   stream_t *streamptr = NULL;
 
-  STREAM_INIT
+  STREAM_INIT();
 
-  if ( idx >= 0 && idx < _stream_max )
+  if ( idx >= 0 && idx < _stream_min )
     {
-      STREAM_LOCK
+      STREAM_LOCK();
 
       streamptr = _streamList[idx].ptr;
 
-      STREAM_UNLOCK
+      STREAM_UNLOCK();
     }
   else
-    Error(func, "stream index %d undefined!", idx);
+    Error("stream index %d undefined!", idx);
 
   return (streamptr);
 }
 
-
-/* Create an index from a pointer */
-static int stream_from_pointer(stream_t *ptr)
+/* Create an index from a pointer (add the pointer to the stream list) */
+static
+int stream_from_pointer(stream_t *ptr)
 {
-  static char func[] = "stream_from_pointer";
-  int      idx = -1;
-  streamPtrToIdx *newptr;
+  int idx = -1;
 
   if ( ptr )
     {
-      STREAM_LOCK
+      STREAM_LOCK();
 
-      if ( _streamAvail )
+      if ( _streamAvail < 0 ) stream_list_extend();
+
+      if ( _streamAvail >= 0 )
 	{
-	  newptr       = _streamAvail;
-	  _streamAvail   = _streamAvail->next;
-	  newptr->next = 0;
+	  streamPtrToIdx *newptr;
+
+	  newptr       = &_streamList[_streamAvail];
+	  _streamAvail = newptr->next;
+	  newptr->next = -1;
 	  idx	       = newptr->idx;
 	  newptr->ptr  = ptr;
       
 	  if ( STREAM_Debug )
-	    Message(func, "Pointer %p has idx %d from stream list", ptr, idx);
+	    Message("Pointer %p has idx %d from stream list", ptr, idx);
 	}
-      else
-	Warning(func, "Too many open streams (limit is %d)!", _stream_max);
 
-      STREAM_UNLOCK
+      STREAM_UNLOCK();
     }
   else
-    Error(func, "Internal problem (pointer %p undefined)", ptr);
+    Error("Internal problem (pointer %p undefined)", ptr);
 
   return (idx);
 }
 
-
-static void stream_init_entry(stream_t *streamptr)
+static
+void stream_init_entry(stream_t *streamptr)
 {
   int i;
 
-  streamptr->self         = stream_from_pointer(streamptr);
+  streamptr->self              = stream_from_pointer(streamptr);
 
   streamptr->accesstype        = UNDEFID;
   streamptr->accessmode        = 0;
@@ -375,7 +416,7 @@ static void stream_init_entry(stream_t *streamptr)
 
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->xdimID[i]   = UNDEFID;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ydimID[i]   = UNDEFID;
-  for ( i = 0; i < MAX_ZAXIS_PS; i++ ) streamptr->zaxisID[i]  = UNDEFID;
+  for ( i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->zaxisID[i]  = UNDEFID;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncxvarID[i] = UNDEFID;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncyvarID[i] = UNDEFID;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncavarID[i] = UNDEFID;
@@ -384,19 +425,17 @@ static void stream_init_entry(stream_t *streamptr)
   streamptr->nfiles            = 0;
   streamptr->fnames            = NULL;
 
-  streamptr->gribHandleNums    = 0;
-  streamptr->gribHandle        = NULL;
+  streamptr->gribContainers    = NULL;
 }
 
 
 stream_t *stream_new_entry(void)
 {
-  static char func[] = "stream_new_entry";
   stream_t *streamptr;
 
   cdiInitialize(); /* ***************** make MT version !!! */
 
-  STREAM_INIT
+  STREAM_INIT();
 
   streamptr = (stream_t *) malloc(sizeof(stream_t));
 
@@ -408,27 +447,27 @@ stream_t *stream_new_entry(void)
 
 void stream_delete_entry(stream_t *streamptr)
 {
-  static char func[] = "stream_delete_entry";
   int idx;
 
   idx = streamptr->self;
 
-  STREAM_LOCK
+  STREAM_LOCK();
 
   free(streamptr);
 
   _streamList[idx].next = _streamAvail;
   _streamList[idx].ptr  = 0;
-  _streamAvail          = &_streamList[idx];
+  _streamAvail          = idx;
 
-  STREAM_UNLOCK
+  STREAM_UNLOCK();
 
   if ( STREAM_Debug )
-    Message(func, "Removed idx %d from stream list", idx);
+    Message("Removed idx %d from stream list", idx);
 }
 
 
-static void stream_initialize(void)
+static
+void stream_initialize(void)
 {
   char *env;
 
@@ -443,20 +482,20 @@ static void stream_initialize(void)
   stream_list_new();
   atexit(stream_list_delete);
 
-  STREAM_LOCK
+  STREAM_LOCK();
 
   stream_init_pointer();
 
-  STREAM_UNLOCK
+  STREAM_UNLOCK();
 
   _stream_init = TRUE;
 }
 
 
-void stream_check_ptr(const char *func, stream_t *streamptr)
+void stream_check_ptr(const char *caller, stream_t *streamptr)
 {
   if ( streamptr == NULL )
-    Error(func, "stream undefined!");
+    Errorc("stream undefined!");
 }
 
 
@@ -465,14 +504,14 @@ int streamSize(void)
   int streamsize = 0;
   int i;
   
-  STREAM_INIT
+  STREAM_INIT();
 
-  STREAM_LOCK
+  STREAM_LOCK();
 
-  for ( i = 0; i < _stream_max; i++ )
+  for ( i = 0; i < _stream_min; i++ )
     if ( _streamList[i].ptr ) streamsize++;
 
-  STREAM_UNLOCK
+  STREAM_UNLOCK();
 
   return (streamsize);
 }
@@ -480,8 +519,6 @@ int streamSize(void)
 
 void cdiDefGlobal(const char *string, int val)
 {
-  static char func[] = "cdiDefGlobal";
-
   if ( strcmp(string, "REGULARGRID") == 0 )
     {
       cdiDataUnreduced = val;
@@ -496,7 +533,7 @@ void cdiDefGlobal(const char *string, int val)
     }
   else
     {
-      Warning(func, "Unsupported global key: %s", string);
+      Warning("Unsupported global key: %s", string);
     }
 }
 
@@ -519,14 +556,13 @@ double cdiInqMissval(void)
 
 void cdiCheckContents(int streamID)
 {
-  static char func[] = "cdiCheckContents";
   int index, nzaxis, zaxisID;
   int vlistID;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamInqVlist(streamID);
   nzaxis = vlistNzaxis(vlistID);
@@ -553,7 +589,6 @@ int streamInqFileID(int streamID)
 
 void streamDefineTaxis(int streamID)
 {
-  static char func[] = "streamDefineTaxis";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -583,7 +618,7 @@ void streamDefineTaxis(int streamID)
 	  (void) streamDefTimestep(streamID, 0);
 	}
       else
-	Error(func, "time axis undefined");
+	Error("time axis undefined");
     }
 }
 
@@ -610,7 +645,6 @@ int streamInqDimgroupID(int streamID)
 
 void cdiDefAccesstype(int streamID, int type)
 {
-  static char func[] = "cdiDefAccesstype";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -624,9 +658,9 @@ void cdiDefAccesstype(int streamID, int type)
       if ( streamptr->accesstype != type )
 	{
 	  if ( streamptr->accesstype == TYPE_REC )
-	    Error(func, "Change access type from REC to VAR not allowed!");
+	    Error("Changing access type from REC to VAR not allowed!");
 	  else
-	    Error(func, "Change access type from VAR to REC not allowed!");
+	    Error("Changing access type from VAR to REC not allowed!");
 	}
     }
 }

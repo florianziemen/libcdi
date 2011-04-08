@@ -28,137 +28,47 @@ typedef struct {
 } compvar_t; 
 
 
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexGetGridType(int *isec2)
 {
-  /*  static char func[] = "cgribexGetGridType"; */
-  int gridtype = 0;
+  int gridtype = GRID_GENERIC;
 
   switch (ISEC2_GridType)
     {
-    case  GTYPE_LATLON:
-    case  GTYPE_LATLON_ROT:
-      {
-	gridtype = GRID_LONLAT;
-	break;
-      }
-    case  GTYPE_LCC:
-      {
-	gridtype = GRID_LCC;
-	break;
-      }
-    case  GTYPE_GAUSSIAN:
-      {
-	if ( ISEC2_Reduced )
-	  gridtype = GRID_GAUSSIAN_REDUCED;
-	else
-	  gridtype = GRID_GAUSSIAN;
-	break;
-      }
-    case  GTYPE_SPECTRAL:
-      {
-	gridtype = GRID_SPECTRAL;
-	break;
-      }
-    case  GTYPE_GME:
-      {
-	gridtype = GRID_GME;
-	break;
-      }
-    default:
-      {
-	gridtype = GRID_GENERIC;
-	break;
-      }
+    case  GRIB1_GTYPE_LATLON:     { if ( ISEC2_Reduced )      break; }
+    case  GRIB1_GTYPE_LATLON_ROT: { gridtype = GRID_LONLAT;   break; }
+    case  GRIB1_GTYPE_LCC:        { gridtype = GRID_LCC;      break; }
+    case  GRIB1_GTYPE_GAUSSIAN:   { if ( ISEC2_Reduced )
+	                              gridtype = GRID_GAUSSIAN_REDUCED;
+                         	    else
+				      gridtype = GRID_GAUSSIAN;
+          	                    break;
+                                  }
+    case  GRIB1_GTYPE_SPECTRAL:   { gridtype = GRID_SPECTRAL; break; }
+    case  GRIB1_GTYPE_GME:        { gridtype = GRID_GME;      break; }
     }
 
   return (gridtype);
 }
+#endif
 
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexGetIsRotated(int *isec2)
 {
-  /*  static char func[] = "cgribexGetIsRotated"; */
   int isRotated = 0;
 
-  if ( ISEC2_GridType == 10 )
+  if ( ISEC2_GridType == GRIB1_GTYPE_LATLON_ROT )
     {
       isRotated = 1;
     }
 
   return (isRotated);
 }
+#endif
 
-static
-int cgribexGetZaxisType(int grb_ltype)
-{
-  int zaxistype = 0;
-
-  switch ( grb_ltype )
-    {
-    case LTYPE_SURFACE:
-      {
-	zaxistype = ZAXIS_SURFACE;
-	break;
-      }
-    case LTYPE_MEANSEA:
-      {
-	zaxistype = ZAXIS_MEANSEA;
-	break;
-      }
-    case LTYPE_99:
-    case LTYPE_ISOBARIC:
-      {
-	zaxistype = ZAXIS_PRESSURE;
-	break;
-      }
-    case LTYPE_HEIGHT:
-      {
-	zaxistype = ZAXIS_HEIGHT;
-	break;
-      }
-    case LTYPE_ALTITUDE:
-      {
-	zaxistype = ZAXIS_ALTITUDE;
-	break;
-      }
-    case LTYPE_SIGMA:
-      {
-	zaxistype = ZAXIS_SIGMA;
-	break;
-      }
-    case LTYPE_HYBRID:
-    case LTYPE_HYBRID_LAYER:
-      {
-	zaxistype = ZAXIS_HYBRID;
-	break;
-      }
-    case LTYPE_LANDDEPTH:
-    case LTYPE_LANDDEPTH_LAYER:
-      {
-	zaxistype = ZAXIS_DEPTH_BELOW_LAND;
-	break;
-      }
-    case LTYPE_ISENTROPIC:
-      {
-	zaxistype = ZAXIS_ISENTROPIC;
-	break;
-      }
-    case LTYPE_SEADEPTH:
-      {
-	zaxistype = ZAXIS_DEPTH_BELOW_SEA;
-	break;
-      }
-    default:
-      {
-	zaxistype = ZAXIS_GENERIC;
-	break;
-      }
-    }
-
-  return (zaxistype);
-}
-
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexGetZaxisHasBounds(int grb_ltype)
 {
@@ -166,8 +76,8 @@ int cgribexGetZaxisHasBounds(int grb_ltype)
 
   switch (grb_ltype)
     {
-    case LTYPE_HYBRID_LAYER:
-    case LTYPE_LANDDEPTH_LAYER:
+    case GRIB1_LTYPE_HYBRID_LAYER:
+    case GRIB1_LTYPE_LANDDEPTH_LAYER:
       {
 	lbounds = 1;
 	break;
@@ -176,12 +86,13 @@ int cgribexGetZaxisHasBounds(int grb_ltype)
 
   return (lbounds);
 }
+#endif
 
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexGetTimeUnit(int *isec1)
 {
-  static char func[] = "cgribexGetTimeUnit";
-  int timeunit = -1;
+  int timeunit = TUNIT_HOUR;
   static int lprint = TRUE;
 
   switch ( ISEC1_TimeUnit )
@@ -189,18 +100,23 @@ int cgribexGetTimeUnit(int *isec1)
     case ISEC1_TABLE4_MINUTE:  timeunit = TUNIT_MINUTE;  break;
     case ISEC1_TABLE4_QUARTER: timeunit = TUNIT_QUARTER; break;
     case ISEC1_TABLE4_HOUR:    timeunit = TUNIT_HOUR;    break;
+    case ISEC1_TABLE4_3HOURS:  timeunit = TUNIT_3HOURS;  break;
+    case ISEC1_TABLE4_6HOURS:  timeunit = TUNIT_6HOURS;  break;
+    case ISEC1_TABLE4_12HOURS: timeunit = TUNIT_12HOURS; break;
     case ISEC1_TABLE4_DAY:     timeunit = TUNIT_DAY;     break;
     default:
       if ( lprint )
 	{
-	  Message(func, "Time unit %d unsupported", ISEC1_TimeUnit);
+	  Message("GRIB time unit %d unsupported!", ISEC1_TimeUnit);
 	  lprint = FALSE;
 	}
     }
 
   return (timeunit);
 }
+#endif
 
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexTimeIsFC(int *isec1)
 {
@@ -211,11 +127,12 @@ int cgribexTimeIsFC(int *isec1)
 
   return (isFC);
 }
+#endif
 
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexGetTsteptype(int timerange)
 {
-  static char func[] = "cgribexGetTsteptype";
   int tsteptype = 0;
   static int lprint = TRUE;
 
@@ -231,21 +148,208 @@ int cgribexGetTsteptype(int timerange)
     default:
       if ( lprint )
 	{
-	  Message(func, "Time range %d unsupported", timerange);
+	  Message("GRIB time range %d unsupported!", timerange);
 	  lprint = FALSE;
 	}
     }
 
   return (tsteptype);
 }
+#endif
 
+#if  defined  (HAVE_LIBCGRIBEX)
+static
+void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid)
+{
+  int gridtype; 
 
+  gridtype = cgribexGetGridType(isec2);
+
+  if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
+    {
+      gridtype = GRID_GAUSSIAN;
+      ISEC2_NumLon = 2*ISEC2_NumLat;
+      ISEC4_NumValues = ISEC2_NumLon*ISEC2_NumLat;
+    }
+
+  memset(grid, 0, sizeof(grid_t));
+  switch (gridtype)
+    {
+    case GRID_LONLAT:
+    case GRID_GAUSSIAN:
+      {
+	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
+	  Error("numberOfPoints (%d) and gridSize (%d) differ!",
+		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
+	grid->size  = ISEC4_NumValues;
+	grid->xsize = ISEC2_NumLon;
+	grid->ysize = ISEC2_NumLat;
+	grid->xinc  = 0;
+	grid->yinc  = 0;
+	grid->xdef  = 0;
+	/* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
+	  {
+	    if ( grid->xsize > 1 )
+	      {
+		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
+		  if ( ISEC2_LonIncr*(grid->xsize-1) > 360000 ) ISEC2_LonIncr = 0;
+
+		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
+		  grid->xinc = ISEC2_LonIncr * 0.001;
+		else
+		  grid->xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->xsize - 1);
+
+		/* correct xinc if necessary */
+		if ( ISEC2_FirstLon == 0 && ISEC2_LastLon > 354000 )
+		  {
+		    double xinc = 360. / grid->xsize;
+
+		    if ( fabs(grid->xinc-xinc) > 0.0 )
+		      {
+			grid->xinc = xinc;
+			if ( CDI_Debug ) Message("set xinc to %g", grid->xinc);
+		      }
+		  }
+	      }
+	    grid->xfirst = ISEC2_FirstLon * 0.001;
+	    grid->xlast  = ISEC2_LastLon  * 0.001;
+	    grid->xdef   = 2;	    
+	  }
+	grid->ydef  = 0;
+	/* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
+	  {
+	    if ( grid->ysize > 1 )
+	      {
+		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
+		  if ( ISEC2_LatIncr*(grid->ysize-1) > 180000 ) ISEC2_LatIncr = 0;
+
+		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
+		  grid->yinc = ISEC2_LatIncr * 0.001;
+		else
+		  grid->yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->ysize - 1);
+	      }
+	    grid->yfirst = ISEC2_FirstLat * 0.001;
+	    grid->ylast  = ISEC2_LastLat  * 0.001;
+	    grid->ydef   = 2;	    
+	  }
+	break;
+      }
+    case GRID_GAUSSIAN_REDUCED:
+      {
+	grid->size   = ISEC4_NumValues;
+        grid->rowlon = ISEC2_RowLonPtr;
+	grid->ysize  = ISEC2_NumLat;
+	grid->xinc  = 0;
+	grid->yinc  = 0;
+	grid->xdef  = 0;
+	/* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
+	  {
+	    if ( grid->xsize > 1 )
+	      {
+		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
+		  grid->xinc = ISEC2_LonIncr * 0.001;
+		else
+		  grid->xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->xsize - 1);
+	      }
+	    grid->xfirst = ISEC2_FirstLon * 0.001;
+	    grid->xlast  = ISEC2_LastLon  * 0.001;
+	    grid->xdef   = 2;	    
+	  }
+	grid->ydef  = 0;
+	/* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
+	  {
+	    if ( grid->ysize > 1 )
+	      {
+		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
+		  grid->yinc = ISEC2_LatIncr * 0.001;
+		else
+		  grid->yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->ysize - 1);
+	      }
+	    grid->yfirst = ISEC2_FirstLat * 0.001;
+	    grid->ylast  = ISEC2_LastLat  * 0.001;
+	    grid->ydef   = 2;	    
+	  }
+	break;
+      }
+    case GRID_LCC:
+      {
+	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
+	  Error("numberOfPoints (%d) and gridSize (%d) differ!",
+		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
+
+	grid->size  = ISEC4_NumValues;
+	grid->xsize = ISEC2_NumLon;
+	grid->ysize = ISEC2_NumLat;
+
+	grid->lcc_xinc      = ISEC2_Lambert_dx;
+	grid->lcc_yinc      = ISEC2_Lambert_dy;
+	grid->lcc_originLon = ISEC2_FirstLon * 0.001;
+	grid->lcc_originLat = ISEC2_FirstLat * 0.001;
+	grid->lcc_lonParY   = ISEC2_Lambert_Lov * 0.001;
+	grid->lcc_lat1      = ISEC2_Lambert_LatS1 * 0.001;
+	grid->lcc_lat2      = ISEC2_Lambert_LatS2 * 0.001;
+	grid->lcc_projflag  = ISEC2_Lambert_ProjFlag;
+	grid->lcc_scanflag  = ISEC2_ScanFlag;
+
+	grid->xdef   = 0;	    
+	grid->ydef   = 0;
+
+	break;
+      }
+    case GRID_SPECTRAL:
+      {
+	grid->size  = ISEC4_NumValues;
+	grid->trunc = ISEC2_PentaJ;
+	if ( ISEC2_RepMode == 2 )
+	  grid->lcomplex = 1;
+	else
+	  grid->lcomplex = 0;
+
+	break;
+      }
+    case GRID_GME:
+      {
+	grid->size  = ISEC4_NumValues;
+	grid->nd    = ISEC2_GME_ND;
+	grid->ni    = ISEC2_GME_NI;
+	grid->ni2   = ISEC2_GME_NI2;
+	grid->ni3   = ISEC2_GME_NI3;
+	break;
+      }
+    case GRID_GENERIC:
+      {
+	grid->size  = ISEC4_NumValues;
+	grid->xsize = 0;
+	grid->ysize = 0;
+	break;
+      }
+    default:
+      {
+	Error("Unsupported grid type: %s", gridNamePtr(gridtype));
+	break;
+      }
+    }
+
+  grid->isRotated = FALSE;
+  if ( cgribexGetIsRotated(isec2) )
+    {
+      grid->isRotated = TRUE;
+      grid->ypole     = - ISEC2_LatSP * 0.001;
+      grid->xpole     =   ISEC2_LonSP * 0.001 - 180;
+      grid->angle     = 0;
+    }
+
+  grid->xvals = NULL;
+  grid->yvals = NULL;
+  grid->type  = gridtype;
+}
+#endif
+
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
 		      int *isec4, long recsize, off_t position, int prec, int ztype, int lmv)
 {
-  static char func[] = "cgribexAddRecord";
-  int gridtype;
   int zaxistype;
   int gridID = CDI_UNDEFID, varID;
   int levelID = 0;
@@ -281,185 +385,13 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
   (*record).ilevel2  = level2;
   (*record).ltype    = ISEC1_LevelType;
 
-  gridtype = cgribexGetGridType(isec2);
-
-  if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
-    {
-      gridtype = GRID_GAUSSIAN;
-      ISEC2_NumLon = 2*ISEC2_NumLat;
-      ISEC4_NumValues = ISEC2_NumLon*ISEC2_NumLat;
-    }
-
-  memset(&grid, 0, sizeof(grid_t));
-  switch (gridtype)
-    {
-    case GRID_LONLAT:
-    case GRID_GAUSSIAN:
-      {
-	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-	  Error(func, "numberOfPoints (%d) and gridSize (%d) differ!",
-		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
-	grid.size  = ISEC4_NumValues;
-	grid.xsize = ISEC2_NumLon;
-	grid.ysize = ISEC2_NumLat;
-	grid.xinc  = 0;
-	grid.yinc  = 0;
-	grid.xdef  = 0;
-	/* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
-	  {
-	    if ( grid.xsize > 1 )
-	      {
-		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
-		  grid.xinc = ISEC2_LonIncr * 0.001;
-		else
-		  grid.xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid.xsize - 1);
-
-		/* correct xinc if necessary */
-		if ( ISEC2_FirstLon == 0 && ISEC2_LastLon > 354000 )
-		  {
-		    double xinc = 360. / grid.xsize;
-
-		    if ( fabs(grid.xinc-xinc) > 0.0 )
-		      {
-			grid.xinc = xinc;
-			if ( CDI_Debug ) Message(func, "set xinc to %g", grid.xinc);
-		      }
-		  }
-	      }
-	    grid.xfirst = ISEC2_FirstLon * 0.001;
-	    grid.xlast  = ISEC2_LastLon  * 0.001;
-	    grid.xdef   = 2;	    
-	  }
-	grid.ydef  = 0;
-	/* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
-	  {
-	    if ( grid.ysize > 1 )
-	      {
-		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
-		  grid.yinc = ISEC2_LatIncr * 0.001;
-		else
-		  grid.yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid.ysize - 1);
-	      }
-	    grid.yfirst = ISEC2_FirstLat * 0.001;
-	    grid.ylast  = ISEC2_LastLat  * 0.001;
-	    grid.ydef   = 2;	    
-	  }
-	break;
-      }
-    case GRID_GAUSSIAN_REDUCED:
-      {
-	grid.size   = ISEC4_NumValues;
-        grid.rowlon = ISEC2_RowLonPtr;
-	grid.ysize  = ISEC2_NumLat;
-	grid.xinc  = 0;
-	grid.yinc  = 0;
-	grid.xdef  = 0;
-	/* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
-	  {
-	    if ( grid.xsize > 1 )
-	      {
-		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
-		  grid.xinc = ISEC2_LonIncr * 0.001;
-		else
-		  grid.xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid.xsize - 1);
-	      }
-	    grid.xfirst = ISEC2_FirstLon * 0.001;
-	    grid.xlast  = ISEC2_LastLon  * 0.001;
-	    grid.xdef   = 2;	    
-	  }
-	grid.ydef  = 0;
-	/* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
-	  {
-	    if ( grid.ysize > 1 )
-	      {
-		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
-		  grid.yinc = ISEC2_LatIncr * 0.001;
-		else
-		  grid.yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid.ysize - 1);
-	      }
-	    grid.yfirst = ISEC2_FirstLat * 0.001;
-	    grid.ylast  = ISEC2_LastLat  * 0.001;
-	    grid.ydef   = 2;	    
-	  }
-	break;
-      }
-    case GRID_LCC:
-      {
-	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-	  Error(func, "numberOfPoints (%d) and gridSize (%d) differ!",
-		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
-
-	grid.size  = ISEC4_NumValues;
-	grid.xsize = ISEC2_NumLon;
-	grid.ysize = ISEC2_NumLat;
-
-	grid.lcc_xinc      = ISEC2_Lambert_dx;
-	grid.lcc_yinc      = ISEC2_Lambert_dy;
-	grid.lcc_originLon = ISEC2_FirstLon * 0.001;
-	grid.lcc_originLat = ISEC2_FirstLat * 0.001;
-	grid.lcc_lonParY   = ISEC2_Lambert_Lov * 0.001;
-	grid.lcc_lat1      = ISEC2_Lambert_LatS1 * 0.001;
-	grid.lcc_lat2      = ISEC2_Lambert_LatS2 * 0.001;
-	grid.lcc_projflag  = ISEC2_Lambert_ProjFlag;
-	grid.lcc_scanflag  = ISEC2_ScanFlag;
-
-	grid.xdef   = 0;	    
-	grid.ydef   = 0;
-
-	break;
-      }
-    case GRID_SPECTRAL:
-      {
-	grid.size  = ISEC4_NumValues;
-	grid.trunc = ISEC2_PentaJ;
-	if ( ISEC2_RepMode == 2 )
-	  grid.lcomplex = 1;
-	else
-	  grid.lcomplex = 0;
-
-	break;
-      }
-    case GRID_GME:
-      {
-	grid.size  = ISEC4_NumValues;
-	grid.nd    = ISEC2_GME_ND;
-	grid.ni    = ISEC2_GME_NI;
-	grid.ni2   = ISEC2_GME_NI2;
-	grid.ni3   = ISEC2_GME_NI3;
-	break;
-      }
-    case GRID_GENERIC:
-      {
-	grid.size  = ISEC4_NumValues;
-	grid.xsize = 0;
-	grid.ysize = 0;
-	break;
-      }
-    default:
-      {
-	Error(func, "%s grid unsupported!", gridNamePtr(gridtype));
-	break;
-      }
-    }
-
-  grid.isRotated = FALSE;
-  if ( cgribexGetIsRotated(isec2) )
-    {
-      grid.isRotated = TRUE;
-      grid.ypole     = - ISEC2_LatSP * 0.001;
-      grid.xpole     =   ISEC2_LonSP * 0.001 - 180;
-      grid.angle     = 0;
-    }
-
-  grid.xvals = NULL;
-  grid.yvals = NULL;
-  grid.type  = gridtype;
+  cgribexGetGrid(streamptr, isec2, isec4, &grid);
 
   gridID = varDefGrid(vlistID, grid, 0);
 
-  zaxistype = cgribexGetZaxisType(ISEC1_LevelType);
+  zaxistype = grib1ltypeToZaxisType(ISEC1_LevelType);
 
-  if ( zaxistype == ZAXIS_HYBRID )
+  if ( zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF )
     {
       int vctsize = ISEC2_NumVCP;
       double *vctptr = &fsec2[10];
@@ -517,10 +449,12 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
   streamptr->nrecs++;
 
   if ( CDI_Debug )
-    Message(func, "varID = %d  param = %d  zaxistype = %d  gridID = %d  levelID = %d",
+    Message("varID = %d  param = %d  zaxistype = %d  gridID = %d  levelID = %d",
 	    varID, param, zaxistype, gridID, levelID);
 }
+#endif
 
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 void MCH_get_undef(int *isec1, double *undef_pds, double *undef_eps)
 {
@@ -545,7 +479,9 @@ void MCH_get_undef(int *isec1, double *undef_pds, double *undef_eps)
     }
   }
 }
+#endif
 
+#if  defined  (HAVE_LIBCGRIBEX)
 static
 void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
 			 int *isec3, double *fsec3, int *isec4, double *fsec4, 
@@ -567,18 +503,18 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
       *lmv = 1;
     }
 }
+#endif
 
-
-void cgribexScanTimestep1(int streamID)
+int cgribexScanTimestep1(int streamID)
 {
-  static char func[] = "cgribexScanTimestep1";
+#if  defined  (HAVE_LIBCGRIBEX)
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0;
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
   long buffersize = 0;
-  int status;
+  int rstatus;
   int fileID;
   int param = 0;
   int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
@@ -593,16 +529,18 @@ void cgribexScanTimestep1(int streamID)
   int warn_numavg = TRUE;
   int taxisID = -1;
   int rdate = 0, rtime = 0, tunit = 0, fcast = 0;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int vlistID;
   int ztype;
   long unzipsize;
   compvar_t compVar, compVar0;
   stream_t *streamptr;
+  extern int cdiSkipRecords;
+  int nskip = cdiSkipRecords;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 0;
 
@@ -616,9 +554,19 @@ void cgribexScanTimestep1(int streamID)
   taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( tsID != 0 )
-    Error(func, "Internal problem! tstepsNewEntry returns %d", tsID);
+    Error("Internal problem! tstepsNewEntry returns %d", tsID);
 
   fileID = streamInqFileID(streamID);
+
+  while ( nskip-- > 0 )
+    {
+      recsize = gribGetSize(fileID);
+      if ( recsize == 0 )
+	Error("Skipping of %d records failed!", cdiSkipRecords);
+
+      recpos  = fileGetPos(fileID);
+      fileSetPos(fileID, recsize, SEEK_CUR);
+    }
 
   nrecs = 0;
   while ( TRUE )
@@ -628,6 +576,9 @@ void cgribexScanTimestep1(int streamID)
 
       if ( recsize == 0 )
 	{
+	  if ( nrecs == 0 )
+	    Error("No GRIB records found!");
+
 	  streamptr->ntsteps = 1;
 	  break;
 	}
@@ -638,8 +589,8 @@ void cgribexScanTimestep1(int streamID)
 	}
 
       readsize = recsize;
-      status = gribRead(fileID, gribbuffer, &readsize);
-      if ( status ) break;
+      rstatus = gribRead(fileID, gribbuffer, &readsize);
+      if ( rstatus ) break;
 
       ztype = COMPRESS_NONE;
       if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
@@ -704,7 +655,7 @@ void cgribexScanTimestep1(int streamID)
 		  {
 		    char paramstr[32];
 		    cdiParamToString(param, paramstr, sizeof(paramstr));
-		    Warning(func, "Inconsistent verification time (param=%s level=%d)", paramstr, level1);
+		    Warning("Inconsistent verification time (param=%s level=%d)", paramstr, level1);
 		    warn_time = FALSE;
 		  }
 	    }
@@ -716,7 +667,7 @@ void cgribexScanTimestep1(int streamID)
 		{
 		  char paramstr[32];
 		  cdiParamToString(param, paramstr, sizeof(paramstr));
-		  Warning(func, "Param=%s level=%d already exist, skipped!", paramstr, level1);
+		  Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 		  continue;
 		}
 	    }
@@ -726,7 +677,7 @@ void cgribexScanTimestep1(int streamID)
 	{
 	  if (  taxis->numavg && warn_numavg && (taxis->numavg != ISEC1_AvgNum) )
 	    {
-	      Message(func, "Change numavg from %d to %d not allowed!",
+	      Warning("Changing numavg from %d to %d not supported!",
 		      taxis->numavg, ISEC1_AvgNum);
 	      warn_numavg = FALSE;
 	    }
@@ -739,13 +690,15 @@ void cgribexScanTimestep1(int streamID)
       nrecs++;
 
       if ( CDI_Debug )
-	Message(func, "%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
+	Message("%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
 
       cgribexAddRecord(streamID, param, isec1, isec2, fsec2, fsec3,
 		       isec4, recsize, recpos, prec, ztype, lmv);
     }
 
   streamptr->rtsteps = 1;
+
+  if ( nrecs == 0 ) return (CDI_EUFSTRUCT);
 
   cdiGenVars(streamID);
 
@@ -790,7 +743,7 @@ void cgribexScanTimestep1(int streamID)
     {
       tsID = tstepsNewEntry(streamID);
       if ( tsID != streamptr->rtsteps )
-	Error(func, "Internal error. tsID = %d", tsID);
+	Error("Internal error. tsID = %d", tsID);
 
       streamptr->tsteps[tsID-1].next   = TRUE;
       streamptr->tsteps[tsID].position = recpos;
@@ -807,19 +760,24 @@ void cgribexScanTimestep1(int streamID)
 	    }
 	}
     }
+#else
+  Error("CGRIBEX support not compiled in!");
+#endif
+
+  return (0);
 }
 
 
 int cgribexScanTimestep2(int streamID)
 {
-  static char func[] = "cgribexScanTimestep2";
+  int rstatus = 0;
+#if  defined  (HAVE_LIBCGRIBEX)
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0;
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
   long buffersize = 0;
-  int status;
   int fileID;
   int param = 0;
   int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
@@ -832,7 +790,7 @@ int cgribexScanTimestep2(int streamID)
   int warn_numavg = TRUE;
   int tsteptype;
   int taxisID = -1;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int vlistID;
   long unzipsize;
   compvar_t compVar, compVar0;
@@ -840,7 +798,7 @@ int cgribexScanTimestep2(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 1;
 
@@ -859,7 +817,7 @@ int cgribexScanTimestep2(int streamID)
                                           
   tsID = streamptr->rtsteps;
   if ( tsID != 1 )
-    Error(func, "Internal problem! unexpeceted timestep %d", tsID+1);
+    Error("Internal problem! unexpeceted timestep %d", tsID+1);
 
   taxis = &streamptr->tsteps[tsID].taxis;
 
@@ -901,8 +859,8 @@ int cgribexScanTimestep2(int streamID)
 	}
 
       readsize = recsize;
-      status = gribRead(fileID, gribbuffer, &readsize);
-      if ( status ) break;
+      rstatus = gribRead(fileID, gribbuffer, &readsize);
+      if ( rstatus ) break;
 
       if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
 	{
@@ -953,7 +911,7 @@ int cgribexScanTimestep2(int streamID)
 		(taxis->numavg != ISEC1_AvgNum) )
 	    {
 	  /*
-	      Message(func, "change numavg from %d to %d not allowed!",
+	      Warning("Changing numavg from %d to %d not supported!",
 		      taxis->numavg, ISEC1_AvgNum);
 	  */
 	      warn_numavg = FALSE;
@@ -984,7 +942,7 @@ int cgribexScanTimestep2(int streamID)
 	{
 	  char paramstr[32];
 	  cdiParamToString(param, paramstr, sizeof(paramstr));
-	  Warning(func, "Param=%s level=%d not defined at timestep 1!", paramstr, level1);
+	  Warning("Param=%s level=%d not defined at timestep 1!", paramstr, level1);
 	  return (CDI_EUFSTRUCT);
 	}
 
@@ -1009,7 +967,7 @@ int cgribexScanTimestep2(int streamID)
 
 	      if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
 
-	      Warning(func, "Param=%s level=%d already exist, skipped!", paramstr, level1);
+	      Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 	      continue;
 	    }
 	  else
@@ -1020,7 +978,7 @@ int cgribexScanTimestep2(int streamID)
 	}
 
       if ( CDI_Debug )
-	Message(func, "%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
+	Message("%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
@@ -1031,7 +989,7 @@ int cgribexScanTimestep2(int streamID)
 
       if ( memcmp(&compVar0, &compVar, sizeof(compvar_t)) != 0 )
 	{
-	  Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
+	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
 		  streamptr->tsteps[tsID].records[recID].param, param,
 		  streamptr->tsteps[tsID].records[recID].ilevel, level1);
@@ -1075,7 +1033,7 @@ int cgribexScanTimestep2(int streamID)
     {
       tsID = tstepsNewEntry(streamID);
       if ( tsID != streamptr->rtsteps )
-	Error(func, "Internal error. tsID = %d", tsID);
+	Error("Internal error. tsID = %d", tsID);
 
       streamptr->tsteps[tsID-1].next   = TRUE;
       streamptr->tsteps[tsID].position = recpos;
@@ -1083,14 +1041,16 @@ int cgribexScanTimestep2(int streamID)
 
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;
+#endif
 
-  return (0);
+  return (rstatus);
 }
 
 
 int cgribexScanTimestep(int streamID)
 {
-  static char func[] = "cgribexScanTimestep";
+  int rstatus = 0;
+#if  defined  (HAVE_LIBCGRIBEX)
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0;
@@ -1098,7 +1058,6 @@ int cgribexScanTimestep(int streamID)
   off_t recpos = 0;
   unsigned char *gribbuffer;
   long buffersize = 0;
-  int status;
   int fileID;
   int param = 0;
   int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
@@ -1108,7 +1067,7 @@ int cgribexScanTimestep(int streamID)
   int warn_numavg = TRUE;
   size_t readsize;
   int taxisID = -1;
-  TAXIS *taxis;
+  taxis_t *taxis;
   int vlistID;
   int rindex, nrecs = 0;
   long unzipsize;
@@ -1117,16 +1076,16 @@ int cgribexScanTimestep(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamInqVlist(streamID);
 
   if ( CDI_Debug )
     {
-      Message(func, "streamID = %d", streamID);
-      Message(func, "cts = %d", streamptr->curTsID);
-      Message(func, "rts = %d", streamptr->rtsteps);
-      Message(func, "nts = %d", streamptr->ntsteps);
+      Message("streamID = %d", streamID);
+      Message("cts = %d", streamptr->curTsID);
+      Message("rts = %d", streamptr->rtsteps);
+      Message("nts = %d", streamptr->ntsteps);
     }
 
   isec0 = streamptr->record->sec0;
@@ -1174,11 +1133,13 @@ int cgribexScanTimestep(int streamID)
 	      gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
 	    }
 
+	  if ( rindex >= nrecs ) break;
+
 	  readsize = recsize;
-	  status = gribRead(fileID, gribbuffer, &readsize);
-	  if ( status )
+	  rstatus = gribRead(fileID, gribbuffer, &readsize);
+	  if ( rstatus )
 	    {
-	      Error(func, "Inconsistent timestep %d (GRIB record %d/%d)!\n", tsID+1, rindex+1,
+	      Error("Inconsistent timestep %d (GRIB record %d/%d)!", tsID+1, rindex+1,
 		    streamptr->tsteps[tsID].recordSize);
 	      break;
 	    }
@@ -1233,7 +1194,7 @@ int cgribexScanTimestep(int streamID)
 		   (taxis->numavg != ISEC1_AvgNum) )
 		{
 	      /*
-		  Message(func, "Change numavg from %d to %d not allowed!",
+	          Warning("Changing numavg from %d to %d not supported!",
 			  streamptr->tsteps[tsID].taxis.numavg, ISEC1_AvgNum);
 	      */
 		  warn_numavg = FALSE;
@@ -1265,7 +1226,7 @@ int cgribexScanTimestep(int streamID)
 	    {
 	      char paramstr[32];
 	      cdiParamToString(param, paramstr, sizeof(paramstr));
-	      Warning(func, "Param=%s level=%d not available at timestep %d!", paramstr, level1, tsID+1);
+	      Warning("Param=%s level=%d not available at timestep %d!", paramstr, level1, tsID+1);
 
 	      if ( cdiInventoryMode == 1 )
 		return (CDI_EUFSTRUCT);
@@ -1288,7 +1249,7 @@ int cgribexScanTimestep(int streamID)
 		  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
 		  
 		  if ( CDI_Debug )
-		    Warning(func, "Param=%s level=%d already exist, skipped!", paramstr, level1);
+		    Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 
 		  continue;
 		}
@@ -1300,7 +1261,7 @@ int cgribexScanTimestep(int streamID)
 	    }
 
 	  if ( CDI_Debug )
-	    Message(func, "%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
+	    Message("%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
 
 	  compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
 	  compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
@@ -1309,18 +1270,18 @@ int cgribexScanTimestep(int streamID)
 
 	  if ( memcmp(&compVar0, &compVar, sizeof(compvar_t)) != 0 )
 	    {
-	      Message(func, "tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
+	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,
 		      streamptr->tsteps[tsID].records[recID].param, param,
 		      streamptr->tsteps[tsID].records[recID].ilevel, level1);
-	      Error(func, "Invalid, unsupported or inconsistent record structure");
+	      Error("Invalid, unsupported or inconsistent record structure");
 	    }
 	  
 	  streamptr->tsteps[tsID].records[recID].position = recpos;
 	  streamptr->tsteps[tsID].records[recID].size = recsize;
 
 	  if ( CDI_Debug )
-	    Message(func, "%4d %8d %4d %8d %8d %6d", rindex, (int)recpos, param, level1, vdate, vtime);
+	    Message("%4d %8d %4d %8d %8d %6d", rindex, (int)recpos, param, level1, vdate, vtime);
 
 	  rindex++;
 	}
@@ -1335,7 +1296,7 @@ int cgribexScanTimestep(int streamID)
 	{
 	  char paramstr[32];
 	  cdiParamToString(streamptr->tsteps[tsID].records[recID].param, paramstr, sizeof(paramstr));
-	  Warning(func, "Param=%s level=%d not found at timestep %d!",
+	  Warning("Param=%s level=%d not found at timestep %d!",
 		  paramstr, streamptr->tsteps[tsID].records[recID].ilevel, tsID+1);
 	  return (CDI_EUFSTRUCT);
 	}
@@ -1346,7 +1307,7 @@ int cgribexScanTimestep(int streamID)
 	{
 	  tsID = tstepsNewEntry(streamID);
 	  if ( tsID != streamptr->rtsteps )
-	    Error(func, "Internal error. tsID = %d", tsID);
+	    Error("Internal error. tsID = %d", tsID);
 
 	  streamptr->tsteps[tsID-1].next   = 1;
 	  streamptr->tsteps[tsID].position = recpos;
@@ -1361,18 +1322,20 @@ int cgribexScanTimestep(int streamID)
 
   if ( nrecs > 0 && nrecs < streamptr->tsteps[tsID].nrecs )
     {
-      Warning(func, "Incomplete timestep. Stop scanning at timestep %d.\n", tsID);
+      Warning("Incomplete timestep. Stop scanning at timestep %d.", tsID);
       streamptr->ntsteps = tsID;
     }
 
-  return (streamptr->ntsteps);
+  rstatus = streamptr->ntsteps;
+#endif
+
+  return (rstatus);
 }
 
 
 int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
 		  int unreduced, int *nmiss, int *zip, double missval)
 {
-  static char func[] = "cgribexDecode";
   int status = 0;
 #if  defined  (HAVE_LIBCGRIBEX)
   int iret = 0, iword = 0;
@@ -1417,13 +1380,13 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
 	  gribsize = gribUnzip(gribbuffer, unzipsize, itmpbuffer, gribsize);
 
 	  if ( gribsize <= 0 )
-	    Error(func, "Decompression problem!\n");
+	    Error("Decompression problem!");
 	  
 	  free(itmpbuffer);
 	}
       else
 	{
-	  Error(func, "Decompression for %d not implemented!\n", izip);
+	  Error("Decompression for %d not implemented!", izip);
 	}
     }
 
@@ -1450,7 +1413,7 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
         }
     }
 #else
-  Error(func, "CGRIBEX support not compiled in!");
+  Error("CGRIBEX support not compiled in!");
 #endif
 
   return (status);
@@ -1495,7 +1458,6 @@ void cgribexDefModel(int *isec1, int vlistID, int varID)
 static
 void cgribexDefParam(int *isec1, int param)
 {
-  static char func[] = "cgribexDefParam";
   int pdis, pcat, pnum;
   static int lwarn = TRUE;
 
@@ -1505,7 +1467,7 @@ void cgribexDefParam(int *isec1, int param)
     {
       char paramstr[32];
       cdiParamToString(param, paramstr, sizeof(paramstr));
-      Warning(func, "Can not convert GRIB2 parameter (%s) to GRIB1!", paramstr);
+      Warning("Can not convert GRIB2 parameter (%s) to GRIB1!", paramstr);
       lwarn = FALSE;
     }
     
@@ -1547,7 +1509,7 @@ int cgribexDefTimerange(int tsteptype, int factor, int calendar,
 	case TSTEP_ACCUM:    timerange =  4; ip1 = 0;  ip2 = ip; break;
 	case TSTEP_DIFF:     timerange =  5; ip1 = 0;  ip2 = ip; break;
 	case TSTEP_INSTANT3:
-	default:             timerange = 10; ip1 = ip; ip2 = 0;  break;
+	default:             timerange = 10; ip1 = ip/256; ip2 = ip%256;  break;
 	}
     }
 
@@ -1579,8 +1541,8 @@ int cgribexDefDateTime(int *isec1, int timeunit, int date, int time)
 
   if ( ISEC1_Year == 0 )
     {
-      ISEC1_Year = 100;
       century -= 1;
+      ISEC1_Year = 100;
     }
 
   century += 1;
@@ -1598,6 +1560,9 @@ int cgribexDefDateTime(int *isec1, int timeunit, int date, int time)
     case TUNIT_MINUTE:  factor =    60; ISEC1_TimeUnit = ISEC1_TABLE4_MINUTE;  break;
     case TUNIT_QUARTER: factor =   900; ISEC1_TimeUnit = ISEC1_TABLE4_QUARTER; break;
     case TUNIT_HOUR:    factor =  3600; ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;    break;
+    case TUNIT_3HOURS:  factor = 10800; ISEC1_TimeUnit = ISEC1_TABLE4_3HOURS;  break;
+    case TUNIT_6HOURS:  factor = 21600; ISEC1_TimeUnit = ISEC1_TABLE4_6HOURS;  break;
+    case TUNIT_12HOURS: factor = 43200; ISEC1_TimeUnit = ISEC1_TABLE4_12HOURS; break;
     case TUNIT_DAY:     factor = 86400; ISEC1_TimeUnit = ISEC1_TABLE4_DAY;     break;
     default:            factor =  3600; ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;    break;
     }
@@ -1632,15 +1597,17 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
       timerange = cgribexDefTimerange(tsteptype, factor, calendar,
 				      rdate, rtime, vdate, vtime, &ip1, &ip2);
 
-      if ( timerange == -1 )
+      if ( timerange == -1 || timerange == 3 )
 	{
 	  timetype = TAXIS_ABSOLUTE;
 	}
-      if ( timerange == 10 )
+      /*
+      else if ( timerange == 10 )
 	{
 	  if ( ip1 < 0 || ip1 > 0xFFFF ) timetype = TAXIS_ABSOLUTE;
 	  if ( ip2 < 0 || ip2 > 0xFFFF ) timetype = TAXIS_ABSOLUTE;
 	}
+      */
       else
 	{
 	  if ( ip1 < 0 || ip1 > 0xFF   ) timetype = TAXIS_ABSOLUTE;
@@ -1661,7 +1628,9 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 	ISEC1_TimeRange = 0;
       else
       */
-      ISEC1_TimeRange   = 10;
+      if ( ISEC1_TimeRange != 3 )
+	ISEC1_TimeRange   = 10;
+
       ISEC1_TimePeriod1 = 0;
       ISEC1_TimePeriod2 = 0;
     }
@@ -1674,8 +1643,8 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 static
 void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 {
-  static char func[] = "cgribexDefGrid";
   int gridtype;
+  int lcurvi = FALSE;
   static short lwarn = TRUE;
 
   memset(isec2, 0, 16*sizeof(int));
@@ -1688,19 +1657,22 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 
   if ( gridtype == GRID_GENERIC )
     {
-      int xsize, ysize;
+      int xsize, ysize, gridsize;
 
+      gridsize = gridInqSize(gridID);
       xsize = gridInqXsize(gridID);
       ysize = gridInqYsize(gridID);
 
-      if ( (ysize == 32  || ysize == 48 || ysize == 64 ||
-	    ysize == 96  || ysize == 160) && 
+      if ( (ysize ==  32 || ysize ==  48 || ysize ==  64 ||
+	    ysize ==  96 || ysize == 160 || ysize == 192 ||
+	    ysize == 240 || ysize == 320 || ysize == 384 ||
+	    ysize == 480 || ysize == 768 ) && 
 	   (xsize == 2*ysize || xsize == 1) )
 	{
 	  gridtype = GRID_GAUSSIAN;
 	  gridChangeType(gridID, gridtype);
 	}
-      else if ( xsize == 1 && ysize == 1 )
+      else if ( gridsize == 1 )
 	{
 	  gridtype = GRID_LONLAT;
 	  gridChangeType(gridID, gridtype);
@@ -1713,12 +1685,13 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
-      if ( lwarn )
+      if ( lwarn && gridInqSize(gridID) > 1 )
 	{
 	  lwarn = FALSE;
-	  Warning(func, "Curvilinear grids are unsupported in GRIB format! Created wrong GDS!");
+	  Warning("Curvilinear grids are unsupported in GRIB1! Created wrong GDS!");
 	}
       gridtype = GRID_LONLAT;
+      lcurvi = TRUE;
     }
 
   ISEC2_Reduced = FALSE;
@@ -1733,6 +1706,18 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
     case GRID_TRAJECTORY:
       {
 	int nlon = 0, nlat;
+	double xfirst = 0, xlast = 0, xinc = 0;
+	double yfirst = 0, ylast = 0, yinc = 0;
+
+	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
+	  ISEC2_GridType = GRIB1_GTYPE_GAUSSIAN;
+	else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
+	  ISEC2_GridType = GRIB1_GTYPE_LATLON_ROT;
+	else
+	  ISEC2_GridType = GRIB1_GTYPE_LATLON;
+
+	nlon = gridInqXsize(gridID);
+	nlat = gridInqYsize(gridID);
 
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
@@ -1742,21 +1727,40 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	  }
 	else
 	  {
-	    nlon = gridInqXsize(gridID);
+	    if ( nlon == 0 )
+	      {
+		nlon = 1;
+	      }
+	    else
+	      {
+		xfirst = gridInqXval(gridID,      0);
+		if ( lcurvi )
+		  xlast  = gridInqXval(gridID, nlon*nlat-1);
+		else
+		  xlast  = gridInqXval(gridID, nlon-1);
+		xinc   = gridInqXinc(gridID);
+	      }
 	  }
 
-	nlat = gridInqYsize(gridID);
-	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
-	  ISEC2_GridType = GTYPE_GAUSSIAN;
-	else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
-	  ISEC2_GridType = GTYPE_LATLON_ROT;
+	if ( nlat == 0 )
+	  {
+	    nlat = 1;
+	  }
 	else
-	  ISEC2_GridType = GTYPE_LATLON;
+	  {
+	    yfirst = gridInqYval(gridID,      0);
+	    if ( lcurvi )
+	      ylast  = gridInqYval(gridID, nlon*nlat-1);
+	    else
+	      ylast  = gridInqYval(gridID, nlat-1);
+	    yinc   = gridInqYinc(gridID);
+	    if ( yinc < 0 ) yinc = -yinc;
+	  }
 
 	ISEC2_NumLon   = nlon;
 	ISEC2_NumLat   = nlat;
-	ISEC2_FirstLat = NINT(gridInqYval(gridID,      0)*1000);
-	ISEC2_LastLat  = NINT(gridInqYval(gridID, nlat-1)*1000);
+	ISEC2_FirstLat = NINT(yfirst*1000);
+	ISEC2_LastLat  = NINT(ylast*1000);
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
 	    ISEC2_FirstLon = 0;
@@ -1765,19 +1769,19 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	  }
 	else
 	  {
-	    ISEC2_FirstLon = NINT(gridInqXval(gridID,      0)*1000);
-	    ISEC2_LastLon  = NINT(gridInqXval(gridID, nlon-1)*1000);
-	    ISEC2_LonIncr  = NINT(gridInqXinc(gridID)*1000);
+	    ISEC2_FirstLon = NINT(xfirst*1000);
+	    ISEC2_LastLon  = NINT(xlast*1000);
+	    ISEC2_LonIncr  = NINT(xinc*1000);
 	  }
-	if ( fabs(gridInqXinc(gridID)*1000 - ISEC2_LonIncr) > FLT_EPSILON )
+	if ( fabs(xinc*1000 - ISEC2_LonIncr) > FLT_EPSILON )
 	  ISEC2_LonIncr = 0;
 
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
 	  ISEC2_NumPar = nlat/2;
 	else
 	  {
-	    ISEC2_LatIncr = NINT(gridInqYinc(gridID)*1000);
-	    if ( fabs(gridInqYinc(gridID)*1000 - ISEC2_LatIncr) > FLT_EPSILON )
+	    ISEC2_LatIncr = NINT(yinc*1000);
+	    if ( fabs(yinc*1000 - ISEC2_LatIncr) > FLT_EPSILON )
 	      ISEC2_LatIncr = 0;
 
 	    if ( ISEC2_LatIncr < 0 ) ISEC2_LatIncr = -ISEC2_LatIncr;
@@ -1820,7 +1824,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
 		   &projflag, &scanflag);
 
-	ISEC2_GridType = GTYPE_LCC;
+	ISEC2_GridType = GRIB1_GTYPE_LCC;
 	ISEC2_NumLon   = xsize;
 	ISEC2_NumLat   = ysize;
 	ISEC2_FirstLon = NINT(originLon * 1000);
@@ -1839,7 +1843,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
       }
     case GRID_SPECTRAL:
       {
-	ISEC2_GridType = GTYPE_SPECTRAL;
+	ISEC2_GridType = GRIB1_GTYPE_SPECTRAL;
 	ISEC2_PentaJ   = gridInqTrunc(gridID);
 	ISEC2_PentaK   = ISEC2_PentaJ;
 	ISEC2_PentaM   = ISEC2_PentaJ;
@@ -1863,7 +1867,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
       }
     case GRID_GME:
       {
-	ISEC2_GridType   = GTYPE_GME;
+	ISEC2_GridType   = GRIB1_GTYPE_GME;
 	ISEC2_GME_ND     = gridInqGMEnd(gridID);
 	ISEC2_GME_NI     = gridInqGMEni(gridID);
 	ISEC2_GME_NI2    = gridInqGMEni2(gridID);
@@ -1876,14 +1880,16 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	break;
       }
     default:
-      Error(func, "%s grid unsupported!", gridNamePtr(gridtype));
+      {
+	Warning("The CGRIBEX library can not store fields on the used grid!");
+	Error("Unsupported grid type: %s", gridNamePtr(gridtype));
+      }
     }
 }
 
 static
 void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
 {
-  static char func[] = "cgribexDefLevel";
   double level;
   int ilevel, zaxistype, ltype;
   static int warning = 1;
@@ -1894,6 +1900,9 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 
   if ( zaxistype == ZAXIS_GENERIC && ltype == 0 )
     {
+      Message("Changed zaxis type from %s to %s",
+	      zaxisNamePtr(zaxistype),
+	      zaxisNamePtr(ZAXIS_PRESSURE));
       zaxistype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, zaxistype);
       zaxisDefUnits(zaxisID, "Pa");
@@ -1905,14 +1914,14 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
     {
     case ZAXIS_SURFACE:
       {
-	ISEC1_LevelType = LTYPE_SURFACE;
+	ISEC1_LevelType = GRIB1_LTYPE_SURFACE;
 	ISEC1_Level1    = (int) zaxisInqLevel(zaxisID, levelID);
 	ISEC1_Level2    = 0;
 	break;
       }
     case ZAXIS_MEANSEA:
       {
-	ISEC1_LevelType = LTYPE_MEANSEA;
+	ISEC1_LevelType = GRIB1_LTYPE_MEANSEA;
 	ISEC1_Level1    = (int) zaxisInqLevel(zaxisID, levelID);
 	ISEC1_Level2    = 0;
 	break;
@@ -1924,13 +1933,13 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
 	  {
-	    ISEC1_LevelType = LTYPE_HYBRID_LAYER;
+	    ISEC1_LevelType = GRIB1_LTYPE_HYBRID_LAYER;
 	    ISEC1_Level1    = (int) zaxisInqLbound(zaxisID, levelID);
 	    ISEC1_Level2    = (int) zaxisInqUbound(zaxisID, levelID);
 	  }
 	else
 	  {
-	    ISEC1_LevelType = LTYPE_HYBRID;
+	    ISEC1_LevelType = GRIB1_LTYPE_HYBRID;
 	    ISEC1_Level1    = (int) zaxisInqLevel(zaxisID, levelID);
 	    ISEC1_Level2    = 0;
 	  }
@@ -1938,7 +1947,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	vctsize = zaxisInqVctSize(zaxisID);
 	if ( vctsize == 0 && warning )
 	  {
-	    Warning(func, "VCT missing. ( param = %d, zaxisID = %d )",
+	    Warning("VCT missing. ( param = %d, zaxisID = %d )",
 		    ISEC1_Parameter, zaxisID);
 	    warning = 0;
 	  }
@@ -1947,7 +1956,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	    ISEC2_NumVCP = 0;
 	    if ( vct_warning )
 	      {
-		Warning(func, "VCT size of %d is too large (maximum is 255). Set to 0!", vctsize);
+		Warning("VCT size of %d is too large (maximum is 255). Set to 0!", vctsize);
 		vct_warning = 0;
 	      }
 	  }
@@ -1965,7 +1974,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 
 	level = zaxisInqLevel(zaxisID, levelID);
 	if ( level < 0 )
-	  Warning(func, "Pressure level of %f Pa is below zero!", level);
+	  Warning("Pressure level of %f Pa is below zero!", level);
 
 	zaxisInqUnits(zaxisID, units);
 	if ( memcmp(units, "Pa", 2) != 0 ) level *= 100;
@@ -1973,13 +1982,13 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	ilevel = (int) level;
 	if ( level < 32768 && (level < 100 || modf(level/100, &dum) > 0) )
 	  {
-	    ISEC1_LevelType = LTYPE_99;
+	    ISEC1_LevelType = GRIB1_LTYPE_99;
 	    ISEC1_Level1    = ilevel;
 	    ISEC1_Level2    = 0;
 	  }
 	else
 	  {
-	    ISEC1_LevelType = LTYPE_ISOBARIC;
+	    ISEC1_LevelType = GRIB1_LTYPE_ISOBARIC;
 	    ISEC1_Level1    = ilevel/100;
 	    ISEC1_Level2    = 0;
 	  }
@@ -1990,7 +1999,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	level = zaxisInqLevel(zaxisID, levelID);
 
 	ilevel = (int) level;
-	ISEC1_LevelType = LTYPE_HEIGHT;
+	ISEC1_LevelType = GRIB1_LTYPE_HEIGHT;
 	ISEC1_Level1    = ilevel;
 	ISEC1_Level2    = 0;
 
@@ -2001,7 +2010,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	level = zaxisInqLevel(zaxisID, levelID);
 
 	ilevel = (int) level;
-	ISEC1_LevelType = LTYPE_ALTITUDE;
+	ISEC1_LevelType = GRIB1_LTYPE_ALTITUDE;
 	ISEC1_Level1    = ilevel;
 	ISEC1_Level2    = 0;
 
@@ -2012,7 +2021,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	level = zaxisInqLevel(zaxisID, levelID);
 
 	ilevel = (int) level;
-	ISEC1_LevelType = LTYPE_SIGMA;
+	ISEC1_LevelType = GRIB1_LTYPE_SIGMA;
 	ISEC1_Level1    = ilevel;
 	ISEC1_Level2    = 0;
 
@@ -2022,7 +2031,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       {
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
 	  {
-	    ISEC1_LevelType = LTYPE_LANDDEPTH_LAYER;
+	    ISEC1_LevelType = GRIB1_LTYPE_LANDDEPTH_LAYER;
 	    ISEC1_Level1    = (int) zaxisInqLbound(zaxisID, levelID);
 	    ISEC1_Level2    = (int) zaxisInqUbound(zaxisID, levelID);
 	  }
@@ -2031,7 +2040,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	    level = zaxisInqLevel(zaxisID, levelID);
 
 	    ilevel = (int) level;
-	    ISEC1_LevelType = LTYPE_LANDDEPTH;
+	    ISEC1_LevelType = GRIB1_LTYPE_LANDDEPTH;
 	    ISEC1_Level1    = ilevel;
 	    ISEC1_Level2    = 0;
 	  }
@@ -2043,7 +2052,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	level = zaxisInqLevel(zaxisID, levelID);
 
 	ilevel = (int) level;
-	ISEC1_LevelType = LTYPE_SEADEPTH;
+	ISEC1_LevelType = GRIB1_LTYPE_SEADEPTH;
 	ISEC1_Level1    = ilevel;
 	ISEC1_Level2    = 0;
 
@@ -2054,7 +2063,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	level = zaxisInqLevel(zaxisID, levelID);
 
 	ilevel = (int) level;
-	ISEC1_LevelType = LTYPE_ISENTROPIC;
+	ISEC1_LevelType = GRIB1_LTYPE_ISENTROPIC;
 	ISEC1_Level1    = ilevel;
 	ISEC1_Level2    = 0;
 
@@ -2073,7 +2082,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       }
     default:
       {
-	Error(func, "zaxistype >%s< unsupported", zaxisNamePtr(zaxistype));
+	Error("Unsupported zaxis type: %s", zaxisNamePtr(zaxistype));
 	break;
       }
     }
@@ -2102,15 +2111,9 @@ void cgribexDefaultSec1(int *isec1)
 static
 void cgribexDefaultSec4(int *isec4)
 {
-  isec4[2] = 0;
-  isec4[3] = 0;
-  isec4[4] = 0;
-  isec4[5] = 0;
-  isec4[6] = 0;
-  isec4[7] = 0;
-  isec4[8] = 0;
-  isec4[9] = 0;
-  isec4[10] = 0;
+  long i;
+
+  for ( i = 2; i <= 10; ++i ) isec4[i] = 0;
 }
 #endif
 
@@ -2119,7 +2122,6 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 		     int vdate, int vtime, int tsteptype, int numavg, 
 		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize)
 {
-  static char func[] = "cgribexEncode";
   size_t nbytes = 0;
 #if  defined  (HAVE_LIBCGRIBEX)
   long gribsize;
@@ -2170,11 +2172,11 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
 	   datasize, (int *) gribbuffer, gribsize, &iword, "C", &iret);
 
-  if ( iret ) Error(func, "Problem during GRIB encode (errno = %d)!", iret);
+  if ( iret ) Error("Problem during GRIB encode (errno = %d)!", iret);
 
   nbytes = iword*sizeof(int);
 #else
-  Error(func, "CGRIBEX support not compiled in!");
+  Error("CGRIBEX support not compiled in!");
 #endif
 
   return (nbytes);

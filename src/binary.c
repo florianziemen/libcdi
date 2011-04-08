@@ -83,7 +83,6 @@ size_t binReadF77Block(int fileID, int byteswap)
 
 void binWriteF77Block(int fileID, int byteswap, size_t blocksize)
 {
-  static char func[] = "binWriteF77Block";
   static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
   unsigned char f77block[4];
 
@@ -123,14 +122,12 @@ void binWriteF77Block(int fileID, int byteswap, size_t blocksize)
     }
 
   if ( fileWrite(fileID, f77block, 4) != 4 )
-    Error(func, "write failed on %s", fileInqName(fileID));
+    Error("write failed on %s", fileInqName(fileID));
 }
 
 
 int binReadInt32(int fileID, int byteswap, size_t size, INT32 *ptr)
 {
-  static char func[] = "binReadInt32";
-
   if ( sizeof(INT32) == 4 )
     {
       fileRead(fileID, (void *) ptr, 4*size);
@@ -138,7 +135,7 @@ int binReadInt32(int fileID, int byteswap, size_t size, INT32 *ptr)
     }
   else
     {
-      Error(func, "not implemented for %d byte integer", sizeof(INT32));
+      Error("not implemented for %d byte integer", sizeof(INT32));
     }
 
   return (0);
@@ -147,8 +144,6 @@ int binReadInt32(int fileID, int byteswap, size_t size, INT32 *ptr)
 
 int binReadInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
 {
-  static char func[] = "binReadInt64";
-
   if ( sizeof(INT64) == 8 )
     {
       fileRead(fileID, (void *) ptr, 8*size);
@@ -156,7 +151,7 @@ int binReadInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
     }
   else
     {
-      Error(func, "not implemented for %d byte integer", sizeof(INT64));
+      Error("not implemented for %d byte integer", sizeof(INT64));
     }
 
   return (0);
@@ -165,8 +160,6 @@ int binReadInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
 
 int binReadFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr)
 {
-  static char func[] = "binReadFlt32";
-
   if ( sizeof(FLT32) == 4 )
     {
       fileRead(fileID, (void *) ptr, 4*size);
@@ -174,7 +167,7 @@ int binReadFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr)
     }
   else
     {
-      Error(func, "not implemented for %d byte float", sizeof(FLT32));
+      Error("not implemented for %d byte float", sizeof(FLT32));
     }
 
   return (0);
@@ -183,8 +176,6 @@ int binReadFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr)
 
 int binReadFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr)
 {
-  static char func[] = "binReadFlt64";
-
   if ( sizeof(FLT64) == 8 )
     {
       fileRead(fileID, (void *) ptr, 8*size);
@@ -192,7 +183,7 @@ int binReadFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr)
     }
   else
     {
-      Error(func, "not implemented for %d byte float", sizeof(FLT64));
+      Error("not implemented for %d byte float", sizeof(FLT64));
     }
 
   return (0);
@@ -201,8 +192,6 @@ int binReadFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr)
 
 int binWriteInt32(int fileID, int byteswap, size_t size, INT32 *ptr)
 {
-  static char func[] = "binWriteInt32";
-
   if ( sizeof(INT32) == 4 )
     {
       if ( byteswap ) swap4byte(ptr, size);
@@ -210,7 +199,7 @@ int binWriteInt32(int fileID, int byteswap, size_t size, INT32 *ptr)
     }
   else
     {
-      Error(func, "not implemented for %d byte integer", sizeof(INT32));
+      Error("not implemented for %d byte integer", sizeof(INT32));
     }
 
   return (0);
@@ -219,8 +208,6 @@ int binWriteInt32(int fileID, int byteswap, size_t size, INT32 *ptr)
 
 int binWriteInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
 {
-  static char func[] = "binWriteInt64";
-
   if ( sizeof(INT64) == 8 )
     {
       if ( byteswap ) swap8byte(ptr, size);
@@ -228,7 +215,7 @@ int binWriteInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
     }
   else
     {
-      Error(func, "not implemented for %d byte integer", sizeof(INT64));
+      Error("not implemented for %d byte integer", sizeof(INT64));
     }
 
   return (0);
@@ -237,8 +224,6 @@ int binWriteInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
 
 int binWriteFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr)
 {
-  static char func[] = "binWriteFlt32";
-
   if ( sizeof(FLT32) == 4 )
     {
       if ( byteswap ) swap4byte(ptr, size);
@@ -246,7 +231,7 @@ int binWriteFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr)
     }
   else
     {
-      Error(func, "not implemented for %d byte float", sizeof(FLT32));
+      Error("not implemented for %d byte float", sizeof(FLT32));
     }
 
   return (0);
@@ -255,8 +240,6 @@ int binWriteFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr)
 
 int binWriteFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr)
 {
-  static char func[] = "binWriteFlt64";
-
   if ( sizeof(FLT64) == 8 )
     {
       if ( byteswap ) swap8byte(ptr, size);
@@ -264,7 +247,7 @@ int binWriteFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr)
     }
   else
     {
-      Error(func, "not implemented for %d byte float", sizeof(FLT64));
+      Error("not implemented for %d byte float", sizeof(FLT64));
     }
 
   return (0);

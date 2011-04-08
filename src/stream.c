@@ -38,11 +38,9 @@ void cdiPrintDefaults(void)
 
 void cdiDebug(int level)
 {
-  static char func[] = "cdiDebug";
-
   if ( level == 1 || level &  2 ) CDI_Debug = 1;
 
-  if ( CDI_Debug ) Message(func, "debug level %d", level);
+  if ( CDI_Debug ) Message("debug level %d", level);
 
   if ( level == 1 || level &  4 ) memDebug(1);
 
@@ -101,7 +99,6 @@ static int getByteorder(int byteswap)
 
 static int getFiletype(const char *filename, int *byteorder)
 {
-  static char func[] = "getFiletype";
   int filetype = CDI_EUFTYPE;
   int fileID;
   int swap = 0;
@@ -129,48 +126,48 @@ static int getFiletype(const char *filename, int *byteorder)
       if ( version <= 1 )
 	{
 	  filetype = FILETYPE_GRB;
-	  if ( CDI_Debug ) Message(func, "found GRIB file = %s, version %d", filename, version);
+	  if ( CDI_Debug ) Message("found GRIB file = %s, version %d", filename, version);
 	}
       else if ( version == 2 )
 	{
 	  filetype = FILETYPE_GRB2;
-	  if ( CDI_Debug ) Message(func, "found GRIB2 file = %s", filename);
+	  if ( CDI_Debug ) Message("found GRIB2 file = %s", filename);
 	}
     }
   else if ( memcmp(buffer, "CDF\001", 4) == 0 )
     {
       filetype = FILETYPE_NC;
-      if ( CDI_Debug ) Message(func, "found CDF1 file = %s", filename);
+      if ( CDI_Debug ) Message("found CDF1 file = %s", filename);
     }
   else if ( memcmp(buffer, "CDF\002", 4) == 0 )
     {
       filetype = FILETYPE_NC2;
-      if ( CDI_Debug ) Message(func, "found CDF2 file = %s", filename);
+      if ( CDI_Debug ) Message("found CDF2 file = %s", filename);
     }
   else if ( memcmp(buffer+1, "HDF", 3) == 0 )
     {
       filetype = FILETYPE_NC4;
-      if ( CDI_Debug ) Message(func, "found HDF file = %s", filename);
+      if ( CDI_Debug ) Message("found HDF file = %s", filename);
     }
 #if  defined  (HAVE_LIBSERVICE)
   else if ( srvCheckFiletype(fileID, &swap) )
     {
       filetype = FILETYPE_SRV;
-      if ( CDI_Debug ) Message(func, "found SRV file = %s", filename);
+      if ( CDI_Debug ) Message("found SRV file = %s", filename);
     }
 #endif
 #if  defined  (HAVE_LIBEXTRA)
   else if ( extCheckFiletype(fileID, &swap) )
     {
       filetype = FILETYPE_EXT;
-      if ( CDI_Debug ) Message(func, "found EXT file = %s", filename);
+      if ( CDI_Debug ) Message("found EXT file = %s", filename);
     }
 #endif
 #if  defined  (HAVE_LIBIEG)
   else if ( iegCheckFiletype(fileID, &swap) )
     {
       filetype = FILETYPE_IEG;
-      if ( CDI_Debug ) Message(func, "found IEG file = %s", filename);
+      if ( CDI_Debug ) Message("found IEG file = %s", filename);
     }
 #endif
   else if ( gribCheckSeek(fileID, &recpos, &version) == 0 )
@@ -178,12 +175,12 @@ static int getFiletype(const char *filename, int *byteorder)
       if ( version <= 1 )
 	{
 	  filetype = FILETYPE_GRB;
-	  if ( CDI_Debug ) Message(func, "found seek GRIB file = %s", filename);
+	  if ( CDI_Debug ) Message("found seeked GRIB file = %s", filename);
 	}
       else if ( version == 2 )
 	{
 	  filetype = FILETYPE_GRB2;
-	  if ( CDI_Debug ) Message(func, "found seek GRIB2 file = %s", filename);
+	  if ( CDI_Debug ) Message("found seeked GRIB2 file = %s", filename);
 	}
     }
 
@@ -220,7 +217,6 @@ int _readline_(FILE *fp, char *line, int len)
 
 int get_fnames(const char *argument, char *fnames[], int max_fnames)
 {
-  static char func[] = "get_fnames";
   int num_fnames = 0;
   int len;
   int nfiles = 0;
@@ -245,10 +241,10 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 	    {
 	      FILE *fp;
 	      fp = fopen(pch, "r");
-	      if ( fp == NULL ) Error(func, "Open failed on %s", pch);
+	      if ( fp == NULL ) Error("Open failed on %s", pch);
 
 	      if ( CDI_Debug )
-		Message(func, "Reading file names from %s", pch);
+		Message("Reading file names from %s", pch);
 
 	      rewind(fp);
 
@@ -260,7 +256,7 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 		  
 		  if ( nfiles >= max_fnames )
 		    {
-		      Warning(func, "Too many input files (limit: %d)", max_fnames);
+		      Warning("Too many input files (limit: %d)", max_fnames);
 		      break;
 		    }
 		  fnames[nfiles] = strdupx(line);
@@ -269,7 +265,7 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 	      
 	      fclose(fp);
 
-	      if ( nfiles == 0 ) Error(func, "No input file found in %s", pch);
+	      if ( nfiles == 0 ) Error("No input file found in %s", pch);
 	    }
 	  else
 	    {
@@ -281,7 +277,7 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 	      nfiles++;
 	      if ( nfiles >= max_fnames )
 		{
-		  Warning(func, "Too many input files (limit: %d)", max_fnames);
+		  Warning("Too many input files (limit: %d)", max_fnames);
 		  nfiles = max_fnames;
 		}
 
@@ -303,14 +299,14 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 
 	  pfp = popen(command, "r");
 	  if ( pfp == NULL )
-	    SysError(func, "popen %s failed", command);
+	    SysError("popen %s failed", command);
 	  
 	  nfiles = 0;
 	  while ( _readline_(pfp, line, MAX_LINE) )
 	    {
 	      if ( nfiles >= max_fnames )
 		{
-		  Warning(func, "Too many input files (limit: %d)", max_fnames);
+		  Warning("Too many input files (limit: %d)", max_fnames);
 		  break;
 		}
 	      fnames[nfiles++] = strdupx(line);
@@ -328,7 +324,6 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
   
   return (num_fnames);
 }
-
 
 /*
 @Function  streamInqFiletype
@@ -351,12 +346,11 @@ The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_GRB2}, @
 */
 int streamInqFiletype(int streamID)
 {
-  static char func[] = "streamInqFiletype";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   return (streamptr->filetype);
 }
@@ -379,7 +373,6 @@ int getByteswap(int byteorder)
   return (byteswap);
 }
 
-
 /*
 @Function  streamDefByteorder
 @Title     Define the byte order
@@ -398,13 +391,12 @@ with the file format type @func{FILETYPE_SRV}, @func{FILETYPE_EXT} or @func{FILE
 */
 void streamDefByteorder(int streamID, int byteorder)
 {
-  static char func[] = "streamDefByteorder";
   int filetype, fileID;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   streamptr->byteorder = byteorder;
   filetype = streamptr->filetype;
@@ -442,7 +434,6 @@ void streamDefByteorder(int streamID, int byteorder)
     }
 }
 
-
 /*
 @Function  streamInqByteorder
 @Title     Get the byte order
@@ -463,12 +454,11 @@ The valid CDI byte order types are @func{CDI_BIGENDIAN} and @func{CDI_LITTLEENDI
 */
 int streamInqByteorder(int streamID)
 {
-  static char func[] = "streamInqByteorder";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   return (streamptr->byteorder);
 }
@@ -488,12 +478,11 @@ char *streamFilesuffix(int filetype)
 
 char *streamFilename(int streamID)
 {
-  static char func[] = "streamFilename";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   return (streamptr->filename);
 }
@@ -501,14 +490,13 @@ char *streamFilename(int streamID)
 
 int cdiInqTimeSize(int streamID)
 {
-  static char func[] = "cdiInqTimeSize";
   int ntsteps;
   int tsID = 0, nrecs;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   ntsteps = streamptr->ntsteps;
 
@@ -523,7 +511,6 @@ int cdiInqTimeSize(int streamID)
 
 int cdiInqContents(int streamID)
 {
-  static char func[] = "cdiInqContents";
   int filetype;
   int vlistID;
   int taxisID;
@@ -532,7 +519,7 @@ int cdiInqContents(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
@@ -579,7 +566,7 @@ int cdiInqContents(int streamID)
     default:
       {
 	if ( CDI_Debug )
-	  Message(func, "%s support not compiled in!", strfiletype(filetype));
+	  Message("%s support not compiled in!", strfiletype(filetype));
 
 	status = CDI_ELIBNAVAIL;
       }
@@ -599,7 +586,6 @@ int cdiInqContents(int streamID)
 
 int streamOpen(const char *filename, const char *filemode, int filetype)
 {
-  static char func[] = "streamOpen";
   int fileID = CDI_UNDEFID;
   int streamID = CDI_ESYSTEM;
   int status;
@@ -607,7 +593,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
   stream_t *streamptr = NULL;
 
   if ( CDI_Debug )
-    Message(func, "Open %s mode %c file %s", strfiletype(filetype), (int) *filemode, filename);
+    Message("Open %s mode %c file %s", strfiletype(filetype), (int) *filemode, filename);
 
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
 
@@ -672,7 +658,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
  #endif
     default:
       {
-	if ( CDI_Debug ) Message(func, "%s support not compiled in!", strfiletype(filetype));
+	if ( CDI_Debug ) Message("%s support not compiled in!", strfiletype(filetype));
 	return (CDI_ELIBNAVAIL);
       }
     }
@@ -684,7 +670,9 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
   else
     {
       streamptr = stream_new_entry();
-      streamID = streamptr->self;
+      streamID  = streamptr->self;
+
+      if ( streamID < 0 ) return(CDI_ELIMIT);
 
       streamptr->record   = record;
       streamptr->filetype = filetype;
@@ -695,7 +683,11 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
       if ( streamptr->filemode == 'r' )
 	{
 	  vlist_t *vlistptr;
-	  streamptr->vlistID = vlistCreate();
+	  int vlistID;
+	  vlistID = vlistCreate();
+	  if ( vlistID < 0 ) return(CDI_ELIMIT);
+
+	  streamptr->vlistID = vlistID;
 	  /* cdiReadByteorder(streamID); */
 	  status = cdiInqContents(streamID);
 	  if ( status < 0 ) return (status);
@@ -710,7 +702,6 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 
 int streamOpenA(const char *filename, const char *filemode, int filetype)
 {
-  static char func[] = "streamOpenA";
   int fileID = CDI_UNDEFID;
   int streamID = CDI_ESYSTEM;
   int status;
@@ -718,7 +709,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
   stream_t *streamptr = NULL;
 
   if ( CDI_Debug )
-    Message(func, "Open %s mode %c file %s", strfiletype(filetype), (int) *filemode, filename);
+    Message("Open %s mode %c file %s", strfiletype(filetype), (int) *filemode, filename);
 
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
 
@@ -783,7 +774,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 #endif
     default:
       {
-	if ( CDI_Debug ) Message(func, "%s support not compiled in!", strfiletype(filetype));
+	if ( CDI_Debug ) Message("%s support not compiled in!", strfiletype(filetype));
 	return (CDI_ELIBNAVAIL);
       }
     }
@@ -855,7 +846,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 #endif
     default:
       {
-	if ( CDI_Debug ) Message(func, "%s support not compiled in!", strfiletype(filetype));
+	if ( CDI_Debug ) Message("%s support not compiled in!", strfiletype(filetype));
 	return (CDI_ELIBNAVAIL);
       }
     }
@@ -913,7 +904,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 #endif
     default:
       {
-	if ( CDI_Debug ) Message(func, "%s support not compiled in!", strfiletype(filetype));
+	if ( CDI_Debug ) Message("%s support not compiled in!", strfiletype(filetype));
 	return (CDI_ELIBNAVAIL);
       }
     }
@@ -925,7 +916,6 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 
   return (streamID);
 }
-
 
 /*
 @Function  streamOpenRead
@@ -967,22 +957,21 @@ if ( streamID < 0 ) handle_error(streamID);
 */
 int streamOpenRead(const char *filenames)
 {
-  static char func[] = "streamOpenRead";
   int filetype, byteorder;
   int streamID;
-  int num_fnames;
+  int num_fnames = 0;
   char *fnames[MAX_FNAMES];
   const char *filename;
   stream_t *streamptr = NULL;
 
-  num_fnames = get_fnames(filenames, fnames, MAX_FNAMES);
+  //num_fnames = get_fnames(filenames, fnames, MAX_FNAMES);
 
   if ( num_fnames == 0 )
     filename = filenames;
   else
     {
       int i; 
-      for ( i = 0; i < num_fnames; ++i) printf("fnames: %d %s\n", i, fnames[i]);
+      for ( i = 0; i < num_fnames; ++i ) printf("fnames: %d %s\n", i, fnames[i]);
       filename = fnames[0];
     }
 
@@ -1030,7 +1019,6 @@ int streamOpenAppend(const char *filename)
   return (streamID);
 }
 
-
 /*
 @Function  streamOpenWrite
 @Title     Create a new dataset
@@ -1077,7 +1065,6 @@ int streamOpenWrite(const char *filename, int filetype)
   return (streamOpen(filename, "w", filetype));
 }
 
-
 /*
 @Function  streamClose
 @Title     Close an open dataset
@@ -1093,7 +1080,6 @@ The function @func{streamClose} closes an open dataset.
 */
 void streamClose(int streamID)
 {
-  static char func[] = "streamClose";
   int filetype;
   int fileID;
   int index;
@@ -1102,17 +1088,17 @@ void streamClose(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   if ( CDI_Debug )
-    Message(func, "fileID = %d filename = %s", streamID, streamptr->filename);
+    Message("fileID = %d filename = %s", streamID, streamptr->filename);
 
   fileID   = streamptr->fileID;
   filetype = streamptr->filetype;
-  vlistID  = streamInqVlist(streamID);
+  vlistID  = streamptr->vlistID;
 
   if ( fileID == CDI_UNDEFID )
-    Warning(func, "File %s not open!", streamptr->filename);
+    Warning("File %s not open!", streamptr->filename);
   else
     switch (filetype)
       {
@@ -1121,18 +1107,7 @@ void streamClose(int streamID)
       case FILETYPE_GRB2:
 	{
 	  gribClose(fileID);
-	  if ( streamptr->gribHandleNums )
-	    {
-	      int i;
-	      for ( i = 0; i < streamptr->gribHandleNums; ++i )
-		{
-		  gribHandleDelete(streamptr->gribHandle[0]);
-		  streamptr->gribHandle[i] = NULL;
-		}
-	      free(streamptr->gribHandle);
-	      streamptr->gribHandle = NULL;
-	      streamptr->gribHandleNums = 0;
-	    }
+	  gribContainersDelete(streamID);
 	  break;
 	}
 #endif
@@ -1171,7 +1146,7 @@ void streamClose(int streamID)
 #endif
       default:
 	{
-	  Error(func, "%s support not compiled in!", strfiletype(filetype));
+	  Error("%s support not compiled in!", strfiletype(filetype));
 	  break;
 	}
       }
@@ -1228,7 +1203,6 @@ void streamClose(int streamID)
   stream_delete_entry(streamptr);
 }
 
-
 /*
 @Function  streamSync
 @Title     Synchronize an Open Dataset to Disk
@@ -1244,7 +1218,6 @@ The function @func{streamSync} offers a way to synchronize the disk copy of a da
 */
 void streamSync(int streamID)
 {
-  static char func[] = "streamSync";
   int filetype;
   int fileID;
   int vlistID;
@@ -1253,7 +1226,7 @@ void streamSync(int streamID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   fileID   = streamptr->fileID;
   filetype = streamptr->filetype;
@@ -1261,11 +1234,11 @@ void streamSync(int streamID)
   nvars    = vlistNvars(vlistID);
 
   if ( fileID == CDI_UNDEFID )
-    Warning(func, "File %s not open!", streamptr->filename);
+    Warning("File %s not open!", streamptr->filename);
   else if ( vlistID == CDI_UNDEFID )
-    Warning(func, "Vlist undefined for file %s!", streamptr->filename);
+    Warning("Vlist undefined for file %s!", streamptr->filename);
   else if ( nvars == 0 )
-    Warning(func, "No variables defined!");
+    Warning("No variables defined!");
   else
     {
       if ( streamptr->filemode == 'w' || streamptr->filemode == 'a' )
@@ -1292,7 +1265,6 @@ void streamSync(int streamID)
     }
 }
 
-
 /*
 @Function  streamDefTimestep
 @Title     Define time step
@@ -1312,7 +1284,6 @@ The function @func{streamDefTimestep} defines the time step of a stream.
 */
 int streamDefTimestep(int streamID, int tsID)
 {
-  static char func[] = "streamDefTimestep";
   int newtsID;
   int taxisID;
   int vlistID;
@@ -1321,15 +1292,15 @@ int streamDefTimestep(int streamID, int tsID)
   streamptr = stream_to_pointer(streamID);
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d  tsID = %d", streamID, tsID);
+    Message("streamID = %d  tsID = %d", streamID, tsID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamInqVlist(streamID);
   taxisID = vlistInqTaxis(vlistID);
   if ( taxisID == CDI_UNDEFID )
     {
-      Warning(func, "taxisID undefined for fileID = %d! Using absolute time axis.", streamID);
+      Warning("taxisID undefined for fileID = %d! Using absolute time axis.", streamID);
       taxisID = taxisCreate(TAXIS_ABSOLUTE);
       vlistDefTaxis(vlistID, taxisID);
     }
@@ -1337,7 +1308,7 @@ int streamDefTimestep(int streamID, int tsID)
   newtsID = tstepsNewEntry(streamID);
 
   if ( tsID != newtsID )
-    Error(func, "Internal problem: tsID = %d newtsID = %d", tsID, newtsID);
+    Error("Internal problem: tsID = %d newtsID = %d", tsID, newtsID);
 
   streamptr->curTsID = tsID;
 
@@ -1355,7 +1326,6 @@ int streamDefTimestep(int streamID, int tsID)
 
   return (streamptr->ntsteps);
 }
-
 
 /*
 @Function  streamInqTimestep
@@ -1376,7 +1346,6 @@ The function @func{streamInqTimestep} returns the time step of a stream.
 */
 int streamInqTimestep(int streamID, int tsID)
 {
-  static char func[] = "streamInqTimestep";
   int filetype;
   int nrecs = 0;
   int taxisID;
@@ -1385,7 +1354,7 @@ int streamInqTimestep(int streamID, int tsID)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamInqVlist(streamID);
 
@@ -1396,7 +1365,7 @@ int streamInqTimestep(int streamID, int tsID)
       streamptr->tsteps[tsID].curRecID = CDI_UNDEFID;
       taxisID = vlistInqTaxis(vlistID);
       if ( taxisID == -1 )
-	Error(func, "Timestep undefined for fileID = %d", streamID);
+	Error("Timestep undefined for fileID = %d", streamID);
       ptaxisCopy(taxisPtr(taxisID), &streamptr->tsteps[tsID].taxis);
 
       return (nrecs);
@@ -1410,7 +1379,7 @@ int streamInqTimestep(int streamID, int tsID)
   filetype = streamptr->filetype;
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d  tsID = %d  filetype = %d", streamID, tsID, filetype);
+    Message("streamID = %d  tsID = %d  filetype = %d", streamID, tsID, filetype);
 
   switch (filetype)
     {
@@ -1454,20 +1423,19 @@ int streamInqTimestep(int streamID, int tsID)
 #endif
     default:
       {
-	Error(func, "%s support not compiled in!", strfiletype(filetype));
+	Error("%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
 
   taxisID = vlistInqTaxis(vlistID);
   if ( taxisID == -1 )
-    Error(func, "Timestep undefined for fileID = %d", streamID);
+    Error("Timestep undefined for fileID = %d", streamID);
 
   ptaxisCopy(taxisPtr(taxisID), &streamptr->tsteps[tsID].taxis);
 
   return (nrecs);
 }
-
 
 /*
 @Function  streamReadVar
@@ -1487,16 +1455,15 @@ from an open dataset.
 */
 void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 {
-  static char func[] = "streamReadVar";
   int filetype;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d  varID = %d", streamID, varID);
+    Message("streamID = %d  varID = %d", streamID, varID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
@@ -1544,12 +1511,11 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 #endif
     default:
       {
-	Error(func, "%s support not compiled in!", strfiletype(filetype));
+	Error("%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
 }
-
 
 /*
 @Function  streamWriteVar
@@ -1569,16 +1535,15 @@ to an open dataset.
 */
 void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 {
-  static char func[] = "streamWriteVar";
   int filetype;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d varID = %d", streamID, varID);
+    Message("streamID = %d varID = %d", streamID, varID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   streamDefineTaxis(streamID);
 
@@ -1627,12 +1592,11 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 #endif
     default:
       {
-	Error(func, "%s support not compiled in!", strfiletype(filetype));
+	Error("%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
 }
-
 
 /*
 @Function  streamReadVarSlice
@@ -1653,14 +1617,13 @@ from an open dataset.
 */
 void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
 {
-  static char func[] = "streamReadVarSlice";
   int filetype;
   int ierr = 0;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
@@ -1708,12 +1671,11 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
 #endif
     default:
       {
-	Error(func, "%s support not compiled in!", strfiletype(filetype));
+	Error("%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
 }
-
 
 /*
 @Function  streamWriteVarSlice
@@ -1734,7 +1696,6 @@ variable to an open dataset.
 */
 void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
 {
-  static char func[] = "streamWriteVarSlice";
   int filetype;
   int ierr = 0;
   stream_t *streamptr;
@@ -1742,9 +1703,9 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
   streamptr = stream_to_pointer(streamID);
 
   if ( CDI_Debug )
-    Message(func, "streamID = %d varID = %d", streamID, varID);
+    Message("streamID = %d varID = %d", streamID, varID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
@@ -1791,7 +1752,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
 #endif
     default:
       {
-	Error(func, "%s support not compiled in!", strfiletype(filetype));
+	Error("%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
@@ -1800,7 +1761,6 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
 
 void streamWriteContents(int streamID, char *cname)
 {
-  static char func[] = "streamWriteContents";
   FILE *cnp;
   int tsID, recID, varID, levelID;
   long recsize;
@@ -1817,13 +1777,13 @@ void streamWriteContents(int streamID, char *cname)
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamInqVlist(streamID);
 
   cnp = fopen(cname, "w");
 
-  if ( cnp == NULL ) SysError(func, cname);
+  if ( cnp == NULL ) SysError(cname);
 
   fprintf(cnp, "#CDI library version %s\n", cdiLibraryVersion());
   fprintf(cnp, "#\n");
@@ -1928,7 +1888,7 @@ void cdiDefTableID(int tableID)
 void cdiPrintVersion(void)
 {
   fprintf(stderr, "     CDI library version : %s\n", cdiLibraryVersion());
-#if  defined  (HAVE_LIBGRIB)
+#if  defined  (HAVE_LIBCGRIBEX)
   fprintf(stderr, " CGRIBEX library version : %s\n", cgribexLibraryVersion());
 #endif
 #if  defined  (HAVE_LIBGRIB_API)
@@ -1959,24 +1919,23 @@ void cdiPrintVersion(void)
 
 int streamNtsteps(int streamID)
 {
-  static char func[] = "streamNtsteps";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   return (streamptr->ntsteps);
 }
 
+
 off_t   streamNvals(int streamID)
 {
-  static char func[] = "streamNvals";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   return (streamptr->numvals);
 }
@@ -1997,14 +1956,13 @@ The function @func{streamDefVlist} defines the variable list of a stream.
 */
 void streamDefVlist(int streamID, int vlistID)
 {
-  static char func[] = "streamDefVlist";
   int nvars, varID;
   int gridID, zaxisID;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   if ( streamptr->vlistID == CDI_UNDEFID )
     {
@@ -2028,18 +1986,18 @@ void streamDefVlist(int streamID, int vlistID)
 	    {
 	      cdfDefVars(streamID);
 	    }
-	  else if ( streamptr->filetype == FILETYPE_GRB2 )
+	  else if ( streamptr->filetype == FILETYPE_GRB  ||
+		    streamptr->filetype == FILETYPE_GRB2 )
 	    {
-	      gribapiDefHandles(streamID);
+	      gribContainersNew(streamID);
 	    }
 	}
     }
   else
     {
-      Warning(func, "vlist already defined for %s!", streamptr->filename);
+      Warning("vlist already defined for %s!", streamptr->filename);
     }
 }
-
 
 /*
 @Function  streamInqVlist
@@ -2059,12 +2017,11 @@ The function @func{streamInqVlist} returns the variable list of a stream.
 */
 int streamInqVlist(int streamID)
 {
-  static char func[] = "streamInqVlist";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
   
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   return (streamptr->vlistID);
 }
@@ -2072,12 +2029,11 @@ int streamInqVlist(int streamID)
 
 void streamDefZtype(int streamID, int ztype)
 {
-  static char func[] = "streamDefZtype";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   streamptr->ztype = ztype;
 }
@@ -2085,12 +2041,11 @@ void streamDefZtype(int streamID, int ztype)
 
 void streamDefZlevel(int streamID, int zlevel)
 {
-  static char func[] = "streamDefZlevel";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   streamptr->zlevel = zlevel;
 }
@@ -2098,12 +2053,11 @@ void streamDefZlevel(int streamID, int zlevel)
 
 int streamInqZtype(int streamID)
 {
-  static char func[] = "streamInqZtype";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   return (streamptr->ztype);
 }
@@ -2111,12 +2065,11 @@ int streamInqZtype(int streamID)
 
 int streamInqZlevel(int streamID)
 {
-  static char func[] = "streamInqZlevel";
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(func, streamptr);
+  stream_check_ptr(__func__, streamptr);
 
   return (streamptr->zlevel);
 }
