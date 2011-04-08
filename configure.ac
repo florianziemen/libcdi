@@ -180,7 +180,9 @@ ACX_CHECK_CFINT([$srcdir/src/cfortran.h])
 
 AC_SUBST([CPPFLAGS])
 
-AC_OUTPUT(Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile cdi.settings)
+AC_OUTPUT([Makefile src/Makefile interfaces/Makefile app/Makefile \
+	tests/Makefile examples/Makefile cdi.settings \
+	pioExamples/Makefile])
 
 #  ----------------------------------------------------------------------
 #  Show configuration

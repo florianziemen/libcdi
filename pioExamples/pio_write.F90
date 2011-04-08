@@ -424,7 +424,7 @@ PROGRAM CDIWRITE
     WRITE ( 0, * ) '------------------------------------------------------------------'
   END IF
 
-  CALL FLUSH ( 0 )
+  FLUSH ( 0 )
   
   CALL MPI_COMM_FREE ( pioComm, error )
   CALL MPI_FINALIZE ( error )
@@ -438,7 +438,7 @@ PROGRAM CDIWRITE
   WRITE ( 0, * ) 'MAIN: Close time:', sumCLOSE, 's'
   WRITE ( 0, * ) '------------------------------------------------------------------'
   
-  CALL FLUSH ( 0 )
+  FLUSH ( 0 )
 #endif
   
   
