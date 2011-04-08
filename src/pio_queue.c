@@ -1,10 +1,14 @@
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 
-#ifndef NOMPI
+#ifdef USE_MPI
 #include "pio_impl.h"
 
 queue *queueInit ( valDestroyFunction vD, keyCompareFunction kC )

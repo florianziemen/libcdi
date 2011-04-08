@@ -4,7 +4,11 @@
    ( pioOpenFile member name, recv in tmpbuffer, if(!uniqueName(q,v,n))abort )
 */
 
-#ifndef NOMPI
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
+#ifdef USE_MPI
 
 #include <stdio.h>
 #include <stdbool.h>

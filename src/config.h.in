@@ -161,6 +161,9 @@
 /* User name */
 #undef USER_NAME
 
+/* parallel I/O requested and available */
+#undef USE_MPI
+
 /* Version number of package */
 #undef VERSION
 

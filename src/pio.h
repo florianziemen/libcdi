@@ -1,7 +1,11 @@
 #ifndef _PIO_H
 #define _PIO_H
 
-#ifndef NOMPI
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
+#ifdef USE_MPI
 #include <stdlib.h>
 #include "mpi.h"
 

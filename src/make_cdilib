@@ -50,7 +50,7 @@ cat > ${PROG} << EOR
 #include <aio.h>
 #endif
 #include <stdbool.h>
-#ifndef NOMPI
+#ifdef USE_MPI
 #include "mpi.h"
 #endif 
 #include <assert.h>

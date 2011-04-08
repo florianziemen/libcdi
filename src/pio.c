@@ -1,10 +1,14 @@
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#ifndef NOMPI
+#ifdef USE_MPI
 
 #include "mpi.h"
 #include "cdi.h"
@@ -15,7 +19,7 @@
 
 bool ddebug = false;
 
-#ifndef NOMPI
+#ifdef USE_MPI
 
 char * command2charP[6] = {"IO_Open_file", "IO_Close_file",
 			   "IO_Get_fp","IO_Set_fp",
@@ -347,7 +351,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
 
 int pioInit ( int ptype, int commF, int *color, int *nnodes, int *pioCollComm2F )
 {
-#ifndef NOMPI
+#ifdef USE_MPI
   MPI_Comm comm;
   int size, rank;
 #endif
@@ -356,7 +360,7 @@ int pioInit ( int ptype, int commF, int *color, int *nnodes, int *pioCollComm2F 
   *color = 1;
   *pioCollComm2F = 0;
 
-#ifndef NOMPI
+#ifdef USE_MPI
   
   comm = MPI_COMM_NULL;
 
@@ -442,7 +446,7 @@ int pioInit ( int ptype, int commF, int *color, int *nnodes, int *pioCollComm2F 
 
 void pioFinalize ()
 {
-#ifndef NOMPI
+#ifdef USE_MPI
   switch ( pioinfo->type )
     {
     case PIO_POSIX_FPGUARD_THREAD:

@@ -107,11 +107,10 @@ ACX_OPTIONS
 #  ----------------------------------------------------------------------
 # Compile with MPI support
 AC_ARG_ENABLE(mpi,AS_HELP_STRING([--enable-mpi],[Compile with MPI compiler [default=no]]),enable_mpi=${enableval},enable_mpi=no)
-AS_IF([test "${enable_mpi}" = "yes"],
-      [AS_IF([test "${host_os%???}" = "aix"],
-             [replace_cc="mpicc"],
-             [replace_cc="mpcc_r"])],
-      [replace_cc=$CC])
+AS_IF([test x"${enable_mpi}" = x"yes"],
+      [USE_MPI=yes])
+AS_IF([test x"$USE_MPI" = xyes],
+  [AC_DEFINE([USE_MPI],[1],[parallel I/O requested and available])])
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
 AC_ARG_ENABLE(iso-c-interface,
@@ -180,8 +179,6 @@ AM_CONDITIONAL(CREATE_INTERFACES, [test  "x$enable_ruby" = "xyes" -o "x$enable_p
 ACX_CHECK_CFINT([$srcdir/src/cfortran.h])
 
 AC_SUBST([CPPFLAGS])
-
-AS_IF([test "x${replace_cc}" != "x"],[CC=$replace_cc])
 
 AC_OUTPUT(Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile cdi.settings)
 

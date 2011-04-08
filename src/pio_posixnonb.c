@@ -1,7 +1,11 @@
 //pio_posixnonb.c:693: warning: pointer targets in passing argument 2 of ‘strncpy’ differ in signedness
 
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
 
-#ifndef NOMPI
+
+#ifdef USE_MPI
 
 #include <stdbool.h>
 #include <stdio.h>

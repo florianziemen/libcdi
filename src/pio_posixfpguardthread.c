@@ -4,8 +4,11 @@
    mutexes for each filedatas offset
    mutex for queue
 */
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
 
-#ifndef NOMPI
+#ifdef USE_MPI
 
 #include <pthread.h>
 #include <stdlib.h>

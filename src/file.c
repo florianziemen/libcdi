@@ -21,7 +21,7 @@ size_t getpagesize(void);
 
 /* begin deike */
 
-#ifndef NOMPI
+#ifdef USE_MPI
 #include "pio.h"
 #include "cdi.h"
 extern pioInfo *pioinfo;
@@ -1066,7 +1066,7 @@ int fileOpen(const char *filename, const char *mode)
   bfile_t *fileptr = NULL;
 
   /* begin deike */
-#ifndef NOMPI
+#ifdef USE_MPI
   if ( memcmp ( mode, "w", 1 ) == 0 && pioinfo->type != PIO_NONE )
     return pioFileOpenW ( filename );
 #endif
@@ -1161,7 +1161,7 @@ int fileClose(int fileID)
   bfile_t *fileptr;
 
   /* begin deike */
-#ifndef NOMPI
+#ifdef USE_MPI
   if ( pioinfo->type != PIO_NONE )
       return pioFileClose ( fileID );
 #endif

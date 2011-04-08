@@ -2,8 +2,12 @@
    todo  
    README: specialRank Pe closes down, when all output files are closed    
 */
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
 
-#ifndef NOMPI
+
+#ifdef USE_MPI
 #ifndef _SX
 
 #include <stdbool.h>

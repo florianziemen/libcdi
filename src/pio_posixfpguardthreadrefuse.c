@@ -12,7 +12,11 @@
    change condition to refuse of message ( without hard coding )
 */
 
-#ifndef NOMPI
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
+#ifdef USE_MPI
 
 #include <pthread.h>
 #include <stdlib.h>

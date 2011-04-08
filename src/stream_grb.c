@@ -1,4 +1,4 @@
-#if defined (HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #  include "config.h"
 #endif
 
@@ -66,7 +66,7 @@ int grib2ltypeToZaxisType(int grib_ltype)
 
 /* begin deike */
 
-#ifndef NOMPI
+#ifdef USE_MPI
 #include "pio.h"               
 extern pioInfo *pioinfo;
 #endif
@@ -579,7 +579,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
 
   /* begin deike */
 
-#ifndef NOMPI
+#ifdef USE_MPI
   if ( pioinfo->type != PIO_NONE )
     nwrite = pioFileWrite ( fileID, tsID, gribbuffer, nbytes );
   else

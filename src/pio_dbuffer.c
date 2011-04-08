@@ -1,5 +1,9 @@
 #define _XOPEN_SOURCE 600
 
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -7,7 +11,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#ifndef NOMPI
+#ifdef USE_MPI
 #include "pio_impl.h"
 
 bool ldebug    =true;

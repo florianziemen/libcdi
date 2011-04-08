@@ -1,9 +1,13 @@
 #ifndef _PIO_IMPL_H
 #define _PIO_IMPL_H
 
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 #include <stdbool.h>
 
-#ifndef NOMPI
+#ifdef USE_MPI
 #include "mpi.h"
 
 typedef enum 
