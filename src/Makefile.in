@@ -359,7 +359,7 @@ EXTRA_libcdi_la_SOURCES = \
 
 LOCALTARGETS = $(am__append_2)
 #
-CLEANFILES = `ls *~` cdilib.c $(am__append_3)
+CLEANFILES = ./*~ cdilib.c $(am__append_3)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
