@@ -142,6 +142,7 @@ pioExamples/cdi_write_parallel.job -text
 pioExamples/cdi_write_serial.job -text
 pioExamples/myModel.c -text
 pioExamples/myModel2003.F90 -text
+pioExamples/pio_interface.inc -text
 pioExamples/pio_write.F90 -text
 pioExamples/write_nec_parallel.job -text
 pioExamples/write_tornado_parallel.job -text
@@ -201,6 +202,8 @@ src/pio_dbuffer.c -text
 src/pio_impl.h -text
 src/pio_interface.c -text
 src/pio_interface.h -text
+src/pio_interface.inc -text
+src/pio_interface_f.c -text
 src/pio_interface_f.h -text
 src/pio_mpinonb.c -text
 src/pio_posixasynch.c -text

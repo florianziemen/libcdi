@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 #
-EXTRA_DIST = make_cdilib mo_cdi.f90
+EXTRA_DIST = make_cdilib mo_cdi.f90 pio_interface.inc
 
 if ENABLE_CDI_LIB
   lib_LTLIBRARIES = libcdi.la
@@ -118,6 +118,7 @@ PIO_SOURCES=								\
 	pio_impl.h							\
 	pio_interface.c							\
 	pio_interface.h							\
+	pio_interface_f.c						\
 	pio_interface_f.h						\
 	pio_mpinonb.c							\
 	pio_posixasynch.c						\

@@ -24015,6 +24015,18 @@ if test x"$USE_MPI" = xyes; then :
 
 $as_echo "#define USE_MPI 1" >>confdefs.h
 
+   for ac_func in MPI_Comm_f2c
+do :
+  ac_fn_c_check_func "$LINENO" "MPI_Comm_f2c" "ac_cv_func_MPI_Comm_f2c"
+if test "x$ac_cv_func_MPI_Comm_f2c" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_MPI_COMM_F2C 1
+_ACEOF
+
+fi
+done
+
+
 fi
  if test x"$USE_MPI" = xyes; then
   USE_MPI_TRUE=
