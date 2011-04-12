@@ -132,6 +132,7 @@ pioExamples/Makefile_blizzard -text
 pioExamples/Makefile_tornado_parallel -text
 pioExamples/Makefile_tornado_serial -text
 pioExamples/README -text
+pioExamples/cdi.inc -text
 pioExamples/cdi_write_f.F90 -text
 pioExamples/cdi_write_more_nodes.F90 -text
 pioExamples/cdi_write_more_nodes.job -text
