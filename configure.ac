@@ -111,6 +111,7 @@ AS_IF([test x"${enable_mpi}" = x"yes"],
       [USE_MPI=yes])
 AS_IF([test x"$USE_MPI" = xyes],
   [AC_DEFINE([USE_MPI],[1],[parallel I/O requested and available])])
+AM_CONDITIONAL([USE_MPI],[test x"$USE_MPI" = xyes])
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
 AC_ARG_ENABLE(iso-c-interface,

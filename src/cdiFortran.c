@@ -53,8 +53,6 @@
 
 /*  CALENDAR types  */
 
-FCALLSCFUN5 (INT, pioInit, PIOINIT, pioinit, INT, INT, PINT, PINT, PINT)
-FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
 
 /*  CDI control routines  */
 
