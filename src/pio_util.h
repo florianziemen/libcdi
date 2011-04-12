@@ -1,0 +1,43 @@
+#ifndef PIO_UTIL_
+#define PIO_UTIL_
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include "mpi.h"
+
+#define ddebug 3
+
+#define MAXSTRLNNETCDF    32
+#define MAXBUFFERSIZE     32
+#define MAXVALUE          10
+#define MAXDEBUG           3
+#define MAXLEVELINFOS     10
+#define MAXVARS           10
+
+#define MAXLEVEL          10
+#define MAXLEVELIDX       10
+#define MAXRECORDS        10
+#define MAXRECIDS         10 
+#define MAXVARS           10
+#define MAXTSTEPS         10
+#define MAXFNAMES         10
+#define MAXGHBUFFERSIZE_0 10
+#define MAXGHBUFFERSIZE_1 10
+
+#define MAXSTRING        256
+
+typedef enum 
+  {
+    FINALIZE,
+    METADATA
+  } command;
+
+void myAbort ( char *, const char *, int, int );
+void * myMalloc ( size_t, const char *, int );
+void checkMPI2 ( int, const char *, int, int );
+#define CHECK_MPI(rv, rank) checkMPI2(rv, __FILE__, __LINE__, rank)
+void myDebug ( const char *, const char *, int );
+void myDebugComm ( const char *filename, const char *functionname, int line, MPI_Comm *comm );
+
+#endif

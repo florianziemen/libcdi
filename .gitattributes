@@ -128,6 +128,8 @@ m4/ltoptions.m4 -text
 m4/ltsugar.m4 -text
 m4/ltversion.m4 -text
 m4/lt~obsolete.m4 -text
+pioExamples/Makefile.am -text
+pioExamples/Makefile.in -text
 pioExamples/Makefile_blizzard -text
 pioExamples/Makefile_tornado_parallel -text
 pioExamples/Makefile_tornado_serial -text
@@ -138,6 +140,8 @@ pioExamples/cdi_write_more_nodes.F90 -text
 pioExamples/cdi_write_more_nodes.job -text
 pioExamples/cdi_write_parallel.job -text
 pioExamples/cdi_write_serial.job -text
+pioExamples/myModel.c -text
+pioExamples/myModel2003.F90 -text
 pioExamples/pio_write.F90 -text
 pioExamples/write_nec_parallel.job -text
 pioExamples/write_tornado_parallel.job -text
@@ -195,6 +199,8 @@ src/pio.c -text
 src/pio.h -text
 src/pio_dbuffer.c -text
 src/pio_impl.h -text
+src/pio_interface.c -text
+src/pio_interface.h -text
 src/pio_mpinonb.c -text
 src/pio_posixasynch.c -text
 src/pio_posixfpguardsendrecv.c -text
@@ -202,6 +208,10 @@ src/pio_posixfpguardthread.c -text
 src/pio_posixfpguardthreadrefuse.c -text
 src/pio_posixnonb.c -text
 src/pio_queue.c -text
+src/pio_server.c -text
+src/pio_server.h -text
+src/pio_util.c -text
+src/pio_util.h -text
 src/service.h -text
 src/servicelib.c -text
 src/stream.c -text

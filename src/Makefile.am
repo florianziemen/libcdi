@@ -52,7 +52,9 @@ libcdi_la_SOURCES = 	 \
 	pio.c            \
 	pio.h            \
 	pio_dbuffer.c    \
-	pio_impl.h 	\
+	pio_impl.h 	 \
+	pio_interface.c  \
+	pio_interface.h	 \
 	pio_mpinonb.c    \
 	pio_posixasynch.c\
 	pio_posixfpguardsendrecv.c \
@@ -60,6 +62,10 @@ libcdi_la_SOURCES = 	 \
 	pio_posixfpguardthreadrefuse.c \
 	pio_posixnonb.c  \
 	pio_queue.c      \
+	pio_server.c     \
+	pio_server.h     \
+	pio_util.c       \
+	pio_util.h       \
 	service.h	 \
 	servicelib.c     \
 	stream_cdf.c     \
