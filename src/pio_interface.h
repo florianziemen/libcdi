@@ -3,8 +3,6 @@
 
 #include <mpi.h>
 
-extern MPI_Comm commCalc;
-
 void IOMapping ( int *, int *, int *, int, int *, int );
 void IOStop ();
 void IOFinalize ();

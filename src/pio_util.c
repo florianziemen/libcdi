@@ -2,7 +2,7 @@
 
 
 char commands[][12] = { "FINALIZE\0",
-                       "METADATA\0"};
+		       "METADATA\0"};
 
 
 /****************************************************/
@@ -10,29 +10,29 @@ char commands[][12] = { "FINALIZE\0",
 void myAbort ( char *errorString, const char *filename, int line, int rank )
 {
   fprintf ( stderr, "testERROR, pe%d, %s, line %d, errorString: \"%s\"\n",
-            rank, filename, line, errorString );
+	    rank, filename, line, errorString );
   MPI_Abort ( MPI_COMM_WORLD, 1 );
 }
 
-/*****************************************************************************/
+/*****************************************************************************/  
 
 void * myMalloc ( size_t size, const char *filename, int line )
-{
+{ 
   void * value = malloc ( size );
 
   if ( value == NULL )
     myAbort ( "malloc did not succeed", filename, line, -1 );
-
+  
   return value;
 }
 
-/***************************************************************/
+/***************************************************************/ 
 
 void checkMPI2 ( int iret, const char *filename, int line, int rank )
 {
   char errorString1[MPI_MAX_ERROR_STRING + 1];
   char errorString2[MPI_MAX_ERROR_STRING + 1];
-  int len, errorClass;
+  int len, errorClass; 
 
   if ( iret != MPI_SUCCESS )
     {
@@ -41,12 +41,12 @@ void checkMPI2 ( int iret, const char *filename, int line, int rank )
       errorString1[len] = '\0';
       MPI_Error_string ( iret, errorString2, &len);
       errorString2[len] = '\0';
-
+      
       fprintf ( stderr, "MPI ERROR, pe%d, %s, line %d,"
-                "errorClass: \"%s\""
-                "errorString: \"%s\"\n",
-                rank, filename, line,
-                errorString1, errorString2);
+		"errorClass: \"%s\""
+		"errorString: \"%s\"\n",
+		rank, filename, line, 
+		errorString1, errorString2);
 
       MPI_Abort ( MPI_COMM_WORLD, iret );
     }
@@ -62,13 +62,13 @@ void myDebug (  const char *filename, const char *functionname, int line )
 
   MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
 
-  fprintf ( stdout,
-            "pe%d in %s, %s, line %d\n",
-            rank, functionname, filename, line );
+  fprintf ( stdout, 
+	    "pe%d in %s, %s, line %d\n", 
+	    rank, functionname, filename, line );
   return;
 }
 
-/****************************************************/
+/****************************************************/ 
 
 void myDebug2 (  const char *filename, const char *functionname, int line, char * text )
 {
@@ -76,66 +76,66 @@ void myDebug2 (  const char *filename, const char *functionname, int line, char 
 
   MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
 
-  fprintf ( stdout,
-            "pe%d in %s, %s, line %d: %s\n",
-            rank, functionname, filename, line, text );
+  fprintf ( stdout, 
+	    "pe%d in %s, %s, line %d: %s\n", 
+	    rank, functionname, filename, line, text );
   return;
 }
 
-/****************************************************/
+/****************************************************/ 
 
-void myDebugComm ( const char *filename, const char *functionname, int line,
-                   MPI_Comm comm )
+void myDebugComm ( const char *filename, const char *functionname, int line, MPI_Comm *comm )
 {
   int rank, size, len, rankGlob;
   char *name;
 
-  name = myMalloc (( MPI_MAX_OBJECT_NAME ), __FILE__, __LINE__ );
-  memset ( name, 0, MPI_MAX_OBJECT_NAME );
-  MPI_Comm_get_name ( comm, name, &len );
-  MPI_Comm_size ( comm, &size );
-  MPI_Comm_rank ( comm, &rank );
-  MPI_Comm_rank ( MPI_COMM_WORLD, &rankGlob );
-  fprintf ( stdout,
-            "pe%d in %s, %s, line %d: comm: name=%s, size=%d, rank=%d\n",
-            rankGlob, functionname, filename, line,
-            name, size, rank );
+  name = ( char * ) myMalloc (( MPI_MAX_OBJECT_NAME ) * sizeof ( char ),
+				  __FILE__, __LINE__ );
+  memset ( name, 0, ( MPI_MAX_OBJECT_NAME ) * sizeof ( char ));
+  MPI_Comm_get_name ( * comm, name, &len ); 
+  MPI_Comm_size ( * comm, &size );
+  MPI_Comm_rank ( * comm, &rank ); 
+  MPI_Comm_rank ( MPI_COMM_WORLD, &rankGlob );   
+  fprintf ( stdout, 
+	    "pe%d in %s, %s, line %d: comm: name=%s, size=%d, rank=%d\n", 
+	    rankGlob, functionname, filename, line,
+	    name, size, rank );
   free ( name );
 
   return;
-
+  
 }
 
 /****************************************************/
 
 void myDebugMsg ( const char *filename, const char *functionname, int line,
-                  int tag, int source, int nfinished )
+		  int tag, int source, int nfinished )
 {
   int rank;
 
   MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
 
-  fprintf ( stdout,
-            "pe%d in %s, %s, line %d: command %s, source %d, finalized=%d\n",
-            rank, functionname, filename, line,
-            &commands[tag][0], source, nfinished );
+  fprintf ( stdout, 
+	    "pe%d in %s, %s, line %d: command %s, source %d, finalized=%d\n", 
+	    rank, functionname, filename, line,
+	    &commands[tag][0], source, nfinished );
   return;
 }
 
 /****************************************************/
 
 void myDebugMsg2 ( const char *filename, const char *functionname, int line,
-                   int tag, int source, char * text )
+		   int tag, int source, char * text )
 {
   int rank;
   char s[MAXSTRING];
 
   MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
 
-  fprintf ( stdout,
-            "pe%d in %s, %s, line %d: command %s, source %d, %s\n",
-            rank, functionname, filename, line,
-            &commands[tag][0], source, text );
+  fprintf ( stdout, 
+	    "pe%d in %s, %s, line %d: command %s, source %d, %s\n", 
+	    rank, functionname, filename, line,
+	    &commands[tag][0], source, text );
   return;
 }
 

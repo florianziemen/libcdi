@@ -159,7 +159,8 @@ mo_cdi.$(FCMODEXT): mo_cdi.f90
 #
 all-local: $(LOCALTARGETS) 
 #
-CLEANFILES  = ./*~ cdilib.c
+CLEANFILES  = `ls *~`
+CLEANFILES += cdilib.c
 if CREATE_ISOC
 CLEANFILES += $(top_builddir)/src/mo_cdi.$(FCMODEXT) $(top_builddir)/src/mo_cdi.o
 endif

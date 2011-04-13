@@ -5,11 +5,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <mpi.h>
 #include "limits.h"
 #include "cdi.h"
 #include "pio_util.h"
-#include "pio_interface.h"
 
 
 extern MPI_Comm * commGlob;
@@ -18,7 +16,8 @@ extern int rankGlob;
 extern int nProcsIO;
 extern int nProcsCalc;
 extern MPI_Comm * commsIO;
-extern int isCalcPE;
+extern MPI_Comm * commCalc; 
+extern int isCalcPE;  
 
 
 
@@ -42,55 +41,56 @@ void IOServer ()
   double * dp;
   char * outtext;
   size_t len, len2;
-
+  
   if ( ddebug >= 1 )
-    myDebugComm ( __FILE__, fnName, __LINE__, commCalc);
-
+    myDebugComm ( __FILE__, fnName, __LINE__, commCalc );
+     
   nfinished = 0;
   outtext = ( char * ) myMalloc ( MAXSTRING * sizeof ( char ), __FILE__, __LINE__ );
 
   for ( ;; )
-    {
+    {  
       fprintf ( stdout, "pe%d before mpi_probe()\n", rankGlob );
-      MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commCalc, &status );
-
+      MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, * commCalc, &status );
+      
       source = status.MPI_SOURCE;
       tag    = status.MPI_TAG;
-
+      
       switch ( tag )
-        {
-        case FINALIZE:
-          MPI_Recv ( &iBuffer, 1, MPI_INTEGER, source,
-                 tag, commCalc, &status );
-          nfinished++;
+	{
+	case FINALIZE:      
+	  MPI_Recv ( &iBuffer, 1, MPI_INTEGER, source, 
+		 tag, * commCalc, &status );
+	  nfinished++;
 
-          if ( ddebug >= 2 )
-            myDebugMsg (  __FILE__, fnName, __LINE__, tag, source, nfinished );
+	  if ( ddebug >= 2 )
+	    myDebugMsg (  __FILE__, fnName, __LINE__, tag, source, nfinished );
 
-          if ( nfinished == nProcsCalc )
-            return;
+	  if ( nfinished == nProcsCalc ) 
+	    return;
+	  
+	  break;
 
-          break;
+	case METADATA:
+	  MPI_Recv ( &iBuffer, 1, MPI_INTEGER, source,
+		     tag, * commCalc, &status );
 
-        case METADATA:
-          MPI_Recv ( &iBuffer, 1, MPI_INTEGER, source,
-                     tag, commCalc, &status );
+	  if  ( ddebug >= 2 )
+	    myDebugMsg (  __FILE__, fnName, __LINE__, tag, source, nfinished );
 
-          if  ( ddebug >= 2 )
-            myDebugMsg (  __FILE__, fnName, __LINE__, tag, source, nfinished );
+	  break;
 
-          break;
+	default:
+	  MPI_Recv ( &iBuffer, 1, MPI_INTEGER, source,
+		     tag, * commCalc, &status );
 
-        default:
-          MPI_Recv ( &iBuffer, 1, MPI_INTEGER, source,
-                     tag, commCalc, &status );
-
-          if ( ddebug >= 2 )
-            myDebugMsg (  __FILE__, fnName, __LINE__, tag, source, nfinished );
-        }
+	  if ( ddebug >= 2 )
+	    myDebugMsg (  __FILE__, fnName, __LINE__, tag, source, nfinished );
+	}
     }
 
   free ( outtext );
-
+    
   return;
 }
+

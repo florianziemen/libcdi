@@ -18,7 +18,7 @@
 #define MAXLEVEL          10
 #define MAXLEVELIDX       10
 #define MAXRECORDS        10
-#define MAXRECIDS         10
+#define MAXRECIDS         10 
 #define MAXVARS           10
 #define MAXTSTEPS         10
 #define MAXFNAMES         10
@@ -27,7 +27,7 @@
 
 #define MAXSTRING        256
 
-typedef enum
+typedef enum 
   {
     FINALIZE,
     METADATA
@@ -38,9 +38,6 @@ void * myMalloc ( size_t, const char *, int );
 void checkMPI2 ( int, const char *, int, int );
 #define CHECK_MPI(rv, rank) checkMPI2(rv, __FILE__, __LINE__, rank)
 void myDebug ( const char *, const char *, int );
-void myDebugComm ( const char *filename, const char *functionname, int line,
-                   MPI_Comm comm );
-void myDebugMsg ( const char *filename, const char *functionname, int line,
-                  int tag, int source, int nfinished );
+void myDebugComm ( const char *filename, const char *functionname, int line, MPI_Comm *comm );
 
 #endif
