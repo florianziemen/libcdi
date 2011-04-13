@@ -78,9 +78,6 @@
 /* Define to 1 if you have a working `mmap' system call. */
 #undef HAVE_MMAP
 
-/* Define to 1 if you have the `MPI_Comm_f2c' function. */
-#undef HAVE_MPI_COMM_F2C
-
 /* Define to 1 if you have the <netcdf.h> header file. */
 #undef HAVE_NETCDF_H
 

@@ -93,14 +93,14 @@ am__libcdi_la_SOURCES_DIST = basetime.c basetime.h binary.c binary.h \
 	taxis.c taxis.h timebase.c timebase.h tsteps.c util.c \
 	varscan.c varscan.h version.c vlist.c vlist.h vlist_att.c \
 	vlist_var.c zaxis.c stream.c swap.c pio.c pio.h pio_dbuffer.c \
-	pio_impl.h pio_interface.c pio_interface.h pio_interface_f.c \
-	pio_interface_f.h pio_mpinonb.c pio_posixasynch.c \
-	pio_posixfpguardsendrecv.c pio_posixfpguardthread.c \
-	pio_posixfpguardthreadrefuse.c pio_posixnonb.c pio_queue.c \
-	pio_server.c pio_server.h pio_util.c pio_util.h
+	pio_impl.h pio_interface.c pio_interface.h pio_interface_f.h \
+	pio_mpinonb.c pio_posixasynch.c pio_posixfpguardsendrecv.c \
+	pio_posixfpguardthread.c pio_posixfpguardthreadrefuse.c \
+	pio_posixnonb.c pio_queue.c pio_server.c pio_server.h \
+	pio_util.c pio_util.h
 @USE_MPI_TRUE@am__objects_1 = pio.lo pio_dbuffer.lo pio_interface.lo \
-@USE_MPI_TRUE@	pio_interface_f.lo pio_mpinonb.lo \
-@USE_MPI_TRUE@	pio_posixasynch.lo pio_posixfpguardsendrecv.lo \
+@USE_MPI_TRUE@	pio_mpinonb.lo pio_posixasynch.lo \
+@USE_MPI_TRUE@	pio_posixfpguardsendrecv.lo \
 @USE_MPI_TRUE@	pio_posixfpguardthread.lo \
 @USE_MPI_TRUE@	pio_posixfpguardthreadrefuse.lo pio_posixnonb.lo \
 @USE_MPI_TRUE@	pio_queue.lo pio_server.lo pio_util.lo
@@ -298,7 +298,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 #
-EXTRA_DIST = make_cdilib mo_cdi.f90 pio_interface.inc
+EXTRA_DIST = make_cdilib mo_cdi.f90
 @ENABLE_CDI_LIB_TRUE@lib_LTLIBRARIES = libcdi.la
 @ENABLE_CDI_LIB_TRUE@include_HEADERS = cdi.h cdi.inc
 @ENABLE_CDI_LIB_FALSE@noinst_LTLIBRARIES = libcdi.la
@@ -343,7 +343,6 @@ EXTRA_libcdi_la_SOURCES = \
 @USE_MPI_TRUE@	pio_impl.h							\
 @USE_MPI_TRUE@	pio_interface.c							\
 @USE_MPI_TRUE@	pio_interface.h							\
-@USE_MPI_TRUE@	pio_interface_f.c						\
 @USE_MPI_TRUE@	pio_interface_f.h						\
 @USE_MPI_TRUE@	pio_mpinonb.c							\
 @USE_MPI_TRUE@	pio_posixasynch.c						\
@@ -483,7 +482,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_dbuffer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_interface.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_interface_f.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_mpinonb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixasynch.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixfpguardsendrecv.Plo@am__quote@

@@ -34,8 +34,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@USE_MPI_TRUE@noinst_PROGRAMS = pio_write$(EXEEXT) myModel$(EXEEXT) \
-@USE_MPI_TRUE@	myModel2003$(EXEEXT)
+noinst_PROGRAMS = pio_write$(EXEEXT) myModel$(EXEEXT) \
+	myModel2003$(EXEEXT)
 subdir = pioExamples
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
