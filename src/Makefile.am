@@ -49,6 +49,23 @@ libcdi_la_SOURCES = 	 \
 	ieglib.c         \
 	institution.c  	 \
 	model.c        	 \
+	pio.c            \
+	pio.h            \
+	pio_dbuffer.c    \
+	pio_impl.h 	 \
+	pio_interface.c  \
+	pio_interface.h	 \
+	pio_mpinonb.c    \
+	pio_posixasynch.c\
+	pio_posixfpguardsendrecv.c \
+	pio_posixfpguardthread.c \
+	pio_posixfpguardthreadrefuse.c \
+	pio_posixnonb.c  \
+	pio_queue.c      \
+	pio_server.c     \
+	pio_server.h     \
+	pio_util.c       \
+	pio_util.h       \
 	service.h	 \
 	servicelib.c     \
 	stream_cdf.c     \
@@ -90,48 +107,6 @@ libcdi_la_SOURCES = 	 \
 	zaxis.c		 \
         stream.c         \
         swap.c
-
-EXTRA_libcdi_la_SOURCES=						\
-	pio.c								\
-	pio.h								\
-	pio_dbuffer.c							\
-	pio_impl.h							\
-	pio_interface.c							\
-	pio_interface.h							\
-	pio_mpinonb.c							\
-	pio_posixasynch.c						\
-	pio_posixfpguardsendrecv.c					\
-	pio_posixfpguardthread.c					\
-	pio_posixfpguardthreadrefuse.c					\
-	pio_posixnonb.c							\
-	pio_queue.c							\
-	pio_server.c							\
-	pio_server.h							\
-	pio_util.c							\
-	pio_util.h
-
-if USE_MPI
-PIO_SOURCES=								\
-	pio.c								\
-	pio.h								\
-	pio_dbuffer.c							\
-	pio_impl.h							\
-	pio_interface.c							\
-	pio_interface.h							\
-	pio_interface_f.h						\
-	pio_mpinonb.c							\
-	pio_posixasynch.c						\
-	pio_posixfpguardsendrecv.c					\
-	pio_posixfpguardthread.c					\
-	pio_posixfpguardthreadrefuse.c					\
-	pio_posixnonb.c							\
-	pio_queue.c							\
-	pio_server.c							\
-	pio_server.h							\
-	pio_util.c							\
-	pio_util.h
-libcdi_la_SOURCES+=$(PIO_SOURCES)
-endif
 
 #libcdi_la_CPPFLAGS  = @CPPFLAGS@
 #libcdi_la_LIBADD    = @LDFLAGS@
