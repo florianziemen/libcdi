@@ -119,6 +119,7 @@ AC_ARG_ENABLE(iso-c-interface,
                              [Create Fortran Interface via iso_c_bindings facility of F2003 [default=no]]).
               ,enable_isoc=${enableval},enable_isoc=no)
 AM_CONDITIONAL([CREATE_ISOC],[test $enable_isoc = 'yes'])
+AS_IF([test "x${enable_isoc}" != "xyes"],[AC_SUBST([FC],$F77)])
 #  Check the module extension of the fortran compiler
 ACX_SL_FC_MOD_SUFFIX(,[FCMODEXT=mod])
 # -----------------------------------------------------------------------

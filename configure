@@ -24041,6 +24041,10 @@ else
   CREATE_ISOC_FALSE=
 fi
 
+if test "x${enable_isoc}" != "xyes"; then :
+  FC=$F77
+
+fi
 #  Check the module extension of the fortran compiler
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for suffix of module files" >&5
 $as_echo_n "checking for suffix of module files... " >&6; }
