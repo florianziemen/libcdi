@@ -10,6 +10,7 @@
 #include "grid.h"
 #include "gaussgrid.h"
 #include "pio_util.h"
+#include "namespace.h"
 
 
 #ifndef  RAD2DEG
@@ -140,7 +141,8 @@ void grid_list_delete(void)
 static
 void grid_init_pointer(void)
 {
-  int nnsp, i, j;
+  int nnsp, i, j, code;
+  namespaceTuple_t nspt;
 
   nnsp = namespaceGetNumber ();
 
@@ -148,8 +150,11 @@ void grid_init_pointer(void)
     {
       for ( j = 0; j < _grid_max; j++ )
 	{
+	  nspt.nsp = i;
+	  nspt.idx = j;
+	  code = namespaceIdxEncode ( nspt );
 	  _gridList[i][j].next = _gridList[i] + j + 1;
-	  _gridList[i][j].idx  = j;
+	  _gridList[i][j].idx  = code;
 	  _gridList[i][j].ptr  = 0;
 	}
       
@@ -164,21 +169,29 @@ grid_t *grid_to_pointer(int idx)
 {
   grid_t *gridptr = NULL;
   int nsp;
+  namespaceTuple_t nspT;
 
   nsp = namespaceGetActive ();
+  
+  nspT = namespaceIdxDecode ( idx );
+
+  if ( nspT.nsp != nsp )
+    Error ( "idx %d from namespace %d not available in active namespace %d !\n",
+	  idx, nspT.nsp, nsp );
+    
 
   GRID_INIT();
 
-  if ( idx >= 0 && idx < _grid_max )
+  if ( nspT.idx >= 0 && nspT.idx < _grid_max )
     {
       GRID_LOCK();
 
-      gridptr = _gridList[nsp][idx].ptr;
+      gridptr = _gridList[nsp][nspT.idx].ptr;
 
       GRID_UNLOCK();
     }
   else
-    Error("grid index %d undefined!", idx);
+    Error("grid index %d undefined!", nspT.idx);
 
   return (gridptr);
 }

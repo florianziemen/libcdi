@@ -61,7 +61,7 @@ void modelRun ()
   double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
   double var1[nlon*nlat];
   double var2[nlon*nlat*nlev];
-  int gridID2, gridID3;
+  int gridID2, gridID3, zaxisID3;
 
   if  ( ddebug >= 3 ) xdebug (  fnName );
 
@@ -102,8 +102,8 @@ void modelRun ()
   // Test namespaces: Create a 2. zaxis list
 
   namespaceSetActive ( 1 );
-  zaxisID2 = zaxisCreate(ZAXIS_PRESSURE, 3);
-  zaxisDefLevels(zaxisID2, levs);
+  zaxisID3 = zaxisCreate(ZAXIS_PRESSURE, 3);
+  zaxisDefLevels(zaxisID3, levs);
   zaxisTestNamespace ();
   namespaceSetActive ( 0 );
  

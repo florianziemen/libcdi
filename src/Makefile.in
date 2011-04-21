@@ -300,6 +300,7 @@ libcdi_la_SOURCES = \
 	institution.c  	 \
 	model.c        	 \
 	namespace.c      \
+	namespace.h      \
 	pio.c            \
 	pio.h            \
 	pio_c_temp.h     \

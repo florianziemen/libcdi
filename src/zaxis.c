@@ -11,6 +11,7 @@
 #include "cdi.h"
 #include "stream_int.h"
 #include "pio_util.h"
+#include "namespace.h"
 
 
 static struct {
@@ -156,7 +157,8 @@ void zaxis_list_delete(void)
 static
 void zaxis_init_pointer(void)
 {
-  int nnsp, i, j;
+  int nnsp, i, j, code;
+  namespaceTuple_t nspt;
 
   nnsp = namespaceGetNumber ();
   
@@ -164,8 +166,11 @@ void zaxis_init_pointer(void)
     {
       for ( j = 0; j < _zaxis_max; j++ )
 	{
+	  nspt.nsp = i;
+	  nspt.idx = j;
+	  code = namespaceIdxEncode ( nspt );
 	  _zaxisList[i][j].next = _zaxisList[i] + j + 1;
-	  _zaxisList[i][j].idx  = j;
+	  _zaxisList[i][j].idx  = code;
 	  _zaxisList[i][j].ptr  = 0;
 	}
 
@@ -180,21 +185,28 @@ zaxis_t *zaxis_to_pointer(int idx)
 {
   zaxis_t *zaxisptr = NULL;
   int nsp;
+  namespaceTuple_t nspT;
 
   nsp = namespaceGetActive ();
+  
+  nspT = namespaceIdxDecode ( idx );
+  
+  if ( nspT.nsp != nsp )
+    Error ( "idx %d from namespace %d not available in active namespace %d !\n",
+	    idx, nspT.nsp, nsp );
 
   ZAXIS_INIT();
 
-  if ( idx >= 0 && idx < _zaxis_max )
+  if ( nspT.idx >= 0 && nspT.idx < _zaxis_max )
     {
       ZAXIS_LOCK();
 
-      zaxisptr = _zaxisList[nsp][idx].ptr;
+      zaxisptr = _zaxisList[nsp][nspT.idx].ptr;
 
       ZAXIS_UNLOCK();
     }
   else
-    Error("zaxis index %d undefined!", idx);
+    Error("zaxis index %d undefined!", nspT.idx);
 
   return (zaxisptr);
 }
