@@ -206,7 +206,7 @@ zaxis_t *zaxis_to_pointer(int idx)
       ZAXIS_UNLOCK();
     }
   else
-    Error("zaxis index %d undefined!", nspT.idx);
+    Error("zaxis index %d undefined!", idx);
 
   return (zaxisptr);
 }

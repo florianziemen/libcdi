@@ -212,6 +212,7 @@ int      namespaceGetActive ( void );
 
 void     gridTestNamespace  ( void );
 void     zaxisTestNamespace ( void );
+void     taxisTestNamespace ( void );
 
   /* CDI control routines */
 

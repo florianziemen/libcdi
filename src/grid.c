@@ -42,7 +42,7 @@ char *Grids[] = {
 };
 
 
-static int  GRID_Debug = 1;   /* If set to 1, debugging */
+static int  GRID_Debug = 0;   /* If set to 1, debugging */
 
 static int _grid_max = MAX_GRIDS;
 
@@ -191,7 +191,7 @@ grid_t *grid_to_pointer(int idx)
       GRID_UNLOCK();
     }
   else
-    Error("grid index %d undefined!", nspT.idx);
+    Error("grid index %d undefined!", idx);
 
   return (gridptr);
 }
@@ -340,8 +340,6 @@ void grid_initialize(void)
 {
   char *env;
   int nnsp;
-
-  fprintf ( stdout, "grid_initialize()\n" );
 
 #if  defined  (HAVE_LIBPTHREAD)
   /* initialize global API mutex lock */

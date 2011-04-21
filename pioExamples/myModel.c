@@ -61,7 +61,10 @@ void modelRun ()
   double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
   double var1[nlon*nlat];
   double var2[nlon*nlat*nlev];
-  int gridID2, gridID3, zaxisID3;
+
+  int gridID2, gridID3;
+  int zaxisID3;
+  int taxisID2, taxisID3, taxisID4, taxisID5;
 
   if  ( ddebug >= 3 ) xdebug (  fnName );
 
@@ -120,9 +123,19 @@ void modelRun ()
 
   // Create a Time axis
   taxisID = taxisCreate(TAXIS_ABSOLUTE);
+  taxisID2 = taxisCreate(TAXIS_ABSOLUTE);
+  namespaceSetActive ( 1 );
+  taxisID3 = taxisCreate(TAXIS_ABSOLUTE);
+  taxisID4 = taxisCreate(TAXIS_ABSOLUTE);
+  taxisID5 = taxisCreate(TAXIS_ABSOLUTE);
+  namespaceSetActive ( 0 );
+ 
+
+  taxisTestNamespace ();
 
   // Assign the Time axis to the variable list
   vlistDefTaxis(vlistID, taxisID);
+  
 
 
   // Create a dataset in netCDF fromat

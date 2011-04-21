@@ -9,6 +9,8 @@
 #include "cdi.h"
 #include "stream_int.h"
 #include "calendar.h"
+#include "pio_util.h"
+#include "namespace.h"
 
 extern int cdiDefaultCalendar;
 
@@ -76,7 +78,7 @@ void taxis_defaults(void)
 
 static int  TAXIS_Debug = 0;   /* If set to 1, debugging */
 
-static int _taxis_min = MIN_TAXES;
+static int *_taxis_min;// = MIN_TAXES;
 static int _taxis_max = MAX_TAXES;
 
 static void taxis_initialize(void);
@@ -111,65 +113,99 @@ typedef struct _taxisPtrToIdx {
 } taxisPtrToIdx;
 
 
-static taxisPtrToIdx *_taxisList  = NULL;
-static int            _taxisAvail = -1;
+static taxisPtrToIdx **_taxisList  = NULL;
+static int            *_taxisAvail;
+
 
 static
 void taxis_list_new(void)
 {
-  assert(_taxisList == NULL);
+  int nnsp, i;
 
-  _taxisList = (taxisPtrToIdx *) malloc(_taxis_min*sizeof(taxisPtrToIdx));
+  nnsp = namespaceGetNumber ();
+
+  for ( i = 0; i < nnsp; i++ )
+    {
+      assert(_taxisList[i] == NULL);     
+      _taxisList[i] = (taxisPtrToIdx *) malloc(_taxis_min[i]*sizeof(taxisPtrToIdx));
+    }
 }
 
 static
 void taxis_list_delete(void)
 {
-  if ( _taxisList ) free(_taxisList);
+  int i, nnsp;
+  
+  nnsp = namespaceGetNumber ();
+  
+  if ( _taxis_min ) free ( _taxis_min );
+  if ( _taxisAvail ) free ( _taxisAvail );
+  if ( _taxisList )
+    {
+      for ( i = 0; i < nnsp; i++ )
+	if (  _taxisList[i] ) free ( _taxisList[i] );
+      free ( _taxisList );
+    }
+  
+
 }
 
 static
 void taxis_init_pointer(void)
 {
-  int  i;
-  
-  for ( i = 0; i < _taxis_min; ++i )
+  int nnsp, i, j, code;
+  namespaceTuple_t nspt;
+
+  nnsp = namespaceGetNumber ();
+
+  for ( i = 0; i < nnsp; i++ )
     {
-      _taxisList[i].idx  = i;
-      _taxisList[i].next = i + 1;
-      _taxisList[i].ptr  = NULL;
+      for ( j = 0; j < _taxis_min[i]; ++j )
+	{
+	  nspt.nsp = i;
+	  nspt.idx = j;
+	  code = namespaceIdxEncode ( nspt );
+	  _taxisList[i][j].idx  = code;
+	  _taxisList[i][j].next = j + 1;
+	  _taxisList[i][j].ptr  = NULL;
+	}
+      
+      _taxisList[i][_taxis_min[i]-1].next = -1;
+      
+      _taxisAvail[i] = 0;
     }
-
-  _taxisList[_taxis_min-1].next = -1;
-
-  _taxisAvail = 0;
 }
 
 static
 void taxis_list_extend(void)
 {
   int ntaxis;
-  int i;
+  int i, nsp, code;
+  namespaceTuple_t nspt;
+  
+  nsp = namespaceGetActive ();
+  nspt.nsp = nsp; 
 
-  assert(_taxisList != NULL);
+  assert(_taxisList[nsp] != NULL);
 
-  ntaxis = _taxis_min + MIN_TAXES;
+  ntaxis = _taxis_min[nsp] + MIN_TAXES; 
 
   if ( ntaxis <= _taxis_max)
     {
-      _taxisList = (taxisPtrToIdx *) realloc(_taxisList, ntaxis*sizeof(taxisPtrToIdx));
+      _taxisList[nsp] = (taxisPtrToIdx *) realloc(_taxisList[nsp], ntaxis*sizeof(taxisPtrToIdx));
   
-      for ( i = _taxis_min; i < ntaxis; ++i )
+      for ( i = _taxis_min[nsp]; i < ntaxis; ++i )
 	{
-	  _taxisList[i].idx  = i;
-	  _taxisList[i].next = i + 1;
-	  _taxisList[i].ptr  = NULL;
+	  nspt.idx = i;
+	  code = namespaceIdxEncode ( nspt );
+	  _taxisList[nsp][i].idx  = code;
+	  _taxisList[nsp][i].next = i + 1;
+	  _taxisList[nsp][i].ptr  = NULL;
 	}
-
-      _taxisAvail = _taxis_min;
-      _taxisList[_taxis_min-1].next = _taxis_min;
-      _taxis_min = ntaxis;
-      _taxisList[_taxis_min-1].next = -1;
+      _taxisAvail[nsp] = _taxis_min[nsp];
+      _taxisList[nsp][_taxis_min[nsp]-1].next = _taxis_min[nsp];
+      _taxis_min[nsp] = ntaxis;
+      _taxisList[nsp][_taxis_min[nsp]-1].next = -1;
     }
   else
     Warning("Too many open taxes (limit is %d)!", _taxis_max);
@@ -179,14 +215,25 @@ static
 taxis_t *taxis_to_pointer(int idx)
 {
   taxis_t *taxisptr = NULL;
+  int nsp;
+  namespaceTuple_t nspT;
+
+  nsp = namespaceGetActive ();
+  
+  nspT = namespaceIdxDecode ( idx );
+
+  if ( nspT.nsp != nsp )
+    Error ( "idx %d from namespace %d not available in active namespace %d !\n",
+         idx, nspT.nsp, nsp );
+  
 
   TAXIS_INIT();
 
-  if ( idx >= 0 && idx < _taxis_min )
+  if ( nspT.idx >= 0 && nspT.idx < _taxis_min[nsp] )
     {
       TAXIS_LOCK();
 
-      taxisptr = _taxisList[idx].ptr;
+      taxisptr = _taxisList[nsp][nspT.idx].ptr;
 
       TAXIS_UNLOCK();
     }
@@ -202,19 +249,22 @@ static
 int taxis_from_pointer(taxis_t *ptr)
 {
   int      idx = -1;
+  int nsp;
+
+  nsp = namespaceGetActive ();
 
   if ( ptr )
     {
       TAXIS_LOCK();
 
-      if ( _taxisAvail < 0 ) taxis_list_extend();
+      if ( _taxisAvail[nsp] < 0 ) taxis_list_extend();
 
-      if ( _taxisAvail >= 0 )
+      if ( _taxisAvail[nsp] >= 0 )
 	{
 	  taxisPtrToIdx *newptr;
 
-	  newptr       = &_taxisList[_taxisAvail];
-	  _taxisAvail  = newptr->next;
+	  newptr       = &_taxisList[nsp][_taxisAvail[nsp]];
+	  _taxisAvail[nsp]  = newptr->next;
 	  newptr->next = -1;
 	  idx	       = newptr->idx;
 	  newptr->ptr  = ptr;
@@ -276,6 +326,9 @@ static
 void taxis_delete_entry(taxis_t *taxisptr)
 {
   int idx;
+  int nsp;
+
+  nsp = namespaceGetActive ();
 
   idx = taxisptr->self;
 
@@ -283,9 +336,9 @@ void taxis_delete_entry(taxis_t *taxisptr)
 
   free(taxisptr);
 
-  _taxisList[idx].next = _taxisAvail;
-  _taxisList[idx].ptr  = 0;
-  _taxisAvail          = idx;
+  _taxisList[nsp][idx].next = _taxisAvail[nsp];
+  _taxisList[nsp][idx].ptr  = 0;
+  _taxisAvail[nsp]          = idx;
 
   TAXIS_UNLOCK();
 
@@ -297,6 +350,7 @@ static
 void taxis_initialize(void)
 {
   char *env;
+  int nnsp, i;
 
 #if  defined  (HAVE_LIBPTHREAD)
   /* initialize global API mutex lock */
@@ -305,6 +359,17 @@ void taxis_initialize(void)
 
   env = getenv("TAXIS_DEBUG");
   if ( env ) TAXIS_Debug = atoi(env);
+
+  nnsp = namespaceGetNumber ();
+  _taxisList  = xmalloc ( nnsp * sizeof ( _taxisList[0] ));
+  _taxisAvail = xmalloc ( nnsp * sizeof ( int ));
+  _taxis_min  = xmalloc ( nnsp * sizeof ( int ));
+
+  for ( i = 0; i < nnsp; i++ )
+    {
+      _taxisAvail[i] = -1;
+      _taxis_min[i]  = MIN_TAXES;
+    }
 
   taxis_list_new();
   atexit(taxis_list_delete);
@@ -1349,4 +1414,85 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->vtime_ub   = source->vtime_ub;
 
   TAXIS_UNLOCK();
+}
+
+
+int taxisListSize ( void )
+{
+  int tls = 0;
+  int i;
+  int nsp;
+
+  nsp = namespaceGetActive ();
+  
+  TAXIS_INIT();
+
+  TAXIS_LOCK();
+
+  for ( i = 0; i < _taxis_min[nsp]; i++ )
+    if ( _taxisList[nsp][i].ptr ) tls++;
+
+  TAXIS_UNLOCK();
+
+  return tls;
+}
+
+
+void taxisPrint ( int taxisID )
+{
+  FILE *fp = stdout;
+  taxis_t *taxisptr;
+  int vdate_lb, vdate_ub;
+  int vtime_lb, vtime_ub;
+
+  taxisptr = taxis_to_pointer ( taxisID );
+  taxis_check_ptr ( __func__, taxisptr );
+
+  taxisInqVdateBounds ( taxisID, &vdate_lb, &vdate_ub);
+  taxisInqVtimeBounds ( taxisID, &vtime_lb, &vtime_ub);
+
+  fprintf ( fp, "#\n");
+  fprintf ( fp, "# taxisID %d\n", taxisID);
+  fprintf ( fp, "#\n"); 
+  fprintf ( fp, "self       = %d\n", taxisptr->self );
+  fprintf ( fp, "used       = %d\n", taxisptr->used );
+  fprintf ( fp, "type       = %d\n", taxisInqType  ( taxisID ));
+  fprintf ( fp, "vdate      = %d\n", taxisInqVdate ( taxisID ));
+  fprintf ( fp, "vtime      = %d\n", taxisInqVtime ( taxisID ));
+  fprintf ( fp, "rdate      = %d\n", taxisInqRdate ( taxisID ));
+  fprintf ( fp, "rtime      = %d\n", taxisInqRtime ( taxisID ));
+  fprintf ( fp, "calendar   = %d\n", taxisInqCalendar ( taxisID ));
+  fprintf ( fp, "unit       = %d\n", taxisInqTunit ( taxisID ));
+  fprintf ( fp, "numavg     = %d\n", taxisInqNumavg ( taxisID ));
+  fprintf ( fp, "has_bounds = %d\n", taxisHasBounds ( taxisID ));
+  fprintf ( fp, "vdate_lb   = %d\n", vdate_lb );
+  fprintf ( fp, "vtime_lb   = %d\n", vtime_lb );
+  fprintf ( fp, "vdate_ub   = %d\n", vdate_ub );
+  fprintf ( fp, "vtime_ub   = %d\n", vtime_ub );
+  fprintf ( fp, "\n");
+}
+
+
+void taxisTestNamespace ()
+{
+  int i, j, tls, temp, nnsp;
+
+  nnsp = namespaceGetNumber ();
+ 
+  if ( _taxis_init )
+    {
+      temp = namespaceGetActive ();
+
+      for ( i = 0; i < nnsp; i++ )
+	{
+	  namespaceSetActive ( i );
+	  tls = taxisListSize ();
+	  fprintf ( stdout, "######### namespace=%d, size of _taxisList: %d\n", 
+		    i, tls );
+	  for ( j = 0; j < tls; j++)
+	    taxisPrint ( _taxisList[i][j].ptr->self );
+	}
+
+      namespaceSetActive ( temp );
+    }
 }
