@@ -49,34 +49,6 @@ char *token = "%";
 
 /*****************************************************************************/
 
-void checkMPI ( int iret, const char *filename, int line, int rank )
-{
-  char errorString1[MPI_MAX_ERROR_STRING + 1];
-  char errorString2[MPI_MAX_ERROR_STRING + 1];
-  int len, errorClass;   
-
-  if ( iret != MPI_SUCCESS )
-    {
-      MPI_Error_class ( iret, &errorClass );
-      MPI_Error_string ( errorClass, errorString1, &len );
-      errorString1[len] = '\0';
-      MPI_Error_string ( iret, errorString2, &len);
-      errorString2[len] = '\0';
-      
-      fprintf ( stderr, "MPI ERROR, pe%d, %s, line %d,"
-		"errorClass: \"%s\""
-		"errorString: \"%s\"\n",
-		rank, filename, line, 
-		errorString1, errorString2);
-
-      MPI_Abort ( MPI_COMM_WORLD, iret );
-    }
-
-  return;
-}
-
-/*****************************************************************************/
-
 void checkMPIstat ( int iret, const char *filename, int line, int rank,  
 			MPI_Status *status )
 {
@@ -104,7 +76,7 @@ void checkMPIstat ( int iret, const char *filename, int line, int rank,
 	}
     }
   else 
-    checkMPI ( iret, filename, line, rank );
+    xmpi ( iret );
   
   return;
 }
@@ -260,7 +232,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
   
   memset ( myHost, 0, MPI_MAX_PROCESSOR_NAME * sizeof ( char ));
   
-  checkMPI (( MPI_Get_processor_name ( myHost, &len )), __FILE__, __LINE__, rank );
+  xmpi ( MPI_Get_processor_name ( myHost, &len ));
 
   if ( myHost[0] == '\0' ) 
     pcdiAbort ( "did not succeed to set hostname", __FILE__, __LINE__ , rank);
@@ -308,8 +280,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
   npes_node = size / ( * nnodes );
   key = rank % npes_node;
 
-  checkMPI ( MPI_Comm_split ( commF2C, *color, key, myComm),
-	     __FILE__, __LINE__, rank );
+  xmpi ( MPI_Comm_split ( commF2C, *color, key, myComm));
 
   free ( allHosts0 );
   free ( allHosts );

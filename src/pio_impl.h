@@ -55,9 +55,7 @@ typedef struct
 } rTag;
 
 /* pio.c */
-void checkMPI ( int, const char *, int, int );
 void checkMPIstat ( int, const char *, int, int, MPI_Status * );
-void * xmalloc ( size_t );
 int setTag ( int, int );
 rTag * getTag ( int );
 void ungetTag ( rTag * );

@@ -28,11 +28,13 @@ void * pcdiXmalloc ( size_t size, const char *filename, int line )
 
 /***************************************************************/ 
 
-void checkMPI2 ( int iret, const char *filename, int line, int rank )
+void pcdiXMPI ( int iret, const char *filename, int line )
 {
   char errorString1[MPI_MAX_ERROR_STRING + 1];
   char errorString2[MPI_MAX_ERROR_STRING + 1];
-  int len, errorClass; 
+  int len, errorClass, rank;
+
+  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
 
   if ( iret != MPI_SUCCESS )
     {
@@ -54,7 +56,7 @@ void checkMPI2 ( int iret, const char *filename, int line, int rank )
   return;
 }
 
-/****************************************************/
+/*****************************************************************************/
 
 void myDebug (  const char *filename, const char *functionname, int line )
 {

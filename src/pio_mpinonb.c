@@ -45,7 +45,7 @@ static queue *bibAFiledataM;
 
 /***************************************************************/
 
-void checkMPINONBcoll ( int iret, const char *filename, int line )
+static void checkMPINONBcoll ( int iret, const char *filename, int line )
 {
   char errorString1[MPI_MAX_ERROR_STRING + 1];
   char errorString2[MPI_MAX_ERROR_STRING + 1];
