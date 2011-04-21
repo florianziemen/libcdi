@@ -45,7 +45,6 @@ int nodeSizes[nNodes] = {1,2};
   11,11,11,11,11 };
 */
 
-
 int nodeSizes[nNodes] = {1};
 int nStreams = 4;
 int streamSizes[4] = {2,5,1,3};
@@ -57,21 +56,41 @@ void modelRun ()
   int gridID, zaxisID1, zaxisID2, taxisID;
   int vlistID, varID1, varID2, streamID, tsID;
   int i, nmiss = 0;
-  double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
+  double lons[nlon] = {0, 30, 60, 91830, 120, 150, 180, 210, 240, 270, 300, 330};
   double lats[nlat] = {-75, -45, -15, 15, 45, 75};
   double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
   double var1[nlon*nlat];
   double var2[nlon*nlat*nlev];
+  int gridID_test;
 
-  if  ( ddebug >= 3 )
-    myDebug (  __FILE__, fnName, __LINE__ );
+  if  ( ddebug >= 3 ) xdebug (  fnName );
 
+  namespaceSetNumber ( 2 );
+  namespaceSetActive ( 0 );
   // Create a regular lon/lat grid
   gridID = gridCreate(GRID_LONLAT, nlon*nlat);
   gridDefXsize(gridID, nlon);
   gridDefYsize(gridID, nlat);
   gridDefXvals(gridID, lons);
   gridDefYvals(gridID, lats);
+
+  // Test namespaces: Create a 2. regular lon/lat grid
+
+  namespaceSetActive ( 1 );
+  gridID_test = gridCreate(GRID_LONLAT, (nlon-1)*(nlat-1));
+  gridDefXsize(gridID_test, nlon-1);
+  gridDefYsize(gridID_test, nlat-1);
+  gridDefXvals(gridID_test, lons);
+  gridDefYvals(gridID_test, lats);
+
+  gridID_test = gridCreate(GRID_LONLAT, (nlon-2)*(nlat-2));
+  gridDefXsize(gridID_test, nlon-2);
+  gridDefYsize(gridID_test, nlat-2);
+  gridDefXvals(gridID_test, lons);
+  gridDefYvals(gridID_test, lats);
+  gridTestNamespace ();
+  namespaceSetActive ( 0 );
+
 
   // Create a surface level Z-axis
   zaxisID1 = zaxisCreate(ZAXIS_SURFACE, 1);
@@ -99,6 +118,7 @@ void modelRun ()
 
 
   // Create a dataset in netCDF fromat
+  
   streamID = streamOpenWrite("example.grb", FILETYPE_GRB);
   if ( streamID < 0 )
     {
@@ -156,17 +176,16 @@ int main (int argc, char *argv[])
   MPI_Comm_size ( commGlob, &sizeGlob );
   MPI_Comm_rank ( commGlob, &rankGlob ); 
                                           
-  if ( nProcsIO <=0 || nProcsIO >= ( float ) sizeGlob / 2.0 )
+  if ( nProcsIO <=0 || nProcsIO >= ( float ) sizeGlob / 2.0 && ! TEST_LOCAL )
     pcdiAbort ( "bad distribution of tasks on PEs", __FILE__, __LINE__, rankGlob );  
 
-  if  ( ddebug >= 3 )
-    myDebug (  __FILE__, fnName, __LINE__ );
+  if  ( ddebug >= 3 ) xdebug (  fnName );
 
-  commModel = pioInit_c ( commGlob, nProcsIO, 1 );
+  //commModel = pioInit_c ( commGlob, nProcsIO, 0 );
 
-  //modelRun ();
+  modelRun ();
 
-  pioFinalize ();
+  //pioFinalize ();
   MPI_Finalize ();                         
 
   return 0;

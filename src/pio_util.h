@@ -41,10 +41,11 @@ void pcdiAbort ( char *, const char *, int, int );
 void * pcdiXmalloc ( size_t, const char *, int );
 #define xmalloc(size) pcdiXmalloc ( size, __FILE__, __LINE__ )
 void pcdiXMPI ( int, const char *, int );
-#define xmpi(ret) pcdiXMPI(ret, __FILE__, __LINE__)
+#define xmpi(ret) pcdiXMPI ( ret, __FILE__, __LINE__ )
 void pcdiXMPIStat ( int, const char *, int, MPI_Status * );
 #define xmpiStat(ret,stat) pcdiXMPIStat ( ret, __FILE__, __LINE__, stat )
 void myDebug ( const char *, const char *, int );
+#define xdebug(fun) myDebug (  __FILE__, fun, __LINE__ )
 void myDebugComm ( const char *filename, const char *functionname, int line, MPI_Comm *comm );
 
 #endif

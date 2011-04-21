@@ -19,6 +19,7 @@ void pcdiAbort ( char *errorString, const char *filename, int line, int rank )
 void * pcdiXmalloc ( size_t size, const char *filename, int line )
 { 
   void * value = malloc ( size );
+  memset ( value, 0, size );
 
   if ( value == NULL )
     pcdiAbort ( "malloc failed", filename, line, -1 );

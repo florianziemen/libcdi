@@ -9,6 +9,7 @@
 #include "stream_int.h"
 #include "grid.h"
 #include "gaussgrid.h"
+#include "pio_util.h"
 
 
 #ifndef  RAD2DEG
@@ -40,7 +41,7 @@ char *Grids[] = {
 };
 
 
-static int  GRID_Debug = 0;   /* If set to 1, debugging */
+static int  GRID_Debug = 1;   /* If set to 1, debugging */
 
 static int _grid_max = MAX_GRIDS;
 
@@ -76,45 +77,97 @@ typedef struct _gridPtrToIdx {
 } gridPtrToIdx;
 
 
-static gridPtrToIdx *_gridList  = NULL;
-static gridPtrToIdx *_gridAvail = NULL;
+static gridPtrToIdx **_gridList  = NULL;
+static gridPtrToIdx **_gridAvail = NULL;
+
+
+
+void gridTestNamespace ()
+{
+  int i, j, sizeGridList, temp;
+
+ 
+  if ( _grid_init )
+    {
+      temp = namespaceGetActive ();
+
+      for ( i = 0; i < namespaceGetNumber (); i++ )
+	{
+	  namespaceSetActive ( i );
+	  sizeGridList = gridSize();
+	  fprintf ( stdout, "######### namespace=%d, size of _gridList: %d\n", 
+		    i, sizeGridList );
+	  for ( j = 0; j < sizeGridList; j++)
+	    gridPrint ( _gridList[i][j].ptr->self, 0 );
+	}
+
+      namespaceSetActive ( temp );
+    }
+}
 
 
 static
 void grid_list_new(void)
 {
-  assert(_gridList == NULL);
+  int nnsp, i;
 
-  _gridList = (gridPtrToIdx *) malloc(_grid_max*sizeof(gridPtrToIdx));
+  nnsp = namespaceGetNumber ();
+
+  fprintf ( stdout, "grid_list_new()\n" );
+  
+  for ( i = 0; i < nnsp; i++ )
+    {
+      assert(_gridList[i] == NULL);
+      _gridList[i] = (gridPtrToIdx *) malloc(_grid_max*sizeof(gridPtrToIdx));
+    }
 }
 
 static
 void grid_list_delete(void)
 {
-  if ( _gridList ) free(_gridList);
+  int i, nnsp;
+
+  nnsp = namespaceGetNumber ();
+
+  if ( _gridList )
+    {
+      for ( i = 0; i < nnsp; i++ )
+	if (  _gridList[i] ) free ( _gridList[i] );
+      free ( _gridList );
+    }
+
+  if ( _gridAvail ) free ( _gridAvail );
 }
 
 static
 void grid_init_pointer(void)
 {
-  int  i;
-  
-  for ( i = 0; i < _grid_max; i++ )
+  int nnsp, i, j;
+
+  nnsp = namespaceGetNumber ();
+
+  for ( i = 0; i < nnsp; i++ )
     {
-      _gridList[i].next = _gridList + i + 1;
-      _gridList[i].idx  = i;
-      _gridList[i].ptr  = 0;
+      for ( j = 0; j < _grid_max; j++ )
+	{
+	  _gridList[i][j].next = _gridList[i] + j + 1;
+	  _gridList[i][j].idx  = j;
+	  _gridList[i][j].ptr  = 0;
+	}
+      
+      _gridList[i][_grid_max-1].next = 0;
+      
+      _gridAvail[i] = _gridList[i];
     }
-
-  _gridList[_grid_max-1].next = 0;
-
-  _gridAvail = _gridList;
 }
 
 static
 grid_t *grid_to_pointer(int idx)
 {
   grid_t *gridptr = NULL;
+  int nsp;
+
+  nsp = namespaceGetActive ();
 
   GRID_INIT();
 
@@ -122,7 +175,7 @@ grid_t *grid_to_pointer(int idx)
     {
       GRID_LOCK();
 
-      gridptr = _gridList[idx].ptr;
+      gridptr = _gridList[nsp][idx].ptr;
 
       GRID_UNLOCK();
     }
@@ -138,15 +191,18 @@ int grid_from_pointer(grid_t *ptr)
 {
   int      idx = -1;
   gridPtrToIdx *newptr;
+  int nsp;
+
+  nsp = namespaceGetActive ();
 
   if ( ptr )
     {
       GRID_LOCK();
 
-      if ( _gridAvail )
+      if ( _gridAvail[nsp] )
 	{
-	  newptr       = _gridAvail;
-	  _gridAvail   = _gridAvail->next;
+	  newptr       = _gridAvail[nsp];
+	  _gridAvail[nsp]   = _gridAvail[nsp]->next;
 	  newptr->next = 0;
 	  idx	       = newptr->idx;
 	  newptr->ptr  = ptr;
@@ -248,6 +304,9 @@ static
 void grid_delete_entry(grid_t *gridptr)
 {
   int idx;
+  int nsp;
+
+  nsp = namespaceGetActive ();
 
   idx = gridptr->self;
 
@@ -255,9 +314,9 @@ void grid_delete_entry(grid_t *gridptr)
 
   free(gridptr);
 
-  _gridList[idx].next = _gridAvail;
-  _gridList[idx].ptr  = 0;
-  _gridAvail          = &_gridList[idx];
+  _gridList[nsp][idx].next = _gridAvail[nsp];
+  _gridList[nsp][idx].ptr  = 0;
+  _gridAvail[nsp]          = &_gridList[nsp][idx];
 
   GRID_UNLOCK();
 
@@ -269,6 +328,9 @@ static
 void grid_initialize(void)
 {
   char *env;
+  int nnsp;
+
+  fprintf ( stdout, "grid_initialize()\n" );
 
 #if  defined  (HAVE_LIBPTHREAD)
   /* initialize global API mutex lock */
@@ -277,6 +339,10 @@ void grid_initialize(void)
 
   env = getenv("GRID_DEBUG");
   if ( env ) GRID_Debug = atoi(env);
+
+  nnsp = namespaceGetNumber ();
+  _gridList  = xmalloc ( nnsp * sizeof ( _gridList[0] ));
+  _gridAvail = xmalloc ( nnsp * sizeof ( _gridList[0] ));
 
   grid_list_new();
   atexit(grid_list_delete);
@@ -313,13 +379,16 @@ int gridSize(void)
 {
   int gridsize = 0;
   long i;
+  int nsp;
+
+  nsp = namespaceGetActive ();
   
   GRID_INIT();
 
   GRID_LOCK();
 
   for ( i = 0; i < _grid_max; i++ )
-    if ( _gridList[i].ptr ) gridsize++;
+    if ( _gridList[nsp][i].ptr ) gridsize++;
 
   GRID_UNLOCK();
 
@@ -552,6 +621,7 @@ int gridCreate(int gridtype, int size)
 	  }
 	gridDefXlongname(gridID, "longitude");
 	gridDefYlongname(gridID, "latitude");
+	
 	/*
 	if ( gridtype == GRID_CURVILINEAR )
 	  {

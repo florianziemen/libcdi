@@ -64,8 +64,8 @@ am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	cdf_int.lo cdi_error.lo cdi_util.lo cdiFortran.lo \
 	cgribexlib.lo dmemory.lo error.lo extralib.lo file.lo \
 	gaussgrid.lo gribapi.lo grid.lo ieglib.lo institution.lo \
-	model.lo pio.lo pio_dbuffer.lo pio_interface.lo pio_mpinonb.lo \
-	pio_posixasynch.lo pio_posixfpguardsendrecv.lo \
+	model.lo namespace.lo pio.lo pio_dbuffer.lo pio_interface.lo \
+	pio_mpinonb.lo pio_posixasynch.lo pio_posixfpguardsendrecv.lo \
 	pio_posixfpguardthread.lo pio_posixfpguardthreadrefuse.lo \
 	pio_posixnonb.lo pio_queue.lo pio_rpc.lo pio_server.lo \
 	pio_util.lo servicelib.lo stream_cdf.lo stream_cgribex.lo \
@@ -299,6 +299,7 @@ libcdi_la_SOURCES = \
 	ieglib.c         \
 	institution.c  	 \
 	model.c        	 \
+	namespace.c      \
 	pio.c            \
 	pio.h            \
 	pio_c_temp.h     \
@@ -479,6 +480,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ieglib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/institution.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/model.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/namespace.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_dbuffer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_interface.Plo@am__quote@

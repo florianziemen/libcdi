@@ -198,10 +198,18 @@ extern "C" {
 #define  PIO_POSIX_FPGUARD_SENDRECV         4
 #define  PIO_POSIX_FPGUARD_THREAD_REFUSE    5
 #define  PIO_POSIX_FPGUARD_THREAD           6
+
+#define  TEST_LOCAL                         1
   
 
-int pioInit ( int, int, int );
+int      pioInit ( int, int, int );
 void     pioFinalize ( void );
+
+void     namespaceSetNumber ( int );
+int      namespaceGetNumber ();
+void     namespaceSetActive ( int );
+int      namespaceGetActive ();
+void     gridTestNamespace ();
 
 /* CDI control routines */
 

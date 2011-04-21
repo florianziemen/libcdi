@@ -1067,8 +1067,9 @@ int fileOpen(const char *filename, const char *mode)
 
   /* begin deike */
 #ifdef USE_MPI
-  if ( memcmp ( mode, "w", 1 ) == 0 && pioinfo->type != PIO_NONE )
-    return pioFileOpenW ( filename );
+  if ( ! TEST_LOCAL )
+    if ( memcmp ( mode, "w", 1 ) == 0 && pioinfo->type != PIO_NONE )
+      return pioFileOpenW ( filename );
 #endif
   /* end deike */
 
@@ -1162,7 +1163,8 @@ int fileClose(int fileID)
 
   /* begin deike */
 #ifdef USE_MPI
-  if ( pioinfo->type != PIO_NONE )
+  if ( ! TEST_LOCAL )
+    if ( pioinfo->type != PIO_NONE )
       return pioFileClose ( fileID );
 #endif
   /* end deike */

@@ -580,7 +580,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   /* begin deike */
 
 #ifdef USE_MPI
-  if ( pioinfo->type != PIO_NONE )
+  if ( pioinfo->type != PIO_NONE && ! TEST_LOCAL )
     nwrite = pioFileWrite ( fileID, tsID, gribbuffer, nbytes );
   else
       nwrite = fileWrite(fileID, gribbuffer, nbytes); 
