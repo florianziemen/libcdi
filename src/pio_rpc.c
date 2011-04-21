@@ -22,15 +22,11 @@ void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
   nProcsIO = nIOP;
   MPI_Comm_rank ( commGlob, &rankGlob );
 
-  commsIO = ( MPI_Comm * ) myMalloc ( nProcsIO * sizeof ( MPI_Comm ),
-				      __FILE__, __LINE__ );
- 
+  commsIO = ( MPI_Comm * ) xmalloc ( nProcsIO * sizeof ( MPI_Comm ));
   strncpy ( name, "commsIO_", 8 ); 
   name[9] = '\0';
   
-  ranks = ( int * ) myMalloc (( nProcsCalc + 1 ) * sizeof ( int ), 
-			      __FILE__, __LINE__ );
-
+  ranks = ( int * ) xmalloc (( nProcsCalc + 1 ) * sizeof ( int ));
   for ( i = 0; i < nProcsCalc; i++ )
     * ( ranks + i ) = i;
   

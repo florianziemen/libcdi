@@ -16,12 +16,12 @@ void pcdiAbort ( char *errorString, const char *filename, int line, int rank )
 
 /*****************************************************************************/  
 
-void * myMalloc ( size_t size, const char *filename, int line )
+void * pcdiXmalloc ( size_t size, const char *filename, int line )
 { 
   void * value = malloc ( size );
 
   if ( value == NULL )
-    pcdiAbort ( "malloc did not succeed", filename, line, -1 );
+    pcdiAbort ( "malloc failed", filename, line, -1 );
   
   return value;
 }
@@ -89,8 +89,7 @@ void myDebugComm ( const char *filename, const char *functionname, int line, MPI
   int rank, size, len, rankGlob;
   char *name;
 
-  name = ( char * ) myMalloc (( MPI_MAX_OBJECT_NAME ) * sizeof ( char ),
-				  __FILE__, __LINE__ );
+  name = ( char * ) xmalloc ( MPI_MAX_OBJECT_NAME );
   memset ( name, 0, ( MPI_MAX_OBJECT_NAME ) * sizeof ( char ));
   MPI_Comm_get_name ( * comm, name, &len ); 
   MPI_Comm_size ( * comm, &size );

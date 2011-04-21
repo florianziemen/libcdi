@@ -270,9 +270,7 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 	weightsStreams[i] += * ( vSizes + offset++ );
     }
 
-  w = ( double * ) myMalloc ( nNodes * sizeof ( double ),
-					 __FILE__, __LINE__ );
-
+  w = ( double * ) xmalloc ( nNodes * sizeof ( double ));
   for ( j = 0; j < nNodes; j++ )
     nPEs += * ( nodeSizes + j );
 
@@ -290,14 +288,9 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 	if ( * ( streamMapping + j ) == i )
 	  nVarsNode += * ( sSizes + j ); 
       
-      weightsVarsNode = ( int * ) myMalloc ( nVarsNode * sizeof ( int ),
-					     __FILE__, __LINE__ );
-      
-      varMappingNode = ( int * ) myMalloc ( nVarsNode * sizeof ( int ),
-					     __FILE__, __LINE__ );
-
-      w = ( double * ) myMalloc ( * ( nodeSizes + i ) * sizeof ( double ),
-					 __FILE__, __LINE__ );
+      weightsVarsNode = ( int * ) xmalloc ( nVarsNode * sizeof ( int ));
+      varMappingNode = ( int * ) xmalloc ( nVarsNode * sizeof ( int ));
+      w = ( double * ) xmalloc ( * ( nodeSizes + i ) * sizeof ( double ));
       offset = 0;
       offsetN = 0;
 

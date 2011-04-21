@@ -109,18 +109,6 @@ void checkMPIstat ( int iret, const char *filename, int line, int rank,
   return;
 }
 
-/***************************************************************/     
-
-void * xmalloc ( size_t size )
-{
-  void * value = malloc ( size );
-
-  if ( value == NULL )
-    pcdiAbort ( "malloc did not succeed", __FILE__, __LINE__, -1 );
-  
-  return value;
-}
-
 /***************************************************************/  
 
 int setTag ( int ID, int sc )
