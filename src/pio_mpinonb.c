@@ -11,8 +11,8 @@
 #include "mpi.h"
 #include "pio.h"
 #include "pio_impl.h"
+#include "pio_util.h"
 
-extern bool ddebug; 
 extern char * command2charP[6];
 
 extern long initial_buffersize;
@@ -81,7 +81,7 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   size_t len;
   int iret;
 
-  if ( ddebug )
+  if ( ddebug == MAXDEBUG )
     fprintf ( stderr, "pe%d initAFiledataMPINONB (): filename=%s, buffersize=%zu, in\n",
 	pioinfo->rank, filename, bs );
 
@@ -95,7 +95,7 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
 
   /* init output buffer */
 
-  if ( ddebug )
+  if ( ddebug == MAXDEBUG )
     fprintf ( stderr, "pe%d initOpenFileCollector(): name=%s, init output buffer\n", 
 	      pioinfo->rank, of->name );
    
@@ -117,7 +117,7 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   of->request = MPI_REQUEST_NULL;
   of->finished = false;
 
-  if ( ddebug )
+  if ( ddebug == MAXDEBUG )
     fprintf ( stderr, "pe%d initAFiledataMPINONB (), opened file %s, return\n",
 	pioinfo->rank, of->name );
   
@@ -134,7 +134,7 @@ int destroyAFiledataMPINONB ( void *v )
 
   of = (aFiledataM * ) v;
 
-  if ( ddebug )
+  if ( ddebug == MAXDEBUG )
     fprintf ( stderr, "pe%d destroyAFiledataMPINONB(): name=%s, close file, in\n", 
 	      pioinfo->rank, of->name );
   
@@ -155,7 +155,7 @@ int destroyAFiledataMPINONB ( void *v )
   free ( of->name );
   free ( of );
 
-  if ( ddebug )
+  if ( ddebug == MAXDEBUG )
     fprintf ( stderr, "pe%d destroyAFiledataMPINONB(), closed file, cleaned up, return\n", 
 	      pioinfo->rank );
 
@@ -193,7 +193,7 @@ void writeMPINONB ( aFiledataM *of, int id )
 
   if ( amount == 0 ) return;
 
-  if ( ddebug ) 
+  if ( ddebug == MAXDEBUG ) 
     fprintf ( stderr, "pe%d writeMPINONB(): Write buffer, size %d bytes, in\n", 
 	      pioinfo->rank, amount );
   
@@ -207,14 +207,14 @@ void writeMPINONB ( aFiledataM *of, int id )
   
   if ( of->db == of->db1 )
     {
-      if ( ddebug ) 
+      if ( ddebug == MAXDEBUG ) 
 	fprintf ( stderr, "pe%d writeMPINONB (): id=%d, change to buffer 2 ...\n", 
 		  pioinfo->rank, id );
       of->db =  of->db2;
     }
   else 
     {
-      if ( ddebug ) 
+      if ( ddebug == MAXDEBUG ) 
 	fprintf ( stderr, "pe%d writeMPINONB (): id=%d, change to buffer 1 ...\n", 
 		  pioinfo->rank, id );
       of->db =  of->db1;
@@ -239,7 +239,7 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
 
   if ( flush == 1 ) 
     {
-      if ( ddebug )
+      if ( ddebug == MAXDEBUG )
 	fprintf ( stderr, "pe%d fileWriter (): tsId = %d, flush buffer\n", 
 		  pioinfo->rank, tsId );
       curr = bibAFiledataM->head;
@@ -255,7 +255,7 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
   of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, id );
   filled = dbuffer_push ( of->db, ( unsigned char * ) buffer, len );
 
-  if ( ddebug )
+  if ( ddebug == MAXDEBUG )
     fprintf ( stderr, "pe%d fileWriter (): id = %d, tsId = %d,"
 	      " pushed data on buffer, filled = %d\n", 
 	      pioinfo->rank, id, tsId, filled ); 
@@ -290,7 +290,7 @@ int fcMPINONB ( int id )
   double accumWaitMax;
   char errorString[maxErrorString];
 
-  if ( ddebug )
+  if ( ddebug == MAXDEBUG )
     fprintf ( stderr, "pe%d fileClose (%d ): write buffer, close file and cleanup, in\n", 
 	      pioinfo->rank, id );
 
@@ -308,7 +308,7 @@ int fcMPINONB ( int id )
 
   if ( !bibAFiledataM->head ) 
     {
-      if ( ddebug )
+      if ( ddebug == MAXDEBUG )
 	fprintf ( stderr, "pe%d fileClose (): cleanup queue \n", 
 		  pioinfo->rank );
       free ( bibAFiledataM );
@@ -316,7 +316,7 @@ int fcMPINONB ( int id )
 
   /* timer output */
 
-  if ( ddebug )
+  if ( ddebug == MAXDEBUG )
     {
       MPI_Reduce ( &accumWait, &accumWaitMax, 
 		   1, MPI_DOUBLE, MPI_MAX, 0, pioinfo->comm  );
@@ -371,7 +371,7 @@ int fowMPINONB ( const char *filename )
   
   if ( ! buffersize )
     {
-      if ( ddebug )
+      if ( ddebug == MAXDEBUG )
 	fprintf ( stderr, 
 		  "pe%d fowMPINONB(): Broadcast buffersize to collectors ...\n", 
 		  pioinfo->rank );
@@ -396,7 +396,7 @@ int fowMPINONB ( const char *filename )
       errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
     }
 
-  if ( ddebug )
+  if ( ddebug == MAXDEBUG )
     fprintf ( stderr, 
 	      "pe%d fowMPINONB(): name=%s, init and enqueued aFiledataM, return id = %d\n", 
 	      pioinfo->rank, filename, id );

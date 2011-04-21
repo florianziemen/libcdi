@@ -23,8 +23,8 @@
 #include "mpi.h"
 #include "pio.h"
 #include "pio_impl.h"
+#include "pio_util.h"
 
-extern bool ddebug;
 extern char * command2charP[6];
 
 extern double startTime;

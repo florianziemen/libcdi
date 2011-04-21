@@ -6,7 +6,6 @@
 #include <string.h>
 #include "mpi.h"
 
-#define ddebug 3
 
 #define MAXSTRLNNETCDF    32
 #define MAXBUFFERSIZE     32
@@ -27,11 +26,16 @@
 
 #define MAXSTRING        256
 
+
+#define ddebug MAXDEBUG
+
+
 typedef enum 
   {
     FINALIZE,
     METADATA
   } command;
+
 
 void myAbort ( char *, const char *, int, int );
 void * myMalloc ( size_t, const char *, int );

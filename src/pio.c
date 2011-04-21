@@ -13,12 +13,10 @@
 #include "cdi.h"
 #include "pio.h"
 #include "pio_impl.h"
-//#include "pio_util.h"
+#include "pio_util.h"
 
 
 #endif
-
-bool ddebug = true;
 
 #ifdef USE_MPI
 
@@ -288,7 +286,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
   if ( myHost[0] == '\0' ) 
     errorPIO ( "did not succeed to set hostname", __FILE__, __LINE__ , rank);
 
-  if ( ddebug )
+  if ( ddebug == MAXDEBUG )
     {
       strncpy ( hostname, myHost, len );
       hostname [ len ] = '\0';
@@ -338,7 +336,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
   free ( allHosts );
   free ( myHost );
 
-  if ( ddebug )
+  if ( ddebug == MAXDEBUG )
     fprintf ( stderr, 
 	      "pe%d in setPioCommunicator, color=%d, before return\n", 
 	      rank, *color );
@@ -358,7 +356,7 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
   *nnodes = 1;
   *color = 1;
 
-  if ( ddebug )
+  if ( ddebug == MAXDEBUG )
     myDebug ( __FILE__, fnName, __LINE__ );
 
 #ifdef USE_MPI
@@ -386,7 +384,7 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
   MPI_Comm_rank ( pioinfo->comm, &( pioinfo->rank ));
   MPI_Comm_size ( pioinfo->comm, &( pioinfo->size ));
   
-  if ( ddebug && pioinfo->rank == 0 )
+  if ( ddebug == MAXDEBUG && pioinfo->rank == 0 )
     fprintf ( stderr, 
 	      "pe%d in bInit(), ptype=%d, initial_buffersize=%ld: "
 	      "after init pioinfo ...\n", 
@@ -423,7 +421,7 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
     }
 #endif
   
-  if ( ddebug )
+  if ( ddebug == MAXDEBUG )
     fprintf ( stderr, "pe in bInit out\n" );
   
   return pioinfo->collectorComm;

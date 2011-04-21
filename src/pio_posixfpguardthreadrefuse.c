@@ -31,11 +31,11 @@
 #include "mpi.h"
 #include "pio.h"
 #include "pio_impl.h"
+#include "pio_util.h"
 
 int maxNFiles = 100;
 extern int tagKey;
 
-extern bool ddebug;
 extern char * command2charP[6];
 
 extern double startTime;
