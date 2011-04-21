@@ -18,13 +18,32 @@ void pcdiAbort ( char *errorString, const char *filename, int line, int rank )
 
 void * pcdiXmalloc ( size_t size, const char *filename, int line )
 { 
-  void * value = malloc ( size );
-  memset ( value, 0, size );
+  void * value = calloc (1, size );
 
   if ( value == NULL )
     pcdiAbort ( "malloc failed", filename, line, -1 );
   
   return value;
+}
+
+void * pcdiXcalloc ( size_t nmemb, size_t size, const char *filename, int line )
+{
+  void * value = calloc ( nmemb, size );
+
+  if ( value == NULL )
+    pcdiAbort ( "calloc failed", filename, line, -1 );
+
+  return value;
+}
+
+void * pcdiXrealloc ( void *p, size_t size, const char *filename, int line )
+{
+  p = realloc ( p, size );
+
+  if ( p == NULL )
+    pcdiAbort ( "realloc failed", filename, line, -1 );
+
+  return p;
 }
 
 /***************************************************************/ 

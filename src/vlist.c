@@ -7,12 +7,16 @@
 #include "stream_int.h"
 #include "vlist.h"
 #include "varscan.h"
+#include "pio_util.h"
 
 
 static int  VLIST_Debug = 0;   /* If set to 1, debugging */
 
-static int _vlist_min = MIN_VLISTS;
-static int _vlist_max = MAX_VLISTS;
+static int *vlist_list_size;
+
+enum {
+  _vlist_max = MAX_VLISTS,
+};
 
 static void vlist_initialize(void);
 
@@ -45,65 +49,94 @@ typedef struct _vlistPtrToIdx {
 } vlistPtrToIdx;
 
 
-static vlistPtrToIdx *_vlistList  = NULL;
-static int            _vlistAvail = -1;
+static vlistPtrToIdx **_vlistList  = NULL;
+static int            *_vlistAvail;
 
 static
 void vlist_list_new(void)
 {
-  assert(_vlistList == NULL);
+  int nnsp, i;
 
-  _vlistList = (vlistPtrToIdx *) malloc(_vlist_min*sizeof(vlistPtrToIdx));
+  nnsp = namespaceGetNumber();
+
+  _vlistList = xcalloc(nnsp, sizeof(_vlistList[0]));
+  _vlistAvail = xcalloc(nnsp, sizeof(_vlistAvail[0]));
+  vlist_list_size = xcalloc(nnsp, sizeof(vlist_list_size[0]));
+  for (i = 0; i < nnsp; ++i)
+  {
+    assert(_vlistList[i] == NULL);
+    vlist_list_size[i] = MIN_VLISTS;
+    _vlistList[i]
+      = (vlistPtrToIdx *) xmalloc(vlist_list_size[i] * sizeof(vlistPtrToIdx));
+  }
 }
 
 static
 void vlist_list_delete(void)
 {
-  if ( _vlistList ) free(_vlistList);
+  int nnsp;
+
+  nnsp = namespaceGetNumber();
+  if ( _vlistList )
+  {
+    int i;
+    for (i = 0; i < nnsp; ++i)
+      if (_vlistList[i])
+        free(_vlistList[i]);
+    free(_vlistList);
+    free(_vlistAvail);
+  }
 }
 
 static
 void vlist_init_pointer(void)
 {
-  int  i;
-  
-  for ( i = 0; i < _vlist_min; ++i )
+  int nnsp, i, j;
+
+  nnsp = namespaceGetNumber();
+
+  for ( j = 0; j < nnsp; ++j )
+  {
+    for ( i = 0; i < vlist_list_size[j]; ++i )
     {
-      _vlistList[i].idx  = i;
-      _vlistList[i].next = i + 1;
-      _vlistList[i].ptr  = NULL;
+      _vlistList[j][i].idx  = i;
+      _vlistList[j][i].next = i + 1;
+      _vlistList[j][i].ptr  = NULL;
     }
 
-  _vlistList[_vlist_min-1].next = -1;
-
-  _vlistAvail = 0;
+    _vlistList[j][vlist_list_size[j]-1].next = -1;
+    _vlistAvail[j] = 0;
+  }
 }
 
 static
 void vlist_list_extend(void)
 {
-  int nvlists;
-  int i;
+  int new_list_size;
+  int i, nsp;
 
-  assert(_vlistList != NULL);
+  nsp = namespaceGetActive ();
 
-  nvlists = _vlist_min + MIN_VLISTS;
+  assert(_vlistList[nsp]);
 
-  if ( nvlists <= _vlist_max)
+  new_list_size = vlist_list_size[nsp] + MIN_VLISTS;
+
+  if ( new_list_size <= _vlist_max)
     {
-      _vlistList = (vlistPtrToIdx *) realloc(_vlistList, nvlists*sizeof(vlistPtrToIdx));
-  
-      for ( i = _vlist_min; i < nvlists; ++i )
+      _vlistList[nsp] =
+        (vlistPtrToIdx *) xrealloc(_vlistList[nsp],
+                                   new_list_size * sizeof(vlistPtrToIdx));
+      for ( i = vlist_list_size[nsp]; i < new_list_size; ++i )
 	{
-	  _vlistList[i].idx  = i;
-	  _vlistList[i].next = i + 1;
-	  _vlistList[i].ptr  = NULL;
+	  _vlistList[nsp][i].idx  = i;
+	  _vlistList[nsp][i].next = i + 1;
+	  _vlistList[nsp][i].ptr  = NULL;
 	}
 
-      _vlistAvail = _vlist_min;
-      _vlistList[_vlist_min-1].next = _vlist_min;
-      _vlist_min = nvlists;
-      _vlistList[_vlist_min-1].next = -1;
+      _vlistAvail[nsp] = vlist_list_size[nsp];
+      _vlistList[nsp][vlist_list_size[nsp]-1].next = vlist_list_size[nsp];
+      vlist_list_size[nsp] = new_list_size;
+      _vlistList[nsp][vlist_list_size[nsp]-1].next = -1;
     }
   else
     Warning("Too many open vlists (limit is %d)!", _vlist_max);
@@ -113,14 +146,17 @@ void vlist_list_extend(void)
 vlist_t *vlist_to_pointer(int idx)
 {
   vlist_t *vlistptr = NULL;
+  int i, nsp;
+
+  nsp = namespaceGetActive ();
 
   VLIST_INIT();
 
-  if ( idx >= 0 && idx < _vlist_min )
+  if ( idx >= 0 && idx < vlist_list_size[nsp] )
     {
       VLIST_LOCK();
 
-      vlistptr = _vlistList[idx].ptr;
+      vlistptr = _vlistList[nsp][idx].ptr;
 
       VLIST_UNLOCK();
     }
@@ -134,24 +170,26 @@ vlist_t *vlist_to_pointer(int idx)
 static
 int vlist_from_pointer(vlist_t *ptr)
 {
-  int      idx = -1;
+  int idx = -1, nsp;
+
+  nsp = namespaceGetActive ();
 
   if ( ptr )
     {
       VLIST_LOCK();
 
-      if ( _vlistAvail < 0 ) vlist_list_extend();
+      if ( _vlistAvail[nsp] < 0 ) vlist_list_extend();
 
-      if ( _vlistAvail >= 0 )
+      if ( _vlistAvail[nsp] >= 0 )
 	{
 	  vlistPtrToIdx *newptr;
 
-	  newptr       = &_vlistList[_vlistAvail];
-	  _vlistAvail  = newptr->next;
+	  newptr       = &_vlistList[nsp][_vlistAvail[nsp]];
+	  _vlistAvail[nsp]  = newptr->next;
 	  newptr->next = -1;
 	  idx	       = newptr->idx;
 	  newptr->ptr  = ptr;
-      
+
 	  if ( VLIST_Debug )
 	    Message("Pointer %p has idx %d from vlist list", ptr, idx);
 	}
@@ -174,7 +212,7 @@ void vlist_init_entry(vlist_t *vlistptr)
   vlistptr->vars           = NULL;
   vlistptr->ngrids         = 0;
   vlistptr->nzaxis         = 0;
-  vlistptr->taxisID        = CDI_UNDEFID; 
+  vlistptr->taxisID        = CDI_UNDEFID;
   vlistptr->instID         = cdiDefaultInstID;
   vlistptr->modelID        = cdiDefaultModelID;
   vlistptr->tableID        = cdiDefaultTableID;
@@ -189,7 +227,7 @@ vlist_t *vlist_new_entry(void)
 {
   vlist_t *vlistptr;
 
-  vlistptr = (vlist_t *) malloc(sizeof(vlist_t));
+  vlistptr = (vlist_t *)xmalloc(sizeof(vlist_t));
 
   if ( vlistptr ) vlist_init_entry(vlistptr);
 
@@ -199,7 +237,9 @@ vlist_t *vlist_new_entry(void)
 static
 void vlist_delete_entry(vlist_t *vlistptr)
 {
-  int idx;
+  int idx, nsp;
+
+  nsp = namespaceGetActive ();
 
   idx = vlistptr->self;
 
@@ -207,9 +247,9 @@ void vlist_delete_entry(vlist_t *vlistptr)
 
   free(vlistptr);
 
-  _vlistList[idx].next = _vlistAvail;
-  _vlistList[idx].ptr  = 0;
-  _vlistAvail          = idx;
+  _vlistList[nsp][idx].next = _vlistAvail[nsp];
+  _vlistList[nsp][idx].ptr  = 0;
+  _vlistAvail[nsp]          = idx;
 
   VLIST_UNLOCK();
 

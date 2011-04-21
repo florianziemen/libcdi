@@ -40,6 +40,12 @@ typedef enum
 void pcdiAbort ( char *, const char *, int, int );
 void * pcdiXmalloc ( size_t, const char *, int );
 #define xmalloc(size) pcdiXmalloc ( size, __FILE__, __LINE__ )
+void * pcdiXcalloc ( size_t, size_t, const char *, int );
+#define xcalloc(nmemb,size) pcdiXcalloc(nmemb, size,            \
+                                        __FILE__, __LINE__)
+void * pcdiXrealloc ( void *, size_t, const char *, int );
+#define xrealloc(p,size) pcdiXrealloc(p, size,            \
+                                      __FILE__, __LINE__)
 void pcdiXMPI ( int, const char *, int );
 #define xmpi(ret) pcdiXMPI ( ret, __FILE__, __LINE__ )
 void pcdiXMPIStat ( int, const char *, int, MPI_Status * );
