@@ -61,7 +61,7 @@ void modelRun ()
   double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
   double var1[nlon*nlat];
   double var2[nlon*nlat*nlev];
-  int gridID_test;
+  int gridID2, gridID3;
 
   if  ( ddebug >= 3 ) xdebug (  fnName );
 
@@ -74,20 +74,20 @@ void modelRun ()
   gridDefXvals(gridID, lons);
   gridDefYvals(gridID, lats);
 
-  // Test namespaces: Create a 2. regular lon/lat grid
+  // Test namespaces: Create a 2. grid list
 
   namespaceSetActive ( 1 );
-  gridID_test = gridCreate(GRID_LONLAT, (nlon-1)*(nlat-1));
-  gridDefXsize(gridID_test, nlon-1);
-  gridDefYsize(gridID_test, nlat-1);
-  gridDefXvals(gridID_test, lons);
-  gridDefYvals(gridID_test, lats);
+  gridID2 = gridCreate(GRID_LONLAT, (nlon-1)*(nlat-1));
+  gridDefXsize(gridID2, nlon-1);
+  gridDefYsize(gridID2, nlat-1);
+  gridDefXvals(gridID2, lons);
+  gridDefYvals(gridID2, lats);
 
-  gridID_test = gridCreate(GRID_LONLAT, (nlon-2)*(nlat-2));
-  gridDefXsize(gridID_test, nlon-2);
-  gridDefYsize(gridID_test, nlat-2);
-  gridDefXvals(gridID_test, lons);
-  gridDefYvals(gridID_test, lats);
+  gridID3 = gridCreate(GRID_LONLAT, (nlon-2)*(nlat-2));
+  gridDefXsize(gridID3, nlon-2);
+  gridDefYsize(gridID3, nlat-2);
+  gridDefXvals(gridID3, lons);
+  gridDefYvals(gridID3, lats);
   gridTestNamespace ();
   namespaceSetActive ( 0 );
 
@@ -98,6 +98,14 @@ void modelRun ()
   // Create a pressure level Z-axis
   zaxisID2 = zaxisCreate(ZAXIS_PRESSURE, nlev);
   zaxisDefLevels(zaxisID2, levs);
+
+  // Test namespaces: Create a 2. zaxis list
+
+  namespaceSetActive ( 1 );
+  zaxisID2 = zaxisCreate(ZAXIS_PRESSURE, 3);
+  zaxisDefLevels(zaxisID2, levs);
+  zaxisTestNamespace ();
+  namespaceSetActive ( 0 );
  
   // Create a variable list
   vlistID = vlistCreate();

@@ -10,6 +10,7 @@
 
 #include "cdi.h"
 #include "stream_int.h"
+#include "pio_util.h"
 
 
 static struct {
@@ -94,45 +95,93 @@ typedef struct _zaxisPtrToIdx {
 } zaxisPtrToIdx;
 
 
-static zaxisPtrToIdx *_zaxisList  = NULL;
-static zaxisPtrToIdx *_zaxisAvail = NULL;
+static zaxisPtrToIdx **_zaxisList  = NULL;
+static zaxisPtrToIdx **_zaxisAvail = NULL;
+
+void zaxisTestNamespace ()
+{
+  int i, j, sizeZaxisList, temp;
+
+ 
+  if ( _zaxis_init )
+    {
+      temp = namespaceGetActive ();
+
+      for ( i = 0; i < namespaceGetNumber (); i++ )
+	{
+	  namespaceSetActive ( i );
+	  sizeZaxisList = zaxisSize();
+	  fprintf ( stdout, "######### namespace=%d, size of _zaxisList: %d\n", 
+		    i, sizeZaxisList );
+	  for ( j = 0; j < sizeZaxisList; j++)
+	    zaxisPrint ( _zaxisList[i][j].ptr->self );
+	}
+
+      namespaceSetActive ( temp );
+    }
+}
 
 
 static
 void zaxis_list_new(void)
 {
-  assert(_zaxisList == NULL);
+  int nnsp, i;
 
-  _zaxisList = (zaxisPtrToIdx *) malloc(_zaxis_max*sizeof(zaxisPtrToIdx));
+  nnsp = namespaceGetNumber ();
+
+  for ( i = 0; i < nnsp; i++ )
+    {
+      assert(_zaxisList[i] == NULL);
+      _zaxisList[i] = (zaxisPtrToIdx *) malloc(_zaxis_max*sizeof(zaxisPtrToIdx));
+    }
 }
 
 static
 void zaxis_list_delete(void)
 {
-  if ( _zaxisList ) free(_zaxisList);
+  int i, nnsp;
+
+  nnsp = namespaceGetNumber ();
+
+  if ( _zaxisList ) 
+    {
+      for ( i = 0; i < nnsp; i++ )
+	if ( _zaxisList[i] ) free ( _zaxisList[i] ); 
+      free(_zaxisList);
+    }
+
+  if ( _zaxisAvail ) free ( _zaxisAvail );
 }
 
 static
 void zaxis_init_pointer(void)
 {
-  int  i;
+  int nnsp, i, j;
+
+  nnsp = namespaceGetNumber ();
   
-  for ( i = 0; i < _zaxis_max; i++ )
+  for ( i = 0; i < nnsp; i++ )
     {
-      _zaxisList[i].next = _zaxisList + i + 1;
-      _zaxisList[i].idx  = i;
-      _zaxisList[i].ptr  = 0;
+      for ( j = 0; j < _zaxis_max; j++ )
+	{
+	  _zaxisList[i][j].next = _zaxisList[i] + j + 1;
+	  _zaxisList[i][j].idx  = j;
+	  _zaxisList[i][j].ptr  = 0;
+	}
+
+      _zaxisList[i][_zaxis_max-1].next = 0;
+
+      _zaxisAvail[i] = _zaxisList[i];
     }
-
-  _zaxisList[_zaxis_max-1].next = 0;
-
-  _zaxisAvail = _zaxisList;
 }
 
 
 zaxis_t *zaxis_to_pointer(int idx)
 {
   zaxis_t *zaxisptr = NULL;
+  int nsp;
+
+  nsp = namespaceGetActive ();
 
   ZAXIS_INIT();
 
@@ -140,7 +189,7 @@ zaxis_t *zaxis_to_pointer(int idx)
     {
       ZAXIS_LOCK();
 
-      zaxisptr = _zaxisList[idx].ptr;
+      zaxisptr = _zaxisList[nsp][idx].ptr;
 
       ZAXIS_UNLOCK();
     }
@@ -156,6 +205,9 @@ int zaxis_from_pointer(zaxis_t *ptr)
 {
   int      idx = -1;
   zaxisPtrToIdx *newptr;
+  int nsp;
+
+  nsp = namespaceGetActive ();
 
   if ( ptr )
     {
@@ -163,8 +215,8 @@ int zaxis_from_pointer(zaxis_t *ptr)
 
       if ( _zaxisAvail )
 	{
-	  newptr       = _zaxisAvail;
-	  _zaxisAvail  = _zaxisAvail->next;
+	  newptr       = _zaxisAvail[nsp];
+	  _zaxisAvail[nsp]  = _zaxisAvail[nsp]->next;
 	  newptr->next = 0;
 	  idx	       = newptr->idx;
 	  newptr->ptr  = ptr;
@@ -220,6 +272,9 @@ static
 void zaxis_delete_entry(zaxis_t *zaxisptr)
 {
   int idx;
+  int nsp;
+
+  nsp = namespaceGetActive ();
 
   idx = zaxisptr->self;
 
@@ -227,9 +282,9 @@ void zaxis_delete_entry(zaxis_t *zaxisptr)
 
   free(zaxisptr);
 
-  _zaxisList[idx].next = _zaxisAvail;
-  _zaxisList[idx].ptr  = 0;
-  _zaxisAvail          = &_zaxisList[idx];
+  _zaxisList[nsp][idx].next = _zaxisAvail[nsp];
+  _zaxisList[nsp][idx].ptr  = 0;
+  _zaxisAvail[nsp]          = &_zaxisList[nsp][idx];
 
   ZAXIS_UNLOCK();
 
@@ -241,6 +296,9 @@ static
 void zaxis_initialize(void)
 {
   char *env;
+  int nnsp;
+
+  fprintf ( stdout, "zaxis_initialize()\n" );
 
 #if  defined  (HAVE_LIBPTHREAD)
   /* initialize global API mutex lock */
@@ -249,6 +307,10 @@ void zaxis_initialize(void)
 
   env = getenv("ZAXIS_DEBUG");
   if ( env ) ZAXIS_Debug = atoi(env);
+
+  nnsp = namespaceGetNumber ();
+  _zaxisList  = xmalloc ( nnsp * sizeof ( _zaxisList[0] ));
+  _zaxisAvail = xmalloc ( nnsp * sizeof ( _zaxisList[0] ));
 
   zaxis_list_new();
   atexit(zaxis_list_delete);
@@ -285,13 +347,16 @@ int zaxisSize(void)
 {
   int zaxissize = 0;
   int i;
+  int nsp;
+
+  nsp = namespaceGetActive ();
   
   ZAXIS_INIT();
 
   ZAXIS_LOCK();
 
   for ( i = 0; i < _zaxis_max; i++ )
-    if ( _zaxisList[i].ptr ) zaxissize++;
+    if ( _zaxisList[nsp][i].ptr ) zaxissize++;
 
   ZAXIS_UNLOCK();
 

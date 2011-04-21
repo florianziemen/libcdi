@@ -202,16 +202,18 @@ extern "C" {
 #define  TEST_LOCAL                         1
   
 
-int      pioInit ( int, int, int );
-void     pioFinalize ( void );
+int      pioInit            ( int, int, int );
+void     pioFinalize        ( void );
 
 void     namespaceSetNumber ( int );
-int      namespaceGetNumber ();
+int      namespaceGetNumber ( void );
 void     namespaceSetActive ( int );
-int      namespaceGetActive ();
-void     gridTestNamespace ();
+int      namespaceGetActive ( void );
 
-/* CDI control routines */
+void     gridTestNamespace  ( void );
+void     zaxisTestNamespace ( void );
+
+  /* CDI control routines */
 
 char   *cdiStringError(int cdiErrno);
 

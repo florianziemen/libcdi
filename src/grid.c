@@ -112,8 +112,6 @@ void grid_list_new(void)
   int nnsp, i;
 
   nnsp = namespaceGetNumber ();
-
-  fprintf ( stdout, "grid_list_new()\n" );
   
   for ( i = 0; i < nnsp; i++ )
     {
