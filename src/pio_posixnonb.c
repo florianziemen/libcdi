@@ -159,8 +159,7 @@ int destroyAFiledataP ( void *v )
     fprintf ( stderr, "pe%d destroyAFiledataP(): name=%s, cleanup, in\n", 
 	      pioinfo->rank, afp->name );
 
-  checkMPIstat ( MPI_Wait ( &( afp->request ), &status ), __FILE__, __LINE__, 
-		 pioinfo->rank, &status );
+  xmpiStat ( MPI_Wait ( &( afp->request ), &status ), &status );
   
   dbuffer_cleanup ( &( afp->db1 ));
   dbuffer_cleanup ( &( afp->db2 ));
@@ -500,8 +499,7 @@ void sendP ( aFiledataP *afd, int id )
 
   if ( ddebug ) startTime = MPI_Wtime ();
 
-  checkMPIstat (  MPI_Wait ( &( afd->request ), &status ), 
-		  __FILE__,  __LINE__, pioinfo->rank, &status );
+  xmpiStat (  MPI_Wait ( &( afd->request ), &status ), &status );
 
   if ( ddebug )
     accumWait +=  ( MPI_Wtime () - startTime );
