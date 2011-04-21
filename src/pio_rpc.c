@@ -10,7 +10,7 @@ MPI_Comm * commsIO;
 MPI_Comm * commCalc; 
  
  
-void  commsIOcreate ( MPI_Comm commGlob, int nIOP )
+void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
 {   
   char fnName[] = "commsIOcreate()";
   int * ranks;

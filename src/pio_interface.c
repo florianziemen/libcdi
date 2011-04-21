@@ -67,7 +67,7 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int mode )
 
   CHECK_MPI ( MPI_Comm_split ( comm, isCalcPE, 0, &commModel ), rankGlob );
 
-  commsIOcreate ( comm, nIOP );
+  commsIOCreate ( comm, nIOP );
 
   if ( !isCalcPE ) 
     {
