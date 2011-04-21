@@ -45,36 +45,6 @@ static queue *bibAFiledataM;
 
 /***************************************************************/
 
-static void checkMPINONBcoll ( int iret, const char *filename, int line )
-{
-  char errorString1[MPI_MAX_ERROR_STRING + 1];
-  char errorString2[MPI_MAX_ERROR_STRING + 1];
-  int len, errorClass;   
-
-  if ( iret != MPI_SUCCESS )
-    {
-      MPI_Error_class ( iret, &errorClass );
-      MPI_Error_string ( errorClass, errorString1, &len );
-      errorString1[len] = '\0';
-      MPI_Error_string ( iret, errorString2, &len);
-      errorString2[len] = '\0';
-      
-      fprintf ( stderr, "MPI ERROR, %s: line %d: pe%d,"
-		"errorClass: \"%s\""
-		"errorString: \"%s\"\n",
-		filename, line, pioinfo->rank, 
-		errorString1, errorString2);
-      
-      queueDestroy ( bibAFiledataM );
-      MPI_Barrier ( pioinfo->comm );
-      MPI_Abort ( MPI_COMM_WORLD, iret );
-    }
-
-  return;
-}
-
-/***************************************************************/
-
 static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
 {
   aFiledataM *of;
@@ -109,11 +79,9 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
 
   /* open file */ 
 
-  checkMPINONBcoll ( MPI_File_open ( pioinfo->comm, of->name, 
-				     ( MPI_MODE_CREATE|MPI_MODE_WRONLY ), 
-				     MPI_INFO_NULL, &( of->fh )), 
-		     __FILE__, __LINE__ );
-
+  xmpi ( MPI_File_open ( pioinfo->comm, of->name, 
+			 ( MPI_MODE_CREATE|MPI_MODE_WRONLY ), 
+			 MPI_INFO_NULL, &( of->fh )));
   of->request = MPI_REQUEST_NULL;
   of->finished = false;
 
