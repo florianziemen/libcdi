@@ -349,7 +349,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
 
 /***************************************************************/
 
-int pioInit ( int ptype, int commF, int *color, int *nnodes, int *pioCollComm2F )
+int bInit ( int ptype, int commF, int *color, int *nnodes, int *pioCollComm2F )
 {
 #ifdef USE_MPI
   MPI_Comm comm;
@@ -394,7 +394,7 @@ int pioInit ( int ptype, int commF, int *color, int *nnodes, int *pioCollComm2F 
   
   if ( ddebug && pioinfo->rank == 0 )
     fprintf ( stderr, 
-	      "pe%d in pioInit(), ptype=%d, initial_buffersize=%ld: "
+	      "pe%d in bInit(), ptype=%d, initial_buffersize=%ld: "
 	      "after init pioinfo ...\n", 
 	      pioinfo->rank, pioinfo->type, initial_buffersize );
   
@@ -444,7 +444,7 @@ int pioInit ( int ptype, int commF, int *color, int *nnodes, int *pioCollComm2F 
 
 /***************************************************************/
 
-void pioFinalize ()
+void bFinalize ()
 {
 #ifdef USE_MPI
   switch ( pioinfo->type )

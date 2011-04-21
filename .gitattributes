@@ -197,6 +197,7 @@ src/mo_cdi.f90 -text
 src/model.c -text
 src/pio.c -text
 src/pio.h -text
+src/pio_c_temp.h -text
 src/pio_dbuffer.c -text
 src/pio_impl.h -text
 src/pio_interface.c -text

@@ -4,8 +4,9 @@
 
 #include <mpi.h>
 #include "cdi.h"
+#include "pio_c_temp.h"
 #include "pio_util.h"
-#include "pio_interface.h"
+
 
 #define nlon 12 // Number of longitudes
 #define nlat  6 // Number of latitudes 
@@ -96,6 +97,7 @@ void modelRun ()
   // Assign the Time axis to the variable list
   vlistDefTaxis(vlistID, taxisID);
 
+
   // Create a dataset in netCDF fromat
   streamID = streamOpenWrite("example.grb", FILETYPE_GRB);
   if ( streamID < 0 )
@@ -121,7 +123,8 @@ void modelRun ()
       for ( i = 0; i < nlon*nlat;      i++ ) var1[i] = 1.1;
       for ( i = 0; i < nlon*nlat*nlev; i++ ) var2[i] = 2.2;
 
-      // Write var1 and var2
+
+void pioServerReturn ();      // Write var1 and var2
       streamWriteVar(streamID, varID1, var1, nmiss);
       streamWriteVar(streamID, varID2, var2, nmiss);
     }
@@ -163,15 +166,12 @@ int main (int argc, char *argv[])
 
   nProcsCalc = sizeGlob - nProcsIO;
 
-  commModel = IOInit ( commGlob, nProcsIO );
-
-  IOMapping ( vlistSizes, streamSizes, var2ProcsIO, nStreams, 
-        nodeSizes, nNodes );
+  commModel = pioInit_c ( commGlob, nProcsIO, 0 );
 
   //modelRun ();
 
-  IOStop ();
-  IOFinalize ();
+  pioServerFinalize ();
+  pioFinalize ();
   MPI_Finalize ();                         
 
   return iret;

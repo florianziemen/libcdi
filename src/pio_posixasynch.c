@@ -816,7 +816,7 @@ int initPOSIXASYNCH ()
     {
       if ( ddebug )
 	fprintf ( stdout, 
-		  "### pe%d pioInit (): Call posixWriter() ...\n", 
+		  "### pe%d bInit (): Call posixWriter() ...\n", 
 		  pioinfo->rank );
       pwPOSIXASYNCH ( ncollectors );
       collectingData = 0;

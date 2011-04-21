@@ -1,6 +1,6 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.4.3.1
+! Fortran interface for CDI library version 1.5.0
 !
 ! Author:
 ! -------
@@ -312,6 +312,9 @@
       PARAMETER (CALENDAR_366DAYS       =  4)
       INTEGER    CALENDAR_NONE         
       PARAMETER (CALENDAR_NONE          =  5)
+!
+!  deike
+!
       INTEGER    PIO_NONE              
       PARAMETER (PIO_NONE               =  0)
       INTEGER    PIO_MPI_NONB          
@@ -328,8 +331,6 @@
       PARAMETER (PIO_POSIX_FPGUARD_THREAD =  6)
       INTEGER         pioInit
 !                                    (INTEGER         ,
-!                                     INTEGER         ,
-!                                     INTEGER         ,
 !                                     INTEGER         ,
 !                                     INTEGER         )
       EXTERNAL        pioInit

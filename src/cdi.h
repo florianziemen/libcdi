@@ -188,7 +188,7 @@ extern "C" {
 #define  CALENDAR_366DAYS         4
 #define  CALENDAR_NONE            5
 
-  /* deike */
+/* deike */
 /* parallel io types, A: asynchronous, B: blocking */
   
 #define  PIO_NONE                           0
@@ -198,9 +198,10 @@ extern "C" {
 #define  PIO_POSIX_FPGUARD_SENDRECV         4
 #define  PIO_POSIX_FPGUARD_THREAD_REFUSE    5
 #define  PIO_POSIX_FPGUARD_THREAD           6
+  
 
-int     pioInit ( int, int, int*, int*, int* );
-void    pioFinalize ( void );
+int pioInit ( int, int, int );
+void     pioFinalize ( void );
 
 /* CDI control routines */
 

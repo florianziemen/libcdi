@@ -739,7 +739,7 @@ int initPOSIXNONB ()
     {
       if ( ddebug )
 	fprintf ( stderr, 
-		  "### pe%d pioInit (): Call posixWriter(), ncollectors = %d ...\n", 
+		  "### pe%d bInit (): Call posixWriter(), ncollectors = %d ...\n", 
 		  pioinfo->rank, ncollectors );
       pwPOSIXNONB ( ncollectors );
       collectingData = 0;

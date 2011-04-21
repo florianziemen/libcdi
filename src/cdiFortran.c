@@ -53,7 +53,10 @@
 
 /*  CALENDAR types  */
 
-FCALLSCFUN5 (INT, pioInit, PIOINIT, pioinit, INT, INT, PINT, PINT, PINT)
+
+/*  deike  */
+
+FCALLSCFUN3 (INT, pioInit, PIOINIT, pioinit, INT, INT, INT)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
 
 /*  CDI control routines  */

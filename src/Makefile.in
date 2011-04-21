@@ -301,6 +301,7 @@ libcdi_la_SOURCES = \
 	model.c        	 \
 	pio.c            \
 	pio.h            \
+	pio_c_temp.h     \
 	pio_dbuffer.c    \
 	pio_impl.h 	 \
 	pio_interface.c  \

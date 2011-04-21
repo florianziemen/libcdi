@@ -34,7 +34,7 @@ int isCalcPE;
   @return
 */
 
-void IOFinalize ()
+void pioFinalize ()
 {
   char fnName[] = "IOFinalize()";
   int i;
@@ -46,6 +46,14 @@ void IOFinalize ()
       MPI_Comm_free ( commsIO + i );
 
   return;
+}
+
+/*****************************************************************************/
+
+
+int pioInit ( int comm, int nIOP, int mode )
+{
+  return 0;
 }
 
 /*****************************************************************************/
@@ -70,7 +78,7 @@ void IOFinalize ()
   @return int indicating wether the calling PE is a calcutator (1) or not (0)
 */
 
-MPI_Comm IOInit ( MPI_Comm comm, int nIOP )
+MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP )
 {
   char fnName[] = "IOInit()";
   int * ranks;
@@ -86,7 +94,7 @@ MPI_Comm IOInit ( MPI_Comm comm, int nIOP )
   MPI_Comm_rank ( commGlob, &rankGlob );
   MPI_Comm_set_name ( commGlob, "commGlob" );
   
-  if ( ddebug >= 1 ) myDebugComm (  __FILE__, fnName,__LINE__ , commGlob );
+  if ( ddebug >= 1 ) myDebugComm (  __FILE__, fnName,__LINE__ , &commGlob );
 
   nProcsIO = nIOP;
   nProcsCalc = sizeGlob - nProcsIO;
@@ -142,7 +150,7 @@ MPI_Comm IOInit ( MPI_Comm comm, int nIOP )
       MPI_Group_free ( &currGroupIO );
       MPI_Group_free ( &groupGlob );
       free ( ranks );
-      IOFinalize ();
+      pioFinalize ();
       MPI_Finalize ();
       exit ( 0 );
     }
@@ -318,7 +326,7 @@ in order of vSizes
    @return
 */
    
-void  IOMapping ( int * vSizes, int * sSizes, int * varMapping, 
+void  varMapGen ( int * vSizes, int * sSizes, int * varMapping, 
 		     int nStreams, int * nodeSizes, int nNodes )
 {
   char fnName[] = "IOMapping()";
@@ -436,9 +444,9 @@ void  IOMapping ( int * vSizes, int * sSizes, int * varMapping,
   @return
 */
 
-void IOStop ()
+void pioServerFinalize ()
 {
-  char fnName[] = "IOStop()";
+  char fnName[] = "pioServerFinalize()";
   int i;
   int ibuffer = 1111;
   

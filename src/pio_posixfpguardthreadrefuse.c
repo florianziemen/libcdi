@@ -370,7 +370,7 @@ void* fpgPOSIXFPGUARDTHREADREFUSE ( void* ncoll )
 		  if ( ddebug )
 		    fprintf ( stdout, "#### pe%d, color%d, returns\n", 
 			      pioinfo->rank, pioinfo->color );
-		  return;
+		  return NULL;
 		}
 	    }	      
 	}
