@@ -209,6 +209,8 @@ src/pio_posixfpguardthread.c -text
 src/pio_posixfpguardthreadrefuse.c -text
 src/pio_posixnonb.c -text
 src/pio_queue.c -text
+src/pio_rpc.c -text
+src/pio_rpc.h -text
 src/pio_server.c -text
 src/pio_server.h -text
 src/pio_util.c -text

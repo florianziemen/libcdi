@@ -8,45 +8,10 @@
 #include <stdio.h> 
 #include "limits.h"
 #include "pio_util.h"
+#include "pio_rpc.h"
 #include "pio_server.h"
 #include "cdi.h"
 
-MPI_Comm commGlob;
-int sizeGlob;
-int rankGlob;
-int nProcsIO;
-int nProcsCalc;
-MPI_Comm * commsIO;
-MPI_Comm * commCalc; 
-int isCalcPE;
-
-
-
-/*****************************************************************************/
-
-/**
-  @brief frees the MPI_Communicators for the 
-  communication between the calculator PEs and the I/O PEs and within the 
-  group of I/O PEs.
-
-  @param
-
-  @return
-*/
-
-void pioFinalize ()
-{
-  char fnName[] = "IOFinalize()";
-  int i;
-
-  if ( ddebug >= 1 ) myDebug (  __FILE__, fnName,__LINE__ );
-  
-  for ( i = 0; i < nProcsIO; i++ )
-    if ( rankGlob < nProcsCalc || rankGlob == nProcsCalc + i )
-      MPI_Comm_free ( commsIO + i );
-
-  return;
-}
 
 /*****************************************************************************/
 
@@ -78,26 +43,22 @@ int pioInit ( int comm, int nIOP, int mode )
   @return int indicating wether the calling PE is a calcutator (1) or not (0)
 */
 
-MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP )
+MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int mode )
 {
-  char fnName[] = "IOInit()";
-  int * ranks;
-  int i, j;
-  MPI_Group groupGlob, currGroupIO;
-  int currIORank;
-  char name[10];
+  char fnName[] = "pioInit_c()";
   MPI_Comm commModel;
+  int isCalcPE;
 
   commGlob = comm;
-  
+
   MPI_Comm_size ( commGlob, &sizeGlob );
+
+  nProcsCalc = sizeGlob - nIOP;
+
   MPI_Comm_rank ( commGlob, &rankGlob );
   MPI_Comm_set_name ( commGlob, "commGlob" );
   
   if ( ddebug >= 1 ) myDebugComm (  __FILE__, fnName,__LINE__ , &commGlob );
-
-  nProcsIO = nIOP;
-  nProcsCalc = sizeGlob - nProcsIO;
   
   if ( rankGlob >= nProcsCalc )
     isCalcPE = 0;
@@ -105,60 +66,15 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP )
     isCalcPE = 1;
 
   CHECK_MPI ( MPI_Comm_split ( comm, isCalcPE, 0, &commModel ), rankGlob );
-  
-  commsIO = ( MPI_Comm * ) myMalloc ( nProcsIO * sizeof ( MPI_Comm ),
-				      __FILE__, __LINE__ );	
-  
-  strncpy ( name, "commsIO_", 8 ); 
-  name[9] = '\0';
-  
-  ranks = ( int * ) myMalloc (( nProcsCalc + 1 ) * sizeof ( int ), 
-			      __FILE__, __LINE__ );
 
-  for ( i = 0; i < nProcsCalc; i++ )
-    * ( ranks + i ) = i;
-  
-  MPI_Comm_group ( commGlob, &groupGlob ); 
+  commsIOcreate ( comm, nIOP );
 
-  for ( i = 0; i < nProcsIO; i++ )
-    {
-      currIORank = nProcsCalc + i;
-      
-      * ( ranks + nProcsCalc ) = currIORank;	  
-	  
-      MPI_Group_incl ( groupGlob, nProcsCalc + 1, ranks, &currGroupIO );
-      MPI_Comm_create ( commGlob, currGroupIO,  commsIO + i );
-      if ( rankGlob < nProcsCalc || rankGlob == nProcsCalc + i )
-	{
-	  sprintf ( &name[8], "%d", i ); 
-	  MPI_Comm_set_name ( * ( commsIO + i ), name );
-	}
-      if ( rankGlob == currIORank )
-	commCalc = commsIO + i;
-    }
-
-  if ( ddebug >= 2 )
-    if ( isCalcPE )
-      for ( i = 0; i < nProcsIO; i++ )
-	myDebugComm ( __FILE__, fnName, __LINE__, commsIO + i );
-    else
-      myDebugComm ( __FILE__, fnName,__LINE__, commCalc );
-   
   if ( !isCalcPE ) 
     {
-      IOServer ();
-      MPI_Group_free ( &currGroupIO );
-      MPI_Group_free ( &groupGlob );
-      free ( ranks );
-      pioFinalize ();
+      IOServer ( commModel, mode );
+      commsIOCleanup ();
       MPI_Finalize ();
       exit ( 0 );
-    }
-  else 
-    {
-      MPI_Group_free ( &currGroupIO );
-      MPI_Group_free ( &groupGlob );
-      free ( ranks );
     }
   
   return commModel;
@@ -329,7 +245,7 @@ in order of vSizes
 void  varMapGen ( int * vSizes, int * sSizes, int * varMapping, 
 		     int nStreams, int * nodeSizes, int nNodes )
 {
-  char fnName[] = "IOMapping()";
+  char fnName[] = "varMapGen()";
   int weightsStreams[nStreams];
   int streamMapping[nStreams];
   int nPEs = 0, nVars = 0;
@@ -444,17 +360,18 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
   @return
 */
 
-void pioServerFinalize ()
+void pioFinalize ()
 {
-  char fnName[] = "pioServerFinalize()";
-  int i;
-  int ibuffer = 1111;
+  char fnName[] = "pioFinalize()";
+  int i, ibuffer = 1111;
   
   if ( ddebug >= 1 )
     myDebug ( __FILE__, fnName, __LINE__ );
   
   for ( i = 0; i < nProcsIO; i++ )
     MPI_Send ( &ibuffer, 1, MPI_INT, nProcsCalc, FINALIZE, *( commsIO + i ));
+
+  commsIOCleanup ();
  
   return;
 }

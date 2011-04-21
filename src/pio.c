@@ -10,14 +10,15 @@
 
 #ifdef USE_MPI
 
-#include "mpi.h"
 #include "cdi.h"
 #include "pio.h"
 #include "pio_impl.h"
+//#include "pio_util.h"
+
 
 #endif
 
-bool ddebug = false;
+bool ddebug = true;
 
 #ifdef USE_MPI
 
@@ -349,25 +350,18 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
 
 /***************************************************************/
 
-int bInit ( int ptype, int commF, int *color, int *nnodes, int *pioCollComm2F )
+MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
 {
-#ifdef USE_MPI
-  MPI_Comm comm;
+  char fnName[] = "bInit()";
   int size, rank;
-#endif
   int collectingData = 1;
   *nnodes = 1;
   *color = 1;
-  *pioCollComm2F = 0;
+
+  if ( ddebug )
+    myDebug ( __FILE__, fnName, __LINE__ );
 
 #ifdef USE_MPI
-  
-  comm = MPI_COMM_NULL;
-
-  if (( comm = MPI_Comm_f2c (( MPI_Fint ) commF )) == NULL )
-    errorPIO ( "MPI_Comm_f2c didn't succeed", __FILE__, __LINE__, -1 );
-
-  MPI_Comm_set_errhandler ( comm, MPI_ERRORS_RETURN );
   MPI_Comm_size ( comm, &size );
   MPI_Comm_rank ( comm, &rank );
   
@@ -427,19 +421,12 @@ int bInit ( int ptype, int commF, int *color, int *nnodes, int *pioCollComm2F )
       collectingData = initPOSIXNONB ();
       break;
     }
-  
-  /* ????? MPI_Comm_c2f hardwired to 0 ????
-   *pioCollComm2F  = 0;
-   if (( *pioCollComm2F = MPI_Comm_c2f ( pioinfo->collectorComm ) == 0 )
-   errorPIO ( "MPI_Comm_c2f didn't succeed\n", __FILE__, __LINE__ , rank);
-  */
-  *pioCollComm2F = MPI_Comm_c2f ( pioinfo->collectorComm );
 #endif
   
   if ( ddebug )
-    fprintf ( stderr, "pe in pioinit out\n" );
+    fprintf ( stderr, "pe in bInit out\n" );
   
-  return collectingData;
+  return pioinfo->collectorComm;
 }
 
 /***************************************************************/

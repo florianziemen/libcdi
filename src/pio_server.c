@@ -7,17 +7,12 @@
 #include <stdio.h>
 #include "limits.h"
 #include "cdi.h"
+#include "pio.h"
+#include "pio_rpc.h"
 #include "pio_util.h"
+ 
 
-
-extern MPI_Comm * commGlob;
-extern int sizeGlob;
-extern int rankGlob;
-extern int nProcsIO;
-extern int nProcsCalc;
-extern MPI_Comm * commsIO;
-extern MPI_Comm * commCalc; 
-extern int isCalcPE;  
+MPI_Comm * commPio;
 
 
 
@@ -31,7 +26,7 @@ extern int isCalcPE;
   @return
 */
 
-void IOServer ()
+void IOServer ( MPI_Comm comm, int ptype )
 {
   char fnName[] = "IOServer()";
   int source, tag, iBuffer;
@@ -39,14 +34,16 @@ void IOServer ()
   static int nfinished;
   void * vp;
   double * dp;
-  char * outtext;
   size_t len, len2;
+  MPI_Comm commColl;
+  int nnodes, color;
+
   
   if ( ddebug >= 1 )
     myDebugComm ( __FILE__, fnName, __LINE__, commCalc );
      
   nfinished = 0;
-  outtext = ( char * ) myMalloc ( MAXSTRING * sizeof ( char ), __FILE__, __LINE__ );
+  commColl = bInit ( ptype, comm, &color, &nnodes );
 
   for ( ;; )
     {  
@@ -88,8 +85,6 @@ void IOServer ()
 	    myDebugMsg (  __FILE__, fnName, __LINE__, tag, source, nfinished );
 	}
     }
-
-  free ( outtext );
     
   return;
 }

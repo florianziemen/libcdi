@@ -124,7 +124,7 @@ void modelRun ()
       for ( i = 0; i < nlon*nlat*nlev; i++ ) var2[i] = 2.2;
 
 
-void pioServerReturn ();      // Write var1 and var2
+      // Write var1 and var2
       streamWriteVar(streamID, varID1, var1, nmiss);
       streamWriteVar(streamID, varID2, var2, nmiss);
     }
@@ -146,17 +146,15 @@ void pioServerReturn ();      // Write var1 and var2
 int main (int argc, char *argv[]) 
 {
   char fnName[] = "main()";
-  int sizeGlob, rankGlob, isCalcPE, nProcsCalc;
-  MPI_Comm commGlob, commModel;
-  int iret = 0;  
-  int var2ProcsIO[11];
+  int sizeGlob, rankGlob;
+  MPI_Comm commGlob, commModel; 
 
 
   MPI_Init(&argc, &argv);           
   MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob );
   MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN );
-  MPI_Comm_rank ( commGlob, &rankGlob ); 
   MPI_Comm_size ( commGlob, &sizeGlob );
+  MPI_Comm_rank ( commGlob, &rankGlob ); 
                                           
   if ( nProcsIO <=0 || nProcsIO >= ( float ) sizeGlob / 2.0 )
     myAbort ( "bad distribution of tasks on PEs", __FILE__, __LINE__, rankGlob );  
@@ -164,15 +162,12 @@ int main (int argc, char *argv[])
   if  ( ddebug >= 3 )
     myDebug (  __FILE__, fnName, __LINE__ );
 
-  nProcsCalc = sizeGlob - nProcsIO;
-
-  commModel = pioInit_c ( commGlob, nProcsIO, 0 );
+  commModel = pioInit_c ( commGlob, nProcsIO, 1 );
 
   //modelRun ();
 
-  pioServerFinalize ();
   pioFinalize ();
   MPI_Finalize ();                         
 
-  return iret;
- }
+  return 0;
+}

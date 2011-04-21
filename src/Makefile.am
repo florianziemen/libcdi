@@ -63,6 +63,8 @@ libcdi_la_SOURCES = 	 \
 	pio_posixfpguardthreadrefuse.c \
 	pio_posixnonb.c  \
 	pio_queue.c      \
+	pio_rpc.c        \
+	pio_rpc.h        \
 	pio_server.c     \
 	pio_server.h     \
 	pio_util.c       \
