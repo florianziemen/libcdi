@@ -157,7 +157,7 @@ int main (int argc, char *argv[])
   MPI_Comm_rank ( commGlob, &rankGlob ); 
                                           
   if ( nProcsIO <=0 || nProcsIO >= ( float ) sizeGlob / 2.0 )
-    myAbort ( "bad distribution of tasks on PEs", __FILE__, __LINE__, rankGlob );  
+    pcdiAbort ( "bad distribution of tasks on PEs", __FILE__, __LINE__, rankGlob );  
 
   if  ( ddebug >= 3 )
     myDebug (  __FILE__, fnName, __LINE__ );

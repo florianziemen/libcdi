@@ -81,7 +81,7 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   iret += dbuffer_init ( &( afd->db2 ), afd->size );
 
   if ( iret > 0 )
-    errorPIO ( "dbuffer_init did not succeed", __FILE__, __LINE__, pioinfo->rank );
+    pcdiAbort ( "dbuffer_init did not succeed", __FILE__, __LINE__, pioinfo->rank );
 
   afd->db = afd->db1;
 
@@ -94,7 +94,7 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   if ( ( afd->fp = fopen ( afd->name, "w" )) == NULL ) 
     {
       sprintf ( errorString, "Failed to open %s", afd->name );
-      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
     }
 
   afd->command = IO_Open_file;
@@ -138,7 +138,7 @@ int destroyAFiledataPF ( void *v )
   if (( iret = fclose ( afd->fp )) == EOF )
     {
       sprintf ( errorString, "Failed to close %s", afd->name );
-      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
     }  
 
   /* file closed, cleanup */
@@ -229,7 +229,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 	      if (( iret = queuePush ( bibBFiledataPF, bfd, 1, rtag->id )) != rtag->id )
 	      {
 		sprintf ( errorString, "fileID=%d not unique", rtag->id );
-		errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+		pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
 	      } 
 	    }
 
@@ -260,7 +260,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 							  rtag->id )))
 	      {
 		sprintf ( errorString, "fileId=%d not in queue", rtag->id );
-		errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+		pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
 	      }
 
 	  if ( ddebug )
@@ -288,7 +288,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 							  rtag->id )))
 	      {
 		sprintf ( errorString, "fileId=%d not in queue", rtag->id );
-		errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+		pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
 	      }
 
 	  if ( ddebug )
@@ -362,7 +362,7 @@ void writePF ( aFiledataPF *afd, int id )
   /* write buffer */
   
   if (( error = fseek ( afd->fp, offset, SEEK_SET )) != 0 )
-    errorPIO ( "did not succeed seeking fp", __FILE__, __LINE__, pioinfo->rank );
+    pcdiAbort ( "did not succeed seeking fp", __FILE__, __LINE__, pioinfo->rank );
 
   if (( written = 
 	fwrite ( afd->db->buffer, sizeof ( char ), amount, afd->fp )) !=
@@ -371,7 +371,7 @@ void writePF ( aFiledataPF *afd, int id )
       sprintf ( errorString, 
 		"fileId=%d, expect to write %u byte, written %u byte", 
 		id, amount, written );
-      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
     }
 
   if ( ddebug )
@@ -453,7 +453,7 @@ size_t fwPOSIXFPGUARDSENDRECV( int id, int tsId, const void *buffer, size_t len 
   if ( error == 1 )
     {
       sprintf ( errorString,"did not succeed filling output buffer, id=%d", id );
-      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
     }
   
   return len;
@@ -510,7 +510,7 @@ void queueCheckFP ( queue *q, const char *name )
 	   memcmp ( name, afd->name, len ) == 0 )
 	{
 	  sprintf ( errorString, "Filename %s is already enqueued\n", name );
-	  errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+	  pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
 	  return;
 	}
       
@@ -564,7 +564,7 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
   if (( id = queuePush ( bibAFiledataPF, afd, 0 )) < 0 )
     {  
       sprintf ( errorString, "filename %s not unique", afd->name );
-      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank ); 
+      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank ); 
     }
 
   if ( ddebug )
@@ -584,7 +584,7 @@ int initPOSIXFPGUARDSENDRECV ()
   int ioRanks[1];
 
   if ( pioinfo->size < 2 )
-    errorPIO ( "usage: #pes/#nodes >= 2", 
+    pcdiAbort ( "usage: #pes/#nodes >= 2", 
 	       __FILE__, __LINE__, pioinfo->rank );
   
   if ( ddebug )

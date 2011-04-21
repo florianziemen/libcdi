@@ -37,7 +37,7 @@ typedef enum
   } command;
 
 
-void myAbort ( char *, const char *, int, int );
+void pcdiAbort ( char *, const char *, int, int );
 void * myMalloc ( size_t, const char *, int );
 void checkMPI2 ( int, const char *, int, int );
 #define CHECK_MPI(rv, rank) checkMPI2(rv, __FILE__, __LINE__, rank)

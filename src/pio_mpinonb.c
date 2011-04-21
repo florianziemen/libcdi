@@ -103,7 +103,7 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   iret += dbuffer_init ( &( of->db2 ), of->size );
 
   if ( iret > 0 )
-    errorPIO ( "dbuffer_init did not succeed", __FILE__, __LINE__, pioinfo->rank );
+    pcdiAbort ( "dbuffer_init did not succeed", __FILE__, __LINE__, pioinfo->rank );
 
   of->db = of->db1;
 
@@ -275,7 +275,7 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
   if ( error == 1 )
     {
       sprintf ( errorString,"did not succeed filling output buffer, id=%d", id );
-      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
     }
   
   return len;
@@ -297,7 +297,7 @@ int fcMPINONB ( int id )
   if ( ! ( of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, id )))
     {
       sprintf ( errorString, "pio_queue, id=%d not found", id ); 
-      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
     }
 
   writeMPINONB ( of, id );
@@ -349,7 +349,7 @@ void queueCheck ( queue *q, const char *name )
 	   memcmp ( name, afm->name, len ) == 0 )
 	{
 	  sprintf ( errorString, "Filename %s is already enqueued\n", name );
-	  errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+	  pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
 	  return;
 	}
       
@@ -393,7 +393,7 @@ int fowMPINONB ( const char *filename )
   if (( id = queuePush ( bibAFiledataM, of, 0 )) < 0 )
     {   
       sprintf ( errorString, "filename %s not unique", of->name );
-      errorPIO ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
     }
 
   if ( ddebug == MAXDEBUG )
@@ -415,7 +415,7 @@ int initMPINONB ()
   bibAFiledataM = queueInit ( destroyAFiledataMPINONB, compareNamesMPINONB );
 
   if ( bibAFiledataM == NULL )
-    errorPIO ( "queueInit did not succeed", __FILE__, __LINE__, pioinfo->rank );
+    pcdiAbort ( "queueInit did not succeed", __FILE__, __LINE__, pioinfo->rank );
 	    
   return collectingData;
 }

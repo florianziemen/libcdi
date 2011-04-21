@@ -7,7 +7,7 @@ char commands[][12] = { "FINALIZE\0",
 
 /****************************************************/
 
-void myAbort ( char *errorString, const char *filename, int line, int rank )
+void pcdiAbort ( char *errorString, const char *filename, int line, int rank )
 {
   fprintf ( stderr, "testERROR, pe%d, %s, line %d, errorString: \"%s\"\n",
 	    rank, filename, line, errorString );
@@ -21,7 +21,7 @@ void * myMalloc ( size_t size, const char *filename, int line )
   void * value = malloc ( size );
 
   if ( value == NULL )
-    myAbort ( "malloc did not succeed", filename, line, -1 );
+    pcdiAbort ( "malloc did not succeed", filename, line, -1 );
   
   return value;
 }

@@ -49,15 +49,6 @@ char *token = "%";
 
 /*****************************************************************************/
 
-void errorPIO ( char *errorString, const char *filename, int line, int rank )
-{
-  fprintf ( stderr, "PIO ERROR, pe%d, %s, line %d, errorString: \"%s\"\n",
-	    rank, filename, line, errorString );
-  MPI_Abort ( MPI_COMM_WORLD, 1 );
-}
-
-/*****************************************************************************/
-
 void checkMPI ( int iret, const char *filename, int line, int rank )
 {
   char errorString1[MPI_MAX_ERROR_STRING + 1];
@@ -125,7 +116,7 @@ void * xmalloc ( size_t size )
   void * value = malloc ( size );
 
   if ( value == NULL )
-    errorPIO ( "malloc did not succeed", __FILE__, __LINE__, -1 );
+    pcdiAbort ( "malloc did not succeed", __FILE__, __LINE__, -1 );
   
   return value;
 }
@@ -284,7 +275,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
   checkMPI (( MPI_Get_processor_name ( myHost, &len )), __FILE__, __LINE__, rank );
 
   if ( myHost[0] == '\0' ) 
-    errorPIO ( "did not succeed to set hostname", __FILE__, __LINE__ , rank);
+    pcdiAbort ( "did not succeed to set hostname", __FILE__, __LINE__ , rank);
 
   if ( ddebug == MAXDEBUG )
     {
@@ -324,7 +315,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
 
   *nnodes = j;
       
-  if ( *color == 0 ) errorPIO ( "Color is not set", __FILE__, __LINE__, rank );
+  if ( *color == 0 ) pcdiAbort ( "Color is not set", __FILE__, __LINE__, rank );
   
   npes_node = size / ( * nnodes );
   key = rank % npes_node;
@@ -364,11 +355,11 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
   MPI_Comm_rank ( comm, &rank );
   
   if ( ptype < 0 || ptype > maxPtype ) 
-    errorPIO ( "PIOTYPE is no valid modus", __FILE__, __LINE__, rank );
+    pcdiAbort ( "PIOTYPE is no valid modus", __FILE__, __LINE__, rank );
 
 #ifdef _SX
   if ( ptype ==  PIO_POSIX_ASYNCH )
-    errorPIO ( "PIO_POSIX_ASYNCH does not work on SX", __FILE__, __LINE__, rank );
+    pcdiAbort ( "PIO_POSIX_ASYNCH does not work on SX", __FILE__, __LINE__, rank );
 #endif
   
   pioinfo = ( pioInfo * ) xmalloc ( sizeof ( pioInfo ));
@@ -378,7 +369,7 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
   setPioCommunicator ( & ( pioinfo->comm ), comm, color, nnodes );
   
   if (( pioinfo->type == PIO_NONE ) && ( *nnodes != size ))
-    errorPIO ( "PIOTYPE, NNODES: not a valid combination", __FILE__, __LINE__, rank );
+    pcdiAbort ( "PIOTYPE, NNODES: not a valid combination", __FILE__, __LINE__, rank );
   
   pioinfo->color = *color;
   MPI_Comm_rank ( pioinfo->comm, &( pioinfo->rank ));
