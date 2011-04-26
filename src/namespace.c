@@ -11,14 +11,14 @@ static int activeNamespace;
 enum {
   intbits = sizeof(int) * CHAR_BIT,
   nspbits = 4,
-  codebits = intbits - nspbits,
-  nspmask = ((1<<nspbits) - 1) << codebits,
-  codemask = (1<<codebits) - 1,
+  idxbits = intbits - nspbits,
+  nspmask = ((1<<nspbits) - 1) << idxbits,
+  idxmask = (1<<idxbits) - 1,
 };
 
 enum {
   NUM_NAMESPACES = 1 << nspbits,
-  NUM_CODES = 1 << codebits,
+  NUM_IDX = 1 << idxbits,
 };
 
 
@@ -41,8 +41,8 @@ void namespaceShowbits ( int n, char *name )
 
 int namespaceIdxEncode ( namespaceTuple_t tin )
 {
-  assert(tin.nsp < NUM_NAMESPACES && tin.idx < NUM_CODES);
-  return ( tin.nsp << codebits ) + tin.idx;
+  assert(tin.nsp < NUM_NAMESPACES && tin.idx < NUM_IDX);
+  return ( tin.nsp << idxbits ) + tin.idx;
 }
 
 
@@ -50,8 +50,8 @@ namespaceTuple_t namespaceIdxDecode ( int code )
 {
   namespaceTuple_t tin;
 
-  tin.idx = code & codemask;
-  tin.nsp = (int)(((unsigned)( code & nspmask )) >> codebits);
+  tin.idx = code & idxmask;
+  tin.nsp = (int)(((unsigned)( code & nspmask )) >> idxbits);
 
   return tin;
 }
