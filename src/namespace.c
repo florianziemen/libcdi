@@ -1,21 +1,33 @@
+#include <assert.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "cdi.h"
 #include "namespace.h"
 
-enum { MAX_NAMESPACES = 16 };
-
 static int nNamespaces = 1;
 static int activeNamespace;
 
+enum {
+  intbits = sizeof(int) * CHAR_BIT,
+  nspbits = 4,
+  codebits = intbits - nspbits,
+  nspmask = ((1<<nspbits) - 1) << codebits,
+  codemask = (1<<codebits) - 1,
+};
+
+enum {
+  NUM_NAMESPACES = 1 << nspbits,
+  NUM_CODES = 1 << codebits,
+};
 
 
 void namespaceShowbits ( int n, char *name )
 {
   int i, bit = 0, andmask;
 
-  fprintf (stdout, "%s: ", name );  
-  for ( i = 0; i < 32; i++ )
+  fprintf (stdout, "%s: ", name );
+  for ( i = 0; i < intbits; i++ )
     {
       andmask = 1 << i;
       bit = n & andmask;
@@ -27,17 +39,17 @@ void namespaceShowbits ( int n, char *name )
 
 int namespaceIdxEncode ( namespaceTuple_t tin )
 {
-  
-  return ( tin.nsp << 28 ) + tin.idx;
-} 
+  assert(tin.nsp < NUM_NAMESPACES && tin.idx < NUM_CODES);
+  return ( tin.nsp << codebits ) + tin.idx;
+}
 
 
 namespaceTuple_t namespaceIdxDecode ( int code )
 {
   namespaceTuple_t tin;
 
-  tin.idx = code & ~( 15 << 28 );
-  tin.nsp = ( code & ( 15 << 28 )) >> 28;
+  tin.idx = code & codemask;
+  tin.nsp = (int)(((unsigned)( code & nspmask )) >> codebits);
 
   return tin;
 }
@@ -45,9 +57,7 @@ namespaceTuple_t namespaceIdxDecode ( int code )
 
 void namespaceSetNumber ( int nspn )
 {
-  if ( nspn > MAX_NAMESPACES || nspn <= 1 )
-    abort ();
-
+  assert(nspn <= NUM_NAMESPACES && nspn >= 1 );
   nNamespaces = nspn;
 }
 
@@ -70,8 +80,3 @@ int namespaceGetActive ()
 {
   return activeNamespace;
 }
-
-
-
-  
-
