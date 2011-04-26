@@ -7,6 +7,7 @@
 #include "stream_int.h"
 #include "vlist.h"
 #include "varscan.h"
+#include "namespace.h"
 #include "pio_util.h"
 
 
@@ -43,7 +44,7 @@ static pthread_mutex_t _vlist_mutex;
 
 
 typedef struct _vlistPtrToIdx {
-  int      idx;
+  int      code;
   int      next;
   vlist_t *ptr;
 } vlistPtrToIdx;
@@ -99,7 +100,7 @@ void vlist_init_pointer(void)
   {
     for ( i = 0; i < vlist_list_size[j]; ++i )
     {
-      _vlistList[j][i].idx  = i;
+      _vlistList[j][i].code = namespaceIdxEncode2(i, j);
       _vlistList[j][i].next = i + 1;
       _vlistList[j][i].ptr  = NULL;
     }
@@ -128,7 +129,7 @@ void vlist_list_extend(void)
                                    new_list_size * sizeof(vlistPtrToIdx));
       for ( i = vlist_list_size[nsp]; i < new_list_size; ++i )
 	{
-	  _vlistList[nsp][i].idx  = i;
+	  _vlistList[nsp][i].code = namespaceIdxEncode2(i, nsp);
 	  _vlistList[nsp][i].next = i + 1;
 	  _vlistList[nsp][i].ptr  = NULL;
 	}
@@ -143,12 +144,17 @@ void vlist_list_extend(void)
 }
 
 
-vlist_t *vlist_to_pointer(int idx)
+vlist_t *vlist_to_pointer(int code)
 {
   vlist_t *vlistptr = NULL;
-  int i, nsp;
+  int i, nsp, idx;
+  namespaceTuple_t nspt;
 
-  nsp = namespaceGetActive ();
+  nsp = namespaceGetActive();
+
+  nspt = namespaceIdxDecode(code);
+  assert(nspt.nsp == nsp);
+  idx = nspt.idx;
 
   VLIST_INIT();
 
@@ -170,7 +176,7 @@ vlist_t *vlist_to_pointer(int idx)
 static
 int vlist_from_pointer(vlist_t *ptr)
 {
-  int idx = -1, nsp;
+  int code = -1, nsp;
 
   nsp = namespaceGetActive ();
 
@@ -187,11 +193,11 @@ int vlist_from_pointer(vlist_t *ptr)
 	  newptr       = &_vlistList[nsp][_vlistAvail[nsp]];
 	  _vlistAvail[nsp]  = newptr->next;
 	  newptr->next = -1;
-	  idx	       = newptr->idx;
+	  code	       = newptr->code;
 	  newptr->ptr  = ptr;
 
 	  if ( VLIST_Debug )
-	    Message("Pointer %p has idx %d from vlist list", ptr, idx);
+	    Message("Pointer %p has idx %d from vlist list", ptr, code);
 	}
 
       VLIST_UNLOCK();
@@ -199,7 +205,7 @@ int vlist_from_pointer(vlist_t *ptr)
   else
     Error("Internal problem (pointer %p undefined)", ptr);
 
-  return (idx);
+  return (code);
 }
 
 static
