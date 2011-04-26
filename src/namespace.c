@@ -24,16 +24,18 @@ enum {
 
 void namespaceShowbits ( int n, char *name )
 {
-  int i, bit = 0, andmask;
+  int i;
+  unsigned mask;
+  char bitvalues[intbits + 1];
 
-  fprintf (stdout, "%s: ", name );
+  mask = 1;
   for ( i = 0; i < intbits; i++ )
     {
-      andmask = 1 << i;
-      bit = n & andmask;
-      fprintf ( stdout, "%d", bit == 0 ? 0 : 1 );
+      bitvalues[i] = ((unsigned)n & mask) ? '1':'0';
+      mask <<= 1;
     }
-  fprintf (stdout, "\n" );
+  bitvalues[intbits] = '\0';
+  fprintf (stdout, "%s: %s\n", name, bitvalues );
 }
 
 
