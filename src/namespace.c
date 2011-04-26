@@ -45,6 +45,12 @@ int namespaceIdxEncode ( namespaceTuple_t tin )
   return ( tin.nsp << idxbits ) + tin.idx;
 }
 
+int namespaceIdxEncode2 ( int idx, int nsp )
+{
+  assert(nsp < NUM_NAMESPACES && idx < NUM_IDX);
+  return ( nsp << idxbits ) + idx;
+}
+
 
 namespaceTuple_t namespaceIdxDecode ( int code )
 {

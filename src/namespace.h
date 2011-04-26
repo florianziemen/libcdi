@@ -8,7 +8,8 @@ typedef struct {
 
 
 void             namespaceShowbits  ( int n, char *name );
-int              namespaceIdxEncode ( namespaceTuple_t tin ); 
+int              namespaceIdxEncode ( namespaceTuple_t tin );
+int              namespaceIdxEncode2 ( int idx, int nsp );
 namespaceTuple_t namespaceIdxDecode ( int code );
 
 #endif
