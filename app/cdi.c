@@ -612,7 +612,7 @@ void setDefaultFileType(char *filetypestr)
 	      fprintf(stderr, "Unexpected character >%c< in file type >%s<!\n", *ftstr, filetypestr);
 	      fprintf(stderr, "Use format[_nbits] with:\n");
 	      fprintf(stderr, "    format = grb, grb2, nc, nc2, nc4, nc4c, srv, ext or ieg\n");
-	      fprintf(stderr, "    nbits  = 32/64 for nc*, srv, ext, ieg; 1 - 24 for grb*\n");
+	      fprintf(stderr, "    nbits  = 32/64 for nc/nc2/nc4/nc4c/srv/ext/ieg; 1 - 24 for grb/grb2\n");
 	      exit(EXIT_FAILURE);
 	    }
 	}
@@ -811,7 +811,7 @@ int main(int argc, char *argv[])
       taxisID = vlistInqTaxis(vlistID1);
       ntsteps = vlistNtsteps(vlistID1);
 
-      if ( Debug ) fprintf(stderr, "nvars = %d\n", nvars);
+      if ( Debug ) fprintf(stderr, "nvars   = %d\n", nvars);
       if ( Debug ) fprintf(stderr, "ntsteps = %d\n", ntsteps);
 
       if ( fname2 ) vlistID2 = vlistDuplicate(vlistID1);

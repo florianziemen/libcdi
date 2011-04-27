@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   March 2011
+! Uwe Schulzweida, MPI-MET, Hamburg,   April 2011
 !
 
       INTEGER    CDI_UNDEFID           
@@ -56,12 +56,14 @@
       PARAMETER (FILETYPE_NC2           =  4)
       INTEGER    FILETYPE_NC4          
       PARAMETER (FILETYPE_NC4           =  5)
+      INTEGER    FILETYPE_NC4C         
+      PARAMETER (FILETYPE_NC4C          =  6)
       INTEGER    FILETYPE_SRV          
-      PARAMETER (FILETYPE_SRV           =  6)
+      PARAMETER (FILETYPE_SRV           =  7)
       INTEGER    FILETYPE_EXT          
-      PARAMETER (FILETYPE_EXT           =  7)
+      PARAMETER (FILETYPE_EXT           =  8)
       INTEGER    FILETYPE_IEG          
-      PARAMETER (FILETYPE_IEG           =  8)
+      PARAMETER (FILETYPE_IEG           =  9)
 !
 !  Compress types
 !
