@@ -9,209 +9,60 @@
 #include "varscan.h"
 #include "namespace.h"
 #include "pio_util.h"
+#include "resource_handle.h"
 
-
-static int  VLIST_Debug = 0;   /* If set to 1, debugging */
-
-static int *vlist_list_size;
-
-enum {
-  _vlist_max = MAX_VLISTS,
-};
+static int VLIST_Debug = 0;
 
 static void vlist_initialize(void);
 
-static int _vlist_init = FALSE;
 #if  defined  (HAVE_LIBPTHREAD)
 #  include <pthread.h>
 
 static pthread_once_t  _vlist_init_thread = PTHREAD_ONCE_INIT;
 static pthread_mutex_t _vlist_mutex;
 
-#  define VLIST_LOCK()         pthread_mutex_lock(&_vlist_mutex)
-#  define VLIST_UNLOCK()       pthread_mutex_unlock(&_vlist_mutex)
 #  define VLIST_INIT()        \
-   if ( _vlist_init == FALSE ) pthread_once(&_vlist_init_thread, vlist_initialize)
+  pthread_once(&_vlist_init_thread, vlist_initialize)
 
 #else
 
-#  define VLIST_LOCK()
-#  define VLIST_UNLOCK()
-#  define VLIST_INIT() 	      \
-   if ( _vlist_init == FALSE ) vlist_initialize()
+static int vlistIsInitialized = 0;
+
+#  define VLIST_INIT()               \
+  if ( _vlist_init == FALSE ) vlist_initialize()
 
 #endif
 
 
-typedef struct _vlistPtrToIdx {
-  int      code;
-  int      next;
-  vlist_t *ptr;
-} vlistPtrToIdx;
-
-
-static vlistPtrToIdx **_vlistList  = NULL;
-static int            *_vlistAvail;
-
-static
-void vlist_list_new(void)
+/* FIXME: implementation incomplete, fix once leaf nodes are complete */
+static int
+vlist_compare(vlist_t *a, vlist_t *b)
 {
-  int nnsp, i;
-
-  nnsp = namespaceGetNumber();
-
-  _vlistList = xcalloc(nnsp, sizeof(_vlistList[0]));
-  _vlistAvail = xcalloc(nnsp, sizeof(_vlistAvail[0]));
-  vlist_list_size = xcalloc(nnsp, sizeof(vlist_list_size[0]));
-  for (i = 0; i < nnsp; ++i)
-  {
-    assert(_vlistList[i] == NULL);
-    vlist_list_size[i] = MIN_VLISTS;
-    _vlistList[i]
-      = (vlistPtrToIdx *) xmalloc(vlist_list_size[i] * sizeof(vlistPtrToIdx));
-  }
+  int diff;
+  diff = (a->nvars != b->nvars) || (a->ngrids != b->ngrids)
+    || (a->nzaxis != b->nzaxis) || (a->instID != b->instID)
+    || (a->modelID != b->modelID) || (a->tableID != b->tableID)
+    || (a->varsAllocated != b->varsAllocated)
+    || (a->ntsteps != b->ntsteps);
+  return diff;
 }
 
-static
-void vlist_list_delete(void)
-{
-  int nnsp;
-
-  nnsp = namespaceGetNumber();
-  if ( _vlistList )
-  {
-    int i;
-    for (i = 0; i < nnsp; ++i)
-      if (_vlistList[i])
-        free(_vlistList[i]);
-    free(_vlistList);
-    free(_vlistAvail);
-  }
-}
-
-static
-void vlist_init_pointer(void)
-{
-  int nnsp, i, j;
-
-  nnsp = namespaceGetNumber();
-
-  for ( j = 0; j < nnsp; ++j )
-  {
-    for ( i = 0; i < vlist_list_size[j]; ++i )
-    {
-      _vlistList[j][i].code = namespaceIdxEncode2(i, j);
-      _vlistList[j][i].next = i + 1;
-      _vlistList[j][i].ptr  = NULL;
-    }
-
-    _vlistList[j][vlist_list_size[j]-1].next = -1;
-    _vlistAvail[j] = 0;
-  }
-}
-
-static
-void vlist_list_extend(void)
-{
-  int new_list_size;
-  int i, nsp;
-
-  nsp = namespaceGetActive ();
-
-  assert(_vlistList[nsp]);
-
-  new_list_size = vlist_list_size[nsp] + MIN_VLISTS;
-
-  if ( new_list_size <= _vlist_max)
-    {
-      _vlistList[nsp] =
-        (vlistPtrToIdx *) xrealloc(_vlistList[nsp],
-                                   new_list_size * sizeof(vlistPtrToIdx));
-      for ( i = vlist_list_size[nsp]; i < new_list_size; ++i )
-	{
-	  _vlistList[nsp][i].code = namespaceIdxEncode2(i, nsp);
-	  _vlistList[nsp][i].next = i + 1;
-	  _vlistList[nsp][i].ptr  = NULL;
-	}
-
-      _vlistAvail[nsp] = vlist_list_size[nsp];
-      _vlistList[nsp][vlist_list_size[nsp]-1].next = vlist_list_size[nsp];
-      vlist_list_size[nsp] = new_list_size;
-      _vlistList[nsp][vlist_list_size[nsp]-1].next = -1;
-    }
-  else
-    Warning("Too many open vlists (limit is %d)!", _vlist_max);
-}
+resOps vlist_ops = {
+  (valCompareFunc)vlist_compare,
+  free
+};
 
 
 vlist_t *vlist_to_pointer(int code)
 {
-  vlist_t *vlistptr = NULL;
-  int i, nsp, idx;
-  namespaceTuple_t nspt;
-
-  nsp = namespaceGetActive();
-
-  nspt = namespaceIdxDecode(code);
-  assert(nspt.nsp == nsp);
-  idx = nspt.idx;
-
   VLIST_INIT();
-
-  if ( idx >= 0 && idx < vlist_list_size[nsp] )
-    {
-      VLIST_LOCK();
-
-      vlistptr = _vlistList[nsp][idx].ptr;
-
-      VLIST_UNLOCK();
-    }
-  else
-    Error("vlist index %d undefined!", idx);
-
-  return (vlistptr);
-}
-
-/* Create an index from a pointer */
-static
-int vlist_from_pointer(vlist_t *ptr)
-{
-  int code = -1, nsp;
-
-  nsp = namespaceGetActive ();
-
-  if ( ptr )
-    {
-      VLIST_LOCK();
-
-      if ( _vlistAvail[nsp] < 0 ) vlist_list_extend();
-
-      if ( _vlistAvail[nsp] >= 0 )
-	{
-	  vlistPtrToIdx *newptr;
-
-	  newptr       = &_vlistList[nsp][_vlistAvail[nsp]];
-	  _vlistAvail[nsp]  = newptr->next;
-	  newptr->next = -1;
-	  code	       = newptr->code;
-	  newptr->ptr  = ptr;
-
-	  if ( VLIST_Debug )
-	    Message("Pointer %p has idx %d from vlist list", ptr, code);
-	}
-
-      VLIST_UNLOCK();
-    }
-  else
-    Error("Internal problem (pointer %p undefined)", ptr);
-
-  return (code);
+  return reshGetVal(code);
 }
 
 static
 void vlist_init_entry(vlist_t *vlistptr)
 {
-  vlistptr->self           = vlist_from_pointer(vlistptr);
+  vlistptr->self           = reshPut(vlistptr, &vlist_ops);
 
   vlistptr->nlock          = 0;
   vlistptr->nvars          = 0;
@@ -235,7 +86,7 @@ vlist_t *vlist_new_entry(void)
 
   vlistptr = (vlist_t *)xmalloc(sizeof(vlist_t));
 
-  if ( vlistptr ) vlist_init_entry(vlistptr);
+  vlist_init_entry(vlistptr);
 
   return (vlistptr);
 }
@@ -249,15 +100,9 @@ void vlist_delete_entry(vlist_t *vlistptr)
 
   idx = vlistptr->self;
 
-  VLIST_LOCK();
+  reshRemove(idx);
 
   free(vlistptr);
-
-  _vlistList[nsp][idx].next = _vlistAvail[nsp];
-  _vlistList[nsp][idx].ptr  = 0;
-  _vlistAvail[nsp]          = idx;
-
-  VLIST_UNLOCK();
 
   if ( VLIST_Debug )
     Message("Removed idx %d from vlist list", idx);
@@ -268,24 +113,9 @@ void vlist_initialize(void)
 {
   char *env;
 
-#if  defined  (HAVE_LIBPTHREAD)
-  /* initialize global API mutex lock */
-  pthread_mutex_init(&_vlist_mutex, NULL);
-#endif
-
   env = getenv("VLIST_DEBUG");
   if ( env ) VLIST_Debug = atoi(env);
 
-  vlist_list_new();
-  atexit(vlist_list_delete);
-
-  VLIST_LOCK();
-
-  vlist_init_pointer();
-
-  VLIST_UNLOCK();
-
-  _vlist_init = TRUE;
 }
 
 static
@@ -339,7 +169,6 @@ int vlistCreate(void)
   VLIST_INIT();
 
   vlistptr = vlist_new_entry();
-  if ( ! vlistptr ) Error("No memory");
 
   vlistID = vlistptr->self;
 
