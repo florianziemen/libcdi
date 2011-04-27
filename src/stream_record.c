@@ -182,6 +182,7 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
 	rec = cdfInqRecord(streamID, varID, levelID);
 	break;
@@ -273,6 +274,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
 	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
 	status = cdfDefRecord(streamID);
@@ -337,6 +339,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
 	status = cdfReadRecord(streamID, data, nmiss);
 	break;
@@ -398,6 +401,7 @@ void streamWriteRecord(int streamID, const double *data, int nmiss)
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
 	cdfWriteRecord(streamID, data, nmiss);
 	break;

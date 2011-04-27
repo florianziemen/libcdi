@@ -1,5 +1,6 @@
 2011-04-27  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* Added support for FILETYPE_NC4C (netcdf4 classic)
 	* netcdf: Skiped time dependent variables if number of time steps is zero
 
 2011-03-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

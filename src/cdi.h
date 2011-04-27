@@ -42,10 +42,11 @@ extern "C" {
 #define  FILETYPE_GRB2            2   /* File type GRIB version 2             */
 #define  FILETYPE_NC              3   /* File type netCDF                     */
 #define  FILETYPE_NC2             4   /* File type netCDF version 2 (64-bit)  */
-#define  FILETYPE_NC4             5   /* File type netCDF version 4 (classic) */
-#define  FILETYPE_SRV             6   /* File type SERVICE                    */
-#define  FILETYPE_EXT             7   /* File type EXTRA                      */
-#define  FILETYPE_IEG             8   /* File type IEG                        */
+#define  FILETYPE_NC4             5   /* File type netCDF version 4           */
+#define  FILETYPE_NC4C            6   /* File type netCDF version 4 (classic) */
+#define  FILETYPE_SRV             7   /* File type SERVICE                    */
+#define  FILETYPE_EXT             8   /* File type EXTRA                      */
+#define  FILETYPE_IEG             9   /* File type IEG                        */
 
 /* Compress types */
 

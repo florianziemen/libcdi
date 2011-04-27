@@ -2724,7 +2724,7 @@ int cdfDefVar(int streamID, int varID)
   cdf_def_var(fileID, name, (nc_type) xtype, ndims, dims, &ncvarid);
 
 #if  defined  (NC_NETCDF4)
-  if ( lchunk && streamptr->filetype == FILETYPE_NC4 )
+  if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
     {
       if ( (retval = nc_def_var_chunking(fileID, ncvarid, 0, chunks)) )
         Error("nc_def_var_chunking failed, status = %d", retval);
@@ -2733,7 +2733,7 @@ int cdfDefVar(int streamID, int varID)
 
   if ( streamptr->ztype == COMPRESS_ZIP )
     {
-      if ( lchunk && streamptr->filetype == FILETYPE_NC4 )
+      if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
         {
           cdfDefVarDeflate(fileID, ncvarid, streamptr->zlevel);
         }
@@ -2751,7 +2751,7 @@ int cdfDefVar(int streamID, int varID)
 
   if ( streamptr->ztype == COMPRESS_SZIP )
     {
-      if ( lchunk && streamptr->filetype == FILETYPE_NC4 )
+      if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
         {
 #if defined (NC_SZIP_NN_OPTION_MASK)
           cdfDefVarSzip(fileID, ncvarid);

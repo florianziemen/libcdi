@@ -8,7 +8,7 @@ const char *hdfLibraryVersion(void);
 
 int  cdfOpen(const char *filename, const char *mode);
 int  cdfOpen64(const char *filename, const char *mode);
-int  cdf4Open(const char *filename, const char *mode);
+int  cdf4Open(const char *filename, const char *mode, int *filetype);
 void cdfClose(int fileID);
 
 #endif  /* _CDF_H */

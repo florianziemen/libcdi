@@ -340,7 +340,7 @@ The function @func{streamInqFiletype} returns the filetype of a stream.
 @func{streamInqFiletype} returns the type of the file format,
 one of the set of predefined CDI file format types.
 The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_GRB2}, @func{FILETYPE_NC}, @func{FILETYPE_NC2},
-@func{FILETYPE_NC4}, @func{FILETYPE_SRV}, @func{FILETYPE_EXT} and @func{FILETYPE_IEG}.
+@func{FILETYPE_NC4}, @func{FILETYPE_NC4C}, @func{FILETYPE_SRV}, @func{FILETYPE_EXT} and @func{FILETYPE_IEG}.
 
 @EndFunction
 */
@@ -558,6 +558,7 @@ int cdiInqContents(int streamID)
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
         status = cdfInqContents(streamID);
 	break;
@@ -651,8 +652,9 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	break;
       }
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
-	fileID = cdf4Open(filename, filemode);
+	fileID = cdf4Open(filename, filemode, &filetype);
 	break;
       }
  #endif
@@ -767,8 +769,9 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 	break;
       }
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
-	fileID = cdf4Open(filename, "r");
+	fileID = cdf4Open(filename, "r", &filetype);
 	break;
       }
 #endif
@@ -839,6 +842,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
 	cdfClose(fileID);
 	break;
@@ -896,8 +900,9 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 	break;
       }
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
-	fileID = cdf4Open(filename, filemode);
+	fileID = cdf4Open(filename, filemode, &filetype);
 	streamptr->ncmode = 2;
 	break;
       }
@@ -1028,7 +1033,7 @@ int streamOpenAppend(const char *filename)
     @Item  path      The name of the new dataset
     @Item  filetype  The type of the file format, one of the set of predefined CDI file format types.
                      The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_GRB2}, @func{FILETYPE_NC},
-                     @func{FILETYPE_NC2}, @func{FILETYPE_NC4}, @func{FILETYPE_SRV},
+                     @func{FILETYPE_NC2}, @func{FILETYPE_NC4}, @func{FILETYPE_NC4C}, @func{FILETYPE_SRV},
                      @func{FILETYPE_EXT} and @func{FILETYPE_IEG}.
 
 @Description
@@ -1139,6 +1144,7 @@ void streamClose(int streamID)
       case FILETYPE_NC:
       case FILETYPE_NC2:
       case FILETYPE_NC4:
+      case FILETYPE_NC4C:
 	{
 	  cdfClose(fileID);
 	  break;
@@ -1249,6 +1255,7 @@ void streamSync(int streamID)
 	    case FILETYPE_NC:
 	    case FILETYPE_NC2:
 	    case FILETYPE_NC4:
+	    case FILETYPE_NC4C:
 	      {
 		void cdf_sync(int ncid);
 		if ( streamptr->ncmode == 2 ) cdf_sync(fileID);
@@ -1318,7 +1325,8 @@ int streamDefTimestep(int streamID, int tsID)
 
   if ( (streamptr->filetype == FILETYPE_NC  ||
 	streamptr->filetype == FILETYPE_NC2 ||
-	streamptr->filetype == FILETYPE_NC4)
+	streamptr->filetype == FILETYPE_NC4 ||
+	streamptr->filetype == FILETYPE_NC4C)
        && vlistHasTime(vlistID) )
     cdfDefTimestep(streamID, tsID);
 
@@ -1416,6 +1424,7 @@ int streamInqTimestep(int streamID, int tsID)
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
         nrecs = cdfInqTimestep(streamID, tsID);
 	break;
@@ -1504,6 +1513,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
         cdfReadVarDP(streamID, varID, data, nmiss);
 	break;
@@ -1584,6 +1594,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
 	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
         cdfWriteVarDP(streamID, varID, data, nmiss);
@@ -1664,6 +1675,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
         ierr = cdfReadVarSliceDP(streamID, varID, levelID, data, nmiss);
 	break;
@@ -1744,6 +1756,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
 	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
         ierr = cdfWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
@@ -1982,7 +1995,8 @@ void streamDefVlist(int streamID, int vlistID)
 	{
 	  if ( streamptr->filetype == FILETYPE_NC  ||
 	       streamptr->filetype == FILETYPE_NC2 ||
-	       streamptr->filetype == FILETYPE_NC4 )
+	       streamptr->filetype == FILETYPE_NC4 ||
+	       streamptr->filetype == FILETYPE_NC4C )
 	    {
 	      cdfDefVars(streamID);
 	    }
