@@ -14,7 +14,7 @@ typedef int cdiResH;
 
 /* return 0 on equality, not 0 otherwise */
 typedef int ( * valCompareFunc )( void *, void * );
-typedef int ( * valDestroyFunc ) ( void * );
+typedef void ( * valDestroyFunc ) ( void * );
 
 typedef struct {
   valCompareFunc valCompare;
