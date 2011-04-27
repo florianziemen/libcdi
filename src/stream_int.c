@@ -13,6 +13,8 @@
 
 #include "cdi.h"
 #include "stream_int.h"
+#include "pio_util.h"
+#include "namespace.h"
 
 #if  defined  (HAVE_LIBCGRIBEX)
 #include "cgribex.h"
@@ -35,7 +37,6 @@ int   cdiPartabIntern = 1;
 
 double cdiDefaultMissval = -9.E33;
 
-
 char *Filetypes[] = {
   "UNKNOWN",
   "GRIB",
@@ -53,7 +54,7 @@ char *Filetypes[] = {
 #define UNDEFID  CDI_UNDEFID
 
 
-int CDI_Debug   = 0;    /* If set to 1, debugging           */
+int CDI_Debug   = 1;    /* If set to 1, debugging           */
 
 
 int cdiDefaultLeveltype = -1;
@@ -214,7 +215,7 @@ char *strfiletype(int filetype)
 
 static int  STREAM_Debug = 0;   /* If set to 1, debugging */
 
-static int _stream_min = MIN_STREAMS;
+static int *_streamListSize_allocated;
 static int _stream_max = MAX_STREAMS;
 
 static void stream_initialize(void);
@@ -230,14 +231,14 @@ static pthread_mutex_t _stream_mutex;
 #  define STREAM_LOCK()         pthread_mutex_lock(&_stream_mutex)
 #  define STREAM_UNLOCK()       pthread_mutex_unlock(&_stream_mutex)
 #  define STREAM_INIT()        \
-   if ( _stream_init == FALSE ) pthread_once(&_stream_init_thread, stream_initialize)
+  if ( _stream_init == FALSE ) pthread_once(&_stream_init_thread, stream_initialize)
 
 #else
 
 #  define STREAM_LOCK()
 #  define STREAM_UNLOCK()
 #  define STREAM_INIT()        \
-   if ( _stream_init == FALSE ) stream_initialize()
+  if ( _stream_init == FALSE ) stream_initialize()
 
 #endif
 
@@ -249,65 +250,108 @@ typedef struct _streamPtrToIdx {
 } streamPtrToIdx;
 
 
-static streamPtrToIdx *_streamList  = NULL;
-static int             _streamAvail = -1;
+static streamPtrToIdx **_streamList  = NULL;
+static int             *_streamAvail;
 
 static
 void stream_list_new(void)
 {
-  assert(_streamList == NULL);
+  int nnsp, i;
 
-  _streamList = (streamPtrToIdx *) malloc(_stream_min*sizeof(streamPtrToIdx));
+  nnsp = namespaceGetNumber ();
+
+  _streamListSize_allocated  = xcalloc(nnsp, sizeof(_streamListSize_allocated[0]));
+  _streamList  = xcalloc(nnsp, sizeof(_streamList[0]));
+  _streamAvail = xcalloc(nnsp, sizeof(_streamAvail[0]));
+
+  for ( i = 0; i < nnsp; i++ )
+    {
+      _streamListSize_allocated[i] = MIN_STREAMS;
+      assert(_streamList[i] == NULL);
+      _streamList[i] = 
+	(streamPtrToIdx *) xcalloc(_streamListSize_allocated[i], sizeof(streamPtrToIdx));
+      _streamAvail[i] = -1;
+    }
 }
 
 static
 void stream_list_delete(void)
 {
-  if ( _streamList ) free(_streamList);
+  int nnsp, i;
+
+  nnsp = namespaceGetNumber ();
+
+  if ( _streamAvail ) free ( _streamAvail );
+
+  if ( _streamList ) 
+    {
+      for ( i = 0; i < nnsp; i++ )
+	if ( _streamList[i] ) free (_streamList[i] );
+      free ( _streamList );
+    }
+
+  if ( _streamListSize_allocated ) free ( _streamListSize_allocated );
 }
 
 static
 void stream_init_pointer(void)
 {
-  int i;
-  
-  for ( i = 0; i < _stream_min; ++i )
+  int nnsp, i, j, code;
+  namespaceTuple_t nspt;
+
+  nnsp = namespaceGetNumber ();
+
+  for ( i = 0; i < nnsp; i++ )
     {
-      _streamList[i].idx  = i;
-      _streamList[i].next = i + 1;
-      _streamList[i].ptr  = NULL;
+      for ( j = 0; j < _streamListSize_allocated[i]; ++j )
+	{
+	  nspt.nsp = i;
+	  nspt.idx = j;
+	  code = namespaceIdxEncode ( nspt );
+	  _streamList[i][j].idx  = code;
+	  _streamList[i][j].next = j + 1;
+	  _streamList[i][j].ptr  = NULL;
+	}
+      
+      _streamList[i][_streamListSize_allocated[i]-1].next = -1;
+      
+      _streamAvail[i] = 0;
     }
-
-  _streamList[_stream_min-1].next = -1;
-
-  _streamAvail = 0;
 }
 
 static
 void stream_list_extend(void)
 {
-  int nstreams;
-  int i;
+  int newListSize;
+  int i, nsp, code;
+  namespaceTuple_t nspt;
 
-  assert(_streamList != NULL);
+  nsp = namespaceGetActive ();
+  nspt.nsp = nsp;
 
-  nstreams = _stream_min + MIN_STREAMS;
+  assert(_streamList[nsp] != NULL);
 
-  if ( nstreams <= _stream_max)
+  newListSize = _streamListSize_allocated[nsp] + MIN_STREAMS;
+
+  if ( newListSize <= _stream_max)
     {
-      _streamList = (streamPtrToIdx *) realloc(_streamList, nstreams*sizeof(streamPtrToIdx));
+      _streamList[nsp] = 
+	(streamPtrToIdx *) xrealloc(_streamList[nsp], 
+				    newListSize*sizeof(streamPtrToIdx));
   
-      for ( i = _stream_min; i < nstreams; ++i )
+      for ( i = _streamListSize_allocated[nsp]; i < newListSize; ++i )
 	{
-	  _streamList[i].idx  = i;
-	  _streamList[i].next = i + 1;
-	  _streamList[i].ptr  = NULL;
+	  nspt.idx = i;
+	  code = namespaceIdxEncode ( nspt );
+	  _streamList[nsp][i].idx  = code;
+	  _streamList[nsp][i].next = i + 1;
+	  _streamList[nsp][i].ptr  = NULL;
 	}
 
-      _streamAvail = _stream_min;
-      _streamList[_stream_min-1].next = _stream_min;
-      _stream_min = nstreams;
-      _streamList[_stream_min-1].next = -1;
+      _streamAvail[nsp] = _streamListSize_allocated[nsp];
+      _streamList[nsp][_streamListSize_allocated[nsp]-1].next = _streamListSize_allocated[nsp];
+      _streamListSize_allocated[nsp] = newListSize;
+      _streamList[nsp][_streamListSize_allocated[nsp]-1].next = -1;
     }
   else
     Warning("Too many open streams (limit is %d)!", _stream_max);
@@ -317,14 +361,24 @@ void stream_list_extend(void)
 stream_t *stream_to_pointer(int idx)
 {
   stream_t *streamptr = NULL;
+  int nsp;
+  namespaceTuple_t nspT;
+
+  nsp = namespaceGetActive ();
+  
+  nspT = namespaceIdxDecode ( idx );
+
+  if ( nspT.nsp != nsp )
+    Error ( "idx %d from namespace %d not available in active namespace %d !\n",
+         idx, nspT.nsp, nsp );
 
   STREAM_INIT();
 
-  if ( idx >= 0 && idx < _stream_min )
+  if ( idx >= 0 && nspT.idx < _streamListSize_allocated[nsp] )
     {
       STREAM_LOCK();
 
-      streamptr = _streamList[idx].ptr;
+      streamptr = _streamList[nsp][nspT.idx].ptr;
 
       STREAM_UNLOCK();
     }
@@ -339,22 +393,25 @@ static
 int stream_from_pointer(stream_t *ptr)
 {
   int idx = -1;
+  int nsp;
+
+  nsp = namespaceGetActive ();
 
   if ( ptr )
     {
       STREAM_LOCK();
 
-      if ( _streamAvail < 0 ) stream_list_extend();
+      if ( _streamAvail[nsp] < 0 ) stream_list_extend();
 
-      if ( _streamAvail >= 0 )
+      if ( _streamAvail[nsp] >= 0 )
 	{
 	  streamPtrToIdx *newptr;
 
-	  newptr       = &_streamList[_streamAvail];
-	  _streamAvail = newptr->next;
-	  newptr->next = -1;
-	  idx	       = newptr->idx;
-	  newptr->ptr  = ptr;
+	  newptr            = &_streamList[nsp][_streamAvail[nsp]];
+	  _streamAvail[nsp] = newptr->next;
+	  newptr->next      = -1;
+	  idx	            = newptr->idx;
+	  newptr->ptr       = ptr;
       
 	  if ( STREAM_Debug )
 	    Message("Pointer %p has idx %d from stream list", ptr, idx);
@@ -448,6 +505,9 @@ stream_t *stream_new_entry(void)
 void stream_delete_entry(stream_t *streamptr)
 {
   int idx;
+  int nsp;
+
+  nsp = namespaceGetActive ();
 
   idx = streamptr->self;
 
@@ -455,9 +515,9 @@ void stream_delete_entry(stream_t *streamptr)
 
   free(streamptr);
 
-  _streamList[idx].next = _streamAvail;
-  _streamList[idx].ptr  = 0;
-  _streamAvail          = idx;
+  _streamList[nsp][idx].next = _streamAvail[nsp];
+  _streamList[nsp][idx].ptr  = 0;
+  _streamAvail[nsp]          = idx;
 
   STREAM_UNLOCK();
 
@@ -501,19 +561,22 @@ void stream_check_ptr(const char *caller, stream_t *streamptr)
 
 int streamSize(void)
 {
-  int streamsize = 0;
+  int streamListSize = 0;
   int i;
+  int nsp;
+
+  nsp = namespaceGetActive ();
   
   STREAM_INIT();
 
   STREAM_LOCK();
 
-  for ( i = 0; i < _stream_min; i++ )
-    if ( _streamList[i].ptr ) streamsize++;
+  for ( i = 0; i < _streamListSize_allocated[nsp]; i++ )
+    if ( _streamList[nsp][i].ptr ) streamListSize++;
 
   STREAM_UNLOCK();
 
-  return (streamsize);
+  return streamListSize;
 }
 
 
