@@ -217,6 +217,8 @@ src/pio_server.c -text
 src/pio_server.h -text
 src/pio_util.c -text
 src/pio_util.h -text
+src/resource_handle.c -text
+src/resource_handle.h -text
 src/service.h -text
 src/servicelib.c -text
 src/stream.c -text

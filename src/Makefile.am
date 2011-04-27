@@ -71,6 +71,8 @@ libcdi_la_SOURCES = 	 \
 	pio_server.h     \
 	pio_util.c       \
 	pio_util.h       \
+	resource_handle.c\
+	resource_handle.h\
 	service.h	 \
 	servicelib.c     \
 	stream_cdf.c     \
