@@ -39,7 +39,7 @@ static pthread_mutex_t arrayMutex;
 
 typedef struct node {
   int          idx;
-  struct node *next; 
+  struct node *next;
   resOps      *ops;
   void        *ptr;
 } node;
@@ -59,8 +59,8 @@ void arrayNew ( void )
 
   nnsp = namespaceGetNumber ();
 
-  arraySizeAllocated  = xcalloc ( nnsp, 
-				 sizeof ( arraySizeAllocated[0]));
+  arraySizeAllocated  = xcalloc ( nnsp,
+                                 sizeof ( arraySizeAllocated[0]));
   arrayResources  = xcalloc ( nnsp, sizeof ( arrayResources[0] ));
   freeListHead = xcalloc ( nnsp, sizeof( freeListHead[0] ));
 
@@ -68,8 +68,8 @@ void arrayNew ( void )
     {
       arraySizeAllocated[i] = MIN_ARRAY_SIZE;
       assert ( arrayResources[i] == NULL);
-      arrayResources[i] = 
-	xcalloc ( arraySizeAllocated[i], sizeof ( node ));
+      arrayResources[i] =
+        xcalloc ( arraySizeAllocated[i], sizeof ( node ));
     }
 }
 
@@ -85,17 +85,17 @@ void arrayInitPointer ( void )
   for ( i = 0; i < nnsp; i++ )
     {
       for ( j = 0; j < arraySizeAllocated[i]; j++ )
-	{
-	  nspt.nsp = i;
-	  nspt.idx = j;
-	  code = namespaceIdxEncode ( nspt );
-	  arrayResources[i][j].next = arrayResources[i] + j + 1;
-	  arrayResources[i][j].idx  = code;
-	  arrayResources[i][j].ptr  = NULL;
-	}
-      
+        {
+          nspt.nsp = i;
+          nspt.idx = j;
+          code = namespaceIdxEncode ( nspt );
+          arrayResources[i][j].next = arrayResources[i] + j + 1;
+          arrayResources[i][j].idx  = code;
+          arrayResources[i][j].ptr  = NULL;
+        }
+
       arrayResources[i][arraySizeAllocated[i]-1].next = NULL;
-      
+
       freeListHead[i] = arrayResources[i];
     }
 }
@@ -110,7 +110,7 @@ void arrayDelete ( void )
   if ( arrayResources )
     {
       for ( i = 0; i < nnsp; i++ )
-	if (  arrayResources[i] ) free ( arrayResources[i] );
+        if (  arrayResources[i] ) free ( arrayResources[i] );
       free ( arrayResources );
     }
 
@@ -145,13 +145,13 @@ void *reshGetVal ( cdiResH idx )
   namespaceTuple_t nspT;
 
   nsp = namespaceGetActive ();
-  
+
   nspT = namespaceIdxDecode ( idx );
 
   if ( nspT.nsp != nsp )
     Error ( "idx %d from namespace %d not available in active namespace %d !\n",
-	  idx, nspT.nsp, nsp );
-    
+          idx, nspT.nsp, nsp );
+
 
   ARRAY_INIT();
 
@@ -177,13 +177,13 @@ resOps * reshGetOps ( cdiResH idx )
   namespaceTuple_t nspT;
 
   nsp = namespaceGetActive ();
-  
+
   nspT = namespaceIdxDecode ( idx );
 
   if ( nspT.nsp != nsp )
     Error ( "idx %d from namespace %d not available in active namespace %d !\n",
-	  idx, nspT.nsp, nsp );
-    
+          idx, nspT.nsp, nsp );
+
 
   ARRAY_INIT();
 
@@ -217,7 +217,7 @@ arraySizeExtend()
 
   arrayResources[nsp] =
     xrealloc(arrayResources[nsp], newArraySize * sizeof (arrayResources[0][0]));
-  
+
   for ( i = arraySizeAllocated[nsp]; i < newArraySize; ++i )
     {
       nspt.idx = i;
@@ -240,6 +240,8 @@ int reshPut ( void *p, resOps *ops )
   node *newNode;
   int nsp;
 
+  ARRAY_INIT();
+
   nsp = namespaceGetActive ();
 
   assert ( p );
@@ -251,10 +253,10 @@ int reshPut ( void *p, resOps *ops )
   newNode             = freeListHead[nsp];
   freeListHead[nsp]   = freeListHead[nsp]->next;
   newNode->next       = NULL;
-  idx	              = newNode->idx;
+  idx                 = newNode->idx;
   newNode->ptr        = p;
   newNode->ops        = ops;
-      
+
   ARRAY_UNLOCK();
 
   return idx;
