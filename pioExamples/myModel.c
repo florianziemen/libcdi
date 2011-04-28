@@ -1,8 +1,14 @@
+#if defined (HAVE_CONFIG_H)
+#  include "config.h"
+#endif
 
 #define nProcsIO 1
 #define nNodes 1
 
+#ifdef USE_MPI
 #include <mpi.h>
+#endif 
+
 #include "cdi.h"
 #include "pio_c_temp.h"
 #include "pio_util.h"
@@ -185,6 +191,8 @@ int main (int argc, char *argv[])
 {
   char fnName[] = "main()";
   int sizeGlob, rankGlob;
+
+#ifdef USE_MPI
   MPI_Comm commGlob, commModel; 
 
 
@@ -195,7 +203,8 @@ int main (int argc, char *argv[])
   MPI_Comm_rank ( commGlob, &rankGlob ); 
                                           
   if ( nProcsIO <=0 || nProcsIO >= ( float ) sizeGlob / 2.0 && ! TEST_LOCAL )
-    pcdiAbort ( "bad distribution of tasks on PEs", __FILE__, __LINE__, rankGlob );  
+    pcdiAbort ( "bad distribution of tasks on PEs", __FILE__, __LINE__, rankGlob );
+#endif  
 
   if  ( ddebug >= 3 ) xdebug (  fnName );
 
@@ -204,7 +213,9 @@ int main (int argc, char *argv[])
   modelRun ();
 
   //pioFinalize ();
+#ifdef USE_MPI
   MPI_Finalize ();                         
+#endif
 
   return 0;
 }
