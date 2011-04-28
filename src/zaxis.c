@@ -12,8 +12,8 @@
 #include "stream_int.h"
 
 
-#define  LevelDown  0
 #define  LevelUp    1
+#define  LevelDown  2
 
 
 static struct {
@@ -195,6 +195,7 @@ void zaxis_init_entry(zaxis_t *zaxisptr)
 
   zaxisptr->name[0]     = 0;
   zaxisptr->longname[0] = 0;
+  zaxisptr->stdname[0]  = 0;
   zaxisptr->units[0]    = 0;
   zaxisptr->vals        = NULL;
   zaxisptr->ubounds     = NULL;
@@ -202,7 +203,8 @@ void zaxis_init_entry(zaxis_t *zaxisptr)
   zaxisptr->weights     = NULL;
   zaxisptr->type        = CDI_UNDEFID;
   zaxisptr->ltype       = 0;
-  zaxisptr->direction   = CDI_UNDEFID;
+  zaxisptr->positive    = 0;
+  zaxisptr->direction   = 0;
   zaxisptr->prec        = 0;
   zaxisptr->size        = 0;
   zaxisptr->vctsize     = 0;
@@ -368,6 +370,8 @@ int zaxisCreate(int zaxistype, int size)
 
   if ( *ZaxistypeEntry[zaxistype].stdname )
     strcpy(zaxisptr->stdname, ZaxistypeEntry[zaxistype].stdname);
+
+  zaxisptr->positive = ZaxistypeEntry[zaxistype].positive;
 
   vals = (double *) malloc(size*sizeof(double));
 
@@ -617,6 +621,18 @@ int zaxisInqPrec(int zaxisID)
   zaxis_check_ptr(zaxisID, zaxisptr);
 
   return (zaxisptr->prec);
+}
+
+
+int zaxisInqPositive(int zaxisID)
+{
+  zaxis_t *zaxisptr;
+
+  zaxisptr = zaxis_to_pointer(zaxisID);
+
+  zaxis_check_ptr(zaxisID, zaxisptr);
+
+  return (zaxisptr->positive);
 }
 
 
@@ -978,7 +994,7 @@ void cdiCheckZaxis(int zaxisID)
       if ( size > 1 )
 	{
 	  /* check direction */
-	  if ( zaxisptr->direction == CDI_UNDEFID )
+	  if ( ! zaxisptr->direction )
 	    {
 	      found = 0;
 	      for ( i = 1; i < size; i++ )
@@ -1001,9 +1017,9 @@ void cdiCheckZaxis(int zaxisID)
 		}
 	    }
 	  /* check consistent */
-	  if ( zaxisptr->direction == CDI_UNDEFID )
+	  if ( !zaxisptr->direction )
 	    {
-	      Warning("direction undefined for zaxisID %d", zaxisID);
+	      Warning("Direction undefined for zaxisID %d", zaxisID);
 	    }
 	}
     }

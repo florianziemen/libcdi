@@ -2125,6 +2125,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
   int vlistID;
   int zaxisindex;
   int xtype = NC_DOUBLE;
+  int positive;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -2286,6 +2287,18 @@ void cdfDefZaxis(int streamID, int zaxisID)
             cdf_put_att_text(fileID, ncvarid, "units", len, units);
           if ( (len = strlen(stdname)) )
             cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
+
+	  positive = zaxisInqPositive(zaxisID);
+	  if ( positive == 1 )
+	    {
+	      strcpy(tmpname, "up");
+	      cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
+	    }
+	  else if ( positive == 2 )
+	    {
+	      strcpy(tmpname, "down");
+	      cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
+	    }
 
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "Z");
               
