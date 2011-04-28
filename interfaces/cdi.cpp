@@ -93,7 +93,7 @@ void CdiGrid::getBounds()
   hasBounds = (gridInqXbounds(gridID,NULL) && gridInqYbounds(gridID,NULL));
   if (hasBounds)
   {
-    ncorner  = ( gridInqType(gridID) == GRID_CELL ) ? gridInqNvertex(gridID) : 4;
+    ncorner  = ( gridInqType(gridID) == GRID_UNSTRUCTURED ) ? gridInqNvertex(gridID) : 4;
     ncorner *= size;
     xbnds    = (double *) malloc((ncorner*size)*sizeof(double));
     ybnds    = (double *) malloc((ncorner*size)*sizeof(double));
