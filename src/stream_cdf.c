@@ -836,6 +836,7 @@ void cdfDefTime(int streamID)
   int year, month, day, hour, minute, second;
   char unitstr[80];
   char calstr[80];
+  char tmpstr[256];
   size_t len;
   taxis_t *taxis;
   stream_t *streamptr;
@@ -858,6 +859,10 @@ void cdfDefTime(int streamID)
   streamptr->basetime.ncvarid = time_varid;
 
   taxis = &streamptr->tsteps[0].taxis;
+
+
+  strcpy(tmpstr, "time");
+  cdf_put_att_text(fileID, time_varid, "standard_name", strlen(tmpstr), tmpstr);
 
   if ( taxis->has_bounds )
     {
@@ -1115,12 +1120,13 @@ void cdfDefTrajLon(int streamID, int gridID)
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
       cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID, &ncvarid);
+
+      if ( (len = strlen(stdname)) )
+        cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
       if ( (len = strlen(longname)) )
         cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
       if ( (len = strlen(units)) )
         cdf_put_att_text(fileID, ncvarid, "units", len, units);
-      if ( (len = strlen(stdname)) )
-        cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
 
       cdf_enddef(fileID);
       streamptr->ncmode = 2;
@@ -1174,12 +1180,13 @@ void cdfDefTrajLat(int streamID, int gridID)
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
       cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID, &ncvarid);
+
+      if ( (len = strlen(stdname)) )
+        cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
       if ( (len = strlen(longname)) )
         cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
       if ( (len = strlen(units)) )
         cdf_put_att_text(fileID, ncvarid, "units", len, units);
-      if ( (len = strlen(stdname)) )
-        cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
 
       cdf_enddef(fileID);
       streamptr->ncmode = 2;
@@ -1344,12 +1351,13 @@ void cdfDefXaxis(int streamID, int gridID)
       if ( gridInqXvalsPtr(gridID) )
         {
           cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID, &ncvarid);
+
+          if ( (len = strlen(stdname)) )
+            cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
           if ( (len = strlen(longname)) )
             cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
           if ( (len = strlen(units)) )
             cdf_put_att_text(fileID, ncvarid, "units", len, units);
-          if ( (len = strlen(stdname)) )
-            cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
 
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "X");
 
@@ -1472,12 +1480,13 @@ void cdfDefYaxis(int streamID, int gridID)
       if ( gridInqYvalsPtr(gridID) )
         {
           cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID, &ncvarid);
+
+          if ( (len = strlen(stdname)) )
+            cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
           if ( (len = strlen(longname)) )
             cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
           if ( (len = strlen(units)) )
             cdf_put_att_text(fileID, ncvarid, "units", len, units);
-          if ( (len = strlen(stdname)) )
-            cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
 
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "Y");
 
@@ -1615,12 +1624,13 @@ void cdfDefLonLat2D(int streamID, int gridID)
       if ( gridInqXvalsPtr(gridID) )
         {
           cdf_def_var(fileID, xaxisname, (nc_type) xtype, 2, dimIDs, &ncxvarid);
+
+          if ( (len = strlen(xstdname)) )
+            cdf_put_att_text(fileID, ncxvarid, "standard_name", len, xstdname);
           if ( (len = strlen(xlongname)) )
             cdf_put_att_text(fileID, ncxvarid, "long_name", len, xlongname);
           if ( (len = strlen(xunits)) )
             cdf_put_att_text(fileID, ncxvarid, "units", len, xunits);
-          if ( (len = strlen(xstdname)) )
-            cdf_put_att_text(fileID, ncxvarid, "standard_name", len, xstdname);
 
           /* attribute for Panoply */
           cdf_put_att_text(fileID, ncxvarid, "_CoordinateAxisType", 3, "Lon");
@@ -1641,12 +1651,13 @@ void cdfDefLonLat2D(int streamID, int gridID)
       if ( gridInqYvalsPtr(gridID) )
         {
           cdf_def_var(fileID, yaxisname, (nc_type) xtype, 2, dimIDs, &ncyvarid);
+
+          if ( (len = strlen(ystdname)) )
+            cdf_put_att_text(fileID, ncyvarid, "standard_name", len, ystdname);
           if ( (len = strlen(ylongname)) )
             cdf_put_att_text(fileID, ncyvarid, "long_name", len, ylongname);
           if ( (len = strlen(yunits)) )
             cdf_put_att_text(fileID, ncyvarid, "units", len, yunits);
-          if ( (len = strlen(ystdname)) )
-            cdf_put_att_text(fileID, ncyvarid, "standard_name", len, ystdname);
 
           /* attribute for Panoply */
           cdf_put_att_text(fileID, ncyvarid, "_CoordinateAxisType", 3, "Lat");
@@ -1672,8 +1683,9 @@ void cdfDefLonLat2D(int streamID, int gridID)
           char stdname[] = "area";
 
           cdf_def_var(fileID, yaxisname, (nc_type) xtype, 2, dimIDs, &ncavarid);
-          cdf_put_att_text(fileID, ncavarid, "long_name", strlen(longname), longname);
+
           cdf_put_att_text(fileID, ncavarid, "standard_name", strlen(stdname), stdname);
+          cdf_put_att_text(fileID, ncavarid, "long_name", strlen(longname), longname);
           cdf_put_att_text(fileID, ncavarid, "units", strlen(units), units);
 
           streamptr->ncavarID[gridindex] = ncavarid;
@@ -1939,12 +1951,13 @@ void cdfDefCell(int streamID, int gridID)
       if ( gridInqXvalsPtr(gridID) )
         {
           cdf_def_var(fileID, xaxisname, (nc_type) xtype, 1, &dimID, &ncxvarid);
+
+          if ( (len = strlen(xstdname)) )
+            cdf_put_att_text(fileID, ncxvarid, "standard_name", len, xstdname);
           if ( (len = strlen(xlongname)) )
             cdf_put_att_text(fileID, ncxvarid, "long_name", len, xlongname);
           if ( (len = strlen(xunits)) )
             cdf_put_att_text(fileID, ncxvarid, "units", len, xunits);
-          if ( (len = strlen(xstdname)) )
-            cdf_put_att_text(fileID, ncxvarid, "standard_name", len, xstdname);
 
           streamptr->ncxvarID[gridindex] = ncxvarid;
 
@@ -1962,12 +1975,13 @@ void cdfDefCell(int streamID, int gridID)
       if ( gridInqYvalsPtr(gridID) )
         {
           cdf_def_var(fileID, yaxisname, (nc_type) xtype, 1, &dimID, &ncyvarid);
+
+          if ( (len = strlen(ystdname)) )
+            cdf_put_att_text(fileID, ncyvarid, "standard_name", len, ystdname);
           if ( (len = strlen(ylongname)) )
             cdf_put_att_text(fileID, ncyvarid, "long_name", len, ylongname);
           if ( (len = strlen(yunits)) )
             cdf_put_att_text(fileID, ncyvarid, "units", len, yunits);
-          if ( (len = strlen(ystdname)) )
-            cdf_put_att_text(fileID, ncyvarid, "standard_name", len, ystdname);
 
           streamptr->ncyvarID[gridindex] = ncyvarid;
 
@@ -1990,8 +2004,9 @@ void cdfDefCell(int streamID, int gridID)
           char stdname[] = "area";
 
           cdf_def_var(fileID, yaxisname, (nc_type) xtype, 1, &dimID, &ncavarid);
-          cdf_put_att_text(fileID, ncavarid, "long_name", strlen(longname), longname);
+
           cdf_put_att_text(fileID, ncavarid, "standard_name", strlen(stdname), stdname);
+          cdf_put_att_text(fileID, ncavarid, "long_name", strlen(longname), longname);
           cdf_put_att_text(fileID, ncavarid, "units", strlen(units), units);
 
           streamptr->ncavarID[gridindex] = ncavarid;
@@ -2212,10 +2227,10 @@ void cdfDefZaxis(int streamID, int zaxisID)
 	      cdf_def_dim(fileID, axisname, dimlen, &dimID);
 	      cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID,  &ncvarid);
 
-	      strcpy(tmpname, "hybrid level at layer midpoints");
-	      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
 	      strcpy(tmpname, "hybrid_sigma_pressure");
 	      cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "hybrid level at layer midpoints");
+	      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
 	      strcpy(tmpname, "level");
 	      cdf_put_att_text(fileID, ncvarid, "units", strlen(tmpname), tmpname);
 	      strcpy(tmpname, "down");
@@ -2241,10 +2256,10 @@ void cdfDefZaxis(int streamID, int zaxisID)
 	      cdf_def_dim(fileID, axisname, dimlen, &dimID);
 	      cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID,  &ncvarid);
 
-	      strcpy(tmpname, "hybrid level at layer interfaces");
-	      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
 	      strcpy(tmpname, "hybrid_sigma_pressure");
 	      cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "hybrid level at layer interfaces");
+	      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
 	      strcpy(tmpname, "level");
 	      cdf_put_att_text(fileID, ncvarid, "units", strlen(tmpname), tmpname);
 	      strcpy(tmpname, "down");
@@ -2281,12 +2296,13 @@ void cdfDefZaxis(int streamID, int zaxisID)
           zaxisInqStdname(zaxisID, stdname);
 
           cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID, &ncvarid);
+
+          if ( (len = strlen(stdname)) )
+            cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
           if ( (len = strlen(longname)) )
             cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
           if ( (len = strlen(units)) )
             cdf_put_att_text(fileID, ncvarid, "units", len, units);
-          if ( (len = strlen(stdname)) )
-            cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
 
 	  positive = zaxisInqPositive(zaxisID);
 	  if ( positive == 1 )
@@ -2794,11 +2810,11 @@ int cdfDefVar(int streamID, int varID)
         }
     }
 
-  if ( longname && *longname )
-    cdf_put_att_text(fileID, ncvarid, "long_name", strlen(longname), longname);
-
   if ( stdname && *stdname )
     cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(stdname), stdname);
+
+  if ( longname && *longname )
+    cdf_put_att_text(fileID, ncvarid, "long_name", strlen(longname), longname);
 
   if ( units && *units )
     cdf_put_att_text(fileID, ncvarid, "units", strlen(units), units);

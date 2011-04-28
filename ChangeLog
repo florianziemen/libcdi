@@ -1,7 +1,8 @@
 2011-04-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* Added attribute standard_name on netCDF zaxes [request: Karin Meier-Fleischer]
-	* Added attribute positive on netCDF zaxes [request: Karin Meier-Fleischer]
+	* Added attribute standard_name to netCDF time var [request: Karin Meier-Fleischer]
+	* Added attribute standard_name to netCDF zaxes [request: Karin Meier-Fleischer]
+	* Added attribute positive to netCDF zaxes [request: Karin Meier-Fleischer]
 
 2011-04-27  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
