@@ -364,7 +364,7 @@ void reshArrayPrint ()
 	      curr = arrayResources[i]+j;
 	      if ( curr->ptr )
 		{
-		  curr->ops->valPrint (( void * ) &curr->idx );
+		  curr->ops->valPrint (( void * ) curr->ptr );
 		  fprintf ( stdout, "\n" ); 
 		}
 	    }

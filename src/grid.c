@@ -2958,7 +2958,7 @@ double *gridInqYboundsPtr(int gridID)
 }
 
 
-void gridPrint(int gridID, int opt)
+void gridPrintKernel ( grid_t * gridptr, int opt)
 {
   FILE *fp = stdout;
   int type;
@@ -2967,27 +2967,22 @@ void gridPrint(int gridID, int opt)
   int nbyte0, nbyte;
   int i;
   int nvertex, iv;
-  const double *area    = gridInqAreaPtr(gridID);
-  const double *xvals   = gridInqXvalsPtr(gridID);
-  const double *yvals   = gridInqYvalsPtr(gridID);
-  const double *xbounds = gridInqXboundsPtr(gridID);
-  const double *ybounds = gridInqYboundsPtr(gridID);
-  grid_t *gridptr;
+  const double *area    = gridptr->area;
+  const double *xvals   = gridptr->xvals;
+  const double *yvals   = gridptr->yvals;
+  const double *xbounds = gridptr->xbounds;
+  const double *ybounds = gridptr->ybounds;
 
-  gridptr = ( grid_t *) reshGetVal ( gridID );
-
-  grid_check_ptr(gridID, gridptr);
-
-  type     = gridInqType(gridID);
-  trunc    = gridInqTrunc(gridID);
-  gridsize = gridInqSize(gridID);
-  xsize    = gridInqXsize(gridID);
-  ysize    = gridInqYsize(gridID);
-  nvertex  = gridInqNvertex(gridID);
+  type     = gridptr->type;
+  trunc    = gridptr->trunc;
+  gridsize = gridptr->size;
+  xsize    = gridptr->xsize;
+  ysize    = gridptr->ysize;
+  nvertex  = gridptr->nvertex;
 
   nbyte0 = 0;
   fprintf(fp, "#\n");
-  fprintf(fp, "# gridID %d\n", gridID);
+  fprintf(fp, "# gridID %d\n", gridptr->self);
   fprintf(fp, "#\n");
   fprintf(fp, "gridtype  = %s\n", gridNamePtr(type));
   fprintf(fp, "gridsize  = %d\n", gridsize);
@@ -3034,7 +3029,7 @@ void gridPrint(int gridID, int opt)
 	if ( type == GRID_LAEA )
 	  {
 	    double a, lon_0, lat_0;
-	    gridInqLaea(gridID, &a, &lon_0, &lat_0);
+	    gridInqLaea(gridptr->self, &a, &lon_0, &lat_0);
 	    fprintf(fp, "a         = %g\n", a);
 	    fprintf(fp, "lon_0     = %g\n", lon_0);
 	    fprintf(fp, "lat_0     = %g\n", lat_0);
@@ -3043,7 +3038,7 @@ void gridPrint(int gridID, int opt)
 	if ( type == GRID_LCC2 )
 	  {
 	    double a, lon_0, lat_0, lat_1, lat_2;
-	    gridInqLcc2(gridID, &a, &lon_0, &lat_0, &lat_1, &lat_2);
+	    gridInqLcc2(gridptr->self, &a, &lon_0, &lat_0, &lat_1, &lat_2);
 	    fprintf(fp, "a         = %g\n", a);
 	    fprintf(fp, "lon_0     = %g\n", lon_0);
 	    fprintf(fp, "lat_0     = %g\n", lat_0);
@@ -3066,8 +3061,8 @@ void gridPrint(int gridID, int opt)
 		 type == GRID_GENERIC    || type == GRID_LCC2     || 
                  type == GRID_SINUSOIDAL || type == GRID_LAEA )
 	      {
-		xfirst = gridInqXval(gridID, 0);
-		xinc   = gridInqXinc(gridID);
+		xfirst = gridInqXval(gridptr->self, 0);
+		xinc   = gridptr->xinc;
 	      }
 
 	    if ( IS_NOT_EQUAL(xinc, 0) && opt )
@@ -3113,8 +3108,8 @@ void gridPrint(int gridID, int opt)
 	    if ( type == GRID_LONLAT || type == GRID_GENERIC || type == GRID_LCC2 ||
 		 type == GRID_SINUSOIDAL || type == GRID_LAEA )
 	      {
-		yfirst = gridInqYval(gridID, 0);
-		yinc   = gridInqYinc(gridID);
+		yfirst = gridInqYval(gridptr->self, 0);
+		yinc   = gridptr->yinc;
 	      }
 
 	    if ( IS_NOT_EQUAL(yinc, 0) && opt )
@@ -3178,7 +3173,7 @@ void gridPrint(int gridID, int opt)
 	nbyte0 = fprintf(fp, "rowlon = %d  ", ysize);
 	nbyte  = nbyte0;
 	rowlon = (int *) malloc(ysize*sizeof(int));
-	gridInqRowlon(gridID, rowlon);
+	gridInqRowlon(gridptr->self, rowlon);
 	for ( i = 0; i < ysize; i++ )
 	  {
 	    if ( nbyte > 80 )
@@ -3197,7 +3192,7 @@ void gridPrint(int gridID, int opt)
       {
 	double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
 	int projflag, scanflag;
-	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
+	gridInqLCC(gridptr->self, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
 		   &projflag, &scanflag);
 
 	fprintf(fp, "xsize     = %d\n", xsize);
@@ -3220,22 +3215,22 @@ void gridPrint(int gridID, int opt)
     case GRID_SPECTRAL:
       {
 	fprintf(fp, "truncation = %d\n", trunc);
-	fprintf(fp, "complexpacking = %d\n", gridInqComplexPacking(gridID));
+	fprintf(fp, "complexpacking = %d\n", gridptr->lcomplex );
 	break;
       }
     case GRID_GME:
       {
-	fprintf(fp, "ni        = %d\n", gridInqGMEni(gridID));
+	fprintf(fp, "ni        = %d\n", gridptr->ni );
 	break;
       }
     case GRID_REFERENCE:
       {
-	fprintf(fp, "number    = %d\n", gridInqNumber(gridID));
-	fprintf(fp, "position  = %d\n", gridInqPosition(gridID));
-	if ( gridInqReference(gridID, NULL) )
+	fprintf(fp, "number    = %d\n", gridptr->number );
+	fprintf(fp, "position  = %d\n", gridptr->position );
+	if ( gridInqReference(gridptr->self, NULL) )
 	  {
 	    char reference_link[8192];
-	    gridInqReference(gridID, reference_link);
+	    gridInqReference(gridptr->self, reference_link);
 	    fprintf(fp, "path      = %s\n", reference_link);
 	  }
 	break;
@@ -3264,9 +3259,22 @@ void gridPrint(int gridID, int opt)
     }
 }
 
-void gridPrintP ( void * gridID )
+void gridPrint ( int gridID, int opt )
 {
-  gridPrint ( *(( int * ) gridID ), 0 );
+  grid_t *gridptr;
+
+  gridptr = ( grid_t *) reshGetVal ( gridID );
+
+  grid_check_ptr(gridID, gridptr);
+  
+  gridPrintKernel ( gridptr, opt );
+}
+
+
+
+void gridPrintP ( void * grid )
+{
+  gridPrintKernel (( grid_t * ) grid , 0 );
 }
 
 

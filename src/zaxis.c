@@ -1026,25 +1026,20 @@ int zaxisDuplicate(int zaxisID)
 }
 
 
-void zaxisPrint(int zaxisID)
+void zaxisPrintKernel ( zaxis_t * zaxisptr )
 {
   FILE *fp = stdout;
   int type;
   int nlevels, levelID;
   int nbyte0, nbyte;
   double level;
-  zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
-
-  zaxis_check_ptr(zaxisID, zaxisptr);
-
-  type    = zaxisInqType(zaxisID);
-  nlevels = zaxisInqSize(zaxisID);
+  type    = zaxisptr->type;
+  nlevels = zaxisptr->size;
 
   nbyte0 = 0;
   fprintf(fp, "#\n");
-  fprintf(fp, "# zaxisID %d\n", zaxisID);
+  fprintf(fp, "# zaxisID %d\n", zaxisptr->self );
   fprintf(fp, "#\n");
   fprintf(fp, "zaxistype = %s\n", zaxisNamePtr(type));
   fprintf(fp, "size      = %d\n", nlevels);
@@ -1062,7 +1057,7 @@ void zaxisPrint(int zaxisID)
 	  fprintf(fp, "%*s", nbyte0, "");
 	  nbyte = nbyte0;
 	}
-      level = zaxisInqLevel(zaxisID, levelID);
+      level = zaxisInqLevel(zaxisptr->self, levelID);
       nbyte += fprintf(fp, "%.9g ", level);
     }
   fprintf(fp, "\n");
@@ -1080,8 +1075,8 @@ void zaxisPrint(int zaxisID)
 	      fprintf(fp, "%*s", nbyte0, "");
 	      nbyte = nbyte0;
 	    }
-	  level1 = zaxisInqLbound(zaxisID, levelID);
-	  level2 = zaxisInqUbound(zaxisID, levelID);
+	  level1 = zaxisInqLbound(zaxisptr->self, levelID);
+	  level2 = zaxisInqUbound(zaxisptr->self, levelID);
 	  nbyte += fprintf(fp, "%.9g-%.9g ", level1, level2);
 	}
       fprintf(fp, "\n");
@@ -1093,8 +1088,8 @@ void zaxisPrint(int zaxisID)
       int vctsize;
       const double *vct;
 
-      vctsize = zaxisInqVctSize(zaxisID);
-      vct     = zaxisInqVctPtr(zaxisID);
+      vctsize = zaxisptr->vctsize;
+      vct     = zaxisptr->vct;
       fprintf(fp, "vctsize   = %d\n", vctsize);
       if ( vctsize )
 	{
@@ -1129,9 +1124,21 @@ void zaxisPrint(int zaxisID)
 }
 
 
+void zaxisPrint ( int zaxisID )
+{
+  zaxis_t *zaxisptr;
+
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+
+  zaxis_check_ptr(zaxisID, zaxisptr);
+
+  zaxisPrintKernel ( zaxisptr );
+}
+
+
 void zaxisPrintP ( void * zaxisID )
 {
-  zaxisPrint ( * (( int * ) zaxisID ));
+  zaxisPrintKernel (( zaxis_t * ) zaxisID );
 }
 
 
