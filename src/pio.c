@@ -8,12 +8,13 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "pio.h"
+#include "pio_util.h"
+
 #ifdef USE_MPI
 
 #include "cdi.h"
-#include "pio.h"
 #include "pio_impl.h"
-#include "pio_util.h"
 
 
 #endif
@@ -21,11 +22,11 @@
 #ifdef USE_MPI
 
 char * command2charP[6] = {"IO_Open_file", "IO_Close_file",
-			   "IO_Get_fp","IO_Set_fp",
-			   "IO_Send_buffer", "IO_Finalize"};
+                           "IO_Get_fp","IO_Set_fp",
+                           "IO_Send_buffer", "IO_Finalize"};
 
 long initial_buffersize = 16 * 1024 * 1024;
-/*  4 KB <= x < 256 MB */ 
+/*  4 KB <= x < 256 MB */
 /* 16 * 1024 * 1024; */
 /* 16 * 1024; */
 /* 4 * 1024; */
@@ -47,7 +48,7 @@ pioInfo *pioinfo;
 
 char *token = "%";
 
-/***************************************************************/  
+/***************************************************************/
 
 int setTag ( int ID, int sc )
 {
@@ -113,7 +114,7 @@ size_t pioFileWrite ( int id, int tsId, const void *buffer, size_t len )
 int pioFileClose ( int id )
 {
   int iret;
-  
+
   switch ( pioinfo->type )
     {
     case PIO_MPI_NONB:
@@ -146,7 +147,7 @@ int pioFileClose ( int id )
 int pioFileOpenW ( const char *filename )
 {
   int iret;
-  
+
   switch ( pioinfo->type )
     {
     case PIO_MPI_NONB:
@@ -170,21 +171,21 @@ int pioFileOpenW ( const char *filename )
       iret = fowPOSIXNONB ( filename );
       break;
     }
-  
+
   return iret;
 }
 
 /***************************************************************/
 
-static int cmpr ( const void *a, const void *b ) 
-{ 
+static int cmpr ( const void *a, const void *b )
+{
   return strcmp ( *( char ** ) a, *( char ** ) b);
 }
 
 /***************************************************************/
 
-void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color, 
-			  int *nnodes )
+void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
+                          int *nnodes )
 {
   int size, rank, len, npes_node, key, test, i, j;
 
@@ -195,12 +196,12 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
   MPI_Comm_rank ( commF2C, &rank );
 
   myHost = ( char * ) xmalloc ( MPI_MAX_PROCESSOR_NAME * sizeof ( char ));
-  
+
   memset ( myHost, 0, MPI_MAX_PROCESSOR_NAME * sizeof ( char ));
-  
+
   xmpi ( MPI_Get_processor_name ( myHost, &len ));
 
-  if ( myHost[0] == '\0' ) 
+  if ( myHost[0] == '\0' )
     pcdiAbort ( "did not succeed to set hostname", __FILE__, __LINE__ , rank);
 
   if ( ddebug == MAXDEBUG )
@@ -209,18 +210,18 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
       hostname [ len ] = '\0';
       fprintf ( stderr, "pe%d: myHost = %s\n", rank,  hostname );
     }
-  
+
   allHosts = ( char ** ) xmalloc ( size * sizeof ( char * ));
-  allHosts[0] = ( char * ) xmalloc ( size * MPI_MAX_PROCESSOR_NAME * 
-				     sizeof ( char ));
+  allHosts[0] = ( char * ) xmalloc ( size * MPI_MAX_PROCESSOR_NAME *
+                                     sizeof ( char ));
   allHosts0 = allHosts[0];
 
   for ( i = 1; i < size; i++ )
     allHosts[i] = allHosts[0] + i * MPI_MAX_PROCESSOR_NAME;
 
-  MPI_Allgather ( myHost, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, 
-			    & ( allHosts[0][0] ), MPI_MAX_PROCESSOR_NAME, 
-			    MPI_CHAR, commF2C );
+  MPI_Allgather ( myHost, MPI_MAX_PROCESSOR_NAME, MPI_CHAR,
+                            & ( allHosts[0][0] ), MPI_MAX_PROCESSOR_NAME,
+                            MPI_CHAR, commF2C );
 
   qsort ( allHosts, size, sizeof ( char * ), cmpr );
 
@@ -233,16 +234,16 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
       curr = allHosts[i];
       j++;
       if (( test = strcmp ( myHost, curr )) == 0 ) *color = j;
-     
+
       while ( ++i < size )
-	if (( test = strcmp ( allHosts[i], curr )) != 0)
-	  break;
+        if (( test = strcmp ( allHosts[i], curr )) != 0)
+          break;
     }
 
   *nnodes = j;
-      
+
   if ( *color == 0 ) pcdiAbort ( "Color is not set", __FILE__, __LINE__, rank );
-  
+
   npes_node = size / ( * nnodes );
   key = rank % npes_node;
 
@@ -253,10 +254,10 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
   free ( myHost );
 
   if ( ddebug == MAXDEBUG )
-    fprintf ( stderr, 
-	      "pe%d in setPioCommunicator, color=%d, before return\n", 
-	      rank, *color );
-  
+    fprintf ( stderr,
+              "pe%d in setPioCommunicator, color=%d, before return\n",
+              rank, *color );
+
   return;
 }
 
@@ -278,34 +279,34 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
 #ifdef USE_MPI
   MPI_Comm_size ( comm, &size );
   MPI_Comm_rank ( comm, &rank );
-  
-  if ( ptype < 0 || ptype > maxPtype ) 
+
+  if ( ptype < 0 || ptype > maxPtype )
     pcdiAbort ( "PIOTYPE is no valid modus", __FILE__, __LINE__, rank );
 
 #ifdef _SX
   if ( ptype ==  PIO_POSIX_ASYNCH )
     pcdiAbort ( "PIO_POSIX_ASYNCH does not work on SX", __FILE__, __LINE__, rank );
 #endif
-  
+
   pioinfo = ( pioInfo * ) xmalloc ( sizeof ( pioInfo ));
-  
-  pioinfo->type = ptype; 
+
+  pioinfo->type = ptype;
 
   setPioCommunicator ( & ( pioinfo->comm ), comm, color, nnodes );
-  
+
   if (( pioinfo->type == PIO_NONE ) && ( *nnodes != size ))
     pcdiAbort ( "PIOTYPE, NNODES: not a valid combination", __FILE__, __LINE__, rank );
-  
+
   pioinfo->color = *color;
   MPI_Comm_rank ( pioinfo->comm, &( pioinfo->rank ));
   MPI_Comm_size ( pioinfo->comm, &( pioinfo->size ));
-  
+
   if ( ddebug == MAXDEBUG && pioinfo->rank == 0 )
-    fprintf ( stderr, 
-	      "pe%d in bInit(), ptype=%d, initial_buffersize=%ld: "
-	      "after init pioinfo ...\n", 
-	      pioinfo->rank, pioinfo->type, initial_buffersize );
-  
+    fprintf ( stderr,
+              "pe%d in bInit(), ptype=%d, initial_buffersize=%ld: "
+              "after init pioinfo ...\n",
+              pioinfo->rank, pioinfo->type, initial_buffersize );
+
   pioinfo->collectorComm = MPI_COMM_NULL;
 
   switch ( pioinfo->type )
@@ -336,11 +337,15 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
       break;
     }
 #endif
-  
+
   if ( ddebug == MAXDEBUG )
     fprintf ( stderr, "pe in bInit out\n" );
-  
+
+#ifdef USE_MPI
   return pioinfo->collectorComm;
+#else
+  return 0;
+#endif
 }
 
 /***************************************************************/
@@ -355,10 +360,10 @@ void bFinalize ()
       break;
     }
 
-  if ( pioinfo->collectorComm != MPI_COMM_NULL ) 
+  if ( pioinfo->collectorComm != MPI_COMM_NULL )
     MPI_Comm_free ( &( pioinfo->collectorComm ));
-  
-  if ( pioinfo->comm != MPI_COMM_NULL ) 
+
+  if ( pioinfo->comm != MPI_COMM_NULL )
     MPI_Comm_free ( &( pioinfo->comm ));
 
   free ( pioinfo );
@@ -366,4 +371,3 @@ void bFinalize ()
 
   return;
 }
-

@@ -1,4 +1,8 @@
-noinst_PROGRAMS=pio_write myModel myModel2003
+noinst_PROGRAMS=
+
+if USE_MPI
+noinst_PROGRAMS+=pio_write myModel myModel2003
+endif
 
 AM_CFLAGS=-I$(top_srcdir)/src
 

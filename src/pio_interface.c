@@ -1,6 +1,11 @@
 /** @file ioUtil.c
 */
 
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
+#ifdef USE_MPI
 
 #include "pio_interface.h"
 
@@ -12,7 +17,7 @@
 #include "pio_server.h"
 #include "cdi.h"
 
-
+#endif
 /*****************************************************************************/
 
 
@@ -43,6 +48,7 @@ int pioInit ( int comm, int nIOP, int mode )
   @return int indicating wether the calling PE is a calcutator (1) or not (0)
 */
 
+#ifdef USE_MPI
 MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int mode )
 {
   char fnName[] = "pioInit_c()";
@@ -342,6 +348,7 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
   return;
 }
 
+#endif
 /************************************************************************/
 
 /**
@@ -355,6 +362,7 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 
 void pioFinalize ()
 {
+#ifdef USE_MPI
   char fnName[] = "pioFinalize()";
   int i, ibuffer = 1111;
   
@@ -367,6 +375,7 @@ void pioFinalize ()
   commsIOCleanup ();
  
   return;
+#endif
 }
 
 /************************************************************************/

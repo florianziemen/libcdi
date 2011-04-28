@@ -1,10 +1,18 @@
 #ifndef PIO_SERVER_
 #define PIO_SERVER_
 
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
+#ifdef USE_MPI
+
 #include <mpi.h>
 
 extern MPI_Comm * commPio;
 
 void IOServer ( MPI_Comm, int );
+
+#endif
 
 #endif

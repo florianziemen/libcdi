@@ -111,6 +111,7 @@ AS_IF([test x"${enable_mpi}" = x"yes"],
       [USE_MPI=yes])
 AS_IF([test x"$USE_MPI" = xyes],
   [AC_DEFINE([USE_MPI],[1],[parallel I/O requested and available])])
+AM_CONDITIONAL([USE_MPI],[test x"$USE_MPI" = xyes])
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
 AC_ARG_ENABLE(iso-c-interface,
@@ -133,7 +134,7 @@ AM_CONDITIONAL(ENABLE_SWIG,[test "x$SWIG" != "x"])
 AC_ARG_ENABLE(ruby,
   [AS_HELP_STRING([--enable-ruby],[ruby language bindings [default=no] (EXPERIMENTAL)])],
   [AC_CHECK_PROG(RUBY,ruby,ruby)
-   RUBY_INCLUDES="$($RUBY config/interface.rb)"
+   RUBY_INCLUDES="$($RUBY $srcdir/config/interface.rb)"
    save_CPPFLAGS=$CPPFLAGS
    CPPFLAGS="$CPPFLAGS $RUBY_INCLUDES"
    AC_CHECK_HEADER([ruby.h],,[enable_ruby=no
@@ -187,6 +188,7 @@ AC_OUTPUT([Makefile src/Makefile interfaces/Makefile app/Makefile \
 #  ----------------------------------------------------------------------
 #  Show configuration
 AC_MSG_NOTICE([CDI is configured with the following options:])
+./config.status cdi.settings
 cat cdi.settings
 
 AS_IF([test "$ac_cv_prog_cc_c99" = "no"],

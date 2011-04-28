@@ -1,3 +1,8 @@
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
+#ifdef USE_MPI
 #include "pio_rpc.h"
 #include "pio_util.h"
 
@@ -92,3 +97,4 @@ void commsIOCleanup ()
 
   return;
 }
+#endif
