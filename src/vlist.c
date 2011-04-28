@@ -47,9 +47,14 @@ vlist_compare(vlist_t *a, vlist_t *b)
   return diff;
 }
 
+static void
+vlistPrintKernel(vlist_t *vlistptr);
+
+
 resOps vlist_ops = {
   (valCompareFunc)vlist_compare,
-  free
+  free,
+  (valPrintFunc)vlistPrintKernel
 };
 
 
@@ -1005,8 +1010,8 @@ int vlistNtsteps(int vlistID)
   return (vlistptr->ntsteps);
 }
 
-
-void vlistPrint(int vlistID)
+static void
+vlistPrintKernel(vlist_t *vlistptr)
 {
   int nvars, flag, index;
   int varID, fvarID, mvarID, flevID, mlevID, levID;
@@ -1015,15 +1020,10 @@ void vlistPrint(int vlistID)
   char paramstr[32];
   char *name, *longname, *units;
   double level;
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
 
   vlist_check_ptr(__func__, vlistptr);
 
-  printf("#\n# vlistID %d\n#\n", vlistID);
-
-  if ( vlistID == CDI_UNDEFID ) return;
+  printf("#\n# vlistID %d\n#\n", vlistptr->self);
 
   nvars = vlistptr->nvars;
 
@@ -1079,6 +1079,18 @@ void vlistPrint(int vlistID)
 	    }
 	}
     }
+}
+
+
+void vlistPrint(int vlistID)
+{
+  vlist_t *vlistptr;
+
+  if ( vlistID == CDI_UNDEFID ) return;
+
+  vlistptr = vlist_to_pointer(vlistID);
+  vlist_check_ptr(__func__, vlistptr);
+  vlistPrintKernel(vlistptr);
 }
 
 /*

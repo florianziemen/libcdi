@@ -114,8 +114,6 @@ void modelRun ()
   zaxisDefLevels(zaxisID3, levs);
   namespaceSetActive ( 0 );
 
-  reshArrayPrint ();
- 
   // Create a variable list
   vlistID = vlistCreate();
 
@@ -139,6 +137,7 @@ void modelRun ()
   // Assign the Time axis to the variable list
   vlistDefTaxis(vlistID, taxisID);
   
+  reshArrayPrint ();
 
 
   // Create a dataset in netCDF fromat
