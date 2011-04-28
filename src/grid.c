@@ -42,11 +42,11 @@ char *Grids[] = {
 };
 
 
-int  gridCompare2 ( void * gridID, void * grid );
-void gridDestroy2 ( void * gridID );
-void gridPrint2   ( void * gridID );
+int  gridCompareP ( void * gridID, void * grid );
+void gridDestroyP ( void * gridID );
+void gridPrintP   ( void * gridID );
 
-resOps gridOps = { gridCompare2, gridDestroy2, gridPrint2 };
+resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP };
 
 
 static int  GRID_Debug = 0;   /* If set to 1, debugging */
@@ -55,7 +55,7 @@ static int  GRID_Debug = 0;   /* If set to 1, debugging */
 static
 void grid_init_entry(grid_t *gridptr)
 {
-  gridptr->self         = reshPut (( void *) gridptr, &gridOps );
+  gridptr->self         = reshPut (( void * ) gridptr, &gridOps );
 
   gridptr->type         = CDI_UNDEFID;
   gridptr->mask         = NULL;
@@ -471,7 +471,7 @@ void gridDestroy(int gridID)
   reshRemove ( gridID );
 }
 
-void gridDestroy2 ( void * gridID )
+void gridDestroyP ( void * gridID )
 {
   gridDestroy ( *(( int * ) gridID ));
 }
@@ -2262,7 +2262,7 @@ int gridCompare(int gridID, grid_t grid)
   return (differ);
 }
 
-int gridCompare2 ( void * gridID, void * grid )
+int gridCompareP ( void * gridID, void * grid )
 {
   return gridCompare ( *(( int * ) gridID ), *(( grid_t * ) grid ));
 }
@@ -3264,7 +3264,7 @@ void gridPrint(int gridID, int opt)
     }
 }
 
-void gridPrint2 ( void * gridID )
+void gridPrintP ( void * gridID )
 {
   gridPrint ( *(( int * ) gridID ), 0 );
 }

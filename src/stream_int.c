@@ -54,7 +54,7 @@ char *Filetypes[] = {
 #define UNDEFID  CDI_UNDEFID
 
 
-int CDI_Debug   = 1;    /* If set to 1, debugging           */
+int CDI_Debug   = 0;    /* If set to 1, debugging           */
 
 
 int cdiDefaultLeveltype = -1;

@@ -8,6 +8,8 @@
 #include "cdi.h"
 #include "error.h"
 
+extern resOps gridOps;
+
 enum { MIN_ARRAY_SIZE = 128 };
 
 static int *arraySizeAllocated;
@@ -166,7 +168,6 @@ void *reshGetVal ( cdiResH idx )
     Error ( "idx %d from namespace %d not available in active namespace %d !\n",
           idx, nspT.nsp, nsp );
 
-
   ARRAY_INIT();
 
   if ( nspT.idx >= 0 && nspT.idx < arraySizeAllocated[nsp] )
@@ -314,10 +315,8 @@ reshRemove ( cdiResH idx)
 
 int reshCountType ( resOps * ops )
 {
-  int countType = 0;
-  long i;
-  int nsp;
-  
+  int i, nsp, countType = 0;
+
   nsp = namespaceGetActive ();
   
   ARRAY_INIT();
@@ -347,6 +346,8 @@ void reshArrayPrint ()
     {
       temp = namespaceGetActive ();
 
+      fprintf ( stdout, "\n\n###############\n#\n#  print global resource array \n" );
+
       for ( i = 0; i < namespaceGetNumber (); i++ )
 	{
 	  namespaceSetActive ( i );
@@ -356,15 +357,20 @@ void reshArrayPrint ()
 	  fprintf ( stdout, "#\n" );
 	  fprintf ( stdout, "# namespace=%d\n", i );
 	  fprintf ( stdout, "#\n" );
-	  fprintf ( stdout, "##################################\n" );
+	  fprintf ( stdout, "##################################\n\n" );
 
 	  for ( j = 0; j < arraySizeAllocated[i]; j++)
 	    {
-	      curr = &arrayResources[i][j];
+	      curr = arrayResources[i]+j;
 	      if ( curr->ptr )
-		curr->ops->valPrint ( curr->ptr ); 
+		{
+		  curr->ops->valPrint (( void * ) &curr->idx );
+		  fprintf ( stdout, "\n" ); 
+		}
 	    }
 	}
+
+      fprintf ( stdout, "#\n#  end global resource array \n#\n#################\n\n" );
 
       namespaceSetActive ( temp );
     }

@@ -91,7 +91,6 @@ void modelRun ()
   gridDefYsize(gridID3, nlat-2);
   gridDefXvals(gridID3, lons);
   gridDefYvals(gridID3, lats);
-  reshArrayPrint ();
   namespaceSetActive ( 0 );
 
 
@@ -107,8 +106,9 @@ void modelRun ()
   namespaceSetActive ( 1 );
   zaxisID3 = zaxisCreate(ZAXIS_PRESSURE, 3);
   zaxisDefLevels(zaxisID3, levs);
-  zaxisTestNamespace ();
   namespaceSetActive ( 0 );
+
+  reshArrayPrint ();
  
   // Create a variable list
   vlistID = vlistCreate();
@@ -129,9 +129,6 @@ void modelRun ()
   taxisID4 = taxisCreate(TAXIS_ABSOLUTE);
   taxisID5 = taxisCreate(TAXIS_ABSOLUTE);
   namespaceSetActive ( 0 );
- 
-
-  taxisTestNamespace ();
 
   // Assign the Time axis to the variable list
   vlistDefTaxis(vlistID, taxisID);
