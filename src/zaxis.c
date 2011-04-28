@@ -61,9 +61,9 @@ zaxis_t;
 
 static int CDI_MaxZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]);
 
-int  zaxisCompareP ( void * zaxisID, void * zaxis );
-void zaxisDestroyP ( void * zaxisID );
-void zaxisPrintP   ( void * zaxisID );
+int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 );
+void zaxisDestroyP ( void * zaxisptr );
+void zaxisPrintP   ( void * zaxisptr );
 
 resOps zaxisOps = { zaxisCompareP, zaxisDestroyP, zaxisPrintP };
 
@@ -71,9 +71,9 @@ static int  ZAXIS_Debug = 0;   /* If set to 1, debugging */
 
 
 static
-void zaxis_init_entry(zaxis_t *zaxisptr)
+void zaxis_init_ptr ( zaxis_t *zaxisptr ) 
 {
-  zaxisptr->self        = reshPut (( void * ) zaxisptr, &zaxisOps );
+  zaxisptr->self        = -1;
 
   zaxisptr->name[0]     = 0;
   zaxisptr->longname[0] = 0;
@@ -89,6 +89,14 @@ void zaxis_init_entry(zaxis_t *zaxisptr)
   zaxisptr->size        = 0;
   zaxisptr->vctsize     = 0;
   zaxisptr->vct         = NULL;
+}
+
+static
+void zaxis_init_entry ( zaxis_t *zaxisptr )
+{
+  zaxis_init_ptr ( zaxisptr );
+
+  zaxisptr->self = reshPut (( void * ) zaxisptr, &zaxisOps );
 }
 
 static
@@ -199,6 +207,22 @@ int zaxisCreate(int zaxistype, int size)
   return (zaxisID);
 }
 
+
+void zaxisDestroyKernel ( zaxis_t * zaxisptr )
+{
+  int id;
+
+  assert ( zaxisptr );
+
+  id = zaxisptr->self;
+
+  if ( zaxisptr->vals ) free ( zaxisptr->vals );
+
+  free ( zaxisptr );
+
+  reshRemove ( id );
+}
+
 /*
 @Function  zaxisDestroy
 @Title     Destroy a vertical Z-axis
@@ -215,19 +239,13 @@ void zaxisDestroy(int zaxisID)
 
   zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
 
-  zaxis_check_ptr(zaxisID, zaxisptr);
-
-  if ( zaxisptr->vals ) free(zaxisptr->vals);
-
-  free ( zaxisptr );
-
-  reshRemove ( zaxisID );
+  zaxisDestroyKernel ( zaxisptr );
 }
 
 
-void zaxisDestroyP ( void * zaxisID )
+void zaxisDestroyP ( void * zaxisptr )
 {
-  zaxisDestroy ( * (( int * ) zaxisID ));
+  zaxisDestroyKernel (( zaxis_t * ) zaxisptr );
 }
 
 
@@ -1034,6 +1052,8 @@ void zaxisPrintKernel ( zaxis_t * zaxisptr )
   int nbyte0, nbyte;
   double level;
 
+  assert ( zaxisptr );
+
   type    = zaxisptr->type;
   nlevels = zaxisptr->size;
 
@@ -1130,24 +1150,26 @@ void zaxisPrint ( int zaxisID )
 
   zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
 
-  zaxis_check_ptr(zaxisID, zaxisptr);
-
   zaxisPrintKernel ( zaxisptr );
 }
 
 
-void zaxisPrintP ( void * zaxisID )
+void zaxisPrintP ( void * zaxisptr )
 {
-  zaxisPrintKernel (( zaxis_t * ) zaxisID );
+  zaxisPrintKernel (( zaxis_t * ) zaxisptr );
 }
 
 
-int  zaxisCompareP ( void * zaxisID, void * zaxis )
+int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
 {
-  zaxis_t * z = ( zaxis_t * ) zaxis ;
- 
-  return zaxisCompare ( *(( int * ) zaxisID ), 
-			  z->type, z->size, z->size > 0 ? 1 : 0,
-			  z->vals, z->longname, z->units, z->ltype );
+  zaxis_t * z1 = ( zaxis_t * ) zaxisptr1 ;
+  zaxis_t * z2 = ( zaxis_t * ) zaxisptr2 ;
+  
+  assert ( z1 );
+  assert ( z2 );
+
+  return zaxisCompare ( z1->self, 
+			z2->type, z2->size, z2->size > 0 ? 1 : 0,
+			z2->vals, z2->longname, z2->units, z2->ltype );
 }
 			  

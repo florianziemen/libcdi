@@ -375,3 +375,14 @@ void reshArrayPrint ()
       namespaceSetActive ( temp );
     }
 }
+
+
+void reshLock ()
+{
+  ARRAY_LOCK ();
+}
+
+void reshUnlock ()
+{
+  ARRAY_UNLOCK ();
+}

@@ -42,9 +42,9 @@ char *Grids[] = {
 };
 
 
-int  gridCompareP ( void * gridID, void * grid );
-void gridDestroyP ( void * gridID );
-void gridPrintP   ( void * gridID );
+int  gridCompareP ( void * gridptr1, void * gridptr2 );
+void gridDestroyP ( void * gridptr );
+void gridPrintP   ( void * gridptr );
 
 resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP };
 
@@ -53,9 +53,9 @@ static int  GRID_Debug = 0;   /* If set to 1, debugging */
 
 
 static
-void grid_init_entry(grid_t *gridptr)
+void grid_init_ptr(grid_t *gridptr)
 {
-  gridptr->self         = reshPut (( void * ) gridptr, &gridOps );
+  gridptr->self         = -1;
 
   gridptr->type         = CDI_UNDEFID;
   gridptr->mask         = NULL;
@@ -117,6 +117,14 @@ void grid_init_entry(grid_t *gridptr)
   gridptr->yunits[0]    = 0;
   gridptr->xstdname[0]  = 0;
   gridptr->ystdname[0]  = 0;
+}
+
+static
+void grid_init_entry ( grid_t *gridptr )
+{
+  grid_init_ptr ( gridptr );
+
+  gridptr->self = reshPut (( void * ) gridptr, &gridOps );
 }
 
 static
@@ -437,6 +445,28 @@ int gridCreate(int gridtype, int size)
   return (gridID);
 }
 
+void gridDestroyKernel ( grid_t * gridptr )
+{
+  int id;
+
+  assert ( gridptr );
+
+  id = gridptr->self;
+
+  if ( gridptr->mask      ) free(gridptr->mask);
+  if ( gridptr->mask_gme  ) free(gridptr->mask_gme);
+  if ( gridptr->xvals     ) free(gridptr->xvals);
+  if ( gridptr->yvals     ) free(gridptr->yvals);
+  if ( gridptr->area      ) free(gridptr->area);
+  if ( gridptr->xbounds   ) free(gridptr->xbounds);
+  if ( gridptr->ybounds   ) free(gridptr->ybounds);
+  if ( gridptr->rowlon    ) free(gridptr->rowlon);
+  if ( gridptr->reference ) free(gridptr->reference);
+
+  free ( gridptr );
+
+  reshRemove ( id );
+}
 
 /*
 @Function  gridDestroy
@@ -453,27 +483,13 @@ void gridDestroy(int gridID)
   grid_t *gridptr;
 
   gridptr = ( grid_t *) reshGetVal ( gridID );
-  
-  grid_check_ptr(gridID, gridptr);
 
-  if ( gridptr->mask      ) free(gridptr->mask);
-  if ( gridptr->mask_gme  ) free(gridptr->mask_gme);
-  if ( gridptr->xvals     ) free(gridptr->xvals);
-  if ( gridptr->yvals     ) free(gridptr->yvals);
-  if ( gridptr->area      ) free(gridptr->area);
-  if ( gridptr->xbounds   ) free(gridptr->xbounds);
-  if ( gridptr->ybounds   ) free(gridptr->ybounds);
-  if ( gridptr->rowlon    ) free(gridptr->rowlon);
-  if ( gridptr->reference ) free(gridptr->reference);
-
-  free ( gridptr );
-
-  reshRemove ( gridID );
+  gridDestroyKernel ( gridptr );
 }
 
-void gridDestroyP ( void * gridID )
+void gridDestroyP ( void * gridptr )
 {
-  gridDestroy ( *(( int * ) gridID ));
+  gridDestroyKernel (( grid_t * ) gridptr );
 }
 
 
@@ -2262,9 +2278,15 @@ int gridCompare(int gridID, grid_t grid)
   return (differ);
 }
 
-int gridCompareP ( void * gridID, void * grid )
+int gridCompareP ( void * gridptr1, void * gridptr2 )
 {
-  return gridCompare ( *(( int * ) gridID ), *(( grid_t * ) grid ));
+  grid_t * g1 = ( grid_t * ) gridptr1;
+  grid_t * g2 = ( grid_t * ) gridptr2;
+
+  assert ( g1 );
+  assert ( g2 );
+
+  return gridCompare ( g1->self, * g2 );
 }
 
 
@@ -3272,9 +3294,11 @@ void gridPrint ( int gridID, int opt )
 
 
 
-void gridPrintP ( void * grid )
+void gridPrintP ( void * gridptr )
 {
-  gridPrintKernel (( grid_t * ) grid , 0 );
+  assert ( gridptr );
+
+  gridPrintKernel (( grid_t * ) gridptr , 0 );
 }
 
 
