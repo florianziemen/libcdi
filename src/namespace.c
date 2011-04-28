@@ -41,7 +41,7 @@ void namespaceShowbits ( int n, char *name )
 
 int namespaceIdxEncode ( namespaceTuple_t tin )
 {
-  assert(tin.nsp < NUM_NAMESPACES && tin.idx < NUM_IDX);
+  assert ( tin.nsp < NUM_NAMESPACES && tin.idx < NUM_IDX);
   return ( tin.nsp << idxbits ) + tin.idx;
 }
 

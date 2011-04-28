@@ -10,7 +10,7 @@
 #include "grid.h"
 #include "gaussgrid.h"
 #include "pio_util.h"
-#include "namespace.h"
+#include "resource_handle.h"
 
 
 #ifndef  RAD2DEG
@@ -42,200 +42,20 @@ char *Grids[] = {
 };
 
 
+int  gridCompare2 ( void * gridID, void * grid );
+void gridDestroy2 ( void * gridID );
+void gridPrint2   ( void * gridID );
+
+resOps gridOps = { gridCompare2, gridDestroy2, gridPrint2 };
+
+
 static int  GRID_Debug = 0;   /* If set to 1, debugging */
 
-static int _grid_max = MAX_GRIDS;
-
-static void grid_initialize(void);
-
-static int _grid_init = FALSE;
-
-#if  defined  (HAVE_LIBPTHREAD)
-#  include <pthread.h>
-
-static pthread_once_t _grid_init_thread = PTHREAD_ONCE_INIT;
-static pthread_mutex_t _grid_mutex;
-
-#  define GRID_LOCK()         pthread_mutex_lock(&_grid_mutex)
-#  define GRID_UNLOCK()       pthread_mutex_unlock(&_grid_mutex)
-#  define GRID_INIT()        \
-   if ( _grid_init == FALSE ) pthread_once(&_grid_init_thread, grid_initialize)
-
-#else
-
-#  define GRID_LOCK()
-#  define GRID_UNLOCK()
-#  define GRID_INIT()        \
-   if ( _grid_init == FALSE ) grid_initialize()
-
-#endif
-
-
-typedef struct _gridPtrToIdx {
-  int idx;
-  grid_t *ptr;
-  struct _gridPtrToIdx *next;
-} gridPtrToIdx;
-
-
-static gridPtrToIdx **_gridList  = NULL;
-static gridPtrToIdx **_gridAvail = NULL;
-
-
-
-void gridTestNamespace ()
-{
-  int i, j, sizeGridList, temp;
-
- 
-  if ( _grid_init )
-    {
-      temp = namespaceGetActive ();
-
-      for ( i = 0; i < namespaceGetNumber (); i++ )
-	{
-	  namespaceSetActive ( i );
-	  sizeGridList = gridSize();
-	  fprintf ( stdout, "######### namespace=%d, size of _gridList: %d\n", 
-		    i, sizeGridList );
-	  for ( j = 0; j < sizeGridList; j++)
-	    gridPrint ( _gridList[i][j].ptr->self, 0 );
-	}
-
-      namespaceSetActive ( temp );
-    }
-}
-
-
-static
-void grid_list_new(void)
-{
-  int nnsp, i;
-
-  nnsp = namespaceGetNumber ();
-  
-  for ( i = 0; i < nnsp; i++ )
-    {
-      assert(_gridList[i] == NULL);
-      _gridList[i] = (gridPtrToIdx *) malloc(_grid_max*sizeof(gridPtrToIdx));
-    }
-}
-
-static
-void grid_list_delete(void)
-{
-  int i, nnsp;
-
-  nnsp = namespaceGetNumber ();
-
-  if ( _gridList )
-    {
-      for ( i = 0; i < nnsp; i++ )
-	if (  _gridList[i] ) free ( _gridList[i] );
-      free ( _gridList );
-    }
-
-  if ( _gridAvail ) free ( _gridAvail );
-}
-
-static
-void grid_init_pointer(void)
-{
-  int nnsp, i, j, code;
-  namespaceTuple_t nspt;
-
-  nnsp = namespaceGetNumber ();
-
-  for ( i = 0; i < nnsp; i++ )
-    {
-      for ( j = 0; j < _grid_max; j++ )
-	{
-	  nspt.nsp = i;
-	  nspt.idx = j;
-	  code = namespaceIdxEncode ( nspt );
-	  _gridList[i][j].next = _gridList[i] + j + 1;
-	  _gridList[i][j].idx  = code;
-	  _gridList[i][j].ptr  = 0;
-	}
-      
-      _gridList[i][_grid_max-1].next = 0;
-      
-      _gridAvail[i] = _gridList[i];
-    }
-}
-
-static
-grid_t *grid_to_pointer(int idx)
-{
-  grid_t *gridptr = NULL;
-  int nsp;
-  namespaceTuple_t nspT;
-
-  nsp = namespaceGetActive ();
-  
-  nspT = namespaceIdxDecode ( idx );
-
-  if ( nspT.nsp != nsp )
-    Error ( "idx %d from namespace %d not available in active namespace %d !\n",
-	  idx, nspT.nsp, nsp );
-    
-
-  GRID_INIT();
-
-  if ( nspT.idx >= 0 && nspT.idx < _grid_max )
-    {
-      GRID_LOCK();
-
-      gridptr = _gridList[nsp][nspT.idx].ptr;
-
-      GRID_UNLOCK();
-    }
-  else
-    Error("grid index %d undefined!", idx);
-
-  return (gridptr);
-}
-
-/* Create an index from a pointer */
-static
-int grid_from_pointer(grid_t *ptr)
-{
-  int      idx = -1;
-  gridPtrToIdx *newptr;
-  int nsp;
-
-  nsp = namespaceGetActive ();
-
-  if ( ptr )
-    {
-      GRID_LOCK();
-
-      if ( _gridAvail[nsp] )
-	{
-	  newptr       = _gridAvail[nsp];
-	  _gridAvail[nsp]   = _gridAvail[nsp]->next;
-	  newptr->next = 0;
-	  idx	       = newptr->idx;
-	  newptr->ptr  = ptr;
-      
-	  if ( GRID_Debug )
-	    Message("Pointer %p has idx %d from grid list", ptr, idx);
-	}
-      else
-	Warning("Too many open grids (limit is %d)!", _grid_max);
-
-      GRID_UNLOCK();
-    }
-  else
-    Error("Internal problem (pointer %p undefined)", ptr);
-
-  return (idx);
-}
 
 static
 void grid_init_entry(grid_t *gridptr)
 {
-  gridptr->self         = grid_from_pointer(gridptr);
+  gridptr->self         = reshPut (( void *) gridptr, &gridOps );
 
   gridptr->type         = CDI_UNDEFID;
   gridptr->mask         = NULL;
@@ -312,60 +132,6 @@ grid_t *grid_new_entry(void)
 }
 
 static
-void grid_delete_entry(grid_t *gridptr)
-{
-  int idx;
-  int nsp;
-
-  nsp = namespaceGetActive ();
-
-  idx = gridptr->self;
-
-  GRID_LOCK();
-
-  free(gridptr);
-
-  _gridList[nsp][idx].next = _gridAvail[nsp];
-  _gridList[nsp][idx].ptr  = 0;
-  _gridAvail[nsp]          = &_gridList[nsp][idx];
-
-  GRID_UNLOCK();
-
-  if ( GRID_Debug )
-    Message("Removed idx %d from grid list", idx);
-}
-
-static
-void grid_initialize(void)
-{
-  char *env;
-  int nnsp;
-
-#if  defined  (HAVE_LIBPTHREAD)
-  /* initialize global API mutex lock */
-  pthread_mutex_init(&_grid_mutex, NULL);
-#endif
-
-  env = getenv("GRID_DEBUG");
-  if ( env ) GRID_Debug = atoi(env);
-
-  nnsp = namespaceGetNumber ();
-  _gridList  = xmalloc ( nnsp * sizeof ( _gridList[0] ));
-  _gridAvail = xmalloc ( nnsp * sizeof ( _gridList[0] ));
-
-  grid_list_new();
-  atexit(grid_list_delete);
-
-  GRID_LOCK();
-
-  grid_init_pointer();
-
-  GRID_UNLOCK();
-
-  _grid_init = TRUE;
-}
-
-static
 void grid_copy(grid_t *gridptr2, grid_t *gridptr1)
 {
   int gridID2;
@@ -385,23 +151,8 @@ void gridCheckPtr(const char *caller, int gridID, grid_t *gridptr)
 #define  grid_check_ptr(gridID, gridptr)  gridCheckPtr(__func__, gridID, gridptr)
 
 int gridSize(void)
-{
-  int gridsize = 0;
-  long i;
-  int nsp;
-
-  nsp = namespaceGetActive ();
-  
-  GRID_INIT();
-
-  GRID_LOCK();
-
-  for ( i = 0; i < _grid_max; i++ )
-    if ( _gridList[nsp][i].ptr ) gridsize++;
-
-  GRID_UNLOCK();
-
-  return (gridsize);
+{ 
+  return reshCountType ( &gridOps );
 }
 
 
@@ -594,8 +345,6 @@ int gridCreate(int gridtype, int size)
   if ( CDI_Debug )
     Message("gridtype: %d size: %d", gridtype, size);
 
-  GRID_INIT();
-
   gridptr = grid_new_entry();
   if ( ! gridptr ) Error("No memory");
 
@@ -703,7 +452,7 @@ void gridDestroy(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
   
   grid_check_ptr(gridID, gridptr);
 
@@ -717,7 +466,14 @@ void gridDestroy(int gridID)
   if ( gridptr->rowlon    ) free(gridptr->rowlon);
   if ( gridptr->reference ) free(gridptr->reference);
 
-  grid_delete_entry(gridptr);
+  free ( gridptr );
+
+  reshRemove ( gridID );
+}
+
+void gridDestroy2 ( void * gridID )
+{
+  gridDestroy ( *(( int * ) gridID ));
 }
 
 
@@ -759,7 +515,7 @@ void gridDefXname(int gridID, const char *xname)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -786,7 +542,9 @@ void gridDefXlongname(int gridID, const char *xlongname)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
+
+  grid_check_ptr(gridID, gridptr);
 
   if ( xlongname )
     strcpy(gridptr->xlongname, xlongname);
@@ -811,7 +569,7 @@ void gridDefXunits(int gridID, const char *xunits)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -838,7 +596,7 @@ void gridDefYname(int gridID, const char *yname)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -865,7 +623,7 @@ void gridDefYlongname(int gridID, const char *ylongname)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -892,7 +650,7 @@ void gridDefYunits(int gridID, const char *yunits)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -922,7 +680,7 @@ void gridInqXname(int gridID, char *xname)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -951,7 +709,7 @@ void gridInqXlongname(int gridID, char *xlongname)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -980,7 +738,7 @@ void gridInqXunits(int gridID, char *xunits)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -992,7 +750,7 @@ void gridInqXstdname(int gridID, char *xstdname)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1021,7 +779,7 @@ void gridInqYname(int gridID, char *yname)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1050,7 +808,7 @@ void gridInqYlongname(int gridID, char *ylongname)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1079,7 +837,7 @@ void gridInqYunits(int gridID, char *yunits)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1090,7 +848,7 @@ void gridInqYstdname(int gridID, char *ystdname)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1122,7 +880,7 @@ int gridInqType(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1151,7 +909,7 @@ int gridInqSize(int gridID)
   int size = 0;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1196,7 +954,7 @@ int gridInqTrunc(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1218,7 +976,7 @@ void gridDefTrunc(int gridID, int trunc)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1244,7 +1002,7 @@ void gridDefXsize(int gridID, int xsize)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1277,7 +1035,7 @@ void gridDefPrec(int gridID, int prec)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1299,7 +1057,7 @@ int gridInqPrec(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1327,7 +1085,7 @@ int gridInqXsize(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1353,7 +1111,7 @@ void gridDefYsize(int gridID, int ysize)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1392,7 +1150,7 @@ int gridInqYsize(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1414,7 +1172,7 @@ void gridDefRowlon(int gridID, int nrowlon, const int *rowlon)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
   
   grid_check_ptr(gridID, gridptr);
 
@@ -1439,7 +1197,7 @@ void gridInqRowlon(int gridID, int *rowlon)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1454,7 +1212,7 @@ int gridInqMask(int gridID, int *mask)
   long size, i;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1478,7 +1236,7 @@ void gridDefMask(int gridID, const int *mask)
   long size, i;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1513,7 +1271,7 @@ int gridInqMaskGME(int gridID, int *mask)
   long size, i;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1537,7 +1295,7 @@ void gridDefMaskGME(int gridID, const int *mask)
   long size, i;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1580,7 +1338,7 @@ int gridInqXvals(int gridID, double *xvals)
   long size;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1621,7 +1379,7 @@ void gridDefXvals(int gridID, const double *xvals)
   long size;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1668,7 +1426,7 @@ int gridInqYvals(int gridID, double *yvals)
   long size;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1709,7 +1467,7 @@ void gridDefYvals(int gridID, const double *yvals)
   long size;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1737,7 +1495,7 @@ double gridInqXval(int gridID, int index)
   double xval = 0;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1763,7 +1521,7 @@ double gridInqYval(int gridID, int index)
   double yval = 0;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1789,7 +1547,7 @@ double gridInqXinc(int gridID)
   double xinc;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1833,7 +1591,7 @@ double gridInqYinc(int gridID)
   double yinc;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1877,7 +1635,7 @@ double gridInqXpole(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1899,7 +1657,7 @@ void gridDefXpole(int gridID, double xpole)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1925,7 +1683,7 @@ double gridInqYpole(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1947,7 +1705,7 @@ void gridDefYpole(int gridID, double ypole)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1973,7 +1731,7 @@ double gridInqAngle(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -1995,7 +1753,7 @@ void gridDefAngle(int gridID, double angle)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2018,7 +1776,7 @@ int gridInqGMEnd(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2040,7 +1798,7 @@ void gridDefGMEnd(int gridID, int nd)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2062,7 +1820,7 @@ int gridInqGMEni(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2084,7 +1842,7 @@ void gridDefGMEni(int gridID, int ni)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2106,7 +1864,7 @@ int gridInqGMEni2(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2128,7 +1886,7 @@ void gridDefGMEni2(int gridID, int ni2)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2150,7 +1908,7 @@ int gridInqGMEni3(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2161,7 +1919,7 @@ void gridDefGMEni3(int gridID, int ni3)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2183,7 +1941,7 @@ void gridChangeType(int gridID, int gridtype)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2300,7 +2058,7 @@ int gridIsCircular(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2314,7 +2072,7 @@ int gridIsRotated(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2504,6 +2262,11 @@ int gridCompare(int gridID, grid_t grid)
   return (differ);
 }
 
+int gridCompare2 ( void * gridID, void * grid )
+{
+  return gridCompare ( *(( int * ) gridID ), *(( grid_t * ) grid ));
+}
+
 
 int gridGenerate(grid_t grid)
 {
@@ -2512,7 +2275,7 @@ int gridGenerate(grid_t grid)
 
   gridID = gridCreate(grid.type, grid.size);
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2710,7 +2473,7 @@ int gridDuplicate(int gridID)
   int size;
   grid_t *gridptr, *gridptrnew;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2718,7 +2481,8 @@ int gridDuplicate(int gridID)
   gridsize = gridInqSize(gridID);
 
   gridIDnew = gridCreate(gridtype, gridsize);
-  gridptrnew = grid_to_pointer(gridIDnew);
+
+  gridptrnew = ( grid_t *) reshGetVal ( gridIDnew );
 
   grid_copy(gridptrnew, gridptr);
 
@@ -2819,7 +2583,7 @@ void gridCompress(int gridID)
   int gridtype, gridsize;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2889,7 +2653,7 @@ void gridDefArea(int gridID, const double *area)
   long size;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2912,7 +2676,7 @@ void gridInqArea(int gridID, double *area)
   long size;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2928,7 +2692,7 @@ int gridHasArea(int gridID)
   int hasArea = FALSE;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2942,7 +2706,7 @@ const double *gridInqAreaPtr(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2954,7 +2718,7 @@ void gridDefNvertex(int gridID, int nvertex)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2966,7 +2730,7 @@ int gridInqNvertex(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -2994,7 +2758,7 @@ void gridDefXbounds(int gridID, const double *xbounds)
   long nvertex;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3047,7 +2811,7 @@ int gridInqXbounds(int gridID, double *xbounds)
   long nvertex;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3076,7 +2840,7 @@ double *gridInqXboundsPtr(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3104,7 +2868,7 @@ void gridDefYbounds(int gridID, const double *ybounds)
   long nvertex;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3157,7 +2921,7 @@ int gridInqYbounds(int gridID, double *ybounds)
   long nvertex;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3186,7 +2950,7 @@ double *gridInqYboundsPtr(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3210,7 +2974,7 @@ void gridPrint(int gridID, int opt)
   const double *ybounds = gridInqYboundsPtr(gridID);
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3500,12 +3264,17 @@ void gridPrint(int gridID, int opt)
     }
 }
 
+void gridPrint2 ( void * gridID )
+{
+  gridPrint ( *(( int * ) gridID ), 0 );
+}
+
 
 const double *gridInqXvalsPtr(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3517,7 +3286,7 @@ const double *gridInqYvalsPtr(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3553,7 +3322,7 @@ void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3604,7 +3373,7 @@ void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonPar
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3634,7 +3403,7 @@ void gridDefLcc2(int gridID, double earth_radius, double lon_0, double lat_0, do
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3657,7 +3426,7 @@ void gridInqLcc2(int gridID, double *earth_radius, double *lon_0, double *lat_0,
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3683,7 +3452,7 @@ void gridDefLaea(int gridID, double earth_radius, double lon_0, double lat_0)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3704,7 +3473,7 @@ void gridInqLaea(int gridID, double *earth_radius, double *lon_0, double *lat_0)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3729,7 +3498,7 @@ void gridDefComplexPacking(int gridID, int lcomplex)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3742,7 +3511,7 @@ int gridInqComplexPacking(int gridID)
   int lcomplex;
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3756,7 +3525,7 @@ int gridInqNumber(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3768,7 +3537,7 @@ void gridDefNumber(int gridID, int number)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3780,7 +3549,7 @@ int gridInqPosition(int gridID)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3792,7 +3561,7 @@ void gridDefPosition(int gridID, int position)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3805,7 +3574,7 @@ int gridInqReference(int gridID, char *reference)
   grid_t *gridptr;
   int len = 0;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -3825,7 +3594,7 @@ void gridDefReference(int gridID, const char *reference)
 {
   grid_t *gridptr;
 
-  gridptr = grid_to_pointer(gridID);
+  gridptr = ( grid_t *) reshGetVal ( gridID );
 
   grid_check_ptr(gridID, gridptr);
 

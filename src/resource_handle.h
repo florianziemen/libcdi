@@ -15,10 +15,12 @@ typedef int cdiResH;
 /* return 0 on equality, not 0 otherwise */
 typedef int ( * valCompareFunc )( void *, void * );
 typedef void ( * valDestroyFunc ) ( void * );
+typedef void ( * valPrintFunc ) ( void * );
 
 typedef struct {
   valCompareFunc valCompare;
   valDestroyFunc valDestroy;
+  valPrintFunc   valPrint;
 }resOps; 
 
 int
@@ -32,5 +34,7 @@ reshGetOps ( cdiResH );
 
 void
 reshRemove ( cdiResH );
+
+int reshCountType ( resOps * );
 
 #endif

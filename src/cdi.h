@@ -210,9 +210,10 @@ int      namespaceGetNumber ( void );
 void     namespaceSetActive ( int );
 int      namespaceGetActive ( void );
 
-void     gridTestNamespace  ( void );
 void     zaxisTestNamespace ( void );
 void     taxisTestNamespace ( void );
+
+void     reshArrayPrint     ( void );
 
   /* CDI control routines */
 

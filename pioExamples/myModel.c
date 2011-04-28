@@ -91,7 +91,7 @@ void modelRun ()
   gridDefYsize(gridID3, nlat-2);
   gridDefXvals(gridID3, lons);
   gridDefYvals(gridID3, lats);
-  gridTestNamespace ();
+  reshArrayPrint ();
   namespaceSetActive ( 0 );
 
 

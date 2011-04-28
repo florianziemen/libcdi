@@ -74,6 +74,9 @@ void arrayNew ( void )
 }
 
 
+/**************************************************************/
+
+
 static
 void arrayInitPointer ( void )
 {
@@ -100,6 +103,10 @@ void arrayInitPointer ( void )
     }
 }
 
+
+/**************************************************************/
+
+
 static
 void arrayDelete ( void )
 {
@@ -116,6 +123,10 @@ void arrayDelete ( void )
 
   if ( freeListHead ) free ( freeListHead );
 }
+
+
+/**************************************************************/
+
 
 static
 void arrayInitialize ( void )
@@ -136,6 +147,9 @@ void arrayInitialize ( void )
 
   arrayInit = 1;
 }
+
+
+/**************************************************************/
 
 
 void *reshGetVal ( cdiResH idx )
@@ -170,6 +184,9 @@ void *reshGetVal ( cdiResH idx )
 }
 
 
+/**************************************************************/
+
+
 resOps * reshGetOps ( cdiResH idx )
 {
   resOps *ops = NULL;
@@ -201,8 +218,11 @@ resOps * reshGetOps ( cdiResH idx )
   return ops;
 }
 
-void
-arraySizeExtend()
+
+/**************************************************************/
+
+
+void arraySizeExtend()
 {
   int newArraySize;
   int i, nsp, code;
@@ -233,7 +253,9 @@ arraySizeExtend()
 }
 
 
-/* Create an index from a pointer */
+/**************************************************************/
+
+
 int reshPut ( void *p, resOps *ops )
 {
   int      idx = -1;
@@ -245,6 +267,10 @@ int reshPut ( void *p, resOps *ops )
   nsp = namespaceGetActive ();
 
   assert ( p );
+
+  ARRAY_INIT();
+
+  nsp = namespaceGetActive ();
 
   ARRAY_LOCK();
 
@@ -263,6 +289,8 @@ int reshPut ( void *p, resOps *ops )
 }
 
 
+/**************************************************************/
+
 
 void
 reshRemove ( cdiResH idx)
@@ -278,4 +306,66 @@ reshRemove ( cdiResH idx)
   freeListHead[nsp]             = arrayResources[nsp] + idx;
 
   ARRAY_UNLOCK();
+}
+
+
+/**************************************************************/
+
+
+int reshCountType ( resOps * ops )
+{
+  int countType = 0;
+  long i;
+  int nsp;
+  
+  nsp = namespaceGetActive ();
+  
+  ARRAY_INIT();
+  
+  ARRAY_LOCK();
+  
+  for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
+    if ( arrayResources[nsp][i].ptr ) 
+      if ( arrayResources[nsp][i].ops == ops )
+	countType++;
+  
+  ARRAY_UNLOCK();
+  
+  return countType;
+}
+
+
+/**************************************************************/
+
+
+void reshArrayPrint ()
+{
+  int i, j, temp;
+  node * curr;
+ 
+  if ( arrayInit )
+    {
+      temp = namespaceGetActive ();
+
+      for ( i = 0; i < namespaceGetNumber (); i++ )
+	{
+	  namespaceSetActive ( i );
+
+	  fprintf ( stdout, "\n" );
+	  fprintf ( stdout, "##################################\n" );
+	  fprintf ( stdout, "#\n" );
+	  fprintf ( stdout, "# namespace=%d\n", i );
+	  fprintf ( stdout, "#\n" );
+	  fprintf ( stdout, "##################################\n" );
+
+	  for ( j = 0; j < arraySizeAllocated[i]; j++)
+	    {
+	      curr = &arrayResources[i][j];
+	      if ( curr->ptr )
+		curr->ops->valPrint ( curr->ptr ); 
+	    }
+	}
+
+      namespaceSetActive ( temp );
+    }
 }
