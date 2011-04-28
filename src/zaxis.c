@@ -12,36 +12,41 @@
 #include "stream_int.h"
 
 
+#define  LevelDown  0
+#define  LevelUp    1
+
+
 static struct {
+  unsigned char positive;
   char *name;
   char *longname;
-  char *units;
+  char *stdname;
+  char *units;    // 1: up;  2: down
 }
 ZaxistypeEntry[] = {
-  {"sfc",     "surface",                  ""},
-  {"lev",     "generic",                  "level"},
-  {"lev",     "hybrid",                   "level"},
-  {"lev",     "hybrid_half",              "level"},
-  {"lev",     "pressure",                 "Pa"},
-  {"height",  "height",                   "m"},
-  {"depth",   "depth_below_sea",          "m"},
-  {"depth",   "depth_below_land",         "cm"},
-  {"lev",     "isentropic",               "K"},
-  {"lev",     "trajectory",               ""},
-  {"alt",     "altitude",                 "m"},
-  {"lev",     "sigma",                    "level"},
-  {"lev",     "meansea",                  "level"},
+  {0, "sfc",     "surface",           "",               ""},
+  {0, "lev",     "generic",           "",               "level"},
+  {2, "lev",     "hybrid",            "",               "level"},
+  {2, "lev",     "hybrid_half",       "",               "level"},
+  {2, "lev",     "pressure",          "air_pressure",   "Pa"},
+  {1, "height",  "height",            "",               "m"},
+  {2, "depth",   "depth_below_sea",   "",               "m"},
+  {2, "depth",   "depth_below_land",  "",               "cm"},
+  {0, "lev",     "isentropic",        "",               "K"},
+  {0, "lev",     "trajectory",        "",               ""},
+  {1, "alt",     "altitude",          "",               "m"},
+  {0, "lev",     "sigma",             "",               "level"},
+  {0, "lev",     "meansea",           "",               "level"},
 };
 
 static int CDI_MaxZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]);
 
 
-#define  LevelDown  0
-#define  LevelUp    1
-
 typedef struct {
+  unsigned char positive;
   char     name[256];
   char     longname[256];
+  char     stdname[256];
   char     units[256];
   double  *vals;
   double  *lbounds;
@@ -361,6 +366,9 @@ int zaxisCreate(int zaxistype, int size)
   zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
   zaxisDefUnits(zaxisID, ZaxistypeEntry[zaxistype].units);
 
+  if ( *ZaxistypeEntry[zaxistype].stdname )
+    strcpy(zaxisptr->stdname, ZaxistypeEntry[zaxistype].stdname);
+
   vals = (double *) malloc(size*sizeof(double));
 
   for ( ilev = 0; ilev < size; ilev++ )
@@ -573,6 +581,18 @@ void zaxisInqUnits(int zaxisID, char *units)
   zaxis_check_ptr(zaxisID, zaxisptr);
 
   strcpy(units, zaxisptr->units);
+}
+
+
+void zaxisInqStdname(int zaxisID, char *stdname)
+{
+  zaxis_t *zaxisptr;
+
+  zaxisptr = zaxis_to_pointer(zaxisID);
+
+  zaxis_check_ptr(zaxisID, zaxisptr);
+
+  strcpy(stdname, zaxisptr->stdname);
 }
 
 

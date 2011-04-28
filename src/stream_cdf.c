@@ -2106,6 +2106,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
 {
   /*  char zaxisname0[256]; */
   char axisname[256];
+  char stdname[256];
   char longname[256];
   char units[256];
   char tmpname[256];
@@ -2276,12 +2277,15 @@ void cdfDefZaxis(int streamID, int zaxisID)
 
           zaxisInqLongname(zaxisID, longname);
           zaxisInqUnits(zaxisID, units);
+          zaxisInqStdname(zaxisID, stdname);
 
           cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID, &ncvarid);
           if ( (len = strlen(longname)) )
             cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
           if ( (len = strlen(units)) )
             cdf_put_att_text(fileID, ncvarid, "units", len, units);
+          if ( (len = strlen(stdname)) )
+            cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
 
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "Z");
               

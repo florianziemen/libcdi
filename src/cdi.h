@@ -724,6 +724,9 @@ void    zaxisInqName(int zaxisID, char *name);
 /*      zaxisInqLongname: Get the longname of a Z-axis */
 void    zaxisInqLongname(int zaxisID, char *longname);
 
+/*      zaxisInqStdname: Get the standard name of a Z-axis */
+void    zaxisInqStdname(int zaxisID, char *stdname);
+
 /*      zaxisInqUnits: Get the units of a Z-axis */
 void    zaxisInqUnits(int zaxisID, char *units);
 

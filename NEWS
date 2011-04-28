@@ -1,6 +1,11 @@
 CDI NEWS
 --------
 
+Version 1.5.1 (?? ??? 2011):
+
+   New features:
+     * Added support for FILETYPE_NC4C (netcdf4 classic)
+
 Version 1.5.0 (15 March 2011):
 
    New features: 

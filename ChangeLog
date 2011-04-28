@@ -1,3 +1,7 @@
+2011-04-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Added standard_name on netCDF zaxes
+
 2011-04-27  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Added support for FILETYPE_NC4C (netcdf4 classic)
