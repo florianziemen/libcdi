@@ -1680,7 +1680,7 @@ void cdfDefLonLat2D(int streamID, int gridID)
           char yaxisname[] = "cell_area";
           char units[] = "m2";
           char longname[] = "area of grid cell";
-          char stdname[] = "area";
+          char stdname[] = "cell_area";
 
           cdf_def_var(fileID, yaxisname, (nc_type) xtype, 2, dimIDs, &ncavarid);
 
@@ -2001,7 +2001,7 @@ void cdfDefCell(int streamID, int gridID)
           char yaxisname[] = "cell_area";
           char units[] = "m2";
           char longname[] = "area of grid cell";
-          char stdname[] = "area";
+          char stdname[] = "cell_area";
 
           cdf_def_var(fileID, yaxisname, (nc_type) xtype, 1, &dimID, &ncavarid);
 
