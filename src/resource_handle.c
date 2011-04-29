@@ -18,6 +18,9 @@ static void arrayInitialize(void);
 
 static int arrayInit = 0;
 
+
+// ATTENTION: not thread safe yet, namespaces are set in model!
+
 #if  defined  (HAVE_LIBPTHREAD)
 #  include <pthread.h>
 
@@ -49,6 +52,24 @@ typedef struct node {
 
 static node **arrayResources;
 static node **freeListHead;
+
+
+/**************************************************************/
+
+
+void reshLock ()
+{
+  ARRAY_LOCK();
+}
+
+
+/**************************************************************/
+
+
+void reshUnlock ()
+{
+  ARRAY_UNLOCK();
+}
 
 
 /**************************************************************/
@@ -155,6 +176,8 @@ void *reshGetVal ( cdiResH idx, resOps * ops  )
   namespaceTuple_t nspT;
   node * node;
 
+  ARRAY_LOCK ();
+
   nsp = namespaceGetActive ();
 
   nspT = namespaceIdxDecode ( idx );
@@ -164,7 +187,9 @@ void *reshGetVal ( cdiResH idx, resOps * ops  )
 	   nspT.idx >= 0 && 
 	   nspT.idx < arraySizeAllocated[nsp] );
 
-  node =  &arrayResources[nsp][nspT.idx];
+  node =  arrayResources[nsp] + nspT.idx;
+
+  ARRAY_UNLOCK ();
    
   assert ( node->ops == ops );
  
@@ -215,9 +240,9 @@ int reshPut ( void *p, resOps *ops )
 
   ARRAY_INIT();
 
-  nsp = namespaceGetActive ();
-
   ARRAY_LOCK();
+
+  nsp = namespaceGetActive ();
 
   if ( !freeListHead[nsp] ) arraySizeExtend();
 
@@ -240,13 +265,12 @@ int reshPut ( void *p, resOps *ops )
 void reshRemove ( cdiResH idx, resOps * ops )
 {
   int nsp;
-  node * node;
 
   assert ( arrayInit );
 
-  nsp = namespaceGetActive ();
-
   ARRAY_LOCK();
+
+  nsp = namespaceGetActive ();
 
   assert ( arrayResources[nsp][idx].ops == ops );
 
@@ -267,10 +291,10 @@ int reshCountType ( resOps * ops )
   int i, nsp, countType = 0;
 
   if ( !( arrayInit && ops )) return 0;
-
-  nsp = namespaceGetActive ();
   
   ARRAY_LOCK();
+
+  nsp = namespaceGetActive ();
   
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
     if ( arrayResources[nsp][i].ptr ) 
@@ -310,7 +334,7 @@ void reshArrayPrint ()
       
       for ( j = 0; j < arraySizeAllocated[i]; j++)
 	{
-	  curr = arrayResources[i]+j;
+	  curr = arrayResources[i] + j;
 	  if ( curr->ops && curr->ptr )
 	    {
 	      curr->ops->valPrint (( void * ) curr->ptr );
@@ -322,15 +346,4 @@ void reshArrayPrint ()
   fprintf ( stdout, "#\n#  end global resource array \n#\n#################\n\n" );
   
   namespaceSetActive ( temp );
-}
-
-
-void reshLock ()
-{
-  ARRAY_LOCK ();
-}
-
-void reshUnlock ()
-{
-  ARRAY_UNLOCK ();
 }

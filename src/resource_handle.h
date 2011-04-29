@@ -31,7 +31,7 @@ void reshRemove ( cdiResH, resOps * );
 
 int reshCountType ( resOps * );
 
-void reshLock ();
-void reshUnlock ();
+void reshLock   ( void );
+void reshUnlock ( void );
 
 #endif

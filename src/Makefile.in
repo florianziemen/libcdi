@@ -364,8 +364,7 @@ libcdi_la_SOURCES = \
 	vlist_var.c 	 \
 	zaxis.c		 \
         stream.c         \
-        swap.c           \
-        temp.h  
+        swap.c           
 
 LOCALTARGETS = $(am__append_1)
 #
@@ -751,6 +750,7 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am uninstall-includeHEADERS \
 	uninstall-libLTLIBRARIES
+
 
 #libcdi_la_CPPFLAGS  = @CPPFLAGS@
 #libcdi_la_LIBADD    = @LDFLAGS@

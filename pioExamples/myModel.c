@@ -136,9 +136,6 @@ void modelRun ()
 
   // Assign the Time axis to the variable list
   vlistDefTaxis(vlistID, taxisID);
-  
-  reshArrayPrint ();
-
 
   // Create a dataset in netCDF fromat
   
@@ -171,6 +168,8 @@ void modelRun ()
       streamWriteVar(streamID, varID1, var1, nmiss);
       streamWriteVar(streamID, varID2, var2, nmiss);
     }
+  
+  reshArrayPrint ();
 
   // Close the output stream
   streamClose(streamID);
