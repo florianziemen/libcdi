@@ -113,7 +113,7 @@ libcdi_la_SOURCES = 	 \
 	vlist_var.c 	 \
 	zaxis.c		 \
         stream.c         \
-        swap.c
+        swap.c           
 
 #libcdi_la_CPPFLAGS  = @CPPFLAGS@
 #libcdi_la_LIBADD    = @LDFLAGS@

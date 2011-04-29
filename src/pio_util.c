@@ -51,12 +51,12 @@ void * pcdiXcalloc ( size_t nmemb, size_t size, const char *filename, int line )
 
 void * pcdiXrealloc ( void *p, size_t size, const char *filename, int line )
 {
-  p = realloc ( p, size );
+  void * value = realloc ( p, size );
 
-  if ( p == NULL )
+  if ( value == NULL )
     pcdiAbort ( "realloc failed", filename, line, -1 );
 
-  return p;
+  return value;
 }
 
 /***************************************************************/

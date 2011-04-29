@@ -61,17 +61,17 @@ void arrayNew ( void )
 
   nnsp = namespaceGetNumber ();
 
-  arraySizeAllocated  = xcalloc ( nnsp,
-                                 sizeof ( arraySizeAllocated[0]));
-  arrayResources  = xcalloc ( nnsp, sizeof ( arrayResources[0] ));
-  freeListHead = xcalloc ( nnsp, sizeof( freeListHead[0] ));
+  arraySizeAllocated = xcalloc ( nnsp, sizeof ( arraySizeAllocated[0]));
+  arrayResources     = xcalloc ( nnsp, sizeof ( arrayResources[0] ));
+  freeListHead       = xcalloc ( nnsp, sizeof( freeListHead[0] ));
 
   for ( i = 0; i < nnsp; i++ )
     {
       arraySizeAllocated[i] = MIN_ARRAY_SIZE;
+
       assert ( arrayResources[i] == NULL);
-      arrayResources[i] =
-        xcalloc ( arraySizeAllocated[i], sizeof ( node ));
+
+      arrayResources[i] =  xcalloc ( arraySizeAllocated[i], sizeof ( node ));
     }
 }
 
@@ -82,8 +82,7 @@ void arrayNew ( void )
 static
 void arrayInitPointer ( void )
 {
-  int nnsp, i, j, code;
-  namespaceTuple_t nspt;
+  int nnsp, i, j;
 
   nnsp = namespaceGetNumber ();
 
@@ -91,12 +90,8 @@ void arrayInitPointer ( void )
     {
       for ( j = 0; j < arraySizeAllocated[i]; j++ )
         {
-          nspt.nsp = i;
-          nspt.idx = j;
-          code = namespaceIdxEncode ( nspt );
+          arrayResources[i][j].idx  = namespaceIdxEncode2 ( i, j );
           arrayResources[i][j].next = arrayResources[i] + j + 1;
-          arrayResources[i][j].idx  = code;
-          arrayResources[i][j].ptr  = NULL;
         }
 
       arrayResources[i][arraySizeAllocated[i]-1].next = NULL;
@@ -109,21 +104,21 @@ void arrayInitPointer ( void )
 /**************************************************************/
 
 
-static
-void arrayDelete ( void )
+static 
+void arrayDestroy ( void )
 {
-  int i, nnsp;
-
-  nnsp = namespaceGetNumber ();
+  int i;
 
   if ( arrayResources )
     {
-      for ( i = 0; i < nnsp; i++ )
-        if (  arrayResources[i] ) free ( arrayResources[i] );
+      for ( i = 0; i < namespaceGetNumber (); i++ )
+        if (  arrayResources[i] ) 
+	  free ( arrayResources[i] );
       free ( arrayResources );
     }
 
   if ( freeListHead ) free ( freeListHead );
+  if ( arraySizeAllocated ) free ( arraySizeAllocated );
 }
 
 
@@ -138,8 +133,8 @@ void arrayInitialize ( void )
   pthread_mutex_init ( &arrayMutex, NULL);
 #endif
 
-  arrayNew();
-  atexit ( arrayDelete );
+  arrayNew ();
+  atexit ( arrayDestroy );
 
   ARRAY_LOCK ();
 
@@ -154,69 +149,27 @@ void arrayInitialize ( void )
 /**************************************************************/
 
 
-void *reshGetVal ( cdiResH idx )
+void *reshGetVal ( cdiResH idx, resOps * ops  )
 {
-  void *p = NULL;
   int nsp;
   namespaceTuple_t nspT;
+  node * node;
 
   nsp = namespaceGetActive ();
 
   nspT = namespaceIdxDecode ( idx );
 
-  if ( nspT.nsp != nsp )
-    Error ( "idx %d from namespace %d not available in active namespace %d !\n",
-          idx, nspT.nsp, nsp );
+  assert ( arrayInit && 
+	   nspT.nsp == nsp &&
+	   nspT.idx >= 0 && 
+	   nspT.idx < arraySizeAllocated[nsp] );
 
-  ARRAY_INIT();
+  node =  &arrayResources[nsp][nspT.idx];
+   
+  assert ( node->ops == ops );
+ 
 
-  if ( nspT.idx >= 0 && nspT.idx < arraySizeAllocated[nsp] )
-    {
-      ARRAY_LOCK();
-
-      p = arrayResources[nsp][nspT.idx].ptr;
-
-      ARRAY_UNLOCK();
-    }
-  else
-    Error("resource handle %d invalid!", idx);
-
-  return p;
-}
-
-
-/**************************************************************/
-
-
-resOps * reshGetOps ( cdiResH idx )
-{
-  resOps *ops = NULL;
-  int nsp;
-  namespaceTuple_t nspT;
-
-  nsp = namespaceGetActive ();
-
-  nspT = namespaceIdxDecode ( idx );
-
-  if ( nspT.nsp != nsp )
-    Error ( "idx %d from namespace %d not available in active namespace %d !\n",
-          idx, nspT.nsp, nsp );
-
-
-  ARRAY_INIT();
-
-  if ( nspT.idx >= 0 && nspT.idx < arraySizeAllocated[nsp] )
-    {
-      ARRAY_LOCK();
-
-      ops = arrayResources[nsp][nspT.idx].ops;
-
-      ARRAY_UNLOCK();
-    }
-  else
-    Error("resource handle %d invalid!", idx);
-
-  return ops;
+  return node->ptr;
 }
 
 
@@ -227,12 +180,10 @@ void arraySizeExtend()
 {
   int newArraySize;
   int i, nsp, code;
-  namespaceTuple_t nspt;
 
   nsp = namespaceGetActive ();
-  nspt.nsp = nsp;
 
-  assert ( arrayResources[nsp] != NULL );
+  assert ( arrayInit );
 
   newArraySize = arraySizeAllocated[nsp] + MIN_ARRAY_SIZE;
 
@@ -240,12 +191,9 @@ void arraySizeExtend()
     xrealloc(arrayResources[nsp], newArraySize * sizeof (arrayResources[0][0]));
 
   for ( i = arraySizeAllocated[nsp]; i < newArraySize; ++i )
-    {
-      nspt.idx = i;
-      code = namespaceIdxEncode ( nspt );
-      arrayResources[nsp][i].idx  = code;
+    { 
+      arrayResources[nsp][i].idx  = namespaceIdxEncode2 ( nsp, i );
       arrayResources[nsp][i].next = arrayResources[nsp] + i + 1;
-      arrayResources[nsp][i].ptr  = NULL;
     }
 
   arrayResources[nsp][newArraySize-1].next = freeListHead[nsp];
@@ -263,11 +211,7 @@ int reshPut ( void *p, resOps *ops )
   node *newNode;
   int nsp;
 
-  ARRAY_INIT();
-
-  nsp = namespaceGetActive ();
-
-  assert ( p );
+  assert ( p && ops );
 
   ARRAY_INIT();
 
@@ -293,16 +237,21 @@ int reshPut ( void *p, resOps *ops )
 /**************************************************************/
 
 
-void
-reshRemove ( cdiResH idx)
+void reshRemove ( cdiResH idx, resOps * ops )
 {
   int nsp;
+  node * node;
+
+  assert ( arrayInit );
 
   nsp = namespaceGetActive ();
 
   ARRAY_LOCK();
 
+  assert ( arrayResources[nsp][idx].ops == ops );
+
   arrayResources[nsp][idx].next = freeListHead[nsp];
+  arrayResources[nsp][idx].ops  = NULL;
   arrayResources[nsp][idx].ptr  = NULL;
   freeListHead[nsp]             = arrayResources[nsp] + idx;
 
@@ -317,9 +266,9 @@ int reshCountType ( resOps * ops )
 {
   int i, nsp, countType = 0;
 
+  if ( !( arrayInit && ops )) return 0;
+
   nsp = namespaceGetActive ();
-  
-  ARRAY_INIT();
   
   ARRAY_LOCK();
   
@@ -342,38 +291,37 @@ void reshArrayPrint ()
   int i, j, temp;
   node * curr;
  
-  if ( arrayInit )
+  if ( ! arrayInit ) return;
+
+  temp = namespaceGetActive ();
+  
+  fprintf ( stdout, "\n\n###############\n#\n#  print global resource array \n" );
+  
+  for ( i = 0; i < namespaceGetNumber (); i++ )
     {
-      temp = namespaceGetActive ();
-
-      fprintf ( stdout, "\n\n###############\n#\n#  print global resource array \n" );
-
-      for ( i = 0; i < namespaceGetNumber (); i++ )
+      namespaceSetActive ( i );
+      
+      fprintf ( stdout, "\n" );
+      fprintf ( stdout, "##################################\n" );
+      fprintf ( stdout, "#\n" );
+      fprintf ( stdout, "# namespace=%d\n", i );
+      fprintf ( stdout, "#\n" );
+      fprintf ( stdout, "##################################\n\n" );
+      
+      for ( j = 0; j < arraySizeAllocated[i]; j++)
 	{
-	  namespaceSetActive ( i );
-
-	  fprintf ( stdout, "\n" );
-	  fprintf ( stdout, "##################################\n" );
-	  fprintf ( stdout, "#\n" );
-	  fprintf ( stdout, "# namespace=%d\n", i );
-	  fprintf ( stdout, "#\n" );
-	  fprintf ( stdout, "##################################\n\n" );
-
-	  for ( j = 0; j < arraySizeAllocated[i]; j++)
+	  curr = arrayResources[i]+j;
+	  if ( curr->ops && curr->ptr )
 	    {
-	      curr = arrayResources[i]+j;
-	      if ( curr->ptr )
-		{
-		  curr->ops->valPrint (( void * ) curr->ptr );
-		  fprintf ( stdout, "\n" ); 
-		}
+	      curr->ops->valPrint (( void * ) curr->ptr );
+	      fprintf ( stdout, "\n" ); 
 	    }
 	}
-
-      fprintf ( stdout, "#\n#  end global resource array \n#\n#################\n\n" );
-
-      namespaceSetActive ( temp );
     }
+  
+  fprintf ( stdout, "#\n#  end global resource array \n#\n#################\n\n" );
+  
+  namespaceSetActive ( temp );
 }
 
 

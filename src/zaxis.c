@@ -220,7 +220,7 @@ void zaxisDestroyKernel ( zaxis_t * zaxisptr )
 
   free ( zaxisptr );
 
-  reshRemove ( id );
+  reshRemove ( id, &zaxisOps );
 }
 
 /*
@@ -237,7 +237,7 @@ void zaxisDestroy(int zaxisID)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxisDestroyKernel ( zaxisptr );
 }
@@ -285,7 +285,7 @@ void zaxisDefName(int zaxisID, const char *name)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -311,7 +311,7 @@ void zaxisDefLongname(int zaxisID, const char *longname)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -337,7 +337,7 @@ void zaxisDefUnits(int zaxisID, const char *units)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -366,7 +366,7 @@ void zaxisInqName(int zaxisID, char *name)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -394,7 +394,7 @@ void zaxisInqLongname(int zaxisID, char *longname)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -422,7 +422,7 @@ void zaxisInqUnits(int zaxisID, char *units)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -434,7 +434,7 @@ void zaxisDefPrec(int zaxisID, int prec)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -446,7 +446,7 @@ int zaxisInqPrec(int zaxisID)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -458,7 +458,7 @@ void zaxisDefLtype(int zaxisID, int ltype)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -470,7 +470,7 @@ int zaxisInqLtype(int zaxisID)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -498,7 +498,7 @@ void zaxisDefLevels(int zaxisID, const double *levels)
   double *vals;
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -529,7 +529,7 @@ void zaxisDefLevel(int zaxisID, int levelID, double level)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -558,7 +558,7 @@ double zaxisInqLevel(int zaxisID, int levelID)
   double level = 0;
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -574,7 +574,7 @@ double zaxisInqLbound(int zaxisID, int index)
   double level = 0;
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -591,7 +591,7 @@ double zaxisInqUbound(int zaxisID, int index)
   double level = 0;
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -607,7 +607,7 @@ const double *zaxisInqLevelsPtr(int zaxisID)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -636,7 +636,7 @@ void zaxisInqLevels(int zaxisID, double *levels)
   int i;
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -652,7 +652,7 @@ int zaxisInqLbounds(int zaxisID, double *lbounds)
   int i;
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -675,7 +675,7 @@ int zaxisInqUbounds(int zaxisID, double *ubounds)
   int i;
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -698,7 +698,7 @@ int zaxisInqWeights(int zaxisID, double *weights)
   int i;
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -722,7 +722,7 @@ int zaxisInqLevelID(int zaxisID, double level)
   int i;
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -759,7 +759,7 @@ int zaxisInqType(int zaxisID)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -787,7 +787,7 @@ int zaxisInqSize(int zaxisID)
   int size = 1;
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -802,7 +802,7 @@ void cdiCheckZaxis(int zaxisID)
   int size, i, found;
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
   
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -848,7 +848,7 @@ void zaxisDefVct(int zaxisID, int size, const double *vct)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -868,7 +868,7 @@ int zaxisInqVctSize(int zaxisID)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -880,7 +880,7 @@ const double *zaxisInqVctPtr(int zaxisID)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -893,7 +893,7 @@ void zaxisDefLbounds(int zaxisID, const double *lbounds)
   size_t size;
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -915,7 +915,7 @@ void zaxisDefUbounds(int zaxisID, const double *ubounds)
   size_t size;
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -937,7 +937,7 @@ void zaxisDefWeights(int zaxisID, const double *weights)
   size_t size;
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -958,7 +958,7 @@ void zaxisChangeType(int zaxisID, int zaxistype)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
   
@@ -970,7 +970,7 @@ void zaxisResize(int zaxisID, int size)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -988,7 +988,7 @@ int zaxisDuplicate(int zaxisID)
   int size;
   zaxis_t *zaxisptr, *zaxisptrnew;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -996,7 +996,7 @@ int zaxisDuplicate(int zaxisID)
   zaxissize = zaxisInqSize(zaxisID);
 
   zaxisIDnew = zaxisCreate(zaxistype, zaxissize);
-  zaxisptrnew = ( zaxis_t * ) reshGetVal ( zaxisIDnew );
+  zaxisptrnew = ( zaxis_t * ) reshGetVal ( zaxisIDnew, &zaxisOps );
 
   zaxis_copy(zaxisptrnew, zaxisptr);
 
@@ -1148,7 +1148,7 @@ void zaxisPrint ( int zaxisID )
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID );
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxisPrintKernel ( zaxisptr );
 }

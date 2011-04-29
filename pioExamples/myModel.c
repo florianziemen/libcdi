@@ -215,6 +215,5 @@ int main (int argc, char *argv[])
 #ifdef USE_MPI
   MPI_Finalize ();                         
 #endif
-
   return 0;
 }

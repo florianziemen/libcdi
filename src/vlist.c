@@ -61,7 +61,7 @@ resOps vlist_ops = {
 vlist_t *vlist_to_pointer(int code)
 {
   VLIST_INIT();
-  return reshGetVal(code);
+  return reshGetVal(code, &vlist_ops );
 }
 
 static
@@ -105,7 +105,7 @@ void vlist_delete_entry(vlist_t *vlistptr)
 
   idx = vlistptr->self;
 
-  reshRemove(idx);
+  reshRemove(idx, &vlist_ops );
 
   free(vlistptr);
 

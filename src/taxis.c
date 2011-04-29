@@ -209,7 +209,7 @@ void taxisDestroyKernel ( taxis_t * taxisptr )
 
   free ( taxisptr );
 
-  reshRemove ( id );
+  reshRemove ( id, &taxisOps );
 }
 
 
@@ -227,7 +227,7 @@ void taxisDestroy(int taxisID)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxisDestroyKernel ( taxisptr );
 }
@@ -245,7 +245,7 @@ int taxisDuplicate(int taxisID1)
   taxis_t *taxisptr2;
 
   
-  taxisptr1 = ( taxis_t * ) reshGetVal ( taxisID1 );
+  taxisptr1 = ( taxis_t * ) reshGetVal ( taxisID1, &taxisOps );
 
   taxisptr2 = taxis_new_entry();
   if ( ! taxisptr2 ) Error("No memory");
@@ -267,7 +267,7 @@ void taxisDefType(int taxisID, int type)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -292,7 +292,7 @@ void taxisDefVdate(int taxisID, int vdate)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -317,7 +317,7 @@ void taxisDefVtime(int taxisID, int vtime)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -342,7 +342,7 @@ void taxisDefRdate(int taxisID, int rdate)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -367,7 +367,7 @@ void taxisDefRtime(int taxisID, int rtime)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -394,7 +394,7 @@ void taxisDefCalendar(int taxisID, int calendar)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -406,7 +406,7 @@ void taxisDefTunit(int taxisID, int unit)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -418,7 +418,7 @@ void taxisDefNumavg(int taxisID, int numavg)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -434,7 +434,7 @@ int taxisInqType(int taxisID)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -446,7 +446,7 @@ int taxisHasBounds(int taxisID)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -458,7 +458,7 @@ void taxisDeleteBounds(int taxisID)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -472,8 +472,8 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
   taxis_t *taxisptr2;
 
   
-  taxisptr1 = ( taxis_t * ) reshGetVal ( taxisID1 );
-  taxisptr2 = ( taxis_t * ) reshGetVal ( taxisID2 );
+  taxisptr1 = ( taxis_t * ) reshGetVal ( taxisID1, &taxisOps );
+  taxisptr2 = ( taxis_t * ) reshGetVal ( taxisID2, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr1);
   taxis_check_ptr(__func__, taxisptr2);
@@ -517,7 +517,7 @@ int taxisInqVdate(int taxisID)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -529,7 +529,7 @@ void taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -542,7 +542,7 @@ void taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -572,7 +572,7 @@ int taxisInqVtime(int taxisID)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -584,7 +584,7 @@ void taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub)
 {
   taxis_t *taxisptr;
   
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -597,7 +597,7 @@ void taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -628,7 +628,7 @@ int taxisInqRdate(int taxisID)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -662,7 +662,7 @@ int taxisInqRtime(int taxisID)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -699,7 +699,7 @@ int taxisInqCalendar(int taxisID)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -711,7 +711,7 @@ int taxisInqTunit(int taxisID)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -723,7 +723,7 @@ int taxisInqNumavg(int taxisID)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -735,7 +735,7 @@ taxis_t *taxisPtr(int taxisID)
 {
   taxis_t *taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -1214,7 +1214,7 @@ void taxisPrint ( int taxisID )
 {
   taxis_t * taxisptr;
 
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID );
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
   taxisPrintKernel ( taxisptr );
 }
 
@@ -1229,6 +1229,9 @@ int taxisCompareP ( void *  taxisptr1, void * taxisptr2 )
 
   t1 = ( taxis_t * ) taxisptr1;
   t2 = ( taxis_t * ) taxisptr2;
+
+  assert ( t1 );
+  assert ( t2 );
 
   return ! ( t1->used       == t2->used       &&  
 	     t1->type       == t2->type       &&
