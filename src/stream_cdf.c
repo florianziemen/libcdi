@@ -5072,7 +5072,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			dimsize2 = ncdims[dimid].len;
 			if ( dimsize1*dimsize2 != size )
 			  {
-			    Warning("Variable %s has unsupported array structure, skiped!",
+			    Warning("Unsupported array structure, skiped variable %s!",
 				    ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
@@ -5090,7 +5090,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			dimsize = ncdims[dimid].len;
 			if ( dimsize != size )
 			  {
-			    Warning("Variable %s has unsupported array structure, skiped!",
+			    Warning("Unsupported array structure, skiped variable %s!",
 				    ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
@@ -5143,7 +5143,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			dimsize2 = ncdims[dimid].len;
 			if ( dimsize1*dimsize2 != size )
 			  {
-			    Warning("Variable %s has unsupported array structure, skiped!",
+			    Warning("Unsupported array structure, skiped variable %s!",
 				    ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
@@ -5163,7 +5163,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			dimsize = ncdims[dimid].len;
 			if ( dimsize != size )
 			  {
-			    Warning("Variable %s has unsupported array structure, skiped!",
+			    Warning("Unsupported array structure, skiped variable %s!",
 				    ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
