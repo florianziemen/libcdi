@@ -36,12 +36,11 @@ void institutePrintP   ( void * instituteptr );
 resOps instituteOps = { instituteCompareP, instituteDestroyP, institutePrintP };
 
 
-void institutsDefault(void);
-void institutsInit(void);
+void instituteDefault(void);
 
 
 static
-void institute_init_ptr ( institute_t * instituteptr )
+void instituteDefaultValue ( institute_t * instituteptr )
 {
   instituteptr->self       = UNDEFID;
   instituteptr->used       = 0;
@@ -52,24 +51,16 @@ void institute_init_ptr ( institute_t * instituteptr )
 }
 
 
-static 
-void institute_init_entry ( institute_t * instituteptr )
-{
-  institute_init_ptr ( instituteptr );
-
-  instituteptr->self = reshPut (( void * ) instituteptr, &instituteOps );
-}
-
-
 static
-institute_t * institute_new_entry ( void )
+institute_t * instituteNewEntry ( void )
 {
   institute_t *instituteptr;
 
   instituteptr = ( institute_t * ) malloc ( sizeof ( institute_t ));
 
-  if ( instituteptr ) institute_init_entry ( instituteptr );
-
+  assert ( instituteptr ); 
+  instituteDefaultValue ( instituteptr );
+  instituteptr->self = reshPut (( void * ) instituteptr, &instituteOps );
   instituteptr->used = 1;
 
   return  instituteptr;
@@ -77,12 +68,12 @@ institute_t * institute_new_entry ( void )
 
 
 static
-void institutesInitialize (void)
+void instituteInit (void)
 {
   if ( instituteInitialized ) return;
   instituteInitialized = 1; 
 
-  institutsDefault();
+  instituteDefault();
 
 }
 
@@ -133,26 +124,12 @@ int instituteCompareKernel ( institute_t *  ip1, institute_t * ip2 )
 int instituteCompareP ( void *  instituteptr1, void * instituteptr2 )
 {
   institute_t * i1, * i2;
-  //int nameDiffer, longnameDiffer;
 
   i1 = ( institute_t * ) instituteptr1;
   i2 = ( institute_t * ) instituteptr2;
 
   assert ( i1 );
   assert ( i2 );
-
-  /*
-    if ( i1->name && i2->name )
-    nameDiffer = strcmp ( i1->name, i2->name );
-    
-    if ( i1->longname && i2->longname )
-    longnameDiffer = strcmp ( i1->longname, i2->longname );
-    
-    return ! ( i1->center     == i2->center     &&
-    i1->subcenter  == i2->subcenter  &&
-    ! nameDiffer &&
-    ! longnameDiffer ); 
-  */
 
   return instituteCompareKernel ( i1, i2 );
 }
@@ -165,7 +142,7 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
   institute_t * ip1;
   institute_t * ip2;
 
-  institutesInitialize ();
+  instituteInit ();
 
   ip1 = xmalloc ( sizeof ( institute_t ));
 
@@ -205,9 +182,9 @@ int institutDef(int center, int subcenter, const char *name, const char *longnam
 {
   institute_t * instituteptr;
 
-  institutesInitialize ();
+  instituteInit ();
 
-  instituteptr = institute_new_entry();
+  instituteptr = instituteNewEntry();
   
   instituteptr->center    = center;
   instituteptr->subcenter = subcenter;
@@ -222,7 +199,7 @@ int institutInqCenter(int instID)
 {
   institute_t * instituteptr;
 
-  institutesInitialize ();
+  instituteInit ();
 
   instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
@@ -234,7 +211,7 @@ int institutInqSubcenter(int instID)
 {
   institute_t * instituteptr;
 
-  institutesInitialize ();
+  instituteInit ();
 
   instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
@@ -246,7 +223,7 @@ char *institutInqNamePtr(int instID)
 {
   institute_t * instituteptr;
 
-  institutesInitialize ();
+  instituteInit ();
 
   instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
@@ -258,7 +235,7 @@ char *institutInqLongnamePtr(int instID)
 {
   institute_t * instituteptr;
 
-  institutesInitialize ();
+  instituteInit ();
 
   instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
@@ -271,7 +248,7 @@ int institutInqNumber(void)
   int i, instCount, * instIndice, instNum;
   institute_t * instituteptr;
 
-  institutesInitialize ();
+  instituteInit ();
 
   instCount = reshCountType ( &instituteOps );
   instIndice = xmalloc ( instCount * sizeof ( int ));
@@ -290,7 +267,7 @@ int institutInqNumber(void)
 }
 
 
-void institutsDefault(void)
+void instituteDefault(void)
 {
   ECMWF   = institutDef( 98,   0, "ECMWF",     "European Centre for Medium-Range Weather Forecasts");
   MPIMET  = institutDef( 98, 232, "MPIMET",    "Max-Planck-Institute for Meteorology");
