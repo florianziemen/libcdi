@@ -137,7 +137,7 @@ int instituteCompareP ( void *  instituteptr1, void * instituteptr2 )
 
 int institutInq(int center, int subcenter, const char *name, const char *longname)
 {
-  int instID, instCount, * instIndice;
+  int instID, instCount, * instIndice, i;
   size_t len;
   institute_t * ip1;
   institute_t * ip2;
@@ -157,9 +157,10 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
   instIndice = xmalloc ( instCount * sizeof ( int ));
   reshGetIndiceArrayOfType ( instCount, instIndice, &instituteOps );
 
-  for( instID = 0; instID < instCount; instID++ )
+  for( i = 0; i < instCount; i++ )
     {
-      ip2 = ( institute_t * ) reshGetVal ( instIndice[instID], &instituteOps );
+      instID = instIndice[i];
+      ip2 = ( institute_t * ) reshGetVal ( instID, &instituteOps );
       assert ( ip2 );
       
       if ( ip2->used && ! instituteCompareKernel ( ip1, ip2 ))
@@ -171,8 +172,8 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
 
   if ( instID == instCount ) instID = UNDEFID;
 
-  free ( ip1 );
   free ( instIndice );
+  free ( ip1 );
 
   return  (instID);
 }

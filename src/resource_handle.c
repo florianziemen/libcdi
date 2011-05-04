@@ -314,7 +314,7 @@ void reshGetIndiceArrayOfType ( int c, int * indice, resOps * ops )
 {
   int i, j = 0, nsp;
 
-  if ( !( arrayInit && ops )) return 0;
+  assert ( arrayInit && indice && ops );
   
   ARRAY_LOCK();
 

@@ -1172,4 +1172,9 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
 			z2->type, z2->size, z2->size > 0 ? 1 : 0,
 			z2->vals, z2->longname, z2->units, z2->ltype );
 }
-			  
+
+
+void zaxisGetIndexArray ( int nzaxis, int * zaxisIndexArray )
+{
+  reshGetIndiceArrayOfType ( nzaxis, zaxisIndexArray, &zaxisOps );
+}			  

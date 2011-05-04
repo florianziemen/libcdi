@@ -3642,3 +3642,9 @@ void gridDefReference(int gridID, const char *reference)
     }
 }
 
+
+void gridGetIndexArray ( int ngrids, int * gridIndexArray )
+{
+  reshGetIndiceArrayOfType ( ngrids, gridIndexArray, &gridOps );
+}
+
