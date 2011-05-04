@@ -310,6 +310,31 @@ int reshCountType ( resOps * ops )
 /**************************************************************/
 
 
+void reshGetIndiceArrayOfType ( int c, int * indice, resOps * ops )
+{
+  int i, j = 0, nsp;
+
+  if ( !( arrayInit && ops )) return 0;
+  
+  ARRAY_LOCK();
+
+  nsp = namespaceGetActive ();
+  
+  for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
+    if ( arrayResources[nsp][i].ptr && arrayResources[nsp][i].ops ) 
+      if ( arrayResources[nsp][i].ops == ops )
+	{
+	  indice[j++] = i;
+	  if ( j == c ) break;
+	}
+  
+  ARRAY_UNLOCK();
+}
+
+
+/**************************************************************/
+
+
 void reshArrayPrint ()
 {
   int i, j, temp;

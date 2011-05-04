@@ -71,6 +71,8 @@ void modelRun ()
   int gridID2, gridID3;
   int zaxisID3;
   int taxisID2, taxisID3, taxisID4, taxisID5;
+  int instID, modelID;
+  int localtableID, nudgingtableID;
 
   if  ( ddebug >= 3 ) xdebug (  fnName );
 
@@ -121,6 +123,11 @@ void modelRun ()
   varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TIME_VARIABLE);
   varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TIME_VARIABLE);
 
+  instID = institutDef( 98, 232,"MPIMET", "Max-Planck-Institute for Meteorology");
+  modelID = modelDef ( instID, 0, "myModel");
+  localtableID   = tableDef(modelID, 128,   "myModelLocalTable");
+  nudgingtableID   = tableDef(modelID, 129, "myModelNudgingTable");
+  
   // Define the variable names
   vlistDefVarName(vlistID, varID1, "varname1");
   vlistDefVarName(vlistID, varID2, "varname2");

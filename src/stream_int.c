@@ -381,7 +381,7 @@ void cdiCheckContents(int streamID)
   int vlistID;
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
 
   stream_check_ptr(__func__, streamptr);
 
@@ -402,7 +402,7 @@ int streamInqFileID(int streamID)
 {
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
 
   return (streamptr->fileID);
 }
@@ -412,7 +412,7 @@ void streamDefineTaxis(int streamID)
 {
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
 
   if ( streamptr->tsteps == NULL )
     {
@@ -448,7 +448,7 @@ void streamDefDimgroupID(int streamID, int dimgroupID)
 {
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
 
   streamptr->dimgroupID = dimgroupID;
 }
@@ -458,7 +458,7 @@ int streamInqDimgroupID(int streamID)
 {
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
 
   return (streamptr->dimgroupID);
 }
@@ -468,7 +468,7 @@ void cdiDefAccesstype(int streamID, int type)
 {
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
 
   if ( streamptr->accesstype == UNDEFID )
     {
@@ -491,7 +491,7 @@ int cdiInqAccesstype(int streamID)
 {
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
 
   return (streamptr->accesstype);
 }

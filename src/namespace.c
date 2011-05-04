@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include "cdi.h"
 #include "namespace.h"
-#include "resource_handle.h"
 
 static int nNamespaces = 1;
 static int activeNamespace;
@@ -81,9 +80,7 @@ void namespaceSetActive ( int nId )
   if ( nId >= nNamespaces || nId < 0 )
     abort ();
 
-  reshLock ();
   activeNamespace = nId;
-  reshUnlock ();
 }
 
 

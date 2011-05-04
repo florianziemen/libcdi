@@ -30,6 +30,7 @@ void * reshGetVal ( cdiResH, resOps * );
 void reshRemove ( cdiResH, resOps * );
 
 int reshCountType ( resOps * );
+void reshGetIndiceArrayOfType ( int, int *, resOps * );
 
 void reshLock   ( void );
 void reshUnlock ( void );
