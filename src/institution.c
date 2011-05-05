@@ -56,9 +56,8 @@ institute_t * instituteNewEntry ( void )
 {
   institute_t *instituteptr;
 
-  instituteptr = ( institute_t * ) malloc ( sizeof ( institute_t ));
-
-  assert ( instituteptr ); 
+  instituteptr = ( institute_t * ) xmalloc ( sizeof ( institute_t ));
+ 
   instituteDefaultValue ( instituteptr );
   instituteptr->self = reshPut (( void * ) instituteptr, &instituteOps );
   instituteptr->used = 1;

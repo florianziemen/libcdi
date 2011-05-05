@@ -5,6 +5,8 @@
 #include "dmemory.h"
 #include "cdi.h"
 #include "stream_int.h"
+#include "resource_handle.h"
+#include "pio_util.h"
 
 #undef  UNDEFID
 #define UNDEFID -1
@@ -26,173 +28,44 @@ model_t;
 
 static int  MODEL_Debug = 0;   /* If set to 1, debugging */
 
-static int _model_max = MAX_MODELS;
-
 static void model_initialize(void);
 
-static int _model_init = FALSE;
+static int model_init = FALSE;
 
-#if  defined  (HAVE_LIBPTHREAD)
-#  include <pthread.h>
-
-static pthread_once_t _model_init_thread = PTHREAD_ONCE_INIT;
-static pthread_mutex_t _model_mutex;
-
-#  define MODEL_LOCK           pthread_mutex_lock(&_model_mutex);
-#  define MODEL_UNLOCK         pthread_mutex_unlock(&_model_mutex);
 #  define MODEL_INIT                               \
-   if ( _model_init == FALSE ) pthread_once(&_model_init_thread, model_initialize);
-
-#else
-
-#  define MODEL_LOCK
-#  define MODEL_UNLOCK
-#  define MODEL_INIT                               \
-   if ( _model_init == FALSE ) model_initialize();
-
-#endif
+   if ( model_init == FALSE ) model_initialize();
 
 
-typedef struct _modelPtrToIdx {
-  int idx;
-  model_t *ptr;
-  struct _modelPtrToIdx *next;
-} modelPtrToIdx;
+int  modelCompareP ( void * modelptr1, void * modelptr2 );
+void modelDestroyP ( void * modelptr );
+void modelPrintP   ( void * modelptr );
 
-
-static modelPtrToIdx *_modelList  = NULL;
-static modelPtrToIdx *_modelAvail = NULL;
+resOps modelOps = { modelCompareP, modelDestroyP, modelPrintP };
 
 
 static
-void model_list_new(void)
+void modelDefaultValue ( model_t *modelptr )
 {
-  assert(_modelList == NULL);
-
-  _modelList = (modelPtrToIdx *) malloc(_model_max*sizeof(modelPtrToIdx));
-}
-
-static
-void model_list_delete(void)
-{
-  if ( _modelList ) free(_modelList);
-}
-
-static
-void model_init_pointer(void)
-{
-  int  i;
-  
-  for ( i = 0; i < _model_max; i++ )
-    {
-      _modelList[i].next = _modelList + i + 1;
-      _modelList[i].idx  = i;
-      _modelList[i].ptr  = 0;
-    }
-
-  _modelList[_model_max-1].next = 0;
-
-  _modelAvail = _modelList;
-}
-
-static
-model_t *model_to_pointer(int idx)
-{
-  model_t *modelptr = NULL;
-
-  MODEL_INIT
-
-  if ( idx >= 0 && idx < _model_max )
-    {
-      MODEL_LOCK
-
-      modelptr = _modelList[idx].ptr;
-
-      MODEL_UNLOCK
-    }
-  else
-    Error("model index %d undefined!", idx);
-
-  return (modelptr);
-}
-
-/* Create an index from a pointer */
-static
-int model_from_pointer(model_t *ptr)
-{
-  int      idx = -1;
-  modelPtrToIdx *newptr;
-
-  if ( ptr )
-    {
-      MODEL_LOCK
-
-      if ( _modelAvail )
-	{
-	  newptr       = _modelAvail;
-	  _modelAvail  = _modelAvail->next;
-	  newptr->next = 0;
-	  idx	       = newptr->idx;
-	  newptr->ptr  = ptr;
-      
-	  if ( MODEL_Debug )
-	    Message("Pointer %p has idx %d from model list", ptr, idx);
-	}
-      else
-	Warning("Too many open models (limit is %d)!", _model_max);
-
-      MODEL_UNLOCK
-    }
-  else
-    Error("Internal problem (pointer %p undefined)", ptr);
-
-  return (idx);
-}
-
-static
-void model_init_entry(model_t *modelptr)
-{
-  modelptr->self        = model_from_pointer(modelptr);
-
-  modelptr->used        = 1;
-
+  modelptr->self        = UNDEFID;
+  modelptr->used        = 0;
   modelptr->instID      = UNDEFID;
   modelptr->modelgribID = UNDEFID;
   modelptr->name        = NULL;
 }
 
 static
-model_t *model_new_entry(void)
+model_t *modelNewEntry ( void )
 {
   model_t *modelptr;
 
-  modelptr = (model_t *) malloc(sizeof(model_t));
-
-  if ( modelptr ) model_init_entry(modelptr);
+  modelptr = (model_t *) xmalloc(sizeof(model_t));
+  modelDefaultValue ( modelptr );
+  modelptr->self = reshPut (( void * ) modelptr, &modelOps );
+  modelptr->used        = 1;
 
   return (modelptr);
 }
 
-static
-void model_delete_entry(model_t *modelptr)
-{
-  int idx;
-
-  idx = modelptr->self;
-
-  MODEL_LOCK
-
-  free(modelptr);
-
-  _modelList[idx].next = _modelAvail;
-  _modelList[idx].ptr  = 0;
-  _modelAvail          = &_modelList[idx];
-
-  MODEL_UNLOCK
-
-  if ( MODEL_Debug )
-    Message("Removed idx %d from model list", idx);
-}
 
 int modelDef(int instID, int modelgribID, const char *name);
 
@@ -232,24 +105,10 @@ void model_initialize(void)
 {
   char *env;
 
-#if  defined  (HAVE_LIBPTHREAD)
-  /* initialize global API mutex lock */
-  pthread_mutex_init(&_model_mutex, NULL);
-#endif
-
   env = getenv("MODEL_DEBUG");
   if ( env ) MODEL_Debug = atoi(env);
 
-  model_list_new();
-  atexit(model_list_delete);
-
-  MODEL_LOCK
-
-  model_init_pointer();
-
-  MODEL_UNLOCK
-
-  _model_init = TRUE;
+  model_init = TRUE;
 
   model_defaults();
 }
@@ -261,21 +120,9 @@ void model_check_ptr(const char *caller, model_t *modelptr)
     Errorc("model undefined!");
 }
 
-int modelSize(void)
+int modelSize ( void )
 {
-  int modelsize = 0;
-  int i;
-  
-  MODEL_INIT
-
-  MODEL_LOCK
-
-  for ( i = 0; i < _model_max; i++ )
-    if ( _modelList[i].ptr ) modelsize++;
-
-  MODEL_UNLOCK
-
-  return (modelsize);
+  return reshCountType ( &modelOps );
 }
 
 
@@ -284,16 +131,20 @@ int modelInq(int instID, int modelgribID, char *name)
   int modelID = UNDEFID;
   size_t len;
   int found;
-  int model_size;
+  int modelCount;
   model_t *modelptr;
+  int i, * modelIndice;
 
   MODEL_INIT
 
-  model_size = modelSize();
+  modelCount = modelSize();
+  modelIndice = xmalloc ( modelCount * sizeof ( int ));
+  reshGetIndiceArrayOfType ( modelCount, modelIndice, &modelOps );
 
-  for( modelID = 0; modelID < model_size; modelID++ )
+  for( i = 0; i < modelCount; i++ )
     {
-      modelptr = model_to_pointer(modelID);
+      modelID = modelIndice[i];
+      modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
 
       if ( modelptr->used )
 	{
@@ -322,7 +173,9 @@ int modelInq(int instID, int modelgribID, char *name)
 	}
     }
 
-  if ( modelID == model_size ) modelID = UNDEFID;
+  if ( modelID == modelCount ) modelID = UNDEFID;
+
+  if ( modelIndice ) free ( modelIndice );
 
   return (modelID);
 }
@@ -330,87 +183,80 @@ int modelInq(int instID, int modelgribID, char *name)
 
 int modelDef(int instID, int modelgribID, const char *name)
 {
-  int modelID = UNDEFID;
   model_t *modelptr;
 
   MODEL_INIT
+    
+  modelptr = modelNewEntry();
+  
+  modelptr->instID      = instID;
+  modelptr->modelgribID = modelgribID;  
+  if ( name ) modelptr->name = strdupx(name);
 
-  /*
-  modelID = modelInq(instID, modelgribID, name);
-  */
-  if ( modelID == UNDEFID )
-    {
-      modelptr = model_new_entry();
-      if ( ! modelptr ) Error("No memory");
-
-      modelID = modelptr->self;
-
-      modelptr->instID      = instID;
-      modelptr->modelgribID = modelgribID;
-
-      if ( name ) modelptr->name = strdupx(name);
-    }
-
-  return (modelID);
+  return modelptr->self;
 }
 
 
 int modelInqInstitut(int modelID)
 {
-  int instID = UNDEFID;
   model_t *modelptr;
 
   MODEL_INIT
 
-  if ( modelID != UNDEFID )
-    {
-      modelptr = model_to_pointer(modelID);
-
-      model_check_ptr(__func__, modelptr);
-  
-      instID = modelptr->instID;
-    }
-
-  return (instID);
+  modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
+    
+  return modelptr ? modelptr->instID : UNDEFID;
 }
 
 
 int modelInqGribID(int modelID)
 {
-  int modelgribID = UNDEFID;
   model_t *modelptr;
 
   MODEL_INIT
 
-  if ( modelID != UNDEFID )
-    {
-      modelptr = model_to_pointer(modelID);
+  modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
 
-      model_check_ptr(__func__, modelptr);
-  
-      modelgribID = modelptr->modelgribID;
-    }
-
-  return (modelgribID);
+  return modelptr ? modelptr->modelgribID : UNDEFID;
 }
 
 
 char *modelInqNamePtr(int modelID)
 {
-  char *name = NULL;
   model_t *modelptr;
 
   MODEL_INIT
 
-  if ( modelID != UNDEFID )
-    {
-      modelptr = model_to_pointer(modelID);
+  modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );  
 
-      model_check_ptr(__func__, modelptr);
-  
-      if ( modelptr->name )
-	name = modelptr->name;
-    }
+  return modelptr ? modelptr->name : NULL;
+}
 
-  return (name);
+
+int  modelCompareP ( void * modelptr1, void * modelptr2 )
+{
+  return 0;
+}
+
+
+void modelDestroyP ( void * modelptr )
+{
+}
+
+
+void modelPrintP   ( void * modelptr )
+{
+  FILE *fp = stdout;
+  model_t * mp = ( model_t * ) modelptr;
+
+  if ( !mp ) return;
+
+  fprintf ( fp, "#\n");
+  fprintf ( fp, "# modelID %d\n", mp->self);
+  fprintf ( fp, "#\n"); 
+  fprintf ( fp, "self          = %d\n", mp->self );
+  fprintf ( fp, "used          = %d\n", mp->used );
+  fprintf ( fp, "instID        = %d\n", mp->instID );
+  fprintf ( fp, "modelgribID   = %d\n", mp->modelgribID );
+  fprintf ( fp, "name          = %s\n", mp->name ? mp->name : "NN" );
 }
