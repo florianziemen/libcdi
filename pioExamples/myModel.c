@@ -123,10 +123,8 @@ void modelRun ()
   varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TIME_VARIABLE);
   varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TIME_VARIABLE);
 
-  //instID = institutDef( 98, 232,"MPIMET", "Max-Planck-Institute for Meteorology");
+  instID = institutDef( 0, 0,"MYINSTITUTE", "myInstitute");
   modelID = modelDef ( instID, 0, "myModel");
-  localtableID   = tableDef(modelID, 128,   "myModelLocalTable");
-  nudgingtableID   = tableDef(modelID, 129, "myModelNudgingTable");
   
   // Define the variable names
   vlistDefVarName(vlistID, varID1, "varname1");

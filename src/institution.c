@@ -27,8 +27,6 @@ typedef struct
 institute_t;
 
 
-static int instituteInitialized = 0;
-
 int  instituteCompareP ( void * instituteptr1, void * instituteptr2 );
 void instituteDestroyP ( void * instituteptr );
 void institutePrintP   ( void * instituteptr );
@@ -69,11 +67,13 @@ institute_t * instituteNewEntry ( void )
 static
 void instituteInit (void)
 {
+  static int instituteInitialized = 0;
+
   if ( instituteInitialized ) return;
+
   instituteInitialized = 1; 
 
   instituteDefault();
-
 }
 
 
@@ -191,7 +191,7 @@ int institutDef(int center, int subcenter, const char *name, const char *longnam
   if ( name )     instituteptr->name     = strdupx(name);
   if ( longname ) instituteptr->longname = strdupx(longname);
 
-  return ( instituteptr->self );
+  return instituteptr->self;
 }
 
 
@@ -261,7 +261,7 @@ int institutInqNumber(void)
 	instNum++;
     }
 
-  free ( instIndice );
+  if ( instIndice ) free ( instIndice );
     
   return instNum;
 }
@@ -294,7 +294,7 @@ void instituteDestroyP ( void * instituteptr )
 
   id = i1->self;
 
-  free ( instituteptr );
+  if ( instituteptr ) free ( instituteptr );
 
   reshRemove ( id, &instituteOps );
 }

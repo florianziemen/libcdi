@@ -28,12 +28,7 @@ model_t;
 
 static int  MODEL_Debug = 0;   /* If set to 1, debugging */
 
-static void model_initialize(void);
-
-static int model_init = FALSE;
-
-#  define MODEL_INIT                               \
-   if ( model_init == FALSE ) model_initialize();
+static void modelInit(void);
 
 
 int  modelCompareP ( void * modelptr1, void * modelptr2 );
@@ -101,14 +96,17 @@ void model_defaults(void)
 }
 
 static
-void model_initialize(void)
+void modelInit(void)
 {
+  static int modelInitialized = 0;
   char *env;
+
+  if ( modelInitialized ) return;
+
+  modelInitialized = 1;
 
   env = getenv("MODEL_DEBUG");
   if ( env ) MODEL_Debug = atoi(env);
-
-  model_init = TRUE;
 
   model_defaults();
 }
@@ -135,7 +133,7 @@ int modelInq(int instID, int modelgribID, char *name)
   model_t *modelptr;
   int i, * modelIndice;
 
-  MODEL_INIT
+  modelInit ();
 
   modelCount = modelSize();
   modelIndice = xmalloc ( modelCount * sizeof ( int ));
@@ -185,7 +183,7 @@ int modelDef(int instID, int modelgribID, const char *name)
 {
   model_t *modelptr;
 
-  MODEL_INIT
+  modelInit ();
     
   modelptr = modelNewEntry();
   
@@ -201,7 +199,7 @@ int modelInqInstitut(int modelID)
 {
   model_t *modelptr;
 
-  MODEL_INIT
+  modelInit ();
 
   modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
     
@@ -213,7 +211,7 @@ int modelInqGribID(int modelID)
 {
   model_t *modelptr;
 
-  MODEL_INIT
+  modelInit ();
 
   modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
 
@@ -225,7 +223,7 @@ char *modelInqNamePtr(int modelID)
 {
   model_t *modelptr;
 
-  MODEL_INIT
+  modelInit ();
 
   modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );  
 

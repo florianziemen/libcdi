@@ -53,10 +53,9 @@ static int  GRID_Debug = 0;   /* If set to 1, debugging */
 
 
 static
-void grid_init_ptr(grid_t *gridptr)
+void gridDefaultValue(grid_t *gridptr)
 {
-  gridptr->self         = -1;
-
+  gridptr->self         = CDI_UNDEFID;
   gridptr->type         = CDI_UNDEFID;
   gridptr->mask         = NULL;
   gridptr->mask_gme     = NULL;
@@ -119,25 +118,34 @@ void grid_init_ptr(grid_t *gridptr)
   gridptr->ystdname[0]  = 0;
 }
 
-static
-void grid_init_entry ( grid_t *gridptr )
-{
-  grid_init_ptr ( gridptr );
-
-  gridptr->self = reshPut (( void * ) gridptr, &gridOps );
-}
 
 static
-grid_t *grid_new_entry(void)
+grid_t *gridNewEntry ( void )
 {
   grid_t *gridptr;
 
-  gridptr = (grid_t *) malloc(sizeof(grid_t));
+  gridptr = ( grid_t *) xmalloc ( sizeof ( grid_t ));
+  gridDefaultValue ( gridptr );
+  gridptr->self = reshPut (( void * ) gridptr, &gridOps );
 
-  if ( gridptr ) grid_init_entry(gridptr);
-
-  return (gridptr);
+  return gridptr;
 }
+
+
+static
+void gridInit (void)
+{
+  static int gridInitialized = 0;
+  char *env;
+
+  if ( gridInitialized ) return;
+
+  gridInitialized = 1; 
+
+  env = getenv("GRID_DEBUG");
+  if ( env ) GRID_Debug = atoi(env);
+}
+
 
 static
 void grid_copy(grid_t *gridptr2, grid_t *gridptr1)
@@ -353,7 +361,9 @@ int gridCreate(int gridtype, int size)
   if ( CDI_Debug )
     Message("gridtype: %d size: %d", gridtype, size);
 
-  gridptr = grid_new_entry();
+  gridInit ();
+
+  gridptr = gridNewEntry();
   if ( ! gridptr ) Error("No memory");
 
   gridID = gridptr->self;

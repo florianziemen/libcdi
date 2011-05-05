@@ -232,12 +232,11 @@ stream_t *stream_to_pointer(int idx)
 
 
 static
-void stream_init_ptr ( stream_t * streamptr )
+void streamDefaultValue ( stream_t * streamptr )
 {
   int i;
 
-  streamptr->self              = -1;
-
+  streamptr->self              = UNDEFID;
   streamptr->accesstype        = UNDEFID;
   streamptr->accessmode        = 0;
   streamptr->filetype          = UNDEFID;
@@ -292,26 +291,19 @@ void stream_init_ptr ( stream_t * streamptr )
 }
 
 
-static
-void stream_init_entry ( stream_t * streamptr )
-{
-  stream_init_ptr ( streamptr );
-
-  streamptr->self = reshPut (( void * ) streamptr, &streamOps );
-}
-
-
 stream_t *stream_new_entry(void)
 {
   stream_t *streamptr;
 
   cdiInitialize(); /* ***************** make MT version !!! */
 
-  streamptr = (stream_t *) malloc(sizeof(stream_t));
+  streamptr = (stream_t *) xmalloc(sizeof(stream_t));
 
-  if ( streamptr ) stream_init_entry(streamptr);
+  streamDefaultValue ( streamptr );
 
-  return (streamptr);
+  streamptr->self = reshPut (( void * ) streamptr, &streamOps );
+
+  return streamptr;
 }
 
 

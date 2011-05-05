@@ -191,8 +191,8 @@ void *reshGetVal ( cdiResH idx, resOps * ops  )
 
   ARRAY_UNLOCK ();
    
-  assert ( node->ops == ops );
- 
+  assert ( node );
+  assert ( node->ops == ops ); 
 
   return node->ptr;
 }

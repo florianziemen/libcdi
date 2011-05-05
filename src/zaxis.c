@@ -71,10 +71,9 @@ static int  ZAXIS_Debug = 0;   /* If set to 1, debugging */
 
 
 static
-void zaxis_init_ptr ( zaxis_t *zaxisptr ) 
+void zaxisDefaultValue ( zaxis_t *zaxisptr ) 
 {
-  zaxisptr->self        = -1;
-
+  zaxisptr->self        = CDI_UNDEFID;
   zaxisptr->name[0]     = 0;
   zaxisptr->longname[0] = 0;
   zaxisptr->units[0]    = 0;
@@ -91,24 +90,34 @@ void zaxis_init_ptr ( zaxis_t *zaxisptr )
   zaxisptr->vct         = NULL;
 }
 
-static
-void zaxis_init_entry ( zaxis_t *zaxisptr )
-{
-  zaxis_init_ptr ( zaxisptr );
-
-  zaxisptr->self = reshPut (( void * ) zaxisptr, &zaxisOps );
-}
 
 static
-zaxis_t *zaxis_new_entry(void)
+zaxis_t *zaxisNewEntry(void)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = (zaxis_t *) malloc(sizeof(zaxis_t));
+  zaxisptr = (zaxis_t *) xmalloc(sizeof(zaxis_t));
 
-  if ( zaxisptr ) zaxis_init_entry(zaxisptr);
+  zaxisDefaultValue ( zaxisptr );
+
+  zaxisptr->self = reshPut (( void * ) zaxisptr, &zaxisOps );
 
   return (zaxisptr);
+}
+
+
+static
+void zaxisInit (void)
+{
+  static int zaxisInitialized = 0;
+  char *env;
+
+  if ( zaxisInitialized ) return;
+
+  zaxisInitialized = 1; 
+
+  env = getenv("ZAXIS_DEBUG");
+  if ( env ) ZAXIS_Debug = atoi(env);
 }
 
 
@@ -182,8 +191,9 @@ int zaxisCreate(int zaxistype, int size)
   if ( CDI_Debug )
     Message("zaxistype: %d size: %d ", zaxistype, size);
 
-  zaxisptr = zaxis_new_entry();
-  if ( ! zaxisptr ) Error("No memory");
+  zaxisInit ();
+
+  zaxisptr = zaxisNewEntry();
 
   zaxisID = zaxisptr->self;
 

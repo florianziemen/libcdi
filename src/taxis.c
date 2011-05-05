@@ -88,10 +88,9 @@ void taxis_defaults(void)
 
 
 static
-void taxis_init_ptr(taxis_t *taxisptr)
+void taxisDefaultValue ( taxis_t *taxisptr )
 {
-  taxisptr->self       = -1;
-
+  taxisptr->self       = CDI_UNDEFID;
   taxisptr->used       = FALSE;
   taxisptr->type       = DefaultTimeType;
   taxisptr->vdate      = 0;
@@ -108,24 +107,33 @@ void taxis_init_ptr(taxis_t *taxisptr)
   taxisptr->vtime_ub   = 0;
 }
 
-static
-void taxis_init_entry(taxis_t *taxisptr)
-{
-  taxis_init_ptr(taxisptr);
-
-  taxisptr->self = reshPut (( void * ) taxisptr, &taxisOps );
-}
 
 static
-taxis_t *taxis_new_entry(void)
+taxis_t *taxisNewEntry(void)
 {
   taxis_t *taxisptr;
 
-  taxisptr = (taxis_t *) malloc(sizeof(taxis_t));
+  taxisptr = (taxis_t *) xmalloc ( sizeof ( taxis_t ));
 
-  if ( taxisptr ) taxis_init_entry(taxisptr);
+  taxisDefaultValue ( taxisptr );
+  taxisptr->self = reshPut (( void * ) taxisptr, &taxisOps );
 
   return (taxisptr);
+}
+
+
+static
+void taxisInit (void)
+{
+  static int taxisInitialized = 0;
+  char *env;
+
+  if ( taxisInitialized ) return;
+
+  taxisInitialized = 1; 
+
+  env = getenv("TAXIS_DEBUG");
+  if ( env ) TAXIS_Debug = atoi(env);
 }
 
 
@@ -186,8 +194,9 @@ int taxisCreate(int taxistype)
   if ( CDI_Debug )
     Message("taxistype: %d", taxistype);
 
-  taxisptr = taxis_new_entry();
-  if ( ! taxisptr ) Error("No memory");
+  taxisInit ();
+
+  taxisptr = taxisNewEntry();
 
   taxisID = taxisptr->self;
   taxisptr->type = taxistype;
@@ -247,7 +256,7 @@ int taxisDuplicate(int taxisID1)
   
   taxisptr1 = ( taxis_t * ) reshGetVal ( taxisID1, &taxisOps );
 
-  taxisptr2 = taxis_new_entry();
+  taxisptr2 = taxisNewEntry();
   if ( ! taxisptr2 ) Error("No memory");
 
   taxisID2 = taxisptr2->self;
@@ -1151,7 +1160,7 @@ double cdiEncodeTimeval(int date, int time, taxis_t *taxis)
 
 void ptaxisInit(taxis_t *taxisptr)
 {
-  taxis_init_ptr(taxisptr);
+  taxisDefaultValue ( taxisptr );
 }
 
 
