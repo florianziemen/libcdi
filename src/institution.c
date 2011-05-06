@@ -34,9 +34,6 @@ void institutePrintP   ( void * instituteptr );
 resOps instituteOps = { instituteCompareP, instituteDestroyP, institutePrintP };
 
 
-void instituteDefault(void);
-
-
 static
 void instituteDefaultValue ( institute_t * instituteptr )
 {
@@ -65,6 +62,25 @@ institute_t * instituteNewEntry ( void )
 
 
 static
+void instituteDefaultEntries ( void )
+{
+  ECMWF   = institutDef( 98,   0, "ECMWF",     "European Centre for Medium-Range Weather Forecasts");
+  MPIMET  = institutDef( 98, 232, "MPIMET",    "Max-Planck-Institute for Meteorology");
+     (void) institutDef( 98, 255, "MPIMET",    "Max-Planck-Institute for Meteorology");
+     (void) institutDef( 98, 232, "MPIMET",    "Max-Planck Institute for Meteorology");
+     (void) institutDef( 78, 255, "DWD",       "Deutscher Wetterdienst");
+  MCH     = institutDef(215, 255, "MCH",       "MeteoSwiss");
+     (void) institutDef(  7,   0, "NCEP",      "National Centers for Environmental Prediction");
+     (void) institutDef(  7,   1, "NCEP",      "National Centers for Environmental Prediction");
+     (void) institutDef( 60,   0, "NCAR",      "National Center for Atmospheric Research");
+     (void) institutDef( 74,   0, "METOFFICE", "U.K. Met Office");
+     (void) institutDef( 97,   0, "ESA",       "European Space Agency ");
+     (void) institutDef( 99,   0, "KNMI",      "Royal Netherlands Meteorological Institute");
+     /*     (void) institutDef(  0,   0, "IPSL",      "IPSL (Institut Pierre Simon Laplace, Paris, France)"); */
+}
+
+
+static
 void instituteInit (void)
 {
   static int instituteInitialized = 0;
@@ -73,7 +89,7 @@ void instituteInit (void)
 
   instituteInitialized = 1; 
 
-  instituteDefault();
+  instituteDefaultEntries();
 }
 
 
@@ -264,24 +280,6 @@ int institutInqNumber(void)
   if ( instIndice ) free ( instIndice );
     
   return instNum;
-}
-
-
-void instituteDefault(void)
-{
-  ECMWF   = institutDef( 98,   0, "ECMWF",     "European Centre for Medium-Range Weather Forecasts");
-  MPIMET  = institutDef( 98, 232, "MPIMET",    "Max-Planck-Institute for Meteorology");
-     (void) institutDef( 98, 255, "MPIMET",    "Max-Planck-Institute for Meteorology");
-     (void) institutDef( 98, 232, "MPIMET",    "Max-Planck Institute for Meteorology");
-     (void) institutDef( 78, 255, "DWD",       "Deutscher Wetterdienst");
-  MCH     = institutDef(215, 255, "MCH",       "MeteoSwiss");
-     (void) institutDef(  7,   0, "NCEP",      "National Centers for Environmental Prediction");
-     (void) institutDef(  7,   1, "NCEP",      "National Centers for Environmental Prediction");
-     (void) institutDef( 60,   0, "NCAR",      "National Center for Atmospheric Research");
-     (void) institutDef( 74,   0, "METOFFICE", "U.K. Met Office");
-     (void) institutDef( 97,   0, "ESA",       "European Space Agency ");
-     (void) institutDef( 99,   0, "KNMI",      "Royal Netherlands Meteorological Institute");
-     /*     (void) institutDef(  0,   0, "IPSL",      "IPSL (Institut Pierre Simon Laplace, Paris, France)"); */
 }
 
 

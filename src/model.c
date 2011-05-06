@@ -65,7 +65,7 @@ model_t *modelNewEntry ( void )
 int modelDef(int instID, int modelgribID, const char *name);
 
 static
-void model_defaults(void)
+void modelDefaultEntries ( void )
 {
   int instID;
 
@@ -108,7 +108,7 @@ void modelInit(void)
   env = getenv("MODEL_DEBUG");
   if ( env ) MODEL_Debug = atoi(env);
 
-  model_defaults();
+  modelDefaultEntries ();
 }
 
 static
