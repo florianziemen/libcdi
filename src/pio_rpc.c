@@ -12,7 +12,7 @@ int rankGlob;
 int nProcsIO;
 int nProcsCalc;
 MPI_Comm * commsIO;
-MPI_Comm * commCalc; 
+MPI_Comm * commCalc;
  
  
 void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
