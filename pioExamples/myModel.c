@@ -55,6 +55,7 @@ int nodeSizes[nNodes] = {1};
 int nStreams = 4;
 int streamSizes[4] = {2,5,1,3};
 int vlistSizes[11] = {5,1,7,3,2,47,11,11,5,47,1 };
+int hlf[] = { 1, 0 };
 
 void modelRun ()
 {
@@ -72,11 +73,10 @@ void modelRun ()
   int zaxisID3;
   int taxisID2, taxisID3, taxisID4, taxisID5;
   int instID, modelID;
-  int localtableID, nudgingtableID;
 
   if  ( ddebug >= 3 ) xdebug (  fnName );
 
-  namespaceSetNumber ( 2 );
+  namespaceInit ( 2, hlf );
   namespaceSetActive ( 0 );
   // Create a regular lon/lat grid
   gridID = gridCreate(GRID_LONLAT, nlon*nlat);
@@ -174,7 +174,7 @@ void modelRun ()
       streamWriteVar(streamID, varID2, var2, nmiss);
     }
   
-  reshArrayPrint ();
+  //reshArrayPrint ();
 
   // Close the output stream
   streamClose(streamID);
@@ -185,7 +185,6 @@ void modelRun ()
   zaxisDestroy(zaxisID1);
   zaxisDestroy(zaxisID2);
   gridDestroy(gridID);
-
   return;
 }
 
@@ -215,7 +214,7 @@ int main (int argc, char *argv[])
 
   modelRun ();
 
-  //pioFinalize ();
+  pioFinalize ();
 #ifdef USE_MPI
   MPI_Finalize ();                         
 #endif

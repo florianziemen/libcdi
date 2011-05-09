@@ -65,6 +65,7 @@ int grib2ltypeToZaxisType(int grib_ltype)
 }
 
 /* begin deike */
+#include "namespace.h"
 
 #ifdef USE_MPI
 #include "pio.h"               
@@ -578,10 +579,15 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
   /* begin deike */
+  if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
+    return 0;
 
 #ifdef USE_MPI
-  if ( pioinfo->type != PIO_NONE && ! TEST_LOCAL )
-    nwrite = pioFileWrite ( fileID, tsID, gribbuffer, nbytes );
+  if ( ! TEST_LOCAL )
+    {
+      if ( pioinfo->type != PIO_NONE  )
+	nwrite = pioFileWrite ( fileID, tsID, gribbuffer, nbytes );
+    }
   else
       nwrite = fileWrite(fileID, gribbuffer, nbytes); 
 #else

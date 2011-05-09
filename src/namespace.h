@@ -7,9 +7,11 @@ typedef struct {
 }namespaceTuple_t;
 
 
-void             namespaceShowbits   ( int n, char *name );
-int              namespaceIdxEncode  ( namespaceTuple_t tin );
-int              namespaceIdxEncode2 ( int, int );
-namespaceTuple_t namespaceIdxDecode  ( int code );
+void             namespaceShowbits     ( int, char * );
+int              namespaceIdxEncode    ( namespaceTuple_t );
+int              namespaceIdxEncode2   ( int, int );
+namespaceTuple_t namespaceIdxDecode    ( int );
+int              namespaceHasLocalFile ( int );
+void             namespaceCleanup      ( void );
 
 #endif

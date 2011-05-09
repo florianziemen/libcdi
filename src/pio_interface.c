@@ -16,6 +16,7 @@
 #include "pio_rpc.h"
 #include "pio_server.h"
 #include "cdi.h"
+#include "namespace.h"
 
 #endif
 /*****************************************************************************/
@@ -79,6 +80,7 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int mode )
     {
       IOServer ( commModel, mode );
       commsIOCleanup ();
+      namespaceCleanup ();
       MPI_Finalize ();
       exit ( 0 );
     }
@@ -366,16 +368,17 @@ void pioFinalize ()
   char fnName[] = "pioFinalize()";
   int i, ibuffer = 1111;
   
-  if ( ddebug >= 1 )
-    myDebug ( __FILE__, fnName, __LINE__ );
+  if ( ddebug >= 1 ) xdebug ( fnName );
   
   for ( i = 0; i < nProcsIO; i++ )
     MPI_Send ( &ibuffer, 1, MPI_INT, nProcsCalc, FINALIZE, *( commsIO + i ));
 
   commsIOCleanup ();
+#endif
+
+  namespaceCleanup ();
  
   return;
-#endif
 }
 
 /************************************************************************/

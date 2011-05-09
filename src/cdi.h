@@ -205,7 +205,7 @@ extern "C" {
 int      pioInit            ( int, int, int );
 void     pioFinalize        ( void );
 
-void     namespaceSetNumber ( int );
+void     namespaceInit      ( int, int * );
 int      namespaceGetNumber ( void );
 void     namespaceSetActive ( int );
 int      namespaceGetActive ( void );

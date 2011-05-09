@@ -4,9 +4,13 @@
 #include <stdio.h>
 #include "cdi.h"
 #include "namespace.h"
+#include "pio_util.h"
+
 
 static int nNamespaces = 1;
-static int activeNamespace;
+static int activeNamespace = 0;
+static int HLF = 1;
+static int * hasLocalFile = &HLF;
 
 enum {
   intbits = sizeof(int) * CHAR_BIT,
@@ -63,11 +67,25 @@ namespaceTuple_t namespaceIdxDecode ( int code )
 }
 
 
-void namespaceSetNumber ( int nspn )
+void namespaceInit ( int nspn, int * argHasLocalFile )
 {
+  int i;
   assert(nspn <= NUM_NAMESPACES && nspn >= 1 );
   nNamespaces = nspn;
+
+  if ( nspn > 1 )
+    {
+      hasLocalFile = xmalloc ( nspn * sizeof ( int ));
+      for ( i = 0; i < nspn; i++ )  hasLocalFile[i] = argHasLocalFile[i];
+    }
 }
+
+
+void namespaceCleanup ( void )
+{
+  if ( nNamespaces > 1 ) free ( hasLocalFile );
+}
+
 
 int namespaceGetNumber ()
 {
@@ -87,4 +105,13 @@ void namespaceSetActive ( int nId )
 int namespaceGetActive ()
 {
   return activeNamespace;
+}
+
+
+int namespaceHasLocalFile ( int nId )
+{
+  if ( nId >= nNamespaces || nId < 0 )
+    abort ();
+  
+  return hasLocalFile[nId];
 }

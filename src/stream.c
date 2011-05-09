@@ -597,6 +597,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
 
+
   switch (filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
