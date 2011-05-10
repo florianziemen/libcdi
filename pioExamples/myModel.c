@@ -197,7 +197,7 @@ void modelRun ()
       streamWriteVar(streamID, varID2, var2, nmiss);
     }
   
-  //reshArrayPrint ();
+  reshArrayPrint ();
 
   // Close the output stream
   streamClose(streamID);
@@ -234,13 +234,13 @@ int main (int argc, char *argv[])
   if  ( ddebug >= 3 ) xdebug ();
 
 #ifdef USE_MPI
-  commModel = pioInit_c ( commGlob, nProcsIO, 0 );
+  //commModel = pioInit_c ( commGlob, nProcsIO, 0 );
 #endif
 
   modelRun ();
 
 #ifdef USE_MPI
-  pioFinalize ();
+  //pioFinalize ();
   MPI_Finalize ();                         
 #endif
   return 0;

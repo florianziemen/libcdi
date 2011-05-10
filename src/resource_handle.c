@@ -47,6 +47,7 @@ typedef struct node {
   struct node *next;
   resOps      *ops;
   void        *ptr;
+  int         sent;
 } node;
 
 
@@ -113,6 +114,9 @@ void arrayInitPointer ( void )
         {
           arrayResources[i][j].idx  = namespaceIdxEncode2 ( i, j );
           arrayResources[i][j].next = arrayResources[i] + j + 1;
+	  arrayResources[i][j].ops  = NULL;
+	  arrayResources[i][j].ptr  = NULL;
+	  arrayResources[i][j].sent = 0;
         }
 
       arrayResources[i][arraySizeAllocated[i]-1].next = NULL;
@@ -277,6 +281,7 @@ void reshRemove ( cdiResH idx, resOps * ops )
   arrayResources[nsp][idx].next = freeListHead[nsp];
   arrayResources[nsp][idx].ops  = NULL;
   arrayResources[nsp][idx].ptr  = NULL;
+  arrayResources[nsp][idx].sent = 0;
   freeListHead[nsp]             = arrayResources[nsp] + idx;
 
   ARRAY_UNLOCK();
