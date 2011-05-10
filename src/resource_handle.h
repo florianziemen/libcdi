@@ -23,16 +23,22 @@ typedef struct {
   valPrintFunc   valPrint;
 }resOps; 
 
-int reshPut ( void *, resOps * );
+int    reshPut ( void *, resOps * );
+
+void   reshRemove ( cdiResH, resOps * );
+
+int    reshCountType ( resOps * );
 
 void * reshGetVal ( cdiResH, resOps * );
 
-void reshRemove ( cdiResH, resOps * );
+void   reshGetIndiceArrayOfType ( int, int *, resOps * );
 
-int reshCountType ( resOps * );
-void reshGetIndiceArrayOfType ( int, int *, resOps * );
+size_t reshGetSendSize ( void );
 
-void reshLock   ( void );
-void reshUnlock ( void );
+int    reshGetSendData ( size_t, char * );
+
+void   reshLock   ( void );
+
+void   reshUnlock ( void ); 
 
 #endif

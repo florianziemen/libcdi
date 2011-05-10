@@ -58,24 +58,6 @@ static node **freeListHead;
 /**************************************************************/
 
 
-void reshLock ()
-{
-  ARRAY_LOCK();
-}
-
-
-/**************************************************************/
-
-
-void reshUnlock ()
-{
-  ARRAY_UNLOCK();
-}
-
-
-/**************************************************************/
-
-
 static
 void arrayNew ( void )
 {
@@ -174,37 +156,6 @@ void arrayInitialize ( void )
 /**************************************************************/
 
 
-void *reshGetVal ( cdiResH idx, resOps * ops  )
-{
-  int nsp;
-  namespaceTuple_t nspT;
-  node * node;
-
-  ARRAY_LOCK ();
-
-  nsp = namespaceGetActive ();
-
-  nspT = namespaceIdxDecode ( idx );
-
-  assert ( arrayInit && 
-	   nspT.nsp == nsp &&
-	   nspT.idx >= 0 && 
-	   nspT.idx < arraySizeAllocated[nsp] );
-
-  node =  arrayResources[nsp] + nspT.idx;
-
-  ARRAY_UNLOCK ();
-   
-  assert ( node );
-  assert ( node->ops == ops ); 
-
-  return node->ptr;
-}
-
-
-/**************************************************************/
-
-
 void arraySizeExtend()
 {
   int newArraySize;
@@ -256,6 +207,7 @@ int reshPut ( void *p, resOps *ops )
   idx                 = newNode->idx;
   newNode->ptr        = p;
   newNode->ops        = ops;
+  newNode->sent       = 0;
 
   ARRAY_UNLOCK();
 
@@ -269,21 +221,83 @@ int reshPut ( void *p, resOps *ops )
 void reshRemove ( cdiResH idx, resOps * ops )
 {
   int nsp;
-
-  assert ( arrayInit );
+  namespaceTuple_t nspT;
 
   ARRAY_LOCK();
 
   nsp = namespaceGetActive ();
 
-  assert ( arrayResources[nsp][idx].ops == ops );
+  nspT = namespaceIdxDecode ( idx );
 
-  arrayResources[nsp][idx].next = freeListHead[nsp];
-  arrayResources[nsp][idx].ops  = NULL;
-  arrayResources[nsp][idx].ptr  = NULL;
-  arrayResources[nsp][idx].sent = 0;
-  freeListHead[nsp]             = arrayResources[nsp] + idx;
+  assert ( arrayInit && 
+	   nspT.nsp == nsp &&
+	   nspT.idx >= 0 && 
+	   nspT.idx < arraySizeAllocated[nsp] &&
+	   arrayResources[nsp][nspT.idx].ops &&
+	   arrayResources[nsp][nspT.idx].ops == ops );
 
+  arrayResources[nsp][nspT.idx].next = freeListHead[nsp];
+  arrayResources[nsp][nspT.idx].ops  = NULL;
+  arrayResources[nsp][nspT.idx].ptr  = NULL;
+  arrayResources[nsp][nspT.idx].sent = 0;
+  freeListHead  [nsp]                = arrayResources[nsp] + nspT.idx;
+
+  ARRAY_UNLOCK();
+}
+
+
+/**************************************************************/
+
+
+void *reshGetVal ( cdiResH idx, resOps * ops  )
+{
+  int nsp;
+  namespaceTuple_t nspT;
+  node * node;
+
+  ARRAY_LOCK ();
+
+  nsp = namespaceGetActive ();
+
+  nspT = namespaceIdxDecode ( idx );
+
+  assert ( arrayInit && 
+	   nspT.nsp == nsp &&
+	   nspT.idx >= 0 && 
+	   nspT.idx < arraySizeAllocated[nsp] );
+
+  node =  arrayResources[nsp] + nspT.idx;
+
+  ARRAY_UNLOCK ();
+
+  assert ( node &&
+	   node->ops == ops ); 
+
+  return node->ptr;
+}
+
+
+/**************************************************************/
+
+
+void reshGetIndiceArrayOfType ( int c, int * indice, resOps * ops )
+{
+  int i, j = 0, nsp;
+
+  assert ( arrayInit && indice && ops );
+  
+  ARRAY_LOCK();
+
+  nsp = namespaceGetActive ();
+  
+  for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
+    if ( arrayResources[nsp][i].ptr && arrayResources[nsp][i].ops ) 
+      if ( arrayResources[nsp][i].ops == ops )
+	{
+	  indice[j++] = i;
+	  if ( j == c ) break;
+	}
+  
   ARRAY_UNLOCK();
 }
 
@@ -314,25 +328,31 @@ int reshCountType ( resOps * ops )
 
 /**************************************************************/
 
-
-void reshGetIndiceArrayOfType ( int c, int * indice, resOps * ops )
+size_t reshGetSendSize ( void )
 {
-  int i, j = 0, nsp;
+  return 4096 * 4096;
+}
 
-  assert ( arrayInit && indice && ops );
-  
+
+/**************************************************************/
+
+int reshGetSendData ( size_t size, char * buff )
+{
+  return 0;
+}
+
+
+void reshLock ()
+{
   ARRAY_LOCK();
+}
 
-  nsp = namespaceGetActive ();
-  
-  for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
-    if ( arrayResources[nsp][i].ptr && arrayResources[nsp][i].ops ) 
-      if ( arrayResources[nsp][i].ops == ops )
-	{
-	  indice[j++] = i;
-	  if ( j == c ) break;
-	}
-  
+
+/**************************************************************/
+
+
+void reshUnlock ()
+{
   ARRAY_UNLOCK();
 }
 

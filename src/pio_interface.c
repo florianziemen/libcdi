@@ -18,6 +18,7 @@
 #include "pio_rpc.h"
 #include "pio_server.h"
 #include "namespace.h"
+#include "resource_handle.h"
 
 #endif
 
@@ -337,11 +338,22 @@ void  pioMetadata ()
 #ifdef USE_MPI
   int metadataBuffer = 1299;
 
+  size_t buffSize;
+  char * buff;
+
+  buffSize = reshGetSendSize ();
+
+  buff = xcalloc ( 1, buffSize );
+
+  reshGetSendData ( buffSize, buff );
+
   if ( rankGlob < nProcsIO )
     MPI_Send ( &metadataBuffer, 1, MPI_INT, nProcsCalc, 
 	       METADATA, * ( commsIO + rankGlob ));
 
   if ( ddebug ) xdebugText ( "send message metadata" );
+
+  if ( buff ) free ( buff );
 #endif
 }
 
