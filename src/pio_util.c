@@ -126,7 +126,7 @@ void pcdiXMPIStat ( int iret, const char *filename, int line, MPI_Status *status
 
 /****************************************************/
 
-void myDebug (  const char *filename, const char *functionname, int line )
+void pcdiDebug (  const char *filename, const char *functionname, int line )
 {
 #ifdef USE_MPI
   int rank = 0;
@@ -144,7 +144,7 @@ void myDebug (  const char *filename, const char *functionname, int line )
 
 /*****************************************************************************/
 
-void myDebug2 (  const char *filename, const char *functionname, int line, char * text )
+void pcdiDebug2 (  const char *filename, const char *functionname, int line, char * text )
 {
 #ifdef USE_MPI
   int rank;
@@ -164,7 +164,7 @@ void myDebug2 (  const char *filename, const char *functionname, int line, char 
 /****************************************************/
 
 #ifdef USE_MPI
-void myDebugComm ( const char *filename, const char *functionname, int line, MPI_Comm *comm )
+void pcdiDebugComm ( const char *filename, const char *functionname, int line, MPI_Comm *comm )
 {
   int rank, size, len, rankGlob;
   char *name;
@@ -187,7 +187,7 @@ void myDebugComm ( const char *filename, const char *functionname, int line, MPI
 /****************************************************/
 
 #ifdef USE_MPI
-void myDebugMsg ( const char *filename, const char *functionname, int line,
+void pcdiDebugMsg ( const char *filename, const char *functionname, int line,
                   int tag, int source, int nfinished )
 {
   int rank;
@@ -203,7 +203,7 @@ void myDebugMsg ( const char *filename, const char *functionname, int line,
 /****************************************************/
 
 #ifdef USE_MPI
-void myDebugMsg2 ( const char *filename, const char *functionname, int line,
+void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line,
                    int tag, int source, char * text )
 {
   int rank;

@@ -44,11 +44,14 @@ typedef enum
 
 
 void pcdiAbort ( char *, const char *, int, int );
+
 void * pcdiXmalloc ( size_t, const char *, int );
 #define xmalloc(size) pcdiXmalloc ( size, __FILE__, __LINE__ )
+
 void * pcdiXcalloc ( size_t, size_t, const char *, int );
 #define xcalloc(nmemb,size) pcdiXcalloc(nmemb, size,            \
                                         __FILE__, __LINE__)
+
 void * pcdiXrealloc ( void *, size_t, const char *, int );
 #define xrealloc(p,size) pcdiXrealloc(p, size,            \
                                       __FILE__, __LINE__)
@@ -59,11 +62,24 @@ void pcdiXMPIStat ( int, const char *, int, MPI_Status * );
 #define xmpiStat(ret,stat) pcdiXMPIStat ( ret, __FILE__, __LINE__, stat )
 #endif
 
-void myDebug ( const char *, const char *, int );
-#define xdebug(fun) myDebug (  __FILE__, fun, __LINE__ )
+void pcdiDebug ( const char *, const char *, int );
+#define xdebug() pcdiDebug (  __FILE__, __func__, __LINE__ )
 
 #ifdef USE_MPI
-void myDebugComm ( const char *filename, const char *functionname, int line, MPI_Comm *comm );
+void pcdiDebugComm ( const char *filename, const char *functionname, int line, \
+		     MPI_Comm *comm );
+#define xdebugComm(comm) pcdiDebugComm (  __FILE__, __func__, __LINE__, comm )
+
+void pcdiDebugMsg ( const char *filename, const char *functionname, int line, \
+		    int tag, int source, int nfinished );
+#define xdebugMsg(tag,source,nfinished) pcdiDebugMsg ( __FILE__, __func__, \
+							__LINE__, tag, source,\
+							nfinished )
+
+void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line, \
+		    int tag, int source, char * text );
+#define xdebugMsg2(tag,source,text) pcdiDebugMsg ( __FILE__, __func__, \
+						    __LINE__, tag, source, text )
 #endif
 
 #endif

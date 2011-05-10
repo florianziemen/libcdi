@@ -45,8 +45,7 @@ void IOServer ( MPI_Comm comm, int ptype )
   int nnodes, color;
 
   
-  if ( ddebug >= 1 )
-    myDebugComm ( __FILE__, fnName, __LINE__, commCalc );
+  if ( ddebug >= 1 ) xdebugComm ( commCalc );
      
   nfinished = 0;
   commColl = bInit ( ptype, comm, &color, &nnodes );
@@ -66,11 +65,9 @@ void IOServer ( MPI_Comm comm, int ptype )
 		 tag, * commCalc, &status );
 	  nfinished++;
 
-	  if ( ddebug >= 2 )
-	    myDebugMsg (  __FILE__, fnName, __LINE__, tag, source, nfinished );
+	  if ( ddebug >= 2 ) xdebugMsg (  tag, source, nfinished );
 
-	  if ( nfinished == nProcsCalc ) 
-	    return;
+	  if ( nfinished == nProcsCalc )  return;
 	  
 	  break;
 
@@ -78,8 +75,7 @@ void IOServer ( MPI_Comm comm, int ptype )
 	  MPI_Recv ( &iBuffer, 1, MPI_INTEGER, source,
 		     tag, * commCalc, &status );
 
-	  if  ( ddebug >= 2 )
-	    myDebugMsg (  __FILE__, fnName, __LINE__, tag, source, nfinished );
+	  if  ( ddebug >= 2 ) xdebugMsg (  tag, source, nfinished );
 
 	  break;
 
@@ -87,8 +83,7 @@ void IOServer ( MPI_Comm comm, int ptype )
 	  MPI_Recv ( &iBuffer, 1, MPI_INTEGER, source,
 		     tag, * commCalc, &status );
 
-	  if ( ddebug >= 2 )
-	    myDebugMsg (  __FILE__, fnName, __LINE__, tag, source, nfinished );
+	  if ( ddebug >= 2 ) xdebugMsg ( tag, source, nfinished );
 	}
     }
     

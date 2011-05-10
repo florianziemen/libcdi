@@ -19,6 +19,10 @@
 #include "namespace.h"
 
 #endif
+
+#define xprintArray(ps,array,n,datatype) printArray ( ps, array, n, datatype, \
+						      __func__, __FILE__, __LINE__ )
+
 /*****************************************************************************/
 
 
@@ -52,7 +56,6 @@ int pioInit ( int comm, int nIOP, int mode )
 #ifdef USE_MPI
 MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int mode )
 {
-  char fnName[] = "pioInit_c()";
   MPI_Comm commModel;
   int isCalcPE;
 
@@ -65,7 +68,7 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int mode )
   MPI_Comm_rank ( commGlob, &rankGlob );
   MPI_Comm_set_name ( commGlob, "commGlob" );
   
-  if ( ddebug >= 1 ) myDebugComm (  __FILE__, fnName,__LINE__ , &commGlob );
+  if ( ddebug >= 1 ) xdebugComm (  &commGlob );
   
   if ( rankGlob >= nProcsCalc )
     isCalcPE = 0;
@@ -146,7 +149,6 @@ void printArray ( char * ps, void * array, int n, int datatype,
 void mapProblems ( int problemSizes[], int * problemMapping, int nProblems, 
 		   int nWriter, double * w )
 {
-  char fnName[] = "mapProblems()";
   int *ip[nProblems];
   int dummy[nProblems];
   int buckets[nWriter];
@@ -157,8 +159,7 @@ void mapProblems ( int problemSizes[], int * problemMapping, int nProblems,
   int i, j;
   char text[1024], * cp;
   
-  if ( ddebug >= 1 )
-    myDebug ( __FILE__, fnName, __LINE__ );
+  if ( ddebug >= 1 ) xdebug ();
   
 
   for ( i = 0; i < nProblems; i++ )
@@ -196,18 +197,12 @@ void mapProblems ( int problemSizes[], int * problemMapping, int nProblems,
 
   if ( ddebug > 2 )
     {
-      printArray (  "problemSizes = ", problemSizes, nProblems, 
-		    DATATYPE_INT, fnName, __FILE__, __LINE__ );
-      
-      printArray ( "vector of indices, qsort of problemSizes", dummy, 
-		   nProblems, DATATYPE_INT, fnName, __FILE__, __LINE__ ); 
-      printArray ( "problemMapping", problemMapping, nProblems, DATATYPE_INT,
-		   fnName, __FILE__, __LINE__ );
-      printArray ( "meanBucket", meanBucket, nWriter, DATATYPE_FLT,
-		   fnName, __FILE__, __LINE__ );
-      printArray ( "actual buckets", buckets, nWriter, DATATYPE_INT,
-		   fnName, __FILE__, __LINE__ );
-      
+      xprintArray (  "problemSizes = ", problemSizes, nProblems, DATATYPE_INT );     
+      xprintArray ( "vector of indices, qsort of problemSizes", dummy, 
+		   nProblems, DATATYPE_INT ); 
+      xprintArray ( "problemMapping", problemMapping, nProblems, DATATYPE_INT );
+      xprintArray ( "meanBucket", meanBucket, nWriter, DATATYPE_FLT );
+      xprintArray ( "actual buckets", buckets, nWriter, DATATYPE_INT );     
     }  
 
   return;
@@ -253,7 +248,6 @@ in order of vSizes
 void  varMapGen ( int * vSizes, int * sSizes, int * varMapping, 
 		     int nStreams, int * nodeSizes, int nNodes )
 {
-  char fnName[] = "varMapGen()";
   int weightsStreams[nStreams];
   int streamMapping[nStreams];
   int nPEs = 0, nVars = 0;
@@ -266,8 +260,7 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 
   int buckets[nProcsIO];
   
-  if ( ddebug >= 1 )
-    myDebug ( __FILE__, fnName, __LINE__ );
+  if ( ddebug >= 1 ) xdebug ();
   
 
   for ( i = 0; i < nStreams; i++ )
@@ -334,15 +327,13 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 
   if ( ddebug > 1 )
     {
-      printArray ( "varMapping", varMapping, nVars, DATATYPE_INT,
-		   fnName, __FILE__, __LINE__  );
+      xprintArray ( "varMapping", varMapping, nVars, DATATYPE_INT  );
 
       for ( i = 0; i < nProcsIO; i++ )
 	buckets[i] = 0;
       for ( i = 0; i < nVars; i ++ )
 	buckets[*(varMapping + i ) - nProcsCalc] += * ( vSizes + i );
-      printArray ( "buckets", buckets, nProcsIO, DATATYPE_INT, 
-		   fnName, __FILE__, __LINE__  );
+      xprintArray ( "buckets", buckets, nProcsIO, DATATYPE_INT );
     }
 
   IOMetadata ();
@@ -365,10 +356,9 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 void pioFinalize ()
 {
 #ifdef USE_MPI
-  char fnName[] = "pioFinalize()";
   int i, ibuffer = 1111;
   
-  if ( ddebug >= 1 ) xdebug ( fnName );
+  if ( ddebug >= 1 ) xdebug ();
   
   for ( i = 0; i < nProcsIO; i++ )
     MPI_Send ( &ibuffer, 1, MPI_INT, nProcsCalc, FINALIZE, *( commsIO + i ));

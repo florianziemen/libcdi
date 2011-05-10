@@ -273,9 +273,7 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
   *nnodes = 1;
   *color = 1;
 
-  if ( ddebug == MAXDEBUG )
-    myDebug ( __FILE__, fnName, __LINE__ );
-
+  if ( ddebug == MAXDEBUG ) xdebug ();
 #ifdef USE_MPI
   MPI_Comm_size ( comm, &size );
   MPI_Comm_rank ( comm, &rank );

@@ -55,11 +55,10 @@ int nodeSizes[nNodes] = {1};
 int nStreams = 4;
 int streamSizes[4] = {2,5,1,3};
 int vlistSizes[11] = {5,1,7,3,2,47,11,11,5,47,1 };
-int hlf[] = { 1, 0 };
+int hlf[] = { 0, 0 };
 
 void modelRun ()
 {
-  char fnName[] = "modelRun()";
   int gridID, zaxisID1, zaxisID2, taxisID;
   int vlistID, varID1, varID2, streamID, tsID;
   int i, nmiss = 0;
@@ -74,7 +73,7 @@ void modelRun ()
   int taxisID2, taxisID3, taxisID4, taxisID5;
   int instID, modelID;
 
-  if  ( ddebug >= 3 ) xdebug (  fnName );
+  if  ( ddebug >= 3 ) xdebug ();
 
   namespaceInit ( 2, hlf );
   namespaceSetActive ( 0 );
@@ -191,7 +190,6 @@ void modelRun ()
 
 int main (int argc, char *argv[]) 
 {
-  char fnName[] = "main()";
   int sizeGlob, rankGlob;
 
 #ifdef USE_MPI
@@ -208,9 +206,9 @@ int main (int argc, char *argv[])
     pcdiAbort ( "bad distribution of tasks on PEs", __FILE__, __LINE__, rankGlob );
 #endif  
 
-  if  ( ddebug >= 3 ) xdebug (  fnName );
+  if  ( ddebug >= 3 ) xdebug ();
 
-  //commModel = pioInit_c ( commGlob, nProcsIO, 0 );
+  commModel = pioInit_c ( commGlob, nProcsIO, 0 );
 
   modelRun ();
 

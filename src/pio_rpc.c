@@ -58,10 +58,9 @@ void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
     {
 
       if ( rankGlob < nProcsCalc )
-	for ( i = 0; i < nProcsIO; i++ )
-	  myDebugComm ( __FILE__, fnName, __LINE__, commsIO + i );
+	for ( i = 0; i < nProcsIO; i++ ) xdebugComm ( commsIO + i );
       else
-	myDebugComm ( __FILE__, fnName,__LINE__, commCalc );
+	xdebugComm ( commCalc );
     }
 
   MPI_Group_free ( &currGroupIO );
@@ -89,7 +88,7 @@ void commsIOCleanup ()
   char fnName[] = "commsIOCleanup()";
   int i;
 
-  if ( ddebug >= 1 ) myDebug (  __FILE__, fnName,__LINE__ );
+  if ( ddebug >= 1 ) xdebug ();
   
   for ( i = 0; i < nProcsIO; i++ )
     if ( rankGlob < nProcsCalc || rankGlob == nProcsCalc + i )
