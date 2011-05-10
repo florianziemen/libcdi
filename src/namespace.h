@@ -9,6 +9,7 @@ typedef struct {
 
 void             namespaceShowbits     ( int, char * );
 int              namespaceGetNumber    ( void );
+int              namespaceGetActive    ( void );
 int              namespaceIdxEncode    ( namespaceTuple_t );
 int              namespaceIdxEncode2   ( int, int );
 namespaceTuple_t namespaceIdxDecode    ( int );

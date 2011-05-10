@@ -207,7 +207,6 @@ void     pioFinalize        ( void );
 
 void     namespaceInit      ( int, int * );
 void     namespaceSetActive ( int );
-int      namespaceGetActive ( void );
 
 void     reshArrayPrint     ( void );
 
