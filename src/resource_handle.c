@@ -223,14 +223,15 @@ void reshRemove ( cdiResH idx, resOps * ops )
   int nsp;
   namespaceTuple_t nspT;
 
+  assert ( arrayInit && ops );
+
   ARRAY_LOCK();
 
   nsp = namespaceGetActive ();
 
   nspT = namespaceIdxDecode ( idx );
 
-  assert ( arrayInit && 
-	   nspT.nsp == nsp &&
+  assert ( nspT.nsp == nsp &&
 	   nspT.idx >= 0 && 
 	   nspT.idx < arraySizeAllocated[nsp] &&
 	   arrayResources[nsp][nspT.idx].ops &&
@@ -254,6 +255,8 @@ void *reshGetVal ( cdiResH idx, resOps * ops  )
   int nsp;
   namespaceTuple_t nspT;
   node * node;
+
+  assert ( arrayInit && ops );
 
   ARRAY_LOCK ();
 
@@ -309,6 +312,8 @@ int reshCountType ( resOps * ops )
 {
   int i, nsp, countType = 0;
 
+  assert ( ops );
+
   if ( !( arrayInit && ops )) return 0;
   
   ARRAY_LOCK();
@@ -338,6 +343,20 @@ size_t reshGetSendSize ( void )
 
 int reshGetSendData ( size_t size, char * buff )
 {
+  int i, nsp;
+
+  assert ( buff );
+  
+  ARRAY_LOCK();
+
+  nsp = namespaceGetActive ();
+  
+  for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
+    if ( arrayResources[nsp][i].ptr ) 
+      if ( ! arrayResources[nsp][i].sent );;
+  
+  ARRAY_UNLOCK();
+  
   return 0;
 }
 
