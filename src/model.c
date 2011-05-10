@@ -7,6 +7,7 @@
 #include "stream_int.h"
 #include "resource_handle.h"
 #include "pio_util.h"
+#include "resource_handle.h"
 
 #undef  UNDEFID
 #define UNDEFID -1
@@ -31,12 +32,14 @@ static int  MODEL_Debug = 0;   /* If set to 1, debugging */
 static void modelInit(void);
 
 
-int  modelCompareP ( void * modelptr1, void * modelptr2 );
-void modelDestroyP ( void * modelptr );
-void modelPrintP   ( void * modelptr );
+static int    modelCompareP ( void * modelptr1, void * modelptr2 );
+static void   modelDestroyP ( void * modelptr );
+static void   modelPrintP   ( void * modelptr );
+static size_t modelGetSizeP ( void * modelptr );
+static void   modelPackP    ( void * modelptr, void * position, void * buff );
 
-resOps modelOps = { modelCompareP, modelDestroyP, modelPrintP };
-
+resOps modelOps = { modelCompareP, modelDestroyP, modelPrintP, modelGetSizeP, \
+		     modelPackP };
 
 static
 void modelDefaultValue ( model_t *modelptr )
@@ -257,4 +260,20 @@ void modelPrintP   ( void * modelptr )
   fprintf ( fp, "instID        = %d\n", mp->instID );
   fprintf ( fp, "modelgribID   = %d\n", mp->modelgribID );
   fprintf ( fp, "name          = %s\n", mp->name ? mp->name : "NN" );
+}
+
+
+static 
+size_t modelGetSizeP ( void * modelptr )
+{
+  xdebug ();
+  return 0; 
+}
+
+
+static 
+void modelPackP ( void * modelptr, void * position, void * buff )
+{
+  xdebug ();
+  return;
 }

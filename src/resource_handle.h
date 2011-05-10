@@ -13,14 +13,18 @@
 typedef int cdiResH;
 
 /* return 0 on equality, not 0 otherwise */
-typedef int ( * valCompareFunc )( void *, void * );
-typedef void ( * valDestroyFunc ) ( void * );
-typedef void ( * valPrintFunc ) ( void * );
+typedef int    ( * valCompareFunc )( void *, void * );
+typedef void   ( * valDestroyFunc )( void * );
+typedef void   ( * valPrintFunc   )( void * );
+typedef size_t ( * valGetSizeFunc )( void * );
+typedef void   ( * valPackFunc    )( void *, void *, void * );
 
 typedef struct {
   valCompareFunc valCompare;
   valDestroyFunc valDestroy;
   valPrintFunc   valPrint;
+  valGetSizeFunc valGetSize;
+  valPackFunc    valPack;
 }resOps; 
 
 int    reshPut ( void *, resOps * );
@@ -35,7 +39,7 @@ void   reshGetIndiceArrayOfType ( int, int *, resOps * );
 
 size_t reshGetSendSize ( void );
 
-int    reshGetSendData ( size_t, char * );
+int    reshGetSendData ( size_t *, char * );
 
 void   reshLock   ( void );
 

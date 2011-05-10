@@ -42,11 +42,13 @@ char *Grids[] = {
 };
 
 
-int  gridCompareP ( void * gridptr1, void * gridptr2 );
-void gridDestroyP ( void * gridptr );
-void gridPrintP   ( void * gridptr );
+static int    gridCompareP ( void * gridptr1, void * gridptr2 );
+static void   gridDestroyP ( void * gridptr );
+static void   gridPrintP   ( void * gridptr );
+static size_t gridGetSizeP ( void * gridptr );
+static void   gridPackP    ( void * gridptr, void * position, void * buff );
 
-resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP };
+resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP, gridGetSizeP, gridPackP };
 
 
 static int  GRID_Debug = 0;   /* If set to 1, debugging */
@@ -3658,3 +3660,18 @@ void gridGetIndexArray ( int ngrids, int * gridIndexArray )
   reshGetIndiceArrayOfType ( ngrids, gridIndexArray, &gridOps );
 }
 
+
+static 
+size_t gridGetSizeP ( void * gridptr )
+{
+  xdebug ();
+  return 0; 
+}
+
+
+static 
+void gridPackP ( void * gridptr, void * position, void * buff )
+{
+  xdebug ();
+  return;
+}

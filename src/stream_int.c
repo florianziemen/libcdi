@@ -65,12 +65,14 @@ static int cdiSortName = 0;
 static int cdiHaveMissval = 0;
 
 
-int  streamCompareP ( void * streamptr1, void * streamptr2 );
-void streamDestroyP ( void * streamptr );
-void streamPrintP   ( void * streamptr );
+static int    streamCompareP ( void * streamptr1, void * streamptr2 );
+static void   streamDestroyP ( void * streamptr );
+static void   streamPrintP   ( void * streamptr );
+static size_t streamGetSizeP ( void * streamptr );
+static void   streamPackP    ( void * streamptr, void * position, void * buff );
 
-resOps streamOps = { streamCompareP, streamDestroyP, streamPrintP };
-
+resOps streamOps = { streamCompareP, streamDestroyP, streamPrintP, streamGetSizeP, \
+		     streamPackP };
 
 long cdiGetenvInt(char *envName)
 {
@@ -559,4 +561,20 @@ void streamPrintP   ( void * streamptr )
   fprintf ( fp, "nfiles        = %d\n", sp->nfiles );
   fprintf ( fp, "//  char    **fnames;\n" );
   fprintf ( fp, "//  void     *gribContainers;\n" );
+}
+
+
+static 
+size_t streamGetSizeP ( void * streamptr )
+{
+  xdebug ();
+  return 0; 
+}
+
+
+static 
+void streamPackP ( void * streamptr, void * position, void * buff )
+{
+  xdebug ();
+  return;
 }

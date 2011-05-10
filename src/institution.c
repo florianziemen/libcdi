@@ -7,6 +7,7 @@
 #include "stream_int.h"
 #include "resource_handle.h"
 #include "pio_util.h"
+#include "resource_handle.h"
 
 #undef  UNDEFID
 #define UNDEFID  -1
@@ -27,11 +28,14 @@ typedef struct
 institute_t;
 
 
-int  instituteCompareP ( void * instituteptr1, void * instituteptr2 );
-void instituteDestroyP ( void * instituteptr );
-void institutePrintP   ( void * instituteptr );
+static int    instituteCompareP ( void * instituteptr1, void * instituteptr2 );
+static void   instituteDestroyP ( void * instituteptr );
+static void   institutePrintP   ( void * instituteptr );
+static size_t instituteGetSizeP ( void * instituteptr );
+static void   institutePackP    ( void * instituteptr, void * position, void * buff );
 
-resOps instituteOps = { instituteCompareP, instituteDestroyP, institutePrintP };
+resOps instituteOps = { instituteCompareP, instituteDestroyP, institutePrintP, \
+			instituteGetSizeP, institutePackP };
 
 
 static
@@ -314,4 +318,21 @@ void institutePrintP   ( void * instituteptr )
   fprintf ( fp, "subcenter     = %d\n", ip->subcenter );
   fprintf ( fp, "name          = %s\n", ip->name ? ip->name : "NN" );
   fprintf ( fp, "longname      = %s\n", ip->longname ? ip->longname : "NN" );
+}
+
+
+
+static 
+size_t instituteGetSizeP ( void * instituteptr )
+{
+  xdebug ();
+  return 0; 
+}
+
+
+static 
+void institutePackP ( void * instituteptr, void * position, void * buff )
+{
+  xdebug ();
+  return;
 }

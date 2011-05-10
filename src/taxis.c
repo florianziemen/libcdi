@@ -34,11 +34,13 @@ char *Timeunits[] = {
 };
 
 
-int  taxisCompareP ( void * taxisptr1, void * taxisptr2 );
-void taxisDestroyP ( void * taxisptr );
-void taxisPrintP   ( void * taxisptr );
+static int    taxisCompareP ( void * taxisptr1, void * taxisptr2 );
+static void   taxisDestroyP ( void * taxisptr );
+static void   taxisPrintP   ( void * taxisptr );
+static size_t taxisGetSizeP ( void * taxisptr );
+static void   taxisPackP    ( void * taxisptr, void * position, void * buff );
 
-resOps taxisOps = { taxisCompareP, taxisDestroyP, taxisPrintP };
+resOps taxisOps = { taxisCompareP, taxisDestroyP, taxisPrintP, taxisGetSizeP, taxisPackP };
 
 
 static int  TAXIS_Debug = 0;   /* If set to 1, debugging */
@@ -1256,4 +1258,20 @@ int taxisCompareP ( void *  taxisptr1, void * taxisptr2 )
 	     t1->vtime_lb   == t2->vtime_lb   &&
 	     t1->vdate_ub   == t2->vdate_ub   &&
 	     t1->vtime_ub   == t2->vtime_ub ); 
+}
+
+
+static 
+size_t taxisGetSizeP ( void * taxisptr )
+{
+  xdebug ();
+  return 0; 
+}
+
+
+static 
+void taxisPackP ( void * taxisptr, void * position, void * buff )
+{
+  xdebug ();
+  return;
 }

@@ -30,7 +30,6 @@ static int vlistIsInitialized = 0;
 
 #  define VLIST_INIT()               \
   if ( _vlist_init == FALSE ) vlist_initialize()
-
 #endif
 
 
@@ -49,12 +48,16 @@ vlist_compare(vlist_t *a, vlist_t *b)
 
 static void
 vlistPrintKernel(vlist_t *vlistptr);
+static size_t  vlistGetSizeP ( void * vlistptr );
+static void vlistPackP    ( void * vlistptr, void * position, void * buff );
 
 
 resOps vlist_ops = {
   (valCompareFunc)vlist_compare,
   free,
-  (valPrintFunc)vlistPrintKernel
+  (valPrintFunc)vlistPrintKernel,
+  vlistGetSizeP,
+  vlistPackP
 };
 
 
@@ -1490,5 +1493,22 @@ int vlistHasTime(int vlistID)
       }
 
   return (hastime);
+}
+
+
+
+static 
+size_t  vlistGetSizeP ( void * vlistptr )
+{
+  xdebug ();
+  return 0; 
+}
+
+
+static 
+void vlistPackP ( void * vlistptr, void * position, void * buff )
+{
+  xdebug ();
+  return;
 }
 

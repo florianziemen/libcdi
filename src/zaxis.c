@@ -61,11 +61,13 @@ zaxis_t;
 
 static int CDI_MaxZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]);
 
-int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 );
-void zaxisDestroyP ( void * zaxisptr );
-void zaxisPrintP   ( void * zaxisptr );
+static int    zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 );
+static void   zaxisDestroyP ( void * zaxisptr );
+static void   zaxisPrintP   ( void * zaxisptr );
+static size_t zaxisGetSizeP ( void * zaxisptr );
+static void   zaxisPackP    ( void * zaxisptr, void * position, void * buff );
 
-resOps zaxisOps = { zaxisCompareP, zaxisDestroyP, zaxisPrintP };
+resOps zaxisOps = { zaxisCompareP, zaxisDestroyP, zaxisPrintP, zaxisGetSizeP, zaxisPackP };
 
 static int  ZAXIS_Debug = 0;   /* If set to 1, debugging */
 
@@ -253,6 +255,7 @@ void zaxisDestroy(int zaxisID)
 }
 
 
+static
 void zaxisDestroyP ( void * zaxisptr )
 {
   zaxisDestroyKernel (( zaxis_t * ) zaxisptr );
@@ -1164,12 +1167,14 @@ void zaxisPrint ( int zaxisID )
 }
 
 
+static
 void zaxisPrintP ( void * zaxisptr )
 {
   zaxisPrintKernel (( zaxis_t * ) zaxisptr );
 }
 
 
+static
 int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
 {
   zaxis_t * z1 = ( zaxis_t * ) zaxisptr1 ;
@@ -1181,6 +1186,22 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
   return zaxisCompare ( z1->self, 
 			z2->type, z2->size, z2->size > 0 ? 1 : 0,
 			z2->vals, z2->longname, z2->units, z2->ltype );
+}
+
+
+static 
+size_t  zaxisGetSizeP ( void * zaxisptr )
+{
+  xdebug ();
+  return 0; 
+}
+
+
+static 
+void zaxisPackP ( void * zaxisptr, void * position, void * buff )
+{
+  xdebug ();
+  return;
 }
 
 

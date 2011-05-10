@@ -10,7 +10,7 @@
 
 extern resOps gridOps;
 
-enum { MIN_ARRAY_SIZE = 128 };
+enum { MIN_ARRAY_SIZE = 128, MIN_BUFF_SIZE = 4096 };
 
 static int *arraySizeAllocated;
 
@@ -335,15 +335,16 @@ int reshCountType ( resOps * ops )
 
 size_t reshGetSendSize ( void )
 {
-  return 4096 * 4096;
+  return MIN_BUFF_SIZE;
 }
 
 
 /**************************************************************/
 
-int reshGetSendData ( size_t size, char * buff )
+int reshGetSendData ( size_t * size, char * buff )
 {
-  int i, nsp;
+  int i, nsp, position;
+  node * curr;
 
   assert ( buff );
   
@@ -353,11 +354,27 @@ int reshGetSendData ( size_t size, char * buff )
   
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
     if ( arrayResources[nsp][i].ptr ) 
-      if ( ! arrayResources[nsp][i].sent );;
+      if ( ! arrayResources[nsp][i].sent )
+	{
+	  curr = arrayResources[nsp] + i;
+	  assert ( curr->ops );
+
+	  if ( position +  curr->ops->valGetSize (( void * ) curr->ptr ) > size )
+	    {
+	      *size += MIN_BUFF_SIZE;
+	      buff = xrealloc ( buff, * size ); 
+	    }
+
+	  curr->ops->valPack (( void * ) curr->ptr, 
+			      ( void * ) position,
+			      ( void * ) buff );
+	  curr->sent = 1;
+	} 
+	
   
   ARRAY_UNLOCK();
   
-  return 0;
+  return position;
 }
 
 
