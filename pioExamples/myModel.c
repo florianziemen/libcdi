@@ -225,9 +225,10 @@ int main (int argc, char *argv[])
   MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN );
   MPI_Comm_size ( commGlob, &sizeGlob );
   MPI_Comm_rank ( commGlob, &rankGlob ); 
-                                          
-  if ( nProcsIO <=0 || nProcsIO >= ( float ) sizeGlob / 2.0 && ! TEST_LOCAL )
-    pcdiAbort ( "bad distribution of tasks on PEs", __FILE__, __LINE__, rankGlob );
+
+  if ( ! TEST_LOCAL )                                           
+    if ( nProcsIO <=0 || nProcsIO >= ( float ) sizeGlob / 2.0 )
+      pcdiAbort ( "bad distribution of tasks on PEs", __FILE__, __LINE__, rankGlob );
 #endif  
 
   if  ( ddebug >= 3 ) xdebug ();
