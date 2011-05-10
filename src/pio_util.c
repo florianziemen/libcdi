@@ -207,7 +207,6 @@ void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line,
                    int tag, int source, char * text )
 {
   int rank;
-  char s[MAXSTRING];
 
   MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
 
@@ -219,3 +218,17 @@ void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line,
 #endif
 
 /****************************************************/
+
+#ifdef USE_MPI
+void pcdiDebugText ( const char *filename, const char *functionname, int line,
+		     char * text )
+{
+  int rank;
+
+  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+
+  fprintf ( stdout,
+            "pe%d in %s, %s, line %d: %s\n",
+            rank, functionname, filename, line, text );
+}
+#endif

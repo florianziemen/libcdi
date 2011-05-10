@@ -5,17 +5,18 @@
 #  include "config.h"
 #endif
 
+
+#include <stdlib.h>
+#include <stdio.h>
+#include "limits.h" 
+#include "cdi.h"
+#include "pio_util.h"
+
 #ifdef USE_MPI
 
 #include "pio_interface.h"
-
-#include <stdlib.h>
-#include <stdio.h> 
-#include "limits.h"
-#include "pio_util.h"
 #include "pio_rpc.h"
 #include "pio_server.h"
-#include "cdi.h"
 #include "namespace.h"
 
 #endif
@@ -28,6 +29,8 @@
 
 int pioInit ( int comm, int nIOP, int mode )
 {
+#ifdef USE_MPI
+#endif
   return 0;
 }
 
@@ -90,6 +93,7 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int mode )
   
   return commModel;
 }
+#endif
 
 /************************************************************************/
 
@@ -113,15 +117,14 @@ void printArray ( char * ps, void * array, int n, int datatype,
   char as[1024];
   int * iArray;
   double * dArray;
-  /*
-  len = strlen ( ps );
-  memcpy ( as, ps, len );
-  as[len] = '\0';
-  */
 
+#ifdef USE_MPI
   fprintf ( stdout, "pe%d in %s, %s, line %d: %s = ",
 	    rankGlob, funname, filename, line, ps );
-  //fprintf ( stdout, "%s = ", as );
+#else 
+  fprintf ( stdout, "%s, %s, line %d: %s = ",
+	    funname, filename, line, ps );
+#endif
 
   switch ( datatype )
     {
@@ -210,21 +213,6 @@ void mapProblems ( int problemSizes[], int * problemMapping, int nProblems,
 
 /****************************************************/ 
 
-void  IOMetadata ()
-{
-  int metadataBuffer = 1299;
-
-  if ( rankGlob < nProcsIO )
-    MPI_Send ( &metadataBuffer, 1, MPI_INT, nProcsCalc, 
-	       METADATA, * ( commsIO + rankGlob ));
-
-  fprintf ( stdout, "pe%d send message metadata\n", rankGlob );
-
-  return;
-}
-
-/****************************************************/
-
 /**
    @brief is encapsulated in CDI library.
 
@@ -244,10 +232,12 @@ in order of vSizes
    
    @return
 */
-   
+
+#ifdef USE_MPI   
 void  varMapGen ( int * vSizes, int * sSizes, int * varMapping, 
 		     int nStreams, int * nodeSizes, int nNodes )
 {
+
   int weightsStreams[nStreams];
   int streamMapping[nStreams];
   int nPEs = 0, nVars = 0;
@@ -305,8 +295,8 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
       for ( j = 0; j < * ( nodeSizes + i ); j ++ )
 	w[j] = 1.0 / ( double ) * ( nodeSizes + i );
 
-      mapProblems ( weightsVarsNode, varMappingNode, nVarsNode, * ( nodeSizes + i ), 
-		    w );
+      mapProblems ( weightsVarsNode, varMappingNode, nVarsNode, 
+		    * ( nodeSizes + i ),  w );
 
       offset = 0;
       offsetN = 0;
@@ -314,7 +304,8 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
       for ( j = 0; j < nStreams; j++ )
 	if ( * ( streamMapping + j ) == i )
 	  for ( k = 0; k < * ( sSizes + j ); k ++ )
-	    * ( varMapping + offset ++ ) = * ( varMappingNode + offsetN ++ ) + nProcsCalc + summandRank;
+	    * ( varMapping + offset ++ ) = 
+	      * ( varMappingNode + offsetN ++ ) +  nProcsCalc + summandRank;
 	else
 	  offset += * ( sSizes + j );
 
@@ -335,14 +326,26 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 	buckets[*(varMapping + i ) - nProcsCalc] += * ( vSizes + i );
       xprintArray ( "buckets", buckets, nProcsIO, DATATYPE_INT );
     }
+}
+#endif
 
-  IOMetadata ();
+/************************************************************************/
 
-  return;
+
+void  pioMetadata ()
+{
+#ifdef USE_MPI
+  int metadataBuffer = 1299;
+
+  if ( rankGlob < nProcsIO )
+    MPI_Send ( &metadataBuffer, 1, MPI_INT, nProcsCalc, 
+	       METADATA, * ( commsIO + rankGlob ));
+
+  if ( ddebug ) xdebugText ( "send message metadata" );
+#endif
 }
 
-#endif
-/************************************************************************/
+/****************************************************/
 
 /**
   @brief is invoked by the calculator PEs, to inform
@@ -364,11 +367,9 @@ void pioFinalize ()
     MPI_Send ( &ibuffer, 1, MPI_INT, nProcsCalc, FINALIZE, *( commsIO + i ));
 
   commsIOCleanup ();
-#endif
 
   namespaceCleanup ();
- 
-  return;
+#endif
 }
 
 /************************************************************************/

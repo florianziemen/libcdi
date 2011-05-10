@@ -75,8 +75,11 @@ void modelRun ()
 
   if  ( ddebug >= 3 ) xdebug ();
 
+#ifdef USE_MPI
   namespaceInit ( 2, hlf );
   namespaceSetActive ( 0 );
+#endif
+
   // Create a regular lon/lat grid
   gridID = gridCreate(GRID_LONLAT, nlon*nlat);
   gridDefXsize(gridID, nlon);
@@ -86,7 +89,10 @@ void modelRun ()
 
   // Test namespaces: Create a 2. grid list
 
+#ifdef USE_MPI
   namespaceSetActive ( 1 );
+#endif
+
   gridID2 = gridCreate(GRID_LONLAT, (nlon-1)*(nlat-1));
   gridDefXsize(gridID2, nlon-1);
   gridDefYsize(gridID2, nlat-1);
@@ -98,7 +104,10 @@ void modelRun ()
   gridDefYsize(gridID3, nlat-2);
   gridDefXvals(gridID3, lons);
   gridDefYvals(gridID3, lats);
+
+#ifdef USE_MPI
   namespaceSetActive ( 0 );
+#endif
 
 
   // Create a surface level Z-axis
@@ -110,10 +119,15 @@ void modelRun ()
 
   // Test namespaces: Create a 2. zaxis list
 
+#ifdef USE_MPI
   namespaceSetActive ( 1 );
+#endif
   zaxisID3 = zaxisCreate(ZAXIS_PRESSURE, 3);
   zaxisDefLevels(zaxisID3, levs);
+
+#ifdef USE_MPI
   namespaceSetActive ( 0 );
+#endif
 
   // Create a variable list
   vlistID = vlistCreate();
@@ -132,11 +146,17 @@ void modelRun ()
   // Create a Time axis
   taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxisID2 = taxisCreate(TAXIS_ABSOLUTE);
+
+#ifdef USE_MPI
   namespaceSetActive ( 1 );
+#endif
   taxisID3 = taxisCreate(TAXIS_ABSOLUTE);
   taxisID4 = taxisCreate(TAXIS_ABSOLUTE);
   taxisID5 = taxisCreate(TAXIS_ABSOLUTE);
+
+#ifdef USE_MPI
   namespaceSetActive ( 0 );
+#endif
 
   // Assign the Time axis to the variable list
   vlistDefTaxis(vlistID, taxisID);
@@ -152,6 +172,10 @@ void modelRun ()
 
   // Assign the variable list to the dataset
   streamDefVlist(streamID, vlistID);
+
+#ifdef USE_MPI
+  pioMetadata ();
+#endif
 
   // Loop over the number of time steps
   for ( tsID = 0; tsID < ntsteps; tsID++ )
@@ -208,12 +232,14 @@ int main (int argc, char *argv[])
 
   if  ( ddebug >= 3 ) xdebug ();
 
+#ifdef USE_MPI
   commModel = pioInit_c ( commGlob, nProcsIO, 0 );
+#endif
 
   modelRun ();
 
-  pioFinalize ();
 #ifdef USE_MPI
+  pioFinalize ();
   MPI_Finalize ();                         
 #endif
   return 0;
