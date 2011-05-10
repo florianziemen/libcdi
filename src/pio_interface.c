@@ -336,24 +336,26 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 void  pioMetadata ()
 {
 #ifdef USE_MPI
-  int metadataBuffer = 1299;
-
+  char   * buff;
   size_t buffSize;
-  char * buff;
-
-  buffSize = reshGetSendSize ();
-
-  buff = xcalloc ( 1, buffSize );
-
-  reshGetSendData ( buffSize, buff );
+  int    buffPos;
 
   if ( rankGlob < nProcsIO )
-    MPI_Send ( &metadataBuffer, 1, MPI_INT, nProcsCalc, 
-	       METADATA, * ( commsIO + rankGlob ));
-
-  if ( ddebug ) xdebugText ( "send message metadata" );
-
-  if ( buff ) free ( buff );
+    {
+      buffSize = reshGetSendSize ();
+      
+      buff = xcalloc ( 1, buffSize );
+      buffPos = 0;
+      
+      reshGetSendData ( buff, &buffSize, &buffPos, ( void * )( commsIO + rankGlob ));
+      
+      MPI_Send ( buff, buffPos, MPI_PACKED, nProcsCalc, 
+		 METADATA, * ( commsIO + rankGlob ));
+      
+      if ( ddebug ) xdebugText ( "sent message metadata" );
+      
+      if ( buff ) free ( buff );
+    }
 #endif
 }
 

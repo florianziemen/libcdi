@@ -12,6 +12,10 @@
 #include "pio_util.h"
 #include "resource_handle.h"
 
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
+
 
 #ifndef  RAD2DEG
 #define  RAD2DEG  (180./M_PI)   /* conversion for rad to deg */
@@ -46,9 +50,14 @@ static int    gridCompareP ( void * gridptr1, void * gridptr2 );
 static void   gridDestroyP ( void * gridptr );
 static void   gridPrintP   ( void * gridptr );
 static size_t gridGetSizeP ( void * gridptr );
-static void   gridPackP    ( void * gridptr, void * position, void * buff );
+static void   gridPackP    ( void * gridptr, void * buff, void * sizebuff, \
+			     void * position, void * comm );
+static 
+void gridPackP ( void * gridptr, void * buff, void * sizebuff, void * position, 
+		 void * comm );
 
-resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP, gridGetSizeP, gridPackP };
+resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP, gridGetSizeP, \
+		   gridPackP };
 
 
 static int  GRID_Debug = 0;   /* If set to 1, debugging */
@@ -3670,8 +3679,22 @@ size_t gridGetSizeP ( void * gridptr )
 
 
 static 
-void gridPackP ( void * gridptr, void * position, void * buff )
+void gridPackP ( void * gridptr, void * buff, void * sizebuff, void * position, 
+		 void * comm )
 {
+  grid_t   * gridP = ( grid_t * )   gridptr;
+  char     * buffP = ( char * )     buff;
+  int      * sizeP = ( int * )      sizebuff; 
+  int      * posP  = ( int * )      position; 
+#ifdef USE_MPI
+  MPI_Comm * commP = ( MPI_Comm * ) comm;
+#endif
+
   xdebug ();
+
+#ifdef USE_MPI
+  MPI_Pack ( &gridP->size, 1, MPI_INT, buffP, * sizeP, posP, * commP );
+#endif
+
   return;
 }

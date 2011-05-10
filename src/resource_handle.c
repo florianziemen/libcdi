@@ -335,15 +335,15 @@ int reshCountType ( resOps * ops )
 
 size_t reshGetSendSize ( void )
 {
-  return MIN_BUFF_SIZE;
+  return ( size_t ) MIN_BUFF_SIZE;
 }
 
 
 /**************************************************************/
 
-int reshGetSendData ( size_t * size, char * buff )
+int reshGetSendData ( char * buff, size_t * size, int * position, void * comm )
 {
-  int i, nsp, position;
+  int i, nsp;
   node * curr;
 
   assert ( buff );
@@ -357,17 +357,20 @@ int reshGetSendData ( size_t * size, char * buff )
       if ( ! arrayResources[nsp][i].sent )
 	{
 	  curr = arrayResources[nsp] + i;
-	  assert ( curr->ops );
+	  assert ( curr->ops ); 
 
-	  if ( position +  curr->ops->valGetSize (( void * ) curr->ptr ) > size )
+
+	  if ( * position +  curr->ops->valGetSize (( void * ) curr->ptr ) > * size )
 	    {
 	      *size += MIN_BUFF_SIZE;
 	      buff = xrealloc ( buff, * size ); 
 	    }
 
 	  curr->ops->valPack (( void * ) curr->ptr, 
+			      ( void * ) buff ,
+			      ( void * ) size,
 			      ( void * ) position,
-			      ( void * ) buff );
+			      ( void * ) comm );
 	  curr->sent = 1;
 	} 
 	

@@ -17,7 +17,7 @@ typedef int    ( * valCompareFunc )( void *, void * );
 typedef void   ( * valDestroyFunc )( void * );
 typedef void   ( * valPrintFunc   )( void * );
 typedef size_t ( * valGetSizeFunc )( void * );
-typedef void   ( * valPackFunc    )( void *, void *, void * );
+typedef void   ( * valPackFunc    )( void *, void *, void *, void *, void * );
 
 typedef struct {
   valCompareFunc valCompare;
@@ -39,7 +39,7 @@ void   reshGetIndiceArrayOfType ( int, int *, resOps * );
 
 size_t reshGetSendSize ( void );
 
-int    reshGetSendData ( size_t *, char * );
+int    reshGetSendData ( char *, size_t *, int *, void * );
 
 void   reshLock   ( void );
 

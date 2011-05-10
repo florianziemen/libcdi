@@ -43,6 +43,8 @@ void IOServer ( MPI_Comm comm, int ptype )
   size_t len, len2;
   MPI_Comm commColl;
   int nnodes, color;
+  char * buffer;
+  int size;
 
   
   if ( ddebug >= 1 ) xdebugComm ( commCalc );
@@ -52,7 +54,6 @@ void IOServer ( MPI_Comm comm, int ptype )
 
   for ( ;; )
     {  
-      fprintf ( stdout, "pe%d before mpi_probe()\n", rankGlob );
       MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, * commCalc, &status );
       
       source = status.MPI_SOURCE;
@@ -72,8 +73,11 @@ void IOServer ( MPI_Comm comm, int ptype )
 	  break;
 
 	case METADATA:
-	  MPI_Recv ( &iBuffer, 1, MPI_INTEGER, source,
+	  MPI_Get_count ( &status, MPI_CHAR, &size );
+	  buffer = xmalloc (( size_t ) size );
+	  MPI_Recv ( buffer, size, MPI_PACKED, source,
 		     tag, * commCalc, &status );
+	  free ( buffer );
 
 	  if  ( ddebug >= 2 ) xdebugMsg (  tag, source, nfinished );
 
