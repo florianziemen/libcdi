@@ -34,32 +34,35 @@ void pcdiAbort ( char * errorString, const char * filename,
 
 /*****************************************************************************/
 
-void * pcdiXmalloc ( size_t size, const char *filename, int line )
+void * pcdiXmalloc ( size_t size, const char *filename, const char *functionname, 
+		     int line )
 {
   void * value = calloc (1, size );
 
   if ( value == NULL )
-    pcdiAbort ( "malloc failed", filename, line, -1 );
+    pcdiAbort ( "malloc failed", filename, functionname, line );
 
   return value;
 }
 
-void * pcdiXcalloc ( size_t nmemb, size_t size, const char *filename, int line )
+void * pcdiXcalloc ( size_t nmemb, size_t size, const char *filename, 
+		     const char *functionname, int line )
 {
   void * value = calloc ( nmemb, size );
 
   if ( value == NULL )
-    pcdiAbort ( "calloc failed", filename, line, -1 );
+    pcdiAbort ( "calloc failed", filename, functionname, line );
 
   return value;
 }
 
-void * pcdiXrealloc ( void *p, size_t size, const char *filename, int line )
+void * pcdiXrealloc ( void *p, size_t size, const char *functionname, 
+		      const char *filename, int line )
 {
   void * value = realloc ( p, size );
 
   if ( value == NULL )
-    pcdiAbort ( "realloc failed", filename, line, -1 );
+    pcdiAbort ( "realloc failed", filename, functionname, line );
 
   return value;
 }

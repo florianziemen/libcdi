@@ -19,18 +19,6 @@ static void arrayInitialize(void);
 
 static int arrayInit = 0;
 
-
-extern int    gridCompareP ( void * gridptr1, void * gridptr2 );
-extern void   gridDestroyP ( void * gridptr );
-extern void   gridPrintP   ( void * gridptr );
-extern size_t gridGetSizeP ( void * gridptr );
-extern void   gridPackP    ( void * gridptr, void * buff, void * sizebuff, \
-			     void * position, void * comm );
-extern 
-void gridPackP ( void * gridptr, void * buff, void * sizebuff, void * position, 
-		 void * comm );
-
-
 // ATTENTION: not thread safe yet, namespaces are set in model!
 
 #if  defined  (HAVE_LIBPTHREAD)
@@ -345,27 +333,12 @@ int reshCountType ( resOps * ops )
 
 /**************************************************************/
 
-size_t reshPackSize ( void )
+static
+size_t  getPackBufferSize ()
 {
-  return ( size_t ) MIN_BUFF_SIZE;
-}
-
-
-/**************************************************************/
-
-void reshPackMetadata ( char * buff, size_t * size, int * position, void * comm )
-{
-#ifdef USE_MPI
-  int i, nsp;
-  int end = END, sep = SEPARATOR, type = GRID;
+  int nsp, i;
+  size_t size = 0;
   node * curr;
-  MPI_Comm * commP = ( MPI_Comm * ) comm;
-
-  xdebug ();
-
-  assert ( buff );
-  
-  ARRAY_LOCK();
 
   nsp = namespaceGetActive ();
   
@@ -376,40 +349,80 @@ void reshPackMetadata ( char * buff, size_t * size, int * position, void * comm 
 	  curr = arrayResources[nsp] + i;
 	  assert ( curr->ops ); 
 
-	  if ( curr->ops !=  ( resOps * ) &gridPackP )
+	  if ( curr->ops !=  &gridOps )
 	    continue;
 	  
 	  
-	  if ( * position +  curr->ops->valGetSize (( void * ) curr->ptr ) > * size )
-	    {
-	      *size += MIN_BUFF_SIZE;
-	      buff = xrealloc ( buff, * size ); 
-	    }
+	  size +=  curr->ops->valGetSize (( void * ) curr->ptr ) +
+	    ( 2 * sizeof ( int ));
+	} 
+
+  return size;
+}
+
+
+/**************************************************************/
+
+void reshPackBufferDestroy ( char ** buffer )
+{
+  if ( buffer ) free ( *buffer );
+}
+
+
+/**************************************************************/
+
+#ifdef USE_MPI
+void reshPackBufferCreate ( char ** buffer, size_t * size, MPI_Comm comm )
+{
+  int i, nsp, position = 0;
+  int end = END, sep = SEPARATOR, type = GRID;
+  node * curr;
+
+  xdebug ();
+
+  assert ( buffer );
+  
+  ARRAY_LOCK();
+
+  nsp = namespaceGetActive ();
+
+  * size = getPackBufferSize () + sizeof ( int ) ;
+  * buffer = xcalloc ( 1, * size );
+  
+  for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
+    if ( arrayResources[nsp][i].ptr ) 
+      if ( ! arrayResources[nsp][i].sent )
+	{
+	  curr = arrayResources[nsp] + i;
+	  assert ( curr->ops ); 
+
+	  if ( curr->ops !=  &gridOps )
+	    continue;
 	  
-	  MPI_Pack ( &type, 1, MPI_INT, buff, * size, position, * commP );
+	  MPI_Pack ( &type, 1, MPI_INT, * buffer, * size, &position, comm );
 	  
 	  curr->ops->valPack (( void * ) curr->ptr, 
-			      ( void * ) buff ,
+			      ( void * ) * buffer ,
 			      ( void * ) size,
-			      ( void * ) position,
+			      ( void * ) &position,
 			      ( void * ) comm );
 
-	  MPI_Pack ( &sep, 1,  MPI_INT, buff, * size, position, * commP );
+	  MPI_Pack ( &sep, 1,  MPI_INT, * buffer, * size, &position, comm );
 
-	  xdebugText ( "!!! packed one resource with type and separator" );
+	  if ( ddebug == MAXDEBUG ) 
+	    xdebugText ( "#### packed one resource with type and separator" );
 
 	  curr->sent = 1;
 	} 
-
+  
   ARRAY_UNLOCK();
 
-  MPI_Pack ( &end, 1,  MPI_INT, buff, * size, position, * commP );
+  MPI_Pack ( &end, 1,  MPI_INT, * buffer, * size, &position, comm );
 
-  fprintf ( stdout, "!!! END=%d\n", end );
-
-  xdebugText ( "!!! packed END token" );
-#endif  
+  if ( ddebug == MAXDEBUG ) xdebugText ( "#### packed END token" ); 
 }
+
+#endif 
 
 
 void reshLock ()
@@ -434,12 +447,16 @@ void reshArrayPrint ()
 {
   int i, j, temp;
   node * curr;
+
+  xdebug();
+  fprintf ( stdout, "arrayInit=%d\n", arrayInit );
  
   if ( ! arrayInit ) return;
 
   temp = namespaceGetActive ();
   
-  fprintf ( stdout, "\n\n###############\n#\n#  print global resource array \n" );
+  fprintf ( stdout, "\n\n##########################################\n#\n#  print " \
+	    "global resource array \n#\n" );
   
   for ( i = 0; i < namespaceGetNumber (); i++ )
     {
@@ -463,7 +480,8 @@ void reshArrayPrint ()
 	}
     }
   
-  fprintf ( stdout, "#\n#  end global resource array \n#\n#################\n\n" );
+  fprintf ( stdout, "#\n#  end global resource array" \
+	    "\n#\n##########################################\n\n" );
   
   namespaceSetActive ( temp );
 }

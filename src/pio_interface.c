@@ -336,25 +336,20 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 void  pioMetadata ()
 {
 #ifdef USE_MPI
-  char   * buff;
-  size_t buffSize;
-  int    buffPos;
+  char   * buffer;
+  size_t bufferSize;
+  int    bufferPos;
 
   if ( rankGlob < nProcsIO )
     {
-      buffSize = reshPackSize ();
+      reshPackBufferCreate ( &buffer, &bufferSize, commsIO[rankGlob] );
       
-      buff = xcalloc ( 1, buffSize );
-      buffPos = 0;
-      
-      reshPackMetadata ( buff, &buffSize, &buffPos, ( void * )( commsIO + rankGlob ));
-      
-      MPI_Send ( buff, buffPos, MPI_PACKED, nProcsCalc, 
+      MPI_Send ( buffer, bufferSize, MPI_PACKED, nProcsCalc, 
 		 METADATA, * ( commsIO + rankGlob ));
       
       if ( ddebug ) xdebugText ( "sent message metadata" );
       
-      if ( buff ) free ( buff );
+      reshPackBufferDestroy ( &buffer );
     }
 #endif
 }

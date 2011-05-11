@@ -5,6 +5,7 @@
 #ifdef USE_MPI
 #include "pio_rpc.h"
 #include "pio_util.h"
+#include "cdi.h"
 
 MPI_Comm commGlob;
 int sizeGlob;
@@ -97,27 +98,18 @@ void commsIOCleanup ()
 /*****************************************************************************/
 
 
-void unpackGrid ( char * buffer, size_t size, int * pos, MPI_Comm * comm )
+void unpackGrid ( char * buffer, size_t bufferSize, int * pos, MPI_Comm * comm )
 { 
   int token;
+  int gridID;
+  int type, size;
 
   xdebug ();
 
-  MPI_Unpack ( buffer, size, pos, &token, 1, MPI_INT, * comm );
+  MPI_Unpack ( buffer, bufferSize, pos, &type, 1, MPI_INT, * comm );
+  MPI_Unpack ( buffer, bufferSize, pos, &size, 1, MPI_INT, * comm );
 
-  fprintf ( stdout, "########### size of grid=%d, *pos=%d\n", 
-	    token, *pos );
-
-  MPI_Unpack ( buffer, size, pos, &token, 1, MPI_INT, * comm );
-      fprintf ( stdout, "########### token=%d, *pos=%d\n", token, *pos );
-  if ( token != SEPARATOR )
-    {
-      xabort ( "problems unpacking grid" );
-    }
-  else
-    {
-      xdebugText ( " success unpacking grid" );
-    }
+  gridID = gridCreate ( type, size );
 }
 
 
@@ -126,28 +118,26 @@ void unpackGrid ( char * buffer, size_t size, int * pos, MPI_Comm * comm )
 
 void rpcUnpackResources ( char * buffer, size_t size, MPI_Comm * comm )
 { 
-  int token;
+  int token1, token2;
   int pos = 0;
-
-  fprintf ( stdout, "########### size=%d\n", size );
+  char text[4096];
 
   while ( pos < size )
     {
-      MPI_Unpack ( buffer, size, &pos, &token, 1, MPI_INT, * comm );
-      fprintf ( stdout, "########### token=%d, pos=%d\n", token, pos );
+      MPI_Unpack ( buffer, size, &pos, &token1, 1, MPI_INT, * comm );
       
-      switch ( token )
+      switch ( token1 )
 	{
 	case END:
-	  if ( ddebug ) xdebugText ( "end of packed data" );
+	  if ( ddebug ) xdebugText ( "#### end of packed data" );
+	  reshArrayPrint ();
 	  return;
-	  break;
 	case GRID:
 	  unpackGrid ( buffer, size, &pos, comm );
 	  break;
 	case ZAXIS:
 	  break;
-        case TAXIS: 
+	case TAXIS: 
 	  break;
 	case INSTITUTE:
 	  break;
@@ -159,6 +149,19 @@ void rpcUnpackResources ( char * buffer, size_t size, MPI_Comm * comm )
 	  break;
 	default: 
 	  xabort ( "no valid datatype" );
+	}
+
+      MPI_Unpack ( buffer, size, &pos, &token2, 1, MPI_INT, * comm );
+
+      if ( token2 != SEPARATOR )
+	{
+	  sprintf ( text, "problems unpacking type %d", token1); 
+	  xabort ( text);
+	}
+      else
+	{
+	  sprintf ( text,  "#### success unpacking type %d", token1 );
+	  xdebugText ( text );
 	}
     }
 }

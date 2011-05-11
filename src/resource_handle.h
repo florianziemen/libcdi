@@ -1,6 +1,16 @@
 #ifndef RESOURCE_HANDLE_H
 #define RESOURCE_HANDLE_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
+#ifdef USE_MPI
+#include <mpi.h>
+#include <stdlib.h>
+#endif
+
 /*
  * CDI internal handling of resource handles given to user code
  */
@@ -38,9 +48,11 @@ void * reshGetVal ( cdiResH, resOps * );
 
 void   reshGetIndiceArrayOfType ( int, int *, resOps * );
 
-size_t reshGetSendSize ( void );
+#ifdef USE_MPI
+void   reshPackBufferCreate ( char **, size_t *, MPI_Comm );
+void   reshPackBufferDestroy ( char ** );
+#endif
 
-void   reshGetSendData ( char *, size_t *, int *, void * );
 
 void   reshLock   ( void );
 

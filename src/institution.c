@@ -105,7 +105,7 @@ int instituteCount ( void )
 
 int instituteCompareKernel ( institute_t *  ip1, institute_t * ip2 )
 {
-  int differ;
+  int differ = 0;
   size_t len;
 
   if ( ip1->name )

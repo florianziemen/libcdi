@@ -46,16 +46,16 @@ typedef enum
 void pcdiAbort ( char *, const char *, const char *, int );
 #define xabort(text) pcdiAbort ( text, __FILE__, __func__, __LINE__ );
 
-void * pcdiXmalloc ( size_t, const char *, int );
-#define xmalloc(size) pcdiXmalloc ( size, __FILE__, __LINE__ )
+void * pcdiXmalloc ( size_t, const char *, const char *, int );
+#define xmalloc(size) pcdiXmalloc ( size, __FILE__, __func__,  __LINE__ )
 
-void * pcdiXcalloc ( size_t, size_t, const char *, int );
+void * pcdiXcalloc ( size_t, size_t, const char *, const char *, int );
 #define xcalloc(nmemb,size) pcdiXcalloc(nmemb, size,            \
-                                        __FILE__, __LINE__)
+                                        __FILE__, __func__, __LINE__)
 
-void * pcdiXrealloc ( void *, size_t, const char *, int );
+void * pcdiXrealloc ( void *, size_t, const char *, const char *, int );
 #define xrealloc(p,size) pcdiXrealloc(p, size,            \
-                                      __FILE__, __LINE__)
+                                      __FILE__, __func__, __LINE__)
 
 void pcdiDebug ( const char *, const char *, int );
 #define xdebug() pcdiDebug (  __FILE__, __func__, __LINE__ )

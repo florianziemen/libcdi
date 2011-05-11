@@ -52,9 +52,6 @@ void   gridPrintP   ( void * gridptr );
 size_t gridGetSizeP ( void * gridptr );
 void   gridPackP    ( void * gridptr, void * buff, void * sizebuff, \
 			     void * position, void * comm );
- 
-void gridPackP ( void * gridptr, void * buff, void * sizebuff, void * position, 
-		 void * comm );
 
 resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP, gridGetSizeP, \
 		   gridPackP };
@@ -368,6 +365,8 @@ int gridCreate(int gridtype, int size)
 {
   int gridID;
   grid_t *gridptr;
+
+  xdebug ();
 
   if ( CDI_Debug )
     Message("gridtype: %d size: %d", gridtype, size);
@@ -3673,7 +3672,7 @@ void gridGetIndexArray ( int ngrids, int * gridIndexArray )
 size_t gridGetSizeP ( void * gridptr )
 {
   xdebug ();
-  return 0; 
+  return ( 2 * sizeof (int )); 
 }
 
 
@@ -3686,11 +3685,8 @@ void gridPackP ( void * gridptr, void * buff, void * sizebuff, void * position,
   int      * posP  = ( int * )      position; 
 #ifdef USE_MPI
   MPI_Comm * commP = ( MPI_Comm * ) comm;
-#endif
 
-  xdebug ();
-
-#ifdef USE_MPI
+  MPI_Pack ( &gridP->type, 1, MPI_INT, buffP, * sizeP, posP, * commP );
   MPI_Pack ( &gridP->size, 1, MPI_INT, buffP, * sizeP, posP, * commP );
 #endif
 
