@@ -72,8 +72,7 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   iret = dbuffer_init ( &( of->db1 ), of->size );
   iret += dbuffer_init ( &( of->db2 ), of->size );
 
-  if ( iret > 0 )
-    pcdiAbort ( "dbuffer_init did not succeed", __FILE__, __LINE__, pioinfo->rank );
+  if ( iret > 0 ) xabort ( "dbuffer_init did not succeed" );
 
   of->db = of->db1;
 
@@ -243,7 +242,7 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
   if ( error == 1 )
     {
       sprintf ( errorString,"did not succeed filling output buffer, id=%d", id );
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      xabort ( errorString );
     }
   
   return len;
@@ -265,7 +264,7 @@ int fcMPINONB ( int id )
   if ( ! ( of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, id )))
     {
       sprintf ( errorString, "pio_queue, id=%d not found", id ); 
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      xabort ( errorString );
     }
 
   writeMPINONB ( of, id );
@@ -317,7 +316,7 @@ void queueCheck ( queue *q, const char *name )
 	   memcmp ( name, afm->name, len ) == 0 )
 	{
 	  sprintf ( errorString, "Filename %s is already enqueued\n", name );
-	  pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+	  xabort ( errorString );
 	  return;
 	}
       
@@ -361,7 +360,7 @@ int fowMPINONB ( const char *filename )
   if (( id = queuePush ( bibAFiledataM, of, 0 )) < 0 )
     {   
       sprintf ( errorString, "filename %s not unique", of->name );
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      xabort ( errorString );
     }
 
   if ( ddebug == MAXDEBUG )
@@ -383,7 +382,7 @@ int initMPINONB ()
   bibAFiledataM = queueInit ( destroyAFiledataMPINONB, compareNamesMPINONB );
 
   if ( bibAFiledataM == NULL )
-    pcdiAbort ( "queueInit did not succeed", __FILE__, __LINE__, pioinfo->rank );
+    xabort ( "queueInit did not succeed" );
 	    
   return collectingData;
 }

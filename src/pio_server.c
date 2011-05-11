@@ -77,6 +77,7 @@ void IOServer ( MPI_Comm comm, int ptype )
 	  buffer = xmalloc (( size_t ) size );
 	  MPI_Recv ( buffer, size, MPI_PACKED, source,
 		     tag, * commCalc, &status );
+	  rpcUnpackResources ( buffer, size, commCalc );
 	  free ( buffer );
 
 	  if  ( ddebug >= 2 ) xdebugMsg (  tag, source, nfinished );

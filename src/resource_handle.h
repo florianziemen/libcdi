@@ -26,7 +26,8 @@ typedef struct {
   valGetSizeFunc valGetSize;
   valPackFunc    valPack;
 }resOps; 
-
+       
+       
 int    reshPut ( void *, resOps * );
 
 void   reshRemove ( cdiResH, resOps * );
@@ -39,7 +40,7 @@ void   reshGetIndiceArrayOfType ( int, int *, resOps * );
 
 size_t reshGetSendSize ( void );
 
-int    reshGetSendData ( char *, size_t *, int *, void * );
+void   reshGetSendData ( char *, size_t *, int *, void * );
 
 void   reshLock   ( void );
 

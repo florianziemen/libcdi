@@ -201,8 +201,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
 
   xmpi ( MPI_Get_processor_name ( myHost, &len ));
 
-  if ( myHost[0] == '\0' )
-    pcdiAbort ( "did not succeed to set hostname", __FILE__, __LINE__ , rank);
+  if ( myHost[0] == '\0' ) xabort ( "did not succeed to set hostname" );
 
   if ( ddebug == MAXDEBUG )
     {
@@ -242,7 +241,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
 
   *nnodes = j;
 
-  if ( *color == 0 ) pcdiAbort ( "Color is not set", __FILE__, __LINE__, rank );
+  if ( *color == 0 ) xabort ( "Color is not set" );
 
   npes_node = size / ( * nnodes );
   key = rank % npes_node;
@@ -279,11 +278,11 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
   MPI_Comm_rank ( comm, &rank );
 
   if ( ptype < 0 || ptype > maxPtype )
-    pcdiAbort ( "PIOTYPE is no valid modus", __FILE__, __LINE__, rank );
+    xabort ( "PIOTYPE is no valid modus" );
 
 #ifdef _SX
   if ( ptype ==  PIO_POSIX_ASYNCH )
-    pcdiAbort ( "PIO_POSIX_ASYNCH does not work on SX", __FILE__, __LINE__, rank );
+    xabort ( "PIO_POSIX_ASYNCH does not work on SX" );
 #endif
 
   pioinfo = ( pioInfo * ) xmalloc ( sizeof ( pioInfo ));
@@ -293,7 +292,7 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
   setPioCommunicator ( & ( pioinfo->comm ), comm, color, nnodes );
 
   if (( pioinfo->type == PIO_NONE ) && ( *nnodes != size ))
-    pcdiAbort ( "PIOTYPE, NNODES: not a valid combination", __FILE__, __LINE__, rank );
+    xabort ( "PIOTYPE, NNODES: not a valid combination" );
 
   pioinfo->color = *color;
   MPI_Comm_rank ( pioinfo->comm, &( pioinfo->rank ));

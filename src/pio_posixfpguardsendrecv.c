@@ -81,7 +81,7 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   iret += dbuffer_init ( &( afd->db2 ), afd->size );
 
   if ( iret > 0 )
-    pcdiAbort ( "dbuffer_init did not succeed", __FILE__, __LINE__, pioinfo->rank );
+    xabort ( "dbuffer_init did not succeed" );
 
   afd->db = afd->db1;
 
@@ -94,7 +94,7 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   if ( ( afd->fp = fopen ( afd->name, "w" )) == NULL ) 
     {
       sprintf ( errorString, "Failed to open %s", afd->name );
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      xabort ( errorString );
     }
 
   afd->command = IO_Open_file;
@@ -138,7 +138,7 @@ int destroyAFiledataPF ( void *v )
   if (( iret = fclose ( afd->fp )) == EOF )
     {
       sprintf ( errorString, "Failed to close %s", afd->name );
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      xabort ( errorString );
     }  
 
   /* file closed, cleanup */
@@ -229,7 +229,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 	      if (( iret = queuePush ( bibBFiledataPF, bfd, 1, rtag->id )) != rtag->id )
 	      {
 		sprintf ( errorString, "fileID=%d not unique", rtag->id );
-		pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+		xabort ( errorString);
 	      } 
 	    }
 
@@ -260,7 +260,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 							  rtag->id )))
 	      {
 		sprintf ( errorString, "fileId=%d not in queue", rtag->id );
-		pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+		xabort ( errorString );
 	      }
 
 	  if ( ddebug )
@@ -288,7 +288,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 							  rtag->id )))
 	      {
 		sprintf ( errorString, "fileId=%d not in queue", rtag->id );
-		pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+		xabort ( errorString );
 	      }
 
 	  if ( ddebug )
@@ -362,7 +362,7 @@ void writePF ( aFiledataPF *afd, int id )
   /* write buffer */
   
   if (( error = fseek ( afd->fp, offset, SEEK_SET )) != 0 )
-    pcdiAbort ( "did not succeed seeking fp", __FILE__, __LINE__, pioinfo->rank );
+    xabort ( "did not succeed seeking fp" );
 
   if (( written = 
 	fwrite ( afd->db->buffer, sizeof ( char ), amount, afd->fp )) !=
@@ -371,7 +371,7 @@ void writePF ( aFiledataPF *afd, int id )
       sprintf ( errorString, 
 		"fileId=%d, expect to write %u byte, written %u byte", 
 		id, amount, written );
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      xabort ( errorString );
     }
 
   if ( ddebug )
@@ -453,7 +453,7 @@ size_t fwPOSIXFPGUARDSENDRECV( int id, int tsId, const void *buffer, size_t len 
   if ( error == 1 )
     {
       sprintf ( errorString,"did not succeed filling output buffer, id=%d", id );
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      xabort ( errorString );
     }
   
   return len;
@@ -510,7 +510,7 @@ void queueCheckFP ( queue *q, const char *name )
 	   memcmp ( name, afd->name, len ) == 0 )
 	{
 	  sprintf ( errorString, "Filename %s is already enqueued\n", name );
-	  pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+	  xabort ( errorString );
 	  return;
 	}
       
@@ -564,7 +564,7 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
   if (( id = queuePush ( bibAFiledataPF, afd, 0 )) < 0 )
     {  
       sprintf ( errorString, "filename %s not unique", afd->name );
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank ); 
+      xabort ( errorString ); 
     }
 
   if ( ddebug )
@@ -583,9 +583,7 @@ int initPOSIXFPGUARDSENDRECV ()
   MPI_Group streamGroup, collectorGroup;
   int ioRanks[1];
 
-  if ( pioinfo->size < 2 )
-    pcdiAbort ( "usage: #pes/#nodes >= 2", 
-	       __FILE__, __LINE__, pioinfo->rank );
+  if ( pioinfo->size < 2 ) xabort ( "usage: #pes/#nodes >= 2" );
   
   if ( ddebug )
     fprintf ( stderr, 

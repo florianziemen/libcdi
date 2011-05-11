@@ -7,6 +7,7 @@
 #include "namespace.h"
 #include "cdi.h"
 #include "error.h"
+#include "pio_rpc.h"
 
 extern resOps gridOps;
 
@@ -341,10 +342,15 @@ size_t reshGetSendSize ( void )
 
 /**************************************************************/
 
-int reshGetSendData ( char * buff, size_t * size, int * position, void * comm )
+void reshGetSendData ( char * buff, size_t * size, int * position, void * comm )
 {
+#ifdef USE_MPI
   int i, nsp;
+  int sep = SEPARATOR, type = GRID;
   node * curr;
+  MPI_Comm * commP = ( MPI_Comm * ) comm;
+
+  xdebug ();
 
   assert ( buff );
   
@@ -366,6 +372,9 @@ int reshGetSendData ( char * buff, size_t * size, int * position, void * comm )
 	      buff = xrealloc ( buff, * size ); 
 	    }
 
+	  MPI_Pack ( &sep, 1,  MPI_INT, buff, * size, position, * commP );
+	  MPI_Pack ( &type, 1, MPI_INT, buff, * size, position, * commP );
+
 	  curr->ops->valPack (( void * ) curr->ptr, 
 			      ( void * ) buff ,
 			      ( void * ) size,
@@ -376,8 +385,7 @@ int reshGetSendData ( char * buff, size_t * size, int * position, void * comm )
 	
   
   ARRAY_UNLOCK();
-  
-  return position;
+#endif  
 }
 
 

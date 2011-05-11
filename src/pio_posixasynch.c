@@ -102,8 +102,7 @@ static aFiledataPA *initAFiledataPA ( const char *filename, size_t bs )
   iret = dbuffer_init ( &( afd->db1 ), afd->size );
   iret += dbuffer_init ( &( afd->db2 ), afd->size );
 
-  if ( iret > 0 )
-    pcdiAbort ( "dbuffer_init did not succeed", __FILE__, __LINE__, pioinfo->rank );
+  if ( iret > 0 ) xabort ( "dbuffer_init did not succeed" );
 
   afd->db = afd->db1;
 
@@ -139,7 +138,7 @@ static bFiledataPA *initBFiledataPA ( char *filename,
   if (( bfd->handle = open ( bfd->name, O_CREAT | O_WRONLY, 0666 )) == -1 )
     {
       sprintf ( errorString, "Failed to open %s", bfd->name );
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      xabort ( errorString );
     }
 
   dbuffer_init ( &( bfd->fb ), ( size_t )( nPrefStreams * bfd->size ));
@@ -223,8 +222,7 @@ int destroyBFiledataPA ( void *v )
       do
 	{
 	  iret = aio_suspend ( ccBP, 1, NULL );
-	  if ( iret < 0 && errno != EINTR )
-	    pcdiAbort ( "aio_suspend () failed", __FILE__, __LINE__, pioinfo->rank );
+	  if ( iret < 0 && errno != EINTR ) xabort ( "aio_suspend () failed" );
 	} 
       while ( iret != 0 );
 
@@ -232,7 +230,7 @@ int destroyBFiledataPA ( void *v )
 	accumSuspend += ( MPI_Wtime () - startTime);
       
       if (( iret = aio_return ( bfd->ctrlBlks + bfd->nextOpIndex )) == -1 )
-	pcdiAbort ( "aio_return () failed", __FILE__, __LINE__, pioinfo->rank );
+	xabort ( "aio_return () failed" );
  
       bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
       bfd->prefIndex --;
@@ -241,7 +239,7 @@ int destroyBFiledataPA ( void *v )
   if (( iret = close ( bfd->handle )) == -1 )
     {
       sprintf ( errorString, "failed to close %s", bfd->name );
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      xabort ( errorString );
     }
 
   /* file closed, cleanup */
@@ -328,13 +326,19 @@ void writePA ( bFiledataPA *bfd, long amount )
 	      pioinfo->rank, bfd->name, bfd->ctrlBlks[bfd->currOpIndex].aio_nbytes,
 	      bfd->ctrlBlks[bfd->currOpIndex].aio_offset, iret );
 
-  if ( iret == -1 )
-    pcdiAbort ( "did not succeed writing buffer", __FILE__, __LINE__, pioinfo->rank );
-  else
-    if ( ddebug )
-      fprintf ( stdout, "### pe%d writeBuffer (), buffer written to %s\n", 
-		pioinfo->rank, bfd->name );
-	  
+   
+  if ( iret == -1 ) 
+    {
+      xabort ( "did not succeed writing buffer" );
+    }
+  else 
+    {
+      if ( ddebug )
+	fprintf ( stdout, "### pe%d writeBuffer (), buffer written to %s\n", 
+		  pioinfo->rank, bfd->name );
+    }
+   
+  
   bfd->offset += ( off_t ) amount;
   bfd->prefIndex ++;
 
@@ -349,14 +353,14 @@ void writePA ( bFiledataPA *bfd, long amount )
 	{
 	  iret = aio_suspend ( ccBP, 1, NULL );
 	  if ( iret < 0 && errno != EINTR )
-	    pcdiAbort ( "aio_suspend () failed", __FILE__, __LINE__, pioinfo->rank );
+	    xabort ( "aio_suspend () failed" );
 	} while ( iret != 0 );
 
       if ( ddebug )
 	accumSuspend += ( MPI_Wtime () - startTime);
 	      
       if (( iret = aio_return ( bfd->ctrlBlks + bfd->nextOpIndex )) == -1 ) 
-	pcdiAbort ( "aio_return () failed", __FILE__, __LINE__, pioinfo->rank );
+	xabort ( "aio_return () failed" );
 
       bfd->prefIndex --;
     }
@@ -387,7 +391,7 @@ void queueCheckPA ( queue *q, char *name )
 	   memcmp ( name, bfd->name, len ) == 0 )
 	{
 	  sprintf ( errorString, "Filename %s is already enqueued\n", name );
-	  pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+	  xabort ( errorString );
 	  return;
 	}
       
@@ -466,7 +470,7 @@ void pwPOSIXASYNCH ( int ncollectors )
 	      if (( id = queuePush ( bibBFiledataPA, bfd, 1, rtag->id )) != rtag->id )
 		{
 		  sprintf ( errorString, "fileID=%d not unique", rtag->id );
-		  pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+		  xabort ( errorString );
 		} 	      
 	    }
 	  else
@@ -474,7 +478,7 @@ void pwPOSIXASYNCH ( int ncollectors )
 		memcmp ( filename, bfd->name, len ) != 0 )
 	      {
 		sprintf ( errorString, "filename is not consistant, fileID=%d", rtag->id );
-		pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+		xabort ( errorString );
 	      }
 
 	  *( bfd->nfinished + source ) = false;
@@ -497,7 +501,7 @@ void pwPOSIXASYNCH ( int ncollectors )
 							  rtag->id )))
 	    {
 	      sprintf ( errorString, "fileID=%d is not in queue", rtag->id );
-	      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+	      xabort ( errorString );
 	    }
 	  
 	  amount = messagesize;
@@ -523,7 +527,7 @@ void pwPOSIXASYNCH ( int ncollectors )
 							  rtag->id )))
 	    {
 	      sprintf ( errorString, "fileID=%d is not in queue", rtag->id );
-	      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+	      xabort ( errorString );
 	    }
 	  
 	  amount = messagesize;
@@ -671,7 +675,7 @@ size_t fwPOSIXASYNCH( int id, int tsId, const void *buffer, size_t len )
   if ( error == 1 )
     {
       sprintf ( errorString,"did not succeed filling output buffer, id=%d", id );
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      xabort ( errorString );
     }
   
   return len;
@@ -764,7 +768,7 @@ int fowPOSIXASYNCH ( const char *filename )
   if (( id = queuePush ( bibAFiledataPA, afd, 0 )) < 0 )
     {  
       sprintf ( errorString, "filename %s is not unique", afd->name );
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );  
+      xabort ( errorString );  
     }
 
   if ( ddebug )
@@ -797,12 +801,10 @@ int initPOSIXASYNCH ()
   int ioRanks[1];
 
   if ( pioinfo->size < 2 )
-    pcdiAbort ( "usage: #pes/#nodes >= 2", 
-	       __FILE__, __LINE__, pioinfo->rank );
+    xabort ( "usage: #pes/#nodes >= 2");
 
   if ( nPrefStreams < 1 )
-    pcdiAbort ( "usage: #prefetch streams >= 1", 
-	       __FILE__, __LINE__, pioinfo->rank );
+    xabort ( "usage: #prefetch streams >= 1" );
 
   pioinfo->specialRank = pioinfo->size - 1;
   ncollectors = pioinfo->size - 1; 

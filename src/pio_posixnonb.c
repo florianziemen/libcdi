@@ -90,8 +90,7 @@ static aFiledataP *initAFiledataP ( const char *filename, size_t bs )
   iret = dbuffer_init ( &( afp->db1 ), afp->size );
   iret += dbuffer_init ( &( afp->db2 ), afp->size );
 
-  if ( iret > 0 )
-    pcdiAbort ( "dbuffer_init did not succeed", __FILE__, __LINE__, pioinfo->rank );
+  if ( iret > 0 ) xabort ( "dbuffer_init did not succeed" );
 
   afp->db = afp->db1;
 
@@ -128,7 +127,7 @@ static bFiledataP * initBFiledataP ( char *filename,
   if (( bfp->fp = fopen ( filename, "w" )) == NULL ) 
     {
       sprintf ( errorString, "Failed to open %s", bfp->name );
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      xabort ( errorString );
     }
 
   dbuffer_init ( & ( bfp->fb ), ( size_t )( bfp->size ));
@@ -191,7 +190,7 @@ int destroyBFiledataP ( void *v )
   if (( iret = fclose ( bfp->fp )) == EOF )
     {
       sprintf ( errorString, "Failed to close %s", bfp->name );
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      xabort ( errorString );
     }
 
   /* file closed, cleanup */
@@ -260,7 +259,7 @@ void writeP ( bFiledataP *bfd, long amount )
 			   bfd->fp )) != amount )
     {
       sprintf ( errorString, "did not succeed writing buffer in %s", bfd->name );
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      xabort ( errorString );
     }
 
   if ( ddebug )
@@ -289,7 +288,7 @@ void queueCheckP ( queue *q, char *name )
 	   memcmp ( name, bfd->name, len ) == 0 )
 	{
 	  sprintf ( errorString, "Filename %s is already enqueued\n", name );
-	  pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+	  xabort ( errorString );
 	  return;
 	}
       
@@ -328,7 +327,7 @@ void pwPOSIXNONB ( int ncollectors )
 
       if ( rtag ) ungetTag ( rtag );
       if (( rtag   = getTag ( tag )) == NULL )
-	pcdiAbort ( "getTag () failed", __FILE__, __LINE__, pioinfo->rank );
+	xabort ( "getTag () failed" );
 
       MPI_Get_count ( &status, MPI_CHAR, &messagesize );
 
@@ -375,7 +374,7 @@ void pwPOSIXNONB ( int ncollectors )
 	      if (( id = queuePush ( bibBFiledataP, bfd, 1, rtag->id )) != rtag->id )
 		{   
 		  sprintf ( errorString, "fileID=%d not unique", rtag->id );
-		  pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+		  xabort ( errorString );
 		}	      
 	    }
 	  else
@@ -383,7 +382,7 @@ void pwPOSIXNONB ( int ncollectors )
 		memcmp ( filename, bfd->name, len ) != 0 )
 	      {
 		  sprintf ( errorString, "filename is not consistant, fileID=%d", rtag->id );
-		  pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+		  xabort ( errorString );
 	      }
 
 	  *( bfd->nfinished + source ) = false;
@@ -402,7 +401,7 @@ void pwPOSIXNONB ( int ncollectors )
 							 rtag->id )))
 	      {
 		sprintf ( errorString, "fileID=%d is not in queue", rtag->id );
-		pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+		xabort ( errorString );
 	      }
 
 	  amount = messagesize;
@@ -431,7 +430,7 @@ void pwPOSIXNONB ( int ncollectors )
 							 rtag->id )))
 	    {
 	      sprintf ( errorString, "fileID=%d is not in queue", rtag->id );
-	      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+	      xabort ( errorString );
 	    }
 
 	  amount = messagesize;
@@ -586,7 +585,7 @@ size_t fwPOSIXNONB ( int id, int tsId, const void *buffer, size_t len )
   if ( error == 1 )
     {
       sprintf ( errorString,"did not succeed filling output buffer, id=%d", id );
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );
+      xabort ( errorString );
     }
 
   return len;
@@ -681,7 +680,7 @@ int fowPOSIXNONB ( const char *filename )
   if (( id = queuePush ( bibAFiledataP, afd, 0 )) < 0 )
     {
       sprintf ( errorString, "filename %s is not unique", afd->name );
-      pcdiAbort ( errorString, __FILE__, __LINE__, pioinfo->rank );   
+      xabort ( errorString );   
     }
 
   if ( ddebug )
@@ -720,9 +719,7 @@ int initPOSIXNONB ()
   MPI_Group ioGroup, collectorGroup;
   int specialRanks[1];
 
-  if ( pioinfo->size < 2 )
-    pcdiAbort ( "usage: #pes/#nodes >= 2", 
-	       __FILE__, __LINE__, pioinfo->rank );
+  if ( pioinfo->size < 2 ) xabort ( "usage: #pes/#nodes >= 2" );
 
   pioinfo->specialRank = pioinfo->size - 1;
   ncollectors = pioinfo->size - 1;

@@ -14,15 +14,20 @@ char commands[][12] = { "FINALIZE\0",
 
 
 /****************************************************/
-void pcdiAbort ( char *errorString, const char *filename, int line, int rank )
+
+void pcdiAbort ( char * errorString, const char * filename,  
+		 const char *functionname, int line )
 {
+  int rank;
+
 #ifdef USE_MPI
-  fprintf ( stderr, "testERROR, pe%d, %s, line %d, errorString: \"%s\"\n",
-            rank, filename, line, errorString );
+  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+  fprintf ( stderr, "ERROR, pe%d in %s, %s, line %d, errorString: \"%s\"\n",
+	    rank, functionname, filename, line, errorString );
   MPI_Abort ( MPI_COMM_WORLD, 1 );
 #else
-  fprintf ( stderr, "testERROR, %s, line %d, errorString: \"%s\"\n",
-            filename, line, errorString );
+  fprintf ( stderr, "ERROR, %s, %s, line %d, errorString: \"%s\"\n",
+            functionname, filename, line, errorString );
   abort();
 #endif
 }

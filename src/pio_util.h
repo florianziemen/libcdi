@@ -43,7 +43,8 @@ typedef enum
   } command;
 
 
-void pcdiAbort ( char *, const char *, int, int );
+void pcdiAbort ( char *, const char *, const char *, int );
+#define xabort(text) pcdiAbort ( text, __FILE__, __func__, __LINE__ );
 
 void * pcdiXmalloc ( size_t, const char *, int );
 #define xmalloc(size) pcdiXmalloc ( size, __FILE__, __LINE__ )

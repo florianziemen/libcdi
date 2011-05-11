@@ -66,8 +66,6 @@ void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
   MPI_Group_free ( &currGroupIO );
   MPI_Group_free ( &groupGlob );
   free ( ranks );
-
-  return;
 }  
 
 
@@ -92,8 +90,43 @@ void commsIOCleanup ()
   
   for ( i = 0; i < nProcsIO; i++ )
     if ( rankGlob < nProcsCalc || rankGlob == nProcsCalc + i )
-      MPI_Comm_free ( commsIO + i );
-
-  return;
+      MPI_Comm_free ( commsIO + i );;
 }
+
+
+/*****************************************************************************/
+
+void rpcUnpackResources ( char * buffer, size_t size, MPI_Comm * comm )
+{ 
+  int token;
+  int pos = 0;
+
+  fprintf ( stdout, "########### size=%d\n", size );
+
+  MPI_Unpack ( buffer, size, &pos, &token, 1, MPI_INT, * comm );
+  fprintf ( stdout, "########### token=%d, pos=%d\n", token, pos );
+  MPI_Unpack ( buffer, size, &pos, &token, 1, MPI_INT, * comm );
+  fprintf ( stdout, "########### token=%d, pos=%d\n", token, pos );
+
+  switch ( token )
+    {
+    case GRID:
+      break;
+    case ZAXIS:
+      break;
+    case TAXIS:
+      break;
+    case INSTITUTE:
+      break;
+    case MODEL:
+      break;
+    case STREAM:
+      break;
+    case VLIST:
+      break;
+    default: 
+      xabort ( "no valid datatype" );
+    }
+}
+
 #endif
