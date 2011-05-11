@@ -342,12 +342,12 @@ void  pioMetadata ()
 
   if ( rankGlob < nProcsIO )
     {
-      buffSize = reshGetSendSize ();
+      buffSize = reshPackSize ();
       
       buff = xcalloc ( 1, buffSize );
       buffPos = 0;
       
-      reshGetSendData ( buff, &buffSize, &buffPos, ( void * )( commsIO + rankGlob ));
+      reshPackMetadata ( buff, &buffSize, &buffPos, ( void * )( commsIO + rankGlob ));
       
       MPI_Send ( buff, buffPos, MPI_PACKED, nProcsCalc, 
 		 METADATA, * ( commsIO + rankGlob ));

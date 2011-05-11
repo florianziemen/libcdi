@@ -96,6 +96,34 @@ void commsIOCleanup ()
 
 /*****************************************************************************/
 
+
+void unpackGrid ( char * buffer, size_t size, int * pos, MPI_Comm * comm )
+{ 
+  int token;
+
+  xdebug ();
+
+  MPI_Unpack ( buffer, size, pos, &token, 1, MPI_INT, * comm );
+
+  fprintf ( stdout, "########### size of grid=%d, *pos=%d\n", 
+	    token, *pos );
+
+  MPI_Unpack ( buffer, size, pos, &token, 1, MPI_INT, * comm );
+      fprintf ( stdout, "########### token=%d, *pos=%d\n", token, *pos );
+  if ( token != SEPARATOR )
+    {
+      xabort ( "problems unpacking grid" );
+    }
+  else
+    {
+      xdebugText ( " success unpacking grid" );
+    }
+}
+
+
+/*****************************************************************************/
+
+
 void rpcUnpackResources ( char * buffer, size_t size, MPI_Comm * comm )
 { 
   int token;
@@ -103,29 +131,35 @@ void rpcUnpackResources ( char * buffer, size_t size, MPI_Comm * comm )
 
   fprintf ( stdout, "########### size=%d\n", size );
 
-  MPI_Unpack ( buffer, size, &pos, &token, 1, MPI_INT, * comm );
-  fprintf ( stdout, "########### token=%d, pos=%d\n", token, pos );
-  MPI_Unpack ( buffer, size, &pos, &token, 1, MPI_INT, * comm );
-  fprintf ( stdout, "########### token=%d, pos=%d\n", token, pos );
-
-  switch ( token )
+  while ( pos < size )
     {
-    case GRID:
-      break;
-    case ZAXIS:
-      break;
-    case TAXIS:
-      break;
-    case INSTITUTE:
-      break;
-    case MODEL:
-      break;
-    case STREAM:
-      break;
-    case VLIST:
-      break;
-    default: 
-      xabort ( "no valid datatype" );
+      MPI_Unpack ( buffer, size, &pos, &token, 1, MPI_INT, * comm );
+      fprintf ( stdout, "########### token=%d, pos=%d\n", token, pos );
+      
+      switch ( token )
+	{
+	case END:
+	  if ( ddebug ) xdebugText ( "end of packed data" );
+	  return;
+	  break;
+	case GRID:
+	  unpackGrid ( buffer, size, &pos, comm );
+	  break;
+	case ZAXIS:
+	  break;
+        case TAXIS: 
+	  break;
+	case INSTITUTE:
+	  break;
+	case MODEL:
+	  break;
+	case STREAM:
+	  break;
+	case VLIST:
+	  break;
+	default: 
+	  xabort ( "no valid datatype" );
+	}
     }
 }
 

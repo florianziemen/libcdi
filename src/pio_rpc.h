@@ -25,7 +25,9 @@ enum { GRID      = 1,
        MODEL     = 5,
        STREAM    = 6,
        VLIST     = 7,
-       SEPARATOR = 77777777};
+       SEPARATOR = 77777777,
+       END       = 99999999 };
+
 
 
 void commsIOCreate ( MPI_Comm, int );
