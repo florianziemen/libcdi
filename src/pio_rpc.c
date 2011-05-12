@@ -129,7 +129,7 @@ void rpcUnpackResources ( char * buffer, size_t size, MPI_Comm * comm )
       switch ( token1 )
 	{
 	case END:
-	  if ( ddebug ) xdebugText ( "#### end of packed data" );
+	  xdebug ( "#### end of packed data" );
 	  reshArrayPrint ();
 	  return;
 	case GRID:
@@ -160,8 +160,7 @@ void rpcUnpackResources ( char * buffer, size_t size, MPI_Comm * comm )
 	}
       else
 	{
-	  sprintf ( text,  "#### success unpacking type %d", token1 );
-	  xdebugText ( text );
+	  xdebug ( "#### success unpacking type %d", token1 );
 	}
     }
 }

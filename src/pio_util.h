@@ -45,9 +45,9 @@ typedef enum
 
 char * rankOutText ( void );
 
-#define xxdebug(fmt, ...)			\
-    if(ddebug){	\ 
-      fprintf ( stderr, "############%s%s, %s, line %d: " fmt "\n", \
+#define xdebug(fmt, ...)					\
+  if ( ddebug ){						\
+    fprintf ( stderr, "%s%s, %s, line %d: " fmt "\n",		\
 		rankOutText (),  __func__, __FILE__,  __LINE__, \
 		## __VA_ARGS__ );				\
     }
@@ -65,14 +65,6 @@ void * pcdiXcalloc ( size_t, size_t, const char *, const char *, int );
 void * pcdiXrealloc ( void *, size_t, const char *, const char *, int );
 #define xrealloc(p,size) pcdiXrealloc(p, size,            \
                                       __FILE__, __func__, __LINE__)
-
-void pcdiDebug ( const char *, const char *, int );
-#define xdebug() pcdiDebug (  __FILE__, __func__, __LINE__ )
-
-void pcdiDebugText ( const char *filename, const char *functionname, int line, \
-		     char * text );
-#define xdebugText(text) pcdiDebugText ( __FILE__, __func__, \
-					 __LINE__, text )
 
 void pcdiXMPI ( int, const char *, int );
 #define xmpi(ret) pcdiXMPI ( ret, __FILE__, __LINE__ )

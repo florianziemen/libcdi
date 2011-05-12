@@ -131,43 +131,6 @@ void pcdiXMPIStat ( int iret, const char *filename, int line, MPI_Status *status
 
 /****************************************************/
 
-void pcdiDebug (  const char *filename, const char *functionname, int line )
-{
-#ifdef USE_MPI
-  int rank = 0;
-
-  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
-  fprintf ( stdout,
-            "pe%d in %s, %s, line %d\n",
-            rank, functionname, filename, line );
-#else
-  fprintf ( stdout,
-            "%s, %s, line %d\n",
-            functionname, filename, line );
-#endif
-}
-
-/*****************************************************************************/
-
-void pcdiDebug2 (  const char *filename, const char *functionname, int line, char * text )
-{
-#ifdef USE_MPI
-  int rank;
-
-  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
-
-  fprintf ( stdout,
-            "pe%d in %s, %s, line %d: %s\n",
-            rank, functionname, filename, line, text );
-#else
-  fprintf ( stdout,
-            "%s, %s, line %d\n",
-            functionname, filename, line );
-#endif
-}
-
-/****************************************************/
-
 #ifdef USE_MPI
 void pcdiDebugComm ( const char *filename, const char *functionname, int line, MPI_Comm *comm )
 {
@@ -223,20 +186,6 @@ void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line,
 #endif
 
 /****************************************************/
-
-#ifdef USE_MPI
-void pcdiDebugText ( const char *filename, const char *functionname, int line,
-		     char * text )
-{
-  int rank;
-
-  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
-
-  fprintf ( stdout,
-            "pe%d in %s, %s, line %d: %s\n",
-            rank, functionname, filename, line, text );
-}
-#endif
 
 
 char * rankOutText ( void )

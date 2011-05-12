@@ -347,7 +347,7 @@ void  pioMetadata ()
       MPI_Send ( buffer, bufferSize, MPI_PACKED, nProcsCalc, 
 		 METADATA, * ( commsIO + rankGlob ));
       
-      if ( ddebug ) xdebugText ( "sent message metadata" );
+      xdebug ( "sent message metadata" );
       
       reshPackBufferDestroy ( &buffer );
     }

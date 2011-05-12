@@ -409,8 +409,7 @@ void reshPackBufferCreate ( char ** buffer, size_t * size, MPI_Comm comm )
 
 	  MPI_Pack ( &sep, 1,  MPI_INT, * buffer, * size, &position, comm );
 
-	  if ( ddebug == MAXDEBUG ) 
-	    xdebugText ( "#### packed one resource with type and separator" );
+	  xdebug ( "#### packed one resource with type and separator" );
 
 	  curr->sent = 1;
 	} 
@@ -419,7 +418,7 @@ void reshPackBufferCreate ( char ** buffer, size_t * size, MPI_Comm comm )
 
   MPI_Pack ( &end, 1,  MPI_INT, * buffer, * size, &position, comm );
 
-  if ( ddebug == MAXDEBUG ) xdebugText ( "#### packed END token" ); 
+  xdebug ( "#### packed END token" ); 
 }
 
 #endif 
