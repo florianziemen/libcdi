@@ -1,3 +1,7 @@
+2011-05-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* grid::compareXYvals: bug fix for generic grids [report: Felicia Brisc]
+
 2011-04-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Added attribute standard_name to netCDF time var [request: Karin Meier-Fleischer]

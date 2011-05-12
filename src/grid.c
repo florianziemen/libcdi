@@ -2247,7 +2247,7 @@ void compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *y
 {
   long i;
 
-  if ( gridInqXvals(gridID, NULL) )
+  if ( xsize == gridInqXvals(gridID, NULL) )
     {
       double *xvals;
 
@@ -2265,7 +2265,7 @@ void compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *y
       free(xvals);
     }
 
-  if ( gridInqYvals(gridID, NULL) )
+  if ( ysize == gridInqYvals(gridID, NULL) )
     {
       double *yvals;
 
