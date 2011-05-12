@@ -43,6 +43,15 @@ typedef enum
   } command;
 
 
+char * rankOutText ( void );
+
+#define xxdebug(fmt, ...)			\
+    if(ddebug){	\ 
+      fprintf ( stderr, "############%s%s, %s, line %d: " fmt "\n", \
+		rankOutText (),  __func__, __FILE__,  __LINE__, \
+		## __VA_ARGS__ );				\
+    }
+
 void pcdiAbort ( char *, const char *, const char *, int );
 #define xabort(text) pcdiAbort ( text, __FILE__, __func__, __LINE__ );
 
@@ -65,17 +74,17 @@ void pcdiDebugText ( const char *filename, const char *functionname, int line, \
 #define xdebugText(text) pcdiDebugText ( __FILE__, __func__, \
 					 __LINE__, text )
 
-#ifdef USE_MPI
-
 void pcdiXMPI ( int, const char *, int );
 #define xmpi(ret) pcdiXMPI ( ret, __FILE__, __LINE__ )
 
+#ifdef USE_MPI
 void pcdiXMPIStat ( int, const char *, int, MPI_Status * );
 #define xmpiStat(ret,stat) pcdiXMPIStat ( ret, __FILE__, __LINE__, stat )
 
 void pcdiDebugComm ( const char *filename, const char *functionname, int line, \
 		     MPI_Comm *comm );
 #define xdebugComm(comm) pcdiDebugComm (  __FILE__, __func__, __LINE__, comm )
+#endif
 
 void pcdiDebugMsg ( const char *filename, const char *functionname, int line, \
 		    int tag, int source, int nfinished );
@@ -87,6 +96,4 @@ void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line, \
 		    int tag, int source, char * text );
 #define xdebugMsg2(tag,source,text) pcdiDebugMsg ( __FILE__, __func__, \
 						    __LINE__, tag, source, text )
-#endif
-
 #endif

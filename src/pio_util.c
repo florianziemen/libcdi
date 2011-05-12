@@ -5,13 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef USE_MPI
 #include "pio_util.h"
 
 char commands[][12] = { "FINALIZE\0",
                        "METADATA\0"};
-#endif
-
 
 /****************************************************/
 
@@ -240,3 +237,16 @@ void pcdiDebugText ( const char *filename, const char *functionname, int line,
             rank, functionname, filename, line, text );
 }
 #endif
+
+
+char * rankOutText ( void )
+{ 
+  int rank;
+  char text[128];
+  
+#ifdef USE_MPI					
+  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );		
+  sprintf ( text, "pe%d in ", rank );		
+#endif 
+  return &text;
+}

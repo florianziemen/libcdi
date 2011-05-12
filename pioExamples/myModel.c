@@ -231,7 +231,7 @@ int main (int argc, char *argv[])
       pcdiAbort ( "bad distribution of tasks on PEs", __FILE__, __LINE__, rankGlob );
 #endif  
 
-  if  ( ddebug >= 3 ) xdebug ();
+  xxdebug ();
 
 #ifdef USE_MPI
   commModel = pioInit_c ( commGlob, nProcsIO, 0 );
