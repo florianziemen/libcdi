@@ -237,11 +237,13 @@ void* fpgPOSIXFPGUARDTHREADREFUSE ( void* ncoll )
   for ( ;; )
     {
 
-      fprintf ( stdout, "#### pe%d, color=%d, before probe\n", pioinfo->comm, pioinfo->color );
+      fprintf ( stdout, "#### pe%d, color=%d, before probe\n", pioinfo->rank,
+                pioinfo->color );
 
       MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, pioinfo->comm, &status );
 
-      fprintf ( stdout, "#### pe%d, color=%d, after probe\n", pioinfo->comm, pioinfo->color );
+      fprintf ( stdout, "#### pe%d, color=%d, after probe\n", pioinfo->rank,
+                pioinfo->color );
 
       source = status.MPI_SOURCE;
       rtag   = getTag ( status.MPI_TAG ); 
