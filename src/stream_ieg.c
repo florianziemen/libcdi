@@ -815,6 +815,7 @@ void iegAddRecord(int streamID, int param, int *pdb, int *gdb, double *vct,
 	    varID, gridID, levelID);
 }
 
+#if 0
 static
 void iegCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
 		  int level, int xsize, int ysize)
@@ -844,7 +845,7 @@ void iegCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
   if ( CDI_Debug )
     Message("varID = %d levelID = %d", varID, levelID);
 }
-
+#endif
 
 void iegDateTime(int *pdb, int *date, int *time)
 {
