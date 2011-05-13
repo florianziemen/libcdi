@@ -335,7 +335,6 @@ void  pioMetadata ()
 #ifdef USE_MPI
   char   * buffer;
   size_t bufferSize;
-  int    bufferPos;
 
   if ( rankGlob < nProcsIO )
     {
