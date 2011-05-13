@@ -156,7 +156,7 @@ int instituteCompareP ( void *  instituteptr1, void * instituteptr2 )
 
 int institutInq(int center, int subcenter, const char *name, const char *longname)
 {
-  int instID, instCount, * instIndice, i;
+  int instID = UNDEFID, instCount, * instIndice, i;
   institute_t * ip1;
   institute_t * ip2;
 
@@ -180,15 +180,13 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
       instID = instIndice[i];
       ip2 = ( institute_t * ) reshGetVal ( instID, &instituteOps );
       assert ( ip2 );
-      
-      if ( ip2->used && ! instituteCompareKernel ( ip1, ip2 ))
-	{
-	  instID = ip2->self;
-	  break;
-	}
-    }
 
-  if ( instID == instCount ) instID = UNDEFID;
+      if ( ip2->used && ! instituteCompareKernel ( ip1, ip2 ))
+        {
+          instID = ip2->self;
+          break;
+        }
+    }
 
   free ( instIndice );
   free ( ip1 );
