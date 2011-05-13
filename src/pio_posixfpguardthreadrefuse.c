@@ -383,7 +383,8 @@ void* fpgPOSIXFPGUARDTHREADREFUSE ( void* ncoll )
  
 void writePFTR ( aFiledataPFTR *afd, int id )
 {
-  long amountC = 0L, written;
+  long amountC = 0L;
+  ssize_t written;
   long offsetC = 0L, error;
   int tagC;
   MPI_Status statusC;
@@ -425,7 +426,8 @@ void writePFTR ( aFiledataPFTR *afd, int id )
   
   if (( error = lseek ( afd->fd, offsetC, SEEK_SET )) != offsetC )
     {
-      fprintf ( stdout, "pe%d, color%d error=%Ld\n", error );
+      fprintf ( stdout, "pe%d, color%d error=%ld\n",
+                pioinfo->rank, pioinfo->color, error );
       perror ( "Error seeking fd" );
       MPI_Abort ( pioinfo->comm, 1 );
     }
@@ -434,22 +436,23 @@ void writePFTR ( aFiledataPFTR *afd, int id )
     fprintf ( stdout, "pe%d, color%d hallo 1 d\n", 
 	      pioinfo->rank, pioinfo->color );	  
 
-  if (( written = 
+  if (( written =
 	write ( afd->fd, afd->db->buffer, amountC )) !=
       amountC )
     {
-      fprintf ( stdout, 
-		"pe%d, color%d, id=%d, expect to write %16d byte, written %16d byte.\n", 
-		pioinfo->rank, pioinfo->color, id, amountC, written );
+      fprintf ( stdout, "pe%d, color%d, id=%d,"
+                " expect to write %16ld byte, written %16ld byte.\n",
+		pioinfo->rank, pioinfo->color, id, amountC,
+                (long)written );
       perror ( "Error writing data" );
       MPI_Abort ( pioinfo->comm, 1 );
     }
 
   if ( ddebug )
-    fprintf ( stdout, 
-	      "pe%d, color%d in writePFTR (), written %d bytes in file %d with offsetC %ld\n", 
-	      pioinfo->rank, pioinfo->color, written, id, offsetC ); 
-  
+    fprintf ( stdout, "pe%d, color%d in writePFTR (),"
+              " written %ld bytes in file %d with offsetC %ld\n",
+	      pioinfo->rank, pioinfo->color, (long)written, id, offsetC );
+
   /* change outputBuffer */
   
   dbuffer_reset ( afd->db );
