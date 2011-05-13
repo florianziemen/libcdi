@@ -19,7 +19,6 @@ static void vlist_initialize(void);
 #  include <pthread.h>
 
 static pthread_once_t  _vlist_init_thread = PTHREAD_ONCE_INIT;
-static pthread_mutex_t _vlist_mutex;
 
 #  define VLIST_INIT()        \
   pthread_once(&_vlist_init_thread, vlist_initialize)
