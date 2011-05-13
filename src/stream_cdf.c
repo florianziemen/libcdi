@@ -657,12 +657,10 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 }
 #endif
 
-#if  defined  (HAVE_LIBNETCDF)
-
+#if  defined(HAVE_LIBNETCDF) && defined(NC_NETCDF4) && defined(NC_SZIP_NN_OPTION_MASK)
 static
 void cdfDefVarSzip(int ncid, int ncvarid)
 {
-#if  defined  (NC_NETCDF4) && defined (NC_SZIP_NN_OPTION_MASK)
   int retval;
   /* Set options_mask and bits_per_pixel. */
   int options_mask = NC_SZIP_NN_OPTION_MASK;
@@ -683,15 +681,6 @@ void cdfDefVarSzip(int ncid, int ncvarid)
       else
         Error("nc_def_var_szip failed, status = %d", retval);
     }
-#else
-  static int lwarn = TRUE;
-
-  if ( lwarn )
-    {
-      lwarn = FALSE;
-      Warning("netCDF4/Szip compression not available!");
-    }
-#endif
 }
 #endif
 
