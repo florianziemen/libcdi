@@ -408,7 +408,7 @@ long bibBFiledataPFAccess ( aFiledataPFT* afd, int id )
 { 
   int i, iret;
   bFiledataPFT *bfd; 
-  long amount, offsetF, offsetNew;
+  long amount, offsetF = 0, offsetNew;
 
   int ncollectors;
 
