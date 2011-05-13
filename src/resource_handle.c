@@ -159,7 +159,7 @@ void arrayInitialize ( void )
 void arraySizeExtend()
 {
   int newArraySize;
-  int i, nsp, code;
+  int i, nsp;
 
   nsp = namespaceGetActive ();
 
