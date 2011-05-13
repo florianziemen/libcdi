@@ -264,7 +264,7 @@ char *institutInqLongnamePtr(int instID)
 
 int institutInqNumber(void)
 {
-  int i, instCount, * instIndice, instNum;
+  int i, instCount, * instIndice, instNum = 0;
   institute_t * instituteptr;
 
   instituteInit ();
