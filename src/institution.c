@@ -157,7 +157,6 @@ int instituteCompareP ( void *  instituteptr1, void * instituteptr2 )
 int institutInq(int center, int subcenter, const char *name, const char *longname)
 {
   int instID, instCount, * instIndice, i;
-  size_t len;
   institute_t * ip1;
   institute_t * ip2;
 
