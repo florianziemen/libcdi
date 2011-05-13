@@ -394,15 +394,16 @@ void writePFTR ( aFiledataPFTR *afd, int id )
   tagC = setTag ( id, afd->command );
 
   if ( ddebug )
-    fprintf ( stdout, "pe%d, color%d hallo 1 a, tagC=%d, amountC=%d\n", 
+    fprintf ( stdout, "pe%d, color%d hallo 1 a, tagC=%d, amountC=%ld\n", 
 	      pioinfo->rank, pioinfo->color, tagC, amountC );
 
   MPI_Send (  &amountC, 1, MPI_LONG, pioinfo->specialRank, tagC, pioinfo->comm );
 
   if ( ddebug )
-    fprintf ( stdout, 
-	      "pe%d, color%d in writePFTR (), id=%d, command=%d, send amountC=%zu\n", 
-	      pioinfo->rank, pioinfo->color, id, afd->command, amountC ); 
+    fprintf ( stdout,
+	      "pe%d, color%d in writePFTR (),"
+              " id=%d, command=%d, send amountC=%zu\n",
+	      pioinfo->rank, pioinfo->color, id, afd->command, amountC );
 
   if ( ddebug )
     fprintf ( stdout, "pe%d, color%d hallo 1 b, tagC+maxNFiles * tagKey=%d\n", 
