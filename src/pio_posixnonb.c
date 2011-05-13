@@ -484,16 +484,17 @@ void pwPOSIXNONB ( int ncollectors )
 void sendP ( aFiledataP *afd, int id )
 {
   int tag;
-  long amount;
+  size_t amount;
   MPI_Status status;
 
-  amount = ( long ) dbuffer_data_size ( afd->db );
+  amount = dbuffer_data_size ( afd->db );
   tag = setTag ( id, afd->command );
 
-  if ( ddebug ) 
+  if ( ddebug )
     fprintf ( stderr,
-	      "pe%d sendP (): send buffer for %s, size: %l bytes, command=%s, in\n", 
-	      pioinfo->rank, afd->name, amount, 
+	      "pe%d sendP (): send buffer for %s,"
+              " size: %llu bytes, command=%s, in\n",
+	      pioinfo->rank, afd->name, (unsigned long long)amount,
 	      command2charP [ afd->command ] );
 
   if ( ddebug ) startTime = MPI_Wtime ();
