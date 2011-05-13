@@ -114,13 +114,6 @@ void modelInit(void)
   modelDefaultEntries ();
 }
 
-static
-void model_check_ptr(const char *caller, model_t *modelptr)
-{
-  if ( modelptr == NULL )
-    Errorc("model undefined!");
-}
-
 int modelSize ( void )
 {
   return reshCountType ( &modelOps );
