@@ -315,10 +315,15 @@ int main (int rgc, char *argv[])
 
   gauaw(ngl, pl, pw);
   gauaw_old(plo, pwo, ngl);
+  for (i = 0; i < ngl; i++)
+    {
+      pl[i]  = asin(pl[i])/M_PI*180.0;
+      plo[i] = asin(plo[i])/M_PI*180.0;
+    }
 
   for (i = 0; i < ngl; i++)
     {
-      fprintf(stderr, "%4d%25.18f%25.18f%25.18f%25.18f\n", i, pl[i], pw[i], pl[i]-plo[i], pw[i]-pwo[i]);
+      fprintf(stderr, "%4d%25.18f%25.18f%25.18f%25.18f\n", i+1, pl[i], pw[i], pl[i]-plo[i], pw[i]-pwo[i]);
     }
 
   return 0;
