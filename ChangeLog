@@ -1,3 +1,7 @@
+2011-05-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+	
+	* ruby/python interface: changed GRID_CELL to GRID_UNSTRUCTURED [report: Tim Cera]
+	
 2011-05-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* grid::compareXYvals: bug fix for generic grids [report: Felicia Brisc]

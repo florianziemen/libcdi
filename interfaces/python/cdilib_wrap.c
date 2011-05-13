@@ -13248,7 +13248,7 @@ SWIGEXPORT void SWIG_init(void) {
   SWIG_Python_SetConstant(d, "GRID_FOURIER",SWIG_From_int((int)(6)));
   SWIG_Python_SetConstant(d, "GRID_GME",SWIG_From_int((int)(7)));
   SWIG_Python_SetConstant(d, "GRID_TRAJECTORY",SWIG_From_int((int)(8)));
-  SWIG_Python_SetConstant(d, "GRID_CELL",SWIG_From_int((int)(9)));
+  SWIG_Python_SetConstant(d, "GRID_UNSTRUCTURED",SWIG_From_int((int)(9)));
   SWIG_Python_SetConstant(d, "GRID_CURVILINEAR",SWIG_From_int((int)(10)));
   SWIG_Python_SetConstant(d, "GRID_LCC",SWIG_From_int((int)(11)));
   SWIG_Python_SetConstant(d, "GRID_LCC2",SWIG_From_int((int)(12)));
