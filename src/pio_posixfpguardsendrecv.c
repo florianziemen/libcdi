@@ -356,8 +356,9 @@ void writePF ( aFiledataPF *afd, int id )
   
   if ( ddebug )
     fprintf ( stderr, 
-	      "pe%d in writePF (), id=%d, command=%d, amount=%u, send amountL=%ld, recv offset=%ld\n", 
-	      pioinfo->rank, id, afd->command, amount, amountL, offset );      
+	      "pe%d in writePF (), id=%d, command=%d, amount=%llu, send amountL=%ld, recv offset=%ld\n", 
+	      pioinfo->rank, id, afd->command, (unsigned long long)amount,
+              amountL, offset );
   
   /* write buffer */
   
@@ -369,15 +370,17 @@ void writePF ( aFiledataPF *afd, int id )
       amount )
     {
       sprintf ( errorString, 
-		"fileId=%d, expect to write %u byte, written %u byte", 
-		id, amount, written );
+		"fileId=%d, expect to write %llu byte, written %llu byte", 
+		id, (unsigned long long)amount,
+                (unsigned long long)written );
       xabort ( errorString );
     }
 
   if ( ddebug )
     fprintf ( stderr, 
-	      "pe%d in writePF (), written %u bytes in file %d with offset %ld\n", 
-	      pioinfo->rank, written, id, offset ); 
+	      "pe%d in writePF (), written %llu bytes in file %d with offset %ld\n", 
+	      pioinfo->rank, (unsigned long long)written,
+              id, offset ); 
   
   /* change outputBuffer */
   
