@@ -15,9 +15,9 @@ char commands[][12] = { "FINALIZE\0",
 void pcdiAbort ( char * errorString, const char * filename,  
 		 const char *functionname, int line )
 {
+#ifdef USE_MPI
   int rank;
 
-#ifdef USE_MPI
   MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
   fprintf ( stderr, "ERROR, pe%d in %s, %s, line %d, errorString: \"%s\"\n",
 	    rank, functionname, filename, line, errorString );
