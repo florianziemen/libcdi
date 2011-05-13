@@ -639,8 +639,6 @@ int fowPOSIXFPGUARDTHREADREFUSE ( const char *filename )
 int initPOSIXFPGUARDTHREADREFUSE ()
 {
   int collectingData = 1, ncollectors;
-  MPI_Group streamGroup, collectorGroup;
-  int ioRanks[1];
   int rc = 0;
 
   if ( pioinfo->size < 2 )
