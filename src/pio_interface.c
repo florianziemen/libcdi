@@ -114,8 +114,6 @@ void printArray ( char * ps, void * array, int n, int datatype,
 		  const char * funname, const char * filename, int line )
 { 
   int i;
-  size_t len;
-  char as[1024];
   int * iArray;
   double * dArray;
 
@@ -161,8 +159,7 @@ void mapProblems ( int problemSizes[], int * problemMapping, int nProblems,
   int sum = 0;
   int writerIdx;
   int i, j;
-  char text[1024], * cp;
-  
+
   if ( ddebug >= 1 ) xdebug ();
   
 
