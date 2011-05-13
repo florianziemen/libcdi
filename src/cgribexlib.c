@@ -8869,7 +8869,6 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 #if ! defined  (HAVE_LIBSZ)
   static int libszwarn = 1;
 #endif
-  long i;
   int nerr;
   unsigned char *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
   int bdsLen, recLen, gribLen = 0;
@@ -8945,6 +8944,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
   {
     int status;
     size_t tmpLen;
+    long i;
     int bds_ubits;
     SZ_com_t sz_param;          /* szip parameter block */
 
