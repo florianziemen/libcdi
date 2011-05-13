@@ -216,13 +216,15 @@ long rmwOffset ( long *bfdOffset, long amount, long *offsetNew, int tid )
   long offsetOld;
 
   if ( ddebug )
-    if ( tid )
-      fprintf ( stdout, "#### pe%d, thread, in rmwOffset, amount=%ld\n", 
-		pioinfo->rank, amount );
-    else
-      fprintf ( stdout, "pe%d in rmwOffset, amount=%ld\n", 
-		pioinfo->rank, amount );
-  
+    {
+      if ( tid )
+        fprintf ( stdout, "#### pe%d, thread, in rmwOffset, amount=%ld\n",
+                  pioinfo->rank, amount );
+      else
+        fprintf ( stdout, "pe%d in rmwOffset, amount=%ld\n",
+                  pioinfo->rank, amount );
+    }
+
   pthread_mutex_lock ( &offsetMutex );
   offsetOld = *bfdOffset;
   *bfdOffset += amount;
@@ -230,14 +232,17 @@ long rmwOffset ( long *bfdOffset, long amount, long *offsetNew, int tid )
   pthread_mutex_unlock ( &offsetMutex );
 
   if ( ddebug )
-    if ( tid )
-      fprintf ( stdout, 
-		"#### pe%d, thread, in rmwOffset, offsetOld=%ld, offsetNew=%ld\n", 
-		pioinfo->rank, offsetOld, *offsetNew );
-    else
-      fprintf ( stdout, 
-		"pe%d in rmwOffset, offsetOld=%ld, offsetNew=%ld\n", 
-		pioinfo->rank, offsetOld, *offsetNew );
+    {
+      if ( tid )
+        fprintf ( stdout,
+                  "#### pe%d, thread, in rmwOffset, offsetOld=%ld,"
+                  " offsetNew=%ld\n",
+                  pioinfo->rank, offsetOld, *offsetNew );
+      else
+        fprintf ( stdout,
+                  "pe%d in rmwOffset, offsetOld=%ld, offsetNew=%ld\n",
+                  pioinfo->rank, offsetOld, *offsetNew );
+    }
 
   return offsetOld;
 }
