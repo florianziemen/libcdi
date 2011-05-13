@@ -157,7 +157,7 @@ void mapProblems ( int problemSizes[], int * problemMapping, int nProblems,
   int currCapacity, nextCapacity;
   double meanBucket[nWriter];
   int sum = 0;
-  int writerIdx;
+  int writerIdx = 0;
   int i, j;
 
   if ( ddebug >= 1 ) xdebug ();
@@ -192,7 +192,7 @@ void mapProblems ( int problemSizes[], int * problemMapping, int nProblems,
 	      writerIdx = j;
 	    }
 	}
-      * ( problemMapping + dummy[i] ) = writerIdx;
+      problemMapping[ dummy[i] ] = writerIdx;
       buckets[writerIdx] +=  *ip[i];
     }
 
