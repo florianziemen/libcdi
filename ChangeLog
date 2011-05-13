@@ -1,5 +1,6 @@
 2011-05-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
-	
+
+	* gridGenYvals: changed delta eps to 0.002 for gaussian grids [report: John Lillibridge] 
 	* ruby/python interface: changed GRID_CELL to GRID_UNSTRUCTURED [report: Tim Cera]
 	
 2011-05-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

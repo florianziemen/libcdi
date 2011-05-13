@@ -378,6 +378,7 @@ void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals)
 {
   long i;
+  double deleps = 0.002;
 
   if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
     {
@@ -386,7 +387,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 	  calc_gaussgrid(yvals, ysize, yfirst, ylast);
 
 	  if ( ! (IS_EQUAL(yfirst, 0) && IS_EQUAL(ylast, 0)) )
-	    if ( fabs(yvals[0] - yfirst) > 0.001 || fabs(yvals[ysize-1] - ylast) > 0.001 )
+	    if ( fabs(yvals[0] - yfirst) > deleps || fabs(yvals[ysize-1] - ylast) > deleps )
 	      {
 		double yinc = fabs(ylast-yfirst)/(ysize-1);
 		double *ytmp = NULL;
@@ -394,17 +395,17 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 		int ny = (int) (180./yinc + 0.5);
 		ny -= ny%2;
 		/* printf("%g %g %g %g %g %d\n", ylast, yfirst, ylast-yfirst,yinc, 180/yinc, ny); */
-		if ( ny < 4096 )
+		if ( ny > ysize && ny < 4096 )
 		  {
-		    ytmp   = (double *) malloc(ny*sizeof(double));
+		    ytmp = (double *) malloc(ny*sizeof(double));
 		    calc_gaussgrid(ytmp, ny, yfirst, ylast);
 		    for ( i = 0; i < (ny-ysize); i++ )
-		      if ( fabs(ytmp[i] - yfirst) < 0.001 ) break;
+		      if ( fabs(ytmp[i] - yfirst) < deleps ) break;
 
 		    nstart = i;
 
 		    if ( (nstart+ysize-1) < ny )
-		      if ( fabs(ytmp[nstart+ysize-1] - ylast) < 0.001 ) lfound = 1;
+		      if ( fabs(ytmp[nstart+ysize-1] - ylast) < deleps ) lfound = 1;
 		  }
 
 		if ( lfound )
@@ -413,14 +414,13 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 		  }
 		else
 		  {
-		    Warning("Cannot calculate gaussian latitudes for lat1 = %g latn = %g", yfirst, ylast);
+		    Warning("Cannot calculate gaussian latitudes for lat1 = %g latn = %g!", yfirst, ylast);
 		    for ( i = 0; i < ysize; i++ ) yvals[i] = 0;
 		    yvals[0] = yfirst;
 		    yvals[ysize-1] = ylast;
 		  }
 
-		if ( ny < 4096 )
-		  free(ytmp);
+		if ( ytmp ) free(ytmp);
 	      }
 	}
       else
