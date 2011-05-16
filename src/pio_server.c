@@ -34,13 +34,9 @@ MPI_Comm * commPio;
 
 void IOServer ( MPI_Comm comm, int ptype )
 {
-  char fnName[] = "IOServer()";
   int source, tag, iBuffer;
   MPI_Status status;
   static int nfinished;
-  void * vp;
-  double * dp;
-  size_t len, len2;
   MPI_Comm commColl;
   int nnodes, color;
   char * buffer;
