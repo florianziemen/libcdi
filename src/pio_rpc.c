@@ -18,9 +18,8 @@ MPI_Comm * commCalc;
  
 void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
 {   
-  char fnName[] = "commsIOcreate()";
   int * ranks;
-  int i, j;
+  int i;
   MPI_Group groupGlob, currGroupIO;
   int currIORank;
   char name[10];
@@ -84,7 +83,6 @@ void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
 
 void commsIOCleanup ()
 {
-  char fnName[] = "commsIOCleanup()";
   int i;
 
   if ( ddebug >= 1 ) xdebug ();
@@ -100,7 +98,6 @@ void commsIOCleanup ()
 
 void unpackGrid ( char * buffer, size_t bufferSize, int * pos, MPI_Comm * comm )
 { 
-  int token;
   int gridID;
   int type, size;
 
