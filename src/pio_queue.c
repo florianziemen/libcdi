@@ -8,6 +8,8 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "cdi.h"
+
 #ifdef USE_MPI
 #include "pio_impl.h"
 
@@ -56,8 +58,8 @@ int queuePush ( queue *q, void *v, int noCollector, ... )
 {
   node *newNode, *curr;
   va_list ap;
-  int id;
- 
+  int id = CDI_UNDEFID;
+
   va_start(ap, noCollector);
  
   if ( noCollector ) 
