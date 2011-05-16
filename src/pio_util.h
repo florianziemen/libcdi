@@ -43,14 +43,14 @@ typedef enum
   } command;
 
 
-char * rankOutText ( void );
-
 #define xdebug(fmt, ...)					\
-  if ( ddebug ){						\
-    fprintf ( stderr, "%s%s, %s, line %d: " fmt "\n",		\
-		rankOutText (),  __func__, __FILE__,  __LINE__, \
-		## __VA_ARGS__ );				\
-    }
+  if ( ddebug ){                                                \
+    int rank;                                                   \
+    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );                    \
+    fprintf ( stderr, "pe%d in %s, %s, line %d: " fmt "\n",     \
+              rank,  __func__, __FILE__,  __LINE__,             \
+              ## __VA_ARGS__ );                                 \
+  }
 
 void pcdiAbort ( char *, const char *, const char *, int );
 #define xabort(text) pcdiAbort ( text, __FILE__, __func__, __LINE__ );
