@@ -228,7 +228,8 @@ int main (int argc, char *argv[])
 
   if ( ! TEST_LOCAL )                                           
     if ( nProcsIO <=0 || nProcsIO >= ( float ) sizeGlob / 2.0 )
-      pcdiAbort ( "bad distribution of tasks on PEs", __FILE__, __LINE__, rankGlob );
+      pcdiAbort ( "bad distribution of tasks on PEs", __FILE__, __func__,
+                  __LINE__ );
 #endif  
 
   xdebug ();
