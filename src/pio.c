@@ -8,6 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "cdi.h"
 #include "pio.h"
 #include "pio_util.h"
 
@@ -80,7 +81,7 @@ void ungetTag ( rTag *rtag )
 
 size_t pioFileWrite ( int id, int tsId, const void *buffer, size_t len )
 {
-  size_t iret;
+  size_t iret = CDI_UNDEFID;
 
   switch ( pioinfo->type )
     {
@@ -113,7 +114,7 @@ size_t pioFileWrite ( int id, int tsId, const void *buffer, size_t len )
 
 int pioFileClose ( int id )
 {
-  int iret;
+  int iret = CDI_UNDEFID;
 
   switch ( pioinfo->type )
     {
@@ -146,7 +147,7 @@ int pioFileClose ( int id )
 
 int pioFileOpenW ( const char *filename )
 {
-  int iret;
+  int iret = CDI_UNDEFID;
 
   switch ( pioinfo->type )
     {
