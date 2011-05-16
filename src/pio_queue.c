@@ -118,26 +118,26 @@ void *queueIdx2val ( queue *q, int id )
 int queueDelNode ( queue *q, int id ) // error
 {
   node *pred, *curr;
-  int iret;
 
   if ( !q->head ) return -1;
 
   pred = q->head;
   curr = pred->next;
-  
+
   if ( pred->idx == id )
     {
-      if ( pred == q->tail ) q->tail = NULL; 
+      int iret;
+      if ( pred == q->tail ) q->tail = NULL;
       q->head = curr;
       iret = ( *( q->valDestroy )) ( pred->val );
 
-      free ( pred );   
+      free ( pred );
       return iret;
     }
 
   while ( curr )
     {
-      
+
       if ( curr->idx == id ) break;
       pred = curr;
       curr = curr->next;
@@ -145,13 +145,15 @@ int queueDelNode ( queue *q, int id ) // error
 
   if ( curr )
     {
+      int iret;
       if ( curr == q->tail ) q->tail = pred;
       pred->next = curr->next;
       iret = ( *( q->valDestroy )) ( curr->val );
-      free ( curr ); 
+      free ( curr );
+      return iret;
     }
-    
-  return iret;
+
+  return -1;
 }
 
 #endif
