@@ -267,7 +267,6 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
 
 MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
 {
-  char fnName[] = "bInit()";
   int size, rank;
   int collectingData = 1;
   *nnodes = 1;
