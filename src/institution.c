@@ -19,8 +19,8 @@ int MCH    = UNDEFID;
 typedef struct
 {
   int    self;
-  int    used;  
-  int    center;  
+  int    used;
+  int    center;
   int    subcenter;
   char  *name;
   char  *longname;
@@ -56,7 +56,7 @@ institute_t * instituteNewEntry ( void )
   institute_t *instituteptr;
 
   instituteptr = ( institute_t * ) xmalloc ( sizeof ( institute_t ));
- 
+
   instituteDefaultValue ( instituteptr );
   instituteptr->self = reshPut (( void * ) instituteptr, &instituteOps );
   instituteptr->used = 1;
@@ -91,14 +91,14 @@ void instituteInit (void)
 
   if ( instituteInitialized ) return;
 
-  instituteInitialized = 1; 
+  instituteInitialized = 1;
 
   instituteDefaultEntries();
 }
 
 
 int instituteCount ( void )
-{ 
+{
   return reshCountType ( &instituteOps );
 }
 
@@ -112,28 +112,28 @@ int instituteCompareKernel ( institute_t *  ip1, institute_t * ip2 )
     {
       if ( ip1->center    > 0 && ip2->center    != ip1->center )    differ = 1;
       if ( ip1->subcenter > 0 && ip2->subcenter != ip1->subcenter ) differ = 1;
-      
+
       if ( !differ )
-	{
-	  if ( ip2->name )
-	    {
-	      len = strlen(ip2->name);
-	      if ( memcmp(ip2->name, ip1->name, len)) differ = 1;
-	    }
-	}
+        {
+          if ( ip2->name )
+            {
+              len = strlen(ip2->name);
+              if ( memcmp(ip2->name, ip1->name, len)) differ = 1;
+            }
+        }
     }
   else if ( ip1->longname )
     {
       if ( ip2->longname )
-	{
-	  len = strlen(ip2->longname);
-	  if ( memcmp(ip2->longname, ip1->longname, len)) differ = 1;
-	}
+        {
+          len = strlen(ip2->longname);
+          if ( memcmp(ip2->longname, ip1->longname, len)) differ = 1;
+        }
     }
   else
     {
       if ( !( ip2->center    == ip1->center &&
-	      ip2->subcenter == ip1->subcenter )) differ = 1;
+              ip2->subcenter == ip1->subcenter )) differ = 1;
     }
 
   return differ;
@@ -202,7 +202,7 @@ int institutDef(int center, int subcenter, const char *name, const char *longnam
   instituteInit ();
 
   instituteptr = instituteNewEntry();
-  
+
   instituteptr->center    = center;
   instituteptr->subcenter = subcenter;
   if ( name )     instituteptr->name     = strdupx(name);
@@ -270,16 +270,16 @@ int institutInqNumber(void)
   instCount = reshCountType ( &instituteOps );
   instIndice = xmalloc ( instCount * sizeof ( int ));
   reshGetIndiceArrayOfType ( instCount, instIndice, &instituteOps );
-  
+
   for ( i = 0; i < instCount; i++ )
     {
       instituteptr = ( institute_t * ) reshGetVal ( instIndice[i], &instituteOps );
       if ( instituteptr && instituteptr->used )
-	instNum++;
+        instNum++;
     }
 
   if ( instIndice ) free ( instIndice );
-    
+
   return instNum;
 }
 
@@ -308,7 +308,7 @@ void institutePrintP   ( void * instituteptr )
 
   fprintf ( fp, "#\n");
   fprintf ( fp, "# instituteID %d\n", ip->self);
-  fprintf ( fp, "#\n"); 
+  fprintf ( fp, "#\n");
   fprintf ( fp, "self          = %d\n", ip->self );
   fprintf ( fp, "used          = %d\n", ip->used );
   fprintf ( fp, "center        = %d\n", ip->center );
@@ -323,7 +323,7 @@ static
 size_t instituteGetSizeP ( void * instituteptr )
 {
   xdebug ();
-  return 0; 
+  return 0;
 }
 
 

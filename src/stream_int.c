@@ -568,7 +568,7 @@ static
 size_t streamGetSizeP ( void * streamptr )
 {
   xdebug ();
-  return 0; 
+  return 0;
 }
 
 

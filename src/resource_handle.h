@@ -56,6 +56,6 @@ void   reshPackBufferDestroy ( char ** );
 
 void   reshLock   ( void );
 
-void   reshUnlock ( void ); 
+void   reshUnlock ( void );
 
 #endif

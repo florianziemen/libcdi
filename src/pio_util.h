@@ -23,7 +23,7 @@
 #define MAXLEVEL          10
 #define MAXLEVELIDX       10
 #define MAXRECORDS        10
-#define MAXRECIDS         10 
+#define MAXRECIDS         10
 #define MAXVARS           10
 #define MAXTSTEPS         10
 #define MAXFNAMES         10
@@ -36,7 +36,7 @@
 #define ddebug MAXDEBUG
 
 
-typedef enum 
+typedef enum
   {
     FINALIZE,
     METADATA
@@ -74,18 +74,18 @@ void pcdiXMPIStat ( int, const char *, int, MPI_Status * );
 #define xmpiStat(ret,stat) pcdiXMPIStat ( ret, __FILE__, __LINE__, stat )
 
 void pcdiDebugComm ( const char *filename, const char *functionname, int line, \
-		     MPI_Comm *comm );
+                     MPI_Comm *comm );
 #define xdebugComm(comm) pcdiDebugComm (  __FILE__, __func__, __LINE__, comm )
 #endif
 
 void pcdiDebugMsg ( const char *filename, const char *functionname, int line, \
-		    int tag, int source, int nfinished );
+                    int tag, int source, int nfinished );
 #define xdebugMsg(tag,source,nfinished) pcdiDebugMsg ( __FILE__, __func__, \
-							__LINE__, tag, source,\
-							nfinished )
+                                                        __LINE__, tag, source,\
+                                                        nfinished )
 
 void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line, \
-		    int tag, int source, char * text );
+                    int tag, int source, char * text );
 #define xdebugMsg2(tag,source,text) pcdiDebugMsg ( __FILE__, __func__, \
-						    __LINE__, tag, source, text )
+                                                    __LINE__, tag, source, text )
 #endif

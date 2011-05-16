@@ -416,7 +416,7 @@ long bibBFiledataPFAccess ( aFiledataPFT* afd, int id )
   amount = dbuffer_data_size ( afd->db );
 
   if ( ddebug )
-    fprintf ( stdout, 
+    fprintf ( stdout,
 	      "pe%d in bibBFiledataPFAccess(), id=%d, amount=%ld, "
 	      "command=%d(%s)\n",
 	      pioinfo->rank, id, amount, afd->command,

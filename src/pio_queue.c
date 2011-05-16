@@ -38,15 +38,15 @@ void queueDestroy ( queue *q )
 
   if ( q->head )
     {
-      curr = q->head; 
-      
+      curr = q->head;
+
       while ( curr )
-	{
-	  succ = curr->next;
-	  ( *( q->valDestroy )) ( curr->val );
-	  free ( curr );
-	  curr = succ;
-	}
+        {
+          succ = curr->next;
+          ( *( q->valDestroy )) ( curr->val );
+          free ( curr );
+          curr = succ;
+        }
     }
 
   free ( q );
@@ -61,26 +61,26 @@ int queuePush ( queue *q, void *v, int noCollector, ... )
   int id = CDI_UNDEFID;
 
   va_start(ap, noCollector);
- 
-  if ( noCollector ) 
+
+  if ( noCollector )
     id = va_arg( ap, int );
 
   va_end(ap);
 
   // ensure unique key values
- 
-  curr = q->head;   
-      
+
+  curr = q->head;
+
   while ( curr )
-    { 
+    {
       if (( !noCollector &&  ( *( q->keyCompare )) ( v, curr->val )) ||
-	  (  noCollector &&  ( id == curr->idx )))
-	return -1;
-      
+          (  noCollector &&  ( id == curr->idx )))
+        return -1;
+
       curr = curr->next;
-    }  
-  
-  if (( newNode = ( node * ) malloc (sizeof ( node ))) == NULL )    
+    }
+
+  if (( newNode = ( node * ) malloc (sizeof ( node ))) == NULL )
     {
       perror ( "pio_queue: queuePush (): Not enough memory" );
       return 1;
@@ -89,25 +89,25 @@ int queuePush ( queue *q, void *v, int noCollector, ... )
   newNode->idx = noCollector ? id : q->count;
   newNode->val = v;
   newNode->next = NULL;
- 
+
 
   if ( q->tail != NULL)
     q->tail->next = newNode;
   else
     q->head = newNode;
 
-  q->tail = newNode; 
+  q->tail = newNode;
   q->count  ++;
-  
+
   return newNode->idx;
 }
 
 void *queueIdx2val ( queue *q, int id )
 {
   node *curr;
-  
+
   curr = q->head;
-  
+
   while ( curr )
     {
       if ( curr->idx == id ) break;

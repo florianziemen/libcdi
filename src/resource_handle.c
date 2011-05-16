@@ -96,9 +96,9 @@ void arrayInitPointer ( void )
         {
           arrayResources[i][j].idx  = namespaceIdxEncode2 ( i, j );
           arrayResources[i][j].next = arrayResources[i] + j + 1;
-	  arrayResources[i][j].ops  = NULL;
-	  arrayResources[i][j].ptr  = NULL;
-	  arrayResources[i][j].sent = 0;
+          arrayResources[i][j].ops  = NULL;
+          arrayResources[i][j].ptr  = NULL;
+          arrayResources[i][j].sent = 0;
         }
 
       arrayResources[i][arraySizeAllocated[i]-1].next = NULL;
@@ -111,7 +111,7 @@ void arrayInitPointer ( void )
 /**************************************************************/
 
 
-static 
+static
 void arrayDestroy ( void )
 {
   int i;
@@ -119,8 +119,8 @@ void arrayDestroy ( void )
   if ( arrayResources )
     {
       for ( i = 0; i < namespaceGetNumber (); i++ )
-        if (  arrayResources[i] ) 
-	  free ( arrayResources[i] );
+        if (  arrayResources[i] )
+          free ( arrayResources[i] );
       free ( arrayResources );
     }
 
@@ -171,7 +171,7 @@ void arraySizeExtend()
     xrealloc(arrayResources[nsp], newArraySize * sizeof (arrayResources[0][0]));
 
   for ( i = arraySizeAllocated[nsp]; i < newArraySize; ++i )
-    { 
+    {
       arrayResources[nsp][i].idx  = namespaceIdxEncode2 ( nsp, i );
       arrayResources[nsp][i].next = arrayResources[nsp] + i + 1;
     }
@@ -232,10 +232,10 @@ void reshRemove ( cdiResH idx, resOps * ops )
   nspT = namespaceIdxDecode ( idx );
 
   assert ( nspT.nsp == nsp &&
-	   nspT.idx >= 0 && 
-	   nspT.idx < arraySizeAllocated[nsp] &&
-	   arrayResources[nsp][nspT.idx].ops &&
-	   arrayResources[nsp][nspT.idx].ops == ops );
+           nspT.idx >= 0 &&
+           nspT.idx < arraySizeAllocated[nsp] &&
+           arrayResources[nsp][nspT.idx].ops &&
+           arrayResources[nsp][nspT.idx].ops == ops );
 
   arrayResources[nsp][nspT.idx].next = freeListHead[nsp];
   arrayResources[nsp][nspT.idx].ops  = NULL;
@@ -264,17 +264,17 @@ void *reshGetVal ( cdiResH idx, resOps * ops  )
 
   nspT = namespaceIdxDecode ( idx );
 
-  assert ( arrayInit && 
-	   nspT.nsp == nsp &&
-	   nspT.idx >= 0 && 
-	   nspT.idx < arraySizeAllocated[nsp] );
+  assert ( arrayInit &&
+           nspT.nsp == nsp &&
+           nspT.idx >= 0 &&
+           nspT.idx < arraySizeAllocated[nsp] );
 
   node =  arrayResources[nsp] + nspT.idx;
 
   ARRAY_UNLOCK ();
 
   assert ( node &&
-	   node->ops == ops ); 
+           node->ops == ops );
 
   return node->ptr;
 }
@@ -288,19 +288,19 @@ void reshGetIndiceArrayOfType ( int c, int * indice, resOps * ops )
   int i, j = 0, nsp;
 
   assert ( arrayInit && indice && ops );
-  
+
   ARRAY_LOCK();
 
   nsp = namespaceGetActive ();
-  
+
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
-    if ( arrayResources[nsp][i].ptr && arrayResources[nsp][i].ops ) 
+    if ( arrayResources[nsp][i].ptr && arrayResources[nsp][i].ops )
       if ( arrayResources[nsp][i].ops == ops )
-	{
-	  indice[j++] = i;
-	  if ( j == c ) break;
-	}
-  
+        {
+          indice[j++] = i;
+          if ( j == c ) break;
+        }
+
   ARRAY_UNLOCK();
 }
 
@@ -315,18 +315,18 @@ int reshCountType ( resOps * ops )
   assert ( ops );
 
   if ( !( arrayInit && ops )) return 0;
-  
+
   ARRAY_LOCK();
 
   nsp = namespaceGetActive ();
-  
+
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
-    if ( arrayResources[nsp][i].ptr ) 
+    if ( arrayResources[nsp][i].ptr )
       if ( arrayResources[nsp][i].ops == ops )
-	countType++;
-  
+        countType++;
+
   ARRAY_UNLOCK();
-  
+
   return countType;
 }
 
@@ -341,21 +341,21 @@ size_t  getPackBufferSize ()
   node * curr;
 
   nsp = namespaceGetActive ();
-  
-  for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
-    if ( arrayResources[nsp][i].ptr ) 
-      if ( ! arrayResources[nsp][i].sent )
-	{
-	  curr = arrayResources[nsp] + i;
-	  assert ( curr->ops ); 
 
-	  if ( curr->ops !=  &gridOps )
-	    continue;
-	  
-	  
-	  size +=  curr->ops->valGetSize (( void * ) curr->ptr ) +
-	    ( 2 * sizeof ( int ));
-	} 
+  for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
+    if ( arrayResources[nsp][i].ptr )
+      if ( ! arrayResources[nsp][i].sent )
+        {
+          curr = arrayResources[nsp] + i;
+          assert ( curr->ops );
+
+          if ( curr->ops !=  &gridOps )
+            continue;
+
+
+          size +=  curr->ops->valGetSize (( void * ) curr->ptr ) +
+            ( 2 * sizeof ( int ));
+        }
 
   return size;
 }
@@ -381,16 +381,16 @@ void reshPackBufferCreate ( char ** buffer, size_t * size, MPI_Comm comm )
   xdebug ();
 
   assert ( buffer );
-  
+
   ARRAY_LOCK();
 
   nsp = namespaceGetActive ();
 
   * size = getPackBufferSize () + sizeof ( int ) ;
   * buffer = xcalloc ( 1, * size );
-  
+
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
-    if ( arrayResources[nsp][i].ptr ) 
+    if ( arrayResources[nsp][i].ptr )
       if ( ! arrayResources[nsp][i].sent )
 	{
 	  curr = arrayResources[nsp] + i;
@@ -418,10 +418,10 @@ void reshPackBufferCreate ( char ** buffer, size_t * size, MPI_Comm comm )
 
   MPI_Pack ( &end, 1,  MPI_INT, * buffer, * size, &position, comm );
 
-  xdebug ( "#### packed END token" ); 
+  xdebug ( "#### packed END token" );
 }
 
-#endif 
+#endif
 
 
 void reshLock ()
@@ -449,38 +449,38 @@ void reshArrayPrint ()
 
   xdebug();
   fprintf ( stdout, "arrayInit=%d\n", arrayInit );
- 
+
   if ( ! arrayInit ) return;
 
   temp = namespaceGetActive ();
-  
+
   fprintf ( stdout, "\n\n##########################################\n#\n#  print " \
-	    "global resource array \n#\n" );
-  
+            "global resource array \n#\n" );
+
   for ( i = 0; i < namespaceGetNumber (); i++ )
     {
       namespaceSetActive ( i );
-      
+
       fprintf ( stdout, "\n" );
       fprintf ( stdout, "##################################\n" );
       fprintf ( stdout, "#\n" );
       fprintf ( stdout, "# namespace=%d\n", i );
       fprintf ( stdout, "#\n" );
       fprintf ( stdout, "##################################\n\n" );
-      
+
       for ( j = 0; j < arraySizeAllocated[i]; j++)
-	{
-	  curr = arrayResources[i] + j;
-	  if ( curr->ops && curr->ptr )
-	    {
-	      curr->ops->valPrint (( void * ) curr->ptr );
-	      fprintf ( stdout, "\n" ); 
-	    }
-	}
+        {
+          curr = arrayResources[i] + j;
+          if ( curr->ops && curr->ptr )
+            {
+              curr->ops->valPrint (( void * ) curr->ptr );
+              fprintf ( stdout, "\n" );
+            }
+        }
     }
-  
+
   fprintf ( stdout, "#\n#  end global resource array" \
-	    "\n#\n##########################################\n\n" );
-  
+            "\n#\n##########################################\n\n" );
+
   namespaceSetActive ( temp );
 }
