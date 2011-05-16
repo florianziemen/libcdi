@@ -2287,6 +2287,28 @@ int compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yv
   return (differ);
 }
 
+static
+int compareXYvals2(int gridID, long gridsize, double *xvals, double *yvals)
+{
+  int differ = 0;
+
+  if ( !differ && xvals && gridInqXvalsPtr(gridID) )
+    {
+      if ( fabs(xvals[0] - gridInqXval(gridID, 0)) > 1.e-9 ||
+	   fabs(xvals[gridsize-1] - gridInqXval(gridID, gridsize-1)) > 1.e-9 )
+	differ = 1;
+    }
+
+  if ( !differ && yvals && gridInqYvalsPtr(gridID) )
+    {
+      if ( fabs(yvals[0] - gridInqYval(gridID, 0)) > 1.e-9 ||
+	   fabs(yvals[gridsize-1] - gridInqYval(gridID, gridsize-1)) > 1.e-9 )
+	differ = 1;
+    }
+
+  return (differ);
+}
+
 
 int gridCompare(int gridID, grid_t grid)
 {
@@ -2403,36 +2425,16 @@ int gridCompare(int gridID, grid_t grid)
 	      printf("grid.ylast  %f\n", grid.yvals[grid.size-1]);
 	      printf("grid xlast  %f\n", gridInqXval(gridID, grid.size-1));
 	      printf("grid ylast  %f\n", gridInqYval(gridID, grid.size-1));
+	      printf("grid.nv     %d\n", grid.nvertex);
+	      printf("grid nv     %d\n", gridInqNvertex(gridID));	      	    
 	      */
 	      if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
-		if ( grid.xvals && gridInqXvalsPtr(gridID) )
-		  {
-		    if ( fabs(grid.xvals[0] - gridInqXval(gridID, 0)) > 1.e-9 ||
-			 fabs(grid.xvals[grid.size-1] - gridInqXval(gridID, grid.size-1)) > 1.e-9 )
-		      differ = 1;
-		  }
-		if ( grid.yvals && gridInqYvalsPtr(gridID) )
-		  {
-		    if ( fabs(grid.yvals[0] - gridInqYval(gridID, 0)) > 1.e-9 ||
-			 fabs(grid.yvals[grid.size-1] - gridInqYval(gridID, grid.size-1)) > 1.e-9 )
-		      differ = 1;
-		  }
+		differ = compareXYvals2(gridID, grid.size, grid.xvals, grid.yvals);
 	    }
 	  else if ( grid.type == GRID_UNSTRUCTURED )
 	    {
-	      printf("gridID      %d\n", gridID);
-	      printf("grid.xsize  %d\n", grid.xsize);
-	      printf("grid.ysize  %d\n", grid.ysize);
-	      printf("grid.xfirst %f\n", grid.xvals[0]);
-	      printf("grid.yfirst %f\n", grid.yvals[0]);
-	      printf("grid xfirst %f\n", gridInqXval(gridID, 0));
-	      printf("grid yfirst %f\n", gridInqYval(gridID, 0));
-	      printf("grid.xlast  %f\n", grid.xvals[grid.xsize-1]);
-	      printf("grid.ylast  %f\n", grid.yvals[grid.ysize-1]);
-	      printf("grid xlast  %f\n", gridInqXval(gridID, grid.xsize-1));
-	      printf("grid ylast  %f\n", gridInqYval(gridID, grid.ysize-1));
-	      printf("grid.nv     %d\n", grid.nvertex);
-	      printf("grid nv     %d\n", gridInqNvertex(gridID));	      	    
+	      if ( grid.nvertex == gridInqNvertex(gridID) )
+		differ = compareXYvals2(gridID, grid.size, grid.xvals, grid.yvals);
 	    }
 	}
     }
