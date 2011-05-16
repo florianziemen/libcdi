@@ -81,7 +81,6 @@ typedef struct
 {
   int         self;
   int         used;
-  int         nlock;
   int         nvars;        /* number of variables                */
   int         ngrids;
   int         nzaxis;
@@ -100,9 +99,6 @@ vlist_t;
 
 
 vlist_t *vlist_to_pointer(int vlistID);
-int      vlistNlock(int vlistID);
-void     vlistLock(int vlistID);
-void     vlistUnlock(int vlistID);
 char    *vlistInqVarNamePtr(int vlistID, int varID);
 char    *vlistInqVarLongnamePtr(int vlistID, int varID);
 char    *vlistInqVarStdnamePtr(int vlistID, int varID);
