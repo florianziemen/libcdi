@@ -333,6 +333,7 @@ int reshCountType ( resOps * ops )
 
 /**************************************************************/
 
+#ifdef USE_MPI
 static
 size_t  getPackBufferSize ()
 {
@@ -371,7 +372,6 @@ void reshPackBufferDestroy ( char ** buffer )
 
 /**************************************************************/
 
-#ifdef USE_MPI
 void reshPackBufferCreate ( char ** buffer, size_t * size, MPI_Comm comm )
 {
   int i, nsp, position = 0;
@@ -392,28 +392,28 @@ void reshPackBufferCreate ( char ** buffer, size_t * size, MPI_Comm comm )
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
     if ( arrayResources[nsp][i].ptr )
       if ( ! arrayResources[nsp][i].sent )
-	{
-	  curr = arrayResources[nsp] + i;
-	  assert ( curr->ops ); 
+        {
+          curr = arrayResources[nsp] + i;
+          assert ( curr->ops );
 
-	  if ( curr->ops !=  &gridOps )
-	    continue;
-	  
-	  MPI_Pack ( &type, 1, MPI_INT, * buffer, * size, &position, comm );
-	  
-	  curr->ops->valPack (( void * ) curr->ptr, 
-			      ( void * ) * buffer ,
-			      ( void * ) size,
-			      ( void * ) &position,
-			      ( void * ) comm );
+          if ( curr->ops !=  &gridOps )
+            continue;
 
-	  MPI_Pack ( &sep, 1,  MPI_INT, * buffer, * size, &position, comm );
+          MPI_Pack ( &type, 1, MPI_INT, * buffer, * size, &position, comm );
 
-	  xdebug ( "#### packed one resource with type and separator" );
+          curr->ops->valPack ( curr->ptr,
+                               * buffer ,
+                               * size,
+                               &position,
+                               comm );
 
-	  curr->sent = 1;
-	} 
-  
+          MPI_Pack ( &sep, 1,  MPI_INT, * buffer, * size, &position, comm );
+
+          xdebug ( "#### packed one resource with type and separator" );
+
+          curr->sent = 1;
+        }
+
   ARRAY_UNLOCK();
 
   MPI_Pack ( &end, 1,  MPI_INT, * buffer, * size, &position, comm );

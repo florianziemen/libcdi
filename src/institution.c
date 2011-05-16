@@ -31,11 +31,17 @@ institute_t;
 static int    instituteCompareP ( void * instituteptr1, void * instituteptr2 );
 static void   instituteDestroyP ( void * instituteptr );
 static void   institutePrintP   ( void * instituteptr );
-static size_t instituteGetSizeP ( void * instituteptr );
-static void   institutePackP    ( void * instituteptr, void * position, void * buff );
+#ifdef USE_MPI
+static int    instituteGetSizeP ( void * instituteptr );
+static void   institutePackP    ( void * instituteptr, void *buf, int size,
+                                  int *position, MPI_Comm comm );
+#endif
 
-resOps instituteOps = { instituteCompareP, instituteDestroyP, institutePrintP, \
-			instituteGetSizeP, institutePackP };
+resOps instituteOps = { instituteCompareP, instituteDestroyP, institutePrintP
+#ifdef USE_MPI
+                        ,instituteGetSizeP, institutePackP
+#endif
+ };
 
 
 static
@@ -318,18 +324,20 @@ void institutePrintP   ( void * instituteptr )
 }
 
 
-
-static 
-size_t instituteGetSizeP ( void * instituteptr )
+#ifdef USE_MPI
+static
+int instituteGetSizeP ( void * instituteptr )
 {
   xdebug ();
   return 0;
 }
 
 
-static 
-void institutePackP ( void * instituteptr, void * position, void * buff )
+static
+void institutePackP ( void * instituteptr, void * buff, int size,
+                      int *position, MPI_Comm comm )
 {
   xdebug ();
   return;
 }
+#endif

@@ -64,16 +64,23 @@ static int CDI_MaxZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0])
 static int    zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 );
 static void   zaxisDestroyP ( void * zaxisptr );
 static void   zaxisPrintP   ( void * zaxisptr );
-static size_t zaxisGetSizeP ( void * zaxisptr );
-static void   zaxisPackP    ( void * zaxisptr, void * position, void * buff );
+#ifdef USE_MPI
+static int    zaxisGetSizeP ( void * zaxisptr );
+static void   zaxisPackP    ( void * zaxisptr, void * buffer, int size,
+                              int *pos, MPI_Comm comm);
+#endif
 
-resOps zaxisOps = { zaxisCompareP, zaxisDestroyP, zaxisPrintP, zaxisGetSizeP, zaxisPackP };
+resOps zaxisOps = { zaxisCompareP, zaxisDestroyP, zaxisPrintP
+#ifdef USE_MPI
+                    , zaxisGetSizeP, zaxisPackP
+#endif
+};
 
 static int  ZAXIS_Debug = 0;   /* If set to 1, debugging */
 
 
 static
-void zaxisDefaultValue ( zaxis_t *zaxisptr ) 
+void zaxisDefaultValue ( zaxis_t *zaxisptr )
 {
   zaxisptr->self        = CDI_UNDEFID;
   zaxisptr->name[0]     = 0;
@@ -1189,21 +1196,24 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
 }
 
 
-static 
-size_t  zaxisGetSizeP ( void * zaxisptr )
+#ifdef USE_MPI
+static
+int zaxisGetSizeP ( void * zaxisptr )
 {
   xdebug ();
   return 0;
 }
 
 
-static 
-void zaxisPackP ( void * zaxisptr, void * position, void * buff )
+static
+void zaxisPackP ( void * zaxisptr, void *buffer, int size,
+                  int *pos, MPI_Comm comm)
 {
   xdebug ();
   return;
 }
 
+#endif
 
 void zaxisGetIndexArray ( int nzaxis, int * zaxisIndexArray )
 {

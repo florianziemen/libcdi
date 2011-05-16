@@ -68,11 +68,18 @@ static int cdiHaveMissval = 0;
 static int    streamCompareP ( void * streamptr1, void * streamptr2 );
 static void   streamDestroyP ( void * streamptr );
 static void   streamPrintP   ( void * streamptr );
-static size_t streamGetSizeP ( void * streamptr );
-static void   streamPackP    ( void * streamptr, void * position, void * buff );
+#ifdef USE_MPI
+static int    streamGetSizeP ( void * streamptr );
+static void   streamPackP    ( void * streamptr, void * buff, int size,
+                               int * position, MPI_Comm comm );
+#endif
 
-resOps streamOps = { streamCompareP, streamDestroyP, streamPrintP, streamGetSizeP, \
-		     streamPackP };
+resOps streamOps = { streamCompareP, streamDestroyP, streamPrintP,
+#ifdef USE_MPI
+                     streamGetSizeP,
+		     streamPackP
+#endif
+};
 
 long cdiGetenvInt(char *envName)
 {
@@ -564,17 +571,21 @@ void streamPrintP   ( void * streamptr )
 }
 
 
-static 
-size_t streamGetSizeP ( void * streamptr )
+#ifdef USE_MPI
+static
+int streamGetSizeP ( void * streamptr )
 {
   xdebug ();
   return 0;
 }
 
 
-static 
-void streamPackP ( void * streamptr, void * position, void * buff )
+static
+void streamPackP ( void * streamptr, void * buff, int size, int * position,
+                   MPI_Comm comm)
 {
   xdebug ();
   return;
 }
+
+#endif

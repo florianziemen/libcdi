@@ -37,10 +37,17 @@ char *Timeunits[] = {
 static int    taxisCompareP ( void * taxisptr1, void * taxisptr2 );
 static void   taxisDestroyP ( void * taxisptr );
 static void   taxisPrintP   ( void * taxisptr );
-static size_t taxisGetSizeP ( void * taxisptr );
-static void   taxisPackP    ( void * taxisptr, void * position, void * buff );
+#ifdef USE_MPI
+static int taxisGetSizeP ( void * taxisptr );
+static void   taxisPackP ( void * taxisptr, void *buf, int size,
+                           int *position, MPI_Comm comm );
+#endif
 
-resOps taxisOps = { taxisCompareP, taxisDestroyP, taxisPrintP, taxisGetSizeP, taxisPackP };
+resOps taxisOps = { taxisCompareP, taxisDestroyP, taxisPrintP
+#ifdef USE_MPI
+                    , taxisGetSizeP, taxisPackP
+#endif
+};
 
 
 static int  TAXIS_Debug = 0;   /* If set to 1, debugging */
@@ -59,6 +66,7 @@ char *tunitNamePtr(int unitID)
   return (name);
 }
 
+#if 0
 static
 void taxis_defaults(void)
 {
@@ -87,7 +95,7 @@ void taxis_defaults(void)
 	Warning("Unsupported TIMEUNIT %s!", timeunit);
     }
 }
-
+#endif
 
 static
 void taxisDefaultValue ( taxis_t *taxisptr )
@@ -138,7 +146,7 @@ void taxisInit (void)
   if ( env ) TAXIS_Debug = atoi(env);
 }
 
-
+#if 0
 static
 void taxis_copy(taxis_t *taxisptr2, taxis_t *taxisptr1)
 {
@@ -148,6 +156,7 @@ void taxis_copy(taxis_t *taxisptr2, taxis_t *taxisptr1)
   memcpy(taxisptr2, taxisptr1, sizeof(taxis_t));
   taxisptr2->self = taxisID2;
 }
+#endif
 
 static
 void taxis_check_ptr(const char *caller, taxis_t *taxisptr)
@@ -1261,8 +1270,9 @@ int taxisCompareP ( void *  taxisptr1, void * taxisptr2 )
 }
 
 
+#ifdef USE_MPI
 static 
-size_t taxisGetSizeP ( void * taxisptr )
+int taxisGetSizeP ( void * taxisptr )
 {
   xdebug ();
   return 0; 
@@ -1270,8 +1280,10 @@ size_t taxisGetSizeP ( void * taxisptr )
 
 
 static 
-void taxisPackP ( void * taxisptr, void * position, void * buff )
+void taxisPackP ( void * taxisptr, void * buff, int size, int *position,
+                  MPI_Comm comm)
 {
   xdebug ();
   return;
 }
+#endif

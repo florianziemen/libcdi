@@ -49,12 +49,17 @@ char *Grids[] = {
 int    gridCompareP ( void * gridptr1, void * gridptr2 );
 void   gridDestroyP ( void * gridptr );
 void   gridPrintP   ( void * gridptr );
-size_t gridGetSizeP ( void * gridptr );
-void   gridPackP    ( void * gridptr, void * buff, void * sizebuff, \
-			     void * position, void * comm );
+#ifdef USE_MPI
+int gridGetSizeP ( void * gridptr );
+void   gridPackP    ( void * gridptr, void * buff, int size,
+                      int *position, MPI_Comm comm );
+#endif
 
-resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP, gridGetSizeP, \
-		   gridPackP };
+resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP
+#ifdef USE_MPI
+                   , gridGetSizeP, gridPackP
+#endif
+};
 
 
 static int  GRID_Debug = 0;   /* If set to 1, debugging */
@@ -3668,27 +3673,24 @@ void gridGetIndexArray ( int ngrids, int * gridIndexArray )
   reshGetIndiceArrayOfType ( ngrids, gridIndexArray, &gridOps );
 }
 
- 
-size_t gridGetSizeP ( void * gridptr )
+#ifdef USE_MPI
+
+int gridGetSizeP ( void * gridptr )
 {
   xdebug ();
   return ( 2 * sizeof (int ));
 }
 
 
-void gridPackP ( void * gridptr, void * buff, void * sizebuff, void * position, 
-		 void * comm )
+void gridPackP ( void * gridptr, void * buff, int size, int * pos,
+                 MPI_Comm comm )
 {
   grid_t   * gridP = ( grid_t * )   gridptr;
-  char     * buffP = ( char * )     buff;
-  int      * sizeP = ( int * )      sizebuff; 
-  int      * posP  = ( int * )      position; 
-#ifdef USE_MPI
-  MPI_Comm * commP = ( MPI_Comm * ) comm;
 
-  MPI_Pack ( &gridP->type, 1, MPI_INT, buffP, * sizeP, posP, * commP );
-  MPI_Pack ( &gridP->size, 1, MPI_INT, buffP, * sizeP, posP, * commP );
-#endif
+  MPI_Pack ( &gridP->type, 1, MPI_INT, buff, size, pos, comm );
+  MPI_Pack ( &gridP->size, 1, MPI_INT, buff, size, pos, comm );
 
   return;
 }
+
+#endif

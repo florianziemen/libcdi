@@ -26,18 +26,23 @@ typedef int cdiResH;
 typedef int    ( * valCompareFunc )( void *, void * );
 typedef void   ( * valDestroyFunc )( void * );
 typedef void   ( * valPrintFunc   )( void * );
-typedef size_t ( * valGetSizeFunc )( void * );
-typedef void   ( * valPackFunc    )( void *, void *, void *, void *, void * );
+#ifdef USE_MPI
+typedef int    ( * valGetSizeFunc )( void * );
+typedef void   ( * valPackFunc    )( void *, void *buf, int size, int *pos,
+                                     MPI_Comm comm );
+#endif
 
 typedef struct {
   valCompareFunc valCompare;
   valDestroyFunc valDestroy;
   valPrintFunc   valPrint;
+#ifdef USE_MPI
   valGetSizeFunc valGetSize;
   valPackFunc    valPack;
-}resOps; 
-       
-       
+#endif
+}resOps;
+
+
 int    reshPut ( void *, resOps * );
 
 void   reshRemove ( cdiResH, resOps * );

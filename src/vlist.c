@@ -47,16 +47,20 @@ vlist_compare(vlist_t *a, vlist_t *b)
 
 static void
 vlistPrintKernel(vlist_t *vlistptr);
-static size_t  vlistGetSizeP ( void * vlistptr );
-static void vlistPackP    ( void * vlistptr, void * position, void * buff );
-
+#ifdef USE_MPI
+static int  vlistGetSizeP ( void * vlistptr );
+static void vlistPackP    ( void * vlistptr, void * buff, int size,
+                            int *position, MPI_Comm comm );
+#endif
 
 resOps vlist_ops = {
   (valCompareFunc)vlist_compare,
   free,
-  (valPrintFunc)vlistPrintKernel,
-  vlistGetSizeP,
+  (valPrintFunc)vlistPrintKernel
+#ifdef USE_MPI
+  , vlistGetSizeP,
   vlistPackP
+#endif
 };
 
 
@@ -1495,19 +1499,22 @@ int vlistHasTime(int vlistID)
 }
 
 
+#ifdef USE_MPI
 
-static 
-size_t  vlistGetSizeP ( void * vlistptr )
+static
+int  vlistGetSizeP ( void * vlistptr )
 {
   xdebug ();
   return 0;
 }
 
 
-static 
-void vlistPackP ( void * vlistptr, void * position, void * buff )
+static
+void vlistPackP ( void * vlistptr, void * buff, int size, int *position,
+                  MPI_Comm comm )
 {
   xdebug ();
 
 }
 
+#endif

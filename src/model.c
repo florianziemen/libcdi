@@ -19,8 +19,8 @@ int COSMO  = UNDEFID;
 typedef struct
 {
   int      self;
-  int      used;  
-  int      instID;  
+  int      used;
+  int      instID;
   int      modelgribID;
   char    *name;
 }
@@ -35,11 +35,17 @@ static void modelInit(void);
 static int    modelCompareP ( void * modelptr1, void * modelptr2 );
 static void   modelDestroyP ( void * modelptr );
 static void   modelPrintP   ( void * modelptr );
-static size_t modelGetSizeP ( void * modelptr );
-static void   modelPackP    ( void * modelptr, void * position, void * buff );
+#ifdef USE_MPI
+static int    modelGetSizeP ( void * modelptr );
+static void   modelPackP    ( void * modelptr, void * buff, int size,
+                              int *position, MPI_Comm comm);
+#endif
 
-resOps modelOps = { modelCompareP, modelDestroyP, modelPrintP, modelGetSizeP, \
-		     modelPackP };
+resOps modelOps = { modelCompareP, modelDestroyP, modelPrintP
+#ifdef USE_MPI
+                    , modelGetSizeP, modelPackP
+#endif
+};
 
 static
 void modelDefaultValue ( model_t *modelptr )
@@ -141,30 +147,30 @@ int modelInq(int instID, int modelgribID, char *name)
       modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
 
       if ( modelptr->used )
-	{
-	  if ( name )
-	    {
-	      found = 1;
-	      if ( instID      != -1 && modelptr->instID      != instID )      found = 0;
-	      if ( modelgribID !=  0 && modelptr->modelgribID != modelgribID ) found = 0;
+        {
+          if ( name )
+            {
+              found = 1;
+              if ( instID      != -1 && modelptr->instID      != instID )      found = 0;
+              if ( modelgribID !=  0 && modelptr->modelgribID != modelgribID ) found = 0;
 
-	      if ( found )
-		{
-		  if ( modelptr->name )
-		    {
-		      len = strlen(modelptr->name);
-		      if ( memcmp(modelptr->name, name, len) == 0 ) break;
-		      len = strlen(name);
-		      if ( memcmp(modelptr->name, name, len) == 0 ) break;
-		    }
-		}
-	    }
-	  else
-	    {
-	      if ( modelptr->instID      == instID &&
-		   modelptr->modelgribID == modelgribID ) break;
-	    }
-	}
+              if ( found )
+                {
+                  if ( modelptr->name )
+                    {
+                      len = strlen(modelptr->name);
+                      if ( memcmp(modelptr->name, name, len) == 0 ) break;
+                      len = strlen(name);
+                      if ( memcmp(modelptr->name, name, len) == 0 ) break;
+                    }
+                }
+            }
+          else
+            {
+              if ( modelptr->instID      == instID &&
+                   modelptr->modelgribID == modelgribID ) break;
+            }
+        }
     }
 
   if ( modelID == modelCount ) modelID = UNDEFID;
@@ -180,11 +186,11 @@ int modelDef(int instID, int modelgribID, const char *name)
   model_t *modelptr;
 
   modelInit ();
-    
+
   modelptr = modelNewEntry();
-  
+
   modelptr->instID      = instID;
-  modelptr->modelgribID = modelgribID;  
+  modelptr->modelgribID = modelgribID;
   if ( name ) modelptr->name = strdupx(name);
 
   return modelptr->self;
@@ -198,7 +204,7 @@ int modelInqInstitut(int modelID)
   modelInit ();
 
   modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
-    
+
   return modelptr ? modelptr->instID : UNDEFID;
 }
 
@@ -221,7 +227,7 @@ char *modelInqNamePtr(int modelID)
 
   modelInit ();
 
-  modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );  
+  modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
 
   return modelptr ? modelptr->name : NULL;
 }
@@ -247,7 +253,7 @@ void modelPrintP   ( void * modelptr )
 
   fprintf ( fp, "#\n");
   fprintf ( fp, "# modelID %d\n", mp->self);
-  fprintf ( fp, "#\n"); 
+  fprintf ( fp, "#\n");
   fprintf ( fp, "self          = %d\n", mp->self );
   fprintf ( fp, "used          = %d\n", mp->used );
   fprintf ( fp, "instID        = %d\n", mp->instID );
@@ -256,17 +262,21 @@ void modelPrintP   ( void * modelptr )
 }
 
 
-static 
-size_t modelGetSizeP ( void * modelptr )
+#ifdef USE_MPI
+static
+int modelGetSizeP ( void * modelptr )
 {
   xdebug ();
-  return 0; 
+  return 0;
 }
 
 
-static 
-void modelPackP ( void * modelptr, void * position, void * buff )
+static
+void modelPackP ( void * modelptr, void * buff, int size,
+                  int *position, MPI_Comm comm )
 {
   xdebug ();
   return;
 }
+
+#endif
