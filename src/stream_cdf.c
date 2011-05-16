@@ -1520,7 +1520,7 @@ void cdfDefYaxis(int streamID, int gridID)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
-void cdfDefLonLat2D(int streamID, int gridID)
+void cdfDefCurvilinear(int streamID, int gridID)
 {
   char xunits[256];
   char xlongname[256];
@@ -1589,12 +1589,6 @@ void cdfDefLonLat2D(int streamID, int gridID)
                     xdimID = streamptr->xdimID[index];
                     break;
                   }
-              /*
-              for ( index2 = 0; index2 < index; index2++ )
-                if ( streamptr->xdimID[index] == streamptr->xdimID[index2] )
-                  break;
-              if ( index2 == index ) iz++;
-              */
             }
         }
     }
@@ -1861,10 +1855,10 @@ void cdfDefGdim(int streamID, int gridID)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
-void cdfDefCell(int streamID, int gridID)
+void cdfDefUnstructured(int streamID, int gridID)
 {
-  char axisname[] = "cellX";
-  char vertname[] = "nvX";
+  char axisname[] = "ncells";
+  char vertname[] = "nv";
   char xunits[256];
   char xlongname[256];
   char xstdname[256];
@@ -1873,7 +1867,7 @@ void cdfDefCell(int streamID, int gridID)
   char ystdname[256];
   char xaxisname[256];
   char yaxisname[256];
-  int index, iz = 0;
+  int index;
   int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
   int ngrids;
@@ -1918,28 +1912,24 @@ void cdfDefCell(int streamID, int gridID)
             {
               dimlen0 = gridInqSize(gridID0);
               if ( dimlen == dimlen0 )
-                {
-                  dimID = streamptr->xdimID[index];
-                  break;
-                }
-              else
-                iz++;   
+		if ( gridInqNvertex(gridID0) == gridInqNvertex(gridID) && 
+		     IS_EQUAL(gridInqXval(gridID0, 0), gridInqXval(gridID, 0)) &&
+                     IS_EQUAL(gridInqXval(gridID0, dimlen-1), gridInqXval(gridID, dimlen-1)) )
+		  {
+		    dimID = streamptr->xdimID[index];
+		    break;
+		  }
             }
         }
     }
 
   if ( dimID == UNDEFID )
     {
-      if ( iz == 0 )
-        {
-          axisname[4] = '\0';
-          vertname[2] = '\0';
-        }
-      else
-        {
-          sprintf(&axisname[4], "%1d", iz+1);
-          sprintf(&vertname[2], "%1d", iz+1);
-        }
+      int status;
+      status = checkGridName('V', xaxisname, fileID, vlistID, gridID, ngrids, 'X');
+      status = checkGridName('V', yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
+      status = checkGridName('D', axisname, fileID, vlistID, gridID, ngrids, 'X');
+      status = checkGridName('D', vertname, fileID, vlistID, gridID, ngrids, 'X');
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
@@ -2537,7 +2527,11 @@ void cdfDefGrid(int streamID, int gridID)
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {   
-      cdfDefLonLat2D(streamID, gridID);
+      cdfDefCurvilinear(streamID, gridID);
+    }
+  else if ( gridtype == GRID_UNSTRUCTURED )
+    {
+      cdfDefUnstructured(streamID, gridID);
     }
   else if ( gridtype == GRID_GAUSSIAN_REDUCED )
     {
@@ -2552,10 +2546,6 @@ void cdfDefGrid(int streamID, int gridID)
     {
       cdfDefTrajLon(streamID, gridID);
       cdfDefTrajLat(streamID, gridID);
-    }
-  else if ( gridtype == GRID_UNSTRUCTURED )
-    {
-      cdfDefCell(streamID, gridID);
     }
   else if ( gridtype == GRID_SINUSOIDAL || gridtype == GRID_LAEA || gridtype == GRID_LCC2 )
     {
