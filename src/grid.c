@@ -2243,11 +2243,12 @@ int gridIsRotated(int gridID)
 }
 
 static
-void compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yvals0, int *differ)
+int compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yvals0)
 {
   long i;
+  int differ = 0;
 
-  if ( xsize == gridInqXvals(gridID, NULL) )
+  if ( !differ && xsize == gridInqXvals(gridID, NULL) )
     {
       double *xvals;
 
@@ -2258,14 +2259,14 @@ void compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *y
       for ( i = 0; i < xsize; ++i )
 	if ( fabs(xvals0[i] - xvals[i]) > 1.e-10 )
 	  {
-	    *differ = 1;
+	    differ = 1;
 	    break;
 	  }
   
       free(xvals);
     }
 
-  if ( ysize == gridInqYvals(gridID, NULL) )
+  if ( !differ && ysize == gridInqYvals(gridID, NULL) )
     {
       double *yvals;
 
@@ -2276,22 +2277,20 @@ void compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *y
       for ( i = 0; i < ysize; ++i )
 	if ( fabs(yvals0[i] - yvals[i]) > 1.e-10 )
 	  {
-	    *differ = 1;
+	    differ = 1;
 	    break;
 	  }
       
       free(yvals);
     }
+
+  return (differ);
 }
 
 
 int gridCompare(int gridID, grid_t grid)
 {
   int differ = 1;
-  int xsize, ysize;
-
-  xsize = grid.xsize;
-  ysize = grid.ysize;
 
   if ( grid.type == gridInqType(gridID) || grid.type == GRID_GENERIC )
     {
@@ -2343,7 +2342,7 @@ int gridCompare(int gridID, grid_t grid)
 		  else
 		    {
 		      if ( grid.xvals && grid.yvals )
-			compareXYvals(gridID, xsize, ysize, grid.xvals, grid.yvals, &differ);
+			differ = compareXYvals(gridID, grid.xsize, grid.ysize, grid.xvals, grid.yvals);
 		    }
 		}
 	      else
@@ -2356,7 +2355,7 @@ int gridCompare(int gridID, grid_t grid)
 		  if ( grid.xdef == 1 && grid.ydef == 1 )
 		    {
 		      if ( grid.xvals && grid.yvals )
-			compareXYvals(gridID, xsize, ysize, grid.xvals, grid.yvals, &differ);
+			differ = compareXYvals(gridID, grid.xsize, grid.ysize, grid.xvals, grid.yvals);
 		    }
 		}
 	      else if ( (grid.ysize == 0 || grid.ysize == 1) &&
@@ -2384,7 +2383,7 @@ int gridCompare(int gridID, grid_t grid)
 		  else
 		    {
 		      if ( grid.xvals && grid.yvals )
-			compareXYvals(gridID, xsize, ysize, grid.xvals, grid.yvals, &differ);
+			differ = compareXYvals(gridID, grid.xsize, grid.ysize, grid.xvals, grid.yvals);
 		    }
 		}
 	      else
@@ -2400,24 +2399,27 @@ int gridCompare(int gridID, grid_t grid)
 	      printf("grid.yfirst %f\n", grid.yvals[0]);
 	      printf("grid.xfirst %f\n", gridInqXval(gridID, 0));
 	      printf("grid.yfirst %f\n", gridInqYval(gridID, 0));
-	      printf("grid.xlast  %f\n", grid.xvals[xsize-1]);
-	      printf("grid.ylast  %f\n", grid.yvals[ysize-1]);
-	      printf("grid.xlast  %f\n", gridInqXval(gridID, xsize-1));
-	      printf("grid.ylast  %f\n", gridInqYval(gridID, ysize-1));
+	      printf("grid.xlast  %f\n", grid.xvals[grid.xsize-1]);
+	      printf("grid.ylast  %f\n", grid.yvals[grid.ysize-1]);
+	      printf("grid.xlast  %f\n", gridInqXval(gridID, grid.xsize-1));
+	      printf("grid.ylast  %f\n", gridInqYval(gridID, grid.ysize-1));
 	      */
 	      if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
 		if ( grid.xvals && gridInqXvalsPtr(gridID) )
 		  {
 		    if ( fabs(grid.xvals[0] - gridInqXval(gridID, 0)) > 1.e-9 ||
-			 fabs(grid.xvals[xsize-1] - gridInqXval(gridID, xsize-1)) > 1.e-9 )
+			 fabs(grid.xvals[grid.xsize-1] - gridInqXval(gridID, grid.xsize-1)) > 1.e-9 )
 		      differ = 1;
 		  }
 		if ( grid.yvals && gridInqYvalsPtr(gridID) )
 		  {
 		    if ( fabs(grid.yvals[0] - gridInqYval(gridID, 0)) > 1.e-9 ||
-			 fabs(grid.yvals[ysize-1] - gridInqYval(gridID, ysize-1)) > 1.e-9 )
+			 fabs(grid.yvals[grid.ysize-1] - gridInqYval(gridID, grid.ysize-1)) > 1.e-9 )
 		      differ = 1;
 		  }
+	    }
+	  else if ( grid.type == GRID_UNSTRUCTURED )
+	    {
 	    }
 	}
     }
