@@ -8,9 +8,7 @@ int main() {
   std::string _name;
   CdiVariable var;
 
-  Cdi infoz("./python/zonavg-BOT.grb");
-  Cdi info("./testdata/mulval.nc");
-  Cdi infot("./python/BOT.grb");
+  Cdi info("testdata/mulval.nc");
  
   std::cout << "#===============================" << std::endl;
   for (int i = 0; i < info.nvars; i++)
@@ -128,14 +126,15 @@ int main() {
   std::cout << "#==== zlevels:  " << var.zaxis.size << std::endl;
   std::cout << "#===============================" << std::endl;
 
-  var = infot.varByCode[176];
-  std::cout << var.name << std::endl;
-  std::cout << "grid XValues: "; std::vector<double> xv = var.grid.xvalues; for (int k = 0; k < xv.size(); k++) { std::cout << xv[k] << " ";} std::cout << std::endl;
-  std::cout << "grid YValues: "; std::vector<double> yv = var.grid.yvalues; for (int k = 0; k < yv.size(); k++) { std::cout << yv[k] << " ";} std::cout << std::endl;
-  var = infoz.varByCode[176];
-  std::cout << var.name << std::endl;
-  std::cout << "grid XValues: "; xv = var.grid.xvalues; for (int k = 0; k < xv.size(); k++) { std::cout << xv[k] << " ";} std::cout << std::endl;
-  std::cout << "grid YValues: "; yv = var.grid.yvalues; for (int k = 0; k < yv.size(); k++) { std::cout << yv[k] << " ";} std::cout << std::endl;
+/*   var = infot.varByCode[176];
+ *   std::cout << var.name << std::endl;
+ *   std::cout << "grid XValues: "; std::vector<double> xv = var.grid.xvalues; for (int k = 0; k < xv.size(); k++) { std::cout << xv[k] << " ";} std::cout << std::endl;
+ *   std::cout << "grid YValues: "; std::vector<double> yv = var.grid.yvalues; for (int k = 0; k < yv.size(); k++) { std::cout << yv[k] << " ";} std::cout << std::endl;
+ *   var = infoz.varByCode[176];
+ *   std::cout << var.name << std::endl;
+ *   std::cout << "grid XValues: "; xv = var.grid.xvalues; for (int k = 0; k < xv.size(); k++) { std::cout << xv[k] << " ";} std::cout << std::endl;
+ *   std::cout << "grid YValues: "; yv = var.grid.yvalues; for (int k = 0; k < yv.size(); k++) { std::cout << yv[k] << " ";} std::cout << std::endl;
+ */
 
   return 0;
 }
