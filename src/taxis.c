@@ -3,6 +3,9 @@
 #endif
 
 #include <string.h>
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
 
 #include "dmemory.h"
 
