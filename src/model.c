@@ -271,20 +271,51 @@ modelTxCode(void *modelptr)
   return MODEL;
 }
 
+enum {
+  model_nints = 4,
+};
+
+
 static
 int modelGetSizeP ( void * modelptr, MPI_Comm comm )
 {
+  model_t *p = modelptr;
+  int txsize = 0, txinc;
   xdebug ();
-  return 0;
+  xmpi(MPI_Pack_size(model_nints, MPI_INT, comm, &txsize));
+  xmpi(MPI_Pack_size(strlen(p->name) + 1, MPI_CHAR, comm, &txinc));
+  txsize += txinc;
+  return txsize;
 }
 
 
 static
-void modelPackP ( void * modelptr, void * buff, int size,
+void modelPackP ( void * modelptr, void * buf, int size,
                   int *position, MPI_Comm comm )
 {
+  model_t *p = modelptr;
+  int tempbuf[model_nints];
   xdebug ();
-  return;
+  tempbuf[0] = p->self;
+  tempbuf[1] = p->instID;
+  tempbuf[2] = p->modelgribID;
+  tempbuf[3] = (int)strlen(p->name) + 1;
+  xmpi(MPI_Pack(tempbuf, model_nints, MPI_INT, buf, size, position, comm));
+  xmpi(MPI_Pack(p->name, tempbuf[3], MPI_CHAR, buf, size, position, comm));
+}
+
+int
+modelUnpack(void *buf, int size, int *position,
+            MPI_Comm comm)
+{
+  int tempbuf[model_nints];
+  int modelID;
+  char *name;
+  xdebug ();
+  xmpi(MPI_Unpack(buf, size, position, tempbuf, model_nints, MPI_INT, comm));
+  name = xmalloc(tempbuf[3]);
+  xmpi(MPI_Unpack(buf, size, position, name, tempbuf[3], MPI_CHAR, comm));
+  modelID = modelDef(tempbuf[1], tempbuf[2], name);
 }
 
 #endif

@@ -6,6 +6,7 @@
 #include "pio_rpc.h"
 #include "pio_util.h"
 #include "cdi.h"
+#include "model.h"
 
 MPI_Comm commGlob;
 int sizeGlob;
@@ -154,6 +155,7 @@ void rpcUnpackResources ( char * buffer, size_t size, MPI_Comm * comm )
 	case INSTITUTE:
 	  break;
 	case MODEL:
+          modelUnpack(buffer, size, &pos, *comm);
 	  break;
 	case STREAM:
 	  break;
