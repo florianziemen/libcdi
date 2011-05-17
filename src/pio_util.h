@@ -43,6 +43,7 @@ typedef enum
   } command;
 
 
+#ifdef USE_MPI
 #define xdebug(fmt, ...)					\
   if ( ddebug ){                                                \
     int rank;                                                   \
@@ -65,6 +66,15 @@ char * outTextComm ( MPI_Comm * );
     }
 #endif
 */
+
+#else
+#define xdebug(fmt, ...)					\
+  if ( ddebug ){                                                \
+    fprintf ( stderr, "%s, %s, line %d: " fmt "\n",             \
+              __func__, __FILE__,  __LINE__,                    \
+              ## __VA_ARGS__ );                                 \
+  }
+#endif
 
 void pcdiAbort ( char *, const char *, const char *, int );
 #define xabort(text) pcdiAbort ( text, __FILE__, __func__, __LINE__ );
