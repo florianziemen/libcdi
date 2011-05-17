@@ -65,7 +65,7 @@ static int    zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 );
 static void   zaxisDestroyP ( void * zaxisptr );
 static void   zaxisPrintP   ( void * zaxisptr );
 #ifdef USE_MPI
-static int    zaxisGetSizeP ( void * zaxisptr );
+static int    zaxisGetSizeP ( void * zaxisptr, MPI_Comm comm );
 static void   zaxisPackP    ( void * zaxisptr, void * buffer, int size,
                               int *pos, MPI_Comm comm);
 #endif
@@ -1198,7 +1198,7 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
 
 #ifdef USE_MPI
 static
-int zaxisGetSizeP ( void * zaxisptr )
+int zaxisGetSizeP ( void * zaxisptr, MPI_Comm comm )
 {
   xdebug ();
   return 0;

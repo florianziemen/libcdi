@@ -50,9 +50,9 @@ static int    gridCompareP ( void * gridptr1, void * gridptr2 );
 static void   gridDestroyP ( void * gridptr );
 static void   gridPrintP   ( void * gridptr );
 #ifdef USE_MPI
-static int    gridGetSizeP ( void * gridptr );
+static int    gridGetSizeP ( void * gridptr, MPI_Comm comm );
 static void   gridPackP    ( void * gridptr, void * buff, int size,
-                      int *position, MPI_Comm comm );
+                             int *position, MPI_Comm comm );
 #endif
 
 resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP
@@ -3675,7 +3675,7 @@ void gridGetIndexArray ( int ngrids, int * gridIndexArray )
 
 #ifdef USE_MPI
 
-int gridGetSizeP ( void * gridptr )
+int gridGetSizeP ( void * gridptr, MPI_Comm comm )
 {
   grid_t * gridP = ( grid_t * ) gridptr;
   int size = 0;

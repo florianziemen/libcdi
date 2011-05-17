@@ -32,7 +32,7 @@ static int    instituteCompareP ( void * instituteptr1, void * instituteptr2 );
 static void   instituteDestroyP ( void * instituteptr );
 static void   institutePrintP   ( void * instituteptr );
 #ifdef USE_MPI
-static int    instituteGetSizeP ( void * instituteptr );
+static int    instituteGetSizeP ( void * instituteptr, MPI_Comm comm );
 static void   institutePackP    ( void * instituteptr, void *buf, int size,
                                   int *position, MPI_Comm comm );
 #endif
@@ -326,7 +326,7 @@ void institutePrintP   ( void * instituteptr )
 
 #ifdef USE_MPI
 static
-int instituteGetSizeP ( void * instituteptr )
+int instituteGetSizeP ( void * instituteptr, MPI_Comm comm )
 {
   xdebug ();
   return 0;

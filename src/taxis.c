@@ -38,7 +38,7 @@ static int    taxisCompareP ( void * taxisptr1, void * taxisptr2 );
 static void   taxisDestroyP ( void * taxisptr );
 static void   taxisPrintP   ( void * taxisptr );
 #ifdef USE_MPI
-static int taxisGetSizeP ( void * taxisptr );
+static int taxisGetSizeP ( void * taxisptr, MPI_Comm comm );
 static void   taxisPackP ( void * taxisptr, void *buf, int size,
                            int *position, MPI_Comm comm );
 #endif
@@ -1272,7 +1272,7 @@ int taxisCompareP ( void *  taxisptr1, void * taxisptr2 )
 
 #ifdef USE_MPI
 static 
-int taxisGetSizeP ( void * taxisptr )
+int taxisGetSizeP ( void * taxisptr, MPI_Comm comm )
 {
   xdebug ();
   return 0; 

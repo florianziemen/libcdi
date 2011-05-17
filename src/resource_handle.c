@@ -335,10 +335,10 @@ int reshCountType ( resOps * ops )
 
 #ifdef USE_MPI
 static
-size_t  getPackBufferSize ()
+int  getPackBufferSize ( MPI_Comm comm )
 {
   int nsp, i;
-  size_t size = 0;
+  int size = 0;
   node * curr;
 
   nsp = namespaceGetActive ();
@@ -354,7 +354,7 @@ size_t  getPackBufferSize ()
             continue;
 
 
-          size +=  curr->ops->valGetSize (( void * ) curr->ptr ) +
+          size +=  curr->ops->valGetSize ( curr->ptr, comm ) +
             ( 2 * sizeof ( int ));
         }
 
@@ -386,7 +386,7 @@ void reshPackBufferCreate ( char ** buffer, size_t * size, MPI_Comm comm )
 
   nsp = namespaceGetActive ();
 
-  * size = getPackBufferSize () + sizeof ( int ) ;
+  * size = getPackBufferSize ( comm ) + sizeof ( int ) ;
   * buffer = xcalloc ( 1, * size );
 
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )

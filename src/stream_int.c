@@ -69,7 +69,7 @@ static int    streamCompareP ( void * streamptr1, void * streamptr2 );
 static void   streamDestroyP ( void * streamptr );
 static void   streamPrintP   ( void * streamptr );
 #ifdef USE_MPI
-static int    streamGetSizeP ( void * streamptr );
+static int    streamGetSizeP ( void * streamptr, MPI_Comm comm );
 static void   streamPackP    ( void * streamptr, void * buff, int size,
                                int * position, MPI_Comm comm );
 #endif
@@ -573,7 +573,7 @@ void streamPrintP   ( void * streamptr )
 
 #ifdef USE_MPI
 static
-int streamGetSizeP ( void * streamptr )
+int streamGetSizeP ( void * streamptr, MPI_Comm comm )
 {
   xdebug ();
   return 0;

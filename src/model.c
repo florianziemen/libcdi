@@ -36,7 +36,7 @@ static int    modelCompareP ( void * modelptr1, void * modelptr2 );
 static void   modelDestroyP ( void * modelptr );
 static void   modelPrintP   ( void * modelptr );
 #ifdef USE_MPI
-static int    modelGetSizeP ( void * modelptr );
+static int    modelGetSizeP ( void * modelptr, MPI_Comm comm );
 static void   modelPackP    ( void * modelptr, void * buff, int size,
                               int *position, MPI_Comm comm);
 #endif
@@ -264,7 +264,7 @@ void modelPrintP   ( void * modelptr )
 
 #ifdef USE_MPI
 static
-int modelGetSizeP ( void * modelptr )
+int modelGetSizeP ( void * modelptr, MPI_Comm comm )
 {
   xdebug ();
   return 0;

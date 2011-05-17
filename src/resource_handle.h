@@ -27,7 +27,7 @@ typedef int    ( * valCompareFunc )( void *, void * );
 typedef void   ( * valDestroyFunc )( void * );
 typedef void   ( * valPrintFunc   )( void * );
 #ifdef USE_MPI
-typedef int    ( * valGetSizeFunc )( void * );
+typedef int    ( * valGetSizeFunc )( void *, MPI_Comm comm );
 typedef void   ( * valPackFunc    )( void *, void *buf, int size, int *pos,
                                      MPI_Comm comm );
 #endif

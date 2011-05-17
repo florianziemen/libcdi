@@ -48,7 +48,7 @@ vlist_compare(vlist_t *a, vlist_t *b)
 static void
 vlistPrintKernel(vlist_t *vlistptr);
 #ifdef USE_MPI
-static int  vlistGetSizeP ( void * vlistptr );
+static int  vlistGetSizeP ( void * vlistptr, MPI_Comm comm );
 static void vlistPackP    ( void * vlistptr, void * buff, int size,
                             int *position, MPI_Comm comm );
 #endif
@@ -1502,7 +1502,7 @@ int vlistHasTime(int vlistID)
 #ifdef USE_MPI
 
 static
-int  vlistGetSizeP ( void * vlistptr )
+int  vlistGetSizeP ( void * vlistptr, MPI_Comm comm )
 {
   xdebug ();
   return 0;
