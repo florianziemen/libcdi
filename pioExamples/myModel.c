@@ -55,7 +55,7 @@ int nodeSizes[nNodes] = {1};
 int nStreams = 4;
 int streamSizes[4] = {2,5,1,3};
 int vlistSizes[11] = {5,1,7,3,2,47,11,11,5,47,1 };
-int hlf[] = { 0, 0 };
+static int hlf[] = { 0, 0 };
 
 void modelRun ()
 {
