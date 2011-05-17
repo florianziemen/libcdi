@@ -105,8 +105,8 @@ void unpackGrid ( char * buffer, size_t bufferSize, int * pos, MPI_Comm * comm )
 
   xdebug ();
 
-  MPI_Unpack ( buffer, bufferSize, pos, &type, 1, MPI_INT, * comm );
-  MPI_Unpack ( buffer, bufferSize, pos, &int2, 1, MPI_INT, * comm );
+  xmpi(MPI_Unpack ( buffer, bufferSize, pos, &type, 1, MPI_INT, * comm ));
+  xmpi(MPI_Unpack ( buffer, bufferSize, pos, &int2, 1, MPI_INT, * comm ));
   gridID = gridCreate ( int1, int2 );
 
   MPI_Unpack ( buffer, bufferSize, pos, &int1, 1, MPI_INT, * comm );
@@ -142,7 +142,6 @@ void unpackGrid ( char * buffer, size_t bufferSize, int * pos, MPI_Comm * comm )
   gridDefYvals ( gridID, doublebuffer );
 }
 
-
 /*****************************************************************************/
 
 
@@ -154,7 +153,7 @@ void rpcUnpackResources ( char * buffer, size_t size, MPI_Comm * comm )
 
   while ( pos < size )
     {
-      MPI_Unpack ( buffer, size, &pos, &token1, 1, MPI_INT, * comm );
+      xmpi(MPI_Unpack ( buffer, size, &pos, &token1, 1, MPI_INT, * comm ));
       
       switch ( token1 )
 	{
@@ -181,7 +180,7 @@ void rpcUnpackResources ( char * buffer, size_t size, MPI_Comm * comm )
 	  xabort ( "no valid datatype" );
 	}
 
-      MPI_Unpack ( buffer, size, &pos, &token2, 1, MPI_INT, * comm );
+      xmpi(MPI_Unpack ( buffer, size, &pos, &token2, 1, MPI_INT, * comm ));
 
       if ( token2 != SEPARATOR )
 	{
