@@ -190,6 +190,7 @@ src/grid.h -text
 src/ieg.h -text
 src/ieglib.c -text
 src/institution.c -text
+src/institution.h -text
 src/lock.h -text
 src/make_cdilib -text
 src/make_fint.c -text

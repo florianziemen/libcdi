@@ -6,6 +6,7 @@
 #include "pio_rpc.h"
 #include "pio_util.h"
 #include "cdi.h"
+#include "institution.h"
 #include "model.h"
 
 MPI_Comm commGlob;
@@ -153,6 +154,7 @@ void rpcUnpackResources ( char * buffer, size_t size, MPI_Comm * comm )
 	case TAXIS: 
 	  break;
 	case INSTITUTE:
+          instituteUnpack(buffer, size, &pos, *comm);
 	  break;
 	case MODEL:
           modelUnpack(buffer, size, &pos, *comm);

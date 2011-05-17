@@ -333,19 +333,59 @@ instituteTxCode(void *vlistptr)
   return INSTITUTE;
 }
 
+enum {
+  institute_nints = 5,
+};
+
 static
 int instituteGetSizeP ( void * instituteptr, MPI_Comm comm )
 {
+  institute_t *p = instituteptr;
+  int txsize = 0, txinc;
   xdebug ();
-  return 0;
+  xmpi(MPI_Pack_size(institute_nints, MPI_INT, comm, &txsize));
+  xmpi(MPI_Pack_size(strlen(p->name) + 1, MPI_CHAR, comm, &txinc));
+  txsize += txinc;
+  xmpi(MPI_Pack_size(strlen(p->longname) + 1, MPI_CHAR, comm, &txinc));
+  txsize += txinc;
+  return txsize;
 }
 
 
 static
-void institutePackP ( void * instituteptr, void * buff, int size,
+void institutePackP ( void * instituteptr, void *buf, int size,
                       int *position, MPI_Comm comm )
 {
+  institute_t *p = instituteptr;
+  int tempbuf[institute_nints];
   xdebug ();
-  return;
+  tempbuf[0] = p->self;
+  tempbuf[1] = p->center;
+  tempbuf[2] = p->subcenter;
+  tempbuf[3] = (int)strlen(p->name) + 1;
+  tempbuf[4] = (int)strlen(p->longname) + 1;
+  xmpi(MPI_Pack(tempbuf, institute_nints, MPI_INT, buf, size, position, comm));
+  xmpi(MPI_Pack(p->name, tempbuf[3], MPI_CHAR, buf, size, position, comm));
+  xmpi(MPI_Pack(p->longname, tempbuf[4], MPI_CHAR, buf, size, position, comm));
 }
+
+int
+instituteUnpack(void *buf, int size, int *position,
+                MPI_Comm comm)
+{
+  int tempbuf[institute_nints];
+  int instituteID;
+  char *name, *longname;
+  xdebug ();
+  xmpi(MPI_Unpack(buf, size, position, tempbuf, institute_nints, MPI_INT, comm));
+  name = xmalloc(tempbuf[3]);
+  longname = xmalloc(tempbuf[4]);
+  xmpi(MPI_Unpack(buf, size, position, name, tempbuf[3], MPI_CHAR, comm));
+  xmpi(MPI_Unpack(buf, size, position, longname, tempbuf[4], MPI_CHAR, comm));
+  instituteID = institutDef(tempbuf[1], tempbuf[2], name, longname);
+  // FIXME: this should work, once all types are transferred
+  //assert(instituteID == tempbuf[0]);
+  return instituteID;
+}
+
 #endif
