@@ -316,6 +316,9 @@ modelUnpack(void *buf, int size, int *position,
   name = xmalloc(tempbuf[3]);
   xmpi(MPI_Unpack(buf, size, position, name, tempbuf[3], MPI_CHAR, comm));
   modelID = modelDef(tempbuf[1], tempbuf[2], name);
+  // FIXME: this should work, once all types are transferred
+  //assert(modelID == tempbuf[0]);
+  return modelID;
 }
 
 #endif
