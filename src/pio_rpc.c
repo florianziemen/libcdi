@@ -99,14 +99,47 @@ void commsIOCleanup ()
 void unpackGrid ( char * buffer, size_t bufferSize, int * pos, MPI_Comm * comm )
 { 
   int gridID;
-  int type, size;
+  int type;
+  int int1, int2, size;
+  double * doublebuffer;
 
   xdebug ();
 
   MPI_Unpack ( buffer, bufferSize, pos, &type, 1, MPI_INT, * comm );
-  MPI_Unpack ( buffer, bufferSize, pos, &size, 1, MPI_INT, * comm );
+  MPI_Unpack ( buffer, bufferSize, pos, &int2, 1, MPI_INT, * comm );
+  gridID = gridCreate ( int1, int2 );
 
-  gridID = gridCreate ( type, size );
+  MPI_Unpack ( buffer, bufferSize, pos, &int1, 1, MPI_INT, * comm );
+  gridDefXsize(gridID, int1);
+  MPI_Unpack ( buffer, bufferSize, pos, &int1, 1, MPI_INT, * comm );
+  gridDefYsize(gridID, int1);
+
+  if ( type == GRID_UNSTRUCTURED || type == GRID_CURVILINEAR )
+    size = gridInqSize ( gridID );
+  else
+    size = gridInqXsize ( gridID );
+
+
+  doublebuffer = xmalloc ( size * sizeof ( double ));
+
+
+  MPI_Unpack ( buffer, bufferSize, pos, doublebuffer, size, MPI_DOUBLE, * comm );
+
+  gridDefXvals ( gridID, doublebuffer );
+
+
+  if ( type == GRID_UNSTRUCTURED || type == GRID_CURVILINEAR )
+    size = gridInqSize ( gridID );
+  else
+    size = gridInqYsize ( gridID );
+
+
+  doublebuffer = xmalloc ( size * sizeof ( double ));
+
+
+  MPI_Unpack ( buffer, bufferSize, pos, doublebuffer, size, MPI_DOUBLE, * comm );
+
+  gridDefYvals ( gridID, doublebuffer );
 }
 
 

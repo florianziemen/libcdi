@@ -52,6 +52,20 @@ typedef enum
               ## __VA_ARGS__ );                                 \
   }
 
+/*
+#ifdef USE_MPI
+char * outTextComm ( MPI_Comm * );
+
+#define xdebugComm(comm,fmt, ...)				\
+  if ( ddebug ){						\
+    fprintf ( stderr, "%s%s, %s, line %d%s: " fmt "\n",		\
+	      outTextRank (),  __func__, __FILE__,  __LINE__,	\
+	      outTextComm ( comm ),				\
+	      ## __VA_ARGS__  );				\
+    }
+#endif
+*/
+
 void pcdiAbort ( char *, const char *, const char *, int );
 #define xabort(text) pcdiAbort ( text, __FILE__, __func__, __LINE__ );
 

@@ -46,12 +46,12 @@ char *Grids[] = {
 };
 
 
-int    gridCompareP ( void * gridptr1, void * gridptr2 );
-void   gridDestroyP ( void * gridptr );
-void   gridPrintP   ( void * gridptr );
+static int    gridCompareP ( void * gridptr1, void * gridptr2 );
+static void   gridDestroyP ( void * gridptr );
+static void   gridPrintP   ( void * gridptr );
 #ifdef USE_MPI
-int gridGetSizeP ( void * gridptr );
-void   gridPackP    ( void * gridptr, void * buff, int size,
+static int    gridGetSizeP ( void * gridptr );
+static void   gridPackP    ( void * gridptr, void * buff, int size,
                       int *position, MPI_Comm comm );
 #endif
 
@@ -3677,20 +3677,48 @@ void gridGetIndexArray ( int ngrids, int * gridIndexArray )
 
 int gridGetSizeP ( void * gridptr )
 {
+  grid_t * gridP = ( grid_t * ) gridptr;
+  int size = 0;
+
   xdebug ();
-  return ( 2 * sizeof (int ));
+
+  size += 4 * sizeof ( int );
+
+  if ( gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR )
+    size += ( 2 * gridP->size ) * sizeof ( double );
+  else
+    size +=  ( gridP->xsize + gridP->ysize ) * sizeof ( double );
+  
+  return size; 
 }
 
 
-void gridPackP ( void * gridptr, void * buff, int size, int * pos,
-                 MPI_Comm comm )
+void gridPackP ( void * gridptr, void * packBuff, int packBuffSize, 
+		 int * packBuffPos, MPI_Comm comm )
 {
   grid_t   * gridP = ( grid_t * )   gridptr;
+  int size;
 
-  MPI_Pack ( &gridP->type, 1, MPI_INT, buff, size, pos, comm );
-  MPI_Pack ( &gridP->size, 1, MPI_INT, buff, size, pos, comm );
+  MPI_Pack ( &gridP->type, 1, MPI_INT, packBuff, packBuffSize, packBuffPos, comm );
+  MPI_Pack ( &gridP->size, 1, MPI_INT, packBuff, packBuffSize, packBuffPos, comm );
+  MPI_Pack ( &gridP->xsize, 1, MPI_INT, packBuff, packBuffSize, packBuffPos, comm );
+  MPI_Pack ( &gridP->ysize, 1, MPI_INT, packBuff, packBuffSize, packBuffPos, comm );
 
-  return;
+  if ( gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR )
+    size = gridP->size;
+  else
+    size = gridP->xsize;
+
+  MPI_Pack ( &gridP->xvals, size, MPI_DOUBLE, packBuff, packBuffSize, 
+	     packBuffPos, comm );
+
+  if ( gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR )
+    size = gridP->size;
+  else
+    size = gridP->ysize;
+
+  MPI_Pack ( &gridP->yvals, size, MPI_DOUBLE, packBuff, packBuffSize, 
+	     packBuffPos, comm );
 }
 
 #endif
