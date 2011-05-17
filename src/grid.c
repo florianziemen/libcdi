@@ -4,6 +4,10 @@
 
 #include <string.h>
 
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
+
 #include "dmemory.h"
 #include "cdi.h"
 #include "stream_int.h"
@@ -11,11 +15,6 @@
 #include "gaussgrid.h"
 #include "pio_util.h"
 #include "resource_handle.h"
-
-#ifdef USE_MPI
-#include <mpi.h>
-#endif
-
 
 #ifndef  RAD2DEG
 #define  RAD2DEG  (180./M_PI)   /* conversion for rad to deg */
@@ -3675,6 +3674,7 @@ void gridGetIndexArray ( int ngrids, int * gridIndexArray )
 
 #ifdef USE_MPI
 
+static
 int gridGetSizeP ( void * gridptr, MPI_Comm comm )
 {
   grid_t * gridP = ( grid_t * ) gridptr;
@@ -3699,6 +3699,7 @@ int gridGetSizeP ( void * gridptr, MPI_Comm comm )
 }
 
 
+static
 void gridPackP ( void * gridptr, void * packBuffer, int packBufferSize, 
 		 int * packBufferPos, MPI_Comm comm )
 {
