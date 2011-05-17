@@ -54,7 +54,7 @@ void * reshGetVal ( cdiResH, resOps * );
 void   reshGetIndiceArrayOfType ( int, int *, resOps * );
 
 #ifdef USE_MPI
-void   reshPackBufferCreate ( char **, size_t *, MPI_Comm );
+void   reshPackBufferCreate ( char **, int *, MPI_Comm );
 void   reshPackBufferDestroy ( char ** );
 #endif
 

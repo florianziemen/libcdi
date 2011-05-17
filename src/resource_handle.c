@@ -338,7 +338,7 @@ static
 int  getPackBufferSize ( MPI_Comm comm )
 {
   int nsp, i;
-  int size = 0;
+  int packBufferSize = 0, size;
   node * curr;
 
   nsp = namespaceGetActive ();
@@ -352,13 +352,16 @@ int  getPackBufferSize ( MPI_Comm comm )
 
           if ( curr->ops !=  &gridOps )
             continue;
+	  
+	  MPI_Pack_size ( 2, MPI_INT, comm, &size );	  
 
-
-          size +=  curr->ops->valGetSize ( curr->ptr, comm ) +
-            ( 2 * sizeof ( int ));
+          packBufferSize +=  curr->ops->valGetSize ( curr->ptr, comm ) + size;
         }
+	  
+  MPI_Pack_size ( 1, MPI_INT, comm, &size );
+  packBufferSize += size;
 
-  return size;
+  return packBufferSize;
 }
 
 
@@ -372,22 +375,22 @@ void reshPackBufferDestroy ( char ** buffer )
 
 /**************************************************************/
 
-void reshPackBufferCreate ( char ** buffer, size_t * size, MPI_Comm comm )
+void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm comm )
 {
-  int i, nsp, position = 0;
+  int i, nsp, packBufferPos = 0;
   int end = END, sep = SEPARATOR, type = GRID;
   node * curr;
 
   xdebug ();
 
-  assert ( buffer );
+  assert ( packBuffer );
 
   ARRAY_LOCK();
 
   nsp = namespaceGetActive ();
 
-  * size = getPackBufferSize ( comm ) + sizeof ( int ) ;
-  * buffer = xcalloc ( 1, * size );
+  * packBufferSize = getPackBufferSize ( comm );
+  * packBuffer = xcalloc ( 1, * packBufferSize );
 
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
     if ( arrayResources[nsp][i].ptr )
@@ -399,15 +402,17 @@ void reshPackBufferCreate ( char ** buffer, size_t * size, MPI_Comm comm )
           if ( curr->ops !=  &gridOps )
             continue;
 
-          MPI_Pack ( &type, 1, MPI_INT, * buffer, * size, &position, comm );
+          MPI_Pack ( &type, 1, MPI_INT, 
+		     * packBuffer, * packBufferSize, &packBufferPos, comm );
 
           curr->ops->valPack ( curr->ptr,
-                               * buffer ,
-                               * size,
-                               &position,
+                               * packBuffer ,
+                               * packBufferSize,
+                               &packBufferPos,
                                comm );
 
-          MPI_Pack ( &sep, 1,  MPI_INT, * buffer, * size, &position, comm );
+          MPI_Pack ( &sep, 1,  MPI_INT, * packBuffer, 
+		     * packBufferSize, &packBufferPos, comm );
 
           xdebug ( "#### packed one resource with type and separator" );
 
@@ -416,7 +421,8 @@ void reshPackBufferCreate ( char ** buffer, size_t * size, MPI_Comm comm )
 
   ARRAY_UNLOCK();
 
-  MPI_Pack ( &end, 1,  MPI_INT, * buffer, * size, &position, comm );
+  MPI_Pack ( &end, 1,  MPI_INT, 
+	     * packBuffer, * packBufferSize, &packBufferPos, comm );
 
   xdebug ( "#### packed END token" );
 }

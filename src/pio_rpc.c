@@ -99,47 +99,30 @@ void commsIOCleanup ()
 void unpackGrid ( char * buffer, size_t bufferSize, int * pos, MPI_Comm * comm )
 { 
   int gridID;
-  int type;
-  int int1, int2, size;
-  double * doublebuffer;
+  int type, size, xsize, ysize;
+  double * xvals, * yvals;
 
   xdebug ();
 
   xmpi(MPI_Unpack ( buffer, bufferSize, pos, &type, 1, MPI_INT, * comm ));
-  xmpi(MPI_Unpack ( buffer, bufferSize, pos, &int2, 1, MPI_INT, * comm ));
-  gridID = gridCreate ( int1, int2 );
+  xmpi(MPI_Unpack ( buffer, bufferSize, pos, &size, 1, MPI_INT, * comm ));
+  gridID = gridCreate ( type, size );
 
-  MPI_Unpack ( buffer, bufferSize, pos, &int1, 1, MPI_INT, * comm );
-  gridDefXsize(gridID, int1);
-  MPI_Unpack ( buffer, bufferSize, pos, &int1, 1, MPI_INT, * comm );
-  gridDefYsize(gridID, int1);
+  MPI_Unpack ( buffer, bufferSize, pos, &xsize, 1, MPI_INT, * comm );
+  gridDefXsize(gridID, xsize);
+ 
+  MPI_Unpack ( buffer, bufferSize, pos, &ysize, 1, MPI_INT, * comm );
+  gridDefYsize(gridID, ysize);
 
-  if ( type == GRID_UNSTRUCTURED || type == GRID_CURVILINEAR )
-    size = gridInqSize ( gridID );
-  else
-    size = gridInqXsize ( gridID );
+  size = type == GRID_UNSTRUCTURED || type == GRID_CURVILINEAR ? size : xsize;
+  xvals = xmalloc ( size * sizeof ( double ));
+  MPI_Unpack ( buffer, bufferSize, pos, xvals, size, MPI_DOUBLE, * comm );
+  gridDefXvals ( gridID, xvals );
 
-
-  doublebuffer = xmalloc ( size * sizeof ( double ));
-
-
-  MPI_Unpack ( buffer, bufferSize, pos, doublebuffer, size, MPI_DOUBLE, * comm );
-
-  gridDefXvals ( gridID, doublebuffer );
-
-
-  if ( type == GRID_UNSTRUCTURED || type == GRID_CURVILINEAR )
-    size = gridInqSize ( gridID );
-  else
-    size = gridInqYsize ( gridID );
-
-
-  doublebuffer = xmalloc ( size * sizeof ( double ));
-
-
-  MPI_Unpack ( buffer, bufferSize, pos, doublebuffer, size, MPI_DOUBLE, * comm );
-
-  gridDefYvals ( gridID, doublebuffer );
+  size = type == GRID_UNSTRUCTURED || type == GRID_CURVILINEAR ? size : ysize;
+  yvals = xmalloc ( size * sizeof ( double ));
+  MPI_Unpack ( buffer, bufferSize, pos, yvals, size, MPI_DOUBLE, * comm );
+  gridDefYvals ( gridID, yvals );
 }
 
 /*****************************************************************************/
