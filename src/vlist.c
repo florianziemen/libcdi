@@ -10,6 +10,7 @@
 #include "namespace.h"
 #include "pio_util.h"
 #include "resource_handle.h"
+#include "pio_rpc.h"
 
 static int VLIST_Debug = 0;
 
@@ -51,6 +52,7 @@ vlistPrintKernel(vlist_t *vlistptr);
 static int  vlistGetSizeP ( void * vlistptr, MPI_Comm comm );
 static void vlistPackP    ( void * vlistptr, void * buff, int size,
                             int *position, MPI_Comm comm );
+static int  vlistTxCode(void *vlistptr);
 #endif
 
 resOps vlist_ops = {
@@ -59,7 +61,8 @@ resOps vlist_ops = {
   (valPrintFunc)vlistPrintKernel
 #ifdef USE_MPI
   , vlistGetSizeP,
-  vlistPackP
+  vlistPackP,
+  vlistTxCode
 #endif
 };
 
@@ -1500,6 +1503,17 @@ int vlistHasTime(int vlistID)
 
 
 #ifdef USE_MPI
+
+enum {
+  vlist_nints=7,
+};
+
+static int
+vlistTxCode(void *vlistptr)
+{
+  return VLIST;
+}
+
 
 static
 int  vlistGetSizeP ( void * vlistptr, MPI_Comm comm )

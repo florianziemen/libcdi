@@ -15,6 +15,7 @@
 #include "gaussgrid.h"
 #include "pio_util.h"
 #include "resource_handle.h"
+#include "pio_rpc.h"
 
 #ifndef  RAD2DEG
 #define  RAD2DEG  (180./M_PI)   /* conversion for rad to deg */
@@ -52,11 +53,12 @@ static void   gridPrintP   ( void * gridptr );
 static int    gridGetSizeP ( void * gridptr, MPI_Comm comm );
 static void   gridPackP    ( void * gridptr, void * buff, int size,
                              int *position, MPI_Comm comm );
+static int    gridTxCode   ( void * gridptr );
 #endif
 
 resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP
 #ifdef USE_MPI
-                   , gridGetSizeP, gridPackP
+                   , gridGetSizeP, gridPackP, gridTxCode
 #endif
 };
 
@@ -3673,6 +3675,12 @@ void gridGetIndexArray ( int ngrids, int * gridIndexArray )
 }
 
 #ifdef USE_MPI
+
+static int
+gridTxCode( void * gridptr )
+{
+  return GRID;
+}
 
 static
 int gridGetSizeP ( void * gridptr, MPI_Comm comm )

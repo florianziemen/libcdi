@@ -8,6 +8,7 @@
 #include "resource_handle.h"
 #include "pio_util.h"
 #include "resource_handle.h"
+#include "pio_rpc.h"
 
 #undef  UNDEFID
 #define UNDEFID  -1
@@ -35,11 +36,12 @@ static void   institutePrintP   ( void * instituteptr );
 static int    instituteGetSizeP ( void * instituteptr, MPI_Comm comm );
 static void   institutePackP    ( void * instituteptr, void *buf, int size,
                                   int *position, MPI_Comm comm );
+static int    instituteTxCode   ( void * instituteptr );
 #endif
 
 resOps instituteOps = { instituteCompareP, instituteDestroyP, institutePrintP
 #ifdef USE_MPI
-                        ,instituteGetSizeP, institutePackP
+                        ,instituteGetSizeP, institutePackP, instituteTxCode
 #endif
  };
 
@@ -325,6 +327,12 @@ void institutePrintP   ( void * instituteptr )
 
 
 #ifdef USE_MPI
+static int
+instituteTxCode(void *vlistptr)
+{
+  return INSTITUTE;
+}
+
 static
 int instituteGetSizeP ( void * instituteptr, MPI_Comm comm )
 {

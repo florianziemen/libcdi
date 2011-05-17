@@ -9,8 +9,6 @@
 #include "error.h"
 #include "pio_rpc.h"
 
-extern resOps gridOps;
-
 enum { MIN_ARRAY_SIZE = 128, MIN_BUFF_SIZE = 4096 };
 
 static int *arraySizeAllocated;
@@ -338,10 +336,13 @@ static
 int  getPackBufferSize ( MPI_Comm comm )
 {
   int nsp, i;
-  int packBufferSize = 0, size;
+  int packBufferSize = 0;
+  int intpacksize;
   node * curr;
 
   nsp = namespaceGetActive ();
+
+  xmpi(MPI_Pack_size(1, MPI_INT, comm, &intpacksize));
 
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
     if ( arrayResources[nsp][i].ptr )
@@ -350,16 +351,13 @@ int  getPackBufferSize ( MPI_Comm comm )
           curr = arrayResources[nsp] + i;
           assert ( curr->ops );
 
-          if ( curr->ops !=  &gridOps )
-            continue;
-	  
-	  MPI_Pack_size ( 2, MPI_INT, comm, &size );	  
-
-          packBufferSize +=  curr->ops->valGetSize ( curr->ptr, comm ) + size;
+          /* message plus frame of 2 ints */
+          packBufferSize += curr->ops->valGetSize ( curr->ptr, comm )
+            + 2 * intpacksize;
         }
-	  
-  MPI_Pack_size ( 1, MPI_INT, comm, &size );
-  packBufferSize += size;
+
+  /* end marker */
+  packBufferSize += intpacksize;
 
   return packBufferSize;
 }
@@ -378,7 +376,7 @@ void reshPackBufferDestroy ( char ** buffer )
 void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm comm )
 {
   int i, nsp, packBufferPos = 0;
-  int end = END, sep = SEPARATOR, type = GRID;
+  int end = END, sep = SEPARATOR, type;
   node * curr;
 
   xdebug ();
@@ -399,11 +397,14 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
           curr = arrayResources[nsp] + i;
           assert ( curr->ops );
 
-          if ( curr->ops !=  &gridOps )
+          type = curr->ops->txCode(curr->ptr);
+
+          if ( ! type )
             continue;
 
-          MPI_Pack ( &type, 1, MPI_INT, 
-		     * packBuffer, * packBufferSize, &packBufferPos, comm );
+          xmpi(MPI_Pack ( &type, 1, MPI_INT,
+                          * packBuffer, * packBufferSize, &packBufferPos,
+                          comm ));
 
           curr->ops->valPack ( curr->ptr,
                                * packBuffer ,
@@ -411,8 +412,8 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
                                &packBufferPos,
                                comm );
 
-          MPI_Pack ( &sep, 1,  MPI_INT, * packBuffer, 
-		     * packBufferSize, &packBufferPos, comm );
+          xmpi(MPI_Pack ( &sep, 1,  MPI_INT, * packBuffer,
+                          * packBufferSize, &packBufferPos, comm ));
 
           xdebug ( "#### packed one resource with type and separator" );
 
@@ -421,8 +422,8 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
 
   ARRAY_UNLOCK();
 
-  MPI_Pack ( &end, 1,  MPI_INT, 
-	     * packBuffer, * packBufferSize, &packBufferPos, comm );
+  xmpi(MPI_Pack ( &end, 1,  MPI_INT, 
+                  * packBuffer, * packBufferSize, &packBufferPos, comm ));
 
   xdebug ( "#### packed END token" );
 }

@@ -16,6 +16,7 @@
 #include "pio_util.h"
 #include "namespace.h"
 #include "resource_handle.h"
+#include "pio_rpc.h"
 
 #if  defined  (HAVE_LIBCGRIBEX)
 #include "cgribex.h"
@@ -72,12 +73,14 @@ static void   streamPrintP   ( void * streamptr );
 static int    streamGetSizeP ( void * streamptr, MPI_Comm comm );
 static void   streamPackP    ( void * streamptr, void * buff, int size,
                                int * position, MPI_Comm comm );
+static int    streamTxCode   ( void * streamptr );
 #endif
 
 resOps streamOps = { streamCompareP, streamDestroyP, streamPrintP,
 #ifdef USE_MPI
                      streamGetSizeP,
-		     streamPackP
+		     streamPackP,
+                     streamTxCode,
 #endif
 };
 
@@ -572,6 +575,12 @@ void streamPrintP   ( void * streamptr )
 
 
 #ifdef USE_MPI
+static int
+streamTxCode ( void * streamptr )
+{
+  return STREAM;
+}
+
 static
 int streamGetSizeP ( void * streamptr, MPI_Comm comm )
 {

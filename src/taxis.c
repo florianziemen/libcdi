@@ -10,11 +10,13 @@
 #include "dmemory.h"
 
 #include "cdi.h"
+#include "taxis.h"
 #include "stream_int.h"
 #include "calendar.h"
 #include "pio_util.h"
 #include "namespace.h"
 #include "resource_handle.h"
+#include "pio_rpc.h"
 
 extern int cdiDefaultCalendar;
 
@@ -44,11 +46,12 @@ static void   taxisPrintP   ( void * taxisptr );
 static int taxisGetSizeP ( void * taxisptr, MPI_Comm comm );
 static void   taxisPackP ( void * taxisptr, void *buf, int size,
                            int *position, MPI_Comm comm );
+static int taxisTxCode   ( void * taxisptr );
 #endif
 
 resOps taxisOps = { taxisCompareP, taxisDestroyP, taxisPrintP
 #ifdef USE_MPI
-                    , taxisGetSizeP, taxisPackP
+                    , taxisGetSizeP, taxisPackP, taxisTxCode
 #endif
 };
 
@@ -1274,7 +1277,13 @@ int taxisCompareP ( void *  taxisptr1, void * taxisptr2 )
 
 
 #ifdef USE_MPI
-static 
+static int
+taxisTxCode ( void * taxisptr )
+{
+  return TAXIS;
+}
+
+static
 int taxisGetSizeP ( void * taxisptr, MPI_Comm comm )
 {
   xdebug ();

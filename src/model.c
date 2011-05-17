@@ -7,6 +7,7 @@
 #include "stream_int.h"
 #include "pio_util.h"
 #include "resource_handle.h"
+#include "pio_rpc.h"
 
 #undef  UNDEFID
 #define UNDEFID -1
@@ -38,11 +39,12 @@ static void   modelPrintP   ( void * modelptr );
 static int    modelGetSizeP ( void * modelptr, MPI_Comm comm );
 static void   modelPackP    ( void * modelptr, void * buff, int size,
                               int *position, MPI_Comm comm);
+static int    modelTxCode   ( void * modelptr );
 #endif
 
 resOps modelOps = { modelCompareP, modelDestroyP, modelPrintP
 #ifdef USE_MPI
-                    , modelGetSizeP, modelPackP
+                    , modelGetSizeP, modelPackP, modelTxCode
 #endif
 };
 
@@ -262,6 +264,13 @@ void modelPrintP   ( void * modelptr )
 
 
 #ifdef USE_MPI
+
+static int
+modelTxCode(void *modelptr)
+{
+  return MODEL;
+}
+
 static
 int modelGetSizeP ( void * modelptr, MPI_Comm comm )
 {

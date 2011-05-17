@@ -12,6 +12,7 @@
 #include "stream_int.h"
 #include "pio_util.h"
 #include "resource_handle.h"
+#include "pio_rpc.h"
 #include "varscan.h"
 
 
@@ -68,11 +69,12 @@ static void   zaxisPrintP   ( void * zaxisptr );
 static int    zaxisGetSizeP ( void * zaxisptr, MPI_Comm comm );
 static void   zaxisPackP    ( void * zaxisptr, void * buffer, int size,
                               int *pos, MPI_Comm comm);
+static int    zaxisTxCode   ( void * zaxisptr );
 #endif
 
 resOps zaxisOps = { zaxisCompareP, zaxisDestroyP, zaxisPrintP
 #ifdef USE_MPI
-                    , zaxisGetSizeP, zaxisPackP
+                    , zaxisGetSizeP, zaxisPackP, zaxisTxCode
 #endif
 };
 
@@ -1197,6 +1199,12 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
 
 
 #ifdef USE_MPI
+static int
+zaxisTxCode ( void * zaxisptr )
+{
+  return ZAXIS;
+}
+
 static
 int zaxisGetSizeP ( void * zaxisptr, MPI_Comm comm )
 {
