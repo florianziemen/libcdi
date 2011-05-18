@@ -397,7 +397,7 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
           curr = arrayResources[nsp] + i;
           assert ( curr->ops );
 
-          type = curr->ops->txCode(curr->ptr);
+          type = curr->ops->valTxCode(curr->ptr);
 
           if ( ! type )
             continue;
@@ -414,8 +414,6 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
 
           xmpi(MPI_Pack ( &sep, 1,  MPI_INT, * packBuffer,
                           * packBufferSize, &packBufferPos, comm ));
-
-          xdebug ( "#### packed one resource with type and separator" );
 
           curr->sent = 1;
         }

@@ -1208,17 +1208,31 @@ zaxisTxCode ( void * zaxisptr )
 static
 int zaxisGetSizeP ( void * zaxisptr, MPI_Comm comm )
 {
-  xdebug ();
-  return 0;
+  zaxis_t * zaxisP = ( zaxis_t * ) zaxisptr;
+  int packBufferSize = 0, size;
+
+  MPI_Pack_size ( 2, MPI_INT, comm, &size );
+  packBufferSize += size;
+
+  MPI_Pack_size ( zaxisP->size, MPI_DOUBLE, comm, &size );
+  packBufferSize += size;
+
+  return packBufferSize;
 }
 
 
 static
-void zaxisPackP ( void * zaxisptr, void *buffer, int size,
-                  int *pos, MPI_Comm comm)
+void zaxisPackP ( void * zaxisptr, void * packBuffer, int packBufferSize,
+                  int * packBufferPos, MPI_Comm comm )
 {
-  xdebug ();
-  return;
+  zaxis_t * zaxisP = ( zaxis_t * ) zaxisptr;
+
+  MPI_Pack ( &zaxisP->type, 1, MPI_INT, 
+	     packBuffer, packBufferSize, packBufferPos, comm );
+  MPI_Pack ( &zaxisP->size, 1, MPI_INT, 
+	     packBuffer, packBufferSize, packBufferPos, comm );
+  MPI_Pack ( zaxisP->vals, zaxisP->size, MPI_DOUBLE, 
+	     packBuffer, packBufferSize, packBufferPos, comm );
 }
 
 #endif

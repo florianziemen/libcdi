@@ -3688,8 +3688,6 @@ int gridGetSizeP ( void * gridptr, MPI_Comm comm )
   grid_t * gridP = ( grid_t * ) gridptr;
   int packBuffSize = 0, size, count;
 
-  xdebug ();
-
   MPI_Pack_size ( 4, MPI_INT, comm, &size );
 
   packBuffSize += size;

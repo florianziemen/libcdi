@@ -33,7 +33,7 @@ enum { GRID      = 1,
 void commsIOCreate ( MPI_Comm, int );
 void commsIOCleanup ();
 
-void rpcUnpackResources ( char *, size_t, MPI_Comm * );
+void rpcUnpackResources ( char *, int, MPI_Comm );
 
 #endif
 

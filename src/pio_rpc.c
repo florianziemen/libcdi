@@ -98,47 +98,124 @@ void commsIOCleanup ()
 /*****************************************************************************/
 
 
-void unpackGrid ( char * buffer, size_t bufferSize, int * pos, MPI_Comm * comm )
+void unpackGrid ( char * unpackBuffer, int unpackBufferSize, 
+		  int * unpackBufferPos, MPI_Comm comm )
 { 
   int gridID;
   int type, size, xsize, ysize;
   double * xvals, * yvals;
 
-  xdebug ();
-
-  xmpi(MPI_Unpack ( buffer, bufferSize, pos, &type, 1, MPI_INT, * comm ));
-  xmpi(MPI_Unpack ( buffer, bufferSize, pos, &size, 1, MPI_INT, * comm ));
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &type, 1, MPI_INT, comm ));
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &size, 1, MPI_INT, comm ));
   gridID = gridCreate ( type, size );
 
-  MPI_Unpack ( buffer, bufferSize, pos, &xsize, 1, MPI_INT, * comm );
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &xsize, 1, MPI_INT, comm ));
   gridDefXsize(gridID, xsize);
  
-  MPI_Unpack ( buffer, bufferSize, pos, &ysize, 1, MPI_INT, * comm );
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &ysize, 1, MPI_INT, comm ));
   gridDefYsize(gridID, ysize);
 
-  size = type == GRID_UNSTRUCTURED || type == GRID_CURVILINEAR ? size : xsize;
+  size = type == GRID_UNSTRUCTURED || type == GRID_CURVILINEAR ? 
+    size : xsize;
   xvals = xmalloc ( size * sizeof ( double ));
-  MPI_Unpack ( buffer, bufferSize, pos, xvals, size, MPI_DOUBLE, * comm );
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      xvals, size, MPI_DOUBLE, comm ));
   gridDefXvals ( gridID, xvals );
+  free ( xvals );
 
-  size = type == GRID_UNSTRUCTURED || type == GRID_CURVILINEAR ? size : ysize;
+  size = type == GRID_UNSTRUCTURED || type == GRID_CURVILINEAR ? 
+    size : ysize;
   yvals = xmalloc ( size * sizeof ( double ));
-  MPI_Unpack ( buffer, bufferSize, pos, yvals, size, MPI_DOUBLE, * comm );
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      yvals, size, MPI_DOUBLE, comm ));
   gridDefYvals ( gridID, yvals );
+  free ( yvals );
+}
+
+
+/*****************************************************************************/
+
+
+void unpackZaxis ( char * unpackBuffer, int unpackBufferSize, 
+		   int * unpackBufferPos, MPI_Comm comm )
+{ 
+  int zaxisID;
+  int type, size;
+  double * vals;
+
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &type, 1, MPI_INT, comm ));
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &size, 1, MPI_INT, comm ));
+  zaxisID = zaxisCreate ( type, size );
+
+  vals = xmalloc ( size * sizeof ( double ));
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      vals, size, MPI_DOUBLE, comm ));
+  zaxisDefLevels ( zaxisID, vals );
+  free ( vals );
+}
+
+
+/*****************************************************************************/
+
+
+void unpackTaxis ( char * unpackBuffer, int unpackBufferSize, 
+		   int * unpackBufferPos, MPI_Comm comm )
+{ 
+  int taxisID;
+  int type;
+
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &type, 1, MPI_INT, comm ));
+  taxisID = taxisCreate ( type );
 }
 
 /*****************************************************************************/
 
 
-void rpcUnpackResources ( char * buffer, size_t size, MPI_Comm * comm )
+void unpackStream ( char * unpackBuffer, int unpackBufferSize, 
+		    int * unpackBufferPos, MPI_Comm comm )
+{ 
+  int streamID;
+  int filenameLen, filetype, vlistID;
+  char * filename;
+
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &filenameLen, 1, MPI_INT, comm ));
+  filename = xmalloc ( filenameLen * sizeof ( char )); 
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      filename, filenameLen, MPI_CHAR, comm ));
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &filetype, 1, MPI_INT, comm )); 
+  streamID = streamOpenWrite ( filename, filetype );
+  if ( streamID < 0 ) xabort ( "can not open output file" );
+  free ( filename );
+  
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &vlistID, 1, MPI_INT, comm )); 
+  //streamDefVlist ( streamID, vlistID );
+}
+
+
+/*****************************************************************************/
+
+
+void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize, 
+			  MPI_Comm comm )
 { 
   int token1, token2;
-  int pos = 0;
+  int unpackBufferPos = 0;
   char text[4096];
 
-  while ( pos < size )
+  while ( unpackBufferPos < unpackBufferSize )
     {
-      xmpi(MPI_Unpack ( buffer, size, &pos, &token1, 1, MPI_INT, * comm ));
+      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
+			  &token1, 1, MPI_INT, comm ));
       
       switch ( token1 )
 	{
@@ -147,11 +224,13 @@ void rpcUnpackResources ( char * buffer, size_t size, MPI_Comm * comm )
 	  reshArrayPrint ();
 	  return;
 	case GRID:
-	  unpackGrid ( buffer, size, &pos, comm );
+	  unpackGrid ( unpackBuffer, unpackBufferSize, &unpackBufferPos, comm );
 	  break;
 	case ZAXIS:
+	  unpackZaxis ( unpackBuffer, unpackBufferSize, &unpackBufferPos, comm );
 	  break;
 	case TAXIS: 
+	  unpackTaxis ( unpackBuffer, unpackBufferSize, &unpackBufferPos, comm );
 	  break;
 	case INSTITUTE:
           instituteUnpack(buffer, size, &pos, *comm);
@@ -160,6 +239,7 @@ void rpcUnpackResources ( char * buffer, size_t size, MPI_Comm * comm )
           modelUnpack(buffer, size, &pos, *comm);
 	  break;
 	case STREAM:
+	  unpackStream ( unpackBuffer, unpackBufferSize, &unpackBufferPos, comm );
 	  break;
 	case VLIST:
 	  break;
@@ -167,16 +247,13 @@ void rpcUnpackResources ( char * buffer, size_t size, MPI_Comm * comm )
 	  xabort ( "no valid datatype" );
 	}
 
-      xmpi(MPI_Unpack ( buffer, size, &pos, &token2, 1, MPI_INT, * comm ));
+      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
+			  &token2, 1, MPI_INT, comm ));
 
       if ( token2 != SEPARATOR )
 	{
 	  sprintf ( text, "problems unpacking type %d", token1); 
 	  xabort ( text);
-	}
-      else
-	{
-	  xdebug ( "#### success unpacking type %d", token1 );
 	}
     }
 }

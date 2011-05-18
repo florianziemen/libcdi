@@ -1286,16 +1286,23 @@ taxisTxCode ( void * taxisptr )
 static
 int taxisGetSizeP ( void * taxisptr, MPI_Comm comm )
 {
-  xdebug ();
-  return 0; 
+  int packBufferSize = 0, size;
+
+  MPI_Pack_size ( 1, MPI_INT, comm, &size );
+  packBufferSize += size;
+
+  return packBufferSize; 
 }
 
 
 static 
-void taxisPackP ( void * taxisptr, void * buff, int size, int *position,
-                  MPI_Comm comm)
+void taxisPackP ( void * taxisptr, void * packBuffer, int packBufferSize, 
+		  int * packBufferPos, MPI_Comm comm )
 {
-  xdebug ();
-  return;
+  taxis_t * taxisP = ( taxis_t * ) taxisptr;
+  int count;
+
+  MPI_Pack ( &taxisP->type, 1, MPI_INT, 
+	     packBuffer, packBufferSize, packBufferPos, comm );
 }
 #endif

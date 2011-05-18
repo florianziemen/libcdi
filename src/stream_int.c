@@ -584,17 +584,42 @@ streamTxCode ( void * streamptr )
 static
 int streamGetSizeP ( void * streamptr, MPI_Comm comm )
 {
-  xdebug ();
-  return 0;
+  stream_t * streamP = ( stream_t * ) streamptr;
+  int packBufferSize = 0, size;
+
+  MPI_Pack_size ( 1, MPI_INT, comm, &size );
+  packBufferSize += size;
+
+  size = ( int ) strlen ( streamP->filename ) + 1;
+  MPI_Pack_size ( size, MPI_CHAR, comm, &size );
+  packBufferSize += size;
+
+  MPI_Pack_size ( 1, MPI_INT, comm, &size );
+  packBufferSize += size;
+
+  MPI_Pack_size ( 1, MPI_INT, comm, &size );
+  packBufferSize += size;
+
+  return packBufferSize;
 }
 
 
 static
-void streamPackP ( void * streamptr, void * buff, int size, int * position,
-                   MPI_Comm comm)
+void streamPackP ( void * streamptr, void * packBuffer, int packBufferSize,
+                  int * packBufferPos, MPI_Comm comm )
 {
-  xdebug ();
-  return;
+  stream_t * streamP = ( stream_t * ) streamptr;
+  int size;
+
+  size = ( int ) strlen ( streamP->filename ) + 1;
+  MPI_Pack ( &size, 1, MPI_INT, 
+	     packBuffer, packBufferSize, packBufferPos, comm );
+  MPI_Pack ( streamP->filename, size, MPI_CHAR, 
+	     packBuffer, packBufferSize, packBufferPos, comm );
+  MPI_Pack ( &streamP->filetype, 1, MPI_INT, 
+	     packBuffer, packBufferSize, packBufferPos, comm );
+  MPI_Pack ( &streamP->vlistID, 1, MPI_INT, 
+	     packBuffer, packBufferSize, packBufferPos, comm );
 }
 
 #endif

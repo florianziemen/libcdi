@@ -30,7 +30,7 @@ typedef void   ( * valPrintFunc   )( void * );
 typedef int    ( * valGetSizeFunc )( void *, MPI_Comm comm );
 typedef void   ( * valPackFunc    )( void *, void *buf, int size, int *pos,
                                      MPI_Comm comm );
-typedef int    ( * txCodeFunc     )( void * );
+typedef int    ( * valTxCodeFunc  )( void * );
 #endif
 
 typedef struct {
@@ -40,7 +40,7 @@ typedef struct {
 #ifdef USE_MPI
   valGetSizeFunc valGetSize;
   valPackFunc    valPack;
-  txCodeFunc txCode;
+  valTxCodeFunc  valTxCode;
 #endif
 }resOps;
 

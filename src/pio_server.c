@@ -70,10 +70,10 @@ void IOServer ( MPI_Comm comm, int ptype )
 
 	case METADATA:
 	  MPI_Get_count ( &status, MPI_CHAR, &size );
-	  buffer = xmalloc (( size_t ) size );
+	  buffer = xmalloc ( size * sizeof ( char ));
 	  MPI_Recv ( buffer, size, MPI_PACKED, source,
 		     tag, * commCalc, &status );
-	  rpcUnpackResources ( buffer, size, commCalc );
+	  rpcUnpackResources ( buffer, size, &commCalc );
 	  free ( buffer );
 
 	  if  ( ddebug >= 2 ) xdebugMsg (  tag, source, nfinished );
