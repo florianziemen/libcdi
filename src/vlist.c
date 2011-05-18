@@ -10,6 +10,7 @@
 #include "namespace.h"
 #include "pio_util.h"
 #include "resource_handle.h"
+#include "vlist_var.h"
 #include "pio_rpc.h"
 
 static int VLIST_Debug = 0;
@@ -129,7 +130,6 @@ void vlist_initialize(void)
 
   env = getenv("VLIST_DEBUG");
   if ( env ) VLIST_Debug = atoi(env);
-
 }
 
 static
@@ -1518,17 +1518,55 @@ vlistTxCode(void *vlistptr)
 static
 int  vlistGetSizeP ( void * vlistptr, MPI_Comm comm )
 {
+  int txsize, varID;
   xdebug ();
-  return 0;
+  xmpi(MPI_Pack_size(vlist_nints, MPI_INT, comm, &txsize));
+  for ( varID = 0; varID <  ((vlist_t *)vlistptr)->nvars; varID++ )
+  {
+    txsize += vlistVarGetSize(((vlist_t *)vlistptr)->vars + varID, comm);
+  }
+  return txsize;
 }
 
 
 static
-void vlistPackP ( void * vlistptr, void * buff, int size, int *position,
+void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
                   MPI_Comm comm )
 {
+  int varID, tempbuf[vlist_nints];
+  vlist_t *p = vlistptr;
   xdebug ();
-
+  tempbuf[0] = p->self;
+  tempbuf[1] = p->nvars;
+  tempbuf[2] = p->ntsteps;
+  tempbuf[3] = p->taxisID;
+  tempbuf[4] = p->tableID;
+  tempbuf[5] = p->instID;
+  tempbuf[6] = p->modelID;
+  xmpi(MPI_Pack(tempbuf, vlist_nints, MPI_INT, buf, size, position, comm));
+  for ( varID = 0; varID < p->nvars; varID++ )
+  {
+    vlistVarPack(p->vars + varID, buf, size, position, comm);
+  }
 }
+
+void vlistUnpack(char * buf, int size, int *position, MPI_Comm comm)
+{
+  int newvlist;
+  int varID, tempbuf[vlist_nints];
+  xmpi(MPI_Unpack(buf, size, position, tempbuf, vlist_nints, MPI_INT, comm));
+  newvlist = vlistCreate();
+  /* assert(newvlist == tempbuf[0]); */
+  vlistDefTaxis(newvlist, tempbuf[3]);
+  vlistDefTable(newvlist, tempbuf[4]);
+  vlistDefInstitut(newvlist, tempbuf[5]);
+  vlistDefModel(newvlist, tempbuf[6]);
+  for ( varID = 0; varID < tempbuf[1]; varID++ )
+  {
+    vlistVarUnpack(newvlist, buf, size, position, comm);
+  }
+}
+
+
 
 #endif

@@ -8,6 +8,7 @@
 #include "cdi.h"
 #include "institution.h"
 #include "model.h"
+#include "vlist.h"
 
 MPI_Comm commGlob;
 int sizeGlob;
@@ -242,6 +243,7 @@ void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize,
 	  unpackStream ( unpackBuffer, unpackBufferSize, &unpackBufferPos, comm );
 	  break;
 	case VLIST:
+          vlistUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, comm);
 	  break;
 	default: 
 	  xabort ( "no valid datatype" );

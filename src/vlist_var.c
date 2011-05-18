@@ -3,12 +3,15 @@
 #endif
 
 #include <limits.h>
+#ifdef USE_MPI
+#include <mpi.h>
+#include "pio_util.h"
+#endif
 
 #include "dmemory.h"
 #include "cdi.h"
 #include "stream_int.h"
 #include "vlist.h"
-
 
 static
 void vlistvarInitEntry(int vlistID, int varID)
@@ -1521,3 +1524,42 @@ int vlistInqVarZlevel(int vlistID, int varID)
 
   return (vlistptr->vars[varID].zlevel);
 }
+
+#ifdef USE_MPI
+
+enum {
+  vlistvar_nints = 4,
+};
+
+int vlistVarGetSize(var_t *var, MPI_Comm comm)
+{
+  int varsize;
+  xmpi(MPI_Pack_size(vlistvar_nints, MPI_INT, comm, &varsize));
+  return varsize;
+}
+
+void vlistVarPack(var_t *var, char * buf, int size, int *position,
+                  MPI_Comm comm)
+{
+  int tempbuf[vlistvar_nints];
+  tempbuf[0] = var->flag;
+  tempbuf[1] = var->gridID;
+  tempbuf[2] = var->zaxisID;
+  tempbuf[3] = var->timeID;
+  xmpi(MPI_Pack(tempbuf, vlistvar_nints, MPI_INT,
+                buf, size, position, comm));
+}
+
+void vlistVarUnpack(int vlistID,
+                    char * buf, int size, int *position, MPI_Comm comm)
+{
+  int tempbuf[vlistvar_nints];
+  int newvar;
+  xmpi(MPI_Unpack(buf, size, position,
+                  tempbuf, vlistvar_nints, MPI_INT, comm));
+  newvar = vlistDefVar(vlistID, tempbuf[1], tempbuf[2], tempbuf[3]);
+  
+}
+
+
+#endif
