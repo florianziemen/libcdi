@@ -233,10 +233,10 @@ void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize,
 	  unpackTaxis ( unpackBuffer, unpackBufferSize, &unpackBufferPos, comm );
 	  break;
 	case INSTITUTE:
-          instituteUnpack(buffer, size, &pos, *comm);
+          instituteUnpack ( unpackBuffer, unpackBufferSize, &unpackBufferPos, comm);
 	  break;
 	case MODEL:
-          modelUnpack(buffer, size, &pos, *comm);
+          modelUnpack ( unpackBuffer, unpackBufferSize, &unpackBufferPos, comm);
 	  break;
 	case STREAM:
 	  unpackStream ( unpackBuffer, unpackBufferSize, &unpackBufferPos, comm );
