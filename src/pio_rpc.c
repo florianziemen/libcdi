@@ -16,7 +16,7 @@ int rankGlob;
 int nProcsIO;
 int nProcsCalc;
 MPI_Comm * commsIO;
-MPI_Comm * commCalc;
+MPI_Comm commCalc;
  
  
 void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
@@ -54,7 +54,7 @@ void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
 	  MPI_Comm_set_name ( * ( commsIO + i ), name );
 	}
       if ( rankGlob == currIORank )
-	commCalc = commsIO + i;
+	commCalc = commsIO[i];
     }
 
   if ( ddebug >= 2 )
@@ -63,7 +63,7 @@ void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
       if ( rankGlob < nProcsCalc )
 	for ( i = 0; i < nProcsIO; i++ ) xdebugComm ( commsIO + i );
       else
-	xdebugComm ( commCalc );
+	xdebugComm ( &commCalc );
     }
 
   MPI_Group_free ( &currGroupIO );

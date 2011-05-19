@@ -43,14 +43,14 @@ void IOServer ( MPI_Comm comm, int ptype )
   int size;
 
   
-  if ( ddebug >= 1 ) xdebugComm ( commCalc );
+  if ( ddebug >= 1 ) xdebugComm ( &commCalc );
      
   nfinished = 0;
   commColl = bInit ( ptype, comm, &color, &nnodes );
 
   for ( ;; )
     {  
-      MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, * commCalc, &status );
+      MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commCalc, &status );
       
       source = status.MPI_SOURCE;
       tag    = status.MPI_TAG;
@@ -59,7 +59,7 @@ void IOServer ( MPI_Comm comm, int ptype )
 	{
 	case FINALIZE:      
 	  MPI_Recv ( &iBuffer, 1, MPI_INTEGER, source, 
-		 tag, * commCalc, &status );
+		 tag, commCalc, &status );
 	  nfinished++;
 
 	  if ( ddebug >= 2 ) xdebugMsg (  tag, source, nfinished );
@@ -72,8 +72,8 @@ void IOServer ( MPI_Comm comm, int ptype )
 	  MPI_Get_count ( &status, MPI_CHAR, &size );
 	  buffer = xmalloc ( size * sizeof ( char ));
 	  MPI_Recv ( buffer, size, MPI_PACKED, source,
-		     tag, * commCalc, &status );
-	  rpcUnpackResources ( buffer, size, &commCalc );
+		     tag, commCalc, &status );
+	  rpcUnpackResources ( buffer, size, commCalc );
 	  free ( buffer );
 
 	  if  ( ddebug >= 2 ) xdebugMsg (  tag, source, nfinished );
@@ -82,7 +82,7 @@ void IOServer ( MPI_Comm comm, int ptype )
 
 	default:
 	  MPI_Recv ( &iBuffer, 1, MPI_INTEGER, source,
-		     tag, * commCalc, &status );
+		     tag, commCalc, &status );
 
 	  if ( ddebug >= 2 ) xdebugMsg ( tag, source, nfinished );
 	}

@@ -15,7 +15,7 @@ extern int rankGlob;
 extern int nProcsIO;
 extern int nProcsCalc;
 extern MPI_Comm * commsIO;
-extern MPI_Comm * commCalc; 
+extern MPI_Comm commCalc;
 
 
 enum { GRID      = 1,
