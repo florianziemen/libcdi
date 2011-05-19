@@ -1968,6 +1968,7 @@ void streamDefVlist(int streamID, int vlistID)
   if ( streamptr->vlistID == CDI_UNDEFID )
     {
       streamptr->vlistID = vlistDuplicate(vlistID);
+      streamptr->vlistIDorig = vlistID ;
 
       nvars = vlistNvars(vlistID);
       for ( varID = 0; varID < nvars; varID++ )

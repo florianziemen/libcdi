@@ -48,7 +48,7 @@ vlist_compare(vlist_t *a, vlist_t *b)
 }
 
 static void
-vlistPrintKernel(vlist_t *vlistptr);
+vlistPrintKernel(vlist_t *vlistptr, FILE * fp );
 #ifdef USE_MPI
 static int  vlistGetSizeP ( void * vlistptr, MPI_Comm comm );
 static void vlistPackP    ( void * vlistptr, void * buff, int size,
@@ -368,6 +368,9 @@ int vlistDuplicate(int vlistID)
   vlistIDnew = vlistCreate();
 
   vlistCopy(vlistIDnew, vlistID);
+
+  if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
+    reshSetStatus ( vlistIDnew, &vlist_ops, SUSPENDED );
 
   return (vlistIDnew);
 }
@@ -1020,7 +1023,7 @@ int vlistNtsteps(int vlistID)
 }
 
 static void
-vlistPrintKernel(vlist_t *vlistptr)
+vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
 {
   int nvars, flag, index;
   int varID, fvarID, mvarID, flevID, mlevID, levID;
@@ -1032,21 +1035,21 @@ vlistPrintKernel(vlist_t *vlistptr)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  printf("#\n# vlistID %d\n#\n", vlistptr->self);
+  fprintf ( fp, "#\n# vlistID %d\n#\n", vlistptr->self);
 
   nvars = vlistptr->nvars;
 
-  printf("nvars   %d\n", nvars);
-  printf("ngrids  %d\n", vlistptr->ngrids);
-  printf("nzaxis  %d\n", vlistptr->nzaxis);
-  printf("taxisID %d\n", vlistptr->taxisID);
-  printf("instID  %d\n", vlistptr->instID);
-  printf("modelID %d\n", vlistptr->modelID);
-  printf("tableID %d\n", vlistptr->tableID);
+  fprintf ( fp, "nvars   %d\n", nvars);
+  fprintf ( fp, "ngrids  %d\n", vlistptr->ngrids);
+  fprintf ( fp, "nzaxis  %d\n", vlistptr->nzaxis);
+  fprintf ( fp, "taxisID %d\n", vlistptr->taxisID);
+  fprintf ( fp, "instID  %d\n", vlistptr->instID);
+  fprintf ( fp, "modelID %d\n", vlistptr->modelID);
+  fprintf ( fp, "tableID %d\n", vlistptr->tableID);
 
   if ( nvars > 0 )
     {
-      printf(" varID param    gridID zaxisID timeID nlevel flag  name     longname\n");
+      fprintf ( fp, " varID param    gridID zaxisID timeID nlevel flag  name     longname\n");
       for ( varID = 0; varID < nvars; varID++ )
         {
           param    = vlistptr->vars[varID].param;
@@ -1060,15 +1063,15 @@ vlistPrintKernel(vlist_t *vlistptr)
           flag     = vlistptr->vars[varID].flag;
 
           cdiParamToString(param, paramstr, sizeof(paramstr));
-          printf("%6d %-8s %6d %6d %6d %6d %5d  %-8s %s",
+          fprintf ( fp, "%6d %-8s %6d %6d %6d %6d %5d  %-8s %s",
                  varID, paramstr, gridID, zaxisID, timeID, nlevs, flag,
                  name ? name : "", longname ? longname : "");
-          if ( units ) printf("   [%s]", units);
-          printf("\n");
+          if ( units ) fprintf ( fp, "   [%s]", units);
+          fprintf ( fp, "\n");
         }
 
-      printf("\n");
-      printf(" varID  levID fvarID flevID mvarID mlevID  index  dtype  flag  level\n");
+      fprintf ( fp, "\n");
+      fprintf ( fp, " varID  levID fvarID flevID mvarID mlevID  index  dtype  flag  level\n");
       for ( varID = 0; varID < nvars; varID++ )
         {
           nlevs    = vlistptr->vars[varID].nlevs;
@@ -1083,8 +1086,9 @@ vlistPrintKernel(vlist_t *vlistptr)
               index  = vlistptr->vars[varID].levinfo[levID].index;
               flag   = vlistptr->vars[varID].levinfo[levID].flag;
               level  = zaxisInqLevel(zaxisID, levID);
-              printf("%6d %6d %6d %6d %6d %6d %6d %6d %5d  %.9g\n",
-                     varID, levID, fvarID, flevID, mvarID, mlevID, index, dtype, flag, level);
+              fprintf ( fp, "%6d %6d %6d %6d %6d %6d %6d %6d %5d  %.9g\n",
+			varID, levID, fvarID, flevID, mvarID, mlevID, index, 
+			dtype, flag, level);
             }
         }
     }
@@ -1099,7 +1103,7 @@ void vlistPrint(int vlistID)
 
   vlistptr = vlist_to_pointer(vlistID);
   vlist_check_ptr(__func__, vlistptr);
-  vlistPrintKernel(vlistptr);
+  vlistPrintKernel(vlistptr, stdout);
 }
 
 /*

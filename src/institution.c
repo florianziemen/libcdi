@@ -9,6 +9,7 @@
 #include "pio_util.h"
 #include "resource_handle.h"
 #include "pio_rpc.h"
+#include "namespace.h"
 
 #undef  UNDEFID
 #define UNDEFID  -1
@@ -31,7 +32,7 @@ institute_t;
 
 static int    instituteCompareP ( void * instituteptr1, void * instituteptr2 );
 static void   instituteDestroyP ( void * instituteptr );
-static void   institutePrintP   ( void * instituteptr );
+static void   institutePrintP   ( void * instituteptr, FILE * fp );
 #ifdef USE_MPI
 static int    instituteGetSizeP ( void * instituteptr, MPI_Comm comm );
 static void   institutePackP    ( void * instituteptr, void *buf, int size,
@@ -76,19 +77,39 @@ institute_t * instituteNewEntry ( void )
 static
 void instituteDefaultEntries ( void )
 {
-  ECMWF   = institutDef( 98,   0, "ECMWF",     "European Centre for Medium-Range Weather Forecasts");
-  MPIMET  = institutDef( 98, 232, "MPIMET",    "Max-Planck-Institute for Meteorology");
-     (void) institutDef( 98, 255, "MPIMET",    "Max-Planck-Institute for Meteorology");
-     (void) institutDef( 98, 232, "MPIMET",    "Max-Planck Institute for Meteorology");
-     (void) institutDef( 78, 255, "DWD",       "Deutscher Wetterdienst");
-  MCH     = institutDef(215, 255, "MCH",       "MeteoSwiss");
-     (void) institutDef(  7,   0, "NCEP",      "National Centers for Environmental Prediction");
-     (void) institutDef(  7,   1, "NCEP",      "National Centers for Environmental Prediction");
-     (void) institutDef( 60,   0, "NCAR",      "National Center for Atmospheric Research");
-     (void) institutDef( 74,   0, "METOFFICE", "U.K. Met Office");
-     (void) institutDef( 97,   0, "ESA",       "European Space Agency ");
-     (void) institutDef( 99,   0, "KNMI",      "Royal Netherlands Meteorological Institute");
-     /*     (void) institutDef(  0,   0, "IPSL",      "IPSL (Institut Pierre Simon Laplace, Paris, France)"); */
+  cdiResH resH[12];
+  int i;
+
+  resH[0]  = ECMWF   = institutDef( 98,   0, "ECMWF",     
+			 "European Centre for Medium-Range Weather Forecasts");
+  resH[1]  = MPIMET  = institutDef( 98, 232, "MPIMET",    
+			 "Max-Planck-Institute for Meteorology");
+  resH[2]  = institutDef( 98, 255, "MPIMET",    
+			 "Max-Planck-Institute for Meteorology");
+  resH[3]  = institutDef( 98, 232, "MPIMET",    
+			 "Max-Planck Institute for Meteorology");
+  resH[4]  = institutDef( 78, 255, "DWD",       
+			 "Deutscher Wetterdienst");
+  resH[5]  = MCH     = institutDef(215, 255, "MCH",       
+			"MeteoSwiss");
+  resH[6]  = institutDef(  7,   0, "NCEP",      
+			  "National Centers for Environmental Prediction");
+  resH[7]  = institutDef(  7,   1, "NCEP",      
+			  "National Centers for Environmental Prediction");
+  resH[8]  = institutDef( 60,   0, "NCAR",      
+			 "National Center for Atmospheric Research");
+  resH[9]  = institutDef( 74,   0, "METOFFICE", 
+			 "U.K. Met Office");
+  resH[10] = institutDef( 97,   0, "ESA",       
+			 "European Space Agency ");
+  resH[11] = institutDef( 99,   0, "KNMI",      
+			 "Royal Netherlands Meteorological Institute");
+     /*     (void) institutDef(  0,   0, "IPSL",      
+	    "IPSL (Institut Pierre Simon Laplace, Paris, France)"); */
+  
+  if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
+    for ( i = 0; i < 12 ; i++ )
+      reshSetStatus ( resH[i], &instituteOps, SUSPENDED );  
 }
 
 
@@ -307,9 +328,8 @@ void instituteDestroyP ( void * instituteptr )
 }
 
 
-void institutePrintP   ( void * instituteptr )
+void institutePrintP   ( void * instituteptr, FILE * fp )
 {
-  FILE *fp = stdout;
   institute_t * ip = ( institute_t * ) instituteptr;
 
   if ( !ip ) return;

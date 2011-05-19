@@ -45,7 +45,7 @@ typedef struct node {
   struct node *next;
   resOps      *ops;
   void        *ptr;
-  int         sent;
+  int          status;
 } node;
 
 
@@ -92,11 +92,11 @@ void arrayInitPointer ( void )
     {
       for ( j = 0; j < arraySizeAllocated[i]; j++ )
         {
-          arrayResources[i][j].idx  = namespaceIdxEncode2 ( i, j );
-          arrayResources[i][j].next = arrayResources[i] + j + 1;
-          arrayResources[i][j].ops  = NULL;
-          arrayResources[i][j].ptr  = NULL;
-          arrayResources[i][j].sent = 0;
+          arrayResources[i][j].idx    = namespaceIdxEncode2 ( i, j );
+          arrayResources[i][j].next   = arrayResources[i] + j + 1;
+          arrayResources[i][j].ops    = NULL;
+          arrayResources[i][j].ptr    = NULL;
+          arrayResources[i][j].status = ASSIGNED;
         }
 
       arrayResources[i][arraySizeAllocated[i]-1].next = NULL;
@@ -199,13 +199,13 @@ int reshPut ( void *p, resOps *ops )
 
   if ( !freeListHead[nsp] ) arraySizeExtend();
 
-  newNode             = freeListHead[nsp];
-  freeListHead[nsp]   = freeListHead[nsp]->next;
-  newNode->next       = NULL;
-  idx                 = newNode->idx;
-  newNode->ptr        = p;
-  newNode->ops        = ops;
-  newNode->sent       = 0;
+  newNode               = freeListHead[nsp];
+  freeListHead[nsp]     = freeListHead[nsp]->next;
+  newNode->next         = NULL;
+  idx                   = newNode->idx;
+  newNode->ptr          = p;
+  newNode->ops          = ops;
+  newNode->status       = ASSIGNED;
 
   ARRAY_UNLOCK();
 
@@ -235,11 +235,11 @@ void reshRemove ( cdiResH idx, resOps * ops )
            arrayResources[nsp][nspT.idx].ops &&
            arrayResources[nsp][nspT.idx].ops == ops );
 
-  arrayResources[nsp][nspT.idx].next = freeListHead[nsp];
-  arrayResources[nsp][nspT.idx].ops  = NULL;
-  arrayResources[nsp][nspT.idx].ptr  = NULL;
-  arrayResources[nsp][nspT.idx].sent = 0;
-  freeListHead  [nsp]                = arrayResources[nsp] + nspT.idx;
+  arrayResources[nsp][nspT.idx].next   = freeListHead[nsp];
+  arrayResources[nsp][nspT.idx].ops    = NULL;
+  arrayResources[nsp][nspT.idx].ptr    = NULL;
+  arrayResources[nsp][nspT.idx].status = ASSIGNED;
+  freeListHead  [nsp]                  = arrayResources[nsp] + nspT.idx;
 
   ARRAY_UNLOCK();
 }
@@ -346,13 +346,13 @@ int  getPackBufferSize ( MPI_Comm comm )
 
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
     if ( arrayResources[nsp][i].ptr )
-      if ( ! arrayResources[nsp][i].sent )
+      if ( arrayResources[nsp][i].status == ASSIGNED )
         {
           curr = arrayResources[nsp] + i;
           assert ( curr->ops );
 
           /* message plus frame of 2 ints */
-          packBufferSize += curr->ops->valGetSize ( curr->ptr, comm )
+          packBufferSize += curr->ops->valGetPackSize ( curr->ptr, comm )
             + 2 * intpacksize;
         }
 
@@ -392,7 +392,7 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
 
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
     if ( arrayResources[nsp][i].ptr )
-      if ( ! arrayResources[nsp][i].sent )
+      if ( arrayResources[nsp][i].status == ASSIGNED )
         {
           curr = arrayResources[nsp] + i;
           assert ( curr->ops );
@@ -415,7 +415,7 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
           xmpi(MPI_Pack ( &sep, 1,  MPI_INT, * packBuffer,
                           * packBufferSize, &packBufferPos, comm ));
 
-          curr->sent = 1;
+          curr->status = CLOSED;
         }
 
   ARRAY_UNLOCK();
@@ -427,6 +427,76 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
 }
 
 #endif
+
+
+/**************************************************************/
+
+/* for thread safety this feature would have to be integrated in reshPut */
+
+void reshSetStatus ( cdiResH idx, resOps * ops, int status )
+{
+  int nsp;
+  namespaceTuple_t nspT;
+  node * node;
+
+  assert ( arrayInit && ops );
+
+  ARRAY_LOCK ();
+
+  nsp = namespaceGetActive ();
+
+  nspT = namespaceIdxDecode ( idx );
+
+  assert ( arrayInit &&
+           nspT.nsp == nsp &&
+           nspT.idx >= 0 &&
+           nspT.idx < arraySizeAllocated[nsp] );
+
+  node =  arrayResources[nsp] + nspT.idx;
+
+  assert ( node &&
+           node->ops == ops );
+
+  node->status = status;
+
+  ARRAY_UNLOCK ();
+}
+
+
+/**************************************************************/
+
+
+int reshGetStatus ( cdiResH idx, resOps * ops )
+{
+  int nsp;
+  namespaceTuple_t nspT;
+  node * node;
+
+  assert ( arrayInit && ops );
+
+  ARRAY_LOCK ();
+
+  nsp = namespaceGetActive ();
+
+  nspT = namespaceIdxDecode ( idx );
+
+  assert ( arrayInit &&
+           nspT.nsp == nsp &&
+           nspT.idx >= 0 &&
+           nspT.idx < arraySizeAllocated[nsp] );
+
+  node =  arrayResources[nsp] + nspT.idx;
+
+  ARRAY_UNLOCK ();
+
+  assert ( node &&
+           node->ops == ops );
+
+  return node->status;
+}
+
+
+/**************************************************************/
 
 
 void reshLock ()
@@ -447,45 +517,59 @@ void reshUnlock ()
 /**************************************************************/
 
 
-void reshArrayPrint ()
+void reshArrayPrint ( char * filename )
 {
   int i, j, temp;
   node * curr;
+  FILE * fp; 
 
   xdebug();
-  fprintf ( stdout, "arrayInit=%d\n", arrayInit );
 
   if ( ! arrayInit ) return;
 
+  if ( filename )
+    {
+      fp = fopen ( filename, "w" );
+      if ( ! fp ) 
+	{
+	  xdebug ( "could not open file" );
+	  fp = stdout;
+	}
+    }
+  else
+    fp = stdout;
+
   temp = namespaceGetActive ();
 
-  fprintf ( stdout, "\n\n##########################################\n#\n#  print " \
+  fprintf ( fp, "\n\n##########################################\n#\n#  print " \
             "global resource array \n#\n" );
 
   for ( i = 0; i < namespaceGetNumber (); i++ )
     {
       namespaceSetActive ( i );
 
-      fprintf ( stdout, "\n" );
-      fprintf ( stdout, "##################################\n" );
-      fprintf ( stdout, "#\n" );
-      fprintf ( stdout, "# namespace=%d\n", i );
-      fprintf ( stdout, "#\n" );
-      fprintf ( stdout, "##################################\n\n" );
+      fprintf ( fp, "\n" );
+      fprintf ( fp, "##################################\n" );
+      fprintf ( fp, "#\n" );
+      fprintf ( fp, "# namespace=%d\n", i );
+      fprintf ( fp, "#\n" );
+      fprintf ( fp, "##################################\n\n" );
 
       for ( j = 0; j < arraySizeAllocated[i]; j++)
         {
           curr = arrayResources[i] + j;
           if ( curr->ops && curr->ptr )
             {
-              curr->ops->valPrint (( void * ) curr->ptr );
-              fprintf ( stdout, "\n" );
+              curr->ops->valPrint (( void * ) curr->ptr, fp );
+              fprintf ( fp, "\n" );
             }
         }
     }
 
-  fprintf ( stdout, "#\n#  end global resource array" \
+  fprintf ( fp, "#\n#  end global resource array" \
             "\n#\n##########################################\n\n" );
+
+  fclose ( fp );
 
   namespaceSetActive ( temp );
 }

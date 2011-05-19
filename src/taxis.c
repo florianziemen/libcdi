@@ -41,7 +41,7 @@ char *Timeunits[] = {
 
 static int    taxisCompareP ( void * taxisptr1, void * taxisptr2 );
 static void   taxisDestroyP ( void * taxisptr );
-static void   taxisPrintP   ( void * taxisptr );
+static void   taxisPrintP   ( void * taxisptr, FILE * fp );
 #ifdef USE_MPI
 static int taxisGetSizeP ( void * taxisptr, MPI_Comm comm );
 static void   taxisPackP ( void * taxisptr, void *buf, int size,
@@ -1204,9 +1204,8 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   reshUnlock ();
 }
 
-void taxisPrintKernel ( taxis_t * taxisptr )
+void taxisPrintKernel ( taxis_t * taxisptr, FILE * fp )
 {
-  FILE *fp = stdout;
   int vdate_lb, vdate_ub;
   int vtime_lb, vtime_ub;
 
@@ -1241,12 +1240,12 @@ void taxisPrint ( int taxisID )
   taxis_t * taxisptr;
 
   taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
-  taxisPrintKernel ( taxisptr );
+  taxisPrintKernel ( taxisptr, stdout );
 }
 
-void taxisPrintP ( void * taxisptr )
+void taxisPrintP ( void * taxisptr, FILE * fp )
 {
-  taxisPrintKernel (( taxis_t * ) taxisptr );
+  taxisPrintKernel (( taxis_t * ) taxisptr, fp );
 }
 
 int taxisCompareP ( void *  taxisptr1, void * taxisptr2 )

@@ -8,6 +8,7 @@
 #include "pio_util.h"
 #include "resource_handle.h"
 #include "pio_rpc.h"
+#include "namespace.h"
 
 #undef  UNDEFID
 #define UNDEFID -1
@@ -34,7 +35,7 @@ static void modelInit(void);
 
 static int    modelCompareP ( void * modelptr1, void * modelptr2 );
 static void   modelDestroyP ( void * modelptr );
-static void   modelPrintP   ( void * modelptr );
+static void   modelPrintP   ( void * modelptr, FILE * fp );
 #ifdef USE_MPI
 static int    modelGetSizeP ( void * modelptr, MPI_Comm comm );
 static void   modelPackP    ( void * modelptr, void * buff, int size,
@@ -77,32 +78,39 @@ int modelDef(int instID, int modelgribID, const char *name);
 static
 void modelDefaultEntries ( void )
 {
-  int instID;
+  int instID, i;
+  cdiResH resH[10];
 
   instID  = institutInq(  0,   0, "ECMWF", NULL);
   /* (void)    modelDef(instID, 131, "ERA15"); */
   /* (void)    modelDef(instID, 199, "ERA40"); */
 
   instID  = institutInq(  0,   0, "MPIMET", NULL);
-  ECHAM5  = modelDef(instID,  64, "ECHAM5.4");
-  (void)    modelDef(instID,  63, "ECHAM5.3");
-  (void)    modelDef(instID,  62, "ECHAM5.2");
-  (void)    modelDef(instID,  61, "ECHAM5.1");
+  
+
+  resH[0] = ECHAM5  = modelDef(instID,  64, "ECHAM5.4");
+  resH[1] = modelDef(instID,  63, "ECHAM5.3");
+  resH[2] = modelDef(instID,  62, "ECHAM5.2");
+  resH[3] = modelDef(instID,  61, "ECHAM5.1");
 
   instID  = institutInq( 98, 255, "MPIMET", NULL);
-  (void)    modelDef(instID,  60, "ECHAM5.0");
-  ECHAM4  = modelDef(instID,  50, "ECHAM4");
-  (void)    modelDef(instID, 110, "MPIOM1");
+  resH[4] = modelDef(instID,  60, "ECHAM5.0");
+  resH[5] = ECHAM4  = modelDef(instID,  50, "ECHAM4");
+  resH[6] = modelDef(instID, 110, "MPIOM1");
 
   instID  = institutInq(  0,   0, "DWD", NULL);
-  (void)    modelDef(instID, 149, "GME");
+  resH[7] = modelDef(instID, 149, "GME");
 
   instID  = institutInq(  0,   0, "MCH", NULL);
   //(void)  = modelDef(instID, 137, "COSMO");
-  COSMO   = modelDef(instID, 255, "COSMO");
+  resH[8] = COSMO   = modelDef(instID, 255, "COSMO");
 
   instID  = institutInq(  0,   1, "NCEP", NULL);
-  (void)    modelDef(instID,  80, "T62L28MRF");
+  resH[9] = modelDef(instID,  80, "T62L28MRF");
+  
+  if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
+    for ( i = 0; i < 10 ; i++ )
+      reshSetStatus ( resH[i], &modelOps, SUSPENDED );  
 }
 
 static
@@ -245,9 +253,8 @@ void modelDestroyP ( void * modelptr )
 }
 
 
-void modelPrintP   ( void * modelptr )
+void modelPrintP   ( void * modelptr, FILE * fp )
 {
-  FILE *fp = stdout;
   model_t * mp = ( model_t * ) modelptr;
 
   if ( !mp ) return;

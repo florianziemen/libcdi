@@ -199,7 +199,7 @@ void unpackStream ( char * unpackBuffer, int unpackBufferSize,
   
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 		      &vlistID, 1, MPI_INT, comm )); 
-  //streamDefVlist ( streamID, vlistID );
+  streamDefVlist ( streamID, vlistID );
 }
 
 
@@ -222,7 +222,8 @@ void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize,
 	{
 	case END:
 	  xdebug ( "#### end of packed data" );
-	  reshArrayPrint ();
+	  if ( rankGlob == sizeGlob - 1 )
+	    reshArrayPrint ( "reshArrayIOServer" );
 	  return;
 	case GRID:
 	  unpackGrid ( unpackBuffer, unpackBufferSize, &unpackBufferPos, comm );

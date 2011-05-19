@@ -64,7 +64,7 @@ static int CDI_MaxZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0])
 
 static int    zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 );
 static void   zaxisDestroyP ( void * zaxisptr );
-static void   zaxisPrintP   ( void * zaxisptr );
+static void   zaxisPrintP   ( void * zaxisptr, FILE * fp );
 #ifdef USE_MPI
 static int    zaxisGetSizeP ( void * zaxisptr, MPI_Comm comm );
 static void   zaxisPackP    ( void * zaxisptr, void * buffer, int size,
@@ -1066,9 +1066,8 @@ int zaxisDuplicate(int zaxisID)
 }
 
 
-void zaxisPrintKernel ( zaxis_t * zaxisptr )
+void zaxisPrintKernel ( zaxis_t * zaxisptr, FILE * fp )
 {
-  FILE *fp = stdout;
   int type;
   int nlevels, levelID;
   int nbyte0, nbyte;
@@ -1172,14 +1171,14 @@ void zaxisPrint ( int zaxisID )
 
   zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
-  zaxisPrintKernel ( zaxisptr );
+  zaxisPrintKernel ( zaxisptr, stdout );
 }
 
 
 static
-void zaxisPrintP ( void * zaxisptr )
+void zaxisPrintP ( void * zaxisptr, FILE * fp )
 {
-  zaxisPrintKernel (( zaxis_t * ) zaxisptr );
+  zaxisPrintKernel (( zaxis_t * ) zaxisptr, fp );
 }
 
 

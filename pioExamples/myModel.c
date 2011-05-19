@@ -73,6 +73,8 @@ void modelRun ()
   int taxisID2, taxisID3, taxisID4, taxisID5;
   int instID, modelID;
 
+  int rank;
+
   if  ( ddebug >= 3 ) xdebug ();
 
 #ifdef USE_MPI
@@ -196,8 +198,12 @@ void modelRun ()
       streamWriteVar(streamID, varID1, var1, nmiss);
       streamWriteVar(streamID, varID2, var2, nmiss);
     }
-  
-  //reshArrayPrint ();
+
+#ifdef USE_MPI
+  MPI_Comm_rank ( MPI_COMM_WORLD, &rank ); 
+  if ( rank == 0 )
+#endif
+    reshArrayPrint ( "reshArrayModel" );
 
   // Close the output stream
   streamClose(streamID);

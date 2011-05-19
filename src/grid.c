@@ -48,7 +48,7 @@ char *Grids[] = {
 
 static int    gridCompareP ( void * gridptr1, void * gridptr2 );
 static void   gridDestroyP ( void * gridptr );
-static void   gridPrintP   ( void * gridptr );
+static void   gridPrintP   ( void * gridptr, FILE * fp );
 #ifdef USE_MPI
 static int    gridGetSizeP ( void * gridptr, MPI_Comm comm );
 static void   gridPackP    ( void * gridptr, void * buff, int size,
@@ -3006,9 +3006,9 @@ double *gridInqYboundsPtr(int gridID)
 }
 
 
-void gridPrintKernel ( grid_t * gridptr, int opt)
+void gridPrintKernel ( grid_t * gridptr, int opt, FILE * fpArg)
 {
-  FILE *fp = stdout;
+  FILE *fp = fpArg;
   int type;
   int gridsize, xsize, ysize, xdim, ydim;
   int trunc;
@@ -3315,16 +3315,16 @@ void gridPrint ( int gridID, int opt )
 
   grid_check_ptr(gridID, gridptr);
 
-  gridPrintKernel ( gridptr, opt );
+  gridPrintKernel ( gridptr, opt, stdout );
 }
 
 
 
-void gridPrintP ( void * gridptr )
+void gridPrintP ( void * gridptr, FILE * fp )
 {
   assert ( gridptr );
 
-  gridPrintKernel (( grid_t * ) gridptr , 0 );
+  gridPrintKernel (( grid_t * ) gridptr , 0, fp );
 }
 
 

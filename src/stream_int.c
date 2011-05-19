@@ -68,7 +68,7 @@ static int cdiHaveMissval = 0;
 
 static int    streamCompareP ( void * streamptr1, void * streamptr2 );
 static void   streamDestroyP ( void * streamptr );
-static void   streamPrintP   ( void * streamptr );
+static void   streamPrintP   ( void * streamptr, FILE * fp );
 #ifdef USE_MPI
 static int    streamGetSizeP ( void * streamptr, MPI_Comm comm );
 static void   streamPackP    ( void * streamptr, void * buff, int size,
@@ -300,6 +300,7 @@ void streamDefaultValue ( stream_t * streamptr )
   streamptr->fnames            = NULL;
 
   streamptr->gribContainers    = NULL;
+  streamptr->vlistIDorig       = UNDEFID;
 }
 
 
@@ -515,9 +516,8 @@ void streamDestroyP ( void * streamptr )
 }
 
 
-void streamPrintP   ( void * streamptr )
+void streamPrintP   ( void * streamptr, FILE * fp )
 {
-  FILE *fp = stdout;
   stream_t * sp = ( stream_t * ) streamptr;
 
   if ( !sp ) return;
@@ -616,9 +616,11 @@ void streamPackP ( void * streamptr, void * packBuffer, int packBufferSize,
 	     packBuffer, packBufferSize, packBufferPos, comm );
   MPI_Pack ( streamP->filename, size, MPI_CHAR, 
 	     packBuffer, packBufferSize, packBufferPos, comm );
+
   MPI_Pack ( &streamP->filetype, 1, MPI_INT, 
 	     packBuffer, packBufferSize, packBufferPos, comm );
-  MPI_Pack ( &streamP->vlistID, 1, MPI_INT, 
+
+  MPI_Pack ( &streamP->vlistIDorig, 1, MPI_INT, 
 	     packBuffer, packBufferSize, packBufferPos, comm );
 }
 
