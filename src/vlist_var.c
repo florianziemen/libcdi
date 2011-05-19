@@ -190,7 +190,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
       xwarning ( "Operation not executed." );
-      return;
+      return CDI_UNDEFID;
     }
 
   if ( CDI_Debug )
@@ -207,7 +207,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
   if ( timeID != TIME_VARIABLE && timeID != TIME_CONSTANT )
     {
       Message("unexpected timeID %d. Set to TIME_VARIABLE", timeID);
-      vlistptr->vars[varID].timeID = TIME_VARIABLE;	  
+      vlistptr->vars[varID].timeID = TIME_VARIABLE;
     }
 
   nlevs = zaxisInqSize(zaxisID);
