@@ -307,6 +307,12 @@ void zaxisDefName(int zaxisID, const char *name)
 {
   zaxis_t *zaxisptr;
 
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
@@ -333,6 +339,12 @@ void zaxisDefLongname(int zaxisID, const char *longname)
 {
   zaxis_t *zaxisptr;
 
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
@@ -358,6 +370,12 @@ The function @func{zaxisDefUnits} defines the units of a Z-axis.
 void zaxisDefUnits(int zaxisID, const char *units)
 {
   zaxis_t *zaxisptr;
+
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
@@ -456,6 +474,12 @@ void zaxisDefPrec(int zaxisID, int prec)
 {
   zaxis_t *zaxisptr;
 
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
@@ -479,6 +503,12 @@ int zaxisInqPrec(int zaxisID)
 void zaxisDefLtype(int zaxisID, int ltype)
 {
   zaxis_t *zaxisptr;
+
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
@@ -520,6 +550,12 @@ void zaxisDefLevels(int zaxisID, const double *levels)
   double *vals;
   zaxis_t *zaxisptr;
 
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
@@ -550,6 +586,12 @@ The function @func{zaxisDefLevel} defines one level of a Z-axis.
 void zaxisDefLevel(int zaxisID, int levelID, double level)
 {
   zaxis_t *zaxisptr;
+
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
@@ -870,6 +912,12 @@ void zaxisDefVct(int zaxisID, int size, const double *vct)
 {
   zaxis_t *zaxisptr;
 
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
@@ -915,6 +963,12 @@ void zaxisDefLbounds(int zaxisID, const double *lbounds)
   size_t size;
   zaxis_t *zaxisptr;
 
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
@@ -937,6 +991,12 @@ void zaxisDefUbounds(int zaxisID, const double *ubounds)
   size_t size;
   zaxis_t *zaxisptr;
 
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
@@ -958,6 +1018,12 @@ void zaxisDefWeights(int zaxisID, const double *weights)
 {
   size_t size;
   zaxis_t *zaxisptr;
+
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 

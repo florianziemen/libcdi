@@ -293,6 +293,12 @@ void taxisDefType(int taxisID, int type)
 {
   taxis_t *taxisptr;
 
+  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
@@ -317,6 +323,12 @@ The function @func{taxisDefVdate} defines the verification date of a Time axis.
 void taxisDefVdate(int taxisID, int vdate)
 {
   taxis_t *taxisptr;
+
+  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
@@ -343,6 +355,12 @@ void taxisDefVtime(int taxisID, int vtime)
 {
   taxis_t *taxisptr;
 
+  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
@@ -368,6 +386,12 @@ void taxisDefRdate(int taxisID, int rdate)
 {
   taxis_t *taxisptr;
 
+  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
@@ -392,6 +416,12 @@ The function @func{taxisDefVdate} defines the reference time of a Time axis.
 void taxisDefRtime(int taxisID, int rtime)
 {
   taxis_t *taxisptr;
+
+  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
@@ -420,6 +450,12 @@ void taxisDefCalendar(int taxisID, int calendar)
 {
   taxis_t *taxisptr;
 
+  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
@@ -432,6 +468,12 @@ void taxisDefTunit(int taxisID, int unit)
 {
   taxis_t *taxisptr;
 
+  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
@@ -443,6 +485,12 @@ void taxisDefTunit(int taxisID, int unit)
 void taxisDefNumavg(int taxisID, int numavg)
 {
   taxis_t *taxisptr;
+
+  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
@@ -483,6 +531,12 @@ int taxisHasBounds(int taxisID)
 void taxisDeleteBounds(int taxisID)
 {
   taxis_t *taxisptr;
+
+  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
@@ -568,6 +622,12 @@ void taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub)
 {
   taxis_t *taxisptr;
 
+  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
@@ -622,6 +682,12 @@ void taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub)
 void taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub)
 {
   taxis_t *taxisptr;
+
+  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 

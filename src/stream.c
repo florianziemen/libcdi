@@ -21,8 +21,12 @@
 #include "extra.h"
 #include "ieg.h"
 #include "vlist.h"
+#include "resource_handle.h"
+#include "pio_util.h"
 
 #define  MAX_FNAMES  3
+
+extern resOps streamOps;
 
 FILE *popen(const char *command, const char *type);
 int pclose(FILE *stream);
@@ -397,6 +401,12 @@ void streamDefByteorder(int streamID, int byteorder)
   streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
+
+  if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   streamptr->byteorder = byteorder;
   filetype = streamptr->filetype;
@@ -1965,6 +1975,12 @@ void streamDefVlist(int streamID, int vlistID)
 
   stream_check_ptr(__func__, streamptr);
 
+  if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
+    {
+      xdebug ("WARNING: Operation not executed." );
+      return;
+    }
+
   if ( streamptr->vlistID == CDI_UNDEFID )
     {
       streamptr->vlistID = vlistDuplicate(vlistID);
@@ -2037,6 +2053,12 @@ void streamDefZtype(int streamID, int ztype)
 
   stream_check_ptr(__func__, streamptr);
 
+  if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   streamptr->ztype = ztype;
 }
 
@@ -2048,6 +2070,12 @@ void streamDefZlevel(int streamID, int zlevel)
   streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
+
+  if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   streamptr->zlevel = zlevel;
 }

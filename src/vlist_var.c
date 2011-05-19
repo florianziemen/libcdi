@@ -12,6 +12,10 @@
 #include "cdi.h"
 #include "stream_int.h"
 #include "vlist.h"
+#include "resource_handle.h"
+#include "pio_util.h"
+
+extern resOps vlist_ops;
 
 static
 void vlistvarInitEntry(int vlistID, int varID)
@@ -183,6 +187,12 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
 
   vlistptr = vlist_to_pointer(vlistID);
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   if ( CDI_Debug )
     Message("gridID = %d  zaxisID = %d  timeID = %d", gridID, zaxisID, timeID);
 
@@ -266,6 +276,12 @@ void vlistDefVarParam(int vlistID, int varID, int param)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   vlistptr->vars[varID].param = param;
 }
 
@@ -292,6 +308,12 @@ void vlistDefVarCode(int vlistID, int varID, int code)
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   param = vlistptr->vars[varID].param;
 
@@ -813,6 +835,12 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   vlistptr->vars[varID].datatype = datatype;
   
   if ( vlistptr->vars[varID].missvalused == FALSE )
@@ -834,6 +862,12 @@ void vlistDefVarInstitut(int vlistID, int varID, int instID)
 
   vlistptr = vlist_to_pointer(vlistID);
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   vlistptr->vars[varID].instID = instID;
 }
 
@@ -851,6 +885,12 @@ int vlistInqVarInstitut(int vlistID, int varID)
 void vlistDefVarModel(int vlistID, int varID, int modelID)
 {
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -871,6 +911,12 @@ int vlistInqVarModel(int vlistID, int varID)
 void vlistDefVarTable(int vlistID, int varID, int tableID)
 {
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -921,6 +967,12 @@ void vlistDefVarName(int vlistID, int varID, const char *name)
 {
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -955,6 +1007,12 @@ The function @func{vlistDefVarLongname} defines the long name of a variable.
 void vlistDefVarLongname(int vlistID, int varID, const char *longname)
 {
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -991,6 +1049,12 @@ void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
 {
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -1025,6 +1089,12 @@ The function @func{vlistDefVarUnits} defines the units of a variable.
 void vlistDefVarUnits(int vlistID, int varID, const char *units)
 {
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -1113,6 +1183,12 @@ void vlistDefVarMissval(int vlistID, int varID, double missval)
 {
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -1126,6 +1202,12 @@ void vlistDefVarScalefactor(int vlistID, int varID, double scalefactor)
 {
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -1138,6 +1220,12 @@ void vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
 {
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -1149,6 +1237,12 @@ void vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
 void vlistDefVarTsteptype(int vlistID, int varID, int tsteptype)
 {
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -1170,6 +1264,12 @@ void vlistDefVarTimave(int vlistID, int varID, int timave)
 {
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistptr->vars[varID].timave = timave;
@@ -1189,6 +1289,12 @@ int vlistInqVarTimave(int vlistID, int varID)
 void vlistDefVarTimaccu(int vlistID, int varID, int timaccu)
 {
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -1266,6 +1372,12 @@ void vlistDefVarTime(int vlistID, int varID, int timeID)
 {
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistptr->vars[varID].timeID = timeID;
@@ -1285,6 +1397,12 @@ int vlistInqVarMissvalUsed(int vlistID, int varID)
 void vlistDefFlag(int vlistID, int varID, int levID, int flag)
 {
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -1378,6 +1496,12 @@ void vlistDefIndex(int vlistID, int varID, int levelID, int index)
 {
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistptr->vars[varID].levinfo[levelID].index = index;  
@@ -1399,6 +1523,12 @@ void vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
   int nlevs1, nlevs2;
   int nvars, index;
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -1444,6 +1574,12 @@ void vlistChangeVarGrid(int vlistID, int varID, int gridID)
   int nvars, index;
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -1482,9 +1618,21 @@ void vlistDefVarZtype(int vlistID, int varID, int ztype)
 {
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   vlistptr->vars[varID].ztype = ztype;
 }
@@ -1505,6 +1653,12 @@ int vlistInqVarZtype(int vlistID, int varID)
 void vlistDefVarZlevel(int vlistID, int varID, int zlevel)
 {
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 

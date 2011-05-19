@@ -76,6 +76,24 @@ char * outTextComm ( MPI_Comm * );
   }
 #endif
 
+#ifdef USE_MPI
+#define xwarning(fmt, ...)						\
+  if ( ddebug ){							\
+    int rank;								\
+    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );				\
+    fprintf ( stderr, "WARNING: pe%d in %s, %s, line %d: " fmt "\n",	\
+              rank,  __func__, __FILE__,  __LINE__,			\
+              ## __VA_ARGS__ );						\
+  }
+#else
+#define xwarning(fmt, ...)					\
+  if ( ddebug ){                                                \
+    fprintf ( stderr, "WARNING: %s, %s, line %d: " fmt "\n",    \
+              __func__, __FILE__,  __LINE__,                    \
+              ## __VA_ARGS__ );                                 \
+  }
+#endif
+
 void pcdiAbort ( char *, const char *, const char *, int );
 #define xabort(text) pcdiAbort ( text, __FILE__, __func__, __LINE__ );
 

@@ -1007,6 +1007,12 @@ void vlistDefNtsteps(int vlistID, int nts)
 
   vlist_check_ptr(__func__, vlistptr);
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   vlistptr->ntsteps = nts;
 }
 
@@ -1128,6 +1134,12 @@ void vlistDefTaxis(int vlistID, int taxisID)
 
   vlist_check_ptr(__func__, vlistptr);
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   vlistptr->taxisID = taxisID;
 }
 
@@ -1167,6 +1179,12 @@ void  vlistDefTable(int vlistID, int tableID)
 
   vlist_check_ptr(__func__, vlistptr);
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   vlistptr->tableID = tableID;
 }
 
@@ -1190,6 +1208,12 @@ void vlistDefInstitut(int vlistID, int instID)
   vlistptr = vlist_to_pointer(vlistID);
 
   vlist_check_ptr(__func__, vlistptr);
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   vlistptr->instID = instID;
 }
@@ -1231,6 +1255,12 @@ void vlistDefModel(int vlistID, int modelID)
   vlistptr = vlist_to_pointer(vlistID);
 
   vlist_check_ptr(__func__, vlistptr);
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   vlistptr->modelID = modelID;
 }
@@ -1330,6 +1360,12 @@ void vlistChangeGridIndex(int vlistID, int index, int gridID)
 
   vlist_check_ptr(__func__, vlistptr);
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   gridIDold = vlistptr->gridIDs[index];
   vlistptr->gridIDs[index] = gridID;
 
@@ -1349,6 +1385,12 @@ void vlistChangeGrid(int vlistID, int gridID1, int gridID2)
   vlistptr = vlist_to_pointer(vlistID);
 
   vlist_check_ptr(__func__, vlistptr);
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   ngrids = vlistptr->ngrids;
   for ( index = 0; index < ngrids; index++ )
@@ -1411,6 +1453,12 @@ void vlistChangeZaxisIndex(int vlistID, int index, int zaxisID)
 
   vlist_check_ptr(__func__, vlistptr);
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
   zaxisIDold = vlistptr->zaxisIDs[index];
   vlistptr->zaxisIDs[index] = zaxisID;
 
@@ -1449,6 +1497,12 @@ void vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2)
   vlistptr = vlist_to_pointer(vlistID);
 
   vlist_check_ptr(__func__, vlistptr);
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
 
   nzaxis = vlistptr->nzaxis;
   for ( index = 0; index < nzaxis; index++ )
