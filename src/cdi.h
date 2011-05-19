@@ -13,6 +13,8 @@
 extern "C" {
 #endif
 
+#define  CDI_MAX_NAME           256   /* max length of a name                 */
+
 #define  CDI_UNDEFID             -1
 #define  CDI_GLOBAL              -1   /* Global var ID for vlist              */
 

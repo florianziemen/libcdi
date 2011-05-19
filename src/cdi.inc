@@ -4,9 +4,11 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   April 2011
+! Uwe Schulzweida, MPI-MET, Hamburg,   May 2011
 !
 
+      INTEGER    CDI_MAX_NAME          
+      PARAMETER (CDI_MAX_NAME           = 256)
       INTEGER    CDI_UNDEFID           
       PARAMETER (CDI_UNDEFID            = -1)
       INTEGER    CDI_GLOBAL            
@@ -1615,6 +1617,11 @@
 !                                     CHARACTER*(*)   longname)
       EXTERNAL        zaxisInqLongname
 
+!                     zaxisInqStdname
+!                                    (INTEGER         zaxisID,
+!                                     CHARACTER*(*)   stdname)
+      EXTERNAL        zaxisInqStdname
+
 !                     zaxisInqUnits
 !                                    (INTEGER         zaxisID,
 !                                     CHARACTER*(*)   units)
@@ -1628,6 +1635,10 @@
       INTEGER         zaxisInqPrec
 !                                    (INTEGER         zaxisID)
       EXTERNAL        zaxisInqPrec
+
+      INTEGER         zaxisInqPositive
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisInqPositive
 
 !                     zaxisDefLtype
 !                                    (INTEGER         zaxisID,
