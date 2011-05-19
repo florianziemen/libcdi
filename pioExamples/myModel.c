@@ -143,8 +143,13 @@ void modelRun ()
   
   // Define the variable names
   vlistDefVarName(vlistID, varID1, "varname1");
+  {
+    int globfac[] = { 23, 42 };
+    vlistDefAttInt(vlistID, varID1, "seer's globule factors", DATATYPE_INT16,
+                   2, globfac);
+  }
   vlistDefVarName(vlistID, varID2, "varname2");
-
+  vlistDefAttTxt(vlistID, varID2, "txt demo", 6, "banana");
   // Create a Time axis
   taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxisID2 = taxisCreate(TAXIS_ABSOLUTE);

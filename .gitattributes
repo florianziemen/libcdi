@@ -260,6 +260,7 @@ src/version.c -text
 src/vlist.c -text
 src/vlist.h -text
 src/vlist_att.c -text
+src/vlist_att.h -text
 src/vlist_var.c -text
 src/vlist_var.h -text
 src/zaxis.c -text

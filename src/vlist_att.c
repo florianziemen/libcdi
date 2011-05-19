@@ -1,12 +1,21 @@
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
 
 #include "dmemory.h"
 
 #include "cdi.h"
 #include "stream_int.h"
 #include "vlist.h"
+#include "pio_util.h"
 
 
 static
@@ -89,7 +98,7 @@ void fill_att(cdi_att_t *attp, int indtype, int exdtype, size_t nelems, size_t x
 
   if ( xsz > 0 )
     {
-      attp->xvalue = (void *) realloc(attp->xvalue, xsz);
+      attp->xvalue = xrealloc(attp->xvalue, xsz);
       memcpy(attp->xvalue, xvalue, xsz);
     }
 }
@@ -139,7 +148,7 @@ int vlistInqNatts(int vlistID, int varID, int *nattsp)
     @Item  lenp     Pointer to location for returned attribute number
 
 @Description
-The function @func{vlistInqNatts} gets information about an attribute.
+The function @func{vlistInqAtt} gets information about an attribute.
 
 @EndFunction
 */
@@ -465,3 +474,167 @@ int vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp)
 
   return (status);
 }
+
+
+#ifdef USE_MPI
+
+enum {
+  vlist_att_nints = 4,          /* namesz, exdtype, indtype, nelems */
+};
+
+static int
+vlistAttGetSize(vlist_t *vlistptr, int varID, int attnum, MPI_Comm comm)
+{
+  int txsize = 0, txinc;
+  cdi_atts_t *attsp;
+  cdi_att_t *attp;
+
+  assert(attsp = get_attsp(vlistptr, varID));
+  assert(attnum >= 0 && attnum < (int)attsp->nelems);
+  attp = &(attsp->value[attnum]);
+  xmpi(MPI_Pack_size(vlist_att_nints, MPI_INT, comm, &txsize));
+  xmpi(MPI_Pack_size(attp->namesz, MPI_CHAR, comm, &txinc));
+  txsize += txinc;
+  switch (attp->exdtype)
+  {
+  case DATATYPE_FLT:
+    xmpi(MPI_Pack_size((int)attp->nelems, MPI_DOUBLE, comm, &txinc));
+    break;
+  case DATATYPE_INT:
+    xmpi(MPI_Pack_size((int)attp->nelems, MPI_INT, comm, &txinc));
+    break;
+  case DATATYPE_TXT:
+    xmpi(MPI_Pack_size((int)attp->nelems, MPI_CHAR, comm, &txinc));
+    break;
+  default:
+    fprintf(stderr, "Unknown datatype encountered in attribute %s: %d\n",
+            attp->name, attp->exdtype);
+    xabort("");
+  }
+  txsize += txinc;
+  return txsize;
+}
+
+int
+vlistAttsGetSize(vlist_t *p, int varID, MPI_Comm comm)
+{
+  int numAtts, i;
+  int txsize;
+  cdi_atts_t *attsp = get_attsp(p, varID);
+  numAtts = attsp->nelems;
+  xmpi(MPI_Pack_size(1, MPI_INT, comm, &txsize));
+  for (i = 0; i < numAtts; ++i)
+  {
+    txsize += vlistAttGetSize(p, varID, i, comm);
+  }
+  return txsize;
+}
+
+static int
+vlistAttPack(vlist_t *vlistptr, int varID, int attnum,
+             void * buf, int size, int *position, MPI_Comm comm)
+{
+  cdi_atts_t *attsp;
+  cdi_att_t *attp;
+  int tempbuf[vlist_att_nints];
+  MPI_Datatype attVMPIDt;
+
+  assert(attsp = get_attsp(vlistptr, varID));
+  assert(attnum >= 0 && attnum < (int)attsp->nelems);
+  attp = &(attsp->value[attnum]);
+  tempbuf[0] = attp->namesz;
+  tempbuf[1] = attp->exdtype;
+  tempbuf[2] = attp->indtype;
+  tempbuf[3] = attp->nelems;
+  xmpi(MPI_Pack(tempbuf, vlist_att_nints, MPI_INT, buf, size, position, comm));
+  xmpi(MPI_Pack(attp->name, attp->namesz, MPI_CHAR, buf, size, position, comm));
+  switch (attp->indtype)
+  {
+  case DATATYPE_FLT:
+    attVMPIDt = MPI_DOUBLE;
+    break;
+  case DATATYPE_INT:
+    attVMPIDt = MPI_INT;
+    break;
+  case DATATYPE_TXT:
+    attVMPIDt = MPI_CHAR;
+    break;
+  default:
+    fprintf(stderr, "Unknown datatype encountered in attribute %s: %d\n",
+            attp->name, attp->indtype);
+    xabort("");
+  }
+  xmpi(MPI_Pack(attp->xvalue, (int)attp->nelems, attVMPIDt,
+                buf, size, position, comm));
+}
+
+void
+vlistAttsPack(vlist_t *p, int varID,
+              void * buf, int size, int *position, MPI_Comm comm)
+{
+  int numAtts, i;
+  cdi_atts_t *attsp = get_attsp(p, varID);
+  numAtts = attsp->nelems;
+  xmpi(MPI_Pack(&numAtts, 1, MPI_INT, buf, size, position, comm));
+  for (i = 0; i < numAtts; ++i)
+  {
+    vlistAttPack(p, varID, i, buf, size, position, comm);
+  }
+}
+
+static int
+vlistAttUnpack(int vlistID, int varID,
+               void * buf, int size, int *position, MPI_Comm comm)
+{
+  char *attName;
+  int tempbuf[vlist_att_nints];
+  MPI_Datatype attVMPIDt;
+  int elemSize;
+  void *attData;
+
+  xmpi(MPI_Unpack(buf, size, position,
+                  tempbuf, vlist_att_nints, MPI_INT, comm));
+  attName = xmalloc(tempbuf[0] + 1);
+  xmpi(MPI_Unpack(buf, size, position, attName, tempbuf[0], MPI_CHAR, comm));
+  switch (tempbuf[2])
+  {
+  case DATATYPE_FLT:
+    attVMPIDt = MPI_DOUBLE;
+    elemSize = sizeof(double);
+    break;
+  case DATATYPE_INT:
+    attVMPIDt = MPI_INT;
+    elemSize = sizeof(int);
+    break;
+  case DATATYPE_TXT:
+    attVMPIDt = MPI_CHAR;
+    elemSize = 1;
+    break;
+  default:
+    fprintf(stderr, "Unknown datatype encountered in attribute %s: %d\n",
+            attName, tempbuf[2]);
+    xabort("");
+  }
+  attData = xmalloc(elemSize * tempbuf[3]);
+  xmpi(MPI_Unpack(buf, size, position, attData, tempbuf[3], attVMPIDt, comm));
+  vlist_def_att(tempbuf[2], tempbuf[1], vlistID, varID, attName,
+                tempbuf[3], tempbuf[3] * elemSize, attData);
+  free(attName);
+  free(attData);
+}
+
+void
+vlistAttsUnpack(int vlistID, int varID,
+              void * buf, int size, int *position, MPI_Comm comm)
+{
+  int numAtts, i;
+  xmpi(MPI_Unpack(buf, size, position, &numAtts, 1, MPI_INT, comm));
+  for (i = 0; i < numAtts; ++i)
+  {
+    vlistAttUnpack(vlistID, varID, buf, size, position, comm);
+  }
+}
+
+
+
+#endif
