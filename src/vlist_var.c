@@ -507,7 +507,10 @@ char *vlistInqVarUnitsPtr(int vlistID, int varID)
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
     @Item  varID    Variable identifier
-    @Item  name     Variable name
+    @Item  name     Returned variable name. The caller must allocate space for the 
+                    returned name. The maximum possible length, in characters, of a 
+                    variable name is given by the predefined constant CDI_MAX_NAME.
+                    The returned character array will be null-terminated. 
 
 @Description
 The function @func{vlistInqVarName} returns the name of a variable.

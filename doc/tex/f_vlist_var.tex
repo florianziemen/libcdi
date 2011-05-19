@@ -207,7 +207,10 @@ Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate
 \item[{\tt varID}]
 Variable identifier
 \item[{\tt name}]
-Variable name
+Returned variable name. The caller must allocate space for the 
+                    returned name. The maximum possible length, in characters, of a 
+                    variable name is given by the predefined constant CDI\_MAX\_NAME.
+                    The returned character array will be null-terminated. 
 
 \end{deflist}
 \end{minipage}
