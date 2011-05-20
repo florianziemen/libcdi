@@ -809,7 +809,8 @@ const double *zaxisInqLevelsPtr(int zaxisID)
 @Prototype void zaxisInqLevels(int zaxisID, double *levels)
 @Parameter
     @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
-    @Item  levels   Levels of the Z-axis.
+    @Item  levels   Pointer to the location into which the levels are read.
+                    The caller must allocate space for the returned values.
     
 @Description
 The function @func{zaxisInqLevels} returns all levels of a Z-axis.

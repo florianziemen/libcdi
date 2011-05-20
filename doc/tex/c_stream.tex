@@ -378,7 +378,8 @@ Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}
 \item[{\tt varID}]
 Variable identifier.
 \item[{\tt data}]
-Pointer to the location into which the data value is read.
+Pointer to the location into which the data values are read.
+                     The caller must allocate space for the returned values.
 \item[{\tt nmiss}]
 Number of missing values.
 
@@ -438,7 +439,8 @@ Variable identifier.
 \item[{\tt levelID}]
 Level identifier.
 \item[{\tt data}]
-Pointer to the location into which the data value is read.
+Pointer to the location into which the data values are read.
+                     The caller must allocate space for the returned values.
 \item[{\tt nmiss}]
 Number of missing values.
 

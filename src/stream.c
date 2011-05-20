@@ -1454,7 +1454,8 @@ int streamInqTimestep(int streamID, int tsID)
 @Parameter
     @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
     @Item  varID     Variable identifier.
-    @Item  data      Pointer to the location into which the data value is read.
+    @Item  data      Pointer to the location into which the data values are read.
+                     The caller must allocate space for the returned values.
     @Item  nmiss     Number of missing values.
 
 @Description
@@ -1618,7 +1619,8 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
     @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
     @Item  varID     Variable identifier.
     @Item  levelID   Level identifier.
-    @Item  data      Pointer to the location into which the data value is read.
+    @Item  data      Pointer to the location into which the data values are read.
+                     The caller must allocate space for the returned values.
     @Item  nmiss     Number of missing values.
 
 @Description

@@ -294,7 +294,8 @@ The function {\tt gridInqXvals} returns all values of the X-axis.
 \item[{\tt gridID}]
 Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
 \item[{\tt xvals}]
-X-values of the grid.
+Pointer to the location into which the X-values are read.
+                    The caller must allocate space for the returned values.
 
 \end{deflist}
 \end{minipage}
@@ -347,7 +348,8 @@ The function {\tt gridInqYvals} returns all values of the Y-axis.
 \item[{\tt gridID}]
 Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
 \item[{\tt yvals}]
-Y-values of the grid.
+Pointer to the location into which the Y-values are read.
+                    The caller must allocate space for the returned values.
 
 \end{deflist}
 \end{minipage}
@@ -400,7 +402,8 @@ The function {\tt gridInqXbounds} returns the bounds of the X-axis.
 \item[{\tt gridID}]
 Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
 \item[{\tt xbounds}]
-X-bounds of the grid.
+Pointer to the location into which the X-bounds are read.
+                    The caller must allocate space for the returned values.
 
 \end{deflist}
 \end{minipage}
@@ -453,7 +456,8 @@ The function {\tt gridInqYbounds} returns the bounds of the Y-axis.
 \item[{\tt gridID}]
 Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
 \item[{\tt ybounds}]
-Y-bounds of the grid.
+Pointer to the location into which the Y-bounds are read.
+                    The caller must allocate space for the returned values.
 
 \end{deflist}
 \end{minipage}

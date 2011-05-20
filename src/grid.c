@@ -1496,7 +1496,8 @@ void gridDefMaskGME(int gridID, const int *mask)
 @Prototype int gridInqXvals(int gridID, double *xvals)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  xvals    X-values of the grid.
+    @Item  xvals    Pointer to the location into which the X-values are read.
+                    The caller must allocate space for the returned values.
 
 @Description
 The function @func{gridInqXvals} returns all values of the X-axis.
@@ -1584,7 +1585,8 @@ void gridDefXvals(int gridID, const double *xvals)
 @Prototype int gridInqYvals(int gridID, double *yvals)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  yvals    Y-values of the grid.
+    @Item  yvals    Pointer to the location into which the Y-values are read.
+                    The caller must allocate space for the returned values.
 
 @Description
 The function @func{gridInqYvals} returns all values of the Y-axis.
@@ -2979,7 +2981,8 @@ void gridDefXbounds(int gridID, const double *xbounds)
 @Prototype int gridInqXbounds(int gridID, double *xbounds)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  xbounds  X-bounds of the grid.
+    @Item  xbounds  Pointer to the location into which the X-bounds are read.
+                    The caller must allocate space for the returned values.
 
 @Description
 The function @func{gridInqXbounds} returns the bounds of the X-axis.
@@ -3089,7 +3092,8 @@ void gridDefYbounds(int gridID, const double *ybounds)
 @Prototype int gridInqYbounds(int gridID, double *ybounds)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  ybounds  Y-bounds of the grid.
+    @Item  ybounds  Pointer to the location into which the Y-bounds are read.
+                    The caller must allocate space for the returned values.
 
 @Description
 The function @func{gridInqYbounds} returns the bounds of the Y-axis.

@@ -163,7 +163,8 @@ The function {\tt zaxisInqLevels} returns all levels of a Z-axis.
 \item[{\tt zaxisID}]
 Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
 \item[{\tt levels}]
-Levels of the Z-axis.
+Pointer to the location into which the levels are read.
+                    The caller must allocate space for the returned values.
     
 \end{deflist}
 \end{minipage}
