@@ -54,14 +54,14 @@ typedef struct {
   int     ysize;
   int     locked;
   int     lcomplex;
-  char    xname[256];
-  char    yname[256];
-  char    xlongname[256];
-  char    ylongname[256];
-  char    xstdname[256];
-  char    ystdname[256];
-  char    xunits[256];
-  char    yunits[256];
+  char    xname[CDI_MAX_NAME];
+  char    yname[CDI_MAX_NAME];
+  char    xlongname[CDI_MAX_NAME];
+  char    ylongname[CDI_MAX_NAME];
+  char    xstdname[CDI_MAX_NAME];
+  char    ystdname[CDI_MAX_NAME];
+  char    xunits[CDI_MAX_NAME];
+  char    yunits[CDI_MAX_NAME];
 }
 grid_t;
 

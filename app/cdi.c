@@ -231,9 +231,9 @@ void printShortinfo(int streamID, int vlistID, int vardis)
   int timeID, taxisID;
   int nbyte, nbyte0;
   int index;
-  char varname[128];
-  char longname[128];
-  char units[128];
+  char varname[CDI_MAX_NAME];
+  char longname[CDI_MAX_NAME];
+  char units[CDI_MAX_NAME];
   double level;
   char *modelptr, *instptr;
   int datatype;
@@ -684,7 +684,7 @@ int main(int argc, char *argv[])
   int varID;
   int itableID = CDI_UNDEFID, otableID = CDI_UNDEFID;
   int Info = 1;
-  char varname[128];
+  char varname[CDI_MAX_NAME];
   char paramstr[32];
 
   Progname = strrchr(argv[0], '/');

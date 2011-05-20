@@ -4186,7 +4186,7 @@ void printNCvars(ncvar_t *ncvars, int nvars)
 typedef struct
 {
   int      ncvarid;
-  char     name[128];
+  char     name[256];
 }
 varinfo_t;
 

@@ -616,7 +616,7 @@ int gridCreate(int gridtype, int size)
 
 @Prototype void gridDestroy(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
 
 @EndFunction
 */
@@ -668,8 +668,8 @@ void gridName(int gridtype, char *gridname)
 
 @Prototype void gridDefXname(int gridID, const char *name)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  name     Name of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  name     Name of the X-axis.
 
 @Description
 The function @func{gridDefXname} defines the name of a X-axis.
@@ -695,8 +695,8 @@ void gridDefXname(int gridID, const char *xname)
 
 @Prototype void gridDefXlongname(int gridID, const char *longname)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  longname Longname of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  longname Longname of the X-axis.
 
 @Description
 The function @func{gridDefXlongname} defines the longname of a X-axis.
@@ -720,8 +720,8 @@ void gridDefXlongname(int gridID, const char *xlongname)
 
 @Prototype void gridDefXunits(int gridID, const char *units)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  units    Units of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  units    Units of the X-axis.
 
 @Description
 The function @func{gridDefXunits} defines the units of a X-axis.
@@ -747,8 +747,8 @@ void gridDefXunits(int gridID, const char *xunits)
 
 @Prototype void gridDefYname(int gridID, const char *name)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  name     Name of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  name     Name of the Y-axis.
 
 @Description
 The function @func{gridDefYname} defines the name of a Y-axis.
@@ -774,8 +774,8 @@ void gridDefYname(int gridID, const char *yname)
 
 @Prototype void gridDefYlongname(int gridID, const char *longname)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  longname Longname of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  longname Longname of the Y-axis.
 
 @Description
 The function @func{gridDefYlongname} defines the longname of a Y-axis.
@@ -801,8 +801,8 @@ void gridDefYlongname(int gridID, const char *ylongname)
 
 @Prototype void gridDefYunits(int gridID, const char *units)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  units    Units of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  units    Units of the Y-axis.
 
 @Description
 The function @func{gridDefYunits} defines the units of a Y-axis.
@@ -826,10 +826,12 @@ void gridDefYunits(int gridID, const char *yunits)
 @Function  gridInqXname
 @Title     Get the name of a X-axis
 
-@Prototype void gridInqXname(int gridID, const char *name)
+@Prototype void gridInqXname(int gridID, char *name)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  name     Name of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  name     Name of the X-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{gridInqXname} returns the name of a X-axis.
@@ -855,10 +857,12 @@ void gridInqXname(int gridID, char *xname)
 @Function  gridInqXlongname
 @Title     Get the longname of a X-axis
 
-@Prototype void gridInqXlongname(int gridID, const char *longname)
+@Prototype void gridInqXlongname(int gridID, char *longname)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  longname Longname of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  longname Longname of the X-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{gridInqXlongname} returns the longname of a X-axis.
@@ -884,10 +888,12 @@ void gridInqXlongname(int gridID, char *xlongname)
 @Function  gridInqXunits
 @Title     Get the units of a X-axis
 
-@Prototype void gridInqXunits(int gridID, const char *units)
+@Prototype void gridInqXunits(int gridID, char *units)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  units    Units of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  units    Units of the X-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{gridInqXunits} returns the units of a X-axis.
@@ -925,10 +931,12 @@ void gridInqXstdname(int gridID, char *xstdname)
 @Function  gridInqYname
 @Title     Get the name of a Y-axis
 
-@Prototype void gridInqYname(int gridID, const char *name)
+@Prototype void gridInqYname(int gridID, char *name)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  name     Name of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  name     Name of the Y-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{gridInqYname} returns the name of a Y-axis.
@@ -954,10 +962,12 @@ void gridInqYname(int gridID, char *yname)
 @Function  gridInqYlongname
 @Title     Get the longname of a Y-axis
 
-@Prototype void gridInqXlongname(int gridID, const char *longname)
+@Prototype void gridInqXlongname(int gridID, char *longname)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  longname Longname of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  longname Longname of the Y-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{gridInqYlongname} returns the longname of a Y-axis.
@@ -983,10 +993,12 @@ void gridInqYlongname(int gridID, char *ylongname)
 @Function  gridInqYunits
 @Title     Get the units of a Y-axis
 
-@Prototype void gridInqYunits(int gridID, const char *units)
+@Prototype void gridInqYunits(int gridID, char *units)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  units    Units of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  units    Units of the Y-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{gridInqYunits} returns the units of a Y-axis.
@@ -1025,7 +1037,7 @@ void gridInqYstdname(int gridID, char *ystdname)
 
 @Prototype int gridInqType(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
 
 @Description
 The function @func{gridInqType} returns the type of a Grid.
@@ -1153,8 +1165,8 @@ void gridDefTrunc(int gridID, int trunc)
 
 @Prototype void gridDefXsize(int gridID, int xsize)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  xsize    Number of values of a X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  xsize    Number of values of a X-axis.
 
 @Description
 The function @func{gridDefXsize} defines the number of values of a X-axis.
@@ -1234,7 +1246,7 @@ int gridInqPrec(int gridID)
 
 @Prototype void gridInqXsize(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
 
 @Description
 The function @func{gridInqXsize} returns the number of values of a X-axis.
@@ -1262,8 +1274,8 @@ int gridInqXsize(int gridID)
 
 @Prototype void gridDefYsize(int gridID, int ysize)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  ysize    Number of values of a Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  ysize    Number of values of a Y-axis.
 
 @Description
 The function @func{gridDefYsize} defines the number of values of a Y-axis.
@@ -1299,7 +1311,7 @@ void gridDefYsize(int gridID, int ysize)
 
 @Prototype void gridInqYsize(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
 
 @Description
 The function @func{gridInqYsize} returns the number of values of a Y-axis.
@@ -1483,8 +1495,8 @@ void gridDefMaskGME(int gridID, const int *mask)
 
 @Prototype int gridInqXvals(int gridID, double *xvals)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  xvals    X-values of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  xvals    X-values of the grid.
 
 @Description
 The function @func{gridInqXvals} returns all values of the X-axis.
@@ -1528,8 +1540,8 @@ int gridInqXvals(int gridID, double *xvals)
 
 @Prototype void gridDefXvals(int gridID, const double *xvals)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  xvals    X-values of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  xvals    X-values of the grid.
 
 @Description
 The function @func{gridDefXvals} defines all values of the X-axis.
@@ -1571,8 +1583,8 @@ void gridDefXvals(int gridID, const double *xvals)
 
 @Prototype int gridInqYvals(int gridID, double *yvals)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  yvals    Y-values of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  yvals    Y-values of the grid.
 
 @Description
 The function @func{gridInqYvals} returns all values of the Y-axis.
@@ -1616,8 +1628,8 @@ int gridInqYvals(int gridID, double *yvals)
 
 @Prototype void gridDefYvals(int gridID, const double *yvals)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  yvals    Y-values of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  yvals    Y-values of the grid.
 
 @Description
 The function @func{gridDefYvals} defines all values of the Y-axis.
@@ -2918,8 +2930,8 @@ int gridInqNvertex(int gridID)
 
 @Prototype void gridDefXbounds(int gridID, const double *xbounds)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  xbounds  X-bounds of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  xbounds  X-bounds of the grid.
 
 @Description
 The function @func{gridDefXbounds} defines all bounds of the X-axis.
@@ -2966,8 +2978,8 @@ void gridDefXbounds(int gridID, const double *xbounds)
 
 @Prototype int gridInqXbounds(int gridID, double *xbounds)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  xbounds  X-bounds of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  xbounds  X-bounds of the grid.
 
 @Description
 The function @func{gridInqXbounds} returns the bounds of the X-axis.
@@ -3028,8 +3040,8 @@ double *gridInqXboundsPtr(int gridID)
 
 @Prototype void gridDefYbounds(int gridID, const double *ybounds)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  ybounds  Y-bounds of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  ybounds  Y-bounds of the grid.
 
 @Description
 The function @func{gridDefYbounds} defines all bounds of the Y-axis.
@@ -3076,8 +3088,8 @@ void gridDefYbounds(int gridID, const double *ybounds)
 
 @Prototype int gridInqYbounds(int gridID, double *ybounds)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  ybounds  Y-bounds of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  ybounds  Y-bounds of the grid.
 
 @Description
 The function @func{gridInqYbounds} returns the bounds of the Y-axis.
@@ -3469,16 +3481,16 @@ const double *gridInqYvalsPtr(int gridID)
 
 @Prototype void gridDefLCC(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc, int projflag, int scanflag)
 @Parameter
-    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}
-    @Item  originLon Longitude of the first grid point
-    @Item  originLat Latitude of the first grid point
-    @Item  lonParY   The East longitude of the meridian which is parallel to the Y-axis
-    @Item  lat1      First latitude from the pole at which the secant cone cuts the sphere
-    @Item  lat2      Second latitude at which the secant cone cuts the sphere
-    @Item  xinc      X-direction grid lenght in meter
-    @Item  yinc      Y-direction grid lenght in meter
-    @Item  projflag  Projection centre flag
-    @Item  scanflag  Scanning mode flag
+    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  originLon Longitude of the first grid point.
+    @Item  originLat Latitude of the first grid point.
+    @Item  lonParY   The East longitude of the meridian which is parallel to the Y-axis.
+    @Item  lat1      First latitude from the pole at which the secant cone cuts the sphere.
+    @Item  lat2      Second latitude at which the secant cone cuts the sphere.
+    @Item  xinc      X-direction grid lenght in meter.
+    @Item  yinc      Y-direction grid lenght in meter.
+    @Item  projflag  Projection centre flag.
+    @Item  scanflag  Scanning mode flag.
  
 @Description
 The function @func{gridDefLCC} defines the parameter of a Lambert Conformal Conic grid.
@@ -3520,16 +3532,16 @@ void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
 
 @Prototype void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonParY, double *lat1, double *lat2, double *xinc, double *yinc, int *projflag, int *scanflag)
 @Parameter
-    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}
-    @Item  originLon Longitude of the first grid point
-    @Item  originLat Latitude of the first grid point
-    @Item  lonParY   The East longitude of the meridian which is parallel to the Y-axis
-    @Item  lat1      First latitude from the pole at which the secant cone cuts the sphere
-    @Item  lat2      Second latitude at which the secant cone cuts the sphere
-    @Item  xinc      X-direction grid lenght in meter
-    @Item  yinc      Y-direction grid lenght in meter
-    @Item  projflag  Projection centre flag
-    @Item  scanflag  Scanning mode flag
+    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  originLon Longitude of the first grid point.
+    @Item  originLat Latitude of the first grid point.
+    @Item  lonParY   The East longitude of the meridian which is parallel to the Y-axis.
+    @Item  lat1      First latitude from the pole at which the secant cone cuts the sphere.
+    @Item  lat2      Second latitude at which the secant cone cuts the sphere.
+    @Item  xinc      X-direction grid lenght in meter.
+    @Item  yinc      Y-direction grid lenght in meter.
+    @Item  projflag  Projection centre flag.
+    @Item  scanflag  Scanning mode flag.
  
 @Description
 The function @func{gridInqLCC} returns the parameter of a Lambert Conformal Conic grid.
@@ -3778,4 +3790,3 @@ void gridDefReference(int gridID, const char *reference)
       gridptr->reference = strdupx(reference);
     }
 }
-

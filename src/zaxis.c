@@ -316,7 +316,7 @@ int zaxisSize(void)
                       The valid CDI Z-axis types are @func{ZAXIS_GENERIC}, @func{ZAXIS_SURFACE},
                       @func{ZAXIS_HYBRID}, @func{ZAXIS_SIGMA}, @func{ZAXIS_PRESSURE}, @func{ZAXIS_HEIGHT},
                       @func{ZAXIS_DEPTH_BELOW_SEA} and @func{ZAXIS_DEPTH_BELOW_LAND}.
-    @Item  size       Number of levels
+    @Item  size       Number of levels.
 
 @Description
 The function @func{zaxisCreate} creates a vertical Z-axis.
@@ -389,7 +389,7 @@ int zaxisCreate(int zaxistype, int size)
 
 @Prototype void zaxisDestroy(int zaxisID)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
 
 @EndFunction
 */
@@ -431,8 +431,8 @@ void zaxisName(int zaxistype, char *zaxisname)
 
 @Prototype void zaxisDefName(int zaxisID, const char *name)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  name     Name of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  name     Name of the Z-axis.
 
 @Description
 The function @func{zaxisDefName} defines the name of a Z-axis.
@@ -457,8 +457,8 @@ void zaxisDefName(int zaxisID, const char *name)
 
 @Prototype void zaxisDefLongname(int zaxisID, const char *longname)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  longname Longname of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  longname Longname of the Z-axis.
 
 @Description
 The function @func{zaxisDefLongname} defines the longname of a Z-axis.
@@ -483,8 +483,8 @@ void zaxisDefLongname(int zaxisID, const char *longname)
 
 @Prototype void zaxisDefUnits(int zaxisID, const char *units)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  units    Units of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  units    Units of the Z-axis.
 
 @Description
 The function @func{zaxisDefUnits} defines the units of a Z-axis.
@@ -509,8 +509,10 @@ void zaxisDefUnits(int zaxisID, const char *units)
 
 @Prototype void zaxisInqName(int zaxisID, char *name)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  name     Name of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  name     Name of the Z-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{zaxisInqName} returns the name of a Z-axis.
@@ -537,8 +539,10 @@ void zaxisInqName(int zaxisID, char *name)
 
 @Prototype void zaxisInqLongname(int zaxisID, char *longname)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  longname Longname of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  longname Longname of the Z-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{zaxisInqLongname} returns the longname of a Z-axis.
@@ -566,7 +570,9 @@ void zaxisInqLongname(int zaxisID, char *longname)
 @Prototype void zaxisInqUnits(int zaxisID, char *units)
 @Parameter
     @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  units    Units of the Z-axis
+    @Item  units    Units of the Z-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{zaxisInqUnits} returns the units of a Z-axis.
@@ -665,8 +671,8 @@ int zaxisInqLtype(int zaxisID)
 
 @Prototype void zaxisDefLevels(int zaxisID, const double *levels)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  levels   All levels of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  levels   All levels of the Z-axis.
 
 @Description
 The function @func{zaxisDefLevels} defines the levels of a Z-axis.
@@ -698,9 +704,9 @@ void zaxisDefLevels(int zaxisID, const double *levels)
 
 @Prototype void zaxisDefLevel(int zaxisID, int levelID, double level)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  levelID  Level identifier
-    @Item  level    Level
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  levelID  Level identifier.
+    @Item  level    Level.
 
 @Description
 The function @func{zaxisDefLevel} defines one level of a Z-axis.
@@ -725,8 +731,8 @@ void zaxisDefLevel(int zaxisID, int levelID, double level)
 
 @Prototype double zaxisInqLevel(int zaxisID, int levelID)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  levelID  Level index (range: 0 to nlevel-1)
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  levelID  Level index (range: 0 to nlevel-1).
 
 @Description
 The function @func{zaxisInqLevel} returns one level of a Z-axis.
@@ -802,8 +808,8 @@ const double *zaxisInqLevelsPtr(int zaxisID)
 
 @Prototype void zaxisInqLevels(int zaxisID, double *levels)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  levels   Levels of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  levels   Levels of the Z-axis.
     
 @Description
 The function @func{zaxisInqLevels} returns all levels of a Z-axis.
@@ -923,7 +929,7 @@ int zaxisInqLevelID(int zaxisID, double level)
 
 @Prototype int zaxisInqType(int zaxisID)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
 
 @Description
 The function @func{zaxisInqType} returns the type of a Z-axis.

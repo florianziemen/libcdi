@@ -139,9 +139,9 @@ void vlistCheckVarID(const char *caller, int vlistID, int varID)
 
 @Prototype int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
     @Item  timeID   One of the set of predefined CDI time identifiers.
                     The valid CDI time identifiers are @func{TIME_CONSTANT} and @func{TIME_VARIABLE}.
 
@@ -246,9 +246,9 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
 
 @Prototype void vlistDefVarParam(int vlistID, int varID, int param)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
-    @Item  param    Parameter number
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
+    @Item  param    Parameter number.
 
 @Description
 The function @func{vlistDefVarParam} defines the parameter number of a variable.
@@ -272,9 +272,9 @@ void vlistDefVarParam(int vlistID, int varID, int param)
 
 @Prototype void vlistDefVarCode(int vlistID, int varID, int code)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
-    @Item  code     Code number
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
+    @Item  code     Code number.
 
 @Description
 The function @func{vlistDefVarCode} defines the code number of a variable.
@@ -319,8 +319,8 @@ void vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *timeID)
 
 @Prototype int vlistInqVarGrid(int vlistID, int varID)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
 
 @Description
 The function @func{vlistInqVarGrid} returns the grid ID of a variable.
@@ -347,8 +347,8 @@ int vlistInqVarGrid(int vlistID, int varID)
 
 @Prototype int vlistInqVarZaxis(int vlistID, int varID)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
 
 @Description
 The function @func{vlistInqVarZaxis} returns the zaxis ID of a variable.
@@ -387,8 +387,8 @@ int vlistInqVarTime(int vlistID, int varID)
 
 @Prototype int vlistInqVarParam(int vlistID, int varID)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
 
 @Description
 The function @func{vlistInqVarParam} returns the parameter number of a variable.
@@ -418,8 +418,8 @@ int vlistInqVarParam(int vlistID, int varID)
 
 @Prototype int vlistInqVarCode(int vlistID, int varID)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
 
 @Description
 The function @func{vlistInqVarCode} returns the code number of a variable.
@@ -505,12 +505,11 @@ char *vlistInqVarUnitsPtr(int vlistID, int varID)
 
 @Prototype void vlistInqVarName(int vlistID, int varID, char *name)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
     @Item  name     Returned variable name. The caller must allocate space for the 
-                    returned name. The maximum possible length, in characters, of a 
-                    variable name is given by the predefined constant CDI_MAX_NAME.
-                    The returned character array will be null-terminated. 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{vlistInqVarName} returns the name of a variable.
@@ -560,9 +559,11 @@ void vlistInqVarName(int vlistID, int varID, char *name)
 
 @Prototype void vlistInqVarLongname(int vlistID, int varID, char *longname)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
-    @Item  longname Variable description
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
+    @Item  longname Long name of the variable. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{vlistInqVarLongname} returns the longname of a variable if available,
@@ -610,9 +611,11 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
 
 @Prototype void vlistInqVarStdname(int vlistID, int varID, char *stdname)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
-    @Item  stdname  Variable standard name
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
+    @Item  stdname  Standard name of the variable. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{vlistInqVarStdname} returns the standard name of a variable if available,
@@ -647,9 +650,11 @@ void vlistInqVarStdname(int vlistID, int varID, char *stdname)
 
 @Prototype void vlistInqVarUnits(int vlistID, int varID, char *units)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
-    @Item  units    Variable units
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
+    @Item  units    Units of the variable. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{vlistInqVarUnits} returns the units of a variable if available,
@@ -745,8 +750,8 @@ int vlistInqVarSize(int vlistID, int varID)
 
 @Prototype int vlistInqVarDatatype(int vlistID, int varID)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
 
 @Description
 The function @func{vlistInqVarDatatype} returns the data type of a variable.
@@ -793,8 +798,8 @@ int vlistInqVarNumber(int vlistID, int varID)
 
 @Prototype void vlistDefVarDatatype(int vlistID, int varID, int datatype)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
     @Item  datatype The data type identifier.
                     The valid CDI data types are @func{DATATYPE_PACK8}, @func{DATATYPE_PACK16},
                     @func{DATATYPE_PACK24}, @func{DATATYPE_FLT32}, @func{DATATYPE_FLT64},
@@ -908,9 +913,9 @@ int vlistInqVarTable(int vlistID, int varID)
 
 @Prototype void vlistDefVarName(int vlistID, int varID, const char *name)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
-    @Item  name     Name of the variable
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
+    @Item  name     Name of the variable.
 
 @Description
 The function @func{vlistDefVarName} defines the name of a variable.
@@ -943,9 +948,9 @@ void vlistDefVarName(int vlistID, int varID, const char *name)
 
 @Prototype void vlistDefVarLongname(int vlistID, int varID, const char *longname)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
-    @Item  longname Long name of the variable
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
+    @Item  longname Long name of the variable.
 
 @Description
 The function @func{vlistDefVarLongname} defines the long name of a variable.
@@ -978,9 +983,9 @@ void vlistDefVarLongname(int vlistID, int varID, const char *longname)
 
 @Prototype void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
-    @Item  stdname  Standard name of the variable
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
+    @Item  stdname  Standard name of the variable.
 
 @Description
 The function @func{vlistDefVarStdname} defines the standard name of a variable.
@@ -1013,9 +1018,9 @@ void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
 
 @Prototype void vlistDefVarUnits(int vlistID, int varID, const char *units)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
-    @Item  units    Units of the variable
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
+    @Item  units    Units of the variable.
 
 @Description
 The function @func{vlistDefVarUnits} defines the units of a variable.
@@ -1048,8 +1053,8 @@ void vlistDefVarUnits(int vlistID, int varID, const char *units)
 
 @Prototype double vlistInqVarMissval(int vlistID, int varID)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
 
 @Description
 The function @func{vlistInqVarMissval} returns the missing value of a variable.
@@ -1100,9 +1105,9 @@ double vlistInqVarAddoffset(int vlistID, int varID)
 
 @Prototype void vlistDefVarMissval(int vlistID, int varID, double missval)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-    @Item  varID    Variable identifier
-    @Item  missval  Missing value
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
+    @Item  missval  Missing value.
 
 @Description
 The function @func{vlistDefVarMissval} defines the missing value of a variable.

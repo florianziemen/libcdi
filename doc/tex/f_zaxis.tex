@@ -20,7 +20,7 @@ The type of the Z-axis, one of the set of predefined {\CDI} Z-axis types.
                       {\tt ZAXIS\_HYBRID}, {\tt ZAXIS\_SIGMA}, {\tt ZAXIS\_PRESSURE}, {\tt ZAXIS\_HEIGHT},
                       {\tt ZAXIS\_DEPTH\_BELOW\_SEA} and {\tt ZAXIS\_DEPTH\_BELOW\_LAND}.
 \item[{\tt size}]
-Number of levels
+Number of levels.
 
 \end{deflist}
 \end{minipage}
@@ -61,7 +61,7 @@ Here is an example using {\tt zaxisCreate} to create a pressure level Z-axis:
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt zaxisID\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
 
 \end{deflist}
 \end{minipage}
@@ -82,7 +82,7 @@ The function {\tt zaxisInqType} returns the type of a Z-axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt zaxisID\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
 
 \end{deflist}
 \end{minipage}
@@ -138,9 +138,9 @@ The function {\tt zaxisDefLevels} defines the levels of a Z-axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt zaxisID\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
 \item[{\tt levels}]
-All levels of the Z-axis
+All levels of the Z-axis.
 
 \end{deflist}
 \end{minipage}
@@ -161,9 +161,9 @@ The function {\tt zaxisInqLevels} returns all levels of a Z-axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt zaxisID\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
 \item[{\tt levels}]
-Levels of the Z-axis
+Levels of the Z-axis.
     
 \end{deflist}
 \end{minipage}
@@ -188,9 +188,9 @@ The function {\tt zaxisInqLevel} returns one level of a Z-axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt zaxisID\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
 \item[{\tt levelID}]
-Level index (range: 0 to nlevel-1)
+Level index (range: 0 to nlevel-1).
 
 \end{deflist}
 \end{minipage}
@@ -215,9 +215,9 @@ The function {\tt zaxisDefName} defines the name of a Z-axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt zaxisID\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
 \item[{\tt name}]
-Name of the Z-axis
+Name of the Z-axis.
 
 \end{deflist}
 \end{minipage}
@@ -238,9 +238,11 @@ The function {\tt zaxisInqName} returns the name of a Z-axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt zaxisID\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
 \item[{\tt name}]
-Name of the Z-axis
+Name of the Z-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI\_MAX\_NAME.
 
 \end{deflist}
 \end{minipage}
@@ -266,9 +268,9 @@ The function {\tt zaxisDefLongname} defines the longname of a Z-axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt longname\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
 \item[{\tt longname}]
-Longname of the Z-axis
+Longname of the Z-axis.
 
 \end{deflist}
 \end{minipage}
@@ -289,9 +291,11 @@ The function {\tt zaxisInqLongname} returns the longname of a Z-axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt longname\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
 \item[{\tt longname}]
-Longname of the Z-axis
+Longname of the Z-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI\_MAX\_NAME.
 
 \end{deflist}
 \end{minipage}
@@ -317,9 +321,9 @@ The function {\tt zaxisDefUnits} defines the units of a Z-axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt zaxisID\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
 \item[{\tt units}]
-Units of the Z-axis
+Units of the Z-axis.
 
 \end{deflist}
 \end{minipage}
@@ -342,7 +346,9 @@ The function {\tt zaxisInqUnits} returns the units of a Z-axis.
 \item[{\tt zaxisID}]
 Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
 \item[{\tt units}]
-Units of the Z-axis
+Units of the Z-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI\_MAX\_NAME.
 
 \end{deflist}
 \end{minipage}

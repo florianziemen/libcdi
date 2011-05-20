@@ -15,11 +15,11 @@ The function {\tt vlistDefVar} adds a new variable to vlistID.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt gridID}]
-Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
 \item[{\tt timeID}]
 One of the set of predefined {\CDI} time identifiers.
                     The valid {\CDI} time identifiers are {\tt TIME\_CONSTANT} and {\tt TIME\_VARIABLE}.
@@ -68,9 +68,9 @@ The function {\tt vlistInqVarGrid} returns the grid ID of a variable.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier
+Variable identifier.
 
 \end{deflist}
 \end{minipage}
@@ -96,9 +96,9 @@ The function {\tt vlistInqVarZaxis} returns the zaxis ID of a variable.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier
+Variable identifier.
 
 \end{deflist}
 \end{minipage}
@@ -124,11 +124,11 @@ The function {\tt vlistDefVarCode} defines the code number of a variable.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier
+Variable identifier.
 \item[{\tt code}]
-Code number
+Code number.
 
 \end{deflist}
 \end{minipage}
@@ -149,9 +149,9 @@ The function {\tt vlistInqVarCode} returns the code number of a variable.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier
+Variable identifier.
 
 \end{deflist}
 \end{minipage}
@@ -177,11 +177,11 @@ The function {\tt vlistDefVarName} defines the name of a variable.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier
+Variable identifier.
 \item[{\tt name}]
-Name of the variable
+Name of the variable.
 
 \end{deflist}
 \end{minipage}
@@ -202,14 +202,13 @@ The function {\tt vlistInqVarName} returns the name of a variable.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier
+Variable identifier.
 \item[{\tt name}]
 Returned variable name. The caller must allocate space for the 
-                    returned name. The maximum possible length, in characters, of a 
-                    variable name is given by the predefined constant CDI\_MAX\_NAME.
-                    The returned character array will be null-terminated. 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI\_MAX\_NAME.
 
 \end{deflist}
 \end{minipage}
@@ -236,11 +235,11 @@ The function {\tt vlistDefVarLongname} defines the long name of a variable.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt longname\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier
+Variable identifier.
 \item[{\tt longname}]
-Long name of the variable
+Long name of the variable.
 
 \end{deflist}
 \end{minipage}
@@ -262,11 +261,13 @@ otherwise the result is an empty string.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt longname\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier
+Variable identifier.
 \item[{\tt longname}]
-Variable description
+Long name of the variable. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI\_MAX\_NAME.
 
 \end{deflist}
 \end{minipage}
@@ -292,11 +293,11 @@ The function {\tt vlistDefVarStdname} defines the standard name of a variable.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier
+Variable identifier.
 \item[{\tt stdname}]
-Standard name of the variable
+Standard name of the variable.
 
 \end{deflist}
 \end{minipage}
@@ -318,11 +319,13 @@ otherwise the result is an empty string.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier
+Variable identifier.
 \item[{\tt stdname}]
-Variable standard name
+Standard name of the variable. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI\_MAX\_NAME.
 
 \end{deflist}
 \end{minipage}
@@ -348,11 +351,11 @@ The function {\tt vlistDefVarUnits} defines the units of a variable.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier
+Variable identifier.
 \item[{\tt units}]
-Units of the variable
+Units of the variable.
 
 \end{deflist}
 \end{minipage}
@@ -374,11 +377,13 @@ otherwise the result is an empty string.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier
+Variable identifier.
 \item[{\tt units}]
-Variable units
+Units of the variable. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI\_MAX\_NAME.
 
 \end{deflist}
 \end{minipage}
@@ -404,9 +409,9 @@ The function {\tt vlistDefVarDatatype} defines the data type of a variable.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt datatype\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier
+Variable identifier.
 \item[{\tt datatype}]
 The data type identifier.
                     The valid {\CDI} data types are {\tt DATATYPE\_PACK8}, {\tt DATATYPE\_PACK16},
@@ -432,9 +437,9 @@ The function {\tt vlistInqVarDatatype} returns the data type of a variable.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier
+Variable identifier.
 
 \end{deflist}
 \end{minipage}
@@ -463,11 +468,11 @@ The function {\tt vlistDefVarMissval} defines the missing value of a variable.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier
+Variable identifier.
 \item[{\tt missval}]
-Missing value
+Missing value.
 
 \end{deflist}
 \end{minipage}
@@ -488,9 +493,9 @@ The function {\tt vlistInqVarMissval} returns the missing value of a variable.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier
+Variable identifier.
 
 \end{deflist}
 \end{minipage}
