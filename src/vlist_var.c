@@ -1682,7 +1682,7 @@ int vlistInqVarZlevel(int vlistID, int varID)
 #ifdef USE_MPI
 
 enum {
-  vlistvar_nints = 17,
+  vlistvar_nints = 19,
   vlistvar_ndbls = 3,
 };
 
@@ -1739,6 +1739,8 @@ void vlistVarPack(var_t *var, char * buf, int size, int *position,
   tempbuf[14] = var->timave;
   tempbuf[15] = var->timaccu;
   tempbuf[16] = var->missvalused;
+  tempbuf[17] = var->ztype;
+  tempbuf[18] = var->zlevel;
   dtempbuf[0] = var->missval;
   dtempbuf[1] = var->scalefactor;
   dtempbuf[2] = var->addoffset;
@@ -1823,6 +1825,8 @@ void vlistVarUnpack(int vlistID,
     vlistDefVarMissval(vlistID, newvar, dtempbuf[0]);
   vlistDefVarScalefactor(vlistID, newvar, dtempbuf[1]);
   vlistDefVarAddoffset(vlistID, newvar, dtempbuf[2]);
+  vlistDefVarZtype(vlistID, newvar, tempbuf[17]);
+  vlistDefVarZlevel(vlistID, newvar, tempbuf[18]);
 }
 
 
