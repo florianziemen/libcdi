@@ -1682,7 +1682,7 @@ int vlistInqVarZlevel(int vlistID, int varID)
 #ifdef USE_MPI
 
 enum {
-  vlistvar_nints = 10,
+  vlistvar_nints = 13,
 };
 
 int vlistVarGetSize(var_t *var, MPI_Comm comm)
@@ -1726,6 +1726,9 @@ void vlistVarPack(var_t *var, char * buf, int size, int *position,
   tempbuf[7] = unitssz = var->units?strlen(var->units):0;
   tempbuf[8] = var->datatype;
   tempbuf[9] = var->param;
+  tempbuf[10] = var->instID;
+  tempbuf[11] = var->modelID;
+  tempbuf[12] = var->tableID;
   xmpi(MPI_Pack(tempbuf, vlistvar_nints, MPI_INT,
                 buf, size, position, comm));
   if (namesz)
@@ -1790,6 +1793,10 @@ void vlistVarUnpack(int vlistID,
   }
   free(varname);
   vlistDefVarDatatype(vlistID, newvar, tempbuf[8]);
+  vlistDefVarInstitut(vlistID, newvar, tempbuf[10]);
+  vlistDefVarModel(vlistID, newvar, tempbuf[11]);
+  vlistDefVarTable(vlistID, newvar, tempbuf[12]);
+  /* FIXME: changing the table might change the param code */
   vlistDefVarParam(vlistID, newvar, tempbuf[9]);
 }
 
