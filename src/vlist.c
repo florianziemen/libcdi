@@ -312,7 +312,7 @@ int vlistCreate(void)
 void vlistDestroy(int vlistID)
 {
   vlist_t *vlistptr;
-  int nvars = vlistptr->nvars;
+  int nvars;
   int varID;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -320,6 +320,8 @@ void vlistDestroy(int vlistID)
   vlist_check_ptr(__func__, vlistptr);
 
   vlistDelAtts(vlistID, CDI_GLOBAL);
+
+  nvars = vlistptr->nvars;
 
   for ( varID = 0; varID < nvars; varID++ )
     {
