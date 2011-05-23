@@ -495,7 +495,7 @@ vlistAttGetSize(vlist_t *vlistptr, int varID, int attnum, MPI_Comm comm)
   xmpi(MPI_Pack_size(vlist_att_nints, MPI_INT, comm, &txsize));
   xmpi(MPI_Pack_size(attp->namesz, MPI_CHAR, comm, &txinc));
   txsize += txinc;
-  switch (attp->exdtype)
+  switch (attp->indtype)
   {
   case DATATYPE_FLT:
     xmpi(MPI_Pack_size((int)attp->nelems, MPI_DOUBLE, comm, &txinc));
@@ -508,7 +508,7 @@ vlistAttGetSize(vlist_t *vlistptr, int varID, int attnum, MPI_Comm comm)
     break;
   default:
     fprintf(stderr, "Unknown datatype encountered in attribute %s: %d\n",
-            attp->name, attp->exdtype);
+            attp->name, attp->indtype);
     xabort("");
   }
   txsize += txinc;
