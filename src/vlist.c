@@ -1582,9 +1582,7 @@ int  vlistGetSizeP ( void * vlistptr, MPI_Comm comm )
   xmpi(MPI_Pack_size(vlist_nints, MPI_INT, comm, &txsize));
   txsize += vlistAttsGetSize(p, CDI_GLOBAL, comm);
   for ( varID = 0; varID <  p->nvars; varID++ )
-  {
-    txsize += vlistVarGetSize(((vlist_t *)vlistptr)->vars + varID, comm);
-  }
+    txsize += vlistVarGetSize(p, varID, comm);
   return txsize;
 }
 
@@ -1607,7 +1605,7 @@ void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
   vlistAttsPack(p, CDI_GLOBAL, buf, size, position, comm);
   for ( varID = 0; varID < p->nvars; varID++ )
   {
-    vlistVarPack(p->vars + varID, buf, size, position, comm);
+    vlistVarPack(p, varID, buf, size, position, comm);
   }
 }
 
@@ -1624,9 +1622,7 @@ void vlistUnpack(char * buf, int size, int *position, MPI_Comm comm)
   vlistDefModel(newvlist, tempbuf[6]);
   vlistAttsUnpack(newvlist, CDI_GLOBAL, buf, size, position, comm);
   for ( varID = 0; varID < tempbuf[1]; varID++ )
-  {
     vlistVarUnpack(newvlist, buf, size, position, comm);
-  }
 }
 
 

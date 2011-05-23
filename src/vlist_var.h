@@ -12,9 +12,9 @@
 #include "vlist.h"
 
 #ifdef USE_MPI
-int vlistVarGetSize(var_t *var, MPI_Comm comm);
-void vlistVarPack(var_t *var, char * buffer, int bufferSize, int * pos,
-                  MPI_Comm comm);
+int vlistVarGetSize(vlist_t *p, int varID, MPI_Comm comm);
+void vlistVarPack(vlist_t *p, int varID,
+                  char * buffer, int bufferSize, int * pos, MPI_Comm comm);
 void vlistVarUnpack(int vlistID,
                     char * buf, int size, int *position, MPI_Comm comm);
 #endif

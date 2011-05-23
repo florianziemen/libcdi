@@ -14,6 +14,7 @@
 #include "vlist.h"
 #include "resource_handle.h"
 #include "pio_util.h"
+#include "vlist_att.h"
 
 extern resOps vlist_ops;
 
@@ -1686,8 +1687,9 @@ enum {
   vlistvar_ndbls = 3,
 };
 
-int vlistVarGetSize(var_t *var, MPI_Comm comm)
+int vlistVarGetSize(vlist_t *p, int varID, MPI_Comm comm)
 {
+  var_t *var = p->vars + varID;
   int varsize, txinc;
 
   xmpi(MPI_Pack_size(vlistvar_nints, MPI_INT, comm, &varsize));
@@ -1713,14 +1715,16 @@ int vlistVarGetSize(var_t *var, MPI_Comm comm)
     xmpi(MPI_Pack_size(strlen(var->units), MPI_CHAR, comm, &txinc));
     varsize += txinc;
   }
+  varsize += vlistAttsGetSize(p, varID, comm);
   return varsize;
 }
 
-void vlistVarPack(var_t *var, char * buf, int size, int *position,
+void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
                   MPI_Comm comm)
 {
-  int tempbuf[vlistvar_nints], namesz, longnamesz, stdnamesz, unitssz;
   double dtempbuf[vlistvar_ndbls];
+  var_t *var = p->vars + varID;
+  int tempbuf[vlistvar_nints], namesz, longnamesz, stdnamesz, unitssz, i;
 
   tempbuf[0] = var->flag;
   tempbuf[1] = var->gridID;
@@ -1759,6 +1763,8 @@ void vlistVarPack(var_t *var, char * buf, int size, int *position,
   if (unitssz)
     xmpi(MPI_Pack(var->units, unitssz, MPI_CHAR,
                   buf, size, position, comm));
+  for (i = 0; i < var->atts.nelems; ++i)
+    vlistAttsPack(p, varID, buf, size, position, comm);
 }
 
 static inline int
@@ -1827,6 +1833,7 @@ void vlistVarUnpack(int vlistID,
   vlistDefVarAddoffset(vlistID, newvar, dtempbuf[2]);
   vlistDefVarZtype(vlistID, newvar, tempbuf[17]);
   vlistDefVarZlevel(vlistID, newvar, tempbuf[18]);
+  vlistAttsUnpack(vlistID, newvar, buf, size, position, comm);
 }
 
 
