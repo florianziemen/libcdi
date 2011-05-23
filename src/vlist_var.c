@@ -1682,7 +1682,7 @@ int vlistInqVarZlevel(int vlistID, int varID)
 #ifdef USE_MPI
 
 enum {
-  vlistvar_nints = 6,
+  vlistvar_nints = 7,
 };
 
 int vlistVarGetSize(var_t *var, MPI_Comm comm)
@@ -1699,25 +1699,34 @@ int vlistVarGetSize(var_t *var, MPI_Comm comm)
     xmpi(MPI_Pack_size(strlen(var->longname), MPI_CHAR, comm, &txinc));
     varsize += txinc;
   }
+  if (var->stdname)
+  {
+    xmpi(MPI_Pack_size(strlen(var->stdname), MPI_CHAR, comm, &txinc));
+    varsize += txinc;
+  }
   return varsize;
 }
 
 void vlistVarPack(var_t *var, char * buf, int size, int *position,
                   MPI_Comm comm)
 {
-  int tempbuf[vlistvar_nints], namesz, longnamesz;
+  int tempbuf[vlistvar_nints], namesz, longnamesz, stdnamesz;
   tempbuf[0] = var->flag;
   tempbuf[1] = var->gridID;
   tempbuf[2] = var->zaxisID;
   tempbuf[3] = var->timeID;
   tempbuf[4] = namesz = var->name?strlen(var->name):0;
   tempbuf[5] = longnamesz = var->longname?strlen(var->longname):0;
+  tempbuf[6] = stdnamesz = var->stdname?strlen(var->stdname):0;
   xmpi(MPI_Pack(tempbuf, vlistvar_nints, MPI_INT,
                 buf, size, position, comm));
   if (namesz)
     xmpi(MPI_Pack(var->name, namesz, MPI_CHAR, buf, size, position, comm));
   if (longnamesz)
     xmpi(MPI_Pack(var->longname, longnamesz, MPI_CHAR,
+                  buf, size, position, comm));
+  if (stdnamesz)
+    xmpi(MPI_Pack(var->stdname, stdnamesz, MPI_CHAR,
                   buf, size, position, comm));
 }
 
@@ -1737,8 +1746,8 @@ void vlistVarUnpack(int vlistID,
   xmpi(MPI_Unpack(buf, size, position,
                   tempbuf, vlistvar_nints, MPI_INT, comm));
   newvar = vlistDefVar(vlistID, tempbuf[1], tempbuf[2], tempbuf[3]);
-  if (tempbuf[4] || tempbuf[5])
-    varname = xmalloc(imax(tempbuf[4],tempbuf[5]) + 1);
+  if (tempbuf[4] || tempbuf[5] || tempbuf[6])
+    varname = xmalloc(imax(imax(tempbuf[4],tempbuf[5]),tempbuf[6]) + 1);
   if (tempbuf[4])
   {
     xmpi(MPI_Unpack(buf, size, position,
@@ -1752,6 +1761,13 @@ void vlistVarUnpack(int vlistID,
                     varname, tempbuf[5], MPI_CHAR, comm));
     varname[tempbuf[5]] = '\0';
     vlistDefVarLongname(vlistID, newvar, varname);
+  }
+  if (tempbuf[6])
+  {
+    xmpi(MPI_Unpack(buf, size, position,
+                    varname, tempbuf[6], MPI_CHAR, comm));
+    varname[tempbuf[6]] = '\0';
+    vlistDefVarStdname(vlistID, newvar, varname);
   }
   free(varname);
 }
