@@ -1682,13 +1682,17 @@ int vlistInqVarZlevel(int vlistID, int varID)
 #ifdef USE_MPI
 
 enum {
-  vlistvar_nints = 16,
+  vlistvar_nints = 17,
+  vlistvar_ndbls = 3,
 };
 
 int vlistVarGetSize(var_t *var, MPI_Comm comm)
 {
   int varsize, txinc;
+
   xmpi(MPI_Pack_size(vlistvar_nints, MPI_INT, comm, &varsize));
+  xmpi(MPI_Pack_size(vlistvar_ndbls, MPI_DOUBLE, comm, &txinc));
+  varsize += txinc;
   if (var->name)
   {
     xmpi(MPI_Pack_size(strlen(var->name), MPI_CHAR, comm, &txinc));
@@ -1716,6 +1720,8 @@ void vlistVarPack(var_t *var, char * buf, int size, int *position,
                   MPI_Comm comm)
 {
   int tempbuf[vlistvar_nints], namesz, longnamesz, stdnamesz, unitssz;
+  double dtempbuf[vlistvar_ndbls];
+
   tempbuf[0] = var->flag;
   tempbuf[1] = var->gridID;
   tempbuf[2] = var->zaxisID;
@@ -1732,7 +1738,13 @@ void vlistVarPack(var_t *var, char * buf, int size, int *position,
   tempbuf[13] = var->tsteptype;
   tempbuf[14] = var->timave;
   tempbuf[15] = var->timaccu;
+  tempbuf[16] = var->missvalused;
+  dtempbuf[0] = var->missval;
+  dtempbuf[1] = var->scalefactor;
+  dtempbuf[2] = var->addoffset;
   xmpi(MPI_Pack(tempbuf, vlistvar_nints, MPI_INT,
+                buf, size, position, comm));
+  xmpi(MPI_Pack(dtempbuf, vlistvar_ndbls, MPI_DOUBLE,
                 buf, size, position, comm));
   if (namesz)
     xmpi(MPI_Pack(var->name, namesz, MPI_CHAR, buf, size, position, comm));
@@ -1757,11 +1769,14 @@ imax(int a, int b)
 void vlistVarUnpack(int vlistID,
                     char * buf, int size, int *position, MPI_Comm comm)
 {
+  double dtempbuf[vlistvar_ndbls];
   int tempbuf[vlistvar_nints];
   int newvar;
   char *varname = NULL;
   xmpi(MPI_Unpack(buf, size, position,
                   tempbuf, vlistvar_nints, MPI_INT, comm));
+  xmpi(MPI_Unpack(buf, size, position,
+                  dtempbuf, vlistvar_ndbls, MPI_DOUBLE, comm));
   newvar = vlistDefVar(vlistID, tempbuf[1], tempbuf[2], tempbuf[3]);
   if (tempbuf[4] || tempbuf[5] || tempbuf[6] || tempbuf[7])
     varname = xmalloc(imax(imax(imax(tempbuf[4],tempbuf[5]),tempbuf[6]),
@@ -1804,6 +1819,10 @@ void vlistVarUnpack(int vlistID,
   vlistDefVarTsteptype(vlistID, newvar, tempbuf[13]);
   vlistDefVarTimave(vlistID, newvar, tempbuf[14]);
   vlistDefVarTimaccu(vlistID, newvar, tempbuf[15]);
+  if (tempbuf[16])
+    vlistDefVarMissval(vlistID, newvar, dtempbuf[0]);
+  vlistDefVarScalefactor(vlistID, newvar, dtempbuf[1]);
+  vlistDefVarAddoffset(vlistID, newvar, dtempbuf[2]);
 }
 
 
