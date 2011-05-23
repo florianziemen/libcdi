@@ -131,6 +131,9 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
   int lindex;
   stream_t *streamptr;
 
+  check_parg(varID);
+  check_parg(levelID);
+
   streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
@@ -296,6 +299,9 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
   int filetype;
   stream_t *streamptr;
 
+  check_parg(data);
+  check_parg(nmiss);
+
   streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
@@ -359,6 +365,8 @@ void streamWriteRecord(int streamID, const double *data, int nmiss)
   int status = 0;
   int filetype;
   stream_t *streamptr;
+
+  check_parg(data);
 
   streamptr = stream_to_pointer(streamID);
 

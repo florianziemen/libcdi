@@ -1468,10 +1468,12 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
   int filetype;
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamID, varID);
 
-  if ( CDI_Debug )
-    Message("streamID = %d  varID = %d", streamID, varID);
+  check_parg(data);
+  check_parg(nmiss);
+
+  streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
 
@@ -1549,10 +1551,11 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
   int filetype;
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
 
-  if ( CDI_Debug )
-    Message("streamID = %d varID = %d", streamID, varID);
+  check_parg(data);
+
+  streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
 
@@ -1634,6 +1637,11 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
   int ierr = 0;
   stream_t *streamptr;
 
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamID, varID);
+
+  check_parg(data);
+  check_parg(nmiss);
+
   streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
@@ -1714,10 +1722,11 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
   int ierr = 0;
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
 
-  if ( CDI_Debug )
-    Message("streamID = %d varID = %d", streamID, varID);
+  check_parg(data);
+
+  streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
 
