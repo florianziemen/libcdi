@@ -43,7 +43,6 @@ vlist_compare(vlist_t *a, vlist_t *b)
   diff = (a->nvars != b->nvars) || (a->ngrids != b->ngrids)
     || (a->nzaxis != b->nzaxis) || (a->instID != b->instID)
     || (a->modelID != b->modelID) || (a->tableID != b->tableID)
-    || (a->varsAllocated != b->varsAllocated)
     || (a->ntsteps != b->ntsteps);
   return diff;
 }
