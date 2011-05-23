@@ -596,6 +596,7 @@ vlistAttUnpack(int vlistID, int varID,
                   tempbuf, vlist_att_nints, MPI_INT, comm));
   attName = xmalloc(tempbuf[0] + 1);
   xmpi(MPI_Unpack(buf, size, position, attName, tempbuf[0], MPI_CHAR, comm));
+  attName[tempbuf[0]] = '\0';
   switch (tempbuf[2])
   {
   case DATATYPE_FLT:
