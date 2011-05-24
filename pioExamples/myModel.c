@@ -182,9 +182,7 @@ void modelRun ()
 
 #ifdef USE_MPI
   pioMetadata ();
-#endif
-  streamDefByteorder(streamID, 5); 
-  zaxisDefLevels ( zaxisID1, levs ); 
+#endif 
 
   // Loop over the number of time steps
   for ( tsID = 0; tsID < ntsteps; tsID++ )

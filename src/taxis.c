@@ -324,12 +324,6 @@ void taxisDefVdate(int taxisID, int vdate)
 {
   taxis_t *taxisptr;
 
-  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
-    {
-      xwarning ( "Operation not executed." );
-      return;
-    }
-
   taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
@@ -354,12 +348,6 @@ The function @func{taxisDefVtime} defines the verification time of a Time axis.
 void taxisDefVtime(int taxisID, int vtime)
 {
   taxis_t *taxisptr;
-
-  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
-    {
-      xwarning ( "Operation not executed." );
-      return;
-    }
 
   taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 

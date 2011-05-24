@@ -44,7 +44,7 @@ typedef struct {
 #endif
 }resOps;
 
-enum { ASSIGNED, SUSPENDED, CLOSED };
+enum { RESH_UNDEFID, ASSIGNED, SUSPENDED, CLOSED };
 
 int    reshPut ( void *, resOps * );
 void   reshRemove ( cdiResH, resOps * );

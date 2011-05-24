@@ -96,7 +96,7 @@ void arrayInitPointer ( void )
           arrayResources[i][j].next   = arrayResources[i] + j + 1;
           arrayResources[i][j].ops    = NULL;
           arrayResources[i][j].ptr    = NULL;
-          arrayResources[i][j].status = ASSIGNED;
+          arrayResources[i][j].status = RESH_UNDEFID;
         }
 
       arrayResources[i][arraySizeAllocated[i]-1].next = NULL;
@@ -198,7 +198,6 @@ int reshPut ( void *p, resOps *ops )
   nsp = namespaceGetActive ();
 
   if ( !freeListHead[nsp] ) arraySizeExtend();
-
   newNode               = freeListHead[nsp];
   freeListHead[nsp]     = freeListHead[nsp]->next;
   newNode->next         = NULL;
@@ -238,7 +237,7 @@ void reshRemove ( cdiResH idx, resOps * ops )
   arrayResources[nsp][nspT.idx].next   = freeListHead[nsp];
   arrayResources[nsp][nspT.idx].ops    = NULL;
   arrayResources[nsp][nspT.idx].ptr    = NULL;
-  arrayResources[nsp][nspT.idx].status = ASSIGNED;
+  arrayResources[nsp][nspT.idx].status = RESH_UNDEFID;
   freeListHead  [nsp]                  = arrayResources[nsp] + nspT.idx;
 
   ARRAY_UNLOCK();
