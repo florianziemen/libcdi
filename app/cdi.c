@@ -757,6 +757,7 @@ int main(int argc, char *argv[])
   if ( rTable )
     {
       itableID = tableInq(-1, 0, rTable);
+      if ( itableID != CDI_UNDEFID ) cdiDefTableID(itableID);
       otableID = itableID;
     }
 

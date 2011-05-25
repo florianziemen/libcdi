@@ -37,6 +37,7 @@ char *Grids[] = {
   /* 13 */  "laea",
   /* 14 */  "sinusoidal",
   /* 15 */  "reference",
+  /* 16 */  "projection",
 };
 
 
@@ -165,11 +166,10 @@ int grid_from_pointer(grid_t *ptr)
   return (idx);
 }
 
-static
-void grid_init_entry(grid_t *gridptr)
-{
-  gridptr->self         = grid_from_pointer(gridptr);
 
+void grid_init(grid_t *gridptr)
+{
+  gridptr->self         = CDI_UNDEFID;
   gridptr->type         = CDI_UNDEFID;
   gridptr->mask         = NULL;
   gridptr->mask_gme     = NULL;
@@ -230,6 +230,32 @@ void grid_init_entry(grid_t *gridptr)
   gridptr->yunits[0]    = 0;
   gridptr->xstdname[0]  = 0;
   gridptr->ystdname[0]  = 0;
+  gridptr->name         = NULL;
+}
+
+
+void grid_free(grid_t *gridptr)
+{
+  if ( gridptr->mask      ) free(gridptr->mask);
+  if ( gridptr->mask_gme  ) free(gridptr->mask_gme);
+  if ( gridptr->xvals     ) free(gridptr->xvals);
+  if ( gridptr->yvals     ) free(gridptr->yvals);
+  if ( gridptr->area      ) free(gridptr->area);
+  if ( gridptr->xbounds   ) free(gridptr->xbounds);
+  if ( gridptr->ybounds   ) free(gridptr->ybounds);
+  if ( gridptr->rowlon    ) free(gridptr->rowlon);
+  if ( gridptr->reference ) free(gridptr->reference);
+  if ( gridptr->name      ) free(gridptr->name);
+
+  grid_init(gridptr);
+}
+
+static
+void grid_init_entry(grid_t *gridptr)
+{
+  grid_init(gridptr);
+
+  gridptr->self = grid_from_pointer(gridptr);
 }
 
 static

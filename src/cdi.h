@@ -130,6 +130,7 @@ extern "C" {
 #define  GRID_LAEA               13  /* Lambert Azimuthal Equal Area            */
 #define  GRID_SINUSOIDAL         14  /* Sinusoidal                              */
 #define  GRID_REFERENCE          15  /* Reference to the grid                   */
+#define  GRID_PROJECTION         16  /* Projected coordiantes                   */
 
 /* ZAXIS types */
 

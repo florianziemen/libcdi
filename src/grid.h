@@ -62,9 +62,13 @@ typedef struct {
   char    ystdname[CDI_MAX_NAME];
   char    xunits[CDI_MAX_NAME];
   char    yunits[CDI_MAX_NAME];
+  char   *name;
 }
 grid_t;
 
+
+void grid_init(grid_t *gridptr);
+void grid_free(grid_t *gridptr);
 
 const double *gridInqXvalsPtr(int gridID);
 const double *gridInqYvalsPtr(int gridID);

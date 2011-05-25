@@ -4899,6 +4899,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
   int nvatts;
   size_t nvertex;
   grid_t grid;
+  grid_t proj;
   int gridindex;
   size_t size = 0, xsize, ysize;
   char name[256];
@@ -4991,7 +4992,8 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 	  if ( ncvars[ncvarid].gridtype == UNDEFID || ncvars[ncvarid].gridtype == GRID_GENERIC )
 	    if ( ydimid == xdimid ) ncvars[ncvarid].gridtype = GRID_UNSTRUCTURED;
 
-	  memset(&grid, 0, sizeof(grid_t));
+	  grid_init(&grid);
+	  grid_init(&proj);
 
 	  grid.prec  = DATATYPE_FLT64;
 	  grid.trunc = ncvars[ncvarid].truncation;
@@ -5329,6 +5331,11 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			grid.type = GRID_LAEA;
 		      else if ( strcmp(attstring, "lambert_conformal_conic") == 0 )
 			grid.type = GRID_LCC2;
+		      else if ( strcmp(attstring, "lambert_cylindrical_equal_area") == 0 )
+			{
+			  proj.type = GRID_PROJECTION;
+			  proj.name = strdup(attstring);
+			}    
 		    }
 		  else if ( strcmp(attname, "earth_radius") == 0 )
 		    {
@@ -5382,8 +5389,12 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 	    }
 
 	  if ( CDI_Debug )
-	    Message("grid: type = %d, size = %d, nx = %d, ny %d",
-		    grid.type, grid.size, grid.xsize, grid.ysize);
+	    {
+	      Message("grid: type = %d, size = %d, nx = %d, ny %d",
+		      grid.type, grid.size, grid.xsize, grid.ysize);
+	      Message("proj: type = %d, size = %d, nx = %d, ny %d",
+		      proj.type, proj.size, proj.xsize, proj.ysize);
+	    }
 
 	  ncvars[ncvarid].gridID = varDefGrid(vlistID, grid, 1);
 
@@ -5391,11 +5402,8 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 	  streamptr->xdimID[gridindex] = xdimid;
 	  streamptr->ydimID[gridindex] = ydimid;
 
-	  if ( grid.xvals )   free(grid.xvals);
-	  if ( grid.yvals )   free(grid.yvals);
-	  if ( grid.xbounds ) free(grid.xbounds);
-	  if ( grid.ybounds ) free(grid.ybounds);
-	  if ( grid.area )    free(grid.area);
+	  grid_free(&grid);
+	  grid_free(&proj);
 
 	  if ( CDI_Debug )
 	    Message("gridID %d %d %s", ncvars[ncvarid].gridID, ncvarid, ncvars[ncvarid].name);
