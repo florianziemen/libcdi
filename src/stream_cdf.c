@@ -4351,29 +4351,23 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             }
           else if ( strcmp(attname, "add_offset") == 0 && atttype != NC_CHAR )
             {
-              if ( atttype != NC_CHAR )
-                {
-                  cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].addoffset);
-                  /*
-                    if ( atttype != NC_BYTE && atttype != NC_SHORT && atttype != NC_INT )
-                    if ( ncvars[ncvarid].addoffset != 0 )
-                    Warning("attribute add_offset not supported for atttype %d", atttype);
-                  */
-                  cdfSetVar(ncvars, ncvarid, TRUE);
-                }
+	      cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].addoffset);
+	      /*
+		if ( atttype != NC_BYTE && atttype != NC_SHORT && atttype != NC_INT )
+		if ( ncvars[ncvarid].addoffset != 0 )
+		Warning("attribute add_offset not supported for atttype %d", atttype);
+	      */
+	      cdfSetVar(ncvars, ncvarid, TRUE);
             }
           else if ( strcmp(attname, "scale_factor") == 0 && atttype != NC_CHAR )
             {
-              if ( atttype != NC_CHAR )
-                {
-                  cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].scalefactor);
-                  /*
-                    if ( atttype != NC_BYTE && atttype != NC_SHORT && atttype != NC_INT )
-                    if ( ncvars[ncvarid].scalefactor != 1 )
-                    Warning("attribute scale_factor not supported for atttype %d", atttype);
-                  */
-                  cdfSetVar(ncvars, ncvarid, TRUE);
-                }
+	      cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].scalefactor);
+	      /*
+		if ( atttype != NC_BYTE && atttype != NC_SHORT && atttype != NC_INT )
+		if ( ncvars[ncvarid].scalefactor != 1 )
+		Warning("attribute scale_factor not supported for atttype %d", atttype);
+	      */
+	      cdfSetVar(ncvars, ncvarid, TRUE);
             }
           else if ( strcmp(attname, "bounds") == 0 && atttype == NC_CHAR )
             {
@@ -4457,8 +4451,8 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               cdfSetVar(ncvars, ncvarid, TRUE);
             }
           */
-          else if ( strcmp(attname, "associate")  == 0 || 
-                    strcmp(attname, "coordinates") == 0 )
+          else if ( (strcmp(attname, "associate")  == 0 || strcmp(attname, "coordinates") == 0) &&
+		    atttype == NC_CHAR )
             {
               int status;
               char *pstring, *varname = NULL;
@@ -4529,29 +4523,23 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
                 }
             }
-          else if ( strcmp(attname, "_FillValue") == 0 || 
-                    strcmp(attname, "missing_value") == 0 )
+          else if ( (strcmp(attname, "_FillValue") == 0 || strcmp(attname, "missing_value") == 0) &&
+		    atttype != NC_CHAR )
             {
-              if ( atttype != NC_CHAR )
-                {
-                  cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].missval);
-                  ncvars[ncvarid].defmiss = TRUE;
-                  /* cdfSetVar(ncvars, ncvarid, TRUE); */
-                }
+	      cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].missval);
+	      ncvars[ncvarid].defmiss = TRUE;
+	      /* cdfSetVar(ncvars, ncvarid, TRUE); */
             }
-          else if ( strcmp(attname, "cdi") == 0 )
+          else if ( strcmp(attname, "cdi") == 0 && atttype == NC_CHAR )
             {         
-              if ( atttype == NC_CHAR )
-                {
-                  cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
-                  strtolower(attstring);
+	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+	      strtolower(attstring);
 
-                  if ( memcmp(attstring, "ignore", 6) == 0 )
-                    {
-                      ncvars[ncvarid].ignore = TRUE;
-                      cdfSetVar(ncvars, ncvarid, FALSE);
-                    }
-                }
+	      if ( memcmp(attstring, "ignore", 6) == 0 )
+		{
+		  ncvars[ncvarid].ignore = TRUE;
+		  cdfSetVar(ncvars, ncvarid, FALSE);
+		}
             }
           else if ( strcmp(attname, "axis") == 0 && atttype == NC_CHAR )
             {
