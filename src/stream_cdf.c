@@ -5375,7 +5375,24 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		    }
 		}
 	    }
+	  /*
+	  if ( proj.type == GRID_PROJECTION )
+	    {
+	      if ( grid.type == GRID_GENERIC )
+		{
+		  grid.type = GRID_CURVILINEAR;
+		}
 
+	      if ( grid.type == GRID_CURVILINEAR )
+		{
+		  proj.size  = grid.size;
+		  proj.xsize = grid.xsize;
+                  proj.ysize = grid.ysize;
+		}
+
+	      grid.proj = gridGenerate(proj);
+	    }
+	  */
 	  if ( CDI_Debug )
 	    {
 	      Message("grid: type = %d, size = %d, nx = %d, ny %d",

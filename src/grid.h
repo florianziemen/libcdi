@@ -7,6 +7,7 @@ typedef struct {
   int     self;
   int     type;                   /* grid type                      */
   int     prec;                   /* grid precision                 */
+  int     proj;                   /* grid projection                */
   mask_t *mask;
   mask_t *mask_gme;
   double *xvals;

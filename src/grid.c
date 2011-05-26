@@ -171,6 +171,7 @@ void grid_init(grid_t *gridptr)
 {
   gridptr->self         = CDI_UNDEFID;
   gridptr->type         = CDI_UNDEFID;
+  gridptr->proj         = CDI_UNDEFID;
   gridptr->mask         = NULL;
   gridptr->mask_gme     = NULL;
   gridptr->xvals        = NULL;
@@ -2507,6 +2508,7 @@ int gridGenerate(grid_t grid)
     case GRID_LCC2:
     case GRID_SINUSOIDAL:
     case GRID_LAEA:
+    case GRID_PROJECTION:
       {
 	if ( grid.xsize > 0 ) gridDefXsize(gridID, grid.xsize);
 	if ( grid.ysize > 0 ) gridDefYsize(gridID, grid.ysize);
@@ -2579,6 +2581,11 @@ int gridGenerate(grid_t grid)
 	  gridDefLCC(gridID, grid.lcc_originLon, grid.lcc_originLat, grid.lcc_lonParY,
 		     grid.lcc_lat1, grid.lcc_lat2, grid.lcc_xinc, grid.lcc_yinc,
 		     grid.lcc_projflag, grid.lcc_scanflag);
+
+	if ( grid.type == GRID_PROJECTION )
+	  {
+	    gridptr->name = strdup(grid.name);
+	  }
 
 	break;
       }

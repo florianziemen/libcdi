@@ -640,7 +640,7 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
       {
 	gridID = vlistptr->gridIDs[index];
 	if ( gridID == UNDEFID )
-	  Error("undefined gridID %d", gridID);
+	  Error("Internal problem: undefined gridID %d!", gridID);
 
 	if ( gridCompare(gridID, grid) == 0 )
 	  {
