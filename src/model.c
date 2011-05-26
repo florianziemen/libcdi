@@ -29,6 +29,7 @@ model_t;
 
 
 static int  MODEL_Debug = 0;   /* If set to 1, debugging */
+static int * modelInitializedNsp;
 
 static void modelInit(void);
 
@@ -84,9 +85,7 @@ void modelDefaultEntries ( void )
   instID  = institutInq(  0,   0, "ECMWF", NULL);
   /* (void)    modelDef(instID, 131, "ERA15"); */
   /* (void)    modelDef(instID, 199, "ERA40"); */
-
   instID  = institutInq(  0,   0, "MPIMET", NULL);
-  
 
   resH[0] = ECHAM5  = modelDef(instID,  64, "ECHAM5.4");
   resH[1] = modelDef(instID,  63, "ECHAM5.3");
@@ -114,18 +113,35 @@ void modelDefaultEntries ( void )
 }
 
 static
+void modelFinalize ( void )
+{
+  free (   modelInitializedNsp );
+}
+
+static
 void modelInit(void)
 {
   static int modelInitialized = 0;
+  int nsp, nspc;
   char *env;
 
-  if ( modelInitialized ) return;
+  nspc = namespaceGetNumber ();
+  
+  if ( !modelInitialized )
+    {
+      modelInitialized = 1;
+      modelInitializedNsp = xcalloc ( 1, nspc * sizeof ( int ));
+      atexit ( modelFinalize );
+      env = getenv("MODEL_DEBUG");
+      if ( env ) MODEL_Debug = atoi(env);  
+    }
 
-  modelInitialized = 1;
-
-  env = getenv("MODEL_DEBUG");
-  if ( env ) MODEL_Debug = atoi(env);
-
+  nsp = namespaceGetActive ();
+  
+  if ( modelInitializedNsp[nsp] ) return;
+  
+  modelInitializedNsp[nsp] = 1;
+  
   modelDefaultEntries ();
 }
 
@@ -142,17 +158,17 @@ int modelInq(int instID, int modelgribID, char *name)
   int found;
   int modelCount;
   model_t *modelptr;
-  int i, * modelIndice;
+  int i, * modelKeys;
 
   modelInit ();
 
   modelCount = modelSize();
-  modelIndice = xmalloc ( modelCount * sizeof ( int ));
-  reshGetIndiceArrayOfType ( modelCount, modelIndice, &modelOps );
+  modelKeys = xmalloc ( modelCount * sizeof ( int ));
+  reshGetKeysArrayOfType ( modelCount, modelKeys, &modelOps );
 
   for( i = 0; i < modelCount; i++ )
     {
-      modelID = modelIndice[i];
+      modelID = modelKeys[i];
       modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
 
       if ( modelptr->used )
@@ -184,7 +200,7 @@ int modelInq(int instID, int modelgribID, char *name)
 
   if ( modelID == modelCount ) modelID = UNDEFID;
 
-  if ( modelIndice ) free ( modelIndice );
+  if ( modelKeys ) free ( modelKeys );
 
   return (modelID);
 }
@@ -288,7 +304,6 @@ int modelGetSizeP ( void * modelptr, MPI_Comm comm )
 {
   model_t *p = modelptr;
   int txsize = 0, txinc;
-  xdebug ();
   xmpi(MPI_Pack_size(model_nints, MPI_INT, comm, &txsize));
   xmpi(MPI_Pack_size(strlen(p->name) + 1, MPI_CHAR, comm, &txinc));
   txsize += txinc;
@@ -302,7 +317,6 @@ void modelPackP ( void * modelptr, void * buf, int size,
 {
   model_t *p = modelptr;
   int tempbuf[model_nints];
-  xdebug ();
   tempbuf[0] = p->self;
   tempbuf[1] = p->instID;
   tempbuf[2] = p->modelgribID;
@@ -312,17 +326,16 @@ void modelPackP ( void * modelptr, void * buf, int size,
 }
 
 int
-modelUnpack(void *buf, int size, int *position,
+modelUnpack(void *buf, int size, int *position, int nspTarget,
             MPI_Comm comm)
 {
   int tempbuf[model_nints];
   int modelID;
   char *name;
-  xdebug ();
   xmpi(MPI_Unpack(buf, size, position, tempbuf, model_nints, MPI_INT, comm));
   name = xmalloc(tempbuf[3]);
   xmpi(MPI_Unpack(buf, size, position, name, tempbuf[3], MPI_CHAR, comm));
-  modelID = modelDef(tempbuf[1], tempbuf[2], name);
+  modelID = modelDef( namespaceAdaptKey ( tempbuf[1], nspTarget ), tempbuf[2], name);
   // FIXME: this should work, once all types are transferred
   //assert(modelID == tempbuf[0]);
   return modelID;

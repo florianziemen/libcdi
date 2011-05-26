@@ -125,7 +125,7 @@ int      vlistDelAtts(int vlistID, int varID);
 int      vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2);
 
 #ifdef USE_MPI
-void vlistUnpack(char * buffer, int bufferSize, int * pos, MPI_Comm comm);
+void vlistUnpack(char * buffer, int bufferSize, int * pos, int, MPI_Comm comm);
 #endif
 
 #endif  /* _VLIST_H */

@@ -16,7 +16,7 @@ int vlistVarGetSize(vlist_t *p, int varID, MPI_Comm comm);
 void vlistVarPack(vlist_t *p, int varID,
                   char * buffer, int bufferSize, int * pos, MPI_Comm comm);
 void vlistVarUnpack(int vlistID,
-                    char * buf, int size, int *position, MPI_Comm comm);
+                    char * buf, int size, int *position, int, MPI_Comm comm);
 #endif
 
 #endif

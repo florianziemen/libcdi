@@ -372,8 +372,6 @@ int gridCreate(int gridtype, int size)
   int gridID;
   grid_t *gridptr;
 
-  xdebug ();
-
   if ( CDI_Debug )
     Message("gridtype: %d size: %d", gridtype, size);
 
@@ -3869,7 +3867,7 @@ void gridDefReference(int gridID, const char *reference)
 
 void gridGetIndexArray ( int ngrids, int * gridIndexArray )
 {
-  reshGetIndiceArrayOfType ( ngrids, gridIndexArray, &gridOps );
+  reshGetKeysArrayOfType ( ngrids, gridIndexArray, &gridOps );
 }
 
 #ifdef USE_MPI

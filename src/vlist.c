@@ -1578,7 +1578,6 @@ int  vlistGetSizeP ( void * vlistptr, MPI_Comm comm )
 {
   int txsize, varID;
   vlist_t *p = vlistptr;
-  xdebug ();
   xmpi(MPI_Pack_size(vlist_nints, MPI_INT, comm, &txsize));
   txsize += vlistAttsGetSize(p, CDI_GLOBAL, comm);
   for ( varID = 0; varID <  p->nvars; varID++ )
@@ -1593,7 +1592,6 @@ void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
 {
   int varID, tempbuf[vlist_nints];
   vlist_t *p = vlistptr;
-  xdebug ();
   tempbuf[0] = p->self;
   tempbuf[1] = p->nvars;
   tempbuf[2] = p->ntsteps;
@@ -1609,20 +1607,20 @@ void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
   }
 }
 
-void vlistUnpack(char * buf, int size, int *position, MPI_Comm comm)
+void vlistUnpack(char * buf, int size, int *position, int nspTarget, MPI_Comm comm)
 {
   int newvlist;
   int varID, tempbuf[vlist_nints];
   xmpi(MPI_Unpack(buf, size, position, tempbuf, vlist_nints, MPI_INT, comm));
   newvlist = vlistCreate();
   /* assert(newvlist == tempbuf[0]); */
-  vlistDefTaxis(newvlist, tempbuf[3]);
+  vlistDefTaxis ( newvlist, namespaceAdaptKey ( tempbuf[3], nspTarget ));
   vlistDefTable(newvlist, tempbuf[4]);
-  vlistDefInstitut(newvlist, tempbuf[5]);
-  vlistDefModel(newvlist, tempbuf[6]);
+  vlistDefInstitut ( newvlist, namespaceAdaptKey ( tempbuf[5], nspTarget ));
+  vlistDefModel ( newvlist, namespaceAdaptKey ( tempbuf[6], nspTarget ));
   vlistAttsUnpack(newvlist, CDI_GLOBAL, buf, size, position, comm);
   for ( varID = 0; varID < tempbuf[1]; varID++ )
-    vlistVarUnpack(newvlist, buf, size, position, comm);
+    vlistVarUnpack ( newvlist, buf, size, position, nspTarget, comm );
 }
 
 

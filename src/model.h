@@ -3,6 +3,6 @@
 
 int
 modelUnpack(void *buf, int size, int *position,
-            MPI_Comm comm);
+            int, MPI_Comm comm);
 
 #endif

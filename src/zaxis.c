@@ -852,7 +852,6 @@ int zaxisInqSize(int zaxisID)
   zaxis_t *zaxisptr;
 
   zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
-
   zaxis_check_ptr(zaxisID, zaxisptr);
 
   size = zaxisptr->size;
@@ -1276,10 +1275,10 @@ int zaxisGetSizeP ( void * zaxisptr, MPI_Comm comm )
   zaxis_t * zaxisP = ( zaxis_t * ) zaxisptr;
   int packBufferSize = 0, size;
 
-  MPI_Pack_size ( 2, MPI_INT, comm, &size );
+  xmpi ( MPI_Pack_size ( 2, MPI_INT, comm, &size ));
   packBufferSize += size;
 
-  MPI_Pack_size ( zaxisP->size, MPI_DOUBLE, comm, &size );
+  xmpi ( MPI_Pack_size ( zaxisP->size, MPI_DOUBLE, comm, &size ));
   packBufferSize += size;
 
   return packBufferSize;
@@ -1292,17 +1291,17 @@ void zaxisPackP ( void * zaxisptr, void * packBuffer, int packBufferSize,
 {
   zaxis_t * zaxisP = ( zaxis_t * ) zaxisptr;
 
-  MPI_Pack ( &zaxisP->type, 1, MPI_INT, 
-	     packBuffer, packBufferSize, packBufferPos, comm );
-  MPI_Pack ( &zaxisP->size, 1, MPI_INT, 
-	     packBuffer, packBufferSize, packBufferPos, comm );
-  MPI_Pack ( zaxisP->vals, zaxisP->size, MPI_DOUBLE, 
-	     packBuffer, packBufferSize, packBufferPos, comm );
+  xmpi ( MPI_Pack ( &zaxisP->type, 1, MPI_INT, 
+		    packBuffer, packBufferSize, packBufferPos, comm ));
+  xmpi ( MPI_Pack ( &zaxisP->size, 1, MPI_INT, 
+		    packBuffer, packBufferSize, packBufferPos, comm ));
+  xmpi ( MPI_Pack ( zaxisP->vals, zaxisP->size, MPI_DOUBLE, 
+		    packBuffer, packBufferSize, packBufferPos, comm ));
 }
 
 #endif
 
 void zaxisGetIndexArray ( int nzaxis, int * zaxisIndexArray )
 {
-  reshGetIndiceArrayOfType ( nzaxis, zaxisIndexArray, &zaxisOps );
+  reshGetKeysArrayOfType ( nzaxis, zaxisIndexArray, &zaxisOps );
 }

@@ -115,3 +115,21 @@ int namespaceHasLocalFile ( int nId )
   
   return hasLocalFile[nId];
 }
+
+
+int namespaceAdaptKey ( int key, int nspTarget )
+{
+  namespaceTuple_t tin;
+  int nsp;
+
+  if ( key == CDI_UNDEFID ) return CDI_UNDEFID;
+
+  tin.idx = key & idxmask;
+  tin.nsp = (int)(((unsigned)( key & nspmask )) >> idxbits);
+
+  assert ( tin.nsp == nspTarget );
+
+  nsp = namespaceGetActive ();
+ 
+  return namespaceIdxEncode2 ( nsp, tin.idx );
+}

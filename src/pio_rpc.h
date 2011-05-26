@@ -25,6 +25,7 @@ enum { GRID      = 1,
        MODEL     = 5,
        STREAM    = 6,
        VLIST     = 7,
+       START     = 55555555,
        SEPARATOR = 77777777,
        END       = 99999999 };
 

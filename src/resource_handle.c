@@ -280,7 +280,7 @@ void *reshGetVal ( cdiResH idx, resOps * ops  )
 /**************************************************************/
 
 
-void reshGetIndiceArrayOfType ( int c, int * indice, resOps * ops )
+void reshGetKeysArrayOfType ( int c, int * indice, resOps * ops )
 {
   int i, j = 0, nsp;
 
@@ -294,7 +294,7 @@ void reshGetIndiceArrayOfType ( int c, int * indice, resOps * ops )
     if ( arrayResources[nsp][i].ptr && arrayResources[nsp][i].ops )
       if ( arrayResources[nsp][i].ops == ops )
         {
-          indice[j++] = i;
+          indice[j++] = namespaceIdxEncode2 ( nsp, i );
           if ( j == c ) break;
         }
 
@@ -341,8 +341,12 @@ int  getPackBufferSize ( MPI_Comm comm )
 
   nsp = namespaceGetActive ();
 
-  xmpi(MPI_Pack_size(1, MPI_INT, comm, &intpacksize));
+  xmpi ( MPI_Pack_size ( 1, MPI_INT, comm, &intpacksize ));
 
+  /* pack start marker, namespace and sererator marker */
+  packBufferSize += 3 * intpacksize;
+
+  /* pack resources, type marker and seperator marker */
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
     if ( arrayResources[nsp][i].ptr )
       if ( arrayResources[nsp][i].status == ASSIGNED )
@@ -375,10 +379,8 @@ void reshPackBufferDestroy ( char ** buffer )
 void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm comm )
 {
   int i, nsp, packBufferPos = 0;
-  int end = END, sep = SEPARATOR, type;
+  int start = START, end = END, sep = SEPARATOR, type;
   node * curr;
-
-  xdebug ();
 
   assert ( packBuffer );
 
@@ -388,6 +390,15 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
 
   * packBufferSize = getPackBufferSize ( comm );
   * packBuffer = xcalloc ( 1, * packBufferSize );
+
+  xmpi ( MPI_Pack ( &start, 1,  MPI_INT, 
+		    * packBuffer, * packBufferSize, &packBufferPos, comm ));
+
+  xmpi ( MPI_Pack ( &nsp, 1,  MPI_INT, 
+		    * packBuffer, * packBufferSize, &packBufferPos, comm ));
+
+  xmpi ( MPI_Pack ( &sep, 1,  MPI_INT, 
+		    * packBuffer, * packBufferSize, &packBufferPos, comm ));
 
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
     if ( arrayResources[nsp][i].ptr )
@@ -401,9 +412,8 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
           if ( ! type )
             continue;
 
-          xmpi(MPI_Pack ( &type, 1, MPI_INT,
-                          * packBuffer, * packBufferSize, &packBufferPos,
-                          comm ));
+          xmpi ( MPI_Pack ( &type, 1, MPI_INT, * packBuffer, 
+			    * packBufferSize, &packBufferPos, comm ));
 
           curr->ops->valPack ( curr->ptr,
                                * packBuffer ,
@@ -411,18 +421,16 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
                                &packBufferPos,
                                comm );
 
-          xmpi(MPI_Pack ( &sep, 1,  MPI_INT, * packBuffer,
-                          * packBufferSize, &packBufferPos, comm ));
+          xmpi ( MPI_Pack ( &sep, 1,  MPI_INT, * packBuffer,
+			    * packBufferSize, &packBufferPos, comm ));
 
           curr->status = CLOSED;
         }
 
   ARRAY_UNLOCK();
 
-  xmpi(MPI_Pack ( &end, 1,  MPI_INT, 
+  xmpi ( MPI_Pack ( &end, 1,  MPI_INT, 
                   * packBuffer, * packBufferSize, &packBufferPos, comm ));
-
-  xdebug ( "#### packed END token" );
 }
 
 #endif
@@ -522,8 +530,6 @@ void reshArrayPrint ( char * filename )
   node * curr;
   FILE * fp; 
 
-  xdebug();
-
   if ( ! arrayInit ) return;
 
   if ( filename )
@@ -553,6 +559,8 @@ void reshArrayPrint ( char * filename )
       fprintf ( fp, "# namespace=%d\n", i );
       fprintf ( fp, "#\n" );
       fprintf ( fp, "##################################\n\n" );
+
+      fprintf ( fp, "arraySizeAllocated[%d]=%d\n", i, arraySizeAllocated[i] );
 
       for ( j = 0; j < arraySizeAllocated[i]; j++)
         {

@@ -9,6 +9,7 @@
 #include "institution.h"
 #include "model.h"
 #include "vlist.h"
+#include "namespace.h"
 
 MPI_Comm commGlob;
 int sizeGlob;
@@ -17,6 +18,9 @@ int nProcsIO;
 int nProcsCalc;
 MPI_Comm * commsIO;
 MPI_Comm commCalc;
+
+extern 
+void reshArrayPrint ( char * filename );
  
  
 void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
@@ -180,7 +184,7 @@ void unpackTaxis ( char * unpackBuffer, int unpackBufferSize,
 
 
 void unpackStream ( char * unpackBuffer, int unpackBufferSize, 
-		    int * unpackBufferPos, MPI_Comm comm )
+		    int * unpackBufferPos, int nspTarget, MPI_Comm comm )
 { 
   int streamID;
   int filenameLen, filetype, vlistID;
@@ -199,7 +203,7 @@ void unpackStream ( char * unpackBuffer, int unpackBufferSize,
   
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 		      &vlistID, 1, MPI_INT, comm )); 
-  streamDefVlist ( streamID, vlistID );
+  streamDefVlist ( streamID, namespaceAdaptKey ( vlistID, nspTarget ));
 }
 
 
@@ -209,7 +213,7 @@ void unpackStream ( char * unpackBuffer, int unpackBufferSize,
 void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize, 
 			  MPI_Comm comm )
 { 
-  int token1, token2;
+  int token1, token2, nspTarget;
   int unpackBufferPos = 0;
   char text[4096];
 
@@ -221,30 +225,38 @@ void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize,
       switch ( token1 )
 	{
 	case END:
-	  xdebug ( "#### end of packed data" );
-	  if ( rankGlob == sizeGlob - 1 )
-	    reshArrayPrint ( "reshArrayIOServer" );
 	  return;
+	case START:
+	  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
+			      &nspTarget, 1, MPI_INT, comm ));
+	  break;
 	case GRID:
-	  unpackGrid ( unpackBuffer, unpackBufferSize, &unpackBufferPos, comm );
+	  unpackGrid ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
+		       comm );
 	  break;
-	case ZAXIS:
-	  unpackZaxis ( unpackBuffer, unpackBufferSize, &unpackBufferPos, comm );
+	case ZAXIS:  
+	  unpackZaxis ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
+			comm );
 	  break;
-	case TAXIS: 
-	  unpackTaxis ( unpackBuffer, unpackBufferSize, &unpackBufferPos, comm );
+	case TAXIS:
+	  unpackTaxis ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
+			comm );
 	  break;
 	case INSTITUTE:
-          instituteUnpack ( unpackBuffer, unpackBufferSize, &unpackBufferPos, comm);
+          instituteUnpack ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
+			    comm);
 	  break;
 	case MODEL:
-          modelUnpack ( unpackBuffer, unpackBufferSize, &unpackBufferPos, comm);
+          modelUnpack ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
+			nspTarget, comm);
 	  break;
 	case STREAM:
-	  unpackStream ( unpackBuffer, unpackBufferSize, &unpackBufferPos, comm );
+	  unpackStream ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
+			 nspTarget, comm );
 	  break;
 	case VLIST:
-          vlistUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, comm);
+          vlistUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, 
+		      nspTarget, comm);
 	  break;
 	default: 
 	  xabort ( "no valid datatype" );

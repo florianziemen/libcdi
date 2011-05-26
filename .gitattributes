@@ -140,6 +140,7 @@ pioExamples/cdi_write_more_nodes.F90 -text
 pioExamples/cdi_write_more_nodes.job -text
 pioExamples/cdi_write_parallel.job -text
 pioExamples/cdi_write_serial.job -text
+pioExamples/compareResourcesArray.c -text
 pioExamples/myModel.c -text
 pioExamples/myModel2003.F90 -text
 pioExamples/pio_write.F90 -text

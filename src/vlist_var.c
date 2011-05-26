@@ -187,7 +187,6 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
-
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
       xwarning ( "Operation not executed." );
@@ -1774,8 +1773,8 @@ imax(int a, int b)
 }
 
 
-void vlistVarUnpack(int vlistID,
-                    char * buf, int size, int *position, MPI_Comm comm)
+void vlistVarUnpack(int vlistID, char * buf, int size, int *position, 
+		    int nspTarget, MPI_Comm comm)
 {
   double dtempbuf[vlistvar_ndbls];
   int tempbuf[vlistvar_nints];
@@ -1785,7 +1784,10 @@ void vlistVarUnpack(int vlistID,
                   tempbuf, vlistvar_nints, MPI_INT, comm));
   xmpi(MPI_Unpack(buf, size, position,
                   dtempbuf, vlistvar_ndbls, MPI_DOUBLE, comm));
-  newvar = vlistDefVar(vlistID, tempbuf[1], tempbuf[2], tempbuf[3]);
+  newvar = vlistDefVar ( vlistID, 
+			 namespaceAdaptKey ( tempbuf[1], nspTarget ), 
+			 namespaceAdaptKey ( tempbuf[2], nspTarget ),
+			 tempbuf[3]);
   if (tempbuf[4] || tempbuf[5] || tempbuf[6] || tempbuf[7])
     varname = xmalloc(imax(imax(imax(tempbuf[4],tempbuf[5]),tempbuf[6]),
                            tempbuf[7])+ 1);
@@ -1819,8 +1821,10 @@ void vlistVarUnpack(int vlistID,
   }
   free(varname);
   vlistDefVarDatatype(vlistID, newvar, tempbuf[8]);
-  vlistDefVarInstitut(vlistID, newvar, tempbuf[10]);
-  vlistDefVarModel(vlistID, newvar, tempbuf[11]);
+  vlistDefVarInstitut ( vlistID, newvar, 
+			namespaceAdaptKey ( tempbuf[10], nspTarget ));
+  vlistDefVarModel ( vlistID, newvar, 
+		     namespaceAdaptKey ( tempbuf[11], nspTarget ));
   vlistDefVarTable(vlistID, newvar, tempbuf[12]);
   /* FIXME: changing the table might change the param code */
   vlistDefVarParam(vlistID, newvar, tempbuf[9]);

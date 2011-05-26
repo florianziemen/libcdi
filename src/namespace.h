@@ -15,5 +15,6 @@ int              namespaceIdxEncode2   ( int, int );
 namespaceTuple_t namespaceIdxDecode    ( int );
 int              namespaceHasLocalFile ( int );
 void             namespaceCleanup      ( void );
+int              namespaceAdaptKey     ( int, int );
 
 #endif

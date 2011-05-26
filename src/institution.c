@@ -46,6 +46,7 @@ resOps instituteOps = { instituteCompareP, instituteDestroyP, institutePrintP
 #endif
  };
 
+static int * instituteInitializedNsp;
 
 static
 void instituteDefaultValue ( institute_t * instituteptr )
@@ -113,14 +114,33 @@ void instituteDefaultEntries ( void )
 }
 
 
+
+static
+void instituteFinalize ( void )
+{
+  free ( instituteInitializedNsp );
+}
+ 
+
 static
 void instituteInit (void)
 {
   static int instituteInitialized = 0;
+  int nsp, nspc;
+  char *env;
 
-  if ( instituteInitialized ) return;
+  nspc = namespaceGetNumber ();
+  
+  if ( !instituteInitialized )
+    {
+      instituteInitialized = 1;
+      instituteInitializedNsp = xcalloc ( 1, nspc * sizeof ( int ));
+      atexit ( instituteFinalize ); 
+    }
 
-  instituteInitialized = 1;
+  nsp = namespaceGetActive ();
+  if ( instituteInitializedNsp[nsp] ) return;
+  instituteInitializedNsp[nsp] = 1;
 
   instituteDefaultEntries();
 }
@@ -185,7 +205,7 @@ int instituteCompareP ( void *  instituteptr1, void * instituteptr2 )
 
 int institutInq(int center, int subcenter, const char *name, const char *longname)
 {
-  int instID = UNDEFID, instCount, * instIndice, i;
+  int instID = UNDEFID, instCount, * instKeys, i;
   institute_t * ip1;
   institute_t * ip2;
 
@@ -201,12 +221,12 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
   ip1->longname   = ( char * ) longname;
 
   instCount = instituteCount ();
-  instIndice = xmalloc ( instCount * sizeof ( int ));
-  reshGetIndiceArrayOfType ( instCount, instIndice, &instituteOps );
+  instKeys = xmalloc ( instCount * sizeof ( int ));
+  reshGetKeysArrayOfType ( instCount, instKeys, &instituteOps );
 
   for( i = 0; i < instCount; i++ )
     {
-      instID = instIndice[i];
+      instID = instKeys[i];
       ip2 = ( institute_t * ) reshGetVal ( instID, &instituteOps );
       assert ( ip2 );
 
@@ -217,7 +237,7 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
         }
     }
 
-  free ( instIndice );
+  free ( instKeys );
   free ( ip1 );
 
   return  (instID);
@@ -291,23 +311,23 @@ char *institutInqLongnamePtr(int instID)
 
 int institutInqNumber(void)
 {
-  int i, instCount, * instIndice, instNum = 0;
+  int i, instCount, * instKeys, instNum = 0;
   institute_t * instituteptr;
 
   instituteInit ();
 
   instCount = reshCountType ( &instituteOps );
-  instIndice = xmalloc ( instCount * sizeof ( int ));
-  reshGetIndiceArrayOfType ( instCount, instIndice, &instituteOps );
+  instKeys = xmalloc ( instCount * sizeof ( int ));
+  reshGetKeysArrayOfType ( instCount, instKeys, &instituteOps );
 
   for ( i = 0; i < instCount; i++ )
     {
-      instituteptr = ( institute_t * ) reshGetVal ( instIndice[i], &instituteOps );
+      instituteptr = ( institute_t * ) reshGetVal ( instKeys[i], &instituteOps );
       if ( instituteptr && instituteptr->used )
         instNum++;
     }
 
-  if ( instIndice ) free ( instIndice );
+  if ( instKeys ) free ( instKeys );
 
   return instNum;
 }
@@ -362,7 +382,6 @@ int instituteGetSizeP ( void * instituteptr, MPI_Comm comm )
 {
   institute_t *p = instituteptr;
   int txsize = 0, txinc;
-  xdebug ();
   xmpi(MPI_Pack_size(institute_nints, MPI_INT, comm, &txsize));
   xmpi(MPI_Pack_size(strlen(p->name) + 1, MPI_CHAR, comm, &txinc));
   txsize += txinc;
@@ -378,7 +397,6 @@ void institutePackP ( void * instituteptr, void *buf, int size,
 {
   institute_t *p = instituteptr;
   int tempbuf[institute_nints];
-  xdebug ();
   tempbuf[0] = p->self;
   tempbuf[1] = p->center;
   tempbuf[2] = p->subcenter;
@@ -396,7 +414,6 @@ instituteUnpack(void *buf, int size, int *position,
   int tempbuf[institute_nints];
   int instituteID;
   char *name, *longname;
-  xdebug ();
   xmpi(MPI_Unpack(buf, size, position, tempbuf, institute_nints, MPI_INT, comm));
   name = xmalloc(tempbuf[3]);
   longname = xmalloc(tempbuf[4]);
