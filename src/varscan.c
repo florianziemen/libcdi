@@ -10,6 +10,8 @@
 #include "dmemory.h"
 #include "varscan.h"
 #include "vlist.h"
+#include "pio_util.h"
+
 
 #undef  UNDEFID
 #define UNDEFID -1
@@ -695,16 +697,26 @@ int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, double *l
   int zlbounds = 0;
   int ltype_is_equal = FALSE;
 
+  xdebug ();
+
   if ( ltype == zaxisInqLtype(zaxisID) ) ltype_is_equal = TRUE;
+
+  xdebug ();
 
   if ( ltype_is_equal && (zaxistype == zaxisInqType(zaxisID) || zaxistype == ZAXIS_GENERIC) )
     {
+
+  xdebug ();
       if ( zaxisInqLbounds(zaxisID, NULL) > 0 ) zlbounds = 1;
+
+  xdebug ();
       if ( nlevels == zaxisInqSize(zaxisID) && zlbounds == lbounds )
 	{
 	  const double *dlevels;
 	  char zlongname[256];
 	  char zunits[256];
+
+  xdebug ();
 	  
 	  dlevels = zaxisInqLevelsPtr(zaxisID);
 	  for ( levelID = 0; levelID < nlevels; levelID++ )
@@ -713,21 +725,31 @@ int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, double *l
 		break;
 	    }
 
+  xdebug ();
+
 	  if ( levelID == nlevels ) differ = 0;
 
 	  if ( ! differ )
 	    {
+
+  xdebug ();
 	      zaxisInqLongname(zaxisID, zlongname);
 	      zaxisInqUnits(zaxisID, zunits);
 	      if ( longname && zlongname[0] )
 		{
+
+  xdebug ();
 		  if ( strcmp(longname, zlongname) != 0 ) differ = 1;
 		}
 	      if ( units && zunits[0] )
 		{
+
+  xdebug ();
 		  if ( strcmp(units, zunits) != 0 ) differ = 1;
 		}
 	    }
+
+  xdebug ();
 	}
     }
 

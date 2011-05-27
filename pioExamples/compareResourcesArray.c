@@ -13,9 +13,11 @@
 #include "pio_c_temp.h"
 #include "pio_util.h"
 
-extern void   reshPackBufferCreate ( char **, int *, MPI_Comm );
+extern int    reshArrayCompare      ( int, int );
+extern void   reshArrayPrint        ( char * );
+extern void   reshPackBufferCreate  ( char **, int *, MPI_Comm );
 extern void   reshPackBufferDestroy ( char ** );
-extern void   rpcUnpackResources ( char *, int, MPI_Comm );
+extern void   rpcUnpackResources    ( char *, int, MPI_Comm );
 
 #define nlon 12 // Number of longitudes
 #define nlat  6 // Number of latitudes 
@@ -74,6 +76,8 @@ void modelRun ()
   char * recvBuffer, * sendBuffer;
   int bufferSize;
   MPI_Status status;
+
+  int differ;
 
   namespaceInit ( 2, hlf );
   namespaceSetActive ( 0 );
@@ -140,12 +144,17 @@ void modelRun ()
   namespaceSetActive ( 0 ); 
   free ( recvBuffer );  
   reshPackBufferDestroy ( &sendBuffer );
+  xdebug ();
+  differ = reshArrayCompare ( 0, 1 );
+  printf ( "###### The resource arrays %s.\n", differ ? "differ" : "are equal" );
+  xdebug ();
   reshArrayPrint ( "reshArrayModel" );
 
   // Close the output stream
   streamClose(streamID);
-
+		    
   // Destroy the objects
+  
   vlistDestroy(vlistID);
   taxisDestroy(taxisID);
   zaxisDestroy(zaxisID1);

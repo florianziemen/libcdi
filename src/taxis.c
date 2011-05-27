@@ -46,7 +46,7 @@ static void   taxisPrintP   ( void * taxisptr, FILE * fp );
 static int taxisGetSizeP ( void * taxisptr, MPI_Comm comm );
 static void   taxisPackP ( void * taxisptr, void *buf, int size,
                            int *position, MPI_Comm comm );
-static int taxisTxCode   ( void * taxisptr );
+static int taxisTxCode   ( void );
 #endif
 
 resOps taxisOps = { taxisCompareP, taxisDestroyP, taxisPrintP
@@ -1331,7 +1331,7 @@ int taxisCompareP ( void *  taxisptr1, void * taxisptr2 )
 
 #ifdef USE_MPI
 static int
-taxisTxCode ( void * taxisptr )
+taxisTxCode ( void )
 {
   return TAXIS;
 }

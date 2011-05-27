@@ -130,4 +130,6 @@ void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line, \
                     int tag, int source, char * text );
 #define xdebugMsg2(tag,source,text) pcdiDebugMsg ( __FILE__, __func__, \
                                                     __LINE__, tag, source, text )
+int xmaxInt ( int, int );
+int xminInt ( int, int );
 #endif

@@ -69,7 +69,7 @@ static void   zaxisPrintP   ( void * zaxisptr, FILE * fp );
 static int    zaxisGetSizeP ( void * zaxisptr, MPI_Comm comm );
 static void   zaxisPackP    ( void * zaxisptr, void * buffer, int size,
                               int *pos, MPI_Comm comm);
-static int    zaxisTxCode   ( void * zaxisptr );
+static int    zaxisTxCode   ( void );
 #endif
 
 resOps zaxisOps = { zaxisCompareP, zaxisDestroyP, zaxisPrintP
@@ -1252,19 +1252,40 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
 {
   zaxis_t * z1 = ( zaxis_t * ) zaxisptr1 ;
   zaxis_t * z2 = ( zaxis_t * ) zaxisptr2 ;
+  static int differ = -1;
+  static int equal  =  0;
 
   assert ( z1 );
   assert ( z2 );
 
-  return zaxisCompare ( z1->self,
-                        z2->type, z2->size, z2->size > 0 ? 1 : 0,
-                        z2->vals, z2->longname, z2->units, z2->ltype );
+  //zaxisptr->self        = CDI_UNDEFID;
+  //zaxisptr->name[0]     = 0;
+  //zaxisptr->longname[0] = 0;
+  //zaxisptr->units[0]    = 0;
+  //zaxisptr->vals        = NULL;
+  //zaxisptr->ubounds     = NULL;
+  //zaxisptr->lbounds     = NULL;
+  //zaxisptr->weights     = NULL;
+  if ( z1->type      != z2->type )      return differ;
+  if ( z1->ltype     != z2->ltype )     return differ;
+  if ( z1->direction != z2->direction ) return differ;
+  if ( z1->prec      != z2->prec )      return differ;
+  if ( z1->size      != z2->size )      return differ;
+  if ( z1->vctsize   != z2->vctsize )   return differ;
+  //zaxisptr->vct         = NULL;
+  
+  /*
+    return zaxisCompare ( z1->self,
+    z2->type, z2->size, z2->size > 0 ? 1 : 0,
+    z2->vals, z2->longname, z2->units, z2->ltype );
+  */
+  return equal;
 }
 
 
 #ifdef USE_MPI
 static int
-zaxisTxCode ( void * zaxisptr )
+zaxisTxCode ( void )
 {
   return ZAXIS;
 }

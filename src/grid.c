@@ -53,7 +53,7 @@ static void   gridPrintP   ( void * gridptr, FILE * fp );
 static int    gridGetSizeP ( void * gridptr, MPI_Comm comm );
 static void   gridPackP    ( void * gridptr, void * buff, int size,
                              int *position, MPI_Comm comm );
-static int    gridTxCode   ( void * gridptr );
+static int    gridTxCode   ( void );
 #endif
 
 resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP
@@ -3873,7 +3873,7 @@ void gridGetIndexArray ( int ngrids, int * gridIndexArray )
 #ifdef USE_MPI
 
 static int
-gridTxCode( void * gridptr )
+gridTxCode ()
 {
   return GRID;
 }

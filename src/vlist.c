@@ -53,7 +53,7 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp );
 static int  vlistGetSizeP ( void * vlistptr, MPI_Comm comm );
 static void vlistPackP    ( void * vlistptr, void * buff, int size,
                             int *position, MPI_Comm comm );
-static int  vlistTxCode(void *vlistptr);
+static int  vlistTxCode   ( void );
 #endif
 
 resOps vlist_ops = {
@@ -1567,7 +1567,7 @@ enum {
 };
 
 static int
-vlistTxCode(void *vlistptr)
+vlistTxCode ( void )
 {
   return VLIST;
 }

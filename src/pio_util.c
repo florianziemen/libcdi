@@ -187,3 +187,21 @@ void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line,
 
 
 /****************************************************/
+
+
+int xmaxInt ( int a, int b )
+{
+  return a >= b ? a : b;
+}
+
+
+/****************************************************/
+
+
+int xminInt ( int a, int b )
+{
+  return a <= b ? a : b;
+}
+
+
+/****************************************************/

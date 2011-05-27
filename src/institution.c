@@ -37,7 +37,7 @@ static void   institutePrintP   ( void * instituteptr, FILE * fp );
 static int    instituteGetSizeP ( void * instituteptr, MPI_Comm comm );
 static void   institutePackP    ( void * instituteptr, void *buf, int size,
                                   int *position, MPI_Comm comm );
-static int    instituteTxCode   ( void * instituteptr );
+static int    instituteTxCode   ( void );
 #endif
 
 resOps instituteOps = { instituteCompareP, instituteDestroyP, institutePrintP
@@ -368,7 +368,7 @@ void institutePrintP   ( void * instituteptr, FILE * fp )
 
 #ifdef USE_MPI
 static int
-instituteTxCode(void *vlistptr)
+instituteTxCode ( void )
 {
   return INSTITUTE;
 }

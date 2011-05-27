@@ -209,8 +209,6 @@ void     pioMetadata        ( void );
 void     namespaceInit      ( int, int * );
 void     namespaceSetActive ( int );
 
-void     reshArrayPrint     ( char * );
-
 void     gridGetIndexArray  ( int, int * );
 void     zaxisGetIndexArray ( int, int * );
 

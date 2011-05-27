@@ -30,7 +30,7 @@ typedef void   ( * valPrintFunc       )( void *, FILE * );
 typedef int    ( * valGetPackSizeFunc )( void *, MPI_Comm comm );
 typedef void   ( * valPackFunc        )( void *, void *buf, int size, int *pos,
 					 MPI_Comm comm );
-typedef int    ( * valTxCodeFunc      )( void * );
+typedef int    ( * valTxCodeFunc      )( void );
 #endif
 
 typedef struct {
@@ -65,5 +65,8 @@ int    reshGetStatus ( cdiResH, resOps * );
 
 void   reshLock   ( void );
 void   reshUnlock ( void );
+
+int    reshArrayCompare      ( int, int );
+void   reshArrayPrint        ( char * );
 
 #endif

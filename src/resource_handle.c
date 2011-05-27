@@ -407,7 +407,7 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
           curr = arrayResources[nsp] + i;
           assert ( curr->ops );
 
-          type = curr->ops->valTxCode(curr->ptr);
+          type = curr->ops->valTxCode ();
 
           if ( ! type )
             continue;
@@ -518,6 +518,70 @@ void reshLock ()
 void reshUnlock ()
 {
   ARRAY_UNLOCK();
+}
+
+
+/**************************************************************/
+
+
+int reshArrayCompare ( int nsp0, int nsp1 )
+{
+  const int equal  = 0;
+  const int differ = -1;
+  int i;
+  node * node0, * node1;
+
+  assert ( arrayInit && 
+	   namespaceGetNumber () > xmaxInt ( nsp0, nsp1 ) &&
+	   xminInt ( nsp0, nsp1 ) >= 0 );
+
+  for ( i = 0; i < arraySizeAllocated[nsp0]; i++ )
+    {
+      node0 = arrayResources[nsp0] + i;
+      if ( node0->ptr )
+	{
+	  if ( i >= arraySizeAllocated[nsp1] )
+	    {
+	      xdebug ();
+	      return differ;
+	    }
+	  node1 = arrayResources[nsp1] + i;
+	  if ( !node1->ptr )
+	    {
+	      xdebug ();
+	      return differ;
+	    }
+	  assert ( node0->ops && node1->ops );
+	  if ( node0->ops != node1->ops )
+	    {
+	      xdebug ();
+	      return differ;
+	    }
+	  if ( node0->ops->valCompare 
+	       (( void * ) node0->ptr, ( void * ) node1->ptr ) != equal )
+	    {
+	      printf ( "type %d, values idx0=%d and idx1=%d differ\n", 
+		       node0->ops->valTxCode (), node0->idx, node1->idx );
+	      return differ;
+	    }
+	  else 
+	    {
+	      printf ( "type %d, values idx0=%d and idx1=%d are equal\n", 
+		       node0->ops->valTxCode (), node0->idx, node1->idx );
+	    }
+	}
+      else if ( arrayResources[nsp1][i].ptr )
+	return differ;
+    }
+
+  for ( ; i < arraySizeAllocated[nsp1]; i++ )
+    if ( arrayResources[nsp1][i].ptr )
+      {
+	xdebug ();
+	return differ;
+      }
+	
+  return equal;
 }
 
 

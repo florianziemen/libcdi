@@ -41,7 +41,7 @@ static void   modelPrintP   ( void * modelptr, FILE * fp );
 static int    modelGetSizeP ( void * modelptr, MPI_Comm comm );
 static void   modelPackP    ( void * modelptr, void * buff, int size,
                               int *position, MPI_Comm comm);
-static int    modelTxCode   ( void * modelptr );
+static int    modelTxCode   ( void );
 #endif
 
 resOps modelOps = { modelCompareP, modelDestroyP, modelPrintP
@@ -289,7 +289,7 @@ void modelPrintP   ( void * modelptr, FILE * fp )
 #ifdef USE_MPI
 
 static int
-modelTxCode(void *modelptr)
+modelTxCode ( void )
 {
   return MODEL;
 }

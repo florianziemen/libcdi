@@ -14,6 +14,9 @@
 #include "pio_util.h"
 
 
+extern void   reshArrayPrint        ( char * );
+
+
 #define nlon 12 // Number of longitudes
 #define nlat  6 // Number of latitudes 
 #define nlev  5 // Number of levels    

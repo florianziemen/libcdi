@@ -73,7 +73,7 @@ static void   streamPrintP   ( void * streamptr, FILE * fp );
 static int    streamGetSizeP ( void * streamptr, MPI_Comm comm );
 static void   streamPackP    ( void * streamptr, void * buff, int size,
                                int * position, MPI_Comm comm );
-static int    streamTxCode   ( void * streamptr );
+static int    streamTxCode   ( void );
 #endif
 
 resOps streamOps = { streamCompareP, streamDestroyP, streamPrintP,
@@ -576,7 +576,7 @@ void streamPrintP   ( void * streamptr, FILE * fp )
 
 #ifdef USE_MPI
 static int
-streamTxCode ( void * streamptr )
+streamTxCode ( void )
 {
   return STREAM;
 }
