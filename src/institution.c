@@ -205,7 +205,7 @@ int instituteCompareP ( void *  instituteptr1, void * instituteptr2 )
 
 int institutInq(int center, int subcenter, const char *name, const char *longname)
 {
-  int instID = UNDEFID, instCount, * instKeys, i;
+  int instID = UNDEFID, instCount, * instResHs, i;
   institute_t * ip1;
   institute_t * ip2;
 
@@ -221,12 +221,12 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
   ip1->longname   = ( char * ) longname;
 
   instCount = instituteCount ();
-  instKeys = xmalloc ( instCount * sizeof ( int ));
-  reshGetKeysArrayOfType ( instCount, instKeys, &instituteOps );
+  instResHs = xmalloc ( instCount * sizeof ( int ));
+  reshGetResHArrayOfType ( instCount, instResHs, &instituteOps );
 
   for( i = 0; i < instCount; i++ )
     {
-      instID = instKeys[i];
+      instID = instResHs[i];
       ip2 = ( institute_t * ) reshGetVal ( instID, &instituteOps );
       assert ( ip2 );
 
@@ -237,7 +237,7 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
         }
     }
 
-  free ( instKeys );
+  free ( instResHs );
   free ( ip1 );
 
   return  (instID);
@@ -311,23 +311,23 @@ char *institutInqLongnamePtr(int instID)
 
 int institutInqNumber(void)
 {
-  int i, instCount, * instKeys, instNum = 0;
+  int i, instCount, * instResHs, instNum = 0;
   institute_t * instituteptr;
 
   instituteInit ();
 
   instCount = reshCountType ( &instituteOps );
-  instKeys = xmalloc ( instCount * sizeof ( int ));
-  reshGetKeysArrayOfType ( instCount, instKeys, &instituteOps );
+  instResHs = xmalloc ( instCount * sizeof ( int ));
+  reshGetResHArrayOfType ( instCount, instResHs, &instituteOps );
 
   for ( i = 0; i < instCount; i++ )
     {
-      instituteptr = ( institute_t * ) reshGetVal ( instKeys[i], &instituteOps );
+      instituteptr = ( institute_t * ) reshGetVal ( instResHs[i], &instituteOps );
       if ( instituteptr && instituteptr->used )
         instNum++;
     }
 
-  if ( instKeys ) free ( instKeys );
+  if ( instResHs ) free ( instResHs );
 
   return instNum;
 }

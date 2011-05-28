@@ -1322,7 +1322,7 @@ void zaxisPackP ( void * zaxisptr, void * packBuffer, int packBufferSize,
 
 #endif
 
-void zaxisGetIndexArray ( int nzaxis, int * zaxisIndexArray )
+void zaxisGetIndexArray ( int nzaxis, int * zaxisResHs )
 {
-  reshGetKeysArrayOfType ( nzaxis, zaxisIndexArray, &zaxisOps );
+  reshGetResHArrayOfType ( nzaxis, zaxisResHs, &zaxisOps );
 }

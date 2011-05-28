@@ -158,17 +158,17 @@ int modelInq(int instID, int modelgribID, char *name)
   int found;
   int modelCount;
   model_t *modelptr;
-  int i, * modelKeys;
+  int i, * modelResHs;
 
   modelInit ();
 
   modelCount = modelSize();
-  modelKeys = xmalloc ( modelCount * sizeof ( int ));
-  reshGetKeysArrayOfType ( modelCount, modelKeys, &modelOps );
+  modelResHs = xmalloc ( modelCount * sizeof ( int ));
+  reshGetResHArrayOfType ( modelCount, modelResHs, &modelOps );
 
   for( i = 0; i < modelCount; i++ )
     {
-      modelID = modelKeys[i];
+      modelID = modelResHs[i];
       modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
 
       if ( modelptr->used )
@@ -200,7 +200,7 @@ int modelInq(int instID, int modelgribID, char *name)
 
   if ( modelID == modelCount ) modelID = UNDEFID;
 
-  if ( modelKeys ) free ( modelKeys );
+  if ( modelResHs ) free ( modelResHs );
 
   return (modelID);
 }

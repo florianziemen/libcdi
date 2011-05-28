@@ -16,7 +16,8 @@
 #include "pio.h"
 #include "pio_rpc.h"
 #include "pio_util.h"
- 
+
+extern void reshArrayPrint ( char * );
 
 MPI_Comm * commPio;
 
@@ -75,6 +76,8 @@ void IOServer ( MPI_Comm comm, int ptype )
 		     tag, commCalc, &status );
 	  rpcUnpackResources ( buffer, size, commCalc );
 	  free ( buffer );
+
+	  if ( rankGlob == nProcsCalc ) reshArrayPrint ( "reshArrayIOServer" );
 
 	  if  ( ddebug >= 2 ) xdebugMsg (  tag, source, nfinished );
 

@@ -14,7 +14,7 @@
 #include "pio_util.h"
 
 
-extern void   reshArrayPrint        ( char * );
+extern void reshArrayPrint ( char * );
 
 
 #define nlon 12 // Number of longitudes

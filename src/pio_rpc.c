@@ -18,9 +18,6 @@ int nProcsIO;
 int nProcsCalc;
 MPI_Comm * commsIO;
 MPI_Comm commCalc;
-
-extern 
-void reshArrayPrint ( char * filename );
  
  
 void  commsIOCreate ( MPI_Comm commGlob, int nIOP )

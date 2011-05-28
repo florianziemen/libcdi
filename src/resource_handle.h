@@ -53,7 +53,7 @@ int    reshCountType ( resOps * );
 
 void * reshGetVal ( cdiResH, resOps * );
 
-void   reshGetKeysArrayOfType ( int, int *, resOps * );
+void   reshGetResHArrayOfType ( int, int *, resOps * );
 
 #ifdef USE_MPI
 void   reshPackBufferCreate ( char **, int *, MPI_Comm );
@@ -65,8 +65,5 @@ int    reshGetStatus ( cdiResH, resOps * );
 
 void   reshLock   ( void );
 void   reshUnlock ( void );
-
-int    reshArrayCompare      ( int, int );
-void   reshArrayPrint        ( char * );
 
 #endif

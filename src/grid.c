@@ -3867,7 +3867,7 @@ void gridDefReference(int gridID, const char *reference)
 
 void gridGetIndexArray ( int ngrids, int * gridIndexArray )
 {
-  reshGetKeysArrayOfType ( ngrids, gridIndexArray, &gridOps );
+  reshGetResHArrayOfType ( ngrids, gridIndexArray, &gridOps );
 }
 
 #ifdef USE_MPI

@@ -41,11 +41,11 @@ static pthread_mutex_t arrayMutex;
 
 
 typedef struct node {
-  int          idx;
-  struct node *next;
-  resOps      *ops;
-  void        *ptr;
-  int          status;
+  cdiResH       resH;//idx
+  struct node * next;
+  resOps      * ops;
+  void        * val;//ptr
+  int           status;
 } node;
 
 
@@ -92,10 +92,10 @@ void arrayInitPointer ( void )
     {
       for ( j = 0; j < arraySizeAllocated[i]; j++ )
         {
-          arrayResources[i][j].idx    = namespaceIdxEncode2 ( i, j );
+          arrayResources[i][j].resH    = namespaceIdxEncode2 ( i, j );
           arrayResources[i][j].next   = arrayResources[i] + j + 1;
           arrayResources[i][j].ops    = NULL;
-          arrayResources[i][j].ptr    = NULL;
+          arrayResources[i][j].val    = NULL;
           arrayResources[i][j].status = RESH_UNDEFID;
         }
 
@@ -122,8 +122,8 @@ void arrayDestroy ( void )
 	  for ( j = 0; j < arraySizeAllocated[i]; j++ )
 	    {
 	      node = arrayResources[i] + j;
-	      if ( node->ptr )
-		node->ops->valDestroy ( node->ptr );
+	      if ( node->val )
+		node->ops->valDestroy ( node->val );
 	    }
 	}
       free ( arrayResources[i] );
@@ -179,7 +179,7 @@ void arraySizeExtend()
 
   for ( i = arraySizeAllocated[nsp]; i < newArraySize; ++i )
     {
-      arrayResources[nsp][i].idx  = namespaceIdxEncode2 ( nsp, i );
+      arrayResources[nsp][i].resH  = namespaceIdxEncode2 ( nsp, i );
       arrayResources[nsp][i].next = arrayResources[nsp] + i + 1;
     }
 
@@ -194,9 +194,8 @@ void arraySizeExtend()
 
 int reshPut ( void *p, resOps *ops )
 {
-  int      idx = -1;
-  node *newNode;
-  int nsp;
+  cdiResH resH = -1, nsp;
+  node * newNode;
 
   assert ( p && ops );
 
@@ -210,21 +209,21 @@ int reshPut ( void *p, resOps *ops )
   newNode               = freeListHead[nsp];
   freeListHead[nsp]     = freeListHead[nsp]->next;
   newNode->next         = NULL;
-  idx                   = newNode->idx;
-  newNode->ptr          = p;
+  resH                  = newNode->resH;
+  newNode->val          = p;
   newNode->ops          = ops;
   newNode->status       = ASSIGNED;
 
   ARRAY_UNLOCK();
 
-  return idx;
+  return resH;
 }
 
 
 /**************************************************************/
 
 
-void reshRemove ( cdiResH idx, resOps * ops )
+void reshRemove ( cdiResH resH, resOps * ops )
 {
   int nsp;
   namespaceTuple_t nspT;
@@ -235,7 +234,7 @@ void reshRemove ( cdiResH idx, resOps * ops )
 
   nsp = namespaceGetActive ();
 
-  nspT = namespaceResHDecode ( idx );
+  nspT = namespaceResHDecode ( resH );
 
   assert ( nspT.nsp == nsp &&
            nspT.idx >= 0 &&
@@ -245,7 +244,7 @@ void reshRemove ( cdiResH idx, resOps * ops )
 
   arrayResources[nsp][nspT.idx].next   = freeListHead[nsp];
   arrayResources[nsp][nspT.idx].ops    = NULL;
-  arrayResources[nsp][nspT.idx].ptr    = NULL;
+  arrayResources[nsp][nspT.idx].val    = NULL;
   arrayResources[nsp][nspT.idx].status = RESH_UNDEFID;
   freeListHead  [nsp]                  = arrayResources[nsp] + nspT.idx;
 
@@ -256,7 +255,7 @@ void reshRemove ( cdiResH idx, resOps * ops )
 /**************************************************************/
 
 
-void *reshGetVal ( cdiResH idx, resOps * ops  )
+void *reshGetVal ( cdiResH resH, resOps * ops  )
 {
   int nsp;
   namespaceTuple_t nspT;
@@ -268,7 +267,7 @@ void *reshGetVal ( cdiResH idx, resOps * ops  )
 
   nsp = namespaceGetActive ();
 
-  nspT = namespaceResHDecode ( idx );
+  nspT = namespaceResHDecode ( resH );
 
   assert ( arrayInit &&
            nspT.nsp == nsp &&
@@ -282,28 +281,28 @@ void *reshGetVal ( cdiResH idx, resOps * ops  )
   assert ( node &&
            node->ops == ops );
 
-  return node->ptr;
+  return node->val;
 }
 
 
 /**************************************************************/
 
 
-void reshGetKeysArrayOfType ( int c, int * indice, resOps * ops )
+void reshGetResHArrayOfType ( int c, int * resHs, resOps * ops )
 {
   int i, j = 0, nsp;
 
-  assert ( arrayInit && indice && ops );
+  assert ( arrayInit && resHs && ops );
 
   ARRAY_LOCK();
 
   nsp = namespaceGetActive ();
 
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
-    if ( arrayResources[nsp][i].ptr && arrayResources[nsp][i].ops )
+    if ( arrayResources[nsp][i].val && arrayResources[nsp][i].ops )
       if ( arrayResources[nsp][i].ops == ops )
         {
-          indice[j++] = namespaceIdxEncode2 ( nsp, i );
+          resHs[j++] = namespaceIdxEncode2 ( nsp, i );
           if ( j == c ) break;
         }
 
@@ -327,7 +326,7 @@ int reshCountType ( resOps * ops )
   nsp = namespaceGetActive ();
 
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
-    if ( arrayResources[nsp][i].ptr )
+    if ( arrayResources[nsp][i].val )
       if ( arrayResources[nsp][i].ops == ops )
         countType++;
 
@@ -357,14 +356,14 @@ int  getPackBufferSize ( MPI_Comm comm )
 
   /* pack resources, type marker and seperator marker */
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
-    if ( arrayResources[nsp][i].ptr )
+    if ( arrayResources[nsp][i].val )
       if ( arrayResources[nsp][i].status == ASSIGNED )
         {
           curr = arrayResources[nsp] + i;
           assert ( curr->ops );
 
           /* message plus frame of 2 ints */
-          packBufferSize += curr->ops->valGetPackSize ( curr->ptr, comm )
+          packBufferSize += curr->ops->valGetPackSize ( curr->val, comm )
             + 2 * intpacksize;
         }
 
@@ -410,7 +409,7 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
 		    * packBuffer, * packBufferSize, &packBufferPos, comm ));
 
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
-    if ( arrayResources[nsp][i].ptr )
+    if ( arrayResources[nsp][i].val )
       if ( arrayResources[nsp][i].status == ASSIGNED )
         {
           curr = arrayResources[nsp] + i;
@@ -424,7 +423,7 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
           xmpi ( MPI_Pack ( &type, 1, MPI_INT, * packBuffer, 
 			    * packBufferSize, &packBufferPos, comm ));
 
-          curr->ops->valPack ( curr->ptr,
+          curr->ops->valPack ( curr->val,
                                * packBuffer ,
                                * packBufferSize,
                                &packBufferPos,
@@ -449,7 +448,7 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
 
 /* for thread safety this feature would have to be integrated in reshPut */
 
-void reshSetStatus ( cdiResH idx, resOps * ops, int status )
+void reshSetStatus ( cdiResH resH, resOps * ops, int status )
 {
   int nsp;
   namespaceTuple_t nspT;
@@ -461,7 +460,7 @@ void reshSetStatus ( cdiResH idx, resOps * ops, int status )
 
   nsp = namespaceGetActive ();
 
-  nspT = namespaceResHDecode ( idx );
+  nspT = namespaceResHDecode ( resH );
 
   assert ( arrayInit &&
            nspT.nsp == nsp &&
@@ -482,7 +481,7 @@ void reshSetStatus ( cdiResH idx, resOps * ops, int status )
 /**************************************************************/
 
 
-int reshGetStatus ( cdiResH idx, resOps * ops )
+int reshGetStatus ( cdiResH resH, resOps * ops )
 {
   int nsp;
   namespaceTuple_t nspT;
@@ -494,7 +493,7 @@ int reshGetStatus ( cdiResH idx, resOps * ops )
 
   nsp = namespaceGetActive ();
 
-  nspT = namespaceResHDecode ( idx );
+  nspT = namespaceResHDecode ( resH );
 
   assert ( arrayInit &&
            nspT.nsp == nsp &&
@@ -547,7 +546,7 @@ int reshArrayCompare ( int nsp0, int nsp1 )
   for ( i = 0; i < arraySizeAllocated[nsp0]; i++ )
     {
       node0 = arrayResources[nsp0] + i;
-      if ( node0->ptr )
+      if ( node0->val )
 	{
 	  if ( i >= arraySizeAllocated[nsp1] )
 	    {
@@ -556,7 +555,7 @@ int reshArrayCompare ( int nsp0, int nsp1 )
 	    }
 
 	  node1 = arrayResources[nsp1] + i;
-	  if ( !node1->ptr )
+	  if ( !node1->val )
 	    {
 	      xdebug ();
 	      return differ;
@@ -569,20 +568,20 @@ int reshArrayCompare ( int nsp0, int nsp1 )
 	      return differ;
 	    }
 
-	  valCompare =  node0->ops->valCompare ( node0->ptr, node1->ptr );
-	  printf ( "type %d, values idx0=%d and idx1=%d %s\n", 
+	  valCompare =  node0->ops->valCompare ( node0->val, node1->val );
+	  printf ( "type %d, values resH0=%d and resH1=%d %s\n", 
 		   node0->ops->valTxCode (), 
-		   node0->idx, 
-		   node1->idx,
+		   node0->resH, 
+		   node1->resH,
 		   valCompare == equal ? "are equal" : "differ" );
 	  if ( valCompare != equal ) return differ;
 	}
-      else if ( arrayResources[nsp1][i].ptr )
+      else if ( arrayResources[nsp1][i].val )
 	return differ;
     }
 
   for ( ; i < arraySizeAllocated[nsp1]; i++ )
-    if ( arrayResources[nsp1][i].ptr )
+    if ( arrayResources[nsp1][i].val )
       {
 	xdebug ();
 	return differ;
@@ -636,9 +635,9 @@ void reshArrayPrint ( char * filename )
       for ( j = 0; j < arraySizeAllocated[i]; j++)
         {
           curr = arrayResources[i] + j;
-          if ( curr->ops && curr->ptr )
+          if ( curr->ops && curr->val )
             {
-              curr->ops->valPrint (( void * ) curr->ptr, fp );
+              curr->ops->valPrint (( void * ) curr->val, fp );
               fprintf ( fp, "\n" );
             }
         }
