@@ -19,6 +19,8 @@ extern void   reshPackBufferCreate  ( char **, int *, MPI_Comm );
 extern void   reshPackBufferDestroy ( char ** );
 extern void   rpcUnpackResources    ( char *, int, MPI_Comm );
 
+extern void arrayDestroy ( void );
+
 #define nlon 12 // Number of longitudes
 #define nlat  6 // Number of latitudes 
 #define nlev  5 // Number of levels    
@@ -144,15 +146,13 @@ void modelRun ()
   namespaceSetActive ( 0 ); 
   free ( recvBuffer );  
   reshPackBufferDestroy ( &sendBuffer );
-  xdebug ();
   differ = reshArrayCompare ( 0, 1 );
-  printf ( "###### The resource arrays %s.\n", differ ? "differ" : "are equal" );
-  xdebug ();
+  printf ( "The resource arrays %s.\n", differ ? "differ" : "are equal" );
   reshArrayPrint ( "reshArrayModel" );
-
+  
   // Close the output stream
   streamClose(streamID);
-		    
+  
   // Destroy the objects
   
   vlistDestroy(vlistID);

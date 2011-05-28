@@ -56,12 +56,12 @@ int namespaceIdxEncode2 ( int nsp, int idx )
 }
 
 
-namespaceTuple_t namespaceIdxDecode ( int code )
+namespaceTuple_t namespaceResHDecode ( int resH )
 {
   namespaceTuple_t tin;
 
-  tin.idx = code & idxmask;
-  tin.nsp = (int)(((unsigned)( code & nspmask )) >> idxbits);
+  tin.idx = resH & idxmask;
+  tin.nsp = (int)(((unsigned)( resH & nspmask )) >> idxbits);
 
   return tin;
 }

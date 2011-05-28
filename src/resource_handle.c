@@ -109,21 +109,30 @@ void arrayInitPointer ( void )
 /**************************************************************/
 
 
-static
 void arrayDestroy ( void )
 {
-  int i;
-
+  node * node;
+  int i, j, nspTemp = namespaceGetActive ();
+  
   if ( arrayResources )
     {
       for ( i = 0; i < namespaceGetNumber (); i++ )
-        if (  arrayResources[i] )
-          free ( arrayResources[i] );
-      free ( arrayResources );
+	{
+	  namespaceSetActive ( i );  
+	  for ( j = 0; j < arraySizeAllocated[i]; j++ )
+	    {
+	      node = arrayResources[i] + j;
+	      if ( node->ptr )
+		node->ops->valDestroy ( node->ptr );
+	    }
+	}
+      free ( arrayResources[i] );
     }
-
+  free ( arrayResources );
+  
   if ( freeListHead ) free ( freeListHead );
   if ( arraySizeAllocated ) free ( arraySizeAllocated );
+  namespaceSetActive ( nspTemp );    
 }
 
 
@@ -226,7 +235,7 @@ void reshRemove ( cdiResH idx, resOps * ops )
 
   nsp = namespaceGetActive ();
 
-  nspT = namespaceIdxDecode ( idx );
+  nspT = namespaceResHDecode ( idx );
 
   assert ( nspT.nsp == nsp &&
            nspT.idx >= 0 &&
@@ -259,7 +268,7 @@ void *reshGetVal ( cdiResH idx, resOps * ops  )
 
   nsp = namespaceGetActive ();
 
-  nspT = namespaceIdxDecode ( idx );
+  nspT = namespaceResHDecode ( idx );
 
   assert ( arrayInit &&
            nspT.nsp == nsp &&
@@ -452,7 +461,7 @@ void reshSetStatus ( cdiResH idx, resOps * ops, int status )
 
   nsp = namespaceGetActive ();
 
-  nspT = namespaceIdxDecode ( idx );
+  nspT = namespaceResHDecode ( idx );
 
   assert ( arrayInit &&
            nspT.nsp == nsp &&
@@ -485,7 +494,7 @@ int reshGetStatus ( cdiResH idx, resOps * ops )
 
   nsp = namespaceGetActive ();
 
-  nspT = namespaceIdxDecode ( idx );
+  nspT = namespaceResHDecode ( idx );
 
   assert ( arrayInit &&
            nspT.nsp == nsp &&
@@ -528,7 +537,7 @@ int reshArrayCompare ( int nsp0, int nsp1 )
 {
   const int equal  = 0;
   const int differ = -1;
-  int i;
+  int i, valCompare;
   node * node0, * node1;
 
   assert ( arrayInit && 
@@ -545,30 +554,28 @@ int reshArrayCompare ( int nsp0, int nsp1 )
 	      xdebug ();
 	      return differ;
 	    }
+
 	  node1 = arrayResources[nsp1] + i;
 	  if ( !node1->ptr )
 	    {
 	      xdebug ();
 	      return differ;
 	    }
+
 	  assert ( node0->ops && node1->ops );
 	  if ( node0->ops != node1->ops )
 	    {
 	      xdebug ();
 	      return differ;
 	    }
-	  if ( node0->ops->valCompare 
-	       (( void * ) node0->ptr, ( void * ) node1->ptr ) != equal )
-	    {
-	      printf ( "type %d, values idx0=%d and idx1=%d differ\n", 
-		       node0->ops->valTxCode (), node0->idx, node1->idx );
-	      return differ;
-	    }
-	  else 
-	    {
-	      printf ( "type %d, values idx0=%d and idx1=%d are equal\n", 
-		       node0->ops->valTxCode (), node0->idx, node1->idx );
-	    }
+
+	  valCompare =  node0->ops->valCompare ( node0->ptr, node1->ptr );
+	  printf ( "type %d, values idx0=%d and idx1=%d %s\n", 
+		   node0->ops->valTxCode (), 
+		   node0->idx, 
+		   node1->idx,
+		   valCompare == equal ? "are equal" : "differ" );
+	  if ( valCompare != equal ) return differ;
 	}
       else if ( arrayResources[nsp1][i].ptr )
 	return differ;

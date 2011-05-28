@@ -12,7 +12,7 @@ int              namespaceGetNumber    ( void );
 int              namespaceGetActive    ( void );
 int              namespaceIdxEncode    ( namespaceTuple_t );
 int              namespaceIdxEncode2   ( int, int );
-namespaceTuple_t namespaceIdxDecode    ( int );
+namespaceTuple_t namespaceResHDecode   ( int );
 int              namespaceHasLocalFile ( int );
 void             namespaceCleanup      ( void );
 int              namespaceAdaptKey     ( int, int );
