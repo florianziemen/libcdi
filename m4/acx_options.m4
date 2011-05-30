@@ -154,9 +154,11 @@ AC_ARG_WITH([netcdf],
                                                 [AC_MSG_ERROR([Could not link to netcdf library])])
                                  AC_SUBST([NETCDF_LDFLAGS],[" -L$NETCDF_ROOT/lib -lnetcdf"])
                                  AC_SUBST([NETCDF_INCLUDE],[" -I$NETCDF_ROOT/include"])
+                                 AC_MSG_CHECKING([nc-config script])
                                  AC_CHECK_PROG(NC_CONFIG,nc-config,nc-config)
                                  AS_IF([test "x$NC_CONFIG" != "x"],
-                                   [AC_MSG_CHECKING([netcdf's nc2 support])
+                                   [AC_MSG_RESULT([found])
+                                   AC_MSG_CHECKING([netcdf's nc2 support])
                                    AS_IF([test "x$($NC_CONFIG --has-nc2)" = "xyes"],
                                          [AC_DEFINE([HAVE_NETCDF2],[1],[Define to 1 for NETCDF2 support])
                                           AC_MSG_RESULT([yes])],[AC_MSG_RESULT([no])])
@@ -164,7 +166,7 @@ AC_ARG_WITH([netcdf],
                                    AS_IF([test "x$($NC_CONFIG --has-nc4)" = "xyes"],
                                          [AC_DEFINE([HAVE_NETCDF4],[1],[Define to 1 for NETCDF4 support])
                                           AC_MSG_RESULT([yes])],[AC_MSG_RESULT([no])])],
-                                   [AS_ECHO([Could not find nc-config! go on with default configuration])])],
+                                   [AC_MSG_RESULT([Could not find nc-config! go on with default configuration])])],
                                 [AC_MSG_NOTICE([$NETCDF_ROOT is not a directory! NETCDF suppressed])])])],
             [AC_MSG_CHECKING([for NETCDF library])
              AC_MSG_RESULT([suppressed])])

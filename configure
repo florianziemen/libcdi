@@ -3317,8 +3317,8 @@ esac
 
 
 
-macro_version='2.4'
-macro_revision='1.3293'
+macro_version='2.2.10'
+macro_revision='1.3175'
 
 
 
@@ -23395,6 +23395,8 @@ fi
 
                                  NETCDF_INCLUDE=" -I$NETCDF_ROOT/include"
 
+                                 { $as_echo "$as_me:${as_lineno-$LINENO}: checking nc-config script" >&5
+$as_echo_n "checking nc-config script... " >&6; }
                                  # Extract the first word of "nc-config", so it can be a program name with args.
 set dummy nc-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -23433,7 +23435,9 @@ fi
 
 
                                  if test "x$NC_CONFIG" != "x"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's nc2 support" >&5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: found" >&5
+$as_echo "found" >&6; }
+                                   { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's nc2 support" >&5
 $as_echo_n "checking netcdf's nc2 support... " >&6; }
                                    if test "x$($NC_CONFIG --has-nc2)" = "xyes"; then :
 
@@ -23458,7 +23462,8 @@ else
 $as_echo "no" >&6; }
 fi
 else
-  $as_echo Could not find nc-config! go on with default configuration
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: Could not find nc-config! go on with default configuration" >&5
+$as_echo "Could not find nc-config! go on with default configuration" >&6; }
 fi
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: $NETCDF_ROOT is not a directory! NETCDF suppressed" >&5
