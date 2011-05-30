@@ -11,6 +11,9 @@
 #include "vlist.h"
 #include "namespace.h"
 
+
+extern void gridUnpack ( char *, int, int *, MPI_Comm );
+
 MPI_Comm commGlob;
 int sizeGlob;
 int rankGlob;
@@ -213,7 +216,7 @@ void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize,
   int token1, token2, nspTarget;
   int unpackBufferPos = 0;
   char text[4096];
-
+	  
   while ( unpackBufferPos < unpackBufferSize )
     {
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
@@ -228,7 +231,7 @@ void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize,
 			      &nspTarget, 1, MPI_INT, comm ));
 	  break;
 	case GRID:
-	  unpackGrid ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
+	  gridUnpack ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
 		       comm );
 	  break;
 	case ZAXIS:  

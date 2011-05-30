@@ -3,6 +3,8 @@
 
 typedef unsigned char mask_t;
 
+enum { CHAR = 0, INTEGER = 1, DOUBLE = 2, stringlen = 256 };
+
 typedef struct {
   int     self;
   int     type;                   /* grid type                      */
@@ -54,14 +56,14 @@ typedef struct {
   int     ysize;
   int     locked;
   int     lcomplex;
-  char    xname[256];
-  char    yname[256];
-  char    xlongname[256];
-  char    ylongname[256];
-  char    xstdname[256];
-  char    ystdname[256];
-  char    xunits[256];
-  char    yunits[256];
+  char    xname[stringlen];
+  char    yname[stringlen];
+  char    xlongname[stringlen];
+  char    ylongname[stringlen];
+  char    xstdname[stringlen];
+  char    ystdname[stringlen];
+  char    xunits[stringlen];
+  char    yunits[stringlen];
 }
 grid_t;
 
