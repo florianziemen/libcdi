@@ -170,6 +170,7 @@ LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
+NC_CONFIG = @NC_CONFIG@
 NETCDF_INCLUDE = @NETCDF_INCLUDE@
 NETCDF_LDFLAGS = @NETCDF_LDFLAGS@
 NM = @NM@
@@ -662,17 +663,17 @@ uninstall-am: uninstall-binPROGRAMS
 @ENABLE_PYTHON_TRUE@pythonLibTest: pythonLib
 @ENABLE_PYTHON_TRUE@	@cd python; python testLib.py
 # =========================================================
-@ENABLE_PYTHON_TRUE@pythonObjWrapper: cdiobj.i
+@ENABLE_PYTHON_TRUE@python/cdiobj_wrap.cpp: cdiobj.i
 @ENABLE_PYTHON_TRUE@@ENABLE_SWIG_TRUE@	$(SWIG) -python -c++ -module CdiObj -o python/cdiobj_wrap.cpp $(AM_CPPFLAGS) cdiobj.i
 
-@ENABLE_PYTHON_TRUE@pythonObj: pythonObjWrapper
+@ENABLE_PYTHON_TRUE@pythonObj: python/cdiobj_wrap.cpp
 @ENABLE_PYTHON_TRUE@	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py build_ext --inplace
 
 @ENABLE_PYTHON_TRUE@pythonObjTest: pythonObj
 @ENABLE_PYTHON_TRUE@	@cd python; python testObj.py
 
 @ENABLE_PYTHON_TRUE@pythonObjInstall: pythonObj
-@ENABLE_PYTHON_TRUE@	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py install
+@ENABLE_PYTHON_TRUE@	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py install --prefix=$(prefix)
 # =========================================================
 help:
 	@echo "#=====================================================#"
