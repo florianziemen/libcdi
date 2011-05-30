@@ -133,5 +133,5 @@ void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line, \
 int xmaxInt ( int, int );
 int xminInt ( int, int );
 
-int xchecksum ( int, int, void * );
+double xchecksum ( int, int, void * );
 #endif

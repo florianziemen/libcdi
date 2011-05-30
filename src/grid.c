@@ -4009,11 +4009,34 @@ int gridGetPackSize ( void * voidP, MPI_Comm comm )
   xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
   packBuffSize += size;
 
-  if ( gridP->reference );
+  if ( gridP->reference )
+    {
+      count = strlen ( gridP->reference ) + 1;
+      xmpi ( MPI_Pack_size ( 1, MPI_INT, comm, &size ));
+      packBuffSize += size;
+      xmpi ( MPI_Pack_size ( count, MPI_CHAR, comm, &size ));     
+      packBuffSize += size;
+      xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
+      packBuffSize += size;
+    }
  
-  if ( gridP->mask );
+  if ( gridP->mask )
+    {
+      if ( !gridP->size ) xabort ("");
+      xmpi ( MPI_Pack_size ( gridP->size, MPI_UNSIGNED_CHAR, comm, &size ));     
+      packBuffSize += size;
+      xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
+      packBuffSize += size;
+    }
 
-  if ( gridP->mask_gme );
+  if ( gridP->mask_gme )
+    {
+      if ( !gridP->size ) xabort ("");
+      xmpi ( MPI_Pack_size ( gridP->size, MPI_UNSIGNED_CHAR, comm, &size ));     
+      packBuffSize += size;
+      xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
+      packBuffSize += size;
+    }
   
   return packBuffSize; 
 }
@@ -4023,7 +4046,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
 		  int * unpackBufferPos, MPI_Comm comm )
 {
   grid_t * gridP;
-  int intBuffer[gridNint + 1], memberMask, size;
+  int intBuffer[gridNint + 1], memberMask, size, referenceSize;
   double doubleBuffer[gridNdouble + 1], d;
   char charBuffer[gridNstrings * stringlen];
 
@@ -4206,11 +4229,42 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
   memcpy ( gridP->xunits   , &charBuffer[stringlen * 6], stringlen * sizeof ( char ));
   memcpy ( gridP->yunits   , &charBuffer[stringlen * 7], stringlen * sizeof ( char ));
 
-  if ( memberMask & ( 1 << reference ));
+  if ( memberMask & ( 1 << reference ))
+    {
+      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+			  &referenceSize, 1, MPI_INT, comm ));
+      gridP->reference = xmalloc ( referenceSize * sizeof ( char ));
+      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+			  gridP->reference, referenceSize, MPI_CHAR, comm ));
+      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+			  &d, 1, MPI_DOUBLE, comm ));
+      if ( xchecksum ( CHAR, referenceSize, gridP->reference ) != d )
+	xabort ("");
+    }
 
-  if ( memberMask & ( 1 << mask ));
+  if ( memberMask & ( 1 << mask ))
+    {
+      if ( !gridP->size ) xabort ("");
+      gridP->mask = xmalloc ( gridP->size * sizeof ( mask_t ));
+      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+			  gridP->mask, gridP->size, MPI_UNSIGNED_CHAR, comm ));
+      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+			  &d, 1, MPI_DOUBLE, comm ));
+      if ( xchecksum ( UNSIGNED_CHAR, gridP->size, gridP->mask ) != d )
+	xabort ("");
+    }
 
-  if ( memberMask & ( 1 << mask_gme ));
+  if ( memberMask & ( 1 << mask_gme ))
+    {
+      if ( !gridP->size ) xabort ("");
+      gridP->mask_gme = xmalloc ( gridP->size * sizeof ( mask_t ));
+      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+			  gridP->mask_gme, gridP->size, MPI_UNSIGNED_CHAR, comm ));
+      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+			  &d, 1, MPI_DOUBLE, comm ));
+      if ( xchecksum ( UNSIGNED_CHAR, gridP->size, gridP->mask_gme ) != d )
+	xabort ("");
+    }
 } 							       
 
 
@@ -4383,11 +4437,37 @@ void gridPack ( void * voidP, void * packBuffer, int packBufferSize,
   xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
 		    packBuffer, packBufferSize, packBufferPos, comm ));
 
-  if ( gridP->reference );
+  if ( gridP->reference )
+    {
+      size = strlen ( gridP->reference ) + 1;
+      xmpi ( MPI_Pack ( &size, 1, MPI_INT, 
+			packBuffer, packBufferSize, packBufferPos, comm ));
+      xmpi ( MPI_Pack ( gridP->reference, size, MPI_CHAR, 
+			packBuffer, packBufferSize, packBufferPos, comm ));
+      d = xchecksum ( CHAR, size, gridP->reference );
+      xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
+			packBuffer, packBufferSize, packBufferPos, comm )); 
+    }
  
-  if ( gridP->mask );
+  if ( gridP->mask )
+    {
+      if ( !gridP->size ) xabort ("");
+      xmpi ( MPI_Pack ( gridP->mask, gridP->size, MPI_UNSIGNED_CHAR, 
+			packBuffer, packBufferSize, packBufferPos, comm ));
+      d = xchecksum ( UNSIGNED_CHAR, gridP->size, gridP->mask );
+      xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
+			packBuffer, packBufferSize, packBufferPos, comm )); 
+    }
 
-  if ( gridP->mask_gme );
+  if ( gridP->mask_gme )
+    {
+      if ( !gridP->size ) xabort ("");
+      xmpi ( MPI_Pack ( gridP->mask, gridP->size, MPI_UNSIGNED_CHAR, 
+			packBuffer, packBufferSize, packBufferPos, comm ));
+      d = xchecksum ( UNSIGNED_CHAR, gridP->size, gridP->mask );
+      xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
+			packBuffer, packBufferSize, packBufferPos, comm )); 
+    }
 }
 
 #endif

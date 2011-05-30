@@ -207,7 +207,10 @@ int xminInt ( int a, int b )
 /****************************************************/ 
 
 
-int xchecksum ( int type, int count, void * buffer )
+double xchecksum ( int type, int count, void * buffer )
 {
-  return 0;
+  return 0.0;
 }
+
+
+/****************************************************/ 
