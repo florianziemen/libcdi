@@ -2438,11 +2438,94 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
 {
   grid_t * g1 = ( grid_t * ) gridptr1;
   grid_t * g2 = ( grid_t * ) gridptr2;
+  int differ = -1;
+  int equal  = 0;
+  int i;
 
   assert ( g1 );
   assert ( g2 );
 
-  return gridCompare ( g1->self, * g2 );
+  if ( g1->type          != g2->type         ) return differ;
+  if ( g1->prec          != g2->prec         ) return differ;
+  if ( g1->lcc_projflag  != g2->lcc_projflag ) return differ;
+  if ( g1->lcc_scanflag  != g2->lcc_scanflag ) return differ;
+  if ( g1->lcc_defined   != g2->lcc_defined  ) return differ;
+  if ( g1->lcc2_defined  != g2->lcc2_defined ) return differ;
+  if ( g1->laea_defined  != g2->laea_defined ) return differ;
+  if ( g1->isCyclic      != g2->isCyclic     ) return differ;
+  if ( g1->isRotated     != g2->isRotated    ) return differ;
+  if ( g1->xdef          != g2->xdef         ) return differ;
+  if ( g1->ydef          != g2->ydef         ) return differ;
+  if ( g1->nd            != g2->nd           ) return differ;
+  if ( g1->ni            != g2->ni           ) return differ;
+  if ( g1->ni2           != g2->ni2          ) return differ;
+  if ( g1->ni3           != g2->ni3          ) return differ;
+  if ( g1->number        != g2->number       ) return differ;
+  if ( g1->position      != g2->position     ) return differ;
+  if ( g1->trunc         != g2->trunc        ) return differ;
+  if ( g1->nvertex       != g2->nvertex      ) return differ;
+  if ( g1->nrowlon       != g2->nrowlon      ) return differ;
+  if ( g1->size          != g2->size         ) return differ;
+  if ( g1->xsize         != g2->xsize        ) return differ;
+  if ( g1->ysize         != g2->ysize        ) return differ;
+  if ( g1->locked        != g2->locked       ) return differ;
+  if ( g1->lcomplex      != g2->lcomplex     ) return differ;
+
+  if ( g1->rowlon )
+    {
+      if ( !g1->nrowlon ) xabort ("");
+      if ( !g2->rowlon || ( g1->nrowlon != g2->nrowlon )) return differ;
+      for ( i = 0; i<g1->nrowlon; i++ )
+	if ( g1->rowlon[i] != g2->rowlon[i] ) return differ; 
+    } 
+  else if ( g2->rowlon )
+    return differ;
+
+  if ( g1->xfirst        != g2->xfirst        ) return differ;       
+  if ( g1->yfirst	 != g2->yfirst        ) return differ;
+  if ( g1->xlast         != g2->xlast         ) return differ;
+  if ( g1->ylast         != g2->ylast         ) return differ;
+  if ( g1->xinc	         != g2->xinc          ) return differ;
+  if ( g1->yinc	         != g2->yinc          ) return differ;
+  if ( g1->lcc_originLon != g2->lcc_originLon ) return differ;         
+  if ( g1->lcc_originLat != g2->lcc_originLat ) return differ;
+  if ( g1->lcc_lonParY   != g2->lcc_lonParY   ) return differ;
+  if ( g1->lcc_lat1      != g2->lcc_lat1      ) return differ;
+  if ( g1->lcc_lat2      != g2->lcc_lat2      ) return differ;
+  if ( g1->lcc_xinc      != g2->lcc_xinc      ) return differ;
+  if ( g1->lcc_yinc      != g2->lcc_yinc      ) return differ;
+  if ( g1->lcc2_lon_0    != g2->lcc2_lon_0    ) return differ;         
+  if ( g1->lcc2_lat_0    != g2->lcc2_lat_0    ) return differ;
+  if ( g1->lcc2_lat_1    != g2->lcc2_lat_1    ) return differ;
+  if ( g1->lcc2_lat_2    != g2->lcc2_lat_2    ) return differ;
+  if ( g1->lcc2_a        != g2->lcc2_a        ) return differ;
+  if ( g1->laea_lon_0    != g2->laea_lon_0    ) return differ;         
+  if ( g1->laea_lat_0    != g2->laea_lat_0    ) return differ;
+  if ( g1->laea_a        != g2->laea_a        ) return differ;
+  if ( g1->xpole         != g2->xpole         ) return differ;
+  if ( g1->ypole         != g2->ypole         ) return differ;
+  if ( g1->angle         != g2->angle         ) return differ;  
+
+  /*
+  if ( !memcmp ( g1->xname    , g2->xname    , stringlen * sizeof ( char ))) 
+    return differ;
+  if ( !memcmp ( g1->yname    , g2->yname    , stringlen * sizeof ( char ))) 
+    return differ;
+  if ( !memcmp ( g1->xlongname, g2->xlongname, stringlen * sizeof ( char ))) 
+    return differ;
+  if ( !memcmp ( g1->ylongname, g2->ylongname, stringlen * sizeof ( char ))) 
+    return differ;
+  if ( !memcmp ( g1->xstdname , g2->xstdname , stringlen * sizeof ( char ))) 
+    return differ;
+  if ( !memcmp ( g1->ystdname , g2->ystdname , stringlen * sizeof ( char ))) 
+    return differ;
+  if ( !memcmp ( g1->xunits   , g2->xunits   , stringlen * sizeof ( char ))) 
+    return differ;
+  if ( !memcmp ( g1->yunits   , g2->yunits   , stringlen * sizeof ( char ))) 
+    return differ;
+  */
+
+  return equal;
 }
 
 
