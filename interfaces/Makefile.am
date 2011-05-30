@@ -78,19 +78,19 @@ pythonLib: pythonLibWrapper
 pythonLibTest: pythonLib
 	@cd python; python testLib.py
 # =========================================================
-pythonObjWrapper: cdiobj.i
+python/cdiobj_wrap.cpp: cdiobj.i
 if ENABLE_SWIG
 	$(SWIG) -python -c++ -module CdiObj -o python/cdiobj_wrap.cpp $(AM_CPPFLAGS) cdiobj.i
 endif
 
-pythonObj: pythonObjWrapper
+pythonObj: python/cdiobj_wrap.cpp
 	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py build_ext --inplace
 
 pythonObjTest: pythonObj
 	@cd python; python testObj.py
 
 pythonObjInstall: pythonObj
-	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py install
+	cd python; CC="$(CC)" CXX="$(CXX)" BUILDLIBDIR="$(top_builddir)/src/.libs" LIBDIR=$(libdir) CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="-L../../src/.libs $(LDFLAGS)" INCFLAGS="-I../" python setupObj.py install --prefix=$(prefix)
 endif
 # =========================================================
 help:
