@@ -368,7 +368,7 @@ int cdfInqDatatype(int xtype)
   else if ( xtype == NC_INT    )  datatype = DATATYPE_INT32;
   else if ( xtype == NC_FLOAT  )  datatype = DATATYPE_FLT32;
   else if ( xtype == NC_DOUBLE )  datatype = DATATYPE_FLT64;
-#if  defined  (NC_NETCDF4)
+#if  defined  (HAVE_NETCDF4)
   else if ( xtype == NC_LONG   )  datatype = DATATYPE_INT32;
   else if ( xtype == NC_UBYTE  )  datatype = DATATYPE_UINT8;
   else if ( xtype == NC_USHORT )  datatype = DATATYPE_UINT16;
@@ -395,7 +395,7 @@ int cdfDefDatatype(int datatype, int filetype)
       if      ( datatype == DATATYPE_INT8   ) xtype = NC_BYTE;
       else if ( datatype == DATATYPE_INT16  ) xtype = NC_SHORT;
       else if ( datatype == DATATYPE_INT32  ) xtype = NC_INT;
-#if  defined  (NC_NETCDF4)
+#if  defined  (HAVE_NETCDF4)
       else if ( datatype == DATATYPE_UINT8  ) xtype = NC_UBYTE;
       else if ( datatype == DATATYPE_UINT16 ) xtype = NC_USHORT;
       else if ( datatype == DATATYPE_UINT32 ) xtype = NC_UINT;
@@ -633,7 +633,7 @@ void cdfReadGridTraj(int streamID, int gridID)
 static
 void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 {
-#if  defined  (NC_NETCDF4)
+#if  defined  (HAVE_NETCDF4)
   int retval;
   /* Set chunking, shuffle, and deflate. */
   int shuffle = 1;
@@ -661,7 +661,7 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 static
 void cdfDefVarSzip(int ncid, int ncvarid)
 {
-#if  defined  (NC_NETCDF4) && defined (NC_SZIP_NN_OPTION_MASK)
+#if  defined  (HAVE_NETCDF4) && defined (NC_SZIP_NN_OPTION_MASK)
   int retval;
   /* Set options_mask and bits_per_pixel. */
   int options_mask = NC_SZIP_NN_OPTION_MASK;
@@ -2746,7 +2746,7 @@ int cdfDefVar(int streamID, int varID)
 
   cdf_def_var(fileID, name, (nc_type) xtype, ndims, dims, &ncvarid);
 
-#if  defined  (NC_NETCDF4)
+#if  defined  (HAVE_NETCDF4)
   if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
     {
       if ( (retval = nc_def_var_chunking(fileID, ncvarid, 0, chunks)) )
@@ -4231,7 +4231,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
       ncvars[ncvarid].xtype = xtype;
       ncvars[ncvarid].ndims = nvdims;
 
-#if  defined  (NC_NETCDF4)
+#if  defined  (HAVE_NETCDF4)
       if ( format == NC_FORMAT_NETCDF4_CLASSIC || format == NC_FORMAT_NETCDF4 )
         {
           int shuffle, deflate, deflate_level;
@@ -5648,7 +5648,7 @@ int cdfInqContents(int streamID)
   if ( CDI_Debug )
     Message("streamID = %d, fileID = %d", streamID, fileID);
 
-#if  defined  (NC_NETCDF4)
+#if  defined  (HAVE_NETCDF4)
   nc_inq_format(fileID, &format);
 #endif
 
@@ -6107,7 +6107,7 @@ int cdfInqContents(int streamID)
       varID = streamNewVar(streamID, ncvars[ncvarid].gridID, ncvars[ncvarid].zaxisID);
       varID = vlistDefVar(vlistID, ncvars[ncvarid].gridID, ncvars[ncvarid].zaxisID, ncvars[ncvarid].timeID);
 
-#if  defined  (NC_NETCDF4)
+#if  defined  (HAVE_NETCDF4)
       if ( ncvars[ncvarid].deflate )
 	vlistDefVarZtype(vlistID, varID, COMPRESS_ZIP);
 #endif
