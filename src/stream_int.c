@@ -410,7 +410,7 @@ void stream_init_entry(stream_t *streamptr)
   streamptr->sortname          = cdiSortName;
   streamptr->have_missval      = cdiHaveMissval;
   streamptr->comptype          = COMPRESS_NONE;
-  streamptr->zlevel            = 0;
+  streamptr->complevel         = 0;
 
   basetimeInit(&streamptr->basetime);
 

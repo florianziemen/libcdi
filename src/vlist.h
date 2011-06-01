@@ -71,7 +71,7 @@ typedef struct
   double      addoffset;
   levinfo_t  *levinfo;
   int         comptype;     // compression type
-  int         zlevel;
+  int         complevel;    // compression level
   cdi_atts_t  atts;
 }
 var_t;

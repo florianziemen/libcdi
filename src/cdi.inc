@@ -449,18 +449,18 @@
 !                                     INTEGER         comptype)
       EXTERNAL        streamDefCompType
 
-!                     streamDefZlevel
+!                     streamDefCompLevel
 !                                    (INTEGER         streamID,
-!                                     INTEGER         zlevel)
-      EXTERNAL        streamDefZlevel
+!                                     INTEGER         complevel)
+      EXTERNAL        streamDefCompLevel
 
       INTEGER         streamInqCompType
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqCompType
 
-      INTEGER         streamInqZlevel
+      INTEGER         streamInqCompLevel
 !                                    (INTEGER         streamID)
-      EXTERNAL        streamInqZlevel
+      EXTERNAL        streamInqCompLevel
 
       INTEGER         streamDefTimestep
 !                                    (INTEGER         streamID,
@@ -760,16 +760,16 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarCompType
 
-!                     vlistDefVarZlevel
+!                     vlistDefVarCompLevel
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
-!                                     INTEGER         zlevel)
-      EXTERNAL        vlistDefVarZlevel
+!                                     INTEGER         complevel)
+      EXTERNAL        vlistDefVarCompLevel
 
-      INTEGER         vlistInqVarZlevel
+      INTEGER         vlistInqVarCompLevel
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarZlevel
+      EXTERNAL        vlistInqVarCompLevel
 
 !                     vlistDefVarParam
 !                                    (INTEGER         vlistID,

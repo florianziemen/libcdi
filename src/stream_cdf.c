@@ -2758,7 +2758,7 @@ int cdfDefVar(int streamID, int varID)
     {
       if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
         {
-          cdfDefVarDeflate(fileID, ncvarid, streamptr->zlevel);
+          cdfDefVarDeflate(fileID, ncvarid, streamptr->complevel);
         }
       else
         {

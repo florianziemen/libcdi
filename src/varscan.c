@@ -44,8 +44,8 @@ typedef struct
   int         instID;
   int         modelID;
   int         tableID;
-  int         comptype;  // compression type
-  int         zlevel;
+  int         comptype;       // compression type
+  int         complevel;      // compression level
   int         lmissval;
   double      missval;
   char       *name;
@@ -79,7 +79,7 @@ void paramInitEntry(int varID, int param)
   vartable[varID].modelID        = UNDEFID;
   vartable[varID].tableID        = UNDEFID;
   vartable[varID].comptype       = COMPRESS_NONE;
-  vartable[varID].zlevel         = 1;
+  vartable[varID].complevel      = 1;
   vartable[varID].lmissval       = 0;
   vartable[varID].missval        = 0;
   vartable[varID].name           = NULL;
@@ -834,9 +834,9 @@ void varDefCompType(int varID, int comptype)
 }
 
 
-void varDefZlevel(int varID, int zlevel)
+void varDefCompLevel(int varID, int complevel)
 {
-  vartable[varID].zlevel = zlevel;
+  vartable[varID].complevel = complevel;
 }
 
 

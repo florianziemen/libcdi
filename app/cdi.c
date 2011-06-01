@@ -49,8 +49,8 @@ int DefaultFileType  = CDI_UNDEFID;
 int DefaultDataType  = CDI_UNDEFID;
 int DefaultByteorder = CDI_UNDEFID;
 
-int comptype  = COMPRESS_NONE;
-int Zlevel = 0;
+int comptype  = COMPRESS_NONE;  // Compression type
+int complevel = 0;              // Compression level
 
 
 static
@@ -651,12 +651,12 @@ void defineCompress(const char *arg)
   else if ( strncmp(arg, "gzip", len) == 0 )
     {
       comptype = COMPRESS_GZIP;
-      Zlevel = 6;
+      complevel = 6;
     }
   else if ( strncmp(arg, "zip", len) == 0 )
     {
       comptype = COMPRESS_ZIP;
-      Zlevel = 1;
+      complevel = 1;
     }
   else
     fprintf(stderr, "%s compression unsupported!\n", arg);
@@ -845,7 +845,7 @@ int main(int argc, char *argv[])
 	  if ( comptype != COMPRESS_NONE )
 	    {
 	      streamDefCompType(streamID2, comptype);
-	      streamDefZlevel(streamID2, Zlevel);
+	      streamDefCompLevel(streamID2, complevel);
 	    }
 
 	  streamDefVlist(streamID2, vlistID2);

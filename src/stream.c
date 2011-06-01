@@ -2064,7 +2064,7 @@ void streamDefCompType(int streamID, int comptype)
 }
 
 
-void streamDefZlevel(int streamID, int zlevel)
+void streamDefCompLevel(int streamID, int complevel)
 {
   stream_t *streamptr;
 
@@ -2072,7 +2072,7 @@ void streamDefZlevel(int streamID, int zlevel)
 
   stream_check_ptr(__func__, streamptr);
 
-  streamptr->zlevel = zlevel;
+  streamptr->complevel = complevel;
 }
 
 
@@ -2088,7 +2088,7 @@ int streamInqCompType(int streamID)
 }
 
 
-int streamInqZlevel(int streamID)
+int streamInqCompLevel(int streamID)
 {
   stream_t *streamptr;
 
@@ -2096,5 +2096,5 @@ int streamInqZlevel(int streamID)
 
   stream_check_ptr(__func__, streamptr);
 
-  return (streamptr->zlevel);
+  return (streamptr->complevel);
 }

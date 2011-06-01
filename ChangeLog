@@ -1,6 +1,7 @@
 2011-06-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* CDI: changed compression type from Ztype to CompType
+	* CDI: changed compression level from Zlevel to CompLevel [report: Thomas Jahns]
 
 2011-05-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 

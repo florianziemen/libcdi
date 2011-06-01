@@ -238,8 +238,8 @@ typedef struct {
   int       unreduced;
   int       sortname;
   int       have_missval;
-  int       comptype;     /* compression type */
-  int       zlevel;
+  int       comptype;      // compression type
+  int       complevel;     // compression level
   int       curfile;
   int       nfiles;
   char    **fnames;

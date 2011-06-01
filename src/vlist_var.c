@@ -42,7 +42,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].nlevs        = 0;
   vlistptr->vars[varID].levinfo      = NULL;
   vlistptr->vars[varID].comptype     = COMPRESS_NONE;
-  vlistptr->vars[varID].zlevel       = 1;
+  vlistptr->vars[varID].complevel    = 1;
   vlistptr->vars[varID].atts.nalloc  = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems  = 0;
 }
@@ -1507,7 +1507,7 @@ int vlistInqVarCompType(int vlistID, int varID)
 }
 
 
-void vlistDefVarZlevel(int vlistID, int varID, int zlevel)
+void vlistDefVarCompLevel(int vlistID, int varID, int complevel)
 {
   vlist_t *vlistptr;
 
@@ -1515,11 +1515,11 @@ void vlistDefVarZlevel(int vlistID, int varID, int zlevel)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  vlistptr->vars[varID].zlevel = zlevel;
+  vlistptr->vars[varID].complevel = complevel;
 }
 
 
-int vlistInqVarZlevel(int vlistID, int varID)
+int vlistInqVarCompLevel(int vlistID, int varID)
 {
   vlist_t *vlistptr;
 
@@ -1527,5 +1527,5 @@ int vlistInqVarZlevel(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].zlevel);
+  return (vlistptr->vars[varID].complevel);
 }

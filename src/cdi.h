@@ -259,14 +259,14 @@ int     streamInqByteorder(int streamID);
 /*      streamDefCompType: Define compression type */
 void    streamDefCompType(int streamID, int comptype);
 
-/*      streamDefZlevel: Define compression level */
-void    streamDefZlevel(int streamID, int zlevel);
+/*      streamDefCompLevel: Define compression level */
+void    streamDefCompLevel(int streamID, int complevel);
 
 /*      streamInqCompType: Get compression type */
 int     streamInqCompType(int streamID);
 
-/*      streamInqZlevel: Get compression level */
-int     streamInqZlevel(int streamID);
+/*      streamInqCompLevel: Get compression level */
+int     streamInqCompLevel(int streamID);
 
 /*      streamDefTimestep: Define time step */
 int     streamDefTimestep(int streamID, int tsID);
@@ -386,8 +386,8 @@ int     vlistInqVarTime(int vlistID, int varID);
 
 void    vlistDefVarCompType(int vlistID, int varID, int comptype);
 int     vlistInqVarCompType(int vlistID, int varID);
-void    vlistDefVarZlevel(int vlistID, int varID, int zlevel);
-int     vlistInqVarZlevel(int vlistID, int varID);
+void    vlistDefVarCompLevel(int vlistID, int varID, int complevel);
+int     vlistInqVarCompLevel(int vlistID, int varID);
 
 /*      vlistDefVarParam: Define the parameter number of a Variable */
 void    vlistDefVarParam(int vlistID, int varID, int param);
