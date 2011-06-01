@@ -2052,7 +2052,7 @@ int streamInqVlist(int streamID)
 }
 
 
-void streamDefZtype(int streamID, int ztype)
+void streamDefCompType(int streamID, int comptype)
 {
   stream_t *streamptr;
 
@@ -2060,7 +2060,7 @@ void streamDefZtype(int streamID, int ztype)
 
   stream_check_ptr(__func__, streamptr);
 
-  streamptr->ztype = ztype;
+  streamptr->comptype = comptype;
 }
 
 
@@ -2076,7 +2076,7 @@ void streamDefZlevel(int streamID, int zlevel)
 }
 
 
-int streamInqZtype(int streamID)
+int streamInqCompType(int streamID)
 {
   stream_t *streamptr;
 
@@ -2084,7 +2084,7 @@ int streamInqZtype(int streamID)
 
   stream_check_ptr(__func__, streamptr);
 
-  return (streamptr->ztype);
+  return (streamptr->comptype);
 }
 
 

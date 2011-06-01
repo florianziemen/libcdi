@@ -536,7 +536,7 @@ double grib2GetLevel(grib_handle *gh, int leveltype)
 
 static
 void gribapiAddRecord(int streamID, int param, grib_handle *gh,
-		      long recsize, off_t position, int prec, int ztype)
+		      long recsize, off_t position, int prec, int comptype)
 {
   long editionNumber;
   int zaxistype;
@@ -670,7 +670,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
   (*record).varID   = varID;
   (*record).levelID = levelID;
 
-  varDefZtype(varID, ztype);
+  varDefCompType(varID, comptype);
 
   if ( varInqInst(varID) == CDI_UNDEFID )
     {
@@ -753,7 +753,7 @@ int gribapiScanTimestep1(int streamID)
   int rdate = 0, rtime = 0, tunit = 0, fcast = 0;
   taxis_t *taxis;
   int vlistID;
-  int ztype;
+  int comptype;
   long unzipsize;
   compvar2_t compVar, compVar0;
   stream_t *streamptr;
@@ -800,10 +800,10 @@ int gribapiScanTimestep1(int streamID)
       rstatus = gribRead(fileID, gribbuffer, &readsize);
       if ( rstatus ) break;
 
-      ztype = COMPRESS_NONE;
+      comptype = COMPRESS_NONE;
       if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
 	{
-	  ztype = COMPRESS_SZIP;
+	  comptype = COMPRESS_SZIP;
 	  unzipsize += 100;
 	  if ( (long) buffersize < unzipsize )
 	    {
@@ -848,7 +848,7 @@ int gribapiScanTimestep1(int streamID)
 	  if ( status == 0 )
 	    {
 	      // fprintf(stderr, "packingType %d %s\n", len, typeOfPacking);
-	      if ( strncmp(typeOfPacking, "grid_jpeg", len) == 0 ) ztype = COMPRESS_JPEG;
+	      if ( strncmp(typeOfPacking, "grid_jpeg", len) == 0 ) comptype = COMPRESS_JPEG;
 	    }
 	  
 	  GRIB_CHECK(grib_get_long(gh, "discipline", &lpar), 0);
@@ -971,7 +971,7 @@ int gribapiScanTimestep1(int streamID)
       if ( CDI_Debug )
 	Message("%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
 
-      gribapiAddRecord(streamID, param, gh, recsize, recpos, prec, ztype);
+      gribapiAddRecord(streamID, param, gh, recsize, recpos, prec, comptype);
 
       grib_handle_delete(gh);
       gh = NULL;

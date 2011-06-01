@@ -355,6 +355,15 @@ Close an open dataset.
 Define the byteorder.
 
 
+\section*{\tt \htmlref{streamDefCompType}{streamDefCompType}}
+
+\begin{verbatim}
+    void streamDefCompType (intstreamID, intcomptype);
+\end{verbatim}
+
+Define compression type.
+
+
 \section*{\tt \htmlref{streamDefTimestep}{streamDefTimestep}}
 
 \begin{verbatim}
@@ -382,15 +391,6 @@ Define the Vlist for a stream.
 Define compression level.
 
 
-\section*{\tt \htmlref{streamDefZtype}{streamDefZtype}}
-
-\begin{verbatim}
-    void streamDefZtype (intstreamID, intztype);
-\end{verbatim}
-
-Define compression type.
-
-
 \section*{\tt \htmlref{streamInqByteorder}{streamInqByteorder}}
 
 \begin{verbatim}
@@ -398,6 +398,15 @@ Define compression type.
 \end{verbatim}
 
 Get the byteorder.
+
+
+\section*{\tt \htmlref{streamInqCompType}{streamInqCompType}}
+
+\begin{verbatim}
+    int streamInqCompType (intstreamID);
+\end{verbatim}
+
+Get compression type.
 
 
 \section*{\tt \htmlref{streamInqFiletype}{streamInqFiletype}}
@@ -434,15 +443,6 @@ Get the Vlist of a stream.
 \end{verbatim}
 
 Get compression level.
-
-
-\section*{\tt \htmlref{streamInqZtype}{streamInqZtype}}
-
-\begin{verbatim}
-    int streamInqZtype (intstreamID);
-\end{verbatim}
-
-Get compression type.
 
 
 \section*{\tt \htmlref{streamOpenRead}{streamOpenRead}}

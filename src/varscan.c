@@ -44,7 +44,7 @@ typedef struct
   int         instID;
   int         modelID;
   int         tableID;
-  int         ztype;
+  int         comptype;  // compression type
   int         zlevel;
   int         lmissval;
   double      missval;
@@ -78,7 +78,7 @@ void paramInitEntry(int varID, int param)
   vartable[varID].instID         = UNDEFID;
   vartable[varID].modelID        = UNDEFID;
   vartable[varID].tableID        = UNDEFID;
-  vartable[varID].ztype          = COMPRESS_NONE;
+  vartable[varID].comptype       = COMPRESS_NONE;
   vartable[varID].zlevel         = 1;
   vartable[varID].lmissval       = 0;
   vartable[varID].missval        = 0;
@@ -387,7 +387,7 @@ void cdiGenVars(int streamID)
   int tsteptype;
   int timave, timaccu;
   int lbounds;
-  int ztype;
+  int comptype;
   char name[256], longname[256], units[256];
   double *dlevels = NULL;
   double *dlevels1 = NULL;
@@ -448,7 +448,7 @@ void cdiGenVars(int streamID)
       tsteptype = vartable[varid].tsteptype;
       timave    = vartable[varid].timave;
       timaccu   = vartable[varid].timaccu;
-      ztype     = vartable[varid].ztype;
+      comptype  = vartable[varid].comptype;
 
       zaxisID = UNDEFID;
 
@@ -529,7 +529,7 @@ void cdiGenVars(int streamID)
       vlistDefVarTsteptype(vlistID, varID, tsteptype);
       vlistDefVarTimave(vlistID, varID, timave);
       vlistDefVarTimaccu(vlistID, varID, timaccu);
-      vlistDefVarZtype(vlistID, varID, ztype);
+      vlistDefVarCompType(vlistID, varID, comptype);
 
       if ( vartable[varid].lmissval ) vlistDefVarMissval(vlistID, varID, vartable[varid].missval);
 
@@ -827,10 +827,10 @@ void varDefMissval(int varID, double missval)
 }
 
 
-void varDefZtype(int varID, int ztype)
+void varDefCompType(int varID, int comptype)
 {
-  if ( vartable[varID].ztype == COMPRESS_NONE )
-    vartable[varID].ztype = ztype;
+  if ( vartable[varID].comptype == COMPRESS_NONE )
+    vartable[varID].comptype = comptype;
 }
 
 

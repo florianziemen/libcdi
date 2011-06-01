@@ -549,7 +549,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
       gc = (void *) &gribContainers[varID];
     }
 
-  if ( streamptr->ztype == COMPRESS_JPEG )
+  if ( streamptr->comptype == COMPRESS_JPEG )
     {
       if ( filetype == FILETYPE_GRB2 )
 	{
@@ -565,7 +565,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   nbytes = grbEncode(filetype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, 
 		     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg, gc);
 
-  if ( streamptr->ztype == COMPRESS_SZIP )
+  if ( streamptr->comptype == COMPRESS_SZIP )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
   nwrite = fileWrite(fileID, gribbuffer, nbytes);
@@ -641,7 +641,7 @@ int grbCopyRecord(int streamID2, int streamID1)
   izip = gribGetZip(recsize, gribbuffer, &unzipsize);
   
   if ( izip == 0 )
-    if ( streamptr2->ztype == COMPRESS_SZIP )
+    if ( streamptr2->comptype == COMPRESS_SZIP )
       nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
   while ( nbytes & 7 ) gribbuffer[nbytes++] = 0;

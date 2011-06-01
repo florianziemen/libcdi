@@ -1,3 +1,7 @@
+2011-06-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* CDI: changed compression type from Ztype to CompType
+
 2011-05-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* gridGenYvals: changed delta eps to 0.002 for gaussian grids [report: John Lillibridge] 

@@ -2754,7 +2754,7 @@ int cdfDefVar(int streamID, int varID)
     }
 #endif
 
-  if ( streamptr->ztype == COMPRESS_ZIP )
+  if ( streamptr->comptype == COMPRESS_ZIP )
     {
       if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
         {
@@ -2772,7 +2772,7 @@ int cdfDefVar(int streamID, int varID)
         }
     }
 
-  if ( streamptr->ztype == COMPRESS_SZIP )
+  if ( streamptr->comptype == COMPRESS_SZIP )
     {
       if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
         {
@@ -6109,7 +6109,7 @@ int cdfInqContents(int streamID)
 
 #if  defined  (HAVE_NETCDF4)
       if ( ncvars[ncvarid].deflate )
-	vlistDefVarZtype(vlistID, varID, COMPRESS_ZIP);
+	vlistDefVarCompType(vlistID, varID, COMPRESS_ZIP);
 #endif
 
       streamptr->vars[varID1].level   = NULL;

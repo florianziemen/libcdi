@@ -41,7 +41,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].units        = NULL;
   vlistptr->vars[varID].nlevs        = 0;
   vlistptr->vars[varID].levinfo      = NULL;
-  vlistptr->vars[varID].ztype        = COMPRESS_NONE;
+  vlistptr->vars[varID].comptype     = COMPRESS_NONE;
   vlistptr->vars[varID].zlevel       = 1;
   vlistptr->vars[varID].atts.nalloc  = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems  = 0;
@@ -1483,7 +1483,7 @@ void vlistChangeVarGrid(int vlistID, int varID, int gridID)
 }
 
 
-void vlistDefVarZtype(int vlistID, int varID, int ztype)
+void vlistDefVarCompType(int vlistID, int varID, int comptype)
 {
   vlist_t *vlistptr;
 
@@ -1491,11 +1491,11 @@ void vlistDefVarZtype(int vlistID, int varID, int ztype)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  vlistptr->vars[varID].ztype = ztype;
+  vlistptr->vars[varID].comptype = comptype;
 }
 
 
-int vlistInqVarZtype(int vlistID, int varID)
+int vlistInqVarCompType(int vlistID, int varID)
 {
   vlist_t *vlistptr;
 
@@ -1503,7 +1503,7 @@ int vlistInqVarZtype(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].ztype);
+  return (vlistptr->vars[varID].comptype);
 }
 
 

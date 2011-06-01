@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   May 2011
+! Uwe Schulzweida, MPI-MET, Hamburg,   June 2011
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -214,6 +214,8 @@
       PARAMETER (GRID_SINUSOIDAL        = 14)
       INTEGER    GRID_REFERENCE        
       PARAMETER (GRID_REFERENCE         = 15)
+      INTEGER    GRID_PROJECTION       
+      PARAMETER (GRID_PROJECTION        = 16)
 !
 !  ZAXIS types
 !
@@ -442,19 +444,19 @@
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqByteorder
 
-!                     streamDefZtype
+!                     streamDefCompType
 !                                    (INTEGER         streamID,
-!                                     INTEGER         ztype)
-      EXTERNAL        streamDefZtype
+!                                     INTEGER         comptype)
+      EXTERNAL        streamDefCompType
 
 !                     streamDefZlevel
 !                                    (INTEGER         streamID,
 !                                     INTEGER         zlevel)
       EXTERNAL        streamDefZlevel
 
-      INTEGER         streamInqZtype
+      INTEGER         streamInqCompType
 !                                    (INTEGER         streamID)
-      EXTERNAL        streamInqZtype
+      EXTERNAL        streamInqCompType
 
       INTEGER         streamInqZlevel
 !                                    (INTEGER         streamID)
@@ -747,16 +749,16 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarTime
 
-!                     vlistDefVarZtype
+!                     vlistDefVarCompType
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
-!                                     INTEGER         ztype)
-      EXTERNAL        vlistDefVarZtype
+!                                     INTEGER         comptype)
+      EXTERNAL        vlistDefVarCompType
 
-      INTEGER         vlistInqVarZtype
+      INTEGER         vlistInqVarCompType
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarZtype
+      EXTERNAL        vlistInqVarCompType
 
 !                     vlistDefVarZlevel
 !                                    (INTEGER         vlistID,

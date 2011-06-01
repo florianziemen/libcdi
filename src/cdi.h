@@ -256,14 +256,14 @@ void    streamDefByteorder(int streamID, int byteorder);
 /*      streamInqByteorder: Get the byteorder */
 int     streamInqByteorder(int streamID);
 
-/*      streamDefZtype: Define compression type */
-void    streamDefZtype(int streamID, int ztype);
+/*      streamDefCompType: Define compression type */
+void    streamDefCompType(int streamID, int comptype);
 
 /*      streamDefZlevel: Define compression level */
 void    streamDefZlevel(int streamID, int zlevel);
 
-/*      streamInqZtype: Get compression type */
-int     streamInqZtype(int streamID);
+/*      streamInqCompType: Get compression type */
+int     streamInqCompType(int streamID);
 
 /*      streamInqZlevel: Get compression level */
 int     streamInqZlevel(int streamID);
@@ -384,8 +384,8 @@ int     vlistInqVarGrid(int vlistID, int varID);
 int     vlistInqVarZaxis(int vlistID, int varID);
 int     vlistInqVarTime(int vlistID, int varID);
 
-void    vlistDefVarZtype(int vlistID, int varID, int ztype);
-int     vlistInqVarZtype(int vlistID, int varID);
+void    vlistDefVarCompType(int vlistID, int varID, int comptype);
+int     vlistInqVarCompType(int vlistID, int varID);
 void    vlistDefVarZlevel(int vlistID, int varID, int zlevel);
 int     vlistInqVarZlevel(int vlistID, int varID);
 

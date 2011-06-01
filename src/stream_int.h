@@ -238,7 +238,7 @@ typedef struct {
   int       unreduced;
   int       sortname;
   int       have_missval;
-  int       ztype;
+  int       comptype;     /* compression type */
   int       zlevel;
   int       curfile;
   int       nfiles;

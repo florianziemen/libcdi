@@ -70,7 +70,7 @@ typedef struct
   double      scalefactor;
   double      addoffset;
   levinfo_t  *levinfo;
-  int         ztype;
+  int         comptype;     // compression type
   int         zlevel;
   cdi_atts_t  atts;
 }
