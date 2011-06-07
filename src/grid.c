@@ -2440,7 +2440,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   grid_t * g2 = ( grid_t * ) gridptr2;
   int differ = -1;
   int equal  = 0;
-  int i;
+  int i, size;
 
   assert ( g1 );
   assert ( g2 );
@@ -2474,8 +2474,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( g1->rowlon )
     {
       if ( !g1->nrowlon ) xabort ("");
-      if ( !g2->rowlon || ( g1->nrowlon != g2->nrowlon )) return differ;
-      for ( i = 0; i<g1->nrowlon; i++ )
+      for ( i = 0; i < g1->nrowlon; i++ )
 	if ( g1->rowlon[i] != g2->rowlon[i] ) return differ; 
     } 
   else if ( g2->rowlon )
@@ -2504,26 +2503,133 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( g1->laea_a        != g2->laea_a        ) return differ;
   if ( g1->xpole         != g2->xpole         ) return differ;
   if ( g1->ypole         != g2->ypole         ) return differ;
-  if ( g1->angle         != g2->angle         ) return differ;  
+  if ( g1->angle         != g2->angle         ) return differ; 
 
-  /*
-  if ( !memcmp ( g1->xname    , g2->xname    , stringlen * sizeof ( char ))) 
+  
+  if ( g1->xvals )
+    {
+      if ( g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR )
+	size = g1->size;
+      else
+	size = g1->xsize;
+      if ( !size ) xabort ("");
+
+      if ( !g2->xvals ) return differ;
+
+      for ( i = 0; i < size; i++ )
+	if ( g1->xvals[i] != g2->xvals[i] ) return differ; 
+    } 
+  else if ( g2->xvals )
     return differ;
-  if ( !memcmp ( g1->yname    , g2->yname    , stringlen * sizeof ( char ))) 
+  
+  if ( g1->yvals )
+    {
+      if ( g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR )
+	size = g1->size;
+      else
+	size = g1->ysize;
+      if ( !size ) xabort ("");
+
+      if ( !g2->yvals ) return differ;
+
+      for ( i = 0; i < size; i++ )
+	  if ( g1->yvals[i] != g2->yvals[i] ) return differ;
+    } 
+  else if ( g2->yvals )
     return differ;
-  if ( !memcmp ( g1->xlongname, g2->xlongname, stringlen * sizeof ( char ))) 
+  
+  if ( g1->area )
+    {
+      if ( !g1->size ) xabort ("");
+
+      if ( !g2->area ) return differ;
+
+      for ( i = 0; i < g1->size; i++ )
+	if ( g1->area[i] != g2->area[i] ) return differ;
+    } 
+  else if ( g2->area )
     return differ;
-  if ( !memcmp ( g1->ylongname, g2->ylongname, stringlen * sizeof ( char ))) 
+
+  if ( g1->xbounds )
+    {
+      if ( !g1->nvertex ) xabort ("");
+      if ( g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED )
+	size = g1->nvertex * g1->size;
+      else
+	size = g1->nvertex * g1->xsize;
+      if ( !size ) xabort ("");
+
+      if ( !g2->xbounds ) return differ;
+
+      for ( i = 0; i < size; i++ )
+	if ( g1->xbounds[i] != g2->xbounds[i] ) return differ;
+    } 
+  else if ( g2->xbounds )
     return differ;
-  if ( !memcmp ( g1->xstdname , g2->xstdname , stringlen * sizeof ( char ))) 
+
+  if ( g1->ybounds )
+    {
+      if ( !g1->nvertex ) xabort ("");
+      if ( g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED )
+	size = g1->nvertex * g1->size;
+      else
+	size = g1->nvertex * g1->ysize;
+      if ( !size ) xabort ("");
+
+      if ( !g2->ybounds ) return differ;
+
+      for ( i = 0; i < size; i++ )
+	if ( g1->ybounds[i] != g2->ybounds[i] ) return differ;
+    } 
+  else if ( g2->ybounds )
     return differ;
-  if ( !memcmp ( g1->ystdname , g2->ystdname , stringlen * sizeof ( char ))) 
+
+  if ( memcmp ( &g1->xname    ,&g2->xname    ,stringlen * sizeof ( char ))) 
     return differ;
-  if ( !memcmp ( g1->xunits   , g2->xunits   , stringlen * sizeof ( char ))) 
+  if ( memcmp ( &g1->yname    ,&g2->yname    ,stringlen * sizeof ( char ))) 
     return differ;
-  if ( !memcmp ( g1->yunits   , g2->yunits   , stringlen * sizeof ( char ))) 
+  if ( memcmp ( &g1->xlongname,&g2->xlongname,stringlen * sizeof ( char ))) 
     return differ;
-  */
+  if ( memcmp ( &g1->ylongname,&g2->ylongname,stringlen * sizeof ( char ))) 
+    return differ;
+  if ( memcmp ( &g1->xstdname ,&g2->xstdname ,stringlen * sizeof ( char ))) 
+    return differ;
+  if ( memcmp ( &g1->ystdname ,&g2->ystdname ,stringlen * sizeof ( char ))) 
+    return differ;
+  if ( memcmp ( &g1->xunits   ,&g2->xunits   ,stringlen * sizeof ( char ))) 
+    return differ;
+  if ( memcmp ( &g1->yunits   ,&g2->yunits   ,stringlen * sizeof ( char ))) 
+    return differ; 
+
+  if ( g1->reference )
+    {
+      if ( !g2->reference ) return differ;
+      size = strlen ( g1->reference ) + 1;
+      if ( memcmp ( g1->reference, g2->reference, size * sizeof ( char ))) 
+	return differ;
+    }
+  else if ( g2->reference )
+    return differ;
+
+  if ( g1->mask )
+    {
+      if ( !g1->size ) xabort ("");
+      if ( !g2->mask ) return differ;
+      if ( memcmp ( g1->mask, g2->mask, g1->size * sizeof ( unsigned char ))) 
+	return differ;
+    }
+  else if ( g2->mask )
+    return differ;
+
+  if ( g1->mask_gme )
+    {
+      if ( !g1->size ) xabort ("");
+      if ( !g2->mask_gme ) return differ;
+      if ( memcmp ( g1->mask_gme, g2->mask_gme, 
+		    g1->size * sizeof ( unsigned char ))) return differ;
+    }
+  else if ( g2->mask_gme )
+    return differ;
 
   return equal;
 }
