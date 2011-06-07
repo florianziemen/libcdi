@@ -11859,7 +11859,7 @@ SWIGEXPORT void Init_CdiLib(void) {
   rb_define_const(mCdiLib, "GRID_FOURIER", SWIG_From_int((int)(6)));
   rb_define_const(mCdiLib, "GRID_GME", SWIG_From_int((int)(7)));
   rb_define_const(mCdiLib, "GRID_TRAJECTORY", SWIG_From_int((int)(8)));
-  rb_define_const(mCdiLib, "GRID_CELL", SWIG_From_int((int)(9)));
+  rb_define_const(mCdiLib, "GRID_UNSTRUCTURED", SWIG_From_int((int)(9)));
   rb_define_const(mCdiLib, "GRID_CURVILINEAR", SWIG_From_int((int)(10)));
   rb_define_const(mCdiLib, "GRID_LCC", SWIG_From_int((int)(11)));
   rb_define_const(mCdiLib, "GRID_LCC2", SWIG_From_int((int)(12)));

@@ -9,6 +9,7 @@ typedef struct {
   int     self;
   int     type;                   /* grid type                      */
   int     prec;                   /* grid precision                 */
+  int     proj;                   /* grid projection                */
   mask_t *mask;
   mask_t *mask_gme;
   double *xvals;
@@ -56,17 +57,21 @@ typedef struct {
   int     ysize;
   int     locked;
   int     lcomplex;
-  char    xname[stringlen];
-  char    yname[stringlen];
-  char    xlongname[stringlen];
-  char    ylongname[stringlen];
-  char    xstdname[stringlen];
-  char    ystdname[stringlen];
-  char    xunits[stringlen];
-  char    yunits[stringlen];
+  char    xname[CDI_MAX_NAME];
+  char    yname[CDI_MAX_NAME];
+  char    xlongname[CDI_MAX_NAME];
+  char    ylongname[CDI_MAX_NAME];
+  char    xstdname[CDI_MAX_NAME];
+  char    ystdname[CDI_MAX_NAME];
+  char    xunits[CDI_MAX_NAME];
+  char    yunits[CDI_MAX_NAME];
+  char   *name;
 }
 grid_t;
 
+
+void grid_init(grid_t *gridptr);
+void grid_free(grid_t *gridptr);
 
 const double *gridInqXvalsPtr(int gridID);
 const double *gridInqYvalsPtr(int gridID);

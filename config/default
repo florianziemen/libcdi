@@ -15,6 +15,8 @@ case "${HOSTNAME}" in
     hama*)
 	./configure --prefix=$HOME/local \
                     --enable-maintainer-mode \
+                    --enable-swig \
+                    --enable-python \
                     --with-jasper=/opt/local \
                     --with-grib_api=$HOME/local/gribapi-1.9.8 \
                     --with-netcdf=/opt/local \
@@ -33,6 +35,8 @@ case "${HOSTNAME}" in
 	./configure --prefix=$HOME/local/etch-ia32 \
                     --enable-maintainer-mode \
                     --enable-all-static \
+                    --enable-swig \
+                    --enable-python \
                     --with-jasper=/sw/etch-ia32/jasper-1.900.1 \
                     --with-grib_api=$HOME/local/etch-ia32/grib_api-1.9.8 \
 	            --with-netcdf=/sw/etch-ia32/netcdf-4.0.1 \

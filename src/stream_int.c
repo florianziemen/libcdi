@@ -283,8 +283,8 @@ void streamDefaultValue ( stream_t * streamptr )
   streamptr->unreduced         = cdiDataUnreduced;
   streamptr->sortname          = cdiSortName;
   streamptr->have_missval      = cdiHaveMissval;
-  streamptr->ztype             = COMPRESS_NONE;
-  streamptr->zlevel            = 0;
+  streamptr->comptype          = COMPRESS_NONE;
+  streamptr->complevel         = 0;
 
   basetimeInit(&streamptr->basetime);
 
@@ -565,8 +565,8 @@ void streamPrintP   ( void * streamptr, FILE * fp )
   fprintf ( fp, "unreduced     = %d\n", sp->unreduced );
   fprintf ( fp, "sortname      = %d\n", sp->sortname );
   fprintf ( fp, "have_missval  = %d\n", sp->have_missval );
-  fprintf ( fp, "ztype         = %d\n", sp->ztype );
-  fprintf ( fp, "zlevel        = %d\n", sp->zlevel );
+  fprintf ( fp, "ztype         = %d\n", sp->comptype );
+  fprintf ( fp, "zlevel        = %d\n", sp->complevel );
   fprintf ( fp, "curfile       = %d\n", sp->curfile );
   fprintf ( fp, "nfiles        = %d\n", sp->nfiles );
   fprintf ( fp, "//  char    **fnames;\n" );

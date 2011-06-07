@@ -1,3 +1,28 @@
+2011-06-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* CDI: changed compression type from Ztype to CompType
+	* CDI: changed compression level from Zlevel to CompLevel [report: Thomas Jahns]
+
+2011-05-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* gridGenYvals: changed delta eps to 0.002 for gaussian grids [report: John Lillibridge] 
+	* ruby/python interface: changed GRID_CELL to GRID_UNSTRUCTURED [report: Tim Cera]
+	
+2011-05-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* grid::compareXYvals: bug fix for generic grids [report: Felicia Brisc]
+
+2011-04-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Added attribute standard_name to netCDF time var [request: Karin Meier-Fleischer]
+	* Added attribute standard_name to netCDF zaxes [request: Karin Meier-Fleischer]
+	* Added attribute positive to netCDF zaxes [request: Karin Meier-Fleischer]
+
+2011-04-27  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Added support for FILETYPE_NC4C (netcdf4 classic)
+	* netcdf: Skiped time dependent variables if number of time steps is zero
+
 2011-03-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* using CGRIBEX library version 1.5.0

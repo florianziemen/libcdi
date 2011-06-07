@@ -78,8 +78,8 @@ typedef struct
   double      scalefactor;
   double      addoffset;
   levinfo_t  *levinfo;
-  int         ztype;
-  int         zlevel;
+  int         comptype;     // compression type
+  int         complevel;    // compression level
   cdi_atts_t  atts;
 }
 var_t;
@@ -88,7 +88,7 @@ var_t;
 typedef struct
 {
   int         self;
-  int         nlock;
+  int         used;
   int         nvars;        /* number of variables                */
   int         ngrids;
   int         nzaxis;
@@ -107,9 +107,6 @@ vlist_t;
 
 
 vlist_t *vlist_to_pointer(int vlistID);
-int      vlistNlock(int vlistID);
-void     vlistLock(int vlistID);
-void     vlistUnlock(int vlistID);
 char    *vlistInqVarNamePtr(int vlistID, int varID);
 char    *vlistInqVarLongnamePtr(int vlistID, int varID);
 char    *vlistInqVarStdnamePtr(int vlistID, int varID);

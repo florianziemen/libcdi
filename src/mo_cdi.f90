@@ -89,7 +89,7 @@ module mo_cdi
       integer :: GRID_FOURIER = 6
       integer :: GRID_GME = 7
       integer :: GRID_TRAJECTORY = 8
-      integer :: GRID_CELL = 9
+      integer :: GRID_UNSTRUCTURED = 9
       integer :: GRID_CURVILINEAR = 10
       integer :: GRID_LCC = 11
       integer :: GRID_LCC2 = 12
@@ -3077,7 +3077,7 @@ module mo_cdi
       public :: GRID_FOURIER
       public :: GRID_GME
       public :: GRID_TRAJECTORY
-      public :: GRID_CELL
+      public :: GRID_UNSTRUCTURED
       public :: GRID_CURVILINEAR
       public :: GRID_LCC
       public :: GRID_LCC2

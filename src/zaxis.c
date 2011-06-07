@@ -16,34 +16,39 @@
 #include "varscan.h"
 
 
+#define  LevelUp    1
+#define  LevelDown  2
+
+
 static struct {
+  unsigned char positive;
   char *name;
   char *longname;
-  char *units;
+  char *stdname;
+  char *units;    // 1: up;  2: down
 }
 ZaxistypeEntry[] = {
-  {"sfc",     "surface",                  ""},
-  {"lev",     "generic",                  "level"},
-  {"lev",     "hybrid",                   "level"},
-  {"lev",     "hybrid_half",              "level"},
-  {"lev",     "pressure",                 "Pa"},
-  {"height",  "height",                   "m"},
-  {"depth",   "depth_below_sea",          "m"},
-  {"depth",   "depth_below_land",         "cm"},
-  {"lev",     "isentropic",               "K"},
-  {"lev",     "trajectory",               ""},
-  {"alt",     "altitude",                 "m"},
-  {"lev",     "sigma",                    "level"},
-  {"lev",     "meansea",                  "level"},
+  {0, "sfc",     "surface",           "",               ""},
+  {0, "lev",     "generic",           "",               "level"},
+  {2, "lev",     "hybrid",            "",               "level"},
+  {2, "lev",     "hybrid_half",       "",               "level"},
+  {2, "lev",     "pressure",          "air_pressure",   "Pa"},
+  {1, "height",  "height",            "",               "m"},
+  {2, "depth",   "depth_below_sea",   "",               "m"},
+  {2, "depth",   "depth_below_land",  "",               "cm"},
+  {0, "lev",     "isentropic",        "",               "K"},
+  {0, "lev",     "trajectory",        "",               ""},
+  {1, "alt",     "altitude",          "",               "m"},
+  {0, "lev",     "sigma",             "",               "level"},
+  {0, "lev",     "meansea",           "",               "level"},
 };
 
 
-#define  LevelDown  0
-#define  LevelUp    1
-
 typedef struct {
+  unsigned char positive;
   char     name[256];
   char     longname[256];
+  char     stdname[256];
   char     units[256];
   double  *vals;
   double  *lbounds;
@@ -87,6 +92,7 @@ void zaxisDefaultValue ( zaxis_t *zaxisptr )
   zaxisptr->self        = CDI_UNDEFID;
   zaxisptr->name[0]     = 0;
   zaxisptr->longname[0] = 0;
+  zaxisptr->stdname[0]  = 0;
   zaxisptr->units[0]    = 0;
   zaxisptr->vals        = NULL;
   zaxisptr->ubounds     = NULL;
@@ -94,7 +100,8 @@ void zaxisDefaultValue ( zaxis_t *zaxisptr )
   zaxisptr->weights     = NULL;
   zaxisptr->type        = CDI_UNDEFID;
   zaxisptr->ltype       = 0;
-  zaxisptr->direction   = CDI_UNDEFID;
+  zaxisptr->positive    = 0;
+  zaxisptr->direction   = 0;
   zaxisptr->prec        = 0;
   zaxisptr->size        = 0;
   zaxisptr->vctsize     = 0;
@@ -167,7 +174,7 @@ int zaxisSize(void)
                       The valid CDI Z-axis types are @func{ZAXIS_GENERIC}, @func{ZAXIS_SURFACE},
                       @func{ZAXIS_HYBRID}, @func{ZAXIS_SIGMA}, @func{ZAXIS_PRESSURE}, @func{ZAXIS_HEIGHT},
                       @func{ZAXIS_DEPTH_BELOW_SEA} and @func{ZAXIS_DEPTH_BELOW_LAND}.
-    @Item  size       Number of levels
+    @Item  size       Number of levels.
 
 @Description
 The function @func{zaxisCreate} creates a vertical Z-axis.
@@ -218,6 +225,11 @@ int zaxisCreate(int zaxistype, int size)
   zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
   zaxisDefUnits(zaxisID, ZaxistypeEntry[zaxistype].units);
 
+  if ( *ZaxistypeEntry[zaxistype].stdname )
+    strcpy(zaxisptr->stdname, ZaxistypeEntry[zaxistype].stdname);
+
+  zaxisptr->positive = ZaxistypeEntry[zaxistype].positive;
+
   vals = (double *) malloc(size*sizeof(double));
 
   for ( ilev = 0; ilev < size; ilev++ )
@@ -250,7 +262,7 @@ void zaxisDestroyKernel ( zaxis_t * zaxisptr )
 
 @Prototype void zaxisDestroy(int zaxisID)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
 
 @EndFunction
 */
@@ -295,8 +307,8 @@ void zaxisName(int zaxistype, char *zaxisname)
 
 @Prototype void zaxisDefName(int zaxisID, const char *name)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  name     Name of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  name     Name of the Z-axis.
 
 @Description
 The function @func{zaxisDefName} defines the name of a Z-axis.
@@ -327,8 +339,8 @@ void zaxisDefName(int zaxisID, const char *name)
 
 @Prototype void zaxisDefLongname(int zaxisID, const char *longname)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  longname Longname of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  longname Longname of the Z-axis.
 
 @Description
 The function @func{zaxisDefLongname} defines the longname of a Z-axis.
@@ -359,8 +371,8 @@ void zaxisDefLongname(int zaxisID, const char *longname)
 
 @Prototype void zaxisDefUnits(int zaxisID, const char *units)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  units    Units of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  units    Units of the Z-axis.
 
 @Description
 The function @func{zaxisDefUnits} defines the units of a Z-axis.
@@ -391,8 +403,10 @@ void zaxisDefUnits(int zaxisID, const char *units)
 
 @Prototype void zaxisInqName(int zaxisID, char *name)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  name     Name of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  name     Name of the Z-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{zaxisInqName} returns the name of a Z-axis.
@@ -419,8 +433,10 @@ void zaxisInqName(int zaxisID, char *name)
 
 @Prototype void zaxisInqLongname(int zaxisID, char *longname)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  longname Longname of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  longname Longname of the Z-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{zaxisInqLongname} returns the longname of a Z-axis.
@@ -448,7 +464,9 @@ void zaxisInqLongname(int zaxisID, char *longname)
 @Prototype void zaxisInqUnits(int zaxisID, char *units)
 @Parameter
     @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  units    Units of the Z-axis
+    @Item  units    Units of the Z-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{zaxisInqUnits} returns the units of a Z-axis.
@@ -467,6 +485,18 @@ void zaxisInqUnits(int zaxisID, char *units)
   zaxis_check_ptr(zaxisID, zaxisptr);
 
   strcpy(units, zaxisptr->units);
+}
+
+
+void zaxisInqStdname(int zaxisID, char *stdname)
+{
+  zaxis_t *zaxisptr;
+
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+
+  zaxis_check_ptr(zaxisID, zaxisptr);
+
+  strcpy(stdname, zaxisptr->stdname);
 }
 
 
@@ -497,6 +527,18 @@ int zaxisInqPrec(int zaxisID)
   zaxis_check_ptr(zaxisID, zaxisptr);
 
   return (zaxisptr->prec);
+}
+
+
+int zaxisInqPositive(int zaxisID)
+{
+  zaxis_t *zaxisptr;
+
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+
+  zaxis_check_ptr(zaxisID, zaxisptr);
+
+  return (zaxisptr->positive);
 }
 
 
@@ -535,8 +577,8 @@ int zaxisInqLtype(int zaxisID)
 
 @Prototype void zaxisDefLevels(int zaxisID, const double *levels)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  levels   All levels of the Z-axis
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  levels   All levels of the Z-axis.
 
 @Description
 The function @func{zaxisDefLevels} defines the levels of a Z-axis.
@@ -574,9 +616,9 @@ void zaxisDefLevels(int zaxisID, const double *levels)
 
 @Prototype void zaxisDefLevel(int zaxisID, int levelID, double level)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  levelID  Level identifier
-    @Item  level    Level
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  levelID  Level identifier.
+    @Item  level    Level.
 
 @Description
 The function @func{zaxisDefLevel} defines one level of a Z-axis.
@@ -607,8 +649,8 @@ void zaxisDefLevel(int zaxisID, int levelID, double level)
 
 @Prototype double zaxisInqLevel(int zaxisID, int levelID)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  levelID  Level index (range: 0 to nlevel-1)
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  levelID  Level index (range: 0 to nlevel-1).
 
 @Description
 The function @func{zaxisInqLevel} returns one level of a Z-axis.
@@ -684,9 +726,10 @@ const double *zaxisInqLevelsPtr(int zaxisID)
 
 @Prototype void zaxisInqLevels(int zaxisID, double *levels)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  levels   Levels of the Z-axis
-
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  levels   Pointer to the location into which the levels are read.
+                    The caller must allocate space for the returned values.
+    
 @Description
 The function @func{zaxisInqLevels} returns all levels of a Z-axis.
 
@@ -805,7 +848,7 @@ int zaxisInqLevelID(int zaxisID, double level)
 
 @Prototype int zaxisInqType(int zaxisID)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
 
 @Description
 The function @func{zaxisInqType} returns the type of a Z-axis.
@@ -873,36 +916,36 @@ void cdiCheckZaxis(int zaxisID)
     {
       size = zaxisptr->size;
       if ( size > 1 )
-        {
-          /* check direction */
-          if ( zaxisptr->direction == CDI_UNDEFID )
-            {
-              found = 0;
-              for ( i = 1; i < size; i++ )
-                if ( zaxisptr->vals[i] > zaxisptr->vals[i-1] )
-                  found++;
-              if ( found == size-1 )
-                {
-                  zaxisptr->direction = LevelUp;
-                }
-              else
-                {
-                  found = 0;
-                  for ( i = 1; i < size; i++ )
-                    if ( zaxisptr->vals[i] < zaxisptr->vals[i-1] )
-                      found++;
-                  if ( found == size-1 )
-                    {
-                      zaxisptr->direction = LevelDown;
-                    }
-                }
-            }
-          /* check consistent */
-          if ( zaxisptr->direction == CDI_UNDEFID )
-            {
-              Warning("direction undefined for zaxisID %d", zaxisID);
-            }
-        }
+	{
+	  /* check direction */
+	  if ( ! zaxisptr->direction )
+	    {
+	      found = 0;
+	      for ( i = 1; i < size; i++ )
+		if ( zaxisptr->vals[i] > zaxisptr->vals[i-1] )
+		  found++;
+	      if ( found == size-1 )
+		{
+		  zaxisptr->direction = LevelUp;
+		}
+	      else
+		{
+		  found = 0;
+		  for ( i = 1; i < size; i++ )
+		    if ( zaxisptr->vals[i] < zaxisptr->vals[i-1] )
+		      found++;
+		  if ( found == size-1 )
+		    {
+		      zaxisptr->direction = LevelDown;
+		    }
+		}
+	    }
+	  /* check consistent */
+	  if ( !zaxisptr->direction )
+	    {
+	      Warning("Direction undefined for zaxisID %d", zaxisID);
+	    }
+	}
     }
 }
 

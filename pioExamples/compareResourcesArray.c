@@ -67,13 +67,11 @@ static int hlf[] = { 0, 1 };
 void modelRun ()
 {
   int gridID, zaxisID1, zaxisID2, taxisID;
-  int vlistID, varID1, varID2, streamID, tsID;
+  int vlistID, varID1, varID2, streamID;
   int instID, modelID;
   double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
   double lats[nlat] = {-75, -45, -15, 15, 45, 75};
   double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
-  double var1[nlon*nlat];
-  double var2[nlon*nlat*nlev];
 
   char * recvBuffer, * sendBuffer;
   int bufferSize;
@@ -93,8 +91,8 @@ void modelRun ()
 
   //gridDefArea ( gridID, );
   gridDefNvertex ( gridID, 1 );
-  gridDefXbounds ( gridID, &lons );
-  gridDefYbounds ( gridID, &lats );
+  gridDefXbounds ( gridID, lons );
+  gridDefYbounds ( gridID, lats );
 	       
 
 

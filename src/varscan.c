@@ -46,8 +46,8 @@ typedef struct
   int         instID;
   int         modelID;
   int         tableID;
-  int         ztype;
-  int         zlevel;
+  int         comptype;       // compression type
+  int         complevel;      // compression level
   int         lmissval;
   double      missval;
   char       *name;
@@ -80,8 +80,8 @@ void paramInitEntry(int varID, int param)
   vartable[varID].instID         = UNDEFID;
   vartable[varID].modelID        = UNDEFID;
   vartable[varID].tableID        = UNDEFID;
-  vartable[varID].ztype          = COMPRESS_NONE;
-  vartable[varID].zlevel         = 1;
+  vartable[varID].comptype       = COMPRESS_NONE;
+  vartable[varID].complevel      = 1;
   vartable[varID].lmissval       = 0;
   vartable[varID].missval        = 0;
   vartable[varID].name           = NULL;
@@ -389,7 +389,7 @@ void cdiGenVars(int streamID)
   int tsteptype;
   int timave, timaccu;
   int lbounds;
-  int ztype;
+  int comptype;
   char name[256], longname[256], units[256];
   double *dlevels = NULL;
   double *dlevels1 = NULL;
@@ -450,7 +450,7 @@ void cdiGenVars(int streamID)
       tsteptype = vartable[varid].tsteptype;
       timave    = vartable[varid].timave;
       timaccu   = vartable[varid].timaccu;
-      ztype     = vartable[varid].ztype;
+      comptype  = vartable[varid].comptype;
 
       zaxisID = UNDEFID;
 
@@ -531,7 +531,7 @@ void cdiGenVars(int streamID)
       vlistDefVarTsteptype(vlistID, varID, tsteptype);
       vlistDefVarTimave(vlistID, varID, timave);
       vlistDefVarTimaccu(vlistID, varID, timaccu);
-      vlistDefVarZtype(vlistID, varID, ztype);
+      vlistDefVarCompType(vlistID, varID, comptype);
 
       if ( vartable[varid].lmissval ) vlistDefVarMissval(vlistID, varID, vartable[varid].missval);
 
@@ -643,7 +643,7 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
       {
 	gridID = vlistptr->gridIDs[index];
 	if ( gridID == UNDEFID )
-	  Error("undefined gridID %d", gridID);
+	  Error("Internal problem: undefined gridID %d!", gridID);
 
 	if ( gridCompare(gridID, grid) == 0 )
 	  {
@@ -861,16 +861,16 @@ void varDefMissval(int varID, double missval)
 }
 
 
-void varDefZtype(int varID, int ztype)
+void varDefCompType(int varID, int comptype)
 {
-  if ( vartable[varID].ztype == COMPRESS_NONE )
-    vartable[varID].ztype = ztype;
+  if ( vartable[varID].comptype == COMPRESS_NONE )
+    vartable[varID].comptype = comptype;
 }
 
 
-void varDefZlevel(int varID, int zlevel)
+void varDefCompLevel(int varID, int complevel)
 {
-  vartable[varID].zlevel = zlevel;
+  vartable[varID].complevel = complevel;
 }
 
 

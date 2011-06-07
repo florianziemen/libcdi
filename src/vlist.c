@@ -79,7 +79,6 @@ void vlist_init_entry(vlist_t *vlistptr)
 {
   vlistptr->self           = reshPut(vlistptr, &vlist_ops);
 
-  vlistptr->nlock          = 0;
   vlistptr->nvars          = 0;
   vlistptr->vars           = NULL;
   vlistptr->ngrids         = 0;
@@ -186,8 +185,6 @@ int vlistCreate(void)
 
   vlistID = vlistptr->self;
 
-  if ( vlistID >= 0 ) vlistLock(vlistID);
-
   return (vlistID);
 }
 
@@ -204,77 +201,31 @@ int vlistCreate(void)
 void vlistDestroy(int vlistID)
 {
   vlist_t *vlistptr;
+  int nvars;
+  int varID;
 
   vlistptr = vlist_to_pointer(vlistID);
 
   vlist_check_ptr(__func__, vlistptr);
 
-  vlistUnlock(vlistID);
+  vlistDelAtts(vlistID, CDI_GLOBAL);
 
-  if ( vlistptr->nlock > 0 )
+  nvars = vlistptr->nvars;
+
+  for ( varID = 0; varID < nvars; varID++ )
     {
-      Warning("vlist %d is locked!", vlistID);
+      if ( vlistptr->vars[varID].levinfo )  free(vlistptr->vars[varID].levinfo);
+      if ( vlistptr->vars[varID].name )     free(vlistptr->vars[varID].name);
+      if ( vlistptr->vars[varID].longname ) free(vlistptr->vars[varID].longname);
+      if ( vlistptr->vars[varID].stdname )  free(vlistptr->vars[varID].stdname);
+      if ( vlistptr->vars[varID].units )    free(vlistptr->vars[varID].units);
+      
+      vlistDelAtts(vlistID, varID);
     }
-  else
-    {
-      int nvars = vlistptr->nvars;
-      int varID;
+  
+  if ( vlistptr->vars ) free(vlistptr->vars);
 
-      vlistDelAtts(vlistID, CDI_GLOBAL);
-
-      for ( varID = 0; varID < nvars; varID++ )
-        {
-          if ( vlistptr->vars[varID].levinfo )  free(vlistptr->vars[varID].levinfo);
-          if ( vlistptr->vars[varID].name )     free(vlistptr->vars[varID].name);
-          if ( vlistptr->vars[varID].longname ) free(vlistptr->vars[varID].longname);
-          if ( vlistptr->vars[varID].stdname )  free(vlistptr->vars[varID].stdname);
-          if ( vlistptr->vars[varID].units )    free(vlistptr->vars[varID].units);
-
-          vlistDelAtts(vlistID, varID);
-        }
-
-      if ( vlistptr->vars ) free(vlistptr->vars);
-
-      vlist_delete_entry(vlistptr);
-    }
-}
-
-
-int vlistNlock(int vlistID)
-{
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
-
-  vlist_check_ptr(__func__, vlistptr);
-
-  return (vlistptr->nlock);
-}
-
-
-void vlistLock(int vlistID)
-{
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
-
-  vlist_check_ptr(__func__, vlistptr);
-
-  vlistptr->nlock++;
-  /*  Message("vlistID %d nlock %d", vlistID, vlistptr->nlock); */
-}
-
-
-void vlistUnlock(int vlistID)
-{
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
-
-  vlist_check_ptr(__func__, vlistptr);
-
-  vlistptr->nlock--;
-  /*  Message("vlistID %d nlock %d", vlistID, vlistptr->nlock); */
+  vlist_delete_entry(vlistptr);
 }
 
 /*
@@ -336,8 +287,6 @@ void vlistCopy(int vlistID2, int vlistID1)
           vlistCopyVarAtts(vlistID1, varID, vlistID2, varID);
         }
     }
-
-  vlistptr2->nlock = 0;
 }
 
 /*

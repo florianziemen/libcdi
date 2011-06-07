@@ -32,7 +32,7 @@ char *Timeunits[] = {
   "days",
   "months",
   "years",
-  "quarter",
+  "quarters",
   "3hours",
   "6hours",
   "12hours",
@@ -81,9 +81,9 @@ void taxis_defaults(void)
   timeunit = getenv("TIMEUNIT");
   if ( timeunit )
     {
-      if ( strcmp(timeunit, "minute") == 0 )
+      if ( strcmp(timeunit, "minutes") == 0 )
 	DefaultTimeUnit = TUNIT_MINUTE;
-      else if ( strcmp(timeunit, "hour") == 0 )
+      else if ( strcmp(timeunit, "hours") == 0 )
 	DefaultTimeUnit = TUNIT_HOUR;
       else if ( strcmp(timeunit, "3hours") == 0 )
 	DefaultTimeUnit = TUNIT_3HOURS;
@@ -91,11 +91,11 @@ void taxis_defaults(void)
 	DefaultTimeUnit = TUNIT_6HOURS;
       else if ( strcmp(timeunit, "12hours") == 0 )
 	DefaultTimeUnit = TUNIT_12HOURS;
-      else if ( strcmp(timeunit, "day") == 0 )
+      else if ( strcmp(timeunit, "days") == 0 )
 	DefaultTimeUnit = TUNIT_DAY;
-      else if ( strcmp(timeunit, "month") == 0 )
+      else if ( strcmp(timeunit, "months") == 0 )
 	DefaultTimeUnit = TUNIT_MONTH;
-      else if ( strcmp(timeunit, "year") == 0 )
+      else if ( strcmp(timeunit, "years") == 0 )
 	DefaultTimeUnit = TUNIT_YEAR;
       else
 	Warning("Unsupported TIMEUNIT %s!", timeunit);

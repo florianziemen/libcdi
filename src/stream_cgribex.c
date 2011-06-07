@@ -348,7 +348,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid)
 #if  defined  (HAVE_LIBCGRIBEX)
 static
 void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
-		      int *isec4, long recsize, off_t position, int prec, int ztype, int lmv)
+		      int *isec4, long recsize, off_t position, int prec, int comptype, int lmv)
 {
   int zaxistype;
   int gridID = CDI_UNDEFID, varID;
@@ -410,7 +410,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
   (*record).varID   = varID;
   (*record).levelID = levelID;
 
-  varDefZtype(varID, ztype);
+  varDefCompType(varID, comptype);
 
   if ( lmv ) varDefMissval(varID, FSEC3_MissVal);
 
@@ -531,7 +531,7 @@ int cgribexScanTimestep1(int streamID)
   int rdate = 0, rtime = 0, tunit = 0, fcast = 0;
   taxis_t *taxis;
   int vlistID;
-  int ztype;
+  int comptype;
   long unzipsize;
   compvar_t compVar, compVar0;
   stream_t *streamptr;
@@ -592,10 +592,10 @@ int cgribexScanTimestep1(int streamID)
       rstatus = gribRead(fileID, gribbuffer, &readsize);
       if ( rstatus ) break;
 
-      ztype = COMPRESS_NONE;
+      comptype = COMPRESS_NONE;
       if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
 	{
-	  ztype = COMPRESS_SZIP;
+	  comptype = COMPRESS_SZIP;
 	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
 	  if ( (long) buffersize < unzipsize )
 	    {
@@ -667,7 +667,7 @@ int cgribexScanTimestep1(int streamID)
 		{
 		  char paramstr[32];
 		  cdiParamToString(param, paramstr, sizeof(paramstr));
-		  Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
+		  Warning("Param=%s level=%d already exist, skiped!", paramstr, level1);
 		  continue;
 		}
 	    }
@@ -693,7 +693,7 @@ int cgribexScanTimestep1(int streamID)
 	Message("%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
 
       cgribexAddRecord(streamID, param, isec1, isec2, fsec2, fsec3,
-		       isec4, recsize, recpos, prec, ztype, lmv);
+		       isec4, recsize, recpos, prec, comptype, lmv);
     }
 
   streamptr->rtsteps = 1;
@@ -967,7 +967,7 @@ int cgribexScanTimestep2(int streamID)
 
 	      if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
 
-	      Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
+	      Warning("Param=%s level=%d already exist, skiped!", paramstr, level1);
 	      continue;
 	    }
 	  else
@@ -1249,7 +1249,7 @@ int cgribexScanTimestep(int streamID)
 		  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
 		  
 		  if ( CDI_Debug )
-		    Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
+		    Warning("Param=%s level=%d already exist, skiped!", paramstr, level1);
 
 		  continue;
 		}

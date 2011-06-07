@@ -13,6 +13,8 @@
 extern "C" {
 #endif
 
+#define  CDI_MAX_NAME           256   /* max length of a name                 */
+
 #define  CDI_UNDEFID             -1
 #define  CDI_GLOBAL              -1   /* Global var ID for vlist              */
 
@@ -42,10 +44,11 @@ extern "C" {
 #define  FILETYPE_GRB2            2   /* File type GRIB version 2             */
 #define  FILETYPE_NC              3   /* File type netCDF                     */
 #define  FILETYPE_NC2             4   /* File type netCDF version 2 (64-bit)  */
-#define  FILETYPE_NC4             5   /* File type netCDF version 4 (classic) */
-#define  FILETYPE_SRV             6   /* File type SERVICE                    */
-#define  FILETYPE_EXT             7   /* File type EXTRA                      */
-#define  FILETYPE_IEG             8   /* File type IEG                        */
+#define  FILETYPE_NC4             5   /* File type netCDF version 4           */
+#define  FILETYPE_NC4C            6   /* File type netCDF version 4 (classic) */
+#define  FILETYPE_SRV             7   /* File type SERVICE                    */
+#define  FILETYPE_EXT             8   /* File type EXTRA                      */
+#define  FILETYPE_IEG             9   /* File type IEG                        */
 
 /* Compress types */
 
@@ -126,7 +129,8 @@ extern "C" {
 #define  GRID_LCC2               12  /* Lambert Conformal Conic (PROJ)          */
 #define  GRID_LAEA               13  /* Lambert Azimuthal Equal Area            */
 #define  GRID_SINUSOIDAL         14  /* Sinusoidal                              */
-#define  GRID_REFERENCE          15  /* Reference to the grid                   */
+#define  GRID_REFERENCE          15  /* Grid reference number                   */
+#define  GRID_PROJECTION         16  /* Projected coordiantes                   */
 
 /* ZAXIS types */
 
@@ -275,17 +279,17 @@ void    streamDefByteorder(int streamID, int byteorder);
 /*      streamInqByteorder: Get the byteorder */
 int     streamInqByteorder(int streamID);
 
-/*      streamDefZtype: Define compression type */
-void    streamDefZtype(int streamID, int ztype);
+/*      streamDefCompType: Define compression type */
+void    streamDefCompType(int streamID, int comptype);
 
-/*      streamDefZlevel: Define compression level */
-void    streamDefZlevel(int streamID, int zlevel);
+/*      streamDefCompLevel: Define compression level */
+void    streamDefCompLevel(int streamID, int complevel);
 
-/*      streamInqZtype: Get compression type */
-int     streamInqZtype(int streamID);
+/*      streamInqCompType: Get compression type */
+int     streamInqCompType(int streamID);
 
-/*      streamInqZlevel: Get compression level */
-int     streamInqZlevel(int streamID);
+/*      streamInqCompLevel: Get compression level */
+int     streamInqCompLevel(int streamID);
 
 /*      streamDefTimestep: Define time step */
 int     streamDefTimestep(int streamID, int tsID);
@@ -403,10 +407,10 @@ int     vlistInqVarGrid(int vlistID, int varID);
 int     vlistInqVarZaxis(int vlistID, int varID);
 int     vlistInqVarTime(int vlistID, int varID);
 
-void    vlistDefVarZtype(int vlistID, int varID, int ztype);
-int     vlistInqVarZtype(int vlistID, int varID);
-void    vlistDefVarZlevel(int vlistID, int varID, int zlevel);
-int     vlistInqVarZlevel(int vlistID, int varID);
+void    vlistDefVarCompType(int vlistID, int varID, int comptype);
+int     vlistInqVarCompType(int vlistID, int varID);
+void    vlistDefVarCompLevel(int vlistID, int varID, int complevel);
+int     vlistInqVarCompLevel(int vlistID, int varID);
 
 /*      vlistDefVarParam: Define the parameter number of a Variable */
 void    vlistDefVarParam(int vlistID, int varID, int param);
@@ -746,11 +750,16 @@ void    zaxisInqName(int zaxisID, char *name);
 /*      zaxisInqLongname: Get the longname of a Z-axis */
 void    zaxisInqLongname(int zaxisID, char *longname);
 
+/*      zaxisInqStdname: Get the standard name of a Z-axis */
+void    zaxisInqStdname(int zaxisID, char *stdname);
+
 /*      zaxisInqUnits: Get the units of a Z-axis */
 void    zaxisInqUnits(int zaxisID, char *units);
 
 void    zaxisDefPrec(int zaxisID, int prec);
 int     zaxisInqPrec(int zaxisID);
+
+int     zaxisInqPositive(int zaxisID);
 
 void    zaxisDefLtype(int zaxisID, int ltype);
 int     zaxisInqLtype(int zaxisID);

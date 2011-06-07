@@ -58,6 +58,8 @@ char *strdup(const char *s);
 #endif
 
 
+#define check_parg(arg)  if ( arg == 0 ) Warning("Argument '" #arg "' not allocated!")
+
 #if defined (__xlC__) /* performance problems on IBM */
 #ifndef DBL_IS_NAN
 #  define DBL_IS_NAN(x)     ((x) != (x))
@@ -236,8 +238,8 @@ typedef struct {
   int       unreduced;
   int       sortname;
   int       have_missval;
-  int       ztype;
-  int       zlevel;
+  int       comptype;      // compression type
+  int       complevel;     // compression level
   int       curfile;
   int       nfiles;
   char    **fnames;

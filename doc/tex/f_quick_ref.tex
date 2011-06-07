@@ -355,6 +355,24 @@ Close an open dataset.
 Define the byteorder.
 
 
+\section*{\tt \htmlref{streamDefCompLevel}{streamDefCompLevel}}
+
+\begin{verbatim}
+    SUBROUTINE streamDefCompLevel (INTEGER streamID, INTEGER complevel)
+\end{verbatim}
+
+Define compression level.
+
+
+\section*{\tt \htmlref{streamDefCompType}{streamDefCompType}}
+
+\begin{verbatim}
+    SUBROUTINE streamDefCompType (INTEGER streamID, INTEGER comptype)
+\end{verbatim}
+
+Define compression type.
+
+
 \section*{\tt \htmlref{streamDefTimestep}{streamDefTimestep}}
 
 \begin{verbatim}
@@ -373,24 +391,6 @@ Define time step.
 Define the Vlist for a stream.
 
 
-\section*{\tt \htmlref{streamDefZlevel}{streamDefZlevel}}
-
-\begin{verbatim}
-    SUBROUTINE streamDefZlevel (INTEGER streamID, INTEGER zlevel)
-\end{verbatim}
-
-Define compression level.
-
-
-\section*{\tt \htmlref{streamDefZtype}{streamDefZtype}}
-
-\begin{verbatim}
-    SUBROUTINE streamDefZtype (INTEGER streamID, INTEGER ztype)
-\end{verbatim}
-
-Define compression type.
-
-
 \section*{\tt \htmlref{streamInqByteorder}{streamInqByteorder}}
 
 \begin{verbatim}
@@ -398,6 +398,24 @@ Define compression type.
 \end{verbatim}
 
 Get the byteorder.
+
+
+\section*{\tt \htmlref{streamInqCompLevel}{streamInqCompLevel}}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqCompLevel (INTEGER streamID)
+\end{verbatim}
+
+Get compression level.
+
+
+\section*{\tt \htmlref{streamInqCompType}{streamInqCompType}}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqCompType (INTEGER streamID)
+\end{verbatim}
+
+Get compression type.
 
 
 \section*{\tt \htmlref{streamInqFiletype}{streamInqFiletype}}
@@ -425,24 +443,6 @@ Get time step.
 \end{verbatim}
 
 Get the Vlist of a stream.
-
-
-\section*{\tt \htmlref{streamInqZlevel}{streamInqZlevel}}
-
-\begin{verbatim}
-    INTEGER FUNCTION streamInqZlevel (INTEGER streamID)
-\end{verbatim}
-
-Get compression level.
-
-
-\section*{\tt \htmlref{streamInqZtype}{streamInqZtype}}
-
-\begin{verbatim}
-    INTEGER FUNCTION streamInqZtype (INTEGER streamID)
-\end{verbatim}
-
-Get compression type.
 
 
 \section*{\tt \htmlref{streamOpenRead}{streamOpenRead}}
@@ -1097,6 +1097,15 @@ Get the name of a Z-axis.
 \end{verbatim}
 
 Get the size of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisInqStdname}{zaxisInqStdname}}
+
+\begin{verbatim}
+    SUBROUTINE zaxisInqStdname (INTEGER zaxisID, CHARACTER*(*) stdname)
+\end{verbatim}
+
+Get the standard name of a Z-axis.
 
 
 \section*{\tt \htmlref{zaxisInqType}{zaxisInqType}}

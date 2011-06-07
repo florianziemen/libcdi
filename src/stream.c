@@ -335,7 +335,7 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 
 @Prototype int streamInqFiletype(int streamID)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
 
 @Description
 The function @func{streamInqFiletype} returns the filetype of a stream.
@@ -344,7 +344,7 @@ The function @func{streamInqFiletype} returns the filetype of a stream.
 @func{streamInqFiletype} returns the type of the file format,
 one of the set of predefined CDI file format types.
 The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_GRB2}, @func{FILETYPE_NC}, @func{FILETYPE_NC2},
-@func{FILETYPE_NC4}, @func{FILETYPE_SRV}, @func{FILETYPE_EXT} and @func{FILETYPE_IEG}.
+@func{FILETYPE_NC4}, @func{FILETYPE_NC4C}, @func{FILETYPE_SRV}, @func{FILETYPE_EXT} and @func{FILETYPE_IEG}.
 
 @EndFunction
 */
@@ -383,7 +383,7 @@ int getByteswap(int byteorder)
 
 @Prototype void streamDefByteorder(int streamID, int byteorder)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
     @Item  byteorder The byte order of a dataset, one of the CDI constants @func{CDI_BIGENDIAN} and
                      @func{CDI_LITTLEENDIAN}.
 
@@ -450,7 +450,7 @@ void streamDefByteorder(int streamID, int byteorder)
 
 @Prototype int streamInqByteorder(int streamID)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
 
 @Description
 The function @func{streamInqByteorder} returns the byte order of a binary dataset
@@ -568,6 +568,7 @@ int cdiInqContents(int streamID)
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
         status = cdfInqContents(streamID);
 	break;
@@ -662,8 +663,9 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	break;
       }
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
-	fileID = cdf4Open(filename, filemode);
+	fileID = cdf4Open(filename, filemode, &filetype);
 	break;
       }
  #endif
@@ -778,8 +780,9 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 	break;
       }
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
-	fileID = cdf4Open(filename, "r");
+	fileID = cdf4Open(filename, "r", &filetype);
 	break;
       }
 #endif
@@ -850,6 +853,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
 	cdfClose(fileID);
 	break;
@@ -907,8 +911,9 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 	break;
       }
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
-	fileID = cdf4Open(filename, filemode);
+	fileID = cdf4Open(filename, filemode, &filetype);
 	streamptr->ncmode = 2;
 	break;
       }
@@ -934,7 +939,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 
 @Prototype int streamOpenRead(const char *path)
 @Parameter
-    @Item  path  The name of the dataset to be read
+    @Item  path  The name of the dataset to be read.
 
 @Description
 The function @func{streamOpenRead} opens an existing dataset for reading.
@@ -945,10 +950,10 @@ open stream. Otherwise, a negative number with the error status is returned.
 
 @Errors
 @List
-   @Item  CDI_ESYSTEM     Operating system error
-   @Item  CDI_EINVAL      Invalid argument
-   @Item  CDI_EUFILETYPE  Unsupported file type
-   @Item  CDI_ELIBNAVAIL  Library support not compiled in
+   @Item  CDI_ESYSTEM     Operating system error.
+   @Item  CDI_EINVAL      Invalid argument.
+   @Item  CDI_EUFILETYPE  Unsupported file type.
+   @Item  CDI_ELIBNAVAIL  Library support not compiled in.
 @EndList
 
 @Example
@@ -1036,10 +1041,10 @@ int streamOpenAppend(const char *filename)
 
 @Prototype int streamOpenWrite(const char *path, int filetype)
 @Parameter
-    @Item  path      The name of the new dataset
+    @Item  path      The name of the new dataset.
     @Item  filetype  The type of the file format, one of the set of predefined CDI file format types.
                      The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_GRB2}, @func{FILETYPE_NC},
-                     @func{FILETYPE_NC2}, @func{FILETYPE_NC4}, @func{FILETYPE_SRV},
+                     @func{FILETYPE_NC2}, @func{FILETYPE_NC4}, @func{FILETYPE_NC4C}, @func{FILETYPE_SRV},
                      @func{FILETYPE_EXT} and @func{FILETYPE_IEG}.
 
 @Description
@@ -1050,10 +1055,10 @@ open stream. Otherwise, a negative number with the error status is returned.
 
 @Errors
 @List
-   @Item  CDI_ESYSTEM     Operating system error
-   @Item  CDI_EINVAL      Invalid argument
-   @Item  CDI_EUFILETYPE  Unsupported file type
-   @Item  CDI_ELIBNAVAIL  Library support not compiled in
+   @Item  CDI_ESYSTEM     Operating system error.
+   @Item  CDI_EINVAL      Invalid argument.
+   @Item  CDI_EUFILETYPE  Unsupported file type.
+   @Item  CDI_ELIBNAVAIL  Library support not compiled in.
 @EndList
 
 @Example
@@ -1082,7 +1087,7 @@ int streamOpenWrite(const char *filename, int filetype)
 
 @Prototype  void streamClose(int streamID)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
 
 @Description
 The function @func{streamClose} closes an open dataset.
@@ -1150,6 +1155,7 @@ void streamClose(int streamID)
       case FILETYPE_NC:
       case FILETYPE_NC2:
       case FILETYPE_NC4:
+      case FILETYPE_NC4C:
 	{
 	  cdfClose(fileID);
 	  break;
@@ -1220,7 +1226,7 @@ void streamClose(int streamID)
 
 @Prototype  void streamSync(int streamID)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
 
 @Description
 The function @func{streamSync} offers a way to synchronize the disk copy of a dataset with in-memory buffers.
@@ -1260,6 +1266,7 @@ void streamSync(int streamID)
 	    case FILETYPE_NC:
 	    case FILETYPE_NC2:
 	    case FILETYPE_NC4:
+	    case FILETYPE_NC4C:
 	      {
 		void cdf_sync(int ncid);
 		if ( streamptr->ncmode == 2 ) cdf_sync(fileID);
@@ -1282,8 +1289,8 @@ void streamSync(int streamID)
 
 @Prototype int streamDefTimestep(int streamID, int tsID)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
-    @Item  tsID      Timestep identifier
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  tsID      Timestep identifier.
 
 @Description
 The function @func{streamDefTimestep} defines the time step of a stream.
@@ -1329,7 +1336,8 @@ int streamDefTimestep(int streamID, int tsID)
 
   if ( (streamptr->filetype == FILETYPE_NC  ||
 	streamptr->filetype == FILETYPE_NC2 ||
-	streamptr->filetype == FILETYPE_NC4)
+	streamptr->filetype == FILETYPE_NC4 ||
+	streamptr->filetype == FILETYPE_NC4C)
        && vlistHasTime(vlistID) )
     cdfDefTimestep(streamID, tsID);
 
@@ -1344,8 +1352,8 @@ int streamDefTimestep(int streamID, int tsID)
 
 @Prototype int streamInqTimestep(int streamID, int tsID)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
-    @Item  tsID      Timestep identifier
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  tsID      Timestep identifier.
 
 @Description
 The function @func{streamInqTimestep} returns the time step of a stream.
@@ -1427,6 +1435,7 @@ int streamInqTimestep(int streamID, int tsID)
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
         nrecs = cdfInqTimestep(streamID, tsID);
 	break;
@@ -1454,10 +1463,11 @@ int streamInqTimestep(int streamID, int tsID)
 
 @Prototype void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
-    @Item  varID     Variable identifier
-    @Item  data      Pointer to the location into which the data value is read
-    @Item  nmiss     Number of missing values
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  varID     Variable identifier.
+    @Item  data      Pointer to the location into which the data values are read.
+                     The caller must allocate space for the returned values.
+    @Item  nmiss     Number of missing values.
 
 @Description
 The function streamReadVar reads all the values of one time step of a variable
@@ -1469,10 +1479,12 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
   int filetype;
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamID, varID);
 
-  if ( CDI_Debug )
-    Message("streamID = %d  varID = %d", streamID, varID);
+  check_parg(data);
+  check_parg(nmiss);
+
+  streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
 
@@ -1515,6 +1527,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
         cdfReadVarDP(streamID, varID, data, nmiss);
 	break;
@@ -1534,10 +1547,10 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 
 @Prototype void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
-    @Item  varID     Variable identifier
-    @Item  data      Pointer to a block of data values to be written
-    @Item  nmiss     Number of missing values
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  varID     Variable identifier.
+    @Item  data      Pointer to a block of data values to be written.
+    @Item  nmiss     Number of missing values.
 
 @Description
 The function streamWriteVar writes the values of one time step of a variable 
@@ -1549,10 +1562,11 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
   int filetype;
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
 
-  if ( CDI_Debug )
-    Message("streamID = %d varID = %d", streamID, varID);
+  check_parg(data);
+
+  streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
 
@@ -1595,6 +1609,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
 	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
         cdfWriteVarDP(streamID, varID, data, nmiss);
@@ -1615,11 +1630,12 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 
 @Prototype void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
-    @Item  varID     Variable identifier
-    @Item  levelID   Level identifier
-    @Item  data      Pointer to the location into which the data value is read
-    @Item  nmiss     Number of missing values
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  varID     Variable identifier.
+    @Item  levelID   Level identifier.
+    @Item  data      Pointer to the location into which the data values are read.
+                     The caller must allocate space for the returned values.
+    @Item  nmiss     Number of missing values.
 
 @Description
 The function streamReadVar reads all the values of a horizontal slice of a variable
@@ -1631,6 +1647,11 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
   int filetype;
   int ierr = 0;
   stream_t *streamptr;
+
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamID, varID);
+
+  check_parg(data);
+  check_parg(nmiss);
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1675,6 +1696,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
         ierr = cdfReadVarSliceDP(streamID, varID, levelID, data, nmiss);
 	break;
@@ -1694,11 +1716,11 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
 
 @Prototype void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
-    @Item  varID     Variable identifier
-    @Item  levelID   Level identifier
-    @Item  data      Pointer to a block of data values to be written
-    @Item  nmiss     Number of missing values
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  varID     Variable identifier.
+    @Item  levelID   Level identifier.
+    @Item  data      Pointer to a block of data values to be written.
+    @Item  nmiss     Number of missing values.
 
 @Description
 The function streamWriteVarSlice writes the values of a horizontal slice of a 
@@ -1711,10 +1733,11 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
   int ierr = 0;
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
 
-  if ( CDI_Debug )
-    Message("streamID = %d varID = %d", streamID, varID);
+  check_parg(data);
+
+  streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
 
@@ -1755,6 +1778,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
 	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
         ierr = cdfWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
@@ -1957,8 +1981,8 @@ off_t   streamNvals(int streamID)
 
 @Prototype void streamDefVlist(int streamID, int vlistID)
 @Parameter
-    @Item  streamID Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+    @Item  streamID Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
 
 @Description
 The function @func{streamDefVlist} defines the variable list of a stream.
@@ -2000,7 +2024,8 @@ void streamDefVlist(int streamID, int vlistID)
 	{
 	  if ( streamptr->filetype == FILETYPE_NC  ||
 	       streamptr->filetype == FILETYPE_NC2 ||
-	       streamptr->filetype == FILETYPE_NC4 )
+	       streamptr->filetype == FILETYPE_NC4 ||
+	       streamptr->filetype == FILETYPE_NC4C )
 	    {
 	      cdfDefVars(streamID);
 	    }
@@ -2023,7 +2048,7 @@ void streamDefVlist(int streamID, int vlistID)
 
 @Prototype int streamInqVlist(int streamID)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
 
 @Description
 The function @func{streamInqVlist} returns the variable list of a stream.
@@ -2045,7 +2070,7 @@ int streamInqVlist(int streamID)
 }
 
 
-void streamDefZtype(int streamID, int ztype)
+void streamDefCompType(int streamID, int comptype)
 {
   stream_t *streamptr;
 
@@ -2059,11 +2084,11 @@ void streamDefZtype(int streamID, int ztype)
       return;
     }
 
-  streamptr->ztype = ztype;
+  streamptr->comptype = comptype;
 }
 
 
-void streamDefZlevel(int streamID, int zlevel)
+void streamDefCompLevel(int streamID, int complevel)
 {
   stream_t *streamptr;
 
@@ -2077,11 +2102,11 @@ void streamDefZlevel(int streamID, int zlevel)
       return;
     }
 
-  streamptr->zlevel = zlevel;
+  streamptr->complevel = complevel;
 }
 
 
-int streamInqZtype(int streamID)
+int streamInqCompType(int streamID)
 {
   stream_t *streamptr;
 
@@ -2089,11 +2114,11 @@ int streamInqZtype(int streamID)
 
   stream_check_ptr(__func__, streamptr);
 
-  return (streamptr->ztype);
+  return (streamptr->comptype);
 }
 
 
-int streamInqZlevel(int streamID)
+int streamInqCompLevel(int streamID)
 {
   stream_t *streamptr;
 
@@ -2101,5 +2126,5 @@ int streamInqZlevel(int streamID)
 
   stream_check_ptr(__func__, streamptr);
 
-  return (streamptr->zlevel);
+  return (streamptr->complevel);
 }

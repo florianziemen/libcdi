@@ -52,6 +52,9 @@ void printFiletype(int streamID, int vlistID)
     case FILETYPE_NC4:
       printf("netCDF4");
       break;
+    case FILETYPE_NC4C:
+      printf("netCDF4 classic");
+      break;
     case FILETYPE_SRV:
       printf("SERVICE");
       break;
@@ -78,21 +81,21 @@ void printFiletype(int streamID, int vlistID)
 	}
     }
 
-  if ( filetype == FILETYPE_GRB || filetype == FILETYPE_NC4 )
+  if ( filetype == FILETYPE_GRB || filetype == FILETYPE_NC4 || filetype == FILETYPE_NC4C )
     {
       int nvars, varID;
-      int ztype;
+      int comptype;
 
       nvars = vlistNvars(vlistID);
 
       for ( varID = 0; varID < nvars; varID++ )
 	{
-	  ztype = vlistInqVarZtype(vlistID, varID);
-	  if ( ztype )
+	  comptype = vlistInqVarCompType(vlistID, varID);
+	  if ( comptype )
 	    {
-	      if ( ztype == COMPRESS_SZIP )
+	      if ( comptype == COMPRESS_SZIP )
 		printf(" SZIP");
-	      else if ( ztype == COMPRESS_ZIP )
+	      else if ( comptype == COMPRESS_ZIP )
 		printf(" ZIP");
 
 	      break;
@@ -103,16 +106,16 @@ void printFiletype(int streamID, int vlistID)
   if ( filetype == FILETYPE_GRB2 )
     {
       int nvars, varID;
-      int ztype;
+      int comptype;
 
       nvars = vlistNvars(vlistID);
 
       for ( varID = 0; varID < nvars; varID++ )
 	{
-	  ztype = vlistInqVarZtype(vlistID, varID);
-	  if ( ztype )
+	  comptype = vlistInqVarCompType(vlistID, varID);
+	  if ( comptype )
 	    {
-	      if ( ztype == COMPRESS_JPEG )
+	      if ( comptype == COMPRESS_JPEG )
 		printf(" JPEG");
 
 	      break;
@@ -129,7 +132,7 @@ void printGridInfo(int vlistID)
   int ngrids, index;
   int gridID, gridtype, trunc, gridsize, xsize, ysize;
   int nbyte0;
-  char xname[128], yname[128], xunits[128], yunits[128];
+  char xname[CDI_MAX_NAME], yname[CDI_MAX_NAME], xunits[CDI_MAX_NAME], yunits[CDI_MAX_NAME];
 
   ngrids = vlistNgrids(vlistID);
   for ( index = 0; index < ngrids; index++ )
@@ -145,9 +148,7 @@ void printGridInfo(int vlistID)
       gridInqXunits(gridID, xunits);
       gridInqYunits(gridID, yunits);
 
-      /*	  nbyte0   = fprintf(stdout, "  %4d : %-23s : ",*/
-      nbyte0   = fprintf(stdout, "  %4d : %-12s > ",
-			 gridID+1, gridNamePtr(gridtype));
+      nbyte0   = fprintf(stdout, "  %4d : %-12s > ", index+1, gridNamePtr(gridtype));
 
       if ( gridtype == GRID_LONLAT   ||
 	   gridtype == GRID_LCC2 ||

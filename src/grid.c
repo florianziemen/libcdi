@@ -43,6 +43,7 @@ char *Grids[] = {
   /* 13 */  "laea",
   /* 14 */  "sinusoidal",
   /* 15 */  "reference",
+  /* 16 */  "projection",
 };
 
 
@@ -66,11 +67,11 @@ resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP
 static int  GRID_Debug = 0;   /* If set to 1, debugging */
 
 
-static
-void gridDefaultValue(grid_t *gridptr)
+void grid_init(grid_t *gridptr)
 {
   gridptr->self         = CDI_UNDEFID;
   gridptr->type         = CDI_UNDEFID;
+  gridptr->proj         = CDI_UNDEFID;
   gridptr->mask         = NULL;
   gridptr->mask_gme     = NULL;
   gridptr->xvals        = NULL;
@@ -130,8 +131,25 @@ void gridDefaultValue(grid_t *gridptr)
   gridptr->yunits[0]    = 0;
   gridptr->xstdname[0]  = 0;
   gridptr->ystdname[0]  = 0;
+  gridptr->name         = NULL;
 }
 
+
+void grid_free(grid_t *gridptr)
+{
+  if ( gridptr->mask      ) free(gridptr->mask);
+  if ( gridptr->mask_gme  ) free(gridptr->mask_gme);
+  if ( gridptr->xvals     ) free(gridptr->xvals);
+  if ( gridptr->yvals     ) free(gridptr->yvals);
+  if ( gridptr->area      ) free(gridptr->area);
+  if ( gridptr->xbounds   ) free(gridptr->xbounds);
+  if ( gridptr->ybounds   ) free(gridptr->ybounds);
+  if ( gridptr->rowlon    ) free(gridptr->rowlon);
+  if ( gridptr->reference ) free(gridptr->reference);
+  if ( gridptr->name      ) free(gridptr->name);
+
+  grid_init(gridptr);
+}
 
 static
 grid_t *gridNewEntry ( void )
@@ -139,7 +157,7 @@ grid_t *gridNewEntry ( void )
   grid_t *gridptr;
 
   gridptr = ( grid_t *) xmalloc ( sizeof ( grid_t ));
-  gridDefaultValue ( gridptr );
+  grid_init ( gridptr );
   gridptr->self = reshPut (( void * ) gridptr, &gridOps );
 
   return gridptr;
@@ -237,51 +255,51 @@ void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals)
 {
   long i;
+  double deleps = 0.002;
 
   if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
     {
       if ( ysize > 2 )
-        {
-          calc_gaussgrid(yvals, ysize, yfirst, ylast);
+	{
+	  calc_gaussgrid(yvals, ysize, yfirst, ylast);
 
-          if ( ! (IS_EQUAL(yfirst, 0) && IS_EQUAL(ylast, 0)) )
-            if ( fabs(yvals[0] - yfirst) > 0.001 || fabs(yvals[ysize-1] - ylast) > 0.001 )
-              {
-                double yinc = fabs(ylast-yfirst)/(ysize-1);
-                double *ytmp = NULL;
-                int nstart, lfound = 0;
-                int ny = (int) (180./yinc + 0.5);
-                ny -= ny%2;
-                /* printf("%g %g %g %g %g %d\n", ylast, yfirst, ylast-yfirst,yinc, 180/yinc, ny); */
-                if ( ny < 4096 )
-                  {
-                    ytmp   = (double *) malloc(ny*sizeof(double));
-                    calc_gaussgrid(ytmp, ny, yfirst, ylast);
-                    for ( i = 0; i < (ny-ysize); i++ )
-                      if ( fabs(ytmp[i] - yfirst) < 0.001 ) break;
+	  if ( ! (IS_EQUAL(yfirst, 0) && IS_EQUAL(ylast, 0)) )
+	    if ( fabs(yvals[0] - yfirst) > deleps || fabs(yvals[ysize-1] - ylast) > deleps )
+	      {
+		double yinc = fabs(ylast-yfirst)/(ysize-1);
+		double *ytmp = NULL;
+		int nstart, lfound = 0;
+		int ny = (int) (180./yinc + 0.5);
+		ny -= ny%2;
+		/* printf("%g %g %g %g %g %d\n", ylast, yfirst, ylast-yfirst,yinc, 180/yinc, ny); */
+		if ( ny > ysize && ny < 4096 )
+		  {
+		    ytmp = (double *) malloc(ny*sizeof(double));
+		    calc_gaussgrid(ytmp, ny, yfirst, ylast);
+		    for ( i = 0; i < (ny-ysize); i++ )
+		      if ( fabs(ytmp[i] - yfirst) < deleps ) break;
 
-                    nstart = i;
+		    nstart = i;
 
-                    if ( (nstart+ysize-1) < ny )
-                      if ( fabs(ytmp[nstart+ysize-1] - ylast) < 0.001 ) lfound = 1;
-                  }
+		    if ( (nstart+ysize-1) < ny )
+		      if ( fabs(ytmp[nstart+ysize-1] - ylast) < deleps ) lfound = 1;
+		  }
 
-                if ( lfound )
-                  {
-                    for ( i = 0; i < ysize; i++ ) yvals[i] = ytmp[i+nstart];
-                  }
-                else
-                  {
-                    Warning("Cannot calculate gaussian latitudes for lat1 = %g latn = %g", yfirst, ylast);
-                    for ( i = 0; i < ysize; i++ ) yvals[i] = 0;
-                    yvals[0] = yfirst;
-                    yvals[ysize-1] = ylast;
-                  }
+		if ( lfound )
+		  {
+		    for ( i = 0; i < ysize; i++ ) yvals[i] = ytmp[i+nstart];
+		  }
+		else
+		  {
+		    Warning("Cannot calculate gaussian latitudes for lat1 = %g latn = %g!", yfirst, ylast);
+		    for ( i = 0; i < ysize; i++ ) yvals[i] = 0;
+		    yvals[0] = yfirst;
+		    yvals[ysize-1] = ylast;
+		  }
 
-                if ( ny < 4096 )
-                  free(ytmp);
-              }
-        }
+		if ( ytmp ) free(ytmp);
+	      }
+	}
       else
         {
           yvals[0] = yfirst;
@@ -498,7 +516,7 @@ void gridDestroyKernel ( grid_t * gridptr )
 
 @Prototype void gridDestroy(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
 
 @EndFunction
 */
@@ -543,8 +561,8 @@ void gridName(int gridtype, char *gridname)
 
 @Prototype void gridDefXname(int gridID, const char *name)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  name     Name of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  name     Name of the X-axis.
 
 @Description
 The function @func{gridDefXname} defines the name of a X-axis.
@@ -576,8 +594,8 @@ void gridDefXname(int gridID, const char *xname)
 
 @Prototype void gridDefXlongname(int gridID, const char *longname)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  longname Longname of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  longname Longname of the X-axis.
 
 @Description
 The function @func{gridDefXlongname} defines the longname of a X-axis.
@@ -609,8 +627,8 @@ void gridDefXlongname(int gridID, const char *xlongname)
 
 @Prototype void gridDefXunits(int gridID, const char *units)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  units    Units of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  units    Units of the X-axis.
 
 @Description
 The function @func{gridDefXunits} defines the units of a X-axis.
@@ -642,8 +660,8 @@ void gridDefXunits(int gridID, const char *xunits)
 
 @Prototype void gridDefYname(int gridID, const char *name)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  name     Name of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  name     Name of the Y-axis.
 
 @Description
 The function @func{gridDefYname} defines the name of a Y-axis.
@@ -675,8 +693,8 @@ void gridDefYname(int gridID, const char *yname)
 
 @Prototype void gridDefYlongname(int gridID, const char *longname)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  longname Longname of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  longname Longname of the Y-axis.
 
 @Description
 The function @func{gridDefYlongname} defines the longname of a Y-axis.
@@ -708,8 +726,8 @@ void gridDefYlongname(int gridID, const char *ylongname)
 
 @Prototype void gridDefYunits(int gridID, const char *units)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  units    Units of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  units    Units of the Y-axis.
 
 @Description
 The function @func{gridDefYunits} defines the units of a Y-axis.
@@ -739,10 +757,12 @@ void gridDefYunits(int gridID, const char *yunits)
 @Function  gridInqXname
 @Title     Get the name of a X-axis
 
-@Prototype void gridInqXname(int gridID, const char *name)
+@Prototype void gridInqXname(int gridID, char *name)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  name     Name of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  name     Name of the X-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{gridInqXname} returns the name of a X-axis.
@@ -768,10 +788,12 @@ void gridInqXname(int gridID, char *xname)
 @Function  gridInqXlongname
 @Title     Get the longname of a X-axis
 
-@Prototype void gridInqXlongname(int gridID, const char *longname)
+@Prototype void gridInqXlongname(int gridID, char *longname)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  longname Longname of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  longname Longname of the X-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{gridInqXlongname} returns the longname of a X-axis.
@@ -797,10 +819,12 @@ void gridInqXlongname(int gridID, char *xlongname)
 @Function  gridInqXunits
 @Title     Get the units of a X-axis
 
-@Prototype void gridInqXunits(int gridID, const char *units)
+@Prototype void gridInqXunits(int gridID, char *units)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  units    Units of the X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  units    Units of the X-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{gridInqXunits} returns the units of a X-axis.
@@ -838,10 +862,12 @@ void gridInqXstdname(int gridID, char *xstdname)
 @Function  gridInqYname
 @Title     Get the name of a Y-axis
 
-@Prototype void gridInqYname(int gridID, const char *name)
+@Prototype void gridInqYname(int gridID, char *name)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  name     Name of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  name     Name of the Y-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{gridInqYname} returns the name of a Y-axis.
@@ -867,10 +893,12 @@ void gridInqYname(int gridID, char *yname)
 @Function  gridInqYlongname
 @Title     Get the longname of a Y-axis
 
-@Prototype void gridInqXlongname(int gridID, const char *longname)
+@Prototype void gridInqXlongname(int gridID, char *longname)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  longname Longname of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  longname Longname of the Y-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{gridInqYlongname} returns the longname of a Y-axis.
@@ -896,10 +924,12 @@ void gridInqYlongname(int gridID, char *ylongname)
 @Function  gridInqYunits
 @Title     Get the units of a Y-axis
 
-@Prototype void gridInqYunits(int gridID, const char *units)
+@Prototype void gridInqYunits(int gridID, char *units)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  units    Units of the Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  units    Units of the Y-axis. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI_MAX_NAME.
 
 @Description
 The function @func{gridInqYunits} returns the units of a Y-axis.
@@ -938,7 +968,7 @@ void gridInqYstdname(int gridID, char *ystdname)
 
 @Prototype int gridInqType(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
 
 @Description
 The function @func{gridInqType} returns the type of a Grid.
@@ -1072,8 +1102,8 @@ void gridDefTrunc(int gridID, int trunc)
 
 @Prototype void gridDefXsize(int gridID, int xsize)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  xsize    Number of values of a X-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  xsize    Number of values of a X-axis.
 
 @Description
 The function @func{gridDefXsize} defines the number of values of a X-axis.
@@ -1165,7 +1195,7 @@ int gridInqPrec(int gridID)
 
 @Prototype void gridInqXsize(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
 
 @Description
 The function @func{gridInqXsize} returns the number of values of a X-axis.
@@ -1193,8 +1223,8 @@ int gridInqXsize(int gridID)
 
 @Prototype void gridDefYsize(int gridID, int ysize)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  ysize    Number of values of a Y-axis
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  ysize    Number of values of a Y-axis.
 
 @Description
 The function @func{gridDefYsize} defines the number of values of a Y-axis.
@@ -1236,7 +1266,7 @@ void gridDefYsize(int gridID, int ysize)
 
 @Prototype void gridInqYsize(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
 
 @Description
 The function @func{gridInqYsize} returns the number of values of a Y-axis.
@@ -1438,8 +1468,9 @@ void gridDefMaskGME(int gridID, const int *mask)
 
 @Prototype int gridInqXvals(int gridID, double *xvals)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  xvals    X-values of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  xvals    Pointer to the location into which the X-values are read.
+                    The caller must allocate space for the returned values.
 
 @Description
 The function @func{gridInqXvals} returns all values of the X-axis.
@@ -1483,8 +1514,8 @@ int gridInqXvals(int gridID, double *xvals)
 
 @Prototype void gridDefXvals(int gridID, const double *xvals)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  xvals    X-values of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  xvals    X-values of the grid.
 
 @Description
 The function @func{gridDefXvals} defines all values of the X-axis.
@@ -1532,8 +1563,9 @@ void gridDefXvals(int gridID, const double *xvals)
 
 @Prototype int gridInqYvals(int gridID, double *yvals)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  yvals    Y-values of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  yvals    Pointer to the location into which the Y-values are read.
+                    The caller must allocate space for the returned values.
 
 @Description
 The function @func{gridInqYvals} returns all values of the Y-axis.
@@ -1577,8 +1609,8 @@ int gridInqYvals(int gridID, double *yvals)
 
 @Prototype void gridDefYvals(int gridID, const double *yvals)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  yvals    Y-values of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  yvals    Y-values of the grid.
 
 @Description
 The function @func{gridDefYvals} defines all values of the Y-axis.
@@ -2252,11 +2284,12 @@ int gridIsRotated(int gridID)
 }
 
 static
-void compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yvals0, int *differ)
+int compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yvals0)
 {
   long i;
+  int differ = 0;
 
-  if ( gridInqXvals(gridID, NULL) )
+  if ( !differ && xsize == gridInqXvals(gridID, NULL) )
     {
       double *xvals;
 
@@ -2265,16 +2298,16 @@ void compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *y
       gridInqXvals(gridID, xvals);
 
       for ( i = 0; i < xsize; ++i )
-        if ( fabs(xvals0[i] - xvals[i]) > 1.e-10 )
-          {
-            *differ = 1;
-            break;
-          }
-
+	if ( fabs(xvals0[i] - xvals[i]) > 1.e-10 )
+	  {
+	    differ = 1;
+	    break;
+	  }
+  
       free(xvals);
     }
 
-  if ( gridInqYvals(gridID, NULL) )
+  if ( !differ && ysize == gridInqYvals(gridID, NULL) )
     {
       double *yvals;
 
@@ -2283,152 +2316,168 @@ void compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *y
       gridInqYvals(gridID, yvals);
 
       for ( i = 0; i < ysize; ++i )
-        if ( fabs(yvals0[i] - yvals[i]) > 1.e-10 )
-          {
-            *differ = 1;
-            break;
-          }
-
+	if ( fabs(yvals0[i] - yvals[i]) > 1.e-10 )
+	  {
+	    differ = 1;
+	    break;
+	  }
+      
       free(yvals);
     }
+
+  return (differ);
+}
+
+static
+int compareXYvals2(int gridID, long gridsize, double *xvals, double *yvals)
+{
+  int differ = 0;
+
+  if ( !differ && xvals && gridInqXvalsPtr(gridID) )
+    {
+      if ( fabs(xvals[0] - gridInqXval(gridID, 0)) > 1.e-9 ||
+	   fabs(xvals[gridsize-1] - gridInqXval(gridID, gridsize-1)) > 1.e-9 )
+	differ = 1;
+    }
+
+  if ( !differ && yvals && gridInqYvalsPtr(gridID) )
+    {
+      if ( fabs(yvals[0] - gridInqYval(gridID, 0)) > 1.e-9 ||
+	   fabs(yvals[gridsize-1] - gridInqYval(gridID, gridsize-1)) > 1.e-9 )
+	differ = 1;
+    }
+
+  return (differ);
 }
 
 
 int gridCompare(int gridID, grid_t grid)
 {
   int differ = 1;
-  int xsize, ysize;
-
-  xsize = grid.xsize;
-  ysize = grid.ysize;
 
   if ( grid.type == gridInqType(gridID) || grid.type == GRID_GENERIC )
     {
       if ( grid.size == gridInqSize(gridID) )
-        {
-          differ = 0;
-          if ( grid.type == GRID_LONLAT )
-            {
-              /*
-              printf("gridID      %d\n", gridID);
-              printf("grid.xdef   %d\n", grid.xdef);
-              printf("grid.ydef   %d\n", grid.ydef);
-              printf("grid.xsize  %d\n", grid.xsize);
-              printf("grid.ysize  %d\n", grid.ysize);
-              printf("grid.xfirst %f\n", grid.xfirst);
-              printf("grid.yfirst %f\n", grid.yfirst);
-              printf("grid.xfirst %f\n", gridInqXval(gridID, 0));
-              printf("grid.yfirst %f\n", gridInqYval(gridID, 0));
-              printf("grid.xinc   %f\n", grid.xinc);
-              printf("grid.yinc   %f\n", grid.yinc);
-              printf("grid.xinc   %f\n", gridInqXinc(gridID));
-              printf("grid.yinc   %f\n", gridInqYinc(gridID));
-              */
-              if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
-                {
-                  if ( grid.xdef == 2 && grid.ydef == 2 )
-                    {
-                      if ( ! (IS_EQUAL(grid.xfirst, 0) && IS_EQUAL(grid.xlast, 0) && IS_EQUAL(grid.xinc, 0)) &&
-                           ! (IS_EQUAL(grid.yfirst, 0) && IS_EQUAL(grid.ylast, 0) && IS_EQUAL(grid.yinc, 0)) &&
-                           IS_NOT_EQUAL(grid.xfirst, grid.xlast) && IS_NOT_EQUAL(grid.yfirst, grid.ylast) )
-                        {
-                          if ( IS_NOT_EQUAL(grid.xfirst, gridInqXval(gridID, 0)) ||
-                               IS_NOT_EQUAL(grid.yfirst, gridInqYval(gridID, 0)))
-                            {
-                              differ = 1;
-                            }
-                          if ( !differ && fabs(grid.xinc) > 0 &&
-                               fabs(fabs(grid.xinc) - fabs(gridInqXinc(gridID))) > fabs(grid.xinc/1000))
-                            {
-                              differ = 1;
-                            }
-                          if ( !differ && fabs(grid.yinc) > 0 &&
-                               fabs(fabs(grid.yinc) - fabs(gridInqYinc(gridID))) > fabs(grid.yinc/1000))
-                            {
-                              differ = 1;
-                            }
-                        }
-                    }
-                  else
-                    {
-                      if ( grid.xvals && grid.yvals )
-                        compareXYvals(gridID, xsize, ysize, grid.xvals, grid.yvals, &differ);
-                    }
-                }
-              else
-                differ = 1;
-            }
-          else if ( grid.type == GRID_GENERIC )
-            {
-              if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
-                {
-                  if ( grid.xdef == 1 && grid.ydef == 1 )
-                    {
-                      if ( grid.xvals && grid.yvals )
-                        compareXYvals(gridID, xsize, ysize, grid.xvals, grid.yvals, &differ);
-                    }
-                }
-              else if ( (grid.ysize == 0 || grid.ysize == 1) &&
-                        grid.xsize == gridInqXsize(gridID)*gridInqYsize(gridID) )
-                {
-                }
-              else
-                differ = 1;
-            }
-          else if ( grid.type == GRID_GAUSSIAN )
-            {
-              if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
-                {
-                  if ( grid.xdef == 2 && grid.ydef == 2 )
-                    {
-                      if ( ! (IS_EQUAL(grid.xfirst, 0) && IS_EQUAL(grid.xlast, 0) && IS_EQUAL(grid.xinc, 0)) &&
-                           ! (IS_EQUAL(grid.yfirst, 0) && IS_EQUAL(grid.ylast, 0)) )
-                        if ( fabs(grid.xfirst - gridInqXval(gridID, 0)) > 0.001 ||
-                             fabs(grid.yfirst - gridInqYval(gridID, 0)) > 0.001 ||
-                             (fabs(grid.xinc)>0 && fabs(fabs(grid.xinc) - fabs(gridInqXinc(gridID))) > fabs(grid.xinc/1000)) )
-                          {
-                            differ = 1;
-                          }
-                    }
-                  else
-                    {
-                      if ( grid.xvals && grid.yvals )
-                        compareXYvals(gridID, xsize, ysize, grid.xvals, grid.yvals, &differ);
-                    }
-                }
-              else
-                differ = 1;
-            }
-          else if ( grid.type == GRID_CURVILINEAR )
-            {
-              /*
-              printf("gridID      %d\n", gridID);
-              printf("grid.xsize  %d\n", grid.xsize);
-              printf("grid.ysize  %d\n", grid.ysize);
-              printf("grid.xfirst %f\n", grid.xvals[0]);
-              printf("grid.yfirst %f\n", grid.yvals[0]);
-              printf("grid.xfirst %f\n", gridInqXval(gridID, 0));
-              printf("grid.yfirst %f\n", gridInqYval(gridID, 0));
-              printf("grid.xlast  %f\n", grid.xvals[xsize-1]);
-              printf("grid.ylast  %f\n", grid.yvals[ysize-1]);
-              printf("grid.xlast  %f\n", gridInqXval(gridID, xsize-1));
-              printf("grid.ylast  %f\n", gridInqYval(gridID, ysize-1));
-              */
-              if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
-                if ( grid.xvals && gridInqXvalsPtr(gridID) )
-                  {
-                    if ( fabs(grid.xvals[0] - gridInqXval(gridID, 0)) > 1.e-9 ||
-                         fabs(grid.xvals[xsize-1] - gridInqXval(gridID, xsize-1)) > 1.e-9 )
-                      differ = 1;
-                  }
-                if ( grid.yvals && gridInqYvalsPtr(gridID) )
-                  {
-                    if ( fabs(grid.yvals[0] - gridInqYval(gridID, 0)) > 1.e-9 ||
-                         fabs(grid.yvals[ysize-1] - gridInqYval(gridID, ysize-1)) > 1.e-9 )
-                      differ = 1;
-                  }
-            }
-        }
+	{
+	  differ = 0;
+	  if ( grid.type == GRID_LONLAT )
+	    {
+	      /*
+	      printf("gridID      %d\n", gridID);
+	      printf("grid.xdef   %d\n", grid.xdef);
+	      printf("grid.ydef   %d\n", grid.ydef);
+	      printf("grid.xsize  %d\n", grid.xsize);
+	      printf("grid.ysize  %d\n", grid.ysize);
+	      printf("grid.xfirst %f\n", grid.xfirst);
+	      printf("grid.yfirst %f\n", grid.yfirst);
+	      printf("grid.xfirst %f\n", gridInqXval(gridID, 0));
+	      printf("grid.yfirst %f\n", gridInqYval(gridID, 0));
+	      printf("grid.xinc   %f\n", grid.xinc);
+	      printf("grid.yinc   %f\n", grid.yinc);
+	      printf("grid.xinc   %f\n", gridInqXinc(gridID));
+	      printf("grid.yinc   %f\n", gridInqYinc(gridID));
+	      */
+	      if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
+		{
+		  if ( grid.xdef == 2 && grid.ydef == 2 )
+		    {
+		      if ( ! (IS_EQUAL(grid.xfirst, 0) && IS_EQUAL(grid.xlast, 0) && IS_EQUAL(grid.xinc, 0)) &&
+			   ! (IS_EQUAL(grid.yfirst, 0) && IS_EQUAL(grid.ylast, 0) && IS_EQUAL(grid.yinc, 0)) &&
+			   IS_NOT_EQUAL(grid.xfirst, grid.xlast) && IS_NOT_EQUAL(grid.yfirst, grid.ylast) )
+			{
+			  if ( IS_NOT_EQUAL(grid.xfirst, gridInqXval(gridID, 0)) ||
+			       IS_NOT_EQUAL(grid.yfirst, gridInqYval(gridID, 0)))
+			    {
+			      differ = 1;
+			    }
+			  if ( !differ && fabs(grid.xinc) > 0 &&
+			       fabs(fabs(grid.xinc) - fabs(gridInqXinc(gridID))) > fabs(grid.xinc/1000))
+			    {
+			      differ = 1;
+			    }
+			  if ( !differ && fabs(grid.yinc) > 0 &&
+			       fabs(fabs(grid.yinc) - fabs(gridInqYinc(gridID))) > fabs(grid.yinc/1000))
+			    {
+			      differ = 1;
+			    }
+			}
+		    }
+		  else
+		    {
+		      if ( grid.xvals && grid.yvals )
+			differ = compareXYvals(gridID, grid.xsize, grid.ysize, grid.xvals, grid.yvals);
+		    }
+		}
+	      else
+		differ = 1;		
+	    }
+	  else if ( grid.type == GRID_GENERIC )
+	    {
+	      if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
+		{
+		  if ( grid.xdef == 1 && grid.ydef == 1 )
+		    {
+		      if ( grid.xvals && grid.yvals )
+			differ = compareXYvals(gridID, grid.xsize, grid.ysize, grid.xvals, grid.yvals);
+		    }
+		}
+	      else if ( (grid.ysize == 0 || grid.ysize == 1) &&
+			grid.xsize == gridInqXsize(gridID)*gridInqYsize(gridID) )
+		{
+		}
+	      else
+		differ = 1;		
+	    }
+	  else if ( grid.type == GRID_GAUSSIAN )
+	    {
+	      if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
+		{
+		  if ( grid.xdef == 2 && grid.ydef == 2 )
+		    {
+		      if ( ! (IS_EQUAL(grid.xfirst, 0) && IS_EQUAL(grid.xlast, 0) && IS_EQUAL(grid.xinc, 0)) &&
+			   ! (IS_EQUAL(grid.yfirst, 0) && IS_EQUAL(grid.ylast, 0)) )
+			if ( fabs(grid.xfirst - gridInqXval(gridID, 0)) > 0.001 ||
+			     fabs(grid.yfirst - gridInqYval(gridID, 0)) > 0.001 ||
+			     (fabs(grid.xinc)>0 && fabs(fabs(grid.xinc) - fabs(gridInqXinc(gridID))) > fabs(grid.xinc/1000)) )
+			  {
+			    differ = 1;
+			  }
+		    }
+		  else
+		    {
+		      if ( grid.xvals && grid.yvals )
+			differ = compareXYvals(gridID, grid.xsize, grid.ysize, grid.xvals, grid.yvals);
+		    }
+		}
+	      else
+		differ = 1;		
+	    }
+	  else if ( grid.type == GRID_CURVILINEAR )
+	    {
+	      /*
+	      printf("gridID      %d\n", gridID);
+	      printf("grid.xsize  %d\n", grid.xsize);
+	      printf("grid.ysize  %d\n", grid.ysize);
+	      printf("grid.xfirst %f\n", grid.xvals[0]);
+	      printf("grid.yfirst %f\n", grid.yvals[0]);
+	      printf("grid xfirst %f\n", gridInqXval(gridID, 0));
+	      printf("grid yfirst %f\n", gridInqYval(gridID, 0));
+	      printf("grid.xlast  %f\n", grid.xvals[grid.size-1]);
+	      printf("grid.ylast  %f\n", grid.yvals[grid.size-1]);
+	      printf("grid xlast  %f\n", gridInqXval(gridID, grid.size-1));
+	      printf("grid ylast  %f\n", gridInqYval(gridID, grid.size-1));
+	      printf("grid.nv     %d\n", grid.nvertex);
+	      printf("grid nv     %d\n", gridInqNvertex(gridID));	      	    
+	      */
+	      if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
+		differ = compareXYvals2(gridID, grid.size, grid.xvals, grid.yvals);
+	    }
+	  else if ( grid.type == GRID_UNSTRUCTURED )
+	    {
+	      if ( grid.nvertex == gridInqNvertex(gridID) )
+		differ = compareXYvals2(gridID, grid.size, grid.xvals, grid.yvals);
+	    }
+	}
     }
 
   return (differ);
@@ -2584,28 +2633,28 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   else if ( g2->ybounds )
     return differ;
 
-  if ( memcmp ( &g1->xname    ,&g2->xname    ,stringlen * sizeof ( char ))) 
+  if ( memcmp ( &g1->xname    ,&g2->xname    ,CDI_MAX_NAME )) 
     return differ;
-  if ( memcmp ( &g1->yname    ,&g2->yname    ,stringlen * sizeof ( char ))) 
+  if ( memcmp ( &g1->yname    ,&g2->yname    ,CDI_MAX_NAME )) 
     return differ;
-  if ( memcmp ( &g1->xlongname,&g2->xlongname,stringlen * sizeof ( char ))) 
+  if ( memcmp ( &g1->xlongname,&g2->xlongname,CDI_MAX_NAME )) 
     return differ;
-  if ( memcmp ( &g1->ylongname,&g2->ylongname,stringlen * sizeof ( char ))) 
+  if ( memcmp ( &g1->ylongname,&g2->ylongname,CDI_MAX_NAME )) 
     return differ;
-  if ( memcmp ( &g1->xstdname ,&g2->xstdname ,stringlen * sizeof ( char ))) 
+  if ( memcmp ( &g1->xstdname ,&g2->xstdname ,CDI_MAX_NAME )) 
     return differ;
-  if ( memcmp ( &g1->ystdname ,&g2->ystdname ,stringlen * sizeof ( char ))) 
+  if ( memcmp ( &g1->ystdname ,&g2->ystdname ,CDI_MAX_NAME )) 
     return differ;
-  if ( memcmp ( &g1->xunits   ,&g2->xunits   ,stringlen * sizeof ( char ))) 
+  if ( memcmp ( &g1->xunits   ,&g2->xunits   ,CDI_MAX_NAME )) 
     return differ;
-  if ( memcmp ( &g1->yunits   ,&g2->yunits   ,stringlen * sizeof ( char ))) 
+  if ( memcmp ( &g1->yunits   ,&g2->yunits   ,CDI_MAX_NAME )) 
     return differ; 
 
   if ( g1->reference )
     {
       if ( !g2->reference ) return differ;
       size = strlen ( g1->reference ) + 1;
-      if ( memcmp ( g1->reference, g2->reference, size * sizeof ( char ))) 
+      if ( memcmp ( g1->reference, g2->reference, size )) 
 	return differ;
     }
   else if ( g2->reference )
@@ -2659,6 +2708,7 @@ int gridGenerate(grid_t grid)
     case GRID_LCC2:
     case GRID_SINUSOIDAL:
     case GRID_LAEA:
+    case GRID_PROJECTION:
       {
         if ( grid.xsize > 0 ) gridDefXsize(gridID, grid.xsize);
         if ( grid.ysize > 0 ) gridDefYsize(gridID, grid.ysize);
@@ -3123,8 +3173,8 @@ int gridInqNvertex(int gridID)
 
 @Prototype void gridDefXbounds(int gridID, const double *xbounds)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  xbounds  X-bounds of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  xbounds  X-bounds of the grid.
 
 @Description
 The function @func{gridDefXbounds} defines all bounds of the X-axis.
@@ -3177,8 +3227,9 @@ void gridDefXbounds(int gridID, const double *xbounds)
 
 @Prototype int gridInqXbounds(int gridID, double *xbounds)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  xbounds  X-bounds of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  xbounds  Pointer to the location into which the X-bounds are read.
+                    The caller must allocate space for the returned values.
 
 @Description
 The function @func{gridInqXbounds} returns the bounds of the X-axis.
@@ -3239,8 +3290,8 @@ double *gridInqXboundsPtr(int gridID)
 
 @Prototype void gridDefYbounds(int gridID, const double *ybounds)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  ybounds  Y-bounds of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  ybounds  Y-bounds of the grid.
 
 @Description
 The function @func{gridDefYbounds} defines all bounds of the Y-axis.
@@ -3293,8 +3344,9 @@ void gridDefYbounds(int gridID, const double *ybounds)
 
 @Prototype int gridInqYbounds(int gridID, double *ybounds)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
-    @Item  ybounds  Y-bounds of the grid
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  ybounds  Pointer to the location into which the Y-bounds are read.
+                    The caller must allocate space for the returned values.
 
 @Description
 The function @func{gridInqYbounds} returns the bounds of the Y-axis.
@@ -3701,17 +3753,17 @@ const double *gridInqYvalsPtr(int gridID)
 
 @Prototype void gridDefLCC(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc, int projflag, int scanflag)
 @Parameter
-    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}
-    @Item  originLon Longitude of the first grid point
-    @Item  originLat Latitude of the first grid point
-    @Item  lonParY   The East longitude of the meridian which is parallel to the Y-axis
-    @Item  lat1      First latitude from the pole at which the secant cone cuts the sphere
-    @Item  lat2      Second latitude at which the secant cone cuts the sphere
-    @Item  xinc      X-direction grid lenght in meter
-    @Item  yinc      Y-direction grid lenght in meter
-    @Item  projflag  Projection centre flag
-    @Item  scanflag  Scanning mode flag
-
+    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  originLon Longitude of the first grid point.
+    @Item  originLat Latitude of the first grid point.
+    @Item  lonParY   The East longitude of the meridian which is parallel to the Y-axis.
+    @Item  lat1      First latitude from the pole at which the secant cone cuts the sphere.
+    @Item  lat2      Second latitude at which the secant cone cuts the sphere.
+    @Item  xinc      X-direction grid lenght in meter.
+    @Item  yinc      Y-direction grid lenght in meter.
+    @Item  projflag  Projection centre flag.
+    @Item  scanflag  Scanning mode flag.
+ 
 @Description
 The function @func{gridDefLCC} defines the parameter of a Lambert Conformal Conic grid.
 
@@ -3758,17 +3810,17 @@ void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
 
 @Prototype void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonParY, double *lat1, double *lat2, double *xinc, double *yinc, int *projflag, int *scanflag)
 @Parameter
-    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}
-    @Item  originLon Longitude of the first grid point
-    @Item  originLat Latitude of the first grid point
-    @Item  lonParY   The East longitude of the meridian which is parallel to the Y-axis
-    @Item  lat1      First latitude from the pole at which the secant cone cuts the sphere
-    @Item  lat2      Second latitude at which the secant cone cuts the sphere
-    @Item  xinc      X-direction grid lenght in meter
-    @Item  yinc      Y-direction grid lenght in meter
-    @Item  projflag  Projection centre flag
-    @Item  scanflag  Scanning mode flag
-
+    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  originLon Longitude of the first grid point.
+    @Item  originLat Latitude of the first grid point.
+    @Item  lonParY   The East longitude of the meridian which is parallel to the Y-axis.
+    @Item  lat1      First latitude from the pole at which the secant cone cuts the sphere.
+    @Item  lat2      Second latitude at which the secant cone cuts the sphere.
+    @Item  xinc      X-direction grid lenght in meter.
+    @Item  yinc      Y-direction grid lenght in meter.
+    @Item  projflag  Projection centre flag.
+    @Item  scanflag  Scanning mode flag.
+ 
 @Description
 The function @func{gridInqLCC} returns the parameter of a Lambert Conformal Conic grid.
 
@@ -4193,7 +4245,7 @@ int gridGetPackSize ( void * voidP, MPI_Comm comm )
       packBuffSize += size;
     }
 
-  xmpi ( MPI_Pack_size ( gridNstrings * stringlen , MPI_CHAR, comm, &size ));
+  xmpi ( MPI_Pack_size ( gridNstrings * CDI_MAX_NAME , MPI_CHAR, comm, &size ));
   packBuffSize += size;
   xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
   packBuffSize += size;
@@ -4237,7 +4289,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
   grid_t * gridP;
   int intBuffer[gridNint + 1], memberMask, size, referenceSize;
   double doubleBuffer[gridNdouble + 1], d;
-  char charBuffer[gridNstrings * stringlen];
+  char charBuffer[gridNstrings * CDI_MAX_NAME];
 
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 		      intBuffer, gridNint + 1, MPI_INT, comm ));
@@ -4403,26 +4455,26 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
     }
 
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      charBuffer, gridNstrings * stringlen, MPI_CHAR, comm ));
+		      charBuffer, gridNstrings * CDI_MAX_NAME, MPI_CHAR, comm ));
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 		      &d, 1, MPI_DOUBLE, comm ));
 
-  if ( d != xchecksum ( CHAR, gridNstrings * stringlen, charBuffer )) xabort ("");
+  if ( d != xchecksum ( CHAR, gridNstrings * CDI_MAX_NAME, charBuffer )) xabort ("");
 
-  memcpy ( gridP->xname    , &charBuffer[stringlen * 0], stringlen * sizeof ( char ));
-  memcpy ( gridP->yname    , &charBuffer[stringlen * 1], stringlen * sizeof ( char ));
-  memcpy ( gridP->xlongname, &charBuffer[stringlen * 2], stringlen * sizeof ( char ));
-  memcpy ( gridP->ylongname, &charBuffer[stringlen * 3], stringlen * sizeof ( char ));
-  memcpy ( gridP->xstdname , &charBuffer[stringlen * 4], stringlen * sizeof ( char ));
-  memcpy ( gridP->ystdname , &charBuffer[stringlen * 5], stringlen * sizeof ( char ));
-  memcpy ( gridP->xunits   , &charBuffer[stringlen * 6], stringlen * sizeof ( char ));
-  memcpy ( gridP->yunits   , &charBuffer[stringlen * 7], stringlen * sizeof ( char ));
+  memcpy ( gridP->xname    , &charBuffer[CDI_MAX_NAME * 0], CDI_MAX_NAME );
+  memcpy ( gridP->yname    , &charBuffer[CDI_MAX_NAME * 1], CDI_MAX_NAME );
+  memcpy ( gridP->xlongname, &charBuffer[CDI_MAX_NAME * 2], CDI_MAX_NAME );
+  memcpy ( gridP->ylongname, &charBuffer[CDI_MAX_NAME * 3], CDI_MAX_NAME );
+  memcpy ( gridP->xstdname , &charBuffer[CDI_MAX_NAME * 4], CDI_MAX_NAME );
+  memcpy ( gridP->ystdname , &charBuffer[CDI_MAX_NAME * 5], CDI_MAX_NAME );
+  memcpy ( gridP->xunits   , &charBuffer[CDI_MAX_NAME * 6], CDI_MAX_NAME );
+  memcpy ( gridP->yunits   , &charBuffer[CDI_MAX_NAME * 7], CDI_MAX_NAME );
 
   if ( memberMask & ( 1 << reference ))
     {
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &referenceSize, 1, MPI_INT, comm ));
-      gridP->reference = xmalloc ( referenceSize * sizeof ( char ));
+      gridP->reference = xmalloc ( referenceSize );
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  gridP->reference, referenceSize, MPI_CHAR, comm ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
@@ -4464,7 +4516,7 @@ void gridPack ( void * voidP, void * packBuffer, int packBufferSize,
   grid_t   * gridP = ( grid_t * )   voidP;
   int intBuffer[gridNint + 1], size;
   double doubleBuffer[gridNdouble + 1], d;
-  char charBuffer[gridNstrings * stringlen];
+  char charBuffer[gridNstrings * CDI_MAX_NAME];
 
   intBuffer[0]  = gridP->type;
   intBuffer[1]  = gridP->prec;
@@ -4611,18 +4663,18 @@ void gridPack ( void * voidP, void * packBuffer, int packBufferSize,
 			packBuffer, packBufferSize, packBufferPos, comm ));
     }
 
-  memcpy ( &charBuffer[stringlen * 0], gridP->xname,     stringlen * sizeof ( char ));
-  memcpy ( &charBuffer[stringlen * 1], gridP->yname,     stringlen * sizeof ( char ));
-  memcpy ( &charBuffer[stringlen * 2], gridP->xlongname, stringlen * sizeof ( char ));
-  memcpy ( &charBuffer[stringlen * 3], gridP->ylongname, stringlen * sizeof ( char ));
-  memcpy ( &charBuffer[stringlen * 4], gridP->xstdname,  stringlen * sizeof ( char ));
-  memcpy ( &charBuffer[stringlen * 5], gridP->ystdname,  stringlen * sizeof ( char ));
-  memcpy ( &charBuffer[stringlen * 6], gridP->xunits,    stringlen * sizeof ( char ));
-  memcpy ( &charBuffer[stringlen * 7], gridP->yunits,    stringlen * sizeof ( char ));
+  memcpy ( &charBuffer[CDI_MAX_NAME * 0], gridP->xname,     CDI_MAX_NAME );
+  memcpy ( &charBuffer[CDI_MAX_NAME * 1], gridP->yname,     CDI_MAX_NAME );
+  memcpy ( &charBuffer[CDI_MAX_NAME * 2], gridP->xlongname, CDI_MAX_NAME );
+  memcpy ( &charBuffer[CDI_MAX_NAME * 3], gridP->ylongname, CDI_MAX_NAME );
+  memcpy ( &charBuffer[CDI_MAX_NAME * 4], gridP->xstdname,  CDI_MAX_NAME );
+  memcpy ( &charBuffer[CDI_MAX_NAME * 5], gridP->ystdname,  CDI_MAX_NAME );
+  memcpy ( &charBuffer[CDI_MAX_NAME * 6], gridP->xunits,    CDI_MAX_NAME );
+  memcpy ( &charBuffer[CDI_MAX_NAME * 7], gridP->yunits,    CDI_MAX_NAME );
 
-  xmpi ( MPI_Pack ( charBuffer, gridNstrings * stringlen, MPI_CHAR, 
+  xmpi ( MPI_Pack ( charBuffer, gridNstrings * CDI_MAX_NAME, MPI_CHAR, 
 		    packBuffer, packBufferSize, packBufferPos, comm )); 
-  d = xchecksum  ( CHAR, gridNstrings * stringlen, charBuffer );
+  d = xchecksum  ( CHAR, gridNstrings * CDI_MAX_NAME, charBuffer );
   xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
 		    packBuffer, packBufferSize, packBufferPos, comm ));
 

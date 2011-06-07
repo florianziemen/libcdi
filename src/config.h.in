@@ -78,6 +78,12 @@
 /* Define to 1 if you have a working `mmap' system call. */
 #undef HAVE_MMAP
 
+/* Define to 1 for NETCDF2 support */
+#undef HAVE_NETCDF2
+
+/* Define to 1 for NETCDF4 support */
+#undef HAVE_NETCDF4
+
 /* Define to 1 if you have the <netcdf.h> header file. */
 #undef HAVE_NETCDF_H
 

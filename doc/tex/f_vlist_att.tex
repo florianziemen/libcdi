@@ -15,11 +15,11 @@ The function {\tt vlistInqNatts} gets the number of variable attributes assigned
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier, or CDI\_GLOBAL for a global attribute
+Variable identifier, or CDI\_GLOBAL for a global attribute.
 \item[{\tt nattsp}]
-Pointer to location for returned number of variable attributes
+Pointer to location for returned number of variable attributes.
 
 \end{deflist}
 \end{minipage}
@@ -41,17 +41,19 @@ The function {\tt vlistInqNatts} gets information about an attribute.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier, or CDI\_GLOBAL for a global attribute
+Variable identifier, or CDI\_GLOBAL for a global attribute.
 \item[{\tt attnum}]
-Attribute number (from 0 to natts-1)
+Attribute number (from 0 to natts-1).
 \item[{\tt name}]
-Pointer to the location for the returned attribute name
+Pointer to the location for the returned attribute name. The caller must allocate space for the 
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant CDI\_MAX\_NAME.
 \item[{\tt typep}]
-Pointer to location for returned attribute type
+Pointer to location for returned attribute type.
 \item[{\tt lenp}]
-Pointer to location for returned attribute number
+Pointer to location for returned attribute number.
 
 \end{deflist}
 \end{minipage}
@@ -74,17 +76,17 @@ The function {\tt vlistDefAttInt} defines an integer attribute.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier, or CDI\_GLOBAL for a global attribute
+Variable identifier, or CDI\_GLOBAL for a global attribute.
 \item[{\tt name}]
-Attribute name
+Attribute name.
 \item[{\tt type}]
-External data type (DATATYPE\_INT16 or DATATYPE\_INT32)
+External data type (DATATYPE\_INT16 or DATATYPE\_INT32).
 \item[{\tt len}]
-Number of values provided for the attribute
+Number of values provided for the attribute.
 \item[{\tt ip}]
-Pointer to one or more integer values
+Pointer to one or more integer values.
 
 \end{deflist}
 \end{minipage}
@@ -106,15 +108,15 @@ The function {\tt vlistInqAttInt} gets the values(s) of an integer attribute.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier, or CDI\_GLOBAL for a global attribute
+Variable identifier, or CDI\_GLOBAL for a global attribute.
 \item[{\tt name}]
-Attribute name
+Attribute name.
 \item[{\tt mlen}]
-Number of allocated values provided for the attribute
+Number of allocated values provided for the attribute.
 \item[{\tt ip}]
-Pointer location for returned integer attribute value(s)
+Pointer location for returned integer attribute value(s).
 
 \end{deflist}
 \end{minipage}
@@ -137,17 +139,17 @@ The function {\tt vlistDefAttFlt} defines a floating point attribute.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier, or CDI\_GLOBAL for a global attribute
+Variable identifier, or CDI\_GLOBAL for a global attribute.
 \item[{\tt name}]
-Attribute name
+Attribute name.
 \item[{\tt type}]
-External data type (DATATYPE\_FLT32 or DATATYPE\_FLT64)
+External data type (DATATYPE\_FLT32 or DATATYPE\_FLT64).
 \item[{\tt len}]
-Number of values provided for the attribute
+Number of values provided for the attribute.
 \item[{\tt dp}]
-Pointer to one or more floating point values
+Pointer to one or more floating point values.
 
 \end{deflist}
 \end{minipage}
@@ -169,15 +171,15 @@ The function {\tt vlistInqAttFlt} gets the values(s) of a floating point attribu
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier, or CDI\_GLOBAL for a global attribute
+Variable identifier, or CDI\_GLOBAL for a global attribute.
 \item[{\tt name}]
-Attribute name
+Attribute name.
 \item[{\tt mlen}]
-Number of allocated values provided for the attribute
+Number of allocated values provided for the attribute.
 \item[{\tt dp}]
-Pointer location for returned floating point attribute value(s)
+Pointer location for returned floating point attribute value(s).
 
 \end{deflist}
 \end{minipage}
@@ -200,15 +202,15 @@ The function {\tt vlistDefAttTxt} defines a text attribute.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier, or CDI\_GLOBAL for a global attribute
+Variable identifier, or CDI\_GLOBAL for a global attribute.
 \item[{\tt name}]
-Attribute name
+Attribute name.
 \item[{\tt len}]
-Number of values provided for the attribute
+Number of values provided for the attribute.
 \item[{\tt tp}]
-Pointer to one or more character values
+Pointer to one or more character values.
 
 \end{deflist}
 \end{minipage}
@@ -230,15 +232,15 @@ The function {\tt vlistInqAttTxt} gets the values(s) of a text attribute.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt vlistID\ }
 \item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier, or CDI\_GLOBAL for a global attribute
+Variable identifier, or CDI\_GLOBAL for a global attribute.
 \item[{\tt name}]
-Attribute name
+Attribute name.
 \item[{\tt mlen}]
-Number of allocated values provided for the attribute
+Number of allocated values provided for the attribute.
 \item[{\tt tp}]
-Pointer location for returned text attribute value(s)
+Pointer location for returned text attribute value(s).
 
 \end{deflist}
 \end{minipage}

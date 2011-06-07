@@ -89,11 +89,11 @@ void cdfComment(int ncid)
 }
 
 
-int cdfOpenFile(const char *filename, const char *mode, int version)
+int cdfOpenFile(const char *filename, const char *mode, int *filetype)
 {
   int ncid = -1;
 #if  defined  (HAVE_LIBNETCDF)
-  int fmode;
+  int fmode = tolower(*mode);
   int writemode = NC_CLOBBER;
   int readmode = NC_NOWRITE;
   int status;
@@ -102,43 +102,35 @@ int cdfOpenFile(const char *filename, const char *mode, int version)
     ncid = CDI_EINVAL;
   else
     {
-      switch (*mode)
+      switch (fmode)
 	{
 	case 'r':
-	case 'R':
-	  fmode = 'r';
 	  status = cdf_open(filename, readmode, &ncid);
 	  if ( status > 0 && ncid < 0 ) ncid = CDI_ESYSTEM;
-#if  defined  (NC_NETCDF4)
-	  /*
+#if  defined  (HAVE_NETCDF4)
 	  else
 	    {
 	      int format;
 	      (void) nc_inq_format(ncid, &format);
-	      if ( format == NC_FORMAT_NETCDF4 )
+	      if ( format == NC_FORMAT_NETCDF4_CLASSIC )
 		{
-		  cdf_close(ncid);
-		  ncid = CDI_EUNC4;
+		  *filetype = FILETYPE_NC4C;
 		}
 	    }
-	  */
 #endif
 	  break;
 	case 'w':
-	case 'W':
-	  fmode = 'w';
 #if  defined  (NC_64BIT_OFFSET)
-	  if ( version == 2 ) writemode = NC_CLOBBER | NC_64BIT_OFFSET;
+	  if      ( *filetype == FILETYPE_NC2  ) writemode = NC_CLOBBER | NC_64BIT_OFFSET;
 #endif
-#if  defined  (NC_NETCDF4)
-	  if ( version == 4 ) writemode = NC_CLOBBER | NC_NETCDF4 /*| NC_CLASSIC_MODEL*/;
+#if  defined  (HAVE_NETCDF4)
+	  if      ( *filetype == FILETYPE_NC4  ) writemode = NC_CLOBBER | NC_NETCDF4;
+	  else if ( *filetype == FILETYPE_NC4C ) writemode = NC_CLOBBER | NC_NETCDF4 | NC_CLASSIC_MODEL;
 #endif
 	  cdf_create(filename, writemode, &ncid);
 	  cdfComment(ncid);
 	  break;
 	case 'a':
-	case 'A':
-	  fmode = 'a';
 	  cdf_open(filename, NC_WRITE, &ncid);
 	  break;
 	default:
@@ -154,14 +146,15 @@ int cdfOpenFile(const char *filename, const char *mode, int version)
 int cdfOpen(const char *filename, const char *mode)
 {
   int fileID = 0;
+  int filetype = FILETYPE_NC;
 
   if ( CDF_Debug )
-    Message("open %s with mode %c", filename, *mode);
+    Message("Open %s with mode %c", filename, *mode);
 
-  fileID = cdfOpenFile(filename, mode, 1);
+  fileID = cdfOpenFile(filename, mode, &filetype);
 
   if ( CDF_Debug )
-    Message("file %s opened with id %d", filename, fileID);
+    Message("File %s opened with id %d", filename, fileID);
 
   return (fileID);
 }
@@ -170,44 +163,57 @@ int cdfOpen(const char *filename, const char *mode)
 int cdfOpen64(const char *filename, const char *mode)
 {
   int fileID = -1;
+  int open_file = TRUE;
+  int filetype = FILETYPE_NC2;
 
   if ( CDF_Debug )
-    Message("open %s with mode %c", filename, *mode);
+    Message("Open %s with mode %c", filename, *mode);
 
 #if  defined  (HAVE_LIBNETCDF)
 #if  ! defined  (NC_64BIT_OFFSET)
-  fileID = CDI_ELIBNAVAIL;
-  return (fileID);
+  open_file = FALSE;
 #endif
 #endif
 
-  fileID = cdfOpenFile(filename, mode, 2);
+  if ( open_file )
+    {
+      fileID = cdfOpenFile(filename, mode, &filetype);
 
-  if ( CDF_Debug )
-    Message("file %s opened with id %d", filename, fileID);
+      if ( CDF_Debug )
+	Message("File %s opened with id %d", filename, fileID);
+    }
+  else
+    {
+      fileID = CDI_ELIBNAVAIL;
+    }
 
   return (fileID);
 }
 
 
-int cdf4Open(const char *filename, const char *mode)
+int cdf4Open(const char *filename, const char *mode, int *filetype)
 {
   int fileID = -1;
+  int open_file = FALSE;
 
   if ( CDF_Debug )
-    Message("open %s with mode %c", filename, *mode);
+    Message("Open %s with mode %c", filename, *mode);
 
-#if  defined  (HAVE_LIBNETCDF)
-#if  ! defined  (NC_NETCDF4)
-  fileID = CDI_ELIBNAVAIL;
-  return (fileID);
-#endif
+#if  defined  (HAVE_NETCDF4)
+  open_file = TRUE;
 #endif
 
-  fileID = cdfOpenFile(filename, mode, 4);
+  if ( open_file )
+    {
+      fileID = cdfOpenFile(filename, mode, filetype);
 
-  if ( CDF_Debug )
-    Message("file %s opened with id %d", filename, fileID);
+      if ( CDF_Debug )
+	Message("File %s opened with id %d", filename, fileID);
+    }
+  else
+    {
+      fileID = CDI_ELIBNAVAIL;
+    }
 
   return (fileID);
 }

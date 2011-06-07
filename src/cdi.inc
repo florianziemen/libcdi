@@ -4,9 +4,11 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   April 2011
+! Uwe Schulzweida, MPI-MET, Hamburg,   June 2011
 !
 
+      INTEGER    CDI_MAX_NAME          
+      PARAMETER (CDI_MAX_NAME           = 256)
       INTEGER    CDI_UNDEFID           
       PARAMETER (CDI_UNDEFID            = -1)
       INTEGER    CDI_GLOBAL            
@@ -56,12 +58,14 @@
       PARAMETER (FILETYPE_NC2           =  4)
       INTEGER    FILETYPE_NC4          
       PARAMETER (FILETYPE_NC4           =  5)
+      INTEGER    FILETYPE_NC4C         
+      PARAMETER (FILETYPE_NC4C          =  6)
       INTEGER    FILETYPE_SRV          
-      PARAMETER (FILETYPE_SRV           =  6)
+      PARAMETER (FILETYPE_SRV           =  7)
       INTEGER    FILETYPE_EXT          
-      PARAMETER (FILETYPE_EXT           =  7)
+      PARAMETER (FILETYPE_EXT           =  8)
       INTEGER    FILETYPE_IEG          
-      PARAMETER (FILETYPE_IEG           =  8)
+      PARAMETER (FILETYPE_IEG           =  9)
 !
 !  Compress types
 !
@@ -210,6 +214,8 @@
       PARAMETER (GRID_SINUSOIDAL        = 14)
       INTEGER    GRID_REFERENCE        
       PARAMETER (GRID_REFERENCE         = 15)
+      INTEGER    GRID_PROJECTION       
+      PARAMETER (GRID_PROJECTION        = 16)
 !
 !  ZAXIS types
 !
@@ -329,6 +335,8 @@
       PARAMETER (PIO_POSIX_FPGUARD_THREAD_REFUSE =  5)
       INTEGER    PIO_POSIX_FPGUARD_THREAD
       PARAMETER (PIO_POSIX_FPGUARD_THREAD =  6)
+      INTEGER    TEST_LOCAL            
+      PARAMETER (TEST_LOCAL             =  1)
       INTEGER         pioInit
 !                                    (INTEGER         ,
 !                                     INTEGER         ,
@@ -338,9 +346,28 @@
 !                     pioFinalize
       EXTERNAL        pioFinalize
 
-!
-!  CDI control routines
-!
+!                     pioMetadata
+      EXTERNAL        pioMetadata
+
+!                     namespaceInit
+!                                    (INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        namespaceInit
+
+!                     namespaceSetActive
+!                                    (INTEGER         )
+      EXTERNAL        namespaceSetActive
+
+!                     gridGetIndexArray
+!                                    (INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        gridGetIndexArray
+
+!                     zaxisGetIndexArray
+!                                    (INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        zaxisGetIndexArray
+
       CHARACTER*80    cdiStringError
 !                                    (INTEGER         cdiErrno)
       EXTERNAL        cdiStringError
@@ -464,23 +491,23 @@
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqByteorder
 
-!                     streamDefZtype
+!                     streamDefCompType
 !                                    (INTEGER         streamID,
-!                                     INTEGER         ztype)
-      EXTERNAL        streamDefZtype
+!                                     INTEGER         comptype)
+      EXTERNAL        streamDefCompType
 
-!                     streamDefZlevel
+!                     streamDefCompLevel
 !                                    (INTEGER         streamID,
-!                                     INTEGER         zlevel)
-      EXTERNAL        streamDefZlevel
+!                                     INTEGER         complevel)
+      EXTERNAL        streamDefCompLevel
 
-      INTEGER         streamInqZtype
+      INTEGER         streamInqCompType
 !                                    (INTEGER         streamID)
-      EXTERNAL        streamInqZtype
+      EXTERNAL        streamInqCompType
 
-      INTEGER         streamInqZlevel
+      INTEGER         streamInqCompLevel
 !                                    (INTEGER         streamID)
-      EXTERNAL        streamInqZlevel
+      EXTERNAL        streamInqCompLevel
 
       INTEGER         streamDefTimestep
 !                                    (INTEGER         streamID,
@@ -769,27 +796,27 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarTime
 
-!                     vlistDefVarZtype
+!                     vlistDefVarCompType
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
-!                                     INTEGER         ztype)
-      EXTERNAL        vlistDefVarZtype
+!                                     INTEGER         comptype)
+      EXTERNAL        vlistDefVarCompType
 
-      INTEGER         vlistInqVarZtype
+      INTEGER         vlistInqVarCompType
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarZtype
+      EXTERNAL        vlistInqVarCompType
 
-!                     vlistDefVarZlevel
+!                     vlistDefVarCompLevel
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
-!                                     INTEGER         zlevel)
-      EXTERNAL        vlistDefVarZlevel
+!                                     INTEGER         complevel)
+      EXTERNAL        vlistDefVarCompLevel
 
-      INTEGER         vlistInqVarZlevel
+      INTEGER         vlistInqVarCompLevel
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarZlevel
+      EXTERNAL        vlistInqVarCompLevel
 
 !                     vlistDefVarParam
 !                                    (INTEGER         vlistID,
@@ -1639,6 +1666,11 @@
 !                                     CHARACTER*(*)   longname)
       EXTERNAL        zaxisInqLongname
 
+!                     zaxisInqStdname
+!                                    (INTEGER         zaxisID,
+!                                     CHARACTER*(*)   stdname)
+      EXTERNAL        zaxisInqStdname
+
 !                     zaxisInqUnits
 !                                    (INTEGER         zaxisID,
 !                                     CHARACTER*(*)   units)
@@ -1652,6 +1684,10 @@
       INTEGER         zaxisInqPrec
 !                                    (INTEGER         zaxisID)
       EXTERNAL        zaxisInqPrec
+
+      INTEGER         zaxisInqPositive
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisInqPositive
 
 !                     zaxisDefLtype
 !                                    (INTEGER         zaxisID,

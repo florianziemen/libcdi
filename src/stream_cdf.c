@@ -368,7 +368,7 @@ int cdfInqDatatype(int xtype)
   else if ( xtype == NC_INT    )  datatype = DATATYPE_INT32;
   else if ( xtype == NC_FLOAT  )  datatype = DATATYPE_FLT32;
   else if ( xtype == NC_DOUBLE )  datatype = DATATYPE_FLT64;
-#if  defined  (NC_NETCDF4)
+#if  defined  (HAVE_NETCDF4)
   else if ( xtype == NC_LONG   )  datatype = DATATYPE_INT32;
   else if ( xtype == NC_UBYTE  )  datatype = DATATYPE_UINT8;
   else if ( xtype == NC_USHORT )  datatype = DATATYPE_UINT16;
@@ -395,7 +395,7 @@ int cdfDefDatatype(int datatype, int filetype)
       if      ( datatype == DATATYPE_INT8   ) xtype = NC_BYTE;
       else if ( datatype == DATATYPE_INT16  ) xtype = NC_SHORT;
       else if ( datatype == DATATYPE_INT32  ) xtype = NC_INT;
-#if  defined  (NC_NETCDF4)
+#if  defined  (HAVE_NETCDF4)
       else if ( datatype == DATATYPE_UINT8  ) xtype = NC_UBYTE;
       else if ( datatype == DATATYPE_UINT16 ) xtype = NC_USHORT;
       else if ( datatype == DATATYPE_UINT32 ) xtype = NC_UINT;
@@ -633,7 +633,7 @@ void cdfReadGridTraj(int streamID, int gridID)
 static
 void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 {
-#if  defined  (NC_NETCDF4)
+#if  defined  (HAVE_NETCDF4)
   int retval;
   /* Set chunking, shuffle, and deflate. */
   int shuffle = 1;
@@ -657,7 +657,7 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 }
 #endif
 
-#if  defined(HAVE_LIBNETCDF) && defined(NC_NETCDF4) && defined(NC_SZIP_NN_OPTION_MASK)
+#if  defined(HAVE_LIBNETCDF) && defined(HAVE_NETCDF4) && defined(NC_SZIP_NN_OPTION_MASK)
 static
 void cdfDefVarSzip(int ncid, int ncvarid)
 {
@@ -826,6 +826,7 @@ void cdfDefTime(int streamID)
   int year, month, day, hour, minute, second;
   char unitstr[80];
   char calstr[80];
+  char tmpstr[256];
   size_t len;
   taxis_t *taxis;
   stream_t *streamptr;
@@ -848,6 +849,10 @@ void cdfDefTime(int streamID)
   streamptr->basetime.ncvarid = time_varid;
 
   taxis = &streamptr->tsteps[0].taxis;
+
+
+  strcpy(tmpstr, "time");
+  cdf_put_att_text(fileID, time_varid, "standard_name", strlen(tmpstr), tmpstr);
 
   if ( taxis->has_bounds )
     {
@@ -1105,12 +1110,13 @@ void cdfDefTrajLon(int streamID, int gridID)
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
       cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID, &ncvarid);
+
+      if ( (len = strlen(stdname)) )
+        cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
       if ( (len = strlen(longname)) )
         cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
       if ( (len = strlen(units)) )
         cdf_put_att_text(fileID, ncvarid, "units", len, units);
-      if ( (len = strlen(stdname)) )
-        cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
 
       cdf_enddef(fileID);
       streamptr->ncmode = 2;
@@ -1164,12 +1170,13 @@ void cdfDefTrajLat(int streamID, int gridID)
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
       cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID, &ncvarid);
+
+      if ( (len = strlen(stdname)) )
+        cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
       if ( (len = strlen(longname)) )
         cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
       if ( (len = strlen(units)) )
         cdf_put_att_text(fileID, ncvarid, "units", len, units);
-      if ( (len = strlen(stdname)) )
-        cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
 
       cdf_enddef(fileID);
       streamptr->ncmode = 2;
@@ -1334,12 +1341,13 @@ void cdfDefXaxis(int streamID, int gridID)
       if ( gridInqXvalsPtr(gridID) )
         {
           cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID, &ncvarid);
+
+          if ( (len = strlen(stdname)) )
+            cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
           if ( (len = strlen(longname)) )
             cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
           if ( (len = strlen(units)) )
             cdf_put_att_text(fileID, ncvarid, "units", len, units);
-          if ( (len = strlen(stdname)) )
-            cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
 
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "X");
 
@@ -1462,12 +1470,13 @@ void cdfDefYaxis(int streamID, int gridID)
       if ( gridInqYvalsPtr(gridID) )
         {
           cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID, &ncvarid);
+
+          if ( (len = strlen(stdname)) )
+            cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
           if ( (len = strlen(longname)) )
             cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
           if ( (len = strlen(units)) )
             cdf_put_att_text(fileID, ncvarid, "units", len, units);
-          if ( (len = strlen(stdname)) )
-            cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
 
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "Y");
 
@@ -1501,7 +1510,7 @@ void cdfDefYaxis(int streamID, int gridID)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
-void cdfDefLonLat2D(int streamID, int gridID)
+void cdfDefCurvilinear(int streamID, int gridID)
 {
   char xunits[256];
   char xlongname[256];
@@ -1570,12 +1579,6 @@ void cdfDefLonLat2D(int streamID, int gridID)
                     xdimID = streamptr->xdimID[index];
                     break;
                   }
-              /*
-              for ( index2 = 0; index2 < index; index2++ )
-                if ( streamptr->xdimID[index] == streamptr->xdimID[index2] )
-                  break;
-              if ( index2 == index ) iz++;
-              */
             }
         }
     }
@@ -1605,12 +1608,13 @@ void cdfDefLonLat2D(int streamID, int gridID)
       if ( gridInqXvalsPtr(gridID) )
         {
           cdf_def_var(fileID, xaxisname, (nc_type) xtype, 2, dimIDs, &ncxvarid);
+
+          if ( (len = strlen(xstdname)) )
+            cdf_put_att_text(fileID, ncxvarid, "standard_name", len, xstdname);
           if ( (len = strlen(xlongname)) )
             cdf_put_att_text(fileID, ncxvarid, "long_name", len, xlongname);
           if ( (len = strlen(xunits)) )
             cdf_put_att_text(fileID, ncxvarid, "units", len, xunits);
-          if ( (len = strlen(xstdname)) )
-            cdf_put_att_text(fileID, ncxvarid, "standard_name", len, xstdname);
 
           /* attribute for Panoply */
           cdf_put_att_text(fileID, ncxvarid, "_CoordinateAxisType", 3, "Lon");
@@ -1631,12 +1635,13 @@ void cdfDefLonLat2D(int streamID, int gridID)
       if ( gridInqYvalsPtr(gridID) )
         {
           cdf_def_var(fileID, yaxisname, (nc_type) xtype, 2, dimIDs, &ncyvarid);
+
+          if ( (len = strlen(ystdname)) )
+            cdf_put_att_text(fileID, ncyvarid, "standard_name", len, ystdname);
           if ( (len = strlen(ylongname)) )
             cdf_put_att_text(fileID, ncyvarid, "long_name", len, ylongname);
           if ( (len = strlen(yunits)) )
             cdf_put_att_text(fileID, ncyvarid, "units", len, yunits);
-          if ( (len = strlen(ystdname)) )
-            cdf_put_att_text(fileID, ncyvarid, "standard_name", len, ystdname);
 
           /* attribute for Panoply */
           cdf_put_att_text(fileID, ncyvarid, "_CoordinateAxisType", 3, "Lat");
@@ -1659,11 +1664,12 @@ void cdfDefLonLat2D(int streamID, int gridID)
           char yaxisname[] = "cell_area";
           char units[] = "m2";
           char longname[] = "area of grid cell";
-          char stdname[] = "area";
+          char stdname[] = "cell_area";
 
           cdf_def_var(fileID, yaxisname, (nc_type) xtype, 2, dimIDs, &ncavarid);
-          cdf_put_att_text(fileID, ncavarid, "long_name", strlen(longname), longname);
+
           cdf_put_att_text(fileID, ncavarid, "standard_name", strlen(stdname), stdname);
+          cdf_put_att_text(fileID, ncavarid, "long_name", strlen(longname), longname);
           cdf_put_att_text(fileID, ncavarid, "units", strlen(units), units);
 
           streamptr->ncavarID[gridindex] = ncavarid;
@@ -1839,10 +1845,10 @@ void cdfDefGdim(int streamID, int gridID)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
-void cdfDefCell(int streamID, int gridID)
+void cdfDefUnstructured(int streamID, int gridID)
 {
-  char axisname[] = "cellX";
-  char vertname[] = "nvX";
+  char axisname[] = "ncells";
+  char vertname[] = "nv";
   char xunits[256];
   char xlongname[256];
   char xstdname[256];
@@ -1851,7 +1857,7 @@ void cdfDefCell(int streamID, int gridID)
   char ystdname[256];
   char xaxisname[256];
   char yaxisname[256];
-  int index, iz = 0;
+  int index;
   int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
   int ngrids;
@@ -1896,28 +1902,24 @@ void cdfDefCell(int streamID, int gridID)
             {
               dimlen0 = gridInqSize(gridID0);
               if ( dimlen == dimlen0 )
-                {
-                  dimID = streamptr->xdimID[index];
-                  break;
-                }
-              else
-                iz++;   
+		if ( gridInqNvertex(gridID0) == gridInqNvertex(gridID) && 
+		     IS_EQUAL(gridInqXval(gridID0, 0), gridInqXval(gridID, 0)) &&
+                     IS_EQUAL(gridInqXval(gridID0, dimlen-1), gridInqXval(gridID, dimlen-1)) )
+		  {
+		    dimID = streamptr->xdimID[index];
+		    break;
+		  }
             }
         }
     }
 
   if ( dimID == UNDEFID )
     {
-      if ( iz == 0 )
-        {
-          axisname[4] = '\0';
-          vertname[2] = '\0';
-        }
-      else
-        {
-          sprintf(&axisname[4], "%1d", iz+1);
-          sprintf(&vertname[2], "%1d", iz+1);
-        }
+      int status;
+      status = checkGridName('V', xaxisname, fileID, vlistID, gridID, ngrids, 'X');
+      status = checkGridName('V', yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
+      status = checkGridName('D', axisname, fileID, vlistID, gridID, ngrids, 'X');
+      status = checkGridName('D', vertname, fileID, vlistID, gridID, ngrids, 'X');
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
@@ -1929,12 +1931,13 @@ void cdfDefCell(int streamID, int gridID)
       if ( gridInqXvalsPtr(gridID) )
         {
           cdf_def_var(fileID, xaxisname, (nc_type) xtype, 1, &dimID, &ncxvarid);
+
+          if ( (len = strlen(xstdname)) )
+            cdf_put_att_text(fileID, ncxvarid, "standard_name", len, xstdname);
           if ( (len = strlen(xlongname)) )
             cdf_put_att_text(fileID, ncxvarid, "long_name", len, xlongname);
           if ( (len = strlen(xunits)) )
             cdf_put_att_text(fileID, ncxvarid, "units", len, xunits);
-          if ( (len = strlen(xstdname)) )
-            cdf_put_att_text(fileID, ncxvarid, "standard_name", len, xstdname);
 
           streamptr->ncxvarID[gridindex] = ncxvarid;
 
@@ -1952,12 +1955,13 @@ void cdfDefCell(int streamID, int gridID)
       if ( gridInqYvalsPtr(gridID) )
         {
           cdf_def_var(fileID, yaxisname, (nc_type) xtype, 1, &dimID, &ncyvarid);
+
+          if ( (len = strlen(ystdname)) )
+            cdf_put_att_text(fileID, ncyvarid, "standard_name", len, ystdname);
           if ( (len = strlen(ylongname)) )
             cdf_put_att_text(fileID, ncyvarid, "long_name", len, ylongname);
           if ( (len = strlen(yunits)) )
             cdf_put_att_text(fileID, ncyvarid, "units", len, yunits);
-          if ( (len = strlen(ystdname)) )
-            cdf_put_att_text(fileID, ncyvarid, "standard_name", len, ystdname);
 
           streamptr->ncyvarID[gridindex] = ncyvarid;
 
@@ -1977,11 +1981,12 @@ void cdfDefCell(int streamID, int gridID)
           char yaxisname[] = "cell_area";
           char units[] = "m2";
           char longname[] = "area of grid cell";
-          char stdname[] = "area";
+          char stdname[] = "cell_area";
 
           cdf_def_var(fileID, yaxisname, (nc_type) xtype, 1, &dimID, &ncavarid);
-          cdf_put_att_text(fileID, ncavarid, "long_name", strlen(longname), longname);
+
           cdf_put_att_text(fileID, ncavarid, "standard_name", strlen(stdname), stdname);
+          cdf_put_att_text(fileID, ncavarid, "long_name", strlen(longname), longname);
           cdf_put_att_text(fileID, ncavarid, "units", strlen(units), units);
 
           streamptr->ncavarID[gridindex] = ncavarid;
@@ -2096,6 +2101,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
 {
   /*  char zaxisname0[256]; */
   char axisname[256];
+  char stdname[256];
   char longname[256];
   char units[256];
   char tmpname[256];
@@ -2114,6 +2120,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
   int vlistID;
   int zaxisindex;
   int xtype = NC_DOUBLE;
+  int positive;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -2200,10 +2207,10 @@ void cdfDefZaxis(int streamID, int zaxisID)
 	      cdf_def_dim(fileID, axisname, dimlen, &dimID);
 	      cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID,  &ncvarid);
 
-	      strcpy(tmpname, "hybrid level at layer midpoints");
-	      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
 	      strcpy(tmpname, "hybrid_sigma_pressure");
 	      cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "hybrid level at layer midpoints");
+	      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
 	      strcpy(tmpname, "level");
 	      cdf_put_att_text(fileID, ncvarid, "units", strlen(tmpname), tmpname);
 	      strcpy(tmpname, "down");
@@ -2229,10 +2236,10 @@ void cdfDefZaxis(int streamID, int zaxisID)
 	      cdf_def_dim(fileID, axisname, dimlen, &dimID);
 	      cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID,  &ncvarid);
 
-	      strcpy(tmpname, "hybrid level at layer interfaces");
-	      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
 	      strcpy(tmpname, "hybrid_sigma_pressure");
 	      cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(tmpname), tmpname);
+	      strcpy(tmpname, "hybrid level at layer interfaces");
+	      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
 	      strcpy(tmpname, "level");
 	      cdf_put_att_text(fileID, ncvarid, "units", strlen(tmpname), tmpname);
 	      strcpy(tmpname, "down");
@@ -2266,12 +2273,28 @@ void cdfDefZaxis(int streamID, int zaxisID)
 
           zaxisInqLongname(zaxisID, longname);
           zaxisInqUnits(zaxisID, units);
+          zaxisInqStdname(zaxisID, stdname);
 
           cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID, &ncvarid);
+
+          if ( (len = strlen(stdname)) )
+            cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
           if ( (len = strlen(longname)) )
             cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
           if ( (len = strlen(units)) )
             cdf_put_att_text(fileID, ncvarid, "units", len, units);
+
+	  positive = zaxisInqPositive(zaxisID);
+	  if ( positive == 1 )
+	    {
+	      strcpy(tmpname, "up");
+	      cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
+	    }
+	  else if ( positive == 2 )
+	    {
+	      strcpy(tmpname, "down");
+	      cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
+	    }
 
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "Z");
               
@@ -2494,7 +2517,11 @@ void cdfDefGrid(int streamID, int gridID)
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {   
-      cdfDefLonLat2D(streamID, gridID);
+      cdfDefCurvilinear(streamID, gridID);
+    }
+  else if ( gridtype == GRID_UNSTRUCTURED )
+    {
+      cdfDefUnstructured(streamID, gridID);
     }
   else if ( gridtype == GRID_GAUSSIAN_REDUCED )
     {
@@ -2509,10 +2536,6 @@ void cdfDefGrid(int streamID, int gridID)
     {
       cdfDefTrajLon(streamID, gridID);
       cdfDefTrajLat(streamID, gridID);
-    }
-  else if ( gridtype == GRID_UNSTRUCTURED )
-    {
-      cdfDefCell(streamID, gridID);
     }
   else if ( gridtype == GRID_SINUSOIDAL || gridtype == GRID_LAEA || gridtype == GRID_LCC2 )
     {
@@ -2713,19 +2736,19 @@ int cdfDefVar(int streamID, int varID)
 
   cdf_def_var(fileID, name, (nc_type) xtype, ndims, dims, &ncvarid);
 
-#if  defined  (NC_NETCDF4)
-  if ( lchunk && streamptr->filetype == FILETYPE_NC4 )
+#if  defined  (HAVE_NETCDF4)
+  if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
     {
       if ( (retval = nc_def_var_chunking(fileID, ncvarid, 0, chunks)) )
         Error("nc_def_var_chunking failed, status = %d", retval);
     }
 #endif
 
-  if ( streamptr->ztype == COMPRESS_ZIP )
+  if ( streamptr->comptype == COMPRESS_ZIP )
     {
-      if ( lchunk && streamptr->filetype == FILETYPE_NC4 )
+      if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
         {
-          cdfDefVarDeflate(fileID, ncvarid, streamptr->zlevel);
+          cdfDefVarDeflate(fileID, ncvarid, streamptr->complevel);
         }
       else
         {
@@ -2739,9 +2762,9 @@ int cdfDefVar(int streamID, int varID)
         }
     }
 
-  if ( streamptr->ztype == COMPRESS_SZIP )
+  if ( streamptr->comptype == COMPRESS_SZIP )
     {
-      if ( lchunk && streamptr->filetype == FILETYPE_NC4 )
+      if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
         {
 #if defined (NC_SZIP_NN_OPTION_MASK)
           cdfDefVarSzip(fileID, ncvarid);
@@ -2767,11 +2790,11 @@ int cdfDefVar(int streamID, int varID)
         }
     }
 
-  if ( longname && *longname )
-    cdf_put_att_text(fileID, ncvarid, "long_name", strlen(longname), longname);
-
   if ( stdname && *stdname )
     cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(stdname), stdname);
+
+  if ( longname && *longname )
+    cdf_put_att_text(fileID, ncvarid, "long_name", strlen(longname), longname);
 
   if ( units && *units )
     cdf_put_att_text(fileID, ncvarid, "units", strlen(units), units);
@@ -4153,7 +4176,7 @@ void printNCvars(ncvar_t *ncvars, int nvars)
 typedef struct
 {
   int      ncvarid;
-  char     name[128];
+  char     name[256];
 }
 varinfo_t;
 
@@ -4198,7 +4221,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
       ncvars[ncvarid].xtype = xtype;
       ncvars[ncvarid].ndims = nvdims;
 
-#if  defined  (NC_NETCDF4)
+#if  defined  (HAVE_NETCDF4)
       if ( format == NC_FORMAT_NETCDF4_CLASSIC || format == NC_FORMAT_NETCDF4 )
         {
           int shuffle, deflate, deflate_level;
@@ -4318,29 +4341,23 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             }
           else if ( strcmp(attname, "add_offset") == 0 && atttype != NC_CHAR )
             {
-              if ( atttype != NC_CHAR )
-                {
-                  cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].addoffset);
-                  /*
-                    if ( atttype != NC_BYTE && atttype != NC_SHORT && atttype != NC_INT )
-                    if ( ncvars[ncvarid].addoffset != 0 )
-                    Warning("attribute add_offset not supported for atttype %d", atttype);
-                  */
-                  cdfSetVar(ncvars, ncvarid, TRUE);
-                }
+	      cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].addoffset);
+	      /*
+		if ( atttype != NC_BYTE && atttype != NC_SHORT && atttype != NC_INT )
+		if ( ncvars[ncvarid].addoffset != 0 )
+		Warning("attribute add_offset not supported for atttype %d", atttype);
+	      */
+	      cdfSetVar(ncvars, ncvarid, TRUE);
             }
           else if ( strcmp(attname, "scale_factor") == 0 && atttype != NC_CHAR )
             {
-              if ( atttype != NC_CHAR )
-                {
-                  cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].scalefactor);
-                  /*
-                    if ( atttype != NC_BYTE && atttype != NC_SHORT && atttype != NC_INT )
-                    if ( ncvars[ncvarid].scalefactor != 1 )
-                    Warning("attribute scale_factor not supported for atttype %d", atttype);
-                  */
-                  cdfSetVar(ncvars, ncvarid, TRUE);
-                }
+	      cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].scalefactor);
+	      /*
+		if ( atttype != NC_BYTE && atttype != NC_SHORT && atttype != NC_INT )
+		if ( ncvars[ncvarid].scalefactor != 1 )
+		Warning("attribute scale_factor not supported for atttype %d", atttype);
+	      */
+	      cdfSetVar(ncvars, ncvarid, TRUE);
             }
           else if ( strcmp(attname, "bounds") == 0 && atttype == NC_CHAR )
             {
@@ -4424,8 +4441,8 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               cdfSetVar(ncvars, ncvarid, TRUE);
             }
           */
-          else if ( strcmp(attname, "associate")  == 0 || 
-                    strcmp(attname, "coordinates") == 0 )
+          else if ( (strcmp(attname, "associate")  == 0 || strcmp(attname, "coordinates") == 0) &&
+		    atttype == NC_CHAR )
             {
               int status;
               char *pstring, *varname = NULL;
@@ -4496,29 +4513,23 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
                 }
             }
-          else if ( strcmp(attname, "_FillValue") == 0 || 
-                    strcmp(attname, "missing_value") == 0 )
+          else if ( (strcmp(attname, "_FillValue") == 0 || strcmp(attname, "missing_value") == 0) &&
+		    atttype != NC_CHAR )
             {
-              if ( atttype != NC_CHAR )
-                {
-                  cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].missval);
-                  ncvars[ncvarid].defmiss = TRUE;
-                  /* cdfSetVar(ncvars, ncvarid, TRUE); */
-                }
+	      cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].missval);
+	      ncvars[ncvarid].defmiss = TRUE;
+	      /* cdfSetVar(ncvars, ncvarid, TRUE); */
             }
-          else if ( strcmp(attname, "cdi") == 0 )
+          else if ( strcmp(attname, "cdi") == 0 && atttype == NC_CHAR )
             {         
-              if ( atttype == NC_CHAR )
-                {
-                  cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
-                  strtolower(attstring);
+	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+	      strtolower(attstring);
 
-                  if ( memcmp(attstring, "ignore", 6) == 0 )
-                    {
-                      ncvars[ncvarid].ignore = TRUE;
-                      cdfSetVar(ncvars, ncvarid, FALSE);
-                    }
-                }
+	      if ( memcmp(attstring, "ignore", 6) == 0 )
+		{
+		  ncvars[ncvarid].ignore = TRUE;
+		  cdfSetVar(ncvars, ncvarid, FALSE);
+		}
             }
           else if ( strcmp(attname, "axis") == 0 && atttype == NC_CHAR )
             {
@@ -4866,6 +4877,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
   int nvatts;
   size_t nvertex;
   grid_t grid;
+  grid_t proj;
   int gridindex;
   size_t size = 0, xsize, ysize;
   char name[256];
@@ -4958,7 +4970,8 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 	  if ( ncvars[ncvarid].gridtype == UNDEFID || ncvars[ncvarid].gridtype == GRID_GENERIC )
 	    if ( ydimid == xdimid ) ncvars[ncvarid].gridtype = GRID_UNSTRUCTURED;
 
-	  memset(&grid, 0, sizeof(grid_t));
+	  grid_init(&grid);
+	  grid_init(&proj);
 
 	  grid.prec  = DATATYPE_FLT64;
 	  grid.trunc = ncvars[ncvarid].truncation;
@@ -5029,7 +5042,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			dimsize2 = ncdims[dimid].len;
 			if ( dimsize1*dimsize2 != size )
 			  {
-			    Warning("Variable %s has unsupported array structure, skipped!",
+			    Warning("Unsupported array structure, skiped variable %s!",
 				    ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
@@ -5047,7 +5060,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			dimsize = ncdims[dimid].len;
 			if ( dimsize != size )
 			  {
-			    Warning("Variable %s has unsupported array structure, skipped!",
+			    Warning("Unsupported array structure, skiped variable %s!",
 				    ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
@@ -5100,7 +5113,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			dimsize2 = ncdims[dimid].len;
 			if ( dimsize1*dimsize2 != size )
 			  {
-			    Warning("Variable %s has unsupported array structure, skipped!",
+			    Warning("Unsupported array structure, skiped variable %s!",
 				    ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
@@ -5120,7 +5133,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			dimsize = ncdims[dimid].len;
 			if ( dimsize != size )
 			  {
-			    Warning("Variable %s has unsupported array structure, skipped!",
+			    Warning("Unsupported array structure, skiped variable %s!",
 				    ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
@@ -5268,7 +5281,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		}
 	      else
 		{
-		  Warning("Variable %s has unsupported grid, skipped!", ncvars[ncvarid].name);
+		  Warning("Variable %s has unsupported grid, skiped!", ncvars[ncvarid].name);
 		  ncvars[ncvarid].isvar = -1;
 		  continue;
 		}
@@ -5296,6 +5309,11 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			grid.type = GRID_LAEA;
 		      else if ( strcmp(attstring, "lambert_conformal_conic") == 0 )
 			grid.type = GRID_LCC2;
+		      else if ( strcmp(attstring, "lambert_cylindrical_equal_area") == 0 )
+			{
+			  proj.type = GRID_PROJECTION;
+			  proj.name = strdup(attstring);
+			}    
 		    }
 		  else if ( strcmp(attname, "earth_radius") == 0 )
 		    {
@@ -5347,10 +5365,31 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		    }
 		}
 	    }
+	  /*
+	  if ( proj.type == GRID_PROJECTION )
+	    {
+	      if ( grid.type == GRID_GENERIC )
+		{
+		  grid.type = GRID_CURVILINEAR;
+		}
 
+	      if ( grid.type == GRID_CURVILINEAR )
+		{
+		  proj.size  = grid.size;
+		  proj.xsize = grid.xsize;
+                  proj.ysize = grid.ysize;
+		}
+
+	      grid.proj = gridGenerate(proj);
+	    }
+	  */
 	  if ( CDI_Debug )
-	    Message("grid: type = %d, size = %d, nx = %d, ny %d",
-		    grid.type, grid.size, grid.xsize, grid.ysize);
+	    {
+	      Message("grid: type = %d, size = %d, nx = %d, ny %d",
+		      grid.type, grid.size, grid.xsize, grid.ysize);
+	      Message("proj: type = %d, size = %d, nx = %d, ny %d",
+		      proj.type, proj.size, proj.xsize, proj.ysize);
+	    }
 
 	  ncvars[ncvarid].gridID = varDefGrid(vlistID, grid, 1);
 
@@ -5358,11 +5397,8 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 	  streamptr->xdimID[gridindex] = xdimid;
 	  streamptr->ydimID[gridindex] = ydimid;
 
-	  if ( grid.xvals )   free(grid.xvals);
-	  if ( grid.yvals )   free(grid.yvals);
-	  if ( grid.xbounds ) free(grid.xbounds);
-	  if ( grid.ybounds ) free(grid.ybounds);
-	  if ( grid.area )    free(grid.area);
+	  grid_free(&grid);
+	  grid_free(&proj);
 
 	  if ( CDI_Debug )
 	    Message("gridID %d %d %s", ncvars[ncvarid].gridID, ncvarid, ncvars[ncvarid].name);
@@ -5602,7 +5638,7 @@ int cdfInqContents(int streamID)
   if ( CDI_Debug )
     Message("streamID = %d, fileID = %d", streamID, fileID);
 
-#if  defined  (NC_NETCDF4)
+#if  defined  (HAVE_NETCDF4)
   nc_inq_format(fileID, &format);
 #endif
 
@@ -5717,8 +5753,8 @@ int cdfInqContents(int streamID)
 
   streamptr->ntsteps = ntsteps;
 
-  if ( CDI_Debug )
-    Message("time dimid = %d", streamptr->basetime.ncdimid);
+  if ( CDI_Debug ) Message("Number of timesteps = %d", streamptr->ntsteps);
+  if ( CDI_Debug ) Message("Time dimid = %d", streamptr->basetime.ncdimid);
 
   /* read ncdims */
   for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
@@ -5856,7 +5892,7 @@ int cdfInqContents(int streamID)
       if ( ncvars[ncvarid].isvar == -1 )
 	{
 	  ncvars[ncvarid].isvar = 0;
-	  Warning("Variable %s has unknown type, skipped!", ncvars[ncvarid].name);
+	  Warning("Variable %s has unknown type, skiped!", ncvars[ncvarid].name);
 	  continue;
 	}
 
@@ -5877,8 +5913,18 @@ int cdfInqContents(int streamID)
       if ( cdfInqDatatype(ncvars[ncvarid].xtype) == -1 )
 	{
 	  ncvars[ncvarid].isvar = 0;
-	  Warning("Variable %s has an unsupported data type, skipped!", ncvars[ncvarid].name);
+	  Warning("Variable %s has an unsupported data type, skiped!", ncvars[ncvarid].name);
 	  continue;
+	}
+
+      if ( timedimid != UNDEFID && ntsteps == 0 && ncvars[ncvarid].ndims > 0 )
+	{
+	  if ( timedimid == ncvars[ncvarid].dimids[0] )
+	    {
+	      ncvars[ncvarid].isvar = 0;
+	      Warning("Number of time steps undefined, skiped variable %s!", ncvars[ncvarid].name);
+	      continue;
+	    }
 	}
     }
 
@@ -6051,9 +6097,9 @@ int cdfInqContents(int streamID)
       varID = streamNewVar(streamID, ncvars[ncvarid].gridID, ncvars[ncvarid].zaxisID);
       varID = vlistDefVar(vlistID, ncvars[ncvarid].gridID, ncvars[ncvarid].zaxisID, ncvars[ncvarid].timeID);
 
-#if  defined  (NC_NETCDF4)
+#if  defined  (HAVE_NETCDF4)
       if ( ncvars[ncvarid].deflate )
-	vlistDefVarZtype(vlistID, varID, COMPRESS_ZIP);
+	vlistDefVarCompType(vlistID, varID, COMPRESS_ZIP);
 #endif
 
       streamptr->vars[varID1].level   = NULL;

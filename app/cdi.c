@@ -35,9 +35,7 @@ int      vlistInqVarMissvalUsed(int vlistID, int varID);
 
 #include "printinfo.h"
 
-void cdiDecodeDate(int date, int *year, int *month, int *day);
-void cdiDecodeTime(int time, int *hour, int *minute, int *second);
-
+void cdiDefTableID(int tableID);
 
 int getopt(int argc, char *const argv[], const char *optstring);
 
@@ -51,8 +49,8 @@ int DefaultFileType  = CDI_UNDEFID;
 int DefaultDataType  = CDI_UNDEFID;
 int DefaultByteorder = CDI_UNDEFID;
 
-int Ztype  = COMPRESS_NONE;
-int Zlevel = 0;
+int comptype  = COMPRESS_NONE;  // Compression type
+int complevel = 0;              // Compression level
 
 
 static
@@ -92,7 +90,7 @@ void usage(void)
   fprintf(stderr, "\n");
   fprintf(stderr, "  Options:\n");
   fprintf(stderr, "    -d             Print debugging information\n");
-  fprintf(stderr, "    -f <format>    Format of the output file. (grb, grb2, nc, nc2, nc4, src, ext or ieg)\n");
+  fprintf(stderr, "    -f <format>    Format of the output file. (grb, grb2, nc, nc2, nc4, nc4c, src, ext or ieg)\n");
   fprintf(stderr, "    -s             give short information if ofile is missing\n");
   fprintf(stderr, "    -t <table>     Parameter table name/file\n");
   fprintf(stderr, "                   Predefined tables: ");
@@ -231,9 +229,9 @@ void printShortinfo(int streamID, int vlistID, int vardis)
   int timeID, taxisID;
   int nbyte, nbyte0;
   int index;
-  char varname[128];
-  char longname[128];
-  char units[128];
+  char varname[CDI_MAX_NAME];
+  char longname[CDI_MAX_NAME];
+  char units[CDI_MAX_NAME];
   double level;
   char *modelptr, *instptr;
   int datatype;
@@ -308,7 +306,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 
 	  fprintf(stdout, " %-3s", pstr);
 
-	  if ( vlistInqVarZtype(vlistID, varID) == COMPRESS_NONE )
+	  if ( vlistInqVarCompType(vlistID, varID) == COMPRESS_NONE )
 	    fprintf(stdout, " ");
 	  else
 	    fprintf(stdout, "z");
@@ -586,6 +584,7 @@ void setDefaultFileType(char *filetypestr)
       else if ( memcmp(filetypestr, "grb1", 4)  == 0 ) { ftstr += 4; DefaultFileType = FILETYPE_GRB; }
       else if ( memcmp(filetypestr, "grb",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_GRB; }
       else if ( memcmp(filetypestr, "nc2",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC2; }
+      else if ( memcmp(filetypestr, "nc4c", 4)  == 0 ) { ftstr += 4; DefaultFileType = FILETYPE_NC4C;}
       else if ( memcmp(filetypestr, "nc4",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC4; }
       else if ( memcmp(filetypestr, "nc",   2)  == 0 ) { ftstr += 2; DefaultFileType = FILETYPE_NC;  }
       else if ( memcmp(filetypestr, "srv",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_SRV; }
@@ -594,7 +593,7 @@ void setDefaultFileType(char *filetypestr)
       else
 	{
 	  fprintf(stderr, "Unsupported filetype %s!\n", filetypestr);
-	  fprintf(stderr, "Available filetypes: grb, grb2, nc, nc2, nc4, srv, ext and ieg\n");
+	  fprintf(stderr, "Available filetypes: grb, grb2, nc, nc2, nc4, nc4c, srv, ext and ieg\n");
 	  exit(EXIT_FAILURE);
 	}
 
@@ -610,8 +609,8 @@ void setDefaultFileType(char *filetypestr)
 	    {
 	      fprintf(stderr, "Unexpected character >%c< in file type >%s<!\n", *ftstr, filetypestr);
 	      fprintf(stderr, "Use format[_nbits] with:\n");
-	      fprintf(stderr, "    format = grb, grb2, nc, nc2, nc4, srv, ext or ieg\n");
-	      fprintf(stderr, "    nbits  = 32/64 for nc, nc2, nc4, srv, ext, ieg; 1 - 32 for grb, grb2\n");
+	      fprintf(stderr, "    format = grb, grb2, nc, nc2, nc4, nc4c, srv, ext or ieg\n");
+	      fprintf(stderr, "    nbits  = 32/64 for nc/nc2/nc4/nc4c/srv/ext/ieg; 1 - 24 for grb/grb2\n");
 	      exit(EXIT_FAILURE);
 	    }
 	}
@@ -643,21 +642,21 @@ void defineCompress(const char *arg)
 
   if      ( strncmp(arg, "szip", len) == 0 )
     {
-      Ztype = COMPRESS_SZIP;
+      comptype = COMPRESS_SZIP;
     }
   else if ( strncmp(arg, "jpeg", len) == 0 )
     {
-      Ztype = COMPRESS_JPEG;
+      comptype = COMPRESS_JPEG;
     }
   else if ( strncmp(arg, "gzip", len) == 0 )
     {
-      Ztype = COMPRESS_GZIP;
-      Zlevel = 6;
+      comptype = COMPRESS_GZIP;
+      complevel = 6;
     }
   else if ( strncmp(arg, "zip", len) == 0 )
     {
-      Ztype = COMPRESS_ZIP;
-      Zlevel = 1;
+      comptype = COMPRESS_ZIP;
+      complevel = 1;
     }
   else
     fprintf(stderr, "%s compression unsupported!\n", arg);
@@ -683,7 +682,7 @@ int main(int argc, char *argv[])
   int varID;
   int itableID = CDI_UNDEFID, otableID = CDI_UNDEFID;
   int Info = 1;
-  char varname[128];
+  char varname[CDI_MAX_NAME];
   char paramstr[32];
 
   Progname = strrchr(argv[0], '/');
@@ -756,6 +755,7 @@ int main(int argc, char *argv[])
   if ( rTable )
     {
       itableID = tableInq(-1, 0, rTable);
+      if ( itableID != CDI_UNDEFID ) cdiDefTableID(itableID);
       otableID = itableID;
     }
 
@@ -810,7 +810,7 @@ int main(int argc, char *argv[])
       taxisID = vlistInqTaxis(vlistID1);
       ntsteps = vlistNtsteps(vlistID1);
 
-      if ( Debug ) fprintf(stderr, "nvars = %d\n", nvars);
+      if ( Debug ) fprintf(stderr, "nvars   = %d\n", nvars);
       if ( Debug ) fprintf(stderr, "ntsteps = %d\n", ntsteps);
 
       if ( fname2 ) vlistID2 = vlistDuplicate(vlistID1);
@@ -842,10 +842,10 @@ int main(int argc, char *argv[])
 	  if ( DefaultByteorder != CDI_UNDEFID )
 	    streamDefByteorder(streamID2, DefaultByteorder);
 
-	  if ( Ztype != COMPRESS_NONE )
+	  if ( comptype != COMPRESS_NONE )
 	    {
-	      streamDefZtype(streamID2, Ztype);
-	      streamDefZlevel(streamID2, Zlevel);
+	      streamDefCompType(streamID2, comptype);
+	      streamDefCompLevel(streamID2, complevel);
 	    }
 
 	  streamDefVlist(streamID2, vlistID2);
