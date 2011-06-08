@@ -249,7 +249,11 @@ void zaxisDestroyKernel ( zaxis_t * zaxisptr )
 
   id = zaxisptr->self;
 
-  if ( zaxisptr->vals ) free ( zaxisptr->vals );
+  if ( zaxisptr->vals )    free ( zaxisptr->vals );  
+  if ( zaxisptr->lbounds ) free ( zaxisptr->lbounds );
+  if ( zaxisptr->ubounds ) free ( zaxisptr->ubounds );
+  if ( zaxisptr->weights ) free ( zaxisptr->weights );
+  if ( zaxisptr->vct )     free ( zaxisptr->vct );    
 
   free ( zaxisptr );
 
@@ -1297,31 +1301,90 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
   zaxis_t * z2 = ( zaxis_t * ) zaxisptr2 ;
   static int differ = -1;
   static int equal  =  0;
+  int i;
 
   assert ( z1 );
   assert ( z2 );
 
-  //zaxisptr->self        = CDI_UNDEFID;
-  //zaxisptr->name[0]     = 0;
-  //zaxisptr->longname[0] = 0;
-  //zaxisptr->units[0]    = 0;
-  //zaxisptr->vals        = NULL;
-  //zaxisptr->ubounds     = NULL;
-  //zaxisptr->lbounds     = NULL;
-  //zaxisptr->weights     = NULL;
   if ( z1->type      != z2->type )      return differ;
   if ( z1->ltype     != z2->ltype )     return differ;
   if ( z1->direction != z2->direction ) return differ;
   if ( z1->prec      != z2->prec )      return differ;
   if ( z1->size      != z2->size )      return differ;
   if ( z1->vctsize   != z2->vctsize )   return differ;
-  //zaxisptr->vct         = NULL;
+
+  if ( z1->vals ) 
+    {
+      if ( !z1->size ) xabort ("");
+      
+      if ( !z2->vals ) return differ;
+
+      for ( i = 0; i < z1->size; i++ )
+	if ( z1->vals[i] != z2->vals[i] ) return differ;
+    } 
+  else if ( z2->vals )
+    return differ;
   
-  /*
-    return zaxisCompare ( z1->self,
-    z2->type, z2->size, z2->size > 0 ? 1 : 0,
-    z2->vals, z2->longname, z2->units, z2->ltype );
-  */
+  if ( z1->lbounds )
+    {
+      if ( !z1->size ) xabort ("");
+      
+      if ( !z2->lbounds ) return differ;
+      
+      for ( i = 0; i < z1->size; i++ )
+	if ( z1->lbounds[i] != z2->lbounds[i] ) return differ;
+    } 
+  else if ( z2->lbounds )
+    return differ;
+
+  if ( z1->ubounds )
+    {
+      if ( !z1->size ) xabort ("");
+      
+      if ( !z2->ubounds ) return differ;
+
+      for ( i = 0; i < z1->size; i++ )
+	if ( z1->ubounds[i] != z2->ubounds[i] ) return differ;
+    } 
+  else if ( z2->ubounds )
+    return differ;
+
+  if ( z1->weights )
+    {
+      if ( !z1->size ) xabort ("");
+
+      if ( !z2->weights ) return differ;
+
+      for ( i = 0; i < z1->size; i++ )
+	if ( z1->weights[i] != z2->weights[i] ) return differ;
+    } 
+  else if ( z2->weights )
+    return differ;
+
+ if ( z1->vct )
+    {
+      if ( !z1->vctsize ) xabort ("");
+
+      if ( !z2->vct ) return differ;
+
+      for ( i = 0; i < z1->vctsize; i++ )
+	if ( z1->vct[i] != z2->vct[i] ) return differ;
+    } 
+  else if ( z2->vct )
+    return differ; 
+
+  if ( memcmp ( &z1->name    , &z2->name    , CDI_MAX_NAME )) 
+    return differ;
+  if ( memcmp ( &z1->longname, &z2->longname, CDI_MAX_NAME )) 
+    return differ;
+  if ( memcmp ( &z1->stdname , &z2->stdname , CDI_MAX_NAME )) 
+    return differ;
+  if ( memcmp ( &z1->units   , &z2->units   , CDI_MAX_NAME )) 
+    return differ; 
+
+  if ( z1->positive != z2->positive ) return differ;
+
+
   return equal;
 }
 
