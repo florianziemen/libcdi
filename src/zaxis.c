@@ -1288,9 +1288,81 @@ void zaxisPrint ( int zaxisID )
 
 
 static
-void zaxisPrintP ( void * zaxisptr, FILE * fp )
+void zaxisPrintP ( void * voidptr, FILE * fp )
 {
-  zaxisPrintKernel (( zaxis_t * ) zaxisptr, fp );
+  zaxis_t *zaxisptr = ( zaxis_t * ) voidptr;
+  int nbyte, nbyte0, i;
+
+  assert ( zaxisptr );
+  
+  zaxisPrintKernel ( zaxisptr, fp );
+  
+  fprintf ( fp, "ltype     = %d\n", zaxisptr->ltype );
+  fprintf ( fp, "prec      = %d\n", zaxisptr->prec );
+
+  if ( zaxisptr->vct )
+    {
+      nbyte0 = fprintf(fp, "vct       = ");
+      nbyte = nbyte0;
+      for ( i = 0; i < zaxisptr->vctsize; i++ )
+	{
+	  if ( nbyte > 80 )
+	    {
+	      fprintf(fp, "\n%*s", nbyte0, "");
+	      nbyte = nbyte0;
+	    }
+	  nbyte += fprintf(fp, "%.9g ", zaxisptr->vct[i]);
+	}
+      fprintf(fp, "\n");
+    }
+
+  if ( zaxisptr->lbounds ) 
+    {
+      nbyte0 = fprintf(fp, "lbounds   = ");
+      nbyte = nbyte0;
+      for ( i = 0; i < zaxisptr->size; i++ )
+	{
+	  if ( nbyte > 80 )
+	    {
+	      fprintf(fp, "\n%*s", nbyte0, "");
+	      nbyte = nbyte0;
+	    }
+	  nbyte += fprintf(fp, "%.9g ", zaxisptr->lbounds[i]);
+	}
+      fprintf(fp, "\n");
+    }
+
+  if ( zaxisptr->ubounds )
+    {
+      nbyte0 = fprintf(fp, "ubounds   = ");
+      nbyte = nbyte0;
+      for ( i = 0; i < zaxisptr->size; i++ )
+	{
+	  if ( nbyte > 80 )
+	    {
+	      fprintf(fp, "\n%*s", nbyte0, "");
+	      nbyte = nbyte0;
+	    }
+	  nbyte += fprintf(fp, "%.9g ", zaxisptr->ubounds[i]);
+	}
+      fprintf(fp, "\n");
+    }
+
+  if ( zaxisptr->weights )
+    {
+      nbyte0 = fprintf(fp, "weights   = ");
+      nbyte = nbyte0;
+      for ( i = 0; i < zaxisptr->size; i++ )
+	{
+	  if ( nbyte > 80 )
+	    {
+	      fprintf(fp, "\n%*s", nbyte0, "");
+	      nbyte = nbyte0;
+	    }
+	  nbyte += fprintf(fp, "%.9g ", zaxisptr->weights[i]);
+	}
+      fprintf(fp, "\n");
+    } 
 }
 
 

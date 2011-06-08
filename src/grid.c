@@ -1301,6 +1301,7 @@ int gridInqYsize(int gridID)
 void gridDefRowlon(int gridID, int nrowlon, const int *rowlon)
 {
   grid_t *gridptr;
+  int i;
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
@@ -3715,11 +3716,59 @@ void gridPrint ( int gridID, int opt )
 
 
 
-void gridPrintP ( void * gridptr, FILE * fp )
+void gridPrintP ( void * voidptr, FILE * fp )
 {
+  grid_t * gridptr = ( grid_t * ) voidptr;
+  int nbyte0, nbyte, i;
+
   assert ( gridptr );
 
-  gridPrintKernel (( grid_t * ) gridptr , 0, fp );
+  gridPrintKernel ( gridptr , 0, fp );
+
+  fprintf ( fp, "precision = %d\n", gridptr->prec);
+  fprintf ( fp, "nd        = %d\n", gridptr->nd );
+  fprintf ( fp, "ni        = %d\n", gridptr->ni );
+  fprintf ( fp, "ni2       = %d\n", gridptr->ni2 );
+  fprintf ( fp, "ni3       = %d\n", gridptr->ni3 ); 
+  fprintf ( fp, "number    = %d\n", gridptr->number );
+  fprintf ( fp, "position  = %d\n", gridptr->position );
+  fprintf ( fp, "trunc     = %d\n", gridptr->trunc );
+  fprintf ( fp, "lcomplex  = %d\n", gridptr->lcomplex );
+  fprintf ( fp, "nrowlon   = %d\n", gridptr->nrowlon );
+
+  if ( gridptr->rowlon )
+    {
+      nbyte0 = fprintf(fp, "rowlon    = ");
+      nbyte  = nbyte0;
+      for ( i = 0; i < gridptr->nrowlon; i++ )
+        {
+          if ( nbyte > 80 )
+            {
+              fprintf(fp, "\n");
+              fprintf(fp, "%*s", nbyte0, "");
+              nbyte = nbyte0;
+            }
+          nbyte += fprintf(fp, "%d ", gridptr->rowlon[i]);
+        }
+      fprintf(fp, "\n");
+    }
+
+  if ( gridptr->mask_gme )
+    {
+      nbyte0 = fprintf(fp, "mask_gme  = ");
+      nbyte  = nbyte0;
+      for ( i = 0; i < gridptr->size; i++ )
+        {
+          if ( nbyte > 80 )
+            {
+              fprintf(fp, "\n");
+              fprintf(fp, "%*s", nbyte0, "");
+              nbyte = nbyte0;
+            }
+          nbyte += fprintf(fp, "%d ", (int) gridptr->mask_gme[i]);
+        }
+      fprintf(fp, "\n");
+    }
 }
 
 
@@ -4123,15 +4172,15 @@ gridTxCode ()
 enum { gridNint    = 25, 
        gridNdouble = 24,
        gridNstrings= 8,
-       mask        = 0,
-       mask_gme    = 1,
-       xvals       = 2,
-       yvals       = 3,
-       area        = 4,
-       xbounds     = 5,
-       ybounds     = 6,
-       reference   = 7,
-       rowlon      = 8
+       mask        = 1 << 0,
+       mask_gme    = 1 << 1,
+       xvals       = 1 << 2,
+       yvals       = 1 << 3,
+       area        = 1 << 4,
+       xbounds     = 1 << 5,
+       ybounds     = 1 << 6,
+       reference   = 1 << 7,
+       rowlon      = 1 << 8
 };
 
 
@@ -4139,15 +4188,15 @@ static int getMemberMask ( grid_t * gridP )
 {
   int memberMask = 0;
 
-  if ( gridP->mask )       memberMask |= ( 1 << mask );
-  if ( gridP->mask_gme )   memberMask |= ( 1 << mask_gme );
-  if ( gridP->xvals )      memberMask |= ( 1 << xvals );
-  if ( gridP->yvals )      memberMask |= ( 1 << yvals ); 
-  if ( gridP->area )       memberMask |= ( 1 << area );
-  if ( gridP->xbounds )    memberMask |= ( 1 << xbounds );
-  if ( gridP->ybounds )    memberMask |= ( 1 << ybounds );
-  if ( gridP->reference )  memberMask |= ( 1 << reference );
-  if ( gridP->rowlon )     memberMask |= ( 1 << rowlon );
+  if ( gridP->mask )       memberMask |= mask;
+  if ( gridP->mask_gme )   memberMask |= mask_gme;
+  if ( gridP->xvals )      memberMask |= xvals;
+  if ( gridP->yvals )      memberMask |= yvals; 
+  if ( gridP->area )       memberMask |= area;
+  if ( gridP->xbounds )    memberMask |= xbounds;
+  if ( gridP->ybounds )    memberMask |= ybounds;
+  if ( gridP->reference )  memberMask |= reference;
+  if ( gridP->rowlon )     memberMask |= rowlon;
 
   return memberMask;
 }
@@ -4330,7 +4379,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
   gridP->lcomplex      =   intBuffer[24];
   memberMask           =   intBuffer[25];
 
-  if ( memberMask & ( 1 << rowlon ))
+  if ( memberMask & rowlon )
     {
       if ( !gridP->nrowlon ) xabort ("");
       gridP->rowlon = xmalloc ( gridP->nrowlon * sizeof ( int ));
@@ -4373,7 +4422,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
   gridP->ypole	       =   doubleBuffer[22];
   gridP->angle         =   doubleBuffer[23]; 
 
-  if ( memberMask & ( 1 << xvals ))
+  if ( memberMask & xvals )
     {
       if ( gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR )
 	size = gridP->size;
@@ -4389,7 +4438,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
 	xabort ("");
     }
 
-  if ( memberMask & ( 1 << yvals ))
+  if ( memberMask & yvals )
     {
       if ( gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR )
 	size = gridP->size;
@@ -4405,7 +4454,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
 	xabort ("");
     }
 
-  if ( memberMask & ( 1 << area ))
+  if ( memberMask & area )
     {
       if ( !gridP->size ) xabort ("");
       
@@ -4418,7 +4467,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
 	xabort ("");
     }
 
-  if ( memberMask & ( 1 << xbounds ))
+  if ( memberMask & xbounds )
     {
       if ( !gridP->nvertex ) xabort ("");
       if ( gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED )
@@ -4436,7 +4485,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
 	xabort ("");
     }
 
-  if ( memberMask & ( 1 << ybounds ))
+  if ( memberMask & ybounds )
     {
       if ( !gridP->nvertex ) xabort ("");
       if ( gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED )
@@ -4470,7 +4519,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
   memcpy ( gridP->xunits   , &charBuffer[CDI_MAX_NAME * 6], CDI_MAX_NAME );
   memcpy ( gridP->yunits   , &charBuffer[CDI_MAX_NAME * 7], CDI_MAX_NAME );
 
-  if ( memberMask & ( 1 << reference ))
+  if ( memberMask & reference )
     {
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &referenceSize, 1, MPI_INT, comm ));
@@ -4483,7 +4532,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
 	xabort ("");
     }
 
-  if ( memberMask & ( 1 << mask ))
+  if ( memberMask & mask )
     {
       if ( !gridP->size ) xabort ("");
       gridP->mask = xmalloc ( gridP->size * sizeof ( mask_t ));
@@ -4495,7 +4544,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
 	xabort ("");
     }
 
-  if ( memberMask & ( 1 << mask_gme ))
+  if ( memberMask & mask_gme )
     {
       if ( !gridP->size ) xabort ("");
       gridP->mask_gme = xmalloc ( gridP->size * sizeof ( mask_t ));
@@ -4702,8 +4751,9 @@ void gridPack ( void * voidP, void * packBuffer, int packBufferSize,
 
   if ( gridP->mask_gme )
     {
-      if ( !gridP->size ) xabort ("");
-      xmpi ( MPI_Pack ( gridP->mask, gridP->size, MPI_UNSIGNED_CHAR, 
+      if ( !gridP->size ) xabort ("");;
+
+      xmpi ( MPI_Pack ( gridP->mask_gme, gridP->size, MPI_UNSIGNED_CHAR, 
 			packBuffer, packBufferSize, packBufferPos, comm ));
       d = xchecksum ( UNSIGNED_CHAR, gridP->size, gridP->mask );
       xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
