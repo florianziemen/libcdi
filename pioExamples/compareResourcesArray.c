@@ -94,8 +94,6 @@ void modelRun ()
   gridDefXbounds ( gridID, lons );
   gridDefYbounds ( gridID, lats );
 	       
-
-
   // Create a surface level Z-axis
   zaxisID1 = zaxisCreate(ZAXIS_SURFACE, 1);
 

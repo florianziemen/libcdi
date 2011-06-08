@@ -12,7 +12,8 @@
 #include "namespace.h"
 
 
-extern void gridUnpack ( char *, int, int *, MPI_Comm );
+extern void gridUnpack  ( char *, int, int *, MPI_Comm );
+extern void zaxisUnpack ( char *, int, int *, MPI_Comm );
 
 MPI_Comm commGlob;
 int sizeGlob;
@@ -103,72 +104,6 @@ void commsIOCleanup ()
 /*****************************************************************************/
 
 
-void unpackGrid ( char * unpackBuffer, int unpackBufferSize, 
-		  int * unpackBufferPos, MPI_Comm comm )
-{ 
-  int gridID;
-  int type, size, xsize, ysize;
-  double * xvals, * yvals;
-
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      &type, 1, MPI_INT, comm ));
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      &size, 1, MPI_INT, comm ));
-  gridID = gridCreate ( type, size );
-
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      &xsize, 1, MPI_INT, comm ));
-  gridDefXsize(gridID, xsize);
- 
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      &ysize, 1, MPI_INT, comm ));
-  gridDefYsize(gridID, ysize);
-
-  size = type == GRID_UNSTRUCTURED || type == GRID_CURVILINEAR ? 
-    size : xsize;
-  xvals = xmalloc ( size * sizeof ( double ));
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      xvals, size, MPI_DOUBLE, comm ));
-  gridDefXvals ( gridID, xvals );
-  free ( xvals );
-
-  size = type == GRID_UNSTRUCTURED || type == GRID_CURVILINEAR ? 
-    size : ysize;
-  yvals = xmalloc ( size * sizeof ( double ));
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      yvals, size, MPI_DOUBLE, comm ));
-  gridDefYvals ( gridID, yvals );
-  free ( yvals );
-}
-
-
-/*****************************************************************************/
-
-
-void unpackZaxis ( char * unpackBuffer, int unpackBufferSize, 
-		   int * unpackBufferPos, MPI_Comm comm )
-{ 
-  int zaxisID;
-  int type, size;
-  double * vals;
-
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      &type, 1, MPI_INT, comm ));
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      &size, 1, MPI_INT, comm ));
-  zaxisID = zaxisCreate ( type, size );
-
-  vals = xmalloc ( size * sizeof ( double ));
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      vals, size, MPI_DOUBLE, comm ));
-  zaxisDefLevels ( zaxisID, vals );
-  free ( vals );
-}
-
-
-/*****************************************************************************/
-
-
 void unpackTaxis ( char * unpackBuffer, int unpackBufferSize, 
 		   int * unpackBufferPos, MPI_Comm comm )
 { 
@@ -234,8 +169,8 @@ void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize,
 	  gridUnpack ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
 		       comm );
 	  break;
-	case ZAXIS:  
-	  unpackZaxis ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
+	case ZAXIS: 
+	  zaxisUnpack ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
 			comm );
 	  break;
 	case TAXIS:
