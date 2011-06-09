@@ -2,7 +2,7 @@
 #define INSTITUTION_H
 
 int
-instituteUnpack(void *buf, int size, int *position,
+instituteUnpack(void *buf, int size, int *position, int,
                 MPI_Comm comm);
 
 #endif

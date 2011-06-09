@@ -117,6 +117,17 @@ int defineTaxis ()
   int taxisID = CDI_UNDEFID;
 
   taxisID = taxisCreate(TAXIS_ABSOLUTE);
+  
+  taxisDefType  ( taxisID, 0 );
+  taxisDefVdate ( taxisID, 1 );
+  taxisDefVtime ( taxisID, 2 );
+  taxisDefRdate ( taxisID, 3 );
+  taxisDefRtime ( taxisID, 4 );
+  taxisDefVdateBounds ( taxisID, 5, 6 );
+  taxisDefVtimeBounds ( taxisID, 7, 8 );
+  taxisDefCalendar ( taxisID, 1 );
+  taxisDefTunit ( taxisID, 1 );
+  taxisDefNumavg ( taxisID, 1 );
 
   return taxisID;
 }

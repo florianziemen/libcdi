@@ -17,6 +17,7 @@
 #include "namespace.h"
 #include "resource_handle.h"
 #include "pio_rpc.h"
+#include "pio_util.h"
 
 extern int cdiDefaultCalendar;
 
@@ -39,19 +40,19 @@ char *Timeunits[] = {
 };
 
 
-static int    taxisCompareP ( void * taxisptr1, void * taxisptr2 );
-static void   taxisDestroyP ( void * taxisptr );
-static void   taxisPrintP   ( void * taxisptr, FILE * fp );
+static int    taxisCompareP    ( void * taxisptr1, void * taxisptr2 );
+static void   taxisDestroyP    ( void * taxisptr );
+static void   taxisPrintP      ( void * taxisptr, FILE * fp );
 #ifdef USE_MPI
-static int taxisGetSizeP ( void * taxisptr, MPI_Comm comm );
-static void   taxisPackP ( void * taxisptr, void *buf, int size,
-                           int *position, MPI_Comm comm );
-static int taxisTxCode   ( void );
+static int    taxisGetPackSize ( void * taxisptr, MPI_Comm comm );
+static void   taxisPack        ( void * taxisptr, void *buf, int size,
+				 int *position, MPI_Comm comm );
+static int    taxisTxCode      ( void );
 #endif
 
 resOps taxisOps = { taxisCompareP, taxisDestroyP, taxisPrintP
 #ifdef USE_MPI
-                    , taxisGetSizeP, taxisPackP, taxisTxCode
+                    , taxisGetPackSize, taxisPack, taxisTxCode
 #endif
 };
 
@@ -1336,26 +1337,91 @@ taxisTxCode ( void )
   return TAXIS;
 }
 
+enum { taxisNint = 15 };
+
 static
-int taxisGetSizeP ( void * taxisptr, MPI_Comm comm )
+int taxisGetPackSize ( void * voidP, MPI_Comm comm )
 {
+  taxis_t * taxisP = ( taxis_t * ) voidP;
   int packBufferSize = 0, size;
 
-  MPI_Pack_size ( 1, MPI_INT, comm, &size );
+  xmpi ( MPI_Pack_size ( taxisNint, MPI_INT, comm, &size ));
+  packBufferSize += size;
+  xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
   packBufferSize += size;
 
-  return packBufferSize; 
+  return packBufferSize;
 }
 
 
-static 
-void taxisPackP ( void * taxisptr, void * packBuffer, int packBufferSize, 
-		  int * packBufferPos, MPI_Comm comm )
+void taxisUnpack ( char * unpackBuffer, int unpackBufferSize, 
+		   int * unpackBufferPos, int nspTarget, MPI_Comm comm )
 {
-  taxis_t * taxisP = ( taxis_t * ) taxisptr;
-  int count;
+  taxis_t * taxisP;
+  int intBuffer[taxisNint];
+  double d;
 
-  MPI_Pack ( &taxisP->type, 1, MPI_INT, 
-	     packBuffer, packBufferSize, packBufferPos, comm );
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      intBuffer, taxisNint, MPI_INT, comm ));
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &d, 1, MPI_DOUBLE, comm ));
+
+  if ( xchecksum ( DATATYPE_INT, taxisNint, intBuffer ) != d ) xabort ("");
+
+  taxisInit ();
+
+  taxisP = taxisNewEntry();
+  if ( ! taxisP ) Error("No memory");
+
+  if ( namespaceAdaptKey ( intBuffer[0], nspTarget ) != taxisP->self )
+    xabort ("");
+
+  taxisP->used       = intBuffer[1];  
+  taxisP->type       = intBuffer[2];  
+  taxisP->vdate      = intBuffer[3];  
+  taxisP->vtime      = intBuffer[4];  
+  taxisP->rdate      = intBuffer[5];  
+  taxisP->rtime      = intBuffer[6];  
+  taxisP->calendar   = intBuffer[7];  
+  taxisP->unit       = intBuffer[8];  
+  taxisP->numavg     = intBuffer[9];  
+  taxisP->has_bounds = intBuffer[10];
+  taxisP->vdate_lb   = intBuffer[11]; 
+  taxisP->vtime_lb   = intBuffer[12]; 
+  taxisP->vdate_ub   = intBuffer[13]; 
+  taxisP->vtime_ub   = intBuffer[14];
 }
+
+
+static
+void taxisPack ( void * voidP, void * packBuffer, int packBufferSize, 
+		 int * packBufferPos, MPI_Comm comm )
+{
+  taxis_t   * taxisP = ( taxis_t * ) voidP;
+  int intBuffer[taxisNint], size;
+  double d;
+
+  intBuffer[0]  = taxisP->self; 
+  intBuffer[1]  = taxisP->used;      
+  intBuffer[2]  = taxisP->type;      
+  intBuffer[3]  = taxisP->vdate;     
+  intBuffer[4]  = taxisP->vtime;     
+  intBuffer[5]  = taxisP->rdate;     
+  intBuffer[6]  = taxisP->rtime;     
+  intBuffer[7]  = taxisP->calendar;  
+  intBuffer[8]  = taxisP->unit;      
+  intBuffer[9]  = taxisP->numavg;    
+  intBuffer[10] = taxisP->has_bounds;
+  intBuffer[11] = taxisP->vdate_lb;  
+  intBuffer[12] = taxisP->vtime_lb;  
+  intBuffer[13] = taxisP->vdate_ub;  
+  intBuffer[14] = taxisP->vtime_ub;  
+  
+  xmpi ( MPI_Pack ( intBuffer, taxisNint, MPI_INT, 
+		    packBuffer, packBufferSize, packBufferPos, comm ));
+  d = xchecksum ( DATATYPE_INT, taxisNint, intBuffer );
+  xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
+		    packBuffer, packBufferSize, packBufferPos, comm ));
+}
+
 #endif

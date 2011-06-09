@@ -408,7 +408,7 @@ void institutePackP ( void * instituteptr, void *buf, int size,
 }
 
 int
-instituteUnpack(void *buf, int size, int *position,
+instituteUnpack(void *buf, int size, int *position, int nspTarget,
                 MPI_Comm comm)
 {
   int tempbuf[institute_nints];

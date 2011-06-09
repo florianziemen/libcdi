@@ -3,8 +3,6 @@
 
 typedef unsigned char mask_t;
 
-enum { CHAR = 0, INTEGER = 1, DOUBLE = 2, UNSIGNED_CHAR = 3, stringlen = 256 };
-
 typedef struct {
   int     self;
   int     type;                   /* grid type                      */
