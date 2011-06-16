@@ -25,6 +25,8 @@
 #  include "netcdf.h"
 #endif
 
+//#define PROJECTION_TEST
+
 #undef  UNDEFID
 #define UNDEFID  CDI_UNDEFID
 
@@ -4876,6 +4878,29 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 #endif
 
 #if  defined  (HAVE_LIBNETCDF)
+static
+void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
+{
+  int iatt, nvatts;
+  size_t attlen;
+  char attname[256];
+  nc_type xtype;
+
+  cdf_inq_varnatts(ncfileID, ncvarID, &nvatts);
+
+  for ( iatt = 0; iatt < nvatts; iatt++ )
+    {
+      cdf_inq_attname(ncfileID, ncvarID, iatt, attname);
+      cdf_inq_atttype(ncfileID, ncvarID, attname, &xtype);
+      cdf_inq_attlen(ncfileID, ncvarID, attname, &attlen);
+
+      printf("%s %d\n", attname, (int)attlen);
+    }
+
+}
+#endif
+
+#if  defined  (HAVE_LIBNETCDF)
 /* define all input grids */
 static
 void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid)
@@ -5375,7 +5400,8 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		    }
 		}
 	    }
-	  /*
+
+#if defined (PROJECTION_TEST)
 	  if ( proj.type == GRID_PROJECTION )
 	    {
 	      if ( grid.type == GRID_GENERIC )
@@ -5390,9 +5416,10 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
                   proj.ysize = grid.ysize;
 		}
 
-	      grid.proj = gridGenerate(proj);
+	      //  grid.proj = gridGenerate(proj);
 	    }
-	  */
+#endif
+
 	  if ( CDI_Debug )
 	    {
 	      Message("grid: type = %d, size = %d, nx = %d, ny %d",
@@ -5401,7 +5428,15 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		      proj.type, proj.size, proj.xsize, proj.ysize);
 	    }
 
-	  ncvars[ncvarid].gridID = varDefGrid(vlistID, grid, 1);
+#if defined (PROJECTION_TEST)
+	  if ( proj.type == GRID_PROJECTION )
+	    {
+	      ncvars[ncvarid].gridID = varDefGrid(vlistID, proj, 1);
+	      copy_numeric_projatts(ncvars[ncvarid].gridID, ncvars[ncvarid].gmapid, fileID);
+	    }
+	  else
+#endif
+	    ncvars[ncvarid].gridID = varDefGrid(vlistID, grid, 1);
 
 	  gridindex = vlistGridIndex(vlistID, ncvars[ncvarid].gridID);
 	  streamptr->xdimID[gridindex] = xdimid;
