@@ -528,7 +528,7 @@ char *vlistInqVarUnitsPtr(int vlistID, int varID)
 @Function  vlistInqVarName
 @Title     Get the name of a Variable
 
-@Prototype void vlistInqVarName(int vlistID, int varID, char *name)
+r@Prototype void vlistInqVarName(int vlistID, int varID, char *name)
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
     @Item  varID    Variable identifier.
@@ -1690,7 +1690,7 @@ int vlistInqVarCompLevel(int vlistID, int varID)
 #ifdef USE_MPI
 
 enum {
-  vlistvar_nints = 19,
+  vlistvar_nints = 20,
   vlistvar_ndbls = 3,
 };
 
@@ -1722,6 +1722,8 @@ int vlistVarGetSize(vlist_t *p, int varID, MPI_Comm comm)
     xmpi(MPI_Pack_size(strlen(var->units), MPI_CHAR, comm, &txinc));
     varsize += txinc;
   }
+  xmpi(MPI_Pack_size(4 * var->nlevs, MPI_INT, comm, &txinc));
+  varsize += txinc;
   varsize += vlistAttsGetSize(p, varID, comm);
   return varsize;
 }
@@ -1752,6 +1754,7 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   tempbuf[16] = var->missvalused;
   tempbuf[17] = var->comptype;
   tempbuf[18] = var->complevel;
+  tempbuf[19] = var->nlevs;
   dtempbuf[0] = var->missval;
   dtempbuf[1] = var->scalefactor;
   dtempbuf[2] = var->addoffset;
@@ -1770,6 +1773,18 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   if (unitssz)
     xmpi(MPI_Pack(var->units, unitssz, MPI_CHAR,
                   buf, size, position, comm));
+  {
+    int levbuf[var->nlevs][4];
+    for (i = 0; i < var->nlevs; ++i)
+    {
+      levbuf[i][0] = var->levinfo[i].flag;
+      levbuf[i][1] = var->levinfo[i].index;
+      levbuf[i][2] = var->levinfo[i].mlevelID;
+      levbuf[i][3] = var->levinfo[i].flevelID;
+    }
+    xmpi(MPI_Pack(levbuf, var->nlevs * 4, MPI_INT,
+                  buf, size, position, comm));
+  }
   for (i = 0; i < var->atts.nelems; ++i)
     vlistAttsPack(p, varID, buf, size, position, comm);
 }
@@ -1781,7 +1796,7 @@ imax(int a, int b)
 }
 
 
-void vlistVarUnpack(int vlistID, char * buf, int size, int *position, 
+void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
 		    int nspTarget, MPI_Comm comm)
 {
   double dtempbuf[vlistvar_ndbls];
@@ -1792,8 +1807,8 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
                   tempbuf, vlistvar_nints, MPI_INT, comm));
   xmpi(MPI_Unpack(buf, size, position,
                   dtempbuf, vlistvar_ndbls, MPI_DOUBLE, comm));
-  newvar = vlistDefVar ( vlistID, 
-			 namespaceAdaptKey ( tempbuf[1], nspTarget ), 
+  newvar = vlistDefVar ( vlistID,
+			 namespaceAdaptKey ( tempbuf[1], nspTarget ),
 			 namespaceAdaptKey ( tempbuf[2], nspTarget ),
 			 tempbuf[3]);
   if (tempbuf[4] || tempbuf[5] || tempbuf[6] || tempbuf[7])
@@ -1829,9 +1844,9 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   }
   free(varname);
   vlistDefVarDatatype(vlistID, newvar, tempbuf[8]);
-  vlistDefVarInstitut ( vlistID, newvar, 
+  vlistDefVarInstitut ( vlistID, newvar,
 			namespaceAdaptKey ( tempbuf[10], nspTarget ));
-  vlistDefVarModel ( vlistID, newvar, 
+  vlistDefVarModel ( vlistID, newvar,
 		     namespaceAdaptKey ( tempbuf[11], nspTarget ));
   vlistDefVarTable(vlistID, newvar, tempbuf[12]);
   /* FIXME: changing the table might change the param code */
@@ -1845,6 +1860,26 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   vlistDefVarAddoffset(vlistID, newvar, dtempbuf[2]);
   vlistDefVarCompType(vlistID, newvar, tempbuf[17]);
   vlistDefVarCompLevel(vlistID, newvar, tempbuf[18]);
+  {
+    int levbuf[tempbuf[19]][4];
+    var_t *var = vlist_to_pointer(vlistID)->vars + newvar;
+    int nlevs=tempbuf[19], i, flagSetLev;
+    assert(nlevs == var->nlevs);
+    xmpi(MPI_Unpack(buf, size, position,
+                    levbuf, nlevs * 4, MPI_INT, comm));
+    for (i = 0; i < nlevs; ++i)
+    {
+      vlistDefFlag(vlistID, newvar, i, levbuf[i][0]);
+      vlistDefIndex(vlistID, newvar, i, levbuf[i][1]);
+      // FIXME: these lack a accessor function
+      var->levinfo[i].mlevelID = levbuf[i][2];
+      var->levinfo[i].flevelID = levbuf[i][3];
+      if (levbuf[i][0] == tempbuf[0])
+        flagSetLev = i;
+    }
+    vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev][0]);
+  }
+
   vlistAttsUnpack(vlistID, newvar, buf, size, position, comm);
 }
 
