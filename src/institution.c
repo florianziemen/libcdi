@@ -289,3 +289,12 @@ void institutsDefault(void)
      (void) institutDef( 99,   0, "KNMI",      "Royal Netherlands Meteorological Institute");
      /*     (void) institutDef(  0,   0, "IPSL",      "IPSL (Institut Pierre Simon Laplace, Paris, France)"); */
 }
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

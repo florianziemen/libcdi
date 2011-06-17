@@ -22,3 +22,12 @@ int    cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int
 int    cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data, int nmiss);
 
 #endif
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

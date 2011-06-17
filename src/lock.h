@@ -12,3 +12,12 @@
 	   while ( lock == 1 ) sleep(1); \
            lock = 0; \
 	}
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

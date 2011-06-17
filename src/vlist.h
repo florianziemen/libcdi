@@ -114,3 +114,12 @@ int      vlistDelAtts(int vlistID, int varID);
 int      vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2);
 
 #endif  /* _VLIST_H */
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

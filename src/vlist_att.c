@@ -467,3 +467,12 @@ int vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp)
 
   return (status);
 }
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */
