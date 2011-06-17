@@ -29,6 +29,9 @@ config/mkinstalldirs -text
 /configure.ac -text
 doc/cdi_cman.pdf -text
 doc/cdi_fman.pdf -text
+doc/coding_standards/README -text
+doc/coding_standards/footer.c -text
+doc/coding_standards/ref-example.c -text
 doc/tex/FUNCTIONS -text
 doc/tex/Modules -text
 doc/tex/attribute.tex -text
