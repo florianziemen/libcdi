@@ -56,3 +56,12 @@ void swap8byte(void *ptr, size_t size)
       Error("not implemented for %d byte data", sizeof(INT64));
     }
 }
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

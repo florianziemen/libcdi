@@ -93,3 +93,12 @@ void cdiParamToString(int param, char *paramstr, int maxlen)
   if ( len > ( maxlen-1) )
     fprintf(stderr, "Internal problem (%s): size of input string is too small!\n", __func__);
 }
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

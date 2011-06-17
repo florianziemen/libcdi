@@ -12195,3 +12195,12 @@ SWIGEXPORT void Init_CdiLib(void) {
   rb_define_module_function(mCdiLib, "streamInqHistoryString", _wrap_streamInqHistoryString, -1);
 }
 
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

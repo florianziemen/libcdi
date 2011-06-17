@@ -1551,9 +1551,9 @@ void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
   xmpi(MPI_Pack(tempbuf, vlist_nints, MPI_INT, buf, size, position, comm));
   vlistAttsPack(p, CDI_GLOBAL, buf, size, position, comm);
   for ( varID = 0; varID < p->nvars; varID++ )
-  {
-    vlistVarPack(p, varID, buf, size, position, comm);
-  }
+    {
+      vlistVarPack(p, varID, buf, size, position, comm);
+    }
 }
 
 void vlistUnpack(char * buf, int size, int *position, int nspTarget, MPI_Comm comm)
@@ -1572,6 +1572,14 @@ void vlistUnpack(char * buf, int size, int *position, int nspTarget, MPI_Comm co
     vlistVarUnpack ( newvlist, buf, size, position, nspTarget, comm );
 }
 
-
-
 #endif
+
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

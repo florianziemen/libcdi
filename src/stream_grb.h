@@ -22,3 +22,12 @@ int   grib1ltypeToZaxisType(int grib_ltype);
 int   grib2ltypeToZaxisType(int grib_ltype);
 
 #endif  /* _STREAM_GRB_H */
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */
