@@ -423,6 +423,7 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
 
           if ( ! type )
             continue;
+				 
 
           xmpi ( MPI_Pack ( &type, 1, MPI_INT, * packBuffer, 
 			    * packBufferSize, &packBufferPos, comm ));

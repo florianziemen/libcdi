@@ -2082,6 +2082,18 @@ int streamInqVlist(int streamID)
 }
 
 
+int streamInqVlistIDorig(int streamID)
+{
+  stream_t *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
+  
+  stream_check_ptr(__func__, streamptr);
+
+  return (streamptr->vlistIDorig);
+}
+
+
 void streamDefCompType(int streamID, int comptype)
 {
   stream_t *streamptr;

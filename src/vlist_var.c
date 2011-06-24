@@ -1627,12 +1627,6 @@ void vlistDefVarCompType(int vlistID, int varID, int comptype)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
-    {
-      xwarning ( "Operation not executed." );
-      return;
-    }
-
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -1693,12 +1687,6 @@ void     vlistDefVarIOrank   ( int vlistID, int varID, int iorank )
 {
   vlist_t * vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
-    {
-      xwarning ( "Operation not executed." );
-      return;
-    }
-
   vlistptr = vlist_to_pointer(vlistID );
 
   vlistCheckVarID ( __func__, vlistID, varID );
@@ -1712,10 +1700,23 @@ void     vlistDefVarIOrank   ( int vlistID, int varID, int iorank )
   vlistptr->vars[varID].iorank = iorank;
 }
 
+
+int vlistInqVarIOrank(int vlistID, int varID)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  return vlistptr->vars[varID].iorank;
+}
+
+
 #ifdef USE_MPI
 
 enum {
-  vlistvar_nints = 20,
+  vlistvar_nints = 21,
   vlistvar_ndbls = 3,
 };
 
@@ -1760,6 +1761,8 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   var_t *var = p->vars + varID;
   int tempbuf[vlistvar_nints], namesz, longnamesz, stdnamesz, unitssz, i;
 
+  xdebug ( "var->iorank=%d", var->iorank );
+
   tempbuf[0] = var->flag;
   tempbuf[1] = var->gridID;
   tempbuf[2] = var->zaxisID;
@@ -1780,6 +1783,7 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   tempbuf[17] = var->comptype;
   tempbuf[18] = var->complevel;
   tempbuf[19] = var->nlevs;
+  tempbuf[20] = var->iorank;
   dtempbuf[0] = var->missval;
   dtempbuf[1] = var->scalefactor;
   dtempbuf[2] = var->addoffset;
@@ -1905,11 +1909,13 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
     vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev][0]);
   }
 
+  vlistDefVarIOrank(vlistID, newvar, tempbuf[20]);
   vlistAttsUnpack(vlistID, newvar, buf, size, position, comm);
 }
 
 
 #endif
+
 /*
  * Local Variables:
  * c-file-style: "Java"

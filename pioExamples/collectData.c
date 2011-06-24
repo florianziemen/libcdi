@@ -71,8 +71,6 @@ void modelRun ()
   double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
   double var[nlon*nlat*nlev];
 
-  xdebug ();
-
   namespaceInit ( 1, hasLocalFile );
 
   gridID = gridCreate(GRID_LONLAT, nlon*nlat);
@@ -94,8 +92,6 @@ void modelRun ()
   }
   taxisID = taxisCreate(TAXIS_ABSOLUTE);
   vlistDefTaxis(vlistID, taxisID);
-
-  xdebug ();
   
   streamID = streamOpenWrite("example.grb", FILETYPE_GRB);
   if ( streamID < 0 )
@@ -103,21 +99,13 @@ void modelRun ()
       fprintf(stderr, "%s\n", cdiStringError(streamID));
       return;
     }
-
-  xdebug ();
   
 
   streamDefVlist(streamID, vlistID);
 
 #ifdef USE_MPI
-
-  xdebug ();
-  
   pioMetadata2 ( nNodes, nodeSizes );
 #endif 
-
-  xdebug ();
-  
 
   for ( tsID = 0; tsID < ntsteps; tsID++ )
     {
@@ -131,21 +119,15 @@ void modelRun ()
 
 #ifdef USE_MPI
   MPI_Comm_rank ( MPI_COMM_WORLD, &rank ); 
-  if ( rank == 0 )
+  if ( rank == 0 ) reshArrayPrint ( "reshArrayModel" );
 #endif
-    reshArrayPrint ( "reshArrayModel" );
-
-  xdebug ();
   
 
   streamClose(streamID);
   vlistDestroy(vlistID);
   taxisDestroy(taxisID);
   zaxisDestroy(zaxisID);
-  gridDestroy(gridID);
-
-  xdebug ( "out" );
-  
+  gridDestroy(gridID);  
 }
 
 
@@ -167,11 +149,7 @@ int main (int argc, char *argv[])
     if ( nProcsIO <=0 || nProcsIO > ( float ) sizeGlob / 2.0 )
       pcdiAbort ( "bad distribution of tasks on PEs", __FILE__, __func__,
                   __LINE__ );
-#endif  
 
-  xdebug ();
-
-#ifdef USE_MPI
   commModel = pioInit_c ( commGlob, nProcsIO, 0 );
 #endif
 

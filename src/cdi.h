@@ -218,6 +218,7 @@ void     gridGetIndexArray   ( int, int * );
 void     streamGetIndexArray ( int, int * );
 void     zaxisGetIndexAtrray ( int, int * );
 void     vlistDefVarIOrank   ( int, int, int );
+int      vlistInqVarIOrank   ( int, int );
 
   /* CDI control routines */
 
@@ -272,6 +273,7 @@ void    streamDefVlist(int streamID, int vlistID);
 
 /*      streamInqVlist: Get the Vlist of a stream */
 int     streamInqVlist(int streamID);
+int     streamInqVlistIDorig(int streamID);
 
 /*      streamInqFiletype: Get the filetype */
 int     streamInqFiletype(int streamID);

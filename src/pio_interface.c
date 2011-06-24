@@ -197,7 +197,7 @@ void mapProblems ( int problemSizes[], int * problemMapping, int nProblems,
       problemMapping[ dummy[i] ] = writerIdx;
       buckets[writerIdx] +=  *ip[i];
     }
-
+  /*
   if ( ddebug > 2 )
     {
       xprintArray (  "problemSizes = ", problemSizes, nProblems, DATATYPE_INT );     
@@ -207,8 +207,7 @@ void mapProblems ( int problemSizes[], int * problemMapping, int nProblems,
       xprintArray ( "meanBucket", meanBucket, nWriter, DATATYPE_FLT );
       xprintArray ( "actual buckets", buckets, nWriter, DATATYPE_INT );     
     }  
-
-  return;
+  */
 }
 
 /****************************************************/ 
@@ -315,7 +314,7 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
       free ( varMappingNode );
       free ( weightsVarsNode );
     }
-
+  /*
   if ( ddebug > 1 )
     {
       xprintArray ( "varMapping", varMapping, nVars, DATATYPE_INT  );
@@ -326,6 +325,7 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 	buckets[*(varMapping + i ) - nProcsCalc] += * ( vSizes + i );
       xprintArray ( "buckets", buckets, nProcsIO, DATATYPE_INT );
     }
+  */
 }
 #endif
 
@@ -338,26 +338,35 @@ void mapVars ( int nNodes, int * nodeSizes )
   int i, j, k = 0;
 
 #ifdef USE_MPI
+
   nStreams = streamSize ();
-  xdebug ( "nStreams=%d", nStreams );
   resHs       = xmalloc ( nStreams * sizeof ( int ));
   streamSizes = xmalloc ( nStreams * sizeof ( int ));
   streamGetIndexArray ( nStreams, resHs );
+
   for ( i = 0; i < nStreams; i++ )
-    {
-      streamSizes[i] = streamInqNvars ( * ( resHs + i ));
-      xdebug ( "streamSizes[%d]=%d", i, * ( streamSizes + i ));
-    }
+    streamSizes[i] = streamInqNvars ( * ( resHs + i ));
+
   nVars = xsum ( nStreams, streamSizes );
-  xdebug ( "nVars=%d", nVars );
   varSizes   = xmalloc ( nVars * sizeof ( int ));
   varMapping = xmalloc ( nVars * sizeof ( int ));
+
   for ( i = 0; i < nStreams; i++ )
     for ( j = 0; j < * ( streamSizes + i ); j++ )
-      varSizes[k] += vlistInqVarSize ( streamInqVlist ( * resHs + i ), j );
+      varSizes[k++] += vlistInqVarSize ( streamInqVlist ( * resHs + i ), j );
+
   varMapGen ( varSizes, streamSizes, varMapping, 
 	      nStreams, nodeSizes, nNodes );
-  //reshSetVarMapping ( varMapping );
+
+  k = 0;
+  for ( i = 0; i < nStreams; i++ )
+    for ( j = 0; j < * ( streamSizes + i ); j++ )
+      {
+	vlistDefVarIOrank ( streamInqVlist ( * resHs + i ), j, 
+			  * ( varMapping + k ));
+	vlistDefVarIOrank ( streamInqVlistIDorig ( * resHs + i ), j, 
+			  * ( varMapping + k++ ));
+      }
 
   if ( varMapping )  free ( varMapping );
   if ( varSizes )    free ( varSizes );
