@@ -9,6 +9,8 @@
 #include "error.h"
 #include "pio_rpc.h"
 
+extern void file_list_delete ( void );
+
 enum { MIN_ARRAY_SIZE = 128, MIN_BUFF_SIZE = 4096 };
 
 static int *arraySizeAllocated;
@@ -112,7 +114,7 @@ void arrayInitPointer ( void )
 void arrayDestroy ( void )
 {
   node * node;
-  int i, j, nspTemp = namespaceGetActive ();
+  int i, j;
   
   if ( arrayResources )
     {
@@ -132,7 +134,8 @@ void arrayDestroy ( void )
   
   if ( freeListHead ) free ( freeListHead );
   if ( arraySizeAllocated ) free ( arraySizeAllocated );
-  namespaceSetActive ( nspTemp );    
+
+  file_list_delete ();   
 }
 
 

@@ -328,6 +328,8 @@ void stream_delete_entry(stream_t *streamptr)
 
   idx = streamptr->self;
 
+  free ( streamptr );
+
   reshRemove ( idx, &streamOps );
 
   if ( STREAM_Debug )
@@ -512,7 +514,13 @@ int  streamCompareP ( void * streamptr1, void * streamptr2 )
 
 void streamDestroyP ( void * streamptr )
 {
-  fprintf ( stdout, "############### streamDestroyP () is NOT IMPLEMENTED\n" );
+  int id;
+  stream_t * sp = ( stream_t * ) streamptr;
+
+  assert ( sp );
+
+  id = sp->self;
+  streamClose ( id );
 }
 
 

@@ -20,7 +20,6 @@ size_t getpagesize(void);
 #include "file.h"
 
 /* begin deike */
-#include "namespace.h"
 
 #ifdef USE_MPI
 #include "pio.h"
@@ -196,7 +195,7 @@ void file_list_new(void)
   _fileList = (filePtrToIdx *) malloc(_file_max*sizeof(filePtrToIdx));
 }
 
-static
+
 void file_list_delete(void)
 {
   if ( _fileList ) free(_fileList);
@@ -793,7 +792,6 @@ void file_initialize(void)
     }
 
   file_list_new();
-  atexit(file_list_delete);
 
   FILE_LOCK
 
@@ -1126,6 +1124,7 @@ int fileOpen(const char *filename, const char *mode)
     {
       fileptr->mode = fmode;
       fileptr->name = strdupx(filename);
+
 #if defined (HAVE_STRUCT_STAT_ST_BLKSIZE)
       fileptr->blockSize = (size_t) filestat.st_blksize;
 #else

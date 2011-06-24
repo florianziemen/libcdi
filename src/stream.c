@@ -24,6 +24,8 @@
 #include "resource_handle.h"
 #include "pio_util.h"
 
+#include "namespace.h"
+
 #define  MAX_FNAMES  3
 
 extern resOps streamOps;
@@ -608,75 +610,77 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
 
-
-  switch (filetype)
+  if ( namespaceHasLocalFile ( namespaceGetActive ()))
     {
+      switch (filetype)
+	{
 #if  defined  (HAVE_LIBGRIB)
-    case FILETYPE_GRB:
-    case FILETYPE_GRB2:
-      {
-        fileID = gribOpen(filename, filemode);
-	record = (Record *) malloc(sizeof(Record));
-	record->buffer = NULL;
-	break;
-      }
+	case FILETYPE_GRB:
+	case FILETYPE_GRB2:
+	  {
+	    fileID = gribOpen(filename, filemode);
+	    record = (Record *) malloc(sizeof(Record));
+	    record->buffer = NULL;
+	    break;
+	  }
 #endif
 #if  defined  (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:
-      {
-        fileID = fileOpen(filename, filemode);
-	record = (Record *) malloc(sizeof(Record));
-	record->buffer = NULL;
-	record->srvp   = srvNew();
-	break;
-      }
+	case FILETYPE_SRV:
+	  {
+	    fileID = fileOpen(filename, filemode);
+	    record = (Record *) malloc(sizeof(Record));
+	    record->buffer = NULL;
+	    record->srvp   = srvNew();
+	    break;
+	  }
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:
-      {
-        fileID = fileOpen(filename, filemode);
-	record = (Record *) malloc(sizeof(Record));
-	record->buffer = NULL;
-	record->extp   = extNew();
-	break;
-      }
+	case FILETYPE_EXT:
+	  {
+	    fileID = fileOpen(filename, filemode);
+	    record = (Record *) malloc(sizeof(Record));
+	    record->buffer = NULL;
+	    record->extp   = extNew();
+	    break;
+	  }
 #endif
 #if  defined  (HAVE_LIBIEG)
-    case FILETYPE_IEG:
-      {
-        fileID = fileOpen(filename, filemode);
-	record = (Record *) malloc(sizeof(Record));
-	record->buffer = NULL;
-	record->iegp   = iegNew();
-	break;
-      }
+	case FILETYPE_IEG:
+	  {
+	    fileID = fileOpen(filename, filemode);
+	    record = (Record *) malloc(sizeof(Record));
+	    record->buffer = NULL;
+	    record->iegp   = iegNew();
+	    break;
+	  }
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-      {
-	fileID = cdfOpen(filename, filemode);
-	break;
-      }
-    case FILETYPE_NC2:
-      {
-	fileID = cdfOpen64(filename, filemode);
-	break;
-      }
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
-      {
-	fileID = cdf4Open(filename, filemode, &filetype);
-	break;
-      }
- #endif
-    default:
-      {
-	if ( CDI_Debug ) Message("%s support not compiled in!", strfiletype(filetype));
-	return (CDI_ELIBNAVAIL);
-      }
+	case FILETYPE_NC:
+	  {
+	    fileID = cdfOpen(filename, filemode);
+	    break;
+	  }
+	case FILETYPE_NC2:
+	  {
+	    fileID = cdfOpen64(filename, filemode);
+	    break;
+	  }
+	case FILETYPE_NC4:
+	case FILETYPE_NC4C:
+	  {
+	    fileID = cdf4Open(filename, filemode, &filetype);
+	    break;
+	  }
+#endif
+	default:
+	  {
+	    if ( CDI_Debug ) Message("%s support not compiled in!", strfiletype(filetype));
+	    return (CDI_ELIBNAVAIL);
+	  }
+	}
     }
 
-  if ( fileID < 0 )
+  if ( fileID < 0 && namespaceHasLocalFile ( namespaceGetActive ()) )
     {
       streamID = fileID;
     }
@@ -1102,6 +1106,7 @@ void streamClose(int streamID)
   int vlistID;
   stream_t *streamptr;
 
+
   streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
@@ -1113,68 +1118,71 @@ void streamClose(int streamID)
   filetype = streamptr->filetype;
   vlistID  = streamptr->vlistID;
 
-  if ( fileID == CDI_UNDEFID )
-    Warning("File %s not open!", streamptr->filename);
-  else
-    switch (filetype)
-      {
+  if ( namespaceHasLocalFile ( namespaceGetActive ()))
+    {
+      if ( fileID == CDI_UNDEFID )
+	Warning("File %s not open!", streamptr->filename);
+      else
+	switch (filetype)
+	  {
 #if  defined  (HAVE_LIBGRIB)
-      case FILETYPE_GRB:
-      case FILETYPE_GRB2:
-	{
-	  gribClose(fileID);
-	  gribContainersDelete(streamID);
-	  break;
-	}
+	  case FILETYPE_GRB:
+	  case FILETYPE_GRB2:
+	    {
+	      gribClose(fileID);
+	      gribContainersDelete(streamID);
+	      break;
+	    }
 #endif
 #if  defined  (HAVE_LIBSERVICE)
-      case FILETYPE_SRV:
-	{
-	  fileClose(fileID);
-	  srvDelete(streamptr->record->srvp);
-	  break;
-	}
+	  case FILETYPE_SRV:
+	    {
+	      fileClose(fileID);
+	      srvDelete(streamptr->record->srvp);
+	      break;
+	    }
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-      case FILETYPE_EXT:
-	{
-	  fileClose(fileID);
-	  extDelete(streamptr->record->extp);
-	  break;
-	}
+	  case FILETYPE_EXT:
+	    {
+	      fileClose(fileID);
+	      extDelete(streamptr->record->extp);
+	      break;
+	    }
 #endif
 #if  defined  (HAVE_LIBIEG)
-      case FILETYPE_IEG:
-	{
-	  fileClose(fileID);
-	  iegDelete(streamptr->record->iegp);
-	  break;
-	}
+	  case FILETYPE_IEG:
+	    {
+	      fileClose(fileID);
+	      iegDelete(streamptr->record->iegp);
+	      break;
+	    }
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-      case FILETYPE_NC:
-      case FILETYPE_NC2:
-      case FILETYPE_NC4:
-      case FILETYPE_NC4C:
-	{
-	  cdfClose(fileID);
-	  break;
-	}
+	  case FILETYPE_NC:
+	  case FILETYPE_NC2:
+	  case FILETYPE_NC4:
+	  case FILETYPE_NC4C:
+	    {
+	      cdfClose(fileID);
+	      break;
+	    }
 #endif
-      default:
+	  default:
+	    {
+	      Error("%s support not compiled in!", strfiletype(filetype));
+	      break;
+	    }
+	  }
+    }
+      
+      if ( streamptr->record )
 	{
-	  Error("%s support not compiled in!", strfiletype(filetype));
-	  break;
-	}
-      }
-
-  if ( streamptr->record )
-    {
-      if ( streamptr->record->buffer )
-	free(streamptr->record->buffer);
-
-      free(streamptr->record);
-    }  
+	  if ( streamptr->record->buffer )
+	    free(streamptr->record->buffer);
+	  
+	  free(streamptr->record);
+	}  
 
   streamptr->filetype = 0;
   if ( streamptr->filename ) free(streamptr->filename);
