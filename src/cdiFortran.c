@@ -58,11 +58,14 @@
 
 FCALLSCFUN3 (INT, pioInit, PIOINIT, pioinit, INT, INT, INT)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
-FCALLSCSUB0 (pioMetadata, PIOMETADATA, piometadata)
+FCALLSCSUB2 (pioMetadata, PIOMETADATA, piometadata, INT, PINT)
 FCALLSCSUB2 (namespaceInit, NAMESPACEINIT, namespaceinit, INT, PINT)
 FCALLSCSUB1 (namespaceSetActive, NAMESPACESETACTIVE, namespacesetactive, INT)
 FCALLSCSUB2 (gridGetIndexArray, GRIDGETINDEXARRAY, gridgetindexarray, INT, PINT)
+FCALLSCSUB2 (streamGetIndexArray, STREAMGETINDEXARRAY, streamgetindexarray, INT, PINT)
 FCALLSCSUB2 (zaxisGetIndexArray, ZAXISGETINDEXARRAY, zaxisgetindexarray, INT, PINT)
+FCALLSCSUB3 (vlistDefVarIOrank, VLISTDEFVARIORANK, vlistdefvariorank, INT, INT, INT)
+FCALLSCFUN2 (INT, vlistInqVarIOrank, VLISTINQVARIORANK, vlistinqvariorank, INT, INT)
 FCALLSCFUN1 (STRING, cdiStringError, CDISTRINGERROR, cdistringerror, INT)
 FCALLSCSUB1 (cdiDebug, CDIDEBUG, cdidebug, INT)
 FCALLSCFUN0 (STRING, cdiLibraryVersion, CDILIBRARYVERSION, cdilibraryversion)
@@ -93,6 +96,7 @@ FCALLSCSUB1 (streamClose, STREAMCLOSE, streamclose, INT)
 FCALLSCSUB1 (streamSync, STREAMSYNC, streamsync, INT)
 FCALLSCSUB2 (streamDefVlist, STREAMDEFVLIST, streamdefvlist, INT, INT)
 FCALLSCFUN1 (INT, streamInqVlist, STREAMINQVLIST, streaminqvlist, INT)
+FCALLSCFUN1 (INT, streamInqVlistIDorig, STREAMINQVLISTIDORIG, streaminqvlistidorig, INT)
 FCALLSCFUN1 (INT, streamInqFiletype, STREAMINQFILETYPE, streaminqfiletype, INT)
 FCALLSCSUB2 (streamDefByteorder, STREAMDEFBYTEORDER, streamdefbyteorder, INT, INT)
 FCALLSCFUN1 (INT, streamInqByteorder, STREAMINQBYTEORDER, streaminqbyteorder, INT)
@@ -105,6 +109,7 @@ FCALLSCFUN2 (INT, streamInqTimestep, STREAMINQTIMESTEP, streaminqtimestep, INT, 
 FCALLSCFUN1 (STRING, streamFilename, STREAMFILENAME, streamfilename, INT)
 FCALLSCFUN1 (STRING, streamFilesuffix, STREAMFILESUFFIX, streamfilesuffix, INT)
 FCALLSCFUN1 (INT, streamNtsteps, STREAMNTSTEPS, streamntsteps, INT)
+FCALLSCFUN1 (INT, streamInqNvars, STREAMINQNVARS, streaminqnvars, INT)
 
 /*  STREAM var I/O routines  */
 
@@ -444,12 +449,3 @@ FCALLSCFUN1 (INT, streamInqHistorySize, STREAMINQHISTORYSIZE, streaminqhistorysi
 FCALLSCSUB2 (streamInqHistoryString, STREAMINQHISTORYSTRING, streaminqhistorystring, INT, PSTRING)
 
 #endif
-/*
- * Local Variables:
- * c-file-style: "Java"
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * show-trailing-whitespace: t
- * require-trailing-newline: t
- * End:
- */

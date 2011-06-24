@@ -208,7 +208,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
     {
       strncpy ( hostname, myHost, len );
       hostname [ len ] = '\0';
-      xdebug ( "myHost = %s\n", hostname );
+      xdebug ( "myHost = %s", hostname );
     }
 
   allHosts = ( char ** ) xmalloc ( size * sizeof ( char * ));
@@ -253,10 +253,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
   free ( allHosts );
   free ( myHost );
 
-  if ( ddebug == MAXDEBUG )
-    fprintf ( stderr,
-              "pe%d in setPioCommunicator, color=%d, before return\n",
-              rank, *color );
+  xdebug ( "color=%d", *color );
 
   return;
 }
@@ -272,7 +269,6 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
   *nnodes = 1;
   *color = 1;
 
-  if ( ddebug == MAXDEBUG ) xdebug ();
 #ifdef USE_MPI
   MPI_Comm_size ( comm, &size );
   MPI_Comm_rank ( comm, &rank );
@@ -287,8 +283,6 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
 
   pioinfo = ( pioInfo * ) xmalloc ( sizeof ( pioInfo ));
 
-  xdebug ();
-
   pioinfo->type = ptype;
 
   setPioCommunicator ( & ( pioinfo->comm ), comm, color, nnodes );
@@ -298,22 +292,14 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
 
   pioinfo->color = *color;
 
-  xdebug ();
   MPI_Comm_rank ( pioinfo->comm, &( pioinfo->rank ));
   MPI_Comm_size ( pioinfo->comm, &( pioinfo->size ));
 
-  xdebug ();
-
-  // if ( ddebug == MAXDEBUG && pioinfo->rank == 0 )
-  //fprintf ( stderr,
-	      xdebug(
-              "pe%d in bInit(), ptype=%d, initial_buffersize=%ld: "
-              "after init pioinfo ...\n",
-              pioinfo->rank, pioinfo->type, initial_buffersize );
+  xdebug( "pe%d in bInit(), ptype=%d, initial_buffersize=%ld: "
+          "after init pioinfo ...",
+          pioinfo->rank, pioinfo->type, initial_buffersize );
 
   pioinfo->collectorComm = MPI_COMM_NULL;
-
-  xdebug ();
 
   switch ( pioinfo->type )
     {
@@ -344,7 +330,7 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
     }
 #endif
 
-  xdebug ("bInit out\n" );
+  xdebug ("out" );
 
 #ifdef USE_MPI
   return pioinfo->collectorComm;

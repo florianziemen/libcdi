@@ -209,8 +209,7 @@ extern "C" {
 
 int      pioInit            ( int, int, int );
 void     pioFinalize        ( void );
-void     pioMetadata        ( void );
-void     pioMetadata2       ( int, int * );
+void     pioMetadata        ( int, int * );
 
 void     namespaceInit      ( int, int * );
 void     namespaceSetActive ( int );

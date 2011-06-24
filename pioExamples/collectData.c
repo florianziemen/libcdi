@@ -104,9 +104,10 @@ void modelRun ()
   streamDefVlist(streamID, vlistID);
 
 #ifdef USE_MPI
-  pioMetadata2 ( nNodes, nodeSizes );
+  pioMetadata ( nNodes, nodeSizes );
 #endif 
 
+  /*
   for ( tsID = 0; tsID < ntsteps; tsID++ )
     {
       taxisDefVdate(taxisID, 19850101+tsID);
@@ -116,6 +117,7 @@ void modelRun ()
       for ( i = 0; i < nlon*nlat*nlev; i++ ) var[i] = 2.2;
       streamWriteVar(streamID, varID, var, nmiss);
     }
+  */
 
 #ifdef USE_MPI
   MPI_Comm_rank ( MPI_COMM_WORLD, &rank ); 

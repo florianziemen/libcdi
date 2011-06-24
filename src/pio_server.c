@@ -55,7 +55,6 @@ void IOServer ( MPI_Comm comm, int ptype )
      
   nfinished = 0;
   commColl = bInit ( ptype, comm, &color, &nnodes );
-  xdebug();
 
   for ( ;; )
     {  

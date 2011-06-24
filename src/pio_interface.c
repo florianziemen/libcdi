@@ -389,30 +389,7 @@ void modelWinCreate ( void )
 /************************************************************************/
 
 
-void  pioMetadata ( void )
-{
-#ifdef USE_MPI
-  char   * buffer;
-  int bufferSize;
-
-  if ( rankGlob < nProcsIO )
-    {
-      reshPackBufferCreate ( &buffer, &bufferSize, commsIO[rankGlob] );
-      
-      MPI_Send ( buffer, bufferSize, MPI_PACKED, nProcsCalc, 
-		 METADATA, * ( commsIO + rankGlob ));
-      
-      xdebug ( "sent message metadata" );
-      
-      reshPackBufferDestroy ( &buffer );
-    }
-#endif
-}
-
-/************************************************************************/
-
-
-void  pioMetadata2 ( int nNodes, int * nodeSizes )
+void  pioMetadata ( int nNodes, int * nodeSizes )
 {
 #ifdef USE_MPI
   char   * buffer;

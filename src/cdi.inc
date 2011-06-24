@@ -335,8 +335,6 @@
       PARAMETER (PIO_POSIX_FPGUARD_THREAD_REFUSE =  5)
       INTEGER    PIO_POSIX_FPGUARD_THREAD
       PARAMETER (PIO_POSIX_FPGUARD_THREAD =  6)
-      INTEGER    TEST_LOCAL            
-      PARAMETER (TEST_LOCAL             =  1)
       INTEGER         pioInit
 !                                    (INTEGER         ,
 !                                     INTEGER         ,
@@ -347,6 +345,8 @@
       EXTERNAL        pioFinalize
 
 !                     pioMetadata
+!                                    (INTEGER         ,
+!                                     INTEGER         )
       EXTERNAL        pioMetadata
 
 !                     namespaceInit
@@ -363,10 +363,26 @@
 !                                     INTEGER         )
       EXTERNAL        gridGetIndexArray
 
+!                     streamGetIndexArray
+!                                    (INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        streamGetIndexArray
+
 !                     zaxisGetIndexArray
 !                                    (INTEGER         ,
 !                                     INTEGER         )
       EXTERNAL        zaxisGetIndexArray
+
+!                     vlistDefVarIOrank
+!                                    (INTEGER         ,
+!                                     INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        vlistDefVarIOrank
+
+      INTEGER         vlistInqVarIOrank
+!                                    (INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        vlistInqVarIOrank
 
       CHARACTER*80    cdiStringError
 !                                    (INTEGER         cdiErrno)
@@ -478,6 +494,10 @@
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqVlist
 
+      INTEGER         streamInqVlistIDorig
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamInqVlistIDorig
+
       INTEGER         streamInqFiletype
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqFiletype
@@ -530,6 +550,10 @@
       INTEGER         streamNtsteps
 !                                    (INTEGER         streamID)
       EXTERNAL        streamNtsteps
+
+      INTEGER         streamInqNvars
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamInqNvars
 
 !
 !  STREAM var I/O routines

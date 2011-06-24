@@ -182,9 +182,10 @@ void modelRun ()
   streamDefVlist(streamID, vlistID);
 
 #ifdef USE_MPI
-  pioMetadata ();
+  pioMetadata ( nNodes, nodeSizes );
 #endif 
 
+  /*
   // Loop over the number of time steps
   for ( tsID = 0; tsID < ntsteps; tsID++ )
     {
@@ -204,6 +205,7 @@ void modelRun ()
       streamWriteVar(streamID, varID1, var1, nmiss);
       streamWriteVar(streamID, varID2, var2, nmiss);
     }
+  */
 
 #ifdef USE_MPI
   MPI_Comm_rank ( MPI_COMM_WORLD, &rank ); 
