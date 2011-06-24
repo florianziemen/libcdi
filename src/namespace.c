@@ -133,6 +133,23 @@ int namespaceAdaptKey ( int key, int nspTarget )
  
   return namespaceIdxEncode2 ( nsp, tin.idx );
 }
+
+
+int namespaceAdaptKey2 ( int key )
+{
+  namespaceTuple_t tin;
+  int nsp;
+
+  if ( key == CDI_UNDEFID ) return CDI_UNDEFID;
+
+  tin.idx = key & idxmask;
+  tin.nsp = (int)(((unsigned)( key & nspmask )) >> idxbits);
+
+  nsp = namespaceGetActive ();
+ 
+  return namespaceIdxEncode2 ( nsp, tin.idx );
+}
+
 /*
  * Local Variables:
  * c-file-style: "Java"

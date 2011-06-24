@@ -15,7 +15,8 @@
 extern void   gridUnpack ( char *, int, int *, int, MPI_Comm );
 extern void  zaxisUnpack ( char *, int, int *, int, MPI_Comm );
 extern void  taxisUnpack ( char *, int, int *, int, MPI_Comm );
-extern void streamUnpack ( char *, int, int *, int, MPI_Comm );
+extern double cdiDefaultMissval;  
+extern int streamNint;
 
 
 MPI_Comm commGlob;
@@ -101,6 +102,49 @@ void commsIOCleanup ()
   for ( i = 0; i < nProcsIO; i++ )
     if ( rankGlob < nProcsCalc || rankGlob == nProcsCalc + i )
       MPI_Comm_free ( commsIO + i );;
+}
+
+
+/*****************************************************************************/
+
+
+void streamUnpack ( char * unpackBuffer, int unpackBufferSize, 
+		   int * unpackBufferPos, int nspTarget, MPI_Comm comm )
+{
+  int intBuffer[streamNint], streamID;
+  double d;
+  char filename[CDI_MAX_NAME];
+
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      intBuffer, streamNint, MPI_INT, comm ));
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &d, 1, MPI_DOUBLE, comm ));
+
+  if ( xchecksum ( DATATYPE_INT, streamNint, intBuffer ) != d ) xabort ("");
+
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &cdiDefaultMissval, 1, MPI_DOUBLE, comm ));
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &filename, intBuffer[2], MPI_CHAR, comm ));
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &d, 1, MPI_DOUBLE, comm ));
+  if ( d != xchecksum ( DATATYPE_TXT, intBuffer[2], filename )) xabort ("");
+
+  streamID = streamOpenWrite ( filename, intBuffer[1] );
+  if ( streamID < 0 ) xabort ( "can not open output file" );
+  if ( namespaceAdaptKey ( intBuffer[0], nspTarget ) != streamID )
+    xabort ("");
+
+  streamDefVlist ( streamID, namespaceAdaptKey ( intBuffer[4], nspTarget ));
+  if ( streamInqVlist ( streamID ) != namespaceAdaptKey ( intBuffer[3], nspTarget ))
+    xabort ("");
+
+  streamDefByteorder ( streamID, intBuffer[5] );
+  streamDefCompType  ( streamID, intBuffer[6] );
+  streamDefCompLevel ( streamID, intBuffer[7] ); 
+  cdiDefGlobal  ( "REGULARGRID", intBuffer[8] );
+  cdiDefGlobal     ( "SORTNAME", intBuffer[9] );
+  cdiDefGlobal ( "HAVE_MISSVAL", intBuffer[10] );
 }
 
 

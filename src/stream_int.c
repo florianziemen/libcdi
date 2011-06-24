@@ -311,9 +311,7 @@ stream_t *stream_new_entry(void)
   cdiInitialize(); /* ***************** make MT version !!! */
 
   streamptr = (stream_t *) xmalloc(sizeof(stream_t));
-
   streamDefaultValue ( streamptr );
-
   streamptr->self = reshPut (( void * ) streamptr, &streamOps );
 
   return streamptr;
@@ -327,9 +325,7 @@ void stream_delete_entry(stream_t *streamptr)
   assert ( streamptr );
 
   idx = streamptr->self;
-
   free ( streamptr );
-
   reshRemove ( idx, &streamOps );
 
   if ( STREAM_Debug )
@@ -506,9 +502,32 @@ int cdiInqAccesstype(int streamID)
 
 int  streamCompareP ( void * streamptr1, void * streamptr2 )
 {
-  fprintf ( stdout, "############### streamCompareP () is NOT IMPLEMENTED\n" );
+  stream_t * s1 = ( stream_t * ) streamptr1;
+  stream_t * s2 = ( stream_t * ) streamptr2;
+  int differ = -1;
+  int equal  = 0;
+  int len;
 
-  return 0;
+  assert ( s1 );
+  assert ( s2 );
+
+  if ( s1->filetype  != s2->filetype  ) return differ;
+  if (  namespaceAdaptKey2 ( s1->vlistIDorig ) != 			     
+	namespaceAdaptKey2 ( s2->vlistIDorig )) return differ;
+  if ( s1->byteorder != s2->byteorder ) return differ;
+  if ( s1->comptype  != s2->comptype  ) return differ;
+  if ( s1->complevel != s2->complevel ) return differ; 
+
+  if ( s1->filename )
+    {
+      len = strlen ( s1->filename ) + 1;
+      if ( memcmp ( s1->filename, s2->filename, len )) 
+	return differ;
+    }
+  else if ( s2->filename ) 
+    return differ;
+
+  return equal;
 }
 
 
@@ -579,6 +598,7 @@ void streamPrintP   ( void * streamptr, FILE * fp )
   fprintf ( fp, "nfiles        = %d\n", sp->nfiles );
   fprintf ( fp, "//  char    **fnames;\n" );
   fprintf ( fp, "//  void     *gribContainers;\n" );
+  fprintf ( fp, "vlistIDorig   = %d\n", sp->vlistIDorig );
 }
 
 
@@ -590,7 +610,7 @@ streamTxCode ( void )
 }
 
 
-enum { streamNint = 11 };
+int streamNint = 11 ;
 
 
 static
@@ -612,48 +632,6 @@ int streamGetPackSize ( void * voidP, MPI_Comm comm )
   packBufferSize += size;
 
   return packBufferSize;
-}
-
-
-void streamUnpack ( char * unpackBuffer, int unpackBufferSize, 
-		   int * unpackBufferPos, int nspTarget, MPI_Comm comm )
-{
-  int intBuffer[streamNint], streamID;
-  double d;
-  char filename[CDI_MAX_NAME];
-
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      intBuffer, streamNint, MPI_INT, comm ));
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      &d, 1, MPI_DOUBLE, comm ));
-
-  if ( xchecksum ( DATATYPE_INT, streamNint, intBuffer ) != d ) xabort ("");
-
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      &cdiDefaultMissval, 1, MPI_DOUBLE, comm ));
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      &filename, intBuffer[2], MPI_CHAR, comm ));
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      &d, 1, MPI_DOUBLE, comm ));
-  if ( d != xchecksum ( DATATYPE_TXT, intBuffer[2], filename )) xabort ("");
-
-  xdebug ( "%s, type=%d", filename, intBuffer[1] );
-
-  streamID = streamOpenWrite ( filename, intBuffer[1] );
-  if ( streamID < 0 ) xabort ( "can not open output file" );
-  if ( namespaceAdaptKey ( intBuffer[0], nspTarget ) != streamID )
-    xabort ("");
-
-  streamDefVlist ( streamID, namespaceAdaptKey ( intBuffer[4], nspTarget ));
-  if ( streamInqVlist ( streamID ) != namespaceAdaptKey ( intBuffer[3], nspTarget ))
-    xabort ("");
-
-  streamDefByteorder ( streamID, intBuffer[5] );
-  streamDefCompType  ( streamID, intBuffer[6] );
-  streamDefCompLevel ( streamID, intBuffer[7] ); 
-  cdiDefGlobal  ( "REGULARGRID", intBuffer[8] );
-  cdiDefGlobal     ( "SORTNAME", intBuffer[9] );
-  cdiDefGlobal ( "HAVE_MISSVAL", intBuffer[10] );
 }
 
 
