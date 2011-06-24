@@ -1812,8 +1812,7 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
     xmpi(MPI_Pack(levbuf, var->nlevs * 4, MPI_INT,
                   buf, size, position, comm));
   }
-  for (i = 0; i < var->atts.nelems; ++i)
-    vlistAttsPack(p, varID, buf, size, position, comm);
+  vlistAttsPack(p, varID, buf, size, position, comm);
 }
 
 static inline int
