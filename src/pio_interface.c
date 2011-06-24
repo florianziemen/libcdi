@@ -19,7 +19,7 @@
 #include "pio_server.h"
 #include "namespace.h"
 #include "resource_handle.h"
-
+#include "stream_int.h"
 #endif
 
 #define xprintArray(ps,array,n,datatype) printArray ( ps, array, n, datatype, \
@@ -91,6 +91,8 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int mode )
       MPI_Finalize ();
       exit ( 0 );
     }
+
+  xdebug ( "out" );
   
   return commModel;
 }
@@ -329,8 +331,56 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 
 /************************************************************************/
 
+static
+void mapVars ( int nNodes, int * nodeSizes )
+{
+  int nStreams, nVars, * resHs, * streamSizes, * varSizes, * varMapping;
+  int i, j, k = 0;
 
-void  pioMetadata ()
+#ifdef USE_MPI
+  nStreams = streamSize ();
+  xdebug ( "nStreams=%d", nStreams );
+  resHs       = xmalloc ( nStreams * sizeof ( int ));
+  streamSizes = xmalloc ( nStreams * sizeof ( int ));
+  streamGetIndexArray ( nStreams, resHs );
+  for ( i = 0; i < nStreams; i++ )
+    {
+      streamSizes[i] = streamInqNvars ( * ( resHs + i ));
+      xdebug ( "streamSizes[%d]=%d", i, * ( streamSizes + i ));
+    }
+  nVars = xsum ( nStreams, streamSizes );
+  xdebug ( "nVars=%d", nVars );
+  varSizes   = xmalloc ( nVars * sizeof ( int ));
+  varMapping = xmalloc ( nVars * sizeof ( int ));
+  for ( i = 0; i < nStreams; i++ )
+    for ( j = 0; j < * ( streamSizes + i ); j++ )
+      varSizes[k] += vlistInqVarSize ( streamInqVlist ( * resHs + i ), j );
+  varMapGen ( varSizes, streamSizes, varMapping, 
+	      nStreams, nodeSizes, nNodes );
+  //reshSetVarMapping ( varMapping );
+
+  if ( varMapping )  free ( varMapping );
+  if ( varSizes )    free ( varSizes );
+  if ( streamSizes ) free ( streamSizes );
+  if ( resHs )       free ( resHs );
+  
+#endif
+}
+
+/************************************************************************/
+
+static
+void modelWinCreate ( void )
+{
+#ifdef USE_MPI
+  xdebug ();
+#endif
+}
+
+/************************************************************************/
+
+
+void  pioMetadata ( void )
 {
 #ifdef USE_MPI
   char   * buffer;
@@ -350,7 +400,36 @@ void  pioMetadata ()
 #endif
 }
 
+/************************************************************************/
+
+
+void  pioMetadata2 ( int nNodes, int * nodeSizes )
+{
+#ifdef USE_MPI
+  char   * buffer;
+  int bufferSize;
+
+  mapVars ( nNodes, nodeSizes );
+
+  if ( rankGlob < nProcsIO )
+    {
+      reshPackBufferCreate ( &buffer, &bufferSize, commsIO[rankGlob] );
+      
+      MPI_Send ( buffer, bufferSize, MPI_PACKED, nProcsCalc, 
+		 METADATA, * ( commsIO + rankGlob ));
+      
+      xdebug ( "sent message metadata" );
+      
+      reshPackBufferDestroy ( &buffer );
+    }
+
+  modelWinCreate ();
+#endif
+}
+
+
 /****************************************************/
+
 
 /**
   @brief is invoked by the calculator PEs, to inform
@@ -376,6 +455,17 @@ void pioFinalize ()
   namespaceCleanup ();
 #endif
 }
+
+
+/************************************************************************/
+
+
+void pioWriteVar ()
+{
+#ifdef USE_MPI
+#endif
+}
+
 
 /************************************************************************/
 /*

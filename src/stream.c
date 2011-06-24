@@ -610,6 +610,9 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
 
+  xdebug( "namespaceHasLocalFile(%d)=%s", namespaceGetActive(), 
+	  namespaceHasLocalFile ( namespaceGetActive ()) ? "true":"false");
+
   if ( namespaceHasLocalFile ( namespaceGetActive ()))
     {
       switch (filetype)
@@ -618,6 +621,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	case FILETYPE_GRB:
 	case FILETYPE_GRB2:
 	  {
+	    xdebug();
 	    fileID = gribOpen(filename, filemode);
 	    record = (Record *) malloc(sizeof(Record));
 	    record->buffer = NULL;

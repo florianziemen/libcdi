@@ -1222,6 +1222,8 @@ gribExSP(int *isec0, int *isec1, int *isec2, float *fsec2sp, int *isec3,
 
       for ( j = 0; j < inum; j++ ) fsec4dp[j] = fsec4sp[j];
 
+
+  printf ( "########## %s, %s, %d\n", __FILE__, __func__, __LINE__ );
       gribExDP(isec0, isec1, isec2, fsec2dp, isec3,
 	       fsec3dp, isec4, fsec4dp, klenp, kgrib,
 	       kleng, kword, hoper, kret);
@@ -1236,6 +1238,8 @@ gribExSP(int *isec0, int *isec1, int *isec2, float *fsec2sp, int *isec3,
       for ( j = 0; j < 10; j++ ) fsec2dp[j] = 0.0;
       for ( j = 0; j <  2; j++ ) fsec3dp[j] = 0.0;
 
+
+  printf ( "########## %s, %s, %d\n", __FILE__, __func__, __LINE__ );
       gribExDP(isec0, isec1, isec2, fsec2dp, isec3,
 	       fsec3dp, isec4, fsec4dp, klenp, kgrib,
 	       kleng, kword, hoper, kret);

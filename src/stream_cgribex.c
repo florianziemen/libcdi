@@ -14,6 +14,7 @@
 #include "vlist.h"
 #include "stream_grb.h"
 
+
 #if  defined  (HAVE_LIBCGRIBEX)
 #  include "cgribex.h"
 #endif
@@ -488,6 +489,8 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
 			 int *gribbuffer, int recsize, int *lmv)
 {
   int iret = 0, ipunp = 0, iword = 0;
+
+  printf ( "########## %s, %s, %d\n", __FILE__, __func__, __LINE__ );
 
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
 	   ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);
@@ -1390,6 +1393,8 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
 	}
     }
 
+
+  printf ( "########## %s, %s, %d\n", __FILE__, __func__, __LINE__ );
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, data,
 	   gridsize, (int *) gribbuffer, gribsize, &iword, hoper, &iret);
 

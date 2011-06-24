@@ -208,7 +208,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
     {
       strncpy ( hostname, myHost, len );
       hostname [ len ] = '\0';
-      fprintf ( stderr, "pe%d: myHost = %s\n", rank,  hostname );
+      xdebug ( "myHost = %s\n", hostname );
     }
 
   allHosts = ( char ** ) xmalloc ( size * sizeof ( char * ));
@@ -287,6 +287,8 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
 
   pioinfo = ( pioInfo * ) xmalloc ( sizeof ( pioInfo ));
 
+  xdebug ();
+
   pioinfo->type = ptype;
 
   setPioCommunicator ( & ( pioinfo->comm ), comm, color, nnodes );
@@ -295,16 +297,23 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
     xabort ( "PIOTYPE, NNODES: not a valid combination" );
 
   pioinfo->color = *color;
+
+  xdebug ();
   MPI_Comm_rank ( pioinfo->comm, &( pioinfo->rank ));
   MPI_Comm_size ( pioinfo->comm, &( pioinfo->size ));
 
-  if ( ddebug == MAXDEBUG && pioinfo->rank == 0 )
-    fprintf ( stderr,
+  xdebug ();
+
+  // if ( ddebug == MAXDEBUG && pioinfo->rank == 0 )
+  //fprintf ( stderr,
+	      xdebug(
               "pe%d in bInit(), ptype=%d, initial_buffersize=%ld: "
               "after init pioinfo ...\n",
               pioinfo->rank, pioinfo->type, initial_buffersize );
 
   pioinfo->collectorComm = MPI_COMM_NULL;
+
+  xdebug ();
 
   switch ( pioinfo->type )
     {
@@ -335,8 +344,7 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
     }
 #endif
 
-  if ( ddebug == MAXDEBUG )
-    fprintf ( stderr, "pe in bInit out\n" );
+  xdebug ("bInit out\n" );
 
 #ifdef USE_MPI
   return pioinfo->collectorComm;

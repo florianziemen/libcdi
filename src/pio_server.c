@@ -22,6 +22,13 @@ extern void reshArrayPrint ( char * );
 MPI_Comm * commPio;
 
 
+/************************************************************************/
+
+void serverWinCreate ()
+{
+  xdebug ();
+}
+
 
 /************************************************************************/
 
@@ -48,10 +55,13 @@ void IOServer ( MPI_Comm comm, int ptype )
      
   nfinished = 0;
   commColl = bInit ( ptype, comm, &color, &nnodes );
+  xdebug();
 
   for ( ;; )
     {  
       MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commCalc, &status );
+
+      xdebug();
       
       source = status.MPI_SOURCE;
       tag    = status.MPI_TAG;
@@ -81,13 +91,16 @@ void IOServer ( MPI_Comm comm, int ptype )
 
 	  if  ( ddebug >= 2 ) xdebugMsg (  tag, source, nfinished );
 
+	  serverWinCreate ();
+
+	  break;
+
+	case WRITEVAR:
+	  xdebug("WRITEVAR");
 	  break;
 
 	default:
-	  MPI_Recv ( &iBuffer, 1, MPI_INTEGER, source,
-		     tag, commCalc, &status );
-
-	  if ( ddebug >= 2 ) xdebugMsg ( tag, source, nfinished );
+	  xabort ( "" );
 	}
     }
     

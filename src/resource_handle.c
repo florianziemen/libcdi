@@ -9,6 +9,7 @@
 #include "error.h"
 #include "pio_rpc.h"
 
+
 extern void file_list_delete ( void );
 
 enum { MIN_ARRAY_SIZE = 128, MIN_BUFF_SIZE = 4096 };
@@ -653,6 +654,7 @@ void reshArrayPrint ( char * filename )
 
   namespaceSetActive ( temp );
 }
+
 /*
  * Local Variables:
  * c-file-style: "Java"

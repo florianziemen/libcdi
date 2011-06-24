@@ -53,6 +53,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].complevel    = 1;
   vlistptr->vars[varID].atts.nalloc  = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems  = 0;
+  vlistptr->vars[varID].iorank       = CDI_UNDEFID;
 }
 
 static
@@ -1685,6 +1686,30 @@ int vlistInqVarCompLevel(int vlistID, int varID)
   vlistCheckVarID(__func__, vlistID, varID);
 
   return (vlistptr->vars[varID].complevel);
+}
+
+
+void     vlistDefVarIOrank   ( int vlistID, int varID, int iorank )
+{
+  vlist_t * vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
+  vlistptr = vlist_to_pointer(vlistID );
+
+  vlistCheckVarID ( __func__, vlistID, varID );
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
+  vlistptr->vars[varID].iorank = iorank;
 }
 
 #ifdef USE_MPI

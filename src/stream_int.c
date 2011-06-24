@@ -497,6 +497,14 @@ int cdiInqAccesstype(int streamID)
   streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
 
   return (streamptr->accesstype);
+} 
+
+
+int streamInqNvars ( int streamID )
+{
+  stream_t * streamptr;
+  streamptr = ( stream_t * ) reshGetVal ( streamID, &streamOps );
+  return ( streamptr->nvars );
 }
 
 
@@ -599,6 +607,18 @@ void streamPrintP   ( void * streamptr, FILE * fp )
   fprintf ( fp, "//  char    **fnames;\n" );
   fprintf ( fp, "//  void     *gribContainers;\n" );
   fprintf ( fp, "vlistIDorig   = %d\n", sp->vlistIDorig );
+}
+
+
+int streamSize(void)
+{
+  return reshCountType ( &streamOps );
+}
+
+
+void streamGetIndexArray ( int nstreams, int * streamIndexArray )
+{
+  reshGetResHArrayOfType ( nstreams, streamIndexArray, &streamOps );
 }
 
 

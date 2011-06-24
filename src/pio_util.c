@@ -207,6 +207,20 @@ int xminInt ( int a, int b )
 /****************************************************/ 
 
 
+int xsum ( int n, int * argarray )
+{
+  int i, sum = 0;
+
+  for ( i = 0; i < n; i++ )
+    sum += * ( argarray + i );
+	      
+  return sum;
+}
+
+
+/****************************************************/ 
+
+
 double xchecksum ( int type, int count, void * buffer )
 {
   return 0.0;

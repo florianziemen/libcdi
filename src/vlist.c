@@ -1161,6 +1161,8 @@ void vlistDefInstitut(int vlistID, int instID)
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
       xwarning ( "Operation not executed." );
+
+  xdebug();
       return;
     }
 
@@ -1189,7 +1191,6 @@ int vlistInqInstitut(int vlistID)
             instID = CDI_UNDEFID;
             break;
       }
-
       vlistDefInstitut(vlistID, instID);
     }
 

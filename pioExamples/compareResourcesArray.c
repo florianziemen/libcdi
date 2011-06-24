@@ -132,11 +132,12 @@ int defineTaxis ()
   return taxisID;
 }
 
-int defineStream ()
+void defineStream ( int streamID, int vlistID )
 {
-  int streamID = CDI_UNDEFID;
-
-  return streamID;
+  streamDefByteorder ( streamID, 1 );
+  streamDefCompType  ( streamID, 2 );
+  streamDefCompLevel ( streamID, 3 );
+  streamDefVlist(streamID, vlistID);
 }
 
 int defineVlist ( int gridID, int zaxisID, int taxisID )
@@ -197,11 +198,9 @@ void modelRun ()
   instID  = defineInstitute ();
   modelID = defineModel     ( instID );
   vlistID = defineVlist     ( gridID, zaxisID, taxisID);
-  
   streamID = streamOpenWrite("example.grb", FILETYPE_GRB);
   if ( streamID < 0 ) xabort ( "Could not open file" );
-
-  streamDefVlist(streamID, vlistID);
+  defineStream ( streamID, vlistID );
 
   reshPackBufferCreate ( &sendBuffer, &bufferSize, MPI_COMM_WORLD );
   xmpi ( MPI_Send ( sendBuffer, bufferSize, MPI_PACKED, 0, 0, MPI_COMM_WORLD ));  

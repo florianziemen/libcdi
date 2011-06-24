@@ -81,6 +81,7 @@ typedef struct
   int         comptype;     // compression type
   int         complevel;    // compression level
   cdi_atts_t  atts;
+  int         iorank;
 }
 var_t;
 

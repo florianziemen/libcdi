@@ -306,7 +306,11 @@ int     cdiInqAccesstype(int streamID);
 void    streamDefDimgroupID(int streamID, int dimgroupID);
 int     streamInqDimgroupID(int streamID);
 
-int getByteswap(int byteorder);
+int     getByteswap(int byteorder);
+
+int     streamSize ();
+void    streamGetIndexArray ( int, int * );
+
 
 
 #endif  /* _STREAM_INT_H */

@@ -16,6 +16,7 @@ namespaceTuple_t namespaceResHDecode   ( int );
 int              namespaceHasLocalFile ( int );
 void             namespaceCleanup      ( void );
 int              namespaceAdaptKey     ( int, int );
+int              namespaceAdaptKey2    ( int );
 
 #endif
 /*

@@ -203,18 +203,21 @@ extern "C" {
 #define  PIO_POSIX_FPGUARD_THREAD_REFUSE    5
 #define  PIO_POSIX_FPGUARD_THREAD           6
 
-#define  TEST_LOCAL                         1
+#define  TEST_LOCAL                         0
   
 
 int      pioInit            ( int, int, int );
 void     pioFinalize        ( void );
 void     pioMetadata        ( void );
+void     pioMetadata2       ( int, int * );
 
 void     namespaceInit      ( int, int * );
 void     namespaceSetActive ( int );
 
-void     gridGetIndexArray  ( int, int * );
-void     zaxisGetIndexArray ( int, int * );
+void     gridGetIndexArray   ( int, int * );
+void     streamGetIndexArray ( int, int * );
+void     zaxisGetIndexAtrray ( int, int * );
+void     vlistDefVarIOrank   ( int, int, int );
 
   /* CDI control routines */
 
@@ -302,6 +305,7 @@ char   *streamFilesuffix(int filetype);
 int     streamNtsteps(int streamID);
 off_t   streamNvals(int streamID);
 
+int     streamInqNvars ( int streamID );
 
 /* STREAM var I/O routines */
 

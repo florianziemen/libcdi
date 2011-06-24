@@ -73,10 +73,11 @@ void namespaceInit ( int nspn, int * argHasLocalFile )
   assert(nspn <= NUM_NAMESPACES && nspn >= 1 );
   nNamespaces = nspn;
 
-  if ( nspn > 1 )
+  if ( nspn >= 1 )
     {
       hasLocalFile = xmalloc ( nspn * sizeof ( int ));
-      for ( i = 0; i < nspn; i++ )  hasLocalFile[i] = argHasLocalFile[i];
+      for ( i = 0; i < nspn; i++ )  
+	hasLocalFile[i] = argHasLocalFile[i];
     }
 }
 

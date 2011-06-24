@@ -24,6 +24,7 @@ size_t getpagesize(void);
 #ifdef USE_MPI
 #include "pio.h"
 #include "cdi.h"
+#include "namespace.h"
 extern pioInfo *pioinfo;
 #endif
 

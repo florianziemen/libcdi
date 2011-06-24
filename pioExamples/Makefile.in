@@ -33,7 +33,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = myModel$(EXEEXT) $(am__EXEEXT_1)
-@USE_MPI_TRUE@am__append_1 = pio_write myModel2003 compareResourcesArray
+@USE_MPI_TRUE@am__append_1 = pio_write myModel2003 compareResourcesArray collectData
 subdir = pioExamples
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -49,8 +49,12 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/config.h
 CONFIG_CLEAN_FILES =
 @USE_MPI_TRUE@am__EXEEXT_1 = pio_write$(EXEEXT) myModel2003$(EXEEXT) \
-@USE_MPI_TRUE@	compareResourcesArray$(EXEEXT)
+@USE_MPI_TRUE@	compareResourcesArray$(EXEEXT) \
+@USE_MPI_TRUE@	collectData$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
+am_collectData_OBJECTS = collectData.$(OBJEXT)
+collectData_OBJECTS = $(am_collectData_OBJECTS)
+collectData_DEPENDENCIES =
 am_compareResourcesArray_OBJECTS = compareResourcesArray.$(OBJEXT)
 compareResourcesArray_OBJECTS = $(am_compareResourcesArray_OBJECTS)
 compareResourcesArray_DEPENDENCIES =
@@ -84,10 +88,10 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(compareResourcesArray_SOURCES) $(myModel_SOURCES) \
-	$(myModel2003_SOURCES) $(pio_write_SOURCES)
-DIST_SOURCES = $(compareResourcesArray_SOURCES) $(myModel_SOURCES) \
-	$(myModel2003_SOURCES) $(pio_write_SOURCES)
+SOURCES = $(collectData_SOURCES) $(compareResourcesArray_SOURCES) \
+	$(myModel_SOURCES) $(myModel2003_SOURCES) $(pio_write_SOURCES)
+DIST_SOURCES = $(collectData_SOURCES) $(compareResourcesArray_SOURCES) \
+	$(myModel_SOURCES) $(myModel2003_SOURCES) $(pio_write_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -258,6 +262,8 @@ myModel2003_SOURCES = myModel2003.F90
 myModel2003_LDADD = -L../src -lcdi
 compareResourcesArray_SOURCES = compareResourcesArray.c
 compareResourcesArray_LDADD = -L../src -lcdi
+collectData_SOURCES = collectData.c
+collectData_LDADD = -L../src -lcdi
 all: all-am
 
 .SUFFIXES:
@@ -298,6 +304,9 @@ clean-noinstPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+collectData$(EXEEXT): $(collectData_OBJECTS) $(collectData_DEPENDENCIES) 
+	@rm -f collectData$(EXEEXT)
+	$(LINK) $(collectData_OBJECTS) $(collectData_LDADD) $(LIBS)
 compareResourcesArray$(EXEEXT): $(compareResourcesArray_OBJECTS) $(compareResourcesArray_DEPENDENCIES) 
 	@rm -f compareResourcesArray$(EXEEXT)
 	$(LINK) $(compareResourcesArray_OBJECTS) $(compareResourcesArray_LDADD) $(LIBS)
@@ -317,6 +326,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/collectData.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compareResourcesArray.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/myModel.Po@am__quote@
 
