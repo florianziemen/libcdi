@@ -70,16 +70,16 @@ static int    streamCompareP ( void * streamptr1, void * streamptr2 );
 static void   streamDestroyP ( void * streamptr );
 static void   streamPrintP   ( void * streamptr, FILE * fp );
 #ifdef USE_MPI
-static int    streamGetSizeP ( void * streamptr, MPI_Comm comm );
-static void   streamPackP    ( void * streamptr, void * buff, int size,
-                               int * position, MPI_Comm comm );
-static int    streamTxCode   ( void );
+static int    streamGetPackSize ( void * streamptr, MPI_Comm comm );
+static void   streamPack        ( void * streamptr, void * buff, int size,
+				  int * position, MPI_Comm comm );
+static int    streamTxCode      ( void );
 #endif
 
 resOps streamOps = { streamCompareP, streamDestroyP, streamPrintP,
 #ifdef USE_MPI
-                     streamGetSizeP,
-		     streamPackP,
+                     streamGetPackSize,
+		     streamPack,
                      streamTxCode,
 #endif
 };
@@ -589,47 +589,108 @@ streamTxCode ( void )
   return STREAM;
 }
 
+
+enum { streamNint = 11 };
+
+
 static
-int streamGetSizeP ( void * streamptr, MPI_Comm comm )
+int streamGetPackSize ( void * voidP, MPI_Comm comm )
 {
-  stream_t * streamP = ( stream_t * ) streamptr;
+  stream_t * streamP = ( stream_t * ) voidP;
   int packBufferSize = 0, size;
 
-  MPI_Pack_size ( 1, MPI_INT, comm, &size );
+  xmpi ( MPI_Pack_size ( streamNint, MPI_INT, comm, &size ));
   packBufferSize += size;
+  xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
+  packBufferSize += 2 * size;
 
-  size = ( int ) strlen ( streamP->filename ) + 1;
-  MPI_Pack_size ( size, MPI_CHAR, comm, &size );
+
+  xmpi ( MPI_Pack_size (( int ) strlen ( streamP->filename ) + 1,
+			MPI_CHAR, comm, &size ));
   packBufferSize += size;
-
-  MPI_Pack_size ( 1, MPI_INT, comm, &size );
-  packBufferSize += size;
-
-  MPI_Pack_size ( 1, MPI_INT, comm, &size );
+  xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
   packBufferSize += size;
 
   return packBufferSize;
 }
 
 
+void streamUnpack ( char * unpackBuffer, int unpackBufferSize, 
+		   int * unpackBufferPos, int nspTarget, MPI_Comm comm )
+{
+  int intBuffer[streamNint], streamID;
+  double d;
+  char filename[CDI_MAX_NAME];
+
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      intBuffer, streamNint, MPI_INT, comm ));
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &d, 1, MPI_DOUBLE, comm ));
+
+  if ( xchecksum ( DATATYPE_INT, streamNint, intBuffer ) != d ) xabort ("");
+
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &cdiDefaultMissval, 1, MPI_DOUBLE, comm ));
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &filename, intBuffer[2], MPI_CHAR, comm ));
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+		      &d, 1, MPI_DOUBLE, comm ));
+  if ( d != xchecksum ( DATATYPE_TXT, intBuffer[2], filename )) xabort ("");
+
+  xdebug ( "%s, type=%d", filename, intBuffer[1] );
+
+  streamID = streamOpenWrite ( filename, intBuffer[1] );
+  if ( streamID < 0 ) xabort ( "can not open output file" );
+  if ( namespaceAdaptKey ( intBuffer[0], nspTarget ) != streamID )
+    xabort ("");
+
+  streamDefVlist ( streamID, namespaceAdaptKey ( intBuffer[4], nspTarget ));
+  if ( streamInqVlist ( streamID ) != namespaceAdaptKey ( intBuffer[3], nspTarget ))
+    xabort ("");
+
+  streamDefByteorder ( streamID, intBuffer[5] );
+  streamDefCompType  ( streamID, intBuffer[6] );
+  streamDefCompLevel ( streamID, intBuffer[7] ); 
+  cdiDefGlobal  ( "REGULARGRID", intBuffer[8] );
+  cdiDefGlobal     ( "SORTNAME", intBuffer[9] );
+  cdiDefGlobal ( "HAVE_MISSVAL", intBuffer[10] );
+}
+
+
 static
-void streamPackP ( void * streamptr, void * packBuffer, int packBufferSize,
+void streamPack ( void * streamptr, void * packBuffer, int packBufferSize,
                   int * packBufferPos, MPI_Comm comm )
 {
   stream_t * streamP = ( stream_t * ) streamptr;
-  int size;
+  int intBuffer[streamNint];  
+  double d;
 
-  size = ( int ) strlen ( streamP->filename ) + 1;
-  MPI_Pack ( &size, 1, MPI_INT, 
-	     packBuffer, packBufferSize, packBufferPos, comm );
-  MPI_Pack ( streamP->filename, size, MPI_CHAR, 
-	     packBuffer, packBufferSize, packBufferPos, comm );
+  intBuffer[0]  = streamP->self;
+  intBuffer[1]  = streamP->filetype;
+  intBuffer[2]  =  ( int ) strlen ( streamP->filename ) + 1;
+  intBuffer[3]  = streamP->vlistID;
+  intBuffer[4]  = streamP->vlistIDorig;
+  intBuffer[5]  = streamP->byteorder;
+  intBuffer[6]  = streamP->comptype;
+  intBuffer[7]  = streamP->complevel; 
+  intBuffer[8]  = cdiDataUnreduced;
+  intBuffer[9]  = cdiSortName;
+  intBuffer[10] = cdiHaveMissval;
+  
+  xmpi ( MPI_Pack ( intBuffer, streamNint, MPI_INT, 
+		    packBuffer, packBufferSize, packBufferPos, comm ));
+  d = xchecksum ( DATATYPE_INT , streamNint, intBuffer );
+  xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
+		    packBuffer, packBufferSize, packBufferPos, comm ));
 
-  MPI_Pack ( &streamP->filetype, 1, MPI_INT, 
-	     packBuffer, packBufferSize, packBufferPos, comm );
+  xmpi ( MPI_Pack ( &cdiDefaultMissval, 1, MPI_DOUBLE,
+		    packBuffer, packBufferSize, packBufferPos, comm ));
 
-  MPI_Pack ( &streamP->vlistIDorig, 1, MPI_INT, 
-	     packBuffer, packBufferSize, packBufferPos, comm );
+  xmpi ( MPI_Pack ( streamP->filename, intBuffer[2], MPI_CHAR, 
+		    packBuffer, packBufferSize, packBufferPos, comm )); 
+  d = xchecksum  ( DATATYPE_TXT, intBuffer[2], &streamP->filename );
+  xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
+		    packBuffer, packBufferSize, packBufferPos, comm ));
 }
 
 #endif

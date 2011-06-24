@@ -12,9 +12,11 @@
 #include "namespace.h"
 
 
-extern void  gridUnpack ( char *, int, int *, int, MPI_Comm );
-extern void zaxisUnpack ( char *, int, int *, int, MPI_Comm );
-extern void taxisUnpack ( char *, int, int *, int, MPI_Comm );
+extern void   gridUnpack ( char *, int, int *, int, MPI_Comm );
+extern void  zaxisUnpack ( char *, int, int *, int, MPI_Comm );
+extern void  taxisUnpack ( char *, int, int *, int, MPI_Comm );
+extern void streamUnpack ( char *, int, int *, int, MPI_Comm );
+
 
 MPI_Comm commGlob;
 int sizeGlob;
@@ -105,33 +107,6 @@ void commsIOCleanup ()
 /*****************************************************************************/
 
 
-void unpackStream ( char * unpackBuffer, int unpackBufferSize, 
-		    int * unpackBufferPos, int nspTarget, MPI_Comm comm )
-{ 
-  int streamID;
-  int filenameLen, filetype, vlistID;
-  char * filename;
-
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      &filenameLen, 1, MPI_INT, comm ));
-  filename = xmalloc ( filenameLen * sizeof ( char )); 
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      filename, filenameLen, MPI_CHAR, comm ));
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      &filetype, 1, MPI_INT, comm )); 
-  streamID = streamOpenWrite ( filename, filetype );
-  if ( streamID < 0 ) xabort ( "can not open output file" );
-  free ( filename );
-  
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      &vlistID, 1, MPI_INT, comm )); 
-  streamDefVlist ( streamID, namespaceAdaptKey ( vlistID, nspTarget ));
-}
-
-
-/*****************************************************************************/
-
-
 void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize, 
 			  MPI_Comm comm )
 { 
@@ -173,7 +148,7 @@ void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize,
 			    nspTarget, comm);
 	  break;
 	case STREAM:
-	  unpackStream    ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
+	  streamUnpack    ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
 			    nspTarget, comm );
 	  break;
 	case VLIST:
