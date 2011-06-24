@@ -1011,7 +1011,6 @@ void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
   int timeunit;
   int calendar;
   int julday, secofday, days, secs;
-  static int lwarn = TRUE;
 
   *vdate = 0;
   *vtime = 0;
@@ -1035,61 +1034,31 @@ void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
 
   if ( timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR )
     {
-      static int lold = FALSE;
+      int nmon, dpm;
+      double fmon;
 
-      if ( timeunit == TUNIT_YEAR )
-	{
-	  timeunit = TUNIT_MONTH;
-	  timevalue *= 12;
-	}
-
-      if ( lold )
-	{
-	  int nmon;
-
-	  if ( (NINT(timevalue*10))%10 && lwarn )
-	    {
-	      Warning("Possible wrong calculation of date/time!\n"
-		      "Non integer time offset unsupported for time unit MONTH and YEAR!");
-	      lwarn = FALSE;
-	    }
-
-	  nmon = (int) (timevalue+0.001);
-
-	  month += nmon;
+      if ( timeunit == TUNIT_YEAR ) timevalue *= 12;
 	  
-	  while ( month > 12 ) { month -= 12; year++; }
-	  while ( month <  1 ) { month += 12; year--; }
-	}
-      else
-	{
-	  int nmon, dpm;
-	  double fmon;
+      nmon = (int) timevalue;
+      fmon = timevalue - nmon;
 	  
-	  nmon = (int) timevalue;
-	  fmon = timevalue - nmon;
+      month += nmon;
 	  
-	  month += nmon;
-	  
-	  while ( month > 12 ) { month -= 12; year++; }
-	  while ( month <  1 ) { month += 12; year--; }
+      while ( month > 12 ) { month -= 12; year++; }
+      while ( month <  1 ) { month += 12; year--; }
 
-	  dpm = days_per_month(calendar, year, month);
-	  timeunit = TUNIT_DAY;
-	  timevalue = fmon*dpm;
-	}
+      dpm = days_per_month(calendar, year, month);
+      timeunit = TUNIT_DAY;
+      timevalue = fmon*dpm;
     }
 
-  if ( timeunit != TUNIT_MONTH && timeunit != TUNIT_YEAR )
-    {
-      encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday, &secofday);
+  encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday, &secofday);
 
-      cdiDecodeTimevalue(timeunit, timevalue, &days, &secs);
+  cdiDecodeTimevalue(timeunit, timevalue, &days, &secs);
+  
+  julday_add(days, secs, &julday, &secofday);
 
-      julday_add(days, secs, &julday, &secofday);
-
-      decode_caldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute, &second);
-    }
+  decode_caldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute, &second);
 
   *vdate = cdiEncodeDate(year, month, day);
   *vtime = cdiEncodeTime(hour, minute, second);
@@ -1155,7 +1124,7 @@ double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
 
       value += (days+secs/86400.)/dpm;
 
-      if ( timeunit == TUNIT_YEAR ) value = NINT(value/12);
+      if ( timeunit == TUNIT_YEAR ) value = value/12;
     }
   else
     {
