@@ -28,7 +28,7 @@ extern void   arrayDestroy          ( void );
 #define nlev  5     // Number of levels    
 #define ntsteps   3 // Number of time steps
 
-static int hasLocalFile[] = { 0, 1 };
+static int hasLocalFile[] = { 0, 0 };
 
 double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
 double lats[nlat] = {-75, -45, -15, 15, 45, 75};
@@ -158,7 +158,6 @@ int defineVlist ( int gridID, int zaxisID, int taxisID )
   vlistDefVarName(vlistID, varID2, "varname2");
   vlistDefAttTxt(vlistID, varID2, "txt demo", 6, "banana");
   vlistDefTaxis(vlistID, taxisID);
-
   return vlistID;
 }
 

@@ -18,6 +18,8 @@
 #include "calendar.h"
 #include "timebase.h"
 
+#include "pio_util.h"
+
 #ifndef _GRIB_INT_H
 #define _GRIB_INT_H
 

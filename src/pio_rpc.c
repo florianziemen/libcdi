@@ -119,7 +119,6 @@ void streamUnpack ( char * unpackBuffer, int unpackBufferSize,
 		      intBuffer, streamNint, MPI_INT, comm ));
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 		      &d, 1, MPI_DOUBLE, comm ));
-
   if ( xchecksum ( DATATYPE_INT, streamNint, intBuffer ) != d ) xabort ("");
 
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 

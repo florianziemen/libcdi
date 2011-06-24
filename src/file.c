@@ -25,6 +25,8 @@ size_t getpagesize(void);
 #include "pio.h"
 #include "cdi.h"
 #include "namespace.h"
+
+#include "pio_util.h"
 extern pioInfo *pioinfo;
 #endif
 
@@ -1066,15 +1068,12 @@ int fileOpen(const char *filename, const char *mode)
   bfile_t *fileptr = NULL;
 
   /* begin deike */
-  if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
-    return 0;
     
 #ifdef USE_MPI
-  if ( ! TEST_LOCAL )
     if ( memcmp ( mode, "w", 1 ) == 0 && pioinfo->type != PIO_NONE )
       return pioFileOpenW ( filename );
 #endif
-  /* end deike */ 
+  /* end deike */
 
   FILE_INIT
 
@@ -1166,10 +1165,7 @@ int fileClose(int fileID)
   bfile_t *fileptr;
 
   /* begin deike */
-  if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
-    return 0;
 #ifdef USE_MPI
-  if ( ! TEST_LOCAL )
     if ( pioinfo->type != PIO_NONE )
       return pioFileClose ( fileID );
 #endif

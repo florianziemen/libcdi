@@ -80,7 +80,7 @@ resOps streamOps = { streamCompareP, streamDestroyP, streamPrintP,
 #ifdef USE_MPI
                      streamGetPackSize,
 		     streamPack,
-                     streamTxCode,
+                     streamTxCode
 #endif
 };
 

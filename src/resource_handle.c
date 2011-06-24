@@ -1,3 +1,7 @@
+#if defined (HAVE_CONFIG_H)
+#  include "config.h"
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -544,6 +548,8 @@ int reshArrayCompare ( int nsp0, int nsp1 )
   int i, valCompare;
   node * node0, * node1;
 
+#ifdef USE_MPI
+
   assert ( arrayInit && 
 	   namespaceGetNumber () > xmaxInt ( nsp0, nsp1 ) &&
 	   xminInt ( nsp0, nsp1 ) >= 0 );
@@ -591,6 +597,8 @@ int reshArrayCompare ( int nsp0, int nsp1 )
 	xdebug ();
 	return differ;
       }
+
+#endif
 	
   return equal;
 }

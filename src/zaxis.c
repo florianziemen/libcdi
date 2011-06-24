@@ -14,7 +14,7 @@
 #include "resource_handle.h"
 #include "pio_rpc.h"
 #include "varscan.h"
-
+#include "namespace.h"
 
 #define  LevelUp    1
 #define  LevelDown  2

@@ -578,24 +578,6 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   if ( streamptr->comptype == COMPRESS_SZIP )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
-  /* begin deike */
-  if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
-    return 0;
-
-#ifdef USE_MPI
-  if ( ! TEST_LOCAL )
-    {
-      if ( pioinfo->type != PIO_NONE  )
-	nwrite = pioFileWrite ( fileID, tsID, gribbuffer, nbytes );
-    }
-  else
-      nwrite = fileWrite(fileID, gribbuffer, nbytes); 
-#else
-  nwrite = fileWrite(fileID, gribbuffer, nbytes); 
-#endif
-
-  /* end deike */
-
   if ( nwrite != nbytes ) perror(__func__);
 
   if ( gribbuffer ) free(gribbuffer);

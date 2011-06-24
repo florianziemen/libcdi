@@ -144,11 +144,9 @@ int main (int argc, char *argv[])
   MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN );
   MPI_Comm_size ( commGlob, &sizeGlob );
   MPI_Comm_rank ( commGlob, &rankGlob ); 
-
-  if ( ! TEST_LOCAL )                                           
-    if ( nProcsIO <=0 || nProcsIO > ( float ) sizeGlob / 2.0 )
-      pcdiAbort ( "bad distribution of tasks on PEs", __FILE__, __func__,
-                  __LINE__ );
+                                         
+  if ( nProcsIO <=0 || nProcsIO >= sizeGlob )
+    xabort ( "bad distribution of tasks on PEs" );
 
   commModel = pioInit_c ( commGlob, nProcsIO, 0 );
 #endif

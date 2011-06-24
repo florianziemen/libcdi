@@ -78,8 +78,6 @@ void modelRun ()
 
   int rank;
 
-  if  ( ddebug >= 3 ) xdebug ();
-
 #ifdef USE_MPI
   namespaceInit ( 2, hlf );
   namespaceSetActive ( 0 );
@@ -222,7 +220,6 @@ void modelRun ()
   zaxisDestroy(zaxisID1);
   zaxisDestroy(zaxisID2);
   gridDestroy(gridID);
-  return;
 }
 
 
@@ -233,22 +230,15 @@ int main (int argc, char *argv[])
 #ifdef USE_MPI
   MPI_Comm commGlob, commModel; 
 
-
   MPI_Init(&argc, &argv);           
   MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob );
   MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN );
   MPI_Comm_size ( commGlob, &sizeGlob );
   MPI_Comm_rank ( commGlob, &rankGlob ); 
+                                         
+  if ( nProcsIO <=0 || nProcsIO >= sizeGlob )
+    xabort ( "bad distribution of tasks on PEs" );
 
-  if ( ! TEST_LOCAL )                                           
-    if ( nProcsIO <=0 || nProcsIO >= ( float ) sizeGlob / 2.0 )
-      pcdiAbort ( "bad distribution of tasks on PEs", __FILE__, __func__,
-                  __LINE__ );
-#endif  
-
-  xdebug ();
-
-#ifdef USE_MPI
   commModel = pioInit_c ( commGlob, nProcsIO, 0 );
 #endif
 

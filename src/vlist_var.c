@@ -5,7 +5,6 @@
 #include <limits.h>
 #ifdef USE_MPI
 #include <mpi.h>
-#include "pio_util.h"
 #endif
 
 #include "dmemory.h"
@@ -15,6 +14,7 @@
 #include "resource_handle.h"
 #include "vlist_att.h"
 #include "namespace.h"
+#include "pio_util.h"
 
 extern resOps vlist_ops;
 
@@ -1760,8 +1760,6 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   double dtempbuf[vlistvar_ndbls];
   var_t *var = p->vars + varID;
   int tempbuf[vlistvar_nints], namesz, longnamesz, stdnamesz, unitssz, i;
-
-  xdebug ( "var->iorank=%d", var->iorank );
 
   tempbuf[0] = var->flag;
   tempbuf[1] = var->gridID;
