@@ -1,3 +1,7 @@
+2011-06-24  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* vtime2timeval: do not round result (bug fix for TUNIT_YEAR) [report: Andy Aschwanden]
+
 2011-06-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* CDI: changed compression type from Ztype to CompType
