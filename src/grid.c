@@ -51,11 +51,11 @@ char *Grids[] = {
 static int    gridCompareP    ( void * gridptr1, void * gridptr2 );
 static void   gridDestroyP    ( void * gridptr );
 static void   gridPrintP      ( void * gridptr, FILE * fp );
-static int    gridTxCode      ( void );
 #ifdef USE_MPI
 static int    gridGetPackSize ( void * gridptr, MPI_Comm comm );
 static void   gridPack        ( void * gridptr, void * buff, int size,
 				int *position, MPI_Comm comm );
+static int    gridTxCode      ( void );
 #endif
 
 resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP
