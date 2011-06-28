@@ -41,12 +41,18 @@ subdir = src
 DIST_COMMON = $(am__include_HEADERS_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/acx_options.m4 \
+am__aclocal_m4_deps =  \
+	$(top_srcdir)/m4/acx_assert_lang_is_fortran_variant.m4 \
+	$(top_srcdir)/m4/acx_lang_other_suffix_conftest.m4 \
+	$(top_srcdir)/m4/acx_options.m4 \
+	$(top_srcdir)/m4/acx_sl_fc_mod_path_flag.m4 \
 	$(top_srcdir)/m4/acx_sl_mod_suffix.m4 \
-	$(top_srcdir)/m4/ax_pthread.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/asx_unset.m4 $(top_srcdir)/m4/ax_pthread.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/m4/starlink_fpp.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
@@ -120,6 +126,7 @@ AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
+CDI_F90_INTERFACE_FCFLAGS = @CDI_F90_INTERFACE_FCFLAGS@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
@@ -149,10 +156,16 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FC = @FC@
 FCFLAGS = @FCFLAGS@
+FCFLAGS_f90 = @FCFLAGS_f90@
 FCMODCASE = @FCMODCASE@
 FCMODEXT = @FCMODEXT@
+FC_MOD_FLAG = @FC_MOD_FLAG@
 FFLAGS = @FFLAGS@
 FGREP = @FGREP@
+FPP = @FPP@
+FPPFLAGS = @FPPFLAGS@
+FPP_DEFOPT = @FPP_DEFOPT@
+FPP_INCOPT = @FPP_INCOPT@
 GREP = @GREP@
 GRIB_API_INCLUDE = @GRIB_API_INCLUDE@
 GRIB_API_LDFLAGS = @GRIB_API_LDFLAGS@
@@ -357,7 +370,7 @@ libcdi_la_SOURCES = \
         stream.c         \
         swap.c
 
-LOCALTARGETS = $(am__append_1)
+LOCALTARGETS = pkgconfig/cdi.pc $(am__append_1)
 #
 CLEANFILES = `ls *~` cdilib.c $(am__append_2)
 all: config.h
@@ -697,7 +710,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-libLTLIBRARIES
+install-exec-am: install-exec-local install-libLTLIBRARIES
 
 install-html: install-html-am
 
@@ -747,15 +760,15 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
 	distclean-generic distclean-hdr distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-includeHEADERS install-info \
-	install-info-am install-libLTLIBRARIES install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-includeHEADERS \
-	uninstall-libLTLIBRARIES
+	install-dvi-am install-exec install-exec-am install-exec-local \
+	install-html install-html-am install-includeHEADERS \
+	install-info install-info-am install-libLTLIBRARIES \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-includeHEADERS uninstall-libLTLIBRARIES
 
 
 #libcdi_la_CPPFLAGS  = @CPPFLAGS@
@@ -775,8 +788,15 @@ mo_cdi.o: mo_cdi.f90
 #
 mo_cdi.$(FCMODEXT): mo_cdi.f90
 	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) $<
+
+pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
+	(cd .. ; ./config.status src/pkgconfig/cdi.pc)
 #
 all-local: $(LOCALTARGETS) 
+
+install-exec-local: pkgconfig/cdi.pc
+	$(mkinstalldirs) $(libdir)/pkgconfig
+	$(install_sh_DATA) pkgconfig/cdi.pc $(libdir)/pkgconfig/
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
