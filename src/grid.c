@@ -216,6 +216,8 @@ void grid_init(grid_t *gridptr)
   gridptr->size         = 0;
   gridptr->xsize        = 0;
   gridptr->ysize        = 0;
+  gridptr->xdef         = 0;
+  gridptr->ydef         = 0;
   gridptr->isCyclic     = CDI_UNDEFID;
   gridptr->isRotated    = FALSE;
   gridptr->xpole        = 0.0;
