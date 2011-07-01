@@ -2411,7 +2411,7 @@ int gridCompare(int gridID, grid_t grid)
 		    }
 		}
 	      else
-		differ = 1;		
+		differ = 1;
 	    }
 	  else if ( grid.type == GRID_GENERIC )
 	    {
