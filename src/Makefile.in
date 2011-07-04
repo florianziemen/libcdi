@@ -797,11 +797,8 @@ pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
 all-local: $(LOCALTARGETS) 
 
 install-exec-local: pkgconfig/cdi.pc
-	-ls -la "$(DESTDIR)$(libdir)/pkgconfig"
 	$(mkinstalldirs) "$(DESTDIR)$(libdir)/pkgconfig"
-	-ls -la "$(DESTDIR)$(libdir)/pkgconfig"
 	$(install_sh_DATA) pkgconfig/cdi.pc "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc"
-	-ls -la "$(DESTDIR)$(libdir)/pkgconfig"
 
 uninstall-local:
 	rm -f "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc"
