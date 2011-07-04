@@ -10,7 +10,7 @@ threads_libs=@THREADS_LIBS@
 threads_cflags=@THREADS_INCLUDE@
 zlib_cflags=@ZLIB_INCLUDE@
 zlib_libs=@ZLIB_LIBS@
-
+szlib_cflags=@SZLIB_INCLUDE@
 
 Name: @PACKAGE_NAME@
 Description: CDI is an Interface to access Climate and NWP model Data.

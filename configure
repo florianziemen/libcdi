@@ -24631,7 +24631,9 @@ fi
 
 
 #  ----------------------------------------------------------------------
-#  Compile application with SZLIB library, needed for GRIB1 or for linking against hdf5/netcdf4
+#  Compile application with SZLIB library, needed for GRIB1 or for
+#  linking against hdf5/netcdf4
+SZLIB_INCLUDE=''
 
 # Check whether --with-szlib was given.
 if test "${with_szlib+set}" = set; then :
@@ -24715,8 +24717,6 @@ else
 fi
 
                             SZLIB_LDFLAGS=" -lsz"
-
-                            SZLIB_INCLUDE=""
  ;; #(
   *) :
     SZLIB_ROOT=$with_szlib
@@ -24798,7 +24798,6 @@ fi
                                  SZLIB_LDFLAGS=" -L$SZLIB_ROOT/lib -lsz"
 
                                  SZLIB_INCLUDE=" -I$SZLIB_ROOT/include"
-
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: $SZLIB_ROOT is not a directory! SZLIB suppressed" >&5
 $as_echo "$as_me: $SZLIB_ROOT is not a directory! SZLIB suppressed" >&6;}
@@ -24812,6 +24811,7 @@ $as_echo_n "checking for szlib library... " >&6; }
              { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
 fi
+
 
 #  ----------------------------------------------------------------------
 #  Link application with HDF5 library, required for netcdf4

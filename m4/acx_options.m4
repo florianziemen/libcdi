@@ -51,7 +51,9 @@ AC_ARG_WITH([zlib],
 AC_SUBST([ZLIB_INCLUDE])
 AC_SUBST([ZLIB_LIBS])
 #  ----------------------------------------------------------------------
-#  Compile application with SZLIB library, needed for GRIB1 or for linking against hdf5/netcdf4
+#  Compile application with SZLIB library, needed for GRIB1 or for
+#  linking against hdf5/netcdf4
+SZLIB_INCLUDE=''
 AC_ARG_WITH([szlib],
             [AS_HELP_STRING([--with-szlib=<yes|no|directory> (default=no)],[location of szlib library, optional for GRIB1 and NETCDF4 compression])],
             [AS_CASE(["$with_szlib"],
@@ -62,8 +64,7 @@ AC_ARG_WITH([szlib],
                                            [sz],
                                            [AC_DEFINE([HAVE_LIBSZ],[1],[Define to 1 for SZIP support])],
                                            [AC_MSG_ERROR([Could not link to szlib])])
-                            AC_SUBST([SZLIB_LDFLAGS],[" -lsz"])
-                            AC_SUBST([SZLIB_INCLUDE],[""])],
+                            AC_SUBST([SZLIB_LDFLAGS],[" -lsz"])],
                      [*],[SZLIB_ROOT=$with_szlib
                           AS_IF([test -d "$SZLIB_ROOT"],
                                 [LDFLAGS="-L$SZLIB_ROOT/lib $LDFLAGS"
@@ -74,10 +75,11 @@ AC_ARG_WITH([szlib],
                                                 [AC_DEFINE([HAVE_LIBSZ],[1],[Define to 1 for SZIP support])],
                                                 [AC_MSG_ERROR([Could not link to szlib])])
                                  AC_SUBST([SZLIB_LDFLAGS],[" -L$SZLIB_ROOT/lib -lsz"])
-                                 AC_SUBST([SZLIB_INCLUDE],[" -I$SZLIB_ROOT/include"])],
+                                 SZLIB_INCLUDE=" -I$SZLIB_ROOT/include"],
                                 [AC_MSG_NOTICE([$SZLIB_ROOT is not a directory! SZLIB suppressed])])])],
             [AC_MSG_CHECKING([for szlib library])
              AC_MSG_RESULT([suppressed])])
+AC_SUBST([SZLIB_INCLUDE])
 #  ----------------------------------------------------------------------
 #  Link application with HDF5 library, required for netcdf4
 AC_ARG_WITH([hdf5],
