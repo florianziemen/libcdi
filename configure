@@ -1503,7 +1503,7 @@ Optional Packages:
   --with-sysroot=DIR Search for dependent libraries within DIR
                         (or the compiler's sysroot if not specified).
   --with-threads=<yes/no/directory>
-                          Compuile + link for multithreading [default=yes]
+                          Compile + link for multithreading [default=yes]
   --with-zlib=<yes|no|directory> (default=yes)
                           location of ZLIB compression library (lib and
                           include subdirs), nec. for HDF5/NETCDF4

@@ -4,7 +4,7 @@ AC_DEFUN([ACX_OPTIONS],
 #  Checks for multithreaded compiling + linking
 AC_ARG_WITH([threads],
             [AC_HELP_STRING([--with-threads=<yes/no/directory>],
-                            [Compuile + link for multithreading [default=yes]])],
+                            [Compile + link for multithreading [default=yes]])],
             [],
             [with_threads=yes])
 AS_CASE([$with_threads],
@@ -46,7 +46,7 @@ AC_ARG_WITH([zlib],
                       AC_SEARCH_LIBS([deflate],[z],[AC_DEFINE([HAVE_LIBZ],[1],[Define 1 for ZLIB support])])
                       AC_SUBST([ZLIB_LDFLAGS],[" -lz"])])
 #  ----------------------------------------------------------------------
-#  Compile application with SZLIB library, nedded for GRIB1 or for linking against hdf5/netcdf4
+#  Compile application with SZLIB library, needed for GRIB1 or for linking against hdf5/netcdf4
 AC_ARG_WITH([szlib],
             [AS_HELP_STRING([--with-szlib=<yes|no|directory> (default=no)],[location of szlib library, optional for GRIB1 and NETCDF4 compression])],
             [AS_CASE(["$with_szlib"],
