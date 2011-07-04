@@ -4,9 +4,9 @@ libdir=@libdir@
 includedir=@includedir@
 cflags=-I@includedir@
 fcflags=@FPP_INCOPT@@includedir@ @CDI_F90_INTERFACE_FCFLAGS@
-libs=-L@libdir@ -lcdi @GRIB_API_LDFLAGS@ @JASPER_LDFLAGS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ @THREADS_LDFLAGS@
+libs=-L@libdir@ -lcdi @GRIB_API_LDFLAGS@ @JASPER_LDFLAGS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ @THREADS_LIBS@
 netcdf_root=@NETCDF_ROOT@
-
+threads_libs=@THREADS_LIBS@
 
 
 Name: @PACKAGE_NAME@
