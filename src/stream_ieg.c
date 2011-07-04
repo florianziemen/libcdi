@@ -1470,7 +1470,6 @@ void iegWriteVarDP(int streamID, int varID, const double *data)
   int fileID;
   int levID, nlevs, gridID, gridsize;
   int zaxisID;
-  double level;
   int datatype;
   int tsID;
   int vlistID;
@@ -1526,7 +1525,6 @@ void iegWriteVarDP(int streamID, int varID, const double *data)
 
       iegp->refval = refval;
 
-      /*  header[1] = (int) level; */
       iegDefDataDP(iegp, &data[levID*gridsize]);
       iegWrite(fileID, iegp);
     }
