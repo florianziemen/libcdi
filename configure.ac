@@ -123,7 +123,7 @@ AM_CONDITIONAL(ENABLE_SWIG,[test "x$SWIG" != "x"])
 AC_ARG_ENABLE(ruby,
   [AS_HELP_STRING([--enable-ruby],[ruby language bindings [default=no] (EXPERIMENTAL)])],
   [AC_CHECK_PROG(RUBY,ruby,ruby)
-   RUBY_INCLUDES="$($RUBY config/interface.rb)"
+   RUBY_INCLUDES="$($RUBY $srcdir/config/interface.rb)"
    save_CPPFLAGS=$CPPFLAGS
    CPPFLAGS="$CPPFLAGS $RUBY_INCLUDES"
    AC_CHECK_HEADER([ruby.h],,[enable_ruby=no

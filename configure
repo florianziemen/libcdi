@@ -26250,7 +26250,7 @@ $as_echo "no" >&6; }
 fi
 
 
-   RUBY_INCLUDES="$($RUBY config/interface.rb)"
+   RUBY_INCLUDES="$($RUBY $srcdir/config/interface.rb)"
    save_CPPFLAGS=$CPPFLAGS
    CPPFLAGS="$CPPFLAGS $RUBY_INCLUDES"
    ac_fn_c_check_header_mongrel "$LINENO" "ruby.h" "ac_cv_header_ruby_h" "$ac_includes_default"
@@ -26297,7 +26297,7 @@ else
 
 fi
 #  ----------------------------------------------------------------------
-#  Create the Ruby Interface via swig
+#  Create the Python Interface via swig
 # Check whether --enable-python was given.
 if test "${enable_python+set}" = set; then :
   enableval=$enable_python; # Extract the first word of "python", so it can be a program name with args.
