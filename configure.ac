@@ -178,6 +178,7 @@ AC_OUTPUT([Makefile src/Makefile interfaces/Makefile app/Makefile \
 #  ----------------------------------------------------------------------
 #  Show configuration
 AC_MSG_NOTICE([CDI is configured with the following options:])
+./config.status cdi.settings
 cat cdi.settings
 
 AS_IF([test "$ac_cv_prog_cc_c99" = "no"],
