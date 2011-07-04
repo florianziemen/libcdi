@@ -19,6 +19,7 @@ netcdf_root=@NETCDF_ROOT@
 netcdf_cflags=@NETCDF_INCLUDE@
 netcdf_libs=@NETCDF_LIBS@
 jasper_libs=@JASPER_LIBS@
+grib_api_cflags=@GRIB_API_INCLUDE@
 
 Name: @PACKAGE_NAME@
 Description: CDI is an Interface to access Climate and NWP model Data.
