@@ -25977,15 +25977,6 @@ else
   enable_mpi=no
 fi
 
-if test "${enable_mpi}" = "yes"; then :
-  if test "${host_os%???}" = "aix"; then :
-  replace_cc="mpicc"
-else
-  replace_cc="mpcc_r"
-fi
-else
-  replace_cc=$CC
-fi
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
 # Check whether --enable-iso-c-interface was given.
@@ -26440,10 +26431,6 @@ fi
 
 
 
-
-if test "x${replace_cc}" != "x"; then :
-  CC=$replace_cc
-fi
 
 ac_config_files="$ac_config_files Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile cdi.settings src/pkgconfig/cdi.pc"
 
