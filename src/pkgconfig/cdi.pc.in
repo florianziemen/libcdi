@@ -15,6 +15,7 @@ szlib_libs=@SZLIB_LIBS@
 hdf5_root=@HDF5_ROOT@
 hdf5_cflags=@HDF5_INCLUDE@
 hdf5_libs=@HDF5_LIBS@
+netcdf_root=@NETCDF_ROOT@
 netcdf_cflags=@NETCDF_INCLUDE@
 netcdf_libs=@NETCDF_LIBS@
 

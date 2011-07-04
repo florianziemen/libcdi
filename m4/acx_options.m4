@@ -135,6 +135,7 @@ AC_SUBST([HDF5_INCLUDE])
 AC_SUBST([HDF5_LIBS])
 #  ----------------------------------------------------------------------
 #  Compile application with netcdf
+NETCDF_ROOT=''
 NETCDF_INCLUDE=''
 NETCDF_LIBS=''
 AC_ARG_WITH([netcdf],
@@ -159,9 +160,9 @@ AC_ARG_WITH([netcdf],
                                    [AC_DEFINE([HAVE_NETCDF4],[1],[Define to 1 for NETCDF4 support])
                                     AC_MSG_RESULT([yes])],[AC_MSG_RESULT([no])])],
                                   [AS_ECHO([Could not find nc-config! go on with default configuration])])],
-                     [*],[NETCDF_ROOT=$with_netcdf
-                          AS_IF([test -d "$NETCDF_ROOT"],
-                                [LDFLAGS="-L$NETCDF_ROOT/lib $LDFLAGS"
+                     [*],[AS_IF([test -d "$with_netcdf"],
+                                [NETCDF_ROOT=$with_netcdf
+                                 LDFLAGS="-L$NETCDF_ROOT/lib $LDFLAGS"
                                  CPPFLAGS="-I$NETCDF_ROOT/include $CPPFLAGS"
                                  AC_CHECK_HEADERS([netcdf.h])
                                  AC_SEARCH_LIBS([nc_open],
@@ -184,9 +185,10 @@ AC_ARG_WITH([netcdf],
                                          [AC_DEFINE([HAVE_NETCDF4],[1],[Define to 1 for NETCDF4 support])
                                           AC_MSG_RESULT([yes])],[AC_MSG_RESULT([no])])],
                                    [AC_MSG_RESULT([Could not find nc-config! go on with default configuration])])],
-                                [AC_MSG_NOTICE([$NETCDF_ROOT is not a directory! NETCDF suppressed])])])],
+                                [AC_MSG_NOTICE([$with_netcdf is not a directory! NETCDF suppressed])])])],
             [AC_MSG_CHECKING([for NETCDF library])
              AC_MSG_RESULT([suppressed])])
+AC_SUBST([NETCDF_ROOT])
 AC_SUBST([NETCDF_INCLUDE])
 AC_SUBST([NETCDF_LIBS])
 #  ----------------------------------------------------------------------
