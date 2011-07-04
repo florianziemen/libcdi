@@ -187,9 +187,9 @@ void modelRun ()
   int bufferSize, differ;
   MPI_Status status;
 
-  namespaceInit ( 2, hasLocalFile );
+  pioNamespaceInit ( 2, hasLocalFile );
 
-  namespaceSetActive ( 0 );
+  pioNamespaceSetActive ( 0 );
 
   gridID  = defineGrid      ();
   zaxisID = defineZaxis     ();
@@ -207,7 +207,7 @@ void modelRun ()
   xmpi ( MPI_Recv ( recvBuffer, bufferSize, MPI_PACKED, 0,
 		    0, MPI_COMM_WORLD, &status ));
  
-  namespaceSetActive ( 1 );
+  pioNamespaceSetActive ( 1 );
   rpcUnpackResources ( recvBuffer, bufferSize, MPI_COMM_WORLD );  
   free ( recvBuffer );  
   reshPackBufferDestroy ( &sendBuffer );
@@ -216,8 +216,9 @@ void modelRun ()
   printf ( "The resource arrays %s.\n", differ ? "differ" : "are equal" );
   reshArrayPrint ( "reshArrayModel" );
 
-  namespaceSetActive ( 0 );
+  pioNamespaceSetActive ( 0 );
   streamClose(streamID);
+  pioNamespaceCleanup ();
   return;
 }
 

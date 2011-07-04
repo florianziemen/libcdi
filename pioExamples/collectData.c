@@ -71,7 +71,7 @@ void modelRun ()
   double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
   double var[nlon*nlat*nlev];
 
-  namespaceInit ( 1, hasLocalFile );
+  pioNamespaceInit ( 1, hasLocalFile );
 
   gridID = gridCreate(GRID_LONLAT, nlon*nlat);
   gridDefXsize(gridID, nlon);
@@ -129,7 +129,9 @@ void modelRun ()
   vlistDestroy(vlistID);
   taxisDestroy(taxisID);
   zaxisDestroy(zaxisID);
-  gridDestroy(gridID);  
+  gridDestroy(gridID); 
+
+  pioNamespaceCleanup (); 
 }
 
 

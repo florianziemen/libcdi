@@ -87,7 +87,6 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int mode )
     {
       IOServer ( commModel, mode );
       commsIOCleanup ();
-      namespaceCleanup ();
       MPI_Finalize ();
       exit ( 0 );
     }
@@ -437,8 +436,6 @@ void pioFinalize ()
     MPI_Send ( &ibuffer, 1, MPI_INT, nProcsCalc, FINALIZE, *( commsIO + i ));
 
   commsIOCleanup ();
-
-  namespaceCleanup ();
 #endif
 }
 

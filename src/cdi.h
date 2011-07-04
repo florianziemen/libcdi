@@ -211,8 +211,12 @@ int      pioInit            ( int, int, int );
 void     pioFinalize        ( void );
 void     pioMetadata        ( int, int * );
 
-void     namespaceInit      ( int, int * );
-void     namespaceSetActive ( int );
+    void     namespaceInit      ( int, int * );//to delete
+    void     namespaceSetActive ( int );//to delete 
+
+void     pioNamespaceInit      ( int, int * );
+void     pioNamespaceCleanup   ( void );
+void     pioNamespaceSetActive ( int );
 
 void     gridGetIndexArray   ( int, int * );
 void     streamGetIndexArray ( int, int * );
