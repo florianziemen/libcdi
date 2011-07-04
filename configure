@@ -645,8 +645,8 @@ ENABLE_EXTRA
 ENABLE_SERVICE
 ENABLE_CGRIBEX
 ENABLE_GRIB
+GRIB_API_LIBS
 GRIB_API_INCLUDE
-GRIB_API_LDFLAGS
 JASPER_LIBS
 NETCDF_LIBS
 NETCDF_INCLUDE
@@ -25624,6 +25624,7 @@ fi
 #  ----------------------------------------------------------------------
 #  Compile application with GRIB_API library (for GRIB2 support)
 GRIB_API_INCLUDE=''
+GRIB_API_LIBS=''
 
 # Check whether --with-grib_api was given.
 if test "${with_grib_api+set}" = set; then :
@@ -25783,8 +25784,7 @@ else
   as_fn_error $? "Could not link to grib_api library" "$LINENO" 5
 fi
 
-                                 GRIB_API_LDFLAGS=" -L$GRIB_API_ROOT/lib -lgrib_api"
-
+                                 GRIB_API_LIBS=" -L$GRIB_API_ROOT/lib -lgrib_api"
                                  GRIB_API_INCLUDE=" -I$GRIB_API_ROOT/include"
 else
   as_fn_error $? "$GRIB_API_ROOT is not a directory! GRIB_API suppressed" "$LINENO" 5
@@ -25798,6 +25798,7 @@ $as_echo_n "checking for the GRIB_API library... " >&6; }
              { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
 fi
+
 
 
 #  ----------------------------------------------------------------------

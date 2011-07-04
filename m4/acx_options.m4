@@ -220,6 +220,7 @@ AC_SUBST([JASPER_LIBS])
 #  ----------------------------------------------------------------------
 #  Compile application with GRIB_API library (for GRIB2 support)
 GRIB_API_INCLUDE=''
+GRIB_API_LIBS=''
 AC_ARG_WITH([grib_api],
             [AS_HELP_STRING([--with-grib_api=<yes|no|directory>],
                             [library for grib2 compression; if a directory is given, it will be used as a value for --with-jasper-root])],
@@ -240,12 +241,13 @@ AC_ARG_WITH([grib_api],
                                                 [grib_api],
                                                 [AC_DEFINE([HAVE_LIBGRIB_API],[1],[GRIB_API library is present if defined to 1])],
                                                 [AC_MSG_ERROR([Could not link to grib_api library])])
-                                 AC_SUBST([GRIB_API_LDFLAGS],[" -L$GRIB_API_ROOT/lib -lgrib_api"])
+                                 GRIB_API_LIBS=" -L$GRIB_API_ROOT/lib -lgrib_api"
                                  GRIB_API_INCLUDE=" -I$GRIB_API_ROOT/include"],
                                 [AC_MSG_ERROR([$GRIB_API_ROOT is not a directory! GRIB_API suppressed])])])],
             [AC_MSG_CHECKING([for the GRIB_API library])
              AC_MSG_RESULT([suppressed])])
 AC_SUBST([GRIB_API_INCLUDE])
+AC_SUBST([GRIB_API_LIBS])
 #  ----------------------------------------------------------------------
 #  Enable GRIB support
 AC_MSG_CHECKING([for GRIB support])
