@@ -750,7 +750,8 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
+uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES \
+	uninstall-local
 
 .MAKE: all install-am install-strip
 
@@ -768,7 +769,8 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
 	installdirs maintainer-clean maintainer-clean-generic \
 	mostlyclean mostlyclean-compile mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-includeHEADERS uninstall-libLTLIBRARIES
+	uninstall-am uninstall-includeHEADERS uninstall-libLTLIBRARIES \
+	uninstall-local
 
 
 #libcdi_la_CPPFLAGS  = @CPPFLAGS@
@@ -795,8 +797,15 @@ pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
 all-local: $(LOCALTARGETS) 
 
 install-exec-local: pkgconfig/cdi.pc
-	$(mkinstalldirs) $(libdir)/pkgconfig
-	$(install_sh_DATA) pkgconfig/cdi.pc $(libdir)/pkgconfig/
+	-ls -la "$(DESTDIR)$(libdir)/pkgconfig"
+	$(mkinstalldirs) "$(DESTDIR)$(libdir)/pkgconfig"
+	-ls -la "$(DESTDIR)$(libdir)/pkgconfig"
+	$(install_sh_DATA) pkgconfig/cdi.pc "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc"
+	-ls -la "$(DESTDIR)$(libdir)/pkgconfig"
+
+uninstall-local:
+	rm -f "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc"
+	rmdir "$(DESTDIR)$(libdir)/pkgconfig"
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
