@@ -9,14 +9,15 @@ PROGRAM CDIREADF2003
   INTEGER :: streamID, varID, gridID, zaxisID
   INTEGER :: tsID, vlistID, taxisID
   DOUBLE PRECISION, ALLOCATABLE :: field(:,:)
-  CHARACTER(kind=c_char,len=256) :: name, longname, units
+  CHARACTER(kind=c_char,len=256) :: name, longname, units, msg
 
   ! Open the dataset
   streamID = streamOpenRead(C_CHAR_"example.nc"//C_NULL_CHAR)
   IF ( streamID < 0 ) THEN
-    PRINT *,'Could not Read the file.'
-    WRITE(0,*) cdiStringError(streamID)
-    STOP
+    PRINT *,  'Could not Read the file.'
+    msg = cdiStringError(streamID)
+    WRITE(0,*) msg
+    STOP 1
   END IF
 
   ! Get the variable list of the dataset
@@ -29,7 +30,7 @@ PROGRAM CDIREADF2003
     CALL vlistInqVarName(vlistID, varID, name)
     CALL vlistInqVarLongname(vlistID, varID, longname)
     CALL vlistInqVarUnits(vlistID, varID, units)
-    
+
     CALL ctrim(name)
     CALL ctrim(longname)
     CALL ctrim(units)
