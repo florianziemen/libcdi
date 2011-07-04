@@ -1017,9 +1017,11 @@ int streamOpenAppend(const char *filename)
 
   streamID = streamOpenA(filename, "a", filetype);
 
-  streamptr = stream_to_pointer(streamID);
-
-  streamptr->byteorder = byteorder;
+  if ( streamID >= 0 )
+    {
+      streamptr = stream_to_pointer(streamID);
+      streamptr->byteorder = byteorder;
+    }
 
   return (streamID);
 }
