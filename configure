@@ -655,8 +655,8 @@ HDF5_INCLUDE
 HDF5_LDFLAGS
 SZLIB_INCLUDE
 SZLIB_LDFLAGS
-ZLIB_LDFLAGS
 ZLIB_INCLUDE
+ZLIB_LDFLAGS
 THREADS_LIBS
 THREADS_INCLUDE
 PTHREAD_CFLAGS
@@ -24392,6 +24392,7 @@ esac
 
 #  ----------------------------------------------------------------------
 #  Link application to ZLIB library, needed for netcdf
+ZLIB_INCLUDE=''
 
 # Check whether --with-zlib was given.
 if test "${with_zlib+set}" = set; then :
@@ -24472,7 +24473,6 @@ $as_echo "#define HAVE_LIBZ 1" >>confdefs.h
 
 fi
 
-
                             ZLIB_LDFLAGS=" -lz"
  ;; #(
   *) :
@@ -24550,7 +24550,6 @@ $as_echo "#define HAVE_LIBZ 1" >>confdefs.h
 fi
 
                           ZLIB_INCLUDE=" -I$ZLIB_ROOT/include"
-
                           ZLIB_LDFLAGS=" -L$ZLIB_ROOT/lib -lz"
  ;; #(
   *) :
@@ -24630,6 +24629,7 @@ fi
                       ZLIB_LDFLAGS=" -lz"
 
 fi
+
 
 #  ----------------------------------------------------------------------
 #  Compile application with SZLIB library, needed for GRIB1 or for linking against hdf5/netcdf4

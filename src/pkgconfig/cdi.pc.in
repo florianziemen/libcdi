@@ -8,6 +8,7 @@ libs=-L@libdir@ -lcdi @GRIB_API_LDFLAGS@ @JASPER_LDFLAGS@ @NETCDF_LDFLAGS@ @HDF5
 netcdf_root=@NETCDF_ROOT@
 threads_libs=@THREADS_LIBS@
 threads_cflags=@THREADS_INCLUDE@
+zlib_cflags=@ZLIB_INCLUDE@
 
 
 Name: @PACKAGE_NAME@
