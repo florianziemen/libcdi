@@ -41,7 +41,7 @@
     "include"  : "@HDF5_INCLUDE@"
   },
   "netcdf"   : {
-    "lib"      : "@NETCDF_LDFLAGS@",
+    "lib"      : "@NETCDF_LIBS@",
     "include"  : "@NETCDF_INCLUDE@"
   },
   "grip_api" : {

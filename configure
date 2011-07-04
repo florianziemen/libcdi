@@ -648,9 +648,9 @@ ENABLE_GRIB
 GRIB_API_INCLUDE
 GRIB_API_LDFLAGS
 JASPER_LDFLAGS
+NETCDF_LIBS
 NETCDF_INCLUDE
 NC_CONFIG
-NETCDF_LDFLAGS
 HDF5_LIBS
 HDF5_INCLUDE
 HDF5_ROOT
@@ -25136,6 +25136,7 @@ fi
 #  ----------------------------------------------------------------------
 #  Compile application with netcdf
 NETCDF_INCLUDE=''
+NETCDF_LIBS=''
 
 # Check whether --with-netcdf was given.
 if test "${with_netcdf+set}" = set; then :
@@ -25218,8 +25219,7 @@ else
   as_fn_error $? "Could not link to netcdf library" "$LINENO" 5
 fi
 
-                            NETCDF_LDFLAGS=" -lnetcdf"
-
+                            NETCDF_LIBS=" -lnetcdf"
                             # Extract the first word of "nc-config", so it can be a program name with args.
 set dummy nc-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -25362,8 +25362,7 @@ else
   as_fn_error $? "Could not link to netcdf library" "$LINENO" 5
 fi
 
-                                 NETCDF_LDFLAGS=" -L$NETCDF_ROOT/lib -lnetcdf"
-
+                                 NETCDF_LIBS=" -L$NETCDF_ROOT/lib -lnetcdf"
                                  NETCDF_INCLUDE=" -I$NETCDF_ROOT/include"
                                  { $as_echo "$as_me:${as_lineno-$LINENO}: checking nc-config script" >&5
 $as_echo_n "checking nc-config script... " >&6; }
@@ -25449,6 +25448,7 @@ $as_echo_n "checking for NETCDF library... " >&6; }
              { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
 fi
+
 
 
 #  ----------------------------------------------------------------------
