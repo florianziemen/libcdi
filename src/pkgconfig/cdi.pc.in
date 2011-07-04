@@ -31,6 +31,11 @@ cdi_build_f77=@F77@
 cdi_build_fflags=@FFLAGS@
 cdi_build_cxx=@CXX@
 cdi_build_cxxflags=@CXXFLAGS@
+cdi_build_enable_grib=@ENABLE_GRIB@
+cdi_build_enable_cgribex=@ENABLE_CGRIBEX@
+cdi_build_enable_service=@ENABLE_SERVICE@
+cdi_build_enable_extra=@ENABLE_EXTRA@
+cdi_build_enable_ieg=@ENABLE_IEG@
 
 Name: @PACKAGE_NAME@
 Description: CDI is an Interface to access Climate and NWP model Data.
