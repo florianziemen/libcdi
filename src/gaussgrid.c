@@ -204,6 +204,7 @@ void gauaw(int kn, double *pl, double *pw)
   return;
 }
 
+#if 0
 static
 void gauaw_old(double *pa, double *pw, int nlat)
 {
@@ -294,7 +295,7 @@ void gauaw_old(double *pa, double *pw, int nlat)
 
   return;
 }
-
+#endif
 
 void gaussaw(double *pa, double *pw, int nlat)
 {
