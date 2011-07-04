@@ -296,7 +296,7 @@ top_srcdir = @top_srcdir@
 EXTRA_DIST = cdi_read_f2003.f90 cdi_write_f2003.f90
 #
 AM_CPPFLAGS = -I$(top_srcdir)/src
-AM_FCFLAGS = $(AM_CPPFLAGS)
+AM_FCFLAGS = $(FPP_INCOPT)$(top_srcdir)/src $(FC_MOD_FLAG)../src
 #
 cdi_write_SOURCES = cdi_write.c
 cdi_write_LDADD = $(top_builddir)/src/libcdi.la

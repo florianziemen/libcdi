@@ -8,7 +8,7 @@ if CREATE_ISOC
 endif
 #
 AM_CPPFLAGS             = -I$(top_srcdir)/src
-AM_FCFLAGS              = $(AM_CPPFLAGS)
+AM_FCFLAGS              = $(FPP_INCOPT)$(top_srcdir)/src $(FC_MOD_FLAG)../src
 #
 cdi_write_SOURCES       = cdi_write.c
 cdi_write_LDADD         = $(top_builddir)/src/libcdi.la
