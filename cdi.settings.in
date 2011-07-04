@@ -33,7 +33,7 @@
     "include"  : "@ZLIB_INCLUDE@",
   },
   "szlib"    : {
-    "lib"      : "@SZLIB_LDFLAGS@",
+    "lib"      : "@SZLIB_LIBS@",
     "include"  : "@SZLIB_INCLUDE@"
   },
   "hdf5"     : {
