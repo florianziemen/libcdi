@@ -201,7 +201,11 @@ void file_list_new(void)
 
 void file_list_delete(void)
 {
-  if ( _fileList ) free(_fileList);
+  if ( _fileList ) 
+      {
+          free(_fileList);
+          _fileList = NULL;
+      }
 }
 
 static
@@ -1167,7 +1171,8 @@ int fileClose(int fileID)
   /* begin deike */
 #ifdef USE_MPI
     if ( pioinfo->type != PIO_NONE )
-      return pioFileClose ( fileID );
+        return pioFileClose ( fileID );
+        
 #endif
   /* end deike */
 

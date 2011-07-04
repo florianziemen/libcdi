@@ -79,8 +79,8 @@ void modelRun ()
   int rank;
 
 #ifdef USE_MPI
-  namespaceInit ( 2, hlf );
-  namespaceSetActive ( 0 );
+  pioNamespaceInit ( 2, hlf );
+  pioNamespaceSetActive ( 0 );
 #endif
 
   // Create a regular lon/lat grid
@@ -90,10 +90,10 @@ void modelRun ()
   gridDefXvals(gridID, lons);
   gridDefYvals(gridID, lats);
 
-  // Test namespaces: Create a 2. grid list
+  // Test namespace: Create a 2. grid list
 
 #ifdef USE_MPI
-  namespaceSetActive ( 1 );
+  pioNamespaceSetActive ( 1 );
 #endif
 
   gridID2 = gridCreate(GRID_LONLAT, (nlon-1)*(nlat-1));
@@ -109,7 +109,7 @@ void modelRun ()
   gridDefYvals(gridID3, lats);
 
 #ifdef USE_MPI
-  namespaceSetActive ( 0 );
+  pioNamespaceSetActive ( 0 );
 #endif
 
 
@@ -123,13 +123,13 @@ void modelRun ()
   // Test namespaces: Create a 2. zaxis list
 
 #ifdef USE_MPI
-  namespaceSetActive ( 1 );
+  pioNamespaceSetActive ( 1 );
 #endif
   zaxisID3 = zaxisCreate(ZAXIS_PRESSURE, 3);
   zaxisDefLevels(zaxisID3, levs);
 
 #ifdef USE_MPI
-  namespaceSetActive ( 0 );
+  pioNamespaceSetActive ( 0 );
 #endif
 
   // Create a variable list
@@ -156,14 +156,14 @@ void modelRun ()
   taxisID2 = taxisCreate(TAXIS_ABSOLUTE);
 
 #ifdef USE_MPI
-  namespaceSetActive ( 1 );
+  pioNamespaceSetActive ( 1 );
 #endif
   taxisID3 = taxisCreate(TAXIS_ABSOLUTE);
   taxisID4 = taxisCreate(TAXIS_ABSOLUTE);
   taxisID5 = taxisCreate(TAXIS_ABSOLUTE);
 
 #ifdef USE_MPI
-  namespaceSetActive ( 0 );
+  pioNamespaceSetActive ( 0 );
 #endif
 
   // Assign the Time axis to the variable list
@@ -222,6 +222,8 @@ void modelRun ()
   zaxisDestroy(zaxisID1);
   zaxisDestroy(zaxisID2);
   gridDestroy(gridID);
+
+  pioNamespaceCleanup ();
 }
 
 

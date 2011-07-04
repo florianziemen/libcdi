@@ -2,9 +2,6 @@
 #  include "config.h"
 #endif
 
-#define nProcsIO 1
-#define nNodes 1
-
 #ifdef USE_MPI
 #include <mpi.h>
 #endif 
@@ -13,63 +10,30 @@
 #include "pio_c_temp.h"
 #include "pio_util.h"
 
-
 extern void reshArrayPrint ( char * );
+
+#define nProcsIO 1
+#define nNodes 1
+static int nodeSizes[nNodes] = {1};
 
 static int hasLocalFile[] = { 0 };
 
+#define nVars 5
+static int nlev[nVars] = {1,1,5,5,2};
 
-#define nlon 12 // Number of longitudes
-#define nlat  6 // Number of latitudes 
-#define nlev  5 // Number of levels    
-#define ntsteps   3 // Number of time steps
-
-
-/*
-int nodeSizes[nNodes] = {1,2};
-  int nStreams = 6;
-  int streamSizes[6] = {5,127,19,18,9,52};
-  int vlistSizes[230] = {
-  1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,
-  47,47,47,47,47,47,47,47,47,47,
-  1,1,1,
-  11,11,11,11,11,11,11,11,
-  11,11,11,11,11,11,11,11,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,5,
-  1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,
-  11,11,11,11,11,11,11,11,
-  11,11,11,11,11,11,11,11,
-  11,11,11,11,11,11,11,11,
-  11,11,11,11,11,11,11,11,
-  11,11,11,11,11 };
-*/
-
-int nodeSizes[nNodes] = {1};
-int nStreams = 4;
-int streamSizes[4] = {2,5,1,3};
-int vlistSizes[11] = {5,1,7,3,2,47,11,11,5,47,1 };
+#define nlon    12 
+#define nlat     6 
+#define maxlev   5
+#define ntsteps  3 
 
 void modelRun ()
 {
-  int gridID, zaxisID, taxisID;
-  int vlistID, varID, streamID, tsID;
+  int gridID, zaxisID[nVars], taxisID;
+  int vlistID, varID[nVars], streamID, tsID;
   int i, nmiss = 0, rank;
   double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
   double lats[nlat] = {-75, -45, -15, 15, 45, 75};
-  double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
-  double var[nlon*nlat*nlev];
+  double levs[maxlev] = {101300, 92500, 85000, 50000, 20000};
 
   pioNamespaceInit ( 1, hasLocalFile );
 
@@ -79,17 +43,16 @@ void modelRun ()
   gridDefXvals(gridID, lons);
   gridDefYvals(gridID, lats);
 
-  zaxisID = zaxisCreate(ZAXIS_PRESSURE, nlev);
-  zaxisDefLevels(zaxisID, levs);
-
-  vlistID = vlistCreate();
-  varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARIABLE);
-  vlistDefVarName(vlistID, varID, "myVar");
-  {
-    int globfac[] = { 23, 42 };
-    vlistDefAttInt(vlistID, varID, "seer's globule factors", DATATYPE_INT16,
-                   2, globfac); // bug vlistAttunpack: ..DefAtt.. can't be left out
-  }
+  for ( i = 0; i < nVars; i++ )
+    { 
+      zaxisID[i] = zaxisCreate ( ZAXIS_PRESSURE, nlev[i] );
+      zaxisDefLevels ( zaxisID[i], levs );
+    }
+  vlistID = vlistCreate ();
+    
+  for ( i = 0; i < nVars; i++ )  
+    varID[i] = vlistDefVar ( vlistID, gridID, zaxisID[i], TIME_VARIABLE);
+    
   taxisID = taxisCreate(TAXIS_ABSOLUTE);
   vlistDefTaxis(vlistID, taxisID);
   
@@ -124,11 +87,11 @@ void modelRun ()
   if ( rank == 0 ) reshArrayPrint ( "reshArrayModel" );
 #endif
   
-
   streamClose(streamID);
   vlistDestroy(vlistID);
   taxisDestroy(taxisID);
-  zaxisDestroy(zaxisID);
+  for ( i = 0; i < nVars; i++ )
+    zaxisDestroy ( zaxisID[i] );
   gridDestroy(gridID); 
 
   pioNamespaceCleanup (); 
@@ -152,7 +115,7 @@ int main (int argc, char *argv[])
   if ( nProcsIO <=0 || nProcsIO >= sizeGlob )
     xabort ( "bad distribution of tasks on PEs" );
 
-  commModel = pioInit_c ( commGlob, nProcsIO, 0 );
+  commModel = pioInit_c ( commGlob, nProcsIO, PIO_MPI_NONB );
 #endif
 
   modelRun ();

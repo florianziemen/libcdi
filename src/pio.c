@@ -115,7 +115,6 @@ size_t pioFileWrite ( int id, int tsId, const void *buffer, size_t len )
 int pioFileClose ( int id )
 {
   int iret = CDI_UNDEFID;
-
   switch ( pioinfo->type )
     {
     case PIO_MPI_NONB:
@@ -295,7 +294,7 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
   MPI_Comm_rank ( pioinfo->comm, &( pioinfo->rank ));
   MPI_Comm_size ( pioinfo->comm, &( pioinfo->size ));
 
-  xdebug( "pe%d in bInit(), ptype=%d, initial_buffersize=%ld: "
+  xdebug( "IOPE%d in bInit(), ptype=%d, initial_buffersize=%ld: "
           "after init pioinfo ...",
           pioinfo->rank, pioinfo->type, initial_buffersize );
 
@@ -330,8 +329,6 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
     }
 #endif
 
-  xdebug ("out" );
-
 #ifdef USE_MPI
   return pioinfo->collectorComm;
 #else
@@ -359,8 +356,6 @@ void bFinalize ()
 
   free ( pioinfo );
 #endif
-
-  return;
 }
 /*
  * Local Variables:

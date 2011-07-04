@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   June 2011
+! Uwe Schulzweida, MPI-MET, Hamburg,   July 2011
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -349,14 +349,17 @@
 !                                     INTEGER         )
       EXTERNAL        pioMetadata
 
-!                     namespaceInit
+!                     pioNamespaceInit
 !                                    (INTEGER         ,
 !                                     INTEGER         )
-      EXTERNAL        namespaceInit
+      EXTERNAL        pioNamespaceInit
 
-!                     namespaceSetActive
+!                     pioNamespaceCleanup
+      EXTERNAL        pioNamespaceCleanup
+
+!                     pioNamespaceSetActive
 !                                    (INTEGER         )
-      EXTERNAL        namespaceSetActive
+      EXTERNAL        pioNamespaceSetActive
 
 !                     gridGetIndexArray
 !                                    (INTEGER         ,

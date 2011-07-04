@@ -211,9 +211,6 @@ int      pioInit            ( int, int, int );
 void     pioFinalize        ( void );
 void     pioMetadata        ( int, int * );
 
-    void     namespaceInit      ( int, int * );//to delete
-    void     namespaceSetActive ( int );//to delete 
-
 void     pioNamespaceInit      ( int, int * );
 void     pioNamespaceCleanup   ( void );
 void     pioNamespaceSetActive ( int );

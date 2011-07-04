@@ -96,12 +96,10 @@ void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
 void commsIOCleanup ()
 {
   int i;
-
-  if ( ddebug >= 1 ) xdebug ();
   
   for ( i = 0; i < nProcsIO; i++ )
     if ( rankGlob < nProcsCalc || rankGlob == nProcsCalc + i )
-      MPI_Comm_free ( commsIO + i );;
+        MPI_Comm_free ( commsIO + i );
 }
 
 

@@ -119,26 +119,41 @@ void arrayInitPointer ( void )
 void arrayDestroy ( void )
 {
   node * node;
-  int i, j;
-  
+  int i, j, nnsp;
+
   if ( arrayResources )
     {
-      for ( i = 0; i < namespaceGetNumber (); i++ )
+        nnsp = namespaceGetNumber ();
+      for ( i = 0; i < nnsp; i++ )
 	{
-	  namespaceSetActive ( i );  
-	  for ( j = 0; j < arraySizeAllocated[i]; j++ )
-	    {
-	      node = arrayResources[i] + j;
-	      if ( node->val )
-		node->ops->valDestroy ( node->val );
-	    }
+	  pioNamespaceSetActive ( i ); 
+          if ( arrayResources[i] )
+              {
+                  if ( arraySizeAllocated )
+                      for ( j = 0; j < arraySizeAllocated[i]; j++ )
+                          {
+                              node = arrayResources[i] + j;
+                              if ( node->val )
+                                      node->ops->valDestroy ( node->val );
+                          }
+                  free ( arrayResources[i] );
+                  arrayResources[i] = NULL;
+              }
 	}
-      free ( arrayResources[i] );
+      free ( arrayResources );
+      arrayResources = NULL;
     }
-  free ( arrayResources );
   
-  if ( freeListHead ) free ( freeListHead );
-  if ( arraySizeAllocated ) free ( arraySizeAllocated );
+  if ( freeListHead ) 
+      {
+          free ( freeListHead );
+          freeListHead = NULL;
+      }
+  if ( arraySizeAllocated ) 
+      {
+          free ( arraySizeAllocated );
+          arraySizeAllocated = NULL;
+      }
 
   file_list_delete ();   
 }
@@ -634,7 +649,7 @@ void reshArrayPrint ( char * filename )
 
   for ( i = 0; i < namespaceGetNumber (); i++ )
     {
-      namespaceSetActive ( i );
+      pioNamespaceSetActive ( i );
 
       fprintf ( fp, "\n" );
       fprintf ( fp, "##################################\n" );
@@ -655,13 +670,11 @@ void reshArrayPrint ( char * filename )
             }
         }
     }
-
   fprintf ( fp, "#\n#  end global resource array" \
             "\n#\n##########################################\n\n" );
 
-  fclose ( fp );
-
-  namespaceSetActive ( temp );
+  fclose ( fp );;
+  pioNamespaceSetActive ( temp );
 }
 
 /*

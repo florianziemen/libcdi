@@ -186,7 +186,6 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
   int levID;
   int index;
   vlist_t *vlistptr;
-
   vlistptr = vlist_to_pointer(vlistID);
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
@@ -210,7 +209,6 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
       Message("unexpected timeID %d. Set to TIME_VARIABLE", timeID);
       vlistptr->vars[varID].timeID = TIME_VARIABLE;
     }
-
   nlevs = zaxisInqSize(zaxisID);
 
   vlistptr->vars[varID].levinfo = (levinfo_t *) malloc(nlevs*sizeof(levinfo_t));
@@ -250,7 +248,6 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
     }
 
   vlistptr->vars[varID].param = cdiEncodeParam(-(varID + 1), 255, 255);
-
   return (varID);
 }
 
@@ -1833,6 +1830,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
                   tempbuf, vlistvar_nints, MPI_INT, comm));
   xmpi(MPI_Unpack(buf, size, position,
                   dtempbuf, vlistvar_ndbls, MPI_DOUBLE, comm));
+
   newvar = vlistDefVar ( vlistID,
 			 namespaceAdaptKey ( tempbuf[1], nspTarget ),
 			 namespaceAdaptKey ( tempbuf[2], nspTarget ),
@@ -1905,7 +1903,6 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
     }
     vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev][0]);
   }
-
   vlistDefVarIOrank(vlistID, newvar, tempbuf[20]);
   vlistAttsUnpack(vlistID, newvar, buf, size, position, comm);
 }

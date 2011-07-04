@@ -14,7 +14,7 @@
 #ifdef USE_MPI
 #include "pio_impl.h"
 
-bool ldebug    =true;
+bool ldebug    =false;
 
 
 int dbuffer_init ( struct dBuffer **dbuffer, size_t size )

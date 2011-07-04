@@ -90,8 +90,6 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int mode )
       MPI_Finalize ();
       exit ( 0 );
     }
-
-  xdebug ( "out" );
   
   return commModel;
 }
@@ -160,8 +158,6 @@ void mapProblems ( int problemSizes[], int * problemMapping, int nProblems,
   int sum = 0;
   int writerIdx = 0;
   int i, j;
-
-  if ( ddebug >= 1 ) xdebug ();
   
 
   for ( i = 0; i < nProblems; i++ )
@@ -247,9 +243,6 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
   int nVarsNode, summandRank = 0;
 
   int buckets[nProcsIO];
-  
-  if ( ddebug >= 1 ) xdebug ();
-  
 
   for ( i = 0; i < nStreams; i++ )
     {
@@ -429,8 +422,6 @@ void pioFinalize ()
 {
 #ifdef USE_MPI
   int i, ibuffer = 1111;
-  
-  if ( ddebug >= 1 ) xdebug ();
   
   for ( i = 0; i < nProcsIO; i++ )
     MPI_Send ( &ibuffer, 1, MPI_INT, nProcsCalc, FINALIZE, *( commsIO + i ));

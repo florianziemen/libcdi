@@ -51,9 +51,8 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   size_t len;
   int iret;
 
-  if ( ddebug == MAXDEBUG )
-    fprintf ( stderr, "pe%d initAFiledataMPINONB (): filename=%s, buffersize=%zu, in\n",
-	pioinfo->rank, filename, bs );
+  xdebug ( "IOPE%d: filename=%s, buffersize=%zu, in",
+           pioinfo->rank, filename, bs );
 
   of = ( aFiledataM * ) xmalloc ( sizeof ( aFiledataM ));
   memset ( of, 0, sizeof ( aFiledataM ));
@@ -65,9 +64,8 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
 
   /* init output buffer */
 
-  if ( ddebug == MAXDEBUG )
-    fprintf ( stderr, "pe%d initOpenFileCollector(): name=%s, init output buffer\n", 
-	      pioinfo->rank, of->name );
+  xdebug ( "IOPE%d: name=%s, init output buffer", 
+           pioinfo->rank, of->name );
    
   iret = dbuffer_init ( &( of->db1 ), of->size );
   iret += dbuffer_init ( &( of->db2 ), of->size );
@@ -77,16 +75,14 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   of->db = of->db1;
 
   /* open file */ 
-
   xmpi ( MPI_File_open ( pioinfo->comm, of->name, 
 			 ( MPI_MODE_CREATE|MPI_MODE_WRONLY ), 
 			 MPI_INFO_NULL, &( of->fh )));
   of->request = MPI_REQUEST_NULL;
   of->finished = false;
 
-  if ( ddebug == MAXDEBUG )
-    fprintf ( stderr, "pe%d initAFiledataMPINONB (), opened file %s, return\n",
-	pioinfo->rank, of->name );
+  xdebug ( "IOPE%d opened file %s, return",
+           pioinfo->rank, of->name );
   
   return of;
 }
@@ -101,17 +97,15 @@ int destroyAFiledataMPINONB ( void *v )
 
   of = (aFiledataM * ) v;
 
-  if ( ddebug == MAXDEBUG )
-    fprintf ( stderr, "pe%d destroyAFiledataMPINONB(): name=%s, close file, in\n", 
-	      pioinfo->rank, of->name );
+  xdebug ( "IOPE%d: name=%s, close file, in", 
+           pioinfo->rank, of->name );
   
   /* close file */
 
   startTime = MPI_Wtime ();
-  MPI_Wait ( & ( of->request ), &status ); 
+  xmpi ( MPI_Wait ( & ( of->request ), &status )); 
   accumWait += ( MPI_Wtime () - startTime );
   iret = MPI_File_sync ( of->fh ); 
-  
   iret = MPI_File_close ( & ( of->fh ));
 
   /* file closed, cleanup */
@@ -122,9 +116,8 @@ int destroyAFiledataMPINONB ( void *v )
   free ( of->name );
   free ( of );
 
-  if ( ddebug == MAXDEBUG )
-    fprintf ( stderr, "pe%d destroyAFiledataMPINONB(), closed file, cleaned up, return\n", 
-	      pioinfo->rank );
+  xdebug ( "IOPE%d: closed file, cleaned up, return", 
+           pioinfo->rank );
 
   return iret == MPI_SUCCESS ? 0 : -1;
 }
@@ -160,13 +153,12 @@ void writeMPINONB ( aFiledataM *of, int id )
 
   if ( amount == 0 ) return;
 
-  if ( ddebug == MAXDEBUG ) 
-    fprintf ( stderr, "pe%d writeMPINONB(): Write buffer, size %d bytes, in\n", 
-	      pioinfo->rank, amount );
+  xdebug ( "IOPI%d: Write buffer, size %d bytes, in\n", 
+           pioinfo->rank, amount );
   
-  MPI_Wait ( & ( of->request ), &status );
-  MPI_File_iwrite_shared ( of->fh, of->db->buffer, amount, MPI_CHAR, 
-			   & ( of->request ));
+  xmpi ( MPI_Wait ( & ( of->request ), &status ));
+  xmpi ( MPI_File_iwrite_shared ( of->fh, of->db->buffer, amount, MPI_CHAR, 
+                                  & ( of->request )));
 
   /* change outputBuffer */
   
@@ -174,15 +166,13 @@ void writeMPINONB ( aFiledataM *of, int id )
   
   if ( of->db == of->db1 )
     {
-      if ( ddebug == MAXDEBUG ) 
-	fprintf ( stderr, "pe%d writeMPINONB (): id=%d, change to buffer 2 ...\n", 
-		  pioinfo->rank, id );
+        xdebug ( "IOPE%d: id=%d, change to buffer 2 ...", 
+                 pioinfo->rank, id );
       of->db =  of->db2;
     }
   else 
     {
-      if ( ddebug == MAXDEBUG ) 
-	fprintf ( stderr, "pe%d writeMPINONB (): id=%d, change to buffer 1 ...\n", 
+        xdebug ( "IOPE%d: id=%d, change to buffer 1 ...", 
 		  pioinfo->rank, id );
       of->db =  of->db1;
     }
@@ -206,8 +196,7 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
 
   if ( flush == 1 ) 
     {
-      if ( ddebug == MAXDEBUG )
-	fprintf ( stderr, "pe%d fileWriter (): tsId = %d, flush buffer\n", 
+        xdebug ( "IOPE%d: tsId = %d, flush buffer", 
 		  pioinfo->rank, tsId );
       curr = bibAFiledataM->head;
       while ( curr ) 
@@ -222,10 +211,9 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
   of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, id );
   filled = dbuffer_push ( of->db, ( unsigned char * ) buffer, len );
 
-  if ( ddebug == MAXDEBUG )
-    fprintf ( stderr, "pe%d fileWriter (): id = %d, tsId = %d,"
-	      " pushed data on buffer, filled = %d\n", 
-	      pioinfo->rank, id, tsId, filled ); 
+  xdebug ( "IOPE%d: id = %d, tsId = %d,"
+           " pushed data on buffer, filled = %d", 
+           pioinfo->rank, id, tsId, filled ); 
 
   if ( filled == 1 ) 
     {
@@ -257,9 +245,8 @@ int fcMPINONB ( int id )
   double accumWaitMax;
   char errorString[maxErrorString];
 
-  if ( ddebug == MAXDEBUG )
-    fprintf ( stderr, "pe%d fileClose (%d ): write buffer, close file and cleanup, in\n", 
-	      pioinfo->rank, id );
+  xdebug ( "IOPE%d: write buffer, close file and cleanup, in", 
+           pioinfo->rank, id );
 
   if ( ! ( of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, id )))
     {
@@ -275,10 +262,9 @@ int fcMPINONB ( int id )
 
   if ( !bibAFiledataM->head ) 
     {
-      if ( ddebug == MAXDEBUG )
-	fprintf ( stderr, "pe%d fileClose (): cleanup queue \n", 
-		  pioinfo->rank );
-      free ( bibAFiledataM );
+        xdebug ( "IOPE%d: cleanup queue", 
+                 pioinfo->rank );
+        free ( bibAFiledataM );
     }
 
   /* timer output */
@@ -287,11 +273,11 @@ int fcMPINONB ( int id )
     {
       MPI_Reduce ( &accumWait, &accumWaitMax, 
 		   1, MPI_DOUBLE, MPI_MAX, 0, pioinfo->comm  );
-      fprintf ( stderr, "pe%d pioFileClose(): Wait time %15.10lf s\n",
-		pioinfo->rank, accumWait );
+      xdebug ( "IOPE%d: Wait time %15.10lf s",
+               pioinfo->rank, accumWait );
       if ( pioinfo->rank == 0 )
-	fprintf ( stderr, "pe%d pioFileClose(): Max wait time %15.10lf s\n",
-		  pioinfo->rank, accumWaitMax );
+          xdebug ( "IOPE%d: Max wait time %15.10lf s",
+                   pioinfo->rank, accumWaitMax );
     }
 
   return iret;
@@ -338,9 +324,7 @@ int fowMPINONB ( const char *filename )
   
   if ( ! buffersize )
     {
-      if ( ddebug == MAXDEBUG )
-	fprintf ( stderr, 
-		  "pe%d fowMPINONB(): Broadcast buffersize to collectors ...\n", 
+        xdebug ( "IOPE%d: Broadcast buffersize to collectors ...", 
 		  pioinfo->rank );
       
       if  ( pioinfo->rank == bcastRank )
@@ -354,6 +338,8 @@ int fowMPINONB ( const char *filename )
       MPI_Bcast ( &buffersize, 1, MPI_LONG, bcastRank, pioinfo->comm );
     }
 
+  xdebug ( "buffersize=%d", buffersize );
+
   queueCheck (  bibAFiledataM, filename );
   of = initAFiledataMPINONB ( filename, buffersize );
 
@@ -362,11 +348,9 @@ int fowMPINONB ( const char *filename )
       sprintf ( errorString, "filename %s not unique", of->name );
       xabort ( errorString );
     }
-
-  if ( ddebug == MAXDEBUG )
-    fprintf ( stderr, 
-	      "pe%d fowMPINONB(): name=%s, init and enqueued aFiledataM, return id = %d\n", 
-	      pioinfo->rank, filename, id );
+  
+  xdebug ( "IOPE%d: name=%s, init and enqueued aFiledataM, return id = %d", 
+           pioinfo->rank, filename, id );
   
   return id;
 }

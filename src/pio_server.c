@@ -18,6 +18,7 @@
 #include "pio_util.h"
 
 extern void reshArrayPrint ( char * );
+extern void arrayDestroy ( void );
 
 MPI_Comm * commPio;
 
@@ -49,18 +50,15 @@ void IOServer ( MPI_Comm comm, int ptype )
   int nnodes, color;
   char * buffer;
   int size;
-
   
-  if ( ddebug >= 1 ) xdebugComm ( &commCalc );
+  xdebugComm ( &commCalc );
      
   nfinished = 0;
   commColl = bInit ( ptype, comm, &color, &nnodes );
-
+  
   for ( ;; )
-    {  
+      {
       MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commCalc, &status );
-
-      xdebug();
       
       source = status.MPI_SOURCE;
       tag    = status.MPI_TAG;
@@ -72,9 +70,13 @@ void IOServer ( MPI_Comm comm, int ptype )
 		 tag, commCalc, &status );
 	  nfinished++;
 
-	  if ( ddebug >= 2 ) xdebugMsg (  tag, source, nfinished );
-
-	  if ( nfinished == nProcsCalc )  return;
+	  if ( nfinished == nProcsCalc )  
+              {
+                  xdebug();
+                  arrayDestroy();
+                  bFinalize();
+                  return;
+              }
 	  
 	  break;
 
@@ -102,8 +104,6 @@ void IOServer ( MPI_Comm comm, int ptype )
 	  xabort ( "" );
 	}
     }
-    
-  return;
 }
 
 #endif

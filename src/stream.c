@@ -1109,7 +1109,6 @@ void streamClose(int streamID)
   int vlistID;
   stream_t *streamptr;
 
-
   streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
@@ -1179,13 +1178,13 @@ void streamClose(int streamID)
 	  }
     }
       
-      if ( streamptr->record )
-	{
+  if ( streamptr->record )
+      {
 	  if ( streamptr->record->buffer )
-	    free(streamptr->record->buffer);
+              free(streamptr->record->buffer);
 	  
 	  free(streamptr->record);
-	}  
+      }  
 
   streamptr->filetype = 0;
   if ( streamptr->filename ) free(streamptr->filename);

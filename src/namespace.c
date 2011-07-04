@@ -66,21 +66,6 @@ namespaceTuple_t namespaceResHDecode ( int resH )
   return tin;
 }
 
-// to delete
-void namespaceInit ( int nspn, int * argHasLocalFile )
-{
-  int i;
-  assert(nspn <= NUM_NAMESPACES && nspn >= 1 );
-  nNamespaces = nspn;
-
-  if ( nspn >= 1 )
-    {
-      hasLocalFile = xmalloc ( nspn * sizeof ( int ));
-      for ( i = 0; i < nspn; i++ )  
-	hasLocalFile[i] = argHasLocalFile[i];
-    }
-}
-
 
 void pioNamespaceInit ( int nspn, int * argHasLocalFile )
 {
@@ -99,7 +84,11 @@ void pioNamespaceInit ( int nspn, int * argHasLocalFile )
 
 void pioNamespaceCleanup ( void )
 {
-  if ( nNamespaces > 1 ) free ( hasLocalFile );
+  if ( nNamespaces > 1 ) 
+      {
+          free ( hasLocalFile );
+          hasLocalFile = NULL;
+      }
 }
 
 
@@ -109,18 +98,12 @@ int namespaceGetNumber ()
 }
 
 
-void namespaceSetActive ( int nId )
+void pioNamespaceSetActive ( int nId )
 {
   if ( nId >= nNamespaces || nId < 0 )
     abort ();
 
   activeNamespace = nId;
-}
-
-
-void pioNamespaceSetActive ( int nId )
-{
-    namespaceSetActive ( nId );
 }
 
 
@@ -135,7 +118,7 @@ int namespaceHasLocalFile ( int nId )
   if ( nId >= nNamespaces || nId < 0 )
     abort ();
   
-  return hasLocalFile[nId];
+  return hasLocalFile ? hasLocalFile[nId] : 0;
 }
 
 
