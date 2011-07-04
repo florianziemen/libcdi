@@ -84,6 +84,7 @@ AC_SUBST([SZLIB_INCLUDE])
 AC_SUBST([SZLIB_LIBS])
 #  ----------------------------------------------------------------------
 #  Link application with HDF5 library, required for netcdf4
+HDF5_ROOT=''
 HDF5_INCLUDE=''
 HDF5_LIBS=''
 AC_ARG_WITH([hdf5],
@@ -105,9 +106,9 @@ AC_ARG_WITH([hdf5],
                                   [HDF5_LIBS=" -lhdf5_hl -lhdf5"],
                                   [HDF5_LIBS=" -lhdf5"])
                             ],
-                     [*],[HDF5_ROOT=$with_hdf5
-                          AS_IF([test -d "$HDF5_ROOT"],
-                                [LDFLAGS="-L$HDF5_ROOT/lib $LDFLAGS"
+                     [*],[AS_IF([test -d "$with_hdf5"],
+                                [HDF5_ROOT="$with_hdf5"
+                                 LDFLAGS="-L$HDF5_ROOT/lib $LDFLAGS"
                                  CPPFLAGS="-I$HDF5_ROOT/include $CPPFLAGS"
                                  AC_CHECK_HEADERS([hdf5.h])
                                  AC_SEARCH_LIBS([H5Fopen],
@@ -126,9 +127,10 @@ AC_ARG_WITH([hdf5],
                                        [HDF5_LIBS=" -L$HDF5_ROOT/lib -lhdf5_hl -lhdf5"],
                                        [HDF5_LIBS=" -L$HDF5_ROOT/lib -lhdf5"])
                                  HDF5_INCLUDE=" -I$HDF5_ROOT/include"],
-                                [AC_MSG_NOTICE([$HDF5_ROOT is not a directory! HDF5 suppressed])])])],
+                                [AC_MSG_NOTICE([$with_hdf5 is not a directory! HDF5 suppressed])])])],
             [AC_MSG_CHECKING([for hdf5 library])
              AC_MSG_RESULT([suppressed])])
+AC_SUBST([HDF5_ROOT])
 AC_SUBST([HDF5_INCLUDE])
 AC_SUBST([HDF5_LIBS])
 #  ----------------------------------------------------------------------

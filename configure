@@ -653,6 +653,7 @@ NETCDF_INCLUDE
 NETCDF_LDFLAGS
 HDF5_LIBS
 HDF5_INCLUDE
+HDF5_ROOT
 SZLIB_LIBS
 SZLIB_INCLUDE
 ZLIB_LIBS
@@ -24815,6 +24816,7 @@ fi
 
 #  ----------------------------------------------------------------------
 #  Link application with HDF5 library, required for netcdf4
+HDF5_ROOT=''
 HDF5_INCLUDE=''
 HDF5_LIBS=''
 
@@ -24966,9 +24968,9 @@ else
 fi
                              ;; #(
   *) :
-    HDF5_ROOT=$with_hdf5
-                          if test -d "$HDF5_ROOT"; then :
-  LDFLAGS="-L$HDF5_ROOT/lib $LDFLAGS"
+    if test -d "$with_hdf5"; then :
+  HDF5_ROOT="$with_hdf5"
+                                 LDFLAGS="-L$HDF5_ROOT/lib $LDFLAGS"
                                  CPPFLAGS="-I$HDF5_ROOT/include $CPPFLAGS"
                                  for ac_header in hdf5.h
 do :
@@ -25115,8 +25117,8 @@ else
 fi
                                  HDF5_INCLUDE=" -I$HDF5_ROOT/include"
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: $HDF5_ROOT is not a directory! HDF5 suppressed" >&5
-$as_echo "$as_me: $HDF5_ROOT is not a directory! HDF5 suppressed" >&6;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: $with_hdf5 is not a directory! HDF5 suppressed" >&5
+$as_echo "$as_me: $with_hdf5 is not a directory! HDF5 suppressed" >&6;}
 fi ;; #(
   *) :
      ;;
@@ -25127,6 +25129,7 @@ $as_echo_n "checking for hdf5 library... " >&6; }
              { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
 fi
+
 
 
 
