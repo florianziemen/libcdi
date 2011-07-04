@@ -135,6 +135,7 @@ AC_SUBST([HDF5_INCLUDE])
 AC_SUBST([HDF5_LIBS])
 #  ----------------------------------------------------------------------
 #  Compile application with netcdf
+NETCDF_INCLUDE=''
 AC_ARG_WITH([netcdf],
             [AS_HELP_STRING([--with-netcdf=<yes|no|directory> (default=yes)],[location of netcdf library (lib and include subdirs)])],
             [AS_CASE(["$with_netcdf"],
@@ -146,7 +147,6 @@ AC_ARG_WITH([netcdf],
                                            [AC_DEFINE([HAVE_LIBNETCDF],[1],[Define to 1 for NETCDF support])],
                                            [AC_MSG_ERROR([Could not link to netcdf library])])
                             AC_SUBST([NETCDF_LDFLAGS],[" -lnetcdf"])
-                            AC_SUBST([NETCDF_INCLUDE],[""])
                             AC_CHECK_PROG(NC_CONFIG,nc-config,nc-config)
                             AS_IF([test "x$NC_CONFIG" != "x"],
                                   [AC_MSG_CHECKING([netcdf's nc2 support])
@@ -168,7 +168,7 @@ AC_ARG_WITH([netcdf],
                                                 [AC_DEFINE([HAVE_LIBNETCDF],[1],[Define to 1 for NETCDF support])],
                                                 [AC_MSG_ERROR([Could not link to netcdf library])])
                                  AC_SUBST([NETCDF_LDFLAGS],[" -L$NETCDF_ROOT/lib -lnetcdf"])
-                                 AC_SUBST([NETCDF_INCLUDE],[" -I$NETCDF_ROOT/include"])
+                                 NETCDF_INCLUDE=" -I$NETCDF_ROOT/include"
                                  AC_MSG_CHECKING([nc-config script])
                                  AC_CHECK_PROG(NC_CONFIG,nc-config,[$NETCDF_ROOT/bin/nc-config],,["$NETCDF_ROOT/bin"])
                                  AS_ECHO([$NC_CONFIG])
@@ -186,6 +186,7 @@ AC_ARG_WITH([netcdf],
                                 [AC_MSG_NOTICE([$NETCDF_ROOT is not a directory! NETCDF suppressed])])])],
             [AC_MSG_CHECKING([for NETCDF library])
              AC_MSG_RESULT([suppressed])])
+AC_SUBST([NETCDF_INCLUDE])
 #  ----------------------------------------------------------------------
 #  Link application with JASPER library (needed for GRIB2 compression)
 AC_ARG_WITH([jasper],

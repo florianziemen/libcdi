@@ -648,8 +648,8 @@ ENABLE_GRIB
 GRIB_API_INCLUDE
 GRIB_API_LDFLAGS
 JASPER_LDFLAGS
-NC_CONFIG
 NETCDF_INCLUDE
+NC_CONFIG
 NETCDF_LDFLAGS
 HDF5_LIBS
 HDF5_INCLUDE
@@ -25135,6 +25135,7 @@ fi
 
 #  ----------------------------------------------------------------------
 #  Compile application with netcdf
+NETCDF_INCLUDE=''
 
 # Check whether --with-netcdf was given.
 if test "${with_netcdf+set}" = set; then :
@@ -25218,8 +25219,6 @@ else
 fi
 
                             NETCDF_LDFLAGS=" -lnetcdf"
-
-                            NETCDF_INCLUDE=""
 
                             # Extract the first word of "nc-config", so it can be a program name with args.
 set dummy nc-config; ac_word=$2
@@ -25366,7 +25365,6 @@ fi
                                  NETCDF_LDFLAGS=" -L$NETCDF_ROOT/lib -lnetcdf"
 
                                  NETCDF_INCLUDE=" -I$NETCDF_ROOT/include"
-
                                  { $as_echo "$as_me:${as_lineno-$LINENO}: checking nc-config script" >&5
 $as_echo_n "checking nc-config script... " >&6; }
                                  # Extract the first word of "nc-config", so it can be a program name with args.
@@ -25451,6 +25449,7 @@ $as_echo_n "checking for NETCDF library... " >&6; }
              { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
 fi
+
 
 #  ----------------------------------------------------------------------
 #  Link application with JASPER library (needed for GRIB2 compression)

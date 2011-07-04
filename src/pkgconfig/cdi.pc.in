@@ -15,6 +15,7 @@ szlib_libs=@SZLIB_LIBS@
 hdf5_root=@HDF5_ROOT@
 hdf5_cflags=@HDF5_INCLUDE@
 hdf5_libs=@HDF5_LIBS@
+netcdf_cflags=@NETCDF_INCLUDE@
 
 Name: @PACKAGE_NAME@
 Description: CDI is an Interface to access Climate and NWP model Data.
