@@ -7,6 +7,7 @@ AC_ARG_WITH([threads],
                             [Compile + link for multithreading [default=yes]])],
             [],
             [with_threads=yes])
+THREADS_INCLUDE=''
 THREADS_LIBS=''
 AS_CASE([$with_threads],
         [no],[AC_MSG_CHECKING([multithreading])
@@ -15,15 +16,15 @@ AS_CASE([$with_threads],
                LIBS="$PTHREAD_LIBS $LIBS"
                CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
                CC="$PTHREAD_CC"
-               AS_ECHO(["CC:$CC CFLAGS:$CFLAGS LIBS:$LIBS"])
-               AC_SUBST([THREADS_INCLUDE],[])],
+               AS_ECHO(["CC:$CC CFLAGS:$CFLAGS LIBS:$LIBS"])],
         [*],[THREADS_ROOT=$with_threads
              LDFLAGS="-L$THREADS_ROOT/lib $LDFLAGS"
              CPPFLAGS="-I$THREADS_ROOT/include $CPPFLAGS "
              AC_CHECK_HEADERS(pthread.h)
              AC_CHECK_LIB([pthread],[pthread_create])
              THREADS_LIBS=" -L$THREADS_ROOT/lib -lpthread"
-             AC_SUBST([THREADS_INCLUDE],[" -I$THREADS_ROOT/include"])])
+             THREADS_INCLUDE=" -I$THREADS_ROOT/include"])
+AC_SUBST([THREADS_INCLUDE])
 AC_SUBST([THREADS_LIBS])
 #  ----------------------------------------------------------------------
 #  Link application to ZLIB library, needed for netcdf

@@ -23954,6 +23954,7 @@ else
   with_threads=yes
 fi
 
+THREADS_INCLUDE=''
 THREADS_LIBS=''
 case $with_threads in #(
   no) :
@@ -24320,8 +24321,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
                LIBS="$PTHREAD_LIBS $LIBS"
                CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
                CC="$PTHREAD_CC"
-               $as_echo "CC:$CC CFLAGS:$CFLAGS LIBS:$LIBS"
-                ;; #(
+               $as_echo "CC:$CC CFLAGS:$CFLAGS LIBS:$LIBS" ;; #(
   *) :
     THREADS_ROOT=$with_threads
              LDFLAGS="-L$THREADS_ROOT/lib $LDFLAGS"
@@ -24384,11 +24384,11 @@ _ACEOF
 fi
 
              THREADS_LIBS=" -L$THREADS_ROOT/lib -lpthread"
-             THREADS_INCLUDE=" -I$THREADS_ROOT/include"
- ;; #(
+             THREADS_INCLUDE=" -I$THREADS_ROOT/include" ;; #(
   *) :
      ;;
 esac
+
 
 #  ----------------------------------------------------------------------
 #  Link application to ZLIB library, needed for netcdf
