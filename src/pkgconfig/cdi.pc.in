@@ -20,6 +20,17 @@ netcdf_cflags=@NETCDF_INCLUDE@
 netcdf_libs=@NETCDF_LIBS@
 jasper_libs=@JASPER_LIBS@
 grib_api_cflags=@GRIB_API_INCLUDE@
+cdi_build_cc=@CC@
+cdi_build_cflags=@CFLAGS@
+cdi_build_cppflags=@CPPFLAGS@
+cdi_build_ldflags=@LDFLAGS@
+cdi_build_libs=@LIBS@
+cdi_build_fc=@FC@
+cdi_build_fcflags=@FCFLAGS@
+cdi_build_f77=@F77@
+cdi_build_fflags=@FFLAGS@
+cdi_build_cxx=@CXX@
+cdi_build_cxxflags=@CXXFLAGS@
 
 Name: @PACKAGE_NAME@
 Description: CDI is an Interface to access Climate and NWP model Data.
