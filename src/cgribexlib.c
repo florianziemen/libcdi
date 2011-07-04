@@ -3262,7 +3262,9 @@ void encodeBMS(GRIBPACK *lGrib, long *gribLen, double *fsec3, int *isec4, double
   long bmsLen, bmsUnusedBits;
   long fsec4size;
   long z = *gribLen;
+#ifdef VECTORCODE
   unsigned int *imask;
+#endif
   static int lmissvalinfo = 1;
   /*  unsigned int c, imask; */
 
