@@ -29,7 +29,8 @@
     "include"  : "@THREADS_INCLUDE@"
   },
   "zlib"     : {
-    "lib"      : "@ZLIB_LDFLAGS@",
+    "lib"      : "@ZLIB_LIBS@",
+    "include"  : "@ZLIB_INCLUDE@",
   },
   "szlib"    : {
     "lib"      : "@SZLIB_LDFLAGS@",

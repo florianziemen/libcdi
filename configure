@@ -655,8 +655,8 @@ HDF5_INCLUDE
 HDF5_LDFLAGS
 SZLIB_INCLUDE
 SZLIB_LDFLAGS
+ZLIB_LIBS
 ZLIB_INCLUDE
-ZLIB_LDFLAGS
 THREADS_LIBS
 THREADS_INCLUDE
 PTHREAD_CFLAGS
@@ -24393,6 +24393,7 @@ esac
 #  ----------------------------------------------------------------------
 #  Link application to ZLIB library, needed for netcdf
 ZLIB_INCLUDE=''
+ZLIB_LIBS=''
 
 # Check whether --with-zlib was given.
 if test "${with_zlib+set}" = set; then :
@@ -24473,8 +24474,7 @@ $as_echo "#define HAVE_LIBZ 1" >>confdefs.h
 
 fi
 
-                            ZLIB_LDFLAGS=" -lz"
- ;; #(
+                            ZLIB_LIBS=" -lz" ;; #(
   *) :
     ZLIB_ROOT=$with_zlib
                           LDFLAGS="-L$ZLIB_ROOT/lib $LDFLAGS"
@@ -24550,8 +24550,7 @@ $as_echo "#define HAVE_LIBZ 1" >>confdefs.h
 fi
 
                           ZLIB_INCLUDE=" -I$ZLIB_ROOT/include"
-                          ZLIB_LDFLAGS=" -L$ZLIB_ROOT/lib -lz"
- ;; #(
+                          ZLIB_LIBS=" -L$ZLIB_ROOT/lib -lz" ;; #(
   *) :
      ;;
 esac
@@ -24568,7 +24567,7 @@ fi
 
 done
 
-                      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing deflate" >&5
+              { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing deflate" >&5
 $as_echo_n "checking for library containing deflate... " >&6; }
 if ${ac_cv_search_deflate+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -24626,9 +24625,9 @@ $as_echo "#define HAVE_LIBZ 1" >>confdefs.h
 
 fi
 
-                      ZLIB_LDFLAGS=" -lz"
-
+              ZLIB_LIBS=" -lz"
 fi
+
 
 
 #  ----------------------------------------------------------------------
