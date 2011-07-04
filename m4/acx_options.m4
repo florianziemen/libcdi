@@ -193,6 +193,7 @@ AC_SUBST([NETCDF_INCLUDE])
 AC_SUBST([NETCDF_LIBS])
 #  ----------------------------------------------------------------------
 #  Link application with JASPER library (needed for GRIB2 compression)
+JASPER_LIBS=''
 AC_ARG_WITH([jasper],
             [AS_HELP_STRING([--with-jasper=<directory>],
                             [Specify location of JASPER library. You must specify its location if GRIB_API was built with JASPER.])],
@@ -202,7 +203,7 @@ AC_ARG_WITH([jasper],
                      [yes],[AC_CHECK_HEADERS([jasper.h])
                             AC_SEARCH_LIBS([jas_init],[jasper],[AC_DEFINE([HAVE_LIBJASPER],[1],[Define to 1 for JPEG compression for GRIB2])],
                                            [AC_MSG_ERROR([Could not link to jasper library! Required for GRIB_API])])
-                            AC_SUBST([JASPER_LDFLAGS],[" -ljasper"])],
+                            AC_SUBST([JASPER_LIBS],[" -ljasper"])],
                      [*],[JASPER_ROOT=$with_jasper
                           AS_IF([test -d "$JASPER_ROOT"],
                                 [LDFLAGS="$LDFLAGS -L$JASPER_ROOT/lib"
@@ -211,10 +212,11 @@ AC_ARG_WITH([jasper],
                                                 [jasper],
                                                 [AC_DEFINE([HAVE_LIBJASPER],[1],[Define to 1 for JPEG compression for GRIB2])],
                                                 [AC_MSG_ERROR([Could not link to jasper library! Required for GRIB_API])])
-                                 AC_SUBST([JASPER_LDFLAGS],[" -L$JASPER_ROOT/lib -ljasper"])],
+                                 JASPER_LIBS=" -L$JASPER_ROOT/lib -ljasper"],
                                 [AC_MSG_ERROR([$JASPER_ROOT is not a directory! JASPER suppressed])])])],
             [AC_MSG_CHECKING([for the JASPER library])
              AC_MSG_RESULT([suppressed])])
+AC_SUBST([JASPER_LIBS])
 #  ----------------------------------------------------------------------
 #  Compile application with GRIB_API library (for GRIB2 support)
 AC_ARG_WITH([grib_api],

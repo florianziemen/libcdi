@@ -647,9 +647,10 @@ ENABLE_CGRIBEX
 ENABLE_GRIB
 GRIB_API_INCLUDE
 GRIB_API_LDFLAGS
-JASPER_LDFLAGS
+JASPER_LIBS
 NETCDF_LIBS
 NETCDF_INCLUDE
+NETCDF_ROOT
 NC_CONFIG
 HDF5_LIBS
 HDF5_INCLUDE
@@ -25135,6 +25136,7 @@ fi
 
 #  ----------------------------------------------------------------------
 #  Compile application with netcdf
+NETCDF_ROOT=''
 NETCDF_INCLUDE=''
 NETCDF_LIBS=''
 
@@ -25286,9 +25288,9 @@ else
   $as_echo Could not find nc-config! go on with default configuration
 fi ;; #(
   *) :
-    NETCDF_ROOT=$with_netcdf
-                          if test -d "$NETCDF_ROOT"; then :
-  LDFLAGS="-L$NETCDF_ROOT/lib $LDFLAGS"
+    if test -d "$with_netcdf"; then :
+  NETCDF_ROOT=$with_netcdf
+                                 LDFLAGS="-L$NETCDF_ROOT/lib $LDFLAGS"
                                  CPPFLAGS="-I$NETCDF_ROOT/include $CPPFLAGS"
                                  for ac_header in netcdf.h
 do :
@@ -25436,8 +25438,8 @@ else
 $as_echo "Could not find nc-config! go on with default configuration" >&6; }
 fi
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: $NETCDF_ROOT is not a directory! NETCDF suppressed" >&5
-$as_echo "$as_me: $NETCDF_ROOT is not a directory! NETCDF suppressed" >&6;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: $with_netcdf is not a directory! NETCDF suppressed" >&5
+$as_echo "$as_me: $with_netcdf is not a directory! NETCDF suppressed" >&6;}
 fi ;; #(
   *) :
      ;;
@@ -25451,8 +25453,10 @@ fi
 
 
 
+
 #  ----------------------------------------------------------------------
 #  Link application with JASPER library (needed for GRIB2 compression)
+JASPER_LIBS=''
 
 # Check whether --with-jasper was given.
 if test "${with_jasper+set}" = set; then :
@@ -25535,7 +25539,7 @@ else
   as_fn_error $? "Could not link to jasper library! Required for GRIB_API" "$LINENO" 5
 fi
 
-                            JASPER_LDFLAGS=" -ljasper"
+                            JASPER_LIBS=" -ljasper"
  ;; #(
   *) :
     JASPER_ROOT=$with_jasper
@@ -25602,8 +25606,7 @@ else
   as_fn_error $? "Could not link to jasper library! Required for GRIB_API" "$LINENO" 5
 fi
 
-                                 JASPER_LDFLAGS=" -L$JASPER_ROOT/lib -ljasper"
-
+                                 JASPER_LIBS=" -L$JASPER_ROOT/lib -ljasper"
 else
   as_fn_error $? "$JASPER_ROOT is not a directory! JASPER suppressed" "$LINENO" 5
 fi ;; #(
@@ -25616,6 +25619,7 @@ $as_echo_n "checking for the JASPER library... " >&6; }
              { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
 fi
+
 
 #  ----------------------------------------------------------------------
 #  Compile application with GRIB_API library (for GRIB2 support)

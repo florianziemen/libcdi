@@ -49,7 +49,7 @@
     "include"  : "@GRIB_API_INCLUDE@"
   },
   "jasper" : {
-    "lib"      : "@JASPER_LDFLAGS@"
+    "lib"      : "@JASPER_LIBS@"
   },
   "enable_python" : @ENABLE_PYTHON@,
   "enable_ruby"   : @ENABLE_RUBY@,
