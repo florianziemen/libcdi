@@ -80,7 +80,6 @@ var_t;
 typedef struct
 {
   int         self;
-  int         used;
   int         nvars;        /* number of variables                */
   int         ngrids;
   int         nzaxis;
