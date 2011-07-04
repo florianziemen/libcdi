@@ -164,7 +164,7 @@ GREP = @GREP@
 GRIB_API_INCLUDE = @GRIB_API_INCLUDE@
 GRIB_API_LDFLAGS = @GRIB_API_LDFLAGS@
 HDF5_INCLUDE = @HDF5_INCLUDE@
-HDF5_LDFLAGS = @HDF5_LDFLAGS@
+HDF5_LIBS = @HDF5_LIBS@
 HOST_NAME = @HOST_NAME@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -288,13 +288,13 @@ EXTRA_DIST = $(SWIGCDIOBJ) $(SWIGCDILIB) ruby/cdilib_wrap.c \
 	python/testObj.py
 noinst_LTLIBRARIES = $(am__append_3)
 #
-locallibs = $(top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LIBS@ @ZLIB_LIBS@
+locallibs = $(top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LIBS@ @SZLIB_LIBS@ @ZLIB_LIBS@
 libcdipp_la_SOURCES = cdi.cpp cdi.hpp
 libcdipp_la_LIBADD = $(top_builddir)/src/libcdi.la 
-libcdipp_la_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LIBS@ @ZLIB_LIBS@ $(LDFLAGS)
+libcdipp_la_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LIBS@ @SZLIB_LIBS@ @ZLIB_LIBS@ $(LDFLAGS)
 CdiInfo_SOURCES = CdiInfo.cpp
 CdiInfo_LDADD = libcdipp.la 
-CdiInfo_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LIBS@ @ZLIB_LIBS@ $(LDFLAGS)
+CdiInfo_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LIBS@ @SZLIB_LIBS@ @ZLIB_LIBS@ $(LDFLAGS)
 #
 AM_CPPFLAGS = -I$(top_srcdir)/src
 #

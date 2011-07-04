@@ -37,7 +37,7 @@
     "include"  : "@SZLIB_INCLUDE@"
   },
   "hdf5"     : {
-    "lib"      : "@HDF5_LDFLAGS@",
+    "lib"      : "@HDF5_LIBS@",
     "include"  : "@HDF5_INCLUDE@"
   },
   "netcdf"   : {

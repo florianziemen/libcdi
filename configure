@@ -651,8 +651,8 @@ JASPER_LDFLAGS
 NC_CONFIG
 NETCDF_INCLUDE
 NETCDF_LDFLAGS
+HDF5_LIBS
 HDF5_INCLUDE
-HDF5_LDFLAGS
 SZLIB_LIBS
 SZLIB_INCLUDE
 ZLIB_LIBS
@@ -24816,6 +24816,7 @@ fi
 #  ----------------------------------------------------------------------
 #  Link application with HDF5 library, required for netcdf4
 HDF5_INCLUDE=''
+HDF5_LIBS=''
 
 # Check whether --with-hdf5 was given.
 if test "${with_hdf5+set}" = set; then :
@@ -24958,12 +24959,10 @@ $as_echo "$as_me: Cannot find hdf5 high level interface! It is required for netC
                                             have_hdf5_hl=no
 fi
 
-                            if test "x$have_libhdf5_hl" = 'xyes'; then :
-  HDF5_LDFLAGS=" -lhdf5_hl -lhdf5"
-
+                            if test "x$have_libhdf5_hl" = xyes; then :
+  HDF5_LIBS=" -lhdf5_hl -lhdf5"
 else
-  HDF5_LDFLAGS=" -lhdf5"
-
+  HDF5_LIBS=" -lhdf5"
 fi
                              ;; #(
   *) :
@@ -25110,11 +25109,9 @@ $as_echo "$as_me: Cannot link to hdf5 high level interface! It is required for n
 fi
 
                                  if test "x$have_libhdf5_hl" = 'xyes'; then :
-  HDF5_LDFLAGS=" -L$HDF5_ROOT/lib -lhdf5_hl -lhdf5"
-
+  HDF5_LIBS=" -L$HDF5_ROOT/lib -lhdf5_hl -lhdf5"
 else
-  HDF5_LDFLAGS=" -L$HDF5_ROOT/lib -lhdf5"
-
+  HDF5_LIBS=" -L$HDF5_ROOT/lib -lhdf5"
 fi
                                  HDF5_INCLUDE=" -I$HDF5_ROOT/include"
 else
@@ -25130,6 +25127,7 @@ $as_echo_n "checking for hdf5 library... " >&6; }
              { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
 fi
+
 
 
 #  ----------------------------------------------------------------------
