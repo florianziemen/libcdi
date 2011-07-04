@@ -84,6 +84,7 @@ AC_SUBST([SZLIB_INCLUDE])
 AC_SUBST([SZLIB_LIBS])
 #  ----------------------------------------------------------------------
 #  Link application with HDF5 library, required for netcdf4
+HDF5_INCLUDE=''
 AC_ARG_WITH([hdf5],
             [AS_HELP_STRING([--with-hdf5=<yes|no|directory> (default=no)],[location of hdf5 library, NETCDF4 requires hdf5 high level interface])],
             [AS_CASE(["$with_hdf5"],
@@ -102,7 +103,7 @@ AC_ARG_WITH([hdf5],
                             AS_IF([test "x$have_libhdf5_hl" = 'xyes'],
                                   [AC_SUBST([HDF5_LDFLAGS],[" -lhdf5_hl -lhdf5"])],
                                   [AC_SUBST([HDF5_LDFLAGS],[" -lhdf5"])])
-                            AC_SUBST([HDF5_INCLUDE],[""])],
+                            ],
                      [*],[HDF5_ROOT=$with_hdf5
                           AS_IF([test -d "$HDF5_ROOT"],
                                 [LDFLAGS="-L$HDF5_ROOT/lib $LDFLAGS"
@@ -123,10 +124,11 @@ AC_ARG_WITH([hdf5],
                                  AS_IF([test "x$have_libhdf5_hl" = 'xyes'],
                                        [AC_SUBST([HDF5_LDFLAGS],[" -L$HDF5_ROOT/lib -lhdf5_hl -lhdf5"])],
                                        [AC_SUBST([HDF5_LDFLAGS],[" -L$HDF5_ROOT/lib -lhdf5"])])
-                                 AC_SUBST([HDF5_INCLUDE],[" -I$HDF5_ROOT/include"])],
+                                 HDF5_INCLUDE=" -I$HDF5_ROOT/include"],
                                 [AC_MSG_NOTICE([$HDF5_ROOT is not a directory! HDF5 suppressed])])])],
             [AC_MSG_CHECKING([for hdf5 library])
              AC_MSG_RESULT([suppressed])])
+AC_SUBST([HDF5_INCLUDE])
 #  ----------------------------------------------------------------------
 #  Compile application with netcdf
 AC_ARG_WITH([netcdf],
