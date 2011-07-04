@@ -141,7 +141,7 @@ AC_ARG_ENABLE(ruby,
 AM_CONDITIONAL(ENABLE_RUBY,[test "x$enable_ruby" != "xno"])
 AS_IF([test "x$enable_ruby" != "xno"],[AC_SUBST([ENABLE_RUBY],[true])],[AC_SUBST([ENABLE_RUBY],[false])])
 #  ----------------------------------------------------------------------
-#  Create the Ruby Interface via swig
+#  Create the Python Interface via swig
 AC_ARG_ENABLE(python,
   [AS_HELP_STRING([--enable-python],[python language bindings [default=no] (EXPERIMENTAL)])],
   [AC_CHECK_PROG(PYTHON,python,python)
