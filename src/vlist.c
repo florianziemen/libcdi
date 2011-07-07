@@ -372,8 +372,8 @@ void vlistCopy(int vlistID2, int vlistID1)
       int nvars = vlistptr1->nvars;
       int nlevs, varID;
 
-      vlistptr2->vars = (var_t *) malloc(nvars*sizeof(var_t));
-      memcpy(vlistptr2->vars, vlistptr1->vars, nvars*sizeof(var_t));
+      vlistptr2->vars = (var_t *) malloc(vlistptr2->varsAllocated*sizeof(var_t));
+      memcpy(vlistptr2->vars, vlistptr1->vars, vlistptr2->varsAllocated*sizeof(var_t));
 
       for ( varID = 0; varID < nvars; varID++ )
 	{
