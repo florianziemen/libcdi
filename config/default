@@ -12,6 +12,17 @@ set -x
 #
 case "${HOSTNAME}" in
 # i386-apple-darwin10
+    bailung*)
+	./configure --prefix=$HOME/local \
+                    --enable-maintainer-mode \
+                    --enable-swig \
+                    --enable-python \
+                    --with-jasper=$HOME/local \
+                    --with-grib_api=$HOME/local \
+                    --with-netcdf=$HOME/local \
+                    --with-szlib=$HOME/local \
+	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O2 -Df2cFortran"
+	;;
     hama*)
 	./configure --prefix=$HOME/local \
                     --enable-maintainer-mode \
