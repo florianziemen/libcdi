@@ -562,6 +562,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	if ( vlistptr1->vars[varID].flag ) nvars2++;
 
       vlistptr2->nvars = nvars2;
+      vlistptr2->varsAllocated = nvars2;
       if ( nvars2 > 0 )
 	vlistptr2->vars  = (var_t *) malloc(nvars2*sizeof(var_t));
       else
