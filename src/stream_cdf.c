@@ -4032,15 +4032,18 @@ int isDBSAxis(const char *longname)
 }
 
 static
-int isHeightAxis(const char *longname)
+int isHeightAxis(const char *stdname, const char *longname)
 {
   int status = FALSE;
 
-  if ( strcmp(longname, "height") == 0 ||
-       strcmp(longname, "height above the surface") == 0 )
-    {
-      status = TRUE;
-    }
+  if ( strcmp(stdname, "height") == 0 ) status = TRUE;
+
+  if ( status == FALSE )
+    if ( strcmp(longname, "height") == 0 ||
+         strcmp(longname, "height above the surface") == 0 )
+      {
+        status = TRUE;
+      }
 
   return (status);
 }
@@ -4784,7 +4787,7 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 		{
 		  if ( isDBSAxis(ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_SEA;
-		  else if ( isHeightAxis(ncvars[ncvarid].longname) )
+		  else if ( isHeightAxis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HEIGHT;
 		}
 	    }
@@ -4867,7 +4870,7 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		{
 		  if ( isDBSAxis(ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_SEA;
-		  else if ( isHeightAxis(ncvars[ncvarid].longname) )
+		  else if ( isHeightAxis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HEIGHT;
 		  continue;
 		}

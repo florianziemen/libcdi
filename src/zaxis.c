@@ -29,7 +29,7 @@ ZaxistypeEntry[] = {
   {2, "lev",     "hybrid",            "",               "level"},
   {2, "lev",     "hybrid_half",       "",               "level"},
   {2, "lev",     "pressure",          "air_pressure",   "Pa"},
-  {1, "height",  "height",            "",               "m"},
+  {1, "height",  "height",            "height",         "m"},
   {2, "depth",   "depth_below_sea",   "",               "m"},
   {2, "depth",   "depth_below_land",  "",               "cm"},
   {0, "lev",     "isentropic",        "",               "K"},
