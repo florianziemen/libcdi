@@ -38,10 +38,11 @@ LT_INIT([pic-only])
 AC_CHECK_TOOL([CC],[gcc],[:])
 AC_PROG_CC_C99
 AC_PROG_FC
-AC_FC_SRCEXT([f90])
-AC_LANG_PUSH([Fortran])
-AC_PROG_FPP
-AC_LANG_POP([Fortran])
+AS_IF([test -n "$FC" && test "X$FC" != "Xno"],
+  [AC_FC_SRCEXT([f90])
+   AC_LANG_PUSH([Fortran])
+   AC_PROG_FPP
+   AC_LANG_POP([Fortran])])
 AC_PROG_F77
 AC_PROG_RANLIB
 AC_PROG_CXX
