@@ -5,7 +5,7 @@ SWIGCDIOBJ = cdiobj.i
 BINDINGS   =
 EXTRA_DIST = $(SWIGCDIOBJ) $(SWIGCDILIB)
 EXTRA_DIST += ruby/cdilib_wrap.c ruby/cdiobj_wrap.cpp ruby/testLib.rb ruby/testObj.rb
-EXTRA_DIST += python/cdilib_wrap.c python/cdiobj_wrap.cpp python/testLib.py python/testObj.py python/setupObj.py python/setupLib.py
+EXTRA_DIST += python/cdilib_wrap.c python/cdiobj_wrap.cpp python/testLib.py python/testObj.py python/setupObj.py python/setupLib.py python/setup.py python/table.py python/CdiLib.py python/CdiObj.py
 if CREATE_INTERFACES
 BINDINGS += help
 endif
