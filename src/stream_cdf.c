@@ -966,7 +966,7 @@ void cdfDefTimestep(int streamID, int tsID)
 static
 void cdfDefComplex(int streamID, int gridID)
 {
-  char axisname[] = "complex";
+  char axisname[] = "nc2";
   int index;
   int dimID = UNDEFID;
   int gridID0, gridtype0, gridindex;
@@ -989,7 +989,7 @@ void cdfDefComplex(int streamID, int gridID)
         {
           gridID0 = vlistGrid(vlistID, index);
           gridtype0 = gridInqType(gridID0);
-          if ( gridtype0 == GRID_SPECTRAL )
+          if ( gridtype0 == GRID_SPECTRAL || gridtype0 == GRID_FOURIER )
             {
               dimID = streamptr->xdimID[index];
               break;
@@ -1016,12 +1016,12 @@ void cdfDefComplex(int streamID, int gridID)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
-void cdfDefSpc(int streamID, int gridID)
+void cdfDefSP(int streamID, int gridID)
 {
   /*
   char longname[] = "Spherical harmonic coefficient";
   */
-  char axisname[5] = "spcX";
+  char axisname[5] = "nspX";
   int index, iz = 0;
   int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
@@ -1055,7 +1055,68 @@ void cdfDefSpc(int streamID, int gridID)
                   break;
                 }
               else
-                iz++;   
+                iz++;
+            }
+        }
+    }
+
+  if ( dimID == UNDEFID )
+    {
+      if ( iz == 0 ) axisname[3] = '\0';
+      else           sprintf(&axisname[3], "%1d", iz+1);
+
+      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+
+      cdf_def_dim(fileID, axisname, dimlen, &dimID);
+
+      cdf_enddef(fileID);
+      streamptr->ncmode = 2;
+    }
+
+  gridindex = vlistGridIndex(vlistID, gridID);
+  streamptr->ydimID[gridindex] = dimID;
+}
+#endif
+
+#if  defined  (HAVE_LIBNETCDF)
+static
+void cdfDefFC(int streamID, int gridID)
+{
+  char axisname[5] = "nfcX";
+  int index, iz = 0;
+  int gridID0, gridtype0, gridindex;
+  int dimID = UNDEFID;
+  int ngrids;
+  int fileID;
+  int dimlen, dimlen0;
+  int vlistID;
+  stream_t *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
+
+  vlistID = streamInqVlist(streamID);
+  fileID  = streamInqFileID(streamID);
+
+  ngrids = vlistNgrids(vlistID);
+
+  dimlen = gridInqSize(gridID)/2;
+
+  for ( index = 0; index < ngrids; index++ )
+    {
+      if ( streamptr->ydimID[index] != UNDEFID )
+        {
+          gridID0 = vlistGrid(vlistID, index);
+          gridtype0 = gridInqType(gridID0);
+          if ( gridtype0 == GRID_FOURIER )
+            {
+              dimlen0 = gridInqSize(gridID0)/2;
+              if ( dimlen == dimlen0 )
+                {
+                  dimID = streamptr->ydimID[index];
+                  break;
+                }
+              else
+                iz++;
             }
         }
     }
@@ -2528,7 +2589,7 @@ void cdfDefGrid(int streamID, int gridID)
       if ( gridIsRotated(gridID) ) cdfDefPole(streamID, gridID);
     }
   else if ( gridtype == GRID_CURVILINEAR )
-    {   
+    {
       cdfDefCurvilinear(streamID, gridID);
     }
   else if ( gridtype == GRID_UNSTRUCTURED )
@@ -2542,7 +2603,12 @@ void cdfDefGrid(int streamID, int gridID)
   else if ( gridtype == GRID_SPECTRAL )
     {
       cdfDefComplex(streamID, gridID);
-      cdfDefSpc(streamID, gridID);
+      cdfDefSP(streamID, gridID);
+    }
+  else if ( gridtype == GRID_FOURIER )
+    {
+      cdfDefComplex(streamID, gridID);
+      cdfDefFC(streamID, gridID);
     }
   else if ( gridtype == GRID_TRAJECTORY )
     {
@@ -2901,6 +2967,12 @@ int cdfDefVar(int streamID, int varID)
       axis[iax++] = '-';
       cdf_put_att_text(fileID, ncvarid, "axis", iax, axis);
       cdf_put_att_int(fileID, ncvarid, "truncation", NC_INT, 1L, &gridTruncation);
+    }
+  else if ( gridtype == GRID_FOURIER )
+    {
+      axis[iax++] = '-';
+      axis[iax++] = '-';
+      cdf_put_att_text(fileID, ncvarid, "axis", iax, axis);
     }
 
   /*  if ( xtype == NC_BYTE || xtype == NC_SHORT || xtype == NC_INT ) */
@@ -4318,6 +4390,8 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                 ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
               else if ( strncmp(attstring, "spectral", 8) == 0 )
                 ncvars[ncvarid].gridtype = GRID_SPECTRAL;
+              else if ( strncmp(attstring, "fourier", 7) == 0 )
+                ncvars[ncvarid].gridtype = GRID_FOURIER;
               else if ( strcmp(attstring, "trajectory") == 0 )
                 ncvars[ncvarid].gridtype = GRID_TRAJECTORY;
               else if ( strcmp(attstring, "generic") == 0 )
@@ -5295,6 +5369,11 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 	      {
 		grid.size = size;
 		grid.lcomplex = 1;
+		break;
+	      }
+	    case GRID_FOURIER:
+	      {
+		grid.size = size;
 		break;
 	      }
 	    case GRID_TRAJECTORY:

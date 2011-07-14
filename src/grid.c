@@ -2620,6 +2620,10 @@ int gridGenerate(grid_t grid)
 	if ( grid.lcomplex ) gridDefComplexPacking(gridID, 1);
 	break;
       }
+    case GRID_FOURIER:
+      {
+	break;
+      }
     case GRID_GME:
       {
 	gridDefGMEnd(gridID, grid.nd);
@@ -3446,6 +3450,10 @@ void gridPrint(int gridID, int opt)
       {
 	fprintf(fp, "truncation = %d\n", trunc);
 	fprintf(fp, "complexpacking = %d\n", gridInqComplexPacking(gridID));
+	break;
+      }
+    case GRID_FOURIER:
+      {
 	break;
       }
     case GRID_GME:
