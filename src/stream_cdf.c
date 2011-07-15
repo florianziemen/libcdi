@@ -2959,7 +2959,7 @@ int cdfDefVar(int streamID, int varID)
           cdf_put_att_text(fileID, ncvarid, "cell_measures", len, cellarea);
         }
     }
-  else if ( gridtype == GRID_SPECTRAL )
+  else if ( gridtype == GRID_SPECTRAL || gridtype == GRID_FOURIER )
     {
       int gridTruncation = gridInqTrunc(gridID);
 
@@ -2967,12 +2967,6 @@ int cdfDefVar(int streamID, int varID)
       axis[iax++] = '-';
       cdf_put_att_text(fileID, ncvarid, "axis", iax, axis);
       cdf_put_att_int(fileID, ncvarid, "truncation", NC_INT, 1L, &gridTruncation);
-    }
-  else if ( gridtype == GRID_FOURIER )
-    {
-      axis[iax++] = '-';
-      axis[iax++] = '-';
-      cdf_put_att_text(fileID, ncvarid, "axis", iax, axis);
     }
 
   /*  if ( xtype == NC_BYTE || xtype == NC_SHORT || xtype == NC_INT ) */
@@ -5087,7 +5081,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 
 	  grid.prec  = DATATYPE_FLT64;
 	  grid.trunc = ncvars[ncvarid].truncation;
-	  
+
 	  if ( ncvars[ncvarid].gridtype == GRID_TRAJECTORY )
 	    {
 	      if ( ncvars[ncvarid].xvarid == UNDEFID )
@@ -5113,7 +5107,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		    }
 
 		  if ( ncvars[xvarid].ndims > 2 || ncvars[yvarid].ndims > 2 )
-		    {                           
+		    {
 		      if ( ncvars[xvarid].ndims == 3 && ncvars[xvarid].dimids[0] == timedimid &&
 			   ncvars[yvarid].ndims == 3 && ncvars[yvarid].dimids[0] == timedimid )
 			{

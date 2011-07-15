@@ -2622,6 +2622,7 @@ int gridGenerate(grid_t grid)
       }
     case GRID_FOURIER:
       {
+	gridDefTrunc(gridID, grid.trunc);
 	break;
       }
     case GRID_GME:
@@ -3440,9 +3441,9 @@ void gridPrint(int gridID, int opt)
 	fprintf(fp, "xinc      = %g\n", xincm);
 	fprintf(fp, "yinc      = %g\n", yincm);
 	if ( (projflag & 128) == 0 )
-	  fprintf(fp, "projection= northpole\n");
+	  fprintf(fp, "projection = northpole\n");
 	else
-	  fprintf(fp, "projection= southpole\n");
+	  fprintf(fp, "projection = southpole\n");
 
 	break;
       }
@@ -3454,6 +3455,7 @@ void gridPrint(int gridID, int opt)
       }
     case GRID_FOURIER:
       {
+	fprintf(fp, "truncation = %d\n", trunc);
 	break;
       }
     case GRID_GME:
