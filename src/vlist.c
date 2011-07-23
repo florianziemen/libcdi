@@ -634,8 +634,8 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 		    nvct = zaxisInqVctSize(zaxisID);
 		    vct  = zaxisInqVctPtr(zaxisID);
 		  }
-		lbounds  = 0;     /* <------------ have to define */
-		levels2  = NULL;  /* <------------ have to define */
+		lbounds  = 0;     /* <------------ have to defined */
+		levels2  = NULL;  /* <------------ have to defined */
 		zaxisID2 = vlistInqZaxis(vlistID2, zaxisType, nlevs2, levels, lbounds, levels2, nvct, vct);
 		free(levels);
 

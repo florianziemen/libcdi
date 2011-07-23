@@ -2105,7 +2105,6 @@ void cdfDefVCT(int streamID, int zaxisID)
       size_t count = 1;      
       int ncdimid, ncdimid2;
       int hyaiid, hybiid, hyamid, hybmid;
-      const double *vctptr = zaxisInqVctPtr(zaxisID);
       double mval;
       char tmpname[256];
 
@@ -2159,6 +2158,8 @@ void cdfDefVCT(int streamID, int zaxisID)
       cdf_enddef(fileID);
       streamptr->ncmode = 2;
 
+      const double *vctptr = zaxisInqVctPtr(zaxisID);
+
       cdf_put_var_double(fileID, hyaiid, vctptr);
       cdf_put_var_double(fileID, hybiid, vctptr+ilev);
 
@@ -2168,7 +2169,7 @@ void cdfDefVCT(int streamID, int zaxisID)
           mval = (vctptr[i] + vctptr[i+1]) * 0.5;
           cdf_put_vara_double(fileID, hyamid, &start, &count, &mval);
           mval = (vctptr[ilev+i] + vctptr[ilev+i+1]) * 0.5;
-          cdf_put_vara_double(fileID, hybmid, &start, &count, &mval);     
+          cdf_put_vara_double(fileID, hybmid, &start, &count, &mval);
         }
     }
 }

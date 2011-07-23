@@ -1053,6 +1053,18 @@ void zaxisDefVct(int zaxisID, int size, const double *vct)
 }
 
 
+void zaxisInqVct(int zaxisID, double *vct)
+{
+  zaxis_t *zaxisptr;
+
+  zaxisptr = zaxis_to_pointer(zaxisID);
+
+  zaxis_check_ptr(zaxisID, zaxisptr);
+
+  memcpy(vct, zaxisptr->vct, zaxisptr->vctsize*sizeof(double));
+}
+
+
 int zaxisInqVctSize(int zaxisID)
 {
   zaxis_t *zaxisptr;

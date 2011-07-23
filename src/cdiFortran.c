@@ -350,6 +350,7 @@ FCALLSCFUN1 (INT, zaxisInqPositive, ZAXISINQPOSITIVE, zaxisinqpositive, INT)
 FCALLSCSUB2 (zaxisDefLtype, ZAXISDEFLTYPE, zaxisdefltype, INT, INT)
 FCALLSCFUN1 (INT, zaxisInqLtype, ZAXISINQLTYPE, zaxisinqltype, INT)
 FCALLSCSUB3 (zaxisDefVct, ZAXISDEFVCT, zaxisdefvct, INT, INT, PDOUBLE)
+FCALLSCSUB2 (zaxisInqVct, ZAXISINQVCT, zaxisinqvct, INT, PDOUBLE)
 FCALLSCFUN1 (INT, zaxisInqVctSize, ZAXISINQVCTSIZE, zaxisinqvctsize, INT)
 FCALLSCFUN2 (INT, zaxisInqLbounds, ZAXISINQLBOUNDS, zaxisinqlbounds, INT, PDOUBLE)
 FCALLSCFUN2 (INT, zaxisInqUbounds, ZAXISINQUBOUNDS, zaxisinqubounds, INT, PDOUBLE)
@@ -437,12 +438,3 @@ FCALLSCFUN1 (INT, streamInqHistorySize, STREAMINQHISTORYSIZE, streaminqhistorysi
 FCALLSCSUB2 (streamInqHistoryString, STREAMINQHISTORYSTRING, streaminqhistorystring, INT, PSTRING)
 
 #endif
-/*
- * Local Variables:
- * c-file-style: "Java"
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * show-trailing-whitespace: t
- * require-trailing-newline: t
- * End:
- */

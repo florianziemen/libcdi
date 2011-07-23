@@ -1963,7 +1963,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	else
 	  {
 	    ISEC2_NumVCP = vctsize;
-	    memcpy(&fsec2[10], zaxisInqVctPtr(zaxisID), vctsize*sizeof(double));
+	    zaxisInqVct(zaxiID, &fsec2[10]);
 	  }
 	break;
       }

@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.5.0
+! Fortran interface for CDI library version 1.5.1
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   June 2011
+! Uwe Schulzweida, MPI-MET, Hamburg,   July 2011
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -1656,6 +1656,11 @@
 !                                     INTEGER         size,
 !                                     DOUBLEPRECISION vct_vec)
       EXTERNAL        zaxisDefVct
+
+!                     zaxisInqVct
+!                                    (INTEGER         zaxisID,
+!                                     DOUBLEPRECISION vct_vec)
+      EXTERNAL        zaxisInqVct
 
       INTEGER         zaxisInqVctSize
 !                                    (INTEGER         zaxisID)

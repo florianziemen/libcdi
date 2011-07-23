@@ -1,3 +1,7 @@
+2011-07-23  Pier Giuseppe Fogli  <piergiuseppe.fogli@cmcc.it>
+
+	* added interface function zaxisInqVct to read the VCT
+
 2011-07-23  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* netcdf input: correct wrong formatted time units [request: Harald Anlauf]

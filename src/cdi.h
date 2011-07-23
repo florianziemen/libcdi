@@ -743,6 +743,7 @@ int     zaxisInqLtype(int zaxisID);
 
 const double *zaxisInqLevelsPtr(int zaxisID);
 void    zaxisDefVct(int zaxisID, int size, const double *vct_vec);
+void    zaxisInqVct(int zaxisID, double *vct_vec);
 int     zaxisInqVctSize(int zaxisID);
 const double *zaxisInqVctPtr(int zaxisID);
 int     zaxisInqLbounds(int zaxisID, double *lbounds_vec);
