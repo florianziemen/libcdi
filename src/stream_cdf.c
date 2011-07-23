@@ -230,13 +230,19 @@ int splitBasetime(const char *timeunits, taxis_t *taxis)
             }
           else if ( timetype == TAXIS_RELATIVE )
             {
-              year = atoi(ptu);
-              if ( year < 0 ) ptu++;
+              int v1, v2, v3;
+              v1 = atoi(ptu);
+              if ( v1 < 0 ) ptu++;
               while ( isdigit((int) *ptu) ) ptu++;
-              month = atoi(++ptu);
+              v2 = atoi(++ptu);
               while ( isdigit((int) *ptu) ) ptu++;
-              day = atoi(++ptu);
+              v3 = atoi(++ptu);
               while ( isdigit((int) *ptu) ) ptu++;
+
+              if ( v3 > 999 && v1 < 32 )
+                { year = v3; month = v2; day = v1; }
+              else
+                { year = v1; month = v2; day = v3; }
 
               while ( isspace((int) *ptu) ) ptu++;
 
