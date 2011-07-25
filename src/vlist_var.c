@@ -452,7 +452,7 @@ int vlistInqVarCode(int vlistID, int varID)
 }
 
 
-char *vlistInqVarNamePtr(int vlistID, int varID)
+const char *vlistInqVarNamePtr(int vlistID, int varID)
 {
   vlist_t *vlistptr;
 
@@ -464,7 +464,7 @@ char *vlistInqVarNamePtr(int vlistID, int varID)
 }
 
 
-char *vlistInqVarLongnamePtr(int vlistID, int varID)
+const char *vlistInqVarLongnamePtr(int vlistID, int varID)
 {
   vlist_t *vlistptr;
 
@@ -476,7 +476,7 @@ char *vlistInqVarLongnamePtr(int vlistID, int varID)
 }
 
 
-char *vlistInqVarStdnamePtr(int vlistID, int varID)
+const char *vlistInqVarStdnamePtr(int vlistID, int varID)
 {
   vlist_t *vlistptr;
 
@@ -488,7 +488,7 @@ char *vlistInqVarStdnamePtr(int vlistID, int varID)
 }
 
 
-char *vlistInqVarUnitsPtr(int vlistID, int varID)
+const char *vlistInqVarUnitsPtr(int vlistID, int varID)
 {
   vlist_t *vlistptr;
 

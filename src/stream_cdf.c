@@ -2653,10 +2653,10 @@ int cdfDefVar(int streamID, int varID)
   int code, param, gridID, zaxisID;
   int pnum, pcat, pdis;
   char varname[256];
-  char *name = NULL;
-  char *longname = NULL;
-  char *stdname = NULL;
-  char *units = NULL;
+  const char *name = NULL;
+  const char *longname = NULL;
+  const char *stdname = NULL;
+  const char *units = NULL;
   int dims[4];
   int lchunk = FALSE;
   size_t chunks[4] = {0,0,0,0};
@@ -3398,6 +3398,9 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
 
   cdf_inq_varndims(fileID, ncvarid, &ndimsp);
   cdf_inq_vardimid(fileID, ncvarid, dimids);
+
+  // printf("xid %d, yid %d, zid %d\n", xid, yid, zid);
+  // printf("dimid2 %d, dimid3 %d, dimid4 %d\n", dimids[ndims], dimids[ndims+1], dimids[ndims+2]);
 
   if ( zid != UNDEFID && yid != UNDEFID && xid != UNDEFID )
     {
@@ -5720,15 +5723,246 @@ void define_all_zaxes(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 }
 #endif
 
+
+#if  defined  (HAVE_LIBNETCDF)
+/* define all input variables */
+static
+void define_all_vars(int fileID, int streamID, int vlistID, int instID, int modelID, int tableID, int *varids, ncdim_t *ncdims, int nvars, ncvar_t *ncvars)
+{
+  int varID1, varID, ncvarid;
+  int code;
+  stream_t *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
+  
+  stream_check_ptr(__func__, streamptr);
+
+  if ( streamptr->sortname )
+    {
+      int index;
+      varinfo_t **varInfo;
+      varInfo    = (varinfo_t **) malloc(nvars*sizeof(varinfo_t *));
+      varInfo[0] = (varinfo_t *)  malloc(nvars*sizeof(varinfo_t));
+
+      for ( index = 1; index < nvars; index++ )
+	varInfo[index] = varInfo[0] + index;
+
+      for ( varID = 0; varID < nvars; varID++ )
+	{
+	  ncvarid = varids[varID];
+	  varInfo[varID]->ncvarid = ncvarid;
+	  strcpy(varInfo[varID]->name, ncvars[ncvarid].name);
+	}
+      qsort(varInfo[0], nvars, sizeof(varinfo_t), cmpvarname);
+      for ( varID = 0; varID < nvars; varID++ )
+	{
+	  varids[varID] = varInfo[varID]->ncvarid;
+	}
+      free(varInfo[0]);
+      free(varInfo);
+    }
+
+  for ( varID1 = 0; varID1 < nvars; varID1++ )
+    {
+      int gridID, zaxisID;
+
+      ncvarid = varids[varID1];
+      gridID  = ncvars[ncvarid].gridID;
+      zaxisID = ncvars[ncvarid].zaxisID;
+
+      varID = streamNewVar(streamID, gridID, zaxisID);
+      varID = vlistDefVar(vlistID, gridID, zaxisID, ncvars[ncvarid].timeID);
+
+#if  defined  (HAVE_NETCDF4)
+      if ( ncvars[ncvarid].deflate )
+	vlistDefVarCompType(vlistID, varID, COMPRESS_ZIP);
+#endif
+
+      streamptr->vars[varID1].level   = NULL;
+      streamptr->vars[varID1].defmiss = 0;
+      streamptr->vars[varID1].nlevs   = zaxisInqSize(ncvars[ncvarid].zaxisID);
+      streamptr->vars[varID1].ncvarid = ncvarid;
+
+      vlistDefVarName(vlistID, varID, ncvars[ncvarid].name);
+      if ( ncvars[ncvarid].param != UNDEFID ) vlistDefVarParam(vlistID, varID, ncvars[ncvarid].param);
+      if ( ncvars[ncvarid].code != UNDEFID )  vlistDefVarCode(vlistID, varID, ncvars[ncvarid].code);
+      if ( ncvars[ncvarid].code != UNDEFID )
+	{
+	  int param;
+	  param = cdiEncodeParam(ncvars[ncvarid].code, ncvars[ncvarid].tabnum, 255);
+	  vlistDefVarParam(vlistID, varID, param);
+	}
+      if ( ncvars[ncvarid].longname[0] )      vlistDefVarLongname(vlistID, varID, ncvars[ncvarid].longname);
+      if ( ncvars[ncvarid].stdname[0] )       vlistDefVarStdname(vlistID, varID, ncvars[ncvarid].stdname);
+      if ( ncvars[ncvarid].units[0] )         vlistDefVarUnits(vlistID, varID, ncvars[ncvarid].units);
+      if ( IS_NOT_EQUAL(ncvars[ncvarid].addoffset, 0) )
+	vlistDefVarAddoffset(vlistID, varID, ncvars[ncvarid].addoffset);
+      if ( IS_NOT_EQUAL(ncvars[ncvarid].scalefactor, 1) )
+	vlistDefVarScalefactor(vlistID, varID, ncvars[ncvarid].scalefactor);
+
+      vlistDefVarDatatype(vlistID, varID, cdfInqDatatype(ncvars[ncvarid].xtype));
+
+      vlistDefVarInstitut(vlistID, varID, instID);
+      vlistDefVarModel(vlistID, varID, modelID);
+      if ( ncvars[ncvarid].tableID != UNDEFID )
+	vlistDefVarTable(vlistID, varID, ncvars[ncvarid].tableID);
+
+      if ( ncvars[ncvarid].defmiss == TRUE ) vlistDefVarMissval(vlistID, varID, ncvars[ncvarid].missval);
+
+      if ( CDI_Debug )
+	Message("varID = %d  gridID = %d  zaxisID = %d", varID,
+		vlistInqVarGrid(vlistID, varID), vlistInqVarZaxis(vlistID, varID));
+    }
+
+  for ( varID = 0; varID < nvars; varID++ )
+    {
+      ncvarid = varids[varID];
+
+      if ( ncvars[ncvarid].natts )
+	{
+	  int nvatts;
+	  int attnum;
+	  int iatt;
+	  nc_type attrtype;
+	  size_t attlen;
+	  char attname[256];
+	  const int attstringlen = 8192; char attstring[8192];
+
+	  nvatts = ncvars[ncvarid].natts;
+	  for ( iatt = 0; iatt < nvatts; iatt++ )
+	    {
+	      attnum = ncvars[ncvarid].atts[iatt];
+	      cdf_inq_attname(fileID, ncvarid, attnum, attname);
+	      cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
+	      cdf_inq_atttype(fileID, ncvarid, attname, &attrtype);
+	      if ( attrtype == NC_SHORT || attrtype == NC_INT )
+		{
+		  int *attint;
+		  attint = (int *) malloc(attlen*sizeof(int));
+		  cdfGetAttInt(fileID, ncvarid, attname, attlen, attint);
+		  if ( attrtype == NC_SHORT )
+		    vlistDefAttInt(vlistID, varID, attname, DATATYPE_INT16, (int)attlen, attint);
+		  else
+		    vlistDefAttInt(vlistID, varID, attname, DATATYPE_INT32, (int)attlen, attint);
+		  if ( CDI_Debug )
+		    printf("int: %s.%s = %d\n", ncvars[ncvarid].name, attname, attint[0]);
+		  free(attint);
+		}
+	      else if ( attrtype == NC_FLOAT || attrtype == NC_DOUBLE )
+		{
+		  double *attflt;
+		  attflt = (double *) malloc(attlen*sizeof(double));
+		  cdfGetAttDouble(fileID, ncvarid, attname, attlen, attflt);
+		  if ( attrtype == NC_FLOAT )
+		    vlistDefAttFlt(vlistID, varID, attname, DATATYPE_FLT32, (int)attlen, attflt);
+		  else
+		    vlistDefAttFlt(vlistID, varID, attname, DATATYPE_FLT64, (int)attlen, attflt);
+		  if ( CDI_Debug )
+		    printf("flt: %s.%s = %g\n", ncvars[ncvarid].name, attname, attflt[0]);
+		  free(attflt);
+		}
+	      else if ( attrtype == NC_CHAR )
+		{
+		  cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+		  attlen = 1 + strlen(attstring);
+		  vlistDefAttTxt(vlistID, varID, attname, (int)attlen, attstring);
+		  if ( CDI_Debug )
+		    printf("txt: %s.%s = %s\n", ncvars[ncvarid].name, attname, attstring);
+		}
+	      else
+		{
+		  if ( CDI_Debug )
+		    printf("att: %s.%s = unknown\n", ncvars[ncvarid].name, attname);
+		}
+	    }
+
+	  free(ncvars[ncvarid].atts);
+	}
+    }
+
+  if ( varids ) free(varids);
+
+  for ( varID = 0; varID < nvars; varID++ )
+    {
+      if ( vlistInqVarCode(vlistID, varID) == -varID-1 )
+	{
+	  const char *pname = vlistInqVarNamePtr(vlistID, varID);
+	  size_t len = strlen(pname);
+	  if ( len > 3 && isdigit((int) pname[3]) )
+	    {
+	      if ( memcmp("var", pname, 3) == 0 )
+		{
+		  vlistDefVarCode(vlistID, varID, atoi(pname+3));
+		  vlistDestroyVarName(vlistID, varID);
+		}
+	    }
+	  else if ( len > 4 && isdigit((int) pname[4]) )
+	    {
+	      if ( memcmp("code", pname, 4) == 0 )
+		{
+		  vlistDefVarCode(vlistID, varID, atoi(pname+4));
+		  vlistDestroyVarName(vlistID, varID);
+		}
+	    }
+	  else if ( len > 5 && isdigit((int) pname[5]) )
+	    {
+	      if ( memcmp("param", pname, 5) == 0 )
+		{
+		  int pnum = -1, pcat = 255, pdis = 255;
+		  sscanf(pname+5, "%d.%d.%d", &pnum, &pcat, &pdis);
+		  vlistDefVarParam(vlistID, varID, cdiEncodeParam(pnum, pcat, pdis));
+		  vlistDestroyVarName(vlistID, varID);
+		}
+	    }
+	}
+    }
+
+  for ( varID = 0; varID < nvars; varID++ )
+    {
+      instID  = vlistInqVarInstitut(vlistID, varID);
+      modelID = vlistInqVarModel(vlistID, varID);
+      tableID = vlistInqVarTable(vlistID, varID);
+      code    = vlistInqVarCode(vlistID, varID);
+      if ( cdiDefaultTableID != UNDEFID )
+	{
+	  if ( tableInqParNamePtr(cdiDefaultTableID, code) )
+	    {
+	      vlistDestroyVarName(vlistID, varID);
+	      vlistDestroyVarLongname(vlistID, varID);
+	      vlistDestroyVarUnits(vlistID, varID);
+
+	      if ( tableID != UNDEFID )
+		{
+		  vlistDefVarName(vlistID, varID, tableInqParNamePtr(cdiDefaultTableID, code));
+		  if ( tableInqParLongnamePtr(cdiDefaultTableID, code) )
+		    vlistDefVarLongname(vlistID, varID, tableInqParLongnamePtr(cdiDefaultTableID, code));
+		  if ( tableInqParUnitsPtr(cdiDefaultTableID, code) )
+		    vlistDefVarUnits(vlistID, varID, tableInqParUnitsPtr(cdiDefaultTableID, code));
+		}
+	      else
+		{
+		  tableID = cdiDefaultTableID;
+		}
+	    }
+	  if ( cdiDefaultModelID != UNDEFID )
+	    modelID = cdiDefaultModelID;
+	  if ( cdiDefaultInstID != UNDEFID )
+	    instID = cdiDefaultInstID;
+	}
+      if ( instID  != UNDEFID ) vlistDefVarInstitut(vlistID, varID, instID);
+      if ( modelID != UNDEFID ) vlistDefVarModel(vlistID, varID, modelID);
+      if ( tableID != UNDEFID ) vlistDefVarTable(vlistID, varID, tableID);
+    }
+}
+#endif
+
 int cdfInqContents(int streamID)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int ndims, nvars, ngatts, unlimdimid;
-  int varID, ncvarid;
+  int ncvarid;
   int ncdimid;
-  int varID1;
   int fileID;
-  int nvatts;
   nc_type xtype;
   size_t ntsteps;
   int timedimid = -1;
@@ -5747,7 +5981,6 @@ int cdfInqContents(int streamID)
   double *vct = NULL;
   int instID  = UNDEFID;
   int modelID = UNDEFID;
-  int code;
   int taxisID;
   int i;
   int nbdims;
@@ -6178,233 +6411,22 @@ int cdfInqContents(int streamID)
   varids = (int *) malloc(nvars*sizeof(int));
   nvarids = 0;
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-    {
-      if ( ncvars[ncvarid].isvar == TRUE ) varids[nvarids++] = ncvarid;
-    }
+    if ( ncvars[ncvarid].isvar == TRUE ) varids[nvarids++] = ncvarid;
+
   nc_nvars = nvars;
-
-  if ( CDI_Debug )
-    Message("time varid = %d", streamptr->basetime.ncvarid);
-
-  if ( CDI_Debug )
-    Message("ntsteps = %d", streamptr->ntsteps);
-
   nvars = nvarids;
-  if ( CDI_Debug )
-    Message("nvars = %d", nvars);
 
-  if ( nvars == 0 )
-    return (CDI_EUFSTRUCT);
+  if ( CDI_Debug ) Message("time varid = %d", streamptr->basetime.ncvarid);
+  if ( CDI_Debug ) Message("ntsteps = %d", streamptr->ntsteps);
+  if ( CDI_Debug ) Message("nvars = %d", nvars);
 
-  if ( streamptr->sortname )
-    {
-      int index;
-      varinfo_t **varInfo;
-      varInfo    = (varinfo_t **) malloc(nvars*sizeof(varinfo_t *));
-      varInfo[0] = (varinfo_t *)  malloc(nvars*sizeof(varinfo_t));
+  if ( nvars == 0 ) return (CDI_EUFSTRUCT);
 
-      for ( index = 1; index < nvars; index++ )
-	varInfo[index] = varInfo[0] + index;
 
-      for ( varID = 0; varID < nvars; varID++ )
-	{
-	  ncvarid = varids[varID];
-	  varInfo[varID]->ncvarid = ncvarid;
-	  strcpy(varInfo[varID]->name, ncvars[ncvarid].name);
-	}
-      qsort(varInfo[0], nvars, sizeof(varinfo_t), cmpvarname);
-      for ( varID = 0; varID < nvars; varID++ )
-	{
-	  varids[varID] = varInfo[varID]->ncvarid;
-	}
-      free(varInfo[0]);
-      free(varInfo);
-    }
+  /* define all data variables */
+  define_all_vars(fileID, streamID, vlistID, instID, modelID, tableID, varids, ncdims, nvars, ncvars);
 
-  for ( varID1 = 0; varID1 < nvars; varID1++ )
-    {
-      ncvarid = varids[varID1];
 
-      varID = streamNewVar(streamID, ncvars[ncvarid].gridID, ncvars[ncvarid].zaxisID);
-      varID = vlistDefVar(vlistID, ncvars[ncvarid].gridID, ncvars[ncvarid].zaxisID, ncvars[ncvarid].timeID);
-
-#if  defined  (HAVE_NETCDF4)
-      if ( ncvars[ncvarid].deflate )
-	vlistDefVarCompType(vlistID, varID, COMPRESS_ZIP);
-#endif
-
-      streamptr->vars[varID1].level   = NULL;
-      streamptr->vars[varID1].defmiss = 0;
-      streamptr->vars[varID1].nlevs   = zaxisInqSize(ncvars[ncvarid].zaxisID);
-      streamptr->vars[varID1].ncvarid = ncvarid;
-
-      vlistDefVarName(vlistID, varID, ncvars[ncvarid].name);
-      if ( ncvars[ncvarid].param != UNDEFID ) vlistDefVarParam(vlistID, varID, ncvars[ncvarid].param);
-      if ( ncvars[ncvarid].code != UNDEFID )  vlistDefVarCode(vlistID, varID, ncvars[ncvarid].code);
-      if ( ncvars[ncvarid].code != UNDEFID )
-	{
-	  int param;
-	  param = cdiEncodeParam(ncvars[ncvarid].code, ncvars[ncvarid].tabnum, 255);
-	  vlistDefVarParam(vlistID, varID, param);
-	}
-      if ( ncvars[ncvarid].longname[0] )      vlistDefVarLongname(vlistID, varID, ncvars[ncvarid].longname);
-      if ( ncvars[ncvarid].stdname[0] )       vlistDefVarStdname(vlistID, varID, ncvars[ncvarid].stdname);
-      if ( ncvars[ncvarid].units[0] )         vlistDefVarUnits(vlistID, varID, ncvars[ncvarid].units);
-      if ( IS_NOT_EQUAL(ncvars[ncvarid].addoffset, 0) )
-	vlistDefVarAddoffset(vlistID, varID, ncvars[ncvarid].addoffset);
-      if ( IS_NOT_EQUAL(ncvars[ncvarid].scalefactor, 1) )
-	vlistDefVarScalefactor(vlistID, varID, ncvars[ncvarid].scalefactor);
-
-      vlistDefVarDatatype(vlistID, varID, cdfInqDatatype(ncvars[ncvarid].xtype));
-
-      vlistDefVarInstitut(vlistID, varID, instID);
-      vlistDefVarModel(vlistID, varID, modelID);
-      if ( ncvars[ncvarid].tableID != UNDEFID )
-	vlistDefVarTable(vlistID, varID, ncvars[ncvarid].tableID);
-
-      if ( ncvars[ncvarid].defmiss == TRUE ) vlistDefVarMissval(vlistID, varID, ncvars[ncvarid].missval);
-
-      if ( CDI_Debug )
-	Message("varID = %d  gridID = %d  zaxisID = %d", varID,
-		vlistInqVarGrid(vlistID, varID), vlistInqVarZaxis(vlistID, varID));
-    }
-
-  for ( varID = 0; varID < nvars; varID++ )
-    {
-      ncvarid = varids[varID];
-
-      if ( ncvars[ncvarid].natts )
-	{
-	  int attnum;
-	  nc_type attrtype;
-
-	  nvatts = ncvars[ncvarid].natts;
-	  for ( iatt = 0; iatt < nvatts; iatt++ )
-	    {
-	      attnum = ncvars[ncvarid].atts[iatt];
-	      cdf_inq_attname(fileID, ncvarid, attnum, attname);
-	      cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
-	      cdf_inq_atttype(fileID, ncvarid, attname, &attrtype);
-	      if ( attrtype == NC_SHORT || attrtype == NC_INT )
-		{
-		  int *attint;
-		  attint = (int *) malloc(attlen*sizeof(int));
-		  cdfGetAttInt(fileID, ncvarid, attname, attlen, attint);
-		  if ( attrtype == NC_SHORT )
-		    vlistDefAttInt(vlistID, varID, attname, DATATYPE_INT16, (int)attlen, attint);
-		  else
-		    vlistDefAttInt(vlistID, varID, attname, DATATYPE_INT32, (int)attlen, attint);
-		  if ( CDI_Debug )
-		    printf("int: %s.%s = %d\n", ncvars[ncvarid].name, attname, attint[0]);
-		  free(attint);
-		}
-	      else if ( attrtype == NC_FLOAT || attrtype == NC_DOUBLE )
-		{
-		  double *attflt;
-		  attflt = (double *) malloc(attlen*sizeof(double));
-		  cdfGetAttDouble(fileID, ncvarid, attname, attlen, attflt);
-		  if ( attrtype == NC_FLOAT )
-		    vlistDefAttFlt(vlistID, varID, attname, DATATYPE_FLT32, (int)attlen, attflt);
-		  else
-		    vlistDefAttFlt(vlistID, varID, attname, DATATYPE_FLT64, (int)attlen, attflt);
-		  if ( CDI_Debug )
-		    printf("flt: %s.%s = %g\n", ncvars[ncvarid].name, attname, attflt[0]);
-		  free(attflt);
-		}
-	      else if ( attrtype == NC_CHAR )
-		{
-		  cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
-		  attlen = 1 + strlen(attstring);
-		  vlistDefAttTxt(vlistID, varID, attname, (int)attlen, attstring);
-		  if ( CDI_Debug )
-		    printf("txt: %s.%s = %s\n", ncvars[ncvarid].name, attname, attstring);
-		}
-	      else
-		{
-		  if ( CDI_Debug )
-		    printf("att: %s.%s = unknown\n", ncvars[ncvarid].name, attname);
-		}
-	    }
-
-	  free(ncvars[ncvarid].atts);
-	}
-    }
-
-  if ( varids ) free(varids);
-
-  for ( varID = 0; varID < nvars; varID++ )
-    {
-      if ( vlistInqVarCode(vlistID, varID) == -varID-1 )
-	{
-	  char *pname;
-	  pname = vlistInqVarNamePtr(vlistID, varID);
-	  len = strlen(pname);
-	  if ( len > 3 && isdigit((int) pname[3]) )
-	    {
-	      if ( memcmp("var", pname, 3) == 0 )
-		{
-		  vlistDefVarCode(vlistID, varID, atoi(pname+3));
-		  vlistDestroyVarName(vlistID, varID);
-		}
-	    }
-	  else if ( len > 4 && isdigit((int) pname[4]) )
-	    {
-	      if ( memcmp("code", pname, 4) == 0 )
-		{
-		  vlistDefVarCode(vlistID, varID, atoi(pname+4));
-		  vlistDestroyVarName(vlistID, varID);
-		}
-	    }
-	  else if ( len > 5 && isdigit((int) pname[5]) )
-	    {
-	      if ( memcmp("param", pname, 5) == 0 )
-		{
-		  int pnum = -1, pcat = 255, pdis = 255;
-		  sscanf(pname+5, "%d.%d.%d", &pnum, &pcat, &pdis);
-		  vlistDefVarParam(vlistID, varID, cdiEncodeParam(pnum, pcat, pdis));
-		  vlistDestroyVarName(vlistID, varID);
-		}
-	    }
-	}
-    }
-
-  for ( varID = 0; varID < nvars; varID++ )
-    {
-      instID  = vlistInqVarInstitut(vlistID, varID);
-      modelID = vlistInqVarModel(vlistID, varID);
-      tableID = vlistInqVarTable(vlistID, varID);
-      code    = vlistInqVarCode(vlistID, varID);
-      if ( cdiDefaultTableID != UNDEFID )
-	{
-	  if ( tableInqParNamePtr(cdiDefaultTableID, code) )
-	    {
-	      vlistDestroyVarName(vlistID, varID);
-	      vlistDestroyVarLongname(vlistID, varID);
-	      vlistDestroyVarUnits(vlistID, varID);
-
-	      if ( tableID != UNDEFID )
-		{
-		  vlistDefVarName(vlistID, varID, tableInqParNamePtr(cdiDefaultTableID, code));
-		  if ( tableInqParLongnamePtr(cdiDefaultTableID, code) )
-		    vlistDefVarLongname(vlistID, varID, tableInqParLongnamePtr(cdiDefaultTableID, code));
-		  if ( tableInqParUnitsPtr(cdiDefaultTableID, code) )
-		    vlistDefVarUnits(vlistID, varID, tableInqParUnitsPtr(cdiDefaultTableID, code));
-		}
-	      else
-		{
-		  tableID = cdiDefaultTableID;
-		}
-	    }
-	  if ( cdiDefaultModelID != UNDEFID )
-	    modelID = cdiDefaultModelID;
-	  if ( cdiDefaultInstID != UNDEFID )
-	    instID = cdiDefaultInstID;
-	}
-      if ( instID  != UNDEFID ) vlistDefVarInstitut(vlistID, varID, instID);
-      if ( modelID != UNDEFID ) vlistDefVarModel(vlistID, varID, modelID);
-      if ( tableID != UNDEFID ) vlistDefVarTable(vlistID, varID, tableID);
-    }
- 
   cdiCreateTimesteps(streamID);
 
   /* time varID */

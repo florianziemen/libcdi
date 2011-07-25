@@ -98,10 +98,10 @@ vlist_t;
 
 
 vlist_t *vlist_to_pointer(int vlistID);
-char    *vlistInqVarNamePtr(int vlistID, int varID);
-char    *vlistInqVarLongnamePtr(int vlistID, int varID);
-char    *vlistInqVarStdnamePtr(int vlistID, int varID);
-char    *vlistInqVarUnitsPtr(int vlistID, int varID);
+const char *vlistInqVarNamePtr(int vlistID, int varID);
+const char *vlistInqVarLongnamePtr(int vlistID, int varID);
+const char *vlistInqVarStdnamePtr(int vlistID, int varID);
+const char *vlistInqVarUnitsPtr(int vlistID, int varID);
 void     vlistDestroyVarName(int vlistID, int varID);
 void     vlistDestroyVarLongname(int vlistID, int varID);
 void     vlistDestroyVarUnits(int vlistID, int varID);
