@@ -5158,7 +5158,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			dimsize2 = ncdims[dimid].len;
 			if ( dimsize1*dimsize2 != size )
 			  {
-			    Warning("Unsupported array structure, skiped variable %s!",
+			    Warning("Unsupported array structure, skipped variable %s!",
 				    ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
@@ -5176,7 +5176,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			dimsize = ncdims[dimid].len;
 			if ( dimsize != size )
 			  {
-			    Warning("Unsupported array structure, skiped variable %s!",
+			    Warning("Unsupported array structure, skipped variable %s!",
 				    ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
@@ -5229,7 +5229,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			dimsize2 = ncdims[dimid].len;
 			if ( dimsize1*dimsize2 != size )
 			  {
-			    Warning("Unsupported array structure, skiped variable %s!",
+			    Warning("Unsupported array structure, skipped variable %s!",
 				    ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
@@ -5249,7 +5249,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			dimsize = ncdims[dimid].len;
 			if ( dimsize != size )
 			  {
-			    Warning("Unsupported array structure, skiped variable %s!",
+			    Warning("Unsupported array structure, skipped variable %s!",
 				    ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
@@ -5402,7 +5402,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		}
 	      else
 		{
-		  Warning("Variable %s has unsupported grid, skiped!", ncvars[ncvarid].name);
+		  Warning("Variable %s has unsupported grid, skipped!", ncvars[ncvarid].name);
 		  ncvars[ncvarid].isvar = -1;
 		  continue;
 		}
@@ -6023,7 +6023,7 @@ int cdfInqContents(int streamID)
       if ( ncvars[ncvarid].isvar == -1 )
 	{
 	  ncvars[ncvarid].isvar = 0;
-	  Warning("Variable %s has unknown type, skiped!", ncvars[ncvarid].name);
+	  Warning("Variable %s has unknown type, skipped!", ncvars[ncvarid].name);
 	  continue;
 	}
 
@@ -6044,7 +6044,7 @@ int cdfInqContents(int streamID)
       if ( cdfInqDatatype(ncvars[ncvarid].xtype) == -1 )
 	{
 	  ncvars[ncvarid].isvar = 0;
-	  Warning("Variable %s has an unsupported data type, skiped!", ncvars[ncvarid].name);
+	  Warning("Variable %s has an unsupported data type, skipped!", ncvars[ncvarid].name);
 	  continue;
 	}
 
@@ -6053,7 +6053,7 @@ int cdfInqContents(int streamID)
 	  if ( timedimid == ncvars[ncvarid].dimids[0] )
 	    {
 	      ncvars[ncvarid].isvar = 0;
-	      Warning("Number of time steps undefined, skiped variable %s!", ncvars[ncvarid].name);
+	      Warning("Number of time steps undefined, skipped variable %s!", ncvars[ncvarid].name);
 	      continue;
 	    }
 	}
