@@ -407,6 +407,9 @@ void    vlistDefVarDatatype(int vlistID, int varID, int datatype);
 /*      vlistInqVarDatatype: Get the data type of a Variable */
 int     vlistInqVarDatatype(int vlistID, int varID);
 
+void    vlistDefVarXYZ(int vlistID, int varID, int xyz);
+int     vlistInqVarXYZ(int vlistID, int varID);
+
 int     vlistInqVarNumber(int vlistID, int varID);
 
 void    vlistDefVarInstitut(int vlistID, int varID, int instID);

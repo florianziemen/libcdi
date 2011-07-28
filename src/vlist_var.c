@@ -26,6 +26,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].tsteptype    = TSTEP_INSTANT;
   vlistptr->vars[varID].timave       = 0;
   vlistptr->vars[varID].timaccu      = 0;
+  vlistptr->vars[varID].xyz          = 0;
   vlistptr->vars[varID].gridID       = CDI_UNDEFID;
   vlistptr->vars[varID].zaxisID      = CDI_UNDEFID;
   vlistptr->vars[varID].instID       = CDI_UNDEFID;
@@ -1529,6 +1530,31 @@ int vlistInqVarCompLevel(int vlistID, int varID)
 
   return (vlistptr->vars[varID].complevel);
 }
+
+
+void  vlistDefVarXYZ(int vlistID, int varID, int xyz)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  vlistptr->vars[varID].xyz = xyz;
+}
+
+
+int vlistInqVarXYZ(int vlistID, int varID)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  return (vlistptr->vars[varID].xyz);
+}
+
 /*
  * Local Variables:
  * c-file-style: "Java"

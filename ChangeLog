@@ -1,3 +1,7 @@
+2011-07-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added interface function vlistDefVarXYZ to set the dimension order
+
 2011-07-23  Pier Giuseppe Fogli  <piergiuseppe.fogli@cmcc.it>
 
 	* added interface function zaxisInqVct to read the VCT
@@ -9,7 +13,7 @@
 2011-07-14  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* netcdf: added support for GRID_FOURIER (fourier coefficients)
-	
+
 2011-07-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Version 1.5.1 released
@@ -31,7 +35,7 @@
 
 	* gridGenYvals: changed delta eps to 0.002 for gaussian grids [report: John Lillibridge] 
 	* ruby/python interface: changed GRID_CELL to GRID_UNSTRUCTURED [report: Tim Cera]
-	
+
 2011-05-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* grid::compareXYvals: bug fix for generic grids [report: Felicia Brisc]

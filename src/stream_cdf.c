@@ -3333,10 +3333,8 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   int zaxisindex;
   int vlistID;
   int i, j;
-  int ndimsp;
-  int dimids[9];
-  int swapyxz = FALSE;
-  int swapyz = FALSE;
+  int dimorder[3];
+  int ixyz;
   int swapxy = FALSE;
   double missval;
   int laddoffset, lscalefactor;
@@ -3344,7 +3342,6 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
-
 
   if ( CDI_Debug )
     Message("streamID = %d  varID = %d  levelID = %d", streamID, varID, levelID);
@@ -3361,11 +3358,24 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   gridID  = vlistInqVarGrid(vlistID, varID);
   zaxisID = vlistInqVarZaxis(vlistID, varID);
   timeID  = vlistInqVarTime(vlistID, varID);
+  ixyz    = vlistInqVarXYZ(vlistID, varID);
 
+  if ( ixyz == 0 ) ixyz = 321; // ZYX
+
+  dimorder[0] = ixyz/100;
+  dimorder[1] = (ixyz-dimorder[0]*100)/10;
+  dimorder[2] = (ixyz-dimorder[0]*100-dimorder[1]*10);
+
+  if ( dimorder[2] == 2 || dimorder[0] == 1 ) swapxy = TRUE;
+  /*
+  printf("swapxy %d\n", swapxy);
+  printf("ixyz %d\n", ixyz);
+  printf("dimorder: %d %d %d\n", dimorder[0], dimorder[1], dimorder[2]);
+  */
   gridsize = gridInqSize(gridID);
   xsize = gridInqXsize(gridID);
   ysize = gridInqYsize(gridID);
-      
+
   streamptr->numvals += gridsize;
 
   gridindex = vlistGridIndex(vlistID, gridID);
@@ -3396,144 +3406,27 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
       ndims++;
     }
 
-  cdf_inq_varndims(fileID, ncvarid, &ndimsp);
-  cdf_inq_vardimid(fileID, ncvarid, dimids);
-
-  // printf("xid %d, yid %d, zid %d\n", xid, yid, zid);
-  // printf("dimid2 %d, dimid3 %d, dimid4 %d\n", dimids[ndims], dimids[ndims+1], dimids[ndims+2]);
-
-  if ( zid != UNDEFID && yid != UNDEFID && xid != UNDEFID )
+  for ( int id = 0; id < 3; ++id )
     {
-      if ( yid == dimids[ndims] && xid == dimids[ndims+1] && zid == dimids[ndims+2] )
-        swapyxz = TRUE;
-      if ( zid == dimids[ndims] && xid == dimids[ndims+1] && yid == dimids[ndims+2] )
-        swapxy = TRUE;
-    }
-
-  if ( swapyxz == FALSE && swapxy == FALSE && zid != UNDEFID && yid != UNDEFID )
-    {
-      if ( zid == dimids[ndims] && yid == dimids[ndims+1] )
-        swapyz = FALSE;
-      else if ( yid == dimids[ndims] && zid == dimids[ndims+1] )
-        swapyz = TRUE;
-      else
+      if ( dimorder[id] == 3 && zid != UNDEFID )
         {
-          char name[256];
-          vlistInqVarName(vlistID, varID, name);
-          Error("Unsupported array structure for: %s", name);
+          start[ndims] = levelID;
+          count[ndims] = 1;
+          ndims++;
         }
-    }
-
-  if ( swapyxz == FALSE && swapyz == FALSE && yid != UNDEFID && xid != UNDEFID )
-    {
-      if ( xid == dimids[ndimsp-1] && yid == dimids[ndimsp-2] )
-        swapxy = FALSE;
-      else if ( yid == dimids[ndimsp-1] && xid == dimids[ndimsp-2] )
-        swapxy = TRUE;
-      else
-        {
-          char name[256];
-          vlistInqVarName(vlistID, varID, name);
-          Error("Unsupported array structure for: %s", name);
-        }
-    }
-
-  if ( swapyz )
-    {
-      if ( yid != UNDEFID )
+      else if ( dimorder[id] == 2 && yid != UNDEFID )
         {
           start[ndims] = 0;
-          /* count[ndims] = gridInqYsize(gridID); */
           cdf_inq_dimlen(fileID, yid, &size);
           count[ndims] = size;
           ndims++;
         }
-      if ( zid != UNDEFID )
-        {
-          start[ndims] = levelID;
-          count[ndims] = 1;
-          ndims++;
-        }
-      if ( xid != UNDEFID )
+      else if ( dimorder[id] == 1 && xid != UNDEFID )
         {
           start[ndims] = 0;
-          /* count[ndims] = gridInqXsize(gridID); */
           cdf_inq_dimlen(fileID, xid, &size);
           count[ndims] = size;
           ndims++;
-        }
-    }
-  else if ( swapyxz )
-    {
-      if ( yid != UNDEFID )
-        {
-          start[ndims] = 0;
-          /* count[ndims] = gridInqYsize(gridID); */
-          cdf_inq_dimlen(fileID, yid, &size);
-          count[ndims] = size;
-          ndims++;
-        }
-      if ( xid != UNDEFID )
-        {
-          start[ndims] = 0;
-          /* count[ndims] = gridInqXsize(gridID); */
-          cdf_inq_dimlen(fileID, xid, &size);
-          count[ndims] = size;
-          ndims++;
-        }
-      if ( zid != UNDEFID )
-        {
-          start[ndims] = levelID;
-          count[ndims] = 1;
-          ndims++;
-        }
-    }
-  else
-    {
-      if ( zid != UNDEFID )
-        {
-          start[ndims] = levelID;
-          count[ndims] = 1;
-          ndims++;
-        }
-
-      if ( swapxy )
-        {
-          if ( xid != UNDEFID )
-            {
-              start[ndims] = 0;
-              /* count[ndims] = gridInqXsize(gridID); */
-              cdf_inq_dimlen(fileID, xid, &size);
-              count[ndims] = size;
-              ndims++;
-            }
-          if ( yid != UNDEFID )
-            {
-              start[ndims] = 0;
-              /* count[ndims] = gridInqYsize(gridID); */
-              cdf_inq_dimlen(fileID, yid, &size);
-              count[ndims] = size;
-              ndims++;
-            }
-        }
-      else
-        {
-          if ( yid != UNDEFID )
-            {
-              start[ndims] = 0;
-              /* count[ndims] = gridInqYsize(gridID); */
-              cdf_inq_dimlen(fileID, yid, &size);
-              count[ndims] = size;
-              ndims++;
-            }
-          if ( xid != UNDEFID )
-            {
-              start[ndims] = 0;
-              /* count[ndims] = gridInqXsize(gridID); */
-              cdf_inq_dimlen(fileID, xid, &size);
-              count[ndims] = size;
-              ndims++;
-            }
         }
     }
 
@@ -3670,7 +3563,6 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
     {
       start[ndims] = 0;
       cdf_inq_dimlen(fileID, yid, &size);
-      /*      count[ndims] = gridInqYsize(gridID); */
       count[ndims] = size;
       ndims++;
     }
@@ -3678,7 +3570,6 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
     {
       start[ndims] = 0;
       cdf_inq_dimlen(fileID, xid, &size);
-      /*      count[ndims] = gridInqXsize(gridID); */
       count[ndims] = size;
       ndims++;
     }
@@ -5033,7 +4924,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		{
 		  ydimids[nydims] = ncvars[ncvarid].dimids[i];
 		  nydims++;
-		}	       
+		}
 	    }
 
 	  if ( nxdims == 2 )
@@ -5083,7 +4974,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		{
 		  ydimid = ncvars[yvarid].dimids[0];
 		  ysize  = ncdims[ydimid].len;
-		}   
+		}
 	    }
 
 	  if ( ncvars[ncvarid].gridtype == UNDEFID || ncvars[ncvarid].gridtype == GRID_GENERIC )
@@ -5209,7 +5100,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		      xinc = fabs(grid.xvals[0] - grid.xvals[1]);
 		      for ( i = 2; i < (int) xsize; i++ )
 			if ( (fabs(grid.xvals[i-1] - grid.xvals[i]) - xinc) > (xinc/1000) ) break;
-		  
+
 		      if ( i < (int) xsize ) xinc = 0;
 		    }
 		}
@@ -5282,7 +5173,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		      yinc = fabs(grid.yvals[0] - grid.yvals[1]);
 		      for ( i = 2; i < (int) ysize; i++ )
 			if ( (fabs(grid.yvals[i-1] - grid.yvals[i]) - yinc) > (yinc/1000) ) break;
-		  
+
 		      if ( i < (int) ysize ) yinc = 0;
 		    }
 		}
@@ -5437,7 +5328,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			{
 			  proj.type = GRID_PROJECTION;
 			  proj.name = strdup(attstring);
-			}    
+			}
 		    }
 		  else if ( strcmp(attname, "earth_radius") == 0 )
 		    {
@@ -5615,13 +5506,13 @@ void define_all_zaxes(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 	    }
 
 	  if ( CDI_Debug ) Message("nlevs = %d", zsize);
-    
+
 	  zvar = (double *) malloc(zsize*sizeof(double));
 
 	  zaxisType = UNDEFID;
 
 	  if ( zvarid != UNDEFID ) zaxisType = ncvars[zvarid].zaxistype;
-	  
+
 	  if ( zaxisType == UNDEFID )  zaxisType = ZAXIS_GENERIC;
 
 	  zprec = DATATYPE_FLT64;
@@ -5695,7 +5586,7 @@ void define_all_zaxes(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 	  free(ubounds);
 
 	  zaxisindex = vlistZaxisIndex(vlistID, ncvars[ncvarid].zaxisID);
-	  streamptr->zaxisID[zaxisindex]  = zdimid;	  
+	  streamptr->zaxisID[zaxisindex]  = zdimid;
 
 	  if ( CDI_Debug )
 	    Message("zaxisID %d %d %s", ncvars[ncvarid].zaxisID, ncvarid, ncvars[ncvarid].name);
@@ -5725,7 +5616,7 @@ void define_all_zaxes(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 
 
 #if  defined  (HAVE_LIBNETCDF)
-/* define all input variables */
+/* define all input data variables */
 static
 void define_all_vars(int fileID, int streamID, int vlistID, int instID, int modelID, int tableID, int *varids, ncdim_t *ncdims, int nvars, ncvar_t *ncvars)
 {
@@ -5734,7 +5625,7 @@ void define_all_vars(int fileID, int streamID, int vlistID, int instID, int mode
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
-  
+
   stream_check_ptr(__func__, streamptr);
 
   if ( streamptr->sortname )
@@ -5812,6 +5703,39 @@ void define_all_vars(int fileID, int streamID, int vlistID, int instID, int mode
       if ( CDI_Debug )
 	Message("varID = %d  gridID = %d  zaxisID = %d", varID,
 		vlistInqVarGrid(vlistID, varID), vlistInqVarZaxis(vlistID, varID));
+
+      int gridindex = vlistGridIndex(vlistID, gridID);
+      int xdimid = streamptr->xdimID[gridindex];
+      int ydimid = streamptr->ydimID[gridindex];
+
+      int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
+      int zdimid = streamptr->zaxisID[zaxisindex];
+
+      int ndims = ncvars[ncvarid].ndims;
+      int iodim = 0;
+      int ixyz = 0;
+      int ipow10[4] = {1, 10, 100, 1000};
+
+      if ( ncvars[ncvarid].timeID == TIME_VARIABLE ) iodim++;
+
+      for ( int idim = iodim; idim < ndims; idim++ )
+        {
+          if      ( xdimid == ncvars[ncvarid].dimids[idim] )
+            ixyz += 1*ipow10[(ndims-idim-1)];
+          else if ( ydimid == ncvars[ncvarid].dimids[idim] )
+            ixyz += 2*ipow10[(ndims-idim-1)];
+          else if ( zdimid == ncvars[ncvarid].dimids[idim] )
+            ixyz += 3*ipow10[(ndims-idim-1)];
+        }
+
+      vlistDefVarXYZ(vlistID, varID, ixyz);
+      /*
+      printf("ixyz %d\n", ixyz);
+      printf("ndims %d\n", ncvars[ncvarid].ndims);
+      for ( int i = 0; i < ncvars[ncvarid].ndims; ++i )
+        printf("dimids: %d %d\n", i, ncvars[ncvarid].dimids[i]);
+      printf("xdimid, ydimid %d %d\n", xdimid, ydimid);
+      */
     }
 
   for ( varID = 0; varID < nvars; varID++ )
@@ -6252,7 +6176,7 @@ int cdfInqContents(int streamID)
 
       if ( ncvars[ncvarid].isvar == -1 && ncvars[ncvarid].ndims > 1 )
 	cdfSetVar(ncvars, ncvarid, TRUE);
-	  
+
       if ( ncvars[ncvarid].isvar == -1 )
 	{
 	  ncvars[ncvarid].isvar = 0;
@@ -6541,7 +6465,7 @@ int cdfInqTimestep(int streamID, int tsID)
     Message("streamID = %d  tsID = %d", streamID, tsID);
 
   stream_check_ptr(__func__, streamptr);
-    
+
   if ( tsID < 0 ) Error("unexpected tsID = %d", tsID);
 
   if ( tsID < streamptr->ntsteps && streamptr->ntsteps > 0 )
@@ -6774,7 +6698,7 @@ void cdfDefLocalAtts(int streamID)
 	    }
 	}
       }
-  
+
   if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
 #endif
 }

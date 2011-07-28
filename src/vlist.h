@@ -61,6 +61,7 @@ typedef struct
   int         tsteptype; /* Time step type: TSTEP_INSTANT, TSTEP_AVG ... */
   int         timave;
   int         timaccu;
+  int         xyz;
   int         missvalused; /* TRUE if missval is defined */
   char       *name;
   char       *longname;
