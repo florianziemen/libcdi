@@ -2669,6 +2669,8 @@ int cdfDefVar(int streamID, int varID)
   int gridindex, zaxisindex;
   int tablenum;
   int vlistID;
+  int dimorder[3];
+  int ixyz;
   int iax = 0;
   char axis[5];
   stream_t *streamptr;
@@ -2691,6 +2693,16 @@ int cdfDefVar(int streamID, int varID)
   code    = vlistInqVarCode(vlistID, varID);
   param   = vlistInqVarParam(vlistID, varID);
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
+
+  ixyz    = vlistInqVarXYZ(vlistID, varID);
+
+  if ( ixyz == 0 ) ixyz = 321; // ZYX
+
+  dimorder[0] = ixyz/100;
+  dimorder[1] = (ixyz-dimorder[0]*100)/10;
+  dimorder[2] = (ixyz-dimorder[0]*100-dimorder[1]*10);
+
+  if ( dimorder[2] == 2 || dimorder[0] == 1 ) lchunk = FALSE;
 
   gridsize  = gridInqSize(gridID);
   if ( gridsize > 1 ) lchunk = TRUE;
@@ -2716,7 +2728,7 @@ int cdfDefVar(int streamID, int varID)
       dims[ndims++] = tid;
       axis[iax++] = 'T';
     }
-
+  /*
   if ( zid != UNDEFID ) axis[iax++] = 'Z';
   if ( zid != UNDEFID ) chunks[ndims] = 1;
   if ( zid != UNDEFID ) dims[ndims++] = zid;
@@ -2726,9 +2738,32 @@ int cdfDefVar(int streamID, int varID)
 
   if ( xid != UNDEFID ) chunks[ndims] = xsize;
   if ( xid != UNDEFID ) dims[ndims++] = xid;
+  */
+  for ( int id = 0; id < 3; ++id )
+    {
+      if ( dimorder[id] == 3 && zid != UNDEFID )
+        {
+          axis[iax++] = 'Z';
+          chunks[ndims] = 1;
+          dims[ndims] = zid;
+          ndims++;
+        }
+      else if ( dimorder[id] == 2 && yid != UNDEFID )
+        {
+          chunks[ndims] = ysize;
+          dims[ndims] = yid;
+          ndims++;
+        }
+      else if ( dimorder[id] == 1 && xid != UNDEFID )
+        {
+          chunks[ndims] = xsize;
+          dims[ndims] = xid;
+          ndims++;
+        }
+    }
 
-  if ( CDI_Debug ) 
-    fprintf(stderr, "chunks %d %d %d %d\n", 
+  if ( CDI_Debug )
+    fprintf(stderr, "chunks %d %d %d %d\n",
             (int)chunks[0], (int)chunks[1], (int)chunks[2], (int)chunks[3]);
 
   tableID  = vlistInqVarTable(vlistID, varID);
@@ -2792,13 +2827,13 @@ int cdfDefVar(int streamID, int varID)
 	sprintf(varname, "var%d", code);
       else
 	sprintf(varname, "param%d.%d.%d", pnum, pcat, pdis);
-      
+
       varname2 = varname+strlen(varname);
 
       checkname = TRUE;
       iz = 0;
 
-      while ( checkname ) 
+      while ( checkname )
         {
           if ( iz ) sprintf(varname2, "_%d", iz+1);
 
@@ -2901,7 +2936,7 @@ int cdfDefVar(int streamID, int varID)
         cdf_put_att_int(fileID, ncvarid, "table", NC_INT, 1L, &tablenum);
     }
 
-  if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT  && 
+  if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT  &&
        gridtype != GRID_CURVILINEAR )
     {
       len = strlen(gridNamePtr(gridtype));
@@ -3015,7 +3050,6 @@ int cdfDefVar(int streamID, int varID)
   return (ncvarid);
 }
 #endif
-
 
 void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
 {
@@ -3500,7 +3534,7 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   int xid = UNDEFID, yid = UNDEFID, zid = UNDEFID;
   int ncvarid;
   int ntsteps;
-  size_t size;
+  size_t size, xsize, ysize;
   size_t start[4];
   size_t count[4];
   int ndims = 0;
@@ -3508,9 +3542,14 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   int timeID;
   int gridindex, zaxisindex;
   int i;
+  int dimorder[3];
+  int ixyz;
+  int swapxy = FALSE;
   int dtype;
   int vlistID;
+  const double *pdata = data;
   double *mdata = NULL;
+  double *sdata = NULL;
   stream_t *streamptr;
   extern int CDF_Debug;
 
@@ -3532,7 +3571,20 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   gridID  = vlistInqVarGrid(vlistID, varID);
   zaxisID = vlistInqVarZaxis(vlistID, varID);
   timeID  = vlistInqVarTime(vlistID, varID);
+  ixyz    = vlistInqVarXYZ(vlistID, varID);
 
+  if ( ixyz == 0 ) ixyz = 321; // ZYX
+
+  dimorder[0] = ixyz/100;
+  dimorder[1] = (ixyz-dimorder[0]*100)/10;
+  dimorder[2] = (ixyz-dimorder[0]*100-dimorder[1]*10);
+
+  if ( dimorder[2] == 2 || dimorder[0] == 1 ) swapxy = TRUE;
+  /*
+  printf("swapxy %d\n", swapxy);
+  printf("ixyz %d\n", ixyz);
+  printf("dimorder: %d %d %d\n", dimorder[0], dimorder[1], dimorder[2]);
+  */
   gridindex = vlistGridIndex(vlistID, gridID);
   if ( gridInqType(gridID) == GRID_TRAJECTORY )
     {
@@ -3553,25 +3605,29 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
       count[ndims] = 1;
       ndims++;
     }
-  if ( zid != UNDEFID )
+
+  for ( int id = 0; id < 3; ++id )
     {
-      start[ndims] = levelID;
-      count[ndims] = 1;
-      ndims++;
-    }
-  if ( yid != UNDEFID )
-    {
-      start[ndims] = 0;
-      cdf_inq_dimlen(fileID, yid, &size);
-      count[ndims] = size;
-      ndims++;
-    }
-  if ( xid != UNDEFID )
-    {
-      start[ndims] = 0;
-      cdf_inq_dimlen(fileID, xid, &size);
-      count[ndims] = size;
-      ndims++;
+      if ( dimorder[id] == 3 && zid != UNDEFID )
+        {
+          start[ndims] = levelID;
+          count[ndims] = 1;
+          ndims++;
+        }
+      else if ( dimorder[id] == 2 && yid != UNDEFID )
+        {
+          start[ndims] = 0;
+          cdf_inq_dimlen(fileID, yid, &ysize);
+          count[ndims] = ysize;
+          ndims++;
+        }
+      else if ( dimorder[id] == 1 && xid != UNDEFID )
+        {
+          start[ndims] = 0;
+          cdf_inq_dimlen(fileID, xid, &xsize);
+          count[ndims] = xsize;
+          ndims++;
+        }
     }
 
   if ( CDI_Debug )
@@ -3654,14 +3710,25 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
           Message("nvals = %d, nmiss = %d, missval = %g, minval = %g, maxval = %g",
                   nvals, nmiss, missval, fmin, fmax);
         }
+
+      if ( mdata ) pdata = mdata;
     }
 
-  if ( mdata )
-    cdf_put_vara_double(fileID, ncvarid, start, count, mdata);
-  else
-    cdf_put_vara_double(fileID, ncvarid, start, count, data);
+  if ( swapxy )
+    {
+      int nvals;
+      nvals = gridInqSize(gridID);
+      sdata = (double *) malloc(nvals*sizeof(double));
+      for ( int j = 0; j < (int)ysize; ++j )
+        for ( int i = 0; i < (int)xsize; ++i )
+          sdata[j*xsize+i] = pdata[i*ysize+j];
+      pdata = sdata;
+    }
+
+  cdf_put_vara_double(fileID, ncvarid, start, count, data);
 
   if ( mdata ) free(mdata);
+  if ( sdata ) free(sdata);
 #endif
   return (0);
 }

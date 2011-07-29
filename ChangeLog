@@ -1,3 +1,7 @@
+2011-07-29  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Added flexible XYZ dimension ordering for netCDF [request: Andy Aschwanden]
+
 2011-07-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added interface function vlistDefVarXYZ to set the dimension order

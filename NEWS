@@ -3,8 +3,8 @@ CDI NEWS
 
 Version 1.5.2 (?? ??? 2011):
 
-   New functions:
-     * zaxisInqVct - read VCT
+   New features:
+     * Added flexible XYZ dimension ordering for netCDF
 
 Version 1.5.1 (12 July 2011):
 
