@@ -3721,11 +3721,11 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
       sdata = (double *) malloc(nvals*sizeof(double));
       for ( int j = 0; j < (int)ysize; ++j )
         for ( int i = 0; i < (int)xsize; ++i )
-          sdata[j*xsize+i] = pdata[i*ysize+j];
+           sdata[i*ysize+j] = pdata[j*xsize+i];
       pdata = sdata;
     }
 
-  cdf_put_vara_double(fileID, ncvarid, start, count, data);
+  cdf_put_vara_double(fileID, ncvarid, start, count, pdata);
 
   if ( mdata ) free(mdata);
   if ( sdata ) free(sdata);
