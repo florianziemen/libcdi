@@ -1,3 +1,7 @@
+2011-08-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* scanVarAttributes: check size of axis attribute (bug fix) [report: David Huard]
+
 2011-07-29  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Added flexible XYZ dimension ordering for netCDF [request: Andy Aschwanden]
