@@ -1540,6 +1540,31 @@ void  vlistDefVarXYZ(int vlistID, int varID, int xyz)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
+  /* check xyz dimension order */
+  {
+    int dimorder[3];
+    int dimx = 0, dimy = 0, dimz = 0;
+    int posx = -1, posy = -1, posz = -1;
+    dimorder[0] = xyz/100;
+    dimorder[1] = (xyz-dimorder[0]*100)/10;
+    dimorder[2] = (xyz-dimorder[0]*100-dimorder[1]*10);
+    for ( int id = 0; id < 3; ++id )
+      {
+        if      ( dimorder[id] == 3 ) { dimz++; posz=id; }
+        else if ( dimorder[id] == 2 ) { dimy++; posy=id; }
+        else if ( dimorder[id] == 1 ) { dimx++; posx=id; }
+      }
+    if ( dimz > 1 || dimy > 1 || dimx > 1 ) xyz = 321; // ZYX
+    else
+      {
+        int lchanged = 0;
+        if ( dimz == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 3; lchanged++; break;}
+        if ( dimy == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 2; lchanged++; break;}
+        if ( dimx == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 1; lchanged++; break;}
+        if ( lchanged ) xyz = dimorder[0]*100 + dimorder[1]*10 + dimorder[2];
+      }
+  }
+
   vlistptr->vars[varID].xyz = xyz;
 }
 

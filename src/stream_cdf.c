@@ -2695,14 +2695,7 @@ int cdfDefVar(int streamID, int varID)
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
   ixyz    = vlistInqVarXYZ(vlistID, varID);
-
   if ( ixyz == 0 ) ixyz = 321; // ZYX
-
-  dimorder[0] = ixyz/100;
-  dimorder[1] = (ixyz-dimorder[0]*100)/10;
-  dimorder[2] = (ixyz-dimorder[0]*100-dimorder[1]*10);
-
-  if ( dimorder[2] == 2 || dimorder[0] == 1 ) lchunk = FALSE;
 
   gridsize  = gridInqSize(gridID);
   if ( gridsize > 1 ) lchunk = TRUE;
@@ -2719,11 +2712,23 @@ int cdfDefVar(int streamID, int varID)
   zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   zid = streamptr->zaxisID[zaxisindex];
 
+  dimorder[0] = ixyz/100;
+  dimorder[1] = (ixyz-dimorder[0]*100)/10;
+  dimorder[2] = (ixyz-dimorder[0]*100-dimorder[1]*10);
+
+  if ( dimorder[0] == 3 ) lchunk = FALSE; /* ZYX and ZXY */
+
+  if ( ((dimorder[0]>0)+(dimorder[1]>0)+(dimorder[2]>0)) < ((xid!=UNDEFID)+(yid!=UNDEFID)+(zid!=UNDEFID)) )
+    {
+      printf("xyz=%d  zid=%d  yid=%d  xid=%d\n", ixyz, zid, yid, xid);
+      Error("Internal problem, dimension order missing!");
+    }
+
   tid = streamptr->basetime.ncdimid;
 
   if ( timeID == TIME_VARIABLE )
     {
-      if ( tid == UNDEFID ) Error("Internal problem! Time undefined.");
+      if ( tid == UNDEFID ) Error("Internal problem, time undefined!");
       chunks[ndims] = 1;
       dims[ndims++] = tid;
       axis[iax++] = 'T';
@@ -3393,19 +3398,8 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   zaxisID = vlistInqVarZaxis(vlistID, varID);
   timeID  = vlistInqVarTime(vlistID, varID);
   ixyz    = vlistInqVarXYZ(vlistID, varID);
-
   if ( ixyz == 0 ) ixyz = 321; // ZYX
 
-  dimorder[0] = ixyz/100;
-  dimorder[1] = (ixyz-dimorder[0]*100)/10;
-  dimorder[2] = (ixyz-dimorder[0]*100-dimorder[1]*10);
-
-  if ( dimorder[2] == 2 || dimorder[0] == 1 ) swapxy = TRUE;
-  /*
-  printf("swapxy %d\n", swapxy);
-  printf("ixyz %d\n", ixyz);
-  printf("dimorder: %d %d %d\n", dimorder[0], dimorder[1], dimorder[2]);
-  */
   gridsize = gridInqSize(gridID);
   xsize = gridInqXsize(gridID);
   ysize = gridInqYsize(gridID);
@@ -3431,6 +3425,16 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
   zid = streamptr->zaxisID[zaxisindex];
   /*
   printf("2 %d %d %d %s\n", streamID, zaxisindex, streamptr->zaxisID[zaxisindex], vlistInqVarNamePtr(vlistID, varID));
+  */
+  dimorder[0] = ixyz/100;
+  dimorder[1] = (ixyz-dimorder[0]*100)/10;
+  dimorder[2] = (ixyz-dimorder[0]*100-dimorder[1]*10);
+
+  if ( (dimorder[2] == 2 || dimorder[0] == 1) && xid != UNDEFID && yid != UNDEFID ) swapxy = TRUE;
+  /*
+  printf("swapxy %d\n", swapxy);
+  printf("ixyz %d\n", ixyz);
+  printf("dimorder: %d %d %d\n", dimorder[0], dimorder[1], dimorder[2]);
   */
 
   if ( timeID == TIME_VARIABLE )
@@ -3572,19 +3576,8 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   zaxisID = vlistInqVarZaxis(vlistID, varID);
   timeID  = vlistInqVarTime(vlistID, varID);
   ixyz    = vlistInqVarXYZ(vlistID, varID);
-
   if ( ixyz == 0 ) ixyz = 321; // ZYX
 
-  dimorder[0] = ixyz/100;
-  dimorder[1] = (ixyz-dimorder[0]*100)/10;
-  dimorder[2] = (ixyz-dimorder[0]*100-dimorder[1]*10);
-
-  if ( dimorder[2] == 2 || dimorder[0] == 1 ) swapxy = TRUE;
-  /*
-  printf("swapxy %d\n", swapxy);
-  printf("ixyz %d\n", ixyz);
-  printf("dimorder: %d %d %d\n", dimorder[0], dimorder[1], dimorder[2]);
-  */
   gridindex = vlistGridIndex(vlistID, gridID);
   if ( gridInqType(gridID) == GRID_TRAJECTORY )
     {
@@ -3598,6 +3591,17 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
 
   zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   zid = streamptr->zaxisID[zaxisindex];
+
+  dimorder[0] = ixyz/100;
+  dimorder[1] = (ixyz-dimorder[0]*100)/10;
+  dimorder[2] = (ixyz-dimorder[0]*100-dimorder[1]*10);
+
+  if ( (dimorder[2] == 2 || dimorder[0] == 1) && xid != UNDEFID && yid != UNDEFID ) swapxy = TRUE;
+  /*
+  printf("swapxy %d\n", swapxy);
+  printf("ixyz %d\n", ixyz);
+  printf("dimorder: %d %d %d\n", dimorder[0], dimorder[1], dimorder[2]);
+  */
 
   if ( timeID == TIME_VARIABLE )
     {
