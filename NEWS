@@ -1,10 +1,12 @@
 CDI NEWS
 --------
 
-Version 1.5.2 (?? ??? 2011):
+Version 1.5.2 (22 August 2011):
 
    New features:
      * Added flexible XYZ dimension ordering for netCDF
+     * Added support for grid type GRID_FOURIER (fourier coefficients)
+     * Added interface function zaxisInqVct to read the VCT
 
 Version 1.5.1 (12 July 2011):
 

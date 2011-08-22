@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.5.1
+! Fortran interface for CDI library version 1.5.2
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   July 2011
+! Uwe Schulzweida, MPI-MET, Hamburg,   August 2011
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -803,6 +803,17 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarDatatype
+
+!                     vlistDefVarXYZ
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         xyz)
+      EXTERNAL        vlistDefVarXYZ
+
+      INTEGER         vlistInqVarXYZ
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarXYZ
 
       INTEGER         vlistInqVarNumber
 !                                    (INTEGER         vlistID,
