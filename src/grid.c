@@ -2236,12 +2236,12 @@ void grid_check_cyclic(grid_t *gridptr)
 		  for ( k2 = 0; k2 < 4; ++k2 )
 		    {
 		      val2 = xbounds[i2+k2];
-		      
+
 		      if ( val1 < 1 && val2 > 300 ) val1 += 360;
 		      if ( val2 < 1 && val1 > 300 ) val2 += 360;
 		      if ( val1 < -179 && val2 > 120 ) val1 += 360;
 		      if ( val2 < -179 && val1 > 120 ) val2 += 360;
-		      		      
+
 		      if ( fabs(val1-val2) < 0.001 )
 			{
 			  nc++;
@@ -2249,6 +2249,7 @@ void grid_check_cyclic(grid_t *gridptr)
 			}
 		    }
 		}
+
 	      if ( nc < 1 )
 		{
 		  gridptr->isCyclic = FALSE;
