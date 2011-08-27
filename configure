@@ -809,6 +809,7 @@ enable_dependency_tracking
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
+with_gnu_ld
 enable_largefile
 with_threads
 with_zlib
@@ -838,16 +839,25 @@ LDFLAGS
 LIBS
 CPPFLAGS
 CPP
+CPPFLAGS
 FC
 FCFLAGS
+LDFLAGS
+LIBS
 FPP
 FPPFLAGS
 F77
 FFLAGS
+LDFLAGS
+LIBS
 CXX
 CXXFLAGS
+LDFLAGS
+LIBS
+CPPFLAGS
 CCC
 CXXCPP
+CPPFLAGS
 FCMODEXT'
 
 
