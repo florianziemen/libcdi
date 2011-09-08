@@ -1688,7 +1688,6 @@ void vlistDefVarDeco ( int vlistID, int varID, int decoSize, deco_t * deco )
   vlist_t * vlistptr;
   int i;
 
-  xdebug ("vlistID=%d, varID=%d, decoSize=%d", vlistID, varID, decoSize );
   vlistptr = vlist_to_pointer(vlistID );
 
   vlistCheckVarID ( __func__, vlistID, varID );
@@ -1746,7 +1745,7 @@ int vlistInqVarIOrank(int vlistID, int varID)
 #ifdef USE_MPI
 
 enum {
-  vlistvar_nints = 21,
+  vlistvar_nints = 22,
   vlistvar_ndbls = 3,
 };
 
@@ -1780,6 +1779,8 @@ int vlistVarGetSize(vlist_t *p, int varID, MPI_Comm comm)
   }
   xmpi(MPI_Pack_size(4 * var->nlevs, MPI_INT, comm, &txinc));
   varsize += txinc;
+  xmpi(MPI_Pack_size(3 * var->decoSize, MPI_INT, comm, &txinc));
+  varsize += txinc;
   varsize += vlistAttsGetSize(p, varID, comm);
   return varsize;
 }
@@ -1812,6 +1813,7 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   tempbuf[18] = var->complevel;
   tempbuf[19] = var->nlevs;
   tempbuf[20] = var->iorank;
+  tempbuf[21] = var->decoSize;
   dtempbuf[0] = var->missval;
   dtempbuf[1] = var->scalefactor;
   dtempbuf[2] = var->addoffset;
@@ -1840,6 +1842,17 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
       levbuf[i][3] = var->levinfo[i].flevelID;
     }
     xmpi(MPI_Pack(levbuf, var->nlevs * 4, MPI_INT,
+                  buf, size, position, comm));
+  }
+  {
+    int deco[var->decoSize][3];
+    for (i = 0; i < var->decoSize; ++i)
+    {
+      deco[i][0] = var->deco[i].rank;
+      deco[i][1] = var->deco[i].offset;
+      deco[i][2] = var->deco[i].chunk;
+    }
+    xmpi(MPI_Pack(deco, var->decoSize * 3, MPI_INT,
                   buf, size, position, comm));
   }
   vlistAttsPack(p, varID, buf, size, position, comm);
@@ -1899,7 +1912,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
     varname[tempbuf[7]] = '\0';
     vlistDefVarUnits(vlistID, newvar, varname);
   }
-  free(varname);
+  if ( varname ) free ( varname );
   vlistDefVarDatatype(vlistID, newvar, tempbuf[8]);
   vlistDefVarInstitut ( vlistID, newvar,
 			namespaceAdaptKey ( tempbuf[10], nspTarget ));
@@ -1936,6 +1949,21 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
     }
     vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev][0]);
   }
+  {    var_t *var = vlist_to_pointer(vlistID)->vars + newvar;
+    int decoSize = tempbuf[21], i;
+    deco_t deco[decoSize];
+    int decobuf[decoSize][3];
+
+    xmpi ( MPI_Unpack(buf, size, position,
+                    decobuf, decoSize * 3, MPI_INT, comm ));
+    for (i = 0; i < decoSize; ++i)
+      {
+        deco[i].rank   = decobuf[i][0];
+        deco[i].offset = decobuf[i][1];
+        deco[i].chunk  = decobuf[i][2];
+      }
+    vlistDefVarDeco ( vlistID, newvar, decoSize, &deco );
+}
   vlistDefVarIOrank(vlistID, newvar, tempbuf[20]);
   vlistAttsUnpack(vlistID, newvar, buf, size, position, comm);
 }
