@@ -28,6 +28,7 @@ double   ** winBuffer     = NULL;
 double   ** winBufferHead = NULL;
 MPI_Win   * win           = NULL;
 int       * winPostSet    = NULL;
+int       * winFirstWrite = NULL;
 MPI_Group * groupsIO      = NULL;
 MPI_Group * groupsIONetto = NULL;
 
@@ -396,6 +397,7 @@ void modelWinCleanup ( void )
     }
 
   if ( groupsIONetto )   free ( groupsIONetto );
+  if ( winFirstWrite )   free ( winFirstWrite );
   if ( winPostSet )      free ( winPostSet );
   if ( win )             free ( win );
   if ( winBufferHead )   free ( winBufferHead );
@@ -476,10 +478,10 @@ void modelWinCreate ( void )
   winBufferHead   = xmalloc ( nProcsIO * sizeof ( winBufferHead[0] ));
   win             = xmalloc ( nProcsIO * sizeof ( win[0] ));
   winPostSet      = xmalloc ( nProcsIO * sizeof ( winPostSet[0] ));
+  winFirstWrite   = xmalloc ( nProcsIO * sizeof ( winFirstWrite[0] ));
   groupsIONetto   = xmalloc ( nProcsIO * sizeof ( groupsIONetto[0] ));
 
   getWinBufferSizes ();
-  TEMPgetWinBufferSizes ();
   ranks[0] = nProcsCalc;
 
   for ( IOID = 0; IOID < nProcsIO; IOID ++ )
@@ -490,6 +492,7 @@ void modelWinCreate ( void )
                            MPI_INFO_NULL, &winBuffer[IOID] ));
       assert ( winBuffer[IOID] != NULL ); 
       winBufferHead[IOID] = winBuffer[IOID];
+      winFirstWrite[IOID] = 1;
       xmpi ( MPI_Win_create ( winBuffer[IOID], 
                               ( MPI_Aint ) winBufferSize[IOID] * sizeof ( double ),
                               sizeof ( double ),
@@ -507,33 +510,47 @@ void modelWinCreate ( void )
 
 void pioBuffer ( int streamID, int varID, const double *data, int nmiss )
 {
-  void * vptemp;
-  double temp, * dptemp;
-  int vlistID, IOID = CDI_UNDEFID;
-  /*
-    vlistID = streamInqVlist ( streamID );
-    IOID    = vlistInqVarIOrank ( vlistID, varID ) - nProcsCalc;
+  int size = sizeof ( double ), chunk, vlistID, IOID = CDI_UNDEFID;
+  double temp, start = ( double ) START, sep = ( double ) SEPARATOR;
 
-    xdebug ("streamID=%d, vlistID=%d, varID=%d, IOID=%d, data=%.2f, nmiss=%d",
-    streamID, vlistID, varID, IOID, data[0], nmiss );
+  
+  vlistID = streamInqVlist ( streamID );
+  IOID    = vlistInqVarIOrank ( vlistID, varID ) - nProcsCalc;
+  chunk   = vlistInqVarDecoChunk ( vlistID, varID, rankGlob );
+  
+  assert ( IOID >= 0 &&
+           IOID < nProcsIO &&
+           chunk >= 0 );
+  
+  xdebug ("streamID=%d, vlistID=%d, varID=%d, IOID=%d, "
+          "chunk=%d, data=%.2f, nmiss=%d",
+          streamID, vlistID, varID, IOID, chunk, data[0], nmiss );
 
-    assert ( IOID != CDI_UNDEFID );
-  */
-      for ( IOID = 0; IOID < nProcsIO; IOID++ )
-        {
-          if ( winPostSet[IOID] ) 
-            { 
-              xmpi ( MPI_Win_wait ( win[IOID] )); 
-              winPostSet[IOID] = 0;
-            }
-          temp = ( double ) rankGlob;
-          dptemp = &temp;
-          vptemp = dptemp;
-          memcpy ( &winBufferHead[IOID][0], vptemp, sizeof ( double ));
-          xdebug ( "winBuffer[%d]=%.2f", IOID, winBuffer[IOID][0] );           
-        }
+  if ( winPostSet[IOID] ) 
+    { 
+      xmpi ( MPI_Win_wait ( win[IOID] )); 
+      winPostSet[IOID] = 0;
+    }
 
-  return;
+  if ( winFirstWrite[IOID] )
+    {
+      memcpy ( winBufferHead[IOID], &start, size);
+      winBufferHead[IOID] ++; 
+      winFirstWrite[IOID] = 0;
+    }
+  
+  temp = ( double ) streamID;
+  memcpy ( winBufferHead[IOID], &temp, size);
+  winBufferHead[IOID] ++;
+  temp = ( double ) varID;
+  memcpy ( winBufferHead[IOID], &temp, size);
+  winBufferHead[IOID] ++;
+  size *= chunk;
+  memcpy ( winBufferHead[IOID], data, size);
+  winBufferHead[IOID] += chunk;
+  size = sizeof ( double );
+  memcpy ( winBufferHead[IOID], &sep, size);
+  winBufferHead[IOID] ++;      
 }
 
 /************************************************************************/
@@ -597,7 +614,8 @@ void pioFinalize ()
 void pioWriteTimestep ( int ts, int vdate, int vtime )
 {
 #ifdef USE_MPI
-  int size, IOID, buffer[timestepSize], iAssert = 0;
+  int IOID, buffer[timestepSize], iAssert = 0;
+  double end = ( double ) END, size = sizeof ( double );
 
   assert (    ts >= 0 &&
            vdate >= 0 &&
@@ -606,18 +624,22 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
   buffer[0] = ts;
   buffer[1] = vdate;
   buffer[2] = vtime;
+
+  for ( IOID = 0; IOID < nProcsIO; IOID++ )
+    {
+      memcpy ( winBufferHead[IOID], &end, size);
+      winBufferHead[IOID] ++; 
+      xmpi ( MPI_Win_post ( groupsIONetto[IOID], iAssert, win[IOID] ));
+      winPostSet[IOID] = 1;
+      winBufferHead[IOID] = winBuffer[IOID];
+      winFirstWrite[IOID] = 1;
+    }
   
   if ( rankGlob < nProcsIO ) 
     {  
       xmpi ( MPI_Send ( &buffer[0], timestepSize, MPI_INTEGER, nProcsCalc, 
                       WRITETS, * ( commsIO + rankGlob )));
       xdebug ( "sent message WRITETS" );
-    }
-
-  for ( IOID = 0; IOID < nProcsIO; IOID++ )
-    {
-      xmpi ( MPI_Win_post ( groupsIONetto[IOID], iAssert, win[IOID] ));
-      winPostSet[IOID] = 1;
     }
 #endif
 }

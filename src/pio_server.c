@@ -122,7 +122,6 @@ static
   xmpi ( MPI_Comm_group ( commCalc, &groupCalc ));
   xmpi ( MPI_Group_excl ( groupCalc, 1, ranks, &groupModel ));
 
-
   /* first shot with fixed getBuffers */
   getBufferSize = xmalloc ( nProcsCalc * sizeof ( getBufferSize[0] ));  
   getGetBufferSize ();
@@ -141,6 +140,7 @@ static
 void getData ( int ts, int vdate, int vtime )
 {
   int iAssert   = 0, i;
+  char text[1024];
 
   xdebug();
 
@@ -157,9 +157,12 @@ void getData ( int ts, int vdate, int vtime )
   xmpi ( MPI_Win_complete ( win ));
 
   for ( i = 0; i < nProcsCalc; i++ )
-    xdebug ( "getBufferSize[%d]=%d, got data: %.2f from PE%d", 
-             i, getBufferSize[i], getBuffer[i][0], i );
-
+    {
+      sprintf ( text, "getBufferSize[%d]=%d from PE%d getBuffer[%d]", 
+                i, getBufferSize[i], i, i );
+      xprintArray ( text, &getBuffer[i][0], getBufferSize[i] / sizeof ( double ), 
+                    DATATYPE_FLT );
+    }
   xdebug();
 }
 
@@ -189,7 +192,7 @@ void IOServer ( MPI_Comm comm, int ptype )
   commColl = bInit ( ptype, comm, &color, &nnodes );
   
   for ( ;; )
-      {
+    {
       MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commCalc, &status );
       
       source = status.MPI_SOURCE;
@@ -206,11 +209,8 @@ void IOServer ( MPI_Comm comm, int ptype )
 
 	  if ( nfinished == nProcsCalc )  
               {
-                  xdebug();
                   serverWinCleanup ();
-                  xdebug();
                   arrayDestroy();
-                  xdebug();
                   bFinalize();
                   return;
               }
