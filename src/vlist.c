@@ -980,10 +980,13 @@ int vlistNtsteps(int vlistID)
 static void
 vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
 {
-  int nvars, flag, index, iorank;
+  int nvars, flag, index;
   int varID, fvarID, mvarID, flevID, mlevID, levID;
   int param, gridID, zaxisID, timeID, nlevs;
   int dtype;
+
+  int i, iorank, decoSize, size, rank, offset, chunk;
+
   char paramstr[32];
   char *name, *longname, *units;
   double level;
@@ -1005,7 +1008,7 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
   if ( nvars > 0 )
     {
       fprintf ( fp, " varID param gridID zaxisID timeID nlevel flag "
-		" name longname iorank\n");
+		" name longname iorank decosize\n");
       for ( varID = 0; varID < nvars; varID++ )
         {
           param    = vlistptr->vars[varID].param;
@@ -1018,12 +1021,16 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
           units    = vlistptr->vars[varID].units;
           flag     = vlistptr->vars[varID].flag;
           iorank   = vlistptr->vars[varID].iorank;
+          decoSize = vlistptr->vars[varID].decoSize;
 
           cdiParamToString(param, paramstr, sizeof(paramstr));
-          fprintf ( fp, "%6d   %s %6d %6d %6d %6d %6d  %s "
-		    "         %s %d",
-                 varID, paramstr, gridID, zaxisID, timeID, nlevs, flag,
-		    name ? name : "", longname ? longname : "", iorank );
+          fprintf ( fp, "%6d   %s %6d %6d %6d %6d %6d %s"
+                    " %s %6d %6d",
+                    varID, paramstr, gridID, zaxisID, timeID, nlevs, flag,
+                    name ? name : "    ", 
+                    longname ? longname : "        ",
+                    iorank, decoSize );
+
           if ( units ) fprintf ( fp, "   [%s]", units);
           fprintf ( fp, "\n");
         }
@@ -1049,6 +1056,26 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
 			dtype, flag, level);
             }
         }
+
+      fprintf ( fp, "\n");
+      fprintf ( fp, " varID  size iorank decosize corank offset  chunk\n");
+      for ( varID = 0; varID < nvars; varID++ )
+        {
+          iorank    = vlistptr->vars[varID].iorank;
+          decoSize  = vlistptr->vars[varID].decoSize;
+          size      = vlistptr->vars[varID].nlevs *
+            gridInqSize ( vlistptr->vars[varID].gridID );
+          
+          for ( i = 0; i < decoSize; i++ )
+            {
+              rank   = vlistptr->vars[varID].deco[i].rank;
+              offset = vlistptr->vars[varID].deco[i].offset;
+              offset = vlistptr->vars[varID].deco[i].offset;
+              chunk  = vlistptr->vars[varID].deco[i].chunk;
+              fprintf ( fp, "%3d %8d %6d %6d %6d %8d %6d\n",
+                        varID, size, iorank, decoSize, rank, offset, chunk );
+            }
+        }      
     }
 }
 

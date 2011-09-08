@@ -86,8 +86,8 @@ void modelRun ()
 	  start = 0;
 	  stop = nlon * nlat * nlev[i];
 	  for ( j = start; j < stop; j++ ) var[j] = 2.2;
-	  sprintf ( text, "var[%d]", i );
-	  xprintArray ( text, &var[start], stop, DATATYPE_FLT );
+	  //sprintf ( text, "var[%d]", i );
+	  //xprintArray ( text, &var[start], stop, DATATYPE_FLT );
 	  //streamWriteVar ( streamID, varID[i], &var[start], nmiss );
 	}
     } 

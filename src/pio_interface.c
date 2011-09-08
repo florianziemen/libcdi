@@ -290,7 +290,7 @@ void defVarDeco ( int vlistID, int varID )
   deco_t deco[nProcsCalc];
  
   varSize = vlistInqVarSize ( vlistID, varID );
-  xdebug ("+++++++++vlistID=%d, varID=%d, varSize=%d", vlistID, varID, varSize );
+  //xdebug ("+++++++++vlistID=%d, varID=%d, varSize=%d", vlistID, varID, varSize );
 
   for ( cRank = 0; cRank < nProcsCalc; cRank++ )
     {
@@ -308,11 +308,11 @@ void defVarDeco ( int vlistID, int varID )
       deco[cRank].rank   = cRank;
       deco[cRank].offset = lOffset;
       deco[cRank].chunk  = lChunk;
-      xdebug("deco %d: %d, %d, %d", 
-             cRank,  deco[cRank].rank,  deco[cRank].offset,
-             deco[cRank].chunk );
+      //  xdebug("deco %d: %d, %d, %d", 
+      //     cRank,  deco[cRank].rank,  deco[cRank].offset,
+      //     deco[cRank].chunk );
     }
-  xdebug ("+++++++++vlistID=%d, varID=%d, varSize=%d", vlistID, varID, varSize );
+  //xdebug ("+++++++++vlistID=%d, varID=%d, varSize=%d", vlistID, varID, varSize );
 
   vlistDefVarDeco ( vlistID, varID, nProcsCalc, &deco[0] );
 }
@@ -387,7 +387,6 @@ void  pioMetadata ( int nNodes, int * nodeSizes )
   char   * buffer;
   int bufferSize;
 
-  //mapVars ( nNodes, nodeSizes );
   varsMapNDeco ( nNodes, nodeSizes );
 
   if ( rankGlob < nProcsIO )

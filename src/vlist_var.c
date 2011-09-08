@@ -54,6 +54,9 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].atts.nalloc  = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems  = 0;
   vlistptr->vars[varID].iorank       = CDI_UNDEFID;
+  vlistptr->vars[varID].decoSize     = CDI_UNDEFID;
+  vlistptr->vars[varID].deco         = NULL;
+
 }
 
 static
