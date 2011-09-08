@@ -22,15 +22,133 @@ extern void reshArrayPrint ( char * );
 extern void arrayDestroy ( void );
 
 MPI_Comm * commPio;
+MPI_Win win;
+MPI_Group groupModel;
+
+int     * getBufferSize = NULL;
+double ** getBuffer     = NULL;
 
 
 /************************************************************************/
 
-void serverWinCreate ()
+void serverWinCleanup ()
 {
-  xdebug ();
+  int i;
+  
+  xmpi ( MPI_Win_free ( &win ));
+
+  if ( getBuffer )
+    {  
+      for ( i = 0; i < nProcsCalc; i++ )
+        if ( getBuffer[i] ) free ( getBuffer[i] );
+      free ( getBuffer );
+    }
+  if ( getBufferSize ) free ( getBufferSize );
+  
+  xdebug ( "cleaned up mpi_win" );
+}
+ 
+ /************************************************************************/
+/*
+static 
+  void getGetBufferSize ()
+{
+  int nstreams, * streamIndexArray, streamNo, vlistID, nvars, varID, iorank;
+
+  nstreams = reshCountType ( &streamOps );
+  streamIndexArray = xmalloc ( nstreams * sizeof ( int ));
+  reshGetResHArrayOfType ( nstreams, streamIndexArray, &streamOps );
+  for ( streamNo = 0; streamNo < nstreams; streamNo++ )
+    {
+      vlistID = streamInqVlist ( streamIndexArray[streamNo] );
+      nvars = vlistNvars ( vlistID );
+      for ( varID = 0; varID < nvars; varID++ )
+        {
+          iorank = vlistInqVarIOrank ( vlistID, varID );
+          if ( iorank == rankGlob )
+            {
+              for ( i = 0; i < nProcsCalc; i++ )
+                getBufferSize[i] += 
+                  ( vlistInqVarDecoChunk ( vlistID, varID, i ) *
+                    sizeof ( double ) + wbChunkOverhead * sizeof ( int ));
+            }
+        }
+    }
+  for ( i = 0; i < nProcsCalc; i++ )
+    getBufferSize[i] += ( wbGenOverhead * sizeof ( int ));
+  free ( streamIndexArray );
+  return;
+}
+*/
+ /************************************************************************/
+
+static 
+  void TEMPgetGetBufferSize ()
+{
+  int i;
+
+  for ( i = 0; i < nProcsCalc; i++ )
+    getBufferSize[i] = 1;
+
+  return;
+}
+ 
+ /************************************************************************/
+ 
+ void serverWinCreate ()
+{ 
+  int ranks[1], i;
+  MPI_Group groupCalc;
+
+  xmpi ( MPI_Win_create ( MPI_BOTTOM, 0, sizeof ( double ), MPI_INFO_NULL,
+                         commCalc, &win ));
+  xdebug ( "created mpi_win" );
+
+  /* target group */
+  ranks[0] = nProcsCalc;
+  xmpi ( MPI_Comm_group ( commCalc, &groupCalc ));
+  xmpi ( MPI_Group_excl ( groupCalc, 1, ranks, &groupModel ));
+
+
+  /* first shot with fixed getBuffers */
+  getBufferSize = xmalloc ( nProcsCalc * sizeof ( getBufferSize[0] ));  
+  TEMPgetGetBufferSize ();
+
+  xprintArray ( "getBufferSize", getBufferSize, nProcsCalc, DATATYPE_INT );
+
+  getBuffer = xmalloc ( nProcsCalc * sizeof ( getBuffer[0] ));
+  for ( i = 0; i < nProcsCalc; i++ )
+    getBuffer[i] = xmalloc ( getBufferSize[i] * sizeof ( double ));
+
+  xdebug ( "done" );
 }
 
+/************************************************************************/
+
+void getData ( int ts, int vdate, int vtime )
+{
+  int iAssert   = 0, i;
+
+  xdebug();
+
+  // todo put in correct lbs and ubs
+  assert (    ts >= 0 &&
+           vdate >= 0 &&
+           vtime >= 0 );
+
+  xmpi ( MPI_Win_start ( groupModel, iAssert, win ));  
+  for ( i = 0; i < nProcsCalc; i++ )
+    xmpi ( MPI_Get ( &getBuffer[i][0], getBufferSize[i], MPI_DOUBLE, 
+                     i, 0, getBufferSize[i], MPI_DOUBLE, win ));
+
+  xmpi ( MPI_Win_complete ( win ));
+
+  for ( i = 0; i < nProcsCalc; i++ )
+    xdebug ( "getBufferSize[%d]=%d, got data: %.2f from PE%d", 
+             i, getBufferSize[i], getBuffer[i][0], i );
+
+  xdebug();
+}
 
 /************************************************************************/
 
@@ -76,7 +194,10 @@ void IOServer ( MPI_Comm comm, int ptype )
 	  if ( nfinished == nProcsCalc )  
               {
                   xdebug();
+                  serverWinCleanup ();
+                  xdebug();
                   arrayDestroy();
+                  xdebug();
                   bFinalize();
                   return;
               }
@@ -106,7 +227,8 @@ void IOServer ( MPI_Comm comm, int ptype )
           iBuffer = xmalloc ( size * sizeof ( int ));
           xmpi ( MPI_Recv ( iBuffer, size, MPI_INTEGER, source,
                             tag, commCalc, &status ));
-          xdebug (" recved iBuffer %d %d %d", iBuffer[0], iBuffer[1], iBuffer[2] );       
+          xdebug (" recved iBuffer %d %d %d", iBuffer[0], iBuffer[1], iBuffer[2] );
+          getData ( iBuffer[0], iBuffer[1], iBuffer[2] );      
           free ( iBuffer );
 
 	  break;

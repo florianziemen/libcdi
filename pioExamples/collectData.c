@@ -13,7 +13,7 @@
 
 extern void reshArrayPrint ( char * );
 
-#define nProcsIO 1
+#define nProcsIO 3
 #define nNodes 1
 static int nodeSizes[nNodes] = {1};
 
@@ -25,7 +25,7 @@ static int nlev[nVars] = {1,1,5,5,2};
 #define nlon    12 
 #define nlat     6 
 #define maxlev   5
-#define ntsteps  3 
+#define ntsteps  1 
 
 
 
@@ -78,6 +78,10 @@ void modelRun ()
   pioMetadata ( nNodes, nodeSizes );
 #endif 
 
+  streamWriteVar ( streamID, varID[i], &var[start], nmiss );
+  pioWriteTimestep ( tsID, vdate, vtime );
+
+  /*  
   for ( tsID = 0; tsID < ntsteps; tsID++ )
     {
       taxisDefVdate ( taxisID, vdate + tsID );
@@ -97,16 +101,17 @@ void modelRun ()
 	  stop = start + chunk;
 	  for ( j = start; j < stop; j++ ) var[j] = 2.2;
 	  sprintf ( text, "var[%d], start=%d, chunk=%d", i, start, chunk );
-	  //xprintArray ( text, &var[start], chunk, DATATYPE_FLT );
-	  //streamWriteVar ( streamID, varID[i], &var[start], nmiss );
+  
+	  xprintArray ( text, &var[start], chunk, DATATYPE_FLT );
+	  streamWriteVar ( streamID, varID[i], &var[start], nmiss );
 	  start = CDI_UNDEFID;
 	  chunk = CDI_UNDEFID;
-	}
+	  }
 #ifdef USE_MPI
       pioWriteTimestep ( tsID, vdate, vtime );
 #endif
-
-    } 
+    }
+  */ 
   
 
 #ifdef USE_MPI 

@@ -35,7 +35,7 @@
 
 #define ddebug MAXDEBUG
 
-
+//todo: move to pio_rpc.h
 typedef enum
   {
     FINALIZE,
@@ -137,9 +137,12 @@ int xminInt ( int, int );
 int xsum ( int, int * );
 
 double xchecksum ( int, int, void * );
+ 
+void printArray ( char *, void *, int, int, const char *, const char *, int );
+#define xprintArray(ps,array,n,datatype)                                \
+  if ( ddebug )                                                         \
+    printArray ( ps, array, n, datatype,  __func__, __FILE__, __LINE__ )
 
-#define xprintArray(ps,array,n,datatype) printArray ( ps, array, n, datatype, \
-						      __func__, __FILE__, __LINE__ )
 #endif
 /*
  * Local Variables:

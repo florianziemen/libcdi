@@ -13,7 +13,6 @@
 #include "pio_util.h"
 
 #ifdef USE_MPI
-
 #include "pio_interface.h"
 #include "pio_rpc.h"
 #include "pio_server.h"
@@ -21,8 +20,18 @@
 #include "resource_handle.h"
 #include "stream_int.h"
 #include "vlist.h"
+extern resOps streamOps;
 #endif
 
+int       * winBufferSize = NULL;
+double   ** winBuffer     = NULL;
+double   ** winBufferHead = NULL;
+MPI_Win   * win           = NULL;
+int       * winPostSet    = NULL;
+MPI_Group * groupsIO      = NULL;
+MPI_Group * groupsIONetto = NULL;
+
+int pioType;
 int tsSize = 3;
 
 /*****************************************************************************/
@@ -64,6 +73,7 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int mode )
   int isCalcPE;
 
   commGlob = comm;
+  pioType  = mode;
 
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
 
@@ -154,17 +164,17 @@ void mapProblems ( int problemSizes[], int * problemMapping, int nProblems,
       problemMapping[ dummy[i] ] = writerIdx;
       buckets[writerIdx] +=  *ip[i];
     }
-  /*
+  
   if ( ddebug > 2 )
-    {
+  {
       xprintArray (  "problemSizes = ", problemSizes, nProblems, DATATYPE_INT );     
       xprintArray ( "vector of indices, qsort of problemSizes", dummy, 
 		   nProblems, DATATYPE_INT ); 
       xprintArray ( "problemMapping", problemMapping, nProblems, DATATYPE_INT );
       xprintArray ( "meanBucket", meanBucket, nWriter, DATATYPE_FLT );
       xprintArray ( "actual buckets", buckets, nWriter, DATATYPE_INT );     
-    }  
-  */
+  }  
+  
 }
 
 /****************************************************/ 
@@ -268,7 +278,7 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
       free ( varMappingNode );
       free ( weightsVarsNode );
     }
-  /*
+  
   if ( ddebug > 1 )
     {
       xprintArray ( "varMapping", varMapping, nVars, DATATYPE_INT  );
@@ -279,7 +289,7 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 	buckets[*(varMapping + i ) - nProcsCalc] += * ( vSizes + i );
       xprintArray ( "buckets", buckets, nProcsIO, DATATYPE_INT );
     }
-  */
+  
 }
 #endif
 
@@ -367,16 +377,157 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
 
 /************************************************************************/
 
+static 
+void modelWinCleanup ( void )
+{
+#ifdef USE_MPI
+  int IOID;
+
+  for ( IOID = 0; IOID < nProcsIO; IOID ++ )
+    {
+      if ( winPostSet[IOID] )
+        xmpi ( MPI_Win_wait ( win[IOID] )); 
+      xmpi ( MPI_Win_free ( &win[IOID] ));
+      xmpi ( MPI_Free_mem ( winBuffer[IOID] ));
+      xmpi ( MPI_Group_free ( &groupsIONetto[IOID] ));
+    }
+
+  if ( groupsIONetto )   free ( groupsIONetto );
+  if ( winPostSet )      free ( winPostSet );
+  if ( win )             free ( win );
+  if ( winBufferHead )   free ( winBufferHead );
+  if ( winBuffer )       free ( winBuffer );
+  if ( winBufferSize )   free ( winBufferSize );
+
+  xdebug ( "cleaned up mpi_win's" );
+#endif
+}
+
+/************************************************************************/
+/*
+static
+  void getWinBufferSizes ( void )
+{
+#ifdef USE_MPI
+
+  int IOID, nstreams, * streamIndexArray, streamNo, vlistID, nvars, varID;
+  
+  nstreams = reshCountType ( &streamOps );
+  streamIndexArray = xmalloc ( nstreams * sizeof ( int ));
+  reshGetResHArrayOfType ( nstreams, streamIndexArray, &streamOps );
+  for ( streamNo = 0; streamNo < nstreams; streamNo++ )
+    {
+      vlistID = streamInqVlist ( streamIndexArray[streamNo] );
+      nvars = vlistNvars ( vlistID );
+      for ( varID = 0; varID < nvars; varID++ )
+        {
+          IOID = CDI_UNDEFID;
+          IOID = vlistInqVarIOrank ( vlistID, varID ) - nProcsCalc;
+          assert ( IOID != CDI_UNDEFID );
+          winBufferSize[IOID] += 
+            ( vlistInqVarDecoChunk ( vlistID, varID, rankGlob ) *
+              sizeof ( double ) + wbChunkOverhead * sizeof ( int ));
+        }
+    }
+  free ( streamIndexArray );
+  
+  for ( IOID = 0; IOID < nProcsIO; IOID++ ) 
+    winBufferSize[IOID] += ( wbGenOverhead * sizeof ( int )); 
+  xprintArray ( "winBufferSize", winBufferSize, nProcsIO, DATATYPE_INT );
+
+  return;
+#ENDIF
+}
+*/
+/************************************************************************/
+
+static
+  void TEMPgetWinBufferSizes ( void )
+{
+  int IOID;
+
+  for ( IOID = 0; IOID < nProcsIO; IOID++ ) 
+    winBufferSize[IOID] = 1; 
+  xprintArray ( "winBufferSize TEMP", winBufferSize, nProcsIO, DATATYPE_INT );
+
+  return;
+}
+
+/************************************************************************/
+
+
 static
 void modelWinCreate ( void )
 {
 #ifdef USE_MPI
-  xdebug ( "nothing happens here" );
+
+  int IOID, ranks[1];
+
+  winBufferSize   = xmalloc ( nProcsIO * sizeof ( winBufferSize[0] ));
+  winBuffer       = xmalloc ( nProcsIO * sizeof ( winBuffer[0] ));
+  winBufferHead   = xmalloc ( nProcsIO * sizeof ( winBufferHead[0] ));
+  win             = xmalloc ( nProcsIO * sizeof ( win[0] ));
+  winPostSet      = xmalloc ( nProcsIO * sizeof ( winPostSet[0] ));
+  groupsIONetto   = xmalloc ( nProcsIO * sizeof ( groupsIONetto[0] ));
+
+  TEMPgetWinBufferSizes ();
+  ranks[0] = nProcsCalc;
+
+  for ( IOID = 0; IOID < nProcsIO; IOID ++ )
+    {
+      assert ( winBufferSize[IOID] > 0 );
+      winBuffer[IOID] = NULL;
+      xmpi ( MPI_Alloc_mem (( MPI_Aint ) ( winBufferSize[IOID] * sizeof ( double )), 
+                           MPI_INFO_NULL, &winBuffer[IOID] ));
+      assert ( winBuffer[IOID] != NULL ); 
+      winBufferHead[IOID] = winBuffer[IOID];
+      xmpi ( MPI_Win_create ( winBuffer[IOID], 
+                              ( MPI_Aint ) winBufferSize[IOID] * sizeof ( double ),
+                              sizeof ( double ),
+                              MPI_INFO_NULL, commsIO[IOID], &win[IOID] )); 
+      xmpi ( MPI_Comm_group ( commsIO[IOID], &groupsIONetto[IOID] ));
+      xmpi ( MPI_Group_incl ( groupsIONetto[IOID], 1, ranks, 
+                              &groupsIONetto[IOID] ));
+    }
+  xdebug ( "created mpi_win's" );
+
 #endif
 }
 
 /************************************************************************/
 
+void pioBuffer ( int streamID, int varID, const double *data, int nmiss )
+{
+  void * vptemp;
+  double temp, * dptemp;
+  int vlistID, IOID = CDI_UNDEFID;
+  /*
+    vlistID = streamInqVlist ( streamID );
+    IOID    = vlistInqVarIOrank ( vlistID, varID ) - nProcsCalc;
+
+    xdebug ("streamID=%d, vlistID=%d, varID=%d, IOID=%d, data=%.2f, nmiss=%d",
+    streamID, vlistID, varID, IOID, data[0], nmiss );
+
+    assert ( IOID != CDI_UNDEFID );
+  */
+      for ( IOID = 0; IOID < nProcsIO; IOID++ )
+        {
+          if ( winPostSet[IOID] ) 
+            { 
+              xmpi ( MPI_Win_wait ( win[IOID] )); 
+              winPostSet[IOID] = 0;
+            }
+          temp = ( double ) rankGlob;
+          dptemp = &temp;
+          vptemp = dptemp;
+          memcpy ( &winBufferHead[IOID][0], vptemp, sizeof ( double ));
+          xdebug ( "winBuffer[%d]=%.2f", IOID, winBuffer[IOID][0] );           
+        }
+
+  return;
+}
+
+/************************************************************************/
 
 void  pioMetadata ( int nNodes, int * nodeSizes )
 {
@@ -427,6 +578,7 @@ void pioFinalize ()
       xdebug ( "sent message FINALIZE" );
     }
 
+  modelWinCleanup ();
   commsIOCleanup ();
 #endif
 } 
@@ -436,7 +588,7 @@ void pioFinalize ()
 void pioWriteTimestep ( int ts, int vdate, int vtime )
 {
 #ifdef USE_MPI
-  int size, IOID, buffer[tsSize];
+  int size, IOID, buffer[tsSize], iAssert = 0;
 
   assert (    ts >= 0 &&
            vdate >= 0 &&
@@ -445,14 +597,18 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
   buffer[0] = ts;
   buffer[1] = vdate;
   buffer[2] = vtime;
-
-  size = sizeof ( int );
   
   if ( rankGlob < nProcsIO ) 
     {  
       xmpi ( MPI_Send ( &buffer[0], tsSize, MPI_INTEGER, nProcsCalc, 
                       WRITETS, * ( commsIO + rankGlob )));
       xdebug ( "sent message WRITETS" );
+    }
+
+  for ( IOID = 0; IOID < nProcsIO; IOID++ )
+    {
+      xmpi ( MPI_Win_post ( groupsIONetto[IOID], iAssert, win[IOID] ));
+      winPostSet[IOID] = 1;
     }
 #endif
 }

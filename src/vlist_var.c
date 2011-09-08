@@ -2005,7 +2005,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
         deco[i].offset = decobuf[i][1];
         deco[i].chunk  = decobuf[i][2];
       }
-    vlistDefVarDeco ( vlistID, newvar, decoSize, &deco );
+    vlistDefVarDeco ( vlistID, newvar, decoSize, &deco[0] );
 }
   vlistDefVarIOrank(vlistID, newvar, tempbuf[20]);
   vlistAttsUnpack(vlistID, newvar, buf, size, position, comm);
