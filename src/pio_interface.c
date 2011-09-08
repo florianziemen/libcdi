@@ -20,6 +20,7 @@
 #include "namespace.h"
 #include "resource_handle.h"
 #include "stream_int.h"
+#include "vlist.h"
 #endif
 
 /*****************************************************************************/
@@ -280,10 +281,48 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 }
 #endif
 
+/************************************************************************/ 
+
+#ifdef USE_MPI
+void defVarDeco ( int vlistID, int varID )
+{
+  int varSize, cRank, lChunk, rem, lOffset;
+  deco_t deco[nProcsCalc];
+ 
+  varSize = vlistInqVarSize ( vlistID, varID );
+  xdebug ("+++++++++vlistID=%d, varID=%d, varSize=%d", vlistID, varID, varSize );
+
+  for ( cRank = 0; cRank < nProcsCalc; cRank++ )
+    {
+      lChunk = varSize / nProcsCalc;
+      lOffset = cRank * lChunk;
+      rem = varSize % nProcsCalc;
+      if ( cRank < rem ) 
+        {
+          lChunk++;
+          lOffset += cRank;
+        }
+      else
+        lOffset += rem;
+      
+      deco[cRank].rank   = cRank;
+      deco[cRank].offset = lOffset;
+      deco[cRank].chunk  = lChunk;
+      xdebug("deco %d: %d, %d, %d", 
+             cRank,  deco[cRank].rank,  deco[cRank].offset,
+             deco[cRank].chunk );
+    }
+  xdebug ("+++++++++vlistID=%d, varID=%d, varSize=%d", vlistID, varID, varSize );
+
+  vlistDefVarDeco ( vlistID, varID, nProcsCalc, &deco[0] );
+}
+#endif
+
 /************************************************************************/
 
+
 static
-void mapVars ( int nNodes, int * nodeSizes )
+void varsMapNDeco ( int nNodes, int * nodeSizes )
 {
   int nStreams, nVars, * resHs, * streamSizes, * varSizes, * varMapping;
   int i, j, k = 0;
@@ -313,6 +352,8 @@ void mapVars ( int nNodes, int * nodeSizes )
   for ( i = 0; i < nStreams; i++ )
     for ( j = 0; j < * ( streamSizes + i ); j++ )
       {
+        defVarDeco ( streamInqVlist ( * resHs + i ), j );
+        defVarDeco ( streamInqVlistIDorig ( * resHs + i ), j );
 	vlistDefVarIOrank ( streamInqVlist ( * resHs + i ), j, 
 			  * ( varMapping + k ));
 	vlistDefVarIOrank ( streamInqVlistIDorig ( * resHs + i ), j, 
@@ -346,7 +387,8 @@ void  pioMetadata ( int nNodes, int * nodeSizes )
   char   * buffer;
   int bufferSize;
 
-  mapVars ( nNodes, nodeSizes );
+  //mapVars ( nNodes, nodeSizes );
+  varsMapNDeco ( nNodes, nodeSizes );
 
   if ( rankGlob < nProcsIO )
     {

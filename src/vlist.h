@@ -53,6 +53,15 @@ levinfo_t;
 
 typedef struct
 {
+  int      rank;
+  int      offset;
+  int      chunk;
+}
+deco_t;
+
+
+typedef struct
+{
   int         flag;
   int         nlevs;
   int         isUsed;
@@ -82,6 +91,9 @@ typedef struct
   int         complevel;    // compression level
   cdi_atts_t  atts;
   int         iorank;
+  int         decoSize;
+  deco_t     *deco;
+
 }
 var_t;
 
@@ -123,7 +135,9 @@ int      vlistDelAtts(int vlistID, int varID);
 int      vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2);
 
 #ifdef USE_MPI
-void vlistUnpack(char * buffer, int bufferSize, int * pos, int, MPI_Comm comm);
+void     vlistUnpack(char * buffer, int bufferSize, int * pos, int, MPI_Comm comm);
+void     vlistDefVarDeco ( int vlistID, int varID, int decoSize, 
+                              deco_t * deco );
 #endif
 
 #endif  /* _VLIST_H */

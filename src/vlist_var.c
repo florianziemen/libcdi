@@ -1679,6 +1679,36 @@ int vlistInqVarCompLevel(int vlistID, int varID)
   return (vlistptr->vars[varID].complevel);
 }
 
+ 
+void vlistDefVarDeco ( int vlistID, int varID, int decoSize, deco_t * deco )
+{
+  vlist_t * vlistptr;
+  int i;
+
+  xdebug ("vlistID=%d, varID=%d, decoSize=%d", vlistID, varID, decoSize );
+  vlistptr = vlist_to_pointer(vlistID );
+
+  vlistCheckVarID ( __func__, vlistID, varID );
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning ( "Operation not executed." );
+      return;
+    }
+
+  assert ( decoSize && deco );
+ 
+  vlistptr->vars[varID].deco = xmalloc ( decoSize * sizeof ( deco_t )); 
+
+  for ( i = 0; i < decoSize; i++ )
+    {
+      vlistptr->vars[varID].deco[i].rank   = deco[i].rank;
+      vlistptr->vars[varID].deco[i].offset = deco[i].offset;
+      vlistptr->vars[varID].deco[i].chunk  = deco[i].chunk;
+    }
+
+  vlistptr->vars[varID].decoSize = decoSize;
+}
 
 void     vlistDefVarIOrank   ( int vlistID, int varID, int iorank )
 {
