@@ -31,8 +31,8 @@ int       * winPostSet    = NULL;
 MPI_Group * groupsIO      = NULL;
 MPI_Group * groupsIONetto = NULL;
 
+
 int pioType;
-int tsSize = 3;
 
 /*****************************************************************************/
 
@@ -407,13 +407,14 @@ void modelWinCleanup ( void )
 }
 
 /************************************************************************/
-/*
+
 static
   void getWinBufferSizes ( void )
 {
 #ifdef USE_MPI
-
+  
   int IOID, nstreams, * streamIndexArray, streamNo, vlistID, nvars, varID;
+  int IOIDchunk = 0;
   
   nstreams = reshCountType ( &streamOps );
   streamIndexArray = xmalloc ( nstreams * sizeof ( int ));
@@ -426,22 +427,26 @@ static
         {
           IOID = CDI_UNDEFID;
           IOID = vlistInqVarIOrank ( vlistID, varID ) - nProcsCalc;
-          assert ( IOID != CDI_UNDEFID );
-          winBufferSize[IOID] += 
-            ( vlistInqVarDecoChunk ( vlistID, varID, rankGlob ) *
-              sizeof ( double ) + wbChunkOverhead * sizeof ( int ));
+          IOIDchunk = vlistInqVarDecoChunk ( vlistID, varID, rankGlob );
+          assert ( IOID != CDI_UNDEFID &&
+                   IOIDchunk > 0 );
+          winBufferSize[IOID] += (( IOIDchunk + winBufferOverheadChunk ) * 
+                                  sizeof ( double ));
         }
     }
   free ( streamIndexArray );
   
   for ( IOID = 0; IOID < nProcsIO; IOID++ ) 
-    winBufferSize[IOID] += ( wbGenOverhead * sizeof ( int )); 
+    {
+      winBufferSize[IOID] += ( winBufferOverhead * sizeof ( double )); 
+      assert ( winBufferSize[IOID] < winBufferSizeMax );
+    }
   xprintArray ( "winBufferSize", winBufferSize, nProcsIO, DATATYPE_INT );
 
   return;
-#ENDIF
+#endif
 }
-*/
+
 /************************************************************************/
 
 static
@@ -473,6 +478,7 @@ void modelWinCreate ( void )
   winPostSet      = xmalloc ( nProcsIO * sizeof ( winPostSet[0] ));
   groupsIONetto   = xmalloc ( nProcsIO * sizeof ( groupsIONetto[0] ));
 
+  getWinBufferSizes ();
   TEMPgetWinBufferSizes ();
   ranks[0] = nProcsCalc;
 
@@ -591,7 +597,7 @@ void pioFinalize ()
 void pioWriteTimestep ( int ts, int vdate, int vtime )
 {
 #ifdef USE_MPI
-  int size, IOID, buffer[tsSize], iAssert = 0;
+  int size, IOID, buffer[timestepSize], iAssert = 0;
 
   assert (    ts >= 0 &&
            vdate >= 0 &&
@@ -603,7 +609,7 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
   
   if ( rankGlob < nProcsIO ) 
     {  
-      xmpi ( MPI_Send ( &buffer[0], tsSize, MPI_INTEGER, nProcsCalc, 
+      xmpi ( MPI_Send ( &buffer[0], timestepSize, MPI_INTEGER, nProcsCalc, 
                       WRITETS, * ( commsIO + rankGlob )));
       xdebug ( "sent message WRITETS" );
     }

@@ -33,7 +33,7 @@
 #define MAXSTRING        256
 
 
-#define ddebug MAXDEBUG
+#define ddebug 1
 
 //todo: move to pio_rpc.h
 typedef enum

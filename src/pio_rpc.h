@@ -31,6 +31,13 @@ enum { GRID      = 1,
        SEPARATOR = 77777777,
        END       = 99999999 };
 
+enum{
+  winBufferOverhead = 2,
+  winBufferOverheadChunk = 3,
+  winBufferSizeMax = 1024,
+  timestepSize = 3
+};
+
 
 
 void commsIOCreate ( MPI_Comm, int );

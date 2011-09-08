@@ -17,6 +17,11 @@
 #include "pio.h"
 #include "pio_rpc.h"
 #include "pio_util.h"
+#include "stream_int.h"
+#include "resource_handle.h"
+
+extern resOps streamOps;
+
 
 extern void reshArrayPrint ( char * );
 extern void arrayDestroy ( void );
@@ -49,11 +54,12 @@ void serverWinCleanup ()
 }
  
  /************************************************************************/
-/*
+
 static 
   void getGetBufferSize ()
 {
   int nstreams, * streamIndexArray, streamNo, vlistID, nvars, varID, iorank;
+  int i, decoChunk;
 
   nstreams = reshCountType ( &streamOps );
   streamIndexArray = xmalloc ( nstreams * sizeof ( int ));
@@ -65,21 +71,28 @@ static
       for ( varID = 0; varID < nvars; varID++ )
         {
           iorank = vlistInqVarIOrank ( vlistID, varID );
+          assert ( iorank != CDI_UNDEFID );
           if ( iorank == rankGlob )
             {
               for ( i = 0; i < nProcsCalc; i++ )
-                getBufferSize[i] += 
-                  ( vlistInqVarDecoChunk ( vlistID, varID, i ) *
-                    sizeof ( double ) + wbChunkOverhead * sizeof ( int ));
+                {
+                  decoChunk =  vlistInqVarDecoChunk ( vlistID, varID, i );
+                  assert ( decoChunk > 0 );
+                  getBufferSize[i] += (( decoChunk + winBufferOverheadChunk ) *
+                                       sizeof ( double ));
+                }
             }
         }
     }
   for ( i = 0; i < nProcsCalc; i++ )
-    getBufferSize[i] += ( wbGenOverhead * sizeof ( int ));
+    {
+      getBufferSize[i] += ( winBufferOverhead * sizeof ( double ));
+      assert ( getBufferSize[i] < winBufferSizeMax );
+    }
+  xprintArray ( "getBufferSize", getBufferSize, nProcsCalc, DATATYPE_INT );
   free ( streamIndexArray );
-  return;
 }
-*/
+
  /************************************************************************/
 
 static 
@@ -112,7 +125,7 @@ static
 
   /* first shot with fixed getBuffers */
   getBufferSize = xmalloc ( nProcsCalc * sizeof ( getBufferSize[0] ));  
-  TEMPgetGetBufferSize ();
+  getGetBufferSize ();
 
   xprintArray ( "getBufferSize", getBufferSize, nProcsCalc, DATATYPE_INT );
 
@@ -214,7 +227,7 @@ void IOServer ( MPI_Comm comm, int ptype )
 
 	  if ( rankGlob == nProcsCalc ) reshArrayPrint ( "reshArrayIOServer" );
 
-	  if  ( ddebug >= 2 ) xdebugMsg (  tag, source, nfinished );
+	  if  ( ddebug ) xdebugMsg (  tag, source, nfinished );
  
 	  serverWinCreate ();
 
@@ -223,7 +236,7 @@ void IOServer ( MPI_Comm comm, int ptype )
 	case WRITETS:
 	  if  ( ddebug >= 2 ) xdebugMsg (  tag, source, nfinished );
           xmpi ( MPI_Get_count ( &status, MPI_INTEGER, &size ));     
-          assert ( size == tsSize );
+          assert ( size == timestepSize );
           iBuffer = xmalloc ( size * sizeof ( int ));
           xmpi ( MPI_Recv ( iBuffer, size, MPI_INTEGER, source,
                             tag, commCalc, &status ));
