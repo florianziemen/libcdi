@@ -210,6 +210,7 @@ extern "C" {
 int      pioInit            ( int, int, int );
 void     pioFinalize        ( void );
 void     pioMetadata        ( int, int * );
+void     pioWriteTimestep   ( int, int, int );
 
 void     pioNamespaceInit      ( int, int * );
 void     pioNamespaceCleanup   ( void );

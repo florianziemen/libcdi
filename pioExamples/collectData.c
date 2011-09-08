@@ -102,6 +102,10 @@ void modelRun ()
 	  start = CDI_UNDEFID;
 	  chunk = CDI_UNDEFID;
 	}
+#ifdef USE_MPI
+      pioWriteTimestep ( tsID, vdate, vtime );
+#endif
+
     } 
   
 

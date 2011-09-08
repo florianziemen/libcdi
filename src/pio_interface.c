@@ -23,6 +23,8 @@
 #include "vlist.h"
 #endif
 
+int tsSize = 3;
+
 /*****************************************************************************/
 
 
@@ -63,18 +65,18 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int mode )
 
   commGlob = comm;
 
-  MPI_Comm_size ( commGlob, &sizeGlob );
+  xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
 
   nProcsCalc = sizeGlob - nIOP;
 
-  MPI_Comm_rank ( commGlob, &rankGlob );
-  MPI_Comm_set_name ( commGlob, "commGlob" );
+  xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
+  xmpi ( MPI_Comm_set_name ( commGlob, "commGlob" ));
   
   if ( ddebug >= 1 ) xdebugComm (  &commGlob );
   
   if ( rankGlob >= nProcsCalc )
     isCalcPE = 0;
-  else
+  else 
     isCalcPE = 1;
 
   xmpi ( MPI_Comm_split ( comm, isCalcPE, 0, &commModel ));
@@ -290,7 +292,6 @@ void defVarDeco ( int vlistID, int varID )
   deco_t deco[nProcsCalc];
  
   varSize = vlistInqVarSize ( vlistID, varID );
-  //xdebug ("+++++++++vlistID=%d, varID=%d, varSize=%d", vlistID, varID, varSize );
 
   for ( cRank = 0; cRank < nProcsCalc; cRank++ )
     {
@@ -308,11 +309,7 @@ void defVarDeco ( int vlistID, int varID )
       deco[cRank].rank   = cRank;
       deco[cRank].offset = lOffset;
       deco[cRank].chunk  = lChunk;
-      //  xdebug("deco %d: %d, %d, %d", 
-      //     cRank,  deco[cRank].rank,  deco[cRank].offset,
-      //     deco[cRank].chunk );
     }
-  //xdebug ("+++++++++vlistID=%d, varID=%d, varSize=%d", vlistID, varID, varSize );
 
   vlistDefVarDeco ( vlistID, varID, nProcsCalc, &deco[0] );
 }
@@ -374,7 +371,7 @@ static
 void modelWinCreate ( void )
 {
 #ifdef USE_MPI
-  xdebug ();
+  xdebug ( "nothing happens here" );
 #endif
 }
 
@@ -393,8 +390,8 @@ void  pioMetadata ( int nNodes, int * nodeSizes )
     {
       reshPackBufferCreate ( &buffer, &bufferSize, commsIO[rankGlob] );
       
-      MPI_Send ( buffer, bufferSize, MPI_PACKED, nProcsCalc, 
-		 METADATA, * ( commsIO + rankGlob ));
+      xmpi ( MPI_Send ( buffer, bufferSize, MPI_PACKED, nProcsCalc, 
+                        METADATA, * ( commsIO + rankGlob )));
       
       xdebug ( "sent message metadata" );
       
@@ -424,9 +421,39 @@ void pioFinalize ()
   int i, ibuffer = 1111;
   
   for ( i = 0; i < nProcsIO; i++ )
-    MPI_Send ( &ibuffer, 1, MPI_INT, nProcsCalc, FINALIZE, *( commsIO + i ));
+    {
+      xmpi ( MPI_Send ( &ibuffer, 1, MPI_INT, nProcsCalc, 
+                      FINALIZE, *( commsIO + i )));
+      xdebug ( "sent message FINALIZE" );
+    }
 
   commsIOCleanup ();
+#endif
+} 
+ 
+ /************************************************************************/
+ 
+void pioWriteTimestep ( int ts, int vdate, int vtime )
+{
+#ifdef USE_MPI
+  int size, IOID, buffer[tsSize];
+
+  assert (    ts >= 0 &&
+           vdate >= 0 &&
+           vtime >= 0 );
+
+  buffer[0] = ts;
+  buffer[1] = vdate;
+  buffer[2] = vtime;
+
+  size = sizeof ( int );
+  
+  if ( rankGlob < nProcsIO ) 
+    {  
+      xmpi ( MPI_Send ( &buffer[0], tsSize, MPI_INTEGER, nProcsCalc, 
+                      WRITETS, * ( commsIO + rankGlob )));
+      xdebug ( "sent message WRITETS" );
+    }
 #endif
 }
 

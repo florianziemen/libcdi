@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 #include "limits.h"
 #include "cdi.h"
 #include "pio.h"
@@ -43,7 +44,7 @@ void serverWinCreate ()
 
 void IOServer ( MPI_Comm comm, int ptype )
 {
-  int source, tag, iBuffer;
+  int source, tag, * iBuffer;
   MPI_Status status;
   static int nfinished;
   MPI_Comm commColl;
@@ -65,9 +66,11 @@ void IOServer ( MPI_Comm comm, int ptype )
       
       switch ( tag )
 	{
-	case FINALIZE:      
-	  MPI_Recv ( &iBuffer, 1, MPI_INTEGER, source, 
-		 tag, commCalc, &status );
+	case FINALIZE: 
+          iBuffer = xmalloc ( sizeof ( int ));     
+	  xmpi ( MPI_Recv ( iBuffer, 1, MPI_INTEGER, source, 
+                            tag, commCalc, &status ));
+          free ( iBuffer );
 	  nfinished++;
 
 	  if ( nfinished == nProcsCalc )  
@@ -81,23 +84,31 @@ void IOServer ( MPI_Comm comm, int ptype )
 	  break;
 
 	case METADATA:
-	  MPI_Get_count ( &status, MPI_CHAR, &size );
+	  xmpi ( MPI_Get_count ( &status, MPI_CHAR, &size ));
 	  buffer = xmalloc ( size * sizeof ( char ));
-	  MPI_Recv ( buffer, size, MPI_PACKED, source,
-		     tag, commCalc, &status );
+	  xmpi ( MPI_Recv ( buffer, size, MPI_PACKED, source,
+                            tag, commCalc, &status ));
 	  rpcUnpackResources ( buffer, size, commCalc );
 	  free ( buffer );
 
 	  if ( rankGlob == nProcsCalc ) reshArrayPrint ( "reshArrayIOServer" );
 
 	  if  ( ddebug >= 2 ) xdebugMsg (  tag, source, nfinished );
-
+ 
 	  serverWinCreate ();
 
 	  break;
 
-	case WRITEVAR:
-	  xdebug("WRITEVAR");
+	case WRITETS:
+	  if  ( ddebug >= 2 ) xdebugMsg (  tag, source, nfinished );
+          xmpi ( MPI_Get_count ( &status, MPI_INTEGER, &size ));     
+          assert ( size == tsSize );
+          iBuffer = xmalloc ( size * sizeof ( int ));
+          xmpi ( MPI_Recv ( iBuffer, size, MPI_INTEGER, source,
+                            tag, commCalc, &status ));
+          xdebug (" recved iBuffer %d %d %d", iBuffer[0], iBuffer[1], iBuffer[2] );       
+          free ( iBuffer );
+
 	  break;
 
 	default:

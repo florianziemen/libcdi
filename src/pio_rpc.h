@@ -17,6 +17,8 @@ extern int nProcsCalc;
 extern MPI_Comm * commsIO;
 extern MPI_Comm commCalc;
 
+extern int tsSize;
+
 
 enum { GRID      = 1,
        ZAXIS     = 2,

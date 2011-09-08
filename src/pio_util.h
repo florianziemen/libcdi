@@ -41,7 +41,7 @@ typedef enum
     FINALIZE,
     METADATA,
     WINCREATE,
-    WRITEVAR
+    WRITETS
   } command;
 
 

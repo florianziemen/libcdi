@@ -8,8 +8,11 @@
 #include "pio_util.h"
 #include "cdi.h"
 
-char commands[][12] = { "FINALIZE\0",
-                       "METADATA\0"};
+char commands[][13] = { "FINALIZE\0",
+                        "METADATA\0",
+                        "WINCREATE\0",
+                        "WRITETS\0"};
+
 
 /****************************************************/
 
