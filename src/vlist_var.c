@@ -1712,6 +1712,49 @@ void vlistDefVarDeco ( int vlistID, int varID, int decoSize, deco_t * deco )
   vlistptr->vars[varID].decoSize = decoSize;
 }
 
+
+int vlistInqVarDecoChunk ( int vlistID, int varID, int rank )
+{
+  vlist_t *vlistptr;
+  deco_t * deco;
+  int i, decoSize = 0, iret = CDI_UNDEFID;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  deco  = vlistptr->vars[varID].deco;
+  decoSize = vlistptr->vars[varID].decoSize;
+  if ( decoSize && deco )
+    for ( i = 0; i < decoSize; i++ )
+      if ( deco[i].rank == rank ) iret = deco[i].chunk;
+      
+  return iret;
+}
+
+
+int vlistInqVarDecoOff ( int vlistID, int varID, int rank )
+{
+  vlist_t *vlistptr;
+  deco_t * deco;
+  int i, decoSize = 0, iret = CDI_UNDEFID;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  deco  = vlistptr->vars[varID].deco;
+  decoSize = vlistptr->vars[varID].decoSize;
+  if ( decoSize && deco )
+    for ( i = 0; i < decoSize; i++ )
+        if ( deco[i].rank == rank ) iret = deco[i].offset;
+
+  return iret;
+}
+
+
+
+
 void     vlistDefVarIOrank   ( int vlistID, int varID, int iorank )
 {
   vlist_t * vlistptr;

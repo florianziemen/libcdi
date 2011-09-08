@@ -215,11 +215,14 @@ void     pioNamespaceInit      ( int, int * );
 void     pioNamespaceCleanup   ( void );
 void     pioNamespaceSetActive ( int );
 
-void     gridGetIndexArray   ( int, int * );
-void     streamGetIndexArray ( int, int * );
-void     zaxisGetIndexArray  ( int, int * );
-void     vlistDefVarIOrank   ( int, int, int );
-int      vlistInqVarIOrank   ( int, int );
+void     gridGetIndexArray    ( int, int * );
+void     streamGetIndexArray  ( int, int * );
+void     zaxisGetIndexArray   ( int, int * );
+void     vlistDefVarIOrank    ( int, int, int );
+int      vlistInqVarIOrank    ( int, int );
+int      vlistInqVarDecoChunk ( int, int, int );
+int      vlistInqVarDecoOff   ( int, int, int );
+
 
   /* CDI control routines */
 

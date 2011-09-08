@@ -9,6 +9,7 @@
 #include "cdi.h"
 #include "pio_c_temp.h"
 #include "pio_util.h"
+#include <assert.h>
 
 extern void reshArrayPrint ( char * );
 
@@ -38,7 +39,7 @@ void modelRun ()
   double levs[maxlev] = {101300, 92500, 85000, 50000, 20000};
   double var[nlon*nlat*maxlev];
   int vdate = 19850101, vtime = 120000;
-  int start = CDI_UNDEFID, stop = CDI_UNDEFID;
+  int start = CDI_UNDEFID, chunk = CDI_UNDEFID, stop = CDI_UNDEFID;
   char text[1024];
 
   pioNamespaceInit ( 1, hasLocalFile );
@@ -73,6 +74,7 @@ void modelRun ()
   streamDefVlist ( streamID, vlistID);
 
 #ifdef USE_MPI
+  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
   pioMetadata ( nNodes, nodeSizes );
 #endif 
 
@@ -83,18 +85,27 @@ void modelRun ()
       streamDefTimestep ( streamID, tsID );
       for ( i = 0; i < nVars; i++ )
 	{
+#ifdef USE_MPI
+	  start = vlistInqVarDecoOff ( vlistID, varID[i], rank );
+	  chunk = vlistInqVarDecoChunk ( vlistID, varID[i], rank );
+#else
 	  start = 0;
-	  stop = nlon * nlat * nlev[i];
+	  chunk = nlon * nlat * nlev[i];
+#endif
+	  assert ( start != CDI_UNDEFID &&
+		   chunk != CDI_UNDEFID );
+	  stop = start + chunk;
 	  for ( j = start; j < stop; j++ ) var[j] = 2.2;
-	  //sprintf ( text, "var[%d]", i );
-	  //xprintArray ( text, &var[start], stop, DATATYPE_FLT );
+	  sprintf ( text, "var[%d], start=%d, chunk=%d", i, start, chunk );
+	  //xprintArray ( text, &var[start], chunk, DATATYPE_FLT );
 	  //streamWriteVar ( streamID, varID[i], &var[start], nmiss );
+	  start = CDI_UNDEFID;
+	  chunk = CDI_UNDEFID;
 	}
     } 
   
 
-#ifdef USE_MPI
-  MPI_Comm_rank ( MPI_COMM_WORLD, &rank ); 
+#ifdef USE_MPI 
   if ( rank == 0 ) reshArrayPrint ( "reshArrayModel" );
 #endif
   
