@@ -279,7 +279,7 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
       free ( weightsVarsNode );
     }
   
-  if ( ddebug > 1 )
+  if ( ddebug )
     {
       xprintArray ( "varMapping", varMapping, nVars, DATATYPE_INT  );
 
@@ -337,12 +337,13 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
 #ifdef USE_MPI
 
   nStreams = streamSize ();
+
   resHs       = xmalloc ( nStreams * sizeof ( int ));
   streamSizes = xmalloc ( nStreams * sizeof ( int ));
   streamGetIndexArray ( nStreams, resHs );
 
   for ( i = 0; i < nStreams; i++ )
-    streamSizes[i] = streamInqNvars ( * ( resHs + i ));
+    streamSizes[i] = streamInqNvars ( * ( resHs + i )); 
 
   nVars = xsum ( nStreams, streamSizes );
   varSizes   = xmalloc ( nVars * sizeof ( int ));
@@ -351,6 +352,8 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
   for ( i = 0; i < nStreams; i++ )
     for ( j = 0; j < * ( streamSizes + i ); j++ )
       varSizes[k++] += vlistInqVarSize ( streamInqVlist ( * resHs + i ), j );
+
+  assert ( k == nVars );
 
   varMapGen ( varSizes, streamSizes, varMapping, 
 	      nStreams, nodeSizes, nNodes );

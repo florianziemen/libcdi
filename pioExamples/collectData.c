@@ -15,7 +15,7 @@ extern void reshArrayPrint ( char * );
 
 #define nProcsIO 3
 #define nNodes 1
-static int nodeSizes[nNodes] = {1};
+static int nodeSizes[nNodes] = {3};
 
 static int hasLocalFile[] = { 0 };
 
@@ -26,7 +26,6 @@ static int nlev[nVars] = {1,1,5,5,2};
 #define nlat     6 
 #define maxlev   5
 #define ntsteps  1 
-
 
 
 void modelRun ()
@@ -70,7 +69,6 @@ void modelRun ()
       return;
     }
   
-
   streamDefVlist ( streamID, vlistID);
 
 #ifdef USE_MPI
