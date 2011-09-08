@@ -451,20 +451,6 @@ static
 
 /************************************************************************/
 
-static
-  void TEMPgetWinBufferSizes ( void )
-{
-  int IOID;
-
-  for ( IOID = 0; IOID < nProcsIO; IOID++ ) 
-    winBufferSize[IOID] = 1; 
-  xprintArray ( "winBufferSize TEMP", winBufferSize, nProcsIO, DATATYPE_INT );
-
-  return;
-}
-
-/************************************************************************/
-
 
 static
 void modelWinCreate ( void )
@@ -522,7 +508,7 @@ void pioBuffer ( int streamID, int varID, const double *data, int nmiss )
            IOID < nProcsIO &&
            chunk >= 0 );
   
-  xdebug ("streamID=%d, vlistID=%d, varID=%d, IOID=%d, "
+  xdebug3 ("streamID=%d, vlistID=%d, varID=%d, IOID=%d, "
           "chunk=%d, data=%.2f, nmiss=%d",
           streamID, vlistID, varID, IOID, chunk, data[0], nmiss );
 
@@ -629,7 +615,7 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
     }
   
   if ( rankGlob < nProcsIO ) 
-    {  
+    {
       xmpi ( MPI_Send ( &buffer[0], timestepSize, MPI_INTEGER, nProcsCalc, 
                       WRITETS, * ( commsIO + rankGlob )));
       xdebug ( "sent message WRITETS" );

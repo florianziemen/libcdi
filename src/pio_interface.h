@@ -10,6 +10,7 @@
 #include <mpi.h>
 
 void IOMapping ( int *, int *, int *, int, int *, int );
+void pioBuffer ( int, int, const double *, int );
 void pioServerFinalize ();
 
 #endif

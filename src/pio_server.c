@@ -94,19 +94,6 @@ static
 }
 
  /************************************************************************/
-
-static 
-  void TEMPgetGetBufferSize ()
-{
-  int i;
-
-  for ( i = 0; i < nProcsCalc; i++ )
-    getBufferSize[i] = 1;
-
-  return;
-}
- 
- /************************************************************************/
  
  void serverWinCreate ()
 { 
@@ -115,7 +102,7 @@ static
 
   xmpi ( MPI_Win_create ( MPI_BOTTOM, 0, sizeof ( double ), MPI_INFO_NULL,
                          commCalc, &win ));
-  xdebug ( "created mpi_win" );
+  xdebug3 ( "created mpi_win" );
 
   /* target group */
   ranks[0] = nProcsCalc;
@@ -132,7 +119,7 @@ static
   for ( i = 0; i < nProcsCalc; i++ )
     getBuffer[i] = xmalloc ( getBufferSize[i] * sizeof ( double ));
 
-  xdebug ( "done" );
+  xdebug ( "created mpi_win, allocated getBuffer" );
 }
 
 /************************************************************************/
@@ -141,7 +128,7 @@ void writeVars ( int tsID, int vdate, int vtime )
 {
   int i;
   double ** getBufferHead = NULL, * data = NULL, * dataHead = NULL;
-  int streamID, varID, vlistID, taxisID;
+  int streamID = CDI_UNDEFID, varID, vlistID, taxisID;
   int size, offset, chunk, chunkSize;
   
   int nmiss = 0;
@@ -152,19 +139,21 @@ void writeVars ( int tsID, int vdate, int vtime )
   for ( i = 0; i < nProcsCalc; i++ )
     getBufferHead[i] = getBuffer[i];
 
-  while ( * getBufferHead[0] != ( double ) END )
+  while (( int ) * getBufferHead[0] != END )
     {
-      streamID = ( int ) * getBufferHead[0];
+      assert (( int ) * getBufferHead[0] != CDI_UNDEFID );
+      if (( int ) * getBufferHead[0] != streamID )
+        {
+          streamID = ( int ) * getBufferHead[0];
+          vlistID = streamInqVlist ( streamID );
+          taxisID = vlistInqTaxis ( vlistID );
+          taxisDefVdate ( taxisID, vdate + tsID );
+          taxisDefVtime ( taxisID, vtime );
+          streamDefTimestep ( streamID, tsID );
+        }
       getBufferHead[0]++;
       varID = ( int ) * getBufferHead[0];
       getBufferHead[0]++;
-      xdebug ( "############ read streamID=%d, varID=%d", 
-               streamID, varID );
-      vlistID = streamInqVlist ( streamID );
-      taxisID = vlistInqTaxis ( vlistID );
-      taxisDefVdate ( taxisID, vdate + tsID );
-      taxisDefVtime ( taxisID, vtime );
-      streamDefTimestep ( streamID, tsID );
       size = vlistInqVarSize ( vlistID, varID );
       data = xmalloc ( size * sizeof ( double ));
       dataHead = data;
@@ -178,12 +167,11 @@ void writeVars ( int tsID, int vdate, int vtime )
               assert ( * ( getBufferHead[i] ) == ( double ) varID );
               getBufferHead[i]++;
             }
-          offset = vlistInqVarDecoOff ( vlistID, varID, i );
           chunk  = vlistInqVarDecoChunk ( vlistID, varID, i );
           memcpy ( dataHead, getBufferHead[i], chunk * sizeof ( double ));
           dataHead += chunk;
           getBufferHead[i] += chunk;
-          assert ( * ( getBufferHead[i] ) == ( double ) SEPARATOR );
+          assert (( int ) * ( getBufferHead[i] ) == SEPARATOR );
           getBufferHead[i]++;
         }
 
@@ -196,11 +184,9 @@ void writeVars ( int tsID, int vdate, int vtime )
         }
           
       free ( data );
-      xdebug ( "##########getBufferHead[0]=%.2f", *getBufferHead[0] );
     }
 
   free ( getBufferHead );
-  xdebug ("############");
 } 
 
 /************************************************************************/
@@ -209,8 +195,6 @@ void getData ( int tsID, int vdate, int vtime )
 {
   int iAssert   = 0, i;
   char text[1024];
-
-  xdebug();
 
   // todo put in correct lbs and ubs
   assert (    tsID >= 0 &&
@@ -272,6 +256,7 @@ void IOServer ( MPI_Comm comm, int ptype )
       switch ( tag )
 	{
 	case FINALIZE: 
+	  xdebugMsg (  tag, source, nfinished );
           iBuffer = xmalloc ( sizeof ( int ));     
 	  xmpi ( MPI_Recv ( iBuffer, 1, MPI_INTEGER, source, 
                             tag, commCalc, &status ));
@@ -289,6 +274,7 @@ void IOServer ( MPI_Comm comm, int ptype )
 	  break;
 
 	case METADATA:
+	  xdebugMsg (  tag, source, nfinished );
 	  xmpi ( MPI_Get_count ( &status, MPI_CHAR, &size ));
 	  buffer = xmalloc ( size * sizeof ( char ));
 	  xmpi ( MPI_Recv ( buffer, size, MPI_PACKED, source,
@@ -305,13 +291,14 @@ void IOServer ( MPI_Comm comm, int ptype )
 	  break;
 
 	case WRITETS:
-	  if  ( ddebug >= 2 ) xdebugMsg (  tag, source, nfinished );
+	  xdebugMsg (  tag, source, nfinished );
           xmpi ( MPI_Get_count ( &status, MPI_INTEGER, &size ));     
           assert ( size == timestepSize );
           iBuffer = xmalloc ( size * sizeof ( int ));
           xmpi ( MPI_Recv ( iBuffer, size, MPI_INTEGER, source,
                             tag, commCalc, &status ));
-          xdebug (" recved iBuffer %d %d %d", iBuffer[0], iBuffer[1], iBuffer[2] );
+          xdebug ("command WRITETS, recved:  tsID=%d, vdate=%d, vtime=%d", 
+                  iBuffer[0], iBuffer[1], iBuffer[2] );
           getData ( iBuffer[0], iBuffer[1], iBuffer[2] );      
           free ( iBuffer );
 

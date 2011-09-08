@@ -14,8 +14,6 @@
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
 #include "gribapi.h"
 
-#include "pio_util.h"
-
 
 
 int grib1ltypeToZaxisType(int grib_ltype)
@@ -569,10 +567,6 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
 	}
     }
 
-  xdebug("filetype=%d, varID=%d, levelID=%d, vlistID=%d, gridID=%d, zaxisID=%d, time=%d, "
-         "tsteptype=%d, datasize=%d, data[0]=%.2f",
-         filetype, varID, levelID, vlistID, gridID, zaxisID, time, tsteptype, 
-         datasize, data[0]);
   nbytes = grbEncode(filetype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, 
 		     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg, gc);
   if ( streamptr->comptype == COMPRESS_SZIP )

@@ -33,7 +33,7 @@
 #define MAXSTRING        256
 
 
-#define ddebug 3
+#define ddebug 0
 
 //todo: move to pio_rpc.h
 typedef enum
@@ -55,6 +55,34 @@ typedef enum
               ## __VA_ARGS__ );                                 \
   }
 
+#else
+#define xdebug(fmt, ...)					\
+  if ( ddebug ){                                                \
+    fprintf ( stderr, "%s, %s, line %d: " fmt "\n",             \
+              __func__, __FILE__,  __LINE__,                    \
+              ## __VA_ARGS__ );                                 \
+  }
+#endif
+
+
+#ifdef USE_MPI
+#define xdebug3(fmt, ...)					\
+  if ( ddebug == MAXDEBUG ){                                    \
+    int rank;                                                   \
+    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );                    \
+    fprintf ( stderr, "pe%d in %s, %s, line %d: " fmt "\n",     \
+              rank,  __func__, __FILE__,  __LINE__,             \
+              ## __VA_ARGS__ );                                 \
+  }
+
+#else
+#define xdebug3(fmt, ...)					\
+  if ( ddebug == MAXDEBUG ){                                    \
+    fprintf ( stderr, "%s, %s, line %d: " fmt "\n",             \
+              __func__, __FILE__,  __LINE__,                    \
+              ## __VA_ARGS__ );                                 \
+  }
+#endif
 /*
 #ifdef USE_MPI
 char * outTextComm ( MPI_Comm * );
@@ -68,15 +96,6 @@ char * outTextComm ( MPI_Comm * );
     }
 #endif
 */
-
-#else
-#define xdebug(fmt, ...)					\
-  if ( ddebug ){                                                \
-    fprintf ( stderr, "%s, %s, line %d: " fmt "\n",             \
-              __func__, __FILE__,  __LINE__,                    \
-              ## __VA_ARGS__ );                                 \
-  }
-#endif
 
 #ifdef USE_MPI
 #define xwarning(fmt, ...)						\
@@ -119,19 +138,21 @@ void pcdiXMPIStat ( int, const char *, int, MPI_Status * );
 
 void pcdiDebugComm ( const char *filename, const char *functionname, int line, \
                      MPI_Comm *comm );
-#define xdebugComm(comm) pcdiDebugComm (  __FILE__, __func__, __LINE__, comm )
+#define xdebugComm(comm)\
+  if ( ddebug ) pcdiDebugComm (  __FILE__, __func__, __LINE__, comm )
 #endif
 
 void pcdiDebugMsg ( const char *filename, const char *functionname, int line, \
                     int tag, int source, int nfinished );
-#define xdebugMsg(tag,source,nfinished) pcdiDebugMsg ( __FILE__, __func__, \
-                                                        __LINE__, tag, source,\
-                                                        nfinished )
+#define xdebugMsg(tag,source,nfinished) \
+  if ( ddebug ) \
+    pcdiDebugMsg ( __FILE__, __func__, __LINE__, tag, source, nfinished )
 
 void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line, \
                     int tag, int source, char * text );
-#define xdebugMsg2(tag,source,text) pcdiDebugMsg ( __FILE__, __func__, \
-                                                    __LINE__, tag, source, text )
+#define xdebugMsg2(tag,source,text) \
+  if ( ddebug ) pcdiDebugMsg ( __FILE__, __func__,  __LINE__, tag, source, text )
+
 int xmaxInt ( int, int );
 int xminInt ( int, int );
 int xsum ( int, int * );

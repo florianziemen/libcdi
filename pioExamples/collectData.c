@@ -25,7 +25,7 @@ static int nlev[nVars] = {1,1,5,5,2};
 #define nlon    12 
 #define nlat     6 
 #define maxlev   5
-#define ntsteps  1 
+#define ntsteps  3 
 
 
 void modelRun ()

@@ -153,12 +153,13 @@ void writeMPINONB ( aFiledataM *of, int id )
 
   if ( amount == 0 ) return;
 
-  xdebug ( "IOPI%d: Write buffer, size %d bytes, in\n", 
+  xdebug3 ( "IOPI%d: Write buffer, size %d bytes, in", 
            pioinfo->rank, amount );
   
   xmpi ( MPI_Wait ( & ( of->request ), &status ));
   xmpi ( MPI_File_iwrite_shared ( of->fh, of->db->buffer, amount, MPI_CHAR, 
                                   & ( of->request )));
+  xdebug ( "%d bytes written for id=%d", amount, id );
 
   /* change outputBuffer */
   
@@ -166,13 +167,13 @@ void writeMPINONB ( aFiledataM *of, int id )
   
   if ( of->db == of->db1 )
     {
-        xdebug ( "IOPE%d: id=%d, change to buffer 2 ...", 
+        xdebug3 ( "IOPE%d: id=%d, change to buffer 2 ...", 
                  pioinfo->rank, id );
       of->db =  of->db2;
     }
   else 
     {
-        xdebug ( "IOPE%d: id=%d, change to buffer 1 ...", 
+        xdebug3 ( "IOPE%d: id=%d, change to buffer 1 ...", 
 		  pioinfo->rank, id );
       of->db =  of->db1;
     }
@@ -196,7 +197,7 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
 
   if ( flush == 1 ) 
     {
-        xdebug ( "IOPE%d: tsId = %d, flush buffer", 
+        xdebug3 ( "IOPE%d: tsId = %d, flush buffer", 
 		  pioinfo->rank, tsId );
       curr = bibAFiledataM->head;
       while ( curr ) 
@@ -211,7 +212,7 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
   of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, id );
   filled = dbuffer_push ( of->db, ( unsigned char * ) buffer, len );
 
-  xdebug ( "IOPE%d: id = %d, tsId = %d,"
+  xdebug3 ( "IOPE%d: id = %d, tsId = %d,"
            " pushed data on buffer, filled = %d", 
            pioinfo->rank, id, tsId, filled ); 
 
