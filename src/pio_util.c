@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #include "pio_util.h"
+#include "cdi.h"
 
 char commands[][12] = { "FINALIZE\0",
                        "METADATA\0"};
@@ -226,6 +227,45 @@ double xchecksum ( int type, int count, void * buffer )
   return 0.0;
 }
 
+
+/****************************************************/
+
+void printArray ( char * ps, void * array, int n, int datatype, 
+		  const char * funname, const char * filename, int line )
+{ 
+  int i, rank;
+  int * iArray;
+  double * dArray;
+
+#ifdef USE_MPI
+  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+  fprintf ( stdout, "pe%d in %s, %s, line %d: %s = ",
+	    rank, funname, filename, line, ps );
+#else 
+  fprintf ( stdout, "%s, %s, line %d: %s = ",
+	    funname, filename, line, ps );
+#endif
+
+  switch ( datatype )
+    {
+    case DATATYPE_INT:
+      iArray = ( int * ) array;
+      for ( i = 0; i < n-1; i++ )
+	fprintf ( stdout, "%d ", * ( iArray + i ));
+      fprintf ( stdout, "%d\n", * ( iArray + n - 1 ));
+      break;
+    case DATATYPE_FLT:
+      dArray = ( double * ) array;
+      for ( i = 0; i < n-1; i++ )
+	fprintf ( stdout, "%.2f ", * ( dArray + i ));
+      fprintf ( stdout, "%.2f\n", * ( dArray + n-1 ));
+      break;
+    default:
+      fprintf ( stdout, " ... no datatype defined\n" );
+    } 
+      
+  return;
+}
 
 /****************************************************/ 
 /*

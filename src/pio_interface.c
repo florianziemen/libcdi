@@ -22,9 +22,6 @@
 #include "stream_int.h"
 #endif
 
-#define xprintArray(ps,array,n,datatype) printArray ( ps, array, n, datatype, \
-						      __func__, __FILE__, __LINE__ )
-
 /*****************************************************************************/
 
 
@@ -105,44 +102,6 @@ int cmp ( const void * va, const void * vb )
   b = ( const int ** ) vb;
   
   return (( **a < **b ) - ( **a > **b ));
-}
-
-/****************************************************/
-
-void printArray ( char * ps, void * array, int n, int datatype, 
-		  const char * funname, const char * filename, int line )
-{ 
-  int i;
-  int * iArray;
-  double * dArray;
-
-#ifdef USE_MPI
-  fprintf ( stdout, "pe%d in %s, %s, line %d: %s = ",
-	    rankGlob, funname, filename, line, ps );
-#else 
-  fprintf ( stdout, "%s, %s, line %d: %s = ",
-	    funname, filename, line, ps );
-#endif
-
-  switch ( datatype )
-    {
-    case DATATYPE_INT:
-      iArray = ( int * ) array;
-      for ( i = 0; i < n-1; i++ )
-	fprintf ( stdout, "%d ", * ( iArray + i ));
-      fprintf ( stdout, "%d\n", * ( iArray + n - 1 ));
-      break;
-    case DATATYPE_FLT:
-      dArray = ( double * ) array;
-      for ( i = 0; i < n-1; i++ )
-	fprintf ( stdout, "%.2f ", * ( dArray + i ));
-      fprintf ( stdout, "%.2f\n", * ( dArray + n-1 ));
-      break;
-    default:
-      fprintf ( stdout, " ... no datatype defined\n" );
-    } 
-      
-  return;
 }
 
 /****************************************************/

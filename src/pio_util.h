@@ -137,6 +137,9 @@ int xminInt ( int, int );
 int xsum ( int, int * );
 
 double xchecksum ( int, int, void * );
+
+#define xprintArray(ps,array,n,datatype) printArray ( ps, array, n, datatype, \
+						      __func__, __FILE__, __LINE__ )
 #endif
 /*
  * Local Variables:
