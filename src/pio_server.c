@@ -137,7 +137,75 @@ static
 
 /************************************************************************/
 
-void getData ( int ts, int vdate, int vtime )
+void writeVars ( int tsID, int vdate, int vtime )
+{
+  int i;
+  double ** getBufferHead = NULL, * data = NULL, * dataHead = NULL;
+  int streamID, varID, vlistID, taxisID;
+  int size, offset, chunk, chunkSize;
+  
+  int nmiss = 0;
+  char text[1024];
+
+  getBufferHead = xmalloc ( nProcsCalc * sizeof ( getBufferHead[0] ));
+
+  for ( i = 0; i < nProcsCalc; i++ )
+    getBufferHead[i] = getBuffer[i];
+
+  while ( * getBufferHead[0] != ( double ) END )
+    {
+      streamID = ( int ) * getBufferHead[0];
+      getBufferHead[0]++;
+      varID = ( int ) * getBufferHead[0];
+      getBufferHead[0]++;
+      xdebug ( "############ read streamID=%d, varID=%d", 
+               streamID, varID );
+      vlistID = streamInqVlist ( streamID );
+      taxisID = vlistInqTaxis ( vlistID );
+      taxisDefVdate ( taxisID, vdate + tsID );
+      taxisDefVtime ( taxisID, vtime );
+      streamDefTimestep ( streamID, tsID );
+      size = vlistInqVarSize ( vlistID, varID );
+      data = xmalloc ( size * sizeof ( double ));
+      dataHead = data;
+
+      for ( i = 0; i < nProcsCalc; i++ )
+        {
+          if ( i )
+            {
+              assert ( * ( getBufferHead[i] ) == ( double ) streamID );
+              getBufferHead[i]++;
+              assert ( * ( getBufferHead[i] ) == ( double ) varID );
+              getBufferHead[i]++;
+            }
+          offset = vlistInqVarDecoOff ( vlistID, varID, i );
+          chunk  = vlistInqVarDecoChunk ( vlistID, varID, i );
+          memcpy ( dataHead, getBufferHead[i], chunk * sizeof ( double ));
+          dataHead += chunk;
+          getBufferHead[i] += chunk;
+          assert ( * ( getBufferHead[i] ) == ( double ) SEPARATOR );
+          getBufferHead[i]++;
+        }
+
+      streamWriteVar ( streamID, varID, data, nmiss );
+
+      if ( ddebug > 2 )
+        {
+          sprintf ( text, "streamID=%d, var[%d], size=%d", streamID, varID, size );
+          xprintArray ( text, data, size, DATATYPE_FLT );
+        }
+          
+      free ( data );
+      xdebug ( "##########getBufferHead[0]=%.2f", *getBufferHead[0] );
+    }
+
+  free ( getBufferHead );
+  xdebug ("############");
+} 
+
+/************************************************************************/
+
+void getData ( int tsID, int vdate, int vtime )
 {
   int iAssert   = 0, i;
   char text[1024];
@@ -145,7 +213,7 @@ void getData ( int ts, int vdate, int vtime )
   xdebug();
 
   // todo put in correct lbs and ubs
-  assert (    ts >= 0 &&
+  assert (    tsID >= 0 &&
            vdate >= 0 &&
            vtime >= 0 );
 
@@ -156,14 +224,17 @@ void getData ( int ts, int vdate, int vtime )
 
   xmpi ( MPI_Win_complete ( win ));
 
-  for ( i = 0; i < nProcsCalc; i++ )
-    {
-      sprintf ( text, "getBufferSize[%d]=%d from PE%d getBuffer[%d]", 
-                i, getBufferSize[i], i, i );
-      xprintArray ( text, &getBuffer[i][0], getBufferSize[i] / sizeof ( double ), 
-                    DATATYPE_FLT );
-    }
-  xdebug();
+  if ( ddebug > 2 )
+    for ( i = 0; i < nProcsCalc; i++ )
+      {
+        sprintf ( text, "getBufferSize[%d]=%d from PE%d getBuffer[%d]", 
+                  i, getBufferSize[i], i, i );
+        xprintArray ( text, &getBuffer[i][0], getBufferSize[i] / sizeof ( double ), 
+                      DATATYPE_FLT );
+      }
+
+  writeVars ( tsID, vdate, vtime );
+
 }
 
 /************************************************************************/

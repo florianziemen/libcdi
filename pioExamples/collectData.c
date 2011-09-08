@@ -96,9 +96,12 @@ void modelRun ()
 	  stop = start + chunk;
 	  assert ( stop <=  nlon * nlat * nlev[i] );
 	  for ( j = start; j < stop; j++ ) var[j] = 2.2;
-	  sprintf ( text, "var[%d], start=%d, chunk=%d", i, start, chunk );
-	  xprintArray ( text, &var[start], chunk, DATATYPE_FLT );
- 	  streamWriteVar ( streamID, varID[i], &var[start], nmiss );
+	  if ( ddebug > 2 )
+	    {
+	      sprintf ( text, "var[%d], start=%d, chunk=%d", i, start, chunk );
+	      xprintArray ( text, &var[start], chunk, DATATYPE_FLT );
+	    }
+	  streamWriteVar ( streamID, varID[i], &var[start], nmiss );
 	  start = CDI_UNDEFID;
 	  chunk = CDI_UNDEFID;
 	}

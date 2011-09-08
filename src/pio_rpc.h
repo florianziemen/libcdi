@@ -32,7 +32,7 @@ enum { GRID      = 1,
        END       = 99999999 };
 
 enum{
-  winBufferOverhead = 2,
+  winBufferOverhead = 1,
   winBufferOverheadChunk = 3,
   winBufferSizeMax = 1024,
   timestepSize = 3

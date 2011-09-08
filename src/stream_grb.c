@@ -14,6 +14,8 @@
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
 #include "gribapi.h"
 
+#include "pio_util.h"
+
 
 
 int grib1ltypeToZaxisType(int grib_ltype)
@@ -523,11 +525,8 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   void *gc = NULL;
 
   streamptr = stream_to_pointer(streamID);
-
   stream_check_ptr(__func__, streamptr);
-
   filetype  = streamptr->filetype;
-
   fileID    = streamInqFileID(streamID);
   vlistID   = streamInqVlist(streamID);
   gridID    = vlistInqVarGrid(vlistID, varID);
@@ -539,12 +538,10 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   time      = streamptr->tsteps[tsID].taxis.vtime;
   if ( vlistInqVarTimave(vlistID, varID) )
     numavg = streamptr->tsteps[tsID].taxis.numavg;
-
   if ( CDI_Debug )
     Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
   datasize = gridInqSize(gridID);
-
   gribbuffersize = datasize*4+3000;
   gribbuffer = (unsigned char *) malloc(gribbuffersize);
 
@@ -572,14 +569,30 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
 	}
     }
 
+  xdebug("filetype=%d, varID=%d, levelID=%d, vlistID=%d, gridID=%d, zaxisID=%d, time=%d, "
+         "tsteptype=%d, datasize=%d, data[0]=%.2f",
+         filetype, varID, levelID, vlistID, gridID, zaxisID, time, tsteptype, 
+         datasize, data[0]);
   nbytes = grbEncode(filetype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, 
 		     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg, gc);
-
   if ( streamptr->comptype == COMPRESS_SZIP )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
-  if ( nwrite != nbytes ) perror(__func__);
 
+  /* begin deike */
+
+#ifndef NOMPI
+  if ( pioinfo->type != PIO_NONE )
+    nwrite = pioFileWrite ( fileID, tsID, gribbuffer, nbytes );
+  else
+      nwrite = fileWrite(fileID, gribbuffer, nbytes); 
+#else
+  nwrite = fileWrite(fileID, gribbuffer, nbytes); 
+#endif
+
+  /* end deike */
+
+  if ( nwrite != nbytes ) perror(__func__);
   if ( gribbuffer ) free(gribbuffer);
 
   return ((int)nwrite);

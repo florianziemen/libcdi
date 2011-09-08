@@ -511,7 +511,7 @@ void modelWinCreate ( void )
 void pioBuffer ( int streamID, int varID, const double *data, int nmiss )
 {
   int size = sizeof ( double ), chunk, vlistID, IOID = CDI_UNDEFID;
-  double temp, start = ( double ) START, sep = ( double ) SEPARATOR;
+  double temp, sep = ( double ) SEPARATOR;
 
   
   vlistID = streamInqVlist ( streamID );
@@ -531,26 +531,19 @@ void pioBuffer ( int streamID, int varID, const double *data, int nmiss )
       xmpi ( MPI_Win_wait ( win[IOID] )); 
       winPostSet[IOID] = 0;
     }
-
-  if ( winFirstWrite[IOID] )
-    {
-      memcpy ( winBufferHead[IOID], &start, size);
-      winBufferHead[IOID] ++; 
-      winFirstWrite[IOID] = 0;
-    }
   
   temp = ( double ) streamID;
   memcpy ( winBufferHead[IOID], &temp, size);
-  winBufferHead[IOID] ++;
+  winBufferHead[IOID]++;
   temp = ( double ) varID;
   memcpy ( winBufferHead[IOID], &temp, size);
-  winBufferHead[IOID] ++;
+  winBufferHead[IOID]++;
   size *= chunk;
   memcpy ( winBufferHead[IOID], data, size);
   winBufferHead[IOID] += chunk;
   size = sizeof ( double );
   memcpy ( winBufferHead[IOID], &sep, size);
-  winBufferHead[IOID] ++;      
+  winBufferHead[IOID]++;      
 }
 
 /************************************************************************/
@@ -641,16 +634,6 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
                       WRITETS, * ( commsIO + rankGlob )));
       xdebug ( "sent message WRITETS" );
     }
-#endif
-}
-
-
-/************************************************************************/
-
-
-void pioWriteVar ()
-{
-#ifdef USE_MPI
 #endif
 }
 
