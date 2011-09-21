@@ -5788,14 +5788,28 @@ void define_all_vars(int fileID, int streamID, int vlistID, int instID, int mode
 
       if ( ncvars[ncvarid].timeID == TIME_VARIABLE ) iodim++;
 
-      for ( int idim = iodim; idim < ndims; idim++ )
+      if ( gridInqType(gridID) == GRID_UNSTRUCTURED && ndims-iodim <= 2 && ydimid == xdimid )
         {
-          if      ( xdimid == ncvars[ncvarid].dimids[idim] )
-            ixyz += 1*ipow10[(ndims-idim-1)];
-          else if ( ydimid == ncvars[ncvarid].dimids[idim] )
-            ixyz += 2*ipow10[(ndims-idim-1)];
-          else if ( zdimid == ncvars[ncvarid].dimids[idim] )
-            ixyz += 3*ipow10[(ndims-idim-1)];
+          if ( xdimid == ncvars[ncvarid].dimids[ndims-1] )
+            {
+              ixyz = 321;
+            }
+          else
+            {
+              ixyz = 213;
+            }
+        }
+      else
+        {
+          for ( int idim = iodim; idim < ndims; idim++ )
+            {
+              if      ( xdimid == ncvars[ncvarid].dimids[idim] )
+                ixyz += 1*ipow10[ndims-idim-1];
+              else if ( ydimid == ncvars[ncvarid].dimids[idim] )
+                ixyz += 2*ipow10[ndims-idim-1];
+              else if ( zdimid == ncvars[ncvarid].dimids[idim] )
+                ixyz += 3*ipow10[ndims-idim-1];
+            }
         }
 
       vlistDefVarXYZ(vlistID, varID, ixyz);
