@@ -1587,13 +1587,13 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
       int rdate, rtime;
       int ip1 = 0, ip2 = 0;
       int calendar;
-      
+
       calendar = taxisInqCalendar(taxisID);
       rdate    = taxisInqRdate(taxisID);
       rtime    = taxisInqRtime(taxisID);
 
       factor = cgribexDefDateTime(isec1, timeunit, rdate, rtime);
-      
+
       timerange = cgribexDefTimerange(tsteptype, factor, calendar,
 				      rdate, rtime, vdate, vtime, &ip1, &ip2);
 
@@ -1613,7 +1613,7 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 	  if ( ip1 < 0 || ip1 > 0xFF   ) timetype = TAXIS_ABSOLUTE;
 	  if ( ip2 < 0 || ip2 > 0xFF   ) timetype = TAXIS_ABSOLUTE;
 	}
-      
+
       ISEC1_TimeRange   = timerange;
       ISEC1_TimePeriod1 = ip1;
       ISEC1_TimePeriod2 = ip2;
