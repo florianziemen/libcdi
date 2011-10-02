@@ -1,3 +1,7 @@
+2011-10-02  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* deflate compression with netCDF4 doesn't work (bug fix) [report: Geert Jan van Oldenborgh]
+
 2011-09-21  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* correct netCDF dimension order of unstructured grids (bug fix) [report: Ralf Mueller]

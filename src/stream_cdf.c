@@ -2715,8 +2715,7 @@ int cdfDefVar(int streamID, int varID)
   dimorder[0] = ixyz/100;
   dimorder[1] = (ixyz-dimorder[0]*100)/10;
   dimorder[2] = (ixyz-dimorder[0]*100-dimorder[1]*10);
-
-  if ( dimorder[0] == 3 ) lchunk = FALSE; /* ZYX and ZXY */
+  if ( dimorder[0] != 3 ) lchunk = FALSE; /* ZYX and ZXY */
 
   if ( ((dimorder[0]>0)+(dimorder[1]>0)+(dimorder[2]>0)) < ((xid!=UNDEFID)+(yid!=UNDEFID)+(zid!=UNDEFID)) )
     {
@@ -2877,12 +2876,15 @@ int cdfDefVar(int streamID, int varID)
         }
       else
         {
-          static int lwarn = TRUE;
-
-          if ( lwarn )
+          if ( lchunk )
             {
-              lwarn = FALSE;
-              Warning("Deflate compression is only available for netCDF4!");
+              static int lwarn = TRUE;
+
+              if ( lwarn )
+                {
+                  lwarn = FALSE;
+                  Warning("Deflate compression is only available for netCDF4!");
+                }
             }
         }
     }
