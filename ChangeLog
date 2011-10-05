@@ -1,3 +1,7 @@
+2011-10-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_cdf::cdfInqContents: check units of hybrid levels
+
 2011-10-02  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* deflate compression with netCDF4 doesn't work (bug fix) [report: Geert Jan van Oldenborgh]

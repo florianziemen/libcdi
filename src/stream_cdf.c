@@ -4809,7 +4809,7 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 		{
 		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
 		}
-	      else if ( strcmp(ncvars[ncvarid].units, "level") == 0 )
+	      else if ( strcmp(ncvars[ncvarid].units, "level") == 0 || strcmp(ncvars[ncvarid].units, "1") == 0 )
 		{
 		  if      ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer midpoints") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
@@ -4890,7 +4890,7 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
 		  continue;
 		}
-	      else if ( strcmp(ncvars[ncvarid].units, "level") == 0 )
+	      else if ( strcmp(ncvars[ncvarid].units, "level") == 0 || strcmp(ncvars[ncvarid].units, "1") == 0 )
 		{
 		  if      ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer midpoints") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
