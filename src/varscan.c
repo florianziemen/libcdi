@@ -274,7 +274,6 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
     {
       nvars++;
       varID = paramNewEntry(param);
-      if ( prec > vartable[varID].prec ) vartable[varID].prec = prec;
       vartable[varID].gridID    = gridID;
       vartable[varID].zaxistype = zaxistype;
       vartable[varID].ltype     = ltype;
@@ -291,18 +290,20 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
       if ( vartable[varID].gridID != gridID )
 	{
 	  char paramstr[32];
-	  cdiParamToString(param, paramstr, sizeof(paramstr));	  
+	  cdiParamToString(param, paramstr, sizeof(paramstr));
 	  Message("param = %s gridID = %d", paramstr, gridID);
 	  Error("horizontal grid must not change for same param!");
 	}
       if ( vartable[varID].zaxistype != zaxistype )
 	{
 	  char paramstr[32];
-	  cdiParamToString(param, paramstr, sizeof(paramstr));	  
+	  cdiParamToString(param, paramstr, sizeof(paramstr));
 	  Message("param = %s zaxistype = %d", paramstr, zaxistype);
 	  Error("zaxistype must not change for same param!");
 	}
     }
+
+  if ( prec > vartable[varID].prec ) vartable[varID].prec = prec;
 
   levelID = levelNewEntry(varID, level1, level2);
   vartable[varID].levelTable[levelID].recID = recID;
