@@ -2,6 +2,7 @@
 
 	* stream_cdf::cdfInqContents: check units of hybrid levels
 	* varAddRecord: used max number of bit_per_value for 3D GRIB data
+	* gribapiDefGrid: added parameter jScansPositively [report: Juan Jose Tasso]
 
 2011-10-02  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 

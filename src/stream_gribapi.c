@@ -293,7 +293,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 	  {
 	    if ( grid->xsize > 1 )
 	      {
-		if ( (grid->xfirst > grid->xlast) && (grid->xfirst >= 180) ) grid->xfirst -= 360;
+		if ( (grid->xfirst >= grid->xlast) && (grid->xfirst >= 180) ) grid->xfirst -= 360;
 
 		if ( editionNumber <= 1 )
 		  {
@@ -301,7 +301,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 		    if ( IS_EQUAL(grid->xfirst, 0) && grid->xlast > 354 )
 		      {
 			double xinc = 360. / grid->xsize;
-		      
+
 			if ( fabs(grid->xinc-xinc) > 0.0 )
 			  {
 			    grid->xinc = xinc;
@@ -310,9 +310,9 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 		      }
 		  }
 	      }
-	    grid->xdef   = 2;	    
+	    grid->xdef = 2;
 	  }
-	grid->ydef  = 0;
+	grid->ydef = 0;
         /* if ( IS_NOT_EQUAL(grid->yfirst, 0) || IS_NOT_EQUAL(grid->ylast, 0) ) */
 	  {
 	    if ( grid->ysize > 1 )
@@ -321,7 +321,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 		  {
 		  }
 	      }
-	    grid->ydef   = 2;	    
+	    grid->ydef = 2;
 	  }
 	break;
       }
@@ -1973,7 +1973,7 @@ void gribapiDefTime(grib_handle *gh , int vdate, int vtime, int tsteptype, int n
       rtime    = taxisInqRtime(taxisID);
 
       factor = gribapiDefDateTime(gh, timeunit, rdate, rtime);
-      
+
       timerange = gribapiDefTimerange(tsteptype, factor, calendar,
 				      rdate, rtime, vdate, vtime, &ip);
       // printf("timerange: %d %d\n", timerange, ip);
@@ -2005,7 +2005,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
   static short lwarn = TRUE;
   size_t len;
   char *mesg;
-  
+
   gridtype = gridInqType(gridID);
 
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
@@ -2024,7 +2024,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
       if ( (ysize ==  32 || ysize ==  48 || ysize ==  64 ||
 	    ysize ==  96 || ysize == 160 || ysize == 192 ||
 	    ysize == 240 || ysize == 320 || ysize == 384 ||
-	    ysize == 480 || ysize == 768 ) && 
+	    ysize == 480 || ysize == 768 ) &&
 	   (xsize == 2*ysize || xsize == 1) )
 	{
 	  gridtype = GRID_GAUSSIAN;
@@ -2136,6 +2136,12 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	GRIB_CHECK(grib_set_double(gh, "latitudeOfFirstGridPointInDegrees",  yfirst), 0);
 	GRIB_CHECK(grib_set_double(gh, "latitudeOfLastGridPointInDegrees",   ylast), 0);
 	GRIB_CHECK(grib_set_double(gh, "iDirectionIncrementInDegrees", xinc), 0);
+
+        {
+          long jscan = 0;
+          if ( yfirst < ylast ) jscan = 1;
+          GRIB_CHECK(grib_set_long(gh, "jScansPositively", jscan), 0);
+        }
 	/*
 	if ( fabs(xinc*1000 - ISEC2_LonIncr) > FLT_EPSILON )
 	  ISEC2_LonIncr = 0;
