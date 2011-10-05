@@ -245,3 +245,6 @@ tests/Makefile.am -text
 tests/Makefile.in -text
 tests/test_grib.c -text
 tests/test_grib.sh -text
+util/sunf95preproc-wrapper -text
+util/sxpreproc-wrapper -text
+util/xlfpreproc-wrapper -text
