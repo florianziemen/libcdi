@@ -36,11 +36,6 @@ void pioinfoInit ( pioInfo_t * p )
   p->sizeNode            = CDI_UNDEFID;
   p->rankNode            = CDI_UNDEFID;
   p->hostname[0]         = 0;
-  p->nodeInfo.hostID     = CDI_UNDEFID;
-  p->nodeInfo.isProcColl = CDI_UNDEFID;
-  p->nodeInfo.nNodes     = CDI_UNDEFID;
-  p->nodeSizes           = NULL;
-  p->nodeMap             = NULL;
   p->specialRankNode     = CDI_UNDEFID;
      
   p->commColl            = MPI_COMM_NULL;
@@ -52,6 +47,12 @@ void pioinfoInit ( pioInfo_t * p )
   p->rankCalc            = CDI_UNDEFID;
      
   p->commsIO             = NULL;
+  p->nodeInfo.hostID     = CDI_UNDEFID;
+  p->nodeInfo.isProcColl = CDI_UNDEFID;
+  p->nodeInfo.nNodes     = CDI_UNDEFID;
+  p->nProcsColl          = 0;
+  p->nodeSizes           = NULL;
+  p->nodeMap             = NULL;
 }
 
 
@@ -266,13 +267,12 @@ void     commDefNNodes      ( int nNodes )
 }
 
 
-
-void     commDefCommsIO     ( void )
+void evalPhysNodes ( void )
 {
   nodeInfo_t * nodeInfo;
   MPI_Status status;
   int i, IOID, size, nNodes = CDI_UNDEFID;
-  int ** ip, idx;
+  int ** p1, ** p2,  idx;
 
   assert ( pioinfo2 != NULL &&
            pioinfo2->root        != CDI_UNDEFID &&
@@ -301,17 +301,19 @@ void     commDefCommsIO     ( void )
   xmpi ( MPI_Bcast ( nodeInfo, size, MPI_INTEGER, pioinfo2->root, 
                      pioinfo2->commPio ));
 
+  // consistency check, count collectors
   for ( IOID = 0; IOID < pioinfo2->nProcsIO; IOID++ )
     {
-          if ( IOID == 0 )
-            {
-              assert ( nodeInfo[IOID].nNodes > 0 &&
-                       nodeInfo[IOID].nNodes <= pioinfo2->nProcsIO );
-              nNodes = nodeInfo[IOID].nNodes;
-            }
-          else assert ( nodeInfo[IOID].nNodes == nNodes );         
-          assert ( nodeInfo[IOID].hostID > 0 &&
-                   nodeInfo[IOID].hostID <= nNodes );
+      if ( IOID == 0 )
+        {
+          assert ( nodeInfo[IOID].nNodes > 0 &&
+                   nodeInfo[IOID].nNodes <= pioinfo2->nProcsIO );
+          nNodes = nodeInfo[IOID].nNodes;
+        }
+      else assert ( nodeInfo[IOID].nNodes == nNodes );         
+      assert ( nodeInfo[IOID].hostID > 0 &&
+               nodeInfo[IOID].hostID <= nNodes );
+      if ( nodeInfo[IOID].isProcColl ) pioinfo2->nProcsColl++;
     }
 
   for ( IOID = 0; IOID < pioinfo2->nProcsIO; IOID++ )
@@ -320,35 +322,50 @@ void     commDefCommsIO     ( void )
             IOID, nodeInfo[IOID].hostID, nodeInfo[IOID].isProcColl, 
             nodeInfo[IOID].nNodes );
 
-  pioinfo2->nodeInfo.nNodes = nodeInfo[0].nNodes; 
+  pioinfo2->nodeInfo.nNodes = nNodes; 
   pioinfo2->nodeSizes = xmalloc ( pioinfo2->nodeInfo.nNodes * 
                                   sizeof ( pioinfo2->nodeSizes[0] ));
-  pioinfo2->nodeMap   = xmalloc ( pioinfo2->nProcsIO * 
+  pioinfo2->nodeMap   = xmalloc ( pioinfo2->nProcsColl * 
                                   sizeof ( pioinfo2->nodeMap[0] ));
 
   for ( IOID = 0; IOID < pioinfo2->nProcsIO; IOID++ )
-    pioinfo2->nodeSizes[nodeInfo[IOID].hostID - 1]++;
+    if ( nodeInfo[IOID].isProcColl )
+      pioinfo2->nodeSizes[nodeInfo[IOID].hostID - 1]++;
 
-  ip = xmalloc ( pioinfo2->nodeInfo.nNodes * sizeof ( ip[0] ));
+  p1 = xmalloc ( pioinfo2->nodeInfo.nNodes * sizeof ( p1[0] ));
+  p2 = xmalloc ( pioinfo2->nodeInfo.nNodes * sizeof ( p2[0] ));
   idx = 0;
   for ( i = 0; i < pioinfo2->nodeInfo.nNodes; i++ )
     {
-      assert ( idx >= 0 && idx < pioinfo2->nProcsIO );
-      ip[i] = &pioinfo2->nodeMap[idx];
+      assert ( idx >= 0 && idx < pioinfo2->nProcsColl );
+      p1[i] = &pioinfo2->nodeMap[idx];
+      p2[i] = p1[i] + pioinfo2->nodeSizes[i]; 
       idx += pioinfo2->nodeSizes[i];
     }
 
-  assert ( idx == pioinfo2->nProcsIO );
+  assert ( idx == pioinfo2->nProcsColl );
     
   for ( IOID = 0; IOID < pioinfo2->nProcsIO; IOID++ )
-    * ip[nodeInfo[IOID].hostID - 1]++ = IOID;
-
+    {
+      assert ( p1[nodeInfo[IOID].hostID - 1] <  p2[nodeInfo[IOID].hostID - 1] );
+      if ( nodeInfo[IOID].isProcColl )
+        * p1[nodeInfo[IOID].hostID - 1]++ = IOID;
+    }
+      
   xprintArray3 ( "nodeMap", pioinfo2->nodeMap, 
-                pioinfo2->nProcsIO, DATATYPE_INT );
-  
+                pioinfo2->nProcsColl, DATATYPE_INT );
+
+  free ( p2 );
+  free ( p1 );
   free ( nodeInfo );
 
   commPrint ( stdout );
+}
+
+
+void     commDefCommsIO     ( void )
+{
+  evalPhysNodes ();
 }
 
 
@@ -379,29 +396,6 @@ void commPrint ( FILE * fp )
   fprintf ( fp, "# rankNode    = %d\n", pioinfo2->rankNode );
   fprintf ( fp, "# hostname    = %s\n", pioinfo2->hostname[0] == 0 ? "nn" : 
 	    pioinfo2->hostname );
-  fprintf ( fp, "# hostID      = %d\n", pioinfo2->nodeInfo.hostID );
-  fprintf ( fp, "# isProcColl  = %d\n", pioinfo2->nodeInfo.isProcColl );
-  fprintf ( fp, "# nNodes      = %d\n", pioinfo2->nodeInfo.nNodes );
-  if ( pioinfo2->nodeSizes != NULL )
-    {
-      fprintf ( fp, "# nodeSizes   = " );
-      assert ( pioinfo2->nodeInfo.nNodes != CDI_UNDEFID );
-      for ( i = 0; i < pioinfo2->nodeInfo.nNodes; i++ )
-        fprintf ( fp, "%d ", pioinfo2->nodeSizes[i] );
-      fprintf ( fp, "\n" );
-    }
-  else     
-    fprintf ( fp, "# nodeSizes   = NULL\n" );
-  if ( pioinfo2->nodeMap != NULL )
-    {
-      fprintf ( fp, "# nodeMap     = " );
-      assert ( pioinfo2->nProcsIO != CDI_UNDEFID );
-      for ( i = 0; i < pioinfo2->nProcsIO; i++ )
-        fprintf ( fp, " %d", pioinfo2->nodeMap[i] );
-      fprintf ( fp, "\n" );
-    }
-  else     
-    fprintf ( fp, "# nodeMap     = NULL\n" );
   fprintf ( fp, "# specialRankNode = %d\n", pioinfo2->specialRankNode );
   fprintf ( fp, "#\n" );
   fprintf ( fp, "# commColl    = %d\n", pioinfo2->commColl );
@@ -419,6 +413,30 @@ void commPrint ( FILE * fp )
     }
   else
     fprintf ( fp, "# commsIO     = NULL\n" );
+  fprintf ( fp, "# hostID      = %d\n", pioinfo2->nodeInfo.hostID );
+  fprintf ( fp, "# isProcColl  = %d\n", pioinfo2->nodeInfo.isProcColl );
+  fprintf ( fp, "# nNodes      = %d\n", pioinfo2->nodeInfo.nNodes );
+  fprintf ( fp, "# nProcsColl  = %d\n", pioinfo2->nProcsColl );
+  if ( pioinfo2->nodeSizes != NULL )
+    {
+      fprintf ( fp, "# nodeSizes   = " );
+      assert ( pioinfo2->nodeInfo.nNodes != CDI_UNDEFID );
+      for ( i = 0; i < pioinfo2->nodeInfo.nNodes; i++ )
+        fprintf ( fp, "%d ", pioinfo2->nodeSizes[i] );
+      fprintf ( fp, "\n" );
+    }
+  else     
+    fprintf ( fp, "# nodeSizes   = NULL\n" );
+  if ( pioinfo2->nodeMap != NULL )
+    {
+      fprintf ( fp, "# nodeMap     = " );
+      assert ( pioinfo2->nProcsIO != CDI_UNDEFID );
+      for ( i = 0; i < pioinfo2->nProcsIO; i++ )
+        fprintf ( fp, "%d ", pioinfo2->nodeMap[i] );
+      fprintf ( fp, "\n" );
+    }
+  else     
+    fprintf ( fp, "# nodeMap     = NULL\n" );
   fprintf ( fp, "#\n" );
   fprintf ( fp, "############################\n" );
   fprintf ( fp, "\n" );

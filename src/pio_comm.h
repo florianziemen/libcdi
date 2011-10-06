@@ -36,9 +36,6 @@ typedef struct {
   int sizeNode;
   int rankNode;
   char hostname [ MPI_MAX_PROCESSOR_NAME + 1 ];
-  nodeInfo_t nodeInfo;
-  int * nodeSizes;
-  int * nodeMap;
   int specialRankNode;
 
   MPI_Comm commColl;
@@ -49,7 +46,11 @@ typedef struct {
   int sizeCalc;
   int rankCalc;
  
-  MPI_Comm * commsIO;  
+  MPI_Comm * commsIO; 
+  nodeInfo_t nodeInfo;
+  int nProcsColl;
+  int * nodeSizes;
+  int * nodeMap; 
 } pioInfo_t;
 
 extern pioInfo_t * pioinfo2;
