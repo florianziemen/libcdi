@@ -33,7 +33,7 @@
 #define MAXSTRING        256
 
 
-#define ddebug 3
+#define ddebug 1
 
 
 #ifdef USE_MPI

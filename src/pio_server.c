@@ -36,6 +36,7 @@ double ** getBuffer     = NULL;
 
 /************************************************************************/
 
+static
 void serverWinCleanup ()
 {
   int i;
@@ -94,7 +95,8 @@ static
 }
 
  /************************************************************************/
- 
+
+static 
  void serverWinCreate ()
 { 
   int ranks[1], i;
@@ -125,6 +127,7 @@ static
 
 /************************************************************************/
 
+static
 void writeVars ( int tsID, int vdate, int vtime )
 {
   int i;
@@ -192,6 +195,7 @@ void writeVars ( int tsID, int vdate, int vtime )
 
 /************************************************************************/
 
+static
 void getData ( int tsID, int vdate, int vtime )
 {
   int iAssert   = 0, i;
@@ -245,7 +249,7 @@ void IOServer ( MPI_Comm comm, int ptype )
   xdebugComm ( &commCalc );
      
   nfinished = 0;
-  commColl = bInit ( ptype, comm, &color, &nnodes );
+  commColl = backendInit ( ptype, comm, &color, &nnodes );
   
   for ( ;; )
     {
@@ -268,7 +272,7 @@ void IOServer ( MPI_Comm comm, int ptype )
               {
                   serverWinCleanup ();
                   arrayDestroy();
-                  bFinalize();
+                  backendFinalize();
                   return;
               }
 	  

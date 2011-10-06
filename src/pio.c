@@ -13,7 +13,6 @@
 #include "pio_util.h"
 
 #ifdef USE_MPI
-#include "cdi.h"
 #include "pio_impl.h"
 #endif
 
@@ -282,7 +281,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
 
 /***************************************************************/
 
-MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
+MPI_Comm backendInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
 {
   int size, rank;
   int collectingData = 1;
@@ -367,7 +366,7 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
 
 /***************************************************************/
 
-void bFinalize ()
+void backendFinalize ()
 {
 #ifdef USE_MPI
   switch ( pioinfo->type )

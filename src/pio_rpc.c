@@ -105,7 +105,7 @@ void commsIOCleanup ()
 
 /*****************************************************************************/
 
-
+static
 void streamUnpack ( char * unpackBuffer, int unpackBufferSize, 
 		   int * unpackBufferPos, int nspTarget, MPI_Comm comm )
 {
