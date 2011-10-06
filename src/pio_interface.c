@@ -1,10 +1,6 @@
-/** @file ioUtil.c
-*/
-
 #ifdef HAVE_CONFIG_H
 #  include "config.h"
 #endif
-
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -68,13 +64,13 @@ int pioInit ( int comm, int nIOP, int mode )
 */
 
 #ifdef USE_MPI
-MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int mode )
+MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOmode )
 {
   MPI_Comm commModel;
   int isCalcPE;
 
   commGlob = comm;
-  pioType  = mode;
+  pioType  = IOmode;
 
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
 
@@ -96,7 +92,7 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int mode )
 
   if ( !isCalcPE ) 
     {
-      IOServer ( commModel, mode );
+      IOServer ( commModel, IOmode );
       commsIOCleanup ();
       MPI_Finalize ();
       exit ( 0 );
