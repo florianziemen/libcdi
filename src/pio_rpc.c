@@ -39,8 +39,6 @@ void  commsIOCreate ()
   commsIO = ( MPI_Comm * ) xmalloc ( nProcsIO * sizeof ( MPI_Comm ));
   strncpy ( name, "commsIO_", 8 ); 
   name[9] = '\0';
-
-  xdebug ("######### nProcsCalc=%d", nProcsCalc );
   
   ranks = ( int * ) xmalloc (( nProcsCalc + 1 ) * sizeof ( int ));
   for ( i = 0; i < nProcsCalc; i++ )

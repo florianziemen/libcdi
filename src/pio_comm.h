@@ -12,10 +12,15 @@
 #include "cdi.h"
 
 typedef struct {
+  int hostID;
+  int isProcColl;
+} nodeInfo_t;
+
+typedef struct {
   int IOModus;
   int nProcsIO;
   int nProcsModel;
-  int role;
+  int isProcIO;
 
   MPI_Comm commGlob;
   int sizeGlob;
@@ -25,17 +30,12 @@ typedef struct {
   int sizePio;
   int rankPio;
 
-  MPI_Comm commModel;
-  int sizeModel;
-  int rankModel;
-
   MPI_Comm commNode;
   int sizeNode;
   int rankNode;
-
-  int specialRankNode;
   char hostname [ MPI_MAX_PROCESSOR_NAME + 1 ];
-  int hostID;
+  nodeInfo_t nodeInfo;
+  int specialRankNode;
 
   MPI_Comm commColl;
   int sizeColl;
@@ -48,29 +48,37 @@ typedef struct {
   MPI_Comm * commsIO;  
 } pioInfo_t;
 
+extern pioInfo_t * pioinfo2;
+
 enum { MAXNPROCSIO = 256,
        MAXIOMODUS  = PIO_POSIX_FPGUARD_SENDRECV};
 
-enum { ISPROCMODEL, ISPROCIO, ISPROCCOLL, ISPROCSPEC };
+enum { NODEINFO = 9999, sizeNodeInfo = 2 };
 
-extern pioInfo_t * pioinfo2;
-
-void     commInit        ( void );
-void     commDestroy     ( void );
-void     commDefCommGlob ( MPI_Comm ); 
-MPI_Comm commInqCommGlob ( void );
-int      commInqSizeGlob ( void );
-int      commInqRankGlob ( void );
-void     commDefNProcsIO ( int );
-int      commInqNProcsIO ( void );
+void     commInit           ( void );
+void     commDestroy        ( void );
+void     commDefCommGlob    ( MPI_Comm ); 
+MPI_Comm commInqCommGlob    ( void );
+int      commInqSizeGlob    ( void );
+int      commInqRankGlob    ( void );
+void     commDefNProcsIO    ( int );
+int      commInqNProcsIO    ( void );
 int      commInqNProcsModel ( void );
-void     commDefIOModus  ( int );
-int      commInqIOModus  ( void );
-void     commDefCommPio  ( void );
-MPI_Comm commInqCommPio  ( void );
-MPI_Comm commInqCommModel( void );
-int      commInqRole     ( void );
-void     commPrint ( FILE * );
+void     commDefIOModus     ( int );
+int      commInqIOModus     ( void );
+void     commDefCommPio     ( void );
+MPI_Comm commInqCommPio     ( void );
+MPI_Comm commInqCommModel   ( void );
+int      commInqIsProcIO    ( void );
+void     commDefIsProcColl  ( int );
+void     commDefCommNode    ( MPI_Comm );
+void     commDefHostName    ( char *, size_t );
+void     commDefHostID      ( int );
+void     commPrint          ( FILE * );
+
+void     commSendNodeInfo   ( void );
+void     commRecvNodeInfo   ( int );
+
 
 
 #endif

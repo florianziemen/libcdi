@@ -8,11 +8,12 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "cdi.h"
 #include "pio.h"
+#include "cdi.h"
 #include "pio_util.h"
 
 #ifdef USE_MPI
+#include "pio_comm.h"
 #include "pio_impl.h"
 #endif
 
@@ -267,6 +268,11 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
   key = rank % npes_node;
 
   xmpi ( MPI_Comm_split ( commF2C, *color, key, myComm));
+
+  commDefCommNode ( * myComm );
+  commDefHostName ( myHost, len );
+  commDefHostID   ( * color );
+
 
   free ( allHosts0 );
   free ( allHosts );

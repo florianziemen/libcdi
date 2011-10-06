@@ -10,6 +10,7 @@
 
 #include "mpi.h"
 #include "pio.h"
+#include "pio_comm.h"
 #include "pio_impl.h"
 #include "pio_util.h"
 
@@ -361,14 +362,18 @@ int fowMPINONB ( const char *filename )
 int initMPINONB ()
 {
   int collectingData = 1;
+  MPI_Comm commGlob = commInqCommGlob ();
 
   xmpi ( MPI_Comm_dup ( pioinfo->comm, &( pioinfo->collectorComm )));
 
-  bibAFiledataM = queueInit ( destroyAFiledataMPINONB, compareNamesMPINONB );
+  commDefIsProcColl ( 1 );
+  commSendNodeInfo ();
 
+  bibAFiledataM = queueInit ( destroyAFiledataMPINONB, compareNamesMPINONB );
+  
   if ( bibAFiledataM == NULL )
-    xabort ( "queueInit did not succeed" );
-	    
+    xabort ( "queueInit did not succeed" );   
+  
   return collectingData;
 }
 

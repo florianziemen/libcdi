@@ -14,8 +14,8 @@
 #include <assert.h>
 #include "limits.h"
 #include "cdi.h"
-#include "pio_comm.h"
 #include "pio.h"
+#include "pio_comm.h"
 #include "pio_rpc.h"
 #include "pio_util.h"
 #include "stream_int.h"
