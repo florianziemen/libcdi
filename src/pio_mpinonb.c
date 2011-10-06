@@ -142,7 +142,7 @@ bool compareNamesMPINONB  ( void *v1, void *v2 )
 
 /***************************************************************/
 
-void writeMPINONB ( aFiledataM *of, int id )
+void writeMPINONB ( aFiledataM *of, int fileID )
 {
   int amount;
   MPI_Status status;
@@ -159,7 +159,7 @@ void writeMPINONB ( aFiledataM *of, int id )
   xmpi ( MPI_Wait ( & ( of->request ), &status ));
   xmpi ( MPI_File_iwrite_shared ( of->fh, of->db->buffer, amount, MPI_CHAR, 
                                   & ( of->request )));
-  xdebug ( "%d bytes written for id=%d", amount, id );
+  xdebug ( "%d bytes written for fileID=%d", amount, fileID );
 
   /* change outputBuffer */
   
@@ -167,14 +167,14 @@ void writeMPINONB ( aFiledataM *of, int id )
   
   if ( of->db == of->db1 )
     {
-        xdebug3 ( "IOPE%d: id=%d, change to buffer 2 ...", 
-                 pioinfo->rank, id );
+        xdebug3 ( "IOPE%d: fileID=%d, change to buffer 2 ...", 
+                 pioinfo->rank, fileID );
       of->db =  of->db2;
     }
   else 
     {
-        xdebug3 ( "IOPE%d: id=%d, change to buffer 1 ...", 
-		  pioinfo->rank, id );
+        xdebug3 ( "IOPE%d: fileID=%d, change to buffer 1 ...", 
+		  pioinfo->rank, fileID );
       of->db =  of->db1;
     }
 
@@ -183,9 +183,9 @@ void writeMPINONB ( aFiledataM *of, int id )
 
 /***************************************************************/
 
-size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
+size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
 {  
-  static int oldTsId = 0;
+  static int oldTsID = 0;
   int error = 0;
   int flush = 0;
   int filled = 0;
@@ -193,28 +193,28 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
   node *curr;
   char errorString[maxErrorString];
 
-  flush = ( tsId != oldTsId ) ? 1 : 0;
+  flush = ( tsID != oldTsID ) ? 1 : 0;
 
   if ( flush == 1 ) 
     {
-        xdebug3 ( "IOPE%d: tsId = %d, flush buffer", 
-		  pioinfo->rank, tsId );
+        xdebug3 ( "IOPE%d: tsID = %d, flush buffer", 
+		  pioinfo->rank, tsID );
       curr = bibAFiledataM->head;
       while ( curr ) 
 	{
 	  writeMPINONB (( aFiledataM *) curr->val, curr->idx );
 	  curr = curr->next;
 	}
-      oldTsId = tsId;
+      oldTsID = tsID;
       MPI_Barrier ( pioinfo->comm ); 
     }                                          
 
-  of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, id );
+  of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, fileID );
   filled = dbuffer_push ( of->db, ( unsigned char * ) buffer, len );
 
-  xdebug3 ( "IOPE%d: id = %d, tsId = %d,"
+  xdebug3 ( "IOPE%d: fileID = %d, tsID = %d,"
            " pushed data on buffer, filled = %d", 
-           pioinfo->rank, id, tsId, filled ); 
+           pioinfo->rank, fileID, tsID, filled ); 
 
   if ( filled == 1 ) 
     {
@@ -222,7 +222,7 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
 	error = filled;
       else
 	{
-	  writeMPINONB ( of, id );
+	  writeMPINONB ( of, fileID );
      
 	  error = dbuffer_push ( of->db, ( unsigned char * ) buffer, len );
 	}
@@ -230,7 +230,7 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
   
   if ( error == 1 )
     {
-      sprintf ( errorString,"did not succeed filling output buffer, id=%d", id );
+      sprintf ( errorString,"did not succeed filling output buffer, fileID=%d", fileID );
       xabort ( errorString );
     }
   
@@ -239,7 +239,7 @@ size_t fwMPINONB ( int id, int tsId, const void *buffer, size_t len )
 
 /***************************************************************/
 
-int fcMPINONB ( int id )
+int fcMPINONB ( int fileID )
 {
   aFiledataM *of;
   int iret;
@@ -247,19 +247,19 @@ int fcMPINONB ( int id )
   char errorString[maxErrorString];
 
   xdebug ( "IOPE%d: write buffer, close file and cleanup, in", 
-           pioinfo->rank, id );
+           pioinfo->rank, fileID );
 
-  if ( ! ( of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, id )))
+  if ( ! ( of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, fileID )))
     {
-      sprintf ( errorString, "pio_queue, id=%d not found", id ); 
+      sprintf ( errorString, "pio_queue, fileID=%d not found", fileID ); 
       xabort ( errorString );
     }
 
-  writeMPINONB ( of, id );
+  writeMPINONB ( of, fileID );
 
   /* dequeue file element */
 
-  iret = queueDelNode ( bibAFiledataM, id );
+  iret = queueDelNode ( bibAFiledataM, fileID );
 
   if ( !bibAFiledataM->head ) 
     {

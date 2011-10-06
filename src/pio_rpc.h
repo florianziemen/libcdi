@@ -17,21 +17,29 @@ extern int nProcsCalc;
 extern MPI_Comm * commsIO;
 extern MPI_Comm commCalc;
 
-extern int tsSize;
+typedef enum
+  {
+    FINALIZE,
+    METADATA,
+    WINCREATE,
+    WRITETS
+  } command;
 
+enum 
+{ GRID      = 1,
+  ZAXIS     = 2,
+  TAXIS     = 3,
+  INSTITUTE = 4,
+  MODEL     = 5,
+  STREAM    = 6,
+  VLIST     = 7,
+  START     = 55555555,
+  SEPARATOR = 77777777,
+  END       = 99999999 
+};
 
-enum { GRID      = 1,
-       ZAXIS     = 2,
-       TAXIS     = 3,
-       INSTITUTE = 4,
-       MODEL     = 5,
-       STREAM    = 6,
-       VLIST     = 7,
-       START     = 55555555,
-       SEPARATOR = 77777777,
-       END       = 99999999 };
-
-enum{
+enum
+{
   winBufferOverhead = 1,
   winBufferOverheadChunk = 3,
   winBufferSizeMax = 1024,

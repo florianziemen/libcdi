@@ -73,9 +73,7 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
 
   /* init output buffer */
 
-  if ( ddebug )
-    fprintf ( stderr, "pe%d in initAFiledataPF(): name=%s, init output buffer\n", 
-	      pioinfo->rank, afd->name );
+  xdebug ( " name=%s, init output buffer",  afd->name );
    
   iret = dbuffer_init ( &( afd->db1 ), afd->size );
   iret += dbuffer_init ( &( afd->db2 ), afd->size );
@@ -86,10 +84,7 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   afd->db = afd->db1;
 
   /* open file */ 
-  
-  if ( ddebug )
-    fprintf ( stderr, "pe%d in initAFiledataPF(): name=%s, open file\n", 
-	      pioinfo->rank, afd->name );
+  xdebug ( "name=%s, open file",  afd->name );
 
   if ( ( afd->fp = fopen ( afd->name, "w" )) == NULL ) 
     {
@@ -131,9 +126,7 @@ int destroyAFiledataPF ( void *v )
   
   /* close file */
   
-  if ( ddebug )
-    fprintf ( stderr, "pe%d in destroyAFiledataPF(): name=%s, close file\n", 
-	      pioinfo->rank, afd->name );
+  xdebug ( "name=%s, close file",  afd->name );
        
   if (( iret = fclose ( afd->fp )) == EOF )
     {
@@ -143,9 +136,7 @@ int destroyAFiledataPF ( void *v )
 
   /* file closed, cleanup */
 
-  if ( ddebug )
-    fprintf ( stderr, "pe%d in destroyAFiledataPF(): name=%s, file closed, cleanup ...\n", 
-	      pioinfo->rank, afd->name );
+  xdebug ( "name=%s, file closed, cleanup ...",  afd->name );
   
   dbuffer_cleanup ( &( afd->db1 ));
   dbuffer_cleanup ( &( afd->db2 ));
@@ -199,23 +190,20 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
   long amount;
   char errorString[maxErrorString];
 
-  if ( ddebug )
-    fprintf(stderr, "pe%d in fpGuard(), ncollectors=%d\n", 
-	    pioinfo->rank, ncollectors);
-
+  xdebug ( "ncollectors=%d", ncollectors);
+  
   bibBFiledataPF = queueInit ( destroyBFiledataPF, NULL );
 
   for ( ;; )
     {
-      MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, pioinfo->comm, &status );
+      xdebug ();
+      xmpi ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, pioinfo->comm, &status ));
       source = status.MPI_SOURCE;
       rtag   = getTag ( status.MPI_TAG ); 
-
-      if ( ddebug )
-	fprintf ( stderr, 
-		  "pe%d in fpGuard (): receive message from source=%d, id=%d, command=%d ( %s )\n",
-		  pioinfo->rank, source, rtag->id, rtag->command, 
-		  command2charP [ rtag->command ]);
+      
+      xdebug ( "receive message from source=%d, id=%d, command=%d ( %s )",
+               source, rtag->id, rtag->command, 
+               command2charP [ rtag->command ]);
       
       switch ( rtag->command )
       	{
@@ -235,22 +223,19 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 
 	  *( bfd->nfinished + source ) = false;
 
-	  if ( ddebug )
-	    fprintf ( stderr, "pe%d in fpGuard(), id=%d, command=%d ( %s ), send offset=%ld\n", 
-		      pioinfo->rank, rtag->id, rtag->command, 
-		      command2charP [ rtag->command ], bfd->offset );
+          xdebug ( "id=%d, command=%d ( %s ), send offset=%ld", 
+                   rtag->id, rtag->command, 
+                   command2charP [ rtag->command ], bfd->offset );
 	  
-	  MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
-			 &amount, 1, MPI_LONG, source,  status.MPI_TAG,
-			 pioinfo->comm, &status );
+	  xmpi ( MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
+                                &amount, 1, MPI_LONG, source,  status.MPI_TAG,
+                                pioinfo->comm, &status ));
 
 	  bfd->offset += amount; 
-
-	  if ( ddebug )
-	    fprintf ( stderr, 
-		      "pe%d in fpguard(), id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld\n", 
-		      pioinfo->rank, rtag->id, rtag->command, 
-		      command2charP [ rtag->command ], amount, bfd->offset );
+ 
+          xdebug ( "id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld", 
+                   rtag->id, rtag->command, 
+                   command2charP [ rtag->command ], amount, bfd->offset );
 
 	  break;
 
@@ -263,22 +248,19 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 		xabort ( errorString );
 	      }
 
-	  if ( ddebug )
-	    fprintf ( stderr, "pe%d in fpGuard(), id=%d, command=%d ( %s ), send offset=%ld\n", 
-		      pioinfo->rank, rtag->id, rtag->command, 
-		      command2charP [ rtag->command ], bfd->offset );
+          xdebug ( "id=%d, command=%d ( %s ), send offset=%ld", 
+                   rtag->id, rtag->command, 
+                   command2charP [ rtag->command ], bfd->offset );
 
-	  MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
-			 &amount, 1, MPI_LONG, source,  status.MPI_TAG,
-			 pioinfo->comm, &status );
+	  xmpi ( MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
+                                &amount, 1, MPI_LONG, source,  status.MPI_TAG,
+                                pioinfo->comm, &status ));
 
 	  bfd->offset += amount;
 
-	  if ( ddebug )
-	    fprintf ( stderr, 
-		      "pe%d in fpguard(), id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld\n", 
-		      pioinfo->rank, rtag->id, rtag->command, 
-		      command2charP [ rtag->command ], amount, bfd->offset );
+          xdebug ( "id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld", 
+                   rtag->id, rtag->command, 
+                   command2charP [ rtag->command ], amount, bfd->offset );
 
 	  break;
 
@@ -291,22 +273,19 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 		xabort ( errorString );
 	      }
 
-	  if ( ddebug )
-	    fprintf ( stderr, "pe%d in fpGuard(): id=%d, command=%d ( %s )), send offset=%ld\n", 
-		      pioinfo->rank, rtag->id, rtag->command,
-		      command2charP [ rtag->command ], bfd->offset );
+          xdebug ( "id=%d, command=%d ( %s )), send offset=%ld", 
+                   rtag->id, rtag->command,
+                   command2charP [ rtag->command ], bfd->offset );
 
-	  MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
-			 &amount, 1, MPI_LONG, source,  status.MPI_TAG,
-			 pioinfo->comm, &status );
+	  xmpi ( MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
+                                &amount, 1, MPI_LONG, source,  status.MPI_TAG,
+                                pioinfo->comm, &status ));
 
 	  bfd->offset += amount;
 
-	  if ( ddebug )
-	    fprintf ( stderr, 
-		      "pe%d in fpguard(), id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld\n", 
-		      pioinfo->rank, rtag->id, rtag->command, 
-		      command2charP [ rtag->command ], amount, bfd->offset );
+          xdebug ( "id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld", 
+                   rtag->id, rtag->command, 
+                   command2charP [ rtag->command ], amount, bfd->offset );
 
 
 	  bfd->nfinished[source] = true;  
@@ -350,15 +329,13 @@ void writePF ( aFiledataPF *afd, int id )
 
   tag = setTag ( id, afd->command );
   
-  MPI_Sendrecv ( &amountL, 1, MPI_LONG, pioinfo->specialRank, tag,
-		 &offset, 1, MPI_LONG, pioinfo->specialRank, tag,
-		 pioinfo->comm, &status );
-  
-  if ( ddebug )
-    fprintf ( stderr, 
-	      "pe%d in writePF (), id=%d, command=%d, amount=%llu, send amountL=%ld, recv offset=%ld\n", 
-	      pioinfo->rank, id, afd->command, (unsigned long long)amount,
-              amountL, offset );
+  xmpi ( MPI_Sendrecv ( &amountL, 1, MPI_LONG, pioinfo->specialRank, tag,
+                        &offset, 1, MPI_LONG, pioinfo->specialRank, tag,
+                        pioinfo->comm, &status ));
+   
+  xdebug ( "id=%d, command=%d, amount=%llu, send amountL=%ld, recv offset=%ld", 
+           id, afd->command, (unsigned long long)amount,
+           amountL, offset );
   
   /* write buffer */
   
@@ -375,12 +352,10 @@ void writePF ( aFiledataPF *afd, int id )
                 (unsigned long long)written );
       xabort ( errorString );
     }
-
-  if ( ddebug )
-    fprintf ( stderr, 
-	      "pe%d in writePF (), written %llu bytes in file %d with offset %ld\n", 
-	      pioinfo->rank, (unsigned long long)written,
-              id, offset ); 
+ 
+  xdebug ( "written %llu bytes in file %d with offset %ld", 
+           (unsigned long long) written,
+           id, offset ); 
   
   /* change outputBuffer */
   
@@ -388,16 +363,12 @@ void writePF ( aFiledataPF *afd, int id )
   
   if ( afd->db == afd->db1 )
     {
-      if ( ddebug ) 
-	fprintf ( stderr, "pe%d in writePF (): id=%d, change to buffer 2 ...\n", 
-		  pioinfo->rank, id );
+      xdebug ( "id=%d, change to buffer 2 ...", id );
       afd->db =  afd->db2;
     }
   else 
     {
-      if ( ddebug ) 
-	fprintf ( stderr, "pe%d in writePF (): id=%d, change to buffer 1 ...\n", 
-		  pioinfo->rank, id );
+      xdebug ( "id=%d, change to buffer 1 ...", id );
       afd->db =  afd->db1;
     }
   
@@ -407,9 +378,9 @@ void writePF ( aFiledataPF *afd, int id )
 
 /***************************************************************/
 
-size_t fwPOSIXFPGUARDSENDRECV( int id, int tsId, const void *buffer, size_t len )
+size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t len )
 {
-  static int oldTsId = 0;
+  static int oldTsID = 0;
   int error = 0;
   int flush = 0;
   int filled = 0;
@@ -417,29 +388,26 @@ size_t fwPOSIXFPGUARDSENDRECV( int id, int tsId, const void *buffer, size_t len 
   node *curr;
   char errorString[maxErrorString];
 
-  flush = ( tsId != oldTsId ) ? 1 : 0;
+  flush = ( tsID != oldTsID ) ? 1 : 0;
 
   if ( flush == 1 ) 
     {
-      if ( ddebug )
-	fprintf ( stderr, "pe%d in fileWriter (): tsId = %d, flush buffer\n", 
-		  pioinfo->rank, tsId );
+      xdebug ( "tsID = %d, flush buffer", tsID );
       curr = bibAFiledataPF->head;
       while ( curr ) 
 	{
 	  writePF (( aFiledataPF *) curr->val, curr->idx );
 	  curr = curr->next;
 	}
-      oldTsId = tsId;
-      MPI_Barrier ( pioinfo->collectorComm ); 
+      oldTsID = tsID;
+      xmpi ( MPI_Barrier ( pioinfo->collectorComm )); 
     }                                          
 
-  afd = ( aFiledataPF * ) queueIdx2val ( bibAFiledataPF, id );
+  afd = ( aFiledataPF * ) queueIdx2val ( bibAFiledataPF, fileID );
   filled = dbuffer_push ( afd->db, ( unsigned char * ) buffer, len );
 
-  if ( ddebug )
-    fprintf ( stderr, "pe%d in fileWriter (): id = %d, tsId = %d, pushed data on buffer, filled = %d\n", 
-	      pioinfo->rank, id, tsId, filled ); 
+  xdebug ( "fileID = %d, tsID = %d, pushed data on buffer, filled = %d", 
+           fileID, tsID, filled ); 
 
   if ( filled == 1 ) 
     {
@@ -447,7 +415,7 @@ size_t fwPOSIXFPGUARDSENDRECV( int id, int tsId, const void *buffer, size_t len 
 	error = filled;
       else
 	{
-	  writePF ( afd, id );
+	  writePF ( afd, fileID );
      
 	  error = dbuffer_push ( afd->db, ( unsigned char * ) buffer, len );
 	}
@@ -455,7 +423,7 @@ size_t fwPOSIXFPGUARDSENDRECV( int id, int tsId, const void *buffer, size_t len 
   
   if ( error == 1 )
     {
-      sprintf ( errorString,"did not succeed filling output buffer, id=%d", id );
+      sprintf ( errorString,"did not succeed filling output buffer, fileID=%d", fileID );
       xabort ( errorString );
     }
   
@@ -469,9 +437,7 @@ int fcPOSIXFPGUARDSENDRECV ( int id )
   aFiledataPF *afd;
   int iret;
 
-  if ( ddebug )
-    fprintf ( stderr, "pe%d in fileClose (%d ): write buffer, close file and cleanup\n", 
-	      pioinfo->rank, id );
+  xdebug ( "write buffer, close file and cleanup", id );
 
   afd = ( aFiledataPF * ) queueIdx2val ( bibAFiledataPF, id );
 
@@ -485,9 +451,7 @@ int fcPOSIXFPGUARDSENDRECV ( int id )
 
   if ( !bibAFiledataPF->head ) 
     {
-      if ( ddebug )
-	fprintf ( stderr, "pe%d in fileClose (): cleanup queue \n", 
-		  pioinfo->rank );
+      xdebug ( "cleanup queue" );
       queueDestroy ( bibAFiledataPF );
     }
 
@@ -538,9 +502,8 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
   if ( firstOpen )
     {
       if ( ddebug && pioinfo->rank == 0)
-	fprintf ( stderr, 
-		  "pe%d in pioFileOpenW(): name=%s, broadcast buffersize to collectors ...\n", 
-		  pioinfo->rank, filename );
+        xdebug (  "name=%s, broadcast buffersize to collectors ...", 
+		  filename );
       
       bcastRank = 0;
       bcastComm = pioinfo->collectorComm;
@@ -553,7 +516,7 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
 	    buffersize = initial_buffersize;
 	}
       
-      MPI_Bcast ( &buffersize, 1, MPI_LONG, 0, bcastComm );
+      xmpi ( MPI_Bcast ( &buffersize, 1, MPI_LONG, 0, bcastComm ));
   
         firstOpen = false;
       }
@@ -570,10 +533,8 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
       xabort ( errorString ); 
     }
 
-  if ( ddebug )
-    fprintf ( stderr, 
-	      "pe%d in pioFileOpenW(): name=%s, init and enqueued aFiledataPF, return id = %d\n", 
-	      pioinfo->rank, filename, id );
+  xdebug ( "name=%s, init and enqueued aFiledataPF, return id = %d", 
+           filename, id );
   
   return id;
 }
@@ -587,26 +548,21 @@ int initPOSIXFPGUARDSENDRECV ()
   int ioRanks[1];
 
   if ( pioinfo->size < 2 ) xabort ( "usage: #pes/#nodes >= 2" );
-  
-  if ( ddebug )
-    fprintf ( stderr, 
-	      "pe%d in initPOSIXFPGUARDSENDRECV()\n", pioinfo->rank );
+   
+  xdebug ();
 
   ncollectors = pioinfo->size - 1;
   pioinfo->specialRank = pioinfo->size - 1;
   
   ioRanks[0] = pioinfo->specialRank;
-  MPI_Comm_group ( pioinfo->comm, &streamGroup );
-  MPI_Group_excl ( streamGroup, 1, ioRanks, &collectorGroup );
-  MPI_Comm_create ( pioinfo->comm, collectorGroup, &
-		    pioinfo->collectorComm );
+  xmpi ( MPI_Comm_group ( pioinfo->comm, &streamGroup ));
+  xmpi ( MPI_Group_excl ( streamGroup, 1, ioRanks, &collectorGroup ));
+  xmpi ( MPI_Comm_create ( pioinfo->comm, collectorGroup, &
+                           pioinfo->collectorComm ));
   
   if ( pioinfo->rank == pioinfo->specialRank ) 
     {
-      if ( ddebug )
-	fprintf ( stderr, 
-		  "pe%d in initPOSIXFPGUARDSENDREC(): Call fpGuard(), ncollectors = %d ...\n", 
-		  pioinfo->rank, ncollectors );
+      xdebug ( "Call fpGuard(), ncollectors = %d ...", ncollectors );
       fpgPOSIXFPGUARDSENDRECV ( ncollectors );
 
       collectingData = 0;

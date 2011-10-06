@@ -12,16 +12,13 @@
 
 #ifdef USE_MPI
 #include "pio_impl.h"
+#include "pio_util.h"
 
 queue *queueInit ( valDestroyFunction vD, keyCompareFunction kC )
 {
   queue *myq;
 
-  if (( myq = ( queue * ) malloc ( sizeof ( queue ))) == NULL )
-    {
-      perror ( "pio_queue: queueInit: Not enough memory" );
-      return NULL;
-    }
+  myq = xmalloc ( sizeof ( queue ));
 
   myq->head = NULL;
   myq->tail = NULL;

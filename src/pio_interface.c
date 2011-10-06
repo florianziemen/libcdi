@@ -165,17 +165,13 @@ void mapProblems ( int problemSizes[], int * problemMapping, int nProblems,
       problemMapping[ dummy[i] ] = writerIdx;
       buckets[writerIdx] +=  *ip[i];
     }
-  
-  if ( ddebug > 2 )
-  {
-      xprintArray (  "problemSizes = ", problemSizes, nProblems, DATATYPE_INT );     
-      xprintArray ( "vector of indices, qsort of problemSizes", dummy, 
-		   nProblems, DATATYPE_INT ); 
-      xprintArray ( "problemMapping", problemMapping, nProblems, DATATYPE_INT );
-      xprintArray ( "meanBucket", meanBucket, nWriter, DATATYPE_FLT );
-      xprintArray ( "actual buckets", buckets, nWriter, DATATYPE_INT );     
-  }  
-  
+
+  xprintArray3 (  "problemSizes = ", problemSizes, nProblems, DATATYPE_INT );     
+  xprintArray3 ( "vector of indices, qsort of problemSizes", dummy, 
+                nProblems, DATATYPE_INT ); 
+  xprintArray3 ( "problemMapping", problemMapping, nProblems, DATATYPE_INT );
+  xprintArray3 ( "meanBucket", meanBucket, nWriter, DATATYPE_FLT );
+  xprintArray3 ( "actual buckets", buckets, nWriter, DATATYPE_INT );      
 }
 
 /****************************************************/ 
@@ -283,14 +279,12 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
   if ( ddebug )
     {
       xprintArray ( "varMapping", varMapping, nVars, DATATYPE_INT  );
-
       for ( i = 0; i < nProcsIO; i++ )
 	buckets[i] = 0;
       for ( i = 0; i < nVars; i ++ )
 	buckets[*(varMapping + i ) - nProcsCalc] += * ( vSizes + i );
       xprintArray ( "buckets", buckets, nProcsIO, DATATYPE_INT );
     }
-  
 }
 #endif
 

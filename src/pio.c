@@ -79,31 +79,31 @@ void ungetTag ( rTag *rtag )
 
 /***************************************************************/
 
-size_t pioFileWrite ( int id, int tsId, const void *buffer, size_t len )
+size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
 {
   size_t iret = CDI_UNDEFID;
 
   switch ( pioinfo->type )
     {
     case PIO_MPI_NONB:
-      iret = fwMPINONB ( id, tsId, buffer, len );
+      iret = fwMPINONB ( fileID, tsID, buffer, len );
       break;
 #ifndef _SX
     case PIO_POSIX_ASYNCH:
-      iret = fwPOSIXASYNCH ( id, tsId, buffer, len );
+      iret = fwPOSIXASYNCH ( fileID, tsID, buffer, len );
       break;
 #endif
     case PIO_POSIX_FPGUARD_SENDRECV:
-      iret = fwPOSIXFPGUARDSENDRECV ( id, tsId, buffer, len );
+      iret = fwPOSIXFPGUARDSENDRECV ( fileID, tsID, buffer, len );
       break;
     case PIO_POSIX_FPGUARD_THREAD:
-      iret = fwPOSIXFPGUARDTHREAD ( id, tsId, buffer, len );
+      iret = fwPOSIXFPGUARDTHREAD ( fileID, tsID, buffer, len );
       break;
     case PIO_POSIX_FPGUARD_THREAD_REFUSE:
-      iret = fwPOSIXFPGUARDTHREADREFUSE ( id, tsId, buffer, len );
+      iret = fwPOSIXFPGUARDTHREADREFUSE ( fileID, tsID, buffer, len );
       break;
     case PIO_POSIX_NONB:
-      iret = fwPOSIXNONB ( id, tsId, buffer, len );
+      iret = fwPOSIXNONB ( fileID, tsID, buffer, len );
       break;
     }
 

@@ -33,16 +33,7 @@
 #define MAXSTRING        256
 
 
-#define ddebug 0
-
-//todo: move to pio_rpc.h
-typedef enum
-  {
-    FINALIZE,
-    METADATA,
-    WINCREATE,
-    WRITETS
-  } command;
+#define ddebug 3
 
 
 #ifdef USE_MPI
@@ -162,6 +153,11 @@ double xchecksum ( int, int, void * );
 void printArray ( char *, void *, int, int, const char *, const char *, int );
 #define xprintArray(ps,array,n,datatype)                                \
   if ( ddebug )                                                         \
+    printArray ( ps, array, n, datatype,  __func__, __FILE__, __LINE__ )
+ 
+void printArray ( char *, void *, int, int, const char *, const char *, int );
+#define xprintArray3(ps,array,n,datatype)                                \
+  if ( ddebug == MAXDEBUG )                                                         \
     printArray ( ps, array, n, datatype,  __func__, __FILE__, __LINE__ )
 
 #endif

@@ -27,6 +27,8 @@ static int nlev[nVars] = {1,1,5,5,2};
 #define maxlev   5
 #define ntsteps  3 
 
+int IOModus = PIO_POSIX_FPGUARD_SENDRECV;
+
 
 void modelRun ()
 {
@@ -144,7 +146,7 @@ int main (int argc, char *argv[])
   if ( nProcsIO <=0 || nProcsIO >= sizeGlob )
     xabort ( "bad distribution of tasks on PEs" );
 
-  commModel = pioInit_c ( commGlob, nProcsIO, PIO_MPI_NONB );
+  commModel = pioInit_c ( commGlob, nProcsIO, IOModus );
 #endif
 
   modelRun ();

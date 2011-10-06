@@ -99,6 +99,7 @@ static
 { 
   int ranks[1], i;
   MPI_Group groupCalc;
+  xdebug();
 
   xmpi ( MPI_Win_create ( MPI_BOTTOM, 0, sizeof ( double ), MPI_INFO_NULL,
                          commCalc, &win ));
@@ -283,11 +284,9 @@ void IOServer ( MPI_Comm comm, int ptype )
 	  free ( buffer );
 
 	  if ( rankGlob == nProcsCalc ) reshArrayPrint ( "reshArrayIOServer" );
-
-	  if  ( ddebug ) xdebugMsg (  tag, source, nfinished );
- 
+          xdebug();
 	  serverWinCreate ();
-
+          xdebug();
 	  break;
 
 	case WRITETS:
