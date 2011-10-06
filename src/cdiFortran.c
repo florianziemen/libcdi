@@ -58,7 +58,8 @@
 
 FCALLSCFUN3 (INT, pioInit, PIOINIT, pioinit, INT, INT, INT)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
-FCALLSCSUB2 (pioMetadata, PIOMETADATA, piometadata, INT, PINT)
+FCALLSCSUB2 (pioEndDef, PIOENDDEF, pioenddef, INT, PINT)
+FCALLSCSUB3 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep, INT, INT, INT)
 FCALLSCSUB2 (pioNamespaceInit, PIONAMESPACEINIT, pionamespaceinit, INT, PINT)
 FCALLSCSUB0 (pioNamespaceCleanup, PIONAMESPACECLEANUP, pionamespacecleanup)
 FCALLSCSUB1 (pioNamespaceSetActive, PIONAMESPACESETACTIVE, pionamespacesetactive, INT)
@@ -67,6 +68,8 @@ FCALLSCSUB2 (streamGetIndexArray, STREAMGETINDEXARRAY, streamgetindexarray, INT,
 FCALLSCSUB2 (zaxisGetIndexArray, ZAXISGETINDEXARRAY, zaxisgetindexarray, INT, PINT)
 FCALLSCSUB3 (vlistDefVarIOrank, VLISTDEFVARIORANK, vlistdefvariorank, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarIOrank, VLISTINQVARIORANK, vlistinqvariorank, INT, INT)
+FCALLSCFUN3 (INT, vlistInqVarDecoChunk, VLISTINQVARDECOCHUNK, vlistinqvardecochunk, INT, INT, INT)
+FCALLSCFUN3 (INT, vlistInqVarDecoOff, VLISTINQVARDECOOFF, vlistinqvardecooff, INT, INT, INT)
 FCALLSCFUN1 (STRING, cdiStringError, CDISTRINGERROR, cdistringerror, INT)
 FCALLSCSUB1 (cdiDebug, CDIDEBUG, cdidebug, INT)
 FCALLSCFUN0 (STRING, cdiLibraryVersion, CDILIBRARYVERSION, cdilibraryversion)

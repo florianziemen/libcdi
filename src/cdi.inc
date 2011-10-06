@@ -1,10 +1,9 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.5.0
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   July 2011
+! Uwe Schulzweida, MPI-MET, Hamburg,   September 2011
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -344,10 +343,16 @@
 !                     pioFinalize
       EXTERNAL        pioFinalize
 
-!                     pioMetadata
+!                     pioEndDef
 !                                    (INTEGER         ,
 !                                     INTEGER         )
-      EXTERNAL        pioMetadata
+      EXTERNAL        pioEndDef
+
+!                     pioWriteTimestep
+!                                    (INTEGER         ,
+!                                     INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        pioWriteTimestep
 
 !                     pioNamespaceInit
 !                                    (INTEGER         ,
@@ -386,6 +391,18 @@
 !                                    (INTEGER         ,
 !                                     INTEGER         )
       EXTERNAL        vlistInqVarIOrank
+
+      INTEGER         vlistInqVarDecoChunk
+!                                    (INTEGER         ,
+!                                     INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        vlistInqVarDecoChunk
+
+      INTEGER         vlistInqVarDecoOff
+!                                    (INTEGER         ,
+!                                     INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        vlistInqVarDecoOff
 
       CHARACTER*80    cdiStringError
 !                                    (INTEGER         cdiErrno)

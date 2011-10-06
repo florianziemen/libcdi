@@ -76,7 +76,7 @@ void modelRun ()
 
 #ifdef USE_MPI
   xmpi ( MPI_Comm_rank ( MPI_COMM_WORLD, &rank ));
-  pioMetadata ( nNodes, nodeSizes );
+  pioEndDef ( nNodes, nodeSizes );
 #endif 
 
    

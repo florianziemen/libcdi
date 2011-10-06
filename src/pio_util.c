@@ -9,7 +9,7 @@
 #include "cdi.h"
 
 char commands[][13] = { "FINALIZE\0",
-                        "METADATA\0",
+                        "RESOURCES\0",
                         "WINCREATE\0",
                         "WRITETS\0"};
 

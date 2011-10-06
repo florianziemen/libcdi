@@ -182,7 +182,7 @@ void modelRun ()
   streamDefVlist(streamID, vlistID);
 
 #ifdef USE_MPI
-  pioMetadata ( nNodes, nodeSizes );
+  pioEndDef ( nNodes, nodeSizes );
 #endif 
 
   /*

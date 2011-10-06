@@ -20,7 +20,7 @@ extern MPI_Comm commCalc;
 typedef enum
   {
     FINALIZE,
-    METADATA,
+    RESOURCES,
     WINCREATE,
     WRITETS
   } command;

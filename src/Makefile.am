@@ -54,6 +54,8 @@ libcdi_la_SOURCES = 	 \
 	pio.c            \
 	pio.h            \
 	pio_c_temp.h     \
+	pio_comm.c       \
+	pio_comm.h       \
 	pio_dbuffer.c    \
 	pio_impl.h 	 \
 	pio_interface.c  \

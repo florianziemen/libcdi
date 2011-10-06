@@ -278,7 +278,7 @@ void IOServer ( MPI_Comm comm, int ptype )
 	  
 	  break;
 
-	case METADATA:
+	case RESOURCES:
 	  xdebugMsg (  tag, source, nfinished );
 	  xmpi ( MPI_Get_count ( &status, MPI_CHAR, &size ));
 	  buffer = xmalloc ( size * sizeof ( char ));

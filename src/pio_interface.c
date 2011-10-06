@@ -10,6 +10,7 @@
 
 #ifdef USE_MPI
 #include "pio_interface.h"
+#include "pio_comm.h"
 #include "pio_rpc.h"
 #include "pio_server.h"
 #include "namespace.h"
@@ -78,6 +79,12 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOmode )
 
   xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
   xmpi ( MPI_Comm_set_name ( commGlob, "commGlob" ));
+
+
+  pioInfoNew ();
+  xdebug ( "pioinfo2->sizeGlob=%d", pioinfo2->sizeGlob );
+  pioInfoDestroy ();
+
   
   if ( ddebug >= 1 ) xdebugComm (  &commGlob );
   
@@ -524,7 +531,7 @@ void pioBuffer ( int streamID, int varID, const double *data, int nmiss )
 
 /************************************************************************/
 
-void  pioMetadata ( int nNodes, int * nodeSizes )
+void  pioEndDef ( int nNodes, int * nodeSizes )
 {
 #ifdef USE_MPI
   char   * buffer;
@@ -537,7 +544,7 @@ void  pioMetadata ( int nNodes, int * nodeSizes )
       reshPackBufferCreate ( &buffer, &bufferSize, commsIO[rankGlob] );
       
       xmpi ( MPI_Send ( buffer, bufferSize, MPI_PACKED, nProcsCalc, 
-                        METADATA, * ( commsIO + rankGlob )));
+                        RESOURCES, * ( commsIO + rankGlob )));
       
       xdebug ( "sent message metadata" );
       
