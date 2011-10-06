@@ -65,13 +65,13 @@ int pioInit ( int comm, int nIOP, int mode )
 */
 
 #ifdef USE_MPI
-MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOmode )
+MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOModus )
 {
   MPI_Comm commModel;
   int isCalcPE;
 
   commGlob = comm;
-  pioType  = IOmode;
+  pioType  = IOModus;
 
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
 
@@ -81,9 +81,13 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOmode )
   xmpi ( MPI_Comm_set_name ( commGlob, "commGlob" ));
 
 
-  pioInfoNew ();
-  xdebug ( "pioinfo2->sizeGlob=%d", pioinfo2->sizeGlob );
-  pioInfoDestroy ();
+  commInit ();
+  commDefCommGlob ( comm );
+  commDefNProcsIO ( nIOP );
+  commDefIOModus  ( IOModus );
+  if ( rankGlob == 0 ) commPrint ( stdout );
+  xdebug ( "pioinfo2->sizeGlob=%d", commInqSizeGlob ());
+  commDestroy ();
 
   
   if ( ddebug >= 1 ) xdebugComm (  &commGlob );
@@ -99,7 +103,7 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOmode )
 
   if ( !isCalcPE ) 
     {
-      IOServer ( commModel, IOmode );
+      IOServer ( commModel, IOModus );
       commsIOCleanup ();
       MPI_Finalize ();
       exit ( 0 );

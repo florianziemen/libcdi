@@ -8,6 +8,7 @@
 #ifdef USE_MPI
 
 #include <mpi.h>
+#include "cdi.h"
 
 typedef struct {
   int IOModus;
@@ -44,10 +45,22 @@ typedef struct {
   MPI_Comm * commsIO;  
 } pioInfo_t;
 
+enum { MAXNPROCSIO = 256,
+       MAXIOMODUS  = PIO_POSIX_FPGUARD_SENDRECV};
+
 extern pioInfo_t * pioinfo2;
 
-void pioInfoNew ( void );
-void pioInfoDestroy ( void );
+void     commInit        ( void );
+void     commDestroy     ( void );
+void     commDefCommGlob ( MPI_Comm ); 
+MPI_Comm commInqCommGlob ( void );
+int      commInqSizeGlob ( void );
+int      commInqRankGlob ( void );
+void     commDefNProcsIO ( int );
+int      commInqNProcsIO ( void );
+void     commDefIOModus  ( int );
+int      commInqIOModus  ( void );
+void     commPrint ( FILE * );
 
 
 #endif
