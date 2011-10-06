@@ -69,28 +69,21 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOModus )
 {
   MPI_Comm commModel;
   int isCalcPE;
-
-  commGlob = comm;
-  pioType  = IOModus;
-
-  xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
-
-  nProcsCalc = sizeGlob - nIOP;
-
-  xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
-  xmpi ( MPI_Comm_set_name ( commGlob, "commGlob" ));
-
+  int sizeGlob, rankGlob;
 
   commInit ();
   commDefCommGlob ( comm );
   commDefNProcsIO ( nIOP );
   commDefIOModus  ( IOModus );
-  if ( rankGlob == 0 ) commPrint ( stdout );
-  xdebug ( "pioinfo2->sizeGlob=%d", commInqSizeGlob ());
-  commDestroy ();
 
-  
-  if ( ddebug >= 1 ) xdebugComm (  &commGlob );
+  sizeGlob = commInqSizeGlob ();
+  rankGlob = commInqRankGlob ();
+
+  if ( rankGlob == 0 ) commPrint ( stdout );
+
+  pioType  = IOModus;
+
+  nProcsCalc = sizeGlob - nIOP;
   
   if ( rankGlob >= nProcsCalc )
     isCalcPE = 0;
@@ -418,6 +411,7 @@ static
   
   int IOID, nstreams, * streamIndexArray, streamNo, vlistID, nvars, varID;
   int IOIDchunk = 0;
+  int rankGlob = commInqRankGlob ();
   
   nstreams = reshCountType ( &streamOps );
   streamIndexArray = xmalloc ( nstreams * sizeof ( int ));
@@ -499,6 +493,7 @@ void pioBuffer ( int streamID, int varID, const double *data, int nmiss )
 {
   int size = sizeof ( double ), chunk, vlistID, IOID = CDI_UNDEFID;
   double temp, sep = ( double ) SEPARATOR;
+  int rankGlob = commInqRankGlob ();
 
   
   vlistID = streamInqVlist ( streamID );
@@ -540,6 +535,7 @@ void  pioEndDef ( int nNodes, int * nodeSizes )
 #ifdef USE_MPI
   char   * buffer;
   int bufferSize;
+  int rankGlob = commInqRankGlob ();
 
   varsMapNDeco ( nNodes, nodeSizes );
 
@@ -586,6 +582,7 @@ void pioFinalize ()
 
   modelWinCleanup ();
   commsIOCleanup ();
+  commDestroy ();
 #endif
 } 
  
@@ -596,6 +593,7 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
 #ifdef USE_MPI
   int IOID, buffer[timestepSize], iAssert = 0;
   double end = ( double ) END, size = sizeof ( double );
+  int rankGlob = commInqRankGlob ();
 
   assert (    ts >= 0 &&
            vdate >= 0 &&

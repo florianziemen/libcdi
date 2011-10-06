@@ -151,39 +151,7 @@ int      commInqIOModus  ( void )
 
   return pioinfo2->IOModus;
 }
-/*
-  p->IOModus         = CDI_UNDEFID;
-  p->nProcsIO        = CDI_UNDEFID;
 
-  p->commGlob        = MPI_COMM_NULL;
-  p->sizeGlob        = CDI_UNDEFID;
-  p->rankGlob        = CDI_UNDEFID;
-
-  p->commPio         = MPI_COMM_NULL;
-  p->sizePio         = CDI_UNDEFID;
-  p->rankPio         = CDI_UNDEFID;
-
-  p->commModel       = MPI_COMM_NULL;
-  p->sizeModel       = CDI_UNDEFID;
-  p->rankModel       = CDI_UNDEFID;
-
-  p->commNode        = MPI_COMM_NULL;
-  p->sizeNode        = CDI_UNDEFID;
-  p->rankNode        = CDI_UNDEFID;
-  p->hostname[0]     = 0;
-  p->hostID          = CDI_UNDEFID;
-  p->specialRankNode = CDI_UNDEFID;
-     
-  p->commColl        = MPI_COMM_NULL;
-  p->sizeColl        = CDI_UNDEFID;
-  p->rankColl        = CDI_UNDEFID;
-     
-  p->commCalc        = MPI_COMM_NULL;
-  p->sizeCalc        = CDI_UNDEFID;
-  p->rankCalc        = CDI_UNDEFID;
-     
-  p->commsIO         = NULL;
-*/
 
 void commPrint ( FILE * fp )
 {
@@ -214,7 +182,7 @@ void commPrint ( FILE * fp )
   fprintf ( fp, "# rankNode = %d\n", pioinfo2->rankNode );
   fprintf ( fp, "# hostname = %s\n", pioinfo2->hostname[0] == 0 ? "nn" : 
 	    pioinfo2->hostname );
-  fprintf ( fp, "# hostID = %d\n", pioinfo2->hostID );
+  fprintf ( fp, "# hostID   = %d\n", pioinfo2->hostID );
   fprintf ( fp, "# specialRankNode = %d\n", pioinfo2->specialRankNode );
   fprintf ( fp, "#\n" );
   fprintf ( fp, "# commColl = %d\n", pioinfo2->commColl );

@@ -14,6 +14,7 @@
 #include <assert.h>
 #include "limits.h"
 #include "cdi.h"
+#include "pio_comm.h"
 #include "pio.h"
 #include "pio_rpc.h"
 #include "pio_util.h"
@@ -61,6 +62,7 @@ static
 {
   int nstreams, * streamIndexArray, streamNo, vlistID, nvars, varID, iorank;
   int i, decoChunk;
+  int rankGlob = commInqRankGlob ();
 
   nstreams = reshCountType ( &streamOps );
   streamIndexArray = xmalloc ( nstreams * sizeof ( int ));
@@ -287,7 +289,8 @@ void IOServer ( MPI_Comm comm, int ptype )
 	  rpcUnpackResources ( buffer, size, commCalc );
 	  free ( buffer );
 
-	  if ( rankGlob == nProcsCalc ) reshArrayPrint ( "reshArrayIOServer" );
+	  if ( commInqRankGlob () == nProcsCalc ) 
+            reshArrayPrint ( "reshArrayIOServer" );
           xdebug();
 	  serverWinCreate ();
           xdebug();

@@ -8,6 +8,7 @@
 #ifdef USE_MPI
 
 #include <mpi.h>
+#include <stdio.h>
 #include "cdi.h"
 
 typedef struct {

@@ -4,8 +4,9 @@
 
 #ifdef USE_MPI
 #include "pio_rpc.h"
-#include "pio_util.h"
 #include "cdi.h"
+#include "pio_comm.h"
+#include "pio_util.h"
 #include "institution.h"
 #include "model.h"
 #include "vlist.h"
@@ -18,10 +19,6 @@ extern void  taxisUnpack ( char *, int, int *, int, MPI_Comm );
 extern double cdiDefaultMissval;  
 extern int streamNint;
 
-
-MPI_Comm commGlob;
-int sizeGlob;
-int rankGlob;
 int nProcsIO;
 int nProcsCalc;
 MPI_Comm * commsIO;
@@ -35,9 +32,9 @@ void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
   MPI_Group groupGlob, currGroupIO;
   int currIORank;
   char name[10];
+  int rankGlob = commInqRankGlob ();
 
   nProcsIO = nIOP;
-  MPI_Comm_rank ( commGlob, &rankGlob );
 
   commsIO = ( MPI_Comm * ) xmalloc ( nProcsIO * sizeof ( MPI_Comm ));
   strncpy ( name, "commsIO_", 8 ); 
@@ -47,7 +44,7 @@ void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
   for ( i = 0; i < nProcsCalc; i++ )
     * ( ranks + i ) = i;
   
-  MPI_Comm_group ( commGlob, &groupGlob ); 
+  MPI_Comm_group ( commInqCommGlob (), &groupGlob ); 
 
   for ( i = 0; i < nProcsIO; i++ )
     {
@@ -56,7 +53,7 @@ void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
       * ( ranks + nProcsCalc ) = currIORank;	  
 	  
       MPI_Group_incl ( groupGlob, nProcsCalc + 1, ranks, &currGroupIO );
-      MPI_Comm_create ( commGlob, currGroupIO,  commsIO + i );
+      MPI_Comm_create ( commInqCommGlob (), currGroupIO,  commsIO + i );
       if ( rankGlob < nProcsCalc || rankGlob == nProcsCalc + i )
 	{
 	  sprintf ( &name[8], "%d", i ); 
@@ -96,6 +93,7 @@ void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
 void commsIOCleanup ()
 {
   int i;
+  int rankGlob = commInqRankGlob ();
   
   for ( i = 0; i < nProcsIO; i++ )
     if ( rankGlob < nProcsCalc || rankGlob == nProcsCalc + i )

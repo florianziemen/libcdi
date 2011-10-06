@@ -9,9 +9,6 @@
 
 #include <mpi.h>
 
-extern MPI_Comm commGlob;
-extern int sizeGlob;
-extern int rankGlob;
 extern int nProcsIO;
 extern int nProcsCalc;
 extern MPI_Comm * commsIO;
