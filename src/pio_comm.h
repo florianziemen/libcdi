@@ -55,10 +55,13 @@ typedef struct {
 
 extern pioInfo_t * pioinfo2;
 
-enum { MAXNPROCSIO = 256,
-       MAXIOMODUS  = PIO_POSIX_FPGUARD_SENDRECV};
+enum { MAXNPROCSIO   = 256,
+       MAXCOMMIONAME = 12,
+       MAXIOMODUS    = PIO_POSIX_FPGUARD_SENDRECV};
 
-enum { NODEINFO = 9999, sizeNodeInfo = 3 };
+enum { sizeNodeInfo  = 3,
+       NODEINFO      = 1111, 
+       NODEMAP       = 2222};
 
 void     commInit           ( void );
 void     commDestroy        ( void );
@@ -79,11 +82,14 @@ void     commDefIsProcColl  ( int );
 void     commDefCommNode    ( MPI_Comm );
 void     commDefHostName    ( char *, size_t );
 void     commDefHostID      ( int );
-void     commDefNNodes      ( int );
+void     commDefNNodes      ( int ); 
+void     commDefNProcsColl  ( int );
+void     commEvalPhysNodes  ( void );
 void     commDefCommsIO     ( void );
 void     commPrint          ( FILE * );
 
 void     commSendNodeInfo   ( void );
+void     commRecvNodeMap    ( void );// todo switch to gatherNodeInfo inside commpio
 void     commDefCommsIO     ( void );
 
 

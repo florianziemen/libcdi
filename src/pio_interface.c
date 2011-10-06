@@ -79,9 +79,12 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOModus )
       MPI_Finalize ();
       exit ( 0 );
     }
-  else 
-    commDefCommsIO ();        
-  
+  else
+    { 
+      xdebug();
+      commEvalPhysNodes ();
+      commDefCommsIO ();        
+    }
   
   return commInqCommModel ();
 }

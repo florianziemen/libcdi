@@ -252,11 +252,28 @@ void commSendNodeInfo ( void )
            pioinfo2->nodeInfo.isProcColl != CDI_UNDEFID &&
            pioinfo2->nodeInfo.nNodes     != CDI_UNDEFID &&
            pioinfo2->commGlob            != MPI_COMM_NULL );
-
-  commPrint ( stdout);
   
   xmpi ( MPI_Send ( &pioinfo2->nodeInfo, sizeNodeInfo, MPI_INTEGER, 
                     pioinfo2->root, NODEINFO, pioinfo2->commGlob ));
+}
+
+
+void     commRecvNodeMap    ( void )
+{
+  MPI_Status status;
+
+  assert ( pioinfo2 != NULL &&
+           pioinfo2->nProcsColl != CDI_UNDEFID &&
+           pioinfo2->commGlob   != MPI_COMM_NULL &&
+           pioinfo2->nProcsModel != CDI_UNDEFID &&
+           pioinfo2->nodeMap == NULL );
+
+  pioinfo2->nodeMap = xmalloc ( pioinfo2->nProcsColl * 
+                                sizeof ( pioinfo2->nodeMap[0] )); 
+
+  xmpi ( MPI_Recv ( pioinfo2->nodeMap, pioinfo2->nProcsColl, MPI_INTEGER, 
+                    pioinfo2->rankGlob - pioinfo2->nProcsModel, NODEMAP, 
+                    pioinfo2->commGlob, &status ));
 }
 
 
@@ -267,7 +284,14 @@ void     commDefNNodes      ( int nNodes )
 }
 
 
-void evalPhysNodes ( void )
+void     commDefNProcsColl  ( int nProcsColl )
+{
+  assert ( pioinfo2 != NULL );
+  pioinfo2->nProcsColl = nProcsColl;
+}
+
+
+void     commEvalPhysNodes  ( void )
 {
   nodeInfo_t * nodeInfo;
   MPI_Status status;
@@ -281,6 +305,7 @@ void evalPhysNodes ( void )
            pioinfo2->sizeGlob    != CDI_UNDEFID &&
            pioinfo2->rankGlob    != CDI_UNDEFID &&
            pioinfo2->commGlob    != MPI_COMM_NULL );
+  xdebug();
 
   size = pioinfo2->nProcsIO * sizeNodeInfo;
 
@@ -316,22 +341,18 @@ void evalPhysNodes ( void )
       if ( nodeInfo[IOID].isProcColl ) pioinfo2->nProcsColl++;
     }
 
-  for ( IOID = 0; IOID < pioinfo2->nProcsIO; IOID++ )
-    xdebug3 ("#### nodeInfo[%d]: nodeID=%d, isProcColl=%d,"
-            " nNodes=%d", 
-            IOID, nodeInfo[IOID].hostID, nodeInfo[IOID].isProcColl, 
-            nodeInfo[IOID].nNodes );
-
+  // define nodeSizes
   pioinfo2->nodeInfo.nNodes = nNodes; 
   pioinfo2->nodeSizes = xmalloc ( pioinfo2->nodeInfo.nNodes * 
                                   sizeof ( pioinfo2->nodeSizes[0] ));
-  pioinfo2->nodeMap   = xmalloc ( pioinfo2->nProcsColl * 
-                                  sizeof ( pioinfo2->nodeMap[0] ));
-
   for ( IOID = 0; IOID < pioinfo2->nProcsIO; IOID++ )
     if ( nodeInfo[IOID].isProcColl )
       pioinfo2->nodeSizes[nodeInfo[IOID].hostID - 1]++;
 
+  // define nodeMap
+  pioinfo2->nodeMap   = xmalloc ( pioinfo2->nProcsColl * 
+                                  sizeof ( pioinfo2->nodeMap[0] ));
+  // helpers
   p1 = xmalloc ( pioinfo2->nodeInfo.nNodes * sizeof ( p1[0] ));
   p2 = xmalloc ( pioinfo2->nodeInfo.nNodes * sizeof ( p2[0] ));
   idx = 0;
@@ -342,30 +363,78 @@ void evalPhysNodes ( void )
       p2[i] = p1[i] + pioinfo2->nodeSizes[i]; 
       idx += pioinfo2->nodeSizes[i];
     }
-
   assert ( idx == pioinfo2->nProcsColl );
     
   for ( IOID = 0; IOID < pioinfo2->nProcsIO; IOID++ )
     {
       assert ( p1[nodeInfo[IOID].hostID - 1] <  p2[nodeInfo[IOID].hostID - 1] );
       if ( nodeInfo[IOID].isProcColl )
-        * p1[nodeInfo[IOID].hostID - 1]++ = IOID;
+        * p1[nodeInfo[IOID].hostID - 1]++ = IOID + pioinfo2->nProcsModel;
     }
-      
-  xprintArray3 ( "nodeMap", pioinfo2->nodeMap, 
-                pioinfo2->nProcsColl, DATATYPE_INT );
+
+  if ( pioinfo2->rankGlob < pioinfo2->nProcsIO )
+    xmpi ( MPI_Send ( pioinfo2->nodeMap, pioinfo2->nProcsColl, MPI_INTEGER, 
+                    pioinfo2->rankGlob + pioinfo2->nProcsModel, 
+                      NODEMAP, pioinfo2->commGlob ));
 
   free ( p2 );
   free ( p1 );
   free ( nodeInfo );
-
-  commPrint ( stdout );
+  xdebug();
 }
 
-
+// collective call
 void     commDefCommsIO     ( void )
 {
-  evalPhysNodes ();
+  MPI_Group groupGlob, currGroupIO;
+  int IOID, * ranks, i, currIORank;
+  char name[MAXCOMMIONAME];
+
+  pioinfo2->commsIO = xmalloc ( pioinfo2->nProcsColl * 
+                                sizeof ( pioinfo2->commsIO[0] ));
+  strncpy ( name, "COMMSIO_", 8 ); 
+  name[MAXCOMMIONAME - 1] = '\0';
+  
+  ranks = xmalloc (( pioinfo2->nProcsModel + 1 ) * sizeof ( ranks[0] ));
+  for ( i = 0; i < pioinfo2->nProcsModel; i++ )
+    * ( ranks + i ) = i;
+  
+  xmpi ( MPI_Comm_group ( pioinfo2->commGlob, &groupGlob )); 
+
+  for ( IOID = 0; IOID < pioinfo2->nProcsColl; IOID++ )
+    {
+      currIORank = pioinfo2->nodeMap[IOID];
+      * ( ranks + pioinfo2->nProcsModel ) = currIORank;	  
+      xmpi ( MPI_Group_incl ( groupGlob, pioinfo2->nProcsModel + 1, 
+                              ranks, &currGroupIO ));
+      xmpi ( MPI_Comm_create ( pioinfo2->commGlob, currGroupIO,  
+                               pioinfo2->commsIO + IOID ));
+      if ( pioinfo2->rankGlob == currIORank )
+	pioinfo2->commCalc = pioinfo2->commsIO[IOID];
+
+      if ( pioinfo2->rankGlob < pioinfo2->nProcsModel || 
+           pioinfo2->rankGlob == currIORank )
+	{
+	  sprintf ( &name[8], "%d", IOID ); 
+	  xmpi ( MPI_Comm_set_name ( pioinfo2->commsIO[IOID], name ));
+	}
+    }
+
+  if ( ddebug >= 2 )
+    {
+
+      if ( pioinfo2->rankGlob < pioinfo2->nProcsModel )
+	for ( IOID = 0; IOID < pioinfo2->nProcsColl; IOID++ ) 
+          xdebugComm ( pioinfo2->commsIO + IOID );
+      else if ( pioinfo2->nodeInfo.isProcColl )
+	xdebugComm ( &pioinfo2->commCalc );
+    }
+
+  xmpi ( MPI_Group_free ( &currGroupIO ));
+  xmpi ( MPI_Group_free ( &groupGlob ));
+  free ( ranks );
+
+  commPrint ( stdout );
 }
 
 

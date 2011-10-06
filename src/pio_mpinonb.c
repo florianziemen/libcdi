@@ -367,7 +367,10 @@ int initMPINONB ()
   xmpi ( MPI_Comm_dup ( pioinfo->comm, &( pioinfo->collectorComm )));
 
   commDefIsProcColl ( 1 );
+  commDefNProcsColl ( commInqNProcsIO ());
   commSendNodeInfo ();
+  commRecvNodeMap ();
+  commDefCommsIO ();
 
   bibAFiledataM = queueInit ( destroyAFiledataMPINONB, compareNamesMPINONB );
   
