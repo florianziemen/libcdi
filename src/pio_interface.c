@@ -76,12 +76,12 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOModus )
     {
       IOServer ();
       commsIOCleanup ();
+      commDestroy ();
       MPI_Finalize ();
       exit ( 0 );
     }
   else
     { 
-      xdebug();
       commEvalPhysNodes ();
       commDefCommsIO ();        
     }

@@ -65,30 +65,48 @@ void commInit ( void )
 
 void commDestroy ( void )
 {
-  int i;
+  int IOID;
 
-  assert ( pioinfo2 );
+  assert ( pioinfo2 != NULL );
 
   if ( pioinfo2->nodeMap   != NULL ) free ( pioinfo2->nodeMap );
   if ( pioinfo2->nodeSizes != NULL ) free ( pioinfo2->nodeSizes );
 
-  if ( pioinfo2->commsIO ) 
+  if ( pioinfo2->commsIO != NULL ) 
     {
-      for ( i = 0; i < pioinfo2->nProcsIO; i++ )
-	if ( pioinfo2->commsIO[i] != MPI_COMM_NULL )
-	  xmpi ( MPI_Comm_free ( &pioinfo2->commsIO[i] ));
+      for ( IOID = 0; IOID < pioinfo2->nProcsColl; IOID++ )
+	if ( pioinfo2->commsIO[IOID] != MPI_COMM_NULL )
+	  xmpi ( MPI_Comm_free ( &pioinfo2->commsIO[IOID] ));
       free ( &pioinfo2->commsIO ); 
-    }  
+      pioinfo2->commsIO = NULL;
+    }
+ 
   if ( pioinfo2->commCalc != MPI_COMM_NULL )
-    xmpi ( MPI_Comm_free ( &pioinfo2->commCalc ));
+    {
+      xmpi ( MPI_Comm_free ( &pioinfo2->commCalc )); 
+      pioinfo2->commCalc = MPI_COMM_NULL;
+    }
+ 
   if ( pioinfo2->commColl != MPI_COMM_NULL )
-    xmpi ( MPI_Comm_free ( &pioinfo2->commColl ));
+    {
+      xmpi ( MPI_Comm_free ( &pioinfo2->commColl )); 
+      pioinfo2->commColl = MPI_COMM_NULL;
+    }
+  
   if ( pioinfo2->commNode != MPI_COMM_NULL )
-    xmpi ( MPI_Comm_free ( &pioinfo2->commNode ));
+    {
+      xmpi ( MPI_Comm_free ( &pioinfo2->commNode )); 
+      pioinfo2->commNode = MPI_COMM_NULL;
+    }
+  
   if ( pioinfo2->commPio != MPI_COMM_NULL )
-    xmpi ( MPI_Comm_free ( &pioinfo2->commPio ));    
-
+    {
+      xmpi ( MPI_Comm_free ( &pioinfo2->commPio )); 
+      pioinfo2->commPio != MPI_COMM_NULL;    
+    }
+  
   free ( pioinfo2 );
+  pioinfo2 = NULL;
 }
 
 
@@ -226,7 +244,8 @@ void     commDefIsProcColl  ( int isProcColl )
 void     commDefCommNode    ( MPI_Comm commNode )
 {
   assert ( pioinfo2 != NULL );
-  pioinfo2->commNode = commNode;  
+  //pioinfo2->commNode = commNode; 
+  xmpi ( MPI_Comm_dup ( commNode, &pioinfo2->commNode ));
 }
 
 
@@ -412,6 +431,7 @@ void     commDefCommsIO     ( void )
       if ( pioinfo2->rankGlob == currIORank )
 	pioinfo2->commCalc = pioinfo2->commsIO[IOID];
 
+      // set names for debugging
       if ( pioinfo2->rankGlob < pioinfo2->nProcsModel || 
            pioinfo2->rankGlob == currIORank )
 	{
@@ -455,6 +475,7 @@ void commPrint ( FILE * fp )
   fprintf ( fp, "# commGlob    = %d\n", pioinfo2->commGlob );
   fprintf ( fp, "# sizeGlob    = %d\n", pioinfo2->sizeGlob );
   fprintf ( fp, "# rankGlob    = %d\n", pioinfo2->rankGlob );
+  fprintf ( fp, "# root        = %d\n", pioinfo2->root );
   fprintf ( fp, "#\n" );
   fprintf ( fp, "# commPio     = %d\n", pioinfo2->commPio );
   fprintf ( fp, "# sizePio     = %d\n", pioinfo2->sizePio );
