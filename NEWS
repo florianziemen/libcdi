@@ -1,6 +1,13 @@
 CDI NEWS
 --------
 
+Version 1.5.3 (?? October 2011):
+
+   New features:
+     * Added support for level type ZAXIS_NOMINAL_TOP, ZAXIS_SEA_BOTTOM, ZAXIS_ATMOSPHERE
+   Fixed bugs:
+     * deflate compression with netCDF4 doesn't work
+
 Version 1.5.2 (22 August 2011):
 
    New features:

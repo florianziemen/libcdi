@@ -24,19 +24,22 @@ static struct {
   char *units;    // 1: up;  2: down
 }
 ZaxistypeEntry[] = {
-  {0, "sfc",     "surface",           "",               ""},
-  {0, "lev",     "generic",           "",               "level"},
-  {2, "lev",     "hybrid",            "",               "level"},
-  {2, "lev",     "hybrid_half",       "",               "level"},
-  {2, "lev",     "pressure",          "air_pressure",   "Pa"},
-  {1, "height",  "height",            "height",         "m"},
-  {2, "depth",   "depth_below_sea",   "depth",          "m"},
-  {2, "depth",   "depth_below_land",  "",               "cm"},
-  {0, "lev",     "isentropic",        "",               "K"},
-  {0, "lev",     "trajectory",        "",               ""},
-  {1, "alt",     "altitude",          "",               "m"},
-  {0, "lev",     "sigma",             "",               "level"},
-  {0, "lev",     "meansea",           "",               "level"},
+  { /*  0 */ 0, "sfc",        "surface",           "",               ""},
+  { /*  1 */ 0, "lev",        "generic",           "",               "level"},
+  { /*  2 */ 2, "lev",        "hybrid",            "",               "level"},
+  { /*  3 */ 2, "lev",        "hybrid_half",       "",               "level"},
+  { /*  4 */ 2, "lev",        "pressure",          "air_pressure",   "Pa"},
+  { /*  5 */ 1, "height",     "height",            "height",         "m"},
+  { /*  6 */ 2, "depth",      "depth_below_sea",   "depth",          "m"},
+  { /*  7 */ 2, "depth",      "depth_below_land",  "",               "cm"},
+  { /*  8 */ 0, "lev",        "isentropic",        "",               "K"},
+  { /*  9 */ 0, "lev",        "trajectory",        "",               ""},
+  { /* 10 */ 1, "alt",        "altitude",          "",               "m"},
+  { /* 11 */ 0, "lev",        "sigma",             "",               "level"},
+  { /* 12 */ 0, "lev",        "meansea",           "",               "level"},
+  { /* 13 */ 0, "toa",        "nominal_top",       "",               ""},
+  { /* 14 */ 0, "seabottom",  "sea_bottom",        "",               ""},
+  { /* 15 */ 0, "atmosphere", "atmosphere",        "",               ""},
 };
 
 static int CDI_MaxZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]);
@@ -121,7 +124,7 @@ static
 void zaxis_init_pointer(void)
 {
   int  i;
-  
+
   for ( i = 0; i < _zaxis_max; i++ )
     {
       _zaxisList[i].next = _zaxisList + i + 1;
@@ -173,7 +176,7 @@ int zaxis_from_pointer(zaxis_t *ptr)
 	  newptr->next = 0;
 	  idx	       = newptr->idx;
 	  newptr->ptr  = ptr;
-      
+
 	  if ( ZAXIS_Debug )
 	    Message("Pointer %p has idx %d from zaxis list", ptr, idx);
 	}
@@ -292,7 +295,7 @@ int zaxisSize(void)
 {
   int zaxissize = 0;
   int i;
-  
+
   ZAXIS_INIT();
 
   ZAXIS_LOCK();
@@ -510,7 +513,7 @@ void zaxisDefUnits(int zaxisID, const char *units)
 @Prototype void zaxisInqName(int zaxisID, char *name)
 @Parameter
     @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
-    @Item  name     Name of the Z-axis. The caller must allocate space for the 
+    @Item  name     Name of the Z-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant CDI_MAX_NAME.
 
@@ -540,7 +543,7 @@ void zaxisInqName(int zaxisID, char *name)
 @Prototype void zaxisInqLongname(int zaxisID, char *longname)
 @Parameter
     @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
-    @Item  longname Longname of the Z-axis. The caller must allocate space for the 
+    @Item  longname Longname of the Z-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant CDI_MAX_NAME.
 
@@ -570,7 +573,7 @@ void zaxisInqLongname(int zaxisID, char *longname)
 @Prototype void zaxisInqUnits(int zaxisID, char *units)
 @Parameter
     @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
-    @Item  units    Units of the Z-axis. The caller must allocate space for the 
+    @Item  units    Units of the Z-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant CDI_MAX_NAME.
 
@@ -811,7 +814,7 @@ const double *zaxisInqLevelsPtr(int zaxisID)
     @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
     @Item  levels   Pointer to the location into which the levels are read.
                     The caller must allocate space for the returned values.
-    
+
 @Description
 The function @func{zaxisInqLevels} returns all levels of a Z-axis.
 

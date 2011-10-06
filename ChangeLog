@@ -1,3 +1,7 @@
+2011-10-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added level type ZAXIS_NOMINAL_TOP, ZAXIS_SEA_BOTTOM, ZAXIS_ATMOSPHERE [request: Dörte Liermann]
+
 2011-10-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* stream_cdf::cdfInqContents: check units of hybrid levels
