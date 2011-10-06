@@ -57,8 +57,8 @@ typedef struct
   bool *nfinished;
 } bFiledataPFT;
 
-static queue *bibAFiledataPFT;
-queue *bibBFiledataPF;
+static queue_t *bibAFiledataPFT;
+queue_t *bibBFiledataPF;
 
 pthread_t thread;
 pthread_attr_t attr;
@@ -253,7 +253,7 @@ void communicateOffset ( MPI_Status *statusF, long *bfdOffset )
 {
   long amount, offsetOld, offsetNew;
   int source, tag;
-  rTag *rtagF;
+  tag_t *rtagF;
 
   source = statusF->MPI_SOURCE;
   tag = statusF->MPI_TAG;
@@ -287,7 +287,7 @@ void communicateOffset ( MPI_Status *statusF, long *bfdOffset )
 void* fpgPOSIXFPGUARDTHREAD ( void* ncoll )
 {
   int i, source, iret;
-  rTag *rtag;
+  tag_t *rtag;
   MPI_Status status;
   bFiledataPFT *bfd; 
 
@@ -594,7 +594,7 @@ size_t fwPOSIXFPGUARDTHREAD( int id, int tsId, const void *buffer, size_t len )
   int flush = 0;
   int filled = 0;
   aFiledataPFT *afd;
-  node *curr;
+  listElem_t *curr;
 
   flush = ( tsId != oldTsId ) ? 1 : 0;
 

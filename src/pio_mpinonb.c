@@ -40,7 +40,7 @@ typedef struct
   bool finished;
 } aFiledataM;
 
-static queue *bibAFiledataM;
+static queue_t *bibAFiledataM;
 
 
 /***************************************************************/
@@ -190,7 +190,7 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
   int flush = 0;
   int filled = 0;
   aFiledataM *of;
-  node *curr;
+  listElem_t *curr;
   char errorString[maxErrorString];
 
   flush = ( tsID != oldTsID ) ? 1 : 0;
@@ -286,9 +286,9 @@ int fcMPINONB ( int fileID )
 
 /***************************************************************/
 // baustelle, in modi vereinheitlichen, kapseln in pio_queue.c
-void queueCheck ( queue *q, const char *name )
+void queueCheck ( queue_t *q, const char *name )
 {
-  node *curr;
+  listElem_t *curr;
   aFiledataM *afm;
   size_t len;
   char errorString[maxErrorString];

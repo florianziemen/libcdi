@@ -27,37 +27,35 @@ struct dBuffer
   unsigned char * buffer;
 };
 
-struct listElem 
+typedef struct listElem 
 {
   int idx;
   void * val;
   struct listElem * next;
-};
-
-typedef struct listElem node;
+} listElem_t;
 
 typedef int ( * valDestroyFunction ) ( void * );
 typedef bool ( * keyCompareFunction ) ( void *, void * );
 
 typedef struct 
 {
-  node * head;
-  node * tail;
+  listElem_t * head;
+  listElem_t * tail;
   valDestroyFunction valDestroy;
   keyCompareFunction keyCompare;
   int count;
-} queue;
+} queue_t;
 
 typedef struct
 {
   int id;
   int command;
-} rTag;
+} tag_t;
 
 /* pio.c */
 int setTag ( int, int );
-rTag * getTag ( int );
-void ungetTag ( rTag * );
+tag_t * getTag ( int );
+void ungetTag ( tag_t * );
 
 /* pio_dbuffer.c */
 int dbuffer_init ( struct dBuffer **, size_t );
@@ -68,11 +66,11 @@ void dbuffer_cleanup ( struct dBuffer ** );
 size_t dbuffer_free ( struct dBuffer * );
 
 /* pio_queue.c */
-queue * queueInit ( valDestroyFunction, keyCompareFunction );
-void queueDestroy ( queue * );
-int queuePush ( queue *, void *, int, ... );
-void * queueIdx2val ( queue *, int );
-int queueDelNode ( queue *, int );
+queue_t * queueInit ( valDestroyFunction, keyCompareFunction );
+void queueDestroy ( queue_t * );
+int queuePush ( queue_t *, void *, int, ... );
+void * queueIdx2val ( queue_t *, int );
+int queueDelNode ( queue_t *, int );
 
 /* pio_mpinonb.c */
 int fowMPINONB ( const char * );

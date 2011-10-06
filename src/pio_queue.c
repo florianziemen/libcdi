@@ -14,11 +14,11 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
-queue *queueInit ( valDestroyFunction vD, keyCompareFunction kC )
+queue_t *queueInit ( valDestroyFunction vD, keyCompareFunction kC )
 {
-  queue *myq;
+  queue_t *myq;
 
-  myq = xmalloc ( sizeof ( queue ));
+  myq = xmalloc ( sizeof ( queue_t ));
 
   myq->head = NULL;
   myq->tail = NULL;
@@ -29,9 +29,9 @@ queue *queueInit ( valDestroyFunction vD, keyCompareFunction kC )
   return myq;
 }
 
-void queueDestroy ( queue *q )
+void queueDestroy ( queue_t *q )
 {
-  node *curr, *succ;
+  listElem_t *curr, *succ;
 
   if ( q->head )
     {
@@ -51,9 +51,9 @@ void queueDestroy ( queue *q )
   return;
 }
 
-int queuePush ( queue *q, void *v, int noCollector, ... )
+int queuePush ( queue_t *q, void *v, int noCollector, ... )
 {
-  node *newNode, *curr;
+  listElem_t *newListElem_T, *curr;
   va_list ap;
   int id = CDI_UNDEFID;
 
@@ -77,31 +77,31 @@ int queuePush ( queue *q, void *v, int noCollector, ... )
       curr = curr->next;
     }
 
-  if (( newNode = ( node * ) malloc (sizeof ( node ))) == NULL )
+  if (( newListElem_T = ( listElem_t * ) malloc (sizeof ( listElem_t ))) == NULL )
     {
       perror ( "pio_queue: queuePush (): Not enough memory" );
       return 1;
     }
 
-  newNode->idx = noCollector ? id : q->count;
-  newNode->val = v;
-  newNode->next = NULL;
+  newListElem_T->idx = noCollector ? id : q->count;
+  newListElem_T->val = v;
+  newListElem_T->next = NULL;
 
 
   if ( q->tail != NULL)
-    q->tail->next = newNode;
+    q->tail->next = newListElem_T;
   else
-    q->head = newNode;
+    q->head = newListElem_T;
 
-  q->tail = newNode;
+  q->tail = newListElem_T;
   q->count  ++;
 
-  return newNode->idx;
+  return newListElem_T->idx;
 }
 
-void *queueIdx2val ( queue *q, int id )
+void *queueIdx2val ( queue_t *q, int id )
 {
-  node *curr;
+  listElem_t *curr;
 
   curr = q->head;
 
@@ -114,9 +114,9 @@ void *queueIdx2val ( queue *q, int id )
   return curr ? curr->val : NULL;
 }
 
-int queueDelNode ( queue *q, int id ) // error
+int queueDelNode ( queue_t *q, int id ) // error
 {
-  node *pred, *curr;
+  listElem_t *pred, *curr;
 
   if ( !q->head ) return -1;
 

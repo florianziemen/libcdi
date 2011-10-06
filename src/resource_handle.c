@@ -47,17 +47,17 @@ static pthread_mutex_t arrayMutex;
 #endif
 
 
-typedef struct node {
+typedef struct arrayElem {
   cdiResH       resH;//idx
-  struct node * next;
+  struct arrayElem * next;
   resOps      * ops;
   void        * val;//ptr
   int           status;
-} node;
+} arrayElem_t;
 
 
-static node **arrayResources;
-static node **freeListHead;
+static arrayElem_t **arrayResources;
+static arrayElem_t **freeListHead;
 
 
 /**************************************************************/
@@ -80,7 +80,7 @@ void arrayNew ( void )
 
       assert ( arrayResources[i] == NULL);
 
-      arrayResources[i] =  xcalloc ( arraySizeAllocated[i], sizeof ( node ));
+      arrayResources[i] =  xcalloc ( arraySizeAllocated[i], sizeof ( arrayElem_t ));
     }
 }
 
@@ -118,7 +118,7 @@ void arrayInitPointer ( void )
 
 void arrayDestroy ( void )
 {
-  node * node;
+  arrayElem_t * arrayElem;
   int i, j, nnsp;
 
   if ( arrayResources )
@@ -132,9 +132,9 @@ void arrayDestroy ( void )
                   if ( arraySizeAllocated )
                       for ( j = 0; j < arraySizeAllocated[i]; j++ )
                           {
-                              node = arrayResources[i] + j;
-                              if ( node->val )
-                                      node->ops->valDestroy ( node->val );
+                              arrayElem = arrayResources[i] + j;
+                              if ( arrayElem->val )
+                                      arrayElem->ops->valDestroy ( arrayElem->val );
                           }
                   free ( arrayResources[i] );
                   arrayResources[i] = NULL;
@@ -218,7 +218,7 @@ void arraySizeExtend()
 int reshPut ( void *p, resOps *ops )
 {
   cdiResH resH = -1, nsp;
-  node * newNode;
+  arrayElem_t * newArrayElem;
 
   assert ( p && ops );
 
@@ -229,13 +229,13 @@ int reshPut ( void *p, resOps *ops )
   nsp = namespaceGetActive ();
 
   if ( !freeListHead[nsp] ) arraySizeExtend();
-  newNode               = freeListHead[nsp];
+  newArrayElem               = freeListHead[nsp];
   freeListHead[nsp]     = freeListHead[nsp]->next;
-  newNode->next         = NULL;
-  resH                  = newNode->resH;
-  newNode->val          = p;
-  newNode->ops          = ops;
-  newNode->status       = ASSIGNED;
+  newArrayElem->next         = NULL;
+  resH                  = newArrayElem->resH;
+  newArrayElem->val          = p;
+  newArrayElem->ops          = ops;
+  newArrayElem->status       = ASSIGNED;
 
   ARRAY_UNLOCK();
 
@@ -282,7 +282,7 @@ void *reshGetVal ( cdiResH resH, resOps * ops  )
 {
   int nsp;
   namespaceTuple_t nspT;
-  node * node;
+  arrayElem_t * arrayElem;
 
   assert ( arrayInit && ops );
 
@@ -297,14 +297,14 @@ void *reshGetVal ( cdiResH resH, resOps * ops  )
            nspT.idx >= 0 &&
            nspT.idx < arraySizeAllocated[nsp] );
 
-  node =  arrayResources[nsp] + nspT.idx;
+  arrayElem =  arrayResources[nsp] + nspT.idx;
 
   ARRAY_UNLOCK ();
 
-  assert ( node &&
-           node->ops == ops );
+  assert ( arrayElem &&
+           arrayElem->ops == ops );
 
-  return node->val;
+  return arrayElem->val;
 }
 
 
@@ -368,7 +368,7 @@ int  getPackBufferSize ( MPI_Comm comm )
   int nsp, i;
   int packBufferSize = 0;
   int intpacksize;
-  node * curr;
+  arrayElem_t * curr;
 
   nsp = namespaceGetActive ();
 
@@ -411,7 +411,7 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
 {
   int i, nsp, packBufferPos = 0;
   int start = START, end = END, sep = SEPARATOR, type;
-  node * curr;
+  arrayElem_t * curr;
 
   assert ( packBuffer );
 
@@ -476,7 +476,7 @@ void reshSetStatus ( cdiResH resH, resOps * ops, int status )
 {
   int nsp;
   namespaceTuple_t nspT;
-  node * node;
+  arrayElem_t * arrayElem;
 
   assert ( arrayInit && ops );
 
@@ -491,12 +491,12 @@ void reshSetStatus ( cdiResH resH, resOps * ops, int status )
            nspT.idx >= 0 &&
            nspT.idx < arraySizeAllocated[nsp] );
 
-  node =  arrayResources[nsp] + nspT.idx;
+  arrayElem =  arrayResources[nsp] + nspT.idx;
 
-  assert ( node &&
-           node->ops == ops );
+  assert ( arrayElem &&
+           arrayElem->ops == ops );
 
-  node->status = status;
+  arrayElem->status = status;
 
   ARRAY_UNLOCK ();
 }
@@ -509,7 +509,7 @@ int reshGetStatus ( cdiResH resH, resOps * ops )
 {
   int nsp;
   namespaceTuple_t nspT;
-  node * node;
+  arrayElem_t * arrayElem;
 
   assert ( arrayInit && ops );
 
@@ -524,14 +524,14 @@ int reshGetStatus ( cdiResH resH, resOps * ops )
            nspT.idx >= 0 &&
            nspT.idx < arraySizeAllocated[nsp] );
 
-  node =  arrayResources[nsp] + nspT.idx;
+  arrayElem =  arrayResources[nsp] + nspT.idx;
 
   ARRAY_UNLOCK ();
 
-  assert ( node &&
-           node->ops == ops );
+  assert ( arrayElem &&
+           arrayElem->ops == ops );
 
-  return node->status;
+  return arrayElem->status;
 }
 
 
@@ -561,7 +561,7 @@ int reshArrayCompare ( int nsp0, int nsp1 )
   const int equal  = 0;
   const int differ = -1;
   int i, valCompare;
-  node * node0, * node1;
+  arrayElem_t * arrayElem0, * arrayElem1;
 
 #ifdef USE_MPI
 
@@ -571,8 +571,8 @@ int reshArrayCompare ( int nsp0, int nsp1 )
 
   for ( i = 0; i < arraySizeAllocated[nsp0]; i++ )
     {
-      node0 = arrayResources[nsp0] + i;
-      if ( node0->val )
+      arrayElem0 = arrayResources[nsp0] + i;
+      if ( arrayElem0->val )
 	{
 	  if ( i >= arraySizeAllocated[nsp1] )
 	    {
@@ -580,25 +580,25 @@ int reshArrayCompare ( int nsp0, int nsp1 )
 	      return differ;
 	    }
 
-	  node1 = arrayResources[nsp1] + i;
-	  if ( !node1->val )
+	  arrayElem1 = arrayResources[nsp1] + i;
+	  if ( !arrayElem1->val )
 	    {
 	      xdebug ();
 	      return differ;
 	    }
 
-	  assert ( node0->ops && node1->ops );
-	  if ( node0->ops != node1->ops )
+	  assert ( arrayElem0->ops && arrayElem1->ops );
+	  if ( arrayElem0->ops != arrayElem1->ops )
 	    {
 	      xdebug ();
 	      return differ;
 	    }
 
-	  valCompare =  node0->ops->valCompare ( node0->val, node1->val );
+	  valCompare =  arrayElem0->ops->valCompare ( arrayElem0->val, arrayElem1->val );
 	  printf ( "type %d, values resH0=%d and resH1=%d %s\n", 
-		   node0->ops->valTxCode (), 
-		   node0->resH, 
-		   node1->resH,
+		   arrayElem0->ops->valTxCode (), 
+		   arrayElem0->resH, 
+		   arrayElem1->resH,
 		   valCompare == equal ? "are equal" : "differ" );
 	  if ( valCompare != equal ) return differ;
 	}
@@ -625,7 +625,7 @@ int reshArrayCompare ( int nsp0, int nsp1 )
 void reshArrayPrint ( char * filename )
 {
   int i, j, temp;
-  node * curr;
+  arrayElem_t * curr;
   FILE * fp; 
 
   if ( ! arrayInit ) return;

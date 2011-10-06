@@ -68,7 +68,7 @@ typedef struct
   bool *nfinished;
 } bFiledataPFTR;
 
-static queue *bibAFiledataPFTR;
+static queue_t *bibAFiledataPFTR;
 
 pthread_t thread;
 pthread_attr_t attr;
@@ -218,10 +218,10 @@ bool compareNamesAPFTR ( void *v1, void *v2 )
 void* fpgPOSIXFPGUARDTHREADREFUSE ( void* ncoll )
 {
   int i, source, iret;
-  rTag *rtag;
+  tag_t *rtag;
   MPI_Status status;
   bFiledataPFTR *bfd; 
-  queue *bibBFiledataPFTR;
+  queue_t *bibBFiledataPFTR;
   long amount;
 
   int ncollectors;
@@ -485,7 +485,7 @@ size_t fwPOSIXFPGUARDTHREADREFUSE ( int id, int tsId, const void *buffer, size_t
   int flush = 0;
   int filled = 0;
   aFiledataPFTR *afd;
-  node *curr;
+  listElem_t *curr;
 
   flush = ( tsId != oldTsId ) ? 1 : 0;
 

@@ -54,11 +54,11 @@ int setTag ( int ID, int sc )
 
 /***************************************************************/
 
-rTag * getTag ( int tag )
+tag_t * getTag ( int tag )
 {
-  rTag *rtag;
+  tag_t *rtag;
 
-  rtag = ( rTag * ) xmalloc ( sizeof ( rTag ));
+  rtag = ( tag_t * ) xmalloc ( sizeof ( tag_t ));
   rtag->id = tag / tagKey;
   rtag->command = tag % tagKey;
 
@@ -67,7 +67,7 @@ rTag * getTag ( int tag )
 
 /***************************************************************/
 
-void ungetTag ( rTag *rtag )
+void ungetTag ( tag_t *rtag )
 {
   free ( rtag );
   return;

@@ -55,7 +55,7 @@ typedef struct
   bool *nfinished;
 } bFiledataP;
 
-static queue * bibAFiledataP;
+static queue_t * bibAFiledataP;
 
 
 int errclass, ierr, resultlen;
@@ -271,9 +271,9 @@ void writeP ( bFiledataP *bfd, long amount )
 
 /***************************************************************/
 // baustelle, in modi vereinheitlichen, kapseln in pio_queue.c
-void queueCheckP ( queue *q, char *name )
+void queueCheckP ( queue_t *q, char *name )
 {
-  node *curr;
+  listElem_t *curr;
   bFiledataP *bfd;
   size_t len;
   char errorString[maxErrorString];
@@ -302,12 +302,12 @@ void queueCheckP ( queue *q, char *name )
 void pwPOSIXNONB ( int ncollectors )
 {
   bFiledataP *bfd; 
-  queue * bibBFiledataP;
+  queue_t * bibBFiledataP;
   long amount, buffersize;
   char *messageBuffer = NULL;
   char *pMB, *filename, *temp;
   int messagesize, source, tag, i, len, id;
-  rTag *rtag = NULL;
+  tag_t *rtag = NULL;
   MPI_Status status;
   char errorString[maxErrorString];
 
@@ -540,7 +540,7 @@ size_t fwPOSIXNONB ( int id, int tsId, const void *buffer, size_t len )
   int flush = 0;
   int filled = 0;
   aFiledataP *afd;
-  node *curr;
+  listElem_t *curr;
   char errorString[maxErrorString];
 
   flush = ( tsId != oldTsId ) ? 1 : 0;

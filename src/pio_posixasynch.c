@@ -69,7 +69,7 @@ typedef struct
   bool *nfinished;
 } bFiledataPA;
 
-static queue *bibAFiledataPA;
+static queue_t *bibAFiledataPA;
 
 int nPrefStreams = 4;
 
@@ -374,9 +374,9 @@ void writePA ( bFiledataPA *bfd, long amount )
 
 /***************************************************************/
 // baustelle, in modi vereinheitlichen, kapseln in pio_queue.c
-void queueCheckPA ( queue *q, char *name )
+void queueCheckPA ( queue_t *q, char *name )
 {
-  node *curr;
+  listElem_t *curr;
   bFiledataPA *bfd;
   size_t len;
   char errorString[maxErrorString];
@@ -405,12 +405,12 @@ void queueCheckPA ( queue *q, char *name )
 void pwPOSIXASYNCH ( int ncollectors )
 {
   bFiledataPA *bfd; 
-  queue * bibBFiledataPA;
+  queue_t * bibBFiledataPA;
   long amount, buffersize;
   char *messageBuffer, *pMB, *filename, *temp;
   int messagesize, source, tag, i, id;
   size_t len;
-  rTag *rtag;
+  tag_t *rtag;
   MPI_Status status;
   char errorString[maxErrorString];
 
@@ -630,7 +630,7 @@ size_t fwPOSIXASYNCH( int id, int tsId, const void *buffer, size_t len )
   int flush = 0;
   int filled = 0;
   aFiledataPA *afd;
-  node *curr;
+  listElem_t *curr;
   char errorString[maxErrorString];
 
   flush = ( tsId != oldTsId ) ? 1 : 0;

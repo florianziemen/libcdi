@@ -53,7 +53,7 @@ typedef struct
   bool *nfinished;
 } bFiledataPF;
 
-static queue *bibAFiledataPF;
+static queue_t *bibAFiledataPF;
 
 /***************************************************************/
   
@@ -183,10 +183,10 @@ bool compareNamesAPF ( void *v1, void *v2 )
 void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 {
   int i, source, iret;
-  rTag *rtag;
+  tag_t *rtag;
   MPI_Status status;
   bFiledataPF *bfd; 
-  queue *bibBFiledataPF;
+  queue_t *bibBFiledataPF;
   long amount;
   char errorString[maxErrorString];
 
@@ -385,7 +385,7 @@ size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t 
   int flush = 0;
   int filled = 0;
   aFiledataPF *afd;
-  node *curr;
+  listElem_t *curr;
   char errorString[maxErrorString];
 
   flush = ( tsID != oldTsID ) ? 1 : 0;
@@ -460,9 +460,9 @@ int fcPOSIXFPGUARDSENDRECV ( int id )
 
 /***************************************************************/
 // baustelle, in modi vereinheitlichen, kapseln in pio_queue.c
-void queueCheckFP ( queue *q, const char *name )
+void queueCheckFP ( queue_t *q, const char *name )
 {
-  node *curr;
+  listElem_t *curr;
   aFiledataPF *afd;
   size_t len;
   char errorString[maxErrorString];
