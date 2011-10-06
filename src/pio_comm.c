@@ -236,16 +236,24 @@ MPI_Comm commInqCommModel( void )
 
 void     commDefIsProcColl  ( int isProcColl )
 {
-  assert ( pioinfo2 != NULL );
-  pioinfo2->nodeInfo.isProcColl = isProcColl;
+  assert ( pioinfo2 != NULL &&
+           pioinfo2->commNode != MPI_COMM_NULL &&
+           pioinfo2->commColl == MPI_COMM_NULL );
+
+  pioinfo2->nodeInfo.isProcColl = isProcColl;  
+  xmpi ( MPI_Comm_split ( pioinfo2->commNode, pioinfo2->nodeInfo.isProcColl, 0, 
+                          &pioinfo2->commColl ));
+  xmpi ( MPI_Comm_size ( pioinfo2->commColl, &pioinfo2->sizeColl ));
+  xmpi ( MPI_Comm_rank ( pioinfo2->commColl, &pioinfo2->rankColl )); 
 }
 
 
 void     commDefCommNode    ( MPI_Comm commNode )
 {
   assert ( pioinfo2 != NULL );
-  //pioinfo2->commNode = commNode; 
   xmpi ( MPI_Comm_dup ( commNode, &pioinfo2->commNode ));
+  xmpi ( MPI_Comm_size ( pioinfo2->commNode, &pioinfo2->sizeNode ));
+  xmpi ( MPI_Comm_rank ( pioinfo2->commNode, &pioinfo2->rankNode ));
 }
 
 
