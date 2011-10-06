@@ -45,7 +45,7 @@ enum
 
 
 
-void commsIOCreate ( MPI_Comm, int );
+void commsIOCreate  ();
 void commsIOCleanup ();
 
 void rpcUnpackResources ( char *, int, MPI_Comm );

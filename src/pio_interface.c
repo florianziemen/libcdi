@@ -74,14 +74,14 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOModus )
   commDefIOModus  ( IOModus );
   commDefCommPio ();
 
-  commsIOCreate ( comm, nIOP );
+  commsIOCreate ();
 
   //if ( commInqRankGlob () == 0 ) commPrint ( stdout );
   commPrint ( stdout );
 
   if ( commInqRole () == ISPROCPIO ) 
     {
-      IOServer ( commInqCommPio (), IOModus );
+      IOServer ();
       commsIOCleanup ();
       MPI_Finalize ();
       exit ( 0 );

@@ -25,7 +25,7 @@ MPI_Comm * commsIO;
 MPI_Comm commCalc;
  
  
-void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
+void  commsIOCreate ()
 {   
   int * ranks;
   int i;
@@ -34,7 +34,8 @@ void  commsIOCreate ( MPI_Comm commGlob, int nIOP )
   char name[10];
   int rankGlob = commInqRankGlob ();
 
-  nProcsIO = nIOP;
+  MPI_Comm commGlob = commInqCommGlob ();
+  nProcsIO = commInqNProcsIO ();
   nProcsCalc = commInqNProcsModel ();
 
   commsIO = ( MPI_Comm * ) xmalloc ( nProcsIO * sizeof ( MPI_Comm ));

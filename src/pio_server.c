@@ -238,7 +238,7 @@ void getData ( int tsID, int vdate, int vtime )
   @return
 */
 
-void IOServer ( MPI_Comm comm, int ptype )
+void IOServer ()
 {
   int source, tag, * iBuffer;
   MPI_Status status;
@@ -247,6 +247,8 @@ void IOServer ( MPI_Comm comm, int ptype )
   int nnodes, color;
   char * buffer;
   int size;
+  MPI_Comm comm = commInqCommPio ();
+  int ptype = commInqIOModus ();
   
   xdebugComm ( &commCalc );
      

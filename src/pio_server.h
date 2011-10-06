@@ -11,7 +11,7 @@
 
 extern MPI_Comm * commPio;
 
-void IOServer ( MPI_Comm, int );
+void IOServer ();
 
 #endif
 
