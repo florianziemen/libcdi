@@ -14,6 +14,7 @@
 typedef struct {
   int hostID;
   int isProcColl;
+  int nNodes;
 } nodeInfo_t;
 
 typedef struct {
@@ -36,6 +37,8 @@ typedef struct {
   int rankNode;
   char hostname [ MPI_MAX_PROCESSOR_NAME + 1 ];
   nodeInfo_t nodeInfo;
+  int * nodeSizes;
+  int * nodeMap;
   int specialRankNode;
 
   MPI_Comm commColl;
@@ -54,7 +57,7 @@ extern pioInfo_t * pioinfo2;
 enum { MAXNPROCSIO = 256,
        MAXIOMODUS  = PIO_POSIX_FPGUARD_SENDRECV};
 
-enum { NODEINFO = 9999, sizeNodeInfo = 2 };
+enum { NODEINFO = 9999, sizeNodeInfo = 3 };
 
 void     commInit           ( void );
 void     commDestroy        ( void );
@@ -75,6 +78,7 @@ void     commDefIsProcColl  ( int );
 void     commDefCommNode    ( MPI_Comm );
 void     commDefHostName    ( char *, size_t );
 void     commDefHostID      ( int );
+void     commDefNNodes      ( int );
 void     commDefCommsIO     ( void );
 void     commPrint          ( FILE * );
 

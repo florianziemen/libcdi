@@ -239,9 +239,9 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
   for ( i = 1; i < size; i++ )
     allHosts[i] = allHosts[0] + i * MPI_MAX_PROCESSOR_NAME;
 
-  MPI_Allgather ( myHost, MPI_MAX_PROCESSOR_NAME, MPI_CHAR,
-                            & ( allHosts[0][0] ), MPI_MAX_PROCESSOR_NAME,
-                            MPI_CHAR, commF2C );
+  xmpi ( MPI_Allgather ( myHost, MPI_MAX_PROCESSOR_NAME, MPI_CHAR,
+                         & ( allHosts[0][0] ), MPI_MAX_PROCESSOR_NAME,
+                         MPI_CHAR, commF2C ));
 
   qsort ( allHosts, size, sizeof ( char * ), cmpr );
 
@@ -272,6 +272,7 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
   commDefCommNode ( * myComm );
   commDefHostName ( myHost, len );
   commDefHostID   ( * color );
+  commDefNNodes ( * nnodes );
 
 
   free ( allHosts0 );
