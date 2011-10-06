@@ -25,6 +25,7 @@ typedef struct {
   MPI_Comm commGlob;
   int sizeGlob;
   int rankGlob;
+  int root;
 
   MPI_Comm commPio;
   int sizePio;
@@ -74,10 +75,11 @@ void     commDefIsProcColl  ( int );
 void     commDefCommNode    ( MPI_Comm );
 void     commDefHostName    ( char *, size_t );
 void     commDefHostID      ( int );
+void     commDefCommsIO     ( void );
 void     commPrint          ( FILE * );
 
 void     commSendNodeInfo   ( void );
-void     commRecvNodeInfo   ( int );
+void     commDefCommsIO     ( void );
 
 
 

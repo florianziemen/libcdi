@@ -26,6 +26,7 @@ void pioinfoInit ( pioInfo_t * p )
   p->commGlob            = MPI_COMM_NULL;
   p->sizeGlob            = CDI_UNDEFID;
   p->rankGlob            = CDI_UNDEFID;
+  p->root                = CDI_UNDEFID;
 
   p->commPio             = MPI_COMM_NULL;
   p->sizePio             = CDI_UNDEFID;
@@ -91,7 +92,8 @@ void commDefCommGlob ( MPI_Comm c )
 
   pioinfo2->commGlob = c;
   xmpi ( MPI_Comm_size ( c, &pioinfo2->sizeGlob ));
-  xmpi ( MPI_Comm_rank ( c, &pioinfo2->rankGlob ));  
+  xmpi ( MPI_Comm_rank ( c, &pioinfo2->rankGlob ));
+  pioinfo2->root = 0;
 }
  
 
@@ -224,7 +226,7 @@ void     commDefCommNode    ( MPI_Comm commNode )
 void     commDefHostName    ( char * hostname, size_t len )
 {
   assert ( pioinfo2 != NULL );
-  strncpy ( &pioinfo2->hostname, hostname, len );
+  strncpy ( pioinfo2->hostname, hostname, len );
 }
 
 
@@ -237,29 +239,41 @@ void     commDefHostID      ( int hostID )
 
 void commSendNodeInfo ( void )
 {
-  int rootRank = 0;
-
   assert ( pioinfo2 != NULL &&
+           pioinfo2->root != CDI_UNDEFID &&
            pioinfo2->nodeInfo.hostID != CDI_UNDEFID &&
            pioinfo2->nodeInfo.isProcColl != CDI_UNDEFID );
 
   commPrint ( stdout);
   
-  xmpi ( MPI_Send ( &pioinfo2->nodeInfo, sizeNodeInfo, MPI_INTEGER, rootRank, 
-                    NODEINFO, pioinfo2->commGlob ));
+  xmpi ( MPI_Send ( &pioinfo2->nodeInfo, sizeNodeInfo, MPI_INTEGER, 
+                    pioinfo2->root, NODEINFO, pioinfo2->commGlob ));
 }
 
 
-void commRecvNodeInfo ( int rank )
+
+void     commDefCommsIO     ( void )
 {
   nodeInfo_t nodeInfo;
   MPI_Status status;
+  int i;
 
-  xmpi ( MPI_Recv ( &nodeInfo, sizeNodeInfo, MPI_INTEGER, rank, 
-                    NODEINFO, pioinfo2->commGlob, &status ));
+  assert ( pioinfo2 != NULL &&
+           pioinfo2->root != CDI_UNDEFID &&
+           pioinfo2->nProcsModel != CDI_UNDEFID &&
+           pioinfo2->sizeGlob != CDI_UNDEFID &&
+           pioinfo2->rankGlob != CDI_UNDEFID &&
+           pioinfo2->commGlob != MPI_COMM_NULL );
 
-  xdebug ("#### recvd from PE%d nodeInfo: nodeID=%d, isProcColl=%d", 
-          rank, nodeInfo.hostID, nodeInfo.isProcColl );
+  if ( pioinfo2->rankGlob == pioinfo2->root )
+    for ( i = pioinfo2->nProcsModel; i < pioinfo2->sizeGlob; i++ )
+      {
+        xmpi ( MPI_Recv ( &nodeInfo, sizeNodeInfo, MPI_INTEGER, i, 
+                          NODEINFO, pioinfo2->commGlob, &status ));
+        
+        xdebug ("#### recvd from PE%d nodeInfo: nodeID=%d, isProcColl=%d", 
+                i, nodeInfo.hostID, nodeInfo.isProcColl );
+      }
 }
 
 

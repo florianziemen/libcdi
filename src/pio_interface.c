@@ -64,10 +64,6 @@ int pioInit ( int comm, int nIOP, int mode )
 #ifdef USE_MPI
 MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOModus )
 {
-  int buffer, sizeGlob, rankGlob, nProcsModel, i;
-  MPI_Comm commGlob;
-  int rankBcast = 0;
-
   commInit ();
   commDefCommGlob ( comm );
   commDefNProcsIO ( nIOP );
@@ -76,11 +72,6 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOModus )
 
   commsIOCreate ();
 
-  rankGlob = commInqRankGlob ();
-
-  if ( rankGlob == rankBcast ) commPrint ( stdout );
-  //commPrint ( stdout );
-
   if ( commInqIsProcIO ()) 
     {
       IOServer ();
@@ -88,16 +79,8 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOModus )
       MPI_Finalize ();
       exit ( 0 );
     }
-  
-  else if ( rankGlob == rankBcast )
-    {
-      sizeGlob = commInqSizeGlob ();
-      nProcsModel = commInqNProcsModel ();
-
-      for ( i = nProcsModel; i < sizeGlob; i++ )
-        commRecvNodeInfo ( i );
-        
-    }
+  else 
+    commDefCommsIO ();        
   
   
   return commInqCommModel ();
