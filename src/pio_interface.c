@@ -29,9 +29,6 @@ int       * winFirstWrite = NULL;
 MPI_Group * groupsIO      = NULL;
 MPI_Group * groupsIONetto = NULL;
 
-
-int pioType;
-
 /*****************************************************************************/
 
 
@@ -75,34 +72,22 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOModus )
   commDefCommGlob ( comm );
   commDefNProcsIO ( nIOP );
   commDefIOModus  ( IOModus );
-
-  sizeGlob = commInqSizeGlob ();
-  rankGlob = commInqRankGlob ();
-
-  if ( rankGlob == 0 ) commPrint ( stdout );
-
-  pioType  = IOModus;
-
-  nProcsCalc = sizeGlob - nIOP;
-  
-  if ( rankGlob >= nProcsCalc )
-    isCalcPE = 0;
-  else 
-    isCalcPE = 1;
-
-  xmpi ( MPI_Comm_split ( comm, isCalcPE, 0, &commModel ));
+  commDefCommPio ();
 
   commsIOCreate ( comm, nIOP );
 
-  if ( !isCalcPE ) 
+  //if ( commInqRankGlob () == 0 ) commPrint ( stdout );
+  commPrint ( stdout );
+
+  if ( commInqRole () == ISPROCPIO ) 
     {
-      IOServer ( commModel, IOModus );
+      IOServer ( commInqCommPio (), IOModus );
       commsIOCleanup ();
       MPI_Finalize ();
       exit ( 0 );
     }
   
-  return commModel;
+  return commInqCommModel ();
 }
 #endif
 
@@ -494,7 +479,6 @@ void pioBuffer ( int streamID, int varID, const double *data, int nmiss )
   int size = sizeof ( double ), chunk, vlistID, IOID = CDI_UNDEFID;
   double temp, sep = ( double ) SEPARATOR;
   int rankGlob = commInqRankGlob ();
-
   
   vlistID = streamInqVlist ( streamID );
   IOID    = vlistInqVarIOrank ( vlistID, varID ) - nProcsCalc;

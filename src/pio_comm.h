@@ -14,6 +14,8 @@
 typedef struct {
   int IOModus;
   int nProcsIO;
+  int nProcsModel;
+  int role;
 
   MPI_Comm commGlob;
   int sizeGlob;
@@ -49,6 +51,8 @@ typedef struct {
 enum { MAXNPROCSIO = 256,
        MAXIOMODUS  = PIO_POSIX_FPGUARD_SENDRECV};
 
+enum { ISPROCMODEL, ISPROCPIO, ISPROCCOLL, ISPROCSPEC };
+
 extern pioInfo_t * pioinfo2;
 
 void     commInit        ( void );
@@ -59,8 +63,13 @@ int      commInqSizeGlob ( void );
 int      commInqRankGlob ( void );
 void     commDefNProcsIO ( int );
 int      commInqNProcsIO ( void );
+int      commInqNProcsModel ( void );
 void     commDefIOModus  ( int );
 int      commInqIOModus  ( void );
+void     commDefCommPio  ( void );
+MPI_Comm commInqCommPio  ( void );
+MPI_Comm commInqCommModel( void );
+int      commInqRole     ( void );
 void     commPrint ( FILE * );
 
 

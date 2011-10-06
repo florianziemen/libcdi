@@ -27,11 +27,11 @@
 #include "namespace.h"
 #include "pio_interface.h"
 #include "pio_rpc.h"
+#include "pio_comm.h"
 
 #define  MAX_FNAMES  3
 
 extern resOps streamOps;
-extern int pioType;
 
 
 FILE *popen(const char *command, const char *type);
@@ -1584,7 +1584,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 #ifdef USE_MPI
   if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
     {
-      if ( pioType != PIO_NONE  )
+      if ( commInqIOModus () != PIO_NONE  )
         pioBuffer ( streamID, varID, data, nmiss );
       return; 
     } 
