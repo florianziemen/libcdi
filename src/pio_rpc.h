@@ -9,8 +9,6 @@
 
 #include <mpi.h>
 
-extern int nProcsIO;
-extern int nProcsCalc;
 extern MPI_Comm * commsIO;
 extern MPI_Comm commCalc;
 

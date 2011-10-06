@@ -76,10 +76,10 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOModus )
 
   commsIOCreate ();
 
-  //if ( commInqRankGlob () == 0 ) commPrint ( stdout );
-  commPrint ( stdout );
+  if ( commInqRankGlob () == 0 ) commPrint ( stdout );
+  //commPrint ( stdout );
 
-  if ( commInqRole () == ISPROCPIO ) 
+  if ( commInqRole () == ISPROCIO ) 
     {
       IOServer ();
       commsIOCleanup ();
@@ -195,6 +195,8 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
   int * weightsVarsNode;
   int * varMappingNode;
   int nVarsNode, summandRank = 0;
+  int nProcsIO = commInqNProcsIO ();
+  int nProcsCalc = commInqNProcsModel ();
 
   int buckets[nProcsIO];
 
@@ -279,6 +281,7 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 void defVarDeco ( int vlistID, int varID )
 {
   int varSize, cRank, lChunk, rem, lOffset;
+  int nProcsCalc = commInqNProcsModel ();
   deco_t deco[nProcsCalc];
  
   varSize = vlistInqVarSize ( vlistID, varID );
@@ -366,7 +369,7 @@ void modelWinCleanup ( void )
 #ifdef USE_MPI
   int IOID;
 
-  for ( IOID = 0; IOID < nProcsIO; IOID ++ )
+  for ( IOID = 0; IOID < commInqNProcsIO (); IOID ++ )
     {
       if ( winPostSet[IOID] )
         xmpi ( MPI_Win_wait ( win[IOID] )); 
@@ -397,6 +400,8 @@ static
   int IOID, nstreams, * streamIndexArray, streamNo, vlistID, nvars, varID;
   int IOIDchunk = 0;
   int rankGlob = commInqRankGlob ();
+  int nProcsIO = commInqNProcsIO ();
+  int nProcsCalc = commInqNProcsModel ();
   
   nstreams = reshCountType ( &streamOps );
   streamIndexArray = xmalloc ( nstreams * sizeof ( int ));
@@ -438,6 +443,8 @@ void modelWinCreate ( void )
 #ifdef USE_MPI
 
   int IOID, ranks[1];
+  int nProcsIO = commInqNProcsIO ();
+  int nProcsCalc = commInqNProcsModel ();
 
   winBufferSize   = xmalloc ( nProcsIO * sizeof ( winBufferSize[0] ));
   winBuffer       = xmalloc ( nProcsIO * sizeof ( winBuffer[0] ));
@@ -448,7 +455,7 @@ void modelWinCreate ( void )
   groupsIONetto   = xmalloc ( nProcsIO * sizeof ( groupsIONetto[0] ));
 
   getWinBufferSizes ();
-  ranks[0] = nProcsCalc;
+  ranks[0] = commInqNProcsModel ();
 
   for ( IOID = 0; IOID < nProcsIO; IOID ++ )
     {
@@ -481,11 +488,11 @@ void pioBuffer ( int streamID, int varID, const double *data, int nmiss )
   int rankGlob = commInqRankGlob ();
   
   vlistID = streamInqVlist ( streamID );
-  IOID    = vlistInqVarIOrank ( vlistID, varID ) - nProcsCalc;
+  IOID    = vlistInqVarIOrank ( vlistID, varID ) - commInqNProcsModel ();
   chunk   = vlistInqVarDecoChunk ( vlistID, varID, rankGlob );
   
   assert ( IOID >= 0 &&
-           IOID < nProcsIO &&
+           IOID < commInqNProcsIO () &&
            chunk >= 0 );
   
   xdebug3 ("streamID=%d, vlistID=%d, varID=%d, IOID=%d, "
@@ -523,11 +530,11 @@ void  pioEndDef ( int nNodes, int * nodeSizes )
 
   varsMapNDeco ( nNodes, nodeSizes );
 
-  if ( rankGlob < nProcsIO )
+  if ( rankGlob < commInqNProcsIO ())
     {
       reshPackBufferCreate ( &buffer, &bufferSize, commsIO[rankGlob] );
       
-      xmpi ( MPI_Send ( buffer, bufferSize, MPI_PACKED, nProcsCalc, 
+      xmpi ( MPI_Send ( buffer, bufferSize, MPI_PACKED, commInqNProcsModel (), 
                         RESOURCES, * ( commsIO + rankGlob )));
       
       xdebug ( "sent message metadata" );
@@ -557,9 +564,9 @@ void pioFinalize ()
 #ifdef USE_MPI
   int i, ibuffer = 1111;
   
-  for ( i = 0; i < nProcsIO; i++ )
+  for ( i = 0; i < commInqNProcsIO (); i++ )
     {
-      xmpi ( MPI_Send ( &ibuffer, 1, MPI_INT, nProcsCalc, 
+      xmpi ( MPI_Send ( &ibuffer, 1, MPI_INT, commInqNProcsModel (), 
                       FINALIZE, *( commsIO + i )));
       xdebug ( "sent message FINALIZE" );
     }
@@ -578,6 +585,8 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
   int IOID, buffer[timestepSize], iAssert = 0;
   double end = ( double ) END, size = sizeof ( double );
   int rankGlob = commInqRankGlob ();
+  int nProcsIO = commInqNProcsIO ();
+  int nProcsCalc = commInqNProcsModel ();
 
   assert (    ts >= 0 &&
            vdate >= 0 &&

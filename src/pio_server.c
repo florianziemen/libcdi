@@ -41,6 +41,7 @@ static
 void serverWinCleanup ()
 {
   int i;
+  int nProcsCalc = commInqNProcsModel ();
   
   xmpi ( MPI_Win_free ( &win ));
 
@@ -63,6 +64,7 @@ static
   int nstreams, * streamIndexArray, streamNo, vlistID, nvars, varID, iorank;
   int i, decoChunk;
   int rankGlob = commInqRankGlob ();
+  int nProcsCalc = commInqNProcsModel ();
 
   nstreams = reshCountType ( &streamOps );
   streamIndexArray = xmalloc ( nstreams * sizeof ( int ));
@@ -103,11 +105,10 @@ static
 { 
   int ranks[1], i;
   MPI_Group groupCalc;
-  xdebug();
+  int nProcsCalc = commInqNProcsModel ();
 
   xmpi ( MPI_Win_create ( MPI_BOTTOM, 0, sizeof ( double ), MPI_INFO_NULL,
                          commCalc, &win ));
-  xdebug3 ( "created mpi_win" );
 
   /* target group */
   ranks[0] = nProcsCalc;
@@ -139,6 +140,7 @@ void writeVars ( int tsID, int vdate, int vtime )
   
   int nmiss = 0;
   char text[1024];
+  int nProcsCalc = commInqNProcsModel ();
 
   getBufferHead = xmalloc ( nProcsCalc * sizeof ( getBufferHead[0] ));
 
@@ -202,6 +204,7 @@ void getData ( int tsID, int vdate, int vtime )
 {
   int iAssert   = 0, i;
   char text[1024];
+  int nProcsCalc = commInqNProcsModel ();
 
   // todo put in correct lbs and ubs
   assert (    tsID >= 0 &&
@@ -249,7 +252,8 @@ void IOServer ()
   int size;
   MPI_Comm comm = commInqCommPio ();
   int ptype = commInqIOModus ();
-  
+  int nProcsCalc = commInqNProcsModel ();
+
   xdebugComm ( &commCalc );
      
   nfinished = 0;

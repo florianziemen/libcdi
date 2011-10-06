@@ -184,7 +184,7 @@ void     commDefCommPio  ( void )
 
   nProcsModel = pioinfo2->sizeGlob - pioinfo2->nProcsIO;
 
-  pioinfo2->role = pioinfo2->rankGlob >= nProcsModel ? ISPROCPIO : ISPROCMODEL;
+  pioinfo2->role = pioinfo2->rankGlob >= nProcsModel ? ISPROCIO : ISPROCMODEL;
 
   xmpi ( MPI_Comm_split ( pioinfo2->commGlob, pioinfo2->role, 0, 
                           &pioinfo2->commPio ));

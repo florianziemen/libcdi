@@ -19,8 +19,6 @@ extern void  taxisUnpack ( char *, int, int *, int, MPI_Comm );
 extern double cdiDefaultMissval;  
 extern int streamNint;
 
-int nProcsIO;
-int nProcsCalc;
 MPI_Comm * commsIO;
 MPI_Comm commCalc;
  
@@ -35,8 +33,8 @@ void  commsIOCreate ()
   int rankGlob = commInqRankGlob ();
 
   MPI_Comm commGlob = commInqCommGlob ();
-  nProcsIO = commInqNProcsIO ();
-  nProcsCalc = commInqNProcsModel ();
+  int nProcsIO = commInqNProcsIO ();
+  int nProcsCalc = commInqNProcsModel ();
 
   commsIO = ( MPI_Comm * ) xmalloc ( nProcsIO * sizeof ( MPI_Comm ));
   strncpy ( name, "commsIO_", 8 ); 
@@ -98,6 +96,8 @@ void commsIOCleanup ()
 {
   int i;
   int rankGlob = commInqRankGlob ();
+  int nProcsIO = commInqNProcsIO ();
+  int nProcsCalc = commInqNProcsModel ();
   
   for ( i = 0; i < nProcsIO; i++ )
     if ( rankGlob < nProcsCalc || rankGlob == nProcsCalc + i )
