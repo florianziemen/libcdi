@@ -2217,8 +2217,11 @@ void cdfDefZaxis(int streamID, int zaxisID)
   dimlen = zaxisInqSize(zaxisID);
   type   = zaxisInqType(zaxisID);
 
-  if ( dimlen == 1 && type == ZAXIS_SURFACE ) return;
-  if ( dimlen == 1 && type == ZAXIS_MEANSEA ) return;
+  if ( dimlen == 1 && type == ZAXIS_SURFACE     ) return;
+  if ( dimlen == 1 && type == ZAXIS_TOA         ) return;
+  if ( dimlen == 1 && type == ZAXIS_SEA_BOTTOM  ) return;
+  if ( dimlen == 1 && type == ZAXIS_ATMOSPHERE  ) return;
+  if ( dimlen == 1 && type == ZAXIS_MEANSEA     ) return;
 
   zaxisInqName(zaxisID, axisname);
   /*
@@ -2328,7 +2331,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
 	      cdf_put_att_text(fileID, ncvarid, "formula", strlen(tmpname), tmpname);
 	      strcpy(tmpname, "ap: hyai b: hybi ps: aps");
 	      cdf_put_att_text(fileID, ncvarid, "formula_terms", strlen(tmpname), tmpname);
-              
+
 	      cdf_enddef(fileID);
 	      streamptr->ncmode = 2;
 
@@ -2377,8 +2380,8 @@ void cdfDefZaxis(int streamID, int zaxisID)
 	    }
 
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "Z");
-              
-	  if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) ) 
+
+	  if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
             {
 	      if ( nc_inq_dimid(fileID, "nb2", &nvdimID) != NC_NOERR )
 		cdf_def_dim(fileID, "nb2", nvertex, &nvdimID);
@@ -2397,7 +2400,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
           streamptr->ncmode = 2;
 
           cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
-	  
+
           if ( ncbvarid != UNDEFID )
 	    {
 	      int i;
@@ -3048,6 +3051,17 @@ int cdfDefVar(int streamID, int varID)
 
   if ( vlistInqVarMissvalUsed(vlistID, varID) )
     cdfDefVarMissval(streamID, varID, vlistInqVarDatatype(vlistID, varID), 0);
+
+  if ( zid == -1 )
+    {
+      if ( zaxisInqType(zaxisID) == ZAXIS_TOA         || 
+           zaxisInqType(zaxisID) == ZAXIS_SEA_BOTTOM  ||
+           zaxisInqType(zaxisID) == ZAXIS_ATMOSPHERE )
+        {
+          zaxisInqName(zaxisID, varname);
+          cdf_put_att_text(fileID, ncvarid, "level_type", strlen(varname), varname);
+        }
+    }
 
   /* Attributes */
   defineAttributes(vlistID, varID, fileID, ncvarid);
@@ -4385,7 +4399,30 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   if ( warn )
                     {
                       warn = FALSE;
-                      Warning("Gridtype %s unsupported!", attstring);
+                      Warning("Grid type %s unsupported!", attstring);
+                    }
+                }
+
+              cdfSetVar(ncvars, ncvarid, TRUE);
+            }
+          else if ( strcmp(attname, "level_type") == 0 && atttype == NC_CHAR )
+            {
+              cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+              strtolower(attstring);
+
+              if      ( strcmp(attstring, "toa") == 0 )
+                ncvars[ncvarid].zaxistype = ZAXIS_TOA;
+              else if ( strcmp(attstring, "seabottom") == 0 )
+                ncvars[ncvarid].zaxistype = ZAXIS_SEA_BOTTOM;
+              else if ( strcmp(attstring, "atmosphere") == 0 )
+                ncvars[ncvarid].zaxistype = ZAXIS_ATMOSPHERE;
+              else
+                {
+                  static int warn = TRUE;
+                  if ( warn )
+                    {
+                      warn = FALSE;
+                      Warning("Grid type %s unsupported!", attstring);
                     }
                 }
 
@@ -5636,7 +5673,11 @@ void define_all_zaxes(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 
 	      if ( zsize == 1 )
 		{
-		  zaxisType = ZAXIS_SURFACE;
+                  if ( ncvars[ncvarid].zaxistype != UNDEFID )
+                    zaxisType = ncvars[ncvarid].zaxistype;
+                  else
+                    zaxisType = ZAXIS_SURFACE;
+
 		  zvar[0] = 0;
 		  /*
 		  if ( zdimid == UNDEFID )

@@ -2344,12 +2344,12 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 	GRIB_CHECK(grib_set_long(gh, "level", (long) zaxisInqLevel(zaxisID, levelID)), 0);
 	break;
       }
-    case ZAXIS_NOMINAL_TOP:
+    case ZAXIS_TOA:
       {
 	if ( editionNumber <= 1 )
-	  GRIB_CHECK(grib_set_long(gh, "indicatorOfTypeOfLevel", GRIB1_LTYPE_NOMINAL_TOP), 0);
+	  GRIB_CHECK(grib_set_long(gh, "indicatorOfTypeOfLevel", GRIB1_LTYPE_TOA), 0);
 	else
-	  GRIB_CHECK(grib_set_long(gh, "typeOfFirstFixedSurface", GRIB2_LTYPE_NOMINAL_TOP), 0);
+	  GRIB_CHECK(grib_set_long(gh, "typeOfFirstFixedSurface", GRIB2_LTYPE_TOA), 0);
 	break;
       }
     case ZAXIS_SEA_BOTTOM:

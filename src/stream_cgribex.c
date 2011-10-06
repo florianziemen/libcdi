@@ -1919,9 +1919,9 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	ISEC1_Level2    = 0;
 	break;
       }
-    case ZAXIS_NOMINAL_TOP:
+    case ZAXIS_TOA:
       {
-	ISEC1_LevelType = GRIB1_LTYPE_NOMINAL_TOP;
+	ISEC1_LevelType = GRIB1_LTYPE_TOA;
 	ISEC1_Level1    = 0;
 	ISEC1_Level2    = 0;
 	break;

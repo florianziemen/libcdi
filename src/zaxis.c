@@ -37,7 +37,7 @@ ZaxistypeEntry[] = {
   { /* 10 */ 1, "alt",        "altitude",          "",               "m"},
   { /* 11 */ 0, "lev",        "sigma",             "",               "level"},
   { /* 12 */ 0, "lev",        "meansea",           "",               "level"},
-  { /* 13 */ 0, "toa",        "nominal_top",       "",               ""},
+  { /* 13 */ 0, "toa",        "top_of_atmosphere", "",               ""},
   { /* 14 */ 0, "seabottom",  "sea_bottom",        "",               ""},
   { /* 15 */ 0, "atmosphere", "atmosphere",        "",               ""},
 };
