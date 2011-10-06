@@ -86,22 +86,32 @@ size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
       iret = fwMPINONB ( fileID, tsID, buffer, len );
       break;
 #ifndef _SX
+/*
     case PIO_POSIX_ASYNCH:
       iret = fwPOSIXASYNCH ( fileID, tsID, buffer, len );
       break;
+*/
 #endif
+/*
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fwPOSIXFPGUARDSENDRECV ( fileID, tsID, buffer, len );
       break;
+*/
+/*
     case PIO_POSIX_FPGUARD_THREAD:
       iret = fwPOSIXFPGUARDTHREAD ( fileID, tsID, buffer, len );
       break;
+*/
+/*
     case PIO_POSIX_FPGUARD_THREAD_REFUSE:
       iret = fwPOSIXFPGUARDTHREADREFUSE ( fileID, tsID, buffer, len );
       break;
+*/
+/*
     case PIO_POSIX_NONB:
       iret = fwPOSIXNONB ( fileID, tsID, buffer, len );
       break;
+*/
     }
 
   return iret;
@@ -118,22 +128,32 @@ int pioFileClose ( int id )
       iret = fcMPINONB ( id );
       break;
 #ifndef _SX
+/*
     case PIO_POSIX_ASYNCH:
       iret = fcPOSIXASYNCH ( id );
       break;
+*/
 #endif
+/*
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fcPOSIXFPGUARDSENDRECV ( id );
       break;
+*/
+/*
     case PIO_POSIX_FPGUARD_THREAD:
       iret = fcPOSIXFPGUARDTHREAD ( id );
       break;
+*/
+/*
     case PIO_POSIX_FPGUARD_THREAD_REFUSE:
       iret = fcPOSIXFPGUARDTHREADREFUSE ( id );
       break;
+*/
+/*
     case PIO_POSIX_NONB:
       iret = fcPOSIXNONB ( id );
       break;
+*/
     }
 
   return iret;
@@ -151,22 +171,32 @@ int pioFileOpenW ( const char *filename )
       iret = fowMPINONB ( filename );
       break;
 #ifndef _SX
+/*
     case PIO_POSIX_ASYNCH:
       iret = fowPOSIXASYNCH ( filename );
       break;
+*/
 #endif
+/*
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fowPOSIXFPGUARDSENDRECV ( filename );
       break;
+*/
+/*
     case PIO_POSIX_FPGUARD_THREAD:
       iret = fowPOSIXFPGUARDTHREAD ( filename );
       break;
+*/
+/*
     case PIO_POSIX_FPGUARD_THREAD_REFUSE:
       iret = fowPOSIXFPGUARDTHREADREFUSE ( filename );
       break;
+*/
+/*
     case PIO_POSIX_NONB:
       iret = fowPOSIXNONB ( filename );
       break;
+*/
     }
 
   return iret;
@@ -307,22 +337,32 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
       collectingData = initMPINONB ();
       break;
 #ifndef _SX
+/*
     case PIO_POSIX_ASYNCH:
       collectingData = initPOSIXASYNCH ();
       break;
+*/
 #endif
+/*
     case PIO_POSIX_FPGUARD_SENDRECV:
       collectingData = initPOSIXFPGUARDSENDRECV ();
       break;
+*/
+/*
     case PIO_POSIX_FPGUARD_THREAD:
       collectingData = initPOSIXFPGUARDTHREAD ();
       break;
+*/
+/*
     case PIO_POSIX_FPGUARD_THREAD_REFUSE:
       collectingData = initPOSIXFPGUARDTHREADREFUSE ();
       break;
+*/
+/*
     case PIO_POSIX_NONB:
       collectingData = initPOSIXNONB ();
       break;
+*/
     }
 #endif
 
@@ -340,9 +380,11 @@ void bFinalize ()
 #ifdef USE_MPI
   switch ( pioinfo->type )
     {
+/*
     case PIO_POSIX_FPGUARD_THREAD:
       finalizePOSIXFPGUARDTHREAD ();
       break;
+*/
     }
 
   if ( pioinfo->collectorComm != MPI_COMM_NULL )
