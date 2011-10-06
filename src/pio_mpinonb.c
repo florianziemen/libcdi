@@ -206,7 +206,7 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
 	  curr = curr->next;
 	}
       oldTsID = tsID;
-      MPI_Barrier ( pioinfo->comm ); 
+      xmpi ( MPI_Barrier ( pioinfo->comm )); 
     }                                          
 
   of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, fileID );
@@ -272,8 +272,8 @@ int fcMPINONB ( int fileID )
 
   if ( ddebug == MAXDEBUG )
     {
-      MPI_Reduce ( &accumWait, &accumWaitMax, 
-		   1, MPI_DOUBLE, MPI_MAX, 0, pioinfo->comm  );
+      xmpi ( MPI_Reduce ( &accumWait, &accumWaitMax, 
+                          1, MPI_DOUBLE, MPI_MAX, 0, pioinfo->comm  ));
       xdebug ( "IOPE%d: Wait time %15.10lf s",
                pioinfo->rank, accumWait );
       if ( pioinfo->rank == 0 )
@@ -336,7 +336,7 @@ int fowMPINONB ( const char *filename )
 	    buffersize = initial_buffersize;
 	}
       
-      MPI_Bcast ( &buffersize, 1, MPI_LONG, bcastRank, pioinfo->comm );
+      xmpi ( MPI_Bcast ( &buffersize, 1, MPI_LONG, bcastRank, pioinfo->comm ));
     }
 
   xdebug ( "buffersize=%d", buffersize );
@@ -362,7 +362,7 @@ int initMPINONB ()
 {
   int collectingData = 1;
 
-  MPI_Comm_dup ( pioinfo->comm, &( pioinfo->collectorComm ));
+  xmpi ( MPI_Comm_dup ( pioinfo->comm, &( pioinfo->collectorComm )));
 
   bibAFiledataM = queueInit ( destroyAFiledataMPINONB, compareNamesMPINONB );
 

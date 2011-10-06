@@ -1,5 +1,5 @@
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <stdbool.h>
@@ -13,11 +13,8 @@
 #include "pio_util.h"
 
 #ifdef USE_MPI
-
 #include "cdi.h"
 #include "pio_impl.h"
-
-
 #endif
 
 #ifdef USE_MPI
@@ -192,8 +189,8 @@ void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
   char *myHost, **allHosts, *allHosts0, *curr;
   char hostname [ MPI_MAX_PROCESSOR_NAME + 1 ];
 
-  MPI_Comm_size ( commF2C, &size );
-  MPI_Comm_rank ( commF2C, &rank );
+  xmpi ( MPI_Comm_size ( commF2C, &size ));
+  xmpi ( MPI_Comm_rank ( commF2C, &rank ));
 
   myHost = ( char * ) xmalloc ( MPI_MAX_PROCESSOR_NAME * sizeof ( char ));
 
@@ -269,8 +266,8 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
   *color = 1;
 
 #ifdef USE_MPI
-  MPI_Comm_size ( comm, &size );
-  MPI_Comm_rank ( comm, &rank );
+  xmpi ( MPI_Comm_size ( comm, &size ));
+  xmpi ( MPI_Comm_rank ( comm, &rank ));
 
   if ( ptype < 0 || ptype > maxPtype )
     xabort ( "PIOTYPE is no valid modus" );
@@ -291,8 +288,8 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
 
   pioinfo->color = *color;
 
-  MPI_Comm_rank ( pioinfo->comm, &( pioinfo->rank ));
-  MPI_Comm_size ( pioinfo->comm, &( pioinfo->size ));
+  xmpi ( MPI_Comm_rank ( pioinfo->comm, &( pioinfo->rank )));
+  xmpi ( MPI_Comm_size ( pioinfo->comm, &( pioinfo->size )));
 
   xdebug( "IOPE%d in bInit(), ptype=%d, initial_buffersize=%ld: "
           "after init pioinfo ...",
@@ -303,7 +300,7 @@ MPI_Comm bInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
   switch ( pioinfo->type )
     {
     case PIO_NONE:
-      MPI_Comm_dup ( pioinfo->comm, &( pioinfo->collectorComm ));
+      xmpi ( MPI_Comm_dup ( pioinfo->comm, &( pioinfo->collectorComm )));
       collectingData = 1;
       break;
     case PIO_MPI_NONB:
@@ -349,10 +346,10 @@ void bFinalize ()
     }
 
   if ( pioinfo->collectorComm != MPI_COMM_NULL )
-    MPI_Comm_free ( &( pioinfo->collectorComm ));
+    xmpi ( MPI_Comm_free ( &( pioinfo->collectorComm )));
 
   if ( pioinfo->comm != MPI_COMM_NULL )
-    MPI_Comm_free ( &( pioinfo->comm ));
+    xmpi ( MPI_Comm_free ( &( pioinfo->comm )));
 
   free ( pioinfo );
 #endif

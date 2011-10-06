@@ -27,7 +27,7 @@ static int nlev[nVars] = {1,1,5,5,2};
 #define maxlev   5
 #define ntsteps  3 
 
-int IOModus = PIO_POSIX_FPGUARD_SENDRECV;
+int IOModus = PIO_MPI_NONB;
 
 
 void modelRun ()
@@ -74,7 +74,7 @@ void modelRun ()
   streamDefVlist ( streamID, vlistID);
 
 #ifdef USE_MPI
-  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+  xmpi ( MPI_Comm_rank ( MPI_COMM_WORLD, &rank ));
   pioMetadata ( nNodes, nodeSizes );
 #endif 
 
@@ -137,11 +137,11 @@ int main (int argc, char *argv[])
   MPI_Comm commGlob, commModel; 
 
 
-  MPI_Init ( &argc, &argv);           
-  MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob );
-  MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN );
-  MPI_Comm_size ( commGlob, &sizeGlob );
-  MPI_Comm_rank ( commGlob, &rankGlob ); 
+  xmpi ( MPI_Init ( &argc, &argv));           
+  xmpi ( MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob ));
+  xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
+  xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
+  xmpi ( MPI_Comm_rank ( commGlob, &rankGlob )); 
                                          
   if ( nProcsIO <=0 || nProcsIO >= sizeGlob )
     xabort ( "bad distribution of tasks on PEs" );
