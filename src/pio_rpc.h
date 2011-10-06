@@ -9,9 +9,6 @@
 
 #include <mpi.h>
 
-extern MPI_Comm * commsIO;
-extern MPI_Comm commCalc;
-
 typedef enum
   {
     FINALIZE,
@@ -40,11 +37,6 @@ enum
   winBufferSizeMax = 1024,
   timestepSize = 3
 };
-
-
-
-void commsIOCreate  ();
-void commsIOCleanup ();
 
 void rpcUnpackResources ( char *, int, MPI_Comm );
 

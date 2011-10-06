@@ -332,7 +332,6 @@ void     commEvalPhysNodes  ( void )
            pioinfo2->sizeGlob    != CDI_UNDEFID &&
            pioinfo2->rankGlob    != CDI_UNDEFID &&
            pioinfo2->commGlob    != MPI_COMM_NULL );
-  xdebug();
 
   size = pioinfo2->nProcsIO * sizeNodeInfo;
 
@@ -407,7 +406,6 @@ void     commEvalPhysNodes  ( void )
   free ( p2 );
   free ( p1 );
   free ( nodeInfo );
-  xdebug();
 }
 
 // collective call
@@ -419,6 +417,9 @@ void     commDefCommsIO     ( void )
 
   pioinfo2->commsIO = xmalloc ( pioinfo2->nProcsColl * 
                                 sizeof ( pioinfo2->commsIO[0] ));
+  for ( IOID = 0; IOID < pioinfo2->nProcsColl; IOID++ )
+    pioinfo2->commsIO[IOID] = MPI_COMM_NULL;
+
   strncpy ( name, "COMMSIO_", 8 ); 
   name[MAXCOMMIONAME - 1] = '\0';
   
@@ -463,6 +464,27 @@ void     commDefCommsIO     ( void )
   free ( ranks );
 
   commPrint ( stdout );
+}
+
+
+MPI_Comm commInqCommsIO     ( int IOID )
+{
+  assert ( IOID >= 0 &&
+           pioinfo2 != NULL &&
+           pioinfo2->nProcsColl != CDI_UNDEFID &&
+           IOID < pioinfo2->nProcsColl &&
+           pioinfo2->commsIO != NULL &&
+           pioinfo2->commsIO[IOID] != MPI_COMM_NULL );
+
+  return pioinfo2->commsIO[IOID];
+}
+
+
+MPI_Comm commInqCommCalc    ( void )
+{
+  assert ( pioinfo2 != NULL &&
+           pioinfo2->commCalc != MPI_COMM_NULL );
+  return pioinfo2->commCalc;
 }
 
 

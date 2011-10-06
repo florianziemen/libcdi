@@ -108,11 +108,11 @@ static
   int nProcsCalc = commInqNProcsModel ();
 
   xmpi ( MPI_Win_create ( MPI_BOTTOM, 0, sizeof ( double ), MPI_INFO_NULL,
-                         commCalc, &win ));
+                          commInqCommCalc (), &win ));
 
   /* target group */
   ranks[0] = nProcsCalc;
-  xmpi ( MPI_Comm_group ( commCalc, &groupCalc ));
+  xmpi ( MPI_Comm_group ( commInqCommCalc (), &groupCalc ));
   xmpi ( MPI_Group_excl ( groupCalc, 1, ranks, &groupModel ));
 
   /* first shot with fixed getBuffers */
@@ -246,19 +246,18 @@ void IOServer ()
   int source, tag, * iBuffer;
   MPI_Status status;
   static int nfinished;
-  MPI_Comm commColl;
+  MPI_Comm commColl, commCalc;
   int nnodes, color;
   char * buffer;
   int size;
   MPI_Comm comm = commInqCommPio ();
   int ptype = commInqIOModus ();
   int nProcsCalc = commInqNProcsModel ();
-
-  xdebugComm ( &commCalc );
      
   nfinished = 0;
   commColl = backendInit ( ptype, comm, &color, &nnodes );
-  
+  commCalc = commInqCommCalc ();
+
   for ( ;; )
     {
       MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commCalc, &status );

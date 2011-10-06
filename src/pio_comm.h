@@ -85,7 +85,9 @@ void     commDefHostID      ( int );
 void     commDefNNodes      ( int ); 
 void     commDefNProcsColl  ( int );
 void     commEvalPhysNodes  ( void );
-void     commDefCommsIO     ( void );
+void     commDefCommsIO     ( void ); 
+MPI_Comm commInqCommsIO     ( int );
+MPI_Comm commInqCommCalc    ( void );
 void     commPrint          ( FILE * );
 
 void     commSendNodeInfo   ( void );

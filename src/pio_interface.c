@@ -70,12 +70,9 @@ MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOModus )
   commDefIOModus  ( IOModus );
   commDefCommPio ();
 
-  commsIOCreate ();
-
   if ( commInqIsProcIO ()) 
     {
       IOServer ();
-      commsIOCleanup ();
       commDestroy ();
       MPI_Finalize ();
       exit ( 0 );
@@ -460,16 +457,18 @@ void modelWinCreate ( void )
     {
       assert ( winBufferSize[IOID] > 0 );
       winBuffer[IOID] = NULL;
-      xmpi ( MPI_Alloc_mem (( MPI_Aint ) ( winBufferSize[IOID] * sizeof ( double )), 
-                           MPI_INFO_NULL, &winBuffer[IOID] ));
+      xmpi ( MPI_Alloc_mem (( MPI_Aint )( winBufferSize[IOID] * 
+                                          sizeof ( double )), 
+                            MPI_INFO_NULL, &winBuffer[IOID] ));
       assert ( winBuffer[IOID] != NULL ); 
       winBufferHead[IOID] = winBuffer[IOID];
       winFirstWrite[IOID] = 1;
       xmpi ( MPI_Win_create ( winBuffer[IOID], 
-                              ( MPI_Aint ) winBufferSize[IOID] * sizeof ( double ),
-                              sizeof ( double ),
-                              MPI_INFO_NULL, commsIO[IOID], &win[IOID] )); 
-      xmpi ( MPI_Comm_group ( commsIO[IOID], &groupsIONetto[IOID] ));
+                              ( MPI_Aint ) winBufferSize[IOID] * 
+                              sizeof ( double ), sizeof ( double ),
+                              MPI_INFO_NULL, commInqCommsIO ( IOID ), 
+                              &win[IOID] )); 
+      xmpi ( MPI_Comm_group ( commInqCommsIO ( IOID ), &groupsIONetto[IOID] ));
       xmpi ( MPI_Group_incl ( groupsIONetto[IOID], 1, ranks, 
                               &groupsIONetto[IOID] ));
     }
@@ -531,10 +530,10 @@ void  pioEndDef ( int nNodes, int * nodeSizes )
 
   if ( rankGlob < commInqNProcsIO ())
     {
-      reshPackBufferCreate ( &buffer, &bufferSize, commsIO[rankGlob] );
+      reshPackBufferCreate ( &buffer, &bufferSize, commInqCommsIO ( rankGlob ));
       
       xmpi ( MPI_Send ( buffer, bufferSize, MPI_PACKED, commInqNProcsModel (), 
-                        RESOURCES, * ( commsIO + rankGlob )));
+                        RESOURCES, commInqCommsIO ( rankGlob )));
       
       xdebug ( "sent message metadata" );
       
@@ -566,12 +565,11 @@ void pioFinalize ()
   for ( i = 0; i < commInqNProcsIO (); i++ )
     {
       xmpi ( MPI_Send ( &ibuffer, 1, MPI_INT, commInqNProcsModel (), 
-                      FINALIZE, *( commsIO + i )));
+                        FINALIZE, commInqCommsIO ( i )));
       xdebug ( "sent message FINALIZE" );
     }
 
   modelWinCleanup ();
-  commsIOCleanup ();
   commDestroy ();
 #endif
 } 
@@ -608,7 +606,7 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
   if ( rankGlob < nProcsIO ) 
     {
       xmpi ( MPI_Send ( &buffer[0], timestepSize, MPI_INTEGER, nProcsCalc, 
-                      WRITETS, * ( commsIO + rankGlob )));
+                        WRITETS, commInqCommsIO ( rankGlob )));
       xdebug ( "sent message WRITETS" );
     }
 #endif
