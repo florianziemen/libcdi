@@ -3,7 +3,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   September 2011
+! Uwe Schulzweida, MPI-MET, Hamburg,   October 2011
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -344,8 +344,6 @@
       EXTERNAL        pioFinalize
 
 !                     pioEndDef
-!                                    (INTEGER         ,
-!                                     INTEGER         )
       EXTERNAL        pioEndDef
 
 !                     pioWriteTimestep

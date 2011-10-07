@@ -3,7 +3,6 @@
 #endif
 
 #define nProcsIO 1
-#define nNodes 1
 
 #ifdef USE_MPI
 #include <mpi.h>
@@ -54,7 +53,6 @@ int nodeSizes[nNodes] = {1,2};
   11,11,11,11,11 };
 */
 
-int nodeSizes[nNodes] = {1};
 int nStreams = 4;
 int streamSizes[4] = {2,5,1,3};
 int vlistSizes[11] = {5,1,7,3,2,47,11,11,5,47,1 };
@@ -182,7 +180,7 @@ void modelRun ()
   streamDefVlist(streamID, vlistID);
 
 #ifdef USE_MPI
-  pioEndDef ( nNodes, nodeSizes );
+  pioEndDef ();
 #endif 
 
   /*

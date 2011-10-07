@@ -519,7 +519,7 @@ void pioBuffer ( int streamID, int varID, const double *data, int nmiss )
 
 /************************************************************************/
 
-void  pioEndDef ( int nNodes, int * nodeSizes )
+void  pioEndDef ( void )
 {
 #ifdef USE_MPI
   char   * buffer;

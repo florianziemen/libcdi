@@ -58,7 +58,7 @@
 
 FCALLSCFUN3 (INT, pioInit, PIOINIT, pioinit, INT, INT, INT)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
-FCALLSCSUB2 (pioEndDef, PIOENDDEF, pioenddef, INT, PINT)
+FCALLSCSUB0 (pioEndDef, PIOENDDEF, pioenddef)
 FCALLSCSUB3 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep, INT, INT, INT)
 FCALLSCSUB2 (pioNamespaceInit, PIONAMESPACEINIT, pionamespaceinit, INT, PINT)
 FCALLSCSUB0 (pioNamespaceCleanup, PIONAMESPACECLEANUP, pionamespacecleanup)

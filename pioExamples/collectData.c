@@ -14,8 +14,6 @@
 extern void reshArrayPrint ( char * );
 
 #define nProcsIO 3
-#define nNodes 1
-static int nodeSizes[nNodes] = {3};
 
 static int hasLocalFile[] = { 0 };
 
@@ -76,7 +74,7 @@ void modelRun ()
 
 #ifdef USE_MPI
   xmpi ( MPI_Comm_rank ( MPI_COMM_WORLD, &rank ));
-  pioEndDef ( nNodes, nodeSizes );
+  pioEndDef ();
 #endif 
 
    
