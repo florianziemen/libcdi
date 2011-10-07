@@ -68,8 +68,7 @@ int grib2ltypeToZaxisType(int grib_ltype)
 #include "namespace.h"
 
 #ifdef USE_MPI
-#include "pio.h"               
-extern pioInfo *pioinfo;
+#include "pio_comm.h"        
 #endif
 
 /* end deike */
@@ -576,7 +575,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   /* begin deike */
 
 #ifndef NOMPI
-  if ( pioinfo->type != PIO_NONE )
+  if ( commInqIOModus () != PIO_NONE )
     nwrite = pioFileWrite ( fileID, tsID, gribbuffer, nbytes );
   else
       nwrite = fileWrite(fileID, gribbuffer, nbytes); 

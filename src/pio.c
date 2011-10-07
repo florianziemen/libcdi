@@ -8,6 +8,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <assert.h>
+
 #include "pio.h"
 #include "cdi.h"
 #include "pio_util.h"
@@ -80,7 +82,7 @@ size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
 {
   size_t iret = CDI_UNDEFID;
 
-  switch ( pioinfo->type )
+  switch ( commInqIOModus ())
     {
     case PIO_MPI_NONB:
       iret = fwMPINONB ( fileID, tsID, buffer, len );
@@ -120,7 +122,7 @@ size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
 int pioFileClose ( int id )
 {
   int iret = CDI_UNDEFID;
-  switch ( pioinfo->type )
+  switch ( commInqIOModus ())
     {
     case PIO_MPI_NONB:
       iret = fcMPINONB ( id );
@@ -161,7 +163,7 @@ int pioFileOpenW ( const char *filename )
 {
   int iret = CDI_UNDEFID;
 
-  switch ( pioinfo->type )
+  switch ( commInqIOModus ())
     {
     case PIO_MPI_NONB:
       iret = fowMPINONB ( filename );
@@ -195,95 +197,6 @@ int pioFileOpenW ( const char *filename )
 
   return iret;
 }
-
-/***************************************************************/
-
-static int cmpr ( const void *a, const void *b )
-{
-  return strcmp ( *( char ** ) a, *( char ** ) b);
-}
-
-/***************************************************************/
-
-void setPioCommunicator ( MPI_Comm *myComm, MPI_Comm commF2C, int *color,
-                          int *nnodes )
-{
-  int size, rank, len, npes_node, key, test, i, j;
-
-  char *myHost, **allHosts, *allHosts0, *curr;
-  char hostname [ MPI_MAX_PROCESSOR_NAME + 1 ];
-
-  xmpi ( MPI_Comm_size ( commF2C, &size ));
-  xmpi ( MPI_Comm_rank ( commF2C, &rank ));
-
-  myHost = ( char * ) xmalloc ( MPI_MAX_PROCESSOR_NAME * sizeof ( char ));
-
-  memset ( myHost, 0, MPI_MAX_PROCESSOR_NAME * sizeof ( char ));
-
-  xmpi ( MPI_Get_processor_name ( myHost, &len ));
-
-  if ( myHost[0] == '\0' ) xabort ( "did not succeed to set hostname" );
-
-  if ( ddebug == MAXDEBUG )
-    {
-      strncpy ( hostname, myHost, len );
-      hostname [ len ] = '\0';
-      xdebug ( "myHost = %s", hostname );
-    }
-
-  allHosts = ( char ** ) xmalloc ( size * sizeof ( char * ));
-  allHosts[0] = ( char * ) xmalloc ( size * MPI_MAX_PROCESSOR_NAME *
-                                     sizeof ( char ));
-  allHosts0 = allHosts[0];
-
-  for ( i = 1; i < size; i++ )
-    allHosts[i] = allHosts[0] + i * MPI_MAX_PROCESSOR_NAME;
-
-  xmpi ( MPI_Allgather ( myHost, MPI_MAX_PROCESSOR_NAME, MPI_CHAR,
-                         & ( allHosts[0][0] ), MPI_MAX_PROCESSOR_NAME,
-                         MPI_CHAR, commF2C ));
-
-  qsort ( allHosts, size, sizeof ( char * ), cmpr );
-
-  *color = 0;
-  i = 0;
-  j = 0;
-
-  while ( i < size )
-    {
-      curr = allHosts[i];
-      j++;
-      if (( test = strcmp ( myHost, curr )) == 0 ) *color = j;
-
-      while ( ++i < size )
-        if (( test = strcmp ( allHosts[i], curr )) != 0)
-          break;
-    }
-
-  *nnodes = j;
-
-  if ( *color == 0 ) xabort ( "Color is not set" );
-
-  npes_node = size / ( * nnodes );
-  key = rank % npes_node;
-
-  xmpi ( MPI_Comm_split ( commF2C, *color, key, myComm));
-
-  commDefCommNode ( * myComm );
-  commDefHostName ( myHost, len );
-  commDefHostID   ( * color );
-  commDefNNodes ( * nnodes );
-
-
-  free ( allHosts0 );
-  free ( allHosts );
-  free ( myHost );
-
-  xdebug ( "color=%d", *color );
-
-  return;
-}
-
 #endif
 
 /***************************************************************/
@@ -292,47 +205,37 @@ MPI_Comm backendInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
 {
   int size, rank;
   int collectingData = 1;
-  *nnodes = 1;
-  *color = 1;
 
 #ifdef USE_MPI
   xmpi ( MPI_Comm_size ( comm, &size ));
   xmpi ( MPI_Comm_rank ( comm, &rank ));
 
+  /*
   if ( ptype < 0 || ptype > maxPtype )
     xabort ( "PIOTYPE is no valid modus" );
+  
 
 #ifdef _SX
   if ( ptype ==  PIO_POSIX_ASYNCH )
     xabort ( "PIO_POSIX_ASYNCH does not work on SX" );
 #endif
+  */
 
-  pioinfo = ( pioInfo * ) xmalloc ( sizeof ( pioInfo ));
+  commDefCommNode ();
 
-  pioinfo->type = ptype;
-
-  setPioCommunicator ( & ( pioinfo->comm ), comm, color, nnodes );
-
+  /*
   if (( pioinfo->type == PIO_NONE ) && ( *nnodes != size ))
     xabort ( "PIOTYPE, NNODES: not a valid combination" );
+  */
 
-  pioinfo->color = *color;
-
-  xmpi ( MPI_Comm_rank ( pioinfo->comm, &( pioinfo->rank )));
-  xmpi ( MPI_Comm_size ( pioinfo->comm, &( pioinfo->size )));
-
-  xdebug( "IOPE%d in bInit(), ptype=%d, initial_buffersize=%ld: "
-          "after init pioinfo ...",
-          pioinfo->rank, pioinfo->type, initial_buffersize );
-
-  pioinfo->collectorComm = MPI_COMM_NULL;
-
-  switch ( pioinfo->type )
+  switch ( commInqIOModus ())
     {
+      /*
     case PIO_NONE:
       xmpi ( MPI_Comm_dup ( pioinfo->comm, &( pioinfo->collectorComm )));
       collectingData = 1;
       break;
+      */
     case PIO_MPI_NONB:
       collectingData = initMPINONB ();
       break;
@@ -343,9 +246,11 @@ MPI_Comm backendInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
       break;
 */
 #endif
-    case PIO_POSIX_FPGUARD_SENDRECV:
+      /*
+        case PIO_POSIX_FPGUARD_SENDRECV:
       collectingData = initPOSIXFPGUARDSENDRECV ();
       break;
+      */
 /*
     case PIO_POSIX_FPGUARD_THREAD:
       collectingData = initPOSIXFPGUARDTHREAD ();
@@ -365,7 +270,9 @@ MPI_Comm backendInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
 #endif
 
 #ifdef USE_MPI
-  return pioinfo->collectorComm;
+  // TODO: change interface! 
+  assert ( pioinfo2 != NULL && pioinfo2->commColl != MPI_COMM_NULL );
+  return pioinfo2->commColl;
 #else
   return 0;
 #endif
@@ -376,13 +283,14 @@ MPI_Comm backendInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
 void backendFinalize ()
 {
 #ifdef USE_MPI
+  /*
   switch ( pioinfo->type )
     {
-/*
+
     case PIO_POSIX_FPGUARD_THREAD:
       finalizePOSIXFPGUARDTHREAD ();
       break;
-*/
+
     }
 
   if ( pioinfo->collectorComm != MPI_COMM_NULL )
@@ -392,6 +300,7 @@ void backendFinalize ()
     xmpi ( MPI_Comm_free ( &( pioinfo->comm )));
 
   free ( pioinfo );
+*/
 #endif
 }
 /*

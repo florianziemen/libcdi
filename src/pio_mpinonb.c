@@ -51,9 +51,11 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   aFiledataM *of;
   size_t len;
   int iret;
+  MPI_Comm commNode = commInqCommNode ();
+  int rankNode = commInqRankNode ();
 
   xdebug ( "IOPE%d: filename=%s, buffersize=%zu, in",
-           pioinfo->rank, filename, bs );
+           rankNode, filename, bs );
 
   of = ( aFiledataM * ) xmalloc ( sizeof ( aFiledataM ));
   memset ( of, 0, sizeof ( aFiledataM ));
@@ -66,7 +68,7 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   /* init output buffer */
 
   xdebug ( "IOPE%d: name=%s, init output buffer", 
-           pioinfo->rank, of->name );
+           rankNode, of->name );
    
   iret = dbuffer_init ( &( of->db1 ), of->size );
   iret += dbuffer_init ( &( of->db2 ), of->size );
@@ -76,14 +78,14 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   of->db = of->db1;
 
   /* open file */ 
-  xmpi ( MPI_File_open ( pioinfo->comm, of->name, 
+  xmpi ( MPI_File_open ( commNode, of->name, 
 			 ( MPI_MODE_CREATE|MPI_MODE_WRONLY ), 
 			 MPI_INFO_NULL, &( of->fh )));
   of->request = MPI_REQUEST_NULL;
   of->finished = false;
 
   xdebug ( "IOPE%d opened file %s, return",
-           pioinfo->rank, of->name );
+           rankNode, of->name );
   
   return of;
 }
@@ -95,11 +97,12 @@ int destroyAFiledataMPINONB ( void *v )
   int iret = 0;
   aFiledataM *of;
   MPI_Status status;
+  int rankNode = commInqRankNode ();
 
   of = (aFiledataM * ) v;
 
   xdebug ( "IOPE%d: name=%s, close file, in", 
-           pioinfo->rank, of->name );
+           rankNode, of->name );
   
   /* close file */
 
@@ -118,7 +121,7 @@ int destroyAFiledataMPINONB ( void *v )
   free ( of );
 
   xdebug ( "IOPE%d: closed file, cleaned up, return", 
-           pioinfo->rank );
+           rankNode );
 
   return iret == MPI_SUCCESS ? 0 : -1;
 }
@@ -147,6 +150,7 @@ void writeMPINONB ( aFiledataM *of, int fileID )
 {
   int amount;
   MPI_Status status;
+  int rankNode = commInqRankNode ();
 
   /* write buffer */
   
@@ -155,7 +159,7 @@ void writeMPINONB ( aFiledataM *of, int fileID )
   if ( amount == 0 ) return;
 
   xdebug3 ( "IOPI%d: Write buffer, size %d bytes, in", 
-           pioinfo->rank, amount );
+           rankNode, amount );
   
   xmpi ( MPI_Wait ( & ( of->request ), &status ));
   xmpi ( MPI_File_iwrite_shared ( of->fh, of->db->buffer, amount, MPI_CHAR, 
@@ -169,13 +173,13 @@ void writeMPINONB ( aFiledataM *of, int fileID )
   if ( of->db == of->db1 )
     {
         xdebug3 ( "IOPE%d: fileID=%d, change to buffer 2 ...", 
-                 pioinfo->rank, fileID );
+                 rankNode, fileID );
       of->db =  of->db2;
     }
   else 
     {
         xdebug3 ( "IOPE%d: fileID=%d, change to buffer 1 ...", 
-		  pioinfo->rank, fileID );
+		  rankNode, fileID );
       of->db =  of->db1;
     }
 
@@ -193,13 +197,15 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
   aFiledataM *of;
   listElem_t *curr;
   char errorString[maxErrorString];
+  MPI_Comm commNode = commInqCommNode ();
+  int rankNode = commInqRankNode ();
 
   flush = ( tsID != oldTsID ) ? 1 : 0;
 
   if ( flush == 1 ) 
     {
         xdebug3 ( "IOPE%d: tsID = %d, flush buffer", 
-		  pioinfo->rank, tsID );
+		  rankNode, tsID );
       curr = bibAFiledataM->head;
       while ( curr ) 
 	{
@@ -207,7 +213,7 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
 	  curr = curr->next;
 	}
       oldTsID = tsID;
-      xmpi ( MPI_Barrier ( pioinfo->comm )); 
+      xmpi ( MPI_Barrier ( commNode )); 
     }                                          
 
   of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, fileID );
@@ -215,7 +221,7 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
 
   xdebug3 ( "IOPE%d: fileID = %d, tsID = %d,"
            " pushed data on buffer, filled = %d", 
-           pioinfo->rank, fileID, tsID, filled ); 
+           rankNode, fileID, tsID, filled ); 
 
   if ( filled == 1 ) 
     {
@@ -246,9 +252,11 @@ int fcMPINONB ( int fileID )
   int iret;
   double accumWaitMax;
   char errorString[maxErrorString];
+  MPI_Comm commNode = commInqCommNode ();
+  int rankNode = commInqRankNode ();
 
   xdebug ( "IOPE%d: write buffer, close file and cleanup, in", 
-           pioinfo->rank, fileID );
+           rankNode, fileID );
 
   if ( ! ( of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, fileID )))
     {
@@ -265,7 +273,7 @@ int fcMPINONB ( int fileID )
   if ( !bibAFiledataM->head ) 
     {
         xdebug ( "IOPE%d: cleanup queue", 
-                 pioinfo->rank );
+                 rankNode );
         free ( bibAFiledataM );
     }
 
@@ -274,12 +282,12 @@ int fcMPINONB ( int fileID )
   if ( ddebug == MAXDEBUG )
     {
       xmpi ( MPI_Reduce ( &accumWait, &accumWaitMax, 
-                          1, MPI_DOUBLE, MPI_MAX, 0, pioinfo->comm  ));
+                          1, MPI_DOUBLE, MPI_MAX, 0, commNode  ));
       xdebug ( "IOPE%d: Wait time %15.10lf s",
-               pioinfo->rank, accumWait );
-      if ( pioinfo->rank == 0 )
+               rankNode, accumWait );
+      if ( rankNode == 0 )
           xdebug ( "IOPE%d: Max wait time %15.10lf s",
-                   pioinfo->rank, accumWaitMax );
+                   rankNode, accumWaitMax );
     }
 
   return iret;
@@ -321,15 +329,17 @@ int fowMPINONB ( const char *filename )
   static long buffersize = 0; 
   int id, bcastRank = 0; 
   char errorString[maxErrorString];
+  MPI_Comm commNode = commInqCommNode ();
+  int rankNode = commInqRankNode ();
 
   /* broadcast buffersize to collectors ( just once, for all files )*/
   
   if ( ! buffersize )
     {
         xdebug ( "IOPE%d: Broadcast buffersize to collectors ...", 
-		  pioinfo->rank );
+		  rankNode );
       
-      if  ( pioinfo->rank == bcastRank )
+      if  ( rankNode == bcastRank )
 	{ 
 	  if ( getenv( "BUFSIZE" ) != NULL )
 	    buffersize = atol ( getenv ( "BUFSIZE" ));
@@ -337,7 +347,7 @@ int fowMPINONB ( const char *filename )
 	    buffersize = initial_buffersize;
 	}
       
-      xmpi ( MPI_Bcast ( &buffersize, 1, MPI_LONG, bcastRank, pioinfo->comm ));
+      xmpi ( MPI_Bcast ( &buffersize, 1, MPI_LONG, bcastRank, commNode ));
     }
 
   xdebug ( "buffersize=%d", buffersize );
@@ -352,7 +362,7 @@ int fowMPINONB ( const char *filename )
     }
   
   xdebug ( "IOPE%d: name=%s, init and enqueued aFiledataM, return id = %d", 
-           pioinfo->rank, filename, id );
+           rankNode, filename, id );
   
   return id;
 }
@@ -362,12 +372,8 @@ int fowMPINONB ( const char *filename )
 int initMPINONB ()
 {
   int collectingData = 1;
-  MPI_Comm commGlob = commInqCommGlob ();
 
-  xmpi ( MPI_Comm_dup ( pioinfo->comm, &( pioinfo->collectorComm )));
-
-  commDefIsProcColl ( 1 );
-  commDefNProcsColl ( commInqNProcsIO ());
+  commDefCommColl ( 1 );
   commSendNodeInfo ();
   commRecvNodeMap ();
   commDefCommsIO ();

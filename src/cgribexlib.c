@@ -5221,7 +5221,6 @@ int gribOpen(const char *filename, const char *mode)
       fileSetBufferType(fileID, FILE_BUFTYPE_MMAP);
     }
 #endif
-
   return (fileID);  
 }
 

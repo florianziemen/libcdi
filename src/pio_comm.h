@@ -36,6 +36,7 @@ typedef struct {
   int sizeNode;
   int rankNode;
   char hostname [ MPI_MAX_PROCESSOR_NAME + 1 ];
+  nodeInfo_t nodeInfo;
   int specialRankNode;
 
   MPI_Comm commColl;
@@ -47,7 +48,6 @@ typedef struct {
   int rankCalc;
  
   MPI_Comm * commsIO; 
-  nodeInfo_t nodeInfo;
   int nProcsColl;
   int * nodeSizes;
   int * nodeMap; 
@@ -78,13 +78,11 @@ void     commDefCommPio     ( void );
 MPI_Comm commInqCommPio     ( void );
 MPI_Comm commInqCommModel   ( void );
 int      commInqIsProcIO    ( void );
-void     commDefIsProcColl  ( int );
-void     commDefCommNode    ( MPI_Comm );
-void     commDefHostName    ( char *, size_t );
-void     commDefHostID      ( int );
-void     commDefNNodes      ( int ); 
+void     commDefCommNode    ( void );
+MPI_Comm commInqCommNode    ( void );
+int      commInqRankNode    ( void );
 int      commInqNNodes      ( void );
-void     commDefNProcsColl  ( int );
+void     commDefCommColl    ( int );
 void     commEvalPhysNodes  ( void );
 void     commDefCommsIO     ( void ); 
 MPI_Comm commInqCommsIO     ( int );
@@ -93,7 +91,6 @@ void     commPrint          ( FILE * );
 
 void     commSendNodeInfo   ( void );
 void     commRecvNodeMap    ( void );// todo switch to gatherNodeInfo inside commpio
-void     commDefCommsIO     ( void );
 int *    commInqNodeSizes   ( void );
 
 

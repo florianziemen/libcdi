@@ -23,6 +23,7 @@ size_t getpagesize(void);
 
 #ifdef USE_MPI
 #include "pio.h"
+#include "pio_comm.h"
 #include "cdi.h"
 #include "namespace.h"
 
@@ -1074,7 +1075,7 @@ int fileOpen(const char *filename, const char *mode)
   /* begin deike */
     
 #ifdef USE_MPI
-    if ( memcmp ( mode, "w", 1 ) == 0 && pioinfo->type != PIO_NONE )
+  if ( memcmp ( mode, "w", 1 ) == 0 && commInqIOModus () != PIO_NONE )
       return pioFileOpenW ( filename );
 #endif
   /* end deike */
@@ -1170,7 +1171,7 @@ int fileClose(int fileID)
 
   /* begin deike */
 #ifdef USE_MPI
-    if ( pioinfo->type != PIO_NONE )
+  if ( commInqIOModus () != PIO_NONE )
         return pioFileClose ( fileID );
         
 #endif
