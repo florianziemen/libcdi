@@ -311,6 +311,14 @@ void     commDefNNodes      ( int nNodes )
 }
 
 
+int      commInqNNodes      ( void )
+{
+  assert ( pioinfo2 != NULL &&
+           pioinfo2->nodeInfo.nNodes != CDI_UNDEFID );
+  return pioinfo2->nodeInfo.nNodes;
+}
+
+
 void     commDefNProcsColl  ( int nProcsColl )
 {
   assert ( pioinfo2 != NULL );
@@ -407,6 +415,15 @@ void     commEvalPhysNodes  ( void )
   free ( p1 );
   free ( nodeInfo );
 }
+
+
+int *    commInqNodeSizes   ( void )
+{
+  assert ( pioinfo2 != NULL &&
+           pioinfo2->nodeSizes != NULL );
+  return pioinfo2->nodeSizes;
+}
+
 
 // collective call
 void     commDefCommsIO     ( void )

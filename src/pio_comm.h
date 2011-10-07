@@ -83,6 +83,7 @@ void     commDefCommNode    ( MPI_Comm );
 void     commDefHostName    ( char *, size_t );
 void     commDefHostID      ( int );
 void     commDefNNodes      ( int ); 
+int      commInqNNodes      ( void );
 void     commDefNProcsColl  ( int );
 void     commEvalPhysNodes  ( void );
 void     commDefCommsIO     ( void ); 
@@ -93,6 +94,7 @@ void     commPrint          ( FILE * );
 void     commSendNodeInfo   ( void );
 void     commRecvNodeMap    ( void );// todo switch to gatherNodeInfo inside commpio
 void     commDefCommsIO     ( void );
+int *    commInqNodeSizes   ( void );
 
 
 

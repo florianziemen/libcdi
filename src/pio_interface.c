@@ -526,7 +526,8 @@ void  pioEndDef ( int nNodes, int * nodeSizes )
   int bufferSize;
   int rankGlob = commInqRankGlob ();
 
-  varsMapNDeco ( nNodes, nodeSizes );
+  //varsMapNDeco ( nNodes, nodeSizes );
+  varsMapNDeco ( commInqNNodes (), commInqNodeSizes ());
 
   if ( rankGlob < commInqNProcsIO ())
     {

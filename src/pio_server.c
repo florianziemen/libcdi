@@ -260,7 +260,7 @@ void IOServer ()
 
   for ( ;; )
     {
-      MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commCalc, &status );
+      xmpi ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commCalc, &status ));
       
       source = status.MPI_SOURCE;
       tag    = status.MPI_TAG;
