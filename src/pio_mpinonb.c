@@ -26,9 +26,6 @@ extern double accumSend;
 extern double accumSuspend;
 extern double accumWait;
 extern double accumWrite;
-
-extern pioInfo *pioinfo;
-
 typedef struct 
 {
   char *name;
@@ -369,10 +366,8 @@ int fowMPINONB ( const char *filename )
 
 /***************************************************************/
 
-int initMPINONB ()
+void initMPINONB ( void )
 {
-  int collectingData = 1;
-
   commDefCommColl ( 1 );
   commSendNodeInfo ();
   commRecvNodeMap ();
@@ -382,8 +377,6 @@ int initMPINONB ()
   
   if ( bibAFiledataM == NULL )
     xabort ( "queueInit did not succeed" );   
-  
-  return collectingData;
 }
 
 #endif

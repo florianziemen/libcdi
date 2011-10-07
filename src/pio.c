@@ -44,8 +44,6 @@ double accumSuspend = 0.0;
 double accumWait    = 0.0;
 double accumWrite   = 0.0;
 
-pioInfo * pioinfo;
-
 char *token = "%";
 
 /***************************************************************/
@@ -94,9 +92,11 @@ size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
       break;
 */
 #endif
+      /*
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fwPOSIXFPGUARDSENDRECV ( fileID, tsID, buffer, len );
       break;
+      */
 /*
     case PIO_POSIX_FPGUARD_THREAD:
       iret = fwPOSIXFPGUARDTHREAD ( fileID, tsID, buffer, len );
@@ -134,9 +134,11 @@ int pioFileClose ( int id )
       break;
 */
 #endif
+      /*
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fcPOSIXFPGUARDSENDRECV ( id );
       break;
+      */
 /*
     case PIO_POSIX_FPGUARD_THREAD:
       iret = fcPOSIXFPGUARDTHREAD ( id );
@@ -175,9 +177,11 @@ int pioFileOpenW ( const char *filename )
       break;
 */
 #endif
+      /*
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fowPOSIXFPGUARDSENDRECV ( filename );
       break;
+      */
 /*
     case PIO_POSIX_FPGUARD_THREAD:
       iret = fowPOSIXFPGUARDTHREAD ( filename );
@@ -203,7 +207,6 @@ int pioFileOpenW ( const char *filename )
 
 void backendInit ( void )
 {
-  int collectingData = 1;
   int IOModus = commInqIOModus ();
 
 #ifdef USE_MPI
@@ -215,14 +218,11 @@ void backendInit ( void )
 
   switch ( IOModus )
     {
-      /*
     case PIO_NONE:
-      xmpi ( MPI_Comm_dup ( pioinfo->comm, &( pioinfo->collectorComm )));
-      collectingData = 1;
+      commDefCommColl ( 1 );
       break;
-      */
     case PIO_MPI_NONB:
-      collectingData = initMPINONB ();
+      initMPINONB ();
       break;
 #ifndef _SX
 /*
@@ -253,39 +253,13 @@ void backendInit ( void )
 */
     }
 #endif
-
-#ifdef USE_MPI
-  // TODO: change interface! 
-  assert ( pioinfo2 != NULL && pioinfo2->commColl != MPI_COMM_NULL );
-  return pioinfo2->commColl;
-#else
-  return 0;
-#endif
 }
 
 /***************************************************************/
 
-void backendFinalize ()
+void backendFinalize ( void )
 {
 #ifdef USE_MPI
-  /*
-  switch ( pioinfo->type )
-    {
-
-    case PIO_POSIX_FPGUARD_THREAD:
-      finalizePOSIXFPGUARDTHREAD ();
-      break;
-
-    }
-
-  if ( pioinfo->collectorComm != MPI_COMM_NULL )
-    xmpi ( MPI_Comm_free ( &( pioinfo->collectorComm )));
-
-  if ( pioinfo->comm != MPI_COMM_NULL )
-    xmpi ( MPI_Comm_free ( &( pioinfo->comm )));
-
-  free ( pioinfo );
-*/
 #endif
 }
 /*

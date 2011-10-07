@@ -9,21 +9,11 @@
 #include <stdlib.h>
 #include <mpi.h>
 
-typedef struct{
-  int type;
-  MPI_Comm comm;
-  int color;
-  int size;
-  int rank;
-  int specialRank;
-  MPI_Comm collectorComm;
-}pioInfo; 
-
 void   backendInit     ( void );
 void   backendFinalize ( void );
-int    pioFileOpenW ( const char* );
-int    pioFileClose ( int );
-size_t pioFileWrite ( int, int, const void*, size_t );
+int    pioFileOpenW    ( const char* );
+int    pioFileClose    ( int );
+size_t pioFileWrite    ( int, int, const void*, size_t );
 
 #else
 typedef int MPI_Comm;

@@ -76,7 +76,7 @@ int queueDelNode ( queue_t *, int );
 int fowMPINONB ( const char * );
 int fcMPINONB ( int );
 size_t fwMPINONB( int, int, const void *, size_t );
-int initMPINONB ( void );
+void initMPINONB ( void );
 
 /* pio_posixasynch.c */
 #ifndef _SX
