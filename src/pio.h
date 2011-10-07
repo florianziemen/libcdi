@@ -7,7 +7,7 @@
 
 #ifdef USE_MPI
 #include <stdlib.h>
-#include "mpi.h"
+#include <mpi.h>
 
 typedef struct{
   int type;
@@ -19,8 +19,8 @@ typedef struct{
   MPI_Comm collectorComm;
 }pioInfo; 
 
-MPI_Comm backendInit     ( void );
-void     backendFinalize ( void );
+void   backendInit     ( void );
+void   backendFinalize ( void );
 int    pioFileOpenW ( const char* );
 int    pioFileClose ( int );
 size_t pioFileWrite ( int, int, const void*, size_t );

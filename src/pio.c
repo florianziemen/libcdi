@@ -201,7 +201,7 @@ int pioFileOpenW ( const char *filename )
 
 /***************************************************************/
 
-MPI_Comm backendInit ( void )
+void backendInit ( void )
 {
   int collectingData = 1;
   int IOModus = commInqIOModus ();
