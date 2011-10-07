@@ -44,7 +44,7 @@ double accumSuspend = 0.0;
 double accumWait    = 0.0;
 double accumWrite   = 0.0;
 
-pioInfo *pioinfo;
+pioInfo * pioinfo;
 
 char *token = "%";
 
@@ -205,30 +205,19 @@ MPI_Comm backendInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
 {
   int size, rank;
   int collectingData = 1;
+  int IOModus = commInqIOModus ();
 
 #ifdef USE_MPI
   xmpi ( MPI_Comm_size ( comm, &size ));
   xmpi ( MPI_Comm_rank ( comm, &rank ));
 
-  /*
-  if ( ptype < 0 || ptype > maxPtype )
-    xabort ( "PIOTYPE is no valid modus" );
-  
-
-#ifdef _SX
-  if ( ptype ==  PIO_POSIX_ASYNCH )
-    xabort ( "PIO_POSIX_ASYNCH does not work on SX" );
-#endif
-  */
-
   commDefCommNode ();
 
-  /*
-  if (( pioinfo->type == PIO_NONE ) && ( *nnodes != size ))
+  if (( IOModus == PIO_NONE ) && ( commInqNNodes () != size ))
     xabort ( "PIOTYPE, NNODES: not a valid combination" );
-  */
+ 
 
-  switch ( commInqIOModus ())
+  switch ( IOModus )
     {
       /*
     case PIO_NONE:

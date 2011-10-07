@@ -14,6 +14,16 @@
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
 #include "gribapi.h"
 
+/* begin deike */
+#include "namespace.h"
+
+#ifdef USE_MPI
+#include "pio.h"
+#include "pio_comm.h"        
+#endif
+
+/* end deike */
+
 
 
 int grib1ltypeToZaxisType(int grib_ltype)
@@ -63,15 +73,6 @@ int grib2ltypeToZaxisType(int grib_ltype)
 
   return (zaxistype);
 }
-
-/* begin deike */
-#include "namespace.h"
-
-#ifdef USE_MPI
-#include "pio_comm.h"        
-#endif
-
-/* end deike */
 
 
 int grbBitsPerValue(int datatype)

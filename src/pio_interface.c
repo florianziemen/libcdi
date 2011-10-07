@@ -62,10 +62,18 @@ int pioInit ( int comm, int nIOP, int mode )
 */
 
 #ifdef USE_MPI
-MPI_Comm pioInit_c ( MPI_Comm comm, int nIOP, int IOModus )
+MPI_Comm pioInit_c ( MPI_Comm commGlob, int nIOP, int IOModus )
 {
+  if ( IOModus < PIO_NONE || IOModus > PIO_MAX_IOMODUS )
+    xabort ( "PIOTYPE is no valid modus" );
+  
+#ifdef _SX
+  if ( IOModus ==  PIO_POSIX_ASYNCH )
+    xabort ( "PIO_POSIX_ASYNCH does not work on SX" );
+#endif
+
   commInit ();
-  commDefCommGlob ( comm );
+  commDefCommGlob ( commGlob );
   commDefNProcsIO ( nIOP );
   commDefIOModus  ( IOModus );
   commDefCommPio ();

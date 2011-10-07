@@ -22,13 +22,11 @@ size_t getpagesize(void);
 /* begin deike */
 
 #ifdef USE_MPI
-#include "pio.h"
-#include "pio_comm.h"
 #include "cdi.h"
 #include "namespace.h"
-
+#include "pio.h"
+#include "pio_comm.h"
 #include "pio_util.h"
-extern pioInfo *pioinfo;
 #endif
 
 /* end deike */
