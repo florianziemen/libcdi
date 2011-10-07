@@ -65,33 +65,40 @@ enum { sizeNodeInfo  = 3,
 
 void     commInit           ( void );
 void     commDestroy        ( void );
+
 void     commDefCommGlob    ( MPI_Comm ); 
 MPI_Comm commInqCommGlob    ( void );
 int      commInqSizeGlob    ( void );
 int      commInqRankGlob    ( void );
+
 void     commDefNProcsIO    ( int );
 int      commInqNProcsIO    ( void );
 int      commInqNProcsModel ( void );
 void     commDefIOModus     ( int );
 int      commInqIOModus     ( void );
+
 void     commDefCommPio     ( void );
 MPI_Comm commInqCommPio     ( void );
 MPI_Comm commInqCommModel   ( void );
 int      commInqIsProcIO    ( void );
+
 void     commDefCommNode    ( void );
 MPI_Comm commInqCommNode    ( void );
+int      commInqSizeNode    ( void );
 int      commInqRankNode    ( void );
+
+void     commSendNodeInfo   ( void );
+void     commRecvNodeMap    ( void );// todo switch to gatherNodeInfo inside commpio
+int *    commInqNodeSizes   ( void );
 int      commInqNNodes      ( void );
 void     commDefCommColl    ( int );
 void     commEvalPhysNodes  ( void );
 void     commDefCommsIO     ( void ); 
 MPI_Comm commInqCommsIO     ( int );
 MPI_Comm commInqCommCalc    ( void );
+
 void     commPrint          ( FILE * );
 
-void     commSendNodeInfo   ( void );
-void     commRecvNodeMap    ( void );// todo switch to gatherNodeInfo inside commpio
-int *    commInqNodeSizes   ( void );
 
 
 

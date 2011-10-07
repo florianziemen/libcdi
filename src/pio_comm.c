@@ -325,6 +325,14 @@ MPI_Comm commInqCommNode    ( void )
 } 
 
 
+int commInqSizeNode ( void )
+{
+  assert ( pioinfo2 != NULL &&
+           pioinfo2->sizeNode != CDI_UNDEFID );
+  return pioinfo2->sizeNode;
+}
+
+
 int commInqRankNode ( void )
 {
   assert ( pioinfo2 != NULL &&

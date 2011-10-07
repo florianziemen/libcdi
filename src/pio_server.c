@@ -255,7 +255,7 @@ void IOServer ()
   int nProcsCalc = commInqNProcsModel ();
      
   nfinished = 0;
-  commColl = backendInit ( ptype, comm, &color, &nnodes );
+  commColl = backendInit ();
   commCalc = commInqCommCalc ();
 
   for ( ;; )

@@ -19,7 +19,7 @@ typedef struct{
   MPI_Comm collectorComm;
 }pioInfo; 
 
-MPI_Comm backendInit     ( int, MPI_Comm, int *, int * );
+MPI_Comm backendInit     ( void );
 void     backendFinalize ( void );
 int    pioFileOpenW ( const char* );
 int    pioFileClose ( int );

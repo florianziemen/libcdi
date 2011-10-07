@@ -201,19 +201,15 @@ int pioFileOpenW ( const char *filename )
 
 /***************************************************************/
 
-MPI_Comm backendInit ( int ptype, MPI_Comm comm, int *color, int *nnodes )
+MPI_Comm backendInit ( void )
 {
-  int size, rank;
   int collectingData = 1;
   int IOModus = commInqIOModus ();
 
 #ifdef USE_MPI
-  xmpi ( MPI_Comm_size ( comm, &size ));
-  xmpi ( MPI_Comm_rank ( comm, &rank ));
-
   commDefCommNode ();
 
-  if (( IOModus == PIO_NONE ) && ( commInqNNodes () != size ))
+  if (( IOModus == PIO_NONE ) && ( commInqSizeNode () != 1 ))
     xabort ( "PIOTYPE, NNODES: not a valid combination" );
  
 
