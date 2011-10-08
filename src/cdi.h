@@ -203,7 +203,7 @@ extern "C" {
 #define  PIO_POSIX_FPGUARD_THREAD_REFUSE    5
 #define  PIO_POSIX_FPGUARD_THREAD           6
 
-#define  PIO_MAX_IOMODUS                    PIO_MPI_NONB
+#define  PIO_MAX_IOMODUS                    PIO_POSIX_FPGUARD_SENDRECV
 
   //#define  TEST_LOCAL                         0 
 // set to 1 if running compareResourceArray with one PE

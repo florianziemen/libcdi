@@ -53,30 +53,30 @@ typedef struct
 } tag_t;
 
 /* pio.c */
-int setTag ( int, int );
-tag_t * getTag ( int );
-void ungetTag ( tag_t * );
+int       setTag ( int, int );
+tag_t *   getTag ( int );
+void      ungetTag ( tag_t * );
 
 /* pio_dbuffer.c */
-int dbuffer_init ( struct dBuffer **, size_t );
-int dbuffer_push ( struct dBuffer *, unsigned char *, size_t );
-size_t dbuffer_data_size ( struct dBuffer * );
-int dbuffer_reset ( struct dBuffer * );
-void dbuffer_cleanup ( struct dBuffer ** );
-size_t dbuffer_free ( struct dBuffer * );
+int       dbuffer_init ( struct dBuffer **, size_t );
+int       dbuffer_push ( struct dBuffer *, unsigned char *, size_t );
+size_t    dbuffer_data_size ( struct dBuffer * );
+int       dbuffer_reset ( struct dBuffer * );
+void      dbuffer_cleanup ( struct dBuffer ** );
+size_t    dbuffer_free ( struct dBuffer * );
 
 /* pio_queue.c */
 queue_t * queueInit ( valDestroyFunction, keyCompareFunction );
-void queueDestroy ( queue_t * );
-int queuePush ( queue_t *, void *, int, ... );
-void * queueIdx2val ( queue_t *, int );
-int queueDelNode ( queue_t *, int );
+void      queueDestroy ( queue_t * );
+int       queuePush ( queue_t *, void *, int, ... );
+void *    queueIdx2val ( queue_t *, int );
+int       queueDelNode ( queue_t *, int );
 
 /* pio_mpinonb.c */
-int fowMPINONB ( const char * );
-int fcMPINONB ( int );
-size_t fwMPINONB( int, int, const void *, size_t );
-void initMPINONB ( void );
+int       fowMPINONB ( const char * );
+int       fcMPINONB ( int );
+size_t    fwMPINONB( int, int, const void *, size_t );
+void      initMPINONB ( void );
 
 /* pio_posixasynch.c */
 #ifndef _SX
@@ -87,11 +87,11 @@ size_t fwPOSIXASYNCH( int, int, const void *, size_t );
 int initPOSIXASYNCH ( void );
 #endif
 /* pio_posixfpguardsendrecv.c */
-void fpgPOSIXFPGUARDSENDRECV ( int );
-int  fowPOSIXFPGUARDSENDRECV ( const char * );
-int   fcPOSIXFPGUARDSENDRECV ( int );
-size_t   fwPOSIXFPGUARDSENDRECV ( int, int, const void *, size_t );
-int initPOSIXFPGUARDSENDRECV ( void );
+void      fpgPOSIXFPGUARDSENDRECV ( int );
+int       fowPOSIXFPGUARDSENDRECV ( const char * );
+int       fcPOSIXFPGUARDSENDRECV ( int );
+size_t    fwPOSIXFPGUARDSENDRECV ( int, int, const void *, size_t );
+void      initPOSIXFPGUARDSENDRECV ( void );
 
 /* pio_posixfpguardthread.c */
 void * fpgPOSIXFPGUARDTHREAD ( void * );

@@ -25,8 +25,8 @@ static int nlev[nVars] = {1,1,5,5,2};
 #define maxlev   5
 #define ntsteps  3 
 
-//int IOModus = PIO_POSIX_FPGUARD_SENDRECV;
-int IOModus = PIO_MPI_NONB;
+int IOModus = PIO_POSIX_FPGUARD_SENDRECV;
+//int IOModus = PIO_MPI_NONB;
 
 
 void modelRun ()

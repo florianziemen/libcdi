@@ -104,25 +104,26 @@ static
  void serverWinCreate ()
 { 
   int ranks[1], i;
+  MPI_Comm commCalc = commInqCommCalc ();
   MPI_Group groupCalc;
-  int nProcsCalc = commInqNProcsModel ();
+  int nProcsModel = commInqNProcsModel ();
 
   xmpi ( MPI_Win_create ( MPI_BOTTOM, 0, sizeof ( double ), MPI_INFO_NULL,
-                          commInqCommCalc (), &win ));
+                          commCalc, &win ));
 
   /* target group */
-  ranks[0] = nProcsCalc;
-  xmpi ( MPI_Comm_group ( commInqCommCalc (), &groupCalc ));
+  ranks[0] = nProcsModel;
+  xmpi ( MPI_Comm_group ( commCalc, &groupCalc ));
   xmpi ( MPI_Group_excl ( groupCalc, 1, ranks, &groupModel ));
 
   /* first shot with fixed getBuffers */
-  getBufferSize = xmalloc ( nProcsCalc * sizeof ( getBufferSize[0] ));  
+  getBufferSize = xmalloc ( nProcsModel * sizeof ( getBufferSize[0] ));  
   getGetBufferSize ();
 
-  xprintArray ( "getBufferSize", getBufferSize, nProcsCalc, DATATYPE_INT );
+  xprintArray ( "getBufferSize", getBufferSize, nProcsModel, DATATYPE_INT );
 
-  getBuffer = xmalloc ( nProcsCalc * sizeof ( getBuffer[0] ));
-  for ( i = 0; i < nProcsCalc; i++ )
+  getBuffer = xmalloc ( nProcsModel * sizeof ( getBuffer[0] ));
+  for ( i = 0; i < nProcsModel; i++ )
     getBuffer[i] = xmalloc ( getBufferSize[i] * sizeof ( double ));
 
   xdebug ( "created mpi_win, allocated getBuffer" );
@@ -140,11 +141,11 @@ void writeVars ( int tsID, int vdate, int vtime )
   
   int nmiss = 0;
   char text[1024];
-  int nProcsCalc = commInqNProcsModel ();
+  int nProcsModel = commInqNProcsModel ();
 
-  getBufferHead = xmalloc ( nProcsCalc * sizeof ( getBufferHead[0] ));
+  getBufferHead = xmalloc ( nProcsModel * sizeof ( getBufferHead[0] ));
 
-  for ( i = 0; i < nProcsCalc; i++ )
+  for ( i = 0; i < nProcsModel; i++ )
     getBufferHead[i] = getBuffer[i];
 
   while (( int ) * getBufferHead[0] != END )
@@ -166,7 +167,7 @@ void writeVars ( int tsID, int vdate, int vtime )
       data = xmalloc ( size * sizeof ( double ));
       dataHead = data;
 
-      for ( i = 0; i < nProcsCalc; i++ )
+      for ( i = 0; i < nProcsModel; i++ )
         {
           if ( i )
             {
@@ -204,7 +205,7 @@ void getData ( int tsID, int vdate, int vtime )
 {
   int iAssert   = 0, i;
   char text[1024];
-  int nProcsCalc = commInqNProcsModel ();
+  int nProcsModel = commInqNProcsModel ();
 
   // todo put in correct lbs and ubs
   assert (    tsID >= 0 &&
@@ -212,14 +213,14 @@ void getData ( int tsID, int vdate, int vtime )
            vtime >= 0 );
 
   xmpi ( MPI_Win_start ( groupModel, iAssert, win ));  
-  for ( i = 0; i < nProcsCalc; i++ )
+  for ( i = 0; i < nProcsModel; i++ )
     xmpi ( MPI_Get ( &getBuffer[i][0], getBufferSize[i], MPI_DOUBLE, 
                      i, 0, getBufferSize[i], MPI_DOUBLE, win ));
 
   xmpi ( MPI_Win_complete ( win ));
 
   if ( ddebug > 2 )
-    for ( i = 0; i < nProcsCalc; i++ )
+    for ( i = 0; i < nProcsModel; i++ )
       {
         sprintf ( text, "getBufferSize[%d]=%d from PE%d getBuffer[%d]", 
                   i, getBufferSize[i], i, i );
@@ -243,19 +244,15 @@ void getData ( int tsID, int vdate, int vtime )
 
 void IOServer ()
 {
-  int source, tag, * iBuffer;
-  MPI_Status status;
-  static int nfinished;
-  MPI_Comm commColl, commCalc;
-  int nnodes, color;
+  int source, tag, * iBuffer, size, nProcsModel = commInqNProcsModel ();
+  static int nfinished = 0;
   char * buffer;
-  int size;
-  MPI_Comm comm = commInqCommPio ();
-  int ptype = commInqIOModus ();
-  int nProcsCalc = commInqNProcsModel ();
+  MPI_Comm commCalc;
+  MPI_Status status;
      
-  nfinished = 0;
   backendInit ();
+  if ( commInqRankNode () == commInqSpecialRankNode ()) 
+    backendFinalize ();
   commCalc = commInqCommCalc ();
 
   for ( ;; )
@@ -275,11 +272,10 @@ void IOServer ()
           free ( iBuffer );
 	  nfinished++;
 
-	  if ( nfinished == nProcsCalc )  
+	  if ( nfinished == nProcsModel )  
               {
                   serverWinCleanup ();
                   arrayDestroy();
-                  backendFinalize();
                   return;
               }
 	  
@@ -294,11 +290,9 @@ void IOServer ()
 	  rpcUnpackResources ( buffer, size, commCalc );
 	  free ( buffer );
 
-	  if ( commInqRankGlob () == nProcsCalc ) 
+	  if ( commInqRankGlob () == nProcsModel ) 
             reshArrayPrint ( "reshArrayIOServer" );
-          xdebug();
 	  serverWinCreate ();
-          xdebug();
 	  break;
 
 	case WRITETS:

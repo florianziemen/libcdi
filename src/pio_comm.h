@@ -86,16 +86,22 @@ void     commDefCommNode    ( void );
 MPI_Comm commInqCommNode    ( void );
 int      commInqSizeNode    ( void );
 int      commInqRankNode    ( void );
+int      commInqSpecialRankNode ( void );
+
+void     commDefCommColl    ( int ); 
+MPI_Comm commInqCommColl    ( void );
+int      commInqSizeColl    ( void ); 
+int      commInqRankColl    ( void ); 
 
 void     commSendNodeInfo   ( void );
 void     commRecvNodeMap    ( void );// todo switch to gatherNodeInfo inside commpio
 int *    commInqNodeSizes   ( void );
 int      commInqNNodes      ( void );
-void     commDefCommColl    ( int );
 void     commEvalPhysNodes  ( void );
 void     commDefCommsIO     ( void ); 
 MPI_Comm commInqCommsIO     ( int );
 MPI_Comm commInqCommCalc    ( void );
+int      commInqNProcsColl  ( void );
 
 void     commPrint          ( FILE * );
 

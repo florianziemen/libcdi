@@ -199,10 +199,10 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
   int * weightsVarsNode;
   int * varMappingNode;
   int nVarsNode, summandRank = 0;
-  int nProcsIO = commInqNProcsIO ();
-  int nProcsCalc = commInqNProcsModel ();
+  int nProcsColl = commInqNProcsColl ();
+  int nProcsModel = commInqNProcsModel ();
 
-  int buckets[nProcsIO];
+  int buckets[nProcsColl];
 
   for ( i = 0; i < nStreams; i++ )
     {
@@ -256,7 +256,7 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 	if ( * ( streamMapping + j ) == i )
 	  for ( k = 0; k < * ( sSizes + j ); k ++ )
 	    * ( varMapping + offset ++ ) = 
-	      * ( varMappingNode + offsetN ++ ) +  nProcsCalc + summandRank;
+	      * ( varMappingNode + offsetN ++ ) +  nProcsModel + summandRank;
 	else
 	  offset += * ( sSizes + j );
 
@@ -270,11 +270,11 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
   if ( ddebug )
     {
       xprintArray ( "varMapping", varMapping, nVars, DATATYPE_INT  );
-      for ( i = 0; i < nProcsIO; i++ )
+      for ( i = 0; i < nProcsColl; i++ )
 	buckets[i] = 0;
       for ( i = 0; i < nVars; i ++ )
-	buckets[*(varMapping + i ) - nProcsCalc] += * ( vSizes + i );
-      xprintArray ( "buckets", buckets, nProcsIO, DATATYPE_INT );
+	buckets[*(varMapping + i ) - nProcsModel] += * ( vSizes + i );
+      xprintArray ( "buckets", buckets, nProcsColl, DATATYPE_INT );
     }
 }
 #endif
@@ -285,16 +285,16 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 void defVarDeco ( int vlistID, int varID )
 {
   int varSize, cRank, lChunk, rem, lOffset;
-  int nProcsCalc = commInqNProcsModel ();
-  deco_t deco[nProcsCalc];
+  int nProcsModel = commInqNProcsModel ();
+  deco_t deco[nProcsModel];
  
   varSize = vlistInqVarSize ( vlistID, varID );
 
-  for ( cRank = 0; cRank < nProcsCalc; cRank++ )
+  for ( cRank = 0; cRank < nProcsModel; cRank++ )
     {
-      lChunk = varSize / nProcsCalc;
+      lChunk = varSize / nProcsModel;
       lOffset = cRank * lChunk;
-      rem = varSize % nProcsCalc;
+      rem = varSize % nProcsModel;
       if ( cRank < rem ) 
         {
           lChunk++;
@@ -308,7 +308,7 @@ void defVarDeco ( int vlistID, int varID )
       deco[cRank].chunk  = lChunk;
     }
 
-  vlistDefVarDeco ( vlistID, varID, nProcsCalc, &deco[0] );
+  vlistDefVarDeco ( vlistID, varID, nProcsModel, &deco[0] );
 }
 #endif
 
@@ -373,7 +373,7 @@ void modelWinCleanup ( void )
 #ifdef USE_MPI
   int IOID;
 
-  for ( IOID = 0; IOID < commInqNProcsIO (); IOID ++ )
+  for ( IOID = 0; IOID < commInqNProcsColl (); IOID ++ )
     {
       if ( winPostSet[IOID] )
         xmpi ( MPI_Win_wait ( win[IOID] )); 
@@ -404,8 +404,8 @@ static
   int IOID, nstreams, * streamIndexArray, streamNo, vlistID, nvars, varID;
   int IOIDchunk = 0;
   int rankGlob = commInqRankGlob ();
-  int nProcsIO = commInqNProcsIO ();
-  int nProcsCalc = commInqNProcsModel ();
+  int nProcsColl = commInqNProcsColl ();
+  int nProcsModel = commInqNProcsModel ();
   
   nstreams = reshCountType ( &streamOps );
   streamIndexArray = xmalloc ( nstreams * sizeof ( int ));
@@ -417,7 +417,7 @@ static
       for ( varID = 0; varID < nvars; varID++ )
         {
           IOID = CDI_UNDEFID;
-          IOID = vlistInqVarIOrank ( vlistID, varID ) - nProcsCalc;
+          IOID = vlistInqVarIOrank ( vlistID, varID ) - nProcsModel;
           IOIDchunk = vlistInqVarDecoChunk ( vlistID, varID, rankGlob );
           assert ( IOID != CDI_UNDEFID &&
                    IOIDchunk > 0 );
@@ -427,12 +427,12 @@ static
     }
   free ( streamIndexArray );
   
-  for ( IOID = 0; IOID < nProcsIO; IOID++ ) 
+  for ( IOID = 0; IOID < nProcsColl; IOID++ ) 
     {
       winBufferSize[IOID] += ( winBufferOverhead * sizeof ( double )); 
       assert ( winBufferSize[IOID] < winBufferSizeMax );
     }
-  xprintArray ( "winBufferSize", winBufferSize, nProcsIO, DATATYPE_INT );
+  xprintArray ( "winBufferSize", winBufferSize, nProcsColl, DATATYPE_INT );
 
   return;
 #endif
@@ -447,21 +447,21 @@ void modelWinCreate ( void )
 #ifdef USE_MPI
 
   int IOID, ranks[1];
-  int nProcsIO = commInqNProcsIO ();
-  int nProcsCalc = commInqNProcsModel ();
+  int nProcsColl = commInqNProcsColl ();
+  int nProcsModel = commInqNProcsModel ();
 
-  winBufferSize   = xmalloc ( nProcsIO * sizeof ( winBufferSize[0] ));
-  winBuffer       = xmalloc ( nProcsIO * sizeof ( winBuffer[0] ));
-  winBufferHead   = xmalloc ( nProcsIO * sizeof ( winBufferHead[0] ));
-  win             = xmalloc ( nProcsIO * sizeof ( win[0] ));
-  winPostSet      = xmalloc ( nProcsIO * sizeof ( winPostSet[0] ));
-  winFirstWrite   = xmalloc ( nProcsIO * sizeof ( winFirstWrite[0] ));
-  groupsIONetto   = xmalloc ( nProcsIO * sizeof ( groupsIONetto[0] ));
+  winBufferSize   = xmalloc ( nProcsColl * sizeof ( winBufferSize[0] ));
+  winBuffer       = xmalloc ( nProcsColl * sizeof ( winBuffer[0] ));
+  winBufferHead   = xmalloc ( nProcsColl * sizeof ( winBufferHead[0] ));
+  win             = xmalloc ( nProcsColl * sizeof ( win[0] ));
+  winPostSet      = xmalloc ( nProcsColl * sizeof ( winPostSet[0] ));
+  winFirstWrite   = xmalloc ( nProcsColl * sizeof ( winFirstWrite[0] ));
+  groupsIONetto   = xmalloc ( nProcsColl * sizeof ( groupsIONetto[0] ));
 
   getWinBufferSizes ();
   ranks[0] = commInqNProcsModel ();
 
-  for ( IOID = 0; IOID < nProcsIO; IOID ++ )
+  for ( IOID = 0; IOID < nProcsColl; IOID ++ )
     {
       assert ( winBufferSize[IOID] > 0 );
       winBuffer[IOID] = NULL;
@@ -534,10 +534,9 @@ void  pioEndDef ( void )
   int bufferSize;
   int rankGlob = commInqRankGlob ();
 
-  //varsMapNDeco ( nNodes, nodeSizes );
   varsMapNDeco ( commInqNNodes (), commInqNodeSizes ());
 
-  if ( rankGlob < commInqNProcsIO ())
+  if ( rankGlob < commInqNProcsColl ())
     {
       reshPackBufferCreate ( &buffer, &bufferSize, commInqCommsIO ( rankGlob ));
       
@@ -571,7 +570,7 @@ void pioFinalize ()
 #ifdef USE_MPI
   int i, ibuffer = 1111;
   
-  for ( i = 0; i < commInqNProcsIO (); i++ )
+  for ( i = 0; i < commInqNProcsColl (); i++ )
     {
       xmpi ( MPI_Send ( &ibuffer, 1, MPI_INT, commInqNProcsModel (), 
                         FINALIZE, commInqCommsIO ( i )));
@@ -591,8 +590,8 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
   int IOID, buffer[timestepSize], iAssert = 0;
   double end = ( double ) END, size = sizeof ( double );
   int rankGlob = commInqRankGlob ();
-  int nProcsIO = commInqNProcsIO ();
-  int nProcsCalc = commInqNProcsModel ();
+  int nProcsColl = commInqNProcsColl ();
+  int nProcsModel = commInqNProcsModel ();
 
   assert (    ts >= 0 &&
            vdate >= 0 &&
@@ -602,7 +601,7 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
   buffer[1] = vdate;
   buffer[2] = vtime;
 
-  for ( IOID = 0; IOID < nProcsIO; IOID++ )
+  for ( IOID = 0; IOID < nProcsColl; IOID++ )
     {
       memcpy ( winBufferHead[IOID], &end, size);
       winBufferHead[IOID] ++; 
@@ -612,9 +611,9 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
       winFirstWrite[IOID] = 1;
     }
   
-  if ( rankGlob < nProcsIO ) 
+  if ( rankGlob < nProcsColl ) 
     {
-      xmpi ( MPI_Send ( &buffer[0], timestepSize, MPI_INTEGER, nProcsCalc, 
+      xmpi ( MPI_Send ( &buffer[0], timestepSize, MPI_INTEGER, nProcsModel, 
                         WRITETS, commInqCommsIO ( rankGlob )));
       xdebug ( "sent message WRITETS" );
     }

@@ -92,11 +92,11 @@ size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
       break;
 */
 #endif
-      /*
+      
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fwPOSIXFPGUARDSENDRECV ( fileID, tsID, buffer, len );
       break;
-      */
+      
 /*
     case PIO_POSIX_FPGUARD_THREAD:
       iret = fwPOSIXFPGUARDTHREAD ( fileID, tsID, buffer, len );
@@ -134,11 +134,11 @@ int pioFileClose ( int id )
       break;
 */
 #endif
-      /*
+      
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fcPOSIXFPGUARDSENDRECV ( id );
       break;
-      */
+      
 /*
     case PIO_POSIX_FPGUARD_THREAD:
       iret = fcPOSIXFPGUARDTHREAD ( id );
@@ -177,11 +177,11 @@ int pioFileOpenW ( const char *filename )
       break;
 */
 #endif
-      /*
+      
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fowPOSIXFPGUARDSENDRECV ( filename );
       break;
-      */
+      
 /*
     case PIO_POSIX_FPGUARD_THREAD:
       iret = fowPOSIXFPGUARDTHREAD ( filename );
@@ -231,11 +231,11 @@ void backendInit ( void )
       break;
 */
 #endif
-      /*
-        case PIO_POSIX_FPGUARD_SENDRECV:
-      collectingData = initPOSIXFPGUARDSENDRECV ();
+      
+    case PIO_POSIX_FPGUARD_SENDRECV:
+      initPOSIXFPGUARDSENDRECV ();
       break;
-      */
+      
 /*
     case PIO_POSIX_FPGUARD_THREAD:
       collectingData = initPOSIXFPGUARDTHREAD ();
@@ -260,6 +260,11 @@ void backendInit ( void )
 void backendFinalize ( void )
 {
 #ifdef USE_MPI
+  //xdebug ("#############################");
+  commDestroy ();
+  //xdebug ("#############################");
+  MPI_Finalize ();
+  exit ( 0 );
 #endif
 }
 /*

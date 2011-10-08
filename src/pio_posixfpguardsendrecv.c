@@ -16,6 +16,7 @@
 
 #include "mpi.h"
 #include "pio.h"
+#include "pio_comm.h"
 #include "pio_impl.h"
 #include "pio_util.h"
 
@@ -32,8 +33,6 @@ extern double accumSend;
 extern double accumSuspend;
 extern double accumWait;
 extern double accumWrite; 
-
-extern pioInfo *pioinfo;
 
 typedef struct 
 {
@@ -189,6 +188,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
   queue_t *bibBFiledataPF;
   long amount;
   char errorString[maxErrorString];
+  MPI_Comm commNode = commInqCommNode ();
 
   xdebug ( "ncollectors=%d", ncollectors);
   
@@ -196,8 +196,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 
   for ( ;; )
     {
-      xdebug ();
-      xmpi ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, pioinfo->comm, &status ));
+      xmpi ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commNode, &status ));
       source = status.MPI_SOURCE;
       rtag   = getTag ( status.MPI_TAG ); 
       
@@ -229,7 +228,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 	  
 	  xmpi ( MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
                                 &amount, 1, MPI_LONG, source,  status.MPI_TAG,
-                                pioinfo->comm, &status ));
+                                commNode, &status ));
 
 	  bfd->offset += amount; 
  
@@ -254,7 +253,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 
 	  xmpi ( MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
                                 &amount, 1, MPI_LONG, source,  status.MPI_TAG,
-                                pioinfo->comm, &status ));
+                                commNode, &status ));
 
 	  bfd->offset += amount;
 
@@ -279,7 +278,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 
 	  xmpi ( MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
                                 &amount, 1, MPI_LONG, source,  status.MPI_TAG,
-                                pioinfo->comm, &status ));
+                                commNode, &status ));
 
 	  bfd->offset += amount;
 
@@ -321,6 +320,8 @@ void writePF ( aFiledataPF *afd, int id )
   int error, tag;
   MPI_Status status;
   char errorString[maxErrorString];
+  int specialRank = commInqSpecialRankNode ();
+  MPI_Comm commNode = commInqCommNode ();
   
   /* send buffersize, recv offset */
 
@@ -329,9 +330,9 @@ void writePF ( aFiledataPF *afd, int id )
 
   tag = setTag ( id, afd->command );
   
-  xmpi ( MPI_Sendrecv ( &amountL, 1, MPI_LONG, pioinfo->specialRank, tag,
-                        &offset, 1, MPI_LONG, pioinfo->specialRank, tag,
-                        pioinfo->comm, &status ));
+  xmpi ( MPI_Sendrecv ( &amountL, 1, MPI_LONG, specialRank, tag,
+                        &offset, 1, MPI_LONG, specialRank, tag,
+                        commNode, &status ));
    
   xdebug ( "id=%d, command=%d, amount=%llu, send amountL=%ld, recv offset=%ld", 
            id, afd->command, (unsigned long long)amount,
@@ -400,7 +401,7 @@ size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t 
 	  curr = curr->next;
 	}
       oldTsID = tsID;
-      xmpi ( MPI_Barrier ( pioinfo->collectorComm )); 
+      xmpi ( MPI_Barrier ( commInqCommColl ())); 
     }                                          
 
   afd = ( aFiledataPF * ) queueIdx2val ( bibAFiledataPF, fileID );
@@ -490,8 +491,7 @@ void queueCheckFP ( queue_t *q, const char *name )
 
 int fowPOSIXFPGUARDSENDRECV ( const char *filename )
 {
-  int bcastRank, id; 
-  MPI_Comm bcastComm;
+  int root = 0, id; 
   static aFiledataPF *afd;
   static bool firstOpen = true;
   static long buffersize = 0;
@@ -500,26 +500,21 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
   /* broadcast buffersize to collectors */
   
   if ( firstOpen )
-    {
-      if ( ddebug && pioinfo->rank == 0)
-        xdebug (  "name=%s, broadcast buffersize to collectors ...", 
-		  filename );
-      
-      bcastRank = 0;
-      bcastComm = pioinfo->collectorComm;
-      
-      if  ( pioinfo->rank == bcastRank )
+    {      
+      if  ( commInqRankColl () == root )
 	{ 
+          xdebug (  "name=%s, broadcast buffersize to collectors ...", 
+                    filename );
 	  if ( getenv( "BUFSIZE" ) != NULL )
 	    buffersize = atol ( getenv ( "BUFSIZE" ));
 	  if ( buffersize < initial_buffersize )
 	    buffersize = initial_buffersize;
 	}
       
-      xmpi ( MPI_Bcast ( &buffersize, 1, MPI_LONG, 0, bcastComm ));
-  
-        firstOpen = false;
-      }
+      xmpi ( MPI_Bcast ( &buffersize, 1, MPI_LONG, root, commInqCommColl ()));
+      
+      firstOpen = false;
+    }
 
   /* init and enqueue file element */ 
   
@@ -541,37 +536,30 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
 
 /***************************************************************/
 
-int initPOSIXFPGUARDSENDRECV ()
+void initPOSIXFPGUARDSENDRECV ( void )
 {
-  int collectingData = 1, ncollectors;
-  MPI_Group streamGroup, collectorGroup;
-  int ioRanks[1];
+  int ncollectors;
 
-  if ( pioinfo->size < 2 ) xabort ( "usage: #pes/#nodes >= 2" );
-   
-  xdebug ();
-
-  ncollectors = pioinfo->size - 1;
-  pioinfo->specialRank = pioinfo->size - 1;
+  if ( commInqSizeNode () < 2 ) xabort ( "usage: #pes/#nodes >= 2" );
   
-  ioRanks[0] = pioinfo->specialRank;
-  xmpi ( MPI_Comm_group ( pioinfo->comm, &streamGroup ));
-  xmpi ( MPI_Group_excl ( streamGroup, 1, ioRanks, &collectorGroup ));
-  xmpi ( MPI_Comm_create ( pioinfo->comm, collectorGroup, &
-                           pioinfo->collectorComm ));
-  
-  if ( pioinfo->rank == pioinfo->specialRank ) 
+  if ( commInqRankNode () == commInqSpecialRankNode ()) 
     {
+      commDefCommColl ( 0 );
+      commSendNodeInfo ();
+      commRecvNodeMap ();
+      commDefCommsIO ();
+      ncollectors =  commInqSizeNode () - commInqSizeColl ();
       xdebug ( "Call fpGuard(), ncollectors = %d ...", ncollectors );
       fpgPOSIXFPGUARDSENDRECV ( ncollectors );
-
-      collectingData = 0;
     }
   else
-    bibAFiledataPF = queueInit ( destroyAFiledataPF, compareNamesAPF );
-    
-
-  return collectingData;
+    {
+      commDefCommColl ( 1 );
+      commSendNodeInfo ();
+      commRecvNodeMap ();
+      commDefCommsIO ();
+      bibAFiledataPF = queueInit ( destroyAFiledataPF, compareNamesAPF );
+    }
 }
 
 #endif
