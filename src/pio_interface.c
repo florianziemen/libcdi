@@ -256,7 +256,7 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 	if ( * ( streamMapping + j ) == i )
 	  for ( k = 0; k < * ( sSizes + j ); k ++ )
 	    * ( varMapping + offset ++ ) = 
-	      * ( varMappingNode + offsetN ++ ) +  nProcsModel + summandRank;
+              commCollID2RankGlob ( * ( varMappingNode + offsetN ++ ) +  summandRank );
 	else
 	  offset += * ( sSizes + j );
 
@@ -273,7 +273,7 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
       for ( i = 0; i < nProcsColl; i++ )
 	buckets[i] = 0;
       for ( i = 0; i < nVars; i ++ )
-	buckets[*(varMapping + i ) - nProcsModel] += * ( vSizes + i );
+	buckets[commRankGlob2CollID ( *(varMapping + i ))] += * ( vSizes + i );
       xprintArray ( "buckets", buckets, nProcsColl, DATATYPE_INT );
     }
 }
