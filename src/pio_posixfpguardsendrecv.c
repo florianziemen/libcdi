@@ -179,7 +179,7 @@ bool compareNamesAPF ( void *v1, void *v2 )
 
 /***************************************************************/
 
-void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
+void fpgPOSIXFPGUARDSENDRECV ( void )
 {
   int i, source, iret;
   tag_t *rtag;
@@ -189,13 +189,15 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
   long amount;
   char errorString[maxErrorString];
   MPI_Comm commNode = commInqCommNode ();
+  int nProcsCollNode =  commInqSizeNode () - commInqSizeColl ();
 
-  xdebug ( "ncollectors=%d", ncollectors);
+  xdebug ( "ncollectors=%d on this node", nProcsCollNode );
   
   bibBFiledataPF = queueInit ( destroyBFiledataPF, NULL );
 
   for ( ;; )
     {
+      xdebug ();
       xmpi ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commNode, &status ));
       source = status.MPI_SOURCE;
       rtag   = getTag ( status.MPI_TAG ); 
@@ -211,7 +213,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 							     rtag->id )))
 	    {
 	      bfd = ( bFiledataPF * ) initBFiledataPF ( rtag->id, 
-							       ncollectors );
+							       nProcsCollNode );
 
 	      if (( iret = queuePush ( bibBFiledataPF, bfd, 1, rtag->id )) != rtag->id )
 	      {
@@ -290,7 +292,7 @@ void fpgPOSIXFPGUARDSENDRECV ( int ncollectors )
 	  bfd->nfinished[source] = true;  
 	  bfd->finished          = true;
 	  
-	  for ( i = 0; i < ncollectors; i++ )
+	  for ( i = 0; i < nProcsCollNode; i++ )
 	    if ( !( bfd->nfinished[i] ))
 	      {
 		bfd->finished = false;
@@ -538,8 +540,6 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
 
 void initPOSIXFPGUARDSENDRECV ( void )
 {
-  int ncollectors;
-
   if ( commInqSizeNode () < 2 ) xabort ( "usage: #pes/#nodes >= 2" );
   
   if ( commInqRankNode () == commInqSpecialRankNode ()) 
@@ -548,9 +548,7 @@ void initPOSIXFPGUARDSENDRECV ( void )
       commSendNodeInfo ();
       commRecvNodeMap ();
       commDefCommsIO ();
-      ncollectors =  commInqSizeNode () - commInqSizeColl ();
-      xdebug ( "Call fpGuard(), ncollectors = %d ...", ncollectors );
-      fpgPOSIXFPGUARDSENDRECV ( ncollectors );
+      fpgPOSIXFPGUARDSENDRECV ();
     }
   else
     {

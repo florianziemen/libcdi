@@ -686,8 +686,8 @@ void commPrint ( FILE * fp )
   if ( pioinfo2->commsIO != NULL )
     {
       fprintf ( fp, "#\n" );
-      for ( i = 0; i < pioinfo2->nProcsIO; i++ )
-	fprintf ( fp, "# commsIO[%d]    = %d\n", i, pioinfo2->commsIO[i] );
+      for ( i = 0; i < pioinfo2->nProcsColl; i++ )
+	fprintf ( fp, "# commsIO[%d]  = %d\n", i, pioinfo2->commsIO[i] );
     }
   else
     fprintf ( fp, "# commsIO     = NULL\n" );

@@ -83,8 +83,8 @@ am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	gaussgrid.lo gribapi.lo grid.lo ieglib.lo institution.lo \
 	model.lo namespace.lo pio.lo pio_comm.lo pio_dbuffer.lo \
 	pio_interface.lo pio_mpinonb.lo pio_posixfpguardsendrecv.lo \
-	pio_queue.lo pio_rpc.lo pio_server.lo pio_util.lo \
-	resource_handle.lo servicelib.lo stream_cdf.lo \
+	pio_posixnonb.lo pio_queue.lo pio_rpc.lo pio_server.lo \
+	pio_util.lo resource_handle.lo servicelib.lo stream_cdf.lo \
 	stream_cgribex.lo stream_ext.lo stream_grb.lo \
 	stream_gribapi.lo stream_history.lo stream_ieg.lo \
 	stream_int.lo stream_record.lo stream_srv.lo stream_var.lo \
@@ -332,6 +332,7 @@ libcdi_la_SOURCES = \
 	pio_interface.h	 \
 	pio_mpinonb.c    \
 	pio_posixfpguardsendrecv.c \
+	pio_posixnonb.c  \
 	pio_queue.c      \
 	pio_rpc.c        \
 	pio_rpc.h        \
@@ -513,6 +514,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_interface.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_mpinonb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixfpguardsendrecv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixnonb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_queue.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_rpc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_server.Plo@am__quote@

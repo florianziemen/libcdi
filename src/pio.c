@@ -107,11 +107,9 @@ size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
       iret = fwPOSIXFPGUARDTHREADREFUSE ( fileID, tsID, buffer, len );
       break;
 */
-/*
     case PIO_POSIX_NONB:
       iret = fwPOSIXNONB ( fileID, tsID, buffer, len );
       break;
-*/
     }
 
   return iret;
@@ -149,11 +147,9 @@ int pioFileClose ( int id )
       iret = fcPOSIXFPGUARDTHREADREFUSE ( id );
       break;
 */
-/*
     case PIO_POSIX_NONB:
       iret = fcPOSIXNONB ( id );
       break;
-*/
     }
 
   return iret;
@@ -192,11 +188,9 @@ int pioFileOpenW ( const char *filename )
       iret = fowPOSIXFPGUARDTHREADREFUSE ( filename );
       break;
 */
-/*
     case PIO_POSIX_NONB:
       iret = fowPOSIXNONB ( filename );
       break;
-*/
     }
 
   return iret;
@@ -246,11 +240,9 @@ void backendInit ( void )
       collectingData = initPOSIXFPGUARDTHREADREFUSE ();
       break;
 */
-/*
     case PIO_POSIX_NONB:
-      collectingData = initPOSIXNONB ();
+      initPOSIXNONB ();
       break;
-*/
     }
 #endif
 }
@@ -260,9 +252,7 @@ void backendInit ( void )
 void backendFinalize ( void )
 {
 #ifdef USE_MPI
-  //xdebug ("#############################");
   commDestroy ();
-  //xdebug ("#############################");
   MPI_Finalize ();
   exit ( 0 );
 #endif
