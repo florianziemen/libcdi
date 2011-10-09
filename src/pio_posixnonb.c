@@ -102,11 +102,11 @@ static bFiledataP * initBFiledataP ( char *filename,
   int i;
   char errorString[maxErrorString];
 
-  xdebug ( "filename=%s, buffersize=%lu, ncollectors=%d, in", filename, bs, nc );
+  xdebug ( "filename=%s, buffersize=%lu, ncollectors=%d", filename, bs, nc );
 
-  bfp = xmalloc ( sizeof (  bFiledataP ));
+  bfp = xmalloc ( sizeof (  bfp[0] ));
 
-  bfp->name = xmalloc (( strlen ( filename ) + 1 ) * sizeof ( char ));
+  bfp->name = xmalloc (( strlen ( filename ) + 1 ) * sizeof ( bfp->name[0] ));
   strcpy ( bfp->name, filename );
   bfp->size = bs;
 
@@ -134,7 +134,6 @@ static bFiledataP * initBFiledataP ( char *filename,
 
 int destroyAFiledataP ( void *v )
 {
-  int iret = 0;
   aFiledataP *afp = ( aFiledataP * ) v;
   MPI_Status status;
 
@@ -150,7 +149,7 @@ int destroyAFiledataP ( void *v )
 
   xdebug ( "cleaned up, return" );
 
-  return iret;
+  return 0;
 }
 
 /***************************************************************/
@@ -238,12 +237,11 @@ void writeP ( bFiledataP *bfd, long amount )
 
   xdebug ( "filename=%s, written=%ld, amount=%ld, return",
            bfd->name, written, amount );
-
-  return;
 }
 
 /***************************************************************/
-// baustelle, in modi vereinheitlichen, kapseln in pio_queue.c
+
+// TODO: unify in IOModi, encapsulate in pio_queue.c
 void queueCheckP ( queue_t *q, char *name )
 {
   listElem_t *curr;
@@ -267,10 +265,9 @@ void queueCheckP ( queue_t *q, char *name )
       
       curr = curr->next;
     }  
-
-  return;
 }
-//
+
+/***************************************************************/
 
 void pwPOSIXNONB ( void )
 {
@@ -292,8 +289,8 @@ void pwPOSIXNONB ( void )
   
   for ( ;; )
     {    
-
-      xmpi ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commNode, &status ));
+      xmpiStat ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commNode, 
+                             &status ), &status );
 
       source = status.MPI_SOURCE;
       tag    = status.MPI_TAG;
@@ -313,7 +310,7 @@ void pwPOSIXNONB ( void )
 	{
       	case IO_Open_file:
 
-	  messageBuffer = ( char *) xmalloc ( messagesize  * sizeof ( char ));
+	  messageBuffer = xmalloc ( messagesize  * sizeof ( messageBuffer[0] ));
     	  pMB = messageBuffer;
 
 	  xmpi ( MPI_Recv ( messageBuffer, messagesize, MPI_CHAR, source, 
@@ -389,8 +386,7 @@ void pwPOSIXNONB ( void )
 	case IO_Close_file:
 	  
 	  xdebug ( "command %s,  file%d, source%d", 
-                   command2charP [ rtag->command ], 
-                   rtag->id, source );
+                   command2charP [ rtag->command ],  rtag->id, source );
 	  
 	  if ( ! ( bfd = ( bFiledataP * ) queueIdx2val ( bibBFiledataP,  
 							 rtag->id )))
@@ -402,8 +398,7 @@ void pwPOSIXNONB ( void )
 	  amount = messagesize;
 
 	  xdebug ( "command %s, id=%d, name=%s, amount=%ld", 
-                   command2charP [ rtag->command ], 
-                   rtag->id, bfd->name, amount );
+                   command2charP [ rtag->command ], rtag->id, bfd->name, amount );
 	  
 	  xmpi ( MPI_Recv (  bfd->fb->buffer, amount, MPI_CHAR, source,  tag, 
                              commNode, &status ));	
@@ -458,7 +453,7 @@ void sendP ( aFiledataP *afd, int id )
 
   if ( ddebug ) startTime = MPI_Wtime ();
 
-  xmpi (  MPI_Wait ( &( afd->request ), &status ));
+  xmpiStat (  MPI_Wait ( &( afd->request ), &status ), &status );
 
   if ( ddebug ) accumWait +=  ( MPI_Wtime () - startTime );
 
@@ -598,16 +593,15 @@ int fowPOSIXNONB ( const char *filename )
   
   if ( ! buffersize )
     {
-      xdebug (" Broadcast buffersize to collectors ..." );
-      
       if  ( commInqRankColl () == root )
 	{ 
 	  if ( getenv( "BUFSIZE" ) != NULL )
 	    buffersize = atol ( getenv ( "BUFSIZE" ));
 	  if ( buffersize < initial_buffersize )
 	    buffersize = initial_buffersize;
-	}
-      
+          xdebug ( "filename=%s, broadcast buffersize=%d to collectors ...", 
+                   filename, buffersize ); 
+	}      
       xmpi ( MPI_Bcast ( &buffersize, 1, MPI_LONG, root, commInqCommColl ()));
     }
 
@@ -666,7 +660,7 @@ void initPOSIXNONB ( void )
       commRecvNodeMap ();
       commDefCommsIO ();
       bibAFiledataP = queueInit ( destroyAFiledataP, 
-				compareNamesAP );
+                                  compareNamesAP );
     }
 }
 

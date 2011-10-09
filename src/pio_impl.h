@@ -80,11 +80,11 @@ void      initMPINONB ( void );
 
 /* pio_posixasynch.c */
 #ifndef _SX
-void pwPOSIXASYNCH ( int );
-int fowPOSIXASYNCH ( const char * );
-int fcPOSIXASYNCH ( int );
-size_t fwPOSIXASYNCH( int, int, const void *, size_t );
-int initPOSIXASYNCH ( void );
+void      pwPOSIXASYNCH ( void );
+int       fowPOSIXASYNCH ( const char * );
+int       fcPOSIXASYNCH ( int );
+size_t    fwPOSIXASYNCH( int, int, const void *, size_t );
+void      initPOSIXASYNCH ( void );
 #endif
 /* pio_posixfpguardsendrecv.c */
 void      fpgPOSIXFPGUARDSENDRECV ( void );

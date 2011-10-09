@@ -61,6 +61,7 @@ libcdi_la_SOURCES = 	 \
 	pio_interface.c  \
 	pio_interface.h	 \
 	pio_mpinonb.c    \
+	pio_posixasynch.c\
 	pio_posixfpguardsendrecv.c \
 	pio_posixnonb.c  \
 	pio_queue.c      \

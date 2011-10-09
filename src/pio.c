@@ -86,11 +86,9 @@ size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
       iret = fwMPINONB ( fileID, tsID, buffer, len );
       break;
 #ifndef _SX
-/*
     case PIO_POSIX_ASYNCH:
       iret = fwPOSIXASYNCH ( fileID, tsID, buffer, len );
       break;
-*/
 #endif
       
     case PIO_POSIX_FPGUARD_SENDRECV:
@@ -126,13 +124,10 @@ int pioFileClose ( int id )
       iret = fcMPINONB ( id );
       break;
 #ifndef _SX
-/*
     case PIO_POSIX_ASYNCH:
       iret = fcPOSIXASYNCH ( id );
       break;
-*/
 #endif
-      
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fcPOSIXFPGUARDSENDRECV ( id );
       break;
@@ -167,13 +162,10 @@ int pioFileOpenW ( const char *filename )
       iret = fowMPINONB ( filename );
       break;
 #ifndef _SX
-/*
     case PIO_POSIX_ASYNCH:
       iret = fowPOSIXASYNCH ( filename );
       break;
-*/
 #endif
-      
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fowPOSIXFPGUARDSENDRECV ( filename );
       break;
@@ -219,13 +211,10 @@ void backendInit ( void )
       initMPINONB ();
       break;
 #ifndef _SX
-/*
     case PIO_POSIX_ASYNCH:
-      collectingData = initPOSIXASYNCH ();
+      initPOSIXASYNCH ();
       break;
-*/
 #endif
-      
     case PIO_POSIX_FPGUARD_SENDRECV:
       initPOSIXFPGUARDSENDRECV ();
       break;
@@ -252,6 +241,15 @@ void backendInit ( void )
 void backendFinalize ( void )
 {
 #ifdef USE_MPI
+  /*
+    switch ( pioinfo->type )
+    {
+
+    case PIO_POSIX_FPGUARD_THREAD:
+      finalizePOSIXFPGUARDTHREAD ();
+      break;
+    }
+  */
   commDestroy ();
   MPI_Finalize ();
   exit ( 0 );
