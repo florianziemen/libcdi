@@ -108,6 +108,8 @@ static
   MPI_Group groupCalc;
   int nProcsModel = commInqNProcsModel ();
 
+  int sizeModelGroup;
+
   xmpi ( MPI_Win_create ( MPI_BOTTOM, 0, sizeof ( double ), MPI_INFO_NULL,
                           commCalc, &win ));
 
@@ -115,6 +117,8 @@ static
   ranks[0] = nProcsModel;
   xmpi ( MPI_Comm_group ( commCalc, &groupCalc ));
   xmpi ( MPI_Group_excl ( groupCalc, 1, ranks, &groupModel ));
+
+  xmpi ( MPI_Group_size ( groupModel, &sizeModelGroup ));
 
   /* first shot with fixed getBuffers */
   getBufferSize = xmalloc ( nProcsModel * sizeof ( getBufferSize[0] ));  
@@ -212,11 +216,10 @@ void getData ( int tsID, int vdate, int vtime )
            vdate >= 0 &&
            vtime >= 0 );
 
-  xmpi ( MPI_Win_start ( groupModel, iAssert, win ));  
+  xmpi ( MPI_Win_start ( groupModel, iAssert, win )); 
   for ( i = 0; i < nProcsModel; i++ )
     xmpi ( MPI_Get ( &getBuffer[i][0], getBufferSize[i], MPI_DOUBLE, 
                      i, 0, getBufferSize[i], MPI_DOUBLE, win ));
-
   xmpi ( MPI_Win_complete ( win ));
 
   if ( ddebug > 2 )
@@ -302,9 +305,9 @@ void IOServer ()
           iBuffer = xmalloc ( size * sizeof ( int ));
           xmpi ( MPI_Recv ( iBuffer, size, MPI_INTEGER, source,
                             tag, commCalc, &status ));
-          xdebug ("command WRITETS, recved:  tsID=%d, vdate=%d, vtime=%d", 
-                  iBuffer[0], iBuffer[1], iBuffer[2] );
-          getData ( iBuffer[0], iBuffer[1], iBuffer[2] );      
+          xdebug ("command WRITETS, recved:  tsID=%d, vdate=%d, vtime=%d, source=%d", 
+                  iBuffer[0], iBuffer[1], iBuffer[2], source );
+          getData ( iBuffer[0], iBuffer[1], iBuffer[2] );     
           free ( iBuffer );
 
 	  break;

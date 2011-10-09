@@ -12,54 +12,55 @@
 
 #ifdef USE_MPI
 
-static pioInfo_t * pioinfo2 = NULL;
+static pioInfo_t * info = NULL;
 
 
 static
 void pioinfoInit ( pioInfo_t * p )
 {
-  p->IOModus             = CDI_UNDEFID;
-  p->nProcsIO            = CDI_UNDEFID;
-  p->nProcsModel         = CDI_UNDEFID;
-  p->isProcIO            = CDI_UNDEFID;
-
-  p->commGlob            = MPI_COMM_NULL;
-  p->sizeGlob            = CDI_UNDEFID;
-  p->rankGlob            = CDI_UNDEFID;
-  p->root                = CDI_UNDEFID;
-
-  p->commPio             = MPI_COMM_NULL;
-  p->sizePio             = CDI_UNDEFID;
-  p->rankPio             = CDI_UNDEFID;
-
-  p->commNode            = MPI_COMM_NULL;
-  p->sizeNode            = CDI_UNDEFID;
-  p->rankNode            = CDI_UNDEFID;
-  p->hostname[0]         = 0;
-  p->specialRankNode     = CDI_UNDEFID;
-     
-  p->commColl            = MPI_COMM_NULL;
-  p->sizeColl            = CDI_UNDEFID;
-  p->rankColl            = CDI_UNDEFID;
-     
-  p->commCalc            = MPI_COMM_NULL;
-  p->sizeCalc            = CDI_UNDEFID;
-  p->rankCalc            = CDI_UNDEFID;
-     
-  p->commsIO             = NULL;
-  p->nodeInfo.hostID     = CDI_UNDEFID;
-  p->nodeInfo.isProcColl = CDI_UNDEFID;
-  p->nodeInfo.nNodes     = CDI_UNDEFID;
-  p->nProcsColl          = 0;
-  p->nodeSizes           = NULL;
-  p->nodeMap             = NULL;
+  p->IOMode               = CDI_UNDEFID;
+  p->maxIOMode            = CDI_UNDEFID;
+  p->minIOModeWithSpecialProcs = CDI_UNDEFID;
+  p->nProcsIO             = CDI_UNDEFID;
+  p->nProcsModel          = CDI_UNDEFID;
+  p->isProcIO             = CDI_UNDEFID;
+                          
+  p->commGlob             = MPI_COMM_NULL;
+  p->sizeGlob             = CDI_UNDEFID;
+  p->rankGlob             = CDI_UNDEFID;
+  p->root                 = CDI_UNDEFID;
+                          
+  p->commPio              = MPI_COMM_NULL;
+  p->sizePio              = CDI_UNDEFID;
+  p->rankPio              = CDI_UNDEFID;
+                          
+  p->commNode             = MPI_COMM_NULL;
+  p->sizeNode             = CDI_UNDEFID;
+  p->rankNode             = CDI_UNDEFID;
+  p->hostname[0]          = 0;
+  p->specialRankNode      = CDI_UNDEFID;
+                          
+  p->commColl             = MPI_COMM_NULL;
+  p->sizeColl             = CDI_UNDEFID;
+  p->rankColl             = CDI_UNDEFID;
+                          
+  p->commCalc             = MPI_COMM_NULL;
+                          
+  p->commsIO              = NULL;
+  p->nodeInfo.hostID      = CDI_UNDEFID;
+  p->nodeInfo.isProcColl  = CDI_UNDEFID;
+  p->nodeInfo.nNodes      = CDI_UNDEFID;
+  p->nProcsColl           = 0;
+  p->nodeSizes            = NULL;
+  p->nodeMap              = NULL;
 }
 
 
 void commInit ( void )
 {
-  pioinfo2 = xmalloc ( sizeof ( pioInfo_t ));
-  pioinfoInit ( pioinfo2 );
+  assert ( info == 0 );
+  info = xmalloc ( sizeof ( pioInfo_t ));
+  pioinfoInit ( info );
 }
 
 
@@ -67,134 +68,140 @@ void commDestroy ( void )
 {
   int collID;
 
-  assert ( pioinfo2 != NULL );
+  assert ( info != NULL );
 
-  if ( pioinfo2->nodeMap   != NULL ) free ( pioinfo2->nodeMap );
-  if ( pioinfo2->nodeSizes != NULL ) free ( pioinfo2->nodeSizes );
+  if ( info->nodeMap   != NULL ) free ( info->nodeMap );
+  if ( info->nodeSizes != NULL ) free ( info->nodeSizes );
 
-  if ( pioinfo2->commsIO != NULL ) 
+  xdebug ();
+
+  if ( info->commsIO != NULL ) 
     {
-      for ( collID = 0; collID < pioinfo2->nProcsColl; collID++ )
-	if ( pioinfo2->commsIO[collID] != MPI_COMM_NULL )
-	  xmpi ( MPI_Comm_free ( &pioinfo2->commsIO[collID] ));
-      free ( &pioinfo2->commsIO ); 
-      pioinfo2->commsIO = NULL;
+      for ( collID = 0; collID < info->nProcsColl; collID++ )
+	if ( info->commsIO[collID] != MPI_COMM_NULL )
+	  xmpi ( MPI_Comm_free ( &info->commsIO[collID] ));
+      free ( info->commsIO ); 
+      info->commsIO = NULL;
     }
  
-  if ( pioinfo2->commCalc != MPI_COMM_NULL )
+  if ( info->commCalc != MPI_COMM_NULL )
     {
-      xmpi ( MPI_Comm_free ( &pioinfo2->commCalc )); 
-      pioinfo2->commCalc = MPI_COMM_NULL;
+      xmpi ( MPI_Comm_free ( &info->commCalc )); 
+      info->commCalc = MPI_COMM_NULL;
     }
  
-  if ( pioinfo2->commColl != MPI_COMM_NULL )
+  if ( info->commColl != MPI_COMM_NULL )
     {
-      xmpi ( MPI_Comm_free ( &pioinfo2->commColl )); 
-      pioinfo2->commColl = MPI_COMM_NULL;
+      xmpi ( MPI_Comm_free ( &info->commColl )); 
+      info->commColl = MPI_COMM_NULL;
     }
   
-  if ( pioinfo2->commNode != MPI_COMM_NULL )
+  if ( info->commNode != MPI_COMM_NULL )
     {
-      xmpi ( MPI_Comm_free ( &pioinfo2->commNode )); 
-      pioinfo2->commNode = MPI_COMM_NULL;
+      xmpi ( MPI_Comm_free ( &info->commNode )); 
+      info->commNode = MPI_COMM_NULL;
     }
   
-  if ( pioinfo2->commPio != MPI_COMM_NULL )
+  if ( info->commPio != MPI_COMM_NULL )
     {
-      xmpi ( MPI_Comm_free ( &pioinfo2->commPio )); 
-      pioinfo2->commPio != MPI_COMM_NULL;    
+      xmpi ( MPI_Comm_free ( &info->commPio )); 
+      info->commPio != MPI_COMM_NULL;    
     }
   
-  free ( pioinfo2 );
-  pioinfo2 = NULL;
+  free ( info );
+  info = NULL;
 }
 
 
 void commDefCommGlob ( MPI_Comm c )
 {
-  assert ( pioinfo2 != NULL &&
+  assert ( info != NULL &&
 	   c != MPI_COMM_NULL );
 
-  pioinfo2->commGlob = c;
-  xmpi ( MPI_Comm_size ( c, &pioinfo2->sizeGlob ));
-  xmpi ( MPI_Comm_rank ( c, &pioinfo2->rankGlob ));
-  pioinfo2->root = 0;
+  info->commGlob = c;
+  xmpi ( MPI_Comm_size ( c, &info->sizeGlob ));
+  xmpi ( MPI_Comm_rank ( c, &info->rankGlob ));
+  info->root = 0;
 }
  
 
 MPI_Comm commInqCommGlob ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->commGlob != MPI_COMM_NULL );
-  return pioinfo2->commGlob;
+  assert ( info != NULL &&
+           info->commGlob != MPI_COMM_NULL );
+  return info->commGlob;
 }
 
 
 int commInqSizeGlob ( void )
 {
-  assert ( pioinfo2 != NULL  &&
-           pioinfo2->sizeGlob != CDI_UNDEFID );
-  return pioinfo2->sizeGlob;
+  assert ( info != NULL  &&
+           info->sizeGlob != CDI_UNDEFID );
+  return info->sizeGlob;
 }
 
 
 int commInqRankGlob ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->rankGlob != CDI_UNDEFID );
-  return pioinfo2->rankGlob;
+  assert ( info != NULL &&
+           info->rankGlob != CDI_UNDEFID );
+  return info->rankGlob;
 }
 
 
 void commDefNProcsIO ( int n )
 {
-  assert ( pioinfo2 != NULL &&
+  assert ( info != NULL &&
 	   n >= 0 &&
 	   n < MAXNPROCSIO &&
-           pioinfo2->commGlob != MPI_COMM_NULL );
-  pioinfo2->nProcsIO = n;
-  pioinfo2->nProcsModel = pioinfo2->sizeGlob - pioinfo2->nProcsIO;
+           info->commGlob != MPI_COMM_NULL );
+  info->nProcsIO = n;
+  info->nProcsModel = info->sizeGlob - info->nProcsIO;
 }
 
 
 int commInqNProcsIO ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->nProcsIO != CDI_UNDEFID );
-  return pioinfo2->nProcsIO;
+  assert ( info != NULL &&
+           info->nProcsIO != CDI_UNDEFID );
+  return info->nProcsIO;
 }
 
 
 int      commInqIsProcIO     ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->isProcIO != CDI_UNDEFID );
-  return pioinfo2->isProcIO;
+  assert ( info != NULL &&
+           info->isProcIO != CDI_UNDEFID );
+  return info->isProcIO;
 }
 
 
 int commInqNProcsModel ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->nProcsModel != CDI_UNDEFID );
-  return pioinfo2->nProcsModel;
+  assert ( info != NULL &&
+           info->nProcsModel != CDI_UNDEFID );
+  return info->nProcsModel;
 }
 
 
-void     commDefIOModus  ( int IOModus )
+void     commDefIOMode  ( int IOMode, int maxIOMode, int minIOModeWithSpecialProcs )
 {
-  assert ( pioinfo2 != NULL &&
-	   IOModus >= 0 &&
-	   IOModus <= MAXIOMODUS );
-  pioinfo2->IOModus = IOModus;
+  assert ( info != NULL &&
+	   IOMode >= 0 &&
+           maxIOMode >= IOMode &&
+           minIOModeWithSpecialProcs > 0 &&
+           minIOModeWithSpecialProcs <= maxIOMode );
+  info->IOMode = IOMode;
+  info->maxIOMode = maxIOMode;
+  info->minIOModeWithSpecialProcs = minIOModeWithSpecialProcs;
 }
 
 
-int      commInqIOModus  ( void )
+int      commInqIOMode  ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->IOModus != CDI_UNDEFID );
-  return pioinfo2->IOModus;
+  assert ( info != NULL &&
+           info->IOMode != CDI_UNDEFID );
+  return info->IOMode;
 }
 
 
@@ -202,73 +209,73 @@ void     commDefCommPio  ( void )
 {
   int nProcsModel;
 
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->commGlob != MPI_COMM_NULL &&
-           pioinfo2->IOModus  != CDI_UNDEFID &&
-           pioinfo2->nProcsIO != CDI_UNDEFID );
+  assert ( info != NULL &&
+           info->commGlob != MPI_COMM_NULL &&
+           info->IOMode  != CDI_UNDEFID &&
+           info->nProcsIO != CDI_UNDEFID );
 
-  nProcsModel = pioinfo2->sizeGlob - pioinfo2->nProcsIO;
+  nProcsModel = info->sizeGlob - info->nProcsIO;
 
-  pioinfo2->isProcIO = pioinfo2->rankGlob >= nProcsModel ? 1 : 0;
+  info->isProcIO = info->rankGlob >= nProcsModel ? 1 : 0;
 
-  xmpi ( MPI_Comm_split ( pioinfo2->commGlob, pioinfo2->isProcIO, 0, 
-                          &pioinfo2->commPio ));
-  xmpi ( MPI_Comm_size ( pioinfo2->commPio, &pioinfo2->sizePio ));
-  xmpi ( MPI_Comm_rank ( pioinfo2->commPio, &pioinfo2->rankPio )); 
+  xmpi ( MPI_Comm_split ( info->commGlob, info->isProcIO, 0, 
+                          &info->commPio ));
+  xmpi ( MPI_Comm_size ( info->commPio, &info->sizePio ));
+  xmpi ( MPI_Comm_rank ( info->commPio, &info->rankPio )); 
 }
 
 
 MPI_Comm commInqCommPio  ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->commPio != MPI_COMM_NULL );
-  return pioinfo2->commPio;
+  assert ( info != NULL &&
+           info->commPio != MPI_COMM_NULL );
+  return info->commPio;
 }
 
 
 MPI_Comm commInqCommModel( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->commPio != MPI_COMM_NULL );
-  return pioinfo2->commPio;
+  assert ( info != NULL &&
+           info->commPio != MPI_COMM_NULL );
+  return info->commPio;
 }
 
 
 void     commDefCommColl  ( int isProcColl )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->commNode != MPI_COMM_NULL &&
-           pioinfo2->commColl == MPI_COMM_NULL );
+  assert ( info != NULL &&
+           info->commNode != MPI_COMM_NULL &&
+           info->commColl == MPI_COMM_NULL );
 
-  pioinfo2->nodeInfo.isProcColl = isProcColl;  
-  xmpi ( MPI_Comm_split ( pioinfo2->commNode, pioinfo2->nodeInfo.isProcColl, 0, 
-                          &pioinfo2->commColl ));
-  xmpi ( MPI_Comm_size ( pioinfo2->commColl, &pioinfo2->sizeColl ));
-  xmpi ( MPI_Comm_rank ( pioinfo2->commColl, &pioinfo2->rankColl )); 
+  info->nodeInfo.isProcColl = isProcColl;  
+  xmpi ( MPI_Comm_split ( info->commNode, info->nodeInfo.isProcColl, 0, 
+                          &info->commColl ));
+  xmpi ( MPI_Comm_size ( info->commColl, &info->sizeColl ));
+  xmpi ( MPI_Comm_rank ( info->commColl, &info->rankColl )); 
 }
 
 
 MPI_Comm commInqCommColl    ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->commColl != MPI_COMM_NULL );
-  return pioinfo2->commColl;
+  assert ( info != NULL &&
+           info->commColl != MPI_COMM_NULL );
+  return info->commColl;
 }
 
 
 int      commInqSizeColl    ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->sizeColl != CDI_UNDEFID );
-  return pioinfo2->sizeColl; 
+  assert ( info != NULL &&
+           info->sizeColl != CDI_UNDEFID );
+  return info->sizeColl; 
 }
 
 
 int      commInqRankColl    ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->rankColl != CDI_UNDEFID );
-  return pioinfo2->rankColl; 
+  assert ( info != NULL &&
+           info->rankColl != CDI_UNDEFID );
+  return info->rankColl; 
 }
 
 
@@ -284,17 +291,17 @@ void commDefCommNode ( void )
   char * myHost, ** allHosts, * allHosts0, * curr;
   char hostname [ MPI_MAX_PROCESSOR_NAME + 1 ];
 
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->commPio != MPI_COMM_NULL );
+  assert ( info != NULL &&
+           info->commPio != MPI_COMM_NULL );
 
-  size = pioinfo2->sizePio;
-  rank = pioinfo2->rankPio;
+  size = info->sizePio;
+  rank = info->rankPio;
 
   myHost = xmalloc ( MPI_MAX_PROCESSOR_NAME * sizeof ( myHost[0] ));
   xmpi ( MPI_Get_processor_name ( myHost, &len ));
   if ( myHost[0] == '\0' ) xabort ( "did not succeed to set hostname" );
-  strncpy ( pioinfo2->hostname, myHost, len );
-  pioinfo2->hostname[len] = '\0';
+  strncpy ( info->hostname, myHost, len );
+  info->hostname[len] = '\0';
 
   allHosts    = xmalloc ( size * sizeof ( allHosts[0] ));
   allHosts[0] = xmalloc ( size * MPI_MAX_PROCESSOR_NAME *
@@ -305,7 +312,7 @@ void commDefCommNode ( void )
 
   xmpi ( MPI_Allgather ( myHost, MPI_MAX_PROCESSOR_NAME, MPI_CHAR,
                          & ( allHosts[0][0] ), MPI_MAX_PROCESSOR_NAME,
-                         MPI_CHAR, pioinfo2->commPio ));
+                         MPI_CHAR, info->commPio ));
 
   qsort ( allHosts, size, sizeof ( char * ), cmpr );
 
@@ -316,22 +323,23 @@ void commDefCommNode ( void )
     {
       curr = allHosts[i];
       j++;
-      if (( test = strcmp ( myHost, curr )) == 0 ) pioinfo2->nodeInfo.hostID = j;
+      if (( test = strcmp ( myHost, curr )) == 0 ) info->nodeInfo.hostID = j;
 
       while ( ++i < size )
         if (( test = strcmp ( allHosts[i], curr )) != 0)
           break;
     }
 
-  pioinfo2->nodeInfo.nNodes = j;
+  info->nodeInfo.nNodes = j;
 
-  if ( pioinfo2->nodeInfo.hostID == CDI_UNDEFID ) xabort ( "HostID is not set" );
+  if ( info->nodeInfo.hostID == CDI_UNDEFID ) xabort ( "HostID is not set" );
 
-  xmpi ( MPI_Comm_split ( pioinfo2->commPio, pioinfo2->nodeInfo.hostID, 0, 
-                          &pioinfo2->commNode ));
-  xmpi ( MPI_Comm_size ( pioinfo2->commNode, &pioinfo2->sizeNode ));
-  xmpi ( MPI_Comm_rank ( pioinfo2->commNode, &pioinfo2->rankNode ));
-  pioinfo2->specialRankNode = pioinfo2->sizeNode - 1;
+  xmpi ( MPI_Comm_split ( info->commPio, info->nodeInfo.hostID, 0, 
+                          &info->commNode ));
+  xmpi ( MPI_Comm_size ( info->commNode, &info->sizeNode ));
+  xmpi ( MPI_Comm_rank ( info->commNode, &info->rankNode ));
+  if ( info->IOMode >= info->minIOModeWithSpecialProcs )
+    info->specialRankNode = info->sizeNode - 1;
 
   free ( allHosts0 );
   free ( allHosts );
@@ -343,47 +351,46 @@ void commDefCommNode ( void )
 
 MPI_Comm commInqCommNode    ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->commNode != MPI_COMM_NULL );
-  return pioinfo2->commNode;
+  assert ( info != NULL &&
+           info->commNode != MPI_COMM_NULL );
+  return info->commNode;
 } 
 
 
 int commInqSizeNode ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->sizeNode != CDI_UNDEFID );
-  return pioinfo2->sizeNode;
+  assert ( info != NULL &&
+           info->sizeNode != CDI_UNDEFID );
+  return info->sizeNode;
 }
 
 
 int commInqRankNode ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->rankNode != CDI_UNDEFID );
-  return pioinfo2->rankNode;
+  assert ( info != NULL &&
+           info->rankNode != CDI_UNDEFID );
+  return info->rankNode;
 }
 
 
 int commInqSpecialRankNode ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->specialRankNode != CDI_UNDEFID );
-  return pioinfo2->specialRankNode;
+  assert ( info != NULL );
+  return info->specialRankNode;
 }
 
 
 void commSendNodeInfo ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->root                != CDI_UNDEFID &&
-           pioinfo2->nodeInfo.hostID     != CDI_UNDEFID &&
-           pioinfo2->nodeInfo.isProcColl != CDI_UNDEFID &&
-           pioinfo2->nodeInfo.nNodes     != CDI_UNDEFID &&
-           pioinfo2->commGlob            != MPI_COMM_NULL );
+  assert ( info != NULL &&
+           info->root                != CDI_UNDEFID &&
+           info->nodeInfo.hostID     != CDI_UNDEFID &&
+           info->nodeInfo.isProcColl != CDI_UNDEFID &&
+           info->nodeInfo.nNodes     != CDI_UNDEFID &&
+           info->commGlob            != MPI_COMM_NULL );
   
-  xmpi ( MPI_Send ( &pioinfo2->nodeInfo, sizeNodeInfo, MPI_INTEGER, 
-                    pioinfo2->root, NODEINFO, pioinfo2->commGlob ));
+  xmpi ( MPI_Send ( &info->nodeInfo, sizeNodeInfo, MPI_INTEGER, 
+                    info->root, NODEINFO, info->commGlob ));
 }
 
 
@@ -392,37 +399,37 @@ void     commRecvNodeMap    ( void )
   MPI_Status status;
   int source; 
 
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->commGlob    != MPI_COMM_NULL &&
-           pioinfo2->rankGlob    != CDI_UNDEFID &&
-           pioinfo2->nProcsModel != CDI_UNDEFID &&
-           pioinfo2->nodeMap     == NULL );
+  assert ( info != NULL &&
+           info->commGlob    != MPI_COMM_NULL &&
+           info->rankGlob    != CDI_UNDEFID &&
+           info->nProcsModel != CDI_UNDEFID &&
+           info->nodeMap     == NULL );
 
-  source = pioinfo2->rankGlob - pioinfo2->nProcsModel;
+  source = info->rankGlob - info->nProcsModel;
 
-  xmpi ( MPI_Probe ( source, NODEMAP, pioinfo2->commGlob, &status ));
-  xmpi ( MPI_Get_count ( &status, MPI_INTEGER, &pioinfo2->nProcsColl ));
+  xmpi ( MPI_Probe ( source, NODEMAP, info->commGlob, &status ));
+  xmpi ( MPI_Get_count ( &status, MPI_INTEGER, &info->nProcsColl ));
 
-  pioinfo2->nodeMap = xmalloc ( pioinfo2->nProcsColl * 
-                                sizeof ( pioinfo2->nodeMap[0] )); 
+  info->nodeMap = xmalloc ( info->nProcsColl * 
+                                sizeof ( info->nodeMap[0] )); 
 
-  xmpi ( MPI_Recv ( pioinfo2->nodeMap, pioinfo2->nProcsColl, MPI_INTEGER, 
-                    source, NODEMAP, pioinfo2->commGlob, &status ));
+  xmpi ( MPI_Recv ( info->nodeMap, info->nProcsColl, MPI_INTEGER, 
+                    source, NODEMAP, info->commGlob, &status ));
 }
 
 
 void     commDefNNodes      ( int nNodes )
 {
-  assert ( pioinfo2 != NULL );
-  pioinfo2->nodeInfo.nNodes = nNodes;
+  assert ( info != NULL );
+  info->nodeInfo.nNodes = nNodes;
 }
 
 
 int      commInqNNodes      ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->nodeInfo.nNodes != CDI_UNDEFID );
-  return pioinfo2->nodeInfo.nNodes;
+  assert ( info != NULL &&
+           info->nodeInfo.nNodes != CDI_UNDEFID );
+  return info->nodeInfo.nNodes;
 }
 
 
@@ -433,87 +440,87 @@ void     commEvalPhysNodes  ( void )
   int i, IOID, size, nNodes = CDI_UNDEFID;
   int ** p1, ** p2,  idx;
 
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->root        != CDI_UNDEFID &&
-           pioinfo2->nProcsIO    != CDI_UNDEFID &&
-           pioinfo2->nProcsModel != CDI_UNDEFID &&
-           pioinfo2->sizeGlob    != CDI_UNDEFID &&
-           pioinfo2->rankGlob    != CDI_UNDEFID &&
-           pioinfo2->commGlob    != MPI_COMM_NULL );
+  assert ( info != NULL &&
+           info->root        != CDI_UNDEFID &&
+           info->nProcsIO    != CDI_UNDEFID &&
+           info->nProcsModel != CDI_UNDEFID &&
+           info->sizeGlob    != CDI_UNDEFID &&
+           info->rankGlob    != CDI_UNDEFID &&
+           info->commGlob    != MPI_COMM_NULL );
 
-  size = pioinfo2->nProcsIO * sizeNodeInfo;
+  size = info->nProcsIO * sizeNodeInfo;
 
   nodeInfo = xmalloc ( size * sizeof ( int ));
 
-  if ( pioinfo2->rankGlob == pioinfo2->root )
+  if ( info->rankGlob == info->root )
     {
-      assert ( pioinfo2->rankPio == pioinfo2->root );
+      assert ( info->rankPio == info->root );
  
-      for ( i = pioinfo2->nProcsModel; i < pioinfo2->sizeGlob; i++ )
+      for ( i = info->nProcsModel; i < info->sizeGlob; i++ )
         {
-          IOID = i - pioinfo2->nProcsModel;
+          IOID = i - info->nProcsModel;
           xmpi ( MPI_Recv ( nodeInfo + IOID, sizeNodeInfo, MPI_INTEGER, i, 
-                            NODEINFO, pioinfo2->commGlob, &status ));
+                            NODEINFO, info->commGlob, &status ));
         }
     }
 
-  xmpi ( MPI_Bcast ( nodeInfo, size, MPI_INTEGER, pioinfo2->root, 
-                     pioinfo2->commPio ));
+  xmpi ( MPI_Bcast ( nodeInfo, size, MPI_INTEGER, info->root, 
+                     info->commPio ));
 
   // consistency check, count collectors
-  for ( IOID = 0; IOID < pioinfo2->nProcsIO; IOID++ )
+  for ( IOID = 0; IOID < info->nProcsIO; IOID++ )
     {
       if ( IOID == 0 )
         {
           assert ( nodeInfo[IOID].nNodes > 0 &&
-                   nodeInfo[IOID].nNodes <= pioinfo2->nProcsIO );
+                   nodeInfo[IOID].nNodes <= info->nProcsIO );
           nNodes = nodeInfo[IOID].nNodes;
         }
       else assert ( nodeInfo[IOID].nNodes == nNodes );         
       assert ( nodeInfo[IOID].hostID > 0 &&
                nodeInfo[IOID].hostID <= nNodes );
-      if ( nodeInfo[IOID].isProcColl ) pioinfo2->nProcsColl++;
+      if ( nodeInfo[IOID].isProcColl ) info->nProcsColl++;
     }
 
   // define nodeSizes
-  pioinfo2->nodeInfo.nNodes = nNodes; 
-  pioinfo2->nodeSizes = xmalloc ( pioinfo2->nodeInfo.nNodes * 
-                                  sizeof ( pioinfo2->nodeSizes[0] ));
-  for ( IOID = 0; IOID < pioinfo2->nProcsIO; IOID++ )
+  info->nodeInfo.nNodes = nNodes; 
+  info->nodeSizes = xmalloc ( info->nodeInfo.nNodes * 
+                                  sizeof ( info->nodeSizes[0] ));
+  for ( IOID = 0; IOID < info->nProcsIO; IOID++ )
     if ( nodeInfo[IOID].isProcColl )
-      pioinfo2->nodeSizes[nodeInfo[IOID].hostID - 1]++;
+      info->nodeSizes[nodeInfo[IOID].hostID - 1]++;
 
   // define nodeMap
-  pioinfo2->nodeMap   = xmalloc ( pioinfo2->nProcsColl * 
-                                  sizeof ( pioinfo2->nodeMap[0] ));
+  info->nodeMap   = xmalloc ( info->nProcsColl * 
+                                  sizeof ( info->nodeMap[0] ));
   // helpers
-  p1 = xmalloc ( pioinfo2->nodeInfo.nNodes * sizeof ( p1[0] ));
-  p2 = xmalloc ( pioinfo2->nodeInfo.nNodes * sizeof ( p2[0] ));
+  p1 = xmalloc ( info->nodeInfo.nNodes * sizeof ( p1[0] ));
+  p2 = xmalloc ( info->nodeInfo.nNodes * sizeof ( p2[0] ));
   idx = 0;
-  for ( i = 0; i < pioinfo2->nodeInfo.nNodes; i++ )
+  for ( i = 0; i < info->nodeInfo.nNodes; i++ )
     {
-      assert ( idx >= 0 && idx < pioinfo2->nProcsColl );
-      p1[i] = &pioinfo2->nodeMap[idx];
-      p2[i] = p1[i] + pioinfo2->nodeSizes[i]; 
-      idx += pioinfo2->nodeSizes[i];
+      assert ( idx >= 0 && idx < info->nProcsColl );
+      p1[i] = &info->nodeMap[idx];
+      p2[i] = p1[i] + info->nodeSizes[i]; 
+      idx += info->nodeSizes[i];
     }
-  assert ( idx == pioinfo2->nProcsColl );
+  assert ( idx == info->nProcsColl );
 
   // rankGlob in nodeMap
-  for ( IOID = 0; IOID < pioinfo2->nProcsIO; IOID++ )
+  for ( IOID = 0; IOID < info->nProcsIO; IOID++ )
     {
       if ( nodeInfo[IOID].isProcColl )
         {
           assert ( p1[nodeInfo[IOID].hostID - 1] <  
                    p2[nodeInfo[IOID].hostID - 1] );
-          * p1[nodeInfo[IOID].hostID - 1]++ = IOID + pioinfo2->nProcsModel;
+          * p1[nodeInfo[IOID].hostID - 1]++ = IOID + info->nProcsModel;
         }
     }
 
-  if ( pioinfo2->rankGlob < pioinfo2->nProcsIO )
-    xmpi ( MPI_Send ( pioinfo2->nodeMap, pioinfo2->nProcsColl, MPI_INTEGER, 
-                    pioinfo2->rankGlob + pioinfo2->nProcsModel, 
-                      NODEMAP, pioinfo2->commGlob ));
+  if ( info->rankGlob < info->nProcsIO )
+    xmpi ( MPI_Send ( info->nodeMap, info->nProcsColl, MPI_INTEGER, 
+                    info->rankGlob + info->nProcsModel, 
+                      NODEMAP, info->commGlob ));
 
   free ( p2 );
   free ( p1 );
@@ -523,12 +530,12 @@ void     commEvalPhysNodes  ( void )
 
 int      commCollID2RankGlob      ( int collID ) 
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->nProcsColl != CDI_UNDEFID &&
+  assert ( info != NULL &&
+           info->nProcsColl != CDI_UNDEFID &&
            collID >= 0 &&
-           collID < pioinfo2->nProcsColl &&
-           pioinfo2->nodeMap != NULL );
-  return pioinfo2->nodeMap[collID];
+           collID < info->nProcsColl &&
+           info->nodeMap != NULL );
+  return info->nodeMap[collID];
 }
 
 
@@ -536,15 +543,15 @@ int      commRankGlob2CollID      ( int rankGlob)
 {
   int out = CDI_UNDEFID, collID;
 
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->nProcsColl != CDI_UNDEFID &&
-           pioinfo2->nProcsModel != CDI_UNDEFID &&
-           pioinfo2->sizeGlob != CDI_UNDEFID &&
-           rankGlob >= pioinfo2->nProcsModel &&
-           rankGlob <= pioinfo2->sizeGlob );
+  assert ( info != NULL &&
+           info->nProcsColl != CDI_UNDEFID &&
+           info->nProcsModel != CDI_UNDEFID &&
+           info->sizeGlob != CDI_UNDEFID &&
+           rankGlob >= info->nProcsModel &&
+           rankGlob <= info->sizeGlob );
 
-  for ( collID = 0; collID < pioinfo2->nProcsColl; collID++ )
-    if ( pioinfo2->nodeMap[collID] == rankGlob ) out = collID;
+  for ( collID = 0; collID < info->nProcsColl; collID++ )
+    if ( info->nodeMap[collID] == rankGlob ) out = collID;
 
   return out;
 } 
@@ -552,9 +559,9 @@ int      commRankGlob2CollID      ( int rankGlob)
 
 int *    commInqNodeSizes   ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->nodeSizes != NULL );
-  return pioinfo2->nodeSizes;
+  assert ( info != NULL &&
+           info->nodeSizes != NULL );
+  return info->nodeSizes;
 }
 
 
@@ -565,48 +572,54 @@ void     commDefCommsIO     ( void )
   int collID, * ranks, i, currIORank;
   char name[MAXCOMMIONAME];
 
-  pioinfo2->commsIO = xmalloc ( pioinfo2->nProcsColl * 
-                                sizeof ( pioinfo2->commsIO[0] ));
-  for ( collID = 0; collID < pioinfo2->nProcsColl; collID++ )
-    pioinfo2->commsIO[collID] = MPI_COMM_NULL;
+  assert ( info != NULL &&
+           info->nProcsColl != CDI_UNDEFID &&
+           info->commsIO == NULL &&
+           info->nProcsModel != CDI_UNDEFID &&
+           info->commGlob != MPI_COMM_NULL );
+
+  info->commsIO = xmalloc ( info->nProcsColl * 
+                                sizeof ( info->commsIO[0] ));
+  for ( collID = 0; collID < info->nProcsColl; collID++ )
+    info->commsIO[collID] = MPI_COMM_NULL;
 
   strncpy ( name, "COMMSIO_", 8 ); 
   name[MAXCOMMIONAME - 1] = '\0';
   
-  ranks = xmalloc (( pioinfo2->nProcsModel + 1 ) * sizeof ( ranks[0] ));
-  for ( i = 0; i < pioinfo2->nProcsModel; i++ )
+  ranks = xmalloc (( info->nProcsModel + 1 ) * sizeof ( ranks[0] ));
+  for ( i = 0; i < info->nProcsModel; i++ )
     * ( ranks + i ) = i;
   
-  xmpi ( MPI_Comm_group ( pioinfo2->commGlob, &groupGlob )); 
+  xmpi ( MPI_Comm_group ( info->commGlob, &groupGlob )); 
 
-  for ( collID = 0; collID < pioinfo2->nProcsColl; collID++ )
+  for ( collID = 0; collID < info->nProcsColl; collID++ )
     {
-      currIORank = pioinfo2->nodeMap[collID];
-      * ( ranks + pioinfo2->nProcsModel ) = currIORank;	  
-      xmpi ( MPI_Group_incl ( groupGlob, pioinfo2->nProcsModel + 1, 
+      currIORank = info->nodeMap[collID];
+      * ( ranks + info->nProcsModel ) = currIORank;	  
+      xmpi ( MPI_Group_incl ( groupGlob, info->nProcsModel + 1, 
                               ranks, &currGroupIO ));
-      xmpi ( MPI_Comm_create ( pioinfo2->commGlob, currGroupIO,  
-                               pioinfo2->commsIO + collID ));
-      if ( pioinfo2->rankGlob == currIORank )
-	pioinfo2->commCalc = pioinfo2->commsIO[collID];
+      xmpi ( MPI_Comm_create ( info->commGlob, currGroupIO,  
+                               info->commsIO + collID ));
+      if ( info->rankGlob == currIORank )
+	info->commCalc = info->commsIO[collID];
 
       // set names for debugging
-      if ( pioinfo2->rankGlob < pioinfo2->nProcsModel || 
-           pioinfo2->rankGlob == currIORank )
+      if ( info->rankGlob < info->nProcsModel || 
+           info->rankGlob == currIORank )
 	{
 	  sprintf ( &name[8], "%d", collID ); 
-	  xmpi ( MPI_Comm_set_name ( pioinfo2->commsIO[collID], name ));
+	  xmpi ( MPI_Comm_set_name ( info->commsIO[collID], name ));
 	}
     }
 
   if ( ddebug >= 2 )
     {
 
-      if ( pioinfo2->rankGlob < pioinfo2->nProcsModel )
-	for ( collID = 0; collID < pioinfo2->nProcsColl; collID++ ) 
-          xdebugComm ( pioinfo2->commsIO + collID );
-      else if ( pioinfo2->nodeInfo.isProcColl )
-	xdebugComm ( &pioinfo2->commCalc );
+      if ( info->rankGlob < info->nProcsModel )
+	for ( collID = 0; collID < info->nProcsColl; collID++ ) 
+          xdebugComm ( info->commsIO + collID );
+      else if ( info->nodeInfo.isProcColl )
+	xdebugComm ( &info->commCalc );
     }
 
   xmpi ( MPI_Group_free ( &currGroupIO ));
@@ -620,29 +633,29 @@ void     commDefCommsIO     ( void )
 MPI_Comm commInqCommsIO     ( int collID )
 {
   assert ( collID >= 0 &&
-           pioinfo2 != NULL &&
-           pioinfo2->nProcsColl != CDI_UNDEFID &&
-           collID < pioinfo2->nProcsColl &&
-           pioinfo2->commsIO != NULL &&
-           pioinfo2->commsIO[collID] != MPI_COMM_NULL );
+           info != NULL &&
+           info->nProcsColl != CDI_UNDEFID &&
+           collID < info->nProcsColl &&
+           info->commsIO != NULL &&
+           info->commsIO[collID] != MPI_COMM_NULL );
 
-  return pioinfo2->commsIO[collID];
+  return info->commsIO[collID];
 }
 
 
 MPI_Comm commInqCommCalc    ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->commCalc != MPI_COMM_NULL );
-  return pioinfo2->commCalc;
+  assert ( info != NULL &&
+           info->commCalc != MPI_COMM_NULL );
+  return info->commCalc;
 }
 
 
 int      commInqNProcsColl  ( void )
 {
-  assert ( pioinfo2 != NULL &&
-           pioinfo2->nProcsColl != CDI_UNDEFID );
-  return pioinfo2->nProcsColl;
+  assert ( info != NULL &&
+           info->nProcsColl != CDI_UNDEFID );
+  return info->nProcsColl;
 }
 
 
@@ -650,67 +663,67 @@ void commPrint ( FILE * fp )
 {
   int i;
 
-  assert ( pioinfo2 != NULL );
+  assert ( info != NULL );
 
   fprintf ( fp, "\n" );
-  fprintf ( fp, "######## pioinfo PE%d ###########\n", pioinfo2->rankGlob );
+  fprintf ( fp, "######## pioinfo PE%d ###########\n", info->rankGlob );
   fprintf ( fp, "#\n" );
-  fprintf ( fp, "# IOModus     = %d\n", pioinfo2->IOModus );
-  fprintf ( fp, "# nProcsIO    = %d\n", pioinfo2->nProcsIO );
-  fprintf ( fp, "# nProcsModel = %d\n", pioinfo2->nProcsModel );
-  fprintf ( fp, "# isProcIO    = %d\n", pioinfo2->isProcIO );
+  fprintf ( fp, "# IOMode      = %d\n", info->IOMode );
+  fprintf ( fp, "# maxIOMode   = %d\n", info->maxIOMode );
+  fprintf ( fp, "# minIOModeWithSpecialProcs  = %d\n", info->minIOModeWithSpecialProcs );
+  fprintf ( fp, "# nProcsIO    = %d\n", info->nProcsIO );
+  fprintf ( fp, "# nProcsModel = %d\n", info->nProcsModel );
+  fprintf ( fp, "# isProcIO    = %d\n", info->isProcIO );
   fprintf ( fp, "#\n" );
-  fprintf ( fp, "# commGlob    = %d\n", pioinfo2->commGlob );
-  fprintf ( fp, "# sizeGlob    = %d\n", pioinfo2->sizeGlob );
-  fprintf ( fp, "# rankGlob    = %d\n", pioinfo2->rankGlob );
-  fprintf ( fp, "# root        = %d\n", pioinfo2->root );
+  fprintf ( fp, "# commGlob    = %d\n", info->commGlob );
+  fprintf ( fp, "# sizeGlob    = %d\n", info->sizeGlob );
+  fprintf ( fp, "# rankGlob    = %d\n", info->rankGlob );
+  fprintf ( fp, "# root        = %d\n", info->root );
   fprintf ( fp, "#\n" );
-  fprintf ( fp, "# commPio     = %d\n", pioinfo2->commPio );
-  fprintf ( fp, "# sizePio     = %d\n", pioinfo2->sizePio );
-  fprintf ( fp, "# rankPio     = %d\n", pioinfo2->rankPio );
+  fprintf ( fp, "# commPio     = %d\n", info->commPio );
+  fprintf ( fp, "# sizePio     = %d\n", info->sizePio );
+  fprintf ( fp, "# rankPio     = %d\n", info->rankPio );
   fprintf ( fp, "#\n" );
-  fprintf ( fp, "# commNode    = %d\n", pioinfo2->commNode );
-  fprintf ( fp, "# sizeNode    = %d\n", pioinfo2->sizeNode );
-  fprintf ( fp, "# rankNode    = %d\n", pioinfo2->rankNode );
-  fprintf ( fp, "# hostname    = %s\n", pioinfo2->hostname[0] == 0 ? "nn" : 
-	    pioinfo2->hostname );
-  fprintf ( fp, "# specialRankNode = %d\n", pioinfo2->specialRankNode );
+  fprintf ( fp, "# commNode    = %d\n", info->commNode );
+  fprintf ( fp, "# sizeNode    = %d\n", info->sizeNode );
+  fprintf ( fp, "# rankNode    = %d\n", info->rankNode );
+  fprintf ( fp, "# hostname    = %s\n", info->hostname[0] == 0 ? "nn" : 
+	    info->hostname );
+  fprintf ( fp, "# specialRankNode = %d\n", info->specialRankNode );
   fprintf ( fp, "#\n" );
-  fprintf ( fp, "# commColl    = %d\n", pioinfo2->commColl );
-  fprintf ( fp, "# sizeColl    = %d\n", pioinfo2->sizeColl );
-  fprintf ( fp, "# rankColl    = %d\n", pioinfo2->rankColl );
+  fprintf ( fp, "# commColl    = %d\n", info->commColl );
+  fprintf ( fp, "# sizeColl    = %d\n", info->sizeColl );
+  fprintf ( fp, "# rankColl    = %d\n", info->rankColl );
   fprintf ( fp, "#\n" );
-  fprintf ( fp, "# commCalc    = %d\n", pioinfo2->commCalc );
-  fprintf ( fp, "# sizeCalc    = %d\n", pioinfo2->sizeCalc );
-  fprintf ( fp, "# rankCalc    = %d\n", pioinfo2->rankCalc );
-  if ( pioinfo2->commsIO != NULL )
+  fprintf ( fp, "# commCalc    = %d\n", info->commCalc );
+  if ( info->commsIO != NULL )
     {
       fprintf ( fp, "#\n" );
-      for ( i = 0; i < pioinfo2->nProcsColl; i++ )
-	fprintf ( fp, "# commsIO[%d]  = %d\n", i, pioinfo2->commsIO[i] );
+      for ( i = 0; i < info->nProcsColl; i++ )
+	fprintf ( fp, "# commsIO[%d]  = %d\n", i, info->commsIO[i] );
     }
   else
     fprintf ( fp, "# commsIO     = NULL\n" );
-  fprintf ( fp, "# hostID      = %d\n", pioinfo2->nodeInfo.hostID );
-  fprintf ( fp, "# isProcColl  = %d\n", pioinfo2->nodeInfo.isProcColl );
-  fprintf ( fp, "# nNodes      = %d\n", pioinfo2->nodeInfo.nNodes );
-  fprintf ( fp, "# nProcsColl  = %d\n", pioinfo2->nProcsColl );
-  if ( pioinfo2->nodeSizes != NULL )
+  fprintf ( fp, "# hostID      = %d\n", info->nodeInfo.hostID );
+  fprintf ( fp, "# isProcColl  = %d\n", info->nodeInfo.isProcColl );
+  fprintf ( fp, "# nNodes      = %d\n", info->nodeInfo.nNodes );
+  fprintf ( fp, "# nProcsColl  = %d\n", info->nProcsColl );
+  if ( info->nodeSizes != NULL )
     {
       fprintf ( fp, "# nodeSizes   = " );
-      assert ( pioinfo2->nodeInfo.nNodes != CDI_UNDEFID );
-      for ( i = 0; i < pioinfo2->nodeInfo.nNodes; i++ )
-        fprintf ( fp, "%d ", pioinfo2->nodeSizes[i] );
+      assert ( info->nodeInfo.nNodes != CDI_UNDEFID );
+      for ( i = 0; i < info->nodeInfo.nNodes; i++ )
+        fprintf ( fp, "%d ", info->nodeSizes[i] );
       fprintf ( fp, "\n" );
     }
   else     
     fprintf ( fp, "# nodeSizes   = NULL\n" );
-  if ( pioinfo2->nodeMap != NULL )
+  if ( info->nodeMap != NULL )
     {
       fprintf ( fp, "# nodeMap     = " );
-      assert ( pioinfo2->nProcsColl != CDI_UNDEFID );
-      for ( i = 0; i < pioinfo2->nProcsColl; i++ )
-        fprintf ( fp, "%d ", pioinfo2->nodeMap[i] );
+      assert ( info->nProcsColl != CDI_UNDEFID );
+      for ( i = 0; i < info->nProcsColl; i++ )
+        fprintf ( fp, "%d ", info->nodeMap[i] );
       fprintf ( fp, "\n" );
     }
   else     

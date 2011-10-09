@@ -25,7 +25,6 @@ double   ** winBuffer     = NULL;
 double   ** winBufferHead = NULL;
 MPI_Win   * win           = NULL;
 int       * winPostSet    = NULL;
-int       * winFirstWrite = NULL;
 MPI_Group * groupsIO      = NULL;
 MPI_Group * groupsIONetto = NULL;
 
@@ -40,7 +39,6 @@ int pioInit ( int comm, int nIOP, int mode )
 }
 
 /*****************************************************************************/
- 
 /** 
    @brief initializes the MPI_Communicators needed for the 
   communication between the calculator PEs and the I/O PEs and within the 
@@ -62,24 +60,24 @@ int pioInit ( int comm, int nIOP, int mode )
 */
 
 #ifdef USE_MPI
-MPI_Comm pioInit_c ( MPI_Comm commGlob, int nIOP, int IOModus )
+MPI_Comm pioInit_c ( MPI_Comm commGlob, int nIOP, int IOMode )
 {
-  if ( IOModus < PIO_NONE || IOModus > PIO_MAX_IOMODUS )
+  if ( IOMode < PIO_NONE || IOMode > PIO_MAXIOMODUS )
     xabort ( "PIOTYPE is no valid modus" );
   
 #ifdef _SX
-  if ( IOModus ==  PIO_POSIX_ASYNCH )
+  if ( IOMode ==  PIO_POSIX_ASYNCH )
     xabort ( "PIO_POSIX_ASYNCH does not work on SX" );
 #endif
 
   commInit ();
   commDefCommGlob ( commGlob );
   commDefNProcsIO ( nIOP );
-  commDefIOModus  ( IOModus );
-  commDefCommPio ();
+  commDefIOMode   ( IOMode, PIO_MAXIOMODUS, PIO_MINIOMODUSWITHSPECIALPROCS );
+  commDefCommPio  ();
 
   if ( commInqIsProcIO ()) 
-    {
+    { 
       IOServer ();
       commDestroy ();
       MPI_Finalize ();
@@ -382,7 +380,6 @@ void modelWinCleanup ( void )
     }
 
   if ( groupsIONetto )   free ( groupsIONetto );
-  if ( winFirstWrite )   free ( winFirstWrite );
   if ( winPostSet )      free ( winPostSet );
   if ( win )             free ( win );
   if ( winBufferHead )   free ( winBufferHead );
@@ -452,7 +449,6 @@ void modelWinCreate ( void )
   winBufferHead   = xmalloc ( nProcsColl * sizeof ( winBufferHead[0] ));
   win             = xmalloc ( nProcsColl * sizeof ( win[0] ));
   winPostSet      = xmalloc ( nProcsColl * sizeof ( winPostSet[0] ));
-  winFirstWrite   = xmalloc ( nProcsColl * sizeof ( winFirstWrite[0] ));
   groupsIONetto   = xmalloc ( nProcsColl * sizeof ( groupsIONetto[0] ));
 
   getWinBufferSizes ();
@@ -467,7 +463,6 @@ void modelWinCreate ( void )
                             MPI_INFO_NULL, &winBuffer[collID] ));
       assert ( winBuffer[collID] != NULL ); 
       winBufferHead[collID] = winBuffer[collID];
-      winFirstWrite[collID] = 1;
       xmpi ( MPI_Win_create ( winBuffer[collID], 
                               ( MPI_Aint ) winBufferSize[collID] * 
                               sizeof ( double ), sizeof ( double ),
@@ -539,7 +534,7 @@ void  pioEndDef ( void )
       xmpi ( MPI_Send ( buffer, bufferSize, MPI_PACKED, commInqNProcsModel (), 
                         RESOURCES, commInqCommsIO ( rankGlob )));
       
-      xdebug ( "sent message metadata" );
+      xdebug ( "sent message RESOURCES" );
       
       reshPackBufferDestroy ( &buffer );
     }
@@ -596,6 +591,13 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
   buffer[0] = ts;
   buffer[1] = vdate;
   buffer[2] = vtime;
+  
+  if ( rankGlob < nProcsColl ) 
+    {
+      xmpi ( MPI_Send ( &buffer[0], timestepSize, MPI_INTEGER, nProcsModel, 
+                        WRITETS, commInqCommsIO ( rankGlob )));
+      xdebug ( "sent message WRITETS" );
+    }
 
   for ( collID = 0; collID < nProcsColl; collID++ )
     {
@@ -604,14 +606,6 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
       xmpi ( MPI_Win_post ( groupsIONetto[collID], iAssert, win[collID] ));
       winPostSet[collID] = 1;
       winBufferHead[collID] = winBuffer[collID];
-      winFirstWrite[collID] = 1;
-    }
-  
-  if ( rankGlob < nProcsColl ) 
-    {
-      xmpi ( MPI_Send ( &buffer[0], timestepSize, MPI_INTEGER, nProcsModel, 
-                        WRITETS, commInqCommsIO ( rankGlob )));
-      xdebug ( "sent message WRITETS" );
     }
 #endif
 }

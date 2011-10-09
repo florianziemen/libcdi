@@ -13,7 +13,7 @@
 
 extern void reshArrayPrint ( char * );
 
-#define nProcsIO 3
+#define nProcsIO 1
 
 static int hasLocalFile[] = { 0 };
 
@@ -25,10 +25,11 @@ static int nlev[nVars] = {1,1,5,5,2};
 #define maxlev   5
 #define ntsteps  3 
 
-//int IOModus = PIO_POSIX_FPGUARD_SENDRECV;
-//int IOModus = PIO_MPI_NONB;
-//int IOModus = PIO_POSIX_NONB;
-int IOModus = PIO_POSIX_ASYNCH;
+int IOMode = PIO_NONE;
+//int IOMode = PIO_MPI_NONB;
+//int IOMode = PIO_POSIX_FPGUARD_SENDRECV;
+//int IOMode = PIO_POSIX_ASYNCH;
+//int IOMode = PIO_POSIX_NONB;
 
 void modelRun ()
 {
@@ -131,22 +132,20 @@ void modelRun ()
 
 int main (int argc, char *argv[]) 
 {
-  int sizeGlob, rankGlob;
-
 #ifdef USE_MPI
   MPI_Comm commGlob, commModel; 
+  int sizeGlob;
 
 
   xmpi ( MPI_Init ( &argc, &argv));           
   xmpi ( MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob ));
   xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
-  xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
-  xmpi ( MPI_Comm_rank ( commGlob, &rankGlob )); 
+  xmpi ( MPI_Comm_size ( commGlob, &sizeGlob )); 
                                          
-  if ( nProcsIO <=0 || nProcsIO >= sizeGlob )
+  if ( nProcsIO <= 0 || nProcsIO >= sizeGlob )
     xabort ( "bad distribution of tasks on PEs" );
 
-  commModel = pioInit_c ( commGlob, nProcsIO, IOModus );
+  commModel = pioInit_c ( commGlob, nProcsIO, IOMode );
 #endif
 
   modelRun ();

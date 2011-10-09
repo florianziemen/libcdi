@@ -18,7 +18,9 @@ typedef struct {
 } nodeInfo_t;
 
 typedef struct {
-  int IOModus;
+  int IOMode;
+  int maxIOMode;
+  int minIOModeWithSpecialProcs;
   int nProcsIO;
   int nProcsModel;
   int isProcIO;
@@ -44,8 +46,6 @@ typedef struct {
   int rankColl;
 
   MPI_Comm commCalc;
-  int sizeCalc;
-  int rankCalc;
  
   MPI_Comm * commsIO; 
   int nProcsColl;
@@ -55,8 +55,7 @@ typedef struct {
 
 
 enum { MAXNPROCSIO   = 256,
-       MAXCOMMIONAME = 12,
-       MAXIOMODUS    = PIO_POSIX_FPGUARD_SENDRECV};
+       MAXCOMMIONAME = 12 };
 
 enum { sizeNodeInfo  = 3,
        NODEINFO      = 1111, 
@@ -73,8 +72,8 @@ int      commInqRankGlob        ( void );
 void     commDefNProcsIO        ( int );
 int      commInqNProcsIO        ( void );
 int      commInqNProcsModel     ( void );
-void     commDefIOModus         ( int );
-int      commInqIOModus         ( void );
+void     commDefIOMode          ( int, int, int );
+int      commInqIOMode          ( void );
 
 void     commDefCommPio         ( void );
 MPI_Comm commInqCommPio         ( void );

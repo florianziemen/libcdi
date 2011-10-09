@@ -576,7 +576,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   /* begin deike */
 
 #ifndef NOMPI
-  if ( commInqIOModus () != PIO_NONE )
+  if ( commInqIOMode () != PIO_NONE )
     nwrite = pioFileWrite ( fileID, tsID, gribbuffer, nbytes );
   else
       nwrite = fileWrite(fileID, gribbuffer, nbytes); 

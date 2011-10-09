@@ -80,7 +80,7 @@ size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
 {
   size_t iret = CDI_UNDEFID;
 
-  switch ( commInqIOModus ())
+  switch ( commInqIOMode ())
     {
     case PIO_MPI_NONB:
       iret = fwMPINONB ( fileID, tsID, buffer, len );
@@ -118,7 +118,7 @@ size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
 int pioFileClose ( int id )
 {
   int iret = CDI_UNDEFID;
-  switch ( commInqIOModus ())
+  switch ( commInqIOMode ())
     {
     case PIO_MPI_NONB:
       iret = fcMPINONB ( id );
@@ -156,7 +156,7 @@ int pioFileOpenW ( const char *filename )
 {
   int iret = CDI_UNDEFID;
 
-  switch ( commInqIOModus ())
+  switch ( commInqIOMode ())
     {
     case PIO_MPI_NONB:
       iret = fowMPINONB ( filename );
@@ -193,19 +193,22 @@ int pioFileOpenW ( const char *filename )
 
 void backendInit ( void )
 {
-  int IOModus = commInqIOModus ();
+  int IOMode = commInqIOMode ();
 
 #ifdef USE_MPI
   commDefCommNode ();
 
-  if (( IOModus == PIO_NONE ) && ( commInqSizeNode () != 1 ))
+  if ( IOMode == PIO_NONE  && commInqSizeNode () != 1 )
     xabort ( "PIOTYPE, NNODES: not a valid combination" );
  
 
-  switch ( IOModus )
+  switch ( IOMode )
     {
     case PIO_NONE:
       commDefCommColl ( 1 );
+      commSendNodeInfo ();
+      commRecvNodeMap ();
+      commDefCommsIO ();
       break;
     case PIO_MPI_NONB:
       initMPINONB ();

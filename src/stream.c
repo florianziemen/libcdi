@@ -1584,8 +1584,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 #ifdef USE_MPI
   if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
     {
-      if ( commInqIOModus () != PIO_NONE  )
-        pioBuffer ( streamID, varID, data, nmiss );
+      pioBuffer ( streamID, varID, data, nmiss );
       return; 
     } 
 #endif
