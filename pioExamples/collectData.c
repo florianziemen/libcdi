@@ -4,10 +4,10 @@
 
 #ifdef USE_MPI
 #include <mpi.h>
+#include "pio_c_temp.h"
 #endif 
 
 #include "cdi.h"
-#include "pio_c_temp.h"
 #include "pio_util.h"
 #include <assert.h>
 
@@ -76,6 +76,9 @@ void modelRun ()
 
   pioEndDef ();
 
+  // for debugging
+  reshArrayPrint ( "reshArrayModel" );
+
    
   for ( tsID = 0; tsID < ntsteps; tsID++ )
     {
@@ -100,11 +103,6 @@ void modelRun ()
       pioWriteTimestep ( tsID, vdate, vtime );
     }
    
-  
-
-#ifdef USE_MPI 
-  if ( rank == 0 ) reshArrayPrint ( "reshArrayModel" );
-#endif
   
   streamClose ( streamID );
   vlistDestroy ( vlistID );

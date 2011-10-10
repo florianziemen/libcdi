@@ -2,6 +2,8 @@ noinst_PROGRAMS=myModel
 
 if USE_MPI
 noinst_PROGRAMS+=pio_write myModel2003 compareResourcesArray collectData
+else
+noinst_PROGRAMS+=collectData
 endif
 
 AM_CFLAGS=-I$(top_srcdir)/src

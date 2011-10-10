@@ -72,14 +72,15 @@ int      commInqRankGlob        ( void );
 void     commDefNProcsIO        ( int );
 int      commInqNProcsIO        ( void );
 int      commInqNProcsModel     ( void );
+int      commInqIsProcIO        ( void );
 void     commDefIOMode          ( int, int, int );
 int      commInqIOMode          ( void );
 
 void     commDefCommPio         ( void );
 MPI_Comm commInqCommPio         ( void );
 MPI_Comm commInqCommModel       ( void );
+int      commInqRankPio         ( void );
 int      commInqRankModel       ( void );
-int      commInqIsProcIO        ( void );
 
 void     commDefCommNode        ( void );
 MPI_Comm commInqCommNode        ( void );

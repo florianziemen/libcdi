@@ -7,6 +7,7 @@
 #include <assert.h>
 
 #include "resource_handle.h"
+#include "pio_comm.h"
 #include "pio_util.h"
 #include "namespace.h"
 #include "cdi.h"
@@ -629,6 +630,18 @@ void reshArrayPrint ( char * filename )
   FILE * fp; 
 
   if ( ! arrayInit ) return;
+
+#ifdef USE_MPI
+  {
+    int root = 0;
+    if ( commInqIsProcIO () == 0 )
+      {
+        if (  commInqRankModel () != root )  return;
+      }
+    else if ( commInqRankPio () != root ) return;
+  }
+#endif
+  
 
   if ( filename )
     {

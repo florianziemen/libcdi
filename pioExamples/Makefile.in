@@ -34,8 +34,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = myModel$(EXEEXT) $(am__EXEEXT_1)
+noinst_PROGRAMS = myModel$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2)
 @USE_MPI_TRUE@am__append_1 = pio_write myModel2003 compareResourcesArray collectData
+@USE_MPI_FALSE@am__append_2 = collectData
 subdir = pioExamples
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -54,6 +55,7 @@ CONFIG_CLEAN_VPATH_FILES =
 @USE_MPI_TRUE@am__EXEEXT_1 = pio_write$(EXEEXT) myModel2003$(EXEEXT) \
 @USE_MPI_TRUE@	compareResourcesArray$(EXEEXT) \
 @USE_MPI_TRUE@	collectData$(EXEEXT)
+@USE_MPI_FALSE@am__EXEEXT_2 = collectData$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_collectData_OBJECTS = collectData.$(OBJEXT)
 collectData_OBJECTS = $(am_collectData_OBJECTS)

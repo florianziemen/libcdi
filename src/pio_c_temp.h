@@ -7,9 +7,11 @@
 
 #ifdef USE_MPI
 #include "mpi.h"
+#else
+typedef int MPI_Comm; 
+#endif
 
 MPI_Comm pioInit_c ( MPI_Comm, int, int );
-#endif
 
 #endif
 /*

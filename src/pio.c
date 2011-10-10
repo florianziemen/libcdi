@@ -2,24 +2,21 @@
 #include "config.h"
 #endif
 
+
+#ifdef USE_MPI
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
 #include <assert.h>
 
 #include "pio.h"
 #include "cdi.h"
-#include "pio_util.h"
-
-#ifdef USE_MPI
 #include "pio_comm.h"
 #include "pio_impl.h"
-#endif
-
-#ifdef USE_MPI
+#include "pio_util.h"
 
 char * command2charP[6] = {"IO_Open_file", "IO_Close_file",
                            "IO_Get_fp","IO_Set_fp",
@@ -187,7 +184,6 @@ int pioFileOpenW ( const char *filename )
 
   return iret;
 }
-#endif
 
 /***************************************************************/
 
@@ -195,7 +191,6 @@ void backendInit ( void )
 {
   int IOMode = commInqIOMode ();
 
-#ifdef USE_MPI
   commDefCommNode ();
 
   if ( IOMode == PIO_NONE  && commInqSizeNode () != 1 )
@@ -236,14 +231,12 @@ void backendInit ( void )
       initPOSIXNONB ();
       break;
     }
-#endif
 }
 
 /***************************************************************/
 
 void backendFinalize ( void )
 {
-#ifdef USE_MPI
   /*
     switch ( pioinfo->type )
     {
@@ -256,8 +249,8 @@ void backendFinalize ( void )
   commDestroy ();
   MPI_Finalize ();
   exit ( 0 );
-#endif
 }
+#endif
 /*
  * Local Variables:
  * c-file-style: "Java"

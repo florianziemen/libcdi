@@ -1801,7 +1801,7 @@ int vlistInqVarDecoOff ( int vlistID, int varID )
         if ( deco[i].rank == rankModel ) iret = deco[i].offset;
   }
 #else
-  iret = vlistInqVarSize ( vlistID, varID );
+  iret = 0;
 #endif
 
   assert ( iret != CDI_UNDEFID );      

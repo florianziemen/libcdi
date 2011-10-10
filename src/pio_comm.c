@@ -243,6 +243,15 @@ MPI_Comm commInqCommModel ( void )
 }
 
 
+int      commInqRankPio       ( void )
+{ 
+  assert ( info != NULL &&
+           info->rankPio != CDI_UNDEFID &&
+           info->isProcIO == 1 );
+  return info->rankPio;
+}
+
+
 int      commInqRankModel       ( void )
 { 
   assert ( info != NULL &&

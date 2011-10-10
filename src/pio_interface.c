@@ -26,72 +26,9 @@ MPI_Win   * win           = NULL;
 int       * winPostSet    = NULL;
 MPI_Group * groupsIO      = NULL;
 MPI_Group * groupsIONetto = NULL;
-#endif
 
 /*****************************************************************************/
 
-
-int pioInit ( int comm, int nIOP, int mode )
-{
-#ifdef USE_MPI
-#endif
-  return 0;
-}
-
-/*****************************************************************************/
-/** 
-   @brief initializes the MPI_Communicators needed for the 
-  communication between the calculator PEs and the I/O PEs and within the 
-  group of I/O PEs.
-
-  commGlob: all PEs
-
-  commPIO: I/O PEs, PEs with highest ranks in commGlob
-
-  commModel: calculating PEs, no I/O PEs
-
-  commsIO[i]:
- 
-  Collective call 
-
-  @param comm MPI_Communicator of all calling PEs
-  @param nIOP number of I/O PEs
-  @return int indicating wether the calling PE is a calcutator (1) or not (0)
-*/
-
-#ifdef USE_MPI
-MPI_Comm pioInit_c ( MPI_Comm commGlob, int nIOP, int IOMode )
-{
-  if ( IOMode < PIO_NONE || IOMode > PIO_MAXIOMODUS )
-    xabort ( "PIOTYPE is no valid modus" );
-  
-#ifdef _SX
-  if ( IOMode ==  PIO_POSIX_ASYNCH )
-    xabort ( "PIO_POSIX_ASYNCH does not work on SX" );
-#endif
-
-  commInit ();
-  commDefCommGlob ( commGlob );
-  commDefNProcsIO ( nIOP );
-  commDefIOMode   ( IOMode, PIO_MAXIOMODUS, PIO_MINIOMODUSWITHSPECIALPROCS );
-  commDefCommPio  ();
-
-  if ( commInqIsProcIO ()) 
-    { 
-      IOServer ();
-      commDestroy ();
-      MPI_Finalize ();
-      exit ( 0 );
-    }
-  else
-    { 
-      commEvalPhysNodes ();
-      commDefCommsIO ();        
-    }
-  
-  return commInqCommModel ();
-}
-#endif
 
 /************************************************************************/
 
@@ -182,8 +119,7 @@ in order of vSizes
    
    @return
 */
-
-#ifdef USE_MPI   
+  
 void  varMapGen ( int * vSizes, int * sSizes, int * varMapping, 
 		     int nStreams, int * nodeSizes, int nNodes )
 {
@@ -274,11 +210,9 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
       xprintArray ( "buckets", buckets, nProcsColl, DATATYPE_INT );
     }
 }
-#endif
 
 /************************************************************************/ 
 
-#ifdef USE_MPI
 void defVarDeco ( int vlistID, int varID )
 {
   int varSize, cRank, lChunk, rem, lOffset;
@@ -307,7 +241,6 @@ void defVarDeco ( int vlistID, int varID )
 
   vlistDefVarDeco ( vlistID, varID, nProcsModel, &deco[0] );
 }
-#endif
 
 /************************************************************************/
 
@@ -317,8 +250,6 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
 {
   int nStreams, nVars, * resHs, * streamSizes, * varSizes, * varMapping;
   int i, j, k = 0;
-
-#ifdef USE_MPI
 
   nStreams = streamSize ();
 
@@ -358,8 +289,6 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
   if ( varSizes )    free ( varSizes );
   if ( streamSizes ) free ( streamSizes );
   if ( resHs )       free ( resHs );
-  
-#endif
 }
 
 /************************************************************************/
@@ -367,7 +296,6 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
 static 
 void modelWinCleanup ( void )
 {
-#ifdef USE_MPI
   int collID;
 
   for ( collID = 0; collID < commInqNProcsColl (); collID ++ )
@@ -387,7 +315,6 @@ void modelWinCleanup ( void )
   if ( winBufferSize )   free ( winBufferSize );
 
   xdebug ( "cleaned up mpi_win's" );
-#endif
 }
 
 /************************************************************************/
@@ -395,8 +322,6 @@ void modelWinCleanup ( void )
 static
   void getWinBufferSizes ( void )
 {
-#ifdef USE_MPI
-  
   int collID, nstreams, * streamIndexArray, streamNo, vlistID, nvars, varID;
   int collIDchunk = 0;
   int nProcsColl = commInqNProcsColl ();
@@ -427,9 +352,6 @@ static
       assert ( winBufferSize[collID] < winBufferSizeMax );
     }
   xprintArray ( "winBufferSize", winBufferSize, nProcsColl, DATATYPE_INT );
-
-  return;
-#endif
 }
 
 /************************************************************************/
@@ -438,8 +360,6 @@ static
 static
 void modelWinCreate ( void )
 {
-#ifdef USE_MPI
-
   int collID, ranks[1];
   int nProcsColl = commInqNProcsColl ();
 
@@ -472,8 +392,6 @@ void modelWinCreate ( void )
                               &groupsIONetto[collID] ));
     }
   xdebug ( "created mpi_win's" );
-
-#endif
 }
 
 /************************************************************************/
@@ -513,6 +431,72 @@ void pioBuffer ( int streamID, int varID, const double *data, int nmiss )
   memcpy ( winBufferHead[collID], &sep, size);
   winBufferHead[collID]++;      
 }
+
+#endif
+
+/*****************************************************************************/
+
+int pioInit ( int comm, int nIOP, int mode )
+{
+#ifdef USE_MPI
+#endif
+  return 0;
+}
+
+/*****************************************************************************/
+/** 
+   @brief initializes the MPI_Communicators needed for the 
+  communication between the calculator PEs and the I/O PEs and within the 
+  group of I/O PEs.
+
+  commGlob: all PEs
+
+  commPIO: I/O PEs, PEs with highest ranks in commGlob
+
+  commModel: calculating PEs, no I/O PEs
+
+  commsIO[i]:
+ 
+  Collective call 
+
+  @param comm MPI_Communicator of all calling PEs
+  @param nIOP number of I/O PEs
+  @return int indicating wether the calling PE is a calcutator (1) or not (0)
+*/
+
+#ifdef USE_MPI
+MPI_Comm pioInit_c ( MPI_Comm commGlob, int nIOP, int IOMode )
+{
+  if ( IOMode < PIO_NONE || IOMode > PIO_MAXIOMODUS )
+    xabort ( "PIOTYPE is no valid modus" );
+  
+#ifdef _SX
+  if ( IOMode ==  PIO_POSIX_ASYNCH )
+    xabort ( "PIO_POSIX_ASYNCH does not work on SX" );
+#endif
+
+  commInit ();
+  commDefCommGlob ( commGlob );
+  commDefNProcsIO ( nIOP );
+  commDefIOMode   ( IOMode, PIO_MAXIOMODUS, PIO_MINIOMODUSWITHSPECIALPROCS );
+  commDefCommPio  ();
+
+  if ( commInqIsProcIO ()) 
+    { 
+      IOServer ();
+      commDestroy ();
+      MPI_Finalize ();
+      exit ( 0 );
+    }
+  else
+    { 
+      commEvalPhysNodes ();
+      commDefCommsIO ();        
+    }
+  
+  return commInqCommModel ();
+}
+#endif
 
 /************************************************************************/
 
