@@ -20,6 +20,7 @@
 #include "pio_util.h"
 #include "stream_int.h"
 #include "resource_handle.h"
+#include "vlist_var.h"
 
 extern resOps streamOps;
 
@@ -81,7 +82,7 @@ static
             {
               for ( i = 0; i < nProcsCalc; i++ )
                 {
-                  decoChunk =  vlistInqVarDecoChunk ( vlistID, varID, i );
+                  decoChunk =  vlistInqVarDecoChunk3 ( vlistID, varID, i );
                   assert ( decoChunk > 0 );
                   getBufferSize[i] += (( decoChunk + winBufferOverheadChunk ) *
                                        sizeof ( double ));
@@ -180,7 +181,7 @@ void writeVars ( int tsID, int vdate, int vtime )
               assert ( * ( getBufferHead[i] ) == ( double ) varID );
               getBufferHead[i]++;
             }
-          chunk  = vlistInqVarDecoChunk ( vlistID, varID, i );
+          chunk  = vlistInqVarDecoChunk3 ( vlistID, varID, i );
           memcpy ( dataHead, getBufferHead[i], chunk * sizeof ( double ));
           dataHead += chunk;
           getBufferHead[i] += chunk;

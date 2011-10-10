@@ -228,16 +228,27 @@ void     commDefCommPio  ( void )
 MPI_Comm commInqCommPio  ( void )
 {
   assert ( info != NULL &&
-           info->commPio != MPI_COMM_NULL );
+           info->commPio != MPI_COMM_NULL &&
+           info->isProcIO == 1 );
   return info->commPio;
 }
 
 
-MPI_Comm commInqCommModel( void )
+MPI_Comm commInqCommModel ( void )
 {
   assert ( info != NULL &&
-           info->commPio != MPI_COMM_NULL );
+           info->commPio != MPI_COMM_NULL &&
+           info->isProcIO == 0 );
   return info->commPio;
+}
+
+
+int      commInqRankModel       ( void )
+{ 
+  assert ( info != NULL &&
+           info->rankPio != CDI_UNDEFID &&
+           info->isProcIO == 0 );
+  return info->rankPio;
 }
 
 

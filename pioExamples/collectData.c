@@ -74,10 +74,7 @@ void modelRun ()
   
   streamDefVlist ( streamID, vlistID);
 
-#ifdef USE_MPI
-  xmpi ( MPI_Comm_rank ( MPI_COMM_WORLD, &rank ));
   pioEndDef ();
-#endif 
 
    
   for ( tsID = 0; tsID < ntsteps; tsID++ )
@@ -87,30 +84,20 @@ void modelRun ()
       streamDefTimestep ( streamID, tsID );
       for ( i = 0; i < nVars; i++ )
 	{
-#ifdef USE_MPI
-	  start = vlistInqVarDecoOff ( vlistID, varID[i], rank );
-	  chunk = vlistInqVarDecoChunk ( vlistID, varID[i], rank );
-	  assert ( start >= 0 &&
-		   chunk >= 0 );
-#else
-	  start = 0;
-	  chunk = nlon * nlat * nlev[i];
-#endif
+	  start = vlistInqVarDecoOff ( vlistID, varID[i] );
+	  chunk = vlistInqVarDecoChunk ( vlistID, varID[i] );
 	  stop = start + chunk;
-	  assert ( stop <=  nlon * nlat * nlev[i] );
 	  for ( j = start; j < stop; j++ ) var[j] = 2.2;
-	  if ( ddebug > 2 )
-	    {
-	      sprintf ( text, "var[%d], start=%d, chunk=%d", i, start, chunk );
-	      xprintArray ( text, &var[start], chunk, DATATYPE_FLT );
-	    }
+
+	  //if ddebug == 3
+	  sprintf ( text, "var[%d], start=%d, chunk=%d", i, start, chunk );
+	  xprintArray3 ( text, &var[start], chunk, DATATYPE_FLT );
+
 	  streamWriteVar ( streamID, varID[i], &var[start], nmiss );
 	  start = CDI_UNDEFID;
 	  chunk = CDI_UNDEFID;
 	}
-#ifdef USE_MPI
       pioWriteTimestep ( tsID, vdate, vtime );
-#endif
     }
    
   

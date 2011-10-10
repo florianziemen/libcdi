@@ -5,12 +5,14 @@
 #include <limits.h>
 #ifdef USE_MPI
 #include <mpi.h>
+#include "pio_comm.h"
 #endif
 
 #include "dmemory.h"
 #include "cdi.h"
 #include "stream_int.h"
 #include "vlist.h"
+#include "vlist_var.h"
 #include "resource_handle.h"
 #include "vlist_att.h"
 #include "namespace.h"
@@ -1713,27 +1715,42 @@ void vlistDefVarDeco ( int vlistID, int varID, int decoSize, deco_t * deco )
 }
 
 
-int vlistInqVarDecoChunk ( int vlistID, int varID, int rank )
+int vlistInqVarDecoChunk ( int vlistID, int varID )
 {
   vlist_t *vlistptr;
-  deco_t * deco;
-  int i, decoSize = 0, iret = CDI_UNDEFID;
+  int iret = CDI_UNDEFID;
 
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  deco  = vlistptr->vars[varID].deco;
-  decoSize = vlistptr->vars[varID].decoSize;
-  if ( decoSize && deco )
-    for ( i = 0; i < decoSize; i++ )
-      if ( deco[i].rank == rank ) iret = deco[i].chunk;
+#ifdef USE_MPI
+  {
+    deco_t * deco;
+    int i, decoSize = 0, rank = commInqRankModel ();
+
+    assert ( vlistptr->vars[varID].deco != NULL &&
+             vlistptr->vars[varID].decoSize != CDI_UNDEFID &&
+             vlistptr->vars[varID].deco[i].chunk !=  CDI_UNDEFID );
       
+    deco  = vlistptr->vars[varID].deco;
+    decoSize = vlistptr->vars[varID].decoSize;
+    if ( decoSize && deco )
+      for ( i = 0; i < decoSize; i++ )
+        if ( deco[i].rank == rank ) iret = deco[i].chunk;
+  }
+#else
+  iret = vlistInqVarSize ( vlistID, varID );
+#endif
+
+  assert ( iret != CDI_UNDEFID );         
   return iret;
 }
 
 
-int vlistInqVarDecoOff ( int vlistID, int varID, int rank )
+
+#ifdef USE_MPI
+int vlistInqVarDecoChunk3 ( int vlistID, int varID, int rankModel  )
 {
   vlist_t *vlistptr;
   deco_t * deco;
@@ -1743,16 +1760,81 @@ int vlistInqVarDecoOff ( int vlistID, int varID, int rank )
 
   vlistCheckVarID(__func__, vlistID, varID);
 
+  assert ( vlistptr->vars[varID].deco != NULL &&
+           vlistptr->vars[varID].decoSize != CDI_UNDEFID &&
+           vlistptr->vars[varID].deco[i].chunk !=  CDI_UNDEFID );
+  
   deco  = vlistptr->vars[varID].deco;
   decoSize = vlistptr->vars[varID].decoSize;
   if ( decoSize && deco )
     for ( i = 0; i < decoSize; i++ )
-        if ( deco[i].rank == rank ) iret = deco[i].offset;
+      if ( deco[i].rank == rankModel ) iret = deco[i].chunk;
+  
+  assert ( iret != CDI_UNDEFID );
+  return iret;
+}
+#endif
 
+
+int vlistInqVarDecoOff ( int vlistID, int varID )
+{
+  vlist_t *vlistptr;
+  int iret = CDI_UNDEFID;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+#ifdef USE_MPI
+  {
+    deco_t * deco;
+    int i, decoSize = 0, rankModel = commInqRankModel ();
+
+    assert ( vlistptr->vars[varID].deco != NULL &&
+             vlistptr->vars[varID].decoSize != CDI_UNDEFID &&
+             vlistptr->vars[varID].deco[i].offset !=  CDI_UNDEFID );
+      
+    deco  = vlistptr->vars[varID].deco;
+    decoSize = vlistptr->vars[varID].decoSize;
+    if ( decoSize && deco )
+      for ( i = 0; i < decoSize; i++ )
+        if ( deco[i].rank == rankModel ) iret = deco[i].offset;
+  }
+#else
+  iret = vlistInqVarSize ( vlistID, varID );
+#endif
+
+  assert ( iret != CDI_UNDEFID );      
   return iret;
 }
 
 
+
+#ifdef USE_MPI
+int vlistInqVarDecoOff3 ( int vlistID, int varID, int rankModel  )
+{
+  vlist_t *vlistptr;
+  deco_t * deco;
+  int i, decoSize = 0, iret = CDI_UNDEFID;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  assert ( vlistptr->vars[varID].deco != NULL &&
+           vlistptr->vars[varID].decoSize != CDI_UNDEFID &&
+           vlistptr->vars[varID].deco[i].offset !=  CDI_UNDEFID );
+  
+  deco  = vlistptr->vars[varID].deco;
+  decoSize = vlistptr->vars[varID].decoSize;
+  if ( decoSize && deco )
+    for ( i = 0; i < decoSize; i++ )
+      if ( deco[i].rank == rankModel ) iret = deco[i].offset;
+
+  assert ( iret != CDI_UNDEFID );  
+  return iret;
+}
+#endif
 
 
 void     vlistDefVarIOrank   ( int vlistID, int varID, int iorank )

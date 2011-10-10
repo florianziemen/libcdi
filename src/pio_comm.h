@@ -78,6 +78,7 @@ int      commInqIOMode          ( void );
 void     commDefCommPio         ( void );
 MPI_Comm commInqCommPio         ( void );
 MPI_Comm commInqCommModel       ( void );
+int      commInqRankModel       ( void );
 int      commInqIsProcIO        ( void );
 
 void     commDefCommNode        ( void );

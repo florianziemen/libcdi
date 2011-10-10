@@ -392,13 +392,11 @@
 
       INTEGER         vlistInqVarDecoChunk
 !                                    (INTEGER         ,
-!                                     INTEGER         ,
 !                                     INTEGER         )
       EXTERNAL        vlistInqVarDecoChunk
 
       INTEGER         vlistInqVarDecoOff
 !                                    (INTEGER         ,
-!                                     INTEGER         ,
 !                                     INTEGER         )
       EXTERNAL        vlistInqVarDecoOff
 

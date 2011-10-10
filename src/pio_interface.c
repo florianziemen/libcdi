@@ -18,7 +18,6 @@
 #include "stream_int.h"
 #include "vlist.h"
 extern resOps streamOps;
-#endif
 
 int       * winBufferSize = NULL;
 double   ** winBuffer     = NULL;
@@ -27,6 +26,7 @@ MPI_Win   * win           = NULL;
 int       * winPostSet    = NULL;
 MPI_Group * groupsIO      = NULL;
 MPI_Group * groupsIONetto = NULL;
+#endif
 
 /*****************************************************************************/
 
@@ -399,7 +399,6 @@ static
   
   int collID, nstreams, * streamIndexArray, streamNo, vlistID, nvars, varID;
   int collIDchunk = 0;
-  int rankGlob = commInqRankGlob ();
   int nProcsColl = commInqNProcsColl ();
   
   nstreams = reshCountType ( &streamOps );
@@ -413,7 +412,7 @@ static
         {
           collID = CDI_UNDEFID;
           collID = commRankGlob2CollID ( vlistInqVarIOrank ( vlistID, varID ));
-          collIDchunk = vlistInqVarDecoChunk ( vlistID, varID, rankGlob );
+          collIDchunk = vlistInqVarDecoChunk ( vlistID, varID );
           assert ( collID != CDI_UNDEFID &&
                    collIDchunk > 0 );
           winBufferSize[collID] += (( collIDchunk + winBufferOverheadChunk ) * 
@@ -483,11 +482,10 @@ void pioBuffer ( int streamID, int varID, const double *data, int nmiss )
 {
   int size = sizeof ( double ), chunk, vlistID, collID = CDI_UNDEFID;
   double temp, sep = ( double ) SEPARATOR;
-  int rankGlob = commInqRankGlob ();
   
   vlistID = streamInqVlist ( streamID );
   collID  = commRankGlob2CollID ( vlistInqVarIOrank ( vlistID, varID ));
-  chunk   = vlistInqVarDecoChunk ( vlistID, varID, rankGlob );
+  chunk   = vlistInqVarDecoChunk ( vlistID, varID );
   assert ( collID >= 0 &&
            collID < commInqNProcsIO () &&
            chunk >= 0 );
