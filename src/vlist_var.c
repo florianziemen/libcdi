@@ -56,7 +56,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].atts.nalloc  = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems  = 0;
   vlistptr->vars[varID].iorank       = CDI_UNDEFID;
-  vlistptr->vars[varID].decoSize     = CDI_UNDEFID;
+  vlistptr->vars[varID].decoSize     = 0;
   vlistptr->vars[varID].deco         = NULL;
 
 }
@@ -1904,8 +1904,11 @@ int vlistVarGetSize(vlist_t *p, int varID, MPI_Comm comm)
   }
   xmpi(MPI_Pack_size(4 * var->nlevs, MPI_INT, comm, &txinc));
   varsize += txinc;
-  xmpi(MPI_Pack_size(3 * var->decoSize, MPI_INT, comm, &txinc));
-  varsize += txinc;
+  if ( var->deco != NULL )
+    {
+      xmpi(MPI_Pack_size(3 * var->decoSize, MPI_INT, comm, &txinc));
+      varsize += txinc;
+    }
   varsize += vlistAttsGetSize(p, varID, comm);
   return varsize;
 }
@@ -1969,17 +1972,18 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
     xmpi(MPI_Pack(levbuf, var->nlevs * 4, MPI_INT,
                   buf, size, position, comm));
   }
-  {
-    int deco[var->decoSize][3];
-    for (i = 0; i < var->decoSize; ++i)
+  if ( var->deco != NULL )
     {
-      deco[i][0] = var->deco[i].rank;
-      deco[i][1] = var->deco[i].offset;
-      deco[i][2] = var->deco[i].chunk;
+      int deco[var->decoSize][3];
+      for (i = 0; i < var->decoSize; ++i)
+        {
+          deco[i][0] = var->deco[i].rank;
+          deco[i][1] = var->deco[i].offset;
+          deco[i][2] = var->deco[i].chunk;
+        }
+      xmpi(MPI_Pack(deco, var->decoSize * 3, MPI_INT,
+                    buf, size, position, comm));
     }
-    xmpi(MPI_Pack(deco, var->decoSize * 3, MPI_INT,
-                  buf, size, position, comm));
-  }
   vlistAttsPack(p, varID, buf, size, position, comm);
 }
 
@@ -2074,21 +2078,23 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
     }
     vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev][0]);
   }
-  {    var_t *var = vlist_to_pointer(vlistID)->vars + newvar;
-    int decoSize = tempbuf[21], i;
-    deco_t deco[decoSize];
-    int decobuf[decoSize][3];
-
-    xmpi ( MPI_Unpack(buf, size, position,
-                    decobuf, decoSize * 3, MPI_INT, comm ));
-    for (i = 0; i < decoSize; ++i)
-      {
-        deco[i].rank   = decobuf[i][0];
-        deco[i].offset = decobuf[i][1];
-        deco[i].chunk  = decobuf[i][2];
-      }
-    vlistDefVarDeco ( vlistID, newvar, decoSize, &deco[0] );
-}
+  if ( tempbuf[21] != 0 )
+    {    
+      var_t *var = vlist_to_pointer(vlistID)->vars + newvar;
+      int decoSize = tempbuf[21], i;
+      deco_t deco[decoSize];
+      int decobuf[decoSize][3];
+      
+      xmpi ( MPI_Unpack(buf, size, position,
+                        decobuf, decoSize * 3, MPI_INT, comm ));
+      for (i = 0; i < decoSize; ++i)
+        {
+          deco[i].rank   = decobuf[i][0];
+          deco[i].offset = decobuf[i][1];
+          deco[i].chunk  = decobuf[i][2];
+        }
+      vlistDefVarDeco ( vlistID, newvar, decoSize, &deco[0] );
+    }
   vlistDefVarIOrank(vlistID, newvar, tempbuf[20]);
   vlistAttsUnpack(vlistID, newvar, buf, size, position, comm);
 }

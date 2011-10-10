@@ -29,6 +29,7 @@ extern void   arrayDestroy          ( void );
 #define ntsteps   3 // Number of time steps
 
 static int hasLocalFile[] = { 0, 0 };
+static int IOMode = PIO_NONE;
 
 double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
 double lats[nlat] = {-75, -45, -15, 15, 45, 75};
@@ -179,7 +180,7 @@ int defineModel ( int instID )
   return modelID;
 }
 
-void modelRun ()
+void modelRun ( MPI_Comm comm )
 {
   int gridID, zaxisID, taxisID, instID, modelID, vlistID, streamID;
 
@@ -201,14 +202,14 @@ void modelRun ()
   if ( streamID < 0 ) xabort ( "Could not open file" );
   defineStream ( streamID, vlistID );
 
-  reshPackBufferCreate ( &sendBuffer, &bufferSize, MPI_COMM_WORLD );
-  xmpi ( MPI_Send ( sendBuffer, bufferSize, MPI_PACKED, 0, 0, MPI_COMM_WORLD ));  
+  reshPackBufferCreate ( &sendBuffer, &bufferSize, comm );
+  xmpi ( MPI_Send ( sendBuffer, bufferSize, MPI_PACKED, 0, 0, comm ));  
   recvBuffer = xmalloc ( bufferSize * sizeof ( char ));
   xmpi ( MPI_Recv ( recvBuffer, bufferSize, MPI_PACKED, 0,
-		    0, MPI_COMM_WORLD, &status ));
+		    0, comm, &status ));
  
   pioNamespaceSetActive ( 1 );
-  rpcUnpackResources ( recvBuffer, bufferSize, MPI_COMM_WORLD );  
+  rpcUnpackResources ( recvBuffer, bufferSize, comm );  
   free ( recvBuffer );  
   reshPackBufferDestroy ( &sendBuffer );
 
@@ -225,17 +226,25 @@ void modelRun ()
 
 int main (int argc, char *argv[]) 
 {
-  int size;
+  int sizeGlob;
+  MPI_Comm commGlob, commModel;
 
   MPI_Init(&argc, &argv);           
-  MPI_Comm_set_errhandler ( MPI_COMM_WORLD, MPI_ERRORS_RETURN );
-  MPI_Comm_size ( MPI_COMM_WORLD, &size ); 
+  xmpi ( MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob ));
+  xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
+  xmpi ( MPI_Comm_size ( commGlob, &sizeGlob )); 
 
-  if ( size != 1 )                                         
+  if ( sizeGlob != 1 )                                         
       xabort ( "test transition of resource array only with 1 PE." );
+                                         
+  if ( nProcsIO != 1 )
+    xabort ( "bad distribution of tasks on PEs" );
+  commModel = pioInit_c ( commGlob, nProcsIO, IOMode );
 
-  modelRun ();
+  modelRun ( commModel );
+
   MPI_Finalize ();   
+
   return 0;
 }
 /*
