@@ -465,8 +465,10 @@ int pioInit ( int comm, int nIOP, int mode )
 */
 
 #ifdef USE_MPI
-MPI_Comm pioInit_c ( MPI_Comm commGlob, int nIOP, int IOMode )
+MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode )
 {
+  int sizeGlob;
+
   if ( IOMode < PIO_NONE || IOMode > PIO_MAXIOMODUS )
     xabort ( "PIOTYPE is no valid modus" );
   
@@ -477,9 +479,15 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nIOP, int IOMode )
 
   commInit ();
   commDefCommGlob ( commGlob );
-  commDefNProcsIO ( nIOP );
+
+  sizeGlob = commInqSizeGlob ();                                       
+  if ( nProcsIO <= 0 || nProcsIO >= sizeGlob || nProcsIO > sizeGlob / 2 )
+    xabort ( "bad distribution of tasks on PEs" );
+
+  commDefNProcsIO ( nProcsIO );
   commDefIOMode   ( IOMode, PIO_MAXIOMODUS, PIO_MINIOMODUSWITHSPECIALPROCS );
-  commDefCommPio  ();;
+  commDefCommPio  ();
+
   // just for test case compareResourceArray
   if ( commInqRankGlob () == 0 && commInqSizeGlob () == 1 ) 
     return commInqCommGlob ();

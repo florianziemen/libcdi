@@ -9,8 +9,6 @@
 
 #include <mpi.h>
 
-extern MPI_Comm * commPio;
-
 void IOServer ();
 
 #endif
