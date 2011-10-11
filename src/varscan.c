@@ -701,11 +701,11 @@ int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, double *l
 	  const double *dlevels;
 	  char zlongname[256];
 	  char zunits[256];
-	  
+
 	  dlevels = zaxisInqLevelsPtr(zaxisID);
 	  for ( levelID = 0; levelID < nlevels; levelID++ )
 	    {
-	      if ( fabs(dlevels[levelID] - levels[levelID]) > 0 )
+	      if ( fabs(dlevels[levelID] - levels[levelID]) > 1.e-9 )
 		break;
 	    }
 
@@ -731,8 +731,8 @@ int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, double *l
 }
 
 
-int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbounds, 
-		double *levels1, double *levels2, int vctsize, double *vct, char *name, 
+int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbounds,
+		double *levels1, double *levels2, int vctsize, double *vct, char *name,
 		char *longname, char *units, int prec, int mode, int ltype)
 {
   /*
