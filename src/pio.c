@@ -86,22 +86,10 @@ size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
     case PIO_POSIX_ASYNCH:
       iret = fwPOSIXASYNCH ( fileID, tsID, buffer, len );
       break;
-#endif
-      
+#endif      
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fwPOSIXFPGUARDSENDRECV ( fileID, tsID, buffer, len );
       break;
-      
-/*
-    case PIO_POSIX_FPGUARD_THREAD:
-      iret = fwPOSIXFPGUARDTHREAD ( fileID, tsID, buffer, len );
-      break;
-*/
-/*
-    case PIO_POSIX_FPGUARD_THREAD_REFUSE:
-      iret = fwPOSIXFPGUARDTHREADREFUSE ( fileID, tsID, buffer, len );
-      break;
-*/
     case PIO_POSIX_NONB:
       iret = fwPOSIXNONB ( fileID, tsID, buffer, len );
       break;
@@ -128,17 +116,6 @@ int pioFileClose ( int id )
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fcPOSIXFPGUARDSENDRECV ( id );
       break;
-      
-/*
-    case PIO_POSIX_FPGUARD_THREAD:
-      iret = fcPOSIXFPGUARDTHREAD ( id );
-      break;
-*/
-/*
-    case PIO_POSIX_FPGUARD_THREAD_REFUSE:
-      iret = fcPOSIXFPGUARDTHREADREFUSE ( id );
-      break;
-*/
     case PIO_POSIX_NONB:
       iret = fcPOSIXNONB ( id );
       break;
@@ -166,17 +143,6 @@ int pioFileOpenW ( const char *filename )
     case PIO_POSIX_FPGUARD_SENDRECV:
       iret = fowPOSIXFPGUARDSENDRECV ( filename );
       break;
-      
-/*
-    case PIO_POSIX_FPGUARD_THREAD:
-      iret = fowPOSIXFPGUARDTHREAD ( filename );
-      break;
-*/
-/*
-    case PIO_POSIX_FPGUARD_THREAD_REFUSE:
-      iret = fowPOSIXFPGUARDTHREADREFUSE ( filename );
-      break;
-*/
     case PIO_POSIX_NONB:
       iret = fowPOSIXNONB ( filename );
       break;
@@ -216,17 +182,6 @@ void backendInit ( void )
     case PIO_POSIX_FPGUARD_SENDRECV:
       initPOSIXFPGUARDSENDRECV ();
       break;
-      
-/*
-    case PIO_POSIX_FPGUARD_THREAD:
-      collectingData = initPOSIXFPGUARDTHREAD ();
-      break;
-*/
-/*
-    case PIO_POSIX_FPGUARD_THREAD_REFUSE:
-      collectingData = initPOSIXFPGUARDTHREADREFUSE ();
-      break;
-*/
     case PIO_POSIX_NONB:
       initPOSIXNONB ();
       break;
@@ -237,15 +192,6 @@ void backendInit ( void )
 
 void backendFinalize ( void )
 {
-  /*
-    switch ( pioinfo->type )
-    {
-
-    case PIO_POSIX_FPGUARD_THREAD:
-      finalizePOSIXFPGUARDTHREAD ();
-      break;
-    }
-  */
   commDestroy ();
   MPI_Finalize ();
   exit ( 0 );

@@ -195,16 +195,14 @@ extern "C" {
 /* deike */
 /* parallel io types, A: asynchronous, B: blocking */
   
-#define  PIO_NONE                           0
-#define  PIO_MPI_NONB                       1
-#define  PIO_POSIX_NONB                     2
-#define  PIO_POSIX_ASYNCH                   3
-#define  PIO_POSIX_FPGUARD_SENDRECV         4
-#define  PIO_POSIX_FPGUARD_THREAD_REFUSE    5
-#define  PIO_POSIX_FPGUARD_THREAD           6
+#define  PIO_NONE                        0
+#define  PIO_MPI_NONB                    1
+#define  PIO_POSIX_NONB                  2
+#define  PIO_POSIX_ASYNCH                3
+#define  PIO_POSIX_FPGUARD_SENDRECV      4
 
-#define  PIO_MAXIOMODUS                    PIO_POSIX_FPGUARD_SENDRECV
-#define  PIO_MINIOMODUSWITHSPECIALPROCS    PIO_POSIX_NONB  
+#define  PIO_MAXIOMODUS                  PIO_POSIX_FPGUARD_SENDRECV
+#define  PIO_MINIOMODUSWITHSPECIALPROCS  PIO_POSIX_NONB  
   
 
 int      pioInit            ( int, int, int );

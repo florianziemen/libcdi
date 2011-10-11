@@ -86,28 +86,13 @@ int       fcPOSIXASYNCH ( int );
 size_t    fwPOSIXASYNCH( int, int, const void *, size_t );
 void      initPOSIXASYNCH ( void );
 #endif
+
 /* pio_posixfpguardsendrecv.c */
 void      fpgPOSIXFPGUARDSENDRECV ( void );
 int       fowPOSIXFPGUARDSENDRECV ( const char * );
 int       fcPOSIXFPGUARDSENDRECV ( int );
 size_t    fwPOSIXFPGUARDSENDRECV ( int, int, const void *, size_t );
 void      initPOSIXFPGUARDSENDRECV ( void );
-
-/* pio_posixfpguardthread.c */
-void * fpgPOSIXFPGUARDTHREAD ( void * );
-int  fowPOSIXFPGUARDTHREAD ( const char * );
-int   fcPOSIXFPGUARDTHREAD ( int );
-size_t   fwPOSIXFPGUARDTHREAD ( int, int, const void *, size_t );
-int initPOSIXFPGUARDTHREAD ( void );
-void finalizePOSIXFPGUARDTHREAD ( void );
-
-/* pio_posixfpguardthreadrefuse.c */
-void * fpgPOSIXFPGUARDTHREADREFUSE ( void * );
-int  fowPOSIXFPGUARDTHREADREFUSE ( const char * );
-int   fcPOSIXFPGUARDTHREADREFUSE  ( int );
-size_t   fwPOSIXFPGUARDTHREADREFUSE  ( int, int, const void *, size_t );
-int initPOSIXFPGUARDTHREADREFUSE  ( void );
-void finalizePOSIXFPGUARDTHREADREFUSE  ( void );
 
 /* pio_posixnonb.c */
 void      pwPOSIXNONB ( void );

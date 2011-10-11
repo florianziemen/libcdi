@@ -160,6 +160,9 @@ void printArray ( char *, void *, int, int, const char *, const char *, int );
   if ( ddebug == MAXDEBUG )                                                         \
     printArray ( ps, array, n, datatype,  __func__, __FILE__, __LINE__ )
 
+
+void reshArrayPrint ( char * );
+
 #endif
 /*
  * Local Variables:

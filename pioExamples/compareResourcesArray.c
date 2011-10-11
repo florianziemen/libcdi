@@ -14,7 +14,6 @@
 #include "pio_util.h"
 
 extern int    reshArrayCompare      ( int, int );
-extern void   reshArrayPrint        ( char * );
 extern void   reshPackBufferCreate  ( char **, int *, MPI_Comm );
 extern void   reshPackBufferDestroy ( char ** );
 extern void   rpcUnpackResources    ( char *, int, MPI_Comm );

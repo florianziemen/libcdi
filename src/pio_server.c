@@ -23,9 +23,6 @@
 #include "vlist_var.h"
 
 extern resOps streamOps;
-
-
-extern void reshArrayPrint ( char * );
 extern void arrayDestroy ( void );
 
 MPI_Comm * commPio;
