@@ -24,10 +24,10 @@ static int nlev[nVars] = {1,1,5,5,2};
 #define ntsteps  3 
 
 //int IOMode = PIO_NONE;
-//int IOMode = PIO_MPI_NONB;
+int IOMode = PIO_MPI_NONB;
 //int IOMode = PIO_POSIX_FPGUARD_SENDRECV;
 //int IOMode = PIO_POSIX_ASYNCH;
-int IOMode = PIO_POSIX_NONB;
+//int IOMode = PIO_POSIX_NONB;
 
 void modelRun ()
 {

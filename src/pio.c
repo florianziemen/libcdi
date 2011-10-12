@@ -5,13 +5,6 @@
 
 #ifdef USE_MPI
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <assert.h>
-
 #include "pio.h"
 #include "cdi.h"
 #include "pio_comm.h"
@@ -28,8 +21,6 @@ long initial_buffersize = 16 * 1024 * 1024;
 /* 16 * 1024; */
 /* 4 * 1024; */
 
-int maxPtype = 4;
-int maxNnodes  = 249;
 int tagKey = 100;
 int maxErrorString = 100;
 

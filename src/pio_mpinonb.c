@@ -54,11 +54,10 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   xdebug ( "IOPE%d: filename=%s, buffersize=%zu, in",
            rankNode, filename, bs );
 
-  of = ( aFiledataM * ) xmalloc ( sizeof ( aFiledataM ));
-  memset ( of, 0, sizeof ( aFiledataM ));
+  of = xmalloc ( sizeof ( of[0] ));
 
   len = strlen ( filename );
-  of->name = ( char * ) xmalloc (( len ) * sizeof ( char ));
+  of->name = xmalloc (( len ) * sizeof ( of->name[0] ));
   strcpy ( of->name, filename );
   of->size = bs;
 
@@ -315,8 +314,6 @@ void queueCheck ( queue_t *q, const char *name )
       
       curr = curr->next;
     }  
-
-  return;
 }
 //
 
