@@ -63,12 +63,14 @@ static
   int i, decoChunk;
   int rankGlob = commInqRankGlob ();
   int nProcsCalc = commInqNProcsModel ();
+  int root = commInqRootGlob ();
 
   nstreams = reshCountType ( &streamOps );
   streamIndexArray = xmalloc ( nstreams * sizeof ( int ));
   reshGetResHArrayOfType ( nstreams, streamIndexArray, &streamOps );
   for ( streamNo = 0; streamNo < nstreams; streamNo++ )
     {
+      // space required for data
       vlistID = streamInqVlist ( streamIndexArray[streamNo] );
       nvars = vlistNvars ( vlistID );
       for ( varID = 0; varID < nvars; varID++ )
@@ -86,6 +88,10 @@ static
                 }
             }
         }
+      // space required for the function calls streamOpen, streamDefVlist, streamClose 
+      // once per stream and timestep only on the modelprocs with rank < nProcsModel
+      getBufferSize[root] += ( 3 * winBufferOverheadChunk * sizeof ( double ) +
+                               4 * CDI_MAX_NAME ); 
     }
   for ( i = 0; i < nProcsCalc; i++ )
     {
@@ -144,60 +150,77 @@ void writeVars ( int tsID, int vdate, int vtime )
   int nmiss = 0;
   char text[1024];
   int nProcsModel = commInqNProcsModel ();
+  int root = commInqRootGlob ();
 
   getBufferHead = xmalloc ( nProcsModel * sizeof ( getBufferHead[0] ));
 
   for ( i = 0; i < nProcsModel; i++ )
     getBufferHead[i] = getBuffer[i];
 
-  while (( int ) * getBufferHead[0] != END )
+  while (( int ) * getBufferHead[root] != END )
     {
-      assert (( int ) * getBufferHead[0] != CDI_UNDEFID );
-      if (( int ) * getBufferHead[0] != streamID )
+      switch ( ( int ) * getBufferHead[root] )
         {
-          streamID = ( int ) * getBufferHead[0];
-          vlistID = streamInqVlist ( streamID );
-          taxisID = vlistInqTaxis ( vlistID );
-          taxisDefVdate ( taxisID, vdate + tsID );
-          taxisDefVtime ( taxisID, vtime );
-          streamDefTimestep ( streamID, tsID );
-        }
-      getBufferHead[0]++;
-      varID = ( int ) * getBufferHead[0];
-      getBufferHead[0]++;
-      size = vlistInqVarSize ( vlistID, varID );
-      data = xmalloc ( size * sizeof ( double ));
-      dataHead = data;
-
-      for ( i = 0; i < nProcsModel; i++ )
-        {
-          if ( i )
+        case DATATOKEN:
+          getBufferHead[root]++;
+          assert (( int ) * getBufferHead[root] != CDI_UNDEFID );
+          if (( int ) * getBufferHead[root] != streamID )
             {
-              assert ( * ( getBufferHead[i] ) == ( double ) streamID );
-              getBufferHead[i]++;
-              assert ( * ( getBufferHead[i] ) == ( double ) varID );
+              streamID = ( int ) * getBufferHead[root];
+              vlistID = streamInqVlist ( streamID );
+              taxisID = vlistInqTaxis ( vlistID );
+              taxisDefVdate ( taxisID, vdate + tsID );
+              taxisDefVtime ( taxisID, vtime );
+              streamDefTimestep ( streamID, tsID );
+            }
+          getBufferHead[root]++;
+          varID = ( int ) * getBufferHead[root];
+          getBufferHead[root]++;
+          size = vlistInqVarSize ( vlistID, varID );
+          data = xmalloc ( size * sizeof ( double ));
+          dataHead = data;
+          
+          for ( i = 0; i < nProcsModel; i++ )
+            {
+              if ( i != root )
+                {
+                  assert (( int ) * getBufferHead[i] == DATATOKEN );
+                  getBufferHead[i]++;
+                  assert (( int ) * getBufferHead[i] == streamID );
+                  getBufferHead[i]++;
+                  assert (( int ) * getBufferHead[i] == varID );
+                  getBufferHead[i]++;
+                }
+              chunk  = vlistInqVarDecoChunk3 ( vlistID, varID, i );
+              memcpy ( dataHead, getBufferHead[i], chunk * sizeof ( double ));
+              dataHead += chunk;
+              getBufferHead[i] += chunk;
+              assert (( int ) * ( getBufferHead[i] ) == SEPARATOR );
               getBufferHead[i]++;
             }
-          chunk  = vlistInqVarDecoChunk3 ( vlistID, varID, i );
-          memcpy ( dataHead, getBufferHead[i], chunk * sizeof ( double ));
-          dataHead += chunk;
-          getBufferHead[i] += chunk;
-          assert (( int ) * ( getBufferHead[i] ) == SEPARATOR );
-          getBufferHead[i]++;
-        }
-
-      streamWriteVar ( streamID, varID, data, nmiss );
-
-      if ( ddebug > 2 )
-        {
-          sprintf ( text, "streamID=%d, var[%d], size=%d", streamID, varID, size );
-          xprintArray ( text, data, size, DATATYPE_FLT );
-        }
           
-      free ( data );
-    }
+          streamWriteVar ( streamID, varID, data, nmiss );
 
-  free ( getBufferHead );
+          if ( ddebug > 2 )
+            {
+              sprintf ( text, "streamID=%d, var[%d], size=%d", streamID, varID, size );
+              xprintArray ( text, data, size, DATATYPE_FLT );
+            }
+          
+          free ( data );
+          break;
+        case FUNCCALL:
+          xdebug ( "READ FUNCTION CALL FROM WIN BUFFER!" );
+          getBufferHead[root]++;
+          assert (( int ) * ( getBufferHead[root] ) == SEPARATOR );
+          getBufferHead[root]++;
+          break;
+        default:
+          xabort ( "BUFFER NOT READABLE!" );
+          
+        }
+    }
+      free ( getBufferHead );
 } 
 
 /************************************************************************/

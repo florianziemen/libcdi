@@ -9,7 +9,8 @@
 
 #include <mpi.h>
 
-void pioBuffer ( int, int, const double *, int );
+void pioBufferData ( int, int, const double *, int );
+void pioBufferFuncCall ( const char *, int, ... );
 
 #endif
 

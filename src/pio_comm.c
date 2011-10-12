@@ -149,6 +149,14 @@ int commInqRankGlob ( void )
 }
 
 
+int commInqRootGlob ( void )
+{
+  assert ( info != NULL &&
+           info->root != CDI_UNDEFID );
+  return info->root;
+}
+
+
 void commDefNProcsIO ( int n )
 {
   assert ( info != NULL &&

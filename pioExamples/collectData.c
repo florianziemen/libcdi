@@ -32,7 +32,7 @@ int IOMode = PIO_MPI_NONB;
 void modelRun ()
 {
   int gridID, zaxisID[nVars], taxisID;
-  int vlistID, varID[nVars], streamID, tsID;
+  int vlistID, varID[nVars], streamID[2], tsID;
   int i, j, nmiss = 0, rank;
   double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
   double lats[nlat] = {-75, -45, -15, 15, 45, 75};
@@ -63,14 +63,14 @@ void modelRun ()
   taxisID = taxisCreate ( TAXIS_ABSOLUTE );
   vlistDefTaxis ( vlistID, taxisID );
   
-  streamID = streamOpenWrite ( "example.grb", FILETYPE_GRB );
-  if ( streamID < 0 )
+  streamID[0] = streamOpenWrite ( "example.grb", FILETYPE_GRB );
+  if ( streamID[0] < 0 )
     {
-      fprintf ( stderr, "%s\n", cdiStringError ( streamID ));
+      fprintf ( stderr, "%s\n", cdiStringError ( streamID[0] ));
       return;
     }
   
-  streamDefVlist ( streamID, vlistID);
+  streamDefVlist ( streamID[0], vlistID);
 
   pioEndDef ();
 
@@ -82,7 +82,7 @@ void modelRun ()
     {
       taxisDefVdate ( taxisID, vdate + tsID );
       taxisDefVtime ( taxisID, vtime );
-      streamDefTimestep ( streamID, tsID );
+      streamDefTimestep ( streamID[0], tsID );
       for ( i = 0; i < nVars; i++ )
 	{
 	  start = vlistInqVarDecoOff ( vlistID, varID[i] );
@@ -94,15 +94,16 @@ void modelRun ()
 	  sprintf ( text, "var[%d], start=%d, chunk=%d", i, start, chunk );
 	  xprintArray3 ( text, &var[start], chunk, DATATYPE_FLT );
 
-	  streamWriteVar ( streamID, varID[i], &var[start], nmiss );
+	  streamWriteVar ( streamID[0], varID[i], &var[start], nmiss );
 	  start = CDI_UNDEFID;
 	  chunk = CDI_UNDEFID;
 	}
+      streamID[1] = streamOpenWrite ( "example2.grb", FILETYPE_GRB );
       pioWriteTimestep ( tsID, vdate, vtime );
     }
    
   
-  streamClose ( streamID );
+  streamClose ( streamID[0] );
   vlistDestroy ( vlistID );
   taxisDestroy ( taxisID );
   for ( i = 0; i < nVars; i++ )

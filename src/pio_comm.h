@@ -68,6 +68,7 @@ void     commDefCommGlob        ( MPI_Comm );
 MPI_Comm commInqCommGlob        ( void );
 int      commInqSizeGlob        ( void );
 int      commInqRankGlob        ( void );
+int      commInqRootGlob        ( void );
 
 void     commDefNProcsIO        ( int );
 int      commInqNProcsIO        ( void );

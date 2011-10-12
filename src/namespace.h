@@ -4,6 +4,7 @@
 typedef struct {
   int idx;
   int nsp;
+  int resASent;
 }namespaceTuple_t;
 
 
@@ -16,6 +17,8 @@ namespaceTuple_t namespaceResHDecode   ( int );
 int              namespaceHasLocalFile ( int );
 int              namespaceAdaptKey     ( int, int );
 int              namespaceAdaptKey2    ( int );
+void             namespaceDefResASent  ( void );
+int              namespaceInqResASent  ( void );
 
 #endif
 /*

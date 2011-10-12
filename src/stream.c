@@ -29,6 +29,8 @@
 #include "pio_rpc.h"
 #include "pio_comm.h"
 
+#include <string.h>
+
 #define  MAX_FNAMES  3
 
 extern resOps streamOps;
@@ -608,6 +610,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
   int status;
   Record *record = NULL;
   stream_t *streamptr = NULL;
+  int hasLocalFile = namespaceHasLocalFile ( namespaceGetActive ());
 
   if ( CDI_Debug )
     Message("Open %s mode %c file %s", strfiletype(filetype), (int) *filemode, filename);
@@ -617,7 +620,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
   xdebug( "namespaceHasLocalFile(%d)=%s", namespaceGetActive(), 
 	  namespaceHasLocalFile ( namespaceGetActive ()) ? "true":"false");
 
-  if ( namespaceHasLocalFile ( namespaceGetActive ()))
+  if ( hasLocalFile )
     {
       switch (filetype)
 	{
@@ -687,7 +690,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	}
     }
 
-  if ( fileID < 0 && namespaceHasLocalFile ( namespaceGetActive ()) )
+  if ( fileID < 0 && hasLocalFile )
     {
       streamID = fileID;
     }
@@ -718,6 +721,11 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	  vlistptr = vlist_to_pointer(streamptr->vlistID);
 	  vlistptr->ntsteps = streamNtsteps(streamID);
 	}
+
+      if ( !hasLocalFile && 
+           namespaceInqResASent () == 1 &&
+           streamptr->filemode == 'w' )
+        pioBufferFuncCall ( __func__, 2, filename, filetype );
     }
  
   return (streamID);
@@ -1584,7 +1592,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 #ifdef USE_MPI
   if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
     {
-      pioBuffer ( streamID, varID, data, nmiss );
+      pioBufferData ( streamID, varID, data, nmiss );
       return; 
     } 
 #endif

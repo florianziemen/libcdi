@@ -11,6 +11,8 @@ static int nNamespaces = 1;
 static int activeNamespace = 0;
 static int HLF = 1;
 static int * hasLocalFile = &HLF;
+static int RAS = 0;
+static int * resASent = &RAS;
 
 enum {
   intbits = sizeof(int) * CHAR_BIT,
@@ -79,6 +81,7 @@ void pioNamespaceInit ( int nspn, int * argHasLocalFile )
       hasLocalFile = xmalloc ( nspn * sizeof ( hasLocalFile[0] ));
       for ( i = 0; i < nspn; i++ )  
 	hasLocalFile[i] = argHasLocalFile[i];
+      resASent = xmalloc ( nspn * sizeof ( resASent[0] ));
     }
 #endif
 }
@@ -155,6 +158,20 @@ int namespaceAdaptKey2 ( int key )
   nsp = namespaceGetActive ();
  
   return namespaceIdxEncode2 ( nsp, tin.idx );
+}
+
+
+void namespaceDefResASent ( void )
+{
+  int nsp = namespaceGetActive ();
+  resASent[nsp] = 1;
+}
+
+
+int namespaceInqResASent ( void )
+{
+  int nsp = namespaceGetActive ();
+  return resASent[nsp];
 }
 
 /*

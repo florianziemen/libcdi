@@ -26,14 +26,16 @@ enum
   STREAM    = 6,
   VLIST     = 7,
   START     = 55555555,
-  SEPARATOR = 77777777,
+  SEPARATOR = 66666666,
+  DATATOKEN = 77777777,
+  FUNCCALL  = 88888888,
   END       = 99999999 
 };
 
 enum
 {
   winBufferOverhead = 1,
-  winBufferOverheadChunk = 3,
+  winBufferOverheadChunk = 4,
   winBufferSizeMax = 128 * 1024,
   timestepSize = 3
 };

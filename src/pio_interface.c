@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include "limits.h" 
 #include "cdi.h"
 #include "pio_util.h"
@@ -26,6 +27,9 @@ MPI_Win   * win           = NULL;
 int       * winPostSet    = NULL;
 MPI_Group * groupsIO      = NULL;
 MPI_Group * groupsIONetto = NULL;
+
+enum { nFuncs = 3, STREAMOPEN = 0, STREAMDEFVLIST = 1, STREAMCLOSE = 2 };
+static char * funcMap[nFuncs] = {"streamOpen", "streamDefVlist", "streamClose" };
 
 /*****************************************************************************/
 
@@ -324,13 +328,16 @@ static
 {
   int collID, nstreams, * streamIndexArray, streamNo, vlistID, nvars, varID;
   int collIDchunk = 0;
-  int nProcsColl = commInqNProcsColl ();
+  int nProcsColl  = commInqNProcsColl ();
+  int rankGlob    = commInqRankGlob ();
+  int root = commInqRootGlob ();
   
   nstreams = reshCountType ( &streamOps );
   streamIndexArray = xmalloc ( nstreams * sizeof ( int ));
   reshGetResHArrayOfType ( nstreams, streamIndexArray, &streamOps );
   for ( streamNo = 0; streamNo < nstreams; streamNo++ )
     {
+      // space required for data
       vlistID = streamInqVlist ( streamIndexArray[streamNo] );
       nvars = vlistNvars ( vlistID );
       for ( varID = 0; varID < nvars; varID++ )
@@ -343,6 +350,13 @@ static
           winBufferSize[collID] += (( collIDchunk + winBufferOverheadChunk ) * 
                                   sizeof ( double ));
         }
+
+      // space required for the function calls streamOpen, streamDefVlist, streamClose 
+      // once per stream and timestep only on the modelprocs with rank < nProcsModel
+      if ( rankGlob == root ) 
+        for ( collID = 0; collID < nProcsColl; collID++ ) 
+          winBufferSize[collID] += ( 3 * winBufferOverheadChunk * sizeof ( double ) +
+                                     4 * CDI_MAX_NAME );                                     
     }
   free ( streamIndexArray );
   
@@ -396,10 +410,10 @@ void modelWinCreate ( void )
 
 /************************************************************************/
 
-void pioBuffer ( int streamID, int varID, const double *data, int nmiss )
+void pioBufferData ( int streamID, int varID, const double *data, int nmiss )
 {
   int size = sizeof ( double ), chunk, vlistID, collID = CDI_UNDEFID;
-  double temp, sep = ( double ) SEPARATOR;
+  double temp, sep = ( double ) SEPARATOR, datatoken = ( double ) DATATOKEN;
   
   vlistID = streamInqVlist ( streamID );
   collID  = commRankGlob2CollID ( vlistInqVarIOrank ( vlistID, varID ));
@@ -417,7 +431,9 @@ void pioBuffer ( int streamID, int varID, const double *data, int nmiss )
       xmpi ( MPI_Win_wait ( win[collID] )); 
       winPostSet[collID] = 0;
     }
-  
+
+  memcpy ( winBufferHead[collID], &datatoken, size);
+  winBufferHead[collID]++;   
   temp = ( double ) streamID;
   memcpy ( winBufferHead[collID], &temp, size);
   winBufferHead[collID]++;
@@ -430,6 +446,71 @@ void pioBuffer ( int streamID, int varID, const double *data, int nmiss )
   size = sizeof ( double );
   memcpy ( winBufferHead[collID], &sep, size);
   winBufferHead[collID]++;      
+}
+
+/************************************************************************/
+
+int func2Int ( const char * func )
+{
+  int iret = CDI_UNDEFID, funcID;
+
+  for ( funcID = 0; funcID < nFuncs; funcID ++ )
+    if ( strlen ( funcMap[funcID] ) == strlen ( func ) && 
+         memcmp ( func, funcMap[funcID], strlen ( func )) == 0 )
+      iret = funcID;
+
+  return iret;
+}
+
+/************************************************************************/
+
+void pioBufferFuncCall ( const char * func, int argc, ... )
+{
+  va_list ap;
+  int rankGlob = commInqRankGlob ();
+  int root = commInqRootGlob ();
+  int collID, nProcsColl = commInqNProcsColl ();
+  double sep = ( double ) SEPARATOR, funcCall = ( double ) FUNCCALL;
+  int size = sizeof ( double );
+  
+  if ( rankGlob == root )
+    {      
+      va_start ( ap, argc );
+      
+      switch ( func2Int ( func )) 
+        {
+        case STREAMOPEN:
+          {
+            char * filename;
+            int    filetype;
+            
+            assert ( argc == 2 );
+            filename  = va_arg ( ap, char * );
+            filetype  = va_arg ( ap, int );
+  
+            for ( collID = 0; collID < nProcsColl; collID++ ) 
+              {
+                if ( winPostSet[collID] ) 
+                  { 
+                    xmpi ( MPI_Win_wait ( win[collID] )); 
+                    winPostSet[collID] = 0;
+                  }
+                memcpy ( winBufferHead[collID], &funcCall, size);
+                winBufferHead[collID]++; 
+                memcpy ( winBufferHead[collID], &sep, size);
+                winBufferHead[collID]++; 
+              }
+
+            xdebug ( "WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, %s, %d", 
+                     funcMap[0], filename, filetype );
+            break;
+          }
+        default:
+          xabort ( "FUNCTION NOT MAPPED!" );
+        }
+      
+      va_end ( ap );
+    }
 }
 
 #endif
@@ -528,6 +609,8 @@ void  pioEndDef ( void )
                         RESOURCES, commInqCommsIO ( rankGlob )));
       
       xdebug ( "sent message RESOURCES" );
+
+      namespaceDefResASent ();
       
       reshPackBufferDestroy ( &buffer );
     }
