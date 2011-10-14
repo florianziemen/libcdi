@@ -1921,11 +1921,7 @@ void cdiPrintVersion(void)
   fprintf(stderr, "GRIB_API library version : %s\n", gribapiLibraryVersion());
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-#  if  defined  (HAVE_LIBNC_DAP)
-  fprintf(stderr, "  nc_dap library version : %s\n", cdfLibraryVersion());
-#  else
   fprintf(stderr, "  netCDF library version : %s\n", cdfLibraryVersion());
-#  endif
 #endif
 #if  defined  (HAVE_LIBHDF5)
   fprintf(stderr, "    HDF5 library version : %s\n", hdfLibraryVersion());
