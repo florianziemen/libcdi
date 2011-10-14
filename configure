@@ -809,6 +809,7 @@ enable_dependency_tracking
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
+with_gnu_ld
 enable_largefile
 with_threads
 with_zlib
@@ -838,16 +839,25 @@ LDFLAGS
 LIBS
 CPPFLAGS
 CPP
+CPPFLAGS
 FC
 FCFLAGS
+LDFLAGS
+LIBS
 FPP
 FPPFLAGS
 F77
 FFLAGS
+LDFLAGS
+LIBS
 CXX
 CXXFLAGS
+LDFLAGS
+LIBS
+CPPFLAGS
 CCC
 CXXCPP
+CPPFLAGS
 FCMODEXT'
 
 
@@ -24571,7 +24581,7 @@ fi
 
 done
 
-              { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing deflate" >&5
+                      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing deflate" >&5
 $as_echo_n "checking for library containing deflate... " >&6; }
 if ${ac_cv_search_deflate+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -25408,7 +25418,19 @@ fi
 
 
                                  if test "x$NC_CONFIG" != "x"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's nc2 support" >&5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's OpenDAP support" >&5
+$as_echo_n "checking netcdf's OpenDAP support... " >&6; }
+                                    if test "x$($NC_CONFIG --has-dap)" = "xyes"; then :
+
+$as_echo "#define HAVE_LIBNC_DAP 1" >>confdefs.h
+
+                                           { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+                                   { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's nc2 support" >&5
 $as_echo_n "checking netcdf's nc2 support... " >&6; }
                                    if test "x$($NC_CONFIG --has-nc2)" = "xyes"; then :
 

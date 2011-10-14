@@ -45,8 +45,8 @@ AC_ARG_WITH([zlib],
                           AC_SEARCH_LIBS([deflate],[z],[AC_DEFINE([HAVE_LIBZ],[1],[Define 1 for ZLIB support])])
                           ZLIB_INCLUDE=" -I$ZLIB_ROOT/include"
                           ZLIB_LIBS=" -L$ZLIB_ROOT/lib -lz"])],
-             [AC_CHECK_HEADERS(zlib.h)
-              AC_SEARCH_LIBS([deflate],[z],[AC_DEFINE([HAVE_LIBZ],[1],[Define 1 for ZLIB support])])
+                     [AC_CHECK_HEADERS(zlib.h)
+                      AC_SEARCH_LIBS([deflate],[z],[AC_DEFINE([HAVE_LIBZ],[1],[Define 1 for ZLIB support])])
               ZLIB_LIBS=" -lz"])
 AC_SUBST([ZLIB_INCLUDE])
 AC_SUBST([ZLIB_LIBS])
@@ -174,6 +174,10 @@ AC_ARG_WITH([netcdf],
                                  AC_MSG_CHECKING([nc-config script])
                                  AC_CHECK_PROG(NC_CONFIG,nc-config,[$NETCDF_ROOT/bin/nc-config],,["$NETCDF_ROOT/bin"])
                                  AS_IF([test "x$NC_CONFIG" != "x"],
+                                   [AC_MSG_CHECKING([netcdf's OpenDAP support])
+                                    AS_IF([test "x$($NC_CONFIG --has-dap)" = "xyes"],
+                                          [AC_DEFINE([HAVE_LIBNC_DAP],[1],[Define to 1 for NETCDF OpenDAP])
+                                           AC_MSG_RESULT([yes])],[AC_MSG_RESULT([no])])]
                                    [AC_MSG_CHECKING([netcdf's nc2 support])
                                    AS_IF([test "x$($NC_CONFIG --has-nc2)" = "xyes"],
                                          [AC_DEFINE([HAVE_NETCDF2],[1],[Define to 1 for NETCDF2 support])

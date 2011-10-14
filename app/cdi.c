@@ -57,6 +57,48 @@ static
 void version(void)
 {
   fprintf(stderr, "CDI version 1.7.1\n");
+#if defined (COMPILER)
+  fprintf(stderr, "Compiler: %s\n", COMPILER);
+#endif
+#if defined (COMP_VERSION)
+  fprintf(stderr, " version: %s\n", COMP_VERSION);
+#endif
+  fprintf(stderr, "    with:");
+#if defined (HAVE_LIBPTHREAD)
+  fprintf(stderr, " PTHREADS");
+#endif
+#if defined (_OPENMP)
+  fprintf(stderr, " OpenMP");
+#endif
+#if  defined  (HAVE_NETCDF4)
+  fprintf(stderr, " NC4");
+#endif
+#if  defined  (HAVE_LIBNC_DAP)
+  fprintf(stderr, " OPeNDAP");
+#endif
+#if defined (HAVE_LIBSZ)
+  fprintf(stderr, " SZ");
+#endif
+#if defined (HAVE_LIBZ)
+  fprintf(stderr, " Z");
+#endif
+#if defined (HAVE_LIBJASPER)
+  fprintf(stderr, " JASPER");
+#endif
+#if defined (HAVE_LIBPROJ)
+  fprintf(stderr, " PROJ.4");
+#endif
+#if defined (HAVE_LIBDRMAA)
+  fprintf(stderr, " DRMAA");
+#endif
+#if defined (HAVE_LIBCURL)
+  fprintf(stderr, " CURL");
+#endif
+  fprintf(stderr, "\n");
+#if defined (USER_NAME) && defined(HOST_NAME) && defined(SYSTEM_TYPE)
+  fprintf(stderr, "Compiled: by %s on %s (%s) %s %s\n",
+	  USER_NAME, HOST_NAME, SYSTEM_TYPE, __DATE__, __TIME__);
+#endif
   cdiPrintVersion();
   fprintf(stderr, "\n");
 /*
@@ -131,7 +173,7 @@ void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
 
   date2str(vdate, vdatestr, sizeof(vdatestr));
   time2str(vtime, vtimestr, sizeof(vtimestr));
-	  
+
   fprintf(stdout, "%6d :%s %s %-10s %7g ", ++rec, vdatestr, vtimestr, varname, level);
 
   fprintf(stdout, "%7d ", datasize);
