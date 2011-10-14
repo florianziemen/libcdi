@@ -308,7 +308,7 @@ AC_MSG_RESULT([$enable_ieg])
 AC_SUBST([ENABLE_IEG],[$enable_ieg])
 #  ----------------------------------------------------------------------
 # At the moment, there are two possible CDI bindings
-# (default for CDO) linking directly to CDI's object files in ./libcdi/src
+# (default for CDO) linking directly to CDI convenience library with libtool
 # (default for CDI) build and link to a shared CDI library
 AS_IF([test "x$CDO_DISABLE_CDILIB" = "x1"],[enable_cdi_lib=no],[enable_cdi_lib=yes])
 # save CDI binding mode for later automake use

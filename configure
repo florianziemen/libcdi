@@ -25917,7 +25917,7 @@ ENABLE_IEG=$enable_ieg
 
 #  ----------------------------------------------------------------------
 # At the moment, there are two possible CDI bindings
-# (default for CDO) linking directly to CDI's object files in ./libcdi/src
+# (default for CDO) linking directly to CDI convenience library with libtool
 # (default for CDI) build and link to a shared CDI library
 if test "x$CDO_DISABLE_CDILIB" = "x1"; then :
   enable_cdi_lib=no
