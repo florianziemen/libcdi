@@ -1730,14 +1730,17 @@ int vlistInqVarDecoChunk ( int vlistID, int varID )
     int i, decoSize = 0, rank = commInqRankModel ();
 
     assert ( vlistptr->vars[varID].deco != NULL &&
-             vlistptr->vars[varID].decoSize != CDI_UNDEFID &&
-             vlistptr->vars[varID].deco[i].chunk !=  CDI_UNDEFID );
+             vlistptr->vars[varID].decoSize != CDI_UNDEFID ); 
       
     deco  = vlistptr->vars[varID].deco;
     decoSize = vlistptr->vars[varID].decoSize;
     if ( decoSize && deco )
       for ( i = 0; i < decoSize; i++ )
-        if ( deco[i].rank == rank ) iret = deco[i].chunk;
+        if ( deco[i].rank == rank ) 
+          {
+            iret = deco[i].chunk;
+            break;
+          }
   }
 #else
   iret = vlistInqVarSize ( vlistID, varID );
@@ -1761,15 +1764,17 @@ int vlistInqVarDecoChunk3 ( int vlistID, int varID, int rankModel  )
   vlistCheckVarID(__func__, vlistID, varID);
 
   assert ( vlistptr->vars[varID].deco != NULL &&
-           vlistptr->vars[varID].decoSize != CDI_UNDEFID &&
-           vlistptr->vars[varID].deco[i].chunk !=  CDI_UNDEFID );
+           vlistptr->vars[varID].decoSize != CDI_UNDEFID ); 
   
   deco  = vlistptr->vars[varID].deco;
   decoSize = vlistptr->vars[varID].decoSize;
   if ( decoSize && deco )
     for ( i = 0; i < decoSize; i++ )
-      if ( deco[i].rank == rankModel ) iret = deco[i].chunk;
-  
+      if ( deco[i].rank == rankModel ) 
+        {
+          iret = deco[i].chunk;
+          break;
+        }
   assert ( iret != CDI_UNDEFID );
   return iret;
 }
@@ -1791,15 +1796,18 @@ int vlistInqVarDecoOff ( int vlistID, int varID )
     int i, decoSize = 0, rankModel = commInqRankModel ();
 
     assert ( vlistptr->vars[varID].deco != NULL &&
-             vlistptr->vars[varID].decoSize != CDI_UNDEFID &&
-             vlistptr->vars[varID].deco[i].offset !=  CDI_UNDEFID );
+             vlistptr->vars[varID].decoSize != CDI_UNDEFID );
       
     deco  = vlistptr->vars[varID].deco;
     decoSize = vlistptr->vars[varID].decoSize;
     if ( decoSize && deco )
       for ( i = 0; i < decoSize; i++ )
-        if ( deco[i].rank == rankModel ) iret = deco[i].offset;
-  }
+        if ( deco[i].rank == rankModel ) 
+          {
+            iret = deco[i].offset;
+            break;
+          }
+}
 #else
   iret = 0;
 #endif
@@ -1822,15 +1830,17 @@ int vlistInqVarDecoOff3 ( int vlistID, int varID, int rankModel  )
   vlistCheckVarID(__func__, vlistID, varID);
 
   assert ( vlistptr->vars[varID].deco != NULL &&
-           vlistptr->vars[varID].decoSize != CDI_UNDEFID &&
-           vlistptr->vars[varID].deco[i].offset !=  CDI_UNDEFID );
+           vlistptr->vars[varID].decoSize != CDI_UNDEFID );
   
   deco  = vlistptr->vars[varID].deco;
   decoSize = vlistptr->vars[varID].decoSize;
   if ( decoSize && deco )
     for ( i = 0; i < decoSize; i++ )
-      if ( deco[i].rank == rankModel ) iret = deco[i].offset;
-
+      if ( deco[i].rank == rankModel ) 
+        {
+          iret = deco[i].offset;
+          break;
+        }
   assert ( iret != CDI_UNDEFID );  
   return iret;
 }
