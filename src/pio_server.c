@@ -60,7 +60,7 @@ static
   void getGetBufferSize ()
 {
   int nstreams, * streamIndexArray, streamNo, vlistID, nvars, varID, iorank;
-  int i, decoChunk;
+  int i, decoChunk, sumGetBufferSizes = 0;
   int rankGlob = commInqRankGlob ();
   int nProcsCalc = commInqNProcsModel ();
   int root = commInqRootGlob ();
@@ -96,8 +96,9 @@ static
   for ( i = 0; i < nProcsCalc; i++ )
     {
       getBufferSize[i] += ( winBufferOverhead * sizeof ( double ));
-      assert ( getBufferSize[i] < winBufferSizeMax );
+      sumGetBufferSizes += getBufferSize[i];
     }
+  if ( sumGetBufferSizes > MAXWINBUFFERSIZE ) xabort ( "" );
   xprintArray ( "getBufferSize", getBufferSize, nProcsCalc, DATATYPE_INT );
   free ( streamIndexArray );
 }

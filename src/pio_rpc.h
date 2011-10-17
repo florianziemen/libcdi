@@ -36,9 +36,14 @@ enum
 {
   winBufferOverhead = 1,
   winBufferOverheadChunk = 4,
-  winBufferSizeMax = 128 * 1024,
+  winBufferOverheadFuncCall = 3,
+  MAXWINBUFFERSIZE = 128 * 1024,
   timestepSize = 3
 };
+
+enum { nFuncs = 3, STREAMOPEN = 0, STREAMDEFVLIST = 1, STREAMCLOSE = 2 };
+enum { MAXDATAFILENAME = 256, MINFUNCID = STREAMOPEN, MAXFUNCID = STREAMCLOSE };
+extern char * funcMap[nFuncs];
 
 void rpcUnpackResources ( char *, int, MPI_Comm );
 
