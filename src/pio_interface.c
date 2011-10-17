@@ -552,7 +552,6 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
 
         if ( argc != 1 ) xabort ( "" );
         streamID  = va_arg ( ap, int );
-        // resH check streamID
         
         for ( collID = 0; collID < nProcsColl; collID++ ) 
           {
@@ -624,6 +623,44 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
         xdebug ( "WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, filenamesz=%d,"
                  " filename=%s, filetype=%d", 
                  funcMap[funcID], filenamesz, filename, filetype );
+      }
+      break;
+    case STREAMDEFVLIST:
+      {
+        int streamID, vlistID;
+
+        if ( argc != 2 ) xabort ( "" );
+        streamID  = va_arg ( ap, int );
+        vlistID   = va_arg ( ap, int );
+        
+        for ( collID = 0; collID < nProcsColl; collID++ ) 
+          {
+            size = ( winBufferOverheadFuncCall + 2 ) * sizeof ( int );
+            if ( winBufferHead[collID] - winBuffer[collID] + size >= 
+                 winBufferSize[collID] )
+              xabort ( "" );  
+
+            if ( winPostSet[collID] ) 
+              { 
+                xmpi ( MPI_Win_wait ( win[collID] )); 
+                winPostSet[collID] = 0;
+                modelWinFlushBuffer ( collID );
+              }
+            modelWinBufferPutAtEnd ( __func__, collID, &tokenFuncCall, 
+                                     sizeof ( tokenFuncCall));
+            modelWinBufferPutAtEnd ( __func__, collID, &funcID, 
+                                     sizeof ( funcID ));
+            modelWinBufferPutAtEnd ( __func__, collID, &streamID, 
+                                     sizeof ( streamID ));
+            modelWinBufferPutAtEnd ( __func__, collID, &vlistID, 
+                                     sizeof ( streamID ));
+            modelWinBufferPutAtEnd ( __func__, collID, &tokenSep, 
+                                     sizeof ( tokenSep ));
+          }
+        
+        xdebug ( "WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d,"
+                 " vlistID=%d", 
+                 funcMap[funcID], streamID, vlistID );
       }
       break;
     default:

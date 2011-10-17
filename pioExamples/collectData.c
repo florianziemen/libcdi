@@ -95,7 +95,10 @@ void modelRun ()
 	  chunk = CDI_UNDEFID;
 	}
       if ( tsID == 1 )
-	streamID[1] = streamOpenWrite ( "example2.grb", FILETYPE_GRB );
+	{
+	  streamID[1] = streamOpenWrite ( "example2.grb", FILETYPE_GRB );
+	  streamDefVlist ( streamID[1], vlistID );
+	}
       if ( tsID == 2 )
 	streamClose ( streamID[1] );
       pioWriteTimestep ( tsID, vdate, vtime );

@@ -1128,10 +1128,7 @@ void streamClose(int streamID)
   xdebug ( "streamID=%d", streamID );
 
   streamptr = stream_to_pointer(streamID);
-  xdebug ();
-
   stream_check_ptr(__func__, streamptr);
-  xdebug ();
 
   if ( CDI_Debug )
     Message("fileID = %d filename = %s", streamID, streamptr->filename);
@@ -2044,11 +2041,18 @@ void streamDefVlist(int streamID, int vlistID)
 
   stream_check_ptr(__func__, streamptr);
 
+  /*
   if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
     {
       xdebug ("WARNING: Operation not executed." );
       return;
     }
+  */
+
+#ifdef USE_MPI
+    if ( namespaceInqResASent () == 1 )
+      pioBufferFuncCall ( __func__, 2, streamID, vlistID );
+#endif
 
   if ( streamptr->vlistID == CDI_UNDEFID )
     {

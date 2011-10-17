@@ -182,21 +182,21 @@ static
       {
         int streamID;
 
-        xdebug ( "FUNCTION STREAMCLOSE" );
         getBufferGetFromEnd ( __func__, __LINE__, 
                               root, &streamID, sizeof ( streamID ));
-        // todo check streamID
         streamClose ( streamID );
-        xdebug ( "########### closed stream %d", streamID );
+
+        xdebug ( "READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
+                 " closed stream", 
+                 funcMap[funcID], streamID );
       }
       break;
     case STREAMOPEN:
       {
         char * filename, * endname = "\0";
         size_t filenamesz;
-        int filetype;
+        int filetype, streamID;
 
-        xdebug ( "FUNCTION STREAMOPEN" );
         getBufferGetFromEnd ( __func__, __LINE__, 
                               root, &filenamesz, sizeof ( filenamesz ));
         if ( filenamesz <= 0 || filenamesz >= MAXDATAFILENAME ) xabort ( "" );
@@ -206,15 +206,31 @@ static
         memcpy ( filename + filenamesz, endname, 1 );
         getBufferGetFromEnd ( __func__, __LINE__, 
                               root, &filetype, sizeof ( filetype ));
-        xdebug ( "read args filename=%s, filetype=%d, open stream", 
-                 filename, filetype );
-        streamOpenWrite ( filename, filetype );
+        streamID = streamOpenWrite ( filename, filetype );
         free ( filename );
-        xdebug ( "######## opened stream %s", filename );
+
+        xdebug ( "READ FUNCTION CALL FROM WIN:  %s, filenamesz=%d,"
+                 " filename=%s, filetype=%d, opened stream %d", 
+                 funcMap[funcID], filenamesz, filename, filetype, streamID );
       }
       break; 
+    case STREAMDEFVLIST:
+      {
+        int streamID, vlistID;
+
+        getBufferGetFromEnd ( __func__, __LINE__, 
+                              root, &streamID, sizeof ( vlistID ));
+        getBufferGetFromEnd ( __func__, __LINE__, 
+                              root, &vlistID, sizeof ( vlistID ));
+        streamDefVlist ( streamID, vlistID );
+
+        xdebug ( "READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
+                 " vlistID=%d, called streamDefVlist ().", 
+                 funcMap[funcID], streamID, vlistID );
+      }
+      break;
     default:
-      xabort ( "FUNCTIONCALL NOT IMPLEMENTED!" );
+      xabort ( "REMOTE FUNCTIONCALL NOT IMPLEMENTED!" );
     }
   getBufferGetFromEnd ( __func__, __LINE__, 
                         root, &tokenID, sizeof ( tokenID ));
@@ -423,7 +439,6 @@ void IOServer ()
                 }
 
                 serverWinCleanup ();
-                xdebug ();
                 arrayDestroy();
                 return;
               }
