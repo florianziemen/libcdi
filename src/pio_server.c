@@ -178,6 +178,18 @@ static
   
   switch ( funcID )
     {
+    case STREAMCLOSE:
+      {
+        int streamID;
+
+        xdebug ( "FUNCTION STREAMCLOSE" );
+        getBufferGetFromEnd ( __func__, __LINE__, 
+                              root, &streamID, sizeof ( streamID ));
+        // todo check streamID
+        streamClose ( streamID );
+        xdebug ( "########### closed stream %d", streamID );
+      }
+      break;
     case STREAMOPEN:
       {
         char * filename, * endname = "\0";

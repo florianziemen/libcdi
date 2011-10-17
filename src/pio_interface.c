@@ -547,7 +547,38 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
   switch ( funcID ) 
     {
     case STREAMCLOSE:
-      xdebug ( "CASE STREAMCLOSE" );
+      {
+        int streamID;
+
+        if ( argc != 1 ) xabort ( "" );
+        streamID  = va_arg ( ap, int );
+        // resH check streamID
+        
+        for ( collID = 0; collID < nProcsColl; collID++ ) 
+          {
+            size = ( winBufferOverheadFuncCall + 1 ) * sizeof ( int );
+            if ( winBufferHead[collID] - winBuffer[collID] + size >= 
+                 winBufferSize[collID] )
+              xabort ( "" );  
+
+            if ( winPostSet[collID] ) 
+              { 
+                xmpi ( MPI_Win_wait ( win[collID] )); 
+                winPostSet[collID] = 0;
+                modelWinFlushBuffer ( collID );
+              }
+            modelWinBufferPutAtEnd ( __func__, collID, &tokenFuncCall, 
+                                     sizeof ( tokenFuncCall));
+            modelWinBufferPutAtEnd ( __func__, collID, &funcID, 
+                                     sizeof ( funcID ));
+            modelWinBufferPutAtEnd ( __func__, collID, &streamID, 
+                                     sizeof ( streamID ));
+            modelWinBufferPutAtEnd ( __func__, collID, &tokenSep, 
+                                     sizeof ( tokenSep ));
+          }
+      xdebug ( "WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d", 
+               funcMap[funcID], streamID );
+      }       
       break;
     case STREAMOPEN:
       {
@@ -564,7 +595,8 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
         
         for ( collID = 0; collID < nProcsColl; collID++ ) 
           {
-            size = winBufferOverheadFuncCall * sizeof ( int ) +  MAXDATAFILENAME;
+            size = ( winBufferOverheadFuncCall + 2 ) * sizeof ( int ) +  
+              MAXDATAFILENAME;
             if ( winBufferHead[collID] - winBuffer[collID] + size >= 
                  winBufferSize[collID] )
               xabort ( "" );  
@@ -589,10 +621,11 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
                                      sizeof ( tokenSep ));
           }
         
-        xdebug ( "WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, %s, %d", 
-                 funcMap[0], filename, filetype );
-        break;
+        xdebug ( "WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, filenamesz=%d,"
+                 " filename=%s, filetype=%d", 
+                 funcMap[funcID], filenamesz, filename, filetype );
       }
+      break;
     default:
       xabort ( "FUNCTION NOT MAPPED!" );
     }
