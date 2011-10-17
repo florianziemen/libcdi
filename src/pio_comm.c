@@ -73,8 +73,6 @@ void commDestroy ( void )
   if ( info->nodeMap   != NULL ) free ( info->nodeMap );
   if ( info->nodeSizes != NULL ) free ( info->nodeSizes );
 
-  xdebug ();
-
   if ( info->commsIO != NULL ) 
     {
       for ( collID = 0; collID < info->nProcsColl; collID++ )

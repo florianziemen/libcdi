@@ -148,7 +148,6 @@ static
   void getBufferGetFromEnd ( const char * caller, int line,  
                              int ID, void * argBuffer, size_t size )
 {
-  int temp;
   char text[1024];
 
   if ( getBufferHead == NULL ||
@@ -161,11 +160,6 @@ static
       sprintf ( text, "caller: %s, line %d, ", caller, line );
       xabort ( text );
     }
-
-  temp = (int ) * getBufferHead[ID];
-  xdebug ("caller: %s, line %d, ID=%d, bufferHead=%d, token=%d ", 
-          caller, line, ID, getBufferHead[ID] - getBuffer[ID],
-          temp );
   
   memcpy ( argBuffer, getBufferHead[ID], size );
   getBufferHead[ID] += size;
@@ -181,7 +175,6 @@ static
 
   getBufferGetFromEnd ( __func__, __LINE__, 
                         root, &funcID, sizeof ( funcID ));
-  xdebug ( "############ read funcID=%d", funcID );
   if ( funcID < MINFUNCID || funcID > MAXFUNCID ) xabort ( "" );
   
   switch ( funcID )
@@ -213,13 +206,9 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
   char text[1024];
   int nProcsModel = commInqNProcsModel ();
   int root        = commInqRootGlob ();
-
-  xdebug ();
   
   getBufferGetFromEnd ( __func__, __LINE__, 
                         root, &tokenID, sizeof ( tokenID ));
-
-  xdebug ( "######## tokenID = %d", tokenID );
 
   while ( tokenID != END )
     {
@@ -239,7 +228,6 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
             }
           getBufferGetFromEnd ( __func__, __LINE__, 
                                 root, &varID, sizeof ( varID ));
-          xdebug ( "########## streamID=%d, varID=%d", streamID, varID );
           size = vlistInqVarSize ( vlistID, varID );
           data = xmalloc ( size * sizeof ( double ));
           dataHead = data;
@@ -265,11 +253,7 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
               getBufferGetFromEnd ( __func__, __LINE__, 
                                     modelID, &tokenID2, sizeof ( tokenID2 ));
               if ( tokenID2 != SEPARATOR ) xabort ( "" );
-            }
-
-          xdebug ( "before streamWriteVar ( %d, %d, %.2f, %d )",
-                   streamID, varID, data[0], nmiss );
-          
+            }         
           streamWriteVar ( streamID, varID, data, nmiss );
 
           if ( ddebug > 2 )
@@ -281,7 +265,6 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
           free ( data );
           break;
         case FUNCCALL:
-          xdebug ( "READ FUNCTION CALL FROM WIN BUFFER!" );
           readFuncCall ();
           break;
         default:
@@ -290,7 +273,6 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
         }
       getBufferGetFromEnd ( __func__, __LINE__, 
                             root, &tokenID, sizeof ( tokenID ));
-      xdebug ( "###################### read tokenID=%d", tokenID );
     }
 } 
 
@@ -333,9 +315,9 @@ void getData ( int tsID, int vdate, int vtime )
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
       getFlushBuffer ( modelID );
-        xmpi ( MPI_Get ( &getBuffer[modelID][0], getBufferSize[modelID], 
-                     MPI_UNSIGNED_CHAR, modelID, 0, 
-                     getBufferSize[modelID], MPI_UNSIGNED_CHAR, win ));
+      xmpi ( MPI_Get ( &getBuffer[modelID][0], getBufferSize[modelID], 
+                       MPI_UNSIGNED_CHAR, modelID, 0, 
+                       getBufferSize[modelID], MPI_UNSIGNED_CHAR, win ));
     }
   xmpi ( MPI_Win_complete ( win ));
 
@@ -348,7 +330,6 @@ void getData ( int tsID, int vdate, int vtime )
                       getBufferSize[modelID] / sizeof ( double ), 
                       DATATYPE_FLT );
       }
-  xdebug ()
   readGetBuffers ( tsID, vdate, vtime );
 
 }
