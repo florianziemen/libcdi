@@ -254,16 +254,16 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
 
   nStreams = streamSize ();
 
-  resHs       = xmalloc ( nStreams * sizeof ( int ));
-  streamSizes = xmalloc ( nStreams * sizeof ( int ));
+  resHs       = xmalloc ( nStreams * sizeof ( resHs[0] ));
+  streamSizes = xmalloc ( nStreams * sizeof ( streamSizes[0] ));
   streamGetIndexArray ( nStreams, resHs );
 
   for ( i = 0; i < nStreams; i++ )
     streamSizes[i] = streamInqNvars ( * ( resHs + i )); 
 
   nVars = xsum ( nStreams, streamSizes );
-  varSizes   = xmalloc ( nVars * sizeof ( int ));
-  varMapping = xmalloc ( nVars * sizeof ( int ));
+  varSizes   = xmalloc ( nVars * sizeof ( varSizes[0] ));
+  varMapping = xmalloc ( nVars * sizeof ( varMapping[0] ));
 
   for ( i = 0; i < nStreams; i++ )
     for ( j = 0; j < * ( streamSizes + i ); j++ )
@@ -546,6 +546,9 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
   
   switch ( funcID ) 
     {
+    case STREAMCLOSE:
+      xdebug ( "CASE STREAMCLOSE" );
+      break;
     case STREAMOPEN:
       {
         char * filename;

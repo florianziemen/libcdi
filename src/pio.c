@@ -181,6 +181,21 @@ void backendInit ( void )
 
 /***************************************************************/
 
+void backendCleanup ( void )
+{
+  int IOMode = commInqIOMode ();
+  switch ( IOMode )
+    {
+    case PIO_MPI_NONB:
+      finalizeMPINONB ();
+      break;
+    default:
+      xdebug ( " backendCleanup function not implemented yet." );
+    }
+}
+
+/***************************************************************/
+
 void backendFinalize ( void )
 {
   commDestroy ();

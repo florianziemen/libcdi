@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <mpi.h>
 
+void   backendCleanup  ( void );
 void   backendInit     ( void );
 void   backendFinalize ( void );
 int    pioFileOpenW    ( const char* );

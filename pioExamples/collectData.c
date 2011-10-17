@@ -11,7 +11,7 @@
 #include "pio_util.h"
 #include <assert.h>
 
-#define nProcsIO 3
+#define nProcsIO 1
 
 static int hasLocalFile[] = { 0 };
 
@@ -24,8 +24,8 @@ static int nlev[nVars] = {1,1,5,5,2};
 #define ntsteps  3 
 
 //int IOMode = PIO_NONE;
-//int IOMode = PIO_MPI_NONB;
-int IOMode = PIO_POSIX_FPGUARD_SENDRECV;
+int IOMode = PIO_MPI_NONB;
+//int IOMode = PIO_POSIX_FPGUARD_SENDRECV;
 //int IOMode = PIO_POSIX_ASYNCH;
 //int IOMode = PIO_POSIX_NONB;
 
@@ -96,6 +96,8 @@ void modelRun ()
 	}
       if ( tsID == 1 )
 	streamID[1] = streamOpenWrite ( "example2.grb", FILETYPE_GRB );
+      if ( tsID == 2 )
+	streamClose ( streamID[1] );
       pioWriteTimestep ( tsID, vdate, vtime );
     }
 
@@ -104,7 +106,6 @@ void modelRun ()
    
   
   streamClose ( streamID[0] );
-  streamClose ( streamID[1] );
   vlistDestroy ( vlistID );
   taxisDestroy ( taxisID );
   for ( i = 0; i < nVars; i++ )

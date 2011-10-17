@@ -398,7 +398,20 @@ void IOServer ()
                 if ( commInqRankGlob () == nProcsModel ) 
                   reshArrayPrint ( "reshArrayIOServer" );
 
+                {
+                  int nStreams = streamSize (), streamNo;
+                  int * resHs;
+
+                  resHs       = xmalloc ( nStreams * sizeof ( resHs[0] ));
+                  streamGetIndexArray ( nStreams, resHs );
+                  for ( streamNo = 0; streamNo < nStreams; streamNo++ )
+                    streamClose ( resHs[streamNo] );
+                  free ( resHs );
+                  backendCleanup ();
+                }
+
                 serverWinCleanup ();
+                xdebug ();
                 arrayDestroy();
                 return;
               }

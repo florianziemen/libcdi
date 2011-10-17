@@ -77,6 +77,7 @@ int       fowMPINONB ( const char * );
 int       fcMPINONB ( int );
 size_t    fwMPINONB( int, int, const void *, size_t );
 void      initMPINONB ( void );
+void      finalizeMPINONB ( void );
 
 /* pio_posixasynch.c */
 #ifndef _SX

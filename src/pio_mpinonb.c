@@ -361,6 +361,21 @@ int fowMPINONB ( const char *filename )
 
 /***************************************************************/
 
+void      finalizeMPINONB ( void )
+{
+  if ( bibAFiledataM->head != NULL )
+    {
+      xabort ( "queue bibAFiledataM not empty" );
+    }
+  else
+    {
+      xdebug ( "cleanup queue" );
+      free ( bibAFiledataM );
+    }
+}
+
+/***************************************************************/
+
 void initMPINONB ( void )
 {
   commDefCommColl ( 1 );

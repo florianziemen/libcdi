@@ -81,7 +81,7 @@ void pioNamespaceInit ( int nspn, int * argHasLocalFile )
       hasLocalFile = xmalloc ( nspn * sizeof ( hasLocalFile[0] ));
       for ( i = 0; i < nspn; i++ )  
 	hasLocalFile[i] = argHasLocalFile[i];
-      resASent = xmalloc ( nspn * sizeof ( resASent[0] ));
+      resASent = xmalloc ( nspn * sizeof ( resASent[0] )); 
     }
 #endif
 }
@@ -90,10 +90,11 @@ void pioNamespaceInit ( int nspn, int * argHasLocalFile )
 void pioNamespaceCleanup ( void )
 {
   if ( nNamespaces > 1 ) 
-      {
-          free ( hasLocalFile );
-          hasLocalFile = NULL;
-      }
+    {
+      free ( hasLocalFile );
+      hasLocalFile = NULL;
+      free ( resASent );
+    }
 }
 
 

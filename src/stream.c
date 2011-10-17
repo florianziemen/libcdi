@@ -1125,9 +1125,13 @@ void streamClose(int streamID)
   int vlistID;
   stream_t *streamptr;
 
+  xdebug ( "streamID=%d", streamID );
+
   streamptr = stream_to_pointer(streamID);
+  xdebug ();
 
   stream_check_ptr(__func__, streamptr);
+  xdebug ();
 
   if ( CDI_Debug )
     Message("fileID = %d filename = %s", streamID, streamptr->filename);
@@ -1193,6 +1197,11 @@ void streamClose(int streamID)
 	    }
 	  }
     }
+#ifdef USE_MPI
+  else
+    if ( namespaceInqResASent () == 1 )
+      pioBufferFuncCall ( __func__, 1, streamID );
+#endif
       
   if ( streamptr->record )
       {
