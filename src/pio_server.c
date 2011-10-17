@@ -174,6 +174,32 @@ static
 /************************************************************************/
 
 static
+  void readFuncCall ( void )
+{
+  int funcID, tokenID;
+  int root = commInqRootGlob ();
+
+  getBufferGetFromEnd ( __func__, __LINE__, 
+                        root, &funcID, sizeof ( funcID ));
+  xdebug ( "############ read funcID=%d", funcID );
+  if ( funcID < MINFUNCID || funcID > MAXFUNCID ) xabort ( "" );
+  
+  switch ( funcID )
+    {
+    case STREAMOPEN:
+      xdebug ( "FUNCTION STREAMOPEN" );
+      break; 
+    default:
+      xabort ( "FUNCTIONCALL NOT IMPLEMENTED!" );
+    }
+  getBufferGetFromEnd ( __func__, __LINE__, 
+                        root, &tokenID, sizeof ( tokenID ));
+  if ( tokenID != SEPARATOR ) xabort ( "" );
+}
+
+/************************************************************************/
+
+static
 void readGetBuffers ( int tsID, int vdate, int vtime )
 {
   int modelID;
@@ -255,7 +281,8 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
           free ( data );
           break;
         case FUNCCALL:
-          xabort ( "READ FUNCTION CALL FROM WIN BUFFER!" );
+          xdebug ( "READ FUNCTION CALL FROM WIN BUFFER!" );
+          readFuncCall ();
           break;
         default:
           xabort ( "BUFFER NOT READABLE!" );
@@ -263,6 +290,7 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
         }
       getBufferGetFromEnd ( __func__, __LINE__, 
                             root, &tokenID, sizeof ( tokenID ));
+      xdebug ( "###################### read tokenID=%d", tokenID );
     }
 } 
 

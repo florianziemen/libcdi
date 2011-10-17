@@ -528,6 +528,7 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
   int collID, nProcsColl = commInqNProcsColl ();
   int tokenSep = SEPARATOR, tokenFuncCall = FUNCCALL;
   size_t size = 0;
+  int funcID = func2Int ( func );
   
   if ( rankGlob != root ) return;
 
@@ -543,7 +544,7 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
          
   va_start ( ap, argc );
   
-  switch ( func2Int ( func )) 
+  switch ( funcID ) 
     {
     case STREAMOPEN:
       {
@@ -568,6 +569,8 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
               }
             modelWinBufferPutAtEnd ( __func__, collID, &tokenFuncCall, 
                                      sizeof ( tokenFuncCall));
+            modelWinBufferPutAtEnd ( __func__, collID, &funcID, 
+                                     sizeof ( funcID ));
             modelWinBufferPutAtEnd ( __func__, collID, &tokenSep, 
                                      sizeof ( tokenSep ));
           }
