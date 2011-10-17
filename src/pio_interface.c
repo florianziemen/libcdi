@@ -355,7 +355,7 @@ static
       if ( rankGlob == root ) 
         for ( collID = 0; collID < nProcsColl; collID++ ) 
           winBufferSize[collID] += ( 3 * winBufferOverheadFuncCall * sizeof ( int ) +
-                                     4 * sizeof ( int ) +
+                                     5 * sizeof ( int ) +
                                      MAXDATAFILENAME );                                     
     }
   free ( streamIndexArray );
@@ -550,15 +550,20 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
       {
         char * filename;
         int    filetype;
+        size_t filenamesz;
         
         if ( argc != 2 ) xabort ( "" );
         filename  = va_arg ( ap, char * );
+        filenamesz = strlen ( filename );
+        if ( filenamesz <= 0 &&
+             filenamesz >= MAXDATAFILENAME ) xabort ( "" );
         filetype  = va_arg ( ap, int );
         
         for ( collID = 0; collID < nProcsColl; collID++ ) 
           {
             size = winBufferOverheadFuncCall * sizeof ( int ) +  MAXDATAFILENAME;
-            if ( winBufferHead[collID] - winBuffer[collID] + size >= winBufferSize[collID] )
+            if ( winBufferHead[collID] - winBuffer[collID] + size >= 
+                 winBufferSize[collID] )
               xabort ( "" );  
 
             if ( winPostSet[collID] ) 
@@ -571,6 +576,12 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
                                      sizeof ( tokenFuncCall));
             modelWinBufferPutAtEnd ( __func__, collID, &funcID, 
                                      sizeof ( funcID ));
+            modelWinBufferPutAtEnd ( __func__, collID, &filenamesz, 
+                                     sizeof ( filenamesz ));
+            modelWinBufferPutAtEnd ( __func__, collID, filename, 
+                                     filenamesz );
+            modelWinBufferPutAtEnd ( __func__, collID, &filetype, 
+                                     sizeof ( filetype ));
             modelWinBufferPutAtEnd ( __func__, collID, &tokenSep, 
                                      sizeof ( tokenSep ));
           }
@@ -623,7 +634,7 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode )
 {
   int sizeGlob;
 
-  if ( IOMode < PIO_NONE || IOMode > PIO_MAXIOMODUS )
+  if ( IOMode < PIO_MINIOMODUS || IOMode > PIO_MAXIOMODUS )
     xabort ( "PIOTYPE is no valid modus" );
   
 #ifdef _SX
@@ -751,7 +762,7 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
       xdebug ( "sent message WRITETS" );
     }
 
-  xdebug ( "########## buffer[0][0] = %d", ( int ) winBuffer[0][0] );
+  xdebug ( "########## buffer[0][0] = %d", ( int ) * winBuffer[0] );
 
   for ( collID = 0; collID < nProcsColl; collID++ )
     {
@@ -760,6 +771,8 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
       xmpi ( MPI_Win_post ( groupsIONetto[collID], iAssert, win[collID] ));
       winPostSet[collID] = 1;
     } 
+
+  xdebug ( "return from win post" );
 #endif
 }
 

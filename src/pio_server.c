@@ -95,7 +95,7 @@ static
       // space required for the 3 function calls streamOpen, streamDefVlist, streamClose 
       // once per stream and timestep for all collprocs only on the modelproc root
       getBufferSize[root] += ( 3 * winBufferOverheadFuncCall * sizeof ( int ) +
-                               4 * sizeof ( int ) +
+                               5 * sizeof ( int ) +
                                MAXDATAFILENAME ); 
     }
   free ( streamIndexArray );
@@ -159,8 +159,7 @@ static
     {
       sprintf ( text, "caller: %s, line %d, ", caller, line );
       xabort ( text );
-    }
-  
+    }  
   memcpy ( argBuffer, getBufferHead[ID], size );
   getBufferHead[ID] += size;
 }
@@ -180,7 +179,27 @@ static
   switch ( funcID )
     {
     case STREAMOPEN:
-      xdebug ( "FUNCTION STREAMOPEN" );
+      {
+        char * filename, * endname = "\0";
+        size_t filenamesz;
+        int filetype;
+
+        xdebug ( "FUNCTION STREAMOPEN" );
+        getBufferGetFromEnd ( __func__, __LINE__, 
+                              root, &filenamesz, sizeof ( filenamesz ));
+        if ( filenamesz <= 0 || filenamesz >= MAXDATAFILENAME ) xabort ( "" );
+        filename = xmalloc ( filenamesz + 1 );
+        getBufferGetFromEnd ( __func__, __LINE__, 
+                              root, filename, filenamesz );
+        memcpy ( filename + filenamesz, endname, 1 );
+        getBufferGetFromEnd ( __func__, __LINE__, 
+                              root, &filetype, sizeof ( filetype ));
+        xdebug ( "read args filename=%s, filetype=%d, open stream", 
+                 filename, filetype );
+        streamOpenWrite ( filename, filetype );
+        free ( filename );
+        xdebug ( "######## opened stream %s", filename );
+      }
       break; 
     default:
       xabort ( "FUNCTIONCALL NOT IMPLEMENTED!" );
@@ -376,9 +395,12 @@ void IOServer ()
 
 	  if ( nfinished == nProcsModel )  
               {
-                  serverWinCleanup ();
-                  arrayDestroy();
-                  return;
+                if ( commInqRankGlob () == nProcsModel ) 
+                  reshArrayPrint ( "reshArrayIOServer" );
+
+                serverWinCleanup ();
+                arrayDestroy();
+                return;
               }
 	  
 	  break;
@@ -392,8 +414,6 @@ void IOServer ()
 	  rpcUnpackResources ( buffer, size, commCalc );
 	  free ( buffer );
 
-	  if ( commInqRankGlob () == nProcsModel ) 
-            reshArrayPrint ( "reshArrayIOServer" );
 	  serverWinCreate ();
 	  break;
 

@@ -201,6 +201,7 @@ extern "C" {
 #define  PIO_POSIX_ASYNCH                3
 #define  PIO_POSIX_FPGUARD_SENDRECV      4
 
+#define  PIO_MINIOMODUS                  PIO_NONE
 #define  PIO_MAXIOMODUS                  PIO_POSIX_FPGUARD_SENDRECV
 #define  PIO_MINIOMODUSWITHSPECIALPROCS  PIO_POSIX_NONB  
   

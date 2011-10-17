@@ -13,6 +13,7 @@
 
 #ifdef USE_MPI
 #include "pio_impl.h"
+#include "pio_util.h"
 
 bool ldebug    =false;
 
@@ -36,7 +37,6 @@ int dbuffer_init ( struct dBuffer **dbuffer, size_t size )
       fprintf ( stdout, "dbuffer_init: dbuffer=NULL\n" );
       return 1;
     }
-
   db = ( struct dBuffer * ) malloc ( sizeof ( struct dBuffer ));
 
   if ( db == NULL )

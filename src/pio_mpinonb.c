@@ -45,26 +45,24 @@ static queue_t *bibAFiledataM;
 
 static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
 {
-  aFiledataM *of;
+  aFiledataM *of = NULL;
   size_t len;
   int iret;
   MPI_Comm commNode = commInqCommNode ();
   int rankNode = commInqRankNode ();
-
-  xdebug ( "IOPE%d: filename=%s, buffersize=%zu, in",
-           rankNode, filename, bs );
+  char * endString = "\0";
 
   of = xmalloc ( sizeof ( of[0] ));
 
   len = strlen ( filename );
-  of->name = xmalloc (( len ) * sizeof ( of->name[0] ));
-  strcpy ( of->name, filename );
+  of->name = xmalloc (( len + 1 ) * sizeof ( of->name[0] ));
+  memcpy ( of->name, filename, len );
+  memcpy ( of->name + len, endString, 1 );
   of->size = bs;
+  of->db1 = NULL;
+  of->db2 = NULL;
 
   /* init output buffer */
-
-  xdebug ( "IOPE%d: name=%s, init output buffer", 
-           rankNode, of->name );
    
   iret = dbuffer_init ( &( of->db1 ), of->size );
   iret += dbuffer_init ( &( of->db2 ), of->size );
@@ -79,9 +77,6 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
 			 MPI_INFO_NULL, &( of->fh )));
   of->request = MPI_REQUEST_NULL;
   of->finished = false;
-
-  xdebug ( "IOPE%d opened file %s, return",
-           rankNode, of->name );
   
   return of;
 }
@@ -127,15 +122,16 @@ int destroyAFiledataMPINONB ( void *v )
 bool compareNamesMPINONB  ( void *v1, void *v2 )
 {
   aFiledataM *afm1, *afm2;
-  size_t len;
+  size_t len1, len2;
   bool bret;
 
   afm1 = ( aFiledataM * ) v1;
   afm2 = ( aFiledataM * ) v2;
 
-  len = strlen ( afm1->name );
-  bret = ( len == strlen ( afm2->name ) && 
-	  memcmp ( afm1->name, afm2->name, len ) == 0 );
+  len1 = strlen ( afm1->name );
+  len2 = strlen ( afm2->name );
+  bret = ( len1 == len2 && 
+	  memcmp ( afm1->name, afm2->name, len1 ) == 0 );
 
   return bret;
 }
@@ -315,9 +311,9 @@ void queueCheck ( queue_t *q, const char *name )
 	}
       
       curr = curr->next;
-    }  
+    } 
 }
-//
+
 
 int fowMPINONB ( const char *filename )
 {

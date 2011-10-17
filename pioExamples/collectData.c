@@ -24,8 +24,8 @@ static int nlev[nVars] = {1,1,5,5,2};
 #define ntsteps  3 
 
 //int IOMode = PIO_NONE;
-int IOMode = PIO_MPI_NONB;
-//int IOMode = PIO_POSIX_FPGUARD_SENDRECV;
+//int IOMode = PIO_MPI_NONB;
+int IOMode = PIO_POSIX_FPGUARD_SENDRECV;
 //int IOMode = PIO_POSIX_ASYNCH;
 //int IOMode = PIO_POSIX_NONB;
 
@@ -74,10 +74,6 @@ void modelRun ()
 
   pioEndDef ();
 
-  // for debugging
-  reshArrayPrint ( "reshArrayModel" );
-
-   
   for ( tsID = 0; tsID < ntsteps; tsID++ )
     {
       taxisDefVdate ( taxisID, vdate + tsID );
@@ -98,12 +94,17 @@ void modelRun ()
 	  start = CDI_UNDEFID;
 	  chunk = CDI_UNDEFID;
 	}
-      streamID[1] = streamOpenWrite ( "example2.grb", FILETYPE_GRB );
+      if ( tsID == 1 )
+	streamID[1] = streamOpenWrite ( "example2.grb", FILETYPE_GRB );
       pioWriteTimestep ( tsID, vdate, vtime );
     }
+
+  // for debugging
+  reshArrayPrint ( "reshArrayModel" );
    
   
   streamClose ( streamID[0] );
+  streamClose ( streamID[1] );
   vlistDestroy ( vlistID );
   taxisDestroy ( taxisID );
   for ( i = 0; i < nVars; i++ )
@@ -119,12 +120,14 @@ int main (int argc, char *argv[])
 #ifdef USE_MPI
   MPI_Comm commGlob, commModel; 
   int sizeGlob;
+  int rankDebug;
 
 
   xmpi ( MPI_Init ( &argc, &argv));           
   xmpi ( MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob ));
   xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob )); 
+  xmpi ( MPI_Comm_rank ( commGlob, &rankDebug )); 
 
   commModel = pioInit_c ( commGlob, nProcsIO, IOMode );
 #endif
