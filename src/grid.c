@@ -117,6 +117,8 @@ void grid_init(grid_t *gridptr)
   gridptr->size         = 0;
   gridptr->xsize        = 0;
   gridptr->ysize        = 0;
+  gridptr->xdef         = 0;
+  gridptr->ydef         = 0;
   gridptr->isCyclic     = CDI_UNDEFID;
   gridptr->isRotated    = FALSE;
   gridptr->xpole        = 0.0;
@@ -2410,7 +2412,7 @@ int gridCompare(int gridID, grid_t grid)
 		    }
 		}
 	      else
-		differ = 1;		
+		differ = 1;
 	    }
 	  else if ( grid.type == GRID_GENERIC )
 	    {
@@ -2813,6 +2815,11 @@ int gridGenerate(grid_t grid)
         gridDefTrunc(gridID, grid.trunc);
         if ( grid.lcomplex ) gridDefComplexPacking(gridID, 1);
         break;
+      }
+    case GRID_FOURIER:
+      {
+	gridDefTrunc(gridID, grid.trunc);
+	break;
       }
     case GRID_GME:
       {
@@ -3634,33 +3641,38 @@ void gridPrintKernel ( grid_t * gridptr, int opt, FILE * fpArg)
       }
     case GRID_LCC:
       {
-        double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
-        int projflag, scanflag;
-        gridInqLCC(gridptr->self, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
-                   &projflag, &scanflag);
+	double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
+	int projflag, scanflag;
+	gridInqLCC(gridptr->self, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
+		   &projflag, &scanflag);
 
-        fprintf(fp, "xsize     = %d\n", xsize);
-        fprintf(fp, "ysize     = %d\n", ysize);
+	fprintf(fp, "xsize     = %d\n", xsize);
+	fprintf(fp, "ysize     = %d\n", ysize);
 
-        fprintf(fp, "originLon = %g\n", originLon);
-        fprintf(fp, "originLat = %g\n", originLat);
-        fprintf(fp, "lonParY   = %g\n", lonParY);
-        fprintf(fp, "lat1      = %g\n", lat1);
-        fprintf(fp, "lat2      = %g\n", lat2);
-        fprintf(fp, "xinc      = %g\n", xincm);
-        fprintf(fp, "yinc      = %g\n", yincm);
-        if ( (projflag & 128) == 0 )
-          fprintf(fp, "projection= northpole\n");
-        else
-          fprintf(fp, "projection= southpole\n");
+	fprintf(fp, "originLon = %g\n", originLon);
+	fprintf(fp, "originLat = %g\n", originLat);
+	fprintf(fp, "lonParY   = %g\n", lonParY);
+	fprintf(fp, "lat1      = %g\n", lat1);
+	fprintf(fp, "lat2      = %g\n", lat2);
+	fprintf(fp, "xinc      = %g\n", xincm);
+	fprintf(fp, "yinc      = %g\n", yincm);
+	if ( (projflag & 128) == 0 )
+	  fprintf(fp, "projection = northpole\n");
+	else
+	  fprintf(fp, "projection = southpole\n");
 
-        break;
+	break;
       }
     case GRID_SPECTRAL:
       {
         fprintf(fp, "truncation = %d\n", trunc);
         fprintf(fp, "complexpacking = %d\n", gridptr->lcomplex );
         break;
+      }
+    case GRID_FOURIER:
+      {
+	fprintf(fp, "truncation = %d\n", trunc);
+	break;
       }
     case GRID_GME:
       {

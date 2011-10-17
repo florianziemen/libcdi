@@ -946,7 +946,7 @@ int gribapiScanTimestep1(int streamID)
 		{
 		  char paramstr[32];
 		  cdiParamToString(param, paramstr, sizeof(paramstr));
-		  Warning("Param=%s level=%d already exist, skiped!", paramstr, level1);
+		  Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 		  continue;
 		}
 	    }
@@ -1295,7 +1295,7 @@ int gribapiScanTimestep2(int streamID)
 
 	      if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
 
-	      Warning("Param=%s level=%d already exist, skiped!", paramstr, level1);
+	      Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 	      continue;
 	    }
 	  else
@@ -1630,7 +1630,7 @@ int gribapiScanTimestep(int streamID)
 		  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
 		  
 		  if ( CDI_Debug )
-		    Warning("Param=%s level=%d already exist, skiped!", paramstr, level1);
+		    Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 
 		  continue;
 		}

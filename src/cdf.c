@@ -84,7 +84,7 @@ void cdfComment(int ncid)
     }
 
   cdf_put_att_text(ncid, NC_GLOBAL, "CDI", strlen(comment), comment);
-  cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.0");
+  cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.4");
 #endif
 }
 

@@ -1,3 +1,43 @@
+2011-08-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* streamFilesuffix: added suffix for filetype NC4C (bug fix)
+
+2011-08-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* scanVarAttributes: check size of axis attribute (bug fix) [report: David Huard]
+
+2011-07-29  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Added flexible XYZ dimension ordering for netCDF [request: Andy Aschwanden]
+
+2011-07-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added interface function vlistDefVarXYZ to set the dimension order
+
+2011-07-23  Pier Giuseppe Fogli  <piergiuseppe.fogli@cmcc.it>
+
+	* added interface function zaxisInqVct to read the VCT
+
+2011-07-23  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* netcdf input: correct wrong formatted time units [request: Harald Anlauf]
+
+2011-07-14  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* netcdf: added support for GRID_FOURIER (fourier coefficients)
+
+2011-07-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.5.1 released
+
+2011-07-07  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* vlistCopy: allocate and copy varsAllocated elements (bug fix) [report: Ralf Mueller]
+
+2011-06-24  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* vtime2timeval: do not round result (bug fix for TUNIT_YEAR) [report: Andy Aschwanden]
+
 2011-06-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* CDI: changed compression type from Ztype to CompType
@@ -7,7 +47,7 @@
 
 	* gridGenYvals: changed delta eps to 0.002 for gaussian grids [report: John Lillibridge] 
 	* ruby/python interface: changed GRID_CELL to GRID_UNSTRUCTURED [report: Tim Cera]
-	
+
 2011-05-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* grid::compareXYvals: bug fix for generic grids [report: Felicia Brisc]

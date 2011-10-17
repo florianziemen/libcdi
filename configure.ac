@@ -1,6 +1,6 @@
 #  Process this file with autoconf to produce a configure script.
 
-AC_INIT([cdi], [1.5.1], [http://code.zmaw.de/projects/cdi])
+AC_INIT([cdi], [1.5.2], [http://code.zmaw.de/projects/cdi])
 
 echo "configuring ${PACKAGE_NAME} ${PACKAGE_VERSION}"
 
@@ -38,6 +38,11 @@ LT_INIT([pic-only])
 AC_CHECK_TOOL([CC],[gcc],[:])
 AC_PROG_CC_C99
 AC_PROG_FC
+AS_IF([test -n "$FC" && test "X$FC" != "Xno"],
+  [AC_FC_SRCEXT([f90])
+   AC_LANG_PUSH([Fortran])
+   AC_PROG_FPP
+   AC_LANG_POP([Fortran])])
 AC_PROG_F77
 AC_PROG_RANLIB
 AC_PROG_CXX
@@ -119,7 +124,16 @@ AC_ARG_ENABLE(iso-c-interface,
                              [Create Fortran Interface via iso_c_bindings facility of F2003 [default=no]]).
               ,enable_isoc=${enableval},enable_isoc=no)
 AM_CONDITIONAL([CREATE_ISOC],[test $enable_isoc = 'yes'])
-AS_IF([test "x${enable_isoc}" != "xyes"],[AC_SUBST([FC],$F77)])
+# in case the Fortran interface uses the more modern F90-style interface,
+# the FCFLAGS for users of the library have to include a switch to use the
+# .mod file
+CDI_F90_INTERFACE_FCFLAGS=''
+AS_IF([test "x${enable_isoc}" = "xyes"],
+  [AC_LANG_PUSH([Fortran])
+   ACX_SL_FC_CHECK_MOD_PATH_FLAG
+   AC_LANG_POP([Fortran])
+   CDI_F90_INTERFACE_FCFLAGS="${FC_MOD_FLAG}${includedir}"])
+AC_SUBST([CDI_F90_INTERFACE_FCFLAGS])
 #  Check the module extension of the fortran compiler
 ACX_SL_FC_MOD_SUFFIX(,[FCMODEXT=mod])
 # -----------------------------------------------------------------------
@@ -152,7 +166,7 @@ AC_ARG_ENABLE(ruby,
 AM_CONDITIONAL(ENABLE_RUBY,[test "x$enable_ruby" != "xno"])
 AS_IF([test "x$enable_ruby" != "xno"],[AC_SUBST([ENABLE_RUBY],[true])],[AC_SUBST([ENABLE_RUBY],[false])])
 #  ----------------------------------------------------------------------
-#  Create the Ruby Interface via swig
+#  Create the Python Interface via swig
 AC_ARG_ENABLE(python,
   [AS_HELP_STRING([--enable-python],[python language bindings [default=no] (EXPERIMENTAL)])],
   [AC_CHECK_PROG(PYTHON,python,python)
@@ -183,7 +197,7 @@ AC_SUBST([CPPFLAGS])
 
 AC_OUTPUT([Makefile src/Makefile interfaces/Makefile app/Makefile \
 	tests/Makefile examples/Makefile cdi.settings \
-	pioExamples/Makefile])
+	pioExamples/Makefile src/pkgconfig/cdi.pc])
 
 #  ----------------------------------------------------------------------
 #  Show configuration

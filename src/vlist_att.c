@@ -477,7 +477,6 @@ int vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp)
   return (status);
 }
 
-
 #ifdef USE_MPI
 
 enum {

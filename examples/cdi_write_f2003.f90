@@ -17,6 +17,7 @@
       DOUBLE PRECISION lons(nlon), lats(nlat), levs(nlev)
       DOUBLE PRECISION var1(nlon*nlat), var2(nlon*nlat*nlev)
       CHARACTER(len=256) :: varname
+      CHARACTER(kind=c_char,len=256) :: msg
 
       DATA lons /0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330/
       DATA lats /-75, -45, -15, 15, 45, 75/
@@ -37,7 +38,7 @@
 !     Create a pressure level Z-axis
       zaxisID2 = zaxisCreate(ZAXIS_PRESSURE, nlev)
       CALL zaxisDefLevels(zaxisID2, levs)
- 
+
 !     Create a variable list
       vlistID = vlistCreate()
 
@@ -59,8 +60,9 @@
 !     Create a dataset in netCDF fromat
       streamID = streamOpenWrite(C_CHAR_"example.nc"//C_NULL_CHAR, FILETYPE_NC)
       IF ( streamID < 0 ) THEN
-         WRITE(0,*) cdiStringError(streamID)
-         STOP
+         msg = cdiStringError(streamID)
+         WRITE(0,*) msg
+         STOP 1
       END IF
 
 !     Assign the variable list to the dataset

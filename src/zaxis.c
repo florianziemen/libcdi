@@ -33,8 +33,8 @@ ZaxistypeEntry[] = {
   {2, "lev",     "hybrid",            "",               "level"},
   {2, "lev",     "hybrid_half",       "",               "level"},
   {2, "lev",     "pressure",          "air_pressure",   "Pa"},
-  {1, "height",  "height",            "",               "m"},
-  {2, "depth",   "depth_below_sea",   "",               "m"},
+  {1, "height",  "height",            "height",         "m"},
+  {2, "depth",   "depth_below_sea",   "depth",          "m"},
   {2, "depth",   "depth_below_land",  "",               "cm"},
   {0, "lev",     "isentropic",        "",               "K"},
   {0, "lev",     "trajectory",        "",               ""},
@@ -977,6 +977,18 @@ void zaxisDefVct(int zaxisID, int size, const double *vct)
   else
     if ( zaxisptr->vctsize != size )
       Warning("VCT was already defined");
+}
+
+
+void zaxisInqVct(int zaxisID, double *vct)
+{
+  zaxis_t *zaxisptr;
+
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+
+  zaxis_check_ptr(zaxisID, zaxisptr);
+
+  memcpy(vct, zaxisptr->vct, zaxisptr->vctsize*sizeof(double));
 }
 
 

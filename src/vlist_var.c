@@ -36,6 +36,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].tsteptype    = TSTEP_INSTANT;
   vlistptr->vars[varID].timave       = 0;
   vlistptr->vars[varID].timaccu      = 0;
+  vlistptr->vars[varID].xyz          = 0;
   vlistptr->vars[varID].gridID       = CDI_UNDEFID;
   vlistptr->vars[varID].zaxisID      = CDI_UNDEFID;
   vlistptr->vars[varID].instID       = CDI_UNDEFID;
@@ -480,7 +481,7 @@ int vlistInqVarCode(int vlistID, int varID)
 }
 
 
-char *vlistInqVarNamePtr(int vlistID, int varID)
+const char *vlistInqVarNamePtr(int vlistID, int varID)
 {
   vlist_t *vlistptr;
 
@@ -492,7 +493,7 @@ char *vlistInqVarNamePtr(int vlistID, int varID)
 }
 
 
-char *vlistInqVarLongnamePtr(int vlistID, int varID)
+const char *vlistInqVarLongnamePtr(int vlistID, int varID)
 {
   vlist_t *vlistptr;
 
@@ -504,7 +505,7 @@ char *vlistInqVarLongnamePtr(int vlistID, int varID)
 }
 
 
-char *vlistInqVarStdnamePtr(int vlistID, int varID)
+const char *vlistInqVarStdnamePtr(int vlistID, int varID)
 {
   vlist_t *vlistptr;
 
@@ -516,7 +517,7 @@ char *vlistInqVarStdnamePtr(int vlistID, int varID)
 }
 
 
-char *vlistInqVarUnitsPtr(int vlistID, int varID)
+const char *vlistInqVarUnitsPtr(int vlistID, int varID)
 {
   vlist_t *vlistptr;
 
@@ -1684,7 +1685,54 @@ int vlistInqVarCompLevel(int vlistID, int varID)
   return (vlistptr->vars[varID].complevel);
 }
 
- 
+void  vlistDefVarXYZ(int vlistID, int varID, int xyz)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  /* check xyz dimension order */
+  {
+    int dimorder[3];
+    int dimx = 0, dimy = 0, dimz = 0;
+    int posx = -1, posy = -1, posz = -1;
+    dimorder[0] = xyz/100;
+    dimorder[1] = (xyz-dimorder[0]*100)/10;
+    dimorder[2] = (xyz-dimorder[0]*100-dimorder[1]*10);
+    for ( int id = 0; id < 3; ++id )
+      {
+        if      ( dimorder[id] == 3 ) { dimz++; posz=id; }
+        else if ( dimorder[id] == 2 ) { dimy++; posy=id; }
+        else if ( dimorder[id] == 1 ) { dimx++; posx=id; }
+      }
+    if ( dimz > 1 || dimy > 1 || dimx > 1 ) xyz = 321; // ZYX
+    else
+      {
+        int lchanged = 0;
+        if ( dimz == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 3; lchanged++; break;}
+        if ( dimy == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 2; lchanged++; break;}
+        if ( dimx == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 1; lchanged++; break;}
+        if ( lchanged ) xyz = dimorder[0]*100 + dimorder[1]*10 + dimorder[2];
+      }
+  }
+
+  vlistptr->vars[varID].xyz = xyz;
+}
+
+int vlistInqVarXYZ(int vlistID, int varID)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  return (vlistptr->vars[varID].xyz);
+}
+
+
 void vlistDefVarDeco ( int vlistID, int varID, int decoSize, deco_t * deco )
 {
   vlist_t * vlistptr;

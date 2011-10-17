@@ -484,7 +484,7 @@ int streamInqByteorder(int streamID)
 
 char *streamFilesuffix(int filetype)
 {
-  static char *fileSuffix[] = {"", ".grb", ".g2", ".nc", ".nc2", ".nc4", ".srv", ".ext", ".ieg", ".h5"};
+  static char *fileSuffix[] = {"", ".grb", ".g2", ".nc", ".nc2", ".nc4", ".nc4", ".srv", ".ext", ".ieg", ".h5"};
   int size = (int) (sizeof(fileSuffix)/sizeof(char *));
 
   if ( filetype > 0 && filetype < size )
@@ -722,10 +722,12 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	  vlistptr->ntsteps = streamNtsteps(streamID);
 	}
 
+#ifdef USE_MPI
       if ( !hasLocalFile && 
            namespaceInqResASent () == 1 &&
            streamptr->filemode == 'w' )
         pioBufferFuncCall ( __func__, 2, filename, filetype );
+#endif
     }
  
   return (streamID);
@@ -1047,9 +1049,11 @@ int streamOpenAppend(const char *filename)
 
   streamID = streamOpenA(filename, "a", filetype);
 
-  streamptr = stream_to_pointer(streamID);
-
-  streamptr->byteorder = byteorder;
+  if ( streamID >= 0 )
+    {
+      streamptr = stream_to_pointer(streamID);
+      streamptr->byteorder = byteorder;
+    }
 
   return (streamID);
 }

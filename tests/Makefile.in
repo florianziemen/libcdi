@@ -37,12 +37,18 @@ check_PROGRAMS = test_grib$(EXEEXT)
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/acx_options.m4 \
+am__aclocal_m4_deps =  \
+	$(top_srcdir)/m4/acx_assert_lang_is_fortran_variant.m4 \
+	$(top_srcdir)/m4/acx_lang_other_suffix_conftest.m4 \
+	$(top_srcdir)/m4/acx_options.m4 \
+	$(top_srcdir)/m4/acx_sl_fc_mod_path_flag.m4 \
 	$(top_srcdir)/m4/acx_sl_mod_suffix.m4 \
-	$(top_srcdir)/m4/ax_pthread.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/asx_unset.m4 $(top_srcdir)/m4/ax_pthread.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/m4/starlink_fpp.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
@@ -83,6 +89,7 @@ AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
+CDI_F90_INTERFACE_FCFLAGS = @CDI_F90_INTERFACE_FCFLAGS@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
@@ -112,22 +119,29 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FC = @FC@
 FCFLAGS = @FCFLAGS@
+FCFLAGS_f90 = @FCFLAGS_f90@
 FCMODCASE = @FCMODCASE@
 FCMODEXT = @FCMODEXT@
+FC_MOD_FLAG = @FC_MOD_FLAG@
 FFLAGS = @FFLAGS@
 FGREP = @FGREP@
+FPP = @FPP@
+FPPFLAGS = @FPPFLAGS@
+FPP_DEFOPT = @FPP_DEFOPT@
+FPP_INCOPT = @FPP_INCOPT@
 GREP = @GREP@
 GRIB_API_INCLUDE = @GRIB_API_INCLUDE@
-GRIB_API_LDFLAGS = @GRIB_API_LDFLAGS@
+GRIB_API_LIBS = @GRIB_API_LIBS@
 HDF5_INCLUDE = @HDF5_INCLUDE@
-HDF5_LDFLAGS = @HDF5_LDFLAGS@
+HDF5_LIBS = @HDF5_LIBS@
+HDF5_ROOT = @HDF5_ROOT@
 HOST_NAME = @HOST_NAME@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-JASPER_LDFLAGS = @JASPER_LDFLAGS@
+JASPER_LIBS = @JASPER_LIBS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -142,7 +156,8 @@ MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 NC_CONFIG = @NC_CONFIG@
 NETCDF_INCLUDE = @NETCDF_INCLUDE@
-NETCDF_LDFLAGS = @NETCDF_LDFLAGS@
+NETCDF_LIBS = @NETCDF_LIBS@
+NETCDF_ROOT = @NETCDF_ROOT@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -170,13 +185,14 @@ STRIP = @STRIP@
 SWIG = @SWIG@
 SYSTEM_TYPE = @SYSTEM_TYPE@
 SZLIB_INCLUDE = @SZLIB_INCLUDE@
-SZLIB_LDFLAGS = @SZLIB_LDFLAGS@
+SZLIB_LIBS = @SZLIB_LIBS@
 THREADS_INCLUDE = @THREADS_INCLUDE@
 THREADS_LDFLAGS = @THREADS_LDFLAGS@
+THREADS_LIBS = @THREADS_LIBS@
 USER_NAME = @USER_NAME@
 VERSION = @VERSION@
 ZLIB_INCLUDE = @ZLIB_INCLUDE@
-ZLIB_LDFLAGS = @ZLIB_LDFLAGS@
+ZLIB_LIBS = @ZLIB_LIBS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@

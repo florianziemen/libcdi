@@ -670,7 +670,7 @@ int cgribexScanTimestep1(int streamID)
 		{
 		  char paramstr[32];
 		  cdiParamToString(param, paramstr, sizeof(paramstr));
-		  Warning("Param=%s level=%d already exist, skiped!", paramstr, level1);
+		  Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 		  continue;
 		}
 	    }
@@ -970,7 +970,7 @@ int cgribexScanTimestep2(int streamID)
 
 	      if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
 
-	      Warning("Param=%s level=%d already exist, skiped!", paramstr, level1);
+	      Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 	      continue;
 	    }
 	  else
@@ -1252,7 +1252,7 @@ int cgribexScanTimestep(int streamID)
 		  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
 		  
 		  if ( CDI_Debug )
-		    Warning("Param=%s level=%d already exist, skiped!", paramstr, level1);
+		    Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 
 		  continue;
 		}
@@ -1968,7 +1968,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	else
 	  {
 	    ISEC2_NumVCP = vctsize;
-	    memcpy(&fsec2[10], zaxisInqVctPtr(zaxisID), vctsize*sizeof(double));
+	    zaxisInqVct(zaxisID, &fsec2[10]);
 	  }
 	break;
       }

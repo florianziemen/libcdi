@@ -5,7 +5,7 @@ SWIGCDIOBJ = cdiobj.i
 BINDINGS   =
 EXTRA_DIST = $(SWIGCDIOBJ) $(SWIGCDILIB)
 EXTRA_DIST += ruby/cdilib_wrap.c ruby/cdiobj_wrap.cpp ruby/testLib.rb ruby/testObj.rb
-EXTRA_DIST += python/cdilib_wrap.c python/cdiobj_wrap.cpp python/testLib.py python/testObj.py
+EXTRA_DIST += python/cdilib_wrap.c python/cdiobj_wrap.cpp python/testLib.py python/testObj.py python/setupObj.py python/setupLib.py python/setup.py python/table.py python/CdiLib.py python/CdiObj.py
 if CREATE_INTERFACES
 BINDINGS += help
 endif
@@ -18,15 +18,15 @@ noinst_PROGRAMS += CdiInfo
 noinst_LTLIBRARIES += libcdipp.la
 endif
 #
-locallibs     = $(top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@
+locallibs     = $(top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LIBS@ @HDF5_LIBS@ @SZLIB_LIBS@ @ZLIB_LIBS@
 
 libcdipp_la_SOURCES = cdi.cpp cdi.hpp
 libcdipp_la_LIBADD = $(top_builddir)/src/libcdi.la 
-libcdipp_la_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS)
+libcdipp_la_LDFLAGS = @NETCDF_LIBS@ @HDF5_LIBS@ @SZLIB_LIBS@ @ZLIB_LIBS@ $(LDFLAGS)
 
 CdiInfo_SOURCES = CdiInfo.cpp
 CdiInfo_LDADD = libcdipp.la 
-CdiInfo_LDFLAGS = @NETCDF_LDFLAGS@ @HDF5_LDFLAGS@ @SZLIB_LDFLAGS@ @ZLIB_LDFLAGS@ $(LDFLAGS)
+CdiInfo_LDFLAGS = @NETCDF_LIBS@ @HDF5_LIBS@ @SZLIB_LIBS@ @ZLIB_LIBS@ $(LDFLAGS)
 #
 #
 if ENABLE_RUBY

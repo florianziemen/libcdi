@@ -439,6 +439,9 @@ void    vlistDefVarDatatype(int vlistID, int varID, int datatype);
 /*      vlistInqVarDatatype: Get the data type of a Variable */
 int     vlistInqVarDatatype(int vlistID, int varID);
 
+void    vlistDefVarXYZ(int vlistID, int varID, int xyz);
+int     vlistInqVarXYZ(int vlistID, int varID);
+
 int     vlistInqVarNumber(int vlistID, int varID);
 
 void    vlistDefVarInstitut(int vlistID, int varID, int instID);
@@ -775,6 +778,7 @@ int     zaxisInqLtype(int zaxisID);
 
 const double *zaxisInqLevelsPtr(int zaxisID);
 void    zaxisDefVct(int zaxisID, int size, const double *vct_vec);
+void    zaxisInqVct(int zaxisID, double *vct_vec);
 int     zaxisInqVctSize(int zaxisID);
 const double *zaxisInqVctPtr(int zaxisID);
 int     zaxisInqLbounds(int zaxisID, double *lbounds_vec);

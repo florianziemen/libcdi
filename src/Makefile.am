@@ -124,7 +124,7 @@ cdilib.c:
 cdilib.o: cdilib.c
 	$(COMPILE) -c $<
 
-LOCALTARGETS  = 
+LOCALTARGETS  = pkgconfig/cdi.pc
 if CREATE_ISOC
 LOCALTARGETS += mo_cdi.o mo_cdi.$(FCMODEXT)
 endif
@@ -137,6 +137,9 @@ mo_cdi.o: mo_cdi.f90
 #
 mo_cdi.$(FCMODEXT): mo_cdi.f90
 	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) $<
+
+pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
+	(cd .. ; ./config.status src/pkgconfig/cdi.pc)
 #
 all-local: $(LOCALTARGETS) 
 #
@@ -145,3 +148,12 @@ CLEANFILES += cdilib.c
 if CREATE_ISOC
 CLEANFILES += $(top_builddir)/src/mo_cdi.$(FCMODEXT) $(top_builddir)/src/mo_cdi.o
 endif
+
+install-exec-local: pkgconfig/cdi.pc
+	$(mkinstalldirs) "$(DESTDIR)$(libdir)/pkgconfig"
+	$(install_sh_DATA) pkgconfig/cdi.pc "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc"
+
+uninstall-local:
+	rm -f "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc"
+	rmdir "$(DESTDIR)$(libdir)/pkgconfig"
+

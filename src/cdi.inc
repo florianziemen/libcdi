@@ -330,10 +330,6 @@
       PARAMETER (PIO_POSIX_ASYNCH       =  3)
       INTEGER    PIO_POSIX_FPGUARD_SENDRECV
       PARAMETER (PIO_POSIX_FPGUARD_SENDRECV =  4)
-      INTEGER    PIO_POSIX_FPGUARD_THREAD_REFUSE
-      PARAMETER (PIO_POSIX_FPGUARD_THREAD_REFUSE =  5)
-      INTEGER    PIO_POSIX_FPGUARD_THREAD
-      PARAMETER (PIO_POSIX_FPGUARD_THREAD =  6)
       INTEGER         pioInit
 !                                    (INTEGER         ,
 !                                     INTEGER         ,
@@ -890,6 +886,17 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarDatatype
+
+!                     vlistDefVarXYZ
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         xyz)
+      EXTERNAL        vlistDefVarXYZ
+
+      INTEGER         vlistInqVarXYZ
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarXYZ
 
       INTEGER         vlistInqVarNumber
 !                                    (INTEGER         vlistID,
@@ -1743,6 +1750,11 @@
 !                                     INTEGER         size,
 !                                     DOUBLEPRECISION vct_vec)
       EXTERNAL        zaxisDefVct
+
+!                     zaxisInqVct
+!                                    (INTEGER         zaxisID,
+!                                     DOUBLEPRECISION vct_vec)
+      EXTERNAL        zaxisInqVct
 
       INTEGER         zaxisInqVctSize
 !                                    (INTEGER         zaxisID)
