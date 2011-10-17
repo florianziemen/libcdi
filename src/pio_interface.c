@@ -328,9 +328,11 @@ static
   int nProcsColl  = commInqNProcsColl ();
   int rankGlob    = commInqRankGlob ();
   int root = commInqRootGlob ();
+
+  if ( winBufferSize == NULL ) xabort ( "" );
   
   nstreams = reshCountType ( &streamOps );
-  streamIndexArray = xmalloc ( nstreams * sizeof ( int ));
+  streamIndexArray = xmalloc ( nstreams * sizeof ( streamIndexArray[0] ));
   reshGetResHArrayOfType ( nstreams, streamIndexArray, &streamOps );
   for ( streamNo = 0; streamNo < nstreams; streamNo++ )
     {
@@ -372,22 +374,21 @@ static
 
 
 static 
-  void modelWinFlushBuffer ( void )
+  void modelWinFlushBuffer ( int collID )
 {
-  int nProcsColl = commInqNProcsColl (), collID;
+  int nProcsColl = commInqNProcsColl ();
 
-  for ( collID = 0; collID < nProcsColl; collID ++ )
-    {
-      if ( winBuffer             == NULL ||
-           winBuffer[collID]     == NULL ||
-           winBufferHead         == NULL ||
-           winBufferSize         == NULL ||
-           winBufferSize[collID] < 0     ||
-           winBufferSize[collID] > MAXWINBUFFERSIZE ) 
-        xabort ( "" );
-      memset ( winBuffer[collID], 0, winBufferSize[collID] );
-      winBufferHead[collID] = winBuffer[collID];
-    }
+  if ( collID                < 0 ||
+       collID                >= nProcsColl ||
+       winBuffer             == NULL ||
+       winBuffer[collID]     == NULL ||
+       winBufferHead         == NULL ||
+       winBufferSize         == NULL ||
+       winBufferSize[collID] < 0     ||
+       winBufferSize[collID] > MAXWINBUFFERSIZE ) 
+    xabort ( "" );
+  memset ( winBuffer[collID], 0, winBufferSize[collID] );
+  winBufferHead[collID] = winBuffer[collID];
 }
 
 
@@ -483,17 +484,18 @@ void pioBufferData ( int streamIDarg, int varIDarg, const double *dataArg, int n
   
   xdebug3 ("streamID=%d, vlistID=%d, varID=%d, collID=%d, "
           "chunk=%d, data=%.2f, nmiss=%d",
-          streamID, vlistID, varID, collID, chunk, data[0], nmiss );
-
-  size = chunk * sizeof ( double ) + winBufferOverheadChunk * sizeof ( int );
-  if ( winBufferHead[collID] - winBuffer[collID] + size >= winBufferSize[collID] )
-    xabort ( "" );   
+          streamID, vlistID, varID, collID, chunk, data[0], nmiss );  
 
   if ( winPostSet[collID] ) 
     { 
       xmpi ( MPI_Win_wait ( win[collID] )); 
       winPostSet[collID] = 0;
+      modelWinFlushBuffer ( collID );
     }
+
+  size = chunk * sizeof ( double ) + winBufferOverheadChunk * sizeof ( int );
+  if ( winBufferHead[collID] - winBuffer[collID] + size >= winBufferSize[collID] )
+    xabort ( "" ); 
 
   modelWinBufferPutAtEnd ( __func__, collID, &tokenData, sizeof ( tokenData ));
   modelWinBufferPutAtEnd ( __func__, collID, &streamID , sizeof ( streamID ));
@@ -562,6 +564,7 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
               { 
                 xmpi ( MPI_Win_wait ( win[collID] )); 
                 winPostSet[collID] = 0;
+                modelWinFlushBuffer ( collID );
               }
             modelWinBufferPutAtEnd ( __func__, collID, &tokenFuncCall, 
                                      sizeof ( tokenFuncCall));
@@ -745,6 +748,8 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
       xdebug ( "sent message WRITETS" );
     }
 
+  xdebug ( "########## buffer[0][0] = %d", ( int ) winBuffer[0][0] );
+
   for ( collID = 0; collID < nProcsColl; collID++ )
     {
       if ( winPostSet[collID] == 1 ) xabort ( "" );
@@ -752,7 +757,6 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
       xmpi ( MPI_Win_post ( groupsIONetto[collID], iAssert, win[collID] ));
       winPostSet[collID] = 1;
     } 
-  modelWinFlushBuffer ();
 #endif
 }
 
