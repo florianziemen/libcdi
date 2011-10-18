@@ -11,9 +11,9 @@
 #include "pio_util.h"
 
 enum { 
-  nProcsIO = 3,
-  //IOMode = PIO_NONE,
-  IOMode   = PIO_MPI_NONB, 
+  nProcsIO = 1,
+  IOMode = PIO_NONE,
+  //IOMode   = PIO_MPI_NONB, 
   //IOMode   = PIO_POSIX_FPGUARD_SENDRECV,
   //IOMode = PIO_POSIX_ASYNCH,
   //IOMode = PIO_POSIX_NONB,

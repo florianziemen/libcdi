@@ -835,8 +835,6 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
       xdebug ( "sent message WRITETS" );
     }
 
-  xdebug ( "########## buffer[0][0] = %d", ( int ) * winBuffer[0] );
-
   for ( collID = 0; collID < nProcsColl; collID++ )
     {
       if ( winPostSet[collID] == 1 ) xabort ( "" );

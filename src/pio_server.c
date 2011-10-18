@@ -154,10 +154,14 @@ static
        argBuffer     == NULL ||
        size           < 0    ||
        ID             < 0    ||
-       ID             >= commInqNProcsColl () ||
+       ID             >= commInqNProcsModel () ||
        getBufferHead[ID] - getBuffer[ID] + size > getBufferSize[ID] )
     {
-      sprintf ( text, "caller: %s, line %d, ", caller, line );
+      sprintf ( text, "caller: %s, line %d, ID = %d, nProcsModel=%d, size = %d, "
+                "getBufferHead[%d] = %d, getBufferSize[%d] = %d",
+                caller, line, ID, size, ID, commInqNProcsModel (), 
+                getBufferHead[ID] - getBuffer[ID],
+                ID, getBufferSize[ID] );
       xabort ( text );
     }  
   memcpy ( argBuffer, getBufferHead[ID], size );
