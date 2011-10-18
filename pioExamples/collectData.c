@@ -11,28 +11,31 @@
 #include "pio_util.h"
 #include <assert.h>
 
-#define nProcsIO 1
+enum { filetype = FILETYPE_GRB,
+       nlon = 12,
+       nlat = 6,
+       maxlev = 5,
+       ntsteps = 3,
+       ntfiles = 2,
+       nVars = 5,
+       nProcsIO = 1};
 
 static int hasLocalFile[] = { 0 };
-
-#define nVars 5
 static int nlev[nVars] = {1,1,5,5,2};
 
-#define nlon    12 
-#define nlat     6 
-#define maxlev   5
-#define ntsteps  3 
+static char * name = "example";
 
-//int IOMode = PIO_NONE;
-int IOMode = PIO_MPI_NONB;
-//int IOMode = PIO_POSIX_FPGUARD_SENDRECV;
-//int IOMode = PIO_POSIX_ASYNCH;
-//int IOMode = PIO_POSIX_NONB;
+//static int IOMode = PIO_NONE;
+static int IOMode = PIO_MPI_NONB;
+//static int IOMode = PIO_POSIX_FPGUARD_SENDRECV;
+//static int IOMode = PIO_POSIX_ASYNCH;
+//static int IOMode = PIO_POSIX_NONB;
+
 
 void modelRun ()
 {
   int gridID, zaxisID[nVars], taxisID;
-  int vlistID, varID[nVars], streamID[2], tsID;
+  int vlistID, varID[nVars], streamID, tsID, tfID = 0;
   int i, j, nmiss = 0, rank;
   double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
   double lats[nlat] = {-75, -45, -15, 15, 45, 75};
@@ -40,7 +43,7 @@ void modelRun ()
   double var[nlon*nlat*maxlev];
   int vdate = 19850101, vtime = 120000;
   int start = CDI_UNDEFID, chunk = CDI_UNDEFID, stop = CDI_UNDEFID;
-  char text[1024];
+  char filename[1024];
 
   pioNamespaceInit ( 1, hasLocalFile );
 
@@ -63,52 +66,55 @@ void modelRun ()
   taxisID = taxisCreate ( TAXIS_ABSOLUTE );
   vlistDefTaxis ( vlistID, taxisID );
   
-  streamID[0] = streamOpenWrite ( "example.grb", FILETYPE_GRB );
-  if ( streamID[0] < 0 )
+  sprintf ( &filename[0], "%s_%d.grb", name, tfID );
+	  xdebug ( "filename = %s.", filename );
+  streamID = streamOpenWrite ( filename, filetype );
+  if ( streamID < 0 )
     {
-      fprintf ( stderr, "%s\n", cdiStringError ( streamID[0] ));
+      fprintf ( stderr, "%s\n", cdiStringError ( streamID ));
       return;
     }
   
-  streamDefVlist ( streamID[0], vlistID);
+  streamDefVlist ( streamID, vlistID);
 
   pioEndDef ();
 
-  for ( tsID = 0; tsID < ntsteps; tsID++ )
+  for ( tfID = 0; tfID < ntfiles; tfID++ )
     {
-      taxisDefVdate ( taxisID, vdate + tsID );
-      taxisDefVtime ( taxisID, vtime );
-      streamDefTimestep ( streamID[0], tsID );
-      for ( i = 0; i < nVars; i++ )
+      if ( tfID > 0 )
 	{
-	  start = vlistInqVarDecoOff ( vlistID, varID[i] );
-	  chunk = vlistInqVarDecoChunk ( vlistID, varID[i] );
-	  stop = start + chunk;
-	  for ( j = start; j < stop; j++ ) var[j] = 2.2;
-
-	  //if ddebug == 3
-	  sprintf ( text, "var[%d], start=%d, chunk=%d", i, start, chunk );
-	  xprintArray3 ( text, &var[start], chunk, DATATYPE_FLT );
-
-	  streamWriteVar ( streamID[0], varID[i], &var[start], nmiss );
-	  start = CDI_UNDEFID;
-	  chunk = CDI_UNDEFID;
+	  streamClose ( streamID );
+	  sprintf ( &filename[0], "%s_%d.grb", name, tfID );
+	  xdebug ( "filename = %s.", filename );
+	  streamID = streamOpenWrite ( filename, filetype );
+	  streamID = streamOpenWrite ( filename, filetype );
+	  if ( streamID < 0 )
+	    {
+	      fprintf ( stderr, "%s\n", cdiStringError ( streamID ));
+	      return;
+	    }
+	  streamDefVlist ( streamID, vlistID );
 	}
-      if ( tsID == 1 )
+      for ( tsID = 0; tsID < ntsteps; tsID++ )
 	{
-	  streamID[1] = streamOpenWrite ( "example2.grb", FILETYPE_GRB );
-	  streamDefVlist ( streamID[1], vlistID );
+	  taxisDefVdate ( taxisID, vdate + tsID );
+	  taxisDefVtime ( taxisID, vtime );
+	  streamDefTimestep ( streamID, tsID );
+	  for ( i = 0; i < nVars; i++ )
+	    {
+	      start = vlistInqVarDecoOff ( vlistID, varID[i] );
+	      chunk = vlistInqVarDecoChunk ( vlistID, varID[i] );
+	      stop = start + chunk;
+	      for ( j = start; j < stop; j++ ) var[j] = 2.2;
+	      
+	      streamWriteVar ( streamID, varID[i], &var[start], nmiss );
+	      start = CDI_UNDEFID;
+	      chunk = CDI_UNDEFID;
+	    }
 	}
-      if ( tsID == 2 )
-	streamClose ( streamID[1] );
-      pioWriteTimestep ( tsID, vdate, vtime );
     }
-
-  // for debugging
-  reshArrayPrint ( "reshArrayModel" );
    
-  
-  streamClose ( streamID[0] );
+  streamClose ( streamID );
   vlistDestroy ( vlistID );
   taxisDestroy ( taxisID );
   for ( i = 0; i < nVars; i++ )
