@@ -617,7 +617,9 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
 
-  xdebug( "namespaceHasLocalFile(%d)=%s", namespaceGetActive(), 
+  xdebug( "filename = %s, filemode = %s, filetype = %d, "
+          "namespaceHasLocalFile(%d)=%s", 
+          filename, filemode, filetype, namespaceGetActive(), 
 	  namespaceHasLocalFile ( namespaceGetActive ()) ? "true":"false");
 
   if ( hasLocalFile )
@@ -1125,13 +1127,13 @@ void streamClose(int streamID)
   int vlistID;
   stream_t *streamptr;
 
-  xdebug ( "streamID=%d", streamID );
-
   streamptr = stream_to_pointer(streamID);
   stream_check_ptr(__func__, streamptr);
 
   if ( CDI_Debug )
     Message("fileID = %d filename = %s", streamID, streamptr->filename);
+
+  xdebug ( "streamID=%d, filename = %s", streamID, streamptr->filename );
 
   fileID   = streamptr->fileID;
   filetype = streamptr->filetype;

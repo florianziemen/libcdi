@@ -94,6 +94,7 @@ int       fowPOSIXFPGUARDSENDRECV ( const char * );
 int       fcPOSIXFPGUARDSENDRECV ( int );
 size_t    fwPOSIXFPGUARDSENDRECV ( int, int, const void *, size_t );
 void      initPOSIXFPGUARDSENDRECV ( void );
+void      finalizePOSIXFPGUARDSENDRECV ( void );
 
 /* pio_posixnonb.c */
 void      pwPOSIXNONB ( void );

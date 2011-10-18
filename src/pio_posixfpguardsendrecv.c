@@ -300,14 +300,28 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 	      }
 	  
 	  if ( bfd->finished )
-	    {
-	      queueDelNode ( bibBFiledataPF, rtag->id );
-	      if ( !bibBFiledataPF->head )
-		{
-		  queueDestroy ( bibBFiledataPF );
-		  return;
-		}
-	    }      
+            queueDelNode ( bibBFiledataPF, rtag->id );
+        case IO_Finalize:
+          {  
+            int buffer = CDI_UNDEFID; 
+
+            xmpi ( MPI_Recv ( &buffer, 1, MPI_INT, source, status.MPI_TAG,
+                              commNode, &status ));
+            
+            if ( bibBFiledataPF->head != NULL ) 
+              {
+                xabort ( "queue bibBFiledataM not empty" );
+              }
+            else
+              {
+                xdebug ( "cleanup queue" );
+                queueDestroy ( bibBFiledataPF );
+              }
+            return;
+          }
+          break;
+        default:
+          xabort ( "COMMAND NOT IMPLEMENTED" );
 	}
     }
 }   
@@ -452,12 +466,6 @@ int fcPOSIXFPGUARDSENDRECV ( int id )
 
   iret = queueDelNode ( bibAFiledataPF, id );
 
-  if ( !bibAFiledataPF->head ) 
-    {
-      xdebug ( "cleanup queue" );
-      queueDestroy ( bibAFiledataPF );
-    }
-
   return iret;
 }
 
@@ -534,6 +542,28 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
            filename, id );
   
   return id;
+}
+
+/***************************************************************/
+
+void  finalizePOSIXFPGUARDSENDRECV ( void )
+{
+  int buffer = 0, tag, specialRank = commInqSpecialRankNode ();
+  MPI_Comm commNode = commInqCommNode ();
+
+  tag = setTag ( 0, IO_Finalize );
+  
+  xmpi ( MPI_Send ( &buffer, 1, MPI_INT, specialRank, tag, commNode ));
+
+  if ( bibAFiledataPF->head != NULL ) 
+    {
+      xabort ( "queue bibAFiledataM not empty" );
+    }
+  else
+    {
+      xdebug ( "cleanup queue" );
+      queueDestroy ( bibAFiledataPF );
+    }
 }
 
 /***************************************************************/

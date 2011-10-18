@@ -11,10 +11,10 @@
 #include "pio_util.h"
 
 enum { 
-  nProcsIO = 1,
-  IOMode = PIO_NONE,
+  nProcsIO = 2,
+  //IOMode = PIO_NONE,
   //IOMode   = PIO_MPI_NONB, 
-  //IOMode   = PIO_POSIX_FPGUARD_SENDRECV,
+  IOMode   = PIO_POSIX_FPGUARD_SENDRECV,
   //IOMode = PIO_POSIX_ASYNCH,
   //IOMode = PIO_POSIX_NONB,
   filetype = FILETYPE_GRB,

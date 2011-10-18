@@ -262,15 +262,6 @@ int fcMPINONB ( int fileID )
 
   iret = queueDelNode ( bibAFiledataM, fileID );
 
-  /*
-    if ( !bibAFiledataM->head ) 
-    {
-    xdebug ( "IOPE%d: cleanup queue", 
-    rankNode );
-    free ( bibAFiledataM );
-    }
-  */
-
   /* timer output */
 
   if ( ddebug == MAXDEBUG )
