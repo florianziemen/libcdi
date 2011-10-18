@@ -87,6 +87,14 @@ case "${HOSTNAME}" in
 		    CC=sxc++ AR=sxar RANLIB=ls \
                     CFLAGS="-O -Onooverlap,restrict=all -pvctl,fullmsg,noassume,loopcnt=1000000"
 	;;
+    lxe0*)
+        echo 'Please choose compiler modules! Checkout with "module av"!'
+        ./configure --prefix=$(pwd)/build-SX  --host=sx9-nec-superux \
+              --with-netcdf=/usr/local/pkg-sx9 \
+              --with-grib_api=/usr/local/pkg-sx9/grib_api   CC=sxc++ FC=sxf90 \
+              LD=/SX/opt/crosskit/inst/bin/sxld AR=/SX/opt/crosskit/inst/bin/sxar \
+              RANLIB=echo
+	;;
 # mips-sgi-irix6.5
     ecgate1)
 	./configure --prefix=$HOME/local \
