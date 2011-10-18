@@ -11,19 +11,19 @@
 #include "pio_util.h"
 
 enum { 
-  nProcsIO = 2,
-  //IOMode = PIO_NONE,
+  nProcsIO = 3,
+  //IOMode   = PIO_NONE,
   //IOMode   = PIO_MPI_NONB, 
   IOMode   = PIO_POSIX_FPGUARD_SENDRECV,
-  //IOMode = PIO_POSIX_ASYNCH,
-  //IOMode = PIO_POSIX_NONB,
+  //IOMode   = PIO_POSIX_ASYNCH,
+  //IOMode   = PIO_POSIX_NONB,
   filetype = FILETYPE_GRB,
   ntfiles  = 2,
   ntsteps  = 3,
   nVars    = 5,
   nlon     = 12,
   nlat     = 6,
-  maxlev   = 5};
+  maxlev   = 5 };
 
 static int hasLocalFile[] = { 0 };
 static int nlev[nVars]    = {1,1,5,5,2};

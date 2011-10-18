@@ -102,6 +102,7 @@ int       fowPOSIXNONB ( const char * );
 int       fcPOSIXNONB ( int );
 size_t    fwPOSIXNONB( int, int, const void *, size_t );
 void      initPOSIXNONB ( void );
+void      finalizePOSIXNONB ( void );
 
 #endif
 #endif

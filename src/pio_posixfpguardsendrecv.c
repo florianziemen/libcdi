@@ -192,10 +192,12 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
   char errorString[maxErrorString];
   MPI_Comm commNode = commInqCommNode ();
   int nProcsCollNode =  commInqSizeNode () - commInqSizeColl ();
+  bool * sentFinalize, doFinalize = false;
 
   xdebug ( "ncollectors=%d on this node", nProcsCollNode );
   
   bibBFiledataPF = queueInit ( destroyBFiledataPF, NULL );
+  sentFinalize = xmalloc ( nProcsCollNode * sizeof ( sentFinalize[0] ));
 
   for ( ;; )
     {
@@ -305,21 +307,32 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
           break;
         case IO_Finalize:
           {  
-            int buffer = CDI_UNDEFID; 
+            int buffer = CDI_UNDEFID, collID; 
 
             xmpi ( MPI_Recv ( &buffer, 1, MPI_INT, source, status.MPI_TAG,
                               commNode, &status ));
-            
-            if ( bibBFiledataPF->head != NULL ) 
+            sentFinalize[source] = true;
+            doFinalize = true;
+            for ( collID = 0; collID < nProcsCollNode; collID++ )
+              if ( !sentFinalize[collID] ) 
+                {
+                  doFinalize = false;
+                  break;
+                }
+            if ( doFinalize )
               {
-                xabort ( "queue bibBFiledataM not empty" );
+                if ( bibBFiledataPF->head != NULL ) 
+                  {
+                    xabort ( "queue bibBFiledataM not empty" );
+                  }
+                else
+                  {
+                    xdebug ( "cleanup queue" );
+                    queueDestroy ( bibBFiledataPF );
+                  }
+                if ( rtag ) ungetTag ( rtag );
+                return;
               }
-            else
-              {
-                xdebug ( "cleanup queue" );
-                queueDestroy ( bibBFiledataPF );
-              }
-            return;
           }
           break;
         default:

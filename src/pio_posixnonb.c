@@ -33,6 +33,7 @@ extern double accumWrite;
 typedef struct 
 {
   char *name;
+  int tsID;
   size_t size;
   struct dBuffer *db1;
   struct dBuffer *db2;
@@ -73,6 +74,7 @@ static aFiledataP *initAFiledataP ( const char *filename, size_t bs )
   afp->name = xmalloc (( len + 1) * sizeof ( afp->name[0] ));
   strcpy ( afp->name, filename );
   afp->size = bs;
+  afp->tsID = 0;
 
   /* init output buffer */
 
@@ -282,10 +284,12 @@ void pwPOSIXNONB ( void )
   MPI_Comm commNode = commInqCommNode ();
   char errorString[maxErrorString];
   int nProcsCollNode = commInqSizeNode () - commInqSizeColl ();
+  bool * sentFinalize, doFinalize;
 
   xdebug ( "ncollectors=%d on this node", nProcsCollNode );
- 
+
   bibBFiledataP = queueInit ( destroyBFiledataP, compareNamesBP );
+  sentFinalize = xmalloc ( nProcsCollNode * sizeof ( sentFinalize ));
   
   for ( ;; )
     {    
@@ -421,14 +425,39 @@ void pwPOSIXNONB ( void )
 	    {
 	      xdebug ( "all are finished with file %d, delete node", rtag->id );
 	      queueDelNode ( bibBFiledataP, rtag->id );
-	      if ( !bibBFiledataP->head )
-		{
-		  xdebug ( "all files are finished, destroy queue, return" );
-		  queueDestroy ( bibBFiledataP );
-		  ungetTag ( rtag );
-		  return;
-		}
-	    }	      
+	    }
+          break;
+        case IO_Finalize:
+          {
+            int buffer = CDI_UNDEFID, collID;
+
+            xmpi ( MPI_Recv ( &buffer, 1, MPI_INT, source, tag, commNode, &status ));
+            sentFinalize[source] = true;
+            doFinalize = true;
+            for ( collID = 0; collID < nProcsCollNode; collID++ )
+              if ( !sentFinalize[collID] ) 
+                {
+                  doFinalize = false;
+                  break;
+                }
+            if ( doFinalize )
+              {
+                if ( bibBFiledataP->head != NULL )
+                  {
+                    xabort ( "Queue bibBfiledataP is not empty." );
+                  }
+                else
+                  {
+                    xdebug ( "all files are finished, destroy queue, return" );
+                    queueDestroy ( bibBFiledataP );
+                  }
+                if ( rtag ) ungetTag ( rtag );
+                return;
+              }
+          }
+          break;
+        default:
+          xabort ( "COMMAND NOT IMPLEMENTED" );
 	}
     }
 }
@@ -480,11 +509,20 @@ void sendP ( aFiledataP *afd, int id )
   return;
 } 
 
+/***************************************************************/ 
+
+void defTimestepP ( aFiledataP *afd, int tsID)
+{
+  if ( afd == NULL || tsID != afd->tsID + 1 ) 
+    xabort ( " defTimestepPF() didn't succeed." );
+  afd->tsID = tsID;
+}
+
+
 /***************************************************************/
 
-size_t fwPOSIXNONB ( int id, int tsId, const void *buffer, size_t len )
+size_t fwPOSIXNONB ( int id, int tsID, const void *buffer, size_t len )
 {
-  static int oldTsId = 0;
   int error = 0;
   int flush = 0;
   int filled = 0;
@@ -492,29 +530,29 @@ size_t fwPOSIXNONB ( int id, int tsId, const void *buffer, size_t len )
   listElem_t *curr;
   char errorString[maxErrorString];
 
-  flush = ( tsId != oldTsId ) ? 1 : 0;
+  afd = ( aFiledataP * ) queueIdx2val ( bibAFiledataP, id );
+
+  flush = ( tsID != afd->tsID ) ? 1 : 0;
 
   if ( flush == 1 ) 
     {
-      xdebug ( "tsId = %d, flush buffer", tsId );
+      xdebug ( "tsID = %d, flush buffer", tsID );
 
       curr = bibAFiledataP->head;
 
       while ( curr ) 
 	{
 	  sendP (( aFiledataP *) curr->val, curr->idx );
+          defTimestepP (( aFiledataP * ) curr->val, tsID );
 	  curr = curr->next;
 	}
-
-      oldTsId = tsId;
       xmpi ( MPI_Barrier ( commInqCommColl ())); 
     }                                          
 
-  afd = ( aFiledataP * ) queueIdx2val ( bibAFiledataP, id );
   filled = dbuffer_push ( afd->db, ( unsigned char * ) buffer, len );
 
-  xdebug ( "id = %d, tsId = %d, pushed %lu byte data on buffer, filled = %d", 
-           id, tsId, len, filled ); 
+  xdebug ( "id = %d, tsID = %d, pushed %lu byte data on buffer, filled = %d", 
+           id, tsID, len, filled ); 
 
   if ( filled == 1 ) 
     {
@@ -556,12 +594,6 @@ int fcPOSIXNONB ( int id )
   /* dequeue file element */
 
   iret = queueDelNode ( bibAFiledataP, id );
-
-  if ( !bibAFiledataP->head ) 
-    {
-      xdebug ( "cleanup queue" );
-      queueDestroy ( bibAFiledataP );
-    }
 
   /* timer output */
   	    
@@ -637,6 +669,28 @@ int fowPOSIXNONB ( const char *filename )
     }
 
   return id;
+}
+
+/***************************************************************/
+
+void finalizePOSIXNONB ( void )
+{
+  int buffer = 0, tag, specialRank = commInqSpecialRankNode ();
+  MPI_Comm commNode = commInqCommNode ();
+
+  tag = setTag ( 0, IO_Finalize );
+  
+  xmpi ( MPI_Send ( &buffer, 1, MPI_INT, specialRank, tag, commNode ));
+
+  if ( bibAFiledataP->head != NULL ) 
+    {
+      xabort ( "Queue bibAFiledataP not empty." );
+    }
+  else
+    {
+      xdebug ( "cleanup queue" );
+      queueDestroy ( bibAFiledataP );
+    }
 }
 
 /***************************************************************/

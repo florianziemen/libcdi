@@ -192,6 +192,9 @@ void backendCleanup ( void )
     case PIO_POSIX_FPGUARD_SENDRECV:
       finalizePOSIXFPGUARDSENDRECV ();
       break;
+    case PIO_POSIX_NONB:
+      finalizePOSIXNONB ();
+      break;
     default:
       xdebug ( " BACKENDCLEANUP FUNCTION NOT IMPLEMENTED YET." );
     }
