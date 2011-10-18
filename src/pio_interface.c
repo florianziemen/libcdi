@@ -842,8 +842,6 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
       xmpi ( MPI_Win_post ( groupsIONetto[collID], iAssert, win[collID] ));
       winPostSet[collID] = 1;
     } 
-
-  xdebug ( "return from win post" );
 #endif
 }
 

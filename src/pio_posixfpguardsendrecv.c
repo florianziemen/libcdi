@@ -37,6 +37,7 @@ extern double accumWrite;
 typedef struct 
 {
   char *name;
+  int tsID;
   size_t size;
   struct dBuffer *db1;
   struct dBuffer *db2;
@@ -69,6 +70,7 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   afd->name = ( char * ) xmalloc (( len ) * sizeof ( char ));
   strcpy ( afd->name, key );
   afd->size = bs;
+  afd->tsID = 0;
 
   /* init output buffer */
 
@@ -197,7 +199,6 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 
   for ( ;; )
     {
-      xdebug ();
       xmpi ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commNode, &status ));
       source = status.MPI_SOURCE;
       rtag   = getTag ( status.MPI_TAG ); 
@@ -301,6 +302,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 	  
 	  if ( bfd->finished )
             queueDelNode ( bibBFiledataPF, rtag->id );
+          break;
         case IO_Finalize:
           {  
             int buffer = CDI_UNDEFID; 
@@ -349,7 +351,6 @@ void writePF ( aFiledataPF *afd, int id )
   xmpi ( MPI_Sendrecv ( &amountL, 1, MPI_LONG, specialRank, tag,
                         &offset, 1, MPI_LONG, specialRank, tag,
                         commNode, &status ));
-   
   xdebug ( "id=%d, command=%d, amount=%llu, send amountL=%ld, recv offset=%ld", 
            id, afd->command, (unsigned long long)amount,
            amountL, offset );
@@ -395,17 +396,28 @@ void writePF ( aFiledataPF *afd, int id )
 
 /***************************************************************/
 
+void defTimestepPF ( aFiledataPF *afd, int tsID)
+{
+  if ( afd == NULL || tsID < 0 || tsID != afd->tsID + 1 ) 
+    xabort ( " defTimestepPF() didn't succeed." );
+  afd->tsID = tsID;
+}
+
+
+/***************************************************************/
+
 size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t len )
 {
-  static int oldTsID = 0;
   int error = 0;
   int flush = 0;
   int filled = 0;
   aFiledataPF *afd;
   listElem_t *curr;
-  char errorString[maxErrorString];
+  char errorString[maxErrorString];                                          
 
-  flush = ( tsID != oldTsID ) ? 1 : 0;
+  afd = ( aFiledataPF * ) queueIdx2val ( bibAFiledataPF, fileID );
+
+  flush = ( tsID != afd->tsID ) ? 1 : 0;
 
   if ( flush == 1 ) 
     {
@@ -414,13 +426,12 @@ size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t 
       while ( curr ) 
 	{
 	  writePF (( aFiledataPF *) curr->val, curr->idx );
+          defTimestepPF (( aFiledataPF * ) curr->val, tsID );
 	  curr = curr->next;
 	}
-      oldTsID = tsID;
       xmpi ( MPI_Barrier ( commInqCommColl ())); 
-    }                                          
+    }
 
-  afd = ( aFiledataPF * ) queueIdx2val ( bibAFiledataPF, fileID );
   filled = dbuffer_push ( afd->db, ( unsigned char * ) buffer, len );
 
   xdebug ( "fileID = %d, tsID = %d, pushed data on buffer, filled = %d", 
