@@ -9,27 +9,25 @@
 
 #include "cdi.h"
 #include "pio_util.h"
-#include <assert.h>
 
-enum { filetype = FILETYPE_GRB,
-       nlon = 12,
-       nlat = 6,
-       maxlev = 5,
-       ntsteps = 3,
-       ntfiles = 2,
-       nVars = 5,
-       nProcsIO = 1};
+enum { 
+  nProcsIO = 3,
+  //IOMode = PIO_NONE,
+  IOMode   = PIO_MPI_NONB, 
+  //IOMode   = PIO_POSIX_FPGUARD_SENDRECV,
+  //IOMode = PIO_POSIX_ASYNCH,
+  //IOMode = PIO_POSIX_NONB,
+  filetype = FILETYPE_GRB,
+  ntfiles  = 2,
+  ntsteps  = 3,
+  nVars    = 5,
+  nlon     = 12,
+  nlat     = 6,
+  maxlev   = 5};
 
 static int hasLocalFile[] = { 0 };
-static int nlev[nVars] = {1,1,5,5,2};
-
-static char * name = "example";
-
-//static int IOMode = PIO_NONE;
-static int IOMode = PIO_MPI_NONB;
-//static int IOMode = PIO_POSIX_FPGUARD_SENDRECV;
-//static int IOMode = PIO_POSIX_ASYNCH;
-//static int IOMode = PIO_POSIX_NONB;
+static int nlev[nVars]    = {1,1,5,5,2};
+static char * name        = "example";
 
 
 void modelRun ()
@@ -67,7 +65,6 @@ void modelRun ()
   vlistDefTaxis ( vlistID, taxisID );
   
   sprintf ( &filename[0], "%s_%d.grb", name, tfID );
-	  xdebug ( "filename = %s.", filename );
   streamID = streamOpenWrite ( filename, filetype );
   if ( streamID < 0 )
     {
@@ -85,8 +82,6 @@ void modelRun ()
 	{
 	  streamClose ( streamID );
 	  sprintf ( &filename[0], "%s_%d.grb", name, tfID );
-	  xdebug ( "filename = %s.", filename );
-	  streamID = streamOpenWrite ( filename, filetype );
 	  streamID = streamOpenWrite ( filename, filetype );
 	  if ( streamID < 0 )
 	    {
@@ -111,6 +106,7 @@ void modelRun ()
 	      start = CDI_UNDEFID;
 	      chunk = CDI_UNDEFID;
 	    }
+	  pioWriteTimestep ( tsID, vdate, vtime );
 	}
     }
    
