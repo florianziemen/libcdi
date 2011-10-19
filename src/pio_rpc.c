@@ -34,7 +34,7 @@ void streamUnpack ( char * unpackBuffer, int unpackBufferSize,
 		      intBuffer, streamNint, MPI_INT, comm ));
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 		      &d, 1, MPI_DOUBLE, comm ));
-  if ( xchecksum ( DATATYPE_INT, streamNint, intBuffer ) != d ) xabort ("");
+  xassert ( xchecksum ( DATATYPE_INT, streamNint, intBuffer ) == d );
 
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 		      &cdiDefaultMissval, 1, MPI_DOUBLE, comm ));
@@ -42,16 +42,15 @@ void streamUnpack ( char * unpackBuffer, int unpackBufferSize,
 		      &filename, intBuffer[2], MPI_CHAR, comm ));
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 		      &d, 1, MPI_DOUBLE, comm ));
-  if ( d != xchecksum ( DATATYPE_TXT, intBuffer[2], filename )) xabort ("");
+  xassert ( d == xchecksum ( DATATYPE_TXT, intBuffer[2], filename ));
 
   streamID = streamOpenWrite ( filename, intBuffer[1] );
-  if ( streamID < 0 ) xabort ( "can not open output file" );
-  if ( namespaceAdaptKey ( intBuffer[0], nspTarget ) != streamID )
-    xabort ("");
+  xassert ( streamID >= 0 &&
+            namespaceAdaptKey ( intBuffer[0], nspTarget ) == streamID );
 
   streamDefVlist ( streamID, namespaceAdaptKey ( intBuffer[4], nspTarget ));
-  if ( streamInqVlist ( streamID ) != namespaceAdaptKey ( intBuffer[3], nspTarget ))
-    xabort ("");
+  xassert ( streamInqVlist ( streamID ) == 
+            namespaceAdaptKey ( intBuffer[3], nspTarget ));
 
   streamDefByteorder ( streamID, intBuffer[5] );
   streamDefCompType  ( streamID, intBuffer[6] );
@@ -114,17 +113,12 @@ void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize,
 			   nspTarget, comm);
 	  break;
 	default: 
-	  xabort ( "no valid datatype" );
+	  xabort ( "TOKEN MAPS NO VALID DATATYPE" );
 	}
 
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
 			  &token2, 1, MPI_INT, comm ));
-
-      if ( token2 != SEPARATOR )
-	{
-	  sprintf ( text, "problems unpacking type %d", token1); 
-	  xabort ( text);
-	}
+      xassert ( token2 == SEPARATOR );
     }
 }
 

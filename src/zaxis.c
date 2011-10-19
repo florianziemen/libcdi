@@ -1399,7 +1399,7 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
 
   if ( z1->vals ) 
     {
-      if ( !z1->size ) xabort ("");
+      xassert ( z1->size );
       
       if ( !z2->vals ) return differ;
 
@@ -1411,7 +1411,7 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
   
   if ( z1->lbounds )
     {
-      if ( !z1->size ) xabort ("");
+      xassert ( z1->size );
       
       if ( !z2->lbounds ) return differ;
       
@@ -1423,7 +1423,7 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
 
   if ( z1->ubounds )
     {
-      if ( !z1->size ) xabort ("");
+      xassert ( z1->size );
       
       if ( !z2->ubounds ) return differ;
 
@@ -1435,7 +1435,7 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
 
   if ( z1->weights )
     {
-      if ( !z1->size ) xabort ("");
+      xassert ( z1->size );
 
       if ( !z2->weights ) return differ;
 
@@ -1447,7 +1447,7 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
 
  if ( z1->vct )
     {
-      if ( !z1->vctsize ) xabort ("");
+      xassert ( z1->vctsize );
 
       if ( !z2->vct ) return differ;
 
@@ -1518,7 +1518,7 @@ int zaxisGetPackSize ( void * voidP, MPI_Comm comm )
 
   if ( zaxisP->vals )
     {
-      if ( ! zaxisP->size ) xabort ("");
+      xassert ( zaxisP->size );
       
       xmpi ( MPI_Pack_size ( zaxisP->size, MPI_DOUBLE, comm, &size ));     
       packBufferSize += size;
@@ -1528,7 +1528,7 @@ int zaxisGetPackSize ( void * voidP, MPI_Comm comm )
 
   if ( zaxisP->lbounds )
     {
-      if ( ! zaxisP->size ) xabort ("");
+      xassert ( zaxisP->size );
       
       xmpi ( MPI_Pack_size ( zaxisP->size, MPI_DOUBLE, comm, &size ));     
       packBufferSize += size;
@@ -1538,7 +1538,7 @@ int zaxisGetPackSize ( void * voidP, MPI_Comm comm )
 
   if ( zaxisP->ubounds )
     {
-      if ( ! zaxisP->size ) xabort ("");
+      xassert ( zaxisP->size );
       
       xmpi ( MPI_Pack_size ( zaxisP->size, MPI_DOUBLE, comm, &size ));     
       packBufferSize += size;
@@ -1548,7 +1548,7 @@ int zaxisGetPackSize ( void * voidP, MPI_Comm comm )
 
   if ( zaxisP->weights )
     {
-      if ( ! zaxisP->size ) xabort ("");
+      xassert ( zaxisP->size );
       
       xmpi ( MPI_Pack_size ( zaxisP->size, MPI_DOUBLE, comm, &size ));     
       packBufferSize += size;
@@ -1558,7 +1558,7 @@ int zaxisGetPackSize ( void * voidP, MPI_Comm comm )
 
   if ( zaxisP->vct )
     {
-      if ( ! zaxisP->vctsize ) xabort ("");
+      xassert ( zaxisP->vctsize );
       
       xmpi ( MPI_Pack_size ( zaxisP->vctsize, MPI_DOUBLE, comm, &size ));     
       packBufferSize += size;
@@ -1590,15 +1590,14 @@ void zaxisUnpack ( char * unpackBuffer, int unpackBufferSize,
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 		      &d, 1, MPI_DOUBLE, comm ));
 
-  if ( xchecksum ( DATATYPE_INT, zaxisNint + 1, intBuffer ) != d ) xabort ("");
+  xassert ( xchecksum ( DATATYPE_INT, zaxisNint + 1, intBuffer ) == d );
 
   zaxisInit ();
 
   zaxisP = zaxisNewEntry();
   if ( ! zaxisP ) Error("No memory");
 
-  if ( namespaceAdaptKey ( intBuffer[0], nspTarget ) != zaxisP->self )
-    xabort ("");
+  xassert ( namespaceAdaptKey ( intBuffer[0], nspTarget ) == zaxisP->self );
 
   zaxisP->prec      = intBuffer[1]; 
   zaxisP->type      = intBuffer[2]; 
@@ -1610,67 +1609,62 @@ void zaxisUnpack ( char * unpackBuffer, int unpackBufferSize,
 
   if ( memberMask & vals ) 
     {
-      if ( ! zaxisP->size ) xabort ("");
+      xassert ( zaxisP->size );
       
       zaxisP->vals = xmalloc ( zaxisP->size * sizeof ( double ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  zaxisP->vals, zaxisP->size, MPI_DOUBLE, comm ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &d, 1, MPI_DOUBLE, comm ));
-      if ( xchecksum ( DATATYPE_FLT, zaxisP->size, zaxisP->vals ) != d )
-	xabort ("");
+      xassert ( xchecksum ( DATATYPE_FLT, zaxisP->size, zaxisP->vals ) == d );
     }
  
   if ( memberMask & lbounds ) 
     {
-      if ( ! zaxisP->size ) xabort ("");
+      xassert ( zaxisP->size );
       
       zaxisP->lbounds = xmalloc ( zaxisP->size * sizeof ( double ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  zaxisP->lbounds, zaxisP->size, MPI_DOUBLE, comm ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &d, 1, MPI_DOUBLE, comm ));
-      if ( xchecksum ( DATATYPE_FLT, zaxisP->size, zaxisP->lbounds ) != d )
-	xabort ("");
+      xassert ( xchecksum ( DATATYPE_FLT, zaxisP->size, zaxisP->lbounds ) == d );
     }
  
   if ( memberMask & ubounds ) 
     {
-      if ( ! zaxisP->size ) xabort ("");
+      xassert ( zaxisP->size );
       
       zaxisP->ubounds = xmalloc ( zaxisP->size * sizeof ( double ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  zaxisP->ubounds, zaxisP->size, MPI_DOUBLE, comm ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &d, 1, MPI_DOUBLE, comm ));
-      if ( xchecksum ( DATATYPE_FLT, zaxisP->size, zaxisP->ubounds ) != d )
-	xabort ("");
+      xassert ( xchecksum ( DATATYPE_FLT, zaxisP->size, zaxisP->ubounds ) == d );
     }
  
   if ( memberMask & weights )
     {
-      if ( ! zaxisP->size ) xabort ("");
+      xassert ( zaxisP->size );
       
       zaxisP->weights = xmalloc ( zaxisP->size * sizeof ( double ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  zaxisP->weights, zaxisP->size, MPI_DOUBLE, comm ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &d, 1, MPI_DOUBLE, comm ));
-      if ( xchecksum ( DATATYPE_FLT, zaxisP->size, zaxisP->weights ) != d )
-	xabort ("");
+      xassert ( xchecksum ( DATATYPE_FLT, zaxisP->size, zaxisP->weights ) == d );
     }
    
   if ( memberMask & vct )
     {
-      if ( ! zaxisP->vctsize ) xabort ("");
+      xassert ( zaxisP->vctsize );
       
       zaxisP->vct = xmalloc ( zaxisP->vctsize * sizeof ( double ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  zaxisP->vct, zaxisP->vctsize, MPI_DOUBLE, comm ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &d, 1, MPI_DOUBLE, comm ));
-      if ( xchecksum ( DATATYPE_FLT, zaxisP->vctsize, zaxisP->vct ) != d )
-	xabort ("");
+      xassert ( xchecksum ( DATATYPE_FLT, zaxisP->vctsize, zaxisP->vct ) == d );
     } 
 
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
@@ -1678,7 +1672,7 @@ void zaxisUnpack ( char * unpackBuffer, int unpackBufferSize,
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 		      &d, 1, MPI_DOUBLE, comm ));
 
-  if ( d != xchecksum ( DATATYPE_TXT, zaxisNstrings * CDI_MAX_NAME, charBuffer )) xabort ("");
+  xassert ( d == xchecksum ( DATATYPE_TXT, zaxisNstrings * CDI_MAX_NAME, charBuffer ));
 
   memcpy ( zaxisP->name,     &charBuffer[CDI_MAX_NAME * 0], CDI_MAX_NAME );
   memcpy ( zaxisP->longname, &charBuffer[CDI_MAX_NAME * 1], CDI_MAX_NAME );
@@ -1716,7 +1710,7 @@ void zaxisPack ( void * voidP, void * packBuffer, int packBufferSize,
   if ( zaxisP->vals )
     {
 
-      if ( ! zaxisP->size ) xabort ("");
+      xassert ( zaxisP->size );
 
       xmpi ( MPI_Pack ( zaxisP->vals, zaxisP->size, MPI_DOUBLE, 
 			packBuffer, packBufferSize, packBufferPos, comm ));
@@ -1727,7 +1721,7 @@ void zaxisPack ( void * voidP, void * packBuffer, int packBufferSize,
 
   if ( zaxisP->lbounds )
     {
-      if ( ! zaxisP->size ) xabort ("");
+      xassert ( zaxisP->size );
 
       xmpi ( MPI_Pack ( zaxisP->lbounds, zaxisP->size, MPI_DOUBLE, 
 			packBuffer, packBufferSize, packBufferPos, comm ));
@@ -1738,7 +1732,7 @@ void zaxisPack ( void * voidP, void * packBuffer, int packBufferSize,
 
   if ( zaxisP->ubounds )
     {
-      if ( ! zaxisP->size ) xabort ("");
+      xassert ( zaxisP->size );
 
       xmpi ( MPI_Pack ( zaxisP->ubounds, zaxisP->size, MPI_DOUBLE, 
 			packBuffer, packBufferSize, packBufferPos, comm ));
@@ -1749,7 +1743,7 @@ void zaxisPack ( void * voidP, void * packBuffer, int packBufferSize,
 
   if ( zaxisP->weights )
     {
-      if ( ! zaxisP->size ) xabort ("");
+      xassert ( zaxisP->size );
 
       xmpi ( MPI_Pack ( zaxisP->weights, zaxisP->size, MPI_DOUBLE, 
 			packBuffer, packBufferSize, packBufferPos, comm ));
@@ -1760,7 +1754,7 @@ void zaxisPack ( void * voidP, void * packBuffer, int packBufferSize,
 
   if ( zaxisP->vct )
     {
-      if ( ! zaxisP->vctsize ) xabort ("");
+      xassert ( zaxisP->vctsize );
 
       xmpi ( MPI_Pack ( zaxisP->vct, zaxisP->vctsize, MPI_DOUBLE, 
 			packBuffer, packBufferSize, packBufferPos, comm ));

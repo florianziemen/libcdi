@@ -1335,15 +1335,14 @@ void taxisUnpack ( char * unpackBuffer, int unpackBufferSize,
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 		      &d, 1, MPI_DOUBLE, comm ));
 
-  if ( xchecksum ( DATATYPE_INT, taxisNint, intBuffer ) != d ) xabort ("");
+  xassert ( xchecksum ( DATATYPE_INT, taxisNint, intBuffer ) == d );
 
   taxisInit ();
 
   taxisP = taxisNewEntry();
   if ( ! taxisP ) Error("No memory");
 
-  if ( namespaceAdaptKey ( intBuffer[0], nspTarget ) != taxisP->self )
-    xabort ("");
+  xassert ( namespaceAdaptKey ( intBuffer[0], nspTarget ) == taxisP->self );
 
   taxisP->used       = intBuffer[1];  
   taxisP->type       = intBuffer[2];  

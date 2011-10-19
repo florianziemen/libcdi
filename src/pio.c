@@ -184,6 +184,8 @@ void backendCleanup ( void )
   int IOMode = commInqIOMode ();
   switch ( IOMode )
     {
+    case PIO_NONE:
+      break;
     case PIO_MPI_NONB:
       finalizeMPINONB ();
       break;

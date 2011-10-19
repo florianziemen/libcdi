@@ -488,6 +488,7 @@ vlistAttGetSize(vlist_t *vlistptr, int varID, int attnum, MPI_Comm comm)
   int txsize = 0, txinc;
   cdi_atts_t *attsp;
   cdi_att_t *attp;
+  char text[1024];
 
   xassert(attsp = get_attsp(vlistptr, varID));
   xassert(attnum >= 0 && attnum < (int)attsp->nelems);
@@ -507,9 +508,9 @@ vlistAttGetSize(vlist_t *vlistptr, int varID, int attnum, MPI_Comm comm)
     xmpi(MPI_Pack_size((int)attp->nelems, MPI_CHAR, comm, &txinc));
     break;
   default:
-    fprintf(stderr, "Unknown datatype encountered in attribute %s: %d\n",
+    sprintf( text, "Unknown datatype encountered in attribute %s: %d\n",
             attp->name, attp->indtype);
-    xabort("");
+    xabort ( text );
   }
   txsize += txinc;
   return txsize;
@@ -538,6 +539,7 @@ vlistAttPack(vlist_t *vlistptr, int varID, int attnum,
   cdi_att_t *attp;
   int tempbuf[vlist_att_nints];
   MPI_Datatype attVMPIDt;
+  char text[1024];
 
   xassert(attsp = get_attsp(vlistptr, varID));
   xassert(attnum >= 0 && attnum < (int)attsp->nelems);
@@ -560,9 +562,9 @@ vlistAttPack(vlist_t *vlistptr, int varID, int attnum,
     attVMPIDt = MPI_CHAR;
     break;
   default:
-    fprintf(stderr, "Unknown datatype encountered in attribute %s: %d\n",
-            attp->name, attp->indtype);
-    xabort("");
+    sprintf( text, "Unknown datatype encountered in attribute %s: %d\n",
+             attp->name, attp->indtype);
+    xabort ( text );
   }
   xmpi(MPI_Pack(attp->xvalue, (int)attp->nelems, attVMPIDt,
                 buf, size, position, comm));
@@ -591,7 +593,8 @@ vlistAttUnpack(int vlistID, int varID,
   MPI_Datatype attVMPIDt;
   int elemSize;
   void *attData;
-
+  char text[1024];
+  
   xmpi(MPI_Unpack(buf, size, position,
                   tempbuf, vlist_att_nints, MPI_INT, comm));
   attName = xmalloc(tempbuf[0] + 1);
@@ -612,9 +615,9 @@ vlistAttUnpack(int vlistID, int varID,
     elemSize = 1;
     break;
   default:
-    fprintf(stderr, "Unknown datatype encountered in attribute %s: %d\n",
+    sprintf ( text, "Unknown datatype encountered in attribute %s: %d\n",
             attName, tempbuf[2]);
-    xabort("");
+    xabort ( text );
   }
   attData = xmalloc(elemSize * tempbuf[3]);
   xmpi(MPI_Unpack(buf, size, position, attData, tempbuf[3], attVMPIDt, comm));

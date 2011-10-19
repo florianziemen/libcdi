@@ -11,11 +11,11 @@
 #include "pio_util.h"
 
 enum { 
-  nProcsIO = 3,
-  //IOMode   = PIO_NONE,
+  nProcsIO = 1,
+  IOMode   = PIO_NONE,
   //IOMode   = PIO_MPI_NONB, 
   //IOMode   = PIO_POSIX_FPGUARD_SENDRECV,
-  IOMode   = PIO_POSIX_ASYNCH,
+  //IOMode   = PIO_POSIX_ASYNCH,
   //IOMode   = PIO_POSIX_NONB,
   filetype = FILETYPE_GRB,
   ntfiles  = 2,
@@ -56,7 +56,7 @@ void modelRun ()
       zaxisID[i] = zaxisCreate ( ZAXIS_PRESSURE, nlev[i] );
       zaxisDefLevels ( zaxisID[i], levs );
     }
-  vlistID = vlistCreate ();
+  vlistID = vlistCreate (); 
     
   for ( i = 0; i < nVars; i++ )  
     varID[i] = vlistDefVar ( vlistID, gridID, zaxisID[i], TIME_VARIABLE );
