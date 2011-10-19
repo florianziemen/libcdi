@@ -189,6 +189,9 @@ void backendCleanup ( void )
     case PIO_MPI_NONB:
       finalizeMPINONB ();
       break;
+    case PIO_POSIX_ASYNCH:
+      finalizePOSIXASYNCH ();
+      break;
     case PIO_POSIX_FPGUARD_SENDRECV:
       finalizePOSIXFPGUARDSENDRECV ();
       break;

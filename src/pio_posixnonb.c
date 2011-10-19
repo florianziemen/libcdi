@@ -514,7 +514,7 @@ void sendP ( aFiledataP *afd, int id )
 void defTimestepP ( aFiledataP *afd, int tsID)
 {
   if ( afd == NULL || tsID != afd->tsID + 1 ) 
-    xabort ( " defTimestepPF() didn't succeed." );
+    xabort ( " defTimestepP () didn't succeed." );
   afd->tsID = tsID;
 }
 

@@ -86,6 +86,7 @@ int       fowPOSIXASYNCH ( const char * );
 int       fcPOSIXASYNCH ( int );
 size_t    fwPOSIXASYNCH( int, int, const void *, size_t );
 void      initPOSIXASYNCH ( void );
+void      finalizePOSIXASYNCH ( void );
 #endif
 
 /* pio_posixfpguardsendrecv.c */
