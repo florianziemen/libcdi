@@ -422,30 +422,27 @@ void IOServer ()
           iBuffer = xmalloc ( sizeof ( int ));     
 	  xmpi ( MPI_Recv ( iBuffer, 1, MPI_INTEGER, source, 
                             tag, commCalc, &status ));
+          xdebug ( "RECEIVED MESSAGE WITH TAG \"FINALIZE\"" );
           free ( iBuffer );
 	  nfinished++;
 
 	  if ( nfinished == nProcsModel )  
+            {              
               {
-                if ( commInqRankGlob () == nProcsModel ) 
-                  reshArrayPrint ( "reshArrayIOServer" );
-
-                {
-                  int nStreams = streamSize (), streamNo;
-                  int * resHs;
-
-                  resHs       = xmalloc ( nStreams * sizeof ( resHs[0] ));
-                  streamGetIndexArray ( nStreams, resHs );
-                  for ( streamNo = 0; streamNo < nStreams; streamNo++ )
+                int nStreams = streamSize (), streamNo;
+                int * resHs;
+                
+                resHs       = xmalloc ( nStreams * sizeof ( resHs[0] ));
+                streamGetIndexArray ( nStreams, resHs );
+                for ( streamNo = 0; streamNo < nStreams; streamNo++ )
                     streamClose ( resHs[streamNo] );
-                  free ( resHs );
-                  backendCleanup ();
-                }
-
-                serverWinCleanup ();
-                arrayDestroy();
-                return;
-              }
+                free ( resHs );
+                backendCleanup ();
+              } 
+              serverWinCleanup ();
+              arrayDestroy();
+              return;
+            }
 	  
 	  break;
 
@@ -455,9 +452,11 @@ void IOServer ()
 	  buffer = xmalloc ( size * sizeof ( char ));
 	  xmpi ( MPI_Recv ( buffer, size, MPI_PACKED, source,
                             tag, commCalc, &status ));
+          xdebug ( "RECEIVED MESSAGE WITH TAG \"RESOURCES\"" );
 	  rpcUnpackResources ( buffer, size, commCalc );
 	  free ( buffer );
-
+          if ( ddebug > 0 && commInqRankGlob () == nProcsModel ) 
+            reshArrayPrint ( "reshArrayIOServer" );
 	  serverWinCreate ();
 	  break;
 
@@ -468,8 +467,9 @@ void IOServer ()
           iBuffer = xmalloc ( size * sizeof ( int ));
           xmpi ( MPI_Recv ( iBuffer, size, MPI_INTEGER, source,
                             tag, commCalc, &status ));
-          xdebug ("command WRITETS, recved:  tsID=%d, vdate=%d, vtime=%d, source=%d", 
-                  iBuffer[0], iBuffer[1], iBuffer[2], source );
+          xdebug ( "RECEIVED MESSAGE WITH TAG \"WRITETS\": "
+                   "tsID=%d, vdate=%d, vtime=%d, source=%d", 
+                   iBuffer[0], iBuffer[1], iBuffer[2], source );
           getData ( iBuffer[0], iBuffer[1], iBuffer[2] );     
           free ( iBuffer );
 

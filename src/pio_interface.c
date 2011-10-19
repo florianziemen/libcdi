@@ -727,11 +727,11 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode )
   int sizeGlob;
 
   if ( IOMode < PIO_MINIOMODUS || IOMode > PIO_MAXIOMODUS )
-    xabort ( "PIOTYPE is no valid modus" );
+    xabort ( "IOMODE IS NOT VALID." );
   
 #ifdef _SX
   if ( IOMode ==  PIO_POSIX_ASYNCH )
-    xabort ( "PIO_POSIX_ASYNCH does not work on SX" );
+    xabort ( "PIO_POSIX_ASYNCH DOES NOT WORK ON SX." );
 #endif
 
   commInit ();
@@ -739,7 +739,7 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode )
 
   sizeGlob = commInqSizeGlob ();                                       
   if ( nProcsIO <= 0 || nProcsIO >= sizeGlob || nProcsIO > sizeGlob / 2 )
-    xabort ( "bad distribution of tasks on PEs" );
+    xabort ( "DISTRIBUTION OF TASKS ON PROCS IS NOT VALID." );
 
   commDefNProcsIO ( nProcsIO );
   commDefIOMode   ( IOMode, PIO_MAXIOMODUS, PIO_MINIOMODUSWITHSPECIALPROCS );
@@ -785,13 +785,12 @@ void  pioEndDef ( void )
       xmpi ( MPI_Send ( buffer, bufferSize, MPI_PACKED, commInqNProcsModel (), 
                         RESOURCES, commInqCommsIO ( rankGlob )));
       
-      xdebug ( "sent message RESOURCES" );
+      xdebug ( "SENT MESSAGE WITH TAG \"RESOURCES\"" );
 
       namespaceDefResASent ();
       
       reshPackBufferDestroy ( &buffer );
     }
-  xdebug ();
 
   modelWinCreate ();
 #endif
@@ -819,7 +818,7 @@ void pioFinalize ()
     {
       xmpi ( MPI_Send ( &ibuffer, 1, MPI_INT, commInqNProcsModel (), 
                         FINALIZE, commInqCommsIO ( collID )));
-      xdebug ( "sent message FINALIZE" );
+      xdebug ( "SENT MESSAGE WITH TAG \"FINALIZE\"" );
     }
 
   modelWinCleanup ();
@@ -852,7 +851,7 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
     {
       xmpi ( MPI_Send ( &buffer[0], timestepSize, MPI_INTEGER, nProcsModel, 
                         WRITETS, commInqCommsIO ( rankGlob )));
-      xdebug ( "sent message WRITETS" );
+      xdebug ( "SENT MESSAGE WITH TAG \"WRITETS\"" );
     }
 
   for ( collID = 0; collID < nProcsColl; collID++ )
