@@ -66,12 +66,7 @@ void modelRun ()
   
   sprintf ( &filename[0], "%s_%d.grb", name, tfID );
   streamID = streamOpenWrite ( filename, filetype );
-  if ( streamID < 0 )
-    {
-      fprintf ( stderr, "%s\n", cdiStringError ( streamID ));
-      return;
-    }
-  
+  xassert ( streamID >= 0 );
   streamDefVlist ( streamID, vlistID);
 
   pioEndDef ();
@@ -83,11 +78,7 @@ void modelRun ()
 	  streamClose ( streamID );
 	  sprintf ( &filename[0], "%s_%d.grb", name, tfID );
 	  streamID = streamOpenWrite ( filename, filetype );
-	  if ( streamID < 0 )
-	    {
-	      fprintf ( stderr, "%s\n", cdiStringError ( streamID ));
-	      return;
-	    }
+	  xassert ( streamID >= 0 );
 	  streamDefVlist ( streamID, vlistID );
 	}
       for ( tsID = 0; tsID < ntsteps; tsID++ )
@@ -100,8 +91,7 @@ void modelRun ()
 	      start = pioInqVarDecoOff   ( vlistID, varID[i] );
 	      chunk = pioInqVarDecoChunk ( vlistID, varID[i] );
 	      stop = start + chunk;
-	      for ( j = start; j < stop; j++ ) var[j] = 2.2;
-	      
+	      for ( j = start; j < stop; j++ ) var[j] = 2.2;	      
 	      streamWriteVar ( streamID, varID[i], &var[start], nmiss );
 	      start = CDI_UNDEFID;
 	      chunk = CDI_UNDEFID;

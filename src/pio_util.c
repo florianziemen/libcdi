@@ -14,6 +14,26 @@ char commands[][13] = { "FINALIZE\0",
                         "WRITETS\0"};
 
 
+void pcdiAssert   ( bool assumption, const char * filename, 
+                    const char * functionname, int line )
+{
+  if ( !assumption )
+    {
+#ifdef USE_MPI
+      int rank;
+      
+      MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+      fprintf ( stderr, "ERROR ASSUMPTION FALSE, pe%d in %s, %s, line %d\n",
+                rank, functionname, filename, line );
+      MPI_Abort ( MPI_COMM_WORLD, 1 );
+#else
+      fprintf ( stderr, "ERROR ASSUMPTION FALSE, %s, %s, line %d\n",
+                functionname, filename, line );
+      abort();
+#endif
+    }
+}
+
 /****************************************************/
 
 void pcdiAbort ( char * errorString, const char * filename,  

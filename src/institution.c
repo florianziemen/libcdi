@@ -196,8 +196,8 @@ int instituteCompareP ( void *  instituteptr1, void * instituteptr2 )
   i1 = ( institute_t * ) instituteptr1;
   i2 = ( institute_t * ) instituteptr2;
 
-  assert ( i1 );
-  assert ( i2 );
+  xassert ( i1 );
+  xassert ( i2 );
 
   return instituteCompareKernel ( i1, i2 );
 }
@@ -228,7 +228,7 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
     {
       instID = instResHs[i];
       ip2 = ( institute_t * ) reshGetVal ( instID, &instituteOps );
-      assert ( ip2 );
+      xassert ( ip2 );
 
       if ( ip2->used && ! instituteCompareKernel ( ip1, ip2 ))
         {
@@ -338,7 +338,7 @@ void instituteDestroyP ( void * instituteptr )
   int id;
   institute_t * i1 = ( institute_t * ) instituteptr;
 
-  assert ( i1 );
+  xassert ( i1 );
 
   id = i1->self;
 
@@ -421,7 +421,7 @@ instituteUnpack(void *buf, int size, int *position, int nspTarget,
   xmpi(MPI_Unpack(buf, size, position, longname, tempbuf[4], MPI_CHAR, comm));
   instituteID = institutDef(tempbuf[1], tempbuf[2], name, longname);
   // FIXME: this should work, once all types are transferred
-  //assert(instituteID == tempbuf[0]);
+  //xassert(instituteID == tempbuf[0]);
   return instituteID;
 }
 

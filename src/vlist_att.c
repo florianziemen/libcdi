@@ -4,7 +4,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 
 #ifdef USE_MPI
 #include <mpi.h>
@@ -43,7 +42,7 @@ cdi_att_t *find_att(cdi_atts_t *attsp, const char *name)
   size_t attid;
   size_t slen;
 
-  assert(attsp != NULL);
+  xassert(attsp != NULL);
 
   if ( attsp->nelems == 0 ) return NULL;
 
@@ -68,8 +67,8 @@ cdi_att_t *new_att(cdi_atts_t *attsp, const char *name)
   cdi_att_t *attp;
   size_t slen;
 
-  assert(attsp != NULL);
-  assert(name  != NULL);
+  xassert(attsp != NULL);
+  xassert(name  != NULL);
 
   if ( attsp->nelems == attsp->nalloc ) return (NULL);
 
@@ -89,7 +88,7 @@ cdi_att_t *new_att(cdi_atts_t *attsp, const char *name)
 static
 void fill_att(cdi_att_t *attp, int indtype, int exdtype, size_t nelems, size_t xsz, const void *xvalue)
 {
-  assert(attp != NULL);
+  xassert(attp != NULL);
 
   attp->xsz = xsz;
   attp->indtype = indtype;
@@ -127,7 +126,7 @@ int vlistInqNatts(int vlistID, int varID, int *nattsp)
   vlistptr = vlist_to_pointer(vlistID);
   
   attsp = get_attsp(vlistptr, varID);
-  assert(attsp != NULL);
+  xassert(attsp != NULL);
 
   *nattsp = attsp->nelems;
 
@@ -161,12 +160,12 @@ int vlistInqAtt(int vlistID, int varID, int attnum, char *name, int *typep, int 
   cdi_att_t *attp = NULL;
   cdi_atts_t *attsp;
 
-  assert(name != NULL);
+  xassert(name != NULL);
 
   vlistptr = vlist_to_pointer(vlistID);
 
   attsp = get_attsp(vlistptr, varID);
-  assert(attsp != NULL);
+  xassert(attsp != NULL);
 
   if ( attnum >= 0 && attnum < (int)attsp->nelems )
     attp = &(attsp->value[attnum]);
@@ -199,7 +198,7 @@ int vlistDelAtts(int vlistID, int varID)
   vlistptr = vlist_to_pointer(vlistID);
 
   attsp = get_attsp(vlistptr, varID);
-  assert(attsp != NULL);
+  xassert(attsp != NULL);
 
   for ( attid = 0; attid < (int)attsp->nelems; attid++ )
     {
@@ -239,7 +238,7 @@ int vlist_def_att(int indtype, int exdtype, int vlistID, int varID, const char *
   vlistptr = vlist_to_pointer(vlistID);
 
   attsp = get_attsp(vlistptr, varID);
-  assert(attsp != NULL);
+  xassert(attsp != NULL);
 
   attp = find_att(attsp, name);
   if ( attp == NULL )
@@ -268,7 +267,7 @@ int vlist_inq_att(int indtype, int vlistID, int varID, const char *name, size_t 
   vlistptr = vlist_to_pointer(vlistID);
 
   attsp = get_attsp(vlistptr, varID);
-  assert(attsp != NULL);
+  xassert(attsp != NULL);
 
   attp = find_att(attsp, name);
   if ( attp != NULL ) /* name in use */
@@ -305,7 +304,7 @@ int vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2)
   vlistptr1 = vlist_to_pointer(vlistID1);
 
   attsp1 = get_attsp(vlistptr1, varID_1);
-  assert(attsp1 != NULL);
+  xassert(attsp1 != NULL);
 
   for ( attid = 0; attid < (int)attsp1->nelems; attid++ )
     {
@@ -490,8 +489,8 @@ vlistAttGetSize(vlist_t *vlistptr, int varID, int attnum, MPI_Comm comm)
   cdi_atts_t *attsp;
   cdi_att_t *attp;
 
-  assert(attsp = get_attsp(vlistptr, varID));
-  assert(attnum >= 0 && attnum < (int)attsp->nelems);
+  xassert(attsp = get_attsp(vlistptr, varID));
+  xassert(attnum >= 0 && attnum < (int)attsp->nelems);
   attp = &(attsp->value[attnum]);
   xmpi(MPI_Pack_size(vlist_att_nints, MPI_INT, comm, &txsize));
   xmpi(MPI_Pack_size(attp->namesz, MPI_CHAR, comm, &txinc));
@@ -540,8 +539,8 @@ vlistAttPack(vlist_t *vlistptr, int varID, int attnum,
   int tempbuf[vlist_att_nints];
   MPI_Datatype attVMPIDt;
 
-  assert(attsp = get_attsp(vlistptr, varID));
-  assert(attnum >= 0 && attnum < (int)attsp->nelems);
+  xassert(attsp = get_attsp(vlistptr, varID));
+  xassert(attnum >= 0 && attnum < (int)attsp->nelems);
   attp = &(attsp->value[attnum]);
   tempbuf[0] = attp->namesz;
   tempbuf[1] = attp->exdtype;

@@ -322,7 +322,7 @@ void stream_delete_entry(stream_t *streamptr)
 {
   int idx;
 
-  assert ( streamptr );
+  xassert ( streamptr );
 
   idx = streamptr->self;
   free ( streamptr );
@@ -516,8 +516,8 @@ int  streamCompareP ( void * streamptr1, void * streamptr2 )
   int equal  = 0;
   int len;
 
-  assert ( s1 );
-  assert ( s2 );
+  xassert ( s1 );
+  xassert ( s2 );
 
   if ( s1->filetype  != s2->filetype  ) return differ;
   if (  namespaceAdaptKey2 ( s1->vlistIDorig ) != 			     
@@ -544,7 +544,7 @@ void streamDestroyP ( void * streamptr )
   int id;
   stream_t * sp = ( stream_t * ) streamptr;
 
-  assert ( sp );
+  xassert ( sp );
 
   id = sp->self;
   streamClose ( id );

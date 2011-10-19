@@ -245,7 +245,7 @@ void zaxisDestroyKernel ( zaxis_t * zaxisptr )
 {
   int id;
 
-  assert ( zaxisptr );
+  xassert ( zaxisptr );
 
   id = zaxisptr->self;
 
@@ -1197,7 +1197,7 @@ void zaxisPrintKernel ( zaxis_t * zaxisptr, FILE * fp )
   int nbyte0, nbyte;
   double level;
 
-  assert ( zaxisptr );
+  xassert ( zaxisptr );
 
   type    = zaxisptr->type;
   nlevels = zaxisptr->size;
@@ -1305,7 +1305,7 @@ void zaxisPrintP ( void * voidptr, FILE * fp )
   zaxis_t *zaxisptr = ( zaxis_t * ) voidptr;
   int nbyte, nbyte0, i;
 
-  assert ( zaxisptr );
+  xassert ( zaxisptr );
   
   zaxisPrintKernel ( zaxisptr, fp );
   
@@ -1387,8 +1387,8 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
   static int equal  =  0;
   int i;
 
-  assert ( z1 );
-  assert ( z2 );
+  xassert ( z1 );
+  xassert ( z2 );
 
   if ( z1->type      != z2->type )      return differ;
   if ( z1->ltype     != z2->ltype )     return differ;

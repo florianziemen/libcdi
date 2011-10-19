@@ -494,7 +494,7 @@ void gridDestroyKernel ( grid_t * gridptr )
 {
   int id;
 
-  assert ( gridptr );
+  xassert ( gridptr );
 
   id = gridptr->self;
 
@@ -2494,8 +2494,8 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   int equal  = 0;
   int i, size;
 
-  assert ( g1 );
-  assert ( g2 );
+  xassert ( g1 );
+  xassert ( g2 );
 
   if ( g1->type          != g2->type         ) return differ;
   if ( g1->prec          != g2->prec         ) return differ;
@@ -2525,7 +2525,6 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
 
   if ( g1->rowlon )
     {
-      if ( !g1->nrowlon ) xabort ("");
       for ( i = 0; i < g1->nrowlon; i++ )
 	if ( g1->rowlon[i] != g2->rowlon[i] ) return differ; 
     } 
@@ -2564,7 +2563,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
 	size = g1->size;
       else
 	size = g1->xsize;
-      if ( !size ) xabort ("");
+      xassert ( size );
 
       if ( !g2->xvals ) return differ;
 
@@ -2580,7 +2579,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
 	size = g1->size;
       else
 	size = g1->ysize;
-      if ( !size ) xabort ("");
+      xassert ( size );
 
       if ( !g2->yvals ) return differ;
 
@@ -2592,7 +2591,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   
   if ( g1->area )
     {
-      if ( !g1->size ) xabort ("");
+      xassert ( g1->size );
 
       if ( !g2->area ) return differ;
 
@@ -2604,12 +2603,12 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
 
   if ( g1->xbounds )
     {
-      if ( !g1->nvertex ) xabort ("");
+      xassert ( g1->nvertex );
       if ( g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED )
 	size = g1->nvertex * g1->size;
       else
 	size = g1->nvertex * g1->xsize;
-      if ( !size ) xabort ("");
+      xassert ( size );
 
       if ( !g2->xbounds ) return differ;
 
@@ -2621,12 +2620,12 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
 
   if ( g1->ybounds )
     {
-      if ( !g1->nvertex ) xabort ("");
+      xassert ( g1->nvertex );
       if ( g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED )
 	size = g1->nvertex * g1->size;
       else
 	size = g1->nvertex * g1->ysize;
-      if ( !size ) xabort ("");
+      xassert ( size );
 
       if ( !g2->ybounds ) return differ;
 
@@ -2665,7 +2664,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
 
   if ( g1->mask )
     {
-      if ( !g1->size ) xabort ("");
+      xassert ( g1->size );
       if ( !g2->mask ) return differ;
       if ( memcmp ( g1->mask, g2->mask, g1->size * sizeof ( unsigned char ))) 
 	return differ;
@@ -2675,7 +2674,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
 
   if ( g1->mask_gme )
     {
-      if ( !g1->size ) xabort ("");
+      xassert ( g1->size );
       if ( !g2->mask_gme ) return differ;
       if ( memcmp ( g1->mask_gme, g2->mask_gme, 
 		    g1->size * sizeof ( unsigned char ))) return differ;
@@ -3733,7 +3732,7 @@ void gridPrintP ( void * voidptr, FILE * fp )
   grid_t * gridptr = ( grid_t * ) voidptr;
   int nbyte0, nbyte, i;
 
-  assert ( gridptr );
+  xassert ( gridptr );
 
   gridPrintKernel ( gridptr , 0, fp );
 
@@ -4227,7 +4226,7 @@ int gridGetPackSize ( void * voidP, MPI_Comm comm )
 
   if ( gridP->rowlon )
     {
-      if ( !gridP->nrowlon ) xabort ("");
+      xassert ( gridP->nrowlon );
 
       xmpi ( MPI_Pack_size ( gridP->nrowlon, MPI_INT, comm, &size ));
       packBuffSize += size;
@@ -4244,7 +4243,7 @@ int gridGetPackSize ( void * voidP, MPI_Comm comm )
 	count =  gridP->size;
       else
 	count =  gridP->xsize;
-      if ( !count ) xabort ("");
+      xassert ( count );
       
       xmpi ( MPI_Pack_size ( count, MPI_DOUBLE, comm, &size ));
       packBuffSize += size;
@@ -4268,7 +4267,7 @@ int gridGetPackSize ( void * voidP, MPI_Comm comm )
 
   if ( gridP->area )
     {
-      if ( !gridP->size ) xabort ("");
+      xassert ( gridP->size );
       
       xmpi ( MPI_Pack_size ( gridP->size, MPI_DOUBLE, comm, &size ));     
       packBuffSize += size;
@@ -4278,12 +4277,12 @@ int gridGetPackSize ( void * voidP, MPI_Comm comm )
 
   if ( gridP->xbounds )
     {
-      if ( !gridP->nvertex ) xabort ("");
+      xassert ( gridP->nvertex );
       if ( gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED )
 	count = gridP->nvertex * gridP->size;
       else
 	count = gridP->nvertex * gridP->xsize;
-      if ( !count ) xabort ("");
+      xassert ( count );
       
       xmpi ( MPI_Pack_size ( count, MPI_DOUBLE, comm, &size ));     
       packBuffSize += size;
@@ -4293,12 +4292,12 @@ int gridGetPackSize ( void * voidP, MPI_Comm comm )
 
   if ( gridP->ybounds )
     {
-      if ( !gridP->nvertex ) xabort ("");
+      xassert ( gridP->nvertex );
       if ( gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED )
 	count = gridP->nvertex * gridP->size;
       else
 	count = gridP->nvertex * gridP->ysize;
-      if ( !count ) xabort ("");
+      xassert ( count );
       
       xmpi ( MPI_Pack_size ( count, MPI_DOUBLE, comm, &size ));     
       packBuffSize += size;
@@ -4324,7 +4323,7 @@ int gridGetPackSize ( void * voidP, MPI_Comm comm )
  
   if ( gridP->mask )
     {
-      if ( !gridP->size ) xabort ("");
+      xassert ( gridP->size );
       xmpi ( MPI_Pack_size ( gridP->size, MPI_UNSIGNED_CHAR, comm, &size ));     
       packBuffSize += size;
       xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
@@ -4333,7 +4332,7 @@ int gridGetPackSize ( void * voidP, MPI_Comm comm )
 
   if ( gridP->mask_gme )
     {
-      if ( !gridP->size ) xabort ("");
+      xassert ( gridP->size );
       xmpi ( MPI_Pack_size ( gridP->size, MPI_UNSIGNED_CHAR, comm, &size ));     
       packBuffSize += size;
       xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
@@ -4357,15 +4356,14 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 		      &d, 1, MPI_DOUBLE, comm ));
 
-  if ( xchecksum ( DATATYPE_INT , gridNint + 1, intBuffer ) != d ) xabort ("");
+  xassert ( xchecksum ( DATATYPE_INT , gridNint + 1, intBuffer ) == d );
 
   gridInit ();
 
   gridP = gridNewEntry();
-  if ( ! gridP ) Error("No memory");
+  xassert ( gridP );
 
-  if ( namespaceAdaptKey ( intBuffer[0], nspTarget ) != gridP->self )
-    xabort ("");
+  xassert ( namespaceAdaptKey ( intBuffer[0], nspTarget ) == gridP->self );
 
   gridP->type          =   intBuffer[1] ;
   gridP->prec          =   intBuffer[2] ;
@@ -4396,21 +4394,20 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
 
   if ( memberMask & rowlon )
     {
-      if ( !gridP->nrowlon ) xabort ("");
+      xassert ( gridP->nrowlon );
       gridP->rowlon = xmalloc ( gridP->nrowlon * sizeof ( int ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			gridP->rowlon, gridP->nrowlon , MPI_INT, comm ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &d, 1, MPI_DOUBLE, comm ));
-      if ( xchecksum ( DATATYPE_INT , gridP->nrowlon, gridP->rowlon ) != d )
-	   xabort ("");
+      xassert ( xchecksum ( DATATYPE_INT , gridP->nrowlon, gridP->rowlon ) == d );
     } 
 
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 		      doubleBuffer, gridNdouble + 1, MPI_DOUBLE, comm ));
 
-  if ( doubleBuffer[24] != xchecksum ( DATATYPE_FLT, gridNdouble, doubleBuffer ))
-       xabort ("");
+  xassert ( doubleBuffer[24] == xchecksum ( DATATYPE_FLT, gridNdouble, 
+                                            doubleBuffer ));
 
   gridP->xfirst        =   doubleBuffer[0] ;       
   gridP->yfirst	       =   doubleBuffer[1] ;
@@ -4449,8 +4446,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
 			  gridP->xvals, size, MPI_DOUBLE, comm ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &d, 1, MPI_DOUBLE, comm ));
-      if ( xchecksum ( DATATYPE_FLT, size, gridP->xvals ) != d )
-	xabort ("");
+      xassert ( xchecksum ( DATATYPE_FLT, size, gridP->xvals ) == d );
     }
 
   if ( memberMask & yvals )
@@ -4465,57 +4461,53 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
 			  gridP->yvals, size, MPI_DOUBLE, comm ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &d, 1, MPI_DOUBLE, comm ));
-      if ( xchecksum ( DATATYPE_FLT, size, gridP->yvals ) != d ) 
-	xabort ("");
+      xassert ( xchecksum ( DATATYPE_FLT, size, gridP->yvals ) == d );
     }
 
   if ( memberMask & area )
     {
-      if ( !gridP->size ) xabort ("");
+      xassert ( gridP->size );
       
       gridP->area =  xmalloc( gridP->size * sizeof ( double ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  gridP->area, gridP->size, MPI_DOUBLE, comm ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &d, 1, MPI_DOUBLE, comm ));
-      if ( xchecksum ( DATATYPE_FLT, gridP->size, gridP->area ) != d )
-	xabort ("");
+      xassert ( xchecksum ( DATATYPE_FLT, gridP->size, gridP->area ) == d );
     }
 
   if ( memberMask & xbounds )
     {
-      if ( !gridP->nvertex ) xabort ("");
+      xassert ( gridP->nvertex );
       if ( gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED )
 	size = gridP->nvertex * gridP->size;
       else
 	size = gridP->nvertex * gridP->xsize;
-      if ( !size ) xabort ("");
+      xassert ( size );
       
       gridP->xbounds =  xmalloc( size * sizeof ( double ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  gridP->xbounds, size, MPI_DOUBLE, comm ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &d, 1, MPI_DOUBLE, comm ));
-      if ( xchecksum ( DATATYPE_FLT, size, gridP->xbounds ) != d )
-	xabort ("");
+      xassert ( xchecksum ( DATATYPE_FLT, size, gridP->xbounds ) == d );
     }
 
   if ( memberMask & ybounds )
     {
-      if ( !gridP->nvertex ) xabort ("");
+      xassert ( gridP->nvertex );
       if ( gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED )
 	size = gridP->nvertex * gridP->size;
       else
 	size = gridP->nvertex * gridP->ysize;
-      if ( !size ) xabort ("");
+      xassert ( size );
       
       gridP->ybounds =  xmalloc( size * sizeof ( double ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  gridP->ybounds, size, MPI_DOUBLE, comm ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &d, 1, MPI_DOUBLE, comm ));
-      if ( xchecksum ( DATATYPE_FLT, size, gridP->ybounds ) != d )
-	xabort ("");
+      xassert ( xchecksum ( DATATYPE_FLT, size, gridP->ybounds ) == d );
     }
 
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
@@ -4523,7 +4515,8 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 		      &d, 1, MPI_DOUBLE, comm ));
 
-  if ( d != xchecksum ( DATATYPE_TXT, gridNstrings * CDI_MAX_NAME, charBuffer )) xabort ("");
+  xassert ( d == xchecksum ( DATATYPE_TXT, gridNstrings * CDI_MAX_NAME, 
+                             charBuffer ));
 
   memcpy ( gridP->xname    , &charBuffer[CDI_MAX_NAME * 0], CDI_MAX_NAME );
   memcpy ( gridP->yname    , &charBuffer[CDI_MAX_NAME * 1], CDI_MAX_NAME );
@@ -4543,32 +4536,31 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
 			  gridP->reference, referenceSize, MPI_CHAR, comm ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &d, 1, MPI_DOUBLE, comm ));
-      if ( xchecksum ( DATATYPE_TXT, referenceSize, gridP->reference ) != d )
-	xabort ("");
+      xassert ( xchecksum ( DATATYPE_TXT, referenceSize, 
+                            gridP->reference ) == d );
     }
 
   if ( memberMask & mask )
     {
-      if ( !gridP->size ) xabort ("");
+      xassert ( gridP->size );
       gridP->mask = xmalloc ( gridP->size * sizeof ( mask_t ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  gridP->mask, gridP->size, MPI_UNSIGNED_CHAR, comm ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &d, 1, MPI_DOUBLE, comm ));
-      if ( xchecksum ( DATATYPE_TXT, gridP->size, gridP->mask ) != d )
-	xabort ("");
+      xassert ( xchecksum ( DATATYPE_TXT, gridP->size, gridP->mask ) == d );
     }
 
   if ( memberMask & mask_gme )
     {
-      if ( !gridP->size ) xabort ("");
+      xassert ( gridP->size );
       gridP->mask_gme = xmalloc ( gridP->size * sizeof ( mask_t ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  gridP->mask_gme, gridP->size, MPI_UNSIGNED_CHAR, comm ));
+			  gridP->mask_gme, gridP->size, MPI_UNSIGNED_CHAR, 
+                          comm ));
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &d, 1, MPI_DOUBLE, comm ));
-      if ( xchecksum ( DATATYPE_TXT, gridP->size, gridP->mask_gme ) != d )
-	xabort ("");
+      xassert ( xchecksum ( DATATYPE_TXT, gridP->size, gridP->mask_gme ) == d );
     }
 } 							       
 
@@ -4618,7 +4610,7 @@ void gridPack ( void * voidP, void * packBuffer, int packBufferSize,
 
   if ( gridP->rowlon )
     {
-      if ( !gridP->nrowlon ) xabort ("");
+      xassert ( gridP->nrowlon );
       xmpi ( MPI_Pack ( gridP->rowlon, gridP->nrowlon, MPI_INT,
 			packBuffer, packBufferSize, packBufferPos, comm ));
       d = xchecksum ( DATATYPE_INT , gridP->nrowlon, gridP->rowlon );
@@ -4661,7 +4653,7 @@ void gridPack ( void * voidP, void * packBuffer, int packBufferSize,
 	size = gridP->size;
       else
 	size = gridP->xsize;
-      if ( !size ) xabort ("");
+      xassert ( size );
       
       xmpi ( MPI_Pack ( gridP->xvals, size, MPI_DOUBLE, 
 			packBuffer, packBufferSize, packBufferPos, comm ));
@@ -4676,7 +4668,7 @@ void gridPack ( void * voidP, void * packBuffer, int packBufferSize,
 	size = gridP->size;
       else
 	size = gridP->ysize;
-      if ( !size ) xabort ("");
+      xassert ( size );
       
       xmpi ( MPI_Pack ( gridP->yvals, size, MPI_DOUBLE, 
 			packBuffer, packBufferSize, packBufferPos, comm ));
@@ -4687,7 +4679,7 @@ void gridPack ( void * voidP, void * packBuffer, int packBufferSize,
 
   if ( gridP->area )
     {
-      if ( !gridP->size ) xabort ("");
+      xassert ( gridP->size );
 
       xmpi ( MPI_Pack ( gridP->area, gridP->size, MPI_DOUBLE, 
 			packBuffer, packBufferSize, packBufferPos, comm ));
@@ -4698,12 +4690,12 @@ void gridPack ( void * voidP, void * packBuffer, int packBufferSize,
 
   if ( gridP->xbounds )
     {
-      if ( !gridP->nvertex ) xabort ("");
+      xassert ( gridP->nvertex );
       if ( gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED )
 	size = gridP->nvertex * gridP->size;
       else
 	size = gridP->nvertex * gridP->xsize;
-      if ( !size ) xabort ("");
+      xassert ( size );
 
       xmpi ( MPI_Pack ( gridP->xbounds, size, MPI_DOUBLE, 
 			packBuffer, packBufferSize, packBufferPos, comm ));
@@ -4714,12 +4706,12 @@ void gridPack ( void * voidP, void * packBuffer, int packBufferSize,
 
   if ( gridP->ybounds )
     {
-      if ( !gridP->nvertex ) xabort ("");
+      xassert ( gridP->nvertex );
       if ( gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED )
 	size = gridP->nvertex * gridP->size;
       else
 	size = gridP->nvertex * gridP->ysize;
-      if ( !size ) xabort ("");
+      xassert ( size );
 
       xmpi ( MPI_Pack ( gridP->ybounds, size, MPI_DOUBLE, 
 			packBuffer, packBufferSize, packBufferPos, comm ));
@@ -4757,7 +4749,7 @@ void gridPack ( void * voidP, void * packBuffer, int packBufferSize,
  
   if ( gridP->mask )
     {
-      if ( !gridP->size ) xabort ("");
+      xassert ( gridP->size );
       xmpi ( MPI_Pack ( gridP->mask, gridP->size, MPI_UNSIGNED_CHAR, 
 			packBuffer, packBufferSize, packBufferPos, comm ));
       d = xchecksum ( DATATYPE_TXT, gridP->size, gridP->mask );
@@ -4767,7 +4759,7 @@ void gridPack ( void * voidP, void * packBuffer, int packBufferSize,
 
   if ( gridP->mask_gme )
     {
-      if ( !gridP->size ) xabort ("");;
+      xassert ( gridP->size );
 
       xmpi ( MPI_Pack ( gridP->mask_gme, gridP->size, MPI_UNSIGNED_CHAR, 
 			packBuffer, packBufferSize, packBufferPos, comm ));

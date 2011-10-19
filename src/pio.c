@@ -150,9 +150,7 @@ void backendInit ( void )
 
   commDefCommNode ();
 
-  if ( IOMode == PIO_NONE  && commInqSizeNode () != 1 )
-    xabort ( "PIOTYPE, NNODES: not a valid combination" );
- 
+  xassert ( IOMode != PIO_NONE  || commInqSizeNode () == 1 );
 
   switch ( IOMode )
     {

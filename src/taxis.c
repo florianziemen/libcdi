@@ -1279,8 +1279,8 @@ int taxisCompareP ( void *  taxisptr1, void * taxisptr2 )
   t1 = ( taxis_t * ) taxisptr1;
   t2 = ( taxis_t * ) taxisptr2;
 
-  assert ( t1 );
-  assert ( t2 );
+  xassert ( t1 );
+  xassert ( t2 );
 
   return ! ( t1->used       == t2->used       &&  
 	     t1->type       == t2->type       &&

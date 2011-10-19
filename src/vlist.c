@@ -1598,7 +1598,7 @@ void vlistUnpack(char * buf, int size, int *position, int nspTarget, MPI_Comm co
   int varID, tempbuf[vlist_nints];
   xmpi(MPI_Unpack(buf, size, position, tempbuf, vlist_nints, MPI_INT, comm));
   newvlist = vlistCreate();
-  /* assert(newvlist == tempbuf[0]); */
+  /* xassert(newvlist == tempbuf[0]); */
   vlistDefTaxis ( newvlist, namespaceAdaptKey ( tempbuf[3], nspTarget ));
   vlistDefTable(newvlist, tempbuf[4]);
   vlistDefInstitut ( newvlist, namespaceAdaptKey ( tempbuf[5], nspTarget ));

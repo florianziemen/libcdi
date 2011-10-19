@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -47,13 +46,13 @@ void namespaceShowbits ( int n, char *name )
 
 int namespaceIdxEncode ( namespaceTuple_t tin )
 {
-  assert ( tin.nsp < NUM_NAMESPACES && tin.idx < NUM_IDX);
+  xassert ( tin.nsp < NUM_NAMESPACES && tin.idx < NUM_IDX);
   return ( tin.nsp << idxbits ) + tin.idx;
 }
 
 int namespaceIdxEncode2 ( int nsp, int idx )
 {
-  assert(nsp < NUM_NAMESPACES && idx < NUM_IDX);
+  xassert(nsp < NUM_NAMESPACES && idx < NUM_IDX);
   return ( nsp << idxbits ) + idx;
 }
 
@@ -73,7 +72,7 @@ void pioNamespaceInit ( int nspn, int * argHasLocalFile )
 {
 #ifdef USE_MPI
   int i;
-  assert(nspn <= NUM_NAMESPACES && nspn >= 1 );
+  xassert(nspn <= NUM_NAMESPACES && nspn >= 1 );
   nNamespaces = nspn;
 
   if ( nspn >= 1 )
@@ -138,7 +137,7 @@ int namespaceAdaptKey ( int key, int nspTarget )
   tin.idx = key & idxmask;
   tin.nsp = (int)(((unsigned)( key & nspmask )) >> idxbits);
 
-  assert ( tin.nsp == nspTarget );
+  xassert ( tin.nsp == nspTarget );
 
   nsp = namespaceGetActive ();
  

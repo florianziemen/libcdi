@@ -2,7 +2,6 @@
 #  include "config.h"
 #endif
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h> 
@@ -192,7 +191,7 @@ static filePtrToIdx *_fileAvail = NULL;
 static
 void file_list_new(void)
 {
-  assert(_fileList == NULL);
+  xassert(_fileList == NULL);
 
   _fileList = (filePtrToIdx *) malloc(_file_max*sizeof(filePtrToIdx));
 }

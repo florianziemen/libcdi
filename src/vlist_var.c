@@ -1748,7 +1748,7 @@ void vlistDefVarDeco ( int vlistID, int varID, int decoSize, deco_t * deco )
       return;
     }
 
-  assert ( decoSize && deco );
+  xassert ( decoSize && deco );
  
   vlistptr->vars[varID].deco = xmalloc ( decoSize * sizeof ( deco_t )); 
 
@@ -1776,7 +1776,7 @@ int vlistInqVarDecoChunk ( int vlistID, int varID, int rankModel  )
   {
     deco_t * deco;
     int i, decoSize = 0;
-    assert ( vlistptr->vars[varID].deco != NULL &&
+    xassert ( vlistptr->vars[varID].deco != NULL &&
              vlistptr->vars[varID].decoSize != CDI_UNDEFID ); 
     
     deco  = vlistptr->vars[varID].deco;
@@ -1793,7 +1793,7 @@ int vlistInqVarDecoChunk ( int vlistID, int varID, int rankModel  )
   iret = vlistInqVarSize ( vlistID, varID );
 #endif
 
-  assert ( iret != CDI_UNDEFID );
+  xassert ( iret != CDI_UNDEFID );
   return iret;
 }
 
@@ -1812,7 +1812,7 @@ int vlistInqVarDecoOff ( int vlistID, int varID, int rankModel  )
     deco_t * deco;
     int i, decoSize = 0;
     
-    assert ( vlistptr->vars[varID].deco != NULL &&
+    xassert ( vlistptr->vars[varID].deco != NULL &&
              vlistptr->vars[varID].decoSize != CDI_UNDEFID );
     
     deco  = vlistptr->vars[varID].deco;
@@ -1829,7 +1829,7 @@ int vlistInqVarDecoOff ( int vlistID, int varID, int rankModel  )
   iret = 0;
 #endif
 
-  assert (  iret != CDI_UNDEFID );  
+  xassert (  iret != CDI_UNDEFID );  
   return iret;
 }
 
@@ -2060,7 +2060,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
     int levbuf[tempbuf[19]][4];
     var_t *var = vlist_to_pointer(vlistID)->vars + newvar;
     int nlevs=tempbuf[19], i, flagSetLev;
-    assert(nlevs == var->nlevs);
+    xassert(nlevs == var->nlevs);
     xmpi(MPI_Unpack(buf, size, position,
                     levbuf, nlevs * 4, MPI_INT, comm));
     for (i = 0; i < nlevs; ++i)

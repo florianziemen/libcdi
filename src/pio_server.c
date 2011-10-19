@@ -11,7 +11,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <assert.h>
 #include "limits.h"
 #include "cdi.h"
 #include "pio.h"
@@ -67,7 +66,7 @@ static
   int nProcsModel = commInqNProcsModel ();
   int root = commInqRootGlob ();
 
-  if ( getBufferSize == NULL ) xabort ( "" );
+  xassert ( getBufferSize != NULL );
 
   nstreams = reshCountType ( &streamOps );
   streamIndexArray = xmalloc ( nstreams * sizeof ( streamIndexArray[0] ));
@@ -80,13 +79,13 @@ static
       for ( varID = 0; varID < nvars; varID++ )
         {
           iorank = vlistInqVarIOrank ( vlistID, varID );
-          if ( iorank == CDI_UNDEFID ) xabort ( "" );
+          xassert ( iorank != CDI_UNDEFID );
           if ( iorank == rankGlob )
             {
               for ( modelID = 0; modelID < nProcsModel; modelID++ )
                 {
                   decoChunk =  vlistInqVarDecoChunk ( vlistID, varID, modelID );
-                  if ( decoChunk <= 0 ) xabort ( "" );
+                  xassert ( decoChunk > 0 );
                   getBufferSize[modelID] += ( decoChunk * sizeof ( double ) + 
                                         winBufferOverheadChunk * sizeof ( int ));
                 }
@@ -105,7 +104,7 @@ static
       getBufferSize[modelID] += ( winBufferOverhead * sizeof ( double ));
       sumGetBufferSizes += getBufferSize[modelID];
     }
-  if ( sumGetBufferSizes > MAXWINBUFFERSIZE ) xabort ( "" );
+  xassert ( sumGetBufferSizes <= MAXWINBUFFERSIZE );
   xprintArray ( "getBufferSize", getBufferSize, nProcsModel, DATATYPE_INT );
 }
 
@@ -178,7 +177,7 @@ static
 
   getBufferGetFromEnd ( __func__, __LINE__, 
                         root, &funcID, sizeof ( funcID ));
-  if ( funcID < MINFUNCID || funcID > MAXFUNCID ) xabort ( "" );
+  xassert ( funcID >= MINFUNCID && funcID <= MAXFUNCID );
   
   switch ( funcID )
     {
@@ -203,7 +202,7 @@ static
 
         getBufferGetFromEnd ( __func__, __LINE__, 
                               root, &filenamesz, sizeof ( filenamesz ));
-        if ( filenamesz <= 0 || filenamesz >= MAXDATAFILENAME ) xabort ( "" );
+        xassert ( filenamesz > 0 && filenamesz < MAXDATAFILENAME );
         filename = xmalloc ( filenamesz + 1 );
         getBufferGetFromEnd ( __func__, __LINE__, 
                               root, filename, filenamesz );
@@ -238,7 +237,7 @@ static
     }
   getBufferGetFromEnd ( __func__, __LINE__, 
                         root, &tokenID, sizeof ( tokenID ));
-  if ( tokenID != SEPARATOR ) xabort ( "" );
+  xassert ( tokenID == SEPARATOR );
 }
 
 /************************************************************************/
@@ -289,13 +288,13 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
                 {
                   getBufferGetFromEnd ( __func__, __LINE__, 
                                         modelID, &tempID, sizeof ( tempID ));
-                  if ( tempID != DATATOKEN ) xabort ( "" );
+                  xassert ( tempID == DATATOKEN );
                   getBufferGetFromEnd ( __func__, __LINE__, 
                                         modelID, &tempID, sizeof ( tempID ));
-                  if ( tempID != streamID ) xabort ( "" );
+                  xassert ( tempID == streamID );
                   getBufferGetFromEnd ( __func__, __LINE__, 
                                         modelID, &tempID, sizeof ( tempID ));
-                  if ( tempID != varID ) xabort ( "" );
+                  xassert ( tempID == varID );
                 }
               chunk  = vlistInqVarDecoChunk ( vlistID, varID, modelID );
               getBufferGetFromEnd ( __func__, __LINE__, 
@@ -303,7 +302,7 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
               dataHead += chunk;
               getBufferGetFromEnd ( __func__, __LINE__, 
                                     modelID, &tokenID2, sizeof ( tokenID2 ));
-              if ( tokenID2 != SEPARATOR ) xabort ( "" );
+              xassert ( tokenID2 == SEPARATOR );
             }         
           streamWriteVar ( streamID, varID, data, nmiss );
 
@@ -335,15 +334,14 @@ static
 {
   int nProcsModel = commInqNProcsModel ();
 
-  if ( modelID                 < 0 ||
-       modelID                >= nProcsModel ||
-       getBuffer              == NULL ||
-       getBuffer[modelID]     == NULL ||
-       getBufferHead          == NULL ||
-       getBufferSize          == NULL ||
-       getBufferSize[modelID]  < 0     ||
-       getBufferSize[modelID]  > MAXWINBUFFERSIZE ) 
-    xabort ( "" );
+  xassert ( modelID                >= 0           &&
+            modelID                 < nProcsModel &&
+            getBuffer              != NULL        &&
+            getBuffer[modelID]     != NULL        &&
+            getBufferHead          != NULL        &&
+            getBufferSize          != NULL        &&
+            getBufferSize[modelID]  > 0           &&
+            getBufferSize[modelID] <= MAXWINBUFFERSIZE );
   memset ( getBuffer[modelID], 0, getBufferSize[modelID] );
   getBufferHead[modelID] = getBuffer[modelID];
 }
@@ -360,7 +358,7 @@ void getData ( int tsID, int vdate, int vtime )
   int nProcsModel = commInqNProcsModel ();
 
   // todo put in correct lbs and ubs
-  if ( tsID < 0 || vdate < 0 || vtime < 0 ) xabort ( "" );
+  xassert ( tsID >= 0 && vdate >= 0 && vtime >= 0 );
 
   xmpi ( MPI_Win_start ( groupModel, iAssert, win )); 
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
@@ -464,7 +462,7 @@ void IOServer ()
 	case WRITETS:
 	  xdebugMsg (  tag, source, nfinished );
           xmpi ( MPI_Get_count ( &status, MPI_INTEGER, &size ));     
-          assert ( size == timestepSize );
+          xassert ( size == timestepSize );
           iBuffer = xmalloc ( size * sizeof ( int ));
           xmpi ( MPI_Recv ( iBuffer, size, MPI_INTEGER, source,
                             tag, commCalc, &status ));
@@ -476,7 +474,7 @@ void IOServer ()
 	  break;
 
 	default:
-	  xabort ( "" );
+	  xabort ( "TAG NOT DEFINED!" );
 	}
     }
 }

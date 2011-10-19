@@ -4,7 +4,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <assert.h>
 
 #include "resource_handle.h"
 #include "pio_comm.h"
@@ -79,7 +78,7 @@ void arrayNew ( void )
     {
       arraySizeAllocated[i] = MIN_ARRAY_SIZE;
 
-      assert ( arrayResources[i] == NULL);
+      xassert ( arrayResources[i] == NULL);
 
       arrayResources[i] =  xcalloc ( arraySizeAllocated[i], sizeof ( arrayElem_t ));
     }
@@ -194,7 +193,7 @@ void arraySizeExtend()
 
   nsp = namespaceGetActive ();
 
-  assert ( arrayInit );
+  xassert ( arrayInit );
 
   newArraySize = arraySizeAllocated[nsp] + MIN_ARRAY_SIZE;
 
@@ -221,7 +220,7 @@ int reshPut ( void *p, resOps *ops )
   cdiResH resH = -1, nsp;
   arrayElem_t * newArrayElem;
 
-  assert ( p && ops );
+  xassert ( p && ops );
 
   ARRAY_INIT();
 
@@ -252,7 +251,7 @@ void reshRemove ( cdiResH resH, resOps * ops )
   int nsp;
   namespaceTuple_t nspT;
 
-  assert ( arrayInit && ops );
+  xassert ( arrayInit && ops );
 
   ARRAY_LOCK();
 
@@ -260,7 +259,7 @@ void reshRemove ( cdiResH resH, resOps * ops )
 
   nspT = namespaceResHDecode ( resH );
 
-  assert ( nspT.nsp == nsp &&
+  xassert ( nspT.nsp == nsp &&
            nspT.idx >= 0 &&
            nspT.idx < arraySizeAllocated[nsp] &&
            arrayResources[nsp][nspT.idx].ops &&
@@ -285,7 +284,7 @@ void *reshGetVal ( cdiResH resH, resOps * ops  )
   namespaceTuple_t nspT;
   arrayElem_t * arrayElem;
 
-  assert ( arrayInit && ops );
+  xassert ( arrayInit && ops );
 
   ARRAY_LOCK ();
 
@@ -293,7 +292,7 @@ void *reshGetVal ( cdiResH resH, resOps * ops  )
 
   nspT = namespaceResHDecode ( resH );
 
-  assert ( arrayInit &&
+  xassert ( arrayInit &&
            nspT.nsp == nsp &&
            nspT.idx >= 0 &&
            nspT.idx < arraySizeAllocated[nsp] );
@@ -302,7 +301,7 @@ void *reshGetVal ( cdiResH resH, resOps * ops  )
 
   ARRAY_UNLOCK ();
 
-  assert ( arrayElem &&
+  xassert ( arrayElem &&
            arrayElem->ops == ops );
 
   return arrayElem->val;
@@ -316,7 +315,7 @@ void reshGetResHArrayOfType ( int c, int * resHs, resOps * ops )
 {
   int i, j = 0, nsp;
 
-  assert ( arrayInit && resHs && ops );
+  xassert ( arrayInit && resHs && ops );
 
   ARRAY_LOCK();
 
@@ -341,7 +340,7 @@ int reshCountType ( resOps * ops )
 {
   int i, nsp, countType = 0;
 
-  assert ( ops );
+  xassert ( ops );
 
   if ( !( arrayInit && ops )) return 0;
 
@@ -384,7 +383,7 @@ int  getPackBufferSize ( MPI_Comm comm )
       if ( arrayResources[nsp][i].status == ASSIGNED )
         {
           curr = arrayResources[nsp] + i;
-          assert ( curr->ops );
+          xassert ( curr->ops );
 
           /* message plus frame of 2 ints */
           packBufferSize += curr->ops->valGetPackSize ( curr->val, comm )
@@ -414,7 +413,7 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
   int start = START, end = END, sep = SEPARATOR, type;
   arrayElem_t * curr;
 
-  assert ( packBuffer );
+  xassert ( packBuffer );
 
   ARRAY_LOCK();
 
@@ -437,7 +436,7 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
       if ( arrayResources[nsp][i].status == ASSIGNED )
         {
           curr = arrayResources[nsp] + i;
-          assert ( curr->ops );
+          xassert ( curr->ops );
 
           type = curr->ops->valTxCode ();
 
@@ -479,7 +478,7 @@ void reshSetStatus ( cdiResH resH, resOps * ops, int status )
   namespaceTuple_t nspT;
   arrayElem_t * arrayElem;
 
-  assert ( arrayInit && ops );
+  xassert ( arrayInit && ops );
 
   ARRAY_LOCK ();
 
@@ -487,14 +486,14 @@ void reshSetStatus ( cdiResH resH, resOps * ops, int status )
 
   nspT = namespaceResHDecode ( resH );
 
-  assert ( arrayInit &&
+  xassert ( arrayInit &&
            nspT.nsp == nsp &&
            nspT.idx >= 0 &&
            nspT.idx < arraySizeAllocated[nsp] );
 
   arrayElem =  arrayResources[nsp] + nspT.idx;
 
-  assert ( arrayElem &&
+  xassert ( arrayElem &&
            arrayElem->ops == ops );
 
   arrayElem->status = status;
@@ -512,7 +511,7 @@ int reshGetStatus ( cdiResH resH, resOps * ops )
   namespaceTuple_t nspT;
   arrayElem_t * arrayElem;
 
-  assert ( arrayInit && ops );
+  xassert ( arrayInit && ops );
 
   ARRAY_LOCK ();
 
@@ -520,7 +519,7 @@ int reshGetStatus ( cdiResH resH, resOps * ops )
 
   nspT = namespaceResHDecode ( resH );
 
-  assert ( arrayInit &&
+  xassert ( arrayInit &&
            nspT.nsp == nsp &&
            nspT.idx >= 0 &&
            nspT.idx < arraySizeAllocated[nsp] );
@@ -529,7 +528,7 @@ int reshGetStatus ( cdiResH resH, resOps * ops )
 
   ARRAY_UNLOCK ();
 
-  assert ( arrayElem &&
+  xassert ( arrayElem &&
            arrayElem->ops == ops );
 
   return arrayElem->status;
@@ -566,7 +565,7 @@ int reshArrayCompare ( int nsp0, int nsp1 )
 
 #ifdef USE_MPI
 
-  assert ( arrayInit && 
+  xassert ( arrayInit && 
 	   namespaceGetNumber () > xmaxInt ( nsp0, nsp1 ) &&
 	   xminInt ( nsp0, nsp1 ) >= 0 );
 
@@ -588,7 +587,7 @@ int reshArrayCompare ( int nsp0, int nsp1 )
 	      return differ;
 	    }
 
-	  assert ( arrayElem0->ops && arrayElem1->ops );
+	  xassert ( arrayElem0->ops && arrayElem1->ops );
 	  if ( arrayElem0->ops != arrayElem1->ops )
 	    {
 	      xdebug ();

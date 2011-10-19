@@ -5,6 +5,7 @@
 #  include "config.h"
 #endif
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -35,6 +36,9 @@
 
 #define ddebug 1
 
+
+void pcdiAssert   ( bool, const char *, const char *, int );
+#define xassert(arg) pcdiAssert ( arg, __FILE__, __func__, __LINE__ );
 
 #ifdef USE_MPI
 #define xdebug(fmt, ...)					\
