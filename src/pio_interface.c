@@ -499,6 +499,7 @@ void pioBufferData ( int streamIDarg, int varIDarg, const double *data, int nmis
   modelWinBufferPutAtEnd ( __func__, collID, &streamID , sizeof ( streamID ));
   modelWinBufferPutAtEnd ( __func__, collID, &varID    , sizeof ( varID ));
   modelWinBufferPutAtEnd ( __func__, collID, data      , chunk * sizeof ( double ));
+  modelWinBufferPutAtEnd ( __func__, collID, &nmiss    , sizeof ( nmiss ));
   modelWinBufferPutAtEnd ( __func__, collID, &tokenSep , sizeof ( tokenSep ));      
 }
 

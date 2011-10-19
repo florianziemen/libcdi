@@ -301,6 +301,8 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
                                     modelID, dataHead, chunk * sizeof ( double ));
               dataHead += chunk;
               getBufferGetFromEnd ( __func__, __LINE__, 
+                                    modelID, &nmiss   , sizeof ( nmiss ));
+              getBufferGetFromEnd ( __func__, __LINE__, 
                                     modelID, &tokenID2, sizeof ( tokenID2 ));
               xassert ( tokenID2 == SEPARATOR );
             }         
