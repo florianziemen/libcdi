@@ -210,6 +210,8 @@ int      pioInit            ( int, int, int );
 void     pioFinalize        ( void );
 void     pioEndDef          ( void );
 void     pioWriteTimestep   ( int, int, int );
+int      pioInqVarDecoChunk ( int, int );
+int      pioInqVarDecoOff   ( int, int );
 
 void     pioNamespaceInit      ( int, int * );
 void     pioNamespaceCleanup   ( void );
@@ -220,8 +222,6 @@ void     streamGetIndexArray  ( int, int * );
 void     zaxisGetIndexArray   ( int, int * );
 void     vlistDefVarIOrank    ( int, int, int );
 int      vlistInqVarIOrank    ( int, int );
-int      vlistInqVarDecoChunk ( int, int );
-int      vlistInqVarDecoOff   ( int, int );
 
 
   /* CDI control routines */

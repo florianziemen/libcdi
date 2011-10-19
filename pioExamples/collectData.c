@@ -97,8 +97,8 @@ void modelRun ()
 	  streamDefTimestep ( streamID, tsID );
 	  for ( i = 0; i < nVars; i++ )
 	    {
-	      start = vlistInqVarDecoOff ( vlistID, varID[i] );
-	      chunk = vlistInqVarDecoChunk ( vlistID, varID[i] );
+	      start = pioInqVarDecoOff   ( vlistID, varID[i] );
+	      chunk = pioInqVarDecoChunk ( vlistID, varID[i] );
 	      stop = start + chunk;
 	      for ( j = start; j < stop; j++ ) var[j] = 2.2;
 	      

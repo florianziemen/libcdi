@@ -327,6 +327,7 @@ static
   int collIDchunk = 0, sumWinBufferSize = 0;
   int nProcsColl  = commInqNProcsColl ();
   int rankGlob    = commInqRankGlob ();
+  int rankModel   = commInqRankModel ();
   int root = commInqRootGlob ();
 
   if ( winBufferSize == NULL ) xabort ( "" );
@@ -343,7 +344,7 @@ static
         {
           collID = CDI_UNDEFID;
           collID = commRankGlob2CollID ( vlistInqVarIOrank ( vlistID, varID ));
-          collIDchunk = vlistInqVarDecoChunk ( vlistID, varID );
+          collIDchunk = vlistInqVarDecoChunk ( vlistID, varID, rankModel );
           if ( collID == CDI_UNDEFID ||
                collIDchunk <= 0 ) xabort ( "" );
           winBufferSize[collID] += ( collIDchunk * sizeof ( double ) + 
@@ -458,20 +459,19 @@ static
 
 /************************************************************************/
 
-void pioBufferData ( int streamIDarg, int varIDarg, const double *dataArg, int nmiss )
+void pioBufferData ( int streamIDarg, int varIDarg, const double *data, int nmiss )
 {
   int chunk, streamID, varID, vlistID, collID = CDI_UNDEFID;
   int tokenSep = SEPARATOR, tokenData = DATATOKEN;
   size_t size;
   void * vp;
-  double * data;
+  int rankModel = commInqRankModel ();
 
-  data     = dataArg;
   streamID = streamIDarg;
   varID    = varIDarg;
   vlistID  = streamInqVlist ( streamID );
   collID   = commRankGlob2CollID ( vlistInqVarIOrank ( vlistID, varID ));
-  chunk    = vlistInqVarDecoChunk ( vlistID, varID );
+  chunk    = vlistInqVarDecoChunk ( vlistID, varID, rankModel );
   if ( collID         < 0                    ||
        collID        >= commInqNProcsColl () ||
        chunk          < 0                    ||
@@ -674,6 +674,32 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
 
 /*****************************************************************************/
 
+int pioInqVarDecoChunk ( int vlistID, int varID )
+{
+  xdebug ();
+#ifdef USE_MPI
+   int rankModel = commInqRankModel ();
+   assert ( rankModel != CDI_UNDEFID );
+   return vlistInqVarDecoChunk ( vlistID, varID, rankModel );
+#endif
+   return vlistInqVarDecoChunk ( vlistID, varID, CDI_UNDEFID );
+}
+
+/*****************************************************************************/
+
+int pioInqVarDecoOff ( int vlistID, int varID )
+{
+  xdebug ();
+#ifdef USE_MPI
+   int rankModel = commInqRankModel ();
+   assert ( rankModel != CDI_UNDEFID );
+   return vlistInqVarDecoOff ( vlistID, varID, rankModel );
+#endif
+   return vlistInqVarDecoOff ( vlistID, varID, CDI_UNDEFID );
+}
+
+/*****************************************************************************/
+
 int pioInit ( int comm, int nIOP, int mode )
 {
 #ifdef USE_MPI
@@ -757,6 +783,7 @@ void  pioEndDef ( void )
   int rankGlob = commInqRankGlob ();
 
   varsMapNDeco ( commInqNNodes (), commInqNodeSizes ());
+  xdebug ();
 
   if ( rankGlob < commInqNProcsColl ())
     {
@@ -771,6 +798,7 @@ void  pioEndDef ( void )
       
       reshPackBufferDestroy ( &buffer );
     }
+  xdebug ();
 
   modelWinCreate ();
 #endif

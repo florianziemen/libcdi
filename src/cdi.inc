@@ -348,6 +348,16 @@
 !                                     INTEGER         )
       EXTERNAL        pioWriteTimestep
 
+      INTEGER         pioInqVarDecoChunk
+!                                    (INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        pioInqVarDecoChunk
+
+      INTEGER         pioInqVarDecoOff
+!                                    (INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        pioInqVarDecoOff
+
 !                     pioNamespaceInit
 !                                    (INTEGER         ,
 !                                     INTEGER         )
@@ -385,16 +395,6 @@
 !                                    (INTEGER         ,
 !                                     INTEGER         )
       EXTERNAL        vlistInqVarIOrank
-
-      INTEGER         vlistInqVarDecoChunk
-!                                    (INTEGER         ,
-!                                     INTEGER         )
-      EXTERNAL        vlistInqVarDecoChunk
-
-      INTEGER         vlistInqVarDecoOff
-!                                    (INTEGER         ,
-!                                     INTEGER         )
-      EXTERNAL        vlistInqVarDecoOff
 
       CHARACTER*80    cdiStringError
 !                                    (INTEGER         cdiErrno)

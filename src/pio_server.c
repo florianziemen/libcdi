@@ -85,7 +85,7 @@ static
             {
               for ( modelID = 0; modelID < nProcsModel; modelID++ )
                 {
-                  decoChunk =  vlistInqVarDecoChunk3 ( vlistID, varID, modelID );
+                  decoChunk =  vlistInqVarDecoChunk ( vlistID, varID, modelID );
                   if ( decoChunk <= 0 ) xabort ( "" );
                   getBufferSize[modelID] += ( decoChunk * sizeof ( double ) + 
                                         winBufferOverheadChunk * sizeof ( int ));
@@ -297,7 +297,7 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
                                         modelID, &tempID, sizeof ( tempID ));
                   if ( tempID != varID ) xabort ( "" );
                 }
-              chunk  = vlistInqVarDecoChunk3 ( vlistID, varID, modelID );
+              chunk  = vlistInqVarDecoChunk ( vlistID, varID, modelID );
               getBufferGetFromEnd ( __func__, __LINE__, 
                                     modelID, dataHead, chunk * sizeof ( double ));
               dataHead += chunk;

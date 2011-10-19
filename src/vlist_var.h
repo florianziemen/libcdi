@@ -18,8 +18,8 @@ void vlistVarPack(vlist_t *p, int varID,
 void vlistVarUnpack(int vlistID,
                     char * buf, int size, int *position, int, MPI_Comm comm);
 
-int      vlistInqVarDecoChunk3 ( int, int, int );
-int      vlistInqVarDecoOff3   ( int, int, int );
+int vlistInqVarDecoChunk ( int, int, int );
+int vlistInqVarDecoOff   ( int, int, int );
 #endif
 
 #endif
