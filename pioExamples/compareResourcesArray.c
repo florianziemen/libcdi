@@ -2,13 +2,8 @@
 #include "config.h"
 #endif
 
-#define nProcsIO 1
-#define nNodes 1
-
 #ifdef USE_MPI
 #include <mpi.h>
-#endif 
-
 #include "cdi.h"
 #include "pio_c_temp.h"
 #include "pio_util.h"
@@ -19,16 +14,16 @@ extern void   reshPackBufferDestroy ( char ** );
 extern void   rpcUnpackResources    ( char *, int, MPI_Comm );
 extern void   arrayDestroy          ( void );
 
-#define DOUBLE_PRECISION  8
-
-
-#define nlon 12     // Number of longitudes
-#define nlat  6     // Number of latitudes 
-#define nlev  5     // Number of levels    
-#define ntsteps   3 // Number of time steps
+enum {
+  IOMode           = PIO_NONE,
+  nProcsIO         = 1,
+  DOUBLE_PRECISION = 8,
+  nlon             = 12,
+  nlat             = 6,
+  nlev             = 5,
+  ntsteps          = 3 };
 
 static int hasLocalFile[] = { 0, 0 };
-static int IOMode = PIO_NONE;
 
 double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
 double lats[nlat] = {-75, -45, -15, 15, 45, 75};
@@ -222,9 +217,11 @@ void modelRun ( MPI_Comm comm )
   return;
 }
 
+#endif 
 
 int main (int argc, char *argv[]) 
 {
+#ifdef USE_MPI
   int sizeGlob;
   MPI_Comm commGlob, commModel;
 
@@ -238,14 +235,20 @@ int main (int argc, char *argv[])
                                          
   if ( nProcsIO != 1 )
     xabort ( "bad distribution of tasks on PEs" );
+
   commModel = pioInit_c ( commGlob, nProcsIO, IOMode );
 
   modelRun ( commModel );
 
-  MPI_Finalize ();   
+  MPI_Finalize (); 
+#else
+#include <stdio.h>
+  printf ( "Use MPI for this testprogram.\n" );
+#endif
 
   return 0;
 }
+
 /*
  * Local Variables:
  * c-file-style: "Java"

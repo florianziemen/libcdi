@@ -123,38 +123,38 @@ void arrayDestroy ( void )
 
   if ( arrayResources )
     {
-        nnsp = namespaceGetNumber ();
+      nnsp = namespaceGetNumber ();
       for ( i = 0; i < nnsp; i++ )
 	{
 	  pioNamespaceSetActive ( i ); 
           if ( arrayResources[i] )
-              {
-                  if ( arraySizeAllocated )
-                      for ( j = 0; j < arraySizeAllocated[i]; j++ )
-                          {
-                              arrayElem = arrayResources[i] + j;
-                              if ( arrayElem->val )
-                                      arrayElem->ops->valDestroy ( arrayElem->val );
-                          }
-                  free ( arrayResources[i] );
-                  arrayResources[i] = NULL;
-              }
+            {
+              if ( arraySizeAllocated )
+                for ( j = 0; j < arraySizeAllocated[i]; j++ )
+                  {
+                    arrayElem = arrayResources[i] + j;
+                    if ( arrayElem->val )
+                      arrayElem->ops->valDestroy ( arrayElem->val );
+                  }
+              free ( arrayResources[i] );
+              arrayResources[i] = NULL;
+            }
 	}
       free ( arrayResources );
       arrayResources = NULL;
     }
   
   if ( freeListHead ) 
-      {
-          free ( freeListHead );
-          freeListHead = NULL;
-      }
+    {
+      free ( freeListHead );
+      freeListHead = NULL;
+    }
   if ( arraySizeAllocated ) 
-      {
-          free ( arraySizeAllocated );
-          arraySizeAllocated = NULL;
-      }
-
+    {
+      free ( arraySizeAllocated );
+      arraySizeAllocated = NULL;
+    }
+  
   file_list_delete ();   
 }
 

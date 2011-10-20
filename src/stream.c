@@ -1133,8 +1133,6 @@ void streamClose(int streamID)
   if ( CDI_Debug )
     Message("fileID = %d filename = %s", streamID, streamptr->filename);
 
-  xdebug ( "streamID=%d, filename = %s", streamID, streamptr->filename );
-
   fileID   = streamptr->fileID;
   filetype = streamptr->filetype;
   vlistID  = streamptr->vlistID;

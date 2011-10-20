@@ -736,18 +736,20 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode )
 
   commInit ();
   commDefCommGlob ( commGlob );
-
-  sizeGlob = commInqSizeGlob ();                                       
-  if ( nProcsIO <= 0 || nProcsIO >= sizeGlob || nProcsIO > sizeGlob / 2 )
+  sizeGlob = commInqSizeGlob ();
+                                      
+  if ( nProcsIO <= 0 || nProcsIO > sizeGlob )
     xabort ( "DISTRIBUTION OF TASKS ON PROCS IS NOT VALID." );
 
   commDefNProcsIO ( nProcsIO );
   commDefIOMode   ( IOMode, PIO_MAXIOMODUS, PIO_MINIOMODUSWITHSPECIALPROCS );
   commDefCommPio  ();
-
-  // just for test case compareResourceArray
+ 
+  // JUST FOR TEST CASE COMPARERESOURCEARRAY
   if ( commInqRankGlob () == 0 && commInqSizeGlob () == 1 ) 
     return commInqCommGlob ();
+
+  xassert ( commInqNProcsModel () > 0 );
 
   if ( commInqIsProcIO ()) 
     { 
