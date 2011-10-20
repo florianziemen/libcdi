@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.5.2
+! Fortran interface for CDI library version 1.5.3
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   August 2011
+! Uwe Schulzweida, MPI-MET, Hamburg,   October 2011
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -245,6 +245,12 @@
       PARAMETER (ZAXIS_SIGMA            = 11)
       INTEGER    ZAXIS_MEANSEA         
       PARAMETER (ZAXIS_MEANSEA          = 12)
+      INTEGER    ZAXIS_TOA             
+      PARAMETER (ZAXIS_TOA              = 13)
+      INTEGER    ZAXIS_SEA_BOTTOM      
+      PARAMETER (ZAXIS_SEA_BOTTOM       = 14)
+      INTEGER    ZAXIS_ATMOSPHERE      
+      PARAMETER (ZAXIS_ATMOSPHERE       = 15)
 !
 !  TAXIS types
 !

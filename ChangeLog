@@ -1,7 +1,11 @@
+2011-10-17  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.5.3 released
+
 2011-10-11  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
        * zaxisCompare: set epsilon from 0 to 1e-9 [request: Felicia Brisc]
-	
+
 2011-10-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added level type ZAXIS_TOA, ZAXIS_SEA_BOTTOM, ZAXIS_ATMOSPHERE [request: Dörte Liermann]
@@ -23,6 +27,10 @@
 2011-08-25  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* using CGRIBEX library version 1.5.1
+
+2011-08-22 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.5.2 released
 
 2011-08-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
