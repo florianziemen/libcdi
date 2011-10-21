@@ -11,7 +11,7 @@
 typedef int MPI_Comm; 
 #endif
 
-MPI_Comm pioInit_c ( MPI_Comm, int, int );
+MPI_Comm pioInit_c ( MPI_Comm, int, int, int, int * );
 
 #endif
 /*

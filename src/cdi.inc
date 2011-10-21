@@ -358,14 +358,6 @@
 !                                     INTEGER         )
       EXTERNAL        pioInqVarDecoOff
 
-!                     pioNamespaceInit
-!                                    (INTEGER         ,
-!                                     INTEGER         )
-      EXTERNAL        pioNamespaceInit
-
-!                     pioNamespaceCleanup
-      EXTERNAL        pioNamespaceCleanup
-
 !                     pioNamespaceSetActive
 !                                    (INTEGER         )
       EXTERNAL        pioNamespaceSetActive

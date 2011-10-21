@@ -77,7 +77,6 @@ void modelRun ()
   int rank;
 
 #ifdef USE_MPI
-  pioNamespaceInit ( 2, hlf );
   pioNamespaceSetActive ( 0 );
 #endif
 
@@ -220,8 +219,6 @@ void modelRun ()
   zaxisDestroy(zaxisID1);
   zaxisDestroy(zaxisID2);
   gridDestroy(gridID);
-
-  pioNamespaceCleanup ();
 }
 
 
@@ -241,7 +238,7 @@ int main (int argc, char *argv[])
   if ( nProcsIO <=0 || nProcsIO >= sizeGlob )
     xabort ( "bad distribution of tasks on PEs" );
 
-  commModel = pioInit_c ( commGlob, nProcsIO, 0 );
+  commModel = pioInit_c ( commGlob, nProcsIO, 0, 2, hlf );
 #endif
 
   modelRun ();

@@ -11,21 +11,22 @@
 #include "pio_util.h"
 
 enum { 
-  nProcsIO = 1,
-  IOMode   = PIO_NONE,
-  //IOMode   = PIO_MPI_NONB, 
-  //IOMode   = PIO_POSIX_FPGUARD_SENDRECV,
-  //IOMode   = PIO_POSIX_ASYNCH,
-  //IOMode   = PIO_POSIX_NONB,
-  filetype = FILETYPE_GRB,
-  ntfiles  = 2,
-  ntsteps  = 3,
-  nVars    = 5,
-  nlon     = 12,
-  nlat     = 6,
-  maxlev   = 5 };
+  nProcsIO    = 3,
+  //IOMode      = PIO_NONE,
+  //IOMode      = PIO_MPI_NONB, 
+  //IOMode      = PIO_POSIX_FPGUARD_SENDRECV,
+  //IOMode      = PIO_POSIX_ASYNCH,
+  IOMode      = PIO_POSIX_NONB,
+  nNamespaces = 1,
+  filetype    = FILETYPE_GRB,
+  ntfiles     = 2,
+  ntsteps     = 3,
+  nVars       = 5,
+  nlon        = 12,
+  nlat        = 6,
+  maxlev      = 5 };
 
-static int hasLocalFile[] = { 0 };
+static int hasLocalFile[nNamespaces] = { 0 };
 static int nlev[nVars]    = {1,1,5,5,2};
 static char * name        = "example";
 
@@ -42,8 +43,6 @@ void modelRun ()
   int vdate = 19850101, vtime = 120000;
   int start = CDI_UNDEFID, chunk = CDI_UNDEFID, stop = CDI_UNDEFID;
   char filename[1024];
-
-  pioNamespaceInit ( 1, hasLocalFile );
 
   gridID = gridCreate ( GRID_LONLAT, nlon*nlat );
   gridDefXsize ( gridID, nlon );
@@ -105,9 +104,7 @@ void modelRun ()
   taxisDestroy ( taxisID );
   for ( i = 0; i < nVars; i++ )
     zaxisDestroy ( zaxisID[i] );
-  gridDestroy ( gridID ); 
-
-  pioNamespaceCleanup (); 
+  gridDestroy ( gridID );  
 }
 
 
@@ -118,14 +115,12 @@ int main (int argc, char *argv[])
   int sizeGlob;
   int rankDebug;
 
-
   xmpi ( MPI_Init ( &argc, &argv));           
   xmpi ( MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob ));
   xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob )); 
-  xmpi ( MPI_Comm_rank ( commGlob, &rankDebug )); 
 
-  commModel = pioInit_c ( commGlob, nProcsIO, IOMode );
+  commModel = pioInit_c ( commGlob, nProcsIO, IOMode, nNamespaces, hasLocalFile );
 #endif
 
   modelRun ();

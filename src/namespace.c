@@ -68,25 +68,24 @@ namespaceTuple_t namespaceResHDecode ( int resH )
 }
 
 
-void pioNamespaceInit ( int nspn, int * argHasLocalFile )
+void namespaceInit ( int nspn, int * argHasLocalFile )
 {
 #ifdef USE_MPI
-  int i;
+  int nspID;
   xassert(nspn <= NUM_NAMESPACES && nspn >= 1 );
   nNamespaces = nspn;
-
   if ( nspn >= 1 )
     {
       hasLocalFile = xmalloc ( nspn * sizeof ( hasLocalFile[0] ));
-      for ( i = 0; i < nspn; i++ )  
-	hasLocalFile[i] = argHasLocalFile[i];
+      for ( nspID = 0; nspID < nspn; nspID++ )  
+	hasLocalFile[nspID] = argHasLocalFile[nspID];
       resASent = xmalloc ( nspn * sizeof ( resASent[0] )); 
     }
 #endif
 }
 
 
-void pioNamespaceCleanup ( void )
+void namespaceCleanup ( void )
 {
   if ( nNamespaces > 1 ) 
     {

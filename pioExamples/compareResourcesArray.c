@@ -17,13 +17,14 @@ extern void   arrayDestroy          ( void );
 enum {
   IOMode           = PIO_NONE,
   nProcsIO         = 1,
+  nNamespaces      = 2,
   DOUBLE_PRECISION = 8,
   nlon             = 12,
   nlat             = 6,
   nlev             = 5,
   ntsteps          = 3 };
 
-static int hasLocalFile[] = { 0, 0 };
+static int hasLocalFile[nNamespaces] = { 0, 0 };
 
 double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
 double lats[nlat] = {-75, -45, -15, 15, 45, 75};
@@ -182,8 +183,6 @@ void modelRun ( MPI_Comm comm )
   int bufferSize, differ;
   MPI_Status status;
 
-  pioNamespaceInit ( 2, hasLocalFile );
-
   pioNamespaceSetActive ( 0 );
 
   gridID  = defineGrid      ();
@@ -213,7 +212,6 @@ void modelRun ( MPI_Comm comm )
 
   pioNamespaceSetActive ( 0 );
   streamClose(streamID);
-  pioNamespaceCleanup ();
   return;
 }
 
@@ -236,7 +234,7 @@ int main (int argc, char *argv[])
   if ( nProcsIO != 1 )
     xabort ( "bad distribution of tasks on PEs" );
 
-  commModel = pioInit_c ( commGlob, nProcsIO, IOMode );
+  commModel = pioInit_c ( commGlob, nProcsIO, IOMode, nNamespaces, hasLocalFile );
 
   modelRun ( commModel );
 

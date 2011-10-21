@@ -10,6 +10,7 @@
 #include "dmemory.h"
 #include "varscan.h"
 #include "vlist.h"
+#include "grid.h"
 #include "pio_util.h"
 
 

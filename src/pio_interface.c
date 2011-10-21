@@ -733,7 +733,8 @@ int pioInit ( int comm, int nIOP, int mode )
 */
 
 #ifdef USE_MPI
-MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode )
+MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode, 
+                     int nNamespaces, int * hasLocalFile )
 {
   int sizeGlob;
 
@@ -756,9 +757,13 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode )
   commDefIOMode   ( IOMode, PIO_MAXIOMODUS, PIO_MINIOMODUSWITHSPECIALPROCS );
   commDefCommPio  ();
  
-  // JUST FOR TEST CASE COMPARERESOURCEARRAY
+  // JUST FOR TEST CASES WITH ONLY ONE MPI TASK
   if ( commInqRankGlob () == 0 && commInqSizeGlob () == 1 ) 
-    return commInqCommGlob ();
+    {
+      xdebug ();
+      namespaceInit ( nNamespaces, hasLocalFile );
+      return commInqCommGlob ();
+    }
 
   xassert ( commInqNProcsModel () > 0 );
 
@@ -772,7 +777,10 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode )
   else
     { 
       commEvalPhysNodes ();
-      commDefCommsIO ();        
+      commDefCommsIO ();  
+      xdebug ( "nNamespaces=%d, hasLocalFile= %d, %d",
+               nNamespaces, hasLocalFile[0], hasLocalFile[1] );
+      namespaceInit ( nNamespaces, hasLocalFile );     
     }
   
   return commInqCommModel ();
@@ -789,7 +797,6 @@ void  pioEndDef ( void )
   int rankGlob = commInqRankGlob ();
 
   varsMapNDeco ( commInqNNodes (), commInqNodeSizes ());
-  xdebug ();
 
   if ( rankGlob < commInqNProcsColl ())
     {
@@ -826,16 +833,16 @@ void pioFinalize ()
 {
 #ifdef USE_MPI
   int collID, ibuffer = 1111;
-  
+
+  namespaceCleanup (); 
   for ( collID = 0; collID < commInqNProcsColl (); collID++ )
     {
       xmpi ( MPI_Send ( &ibuffer, 1, MPI_INT, commInqNProcsModel (), 
                         FINALIZE, commInqCommsIO ( collID )));
       xdebug ( "SENT MESSAGE WITH TAG \"FINALIZE\"" );
     }
-
   modelWinCleanup ();
-  commDestroy ();
+  commDestroy (); 
 #endif
 } 
  

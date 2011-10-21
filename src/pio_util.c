@@ -23,7 +23,7 @@ void pcdiAssert   ( bool assumption, const char * filename,
       int rank;
       
       MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
-      fprintf ( stderr, "ERROR ASSUMPTION FALSE, pe%d in %s, %s, line %d\n",
+      fprintf ( stderr, "ERROR, ASSUMPTION FALSE: PE%d in %s, %s, line %d\n",
                 rank, functionname, filename, line );
       MPI_Abort ( MPI_COMM_WORLD, 1 );
 #else

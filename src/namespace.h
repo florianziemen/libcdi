@@ -7,7 +7,8 @@ typedef struct {
   int resASent;
 }namespaceTuple_t;
 
-
+void             namespaceCleanup      ( void );
+void             namespaceInit         ( int, int * );
 void             namespaceShowbits     ( int, char * );
 int              namespaceGetNumber    ( void );
 int              namespaceGetActive    ( void );

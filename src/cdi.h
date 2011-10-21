@@ -206,15 +206,12 @@ extern "C" {
 #define  PIO_MINIOMODUSWITHSPECIALPROCS  PIO_POSIX_NONB  
   
 
-int      pioInit            ( int, int, int );
-void     pioFinalize        ( void );
-void     pioEndDef          ( void );
-void     pioWriteTimestep   ( int, int, int );
-int      pioInqVarDecoChunk ( int, int );
-int      pioInqVarDecoOff   ( int, int );
-
-void     pioNamespaceInit      ( int, int * );
-void     pioNamespaceCleanup   ( void );
+int      pioInit               ( int, int, int );
+void     pioFinalize           ( void );
+void     pioEndDef             ( void );
+void     pioWriteTimestep      ( int, int, int );
+int      pioInqVarDecoChunk    ( int, int );
+int      pioInqVarDecoOff      ( int, int );
 void     pioNamespaceSetActive ( int );
 
 void     gridGetIndexArray    ( int, int * );
