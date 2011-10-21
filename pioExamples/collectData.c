@@ -10,29 +10,21 @@
 #include "cdi.h"
 #include "pio_util.h"
 
-enum { 
-  nProcsIO    = 3,
-  //IOMode      = PIO_NONE,
-  //IOMode      = PIO_MPI_NONB, 
-  //IOMode      = PIO_POSIX_FPGUARD_SENDRECV,
-  //IOMode      = PIO_POSIX_ASYNCH,
-  IOMode      = PIO_POSIX_NONB,
-  nNamespaces = 1,
-  filetype    = FILETYPE_GRB,
-  ntfiles     = 2,
-  ntsteps     = 3,
-  nVars       = 5,
-  nlon        = 12,
-  nlat        = 6,
-  maxlev      = 5 };
-
-static int hasLocalFile[nNamespaces] = { 0 };
-static int nlev[nVars]    = {1,1,5,5,2};
-static char * name        = "example";
-
 
 void modelRun ()
 {
+  enum {
+    filetype    = FILETYPE_GRB,
+    ntfiles     = 2,
+    ntsteps     = 3,
+    nVars       = 5,
+    nlon        = 12,
+    nlat        = 6,
+    maxlev      = 5 };
+  
+  static int nlev[nVars]    = {1,1,5,5,2};
+  static char * name        = "example";
+
   int gridID, zaxisID[nVars], taxisID;
   int vlistID, varID[nVars], streamID, tsID, tfID = 0;
   int i, j, nmiss = 0, rank;
@@ -110,6 +102,17 @@ void modelRun ()
 
 int main (int argc, char *argv[]) 
 {
+  enum { 
+    nProcsIO    = 3,
+    //IOMode      = PIO_NONE,
+    //IOMode      = PIO_MPI_NONB, 
+    //IOMode      = PIO_POSIX_FPGUARD_SENDRECV,
+    //IOMode      = PIO_POSIX_ASYNCH,
+    IOMode      = PIO_POSIX_NONB,
+    nNamespaces = 1 };
+  
+  static int hasLocalFile[nNamespaces] = { 0 };
+  
 #ifdef USE_MPI
   MPI_Comm commGlob, commModel; 
   int sizeGlob;

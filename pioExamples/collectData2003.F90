@@ -9,6 +9,30 @@
       INCLUDE 'mpif.h'
 #endif
 
+      INTEGER pioComm, rank, error
+  
+#ifdef USE_MPI
+  CALL MPI_INIT ( error )
+  CALL MPI_COMM_DUP ( MPI_COMM_WORLD, pioComm, error )
+  CALL MPI_COMM_RANK ( pioComm, rank, error )
+#endif
+
+  PRINT *, 'BEFORE MODELRUN'
+
+  CALL MODELRUN
+
+  PRINT *, 'AFTER MODELRUN'
+
+#ifdef USE_MPI
+  CALL MPI_FINALIZE ( error )
+#endif
+
+CONTAINS
+
+  SUBROUTINE MODELRUN
+
+    IMPLICIT NONE
+
       INTEGER nlon, nlat, nlev, nts
       PARAMETER (nlon = 12)   ! Number of longitudes
       PARAMETER (nlat =  6)   ! Number of latitudes
@@ -18,7 +42,6 @@
       INTEGER gridID, zaxisID1, zaxisID2, taxisID
       INTEGER vlistID, varID1, varID2, streamID, tsID
       INTEGER i, nmiss, status
-      INTEGER pioComm, rank, error
       DOUBLE PRECISION lons(nlon), lats(nlat), levs(nlev)
       DOUBLE PRECISION var1(nlon*nlat), var2(nlon*nlat*nlev)
       CHARACTER(len=256) :: varname
@@ -26,12 +49,6 @@
       DATA lons /0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330/
       DATA lats /-75, -45, -15, 15, 45, 75/
       DATA levs /101300, 92500, 85000, 50000, 20000/
-  
-#ifdef USE_MPI
-  CALL MPI_INIT ( error )
-  CALL MPI_COMM_DUP ( MPI_COMM_WORLD, pioComm, error )
-  CALL MPI_COMM_RANK ( pioComm, rank, error )
-#endif
 
       nmiss = 0
 
@@ -109,7 +126,5 @@
       CALL zaxisDestroy(zaxisID2)
       CALL gridDestroy(gridID)
 
-#ifdef USE_MPI
-  CALL MPI_FINALIZE ( error )
-#endif
+  END SUBROUTINE MODELRUN
 END PROGRAM COLLECTDATA2003
