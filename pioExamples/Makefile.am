@@ -1,4 +1,4 @@
-noinst_PROGRAMS=collectData
+noinst_PROGRAMS=collectData collectData2003
 
 if USE_MPI
 noinst_PROGRAMS+=compareResourcesArray 
@@ -9,6 +9,10 @@ AM_CFLAGS=-I$(top_srcdir)/src
 collectData_SOURCES=collectData.c
 
 collectData_LDADD=-L../src -lcdi
+
+collectData2003_SOURCES=collectData2003.F90
+
+collectData2003_LDADD=-L../src -lcdi
 
 compareResourcesArray_SOURCES=compareResourcesArray.c
 

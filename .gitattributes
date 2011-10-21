@@ -149,6 +149,7 @@ pioExamples/cdi_write_more_nodes.job -text
 pioExamples/cdi_write_parallel.job -text
 pioExamples/cdi_write_serial.job -text
 pioExamples/collectData.c -text
+pioExamples/collectData2003.F90 -text
 pioExamples/compareResourcesArray.c -text
 pioExamples/myModel.c -text
 pioExamples/myModel2003.F90 -text
