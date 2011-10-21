@@ -21,13 +21,14 @@
 #include "vlist_var.h"
 extern resOps streamOps;
 
-size_t         * winBufferSize = NULL;
-unsigned char ** winBuffer     = NULL;
-unsigned char ** winBufferHead = NULL;
-MPI_Win        * win           = NULL;
-int            * winPostSet    = NULL;
-MPI_Group      * groupsIO      = NULL;
-MPI_Group      * groupsIONetto = NULL;
+size_t         * winBufferSize  = NULL;
+unsigned char ** winBuffer      = NULL;
+unsigned char ** winBufferHead  = NULL;
+MPI_Win        * win            = NULL;
+int            * winPostSet     = NULL;
+int            * refuseFuncCall = NULL;
+MPI_Group      * groupsIO       = NULL;
+MPI_Group      * groupsIONetto  = NULL;
 
 char * funcMap[nFuncs] = {"streamOpen", "streamDefVlist", "streamClose" };
 
@@ -310,6 +311,7 @@ void modelWinCleanup ( void )
     }
 
   if ( groupsIONetto )   free ( groupsIONetto );
+  if ( refuseFuncCall )  free ( refuseFuncCall );
   if ( winPostSet )      free ( winPostSet );
   if ( win )             free ( win );
   if ( winBufferHead )   free ( winBufferHead );
@@ -386,9 +388,11 @@ static
             winBufferHead         != NULL      &&
             winBufferSize         != NULL      &&
             winBufferSize[collID] >= 0         &&
-            winBufferSize[collID] <= MAXWINBUFFERSIZE );
+            winBufferSize[collID] <= MAXWINBUFFERSIZE &&
+            refuseFuncCall        != NULL );
   memset ( winBuffer[collID], 0, winBufferSize[collID] );
   winBufferHead[collID] = winBuffer[collID];
+  refuseFuncCall[collID] = 0;
 }
 
 
@@ -406,6 +410,7 @@ void modelWinCreate ( void )
   winBufferHead   = xmalloc ( nProcsColl * sizeof ( winBufferHead[0] ));
   win             = xmalloc ( nProcsColl * sizeof ( win[0] ));
   winPostSet      = xmalloc ( nProcsColl * sizeof ( winPostSet[0] ));
+  refuseFuncCall  = xmalloc ( nProcsColl * sizeof ( refuseFuncCall[0] ));
   groupsIONetto   = xmalloc ( nProcsColl * sizeof ( groupsIONetto[0] ));
 
   modelWinDefBufferSizes ();
@@ -471,14 +476,15 @@ void pioBufferData ( int streamIDarg, int varIDarg, const double *data, int nmis
   vlistID  = streamInqVlist ( streamID );
   collID   = commRankGlob2CollID ( vlistInqVarIOrank ( vlistID, varID ));
   chunk    = vlistInqVarDecoChunk ( vlistID, varID, rankModel );
-  xassert ( collID        >= 0                    &&
-            collID        <  commInqNProcsColl () &&
-            chunk         >= 0                    &&
-            winBufferSize != NULL                 &&
-            winBuffer     != NULL                 &&
-            winBufferHead != NULL                 &&
-            winPostSet    != NULL                 &&
-            win           != NULL );
+  xassert ( collID         >= 0                    &&
+            collID         <  commInqNProcsColl () &&
+            chunk          >= 0                    &&
+            winBufferSize  != NULL                 &&
+            winBuffer      != NULL                 &&
+            winBufferHead  != NULL                 &&
+            winPostSet     != NULL                 &&
+            refuseFuncCall != NULL                &&
+            win            != NULL );
   
   xdebug3 ("streamID=%d, vlistID=%d, varID=%d, collID=%d, "
           "chunk=%d, data=%.2f, nmiss=%d",
@@ -500,7 +506,9 @@ void pioBufferData ( int streamIDarg, int varIDarg, const double *data, int nmis
   modelWinBufferPutAtEnd ( __func__, collID, &varID    , sizeof ( varID ));
   modelWinBufferPutAtEnd ( __func__, collID, data      , chunk * sizeof ( double ));
   modelWinBufferPutAtEnd ( __func__, collID, &nmiss    , sizeof ( nmiss ));
-  modelWinBufferPutAtEnd ( __func__, collID, &tokenSep , sizeof ( tokenSep ));      
+  modelWinBufferPutAtEnd ( __func__, collID, &tokenSep , sizeof ( tokenSep )); 
+
+  refuseFuncCall[collID] = 1;
 }
 
 /************************************************************************/
@@ -563,6 +571,9 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
                 winPostSet[collID] = 0;
                 modelWinFlushBuffer ( collID );
               }
+
+            xassert ( refuseFuncCall[collID] == 0 );
+
             modelWinBufferPutAtEnd ( __func__, collID, &tokenFuncCall, 
                                      sizeof ( tokenFuncCall));
             modelWinBufferPutAtEnd ( __func__, collID, &funcID, 
