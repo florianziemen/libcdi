@@ -13,6 +13,8 @@
 #include "grid.h"
 #include "pio_util.h"
 
+extern void zaxisGetIndexArray ( int, int * );
+
 
 #undef  UNDEFID
 #define UNDEFID -1

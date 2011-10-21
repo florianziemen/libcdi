@@ -214,12 +214,6 @@ int      pioInqVarDecoChunk    ( int, int );
 int      pioInqVarDecoOff      ( int, int );
 void     pioNamespaceSetActive ( int );
 
-void     gridGetIndexArray    ( int, int * );
-void     streamGetIndexArray  ( int, int * );
-void     zaxisGetIndexArray   ( int, int * );
-void     vlistDefVarIOrank    ( int, int, int );
-int      vlistInqVarIOrank    ( int, int );
-
 
   /* CDI control routines */
 

@@ -362,32 +362,6 @@
 !                                    (INTEGER         )
       EXTERNAL        pioNamespaceSetActive
 
-!                     gridGetIndexArray
-!                                    (INTEGER         ,
-!                                     INTEGER         )
-      EXTERNAL        gridGetIndexArray
-
-!                     streamGetIndexArray
-!                                    (INTEGER         ,
-!                                     INTEGER         )
-      EXTERNAL        streamGetIndexArray
-
-!                     zaxisGetIndexArray
-!                                    (INTEGER         ,
-!                                     INTEGER         )
-      EXTERNAL        zaxisGetIndexArray
-
-!                     vlistDefVarIOrank
-!                                    (INTEGER         ,
-!                                     INTEGER         ,
-!                                     INTEGER         )
-      EXTERNAL        vlistDefVarIOrank
-
-      INTEGER         vlistInqVarIOrank
-!                                    (INTEGER         ,
-!                                     INTEGER         )
-      EXTERNAL        vlistInqVarIOrank
-
       CHARACTER*80    cdiStringError
 !                                    (INTEGER         cdiErrno)
       EXTERNAL        cdiStringError

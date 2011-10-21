@@ -19,6 +19,7 @@
 #include "stream_int.h"
 #include "vlist.h"
 #include "vlist_var.h"
+#include "stream_int.h"
 extern resOps streamOps;
 
 size_t         * winBufferSize  = NULL;
