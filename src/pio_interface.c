@@ -5,21 +5,20 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include "limits.h" 
 #include "cdi.h"
+#include "limits.h" 
 #include "pio_util.h"
+#include "vlist_var.h"
 
 #ifdef USE_MPI
+#include "namespace.h"
 #include "pio_interface.h"
 #include "pio_comm.h"
 #include "pio_rpc.h"
 #include "pio_server.h"
-#include "namespace.h"
 #include "resource_handle.h"
 #include "stream_int.h"
 #include "vlist.h"
-#include "vlist_var.h"
-#include "stream_int.h"
 extern resOps streamOps;
 
 size_t         * winBufferSize  = NULL;
@@ -704,9 +703,23 @@ int pioInqVarDecoOff ( int vlistID, int varID )
 
 /*****************************************************************************/
 
-int pioInit ( int comm, int nIOP, int mode )
+int pioInit ( int commGlobArg, int nProcsIO, int IOMode )
 {
 #ifdef USE_MPI
+  MPI_Comm commGlob;
+  int rank;
+#endif
+
+  xdebug ( "commGlobArg=%d, nProcsIO = %d, IOMode = %d ", 
+           commGlobArg, nProcsIO, IOMode );
+
+#ifdef USE_MPI
+  commGlob = MPI_COMM_NULL;
+  commGlob = MPI_Comm_f2c (( MPI_Fint ) commGlobArg );
+  xassert ( commGlob != MPI_COMM_NULL );
+
+  xmpi ( MPI_Comm_rank ( commGlob, &rank ));
+  xdebug ( "####################### rank=%d", rank );
 #endif
   return 0;
 }
