@@ -440,40 +440,39 @@ void modelWinCreate ( void )
 
 static
   void modelWinBufferPutAtEnd ( const char * caller, 
-                                int ID, void * argBuffer, size_t size )
+                                int collID, const void * argBuffer, size_t size )
 {
   char text[1024];
   /*
-    xdebug ( "ID=%d, size=%d, newBufferHead=%d, oldBufferSize=%d",
-    ID, size, winBufferHead[ID] - winBuffer[ID] + size, winBufferSize[ID] );
+    xdebug ( "collID=%d, size=%d, newBufferHead=%d, oldBufferSize=%d",
+    collID, size, winBufferHead[collID] - winBuffer[collID] + size, 
+    winBufferSize[collID] );
   */
   if ( winBufferHead == NULL ||
        argBuffer     == NULL ||
        size           < 0    ||
-       ID             < 0    ||
-       ID             >= commInqNProcsColl () ||
-       winBufferHead[ID] - winBuffer[ID] + size > winBufferSize[ID] )
+       collID         < 0    ||
+       collID        >= commInqNProcsColl () ||
+       winBufferHead[collID] - winBuffer[collID] + size > winBufferSize[collID] )
     {
       sprintf ( text, "caller: %s", caller );
       xabort ( text );
     }
   
-  memcpy ( winBufferHead[ID], argBuffer, size );
-  winBufferHead[ID] += size;
+  memcpy ( winBufferHead[collID], argBuffer, size );
+  winBufferHead[collID] += size;
 }
 
 /************************************************************************/
 
-void pioBufferData ( int streamIDarg, int varIDarg, const double *data, int nmiss )
+void pioBufferData ( const int streamID, const int varID, const double *data, int nmiss )
 {
-  int chunk, streamID, varID, vlistID, collID = CDI_UNDEFID;
+  int chunk, vlistID, collID = CDI_UNDEFID;
   int tokenSep = SEPARATOR, tokenData = DATATOKEN;
   size_t size;
   void * vp;
   int rankModel = commInqRankModel ();
 
-  streamID = streamIDarg;
-  varID    = varIDarg;
   vlistID  = streamInqVlist ( streamID );
   collID   = commRankGlob2CollID ( vlistInqVarIOrank ( vlistID, varID ));
   chunk    = vlistInqVarDecoChunk ( vlistID, varID, rankModel );

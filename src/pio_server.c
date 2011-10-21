@@ -24,13 +24,13 @@
 extern resOps streamOps;
 extern void arrayDestroy ( void );
 
-MPI_Comm * commPio;
-MPI_Win win;
-MPI_Group groupModel;
+MPI_Comm *       commPio;
 
 int            * getBufferSize = NULL;
 unsigned char ** getBuffer     = NULL;
 unsigned char ** getBufferHead = NULL;
+MPI_Win          getWin;
+MPI_Group        groupModel;
 
 
 /************************************************************************/
@@ -41,7 +41,7 @@ void serverWinCleanup ()
   int i;
   int nProcsCalc = commInqNProcsModel ();
   
-  xmpi ( MPI_Win_free ( &win ));
+  xmpi ( MPI_Win_free ( &getWin ));
 
   if ( getBuffer )
     {  
@@ -119,7 +119,7 @@ static
   int nProcsModel = commInqNProcsModel ();
 
   xmpi ( MPI_Win_create ( MPI_BOTTOM, 0, 1, MPI_INFO_NULL,
-                          commCalc, &win ));
+                          commCalc, &getWin ));
 
   /* target group */
   ranks[0] = nProcsModel;
@@ -362,15 +362,15 @@ void getData ( int tsID, int vdate, int vtime )
   // todo put in correct lbs and ubs
   xassert ( tsID >= 0 && vdate >= 0 && vtime >= 0 );
 
-  xmpi ( MPI_Win_start ( groupModel, iAssert, win )); 
+  xmpi ( MPI_Win_start ( groupModel, iAssert, getWin )); 
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
       getFlushBuffer ( modelID );
       xmpi ( MPI_Get ( &getBuffer[modelID][0], getBufferSize[modelID], 
                        MPI_UNSIGNED_CHAR, modelID, 0, 
-                       getBufferSize[modelID], MPI_UNSIGNED_CHAR, win ));
+                       getBufferSize[modelID], MPI_UNSIGNED_CHAR, getWin ));
     }
-  xmpi ( MPI_Win_complete ( win ));
+  xmpi ( MPI_Win_complete ( getWin ));
 
   if ( ddebug > 2 )
     for ( modelID = 0; modelID < nProcsModel; modelID++ )
