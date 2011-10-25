@@ -46,6 +46,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].complevel    = 1;
   vlistptr->vars[varID].atts.nalloc  = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems  = 0;
+  vlistptr->vars[varID].lvalidrange  = 0;
 }
 
 static
@@ -1076,30 +1077,6 @@ double vlistInqVarMissval(int vlistID, int varID)
   return (vlistptr->vars[varID].missval);
 }
 
-
-double vlistInqVarScalefactor(int vlistID, int varID)
-{
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  return (vlistptr->vars[varID].scalefactor);
-}
-
-
-double vlistInqVarAddoffset(int vlistID, int varID)
-{
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  return (vlistptr->vars[varID].addoffset);
-}
-
 /*
 @Function  vlistDefVarMissval
 @Title     Define the missing value of a Variable
@@ -1127,6 +1104,61 @@ void vlistDefVarMissval(int vlistID, int varID, double missval)
   vlistptr->vars[varID].missvalused = TRUE;
 }
 
+
+int vlistInqVarValidrange(int vlistID, int varID, double *validrange)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  if ( validrange != NULL && vlistptr->vars[varID].lvalidrange )
+    {
+      validrange[0] = vlistptr->vars[varID].validrange[0];
+      validrange[1] = vlistptr->vars[varID].validrange[1];
+    }
+
+  return (vlistptr->vars[varID].lvalidrange);
+}
+
+
+void vlistDefVarValidrange(int vlistID, int varID, const double *validrange)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  vlistptr->vars[varID].validrange[0] = validrange[0];
+  vlistptr->vars[varID].validrange[1] = validrange[1];
+  vlistptr->vars[varID].lvalidrange = TRUE;
+}
+
+
+double vlistInqVarScalefactor(int vlistID, int varID)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  return (vlistptr->vars[varID].scalefactor);
+}
+
+
+double vlistInqVarAddoffset(int vlistID, int varID)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  return (vlistptr->vars[varID].addoffset);
+}
 
 void vlistDefVarScalefactor(int vlistID, int varID, double scalefactor)
 {
