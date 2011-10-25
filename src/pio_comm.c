@@ -435,6 +435,8 @@ void     commRecvNodeMap    ( void )
   xmpi ( MPI_Probe ( source, NODEMAP, info->commGlob, &status ));
   xmpi ( MPI_Get_count ( &status, MPI_INTEGER, &info->nProcsColl ));
 
+  xdebug ( "info->nProcsColl=%d", info->nProcsColl );
+
   info->nodeMap = xmalloc ( info->nProcsColl * 
                                 sizeof ( info->nodeMap[0] )); 
 
@@ -507,6 +509,8 @@ void     commEvalPhysNodes  ( void )
       if ( nodeInfo[IOID].isProcColl ) info->nProcsColl++;
     }
 
+  xassert ( info->nProcsColl <= info->nProcsModel );
+
   // define nodeSizes
   info->nodeInfo.nNodes = nNodes; 
   info->nodeSizes = xmalloc ( info->nodeInfo.nNodes * 
@@ -541,7 +545,6 @@ void     commEvalPhysNodes  ( void )
           * p1[nodeInfo[IOID].hostID - 1]++ = IOID + info->nProcsModel;
         }
     }
-
   if ( info->rankGlob < info->nProcsIO )
     xmpi ( MPI_Send ( info->nodeMap, info->nProcsColl, MPI_INTEGER, 
                     info->rankGlob + info->nProcsModel, 
@@ -616,18 +619,15 @@ void     commDefCommsIO     ( void )
     * ( ranks + i ) = i;
   
   xmpi ( MPI_Comm_group ( info->commGlob, &groupGlob )); 
-  xdebug ();
 
   for ( collID = 0; collID < info->nProcsColl; collID++ )
     {
       currIORank = info->nodeMap[collID];
-      * ( ranks + info->nProcsModel ) = currIORank;	  
+      * ( ranks + info->nProcsModel ) = currIORank;
       xmpi ( MPI_Group_incl ( groupGlob, info->nProcsModel + 1, 
                               ranks, &currGroupIO ));
-  xdebug ();
       xmpi ( MPI_Comm_create ( info->commGlob, currGroupIO,  
                                info->commsIO + collID ));
-  xdebug ();
       if ( info->rankGlob == currIORank )
 	info->commCalc = info->commsIO[collID];
 
@@ -642,7 +642,6 @@ void     commDefCommsIO     ( void )
 
   if ( ddebug >= 2 )
     {
-
       if ( info->rankGlob < info->nProcsModel )
 	for ( collID = 0; collID < info->nProcsColl; collID++ ) 
           xdebugComm ( info->commsIO + collID );
@@ -653,10 +652,8 @@ void     commDefCommsIO     ( void )
   xmpi ( MPI_Group_free ( &currGroupIO ));
   xmpi ( MPI_Group_free ( &groupGlob ));
   free ( ranks );
-  xdebug ();
 
   commPrint ( stdout );
-  xdebug ();
 }
 
 
@@ -692,6 +689,8 @@ int      commInqNProcsColl  ( void )
 void commPrint ( FILE * fp )
 {
   int i;
+
+  if ( ddebug == 0 ) return;
 
   xassert ( info != NULL );
 

@@ -1126,6 +1126,7 @@ void streamClose(int streamID)
   int index;
   int vlistID;
   stream_t *streamptr;
+  xdebug ();
 
   streamptr = stream_to_pointer(streamID);
   stream_check_ptr(__func__, streamptr);
@@ -1198,6 +1199,7 @@ void streamClose(int streamID)
   else
     if ( namespaceInqResASent () == 1 )
       pioBufferFuncCall ( __func__, 1, streamID );
+  xdebug ();
 #endif
       
   if ( streamptr->record )
@@ -1250,6 +1252,7 @@ void streamClose(int streamID)
     }
 
   stream_delete_entry(streamptr);
+  xdebug ();
 }
 
 /*

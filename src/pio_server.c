@@ -404,9 +404,7 @@ void IOServer ()
   MPI_Comm commCalc;
   MPI_Status status;
 
-  xdebug ();
   backendInit ();
-  xdebug ();
   if ( commInqRankNode () == commInqSpecialRankNode ()) 
     backendFinalize ();
   commCalc = commInqCommCalc ();
@@ -428,11 +426,14 @@ void IOServer ()
           xdebug ( "RECEIVED MESSAGE WITH TAG \"FINALIZE\"" );
           free ( iBuffer );
 	  nfinished++;
+          xdebug ( "nfinished=%d, nProcsModel=%d", 
+                  nfinished, nProcsModel );
 
 	  if ( nfinished == nProcsModel )  
             {              
               {
                 int nStreams = streamSize ();
+                xdebug ();
                 if ( nStreams > 0 )
                   {
                     int streamNo;
@@ -444,10 +445,14 @@ void IOServer ()
                       streamClose ( resHs[streamNo] );
                     free ( resHs );
                   }
-                backendCleanup ();
-              } 
+              }
+                xdebug ();
+              backendCleanup (); 
+                xdebug ();
               serverWinCleanup ();
+                xdebug ();
               arrayDestroy();
+                xdebug ();
               return;
             }
 	  

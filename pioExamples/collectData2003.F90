@@ -18,9 +18,9 @@ PROGRAM COLLECTDATA2003
   PARAMETER ( nProcsIO = 4 )
   !PARAMETER ( IOMode   = PIO_NONE )                 
   !PARAMETER ( IOMode   = PIO_MPI_NONB )             
-  !PARAMETER ( IOMode   = PIO_POSIX_NONB )           
+  PARAMETER ( IOMode   = PIO_POSIX_NONB )           
   !PARAMETER ( IOMode   = PIO_POSIX_ASYNCH )         
-  PARAMETER ( IOMode   = PIO_POSIX_FPGUARD_SENDRECV )
+  !PARAMETER ( IOMode   = PIO_POSIX_FPGUARD_SENDRECV )
 
   PARAMETER ( nNamespaces = 1 )
   INTEGER, PARAMETER :: hasLocalFile ( nNamespaces ) = (/ 0 /) 

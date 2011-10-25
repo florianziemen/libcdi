@@ -254,6 +254,7 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
   int nStreams, nVars, * resHs, * streamSizes, * varSizes, * varMapping, * getsStreamData;
   int i, j, k = 0;
   int nProcsColl = commInqNProcsColl ();
+  char text[1024];
 
   nStreams = streamSize ();
 
@@ -291,14 +292,28 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
                               * ( varMapping + k ));
           getsStreamData[commRankGlob2CollID ( varMapping[k++] )] = 1;
         }
-      xprintArray ( "getsStreamData", getsStreamData, nProcsColl, DATATYPE_INT );
-      for ( j = 0; j < nProcsColl; j++ )
-        if ( getsStreamData[j] == 0 ) xabort ( "NUMBER OF IO PROCESSES NOT WORTHWHILE." );
-      
-      memset ( getsStreamData, 0, nProcsColl * sizeof ( getsStreamData[0] ));
-      xprintArray ( "getsStreamData", getsStreamData, nProcsColl, DATATYPE_INT );
-    }
 
+      for ( j = 0; j < nProcsColl; j++ )
+        if ( getsStreamData[j] == 0 )
+          {
+            if ( commInqIOMode () == PIO_MPI_NONB )
+              {
+                sprintf ( text,  
+                          "\nAT LEAST ONE COLLECTOR PROCESS IDLE, "
+                          "\nCURRENTLY NOT COVERED IN IOMODE PIO_MPI_NONB: "
+                          "\nPE%d writes no data for stream %d",
+                          commCollID2RankGlob ( j ), resHs[i]);
+                xabort ( text );
+              }
+            else
+              {
+                xwarning ( "PE%d writes no data for stream %d",
+                           commCollID2RankGlob ( j ), resHs[i]); 
+              }
+          }      
+      memset ( getsStreamData, 0, nProcsColl * sizeof ( getsStreamData[0] ));
+    }
+      
   if ( varMapping )  free ( varMapping );
   if ( varSizes )    free ( varSizes );
   if ( getsStreamData ) free ( getsStreamData );
@@ -739,7 +754,7 @@ int pioInqVarDecoOff ( int vlistID, int varID )
 MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode, 
                      int nNamespaces, int * hasLocalFile )
 {
-  int sizeGlob;
+  int sizeGlob, nProcsModel;
 
   if ( IOMode < PIO_MINIOMODUS || IOMode > PIO_MAXIOMODUS )
     xabort ( "IOMODE IS NOT VALID." );
@@ -761,13 +776,14 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode,
   commDefCommPio  ();
  
   // JUST FOR TEST CASES WITH ONLY ONE MPI TASK
-  if ( commInqRankGlob () == 0 && commInqSizeGlob () == 1 ) 
+  if ( commInqSizeGlob () == 1 ) 
     {
       namespaceInit ( nNamespaces, hasLocalFile );
       return commInqCommGlob ();
     }
 
-  xassert ( commInqNProcsModel () > 0 );
+  if ( commInqNProcsModel () < nProcsIO )
+    xabort ( "NUMBER OF MODEL PROCESSES HAS TO BE LARGER THAN NUMBER OF IO PROCESSES." );
 
   if ( commInqIsProcIO ()) 
     { 
@@ -853,6 +869,7 @@ void pioFinalize ()
 {
 #ifdef USE_MPI
   int collID, ibuffer = 1111;
+  xdebug ();
   namespaceCleanup (); 
   for ( collID = 0; collID < commInqNProcsColl (); collID++ )
     {
@@ -905,6 +922,7 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
       xmpi ( MPI_Win_post ( groupsIONetto[collID], iAssert, win[collID] ));
       winPostSet[collID] = 1;
     } 
+  xdebug ();
 #endif
 }
 
