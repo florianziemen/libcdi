@@ -204,9 +204,9 @@ extern "C" {
 #define  PIO_MINIOMODUS                  PIO_NONE
 #define  PIO_MAXIOMODUS                  PIO_POSIX_FPGUARD_SENDRECV
 #define  PIO_MINIOMODUSWITHSPECIALPROCS  PIO_POSIX_NONB  
-  
+ 
 
-int      pioInit               ( int, int, int );
+int      pioInit               ( int, int, int, int, int * );
 void     pioFinalize           ( void );
 void     pioEndDef             ( void );
 void     pioWriteTimestep      ( int, int, int );

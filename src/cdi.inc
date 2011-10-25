@@ -333,6 +333,8 @@
       INTEGER         pioInit
 !                                    (INTEGER         ,
 !                                     INTEGER         ,
+!                                     INTEGER         ,
+!                                     INTEGER         ,
 !                                     INTEGER         )
       EXTERNAL        pioInit
 

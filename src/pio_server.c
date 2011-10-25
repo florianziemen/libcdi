@@ -29,8 +29,8 @@ MPI_Comm *       commPio;
 int            * getBufferSize = NULL;
 unsigned char ** getBuffer     = NULL;
 unsigned char ** getBufferHead = NULL;
-MPI_Win          getWin;
-MPI_Group        groupModel;
+MPI_Win          getWin        = MPI_WIN_NULL;
+MPI_Group        groupModel    = MPI_GROUP_NULL;
 
 
 /************************************************************************/
@@ -41,8 +41,9 @@ void serverWinCleanup ()
   int i;
   int nProcsCalc = commInqNProcsModel ();
   
-  xmpi ( MPI_Win_free ( &getWin ));
-
+  if ( getWin != MPI_WIN_NULL )
+    xmpi ( MPI_Win_free ( &getWin ));
+  
   if ( getBuffer )
     {  
       for ( i = 0; i < nProcsCalc; i++ )
@@ -429,14 +430,18 @@ void IOServer ()
 	  if ( nfinished == nProcsModel )  
             {              
               {
-                int nStreams = streamSize (), streamNo;
-                int * resHs;
-                
-                resHs       = xmalloc ( nStreams * sizeof ( resHs[0] ));
-                streamGetIndexArray ( nStreams, resHs );
-                for ( streamNo = 0; streamNo < nStreams; streamNo++ )
-                    streamClose ( resHs[streamNo] );
-                free ( resHs );
+                int nStreams = streamSize ();
+                if ( nStreams > 0 )
+                  {
+                    int streamNo;
+                    int * resHs;
+                    
+                    resHs       = xmalloc ( nStreams * sizeof ( resHs[0] ));
+                    streamGetIndexArray ( nStreams, resHs );
+                    for ( streamNo = 0; streamNo < nStreams; streamNo++ )
+                      streamClose ( resHs[streamNo] );
+                    free ( resHs );
+                  }
                 backendCleanup ();
               } 
               serverWinCleanup ();

@@ -154,12 +154,11 @@ int xsum ( int, int * );
 
 double xchecksum ( int, int, void * );
  
-void printArray ( char *, void *, int, int, const char *, const char *, int );
+void printArray ( char *, const void *, int, int, const char *, const char *, int );
 #define xprintArray(ps,array,n,datatype)                                \
   if ( ddebug )                                                         \
     printArray ( ps, array, n, datatype,  __func__, __FILE__, __LINE__ )
  
-void printArray ( char *, void *, int, int, const char *, const char *, int );
 #define xprintArray3(ps,array,n,datatype)                                \
   if ( ddebug == MAXDEBUG )                                                         \
     printArray ( ps, array, n, datatype,  __func__, __FILE__, __LINE__ )

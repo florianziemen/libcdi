@@ -301,14 +301,18 @@ void modelWinCleanup ( void )
 {
   int collID;
 
-  for ( collID = 0; collID < commInqNProcsColl (); collID ++ )
-    {
-      if ( winPostSet[collID] )
-        xmpi ( MPI_Win_wait ( win[collID] )); 
-      xmpi ( MPI_Win_free ( &win[collID] ));
-      xmpi ( MPI_Free_mem ( winBuffer[collID] ));
-      xmpi ( MPI_Group_free ( &groupsIONetto[collID] ));
-    }
+  if ( winPostSet != NULL &&
+       win != NULL &&
+       winBuffer != NULL &&
+       groupsIONetto != NULL )
+    for ( collID = 0; collID < commInqNProcsColl (); collID ++ )
+      {
+        if ( winPostSet[collID] )
+          xmpi ( MPI_Win_wait ( win[collID] )); 
+        xmpi ( MPI_Win_free ( &win[collID] ));
+        xmpi ( MPI_Free_mem ( winBuffer[collID] ));
+        xmpi ( MPI_Group_free ( &groupsIONetto[collID] ));
+      }
 
   if ( groupsIONetto )   free ( groupsIONetto );
   if ( refuseFuncCall )  free ( refuseFuncCall );
@@ -471,6 +475,7 @@ void pioBufferData ( const int streamID, const int varID, const double *data, in
   size_t size;
   void * vp;
   int rankModel = commInqRankModel ();
+  char text[1024];
 
   vlistID  = streamInqVlist ( streamID );
   collID   = commRankGlob2CollID ( vlistInqVarIOrank ( vlistID, varID ));
@@ -485,9 +490,13 @@ void pioBufferData ( const int streamID, const int varID, const double *data, in
             refuseFuncCall != NULL                &&
             win            != NULL );
   
-  xdebug3 ("streamID=%d, vlistID=%d, varID=%d, collID=%d, "
+  xdebug ("streamID=%d, vlistID=%d, varID=%d, collID=%d, "
           "chunk=%d, data=%.2f, nmiss=%d",
           streamID, vlistID, varID, collID, chunk, data[0], nmiss );  
+
+  sprintf ( text, "pioBufferData, streamID=%d, varID=%d, rankModel=%d, data",
+            streamID, varID, rankModel );
+  xprintArray ( text, data, chunk, DATATYPE_FLT );
 
   if ( winPostSet[collID] ) 
     { 
@@ -703,23 +712,58 @@ int pioInqVarDecoOff ( int vlistID, int varID )
 
 /*****************************************************************************/
 
-int pioInit ( int commGlobArg, int nProcsIO, int IOMode )
+int pioInit ( int commGlobArg, int nProcsIO, int IOMode, int nNamespaces,
+              int * hasLocalFile )
 {
 #ifdef USE_MPI
   MPI_Comm commGlob;
-  int rank;
+  int sizeGlob;
+
+  if ( IOMode < PIO_MINIOMODUS || IOMode > PIO_MAXIOMODUS )
+    xabort ( "IOMODE IS NOT VALID." );
+  
+#ifdef _SX
+  if ( IOMode ==  PIO_POSIX_ASYNCH )
+    xabort ( "PIO_POSIX_ASYNCH DOES NOT WORK ON SX." );
 #endif
 
-  xdebug ( "commGlobArg=%d, nProcsIO = %d, IOMode = %d ", 
-           commGlobArg, nProcsIO, IOMode );
-
-#ifdef USE_MPI
   commGlob = MPI_COMM_NULL;
   commGlob = MPI_Comm_f2c (( MPI_Fint ) commGlobArg );
   xassert ( commGlob != MPI_COMM_NULL );
 
-  xmpi ( MPI_Comm_rank ( commGlob, &rank ));
-  xdebug ( "####################### rank=%d", rank );
+  commInit ();
+  commDefCommGlob ( commGlob );
+  sizeGlob = commInqSizeGlob ();
+  if ( nProcsIO <= 0 || nProcsIO > sizeGlob )
+    xabort ( "DISTRIBUTION OF TASKS ON PROCS IS NOT VALID." );
+
+  commDefNProcsIO ( nProcsIO );
+  commDefIOMode   ( IOMode, PIO_MAXIOMODUS, PIO_MINIOMODUSWITHSPECIALPROCS );
+  commDefCommPio  ();
+
+  // JUST FOR TEST CASES WITH ONLY ONE MPI TASK
+  if ( commInqRankGlob () == 0 && commInqSizeGlob () == 1 ) 
+    {
+      namespaceInit ( nNamespaces, hasLocalFile );
+      return MPI_Comm_c2f ( commInqCommGlob ());
+    }
+  xassert ( commInqNProcsModel () > 0 );
+
+  if ( commInqIsProcIO ()) 
+    { 
+      IOServer ();
+      commDestroy ();
+      MPI_Finalize ();
+      exit ( 0 );
+    }
+  else
+    { 
+      commEvalPhysNodes ();
+      commDefCommsIO ();  
+      namespaceInit ( nNamespaces, hasLocalFile );     
+    }
+  
+  return MPI_Comm_c2f ( commInqCommModel ());
 #endif
   return 0;
 }
@@ -773,7 +817,6 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode,
   // JUST FOR TEST CASES WITH ONLY ONE MPI TASK
   if ( commInqRankGlob () == 0 && commInqSizeGlob () == 1 ) 
     {
-      xdebug ();
       namespaceInit ( nNamespaces, hasLocalFile );
       return commInqCommGlob ();
     }
@@ -846,16 +889,20 @@ void pioFinalize ()
 {
 #ifdef USE_MPI
   int collID, ibuffer = 1111;
-
+  xdebug ();
   namespaceCleanup (); 
+  xdebug ();
   for ( collID = 0; collID < commInqNProcsColl (); collID++ )
     {
       xmpi ( MPI_Send ( &ibuffer, 1, MPI_INT, commInqNProcsModel (), 
                         FINALIZE, commInqCommsIO ( collID )));
       xdebug ( "SENT MESSAGE WITH TAG \"FINALIZE\"" );
     }
+  xdebug ();
   modelWinCleanup ();
+  xdebug ();
   commDestroy (); 
+  xdebug ();
 #endif
 } 
  

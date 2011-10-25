@@ -56,7 +56,7 @@
 
 /*  deike  */
 
-FCALLSCFUN3 (INT, pioInit, PIOINIT, pioinit, INT, INT, INT)
+FCALLSCFUN5 (INT, pioInit, PIOINIT, pioinit, INT, INT, INT, INT, PINT)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
 FCALLSCSUB0 (pioEndDef, PIOENDDEF, pioenddef)
 FCALLSCSUB3 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep, INT, INT, INT)

@@ -253,7 +253,7 @@ double xchecksum ( int type, int count, void * buffer )
 
 /****************************************************/
 
-void printArray ( char * ps, void * array, int n, int datatype, 
+void printArray ( char * ps, const void * array, int n, int datatype, 
 		  const char * funname, const char * filename, int line )
 { 
   int i, rank;

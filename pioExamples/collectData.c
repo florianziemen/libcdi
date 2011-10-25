@@ -103,12 +103,12 @@ void modelRun ()
 int main (int argc, char *argv[]) 
 {
   enum { 
-    nProcsIO    = 3,
-    //IOMode      = PIO_NONE,
+    nProcsIO    = 1,
+    IOMode      = PIO_NONE,
     //IOMode      = PIO_MPI_NONB, 
     //IOMode      = PIO_POSIX_FPGUARD_SENDRECV,
     //IOMode      = PIO_POSIX_ASYNCH,
-    IOMode      = PIO_POSIX_NONB,
+    //IOMode      = PIO_POSIX_NONB,
     nNamespaces = 1 };
   
   static int hasLocalFile[nNamespaces] = { 0 };

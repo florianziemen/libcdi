@@ -13,11 +13,18 @@ PROGRAM COLLECTDATA2003
 #endif
 
   INTEGER nProcsIO, IOMode, nNamespaces
-  PARAMETER ( nProcsIO    = 1 )
-  PARAMETER ( IOMode      = PIO_NONE )
+  PARAMETER ( nProcsIO = 1 )
+  PARAMETER ( IOMode   = PIO_NONE )                 
+  !PARAMETER ( IOMode   = PIO_MPI_NONB )             
+  !PARAMETER ( IOMode   = PIO_POSIX_NONB )           
+  !PARAMETER ( IOMode   = PIO_POSIX_ASYNCH )         
+  !PARAMETER ( IOMode   = PIO_POSIX_FPGUARD_SENDRECV )
+
   PARAMETER ( nNamespaces = 1 )
+  INTEGER, PARAMETER :: hasLocalFile ( nNamespaces ) = (/ 0 /)
   
   INTEGER commGlob, rankGlob, error, commModel
+  INTEGER testRank
   
 #ifdef USE_MPI
   CALL MPI_INIT ( error )
@@ -25,33 +32,38 @@ PROGRAM COLLECTDATA2003
   CALL MPI_COMM_RANK ( commGlob, rankGlob, error )
 #endif
 
-  WRITE ( 0, * ) 'BEFORE PIOINIT, PE', rankGlob
-
-  commModel = pioInit ( commGlob, nProcsIO, IOMode )
+  commModel = pioInit ( commGlob, nProcsIO, IOMode, nNamespaces, hasLocalFile )
   
   PRINT *, 'AFTER PIOINIT'
 
-  !PRINT *, 'BEFORE MODELRUN'
+  PRINT *, 'BEFORE MODELRUN'
 
-  !CALL MODELRUN
+  CALL MODELRUN ( commModel )
   
-  !PRINT *, 'AFTER MODELRUN'
+  PRINT *, 'AFTER MODELRUN'
   
 #ifdef USE_MPI
+  CALL pioFinalize ()
+  PRINT *, 'AFTER PIOFINALIZE'
   CALL MPI_FINALIZE ( error )
 #endif
   
 CONTAINS
   
-  SUBROUTINE MODELRUN
+  SUBROUTINE MODELRUN ( commModel )
     
     IMPLICIT NONE
     
-    INTEGER nlon, nlat, nlev, nts
+    INTEGER, INTENT ( IN ) :: commModel
+
+    INTEGER nlon, nlat, nlev, nts, vdate, vtime, filetype
     PARAMETER ( nlon = 12 )   ! Number of longitudes
     PARAMETER ( nlat =  6 )   ! Number of latitudes
     PARAMETER ( nlev =  5 )   ! Number of levels
     PARAMETER ( nts  =  3 )   ! Number of time steps
+    PARAMETER ( vdate = 19850101 )
+    PARAMETER ( vtime = 120000 )
+    PARAMETER ( filetype = FILETYPE_GRB )
     
     INTEGER gridID, zaxisID1, zaxisID2, taxisID
     INTEGER vlistID, varID1, varID2, streamID, tsID
@@ -59,6 +71,7 @@ CONTAINS
     DOUBLE PRECISION lons ( nlon ), lats ( nlat ), levs ( nlev )
     DOUBLE PRECISION var1 ( nlon * nlat ), var2 ( nlon * nlat * nlev )
     CHARACTER(len=256) :: varname
+    INTEGER startID, stopID, chunk, rank, error
     
     DATA lons /0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330/
     DATA lats /-75, -45, -15, 15, 45, 75/
@@ -98,8 +111,7 @@ CONTAINS
     !     Assign the Time axis to the variable list
     CALL vlistDefTaxis(vlistID, taxisID)
     
-    !     Create a dataset in netCDF fromat
-    streamID = streamOpenWrite(C_CHAR_"example.grb"//C_NULL_CHAR, FILETYPE_GRB)
+    streamID = streamOpenWrite(C_CHAR_"example.grb"//C_NULL_CHAR, filetype)
     IF ( streamID < 0 ) THEN
       WRITE(0,*) cdiStringError(streamID)
       STOP
@@ -107,27 +119,37 @@ CONTAINS
     
     !     Assign the variable list to the dataset
     CALL streamDefVlist(streamID, vlistID)
+
+    CALL pioEndDef ();
+
+    CALL MPI_COMM_RANK ( commModel, rank, error ); 
     
     !     Loop over the number of time steps
     DO tsID = 0, nts-1
-      !        Set the verification date to 1985-01-01 + tsID
-      CALL taxisDefVdate(taxisID, 19850101+tsID)
-      !        Set the verification time to 12:00:00
-      CALL taxisDefVtime(taxisID, 120000)
-      !        Define the time step
-      status = streamDefTimestep(streamID, tsID)
+      CALL taxisDefVdate ( taxisID, vdate + tsID )
+      CALL taxisDefVtime ( taxisID, vtime )
+      status = streamDefTimestep ( streamID, tsID )
       
-      !        Init var1 and var2
-      DO i = 1, nlon*nlat
+      ! Init var1 and var2
+      startID = pioInqVarDecoOff ( vlistID, varID1 ) + 1
+      chunk = pioInqVarDecoChunk ( vlistID, varID1 ) - 1
+      stopID = startID + chunk
+      WRITE ( 0, * ) 'var1, PE', rank, ': start=', startID, ', stop=', stopID 
+      DO i = startID, stopID
         var1(i) = 1.1
       END DO
-      DO i = 1, nlon*nlat*nlev
+      startID = pioInqVarDecoOff ( vlistID, varID2 ) + 1
+      chunk = pioInqVarDecoChunk ( vlistID, varID2 ) - 1
+      stopID = startID + chunk
+      WRITE ( 0, * ) 'var2, PE', rank, ': start=', startID, ', stop=', stopID 
+      DO i = startID, stopID
         var2(i) = 2.2
       END DO
       
       !        Write var1 and var2
       CALL streamWriteVar(streamID, varID1, var1, nmiss)
       CALL streamWriteVar(streamID, varID2, var2, nmiss)
+      CALL pioWriteTimestep ( tsID, vdate, vtime )
     END DO
     
     !     Close the output stream
