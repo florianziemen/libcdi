@@ -102,7 +102,7 @@ static
 
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
-      getBufferSize[modelID] += ( winBufferOverhead * sizeof ( double ));
+      getBufferSize[modelID] += ( winBufferOverhead * sizeof ( int ));
       sumGetBufferSizes += getBufferSize[modelID];
     }
   xassert ( sumGetBufferSizes <= MAXWINBUFFERSIZE );
@@ -403,8 +403,10 @@ void IOServer ()
   char * buffer;
   MPI_Comm commCalc;
   MPI_Status status;
-     
+
+  xdebug ();
   backendInit ();
+  xdebug ();
   if ( commInqRankNode () == commInqSpecialRankNode ()) 
     backendFinalize ();
   commCalc = commInqCommCalc ();

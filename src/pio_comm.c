@@ -616,6 +616,7 @@ void     commDefCommsIO     ( void )
     * ( ranks + i ) = i;
   
   xmpi ( MPI_Comm_group ( info->commGlob, &groupGlob )); 
+  xdebug ();
 
   for ( collID = 0; collID < info->nProcsColl; collID++ )
     {
@@ -623,8 +624,10 @@ void     commDefCommsIO     ( void )
       * ( ranks + info->nProcsModel ) = currIORank;	  
       xmpi ( MPI_Group_incl ( groupGlob, info->nProcsModel + 1, 
                               ranks, &currGroupIO ));
+  xdebug ();
       xmpi ( MPI_Comm_create ( info->commGlob, currGroupIO,  
                                info->commsIO + collID ));
+  xdebug ();
       if ( info->rankGlob == currIORank )
 	info->commCalc = info->commsIO[collID];
 
@@ -650,8 +653,10 @@ void     commDefCommsIO     ( void )
   xmpi ( MPI_Group_free ( &currGroupIO ));
   xmpi ( MPI_Group_free ( &groupGlob ));
   free ( ranks );
+  xdebug ();
 
   commPrint ( stdout );
+  xdebug ();
 }
 
 

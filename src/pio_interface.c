@@ -251,13 +251,15 @@ void defVarDeco ( int vlistID, int varID )
 static
 void varsMapNDeco ( int nNodes, int * nodeSizes )
 {
-  int nStreams, nVars, * resHs, * streamSizes, * varSizes, * varMapping;
+  int nStreams, nVars, * resHs, * streamSizes, * varSizes, * varMapping, * getsStreamData;
   int i, j, k = 0;
+  int nProcsColl = commInqNProcsColl ();
 
   nStreams = streamSize ();
 
   resHs       = xmalloc ( nStreams * sizeof ( resHs[0] ));
   streamSizes = xmalloc ( nStreams * sizeof ( streamSizes[0] ));
+  getsStreamData = xmalloc ( nProcsColl * sizeof ( getsStreamData[0] ));
   streamGetIndexArray ( nStreams, resHs );
 
   for ( i = 0; i < nStreams; i++ )
@@ -278,18 +280,28 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
 
   k = 0;
   for ( i = 0; i < nStreams; i++ )
-    for ( j = 0; j < * ( streamSizes + i ); j++ )
-      {
-        defVarDeco ( streamInqVlist ( * resHs + i ), j );
-        defVarDeco ( streamInqVlistIDorig ( * resHs + i ), j );
-	vlistDefVarIOrank ( streamInqVlist ( * resHs + i ), j, 
-			  * ( varMapping + k ));
-	vlistDefVarIOrank ( streamInqVlistIDorig ( * resHs + i ), j, 
-			  * ( varMapping + k++ ));
-      }
+    {
+      for ( j = 0; j < * ( streamSizes + i ); j++ )
+        {
+          defVarDeco ( streamInqVlist ( * resHs + i ), j );
+          defVarDeco ( streamInqVlistIDorig ( * resHs + i ), j );
+          vlistDefVarIOrank ( streamInqVlist ( * resHs + i ), j, 
+                              * ( varMapping + k ));
+          vlistDefVarIOrank ( streamInqVlistIDorig ( * resHs + i ), j, 
+                              * ( varMapping + k ));
+          getsStreamData[commRankGlob2CollID ( varMapping[k++] )] = 1;
+        }
+      xprintArray ( "getsStreamData", getsStreamData, nProcsColl, DATATYPE_INT );
+      for ( j = 0; j < nProcsColl; j++ )
+        if ( getsStreamData[j] == 0 ) xabort ( "NUMBER OF IO PROCESSES NOT WORTHWHILE." );
+      
+      memset ( getsStreamData, 0, nProcsColl * sizeof ( getsStreamData[0] ));
+      xprintArray ( "getsStreamData", getsStreamData, nProcsColl, DATATYPE_INT );
+    }
 
   if ( varMapping )  free ( varMapping );
   if ( varSizes )    free ( varSizes );
+  if ( getsStreamData ) free ( getsStreamData );
   if ( streamSizes ) free ( streamSizes );
   if ( resHs )       free ( resHs );
 }
@@ -841,20 +853,15 @@ void pioFinalize ()
 {
 #ifdef USE_MPI
   int collID, ibuffer = 1111;
-  xdebug ();
   namespaceCleanup (); 
-  xdebug ();
   for ( collID = 0; collID < commInqNProcsColl (); collID++ )
     {
       xmpi ( MPI_Send ( &ibuffer, 1, MPI_INT, commInqNProcsModel (), 
                         FINALIZE, commInqCommsIO ( collID )));
       xdebug ( "SENT MESSAGE WITH TAG \"FINALIZE\"" );
     }
-  xdebug ();
   modelWinCleanup ();
-  xdebug ();
   commDestroy (); 
-  xdebug ();
 #endif
 } 
  
@@ -888,9 +895,12 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
 
   for ( collID = 0; collID < nProcsColl; collID++ )
     {
-      xdebug ( "########## tsID=%d, winPostSet[%d]=%d",
-               tsID, collID, winPostSet[collID] );
-      xassert ( winPostSet[collID] != 1 );
+      if ( winPostSet[collID] ) 
+        { 
+          xmpi ( MPI_Win_wait ( win[collID] )); 
+          winPostSet[collID] = 0;
+          modelWinFlushBuffer ( collID );
+        }
       modelWinBufferPutAtEnd ( __func__, collID, &tokenEnd, sizeof ( tokenEnd ));
       xmpi ( MPI_Win_post ( groupsIONetto[collID], iAssert, win[collID] ));
       winPostSet[collID] = 1;
