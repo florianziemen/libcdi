@@ -489,14 +489,6 @@ void pioBufferData ( const int streamID, const int varID, const double *data, in
             winPostSet     != NULL                 &&
             refuseFuncCall != NULL                &&
             win            != NULL );
-  
-  xdebug ("streamID=%d, vlistID=%d, varID=%d, collID=%d, "
-          "chunk=%d, data=%.2f, nmiss=%d",
-          streamID, vlistID, varID, collID, chunk, data[0], nmiss );  
-
-  sprintf ( text, "pioBufferData, streamID=%d, varID=%d, rankModel=%d, data",
-            streamID, varID, rankModel );
-  xprintArray ( text, data, chunk, DATATYPE_FLT );
 
   if ( winPostSet[collID] ) 
     { 
@@ -711,64 +703,6 @@ int pioInqVarDecoOff ( int vlistID, int varID )
 }
 
 /*****************************************************************************/
-
-int pioInit ( int commGlobArg, int nProcsIO, int IOMode, int nNamespaces,
-              int * hasLocalFile )
-{
-#ifdef USE_MPI
-  MPI_Comm commGlob;
-  int sizeGlob;
-
-  if ( IOMode < PIO_MINIOMODUS || IOMode > PIO_MAXIOMODUS )
-    xabort ( "IOMODE IS NOT VALID." );
-  
-#ifdef _SX
-  if ( IOMode ==  PIO_POSIX_ASYNCH )
-    xabort ( "PIO_POSIX_ASYNCH DOES NOT WORK ON SX." );
-#endif
-
-  commGlob = MPI_COMM_NULL;
-  commGlob = MPI_Comm_f2c (( MPI_Fint ) commGlobArg );
-  xassert ( commGlob != MPI_COMM_NULL );
-
-  commInit ();
-  commDefCommGlob ( commGlob );
-  sizeGlob = commInqSizeGlob ();
-  if ( nProcsIO <= 0 || nProcsIO > sizeGlob )
-    xabort ( "DISTRIBUTION OF TASKS ON PROCS IS NOT VALID." );
-
-  commDefNProcsIO ( nProcsIO );
-  commDefIOMode   ( IOMode, PIO_MAXIOMODUS, PIO_MINIOMODUSWITHSPECIALPROCS );
-  commDefCommPio  ();
-
-  // JUST FOR TEST CASES WITH ONLY ONE MPI TASK
-  if ( commInqRankGlob () == 0 && commInqSizeGlob () == 1 ) 
-    {
-      namespaceInit ( nNamespaces, hasLocalFile );
-      return MPI_Comm_c2f ( commInqCommGlob ());
-    }
-  xassert ( commInqNProcsModel () > 0 );
-
-  if ( commInqIsProcIO ()) 
-    { 
-      IOServer ();
-      commDestroy ();
-      MPI_Finalize ();
-      exit ( 0 );
-    }
-  else
-    { 
-      commEvalPhysNodes ();
-      commDefCommsIO ();  
-      namespaceInit ( nNamespaces, hasLocalFile );     
-    }
-  
-  return MPI_Comm_c2f ( commInqCommModel ());
-#endif
-  return 0;
-}
-
-/*****************************************************************************/
 /** 
    @brief initializes the MPI_Communicators needed for the 
   communication between the calculator PEs and the I/O PEs and within the 
@@ -843,6 +777,24 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode,
 }
 #endif
 
+/*****************************************************************************/
+
+int pioInit ( int commGlobArg, int nProcsIO, int IOMode, int nNamespaces,
+              int * hasLocalFile )
+{
+#ifdef USE_MPI
+  MPI_Comm commGlob;
+
+  commGlob = MPI_COMM_NULL;
+  commGlob = MPI_Comm_f2c (( MPI_Fint ) commGlobArg );
+  xassert ( commGlob != MPI_COMM_NULL );
+  
+  return MPI_Comm_c2f ( pioInit_c ( commGlob, nProcsIO, IOMode, nNamespaces, 
+                                    hasLocalFile ));
+#endif
+  return 0;
+}
+
 /************************************************************************/
 
 void  pioEndDef ( void )
@@ -908,7 +860,7 @@ void pioFinalize ()
  
  /************************************************************************/
  
-void pioWriteTimestep ( int ts, int vdate, int vtime )
+void pioWriteTimestep ( int tsID, int vdate, int vtime )
 {
 #ifdef USE_MPI
   int collID, buffer[timestepSize], iAssert = 0;
@@ -917,13 +869,13 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
   int nProcsColl = commInqNProcsColl ();
   int nProcsModel = commInqNProcsModel ();
 
-  xassert ( ts            >= 0     &&
+  xassert ( tsID            >= 0     &&
             vdate         >= 0     &&
             vtime         >= 0     &&
             winPostSet    != NULL  &&
             win           != NULL );
 
-  buffer[0] = ts;
+  buffer[0] = tsID;
   buffer[1] = vdate;
   buffer[2] = vtime;
   
@@ -936,6 +888,8 @@ void pioWriteTimestep ( int ts, int vdate, int vtime )
 
   for ( collID = 0; collID < nProcsColl; collID++ )
     {
+      xdebug ( "########## tsID=%d, winPostSet[%d]=%d",
+               tsID, collID, winPostSet[collID] );
       xassert ( winPostSet[collID] != 1 );
       modelWinBufferPutAtEnd ( __func__, collID, &tokenEnd, sizeof ( tokenEnd ));
       xmpi ( MPI_Win_post ( groupsIONetto[collID], iAssert, win[collID] ));

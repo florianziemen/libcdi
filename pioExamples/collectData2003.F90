@@ -12,39 +12,38 @@ PROGRAM COLLECTDATA2003
   INCLUDE 'mpif.h'
 #endif
 
+  ! For parallel IO:
+  !  Parameter and variables needed.
   INTEGER nProcsIO, IOMode, nNamespaces
-  PARAMETER ( nProcsIO = 1 )
-  PARAMETER ( IOMode   = PIO_NONE )                 
-  !PARAMETER ( IOMode   = PIO_MPI_NONB )             
+  PARAMETER ( nProcsIO = 3 )
+  !PARAMETER ( IOMode   = PIO_NONE )                 
+  PARAMETER ( IOMode   = PIO_MPI_NONB )             
   !PARAMETER ( IOMode   = PIO_POSIX_NONB )           
   !PARAMETER ( IOMode   = PIO_POSIX_ASYNCH )         
   !PARAMETER ( IOMode   = PIO_POSIX_FPGUARD_SENDRECV )
 
   PARAMETER ( nNamespaces = 1 )
-  INTEGER, PARAMETER :: hasLocalFile ( nNamespaces ) = (/ 0 /)
-  
-  INTEGER commGlob, rankGlob, error, commModel
-  INTEGER testRank
-  
+  INTEGER, PARAMETER :: hasLocalFile ( nNamespaces ) = (/ 0 /) 
+ 
+  INTEGER commGlob, commModel, error
+
+  ! Start parallel environment
 #ifdef USE_MPI
   CALL MPI_INIT ( error )
   CALL MPI_COMM_DUP ( MPI_COMM_WORLD, commGlob, error )
-  CALL MPI_COMM_RANK ( commGlob, rankGlob, error )
 #endif
 
+  ! For parallel IO:
+  ! Initialize environment.
   commModel = pioInit ( commGlob, nProcsIO, IOMode, nNamespaces, hasLocalFile )
-  
-  PRINT *, 'AFTER PIOINIT'
-
-  PRINT *, 'BEFORE MODELRUN'
 
   CALL MODELRUN ( commModel )
-  
-  PRINT *, 'AFTER MODELRUN'
+
+  ! For parallel IO: 
+  ! Cleanup environment.
+  CALL pioFinalize ()
   
 #ifdef USE_MPI
-  CALL pioFinalize ()
-  PRINT *, 'AFTER PIOFINALIZE'
   CALL MPI_FINALIZE ( error )
 #endif
   
@@ -71,7 +70,7 @@ CONTAINS
     DOUBLE PRECISION lons ( nlon ), lats ( nlat ), levs ( nlev )
     DOUBLE PRECISION var1 ( nlon * nlat ), var2 ( nlon * nlat * nlev )
     CHARACTER(len=256) :: varname
-    INTEGER startID, stopID, chunk, rank, error
+    INTEGER startID, stopID, chunk
     
     DATA lons /0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330/
     DATA lats /-75, -45, -15, 15, 45, 75/
@@ -120,35 +119,45 @@ CONTAINS
     !     Assign the variable list to the dataset
     CALL streamDefVlist(streamID, vlistID)
 
-    CALL pioEndDef ();
-
-    CALL MPI_COMM_RANK ( commModel, rank, error ); 
+    !     For parallel IO: 
+    !     End SUBROUTINE MODELRUNpart for CDI resources: 
+    !          Map variables on IO server,
+    !          Decompose data on model processes for IO
+    !          Transmit resources to the IO server.
+    CALL pioEndDef (); 
     
     !     Loop over the number of time steps
     DO tsID = 0, nts-1
       CALL taxisDefVdate ( taxisID, vdate + tsID )
       CALL taxisDefVtime ( taxisID, vtime )
       status = streamDefTimestep ( streamID, tsID )
-      
-      ! Init var1 and var2
-      startID = pioInqVarDecoOff ( vlistID, varID1 ) + 1
-      chunk = pioInqVarDecoChunk ( vlistID, varID1 ) - 1
-      stopID = startID + chunk
-      WRITE ( 0, * ) 'var1, PE', rank, ': start=', startID, ', stop=', stopID 
+       
+      ! For parallel IO:    
+      ! Inquire start index and chunk for IO transposition of var1
+      startID = pioInqVarDecoOff   ( vlistID, varID1 ) + 1
+      chunk   = pioInqVarDecoChunk ( vlistID, varID1 ) - 1
+      stopID = startID + chunk 
+      ! Init decomposed data for var1
       DO i = startID, stopID
         var1(i) = 1.1
       END DO
+      ! Write var1
+      CALL streamWriteVar(streamID, varID1, var1 ( startID ), nmiss)
+
+      ! For parallel IO: 
+      ! Inquire start index and chunk for IO transposition of var2
       startID = pioInqVarDecoOff ( vlistID, varID2 ) + 1
       chunk = pioInqVarDecoChunk ( vlistID, varID2 ) - 1
       stopID = startID + chunk
-      WRITE ( 0, * ) 'var2, PE', rank, ': start=', startID, ', stop=', stopID 
+      ! Init decomposed data for var2
       DO i = startID, stopID
         var2(i) = 2.2
       END DO
-      
-      !        Write var1 and var2
-      CALL streamWriteVar(streamID, varID1, var1, nmiss)
-      CALL streamWriteVar(streamID, varID2, var2, nmiss)
+      ! Write var2
+      CALL streamWriteVar(streamID, varID2, var2 ( startID ), nmiss)
+
+      ! For parallel IO: 
+      ! Start transmission of all data for output in this timestep to IO server.
       CALL pioWriteTimestep ( tsID, vdate, vtime )
     END DO
     
