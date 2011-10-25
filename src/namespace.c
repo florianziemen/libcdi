@@ -8,10 +8,10 @@
 
 static int nNamespaces = 1;
 static int activeNamespace = 0;
-static int HLF = 1;
-static int * hasLocalFile = &HLF;
-static int RAS = 0;
-static int * resASent = &RAS;
+static int serialHLF = 1;
+static int * hasLocalFile = &serialHLF;
+static int serialRS = 0;
+static int * resStatus = &serialRS;
 
 enum {
   intbits = sizeof(int) * CHAR_BIT,
@@ -79,7 +79,7 @@ void namespaceInit ( int nspn, int * argHasLocalFile )
       hasLocalFile = xmalloc ( nspn * sizeof ( hasLocalFile[0] ));
       for ( nspID = 0; nspID < nspn; nspID++ )  
 	hasLocalFile[nspID] = argHasLocalFile[nspID];
-      resASent = xmalloc ( nspn * sizeof ( resASent[0] )); 
+      resStatus = xmalloc ( nspn * sizeof ( resStatus[0] )); 
     }
 #endif
 }
@@ -91,7 +91,7 @@ void namespaceCleanup ( void )
     {
       free ( hasLocalFile );
       hasLocalFile = NULL;
-      free ( resASent );
+      free ( resStatus );
     }
 }
 
@@ -160,17 +160,17 @@ int namespaceAdaptKey2 ( int key )
 }
 
 
-void namespaceDefResASent ( void )
+void namespaceDefResStatus ( statusCode argResStatus )
 {
   int nsp = namespaceGetActive ();
-  resASent[nsp] = 1;
+  resStatus[nsp] = argResStatus;
 }
 
 
-int namespaceInqResASent ( void )
+statusCode namespaceInqResStatus ( void )
 {
   int nsp = namespaceGetActive ();
-  return resASent[nsp];
+  return resStatus[nsp];
 }
 
 /*

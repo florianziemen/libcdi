@@ -189,7 +189,6 @@ static
         getBufferGetFromEnd ( __func__, __LINE__, 
                               root, &streamID, sizeof ( streamID ));
         streamClose ( streamID );
-
         xdebug ( "READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
                  " closed stream", 
                  funcMap[funcID], streamID );
@@ -212,7 +211,6 @@ static
                               root, &filetype, sizeof ( filetype ));
         streamID = streamOpenWrite ( filename, filetype );
         free ( filename );
-
         xdebug ( "READ FUNCTION CALL FROM WIN:  %s, filenamesz=%d,"
                  " filename=%s, filetype=%d, opened stream %d", 
                  funcMap[funcID], filenamesz, filename, filetype, streamID );
@@ -227,7 +225,6 @@ static
         getBufferGetFromEnd ( __func__, __LINE__, 
                               root, &vlistID, sizeof ( vlistID ));
         streamDefVlist ( streamID, vlistID );
-
         xdebug ( "READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
                  " vlistID=%d, called streamDefVlist ().", 
                  funcMap[funcID], streamID, vlistID );
@@ -257,6 +254,7 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
   char text[1024];
   int nProcsModel = commInqNProcsModel ();
   int root        = commInqRootGlob ();
+          
   
   getBufferGetFromEnd ( __func__, __LINE__, 
                         root, &tokenID, sizeof ( tokenID ));
@@ -306,9 +304,10 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
               getBufferGetFromEnd ( __func__, __LINE__, 
                                     modelID, &tokenID2, sizeof ( tokenID2 ));
               xassert ( tokenID2 == SEPARATOR );
-            }         
+            }
+          
           streamWriteVar ( streamID, varID, data, nmiss );
-
+          
           if ( ddebug > 2 )
             {
               sprintf ( text, "streamID=%d, var[%d], size=%d", streamID, varID, size );
@@ -321,12 +320,12 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
           readFuncCall ();
           break;
         default:
-          xabort ( "BUFFER NOT READABLE!" );
-          
+          xabort ( "BUFFER NOT READABLE!" );           
         }
       getBufferGetFromEnd ( __func__, __LINE__, 
                             root, &tokenID, sizeof ( tokenID ));
     }
+          
 } 
 
 /************************************************************************/
@@ -359,6 +358,7 @@ void getData ( int tsID, int vdate, int vtime )
   int iAssert   = 0, modelID;
   char text[1024];
   int nProcsModel = commInqNProcsModel ();
+          
 
   // todo put in correct lbs and ubs
   xassert ( tsID >= 0 && vdate >= 0 && vtime >= 0 );
@@ -383,6 +383,7 @@ void getData ( int tsID, int vdate, int vtime )
                       DATATYPE_FLT );
       }
   readGetBuffers ( tsID, vdate, vtime );
+          
 
 }
 
@@ -433,7 +434,7 @@ void IOServer ()
             {              
               {
                 int nStreams = streamSize ();
-                xdebug ();
+                
                 if ( nStreams > 0 )
                   {
                     int streamNo;
@@ -446,13 +447,10 @@ void IOServer ()
                     free ( resHs );
                   }
               }
-                xdebug ();
               backendCleanup (); 
-                xdebug ();
-              serverWinCleanup ();
-                xdebug ();
+              serverWinCleanup ();                 
               arrayDestroy();
-                xdebug ();
+                
               return;
             }
 	  
@@ -482,9 +480,9 @@ void IOServer ()
           xdebug ( "RECEIVED MESSAGE WITH TAG \"WRITETS\": "
                    "tsID=%d, vdate=%d, vtime=%d, source=%d", 
                    iBuffer[0], iBuffer[1], iBuffer[2], source );
-          getData ( iBuffer[0], iBuffer[1], iBuffer[2] );     
+          
+          getData ( iBuffer[0], iBuffer[1], iBuffer[2] );                
           free ( iBuffer );
-
 	  break;
 
 	default:

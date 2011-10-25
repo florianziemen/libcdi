@@ -251,7 +251,7 @@ void defVarDeco ( int vlistID, int varID )
 static
 void varsMapNDeco ( int nNodes, int * nodeSizes )
 {
-  int nStreams, nVars, * resHs, * streamSizes, * varSizes, * varMapping, * getsStreamData;
+  int nStreams, nVars, * resHs, * streamSizes, * varSizes, * varMapping, * collectsData;
   int i, j, k = 0;
   int nProcsColl = commInqNProcsColl ();
   char text[1024];
@@ -260,7 +260,7 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
 
   resHs       = xmalloc ( nStreams * sizeof ( resHs[0] ));
   streamSizes = xmalloc ( nStreams * sizeof ( streamSizes[0] ));
-  getsStreamData = xmalloc ( nProcsColl * sizeof ( getsStreamData[0] ));
+  collectsData = xmalloc ( nProcsColl * sizeof ( collectsData[0] ));
   streamGetIndexArray ( nStreams, resHs );
 
   for ( i = 0; i < nStreams; i++ )
@@ -281,44 +281,33 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
 
   k = 0;
   for ( i = 0; i < nStreams; i++ )
-    {
-      for ( j = 0; j < * ( streamSizes + i ); j++ )
-        {
-          defVarDeco ( streamInqVlist ( * resHs + i ), j );
-          defVarDeco ( streamInqVlistIDorig ( * resHs + i ), j );
-          vlistDefVarIOrank ( streamInqVlist ( * resHs + i ), j, 
-                              * ( varMapping + k ));
-          vlistDefVarIOrank ( streamInqVlistIDorig ( * resHs + i ), j, 
-                              * ( varMapping + k ));
-          getsStreamData[commRankGlob2CollID ( varMapping[k++] )] = 1;
-        }
+    for ( j = 0; j < * ( streamSizes + i ); j++ )
+      {
+        defVarDeco ( streamInqVlist ( * resHs + i ), j );
+        defVarDeco ( streamInqVlistIDorig ( * resHs + i ), j );
+        vlistDefVarIOrank ( streamInqVlist ( * resHs + i ), j, 
+                            * ( varMapping + k ));
+        vlistDefVarIOrank ( streamInqVlistIDorig ( * resHs + i ), j, 
+                            * ( varMapping + k ));
+        collectsData[commRankGlob2CollID ( varMapping[k++] )] = 1;
+      }      
 
-      for ( j = 0; j < nProcsColl; j++ )
-        if ( getsStreamData[j] == 0 )
-          {
-            if ( commInqIOMode () == PIO_MPI_NONB )
-              {
-                sprintf ( text,  
-                          "\nAT LEAST ONE COLLECTOR PROCESS IDLE, "
-                          "\nCURRENTLY NOT COVERED IN IOMODE PIO_MPI_NONB: "
-                          "\nPE%d writes no data for stream %d",
-                          commCollID2RankGlob ( j ), resHs[i]);
-                xabort ( text );
-              }
-            else
-              {
-                xwarning ( "PE%d writes no data for stream %d",
-                           commCollID2RankGlob ( j ), resHs[i]); 
-              }
-          }      
-      memset ( getsStreamData, 0, nProcsColl * sizeof ( getsStreamData[0] ));
-    }
-      
-  if ( varMapping )  free ( varMapping );
-  if ( varSizes )    free ( varSizes );
-  if ( getsStreamData ) free ( getsStreamData );
-  if ( streamSizes ) free ( streamSizes );
-  if ( resHs )       free ( resHs );
+  for ( j = 0; j < nProcsColl; j++ )
+    if ( collectsData[j] == 0 )
+      {
+        sprintf ( text,  
+                  "\nAT LEAST ONE COLLECTOR PROCESS IDLES, "
+                  "CURRENTLY NOT COVERED: "
+                  "PE%d collects no data",
+                  commCollID2RankGlob ( j ));
+        xabort ( text );
+      }
+  
+  if ( varMapping )   free ( varMapping );
+  if ( varSizes )     free ( varSizes );
+  if ( collectsData ) free ( collectsData );
+  if ( streamSizes )  free ( streamSizes );
+  if ( resHs )        free ( resHs );
 }
 
 /************************************************************************/
@@ -842,13 +831,21 @@ void  pioEndDef ( void )
                         RESOURCES, commInqCommsIO ( rankGlob )));
       
       xdebug ( "SENT MESSAGE WITH TAG \"RESOURCES\"" );
-
-      namespaceDefResASent ();
       
       reshPackBufferDestroy ( &buffer );
     }
 
   modelWinCreate ();
+  namespaceDefResStatus ( STAGE_TIMELOOP );
+#endif
+}
+
+/************************************************************************/
+
+void  pioEndTimestepping ( void )
+{
+#ifdef USE_MPI
+  namespaceDefResStatus ( STAGE_CLEANUP );
 #endif
 }
 
@@ -869,7 +866,6 @@ void pioFinalize ()
 {
 #ifdef USE_MPI
   int collID, ibuffer = 1111;
-  xdebug ();
   namespaceCleanup (); 
   for ( collID = 0; collID < commInqNProcsColl (); collID++ )
     {
@@ -922,7 +918,7 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
       xmpi ( MPI_Win_post ( groupsIONetto[collID], iAssert, win[collID] ));
       winPostSet[collID] = 1;
     } 
-  xdebug ();
+  
 #endif
 }
 

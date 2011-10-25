@@ -209,6 +209,7 @@ extern "C" {
 int      pioInit               ( int, int, int, int, int * );
 void     pioFinalize           ( void );
 void     pioEndDef             ( void );
+void     pioEndTimestepping    ( void );
 void     pioWriteTimestep      ( int, int, int );
 int      pioInqVarDecoChunk    ( int, int );
 int      pioInqVarDecoOff      ( int, int );

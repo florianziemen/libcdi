@@ -788,9 +788,10 @@ void finalizePOSIXASYNCH ( void )
 
 void initPOSIXASYNCH ( void )  
 {
-  if ( commInqSizeNode () < 2 ) xabort ( "usage: #pes/#nodes >= 2");
+  if ( commInqSizeNode () < 2 ) 
+    xabort ( "USAGE: # IO PROCESSES ON A PHYSICAL NODE >= 2" );
 
-  if ( nPrefStreams < 1 ) xabort ( "usage: #prefetch streams >= 1" );
+  if ( nPrefStreams < 1 ) xabort ( "USAGE: # PREFETCH STREAMS >= 1" );
 
   if ( commInqRankNode () == commInqSpecialRankNode ())
     {

@@ -691,6 +691,26 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	  }
 	}
     }
+#ifdef USE_MPI
+  else if ( tolower ( * filemode ) == 'w' )
+    {
+      statusCode nspStatus = namespaceInqResStatus ();
+      switch ( nspStatus )
+        {
+        case STAGE_DEFINITION:
+          break;
+        case STAGE_TIMELOOP:
+          pioBufferFuncCall ( __func__, 2, filename, filetype );
+          break;
+        case STAGE_CLEANUP:
+          xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
+        break;
+        default:
+          xabort ( "INTERNAL ERROR" );
+        }
+    }
+#endif
+    
 
   if ( fileID < 0 && hasLocalFile )
     {
@@ -723,13 +743,6 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	  vlistptr = vlist_to_pointer(streamptr->vlistID);
 	  vlistptr->ntsteps = streamNtsteps(streamID);
 	}
-
-#ifdef USE_MPI
-      if ( !hasLocalFile && 
-           namespaceInqResASent () == 1 &&
-           streamptr->filemode == 'w' )
-        pioBufferFuncCall ( __func__, 2, filename, filetype );
-#endif
     }
  
   return (streamID);
@@ -1126,7 +1139,6 @@ void streamClose(int streamID)
   int index;
   int vlistID;
   stream_t *streamptr;
-  xdebug ();
 
   streamptr = stream_to_pointer(streamID);
   stream_check_ptr(__func__, streamptr);
@@ -1136,10 +1148,10 @@ void streamClose(int streamID)
 
   fileID   = streamptr->fileID;
   filetype = streamptr->filetype;
-  vlistID  = streamptr->vlistID;
+  vlistID  = streamptr->vlistID;   
 
   if ( namespaceHasLocalFile ( namespaceGetActive ()))
-    {
+    {        
       if ( fileID == CDI_UNDEFID )
 	Warning("File %s not open!", streamptr->filename);
       else
@@ -1197,9 +1209,21 @@ void streamClose(int streamID)
     }
 #ifdef USE_MPI
   else
-    if ( namespaceInqResASent () == 1 )
-      pioBufferFuncCall ( __func__, 1, streamID );
-  xdebug ();
+    {
+      statusCode nspStatus = namespaceInqResStatus ();
+      switch ( nspStatus )
+        {
+        case STAGE_DEFINITION:
+          break;
+        case STAGE_TIMELOOP:
+          pioBufferFuncCall ( __func__, 1, streamID );
+          break;
+        case STAGE_CLEANUP:
+        break;
+        default:
+          xabort ( "INTERNAL ERROR" );
+        }
+    }
 #endif
       
   if ( streamptr->record )
@@ -1252,7 +1276,6 @@ void streamClose(int streamID)
     }
 
   stream_delete_entry(streamptr);
-  xdebug ();
 }
 
 /*
@@ -1605,9 +1628,22 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 #ifdef USE_MPI
   if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
     {
-      pioBufferData ( streamID, varID, data, nmiss );
-      return; 
-    } 
+      statusCode nspStatus = namespaceInqResStatus ();
+      switch ( nspStatus )
+        {
+        case STAGE_DEFINITION:
+          xabort ( "DEFINITION STAGE: PARALLEL WRITING NOT POSSIBLE." );
+          break;
+        case STAGE_TIMELOOP:
+          pioBufferData ( streamID, varID, data, nmiss );
+          return;
+        case STAGE_CLEANUP:
+          xabort ( "CLEANUP STAGE: PARALLEL WRITING NOT POSSIBLE." );
+        break;
+        default:
+          xabort ( "INTERNAL ERROR" );
+        }
+    }
 #endif
   /* end deike */
 
@@ -2044,17 +2080,23 @@ void streamDefVlist(int streamID, int vlistID)
 
   stream_check_ptr(__func__, streamptr);
 
-  /*
-  if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
-    {
-      xdebug ("WARNING: Operation not executed." );
-      return;
-    }
-  */
-
 #ifdef USE_MPI
-    if ( namespaceInqResASent () == 1 )
-      pioBufferFuncCall ( __func__, 2, streamID, vlistID );
+  {
+    statusCode nspStatus = namespaceInqResStatus ();
+    switch ( nspStatus )
+      {
+      case STAGE_DEFINITION:
+        break;
+      case STAGE_TIMELOOP:
+        pioBufferFuncCall ( __func__, 2, streamID, vlistID );
+        break;
+      case STAGE_CLEANUP:
+        xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
+        break;
+      default:
+        xabort ( "INTERNAL ERROR" );
+      }
+  }
 #endif
 
   if ( streamptr->vlistID == CDI_UNDEFID )

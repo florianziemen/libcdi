@@ -59,6 +59,7 @@
 FCALLSCFUN5 (INT, pioInit, PIOINIT, pioinit, INT, INT, INT, INT, PINT)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
 FCALLSCSUB0 (pioEndDef, PIOENDDEF, pioenddef)
+FCALLSCSUB0 (pioEndTimestepping, PIOENDTIMESTEPPING, pioendtimestepping)
 FCALLSCSUB3 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep, INT, INT, INT)
 FCALLSCFUN2 (INT, pioInqVarDecoChunk, PIOINQVARDECOCHUNK, pioinqvardecochunk, INT, INT)
 FCALLSCFUN2 (INT, pioInqVarDecoOff, PIOINQVARDECOOFF, pioinqvardecooff, INT, INT)

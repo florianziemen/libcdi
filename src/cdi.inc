@@ -344,6 +344,9 @@
 !                     pioEndDef
       EXTERNAL        pioEndDef
 
+!                     pioEndTimestepping
+      EXTERNAL        pioEndTimestepping
+
 !                     pioWriteTimestep
 !                                    (INTEGER         ,
 !                                     INTEGER         ,

@@ -292,21 +292,23 @@ void pwPOSIXNONB ( void )
   sentFinalize = xmalloc ( nProcsCollNode * sizeof ( sentFinalize ));
   
   for ( ;; )
-    {    
+    {  
+        
       xmpiStat ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commNode, 
                              &status ), &status );
-
+      
+      
       source = status.MPI_SOURCE;
       tag    = status.MPI_TAG;
-
+      
       if ( rtag ) ungetTag ( rtag );
       if (( rtag   = getTag ( tag )) == NULL )
 	xabort ( "getTag () failed" );
-
+      
       xmpi ( MPI_Get_count ( &status, MPI_CHAR, &messagesize ));
 
-      xdebug ( "receive message from source=%d, id=%d, command=%d ( %s ),"
-               "messagesize=%d",
+      xdebug ( "RECEIVE MESSAGE FROM SOURCE=%d, ID=%d, COMMAND=%d ( %s ),"
+               "MESSAGESIZE=%d",
                source, rtag->id, rtag->command, 
                command2charP [ rtag->command ], messagesize);
 
@@ -376,7 +378,7 @@ void pwPOSIXNONB ( void )
 
 	  amount = messagesize;
 
-	  xdebug ( "command %s, id=%d, name=%s", 
+	  xdebug ( "COMMAND %s, ID=%d, NAME=%s", 
                    command2charP [ rtag->command ], 
                    rtag->id, bfd->name );
 	  
@@ -389,7 +391,7 @@ void pwPOSIXNONB ( void )
 
 	case IO_Close_file:
 	  
-	  xdebug ( "command %s,  file%d, source%d", 
+	  xdebug ( "COMMAND %s,  FILE%d, SOURCE%d", 
                    command2charP [ rtag->command ],  rtag->id, source );
 	  
 	  if ( ! ( bfd = ( bFiledataP * ) queueIdx2val ( bibBFiledataP,  
@@ -401,7 +403,7 @@ void pwPOSIXNONB ( void )
 
 	  amount = messagesize;
 
-	  xdebug ( "command %s, id=%d, name=%s, amount=%ld", 
+	  xdebug ( "COMMAND %s, ID=%d, NAME=%s, AMOUNT=%ld", 
                    command2charP [ rtag->command ], rtag->id, bfd->name, amount );
 	  
 	  xmpi ( MPI_Recv (  bfd->fb->buffer, amount, MPI_CHAR, source,  tag, 
@@ -432,14 +434,17 @@ void pwPOSIXNONB ( void )
             int buffer = CDI_UNDEFID, collID;
 
             xmpi ( MPI_Recv ( &buffer, 1, MPI_INT, source, tag, commNode, &status ));
+            
             sentFinalize[source] = true;
             doFinalize = true;
+            
             for ( collID = 0; collID < nProcsCollNode; collID++ )
               if ( !sentFinalize[collID] ) 
                 {
                   doFinalize = false;
                   break;
                 }
+            
             if ( doFinalize )
               {
                 if ( bibBFiledataP->head != NULL )
@@ -452,6 +457,7 @@ void pwPOSIXNONB ( void )
                     queueDestroy ( bibBFiledataP );
                   }
                 if ( rtag ) ungetTag ( rtag );
+            
                 return;
               }
           }
@@ -682,6 +688,8 @@ void finalizePOSIXNONB ( void )
   
   xmpi ( MPI_Send ( &buffer, 1, MPI_INT, specialRank, tag, commNode ));
 
+  xdebug ( "SENT MESSAGE WITH TAG \"IO_FINALIZE\" TO SPECIAL PROCESS" );
+
   if ( bibAFiledataP->head != NULL ) 
     {
       xabort ( "Queue bibAFiledataP not empty." );
@@ -697,7 +705,8 @@ void finalizePOSIXNONB ( void )
 
 void initPOSIXNONB ( void )  
 {
-  if ( commInqSizeNode () < 2 ) xabort ( "usage: #pes/#nodes >= 2" );
+  if ( commInqSizeNode () < 2 ) 
+    xabort ( "USAGE: # IO PROCESSES ON A PHYSICAL NODE >= 2" );
   
   if ( commInqRankNode () == commInqSpecialRankNode ()) 
     {

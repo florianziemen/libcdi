@@ -594,7 +594,8 @@ void  finalizePOSIXFPGUARDSENDRECV ( void )
 
 void initPOSIXFPGUARDSENDRECV ( void )
 {
-  if ( commInqSizeNode () < 2 ) xabort ( "usage: #pes/#nodes >= 2" );
+  if ( commInqSizeNode () < 2 ) 
+    xabort ( "USAGE: # IO PROCESSES ON A PHYSICAL NODE >= 2" );
   
   if ( commInqRankNode () == commInqSpecialRankNode ()) 
     {

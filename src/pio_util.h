@@ -34,7 +34,7 @@
 #define MAXSTRING        256
 
 
-#define ddebug 1
+#define ddebug 0
 
 
 void pcdiAssert   ( bool, const char *, const char *, int );

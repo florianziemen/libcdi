@@ -14,17 +14,16 @@ PROGRAM COLLECTDATA2003
 
   ! For parallel IO:
   !  Parameter and variables needed.
-  INTEGER nProcsIO, IOMode, nNamespaces
-  PARAMETER ( nProcsIO = 4 )
-  !PARAMETER ( IOMode   = PIO_NONE )                 
-  !PARAMETER ( IOMode   = PIO_MPI_NONB )             
-  PARAMETER ( IOMode   = PIO_POSIX_NONB )           
-  !PARAMETER ( IOMode   = PIO_POSIX_ASYNCH )         
-  !PARAMETER ( IOMode   = PIO_POSIX_FPGUARD_SENDRECV )
-
-  PARAMETER ( nNamespaces = 1 )
-  INTEGER, PARAMETER :: hasLocalFile ( nNamespaces ) = (/ 0 /) 
- 
+  INTEGER nProcsIO, IOMode, nNamespaces 
+  PARAMETER ( nProcsIO     = 3 )
+  !PARAMETER ( IOMode       = PIO_NONE )                 
+  !PARAMETER ( IOMode       = PIO_MPI_NONB )             
+  !PARAMETER ( IOMode       = PIO_POSIX_NONB )           
+  !PARAMETER ( IOMode       = PIO_POSIX_ASYNCH )         
+  PARAMETER ( IOMode       = PIO_POSIX_FPGUARD_SENDRECV )
+  PARAMETER ( nNamespaces  = 1 )
+  INTEGER hasLocalFile ( nNamespaces )
+  PARAMETER ( hasLocalFile = (/ 0 /) )  
   INTEGER commGlob, commModel, error
 
   ! Start parallel environment
@@ -56,12 +55,12 @@ CONTAINS
     INTEGER, INTENT ( IN ) :: commModel
 
     INTEGER nlon, nlat, nlev, nts, vdate, vtime, filetype
-    PARAMETER ( nlon = 12 )   ! Number of longitudes
-    PARAMETER ( nlat =  6 )   ! Number of latitudes
-    PARAMETER ( nlev =  5 )   ! Number of levels
-    PARAMETER ( nts  =  3 )   ! Number of time steps
-    PARAMETER ( vdate = 19850101 )
-    PARAMETER ( vtime = 120000 )
+    PARAMETER ( nlon     = 12 )   ! Number of longitudes
+    PARAMETER ( nlat     =  6 )   ! Number of latitudes
+    PARAMETER ( nlev     =  5 )   ! Number of levels
+    PARAMETER ( nts      =  3 )   ! Number of time steps
+    PARAMETER ( vdate    = 19850101 )
+    PARAMETER ( vtime    = 120000 )
     PARAMETER ( filetype = FILETYPE_GRB )
     
     INTEGER gridID, zaxisID1, zaxisID2, taxisID
@@ -160,6 +159,10 @@ CONTAINS
       ! Start transmission of all data for output in this timestep to IO server.
       CALL pioWriteTimestep ( tsID, vdate, vtime )
     END DO
+    
+    ! For parallel IO:
+    ! Preparation for local cleanup
+    CALL pioEndTimestepping ()
     
     !     Close the output stream
     CALL streamClose(streamID)
