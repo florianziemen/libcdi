@@ -4194,11 +4194,11 @@ int isGaussGrid(long ysize, double yinc, double *yvals)
 
       /* check S->N */
       if ( lgauss == FALSE )
-        {                 
+        {
           for ( i = 0; i < ysize; i++ )
             if ( fabs(yv[i] - yvals[ysize-i-1]) >
                  ((yv[0] - yv[1])/500) ) break;
-      
+
           if ( i == ysize ) lgauss = TRUE;
         }
 
@@ -4222,7 +4222,7 @@ void cdfSetVar(ncvar_t *ncvars, int ncvarid, int isvar)
     {
       if ( ! ncvars[ncvarid].ignore )
         Warning("Inconsistent variable definition for %s!", ncvars[ncvarid].name);
-        
+
       ncvars[ncvarid].warn = TRUE;
       isvar = FALSE;
     }
@@ -4663,12 +4663,27 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             }
           else if ( strcmp(attname, "valid_range") == 0 && attlen == 2 )
             {
-	      cdfGetAttDouble(fileID, ncvarid, attname, 2, ncvars[ncvarid].validrange);
-	      ncvars[ncvarid].lvalidrange = TRUE;
-              if ( ((int)ncvars[ncvarid].validrange[0]) == 0 && ((int)ncvars[ncvarid].validrange[1]) == 255 )
-                ncvars[ncvarid].lunsigned = TRUE;
-	      /* cdfSetVar(ncvars, ncvarid, TRUE); */
+              if ( ncvars[ncvarid].lvalidrange == FALSE )
+                {
+                  cdfGetAttDouble(fileID, ncvarid, attname, 2, ncvars[ncvarid].validrange);
+                  ncvars[ncvarid].lvalidrange = TRUE;
+                  if ( ((int)ncvars[ncvarid].validrange[0]) == 0 && ((int)ncvars[ncvarid].validrange[1]) == 255 )
+                    ncvars[ncvarid].lunsigned = TRUE;
+                  /* cdfSetVar(ncvars, ncvarid, TRUE); */
+                }
             }
+          /*
+          else if ( strcmp(attname, "valid_min") == 0 && attlen == 1 )
+            {
+              cdfGetAttDouble(fileID, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[0]);
+              ncvars[ncvarid].lvalidrange = TRUE;
+            }
+          else if ( strcmp(attname, "valid_max") == 0 && attlen == 1 )
+            {
+              cdfGetAttDouble(fileID, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[1]);
+              ncvars[ncvarid].lvalidrange = TRUE;
+            }
+          */
           else if ( strcmp(attname, "_Unsigned") == 0 && atttype == NC_CHAR )
             {
               cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
