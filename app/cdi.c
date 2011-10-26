@@ -442,7 +442,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 
 		  fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d",
 			  year, month, day, hour, minute, second);
-		      
+
 		  unit = taxisInqTunit(taxisID);
 		  if ( unit != CDI_UNDEFID )
 		    {
@@ -461,7 +461,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 		      else
 			fprintf(stdout, "  Units = unknown");
 		    }
-	      
+
 		  calendar = taxisInqCalendar(taxisID);
 		  if ( calendar != CDI_UNDEFID )
 		    {
@@ -478,6 +478,9 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 		      else
 			fprintf(stdout, "  Calendar = unknown");
 		    }
+
+		  if ( taxisHasBounds(taxisID) )
+		    fprintf(stdout, "  Bounds = true");
 
 		  fprintf(stdout, "\n");
 		}
