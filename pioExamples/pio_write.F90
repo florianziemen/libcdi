@@ -165,10 +165,10 @@ PROGRAM CDIWRITE
   
   CHARACTER*(*), PARAMETER :: PTYPENAMES ( 7 ) = (/ &
     'PIO_NONE                       ', &
-    'PIO_MPI_NONB                   ', &
-    'PIO_POSIX_NONB                 ', &
-    'PIO_POSIX_ASYNCH               ', &
-    'PIO_POSIX_FPGUARD_SENDRECV     ', &
+    'PIO_MPI                   ', &
+    'PIO_POSIX                 ', &
+    'PIO_ASYNCH               ', &
+    'PIO_FPGUARD     ', &
     'PIO_POSIX_FPGUARD_THREAD_REFUSE', &
     'PIO_POSIX_FPGUARD_THREAD       '/)
   
@@ -517,7 +517,7 @@ CONTAINS
     CALL MPI_COMM_SIZE ( pioCollectorComm_NODE, ncollectors_NODE, error )
     CALL MPI_COMM_SIZE ( pioComm, size, error )
     
-    IF ( ptype == PIO_NONE .OR. ptype == PIO_MPI_NONB ) THEN
+    IF ( ptype == PIO_NONE .OR. ptype == PIO_MPI ) THEN
        npes_NODE = ncollectors_NODE
     ELSE 
        npes_NODE = ncollectors_NODE + 1

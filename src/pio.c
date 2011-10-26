@@ -70,18 +70,18 @@ size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
 
   switch ( commInqIOMode ())
     {
-    case PIO_MPI_NONB:
+    case PIO_MPI:
       iret = fwMPINONB ( fileID, tsID, buffer, len );
       break;
 #ifndef _SX
-    case PIO_POSIX_ASYNCH:
+    case PIO_ASYNCH:
       iret = fwPOSIXASYNCH ( fileID, tsID, buffer, len );
       break;
 #endif      
-    case PIO_POSIX_FPGUARD_SENDRECV:
+    case PIO_FPGUARD:
       iret = fwPOSIXFPGUARDSENDRECV ( fileID, tsID, buffer, len );
       break;
-    case PIO_POSIX_NONB:
+    case PIO_POSIX:
       iret = fwPOSIXNONB ( fileID, tsID, buffer, len );
       break;
     }
@@ -96,18 +96,18 @@ int pioFileClose ( int id )
   int iret = CDI_UNDEFID;
   switch ( commInqIOMode ())
     {
-    case PIO_MPI_NONB:
+    case PIO_MPI:
       iret = fcMPINONB ( id );
       break;
 #ifndef _SX
-    case PIO_POSIX_ASYNCH:
+    case PIO_ASYNCH:
       iret = fcPOSIXASYNCH ( id );
       break;
 #endif
-    case PIO_POSIX_FPGUARD_SENDRECV:
+    case PIO_FPGUARD:
       iret = fcPOSIXFPGUARDSENDRECV ( id );
       break;
-    case PIO_POSIX_NONB:
+    case PIO_POSIX:
       iret = fcPOSIXNONB ( id );
       break;
     }
@@ -123,18 +123,18 @@ int pioFileOpenW ( const char *filename )
 
   switch ( commInqIOMode ())
     {
-    case PIO_MPI_NONB:
+    case PIO_MPI:
       iret = fowMPINONB ( filename );
       break;
 #ifndef _SX
-    case PIO_POSIX_ASYNCH:
+    case PIO_ASYNCH:
       iret = fowPOSIXASYNCH ( filename );
       break;
 #endif
-    case PIO_POSIX_FPGUARD_SENDRECV:
+    case PIO_FPGUARD:
       iret = fowPOSIXFPGUARDSENDRECV ( filename );
       break;
-    case PIO_POSIX_NONB:
+    case PIO_POSIX:
       iret = fowPOSIXNONB ( filename );
       break;
     }
@@ -160,18 +160,18 @@ void backendInit ( void )
       commRecvNodeMap ();
       commDefCommsIO ();
       break;
-    case PIO_MPI_NONB:
+    case PIO_MPI:
       initMPINONB ();
       break;
 #ifndef _SX
-    case PIO_POSIX_ASYNCH:
+    case PIO_ASYNCH:
       initPOSIXASYNCH ();
       break;
 #endif
-    case PIO_POSIX_FPGUARD_SENDRECV:
+    case PIO_FPGUARD:
       initPOSIXFPGUARDSENDRECV ();
       break;
-    case PIO_POSIX_NONB:
+    case PIO_POSIX:
       initPOSIXNONB ();
       break;
     }
@@ -186,16 +186,16 @@ void backendCleanup ( void )
     {
     case PIO_NONE:
       break;
-    case PIO_MPI_NONB:
+    case PIO_MPI:
       finalizeMPINONB ();
       break;
-    case PIO_POSIX_ASYNCH:
+    case PIO_ASYNCH:
       finalizePOSIXASYNCH ();
       break;
-    case PIO_POSIX_FPGUARD_SENDRECV:
+    case PIO_FPGUARD:
       finalizePOSIXFPGUARDSENDRECV ();
       break;
-    case PIO_POSIX_NONB:
+    case PIO_POSIX:
       finalizePOSIXNONB ();
       break;
     default:

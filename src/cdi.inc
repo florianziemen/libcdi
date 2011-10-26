@@ -317,19 +317,16 @@
       PARAMETER (CALENDAR_366DAYS       =  4)
       INTEGER    CALENDAR_NONE         
       PARAMETER (CALENDAR_NONE          =  5)
-!
-!  deike
-!
       INTEGER    PIO_NONE              
       PARAMETER (PIO_NONE               =  0)
-      INTEGER    PIO_MPI_NONB          
-      PARAMETER (PIO_MPI_NONB           =  1)
-      INTEGER    PIO_POSIX_NONB        
-      PARAMETER (PIO_POSIX_NONB         =  2)
-      INTEGER    PIO_POSIX_ASYNCH      
-      PARAMETER (PIO_POSIX_ASYNCH       =  3)
-      INTEGER    PIO_POSIX_FPGUARD_SENDRECV
-      PARAMETER (PIO_POSIX_FPGUARD_SENDRECV =  4)
+      INTEGER    PIO_MPI               
+      PARAMETER (PIO_MPI                =  1)
+      INTEGER    PIO_POSIX             
+      PARAMETER (PIO_POSIX              =  2)
+      INTEGER    PIO_ASYNCH            
+      PARAMETER (PIO_ASYNCH             =  3)
+      INTEGER    PIO_FPGUARD           
+      PARAMETER (PIO_FPGUARD            =  4)
       INTEGER         pioInit
 !                                    (INTEGER         ,
 !                                     INTEGER         ,

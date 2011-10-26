@@ -53,9 +53,6 @@
 
 /*  CALENDAR types  */
 
-
-/*  deike  */
-
 FCALLSCFUN5 (INT, pioInit, PIOINIT, pioinit, INT, INT, INT, INT, PINT)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
 FCALLSCSUB0 (pioEndDef, PIOENDDEF, pioenddef)

@@ -105,10 +105,10 @@ int main (int argc, char *argv[])
   enum { 
     nProcsIO    = 3,
     //IOMode      = PIO_NONE,
-    //IOMode      = PIO_MPI_NONB, 
-    //IOMode      = PIO_POSIX_FPGUARD_SENDRECV,
-    IOMode      = PIO_POSIX_ASYNCH,
-    //IOMode      = PIO_POSIX_NONB,
+    //IOMode      = PIO_MPI, 
+    //IOMode      = PIO_FPGUARD,
+    IOMode      = PIO_ASYNCH,
+    //IOMode      = PIO_POSIX,
     nNamespaces = 1 };
   
   static int hasLocalFile[nNamespaces] = { 0 };

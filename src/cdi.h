@@ -192,19 +192,19 @@ extern "C" {
 #define  CALENDAR_366DAYS         4
 #define  CALENDAR_NONE            5
 
-/* deike */
-/* parallel io types, A: asynchronous, B: blocking */
+  /* IOMode types */
   
-#define  PIO_NONE                        0
-#define  PIO_MPI_NONB                    1
-#define  PIO_POSIX_NONB                  2
-#define  PIO_POSIX_ASYNCH                3
-#define  PIO_POSIX_FPGUARD_SENDRECV      4
+#define  PIO_NONE                 0
+#define  PIO_MPI                  1
+#define  PIO_POSIX                2
+#define  PIO_ASYNCH               3
+#define  PIO_FPGUARD              4
 
-#define  PIO_MINIOMODUS                  PIO_NONE
-#define  PIO_MAXIOMODUS                  PIO_POSIX_FPGUARD_SENDRECV
-#define  PIO_MINIOMODUSWITHSPECIALPROCS  PIO_POSIX_NONB  
+#define  PIO_MINIOMODE                  PIO_NONE
+#define  PIO_MAXIOMODE                  PIO_FPGUARD
+#define  PIO_MINIOMODEWITHSPECIALPROCS  PIO_POSIX  
  
+  /* parallel IO routines */
 
 int      pioInit               ( int, int, int, int, int * );
 void     pioFinalize           ( void );

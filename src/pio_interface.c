@@ -745,12 +745,12 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode,
 {
   int sizeGlob, nProcsModel;
 
-  if ( IOMode < PIO_MINIOMODUS || IOMode > PIO_MAXIOMODUS )
+  if ( IOMode < PIO_MINIOMODE || IOMode > PIO_MAXIOMODE )
     xabort ( "IOMODE IS NOT VALID." );
   
 #ifdef _SX
-  if ( IOMode ==  PIO_POSIX_ASYNCH )
-    xabort ( "PIO_POSIX_ASYNCH DOES NOT WORK ON SX." );
+  if ( IOMode ==  PIO_ASYNCH )
+    xabort ( "PIO_ASYNCH DOES NOT WORK ON SX." );
 #endif
 
   commInit ();
@@ -761,7 +761,7 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode,
     xabort ( "DISTRIBUTION OF TASKS ON PROCS IS NOT VALID." );
 
   commDefNProcsIO ( nProcsIO );
-  commDefIOMode   ( IOMode, PIO_MAXIOMODUS, PIO_MINIOMODUSWITHSPECIALPROCS );
+  commDefIOMode   ( IOMode, PIO_MAXIOMODE, PIO_MINIOMODEWITHSPECIALPROCS );
   commDefCommPio  ();
  
   // JUST FOR TEST CASES WITH ONLY ONE MPI TASK
@@ -862,7 +862,7 @@ void  pioEndTimestepping ( void )
   @return
 */
 
-void pioFinalize ()
+void pioFinalize ( void )
 {
 #ifdef USE_MPI
   int collID, ibuffer = 1111;
