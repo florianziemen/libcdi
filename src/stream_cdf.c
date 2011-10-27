@@ -446,7 +446,6 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
   int atttype, attlen;
   size_t len;
   char attname[1024];
-  char atttxt[8192];
 
   vlistInqNatts(vlistID, varID, &natts);
 
@@ -456,9 +455,12 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
 
       if ( atttype == DATATYPE_TXT )
         {
-          vlistInqAttTxt(vlistID, varID, attname, sizeof(atttxt), atttxt);
+          char *atttxt;
+          atttxt = (char *) malloc(attlen*sizeof(char));
+          vlistInqAttTxt(vlistID, varID, attname, attlen, atttxt);
           len = attlen;
           cdf_put_att_text(fileID, ncvarID, attname, len, atttxt);
+          free(atttxt);
         }
       else if ( atttype == DATATYPE_INT16 || atttype == DATATYPE_INT32 )
         {

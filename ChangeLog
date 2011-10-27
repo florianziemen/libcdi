@@ -1,3 +1,7 @@
+2011-10-27 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdilib.c::defineAttributes: bug fix atttxt [report: Florian Prill]
+
 2011-10-25 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added support for netcdf attribute valid_range [request: Etienne Tourigny]
