@@ -108,7 +108,7 @@ int main (int argc, char *argv[])
     //IOMode      = PIO_MPI, 
     //IOMode      = PIO_FPGUARD,
     IOMode      = PIO_ASYNCH,
-    //IOMode      = PIO_POSIX,
+    //IOMode      = PIO_WRITER,
     nNamespaces = 1 };
   
   static int hasLocalFile[nNamespaces] = { 0 };

@@ -81,7 +81,7 @@ size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
     case PIO_FPGUARD:
       iret = fwPOSIXFPGUARDSENDRECV ( fileID, tsID, buffer, len );
       break;
-    case PIO_POSIX:
+    case PIO_WRITER:
       iret = fwPOSIXNONB ( fileID, tsID, buffer, len );
       break;
     }
@@ -107,7 +107,7 @@ int pioFileClose ( int id )
     case PIO_FPGUARD:
       iret = fcPOSIXFPGUARDSENDRECV ( id );
       break;
-    case PIO_POSIX:
+    case PIO_WRITER:
       iret = fcPOSIXNONB ( id );
       break;
     }
@@ -134,7 +134,7 @@ int pioFileOpenW ( const char *filename )
     case PIO_FPGUARD:
       iret = fowPOSIXFPGUARDSENDRECV ( filename );
       break;
-    case PIO_POSIX:
+    case PIO_WRITER:
       iret = fowPOSIXNONB ( filename );
       break;
     }
@@ -171,7 +171,7 @@ void backendInit ( void )
     case PIO_FPGUARD:
       initPOSIXFPGUARDSENDRECV ();
       break;
-    case PIO_POSIX:
+    case PIO_WRITER:
       initPOSIXNONB ();
       break;
     }
@@ -195,7 +195,7 @@ void backendCleanup ( void )
     case PIO_FPGUARD:
       finalizePOSIXFPGUARDSENDRECV ();
       break;
-    case PIO_POSIX:
+    case PIO_WRITER:
       finalizePOSIXNONB ();
       break;
     default:

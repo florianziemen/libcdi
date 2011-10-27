@@ -889,11 +889,11 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
   int nProcsColl = commInqNProcsColl ();
   int nProcsModel = commInqNProcsModel ();
 
-  xassert ( tsID            >= 0     &&
-            vdate         >= 0     &&
-            vtime         >= 0     &&
-            winPostSet    != NULL  &&
-            win           != NULL );
+  xassert ( tsID       >= 0     &&
+            vdate      >= 0     &&
+            vtime      >= 0     &&
+            winPostSet != NULL  &&
+            win        != NULL );
 
   buffer[0] = tsID;
   buffer[1] = vdate;

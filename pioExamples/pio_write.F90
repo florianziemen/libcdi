@@ -166,7 +166,7 @@ PROGRAM CDIWRITE
   CHARACTER*(*), PARAMETER :: PTYPENAMES ( 7 ) = (/ &
     'PIO_NONE                       ', &
     'PIO_MPI                   ', &
-    'PIO_POSIX                 ', &
+    'PIO_WRITER                 ', &
     'PIO_ASYNCH               ', &
     'PIO_FPGUARD     ', &
     'PIO_POSIX_FPGUARD_THREAD_REFUSE', &

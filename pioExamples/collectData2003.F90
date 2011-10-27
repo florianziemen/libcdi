@@ -18,7 +18,7 @@ PROGRAM COLLECTDATA2003
   PARAMETER ( nProcsIO     = 3 )
   !PARAMETER ( IOMode       = PIO_NONE )                 
   !PARAMETER ( IOMode       = PIO_MPI )             
-  !PARAMETER ( IOMode       = PIO_POSIX )           
+  !PARAMETER ( IOMode       = PIO_WRITER )           
   !PARAMETER ( IOMode       = PIO_ASYNCH )         
   PARAMETER ( IOMode       = PIO_FPGUARD )
   PARAMETER ( nNamespaces  = 1 )
