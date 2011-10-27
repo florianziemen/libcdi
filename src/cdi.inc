@@ -321,8 +321,8 @@
       PARAMETER (PIO_NONE               =  0)
       INTEGER    PIO_MPI               
       PARAMETER (PIO_MPI                =  1)
-      INTEGER    PIO_POSIX             
-      PARAMETER (PIO_POSIX              =  2)
+      INTEGER    PIO_WRITER            
+      PARAMETER (PIO_WRITER             =  2)
       INTEGER    PIO_ASYNCH            
       PARAMETER (PIO_ASYNCH             =  3)
       INTEGER    PIO_FPGUARD           
