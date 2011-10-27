@@ -222,8 +222,6 @@ src/pio_interface.h -text
 src/pio_mpinonb.c -text
 src/pio_posixasynch.c -text
 src/pio_posixfpguardsendrecv.c -text
-src/pio_posixfpguardthread.c -text
-src/pio_posixfpguardthreadrefuse.c -text
 src/pio_posixnonb.c -text
 src/pio_queue.c -text
 src/pio_rpc.c -text
