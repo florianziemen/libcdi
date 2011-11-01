@@ -3525,7 +3525,7 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
       if ( xtype == NC_BYTE )
         {
           for ( i = 0; i < gridsize; i++ )
-            if ( data[i] < 0 ) data[i] += 255;
+            if ( data[i] < 0 ) data[i] += 256;
         }
     }
 
@@ -3538,7 +3538,10 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
       // printf("readvarslice: validrange %d %g %g\n", lvalidrange, validrange[0], validrange[1]);
       if ( lvalidrange )
         for ( i = 0; i < gridsize; i++ )
-          if ( data[i] < validrange[0] || data[i] > validrange[1] ) data[i] = missval;
+          {
+            if ( IS_NOT_EQUAL(validrange[0], VALIDMISS) && data[i] < validrange[0] ) data[i] = missval;
+            if ( IS_NOT_EQUAL(validrange[1], VALIDMISS) && data[i] > validrange[1] ) data[i] = missval;
+          }
 
       // printf("XXX %31.0f %31.0f %31.0f %31.0f\n", missval, (float)data[0]);
       for ( i = 0; i < gridsize; i++ )
@@ -4048,6 +4051,8 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].deflate         = 0;
       ncvars[ncvarid].lunsigned       = 0;
       ncvars[ncvarid].lvalidrange     = 0;
+      ncvars[ncvarid].validrange[0]   = VALIDMISS;
+      ncvars[ncvarid].validrange[1]   = VALIDMISS;
     }
 }
 
@@ -4674,7 +4679,6 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   /* cdfSetVar(ncvars, ncvarid, TRUE); */
                 }
             }
-          /*
           else if ( strcmp(attname, "valid_min") == 0 && attlen == 1 )
             {
               cdfGetAttDouble(fileID, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[0]);
@@ -4685,7 +4689,6 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               cdfGetAttDouble(fileID, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[1]);
               ncvars[ncvarid].lvalidrange = TRUE;
             }
-          */
           else if ( strcmp(attname, "_Unsigned") == 0 && atttype == NC_CHAR )
             {
               cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);

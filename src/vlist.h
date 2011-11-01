@@ -7,6 +7,7 @@
 #  include "cdi_limits.h"
 #endif
 
+#define VALIDMISS 1.e+303
 
 /*
  * CDI attribute

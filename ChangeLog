@@ -1,3 +1,7 @@
+2011-11-01 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added support for netcdf attribute valid_min/valid_max [request: Etienne Tourigny]
+
 2011-10-27 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cdilib.c::defineAttributes: bug fix atttxt [report: Florian Prill]
