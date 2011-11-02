@@ -3758,7 +3758,7 @@ int cdfWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
               if ( xtype == NC_BYTE )
                 {
                   for ( i = 0; i < nvals; ++i )
-                    if ( mdata[i] > 126 ) mdata[i] -= 256;
+                    if ( mdata[i] > 127 ) mdata[i] -= 256;
                 }
             }
         }
