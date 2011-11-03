@@ -1,17 +1,17 @@
 #ifndef NAMESPACE_H
 #define NAMESPACE_H
 
-typedef struct {
-  int idx;
-  int nsp;
-  int resStatus;
-}namespaceTuple_t;
-
 typedef enum {
   STAGE_DEFINITION = 0,
   STAGE_TIMELOOP   = 1,
   STAGE_CLEANUP    = 2
 } statusCode;
+
+typedef struct {
+  int idx;
+  int nsp;
+  statusCode resStatus;
+}namespaceTuple_t;
 
 void             namespaceCleanup      ( void );
 void             namespaceInit         ( int, int * );

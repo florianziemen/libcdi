@@ -116,10 +116,10 @@ CONTAINS
     CALL streamDefVlist(streamID, vlistID)
 
     !     For parallel IO: 
-    !     End SUBROUTINE MODELRUNpart for CDI resources: 
-    !          Map variables on IO server,
+    !          End definition stage for CDI resources, 
+    !          balance load of variables among collecting IO server,
     !          Decompose data on model processes for IO
-    !          Transmit resources to the IO server.
+    !          Transfer resources to the collecting IO server.
     CALL pioEndDef (); 
 
     !     Loop over the number of time steps

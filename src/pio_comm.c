@@ -15,7 +15,7 @@ static pioInfo_t * info = NULL;
 
 
 static
-void pioinfoInit ( pioInfo_t * p )
+void pioInfoInit ( pioInfo_t * p )
 {
   p->IOMode               = CDI_UNDEFID;
   p->maxIOMode            = CDI_UNDEFID;
@@ -59,7 +59,7 @@ void commInit ( void )
 {
   xassert ( info == 0 );
   info = xmalloc ( sizeof ( pioInfo_t ));
-  pioinfoInit ( info );
+  pioInfoInit ( info );
 }
 
 

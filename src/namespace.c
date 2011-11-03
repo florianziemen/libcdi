@@ -9,9 +9,9 @@
 static int nNamespaces = 1;
 static int activeNamespace = 0;
 static int serialHLF = 1;
-static int * hasLocalFile = &serialHLF;
-static int serialRS = 0;
-static int * resStatus = &serialRS;
+static int * hasLocalFiles = &serialHLF;
+static int serialRS = STAGE_DEFINITION;
+static statusCode * resStatus = &serialRS;
 
 enum {
   intbits = sizeof(int) * CHAR_BIT,
@@ -76,9 +76,9 @@ void namespaceInit ( int nspn, int * argHasLocalFile )
   nNamespaces = nspn;
   if ( nspn >= 1 )
     {
-      hasLocalFile = xmalloc ( nspn * sizeof ( hasLocalFile[0] ));
+      hasLocalFiles = xmalloc ( nspn * sizeof ( hasLocalFiles[0] ));
       for ( nspID = 0; nspID < nspn; nspID++ )  
-	hasLocalFile[nspID] = argHasLocalFile[nspID];
+	hasLocalFiles[nspID] = argHasLocalFile[nspID];
       resStatus = xmalloc ( nspn * sizeof ( resStatus[0] )); 
     }
 #endif
@@ -89,8 +89,8 @@ void namespaceCleanup ( void )
 {
   if ( nNamespaces > 1 ) 
     {
-      free ( hasLocalFile );
-      hasLocalFile = NULL;
+      free ( hasLocalFiles );
+      hasLocalFiles = NULL;
       free ( resStatus );
     }
 }
@@ -104,10 +104,12 @@ int namespaceGetNumber ()
 
 void pioNamespaceSetActive ( int nId )
 {
+#ifdef USE_MPI
   if ( nId >= nNamespaces || nId < 0 )
     abort ();
 
   activeNamespace = nId;
+#endif
 }
 
 
@@ -122,7 +124,7 @@ int namespaceHasLocalFile ( int nId )
   if ( nId >= nNamespaces || nId < 0 )
     abort ();
   
-  return hasLocalFile ? hasLocalFile[nId] : 0;
+  return hasLocalFiles ? hasLocalFiles[nId] : 0;
 }
 
 

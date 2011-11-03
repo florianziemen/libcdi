@@ -206,14 +206,14 @@ extern "C" {
  
   /* parallel IO routines */
 
-int      pioInit               ( int, int, int, int, int * );
-void     pioFinalize           ( void );
 void     pioEndDef             ( void );
 void     pioEndTimestepping    ( void );
-void     pioWriteTimestep      ( int, int, int );
+void     pioFinalize           ( void );
+int      pioInit               ( int, int, int, int, int * );
 int      pioInqVarDecoChunk    ( int, int );
 int      pioInqVarDecoOff      ( int, int );
 void     pioNamespaceSetActive ( int );
+void     pioWriteTimestep      ( int, int, int );
 
   /* CDI control routines */
 
