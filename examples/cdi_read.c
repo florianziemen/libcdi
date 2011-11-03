@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "cdi.h"
 
+extern void reshArrayPrint ( char * filename );
+
 int nlon = 12; // Number of longitudes
 int nlat =  6; // Number of latitudes
 int nlev =  5; // Number of levels
@@ -15,7 +17,7 @@ int main(void)
 
 
   // Open the dataset 
-  streamID = streamOpenRead("example.nc");
+  streamID = streamOpenRead("example.grb");
   if ( streamID < 0 )
     {
       fprintf(stderr, "%s\n", cdiStringError(streamID));
@@ -46,6 +48,8 @@ int main(void)
       streamReadVar(streamID, varID1, var1, &nmiss);
       streamReadVar(streamID, varID2, var2, &nmiss);
     }
+
+  reshArrayPrint ( "reshArrayRead" );
 
   // Close the input stream 
   streamClose(streamID);

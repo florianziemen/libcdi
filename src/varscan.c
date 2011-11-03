@@ -658,19 +658,22 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
   if ( ! griddefined )
     {
       ngrids = gridSize();
-      gridIndexArray = malloc ( ngrids * sizeof ( int ));
-      gridGetIndexArray ( ngrids, gridIndexArray );
-      for ( i = 0; i < ngrids; i++ )
-	{
-	  gridID = gridIndexArray[i];
-	  if ( gridCompare(gridID, grid) == 0 )
-	    {
-	      gridglobdefined = TRUE;
-	      break;
-	    }
-	}
-      if ( gridIndexArray ) free ( gridIndexArray ); 
-
+      if ( ngrids > 0 )
+        {
+          gridIndexArray = malloc ( ngrids * sizeof ( int ));
+          gridGetIndexArray ( ngrids, gridIndexArray );
+          for ( i = 0; i < ngrids; i++ )
+            {
+              gridID = gridIndexArray[i];
+              if ( gridCompare(gridID, grid) == 0 )
+                {
+                  gridglobdefined = TRUE;
+                  break;
+                }
+            }
+          if ( gridIndexArray ) free ( gridIndexArray ); 
+        }
+      
       ngrids = vlistptr->ngrids;
       if ( mode == 1 )
 	for ( index = 0; index < ngrids; index++ )
@@ -776,18 +779,21 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
   if ( ! zaxisdefined )
     {
       nzaxis = zaxisSize();
-      zaxisIndexArray = malloc ( nzaxis * sizeof ( int ));
-      zaxisGetIndexArray ( nzaxis, zaxisIndexArray );
-      for ( i = 0; i < nzaxis; i++ )
-	{
-	  zaxisID = zaxisIndexArray[i];
-	  if ( zaxisCompare(zaxisID, zaxistype, nlevels, lbounds, levels, longname, units, ltype) == 0 )
-	    {
-	      zaxisglobdefined = 1;
-	      break;
-	    }
-	}
-      if ( zaxisIndexArray ) free ( zaxisIndexArray );
+      if ( nzaxis > 0 )
+        {
+          zaxisIndexArray = malloc ( nzaxis * sizeof ( int ));
+          zaxisGetIndexArray ( nzaxis, zaxisIndexArray );
+          for ( i = 0; i < nzaxis; i++ )
+            {
+              zaxisID = zaxisIndexArray[i];
+              if ( zaxisCompare(zaxisID, zaxistype, nlevels, lbounds, levels, longname, units, ltype) == 0 )
+                {
+                  zaxisglobdefined = 1;
+                  break;
+                }
+            }
+          if ( zaxisIndexArray ) free ( zaxisIndexArray );
+        }
 
       nzaxis = vlistptr->nzaxis;
       if ( mode == 1 )
