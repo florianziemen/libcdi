@@ -76,6 +76,7 @@ int cgribexGetZaxisHasBounds(int grb_ltype)
 
   switch (grb_ltype)
     {
+    case GRIB1_LTYPE_SIGMA_LAYER:
     case GRIB1_LTYPE_HYBRID_LAYER:
     case GRIB1_LTYPE_LANDDEPTH_LAYER:
       {
@@ -2039,12 +2040,21 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       }
     case ZAXIS_SIGMA:
       {
-	level = zaxisInqLevel(zaxisID, levelID);
+	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
+	  {
+	    ISEC1_LevelType = GRIB1_LTYPE_SIGMA_LAYER;
+	    ISEC1_Level1    = (int) zaxisInqLbound(zaxisID, levelID);
+	    ISEC1_Level2    = (int) zaxisInqUbound(zaxisID, levelID);
+	  }
+	else
+	  {
+            level = zaxisInqLevel(zaxisID, levelID);
 
-	ilevel = (int) level;
-	ISEC1_LevelType = GRIB1_LTYPE_SIGMA;
-	ISEC1_Level1    = ilevel;
-	ISEC1_Level2    = 0;
+            ilevel = (int) level;
+            ISEC1_LevelType = GRIB1_LTYPE_SIGMA;
+            ISEC1_Level1    = ilevel;
+            ISEC1_Level2    = 0;
+          }
 
 	break;
       }

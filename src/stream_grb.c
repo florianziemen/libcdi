@@ -23,7 +23,7 @@ int grib1ltypeToZaxisType(int grib_ltype)
   switch ( grib_ltype )
     {
     case GRIB1_LTYPE_SURFACE:         { zaxistype = ZAXIS_SURFACE;           break; }
-    case GRIB1_LTYPE_TOA:     { zaxistype = ZAXIS_TOA;       break; }
+    case GRIB1_LTYPE_TOA:             { zaxistype = ZAXIS_TOA;               break; }
     case GRIB1_LTYPE_SEA_BOTTOM:      { zaxistype = ZAXIS_SEA_BOTTOM;        break; }
     case GRIB1_LTYPE_ATMOSPHERE:      { zaxistype = ZAXIS_ATMOSPHERE;        break; }
     case GRIB1_LTYPE_MEANSEA:         { zaxistype = ZAXIS_MEANSEA;           break; }
@@ -31,7 +31,8 @@ int grib1ltypeToZaxisType(int grib_ltype)
     case GRIB1_LTYPE_ISOBARIC:        { zaxistype = ZAXIS_PRESSURE;          break; }
     case GRIB1_LTYPE_HEIGHT:          { zaxistype = ZAXIS_HEIGHT;            break; }
     case GRIB1_LTYPE_ALTITUDE:        { zaxistype = ZAXIS_ALTITUDE;	     break; }
-    case GRIB1_LTYPE_SIGMA:           { zaxistype = ZAXIS_SIGMA;	     break; }
+    case GRIB1_LTYPE_SIGMA:
+    case GRIB1_LTYPE_SIGMA_LAYER:     { zaxistype = ZAXIS_SIGMA;	     break; }
     case GRIB1_LTYPE_HYBRID:
     case GRIB1_LTYPE_HYBRID_LAYER:    { zaxistype = ZAXIS_HYBRID;	     break; }
     case GRIB1_LTYPE_LANDDEPTH:
@@ -51,7 +52,7 @@ int grib2ltypeToZaxisType(int grib_ltype)
   switch ( grib_ltype )
     {
     case GRIB2_LTYPE_SURFACE:            { zaxistype = ZAXIS_SURFACE;           break; }
-    case GRIB2_LTYPE_TOA:        { zaxistype = ZAXIS_TOA;       break; }
+    case GRIB2_LTYPE_TOA:                { zaxistype = ZAXIS_TOA;               break; }
     case GRIB2_LTYPE_SEA_BOTTOM:         { zaxistype = ZAXIS_SEA_BOTTOM;        break; }
     case GRIB2_LTYPE_ATMOSPHERE:         { zaxistype = ZAXIS_ATMOSPHERE;        break; }
     case GRIB2_LTYPE_MEANSEA:            { zaxistype = ZAXIS_MEANSEA;           break; }

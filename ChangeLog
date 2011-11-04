@@ -1,3 +1,7 @@
+2011-11-04 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added support for GRIB1_LTYPE_SIGMA_LAYER
+
 2011-11-01 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added support for netcdf attribute valid_min/valid_max [request: Etienne Tourigny]
