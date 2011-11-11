@@ -3087,6 +3087,27 @@ int cdfDefVar(int streamID, int varID)
 }
 #endif
 
+static
+void scale_add(long size, double *data, double addoffset, double scalefactor)
+{
+  long i;
+  int laddoffset;
+  int lscalefactor;
+
+  laddoffset   = IS_NOT_EQUAL(addoffset, 0);
+  lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
+
+  if ( laddoffset || lscalefactor )
+    {
+      for ( i = 0; i < size; ++i )
+        {
+          if ( lscalefactor ) data[i] *= scalefactor;
+          if ( laddoffset )   data[i] += addoffset;
+        }
+    }
+}
+
+
 void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -4495,7 +4516,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 		if ( ncvars[ncvarid].addoffset != 0 )
 		Warning("attribute add_offset not supported for atttype %d", atttype);
 	      */
-	      cdfSetVar(ncvars, ncvarid, TRUE);
+	      /* (also used for lon/lat) cdfSetVar(ncvars, ncvarid, TRUE); */
             }
           else if ( strcmp(attname, "scale_factor") == 0 && atttype != NC_CHAR )
             {
@@ -4505,7 +4526,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 		if ( ncvars[ncvarid].scalefactor != 1 )
 		Warning("attribute scale_factor not supported for atttype %d", atttype);
 	      */
-	      cdfSetVar(ncvars, ncvarid, TRUE);
+	      /* (also used for lon/lat) cdfSetVar(ncvars, ncvarid, TRUE); */
             }
           else if ( strcmp(attname, "bounds") == 0 && atttype == NC_CHAR )
             {
@@ -5283,6 +5304,8 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		  else
 		    cdf_get_var_double(fileID, xvarid, grid.xvals);
 
+                  scale_add(size, grid.xvals, ncvars[xvarid].addoffset, ncvars[xvarid].scalefactor);
+
 		  strcpy(grid.xname, ncvars[xvarid].name);
 		  strcpy(grid.xlongname, ncvars[xvarid].longname);
 		  strcpy(grid.xunits, ncvars[xvarid].units);
@@ -5355,6 +5378,8 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		    cdf_get_vara_double(fileID, yvarid, start, count, grid.yvals);
 		  else
 		    cdf_get_var_double(fileID, yvarid, grid.yvals);
+
+                  scale_add(size, grid.yvals, ncvars[xvarid].addoffset, ncvars[xvarid].scalefactor);
 
 		  strcpy(grid.yname, ncvars[yvarid].name);
 		  strcpy(grid.ylongname, ncvars[yvarid].longname);
