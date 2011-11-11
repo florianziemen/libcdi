@@ -135,6 +135,25 @@ m4/ltsugar.m4 -text
 m4/ltversion.m4 -text
 m4/lt~obsolete.m4 -text
 m4/starlink_fpp.m4 -text
+pioDoc/graphics/communicators.pdf -text svneol=unset#unset
+pioDoc/graphics/encodeNBuffer.pdf -text svneol=unset#unset
+pioDoc/graphics/legend.pdf -text svneol=unset#unset
+pioDoc/graphics/pioBuffer.pdf -text svneol=unset#unset
+pioDoc/graphics/pio_fpguard.pdf -text svneol=unset#unset
+pioDoc/graphics/pio_mpi.pdf -text svneol=unset#unset
+pioDoc/graphics/pio_none.pdf -text svneol=unset#unset
+pioDoc/graphics/pio_writer.pdf -text svneol=unset#unset
+pioDoc/graphics/serial.pdf -text svneol=unset#unset
+pioDoc/graphics/timestep.pdf -text svneol=unset#unset
+pioDoc/pio_docu.pdf -text svneol=unset#unset
+pioDoc/tex/communicators.tex -text
+pioDoc/tex/intro.tex -text
+pioDoc/tex/makepdf_f -text
+pioDoc/tex/modes.tex -text
+pioDoc/tex/pio_docu.tex -text
+pioDoc/tex/stages.tex -text
+pioDoc/tex/subprograms.tex -text
+pioDoc/tex/timestepping.tex -text
 pioExamples/Makefile.am -text
 pioExamples/Makefile.in -text
 pioExamples/cdi.inc -text
