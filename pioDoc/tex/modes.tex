@@ -71,7 +71,7 @@ the others collect, gather, encode, compress and buffer.
 \end{minipage}
 
 
-\section{{\tt PIO\_NONE}: $1$ process collects and writes with {\tt POSIX IO}}
+\section{{\tt PIO\_NONE}: $1$ process collects and writes using {\tt POSIX IO}}
 \index{PIONONE@{\tt PIO\_NONE}}
 \label{PIONONE}
 
@@ -96,7 +96,7 @@ addition it can be executed in parallel spread over physical nodes.
 \vspace{-5pt}
 \end{figure}
 
-\section{{\tt PIO\_MPI}: $n$ processes collect and write with {\tt MPI IO}}
+\section{{\tt PIO\_MPI}: $n$ processes collect and write using {\tt MPI IO}}
 \index{PIOMPI@{\tt PIO\_MPI}}
 \label{PIOMPI}
 
@@ -110,7 +110,7 @@ write to file. Writing in this I/O mode strongly depends on the {\tt MPI}
 implementation, the buffers used internally are of major importance for the 
 performance of writing.
 
-\section{{\tt PIO\_WRITER}: $n - 1$ processes collect and $1$ writes with 
+\section{{\tt PIO\_WRITER}: $n - 1$ processes collect and $1$ writes using 
 {\tt POSIX IO}}
 \index{PIOWRITER@{\tt PIO\_WRITER}}
 \label{PIOWRITER}
@@ -128,15 +128,15 @@ low level writing  while the others collect, encode, compress and buffer
 the data. The writer is the process with the highest rank within the
 I/O group on one physical node. Originating from {\htmlref{\tt pioInit}{pioInit}} 
 he invokes a
-backend server function, which it does not leave until he received messages from 
+backend server function, which he does not leave until he received messages from 
 all  
 collecting I/O processes to finalize.  A collector gets data from the calculating 
 model processes via {\tt MPI RMA} communication, and, after encoding and
 compressing it, pushes it to a double buffer. If the buffer is filled,
-all the contained data is send via \texttt{MPI\_Isend} to the writer, the 
+the contained data is send via \texttt{MPI\_Isend} to the writer, the 
 collector
-switches to the other buffer and continues its job. Before sending the
-data it has to wait for a potentially outstanding
+switches to the other buffer and continues his job. Before sending the
+data he has to wait for a potentially outstanding
 \texttt{MPI\_Request}. This might happen if the writer or the buffers
 used by {\tt MPI} are overcommited and indicates that the ratio of
 collectors and writers has to be checked. The writer is
@@ -149,7 +149,7 @@ this commands:
 open file and 3. write the data to an open file and close it afterwards. 
 For the file writing {\tt C} standard \texttt{fwrite} is used.
 
-\section{{\tt PIO\_ASYNCH}: $n - 1$ processes collect and $1$ writes with 
+\section{{\tt PIO\_ASYNCH}: $n - 1$ processes collect and $1$ writes using 
 {\tt POSIX AIO}} 
 \index{PIOASYNCH@{\tt PIO\_ASYNCH}}
 \label{PIOASYNCH}
@@ -159,7 +159,7 @@ the method used for low level file writing. The asynchronous nonblocking I/O
 can be overlapped with processing, write orders are passed to the operating 
 system. 
 
-\section{{\tt PIO\_FPGUARD}: $n - 1$ processes collect and write with {\tt POSIX
+\section{{\tt PIO\_FPGUARD}: $n - 1$ processes collect and write using {\tt POSIX
  IO}}
 \index{PIOFPGUARD@{\tt PIO\_FPGUARD}}
 \label{PIOFPGUARD}
@@ -187,7 +187,7 @@ If the buffer is filled, the collector
 sends the count of the contained data to the ``file pointer guard'' and gets a 
 file offset back. With the received offset the collector writes the data to 
 file using {\tt C} standard
-\texttt{fwrite} and goes on with its job. One message per collecting process 
+\texttt{fwrite} and goes on with his job. One message per collecting process 
 is tagged with the finalize command. All other messages needed for 
 the communication between the ``file pointer guard'' and the collectors 
 contain a stream identifier, a numeric value holding the amount of buffered data
