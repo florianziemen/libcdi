@@ -2,6 +2,8 @@
 #include "config.h"
 #endif
 
+#include <stdio.h>
+
 #ifdef USE_MPI
 #include <mpi.h>
 #include "cdi.h"
@@ -240,7 +242,6 @@ int main (int argc, char *argv[])
 
   MPI_Finalize (); 
 #else
-#include <stdio.h>
   printf ( "Use MPI for this testprogram.\n" );
 #endif
 
