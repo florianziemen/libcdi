@@ -57,6 +57,48 @@ static
 void version(void)
 {
   fprintf(stderr, "CDI version 1.7.1\n");
+#if defined (COMPILER)
+  fprintf(stderr, "Compiler: %s\n", COMPILER);
+#endif
+#if defined (COMP_VERSION)
+  fprintf(stderr, " version: %s\n", COMP_VERSION);
+#endif
+  fprintf(stderr, "    with:");
+#if defined (HAVE_LIBPTHREAD)
+  fprintf(stderr, " PTHREADS");
+#endif
+#if defined (_OPENMP)
+  fprintf(stderr, " OpenMP");
+#endif
+#if  defined  (HAVE_NETCDF4)
+  fprintf(stderr, " NC4");
+#endif
+#if  defined  (HAVE_LIBNC_DAP)
+  fprintf(stderr, " OPeNDAP");
+#endif
+#if defined (HAVE_LIBSZ)
+  fprintf(stderr, " SZ");
+#endif
+#if defined (HAVE_LIBZ)
+  fprintf(stderr, " Z");
+#endif
+#if defined (HAVE_LIBJASPER)
+  fprintf(stderr, " JASPER");
+#endif
+#if defined (HAVE_LIBPROJ)
+  fprintf(stderr, " PROJ.4");
+#endif
+#if defined (HAVE_LIBDRMAA)
+  fprintf(stderr, " DRMAA");
+#endif
+#if defined (HAVE_LIBCURL)
+  fprintf(stderr, " CURL");
+#endif
+  fprintf(stderr, "\n");
+#if defined (USER_NAME) && defined(HOST_NAME) && defined(SYSTEM_TYPE)
+  fprintf(stderr, "Compiled: by %s on %s (%s) %s %s\n",
+	  USER_NAME, HOST_NAME, SYSTEM_TYPE, __DATE__, __TIME__);
+#endif
   cdiPrintVersion();
   fprintf(stderr, "\n");
 /*
@@ -131,7 +173,7 @@ void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
 
   date2str(vdate, vdatestr, sizeof(vdatestr));
   time2str(vtime, vtimestr, sizeof(vtimestr));
-	  
+
   fprintf(stdout, "%6d :%s %s %-10s %7g ", ++rec, vdatestr, vtimestr, varname, level);
 
   fprintf(stdout, "%7d ", datasize);
@@ -335,13 +377,13 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  levelsize = zaxisInqSize(zaxisID);
 	  /* zaxisInqLongname(zaxisID, longname); */
 	  zaxisName(zaxistype, longname);
-	  longname[16] = 0;
+	  longname[17] = 0;
 	  zaxisInqUnits(zaxisID, units);
 	  units[12] = 0;
 	  if ( zaxistype == ZAXIS_GENERIC && ltype != 0 )
-	    nbyte0    = fprintf(stdout, "  %4d : %-10s  (ltype=%3d) : ", zaxisID+1, longname, ltype);
+	    nbyte0    = fprintf(stdout, "  %4d : %-11s  (ltype=%3d) : ", zaxisID+1, longname, ltype);
 	  else
-	    nbyte0    = fprintf(stdout, "  %4d : %-16s  %5s : ", zaxisID+1, longname, units);
+	    nbyte0    = fprintf(stdout, "  %4d : %-17s  %5s : ", zaxisID+1, longname, units);
 	  nbyte = nbyte0;
 	  for ( levelID = 0; levelID < levelsize; levelID++ )
 	    {
@@ -359,7 +401,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	    {
 	      double level1, level2;
 	      nbyte = nbyte0;
-	      nbyte0 = fprintf(stdout, "%32s : ", "bounds");
+	      nbyte0 = fprintf(stdout, "%33s : ", "bounds");
 	      for ( levelID = 0; levelID < levelsize; levelID++ )
 		{
 		  if ( nbyte > 80 )
@@ -400,7 +442,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 
 		  fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d",
 			  year, month, day, hour, minute, second);
-		      
+
 		  unit = taxisInqTunit(taxisID);
 		  if ( unit != CDI_UNDEFID )
 		    {
@@ -419,7 +461,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 		      else
 			fprintf(stdout, "  Units = unknown");
 		    }
-	      
+
 		  calendar = taxisInqCalendar(taxisID);
 		  if ( calendar != CDI_UNDEFID )
 		    {
@@ -436,6 +478,9 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 		      else
 			fprintf(stdout, "  Calendar = unknown");
 		    }
+
+		  if ( taxisHasBounds(taxisID) )
+		    fprintf(stdout, "  Bounds = true");
 
 		  fprintf(stdout, "\n");
 		}
