@@ -1,3 +1,7 @@
+2011-12-13 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* verify_coordinate_vars: bug fix in check for units = "1" [report: Katharina Six]
+
 2011-11-11 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added support for netCDF attributes scale_factor and add_offset for lon/lat coordinates

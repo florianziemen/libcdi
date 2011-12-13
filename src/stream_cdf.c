@@ -2554,7 +2554,7 @@ void cdfDefMapping(int streamID, int gridID)
               double lat_1_2[2];
               lat_1_2[0] = lat_1;
               lat_1_2[1] = lat_2;
-              cdf_put_att_double(fileID, ncvarid, "standard_parallel", NC_DOUBLE, 2L, lat_1_2);
+              cdf_put_att_double(fileID, ncvarid, "standard_parallel", NC_DOUBLE, 2, lat_1_2);
             }
         }
 
@@ -4489,12 +4489,12 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               else if ( strcmp(attstring, "atmosphere") == 0 )
                 ncvars[ncvarid].zaxistype = ZAXIS_ATMOSPHERE;
               else
-                {
+                { 
                   static int warn = TRUE;
                   if ( warn )
                     {
                       warn = FALSE;
-                      Warning("Grid type %s unsupported!", attstring);
+                      Warning("Zaxis type %s unsupported!", attstring);
                     }
                 }
 
@@ -4965,7 +4965,7 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
 		  else if ( memcmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
-		  else
+		  else if ( strcmp(ncvars[ncvarid].units, "level") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
 		}
 	      else if ( strcmp(ncvars[ncvarid].units, "cm")  == 0 )
@@ -5046,7 +5046,7 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
 		  else if ( memcmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
-		  else
+		  else if ( strcmp(ncvars[ncvarid].units, "level") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
 		  continue;
 		}
@@ -5242,8 +5242,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			}
 		      else
 			{
-			  Warning("Unsupported grid structure for variable %s (grid dims > 2)!",
-				  ncvars[ncvarid].name);
+			  Warning("Unsupported grid structure for variable %s (grid dims > 2)!", ncvars[ncvarid].name);
 			  ncvars[ncvarid].xvarid = UNDEFID;
 			  ncvars[ncvarid].yvarid = UNDEFID;
 			  xvarid = UNDEFID;
@@ -5270,8 +5269,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			dimsize2 = ncdims[dimid].len;
 			if ( dimsize1*dimsize2 != size )
 			  {
-			    Warning("Unsupported array structure, skipped variable %s!",
-				    ncvars[ncvarid].name);
+			    Warning("Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
 			  }
@@ -5288,8 +5286,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			dimsize = ncdims[dimid].len;
 			if ( dimsize != size )
 			  {
-			    Warning("Unsupported array structure, skipped variable %s!",
-				    ncvars[ncvarid].name);
+			    Warning("Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
 			  }
@@ -5343,8 +5340,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			dimsize2 = ncdims[dimid].len;
 			if ( dimsize1*dimsize2 != size )
 			  {
-			    Warning("Unsupported array structure, skipped variable %s!",
-				    ncvars[ncvarid].name);
+			    Warning("Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
 			  }
@@ -5363,8 +5359,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			dimsize = ncdims[dimid].len;
 			if ( dimsize != size )
 			  {
-			    Warning("Unsupported array structure, skipped variable %s!",
-				    ncvars[ncvarid].name);
+			    Warning("Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
 			    ncvars[ncvarid].isvar = -1;
 			    continue;
 			  }
