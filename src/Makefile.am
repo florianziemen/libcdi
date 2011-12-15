@@ -125,6 +125,11 @@ if CREATE_ISOC
 CLEANFILES += $(top_builddir)/src/mo_cdi.$(FCMODEXT) $(top_builddir)/src/mo_cdi.o
 endif
 
+install-exec-hook:
+	-@rmdir "$(DESTDIR)$(libdir)"
+install-data-hook:
+	-@rmdir "$(DESTDIR)$(includedir)"
+
 install-exec-local: pkgconfig/cdi.pc
 	test $(ENABLE_CDI_LIB) = false \
 		|| ( $(mkinstalldirs) "$(DESTDIR)$(libdir)/pkgconfig" ; \
