@@ -799,12 +799,15 @@ pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
 all-local: $(LOCALTARGETS) 
 
 install-exec-local: pkgconfig/cdi.pc
-	$(mkinstalldirs) "$(DESTDIR)$(libdir)/pkgconfig"
-	$(install_sh_DATA) pkgconfig/cdi.pc "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc"
+	test $(ENABLE_CDI_LIB) = false \
+		|| ( $(mkinstalldirs) "$(DESTDIR)$(libdir)/pkgconfig" ; \
+		     $(install_sh_DATA) pkgconfig/cdi.pc \
+		     "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc" )
 
 uninstall-local:
-	rm -f "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc"
-	rmdir "$(DESTDIR)$(libdir)/pkgconfig"
+	test $(ENABLE_CDI_LIB) = false \
+		|| ( rm -f "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc" ; \
+		     rmdir "$(DESTDIR)$(libdir)/pkgconfig" )
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

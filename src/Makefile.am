@@ -126,10 +126,13 @@ CLEANFILES += $(top_builddir)/src/mo_cdi.$(FCMODEXT) $(top_builddir)/src/mo_cdi.
 endif
 
 install-exec-local: pkgconfig/cdi.pc
-	$(mkinstalldirs) "$(DESTDIR)$(libdir)/pkgconfig"
-	$(install_sh_DATA) pkgconfig/cdi.pc "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc"
+	test $(ENABLE_CDI_LIB) = false \
+		|| ( $(mkinstalldirs) "$(DESTDIR)$(libdir)/pkgconfig" ; \
+		     $(install_sh_DATA) pkgconfig/cdi.pc \
+		     "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc" )
 
 uninstall-local:
-	rm -f "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc"
-	rmdir "$(DESTDIR)$(libdir)/pkgconfig"
+	test $(ENABLE_CDI_LIB) = false \
+		|| ( rm -f "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc" ; \
+		     rmdir "$(DESTDIR)$(libdir)/pkgconfig" )
 
