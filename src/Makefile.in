@@ -35,8 +35,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@CREATE_ISOC_TRUE@am__append_1 = mo_cdi.o mo_cdi.$(FCMODEXT)
-@CREATE_ISOC_TRUE@am__append_2 = $(top_builddir)/src/mo_cdi.$(FCMODEXT) $(top_builddir)/src/mo_cdi.o
+@ENABLE_CDI_LIB_TRUE@am__append_1 = pkgconfig/cdi.pc
+@CREATE_ISOC_TRUE@am__append_2 = mo_cdi.o mo_cdi.$(FCMODEXT)
+@CREATE_ISOC_TRUE@am__append_3 = $(top_builddir)/src/mo_cdi.$(FCMODEXT) $(top_builddir)/src/mo_cdi.o
+@ENABLE_CDI_LIB_TRUE@am__append_4 = pkgconfig/cdi.pc
 subdir = src
 DIST_COMMON = $(am__include_HEADERS_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in
@@ -372,9 +374,9 @@ libcdi_la_SOURCES = \
         stream.c         \
         swap.c
 
-LOCALTARGETS = pkgconfig/cdi.pc $(am__append_1)
+LOCALTARGETS = $(am__append_1) $(am__append_2)
 #
-CLEANFILES = `ls *~` cdilib.c $(am__append_2)
+CLEANFILES = `ls *~` cdilib.c $(am__append_3) $(am__append_4)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -683,6 +685,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+@ENABLE_CDI_LIB_FALSE@uninstall-local:
+@ENABLE_CDI_LIB_FALSE@install-exec-local:
 clean: clean-am
 
 clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
@@ -801,21 +805,18 @@ pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
 #
 all-local: $(LOCALTARGETS) 
 
+@ENABLE_CDI_LIB_TRUE@install-exec-local: pkgconfig/cdi.pc
+@ENABLE_CDI_LIB_TRUE@	$(mkinstalldirs) "$(DESTDIR)$(libdir)/pkgconfig"
+@ENABLE_CDI_LIB_TRUE@	$(install_sh_DATA) pkgconfig/cdi.pc "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc"
+
+@ENABLE_CDI_LIB_TRUE@uninstall-local:
+@ENABLE_CDI_LIB_TRUE@	rm -f "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc"
+@ENABLE_CDI_LIB_TRUE@	rmdir "$(DESTDIR)$(libdir)/pkgconfig"
+
 install-exec-hook:
 	-@rmdir "$(DESTDIR)$(libdir)"
 install-data-hook:
 	-@rmdir "$(DESTDIR)$(includedir)"
-
-install-exec-local: pkgconfig/cdi.pc
-	test $(ENABLE_CDI_LIB) = false \
-		|| ( $(mkinstalldirs) "$(DESTDIR)$(libdir)/pkgconfig" ; \
-		     $(install_sh_DATA) pkgconfig/cdi.pc \
-		     "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc" )
-
-uninstall-local:
-	test $(ENABLE_CDI_LIB) = false \
-		|| ( rm -f "$(DESTDIR)$(libdir)/pkgconfig/cdi.pc" ; \
-		     rmdir "$(DESTDIR)$(libdir)/pkgconfig" )
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
