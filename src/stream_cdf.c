@@ -4465,6 +4465,8 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                 ;
               else if ( strcmp(attstring, "lcc2") == 0 )
                 ;
+              else if ( strcmp(attstring, "linear") == 0 ) // ignore grid type linear
+                ;
               else
                 {
                   static int warn = TRUE;
