@@ -147,6 +147,10 @@ extern "C" {
 #define  ZAXIS_ALTITUDE          10  /* Altitude above mean sea level in meters */
 #define  ZAXIS_SIGMA             11  /* Sigma level                             */
 #define  ZAXIS_MEANSEA           12  /* Mean sea level                          */
+#define  ZAXIS_TOA               13  /* Norminal top of atmosphere              */
+#define  ZAXIS_SEA_BOTTOM        14  /* Sea bottom                              */
+#define  ZAXIS_ATMOSPHERE        15  /* Entire atmosphere                       */
+#define  ZAXIS_REFERENCE         16  /* zaxis reference number                  */
 
 /* TAXIS types */
 

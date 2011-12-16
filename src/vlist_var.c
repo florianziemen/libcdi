@@ -27,39 +27,41 @@ void vlistvarInitEntry(int vlistID, int varID)
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistptr->vars[varID].fvarID       = varID;
-  vlistptr->vars[varID].mvarID       = varID;
-  vlistptr->vars[varID].flag         = 0;
-  vlistptr->vars[varID].param        = 0;
-  vlistptr->vars[varID].timeID       = CDI_UNDEFID;
-  vlistptr->vars[varID].datatype     = CDI_UNDEFID;
-  vlistptr->vars[varID].tsteptype    = TSTEP_INSTANT;
-  vlistptr->vars[varID].timave       = 0;
-  vlistptr->vars[varID].timaccu      = 0;
-  vlistptr->vars[varID].xyz          = 0;
-  vlistptr->vars[varID].gridID       = CDI_UNDEFID;
-  vlistptr->vars[varID].zaxisID      = CDI_UNDEFID;
-  vlistptr->vars[varID].instID       = CDI_UNDEFID;
-  vlistptr->vars[varID].modelID      = CDI_UNDEFID;
-  vlistptr->vars[varID].tableID      = CDI_UNDEFID;
-  vlistptr->vars[varID].missvalused  = FALSE;
-  vlistptr->vars[varID].missval      = cdiDefaultMissval;
-  vlistptr->vars[varID].addoffset    = 0.0;
-  vlistptr->vars[varID].scalefactor  = 1.0;
-  vlistptr->vars[varID].name         = NULL;
-  vlistptr->vars[varID].longname     = NULL;
-  vlistptr->vars[varID].stdname      = NULL;
-  vlistptr->vars[varID].units        = NULL;
-  vlistptr->vars[varID].nlevs        = 0;
-  vlistptr->vars[varID].levinfo      = NULL;
-  vlistptr->vars[varID].comptype     = COMPRESS_NONE;
-  vlistptr->vars[varID].complevel    = 1;
-  vlistptr->vars[varID].atts.nalloc  = MAX_ATTRIBUTES;
-  vlistptr->vars[varID].atts.nelems  = 0;
+  vlistptr->vars[varID].fvarID        = varID;
+  vlistptr->vars[varID].mvarID        = varID;
+  vlistptr->vars[varID].flag          = 0;
+  vlistptr->vars[varID].param         = 0;
+  vlistptr->vars[varID].timeID        = CDI_UNDEFID;
+  vlistptr->vars[varID].datatype      = CDI_UNDEFID;
+  vlistptr->vars[varID].tsteptype     = TSTEP_INSTANT;
+  vlistptr->vars[varID].timave        = 0;
+  vlistptr->vars[varID].timaccu       = 0;
+  vlistptr->vars[varID].xyz           = 0;
+  vlistptr->vars[varID].gridID        = CDI_UNDEFID;
+  vlistptr->vars[varID].zaxisID       = CDI_UNDEFID;
+  vlistptr->vars[varID].instID        = CDI_UNDEFID;
+  vlistptr->vars[varID].modelID       = CDI_UNDEFID;
+  vlistptr->vars[varID].tableID       = CDI_UNDEFID;
+  vlistptr->vars[varID].missvalused   = FALSE;
+  vlistptr->vars[varID].missval       = cdiDefaultMissval;
+  vlistptr->vars[varID].addoffset     = 0.0;
+  vlistptr->vars[varID].scalefactor   = 1.0;
+  vlistptr->vars[varID].name          = NULL;
+  vlistptr->vars[varID].longname      = NULL;
+  vlistptr->vars[varID].stdname       = NULL;
+  vlistptr->vars[varID].units         = NULL;
+  vlistptr->vars[varID].nlevs         = 0;
+  vlistptr->vars[varID].levinfo       = NULL;
+  vlistptr->vars[varID].comptype      = COMPRESS_NONE;
+  vlistptr->vars[varID].complevel     = 1;
+  vlistptr->vars[varID].atts.nalloc   = MAX_ATTRIBUTES;
+  vlistptr->vars[varID].atts.nelems   = 0;
+  vlistptr->vars[varID].lvalidrange   = 0;
+  vlistptr->vars[varID].validrange[0] = VALIDMISS;
+  vlistptr->vars[varID].validrange[1] = VALIDMISS;
   vlistptr->vars[varID].iorank       = CDI_UNDEFID;
   vlistptr->vars[varID].decoSize     = 0;
   vlistptr->vars[varID].deco         = NULL;
-
 }
 
 static
@@ -1152,30 +1154,6 @@ double vlistInqVarMissval(int vlistID, int varID)
   return (vlistptr->vars[varID].missval);
 }
 
-
-double vlistInqVarScalefactor(int vlistID, int varID)
-{
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  return (vlistptr->vars[varID].scalefactor);
-}
-
-
-double vlistInqVarAddoffset(int vlistID, int varID)
-{
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  return (vlistptr->vars[varID].addoffset);
-}
-
 /*
 @Function  vlistDefVarMissval
 @Title     Define the missing value of a Variable
@@ -1195,6 +1173,51 @@ void vlistDefVarMissval(int vlistID, int varID, double missval)
 {
   vlist_t *vlistptr;
 
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  vlistptr->vars[varID].missval = missval;
+  vlistptr->vars[varID].missvalused = TRUE;
+}
+
+
+int vlistInqVarValidrange(int vlistID, int varID, double *validrange)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  if ( validrange != NULL && vlistptr->vars[varID].lvalidrange )
+    {
+      validrange[0] = vlistptr->vars[varID].validrange[0];
+      validrange[1] = vlistptr->vars[varID].validrange[1];
+    }
+
+  return (vlistptr->vars[varID].lvalidrange);
+}
+
+
+void vlistDefVarValidrange(int vlistID, int varID, const double *validrange)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  vlistptr->vars[varID].validrange[0] = validrange[0];
+  vlistptr->vars[varID].validrange[1] = validrange[1];
+  vlistptr->vars[varID].lvalidrange = TRUE;
+}
+
+
+double vlistInqVarScalefactor(int vlistID, int varID)
+{
+  vlist_t *vlistptr;
+
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
       xwarning ( "Operation not executed." );
@@ -1205,10 +1228,20 @@ void vlistDefVarMissval(int vlistID, int varID, double missval)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  vlistptr->vars[varID].missval = missval;
-  vlistptr->vars[varID].missvalused = TRUE;
+  return (vlistptr->vars[varID].scalefactor);
 }
 
+
+double vlistInqVarAddoffset(int vlistID, int varID)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  return (vlistptr->vars[varID].addoffset);
+}
 
 void vlistDefVarScalefactor(int vlistID, int varID, double scalefactor)
 {

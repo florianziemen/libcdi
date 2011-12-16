@@ -2222,41 +2222,42 @@ void grid_check_cyclic(grid_t *gridptr)
         }
 
       if ( xbounds && xsize > 1 )
-        {
-          double val1, val2;
+	{
+	  double val1, val2;
 
-          gridptr->isCyclic = TRUE;
-          for ( j = 0; j < ysize; ++j )
-            {
-              i1 = j*xsize*4;
-              i2 = j*xsize*4+(xsize-1)*4;
-              nc = 0;
-              for ( k1 = 0; k1 < 4; ++k1 )
-                {
-                  val1 = xbounds[i1+k1];
-                  for ( k2 = 0; k2 < 4; ++k2 )
-                    {
-                      val2 = xbounds[i2+k2];
+	  gridptr->isCyclic = TRUE;
+	  for ( j = 0; j < ysize; ++j )
+	    {
+	      i1 = j*xsize*4;
+	      i2 = j*xsize*4+(xsize-1)*4;
+	      nc = 0;
+	      for ( k1 = 0; k1 < 4; ++k1 )
+		{
+		  val1 = xbounds[i1+k1];
+		  for ( k2 = 0; k2 < 4; ++k2 )
+		    {
+		      val2 = xbounds[i2+k2];
 
-                      if ( val1 < 1 && val2 > 300 ) val1 += 360;
-                      if ( val2 < 1 && val1 > 300 ) val2 += 360;
-                      if ( val1 < -179 && val2 > 120 ) val1 += 360;
-                      if ( val2 < -179 && val1 > 120 ) val2 += 360;
+		      if ( val1 < 1 && val2 > 300 ) val1 += 360;
+		      if ( val2 < 1 && val1 > 300 ) val2 += 360;
+		      if ( val1 < -179 && val2 > 120 ) val1 += 360;
+		      if ( val2 < -179 && val1 > 120 ) val2 += 360;
 
-                      if ( fabs(val1-val2) < 0.001 )
-                        {
-                          nc++;
-                          break;
-                        }
-                    }
-                }
-              if ( nc < 1 )
-                {
-                  gridptr->isCyclic = FALSE;
-                  break;
-                }
-            }
-        }
+		      if ( fabs(val1-val2) < 0.001 )
+			{
+			  nc++;
+			  break;
+			}
+		    }
+		}
+
+	      if ( nc < 1 )
+		{
+		  gridptr->isCyclic = FALSE;
+		  break;
+		}
+	    }
+	}
     }
 }
 

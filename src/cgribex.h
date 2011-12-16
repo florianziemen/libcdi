@@ -8,12 +8,16 @@
 
 /* GRIB1 Level Types */
 #define  GRIB1_LTYPE_SURFACE               1
+#define  GRIB1_LTYPE_TOA           8
+#define  GRIB1_LTYPE_SEA_BOTTOM            9
+#define  GRIB1_LTYPE_ATMOSPHERE           10
 #define  GRIB1_LTYPE_99                   99
 #define  GRIB1_LTYPE_ISOBARIC            100
 #define  GRIB1_LTYPE_MEANSEA             102
 #define  GRIB1_LTYPE_ALTITUDE            103
 #define  GRIB1_LTYPE_HEIGHT              105
 #define  GRIB1_LTYPE_SIGMA               107
+#define  GRIB1_LTYPE_SIGMA_LAYER         108
 #define  GRIB1_LTYPE_HYBRID              109
 #define  GRIB1_LTYPE_HYBRID_LAYER        110
 #define  GRIB1_LTYPE_LANDDEPTH           111
@@ -240,12 +244,3 @@ double calculate_pfactor(const double* spectralField, long fieldTruncation, long
 
 #endif  /* _CGRIBEX_H */ 
 
-/*
- * Local Variables:
- * c-file-style: "Java"
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * show-trailing-whitespace: t
- * require-trailing-newline: t
- * End:
- */

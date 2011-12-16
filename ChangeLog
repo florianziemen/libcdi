@@ -1,3 +1,58 @@
+2011-12-13 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* verify_coordinate_vars: bug fix in check for units = "1" [report: Katharina Six]
+
+2011-11-11 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added support for netCDF attributes scale_factor and add_offset for lon/lat coordinates
+
+2011-11-04 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added support for GRIB1_LTYPE_SIGMA_LAYER
+
+2011-11-01 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added support for netcdf attribute valid_min/valid_max [request: Etienne Tourigny]
+
+2011-10-27 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdilib.c::defineAttributes: bug fix atttxt [report: Florian Prill]
+
+2011-10-25 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added support for netcdf attribute valid_range [request: Etienne Tourigny]
+
+2011-10-17  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.5.3 released
+	* using CGRIBEX library version 1.5.1
+
+2011-10-11  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+       * zaxisCompare: set epsilon from 0 to 1e-9 [request: Felicia Brisc]
+
+2011-10-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added level type ZAXIS_TOA, ZAXIS_SEA_BOTTOM, ZAXIS_ATMOSPHERE [request: Dörte Liermann]
+
+2011-10-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_cdf::cdfInqContents: check units of hybrid levels
+	* varAddRecord: used max number of bit_per_value for 3D GRIB data
+	* gribapiDefGrid: added parameter jScansPositively [report: Juan Jose Tasso]
+
+2011-10-02  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* deflate compression with netCDF4 doesn't work (bug fix) [report: Geert Jan van Oldenborgh]
+
+2011-09-21  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* correct netCDF dimension order of unstructured grids (bug fix) [report: Ralf Mueller]
+
+2011-08-22 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.5.2 released
+
 2011-08-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* streamFilesuffix: added suffix for filetype NC4C (bug fix)

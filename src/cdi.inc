@@ -3,7 +3,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   October 2011
+! Uwe Schulzweida, MPI-MET, Hamburg,   December 2011
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -244,6 +244,14 @@
       PARAMETER (ZAXIS_SIGMA            = 11)
       INTEGER    ZAXIS_MEANSEA         
       PARAMETER (ZAXIS_MEANSEA          = 12)
+      INTEGER    ZAXIS_TOA             
+      PARAMETER (ZAXIS_TOA              = 13)
+      INTEGER    ZAXIS_SEA_BOTTOM      
+      PARAMETER (ZAXIS_SEA_BOTTOM       = 14)
+      INTEGER    ZAXIS_ATMOSPHERE      
+      PARAMETER (ZAXIS_ATMOSPHERE       = 15)
+      INTEGER    ZAXIS_REFERENCE       
+      PARAMETER (ZAXIS_REFERENCE        = 16)
 !
 !  TAXIS types
 !
@@ -327,6 +335,15 @@
       PARAMETER (PIO_ASYNCH             =  3)
       INTEGER    PIO_FPGUARD           
       PARAMETER (PIO_FPGUARD            =  4)
+!                     pioEndDef
+      EXTERNAL        pioEndDef
+
+!                     pioEndTimestepping
+      EXTERNAL        pioEndTimestepping
+
+!                     pioFinalize
+      EXTERNAL        pioFinalize
+
       INTEGER         pioInit
 !                                    (INTEGER         ,
 !                                     INTEGER         ,
@@ -334,21 +351,6 @@
 !                                     INTEGER         ,
 !                                     INTEGER         )
       EXTERNAL        pioInit
-
-!                     pioFinalize
-      EXTERNAL        pioFinalize
-
-!                     pioEndDef
-      EXTERNAL        pioEndDef
-
-!                     pioEndTimestepping
-      EXTERNAL        pioEndTimestepping
-
-!                     pioWriteTimestep
-!                                    (INTEGER         ,
-!                                     INTEGER         ,
-!                                     INTEGER         )
-      EXTERNAL        pioWriteTimestep
 
       INTEGER         pioInqVarDecoChunk
 !                                    (INTEGER         ,
@@ -363,6 +365,12 @@
 !                     pioNamespaceSetActive
 !                                    (INTEGER         )
       EXTERNAL        pioNamespaceSetActive
+
+!                     pioWriteTimestep
+!                                    (INTEGER         ,
+!                                     INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        pioWriteTimestep
 
       CHARACTER*80    cdiStringError
 !                                    (INTEGER         cdiErrno)
