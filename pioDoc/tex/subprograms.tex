@@ -233,13 +233,13 @@ basicstyle=\footnotesize, label=model]
     CALL streamDefVlist(streamID, vlistID)
     
     ! End definition stage for CDI resources,
-    CALL pioEndDef ();
+    CALL pioEndDef ()
  
     ! Timestepping stage
     DO tfID = 0, ntf-1
-      IF ( tfId ) THEN
+      IF ( tfID ) THEN
         CALL streamClose ( streamID )
-	streamID = streamOpenWrite ( filename, filetype )
+	streamID = streamOpenWrite ( filename[tfID], filetype )
 	CALL streamDefVlist ( streamID, vlistID )
       ENDIF 
 

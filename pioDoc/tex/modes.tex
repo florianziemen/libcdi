@@ -2,9 +2,8 @@ The I/O performance and scalability of a supercomputer depends on the combinatio
 of the hardware architecture, the filesystem and the {\tt MPI} implementation. We 
 made testruns on several machines invoking {\tt MPI\_File\_iwrite\_shared}, the 
 obvious way of parallel file writing.  
-Especially on the IBM Blizzard, as a matter 
-of course in our primary focus, the benchmark programs achieved surprisingly 
-poor results. 
+Especially on the IBM Blizzard, naturally in our primary focus, the 
+benchmark programs achieved surprisingly poor results. 
 Accordingly the {\CDI} has to provide possibilities to write files in parallel 
 using {\tt POSIX IO}.
 The tasks formerly carried out by the root process are split into the subtask 
@@ -14,7 +13,8 @@ modes of low level writing.
 {\pio} is backwards compatible due to the differentiated behavior of the {\CDI} 
 calls {\tt streamClose}, {\tt streamOpenWrite}, {\tt streamDefVlist}
 and {\tt streamWriteVar} on model side, depending on local writing and I/O stage. 
- The original stream functions were written for low level file writing, naturally
+ The {\tt stream} functions were primarily written for low level file writing, 
+as a matter of course 
  also the collecting I/O processes invoke them. This makes the I/O modes to 
 another key to the program flow of the {\CDI} stream calls.
 \begin{figure}[H]
@@ -52,21 +52,20 @@ I/O modes provided by {\pio}:
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt PIO\_FPGUARD\ } 
 \item[{\htmlref{\tt PIO\_NONE}{PIONONE}}] 
-one process collects, encodes, compresses, buffers and writes using 
+one process collects, transposes, encodes, compresses, buffers and writes using 
 {\tt C} {\tt fwrite}.
 \item[{\htmlref{\tt PIO\_MPI}{PIOMPI}}] 
-all processes collect, gather, encode, compress, buffer and write using 
+all processes collect, transpose, encode, compress, buffer and write using 
 {\tt MPI\_File\_iwrite\_shared}.
-
 \item[{\htmlref{\tt PIO\_ASYNCH}{PIOASYNCH}}]
 one process writes the files using low level 
-{\tt POSIX\_AIO}, the others collect, gather, encode, compress and buffer.
+{\tt POSIX\_AIO}, the others collect, transpose, encode, compress and buffer.
 \item[{\htmlref{\tt PIO\_FPGUARD}{PIOFPGUARD}}]
 one process guards the fileoffsets, all others 
-collect, gather, encode, compress and write using {\tt C} {\tt fwrite}.
+collect, transpose, encode, compress and write using {\tt C} {\tt fwrite}.
 \item[{\htmlref{\tt PIO\_WRITER}{PIOWRITER}}]
 one process writes the files using {\tt C} {\tt fwrite}, 
-the others collect, gather, encode, compress and buffer.
+the others collect, transpose, encode, compress and buffer.
 \end{deflist}
 \end{minipage}
 
