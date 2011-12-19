@@ -639,6 +639,8 @@ int     gridInqPosition(int gridID);
 void    gridDefPosition(int gridID, int position);
 int     gridInqReference(int gridID, char *reference);
 void    gridDefReference(int gridID, const char *reference);
+char   *gridInqUUID(int gridID, char *uuid);
+void    gridDefUUID(int gridID, const char *uuid);
 
 
 /* Lambert Conformal Conic grid (GRIB version) */
@@ -718,6 +720,18 @@ void    zaxisDefLevel(int zaxisID, int levelID, double levels);
 
 /*      zaxisInqLevel: Get one level of a Z-axis */
 double  zaxisInqLevel(int zaxisID, int levelID);
+
+/*      zaxisDefReference: Define the reference of a generalized Z-axis */
+void    zaxisDefReference(int zaxisID, int refID);
+
+/*      zaxisDefUUID: Define the uuid of a generalized Z-axis */
+void    zaxisDefUUID(int zaxisID, const char *uuid);
+
+/*      zaxisInqUUID: Get the reference of a generalized Z-axis */
+char   *zaxisInqUUID(int zaxisID, char *uuid);
+
+/*      zaxisInqReference: Get the reference of a generalized Z-axis */
+int     zaxisInqReference(int zaxisID);
 
 /*      zaxisDefName: Define the name of a Z-axis */
 void    zaxisDefName(int zaxisID, const char *name);

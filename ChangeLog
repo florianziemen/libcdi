@@ -1,3 +1,7 @@
+2011-12-19 Luis Kornblueh  <Luis.Kornblueh@zmaw.de>
+
+	* added suppport for GRIB2 level type 150
+
 2011-12-13 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* verify_coordinate_vars: bug fix in check for units = "1" [report: Katharina Six]

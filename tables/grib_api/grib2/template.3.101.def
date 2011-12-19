@@ -15,3 +15,6 @@ unsigned[3] numberOfGridUsed  : dump ;
 
 #  Number of grid in reference 
 unsigned[1] numberOfGridInReference  : dump ;
+
+# uuid of horizontal grid
+ascii[16] uuidOfHGrid : dump;

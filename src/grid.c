@@ -233,6 +233,7 @@ void grid_init(grid_t *gridptr)
   gridptr->yunits[0]    = 0;
   gridptr->xstdname[0]  = 0;
   gridptr->ystdname[0]  = 0;
+  gridptr->uuid[0]      = 0;
   gridptr->name         = NULL;
 }
 
@@ -2638,6 +2639,7 @@ int gridGenerate(grid_t grid)
       {
 	gridDefNumber(gridID, grid.number);
 	gridDefPosition(gridID, grid.position);
+        gridDefUUID(gridID, grid.uuid);
 	if ( grid.reference ) gridDefReference(gridID, grid.reference);
 	break;
       }
@@ -3198,6 +3200,7 @@ void gridPrint(int gridID, int opt)
   int nbyte0, nbyte;
   int i;
   int nvertex, iv;
+  char uuid[17];
   const double *area    = gridInqAreaPtr(gridID);
   const double *xvals   = gridInqXvalsPtr(gridID);
   const double *yvals   = gridInqYvalsPtr(gridID);
@@ -3468,6 +3471,7 @@ void gridPrint(int gridID, int opt)
       {
 	fprintf(fp, "number    = %d\n", gridInqNumber(gridID));
 	fprintf(fp, "position  = %d\n", gridInqPosition(gridID));
+	fprintf(fp, "uuid      = %s\n", gridInqUUID(gridID, uuid));
 	if ( gridInqReference(gridID, NULL) )
 	  {
 	    char reference_link[8192];
@@ -3839,6 +3843,34 @@ void gridDefReference(int gridID, const char *reference)
 
       gridptr->reference = strdupx(reference);
     }
+}
+
+
+char *gridInqUUID(int gridID, char *uuid)
+{
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  grid_check_ptr(gridID, gridptr);
+
+  strncpy(uuid, gridptr->uuid, 16);
+
+  return (uuid);
+}
+
+
+void gridDefUUID(int gridID, const char *uuid)
+{
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  grid_check_ptr(gridID, gridptr);
+
+  strncpy(gridptr->uuid, uuid, 16);
+
+  return;
 }
 /*
  * Local Variables:

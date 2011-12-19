@@ -2296,7 +2296,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	else
 	  {
 	    GRIB_CHECK(grib_set_long(gh, "numberOfGridUsed", gridInqNumber(gridID)), 0);
-	    GRIB_CHECK(grib_set_long(gh, "numberOfGridInReference", gridInqPosition(gridID)), 0);	
+	    GRIB_CHECK(grib_set_long(gh, "numberOfGridInReference", gridInqPosition(gridID)), 0);
 	  }
 
 	break;
@@ -2317,6 +2317,9 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
   int zaxistype, ltype;
   static int warning = 1;
   long editionNumber;
+  int reference;
+  char uuid[17];
+  size_t len;
 
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
@@ -2535,6 +2538,26 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 	GRIB_CHECK(grib_set_double(gh, "level", level), 0);
 
 	break;
+      }
+    case ZAXIS_REFERENCE:
+      {
+        level = zaxisInqLevel(zaxisID, levelID);
+
+        if ( editionNumber <= 1 )
+          ; // not available
+        else
+          {
+            reference = zaxisInqReference(zaxisID);
+            GRIB_CHECK(grib_set_long(gh, "typeOfFirstFixedSurface", GRIB2_LTYPE_REFERENCE), 0);
+            GRIB_CHECK(grib_set_double(gh, "level", level), 0);
+
+            GRIB_CHECK(grib_set_long(gh, "NV", 2), 0);
+            GRIB_CHECK(grib_set_long(gh, "nlev", (long) zaxisInqSize(zaxisID)), 0);
+            GRIB_CHECK(grib_set_long(gh, "numberOfVGridUsed", reference), 0);
+            len = 16;
+            GRIB_CHECK(grib_set_string(gh, "uuidOfVGrid", zaxisInqUUID(zaxisID, uuid), &len), 0);
+          }
+        break;
       }
     case ZAXIS_GENERIC:
       {

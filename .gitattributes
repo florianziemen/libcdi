@@ -237,9 +237,11 @@ tables/echam5 -text
 tables/echam6 -text
 tables/ecmwf -text
 tables/gen_tableheaderfile -text
+tables/grib_api/grib2/4.5.78.150.table -text
+tables/grib_api/grib2/section.4.def -text
+tables/grib_api/grib2/template.3.101.def -text
 tables/mpiom1 -text
 tables/remo -text
-tables/template.3.101.def -text
 tables/wmo_001 -text
 tests/Makefile.am -text
 tests/Makefile.in -text

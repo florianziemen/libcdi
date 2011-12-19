@@ -46,6 +46,7 @@ typedef struct {
   int     nd, ni, ni2, ni3;       /* parameter for GRID_GME         */
   int     number, position;       /* parameter for GRID_REFERENCE   */
   char   *reference;
+  char    uuid[17];               /* uuid for grid reference        */ 
   int     trunc;                  /* parameter for GRID_SPECTEAL    */
   int     nvertex;
   int    *rowlon;
