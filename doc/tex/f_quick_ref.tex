@@ -1027,6 +1027,24 @@ Define the longname of a Z-axis.
 Define the name of a Z-axis.
 
 
+\section*{\tt \htmlref{zaxisDefReference}{zaxisDefReference}}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDefReference (INTEGER zaxisID, INTEGER refID)
+\end{verbatim}
+
+Define the reference of a generalized Z-axis.
+
+
+\section*{\tt \htmlref{zaxisDefUUID}{zaxisDefUUID}}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDefUUID (INTEGER zaxisID, CHARACTER*(*) uuid)
+\end{verbatim}
+
+Define the uuid of a generalized Z-axis.
+
+
 \section*{\tt \htmlref{zaxisDefUnits}{zaxisDefUnits}}
 
 \begin{verbatim}
@@ -1090,6 +1108,15 @@ Get the longname of a Z-axis.
 Get the name of a Z-axis.
 
 
+\section*{\tt \htmlref{zaxisInqReference}{zaxisInqReference}}
+
+\begin{verbatim}
+    INTEGER FUNCTION zaxisInqReference (INTEGER zaxisID)
+\end{verbatim}
+
+Get the reference of a generalized Z-axis.
+
+
 \section*{\tt \htmlref{zaxisInqSize}{zaxisInqSize}}
 
 \begin{verbatim}
@@ -1115,6 +1142,15 @@ Get the standard name of a Z-axis.
 \end{verbatim}
 
 Get the type of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisInqUUID}{zaxisInqUUID}}
+
+\begin{verbatim}
+    CHARACTER*80 FUNCTION zaxisInqUUID (INTEGER zaxisID, CHARACTER*(*) uuid)
+\end{verbatim}
+
+Get the reference of a generalized Z-axis.
 
 
 \section*{\tt \htmlref{zaxisInqUnits}{zaxisInqUnits}}
