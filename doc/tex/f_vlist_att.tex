@@ -17,7 +17,7 @@ The function {\tt vlistInqNatts} gets the number of variable attributes assigned
 \item[{\tt vlistID}]
 Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier, or CDI\_GLOBAL for a global attribute.
+Variable identifier, or {\tt CDI\_GLOBAL} for a global attribute.
 \item[{\tt nattsp}]
 Pointer to location for returned number of variable attributes.
 
@@ -43,13 +43,13 @@ The function {\tt vlistInqNatts} gets information about an attribute.
 \item[{\tt vlistID}]
 Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier, or CDI\_GLOBAL for a global attribute.
+Variable identifier, or {\tt CDI\_GLOBAL} for a global attribute.
 \item[{\tt attnum}]
 Attribute number (from 0 to natts-1).
 \item[{\tt name}]
 Pointer to the location for the returned attribute name. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI\_MAX\_NAME.
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
 \item[{\tt typep}]
 Pointer to location for returned attribute type.
 \item[{\tt lenp}]
@@ -78,11 +78,11 @@ The function {\tt vlistDefAttInt} defines an integer attribute.
 \item[{\tt vlistID}]
 Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier, or CDI\_GLOBAL for a global attribute.
+Variable identifier, or {\tt CDI\_GLOBAL} for a global attribute.
 \item[{\tt name}]
 Attribute name.
 \item[{\tt type}]
-External data type (DATATYPE\_INT16 or DATATYPE\_INT32).
+External data type ({\tt DATATYPE\_INT16} or {\tt DATATYPE\_INT32}).
 \item[{\tt len}]
 Number of values provided for the attribute.
 \item[{\tt ip}]
@@ -110,7 +110,7 @@ The function {\tt vlistInqAttInt} gets the values(s) of an integer attribute.
 \item[{\tt vlistID}]
 Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier, or CDI\_GLOBAL for a global attribute.
+Variable identifier, or {\tt CDI\_GLOBAL} for a global attribute.
 \item[{\tt name}]
 Attribute name.
 \item[{\tt mlen}]
@@ -141,11 +141,11 @@ The function {\tt vlistDefAttFlt} defines a floating point attribute.
 \item[{\tt vlistID}]
 Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier, or CDI\_GLOBAL for a global attribute.
+Variable identifier, or {\tt CDI\_GLOBAL} for a global attribute.
 \item[{\tt name}]
 Attribute name.
 \item[{\tt type}]
-External data type (DATATYPE\_FLT32 or DATATYPE\_FLT64).
+External data type ({\tt DATATYPE\_FLT32} or {\tt DATATYPE\_FLT64}).
 \item[{\tt len}]
 Number of values provided for the attribute.
 \item[{\tt dp}]
@@ -173,7 +173,7 @@ The function {\tt vlistInqAttFlt} gets the values(s) of a floating point attribu
 \item[{\tt vlistID}]
 Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier, or CDI\_GLOBAL for a global attribute.
+Variable identifier, or {\tt CDI\_GLOBAL} for a global attribute.
 \item[{\tt name}]
 Attribute name.
 \item[{\tt mlen}]
@@ -204,7 +204,7 @@ The function {\tt vlistDefAttTxt} defines a text attribute.
 \item[{\tt vlistID}]
 Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier, or CDI\_GLOBAL for a global attribute.
+Variable identifier, or {\tt CDI\_GLOBAL} for a global attribute.
 \item[{\tt name}]
 Attribute name.
 \item[{\tt len}]
@@ -234,7 +234,7 @@ The function {\tt vlistInqAttTxt} gets the values(s) of a text attribute.
 \item[{\tt vlistID}]
 Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt varID}]
-Variable identifier, or CDI\_GLOBAL for a global attribute.
+Variable identifier, or {\tt CDI\_GLOBAL} for a global attribute.
 \item[{\tt name}]
 Attribute name.
 \item[{\tt mlen}]

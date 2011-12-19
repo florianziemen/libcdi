@@ -513,7 +513,7 @@ const char *vlistInqVarUnitsPtr(int vlistID, int varID)
     @Item  varID    Variable identifier.
     @Item  name     Returned variable name. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI_MAX_NAME.
+                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
 @Description
 The function @func{vlistInqVarName} returns the name of a variable.
@@ -567,7 +567,7 @@ void vlistInqVarName(int vlistID, int varID, char *name)
     @Item  varID    Variable identifier.
     @Item  longname Long name of the variable. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI_MAX_NAME.
+                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
 @Description
 The function @func{vlistInqVarLongname} returns the longname of a variable if available,
@@ -619,7 +619,7 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
     @Item  varID    Variable identifier.
     @Item  stdname  Standard name of the variable. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI_MAX_NAME.
+                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
 @Description
 The function @func{vlistInqVarStdname} returns the standard name of a variable if available,
@@ -658,7 +658,7 @@ void vlistInqVarStdname(int vlistID, int varID, char *stdname)
     @Item  varID    Variable identifier.
     @Item  units    Units of the variable. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI_MAX_NAME.
+                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
 @Description
 The function @func{vlistInqVarUnits} returns the units of a variable if available,

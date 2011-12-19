@@ -520,7 +520,7 @@ void zaxisDefUnits(int zaxisID, const char *units)
     @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
     @Item  name     Name of the Z-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI_MAX_NAME.
+                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
 @Description
 The function @func{zaxisInqName} returns the name of a Z-axis.
@@ -550,7 +550,7 @@ void zaxisInqName(int zaxisID, char *name)
     @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
     @Item  longname Longname of the Z-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI_MAX_NAME.
+                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
 @Description
 The function @func{zaxisInqLongname} returns the longname of a Z-axis.
@@ -580,7 +580,7 @@ void zaxisInqLongname(int zaxisID, char *longname)
     @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
     @Item  units    Units of the Z-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI_MAX_NAME.
+                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
 @Description
 The function @func{zaxisInqUnits} returns the units of a Z-axis.

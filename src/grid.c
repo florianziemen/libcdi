@@ -861,7 +861,7 @@ void gridDefYunits(int gridID, const char *yunits)
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
     @Item  name     Name of the X-axis. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI_MAX_NAME.
+                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
 @Description
 The function @func{gridInqXname} returns the name of a X-axis.
@@ -892,7 +892,7 @@ void gridInqXname(int gridID, char *xname)
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
     @Item  longname Longname of the X-axis. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI_MAX_NAME.
+                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
 @Description
 The function @func{gridInqXlongname} returns the longname of a X-axis.
@@ -923,7 +923,7 @@ void gridInqXlongname(int gridID, char *xlongname)
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
     @Item  units    Units of the X-axis. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI_MAX_NAME.
+                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
 @Description
 The function @func{gridInqXunits} returns the units of a X-axis.
@@ -966,7 +966,7 @@ void gridInqXstdname(int gridID, char *xstdname)
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
     @Item  name     Name of the Y-axis. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI_MAX_NAME.
+                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
 @Description
 The function @func{gridInqYname} returns the name of a Y-axis.
@@ -997,7 +997,7 @@ void gridInqYname(int gridID, char *yname)
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
     @Item  longname Longname of the Y-axis. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI_MAX_NAME.
+                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
 @Description
 The function @func{gridInqYlongname} returns the longname of a Y-axis.
@@ -1028,7 +1028,7 @@ void gridInqYlongname(int gridID, char *ylongname)
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
     @Item  units    Units of the Y-axis. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI_MAX_NAME.
+                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
 @Description
 The function @func{gridInqYunits} returns the units of a Y-axis.
