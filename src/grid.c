@@ -3300,6 +3300,8 @@ void gridPrint(int gridID, int opt)
     case GRID_CURVILINEAR:
     case GRID_UNSTRUCTURED:
       {
+        if ( type == GRID_GAUSSIAN ) fprintf(fp, "np        = %d\n", gridptr->np);
+
 	if ( type == GRID_CURVILINEAR || type == GRID_UNSTRUCTURED )
 	  {
 	    xdim = gridsize;
@@ -3342,7 +3344,7 @@ void gridPrint(int gridID, int opt)
 	    if ( xsize > 0 ) fprintf(fp, "xnpole    = %g\n", gridptr->xpole);
 	    if ( ysize > 0 ) fprintf(fp, "ynpole    = %g\n", gridptr->ypole);
 	    if ( gridptr->angle > 0 ) fprintf(fp, "angle     = %g\n", gridptr->angle);
-	  }
+ 	  }
 
 	if ( xvals )
 	  {
@@ -3460,7 +3462,7 @@ void gridPrint(int gridID, int opt)
    case GRID_GAUSSIAN_REDUCED:
       {
 	int *rowlon;
-	fprintf(fp, "ysize = %d\n", ysize);	        
+	fprintf(fp, "ysize = %d\n", ysize);
 	nbyte0 = fprintf(fp, "rowlon = %d  ", ysize);
 	nbyte  = nbyte0;
 	rowlon = (int *) malloc(ysize*sizeof(int));
