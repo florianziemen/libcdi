@@ -1,5 +1,10 @@
-2012-01-06 Luis Kornblueh  <Luis.Kornblueh@zmaw.de>
+2012-01-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* Version 1.5.4 released
+
+2012-01-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added support for GRIB gaussian grid parameter NumPar on non global grids [Bug #1711]
 	* added interface functions gridDefNP/gridInqNP (number of parallels between a pole and the equator)
 
 2011-12-19 Luis Kornblueh  <Luis.Kornblueh@zmaw.de>

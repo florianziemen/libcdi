@@ -4217,7 +4217,7 @@ int isGaussGrid(long ysize, double yinc, double *yvals)
       for ( i = 0; i < ysize; i++ )
         if ( fabs(yv[i] - yvals[i]) >
              ((yv[0] - yv[1])/500) ) break;
-                      
+
       if ( i == ysize ) lgauss = TRUE;
 
       /* check S->N */
@@ -5109,7 +5109,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
   grid_t grid;
   grid_t proj;
   int gridindex;
-  size_t size = 0, xsize, ysize;
+  size_t size = 0, xsize, ysize, np;
   char name[256];
   int iatt;
   int ltwarn = TRUE;
@@ -5131,6 +5131,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 
 	  xsize = 0;
 	  ysize = 0;
+          np    = 0;
 
 	  ndims = ncvars[ncvarid].ndims;
 	  for ( i = 0; i < ndims; i++ )
@@ -5409,15 +5410,21 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 	      if ( islat && islon )
 		{
 		  if ( isGaussGrid(ysize, yinc, grid.yvals) )
-		    ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
-		  else
+                    {
+                      ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
+                      np = ysize/2;
+                    }
+                  else
 		    ncvars[ncvarid].gridtype = GRID_LONLAT;
 		}
 	      else if ( islat && !islon && xsize == 0 )
 		{
 		  if ( isGaussGrid(ysize, yinc, grid.yvals) )
-		    ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
-		  else
+                    {
+                      ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
+                      np = ysize/2;
+                    }
+                  else
 		    ncvars[ncvarid].gridtype = GRID_LONLAT;
 		}
 	      else if ( islon && !islat && ysize == 0 )
@@ -5439,6 +5446,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		grid.size  = size;
 		grid.xsize = xsize;
 		grid.ysize = ysize;
+                grid.np    = np;
 		if ( xvarid != UNDEFID )
 		  {
 		    grid.xdef  = 1;
