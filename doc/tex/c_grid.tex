@@ -19,7 +19,7 @@ The type of the grid, one of the set of predefined {\CDI} grid types.
                      The valid {\CDI} grid types are {\tt GRID\_GENERIC}, {\tt GRID\_GAUSSIAN},
                      {\tt GRID\_LONLAT}, {\tt GRID\_LCC}, {\tt GRID\_SPECTRAL},
                      {\tt GRID\_GME}, {\tt GRID\_CURVILINEAR}, {\tt GRID\_UNSTRUCTURED} and
-                     {\tt GRID\_REFERENCE}
+                     {\tt GRID\_REFERENCE}.
 \item[{\tt size}]
 Number of gridpoints.
 
@@ -145,7 +145,7 @@ The function {\tt gridInqSize} returns the size of a Grid.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt gridID\ }
 \item[{\tt gridID}]
-Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
 
 \end{deflist}
 \end{minipage}
@@ -188,7 +188,7 @@ The function {\tt gridInqXsize} returns the number of values of a X-axis.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    void gridInqXsize(int gridID);
+    int gridInqXsize(int gridID);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -237,7 +237,7 @@ The function {\tt gridInqYsize} returns the number of values of a Y-axis.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    void gridInqYsize(int gridID);
+    int gridInqYsize(int gridID);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -251,6 +251,57 @@ Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
 \subsubsection*{Result}
 
 {\tt gridInqYsize} returns the number of values of a Y-axis.
+
+
+
+\subsection{Define the number of parallels between a pole and the equator: {\tt gridDefNP}}
+\index{gridDefNP}
+\label{gridDefNP}
+
+The function {\tt gridDefNP} defines the number of parallels between a pole and the equator
+of a Gaussian grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefNP(int gridID, int np);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt np}]
+Number of parallels between a pole and the equator.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the number of parallels between a pole and the equator: {\tt gridInqNP}}
+\index{gridInqNP}
+\label{gridInqNP}
+
+The function {\tt gridInqNP} returns the number of parallels between a pole and the equator
+of a Gaussian grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int gridInqNP(int gridID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqNP} returns the number of parallels between a pole and the equator.
 
 
 

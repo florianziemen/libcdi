@@ -17,6 +17,21 @@ Create a horizontal Grid
 
 \section*{\tt 
 \ifpdf
+\hyperref[gridDefNP]{gridDefNP}
+\else
+gridDefNP
+\fi
+}
+\begin{verbatim}
+    void gridDefNP(int gridID, int np);
+\end{verbatim}
+
+Define the number of parallels between a pole and the equator
+\ifpdfoutput{}{(\ref{gridDefNP})}
+
+
+\section*{\tt 
+\ifpdf
 \hyperref[gridDefXbounds]{gridDefXbounds}
 \else
 gridDefXbounds
@@ -227,6 +242,21 @@ Duplicate a horizontal Grid
 
 \section*{\tt 
 \ifpdf
+\hyperref[gridInqNP]{gridInqNP}
+\else
+gridInqNP
+\fi
+}
+\begin{verbatim}
+    int gridInqNP(int gridID);
+\end{verbatim}
+
+Get the number of parallels between a pole and the equator
+\ifpdfoutput{}{(\ref{gridInqNP})}
+
+
+\section*{\tt 
+\ifpdf
 \hyperref[gridInqSize]{gridInqSize}
 \else
 gridInqSize
@@ -308,7 +338,7 @@ gridInqXsize
 \fi
 }
 \begin{verbatim}
-    void gridInqXsize(int gridID);
+    int gridInqXsize(int gridID);
 \end{verbatim}
 
 Get the number of values of a X-axis
@@ -398,7 +428,7 @@ gridInqYsize
 \fi
 }
 \begin{verbatim}
-    void gridInqYsize(int gridID);
+    int gridInqYsize(int gridID);
 \end{verbatim}
 
 Get the number of values of a Y-axis

@@ -78,6 +78,8 @@ Function catalog:
    gridInqXsize         Get the number of values of a X-axis
    gridDefYsize         Define the number of values of a Y-axis
    gridInqYsize         Get the number of values of a Y-axis
+   gridDefNP            Define the number of parallels between a pole and the equator
+   gridInqNP            Get the number of parallels between a pole and the equator
    gridDefXvals         Define the values of a X-axis
    gridInqXvals         Get all values of a X-axis
    gridDefYvals         Define the values of a Y-axis

@@ -66,6 +66,8 @@ gridDefXsize        grid
 gridInqXsize        grid
 gridDefYsize        grid
 gridInqYsize        grid
+gridDefNP           grid
+gridInqNP           grid
 gridDefXvals        grid
 gridInqXvals        grid
 gridDefYvals        grid

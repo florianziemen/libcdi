@@ -508,7 +508,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
                      The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
                      @func{GRID_LONLAT}, @func{GRID_LCC}, @func{GRID_SPECTRAL},
                      @func{GRID_GME}, @func{GRID_CURVILINEAR}, @func{GRID_UNSTRUCTURED} and
-                     @func{GRID_REFERENCE}
+                     @func{GRID_REFERENCE}.
     @Item  size      Number of gridpoints.
 
 @Description
@@ -1100,7 +1100,7 @@ int gridInqType(int gridID)
 
 @Prototype int gridInqSize(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
 
 @Description
 The function @func{gridInqSize} returns the size of a Grid.
@@ -1275,7 +1275,7 @@ int gridInqPrec(int gridID)
 @Function  gridInqXsize
 @Title     Get the number of values of a X-axis
 
-@Prototype void gridInqXsize(int gridID)
+@Prototype int gridInqXsize(int gridID)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
 
@@ -1338,7 +1338,7 @@ void gridDefYsize(int gridID, int ysize)
 @Function  gridInqYsize
 @Title     Get the number of values of a Y-axis
 
-@Prototype void gridInqYsize(int gridID)
+@Prototype int gridInqYsize(int gridID)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
 
@@ -1368,10 +1368,11 @@ int gridInqYsize(int gridID)
 @Prototype void gridDefNP(int gridID, int np)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  np       Number of parallels between a pole and the equator
+    @Item  np       Number of parallels between a pole and the equator.
 
 @Description
-The function @func{gridDefNP} defines the number of parallels between a pole and the equator.
+The function @func{gridDefNP} defines the number of parallels between a pole and the equator
+of a Gaussian grid.
 
 @EndFunction
 */
@@ -1390,7 +1391,7 @@ void gridDefNP(int gridID, int np)
 @Function  gridInqNP
 @Title     Get the number of parallels between a pole and the equator
 
-@Prototype void gridInqNP(int gridID)
+@Prototype int gridInqNP(int gridID)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
 
@@ -1413,7 +1414,6 @@ int gridInqNP(int gridID)
 
   return (gridptr->np);
 }
-
 
 /*
 @Function  
