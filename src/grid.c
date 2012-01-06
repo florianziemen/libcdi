@@ -2523,7 +2523,7 @@ int gridCompare(int gridID, grid_t grid)
 	      printf("grid xlast  %f\n", gridInqXval(gridID, grid.size-1));
 	      printf("grid ylast  %f\n", gridInqYval(gridID, grid.size-1));
 	      printf("grid.nv     %d\n", grid.nvertex);
-	      printf("grid nv     %d\n", gridInqNvertex(gridID));	      	    
+	      printf("grid nv     %d\n", gridInqNvertex(gridID));
 	      */
 	      if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
 		differ = compareXYvals2(gridID, grid.size, grid.xvals, grid.yvals);
@@ -2552,7 +2552,7 @@ int gridGenerate(grid_t grid)
   grid_check_ptr(gridID, gridptr);
 
   gridDefPrec(gridID, grid.prec);
-	  
+
   switch (grid.type)
     {
     case GRID_LONLAT:
@@ -2568,6 +2568,8 @@ int gridGenerate(grid_t grid)
       {
 	if ( grid.xsize > 0 ) gridDefXsize(gridID, grid.xsize);
 	if ( grid.ysize > 0 ) gridDefYsize(gridID, grid.ysize);
+
+        if ( grid.type == GRID_GAUSSIAN ) gridDefNP(gridID, grid.np);
 
 	if ( grid.nvertex > 0 )
 	  gridDefNvertex(gridID, grid.nvertex);
@@ -2647,6 +2649,7 @@ int gridGenerate(grid_t grid)
       }
     case GRID_GAUSSIAN_REDUCED:
       {
+	gridDefNP(gridID, grid.np);
 	gridDefYsize(gridID, grid.ysize);
 	gridDefRowlon(gridID, grid.ysize, grid.rowlon);
 

@@ -162,7 +162,7 @@ int cgribexGetTsteptype(int timerange)
 static
 void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid)
 {
-  int gridtype; 
+  int gridtype;
 
   gridtype = cgribexGetGridType(isec2);
 
@@ -185,6 +185,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid)
 	grid->size  = ISEC4_NumValues;
 	grid->xsize = ISEC2_NumLon;
 	grid->ysize = ISEC2_NumLat;
+        if ( gridtype == GRID_GAUSSIAN ) grid->np = ISEC2_NumPar;
 	grid->xinc  = 0;
 	grid->yinc  = 0;
 	grid->xdef  = 0;
@@ -214,7 +215,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid)
 	      }
 	    grid->xfirst = ISEC2_FirstLon * 0.001;
 	    grid->xlast  = ISEC2_LastLon  * 0.001;
-	    grid->xdef   = 2;	    
+	    grid->xdef   = 2;
 	  }
 	grid->ydef  = 0;
 	/* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
@@ -231,18 +232,19 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid)
 	      }
 	    grid->yfirst = ISEC2_FirstLat * 0.001;
 	    grid->ylast  = ISEC2_LastLat  * 0.001;
-	    grid->ydef   = 2;	    
+	    grid->ydef   = 2;
 	  }
 	break;
       }
     case GRID_GAUSSIAN_REDUCED:
       {
+        grid->np     = ISEC2_NumPar;
 	grid->size   = ISEC4_NumValues;
         grid->rowlon = ISEC2_RowLonPtr;
 	grid->ysize  = ISEC2_NumLat;
-	grid->xinc  = 0;
-	grid->yinc  = 0;
-	grid->xdef  = 0;
+	grid->xinc   = 0;
+	grid->yinc   = 0;
+	grid->xdef   = 0;
 	/* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
 	  {
 	    if ( grid->xsize > 1 )
@@ -254,7 +256,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid)
 	      }
 	    grid->xfirst = ISEC2_FirstLon * 0.001;
 	    grid->xlast  = ISEC2_LastLon  * 0.001;
-	    grid->xdef   = 2;	    
+	    grid->xdef   = 2;
 	  }
 	grid->ydef  = 0;
 	/* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
@@ -268,7 +270,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid)
 	      }
 	    grid->yfirst = ISEC2_FirstLat * 0.001;
 	    grid->ylast  = ISEC2_LastLat  * 0.001;
-	    grid->ydef   = 2;	    
+	    grid->ydef   = 2;
 	  }
 	break;
       }
@@ -292,7 +294,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid)
 	grid->lcc_projflag  = ISEC2_Lambert_ProjFlag;
 	grid->lcc_scanflag  = ISEC2_ScanFlag;
 
-	grid->xdef   = 0;	    
+	grid->xdef   = 0;
 	grid->ydef   = 0;
 
 	break;
@@ -1711,8 +1713,8 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	double yfirst = 0, ylast = 0, yinc = 0;
 
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
-	  ISEC2_GridType = GRIB1_GTYPE_GAUSSIAN;
-	else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
+          ISEC2_GridType = GRIB1_GTYPE_GAUSSIAN;
+        else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
 	  ISEC2_GridType = GRIB1_GTYPE_LATLON_ROT;
 	else
 	  ISEC2_GridType = GRIB1_GTYPE_LATLON;
@@ -1778,7 +1780,11 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	  ISEC2_LonIncr = 0;
 
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
-	  ISEC2_NumPar = nlat/2;
+          {
+            int np = gridInqNP(gridID);
+            if ( np == 0 ) np = nlat/2;
+            ISEC2_NumPar = np;
+          }
 	else
 	  {
 	    ISEC2_LatIncr = NINT(yinc*1000);

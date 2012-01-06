@@ -270,9 +270,16 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 	GRIB_CHECK(grib_get_long(gh, "Nj", &lpar), 0);
 	nlat = lpar;
 
+	if ( gridtype == GRID_GAUSSIAN )
+          {
+            GRIB_CHECK(grib_get_long(gh, "numberOfParallelsBetweenAPoleAndTheEquator", &lpar), 0);
+            grid->np = lpar;
+          }
+
 	if ( numberOfPoints != nlon*nlat )
 	  Error("numberOfPoints (%d) and gridSize (%d) differ!",
 		(int)numberOfPoints, nlon*nlat);
+
 	grid->size  = numberOfPoints;
 	grid->xsize = nlon;
 	grid->ysize = nlat;
@@ -330,6 +337,9 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 	int nlat, i;
 	size_t dummy;
 	long *pl;
+
+        GRIB_CHECK(grib_get_long(gh, "numberOfParallelsBetweenAPoleAndTheEquator", &lpar), 0);
+        grid->np = lpar;
 
 	GRIB_CHECK(grib_get_long(gh, "Nj", &lpar), 0);
 	nlat = lpar;
@@ -1628,7 +1638,7 @@ int gribapiScanTimestep(int streamID)
 		  cdiParamToString(param, paramstr, sizeof(paramstr));
 
 		  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
-		  
+
 		  if ( CDI_Debug )
 		    Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 
@@ -1638,7 +1648,7 @@ int gribapiScanTimestep(int streamID)
 		{
 		  streamptr->tsteps[tsID].records[recID].used = TRUE;
 		  streamptr->tsteps[tsID].recIDs[rindex] = recID;
-		}    
+		}
 	    }
 
 	  if ( CDI_Debug )
@@ -1657,7 +1667,7 @@ int gribapiScanTimestep(int streamID)
 		      streamptr->tsteps[tsID].records[recID].ilevel, level1);
 	      Error("Invalid, unsupported or inconsistent record structure");
 	    }
-	  
+
 	  streamptr->tsteps[tsID].records[recID].position = recpos;
 	  streamptr->tsteps[tsID].records[recID].size = recsize;
 
@@ -2147,7 +2157,11 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	  ISEC2_LonIncr = 0;
 	*/
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
-	  GRIB_CHECK(grib_set_long(gh, "numberOfParallelsBetweenAPoleAndTheEquator", nlat/2), 0);
+          {
+            int np = gridInqNP(gridID);
+            if ( np == 0 ) np = nlat/2;
+            GRIB_CHECK(grib_set_long(gh, "numberOfParallelsBetweenAPoleAndTheEquator", np), 0);
+          }
 	else
 	  {
 	    latIncr = yinc;
