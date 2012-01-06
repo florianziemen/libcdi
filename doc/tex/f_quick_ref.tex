@@ -13,6 +13,15 @@ CDI library routines:
 Create a horizontal Grid.
 
 
+\section*{\tt \htmlref{gridDefNP}{gridDefNP}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefNP (INTEGER gridID, INTEGER np)
+\end{verbatim}
+
+Define the number of parallels between a pole and the equator.
+
+
 \section*{\tt \htmlref{gridDefNvertex}{gridDefNvertex}}
 
 \begin{verbatim}
@@ -155,6 +164,15 @@ Destroy a horizontal Grid.
 \end{verbatim}
 
 Duplicate a Grid.
+
+
+\section*{\tt \htmlref{gridInqNP}{gridInqNP}}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridInqNP (INTEGER gridID)
+\end{verbatim}
+
+Get the number of parallels between a pole and the equator.
 
 
 \section*{\tt \htmlref{gridInqNvertex}{gridInqNvertex}}
