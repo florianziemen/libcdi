@@ -543,6 +543,12 @@ void    gridDefYsize(int gridID, int ysize);
 /*      gridInqYsize: Get the size of a Y-axis */
 int     gridInqYsize(int gridID);
 
+/*      gridDefNP: Define the number of parallels between a pole and the equator */
+void    gridDefNP(int gridID, int np);
+
+/*      gridInqNP: Get the number of parallels between a pole and the equator */
+int     gridInqNP(int gridID);
+
 /*      gridDefXvals: Define the values of a X-axis */
 void    gridDefXvals(int gridID, const double *xvals_vec);
 

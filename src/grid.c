@@ -216,6 +216,7 @@ void grid_init(grid_t *gridptr)
   gridptr->size         = 0;
   gridptr->xsize        = 0;
   gridptr->ysize        = 0;
+  gridptr->np           = 0;
   gridptr->xdef         = 0;
   gridptr->ydef         = 0;
   gridptr->isCyclic     = CDI_UNDEFID;
@@ -1219,7 +1220,7 @@ void gridDefXsize(int gridID, int xsize)
 
   gridptr->xsize = xsize;
 
-  if ( gridInqType(gridID) != GRID_UNSTRUCTURED && 
+  if ( gridInqType(gridID) != GRID_UNSTRUCTURED &&
        gridptr->xsize*gridptr->ysize > gridInqSize(gridID) )
     Error("inconsistent grid declaration! (xsize %d ysize %d gridsize %d)",
 	  gridptr->xsize, gridptr->ysize, gridInqSize(gridID));
@@ -1227,10 +1228,10 @@ void gridDefXsize(int gridID, int xsize)
 
 
 /*
-@Function  
-@Title     
+@Function
+@Title
 
-@Prototype 
+@Prototype
 @Parameter
     @Item  Grid identifier
 
@@ -1297,7 +1298,6 @@ int gridInqXsize(int gridID)
   return (gridptr->xsize);
 }
 
-
 /*
 @Function  gridDefYsize
 @Title     Define the number of values of a Y-axis
@@ -1334,7 +1334,6 @@ void gridDefYsize(int gridID, int ysize)
 	  gridptr->xsize, gridptr->ysize, gridInqSize(gridID));
 }
 
-
 /*
 @Function  gridInqYsize
 @Title     Get the number of values of a Y-axis
@@ -1360,6 +1359,59 @@ int gridInqYsize(int gridID)
   grid_check_ptr(gridID, gridptr);
 
   return (gridptr->ysize);
+}
+
+/*
+@Function  gridDefNP
+@Title     Define the number of parallels between a pole and the equator
+
+@Prototype void gridDefNP(int gridID, int np)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  np       Number of parallels between a pole and the equator
+
+@Description
+The function @func{gridDefNP} defines the number of parallels between a pole and the equator.
+
+@EndFunction
+*/
+void gridDefNP(int gridID, int np)
+{
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  grid_check_ptr(gridID, gridptr);
+
+  gridptr->np = np;
+}
+
+/*
+@Function  gridInqNP
+@Title     Get the number of parallels between a pole and the equator
+
+@Prototype void gridInqNP(int gridID)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+
+@Description
+The function @func{gridInqNP} returns the number of parallels between a pole and the equator
+of a Gaussian grid.
+
+@Result
+@func{gridInqNP} returns the number of parallels between a pole and the equator.
+
+@EndFunction
+*/
+int gridInqNP(int gridID)
+{
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  grid_check_ptr(gridID, gridptr);
+
+  return (gridptr->np);
 }
 
 
