@@ -843,7 +843,7 @@ int gribapiScanTimestep1(int streamID)
 	      dlevel = grib1GetLevel(gh, leveltype);
 	      if ( leveltype == 99 ) leveltype++;
 	    }
-	  else 
+	  else
 	    {
 	      leveltype = 0;
 	      dlevel = 0;
@@ -860,7 +860,7 @@ int gribapiScanTimestep1(int streamID)
 	      // fprintf(stderr, "packingType %d %s\n", len, typeOfPacking);
 	      if ( strncmp(typeOfPacking, "grid_jpeg", len) == 0 ) comptype = COMPRESS_JPEG;
 	    }
-	  
+
 	  GRIB_CHECK(grib_get_long(gh, "discipline", &lpar), 0);
 	  pdis = (int) lpar;
 
@@ -879,7 +879,7 @@ int gribapiScanTimestep1(int streamID)
 	      dlevel = grib2GetLevel(gh, leveltype);
 	      if ( leveltype == 99 ) leveltype++;
 	    }
-	  else 
+	  else
 	    {
 	      leveltype = 0;
 	      dlevel = 0;
@@ -943,7 +943,7 @@ int gribapiScanTimestep1(int streamID)
 		if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 )
 		  {
 		    char paramstr[32];
-		    cdiParamToString(param, paramstr, sizeof(paramstr));	    
+		    cdiParamToString(param, paramstr, sizeof(paramstr));
 		    Warning("Inconsistent verification time (param=%s level=%d)", paramstr, level1);
 		    warn_time = FALSE;
 		  }

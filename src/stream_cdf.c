@@ -4336,8 +4336,8 @@ int cmpvarname(const void *s1, const void *s2)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
-void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
-                       int timedimid, int modelID, int format)
+void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
+                          int timedimid, int modelID, int format)
 {
   int ncvarid;
   int ncdimid;
@@ -4473,7 +4473,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   if ( warn )
                     {
                       warn = FALSE;
-                      Warning("Grid type %s unsupported!", attstring);
+                      Warning("netCDF attribute grid_type='%s' unsupported!", attstring);
                     }
                 }
 
@@ -4496,7 +4496,7 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   if ( warn )
                     {
                       warn = FALSE;
-                      Warning("Zaxis type %s unsupported!", attstring);
+                      Warning("netCDF attribute level_type='%s' unsupported!", attstring);
                     }
                 }
 
@@ -6303,8 +6303,8 @@ int cdfInqContents(int streamID)
     }
 
 
-  /* scan var attributes */
-  scanVarAttributes(fileID, nvars, ncvars, ncdims, timedimid, modelID, format);
+  /* scan attributes of all variables */
+  cdfScanVarAttributes(fileID, nvars, ncvars, ncdims, timedimid, modelID, format);
 
 
   if ( CDI_Debug ) printNCvars(ncvars, nvars);
