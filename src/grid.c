@@ -2259,8 +2259,8 @@ void grid_check_cyclic(grid_t *gridptr)
 
 	      xinc = fabs(val2-val1);
 
-	      if ( val1 < 1 && valn > 300 ) val1 += 360;
-	      if ( valn < 1 && val1 > 300 ) valn += 360;
+	      if ( val1 <    1 && valn > 300 ) val1 += 360;
+	      if ( valn <    1 && val1 > 300 ) valn += 360;
 	      if ( val1 < -179 && valn > 120 ) val1 += 360;
 	      if ( valn < -179 && val1 > 120 ) valn += 360;
 
@@ -2290,8 +2290,8 @@ void grid_check_cyclic(grid_t *gridptr)
 		    {
 		      val2 = xbounds[i2+k2];
 
-		      if ( val1 < 1 && val2 > 300 ) val1 += 360;
-		      if ( val2 < 1 && val1 > 300 ) val2 += 360;
+		      if ( val1 <    1 && val2 > 300 ) val1 += 360;
+		      if ( val2 <    1 && val1 > 300 ) val2 += 360;
 		      if ( val1 < -179 && val2 > 120 ) val1 += 360;
 		      if ( val2 < -179 && val1 > 120 ) val2 += 360;
 
