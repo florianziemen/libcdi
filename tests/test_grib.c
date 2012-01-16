@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
   
   datasize = nlon * nlat;
   data = (double *) malloc(datasize*sizeof(double));
+  memset(data, 0, datasize*sizeof(double));
 
   gridID = gridCreate(GRID_GAUSSIAN, datasize);
   gridDefXsize(gridID, nlon);
@@ -83,6 +84,7 @@ int main(int argc, char *argv[])
     }
 
   data = (double *) malloc(datasize*sizeof(double));
+  memset(data, 0, datasize*sizeof(double));
 
   taxisID = vlistInqTaxis(vlistID);
 
