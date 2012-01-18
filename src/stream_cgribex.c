@@ -1473,7 +1473,7 @@ void cgribexDefParam(int *isec1, int param)
       Warning("Can not convert GRIB2 parameter (%s) to GRIB1!", paramstr);
       lwarn = FALSE;
     }
-    
+
   if ( pnum < 0 ) pnum = -pnum;
 
   ISEC1_CodeTable = pcat;
@@ -1794,10 +1794,10 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	    if ( ISEC2_LatIncr < 0 ) ISEC2_LatIncr = -ISEC2_LatIncr;
 	  }
 
-	if ( ISEC2_NumLon > 1 && ISEC2_NumLat == 1 ) 
+	if ( ISEC2_NumLon > 1 && ISEC2_NumLat == 1 )
 	  if ( ISEC2_LonIncr != 0 && ISEC2_LatIncr == 0 ) ISEC2_LatIncr = ISEC2_LonIncr;
 
-	if ( ISEC2_NumLon == 1 && ISEC2_NumLat > 1 ) 
+	if ( ISEC2_NumLon == 1 && ISEC2_NumLat > 1 )
 	  if ( ISEC2_LonIncr == 0 && ISEC2_LatIncr != 0 ) ISEC2_LonIncr = ISEC2_LatIncr;
 
 	if ( ISEC2_LatIncr == 0 || ISEC2_LonIncr == 0 )
