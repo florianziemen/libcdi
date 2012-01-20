@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 
   vardata = (double *) malloc(gridsize*MAX_LEVEL*sizeof(double));
 
-  /* Open the output dataset (GRIB fromat) */
+  /* Open the output dataset (GRIB format) */
   streamID2  = streamOpenWrite(ofile, FILETYPE_GRB);
   if ( streamID2 < 0 )
     {

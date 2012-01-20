@@ -32,7 +32,7 @@
 !     Get the Time axis from the variable list
       taxisID = vlistInqTaxis(vlistID1)
 
-!     Open the output dataset (GRIB fromat)
+!     Open the output dataset (GRIB format)
       streamID2 = streamOpenWrite("example.grb", FILETYPE_GRB)
       IF ( streamID2 < 0 ) THEN
          WRITE(0,*) cdiStringError(streamID2)

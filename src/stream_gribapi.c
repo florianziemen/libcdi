@@ -1811,7 +1811,7 @@ void gribapiDefInstitut(grib_handle *gh, int vlistID, int varID)
 
       GRIB_CHECK(grib_get_long(gh, "centre", &center0), 0);
       GRIB_CHECK(grib_get_long(gh, "subCentre", &subcenter0), 0);
-      
+
       if ( center != center0 )
 	GRIB_CHECK(grib_set_long(gh, "centre", center), 0);
       if ( subcenter != subcenter0 )
