@@ -1363,6 +1363,7 @@ void zaxisPrint(int zaxisID)
 {
   FILE *fp = stdout;
   int type;
+  char uuid[17];
   int nlevels, levelID;
   int nbyte0, nbyte;
   double level;
@@ -1450,7 +1451,7 @@ void zaxisPrint(int zaxisID)
 	    {
 	      if ( nbyte > 70 )
 		{
-		  fprintf(fp, "\n%*s", nbyte0, "");
+                  fprintf(fp, "\n%*s", nbyte0, "");
 		  nbyte = nbyte0;
 		}
 	      nbyte += fprintf(fp, "%.9g ", vct[vctsize/2+i]);
@@ -1458,6 +1459,15 @@ void zaxisPrint(int zaxisID)
 	  fprintf(fp, "\n");
 	  */
 	}
+    }
+  if ( type == ZAXIS_REFERENCE )
+    {
+      const unsigned char *d;
+      zaxisInqUUID(zaxisID, uuid);
+      d = (unsigned char *) &uuid;
+      fprintf(fp, "uuid      = %02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
+              d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
+              d[8], d[9], d[10], d[11], d[12], d[13], d[14], d[15]);
     }
 }
 /*

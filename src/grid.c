@@ -3526,9 +3526,14 @@ void gridPrint(int gridID, int opt)
       }
     case GRID_REFERENCE:
       {
+        const unsigned char *d;
 	fprintf(fp, "number    = %d\n", gridInqNumber(gridID));
 	fprintf(fp, "position  = %d\n", gridInqPosition(gridID));
-	fprintf(fp, "uuid      = %s\n", gridInqUUID(gridID, uuid));
+        gridInqUUID(gridID, uuid);
+        d = (unsigned char *) &uuid;
+	fprintf(fp, "uuid      = %02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x\n", 
+                d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
+                d[8], d[9], d[10], d[11], d[12], d[13], d[14], d[15]);
 	if ( gridInqReference(gridID, NULL) )
 	  {
 	    char reference_link[8192];
