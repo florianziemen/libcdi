@@ -2214,7 +2214,13 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	    mesg = "grid_simple"; len = strlen(mesg);
 	    GRIB_CHECK(grib_set_string(gh, "packingType", mesg, &len), 0);
 	  }
-
+        /*
+        {
+          mesg = "grid_ieee"; len = strlen(mesg);
+          GRIB_CHECK(grib_set_string(gh, "packingType", mesg, &len), 0);
+          GRIB_CHECK(grib_set_long(gh, "precision", 2), 0);
+        }
+        */
 	break;
       }
       /*
