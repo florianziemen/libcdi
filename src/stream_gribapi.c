@@ -377,7 +377,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 		    if ( IS_EQUAL(grid->xfirst, 0) && grid->xlast > 354 )
 		      {
 			double xinc = 360. / grid->xsize;
-		      
+
 			if ( fabs(grid->xinc-xinc) > 0.0 )
 			  {
 			    grid->xinc = xinc;
@@ -386,7 +386,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 		      }
 		  }
 	      }
-	    grid->xdef   = 2;	    
+	    grid->xdef = 2;
 	  }
 	grid->ydef  = 0;
         /* if ( IS_NOT_EQUAL(grid->yfirst, 0) || IS_NOT_EQUAL(grid->ylast, 0) ) */
@@ -397,7 +397,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 		  {
 		  }
 	      }
-	    grid->ydef   = 2;	    
+	    grid->ydef = 2;
 	  }
 	break;
       }
@@ -422,7 +422,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 	grid->lcc_projflag  = ISEC2_Lambert_ProjFlag;
 	grid->lcc_scanflag  = ISEC2_ScanFlag;
 
-	grid->xdef   = 0;	    
+	grid->xdef   = 0;
 	grid->ydef   = 0;
 
 	break;
@@ -546,7 +546,7 @@ double grib2GetLevel(grib_handle *gh, int leveltype)
 
 static
 void gribapiAddRecord(int streamID, int param, grib_handle *gh,
-		      long recsize, off_t position, int prec, int comptype)
+		      long recsize, off_t position, int datatype, int comptype)
 {
   long editionNumber;
   int zaxistype;
@@ -566,7 +566,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
   long lpar;
   int status;
   char name[256], longname[256], units[256];
-  size_t vlen; 
+  size_t vlen;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -590,7 +590,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 	  dlevel = grib1GetLevel(gh, leveltype);
 	  if ( leveltype == 99 ) leveltype++;
 	}
-      else 
+      else
 	{
 	  leveltype = 0;
 	  dlevel = 0;
@@ -605,7 +605,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 	  dlevel = grib2GetLevel(gh, leveltype);
 	  if ( leveltype == 99 ) leveltype++;
 	}
-      else 
+      else
 	{
 	  leveltype = 0;
 	  dlevel = 0;
@@ -650,8 +650,8 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 
   //lbounds = cgribexGetZaxisHasBounds(ISEC1_LevelType);
 
-  if ( prec > 32 ) prec = DATATYPE_PACK32;
-  if ( prec <  0 ) prec = DATATYPE_PACK;
+  if ( datatype > 32 ) datatype = DATATYPE_PACK32;
+  if ( datatype <  0 ) datatype = DATATYPE_PACK;
 
   name[0] = 0;
   longname[0] = 0;
@@ -674,7 +674,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
   // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units); 
 
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2,
-	       prec, &varID, &levelID, 0, numavg, leveltype,
+	       datatype, &varID, &levelID, 0, numavg, leveltype,
 	       name, longname, units);
 
   (*record).varID   = varID;
@@ -755,7 +755,7 @@ int gribapiScanTimestep1(int streamID)
   int varID;
   size_t readsize;
   int nrecords, nrecs, recID;
-  int prec;
+  int datatype;
   long recsize = 0;
   int warn_time = TRUE;
   int warn_numavg = TRUE;
@@ -893,13 +893,13 @@ int gribapiScanTimestep1(int streamID)
       /*
       printf("%d %d %d.%d.%d %d %g\n", vdate, vtime, pnum, pcat, pdis, leveltype, dlevel);
       */
-      prec = DATATYPE_PACK;
+      datatype = DATATYPE_PACK;
       status = grib_get_long(gh,"bitsPerValue", &lpar);
       if ( status == 0 )
 	{
 	  bitsPerValue = (int) lpar;
 	  if ( bitsPerValue > 0 && bitsPerValue <= 32 )
-	    prec = bitsPerValue;
+	    datatype = bitsPerValue;
 	}
 
       if ( nrecs == 0 )
@@ -981,7 +981,7 @@ int gribapiScanTimestep1(int streamID)
       if ( CDI_Debug )
 	Message("%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
 
-      gribapiAddRecord(streamID, param, gh, recsize, recpos, prec, comptype);
+      gribapiAddRecord(streamID, param, gh, recsize, recpos, datatype, comptype);
 
       grib_handle_delete(gh);
       gh = NULL;
@@ -2653,7 +2653,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 #else
   gh = gc->gribHandle;
 #endif
-  
+
   if ( ! gc->init ) gribapiDefInstitut(gh, vlistID, varID);
   if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
 
