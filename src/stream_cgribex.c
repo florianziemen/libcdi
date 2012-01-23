@@ -351,7 +351,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid)
 #if  defined  (HAVE_LIBCGRIBEX)
 static
 void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
-		      int *isec4, long recsize, off_t position, int prec, int comptype, int lmv)
+		      int *isec4, long recsize, off_t position, int datatype, int comptype, int lmv)
 {
   int zaxistype;
   int gridID = CDI_UNDEFID, varID;
@@ -404,11 +404,11 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
 
   lbounds = cgribexGetZaxisHasBounds(ISEC1_LevelType);
 
-  if ( prec > 32 ) prec = DATATYPE_PACK32;
-  if ( prec <  0 ) prec = DATATYPE_PACK;
+  if ( datatype > 32 ) datatype = DATATYPE_PACK32;
+  if ( datatype <  0 ) datatype = DATATYPE_PACK;
 
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2,
-	       prec, &varID, &levelID, tsteptype, numavg, ISEC1_LevelType, NULL, NULL, NULL);
+	       datatype, &varID, &levelID, tsteptype, numavg, ISEC1_LevelType, NULL, NULL, NULL);
 
   (*record).varID   = varID;
   (*record).levelID = levelID;
@@ -526,7 +526,7 @@ int cgribexScanTimestep1(int streamID)
   int varID;
   size_t readsize;
   int nrecords, nrecs, recID;
-  int prec;
+  int datatype;
   long recsize = 0;
   int warn_time = TRUE;
   int warn_numavg = TRUE;
@@ -619,9 +619,9 @@ int cgribexScanTimestep1(int streamID)
       gribDateTime(isec1, &vdate, &vtime);
 
       if ( ISEC4_NumBits > 0 && ISEC4_NumBits <= 32 )
-	prec = ISEC4_NumBits;
+	datatype = ISEC4_NumBits;
       else
-        prec = DATATYPE_PACK;
+        datatype = DATATYPE_PACK;
 
       if ( nrecs == 0 )
 	{
@@ -696,7 +696,7 @@ int cgribexScanTimestep1(int streamID)
 	Message("%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
 
       cgribexAddRecord(streamID, param, isec1, isec2, fsec2, fsec3,
-		       isec4, recsize, recpos, prec, comptype, lmv);
+		       isec4, recsize, recpos, datatype, comptype, lmv);
     }
 
   streamptr->rtsteps = 1;
