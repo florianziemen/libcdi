@@ -2012,6 +2012,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
   int gridtype;
   int status;
   long editionNumber;
+  char uuid[17];
   static short lwarn = TRUE;
   size_t len;
   char *mesg;
@@ -2317,6 +2318,9 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg)
 	  {
 	    GRIB_CHECK(grib_set_long(gh, "numberOfGridUsed", gridInqNumber(gridID)), 0);
 	    GRIB_CHECK(grib_set_long(gh, "numberOfGridInReference", gridInqPosition(gridID)), 0);
+            len = 16;
+            GRIB_CHECK(grib_set_string(gh, "uuidOfHGrid", gridInqUUID(gridID, uuid), &len), 0);
+
 	  }
 
 	break;
