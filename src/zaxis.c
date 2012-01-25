@@ -781,6 +781,8 @@ void zaxisDefUUID(int zaxisID, const char *uuid)
   zaxis_check_ptr(zaxisID, zaxisptr);
 
   strncpy(zaxisptr->uuid, uuid, 16);
+
+  return;
 }
 
 /*
