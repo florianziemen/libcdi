@@ -470,7 +470,6 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 		  grid->reference = strdupx(reference_link);
 	      }
             len = (size_t) 16;
-            uuid[16] = 0;
             if ( grib_get_string(gh, "uuidOfHGrid", uuid, &len) == 0)
               {
                 strncpy(grid->uuid, uuid, 16);
@@ -637,22 +636,47 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 
   zaxistype = gribapiGetZaxisType(editionNumber, leveltype);
 
-  if ( zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF )
+  switch (zaxistype)
     {
-      int vctsize;
-      size_t dummy;
-      double *vctptr;
+    case ZAXIS_HYBRID:
+    case ZAXIS_HYBRID_HALF:
+      {
+        int vctsize;
+        size_t dummy;
+        double *vctptr;
 
-      GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
-      vctsize = lpar;
-      if ( vctsize > 0 )
-	{
-	  vctptr = (double *) malloc(vctsize*sizeof(double));
-	  dummy = vctsize;
-	  GRIB_CHECK(grib_get_double_array(gh, "pv", vctptr, &dummy), 0);
-	  varDefVCT(vctsize, vctptr);
-	  free(vctptr);
-	}
+        GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
+        vctsize = lpar;
+        if ( vctsize > 0 )
+          {
+            vctptr = (double *) malloc(vctsize*sizeof(double));
+            dummy = vctsize;
+            GRIB_CHECK(grib_get_double_array(gh, "pv", vctptr, &dummy), 0);
+            varDefVCT(vctsize, vctptr);
+            free(vctptr);
+          }
+        break;
+      }
+    case ZAXIS_REFERENCE:
+      {
+        size_t len;
+        char uuid[17];
+        long nlev, nvgrid;
+
+        GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
+        if ( lpar != 2 )
+          {
+            fprintf(stderr, "Warning ...\n");
+          }
+        GRIB_CHECK(grib_get_long(gh, "nlev", &nlev), 0);
+        GRIB_CHECK(grib_get_long(gh, "numberOfVGridUsed", &nvgrid), 0);
+
+        len = (size_t) 16;
+        uuid[16] = 0;
+        GRIB_CHECK(grib_get_string(gh, "uuidOfVGrid", uuid, &len), 0);
+        varDefZAxisReference((int) nlev, (int) nvgrid, uuid);
+        break;
+      }
     }
 
   //lbounds = cgribexGetZaxisHasBounds(ISEC1_LevelType);
