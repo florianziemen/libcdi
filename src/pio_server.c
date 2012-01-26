@@ -209,11 +209,12 @@ static
         memcpy ( filename + filenamesz, endname, 1 );
         getBufferGetFromEnd ( __func__, __LINE__, 
                               root, &filetype, sizeof ( filetype ));
+        xassert ( filetype >= MINFILETYPE && filetype <= MAXFILETYPE );
         streamID = streamOpenWrite ( filename, filetype );
-        free ( filename );
         xdebug ( "READ FUNCTION CALL FROM WIN:  %s, filenamesz=%d,"
-                 " filename=%s, filetype=%d, opened stream %d", 
+                 " filename=%s, filetype=%d, OPENED STREAM %d", 
                  funcMap[funcID], filenamesz, filename, filetype, streamID );
+        free ( filename );
       }
       break; 
     case STREAMDEFVLIST:
@@ -418,19 +419,19 @@ void IOServer ()
       tag    = status.MPI_TAG;
       
       switch ( tag )
-	{
-	case FINALIZE: 
-	  xdebugMsg (  tag, source, nfinished );
+        {
+        case FINALIZE: 
+          xdebugMsg (  tag, source, nfinished );
           iBuffer = xmalloc ( sizeof ( int ));     
-	  xmpi ( MPI_Recv ( iBuffer, 1, MPI_INTEGER, source, 
+          xmpi ( MPI_Recv ( iBuffer, 1, MPI_INTEGER, source, 
                             tag, commCalc, &status ));
           xdebug ( "RECEIVED MESSAGE WITH TAG \"FINALIZE\"" );
           free ( iBuffer );
-	  nfinished++;
+          nfinished++;
           xdebug ( "nfinished=%d, nProcsModel=%d", 
-                  nfinished, nProcsModel );
-
-	  if ( nfinished == nProcsModel )  
+                   nfinished, nProcsModel );
+          
+          if ( nfinished == nProcsModel )  
             {              
               {
                 int nStreams = streamSize ();
@@ -450,12 +451,12 @@ void IOServer ()
               backendCleanup (); 
               serverWinCleanup ();                 
               arrayDestroy();
-                
+              
               return;
             }
 	  
-	  break;
-
+          break;
+          
 	case RESOURCES:
 	  xdebugMsg (  tag, source, nfinished );
 	  xmpi ( MPI_Get_count ( &status, MPI_CHAR, &size ));

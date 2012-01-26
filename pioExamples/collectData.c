@@ -105,8 +105,8 @@ int main (int argc, char *argv[])
   enum { 
     nProcsIO    = 3,
     //IOMode      = PIO_NONE,
-    IOMode      = PIO_MPI, 
-    //IOMode      = PIO_FPGUARD,
+    //IOMode      = PIO_MPI, 
+    IOMode      = PIO_FPGUARD,
     //IOMode      = PIO_ASYNCH,
     //IOMode      = PIO_WRITER,
     nNamespaces = 1 };
@@ -116,12 +116,13 @@ int main (int argc, char *argv[])
 #ifdef USE_MPI
   MPI_Comm commGlob, commModel; 
   int sizeGlob;
-  int rankDebug;
+  int rankGlob;
 
   xmpi ( MPI_Init ( &argc, &argv));           
   xmpi ( MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob ));
   xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob )); 
+  xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
 
   commModel = pioInit_c ( commGlob, nProcsIO, IOMode, nNamespaces, hasLocalFile );
 #endif

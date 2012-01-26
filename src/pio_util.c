@@ -25,10 +25,12 @@ void pcdiAssert   ( bool assumption, const char * filename,
       MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
       fprintf ( stderr, "ERROR, ASSUMPTION FALSE: PE%d in %s, %s, line %d\n",
                 rank, functionname, filename, line );
+      fflush ( stderr );
       MPI_Abort ( MPI_COMM_WORLD, 1 );
 #else
       fprintf ( stderr, "ERROR ASSUMPTION FALSE, %s, %s, line %d\n",
                 functionname, filename, line );
+      fflush ( stderr );
       abort();
 #endif
     }
@@ -179,16 +181,17 @@ void pcdiDebugComm ( const char *filename, const char *functionname, int line, M
 /****************************************************/
 
 #ifdef USE_MPI
-void pcdiDebugMsg ( const char *filename, const char *functionname, int line,
-                  int tag, int source, int nfinished )
+void pcdiDebugMsg ( const char * cdiPioDebugString, const char *filename, 
+                    const char *functionname, int line, int tag, int source, 
+                    int nfinished )
 {
   int rank;
 
   MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
 
   fprintf ( stdout,
-            "pe%d in %s, %s, line %d: command %s, source %d, finalized=%d\n",
-            rank, functionname, filename, line,
+            "%s pe%d in %s, %s, line %d: command %s, source %d, finalized=%d\n",
+            cdiPioDebugString, rank, functionname, filename, line,
             &commands[tag][0], source, nfinished );
 }
 #endif
@@ -253,8 +256,8 @@ double xchecksum ( int type, int count, void * buffer )
 
 /****************************************************/
 
-void printArray ( char * ps, const void * array, int n, int datatype, 
-		  const char * funname, const char * filename, int line )
+void printArray ( const char * cdiPioDebugString, char * ps, const void * array, int n, 
+                  int datatype, const char * funname, const char * filename, int line )
 { 
   int i, rank;
   int * iArray;
@@ -262,11 +265,11 @@ void printArray ( char * ps, const void * array, int n, int datatype,
 
 #ifdef USE_MPI
   MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
-  fprintf ( stdout, "pe%d in %s, %s, line %d: %s = ",
-	    rank, funname, filename, line, ps );
+  fprintf ( stdout, "%s pe%d in %s, %s, line %d: %s = ",
+	    cdiPioDebugString, rank, funname, filename, line, ps );
 #else 
-  fprintf ( stdout, "%s, %s, line %d: %s = ",
-	    funname, filename, line, ps );
+  fprintf ( stdout, "%s %s, %s, line %d: %s = ",
+	    cdiPioDebugString, funname, filename, line, ps );
 #endif
 
   switch ( datatype )

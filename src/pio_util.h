@@ -32,9 +32,12 @@
 #define MAXGHBUFFERSIZE_1 10
 
 #define MAXSTRING        256
+#define MINFILETYPE        1
+#define MAXFILETYPE        9
 
+#define ddebug             0
 
-#define ddebug 0
+static char * debugString = "#####";
 
 
 void pcdiAssert   ( bool, const char *, const char *, int );
@@ -45,8 +48,8 @@ void pcdiAssert   ( bool, const char *, const char *, int );
   if ( ddebug ){                                                \
     int rank;                                                   \
     MPI_Comm_rank ( MPI_COMM_WORLD, &rank );                    \
-    fprintf ( stderr, "pe%d in %s, %s, line %d: " fmt "\n",     \
-              rank,  __func__, __FILE__,  __LINE__,             \
+    fprintf ( stderr, "%s pe%d in %s, %s, line %d: " fmt "\n",     \
+              debugString, rank,  __func__, __FILE__,  __LINE__,     \
               ## __VA_ARGS__ );                                 \
   }
 
@@ -137,11 +140,11 @@ void pcdiDebugComm ( const char *filename, const char *functionname, int line, \
   if ( ddebug ) pcdiDebugComm (  __FILE__, __func__, __LINE__, comm )
 #endif
 
-void pcdiDebugMsg ( const char *filename, const char *functionname, int line, \
+void pcdiDebugMsg ( const char * cdiDebugString, const char *filename, const char *functionname, int line, \
                     int tag, int source, int nfinished );
 #define xdebugMsg(tag,source,nfinished) \
   if ( ddebug ) \
-    pcdiDebugMsg ( __FILE__, __func__, __LINE__, tag, source, nfinished )
+      pcdiDebugMsg ( debugString, __FILE__, __func__, __LINE__, tag, source, nfinished )
 
 void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line, \
                     int tag, int source, char * text );
@@ -154,14 +157,14 @@ int xsum ( int, int * );
 
 double xchecksum ( int, int, void * );
  
-void printArray ( char *, const void *, int, int, const char *, const char *, int );
+void printArray ( const char *, char *, const void *, int, int, const char *, const char *, int );
 #define xprintArray(ps,array,n,datatype)                                \
   if ( ddebug )                                                         \
-    printArray ( ps, array, n, datatype,  __func__, __FILE__, __LINE__ )
+      printArray ( debugString, ps, array, n, datatype,  __func__, __FILE__, __LINE__ )
  
 #define xprintArray3(ps,array,n,datatype)                                \
   if ( ddebug == MAXDEBUG )                                                         \
-    printArray ( ps, array, n, datatype,  __func__, __FILE__, __LINE__ )
+      printArray ( debugString, ps, array, n, datatype,  __func__, __FILE__, __LINE__ )
 
 
 void reshArrayPrint ( char * );

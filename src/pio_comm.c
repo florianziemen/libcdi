@@ -80,13 +80,7 @@ void commDestroy ( void )
       free ( info->commsIO ); 
       info->commsIO = NULL;
     }
- 
-  if ( info->commCalc != MPI_COMM_NULL )
-    {
-      xmpi ( MPI_Comm_free ( &info->commCalc )); 
-      info->commCalc = MPI_COMM_NULL;
-    }
- 
+
   if ( info->commColl != MPI_COMM_NULL )
     {
       xmpi ( MPI_Comm_free ( &info->commColl )); 
