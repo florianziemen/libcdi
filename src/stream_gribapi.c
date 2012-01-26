@@ -454,6 +454,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       }
     case GRID_REFERENCE:
       {
+        char uuid[17];
 	char reference_link[8192];
 	size_t len = sizeof(reference_link);
 	reference_link[0] = 0;
@@ -468,6 +469,12 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 		if ( strncmp(reference_link, "file://", 7) == 0 )
 		  grid->reference = strdupx(reference_link);
 	      }
+            len = (size_t) 16;
+            uuid[16] = 0;
+            if ( grib_get_string(gh, "uuidOfHGrid", uuid, &len) == 0)
+              {
+                strncpy(grid->uuid, uuid, 16);
+              }
 	  }
 
 	break;
