@@ -99,7 +99,7 @@ static
 void grid_init_pointer(void)
 {
   int  i;
-  
+
   for ( i = 0; i < _grid_max; i++ )
     {
       _gridList[i].next = _gridList + i + 1;
@@ -151,7 +151,7 @@ int grid_from_pointer(grid_t *ptr)
 	  newptr->next = 0;
 	  idx	       = newptr->idx;
 	  newptr->ptr  = ptr;
-      
+
 	  if ( GRID_Debug )
 	    Message("Pointer %p has idx %d from grid list", ptr, idx);
 	}
