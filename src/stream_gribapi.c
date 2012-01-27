@@ -2051,7 +2051,7 @@ void gribapiDefTime(grib_handle *gh , int vdate, int vtime, int tsteptype, int n
 
 #if  defined  (HAVE_LIBGRIB_API)
 static
-void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg, int *lieee)
+void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg, int lieee, int datatype)
 {
   int gridtype;
   int status;
@@ -2249,10 +2249,15 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg, int *lieee)
 	/* South -> North */
 	//if ( ISEC2_LastLat > ISEC2_FirstLat ) ISEC2_ScanFlag += 64;
 
-        if ( *lieee )
+        if ( lieee )
           {
             mesg = "grid_ieee"; len = strlen(mesg);
             GRIB_CHECK(grib_set_string(gh, "packingType", mesg, &len), 0);
+
+	    if ( datatype == DATATYPE_FLT64 )
+	      GRIB_CHECK(grib_set_long(gh, "precision", 2), 0);
+	    else
+	      GRIB_CHECK(grib_set_long(gh, "precision", 1), 0);
           }
 	else if ( ljpeg && editionNumber == 2 )
 	  {
@@ -2310,8 +2315,6 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg, int *lieee)
 	GRIB_CHECK(grib_set_long(gh, "M", trunc), 0);
 
 	// GRIB_CHECK(grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
-
-        if ( *lieee ) *lieee = FALSE;
         /*
         if ( lieee )
           {
@@ -2341,8 +2344,6 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg, int *lieee)
       }
     case GRID_GME:
       {
-        if ( *lieee ) *lieee = FALSE;
-
 	GRIB_CHECK(grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_GME), 0);
 
 	GRIB_CHECK(grib_set_long(gh, "nd", gridInqGMEnd(gridID)), 0);
@@ -2359,8 +2360,6 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg, int *lieee)
       }
     case GRID_REFERENCE:
       {
-        if ( *lieee ) *lieee = FALSE;
-
 	static int warning = 1;
 	status = grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_NUMBER);
 	if ( status != 0 && warning )
@@ -2732,15 +2731,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
     }
 
-  if ( ! gc->init ) gribapiDefGrid(gh, gridID, ljpeg, &lieee);
-
-  if ( lieee == TRUE )
-    {
-      if ( datatype == DATATYPE_FLT64 )
-        GRIB_CHECK(grib_set_long(gh, "precision", 2), 0);
-      else
-        GRIB_CHECK(grib_set_long(gh, "precision", 1), 0);
-    }
+  if ( ! gc->init ) gribapiDefGrid(gh, gridID, ljpeg, lieee, datatype);
 
   gribapiDefLevel(gh, param, zaxisID, levelID);
 
