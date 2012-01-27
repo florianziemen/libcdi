@@ -756,10 +756,13 @@ int main(int argc, char *argv[])
   if (Progname == 0) Progname = argv[0];
   else               Progname++;
 
-  while ( (c = getopt(argc, argv, "f:t:w:z:cdhlMmqRrsvVZ")) != EOF )
+  while ( (c = getopt(argc, argv, "b:f:t:w:z:cdhlMmqRrsvVZ")) != EOF )
     {
       switch (c)
 	{
+	case 'b':
+	  setDefaultDataType(optarg);
+	  break;
 	case 'd':
 	  Debug = 1;
 	  break;

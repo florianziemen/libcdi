@@ -444,24 +444,28 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
 static
 size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		 int date, int time, int tsteptype, int numavg, 
-		 long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize,
+		 long datasize, const double *data, int nmiss, unsigned char **gribbuffer,
 		 int ljpeg, void *gribContainer)
 {
   size_t nbytes;
+  size_t gribbuffersize;
 
 #if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
     {
+      gribbuffersize = datasize*4+3000;
+      *gribbuffer = (unsigned char *) malloc(gribbuffersize);
+
       nbytes = cgribexEncode(varID, levelID, vlistID, gridID, zaxisID,
 			     date, time, tsteptype, numavg, 
-			     datasize, data, nmiss, gribbuffer, gribbuffersize);
+			     datasize, data, nmiss, *gribbuffer, gribbuffersize);
     }
   else
 #endif
     {
       nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID,
 			     date, time, tsteptype, numavg, 
-			     datasize, data, nmiss, gribbuffer, gribbuffersize,
+			     datasize, data, nmiss, gribbuffer, &gribbuffersize,
 			     ljpeg, gribContainer);
     }
 
@@ -505,7 +509,6 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   int gridID;
   int zaxisID;
   unsigned char *gribbuffer = NULL;
-  size_t gribbuffersize = 0;
   long datasize;
   int tsID;
   int vlistID;
@@ -541,10 +544,10 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
     Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
   datasize = gridInqSize(gridID);
-
+  /*
   gribbuffersize = datasize*4+3000;
   gribbuffer = (unsigned char *) malloc(gribbuffersize);
-
+  */
 #if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
     {
@@ -570,7 +573,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
     }
 
   nbytes = grbEncode(filetype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, 
-		     datasize, data, nmiss, gribbuffer, gribbuffersize, ljpeg, gc);
+		     datasize, data, nmiss, &gribbuffer, ljpeg, gc);
 
   if ( streamptr->comptype == COMPRESS_SZIP )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
