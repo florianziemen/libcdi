@@ -664,7 +664,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
         long nlev, nvgrid;
 
         GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
-        if ( lpar != 2 )
+        if ( lpar != 3 )
           {
             fprintf(stderr, "Warning ...\n");
           }
@@ -2629,7 +2629,7 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
             GRIB_CHECK(grib_set_long(gh, "typeOfFirstFixedSurface", GRIB2_LTYPE_REFERENCE), 0);
             GRIB_CHECK(grib_set_double(gh, "level", level), 0);
 
-            GRIB_CHECK(grib_set_long(gh, "NV", 2), 0);
+            GRIB_CHECK(grib_set_long(gh, "NV", 3), 0);
             GRIB_CHECK(grib_set_long(gh, "nlev", (long) zaxisInqSize(zaxisID)), 0);
             GRIB_CHECK(grib_set_long(gh, "numberOfVGridUsed", reference), 0);
             len = 16;
