@@ -281,7 +281,7 @@ int institutInqSubcenter(int instID)
 
   instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
-  return instituteptr ? instituteptr->center: UNDEFID;
+  return instituteptr ? instituteptr->subcenter: UNDEFID;
 }
 
 
