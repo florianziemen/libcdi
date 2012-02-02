@@ -183,6 +183,8 @@ src/make_cdilib -text
 src/make_fint.c -text
 src/mo_cdi.f90 -text
 src/model.c -text
+src/namespace.c -text
+src/namespace.h -text
 src/pio_util.c -text
 src/pio_util.h -text
 src/pkgconfig/cdi.pc.in -text

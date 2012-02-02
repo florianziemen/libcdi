@@ -49,6 +49,8 @@ libcdi_la_SOURCES = 	 \
 	ieglib.c         \
 	institution.c  	 \
 	model.c        	 \
+        namespace.c      \
+        namespace.h      \
         pio_util.c       \
         pio_util.h       \
 	service.h	 \
