@@ -1,3 +1,7 @@
+2012-02-02 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_cdf::cdfDefCurvilinear: bug fix for CLM s,u,v grids [report: Hans-Jürgen Panitz]
+
 2012-01-30 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Version 1.5.4 released

@@ -1665,11 +1665,19 @@ void cdfDefCurvilinear(int streamID, int gridID)
                     xdimID = streamptr->xdimID[index];
                     break;
                   }
+              dimlen0 = gridInqYsize(gridID0);
+              if ( ydimlen == dimlen0 )
+                if ( IS_EQUAL(gridInqYval(gridID0, 0), gridInqYval(gridID, 0)) &&
+                     IS_EQUAL(gridInqYval(gridID0, xdimlen-1), gridInqYval(gridID, xdimlen-1)) )
+                  {
+                    ydimID = streamptr->ydimID[index];
+                    break;
+                  }
             }
         }
     }
 
-  if ( xdimID == UNDEFID )
+  if ( xdimID == UNDEFID || ydimID == UNDEFID )
     {
       int status;
       status = checkGridName('V', xaxisname, fileID, vlistID, gridID, ngrids, 'X');
@@ -6536,7 +6544,7 @@ int cdfInqContents(int streamID)
 	    }
 	}
     }
-  
+
   if ( CDI_Debug ) printNCvars(ncvars, nvars);
 
 
