@@ -5,7 +5,6 @@
 #include "config.h"
 #endif
 
-
 #ifdef USE_MPI
 #include <mpi.h>
 #include <stdlib.h>

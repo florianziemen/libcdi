@@ -97,7 +97,7 @@ void arrayInitPointer ( void )
     {
       for ( j = 0; j < arraySizeAllocated[i]; j++ )
         {
-          arrayResources[i][j].resH    = namespaceIdxEncode2 ( i, j );
+          arrayResources[i][j].resH   = namespaceIdxEncode2 ( i, j );
           arrayResources[i][j].next   = arrayResources[i] + j + 1;
           arrayResources[i][j].ops    = NULL;
           arrayResources[i][j].val    = NULL;
@@ -124,7 +124,7 @@ void arrayDestroy ( void )
       nnsp = namespaceGetNumber ();
       for ( i = 0; i < nnsp; i++ )
 	{
-	  pioNamespaceSetActive ( i ); 
+	  pioNamespaceSetActive ( i );
           if ( arrayResources[i] )
             {
               if ( arraySizeAllocated )
@@ -141,13 +141,13 @@ void arrayDestroy ( void )
       free ( arrayResources );
       arrayResources = NULL;
     }
-  
-  if ( freeListHead ) 
+
+  if ( freeListHead )
     {
       free ( freeListHead );
       freeListHead = NULL;
     }
-  if ( arraySizeAllocated ) 
+  if ( arraySizeAllocated )
     {
       free ( arraySizeAllocated );
       arraySizeAllocated = NULL;
@@ -169,11 +169,11 @@ void arrayInitialize ( void )
   arrayNew ();
   atexit ( arrayDestroy );
 
-  ARRAY_LOCK ();
+  ARRAY_LOCK();
 
   arrayInitPointer ();
 
-  ARRAY_UNLOCK ();
+  ARRAY_UNLOCK();
 
   arrayInit = 1;
 }
@@ -226,9 +226,9 @@ int reshPut ( void *p, resOps *ops )
 
   if ( !freeListHead[nsp] ) arraySizeExtend();
   newArrayElem               = freeListHead[nsp];
-  freeListHead[nsp]     = freeListHead[nsp]->next;
+  freeListHead[nsp]          = freeListHead[nsp]->next;
   newArrayElem->next         = NULL;
-  resH                  = newArrayElem->resH;
+  resH                       = newArrayElem->resH;
   newArrayElem->val          = p;
   newArrayElem->ops          = ops;
   newArrayElem->status       = ASSIGNED;
@@ -256,10 +256,10 @@ void reshRemove ( cdiResH resH, resOps * ops )
   nspT = namespaceResHDecode ( resH );
 
   xassert ( nspT.nsp == nsp &&
-           nspT.idx >= 0 &&
-           nspT.idx < arraySizeAllocated[nsp] &&
-           arrayResources[nsp][nspT.idx].ops &&
-           arrayResources[nsp][nspT.idx].ops == ops );
+            nspT.idx >= 0 &&
+            nspT.idx < arraySizeAllocated[nsp] &&
+            arrayResources[nsp][nspT.idx].ops &&
+            arrayResources[nsp][nspT.idx].ops == ops );
 
   arrayResources[nsp][nspT.idx].next   = freeListHead[nsp];
   arrayResources[nsp][nspT.idx].ops    = NULL;
@@ -282,23 +282,23 @@ void *reshGetVal ( cdiResH resH, resOps * ops  )
 
   xassert ( arrayInit && ops );
 
-  ARRAY_LOCK ();
+  ARRAY_LOCK();
 
   nsp = namespaceGetActive ();
 
   nspT = namespaceResHDecode ( resH );
 
   xassert ( arrayInit &&
-           nspT.nsp == nsp &&
-           nspT.idx >= 0 &&
-           nspT.idx < arraySizeAllocated[nsp] );
+            nspT.nsp == nsp &&
+            nspT.idx >= 0 &&
+            nspT.idx < arraySizeAllocated[nsp] );
 
   arrayElem =  arrayResources[nsp] + nspT.idx;
 
-  ARRAY_UNLOCK ();
+  ARRAY_UNLOCK();
 
   xassert ( arrayElem &&
-           arrayElem->ops == ops );
+            arrayElem->ops == ops );
 
   return arrayElem->val;
 }
@@ -418,13 +418,13 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
   * packBufferSize = getPackBufferSize ( comm );
   * packBuffer = xcalloc ( 1, * packBufferSize );
 
-  xmpi ( MPI_Pack ( &start, 1,  MPI_INT, 
+  xmpi ( MPI_Pack ( &start, 1,  MPI_INT,
 		    * packBuffer, * packBufferSize, &packBufferPos, comm ));
 
-  xmpi ( MPI_Pack ( &nsp, 1,  MPI_INT, 
+  xmpi ( MPI_Pack ( &nsp, 1,  MPI_INT,
 		    * packBuffer, * packBufferSize, &packBufferPos, comm ));
 
-  xmpi ( MPI_Pack ( &sep, 1,  MPI_INT, 
+  xmpi ( MPI_Pack ( &sep, 1,  MPI_INT,
 		    * packBuffer, * packBufferSize, &packBufferPos, comm ));
 
   for ( i = 0; i < arraySizeAllocated[nsp]; i++ )
@@ -436,11 +436,9 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
 
           type = curr->ops->valTxCode ();
 
-          if ( ! type )
-            continue;
-				 
+          if ( ! type ) continue;
 
-          xmpi ( MPI_Pack ( &type, 1, MPI_INT, * packBuffer, 
+          xmpi ( MPI_Pack ( &type, 1, MPI_INT, * packBuffer,
 			    * packBufferSize, &packBufferPos, comm ));
 
           curr->ops->valPack ( curr->val,
@@ -457,7 +455,7 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
 
   ARRAY_UNLOCK();
 
-  xmpi ( MPI_Pack ( &end, 1,  MPI_INT, 
+  xmpi ( MPI_Pack ( &end, 1,  MPI_INT,
                   * packBuffer, * packBufferSize, &packBufferPos, comm ));
 }
 
@@ -476,25 +474,25 @@ void reshSetStatus ( cdiResH resH, resOps * ops, int status )
 
   xassert ( arrayInit && ops );
 
-  ARRAY_LOCK ();
+  ARRAY_LOCK();
 
   nsp = namespaceGetActive ();
 
   nspT = namespaceResHDecode ( resH );
 
   xassert ( arrayInit &&
-           nspT.nsp == nsp &&
-           nspT.idx >= 0 &&
-           nspT.idx < arraySizeAllocated[nsp] );
+            nspT.nsp == nsp &&
+            nspT.idx >= 0 &&
+            nspT.idx < arraySizeAllocated[nsp] );
 
   arrayElem =  arrayResources[nsp] + nspT.idx;
 
   xassert ( arrayElem &&
-           arrayElem->ops == ops );
+            arrayElem->ops == ops );
 
   arrayElem->status = status;
 
-  ARRAY_UNLOCK ();
+  ARRAY_UNLOCK();
 }
 
 
@@ -509,23 +507,23 @@ int reshGetStatus ( cdiResH resH, resOps * ops )
 
   xassert ( arrayInit && ops );
 
-  ARRAY_LOCK ();
+  ARRAY_LOCK();
 
   nsp = namespaceGetActive ();
 
   nspT = namespaceResHDecode ( resH );
 
   xassert ( arrayInit &&
-           nspT.nsp == nsp &&
-           nspT.idx >= 0 &&
-           nspT.idx < arraySizeAllocated[nsp] );
+            nspT.nsp == nsp &&
+            nspT.idx >= 0 &&
+            nspT.idx < arraySizeAllocated[nsp] );
 
-  arrayElem =  arrayResources[nsp] + nspT.idx;
+  arrayElem = arrayResources[nsp] + nspT.idx;
 
-  ARRAY_UNLOCK ();
+  ARRAY_UNLOCK();
 
   xassert ( arrayElem &&
-           arrayElem->ops == ops );
+            arrayElem->ops == ops );
 
   return arrayElem->status;
 }
