@@ -11,7 +11,7 @@ static int activeNamespace = 0;
 static int serialHLF = 1;
 static int * hasLocalFiles = &serialHLF;
 static int serialRS = STAGE_DEFINITION;
-static statusCode * resStatus = &serialRS;
+static statusCode * resStatus = (statusCode *) &serialRS;
 
 enum {
   intbits = sizeof(int) * CHAR_BIT,
@@ -72,7 +72,9 @@ void namespaceInit ( int nspn, int * argHasLocalFile )
 {
 #ifdef USE_MPI
   int nspID;
+
   xassert(nspn <= NUM_NAMESPACES && nspn >= 1 );
+
   nNamespaces = nspn;
   if ( nspn >= 1 )
     {
