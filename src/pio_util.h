@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
 #ifdef USE_MPI
 #include "mpi.h"
 #endif

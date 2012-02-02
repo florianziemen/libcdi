@@ -14,14 +14,14 @@ char commands[][13] = { "FINALIZE\0",
                         "WRITETS\0"};
 
 
-void pcdiAssert   ( bool assumption, const char * filename, 
+void pcdiAssert   ( bool assumption, const char * filename,
                     const char * functionname, int line )
 {
   if ( !assumption )
     {
 #ifdef USE_MPI
       int rank;
-      
+
       MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
       fprintf ( stderr, "ERROR, ASSUMPTION FALSE: PE%d in %s, %s, line %d\n",
                 rank, functionname, filename, line );
@@ -38,7 +38,7 @@ void pcdiAssert   ( bool assumption, const char * filename,
 
 /****************************************************/
 
-void pcdiAbort ( char * errorString, const char * filename,  
+void pcdiAbort ( char * errorString, const char * filename,
 		 const char *functionname, int line )
 {
 #ifdef USE_MPI
@@ -57,7 +57,7 @@ void pcdiAbort ( char * errorString, const char * filename,
 
 /*****************************************************************************/
 
-void * pcdiXmalloc ( size_t size, const char *filename, const char *functionname, 
+void * pcdiXmalloc ( size_t size, const char *filename, const char *functionname,
 		     int line )
 {
   void * value = calloc (1, size );
@@ -68,7 +68,7 @@ void * pcdiXmalloc ( size_t size, const char *filename, const char *functionname
   return value;
 }
 
-void * pcdiXcalloc ( size_t nmemb, size_t size, const char *filename, 
+void * pcdiXcalloc ( size_t nmemb, size_t size, const char *filename,
 		     const char *functionname, int line )
 {
   void * value = calloc ( nmemb, size );
@@ -79,7 +79,7 @@ void * pcdiXcalloc ( size_t nmemb, size_t size, const char *filename,
   return value;
 }
 
-void * pcdiXrealloc ( void *p, size_t size, const char *functionname, 
+void * pcdiXrealloc ( void *p, size_t size, const char *functionname,
 		      const char *filename, int line )
 {
   void * value = realloc ( p, size );
@@ -181,8 +181,8 @@ void pcdiDebugComm ( const char *filename, const char *functionname, int line, M
 /****************************************************/
 
 #ifdef USE_MPI
-void pcdiDebugMsg ( const char * cdiPioDebugString, const char *filename, 
-                    const char *functionname, int line, int tag, int source, 
+void pcdiDebugMsg ( const char * cdiPioDebugString, const char *filename,
+                    const char *functionname, int line, int tag, int source,
                     int nfinished )
 {
   int rank;
@@ -231,7 +231,7 @@ int xminInt ( int a, int b )
 }
 
 
-/****************************************************/ 
+/****************************************************/
 
 
 int xsum ( int n, int * argarray )
@@ -240,12 +240,12 @@ int xsum ( int n, int * argarray )
 
   for ( i = 0; i < n; i++ )
     sum += * ( argarray + i );
-	      
+
   return sum;
 }
 
 
-/****************************************************/ 
+/****************************************************/
 
 
 double xchecksum ( int type, int count, void * buffer )
@@ -256,9 +256,9 @@ double xchecksum ( int type, int count, void * buffer )
 
 /****************************************************/
 
-void printArray ( const char * cdiPioDebugString, char * ps, const void * array, int n, 
+void printArray ( const char * cdiPioDebugString, char * ps, const void * array, int n,
                   int datatype, const char * funname, const char * filename, int line )
-{ 
+{
   int i, rank;
   int * iArray;
   double * dArray;
@@ -267,7 +267,7 @@ void printArray ( const char * cdiPioDebugString, char * ps, const void * array,
   MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
   fprintf ( stdout, "%s pe%d in %s, %s, line %d: %s = ",
 	    cdiPioDebugString, rank, funname, filename, line, ps );
-#else 
+#else
   fprintf ( stdout, "%s %s, %s, line %d: %s = ",
 	    cdiPioDebugString, funname, filename, line, ps );
 #endif
@@ -288,12 +288,12 @@ void printArray ( const char * cdiPioDebugString, char * ps, const void * array,
       break;
     default:
       fprintf ( stdout, " ... no datatype defined\n" );
-    } 
-      
+    }
+
   return;
 }
 
-/****************************************************/ 
+/****************************************************/
 /*
  * Local Variables:
  * c-file-style: "Java"
