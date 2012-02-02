@@ -89,12 +89,13 @@ am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	cdf_int.lo cdi_error.lo cdi_util.lo cdiFortran.lo \
 	cgribexlib.lo dmemory.lo error.lo extralib.lo file.lo \
 	gaussgrid.lo gribapi.lo grid.lo ieglib.lo institution.lo \
-	model.lo servicelib.lo stream_cdf.lo stream_cgribex.lo \
-	stream_ext.lo stream_grb.lo stream_gribapi.lo \
-	stream_history.lo stream_ieg.lo stream_int.lo stream_record.lo \
-	stream_srv.lo stream_var.lo table.lo taxis.lo timebase.lo \
-	tsteps.lo util.lo varscan.lo version.lo vlist.lo vlist_att.lo \
-	vlist_var.lo zaxis.lo stream.lo swap.lo
+	model.lo pio_util.lo servicelib.lo stream_cdf.lo \
+	stream_cgribex.lo stream_ext.lo stream_grb.lo \
+	stream_gribapi.lo stream_history.lo stream_ieg.lo \
+	stream_int.lo stream_record.lo stream_srv.lo stream_var.lo \
+	table.lo taxis.lo timebase.lo tsteps.lo util.lo varscan.lo \
+	version.lo vlist.lo vlist_att.lo vlist_var.lo zaxis.lo \
+	stream.lo swap.lo
 libcdi_la_OBJECTS = $(am_libcdi_la_OBJECTS)
 @ENABLE_CDI_LIB_FALSE@am_libcdi_la_rpath =
 @ENABLE_CDI_LIB_TRUE@am_libcdi_la_rpath = -rpath $(libdir)
@@ -335,6 +336,8 @@ libcdi_la_SOURCES = \
 	ieglib.c         \
 	institution.c  	 \
 	model.c        	 \
+        pio_util.c       \
+        pio_util.h       \
 	service.h	 \
 	servicelib.c     \
 	stream_cdf.c     \
@@ -500,6 +503,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ieglib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/institution.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/model.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/servicelib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cdf.Plo@am__quote@
