@@ -14,8 +14,6 @@
 #include "pio_rpc.h"
 
 
-extern void file_list_delete ( void );
-
 enum { MIN_ARRAY_SIZE = 128, MIN_BUFF_SIZE = 4096 };
 
 static int *arraySizeAllocated;
@@ -154,8 +152,6 @@ void arrayDestroy ( void )
       free ( arraySizeAllocated );
       arraySizeAllocated = NULL;
     }
-  
-  file_list_delete ();   
 }
 
 

@@ -11,7 +11,7 @@ typedef struct {
   int idx;
   int nsp;
   statusCode resStatus;
-}namespaceTuple_t;
+} namespaceTuple_t;
 
 void             namespaceCleanup      ( void );
 void             namespaceInit         ( int, int * );

@@ -77,9 +77,9 @@ void namespaceInit ( int nspn, int * argHasLocalFile )
   if ( nspn >= 1 )
     {
       hasLocalFiles = xmalloc ( nspn * sizeof ( hasLocalFiles[0] ));
-      for ( nspID = 0; nspID < nspn; nspID++ )  
+      for ( nspID = 0; nspID < nspn; nspID++ )
 	hasLocalFiles[nspID] = argHasLocalFile[nspID];
-      resStatus = xmalloc ( nspn * sizeof ( resStatus[0] )); 
+      resStatus = xmalloc ( nspn * sizeof ( resStatus[0] ));
     }
 #endif
 }
@@ -87,7 +87,7 @@ void namespaceInit ( int nspn, int * argHasLocalFile )
 
 void namespaceCleanup ( void )
 {
-  if ( nNamespaces > 1 ) 
+  if ( nNamespaces > 1 )
     {
       free ( hasLocalFiles );
       hasLocalFiles = NULL;
@@ -123,7 +123,7 @@ int namespaceHasLocalFile ( int nId )
 {
   if ( nId >= nNamespaces || nId < 0 )
     abort ();
-  
+
   return hasLocalFiles ? hasLocalFiles[nId] : 0;
 }
 
@@ -141,7 +141,7 @@ int namespaceAdaptKey ( int key, int nspTarget )
   xassert ( tin.nsp == nspTarget );
 
   nsp = namespaceGetActive ();
- 
+
   return namespaceIdxEncode2 ( nsp, tin.idx );
 }
 
@@ -157,7 +157,7 @@ int namespaceAdaptKey2 ( int key )
   tin.nsp = (int)(((unsigned)( key & nspmask )) >> idxbits);
 
   nsp = namespaceGetActive ();
- 
+
   return namespaceIdxEncode2 ( nsp, tin.idx );
 }
 
