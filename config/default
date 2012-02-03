@@ -11,6 +11,16 @@ fi
 set -x
 #
 case "${HOSTNAME}" in
+    tornado*)
+	./configure --prefix=/scratch/work/mh0033/m300050/cdi-pio \
+                    --disable-shared \
+                    --enable-maintainer-mode \
+	            --with-netcdf=/sw/sles10-x64/netcdf-4.1.3-static-nag52 \
+	            --with-hdf5=/sw/sles10-x64/hdf5-1.8.7-static \
+                    --with-zlib=/sw/sles10-x64/zlib-1.2.3 \
+                    --with-szlib=/sw/sles10-x64/szip-2.1-static \
+	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O2 -DNAGf90Fortran"
+	;;
 # i386-apple-darwin10
     bailung*)
 	./configure --prefix=$HOME/local \

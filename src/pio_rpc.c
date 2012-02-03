@@ -70,6 +70,8 @@ void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize,
   int token1, token2, nspTarget;
   int unpackBufferPos = 0;
   char text[4096];
+
+  xdebug ();
 	  
   while ( unpackBufferPos < unpackBufferSize )
     {
@@ -120,6 +122,7 @@ void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize,
 			  &token2, 1, MPI_INT, comm ));
       xassert ( token2 == SEPARATOR );
     }
+  xdebug ();
 }
 
 #endif

@@ -5,7 +5,7 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #include "pio_c_temp.h"
-#endif 
+#endif
 
 #include "cdi.h"
 #include "pio_util.h"
@@ -21,7 +21,7 @@ void modelRun ()
     nlon        = 12,
     nlat        = 6,
     maxlev      = 5 };
-  
+
   static int nlev[nVars]    = {1,1,5,5,2};
   static char * name        = "example";
 
@@ -43,18 +43,18 @@ void modelRun ()
   gridDefYvals ( gridID, lats );
 
   for ( i = 0; i < nVars; i++ )
-    { 
+    {
       zaxisID[i] = zaxisCreate ( ZAXIS_PRESSURE, nlev[i] );
       zaxisDefLevels ( zaxisID[i], levs );
     }
-  vlistID = vlistCreate (); 
-    
-  for ( i = 0; i < nVars; i++ )  
+  vlistID = vlistCreate ();
+
+  for ( i = 0; i < nVars; i++ )
     varID[i] = vlistDefVar ( vlistID, gridID, zaxisID[i], TIME_VARIABLE );
-    
+
   taxisID = taxisCreate ( TAXIS_ABSOLUTE );
   vlistDefTaxis ( vlistID, taxisID );
-  
+
   sprintf ( &filename[0], "%s_%d.grb", name, tfID );
   streamID = streamOpenWrite ( filename, filetype );
   xassert ( streamID >= 0 );
@@ -82,7 +82,7 @@ void modelRun ()
 	      start = pioInqVarDecoOff   ( vlistID, varID[i] );
 	      chunk = pioInqVarDecoChunk ( vlistID, varID[i] );
 	      stop = start + chunk;
-	      for ( j = start; j < stop; j++ ) var[j] = 2.2;	      
+	      for ( j = start; j < stop; j++ ) var[j] = 2.2;
 	      streamWriteVar ( streamID, varID[i], &var[start], nmiss );
 	      start = CDI_UNDEFID;
 	      chunk = CDI_UNDEFID;
@@ -90,38 +90,38 @@ void modelRun ()
 	  pioWriteTimestep ( tsID, vdate, vtime );
 	}
     }
-   
+
   streamClose ( streamID );
   vlistDestroy ( vlistID );
   taxisDestroy ( taxisID );
   for ( i = 0; i < nVars; i++ )
     zaxisDestroy ( zaxisID[i] );
-  gridDestroy ( gridID );  
+  gridDestroy ( gridID );
 }
 
 
-int main (int argc, char *argv[]) 
+int main (int argc, char *argv[])
 {
-  enum { 
-    nProcsIO    = 3,
-    //IOMode      = PIO_NONE,
-    //IOMode      = PIO_MPI, 
-    IOMode      = PIO_FPGUARD,
+  enum {
+    nProcsIO    = 1,
+    IOMode      = PIO_NONE,
+    //IOMode      = PIO_MPI,
+    //IOMode      = PIO_FPGUARD,
     //IOMode      = PIO_ASYNCH,
     //IOMode      = PIO_WRITER,
     nNamespaces = 1 };
-  
+
   static int hasLocalFile[nNamespaces] = { 0 };
-  
+
 #ifdef USE_MPI
-  MPI_Comm commGlob, commModel; 
+  MPI_Comm commGlob, commModel;
   int sizeGlob;
   int rankGlob;
 
-  xmpi ( MPI_Init ( &argc, &argv));           
+  xmpi ( MPI_Init ( &argc, &argv));
   xmpi ( MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob ));
   xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
-  xmpi ( MPI_Comm_size ( commGlob, &sizeGlob )); 
+  xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
   xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
 
   commModel = pioInit_c ( commGlob, nProcsIO, IOMode, nNamespaces, hasLocalFile );
@@ -131,7 +131,7 @@ int main (int argc, char *argv[])
 
 #ifdef USE_MPI
   pioFinalize ();
-  MPI_Finalize ();                         
+  MPI_Finalize ();
 #endif
   return 0;
 }

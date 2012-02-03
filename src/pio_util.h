@@ -36,10 +36,9 @@
 #define MINFILETYPE        1
 #define MAXFILETYPE        9
 
-#define ddebug             0
+#define ddebug             1
 
 static char * debugString = "#####";
-
 
 void pcdiAssert   ( bool, const char *, const char *, int );
 #define xassert(arg) pcdiAssert ( arg, __FILE__, __func__, __LINE__ );
@@ -57,8 +56,8 @@ void pcdiAssert   ( bool, const char *, const char *, int );
 #else
 #define xdebug(fmt, ...)					\
   if ( ddebug ){                                                \
-    fprintf ( stderr, "%s, %s, line %d: " fmt "\n",             \
-              __func__, __FILE__,  __LINE__,                    \
+    fprintf ( stderr, "%s %s, %s, line %d: " fmt "\n",             \
+              debugString, __func__, __FILE__,  __LINE__,          \
               ## __VA_ARGS__ );                                 \
   }
 #endif

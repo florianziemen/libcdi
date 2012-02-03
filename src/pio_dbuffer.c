@@ -15,7 +15,7 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
-bool ldebug    =false;
+bool localDebug    =false;
 
 
 int dbuffer_init ( struct dBuffer **dbuffer, size_t size )
@@ -28,7 +28,7 @@ int dbuffer_init ( struct dBuffer **dbuffer, size_t size )
 #ifndef _SX
   pagesize = ( size_t ) sysconf ( _SC_PAGESIZE );
 
-  if ( ldebug ) 
+  if ( localDebug ) 
     fprintf ( stdout, "dbuffer_init(): pagesize = %zu bytes, size = %zu \n", pagesize, size );
 
   if ( dbuffer == NULL || size < pagesize )
@@ -49,7 +49,7 @@ int dbuffer_init ( struct dBuffer **dbuffer, size_t size )
   while ( db->size < size )
     {
       db->size <<= 1;
-      if ( ldebug ) 
+      if ( localDebug ) 
 	fprintf ( stdout,"size correction: %zu\n", db->size );
     }
   

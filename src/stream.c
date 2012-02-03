@@ -41,10 +41,10 @@ int pclose(FILE *stream);
 
 void cdiPrintDefaults(void)
 {
-  fprintf (stderr, "default instID     :  %d\n", cdiDefaultInstID); 
-  fprintf (stderr, "default modelID    :  %d\n", cdiDefaultModelID); 
-  fprintf (stderr, "default tableID    :  %d\n", cdiDefaultTableID); 
-  fprintf (stderr, "default missval    :  %g\n", cdiDefaultMissval); 
+  fprintf (stderr, "default instID     :  %d\n", cdiDefaultInstID);
+  fprintf (stderr, "default modelID    :  %d\n", cdiDefaultModelID);
+  fprintf (stderr, "default tableID    :  %d\n", cdiDefaultTableID);
+  fprintf (stderr, "default missval    :  %g\n", cdiDefaultMissval);
 }
 
 
@@ -244,7 +244,7 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
     {
       pch = &argument[i+1];
       len -= (i+1);
-      if ( len && ( memcmp(argument, "filelist:", i) == 0 || 
+      if ( len && ( memcmp(argument, "filelist:", i) == 0 ||
 		    memcmp(argument, "flist:", i) == 0 ) )
 	{
 	  for ( i = 0; i < len; ++i ) if ( pch[i] == ',' ) nfiles++;
@@ -265,7 +265,7 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 		{
 		  if ( line[0] == '#' || line[0] == '\0' ||
 		       line[0] == ' ' ) continue;
-		  
+
 		  if ( nfiles >= max_fnames )
 		    {
 		      Warning("Too many input files (limit: %d)", max_fnames);
@@ -274,7 +274,7 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 		  fnames[nfiles] = strdupx(line);
 		  nfiles++;
 		}
-	      
+
 	      fclose(fp);
 
 	      if ( nfiles == 0 ) Error("No input file found in %s", pch);
@@ -282,10 +282,10 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 	  else
 	    {
 	      char xline[65536];
-	      	      
+
 	      strcpy(xline, pch);
 	      for ( i = 0; i < len; i++ ) if ( xline[i] == ',' ) xline[i] = 0;
-	      
+
 	      nfiles++;
 	      if ( nfiles >= max_fnames )
 		{
@@ -305,14 +305,14 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 	{
 	  char command[4096];
 	  FILE *pfp;
-	  
+
 	  strcpy(command, "ls ");
 	  strcat(command, pch);
 
 	  pfp = popen(command, "r");
 	  if ( pfp == NULL )
 	    SysError("popen %s failed", command);
-	  
+
 	  nfiles = 0;
 	  while ( _readline_(pfp, line, MAX_LINE) )
 	    {
@@ -333,7 +333,7 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
     }
 
   num_fnames = nfiles;
-  
+
   return (num_fnames);
 }
 
@@ -618,8 +618,8 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
 
   xdebug( "filename = %s, filemode = %s, filetype = %d, "
-          "namespaceHasLocalFile(%d)=%s", 
-          filename, filemode, filetype, namespaceGetActive(), 
+          "namespaceHasLocalFile(%d)=%s",
+          filename, filemode, filetype, namespaceGetActive(),
 	  namespaceHasLocalFile ( namespaceGetActive ()) ? "true":"false");
 
   if ( hasLocalFile )
@@ -710,7 +710,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
         }
     }
 #endif
-    
+
 
   if ( fileID < 0 && hasLocalFile )
     {
@@ -744,7 +744,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	  vlistptr->ntsteps = streamNtsteps(streamID);
 	}
     }
- 
+
   return (streamID);
 }
 
@@ -853,7 +853,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
       vlistptr = vlist_to_pointer(streamptr->vlistID);
       vlistptr->ntsteps = cdiInqTimeSize(streamID);
     }
- 
+
   switch (filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
@@ -1022,7 +1022,7 @@ int streamOpenRead(const char *filenames)
     filename = filenames;
   else
     {
-      int i; 
+      int i;
       for ( i = 0; i < num_fnames; ++i ) printf("fnames: %d %s\n", i, fnames[i]);
       filename = fnames[0];
     }
@@ -1100,7 +1100,7 @@ open stream. Otherwise, a negative number with the error status is returned.
 @EndList
 
 @Example
-Here is an example using @func{streamOpenWrite} to create a new netCDF file 
+Here is an example using @func{streamOpenWrite} to create a new netCDF file
 named @func{foo.nc} for writing:
 
 @Source
@@ -1148,10 +1148,10 @@ void streamClose(int streamID)
 
   fileID   = streamptr->fileID;
   filetype = streamptr->filetype;
-  vlistID  = streamptr->vlistID;   
+  vlistID  = streamptr->vlistID;
 
   if ( namespaceHasLocalFile ( namespaceGetActive ()))
-    {        
+    {
       if ( fileID == CDI_UNDEFID )
 	Warning("File %s not open!", streamptr->filename);
       else
@@ -1225,14 +1225,14 @@ void streamClose(int streamID)
         }
     }
 #endif
-      
+
   if ( streamptr->record )
       {
 	  if ( streamptr->record->buffer )
               free(streamptr->record->buffer);
-	  
+
 	  free(streamptr->record);
-      }  
+      }
 
   streamptr->filetype = 0;
   if ( streamptr->filename ) free(streamptr->filename);
@@ -1253,7 +1253,7 @@ void streamClose(int streamID)
       if ( streamptr->tsteps[index].recIDs )
 	free(streamptr->tsteps[index].recIDs);
     }
-    
+
   if ( streamptr->tsteps ) free(streamptr->tsteps);
 
   if ( streamptr->nfiles > 0 )
@@ -1611,7 +1611,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
     @Item  nmiss     Number of missing values.
 
 @Description
-The function streamWriteVar writes the values of one time step of a variable 
+The function streamWriteVar writes the values of one time step of a variable
 to an open dataset.
 @EndFunction
 */
@@ -1804,7 +1804,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
     @Item  nmiss     Number of missing values.
 
 @Description
-The function streamWriteVarSlice writes the values of a horizontal slice of a 
+The function streamWriteVarSlice writes the values of a horizontal slice of a
 variable to an open dataset.
 @EndFunction
 */
@@ -1941,7 +1941,7 @@ void streamWriteContents(int streamID, char *cname)
   fprintf(cnp, "#\n");
 
   fprintf(cnp, "tsID:nrecs:date:time\n");
-  
+
   tsID = 0;
   while (1)
     {
@@ -2153,7 +2153,7 @@ int streamInqVlist(int streamID)
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
-  
+
   stream_check_ptr(__func__, streamptr);
 
   return (streamptr->vlistID);
@@ -2165,7 +2165,7 @@ int streamInqVlistIDorig(int streamID)
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
-  
+
   stream_check_ptr(__func__, streamptr);
 
   return (streamptr->vlistIDorig);

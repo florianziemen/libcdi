@@ -465,6 +465,7 @@ void IOServer ()
                             tag, commCalc, &status ));
           xdebug ( "RECEIVED MESSAGE WITH TAG \"RESOURCES\"" );
 	  rpcUnpackResources ( buffer, size, commCalc );
+          xdebug ();
 	  free ( buffer );
           if ( ddebug > 0 && commInqRankGlob () == nProcsModel ) 
             reshArrayPrint ( "reshArrayIOServer" );

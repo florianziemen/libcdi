@@ -37,7 +37,7 @@ enum
   winBufferOverhead = 1,
   winBufferOverheadChunk = 5,
   winBufferOverheadFuncCall = 3,
-  MAXWINBUFFERSIZE = 128 * 1024,
+  MAXWINBUFFERSIZE = 128 * 1024 * 1024,
   timestepSize = 3
 };
 
