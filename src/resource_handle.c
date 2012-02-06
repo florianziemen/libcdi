@@ -6,12 +6,14 @@
 #include <stdio.h>
 
 #include "resource_handle.h"
-#include "pio_comm.h"
 #include "pio_util.h"
 #include "namespace.h"
 #include "cdi.h"
 #include "error.h"
+#ifdef USE_MPI
+#include "pio_comm.h"
 #include "pio_rpc.h"
+#endif
 
 
 enum { MIN_LIST_SIZE = 128 };
@@ -76,7 +78,7 @@ void listNew ( void )
 
       xassert ( listResources[i] == NULL);
 
-      listResources[i] =  xcalloc ( listSizeAllocated[i], sizeof ( listElem_t ));
+      listResources[i] = xcalloc ( listSizeAllocated[i], sizeof ( listElem_t ));
     }
 }
 
@@ -214,9 +216,9 @@ int reshPut ( void *p, resOps *ops )
 
   if ( !freeListHead[nsp] ) listSizeExtend();
   newListElem               = freeListHead[nsp];
-  freeListHead[nsp]          = freeListHead[nsp]->next;
+  freeListHead[nsp]         = freeListHead[nsp]->next;
   newListElem->next         = NULL;
-  resH                       = newListElem->resH;
+  resH                      = newListElem->resH;
   newListElem->val          = p;
   newListElem->ops          = ops;
   newListElem->status       = ASSIGNED;
@@ -631,7 +633,7 @@ void reshListPrint ( char * filename )
 
       fprintf ( fp, "listSizeAllocated[%d]=%d\n", i, listSizeAllocated[i] );
 
-      for ( j = 0; j < listSizeAllocated[i]; j++)
+      for ( j = 0; j < listSizeAllocated[i]; j++ )
         {
           curr = listResources[i] + j;
           if ( curr->ops && curr->val )
