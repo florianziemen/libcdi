@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "cdi.h"
 
-extern void reshArrayPrint ( char * filename );
+extern void reshListPrint ( char * filename );
 
 int nlon = 12; // Number of longitudes
 int nlat =  6; // Number of latitudes
@@ -49,7 +49,7 @@ int main(void)
       streamReadVar(streamID, varID2, var2, &nmiss);
     }
 
-  reshArrayPrint ( "reshArrayRead" );
+  reshListPrint ( "reshListRead" );
 
   // Close the input stream 
   streamClose(streamID);

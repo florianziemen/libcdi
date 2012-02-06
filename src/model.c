@@ -164,7 +164,7 @@ int modelInq(int instID, int modelgribID, char *name)
 
   modelCount = modelSize();
   modelResHs = xmalloc ( modelCount * sizeof ( int ));
-  reshGetResHArrayOfType ( modelCount, modelResHs, &modelOps );
+  reshGetResHListOfType ( modelCount, modelResHs, &modelOps );
 
   for( i = 0; i < modelCount; i++ )
     {

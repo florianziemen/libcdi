@@ -4167,9 +4167,9 @@ void gridDefReference(int gridID, const char *reference)
 }
 
 
-void gridGetIndexArray ( int ngrids, int * gridIndexArray )
+void gridGetIndexList ( int ngrids, int * gridIndexList )
 {
-  reshGetResHArrayOfType ( ngrids, gridIndexArray, &gridOps );
+  reshGetResHListOfType ( ngrids, gridIndexList, &gridOps );
 }
 
 

@@ -261,7 +261,7 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
   resHs       = xmalloc ( nStreams * sizeof ( resHs[0] ));
   streamSizes = xmalloc ( nStreams * sizeof ( streamSizes[0] ));
   collectsData = xmalloc ( nProcsColl * sizeof ( collectsData[0] ));
-  streamGetIndexArray ( nStreams, resHs );
+  streamGetIndexList ( nStreams, resHs );
 
   xprintArray ( "Echam streams", resHs, nStreams, DATATYPE_INT );
 
@@ -272,7 +272,7 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
   varSizes   = xmalloc ( nVars * sizeof ( varSizes[0] ));
   varMapping = xmalloc ( nVars * sizeof ( varMapping[0] ));
 
-  reshArrayPrint ( "reshArrayModelEcham" );
+  reshListPrint ( "reshListModelEcham" );
 
   for ( i = 0; i < nStreams; i++ )
     for ( j = 0; j < * ( streamSizes + i ); j++ )
@@ -350,7 +350,7 @@ void modelWinCleanup ( void )
 static
   void modelWinDefBufferSizes ( void )
 {
-  int collID, nstreams, * streamIndexArray, streamNo, vlistID, nvars, varID;
+  int collID, nstreams, * streamIndexList, streamNo, vlistID, nvars, varID;
   int collIDchunk = 0, sumWinBufferSize = 0;
   int nProcsColl  = commInqNProcsColl ();
   int rankGlob    = commInqRankGlob ();
@@ -360,12 +360,12 @@ static
   xassert ( winBufferSize != NULL );
 
   nstreams = reshCountType ( &streamOps );
-  streamIndexArray = xmalloc ( nstreams * sizeof ( streamIndexArray[0] ));
-  reshGetResHArrayOfType ( nstreams, streamIndexArray, &streamOps );
+  streamIndexList = xmalloc ( nstreams * sizeof ( streamIndexList[0] ));
+  reshGetResHListOfType ( nstreams, streamIndexList, &streamOps );
   for ( streamNo = 0; streamNo < nstreams; streamNo++ )
     {
       // space required for data
-      vlistID = streamInqVlist ( streamIndexArray[streamNo] );
+      vlistID = streamInqVlist ( streamIndexList[streamNo] );
       nvars = vlistNvars ( vlistID );
       for ( varID = 0; varID < nvars; varID++ )
         {
@@ -385,7 +385,7 @@ static
                                      5 * sizeof ( int ) +
                                      MAXDATAFILENAME );
     }
-  free ( streamIndexArray );
+  free ( streamIndexList );
 
   for ( collID = 0; collID < nProcsColl; collID++ )
     {
@@ -836,7 +836,7 @@ void  pioEndDef ( void )
 
   varsMapNDeco ( commInqNNodes (), commInqNodeSizes ());
 
-  reshArrayPrint ( "reshArrayModelEcham" );
+  reshListPrint ( "reshListModelEcham" );
   
   if ( rankGlob < commInqNProcsColl ())
     {

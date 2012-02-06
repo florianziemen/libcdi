@@ -13,7 +13,7 @@
 #include "grid.h"
 #include "pio_util.h"
 
-extern void zaxisGetIndexArray ( int, int * );
+extern void zaxisGetIndexList ( int, int * );
 
 
 #undef  UNDEFID
@@ -635,7 +635,7 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
   int gridID = UNDEFID;
   int index;
   vlist_t *vlistptr;
-  int * gridIndexArray, i;
+  int * gridIndexList, i;
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -661,18 +661,18 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
       ngrids = gridSize();
       if ( ngrids > 0 )
         {
-          gridIndexArray = malloc ( ngrids * sizeof ( int ));
-          gridGetIndexArray ( ngrids, gridIndexArray );
+          gridIndexList = malloc ( ngrids * sizeof ( int ));
+          gridGetIndexList ( ngrids, gridIndexList );
           for ( i = 0; i < ngrids; i++ )
             {
-              gridID = gridIndexArray[i];
+              gridID = gridIndexList[i];
               if ( gridCompare(gridID, grid) == 0 )
                 {
                   gridglobdefined = TRUE;
                   break;
                 }
             }
-          if ( gridIndexArray ) free ( gridIndexArray ); 
+          if ( gridIndexList ) free ( gridIndexList ); 
         }
       
       ngrids = vlistptr->ngrids;
@@ -758,7 +758,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
   int index;
   int zaxisglobdefined = 0;
   vlist_t *vlistptr;
-  int * zaxisIndexArray, i;
+  int * zaxisIndexList, i;
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -782,18 +782,18 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
       nzaxis = zaxisSize();
       if ( nzaxis > 0 )
         {
-          zaxisIndexArray = malloc ( nzaxis * sizeof ( int ));
-          zaxisGetIndexArray ( nzaxis, zaxisIndexArray );
+          zaxisIndexList = malloc ( nzaxis * sizeof ( int ));
+          zaxisGetIndexList ( nzaxis, zaxisIndexList );
           for ( i = 0; i < nzaxis; i++ )
             {
-              zaxisID = zaxisIndexArray[i];
+              zaxisID = zaxisIndexList[i];
               if ( zaxisCompare(zaxisID, zaxistype, nlevels, lbounds, levels, longname, units, ltype) == 0 )
                 {
                   zaxisglobdefined = 1;
                   break;
                 }
             }
-          if ( zaxisIndexArray ) free ( zaxisIndexArray );
+          if ( zaxisIndexList ) free ( zaxisIndexList );
         }
 
       nzaxis = vlistptr->nzaxis;

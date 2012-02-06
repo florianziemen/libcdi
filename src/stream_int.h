@@ -309,7 +309,7 @@ int     streamInqDimgroupID(int streamID);
 int     getByteswap(int byteorder);
 
 int     streamSize ();
-void    streamGetIndexArray ( int, int * );
+void    streamGetIndexList ( int, int * );
 
 
 

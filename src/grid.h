@@ -81,7 +81,7 @@ const double *gridInqAreaPtr(int gridID);
 int gridCompare(int gridID, grid_t grid);
 int gridGenerate(grid_t grid);
 
-void     gridGetIndexArray    ( int, int * );
+void     gridGetIndexList    ( int, int * );
 
 #endif
 /*

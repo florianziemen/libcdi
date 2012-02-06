@@ -15,10 +15,8 @@
  */
 
 /*
- * for reasons of compatibility with cfortran.h, the handle type is
- * int
+ * for reasons of compatibility with cfortran.h, the handle type is: int
  */
-
 typedef int cdiResH;
 
 /* return 0 on equality, not 0 otherwise */
@@ -27,8 +25,7 @@ typedef void   ( * valDestroyFunc     )( void * );
 typedef void   ( * valPrintFunc       )( void *, FILE * );
 #ifdef USE_MPI
 typedef int    ( * valGetPackSizeFunc )( void *, MPI_Comm comm );
-typedef void   ( * valPackFunc        )( void *, void *buf, int size, int *pos,
-					 MPI_Comm comm );
+typedef void   ( * valPackFunc        )( void *, void *buf, int size, int *pos, MPI_Comm comm );
 typedef int    ( * valTxCodeFunc      )( void );
 #endif
 
@@ -52,7 +49,7 @@ int    reshCountType ( resOps * );
 
 void * reshGetVal ( cdiResH, resOps * );
 
-void   reshGetResHArrayOfType ( int, int *, resOps * );
+void   reshGetResHListOfType ( int, int *, resOps * );
 
 #ifdef USE_MPI
 void   reshPackBufferCreate ( char **, int *, MPI_Comm );

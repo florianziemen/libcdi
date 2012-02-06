@@ -61,7 +61,7 @@ void serverWinCleanup ()
 static 
   void collDefBufferSizes ()
 {
-  int nstreams, * streamIndexArray, streamNo, vlistID, nvars, varID, iorank;
+  int nstreams, * streamIndexList, streamNo, vlistID, nvars, varID, iorank;
   int modelID, decoChunk, sumGetBufferSizes = 0;
   int rankGlob = commInqRankGlob ();
   int nProcsModel = commInqNProcsModel ();
@@ -70,12 +70,12 @@ static
   xassert ( getBufferSize != NULL );
 
   nstreams = reshCountType ( &streamOps );
-  streamIndexArray = xmalloc ( nstreams * sizeof ( streamIndexArray[0] ));
-  reshGetResHArrayOfType ( nstreams, streamIndexArray, &streamOps );
+  streamIndexList = xmalloc ( nstreams * sizeof ( streamIndexList[0] ));
+  reshGetResHListOfType ( nstreams, streamIndexList, &streamOps );
   for ( streamNo = 0; streamNo < nstreams; streamNo++ )
     {
       // space required for data
-      vlistID = streamInqVlist ( streamIndexArray[streamNo] );
+      vlistID = streamInqVlist ( streamIndexList[streamNo] );
       nvars = vlistNvars ( vlistID );
       for ( varID = 0; varID < nvars; varID++ )
         {
@@ -98,7 +98,7 @@ static
                                5 * sizeof ( int ) +
                                MAXDATAFILENAME ); 
     }
-  free ( streamIndexArray );
+  free ( streamIndexList );
 
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
@@ -442,7 +442,7 @@ void IOServer ()
                     int * resHs;
                     
                     resHs       = xmalloc ( nStreams * sizeof ( resHs[0] ));
-                    streamGetIndexArray ( nStreams, resHs );
+                    streamGetIndexList ( nStreams, resHs );
                     for ( streamNo = 0; streamNo < nStreams; streamNo++ )
                       streamClose ( resHs[streamNo] );
                     free ( resHs );
@@ -468,7 +468,7 @@ void IOServer ()
           xdebug ();
 	  free ( buffer );
           if ( ddebug > 0 && commInqRankGlob () == nProcsModel ) 
-            reshArrayPrint ( "reshArrayIOServer" );
+            reshListPrint ( "reshListIOServer" );
 	  serverWinCreate ();
 	  break;
 

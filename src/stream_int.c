@@ -616,9 +616,9 @@ int streamSize(void)
 }
 
 
-void streamGetIndexArray ( int nstreams, int * streamIndexArray )
+void streamGetIndexList ( int nstreams, int * streamIndexList )
 {
-  reshGetResHArrayOfType ( nstreams, streamIndexArray, &streamOps );
+  reshGetResHListOfType ( nstreams, streamIndexList, &streamOps );
 }
 
 

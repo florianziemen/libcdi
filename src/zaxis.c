@@ -1782,9 +1782,9 @@ void zaxisPack ( void * voidP, void * packBuffer, int packBufferSize,
 
 #endif
 
-void zaxisGetIndexArray ( int nzaxis, int * zaxisResHs )
+void zaxisGetIndexList ( int nzaxis, int * zaxisResHs )
 {
-  reshGetResHArrayOfType ( nzaxis, zaxisResHs, &zaxisOps );
+  reshGetResHListOfType ( nzaxis, zaxisResHs, &zaxisOps );
 }
 /*
  * Local Variables:

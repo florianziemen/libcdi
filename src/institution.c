@@ -222,7 +222,7 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
 
   instCount = instituteCount ();
   instResHs = xmalloc ( instCount * sizeof ( int ));
-  reshGetResHArrayOfType ( instCount, instResHs, &instituteOps );
+  reshGetResHListOfType ( instCount, instResHs, &instituteOps );
 
   for( i = 0; i < instCount; i++ )
     {
@@ -318,7 +318,7 @@ int institutInqNumber(void)
 
   instCount = reshCountType ( &instituteOps );
   instResHs = xmalloc ( instCount * sizeof ( int ));
-  reshGetResHArrayOfType ( instCount, instResHs, &instituteOps );
+  reshGetResHListOfType ( instCount, instResHs, &instituteOps );
 
   for ( i = 0; i < instCount; i++ )
     {
