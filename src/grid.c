@@ -1216,7 +1216,7 @@ void gridDefXsize(int gridID, int xsize)
     Error("xsize %d is greater then gridsize %d", xsize, gridInqSize(gridID));
 
   if ( gridInqType(gridID) == GRID_UNSTRUCTURED && xsize != gridInqSize(gridID) )
-    Error("xsize %d must be equal gridsize %d for gridtype CELL", xsize, gridInqSize(gridID));
+    Error("xsize %d must be equal gridsize %d for gridtype: UNSTRUCTURED", xsize, gridInqSize(gridID));
 
   gridptr->xsize = xsize;
 
@@ -1327,7 +1327,7 @@ void gridDefYsize(int gridID, int ysize)
     Error("ysize %d is greater then gridsize %d", ysize, gridInqSize(gridID));
 
   if ( gridInqType(gridID) == GRID_UNSTRUCTURED && ysize != gridInqSize(gridID) )
-    Error("ysize %d must be equal gridsize %d for gridtype CELL", ysize, gridInqSize(gridID));
+    Error("ysize %d must be equal gridsize %d for gridtype: UNSTRUCTURED", ysize, gridInqSize(gridID));
 
   gridptr->ysize = ysize;
 
