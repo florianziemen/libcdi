@@ -1220,10 +1220,13 @@ void gridDefXsize(int gridID, int xsize)
 
   gridptr->xsize = xsize;
 
-  if ( gridInqType(gridID) != GRID_UNSTRUCTURED &&
-       gridptr->xsize*gridptr->ysize > gridInqSize(gridID) )
-    Error("inconsistent grid declaration! (xsize %d ysize %d gridsize %d)",
-	  gridptr->xsize, gridptr->ysize, gridInqSize(gridID));
+  if ( gridInqType(gridID) != GRID_UNSTRUCTURED )
+    {
+      long gridsize = gridptr->xsize*gridptr->ysize;
+      if ( gridsize > 0 && gridsize != gridInqSize(gridID) )
+        Error("Inconsistent grid declaration! (xsize=%d ysize=%d gridsize=%d)",
+              gridptr->xsize, gridptr->ysize, gridInqSize(gridID));
+    }
 }
 
 
@@ -1328,10 +1331,13 @@ void gridDefYsize(int gridID, int ysize)
 
   gridptr->ysize = ysize;
 
-  if ( gridInqType(gridID) != GRID_UNSTRUCTURED && 
-       gridptr->xsize*gridptr->ysize > gridInqSize(gridID) )
-    Error("inconsistent grid declaration! (xsize %d ysize %d gridsize %d)",
-	  gridptr->xsize, gridptr->ysize, gridInqSize(gridID));
+  if ( gridInqType(gridID) != GRID_UNSTRUCTURED )
+    {
+      long gridsize = gridptr->xsize*gridptr->ysize;
+      if ( gridsize > 0 && gridsize != gridInqSize(gridID) )
+        Error("Inconsistent grid declaration! (xsize=%d ysize=%d gridsize=%d)",
+              gridptr->xsize, gridptr->ysize, gridInqSize(gridID));
+    }
 }
 
 /*
