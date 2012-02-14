@@ -208,9 +208,9 @@ void modelRun ( MPI_Comm comm )
   free ( recvBuffer );  
   reshPackBufferDestroy ( &sendBuffer );
 
-  differ = reshArrayCompare ( 0, 1 );
+  differ = reshListCompare ( 0, 1 );
   printf ( "The resource arrays %s.\n", differ ? "differ" : "are equal" );
-  reshArrayPrint ( "reshArrayModel" );
+  reshListPrint ( "reshArrayModel" );
 
   pioNamespaceSetActive ( 0 );
   streamClose(streamID);

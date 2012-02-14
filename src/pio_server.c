@@ -406,6 +406,8 @@ void IOServer ()
   MPI_Comm commCalc;
   MPI_Status status;
 
+  xdebug ( "START" );
+
   backendInit ();
   if ( commInqRankNode () == commInqSpecialRankNode ()) 
     backendFinalize ();
@@ -450,8 +452,8 @@ void IOServer ()
               }
               backendCleanup (); 
               serverWinCleanup ();                 
-              arrayDestroy();
-              
+              listDestroy();
+              xdebug ( "RETURN" );
               return;
             }
 	  
