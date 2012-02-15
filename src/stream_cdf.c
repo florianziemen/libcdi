@@ -415,7 +415,7 @@ int cdfDefDatatype(int datatype, int filetype)
       else if ( datatype == DATATYPE_UINT16 ) xtype = NC_USHORT;
       else if ( datatype == DATATYPE_UINT32 ) xtype = NC_UINT;
 #else
-      else if ( datatype == DATATYPE_UINT8  ) xtype = NC_BYTE;
+      else if ( datatype == DATATYPE_UINT8  ) xtype = NC_SHORT;
       else if ( datatype == DATATYPE_UINT16 ) xtype = NC_INT;
       else if ( datatype == DATATYPE_UINT32 ) xtype = NC_INT;
 #endif
@@ -427,7 +427,7 @@ int cdfDefDatatype(int datatype, int filetype)
       if      ( datatype == DATATYPE_INT8   ) xtype = NC_BYTE;
       else if ( datatype == DATATYPE_INT16  ) xtype = NC_SHORT;
       else if ( datatype == DATATYPE_INT32  ) xtype = NC_INT;
-      else if ( datatype == DATATYPE_UINT8  ) xtype = NC_BYTE;
+      else if ( datatype == DATATYPE_UINT8  ) xtype = NC_SHORT;
       else if ( datatype == DATATYPE_UINT16 ) xtype = NC_INT;
       else if ( datatype == DATATYPE_UINT32 ) xtype = NC_INT;
       else if ( datatype == DATATYPE_FLT64  ) xtype = NC_DOUBLE;
