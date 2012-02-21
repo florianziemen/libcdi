@@ -107,8 +107,7 @@ int namespaceGetNumber ()
 void pioNamespaceSetActive ( int nId )
 {
 #ifdef USE_MPI
-  if ( nId >= nNamespaces || nId < 0 )
-    abort ();
+  xassert ( nId < nNamespaces && nId >= 0 );
 
   activeNamespace = nId;
 #endif
@@ -123,8 +122,7 @@ int namespaceGetActive ()
 
 int namespaceHasLocalFile ( int nId )
 {
-  if ( nId >= nNamespaces || nId < 0 )
-    abort ();
+  xassert ( nId < nNamespaces && nId >= 0 );
 
   return hasLocalFiles ? hasLocalFiles[nId] : 0;
 }

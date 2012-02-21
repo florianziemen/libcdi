@@ -209,7 +209,7 @@ void backendFinalize ( void )
 {
   commDestroy ();
   MPI_Finalize ();
-  exit ( 0 );
+  exit ( EXIT_SUCCESS );
 }
 #endif
 /*

@@ -255,7 +255,8 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
   char text[1024];
   int nProcsModel = commInqNProcsModel ();
   int root        = commInqRootGlob ();
-          
+  
+  xdebug ( "START" );
   
   getBufferGetFromEnd ( __func__, __LINE__, 
                         root, &tokenID, sizeof ( tokenID ));
@@ -272,7 +273,7 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
               streamID = streamIDNew;
               vlistID = streamInqVlist ( streamID );
               taxisID = vlistInqTaxis ( vlistID );
-              taxisDefVdate ( taxisID, vdate + tsID );
+              taxisDefVdate ( taxisID, vdate );
               taxisDefVtime ( taxisID, vtime );
               streamDefTimestep ( streamID, tsID );
             }
@@ -326,7 +327,7 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
       getBufferGetFromEnd ( __func__, __LINE__, 
                             root, &tokenID, sizeof ( tokenID ));
     }
-          
+  xdebug ( "RETURN" );        
 } 
 
 /************************************************************************/
@@ -360,14 +361,17 @@ void getData ( int tsID, int vdate, int vtime )
   char text[1024];
   int nProcsModel = commInqNProcsModel ();
           
+  xdebug ( "START" );
 
   // todo put in correct lbs and ubs
   xassert ( tsID >= 0 && vdate >= 0 && vtime >= 0 );
-
   xmpi ( MPI_Win_start ( groupModel, iAssert, getWin )); 
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
       getFlushBuffer ( modelID );
+      xdebug ( "modelID=%d, nProcsModel=%d, getBufferSize[%d]=%d, getWin=%p, sizeof(int)=%d",
+               modelID, nProcsModel, modelID, getBufferSize[modelID], getWin,
+               sizeof ( int ));
       xmpi ( MPI_Get ( &getBuffer[modelID][0], getBufferSize[modelID], 
                        MPI_UNSIGNED_CHAR, modelID, 0, 
                        getBufferSize[modelID], MPI_UNSIGNED_CHAR, getWin ));
@@ -385,7 +389,7 @@ void getData ( int tsID, int vdate, int vtime )
       }
   readGetBuffers ( tsID, vdate, vtime );
           
-
+  xdebug ( "RETURN" );
 }
 
 /************************************************************************/

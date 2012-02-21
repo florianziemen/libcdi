@@ -617,7 +617,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
 
-  xdebug( "filename = %s, filemode = %s, filetype = %d, "
+  xdebug( "START, filename = %s, filemode = %s, filetype = %d, "
           "namespaceHasLocalFile(%d)=%s",
           filename, filemode, filetype, namespaceGetActive(),
 	  namespaceHasLocalFile ( namespaceGetActive ()) ? "true":"false");
@@ -631,6 +631,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	case FILETYPE_GRB2:
 	  {
 	    fileID = gribOpen(filename, filemode);
+            xdebug ( "%s OPENED, fileID=%d", filename, fileID );
 	    record = (Record *) malloc(sizeof(Record));
 	    record->buffer = NULL;
 	    break;
@@ -710,7 +711,6 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
         }
     }
 #endif
-
 
   if ( fileID < 0 && hasLocalFile )
     {
@@ -1153,7 +1153,7 @@ void streamClose(int streamID)
   if ( namespaceHasLocalFile ( namespaceGetActive ()))
     {
       if ( fileID == CDI_UNDEFID )
-	Warning("File %s not open!", streamptr->filename);
+        Warning("File %s not open!", streamptr->filename);
       else
 	switch (filetype)
 	  {
@@ -1298,6 +1298,8 @@ void streamSync(int streamID)
   int vlistID;
   int nvars;
   stream_t *streamptr;
+
+  if ( !namespaceHasLocalFile ( namespaceGetActive ())) return;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -2075,7 +2077,6 @@ void streamDefVlist(int streamID, int vlistID)
   streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
-
 #ifdef USE_MPI
   {
     statusCode nspStatus = namespaceInqResStatus ();
@@ -2107,7 +2108,8 @@ void streamDefVlist(int streamID, int vlistID)
 	  zaxisID = vlistInqVarZaxis(vlistID, varID);
 	  streamNewVar(streamID, gridID, zaxisID);
 	  if ( streamptr->have_missval )
-	    vlistDefVarMissval(streamptr->vlistID, varID, vlistInqVarMissval(vlistID, varID));
+	    vlistDefVarMissval(streamptr->vlistID, varID, 
+                               vlistInqVarMissval(vlistID, varID));
 	}
 
       if ( streamptr->filemode == 'w' )

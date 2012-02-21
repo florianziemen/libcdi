@@ -4258,7 +4258,7 @@ int gridGetPackSize ( void * voidP, MPI_Comm comm )
 	count =  gridP->size;
       else
 	count =  gridP->ysize;
-      if ( !count ) abort ();
+      xassert ( count );
       
       xmpi ( MPI_Pack_size ( count, MPI_DOUBLE, comm, &size ));     
       packBuffSize += size;

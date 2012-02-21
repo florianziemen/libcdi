@@ -24,8 +24,8 @@ size_t getpagesize(void);
 #include "namespace.h"
 #include "pio.h"
 #include "pio_comm.h"
-#include "pio_util.h"
 #endif
+#include "pio_util.h"
 
 #if ! defined(O_BINARY)
 #define O_BINARY 0
@@ -1145,7 +1145,6 @@ int fileOpen(const char *filename, const char *mode)
       if ( FILE_Debug )
 	Message("File %s opened with ID %d", filename, fileID);
     }
-
   return (fileID);
 }
 

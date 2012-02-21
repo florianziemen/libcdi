@@ -256,6 +256,8 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
   int nProcsColl = commInqNProcsColl ();
   char text[1024];
 
+  xdebug ( "START, nProcsColl=%d", nProcsColl );
+
   nStreams = streamSize ();
 
   resHs       = xmalloc ( nStreams * sizeof ( resHs[0] ));
@@ -263,16 +265,12 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
   collectsData = xmalloc ( nProcsColl * sizeof ( collectsData[0] ));
   streamGetIndexList ( nStreams, resHs );
 
-  xprintArray ( "Echam streams", resHs, nStreams, DATATYPE_INT );
-
   for ( i = 0; i < nStreams; i++ )
     streamSizes[i] = streamInqNvars ( * ( resHs + i ));
 
   nVars = xsum ( nStreams, streamSizes );
   varSizes   = xmalloc ( nVars * sizeof ( varSizes[0] ));
   varMapping = xmalloc ( nVars * sizeof ( varMapping[0] ));
-
-  reshListPrint ( "reshListModelEcham" );
 
   for ( i = 0; i < nStreams; i++ )
     for ( j = 0; j < * ( streamSizes + i ); j++ )
@@ -312,6 +310,8 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
   if ( collectsData ) free ( collectsData );
   if ( streamSizes )  free ( streamSizes );
   if ( resHs )        free ( resHs );
+
+  xdebug ( "RETURN" );
 }
 
 /************************************************************************/
@@ -321,6 +321,7 @@ void modelWinCleanup ( void )
 {
   int collID;
 
+  xdebug ( "START" );
   if ( winPostSet != NULL &&
        win != NULL &&
        winBuffer != NULL &&
@@ -342,7 +343,7 @@ void modelWinCleanup ( void )
   if ( winBuffer )       free ( winBuffer );
   if ( winBufferSize )   free ( winBufferSize );
 
-  xdebug ( "cleaned up mpi_win's" );
+  xdebug ( "RETURN. CLEANED UP MPI_WIN'S" );
 }
 
 /************************************************************************/
@@ -357,6 +358,7 @@ static
   int rankModel   = commInqRankModel ();
   int root = commInqRootGlob ();
 
+  xdebug ( "START" );
   xassert ( winBufferSize != NULL );
 
   nstreams = reshCountType ( &streamOps );
@@ -395,6 +397,7 @@ static
   xdebug ("sumWinBufferSize=%d, MAXWINBUFFERSIZE=%d", sumWinBufferSize, MAXWINBUFFERSIZE );
   xassert ( sumWinBufferSize <= MAXWINBUFFERSIZE );
   xprintArray ( "winBufferSize", winBufferSize, nProcsColl, DATATYPE_INT );
+  xdebug ( "RETURN" );
 }
 
 
@@ -430,6 +433,7 @@ void modelWinCreate ( void )
   int collID, ranks[1];
   int nProcsColl = commInqNProcsColl ();
 
+  xdebug ( "START" );
   winBufferSize   = xmalloc ( nProcsColl * sizeof ( winBufferSize[0] ));
   winBuffer       = xmalloc ( nProcsColl * sizeof ( winBuffer[0] ));
   winBufferHead   = xmalloc ( nProcsColl * sizeof ( winBufferHead[0] ));
@@ -457,7 +461,7 @@ void modelWinCreate ( void )
       xmpi ( MPI_Group_incl ( groupsIONetto[collID], 1, ranks,
                               &groupsIONetto[collID] ));
     }
-  xdebug ( "created mpi_win's" );
+  xdebug ( "RETURN, CREATED MPI_WIN'S" );
 }
 
 /************************************************************************/
@@ -557,6 +561,8 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
   int tokenSep = SEPARATOR, tokenFuncCall = FUNCCALL;
   size_t size = 0;
   int funcID = func2Int ( func );
+
+  xdebug ( "START" );
 
   if ( rankGlob != root ) return;
 
@@ -695,6 +701,8 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
     }
 
   va_end ( ap );
+
+  xdebug ( "RETURN" );
 }
 
 #endif
@@ -771,8 +779,8 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode,
 
   // JUST FOR TEST CASES WITH ONLY ONE MPI TASK
   if ( commInqSizeGlob () == 1 )
-      {
-          namespaceInit ( nNamespaces, hasLocalFile );
+    {
+      namespaceInit ( nNamespaces, hasLocalFile );
       return commInqCommGlob ();
     }
 
@@ -784,7 +792,7 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode,
       IOServer ();
       commDestroy ();
       MPI_Finalize ();
-      exit ( 0 );
+      exit ( EXIT_SUCCESS );
     }
   else
     {
@@ -793,7 +801,7 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode,
       namespaceInit ( nNamespaces, hasLocalFile );
     }
 
-  xdebug ( "nProcsGlob=%d, return from pioInit()", sizeGlob );
+  xdebug ( "nProcsGlob=%d, RETURN", sizeGlob );
   return commInqCommModel ();
 }
 #endif
@@ -803,8 +811,7 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode,
 int pioInit ( int commGlobArg, int nProcsIO, int IOMode, int nNamespaces,
               int * hasLocalFile )
 {
-  
-  xdebug( "%s, nProcsIO=%d, IOMode=%d, nNamespaces=%d",
+  xdebug( "START: %s, nProcsIO=%d, IOMode=%d, nNamespaces=%d",
 #ifdef USE_MPI
           "cdi parallel",
 #else
@@ -822,6 +829,8 @@ int pioInit ( int commGlobArg, int nProcsIO, int IOMode, int nNamespaces,
   return MPI_Comm_c2f ( pioInit_c ( commGlob, nProcsIO, IOMode, nNamespaces,
                                     hasLocalFile ));
 #endif
+
+  xdebug ( "RETURN" );
   return 0;
 }
 
@@ -834,9 +843,11 @@ void  pioEndDef ( void )
   int bufferSize;
   int rankGlob = commInqRankGlob ();
 
+  xdebug ( "START" );
+
   varsMapNDeco ( commInqNNodes (), commInqNodeSizes ());
 
-  reshListPrint ( "reshListModelEcham" );
+  reshListPrint ( "reshListModel" );
   
   if ( rankGlob < commInqNProcsColl ())
     {
@@ -850,11 +861,9 @@ void  pioEndDef ( void )
       reshPackBufferDestroy ( &buffer );
     }
 
-  xdebug();
-
   modelWinCreate ();
-  xdebug();
   namespaceDefResStatus ( STAGE_TIMELOOP );
+  xdebug ( "RETURN" );
 #endif
 }
 
@@ -863,7 +872,9 @@ void  pioEndDef ( void )
 void  pioEndTimestepping ( void )
 {
 #ifdef USE_MPI
+  xdebug ( "START" );
   namespaceDefResStatus ( STAGE_CLEANUP );
+  xdebug ( "RETURN" );
 #endif
 }
 
@@ -884,6 +895,7 @@ void pioFinalize ( void )
 {
 #ifdef USE_MPI
   int collID, ibuffer = 1111;
+  xdebug ( "START" );
   namespaceCleanup ();
   for ( collID = 0; collID < commInqNProcsColl (); collID++ )
     {
@@ -893,6 +905,7 @@ void pioFinalize ( void )
     }
   modelWinCleanup ();
   commDestroy ();
+  xdebug ( "RETURN" );
 #endif
 }
 
@@ -932,10 +945,23 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
           winPostSet[collID] = 0;
           modelWinFlushBuffer ( collID );
         }
-      modelWinBufferPutAtEnd ( __func__, collID, &tokenEnd, sizeof ( tokenEnd ));
+      modelWinBufferPutAtEnd ( __func__, collID, &tokenEnd, 
+                               sizeof ( tokenEnd ));
       xmpi ( MPI_Win_post ( groupsIONetto[collID], iAssert, win[collID] ));
       winPostSet[collID] = 1;
     }
 
+  xdebug ( "RETURN. messages sent, windows posted: tsID=%d, vdate=%d, vtime=%d", 
+           tsID, vdate, vtime );
+
 #endif
 }
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

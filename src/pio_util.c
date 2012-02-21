@@ -31,7 +31,7 @@ void pcdiAssert   ( bool assumption, const char * filename,
       fprintf ( stderr, "ERROR, FALSE ASSUMPTION, %s, %s, line %d\n",
                 functionname, filename, line );
       fflush ( stderr );
-      abort();
+      exit ( EXIT_FAILURE );
 #endif
     }
 }
@@ -51,7 +51,7 @@ void pcdiAbort ( char * errorString, const char * filename,
 #else
   fprintf ( stderr, "ERROR, %s, %s, line %d, errorString: \"%s\"\n",
             functionname, filename, line, errorString );
-  abort();
+  exit ( EXIT_FAILURE );
 #endif
 }
 

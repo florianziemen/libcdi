@@ -10,7 +10,7 @@
 #include "pio_c_temp.h"
 #include "pio_util.h"
 
-extern int    reshArrayCompare      ( int, int );
+extern int    reshListCompare      ( int, int );
 extern void   reshPackBufferCreate  ( char **, int *, MPI_Comm );
 extern void   reshPackBufferDestroy ( char ** );
 extern void   rpcUnpackResources    ( char *, int, MPI_Comm );

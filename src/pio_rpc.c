@@ -43,10 +43,14 @@ void streamUnpack ( char * unpackBuffer, int unpackBufferSize,
   xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 		      &d, 1, MPI_DOUBLE, comm ));
   xassert ( d == xchecksum ( DATATYPE_TXT, intBuffer[2], filename ));
-
   streamID = streamOpenWrite ( filename, intBuffer[1] );
+  xdebug ("streamID=%d, intBuffer[0]=%d, nspTarget=%d,"
+          " namespaceAdaptKey(a,b)=%d",
+          streamID, intBuffer[0], nspTarget,  
+          namespaceAdaptKey ( intBuffer[0], nspTarget ));
   xassert ( streamID >= 0 &&
             namespaceAdaptKey ( intBuffer[0], nspTarget ) == streamID );
+  xdebug ("streamID=%d, vlistID=%d", streamID, namespaceAdaptKey ( intBuffer[4], nspTarget ));
 
   streamDefVlist ( streamID, namespaceAdaptKey ( intBuffer[4], nspTarget ));
   xassert ( streamInqVlist ( streamID ) == 
@@ -56,7 +60,7 @@ void streamUnpack ( char * unpackBuffer, int unpackBufferSize,
   streamDefCompType  ( streamID, intBuffer[6] );
   streamDefCompLevel ( streamID, intBuffer[7] ); 
   cdiDefGlobal  ( "REGULARGRID", intBuffer[8] );
-  cdiDefGlobal     ( "SORTNAME", intBuffer[9] );
+  cdiDefGlobal     ( "SORTNAME", intBuffer[9] ); 
   cdiDefGlobal ( "HAVE_MISSVAL", intBuffer[10] );
 }
 
@@ -71,7 +75,7 @@ void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize,
   int unpackBufferPos = 0;
   char text[4096];
 
-  xdebug ();
+  xdebug ( "START" );
 	  
   while ( unpackBufferPos < unpackBufferSize )
     {
@@ -122,7 +126,7 @@ void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize,
 			  &token2, 1, MPI_INT, comm ));
       xassert ( token2 == SEPARATOR );
     }
-  xdebug ();
+  xdebug ( "RETURN" );
 }
 
 #endif

@@ -503,6 +503,8 @@ void     commEvalPhysNodes  ( void )
       if ( nodeInfo[IOID].isProcColl ) info->nProcsColl++;
     }
 
+  xdebug ( "info->nProcsColl=%d", info->nProcsColl );
+
   xassert ( info->nProcsColl <= info->nProcsModel );
 
   // define nodeSizes
