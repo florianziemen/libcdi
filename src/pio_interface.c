@@ -770,7 +770,7 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode,
   commDefCommGlob ( commGlob );
   sizeGlob = commInqSizeGlob ();
 
-  if ( nProcsIO <= 0 || nProcsIO > sizeGlob )
+  if ( nProcsIO <= 0 || nProcsIO > sizeGlob - 1 )
     xabort ( "DISTRIBUTION OF TASKS ON PROCS IS NOT VALID." );
 
   commDefNProcsIO ( nProcsIO );
@@ -783,9 +783,6 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode,
       namespaceInit ( nNamespaces, hasLocalFile );
       return commInqCommGlob ();
     }
-
-  if ( commInqNProcsModel () < nProcsIO )
-    xabort ( "NUMBER OF MODEL PROCESSES HAS TO BE LARGER THAN NUMBER OF IO PROCESSES." );
 
   if ( commInqIsProcIO ())
     {

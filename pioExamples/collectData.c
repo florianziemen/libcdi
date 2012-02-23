@@ -103,10 +103,10 @@ void modelRun ()
 int main (int argc, char *argv[])
 {
   enum {
-    nProcsIO    = 1,
+    nProcsIO    = 3,
     //IOMode      = PIO_NONE,
-    IOMode      = PIO_MPI,
-    //IOMode      = PIO_FPGUARD,
+    //IOMode      = PIO_MPI,
+    IOMode      = PIO_FPGUARD,
     //IOMode      = PIO_ASYNCH,
     //IOMode      = PIO_WRITER,
     nNamespaces = 1 };

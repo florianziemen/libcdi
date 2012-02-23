@@ -424,7 +424,7 @@ void     commRecvNodeMap    ( void )
            info->nProcsModel != CDI_UNDEFID &&
            info->nodeMap     == NULL );
 
-  source = info->rankGlob - info->nProcsModel;
+  source = info->root;
 
   xmpi ( MPI_Probe ( source, NODEMAP, info->commGlob, &status ));
   xmpi ( MPI_Get_count ( &status, MPI_INTEGER, &info->nProcsColl ));
@@ -541,11 +541,11 @@ void     commEvalPhysNodes  ( void )
           * p1[nodeInfo[IOID].hostID - 1]++ = IOID + info->nProcsModel;
         }
     }
-  if ( info->rankGlob < info->nProcsIO )
-    xmpi ( MPI_Send ( info->nodeMap, info->nProcsColl, MPI_INTEGER, 
-                    info->rankGlob + info->nProcsModel, 
-                      NODEMAP, info->commGlob ));
 
+  if ( info->rankGlob == info->root )
+    for ( IOID = info->nProcsModel; IOID < info->sizeGlob; IOID++ )
+      xmpi ( MPI_Send ( info->nodeMap, info->nProcsColl, MPI_INTEGER, 
+                        IOID, NODEMAP, info->commGlob ));
   free ( p2 );
   free ( p1 );
   free ( nodeInfo );
