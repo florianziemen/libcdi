@@ -50,6 +50,7 @@ void pioInfoInit ( pioInfo_t * p )
   p->nodeInfo.isProcColl  = CDI_UNDEFID;
   p->nodeInfo.nNodes      = CDI_UNDEFID;
   p->nProcsColl           = 0;
+  p->procsCollMap         = NULL;
   p->nodeSizes            = NULL;
   p->nodeMap              = NULL;
 }
@@ -458,7 +459,7 @@ void     commEvalPhysNodes  ( void )
 {
   nodeInfo_t * nodeInfo;
   MPI_Status status;
-  int i, IOID, size, nNodes = CDI_UNDEFID;
+  int i, IOID, collID, size, nNodes = CDI_UNDEFID;
   int ** p1, ** p2,  idx;
 
   xassert ( info != NULL &&
@@ -507,13 +508,20 @@ void     commEvalPhysNodes  ( void )
 
   xassert ( info->nProcsColl <= info->nProcsModel );
 
+  info->procsCollMap = xmalloc ( info->nProcsColl * 
+                                 sizeof ( info->procsCollMap[0] )); 
+
   // define nodeSizes
   info->nodeInfo.nNodes = nNodes; 
   info->nodeSizes = xmalloc ( info->nodeInfo.nNodes * 
                                   sizeof ( info->nodeSizes[0] ));
+  collID = 0;
   for ( IOID = 0; IOID < info->nProcsIO; IOID++ )
     if ( nodeInfo[IOID].isProcColl )
-      info->nodeSizes[nodeInfo[IOID].hostID - 1]++;
+      {
+        info->nodeSizes[nodeInfo[IOID].hostID - 1]++;
+        info->procsCollMap[collID++] = IOID + info->nProcsModel;
+      }
 
   // define nodeMap
   info->nodeMap   = xmalloc ( info->nProcsColl * 
@@ -733,6 +741,16 @@ void commPrint ( FILE * fp )
   fprintf ( fp, "# isProcColl  = %d\n", info->nodeInfo.isProcColl );
   fprintf ( fp, "# nNodes      = %d\n", info->nodeInfo.nNodes );
   fprintf ( fp, "# nProcsColl  = %d\n", info->nProcsColl );
+  if ( info->procsCollMap != NULL )
+    {
+      fprintf ( fp, "# procsCollMap   = " );
+      xassert ( info->nProcsColl != CDI_UNDEFID );
+      for ( i = 0; i < info->nProcsColl; i++ )
+        fprintf ( fp, "%d ", info->procsCollMap[i] );
+      fprintf ( fp, "\n" );
+    }
+  else     
+    fprintf ( fp, "# procsCollMap   = NULL\n" );
   if ( info->nodeSizes != NULL )
     {
       fprintf ( fp, "# nodeSizes   = " );

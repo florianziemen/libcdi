@@ -49,6 +49,7 @@ typedef struct {
  
   MPI_Comm * commsIO; 
   int nProcsColl;
+  int * procsCollMap;
   int * nodeSizes;
   int * nodeMap; 
 } pioInfo_t;
