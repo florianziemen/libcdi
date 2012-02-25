@@ -49,7 +49,7 @@ void pioInfoInit ( pioInfo_t * p )
   p->nodeInfo.hostID      = CDI_UNDEFID;
   p->nodeInfo.isProcColl  = CDI_UNDEFID;
   p->nodeInfo.nNodes      = CDI_UNDEFID;
-  p->nProcsColl           = 0;
+  p->nProcsColl           = CDI_UNDEFID;
   p->procsCollMap         = NULL;
   p->nodeSizes            = NULL;
   p->nodeMap              = NULL;
@@ -501,7 +501,11 @@ void     commEvalPhysNodes  ( void )
       else xassert ( nodeInfo[IOID].nNodes == nNodes );         
       xassert ( nodeInfo[IOID].hostID > 0 &&
                nodeInfo[IOID].hostID <= nNodes );
-      if ( nodeInfo[IOID].isProcColl ) info->nProcsColl++;
+      if ( nodeInfo[IOID].isProcColl ) 
+        {
+          if ( info->nProcsColl == CDI_UNDEFID ) info->nProcsColl = 0;
+          info->nProcsColl++;
+        }
     }
 
   xdebug ( "info->nProcsColl=%d", info->nProcsColl );

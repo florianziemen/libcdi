@@ -74,7 +74,7 @@ void modelRun ()
 	}
       for ( tsID = 0; tsID < ntsteps; tsID++ )
 	{
-	  taxisDefVdate ( taxisID, vdate + tsID );
+	  taxisDefVdate ( taxisID, vdate );
 	  taxisDefVtime ( taxisID, vtime );
 	  streamDefTimestep ( streamID, tsID );
 	  for ( i = 0; i < nVars; i++ )
@@ -90,7 +90,7 @@ void modelRun ()
 	  pioWriteTimestep ( tsID, vdate, vtime );
 	}
     }
-
+  pioEndTimestepping ();
   streamClose ( streamID );
   vlistDestroy ( vlistID );
   taxisDestroy ( taxisID );

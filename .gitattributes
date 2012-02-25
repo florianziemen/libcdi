@@ -159,6 +159,7 @@ pioExamples/Makefile.in -text
 pioExamples/cdi.inc -text
 pioExamples/collectData.c -text
 pioExamples/collectData2003.F90 -text
+pioExamples/collectDataNStreams.c -text
 pioExamples/compareResourcesArray.c -text
 src/Makefile.am -text
 src/Makefile.in -text

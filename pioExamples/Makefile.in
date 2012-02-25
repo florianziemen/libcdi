@@ -35,7 +35,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = collectData$(EXEEXT) collectData2003$(EXEEXT) \
-	$(am__EXEEXT_1)
+	collectDataNStreams$(EXEEXT) $(am__EXEEXT_1)
 @USE_MPI_TRUE@am__append_1 = compareResourcesArray 
 subdir = pioExamples
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -66,6 +66,9 @@ collectData_DEPENDENCIES =
 am_collectData2003_OBJECTS = collectData2003.$(OBJEXT)
 collectData2003_OBJECTS = $(am_collectData2003_OBJECTS)
 collectData2003_DEPENDENCIES =
+am_collectDataNStreams_OBJECTS = collectDataNStreams.$(OBJEXT)
+collectDataNStreams_OBJECTS = $(am_collectDataNStreams_OBJECTS)
+collectDataNStreams_DEPENDENCIES =
 am_compareResourcesArray_OBJECTS = compareResourcesArray.$(OBJEXT)
 compareResourcesArray_OBJECTS = $(am_compareResourcesArray_OBJECTS)
 compareResourcesArray_DEPENDENCIES =
@@ -92,8 +95,10 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(collectData_SOURCES) $(collectData2003_SOURCES) \
+	$(collectDataNStreams_SOURCES) \
 	$(compareResourcesArray_SOURCES)
 DIST_SOURCES = $(collectData_SOURCES) $(collectData2003_SOURCES) \
+	$(collectDataNStreams_SOURCES) \
 	$(compareResourcesArray_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -273,6 +278,8 @@ collectData_SOURCES = collectData.c
 collectData_LDADD = -L../src -lcdi
 collectData2003_SOURCES = collectData2003.F90
 collectData2003_LDADD = -L../src -lcdi
+collectDataNStreams_SOURCES = collectDataNStreams.c
+collectDataNStreams_LDADD = -L../src -lcdi
 compareResourcesArray_SOURCES = compareResourcesArray.c
 compareResourcesArray_LDADD = -L../src -lcdi
 all: all-am
@@ -324,6 +331,9 @@ collectData$(EXEEXT): $(collectData_OBJECTS) $(collectData_DEPENDENCIES)
 collectData2003$(EXEEXT): $(collectData2003_OBJECTS) $(collectData2003_DEPENDENCIES) 
 	@rm -f collectData2003$(EXEEXT)
 	$(FCLINK) $(collectData2003_OBJECTS) $(collectData2003_LDADD) $(LIBS)
+collectDataNStreams$(EXEEXT): $(collectDataNStreams_OBJECTS) $(collectDataNStreams_DEPENDENCIES) 
+	@rm -f collectDataNStreams$(EXEEXT)
+	$(LINK) $(collectDataNStreams_OBJECTS) $(collectDataNStreams_LDADD) $(LIBS)
 compareResourcesArray$(EXEEXT): $(compareResourcesArray_OBJECTS) $(compareResourcesArray_DEPENDENCIES) 
 	@rm -f compareResourcesArray$(EXEEXT)
 	$(LINK) $(compareResourcesArray_OBJECTS) $(compareResourcesArray_LDADD) $(LIBS)
@@ -335,6 +345,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/collectData.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/collectDataNStreams.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compareResourcesArray.Po@am__quote@
 
 .F90.o:
