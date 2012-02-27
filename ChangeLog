@@ -1,3 +1,8 @@
+2012-05-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.5.5 released
+	* using CGRIBEX library version 1.5.2
+
 2012-02-15 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* stream_cdf::cdfDefDatatype: bug fix for DATATYPE_UINT8
