@@ -10,47 +10,52 @@
 #include "cdi.h"
 #include "pio_util.h"
 
-void timePassingHack ( int * vdate, int * vtime, int timePassed )
+void hoursPassingHack ( int * vdate, int * vtime, int hoursPassed )
 {
   int sum, days, hours, oldDays;
-
-  sum = * vtime + timePassed;
+  
+  xassert ( hoursPassed % 10000 == 0 );
+  sum = * vtime + hoursPassed;
   days = sum / 240000;
   hours = sum % 240000;
   oldDays = * vdate % 100;
   if ( oldDays + days > 28 ) xabort ( "UNEXPECTED USE" );
   * vtime = hours;
   * vdate = * vdate + days;
-  xdebug ( "vdate=%d, vtime=%d", * vdate, * vtime );
 }
  
 void modelRun ()
 {
   enum {
     filetype    = FILETYPE_GRB,
-    nStreams    = 2,
+    nStreams    = 5,
+    MAXNSTREAMS = 25,
     ntfiles     = 2,
     ntsteps     = 3,
     nVars       = 5,
     nlon        = 12,
     nlat        = 6,
-    maxlev      = 5 };
+    MAXNLEV     = 5 };
 
-  static int nlev[nStreams][nVars] = {{1,1,5,5,2},{3,5,2,2,1}};
+  static int nlev[nStreams][nVars] =
+    {{1,1,5,5,2},{3,5,2,2,1},{3,5,2,2,1},{5,2,2,2,1}, {3,3,3,3,3}};
+
   static char nameExp[7]           = "example";
-  static char postStream[nStreams][2] = {"A\0","B\0" };
+  static int asciiA                = 65;
   char nameStream[8];
+  char filename[1024];
 
   int gridID, zaxisID[nStreams][nVars], taxisID;
   int streamID[nStreams], vlistID[nStreams], varID[nStreams][nVars], tsID, tfID = 0;
   int i, j, k, nmiss = 0, rank;
   double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
   double lats[nlat] = {-75, -45, -15, 15, 45, 75};
-  double levs[maxlev] = {101300, 92500, 85000, 50000, 20000};
-  double var[nlon*nlat*maxlev];
-  int vdate = 19850101, vtime = 120000;
+  double levs[MAXNLEV] = {101300, 92500, 85000, 50000, 20000};
+  double var[nlon*nlat*MAXNLEV];
+  int vdate = 19850101, vtime = 120000, hourStep = 20000;
   int start = CDI_UNDEFID, chunk = CDI_UNDEFID, stop = CDI_UNDEFID;
-  char filename[1024];
+
+  xassert ( nStreams < MAXNSTREAMS );
 
   gridID = gridCreate ( GRID_LONLAT, nlon*nlat );
   gridDefXsize ( gridID, nlon );
@@ -62,6 +67,7 @@ void modelRun ()
     {
       for ( j = 0; j < nVars; j++ )
         {
+          xassert ( nlev[i][j] > 0 && nlev[i][j] <= MAXNLEV );
           zaxisID[i][j] = zaxisCreate ( ZAXIS_PRESSURE, nlev[i][j] );
           zaxisDefLevels ( zaxisID[i][j], levs );
         }
@@ -79,7 +85,7 @@ void modelRun ()
   for ( i = 0; i < nStreams; i++ )
     {
       memset ( filename, 0, 1024 );
-      sprintf ( &filename[0], "%s%s_%d.grb", nameExp, postStream[i], tfID );
+      sprintf ( &filename[0], "%s%c_%d.grb", nameExp, asciiA + i, tfID );
       streamID[i] = streamOpenWrite ( filename, filetype );
       xassert ( streamID[i] >= 0 );
       streamDefVlist ( streamID[i], vlistID[i]);
@@ -95,7 +101,7 @@ void modelRun ()
           for ( i = 0; i < nStreams; i++ )
             {
               streamClose ( streamID[i] );
-              sprintf ( &filename[0], "%s%s_%d.grb", nameExp, postStream[i], tfID );
+              sprintf ( &filename[0], "%s%c_%d.grb", nameExp, asciiA + i, tfID );
               streamID[i] = streamOpenWrite ( filename, filetype );
               xassert ( streamID[i] >= 0 );
               streamDefVlist ( streamID[i], vlistID[i] );
@@ -104,7 +110,7 @@ void modelRun ()
       xdebug ();
       for ( tsID = 0; tsID < ntsteps; tsID++ )
 	{
-          timePassingHack ( &vdate, &vtime, 20000 );
+          hoursPassingHack ( &vdate, &vtime, hourStep );
 	  taxisDefVdate ( taxisID, vdate );
 	  taxisDefVtime ( taxisID, vtime );
           for ( i = 0; i < nStreams; i++ )

@@ -917,6 +917,8 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
   int nProcsColl = commInqNProcsColl ();
   int nProcsModel = commInqNProcsModel ();
 
+  xdebug ( "START" );
+
   xassert ( tsID       >= 0     &&
             vdate      >= 0     &&
             vtime      >= 0     &&
