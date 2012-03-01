@@ -1,0 +1,35 @@
+ #! /bin/bash
+#
+#-----------------------------------------------------------------------------
+#$ -S /bin/bash
+#$ -N write
+#$ -o write.$JOB_ID.o
+#$ -j y
+#$ -pe orte8 16
+#$ -q cluster
+#$ -cwd
+#-----------------------------------------------------------------------------
+# 
+
+IOMODE=3
+NPROCSIO=8
+NPROCSMODEL=8
+(( SIZEGLOB = NPROCSIO + NPROCSMODEL ))
+
+EXPUSER=m300050
+EXPGROUP=mh0033
+EXPDIR=/scratch/work/$EXPGROUP/$EXPUSER/cdi-exp
+WORKDIR=/scratch/work/$EXPGROUP/$EXPUSER/cdi-build/cdi-parallel
+
+# the directory for the experiment will be created, if not already there
+if [ ! -d $EXPDIR ]; then
+    mkdir -p $EXPDIR
+fi
+
+cd $EXPDIR
+
+MPIBIN=/sw/sles10-x64/mpi/openmpi-1.4.3-static-nag52/bin
+
+$MPIBIN/mpiexec -n $SIZEGLOB $WORKDIR/pioExamples/collectDataNStreams $IOMODE $NPROCSIO
+
+exit

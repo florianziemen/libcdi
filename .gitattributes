@@ -302,3 +302,4 @@ tests/test_grib.sh -text
 util/sunf95preproc-wrapper -text
 util/sxpreproc-wrapper -text
 util/xlfpreproc-wrapper -text
+/write_tornado.job -text

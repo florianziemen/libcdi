@@ -95,7 +95,6 @@ void modelRun ()
 
   for ( tfID = 0; tfID < ntfiles; tfID++ )
     {
-      xdebug ( "tfID=%d, ntfiles=%d", tfID, ntfiles );
       if ( tfID > 0 )
 	{
           for ( i = 0; i < nStreams; i++ )
@@ -107,7 +106,7 @@ void modelRun ()
               streamDefVlist ( streamID[i], vlistID[i] );
             }
 	}
-      xdebug ();
+
       for ( tsID = 0; tsID < ntsteps; tsID++ )
 	{
           hoursPassingHack ( &vdate, &vtime, hourStep );
@@ -129,7 +128,6 @@ void modelRun ()
             }
 	  pioWriteTimestep ( tsID, vdate, vtime );
 	}
-      xdebug ();
     }
 
   pioEndTimestepping ();
@@ -151,12 +149,12 @@ void modelRun ()
 int main (int argc, char *argv[])
 {
   enum {
-    nProcsIO    = 3,
-    //IOMode      = PIO_NONE,
-    //IOMode      = PIO_MPI,
-    IOMode      = PIO_FPGUARD,
-    //IOMode      = PIO_ASYNCH,
-    //IOMode      = PIO_WRITER,
+    nProcsIODef    = 3,
+    //IOModeDef       = PIO_NONE,
+    //IOModeDef       = PIO_MPI,
+    IOModeDef       = PIO_FPGUARD,
+    //IOModeDef       = PIO_ASYNCH,
+    //IOModeDef       = PIO_WRITER,
     nNamespaces = 1 };
 
   static int hasLocalFile[nNamespaces] = { 0 };
@@ -164,13 +162,29 @@ int main (int argc, char *argv[])
 #ifdef USE_MPI
   MPI_Comm commGlob, commModel;
   int sizeGlob;
-  int rankGlob;
+  int rankGlob; 
+  int IOMode, nProcsIO, count;
 
   xmpi ( MPI_Init ( &argc, &argv));
   xmpi ( MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob ));
   xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
   xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
+
+  if (argc > 1)
+    {    
+      xassert ( argc >= 3 );
+      IOMode = atoi(argv[1]);
+      nProcsIO = atoi(argv[2]);
+      xassert ( IOMode >= PIO_MINIOMODE && IOMode <= PIO_MAXIOMODE &&
+                nProcsIO >= 0 && nProcsIO <= sizeGlob );
+      printf ( "IOMode=%d, nProcsIO=%d", IOMode, nProcsIO );
+    }
+  else
+    {
+      IOMode = IOModeDef;
+      nProcsIO = nProcsIODef;
+    }
 
   commModel = pioInit_c ( commGlob, nProcsIO, IOMode, nNamespaces, hasLocalFile );
 #endif
