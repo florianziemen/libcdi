@@ -1462,19 +1462,17 @@ static
 void cgribexDefParam(int *isec1, int param)
 {
   int pdis, pcat, pnum;
-  static int lwarn = TRUE;
 
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
-  if ( pdis != 255 && lwarn )
+  if ( pnum < 0 ) pnum = -pnum;
+
+  if ( pdis != 255 )
     {
       char paramstr[32];
       cdiParamToString(param, paramstr, sizeof(paramstr));
-      Warning("Can not convert GRIB2 parameter (%s) to GRIB1!", paramstr);
-      lwarn = FALSE;
+      Warning("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
     }
-
-  if ( pnum < 0 ) pnum = -pnum;
 
   ISEC1_CodeTable = pcat;
   ISEC1_Parameter = pnum;

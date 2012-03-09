@@ -1906,14 +1906,11 @@ void gribapiDefParam(grib_handle *gh, int param, const char *name)
 
       if ( editionNumber <= 1 )
 	{
-	  static int lwarn = TRUE;
-
-	  if ( pdis != 255 && lwarn )
+	  if ( pdis != 255 )
 	    {
 	      char paramstr[32];
 	      cdiParamToString(param, paramstr, sizeof(paramstr));
-	      Warning("Can not convert GRIB2 parameter (%s) to GRIB1!", paramstr);
-	      lwarn = FALSE;
+	      Warning("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
 	    }
 
 	  GRIB_CHECK(grib_set_long(gh, "table2Version",        pcat), 0);
@@ -2365,7 +2362,7 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg, int lieee, int datat
 	if ( status != 0 && warning )
 	  {
 	    warning = 0;
-	    Warning("Can not write reference grid!");
+	    Warning("Can't write reference grid!");
 	    Warning("gridDefinitionTemplateNumber %d not found (grib2/template.3.%d.def)!",
 		    GRIB2_GTYPE_NUMBER, GRIB2_GTYPE_NUMBER);
 	  }
