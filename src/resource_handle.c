@@ -10,6 +10,7 @@
 #include "namespace.h"
 #include "cdi.h"
 #include "error.h"
+#include "file.h"
 #ifdef USE_MPI
 #include "pio_comm.h"
 #include "pio_rpc.h"
@@ -161,6 +162,14 @@ void listInitialize ( void )
 #endif
 
   listNew ();
+  /* file is special and has its own table, which needs to be
+   * created, before we register the listDestroy exit handler */
+  {
+    int null_id;
+    null_id = fileOpen("/dev/null", "r");
+    if (null_id /= -1)
+      fileClose(null_id);
+  }
   atexit ( listDestroy );
 
   LIST_LOCK();
