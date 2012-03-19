@@ -23,7 +23,7 @@ case "${HOSTNAME}" in
                     --with-szlib=$HOME/local \
 	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O2 -Df2cFortran"
 	;;
-    cinglung*|feilung*)
+    cinglung*|feilung*|wanglung*)
 	./configure --prefix=$HOME/local \
                     --enable-shared \
                     --enable-maintainer-mode \
