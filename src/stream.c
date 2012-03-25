@@ -1532,23 +1532,8 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
     }
 }
 
-/*
-@Function  streamWriteVar
-@Title     Write a variable
 
-@Prototype void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
-@Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
-    @Item  varID     Variable identifier.
-    @Item  data      Pointer to a block of data values to be written.
-    @Item  nmiss     Number of missing values.
-
-@Description
-The function streamWriteVar writes the values of one time step of a variable 
-to an open dataset.
-@EndFunction
-*/
-void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
+void stream_write_var(int streamID, int varID, int memtype, const void *data, int nmiss)
 {
   int filetype;
   stream_t *streamptr;
@@ -1571,6 +1556,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("grbWriteVar not implemented for memtype float!");
         grbWriteVarDP(streamID, varID, data, nmiss);
 	break;
       }
@@ -1578,6 +1564,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("srvWriteVar not implemented for memtype float!");
         srvWriteVarDP(streamID, varID, data);
 	break;
       }
@@ -1585,6 +1572,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("extWriteVar not implemented for memtype float!");
         extWriteVarDP(streamID, varID, data);
 	break;
       }
@@ -1592,6 +1580,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("iegWriteVar not implemented for memtype float!");
         iegWriteVarDP(streamID, varID, data);
 	break;
       }
@@ -1603,7 +1592,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
     case FILETYPE_NC4C:
       {
 	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
-        cdfWriteVarDP(streamID, varID, data, nmiss);
+        cdf_write_var(streamID, varID, memtype, data, nmiss);
 	break;
       }
 #endif
@@ -1613,6 +1602,36 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 	break;
       }
     }
+}
+
+/*
+@Function  streamWriteVar
+@Title     Write a variable
+
+@Prototype void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  varID     Variable identifier.
+    @Item  data      Pointer to a block of data values to be written.
+    @Item  nmiss     Number of missing values.
+
+@Description
+The function streamWriteVar writes the values of one time step of a variable to an open dataset.
+@EndFunction
+*/
+void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
+{
+  stream_write_var(streamID, varID, MEMTYPE_DOUBLE, data, nmiss);
+}
+
+void streamWriteVarDouble(int streamID, int varID, const double *data, int nmiss)
+{
+  stream_write_var(streamID, varID, MEMTYPE_DOUBLE, data, nmiss);
+}
+
+void streamWriteVarFloat(int streamID, int varID, const float *data, int nmiss)
+{
+  stream_write_var(streamID, varID, MEMTYPE_FLOAT, data, nmiss);
 }
 
 /*
@@ -1701,24 +1720,8 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
     }
 }
 
-/*
-@Function  streamWriteVarSlice
-@Title     Write a horizontal slice of a variable
 
-@Prototype void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
-@Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
-    @Item  varID     Variable identifier.
-    @Item  levelID   Level identifier.
-    @Item  data      Pointer to a block of data values to be written.
-    @Item  nmiss     Number of missing values.
-
-@Description
-The function streamWriteVarSlice writes the values of a horizontal slice of a 
-variable to an open dataset.
-@EndFunction
-*/
-void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
+void stream_write_var_slice(int streamID, int varID, int levelID, int memtype, const void *data, int nmiss)
 {
   int filetype;
   int ierr = 0;
@@ -1740,6 +1743,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("grbWriteVarSlice not implemented for memtype float!");
         grbWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
 	break;
       }
@@ -1747,6 +1751,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("srvWriteVarSlice not implemented for memtype float!");
         srvWriteVarSliceDP(streamID, varID, levelID, data);
 	break;
       }
@@ -1754,6 +1759,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("extWriteVarSlice not implemented for memtype float!");
         extWriteVarSliceDP(streamID, varID, levelID, data);
 	break;
       }
@@ -1761,6 +1767,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("iegWriteVarSlice not implemented for memtype float!");
         iegWriteVarSliceDP(streamID, varID, levelID, data);
 	break;
       }
@@ -1772,7 +1779,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
     case FILETYPE_NC4C:
       {
 	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
-        ierr = cdfWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
+        ierr = cdf_write_var_slice(streamID, varID, levelID, memtype, data, nmiss);
 	break;
       }
 #endif
@@ -1782,6 +1789,37 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
 	break;
       }
     }
+}
+
+/*
+@Function  streamWriteVarSlice
+@Title     Write a horizontal slice of a variable
+
+@Prototype void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  varID     Variable identifier.
+    @Item  levelID   Level identifier.
+    @Item  data      Pointer to a block of data values to be written.
+    @Item  nmiss     Number of missing values.
+
+@Description
+The function streamWriteVarSlice writes the values of a horizontal slice of a variable to an open dataset.
+@EndFunction
+*/
+void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
+{
+  stream_write_var_slice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, nmiss);
+}
+
+void streamWriteVarSliceDouble(int streamID, int varID, int levelID, const double *data, int nmiss)
+{
+  stream_write_var_slice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, nmiss);
+}
+
+void streamWriteVarSliceFloat(int streamID, int varID, int levelID, const float *data, int nmiss)
+{
+  stream_write_var_slice(streamID, varID, levelID, MEMTYPE_FLOAT, data, nmiss);
 }
 
 

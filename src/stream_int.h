@@ -101,6 +101,9 @@ char *strdup(const char *s);
 #define  TYPE_REC  0
 #define  TYPE_VAR  1
 
+#define  MEMTYPE_DOUBLE  1
+#define  MEMTYPE_FLOAT   2
+
 
 typedef struct
 {
@@ -306,6 +309,9 @@ void    streamDefDimgroupID(int streamID, int dimgroupID);
 int     streamInqDimgroupID(int streamID);
 
 int getByteswap(int byteorder);
+
+
+void stream_write_record(int streamID, int memtype, const void *data, int nmiss);
 
 
 #endif  /* _STREAM_INT_H */

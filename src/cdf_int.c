@@ -446,8 +446,8 @@ void cdf_put_var_float(int ncid, int varid, const float *fp)
 }
 
 
-void  cdf_put_vara_double (int ncid, int varid, const size_t start[],
-			   const size_t count[], const double *dp)
+void  cdf_put_vara_double(int ncid, int varid, const size_t start[],
+                          const size_t count[], const double *dp)
 {
   int status;
 
@@ -461,8 +461,23 @@ void  cdf_put_vara_double (int ncid, int varid, const size_t start[],
 }
 
 
-void  cdf_get_vara_int (int ncid, int varid, const size_t start[],
-			const size_t count[], int *dp)
+void  cdf_put_vara_float(int ncid, int varid, const size_t start[],
+                         const size_t count[], const float *fp)
+{
+  int status;
+
+  status = nc_put_vara_float(ncid, varid, start, count, fp);
+
+  if ( CDF_Debug || status != NC_NOERR )
+    Message("ncid = %d varid = %d val0 = %f", ncid, varid, *fp);
+
+  if ( status != NC_NOERR )
+    Error("%s", nc_strerror(status));
+}
+
+
+void  cdf_get_vara_int(int ncid, int varid, const size_t start[],
+                       const size_t count[], int *dp)
 {
   int status;
 
@@ -476,12 +491,27 @@ void  cdf_get_vara_int (int ncid, int varid, const size_t start[],
 }
 
 
-void  cdf_get_vara_double (int ncid, int varid, const size_t start[],
-			   const size_t count[], double *dp)
+void  cdf_get_vara_double(int ncid, int varid, const size_t start[],
+                          const size_t count[], double *dp)
 {
   int status;
 
   status = nc_get_vara_double(ncid, varid, start, count, dp);
+
+  if ( CDF_Debug || status != NC_NOERR )
+    Message("ncid = %d varid = %d", ncid, varid);
+
+  if ( status != NC_NOERR )
+    Error("%s", nc_strerror(status));
+}
+
+
+void  cdf_get_vara_float(int ncid, int varid, const size_t start[],
+                         const size_t count[], float *fp)
+{
+  int status;
+
+  status = nc_get_vara_float(ncid, varid, start, count, fp);
 
   if ( CDF_Debug || status != NC_NOERR )
     Message("ncid = %d varid = %d", ncid, varid);
