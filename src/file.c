@@ -1068,7 +1068,7 @@ int fileOpen(const char *filename, const char *mode)
   bfile_t *fileptr = NULL;
 
 #ifdef USE_MPI
-  if ( memcmp ( mode, "w", 1 ) == 0 && commInqIOMode () != PIO_NONE )
+  if ( mode[0] == 'w' && commInqIOMode () != PIO_NONE )
       return pioFileOpenW ( filename );
 #endif
 
