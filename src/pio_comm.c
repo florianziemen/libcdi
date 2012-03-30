@@ -11,6 +11,44 @@
 
 #ifdef USE_MPI
 
+typedef struct {
+  int IOMode;
+  int maxIOMode;
+  int minIOModeWithSpecialProcs;
+  int nProcsIO;
+  int nProcsModel;
+  int isProcIO;
+
+  MPI_Comm commGlob;
+  int sizeGlob;
+  int rankGlob;
+  int root;
+
+  MPI_Comm commPio;
+  int sizePio;
+  int rankPio;
+
+  MPI_Comm commNode;
+  int sizeNode;
+  int rankNode;
+  char hostname [ MPI_MAX_PROCESSOR_NAME + 1 ];
+  nodeInfo_t nodeInfo;
+  int specialRankNode;
+
+  MPI_Comm commColl;
+  int sizeColl;
+  int rankColl;
+
+  MPI_Comm commCalc;
+
+  MPI_Comm * commsIO;
+  int nProcsColl;
+  int * procsCollMap;
+  int * nodeSizes;
+  int * nodeMap;
+} pioInfo_t;
+
+
 static pioInfo_t * info = NULL;
 
 
