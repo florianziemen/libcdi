@@ -454,7 +454,7 @@ void IOServer ()
               }
               backendCleanup (); 
               serverWinCleanup ();                 
-              listDestroy();
+              /* listDestroy(); */
               xdebug ( "RETURN" );
               return;
             }
