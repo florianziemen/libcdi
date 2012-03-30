@@ -60,11 +60,11 @@ void pcdiAssert   ( bool, const char *, const char *, int );
   }
 
 #else
-#define xdebug(fmt, ...)					\
-  if ( ddebug ){                                                \
+#define xdebug(fmt, ...)                                           \
+  if ( ddebug ){                                                   \
     fprintf ( stderr, "%s %s, %s, line %d: " fmt "\n",             \
               debugString, __func__, __FILE__,  __LINE__,          \
-              __VA_ARGS__ );                                 \
+              __VA_ARGS__ );                                       \
   }
 #endif
 
@@ -76,7 +76,7 @@ void pcdiAssert   ( bool, const char *, const char *, int );
     MPI_Comm_rank ( MPI_COMM_WORLD, &rank );                    \
     fprintf ( stderr, "pe%d in %s, %s, line %d: " fmt "\n",     \
               rank,  __func__, __FILE__,  __LINE__,             \
-              __VA_ARGS__ );                                 \
+              __VA_ARGS__ );                                    \
   }
 
 #else
