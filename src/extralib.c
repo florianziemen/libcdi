@@ -244,14 +244,13 @@ int extInqData(void *ext, int prec, void *data)
   size_t datasize;
   size_t i;
   int ierr = 0;
-  int rprec, number;
+  int rprec;
   void *buffer;
   int byteswap = extp->byteswap;
 
   datasize = extp->datasize;
   buffer   = extp->buffer;
   rprec    = extp->prec;
-  number   = extp->number;
 
   switch ( rprec )
     {
