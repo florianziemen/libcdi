@@ -33,9 +33,14 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = test_grib$(EXEEXT)
+check_PROGRAMS = test_grib$(EXEEXT) cksum_write$(EXEEXT) \
+	cksum_read$(EXEEXT)
 subdir = tests
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/test_cksum_extra.in $(srcdir)/test_cksum_grib.in \
+	$(srcdir)/test_cksum_ieg.in $(srcdir)/test_cksum_nc.in \
+	$(srcdir)/test_cksum_nc2.in $(srcdir)/test_cksum_nc4.in \
+	$(srcdir)/test_cksum_service.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps =  \
 	$(top_srcdir)/m4/acx_assert_lang_is_fortran_variant.m4 \
@@ -53,8 +58,18 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = test_cksum_grib test_cksum_nc test_cksum_nc2 \
+	test_cksum_nc4 test_cksum_extra test_cksum_service \
+	test_cksum_ieg
 CONFIG_CLEAN_VPATH_FILES =
+am_cksum_read_OBJECTS = cksum_read.$(OBJEXT) cksum.$(OBJEXT)
+cksum_read_OBJECTS = $(am_cksum_read_OBJECTS)
+cksum_read_LDADD = $(LDADD)
+cksum_read_DEPENDENCIES =
+am_cksum_write_OBJECTS = cksum_write.$(OBJEXT) cksum.$(OBJEXT)
+cksum_write_OBJECTS = $(am_cksum_write_OBJECTS)
+cksum_write_LDADD = $(LDADD)
+cksum_write_DEPENDENCIES =
 am_test_grib_OBJECTS = test_grib.$(OBJEXT)
 test_grib_OBJECTS = $(am_test_grib_OBJECTS)
 test_grib_LDADD = $(LDADD)
@@ -72,8 +87,10 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(test_grib_SOURCES)
-DIST_SOURCES = $(test_grib_SOURCES)
+SOURCES = $(cksum_read_SOURCES) $(cksum_write_SOURCES) \
+	$(test_grib_SOURCES)
+DIST_SOURCES = $(cksum_read_SOURCES) $(cksum_write_SOURCES) \
+	$(test_grib_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -254,9 +271,13 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 #
-TESTS = test_grib.sh
+TESTS = test_grib.sh test_cksum_grib test_cksum_nc test_cksum_extra \
+	test_cksum_service test_cksum_nc2 test_cksum_nc4 test_cksum_ieg
+
 #
 test_grib_SOURCES = test_grib.c
+cksum_write_SOURCES = cksum_write.c cksum.c cksum.h
+cksum_read_SOURCES = cksum_read.c cksum.c cksum.h
 #
 LDADD = -L../src -lcdi -lm
 AM_LDFLAGS = -L$(top_srcdir)/src
@@ -299,6 +320,20 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+test_cksum_grib: $(top_builddir)/config.status $(srcdir)/test_cksum_grib.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+test_cksum_nc: $(top_builddir)/config.status $(srcdir)/test_cksum_nc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+test_cksum_nc2: $(top_builddir)/config.status $(srcdir)/test_cksum_nc2.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+test_cksum_nc4: $(top_builddir)/config.status $(srcdir)/test_cksum_nc4.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+test_cksum_extra: $(top_builddir)/config.status $(srcdir)/test_cksum_extra.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+test_cksum_service: $(top_builddir)/config.status $(srcdir)/test_cksum_service.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+test_cksum_ieg: $(top_builddir)/config.status $(srcdir)/test_cksum_ieg.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
@@ -308,6 +343,12 @@ clean-checkPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+cksum_read$(EXEEXT): $(cksum_read_OBJECTS) $(cksum_read_DEPENDENCIES) 
+	@rm -f cksum_read$(EXEEXT)
+	$(LINK) $(cksum_read_OBJECTS) $(cksum_read_LDADD) $(LIBS)
+cksum_write$(EXEEXT): $(cksum_write_OBJECTS) $(cksum_write_DEPENDENCIES) 
+	@rm -f cksum_write$(EXEEXT)
+	$(LINK) $(cksum_write_OBJECTS) $(cksum_write_LDADD) $(LIBS)
 test_grib$(EXEEXT): $(test_grib_OBJECTS) $(test_grib_DEPENDENCIES) 
 	@rm -f test_grib$(EXEEXT)
 	$(LINK) $(test_grib_OBJECTS) $(test_grib_LDADD) $(LIBS)
@@ -318,6 +359,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_read.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_write.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_grib.Po@am__quote@
 
 .c.o:

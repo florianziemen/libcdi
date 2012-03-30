@@ -197,6 +197,14 @@ ACX_CHECK_CFINT([$srcdir/src/cfortran.h])
 
 AC_SUBST([CPPFLAGS])
 
+AC_CONFIG_FILES([tests/test_cksum_grib \
+                 tests/test_cksum_nc \
+                 tests/test_cksum_nc2 \
+                 tests/test_cksum_nc4 \
+                 tests/test_cksum_extra \
+                 tests/test_cksum_service \
+                 tests/test_cksum_ieg],[chmod a+x "$ac_file"])
+
 AC_OUTPUT([Makefile src/Makefile interfaces/Makefile app/Makefile \
 	tests/Makefile examples/Makefile cdi.settings \
 	pioExamples/Makefile src/pkgconfig/cdi.pc])

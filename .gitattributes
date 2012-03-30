@@ -297,6 +297,17 @@ tables/template.3.101.def -text
 tables/wmo_001 -text
 tests/Makefile.am -text
 tests/Makefile.in -text
+tests/cksum.c -text
+tests/cksum.h -text
+tests/cksum_read.c -text
+tests/cksum_write.c -text
+tests/test_cksum_extra.in -text
+tests/test_cksum_grib.in -text
+tests/test_cksum_ieg.in -text
+tests/test_cksum_nc.in -text
+tests/test_cksum_nc2.in -text
+tests/test_cksum_nc4.in -text
+tests/test_cksum_service.in -text
 tests/test_grib.c -text
 tests/test_grib.sh -text
 util/sunf95preproc-wrapper -text

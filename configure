@@ -26638,6 +26638,9 @@ fi
 
 
 
+ac_config_files="$ac_config_files tests/test_cksum_grib tests/test_cksum_nc tests/test_cksum_nc2 tests/test_cksum_nc4 tests/test_cksum_extra tests/test_cksum_service tests/test_cksum_ieg"
+
+
 ac_config_files="$ac_config_files Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile cdi.settings pioExamples/Makefile src/pkgconfig/cdi.pc"
 
 cat >confcache <<\_ACEOF
@@ -27969,6 +27972,13 @@ do
     "src/config.h") CONFIG_HEADERS="$CONFIG_HEADERS src/config.h" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
+    "tests/test_cksum_grib") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_grib" ;;
+    "tests/test_cksum_nc") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_nc" ;;
+    "tests/test_cksum_nc2") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_nc2" ;;
+    "tests/test_cksum_nc4") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_nc4" ;;
+    "tests/test_cksum_extra") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_extra" ;;
+    "tests/test_cksum_service") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_service" ;;
+    "tests/test_cksum_ieg") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_ieg" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "interfaces/Makefile") CONFIG_FILES="$CONFIG_FILES interfaces/Makefile" ;;
@@ -29784,6 +29794,13 @@ compiler_lib_search_path=$lt_compiler_lib_search_path_CXX
 _LT_EOF
 
  ;;
+    "tests/test_cksum_grib":F) chmod a+x "$ac_file" ;;
+    "tests/test_cksum_nc":F) chmod a+x "$ac_file" ;;
+    "tests/test_cksum_nc2":F) chmod a+x "$ac_file" ;;
+    "tests/test_cksum_nc4":F) chmod a+x "$ac_file" ;;
+    "tests/test_cksum_extra":F) chmod a+x "$ac_file" ;;
+    "tests/test_cksum_service":F) chmod a+x "$ac_file" ;;
+    "tests/test_cksum_ieg":F) chmod a+x "$ac_file" ;;
 
   esac
 done # for ac_tag
