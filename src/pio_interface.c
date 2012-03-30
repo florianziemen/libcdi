@@ -727,8 +727,9 @@ int pioInqVarDecoOff ( int vlistID, int varID )
    int rankModel = commInqRankModel ();
    xassert ( rankModel != CDI_UNDEFID );
    return vlistInqVarDecoOff ( vlistID, varID, rankModel );
-#endif
+#else
    return vlistInqVarDecoOff ( vlistID, varID, CDI_UNDEFID );
+#endif
 }
 
 /*****************************************************************************/
