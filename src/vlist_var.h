@@ -11,14 +11,15 @@
 
 #include "vlist.h"
 
+int  vlistInqVarDecoChunk ( int, int, int );
+int  vlistInqVarDecoOff   ( int, int, int );
+
 #ifdef USE_MPI
 int  vlistVarGetSize(vlist_t *p, int varID, MPI_Comm comm);
 void vlistVarPack(vlist_t *p, int varID,
                   char * buffer, int bufferSize, int * pos, MPI_Comm comm);
 void vlistVarUnpack(int vlistID,
                     char * buf, int size, int *position, int, MPI_Comm comm);
-int  vlistInqVarDecoChunk ( int, int, int );
-int  vlistInqVarDecoOff   ( int, int, int );
 void vlistDefVarIOrank    ( int, int, int );
 int  vlistInqVarIOrank    ( int, int );
 #endif
