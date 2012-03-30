@@ -106,6 +106,7 @@ int namespaceGetNumber ()
 
 void pioNamespaceSetActive ( int nId )
 {
+  /* FIXME: this should not be PIO-only */
 #ifdef USE_MPI
   xassert ( nId < nNamespaces && nId >= 0 );
 
