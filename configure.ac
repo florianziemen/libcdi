@@ -43,6 +43,7 @@ AS_IF([test -n "$FC" && test "X$FC" != "Xno"],
    AC_LANG_PUSH([Fortran])
    AC_PROG_FPP
    AC_LANG_POP([Fortran])])
+AM_CONDITIONAL([USE_FC],[test -n "$FC" && test "X$FC" != "Xno"])
 AC_PROG_F77
 AC_PROG_RANLIB
 AC_PROG_CXX
@@ -135,7 +136,8 @@ AS_IF([test "x${enable_isoc}" = "xyes"],
    CDI_F90_INTERFACE_FCFLAGS="${FC_MOD_FLAG}${includedir}"])
 AC_SUBST([CDI_F90_INTERFACE_FCFLAGS])
 #  Check the module extension of the fortran compiler
-ACX_SL_FC_MOD_SUFFIX(,[FCMODEXT=mod])
+AS_IF([test -n "$FC" && test "X$FC" != "Xno"],
+  [ACX_SL_FC_MOD_SUFFIX(,[FCMODEXT=mod])])
 # -----------------------------------------------------------------------
 # Check for SWIG - Generator for script-language bindings
 AC_ARG_ENABLE(swig,

@@ -34,9 +34,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = collectData$(EXEEXT) collectData2003$(EXEEXT) \
-	collectDataNStreams$(EXEEXT) $(am__EXEEXT_1)
-@USE_MPI_TRUE@am__append_1 = compareResourcesArray 
+noinst_PROGRAMS = collectData$(EXEEXT) collectDataNStreams$(EXEEXT) \
+	$(am__EXEEXT_1) $(am__EXEEXT_2)
+@USE_MPI_TRUE@am__append_1 = compareResourcesArray
+@USE_FC_TRUE@am__append_2 = collectData2003
 subdir = pioExamples
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -59,6 +60,7 @@ CONFIG_HEADER = $(top_builddir)/src/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @USE_MPI_TRUE@am__EXEEXT_1 = compareResourcesArray$(EXEEXT)
+@USE_FC_TRUE@am__EXEEXT_2 = collectData2003$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_collectData_OBJECTS = collectData.$(OBJEXT)
 collectData_OBJECTS = $(am_collectData_OBJECTS)

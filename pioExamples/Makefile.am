@@ -1,7 +1,11 @@
-noinst_PROGRAMS=collectData collectData2003 collectDataNStreams
+noinst_PROGRAMS=collectData collectDataNStreams
 
 if USE_MPI
-noinst_PROGRAMS+=compareResourcesArray 
+noinst_PROGRAMS+=compareResourcesArray
+endif
+
+if USE_FC
+noinst_PROGRAMS+=collectData2003
 endif
 
 AM_CFLAGS=-I$(top_srcdir)/src
