@@ -24,8 +24,6 @@
 extern resOps streamOps;
 extern void arrayDestroy ( void );
 
-MPI_Comm *       commPio;
-
 int            * getBufferSize = NULL;
 unsigned char ** getBuffer     = NULL;
 unsigned char ** getBufferHead = NULL;
