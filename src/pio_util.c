@@ -20,13 +20,16 @@ void pcdiAssert   ( bool assumption, const char * filename,
   if ( !assumption )
     {
 #ifdef USE_MPI
-      int rank;
-
-      MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+      int rank = -1, init_flag = 0;
+      if (MPI_Initialized(&init_flag) == MPI_SUCCESS && init_flag)
+        MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
       fprintf ( stderr, "ERROR, FALSE ASSUMPTION: PE%d in %s, %s, line %d\n",
                 rank, functionname, filename, line );
       fflush ( stderr );
-      MPI_Abort ( MPI_COMM_WORLD, 1 );
+      if (init_flag)
+        MPI_Abort ( MPI_COMM_WORLD, 1 );
+      else
+        exit ( EXIT_FAILURE );
 #else
       fprintf ( stderr, "ERROR, FALSE ASSUMPTION, %s, %s, line %d\n",
                 functionname, filename, line );
@@ -264,7 +267,13 @@ void printArray ( const char * cdiPioDebugString, char * ps, const void * array,
   double * dArray;
 
 #ifdef USE_MPI
-  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+  {
+    int init_flag;
+    if (MPI_Initialized(&init_flag) == MPI_SUCCESS && init_flag)
+      MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+    else
+      rank = -1;
+  }
   fprintf ( stdout, "%s pe%d in %s, %s, line %d: %s = ",
 	    cdiPioDebugString, rank, funname, filename, line, ps );
 #else

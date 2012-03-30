@@ -44,13 +44,19 @@ void pcdiAssert   ( bool, const char *, const char *, int );
 #define xassert(arg) pcdiAssert ( arg, __FILE__, __func__, __LINE__ );
 
 #ifdef USE_MPI
-#define xdebug(fmt, ...)					\
-  if ( ddebug ){                                                \
-    int rank;                                                   \
-    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );                    \
-    fprintf ( stderr, "%s pe%d in %s, %s, line %d: " fmt "\n",     \
-              debugString, rank,  __func__, __FILE__,  __LINE__,     \
-              ## __VA_ARGS__ );                                 \
+#define xdebug(fmt, ...)                                                \
+  if ( ddebug ){                                                        \
+    int rank;                                                           \
+    {                                                                   \
+      int init_flag;                                                    \
+      if (MPI_Initialized(&init_flag) == MPI_SUCCESS && init_flag)      \
+        MPI_Comm_rank ( MPI_COMM_WORLD, &rank );                        \
+      else                                                              \
+        rank = -1;                                                      \
+    }                                                                   \
+    fprintf ( stderr, "%s pe%d in %s, %s, line %d: " fmt "\n",          \
+              debugString, rank,  __func__, __FILE__,  __LINE__,        \
+              ## __VA_ARGS__ );                                         \
   }
 
 #else
