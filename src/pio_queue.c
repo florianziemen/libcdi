@@ -80,6 +80,7 @@ int queuePush ( queue_t *q, void *v, int noCollector, ... )
   if (( newListElem_T = ( listElem_t * ) malloc (sizeof ( listElem_t ))) == NULL )
     {
       perror ( "pio_queue: queuePush (): Not enough memory" );
+      /* FIXME: why not abort? */
       return 1;
     }
 
