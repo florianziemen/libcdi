@@ -29,12 +29,12 @@ void pcdiAssert   ( bool assumption, const char * filename,
       if (init_flag)
         MPI_Abort ( MPI_COMM_WORLD, 1 );
       else
-        exit ( EXIT_FAILURE );
+        abort();
 #else
       fprintf ( stderr, "ERROR, FALSE ASSUMPTION, %s, %s, line %d\n",
                 functionname, filename, line );
       fflush ( stderr );
-      exit ( EXIT_FAILURE );
+      abort();
 #endif
     }
 }
