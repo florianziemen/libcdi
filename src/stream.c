@@ -25,6 +25,7 @@
 #include "pio_util.h"
 
 #include "namespace.h"
+#include "pio_impl.h"
 #include "pio_interface.h"
 #include "pio_rpc.h"
 #include "pio_comm.h"
@@ -1155,57 +1156,67 @@ void streamClose(int streamID)
       if ( fileID == CDI_UNDEFID )
         Warning("File %s not open!", streamptr->filename);
       else
-	switch (filetype)
-	  {
+        {
+          /* FIXME: the following is an example for too tight
+           * coupling of MPI and serial code and needs to be fixed */
+#ifdef USE_MPI
+          if (commInqIOMode () == PIO_MPI)
+            {
+              fcMPINONB(fileID);
+            }
+#endif
+          switch (filetype)
+            {
 #if  defined  (HAVE_LIBGRIB)
-	  case FILETYPE_GRB:
-	  case FILETYPE_GRB2:
-	    {
-	      gribClose(fileID);
-	      gribContainersDelete(streamID);
-	      break;
-	    }
+            case FILETYPE_GRB:
+            case FILETYPE_GRB2:
+              {
+                gribClose(fileID);
+                gribContainersDelete(streamID);
+                break;
+              }
 #endif
 #if  defined  (HAVE_LIBSERVICE)
-	  case FILETYPE_SRV:
-	    {
-	      fileClose(fileID);
-	      srvDelete(streamptr->record->srvp);
-	      break;
-	    }
+            case FILETYPE_SRV:
+              {
+                fileClose(fileID);
+                srvDelete(streamptr->record->srvp);
+                break;
+              }
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-	  case FILETYPE_EXT:
-	    {
-	      fileClose(fileID);
-	      extDelete(streamptr->record->extp);
-	      break;
-	    }
+            case FILETYPE_EXT:
+              {
+                fileClose(fileID);
+                extDelete(streamptr->record->extp);
+                break;
+              }
 #endif
 #if  defined  (HAVE_LIBIEG)
-	  case FILETYPE_IEG:
-	    {
-	      fileClose(fileID);
-	      iegDelete(streamptr->record->iegp);
-	      break;
-	    }
+            case FILETYPE_IEG:
+              {
+                fileClose(fileID);
+                iegDelete(streamptr->record->iegp);
+                break;
+              }
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-	  case FILETYPE_NC:
-	  case FILETYPE_NC2:
-	  case FILETYPE_NC4:
-	  case FILETYPE_NC4C:
-	    {
-	      cdfClose(fileID);
-	      break;
-	    }
+            case FILETYPE_NC:
+            case FILETYPE_NC2:
+            case FILETYPE_NC4:
+            case FILETYPE_NC4C:
+              {
+                cdfClose(fileID);
+                break;
+              }
 #endif
-	  default:
-	    {
-	      Error("%s support not compiled in!", strfiletype(filetype));
-	      break;
-	    }
-	  }
+            default:
+              {
+                Error("%s support not compiled in!", strfiletype(filetype));
+                break;
+              }
+            }
+        }
     }
 #ifdef USE_MPI
   else
