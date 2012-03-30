@@ -167,7 +167,7 @@ void listInitialize ( void )
   {
     int null_id;
     null_id = fileOpen("/dev/null", "r");
-    if (null_id /= -1)
+    if (null_id != -1)
       fileClose(null_id);
   }
   atexit ( listDestroy );
