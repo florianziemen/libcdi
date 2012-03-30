@@ -283,14 +283,22 @@ void *reshGetVal ( cdiResH resH, resOps * ops  )
 
   nspT = namespaceResHDecode ( resH );
 
-  xassert ( listInit &&
-            nspT.nsp == nsp &&
-            nspT.idx >= 0 &&
-            nspT.idx < listSizeAllocated[nsp] );
-
-  listElem = listResources[nsp] + nspT.idx;
-
-  LIST_UNLOCK();
+  if (listInit &&
+      nspT.nsp == nsp &&
+      nspT.idx >= 0 &&
+      nspT.idx < listSizeAllocated[nsp])
+    {
+      listElem = listResources[nsp] + nspT.idx;
+      LIST_UNLOCK();
+    }
+  else
+    {
+      LIST_UNLOCK();
+      xassert(listInit &&
+              nspT.nsp == nsp &&
+              nspT.idx >= 0 &&
+              nspT.idx < listSizeAllocated[nsp] );
+    }
 
   xassert ( listElem &&
             listElem->ops == ops );
