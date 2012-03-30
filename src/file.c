@@ -1159,12 +1159,12 @@ int fileClose(int fileID)
   char *ftname[] = {"unknown", "open", "fopen"};
   bfile_t *fileptr;
 
+  fileptr = file_to_pointer(fileID);
+
 #ifdef USE_MPI
-  if ( commInqIOMode () != PIO_NONE )
+  if (fileptr && fileptr->mode == 'w' && commInqIOMode () != PIO_NONE )
     return pioFileClose ( fileID );
 #endif
-
-  fileptr = file_to_pointer(fileID);
 
   if ( fileptr == NULL )
     {
