@@ -549,21 +549,21 @@ int reshListCompare ( int nsp0, int nsp1 )
 	{
 	  if ( i >= listSizeAllocated[nsp1] )
 	    {
-	      xdebug ();
+	      xdebug("%s", "");
 	      return differ;
 	    }
 
 	  listElem1 = listResources[nsp1] + i;
 	  if ( !listElem1->val )
 	    {
-	      xdebug ();
+	      xdebug("%s", "");
 	      return differ;
 	    }
 
 	  xassert ( listElem0->ops && listElem1->ops );
 	  if ( listElem0->ops != listElem1->ops )
 	    {
-	      xdebug ();
+	      xdebug("%s", "");
 	      return differ;
 	    }
 
@@ -582,7 +582,7 @@ int reshListCompare ( int nsp0, int nsp1 )
   for ( ; i < listSizeAllocated[nsp1]; i++ )
     if ( listResources[nsp1][i].val )
       {
-	xdebug ();
+	xdebug("%s", "");
 	return differ;
       }
 
@@ -617,7 +617,7 @@ void reshListPrint ( char * filename )
       fp = fopen ( filename, "w" );
       if ( ! fp )
 	{
-	  xdebug ( "could not open file" );
+	  xdebug("%s", "could not open file" );
 	  fp = stdout;
 	}
     }

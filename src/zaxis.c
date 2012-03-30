@@ -327,7 +327,7 @@ void zaxisDefName(int zaxisID, const char *name)
 
   if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -359,7 +359,7 @@ void zaxisDefLongname(int zaxisID, const char *longname)
 
   if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -391,7 +391,7 @@ void zaxisDefUnits(int zaxisID, const char *units)
 
   if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -512,7 +512,7 @@ void zaxisDefPrec(int zaxisID, int prec)
 
   if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -554,7 +554,7 @@ void zaxisDefLtype(int zaxisID, int ltype)
 
   if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -600,7 +600,7 @@ void zaxisDefLevels(int zaxisID, const double *levels)
 
   if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -637,7 +637,7 @@ void zaxisDefLevel(int zaxisID, int levelID, double level)
 
   if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -962,7 +962,7 @@ void zaxisDefVct(int zaxisID, int size, const double *vct)
 
   if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -1025,7 +1025,7 @@ void zaxisDefLbounds(int zaxisID, const double *lbounds)
 
   if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -1053,7 +1053,7 @@ void zaxisDefUbounds(int zaxisID, const double *ubounds)
 
   if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -1081,7 +1081,7 @@ void zaxisDefWeights(int zaxisID, const double *weights)
 
   if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 

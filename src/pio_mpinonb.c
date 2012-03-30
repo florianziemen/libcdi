@@ -360,7 +360,7 @@ void      finalizeMPINONB ( void )
     }
   else
     {
-      xdebug ( "cleanup queue" );
+      xdebug("%s", "cleanup queue");
       free ( bibAFiledataM );
     }
 }

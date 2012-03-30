@@ -199,7 +199,7 @@ void backendCleanup ( void )
       finalizePOSIXNONB ();
       break;
     default:
-      xdebug ( " BACKENDCLEANUP FUNCTION NOT IMPLEMENTED YET." );
+      xdebug("%s", " BACKENDCLEANUP FUNCTION NOT IMPLEMENTED YET.");
     }
 }
 

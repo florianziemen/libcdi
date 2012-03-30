@@ -149,7 +149,7 @@ int destroyAFiledataP ( void *v )
   free ( afp->name );
   free ( afp );
 
-  xdebug ( "cleaned up, return" );
+  xdebug("%s", "cleaned up, return");
 
   return 0;
 }
@@ -180,7 +180,7 @@ int destroyBFiledataP ( void *v )
   free ( bfp->nfinished );
   free ( bfp );
 
-  xdebug ( "cleaned up, return" );
+  xdebug("%s", "cleaned up, return");
 
   return iret;
 }
@@ -322,7 +322,7 @@ void pwPOSIXNONB ( void )
 	  xmpi ( MPI_Recv ( messageBuffer, messagesize, MPI_CHAR, source, 
                             tag, commNode, &status ));
 
-	  xdebug ( "after recv, in loop" ); 
+	  xdebug("%s", "after recv, in loop");
 	  
 	  filename = strtok ( pMB, token );
 	  pMB += ( strlen ( filename ) + 1 );
@@ -453,7 +453,8 @@ void pwPOSIXNONB ( void )
                   }
                 else
                   {
-                    xdebug ( "all files are finished, destroy queue, return" );
+                    xdebug("%s", "all files are finished, destroy queue,"
+                           " return");
                     queueDestroy ( bibBFiledataP );
                   }
                 if ( rtag ) ungetTag ( rtag );
@@ -501,12 +502,12 @@ void sendP ( aFiledataP *afd, int id )
  
   if ( afd->db == afd->db1 )
     {
-      xdebug ( "Change to buffer 2 ..." );
+      xdebug("%s", "Change to buffer 2 ...");
       afd->db =  afd->db2;
     }
   else 
     {
-      xdebug ( "Change to buffer 1 ..." );
+      xdebug("%s", "Change to buffer 1 ...");
       afd->db =  afd->db1;
     }
   
@@ -688,7 +689,7 @@ void finalizePOSIXNONB ( void )
   
   xmpi ( MPI_Send ( &buffer, 1, MPI_INT, specialRank, tag, commNode ));
 
-  xdebug ( "SENT MESSAGE WITH TAG \"IO_FINALIZE\" TO SPECIAL PROCESS" );
+  xdebug("%s", "SENT MESSAGE WITH TAG \"IO_FINALIZE\" TO SPECIAL PROCESS");
 
   if ( bibAFiledataP->head != NULL ) 
     {
@@ -696,7 +697,7 @@ void finalizePOSIXNONB ( void )
     }
   else
     {
-      xdebug ( "cleanup queue" );
+      xdebug("%s", "cleanup queue");
       queueDestroy ( bibAFiledataP );
     }
 }

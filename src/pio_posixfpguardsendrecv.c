@@ -327,7 +327,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
                   }
                 else
                   {
-                    xdebug ( "cleanup queue" );
+                    xdebug("%s", "cleanup queue");
                     queueDestroy ( bibBFiledataPF );
                   }
                 if ( rtag ) ungetTag ( rtag );
@@ -585,7 +585,7 @@ void  finalizePOSIXFPGUARDSENDRECV ( void )
     }
   else
     {
-      xdebug ( "cleanup queue" );
+      xdebug("%s", "cleanup queue");
       queueDestroy ( bibAFiledataPF );
     }
 }

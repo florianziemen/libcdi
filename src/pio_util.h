@@ -56,7 +56,7 @@ void pcdiAssert   ( bool, const char *, const char *, int );
     }                                                                   \
     fprintf ( stderr, "%s pe%d in %s, %s, line %d: " fmt "\n",          \
               debugString, rank,  __func__, __FILE__,  __LINE__,        \
-              ## __VA_ARGS__ );                                         \
+              __VA_ARGS__ );                                            \
   }
 
 #else
@@ -64,7 +64,7 @@ void pcdiAssert   ( bool, const char *, const char *, int );
   if ( ddebug ){                                                \
     fprintf ( stderr, "%s %s, %s, line %d: " fmt "\n",             \
               debugString, __func__, __FILE__,  __LINE__,          \
-              ## __VA_ARGS__ );                                 \
+              __VA_ARGS__ );                                 \
   }
 #endif
 
@@ -76,7 +76,7 @@ void pcdiAssert   ( bool, const char *, const char *, int );
     MPI_Comm_rank ( MPI_COMM_WORLD, &rank );                    \
     fprintf ( stderr, "pe%d in %s, %s, line %d: " fmt "\n",     \
               rank,  __func__, __FILE__,  __LINE__,             \
-              ## __VA_ARGS__ );                                 \
+              __VA_ARGS__ );                                 \
   }
 
 #else
@@ -84,7 +84,7 @@ void pcdiAssert   ( bool, const char *, const char *, int );
   if ( ddebug == MAXDEBUG ){                                    \
     fprintf ( stderr, "%s, %s, line %d: " fmt "\n",             \
               __func__, __FILE__,  __LINE__,                    \
-              ## __VA_ARGS__ );                                 \
+              __VA_ARGS__ );                                 \
   }
 #endif
 /*
@@ -108,14 +108,14 @@ char * outTextComm ( MPI_Comm * );
     MPI_Comm_rank ( MPI_COMM_WORLD, &rank );				\
     fprintf ( stderr, "WARNING: pe%d in %s, %s, line %d: " fmt "\n",	\
               rank,  __func__, __FILE__,  __LINE__,			\
-              ## __VA_ARGS__ );						\
+              __VA_ARGS__ );						\
   }
 #else
 #define xwarning(fmt, ...)					\
   if ( ddebug ){                                                \
     fprintf ( stderr, "WARNING: %s, %s, line %d: " fmt "\n",    \
               __func__, __FILE__,  __LINE__,                    \
-              ## __VA_ARGS__ );                                 \
+              __VA_ARGS__ );                                 \
   }
 #endif
 

@@ -296,7 +296,7 @@ void taxisDefType(int taxisID, int type)
 
   if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed." );
       return;
     }
 
@@ -377,7 +377,7 @@ void taxisDefRdate(int taxisID, int rdate)
 
   if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -408,7 +408,7 @@ void taxisDefRtime(int taxisID, int rtime)
 
   if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -441,7 +441,7 @@ void taxisDefCalendar(int taxisID, int calendar)
 
   if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -459,7 +459,7 @@ void taxisDefTunit(int taxisID, int unit)
 
   if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -477,7 +477,7 @@ void taxisDefNumavg(int taxisID, int numavg)
 
   if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -523,7 +523,7 @@ void taxisDeleteBounds(int taxisID)
 
   if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -613,7 +613,7 @@ void taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub)
 
   if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -674,7 +674,7 @@ void taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub)
 
   if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 

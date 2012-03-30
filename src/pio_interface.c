@@ -311,7 +311,7 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
   if ( streamSizes )  free ( streamSizes );
   if ( resHs )        free ( resHs );
 
-  xdebug ( "RETURN" );
+  xdebug("%s", "RETURN");
 }
 
 /************************************************************************/
@@ -321,7 +321,7 @@ void modelWinCleanup ( void )
 {
   int collID;
 
-  xdebug ( "START" );
+  xdebug("%s", "START");
   if ( winPostSet != NULL &&
        win != NULL &&
        winBuffer != NULL &&
@@ -343,7 +343,7 @@ void modelWinCleanup ( void )
   if ( winBuffer )       free ( winBuffer );
   if ( winBufferSize )   free ( winBufferSize );
 
-  xdebug ( "RETURN. CLEANED UP MPI_WIN'S" );
+  xdebug("%s", "RETURN. CLEANED UP MPI_WIN'S");
 }
 
 /************************************************************************/
@@ -358,7 +358,7 @@ static
   int rankModel   = commInqRankModel ();
   int root = commInqRootGlob ();
 
-  xdebug ( "START" );
+  xdebug("%s", "START");
   xassert ( winBufferSize != NULL );
 
   nstreams = reshCountType ( &streamOps );
@@ -397,7 +397,7 @@ static
   xdebug ("sumWinBufferSize=%d, MAXWINBUFFERSIZE=%d", sumWinBufferSize, MAXWINBUFFERSIZE );
   xassert ( sumWinBufferSize <= MAXWINBUFFERSIZE );
   xprintArray ( "winBufferSize", winBufferSize, nProcsColl, DATATYPE_INT );
-  xdebug ( "RETURN" );
+  xdebug("%s", "RETURN");
 }
 
 
@@ -433,7 +433,7 @@ void modelWinCreate ( void )
   int collID, ranks[1];
   int nProcsColl = commInqNProcsColl ();
 
-  xdebug ( "START" );
+  xdebug("%s", "START");
   winBufferSize   = xmalloc ( nProcsColl * sizeof ( winBufferSize[0] ));
   winBuffer       = xmalloc ( nProcsColl * sizeof ( winBuffer[0] ));
   winBufferHead   = xmalloc ( nProcsColl * sizeof ( winBufferHead[0] ));
@@ -461,7 +461,7 @@ void modelWinCreate ( void )
       xmpi ( MPI_Group_incl ( groupsIONetto[collID], 1, ranks,
                               &groupsIONetto[collID] ));
     }
-  xdebug ( "RETURN, CREATED MPI_WIN'S" );
+  xdebug("%s", "RETURN, CREATED MPI_WIN'S");
 }
 
 /************************************************************************/
@@ -562,7 +562,7 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
   size_t size = 0;
   int funcID = func2Int ( func );
 
-  xdebug ( "START" );
+  xdebug("%s", "START");
 
   if ( rankGlob != root ) return;
 
@@ -702,7 +702,7 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
 
   va_end ( ap );
 
-  xdebug ( "RETURN" );
+  xdebug("%s", "RETURN");
 }
 
 #endif
@@ -809,13 +809,15 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode,
 int pioInit ( int commGlobArg, int nProcsIO, int IOMode, int nNamespaces,
               int * hasLocalFile )
 {
-  xdebug( "START: %s, nProcsIO=%d, IOMode=%d, nNamespaces=%d",
 #ifdef USE_MPI
-          "cdi parallel",
+  xdebug("START: %s, nProcsIO=%d, IOMode=%d, nNamespaces=%d",
+         "cdi parallel",
+         nProcsIO, IOMode, nNamespaces );
 #else
-          "cdi serial",
+  xdebug("START: %s, nProcsIO=%d, IOMode=%d, nNamespaces=%d",
+         "cdi serial",
+         nProcsIO, IOMode, nNamespaces );
 #endif
-          nProcsIO, IOMode, nNamespaces );
 
 #ifdef USE_MPI
   MPI_Comm commGlob;
@@ -827,8 +829,7 @@ int pioInit ( int commGlobArg, int nProcsIO, int IOMode, int nNamespaces,
   return MPI_Comm_c2f ( pioInit_c ( commGlob, nProcsIO, IOMode, nNamespaces,
                                     hasLocalFile ));
 #endif
-
-  xdebug ( "RETURN" );
+  xdebug("%s", "RETURN" );
   return 0;
 }
 
@@ -841,7 +842,7 @@ void  pioEndDef ( void )
   int bufferSize;
   int rankGlob = commInqRankGlob ();
 
-  xdebug ( "START" );
+  xdebug("%s", "START");
 
   varsMapNDeco ( commInqNNodes (), commInqNodeSizes ());
 
@@ -854,14 +855,14 @@ void  pioEndDef ( void )
       xmpi ( MPI_Send ( buffer, bufferSize, MPI_PACKED, commInqNProcsModel (),
                         RESOURCES, commInqCommsIO ( rankGlob )));
 
-      xdebug ( "SENT MESSAGE WITH TAG \"RESOURCES\"" );
+      xdebug("%s", "SENT MESSAGE WITH TAG \"RESOURCES\"");
 
       reshPackBufferDestroy ( &buffer );
     }
 
   modelWinCreate ();
   namespaceDefResStatus ( STAGE_TIMELOOP );
-  xdebug ( "RETURN" );
+  xdebug("%s", "RETURN");
 #endif
 }
 
@@ -870,9 +871,9 @@ void  pioEndDef ( void )
 void  pioEndTimestepping ( void )
 {
 #ifdef USE_MPI
-  xdebug ( "START" );
+  xdebug("%s", "START");
   namespaceDefResStatus ( STAGE_CLEANUP );
-  xdebug ( "RETURN" );
+  xdebug("%s", "RETURN");
 #endif
 }
 
@@ -893,17 +894,17 @@ void pioFinalize ( void )
 {
 #ifdef USE_MPI
   int collID, ibuffer = 1111;
-  xdebug ( "START" );
+  xdebug("%s", "START");
   namespaceCleanup ();
   for ( collID = 0; collID < commInqNProcsColl (); collID++ )
     {
       xmpi ( MPI_Send ( &ibuffer, 1, MPI_INT, commInqNProcsModel (),
                         FINALIZE, commInqCommsIO ( collID )));
-      xdebug ( "SENT MESSAGE WITH TAG \"FINALIZE\"" );
+      xdebug("%s", "SENT MESSAGE WITH TAG \"FINALIZE\"");
     }
   modelWinCleanup ();
   commDestroy ();
-  xdebug ( "RETURN" );
+  xdebug("%s", "RETURN");
 #endif
 }
 
@@ -918,7 +919,7 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
   int nProcsColl = commInqNProcsColl ();
   int nProcsModel = commInqNProcsModel ();
 
-  xdebug ( "START" );
+  xdebug("%s", "START");
 
   xassert ( tsID       >= 0     &&
             vdate      >= 0     &&
@@ -934,7 +935,7 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
     {
       xmpi ( MPI_Send ( &buffer[0], timestepSize, MPI_INTEGER, nProcsModel,
                         WRITETS, commInqCommsIO ( rankGlob )));
-      xdebug ( "SENT MESSAGE WITH TAG \"WRITETS\"" );
+      xdebug("%s", "SENT MESSAGE WITH TAG \"WRITETS\"");
     }
 
   for ( collID = 0; collID < nProcsColl; collID++ )

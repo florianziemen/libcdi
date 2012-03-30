@@ -51,7 +51,7 @@ void serverWinCleanup ()
   if ( getBufferSize ) free ( getBufferSize );
   if ( getBufferHead ) free ( getBufferHead );
   
-  xdebug ( "cleaned up mpi_win" );
+  xdebug("%s", "cleaned up mpi_win");
 }
  
  /************************************************************************/
@@ -137,7 +137,7 @@ static
       getBufferHead[modelID] = getBuffer[modelID];
     }
 
-  xdebug ( "created mpi_win, allocated getBuffer" );
+  xdebug("%s", "created mpi_win, allocated getBuffer");
 }
 
 /************************************************************************/
@@ -254,7 +254,7 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
   int nProcsModel = commInqNProcsModel ();
   int root        = commInqRootGlob ();
   
-  xdebug ( "START" );
+  xdebug("%s", "START");
   
   getBufferGetFromEnd ( __func__, __LINE__, 
                         root, &tokenID, sizeof ( tokenID ));
@@ -325,7 +325,7 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
       getBufferGetFromEnd ( __func__, __LINE__, 
                             root, &tokenID, sizeof ( tokenID ));
     }
-  xdebug ( "RETURN" );        
+  xdebug("%s", "RETURN");
 } 
 
 /************************************************************************/
@@ -359,7 +359,7 @@ void getData ( int tsID, int vdate, int vtime )
   char text[1024];
   int nProcsModel = commInqNProcsModel ();
           
-  xdebug ( "START" );
+  xdebug("%s", "START");
 
   // todo put in correct lbs and ubs
   xassert ( tsID >= 0 && vdate >= 0 && vtime >= 0 );
@@ -387,7 +387,7 @@ void getData ( int tsID, int vdate, int vtime )
       }
   readGetBuffers ( tsID, vdate, vtime );
           
-  xdebug ( "RETURN" );
+  xdebug("%s", "RETURN");
 }
 
 /************************************************************************/
@@ -408,7 +408,7 @@ void IOServer ()
   MPI_Comm commCalc;
   MPI_Status status;
 
-  xdebug ( "START" );
+  xdebug("%s", "START");
 
   backendInit ();
   if ( commInqRankNode () == commInqSpecialRankNode ()) 
@@ -429,7 +429,7 @@ void IOServer ()
           iBuffer = xmalloc ( sizeof ( int ));     
           xmpi ( MPI_Recv ( iBuffer, 1, MPI_INTEGER, source, 
                             tag, commCalc, &status ));
-          xdebug ( "RECEIVED MESSAGE WITH TAG \"FINALIZE\"" );
+          xdebug("%s", "RECEIVED MESSAGE WITH TAG \"FINALIZE\"");
           free ( iBuffer );
           nfinished++;
           xdebug ( "nfinished=%d, nProcsModel=%d", 
@@ -455,7 +455,7 @@ void IOServer ()
               backendCleanup (); 
               serverWinCleanup ();                 
               /* listDestroy(); */
-              xdebug ( "RETURN" );
+              xdebug("%s", "RETURN");
               return;
             }
 	  
@@ -467,9 +467,9 @@ void IOServer ()
 	  buffer = xmalloc ( size * sizeof ( char ));
 	  xmpi ( MPI_Recv ( buffer, size, MPI_PACKED, source,
                             tag, commCalc, &status ));
-          xdebug ( "RECEIVED MESSAGE WITH TAG \"RESOURCES\"" );
+          xdebug("%s", "RECEIVED MESSAGE WITH TAG \"RESOURCES\"");
 	  rpcUnpackResources ( buffer, size, commCalc );
-          xdebug ();
+          xdebug("%s", "");
 	  free ( buffer );
           if ( ddebug > 0 && commInqRankGlob () == nProcsModel ) 
             reshListPrint ( "reshListIOServer" );

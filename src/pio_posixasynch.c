@@ -177,7 +177,7 @@ int destroyAFiledataPA ( void *v )
   free ( afd->name );
   free ( afd );
 
-  xdebug ( "cleaned up, return" );
+  xdebug("%s", "cleaned up, return");
 
   return 0;
 }
@@ -234,7 +234,7 @@ int destroyBFiledataPA ( void *v )
   free ( bfd->name );
   free ( bfd );
 
-  xdebug ( "closed file and cleaned up, return" );
+  xdebug("%s", "closed file and cleaned up, return");
 
   return iret;
 }
@@ -547,7 +547,8 @@ void pwPOSIXASYNCH ( void )
                   }
                 else
                   {
-                    xdebug ( "all files are finished, destroy queue, return" );
+                    xdebug("%s", "all files are finished, destroy queue,"
+                           " return");
                     queueDestroy ( bibBFiledataPA );
                   }
                 if ( rtag ) ungetTag ( rtag );
@@ -592,12 +593,12 @@ void sendPA ( aFiledataPA *afd, int id )
   
   if ( afd->db == afd->db1 )
     {
-      xdebug ( "Change to buffer 2 ..." );
+      xdebug("%s", "Change to buffer 2 ...");
       afd->db =  afd->db2;
     }
   else 
     {
-      xdebug ( "Change to buffer 1 ..." );
+      xdebug("%s", "Change to buffer 1 ...");
       afd->db =  afd->db1;
     }
   
@@ -779,7 +780,7 @@ void finalizePOSIXASYNCH ( void )
     }
   else
     {
-      xdebug ( "cleanup queue" );
+      xdebug("%s", "cleanup queue");
       queueDestroy ( bibAFiledataPA );
     }
 }

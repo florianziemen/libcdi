@@ -142,7 +142,7 @@ void modelRun ()
     for ( j = 0; j < nVars; j++ )
       zaxisDestroy ( zaxisID[i][j] );
   gridDestroy ( gridID );
-  xdebug ( "RETURN" );
+  xdebug("%s", "RETURN");
 }
 
 
@@ -162,7 +162,7 @@ int main (int argc, char *argv[])
 #ifdef USE_MPI
   MPI_Comm commGlob, commModel;
   int sizeGlob;
-  int rankGlob; 
+  int rankGlob;
   int IOMode, nProcsIO, count;
 
   xmpi ( MPI_Init ( &argc, &argv));
@@ -172,7 +172,7 @@ int main (int argc, char *argv[])
   xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
 
   if (argc > 1)
-    {    
+    {
       xassert ( argc >= 3 );
       IOMode = atoi(argv[1]);
       nProcsIO = atoi(argv[2]);

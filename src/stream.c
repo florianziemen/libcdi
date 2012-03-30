@@ -412,7 +412,7 @@ void streamDefByteorder(int streamID, int byteorder)
 
   if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -617,10 +617,10 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
 
-  xdebug( "START, filename = %s, filemode = %s, filetype = %d, "
-          "namespaceHasLocalFile(%d)=%s",
-          filename, filemode, filetype, namespaceGetActive(),
-	  namespaceHasLocalFile ( namespaceGetActive ()) ? "true":"false");
+  xdebug("START, filename = %s, filemode = %s, filetype = %d, "
+         "namespaceHasLocalFile(%d)=%s",
+         filename, filemode, filetype, namespaceGetActive(),
+	 namespaceHasLocalFile ( namespaceGetActive ()) ? "true":"false");
 
   if ( hasLocalFile )
     {
@@ -631,7 +631,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	case FILETYPE_GRB2:
 	  {
 	    fileID = gribOpen(filename, filemode);
-            xdebug ( "%s OPENED, fileID=%d", filename, fileID );
+            xdebug("%s OPENED, fileID=%d", filename, fileID);
 	    record = (Record *) malloc(sizeof(Record));
 	    record->buffer = NULL;
 	    break;
@@ -2184,7 +2184,7 @@ void streamDefCompType(int streamID, int comptype)
 
   if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
@@ -2202,7 +2202,7 @@ void streamDefCompLevel(int streamID, int complevel)
 
   if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
     {
-      xwarning ( "Operation not executed." );
+      xwarning("%s", "Operation not executed.");
       return;
     }
 
