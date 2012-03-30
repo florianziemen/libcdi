@@ -1216,7 +1216,7 @@ double vlistInqVarScalefactor(int vlistID, int varID)
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
       xwarning ( "Operation not executed." );
-      return;
+      return 1.0;
     }
 
   vlistptr = vlist_to_pointer(vlistID);
