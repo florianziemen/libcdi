@@ -3,6 +3,10 @@
 
 #if  defined  (HAVE_LIBNETCDF)
 
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
+
 #include "netcdf.h"
 
 void cdf_create (const char *path, int cmode, int *idp);

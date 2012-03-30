@@ -20,6 +20,9 @@
 #include "varscan.h"
 #include "vlist.h"
 
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
 
 #if  defined  (HAVE_LIBNETCDF)
 #  include "netcdf.h"
