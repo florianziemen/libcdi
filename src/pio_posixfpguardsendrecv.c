@@ -67,8 +67,8 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   afd = ( aFiledataPF * ) xmalloc ( sizeof ( aFiledataPF ));
   memset ( afd, 0, sizeof ( aFiledataPF ));
   len = strlen ( key );
-  afd->name = ( char * ) xmalloc (( len ) * sizeof ( char ));
-  strcpy ( afd->name, key );
+  afd->name = (char *)xmalloc(len + 1);
+  strcpy(afd->name, key);
   afd->size = bs;
   afd->tsID = 0;
 
