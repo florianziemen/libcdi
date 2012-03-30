@@ -237,9 +237,13 @@ void     commDefIOMode  ( int IOMode, int maxIOMode, int minIOModeWithSpecialPro
 
 int      commInqIOMode  ( void )
 {
-  xassert ( info != NULL &&
-           info->IOMode != CDI_UNDEFID );
-  return info->IOMode;
+  if (info != NULL)
+    {
+      xassert ( info->IOMode != CDI_UNDEFID );
+      return info->IOMode;
+    }
+  else
+    return PIO_NONE;
 }
 
 
