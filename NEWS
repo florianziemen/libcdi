@@ -4,7 +4,7 @@ CDI NEWS
 Version 1.5.5 (?? May 2012):
 
    New features:
-     * added single precision support: streamWriteVarFloat, streamWriteVarSliceFloat
+     * Added single precision support: streamWriteVarFloat, streamWriteVarSliceFloat
 
 Version 1.5.4 (30 January 2012):
 
