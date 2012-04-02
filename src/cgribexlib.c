@@ -3733,7 +3733,7 @@ void encode_double_array_common(int numBits, long packStart, long datasize, GRIB
 }
 
 static
-void encode_double_array(int numBits, long PackStart, long datasize, 
+void encode_double_array(int numBits, long packStart, long datasize, 
 			 GRIBPACK *restrict lGrib,
 			 const double *restrict data, 
 			 double zref, double factor, long *restrict gz)
@@ -3741,6 +3741,9 @@ void encode_double_array(int numBits, long PackStart, long datasize,
   long i, z = *gz;
   unsigned long ipval;
   double tmp;
+
+  data += packStart;
+  datasize -= packStart;
 
   if      ( numBits ==  8 )
     {
@@ -3751,7 +3754,7 @@ void encode_double_array(int numBits, long PackStart, long datasize,
 #elif defined (__uxp__)
 #pragma loop novrec
 #endif
-      for ( i = PackStart; i < datasize; i++ )
+      for ( i = 0; i < datasize; i++ )
 	{
 	  tmp = ((data[i] - zref) * factor + 0.5);
           ipval = (unsigned long) tmp;
@@ -3830,7 +3833,7 @@ void encode_double_array(int numBits, long PackStart, long datasize,
 #ifdef _GET_IBM_COUNTER 
       hpmStart(2, "pack 16bit base");
 #endif
-      for ( i = PackStart; i < datasize; i++ )
+      for ( i = 0; i < datasize; i++ )
       	{
       	  tmp = ((data[i] - zref) * factor + 0.5);
           ipval = (unsigned long) tmp;
@@ -3856,7 +3859,7 @@ void encode_double_array(int numBits, long PackStart, long datasize,
 #elif defined (__uxp__)
 #pragma loop novrec
 #endif
-      for ( i = PackStart; i < datasize; i++ )
+      for ( i = 0; i < datasize; i++ )
 	{
 	  tmp = ((data[i] - zref) * factor + 0.5);
           ipval = (unsigned long) tmp;
@@ -3879,7 +3882,7 @@ void encode_double_array(int numBits, long PackStart, long datasize,
 #elif defined (__uxp__)
 #pragma loop novrec
 #endif
-      for ( i = PackStart; i < datasize; i++ )
+      for ( i = 0; i < datasize; i++ )
 	{
 	  tmp = ((data[i] - zref) * factor + 0.5);
           ipval = (unsigned long) tmp;
@@ -3896,7 +3899,7 @@ void encode_double_array(int numBits, long PackStart, long datasize,
     }
   else if ( numBits > 0 && numBits <= 32 )
     {
-      encode_double_array_common(numBits, PackStart, datasize, lGrib, 
+      encode_double_array_common(numBits, 0, datasize, lGrib, 
 				 data, zref, factor, &z);
     }
   else if ( numBits == 0 )
@@ -9559,7 +9562,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.5.2" " of ""Apr  2 2012"" ""10:27:22";
+static const char grb_libvers[] = "1.5.2" " of ""Apr  2 2012"" ""10:50:01";
 const char *
 cgribexLibraryVersion(void)
 {
