@@ -3,6 +3,10 @@
 
 /* CGRIBEXLIB_VERSION="1.5.2" */
 
+#ifdef _ARCH_PWR6
+#pragma options nostrict
+#endif
+
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
 #endif
@@ -3758,10 +3762,6 @@ void encode_double_array(int numBits, long packStart, long datasize,
 	{
 	  tmp = ((data[i] - zref) * factor + 0.5);
           ipval = (unsigned long) tmp;
-	  /*
-	  if ( ipval > max_nbpv_pow2 ) ipval = max_nbpv_pow2;
-	  if ( ipval < 0 ) ipval = 0;
-	  */
 	  lGrib[z  ] = ipval;
           z++;
 	}
@@ -3784,6 +3784,7 @@ void encode_double_array(int numBits, long packStart, long datasize,
 	long ofs = datasize - residual;
 	double dval[__UNROLL_DEPTH_2];
 	unsigned long ival[__UNROLL_DEPTH_2];
+	// unsigned short *sgrib = (unsigned short *) (lGrib + z);
 	// reducing FP operations to single FMA is slowing down ...
 	// double dconst; 
 
@@ -3799,27 +3800,27 @@ void encode_double_array(int numBits, long packStart, long datasize,
 	  {
 	    for (j = 0; j < __UNROLL_DEPTH_2; j++) 
 	      {
-		 dval[j] = ((data[i+j] - zref) * factor + 0.5);
-		 //dval[j] = factor*data[i+j] - dconst;
-	      }
-	    for (j = 0; j < __UNROLL_DEPTH_2; j++) 
-	      {
+		dval[j] = ((data[i+j] - zref) * factor + 0.5);
 		ival[j] = (unsigned long) dval[j];
-		//  if ( ipval > max_nbpv_pow2 ) ipval = max_nbpv_pow2;
-		//  if ( ipval < 0 ) ipval = 0;
 	      }
 	    for (j = 0; j < __UNROLL_DEPTH_2; j++) 
 	      {
-		lGrib[z  ] = ival[j] >>  8;
-		lGrib[z+1] = ival[j];
+		//*sgrib = (unsigned short) ival[j];
+		//sgrib++;
+	        lGrib[z  ] = ival[j] >>  8;
+	        lGrib[z+1] = ival[j];
 		z += 2;
 	      }
 	  }
 	for (j = 0; j < residual; j++) 
 	  {
 	    dval[j] = ((data[ofs+j] - zref) * factor + 0.5);
-	    //dval[j] = factor*data[i+j] - dconst;
 	    ival[j] = (unsigned long) dval[j];
+	  }
+	for (j = 0; j < residual; j++) 
+	  {
+	    //*sgrib = (unsigned short) ival[j];
+	    //sgrib++;
 	    lGrib[z  ] = ival[j] >>  8;
 	    lGrib[z+1] = ival[j];
 	    z += 2;
@@ -3837,10 +3838,6 @@ void encode_double_array(int numBits, long packStart, long datasize,
       	{
       	  tmp = ((data[i] - zref) * factor + 0.5);
           ipval = (unsigned long) tmp;
-      	  /*
-      	  if ( ipval > max_nbpv_pow2 ) ipval = max_nbpv_pow2;
-      	  if ( ipval < 0 ) ipval = 0;
-      	  */
           lGrib[z  ] = ipval >>  8;
           lGrib[z+1] = ipval;
           z += 2;
@@ -3863,10 +3860,6 @@ void encode_double_array(int numBits, long packStart, long datasize,
 	{
 	  tmp = ((data[i] - zref) * factor + 0.5);
           ipval = (unsigned long) tmp;
-	  /*
-	  if ( ipval > max_nbpv_pow2 ) ipval = max_nbpv_pow2;
-	  if ( ipval < 0 ) ipval = 0;
-	  */
           lGrib[z  ] =  ipval >> 16;
           lGrib[z+1] =  ipval >>  8;
           lGrib[z+2] =  ipval;
@@ -3886,10 +3879,6 @@ void encode_double_array(int numBits, long packStart, long datasize,
 	{
 	  tmp = ((data[i] - zref) * factor + 0.5);
           ipval = (unsigned long) tmp;
-	  /*
-	  if ( ipval > max_nbpv_pow2 ) ipval = max_nbpv_pow2;
-	  if ( ipval < 0 ) ipval = 0;
-	  */
           lGrib[z  ] =  ipval >> 24;
           lGrib[z+1] =  ipval >> 16;
           lGrib[z+2] =  ipval >>  8;
@@ -9562,7 +9551,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.5.2" " of ""Apr  2 2012"" ""10:50:01";
+static const char grb_libvers[] = "1.5.2" " of ""Apr  2 2012"" ""12:52:13";
 const char *
 cgribexLibraryVersion(void)
 {
