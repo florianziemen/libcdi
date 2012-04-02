@@ -3799,7 +3799,7 @@ void encode_double_array(int numBits, long PackStart, long datasize,
 		 dval[j] = ((data[i+j] - zref) * factor + 0.5);
 		 //dval[j] = factor*data[i+j] - dconst;
 	      }
-s	    for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	    for (j = 0; j < __UNROLL_DEPTH_2; j++) 
 	      {
 		ival[j] = (unsigned long) dval[j];
 		//  if ( ipval > max_nbpv_pow2 ) ipval = max_nbpv_pow2;
@@ -9559,7 +9559,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.5.2" " of ""Apr  2 2012"" ""10:03:59";
+static const char grb_libvers[] = "1.5.2" " of ""Apr  2 2012"" ""10:27:22";
 const char *
 cgribexLibraryVersion(void)
 {
