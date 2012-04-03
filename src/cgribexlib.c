@@ -3753,6 +3753,9 @@ void encode_double_array(int numBits, long packStart, long datasize,
 
   if      ( numBits ==  8 )
     {
+#ifdef _GET_IBM_COUNTER 
+      hpmStart(2, "pack 8 bit base");
+#endif
 #if   defined (CRAY)
 #pragma _CRI ivdep
 #elif defined (SX)
@@ -3767,11 +3770,14 @@ void encode_double_array(int numBits, long packStart, long datasize,
 	  lGrib[z  ] = ipval;
           z++;
 	}
+#ifdef _GET_IBM_COUNTER 
+      hpmStop(2);
+#endif
     }
   else if ( numBits == 16 )
     {
 #ifdef _GET_IBM_COUNTER 
-      hpmStart(2, "pack 16bit base");
+      hpmStart(3, "pack 16 bit base");
 #endif
 #if   defined (CRAY)
 #pragma _CRI ivdep
@@ -3789,11 +3795,14 @@ void encode_double_array(int numBits, long packStart, long datasize,
           z += 2;
       	}
 #ifdef _GET_IBM_COUNTER 
-      hpmStop(2);
+      hpmStop(3);
 #endif
     }
   else if ( numBits == 24 )
     {
+#ifdef _GET_IBM_COUNTER 
+      hpmStart(4, "pack 24 bit base");
+#endif
 #if   defined (CRAY)
 #pragma _CRI ivdep
 #elif defined (SX)
@@ -3810,9 +3819,15 @@ void encode_double_array(int numBits, long packStart, long datasize,
           lGrib[z+2] =  ipval;
           z += 3;
 	}
+#ifdef _GET_IBM_COUNTER 
+      hpmStop(4);
+#endif
     }
   else if ( numBits == 32 )
     {
+#ifdef _GET_IBM_COUNTER 
+      hpmStart(5, "pack 32 bit base");
+#endif
 #if   defined (CRAY)
 #pragma _CRI ivdep
 #elif defined (SX)
@@ -3830,6 +3845,9 @@ void encode_double_array(int numBits, long packStart, long datasize,
           lGrib[z+3] =  ipval;
           z += 4;
 	}
+#ifdef _GET_IBM_COUNTER 
+      hpmStop(5);
+#endif
     }
   else if ( numBits > 0 && numBits <= 32 )
     {
@@ -3872,30 +3890,48 @@ void encode_double_array_unrolled(int numBits, long packStart, long datasize,
     long ofs = datasize - residual;
     double dval[__UNROLL_DEPTH_2];
     unsigned long ival;
-    unsigned short *sgrib = (unsigned short *) (lGrib + z);
-    // reducing FP operations to single FMA is slowing down ...
-    // double dconst; 
 
-    //   (data - zref)*factor+0.5
-    // = factor*data - zref*factor + 0.5
-    // dconst = zref*factor-0.5;
+    // reducing FP operations to single FMA is slowing down on pwr6 ...
 
     if      ( numBits ==  8 )
       {
-	for ( i = 0; i < datasize; i++ )
+	unsigned char *cgrib = (unsigned char *) (lGrib + z);
+#ifdef _GET_IBM_COUNTER 
+	hpmStart(2, "pack 8 bit unrolled");
+#endif
+	for ( i = 0; i < datasize - residual; i += __UNROLL_DEPTH_2 ) 
 	  {
-	    tmp = ((data[i] - zref) * factor + 0.5);
-	    ipval = (unsigned long) tmp;
-	    lGrib[z  ] = ipval;
+	    for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	      {
+		dval[j] = ((data[i] - zref) * factor + 0.5);
+	      }
+	    for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	      {
+		*cgrib =  (unsigned long) dval[j];
+		cgrib++;
+		z++;
+	      }
+	  }
+	for (j = 0; j < residual; j++) 
+	  {
+	    dval[j] = ((data[ofs+j] - zref) * factor + 0.5);
+	  }
+	for (j = 0; j < residual; j++) 
+	  {
+	    *cgrib = (unsigned long) dval[j];
+	    cgrib++;
 	    z++;
 	  }
+#ifdef _GET_IBM_COUNTER 
+	hpmStop(2);
+#endif
       }
     else if ( numBits == 16 )
       {
+	unsigned short *sgrib = (unsigned short *) (lGrib + z);
 #ifdef _GET_IBM_COUNTER 
-	hpmStart(2, "pack 16bit unrolled");
+	hpmStart(3, "pack 16 bit unrolled");
 #endif
-	//#pragma nounrollandfuse
 	for ( i = 0; i < datasize - residual; i += __UNROLL_DEPTH_2 ) 
 	  {
 	    for (j = 0; j < __UNROLL_DEPTH_2; j++) 
@@ -3946,33 +3982,107 @@ void encode_double_array_unrolled(int numBits, long packStart, long datasize,
 	      }
 	  }
 #ifdef _GET_IBM_COUNTER 
-	hpmStop(2);
+	hpmStop(3);
 #endif
       }
     else if ( numBits == 24 )
       {
-	for ( i = 0; i < datasize; i++ )
+#ifdef _GET_IBM_COUNTER 
+	hpmStart(4, "pack 24 bit unrolled");
+#endif
+	for ( i = 0; i < datasize - residual; i += __UNROLL_DEPTH_2 ) 
 	  {
-	    tmp = ((data[i] - zref) * factor + 0.5);
-	    ipval = (unsigned long) tmp;
+	    for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	      {
+		dval[j] = ((data[i+j] - zref) * factor + 0.5);
+	      }
+	    for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	      {
+		ipval = (unsigned long) dval[j];
+		lGrib[z  ] =  ipval >> 16;
+		lGrib[z+1] =  ipval >>  8;
+		lGrib[z+2] =  ipval;
+		z += 3;
+	      }
+	  }
+	for (j = 0; j < residual; j++) 
+	  {
+	    dval[j] = ((data[ofs+j] - zref) * factor + 0.5);
+	  }
+	for (j = 0; j < residual; j++) 
+	  {
+	    ipval = (unsigned long) dval[j];
 	    lGrib[z  ] =  ipval >> 16;
 	    lGrib[z+1] =  ipval >>  8;
 	    lGrib[z+2] =  ipval;
 	    z += 3;
 	  }
+#ifdef _GET_IBM_COUNTER 
+	hpmStop(4);
+#endif
       }
     else if ( numBits == 32 )
       {
-	for ( i = 0; i < datasize; i++ )
+#ifdef _GET_IBM_COUNTER 
+	hpmStart(5, "pack 32 bit unrolled");
+#endif
+	unsigned int *igrib = (unsigned int *) (lGrib + z);
+	for ( i = 0; i < datasize - residual; i += __UNROLL_DEPTH_2 ) 
 	  {
-	    tmp = ((data[i] - zref) * factor + 0.5);
-	    ipval = (unsigned long) tmp;
-	    lGrib[z  ] =  ipval >> 24;
-	    lGrib[z+1] =  ipval >> 16;
-	    lGrib[z+2] =  ipval >>  8;
-	    lGrib[z+3] =  ipval;
-	    z += 4;
-	}
+	    for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	      {
+		dval[j] = ((data[i+j] - zref) * factor + 0.5);
+	      }
+	    if ( IS_BIGENDIAN() )
+	      {
+		for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+		  {
+		    *igrib = (unsigned long) dval[j];
+		    igrib++;
+		    z += 4;
+		  }
+	      }
+	    else
+	      {
+		for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+		  {
+		    ival = (unsigned long) dval[j];
+		    lGrib[z  ] =  ipval >> 24;
+		    lGrib[z+1] =  ipval >> 16;
+		    lGrib[z+2] =  ipval >>  8;
+		    lGrib[z+3] =  ipval;
+		    z += 4;
+		  }
+	      }
+	  }
+	for (j = 0; j < residual; j++) 
+	  {
+	    dval[j] = ((data[ofs+j] - zref) * factor + 0.5);
+	  }
+	if ( IS_BIGENDIAN() )
+	  {
+	    for (j = 0; j < residual; j++) 
+	      {
+		*igrib = (unsigned long) dval[j];
+		igrib++;
+		z += 4;
+	      }
+	  }
+	else
+	  {
+	    for (j = 0; j < residual; j++) 
+	      {
+		ival = (unsigned long) dval[j];
+		lGrib[z  ] =  ipval >> 24;
+		lGrib[z+1] =  ipval >> 16;
+		lGrib[z+2] =  ipval >>  8;
+		lGrib[z+3] =  ipval;
+		z += 4;
+	      }
+	  }
+#ifdef _GET_IBM_COUNTER 
+	hpmStop(5);
+#endif
       }
     else if ( numBits > 0 && numBits <= 32 )
       {
@@ -9642,7 +9752,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.5.2" " of ""Apr  3 2012"" ""15:08:45";
+static const char grb_libvers[] = "1.5.2" " of ""Apr  3 2012"" ""15:28:49";
 const char *
 cgribexLibraryVersion(void)
 {
