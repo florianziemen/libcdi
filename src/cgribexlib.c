@@ -16,8 +16,8 @@
 #include <stdarg.h>
 #include <sys/types.h>
 
-#undef _GET_X86_COUNTER
-#undef _GET_IBM_COUNTER
+//#undef _GET_X86_COUNTER
+//#undef _GET_IBM_COUNTER
 //#undef _ARCH_PWR6
 //#undef __AVX__
 //#undef __SSE2__
@@ -9642,7 +9642,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.5.2" " of ""Apr  3 2012"" ""11:54:11";
+static const char grb_libvers[] = "1.5.2" " of ""Apr  3 2012"" ""15:02:30";
 const char *
 cgribexLibraryVersion(void)
 {
