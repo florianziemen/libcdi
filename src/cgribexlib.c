@@ -9271,7 +9271,7 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
 	else if ( status == SZ_MEM_ERROR )
 	  Warning("SZ_MEM_ERROR code %3d level %3d", PDS_Parameter, PDS_Level2);
 	else if ( status == SZ_OUTBUFF_FULL )
-	  Warning("SZ_OUTBUFF_FULL code %3d level %3d", PDS_Parameter, PDS_Level2);
+	  /*Warning("SZ_OUTBUFF_FULL code %3d level %3d", PDS_Parameter, PDS_Level2)*/;
 	else
 	  Warning("SZ ERROR: %d code %3d level %3d", status, PDS_Parameter, PDS_Level2);
       }
@@ -9642,7 +9642,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.5.2" " of ""Apr  3 2012"" ""11:30:07";
+static const char grb_libvers[] = "1.5.2" " of ""Apr  3 2012"" ""11:54:11";
 const char *
 cgribexLibraryVersion(void)
 {
