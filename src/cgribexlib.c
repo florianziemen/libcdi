@@ -9642,7 +9642,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.5.2" " of ""Apr  3 2012"" ""15:02:30";
+static const char grb_libvers[] = "1.5.2" " of ""Apr  3 2012"" ""15:07:09";
 const char *
 cgribexLibraryVersion(void)
 {
