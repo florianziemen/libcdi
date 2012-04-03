@@ -106,6 +106,8 @@
 #  define  GRIBPACK     unsigned char
 #endif
 
+#define  U_BYTEORDER     static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1}
+#define  IS_BIGENDIAN()  (u_byteorder.c[sizeof(long) - 1])
 
 #if defined (__xlC__) /* performance problems on IBM */
 #ifndef DBL_IS_NAN
@@ -3043,7 +3045,7 @@ void minmaxval(const double *restrict data, long datasize, double *fmin, double 
 #else
 
 #ifdef _ARCH_PWR6
-#define __UNROLL_DEPTH_1 7
+#define __UNROLL_DEPTH_1 6
 
   // to allow pipelining we have to unroll 
 
@@ -3768,66 +3770,15 @@ void encode_double_array(int numBits, long packStart, long datasize,
     }
   else if ( numBits == 16 )
     {
+#ifdef _GET_IBM_COUNTER 
+      hpmStart(2, "pack 16bit base");
+#endif
 #if   defined (CRAY)
 #pragma _CRI ivdep
 #elif defined (SX)
 #pragma vdir nodep
 #elif defined (__uxp__)
 #pragma loop novrec
-#endif
-
-#ifdef _ARCH_PWR6
-#define __UNROLL_DEPTH_2 8
-      {
-	long j;
-	long residual =  datasize % __UNROLL_DEPTH_2;
-	long ofs = datasize - residual;
-	double dval[__UNROLL_DEPTH_2];
-	unsigned long ival[__UNROLL_DEPTH_2];
-	// reducing FP operations to single FMA is slowing down ...
-	// double dconst; 
-
-        //   (data - zref)*factor+0.5
-        // = factor*data - zref*factor + 0.5
-	// dconst = zref*factor-0.5;
-
-#ifdef _GET_IBM_COUNTER 
-	hpmStart(2, "pack 16bit unrolled");
-#endif
-	//#pragma nounrollandfuse
-	for ( i = 0; i < datasize - residual; i += __UNROLL_DEPTH_2 ) 
-	  {
-	    for (j = 0; j < __UNROLL_DEPTH_2; j++) 
-	      {
-		dval[j] = ((data[i+j] - zref) * factor + 0.5);
-		ival[j] = (unsigned long) dval[j];
-	      }
-	    for (j = 0; j < __UNROLL_DEPTH_2; j++) 
-	      {
-	        lGrib[z  ] = ival[j] >>  8;
-	        lGrib[z+1] = ival[j];
-		z += 2;
-	      }
-	  }
-	for (j = 0; j < residual; j++) 
-	  {
-	    dval[j] = ((data[ofs+j] - zref) * factor + 0.5);
-	    ival[j] = (unsigned long) dval[j];
-	  }
-	for (j = 0; j < residual; j++) 
-	  {
-	    lGrib[z  ] = ival[j] >>  8;
-	    lGrib[z+1] = ival[j];
-	    z += 2;
-	  }
-#ifdef _GET_IBM_COUNTER 
-	hpmStop(2);
-#endif
-#undef __UNROLL_DEPTH_2
-      }
-#else
-#ifdef _GET_IBM_COUNTER 
-      hpmStart(2, "pack 16bit base");
 #endif
       for ( i = 0; i < datasize; i++ )
       	{
@@ -3839,7 +3790,6 @@ void encode_double_array(int numBits, long packStart, long datasize,
       	}
 #ifdef _GET_IBM_COUNTER 
       hpmStop(2);
-#endif
 #endif
     }
   else if ( numBits == 24 )
@@ -3895,6 +3845,151 @@ void encode_double_array(int numBits, long packStart, long datasize,
     }
 
   *gz = z;
+}
+
+
+static
+void encode_double_array_unrolled(int numBits, long packStart, long datasize, 
+				  GRIBPACK *restrict lGrib,
+				  const double *restrict data, 
+				  double zref, double factor, long *restrict gz)
+{
+  U_BYTEORDER;
+  long i, j, z = *gz;
+  unsigned long ipval;
+  double tmp;
+#ifdef _ARCH_PWR6
+#define __UNROLL_DEPTH_2 8
+#else
+#define __UNROLL_DEPTH_2 8
+#endif
+
+  data += packStart;
+  datasize -= packStart;
+
+  {
+    long residual =  datasize % __UNROLL_DEPTH_2;
+    long ofs = datasize - residual;
+    double dval[__UNROLL_DEPTH_2];
+    unsigned long ival;
+    unsigned short *sgrib = (unsigned short *) (lGrib + z);
+    // reducing FP operations to single FMA is slowing down ...
+    // double dconst; 
+
+    //   (data - zref)*factor+0.5
+    // = factor*data - zref*factor + 0.5
+    // dconst = zref*factor-0.5;
+
+    if      ( numBits ==  8 )
+      {
+	for ( i = 0; i < datasize; i++ )
+	  {
+	    tmp = ((data[i] - zref) * factor + 0.5);
+	    ipval = (unsigned long) tmp;
+	    lGrib[z  ] = ipval;
+	    z++;
+	  }
+      }
+    else if ( numBits == 16 )
+      {
+#ifdef _GET_IBM_COUNTER 
+	hpmStart(2, "pack 16bit unrolled");
+#endif
+	//#pragma nounrollandfuse
+	for ( i = 0; i < datasize - residual; i += __UNROLL_DEPTH_2 ) 
+	  {
+	    for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	      {
+		dval[j] = ((data[i+j] - zref) * factor + 0.5);
+	      }
+	    if ( IS_BIGENDIAN() )
+	      {
+		for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+		  {
+		    *sgrib = (unsigned long) dval[j];
+		    sgrib++;
+		    z += 2;
+		  }
+	      }
+	    else
+	      {
+		for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+		  {
+		    ival = (unsigned long) dval[j];
+		    lGrib[z  ] = ival >>  8;
+		    lGrib[z+1] = ival;
+		    z += 2;
+		  }
+	      }
+	  }
+	for (j = 0; j < residual; j++) 
+	  {
+	    dval[j] = ((data[ofs+j] - zref) * factor + 0.5);
+	  }
+	if ( IS_BIGENDIAN() )
+	  {
+	    for (j = 0; j < residual; j++) 
+	      {
+		*sgrib = (unsigned long) dval[j];
+		sgrib++;
+		z += 2;
+	      }
+	  }
+	else
+	  {
+	    for (j = 0; j < residual; j++) 
+	      {
+		ival = (unsigned long) dval[j];
+		lGrib[z  ] = ival >>  8;
+		lGrib[z+1] = ival;
+		z += 2;
+	      }
+	  }
+#ifdef _GET_IBM_COUNTER 
+	hpmStop(2);
+#endif
+      }
+    else if ( numBits == 24 )
+      {
+	for ( i = 0; i < datasize; i++ )
+	  {
+	    tmp = ((data[i] - zref) * factor + 0.5);
+	    ipval = (unsigned long) tmp;
+	    lGrib[z  ] =  ipval >> 16;
+	    lGrib[z+1] =  ipval >>  8;
+	    lGrib[z+2] =  ipval;
+	    z += 3;
+	  }
+      }
+    else if ( numBits == 32 )
+      {
+	for ( i = 0; i < datasize; i++ )
+	  {
+	    tmp = ((data[i] - zref) * factor + 0.5);
+	    ipval = (unsigned long) tmp;
+	    lGrib[z  ] =  ipval >> 24;
+	    lGrib[z+1] =  ipval >> 16;
+	    lGrib[z+2] =  ipval >>  8;
+	    lGrib[z+3] =  ipval;
+	    z += 4;
+	}
+      }
+    else if ( numBits > 0 && numBits <= 32 )
+      {
+	encode_double_array_common(numBits, 0, datasize, lGrib, 
+				   data, zref, factor, &z);
+      }
+    else if ( numBits == 0 )
+      {
+      }
+    else
+      {
+	Error("Unimplemented packing factor %d!", numBits);
+      }
+  }
+
+  *gz = z;
+#undef __UNROLL_DEPTH_2
 }
 
 /* GRIB BLOCK 4 - BINARY DATA SECTION */
@@ -4158,7 +4253,11 @@ int encodeBDS(GRIBPACK *lGrib, long *gribLen, int decscale, int *isec2, int *ise
 
   *datsize  = ((datasize-PackStart)*nbpv + 7)/8;
 
-  encode_double_array(nbpv, PackStart, datasize, lGrib, data, zref, factor, &z);
+#if  defined  (_ARCH_PWR6)
+  encode_double_array_unrolled(nbpv, PackStart, datasize, lGrib, data, zref, factor, &z);
+#else
+  encode_double_array         (nbpv, PackStart, datasize, lGrib, data, zref, factor, &z);
+#endif
 
   if ( unused_bits >= 8 ) Put1Byte(0);  /*  Fillbyte                     */
 
@@ -7449,9 +7548,6 @@ C     ----------------------------------------------------------------
   nsubce  = 0;
 }
 
-#undef  IsBigendian
-#define IsBigendian()  ( u_byteorder.c[sizeof(long) - 1] )
-
 /* pack 8-bit bytes from 64-bit words to a packed buffer */
 /* same as : for ( int i = 0; i < bc; ++i ) cp[i] = (unsigned char) up[i]; */
 
@@ -7460,7 +7556,7 @@ long packInt64(unsigned INT64 *up, unsigned char *cp, long bc, long tc)
 #if defined (CRAY)
   (void) _pack(up, cp, bc, tc);
 #else
-  static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
+  U_BYTEORDER;
   unsigned char *cp0;
   unsigned INT64 upi, *up0, *ip0, *ip1, *ip2, *ip3, *ip4, *ip5, *ip6, *ip7;
   long head, trail, inner, i, j;
@@ -7501,7 +7597,7 @@ long packInt64(unsigned INT64 *up, unsigned char *cp, long bc, long tc)
 
   j = 0;
 
-  if ( IsBigendian() )
+  if ( IS_BIGENDIAN() )
     {
 #if defined (CRAY)
 #pragma _CRI ivdep
@@ -7566,7 +7662,7 @@ long packInt64(unsigned INT64 *up, unsigned char *cp, long bc, long tc)
 
 long unpackInt64(unsigned char *cp, unsigned INT64 *up, long bc, long tc)
 {
-  static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
+  U_BYTEORDER;
   unsigned char *cp0;
   unsigned INT64 *up0;
   unsigned INT64 *ip0, *ip1, *ip2, *ip3, *ip4, *ip5, *ip6, *ip7;
@@ -7609,7 +7705,7 @@ long unpackInt64(unsigned char *cp, unsigned INT64 *up, long bc, long tc)
 
   j = 0;
 
-  if ( IsBigendian() )
+  if ( IS_BIGENDIAN() )
     {
 #if defined (CRAY)
 #pragma _CRI ivdep
@@ -7672,7 +7768,7 @@ long unpackInt64(unsigned char *cp, unsigned INT64 *up, long bc, long tc)
 #if  defined  (INT32)
 long packInt32(unsigned INT32 *up, unsigned char *cp, long bc, long tc)
 {
-  static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
+  U_BYTEORDER;
   unsigned char *cp0;
   unsigned INT32 *up0, *ip0, *ip1, *ip2, *ip3;
   long head, trail, inner, i, j;
@@ -7709,7 +7805,7 @@ long packInt32(unsigned INT32 *up, unsigned char *cp, long bc, long tc)
 
   j = 0;
 
-  if ( IsBigendian() )
+  if ( IS_BIGENDIAN() )
     {
 #if defined (CRAY)
 #pragma _CRI ivdep
@@ -7768,7 +7864,7 @@ long packInt32(unsigned INT32 *up, unsigned char *cp, long bc, long tc)
 #if  defined  (INT32)
 long unpackInt32(unsigned char *cp, unsigned INT32 *up, long bc, long tc)
 {
-  static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
+  U_BYTEORDER;
   unsigned char *cp0;
   unsigned INT32 *up0;
   unsigned INT32 *ip0, *ip1, *ip2, *ip3;
@@ -7807,7 +7903,7 @@ long unpackInt32(unsigned char *cp, unsigned INT32 *up, long bc, long tc)
 
   j = 0;
 
-  if ( IsBigendian() )
+  if ( IS_BIGENDIAN() )
     {
 #if defined (CRAY)
 #pragma _CRI ivdep
@@ -9546,7 +9642,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.5.2" " of ""Apr  3 2012"" ""08:53:40";
+static const char grb_libvers[] = "1.5.2" " of ""Apr  3 2012"" ""11:30:07";
 const char *
 cgribexLibraryVersion(void)
 {
