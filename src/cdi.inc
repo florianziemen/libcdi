@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.5.4
+! Fortran interface for CDI library version 1.5.5rc1
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   January 2012
+! Uwe Schulzweida, MPI-MET, Hamburg,   April 2012
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -509,6 +509,20 @@
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVar
 
+!                     streamWriteVarDouble
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     DOUBLEPRECISION data_vec,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamWriteVarDouble
+
+!                     streamWriteVarFloat
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     REAL            data_vec,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamWriteVarFloat
+
 !                     streamReadVarSlice
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
@@ -524,6 +538,22 @@
 !                                     DOUBLEPRECISION data_vec,
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVarSlice
+
+!                     streamWriteVarSliceDouble
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     INTEGER         levelID,
+!                                     DOUBLEPRECISION data_vec,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamWriteVarSliceDouble
+
+!                     streamWriteVarSliceFloat
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     INTEGER         levelID,
+!                                     REAL            data_vec,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamWriteVarSliceFloat
 
 !
 !  STREAM record I/O routines
@@ -552,10 +582,28 @@
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteRecord
 
+!                     streamWriteRecordDouble
+!                                    (INTEGER         streamID,
+!                                     DOUBLEPRECISION data_vec,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamWriteRecordDouble
+
+!                     streamWriteRecordFloat
+!                                    (INTEGER         streamID,
+!                                     REAL            data_vec,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamWriteRecordFloat
+
 !                     streamCopyRecord
 !                                    (INTEGER         streamIDdest,
 !                                     INTEGER         streamIDsrc)
       EXTERNAL        streamCopyRecord
+
+!                     streamInqGinfo
+!                                    (INTEGER         streamID,
+!                                     INTEGER         intnum,
+!                                     REAL            fltnum)
+      EXTERNAL        streamInqGinfo
 
 !
 !  VLIST routines

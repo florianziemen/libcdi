@@ -103,8 +103,12 @@ FCALLSCFUN1 (INT, streamNtsteps, STREAMNTSTEPS, streamntsteps, INT)
 
 FCALLSCSUB4 (streamReadVar, STREAMREADVAR, streamreadvar, INT, INT, PDOUBLE, PINT)
 FCALLSCSUB4 (streamWriteVar, STREAMWRITEVAR, streamwritevar, INT, INT, PDOUBLE, INT)
+FCALLSCSUB4 (streamWriteVarDouble, STREAMWRITEVARDOUBLE, streamwritevardouble, INT, INT, PDOUBLE, INT)
+FCALLSCSUB4 (streamWriteVarFloat, STREAMWRITEVARFLOAT, streamwritevarfloat, INT, INT, PFLOAT, INT)
 FCALLSCSUB5 (streamReadVarSlice, STREAMREADVARSLICE, streamreadvarslice, INT, INT, INT, PDOUBLE, PINT)
 FCALLSCSUB5 (streamWriteVarSlice, STREAMWRITEVARSLICE, streamwritevarslice, INT, INT, INT, PDOUBLE, INT)
+FCALLSCSUB5 (streamWriteVarSliceDouble, STREAMWRITEVARSLICEDOUBLE, streamwritevarslicedouble, INT, INT, INT, PDOUBLE, INT)
+FCALLSCSUB5 (streamWriteVarSliceFloat, STREAMWRITEVARSLICEFLOAT, streamwritevarslicefloat, INT, INT, INT, PFLOAT, INT)
 
 /*  STREAM record I/O routines  */
 
@@ -112,7 +116,10 @@ FCALLSCSUB3 (streamInqRecord, STREAMINQRECORD, streaminqrecord, INT, PINT, PINT)
 FCALLSCSUB3 (streamDefRecord, STREAMDEFRECORD, streamdefrecord, INT, INT, INT)
 FCALLSCSUB3 (streamReadRecord, STREAMREADRECORD, streamreadrecord, INT, PDOUBLE, PINT)
 FCALLSCSUB3 (streamWriteRecord, STREAMWRITERECORD, streamwriterecord, INT, PDOUBLE, INT)
+FCALLSCSUB3 (streamWriteRecordDouble, STREAMWRITERECORDDOUBLE, streamwriterecorddouble, INT, PDOUBLE, INT)
+FCALLSCSUB3 (streamWriteRecordFloat, STREAMWRITERECORDFLOAT, streamwriterecordfloat, INT, PFLOAT, INT)
 FCALLSCSUB2 (streamCopyRecord, STREAMCOPYRECORD, streamcopyrecord, INT, INT)
+FCALLSCSUB3 (streamInqGinfo, STREAMINQGINFO, streaminqginfo, INT, PINT, PFLOAT)
 
 /*  VLIST routines  */
 
