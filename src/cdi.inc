@@ -509,19 +509,12 @@
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVar
 
-!                     streamWriteVarDouble
-!                                    (INTEGER         streamID,
-!                                     INTEGER         varID,
-!                                     DOUBLEPRECISION data_vec,
-!                                     INTEGER         nmiss)
-      EXTERNAL        streamWriteVarDouble
-
-!                     streamWriteVarFloat
+!                     streamWriteVarF
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
 !                                     REAL            data_vec,
 !                                     INTEGER         nmiss)
-      EXTERNAL        streamWriteVarFloat
+      EXTERNAL        streamWriteVarF
 
 !                     streamReadVarSlice
 !                                    (INTEGER         streamID,
@@ -539,21 +532,13 @@
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVarSlice
 
-!                     streamWriteVarSliceDouble
-!                                    (INTEGER         streamID,
-!                                     INTEGER         varID,
-!                                     INTEGER         levelID,
-!                                     DOUBLEPRECISION data_vec,
-!                                     INTEGER         nmiss)
-      EXTERNAL        streamWriteVarSliceDouble
-
-!                     streamWriteVarSliceFloat
+!                     streamWriteVarSliceF
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
 !                                     INTEGER         levelID,
 !                                     REAL            data_vec,
 !                                     INTEGER         nmiss)
-      EXTERNAL        streamWriteVarSliceFloat
+      EXTERNAL        streamWriteVarSliceF
 
 !
 !  STREAM record I/O routines
@@ -582,17 +567,11 @@
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteRecord
 
-!                     streamWriteRecordDouble
-!                                    (INTEGER         streamID,
-!                                     DOUBLEPRECISION data_vec,
-!                                     INTEGER         nmiss)
-      EXTERNAL        streamWriteRecordDouble
-
-!                     streamWriteRecordFloat
+!                     streamWriteRecordF
 !                                    (INTEGER         streamID,
 !                                     REAL            data_vec,
 !                                     INTEGER         nmiss)
-      EXTERNAL        streamWriteRecordFloat
+      EXTERNAL        streamWriteRecordF
 
 !                     streamCopyRecord
 !                                    (INTEGER         streamIDdest,
