@@ -1624,12 +1624,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
   stream_write_var(streamID, varID, MEMTYPE_DOUBLE, data, nmiss);
 }
 
-void streamWriteVarDouble(int streamID, int varID, const double *data, int nmiss)
-{
-  stream_write_var(streamID, varID, MEMTYPE_DOUBLE, data, nmiss);
-}
-
-void streamWriteVarFloat(int streamID, int varID, const float *data, int nmiss)
+void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
 {
   stream_write_var(streamID, varID, MEMTYPE_FLOAT, data, nmiss);
 }
@@ -1812,12 +1807,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
   stream_write_var_slice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, nmiss);
 }
 
-void streamWriteVarSliceDouble(int streamID, int varID, int levelID, const double *data, int nmiss)
-{
-  stream_write_var_slice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, nmiss);
-}
-
-void streamWriteVarSliceFloat(int streamID, int varID, int levelID, const float *data, int nmiss)
+void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, int nmiss)
 {
   stream_write_var_slice(streamID, varID, levelID, MEMTYPE_FLOAT, data, nmiss);
 }

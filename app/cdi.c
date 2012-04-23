@@ -985,7 +985,7 @@ int main(int argc, char *argv[])
 		      if ( Move )
 			streamCopyRecord(streamID2, streamID1);
 		      else
-			streamWriteRecordDouble(streamID2, data, nmiss);
+			streamWriteRecord(streamID2, data, nmiss);
 		    }
 	      	}
 	    }

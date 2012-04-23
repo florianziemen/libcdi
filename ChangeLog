@@ -5,7 +5,7 @@
 
 2012-03-24 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* added single precision support: streamWriteVarFloat, streamWriteVarSliceFloat
+	* added single precision support: streamWriteVarF, streamWriteVarSliceF
 
 2012-02-15 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 

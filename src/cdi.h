@@ -291,16 +291,14 @@ void    streamReadVar(int streamID, int varID, double *data_vec, int *nmiss);
 
 /*      streamWriteVar: Write a variable */
 void    streamWriteVar(int streamID, int varID, const double *data_vec, int nmiss);
-void    streamWriteVarDouble(int streamID, int varID, const double *data_vec, int nmiss);
-void    streamWriteVarFloat(int streamID, int varID, const float *data_vec, int nmiss);
+void    streamWriteVarF(int streamID, int varID, const float *data_vec, int nmiss);
 
 /*      streamReadVarSlice: Read a horizontal slice of a variable */
 void    streamReadVarSlice(int streamID, int varID, int levelID, double *data_vec, int *nmiss);
 
 /*      streamWriteVarSlice: Write a horizontal slice of a variable */
 void    streamWriteVarSlice(int streamID, int varID, int levelID, const double *data_vec, int nmiss);
-void    streamWriteVarSliceDouble(int streamID, int varID, int levelID, const double *data_vec, int nmiss);
-void    streamWriteVarSliceFloat(int streamID, int varID, int levelID, const float *data_vec, int nmiss);
+void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data_vec, int nmiss);
 
 
 /* STREAM record I/O routines */
@@ -309,8 +307,7 @@ void    streamInqRecord(int streamID, int *varID, int *levelID);
 void    streamDefRecord(int streamID, int  varID, int  levelID);
 void    streamReadRecord(int streamID, double *data_vec, int *nmiss);
 void    streamWriteRecord(int streamID, const double *data_vec, int nmiss);
-void    streamWriteRecordDouble(int streamID, const double *data_vec, int nmiss);
-void    streamWriteRecordFloat(int streamID, const float *data_vec, int nmiss);
+void    streamWriteRecordF(int streamID, const float *data_vec, int nmiss);
 void    streamCopyRecord(int streamIDdest, int streamIDsrc);
 
 void    streamInqGinfo(int streamID, int *intnum, float *fltnum);

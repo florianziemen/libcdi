@@ -433,12 +433,7 @@ void streamWriteRecord(int streamID, const double *data, int nmiss)
   stream_write_record(streamID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
 }
 
-void streamWriteRecordDouble(int streamID, const double *data, int nmiss)
-{
-  stream_write_record(streamID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
-}
-
-void streamWriteRecordFloat(int streamID, const float *data, int nmiss)
+void streamWriteRecordF(int streamID, const float *data, int nmiss)
 {
   stream_write_record(streamID, MEMTYPE_FLOAT, (const void *) data, nmiss);
 }
