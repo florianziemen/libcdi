@@ -3,6 +3,10 @@
 	* Version 1.5.5 released
 	* using CGRIBEX library version 1.5.2
 
+2012-04-26 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added support for ZAXIS_DEPTH_BELOW_LAND units "cm", "dm" and "m"
+
 2012-03-24 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added single precision support: streamWriteVarF, streamWriteVarSliceF

@@ -542,10 +542,21 @@ static
 double grib2GetLevel(grib_handle *gh, int leveltype)
 {
   double dlevel;
+  long factor;
 
-  GRIB_CHECK(grib_get_double(gh, "level", &dlevel), 0);
-  if ( leveltype == 100 ) dlevel *= 100;
-  if ( dlevel < -2.e9 || dlevel > 2.e9 ) dlevel = 0;
+  if ( leveltype == GRIB2_LTYPE_LANDDEPTH )
+    {
+      GRIB_CHECK(grib_get_long(gh, "scaleFactorOfFirstFixedSurface", &factor), 0);
+      GRIB_CHECK(grib_get_double(gh, "scaledValueOfFirstFixedSurface", &dlevel), 0);
+      if      ( factor == 0 ) dlevel *= 100; //  m to cm
+      else if ( factor == 1 ) dlevel *=  10; // dm to cm
+    }
+  else
+    {
+      GRIB_CHECK(grib_get_double(gh, "level", &dlevel), 0);
+      if ( leveltype == GRIB2_LTYPE_ISOBARIC ) dlevel *= 100;
+      if ( dlevel < -2.e9 || dlevel > 2.e9 ) dlevel = 0;
+    }
 
   return (dlevel);
 }
@@ -2565,27 +2576,46 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
       }
     case ZAXIS_DEPTH_BELOW_LAND:
       {
-	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
+	char units[128];
+	long factor;
+
+	zaxisInqUnits(zaxisID, units);
+
+	if ( editionNumber <= 1 )
 	  {
-	    GRIB_CHECK(grib_set_long(gh, "typeOfFirstFixedSurface", GRIB2_LTYPE_LANDDEPTH), 0);
-	    GRIB_CHECK(grib_set_double(gh, "level", zaxisInqLbound(zaxisID, levelID)), 0);
-	    GRIB_CHECK(grib_set_long(gh, "typeOfSecondFixedSurface", GRIB2_LTYPE_LANDDEPTH), 0);
-	    GRIB_CHECK(grib_set_double(gh, "level", zaxisInqUbound(zaxisID, levelID)), 0);
-	    /*
-	    ISEC1_LevelType = GRIB2_LTYPE_LANDDEPTH_LAYER;
-	    ISEC1_Level1    = (int) zaxisInqLbound(zaxisID, levelID);
-	    ISEC1_Level2    = (int) zaxisInqUbound(zaxisID, levelID);
-	    */
+	    if      ( memcmp(units, "cm", 2) == 0 ) factor =   1;
+	    else if ( memcmp(units, "dm", 2) == 0 ) factor =  10;
+	    else                                    factor = 100; // meter
+
+	    GRIB_CHECK(grib_set_long(gh, "indicatorOfTypeOfLevel", GRIB1_LTYPE_LANDDEPTH), 0);
+	    GRIB_CHECK(grib_set_double(gh, "level", level*factor), 0);
 	  }
 	else
 	  {
-	    level = zaxisInqLevel(zaxisID, levelID);
+	    if      ( memcmp(units, "cm", 2) == 0 ) factor = 2;
+	    else if ( memcmp(units, "dm", 2) == 0 ) factor = 1;
+	    else                                    factor = 0; // meter
 
-	    if ( editionNumber <= 1 )
-	      GRIB_CHECK(grib_set_long(gh, "indicatorOfTypeOfLevel", GRIB1_LTYPE_LANDDEPTH), 0);
+	    if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
+	      {
+		double level1, level2;
+		level1 = zaxisInqLbound(zaxisID, levelID);
+		level2 = zaxisInqUbound(zaxisID, levelID);
+		GRIB_CHECK(grib_set_long(gh, "typeOfFirstFixedSurface", GRIB2_LTYPE_LANDDEPTH), 0);
+		GRIB_CHECK(grib_set_long(gh, "scaleFactorOfFirstFixedSurface", factor), 0);
+		GRIB_CHECK(grib_set_double(gh, "scaledValueOfFirstFixedSurface", level1), 0);
+		GRIB_CHECK(grib_set_long(gh, "typeOfSecondFixedSurface", GRIB2_LTYPE_LANDDEPTH), 0);
+		GRIB_CHECK(grib_set_long(gh, "scaleFactorOfSecondFixedSurface", factor), 0);
+		GRIB_CHECK(grib_set_long(gh, "scaleFactorOfSecondFixedSurface", factor), 0);
+	      }
 	    else
-	      GRIB_CHECK(grib_set_long(gh, "typeOfFirstFixedSurface", GRIB2_LTYPE_LANDDEPTH), 0);
-	    GRIB_CHECK(grib_set_double(gh, "level", level), 0);
+	      {
+		level = zaxisInqLevel(zaxisID, levelID);
+		
+		GRIB_CHECK(grib_set_long(gh, "typeOfFirstFixedSurface", GRIB2_LTYPE_LANDDEPTH), 0);
+		GRIB_CHECK(grib_set_long(gh, "scaleFactorOfFirstFixedSurface", factor), 0);
+	       	GRIB_CHECK(grib_set_double(gh, "scaledValueOfFirstFixedSurface", level), 0);
+	      }
 	  }
 
 	break;

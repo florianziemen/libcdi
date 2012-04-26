@@ -4158,7 +4158,7 @@ int isLatAxis(const char *units, const char *stdname)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
-int isDBLAxis(const char *longname)
+int isDBLAxis(const char *units, const char *longname)
 {
   int status = FALSE;
 
@@ -4166,7 +4166,12 @@ int isDBLAxis(const char *longname)
        strcmp(longname, "depth_below_land")         == 0 ||
        strcmp(longname, "levels below the surface") == 0 )
     {
-      status = TRUE;
+      /*
+      if ( strcmp(ncvars[ncvarid].units, "cm") == 0 ||
+           strcmp(ncvars[ncvarid].units, "dm") == 0 ||
+           strcmp(ncvars[ncvarid].units, "m")  == 0 )
+      */
+        status = TRUE;
     }
 
   return (status);
@@ -4999,10 +5004,9 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 		  else if ( strcmp(ncvars[ncvarid].units, "level") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
 		}
-	      else if ( strcmp(ncvars[ncvarid].units, "cm")  == 0 )
-		{
-		  if ( isDBLAxis(ncvars[ncvarid].longname) )
-		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_LAND;
+	      else if ( isDBLAxis(ncvars[ncvarid].units, ncvars[ncvarid].longname) )
+                {
+                  ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_LAND;
 		}
 	      else if ( strcmp(ncvars[ncvarid].units, "m")   == 0 )
 		{
@@ -5081,10 +5085,9 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
 		  continue;
 		}
-	      else if ( strcmp(ncvars[ncvarid].units, "cm")  == 0 )
+	      else if ( isDBLAxis(ncvars[ncvarid].units, ncvars[ncvarid].longname) )
 		{
-		  if ( isDBLAxis(ncvars[ncvarid].longname) )
-		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_LAND;
+                  ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_LAND;
 		  continue;
 		}
 	      else if ( strcmp(ncvars[ncvarid].units, "m")   == 0 )

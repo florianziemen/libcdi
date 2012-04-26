@@ -2064,17 +2064,29 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       }
     case ZAXIS_DEPTH_BELOW_LAND:
       {
+	char units[128];
+	long factor;
+
+	zaxisInqUnits(zaxisID, units);
+
+        if      ( memcmp(units, "cm", 2) == 0 ) factor =   1;
+        else if ( memcmp(units, "dm", 2) == 0 ) factor =  10;
+        else                                    factor = 100; // meter
+
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
 	  {
+            double level1, level2;
+            level1 = zaxisInqLbound(zaxisID, levelID);
+            level2 = zaxisInqUbound(zaxisID, levelID);
 	    ISEC1_LevelType = GRIB1_LTYPE_LANDDEPTH_LAYER;
-	    ISEC1_Level1    = (int) zaxisInqLbound(zaxisID, levelID);
-	    ISEC1_Level2    = (int) zaxisInqUbound(zaxisID, levelID);
+	    ISEC1_Level1    = (int) (level1*factor);
+	    ISEC1_Level2    = (int) (level2*factor);
 	  }
 	else
 	  {
 	    level = zaxisInqLevel(zaxisID, levelID);
 
-	    ilevel = (int) level;
+	    ilevel = (int) (level*factor);
 	    ISEC1_LevelType = GRIB1_LTYPE_LANDDEPTH;
 	    ISEC1_Level1    = ilevel;
 	    ISEC1_Level2    = 0;
