@@ -5409,7 +5409,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		  else
 		    cdf_get_var_double(fileID, yvarid, grid.yvals);
 
-                  scale_add(size, grid.yvals, ncvars[xvarid].addoffset, ncvars[xvarid].scalefactor);
+                  scale_add(size, grid.yvals, ncvars[yvarid].addoffset, ncvars[yvarid].scalefactor);
 
 		  strcpy(grid.yname, ncvars[yvarid].name);
 		  strcpy(grid.ylongname, ncvars[yvarid].longname);
