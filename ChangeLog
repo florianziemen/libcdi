@@ -17,7 +17,7 @@
 
 2012-04-26 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* added support for ZAXIS_DEPTH_BELOW_LAND units "cm", "dm" and "m"
+	* added support for ZAXIS_DEPTH_BELOW_LAND units "mm",  "cm", "dm" and "m"
 
 2012-03-24 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 

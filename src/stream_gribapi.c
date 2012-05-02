@@ -617,8 +617,9 @@ double grib2GetLevel(grib_handle *gh, int leveltype)
     {
       GRIB_CHECK(grib_get_long(gh, "scaleFactorOfFirstFixedSurface", &factor), 0);
       GRIB_CHECK(grib_get_double(gh, "scaledValueOfFirstFixedSurface", &dlevel), 0);
-      if      ( factor == 0 ) dlevel *= 100; //  m to cm
-      else if ( factor == 1 ) dlevel *=  10; // dm to cm
+      if      ( factor == 0 ) dlevel *= 100;   //  m to cm
+      else if ( factor == 1 ) dlevel *=  10;   // dm to cm
+      else if ( factor == 3 ) dlevel *=   0.1; // mm to cm
     }
   else
     {
@@ -2665,13 +2666,14 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
     case ZAXIS_DEPTH_BELOW_LAND:
       {
 	char units[128];
-	long factor;
 
 	zaxisInqUnits(zaxisID, units);
 
 	if ( editionNumber <= 1 )
 	  {
-	    if      ( memcmp(units, "cm", 2) == 0 ) factor =   1;
+	    double factor;
+	    if      ( memcmp(units, "mm", 2) == 0 ) factor =   0.1;
+	    else if ( memcmp(units, "cm", 2) == 0 ) factor =   1;
 	    else if ( memcmp(units, "dm", 2) == 0 ) factor =  10;
 	    else                                    factor = 100; // meter
 
@@ -2680,7 +2682,9 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 	  }
 	else
 	  {
-	    if      ( memcmp(units, "cm", 2) == 0 ) factor = 2;
+	    long factor;
+	    if      ( memcmp(units, "mm", 2) == 0 ) factor = 3;
+	    else if ( memcmp(units, "cm", 2) == 0 ) factor = 2;
 	    else if ( memcmp(units, "dm", 2) == 0 ) factor = 1;
 	    else                                    factor = 0; // meter
 

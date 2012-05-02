@@ -2065,11 +2065,12 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
     case ZAXIS_DEPTH_BELOW_LAND:
       {
 	char units[128];
-	long factor;
+	double factor;
 
 	zaxisInqUnits(zaxisID, units);
 
-        if      ( memcmp(units, "cm", 2) == 0 ) factor =   1;
+        if      ( memcmp(units, "mm", 2) == 0 ) factor =   0.1;
+        else if ( memcmp(units, "cm", 2) == 0 ) factor =   1;
         else if ( memcmp(units, "dm", 2) == 0 ) factor =  10;
         else                                    factor = 100; // meter
 
