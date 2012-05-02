@@ -12,6 +12,7 @@
 #include "datetime.h"
 #include "vlist.h"
 #include "stream_grb.h"
+#include "calendar.h"
 
 
 #if  defined  (HAVE_LIBGRIB_API)
@@ -110,11 +111,27 @@ static
 int gribapiGetTimeUnits(grib_handle *gh)
 {
   int timeunits = -1;
+  long unitsOfTime;
   long lpar;
   size_t len = 8;
   char stepunits[8];
   static int lprint = TRUE;
 
+  GRIB_CHECK(grib_get_long(gh, "indicatorOfUnitOfTimeRange", &unitsOfTime), 0);  
+
+  switch (unitsOfTime)
+    {
+    case 13:  timeunits = TUNIT_SECOND;  break;
+    case  0:  timeunits = TUNIT_MINUTE;  break;
+    case  1:  timeunits = TUNIT_HOUR;    break;
+    case 10:  timeunits = TUNIT_3HOURS;  break;
+    case 11:  timeunits = TUNIT_6HOURS;  break;
+    case 12:  timeunits = TUNIT_12HOURS; break;
+    case  2:  timeunits = TUNIT_DAY;     break;
+    default:  timeunits = TUNIT_HOUR;    break;
+    }
+
+  /*
   GRIB_CHECK(grib_get_string(gh, "stepUnits", stepunits, &len), 0);
 
   len--;
@@ -133,6 +150,7 @@ int gribapiGetTimeUnits(grib_handle *gh)
       Message("Step units >%s< unsupported!", stepunits);
       lprint = FALSE;
     }
+  */
 
   return (timeunits);
 }
@@ -204,6 +222,8 @@ int gribapiGetTsteptype(grib_handle *gh)
 static
 void gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
 {
+  int rdate, rtime;
+  int timeUnits, timePeriod;
   long lpar;
   long sigofrtime = 3;
   long editionNumber;
@@ -224,10 +244,59 @@ void gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
     }
   else
     {
+      /*
       GRIB_CHECK(grib_get_long(gh, "validityDate", &lpar), 0);
       *vdate = (int) lpar;
       GRIB_CHECK(grib_get_long(gh, "validityTime", &lpar), 0);
       *vtime = (int) lpar*100;
+      */
+      GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
+      rdate = (int) lpar;
+      GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
+      rtime = (int) lpar*100;    
+      GRIB_CHECK(grib_get_long(gh, "forecastTime", &lpar), 0);
+      timePeriod = (int) lpar;
+      timeUnits = gribapiGetTimeUnits(gh);
+      
+      {
+	static int lprint = TRUE;
+	extern int grib_calendar;
+	int ryear, rmonth, rday, rhour, rminute, rsecond;
+	int time_period = timePeriod;
+	int julday, secofday, addsec;
+
+	cdiDecodeDate(rdate, &ryear, &rmonth, &rday);
+	cdiDecodeTime(rtime, &rhour, &rminute, &rsecond);
+
+	encode_caldaysec(grib_calendar, ryear, rmonth, rday, rhour, rminute, rsecond, &julday, &secofday);
+
+	addsec = 0;
+	switch ( timeUnits )
+	  {
+	  case TUNIT_SECOND:  addsec =         time_period; break;
+	  case TUNIT_MINUTE:  addsec =    60 * time_period; break;
+	  case TUNIT_HOUR:    addsec =  3600 * time_period; break;
+	  case TUNIT_3HOURS:  addsec = 10800 * time_period; break;
+	  case TUNIT_6HOURS:  addsec = 21600 * time_period; break;
+	  case TUNIT_12HOURS: addsec = 43200 * time_period; break;
+	  case TUNIT_DAY:     addsec = 86400 * time_period; break;
+	  default:
+	    if ( lprint )
+	      {
+	        Warning("Time unit %d unsupported", timeUnits);
+		lprint = FALSE;
+	      }
+	  }
+
+	julday_add_seconds(addsec, &julday, &secofday);
+
+	decode_caldaysec(grib_calendar, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute, &rsecond);
+	/*
+	  printf("new %d/%d/%d %d:%d\n", ryear, rmonth, rday, rhour, rminute);
+	*/
+	*vdate = cdiEncodeDate(ryear, rmonth, rday);
+	*vtime = cdiEncodeTime(rhour, rminute, rsecond);
+      }
     }
 }
 #endif
@@ -1982,32 +2051,43 @@ int gribapiDefTimerange(int tsteptype, int factor, int calendar,
 
 #if  defined  (HAVE_LIBGRIB_API)
 static
-int gribapiDefDateTime(grib_handle *gh, int timeunit, int date, int time)
+int gribapiDefStepUnits(grib_handle *gh, int timeunit)
 {
   int factor = 1;
+  long unitsOfTime;
   char stepunits[8];
   size_t len;
+
+  switch (timeunit)
+    {
+    case TUNIT_SECOND:  factor =     1;  unitsOfTime = 13;  strcpy(stepunits, "s");   break;
+    case TUNIT_MINUTE:  factor =    60;  unitsOfTime =  0;  strcpy(stepunits, "m");   break;
+    case TUNIT_HOUR:    factor =  3600;  unitsOfTime =  1;  strcpy(stepunits, "h");   break;
+    case TUNIT_3HOURS:  factor = 10800;  unitsOfTime = 10;  strcpy(stepunits, "3h");  break;
+    case TUNIT_6HOURS:  factor = 21600;  unitsOfTime = 11;  strcpy(stepunits, "6h");  break;
+    case TUNIT_12HOURS: factor = 43200;  unitsOfTime = 12;  strcpy(stepunits, "12h"); break;
+    case TUNIT_DAY:     factor = 86400;  unitsOfTime =  2;  strcpy(stepunits, "D");   break;
+    default:            factor =  3600;  unitsOfTime =  1;  strcpy(stepunits, "h");   break;
+    }
+
+  len = strlen(stepunits) + 1;
+  GRIB_CHECK(grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime), 0);  
+  GRIB_CHECK(grib_set_string(gh, "stepUnits", stepunits, &len), 0);  
+
+  return (factor);
+}
+
+static
+int gribapiDefDateTime(grib_handle *gh, int timeunit, int date, int time)
+{
+  GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 0), 0);
+  GRIB_CHECK(grib_set_long(gh, "stepRange", 0), 0);
 
   if ( date == 0 ) date = 10101;
   GRIB_CHECK(grib_set_long(gh, "dataDate", date), 0);
   GRIB_CHECK(grib_set_long(gh, "dataTime", time/100), 0);
 
-  switch (timeunit)
-    {
-    case TUNIT_SECOND:  factor =     1; strcpy(stepunits, "s");   break;
-    case TUNIT_MINUTE:  factor =    60; strcpy(stepunits, "m");   break;
-    case TUNIT_HOUR:    factor =  3600; strcpy(stepunits, "h");   break;
-    case TUNIT_3HOURS:  factor = 10800; strcpy(stepunits, "3h");  break;
-    case TUNIT_6HOURS:  factor = 21600; strcpy(stepunits, "6h");  break;
-    case TUNIT_12HOURS: factor = 43200; strcpy(stepunits, "12h"); break;
-    case TUNIT_DAY:     factor = 86400; strcpy(stepunits, "D");   break;
-    default:            factor =  3600; strcpy(stepunits, "h");   break;
-    }
-
-  len = strlen(stepunits) + 1;
-  GRIB_CHECK(grib_set_string(gh, "stepUnits", stepunits, &len), 0);  
-
-  return (factor);
+  return (gribapiDefStepUnits(gh, timeunit));
 }
 #endif
 
@@ -2040,11 +2120,19 @@ void gribapiDefTime(grib_handle *gh , int vdate, int vtime, int tsteptype, int n
 				      rdate, rtime, vdate, vtime, &ip);
       // printf("timerange: %d %d\n", timerange, ip);
 
-      if ( ip > 0 )
+      if ( timerange == -1 )
+	{
+	  timetype = TAXIS_ABSOLUTE;
+	}
+      else
 	{
 	  GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
 	  //GRIB_CHECK(grib_set_long(gh, "stepType", timerange), 0);
 	  GRIB_CHECK(grib_set_long(gh, "stepRange", ip), 0);
+	  // if ( vdate == 0 ) vdate = 10101;
+	  // GRIB_CHECK(grib_set_long(gh, "dataDate", vdate), 0);
+	  // GRIB_CHECK(grib_set_long(gh, "dataTime", vtime/100), 0);
+	  gribapiDefStepUnits(gh, timeunit);
 	}
     }
 

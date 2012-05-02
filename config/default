@@ -17,11 +17,11 @@ case "${HOSTNAME}" in
                     --enable-maintainer-mode \
                     --enable-swig \
                     --enable-python \
-                    --with-jasper=$HOME/local \
-                    --with-grib_api=$HOME/local \
+                    --with-jasper=/opt/local \
+                    --with-grib_api=$HOME/local/gribapi-1.9.16 \
                     --with-netcdf=$HOME/local \
                     --with-szlib=$HOME/local \
-	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O2 -Df2cFortran"
+	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O2 -Df2cFortran" LIBS="-L/opt/local/lib -lopenjpeg"
 	;;
     cinglung*|feilung*|wanglung*)
 	./configure --prefix=$HOME/local \
