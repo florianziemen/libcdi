@@ -5,6 +5,10 @@
 
 2012-05-02 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* cdi.h: added vlistDefVarTime() [request: Florian Prill]
+
+2012-05-02 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
 	* stream_gribapi: bug fix for validation date and time
 
 2012-04-27 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

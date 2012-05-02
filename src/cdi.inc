@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   April 2012
+! Uwe Schulzweida, MPI-MET, Hamburg,   May 2012
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -783,6 +783,12 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarTime
+
+!                     vlistDefVarTime
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         timeID)
+      EXTERNAL        vlistDefVarTime
 
 !                     vlistDefVarCompType
 !                                    (INTEGER         vlistID,

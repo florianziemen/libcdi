@@ -391,6 +391,8 @@ int     vlistInqVarGrid(int vlistID, int varID);
 int     vlistInqVarZaxis(int vlistID, int varID);
 int     vlistInqVarTime(int vlistID, int varID);
 
+void    vlistDefVarTime(int vlistID, int varID, int timeID);
+
 void    vlistDefVarCompType(int vlistID, int varID, int comptype);
 int     vlistInqVarCompType(int vlistID, int varID);
 void    vlistDefVarCompLevel(int vlistID, int varID, int complevel);
