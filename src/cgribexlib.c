@@ -845,6 +845,7 @@ void sse2_minmax_val(const double *restrict buf, long nframes, double *min, doub
 
 #endif
 
+static
 void minmax_val(const double *restrict data, long datasize, double *fmin, double *fmax)
 {
 #ifdef _GET_X86_COUNTER 
@@ -1025,7 +1026,7 @@ void encode_double_array_common(int numBits, long packStart, long datasize, GRIB
   *gz = z;
 }
 
-
+static
 void encode_double_array_byte(int numBits, long packStart, long datasize, 
 			      GRIBPACK *restrict lGrib,
 			      const double *restrict data, 
@@ -1152,7 +1153,7 @@ void encode_double_array_byte(int numBits, long packStart, long datasize,
   *gz = z;
 }
 
-
+static
 void encode_double_array_unrolled(int numBits, long packStart, long datasize, 
 				  GRIBPACK *restrict lGrib,
 				  const double *restrict data, 
@@ -3560,8 +3561,6 @@ void gribPrintSec4Wave(int *isec4)
 }
 
 int  BitsPerInt = (int) (sizeof(int) * 8);
-
-void minmax_val(const double *restrict data, long datasize, double *fmin, double *fmax);
 
 
 
@@ -9758,7 +9757,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.5.2" " of ""May  4 2012"" ""14:42:52";
+static const char grb_libvers[] = "1.5.2" " of ""May  4 2012"" ""15:31:56";
 const char *
 cgribexLibraryVersion(void)
 {
