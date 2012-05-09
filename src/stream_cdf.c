@@ -5881,10 +5881,11 @@ void define_all_zaxes(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 #if  defined  (HAVE_LIBNETCDF)
 /* define all input data variables */
 static
-void define_all_vars(int fileID, int streamID, int vlistID, int instID, int modelID, int tableID, int *varids, ncdim_t *ncdims, int nvars, ncvar_t *ncvars)
+void define_all_vars(int fileID, int streamID, int vlistID, int instID, int modelID, int *varids, ncdim_t *ncdims, int nvars, ncvar_t *ncvars)
 {
   int varID1, varID, ncvarid;
   int code;
+  int tableID;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -6182,7 +6183,6 @@ int cdfInqContents(int streamID)
   int nc_nvars;
   int nvcth_id = UNDEFID, vcta_id = UNDEFID, vctb_id = UNDEFID;
   size_t vctsize = 0;
-  int tableID;
   double *vct = NULL;
   int instID  = UNDEFID;
   int modelID = UNDEFID;
@@ -6630,7 +6630,7 @@ int cdfInqContents(int streamID)
 
 
   /* define all data variables */
-  define_all_vars(fileID, streamID, vlistID, instID, modelID, tableID, varids, ncdims, nvars, ncvars);
+  define_all_vars(fileID, streamID, vlistID, instID, modelID, varids, ncdims, nvars, ncvars);
 
 
   cdiCreateTimesteps(streamID);
