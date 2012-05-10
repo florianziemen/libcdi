@@ -18,8 +18,10 @@ Function catalog:
    streamDefTimestep    Define time step
    streamInqTimestep    Get time step
    streamWriteVar       Write a variable
+   streamWriteVarF      Write a variable
    streamReadVar        Read a variable
    streamWriteVarSlice  Write a horizontal slice of a variable
+   streamWriteVarSliceF Write a horizontal slice of a variable
    streamReadVarSlice   Read a horizontal slice of a variable
 -------------------------------------------------------------
    vlist

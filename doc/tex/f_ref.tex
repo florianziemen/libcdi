@@ -665,6 +665,22 @@ Write a variable
 
 \section*{\tt 
 \ifpdf
+\hyperref[streamWriteVarF]{streamWriteVarF}
+\else
+streamWriteVarF
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamWriteVarF(INTEGER streamID, INTEGER varID, const float *data, 
+                               INTEGER nmiss)
+\end{verbatim}
+
+Write a variable
+\ifpdfoutput{}{(\ref{streamWriteVarF})}
+
+
+\section*{\tt 
+\ifpdf
 \hyperref[streamWriteVarSlice]{streamWriteVarSlice}
 \else
 streamWriteVarSlice
@@ -677,6 +693,22 @@ streamWriteVarSlice
 
 Write a horizontal slice of a variable
 \ifpdfoutput{}{(\ref{streamWriteVarSlice})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamWriteVarSliceF]{streamWriteVarSliceF}
+\else
+streamWriteVarSliceF
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamWriteVarSliceF(INTEGER streamID, INTEGER varID, INTEGER levelID, 
+                                    const float *data, INTEGER nmiss)
+\end{verbatim}
+
+Write a horizontal slice of a variable
+\ifpdfoutput{}{(\ref{streamWriteVarSliceF})}
 
 
 \section*{\tt 

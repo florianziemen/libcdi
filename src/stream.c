@@ -379,7 +379,7 @@ int getByteswap(int byteorder)
 
 @Prototype void streamDefByteorder(int streamID, int byteorder)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
     @Item  byteorder The byte order of a dataset, one of the CDI constants @func{CDI_BIGENDIAN} and
                      @func{CDI_LITTLEENDIAN}.
 
@@ -1280,7 +1280,7 @@ void streamSync(int streamID)
 
 @Prototype int streamDefTimestep(int streamID, int tsID)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
     @Item  tsID      Timestep identifier.
 
 @Description
@@ -1454,7 +1454,7 @@ int streamInqTimestep(int streamID, int tsID)
 
 @Prototype void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
     @Item  varID     Variable identifier.
     @Item  data      Pointer to the location into which the data values are read.
                      The caller must allocate space for the returned values.
@@ -1610,13 +1610,14 @@ void stream_write_var(int streamID, int varID, int memtype, const void *data, in
 
 @Prototype void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
     @Item  varID     Variable identifier.
-    @Item  data      Pointer to a block of data values to be written.
+    @Item  data      Pointer to a block of double precision floating point data values to be written.
     @Item  nmiss     Number of missing values.
 
 @Description
 The function streamWriteVar writes the values of one time step of a variable to an open dataset.
+The values are converted to the external data type of the variable, if necessary.
 @EndFunction
 */
 void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
@@ -1624,6 +1625,23 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
   stream_write_var(streamID, varID, MEMTYPE_DOUBLE, data, nmiss);
 }
 
+/*
+@Function  streamWriteVarF
+@Title     Write a variable
+
+@Prototype void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
+    @Item  varID     Variable identifier.
+    @Item  data      Pointer to a block of single precision floating point data values to be written.
+    @Item  nmiss     Number of missing values.
+
+@Description
+The function streamWriteVarF writes the values of one time step of a variable to an open dataset.
+The values are converted to the external data type of the variable, if necessary.
+Only support for netCDF was implemented in this function.
+@EndFunction
+*/
 void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
 {
   stream_write_var(streamID, varID, MEMTYPE_FLOAT, data, nmiss);
@@ -1635,7 +1653,7 @@ void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
 
 @Prototype void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
     @Item  varID     Variable identifier.
     @Item  levelID   Level identifier.
     @Item  data      Pointer to the location into which the data values are read.
@@ -1792,14 +1810,15 @@ void stream_write_var_slice(int streamID, int varID, int levelID, int memtype, c
 
 @Prototype void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
     @Item  varID     Variable identifier.
     @Item  levelID   Level identifier.
-    @Item  data      Pointer to a block of data values to be written.
+    @Item  data      Pointer to a block of double precision floating point data values to be written.
     @Item  nmiss     Number of missing values.
 
 @Description
 The function streamWriteVarSlice writes the values of a horizontal slice of a variable to an open dataset.
+The values are converted to the external data type of the variable, if necessary.
 @EndFunction
 */
 void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
@@ -1807,6 +1826,24 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
   stream_write_var_slice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, nmiss);
 }
 
+/*
+@Function  streamWriteVarSliceF
+@Title     Write a horizontal slice of a variable
+
+@Prototype void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, int nmiss)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
+    @Item  varID     Variable identifier.
+    @Item  levelID   Level identifier.
+    @Item  data      Pointer to a block of single precision floating point data values to be written.
+    @Item  nmiss     Number of missing values.
+
+@Description
+The function streamWriteVarSliceF writes the values of a horizontal slice of a variable to an open dataset.
+The values are converted to the external data type of the variable, if necessary.
+Only support for netCDF was implemented in this function.
+@EndFunction
+*/
 void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, int nmiss)
 {
   stream_write_var_slice(streamID, varID, levelID, MEMTYPE_FLOAT, data, nmiss);
@@ -1996,7 +2033,7 @@ off_t   streamNvals(int streamID)
 
 @Prototype void streamDefVlist(int streamID, int vlistID)
 @Parameter
-    @Item  streamID Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  streamID Stream ID, from a previous call to @fref{streamOpenWrite}.
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
 
 @Description
