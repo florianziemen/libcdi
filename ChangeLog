@@ -1,3 +1,7 @@
+2012-05-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_cdf::cdfDefUnstructured: fixed memory bug [ICON - Bug #2398]
+
 2012-05-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Version 1.5.5 released

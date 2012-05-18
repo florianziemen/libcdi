@@ -1944,8 +1944,6 @@ void cdfDefGdim(int streamID, int gridID)
 static
 void cdfDefUnstructured(int streamID, int gridID)
 {
-  char axisname[] = "ncells";
-  char vertname[] = "nv";
   char xunits[256];
   char xlongname[256];
   char xstdname[256];
@@ -2013,6 +2011,11 @@ void cdfDefUnstructured(int streamID, int gridID)
   if ( dimID == UNDEFID )
     {
       int status;
+      char axisname[256];
+      char vertname[256];
+      strcpy(axisname, "ncells");
+      strcpy(vertname, "nv");
+
       status = checkGridName('V', xaxisname, fileID, vlistID, gridID, ngrids, 'X');
       status = checkGridName('V', yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
       status = checkGridName('D', axisname, fileID, vlistID, gridID, ngrids, 'X');
