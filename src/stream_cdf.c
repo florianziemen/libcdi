@@ -6471,7 +6471,7 @@ int cdfInqContents(int streamID)
       if ( ncvars[ncvarid].ndims > 4 )
 	{
 	  ncvars[ncvarid].isvar = 0;
-	  Warning("%d dimensional variables unsupported. Skip variable %s",
+	  Warning("%d dimensional variables unsupported, skipped variable %s!",
 		ncvars[ncvarid].ndims, ncvars[ncvarid].name);
 	  continue;
 	}
