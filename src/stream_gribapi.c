@@ -2767,12 +2767,13 @@ void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID)
 		double level1, level2;
 		level1 = zaxisInqLbound(zaxisID, levelID);
 		level2 = zaxisInqUbound(zaxisID, levelID);
+
 		GRIB_CHECK(grib_set_long(gh, "typeOfFirstFixedSurface", GRIB2_LTYPE_LANDDEPTH), 0);
 		GRIB_CHECK(grib_set_long(gh, "scaleFactorOfFirstFixedSurface", factor), 0);
-		GRIB_CHECK(grib_set_double(gh, "scaledValueOfFirstFixedSurface", level1*factor), 0);
+		GRIB_CHECK(grib_set_double(gh, "scaledValueOfFirstFixedSurface", level1), 0);
 		GRIB_CHECK(grib_set_long(gh, "typeOfSecondFixedSurface", GRIB2_LTYPE_LANDDEPTH), 0);
 		GRIB_CHECK(grib_set_long(gh, "scaleFactorOfSecondFixedSurface", factor), 0);
-		GRIB_CHECK(grib_set_double(gh, "scaledValueOfSecondFixedSurface", level2*factor), 0);
+		GRIB_CHECK(grib_set_double(gh, "scaledValueOfSecondFixedSurface", level2), 0);
 	      }
 	    else
 	      {		

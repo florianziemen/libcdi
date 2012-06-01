@@ -63,7 +63,7 @@ int cgribexGetIsRotated(int *isec2)
     {
       isRotated = 1;
     }
-
+ 
   return (isRotated);
 }
 #endif
