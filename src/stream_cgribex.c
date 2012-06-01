@@ -1973,8 +1973,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	vctsize = zaxisInqVctSize(zaxisID);
 	if ( vctsize == 0 && warning )
 	  {
-	    Warning("VCT missing. ( param = %d, zaxisID = %d )",
-		    ISEC1_Parameter, zaxisID);
+	    Warning("VCT missing. ( param = %d, zaxisID = %d )", ISEC1_Parameter, zaxisID);
 	    warning = 0;
 	  }
 	if ( vctsize > 255 )
