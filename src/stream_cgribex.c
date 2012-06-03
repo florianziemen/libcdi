@@ -25,7 +25,7 @@ typedef struct {
   int level1;
   int level2;
   int ltype;
-} compvar_t; 
+} compvar_t;
 
 
 #if  defined  (HAVE_LIBCGRIBEX)
@@ -817,7 +817,7 @@ int cgribexScanTimestep2(int streamID)
 
   gribbuffer = (unsigned char *) streamptr->record->buffer;
   buffersize = streamptr->record->buffersize;
-                                          
+
   tsID = streamptr->rtsteps;
   if ( tsID != 1 )
     Error("Internal problem! unexpeceted timestep %d", tsID+1);
@@ -833,14 +833,12 @@ int cgribexScanTimestep2(int streamID)
   streamptr->tsteps[1].nrecs = 0;
   for ( recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[1].recIDs[recID] = -1;
-      
+
   for ( recID = 0; recID < nrecords; recID++ )
     {
       varID = streamptr->tsteps[0].records[recID].varID;
-      streamptr->tsteps[tsID].records[recID].position = 
-	streamptr->tsteps[0].records[recID].position;
-      streamptr->tsteps[tsID].records[recID].size     = 
-	streamptr->tsteps[0].records[recID].size;
+      streamptr->tsteps[tsID].records[recID].position =	streamptr->tsteps[0].records[recID].position;
+      streamptr->tsteps[tsID].records[recID].size     =	streamptr->tsteps[0].records[recID].size;
     }
 
   rindex = 0;
@@ -959,7 +957,7 @@ int cgribexScanTimestep2(int streamID)
 	    {
 	      streamptr->tsteps[tsID].records[recID].used = TRUE;
 	      streamptr->tsteps[tsID].recIDs[rindex] = recID;
-	    }    
+	    }
 	}
       else
 	{
@@ -977,7 +975,7 @@ int cgribexScanTimestep2(int streamID)
 	    {
 	      streamptr->tsteps[tsID].records[recID].used = TRUE;
 	      streamptr->tsteps[tsID].recIDs[rindex] = recID;
-	    }    
+	    }
 	}
 
       if ( CDI_Debug )
@@ -1207,7 +1205,7 @@ int cgribexScanTimestep(int streamID)
 		  taxis->numavg = ISEC1_AvgNum;
 		}
 	    }
-	  
+
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
 	  compVar.param  = param;
@@ -1250,7 +1248,7 @@ int cgribexScanTimestep(int streamID)
 		  cdiParamToString(param, paramstr, sizeof(paramstr));
 
 		  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
-		  
+
 		  if ( CDI_Debug )
 		    Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
 
@@ -1260,7 +1258,7 @@ int cgribexScanTimestep(int streamID)
 		{
 		  streamptr->tsteps[tsID].records[recID].used = TRUE;
 		  streamptr->tsteps[tsID].recIDs[rindex] = recID;
-		}    
+		}
 	    }
 
 	  if ( CDI_Debug )
@@ -1279,7 +1277,7 @@ int cgribexScanTimestep(int streamID)
 		      streamptr->tsteps[tsID].records[recID].ilevel, level1);
 	      Error("Invalid, unsupported or inconsistent record structure");
 	    }
-	  
+
 	  streamptr->tsteps[tsID].records[recID].position = recpos;
 	  streamptr->tsteps[tsID].records[recID].size = recsize;
 
@@ -1384,7 +1382,7 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
 
 	  if ( gribsize <= 0 )
 	    Error("Decompression problem!");
-	  
+
 	  free(itmpbuffer);
 	}
       else
@@ -1494,7 +1492,7 @@ int cgribexDefTimerange(int tsteptype, int factor, int calendar,
   cdiDecodeDate(vdate, &year, &month, &day);
   cdiDecodeTime(vtime, &hour, &minute, &second);
   encode_juldaysec(calendar, year, month, day, hour, minute, &julday2, &secofday2);
-  
+
   (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
 
   if ( !(int) fmod(days*86400.0 + secs, factor) )
@@ -1533,7 +1531,7 @@ int cgribexDefDateTime(int *isec1, int timeunit, int date, int time)
   century =  year / 100;
 
   ISEC1_Year = year - century*100;
-  
+
   if ( year < 0 )
     {
       century = -century;
@@ -1695,8 +1693,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
       lcurvi = TRUE;
     }
 
-  ISEC2_Reduced = FALSE;
-
+  ISEC2_Reduced  = FALSE;
   ISEC2_ScanFlag = 0;
 
   switch (gridtype)

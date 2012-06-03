@@ -1327,10 +1327,8 @@ int gribapiScanTimestep2(int streamID)
   for ( recID = 0; recID < nrecords; recID++ )
     {
       varID = streamptr->tsteps[0].records[recID].varID;
-      streamptr->tsteps[tsID].records[recID].position = 
-	streamptr->tsteps[0].records[recID].position;
-      streamptr->tsteps[tsID].records[recID].size     = 
-	streamptr->tsteps[0].records[recID].size;
+      streamptr->tsteps[tsID].records[recID].position = streamptr->tsteps[0].records[recID].position;
+      streamptr->tsteps[tsID].records[recID].size     = streamptr->tsteps[0].records[recID].size;
     }
 
   rindex = 0;
