@@ -152,15 +152,27 @@ extern "C" {
 #define  ZAXIS_ATMOSPHERE        15  /* Entire atmosphere                       */
 #define  ZAXIS_REFERENCE         16  /* zaxis reference number                  */
 
-/* TAXIS types */
-
-#define  TAXIS_ABSOLUTE           1
-#define  TAXIS_RELATIVE           2
-
 /* TIME types */
 
 #define  TIME_CONSTANT            1
 #define  TIME_VARIABLE            2
+
+/* TSTEP types */
+
+#define  TSTEP_INSTANT            1
+#define  TSTEP_AVG                2
+#define  TSTEP_ACCUM              3
+#define  TSTEP_MAX                4
+#define  TSTEP_MIN                5
+#define  TSTEP_DIFF               6
+#define  TSTEP_RANGE              7
+#define  TSTEP_INSTANT2           8
+#define  TSTEP_INSTANT3           9
+
+/* TAXIS types */
+
+#define  TAXIS_ABSOLUTE           1
+#define  TAXIS_RELATIVE           2
 
 /* TUNIT types */
 
@@ -174,18 +186,6 @@ extern "C" {
 #define  TUNIT_3HOURS             8
 #define  TUNIT_6HOURS             9
 #define  TUNIT_12HOURS           10
-
-/* TSTEP types */
-
-#define  TSTEP_INSTANT            1
-#define  TSTEP_AVG                2
-#define  TSTEP_ACCUM              3
-#define  TSTEP_MAX                4
-#define  TSTEP_MIN                5
-#define  TSTEP_DIFF               6
-#define  TSTEP_RANGE              7
-#define  TSTEP_INSTANT2           8
-#define  TSTEP_INSTANT3           9
 
 /* CALENDAR types */
 
