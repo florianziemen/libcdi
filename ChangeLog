@@ -1,6 +1,8 @@
 2012-06-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added support for grib_api key stepType  [request: Dörte Liermann]
+	* changed TIME_CONSTANT and TIME_VARIABLE to TSTEP_CONSTANT and TSTEP_XXX
+	* renamed vlistInqVarTime() vlistInqVarTsteptype()
 
 2012-06-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
