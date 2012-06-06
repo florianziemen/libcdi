@@ -995,7 +995,7 @@ int main(int argc, char *argv[])
 	    {
 	      for ( varID = 0; varID < nvars; varID++ )
 		{
-		  if ( vlistInqVarTime(vlistID1, varID) == TIME_CONSTANT && tsID > 0 ) continue;
+		  if ( vlistInqVarTsteptype(vlistID1, varID) == TSTEP_CONSTANT && tsID > 0 ) continue;
 
 		  number   = vlistInqVarNumber(vlistID1, varID);
 		  gridID   = vlistInqVarGrid(vlistID1, varID);

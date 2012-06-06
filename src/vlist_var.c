@@ -372,18 +372,6 @@ int vlistInqVarZaxis(int vlistID, int varID)
   return (vlistptr->vars[varID].zaxisID);
 }
 
-
-int vlistInqVarTime(int vlistID, int varID)
-{
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  return (vlistptr->vars[varID].tsteptype);
-}
-
 /*
 @Function  vlistInqVarParam
 @Title     Get the parameter number of a Variable

@@ -781,11 +781,6 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarZaxis
 
-      INTEGER         vlistInqVarTime
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarTime
-
       INTEGER         vlistInqVarTsteptype
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)

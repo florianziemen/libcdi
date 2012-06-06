@@ -390,10 +390,8 @@ void    vlistChangeVarZaxis(int vlistID, int varID, int zaxisID);
 void    vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *tsteptype);
 int     vlistInqVarGrid(int vlistID, int varID);
 int     vlistInqVarZaxis(int vlistID, int varID);
-int     vlistInqVarTime(int vlistID, int varID);
 
 int     vlistInqVarTsteptype(int vlistID, int varID);
-
 void    vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
 
 void    vlistDefVarCompType(int vlistID, int varID, int comptype);
