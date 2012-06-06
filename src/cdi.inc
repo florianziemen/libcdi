@@ -1,6 +1,6 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.5.5
+! Fortran interface for CDI library version 1.5.6rc1
 !
 ! Author:
 ! -------
@@ -257,9 +257,9 @@
 !  TIME types
 !
       INTEGER    TIME_CONSTANT         
-      PARAMETER (TIME_CONSTANT          =  1)
+      PARAMETER (TIME_CONSTANT          =  0)
       INTEGER    TIME_VARIABLE         
-      PARAMETER (TIME_VARIABLE          =  2)
+      PARAMETER (TIME_VARIABLE          =  1)
 !
 !  TSTEP types
 !
@@ -748,7 +748,7 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         gridID,
 !                                     INTEGER         zaxisID,
-!                                     INTEGER         timeID)
+!                                     INTEGER         tsteptype)
       EXTERNAL        vlistDefVar
 
 !                     vlistChangeVarGrid
@@ -768,7 +768,7 @@
 !                                     INTEGER         varID,
 !                                     INTEGER         gridID,
 !                                     INTEGER         zaxisID,
-!                                     INTEGER         timeID)
+!                                     INTEGER         tsteptype)
       EXTERNAL        vlistInqVar
 
       INTEGER         vlistInqVarGrid
@@ -785,6 +785,17 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarTime
+
+      INTEGER         vlistInqVarTsteptype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarTsteptype
+
+!                     vlistDefVarTsteptype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         tsteptype)
+      EXTERNAL        vlistDefVarTsteptype
 
 !                     vlistDefVarCompType
 !                                    (INTEGER         vlistID,
@@ -970,17 +981,6 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarAddoffset
-
-!                     vlistDefVarTsteptype
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     INTEGER         tsteptype)
-      EXTERNAL        vlistDefVarTsteptype
-
-      INTEGER         vlistInqVarTsteptype
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarTsteptype
 
 !                     vlistDefVarTimave
 !                                    (INTEGER         vlistID,
