@@ -268,7 +268,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
   int nrecs, nvars, nzaxis, ntsteps;
   int levelID, levelsize;
   int tsID, ntimeout;
-  int timeID, taxisID;
+  int tstepID, taxisID;
   int nbyte, nbyte0;
   int index;
   char varname[CDI_MAX_NAME];
@@ -286,10 +286,10 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 
       if ( vardis )
 	fprintf(stdout,
-		"   Var : Institut Source   Varname     Time Typ  Grid Size Num  Levels Num\n");
+		"   Var : Institut Source   Varname     Ttype   Dtype  Gridsize Num  Levels Num\n");
       else
 	fprintf(stdout,
-		"   Var : Institut Source   Param       Time Typ  Grid Size Num  Levels Num\n");
+		"   Var : Institut Source   Param       Ttype   Dtype  Gridsize Num  Levels Num\n");
 
       nvars = vlistNvars(vlistID);
 
@@ -324,11 +324,13 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  else
 	    fprintf(stdout, "%-12s", paramstr);
 
-	  timeID = vlistInqVarTime(vlistID, varID);
-	  if ( timeID == TIME_CONSTANT )
-	    fprintf(stdout, "con ");
-	  else
-	    fprintf(stdout, "var ");
+	  tstepID = vlistInqVarTsteptype(vlistID, varID);
+	  if      ( tstepID == TSTEP_CONSTANT ) fprintf(stdout, "%-8s", "constant");
+	  else if ( tstepID == TSTEP_INSTANT  ) fprintf(stdout, "%-8s", "instant");
+	  else if ( tstepID == TSTEP_MIN      ) fprintf(stdout, "%-8s", "min");
+	  else if ( tstepID == TSTEP_MAX      ) fprintf(stdout, "%-8s", "max");
+	  else if ( tstepID == TSTEP_ACCUM    ) fprintf(stdout, "%-8s", "accum");
+	  else                                  fprintf(stdout, "%-8s", "unknown");
 
 	  datatype = vlistInqVarDatatype(vlistID, varID);
 

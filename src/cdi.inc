@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   May 2012
+! Uwe Schulzweida, MPI-MET, Hamburg,   June 2012
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -254,19 +254,42 @@
       INTEGER    ZAXIS_REFERENCE       
       PARAMETER (ZAXIS_REFERENCE        = 16)
 !
-!  TAXIS types
-!
-      INTEGER    TAXIS_ABSOLUTE        
-      PARAMETER (TAXIS_ABSOLUTE         =  1)
-      INTEGER    TAXIS_RELATIVE        
-      PARAMETER (TAXIS_RELATIVE         =  2)
-!
 !  TIME types
 !
       INTEGER    TIME_CONSTANT         
       PARAMETER (TIME_CONSTANT          =  1)
       INTEGER    TIME_VARIABLE         
       PARAMETER (TIME_VARIABLE          =  2)
+!
+!  TSTEP types
+!
+      INTEGER    TSTEP_CONSTANT        
+      PARAMETER (TSTEP_CONSTANT         =  0)
+      INTEGER    TSTEP_INSTANT         
+      PARAMETER (TSTEP_INSTANT          =  1)
+      INTEGER    TSTEP_AVG             
+      PARAMETER (TSTEP_AVG              =  2)
+      INTEGER    TSTEP_ACCUM           
+      PARAMETER (TSTEP_ACCUM            =  3)
+      INTEGER    TSTEP_MAX             
+      PARAMETER (TSTEP_MAX              =  4)
+      INTEGER    TSTEP_MIN             
+      PARAMETER (TSTEP_MIN              =  5)
+      INTEGER    TSTEP_DIFF            
+      PARAMETER (TSTEP_DIFF             =  6)
+      INTEGER    TSTEP_RANGE           
+      PARAMETER (TSTEP_RANGE            =  7)
+      INTEGER    TSTEP_INSTANT2        
+      PARAMETER (TSTEP_INSTANT2         =  8)
+      INTEGER    TSTEP_INSTANT3        
+      PARAMETER (TSTEP_INSTANT3         =  9)
+!
+!  TAXIS types
+!
+      INTEGER    TAXIS_ABSOLUTE        
+      PARAMETER (TAXIS_ABSOLUTE         =  1)
+      INTEGER    TAXIS_RELATIVE        
+      PARAMETER (TAXIS_RELATIVE         =  2)
 !
 !  TUNIT types
 !
@@ -290,27 +313,6 @@
       PARAMETER (TUNIT_6HOURS           =  9)
       INTEGER    TUNIT_12HOURS         
       PARAMETER (TUNIT_12HOURS          = 10)
-!
-!  TSTEP types
-!
-      INTEGER    TSTEP_INSTANT         
-      PARAMETER (TSTEP_INSTANT          =  1)
-      INTEGER    TSTEP_AVG             
-      PARAMETER (TSTEP_AVG              =  2)
-      INTEGER    TSTEP_ACCUM           
-      PARAMETER (TSTEP_ACCUM            =  3)
-      INTEGER    TSTEP_MAX             
-      PARAMETER (TSTEP_MAX              =  4)
-      INTEGER    TSTEP_MIN             
-      PARAMETER (TSTEP_MIN              =  5)
-      INTEGER    TSTEP_DIFF            
-      PARAMETER (TSTEP_DIFF             =  6)
-      INTEGER    TSTEP_RANGE           
-      PARAMETER (TSTEP_RANGE            =  7)
-      INTEGER    TSTEP_INSTANT2        
-      PARAMETER (TSTEP_INSTANT2         =  8)
-      INTEGER    TSTEP_INSTANT3        
-      PARAMETER (TSTEP_INSTANT3         =  9)
 !
 !  CALENDAR types
 !
@@ -783,12 +785,6 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarTime
-
-!                     vlistDefVarTime
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     INTEGER         timeID)
-      EXTERNAL        vlistDefVarTime
 
 !                     vlistDefVarCompType
 !                                    (INTEGER         vlistID,

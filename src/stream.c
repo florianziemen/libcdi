@@ -1856,7 +1856,7 @@ void streamWriteContents(int streamID, char *cname)
   int tsID, recID, varID, levelID;
   long recsize;
   int nrecs, nvars;
-  int code, gridID, zaxisID, timeID, datatype;
+  int code, gridID, zaxisID, tsteptype, datatype;
   int ngrids, nzaxis;
   int filetype, gridtype;
   int xsize, ysize;
@@ -1899,24 +1899,24 @@ void streamWriteContents(int streamID, char *cname)
 
   fprintf(cnp, "#\n");
 
-  fprintf(cnp, "varID:code:gridID:zaxisID:timeID:datatype\n");
+  fprintf(cnp, "varID:code:gridID:zaxisID:tsteptype:datatype\n");
 
   nvars = vlistNvars(vlistID);
   for ( varID = 0; varID < nvars; varID++ )
     {
-      code     = vlistInqVarCode(vlistID, varID);
-      gridID   = vlistInqVarGrid(vlistID, varID);
-      zaxisID  = vlistInqVarZaxis(vlistID, varID);
-      timeID   = vlistInqVarTime(vlistID, varID);
-      datatype = vlistInqVarDatatype(vlistID, varID);
+      code      = vlistInqVarCode(vlistID, varID);
+      gridID    = vlistInqVarGrid(vlistID, varID);
+      zaxisID   = vlistInqVarZaxis(vlistID, varID);
+      tsteptype = vlistInqVarTsteptype(vlistID, varID);
+      datatype  = vlistInqVarDatatype(vlistID, varID);
       fprintf(cnp, "%4d:%4d:%4d:%4d:%4d:%4d:\n",
-	      varID+1, code, gridID, zaxisID, timeID, datatype);
+	      varID+1, code, gridID, zaxisID, tsteptype, datatype);
     }
 
   fprintf(cnp, "#\n");
 
   fprintf(cnp, "tsID:nrecs:date:time\n");
-  
+
   tsID = 0;
   while (1)
     {

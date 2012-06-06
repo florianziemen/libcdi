@@ -759,7 +759,7 @@ int cgribexScanTimestep1(int streamID)
 	  streamptr->ntsteps = 0;
 	  for ( varID = 0; varID < streamptr->nvars; varID++ )
 	    {
-	      vlistDefVarTime(vlistID, varID, TIME_CONSTANT);
+	      vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
 	    }
 	}
     }
@@ -909,7 +909,7 @@ int cgribexScanTimestep2(int streamID)
       if ( ISEC1_AvgNum )
 	{
 	  if (  taxis->numavg && warn_numavg &&
-		(taxis->numavg != ISEC1_AvgNum) )
+        	(taxis->numavg != ISEC1_AvgNum) )
 	    {
 	  /*
 	      Warning("Changing numavg from %d to %d not supported!",
@@ -1019,7 +1019,7 @@ int cgribexScanTimestep2(int streamID)
       if ( ! streamptr->tsteps[tsID].records[recID].used )
 	{
 	  varID = streamptr->tsteps[tsID].records[recID].varID;
-	  vlistDefVarTime(vlistID, varID, TIME_CONSTANT);
+          vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
 	}
       else
 	{

@@ -154,11 +154,12 @@ extern "C" {
 
 /* TIME types */
 
-#define  TIME_CONSTANT            1
-#define  TIME_VARIABLE            2
+#define  TIME_CONSTANT            0  /* obsolate, use TSTEP_CONSTANT            */
+#define  TIME_VARIABLE            1  /* obsolate, use TSTEP_INSTANT             */
 
 /* TSTEP types */
 
+#define  TSTEP_CONSTANT           0
 #define  TSTEP_INSTANT            1
 #define  TSTEP_AVG                2
 #define  TSTEP_ACCUM              3
@@ -381,17 +382,19 @@ int     vlistInqModel(int vlistID);
 /* VLIST VAR routines */
 
 /*      vlistDefVar: Create a new Variable */
-int     vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID);
+int     vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype);
 
 void    vlistChangeVarGrid(int vlistID, int varID, int gridID);
 void    vlistChangeVarZaxis(int vlistID, int varID, int zaxisID);
 
-void    vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *timeID);
+void    vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *tsteptype);
 int     vlistInqVarGrid(int vlistID, int varID);
 int     vlistInqVarZaxis(int vlistID, int varID);
 int     vlistInqVarTime(int vlistID, int varID);
 
-void    vlistDefVarTime(int vlistID, int varID, int timeID);
+int     vlistInqVarTsteptype(int vlistID, int varID);
+
+void    vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
 
 void    vlistDefVarCompType(int vlistID, int varID, int comptype);
 int     vlistInqVarCompType(int vlistID, int varID);
@@ -463,8 +466,6 @@ double  vlistInqVarScalefactor(int vlistID, int varID);
 void    vlistDefVarAddoffset(int vlistID, int varID, double addoffset);
 double  vlistInqVarAddoffset(int vlistID, int varID);
 
-void    vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
-int     vlistInqVarTsteptype(int vlistID, int varID);
 void    vlistDefVarTimave(int vlistID, int varID, int timave);
 int     vlistInqVarTimave(int vlistID, int varID);
 void    vlistDefVarTimaccu(int vlistID, int varID, int timaccu);

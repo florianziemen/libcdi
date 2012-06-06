@@ -185,7 +185,7 @@ typedef struct {
   int       isUsed;
   int       gridID;
   int       zaxisID;
-  int       timeID;      /* ( TIME_VARIABLE or TIME_CONSTANT ) */
+  int       tsteptype;   /* TSTEP_* */
   int       nlevel;
 }
 SVARINFO;

@@ -21,7 +21,6 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].mvarID        = varID;
   vlistptr->vars[varID].flag          = 0;
   vlistptr->vars[varID].param         = 0;
-  vlistptr->vars[varID].timeID        = CDI_UNDEFID;
   vlistptr->vars[varID].datatype      = CDI_UNDEFID;
   vlistptr->vars[varID].tsteptype     = TSTEP_INSTANT;
   vlistptr->vars[varID].timave        = 0;
@@ -141,13 +140,13 @@ void vlistCheckVarID(const char *caller, int vlistID, int varID)
 @Function  vlistDefVar
 @Title     Define a Variable
 
-@Prototype int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
+@Prototype int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
-    @Item  timeID   One of the set of predefined CDI time identifiers.
-                    The valid CDI time identifiers are @func{TIME_CONSTANT} and @func{TIME_VARIABLE}.
+    @Item  vlistID   Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  zaxisID   Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  tsteptype One of the set of predefined CDI timestep types.
+                     The valid CDI timestep types are @func{TSTEP_CONSTANT} and @func{TSTEP_INSTANT}.
 
 @Description
 The function @func{vlistDefVar} adds a new variable to vlistID.
@@ -165,7 +164,7 @@ and add a variable with @func{vlistDefVar}.
 int vlistID, varID;
    ...
 vlistID = vlistCreate();
-varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARIABLE);
+varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_INSTANT);
    ...
 streamDefVlist(streamID, vlistID);
    ...
@@ -174,7 +173,7 @@ vlistDestroy(vlistID);
 @EndSource
 @EndFunction
 */
-int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
+int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
 {
   int varID;
   int nlevs;
@@ -185,7 +184,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
   vlistptr = vlist_to_pointer(vlistID);
 
   if ( CDI_Debug )
-    Message("gridID = %d  zaxisID = %d  timeID = %d", gridID, zaxisID, timeID);
+    Message("gridID = %d  zaxisID = %d  tsteptype = %d", gridID, zaxisID, tsteptype);
 
   varID = vlistvarNewEntry(vlistID);
 
@@ -193,12 +192,12 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID)
 
   vlistptr->vars[varID].gridID  = gridID;
   vlistptr->vars[varID].zaxisID = zaxisID;
-  vlistptr->vars[varID].timeID  = timeID;
+  vlistptr->vars[varID].tsteptype = tsteptype;
 
-  if ( timeID != TIME_VARIABLE && timeID != TIME_CONSTANT )
+  if ( tsteptype < 0 )
     {
-      Message("unexpected timeID %d. Set to TIME_VARIABLE", timeID);
-      vlistptr->vars[varID].timeID = TIME_VARIABLE;	  
+      Message("Unexpected tstep type %d, set to TSTEP_INSTANT!", tsteptype);
+      vlistptr->vars[varID].tsteptype = TSTEP_INSTANT;
     }
 
   nlevs = zaxisInqSize(zaxisID);
@@ -302,7 +301,7 @@ void vlistDefVarCode(int vlistID, int varID, int code)
 }
 
 
-void vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *timeID)
+void vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *tsteptype)
 {
   vlist_t *vlistptr;
 
@@ -310,9 +309,9 @@ void vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *timeID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  *gridID  = vlistptr->vars[varID].gridID;
-  *zaxisID = vlistptr->vars[varID].zaxisID;
-  *timeID  = vlistptr->vars[varID].timeID;
+  *gridID    = vlistptr->vars[varID].gridID;
+  *zaxisID   = vlistptr->vars[varID].zaxisID;
+  *tsteptype = vlistptr->vars[varID].tsteptype;
 
   return;
 }
@@ -382,7 +381,7 @@ int vlistInqVarTime(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].timeID);
+  return (vlistptr->vars[varID].tsteptype);
 }
 
 /*
@@ -730,14 +729,14 @@ int vlistInqVarSize(int vlistID, int varID)
   int size;
   int zaxisID, gridID;
   int nlevs, gridsize;
-  int timeID;
+  int tsteptype;
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  vlistInqVar(vlistID, varID, &gridID, &zaxisID, &timeID);
+  vlistInqVar(vlistID, varID, &gridID, &zaxisID, &tsteptype);
 
   nlevs = zaxisInqSize(zaxisID);
 
@@ -1299,16 +1298,6 @@ void vlistDestroyVarUnits(int vlistID, int varID)
       free(vlistptr->vars[varID].units);
       vlistptr->vars[varID].units = NULL;
     }
-}
-
-
-void vlistDefVarTime(int vlistID, int varID, int timeID)
-{
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
-
-  vlistptr->vars[varID].timeID = timeID;
 }
 
 

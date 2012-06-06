@@ -597,12 +597,12 @@ void streamDefineTaxis(int streamID)
     {
       int varID, nvars;
       int vlistID;
-  
+
       vlistID = streamInqVlist(streamID);
 
       nvars = vlistNvars(vlistID);
       for ( varID = 0; varID < nvars; varID++ )
-	if ( vlistInqVarTime(vlistID, varID) == TIME_VARIABLE ) break;
+	if ( vlistInqVarTsteptype(vlistID, varID) == TSTEP_CONSTANT ) break;
 
       if ( varID == nvars )
 	{
@@ -614,7 +614,7 @@ void streamDefineTaxis(int streamID)
 	      taxisID = taxisCreate(TAXIS_ABSOLUTE);
 	      vlistDefTaxis(vlistID, taxisID);
 	    }
-	    
+
 	  (void) streamDefTimestep(streamID, 0);
 	}
       else

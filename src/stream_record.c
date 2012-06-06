@@ -538,7 +538,7 @@ void cdiCreateRecords(int streamID, int tsID)
 	{
 	  varID = streamptr->tsteps[0].records[recID].varID;
 	  if ( varID != -1 ) /* varID = -1 for write mode !!! */
-	    if ( vlistInqVarTime(vlistID, varID) == TIME_CONSTANT )
+	    if ( vlistInqVarTsteptype(vlistID, varID) == TSTEP_CONSTANT )
 	      continue;
 	  nrecords++;
 	}
@@ -570,7 +570,7 @@ void cdiCreateRecords(int streamID, int tsID)
 	{
 	  varID = streamptr->tsteps[0].records[recID].varID;
 	  if ( varID != -1 ) /* varID = -1 for write mode !!! */
-	    if ( vlistInqVarTime(vlistID, varID) == TIME_VARIABLE )
+	    if ( vlistInqVarTsteptype(vlistID, varID) != TSTEP_CONSTANT )
 	      {
 		streamptr->tsteps[tsID].records[recID].position = CDI_UNDEFID;
 		streamptr->tsteps[tsID].records[recID].size     = 0;

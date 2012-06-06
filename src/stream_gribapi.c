@@ -182,35 +182,30 @@ int gribapiTimeIsFC(grib_handle *gh)
 static
 int gribapiGetTsteptype(grib_handle *gh)
 {
-  int tsteptype = 0;
-  int timerange;
+  int tsteptype = TSTEP_INSTANT;
   long lpar;
   static int lprint = TRUE;
 
   if ( gribapiTimeIsFC(gh) )
     {
       int status;
-      status = grib_get_long(gh, "stepType", &lpar);
-      if ( status == 0 )
+      size_t len = 256;
+      char stepType[256];
+      
+      status = grib_get_string(gh, "stepType", stepType, &len);
+      if ( status == 0 && len > 1 && len < 256 )
 	{
-	  timerange = (int) lpar;
-
-	  // printf("timerange %d\n", timerange);
-
-	  switch ( timerange )
+	  if      ( strncmp("instant", stepType, len) == 0 ) tsteptype = TSTEP_INSTANT;
+	  else if ( strncmp("min",     stepType, len) == 0 ) tsteptype = TSTEP_MIN;
+	  else if ( strncmp("max",     stepType, len) == 0 ) tsteptype = TSTEP_MAX;
+	  else if ( strncmp("accum",   stepType, len) == 0 ) tsteptype = TSTEP_ACCUM;
+	  else if ( lprint )
 	    {
-	    case  0:  tsteptype = TSTEP_AVG;    break;
-	    case  1:  tsteptype = TSTEP_ACCUM;  break;
-	    case  2:  tsteptype = TSTEP_MIN;    break;
-	    case  3:  tsteptype = TSTEP_MAX;    break;
-	    case  4:  tsteptype = TSTEP_DIFF;   break;
-	    default:
-	      if ( lprint )
-		{
-		  Message("Time range %d unsupported", timerange);
-		  lprint = FALSE;
-		}
+	      Message("stepType %s unsupported, set to instant!", stepType);
+	      lprint = FALSE;
 	    }
+
+	  // printf("stepType: %s %ld %d\n", stepType, len, tsteptype);
 	}
     }
 
@@ -220,10 +215,12 @@ int gribapiGetTsteptype(grib_handle *gh)
 
 #if  defined  (HAVE_LIBGRIB_API)
 static
-void gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
+int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
 {
   int rdate, rtime;
-  int timeUnits, timePeriod;
+  int timeUnits, startStep, endStep;
+  int tstepRange = 0;
+  int range;
   long lpar;
   long sigofrtime = 3;
   long editionNumber;
@@ -244,25 +241,29 @@ void gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
     }
   else
     {
-      /*
-      GRIB_CHECK(grib_get_long(gh, "validityDate", &lpar), 0);
-      *vdate = (int) lpar;
-      GRIB_CHECK(grib_get_long(gh, "validityTime", &lpar), 0);
-      *vtime = (int) lpar*100;
-      */
       GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
       rdate = (int) lpar;
       GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
       rtime = (int) lpar*100;    
       GRIB_CHECK(grib_get_long(gh, "forecastTime", &lpar), 0);
-      timePeriod = (int) lpar;
+      startStep = (int) lpar;
+      GRIB_CHECK(grib_get_long(gh, "endStep", &lpar), 0);
+      endStep = (int) lpar;
       timeUnits = gribapiGetTimeUnits(gh);
-      
+
+      range = endStep - startStep;
+
+      if ( range > 0 )
+	{
+	  if ( startStep == 0 ) tstepRange = -1;
+	  else                  tstepRange =  1;
+	}
+
       {
 	static int lprint = TRUE;
 	extern int grib_calendar;
 	int ryear, rmonth, rday, rhour, rminute, rsecond;
-	int time_period = timePeriod;
+	int time_period = endStep;
 	int julday, secofday, addsec;
 
 	cdiDecodeDate(rdate, &ryear, &rmonth, &rday);
@@ -298,6 +299,8 @@ void gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
 	*vtime = cdiEncodeTime(rhour, rminute, rsecond);
       }
     }
+
+  return (tstepRange);
 }
 #endif
 
@@ -836,7 +839,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
   // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units); 
 
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2,
-	       datatype, &varID, &levelID, 0, numavg, leveltype,
+	       datatype, &varID, &levelID, tsteptype, numavg, leveltype,
 	       name, longname, units);
 
   (*record).varID   = varID;
@@ -1200,7 +1203,7 @@ int gribapiScanTimestep1(int streamID)
 	  streamptr->ntsteps = 0;
 	  for ( varID = 0; varID < streamptr->nvars; varID++ )
 	    {
-	      vlistDefVarTime(vlistID, varID, TIME_CONSTANT);
+	      vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
 	    }
 	}
     }
@@ -1487,7 +1490,7 @@ int gribapiScanTimestep2(int streamID)
       if ( ! streamptr->tsteps[tsID].records[recID].used )
 	{
 	  varID = streamptr->tsteps[tsID].records[recID].varID;
-	  vlistDefVarTime(vlistID, varID, TIME_CONSTANT);
+	  vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
 	}
       else
 	{
@@ -1986,47 +1989,6 @@ void gribapiDefParam(grib_handle *gh, int param, const char *name)
 
 #if  defined  (HAVE_LIBGRIB_API)
 static
-int gribapiDefTimerange(int tsteptype, int factor, int calendar,
-			int rdate, int rtime, int vdate, int vtime, int *pip)
-{
-  int timerange = -1;
-  int year, month, day, hour, minute, second;
-  int julday1, secofday1, julday2, secofday2, days, secs;
-  int ip = 0;
-
-  cdiDecodeDate(rdate, &year, &month, &day);
-  cdiDecodeTime(rtime, &hour, &minute, &second);
-  encode_juldaysec(calendar, year, month, day, hour, minute, &julday1, &secofday1);
-
-  cdiDecodeDate(vdate, &year, &month, &day);
-  cdiDecodeTime(vtime, &hour, &minute, &second);
-  encode_juldaysec(calendar, year, month, day, hour, minute, &julday2, &secofday2);
-  
-  (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
-
-  if ( !(int) fmod(days*86400.0 + secs, factor) )
-    {
-      ip = (int) ((days*86400.0 + secs)/factor);
-
-      switch ( tsteptype )
-	{
-	case TSTEP_AVG:    timerange =  0;  break;
-	case TSTEP_ACCUM:  timerange =  1;  break;
-	case TSTEP_MIN:    timerange =  2;  break;
-	case TSTEP_MAX:    timerange =  3;  break;
-	case TSTEP_DIFF:   timerange =  4;  break;
-	default:           timerange =  0;  break;
-	}
-    }
-
-  *pip = ip;
-
-  return (timerange);
-}
-#endif
-
-#if  defined  (HAVE_LIBGRIB_API)
-static
 int gribapiDefStepUnits(grib_handle *gh, int timeunit)
 {
   int factor = 1;
@@ -2065,26 +2027,80 @@ int gribapiDefDateTime(grib_handle *gh, int timeunit, int date, int time)
 
   return (gribapiDefStepUnits(gh, timeunit));
 }
+
+static
+int gribapiDefTsteptype(grib_handle *gh, int tsteptype, int timeunit, int factor, int calendar,
+			int rdate, int rtime, int vdate, int vtime)
+{
+  int status = -1;
+  int year, month, day, hour, minute, second;
+  int julday1, secofday1, julday2, secofday2, days, secs;
+  long startStep = 0, endStep;
+  long proDefTempNum = 0;
+  size_t len = 256;
+  char stepType[256];
+
+  cdiDecodeDate(rdate, &year, &month, &day);
+  cdiDecodeTime(rtime, &hour, &minute, &second);
+  encode_juldaysec(calendar, year, month, day, hour, minute, &julday1, &secofday1);
+
+  cdiDecodeDate(vdate, &year, &month, &day);
+  cdiDecodeTime(vtime, &hour, &minute, &second);
+  encode_juldaysec(calendar, year, month, day, hour, minute, &julday2, &secofday2);
+  
+  (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
+
+  if ( !(int) fmod(days*86400.0 + secs, factor) )
+    {
+      endStep = (int) ((days*86400.0 + secs)/factor);
+
+      GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
+      gribapiDefStepUnits(gh, timeunit);
+
+      // printf(">>>>> tsteptype %d  startStep %d  endStep %d\n", tsteptype, startStep, endStep);
+
+      switch ( tsteptype )
+	{
+	case TSTEP_INSTANT:  strcpy(stepType, "instant"); proDefTempNum = 0; break;
+	case TSTEP_MIN:      strcpy(stepType, "min");     proDefTempNum = 8; break;
+	case TSTEP_MAX:      strcpy(stepType, "max");     proDefTempNum = 8; break;
+	case TSTEP_ACCUM:    strcpy(stepType, "accum");   proDefTempNum = 8; break;
+	default:             strcpy(stepType, "instant"); proDefTempNum = 0; break;
+	}
+
+      GRIB_CHECK(grib_set_long(gh, "productDefinitionTemplateNumber", proDefTempNum), 0);
+      len = strlen(stepType);
+      GRIB_CHECK(grib_set_string(gh, "stepType", stepType, &len), 0);
+
+      if ( proDefTempNum == 0 ) startStep = endStep;
+
+      GRIB_CHECK(grib_set_long(gh, "forecastTime", startStep), 0);
+      GRIB_CHECK(grib_set_long(gh, "endStep", endStep), 0);
+
+      status = 0;
+    }
+
+  return (status);
+}
 #endif
 
 #if  defined  (HAVE_LIBGRIB_API)
 static
 void gribapiDefTime(grib_handle *gh , int vdate, int vtime, int tsteptype, int numavg, int taxisID)
 {
-  int timetype = -1;
-  int timerange = 0;
+  int taxistype = -1;
   int timeunit;
 
-  if ( taxisID != -1 ) timetype = taxisInqType(taxisID);
+  if ( taxisID != -1 ) taxistype = taxisInqType(taxisID);
 
   timeunit = taxisInqTunit(taxisID);
 
-  if ( timetype == TAXIS_RELATIVE )
+  if ( taxistype == TAXIS_RELATIVE )
     {
       int factor = 1;
       int rdate, rtime;
-      int ip = 0;
       int calendar;
+      int status;
 
       calendar = taxisInqCalendar(taxisID);
       rdate    = taxisInqRdate(taxisID);
@@ -2092,31 +2108,15 @@ void gribapiDefTime(grib_handle *gh , int vdate, int vtime, int tsteptype, int n
 
       factor = gribapiDefDateTime(gh, timeunit, rdate, rtime);
 
-      timerange = gribapiDefTimerange(tsteptype, factor, calendar,
-				      rdate, rtime, vdate, vtime, &ip);
-      // printf("timerange: %d %d\n", timerange, ip);
+      status = gribapiDefTsteptype(gh, tsteptype, timeunit, factor, calendar,
+				   rdate, rtime, vdate, vtime);
 
-      if ( timerange == -1 )
-	{
-	  timetype = TAXIS_ABSOLUTE;
-	}
-      else
-	{
-	  GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
-	  //GRIB_CHECK(grib_set_long(gh, "stepType", timerange), 0);
-	  GRIB_CHECK(grib_set_long(gh, "stepRange", ip), 0);
-	  // if ( vdate == 0 ) vdate = 10101;
-	  // GRIB_CHECK(grib_set_long(gh, "dataDate", vdate), 0);
-	  // GRIB_CHECK(grib_set_long(gh, "dataTime", vtime/100), 0);
-	  gribapiDefStepUnits(gh, timeunit);
-	}
+      if ( status != 0 ) taxistype = TAXIS_ABSOLUTE;
     }
 
-  if ( timetype == TAXIS_ABSOLUTE )
+  if ( taxistype == TAXIS_ABSOLUTE )
     {
       (void) gribapiDefDateTime(gh, timeunit, vdate, vtime);
-
-      // GRIB_CHECK(grib_set_long(gh, "stepType", timerange), 0);
     }
 }
 #endif

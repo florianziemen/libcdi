@@ -39,16 +39,16 @@
 /*  ZAXIS types  */
 
 
-/*  TAXIS types  */
-
-
 /*  TIME types  */
 
 
-/*  TUNIT types  */
-
-
 /*  TSTEP types  */
+
+
+/*  TAXIS types  */
+
+
+/*  TUNIT types  */
 
 
 /*  CALENDAR types  */
@@ -163,7 +163,6 @@ FCALLSCSUB5 (vlistInqVar, VLISTINQVAR, vlistinqvar, INT, INT, PINT, PINT, PINT)
 FCALLSCFUN2 (INT, vlistInqVarGrid, VLISTINQVARGRID, vlistinqvargrid, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarZaxis, VLISTINQVARZAXIS, vlistinqvarzaxis, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarTime, VLISTINQVARTIME, vlistinqvartime, INT, INT)
-FCALLSCSUB3 (vlistDefVarTime, VLISTDEFVARTIME, vlistdefvartime, INT, INT, INT)
 FCALLSCSUB3 (vlistDefVarCompType, VLISTDEFVARCOMPTYPE, vlistdefvarcomptype, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarCompType, VLISTINQVARCOMPTYPE, vlistinqvarcomptype, INT, INT)
 FCALLSCSUB3 (vlistDefVarCompLevel, VLISTDEFVARCOMPLEVEL, vlistdefvarcomplevel, INT, INT, INT)

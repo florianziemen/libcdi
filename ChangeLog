@@ -1,3 +1,7 @@
+2012-06-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added support for grib_api key stepType  [request: Dörte Liermann]
+
 2012-06-01  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* stream_gribapi: added support for level type HYBRID_HALF	[request: Dörte Liermann]
