@@ -268,7 +268,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
   int nrecs, nvars, nzaxis, ntsteps;
   int levelID, levelsize;
   int tsID, ntimeout;
-  int tstepID, taxisID;
+  int tsteptype, taxisID;
   int nbyte, nbyte0;
   int index;
   char varname[CDI_MAX_NAME];
@@ -320,17 +320,17 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	    fprintf(stdout, "unknown  ");
 
 	  if ( vardis )
-	    fprintf(stdout, "%-12s", varname);
+	    fprintf(stdout, "%-11s ", varname);
 	  else
-	    fprintf(stdout, "%-12s", paramstr);
+	    fprintf(stdout, "%-11s ", paramstr);
 
-	  tstepID = vlistInqVarTsteptype(vlistID, varID);
-	  if      ( tstepID == TSTEP_CONSTANT ) fprintf(stdout, "%-8s", "constant");
-	  else if ( tstepID == TSTEP_INSTANT  ) fprintf(stdout, "%-8s", "instant");
-	  else if ( tstepID == TSTEP_MIN      ) fprintf(stdout, "%-8s", "min");
-	  else if ( tstepID == TSTEP_MAX      ) fprintf(stdout, "%-8s", "max");
-	  else if ( tstepID == TSTEP_ACCUM    ) fprintf(stdout, "%-8s", "accum");
-	  else                                  fprintf(stdout, "%-8s", "unknown");
+	  tsteptype = vlistInqVarTsteptype(vlistID, varID);
+	  if      ( tsteptype == TSTEP_CONSTANT ) fprintf(stdout, "%-8s", "constant");
+	  else if ( tsteptype == TSTEP_INSTANT  ) fprintf(stdout, "%-8s", "instant");
+	  else if ( tsteptype == TSTEP_MIN      ) fprintf(stdout, "%-8s", "min");
+	  else if ( tsteptype == TSTEP_MAX      ) fprintf(stdout, "%-8s", "max");
+	  else if ( tsteptype == TSTEP_ACCUM    ) fprintf(stdout, "%-8s", "accum");
+	  else                                    fprintf(stdout, "%-8s", "unknown");
 
 	  datatype = vlistInqVarDatatype(vlistID, varID);
 
@@ -432,7 +432,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 
 	  if ( taxisID != CDI_UNDEFID )
 	    {
-	      int calendar, unit;
+	      int calendar, tunits;
 
 	      if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 		{
@@ -445,20 +445,26 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 		  fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d",
 			  year, month, day, hour, minute, second);
 
-		  unit = taxisInqTunit(taxisID);
-		  if ( unit != CDI_UNDEFID )
+		  tunits = taxisInqTunit(taxisID);
+		  if ( tunits != CDI_UNDEFID )
 		    {
-		      if ( unit == TUNIT_YEAR )
+		      if ( tunits == TUNIT_YEAR )
 			fprintf(stdout, "  Units = years");
-		      else if ( unit == TUNIT_MONTH )
+		      else if ( tunits == TUNIT_MONTH )
 			fprintf(stdout, "  Units = months");
-		      else if ( unit == TUNIT_DAY )
+		      else if ( tunits == TUNIT_DAY )
 			fprintf(stdout, "  Units = days");
-		      else if ( unit == TUNIT_HOUR )
+		      else if ( tunits == TUNIT_12HOURS )
+			fprintf(stdout, "  Units = 12hours");
+		      else if ( tunits == TUNIT_6HOURS )
+			fprintf(stdout, "  Units = 6hours");
+		      else if ( tunits == TUNIT_3HOURS )
+			fprintf(stdout, "  Units = 3hours");
+		      else if ( tunits == TUNIT_HOUR )
 			fprintf(stdout, "  Units = hours");
-		      else if ( unit == TUNIT_MINUTE )
+		      else if ( tunits == TUNIT_MINUTE )
 			fprintf(stdout, "  Units = minutes");
-		      else if ( unit == TUNIT_SECOND )
+		      else if ( tunits == TUNIT_SECOND )
 			fprintf(stdout, "  Units = seconds");
 		      else
 			fprintf(stdout, "  Units = unknown");
