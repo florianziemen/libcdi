@@ -166,9 +166,13 @@ extern "C" {
 #define  TSTEP_MAX                4
 #define  TSTEP_MIN                5
 #define  TSTEP_DIFF               6
-#define  TSTEP_RANGE              7
-#define  TSTEP_INSTANT2           8
-#define  TSTEP_INSTANT3           9
+#define  TSTEP_RMS                7
+#define  TSTEP_SD                 8
+#define  TSTEP_COV                9
+#define  TSTEP_RATIO             10
+#define  TSTEP_RANGE             11
+#define  TSTEP_INSTANT2          12
+#define  TSTEP_INSTANT3          13
 
 /* TAXIS types */
 

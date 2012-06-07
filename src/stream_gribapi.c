@@ -196,9 +196,15 @@ int gribapiGetTsteptype(grib_handle *gh)
       if ( status == 0 && len > 1 && len < 256 )
 	{
 	  if      ( strncmp("instant", stepType, len) == 0 ) tsteptype = TSTEP_INSTANT;
-	  else if ( strncmp("min",     stepType, len) == 0 ) tsteptype = TSTEP_MIN;
-	  else if ( strncmp("max",     stepType, len) == 0 ) tsteptype = TSTEP_MAX;
+	  else if ( strncmp("avg",     stepType, len) == 0 ) tsteptype = TSTEP_AVG;
 	  else if ( strncmp("accum",   stepType, len) == 0 ) tsteptype = TSTEP_ACCUM;
+	  else if ( strncmp("max",     stepType, len) == 0 ) tsteptype = TSTEP_MAX;
+	  else if ( strncmp("min",     stepType, len) == 0 ) tsteptype = TSTEP_MIN;
+	  else if ( strncmp("diff",    stepType, len) == 0 ) tsteptype = TSTEP_DIFF;
+	  else if ( strncmp("rms",     stepType, len) == 0 ) tsteptype = TSTEP_RMS;
+	  else if ( strncmp("sd",      stepType, len) == 0 ) tsteptype = TSTEP_SD;
+	  else if ( strncmp("cov",     stepType, len) == 0 ) tsteptype = TSTEP_COV;
+	  else if ( strncmp("ratio",   stepType, len) == 0 ) tsteptype = TSTEP_RATIO;
 	  else if ( lprint )
 	    {
 	      Message("stepType %s unsupported, set to instant!", stepType);
@@ -2062,9 +2068,15 @@ int gribapiDefTsteptype(grib_handle *gh, int tsteptype, int timeunit, int factor
       switch ( tsteptype )
 	{
 	case TSTEP_INSTANT:  strcpy(stepType, "instant"); proDefTempNum = 0; break;
-	case TSTEP_MIN:      strcpy(stepType, "min");     proDefTempNum = 8; break;
-	case TSTEP_MAX:      strcpy(stepType, "max");     proDefTempNum = 8; break;
+	case TSTEP_AVG:      strcpy(stepType, "avg");     proDefTempNum = 8; break;
 	case TSTEP_ACCUM:    strcpy(stepType, "accum");   proDefTempNum = 8; break;
+	case TSTEP_MAX:      strcpy(stepType, "max");     proDefTempNum = 8; break;
+	case TSTEP_MIN:      strcpy(stepType, "min");     proDefTempNum = 8; break;
+	case TSTEP_DIFF:     strcpy(stepType, "diff");    proDefTempNum = 8; break;
+	case TSTEP_RMS:      strcpy(stepType, "rms");     proDefTempNum = 8; break;
+	case TSTEP_SD:       strcpy(stepType, "sd");      proDefTempNum = 8; break;
+	case TSTEP_COV:      strcpy(stepType, "cov");     proDefTempNum = 8; break;
+	case TSTEP_RATIO:    strcpy(stepType, "ratio");   proDefTempNum = 8; break;
 	default:             strcpy(stepType, "instant"); proDefTempNum = 0; break;
 	}
 
