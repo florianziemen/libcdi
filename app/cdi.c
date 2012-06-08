@@ -256,6 +256,7 @@ void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
     fprintf(stdout, "Found %d of %d missing values!\n", imiss, nmiss);
 }
 
+#define MAXCHARS 82
 
 static
 void printShortinfo(int streamID, int vlistID, int vardis)
@@ -389,7 +390,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  nbyte = nbyte0;
 	  for ( levelID = 0; levelID < levelsize; levelID++ )
 	    {
-	      if ( nbyte > 80 )
+	      if ( nbyte > MAXCHARS )
 		{
 		  fprintf(stdout, "\n");
 		  fprintf(stdout, "%*s", nbyte0, "");
@@ -406,7 +407,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	      nbyte0 = fprintf(stdout, "%33s : ", "bounds");
 	      for ( levelID = 0; levelID < levelsize; levelID++ )
 		{
-		  if ( nbyte > 80 )
+		  if ( nbyte > MAXCHARS )
 		    {
 		      fprintf(stdout, "\n");
 		      fprintf(stdout, "%*s", nbyte0, "");
