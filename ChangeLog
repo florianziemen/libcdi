@@ -1,3 +1,8 @@
+2012-07-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.5.6 released
+	* using CGRIBEX library version 1.5.3
+
 2012-06-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added support for grib_api key stepType  [request: Dörte Liermann]
