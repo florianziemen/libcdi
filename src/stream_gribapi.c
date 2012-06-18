@@ -165,7 +165,7 @@ int gribapiTimeIsFC(grib_handle *gh)
 
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
-  if ( editionNumber == 2 )
+  if ( editionNumber > 1 )
     {
       long sigofrtime;
 
@@ -233,7 +233,7 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
 
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
-  if ( editionNumber == 2 )
+  if ( editionNumber > 1 )
     {
       GRIB_CHECK(grib_get_long(gh, "significanceOfReferenceTime", &sigofrtime), 0);
     }
@@ -2024,7 +2024,11 @@ int gribapiDefStepUnits(grib_handle *gh, int timeunit)
 static
 int gribapiDefDateTime(grib_handle *gh, int timeunit, int date, int time)
 {
-  GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 0), 0);
+  long editionNumber;
+
+  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
+
+  if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 0), 0);
   GRIB_CHECK(grib_set_long(gh, "stepRange", 0), 0);
 
   if ( date == 0 ) date = 10101;
@@ -2045,6 +2049,9 @@ int gribapiDefTsteptype(grib_handle *gh, int tsteptype, int timeunit, int factor
   long proDefTempNum = 0;
   size_t len = 256;
   char stepType[256];
+  long editionNumber;
+
+  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
@@ -2060,7 +2067,7 @@ int gribapiDefTsteptype(grib_handle *gh, int tsteptype, int timeunit, int factor
     {
       endStep = (int) ((days*86400.0 + secs)/factor);
 
-      GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
+      if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
       gribapiDefStepUnits(gh, timeunit);
 
       // printf(">>>>> tsteptype %d  startStep %d  endStep %d\n", tsteptype, startStep, endStep);
@@ -2080,13 +2087,13 @@ int gribapiDefTsteptype(grib_handle *gh, int tsteptype, int timeunit, int factor
 	default:             strcpy(stepType, "instant"); proDefTempNum = 0; break;
 	}
 
-      GRIB_CHECK(grib_set_long(gh, "productDefinitionTemplateNumber", proDefTempNum), 0);
+      if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "productDefinitionTemplateNumber", proDefTempNum), 0);
       len = strlen(stepType);
       GRIB_CHECK(grib_set_string(gh, "stepType", stepType, &len), 0);
 
       if ( proDefTempNum == 0 ) startStep = endStep;
 
-      GRIB_CHECK(grib_set_long(gh, "forecastTime", startStep), 0);
+      if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "forecastTime", startStep), 0);
       GRIB_CHECK(grib_set_long(gh, "endStep", endStep), 0);
 
       status = 0;

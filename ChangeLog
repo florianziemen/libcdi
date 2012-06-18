@@ -3,6 +3,10 @@
 	* Version 1.5.6 released
 	* using CGRIBEX library version 1.5.3
 
+2012-06-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* grib_api: use key significanceOfReferenceTime only for GRIB2
+
 2012-06-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added support for grib_api key stepType  [request: Dörte Liermann]
