@@ -4620,7 +4620,7 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
                 }
               else
                 {
-                  Warning("%s has unexpected contents: %s", attname, cell_measures);
+                  Warning("%s has an unexpected contents: %s", attname, cell_measures);
                 }
               cdfSetVar(ncvars, ncvarid, TRUE);
             }
@@ -5558,7 +5558,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		}
 	      else
 		{
-		  Warning("Variable %s has unsupported grid, skipped!", ncvars[ncvarid].name);
+		  Warning("Variable %s has an unsupported grid, skipped!", ncvars[ncvarid].name);
 		  ncvars[ncvarid].isvar = -1;
 		  continue;
 		}
@@ -6464,7 +6464,7 @@ int cdfInqContents(int streamID)
       if ( ncvars[ncvarid].isvar == -1 )
 	{
 	  ncvars[ncvarid].isvar = 0;
-	  Warning("Variable %s has unknown type, skipped!", ncvars[ncvarid].name);
+	  Warning("Variable %s has an unknown type, skipped!", ncvars[ncvarid].name);
 	  continue;
 	}
 
