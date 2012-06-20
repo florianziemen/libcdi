@@ -3,6 +3,10 @@
 	* Version 1.5.6 released
 	* using CGRIBEX library version 1.5.3
 
+2012-06-20  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdf_write_var_data: bug fix for unscaled uint8, int8, int16,int32 (bug introduced in 1.5.5)
+
 2012-06-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* grib_api: use key significanceOfReferenceTime only for GRIB2

@@ -1,6 +1,12 @@
 CDI NEWS
 --------
 
+Version 1.5.6 (?? ??? 2012):
+
+   New features:
+   Fixed bugs:
+     * wrong netCDF output for unscaled uint8, int8, int16, int32 (bug introduced in 1.5.5)
+
 Version 1.5.5 (15 May 2012):
 
    New features:

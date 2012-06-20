@@ -3256,12 +3256,10 @@ int cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtyp
 {
 #if  defined  (HAVE_LIBNETCDF)
   long i, j;
-  const double *data_dp = (const double *) data;
-  const double *pdata_dp = data;
+  const double *pdata_dp = (const double *) data;
   double *mdata_dp = NULL;
   double *sdata_dp = NULL;
-  const float *data_sp = (const float *) data;
-  const float *pdata_sp = data;
+  const float *pdata_sp = (const float *) data;
   float *mdata_sp = NULL;
   float *sdata_sp = NULL;
   extern int CDF_Debug;
@@ -3284,7 +3282,8 @@ int cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtyp
           if ( memtype == MEMTYPE_FLOAT )
             {
               mdata_sp = (float *) malloc(nvals*sizeof(float));
-              memcpy(mdata_sp, data_sp, nvals*sizeof(float));
+              memcpy(mdata_sp, pdata_sp, nvals*sizeof(float));
+              pdata_sp = mdata_sp;
 
               if ( nmiss > 0 )
                 {
@@ -3309,7 +3308,8 @@ int cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtyp
           else
             {
               mdata_dp = (double *) malloc(nvals*sizeof(double));
-              memcpy(mdata_dp, data_dp, nvals*sizeof(double));
+              memcpy(mdata_dp, pdata_dp, nvals*sizeof(double));
+              pdata_dp = mdata_dp;
 
               if ( nmiss > 0 )
                 {
@@ -3338,7 +3338,12 @@ int cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtyp
         {
           if ( memtype == MEMTYPE_FLOAT )
             {
-              if ( mdata_sp == NULL ) mdata_sp = (float *) malloc(nvals*sizeof(float));
+              if ( mdata_sp == NULL )
+                {
+                  mdata_sp = (float *) malloc(nvals*sizeof(float));
+                  memcpy(mdata_sp, pdata_sp, nvals*sizeof(float));
+                  pdata_sp = mdata_sp;
+                }
 
               for ( i = 0; i < nvals; i++ ) mdata_sp[i] = NINT(mdata_sp[i]);
 
@@ -3355,7 +3360,12 @@ int cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtyp
             }
           else
             {
-              if ( mdata_dp == NULL ) mdata_dp = (double *) malloc(nvals*sizeof(double));
+              if ( mdata_dp == NULL )
+                {
+                  mdata_dp = (double *) malloc(nvals*sizeof(double));
+                  memcpy(mdata_dp, pdata_dp, nvals*sizeof(double));
+                  pdata_dp = mdata_dp;
+                }
 
               for ( i = 0; i < nvals; i++ ) mdata_dp[i] = NINT(mdata_dp[i]);
 
@@ -3372,24 +3382,22 @@ int cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtyp
             }
         }
 
-      if ( CDF_Debug )
+      if ( CDF_Debug && memtype != MEMTYPE_FLOAT )
         {
           double fmin, fmax;
           fmin =  1.0e200;
           fmax = -1.0e200;
           for ( i = 0; i < nvals; ++i )
             {
-              if ( !DBL_IS_EQUAL(data_dp[i], missval) )
+              if ( !DBL_IS_EQUAL(pdata_dp[i], missval) )
                 {
-                  if ( data_dp[i] < fmin ) fmin = data_dp[i];
-                  if ( data_dp[i] > fmax ) fmax = data_dp[i];
+                  if ( pdata_dp[i] < fmin ) fmin = pdata_dp[i];
+                  if ( pdata_dp[i] > fmax ) fmax = pdata_dp[i];
                 }
             }
           Message("nvals = %d, nmiss = %d, missval = %g, minval = %g, maxval = %g",
                   nvals, nmiss, missval, fmin, fmax);
         }
-
-      if ( mdata_dp ) pdata_dp = mdata_dp;
     }
 
   if ( swapxy )
