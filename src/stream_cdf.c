@@ -6209,7 +6209,7 @@ int cdfInqContents(int streamID)
   int ucla_les = FALSE;
 
   streamptr = stream_to_pointer(streamID);
-  
+
   stream_check_ptr(__func__, streamptr);
 
   vlistID = streamInqVlist(streamID);
@@ -6232,7 +6232,7 @@ int cdfInqContents(int streamID)
       Warning("ndims = %d", ndims);
       return (CDI_EUFSTRUCT);
     }
-  
+
   /* alloc ncvars */
   if ( nvars > 0 )
     ncvars = (ncvar_t *) malloc(nvars*sizeof(ncvar_t));
@@ -6365,7 +6365,7 @@ int cdfInqContents(int streamID)
 		}
 	      else
 		{
-		  if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
+                  //  if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
 		}
 	      // if ( ncvars[ncvarid].isvar != TRUE ) cdfSetVar(ncvars, ncvarid, FALSE);
 
@@ -6466,7 +6466,8 @@ int cdfInqContents(int streamID)
       if ( ncvars[ncvarid].isvar == -1 && ncvars[ncvarid].ndims == 0 )
 	cdfSetVar(ncvars, ncvarid, FALSE);
 
-      if ( ncvars[ncvarid].isvar == -1 && ncvars[ncvarid].ndims > 1 )
+      //if ( ncvars[ncvarid].isvar == -1 && ncvars[ncvarid].ndims > 1 )
+      if ( ncvars[ncvarid].isvar == -1 && ncvars[ncvarid].ndims >= 1 )
 	cdfSetVar(ncvars, ncvarid, TRUE);
 
       if ( ncvars[ncvarid].isvar == -1 )
