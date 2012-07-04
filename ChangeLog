@@ -5,6 +5,7 @@
 
 2012-07-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* stream_cdf::define_all_grids: modify check for same x and y varids
 	* cdfInqContents: set all undefined 1D variables to data variables [request: Florian Prill]
 
 2012-06-20  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

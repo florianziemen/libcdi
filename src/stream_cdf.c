@@ -5712,20 +5712,24 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		  }
 
 		if ( xdimid == xdimid2 &&
-		     (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == UNDEFID)) )
+		    (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == UNDEFID)) )
 		  {
 		    int same_grid = TRUE;
-
+                    /*
 		    if ( xvarid != -1 && ncvars[ncvarid2].xvarid != UNDEFID &&
 			 xvarid != ncvars[ncvarid2].xvarid ) same_grid = FALSE;
 
 		    if ( yvarid != -1 && ncvars[ncvarid2].yvarid != UNDEFID &&
 			 yvarid != ncvars[ncvarid2].yvarid ) same_grid = FALSE;
+                    */
+		    if ( xvarid != ncvars[ncvarid2].xvarid ) same_grid = FALSE;
+		    if ( yvarid != ncvars[ncvarid2].yvarid ) same_grid = FALSE;
 
 		    if ( same_grid )
 		      {
+                        printf("xvarid %d %d yvarid %d %d\n",  xvarid, ncvars[ncvarid2].xvarid,  yvarid,  ncvars[ncvarid2].yvarid );
 			if ( CDI_Debug )
-			  Message("gridID %d %d %s",
+			  Message("Same gridID %d %d %s",
 				  ncvars[ncvarid].gridID, ncvarid2, ncvars[ncvarid2].name);
 			ncvars[ncvarid2].gridID = ncvars[ncvarid].gridID;
 		      }
