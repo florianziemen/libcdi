@@ -5722,12 +5722,11 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		    if ( yvarid != -1 && ncvars[ncvarid2].yvarid != UNDEFID &&
 			 yvarid != ncvars[ncvarid2].yvarid ) same_grid = FALSE;
                     */
-		    if ( xvarid != ncvars[ncvarid2].xvarid ) same_grid = FALSE;
-		    if ( yvarid != ncvars[ncvarid2].yvarid ) same_grid = FALSE;
+		    if ( ncvars[ncvarid].xvarid != ncvars[ncvarid2].xvarid ) same_grid = FALSE;
+		    if ( ncvars[ncvarid].yvarid != ncvars[ncvarid2].yvarid ) same_grid = FALSE;
 
 		    if ( same_grid )
 		      {
-                        printf("xvarid %d %d yvarid %d %d\n",  xvarid, ncvars[ncvarid2].xvarid,  yvarid,  ncvars[ncvarid2].yvarid );
 			if ( CDI_Debug )
 			  Message("Same gridID %d %d %s",
 				  ncvars[ncvarid].gridID, ncvarid2, ncvars[ncvarid2].name);
