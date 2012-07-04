@@ -6584,13 +6584,6 @@ int cdfInqContents(int streamID)
 	}
     }
 
-  if ( CDI_Debug ) printNCvars(ncvars, nvars);
-
-
-  /* define all grids */
-  define_all_grids(streamptr, fileID, vlistID, ncdims, nvars, ncvars, timedimid);
-
-
   /* find VCT */
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
@@ -6600,16 +6593,28 @@ int cdfInqContents(int streamID)
 	    {
 	      vcta_id = ncvarid;
 	      nvcth_id = ncvars[ncvarid].dimids[0];
+              ncvars[ncvarid].isvar = FALSE;
 	      continue;
 	    }
 	  if ( memcmp(ncvars[ncvarid].name, "hybi", 4) == 0 )
 	    {
 	      vctb_id = ncvarid;
 	      nvcth_id = ncvars[ncvarid].dimids[0];
+              ncvars[ncvarid].isvar = FALSE;
 	      continue;
 	    }
+
+	  if      ( memcmp(ncvars[ncvarid].name, "hyam", 4) == 0 ) ncvars[ncvarid].isvar = FALSE;
+	  else if ( memcmp(ncvars[ncvarid].name, "hybm", 4) == 0 ) ncvars[ncvarid].isvar = FALSE;
 	}
     }
+
+  if ( CDI_Debug ) printNCvars(ncvars, nvars);
+
+
+  /* define all grids */
+  define_all_grids(streamptr, fileID, vlistID, ncdims, nvars, ncvars, timedimid);
+
 
   /* read VCT */
   if ( nvcth_id != UNDEFID && vcta_id != UNDEFID && vctb_id != UNDEFID )
