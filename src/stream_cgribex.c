@@ -1140,8 +1140,8 @@ int cgribexScanTimestep(int streamID)
 	  rstatus = gribRead(fileID, gribbuffer, &readsize);
 	  if ( rstatus )
 	    {
-	      Error("Inconsistent timestep %d (GRIB record %d/%d)!", tsID+1, rindex+1,
-		    streamptr->tsteps[tsID].recordSize);
+	      Warning("Inconsistent timestep %d (GRIB record %d/%d)!", tsID+1, rindex+1,
+                      streamptr->tsteps[tsID].recordSize);
 	      break;
 	    }
 

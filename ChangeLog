@@ -5,6 +5,10 @@
 
 2012-07-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* grib scan timestep: changed Error() to Warning() for inconsistent timesteps
+
+2012-07-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
 	* stream_cdf::define_all_grids: modify check for same x and y varids
 	* cdfInqContents: set all undefined 1D variables to data variables [request: Florian Prill]
 
