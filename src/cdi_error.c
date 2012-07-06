@@ -15,8 +15,6 @@ char *cdiStringError(int cdiErrno)
   static char _EUNC4[]       = "Unsupported netCDF4 structure";
   static char _ELIMIT[]      = "Internal limits exceeded";
 
-  printf("cdiErrno: %d\n", cdiErrno);
-  printf("errno: %d\n", errno);
   switch (cdiErrno) {
   case CDI_ESYSTEM:
     {

@@ -615,6 +615,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
     case FILETYPE_SRV:
       {
         fileID = fileOpen(filename, filemode);
+        if ( fileID < 0 ) fileID = CDI_ESYSTEM;
 	record = (Record *) malloc(sizeof(Record));
 	record->buffer = NULL;
 	record->srvp   = srvNew();
@@ -625,6 +626,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
     case FILETYPE_EXT:
       {
         fileID = fileOpen(filename, filemode);
+        if ( fileID < 0 ) fileID = CDI_ESYSTEM;
 	record = (Record *) malloc(sizeof(Record));
 	record->buffer = NULL;
 	record->extp   = extNew();
@@ -635,6 +637,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
     case FILETYPE_IEG:
       {
         fileID = fileOpen(filename, filemode);
+        if ( fileID < 0 ) fileID = CDI_ESYSTEM;
 	record = (Record *) malloc(sizeof(Record));
 	record->buffer = NULL;
 	record->iegp   = iegNew();
