@@ -1092,7 +1092,7 @@ int fileOpen(const char *filename, const char *mode)
 
   if ( FILE_Debug )
     if ( fp == NULL && fd == -1 )
-      Message("Open failed on %s mode %c", filename, fmode);
+      Message("Open failed on %s mode %c", filename, fmode, errno);
 
   if ( fp )
     {
