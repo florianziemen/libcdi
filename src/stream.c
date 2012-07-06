@@ -605,6 +605,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
     case FILETYPE_GRB2:
       {
         fileID = gribOpen(filename, filemode);
+        if ( fileID < 0 ) fileID = CDI_ESYSTEM;
 	record = (Record *) malloc(sizeof(Record));
 	record->buffer = NULL;
 	break;
@@ -674,7 +675,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
       streamptr = stream_new_entry();
       streamID  = streamptr->self;
 
-      if ( streamID < 0 ) return(CDI_ELIMIT);
+      if ( streamID < 0 ) return (CDI_ELIMIT);
 
       streamptr->record   = record;
       streamptr->filetype = filetype;
