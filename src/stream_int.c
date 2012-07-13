@@ -24,6 +24,7 @@ int cdiDefaultInstID   = CDI_UNDEFID;
 int cdiDefaultModelID  = CDI_UNDEFID;
 int cdiDefaultTableID  = CDI_UNDEFID;
 int cdiNcMissingValue  = CDI_UNDEFID;
+int cdiNcChunksizehint = CDI_UNDEFID;
 int cdiSplitLtype105   = CDI_UNDEFID;
 
 int cdiIgnoreAttCoordinates = FALSE;
@@ -143,6 +144,9 @@ void cdiInitialize(void)
 
       envString = getenv("NC_MISSING_VALUE");
       if ( envString ) cdiNcMissingValue = atoi(envString);
+
+      envString = getenv("NC_CHUNKSIZEHINT");
+      if ( envString ) cdiNcChunksizehint = atoi(envString);
 
       envString = getenv("SPLIT_LTYPE_105");
       if ( envString ) cdiSplitLtype105 = atoi(envString);
@@ -530,6 +534,10 @@ void cdiDefGlobal(const char *string, int val)
   else if ( strcmp(string, "HAVE_MISSVAL") == 0 )
     {
       cdiHaveMissval = val;
+    }
+  else if ( strcmp(string, "NC_CHUNKSIZEHINT") == 0 )
+    {
+      cdiNcChunksizehint = val;
     }
   else
     {

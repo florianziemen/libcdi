@@ -258,6 +258,7 @@ extern int cdiDefaultModelID;
 extern int cdiDefaultTableID;
 extern int cdiDefaultLeveltype;
 extern int cdiNcMissingValue;
+extern int cdiNcChunksizehint;
 extern int cdiSplitLtype105;
 
 extern char *cdiPartabPath;

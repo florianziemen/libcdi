@@ -57,6 +57,8 @@ void cdf_create(const char *path, int cmode, int *ncidp)
   chunksizehint = 16777216; /* 16 MB */
 #endif
 
+  if ( cdiNcChunksizehint != CDI_UNDEFID ) chunksizehint = cdiNcChunksizehint;
+
   status = nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
 
   if ( CDF_Debug || status != NC_NOERR )

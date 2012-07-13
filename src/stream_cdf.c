@@ -1827,7 +1827,7 @@ void cdfDefRgrid(int streamID, int gridID)
                   break;
                 }
               else
-                iz++;   
+                iz++;
             }
         }
     }

@@ -3,6 +3,10 @@
 	* Version 1.5.6 released
 	* using CGRIBEX library version 1.5.3
 
+2012-07-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added support for environment variable NC_CHUNKSIZEHINT [Feature #2142]
+
 2012-07-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* grib scan timestep: changed Error() to Warning() for inconsistent timesteps
