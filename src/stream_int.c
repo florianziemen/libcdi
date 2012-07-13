@@ -191,7 +191,9 @@ void cdiInitialize(void)
 	  if ( CDI_Debug )
 	    Message("Default calendar set to %s!", envString);
 	}
+#if  defined  (HAVE_LIBCGRIBEX)
       gribSetCalendar(cdiDefaultCalendar);
+#endif
 
       envString = getenv("PARTAB_INTERN");
       if ( envString ) cdiPartabIntern = atoi(envString);
@@ -581,7 +583,6 @@ void cdiCheckContents(int streamID)
       if ( zaxisInqType(zaxisID) == ZAXIS_GENERIC )
 	cdiCheckZaxis(zaxisID);
     }
-    
 }
 
 

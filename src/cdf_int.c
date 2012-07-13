@@ -67,13 +67,11 @@ void cdf_create(const char *path, int cmode, int *ncidp)
   if ( CDF_Debug || status != NC_NOERR )
     Message("chunksizehint %d", chunksizehint);
 
-  if ( status != NC_NOERR )
-    Error("%s", nc_strerror(status));
+  if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 
   status = nc_set_fill(*ncidp, NC_NOFILL, &oldfill);
 
-  if ( status != NC_NOERR )
-    Error("%s", nc_strerror(status));
+  if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
 
 
@@ -102,17 +100,17 @@ int cdf_open(const char *path, int omode, int *ncidp)
       /*
       if ( chunksizehint < ChunkSizeMin ) chunksizehint = ChunkSizeMin;
       */
+      if ( cdiNcChunksizehint != CDI_UNDEFID ) chunksizehint = cdiNcChunksizehint;
+
       status = nc__open(path, omode, &chunksizehint, ncidp);
 
-      if ( CDF_Debug )
-	Message("chunksizehint %d", chunksizehint);
+      if ( CDF_Debug ) Message("chunksizehint %d", chunksizehint);
     }
 
   if ( CDF_Debug )
     Message("ncid = %d  mode = %d  file = %s", *ncidp, omode, path);
 
-  if ( CDF_Debug && status != NC_NOERR )
-    Message("%s", nc_strerror(status));
+  if ( CDF_Debug && status != NC_NOERR ) Message("%s", nc_strerror(status));
 
   return (status);
 }

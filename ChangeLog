@@ -5,6 +5,7 @@
 
 2012-07-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* added call to cdiInitialize() in all streamOpen functions (bug fix)
 	* added support for environment variable NC_CHUNKSIZEHINT [Feature #2142]
 
 2012-07-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

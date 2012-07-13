@@ -311,6 +311,7 @@ int     streamInqDimgroupID(int streamID);
 
 int getByteswap(int byteorder);
 
+void  cdiInitialize(void);
 
 void stream_write_record(int streamID, int memtype, const void *data, int nmiss);
 

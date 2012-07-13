@@ -29,10 +29,10 @@ int pclose(FILE *stream);
 
 void cdiPrintDefaults(void)
 {
-  fprintf (stderr, "default instID     :  %d\n", cdiDefaultInstID); 
-  fprintf (stderr, "default modelID    :  %d\n", cdiDefaultModelID); 
-  fprintf (stderr, "default tableID    :  %d\n", cdiDefaultTableID); 
-  fprintf (stderr, "default missval    :  %g\n", cdiDefaultMissval); 
+  fprintf (stderr, "default instID     :  %d\n", cdiDefaultInstID);
+  fprintf (stderr, "default modelID    :  %d\n", cdiDefaultModelID);
+  fprintf (stderr, "default tableID    :  %d\n", cdiDefaultTableID);
+  fprintf (stderr, "default missval    :  %g\n", cdiDefaultMissval);
 }
 
 
@@ -232,7 +232,7 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
     {
       pch = &argument[i+1];
       len -= (i+1);
-      if ( len && ( memcmp(argument, "filelist:", i) == 0 || 
+      if ( len && ( memcmp(argument, "filelist:", i) == 0 ||
 		    memcmp(argument, "flist:", i) == 0 ) )
 	{
 	  for ( i = 0; i < len; ++i ) if ( pch[i] == ',' ) nfiles++;
@@ -253,7 +253,7 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 		{
 		  if ( line[0] == '#' || line[0] == '\0' ||
 		       line[0] == ' ' ) continue;
-		  
+
 		  if ( nfiles >= max_fnames )
 		    {
 		      Warning("Too many input files (limit: %d)", max_fnames);
@@ -262,7 +262,7 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 		  fnames[nfiles] = strdupx(line);
 		  nfiles++;
 		}
-	      
+
 	      fclose(fp);
 
 	      if ( nfiles == 0 ) Error("No input file found in %s", pch);
@@ -270,10 +270,10 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 	  else
 	    {
 	      char xline[65536];
-	      	      
+
 	      strcpy(xline, pch);
 	      for ( i = 0; i < len; i++ ) if ( xline[i] == ',' ) xline[i] = 0;
-	      
+
 	      nfiles++;
 	      if ( nfiles >= max_fnames )
 		{
@@ -293,14 +293,13 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 	{
 	  char command[4096];
 	  FILE *pfp;
-	  
+
 	  strcpy(command, "ls ");
 	  strcat(command, pch);
 
 	  pfp = popen(command, "r");
-	  if ( pfp == NULL )
-	    SysError("popen %s failed", command);
-	  
+	  if ( pfp == NULL ) SysError("popen %s failed", command);
+
 	  nfiles = 0;
 	  while ( _readline_(pfp, line, MAX_LINE) )
 	    {
@@ -321,7 +320,7 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
     }
 
   num_fnames = nfiles;
-  
+
   return (num_fnames);
 }
 
@@ -701,7 +700,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	  vlistptr->ntsteps = streamNtsteps(streamID);
 	}
     }
- 
+
   return (streamID);
 }
 
@@ -973,6 +972,8 @@ int streamOpenRead(const char *filenames)
   const char *filename;
   stream_t *streamptr = NULL;
 
+  cdiInitialize();
+
   //num_fnames = get_fnames(filenames, fnames, MAX_FNAMES);
 
   if ( num_fnames == 0 )
@@ -1014,6 +1015,8 @@ int streamOpenAppend(const char *filename)
   int filetype, byteorder;
   int streamID;
   stream_t *streamptr;
+
+  cdiInitialize();
 
   filetype = getFiletype(filename, &byteorder);
 
@@ -1073,6 +1076,8 @@ if ( streamID < 0 ) handle_error(streamID);
 */
 int streamOpenWrite(const char *filename, int filetype)
 {
+  cdiInitialize();
+
   return (streamOpen(filename, "w", filetype));
 }
 
@@ -2112,7 +2117,7 @@ int streamInqVlist(int streamID)
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
-  
+
   stream_check_ptr(__func__, streamptr);
 
   return (streamptr->vlistID);
