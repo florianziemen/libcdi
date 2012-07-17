@@ -484,6 +484,9 @@ int     vlistFindLevel(int vlistID, int fvarID, int flevelID);
 int     vlistMergedVar(int vlistID, int varID);
 int     vlistMergedLevel(int vlistID, int varID, int levelID);
 
+/*     Ensemble info routines */
+void    vlistDefVarEnsemble(int vlistID, int varID, int ensID, int ensCount, int forecast_type);
+int     vlistInqVarEnsemble(int vlistID, int varID, int *ensID, int *ensCount, int *forecast_type);
 
 /* VLIST attributes */
 

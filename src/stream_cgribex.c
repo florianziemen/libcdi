@@ -2159,6 +2159,41 @@ void cgribexDefaultSec4(int *isec4)
 
   for ( i = 2; i <= 10; ++i ) isec4[i] = 0;
 }
+
+static
+void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
+{
+
+  /* int *ensID, int *ensCount, int *forecast_type; */
+
+  int ensID, ensCount, forecast_type;
+
+  /* For Ensemble info  */
+
+  //Put1Byte(isec1[36]);        /* MPIM local GRIB use definition identifier  */
+                                /*    (extension identifier)                  */
+  //Put1Byte(isec1[37]);        /* type of ensemble forecast                  */
+  //Put2Byte(isec1[38]);        /* individual ensemble member                 */
+  //Put2Byte(isec1[39]);        /* number of forecasts in ensemble            */
+
+  if( !vlistInqVarEnsemble( vlistID,  varID, &ensID, &ensCount, &forecast_type ) )
+    {
+        ISEC1_LocalFLag = 1;
+	isec1[36] = 1;
+
+	isec1[37] =  forecast_type;
+	isec1[38] =  ensID;
+	isec1[39] =  ensCount;
+
+#ifdef DBG
+	if( DBG )  
+	  {
+	    fprintf( stderr, "cgribexDefEnsembleVar :\n EnsID  %d\n Enscount %d\n Forecast init type %d\n",  ensID, 
+		     ensCount,  forecast_type );
+	  }
+#endif
+    }
+}
 #endif
 
 
@@ -2195,6 +2230,8 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   cgribexDefGrid(isec1, isec2, isec4, gridID);
   cgribexDefLevel(isec1, isec2, fsec2, zaxisID, levelID);
   cgribexDefMask(isec3);
+
+  cgribexDefEnsembleVar(isec1, vlistID, varID);
 
   ISEC4_NumValues = gridInqSize(gridID);
   ISEC4_NumBits   = grbBitsPerValue(datatype);

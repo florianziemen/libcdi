@@ -2698,6 +2698,7 @@ int cdfDefVar(int streamID, int varID)
   int iax = 0;
   char axis[5];
   stream_t *streamptr;
+  int ensID, ensCount, forecast_type;
   int retval;
 
   streamptr = stream_to_pointer(streamID);
@@ -3090,6 +3091,25 @@ int cdfDefVar(int streamID, int varID)
           zaxisInqName(zaxisID, varname);
           cdf_put_att_text(fileID, ncvarid, "level_type", strlen(varname), varname);
         }
+    }
+
+  if( !vlistInqVarEnsemble( vlistID,  varID, &ensID, &ensCount, &forecast_type ) )
+    {
+      /* void cdf_put_att_int(  int ncid, int varid, const char *name, nc_type xtype,
+	                        size_t len, const int *ip )
+       */
+
+	cdf_put_att_int(fileID, ncvarid, "realization", NC_INT, 1, &ensID);
+	cdf_put_att_int(fileID, ncvarid, "ensemble_members", NC_INT, 1, &ensCount);
+	cdf_put_att_int(fileID, ncvarid, "forecast_init_type", NC_INT, 1, &forecast_type);
+
+#ifdef DBG
+	if( DBG )
+	  {
+	    fprintf( stderr, "cdfDefVar :\n EnsID  %d\n Enscount %d\n Forecast init type %d\n",  ensID,
+		     ensCount,  forecast_type );
+	  }
+#endif
     }
 
   /* Attributes */

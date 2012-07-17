@@ -2808,6 +2808,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   int datatype;
   int param;
   int lieee = FALSE;
+  int ensID, ensCount, forecast_type; /* Ensemble Data */
   long bitsPerValue;
   long editionNumber;
   char name[256];
@@ -2831,6 +2832,14 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
 
   if ( ! gc->init ) gribapiDefParam(gh, param, name);
+
+  if( !vlistInqVarEnsemble( vlistID,  varID, &ensID, &ensCount, &forecast_type ) )
+    {
+      GRIB_CHECK(grib_set_long(gh, "typeOfEnsembleForecast", forecast_type ), 0);
+      GRIB_CHECK(grib_set_long(gh, "numberOfForecastsInEnsemble", ensCount ), 0);
+      GRIB_CHECK(grib_set_long(gh, "perturbationNumber", ensID ), 0);
+    }
+
   gribapiDefTime(gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID));
 
   if ( editionNumber == 2 && (datatype == DATATYPE_FLT32 || datatype == DATATYPE_FLT64) ) lieee = TRUE;

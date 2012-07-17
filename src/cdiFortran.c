@@ -211,6 +211,11 @@ FCALLSCFUN3 (INT, vlistFindLevel, VLISTFINDLEVEL, vlistfindlevel, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistMergedVar, VLISTMERGEDVAR, vlistmergedvar, INT, INT)
 FCALLSCFUN3 (INT, vlistMergedLevel, VLISTMERGEDLEVEL, vlistmergedlevel, INT, INT, INT)
 
+/*  Ensemble info routines  */
+
+FCALLSCSUB5 (vlistDefVarEnsemble, VLISTDEFVARENSEMBLE, vlistdefvarensemble, INT, INT, INT, INT, INT)
+FCALLSCFUN5 (INT, vlistInqVarEnsemble, VLISTINQVARENSEMBLE, vlistinqvarensemble, INT, INT, PINT, PINT, PINT)
+
 /*  VLIST attributes  */
 
 FCALLSCFUN3 (INT, vlistInqNatts, VLISTINQNATTS, vlistinqnatts, INT, INT, PINT)

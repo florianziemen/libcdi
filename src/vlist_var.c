@@ -48,6 +48,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].lvalidrange   = 0;
   vlistptr->vars[varID].validrange[0] = VALIDMISS;
   vlistptr->vars[varID].validrange[1] = VALIDMISS;
+  vlistptr->vars[varID].ensdata       = NULL;
 }
 
 static
@@ -1589,6 +1590,76 @@ int vlistInqVarXYZ(int vlistID, int varID)
   vlistCheckVarID(__func__, vlistID, varID);
 
   return (vlistptr->vars[varID].xyz);
+}
+
+
+/* Ensemble Info Routines */
+void vlistDefVarEnsemble(int vlistID, int varID, int ensID, int ensCount, int forecast_type )
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  if ( vlistptr->vars[varID].ensdata == NULL )
+  vlistptr->vars[varID].ensdata = (ensinfo_t *) malloc( sizeof( ensinfo_t ) );
+
+  vlistptr->vars[varID].ensdata->ens_index          = ensID;
+  vlistptr->vars[varID].ensdata->ens_count          = ensCount;
+  vlistptr->vars[varID].ensdata->forecast_init_type = forecast_type;
+
+  /*
+    int      ens_index;
+    int      ens_count;
+    int      forecast_init_type;
+  */
+
+#ifdef DBG
+  if( DBG )
+    {
+      fprintf( stderr, "vlistDefVarEnsemble Inputs: \n EnsID  %d\n Enscount %d\n Forecast init type %d\n", ensID, 
+	       ensCount, forecast_type );
+
+      fprintf( stderr, "vlistDefVarEnsemble outputs: \n EnsID  %d\n Enscount %d\n Forecast init type %d\n",vlistptr->vars[varID].ensdata->ens_index, 
+	       vlistptr->vars[varID].ensdata->ens_count,  vlistptr->vars[varID].ensdata->forecast_init_type );
+    }
+#endif
+}
+
+
+int vlistInqVarEnsemble( int vlistID, int varID, int *ensID, int *ensCount, int *forecast_type )
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  if(   vlistptr->vars[varID].ensdata )
+    {
+      *ensID = vlistptr->vars[varID].ensdata->ens_index;
+      *ensCount = vlistptr->vars[varID].ensdata->ens_count;
+      *forecast_type = vlistptr->vars[varID].ensdata->forecast_init_type;
+    }
+  else
+    return 1;
+
+#ifdef DBG
+  if( DBG )
+    {
+      fprintf( stderr, "vlistInqVarEnsemble outputs: \n EnsID %d\n Enscount %d\n Forecast init type %d\n", *ensID, 
+	       *ensCount, *forecast_type );
+
+      /*
+      fprintf( stderr, " EnsID  %d\n Enscount %d\n Forecast init type %d\n",vlistptr->vars[varID].ensdata->ens_index, 
+	       vlistptr->vars[varID].ensdata->ens_count,  vlistptr->vars[varID].ensdata->forecast_init_type );
+      */
+
+    }
+#endif
+
+    return 0;
 }
 
 /*

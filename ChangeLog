@@ -3,6 +3,10 @@
 	* Version 1.5.6 released
 	* using CGRIBEX library version 1.5.3
 
+2012-07-17  Modali Kameswarrao  <modali.kameswarrao@zmaw.de>
+
+	* added vlistDefVarEnsemble() for GRIB and netCDF
+
 2012-07-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added call to cdiInitialize() in all streamOpen functions (bug fix)

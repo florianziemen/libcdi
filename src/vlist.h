@@ -46,6 +46,15 @@ levinfo_t;
 
 typedef struct
 {
+  int ens_index;
+  int ens_count;
+  int forecast_init_type;
+}
+ensinfo_t;
+
+
+typedef struct
+{
   int         flag;
   int         nlevs;
   int         isUsed;
@@ -75,6 +84,7 @@ typedef struct
   levinfo_t  *levinfo;
   int         comptype;     // compression type
   int         complevel;    // compression level
+  ensinfo_t  *ensdata;      /* Ensemble information */
   cdi_atts_t  atts;
 }
 var_t;

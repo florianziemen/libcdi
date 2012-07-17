@@ -330,10 +330,12 @@ void vlistDestroy(int vlistID)
       if ( vlistptr->vars[varID].longname ) free(vlistptr->vars[varID].longname);
       if ( vlistptr->vars[varID].stdname )  free(vlistptr->vars[varID].stdname);
       if ( vlistptr->vars[varID].units )    free(vlistptr->vars[varID].units);
-      
+
+      if ( vlistptr->vars[varID].ensdata )  free(vlistptr->vars[varID].ensdata);
+
       vlistDelAtts(vlistID, varID);
     }
-  
+ 
   if ( vlistptr->vars ) free(vlistptr->vars);
 
   vlist_delete_entry(vlistptr);
@@ -394,6 +396,14 @@ void vlistCopy(int vlistID2, int vlistID1)
 	  vlistptr2->vars[varID].levinfo = (levinfo_t *) malloc(nlevs*sizeof(levinfo_t));
 	  memcpy(vlistptr2->vars[varID].levinfo,
 		 vlistptr1->vars[varID].levinfo, nlevs*sizeof(levinfo_t));
+
+          if ( vlistptr2->vars[varID].ensdata ) free(vlistptr2->vars[varID].ensdata);
+          if ( vlistptr1->vars[varID].ensdata )
+            {
+              vlistptr2->vars[varID].ensdata = (ensinfo_t *) malloc(sizeof(ensinfo_t));
+              memcpy(vlistptr2->vars[varID].ensdata,
+                     vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
+            }
 
 	  vlistptr2->vars[varID].atts.nelems = 0;
 	  vlistCopyVarAtts(vlistID1, varID, vlistID2, varID);
@@ -765,6 +775,12 @@ void vlistCat(int vlistID2, int vlistID1)
       nlevs = vlistptr1->vars[varID].nlevs;
       vlistptr2->vars[varID2].levinfo = (levinfo_t *) malloc(nlevs*sizeof(levinfo_t));
       memcpy(vlistptr2->vars[varID2].levinfo, vlistptr1->vars[varID].levinfo, nlevs*sizeof(levinfo_t));
+
+      if ( vlistptr1->vars[varID].ensdata )
+        {
+          vlistptr2->vars[varID2].ensdata = (ensinfo_t *) malloc(sizeof(ensinfo_t));
+          memcpy(vlistptr2->vars[varID2].ensdata, vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
+        }
 
       vlistptr2->vars[varID2].atts.nelems = 0;
       vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);

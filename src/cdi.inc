@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.5.6rc1
+! Fortran interface for CDI library version 1.5.6
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   June 2012
+! Uwe Schulzweida, MPI-MET, Hamburg,   July 2012
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -277,12 +277,20 @@
       PARAMETER (TSTEP_MIN              =  5)
       INTEGER    TSTEP_DIFF            
       PARAMETER (TSTEP_DIFF             =  6)
+      INTEGER    TSTEP_RMS             
+      PARAMETER (TSTEP_RMS              =  7)
+      INTEGER    TSTEP_SD              
+      PARAMETER (TSTEP_SD               =  8)
+      INTEGER    TSTEP_COV             
+      PARAMETER (TSTEP_COV              =  9)
+      INTEGER    TSTEP_RATIO           
+      PARAMETER (TSTEP_RATIO            = 10)
       INTEGER    TSTEP_RANGE           
-      PARAMETER (TSTEP_RANGE            =  7)
+      PARAMETER (TSTEP_RANGE            = 11)
       INTEGER    TSTEP_INSTANT2        
-      PARAMETER (TSTEP_INSTANT2         =  8)
+      PARAMETER (TSTEP_INSTANT2         = 12)
       INTEGER    TSTEP_INSTANT3        
-      PARAMETER (TSTEP_INSTANT3         =  9)
+      PARAMETER (TSTEP_INSTANT3         = 13)
 !
 !  TAXIS types
 !
@@ -1051,6 +1059,25 @@
 !                                     INTEGER         varID,
 !                                     INTEGER         levelID)
       EXTERNAL        vlistMergedLevel
+
+!
+!  Ensemble info routines
+!
+!                     vlistDefVarEnsemble
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         ensID,
+!                                     INTEGER         ensCount,
+!                                     INTEGER         forecast_type)
+      EXTERNAL        vlistDefVarEnsemble
+
+      INTEGER         vlistInqVarEnsemble
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         ensID,
+!                                     INTEGER         ensCount,
+!                                     INTEGER         forecast_type)
+      EXTERNAL        vlistInqVarEnsemble
 
 !
 !  VLIST attributes
