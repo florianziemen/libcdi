@@ -789,6 +789,14 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarZaxis
 
+!
+!  used in MPIOM
+!
+      INTEGER         vlistInqVarID
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         code)
+      EXTERNAL        vlistInqVarID
+
       INTEGER         vlistInqVarTsteptype
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)

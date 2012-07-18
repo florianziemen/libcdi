@@ -681,14 +681,14 @@ void vlistInqVarUnits(int vlistID, int varID, char *units)
 	  if ( tableInqParUnits(tableID, code, units) != 0 )
 	    units[0] = '\0';
 	}
-    }  
+    }
   else
     strcpy(units, vlistptr->vars[varID].units);
 
   return;
 }
 
-/* not used 
+/* used in MPIOM ! */
 int vlistInqVarID(int vlistID, int code)
 {
   int varID;
@@ -701,17 +701,12 @@ int vlistInqVarID(int vlistID, int code)
     {
       param = vlistptr->vars[varID].param;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
-      if ( pnum == code ) break;
+      if ( pnum == code ) return (varID);
     }
 
-  if ( varID == vlistptr->nvars )
-    {
-      varID = CDI_UNDEFID;
-    }
-
-  return (varID);
+  return (CDI_UNDEFID);
 }
-*/
+
 
 int vlistInqVarSize(int vlistID, int varID)
 {

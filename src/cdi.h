@@ -395,6 +395,9 @@ void    vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *tste
 int     vlistInqVarGrid(int vlistID, int varID);
 int     vlistInqVarZaxis(int vlistID, int varID);
 
+/* used in MPIOM */
+int     vlistInqVarID(int vlistID, int code);
+
 int     vlistInqVarTsteptype(int vlistID, int varID);
 void    vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
 

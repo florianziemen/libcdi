@@ -162,6 +162,10 @@ FCALLSCSUB3 (vlistChangeVarZaxis, VLISTCHANGEVARZAXIS, vlistchangevarzaxis, INT,
 FCALLSCSUB5 (vlistInqVar, VLISTINQVAR, vlistinqvar, INT, INT, PINT, PINT, PINT)
 FCALLSCFUN2 (INT, vlistInqVarGrid, VLISTINQVARGRID, vlistinqvargrid, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarZaxis, VLISTINQVARZAXIS, vlistinqvarzaxis, INT, INT)
+
+/*  used in MPIOM  */
+
+FCALLSCFUN2 (INT, vlistInqVarID, VLISTINQVARID, vlistinqvarid, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarTsteptype, VLISTINQVARTSTEPTYPE, vlistinqvartsteptype, INT, INT)
 FCALLSCSUB3 (vlistDefVarTsteptype, VLISTDEFVARTSTEPTYPE, vlistdefvartsteptype, INT, INT, INT)
 FCALLSCSUB3 (vlistDefVarCompType, VLISTDEFVARCOMPTYPE, vlistdefvarcomptype, INT, INT, INT)
