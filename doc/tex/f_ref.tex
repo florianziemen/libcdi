@@ -38,7 +38,7 @@ gridDefXbounds
 \fi
 }
 \begin{verbatim}
-    SUBROUTINE gridDefXbounds(INTEGER gridID, const REAL*8 xbounds)
+    SUBROUTINE gridDefXbounds(INTEGER gridID, REAL*8 xbounds)
 \end{verbatim}
 
 Define the bounds of a X-axis
@@ -113,7 +113,7 @@ gridDefXvals
 \fi
 }
 \begin{verbatim}
-    SUBROUTINE gridDefXvals(INTEGER gridID, const REAL*8 xvals)
+    SUBROUTINE gridDefXvals(INTEGER gridID, REAL*8 xvals)
 \end{verbatim}
 
 Define the values of a X-axis
@@ -128,7 +128,7 @@ gridDefYbounds
 \fi
 }
 \begin{verbatim}
-    SUBROUTINE gridDefYbounds(INTEGER gridID, const REAL*8 ybounds)
+    SUBROUTINE gridDefYbounds(INTEGER gridID, REAL*8 ybounds)
 \end{verbatim}
 
 Define the bounds of a Y-axis
@@ -203,7 +203,7 @@ gridDefYvals
 \fi
 }
 \begin{verbatim}
-    SUBROUTINE gridDefYvals(INTEGER gridID, const REAL*8 yvals)
+    SUBROUTINE gridDefYvals(INTEGER gridID, REAL*8 yvals)
 \end{verbatim}
 
 Define the values of a Y-axis
@@ -655,7 +655,7 @@ streamWriteVar
 \fi
 }
 \begin{verbatim}
-    SUBROUTINE streamWriteVar(INTEGER streamID, INTEGER varID, const REAL*8 data, 
+    SUBROUTINE streamWriteVar(INTEGER streamID, INTEGER varID, REAL*8 data, 
                               INTEGER nmiss)
 \end{verbatim}
 
@@ -671,7 +671,7 @@ streamWriteVarF
 \fi
 }
 \begin{verbatim}
-    SUBROUTINE streamWriteVarF(INTEGER streamID, INTEGER varID, const float *data, 
+    SUBROUTINE streamWriteVarF(INTEGER streamID, INTEGER varID, REAL*4 data, 
                                INTEGER nmiss)
 \end{verbatim}
 
@@ -688,7 +688,7 @@ streamWriteVarSlice
 }
 \begin{verbatim}
     SUBROUTINE streamWriteVarSlice(INTEGER streamID, INTEGER varID, INTEGER levelID, 
-                                   const REAL*8 data, INTEGER nmiss)
+                                   REAL*8 data, INTEGER nmiss)
 \end{verbatim}
 
 Write a horizontal slice of a variable
@@ -704,7 +704,7 @@ streamWriteVarSliceF
 }
 \begin{verbatim}
     SUBROUTINE streamWriteVarSliceF(INTEGER streamID, INTEGER varID, INTEGER levelID, 
-                                    const float *data, INTEGER nmiss)
+                                    REAL*4 data, INTEGER nmiss)
 \end{verbatim}
 
 Write a horizontal slice of a variable
@@ -961,7 +961,7 @@ vlistDefAttFlt
 \begin{verbatim}
     INTEGER FUNCTION vlistDefAttFlt(INTEGER vlistID, INTEGER varID, 
                                     CHARACTER*(*) name, INTEGER type, INTEGER len, 
-                                    const REAL*8 dp)
+                                    REAL*8 dp)
 \end{verbatim}
 
 Define a floating point attribute
@@ -978,7 +978,7 @@ vlistDefAttInt
 \begin{verbatim}
     INTEGER FUNCTION vlistDefAttInt(INTEGER vlistID, INTEGER varID, 
                                     CHARACTER*(*) name, INTEGER type, INTEGER len, 
-                                    const INTEGER ip)
+                                    INTEGER ip)
 \end{verbatim}
 
 Define an integer attribute
@@ -1469,7 +1469,7 @@ zaxisDefLevels
 \fi
 }
 \begin{verbatim}
-    SUBROUTINE zaxisDefLevels(INTEGER zaxisID, const REAL*8 levels)
+    SUBROUTINE zaxisDefLevels(INTEGER zaxisID, REAL*8 levels)
 \end{verbatim}
 
 Define the levels of a Z-axis

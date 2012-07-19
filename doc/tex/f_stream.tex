@@ -341,7 +341,7 @@ The values are converted to the external data type of the variable, if necessary
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    SUBROUTINE streamWriteVar(INTEGER streamID, INTEGER varID, const REAL*8 data, 
+    SUBROUTINE streamWriteVar(INTEGER streamID, INTEGER varID, REAL*8 data, 
                               INTEGER nmiss)
 \end{verbatim}
 
@@ -370,7 +370,7 @@ Only support for netCDF was implemented in this function.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    SUBROUTINE streamWriteVarF(INTEGER streamID, INTEGER varID, const float *data, 
+    SUBROUTINE streamWriteVarF(INTEGER streamID, INTEGER varID, REAL*4 data, 
                                INTEGER nmiss)
 \end{verbatim}
 
@@ -428,7 +428,7 @@ The values are converted to the external data type of the variable, if necessary
 
 \begin{verbatim}
     SUBROUTINE streamWriteVarSlice(INTEGER streamID, INTEGER varID, INTEGER levelID, 
-                                   const REAL*8 data, INTEGER nmiss)
+                                   REAL*8 data, INTEGER nmiss)
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -459,7 +459,7 @@ Only support for netCDF was implemented in this function.
 
 \begin{verbatim}
     SUBROUTINE streamWriteVarSliceF(INTEGER streamID, INTEGER varID, INTEGER levelID, 
-                                    const float *data, INTEGER nmiss)
+                                    REAL*4 data, INTEGER nmiss)
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
