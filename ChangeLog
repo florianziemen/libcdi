@@ -1,11 +1,11 @@
-2012-07-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+2012-07-23  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Version 1.5.6 released
 	* using CGRIBEX library version 1.5.3
 
 2012-07-17  Modali Kameswarrao  <modali.kameswarrao@zmaw.de>
 
-	* added vlistDefVarEnsemble() for GRIB and netCDF
+	* added vlistDefVarEnsemble() for GRIB1 and netCDF
 
 2012-07-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
