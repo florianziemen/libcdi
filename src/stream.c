@@ -1727,7 +1727,6 @@ from an open dataset.
 void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
 {
   int filetype;
-  int ierr = 0;
   stream_t *streamptr;
 
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamID, varID);
@@ -1780,7 +1779,8 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-        ierr = cdfReadVarSliceDP(streamID, varID, levelID, data, nmiss);
+        /* FIXME: status value ignored */
+        int ierr = cdfReadVarSliceDP(streamID, varID, levelID, data, nmiss);
 	break;
       }
 #endif
