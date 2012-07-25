@@ -27,10 +27,9 @@ struct rdmaWin
   size_t size;
   unsigned char *buffer, *head;
   MPI_Win win;
-  int postSet;
+  int postSet, refuseFuncCall;
 } *txWin = NULL;
 
-int            * refuseFuncCall = NULL;
 MPI_Group      * groupsIO       = NULL;
 MPI_Group      * groupsIONetto  = NULL;
 
@@ -340,7 +339,6 @@ void modelWinCleanup ( void )
       }
 
   if ( groupsIONetto )   free ( groupsIONetto );
-  if ( refuseFuncCall )  free ( refuseFuncCall );
   if (txWin) free(txWin);
 
   xdebug("%s", "RETURN. CLEANED UP MPI_WIN'S");
@@ -413,11 +411,10 @@ static
             txWin[collID].buffer     != NULL      &&
             txWin != NULL      &&
             txWin[collID].size >= 0         &&
-            txWin[collID].size <= MAXWINBUFFERSIZE &&
-            refuseFuncCall        != NULL );
+            txWin[collID].size <= MAXWINBUFFERSIZE);
   memset(txWin[collID].buffer, 0, txWin[collID].size);
   txWin[collID].head = txWin[collID].buffer;
-  refuseFuncCall[collID] = 0;
+  txWin[collID].refuseFuncCall = 0;
 }
 
 
@@ -432,7 +429,6 @@ void modelWinCreate ( void )
 
   xdebug("%s", "START");
   txWin = xmalloc(nProcsColl * sizeof (txWin[0]));
-  refuseFuncCall  = xmalloc ( nProcsColl * sizeof ( refuseFuncCall[0] ));
   groupsIONetto   = xmalloc ( nProcsColl * sizeof ( groupsIONetto[0] ));
 
   modelWinDefBufferSizes ();
@@ -500,8 +496,7 @@ void pioBufferData ( const int streamID, const int varID, const double *data, in
   xassert ( collID         >= 0                    &&
             collID         <  commInqNProcsColl () &&
             chunk          >= 0                    &&
-            txWin != NULL &&
-            refuseFuncCall != NULL);
+            txWin != NULL);
 
   if (txWin[collID].postSet)
     {
@@ -520,7 +515,7 @@ void pioBufferData ( const int streamID, const int varID, const double *data, in
   modelWinBufferPutAtEnd ( __func__, collID, &nmiss    , sizeof ( nmiss ));
   modelWinBufferPutAtEnd ( __func__, collID, &tokenSep , sizeof ( tokenSep ));
 
-  refuseFuncCall[collID] = 1;
+  txWin[collID].refuseFuncCall = 1;
 }
 
 /************************************************************************/
@@ -582,7 +577,7 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
                 modelWinFlushBuffer ( collID );
               }
 
-            xassert ( refuseFuncCall[collID] == 0 );
+            xassert(txWin[collID].refuseFuncCall == 0);
 
             modelWinBufferPutAtEnd ( __func__, collID, &tokenFuncCall,
                                      sizeof ( tokenFuncCall));
