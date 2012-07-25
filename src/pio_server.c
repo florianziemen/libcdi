@@ -27,7 +27,7 @@ extern void arrayDestroy ( void );
 int            * getBufferSize = NULL;
 unsigned char ** getBuffer     = NULL;
 unsigned char ** getBufferHead = NULL;
-MPI_Win          getWin        = MPI_WIN_NULL;
+static MPI_Win getWin = MPI_WIN_NULL;
 MPI_Group        groupModel    = MPI_GROUP_NULL;
 
 
