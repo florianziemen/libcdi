@@ -63,7 +63,7 @@ void modelRun (struct model_config setup, MPI_Comm comm)
 {
 
   static int nlev[nVars]    = {1,1,5,5,2};
-  static int varCodes[nVars] = {1, 2, 3, 4, 5};
+  static int varCodes[nVars] = {129, 130, 131, 132, 133};
   static char * name        = "example";
 
   int gridID, zaxisID[nVars], taxisID;
