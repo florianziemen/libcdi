@@ -276,6 +276,21 @@ var_scale(int datatype, double *mscale, double *mrscale)
   *mrscale = 1.0 / *mscale;
 }
 
+static inline int
+search_iomode_str(const char *modestr)
+{
+  int i, retval = -1;
+  for (i = 0;
+       i < sizeof (mode_map) / sizeof (mode_map[0]);
+       ++i)
+    if (!strcmp(modestr, mode_map[i].text))
+      {
+        retval = i;
+        break;
+      }
+  return retval;
+}
+
 int main (int argc, char *argv[])
 {
 #ifdef USE_MPI
@@ -312,20 +327,13 @@ int main (int argc, char *argv[])
 #ifdef USE_MPI
       case 'p':
         {
-          int i, found=0;
-          for (i = 0;
-               i < sizeof (mode_map) / sizeof (mode_map[0]);
-               ++i)
-            if (!strcmp(optarg, mode_map[i].text))
-              {
-                found = 1;
-                IOMode = mode_map[i].mode;
-              }
-          if (!found)
+          int entry = search_iomode_str(optarg);
+          if (entry < 0)
             {
               fprintf(stderr, "Unsupported PIO mode requested: %s\n", optarg);
               exit(EXIT_FAILURE);
             }
+          IOMode = mode_map[entry].mode;
         }
         break;
       case 'w':
