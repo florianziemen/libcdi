@@ -318,6 +318,8 @@ tests/test_cksum_nc4.in -text
 tests/test_cksum_service.in -text
 tests/test_grib.c -text
 tests/test_grib.sh -text
+tests/var_cksum.c -text
+tests/var_cksum.h -text
 util/mpi_launch_poe -text
 util/serialrun.in -text
 util/sunf95preproc-wrapper -text
