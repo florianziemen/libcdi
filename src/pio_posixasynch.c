@@ -314,8 +314,9 @@ void pioWriterAIO(void)
 	  bfd->currOpIndex = bfd->nextOpIndex;
 	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
 
-	  memcpy ( bfd->fb->buffer + ( bfd->currOpIndex * bfd->size ),
-                   pMB, ( int ) amount );
+          xassert(amount >= 0);
+	  memcpy((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
+                 pMB, (size_t)amount);
 
 	  writePA ( bfd, amount );
 
@@ -359,8 +360,8 @@ void pioWriterAIO(void)
 
 	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
 
-	  MPI_Recv (  bfd->fb->buffer + ( bfd->currOpIndex * bfd->size ), 
-		      amount, MPI_CHAR, source,  tag, commNode, &status );
+	  MPI_Recv((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
+                   amount, MPI_CHAR, source, tag, commNode, &status);
 
 	  writePA ( bfd, amount );
 
