@@ -8516,7 +8516,7 @@ void repair1(unsigned char *gbuf, long gbufsize)
   int bds_head = 11;
   int bds_ext = 0, bds_ubits;
   int datstart = 0;
-  int llarge = FALSE;
+  /* int llarge = FALSE; */
 
   nerr = grib1Sections(gbuf, gbufsize, &pds, &gds, &bms, &bds);
   if ( nerr )
@@ -8525,7 +8525,8 @@ void repair1(unsigned char *gbuf, long gbufsize)
     }
 
   recLen = gribrec_len(gbuf[4], gbuf[5], gbuf[6]);
-  if ( recLen > JP23SET ) llarge = TRUE;
+  /* FIXME: value of llarge is never evaluated */
+  /* if ( recLen > JP23SET ) llarge = TRUE; */
 
   bds_len   = BDS_Len;
   bds_nbits = BDS_NumBits;
