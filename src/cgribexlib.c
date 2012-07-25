@@ -8115,9 +8115,9 @@ void grib2PrintALL(int nrec, long offset, long recpos, long recsize, unsigned ch
   unsigned char *is  = NULL, *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
   unsigned char *ids = NULL, *lus = NULL, *drs = NULL;
   long ids_len = 0, lus_len = 0, gds_len = 0, pds_len = 0, drs_len = 0, bms_len = 0, bds_len = 0;
-  int gridtype, paramnum, level1type, level2type;
-  int level1, level1sf;
-  int level2, level2sf;
+  int gridtype, paramnum, level1type/* , level2type */;
+  int level1/* , level1sf */;
+  /* int level2 , level2sf; */
   double cr = 1;
 
   if ( header )
@@ -8157,11 +8157,11 @@ void grib2PrintALL(int nrec, long offset, long recpos, long recsize, unsigned ch
   gridtype   = GET_UINT2(gds[12],gds[13]);
   paramnum   = GET_UINT1(pds[10]);
   level1type = GET_UINT1(pds[22]);
-  level1sf   = GET_UINT1(pds[23]);
+  /* level1sf   = GET_UINT1(pds[23]); */
   level1     = GET_UINT4(pds[24],pds[25],pds[26],pds[27]);
-  level2type = GET_UINT1(pds[28]);
-  level2sf   = GET_UINT1(pds[29]);
-  level2     = GET_UINT4(pds[30],pds[31],pds[32],pds[33]);
+  /* level2type = GET_UINT1(pds[28]); */
+  /* level2sf   = GET_UINT1(pds[29]); */
+  /* level2     = GET_UINT4(pds[30],pds[31],pds[32],pds[33]); */
   /*
   printf("level %d %d %d %d %d %d %d\n", level1type, level1sf, level1, level1*level1sf, level2sf, level2, level2*level2sf);
   */
