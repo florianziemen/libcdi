@@ -542,8 +542,8 @@ sendPA(aFiledataPA *afd, int id)
 
   if ( ddebug ) accumWait +=  ( MPI_Wtime () - startTime );
 
-  xmpi ( MPI_Isend ( afd->db->buffer, amount, MPI_CHAR, commInqSpecialRankNode (), 
-                     tag, commInqCommNode (), &afd->request )); 
+  xmpi(MPI_Issend(afd->db->buffer, amount, MPI_CHAR, commInqSpecialRankNode(),
+                  tag, commInqCommNode(), &afd->request));
 
   /* change outputBuffer */
   
@@ -601,6 +601,14 @@ size_t fwPOSIXASYNCH( int id, int tsID, const void *buffer, size_t len )
           defTimestepPA (( aFiledataPA * ) curr->val, tsID );
 	  curr = curr->next;
 	}
+
+      {
+        double startTime;
+        MPI_Status status;
+        if (ddebug) startTime = MPI_Wtime();
+        xmpiStat(MPI_Wait(&(afd->request), &status), &status);
+        if (ddebug) accumWait +=  MPI_Wtime() - startTime;
+      }
       xmpi ( MPI_Barrier ( commInqCommColl ())); 
     }                                          
 
