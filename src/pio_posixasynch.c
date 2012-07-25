@@ -242,18 +242,9 @@ destroyBFiledataPA ( void *v )
 static bool
 compareNamesAPA(void *v1, void *v2)
 {
-  aFiledataPA *afd1, *afd2;
-  size_t len;
-  bool bret;
+  aFiledataPA *afd1 = v1, *afd2 = v2;
 
-  afd1 = ( aFiledataPA * ) v1;
-  afd2 = ( aFiledataPA * ) v2;
-
-  len = strlen ( afd1->name );
-  bret = ( len == strlen ( afd2->name ) && 
-	  memcmp ( afd1->name, afd2->name, len ) == 0 );
-
-  return bret;
+  return !strcmp(afd1->name, afd2->name);
 }
 
 /***************************************************************/
@@ -261,18 +252,9 @@ compareNamesAPA(void *v1, void *v2)
 static bool
 compareNamesBPA(void *v1, void *v2)
 {
-  bFiledataPA *bfd1, *bfd2;
-  size_t len;
-  bool bret;
+  bFiledataPA *bfd1 = v1, *bfd2 = v2;
 
-  bfd1 = ( bFiledataPA * ) v1;
-  bfd2 = ( bFiledataPA * ) v2;
-
-  len = strlen ( bfd1->name );
-  bret = ( len == strlen ( bfd2->name ) && 
-	  memcmp ( bfd1->name, bfd2->name, len ) == 0 );
-
-  return bret;
+  return !strcmp(bfd1->name, bfd2->name);
 }
 
 /***************************************************************/
