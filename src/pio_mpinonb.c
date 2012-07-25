@@ -127,21 +127,11 @@ int destroyAFiledataMPINONB ( void *v )
 
 /***************************************************************/
 
-bool compareNamesMPINONB  ( void *v1, void *v2 )
+static bool
+compareNamesMPINONB(void *v1, void *v2)
 {
-  aFiledataM *afm1, *afm2;
-  size_t len1, len2;
-  bool bret;
-
-  afm1 = ( aFiledataM * ) v1;
-  afm2 = ( aFiledataM * ) v2;
-
-  len1 = strlen ( afm1->name );
-  len2 = strlen ( afm2->name );
-  bret = ( len1 == len2 && 
-	  memcmp ( afm1->name, afm2->name, len1 ) == 0 );
-
-  return bret;
+  aFiledataM *afm1 = v1, *afm2 = v2;
+  return !strcmp(afm1->name, afm2->name);
 }
 
 /***************************************************************/
