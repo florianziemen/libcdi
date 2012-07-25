@@ -125,7 +125,7 @@ size_t dbuffer_data_size ( struct dBuffer *dbuffer )
 }
 
 static size_t
-dbuffer_free ( struct dBuffer *dbuffer )
+dbuffer_freesize(struct dBuffer *dbuffer)
 {
   size_t free_size;
 
@@ -147,7 +147,7 @@ dbuffer_push(struct dBuffer *dbuffer, const void *buffer, size_t len)
   size_t space_left;
   size_t wr_ptr;
 
-  space_left = dbuffer_free ( dbuffer );
+  space_left = dbuffer_freesize(dbuffer);
   if ( len > space_left )
     {
       return 1; /* not enough space left */
