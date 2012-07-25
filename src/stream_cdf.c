@@ -6833,7 +6833,6 @@ void cdfDefGlobalAtts(int streamID)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int fileID, vlistID;
-  vlist_t *vlistptr;
   stream_t *streamptr;
   int natts;
 
@@ -6843,8 +6842,6 @@ void cdfDefGlobalAtts(int streamID)
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
-
-  vlistptr = vlist_to_pointer(vlistID);
 
   cdfDefSource(streamID);
   cdfDefInstitut(streamID);
