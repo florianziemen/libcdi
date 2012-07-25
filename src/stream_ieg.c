@@ -579,7 +579,7 @@ int iegCopyRecord(int streamID2, int streamID1)
 int iegDefRecord(int streamID)
 {
   int status = 0;
-  int fileID, vlistID;
+  int vlistID;
   int gridID;
   int date, time;
   int datatype;
@@ -594,7 +594,6 @@ int iegDefRecord(int streamID)
 
   stream_check_ptr(__func__, streamptr);
 
-  fileID  = streamInqFileID(streamID);
   vlistID = streamInqVlist(streamID);
   iegp    = streamptr->record->iegp;
   byteorder = streamptr->byteorder;
