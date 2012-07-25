@@ -4453,15 +4453,13 @@ void decode_double_array_common2(unsigned char *igrib, long jlend, int NumBits,
 {
   /* code from wgrib routine BDS_unpack */
   unsigned char *bits = igrib;
-  unsigned int map_mask;
   long i;
   int n_bits = NumBits;
   int c_bits, j_bits;
   double jj;
-    
+
   /* older unoptimized code, not often used */
   c_bits = 8;
-  map_mask = 128;
   for ( i = 0; i < jlend; i++ )
     {
       jj = 0.0;
