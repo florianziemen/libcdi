@@ -3,6 +3,7 @@
 #endif
 
 #include <errno.h>
+#include <inttypes.h>
 #include <limits.h>
 #include <math.h>
 #include <string.h>
@@ -222,7 +223,7 @@ var_scale(int datatype, double *mscale, double *mrscale)
               datatype);
       exit(EXIT_FAILURE);
     }
-  *mscale = 1 << mant_bits;
+  *mscale = INT64_C(1) << mant_bits;
   *mrscale = 1.0 / *mscale;
 }
 
