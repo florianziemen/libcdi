@@ -108,9 +108,7 @@ vlist_t *vlist_new_entry(void)
 static
 void vlist_delete_entry(vlist_t *vlistptr)
 {
-  int idx, nsp;
-
-  nsp = namespaceGetActive ();
+  int idx;
 
   idx = vlistptr->self;
 
