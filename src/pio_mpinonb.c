@@ -18,7 +18,6 @@
 extern char * command2charP[6];
 
 extern long initial_buffersize;
-extern int maxErrorString;
 
 extern double accumProbe;
 extern double accumRecv;
@@ -195,7 +194,6 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
   int flush = 0;
   int filled = 0;
   aFiledataM *of;
-  char errorString[maxErrorString];
   MPI_Comm commNode = commInqCommNode ();
   int rankNode = commInqRankNode ();
 
@@ -230,11 +228,8 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
     }
   
   if ( error == 1 )
-    {
-      sprintf ( errorString,"did not succeed filling output buffer, fileID=%d", fileID );
-      xabort ( errorString );
-    }
-  
+    xabort("did not succeed filling output buffer, fileID=%d", fileID);
+
   return len;
 }
 
@@ -245,7 +240,6 @@ int fcMPINONB ( int fileID )
   aFiledataM *of;
   int iret;
   double accumWaitMax;
-  char errorString[maxErrorString];
   MPI_Comm commNode = commInqCommNode ();
   int rankNode = commInqRankNode ();
 
@@ -253,10 +247,7 @@ int fcMPINONB ( int fileID )
          rankNode, fileID );
 
   if (!(of = queueGet(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID)))
-    {
-      sprintf ( errorString, "pio_queue, fileID=%d not found", fileID ); 
-      xabort ( errorString );
-    }
+    xabort("pio_queue, fileID=%d not found", fileID);
 
   writeMPINONB(of);
 
@@ -298,7 +289,6 @@ int fowMPINONB ( const char *filename )
   static aFiledataM *of;
   static long buffersize = 0; 
   int id, bcastRank = 0; 
-  char errorString[maxErrorString];
   MPI_Comm commNode = commInqCommNode ();
   int rankNode = commInqRankNode ();
 
@@ -326,11 +316,8 @@ int fowMPINONB ( const char *filename )
   of = initAFiledataMPINONB ( filename, buffersize );
 
   if ((id = queueAdd(bibAFiledataM, of)) < 0 )
-    {   
-      sprintf ( errorString, "filename %s not unique", of->name );
-      xabort ( errorString );
-    }
-  
+    xabort("filename %s not unique", of->name);
+
   xdebug ( "IOPE%d: name=%s, init and enqueued aFiledataM, return id = %d", 
            rankNode, filename, id );
   

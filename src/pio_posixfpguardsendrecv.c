@@ -25,7 +25,6 @@
 extern char * command2charP[6];
 
 extern long initial_buffersize;
-extern int maxErrorString;
 
 extern double accumProbe;
 extern double accumRecv;
@@ -81,7 +80,6 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   aFiledataPF *afd;
   size_t len;
   int iret;
-  char errorString[maxErrorString];
 
   afd = ( aFiledataPF * ) xmalloc ( sizeof ( aFiledataPF ));
   memset ( afd, 0, sizeof ( aFiledataPF ));
@@ -107,10 +105,7 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   xdebug ( "name=%s, open file",  afd->name );
 
   if ( ( afd->fp = fopen ( afd->name, "w" )) == NULL ) 
-    {
-      sprintf ( errorString, "Failed to open %s", afd->name );
-      xabort ( errorString );
-    }
+    xabort("Failed to open %s", afd->name);
 
   afd->command = IO_Open_file;
   
@@ -142,17 +137,13 @@ int destroyAFiledataPF ( void *v )
 {
   int iret = 0;
   aFiledataPF *afd = ( aFiledataPF * ) v;
-  char errorString[maxErrorString];
-  
+
   /* close file */
   
   xdebug ( "name=%s, close file",  afd->name );
        
   if (( iret = fclose ( afd->fp )) == EOF )
-    {
-      sprintf ( errorString, "Failed to close %s", afd->name );
-      xabort ( errorString );
-    }  
+    xabort("Failed to close %s", afd->name);
 
   /* file closed, cleanup */
 
@@ -208,7 +199,6 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
   bFiledataPF *bfd; 
   queue_t *bibBFiledataPF;
   long amount;
-  char errorString[maxErrorString];
   MPI_Comm commNode = commInqCommNode ();
   int nProcsCollNode =  commInqSizeNode () - commInqSizeColl ();
   bool * sentFinalize, doFinalize = false;
@@ -239,10 +229,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 							       nProcsCollNode );
 
 	      if ((iret = queueAdd(bibBFiledataPF, bfd)) < 0)
-	      {
-		sprintf ( errorString, "fileID=%d not unique", rtag->id );
-		xabort ( errorString);
-	      } 
+		xabort("fileID=%d not unique", rtag->id);
 	    }
 
 	  *( bfd->nfinished + source ) = false;
@@ -267,10 +254,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 
           if (!(bfd = queueGet(bibBFiledataPF, fileIDTestB,
                                (void *)(intptr_t)rtag->id)))
-	      {
-		sprintf ( errorString, "fileId=%d not in queue", rtag->id );
-		xabort ( errorString );
-	      }
+            xabort("fileId=%d not in queue", rtag->id);
 
           xdebug ( "id=%d, command=%d ( %s ), send offset=%ld", 
                    rtag->id, rtag->command, 
@@ -292,10 +276,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 
           if (!(bfd = queueGet(bibBFiledataPF, fileIDTestB,
                                (void *)(intptr_t)rtag->id)))
-	      {
-		sprintf ( errorString, "fileId=%d not in queue", rtag->id );
-		xabort ( errorString );
-	      }
+            xabort("fileId=%d not in queue", rtag->id);
 
           xdebug ( "id=%d, command=%d ( %s )), send offset=%ld", 
                    rtag->id, rtag->command,
@@ -368,7 +349,6 @@ void writePF ( aFiledataPF *afd, int id )
   long amountL;
   int error, tag;
   MPI_Status status;
-  char errorString[maxErrorString];
   int specialRank = commInqSpecialRankNode ();
   MPI_Comm commNode = commInqCommNode ();
   
@@ -394,13 +374,8 @@ void writePF ( aFiledataPF *afd, int id )
   if (( written = 
 	fwrite ( afd->db->buffer, sizeof ( char ), amount, afd->fp )) !=
       amount )
-    {
-      sprintf ( errorString, 
-		"fileId=%d, expect to write %llu byte, written %llu byte", 
-		id, (unsigned long long)amount,
-                (unsigned long long)written );
-      xabort ( errorString );
-    }
+    xabort("fileId=%d, expect to write %zu byte, written %zu byte",
+           id, amount, written);
  
   xdebug ( "written %llu bytes in file %d with offset %ld", 
            (unsigned long long) written,
@@ -451,7 +426,6 @@ size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t 
   int flush = 0;
   int filled = 0;
   aFiledataPF *afd;
-  char errorString[maxErrorString];                                          
 
   afd = queueGet(bibAFiledataPF, fileIDTestA, (void *)(intptr_t)fileID);
 
@@ -482,10 +456,7 @@ size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t 
     }
   
   if ( error == 1 )
-    {
-      sprintf ( errorString,"did not succeed filling output buffer, fileID=%d", fileID );
-      xabort ( errorString );
-    }
+    xabort("did not succeed filling output buffer, fileID=%d", fileID);
   
   return len;
 }
@@ -530,7 +501,6 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
   static aFiledataPF *afd;
   static bool firstOpen = true;
   static long buffersize = 0;
-  char errorString[maxErrorString];
 
   /* broadcast buffersize to collectors */
   
@@ -558,10 +528,7 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
   afd = initAFiledataPF ( filename, buffersize );
 
   if ((id = queueAdd(bibAFiledataPF, afd)) < 0)
-    {
-      sprintf ( errorString, "filename %s not unique", afd->name );
-      xabort ( errorString ); 
-    }
+    xabort("filename %s not unique", afd->name);
 
   xdebug ( "name=%s, init and enqueued aFiledataPF, return id = %d", 
            filename, id );
