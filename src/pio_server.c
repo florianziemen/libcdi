@@ -144,22 +144,17 @@ static
   void getBufferGetFromEnd ( const char * caller, int line,  
                              int ID, void * argBuffer, size_t size )
 {
-  char text[1024];
-
   if (rxWin == NULL ||
-       argBuffer     == NULL ||
-       size           < 0    ||
-       ID             < 0    ||
-       ID             >= commInqNProcsModel () ||
-       rxWin[ID].head - rxWin[ID].buffer + size > rxWin[ID].size)
-    {
-      sprintf ( text, "caller: %s, line %d, ID = %d, nProcsModel=%d, size = %d, "
-                "rxWin[%d].head = %d, rxWin[%d].size = %d",
-                caller, line, ID, size, ID, commInqNProcsModel (), 
-                rxWin[ID].head - rxWin[ID].buffer,
-                ID, rxWin[ID].size);
-      xabort ( text );
-    }  
+      argBuffer     == NULL ||
+      size           < 0    ||
+      ID             < 0    ||
+      ID             >= commInqNProcsModel () ||
+      rxWin[ID].head - rxWin[ID].buffer + size > rxWin[ID].size)
+    xabort("caller: %s, line %d, ID = %d, nProcsModel=%d,"
+           " size = %lu, rxWin[%d].head = %ld, rxWin[%d].size = %lu",
+           caller, line, ID, (unsigned long)size, ID,
+           commInqNProcsModel(), rxWin[ID].head - rxWin[ID].buffer,
+           ID, (unsigned long)rxWin[ID].size);
   memcpy ( argBuffer, rxWin[ID].head, size );
   rxWin[ID].head += size;
 }
