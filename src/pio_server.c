@@ -27,9 +27,9 @@ extern void arrayDestroy ( void );
 static struct
 {
   size_t size;
+  unsigned char *buffer;
 } *rxWin = NULL;
 
-unsigned char ** getBuffer     = NULL;
 unsigned char ** getBufferHead = NULL;
 static MPI_Win getWin = MPI_WIN_NULL;
 MPI_Group        groupModel    = MPI_GROUP_NULL;
@@ -46,13 +46,12 @@ void serverWinCleanup ()
   if ( getWin != MPI_WIN_NULL )
     xmpi ( MPI_Win_free ( &getWin ));
   
-  if ( getBuffer )
-    {  
+  if (rxWin)
+    {
       for ( i = 0; i < nProcsCalc; i++ )
-        if ( getBuffer[i] ) free ( getBuffer[i] );
-      free ( getBuffer );
+        free(rxWin[i].buffer);
+      free(rxWin);
     }
-  if (rxWin) free(rxWin);
   if ( getBufferHead ) free ( getBufferHead );
   
   xdebug("%s", "cleaned up mpi_win");
@@ -132,12 +131,11 @@ static
   collDefBufferSizes ();
   /* xprintArray ( "getBufferSizes", getBufferSize, nProcsModel, DATATYPE_INT ); */
 
-  getBuffer     = xmalloc ( nProcsModel * sizeof ( getBuffer[0] ));
   getBufferHead = xmalloc ( nProcsModel * sizeof ( getBufferHead[0] ));
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
-      getBuffer[modelID] = xmalloc(rxWin[modelID].size);
-      getBufferHead[modelID] = getBuffer[modelID];
+      rxWin[modelID].buffer = xmalloc(rxWin[modelID].size);
+      getBufferHead[modelID] = rxWin[modelID].buffer;
     }
 
   xdebug("%s", "created mpi_win, allocated getBuffer");
@@ -156,12 +154,12 @@ static
        size           < 0    ||
        ID             < 0    ||
        ID             >= commInqNProcsModel () ||
-       getBufferHead[ID] - getBuffer[ID] + size > rxWin[ID].size )
+       getBufferHead[ID] - rxWin[ID].buffer + size > rxWin[ID].size)
     {
       sprintf ( text, "caller: %s, line %d, ID = %d, nProcsModel=%d, size = %d, "
                 "getBufferHead[%d] = %d, rxWin[%d].size = %d",
                 caller, line, ID, size, ID, commInqNProcsModel (), 
-                getBufferHead[ID] - getBuffer[ID],
+                getBufferHead[ID] - rxWin[ID].buffer,
                 ID, rxWin[ID].size);
       xabort ( text );
     }  
@@ -341,14 +339,12 @@ static
 
   xassert ( modelID                >= 0           &&
             modelID                 < nProcsModel &&
-            getBuffer              != NULL        &&
-            getBuffer[modelID]     != NULL        &&
+            rxWin != NULL && rxWin[modelID].buffer != NULL &&
             getBufferHead          != NULL        &&
-            rxWin != NULL &&
             rxWin[modelID].size > 0 &&
             rxWin[modelID].size <= MAXWINBUFFERSIZE );
-  memset(getBuffer[modelID], 0, rxWin[modelID].size);
-  getBufferHead[modelID] = getBuffer[modelID];
+  memset(rxWin[modelID].buffer, 0, rxWin[modelID].size);
+  getBufferHead[modelID] = rxWin[modelID].buffer;
 }
 
 
@@ -378,18 +374,18 @@ void getData ( int tsID, int vdate, int vtime )
              " getWin=%p, sizeof(int)=%u",
              modelID, nProcsModel, modelID, rxWin[modelID].size,
              getWinBaseAddr, (unsigned)sizeof(int));
-      xmpi ( MPI_Get ( &getBuffer[modelID][0], rxWin[modelID].size,
-                       MPI_UNSIGNED_CHAR, modelID, 0,
-                       rxWin[modelID].size, MPI_UNSIGNED_CHAR, getWin ));
+      xmpi(MPI_Get(rxWin[modelID].buffer, rxWin[modelID].size,
+                   MPI_UNSIGNED_CHAR, modelID, 0,
+                   rxWin[modelID].size, MPI_UNSIGNED_CHAR, getWin));
     }
   xmpi ( MPI_Win_complete ( getWin ));
 
   if ( ddebug > 2 )
     for ( modelID = 0; modelID < nProcsModel; modelID++ )
       {
-        sprintf(text, "rxWin[%d].size=%d from PE%d getBuffer[%d]",
+        sprintf(text, "rxWin[%d].size=%d from PE%d rxWin[%d].buffer",
                 modelID, rxWin[modelID].size, modelID, modelID);
-        xprintArray(text, &getBuffer[modelID][0],
+        xprintArray(text, rxWin[modelID].buffer,
                     rxWin[modelID].size / sizeof (double),
                     DATATYPE_FLT);
       }
