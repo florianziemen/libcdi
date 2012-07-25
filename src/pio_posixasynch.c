@@ -136,7 +136,7 @@ static bFiledataPA *initBFiledataPA ( char *filename,
 
   dbuffer_init ( &( bfd->fb ), ( size_t )( nPrefStreams * bfd->size ));
 
-  bfd->ctrlBlks = xmalloc ( nPrefStreams * sizeof ( bfd->ctrlBlks[0] ));
+  bfd->ctrlBlks = xcalloc(nPrefStreams, sizeof (bfd->ctrlBlks[0]));
 
   for ( i = 0; i < nPrefStreams; i++ )
     {
