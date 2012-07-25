@@ -190,15 +190,17 @@ int destroyBFiledataPA ( void *v )
   const struct aiocb *ccBP[1];
   int iret = 0;
   ssize_t ssiret;
+  int nextFinishOp = (bfd->nextOpIndex - bfd->prefIndex + nPrefStreams)
+    % nPrefStreams;
 
   xdebug ( "filename=%s, cleanup and close file", bfd->name );
 
   /* close file */
 
-  while ( bfd->prefIndex > 0 ) 
+  for (; bfd->prefIndex > 0 ; bfd->prefIndex --)
     {
       xdebug("file: %s, prefIndex=%d", bfd->name, (int)bfd->prefIndex);
-      ccBP[0] = ( bfd->ctrlBlks + bfd->nextOpIndex );
+      ccBP[0] = ( bfd->ctrlBlks + nextFinishOp );
 
       if ( ddebug )
 	startTime = MPI_Wtime ();
@@ -207,18 +209,17 @@ int destroyBFiledataPA ( void *v )
 	{
 	  iret = aio_suspend ( ccBP, 1, NULL );
 	  if ( iret < 0 && errno != EINTR ) xabort ( "aio_suspend () failed" );
-	} 
+	}
       while ( iret != 0 );
 
       if ( ddebug )
 	accumSuspend += ( MPI_Wtime () - startTime);
-      
-      iret = aio_error(bfd->ctrlBlks + bfd->nextOpIndex);
-      if (( ssiret = aio_return ( bfd->ctrlBlks + bfd->nextOpIndex )) == -1 )
+
+      iret = aio_error(bfd->ctrlBlks + nextFinishOp);
+      if (( ssiret = aio_return ( bfd->ctrlBlks + nextFinishOp )) == -1 )
 	xabort("aio_return () failed: %s", strerror(iret));
- 
-      bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
-      bfd->prefIndex --;
+
+      nextFinishOp = ( nextFinishOp + 1 ) % nPrefStreams;
     }
 
   if (( iret = close ( bfd->handle )) == -1 )
