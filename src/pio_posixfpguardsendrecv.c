@@ -318,7 +318,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 //*******************************************************
 
 static void
-writePF(aFiledataPF *afd, int id)
+writePF(aFiledataPF *afd)
 {
   size_t amount, written;
   long offset;
@@ -332,7 +332,7 @@ writePF(aFiledataPF *afd, int id)
 
   amount = dbuffer_data_size ( afd->db );
   amountL = ( long ) amount;
-
+  int id = afd->fileID;
   tag = encodeFileOpTag(id, afd->command);
   
   xmpi ( MPI_Sendrecv ( &amountL, 1, MPI_LONG, specialRank, tag,
@@ -390,7 +390,7 @@ defTimestepPF(aFiledataPF *afd, int tsID)
 static void
 flushOp(aFiledataPF *a, int tsID)
 {
-  writePF(a, a->fileID);
+  writePF(a);
   defTimestepPF(a, tsID);
 }
 
@@ -422,7 +422,7 @@ size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t 
 	error = filled;
       else
 	{
-	  writePF ( afd, fileID );
+	  writePF(afd);
      
 	  error = dbuffer_push ( afd->db, ( unsigned char * ) buffer, len );
 	}
@@ -447,7 +447,7 @@ int fcPOSIXFPGUARDSENDRECV ( int id )
 
   afd->command = IO_Close_file;
 
-  writePF ( afd, id );
+  writePF(afd);
 
   /* remove file element */
   iret = listSetRemove(bibAFiledataPF, fileIDTestA, (void *)(intptr_t)id);
