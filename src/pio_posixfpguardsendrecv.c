@@ -28,7 +28,6 @@ extern long initial_buffersize;
 
 typedef struct
 {
-  size_t size;
   struct dBuffer *db1;
   struct dBuffer *db2;
   struct dBuffer *db;
@@ -77,15 +76,14 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   len = strlen(key);
   afd = xcalloc(1, sizeof (*afd) + len + 1);
   strcpy(afd->name, key);
-  afd->size = bs;
   afd->tsID = 0;
 
   /* init output buffer */
 
   xdebug ( " name=%s, init output buffer",  afd->name );
    
-  iret = dbuffer_init ( &( afd->db1 ), afd->size );
-  iret += dbuffer_init ( &( afd->db2 ), afd->size );
+  iret = dbuffer_init(&(afd->db1), bs);
+  iret += dbuffer_init(&(afd->db2), bs);
 
   if ( iret > 0 )
     xabort("dbuffer_init did not succeed");
