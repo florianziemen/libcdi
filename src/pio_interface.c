@@ -30,8 +30,7 @@ struct rdmaWin
   int postSet, refuseFuncCall;
 } *txWin = NULL;
 
-MPI_Group      * groupsIO       = NULL;
-MPI_Group      * groupsIONetto  = NULL;
+MPI_Group      * groupsIO  = NULL;
 
 char * funcMap[nFuncs] = {"streamOpen", "streamDefVlist", "streamClose" };
 
@@ -328,17 +327,17 @@ void modelWinCleanup ( void )
   int collID;
 
   xdebug("%s", "START");
-  if (txWin != NULL && groupsIONetto != NULL)
+  if (txWin != NULL && groupsIO != NULL)
     for ( collID = 0; collID < commInqNProcsColl (); collID ++ )
       {
         if (txWin[collID].postSet)
           xmpi(MPI_Win_wait(txWin[collID].win));
         xmpi(MPI_Win_free(&txWin[collID].win));
         xmpi ( MPI_Free_mem ( txWin[collID].buffer ));
-        xmpi ( MPI_Group_free ( &groupsIONetto[collID] ));
+        xmpi ( MPI_Group_free ( &groupsIO[collID] ));
       }
 
-  if ( groupsIONetto )   free ( groupsIONetto );
+  if ( groupsIO )   free ( groupsIO );
   if (txWin) free(txWin);
 
   xdebug("%s", "RETURN. CLEANED UP MPI_WIN'S");
@@ -429,7 +428,7 @@ void modelWinCreate ( void )
 
   xdebug("%s", "START");
   txWin = xmalloc(nProcsColl * sizeof (txWin[0]));
-  groupsIONetto   = xmalloc ( nProcsColl * sizeof ( groupsIONetto[0] ));
+  groupsIO   = xmalloc ( nProcsColl * sizeof ( groupsIO[0] ));
 
   modelWinDefBufferSizes ();
   ranks[0] = commInqNProcsModel ();
@@ -445,9 +444,9 @@ void modelWinCreate ( void )
       xmpi(MPI_Win_create(txWin[collID].buffer, (MPI_Aint)txWin[collID].size, 1,
                           MPI_INFO_NULL, commInqCommsIO(collID),
                           &txWin[collID].win));
-      xmpi ( MPI_Comm_group ( commInqCommsIO ( collID ), &groupsIONetto[collID] ));
-      xmpi ( MPI_Group_incl ( groupsIONetto[collID], 1, ranks,
-                              &groupsIONetto[collID] ));
+      xmpi ( MPI_Comm_group ( commInqCommsIO ( collID ), &groupsIO[collID] ));
+      xmpi ( MPI_Group_incl ( groupsIO[collID], 1, ranks,
+                              &groupsIO[collID] ));
     }
   xdebug("%s", "RETURN, CREATED MPI_WIN'S");
 }
@@ -925,7 +924,7 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
         }
       modelWinBufferPutAtEnd ( __func__, collID, &tokenEnd, 
                                sizeof ( tokenEnd ));
-      xmpi(MPI_Win_post(groupsIONetto[collID], iAssert, txWin[collID].win));
+      xmpi(MPI_Win_post(groupsIO[collID], iAssert, txWin[collID].win));
       txWin[collID].postSet = 1;
     }
 
