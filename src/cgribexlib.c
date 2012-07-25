@@ -3810,7 +3810,7 @@ void gribEncode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
   int bmsIncluded;
   size_t len;
   GRIBPACK *lGrib;
-  long datstart, datsize, bdsstart, bdsend;
+  long datstart, datsize, bdsstart;
   int status = 0;
 
   grsdef();
@@ -3882,7 +3882,6 @@ void gribEncode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
       return;
     }
 
-  bdsend = gribLen;
   encodeES(lGrib, &gribLen, bdsstart);
 
   if ( (size_t) gribLen > kleng*sizeof(int) )
