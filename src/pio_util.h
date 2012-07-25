@@ -40,6 +40,11 @@
 
 #define debugString "#####"
 
+/* If we're not using GNU C, elide __attribute__ */
+#ifndef __GNUC__
+#  define  __attribute__(x)  /*NOTHING*/
+#endif
+
 void pcdiAssert   ( bool, const char *, const char *, int );
 #define xassert(arg) pcdiAssert ((arg), __FILE__, __func__, __LINE__ );
 
@@ -119,7 +124,8 @@ char * outTextComm ( MPI_Comm * );
   }
 #endif
 
-void pcdiAbort (const char *, const char *, int, const char *, ... );
+void pcdiAbort (const char *, const char *, int, const char *, ... )
+  __attribute__((noreturn));
 #define xabort(...) pcdiAbort (__FILE__, __func__, __LINE__, __VA_ARGS__ );
 
 void * pcdiXmalloc ( size_t, const char *, const char *, int );
