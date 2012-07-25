@@ -486,11 +486,11 @@ int cdfCopyRecord(int streamID2, int streamID1)
 {
   double *data;
   int datasize;
-  int tsID1, tsID2, recID1, recID2;
+  int tsID1, recID1;
   int ivarID, gridID;
   int nmiss;
   int ierr = 0;
-  int vlistID1, vlistID2;
+  int vlistID1;
   stream_t *streamptr1;
   stream_t *streamptr2;
 
@@ -501,13 +501,10 @@ int cdfCopyRecord(int streamID2, int streamID1)
   stream_check_ptr(__func__, streamptr2);
 
   vlistID1 = streamptr1->vlistID;
-  vlistID2 = streamptr2->vlistID;
 
   tsID1 = streamptr1->curTsID;
-  tsID2 = streamptr2->curTsID;
 
   recID1 = streamptr1->tsteps[tsID1].curRecID;
-  recID2 = streamptr2->tsteps[tsID2].curRecID;
 
   ivarID = streamptr1->tsteps[tsID1].records[recID1].varID;
 
