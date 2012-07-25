@@ -48,7 +48,6 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   size_t len;
   int iret;
   MPI_Comm commNode = commInqCommNode ();
-  int rankNode = commInqRankNode ();
   char * endString = "\0";
 
   of = xmalloc ( sizeof ( of[0] ));
