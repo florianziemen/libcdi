@@ -1812,7 +1812,6 @@ variable to an open dataset.
 void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
 {
   int filetype;
-  int ierr = 0;
   stream_t *streamptr;
 
   if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
@@ -1862,6 +1861,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
+        int ierr = 0;
 	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
         ierr = cdfWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
 	break;
