@@ -455,7 +455,6 @@ static void
 modelWinBufferPutAtEnd(const char * caller,
                        int collID, const void * argBuffer, size_t size)
 {
-  char text[1024];
   /*
     xdebug ( "collID=%d, size=%d, newBufferHead=%d, oldBufferSize=%d",
     collID, size, txWin[collID].head - txWin[collID].buffer + size,
@@ -467,10 +466,7 @@ modelWinBufferPutAtEnd(const char * caller,
        collID         < 0    ||
        collID        >= commInqNProcsColl () ||
        txWin[collID].head - txWin[collID].buffer + size > txWin[collID].size)
-    {
-      sprintf ( text, "caller: %s", caller );
-      xabort ( text );
-    }
+    xabort("caller: %s", caller);
 
   memcpy ( txWin[collID].head, argBuffer, size );
   txWin[collID].head += size;
