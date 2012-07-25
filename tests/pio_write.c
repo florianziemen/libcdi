@@ -12,10 +12,13 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #include "pio_c_temp.h"
+#else
+typedef int MPI_Comm;
 #endif
 
 #include "cdi.h"
 #include "pio_util.h"
+#include "cksum.h"
 
 struct model_config
 {
@@ -41,15 +44,17 @@ sign_flat(double v)
   return v;
 }
 
-void modelRun (struct model_config setup)
+enum {
+  ntfiles     = 2,
+  nVars       = 5,
+  maxlev      = 5
+};
+
+void modelRun (struct model_config setup, MPI_Comm comm)
 {
-  enum {
-    ntfiles     = 2,
-    nVars       = 5,
-    maxlev      = 5
-  };
 
   static int nlev[nVars]    = {1,1,5,5,2};
+  static int varCodes[nVars] = {1, 2, 3, 4, 5};
   static char * name        = "example";
 
   int gridID, zaxisID[nVars], taxisID;
@@ -60,9 +65,15 @@ void modelRun (struct model_config setup)
   double *var, *varslice;
   double mscale, mrscale;
   int vdate = 19850101, vtime = 120000;
-  int start = CDI_UNDEFID, chunk = CDI_UNDEFID;
+  int start = CDI_UNDEFID, chunk = CDI_UNDEFID, rank = 0;
   char filename[1024];
   int nlon = setup.nlon, nlat = setup.nlat;
+  uint32_t checksum_state[nVars];
+  size_t varSize[nVars];
+
+#if USE_MPI
+  xmpi ( MPI_Comm_rank ( comm, &rank ));
+#endif
 
   var_scale(setup.datatype, &mscale, &mrscale);
 
@@ -90,7 +101,12 @@ void modelRun (struct model_config setup)
   vlistID = vlistCreate ();
 
   for ( i = 0; i < nVars; i++ )
-    varIDs[i] = vlistDefVar ( vlistID, gridID, zaxisID[i], TIME_VARIABLE );
+    {
+      varIDs[i] = vlistDefVar ( vlistID, gridID, zaxisID[i], TIME_VARIABLE );
+      varSize[i] = nlon * nlat * nlev[i];
+      vlistDefVarCode(vlistID, varIDs[i], varCodes[i]);
+      vlistDefVarDatatype(vlistID, varIDs[i], setup.datatype);
+    }
 
   taxisID = taxisCreate ( TAXIS_ABSOLUTE );
   vlistDefTaxis ( vlistID, taxisID );
@@ -104,6 +120,7 @@ void modelRun (struct model_config setup)
 
   for ( tfID = 0; tfID < ntfiles; tfID++ )
     {
+      memset(checksum_state, 0, sizeof(checksum_state));
       if ( tfID > 0 )
 	{
 	  streamClose ( streamID );
@@ -130,7 +147,11 @@ void modelRun (struct model_config setup)
                             / (lats[nlat-1] - lats[0]))
                       ) * mscale)) * mrscale;
 
-
+              if (rank == 0)
+                {
+                  memcrc_r(&checksum_state[varID], (const unsigned char *)var,
+                           varSize[varID] * sizeof (var[0]));
+                }
 	      start = pioInqVarDecoOff   ( vlistID, varIDs[varID] );
 	      chunk = pioInqVarDecoChunk ( vlistID, varIDs[varID] );
               varslice = realloc(varslice, chunk * sizeof (var[0]));
@@ -141,6 +162,34 @@ void modelRun (struct model_config setup)
 	    }
 	  pioWriteTimestep ( tsID, vdate, vtime );
 	}
+      if (rank == 0)
+        {
+          FILE *tablefp;
+          {
+            sprintf(filename, "%s_%d.cksum", name, tfID);
+            if (!(tablefp = fopen(filename, "w")))
+              {
+                perror("failed to open table file");
+                exit(EXIT_FAILURE);
+              }
+            for (i = 0; i < nVars; ++i)
+              {
+                uint32_t cksum;
+                int code;
+                cksum = memcrc_finish(&checksum_state[i],
+                                      (off_t)varSize[i]
+                                      * sizeof (var[0]) * setup.nts);
+                code = vlistInqVarCode(vlistID, varIDs[i]);
+                if (fprintf(tablefp, "%08lx %d\n", (unsigned long)cksum,
+                            code) < 0)
+                  {
+                    perror("failed to write table file");
+                    exit(EXIT_FAILURE);
+                  }
+              }
+            fclose(tablefp);
+          }
+        }
     }
   pioEndTimestepping ();
   streamClose ( streamID );
@@ -229,15 +278,17 @@ var_scale(int datatype, double *mscale, double *mrscale)
 
 int main (int argc, char *argv[])
 {
+#ifdef USE_MPI
   enum {
     nNamespaces = 2 };
-
   static int hasLocalFile[nNamespaces] = { 0, 1 };
+#endif
 
   struct model_config setup = default_setup;
 
+  MPI_Comm commModel;
 #ifdef USE_MPI
-  MPI_Comm commGlob, commModel;
+  MPI_Comm commGlob;
   int sizeGlob;
   int rankGlob;
   int IOMode = PIO_MPI;
@@ -326,9 +377,11 @@ int main (int argc, char *argv[])
 #ifdef USE_MPI
   commModel = pioInit_c(commGlob, nProcsIO, IOMode,
                         nNamespaces, hasLocalFile);
+#else
+  commModel = -1;
 #endif
 
-  modelRun (setup);
+  modelRun (setup, commModel);
 
 #ifdef USE_MPI
   pioFinalize ();

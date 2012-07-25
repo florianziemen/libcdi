@@ -70,7 +70,7 @@ am_cksum_write_OBJECTS = cksum_write.$(OBJEXT) cksum.$(OBJEXT)
 cksum_write_OBJECTS = $(am_cksum_write_OBJECTS)
 cksum_write_LDADD = $(LDADD)
 cksum_write_DEPENDENCIES =
-am_pio_write_OBJECTS = pio_write.$(OBJEXT)
+am_pio_write_OBJECTS = pio_write.$(OBJEXT) cksum.$(OBJEXT)
 pio_write_OBJECTS = $(am_pio_write_OBJECTS)
 pio_write_LDADD = $(LDADD)
 pio_write_DEPENDENCIES =
@@ -284,7 +284,7 @@ TESTS = test_grib.sh test_cksum_grib test_cksum_nc test_cksum_extra \
 test_grib_SOURCES = test_grib.c
 cksum_write_SOURCES = cksum_write.c cksum.c cksum.h
 cksum_read_SOURCES = cksum_read.c cksum.c cksum.h
-pio_write_SOURCES = pio_write.c
+pio_write_SOURCES = pio_write.c cksum.h cksum.c
 #
 LDADD = -L../src -lcdi -lm
 AM_LDFLAGS = -L$(top_srcdir)/src
