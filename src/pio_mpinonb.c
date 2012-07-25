@@ -192,7 +192,6 @@ void writeMPINONB(aFiledataM *of)
 size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
 {  
   int error = 0;
-  int flush = 0;
   int filled = 0;
   aFiledataM *of;
   int rankNode = commInqRankNode ();
@@ -200,13 +199,12 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
   of = queueGet(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID);
   xassert(of);
 
-  flush = ( tsID != of->tsID ) ? 1 : 0;
+  bool flush = tsID != of->tsID;
 
-  if ( flush == 1 ) 
+  if (flush)
     {
-      xdebug3 ( "IOPE%d: tsID = %d, flush buffer", 
-		  rankNode, tsID );
-      queueForeach(bibAFiledataM, (elemOp)writeMPINONB, NULL);
+      xdebug3("IOPE%d: tsID = %d, flush buffer", rankNode, tsID);
+      writeMPINONB(of);
       of->tsID = tsID;
       MPI_Status status;
       xmpi(MPI_Wait(&(of->request), &status));
