@@ -5031,6 +5031,7 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
     }
 }
 
+#ifdef PROJECTION_TEST
 static
 void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
 {
@@ -5051,6 +5052,7 @@ void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
     }
 
 }
+#endif
 
 /* define all input grids */
 static
