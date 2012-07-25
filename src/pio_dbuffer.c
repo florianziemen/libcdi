@@ -124,7 +124,8 @@ size_t dbuffer_data_size ( struct dBuffer *dbuffer )
   return data_size;
 }
 
-size_t dbuffer_free ( struct dBuffer *dbuffer )
+static size_t
+dbuffer_free ( struct dBuffer *dbuffer )
 {
   size_t free_size;
 

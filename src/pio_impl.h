@@ -48,7 +48,6 @@ int       dbuffer_push(struct dBuffer *, const void *, size_t);
 size_t    dbuffer_data_size ( struct dBuffer * );
 int       dbuffer_reset ( struct dBuffer * );
 void      dbuffer_cleanup ( struct dBuffer ** );
-size_t    dbuffer_free ( struct dBuffer * );
 
 /* pio_list_set.c */
 listSet *listSetNew(valDestroyFunction, eqPredicate);
