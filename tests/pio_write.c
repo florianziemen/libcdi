@@ -77,7 +77,7 @@ modelRegionCompute(double region[], size_t offset, size_t len,
       region[local_pos]
         = sign_flat(round((cos(2.0 * M_PI * (lons[(i + tsID)%nlon] - lons[0])
                                / (lons[nlon-1] - lons[0]))
-                           * sin(2.0 * M_PI * (lats[j] - lats[0])
+                           * sin(2.0 * M_PI * (lats[(j + k)%nlat] - lats[0])
                                  / (lats[nlat-1] - lats[0]))
                            ) * mscale)) * mrscale;
     }
