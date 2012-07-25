@@ -710,7 +710,7 @@ int pioInqVarDecoOff ( int vlistID, int varID )
 MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode,
                      int nNamespaces, int * hasLocalFile )
 {
-  int sizeGlob, nProcsModel;
+  int sizeGlob;
 
   if ( IOMode < PIO_MINIOMODE || IOMode > PIO_MAXIOMODE )
     xabort ( "IOMODE IS NOT VALID." );
