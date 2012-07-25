@@ -218,7 +218,6 @@ int extCopyRecord(int streamID2, int streamID1)
 
 int extDefRecord(int streamID)
 {
-  int fileID;
   int gridID;
   int header[4];
   int status = 0;
@@ -230,7 +229,6 @@ int extDefRecord(int streamID)
 
   stream_check_ptr(__func__, streamptr);
 
-  fileID   = streamInqFileID(streamID);
   gridID   = streamptr->record->gridID;
   extp     = streamptr->record->extp;
 
