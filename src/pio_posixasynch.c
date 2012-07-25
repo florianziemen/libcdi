@@ -248,7 +248,7 @@ void pioWriterAIO(void)
   listSet * bibBFiledataPA;
   long amount, buffersize;
   char *messageBuffer, *pMB, *filename, *temp;
-  int messagesize, source, tag, i, id;
+  int messagesize, source, tag, id;
   struct fileOpTag rtag;
   MPI_Status status;
   MPI_Comm commNode = commInqCommNode ();
