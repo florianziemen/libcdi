@@ -243,7 +243,7 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
   int modelID;
   double * data = NULL, * dataHead = NULL;
   int streamID = CDI_UNDEFID, streamIDNew = CDI_UNDEFID;
-  int tempID, varID, vlistID, taxisID;
+  int varID, vlistID, taxisID;
   int size, offset, chunk, chunkSize;
   int tokenID, tokenID2;
   
@@ -283,6 +283,7 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
             {
               if ( modelID != root )
                 {
+                  int tempID;
                   getBufferGetFromEnd ( __func__, __LINE__, 
                                         modelID, &tempID, sizeof ( tempID ));
                   xassert ( tempID == DATATOKEN );
