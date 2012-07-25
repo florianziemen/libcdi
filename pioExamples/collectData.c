@@ -3,6 +3,7 @@
 #endif
 
 #ifdef USE_MPI
+#include <unistd.h>
 #include <mpi.h>
 #include "pio_c_temp.h"
 #endif
@@ -99,16 +100,20 @@ void modelRun ()
   gridDestroy ( gridID );
 }
 
+struct {
+  char *text;
+  int mode;
+} mode_map[] = {
+  { "PIO_MPI", PIO_MPI },
+  { "PIO_FPGUARD", PIO_FPGUARD },
+  { "PIO_ASYNCH", PIO_ASYNCH },
+  { "PIO_WRITER", PIO_WRITER }
+};
+
 
 int main (int argc, char *argv[])
 {
   enum {
-    nProcsIO    = 3,
-    //IOMode      = PIO_NONE,
-    IOMode      = PIO_MPI,
-    //IOMode      = PIO_FPGUARD,
-    //IOMode      = PIO_ASYNCH,
-    //IOMode      = PIO_WRITER,
     nNamespaces = 1 };
 
   static int hasLocalFile[nNamespaces] = { 0 };
@@ -117,12 +122,44 @@ int main (int argc, char *argv[])
   MPI_Comm commGlob, commModel;
   int sizeGlob;
   int rankGlob;
+  int IOMode = PIO_MPI;
+  int nProcsIO = 2;
 
   xmpi ( MPI_Init ( &argc, &argv));
   xmpi ( MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob ));
   xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
   xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
+
+  {
+    int opt;
+    while ((opt = getopt(argc, argv, "p:w:")) != -1)
+      switch (opt) {
+      case 'p':
+        {
+          int i, found=0;
+          for (i = 0;
+               i < sizeof (mode_map) / sizeof (mode_map[0]);
+               ++i)
+            if (!strcmp(optarg, mode_map[i].text))
+              {
+                found = 1;
+                IOMode = mode_map[i].mode;
+              }
+          if (!found)
+            {
+              fprintf(stderr, "Unsupported PIO mode requested: %s\n", optarg);
+              exit(EXIT_FAILURE);
+            }
+        }
+        break;
+      case 'w':
+        {
+          nProcsIO = strtol(optarg, NULL, 0);
+          break;
+        }
+      }
+  }
 
   commModel = pioInit_c ( commGlob, nProcsIO, IOMode, nNamespaces, hasLocalFile );
 #endif
@@ -135,3 +172,13 @@ int main (int argc, char *argv[])
 #endif
   return 0;
 }
+
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */
