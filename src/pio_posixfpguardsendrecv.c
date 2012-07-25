@@ -26,14 +26,7 @@ extern char * command2charP[6];
 
 extern long initial_buffersize;
 
-extern double accumProbe;
-extern double accumRecv;
-extern double accumSend;
-extern double accumSuspend;
-extern double accumWait;
-extern double accumWrite; 
-
-typedef struct 
+typedef struct
 {
   size_t size;
   struct dBuffer *db1;
@@ -51,7 +44,7 @@ fileIDTestA(void *a, void *fileID)
   return ((aFiledataPF *)a)->fileID == (int)(intptr_t)fileID;
 }
 
-typedef struct 
+typedef struct
 {
   long offset;
   bool finished;
