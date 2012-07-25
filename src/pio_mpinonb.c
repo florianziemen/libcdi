@@ -20,13 +20,9 @@ extern char * command2charP[6];
 
 extern long initial_buffersize;
 
-extern double accumProbe;
-extern double accumRecv;
-extern double accumSend;
-extern double accumSuspend;
 extern double accumWait;
-extern double accumWrite;
-typedef struct 
+
+typedef struct
 {
   char *name;
   size_t size;
