@@ -73,7 +73,8 @@ int nPrefStreams = 4;
 
 /***************************************************************/
 
-static aFiledataPA *initAFiledataPA ( const char *filename, size_t bs )
+static aFiledataPA *
+initAFiledataPA(const char *filename, size_t bs)
 {
   aFiledataPA *afd;
   size_t len;
@@ -110,8 +111,8 @@ static aFiledataPA *initAFiledataPA ( const char *filename, size_t bs )
 
 /***************************************************************/ 
 
-static bFiledataPA *initBFiledataPA ( char *filename, 
-                                      size_t bs, int nc )
+static bFiledataPA *
+initBFiledataPA(char *filename, size_t bs, int nc)
 {
   bFiledataPA *bfd;
   int i;
@@ -156,7 +157,8 @@ static bFiledataPA *initBFiledataPA ( char *filename,
 
 /***************************************************************/
 
-int destroyAFiledataPA ( void *v )
+static int
+destroyAFiledataPA(void *v)
 {
   aFiledataPA *afd = (aFiledataPA * ) v;
   MPI_Status status;
@@ -178,7 +180,8 @@ int destroyAFiledataPA ( void *v )
 
 /***************************************************************/
 
-int destroyBFiledataPA ( void *v )
+static int
+destroyBFiledataPA ( void *v )
 {
   bFiledataPA *bfd = (bFiledataPA * ) v;
   const struct aiocb *ccBP[1];
@@ -236,7 +239,8 @@ int destroyBFiledataPA ( void *v )
 
 /***************************************************************/
 
-bool compareNamesAPA  ( void *v1, void *v2 )
+static bool
+compareNamesAPA(void *v1, void *v2)
 {
   aFiledataPA *afd1, *afd2;
   size_t len;
@@ -254,7 +258,8 @@ bool compareNamesAPA  ( void *v1, void *v2 )
 
 /***************************************************************/
 
-bool compareNamesBPA  ( void *v1, void *v2 )
+static bool
+compareNamesBPA(void *v1, void *v2)
 {
   bFiledataPA *bfd1, *bfd2;
   size_t len;
@@ -338,7 +343,8 @@ writePA(bFiledataPA *bfd, long amount)
 /***************************************************************/
 
 // TODO: unify in IOModi, encapsulate in pio_queue.c
-void queueCheckPA ( queue_t *q, char *name )
+static void
+queueCheckPA(queue_t *q, char *name)
 {
   listElem_t *curr;
   bFiledataPA *bfd;
@@ -580,7 +586,8 @@ sendPA(aFiledataPA *afd, int id)
  
 /***************************************************************/ 
 
-void defTimestepPA ( aFiledataPA * afd, int tsID )
+static void
+defTimestepPA(aFiledataPA * afd, int tsID)
 {
   if ( afd == NULL || tsID != afd->tsID + 1 ) 
     xabort ( " defTimestepPA () didn't succeed." );

@@ -55,7 +55,8 @@ static queue_t * bibAFiledataP;
 
 /***************************************************************/
 
-static aFiledataP *initAFiledataP ( const char *filename, size_t bs )
+static aFiledataP *
+initAFiledataP(const char *filename, size_t bs)
 {
   aFiledataP *afp;
   size_t len;
@@ -92,8 +93,8 @@ static aFiledataP *initAFiledataP ( const char *filename, size_t bs )
 
 /***************************************************************/
 
-static bFiledataP * initBFiledataP ( char *filename, 
-				     size_t bs, int nc )
+static bFiledataP *
+initBFiledataP(char *filename, size_t bs, int nc)
 {
   bFiledataP * bfp;
   int i;
@@ -124,7 +125,8 @@ static bFiledataP * initBFiledataP ( char *filename,
 
 /***************************************************************/
 
-int destroyAFiledataP ( void *v )
+static int
+destroyAFiledataP(void *v)
 {
   aFiledataP *afp = ( aFiledataP * ) v;
   MPI_Status status;
@@ -146,7 +148,8 @@ int destroyAFiledataP ( void *v )
 
 /***************************************************************/
 
-int destroyBFiledataP ( void *v )
+static int
+destroyBFiledataP(void *v)
 {
   int iret = 0;
   bFiledataP *bfp = ( bFiledataP * ) v;
@@ -173,7 +176,8 @@ int destroyBFiledataP ( void *v )
 
 /***************************************************************/
 
-bool compareNamesAP  ( void *v1, void *v2 )
+static bool
+compareNamesAP(void *v1, void *v2)
 {
   aFiledataP *afd1, *afd2;
   size_t len;
@@ -191,7 +195,8 @@ bool compareNamesAP  ( void *v1, void *v2 )
 
 /***************************************************************/
 
-bool compareNamesBP  ( void *v1, void *v2 )
+static bool
+compareNamesBP(void *v1, void *v2)
 {
   bFiledataP *bfd1, *bfd2;
   size_t len;
@@ -227,7 +232,8 @@ writeP(bFiledataP *bfd, long amount)
 /***************************************************************/
 
 // TODO: unify in IOModi, encapsulate in pio_queue.c
-void queueCheckP ( queue_t *q, char *name )
+static void
+queueCheckP(queue_t *q, char *name)
 {
   listElem_t *curr;
   bFiledataP *bfd;
@@ -479,7 +485,8 @@ sendP(aFiledataP *afd, int id)
 
 /***************************************************************/ 
 
-void defTimestepP ( aFiledataP *afd, int tsID)
+static void
+defTimestepP(aFiledataP *afd, int tsID)
 {
   if ( afd == NULL || tsID != afd->tsID + 1 ) 
     xabort ( " defTimestepP () didn't succeed." );
