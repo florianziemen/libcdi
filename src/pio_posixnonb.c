@@ -579,8 +579,6 @@ int fowPOSIXNONB ( const char *filename )
   static long buffersize = 0; 
   int root = 0, id, iret, messageLength = 32;
   char message[messageLength];
-  size_t l;
-  char *temp;
 
   /* broadcast buffersize to collectors */
   
@@ -621,13 +619,13 @@ int fowPOSIXNONB ( const char *filename )
 
   if ( ddebug )
     {
-      l = strlen ( filename ) + strlen ( message ) + 2; 
-      temp = xmalloc (( l + 1 ) * sizeof ( char ));
-      strncpy ( temp, ( char * ) afd->db->buffer, ( size_t ) l );
-      temp[l]  = '\0';
+      size_t l = strlen(filename) + strlen(message) + 2;
+      char *temp = xmalloc(l + 1);
+      strncpy(temp, (char *)afd->db->buffer, l);
+      temp[l] = '\0';
       xdebug("filename=%s, put Open file message on buffer:\n%s,\t return",
-               filename, temp);
-      free ( temp );
+             filename, temp);
+      free(temp);
     }
 
   return id;

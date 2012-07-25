@@ -723,9 +723,9 @@ int fowPOSIXASYNCH ( const char *filename )
       size_t l = strlen(filename) + strlen(message) + 2;
       char *temp = xmalloc(l + 1);
       strncpy(temp, (char *)afd->db->buffer, l);
-      temp[l]  = '\0';
-      xdebug ( "filename=%s, put Open file message on buffer:\n%s,\t return",
-           filename, temp);
+      temp[l] = '\0';
+      xdebug("filename=%s, put Open file message on buffer:\n%s,\t return",
+             filename, temp);
       free(temp);
     }
 
