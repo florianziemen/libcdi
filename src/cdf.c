@@ -121,11 +121,12 @@ int cdfOpenFile(const char *filename, const char *mode, int *filetype)
 	  break;
 	case 'w':
 #if  defined  (NC_64BIT_OFFSET)
-	  if      ( *filetype == FILETYPE_NC2  ) writemode = NC_CLOBBER | NC_64BIT_OFFSET;
+	  if      ( *filetype == FILETYPE_NC2  ) writemode |= NC_64BIT_OFFSET;
 #endif
 #if  defined  (HAVE_NETCDF4)
-	  if      ( *filetype == FILETYPE_NC4  ) writemode = NC_CLOBBER | NC_NETCDF4;
-	  else if ( *filetype == FILETYPE_NC4C ) writemode = NC_CLOBBER | NC_NETCDF4 | NC_CLASSIC_MODEL;
+	  if      ( *filetype == FILETYPE_NC4  ) writemode |= NC_NETCDF4;
+	  else if ( *filetype == FILETYPE_NC4C )
+            writemode |= NC_NETCDF4 | NC_CLASSIC_MODEL;
 #endif
 	  cdf_create(filename, writemode, &ncid);
 	  cdfComment(ncid);
