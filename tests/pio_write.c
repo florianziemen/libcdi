@@ -6,6 +6,7 @@
 #include <inttypes.h>
 #include <limits.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -26,12 +27,14 @@ struct model_config
 {
   int nlon, nlat, nts;
   int filetype, datatype;
+  bool compute_checksum;
   const char *suffix;
 };
 
 struct model_config default_setup
   = { .nlon = 12, .nts = 3, .nlat = 6,
       .filetype = FILETYPE_GRB, .datatype = DATATYPE_PACK24,
+      .compute_checksum = 1,
       .suffix = "grb"
 };
 
@@ -58,6 +61,28 @@ static void
 time_t2cditime(time_t t, int *date, int *timeofday);
 
 
+static void
+modelRegionCompute(double region[], size_t offset, size_t len,
+                   int nlev, int nlat, int nlon,
+                   int tsID, const double lons[], const double lats[],
+                   double mscale, double mrscale)
+{
+  size_t local_pos;
+  for (local_pos = 0; local_pos < len; ++local_pos)
+    {
+      size_t global_pos = offset + local_pos;
+      int k = global_pos / (nlon * nlat);
+      int j = (global_pos % (nlon * nlat))/ nlon;
+      int i = global_pos % nlon;
+      region[local_pos]
+        = sign_flat(round(
+                          (cos(2.0 * M_PI * (lons[(i + tsID)%nlon] - lons[0])
+                               / (lons[nlon-1] - lons[0]))
+                           * sin(2.0 * M_PI * (lats[j] - lats[0])
+                                 / (lats[nlat-1] - lats[0]))
+                           ) * mscale)) * mrscale;
+    }
+}
 
 
 void modelRun (struct model_config setup, MPI_Comm comm)
@@ -69,10 +94,10 @@ void modelRun (struct model_config setup, MPI_Comm comm)
 
   int gridID, zaxisID[nVars], taxisID;
   int vlistID, varIDs[nVars], streamID, tsID, tfID = 0;
-  int i, j, k, varID, nmiss = 0;
+  int i, varID, nmiss = 0;
   double *lons, *lats;
   double levs[maxlev] = {101300, 92500, 85000, 50000, 20000};
-  double *var, *varslice;
+  double *var = NULL, *varslice;
   double mscale, mrscale;
   time_t current_time;
   int vdate = 19850101, vtime = 120000;
@@ -80,18 +105,21 @@ void modelRun (struct model_config setup, MPI_Comm comm)
   char filename[1024];
   int nlon = setup.nlon, nlat = setup.nlat;
   uint32_t checksum_state[nVars];
-  size_t varSize[nVars];
+  size_t varSize[nVars], varslice_size;
+#if USE_MPI
   int *chunks = NULL, *displs = NULL;
+#endif
 
 #if USE_MPI
   xmpi ( MPI_Comm_rank ( comm, &rank ));
   xmpi ( MPI_Comm_size ( comm, &comm_size ));
-#endif
-  if (rank == 0)
+  if (rank == 0 && setup.compute_checksum)
     {
       chunks = xmalloc(comm_size * sizeof (chunks[0]));
       displs = xmalloc(comm_size * sizeof (displs[0]));
+      var = xmalloc(nlon * nlat * maxlev * sizeof(var[0]));
     }
+#endif
 
   var_scale(setup.datatype, &mscale, &mrscale);
 
@@ -113,8 +141,8 @@ void modelRun (struct model_config setup, MPI_Comm comm)
       zaxisDefLevels ( zaxisID[i], levs );
     }
 
-  var = malloc(nlon * nlat * maxlev * sizeof(var[0]));
   varslice = NULL;
+  varslice_size = 0;
 
   vlistID = vlistCreate ();
 
@@ -158,36 +186,35 @@ void modelRun (struct model_config setup, MPI_Comm comm)
 	  streamDefTimestep ( streamID, tsID );
 	  for ( varID = 0; varID < nVars; varID++ )
 	    {
-              for (k = 0; k < nlev[varID]; ++k)
-                for (j = 0; j < nlat; ++j)
-                  for (i = 0; i < nlon; ++i)
-                    var[i+j*nlon+k*nlon*nlat]
-                      = sign_flat(round(
-                      (cos(2.0 * M_PI * (lons[(i + tsID)%nlon] - lons[0])
-                          / (lons[nlon-1] - lons[0]))
-                      * sin(2.0 * M_PI * (lats[j] - lats[0])
-                            / (lats[nlat-1] - lats[0]))
-                      ) * mscale)) * mrscale;
-
               start = pioInqVarDecoOff(vlistID, varIDs[varID]);
               chunk = pioInqVarDecoChunk(vlistID, varIDs[varID]);
-              varslice = realloc(varslice, chunk * sizeof (var[0]));
-              memcpy(varslice, var + start, chunk * sizeof (var[0]));
-
-#if USE_MPI
-              xmpi(MPI_Gather(&chunk, 1, MPI_INT, chunks, 1, MPI_INT, 0, comm));
-              if (rank == 0)
+              if (varslice_size < chunk)
                 {
-                  displs[0] = 0;
-                  for (i = 1; i < comm_size; ++i)
-                    displs[i] = displs[i - 1] + chunks[i - 1];
+                  varslice = xrealloc(varslice, chunk * sizeof (var[0]));
+                  varslice_size = chunk;
                 }
-              xmpi(MPI_Gatherv(varslice, chunk, MPI_DOUBLE, var, chunks, displs,
-                               MPI_DOUBLE, 0, comm));
+              modelRegionCompute(varslice, start, chunk,
+                                 nlev[varID], nlat, nlon,
+                                 tsID, lons, lats,
+                                 mscale, mrscale);
+              if (setup.compute_checksum)
+                {
+#if USE_MPI
+                  xmpi(MPI_Gather(&chunk, 1, MPI_INT,
+                                  chunks, 1, MPI_INT, 0, comm));
+                  if (rank == 0)
+                    {
+                      displs[0] = 0;
+                      for (i = 1; i < comm_size; ++i)
+                        displs[i] = displs[i - 1] + chunks[i - 1];
+                    }
+                  xmpi(MPI_Gatherv(varslice, chunk, MPI_DOUBLE,
+                                   var, chunks, displs, MPI_DOUBLE, 0, comm));
 #else
-              memcpy(var, varslice, varSize[varID] * sizeof (var[0]));
+                  var = varslice;
 #endif
-              if (rank == 0)
+                }
+              if (rank == 0 && setup.compute_checksum)
                 {
                   memcrc_r(&checksum_state[varID], (const unsigned char *)var,
                            varSize[varID] * sizeof (var[0]));
@@ -200,7 +227,7 @@ void modelRun (struct model_config setup, MPI_Comm comm)
           current_time += 86400;
 	  pioWriteTimestep ( tsID, vdate, vtime );
 	}
-      if (rank == 0)
+      if (rank == 0 && setup.compute_checksum)
         {
           FILE *tablefp;
           {
@@ -356,7 +383,7 @@ int main (int argc, char *argv[])
 
   {
     int opt;
-    while ((opt = getopt(argc, argv, "f:m:n:t:"
+    while ((opt = getopt(argc, argv, "f:m:n:t:c"
 #ifdef USE_MPI
                          "p:w:"
 #endif
@@ -407,6 +434,9 @@ int main (int argc, char *argv[])
         break;
       case 't':
         setup.nts = parse_intarg("error parsing number of timesteps");
+        break;
+      case 'c':
+        setup.compute_checksum = 0;
         break;
       default: /* '?' */
         fprintf(stderr, "Usage: %s "
