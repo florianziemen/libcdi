@@ -54,13 +54,13 @@ void modelRun (struct model_config setup)
 
   int gridID, zaxisID[nVars], taxisID;
   int vlistID, varIDs[nVars], streamID, tsID, tfID = 0;
-  int i, j, k, varID, nmiss = 0, rank;
+  int i, j, k, varID, nmiss = 0;
   double *lons, *lats;
   double levs[maxlev] = {101300, 92500, 85000, 50000, 20000};
   double *var, *varslice;
   double mscale, mrscale;
   int vdate = 19850101, vtime = 120000;
-  int start = CDI_UNDEFID, chunk = CDI_UNDEFID, stop = CDI_UNDEFID;
+  int start = CDI_UNDEFID, chunk = CDI_UNDEFID;
   char filename[1024];
   int nlon = setup.nlon, nlat = setup.nlat;
 
