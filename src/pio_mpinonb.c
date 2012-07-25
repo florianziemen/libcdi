@@ -24,7 +24,6 @@ extern double accumWait;
 
 typedef struct
 {
-  char *name;
   size_t size;
   struct dBuffer *db1;
   struct dBuffer *db2;
@@ -34,6 +33,7 @@ typedef struct
   int fileID;
   int tsID;
   bool finished;
+  char name[];
 } aFiledataM;
 
 static queue_t *bibAFiledataM;
@@ -53,9 +53,8 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   int iret;
   MPI_Comm commNode = commInqCommNode ();
 
-  of = xmalloc ( sizeof ( of[0] ));
+  of = xmalloc(sizeof (*of) + strlen(filename) + 1);
 
-  of->name = xmalloc(strlen(filename) + 1);
   strcpy(of->name, filename);
   of->size = bs;
   of->db1 = NULL;
@@ -112,7 +111,6 @@ int destroyAFiledataMPINONB ( void *v )
   dbuffer_cleanup ( & ( of->db1 ));
   dbuffer_cleanup ( & ( of->db2 ));
 
-  free ( of->name );
   free ( of );
 
   xdebug ( "IOPE%d: closed file, cleaned up, return", 

@@ -18,7 +18,6 @@ extern long initial_buffersize;
 
 typedef struct
 {
-  char *name;
   size_t size;
   struct dBuffer *db1;
   struct dBuffer *db2;
@@ -26,6 +25,7 @@ typedef struct
   IO_Server_command command;
   MPI_Request request;
   int tsID, fileID;
+  char name[];
 } remoteFileBuf;
 
 static queue_t * bibRemoteFileBuf;
@@ -45,11 +45,9 @@ initRemoteFileBuf(const char *filename, size_t bs)
 
   xdebug ( "filename=%s, buffersize=%zu, in", filename, bs );
 
-  afp = xmalloc ( sizeof ( remoteFileBuf ));
-
-  len = strlen ( filename );
-  afp->name = xmalloc (( len + 1) * sizeof ( afp->name[0] ));
-  strcpy ( afp->name, filename );
+  len = strlen(filename);
+  afp = xmalloc(sizeof (remoteFileBuf) + len + 1);
+  strcpy(afp->name, filename);
   afp->size = bs;
   afp->tsID = 0;
 
@@ -83,8 +81,7 @@ destroyRemoteFileBuf(void *v)
   dbuffer_cleanup(&afp->db1);
   dbuffer_cleanup(&afp->db2);
 
-  free ( afp->name );
-  free ( afp );
+  free(afp);
 
   xdebug("%s", "cleaned up, return");
 

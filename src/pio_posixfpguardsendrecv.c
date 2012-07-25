@@ -35,7 +35,6 @@ extern double accumWrite;
 
 typedef struct 
 {
-  char *name;
   size_t size;
   struct dBuffer *db1;
   struct dBuffer *db2;
@@ -43,6 +42,7 @@ typedef struct
   FILE *fp;
   IO_Server_command command;
   int tsID, fileID;
+  char name[];
 } aFiledataPF;
 
 static int
@@ -81,10 +81,8 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   size_t len;
   int iret;
 
-  afd = ( aFiledataPF * ) xmalloc ( sizeof ( aFiledataPF ));
-  memset ( afd, 0, sizeof ( aFiledataPF ));
-  len = strlen ( key );
-  afd->name = (char *)xmalloc(len + 1);
+  len = strlen(key);
+  afd = xcalloc(1, sizeof (*afd) + len + 1);
   strcpy(afd->name, key);
   afd->size = bs;
   afd->tsID = 0;
@@ -152,8 +150,7 @@ int destroyAFiledataPF ( void *v )
   dbuffer_cleanup ( &( afd->db1 ));
   dbuffer_cleanup ( &( afd->db2 ));
 
-  free ( afd->name );
-  free ( afd );
+  free(afd);
 
   return iret;
 }

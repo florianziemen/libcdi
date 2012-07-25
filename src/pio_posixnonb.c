@@ -29,13 +29,13 @@ extern double accumWrite;
 
 typedef struct 
 {
-  char *name;
   size_t size;
   struct dBuffer *fb;
   FILE *fp;
   int fileID;
   bool finished;
   bool *nfinished;
+  char name[];
 } bFiledataP;
 
 static int
@@ -54,10 +54,8 @@ initBFiledataP(char *filename, size_t bs, int nc, int fileID)
 
   xdebug ( "filename=%s, buffersize=%lu, ncollectors=%d", filename, bs, nc );
 
-  bfp = xmalloc ( sizeof (  bfp[0] ));
-
-  bfp->name = xmalloc (( strlen ( filename ) + 1 ) * sizeof ( bfp->name[0] ));
-  strcpy ( bfp->name, filename );
+  bfp = xmalloc(sizeof (*bfp) + strlen(filename) + 1);
+  strcpy(bfp->name, filename);
   bfp->size = bs;
 
   if (( bfp->fp = fopen ( filename, "w" )) == NULL ) 
@@ -97,7 +95,6 @@ destroyBFiledataP(void *v)
 
   dbuffer_cleanup ( &( bfp->fb ));
 
-  free ( bfp->name );
   free ( bfp->nfinished );
   free ( bfp );
 

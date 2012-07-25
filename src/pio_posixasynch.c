@@ -37,7 +37,6 @@ extern double accumWrite;
 
 typedef struct
 {
-  char *name;
   size_t size;
   struct dBuffer *fb;
   struct aiocb *ctrlBlks;
@@ -48,6 +47,7 @@ typedef struct
   bool finished;
   bool *nfinished;
   int handle, fileID;
+  char name[];
 } bFiledataPA;
 
 static int
@@ -69,10 +69,8 @@ initBFiledataPA(char *filename, size_t bs, int nc)
   xdebug ( "filename=%s, buffersize=%zu, ncollectors=%d, nPrefetchStreams=%d",
            filename, bs, nc, nPrefStreams );
 
-  bfd = xmalloc ( sizeof ( bfd[0] ));
-
-  bfd->name = xmalloc (( strlen ( filename ) + 1) * sizeof ( bfd->name[0] ));
-  strcpy ( bfd->name, filename );
+  bfd = xmalloc( sizeof (*bfd) + strlen(filename) + 1);
+  strcpy(bfd->name, filename);
   bfd->size = bs;
 
   if (( bfd->handle = open ( bfd->name, O_CREAT | O_WRONLY, 0666 )) == -1 )
@@ -157,8 +155,7 @@ destroyBFiledataPA ( void *v )
 
   free ( bfd->nfinished );
   free ( bfd->ctrlBlks );
-  free ( bfd->name );
-  free ( bfd );
+  free(bfd);
 
   xdebug("%s", "closed file and cleaned up, return");
 
