@@ -191,7 +191,7 @@ bool compareNamesAPF ( void *v1, void *v2 )
 void fpgPOSIXFPGUARDSENDRECV ( void )
 {
   int i, source, iret;
-  tag_t *rtag;
+  struct fileOpTag rtag;
   MPI_Status status;
   bFiledataPF *bfd; 
   queue_t *bibBFiledataPF;
@@ -209,31 +209,28 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
     {
       xmpi ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commNode, &status ));
       source = status.MPI_SOURCE;
-      rtag   = getTag ( status.MPI_TAG ); 
+      rtag = getTag(status.MPI_TAG);
       
-      xdebug ( "receive message from source=%d, id=%d, command=%d ( %s )",
-               source, rtag->id, rtag->command, 
-               command2charP [ rtag->command ]);
+      xdebug("receive message from source=%d, id=%d, command=%d ( %s )",
+             source, rtag.id, rtag.command, command2charP[rtag.command]);
       
-      switch ( rtag->command )
+      switch (rtag.command)
       	{
       	case IO_Open_file:
 
           if (!(bfd = queueGet(bibBFiledataPF, fileIDTestB,
-                               (void *)(intptr_t)rtag->id)))
+                               (void *)(intptr_t)rtag.id)))
 	    {
-	      bfd = ( bFiledataPF * ) initBFiledataPF ( rtag->id, 
-							       nProcsCollNode );
+	      bfd = initBFiledataPF(rtag.id, nProcsCollNode);
 
 	      if ((iret = queueAdd(bibBFiledataPF, bfd)) < 0)
-		xabort("fileID=%d not unique", rtag->id);
+		xabort("fileID=%d not unique", rtag.id);
 	    }
 
 	  *( bfd->nfinished + source ) = false;
 
-          xdebug ( "id=%d, command=%d ( %s ), send offset=%ld", 
-                   rtag->id, rtag->command, 
-                   command2charP [ rtag->command ], bfd->offset );
+          xdebug("id=%d, command=%d ( %s ), send offset=%ld", rtag.id,
+                 rtag.command, command2charP[rtag.command], bfd->offset);
 	  
 	  xmpi ( MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
                                 &amount, 1, MPI_LONG, source,  status.MPI_TAG,
@@ -241,21 +238,20 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 
 	  bfd->offset += amount; 
  
-          xdebug ( "id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld", 
-                   rtag->id, rtag->command, 
-                   command2charP [ rtag->command ], amount, bfd->offset );
+          xdebug("id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld",
+                 rtag.id, rtag.command, command2charP[rtag.command], amount,
+                 bfd->offset);
 
 	  break;
 
 	case IO_Set_fp:
 
           if (!(bfd = queueGet(bibBFiledataPF, fileIDTestB,
-                               (void *)(intptr_t)rtag->id)))
-            xabort("fileId=%d not in queue", rtag->id);
+                               (void *)(intptr_t)rtag.id)))
+            xabort("fileId=%d not in queue", rtag.id);
 
-          xdebug ( "id=%d, command=%d ( %s ), send offset=%ld", 
-                   rtag->id, rtag->command, 
-                   command2charP [ rtag->command ], bfd->offset );
+          xdebug("id=%d, command=%d ( %s ), send offset=%ld", rtag.id,
+                 rtag.command, command2charP[rtag.command], bfd->offset);
 
 	  xmpi ( MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
                                 &amount, 1, MPI_LONG, source,  status.MPI_TAG,
@@ -263,21 +259,20 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 
 	  bfd->offset += amount;
 
-          xdebug ( "id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld", 
-                   rtag->id, rtag->command, 
-                   command2charP [ rtag->command ], amount, bfd->offset );
+          xdebug("id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld",
+                 rtag.id, rtag.command, command2charP[rtag.command], amount,
+                 bfd->offset);
 
 	  break;
 
 	case IO_Close_file:
 
           if (!(bfd = queueGet(bibBFiledataPF, fileIDTestB,
-                               (void *)(intptr_t)rtag->id)))
-            xabort("fileId=%d not in queue", rtag->id);
+                               (void *)(intptr_t)rtag.id)))
+            xabort("fileId=%d not in queue", rtag.id);
 
-          xdebug ( "id=%d, command=%d ( %s )), send offset=%ld", 
-                   rtag->id, rtag->command,
-                   command2charP [ rtag->command ], bfd->offset );
+          xdebug("id=%d, command=%d ( %s )), send offset=%ld", rtag.id,
+                 rtag.command, command2charP[rtag.command], bfd->offset);
 
 	  xmpi ( MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
                                 &amount, 1, MPI_LONG, source,  status.MPI_TAG,
@@ -285,9 +280,9 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 
 	  bfd->offset += amount;
 
-          xdebug ( "id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld", 
-                   rtag->id, rtag->command, 
-                   command2charP [ rtag->command ], amount, bfd->offset );
+          xdebug("id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld",
+                 rtag.id, rtag.command, command2charP[rtag.command], amount,
+                 bfd->offset);
 
 
 	  bfd->nfinished[source] = true;  
@@ -301,7 +296,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 	      }
 
 	  if ( bfd->finished )
-            queueDelNode(bibBFiledataPF, fileIDTestB, (void *)(intptr_t)rtag->id);
+            queueDelNode(bibBFiledataPF, fileIDTestB, (void *)(intptr_t)rtag.id);
           break;
         case IO_Finalize:
           {  
@@ -326,7 +321,6 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
                     xdebug("%s", "cleanup queue");
                     queueDestroy ( bibBFiledataPF );
                   }
-                if ( rtag ) ungetTag ( rtag );
                 return;
               }
           }

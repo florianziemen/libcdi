@@ -32,16 +32,15 @@ typedef bool (*eqPredicate)(void *, void *);
 
 typedef struct queue_t queue_t;
 
-typedef struct
+struct fileOpTag
 {
   int id;
   int command;
-} tag_t;
+};
 
 /* pio.c */
-int       setTag ( int, int );
-tag_t *   getTag ( int );
-void      ungetTag ( tag_t * );
+int setTag(int, int);
+struct fileOpTag getTag(int);
 
 /* pio_dbuffer.c */
 int       dbuffer_init ( struct dBuffer **, size_t );

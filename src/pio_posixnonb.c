@@ -152,7 +152,7 @@ pioWriterStdIO(void)
   char *messageBuffer = NULL;
   char *pMB, *filename, *temp;
   int messagesize, source, tag, i, id;
-  tag_t *rtag = NULL;
+  struct fileOpTag rtag;
   MPI_Status status;
   MPI_Comm commNode = commInqCommNode ();
   int nProcsCollNode = commInqSizeNode () - commInqSizeColl ();
@@ -173,18 +173,15 @@ pioWriterStdIO(void)
       source = status.MPI_SOURCE;
       tag    = status.MPI_TAG;
       
-      if ( rtag ) ungetTag ( rtag );
-      if (( rtag   = getTag ( tag )) == NULL )
-	xabort ( "getTag () failed" );
+      rtag = getTag(tag);
       
       xmpi ( MPI_Get_count ( &status, MPI_CHAR, &messagesize ));
 
       xdebug ( "RECEIVE MESSAGE FROM SOURCE=%d, ID=%d, COMMAND=%d ( %s ),"
-               "MESSAGESIZE=%d",
-               source, rtag->id, rtag->command, 
-               command2charP [ rtag->command ], messagesize);
+               "MESSAGESIZE=%d", source, rtag.id, rtag.command,
+               command2charP[rtag.command], messagesize);
 
-      switch ( rtag->command )
+      switch (rtag.command)
 	{
       	case IO_Open_file:
 
@@ -204,23 +201,22 @@ pioWriterStdIO(void)
 	  amount = (size_t)(messageBuffer + messagesize - pMB);
 	  
 	  xdebug("command %s, filename=%s, buffersize=%zu, amount=%zu",
-                 command2charP [ rtag->command ], filename,
-                 buffersize, amount);
+                 command2charP[rtag.command], filename, buffersize, amount);
 	  
 	  
           if (!(bfd = queueGet(bibBFiledataP, fileIDTest,
-                               (void *)(intptr_t)rtag->id)))
+                               (void *)(intptr_t)rtag.id)))
 	    {
 	      queueForeach(bibBFiledataP, elemCheck, filename);
 	      bfd = initBFiledataP(filename, buffersize, nProcsCollNode,
-                                   rtag->id);
+                                   rtag.id);
 	      
 	      if ((id = queueAdd(bibBFiledataP, bfd)) < 0)
-                xabort("fileID=%d not unique", rtag->id);
+                xabort("fileID=%d not unique", rtag.id);
 	    }
 	  else
 	    if (strcmp(filename, bfd->name) != 0)
-              xabort("filename is not consistent, fileID=%d", rtag->id);
+              xabort("filename is not consistent, fileID=%d", rtag.id);
 
 	  memcpy(bfd->fb->buffer, pMB, amount);
 
@@ -233,14 +229,13 @@ pioWriterStdIO(void)
 	case IO_Send_buffer:
 
           if (!(bfd = queueGet(bibBFiledataP, fileIDTest,
-                               (void *)(intptr_t)rtag->id)))
-            xabort("fileID=%d is not in queue", rtag->id );
+                               (void *)(intptr_t)rtag.id)))
+            xabort("fileID=%d is not in queue", rtag.id );
 
 	  amount = messagesize;
 
-	  xdebug ( "COMMAND %s, ID=%d, NAME=%s", 
-                   command2charP [ rtag->command ], 
-                   rtag->id, bfd->name );
+	  xdebug("COMMAND %s, ID=%d, NAME=%s", command2charP[rtag.command],
+                 rtag.id, bfd->name);
 	  
 	  xmpi ( MPI_Recv (  bfd->fb->buffer, amount, MPI_CHAR, source, tag, 
                              commNode, &status ));
@@ -251,21 +246,20 @@ pioWriterStdIO(void)
 
 	case IO_Close_file:
 	  
-	  xdebug ( "COMMAND %s,  FILE%d, SOURCE%d", 
-                   command2charP [ rtag->command ],  rtag->id, source );
+	  xdebug("COMMAND %s,  FILE%d, SOURCE%d",
+                 command2charP[rtag.command], rtag.id, source);
 
           if (!(bfd = queueGet(bibBFiledataP, fileIDTest,
-                               (void *)(intptr_t)rtag->id)))
-            xabort("fileID=%d is not in queue", rtag->id);
+                               (void *)(intptr_t)rtag.id)))
+            xabort("fileID=%d is not in queue", rtag.id);
 
           amount = messagesize;
 
 	  xdebug("COMMAND %s, ID=%d, NAME=%s, AMOUNT=%zu",
-                 command2charP [ rtag->command ], rtag->id, bfd->name,
-                 amount);
+                 command2charP[rtag.command], rtag.id, bfd->name, amount);
 	  
-	  xmpi ( MPI_Recv (  bfd->fb->buffer, amount, MPI_CHAR, source,  tag, 
-                             commNode, &status ));	
+	  xmpi(MPI_Recv(bfd->fb->buffer, amount, MPI_CHAR, source, tag,
+                        commNode, &status ));
 
 	  writeP ( bfd, amount );
 
@@ -283,8 +277,9 @@ pioWriterStdIO(void)
 
 	  if ( bfd->finished )
 	    {
-	      xdebug ( "all are finished with file %d, delete node", rtag->id );
-	      queueDelNode(bibBFiledataP, fileIDTest, (void *)(intptr_t)rtag->id);
+	      xdebug("all are finished with file %d, delete node", rtag.id);
+	      queueDelNode(bibBFiledataP, fileIDTest,
+                           (void *)(intptr_t)rtag.id);
 	    }
           break;
         case IO_Finalize:
@@ -313,8 +308,6 @@ pioWriterStdIO(void)
                            " return");
                     queueDestroy ( bibBFiledataP );
                   }
-                if ( rtag ) ungetTag ( rtag );
-            
                 return;
               }
           }

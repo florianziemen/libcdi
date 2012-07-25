@@ -41,23 +41,14 @@ int setTag ( int ID, int sc )
 
 /***************************************************************/
 
-tag_t * getTag ( int tag )
+struct fileOpTag getTag(int tag)
 {
-  tag_t *rtag;
+  struct fileOpTag rtag;
 
-  rtag = ( tag_t * ) xmalloc ( sizeof ( tag_t ));
-  rtag->id = tag / tagKey;
-  rtag->command = tag % tagKey;
+  rtag.id = tag / tagKey;
+  rtag.command = tag % tagKey;
 
   return rtag;
-}
-
-/***************************************************************/
-
-void ungetTag ( tag_t *rtag )
-{
-  free ( rtag );
-  return;
 }
 
 /***************************************************************/

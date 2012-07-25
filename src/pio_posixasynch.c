@@ -257,7 +257,7 @@ void pioWriterAIO(void)
   long amount, buffersize;
   char *messageBuffer, *pMB, *filename, *temp;
   int messagesize, source, tag, i, id;
-  tag_t *rtag;
+  struct fileOpTag rtag;
   MPI_Status status;
   MPI_Comm commNode = commInqCommNode ();
   int nProcsCollNode = commInqSizeNode () - commInqSizeColl ();
@@ -276,16 +276,15 @@ void pioWriterAIO(void)
 
       source = status.MPI_SOURCE;
       tag    = status.MPI_TAG;
-      rtag   = getTag ( tag );
+      rtag = getTag(tag);
 
       xmpi ( MPI_Get_count ( &status, MPI_CHAR, &messagesize ));
 
       xdebug ( "receive message from source=%d, id=%d, command=%d ( %s ), "
-               "messagesize=%d",
-               source, rtag->id, rtag->command, 
-               command2charP [ rtag->command ], messagesize);
+               "messagesize=%d", source, rtag.id, rtag.command,
+               command2charP[rtag.command], messagesize);
 
-      switch ( rtag->command )
+      switch (rtag.command)
 	{
       	case IO_Open_file:
 
@@ -303,21 +302,20 @@ void pioWriterAIO(void)
 	  pMB += ( strlen ( temp ) + 1 );
 	  amount = ( long ) ( messageBuffer + messagesize - pMB );
 
-	  xdebug ( "command  %s, filename=%s, buffersize=%ld, amount=%ld",
-                   command2charP [ rtag->command ], filename, 
-                   buffersize, amount );
+	  xdebug("command  %s, filename=%s, buffersize=%ld, amount=%ld",
+                 command2charP[rtag.command], filename, buffersize, amount);
 
           if (!(bfd = queueGet(bibBFiledataPA, fileIDTest,
-                               (void *)(intptr_t)rtag->id)))
+                               (void *)(intptr_t)rtag.id)))
 	    {
               queueForeach(bibBFiledataPA, elemCheck, filename);
 	      bfd = initBFiledataPA(filename, buffersize, nProcsCollNode);
               if ((id = queueAdd(bibBFiledataPA, bfd)) < 0)
-                xabort("fileID=%d not unique", rtag->id);
+                xabort("fileID=%d not unique", rtag.id);
 	    }
 	  else
 	    if (strcmp(filename, bfd->name) != 0)
-              xabort("filename is not consistent, fileID=%d", rtag->id);
+              xabort("filename is not consistent, fileID=%d", rtag.id);
 
 	  bfd->currOpIndex = bfd->nextOpIndex;
 	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
@@ -334,13 +332,13 @@ void pioWriterAIO(void)
 	case IO_Send_buffer:
 
           if (!(bfd = queueGet(bibBFiledataPA, fileIDTest,
-                               (void *)(intptr_t)rtag->id)))
-            xabort("fileID=%d is not in queue", rtag->id);
+                               (void *)(intptr_t)rtag.id)))
+            xabort("fileID=%d is not in queue", rtag.id);
 
 	  amount = messagesize;
 
-	  xdebug ( "command: %s, id=%d, name=%s", 
-                   command2charP [ rtag->command ], rtag->id, bfd->name );
+	  xdebug("command: %s, id=%d, name=%s",
+                 command2charP[rtag.command], rtag.id, bfd->name );
 
 	  bfd->currOpIndex = bfd->nextOpIndex;
 	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
@@ -355,13 +353,13 @@ void pioWriterAIO(void)
 	case IO_Close_file:
 
           if (!(bfd = queueGet(bibBFiledataPA, fileIDTest,
-                               (void *)(intptr_t)rtag->id)))
-            xabort("fileID=%d is not in queue", rtag->id );
+                               (void *)(intptr_t)rtag.id)))
+            xabort("fileID=%d is not in queue", rtag.id);
 
 	  amount = messagesize;
 
-	  xdebug ( " command %s, id=%d, name=%s", 
-                   command2charP [ rtag->command ], rtag->id, bfd->name );
+	  xdebug(" command %s, id=%d, name=%s",
+                 command2charP[rtag.command], rtag.id, bfd->name);
 
 	  bfd->currOpIndex = bfd->nextOpIndex;
 
@@ -384,9 +382,9 @@ void pioWriterAIO(void)
 	  
 	  if ( bfd->finished )
 	    {
-              xdebug ( "all are finished with file %d, delete node", rtag->id );
+              xdebug ( "all are finished with file %d, delete node", rtag.id);
               queueDelNode(bibBFiledataPA, fileIDTest,
-                           (void *)(intptr_t)rtag->id);
+                           (void *)(intptr_t)rtag.id);
 	    }
           break;
         case IO_Finalize:
@@ -412,7 +410,6 @@ void pioWriterAIO(void)
                            " return");
                     queueDestroy ( bibBFiledataPA );
                   }
-                if ( rtag ) ungetTag ( rtag );
                 return;
               }
           }
