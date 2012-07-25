@@ -7,6 +7,7 @@
 #include <limits.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #ifdef USE_MPI
@@ -50,6 +51,14 @@ enum {
   maxlev      = 5
 };
 
+static time_t
+cditime2time_t(int date, int timeofday);
+static void
+time_t2cditime(time_t t, int *date, int *timeofday);
+
+
+
+
 void modelRun (struct model_config setup, MPI_Comm comm)
 {
 
@@ -65,15 +74,22 @@ void modelRun (struct model_config setup, MPI_Comm comm)
   double *var, *varslice;
   double mscale, mrscale;
   int vdate = 19850101, vtime = 120000;
-  int start = CDI_UNDEFID, chunk = CDI_UNDEFID, rank = 0;
+  int start = CDI_UNDEFID, chunk = CDI_UNDEFID, rank = 0, comm_size = 1;
   char filename[1024];
   int nlon = setup.nlon, nlat = setup.nlat;
   uint32_t checksum_state[nVars];
   size_t varSize[nVars];
+  int *chunks, *displs;
 
 #if USE_MPI
   xmpi ( MPI_Comm_rank ( comm, &rank ));
+  xmpi ( MPI_Comm_size ( comm, &comm_size ));
 #endif
+  if (rank == 0)
+    {
+      chunks = xmalloc(comm_size * sizeof (chunks[0]));
+      displs = xmalloc(comm_size * sizeof (displs[0]));
+    }
 
   var_scale(setup.datatype, &mscale, &mrscale);
 
@@ -147,15 +163,30 @@ void modelRun (struct model_config setup, MPI_Comm comm)
                             / (lats[nlat-1] - lats[0]))
                       ) * mscale)) * mrscale;
 
+              start = pioInqVarDecoOff(vlistID, varIDs[varID]);
+              chunk = pioInqVarDecoChunk(vlistID, varIDs[varID]);
+              varslice = realloc(varslice, chunk * sizeof (var[0]));
+              memcpy(varslice, var + start, chunk * sizeof (var[0]));
+
+#if USE_MPI
+              xmpi(MPI_Gather(&chunk, 1, MPI_INT, chunks, 1, MPI_INT, 0, comm));
+              if (rank == 0)
+                {
+                  displs[0] = 0;
+                  for (i = 1; i < comm_size; ++i)
+                    displs[i] = displs[i - 1] + chunks[i - 1];
+                }
+              xmpi(MPI_Gatherv(varslice, chunk, MPI_DOUBLE, var, chunks, displs,
+                               MPI_DOUBLE, 0, comm));
+#else
+              memcpy(var, varslice, varSize[varID] * sizeof (var[0]));
+#endif
               if (rank == 0)
                 {
                   memcrc_r(&checksum_state[varID], (const unsigned char *)var,
                            varSize[varID] * sizeof (var[0]));
                 }
-	      start = pioInqVarDecoOff   ( vlistID, varIDs[varID] );
-	      chunk = pioInqVarDecoChunk ( vlistID, varIDs[varID] );
-              varslice = realloc(varslice, chunk * sizeof (var[0]));
-              memcpy(varslice, var + start, chunk * sizeof (var[0]));
+
 	      streamWriteVar ( streamID, varIDs[varID], varslice, nmiss );
 	      start = CDI_UNDEFID;
 	      chunk = CDI_UNDEFID;
