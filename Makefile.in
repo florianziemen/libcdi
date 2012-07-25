@@ -37,10 +37,10 @@ subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/cdi.settings.in \
 	$(top_srcdir)/configure $(top_srcdir)/src/pkgconfig/cdi.pc.in \
-	AUTHORS COPYING ChangeLog INSTALL NEWS config/compile \
-	config/config.guess config/config.sub config/depcomp \
-	config/install-sh config/ltmain.sh config/missing \
-	config/mkinstalldirs
+	$(top_srcdir)/util/serialrun.in AUTHORS COPYING ChangeLog \
+	INSTALL NEWS config/compile config/config.guess \
+	config/config.sub config/depcomp config/install-sh \
+	config/ltmain.sh config/missing config/mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps =  \
 	$(top_srcdir)/m4/acx_assert_lang_is_fortran_variant.m4 \
@@ -60,7 +60,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/config.h
-CONFIG_CLEAN_FILES = cdi.settings src/pkgconfig/cdi.pc
+CONFIG_CLEAN_FILES = util/serialrun cdi.settings src/pkgconfig/cdi.pc
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -193,6 +193,7 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
+MPI_LAUNCH = @MPI_LAUNCH@
 NC_CONFIG = @NC_CONFIG@
 NETCDF_INCLUDE = @NETCDF_INCLUDE@
 NETCDF_LIBS = @NETCDF_LIBS@
@@ -334,6 +335,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 $(am__aclocal_m4_deps):
+util/serialrun: $(top_builddir)/config.status $(top_srcdir)/util/serialrun.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 cdi.settings: $(top_builddir)/config.status $(srcdir)/cdi.settings.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 src/pkgconfig/cdi.pc: $(top_builddir)/config.status $(top_srcdir)/src/pkgconfig/cdi.pc.in

@@ -117,7 +117,11 @@ AC_ARG_ENABLE(mpi,AS_HELP_STRING([--enable-mpi],[Compile with MPI compiler [defa
 AS_IF([test x"${enable_mpi}" = x"yes"],
       [USE_MPI=yes])
 AS_IF([test x"$USE_MPI" = xyes],
-  [AC_DEFINE([USE_MPI],[1],[parallel I/O requested and available])])
+  [AC_DEFINE([USE_MPI],[1],[parallel I/O requested and available])
+   AC_CHECK_PROGS([MPI_LAUNCH],[mpirun mpiexec],[])
+   AS_IF([test x$MPI_LAUNCH = x],[])],
+  [MPI_LAUNCH="`pwd`/util/serialrun"
+   AC_SUBST([MPI_LAUNCH])])
 AM_CONDITIONAL([USE_MPI],[test x"$USE_MPI" = xyes])
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
@@ -204,7 +208,9 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
                  tests/test_cksum_nc4 \
                  tests/test_cksum_extra \
                  tests/test_cksum_service \
-                 tests/test_cksum_ieg],[chmod a+x "$ac_file"])
+                 tests/test_cksum_ieg \
+                 tests/pio_write_run \
+                 util/serialrun],[chmod a+x "$ac_file"])
 
 AC_OUTPUT([Makefile src/Makefile interfaces/Makefile app/Makefile \
 	tests/Makefile examples/Makefile cdi.settings \

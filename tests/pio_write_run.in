@@ -1,0 +1,2 @@
+#! @SHELL@
+@MPI_LAUNCH@ -n 4 ./pio_write

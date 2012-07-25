@@ -77,7 +77,7 @@ size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
     case PIO_ASYNCH:
       iret = fwPOSIXASYNCH ( fileID, tsID, buffer, len );
       break;
-#endif      
+#endif
     case PIO_FPGUARD:
       iret = fwPOSIXFPGUARDSENDRECV ( fileID, tsID, buffer, len );
       break;
