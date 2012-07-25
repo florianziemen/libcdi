@@ -154,7 +154,8 @@ destroyAFiledataPF(void *v)
 
 /***************************************************************/
 
-int destroyBFiledataPF ( void *v )
+static int
+destroyBFiledataPF(void *v)
 {
   int iret = 0;
   bFiledataPF *bfd = (bFiledataPF * ) v;
@@ -167,7 +168,8 @@ int destroyBFiledataPF ( void *v )
 
 /***************************************************************/
 
-bool compareNamesAPF ( void *v1, void *v2 )
+static bool
+compareNamesAPF(void *v1, void *v2)
 {
   aFiledataPF *afd1, *afd2;
   size_t len;
@@ -392,7 +394,8 @@ writePF(aFiledataPF *afd, int id)
 
 /***************************************************************/
 
-void defTimestepPF ( aFiledataPF *afd, int tsID)
+static void
+defTimestepPF(aFiledataPF *afd, int tsID)
 {
   if ( afd == NULL || tsID < 0 || tsID != afd->tsID + 1 ) 
     xabort ( " defTimestepPF() didn't succeed." );
