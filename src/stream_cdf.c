@@ -106,6 +106,7 @@ typedef struct {
 }
 ncvar_t;
 
+#ifdef HAVE_LIBNETCDF
 static
 void strtolower(char *str)
 {
@@ -118,6 +119,7 @@ void strtolower(char *str)
         str[i] = tolower((int) str[i]);
     }
 }
+#endif
 
 static
 int get_timeunit(int len, char *ptu)
@@ -142,6 +144,7 @@ int get_timeunit(int len, char *ptu)
   return (timeunit);
 }
 
+#ifdef HAVE_LIBNETCDF
 static
 int isTimeUnits(const char *timeunits)
 {
@@ -297,8 +300,6 @@ int splitBasetime(const char *timeunits, taxis_t *taxis)
   return (0);
 }
 
-
-#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfGetAttInt(int fileID, int ncvarid, char *attname, int attlen, int *attint)
 {
@@ -320,9 +321,7 @@ void cdfGetAttInt(int fileID, int ncvarid, char *attname, int attlen, int *attin
       free(pintatt);
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double *attdouble)
 {
   size_t nc_attlen;
@@ -343,9 +342,7 @@ static void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, 
       free(pdoubleatt);
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfGetAttText(int fileID, int ncvarid, char *attname, int attlen, char *atttext)
 {
@@ -368,9 +365,7 @@ void cdfGetAttText(int fileID, int ncvarid, char *attname, int attlen, char *att
       atttext[0] = 0;
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 int cdfInqDatatype(int xtype, int lunsigned)
 {
@@ -395,9 +390,7 @@ int cdfInqDatatype(int xtype, int lunsigned)
 
   return (datatype);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 int cdfDefDatatype(int datatype, int filetype)
 {
@@ -438,10 +431,7 @@ int cdfDefDatatype(int datatype, int filetype)
 
   return (xtype);
 }
-#endif
 
-
-#if  defined  (HAVE_LIBNETCDF)
 static
 void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
 {
@@ -3078,7 +3068,6 @@ int cdfDefVar(int streamID, int varID)
 
   return (ncvarid);
 }
-#endif
 
 static
 void scale_add(long size, double *data, double addoffset, double scalefactor)
@@ -3099,7 +3088,7 @@ void scale_add(long size, double *data, double addoffset, double scalefactor)
         }
     }
 }
-
+#endif
 
 void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
 {
