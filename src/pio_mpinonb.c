@@ -145,11 +145,12 @@ bool compareNamesMPINONB  ( void *v1, void *v2 )
 
 /***************************************************************/
 
-void writeMPINONB ( aFiledataM *of, int fileID )
+void writeMPINONB(aFiledataM *of)
 {
   int amount;
   MPI_Status status;
   int rankNode = commInqRankNode ();
+  int fileID = of->idx;
 
   /* write buffer */
   
@@ -208,8 +209,7 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
       curr = bibAFiledataM->head;
       while ( curr ) 
 	{
-	  writeMPINONB ((aFiledataM *) curr->val,
-                        ((aFiledataM *)curr->val)->idx);
+	  writeMPINONB((aFiledataM *)curr->val);
 	  curr = curr->next;
 	}
       oldTsID = tsID;
@@ -229,7 +229,7 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
 	error = filled;
       else
 	{
-	  writeMPINONB ( of, fileID );
+	  writeMPINONB(of);
      
 	  error = dbuffer_push ( of->db, ( unsigned char * ) buffer, len );
 	}
@@ -264,7 +264,7 @@ int fcMPINONB ( int fileID )
       xabort ( errorString );
     }
 
-  writeMPINONB ( of, fileID );
+  writeMPINONB(of);
 
   /* dequeue file element */
 
