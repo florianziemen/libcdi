@@ -557,7 +557,8 @@ void pwPOSIXASYNCH ( void )
 
 /***************************************************************/
 
-void sendPA ( aFiledataPA *afd, int id )
+static void
+sendPA(aFiledataPA *afd, int id)
 {
   int tag;
   long amount;

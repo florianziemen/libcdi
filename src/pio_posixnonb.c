@@ -462,7 +462,8 @@ void pwPOSIXNONB ( void )
 /***************************************************************/
 
 
-void sendP ( aFiledataP *afd, int id )
+static void
+sendP(aFiledataP *afd, int id)
 {
   int tag;
   size_t amount;
