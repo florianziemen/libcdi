@@ -18,7 +18,7 @@ cksum_stream(const char *fname, size_t *table_len)
   } *varSize = NULL;
   size_t var_size_max_chars = 0;
   double *buf = NULL;
-  struct cksum_table *file_vars;
+  struct cksum_table *file_vars = NULL;
 
   do {
     // Open the dataset
