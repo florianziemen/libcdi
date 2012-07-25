@@ -179,11 +179,11 @@ void  gribSetValueCheck(int vcheck);
 
 void  gribExSP(int *isec0, int *isec1, int *isec2, float *fsec2, int *isec3,
                float *fsec3, int *isec4, float *fsec4, int klenp, int *kgrib,
-               int kleng, int *kword, char *hoper, int *kret);
+               int kleng, int *kword, char hoper, int *kret);
 
 void  gribExDP(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
                double *fsec3, int *isec4, double *fsec4, int klenp, int *kgrib,
-               int kleng, int *kword, char *hoper, int *kret);
+               int kleng, int *kword, char hoper, int *kret);
 
 
 const char *cgribexLibraryVersion(void);

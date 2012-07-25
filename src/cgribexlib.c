@@ -1177,9 +1177,9 @@ void gprintf(const char *caller, const char *fmt, ...)
 void
 gribExDP(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 	 double *fsec3, int *isec4, double *fsec4, int klenp, int *kgrib,
-	 int kleng, int *kword, char *hoper, int *kret)
+	 int kleng, int *kword, char hoper, int *kret)
 {
-  int yfunc = *hoper;
+  int yfunc = hoper;
 
   if ( yfunc == 'D' || yfunc == 'J' || yfunc == 'R' )
     gribDecode(isec0, isec1, isec2, fsec2, isec3,
@@ -1202,13 +1202,13 @@ gribExDP(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 void
 gribExSP(int *isec0, int *isec1, int *isec2, float *fsec2sp, int *isec3,
 	 float *fsec3sp, int *isec4, float *fsec4sp, int klenp, int *kgrib,
-	 int kleng, int *kword, char *hoper, int *kret)
+	 int kleng, int *kword, char hoper, int *kret)
 {
   int inum, j;
   double fsec2dp[1024];
   double fsec3dp[2];
   double *fsec4dp = NULL;
-  int yfunc = *hoper;
+  int yfunc = hoper;
 
   if ( yfunc == 'C' )
     {

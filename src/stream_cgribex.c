@@ -492,7 +492,7 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
   int iret = 0, ipunp = 0, iword = 0;
 
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
-	   ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);
+	   ipunp, (int *) gribbuffer, recsize, &iword, 'J', &iret);
 
   *lmv = 0;
 
@@ -1345,12 +1345,12 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
   int izip;
   long unzipsize;
   double fsec2[512], fsec3[2];
-  char hoper[2];
+  char hoper;
 
   *zip = 0;
 
-  if ( unreduced ) strcpy(hoper, "R");
-  else             strcpy(hoper, "D");
+  if ( unreduced ) hoper = 'R';
+  else             hoper = 'D';
 
   FSEC3_MissVal = missval;
 
@@ -2203,7 +2203,7 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   //printf("isec4[16] %d\n", isec4[16]);
 
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
-	   datasize, (int *) gribbuffer, gribsize, &iword, "C", &iret);
+	   datasize, (int *) gribbuffer, gribsize, &iword, 'C', &iret);
 
   if ( iret ) Error("Problem during GRIB encode (errno = %d)!", iret);
 
