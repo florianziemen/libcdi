@@ -19,7 +19,6 @@ extern char * command2charP[6];
 extern long initial_buffersize;
 extern int maxErrorString;
 
-extern double startTime;
 extern double accumProbe;
 extern double accumRecv;
 extern double accumSend;
@@ -89,6 +88,7 @@ int destroyAFiledataMPINONB ( void *v )
   aFiledataM *of;
   MPI_Status status;
   int rankNode = commInqRankNode ();
+  double startTime;
 
   of = (aFiledataM * ) v;
 

@@ -33,7 +33,6 @@ extern long initial_buffersize;
 extern char *token;
 extern int maxErrorString; 
 
-extern double startTime;
 extern double accumProbe;
 extern double accumRecv;
 extern double accumSend;
@@ -192,6 +191,7 @@ int destroyBFiledataPA ( void *v )
   ssize_t ssiret;
   int nextFinishOp = (bfd->nextOpIndex - bfd->prefIndex + nPrefStreams)
     % nPrefStreams;
+  double startTime;
 
   xdebug ( "filename=%s, cleanup and close file", bfd->name );
 
@@ -282,6 +282,7 @@ writePA(bFiledataPA *bfd, long amount)
 {
   const struct aiocb *ccBP[1];
   int iret;
+  double startTime;
 
   xdebug ( "file %s, in", bfd->name );
   
@@ -555,6 +556,7 @@ sendPA(aFiledataPA *afd, int id)
   int tag;
   long amount;
   MPI_Status status;
+  double startTime;
 
   amount = ( long ) dbuffer_data_size ( afd->db );
   tag = setTag ( id, afd->command );

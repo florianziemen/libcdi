@@ -26,7 +26,6 @@ extern char * command2charP[6];
 extern long initial_buffersize;
 extern int maxErrorString;
 
-extern double startTime;
 extern double accumProbe;
 extern double accumRecv;
 extern double accumSend;

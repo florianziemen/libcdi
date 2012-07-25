@@ -21,7 +21,6 @@ extern long initial_buffersize;
 extern char *token;
 extern int maxErrorString; 
 
-extern double startTime;
 extern double accumProbe;
 extern double accumRecv;
 extern double accumSend;
@@ -459,6 +458,7 @@ sendP(aFiledataP *afd, int id)
   int tag;
   size_t amount;
   MPI_Status status;
+  double startTime;
 
   amount = dbuffer_data_size ( afd->db );
   tag = setTag ( id, afd->command );

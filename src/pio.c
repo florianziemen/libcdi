@@ -24,7 +24,6 @@ long initial_buffersize = 16 * 1024 * 1024;
 int tagKey = 100;
 int maxErrorString = 100;
 
-double startTime;
 double accumProbe   = 0.0;
 double accumRecv    = 0.0;
 double accumSend    = 0.0;
