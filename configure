@@ -25583,6 +25583,7 @@ if test "$ac_res" != no; then :
 
 $as_echo "#define HAVE_LIBNETCDF 1" >>confdefs.h
 
+                                                 ENABLE_NETCDF=yes
 else
   as_fn_error $? "Could not link to netcdf library" "$LINENO" 5
 fi
@@ -25647,6 +25648,7 @@ $as_echo_n "checking netcdf's nc2 support... " >&6; }
 
 $as_echo "#define HAVE_NETCDF2 1" >>confdefs.h
 
+                                          ENABLE_NC2=yes
                                           { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 else
