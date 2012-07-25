@@ -59,7 +59,7 @@ void      ungetTag ( tag_t * );
 
 /* pio_dbuffer.c */
 int       dbuffer_init ( struct dBuffer **, size_t );
-int       dbuffer_push ( struct dBuffer *, unsigned char *, size_t );
+int       dbuffer_push(struct dBuffer *, const void *, size_t);
 size_t    dbuffer_data_size ( struct dBuffer * );
 int       dbuffer_reset ( struct dBuffer * );
 void      dbuffer_cleanup ( struct dBuffer ** );

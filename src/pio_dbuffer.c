@@ -140,7 +140,8 @@ int dbuffer_reset ( struct dBuffer *dbuffer )
   return 0;
 }
 
-int dbuffer_push ( struct dBuffer *dbuffer, unsigned char *buffer, size_t len )
+int
+dbuffer_push(struct dBuffer *dbuffer, const void *buffer, size_t len)
 {
   size_t space_left;
   size_t wr_ptr;
