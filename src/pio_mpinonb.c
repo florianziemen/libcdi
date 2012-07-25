@@ -246,8 +246,8 @@ int fcMPINONB ( int fileID )
   MPI_Comm commNode = commInqCommNode ();
   int rankNode = commInqRankNode ();
 
-  xdebug ( "IOPE%d: write buffer, close file and cleanup, in", 
-           rankNode, fileID );
+  xdebug("IOPE%d: write buffer, close file and cleanup, in %d",
+         rankNode, fileID );
 
   if ( ! ( of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, fileID )))
     {
