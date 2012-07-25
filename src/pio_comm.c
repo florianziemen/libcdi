@@ -752,32 +752,33 @@ void commPrint ( FILE * fp )
   fprintf ( fp, "# nProcsModel = %d\n", info->nProcsModel );
   fprintf ( fp, "# isProcIO    = %d\n", info->isProcIO );
   fprintf ( fp, "#\n" );
-  fprintf ( fp, "# commGlob    = %d\n", info->commGlob );
+  fprintf ( fp, "# commGlob    = %d\n", (int)MPI_Comm_c2f(info->commGlob));
   fprintf ( fp, "# sizeGlob    = %d\n", info->sizeGlob );
   fprintf ( fp, "# rankGlob    = %d\n", info->rankGlob );
   fprintf ( fp, "# root        = %d\n", info->root );
   fprintf ( fp, "#\n" );
-  fprintf ( fp, "# commPio     = %d\n", info->commPio );
+  fprintf ( fp, "# commPio     = %d\n", (int)MPI_Comm_c2f(info->commPio));
   fprintf ( fp, "# sizePio     = %d\n", info->sizePio );
   fprintf ( fp, "# rankPio     = %d\n", info->rankPio );
   fprintf ( fp, "#\n" );
-  fprintf ( fp, "# commNode    = %d\n", info->commNode );
+  fprintf ( fp, "# commNode    = %d\n", (int)MPI_Comm_c2f(info->commNode));
   fprintf ( fp, "# sizeNode    = %d\n", info->sizeNode );
   fprintf ( fp, "# rankNode    = %d\n", info->rankNode );
   fprintf ( fp, "# hostname    = %s\n", info->hostname[0] == 0 ? "nn" : 
 	    info->hostname );
   fprintf ( fp, "# specialRankNode = %d\n", info->specialRankNode );
   fprintf ( fp, "#\n" );
-  fprintf ( fp, "# commColl    = %d\n", info->commColl );
+  fprintf ( fp, "# commColl    = %d\n", (int)MPI_Comm_c2f(info->commColl));
   fprintf ( fp, "# sizeColl    = %d\n", info->sizeColl );
   fprintf ( fp, "# rankColl    = %d\n", info->rankColl );
   fprintf ( fp, "#\n" );
-  fprintf ( fp, "# commCalc    = %d\n", info->commCalc );
+  fprintf ( fp, "# commCalc    = %d\n", (int)MPI_Comm_c2f(info->commCalc));
   if ( info->commsIO != NULL )
     {
       fprintf ( fp, "#\n" );
       for ( i = 0; i < info->nProcsColl; i++ )
-	fprintf ( fp, "# commsIO[%d]  = %d\n", i, info->commsIO[i] );
+	fprintf(fp, "# commsIO[%d]  = %d\n", i,
+                (int)MPI_Comm_c2f(info->commsIO[i]));
     }
   else
     fprintf ( fp, "# commsIO     = NULL\n" );
