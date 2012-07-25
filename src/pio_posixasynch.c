@@ -39,7 +39,7 @@ extern double accumWait;
 extern double accumWrite;
 
 
-typedef struct 
+typedef struct
 {
   char *name;
   size_t size;
@@ -52,7 +52,14 @@ typedef struct
   int prefIndex;
   bool finished;
   bool *nfinished;
+  int idx;
 } bFiledataPA;
+
+static int
+idxTest(void *a, void *idx)
+{
+  return ((bFiledataPA *)a)->idx == (int)(intptr_t)idx;
+}
 
 int nPrefStreams = 4;
 
@@ -313,17 +320,14 @@ void pioWriterAIO(void)
 
 	  xdebug ( "command  %s, filename=%s, buffersize=%ld, amount=%ld",
                    command2charP [ rtag->command ], filename, 
-                   buffersize, amount ); 
+                   buffersize, amount );
 
-	  
-	  if ( !(bfd = ( bFiledataPA * ) queueIdx2val ( bibBFiledataPA, 
-							     rtag->id )))
+          if (!(bfd = queueGet(bibBFiledataPA, idxTest,
+                               (void *)(intptr_t)rtag->id)))
 	    {
-	      queueCheckPA (  bibBFiledataPA, filename );
-	      bfd = ( bFiledataPA * ) initBFiledataPA ( filename, 
-								 buffersize,  
-							       nProcsCollNode );
-	      if (( id = queuePush ( bibBFiledataPA, bfd, 1, rtag->id )) != rtag->id )
+              queueCheckPA (  bibBFiledataPA, filename );
+	      bfd = initBFiledataPA(filename, buffersize, nProcsCollNode);
+              if ((id = queuePush(bibBFiledataPA, bfd)) < 0)
                 xabort("fileID=%d not unique", rtag->id);
 	    }
 	  else
@@ -344,7 +348,8 @@ void pioWriterAIO(void)
 
 	case IO_Send_buffer:
 
-	  if (!(bfd = (bFiledataPA *)queueIdx2val(bibBFiledataPA, rtag->id)))
+          if (!(bfd = queueGet(bibBFiledataPA, idxTest,
+                               (void *)(intptr_t)rtag->id)))
             xabort("fileID=%d is not in queue", rtag->id);
 
 	  amount = messagesize;
@@ -364,7 +369,8 @@ void pioWriterAIO(void)
 
 	case IO_Close_file:
 
-	  if (!(bfd = (bFiledataPA *)queueIdx2val(bibBFiledataPA, rtag->id)))
+          if (!(bfd = queueGet(bibBFiledataPA, idxTest,
+                               (void *)(intptr_t)rtag->id)))
             xabort("fileID=%d is not in queue", rtag->id );
 
 	  amount = messagesize;
@@ -394,7 +400,8 @@ void pioWriterAIO(void)
 	  if ( bfd->finished )
 	    {
               xdebug ( "all are finished with file %d, delete node", rtag->id );
-	      queueDelNode ( bibBFiledataPA, rtag->id );
+              queueDelNode(bibBFiledataPA, idxTest,
+                           (void *)(intptr_t)rtag->id);
 	    }
           break;
         case IO_Finalize:

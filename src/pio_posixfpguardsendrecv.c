@@ -10,6 +10,7 @@
 
 #ifdef USE_MPI
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
@@ -43,14 +44,34 @@ typedef struct
   struct dBuffer *db;
   FILE *fp;
   IO_Server_command command;
+  int idx;
 } aFiledataPF;
+
+static int
+idxTestA(void *a, void *idx)
+{
+  return ((aFiledataPF *)a)->idx == (int)(intptr_t)idx;
+}
 
 typedef struct 
 {
   long offset;
   bool finished;
   bool *nfinished;
+  int idx;
 } bFiledataPF;
+
+static int
+idxTestB(void *a, void *idx)
+{
+  return ((bFiledataPF *)a)->idx == (int)(intptr_t)idx;
+}
+
+static bool
+idxCmpB(void *a, void *b)
+{
+  return ((bFiledataPF *)a)->idx == ((bFiledataPF *)b)->idx;
+}
 
 static queue_t *bibAFiledataPF;
 
@@ -195,7 +216,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 
   xdebug ( "ncollectors=%d on this node", nProcsCollNode );
   
-  bibBFiledataPF = queueInit ( destroyBFiledataPF, NULL );
+  bibBFiledataPF = queueInit ( destroyBFiledataPF, idxCmpB);
   sentFinalize = xmalloc ( nProcsCollNode * sizeof ( sentFinalize[0] ));
 
   for ( ;; )
@@ -211,13 +232,14 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
       switch ( rtag->command )
       	{
       	case IO_Open_file:
-	  if ( !(bfd = ( bFiledataPF * ) queueIdx2val ( bibBFiledataPF, 
-							     rtag->id )))
+
+          if (!(bfd = queueGet(bibBFiledataPF, idxTestB,
+                               (void *)(intptr_t)rtag->id)))
 	    {
 	      bfd = ( bFiledataPF * ) initBFiledataPF ( rtag->id, 
 							       nProcsCollNode );
 
-	      if (( iret = queuePush ( bibBFiledataPF, bfd, 1, rtag->id )) != rtag->id )
+	      if ((iret = queuePush(bibBFiledataPF, bfd)) < 0)
 	      {
 		sprintf ( errorString, "fileID=%d not unique", rtag->id );
 		xabort ( errorString);
@@ -243,9 +265,9 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 	  break;
 
 	case IO_Set_fp:
-	  
-	  if ( ! ( bfd = ( bFiledataPF * ) queueIdx2val ( bibBFiledataPF,  
-							  rtag->id )))
+
+          if (!(bfd = queueGet(bibBFiledataPF, idxTestB,
+                               (void *)(intptr_t)rtag->id)))
 	      {
 		sprintf ( errorString, "fileId=%d not in queue", rtag->id );
 		xabort ( errorString );
@@ -268,9 +290,9 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 	  break;
 
 	case IO_Close_file:
-	  
-	  if ( ! ( bfd = ( bFiledataPF * ) queueIdx2val ( bibBFiledataPF,  
-							  rtag->id )))
+
+          if (!(bfd = queueGet(bibBFiledataPF, idxTestB,
+                               (void *)(intptr_t)rtag->id)))
 	      {
 		sprintf ( errorString, "fileId=%d not in queue", rtag->id );
 		xabort ( errorString );
@@ -300,9 +322,9 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 		bfd->finished = false;
 		break;
 	      }
-	  
+
 	  if ( bfd->finished )
-            queueDelNode ( bibBFiledataPF, rtag->id );
+            queueDelNode(bibBFiledataPF, idxTestB, (void *)(intptr_t)rtag->id);
           break;
         case IO_Finalize:
           {  
@@ -427,7 +449,7 @@ size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t 
   listElem_t *curr;
   char errorString[maxErrorString];                                          
 
-  afd = ( aFiledataPF * ) queueIdx2val ( bibAFiledataPF, fileID );
+  afd = queueGet(bibAFiledataPF, idxTestA, (void *)(intptr_t)fileID);
 
   flush = ( tsID != afd->tsID ) ? 1 : 0;
 
@@ -437,8 +459,8 @@ size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t 
       curr = bibAFiledataPF->head;
       while ( curr ) 
 	{
-	  writePF (( aFiledataPF *) curr->val, curr->idx );
-          defTimestepPF (( aFiledataPF * ) curr->val, tsID );
+	  writePF((aFiledataPF *)curr->val, ((aFiledataPF *)curr->val)->idx);
+          defTimestepPF((aFiledataPF *)curr->val, tsID);
 	  curr = curr->next;
 	}
       xmpi ( MPI_Barrier ( commInqCommColl ())); 
@@ -479,7 +501,7 @@ int fcPOSIXFPGUARDSENDRECV ( int id )
 
   xdebug("write buffer, close file %d and cleanup", id);
 
-  afd = ( aFiledataPF * ) queueIdx2val ( bibAFiledataPF, id );
+  afd = queueGet(bibAFiledataPF, idxTestA, (void *)(intptr_t)id);
 
   afd->command = IO_Close_file;
 
@@ -487,7 +509,7 @@ int fcPOSIXFPGUARDSENDRECV ( int id )
 
   /* dequeue file element */
 
-  iret = queueDelNode ( bibAFiledataPF, id );
+  iret = queueDelNode(bibAFiledataPF, idxTestA, (void *)(intptr_t)id);
 
   return iret;
 }
@@ -555,8 +577,8 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
 
   afd = initAFiledataPF ( filename, buffersize );
 
-  if (( id = queuePush ( bibAFiledataPF, afd, 0 )) < 0 )
-    {  
+  if ((id = queuePush(bibAFiledataPF, afd)) < 0)
+    {
       sprintf ( errorString, "filename %s not unique", afd->name );
       xabort ( errorString ); 
     }

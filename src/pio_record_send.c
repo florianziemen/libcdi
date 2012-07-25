@@ -4,6 +4,7 @@
 
 #ifdef USE_MPI
 
+#include <inttypes.h>
 #include <stdlib.h>
 
 #include "pio_comm.h"
@@ -25,9 +26,16 @@ typedef struct
   struct dBuffer *db;
   IO_Server_command command;
   MPI_Request request;
+  int idx;
 } remoteFileBuf;
 
 static queue_t * bibRemoteFileBuf;
+
+static int
+idxTest(void *a, void *idx)
+{
+  return ((remoteFileBuf *)a)->idx == (int)(intptr_t)idx;
+}
 
 static remoteFileBuf *
 initRemoteFileBuf(const char *filename, size_t bs)
@@ -151,7 +159,7 @@ pioSendWrite(int id, int tsID, const void *buffer, size_t len)
   remoteFileBuf *afd;
   listElem_t *curr;
 
-  afd = (remoteFileBuf *)queueIdx2val(bibRemoteFileBuf, id);
+  afd = queueGet(bibRemoteFileBuf, idxTest, (void *)(intptr_t)id);
 
   flush = ( tsID != afd->tsID ) ? 1 : 0;
 
@@ -163,7 +171,7 @@ pioSendWrite(int id, int tsID, const void *buffer, size_t len)
 
       while (curr)
 	{
-	  sendP((remoteFileBuf *)curr->val, curr->idx);
+	  sendP((remoteFileBuf *)curr->val, ((remoteFileBuf *)curr->val)->idx);
           defTimestep((remoteFileBuf *)curr->val, tsID);
 	  curr = curr->next;
 	}
@@ -210,14 +218,14 @@ pioSendClose(int id)
 
   xdebug ( "fileID %d: send buffer, close file and cleanup",id );
 
-  afd = (remoteFileBuf *)queueIdx2val(bibRemoteFileBuf, id);
+  afd = queueGet(bibRemoteFileBuf, idxTest, (void *)(intptr_t)id);
 
   afd->command = IO_Close_file;
 
   sendP(afd, id);
 
   /* dequeue file element */
-  iret = queueDelNode(bibRemoteFileBuf, id);
+  iret = queueDelNode(bibRemoteFileBuf, idxTest, (void *)(intptr_t)id);
 
   /* timer output */
   if ( ddebug )
@@ -257,7 +265,7 @@ pioSendOpen(const char *filename)
 
   /* init and enqueue remoteFileBuf */
   afd = initRemoteFileBuf(filename, buffersize);
-  if ((id = queuePush(bibRemoteFileBuf, afd, 0)) < 0)
+  if ((id = queuePush(bibRemoteFileBuf, afd)) < 0)
     xabort("filename %s is not unique", afd->name);
 
   xdebug("filename=%s, init and enqueued remoteFileBuf, return id = %d",

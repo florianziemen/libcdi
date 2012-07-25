@@ -4,6 +4,7 @@
 
 #ifdef USE_MPI
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -34,10 +35,17 @@ typedef struct
   struct dBuffer *db;
   MPI_File fh;
   MPI_Request request;
+  int idx;
   bool finished;
 } aFiledataM;
 
 static queue_t *bibAFiledataM;
+
+static int
+idxTest(void *a, void *idx)
+{
+  return ((aFiledataM *)a)->idx == (int)(intptr_t)idx;
+}
 
 
 /***************************************************************/
@@ -200,14 +208,15 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
       curr = bibAFiledataM->head;
       while ( curr ) 
 	{
-	  writeMPINONB (( aFiledataM *) curr->val, curr->idx );
+	  writeMPINONB ((aFiledataM *) curr->val,
+                        ((aFiledataM *)curr->val)->idx);
 	  curr = curr->next;
 	}
       oldTsID = tsID;
       xmpi ( MPI_Barrier ( commNode )); 
     }                                          
 
-  of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, fileID );
+  of = queueGet(bibAFiledataM, idxTest, (void *)(intptr_t)fileID);
   filled = dbuffer_push ( of->db, ( unsigned char * ) buffer, len );
 
   xdebug3 ( "IOPE%d: fileID = %d, tsID = %d,"
@@ -249,7 +258,7 @@ int fcMPINONB ( int fileID )
   xdebug("IOPE%d: write buffer, close file and cleanup, in %d",
          rankNode, fileID );
 
-  if ( ! ( of = ( aFiledataM * ) queueIdx2val ( bibAFiledataM, fileID )))
+  if (!(of = queueGet(bibAFiledataM, idxTest, (void *)(intptr_t)fileID)))
     {
       sprintf ( errorString, "pio_queue, fileID=%d not found", fileID ); 
       xabort ( errorString );
@@ -259,7 +268,7 @@ int fcMPINONB ( int fileID )
 
   /* dequeue file element */
 
-  iret = queueDelNode ( bibAFiledataM, fileID );
+  iret = queueDelNode(bibAFiledataM, idxTest, (void *)(intptr_t)fileID);
 
   /* timer output */
 
@@ -337,7 +346,7 @@ int fowMPINONB ( const char *filename )
   queueCheck (  bibAFiledataM, filename );
   of = initAFiledataMPINONB ( filename, buffersize );
 
-  if (( id = queuePush ( bibAFiledataM, of, 0 )) < 0 )
+  if ((id = queuePush(bibAFiledataM, of)) < 0 )
     {   
       sprintf ( errorString, "filename %s not unique", of->name );
       xabort ( errorString );

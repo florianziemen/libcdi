@@ -35,12 +35,19 @@ typedef struct
   FILE *fp;
   bool finished;
   bool *nfinished;
+  int idx;
 } bFiledataP;
+
+static int
+idxTest(void *a, void *idx)
+{
+  return ((bFiledataP *)a)->idx == (int)(intptr_t)idx;
+}
 
 /***************************************************************/
 
 static bFiledataP *
-initBFiledataP(char *filename, size_t bs, int nc)
+initBFiledataP(char *filename, size_t bs, int nc, int idx)
 {
   bFiledataP * bfp;
   int i;
@@ -63,6 +70,8 @@ initBFiledataP(char *filename, size_t bs, int nc)
 
   for ( i = 0; i < nc; i++ )
     bfp->nfinished[i] = false;
+
+  bfp->idx = idx;
 
   xdebug ( "filename=%s, opened file, return", bfp->name );
 
@@ -167,7 +176,7 @@ pioWriterStdIO(void)
 
   xdebug ( "ncollectors=%d on this node", nProcsCollNode );
 
-  bibBFiledataP = queueInit ( destroyBFiledataP, compareNamesBP );
+  bibBFiledataP = queueInit(destroyBFiledataP, compareNamesBP);
   sentFinalize = xmalloc ( nProcsCollNode * sizeof ( sentFinalize ));
   
   for ( ;; )
@@ -215,13 +224,14 @@ pioWriterStdIO(void)
                  buffersize, amount);
 	  
 	  
-	  if ( !(bfd = ( bFiledataP * ) queueIdx2val ( bibBFiledataP, 
-						       rtag->id )))
+          if (!(bfd = queueGet(bibBFiledataP, idxTest,
+                               (void *)(intptr_t)rtag->id)))
 	    {
-	      queueCheckP (  bibBFiledataP, filename );
-	      bfd = ( bFiledataP * ) initBFiledataP ( filename, buffersize, nProcsCollNode );
+	      queueCheckP(bibBFiledataP, filename);
+	      bfd = initBFiledataP(filename, buffersize, nProcsCollNode,
+                                   rtag->id);
 	      
-	      if (( id = queuePush ( bibBFiledataP, bfd, 1, rtag->id )) != rtag->id )
+	      if ((id = queuePush(bibBFiledataP, bfd)) < 0)
                 xabort("fileID=%d not unique", rtag->id);
 	    }
 	  else
@@ -238,7 +248,8 @@ pioWriterStdIO(void)
 
 	case IO_Send_buffer:
 
-	  if (!(bfd = (bFiledataP *)queueIdx2val(bibBFiledataP, rtag->id)))
+          if (!(bfd = queueGet(bibBFiledataP, idxTest,
+                               (void *)(intptr_t)rtag->id)))
             xabort("fileID=%d is not in queue", rtag->id );
 
 	  amount = messagesize;
@@ -259,7 +270,8 @@ pioWriterStdIO(void)
 	  xdebug ( "COMMAND %s,  FILE%d, SOURCE%d", 
                    command2charP [ rtag->command ],  rtag->id, source );
 
-	  if (!(bfd = (bFiledataP *)queueIdx2val(bibBFiledataP, rtag->id)))
+          if (!(bfd = queueGet(bibBFiledataP, idxTest,
+                               (void *)(intptr_t)rtag->id)))
             xabort("fileID=%d is not in queue", rtag->id);
 
           amount = messagesize;
@@ -288,7 +300,7 @@ pioWriterStdIO(void)
 	  if ( bfd->finished )
 	    {
 	      xdebug ( "all are finished with file %d, delete node", rtag->id );
-	      queueDelNode ( bibBFiledataP, rtag->id );
+	      queueDelNode(bibBFiledataP, idxTest, (void *)(intptr_t)rtag->id);
 	    }
           break;
         case IO_Finalize:

@@ -14,7 +14,7 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
-queue_t *queueInit ( valDestroyFunction vD, keyCompareFunction kC )
+queue_t *queueInit ( valDestroyFunction vD, eqPredicate kC )
 {
   queue_t *myq;
 
@@ -51,31 +51,15 @@ void queueDestroy ( queue_t *q )
   return;
 }
 
-int queuePush ( queue_t *q, void *v, int noCollector, ... )
+int
+queuePush(queue_t *q, void *v)
 {
   listElem_t *newListElem_T, *curr;
-  va_list ap;
-  int id = CDI_UNDEFID;
 
-  va_start(ap, noCollector);
-
-  if ( noCollector )
-    id = va_arg( ap, int );
-
-  va_end(ap);
-
-  // ensure unique key values
-
-  curr = q->head;
-
-  while ( curr )
-    {
-      if (( !noCollector &&  ( *( q->keyCompare )) ( v, curr->val )) ||
-          (  noCollector &&  ( id == curr->idx )))
-        return -1;
-
-      curr = curr->next;
-    }
+  for (curr = q->head; curr; curr = curr->next)
+    // ensure unique keys
+    if (q->keyCompare(v, curr->val))
+      return -1;
 
   if (( newListElem_T = ( listElem_t * ) malloc (sizeof ( listElem_t ))) == NULL )
     {
@@ -84,7 +68,6 @@ int queuePush ( queue_t *q, void *v, int noCollector, ... )
       return 1;
     }
 
-  newListElem_T->idx = noCollector ? id : q->count;
   newListElem_T->val = v;
   newListElem_T->next = NULL;
 
@@ -97,64 +80,39 @@ int queuePush ( queue_t *q, void *v, int noCollector, ... )
   q->tail = newListElem_T;
   q->count  ++;
 
-  return newListElem_T->idx;
+  return 0;
 }
 
-void *queueIdx2val ( queue_t *q, int id )
+int
+queueDelNode(queue_t *q, int (*predicate)(void *, void *),
+             void *data)
 {
-  listElem_t *curr;
+  listElem_t **p;
 
-  curr = q->head;
-
-  while ( curr )
-    {
-      if ( curr->idx == id ) break;
-      curr = curr->next;
-    }
-
-  return curr ? curr->val : NULL;
-}
-
-int queueDelNode ( queue_t *q, int id ) // error
-{
-  listElem_t *pred, *curr;
-
-  if ( !q->head ) return -1;
-
-  pred = q->head;
-  curr = pred->next;
-
-  if ( pred->idx == id )
-    {
-      int iret;
-      if ( pred == q->tail ) q->tail = NULL;
-      q->head = curr;
-      iret = ( *( q->valDestroy )) ( pred->val );
-
-      free ( pred );
-      return iret;
-    }
-
-  while ( curr )
-    {
-
-      if ( curr->idx == id ) break;
-      pred = curr;
-      curr = curr->next;
-    }
-
-  if ( curr )
-    {
-      int iret;
-      if ( curr == q->tail ) q->tail = pred;
-      pred->next = curr->next;
-      iret = ( *( q->valDestroy )) ( curr->val );
-      free ( curr );
-      return iret;
-    }
-
+  for (p = &q->head; *p; p = &(*p)->next)
+    if (predicate((*p)->val, data))
+      {
+        listElem_t *rem = *p;
+        if (rem == q->tail) q->tail = NULL;
+        int iret = q->valDestroy(rem->val);
+        *p = rem->next;
+        free(rem);
+        return iret;
+      }
   return -1;
 }
+
+void *
+queueGet(queue_t *q, int (*predicate)(void *, void *), void *data)
+{
+  listElem_t *p;
+  xassert(q && predicate);
+  for (p = q->head; p; p = p->next)
+    if (predicate(p->val, data))
+      return p->val;
+  return NULL;
+}
+
 
 #endif
 /*

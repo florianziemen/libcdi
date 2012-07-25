@@ -29,20 +29,19 @@ struct dBuffer
 
 typedef struct listElem 
 {
-  int idx;
   void * val;
   struct listElem * next;
 } listElem_t;
 
 typedef int ( * valDestroyFunction ) ( void * );
-typedef bool ( * keyCompareFunction ) ( void *, void * );
+typedef bool (*eqPredicate)(void *, void *);
 
-typedef struct 
+typedef struct
 {
   listElem_t * head;
   listElem_t * tail;
   valDestroyFunction valDestroy;
-  keyCompareFunction keyCompare;
+  eqPredicate keyCompare;
   int count;
 } queue_t;
 
@@ -66,11 +65,12 @@ void      dbuffer_cleanup ( struct dBuffer ** );
 size_t    dbuffer_free ( struct dBuffer * );
 
 /* pio_queue.c */
-queue_t * queueInit ( valDestroyFunction, keyCompareFunction );
+queue_t *queueInit(valDestroyFunction, eqPredicate);
 void      queueDestroy ( queue_t * );
-int       queuePush ( queue_t *, void *, int, ... );
-void *    queueIdx2val ( queue_t *, int );
-int       queueDelNode ( queue_t *, int );
+int queuePush(queue_t *, void *);
+int queueDelNode(queue_t *, int (*predicate)(void *, void *),
+                 void *data);
+void *queueGet(queue_t *q, int (*predicate)(void *, void *), void *data);
 
 /* pio_mpinonb.c */
 int       fowMPINONB ( const char * );
