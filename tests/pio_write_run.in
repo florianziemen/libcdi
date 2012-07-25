@@ -4,4 +4,6 @@ LOG="pio_write.log"
 exec 5>&1 6>&2 >"$LOG" 2>&1
 @MPI_LAUNCH@ -n 4 ./pio_write
 exec 2>&6 1>&5 5>&- 6>&-
+./cksum_read example_0.grb example_0.cksum
+./cksum_read example_1.grb example_1.cksum
 \rm "$LOG"
