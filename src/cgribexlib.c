@@ -108,7 +108,7 @@
 
 double intpow2(int x);
 
-int gribrec_len(int b1, int b2, int b3);
+static int gribrec_len(int b1, int b2, int b3);
 int correct_bdslen(int bdslen, long recsize, long gribpos);
 
 /* CDI converter routines */
@@ -5715,7 +5715,7 @@ int gribWrite(int fileID, unsigned char *buffer, size_t buffersize)
 }
 
 
-int gribrec_len(int b1, int b2, int b3)
+static int gribrec_len(int b1, int b2, int b3)
 {
   int gribsize;
 
