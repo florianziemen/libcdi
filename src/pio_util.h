@@ -38,7 +38,7 @@
 
 #define ddebug             1
 
-static char * debugString = "#####";
+static const char * debugString = "#####";
 
 void pcdiAssert   ( bool, const char *, const char *, int );
 #define xassert(arg) pcdiAssert ( arg, __FILE__, __func__, __LINE__ );
