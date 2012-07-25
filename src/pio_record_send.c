@@ -107,7 +107,7 @@ sendP(remoteFileBuf *afd, int id)
   double startTime;
 
   amount = dbuffer_data_size ( afd->db );
-  tag = setTag(id, afd->command);
+  tag = encodeFileOpTag(id, afd->command);
 
   xdebug("send buffer for %s, size: %zu bytes, command=%s, in",
          afd->name, amount, command2charP[afd->command]);
@@ -303,7 +303,7 @@ pioSendFinalize(void)
   int buffer = 0, tag, specialRank = commInqSpecialRankNode ();
   MPI_Comm commNode = commInqCommNode ();
 
-  tag = setTag(0, IO_Finalize);
+  tag = encodeFileOpTag(0, IO_Finalize);
 
   xmpi(MPI_Send(&buffer, 1, MPI_INT, specialRank, tag, commNode));
   xdebug("%s", "SENT MESSAGE WITH TAG \"IO_FINALIZE\" TO SPECIAL PROCESS");

@@ -348,7 +348,7 @@ void writePF ( aFiledataPF *afd, int id )
   amount = dbuffer_data_size ( afd->db );
   amountL = ( long ) amount;
 
-  tag = setTag ( id, afd->command );
+  tag = encodeFileOpTag(id, afd->command);
   
   xmpi ( MPI_Sendrecv ( &amountL, 1, MPI_LONG, specialRank, tag,
                         &offset, 1, MPI_LONG, specialRank, tag,
@@ -534,8 +534,8 @@ void  finalizePOSIXFPGUARDSENDRECV ( void )
   int buffer = 0, tag, specialRank = commInqSpecialRankNode ();
   MPI_Comm commNode = commInqCommNode ();
 
-  tag = setTag ( 0, IO_Finalize );
-  
+  tag = encodeFileOpTag(0, IO_Finalize);
+
   xmpi ( MPI_Send ( &buffer, 1, MPI_INT, specialRank, tag, commNode ));
 
   if (!queueIsEmpty(bibAFiledataPF))

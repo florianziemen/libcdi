@@ -39,7 +39,7 @@ struct fileOpTag
 };
 
 /* pio.c */
-int setTag(int, int);
+int encodeFileOpTag(int fileID, int command);
 struct fileOpTag decodeFileOpTag(int);
 
 /* pio_dbuffer.c */

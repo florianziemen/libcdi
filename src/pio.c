@@ -21,7 +21,9 @@ long initial_buffersize = 16 * 1024 * 1024;
 /* 16 * 1024; */
 /* 4 * 1024; */
 
-int tagKey = 100;
+enum {
+  tagKey = 100,
+};
 
 double accumProbe   = 0.0;
 double accumRecv    = 0.0;
@@ -34,7 +36,7 @@ char *token = "%";
 
 /***************************************************************/
 
-int setTag ( int ID, int sc )
+int encodeFileOpTag(int ID, int sc)
 {
   return ID * tagKey + sc;
 }
