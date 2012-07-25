@@ -31,7 +31,7 @@ static struct
 } *rxWin = NULL;
 
 static MPI_Win getWin = MPI_WIN_NULL;
-MPI_Group        groupModel    = MPI_GROUP_NULL;
+static MPI_Group groupModel = MPI_GROUP_NULL;
 
 
 /************************************************************************/
