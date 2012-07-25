@@ -37,7 +37,6 @@ extern double accumWrite;
 
 typedef struct
 {
-  size_t size;
   struct dBuffer *fb;
   struct aiocb *ctrlBlks;
   off_t offset;
@@ -70,19 +69,18 @@ initBFiledataPA(char *filename, size_t bs, int nc)
 
   bfd = xmalloc( sizeof (*bfd) + strlen(filename) + 1);
   strcpy(bfd->name, filename);
-  bfd->size = bs;
 
   if (( bfd->handle = open ( bfd->name, O_CREAT | O_WRONLY, 0666 )) == -1 )
     xabort("Failed to open %s", bfd->name);
 
-  dbuffer_init ( &( bfd->fb ), ( size_t )( nPrefStreams * bfd->size ));
+  dbuffer_init(&(bfd->fb), (size_t)(nPrefStreams * bs));
 
   bfd->ctrlBlks = xcalloc(nPrefStreams, sizeof (bfd->ctrlBlks[0]));
 
   for ( i = 0; i < nPrefStreams; i++ )
     {
       bfd->ctrlBlks[i].aio_fildes     = bfd->handle;
-      bfd->ctrlBlks[i].aio_buf        = bfd->fb->buffer + ( i * bfd->size );
+      bfd->ctrlBlks[i].aio_buf = bfd->fb->buffer + i * bs;
       bfd->ctrlBlks[i].aio_reqprio    = 0;
       bfd->ctrlBlks[i].aio_sigevent.sigev_notify = SIGEV_NONE;   
     }
