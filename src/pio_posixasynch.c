@@ -31,7 +31,6 @@ extern char * command2charP[6];
 
 extern long initial_buffersize;
 extern char *token;
-extern int maxErrorString; 
 
 extern double accumProbe;
 extern double accumRecv;
@@ -116,7 +115,6 @@ static bFiledataPA *initBFiledataPA ( char *filename,
 {
   bFiledataPA *bfd;
   int i;
-  char errorString[maxErrorString];
 
   xdebug ( "filename=%s, buffersize=%zu, ncollectors=%d, nPrefetchStreams=%d",
            filename, bs, nc, nPrefStreams );
@@ -128,10 +126,7 @@ static bFiledataPA *initBFiledataPA ( char *filename,
   bfd->size = bs;
 
   if (( bfd->handle = open ( bfd->name, O_CREAT | O_WRONLY, 0666 )) == -1 )
-    {
-      sprintf ( errorString, "Failed to open %s", bfd->name );
-      xabort ( errorString );
-    }
+    xabort("Failed to open %s", bfd->name);
 
   dbuffer_init ( &( bfd->fb ), ( size_t )( nPrefStreams * bfd->size ));
 
@@ -347,25 +342,16 @@ void queueCheckPA ( queue_t *q, char *name )
 {
   listElem_t *curr;
   bFiledataPA *bfd;
-  size_t len;
-  char errorString[maxErrorString];
- 
-  len = strlen ( name );
-  curr = q->head;   
-      
+
+  curr = q->head;
   while ( curr )
-    { 
+    {
       bfd = ( bFiledataPA * ) curr->val;
-      if ( len == strlen ( bfd->name ) &&
-	   memcmp ( name, bfd->name, len ) == 0 )
-	{
-	  sprintf ( errorString, "Filename %s is already enqueued\n", name );
-	  xabort ( errorString );
-	  return;
-	}
-      
+      if (strcmp(name, bfd->name) == 0)
+        xabort("Filename %s is already enqueued\n", name );
+
       curr = curr->next;
-    }  
+    }
 }
 
 /***************************************************************/
@@ -613,7 +599,6 @@ size_t fwPOSIXASYNCH( int id, int tsID, const void *buffer, size_t len )
   int filled = 0;
   aFiledataPA *afd;
   listElem_t *curr;
-  char errorString[maxErrorString];
 
   afd = ( aFiledataPA * ) queueIdx2val ( bibAFiledataPA, id );
   flush = ( tsID != afd->tsID ) ? 1 : 0;
@@ -697,7 +682,6 @@ int fowPOSIXASYNCH ( const char *filename )
   static long buffersize = 0; 
   int root = 0, iret, id, messageLength = 32;
   char message[messageLength];
-  char errorString[maxErrorString];
 
   /* broadcast buffersize to collectors */
              
@@ -719,11 +703,8 @@ int fowPOSIXASYNCH ( const char *filename )
   /* init and enqueue aFiledataPA */
 
   afd = initAFiledataPA ( filename, buffersize );
-  if (( id = queuePush ( bibAFiledataPA, afd, 0 )) < 0 )
-    {  
-      sprintf ( errorString, "filename %s is not unique", afd->name );
-      xabort ( errorString );  
-    }
+  if ((id = queuePush ( bibAFiledataPA, afd, 0)) < 0)
+    xabort("filename %s is not unique", afd->name);
 
   xdebug ( "filename=%s, init and enqueued aFiledataPA, return id = %d", 
            filename, id );

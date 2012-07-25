@@ -19,7 +19,6 @@ extern char * command2charP[6];
 
 extern long initial_buffersize;
 extern char *token;
-extern int maxErrorString; 
 
 extern double accumProbe;
 extern double accumRecv;
@@ -101,7 +100,6 @@ static bFiledataP * initBFiledataP ( char *filename,
 {
   bFiledataP * bfp;
   int i;
-  char errorString[maxErrorString];
 
   xdebug ( "filename=%s, buffersize=%lu, ncollectors=%d", filename, bs, nc );
 
@@ -112,10 +110,7 @@ static bFiledataP * initBFiledataP ( char *filename,
   bfp->size = bs;
 
   if (( bfp->fp = fopen ( filename, "w" )) == NULL ) 
-    {
-      sprintf ( errorString, "Failed to open %s", bfp->name );
-      xabort ( errorString );
-    }
+    xabort("Failed to open %s", bfp->name);
 
   dbuffer_init ( & ( bfp->fb ), ( size_t )( bfp->size ));
 
@@ -222,16 +217,12 @@ static void
 writeP(bFiledataP *bfd, long amount)
 {
   long written;
-  char errorString[maxErrorString];
 
   xdebug ( "filename=%s, amount=%ld, in", bfd->name, amount );
-	  
-  if (( written = fwrite ( bfd->fb->buffer, sizeof ( char ), amount, 
+
+  if (( written = fwrite ( bfd->fb->buffer, sizeof ( char ), amount,
 			   bfd->fp )) != amount )
-    {
-      sprintf ( errorString, "did not succeed writing buffer in %s", bfd->name );
-      xabort ( errorString );
-    }
+    xabort("did not succeed writing buffer in %s", bfd->name);
 
   xdebug ( "filename=%s, written=%ld, amount=%ld, return",
            bfd->name, written, amount );
@@ -245,8 +236,7 @@ void queueCheckP ( queue_t *q, char *name )
   listElem_t *curr;
   bFiledataP *bfd;
   size_t len;
-  char errorString[maxErrorString];
- 
+
   len = strlen ( name );
   curr = q->head;   
       
@@ -255,12 +245,8 @@ void queueCheckP ( queue_t *q, char *name )
       bfd = ( bFiledataP * ) curr->val;
       if ( len == strlen ( bfd->name ) &&
 	   memcmp ( name, bfd->name, len ) == 0 )
-	{
-	  sprintf ( errorString, "Filename %s is already enqueued\n", name );
-	  xabort ( errorString );
-	  return;
-	}
-      
+        xabort("Filename %s is already enqueued\n", name);
+
       curr = curr->next;
     }  
 }
@@ -604,7 +590,6 @@ int fowPOSIXNONB ( const char *filename )
   char message[messageLength];
   size_t l;
   char *temp;
-  char errorString[maxErrorString];
 
   /* broadcast buffersize to collectors */
   
