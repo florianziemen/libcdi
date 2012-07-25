@@ -496,7 +496,7 @@ int extScanTimestep2(int streamID)
   int header[4];
   int status;
   int fileID;
-  int rxysize = 0;
+  /* int rxysize = 0; */
   int param = 0;
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
   int tsID;
@@ -563,7 +563,7 @@ int extScanTimestep2(int streamID)
       vtime  = 0;
       rcode  = header[1];
       rlevel = header[2];
-      rxysize = header[3];
+      /* rxysize = header[3]; */
 
       param = cdiEncodeParam(rcode, 255, 255);
 
@@ -685,7 +685,7 @@ int extScanTimestep(int streamID)
   int status;
   int fileID;
   int tsID;
-  int rxysize = 0;
+  /* int rxysize = 0; */
   int param = 0;
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
   long recsize = 0;
@@ -748,7 +748,7 @@ int extScanTimestep(int streamID)
 	  vtime  = 0;
 	  rcode  = header[1];
 	  rlevel = header[2];
-	  rxysize = header[3];
+	  /* rxysize = header[3]; */
 
 	  param = cdiEncodeParam(rcode, 255, 255);
 
