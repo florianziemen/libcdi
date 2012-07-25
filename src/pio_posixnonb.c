@@ -638,11 +638,15 @@ int fowPOSIXNONB ( const char *filename )
   /* put filename, id and buffersize on buffer */ 
 
   iret = dbuffer_push ( afd->db, ( unsigned char *) filename, strlen ( filename ));
+  xassert(iret == 0);
   iret = dbuffer_push ( afd->db,  ( unsigned char *) token, 1);  
-  sprintf ( message,"%lX", buffersize); 
+  xassert(iret == 0);
+  sprintf ( message,"%lX", buffersize);
   iret = dbuffer_push ( afd->db,  ( unsigned char *) message, strlen ( message ));
-  iret = dbuffer_push ( afd->db,  ( unsigned char *) token, 1); 
-  
+  xassert(iret == 0);
+  iret = dbuffer_push ( afd->db,  ( unsigned char *) token, 1);
+  xassert(iret == 0);
+
   if ( ddebug )
     {
       l = strlen ( filename ) + strlen ( message ) + 2; 
