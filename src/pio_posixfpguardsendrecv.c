@@ -488,7 +488,7 @@ elemCheck(void *q, void *nm)
 int fowPOSIXFPGUARDSENDRECV ( const char *filename )
 {
   int root = 0, id; 
-  static aFiledataPF *afd;
+  aFiledataPF *afd;
   static bool firstOpen = true;
   static long buffersize = 0;
 
