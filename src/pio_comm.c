@@ -135,7 +135,7 @@ void commDestroy ( void )
   if ( info->commPio != MPI_COMM_NULL )
     {
       xmpi ( MPI_Comm_free ( &info->commPio )); 
-      info->commPio != MPI_COMM_NULL;    
+      info->commPio = MPI_COMM_NULL;
     }
   
   free ( info );
