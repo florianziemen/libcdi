@@ -196,7 +196,6 @@ int srvCopyRecord(int streamID2, int streamID1)
 
 int srvDefRecord(int streamID)
 {
-  int fileID;
   int gridID;
   int header[8];
   int status = 0;
@@ -210,7 +209,6 @@ int srvDefRecord(int streamID)
 
   stream_check_ptr(__func__, streamptr);
 
-  fileID = streamInqFileID(streamID);
   gridID = streamptr->record->gridID;
   srvp   = streamptr->record->srvp;
 
@@ -689,7 +687,7 @@ int srvScanTimestep(int streamID)
   int status;
   int fileID;
   int tsID;
-  int rxsize = 0, rysize = 0;
+  /* int rxsize = 0, rysize = 0; */
   int param = 0;
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
   long recsize = 0;
@@ -752,8 +750,8 @@ int srvScanTimestep(int streamID)
 	  rlevel = header[1];
 	  vdate  = header[2];
 	  vtime  = header[3];
-	  rxsize = header[4];
-	  rysize = header[5];
+	  /* rxsize = header[4];
+	   * rysize = header[5]; */
 
 	  param = cdiEncodeParam(rcode, 255, 255);
 
@@ -859,7 +857,6 @@ void srvReadVarDP(int streamID, int varID, double *data, int *nmiss)
   int tsid;
   int recID;
   int i;
-  int status;
   double missval;
   srvrec_t *srvp;
   stream_t *streamptr;
@@ -885,7 +882,8 @@ void srvReadVarDP(int streamID, int varID, double *data, int *nmiss)
       recID = streamptr->vars[varID].level[levID];
       recpos = streamptr->tsteps[tsid].records[recID].position;
       fileSetPos(fileID, recpos, SEEK_SET);
-      status = srvRead(fileID, srvp);
+      if (srvRead(fileID, srvp) < 0)
+        abort();
       srvInqHeader(srvp, header);
       srvInqDataDP(srvp, &data[levID*gridsize]);
     }
@@ -910,7 +908,6 @@ void srvReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   int tsid;
   int recID;
   int i;
-  int status;
   double missval;
   srvrec_t *srvp;
   stream_t *streamptr;
@@ -935,7 +932,8 @@ void srvReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   recID = streamptr->vars[varID].level[levID];
   recpos = streamptr->tsteps[tsid].records[recID].position;
   fileSetPos(fileID, recpos, SEEK_SET);
-  status = srvRead(fileID, srvp);
+  if (srvRead(fileID, srvp) < 0)
+    abort();
   srvInqHeader(srvp, header);
   srvInqDataDP(srvp, data);
 
