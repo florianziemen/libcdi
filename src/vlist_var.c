@@ -2101,12 +2101,11 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
     vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev][0]);
   }
   if ( tempbuf[21] != 0 )
-    {    
-      var_t *var = vlist_to_pointer(vlistID)->vars + newvar;
+    {
       int decoSize = tempbuf[21], i;
       deco_t deco[decoSize];
       int decobuf[decoSize][3];
-      
+
       xmpi ( MPI_Unpack(buf, size, position,
                         decobuf, decoSize * 3, MPI_INT, comm ));
       for (i = 0; i < decoSize; ++i)
