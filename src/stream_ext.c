@@ -882,6 +882,7 @@ void extReadVarDP(int streamID, int varID, double *data, int *nmiss)
       recID = streamptr->vars[varID].level[levID];
       recpos = streamptr->tsteps[tsid].records[recID].position;
       fileSetPos(fileID, recpos, SEEK_SET);
+      /* FIXME: result of operation is ignored */
       status = extRead(fileID, extp);
       extInqHeader(extp, header);
       extInqDataDP(extp, &data[levID*gridsize]);
