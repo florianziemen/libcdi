@@ -943,10 +943,11 @@ void extReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   recID = streamptr->vars[varID].level[levID];
   recpos = streamptr->tsteps[tsid].records[recID].position;
   fileSetPos(fileID, recpos, SEEK_SET);
+  /* FIXME: result of operation is ignored */
   status = extRead(fileID, extp);
   extInqHeader(extp, header);
   extInqDataDP(extp, data);
- 
+
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
   *nmiss = 0;
