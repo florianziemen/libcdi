@@ -542,11 +542,11 @@ void reshUnlock ()
 int reshListCompare ( int nsp0, int nsp1 )
 {
   const int equal  = 0;
+#ifdef USE_MPI
   const int differ = -1;
   int i, valCompare;
   listElem_t * listElem0, * listElem1;
 
-#ifdef USE_MPI
 
   LIST_INIT();
 
