@@ -25,7 +25,7 @@ typedef int MPI_Comm;
 
 struct model_config
 {
-  int nlon, nlat, nts;
+  int nlon, nlat, nts, max_nlev;
   int filetype, datatype;
   bool compute_checksum;
   const char *suffix;
@@ -35,7 +35,8 @@ struct model_config default_setup
   = { .nlon = 12, .nts = 3, .nlat = 6,
       .filetype = FILETYPE_GRB, .datatype = DATATYPE_PACK24,
       .compute_checksum = 1,
-      .suffix = "grb"
+      .suffix = "grb",
+      .max_nlev = 5,
 };
 
 static void
@@ -52,7 +53,6 @@ sign_flat(double v)
 enum {
   ntfiles     = 2,
   nVars       = 5,
-  maxlev      = 5
 };
 
 static time_t
@@ -75,8 +75,7 @@ modelRegionCompute(double region[], size_t offset, size_t len,
       int j = (global_pos % (nlon * nlat))/ nlon;
       int i = global_pos % nlon;
       region[local_pos]
-        = sign_flat(round(
-                          (cos(2.0 * M_PI * (lons[(i + tsID)%nlon] - lons[0])
+        = sign_flat(round((cos(2.0 * M_PI * (lons[(i + tsID)%nlon] - lons[0])
                                / (lons[nlon-1] - lons[0]))
                            * sin(2.0 * M_PI * (lats[j] - lats[0])
                                  / (lats[nlat-1] - lats[0]))
@@ -85,10 +84,11 @@ modelRegionCompute(double region[], size_t offset, size_t len,
 }
 
 
-void modelRun (struct model_config setup, MPI_Comm comm)
+static void
+modelRun(struct model_config setup, MPI_Comm comm)
 {
 
-  static int nlev[nVars]    = {1,1,5,5,2};
+  static int nlev_scale[nVars]    = {0,0,1,1,1};
   static int varCodes[nVars] = {129, 130, 131, 132, 133};
   static char * name        = "example";
 
@@ -96,7 +96,6 @@ void modelRun (struct model_config setup, MPI_Comm comm)
   int vlistID, varIDs[nVars], streamID, tsID, tfID = 0;
   int i, varID, nmiss = 0;
   double *lons, *lats;
-  double levs[maxlev] = {101300, 92500, 85000, 50000, 20000};
   double *var = NULL, *varslice;
   double mscale, mrscale;
   time_t current_time;
@@ -106,6 +105,8 @@ void modelRun (struct model_config setup, MPI_Comm comm)
   int nlon = setup.nlon, nlat = setup.nlat;
   uint32_t checksum_state[nVars];
   size_t varSize[nVars], varslice_size;
+  int *nlev;
+  double *levs;
 #if USE_MPI
   int *chunks = NULL, *displs = NULL;
 #endif
@@ -117,7 +118,8 @@ void modelRun (struct model_config setup, MPI_Comm comm)
     {
       chunks = xmalloc(comm_size * sizeof (chunks[0]));
       displs = xmalloc(comm_size * sizeof (displs[0]));
-      var = xmalloc(nlon * nlat * maxlev * sizeof(var[0]));
+      var = xmalloc((size_t)nlon * (size_t)nlat
+                    * (size_t)setup.max_nlev * sizeof(var[0]));
     }
 #endif
 
@@ -135,8 +137,15 @@ void modelRun (struct model_config setup, MPI_Comm comm)
   gridDefXvals ( gridID, lons );
   gridDefYvals ( gridID, lats );
 
+  levs = xmalloc(setup.max_nlev * sizeof (levs[0]));
+  for (i = 0; i < setup.max_nlev; ++i)
+    levs[i] = 101300.0
+      - 3940.3 * (exp(1.3579 * (double)(i)/(setup.max_nlev - 1)) - 1.0);
+
+  nlev = xmalloc(nVars * sizeof (nlev[0]));
   for ( i = 0; i < nVars; i++ )
     {
+      nlev[i] = nlev_scale[i] * (setup.max_nlev - 1) + 1;
       zaxisID[i] = zaxisCreate ( ZAXIS_PRESSURE, nlev[i] );
       zaxisDefLevels ( zaxisID[i], levs );
     }
@@ -383,7 +392,7 @@ int main (int argc, char *argv[])
 
   {
     int opt;
-    while ((opt = getopt(argc, argv, "f:m:n:t:c"
+    while ((opt = getopt(argc, argv, "f:m:n:z:t:c"
 #ifdef USE_MPI
                          "p:w:"
 #endif
@@ -432,6 +441,15 @@ int main (int argc, char *argv[])
       case 'n':
         setup.nlat = parse_intarg("error parsing number of latitudes");
         break;
+      case 'z':
+        setup.max_nlev = parse_intarg("error parsing number of levels");
+        if (setup.max_nlev < 1)
+          {
+            fputs("number of levels must be greater than zero!\n",
+                  stderr);
+            exit(EXIT_FAILURE);
+          }
+        break;
       case 't':
         setup.nts = parse_intarg("error parsing number of timesteps");
         break;
@@ -440,9 +458,9 @@ int main (int argc, char *argv[])
         break;
       default: /* '?' */
         fprintf(stderr, "Usage: %s "
-                "[-m nlon] [-n nlat] [-o nlev] [-t nts]"
+                "[-m nlon] [-n nlat] [-z nlev] [-t nts]"
 #ifdef USE_MPI
-                " [-p PIO_MODE] [-w NIOSERVERS]"
+                " [-p PIO_MODE] [-w NIOSERVERS] [-c]"
 #endif
                 "\n", argv[0]);
         exit(EXIT_FAILURE);
