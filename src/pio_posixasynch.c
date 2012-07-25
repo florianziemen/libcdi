@@ -44,7 +44,6 @@ typedef struct
   char *name;
   size_t size;
   struct dBuffer *fb;
-  int handle;
   struct aiocb *ctrlBlks;
   off_t offset;
   int currOpIndex;
@@ -52,13 +51,13 @@ typedef struct
   int prefIndex;
   bool finished;
   bool *nfinished;
-  int idx;
+  int handle, fileID;
 } bFiledataPA;
 
 static int
-idxTest(void *a, void *idx)
+fileIDTest(void *a, void *fileID)
 {
-  return ((bFiledataPA *)a)->idx == (int)(intptr_t)idx;
+  return ((bFiledataPA *)a)->fileID == (int)(intptr_t)fileID;
 }
 
 int nPrefStreams = 4;
@@ -313,7 +312,7 @@ void pioWriterAIO(void)
                    command2charP [ rtag->command ], filename, 
                    buffersize, amount );
 
-          if (!(bfd = queueGet(bibBFiledataPA, idxTest,
+          if (!(bfd = queueGet(bibBFiledataPA, fileIDTest,
                                (void *)(intptr_t)rtag->id)))
 	    {
               queueForeach(bibBFiledataPA, elemCheck, filename);
@@ -339,7 +338,7 @@ void pioWriterAIO(void)
 
 	case IO_Send_buffer:
 
-          if (!(bfd = queueGet(bibBFiledataPA, idxTest,
+          if (!(bfd = queueGet(bibBFiledataPA, fileIDTest,
                                (void *)(intptr_t)rtag->id)))
             xabort("fileID=%d is not in queue", rtag->id);
 
@@ -360,7 +359,7 @@ void pioWriterAIO(void)
 
 	case IO_Close_file:
 
-          if (!(bfd = queueGet(bibBFiledataPA, idxTest,
+          if (!(bfd = queueGet(bibBFiledataPA, fileIDTest,
                                (void *)(intptr_t)rtag->id)))
             xabort("fileID=%d is not in queue", rtag->id );
 
@@ -391,7 +390,7 @@ void pioWriterAIO(void)
 	  if ( bfd->finished )
 	    {
               xdebug ( "all are finished with file %d, delete node", rtag->id );
-              queueDelNode(bibBFiledataPA, idxTest,
+              queueDelNode(bibBFiledataPA, fileIDTest,
                            (void *)(intptr_t)rtag->id);
 	    }
           break;
