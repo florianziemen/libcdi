@@ -21,7 +21,6 @@ extern char *token;
 
 typedef struct
 {
-  size_t size;
   struct dBuffer *fb;
   FILE *fp;
   int fileID;
@@ -46,13 +45,12 @@ initBFiledataP(char *filename, size_t bs, int nc, int fileID)
 
   bfp = xmalloc(sizeof (*bfp) + strlen(filename) + 1);
   strcpy(bfp->name, filename);
-  bfp->size = bs;
 
   if (( bfp->fp = fopen ( filename, "w" )) == NULL ) 
     xabort("Failed to open %s", bfp->name);
   int fd = fileno(bfp->fp);
   ftruncate(fd, (off_t)0);
-  dbuffer_init ( & ( bfp->fb ), ( size_t )( bfp->size ));
+  dbuffer_init(&bfp->fb, bs);
 
   bfp->activeCollectors = nc;
 
