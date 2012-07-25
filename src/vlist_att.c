@@ -538,7 +538,6 @@ vlistAttPack(vlist_t *vlistptr, int varID, int attnum,
   cdi_att_t *attp;
   int tempbuf[vlist_att_nints];
   MPI_Datatype attVMPIDt;
-  char text[1024];
 
   xassert(attsp = get_attsp(vlistptr, varID));
   xassert(attnum >= 0 && attnum < (int)attsp->nelems);
@@ -561,9 +560,8 @@ vlistAttPack(vlist_t *vlistptr, int varID, int attnum,
     attVMPIDt = MPI_CHAR;
     break;
   default:
-    sprintf( text, "Unknown datatype encountered in attribute %s: %d\n",
-             attp->name, attp->indtype);
-    xabort ( text );
+    xabort("Unknown datatype encountered in attribute %s: %d\n",
+           attp->name, attp->indtype);
   }
   xmpi(MPI_Pack(attp->xvalue, (int)attp->nelems, attVMPIDt,
                 buf, size, position, comm));
@@ -592,8 +590,7 @@ vlistAttUnpack(int vlistID, int varID,
   MPI_Datatype attVMPIDt;
   int elemSize;
   void *attData;
-  char text[1024];
-  
+
   xmpi(MPI_Unpack(buf, size, position,
                   tempbuf, vlist_att_nints, MPI_INT, comm));
   attName = xmalloc(tempbuf[0] + 1);
@@ -614,9 +611,8 @@ vlistAttUnpack(int vlistID, int varID,
     elemSize = 1;
     break;
   default:
-    sprintf ( text, "Unknown datatype encountered in attribute %s: %d\n",
-            attName, tempbuf[2]);
-    xabort ( text );
+    xabort("Unknown datatype encountered in attribute %s: %d\n",
+           attName, tempbuf[2]);
   }
   attData = xmalloc(elemSize * tempbuf[3]);
   xmpi(MPI_Unpack(buf, size, position, attData, tempbuf[3], attVMPIDt, comm));
