@@ -561,12 +561,10 @@ size_t fwPOSIXNONB ( int id, int tsID, const void *buffer, size_t len )
 	  error = dbuffer_push ( afd->db, ( unsigned char * )buffer, len );
 	}
     }
-  
+
   if ( error == 1 )
-    {
-      sprintf ( errorString,"did not succeed filling output buffer, id=%d", id );
-      xabort ( errorString );
-    }
+    xabort("did not succeed filling output buffer, id=%d", id);
+
 
   return len;
 }
