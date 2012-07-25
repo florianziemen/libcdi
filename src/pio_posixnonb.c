@@ -25,8 +25,7 @@ typedef struct
   struct dBuffer *fb;
   FILE *fp;
   int fileID;
-  bool finished;
-  bool *nfinished;
+  int activeCollectors;
   char name[];
 } bFiledataP;
 
@@ -56,11 +55,7 @@ initBFiledataP(char *filename, size_t bs, int nc, int fileID)
   ftruncate(fd, (off_t)0);
   dbuffer_init ( & ( bfp->fb ), ( size_t )( bfp->size ));
 
-  bfp->finished = false;
-  bfp->nfinished = xmalloc ( nc * sizeof ( bfp->nfinished[0] ));
-
-  for ( i = 0; i < nc; i++ )
-    bfp->nfinished[i] = false;
+  bfp->activeCollectors = nc;
 
   bfp->fileID = fileID;
 
@@ -87,8 +82,7 @@ destroyBFiledataP(void *v)
 
   dbuffer_cleanup ( &( bfp->fb ));
 
-  free ( bfp->nfinished );
-  free ( bfp );
+  free(bfp);
 
   xdebug("%s", "cleaned up, return");
 
@@ -255,19 +249,7 @@ pioWriterStdIO(void)
 
 	  writeP ( bfd, amount );
 
-	  bfd->nfinished[source] = true;
-	  bfd->finished          = true;
-	  
-	  for ( i = 0; i < nProcsCollNode; i++ )
-	    {
-	      if ( bfd->nfinished[i] == false )
-		{
-		  bfd->finished = false;
-		  break;
-		}
-	    }
-
-	  if ( bfd->finished )
+	  if ( ! --(bfd->activeCollectors))
 	    {
 	      xdebug("all are finished with file %d, delete node", rtag.id);
 	      queueDelNode(bibBFiledataP, fileIDTest,
