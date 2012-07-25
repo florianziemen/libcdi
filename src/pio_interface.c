@@ -22,7 +22,7 @@
 extern resOps streamOps;
 
 
-struct rdmaWin
+static struct rdmaWin
 {
   size_t size;
   unsigned char *buffer, *head;
