@@ -223,6 +223,10 @@ pioSendClose(int id)
   afd->command = IO_Close_file;
 
   sendP(afd, id);
+  /* wait for other collectors to also close the file
+   * this prevents one process from re-using the file ID before
+   * another has sent the close */
+  xmpi(MPI_Barrier(commInqCommColl()));
 
   /* dequeue file element */
   iret = queueDelNode(bibRemoteFileBuf, fileIDTest, (void *)(intptr_t)id);
