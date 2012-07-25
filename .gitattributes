@@ -309,6 +309,8 @@ tests/pio_cksum_mpinonb.in -text
 tests/pio_cksum_writer.in -text
 tests/pio_write.c -text
 tests/pio_write_run.in -text
+tests/stream_cksum.c -text
+tests/stream_cksum.h -text
 tests/test_cksum_extra.in -text
 tests/test_cksum_grib.in -text
 tests/test_cksum_ieg.in -text
