@@ -635,6 +635,7 @@ CDI_F90_INTERFACE_FCFLAGS
 FC_MOD_FLAG
 CREATE_ISOC_FALSE
 CREATE_ISOC_TRUE
+USE_MPI
 USE_MPI_FALSE
 USE_MPI_TRUE
 MPI_LAUNCH
@@ -26279,6 +26280,7 @@ else
   USE_MPI_TRUE='#'
   USE_MPI_FALSE=
 fi
+
 
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)

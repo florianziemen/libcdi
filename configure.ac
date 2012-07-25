@@ -123,6 +123,7 @@ AS_IF([test x"$USE_MPI" = xyes],
   [MPI_LAUNCH="`pwd`/util/serialrun"
    AC_SUBST([MPI_LAUNCH])])
 AM_CONDITIONAL([USE_MPI],[test x"$USE_MPI" = xyes])
+AC_SUBST([USE_MPI])
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
 AC_ARG_ENABLE(iso-c-interface,
