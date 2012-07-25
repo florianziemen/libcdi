@@ -137,27 +137,14 @@ writeP(bFiledataP *bfd, long amount)
 
 // TODO: unify in IOModi, encapsulate in pio_queue.c
 static void
-queueCheckP(queue_t *q, char *name)
+elemCheck(void *q, void *nm)
 {
-  listElem_t *curr;
-  bFiledataP *bfd;
-  size_t len;
+  bFiledataP *bfd = q;
+  const char *name = nm;
 
-  len = strlen ( name );
-  curr = q->head;   
-      
-  while ( curr )
-    { 
-      bfd = ( bFiledataP * ) curr->val;
-      if ( len == strlen ( bfd->name ) &&
-	   memcmp ( name, bfd->name, len ) == 0 )
-        xabort("Filename %s is already enqueued\n", name);
-
-      curr = curr->next;
-    }  
+  if (!strcmp(name, bfd->name))
+    xabort("Filename %s is already enqueued\n", name);
 }
-
-/***************************************************************/
 
 void
 pioWriterStdIO(void)
@@ -227,7 +214,7 @@ pioWriterStdIO(void)
           if (!(bfd = queueGet(bibBFiledataP, idxTest,
                                (void *)(intptr_t)rtag->id)))
 	    {
-	      queueCheckP(bibBFiledataP, filename);
+	      queueForeach(bibBFiledataP, elemCheck, filename);
 	      bfd = initBFiledataP(filename, buffersize, nProcsCollNode,
                                    rtag->id);
 	      
@@ -321,10 +308,8 @@ pioWriterStdIO(void)
             
             if ( doFinalize )
               {
-                if ( bibBFiledataP->head != NULL )
-                  {
-                    xabort ( "Queue bibBfiledataP is not empty." );
-                  }
+                if (!queueIsEmpty(bibBFiledataP))
+                  xabort("Queue bibBfiledataP is not empty.");
                 else
                   {
                     xdebug("%s", "all files are finished, destroy queue,"

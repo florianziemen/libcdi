@@ -126,7 +126,7 @@ char * outTextComm ( MPI_Comm * );
 
 void pcdiAbort (const char *, const char *, int, const char *, ... )
   __attribute__((noreturn));
-#define xabort(...) pcdiAbort (__FILE__, __func__, __LINE__, __VA_ARGS__ );
+#define xabort(...) pcdiAbort(__FILE__, __func__, __LINE__, __VA_ARGS__ )
 
 void * pcdiXmalloc ( size_t, const char *, const char *, int );
 #define xmalloc(size) pcdiXmalloc ( size, __FILE__, __func__,  __LINE__ )

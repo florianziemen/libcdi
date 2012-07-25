@@ -150,6 +150,15 @@ defTimestep(remoteFileBuf *afd, int tsID)
   afd->tsID = tsID;
 }
 
+static void
+flushOp(void *b, void *tsID)
+{
+  remoteFileBuf *fb = b;
+  sendP(fb, fb->idx);
+  defTimestep(fb, (int)(intptr_t)tsID);
+}
+
+
 size_t
 pioSendWrite(int id, int tsID, const void *buffer, size_t len)
 {
@@ -157,7 +166,6 @@ pioSendWrite(int id, int tsID, const void *buffer, size_t len)
   int flush = 0;
   int filled;
   remoteFileBuf *afd;
-  listElem_t *curr;
 
   afd = queueGet(bibRemoteFileBuf, idxTest, (void *)(intptr_t)id);
 
@@ -167,14 +175,7 @@ pioSendWrite(int id, int tsID, const void *buffer, size_t len)
     {
       xdebug ( "tsID = %d, flush buffer", tsID );
 
-      curr = bibRemoteFileBuf->head;
-
-      while (curr)
-	{
-	  sendP((remoteFileBuf *)curr->val, ((remoteFileBuf *)curr->val)->idx);
-          defTimestep((remoteFileBuf *)curr->val, tsID);
-	  curr = curr->next;
-	}
+      queueForeach(bibRemoteFileBuf, flushOp, (void *)(intptr_t)tsID);
 
       {
         double startTime;
@@ -307,8 +308,8 @@ pioSendFinalize(void)
   xmpi(MPI_Send(&buffer, 1, MPI_INT, specialRank, tag, commNode));
   xdebug("%s", "SENT MESSAGE WITH TAG \"IO_FINALIZE\" TO SPECIAL PROCESS");
 
-  if (bibRemoteFileBuf->head != NULL)
-    xabort("Queue bibRemoteFileBuf not empty.")
+  if (!queueIsEmpty(bibRemoteFileBuf))
+    xabort("Queue bibRemoteFileBuf not empty.");
   else
     {
       xdebug("%s", "cleanup queue");

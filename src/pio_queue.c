@@ -14,6 +14,19 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
+struct cons
+{
+  void * val;
+  struct cons * next;
+};
+
+struct queue_t {
+  struct cons *head, *tail;
+  valDestroyFunction valDestroy;
+  eqPredicate keyCompare;
+  int count;
+};
+
 queue_t *queueInit ( valDestroyFunction vD, eqPredicate kC )
 {
   queue_t *myq;
@@ -31,7 +44,7 @@ queue_t *queueInit ( valDestroyFunction vD, eqPredicate kC )
 
 void queueDestroy ( queue_t *q )
 {
-  listElem_t *curr, *succ;
+  struct cons *curr, *succ;
 
   if ( q->head )
     {
@@ -54,30 +67,33 @@ void queueDestroy ( queue_t *q )
 int
 queueAdd(queue_t *q, void *v)
 {
-  listElem_t *newListElem_T, *curr;
+  struct cons *newCons;
 
-  for (curr = q->head; curr; curr = curr->next)
-    // ensure unique keys
-    if (q->keyCompare(v, curr->val))
-      return -1;
+  {
+    struct cons *p;
+    for (p = q->head; p; p = p->next)
+      // ensure unique keys
+      if (q->keyCompare(v, p->val))
+        return -1;
+  }
 
-  if (( newListElem_T = ( listElem_t * ) malloc (sizeof ( listElem_t ))) == NULL )
+  if ((newCons = malloc(sizeof(struct cons))) == NULL)
     {
       perror ( "pio_queue: queueAdd (): Not enough memory" );
       /* FIXME: why not abort? */
       return 1;
     }
 
-  newListElem_T->val = v;
-  newListElem_T->next = NULL;
+  newCons->val = v;
+  newCons->next = NULL;
 
 
   if ( q->tail != NULL)
-    q->tail->next = newListElem_T;
+    q->tail->next = newCons;
   else
-    q->head = newListElem_T;
+    q->head = newCons;
 
-  q->tail = newListElem_T;
+  q->tail = newCons;
   q->count  ++;
 
   return 0;
@@ -87,12 +103,12 @@ int
 queueDelNode(queue_t *q, int (*predicate)(void *, void *),
              void *data)
 {
-  listElem_t **p;
+  struct cons **p;
 
   for (p = &q->head; *p; p = &(*p)->next)
     if (predicate((*p)->val, data))
       {
-        listElem_t *rem = *p;
+        struct cons *rem = *p;
         if (rem == q->tail) q->tail = NULL;
         int iret = q->valDestroy(rem->val);
         *p = rem->next;
@@ -105,7 +121,7 @@ queueDelNode(queue_t *q, int (*predicate)(void *, void *),
 void *
 queueGet(queue_t *q, int (*predicate)(void *, void *), void *data)
 {
-  listElem_t *p;
+  struct cons *p;
   xassert(q && predicate);
   for (p = q->head; p; p = p->next)
     if (predicate(p->val, data))
@@ -117,6 +133,15 @@ bool
 queueIsEmpty(queue_t *q)
 {
   return q->head == NULL;
+}
+
+
+void
+queueForeach(queue_t *q, void (*func)(void *elem, void *data), void *data)
+{
+  struct cons *p;
+  for (p = q->head; p; p = p->next)
+    func(p->val, data);
 }
 
 

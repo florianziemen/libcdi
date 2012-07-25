@@ -195,7 +195,6 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
   int flush = 0;
   int filled = 0;
   aFiledataM *of;
-  listElem_t *curr;
   char errorString[maxErrorString];
   MPI_Comm commNode = commInqCommNode ();
   int rankNode = commInqRankNode ();
@@ -204,14 +203,9 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
 
   if ( flush == 1 ) 
     {
-        xdebug3 ( "IOPE%d: tsID = %d, flush buffer", 
+      xdebug3 ( "IOPE%d: tsID = %d, flush buffer", 
 		  rankNode, tsID );
-      curr = bibAFiledataM->head;
-      while ( curr ) 
-	{
-	  writeMPINONB((aFiledataM *)curr->val);
-	  curr = curr->next;
-	}
+      queueForeach(bibAFiledataM, (elemOp)writeMPINONB, NULL);
       oldTsID = tsID;
       xmpi ( MPI_Barrier ( commNode )); 
     }                                          
@@ -288,29 +282,14 @@ int fcMPINONB ( int fileID )
 
 /***************************************************************/
 // baustelle, in modi vereinheitlichen, kapseln in pio_queue.c
-void queueCheck ( queue_t *q, const char *name )
+static void
+elemCheck(void *q, void *nm)
 {
-  listElem_t *curr;
-  aFiledataM *afm;
-  size_t len;
-  char errorString[maxErrorString];
- 
-  len = strlen ( name );
-  curr = q->head;   
-      
-  while ( curr )
-    { 
-      afm = ( aFiledataM * ) curr->val;
-      if ( len == strlen ( afm->name ) &&
-	   memcmp ( name, afm->name, len ) == 0 )
-	{
-	  sprintf ( errorString, "Filename %s is already enqueued\n", name );
-	  xabort ( errorString );
-	  return;
-	}
-      
-      curr = curr->next;
-    } 
+  aFiledataM *afm = q;
+  const char *name = nm;
+
+  if (!strcmp(name, afm->name))
+    xabort("Filename %s is already enqueued\n", name);
 }
 
 
@@ -343,7 +322,7 @@ int fowMPINONB ( const char *filename )
 
   xdebug("buffersize=%ld", buffersize);
 
-  queueCheck (  bibAFiledataM, filename );
+  queueForeach(bibAFiledataM, elemCheck, (void *)filename);
   of = initAFiledataMPINONB ( filename, buffersize );
 
   if ((id = queueAdd(bibAFiledataM, of)) < 0 )
@@ -362,8 +341,8 @@ int fowMPINONB ( const char *filename )
 
 void finalizeMPINONB(void)
 {
-  if (queueIsEmpty(bibAFiledataM))
-    xabort("queue bibAFiledataM not empty")
+  if (!queueIsEmpty(bibAFiledataM))
+    xabort("queue bibAFiledataM not empty");
   else
     {
       xdebug("%s", "cleanup queue");

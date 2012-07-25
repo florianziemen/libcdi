@@ -100,7 +100,7 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   iret += dbuffer_init ( &( afd->db2 ), afd->size );
 
   if ( iret > 0 )
-    xabort ( "dbuffer_init did not succeed" );
+    xabort("dbuffer_init did not succeed");
 
   afd->db = afd->db1;
 
@@ -342,10 +342,8 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
                 }
             if ( doFinalize )
               {
-                if ( bibBFiledataPF->head != NULL ) 
-                  {
-                    xabort ( "queue bibBFiledataM not empty" );
-                  }
+                if (!queueIsEmpty(bibBFiledataPF))
+                  xabort("queue bibBFiledataM not empty");
                 else
                   {
                     xdebug("%s", "cleanup queue");
@@ -440,13 +438,20 @@ void defTimestepPF ( aFiledataPF *afd, int tsID)
 
 /***************************************************************/
 
+static void
+flushOp(void *a, void *tsID)
+{
+  writePF((aFiledataPF *)a, ((aFiledataPF *)a)->idx);
+  defTimestepPF((aFiledataPF *)a, (int)(intptr_t)tsID);
+}
+
+
 size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t len )
 {
   int error = 0;
   int flush = 0;
   int filled = 0;
   aFiledataPF *afd;
-  listElem_t *curr;
   char errorString[maxErrorString];                                          
 
   afd = queueGet(bibAFiledataPF, idxTestA, (void *)(intptr_t)fileID);
@@ -456,13 +461,7 @@ size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t 
   if ( flush == 1 ) 
     {
       xdebug ( "tsID = %d, flush buffer", tsID );
-      curr = bibAFiledataPF->head;
-      while ( curr ) 
-	{
-	  writePF((aFiledataPF *)curr->val, ((aFiledataPF *)curr->val)->idx);
-          defTimestepPF((aFiledataPF *)curr->val, tsID);
-	  curr = curr->next;
-	}
+      queueForeach(bibAFiledataPF, flushOp, (void *)(intptr_t)tsID);
       xmpi ( MPI_Barrier ( commInqCommColl ())); 
     }
 
@@ -516,33 +515,15 @@ int fcPOSIXFPGUARDSENDRECV ( int id )
 
 /***************************************************************/
 // baustelle, in modi vereinheitlichen, kapseln in pio_queue.c
-void queueCheckFP ( queue_t *q, const char *name )
+static void
+elemCheck(void *q, void *nm)
 {
-  listElem_t *curr;
-  aFiledataPF *afd;
-  size_t len;
-  char errorString[maxErrorString];
- 
-  len = strlen ( name );
-  curr = q->head;   
-      
-  while ( curr )
-    { 
-      afd = ( aFiledataPF * ) curr->val;
-      if ( len == strlen ( afd->name ) &&
-	   memcmp ( name, afd->name, len ) == 0 )
-	{
-	  sprintf ( errorString, "Filename %s is already enqueued\n", name );
-	  xabort ( errorString );
-	  return;
-	}
-      
-      curr = curr->next;
-    }  
+  aFiledataPF *afd = q;
+  const char *name = nm;
 
-  return;
+  if (!strcmp(name, afd->name))
+    xabort("Filename %s is already enqueued\n", name);
 }
-//
 
 int fowPOSIXFPGUARDSENDRECV ( const char *filename )
 {
@@ -573,7 +554,7 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
 
   /* init and enqueue file element */ 
   
-  queueCheckFP (  bibAFiledataPF, filename );
+  queueForeach(bibAFiledataPF, elemCheck, (void *)filename);
 
   afd = initAFiledataPF ( filename, buffersize );
 
@@ -600,10 +581,8 @@ void  finalizePOSIXFPGUARDSENDRECV ( void )
   
   xmpi ( MPI_Send ( &buffer, 1, MPI_INT, specialRank, tag, commNode ));
 
-  if ( bibAFiledataPF->head != NULL ) 
-    {
-      xabort ( "queue bibAFiledataM not empty" );
-    }
+  if (!queueIsEmpty(bibAFiledataPF))
+    xabort("queue bibAFiledataM not empty");
   else
     {
       xdebug("%s", "cleanup queue");

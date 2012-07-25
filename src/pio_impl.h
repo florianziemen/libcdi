@@ -27,23 +27,10 @@ struct dBuffer
   unsigned char * buffer;
 };
 
-typedef struct listElem 
-{
-  void * val;
-  struct listElem * next;
-} listElem_t;
-
 typedef int ( * valDestroyFunction ) ( void * );
 typedef bool (*eqPredicate)(void *, void *);
 
-typedef struct
-{
-  listElem_t * head;
-  listElem_t * tail;
-  valDestroyFunction valDestroy;
-  eqPredicate keyCompare;
-  int count;
-} queue_t;
+typedef struct queue_t queue_t;
 
 typedef struct
 {
@@ -72,6 +59,9 @@ bool queueIsEmpty(queue_t *);
 int queueDelNode(queue_t *, int (*predicate)(void *, void *),
                  void *data);
 void *queueGet(queue_t *q, int (*predicate)(void *, void *), void *data);
+
+typedef void (*elemOp)(void *elem, void *data);
+void queueForeach(queue_t *q, elemOp func, void *data);
 
 /* pio_mpinonb.c */
 int       fowMPINONB ( const char * );
