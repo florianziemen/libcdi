@@ -1393,11 +1393,12 @@ int streamDefTimestep(int streamID, int tsID)
 
   streamptr->ntsteps = tsID + 1;
 
-  if ( (streamptr->filetype == FILETYPE_NC  ||
-	streamptr->filetype == FILETYPE_NC2 ||
-	streamptr->filetype == FILETYPE_NC4 ||
-	streamptr->filetype == FILETYPE_NC4C)
-       && vlistHasTime(vlistID) )
+  if (namespaceHasLocalFile(namespaceGetActive())
+      && (streamptr->filetype == FILETYPE_NC  ||
+          streamptr->filetype == FILETYPE_NC2 ||
+          streamptr->filetype == FILETYPE_NC4 ||
+          streamptr->filetype == FILETYPE_NC4C)
+      && vlistHasTime(vlistID))
     cdfDefTimestep(streamID, tsID);
 
   cdiCreateRecords(streamID, tsID);
@@ -2076,6 +2077,7 @@ void streamDefVlist(int streamID, int vlistID)
 
   stream_check_ptr(__func__, streamptr);
 #ifdef USE_MPI
+  if (!namespaceHasLocalFile(namespaceGetActive()))
   {
     statusCode nspStatus = namespaceInqResStatus ();
     switch ( nspStatus )
@@ -2092,6 +2094,7 @@ void streamDefVlist(int streamID, int vlistID)
         xabort ( "INTERNAL ERROR" );
       }
   }
+
 #endif
 
   if ( streamptr->vlistID == CDI_UNDEFID )
@@ -2110,7 +2113,8 @@ void streamDefVlist(int streamID, int vlistID)
                                vlistInqVarMissval(vlistID, varID));
 	}
 
-      if ( streamptr->filemode == 'w' )
+      if (namespaceHasLocalFile(namespaceGetActive())
+          && streamptr->filemode == 'w' )
 	{
 	  if ( streamptr->filetype == FILETYPE_NC  ||
 	       streamptr->filetype == FILETYPE_NC2 ||
