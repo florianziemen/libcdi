@@ -79,7 +79,8 @@ AC_CHECK_HEADERS(malloc.h)
 AC_CHECK_FUNCS(mallinfo)
 #  ----------------------------------------------------------------------
 # Checks for the availability of ANSI-C99 functions
-AC_CHECK_FUNCS(isnan)
+AC_CHECK_DECLS([isnan],,,[AC_INCLUDES_DEFAULT
+@%:@include <math.h>])
 #  ----------------------------------------------------------------------
 #  Check for math library
 AC_CHECK_LIB(m, floor)

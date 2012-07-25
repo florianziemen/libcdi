@@ -13,7 +13,7 @@
 #include <cdi.h>
 int      vlistInqVarMissvalUsed(int vlistID, int varID);
 #ifndef DBL_IS_NAN
-#if  defined  (HAVE_ISNAN)
+#if  defined  (HAVE_DECL_ISNAN)
 #  define DBL_IS_NAN(x)     (isnan(x))
 #elif  defined  (FP_NAN)
 #  define DBL_IS_NAN(x)     (fpclassify(x) == FP_NAN)
