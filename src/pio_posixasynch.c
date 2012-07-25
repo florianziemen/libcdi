@@ -608,7 +608,6 @@ void defTimestepPA ( aFiledataPA * afd, int tsID )
 
 size_t fwPOSIXASYNCH( int id, int tsID, const void *buffer, size_t len )
 {
-  static int oldTsId = 0;
   int error = 0;
   int flush = 0;
   int filled = 0;
