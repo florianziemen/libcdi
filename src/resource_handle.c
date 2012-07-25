@@ -245,8 +245,6 @@ void reshRemove ( cdiResH resH, resOps * ops )
   int nsp;
   namespaceTuple_t nspT;
 
-  xassert ( ops );
-
   LIST_INIT();
 
   LIST_LOCK();
