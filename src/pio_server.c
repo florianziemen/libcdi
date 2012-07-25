@@ -202,10 +202,11 @@ static
                               root, &filetype, sizeof ( filetype ));
         xassert ( filetype >= MINFILETYPE && filetype <= MAXFILETYPE );
         streamID = streamOpenWrite ( filename, filetype );
-        xdebug ( "READ FUNCTION CALL FROM WIN:  %s, filenamesz=%d,"
-                 " filename=%s, filetype=%d, OPENED STREAM %d", 
-                 funcMap[funcID], filenamesz, filename, filetype, streamID );
-        free ( filename );
+        xdebug("READ FUNCTION CALL FROM WIN:  %s, filenamesz=%zu,"
+               " filename=%s, filetype=%d, OPENED STREAM %d",
+               funcMap[funcID], filenamesz, filename,
+               filetype, streamID);
+        free(filename);
       }
       break; 
     case STREAMDEFVLIST:
