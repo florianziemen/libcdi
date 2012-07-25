@@ -1883,7 +1883,7 @@ void streamWriteContents(int streamID, char *cname)
   long recsize;
   int nrecs, nvars;
   int code, gridID, zaxisID, timeID, datatype;
-  int ngrids, nzaxis;
+  int ngrids;
   int filetype, gridtype;
   int xsize, ysize;
   int date, time;
@@ -1921,7 +1921,6 @@ void streamWriteContents(int streamID, char *cname)
       ysize    = gridInqYsize(gridID);
       fprintf(cnp, "%4d:%4d:%4d:%4d\n", i+1, gridtype, xsize, ysize);
     }
-  nzaxis = vlistNzaxis(vlistID);
 
   fprintf(cnp, "#\n");
 
