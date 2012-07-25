@@ -2163,14 +2163,13 @@ void gridChangeType(int gridID, int gridtype)
 static
 void grid_check_cyclic(grid_t *gridptr)
 {
-  int xsize, ysize, gridsize;
+  int xsize, ysize;
   long i1, i2, in, j, k1, k2, nc;
   double xinc, x0;
   const double *xvals, *xbounds;
 
   gridptr->isCyclic = FALSE;
 
-  gridsize = gridptr->size;
   xsize = gridptr->xsize;
   ysize = gridptr->ysize;
   xvals = gridptr->xvals;
