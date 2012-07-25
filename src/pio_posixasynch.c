@@ -697,7 +697,6 @@ int fowPOSIXASYNCH ( const char *filename )
   static long buffersize = 0; 
   int root = 0, iret, id, messageLength = 32;
   char message[messageLength];
-  MPI_Comm bcastComm;
   char errorString[maxErrorString];
 
   /* broadcast buffersize to collectors */
