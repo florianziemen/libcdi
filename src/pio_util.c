@@ -64,8 +64,8 @@ void pcdiAbort(const char * filename, const char *functionname, int line,
           functionname, filename, line);
   vfprintf(stderr, errorString, ap);
   fputs("\"\n", stderr);
-  exit ( EXIT_FAILURE );
 #endif
+  exit ( EXIT_FAILURE );
   va_end(ap);
 }
 
