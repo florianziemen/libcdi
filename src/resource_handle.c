@@ -115,7 +115,7 @@ void listInitPointer ( void )
 
 /**************************************************************/
 
-void listDestroy ( void )
+static void listDestroy ( void )
 {
   listElem_t * listElem;
   int i, j, nnsp;
@@ -186,7 +186,7 @@ void listInitialize ( void )
 
 /**************************************************************/
 
-void listSizeExtend()
+static void listSizeExtend()
 {
   int newListSize;
   int i, nsp;
