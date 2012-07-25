@@ -35,16 +35,16 @@ typedef struct
   struct dBuffer *db;
   MPI_File fh;
   MPI_Request request;
-  int idx;
+  int fileID;
   bool finished;
 } aFiledataM;
 
 static queue_t *bibAFiledataM;
 
 static int
-idxTest(void *a, void *idx)
+fileIDTest(void *a, void *fileID)
 {
-  return ((aFiledataM *)a)->idx == (int)(intptr_t)idx;
+  return ((aFiledataM *)a)->fileID == (int)(intptr_t)fileID;
 }
 
 
@@ -150,7 +150,7 @@ void writeMPINONB(aFiledataM *of)
   int amount;
   MPI_Status status;
   int rankNode = commInqRankNode ();
-  int fileID = of->idx;
+  int fileID = of->fileID;
 
   /* write buffer */
   
@@ -210,7 +210,7 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
       xmpi ( MPI_Barrier ( commNode )); 
     }                                          
 
-  of = queueGet(bibAFiledataM, idxTest, (void *)(intptr_t)fileID);
+  of = queueGet(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID);
   filled = dbuffer_push ( of->db, ( unsigned char * ) buffer, len );
 
   xdebug3 ( "IOPE%d: fileID = %d, tsID = %d,"
@@ -252,7 +252,7 @@ int fcMPINONB ( int fileID )
   xdebug("IOPE%d: write buffer, close file and cleanup, in %d",
          rankNode, fileID );
 
-  if (!(of = queueGet(bibAFiledataM, idxTest, (void *)(intptr_t)fileID)))
+  if (!(of = queueGet(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID)))
     {
       sprintf ( errorString, "pio_queue, fileID=%d not found", fileID ); 
       xabort ( errorString );
@@ -262,7 +262,7 @@ int fcMPINONB ( int fileID )
 
   /* dequeue file element */
 
-  iret = queueDelNode(bibAFiledataM, idxTest, (void *)(intptr_t)fileID);
+  iret = queueDelNode(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID);
 
   /* timer output */
 
