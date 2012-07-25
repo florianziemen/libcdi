@@ -248,6 +248,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
+        /* FIXME: return value not inspected */
         status = grbDefRecord(streamID);
 	break;
       }
@@ -255,6 +256,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
+        /* FIXME: return value not inspected */
         status = srvDefRecord(streamID);
 	break;
       }
@@ -262,6 +264,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
+        /* FIXME: return value not inspected */
         status = extDefRecord(streamID);
 	break;
       }
@@ -269,6 +272,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
+        /* FIXME: return value not inspected */
         status = iegDefRecord(streamID);
 	break;
       }
@@ -316,6 +320,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
+        /* FIXME: return value not inspected */
         status = grbReadRecord(streamID, data, nmiss);
 	break;
       }
@@ -323,6 +328,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
+        /* FIXME: return value not inspected */
         status = srvReadRecord(streamID, data, nmiss);
 	break;
       }
@@ -330,6 +336,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
+        /* FIXME: return value not inspected */
         status = extReadRecord(streamID, data, nmiss);
 	break;
       }
@@ -337,6 +344,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
+        /* FIXME: return value not inspected */
         status = iegReadRecord(streamID, data, nmiss);
 	break;
       }
@@ -347,6 +355,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
+        /* FIXME: return value not inspected */
 	status = cdfReadRecord(streamID, data, nmiss);
 	break;
       }
@@ -451,6 +460,7 @@ void streamCopyRecord(int streamID2, int streamID1)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
+        /* FIXME: return value not inspected */
 	status = grbCopyRecord(streamID2, streamID1);
 	break;
       }
@@ -458,6 +468,7 @@ void streamCopyRecord(int streamID2, int streamID1)
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
+        /* FIXME: return value not inspected */
 	status = srvCopyRecord(streamID2, streamID1);
 	break;
       }
@@ -465,6 +476,7 @@ void streamCopyRecord(int streamID2, int streamID1)
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
+        /* FIXME: return value not inspected */
 	status = extCopyRecord(streamID2, streamID1);
 	break;
       }
@@ -472,12 +484,14 @@ void streamCopyRecord(int streamID2, int streamID1)
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
+        /* FIXME: return value not inspected */
 	status = iegCopyRecord(streamID2, streamID1);
 	break;
       }
 #endif
     default:
       {
+        /* FIXME: return value not inspected */
 	status = cdfCopyRecord(streamID2, streamID1);
 	break;
       }
