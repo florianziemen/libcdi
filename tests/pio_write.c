@@ -230,9 +230,9 @@ var_scale(int datatype, double *mscale, double *mrscale)
 int main (int argc, char *argv[])
 {
   enum {
-    nNamespaces = 1 };
+    nNamespaces = 2 };
 
-  static int hasLocalFile[nNamespaces] = { 0 };
+  static int hasLocalFile[nNamespaces] = { 0, 1 };
 
   struct model_config setup = default_setup;
 
