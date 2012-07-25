@@ -25,9 +25,9 @@ extern resOps streamOps;
 struct rdmaWin
 {
   size_t size;
+  unsigned char *buffer;
 } *txWin = NULL;
 
-unsigned char ** winBuffer      = NULL;
 unsigned char ** winBufferHead  = NULL;
 MPI_Win        * win            = NULL;
 int            * winPostSet     = NULL;
@@ -332,14 +332,13 @@ void modelWinCleanup ( void )
   xdebug("%s", "START");
   if ( winPostSet != NULL &&
        win != NULL &&
-       winBuffer != NULL &&
        groupsIONetto != NULL )
     for ( collID = 0; collID < commInqNProcsColl (); collID ++ )
       {
         if ( winPostSet[collID] )
           xmpi ( MPI_Win_wait ( win[collID] ));
         xmpi ( MPI_Win_free ( &win[collID] ));
-        xmpi ( MPI_Free_mem ( winBuffer[collID] ));
+        xmpi ( MPI_Free_mem ( txWin[collID].buffer ));
         xmpi ( MPI_Group_free ( &groupsIONetto[collID] ));
       }
 
@@ -348,7 +347,6 @@ void modelWinCleanup ( void )
   if ( winPostSet )      free ( winPostSet );
   if ( win )             free ( win );
   if ( winBufferHead )   free ( winBufferHead );
-  if ( winBuffer )       free ( winBuffer );
   if (txWin) free(txWin);
 
   xdebug("%s", "RETURN. CLEANED UP MPI_WIN'S");
@@ -418,15 +416,14 @@ static
 
   xassert ( collID                >= 0         &&
             collID                < nProcsColl &&
-            winBuffer             != NULL      &&
-            winBuffer[collID]     != NULL      &&
+            txWin[collID].buffer     != NULL      &&
             winBufferHead         != NULL      &&
             txWin != NULL      &&
             txWin[collID].size >= 0         &&
             txWin[collID].size <= MAXWINBUFFERSIZE &&
             refuseFuncCall        != NULL );
-  memset(winBuffer[collID], 0, txWin[collID].size);
-  winBufferHead[collID] = winBuffer[collID];
+  memset(txWin[collID].buffer, 0, txWin[collID].size);
+  winBufferHead[collID] = txWin[collID].buffer;
   refuseFuncCall[collID] = 0;
 }
 
@@ -442,7 +439,6 @@ void modelWinCreate ( void )
 
   xdebug("%s", "START");
   txWin = xmalloc(nProcsColl * sizeof (txWin[0]));
-  winBuffer       = xmalloc ( nProcsColl * sizeof ( winBuffer[0] ));
   winBufferHead   = xmalloc ( nProcsColl * sizeof ( winBufferHead[0] ));
   win             = xmalloc ( nProcsColl * sizeof ( win[0] ));
   winPostSet      = xmalloc ( nProcsColl * sizeof ( winPostSet[0] ));
@@ -455,12 +451,12 @@ void modelWinCreate ( void )
   for ( collID = 0; collID < nProcsColl; collID ++ )
     {
       xassert(txWin[collID].size > 0);
-      winBuffer[collID] = NULL;
+      txWin[collID].buffer = NULL;
       xmpi(MPI_Alloc_mem((MPI_Aint)txWin[collID].size, MPI_INFO_NULL,
-                         &winBuffer[collID]));
-      xassert ( winBuffer[collID] != NULL );
-      winBufferHead[collID] = winBuffer[collID];
-      xmpi(MPI_Win_create(winBuffer[collID], (MPI_Aint) txWin[collID].size, 1,
+                         &txWin[collID].buffer));
+      xassert ( txWin[collID].buffer != NULL );
+      winBufferHead[collID] = txWin[collID].buffer;
+      xmpi(MPI_Win_create(txWin[collID].buffer, (MPI_Aint) txWin[collID].size, 1,
                           MPI_INFO_NULL, commInqCommsIO(collID),
                           &win[collID]));
       xmpi ( MPI_Comm_group ( commInqCommsIO ( collID ), &groupsIONetto[collID] ));
@@ -479,7 +475,7 @@ modelWinBufferPutAtEnd(const char * caller,
   char text[1024];
   /*
     xdebug ( "collID=%d, size=%d, newBufferHead=%d, oldBufferSize=%d",
-    collID, size, winBufferHead[collID] - winBuffer[collID] + size,
+    collID, size, winBufferHead[collID] - txWin[collID].buffer + size,
     txWin[collID].size );
   */
   if ( winBufferHead == NULL ||
@@ -487,7 +483,7 @@ modelWinBufferPutAtEnd(const char * caller,
        size           < 0    ||
        collID         < 0    ||
        collID        >= commInqNProcsColl () ||
-       winBufferHead[collID] - winBuffer[collID] + size > txWin[collID].size)
+       winBufferHead[collID] - txWin[collID].buffer + size > txWin[collID].size)
     {
       sprintf ( text, "caller: %s", caller );
       xabort ( text );
@@ -515,7 +511,6 @@ void pioBufferData ( const int streamID, const int varID, const double *data, in
             collID         <  commInqNProcsColl () &&
             chunk          >= 0                    &&
             txWin != NULL &&
-            winBuffer      != NULL                 &&
             winBufferHead  != NULL                 &&
             winPostSet     != NULL                 &&
             refuseFuncCall != NULL                &&
@@ -529,7 +524,7 @@ void pioBufferData ( const int streamID, const int varID, const double *data, in
     }
 
   size = chunk * sizeof ( double ) + winBufferOverheadChunk * sizeof ( int );
-  xassert(winBufferHead[collID] - winBuffer[collID] + size < txWin[collID].size);
+  xassert(winBufferHead[collID] - txWin[collID].buffer + size < txWin[collID].size);
 
   modelWinBufferPutAtEnd ( __func__, collID, &tokenData, sizeof ( tokenData ));
   modelWinBufferPutAtEnd ( __func__, collID, &streamID , sizeof ( streamID ));
@@ -575,7 +570,6 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
             argc          >= 1                    &&
             argc          <= 2                    &&
             txWin != NULL &&
-            winBuffer     != NULL                 &&
             winBufferHead != NULL                 &&
             winPostSet    != NULL                 &&
             win           != NULL );
@@ -594,7 +588,7 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
         for ( collID = 0; collID < nProcsColl; collID++ )
           {
             size = ( winBufferOverheadFuncCall + 1 ) * sizeof ( int );
-            xassert(winBufferHead[collID] - winBuffer[collID] + size <
+            xassert(winBufferHead[collID] - txWin[collID].buffer + size <
                     txWin[collID].size);
 
             if ( winPostSet[collID] )
@@ -636,7 +630,7 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
           {
             size = ( winBufferOverheadFuncCall + 2 ) * sizeof ( int ) +
               MAXDATAFILENAME;
-            xassert(winBufferHead[collID] - winBuffer[collID] + size <
+            xassert(winBufferHead[collID] - txWin[collID].buffer + size <
                     txWin[collID].size);
 
             if ( winPostSet[collID] )
@@ -675,7 +669,7 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
         for ( collID = 0; collID < nProcsColl; collID++ )
           {
             size = ( winBufferOverheadFuncCall + 2 ) * sizeof ( int );
-            xassert(winBufferHead[collID] - winBuffer[collID] + size <
+            xassert(winBufferHead[collID] - txWin[collID].buffer + size <
                     txWin[collID].size);
 
             if ( winPostSet[collID] )
