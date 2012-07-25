@@ -487,28 +487,23 @@ elemCheck(void *q, void *nm)
 
 int fowPOSIXFPGUARDSENDRECV ( const char *filename )
 {
-  int root = 0, id; 
+  int root = 0, id;
   aFiledataPF *afd;
-  static bool firstOpen = true;
   static long buffersize = 0;
 
   /* broadcast buffersize to collectors */
-  
-  if ( firstOpen )
-    {      
-      if  ( commInqRankColl () == root )
-	{ 
-          xdebug (  "name=%s, broadcast buffersize to collectors ...", 
-                    filename );
+  if (!buffersize)
+    {
+      if (commInqRankColl() == root)
+	{
+          xdebug("name=%s, broadcast buffersize to collectors ...",
+                 filename);
 	  if ( getenv( "BUFSIZE" ) != NULL )
 	    buffersize = atol ( getenv ( "BUFSIZE" ));
 	  if ( buffersize < initial_buffersize )
 	    buffersize = initial_buffersize;
 	}
-      
-      xmpi ( MPI_Bcast ( &buffersize, 1, MPI_LONG, root, commInqCommColl ()));
-      
-      firstOpen = false;
+      xmpi(MPI_Bcast(&buffersize, 1, MPI_LONG, root, commInqCommColl()));
     }
 
   /* init and add file element */
@@ -519,9 +514,8 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
   if ((id = listSetAdd(bibAFiledataPF, afd)) < 0)
     xabort("filename %s not unique", afd->name);
 
-  xdebug ( "name=%s, init and add aFiledataPF, return id = %d", 
-           filename, id );
-  
+  xdebug("name=%s, init and add aFiledataPF, return id = %d",
+         filename, id);
   return id;
 }
 
