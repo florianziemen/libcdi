@@ -125,7 +125,7 @@ writeP(bFiledataP *bfd, long amount)
 
   xdebug ( "filename=%s, amount=%ld, in", bfd->name, amount );
 
-  if (( written = fwrite ( bfd->fb->buffer, sizeof ( char ), amount,
+  if (( written = fwrite ( bfd->fb->buffer, 1, amount,
 			   bfd->fp )) != amount )
     xabort("did not succeed writing buffer in %s", bfd->name);
 
