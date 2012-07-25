@@ -41,7 +41,6 @@ static bFiledataP *
 initBFiledataP(char *filename, size_t bs, int nc, int fileID)
 {
   bFiledataP * bfp;
-  int i;
 
   xdebug ( "filename=%s, buffersize=%lu, ncollectors=%d", filename, bs, nc );
 
@@ -135,7 +134,7 @@ pioWriterStdIO(void)
   size_t amount, buffersize;
   char *messageBuffer = NULL;
   char *pMB, *filename, *temp;
-  int messagesize, source, tag, i, id;
+  int messagesize, source, tag, id;
   struct fileOpTag rtag;
   MPI_Status status;
   MPI_Comm commNode = commInqCommNode ();
