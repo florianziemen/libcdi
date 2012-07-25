@@ -2,8 +2,11 @@
 #  include "config.h"
 #endif
 
+#include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "pio_util.h"
 #include "cdi.h"
@@ -41,21 +44,29 @@ void pcdiAssert   ( bool assumption, const char * filename,
 
 /****************************************************/
 
-void pcdiAbort ( char * errorString, const char * filename,
-		 const char *functionname, int line )
+void pcdiAbort(const char * filename, const char *functionname, int line,
+               const char * errorString, ... )
 {
+  va_list ap;
+  va_start(ap, errorString);
 #ifdef USE_MPI
-  int rank;
-
-  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
-  fprintf ( stderr, "ERROR, pe%d in %s, %s, line %d, errorString: \"%s\"\n",
-	    rank, functionname, filename, line, errorString );
+  {
+    int rank;
+    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+    fprintf(stderr, "ERROR, pe%d in %s, %s, line %d, errorString: \"",
+            rank, functionname, filename, line);
+  }
+  vfprintf(stderr, errorString, ap);
+  fputs("\"\n", stderr);
   MPI_Abort ( MPI_COMM_WORLD, 1 );
 #else
-  fprintf ( stderr, "ERROR, %s, %s, line %d, errorString: \"%s\"\n",
-            functionname, filename, line, errorString );
+  fprintf(stderr, "ERROR, %s, %s, line %d, errorString: \"",
+          functionname, filename, line);
+  vfprintf(stderr, errorString, ap);
+  fputs("\"\n", stderr);
   exit ( EXIT_FAILURE );
 #endif
+  va_end(ap);
 }
 
 /*****************************************************************************/
@@ -66,7 +77,8 @@ void * pcdiXmalloc ( size_t size, const char *filename, const char *functionname
   void * value = calloc (1, size );
 
   if ( value == NULL )
-    pcdiAbort ( "malloc failed", filename, functionname, line );
+    pcdiAbort (filename, functionname, line, "malloc failed: %s",
+               strerror(errno));
 
   return value;
 }
@@ -77,7 +89,8 @@ void * pcdiXcalloc ( size_t nmemb, size_t size, const char *filename,
   void * value = calloc ( nmemb, size );
 
   if ( value == NULL )
-    pcdiAbort ( "calloc failed", filename, functionname, line );
+    pcdiAbort (filename, functionname, line, "calloc failed: %s",
+               strerror(errno) );
 
   return value;
 }
@@ -88,7 +101,8 @@ void * pcdiXrealloc ( void *p, size_t size, const char *functionname,
   void * value = realloc ( p, size );
 
   if ( value == NULL )
-    pcdiAbort ( "realloc failed", filename, functionname, line );
+    pcdiAbort(filename, functionname, line, "realloc failed: %s",
+              strerror(errno));
 
   return value;
 }
