@@ -607,9 +607,9 @@ void pioBufferFuncCall(int funcID, int argc, ... )
                                      sizeof ( tokenSep ));
           }
 
-        xdebug ( "WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, filenamesz=%d,"
-                 " filename=%s, filetype=%d",
-                 funcMap[funcID], filenamesz, filename, filetype );
+        xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, filenamesz=%zu,"
+               " filename=%s, filetype=%d",
+               funcMap[funcID], filenamesz, filename, filetype );
       }
       break;
     case STREAMDEFVLIST:
