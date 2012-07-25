@@ -116,17 +116,12 @@ int grbInqRecord(int streamID, int *varID, int *levelID)
 
 int grbDefRecord(int streamID)
 {
-  int fileID;
-  int gridID;
   int status = 0;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
-
-  fileID = streamInqFileID(streamID);
-  gridID = streamptr->record->gridID;
 
   return (status);
 }
