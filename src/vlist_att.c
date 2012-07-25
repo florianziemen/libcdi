@@ -576,9 +576,7 @@ vlistAttsPack(vlist_t *p, int varID,
   numAtts = attsp->nelems;
   xmpi(MPI_Pack(&numAtts, 1, MPI_INT, buf, size, position, comm));
   for (i = 0; i < numAtts; ++i)
-  {
     vlistAttPack(p, varID, i, buf, size, position, comm);
-  }
 }
 
 static void
@@ -624,7 +622,7 @@ vlistAttUnpack(int vlistID, int varID,
 
 void
 vlistAttsUnpack(int vlistID, int varID,
-              void * buf, int size, int *position, MPI_Comm comm)
+                void * buf, int size, int *position, MPI_Comm comm)
 {
   int numAtts, i;
   xmpi(MPI_Unpack(buf, size, position, &numAtts, 1, MPI_INT, comm));
