@@ -520,7 +520,8 @@ void pioBufferFuncCall(int funcID, int argc, ... )
   int tokenSep = SEPARATOR, tokenFuncCall = FUNCCALL;
   size_t size = 0;
 
-  xdebug("%s", "START");
+  xassert(funcID >= 0 && funcID < nFuncs);
+  xdebug("%s, func: %s", "START", funcMap[funcID]);
 
   if ( rankGlob != root ) return;
 
