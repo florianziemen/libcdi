@@ -1162,7 +1162,8 @@ int fileClose(int fileID)
   fileptr = file_to_pointer(fileID);
 
 #ifdef USE_MPI
-  if (fileptr && fileptr->mode == 'w' && commInqIOMode () != PIO_NONE )
+  if (((fileptr && fileptr->mode == 'w') || !fileptr)
+      && commInqIOMode () != PIO_NONE )
     return pioFileClose ( fileID );
 #endif
 
