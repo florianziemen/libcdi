@@ -54,7 +54,6 @@ static queue_t * bibAFiledataP;
 
 
 int errclass, ierr, resultlen;
-char err_buffer [ MPI_MAX_ERROR_STRING ];
 
 /***************************************************************/
 
