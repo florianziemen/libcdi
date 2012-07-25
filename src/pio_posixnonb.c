@@ -115,8 +115,7 @@ static bFiledataP * initBFiledataP ( char *filename,
   bfp->nfinished = xmalloc ( nc * sizeof ( bfp->nfinished[0] ));
 
   for ( i = 0; i < nc; i++ )
-    *( bfp->nfinished + i ) = true;
-
+    bfp->nfinished[i] = false;
 
   xdebug ( "filename=%s, opened file, return", bfp->name );
 
@@ -327,8 +326,6 @@ void pwPOSIXNONB ( void )
 	    if (strcmp(filename, bfd->name) != 0)
               xabort("filename is not consistent, fileID=%d", rtag->id);
 
-	  *( bfd->nfinished + source ) = false;
-
 	  memcpy(bfd->fb->buffer, pMB, amount);
 
 	  writeP(bfd, amount);
@@ -374,12 +371,12 @@ void pwPOSIXNONB ( void )
 
 	  writeP ( bfd, amount );
 
-	  *( bfd->nfinished + source ) = true;	  
+	  bfd->nfinished[source] = true;
 	  bfd->finished          = true;
 	  
 	  for ( i = 0; i < nProcsCollNode; i++ )
 	    {
-	      if ( *( bfd->nfinished + i ) == false )
+	      if ( bfd->nfinished[i] == false )
 		{
 		  bfd->finished = false;
 		  break;

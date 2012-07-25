@@ -147,7 +147,7 @@ static bFiledataPA *initBFiledataPA ( char *filename,
   bfd->nfinished = xmalloc ( nc * sizeof ( bfd->nfinished[0] ));
 
   for ( i = 0; i < nc; i++ )
-    *( bfd->nfinished + i ) = true;
+    bfd->nfinished[i] = false;
 
   xdebug ( "filename=%s, opened file, return", bfd->name );
 
@@ -427,8 +427,6 @@ void pwPOSIXASYNCH ( void )
 	    if (strcmp(filename, bfd->name) != 0)
               xabort("filename is not consistent, fileID=%d", rtag->id);
 
-	  *( bfd->nfinished + source ) = false;
-
 	  bfd->currOpIndex = bfd->nextOpIndex;
 	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
 
@@ -480,7 +478,7 @@ void pwPOSIXASYNCH ( void )
 
 	  writePA ( bfd, amount );
 
-	  bfd->nfinished[source] = true;	  
+	  bfd->nfinished[source] = true;
 	  bfd->finished          = true;
 	  
 	  for ( i = 0; i < nProcsCollNode; i++ )
