@@ -25,20 +25,20 @@ typedef struct
   struct dBuffer *db;
   IO_Server_command command;
   MPI_Request request;
-} aFiledata;
+} remoteFileBuf;
 
-static queue_t * bibAFiledata;
+static queue_t * bibRemoteFileBuf;
 
-static aFiledata *
-initAFiledata(const char *filename, size_t bs)
+static remoteFileBuf *
+initRemoteFileBuf(const char *filename, size_t bs)
 {
-  aFiledata *afp;
+  remoteFileBuf *afp;
   size_t len;
   int iret;
 
   xdebug ( "filename=%s, buffersize=%zu, in", filename, bs );
 
-  afp = xmalloc ( sizeof ( aFiledata ));
+  afp = xmalloc ( sizeof ( remoteFileBuf ));
 
   len = strlen ( filename );
   afp->name = xmalloc (( len + 1) * sizeof ( afp->name[0] ));
@@ -65,9 +65,9 @@ initAFiledata(const char *filename, size_t bs)
 }
 
 static int
-destroyAFiledata(void *v)
+destroyRemoteFileBuf(void *v)
 {
-  aFiledata *afp = ( aFiledata * ) v;
+  remoteFileBuf *afp = ( remoteFileBuf * ) v;
   MPI_Status status;
 
   xdebug ( "filename=%s, cleanup, in", afp->name );
@@ -87,7 +87,7 @@ destroyAFiledata(void *v)
 static bool
 compareNames(void *v1, void *v2)
 {
-  aFiledata *afd1 = v1, *afd2 = v2;
+  remoteFileBuf *afd1 = v1, *afd2 = v2;
 
   return !strcmp(afd1->name, afd2->name);
 }
@@ -95,7 +95,7 @@ compareNames(void *v1, void *v2)
 /***************************************************************/
 /* send buffer to writer and swap buffer for filling */
 static void
-sendP(aFiledata *afd, int id)
+sendP(remoteFileBuf *afd, int id)
 {
   int tag;
   size_t amount;
@@ -135,7 +135,7 @@ sendP(aFiledata *afd, int id)
 }
 
 static void
-defTimestep(aFiledata *afd, int tsID)
+defTimestep(remoteFileBuf *afd, int tsID)
 {
   if ( afd == NULL || tsID != afd->tsID + 1 )
     xabort ( " defTimestepPA () didn't succeed." );
@@ -148,10 +148,10 @@ pioSendWrite(int id, int tsID, const void *buffer, size_t len)
   int error = 0;
   int flush = 0;
   int filled;
-  aFiledata *afd;
+  remoteFileBuf *afd;
   listElem_t *curr;
 
-  afd = (aFiledata *)queueIdx2val(bibAFiledata, id);
+  afd = (remoteFileBuf *)queueIdx2val(bibRemoteFileBuf, id);
 
   flush = ( tsID != afd->tsID ) ? 1 : 0;
 
@@ -159,12 +159,12 @@ pioSendWrite(int id, int tsID, const void *buffer, size_t len)
     {
       xdebug ( "tsID = %d, flush buffer", tsID );
 
-      curr = bibAFiledata->head;
+      curr = bibRemoteFileBuf->head;
 
       while (curr)
 	{
-	  sendP((aFiledata *)curr->val, curr->idx);
-          defTimestep((aFiledata *)curr->val, tsID);
+	  sendP((remoteFileBuf *)curr->val, curr->idx);
+          defTimestep((remoteFileBuf *)curr->val, tsID);
 	  curr = curr->next;
 	}
 
@@ -205,19 +205,19 @@ int
 pioSendClose(int id)
 {
   double accumWaitMax;
-  aFiledata *afd;
+  remoteFileBuf *afd;
   int iret;
 
   xdebug ( "fileID %d: send buffer, close file and cleanup",id );
 
-  afd = (aFiledata *)queueIdx2val(bibAFiledata, id);
+  afd = (remoteFileBuf *)queueIdx2val(bibRemoteFileBuf, id);
 
   afd->command = IO_Close_file;
 
   sendP(afd, id);
 
   /* dequeue file element */
-  iret = queueDelNode(bibAFiledata, id);
+  iret = queueDelNode(bibRemoteFileBuf, id);
 
   /* timer output */
   if ( ddebug )
@@ -235,7 +235,7 @@ pioSendClose(int id)
 int
 pioSendOpen(const char *filename)
 {
-  aFiledata *afd;
+  remoteFileBuf *afd;
   static long buffersize = 0;
   int root = 0, id, iret, messageLength = 32;
   char message[messageLength];
@@ -255,12 +255,12 @@ pioSendOpen(const char *filename)
       xmpi(MPI_Bcast(&buffersize, 1, MPI_LONG, root, commInqCommColl()));
     }
 
-  /* init and enqueue aFiledata */
-  afd = initAFiledata(filename, buffersize);
-  if ((id = queuePush(bibAFiledata, afd, 0)) < 0)
+  /* init and enqueue remoteFileBuf */
+  afd = initRemoteFileBuf(filename, buffersize);
+  if ((id = queuePush(bibRemoteFileBuf, afd, 0)) < 0)
     xabort("filename %s is not unique", afd->name);
 
-  xdebug("filename=%s, init and enqueued aFiledata, return id = %d",
+  xdebug("filename=%s, init and enqueued remoteFileBuf, return id = %d",
          filename, id);
 
   /* put filename, id and buffersize on buffer */
@@ -299,12 +299,12 @@ pioSendFinalize(void)
   xmpi(MPI_Send(&buffer, 1, MPI_INT, specialRank, tag, commNode));
   xdebug("%s", "SENT MESSAGE WITH TAG \"IO_FINALIZE\" TO SPECIAL PROCESS");
 
-  if (bibAFiledata->head != NULL)
-    xabort("Queue bibAFiledata not empty.")
+  if (bibRemoteFileBuf->head != NULL)
+    xabort("Queue bibRemoteFileBuf not empty.")
   else
     {
       xdebug("%s", "cleanup queue");
-      queueDestroy(bibAFiledata);
+      queueDestroy(bibRemoteFileBuf);
     }
 }
 
@@ -337,7 +337,7 @@ pioSendInitialize(void)
       commSendNodeInfo ();
       commRecvNodeMap ();
       commDefCommsIO ();
-      bibAFiledata = queueInit(destroyAFiledata, compareNames);
+      bibRemoteFileBuf = queueInit(destroyRemoteFileBuf, compareNames);
     }
 }
 
