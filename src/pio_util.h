@@ -46,7 +46,12 @@
 #endif
 
 void pcdiAssert   ( bool, const char *, const char *, int );
-#define xassert(arg) pcdiAssert ((arg), __FILE__, __func__, __LINE__ );
+#define xassert(arg) do {                               \
+    if ((arg)) {                                        \
+    } else {                                            \
+      pcdiAssert(0, __FILE__, __func__, __LINE__ ); \
+    }                                                   \
+  } while(0)
 
 #ifdef USE_MPI
 #define xdebug(fmt, ...)                                                \
