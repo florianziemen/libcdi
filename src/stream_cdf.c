@@ -119,7 +119,6 @@ void strtolower(char *str)
         str[i] = tolower((int) str[i]);
     }
 }
-#endif
 
 static
 int get_timeunit(int len, char *ptu)
@@ -144,7 +143,6 @@ int get_timeunit(int len, char *ptu)
   return (timeunit);
 }
 
-#ifdef HAVE_LIBNETCDF
 static
 int isTimeUnits(const char *timeunits)
 {
