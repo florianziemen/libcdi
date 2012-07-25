@@ -49,7 +49,7 @@ void pcdiAssert   ( bool, const char *, const char *, int );
 #define xassert(arg) do {                               \
     if ((arg)) {                                        \
     } else {                                            \
-      pcdiAssert(0, __FILE__, __func__, __LINE__ ); \
+      pcdiAssert(0, __FILE__, __func__, __LINE__ );     \
     }                                                   \
   } while(0)
 
