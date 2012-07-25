@@ -18,10 +18,12 @@ int main(int argc, char *argv[])
   } *varSize;
 
   double **var;
-  char *fname = "example.grb";
+  char *fname = "example.grb", *table_fname = "example.cksum";
 
   if (argc > 1)
     fname = argv[1];
+  if (argc > 2)
+    table_fname = argv[2];
 
   // Open the dataset
   streamID = streamOpenRead(fname);
@@ -108,6 +110,7 @@ int main(int argc, char *argv[])
     }
 
   // check checksums from table file
+  int retcode = EXIT_SUCCESS;
   {
     uint32_t cksum[nvars];
     unsigned long cksum_temp;
@@ -120,7 +123,7 @@ int main(int argc, char *argv[])
         varCodes[i] = vlistInqVarCode(vlistID, i);
         checked[i] = 0;
       }
-    if (!(tablefp = fopen("example.cksum", "r")))
+    if (!(tablefp = fopen(table_fname, "r")))
       {
         fputs("bla\n", stderr);
         perror("failed to open table file");
@@ -136,7 +139,7 @@ int main(int argc, char *argv[])
                   fprintf(stderr, "checksum error for varID %d, code %d!\n"
                           "%08lx != %08lx\n", i, code,
                           (unsigned long)cksum[i], cksum_temp);
-                  exit(EXIT_FAILURE);
+                  retcode = EXIT_FAILURE;
                 }
               checked[i] = 1;
               break;
@@ -154,7 +157,7 @@ int main(int argc, char *argv[])
   // Close the input stream
   streamClose(streamID);
 
-  return 0;
+  return retcode;
 }
 
 /*
