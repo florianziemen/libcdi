@@ -24,7 +24,11 @@
 extern resOps streamOps;
 extern void arrayDestroy ( void );
 
-int            * getBufferSize = NULL;
+static struct
+{
+  size_t size;
+} *rxWin = NULL;
+
 unsigned char ** getBuffer     = NULL;
 unsigned char ** getBufferHead = NULL;
 static MPI_Win getWin = MPI_WIN_NULL;
@@ -48,7 +52,7 @@ void serverWinCleanup ()
         if ( getBuffer[i] ) free ( getBuffer[i] );
       free ( getBuffer );
     }
-  if ( getBufferSize ) free ( getBufferSize );
+  if (rxWin) free(rxWin);
   if ( getBufferHead ) free ( getBufferHead );
   
   xdebug("%s", "cleaned up mpi_win");
@@ -65,7 +69,7 @@ static
   int nProcsModel = commInqNProcsModel ();
   int root = commInqRootGlob ();
 
-  xassert ( getBufferSize != NULL );
+  xassert(rxWin != NULL);
 
   nstreams = reshCountType ( &streamOps );
   streamIndexList = xmalloc ( nstreams * sizeof ( streamIndexList[0] ));
@@ -85,26 +89,25 @@ static
                 {
                   decoChunk =  vlistInqVarDecoChunk ( vlistID, varID, modelID );
                   xassert ( decoChunk > 0 );
-                  getBufferSize[modelID] += ( decoChunk * sizeof ( double ) + 
-                                        winBufferOverheadChunk * sizeof ( int ));
+                  rxWin[modelID].size += decoChunk * sizeof (double)
+                    + winBufferOverheadChunk * sizeof (int);
                 }
             }
-        }
+    }
       // space required for the 3 function calls streamOpen, streamDefVlist, streamClose 
       // once per stream and timestep for all collprocs only on the modelproc root
-      getBufferSize[root] += ( 3 * winBufferOverheadFuncCall * sizeof ( int ) +
-                               5 * sizeof ( int ) +
-                               MAXDATAFILENAME ); 
+      rxWin[root].size += 3 * winBufferOverheadFuncCall * sizeof (int)
+        + 5 * sizeof (int) + MAXDATAFILENAME;
     }
   free ( streamIndexList );
 
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
-      getBufferSize[modelID] += ( winBufferOverhead * sizeof ( int ));
-      sumGetBufferSizes += getBufferSize[modelID];
+      rxWin[modelID].size += winBufferOverhead * sizeof (int);
+      sumGetBufferSizes += rxWin[modelID].size;
     }
   xassert ( sumGetBufferSizes <= MAXWINBUFFERSIZE );
-  xprintArray ( "getBufferSize", getBufferSize, nProcsModel, DATATYPE_INT );
+  /* xprintArray ( "getBufferSize", getBufferSize, nProcsModel, DATATYPE_INT ); */
 }
 
  /************************************************************************/
@@ -125,15 +128,15 @@ static
   xmpi ( MPI_Comm_group ( commCalc, &groupCalc ));
   xmpi ( MPI_Group_excl ( groupCalc, 1, ranks, &groupModel ));
 
-  getBufferSize = xmalloc ( nProcsModel * sizeof ( getBufferSize[0] ));  
+  rxWin = xmalloc(nProcsModel * sizeof (rxWin[0]));
   collDefBufferSizes ();
-  xprintArray ( "getBufferSizes", getBufferSize, nProcsModel, DATATYPE_INT );
+  /* xprintArray ( "getBufferSizes", getBufferSize, nProcsModel, DATATYPE_INT ); */
 
   getBuffer     = xmalloc ( nProcsModel * sizeof ( getBuffer[0] ));
   getBufferHead = xmalloc ( nProcsModel * sizeof ( getBufferHead[0] ));
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
-      getBuffer[modelID] = xmalloc ( getBufferSize[modelID] );
+      getBuffer[modelID] = xmalloc(rxWin[modelID].size);
       getBufferHead[modelID] = getBuffer[modelID];
     }
 
@@ -153,13 +156,13 @@ static
        size           < 0    ||
        ID             < 0    ||
        ID             >= commInqNProcsModel () ||
-       getBufferHead[ID] - getBuffer[ID] + size > getBufferSize[ID] )
+       getBufferHead[ID] - getBuffer[ID] + size > rxWin[ID].size )
     {
       sprintf ( text, "caller: %s, line %d, ID = %d, nProcsModel=%d, size = %d, "
-                "getBufferHead[%d] = %d, getBufferSize[%d] = %d",
+                "getBufferHead[%d] = %d, rxWin[%d].size = %d",
                 caller, line, ID, size, ID, commInqNProcsModel (), 
                 getBufferHead[ID] - getBuffer[ID],
-                ID, getBufferSize[ID] );
+                ID, rxWin[ID].size);
       xabort ( text );
     }  
   memcpy ( argBuffer, getBufferHead[ID], size );
@@ -341,10 +344,10 @@ static
             getBuffer              != NULL        &&
             getBuffer[modelID]     != NULL        &&
             getBufferHead          != NULL        &&
-            getBufferSize          != NULL        &&
-            getBufferSize[modelID]  > 0           &&
-            getBufferSize[modelID] <= MAXWINBUFFERSIZE );
-  memset ( getBuffer[modelID], 0, getBufferSize[modelID] );
+            rxWin != NULL &&
+            rxWin[modelID].size > 0 &&
+            rxWin[modelID].size <= MAXWINBUFFERSIZE );
+  memset(getBuffer[modelID], 0, rxWin[modelID].size);
   getBufferHead[modelID] = getBuffer[modelID];
 }
 
@@ -371,24 +374,24 @@ void getData ( int tsID, int vdate, int vtime )
       getFlushBuffer ( modelID );
       xmpi(MPI_Win_get_attr(getWin, MPI_WIN_BASE, &getWinBaseAddr, &attrFound));
       xassert(attrFound);
-      xdebug("modelID=%d, nProcsModel=%d, getBufferSize[%d]=%d,"
+      xdebug("modelID=%d, nProcsModel=%d, rxWin[%d].size=%d,"
              " getWin=%p, sizeof(int)=%u",
-             modelID, nProcsModel, modelID, getBufferSize[modelID],
+             modelID, nProcsModel, modelID, rxWin[modelID].size,
              getWinBaseAddr, (unsigned)sizeof(int));
-      xmpi ( MPI_Get ( &getBuffer[modelID][0], getBufferSize[modelID], 
-                       MPI_UNSIGNED_CHAR, modelID, 0, 
-                       getBufferSize[modelID], MPI_UNSIGNED_CHAR, getWin ));
+      xmpi ( MPI_Get ( &getBuffer[modelID][0], rxWin[modelID].size,
+                       MPI_UNSIGNED_CHAR, modelID, 0,
+                       rxWin[modelID].size, MPI_UNSIGNED_CHAR, getWin ));
     }
   xmpi ( MPI_Win_complete ( getWin ));
 
   if ( ddebug > 2 )
     for ( modelID = 0; modelID < nProcsModel; modelID++ )
       {
-        sprintf ( text, "getBufferSize[%d]=%d from PE%d getBuffer[%d]", 
-                  modelID, getBufferSize[modelID], modelID, modelID );
-        xprintArray ( text, &getBuffer[modelID][0], 
-                      getBufferSize[modelID] / sizeof ( double ), 
-                      DATATYPE_FLT );
+        sprintf(text, "rxWin[%d].size=%d from PE%d getBuffer[%d]",
+                modelID, rxWin[modelID].size, modelID, modelID);
+        xprintArray(text, &getBuffer[modelID][0],
+                    rxWin[modelID].size / sizeof (double),
+                    DATATYPE_FLT);
       }
   readGetBuffers ( tsID, vdate, vtime );
           
