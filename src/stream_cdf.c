@@ -4222,7 +4222,6 @@ void cdfSetVar(ncvar_t *ncvars, int ncvarid, int isvar)
 
   ncvars[ncvarid].isvar = isvar;
 }
-#endif
 
 static
 void cdfSetDim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
@@ -4237,7 +4236,6 @@ void cdfSetDim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
   ncvars[ncvarid].dimtype[dimid] = dimtype;
 }
 
-#ifdef HAVE_LIBNETCDF
 static
 void printNCvars(ncvar_t *ncvars, int nvars)
 {
