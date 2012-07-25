@@ -617,9 +617,9 @@ int fowPOSIXNONB ( const char *filename )
 	    buffersize = atol ( getenv ( "BUFSIZE" ));
 	  if ( buffersize < initial_buffersize )
 	    buffersize = initial_buffersize;
-          xdebug ( "filename=%s, broadcast buffersize=%d to collectors ...", 
-                   filename, buffersize ); 
-	}      
+          xdebug("filename=%s, broadcast buffersize=%ld to collectors ...",
+                 filename, buffersize);
+	}
       xmpi ( MPI_Bcast ( &buffersize, 1, MPI_LONG, root, commInqCommColl ()));
     }
 
