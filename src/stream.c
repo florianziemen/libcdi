@@ -701,7 +701,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
         case STAGE_DEFINITION:
           break;
         case STAGE_TIMELOOP:
-          pioBufferFuncCall ( __func__, 2, filename, filetype );
+          pioBufferFuncCall(STREAMOPEN, 2, filename, filetype);
           break;
         case STAGE_CLEANUP:
           xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
@@ -1216,7 +1216,7 @@ void streamClose(int streamID)
         case STAGE_DEFINITION:
           break;
         case STAGE_TIMELOOP:
-          pioBufferFuncCall ( __func__, 1, streamID );
+          pioBufferFuncCall(STREAMCLOSE, 1, streamID);
           break;
         case STAGE_CLEANUP:
         break;
@@ -2085,7 +2085,7 @@ void streamDefVlist(int streamID, int vlistID)
       case STAGE_DEFINITION:
         break;
       case STAGE_TIMELOOP:
-        pioBufferFuncCall ( __func__, 2, streamID, vlistID );
+        pioBufferFuncCall(STREAMDEFVLIST, 2, streamID, vlistID);
         break;
       case STAGE_CLEANUP:
         xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );

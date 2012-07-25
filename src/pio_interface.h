@@ -10,7 +10,7 @@
 #include <mpi.h>
 
 void pioBufferData ( int, int, const double *, int );
-void pioBufferFuncCall ( const char *, int, ... );
+void pioBufferFuncCall(int, int, ... );
 
 #endif
 

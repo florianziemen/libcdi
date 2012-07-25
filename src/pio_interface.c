@@ -517,21 +517,7 @@ void pioBufferData ( const int streamID, const int varID, const double *data, in
 
 /************************************************************************/
 
-int func2Int ( const char * func )
-{
-  int iret = CDI_UNDEFID, funcID;
-
-  for ( funcID = 0; funcID < nFuncs; funcID ++ )
-    if ( strlen ( funcMap[funcID] ) == strlen ( func ) &&
-         memcmp ( func, funcMap[funcID], strlen ( func )) == 0 )
-      iret = funcID;
-
-  return iret;
-}
-
-/************************************************************************/
-
-void pioBufferFuncCall ( const char * func, int argc, ... )
+void pioBufferFuncCall(int funcID, int argc, ... )
 {
   va_list ap;
   int rankGlob = commInqRankGlob ();
@@ -539,16 +525,14 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
   int collID, nProcsColl = commInqNProcsColl ();
   int tokenSep = SEPARATOR, tokenFuncCall = FUNCCALL;
   size_t size = 0;
-  int funcID = func2Int ( func );
 
   xdebug("%s", "START");
 
   if ( rankGlob != root ) return;
 
-  xassert ( func          != NULL                 &&
-            argc          >= 1                    &&
-            argc          <= 2                    &&
-            txWin != NULL);
+  xassert (argc          >= 1                    &&
+           argc          <= 2                    &&
+           txWin != NULL);
 
   va_start ( ap, argc );
 
