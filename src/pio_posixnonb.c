@@ -575,7 +575,7 @@ int fcPOSIXNONB ( int id )
 
 int fowPOSIXNONB ( const char *filename )
 {
-  static aFiledataP *afd;
+  aFiledataP *afd;
   static long buffersize = 0; 
   int root = 0, id, iret, messageLength = 32;
   char message[messageLength];

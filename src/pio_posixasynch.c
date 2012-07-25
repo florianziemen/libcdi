@@ -673,7 +673,7 @@ int fcPOSIXASYNCH ( int id )
 
 int fowPOSIXASYNCH ( const char *filename )
 {
-  static aFiledataPA *afd;
+  aFiledataPA *afd;
   static long buffersize = 0; 
   int root = 0, iret, id, messageLength = 32;
   char message[messageLength];
