@@ -1537,11 +1537,11 @@ void iegWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   int fileID;
   int gridID;
   int zaxisID;
-  double level;
+  /* double level; */
   int datatype;
-  int tsID;
+  /* int tsID; */
   int vlistID;
-  int param, date, time, datasize;
+  /* int param, date, time, datasize; */
   iegrec_t *iegp;
   stream_t *streamptr;
 
@@ -1550,18 +1550,18 @@ void iegWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   iegp     = streamptr->record->iegp;
   vlistID  = streamInqVlist(streamID);
   fileID   = streamInqFileID(streamID);
-  tsID     = streamptr->curTsID;
+  /* tsID     = streamptr->curTsID; */
   gridID   = vlistInqVarGrid(vlistID, varID);
   zaxisID  = vlistInqVarZaxis(vlistID, varID);
-  level    = zaxisInqLevel(zaxisID, levID);
+  /* level    = zaxisInqLevel(zaxisID, levID); */
 
   if ( CDI_Debug )
     Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
-  param = vlistInqVarParam(vlistID, varID);
-  date = streamptr->tsteps[tsID].taxis.vdate;
-  time = streamptr->tsteps[tsID].taxis.vtime;
-  datasize = gridInqSize(gridID);
+  /* param = vlistInqVarParam(vlistID, varID); */
+  /* date = streamptr->tsteps[tsID].taxis.vdate; */
+  /* time = streamptr->tsteps[tsID].taxis.vtime; */
+  /* datasize = gridInqSize(gridID); */
 
   datatype = vlistInqVarDatatype(vlistID, varID);
 
