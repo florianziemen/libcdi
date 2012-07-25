@@ -105,6 +105,7 @@ int destroyAFiledataMPINONB ( void *v )
 
   startTime = MPI_Wtime ();
   xmpi ( MPI_Wait ( & ( of->request ), &status )); 
+  xmpi(MPI_Barrier(commInqCommNode()));
   accumWait += ( MPI_Wtime () - startTime );
   iret = MPI_File_sync ( of->fh ); 
   iret = MPI_File_close ( & ( of->fh ));
