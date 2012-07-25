@@ -362,7 +362,7 @@ void getData ( int tsID, int vdate, int vtime )
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
       getFlushBuffer ( modelID );
-      xdebug("modelID=%d, nProcsModel=%d, rxWin[%d].size=%d,"
+      xdebug("modelID=%d, nProcsModel=%d, rxWin[%d].size=%zu,"
              " getWin=%p, sizeof(int)=%u",
              modelID, nProcsModel, modelID, rxWin[modelID].size,
              getWinBaseAddr, (unsigned)sizeof(int));
@@ -375,7 +375,7 @@ void getData ( int tsID, int vdate, int vtime )
   if ( ddebug > 2 )
     for ( modelID = 0; modelID < nProcsModel; modelID++ )
       {
-        sprintf(text, "rxWin[%d].size=%d from PE%d rxWin[%d].buffer",
+        sprintf(text, "rxWin[%d].size=%zu from PE%d rxWin[%d].buffer",
                 modelID, rxWin[modelID].size, modelID, modelID);
         xprintArray(text, rxWin[modelID].buffer,
                     rxWin[modelID].size / sizeof (double),
