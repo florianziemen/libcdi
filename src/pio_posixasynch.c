@@ -277,7 +277,8 @@ bool compareNamesBPA  ( void *v1, void *v2 )
 
 /***************************************************************/
 
-void writePA ( bFiledataPA *bfd, long amount )
+static void
+writePA(bFiledataPA *bfd, long amount)
 {
   const struct aiocb *ccBP[1];
   int iret;

@@ -219,7 +219,8 @@ bool compareNamesBP  ( void *v1, void *v2 )
 
 /***************************************************************/
 
-void writeP ( bFiledataP *bfd, long amount )
+static void
+writeP(bFiledataP *bfd, long amount)
 {
   long written;
   char errorString[maxErrorString];
@@ -271,7 +272,7 @@ void pwPOSIXNONB ( void )
 {
   bFiledataP *bfd; 
   queue_t * bibBFiledataP;
-  long amount, buffersize;
+  size_t amount, buffersize;
   char *messageBuffer = NULL;
   char *pMB, *filename, *temp;
   int messagesize, source, tag, i, len, id;
@@ -324,12 +325,11 @@ void pwPOSIXNONB ( void )
 	  temp =  strtok ( pMB, token );
           buffersize =  strtol ( temp, NULL, 16 );
 	  pMB += ( strlen ( temp ) + 1 );
-	  amount = ( long ) ( messageBuffer + messagesize - pMB );
+	  amount = (size_t)(messageBuffer + messagesize - pMB);
 	  
-	  xdebug ( "command %s, filename=%s, "
-                   "buffersize=%ld, amount=%ld",
-                   command2charP [ rtag->command ], filename, 
-                   buffersize, amount ); 
+	  xdebug("command %s, filename=%s, buffersize=%zu, amount=%zu",
+                 command2charP [ rtag->command ], filename,
+                 buffersize, amount);
 	  
 	  
 	  if ( !(bfd = ( bFiledataP * ) queueIdx2val ( bibBFiledataP, 
@@ -347,9 +347,9 @@ void pwPOSIXNONB ( void )
 
 	  *( bfd->nfinished + source ) = false;
 
-	  memcpy ( bfd->fb->buffer, pMB, ( int ) amount );
+	  memcpy(bfd->fb->buffer, pMB, amount);
 
-	  writeP ( bfd, amount );
+	  writeP(bfd, amount);
 	  
 	  free ( messageBuffer );
 
@@ -383,8 +383,9 @@ void pwPOSIXNONB ( void )
 
           amount = messagesize;
 
-	  xdebug ( "COMMAND %s, ID=%d, NAME=%s, AMOUNT=%ld", 
-                   command2charP [ rtag->command ], rtag->id, bfd->name, amount );
+	  xdebug("COMMAND %s, ID=%d, NAME=%s, AMOUNT=%zu",
+                 command2charP [ rtag->command ], rtag->id, bfd->name,
+                 amount);
 	  
 	  xmpi ( MPI_Recv (  bfd->fb->buffer, amount, MPI_CHAR, source,  tag, 
                              commNode, &status ));	
