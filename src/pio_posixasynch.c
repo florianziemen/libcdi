@@ -112,7 +112,7 @@ destroyBFiledataPA ( void *v )
 
   /* close file */
 
-  for (; bfd->prefIndex > 0 ; bfd->prefIndex --)
+  for (; bfd->prefIndex > 0 ; --(bfd->prefIndex))
     {
       xdebug("file: %s, prefIndex=%d", bfd->name, (int)bfd->prefIndex);
       ccBP[0] = ( bfd->ctrlBlks + nextFinishOp );
