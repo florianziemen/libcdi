@@ -338,9 +338,8 @@ writePF(aFiledataPF *afd, int id)
   xmpi ( MPI_Sendrecv ( &amountL, 1, MPI_LONG, specialRank, tag,
                         &offset, 1, MPI_LONG, specialRank, tag,
                         commNode, &status ));
-  xdebug ( "id=%d, command=%d, amount=%llu, send amountL=%ld, recv offset=%ld", 
-           id, afd->command, (unsigned long long)amount,
-           amountL, offset );
+  xdebug ( "id=%d, command=%d, amount=%zu, send amountL=%ld, recv offset=%ld", 
+           id, afd->command, amount, amountL, offset );
   
   /* write buffer */
   
@@ -353,9 +352,8 @@ writePF(aFiledataPF *afd, int id)
     xabort("fileId=%d, expect to write %zu byte, written %zu byte",
            id, amount, written);
  
-  xdebug ( "written %llu bytes in file %d with offset %ld", 
-           (unsigned long long) written,
-           id, offset ); 
+  xdebug("written %zu bytes in file %d with offset %ld",
+         written, id, offset);
   
   /* change outputBuffer */
   
