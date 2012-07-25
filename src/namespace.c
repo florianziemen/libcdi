@@ -70,6 +70,7 @@ namespaceTuple_t namespaceResHDecode ( int resH )
 
 void namespaceInit ( int nspn, int * argHasLocalFile )
 {
+  /* FIXME: this should not be PIO-only */
 #ifdef USE_MPI
   int nspID;
 
