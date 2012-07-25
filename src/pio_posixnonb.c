@@ -33,21 +33,21 @@ typedef struct
   size_t size;
   struct dBuffer *fb;
   FILE *fp;
+  int fileID;
   bool finished;
   bool *nfinished;
-  int idx;
 } bFiledataP;
 
 static int
-idxTest(void *a, void *idx)
+fileIDTest(void *a, void *fileID)
 {
-  return ((bFiledataP *)a)->idx == (int)(intptr_t)idx;
+  return ((bFiledataP *)a)->fileID == (int)(intptr_t)fileID;
 }
 
 /***************************************************************/
 
 static bFiledataP *
-initBFiledataP(char *filename, size_t bs, int nc, int idx)
+initBFiledataP(char *filename, size_t bs, int nc, int fileID)
 {
   bFiledataP * bfp;
   int i;
@@ -71,7 +71,7 @@ initBFiledataP(char *filename, size_t bs, int nc, int idx)
   for ( i = 0; i < nc; i++ )
     bfp->nfinished[i] = false;
 
-  bfp->idx = idx;
+  bfp->fileID = fileID;
 
   xdebug ( "filename=%s, opened file, return", bfp->name );
 
@@ -211,7 +211,7 @@ pioWriterStdIO(void)
                  buffersize, amount);
 	  
 	  
-          if (!(bfd = queueGet(bibBFiledataP, idxTest,
+          if (!(bfd = queueGet(bibBFiledataP, fileIDTest,
                                (void *)(intptr_t)rtag->id)))
 	    {
 	      queueForeach(bibBFiledataP, elemCheck, filename);
@@ -235,7 +235,7 @@ pioWriterStdIO(void)
 
 	case IO_Send_buffer:
 
-          if (!(bfd = queueGet(bibBFiledataP, idxTest,
+          if (!(bfd = queueGet(bibBFiledataP, fileIDTest,
                                (void *)(intptr_t)rtag->id)))
             xabort("fileID=%d is not in queue", rtag->id );
 
@@ -257,7 +257,7 @@ pioWriterStdIO(void)
 	  xdebug ( "COMMAND %s,  FILE%d, SOURCE%d", 
                    command2charP [ rtag->command ],  rtag->id, source );
 
-          if (!(bfd = queueGet(bibBFiledataP, idxTest,
+          if (!(bfd = queueGet(bibBFiledataP, fileIDTest,
                                (void *)(intptr_t)rtag->id)))
             xabort("fileID=%d is not in queue", rtag->id);
 
@@ -287,7 +287,7 @@ pioWriterStdIO(void)
 	  if ( bfd->finished )
 	    {
 	      xdebug ( "all are finished with file %d, delete node", rtag->id );
-	      queueDelNode(bibBFiledataP, idxTest, (void *)(intptr_t)rtag->id);
+	      queueDelNode(bibBFiledataP, fileIDTest, (void *)(intptr_t)rtag->id);
 	    }
           break;
         case IO_Finalize:
