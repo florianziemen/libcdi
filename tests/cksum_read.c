@@ -125,7 +125,6 @@ int main(int argc, char *argv[])
       }
     if (!(tablefp = fopen(table_fname, "r")))
       {
-        fputs("bla\n", stderr);
         perror("failed to open table file");
         exit(EXIT_FAILURE);
       }
