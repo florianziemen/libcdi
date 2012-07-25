@@ -332,7 +332,7 @@ int fowMPINONB ( const char *filename )
       xmpi ( MPI_Bcast ( &buffersize, 1, MPI_LONG, bcastRank, commNode ));
     }
 
-  xdebug ( "buffersize=%d", buffersize );
+  xdebug("buffersize=%ld", buffersize);
 
   queueCheck (  bibAFiledataM, filename );
   of = initAFiledataMPINONB ( filename, buffersize );
