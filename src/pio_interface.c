@@ -256,7 +256,7 @@ static void
 varsMapNDeco(int nNodes, int *nodeSizes)
 {
   int nStreams, nVars, * resHs, * streamSizes, * varSizes, * varMapping,
-    * collectsData, vlistResH;
+    * collectsData;
   int i, j, k = 0;
   int nProcsColl = commInqNProcsColl ();
   char text[1024];
