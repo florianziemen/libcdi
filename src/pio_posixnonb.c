@@ -53,8 +53,6 @@ typedef struct
 static queue_t * bibAFiledataP;
 
 
-int errclass, ierr, resultlen;
-
 /***************************************************************/
 
 static aFiledataP *initAFiledataP ( const char *filename, size_t bs )
