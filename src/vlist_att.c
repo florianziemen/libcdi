@@ -417,11 +417,10 @@ The function @func{vlistInqAttInt} gets the values(s) of an integer attribute.
 */
 int vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int *ip)
 {
-  int status = CDI_NOERR;
-
-  status = vlist_inq_att(DATATYPE_INT, vlistID, varID, name, mlen*sizeof(int), (void *) ip);
-
-  return (CDI_NOERR);
+  int status
+    = vlist_inq_att(DATATYPE_INT, vlistID, varID, name,
+                    mlen*sizeof(int), (void *) ip);
+  return status;
 }
 
 /*
