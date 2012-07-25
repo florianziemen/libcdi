@@ -191,12 +191,13 @@ int destroyBFiledataPA ( void *v )
   int iret = 0;
   ssize_t ssiret;
 
-  xdebug ( "filename=%s, cleanup and close file, in", bfd->name );
+  xdebug ( "filename=%s, cleanup and close file", bfd->name );
 
   /* close file */
 
   while ( bfd->prefIndex > 0 ) 
     {
+      xdebug("file: %s, prefIndex=%d", bfd->name, (int)bfd->prefIndex);
       ccBP[0] = ( bfd->ctrlBlks + bfd->nextOpIndex );
 
       if ( ddebug )
@@ -373,7 +374,6 @@ void pwPOSIXASYNCH ( void )
   long amount, buffersize;
   char *messageBuffer, *pMB, *filename, *temp;
   int messagesize, source, tag, i, id;
-  size_t len;
   tag_t *rtag;
   MPI_Status status;
   MPI_Comm commNode = commInqCommNode ();
@@ -444,11 +444,11 @@ void pwPOSIXASYNCH ( void )
 	  bfd->currOpIndex = bfd->nextOpIndex;
 	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
 
-	  memcpy ( bfd->fb->buffer + ( bfd->currOpIndex * bfd->size ), 
+	  memcpy ( bfd->fb->buffer + ( bfd->currOpIndex * bfd->size ),
                    pMB, ( int ) amount );
 
 	  writePA ( bfd, amount );
-	  
+
 	  free ( messageBuffer );
 
 	  break;
@@ -624,7 +624,7 @@ size_t fwPOSIXASYNCH( int id, int tsID, const void *buffer, size_t len )
   flush = ( tsID != afd->tsID ) ? 1 : 0;
   if ( flush == 1 ) 
     {
-      xdebug ( "pe%d fileWriter (): tsID = %d, flush buffer", tsID );
+      xdebug ( "fileWriter (): tsID = %d, flush buffer", tsID );
 
       curr = bibAFiledataPA->head;
 
