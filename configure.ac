@@ -113,7 +113,7 @@ AS_CASE([$with_threads],
 ACX_OPTIONS
 #  ----------------------------------------------------------------------
 # Compile with MPI support
-AC_ARG_ENABLE(mpi,AS_HELP_STRING([--enable-mpi],[Compile with MPI compiler [default=no]]),enable_mpi=${enableval},enable_mpi=no)
+AC_ARG_ENABLE(mpi,AS_HELP_STRING([--enable-mpi],[Compile with MPI compiler [default=no]]),enable_mpi=yes,enable_mpi=no)
 AS_IF([test x"${enable_mpi}" = x"yes"],
       [USE_MPI=yes])
 AS_IF([test x"$USE_MPI" = xyes],
