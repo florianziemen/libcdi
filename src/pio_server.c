@@ -346,7 +346,7 @@ static
 static
 void getData ( int tsID, int vdate, int vtime )
 {
-  int iAssert   = 0, modelID;
+  int modelID;
   char text[1024];
   int nProcsModel = commInqNProcsModel ();
   void *getWinBaseAddr;
@@ -356,7 +356,7 @@ void getData ( int tsID, int vdate, int vtime )
 
   // todo put in correct lbs and ubs
   xassert ( tsID >= 0 && vdate >= 0 && vtime >= 0 );
-  xmpi ( MPI_Win_start ( groupModel, iAssert, getWin )); 
+  xmpi(MPI_Win_start(groupModel, 0, getWin));
   xmpi(MPI_Win_get_attr(getWin, MPI_WIN_BASE, &getWinBaseAddr, &attrFound));
   xassert(attrFound);
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
