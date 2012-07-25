@@ -19,15 +19,7 @@ extern char * command2charP[6];
 
 extern char *token;
 
-extern double accumProbe;
-extern double accumRecv;
-extern double accumSend;
-extern double accumSuspend;
-extern double accumWait;
-extern double accumWrite;
-
-
-typedef struct 
+typedef struct
 {
   size_t size;
   struct dBuffer *fb;
