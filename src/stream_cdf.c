@@ -4807,7 +4807,7 @@ void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
     {
       if ( ncvars[ncvarid].isvar == TRUE )
 	{
-	  int lxdim = 0, lydim = 0, lzdim = 0, ltdim = 0;
+	  int lxdim = 0, lydim = 0, lzdim = 0/* , ltdim = 0 */;
 	  ndims = ncvars[ncvarid].ndims;
 	  for ( i = 0; i < ndims; i++ )
 	    {
@@ -4831,7 +4831,7 @@ void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 	      if      ( ncvars[ncvarid].dimtype[i] == X_AXIS ) lxdim = TRUE;
 	      else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS ) lydim = TRUE;
 	      else if ( ncvars[ncvarid].dimtype[i] == Z_AXIS ) lzdim = TRUE;
-	      else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = TRUE;
+	      else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) /* ltdim = TRUE */;
 	    }
 
 	  for ( i = ndims-1; i >= 0; i-- )
