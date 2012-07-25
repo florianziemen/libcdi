@@ -20,21 +20,20 @@ typedef struct
 {
   char *name;
   size_t size;
-  int tsID;
   struct dBuffer *db1;
   struct dBuffer *db2;
   struct dBuffer *db;
   IO_Server_command command;
   MPI_Request request;
-  int idx;
+  int tsID, fileID;
 } remoteFileBuf;
 
 static queue_t * bibRemoteFileBuf;
 
 static int
-idxTest(void *a, void *idx)
+fileIDTest(void *a, void *fileID)
 {
-  return ((remoteFileBuf *)a)->idx == (int)(intptr_t)idx;
+  return ((remoteFileBuf *)a)->fileID == (int)(intptr_t)fileID;
 }
 
 static remoteFileBuf *
@@ -154,7 +153,7 @@ static void
 flushOp(void *b, void *tsID)
 {
   remoteFileBuf *fb = b;
-  sendP(fb, fb->idx);
+  sendP(fb, fb->fileID);
   defTimestep(fb, (int)(intptr_t)tsID);
 }
 
@@ -167,7 +166,7 @@ pioSendWrite(int id, int tsID, const void *buffer, size_t len)
   int filled;
   remoteFileBuf *afd;
 
-  afd = queueGet(bibRemoteFileBuf, idxTest, (void *)(intptr_t)id);
+  afd = queueGet(bibRemoteFileBuf, fileIDTest, (void *)(intptr_t)id);
 
   flush = ( tsID != afd->tsID ) ? 1 : 0;
 
@@ -219,14 +218,14 @@ pioSendClose(int id)
 
   xdebug ( "fileID %d: send buffer, close file and cleanup",id );
 
-  afd = queueGet(bibRemoteFileBuf, idxTest, (void *)(intptr_t)id);
+  afd = queueGet(bibRemoteFileBuf, fileIDTest, (void *)(intptr_t)id);
 
   afd->command = IO_Close_file;
 
   sendP(afd, id);
 
   /* dequeue file element */
-  iret = queueDelNode(bibRemoteFileBuf, idxTest, (void *)(intptr_t)id);
+  iret = queueDelNode(bibRemoteFileBuf, fileIDTest, (void *)(intptr_t)id);
 
   /* timer output */
   if ( ddebug )
