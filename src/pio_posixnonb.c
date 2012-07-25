@@ -160,17 +160,13 @@ int destroyBFiledataP ( void *v )
 {
   int iret = 0;
   bFiledataP *bfp = ( bFiledataP * ) v;
-  char errorString[maxErrorString];
 
   xdebug ( "filename=%s, cleanup, in",  bfp->name );
 
   /* close file */
 
   if (( iret = fclose ( bfp->fp )) == EOF )
-    {
-      sprintf ( errorString, "Failed to close %s", bfp->name );
-      xabort ( errorString );
-    }
+    xabort("Failed to close %s", bfp->name);
 
   /* file closed, cleanup */
 
@@ -344,18 +340,11 @@ void pwPOSIXNONB ( void )
 	      bfd = ( bFiledataP * ) initBFiledataP ( filename, buffersize, nProcsCollNode );
 	      
 	      if (( id = queuePush ( bibBFiledataP, bfd, 1, rtag->id )) != rtag->id )
-		{   
-		  sprintf ( errorString, "fileID=%d not unique", rtag->id );
-		  xabort ( errorString );
-		}	      
+                xabort("fileID=%d not unique", rtag->id);
 	    }
 	  else
-	    if ((( len = strlen ( filename )) != ( int ) strlen ( bfd->name )) || 
-		memcmp ( filename, bfd->name, len ) != 0 )
-	      {
-		  sprintf ( errorString, "filename is not consistant, fileID=%d", rtag->id );
-		  xabort ( errorString );
-	      }
+	    if (strcmp(filename, bfd->name) != 0)
+              xabort("filename is not consistent, fileID=%d", rtag->id);
 
 	  *( bfd->nfinished + source ) = false;
 

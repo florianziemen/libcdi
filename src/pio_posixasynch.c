@@ -220,10 +220,7 @@ int destroyBFiledataPA ( void *v )
     }
 
   if (( iret = close ( bfd->handle )) == -1 )
-    {
-      sprintf ( errorString, "failed to close %s", bfd->name );
-      xabort ( errorString );
-    }
+    xabort("failed to close %s", bfd->name);
 
   /* file closed, cleanup */
 
@@ -435,21 +432,13 @@ void pwPOSIXASYNCH ( void )
 								 buffersize,  
 							       nProcsCollNode );
 	      if (( id = queuePush ( bibBFiledataPA, bfd, 1, rtag->id )) != rtag->id )
-		{
-		  sprintf ( errorString, "fileID=%d not unique", rtag->id );
-		  xabort ( errorString );
-		} 	      
+                xabort("fileID=%d not unique", rtag->id);
 	    }
 	  else
-	    if ((( len = strlen ( filename )) != strlen ( bfd->name )) || 
-		memcmp ( filename, bfd->name, len ) != 0 )
-	      {
-		sprintf ( errorString, "filename is not consistant, fileID=%d", rtag->id );
-		xabort ( errorString );
-	      }
+	    if (strcmp(filename, bfd->name) != 0)
+              xabort("filename is not consistent, fileID=%d", rtag->id);
 
 	  *( bfd->nfinished + source ) = false;
-		 
 
 	  bfd->currOpIndex = bfd->nextOpIndex;
 	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
