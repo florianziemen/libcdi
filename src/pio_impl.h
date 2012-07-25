@@ -79,14 +79,18 @@ size_t    fwMPINONB( int, int, const void *, size_t );
 void      initMPINONB ( void );
 void      finalizeMPINONB ( void );
 
+
+/* common functionality for file split between collectors and writer(s) */
+int pioSendClose(int);
+int pioSendOpen(const char *);
+size_t pioSendWrite(int, int, const void *, size_t);
+void pioSendInitialize(void);
+void pioSendFinalize(void);
+
+
 /* pio_posixasynch.c */
 #ifndef _SX
-void      pwPOSIXASYNCH ( void );
-int       fowPOSIXASYNCH ( const char * );
-int       fcPOSIXASYNCH ( int );
-size_t    fwPOSIXASYNCH( int, int, const void *, size_t );
-void      initPOSIXASYNCH ( void );
-void      finalizePOSIXASYNCH ( void );
+void pioWriterAIO(void);
 #endif
 
 /* pio_posixfpguardsendrecv.c */
@@ -98,12 +102,7 @@ void      initPOSIXFPGUARDSENDRECV ( void );
 void      finalizePOSIXFPGUARDSENDRECV ( void );
 
 /* pio_posixnonb.c */
-void      pwPOSIXNONB ( void );
-int       fowPOSIXNONB ( const char * );
-int       fcPOSIXNONB ( int );
-size_t    fwPOSIXNONB( int, int, const void *, size_t );
-void      initPOSIXNONB ( void );
-void      finalizePOSIXNONB ( void );
+void pioWriterStdIO(void);
 
 #endif
 #endif

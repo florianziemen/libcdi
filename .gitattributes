@@ -227,6 +227,7 @@ src/pio_posixasynch.c -text
 src/pio_posixfpguardsendrecv.c -text
 src/pio_posixnonb.c -text
 src/pio_queue.c -text
+src/pio_record_send.c -text
 src/pio_rpc.c -text
 src/pio_rpc.h -text
 src/pio_server.c -text

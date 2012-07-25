@@ -74,14 +74,12 @@ size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
       break;
 #ifndef _SX
     case PIO_ASYNCH:
-      iret = fwPOSIXASYNCH ( fileID, tsID, buffer, len );
-      break;
 #endif
+    case PIO_WRITER:
+      iret = pioSendWrite(fileID, tsID, buffer, len);
+      break;
     case PIO_FPGUARD:
       iret = fwPOSIXFPGUARDSENDRECV ( fileID, tsID, buffer, len );
-      break;
-    case PIO_WRITER:
-      iret = fwPOSIXNONB ( fileID, tsID, buffer, len );
       break;
     }
 
@@ -100,14 +98,12 @@ int pioFileClose ( int id )
       break;
 #ifndef _SX
     case PIO_ASYNCH:
-      iret = fcPOSIXASYNCH ( id );
-      break;
 #endif
+    case PIO_WRITER:
+      iret = pioSendClose(id);
+      break;
     case PIO_FPGUARD:
       iret = fcPOSIXFPGUARDSENDRECV ( id );
-      break;
-    case PIO_WRITER:
-      iret = fcPOSIXNONB ( id );
       break;
     }
 
@@ -127,14 +123,12 @@ int pioFileOpenW ( const char *filename )
       break;
 #ifndef _SX
     case PIO_ASYNCH:
-      iret = fowPOSIXASYNCH ( filename );
-      break;
 #endif
+    case PIO_WRITER:
+      iret = pioSendOpen(filename);
+      break;
     case PIO_FPGUARD:
       iret = fowPOSIXFPGUARDSENDRECV ( filename );
-      break;
-    case PIO_WRITER:
-      iret = fowPOSIXNONB ( filename );
       break;
     }
 
@@ -164,14 +158,12 @@ void backendInit ( void )
       break;
 #ifndef _SX
     case PIO_ASYNCH:
-      initPOSIXASYNCH ();
-      break;
 #endif
+    case PIO_WRITER:
+      pioSendInitialize();
+      break;
     case PIO_FPGUARD:
       initPOSIXFPGUARDSENDRECV ();
-      break;
-    case PIO_WRITER:
-      initPOSIXNONB ();
       break;
     }
 }
@@ -188,14 +180,14 @@ void backendCleanup ( void )
     case PIO_MPI:
       finalizeMPINONB ();
       break;
+#ifndef _SX
     case PIO_ASYNCH:
-      finalizePOSIXASYNCH ();
+#endif
+    case PIO_WRITER:
+      pioSendFinalize();
       break;
     case PIO_FPGUARD:
       finalizePOSIXFPGUARDSENDRECV ();
-      break;
-    case PIO_WRITER:
-      finalizePOSIXNONB ();
       break;
     default:
       xdebug("%s", " BACKENDCLEANUP FUNCTION NOT IMPLEMENTED YET.");
