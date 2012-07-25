@@ -80,7 +80,7 @@ void modelRun (struct model_config setup, MPI_Comm comm)
   int nlon = setup.nlon, nlat = setup.nlat;
   uint32_t checksum_state[nVars];
   size_t varSize[nVars];
-  int *chunks, *displs;
+  int *chunks = NULL, *displs = NULL;
 
 #if USE_MPI
   xmpi ( MPI_Comm_rank ( comm, &rank ));
