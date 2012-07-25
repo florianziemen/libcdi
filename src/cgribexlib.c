@@ -8512,7 +8512,7 @@ void repair1(unsigned char *gbuf, long gbufsize)
   int recLen;
   unsigned char *source;
   size_t sourceLen;
-  int bds_len, bds_nbits, bds_flag, lspherc, lcomplex, lcompress;
+  int bds_len, bds_nbits, bds_flag, lspherc, lcomplex/* , lcompress */;
   int bds_head = 11;
   int bds_ext = 0, bds_ubits;
   int datstart = 0;
@@ -8533,7 +8533,7 @@ void repair1(unsigned char *gbuf, long gbufsize)
   bds_ubits = bds_flag & 15;
   lspherc   =  bds_flag >> 7;
   lcomplex  = (bds_flag >> 6)&1;
-  lcompress = (bds_flag >> 4)&1;
+  /* lcompress = (bds_flag >> 4)&1; */
 
   if ( lspherc )
     {
