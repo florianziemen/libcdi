@@ -658,9 +658,9 @@ int fowPOSIXNONB ( const char *filename )
       l = strlen ( filename ) + strlen ( message ) + 2; 
       temp = xmalloc (( l + 1 ) * sizeof ( char ));
       strncpy ( temp, ( char * ) afd->db->buffer, ( size_t ) l );
-      *( temp + l )  = '\0';
-      xdebug ( "filename=%s, put Open file message on buffer:\n%s,\t return", 
-		filename, temp ); 
+      temp[l]  = '\0';
+      xdebug("filename=%s, put Open file message on buffer:\n%s,\t return",
+               filename, temp);
       free ( temp );
     }
 

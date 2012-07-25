@@ -745,11 +745,19 @@ int fowPOSIXASYNCH ( const char *filename )
   sprintf ( message,"%lX", buffersize); 
   iret = dbuffer_push ( afd->db,  ( unsigned char *) message, 
                         strlen ( message ));
-  iret = dbuffer_push ( afd->db,  ( unsigned char *) token, 1); 
-  
-  xdebug ( "filename=%s, put Open file message on buffer:\n%s\n return", 
-           filename, afd->db->buffer ); 
-  
+  iret = dbuffer_push ( afd->db,  ( unsigned char *) token, 1);
+
+  if ( ddebug )
+    {
+      size_t l = strlen(filename) + strlen(message) + 2;
+      char *temp = xmalloc(l + 1);
+      strncpy(temp, (char *)afd->db->buffer, l);
+      temp[l]  = '\0';
+      xdebug ( "filename=%s, put Open file message on buffer:\n%s,\t return",
+           filename, temp);
+      free(temp);
+    }
+
   return id;
 }
 
