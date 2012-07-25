@@ -378,7 +378,6 @@ void pwPOSIXASYNCH ( void )
   tag_t *rtag;
   MPI_Status status;
   MPI_Comm commNode = commInqCommNode ();
-  char errorString[maxErrorString];
   int nProcsCollNode = commInqSizeNode () - commInqSizeColl ();
   bool * sentFinalize, doFinalize;
 
@@ -455,14 +454,10 @@ void pwPOSIXASYNCH ( void )
 	  break;
 
 	case IO_Send_buffer:
-	  
-	  if ( ! ( bfd = ( bFiledataPA * ) queueIdx2val ( bibBFiledataPA,  
-							  rtag->id )))
-	    {
-	      sprintf ( errorString, "fileID=%d is not in queue", rtag->id );
-	      xabort ( errorString );
-	    }
-	  
+
+	  if (!(bfd = (bFiledataPA *)queueIdx2val(bibBFiledataPA, rtag->id)))
+            xabort("fileID=%d is not in queue", rtag->id);
+
 	  amount = messagesize;
 
 	  xdebug ( "command: %s, id=%d, name=%s", 
@@ -479,14 +474,10 @@ void pwPOSIXASYNCH ( void )
 	  break;
 
 	case IO_Close_file:
-	  
-	  if ( ! ( bfd = ( bFiledataPA * ) queueIdx2val ( bibBFiledataPA,  
-							  rtag->id )))
-	    {
-	      sprintf ( errorString, "fileID=%d is not in queue", rtag->id );
-	      xabort ( errorString );
-	    }
-	  
+
+	  if (!(bfd = (bFiledataPA *)queueIdx2val(bibBFiledataPA, rtag->id)))
+            xabort("fileID=%d is not in queue", rtag->id );
+
 	  amount = messagesize;
 
 	  xdebug ( " command %s, id=%d, name=%s", 
