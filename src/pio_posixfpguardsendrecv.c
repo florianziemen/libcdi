@@ -111,8 +111,8 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
 }
 
 /***************************************************************/
-
-bFiledataPF * initBFiledataPF ( int key, int nc )
+static bFiledataPF *
+initBFiledataPF(int key, int nc)
 {
   bFiledataPF *bfd;
   int i;
@@ -131,24 +131,21 @@ bFiledataPF * initBFiledataPF ( int key, int nc )
 
 /***************************************************************/
 
-int destroyAFiledataPF ( void *v )
+static int
+destroyAFiledataPF(void *v)
 {
   int iret = 0;
   aFiledataPF *afd = ( aFiledataPF * ) v;
 
   /* close file */
-  
-  xdebug ( "name=%s, close file",  afd->name );
-       
-  if (( iret = fclose ( afd->fp )) == EOF )
+  xdebug("name=%s, close file", afd->name);
+  if ((iret = fclose(afd->fp)) == EOF)
     xabort("Failed to close %s", afd->name);
 
   /* file closed, cleanup */
-
-  xdebug ( "name=%s, file closed, cleanup ...",  afd->name );
-  
-  dbuffer_cleanup ( &( afd->db1 ));
-  dbuffer_cleanup ( &( afd->db2 ));
+  xdebug("name=%s, file closed, cleanup ...",  afd->name);
+  dbuffer_cleanup(&(afd->db1));
+  dbuffer_cleanup(&(afd->db2));
 
   free(afd);
 
@@ -334,7 +331,8 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 
 //*******************************************************
 
-void writePF ( aFiledataPF *afd, int id )
+static void
+writePF(aFiledataPF *afd, int id)
 {
   size_t amount, written;
   long offset;
