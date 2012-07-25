@@ -37,20 +37,19 @@ extern double accumWrite;
 typedef struct 
 {
   char *name;
-  int tsID;
   size_t size;
   struct dBuffer *db1;
   struct dBuffer *db2;
   struct dBuffer *db;
   FILE *fp;
   IO_Server_command command;
-  int idx;
+  int tsID, fileID;
 } aFiledataPF;
 
 static int
-idxTestA(void *a, void *idx)
+fileIDTestA(void *a, void *fileID)
 {
-  return ((aFiledataPF *)a)->idx == (int)(intptr_t)idx;
+  return ((aFiledataPF *)a)->fileID == (int)(intptr_t)fileID;
 }
 
 typedef struct 
@@ -58,19 +57,19 @@ typedef struct
   long offset;
   bool finished;
   bool *nfinished;
-  int idx;
+  int fileID;
 } bFiledataPF;
 
 static int
-idxTestB(void *a, void *idx)
+fileIDTestB(void *a, void *fileID)
 {
-  return ((bFiledataPF *)a)->idx == (int)(intptr_t)idx;
+  return ((bFiledataPF *)a)->fileID == (int)(intptr_t)fileID;
 }
 
 static bool
-idxCmpB(void *a, void *b)
+fileIDCmpB(void *a, void *b)
 {
-  return ((bFiledataPF *)a)->idx == ((bFiledataPF *)b)->idx;
+  return ((bFiledataPF *)a)->fileID == ((bFiledataPF *)b)->fileID;
 }
 
 static queue_t *bibAFiledataPF;
@@ -216,7 +215,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 
   xdebug ( "ncollectors=%d on this node", nProcsCollNode );
   
-  bibBFiledataPF = queueInit ( destroyBFiledataPF, idxCmpB);
+  bibBFiledataPF = queueInit ( destroyBFiledataPF, fileIDCmpB);
   sentFinalize = xmalloc ( nProcsCollNode * sizeof ( sentFinalize[0] ));
 
   for ( ;; )
@@ -233,7 +232,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
       	{
       	case IO_Open_file:
 
-          if (!(bfd = queueGet(bibBFiledataPF, idxTestB,
+          if (!(bfd = queueGet(bibBFiledataPF, fileIDTestB,
                                (void *)(intptr_t)rtag->id)))
 	    {
 	      bfd = ( bFiledataPF * ) initBFiledataPF ( rtag->id, 
@@ -266,7 +265,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 
 	case IO_Set_fp:
 
-          if (!(bfd = queueGet(bibBFiledataPF, idxTestB,
+          if (!(bfd = queueGet(bibBFiledataPF, fileIDTestB,
                                (void *)(intptr_t)rtag->id)))
 	      {
 		sprintf ( errorString, "fileId=%d not in queue", rtag->id );
@@ -291,7 +290,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 
 	case IO_Close_file:
 
-          if (!(bfd = queueGet(bibBFiledataPF, idxTestB,
+          if (!(bfd = queueGet(bibBFiledataPF, fileIDTestB,
                                (void *)(intptr_t)rtag->id)))
 	      {
 		sprintf ( errorString, "fileId=%d not in queue", rtag->id );
@@ -324,7 +323,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 	      }
 
 	  if ( bfd->finished )
-            queueDelNode(bibBFiledataPF, idxTestB, (void *)(intptr_t)rtag->id);
+            queueDelNode(bibBFiledataPF, fileIDTestB, (void *)(intptr_t)rtag->id);
           break;
         case IO_Finalize:
           {  
@@ -441,7 +440,7 @@ void defTimestepPF ( aFiledataPF *afd, int tsID)
 static void
 flushOp(void *a, void *tsID)
 {
-  writePF((aFiledataPF *)a, ((aFiledataPF *)a)->idx);
+  writePF((aFiledataPF *)a, ((aFiledataPF *)a)->fileID);
   defTimestepPF((aFiledataPF *)a, (int)(intptr_t)tsID);
 }
 
@@ -454,7 +453,7 @@ size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t 
   aFiledataPF *afd;
   char errorString[maxErrorString];                                          
 
-  afd = queueGet(bibAFiledataPF, idxTestA, (void *)(intptr_t)fileID);
+  afd = queueGet(bibAFiledataPF, fileIDTestA, (void *)(intptr_t)fileID);
 
   flush = ( tsID != afd->tsID ) ? 1 : 0;
 
@@ -500,7 +499,7 @@ int fcPOSIXFPGUARDSENDRECV ( int id )
 
   xdebug("write buffer, close file %d and cleanup", id);
 
-  afd = queueGet(bibAFiledataPF, idxTestA, (void *)(intptr_t)id);
+  afd = queueGet(bibAFiledataPF, fileIDTestA, (void *)(intptr_t)id);
 
   afd->command = IO_Close_file;
 
@@ -508,7 +507,7 @@ int fcPOSIXFPGUARDSENDRECV ( int id )
 
   /* dequeue file element */
 
-  iret = queueDelNode(bibAFiledataPF, idxTestA, (void *)(intptr_t)id);
+  iret = queueDelNode(bibAFiledataPF, fileIDTestA, (void *)(intptr_t)id);
 
   return iret;
 }
