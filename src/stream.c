@@ -1641,7 +1641,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
           return;
         case STAGE_CLEANUP:
           xabort ( "CLEANUP STAGE: PARALLEL WRITING NOT POSSIBLE." );
-        break;
+          break;
         default:
           xabort ( "INTERNAL ERROR" );
         }

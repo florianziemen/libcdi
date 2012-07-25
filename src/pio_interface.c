@@ -35,7 +35,7 @@ char * funcMap[nFuncs] = {"streamOpen", "streamDefVlist", "streamClose" };
 
 /****************************************************/
 
-int cmp ( const void * va, const void * vb )
+static int cmp ( const void * va, const void * vb )
 {
     const int ** a, ** b;
 
@@ -47,8 +47,9 @@ int cmp ( const void * va, const void * vb )
 
 /****************************************************/
 
-void mapProblems ( int problemSizes[], int * problemMapping, int nProblems,
-		   int nWriter, double * w )
+static void
+mapProblems(int problemSizes[], int * problemMapping, int nProblems,
+            int nWriter, double * w)
 {
   int *ip[nProblems];
   int dummy[nProblems];
@@ -123,8 +124,9 @@ in order of vSizes
    @return
 */
 
-void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
-		     int nStreams, int * nodeSizes, int nNodes )
+static void
+varMapGen(int *vSizes, int *sSizes, int *varMapping,
+          int nStreams, int *nodeSizes, int nNodes)
 {
 
   int weightsStreams[nStreams];
@@ -191,7 +193,7 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 	if ( * ( streamMapping + j ) == i )
 	  for ( k = 0; k < * ( sSizes + j ); k ++ )
 	    * ( varMapping + offset ++ ) =
-              commCollID2RankGlob ( * ( varMappingNode + offsetN ++ ) +  
+              commCollID2RankGlob ( * ( varMappingNode + offsetN ++ ) +
                                     summandRank );
 	else
 	  offset += * ( sSizes + j );
@@ -216,7 +218,8 @@ void  varMapGen ( int * vSizes, int * sSizes, int * varMapping,
 
 /************************************************************************/
 
-void defVarDeco ( int vlistID, int varID )
+static void
+defVarDeco(int vlistID, int varID)
 {
   int varSize, cRank, lChunk, rem, lOffset;
   int nProcsModel = commInqNProcsModel ();
@@ -247,10 +250,10 @@ void defVarDeco ( int vlistID, int varID )
 /************************************************************************/
 
 
-static
-void varsMapNDeco ( int nNodes, int * nodeSizes )
+static void
+varsMapNDeco(int nNodes, int *nodeSizes)
 {
-  int nStreams, nVars, * resHs, * streamSizes, * varSizes, * varMapping, 
+  int nStreams, nVars, * resHs, * streamSizes, * varSizes, * varMapping,
     * collectsData, vlistResH;
   int i, j, k = 0;
   int nProcsColl = commInqNProcsColl ();
@@ -284,7 +287,7 @@ void varsMapNDeco ( int nNodes, int * nodeSizes )
   k = 0;
   for ( i = 0; i < nStreams; i++ )
     for ( j = 0; j < * ( streamSizes + i ); j++ )
-      { 
+      {
         defVarDeco ( streamInqVlist ( *( resHs + i )), j );
         defVarDeco ( streamInqVlistIDorig ( * ( resHs + i )), j );
         vlistDefVarIOrank ( streamInqVlist ( * ( resHs + i )), j,
@@ -341,15 +344,15 @@ void modelWinCleanup ( void )
   if ( win )             free ( win );
   if ( winBufferHead )   free ( winBufferHead );
   if ( winBuffer )       free ( winBuffer );
-  if ( winBufferSize )   free ( winBufferSize );
+  if (txWin) free(txWin);
 
   xdebug("%s", "RETURN. CLEANED UP MPI_WIN'S");
 }
 
 /************************************************************************/
 
-static
-  void modelWinDefBufferSizes ( void )
+static void
+modelWinDefBufferSizes(void)
 {
   int collID, nstreams, * streamIndexList, streamNo, vlistID, nvars, varID;
   int collIDchunk = 0, sumWinBufferSize = 0;
@@ -466,9 +469,9 @@ void modelWinCreate ( void )
 
 /************************************************************************/
 
-static
-  void modelWinBufferPutAtEnd ( const char * caller,
-                                int collID, const void * argBuffer, size_t size )
+static void
+modelWinBufferPutAtEnd(const char * caller,
+                       int collID, const void * argBuffer, size_t size)
 {
   char text[1024];
   /*
