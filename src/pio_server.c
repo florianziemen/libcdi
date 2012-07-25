@@ -187,17 +187,17 @@ static
       break;
     case STREAMOPEN:
       {
-        char * filename, * endname = "\0";
+        char *filename;
         size_t filenamesz;
         int filetype, streamID;
 
         getBufferGetFromEnd ( __func__, __LINE__, 
                               root, &filenamesz, sizeof ( filenamesz ));
         xassert ( filenamesz > 0 && filenamesz < MAXDATAFILENAME );
-        filename = xmalloc ( filenamesz + 1 );
+        filename = xmalloc(filenamesz + 1);
         getBufferGetFromEnd ( __func__, __LINE__, 
                               root, filename, filenamesz );
-        memcpy ( filename + filenamesz, endname, 1 );
+        filename[filenamesz] = '\0';
         getBufferGetFromEnd ( __func__, __LINE__, 
                               root, &filetype, sizeof ( filetype ));
         xassert ( filetype >= MINFILETYPE && filetype <= MAXFILETYPE );
