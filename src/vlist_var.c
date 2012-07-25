@@ -2084,7 +2084,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   {
     int levbuf[tempbuf[19]][4];
     var_t *var = vlist_to_pointer(vlistID)->vars + newvar;
-    int nlevs=tempbuf[19], i, flagSetLev;
+    int nlevs=tempbuf[19], i, flagSetLev = 0;
     xassert(nlevs == var->nlevs);
     xmpi(MPI_Unpack(buf, size, position,
                     levbuf, nlevs * 4, MPI_INT, comm));
