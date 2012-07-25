@@ -296,13 +296,10 @@ void *reshGetVal ( cdiResH resH, resOps * ops  )
   else
     {
       LIST_UNLOCK();
-      xassert(nspT.nsp == nsp &&
-              nspT.idx >= 0 &&
-              nspT.idx < listSizeAllocated[nsp] );
+      xabort("invalid namespace %d or index %d", nspT.nsp, nspT.idx);
     }
 
-  xassert ( listElem &&
-            listElem->ops == ops );
+  xassert(listElem && listElem->ops == ops);
 
   return listElem->val;
 }
