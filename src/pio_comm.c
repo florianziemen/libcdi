@@ -349,15 +349,13 @@ static int cmpr ( const void *a, const void *b )
 
 void commDefCommNode ( void )
 {
-  int size, rank, len, i, j, test;
+  int size, len, i, j, test;
   char * myHost, ** allHosts, * allHosts0, * curr;
-  char hostname [ MPI_MAX_PROCESSOR_NAME + 1 ];
 
   xassert ( info != NULL &&
            info->commPio != MPI_COMM_NULL );
 
   size = info->sizePio;
-  rank = info->rankPio;
 
   myHost = xmalloc ( MPI_MAX_PROCESSOR_NAME * sizeof ( myHost[0] ));
   xmpi ( MPI_Get_processor_name ( myHost, &len ));
