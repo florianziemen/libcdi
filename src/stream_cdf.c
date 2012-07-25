@@ -3923,11 +3923,11 @@ void cdfCreateRecords(int streamID, int tsID)
 #endif
 }
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 int cdfTimeDimID(int fileID, int ndims, int nvars)
 {
   int dimid = 0;
-#if  defined  (HAVE_LIBNETCDF)
   char dimname[80];
   char timeunits[256];
   char attname[256];
@@ -3974,7 +3974,6 @@ int cdfTimeDimID(int fileID, int ndims, int nvars)
         }
     }
 
-#endif
   return (dimid);
 }
 
@@ -4054,7 +4053,6 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
     }
 }
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 int isLonAxis(const char *units, const char *stdname)
 {
@@ -4077,9 +4075,7 @@ int isLonAxis(const char *units, const char *stdname)
 
   return (status);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 int isLatAxis(const char *units, const char *stdname)
 {
@@ -4102,9 +4098,7 @@ int isLatAxis(const char *units, const char *stdname)
 
   return (status);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 int isDBLAxis(const char *longname)
 {
@@ -4153,9 +4147,7 @@ int isHeightAxis(const char *stdname, const char *longname)
 
   return (status);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 int unitsIsPressure(const char *units)
 {
@@ -4172,9 +4164,7 @@ int unitsIsPressure(const char *units)
 
   return (status);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 int isGaussGrid(long ysize, double yinc, double *yvals)
 {
@@ -4212,9 +4202,7 @@ int isGaussGrid(long ysize, double yinc, double *yvals)
 
   return (lgauss);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfSetVar(ncvar_t *ncvars, int ncvarid, int isvar)
 {
@@ -4249,6 +4237,7 @@ void cdfSetDim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
   ncvars[ncvarid].dimtype[dimid] = dimtype;
 }
 
+#ifdef HAVE_LIBNETCDF
 static
 void printNCvars(ncvar_t *ncvars, int nvars)
 {
@@ -4292,7 +4281,7 @@ void printNCvars(ncvar_t *ncvars, int nvars)
       printf("%3d %3d %3d  %-4s %s\n", ncvarid, ncvars[ncvarid].isvar, ndim-2, axis, ncvars[ncvarid].name);
     }
 }
-
+#endif
 
 typedef struct
 {
@@ -4302,6 +4291,7 @@ typedef struct
 varinfo_t;
 
 
+#ifdef HAVE_LIBNETCDF
 static
 int cmpvarname(const void *s1, const void *s2)
 {
@@ -4311,7 +4301,6 @@ int cmpvarname(const void *s1, const void *s2)
   return (strcmp(x->name, y->name));
 }
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                        int timedimid, int modelID, int format)
@@ -4806,7 +4795,6 @@ void scanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 	}
     }
 }
-#endif
 
 static
 void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
@@ -4874,7 +4862,6 @@ void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
     }
 }
 
-#if  defined  (HAVE_LIBNETCDF)
 /* verify coordinate vars - first scan (dimname == varname) */
 static
 void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int timedimid)
@@ -4968,9 +4955,7 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 	}
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 /* verify coordinate vars - second scan (all other variables) */
 static
 void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
@@ -5045,9 +5030,7 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 	}
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
 {
@@ -5068,9 +5051,7 @@ void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
     }
 
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 /* define all input grids */
 static
 void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid)
