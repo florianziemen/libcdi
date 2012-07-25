@@ -188,7 +188,7 @@ int instituteCompareKernel ( institute_t *  ip1, institute_t * ip2 )
 }
 
 
-int instituteCompareP ( void *  instituteptr1, void * instituteptr2 )
+static int instituteCompareP ( void *  instituteptr1, void * instituteptr2 )
 {
   institute_t * i1, * i2;
 
