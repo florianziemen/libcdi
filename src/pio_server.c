@@ -239,8 +239,8 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
   int modelID;
   double * data = NULL, * dataHead = NULL;
   int streamID = CDI_UNDEFID, streamIDNew = CDI_UNDEFID;
-  int varID, vlistID, taxisID;
-  int size, offset, chunk, chunkSize;
+  int varID, vlistID = CDI_UNDEFID, taxisID;
+  int size, chunk;
   int tokenID, tokenID2;
   
   int nmiss = 0;
