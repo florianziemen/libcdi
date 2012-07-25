@@ -516,7 +516,6 @@ size_t fwPOSIXNONB ( int id, int tsID, const void *buffer, size_t len )
   int filled = 0;
   aFiledataP *afd;
   listElem_t *curr;
-  char errorString[maxErrorString];
 
   afd = ( aFiledataP * ) queueIdx2val ( bibAFiledataP, id );
 
@@ -627,10 +626,7 @@ int fowPOSIXNONB ( const char *filename )
 
   afd = initAFiledataP ( filename, buffersize );
   if (( id = queuePush ( bibAFiledataP, afd, 0 )) < 0 )
-    {
-      sprintf ( errorString, "filename %s is not unique", afd->name );
-      xabort ( errorString );   
-    }
+    xabort("filename %s is not unique", afd->name);
 
   xdebug ( "filename=%s, init and enqueued aFiledataP, return id = %d", 
 	    filename, id );
