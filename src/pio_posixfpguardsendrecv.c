@@ -164,18 +164,9 @@ destroyBFiledataPF(void *v)
 static bool
 compareNamesAPF(void *v1, void *v2)
 {
-  aFiledataPF *afd1, *afd2;
-  size_t len;
-  bool ret;
+  aFiledataPF *afd1 = v1, *afd2 = v2;
 
-  afd1 = ( aFiledataPF * ) v1;
-  afd2 = ( aFiledataPF * ) v2;
-
-  len = strlen ( afd1->name );
-  ret = ( len == strlen ( afd2->name ) && 
-	  memcmp ( afd1->name, afd2->name, len ) == 0 );
-
-  return ret;
+  return !strcmp(afd1->name, afd2->name);
 }
 
 /***************************************************************/
