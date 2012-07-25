@@ -6951,7 +6951,7 @@ void cdfDefVars(int streamID)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int index, gridID, zaxisID, vlistID;
-  int nvars, ngrids, nzaxis;
+  int /* nvars,  */ngrids, nzaxis;
   /*
   int  ncvarid;
   */
@@ -6963,7 +6963,7 @@ void cdfDefVars(int streamID)
   if ( vlistID == UNDEFID )
     Error("Internal problem! vlist undefined for streamID %d", streamID);
 
-  nvars  = vlistNvars(vlistID);
+  /* nvars  = vlistNvars(vlistID); */
   ngrids = vlistNgrids(vlistID);
   nzaxis = vlistNzaxis(vlistID);
   /*
