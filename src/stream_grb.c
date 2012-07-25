@@ -15,11 +15,9 @@
 #include "gribapi.h"
 
 /* begin deike */
-#include "namespace.h"
-
 #ifdef USE_MPI
 #include "pio.h"
-#include "pio_comm.h"        
+#include "pio_comm.h"
 #endif
 
 /* end deike */
