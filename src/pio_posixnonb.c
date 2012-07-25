@@ -460,8 +460,7 @@ void pwPOSIXNONB ( void )
 
 
 /***************************************************************/
-
-
+/* send buffer to writer and swap buffer for filling */
 static void
 sendP(aFiledataP *afd, int id)
 {

@@ -556,7 +556,7 @@ void pwPOSIXASYNCH ( void )
 
 
 /***************************************************************/
-
+/* send buffer to writer and swap buffer for filling */
 static void
 sendPA(aFiledataPA *afd, int id)
 {
