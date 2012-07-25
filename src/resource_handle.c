@@ -23,8 +23,6 @@ static int *listSizeAllocated;
 
 static void listInitialize(void);
 
-static int listInit = 0;
-
 // ATTENTION: not thread safe yet, namespaces are set in model!
 
 #if  defined  (HAVE_LIBPTHREAD)
@@ -35,15 +33,21 @@ static pthread_mutex_t listMutex;
 
 #  define LIST_LOCK()         pthread_mutex_lock(&listMutex)
 #  define LIST_UNLOCK()       pthread_mutex_unlock(&listMutex)
-#  define LIST_INIT()        \
-  if ( !listInit ) pthread_once(&listInitThread, listInitialize)
+#  define LIST_INIT()         pthread_once(&listInitThread, listInitialize)
 
 #else
 
+static int listInit = 0;
+
 #  define LIST_LOCK()
 #  define LIST_UNLOCK()
-#  define LIST_INIT()        \
-  if ( !listInit ) listInitialize()
+#  define LIST_INIT()        do {                               \
+  if ( !listInit )                                              \
+    {                                                           \
+      listInitialize();                                         \
+      listInit = 1                                              \
+    }                                                           \
+  } while(0)
 
 #endif
 
@@ -178,7 +182,6 @@ void listInitialize ( void )
 
   LIST_UNLOCK();
 
-  listInit = 1;
 }
 
 /**************************************************************/
@@ -189,8 +192,6 @@ void listSizeExtend()
   int i, nsp;
 
   nsp = namespaceGetActive ();
-
-  xassert ( listInit );
 
   newListSize = listSizeAllocated[nsp] + MIN_LIST_SIZE;
 
@@ -244,7 +245,9 @@ void reshRemove ( cdiResH resH, resOps * ops )
   int nsp;
   namespaceTuple_t nspT;
 
-  xassert ( listInit && ops );
+  xassert ( ops );
+
+  LIST_INIT();
 
   LIST_LOCK();
 
@@ -275,7 +278,9 @@ void *reshGetVal ( cdiResH resH, resOps * ops  )
   namespaceTuple_t nspT;
   listElem_t * listElem;
 
-  xassert ( listInit && ops );
+  xassert ( ops );
+
+  LIST_INIT();
 
   LIST_LOCK();
 
@@ -310,7 +315,9 @@ void reshGetResHListOfType ( int c, int * resHs, resOps * ops )
 {
   int i, j = 0, nsp;
 
-  xassert ( listInit && resHs && ops );
+  xassert ( resHs && ops );
+
+  LIST_INIT();
 
   LIST_LOCK();
 
@@ -335,7 +342,7 @@ int reshCountType ( resOps * ops )
 
   xassert ( ops );
 
-  if ( !( listInit && ops )) return 0;
+  LIST_INIT();
 
   LIST_LOCK();
 
@@ -465,7 +472,9 @@ void reshSetStatus ( cdiResH resH, resOps * ops, int status )
   namespaceTuple_t nspT;
   listElem_t * listElem;
 
-  xassert ( listInit && ops );
+  xassert ( ops );
+
+  LIST_INIT();
 
   LIST_LOCK();
 
@@ -473,8 +482,7 @@ void reshSetStatus ( cdiResH resH, resOps * ops, int status )
 
   nspT = namespaceResHDecode ( resH );
 
-  xassert ( listInit &&
-            nspT.nsp == nsp &&
+  xassert ( nspT.nsp == nsp &&
             nspT.idx >= 0 &&
             nspT.idx < listSizeAllocated[nsp] );
 
@@ -496,7 +504,9 @@ int reshGetStatus ( cdiResH resH, resOps * ops )
   namespaceTuple_t nspT;
   listElem_t * listElem;
 
-  xassert ( listInit && ops );
+  xassert ( ops );
+
+  LIST_INIT();
 
   LIST_LOCK();
 
@@ -504,8 +514,7 @@ int reshGetStatus ( cdiResH resH, resOps * ops )
 
   nspT = namespaceResHDecode ( resH );
 
-  xassert ( listInit &&
-            nspT.nsp == nsp &&
+  xassert ( nspT.nsp == nsp &&
             nspT.idx >= 0 &&
             nspT.idx < listSizeAllocated[nsp] );
 
@@ -544,9 +553,10 @@ int reshListCompare ( int nsp0, int nsp1 )
 
 #ifdef USE_MPI
 
-  xassert ( listInit && 
-	   namespaceGetNumber () > xmaxInt ( nsp0, nsp1 ) &&
-	   xminInt ( nsp0, nsp1 ) >= 0 );
+  LIST_INIT();
+
+  xassert(namespaceGetNumber () > xmaxInt ( nsp0, nsp1 ) &&
+          xminInt ( nsp0, nsp1 ) >= 0 );
 
   for ( i = 0; i < listSizeAllocated[nsp0]; i++ )
     {
@@ -605,7 +615,7 @@ void reshListPrint ( char * filename )
   listElem_t * curr;
   FILE * fp;
 
-  if ( ! listInit ) return;
+  LIST_INIT();
 
 #ifdef USE_MPI
   {
