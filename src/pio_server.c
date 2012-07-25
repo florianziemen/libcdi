@@ -358,6 +358,8 @@ void getData ( int tsID, int vdate, int vtime )
   int iAssert   = 0, modelID;
   char text[1024];
   int nProcsModel = commInqNProcsModel ();
+  void *getWinBaseAddr;
+  int attrFound;
           
   xdebug("%s", "START");
 
@@ -367,9 +369,12 @@ void getData ( int tsID, int vdate, int vtime )
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
       getFlushBuffer ( modelID );
-      xdebug ( "modelID=%d, nProcsModel=%d, getBufferSize[%d]=%d, getWin=%p, sizeof(int)=%d",
-               modelID, nProcsModel, modelID, getBufferSize[modelID], getWin,
-               sizeof ( int ));
+      xmpi(MPI_Win_get_attr(getWin, MPI_WIN_BASE, &getWinBaseAddr, &attrFound));
+      xassert(attrFound);
+      xdebug("modelID=%d, nProcsModel=%d, getBufferSize[%d]=%d,"
+             " getWin=%p, sizeof(int)=%u",
+             modelID, nProcsModel, modelID, getBufferSize[modelID],
+             getWinBaseAddr, (unsigned)sizeof(int));
       xmpi ( MPI_Get ( &getBuffer[modelID][0], getBufferSize[modelID], 
                        MPI_UNSIGNED_CHAR, modelID, 0, 
                        getBufferSize[modelID], MPI_UNSIGNED_CHAR, getWin ));
