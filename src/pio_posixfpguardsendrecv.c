@@ -477,7 +477,7 @@ int fcPOSIXFPGUARDSENDRECV ( int id )
   aFiledataPF *afd;
   int iret;
 
-  xdebug ( "write buffer, close file and cleanup", id );
+  xdebug("write buffer, close file %d and cleanup", id);
 
   afd = ( aFiledataPF * ) queueIdx2val ( bibAFiledataPF, id );
 
