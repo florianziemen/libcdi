@@ -269,8 +269,7 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
               taxisDefVtime ( taxisID, vtime );
               streamDefTimestep ( streamID, tsID );
             }
-          getBufferGetFromEnd ( __func__, __LINE__, 
-                                root, &varID, sizeof ( varID ));
+          getBufferGetFromEnd(__func__, __LINE__, root, &varID, sizeof (varID));
           size = vlistInqVarSize ( vlistID, varID );
           data = xmalloc ( size * sizeof ( double ));
           dataHead = data;
