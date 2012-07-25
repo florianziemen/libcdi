@@ -86,7 +86,7 @@ static aFiledataPA *initAFiledataPA ( const char *filename, size_t bs )
   afd = xmalloc ( sizeof ( aFiledataPA ));
 
   len = strlen ( filename );
-  afd->name = xmalloc (( len ) * sizeof ( afd->name[0] ));
+  afd->name = xmalloc (( len + 1) * sizeof ( afd->name[0] ));
   strcpy ( afd->name, filename );
   afd->size = bs;
   afd->tsID = 0;
@@ -124,7 +124,7 @@ static bFiledataPA *initBFiledataPA ( char *filename,
 
   bfd = xmalloc ( sizeof ( bfd[0] ));
 
-  bfd->name = xmalloc (( strlen ( filename )) * sizeof ( bfd->name[0] ));
+  bfd->name = xmalloc (( strlen ( filename ) + 1) * sizeof ( bfd->name[0] ));
   strcpy ( bfd->name, filename );
   bfd->size = bs;
 
