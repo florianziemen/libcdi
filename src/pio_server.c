@@ -27,10 +27,9 @@ extern void arrayDestroy ( void );
 static struct
 {
   size_t size;
-  unsigned char *buffer;
+  unsigned char *buffer, *head;
 } *rxWin = NULL;
 
-unsigned char ** getBufferHead = NULL;
 static MPI_Win getWin = MPI_WIN_NULL;
 MPI_Group        groupModel    = MPI_GROUP_NULL;
 
@@ -52,8 +51,7 @@ void serverWinCleanup ()
         free(rxWin[i].buffer);
       free(rxWin);
     }
-  if ( getBufferHead ) free ( getBufferHead );
-  
+
   xdebug("%s", "cleaned up mpi_win");
 }
  
@@ -131,11 +129,10 @@ static
   collDefBufferSizes ();
   /* xprintArray ( "getBufferSizes", getBufferSize, nProcsModel, DATATYPE_INT ); */
 
-  getBufferHead = xmalloc ( nProcsModel * sizeof ( getBufferHead[0] ));
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
       rxWin[modelID].buffer = xmalloc(rxWin[modelID].size);
-      getBufferHead[modelID] = rxWin[modelID].buffer;
+      rxWin[modelID].head = rxWin[modelID].buffer;
     }
 
   xdebug("%s", "created mpi_win, allocated getBuffer");
@@ -149,22 +146,22 @@ static
 {
   char text[1024];
 
-  if ( getBufferHead == NULL ||
+  if (rxWin == NULL ||
        argBuffer     == NULL ||
        size           < 0    ||
        ID             < 0    ||
        ID             >= commInqNProcsModel () ||
-       getBufferHead[ID] - rxWin[ID].buffer + size > rxWin[ID].size)
+       rxWin[ID].head - rxWin[ID].buffer + size > rxWin[ID].size)
     {
       sprintf ( text, "caller: %s, line %d, ID = %d, nProcsModel=%d, size = %d, "
-                "getBufferHead[%d] = %d, rxWin[%d].size = %d",
+                "rxWin[%d].head = %d, rxWin[%d].size = %d",
                 caller, line, ID, size, ID, commInqNProcsModel (), 
-                getBufferHead[ID] - rxWin[ID].buffer,
+                rxWin[ID].head - rxWin[ID].buffer,
                 ID, rxWin[ID].size);
       xabort ( text );
     }  
-  memcpy ( argBuffer, getBufferHead[ID], size );
-  getBufferHead[ID] += size;
+  memcpy ( argBuffer, rxWin[ID].head, size );
+  rxWin[ID].head += size;
 }
 
 /************************************************************************/
@@ -340,11 +337,10 @@ static
   xassert ( modelID                >= 0           &&
             modelID                 < nProcsModel &&
             rxWin != NULL && rxWin[modelID].buffer != NULL &&
-            getBufferHead          != NULL        &&
             rxWin[modelID].size > 0 &&
             rxWin[modelID].size <= MAXWINBUFFERSIZE );
   memset(rxWin[modelID].buffer, 0, rxWin[modelID].size);
-  getBufferHead[modelID] = rxWin[modelID].buffer;
+  rxWin[modelID].head = rxWin[modelID].buffer;
 }
 
 
