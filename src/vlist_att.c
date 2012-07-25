@@ -530,7 +530,7 @@ vlistAttsGetSize(vlist_t *p, int varID, MPI_Comm comm)
   return txsize;
 }
 
-static int
+static void
 vlistAttPack(vlist_t *vlistptr, int varID, int attnum,
              void * buf, int size, int *position, MPI_Comm comm)
 {
@@ -583,7 +583,7 @@ vlistAttsPack(vlist_t *p, int varID,
   }
 }
 
-static int
+static void
 vlistAttUnpack(int vlistID, int varID,
                void * buf, int size, int *position, MPI_Comm comm)
 {
