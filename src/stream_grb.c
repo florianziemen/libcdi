@@ -697,7 +697,6 @@ void streamInqGinfo(int streamID, int *intnum, float *fltnum)
   int recID, vrecID, tsID;
   int filetype;
   void *gribbuffer;
-  long recsize;
   long gribbuffersize;
   off_t recpos;
   int zip;
@@ -715,7 +714,6 @@ void streamInqGinfo(int streamID, int *intnum, float *fltnum)
       vrecID  = streamptr->tsteps[tsID].curRecID;
       recID   = streamptr->tsteps[tsID].recIDs[vrecID];
       recpos  = streamptr->tsteps[tsID].records[recID].position;
-      recsize = streamptr->tsteps[tsID].records[recID].size;
       zip     = streamptr->tsteps[tsID].records[recID].zip;
 
       gribbuffer = streamptr->record->buffer;
