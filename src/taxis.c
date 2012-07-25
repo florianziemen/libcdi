@@ -1311,7 +1311,6 @@ enum { taxisNint = 15 };
 static
 int taxisGetPackSize ( void * voidP, MPI_Comm comm )
 {
-  taxis_t * taxisP = ( taxis_t * ) voidP;
   int packBufferSize = 0, size;
 
   xmpi ( MPI_Pack_size ( taxisNint, MPI_INT, comm, &size ));
@@ -1366,7 +1365,7 @@ void taxisPack ( void * voidP, void * packBuffer, int packBufferSize,
 		 int * packBufferPos, MPI_Comm comm )
 {
   taxis_t   * taxisP = ( taxis_t * ) voidP;
-  int intBuffer[taxisNint], size;
+  int intBuffer[taxisNint];
   double d;
 
   intBuffer[0]  = taxisP->self; 
