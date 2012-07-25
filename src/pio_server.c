@@ -398,7 +398,7 @@ void getData ( int tsID, int vdate, int vtime )
 
 void IOServer ()
 {
-  int source, tag, * iBuffer, size, nProcsModel = commInqNProcsModel ();
+  int source, tag, *iBuffer, size, nProcsModel=commInqNProcsModel();
   static int nfinished = 0;
   char * buffer;
   MPI_Comm commCalc;
@@ -420,13 +420,14 @@ void IOServer ()
       
       switch ( tag )
         {
-        case FINALIZE: 
-          xdebugMsg (  tag, source, nfinished );
-          iBuffer = xmalloc ( sizeof ( int ));     
-          xmpi ( MPI_Recv ( iBuffer, 1, MPI_INTEGER, source, 
-                            tag, commCalc, &status ));
+        case FINALIZE:
+          {
+            int i;
+            xdebugMsg(tag, source, nfinished);
+            xmpi(MPI_Recv(&i, 1, MPI_INTEGER, source,
+                          tag, commCalc, &status));
+          }
           xdebug("%s", "RECEIVED MESSAGE WITH TAG \"FINALIZE\"");
-          free ( iBuffer );
           nfinished++;
           xdebug ( "nfinished=%d, nProcsModel=%d", 
                    nfinished, nProcsModel );
