@@ -758,9 +758,7 @@ int vlistInqVarSize(int vlistID, int varID)
   int zaxisID, gridID;
   int nlevs, gridsize;
   int timeID;
-  vlist_t *vlistptr;
 
-  vlistptr = vlist_to_pointer(vlistID);
   vlistCheckVarID(__func__, vlistID, varID);
   vlistInqVar(vlistID, varID, &gridID, &zaxisID, &timeID);
   nlevs = zaxisInqSize(zaxisID);
