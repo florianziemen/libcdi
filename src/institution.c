@@ -127,7 +127,6 @@ void instituteInit (void)
 {
   static int instituteInitialized = 0;
   int nsp, nspc;
-  char *env;
 
   nspc = namespaceGetNumber ();
   
