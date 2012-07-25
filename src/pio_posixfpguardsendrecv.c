@@ -390,28 +390,26 @@ defTimestepPF(aFiledataPF *afd, int tsID)
 /***************************************************************/
 
 static void
-flushOp(void *a, void *tsID)
+flushOp(aFiledataPF *a, int tsID)
 {
-  writePF((aFiledataPF *)a, ((aFiledataPF *)a)->fileID);
-  defTimestepPF((aFiledataPF *)a, (int)(intptr_t)tsID);
+  writePF(a, a->fileID);
+  defTimestepPF(a, tsID);
 }
 
 
 size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t len )
 {
   int error = 0;
-  int flush = 0;
   int filled = 0;
-  aFiledataPF *afd;
+  aFiledataPF *afd
+    = listSetGet(bibAFiledataPF, fileIDTestA, (void *)(intptr_t)fileID);
 
-  afd = listSetGet(bibAFiledataPF, fileIDTestA, (void *)(intptr_t)fileID);
+  bool flush = tsID != afd->tsID;
 
-  flush = ( tsID != afd->tsID ) ? 1 : 0;
-
-  if ( flush == 1 ) 
+  if (flush)
     {
-      xdebug ( "tsID = %d, flush buffer", tsID );
-      listSetForeach(bibAFiledataPF, flushOp, (void *)(intptr_t)tsID);
+      xdebug("fileID %d, tsID = %d, flush buffer", fileID, tsID);
+      flushOp(afd, tsID);
       xmpi ( MPI_Barrier ( commInqCommColl ())); 
     }
 
