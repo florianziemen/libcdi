@@ -2092,7 +2092,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
     {
       vlistDefFlag(vlistID, newvar, i, levbuf[i][0]);
       vlistDefIndex(vlistID, newvar, i, levbuf[i][1]);
-      // FIXME: these lack a accessor function
+      // FIXME: these lack an accessor function
       var->levinfo[i].mlevelID = levbuf[i][2];
       var->levinfo[i].flevelID = levbuf[i][3];
       if (levbuf[i][0] == tempbuf[0])
