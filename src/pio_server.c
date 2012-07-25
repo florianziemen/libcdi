@@ -429,19 +429,17 @@ void IOServer ()
           }
           xdebug("%s", "RECEIVED MESSAGE WITH TAG \"FINALIZE\"");
           nfinished++;
-          xdebug ( "nfinished=%d, nProcsModel=%d", 
-                   nfinished, nProcsModel );
-          
-          if ( nfinished == nProcsModel )  
-            {              
+          xdebug("nfinished=%d, nProcsModel=%d", nfinished, nProcsModel);
+          if ( nfinished == nProcsModel )
+            {
               {
                 int nStreams = streamSize ();
-                
+
                 if ( nStreams > 0 )
                   {
                     int streamNo;
                     int * resHs;
-                    
+
                     resHs       = xmalloc ( nStreams * sizeof ( resHs[0] ));
                     streamGetIndexList ( nStreams, resHs );
                     for ( streamNo = 0; streamNo < nStreams; streamNo++ )
@@ -449,8 +447,8 @@ void IOServer ()
                     free ( resHs );
                   }
               }
-              backendCleanup (); 
-              serverWinCleanup ();                 
+              backendCleanup();
+              serverWinCleanup();
               /* listDestroy(); */
               xdebug("%s", "RETURN");
               return;
