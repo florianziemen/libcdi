@@ -471,8 +471,8 @@ void pwPOSIXASYNCH ( void )
 	  bfd->currOpIndex = bfd->nextOpIndex;
 	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
 	  
-	  xmpi ( MPI_Recv (  bfd->fb->buffer + ( bfd->currOpIndex * bfd->size ), 
-                             amount, MPI_CHAR, source, tag, commNode, &status ));
+	  xmpi(MPI_Recv((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
+                        amount, MPI_CHAR, source, tag, commNode, &status ));
 
 	  writePA ( bfd, amount );
 	  
