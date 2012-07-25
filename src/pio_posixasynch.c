@@ -44,8 +44,7 @@ typedef struct
   int currOpIndex;
   int nextOpIndex;
   int prefIndex;
-  bool finished;
-  bool *nfinished;
+  int activeCollectors;
   int handle, fileID;
   char name[];
 } bFiledataPA;
@@ -91,11 +90,7 @@ initBFiledataPA(char *filename, size_t bs, int nc)
   bfd->nextOpIndex = 0;
   bfd->prefIndex = 0; 
   bfd->offset = 0;
-  bfd->finished = false;
-  bfd->nfinished = xmalloc ( nc * sizeof ( bfd->nfinished[0] ));
-
-  for ( i = 0; i < nc; i++ )
-    bfd->nfinished[i] = false;
+  bfd->activeCollectors = nc;
 
   xdebug ( "filename=%s, opened file, return", bfd->name );
 
@@ -153,8 +148,7 @@ destroyBFiledataPA ( void *v )
 
   dbuffer_cleanup ( &( bfd->fb ));
 
-  free ( bfd->nfinished );
-  free ( bfd->ctrlBlks );
+  free(bfd->ctrlBlks);
   free(bfd);
 
   xdebug("%s", "closed file and cleaned up, return");
@@ -370,17 +364,7 @@ void pioWriterAIO(void)
 
 	  writePA ( bfd, amount );
 
-	  bfd->nfinished[source] = true;
-	  bfd->finished          = true;
-	  
-	  for ( i = 0; i < nProcsCollNode; i++ )
-	    if ( !( bfd->nfinished[i] ))
-	      {
-		bfd->finished = false;
-		break;
-	      }
-	  
-	  if ( bfd->finished )
+	  if ( ! --(bfd->activeCollectors))
 	    {
               xdebug ( "all are finished with file %d, delete node", rtag.id);
               listSetRemove(bibBFiledataPA, fileIDTest,
