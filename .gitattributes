@@ -301,6 +301,8 @@ tests/cksum.c -text
 tests/cksum.h -text
 tests/cksum_read.c -text
 tests/cksum_write.c -text
+tests/ensure_array_size.c -text
+tests/ensure_array_size.h -text
 tests/pio_cksum_asynch.in -text
 tests/pio_cksum_fpguard.in -text
 tests/pio_cksum_mpinonb.in -text

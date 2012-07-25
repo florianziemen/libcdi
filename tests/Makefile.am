@@ -8,7 +8,9 @@ check_PROGRAMS = test_grib cksum_write cksum_read pio_write
 #
 test_grib_SOURCES = test_grib.c
 cksum_write_SOURCES = cksum_write.c cksum.c cksum.h
-cksum_read_SOURCES = cksum_read.c cksum.c cksum.h
+cksum_read_SOURCES = cksum_read.c \
+	cksum.c cksum.h \
+	ensure_array_size.h ensure_array_size.c
 pio_write_SOURCES = pio_write.c cksum.h cksum.c
 #
 LDADD = -L../src -lcdi -lm
