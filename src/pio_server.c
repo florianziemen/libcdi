@@ -361,11 +361,11 @@ void getData ( int tsID, int vdate, int vtime )
   // todo put in correct lbs and ubs
   xassert ( tsID >= 0 && vdate >= 0 && vtime >= 0 );
   xmpi ( MPI_Win_start ( groupModel, iAssert, getWin )); 
+  xmpi(MPI_Win_get_attr(getWin, MPI_WIN_BASE, &getWinBaseAddr, &attrFound));
+  xassert(attrFound);
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
       getFlushBuffer ( modelID );
-      xmpi(MPI_Win_get_attr(getWin, MPI_WIN_BASE, &getWinBaseAddr, &attrFound));
-      xassert(attrFound);
       xdebug("modelID=%d, nProcsModel=%d, rxWin[%d].size=%d,"
              " getWin=%p, sizeof(int)=%u",
              modelID, nProcsModel, modelID, rxWin[modelID].size,
