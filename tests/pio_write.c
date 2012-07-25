@@ -73,6 +73,7 @@ void modelRun (struct model_config setup, MPI_Comm comm)
   double levs[maxlev] = {101300, 92500, 85000, 50000, 20000};
   double *var, *varslice;
   double mscale, mrscale;
+  time_t current_time;
   int vdate = 19850101, vtime = 120000;
   int start = CDI_UNDEFID, chunk = CDI_UNDEFID, rank = 0, comm_size = 1;
   char filename[1024];
@@ -145,8 +146,12 @@ void modelRun (struct model_config setup, MPI_Comm comm)
 	  xassert ( streamID >= 0 );
 	  streamDefVlist ( streamID, vlistID );
 	}
+      vdate = 19850101;
+      vtime = 120000;
+      current_time = cditime2time_t(vdate, vtime);
       for ( tsID = 0; tsID < setup.nts; tsID++ )
 	{
+          time_t2cditime(current_time, &vdate, &vtime);
 	  taxisDefVdate ( taxisID, vdate );
 	  taxisDefVtime ( taxisID, vtime );
 	  streamDefTimestep ( streamID, tsID );
@@ -191,6 +196,7 @@ void modelRun (struct model_config setup, MPI_Comm comm)
 	      start = CDI_UNDEFID;
 	      chunk = CDI_UNDEFID;
 	    }
+          current_time += 86400;
 	  pioWriteTimestep ( tsID, vdate, vtime );
 	}
       if (rank == 0)
@@ -427,6 +433,37 @@ int main (int argc, char *argv[])
   MPI_Finalize ();
 #endif
   return 0;
+}
+
+static time_t
+cditime2time_t(int date, int timeofday)
+{
+  struct tm t_s;
+  time_t t;
+  t_s.tm_year = date / 10000;
+  t_s.tm_mon = (date - t_s.tm_year * 10000)/100;
+  t_s.tm_mday = date % 100;
+  t_s.tm_year -= 1900;
+  t_s.tm_hour = timeofday/10000;
+  t_s.tm_min = (timeofday%10000)/100;
+  t_s.tm_sec = timeofday%100;
+  t_s.tm_isdst = 0;
+  t = mktime(&t_s);
+  /* 
+   * fprintf(stderr, "converted %d,%d to %s to %lld.\n", date, timeofday,
+   *         asctime(&t_s), (long long)t);
+   */
+  return t;
+}
+
+static void
+time_t2cditime(time_t t, int *date, int *timeofday)
+{
+  struct tm *t_s;
+  t_s = localtime(&t);
+  /* fprintf(stderr, "converted %lld to %s.\n", (long long)t, asctime(t_s)); */
+  *date = (t_s->tm_year + 1900) * 10000 + t_s->tm_mon * 100 + t_s->tm_mday;
+  *timeofday = t_s->tm_hour * 10000 + t_s->tm_min * 100 + t_s->tm_sec;
 }
 
 /*
