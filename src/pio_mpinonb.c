@@ -8,8 +8,9 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <mpi.h>
 
-#include "mpi.h"
+#include "cdi.h"
 #include "pio.h"
 #include "pio_comm.h"
 #include "pio_impl.h"
@@ -35,6 +36,7 @@ typedef struct
   MPI_File fh;
   MPI_Request request;
   int fileID;
+  int tsID;
   bool finished;
 } aFiledataM;
 
@@ -72,10 +74,11 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
 
   of->db = of->db1;
 
-  /* open file */ 
-  xmpi ( MPI_File_open ( commNode, of->name, 
-			 ( MPI_MODE_CREATE|MPI_MODE_WRONLY ), 
-			 MPI_INFO_NULL, &( of->fh )));
+  of->tsID = CDI_UNDEFID;
+
+  /* open file */
+  xmpi(MPI_File_open(commNode, of->name, MPI_MODE_CREATE|MPI_MODE_WRONLY,
+                     MPI_INFO_NULL, &( of->fh )));
   of->request = MPI_REQUEST_NULL;
   of->finished = false;
   
@@ -188,23 +191,23 @@ void writeMPINONB(aFiledataM *of)
 
 size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
 {  
-  static int oldTsID = 0;
   int error = 0;
   int flush = 0;
   int filled = 0;
   aFiledataM *of;
   int rankNode = commInqRankNode ();
 
-  flush = ( tsID != oldTsID ) ? 1 : 0;
-
   of = queueGet(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID);
+  xassert(of);
+
+  flush = ( tsID != of->tsID ) ? 1 : 0;
 
   if ( flush == 1 ) 
     {
       xdebug3 ( "IOPE%d: tsID = %d, flush buffer", 
 		  rankNode, tsID );
       queueForeach(bibAFiledataM, (elemOp)writeMPINONB, NULL);
-      oldTsID = tsID;
+      of->tsID = tsID;
       MPI_Status status;
       xmpi(MPI_Wait(&(of->request), &status));
       xmpi(MPI_Barrier(commInqCommNode()));
@@ -314,7 +317,7 @@ int fowMPINONB ( const char *filename )
   xdebug("buffersize=%ld", buffersize);
 
   queueForeach(bibAFiledataM, elemCheck, (void *)filename);
-  of = initAFiledataMPINONB ( filename, buffersize );
+  of = initAFiledataMPINONB(filename, buffersize);
 
   if ((id = queueAdd(bibAFiledataM, of)) < 0 )
     xabort("filename %s not unique", of->name);
