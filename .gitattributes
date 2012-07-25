@@ -301,6 +301,10 @@ tests/cksum.c -text
 tests/cksum.h -text
 tests/cksum_read.c -text
 tests/cksum_write.c -text
+tests/pio_cksum_asynch.in -text
+tests/pio_cksum_fpguard.in -text
+tests/pio_cksum_mpinonb.in -text
+tests/pio_cksum_writer.in -text
 tests/pio_write.c -text
 tests/pio_write_run.in -text
 tests/test_cksum_extra.in -text

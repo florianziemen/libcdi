@@ -211,6 +211,10 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
                  tests/test_cksum_service \
                  tests/test_cksum_ieg \
                  tests/pio_write_run \
+                 tests/pio_cksum_mpinonb \
+                 tests/pio_cksum_fpguard \
+                 tests/pio_cksum_asynch \
+                 tests/pio_cksum_writer \
                  util/serialrun],[chmod a+x "$ac_file"])
 
 AC_OUTPUT([Makefile src/Makefile interfaces/Makefile app/Makefile \
