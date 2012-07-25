@@ -389,7 +389,8 @@ modelWinDefBufferSizes(void)
       txWin[collID].size += winBufferOverhead * sizeof (int);
       sumWinBufferSize += txWin[collID].size;
     }
-  xdebug ("sumWinBufferSize=%d, MAXWINBUFFERSIZE=%d", sumWinBufferSize, MAXWINBUFFERSIZE );
+  xdebug("sumWinBufferSize=%zu, MAXWINBUFFERSIZE=%zu", (size_t)sumWinBufferSize,
+         (size_t)MAXWINBUFFERSIZE);
   xassert ( sumWinBufferSize <= MAXWINBUFFERSIZE );
   /* xprintArray("txWin.size", txWin, nProcsColl, DATATYPE_INT); */
   xdebug("%s", "RETURN");
