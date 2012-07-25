@@ -150,6 +150,8 @@ destroyBFiledataPA ( void *v )
       nextFinishOp = ( nextFinishOp + 1 ) % nPrefStreams;
     }
 
+  if ((iret = ftruncate(bfd->handle, bfd->offset)) == -1)
+    xabort("failed to truncate file %s: %s", bfd->name, strerror(errno));
   if (( iret = close ( bfd->handle )) == -1 )
     xabort("failed to close %s", bfd->name);
 

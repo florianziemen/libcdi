@@ -62,7 +62,8 @@ initBFiledataP(char *filename, size_t bs, int nc, int fileID)
 
   if (( bfp->fp = fopen ( filename, "w" )) == NULL ) 
     xabort("Failed to open %s", bfp->name);
-
+  int fd = fileno(bfp->fp);
+  ftruncate(fd, (off_t)0);
   dbuffer_init ( & ( bfp->fb ), ( size_t )( bfp->size ));
 
   bfp->finished = false;
@@ -89,7 +90,6 @@ destroyBFiledataP(void *v)
   xdebug ( "filename=%s, cleanup, in",  bfp->name );
 
   /* close file */
-
   if (( iret = fclose ( bfp->fp )) == EOF )
     xabort("Failed to close %s", bfp->name);
 

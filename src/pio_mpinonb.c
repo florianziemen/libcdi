@@ -91,6 +91,7 @@ int destroyAFiledataMPINONB ( void *v )
   MPI_Status status;
   int rankNode = commInqRankNode ();
   double startTime;
+  MPI_Offset endpos;
 
   of = (aFiledataM * ) v;
 
@@ -103,7 +104,8 @@ int destroyAFiledataMPINONB ( void *v )
   xmpi ( MPI_Wait ( & ( of->request ), &status )); 
   xmpi(MPI_Barrier(commInqCommNode()));
   accumWait += ( MPI_Wtime () - startTime );
-  iret = MPI_File_sync ( of->fh ); 
+  xmpi(MPI_File_get_position_shared(of->fh, &endpos));
+  xmpi(MPI_File_set_size(of->fh, endpos));
   iret = MPI_File_close ( & ( of->fh ));
 
   /* file closed, cleanup */
