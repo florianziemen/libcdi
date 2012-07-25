@@ -126,7 +126,7 @@ void cdiInitRecord(int streamID)
 
 void streamInqRecord(int streamID, int *varID, int *levelID)
 {
-  int rec = 0;
+  /* int rec = 0; */
   int recID, tsID, rindex;
   int lindex;
   stream_t *streamptr;
@@ -165,8 +165,8 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
   streamptr->curTsID = tsID;
   streamptr->tsteps[tsID].curRecID = rindex;
 
-  rec = recID + 1;
   /*
+  rec = recID + 1;
   filetype = streamptr->filetype;
 
   switch ( filetype )
