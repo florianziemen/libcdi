@@ -479,9 +479,7 @@ void pioBufferData ( const int streamID, const int varID, const double *data, in
   int chunk, vlistID, collID = CDI_UNDEFID;
   int tokenSep = SEPARATOR, tokenData = DATATOKEN;
   size_t size;
-  void * vp;
   int rankModel = commInqRankModel ();
-  char text[1024];
 
   vlistID  = streamInqVlist ( streamID );
   collID   = commRankGlob2CollID ( vlistInqVarIOrank ( vlistID, varID ));
