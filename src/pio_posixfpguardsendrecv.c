@@ -409,7 +409,7 @@ size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t 
       xmpi ( MPI_Barrier ( commInqCommColl ())); 
     }
 
-  filled = dbuffer_push ( afd->db, ( unsigned char * ) buffer, len );
+  filled = dbuffer_push(afd->db, ( unsigned char * ) buffer, len);
 
   xdebug ( "fileID = %d, tsID = %d, pushed data on buffer, filled = %d", 
            fileID, tsID, filled ); 
@@ -449,7 +449,8 @@ int fcPOSIXFPGUARDSENDRECV ( int id )
 
   /* remove file element */
   iret = listSetRemove(bibAFiledataPF, fileIDTestA, (void *)(intptr_t)id);
-
+  /* make sure the file is closed on all collectors before proceeding */
+  xmpi(MPI_Barrier(commInqCommColl()));
   return iret;
 }
 
