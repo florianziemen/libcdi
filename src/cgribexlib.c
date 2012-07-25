@@ -4176,7 +4176,7 @@ int decodePDS(unsigned char *pds, int *isec0, int *isec1)
 static 
 int decodeGDS(unsigned char  *gds, int *isec0, int *isec2, double *fsec2, int *numGridVals, int dfunc)
 {
-  int imisng;
+  /* int imisng; */
   int  ReducedGrid = FALSE, VertCoorTab = FALSE;
   int  locnv = 0, locnl;
   int  jlenl;
@@ -4192,7 +4192,7 @@ int decodeGDS(unsigned char  *gds, int *isec0, int *isec2, double *fsec2, int *n
 
   *numGridVals = 0;
 
-  imisng = 0;
+  /* imisng = 0; */
 
   memset(isec2, 0, 22*sizeof(int));
 
