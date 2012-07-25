@@ -189,7 +189,7 @@ int destroyBFiledataPA ( void *v )
   bFiledataPA *bfd = (bFiledataPA * ) v;
   const struct aiocb *ccBP[1];
   int iret = 0;
-  char errorString[maxErrorString];
+  ssize_t ssiret;
 
   xdebug ( "filename=%s, cleanup and close file, in", bfd->name );
 
@@ -212,8 +212,9 @@ int destroyBFiledataPA ( void *v )
       if ( ddebug )
 	accumSuspend += ( MPI_Wtime () - startTime);
       
-      if (( iret = aio_return ( bfd->ctrlBlks + bfd->nextOpIndex )) == -1 )
-	xabort ( "aio_return () failed" );
+      iret = aio_error(bfd->ctrlBlks + bfd->nextOpIndex);
+      if (( ssiret = aio_return ( bfd->ctrlBlks + bfd->nextOpIndex )) == -1 )
+	xabort("aio_return () failed: %s", strerror(iret));
  
       bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
       bfd->prefIndex --;
