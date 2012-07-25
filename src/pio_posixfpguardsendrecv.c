@@ -521,14 +521,13 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
 
 /***************************************************************/
 
-void  finalizePOSIXFPGUARDSENDRECV ( void )
+void
+finalizePOSIXFPGUARDSENDRECV(void)
 {
-  int buffer = 0, tag, specialRank = commInqSpecialRankNode ();
-  MPI_Comm commNode = commInqCommNode ();
+  int buffer = 0, tag = encodeFileOpTag(0, IO_Finalize);
 
-  tag = encodeFileOpTag(0, IO_Finalize);
-
-  xmpi ( MPI_Send ( &buffer, 1, MPI_INT, specialRank, tag, commNode ));
+  xmpi(MPI_Send(&buffer, 1, MPI_INT, commInqSpecialRankNode(),
+                tag, commInqCommNode()));
 
   if (!listSetIsEmpty(bibAFiledataPF))
     xabort("set bibAFiledataM not empty");
