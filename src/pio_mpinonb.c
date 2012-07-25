@@ -52,17 +52,13 @@ fileIDTest(void *a, void *fileID)
 static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
 {
   aFiledataM *of = NULL;
-  size_t len;
   int iret;
   MPI_Comm commNode = commInqCommNode ();
-  char * endString = "\0";
 
   of = xmalloc ( sizeof ( of[0] ));
 
-  len = strlen ( filename );
-  of->name = xmalloc (( len + 1 ) * sizeof ( of->name[0] ));
-  memcpy ( of->name, filename, len );
-  memcpy ( of->name + len, endString, 1 );
+  of->name = xmalloc(strlen(filename) + 1);
+  strcpy(of->name, filename);
   of->size = bs;
   of->db1 = NULL;
   of->db2 = NULL;
