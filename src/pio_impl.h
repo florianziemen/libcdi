@@ -40,7 +40,7 @@ struct fileOpTag
 
 /* pio.c */
 int setTag(int, int);
-struct fileOpTag getTag(int);
+struct fileOpTag decodeFileOpTag(int);
 
 /* pio_dbuffer.c */
 int       dbuffer_init ( struct dBuffer **, size_t );

@@ -159,7 +159,7 @@ pioWriterStdIO(void)
       source = status.MPI_SOURCE;
       tag    = status.MPI_TAG;
       
-      rtag = getTag(tag);
+      rtag = decodeFileOpTag(tag);
       
       xmpi ( MPI_Get_count ( &status, MPI_CHAR, &messagesize ));
 

@@ -41,7 +41,7 @@ int setTag ( int ID, int sc )
 
 /***************************************************************/
 
-struct fileOpTag getTag(int tag)
+struct fileOpTag decodeFileOpTag(int tag)
 {
   struct fileOpTag rtag;
 

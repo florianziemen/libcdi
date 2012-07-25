@@ -209,7 +209,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
     {
       xmpi ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commNode, &status ));
       source = status.MPI_SOURCE;
-      rtag = getTag(status.MPI_TAG);
+      rtag = decodeFileOpTag(status.MPI_TAG);
       
       xdebug("receive message from source=%d, id=%d, command=%d ( %s )",
              source, rtag.id, rtag.command, command2charP[rtag.command]);
