@@ -239,7 +239,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 	      bfd = ( bFiledataPF * ) initBFiledataPF ( rtag->id, 
 							       nProcsCollNode );
 
-	      if ((iret = queuePush(bibBFiledataPF, bfd)) < 0)
+	      if ((iret = queueAdd(bibBFiledataPF, bfd)) < 0)
 	      {
 		sprintf ( errorString, "fileID=%d not unique", rtag->id );
 		xabort ( errorString);
@@ -577,7 +577,7 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
 
   afd = initAFiledataPF ( filename, buffersize );
 
-  if ((id = queuePush(bibAFiledataPF, afd)) < 0)
+  if ((id = queueAdd(bibAFiledataPF, afd)) < 0)
     {
       sprintf ( errorString, "filename %s not unique", afd->name );
       xabort ( errorString ); 

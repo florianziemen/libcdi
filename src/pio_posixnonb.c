@@ -231,7 +231,7 @@ pioWriterStdIO(void)
 	      bfd = initBFiledataP(filename, buffersize, nProcsCollNode,
                                    rtag->id);
 	      
-	      if ((id = queuePush(bibBFiledataP, bfd)) < 0)
+	      if ((id = queueAdd(bibBFiledataP, bfd)) < 0)
                 xabort("fileID=%d not unique", rtag->id);
 	    }
 	  else

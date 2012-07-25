@@ -52,7 +52,7 @@ void queueDestroy ( queue_t *q )
 }
 
 int
-queuePush(queue_t *q, void *v)
+queueAdd(queue_t *q, void *v)
 {
   listElem_t *newListElem_T, *curr;
 
@@ -63,7 +63,7 @@ queuePush(queue_t *q, void *v)
 
   if (( newListElem_T = ( listElem_t * ) malloc (sizeof ( listElem_t ))) == NULL )
     {
-      perror ( "pio_queue: queuePush (): Not enough memory" );
+      perror ( "pio_queue: queueAdd (): Not enough memory" );
       /* FIXME: why not abort? */
       return 1;
     }

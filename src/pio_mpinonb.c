@@ -346,7 +346,7 @@ int fowMPINONB ( const char *filename )
   queueCheck (  bibAFiledataM, filename );
   of = initAFiledataMPINONB ( filename, buffersize );
 
-  if ((id = queuePush(bibAFiledataM, of)) < 0 )
+  if ((id = queueAdd(bibAFiledataM, of)) < 0 )
     {   
       sprintf ( errorString, "filename %s not unique", of->name );
       xabort ( errorString );

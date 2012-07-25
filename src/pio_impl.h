@@ -67,7 +67,7 @@ size_t    dbuffer_free ( struct dBuffer * );
 /* pio_queue.c */
 queue_t *queueInit(valDestroyFunction, eqPredicate);
 void      queueDestroy ( queue_t * );
-int queuePush(queue_t *, void *);
+int queueAdd(queue_t *, void *);
 int queueDelNode(queue_t *, int (*predicate)(void *, void *),
                  void *data);
 void *queueGet(queue_t *q, int (*predicate)(void *, void *), void *data);
