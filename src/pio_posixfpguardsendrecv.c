@@ -71,7 +71,7 @@ fileIDCmpB(void *a, void *b)
   return ((bFiledataPF *)a)->fileID == ((bFiledataPF *)b)->fileID;
 }
 
-static queue_t *bibAFiledataPF;
+static listSet *bibAFiledataPF;
 
 /***************************************************************/
   
@@ -194,7 +194,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
   struct fileOpTag rtag;
   MPI_Status status;
   bFiledataPF *bfd; 
-  queue_t *bibBFiledataPF;
+  listSet *bibBFiledataPF;
   long amount;
   MPI_Comm commNode = commInqCommNode ();
   int nProcsCollNode =  commInqSizeNode () - commInqSizeColl ();
@@ -202,7 +202,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 
   xdebug ( "ncollectors=%d on this node", nProcsCollNode );
   
-  bibBFiledataPF = queueInit ( destroyBFiledataPF, fileIDCmpB);
+  bibBFiledataPF = listSetNew( destroyBFiledataPF, fileIDCmpB);
   sentFinalize = xmalloc ( nProcsCollNode * sizeof ( sentFinalize[0] ));
 
   for ( ;; )
@@ -218,12 +218,12 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
       	{
       	case IO_Open_file:
 
-          if (!(bfd = queueGet(bibBFiledataPF, fileIDTestB,
+          if (!(bfd = listSetGet(bibBFiledataPF, fileIDTestB,
                                (void *)(intptr_t)rtag.id)))
 	    {
 	      bfd = initBFiledataPF(rtag.id, nProcsCollNode);
 
-	      if ((iret = queueAdd(bibBFiledataPF, bfd)) < 0)
+	      if ((iret = listSetAdd(bibBFiledataPF, bfd)) < 0)
 		xabort("fileID=%d not unique", rtag.id);
 	    }
 
@@ -246,9 +246,9 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 
 	case IO_Set_fp:
 
-          if (!(bfd = queueGet(bibBFiledataPF, fileIDTestB,
+          if (!(bfd = listSetGet(bibBFiledataPF, fileIDTestB,
                                (void *)(intptr_t)rtag.id)))
-            xabort("fileId=%d not in queue", rtag.id);
+            xabort("fileId=%d not in set", rtag.id);
 
           xdebug("id=%d, command=%d ( %s ), send offset=%ld", rtag.id,
                  rtag.command, command2charP[rtag.command], bfd->offset);
@@ -267,9 +267,9 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 
 	case IO_Close_file:
 
-          if (!(bfd = queueGet(bibBFiledataPF, fileIDTestB,
+          if (!(bfd = listSetGet(bibBFiledataPF, fileIDTestB,
                                (void *)(intptr_t)rtag.id)))
-            xabort("fileId=%d not in queue", rtag.id);
+            xabort("fileId=%d not in set", rtag.id);
 
           xdebug("id=%d, command=%d ( %s )), send offset=%ld", rtag.id,
                  rtag.command, command2charP[rtag.command], bfd->offset);
@@ -296,7 +296,8 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 	      }
 
 	  if ( bfd->finished )
-            queueDelNode(bibBFiledataPF, fileIDTestB, (void *)(intptr_t)rtag.id);
+            listSetRemove(bibBFiledataPF, fileIDTestB,
+                          (void *)(intptr_t)rtag.id);
           break;
         case IO_Finalize:
           {  
@@ -314,12 +315,12 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
                 }
             if ( doFinalize )
               {
-                if (!queueIsEmpty(bibBFiledataPF))
-                  xabort("queue bibBFiledataM not empty");
+                if (!listSetIsEmpty(bibBFiledataPF))
+                  xabort("set bibBFiledataM not empty");
                 else
                   {
-                    xdebug("%s", "cleanup queue");
-                    queueDestroy ( bibBFiledataPF );
+                    xdebug("%s", "destroy set");
+                    listSetDelete(bibBFiledataPF);
                   }
                 return;
               }
@@ -418,14 +419,14 @@ size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t 
   int filled = 0;
   aFiledataPF *afd;
 
-  afd = queueGet(bibAFiledataPF, fileIDTestA, (void *)(intptr_t)fileID);
+  afd = listSetGet(bibAFiledataPF, fileIDTestA, (void *)(intptr_t)fileID);
 
   flush = ( tsID != afd->tsID ) ? 1 : 0;
 
   if ( flush == 1 ) 
     {
       xdebug ( "tsID = %d, flush buffer", tsID );
-      queueForeach(bibAFiledataPF, flushOp, (void *)(intptr_t)tsID);
+      listSetForeach(bibAFiledataPF, flushOp, (void *)(intptr_t)tsID);
       xmpi ( MPI_Barrier ( commInqCommColl ())); 
     }
 
@@ -461,21 +462,19 @@ int fcPOSIXFPGUARDSENDRECV ( int id )
 
   xdebug("write buffer, close file %d and cleanup", id);
 
-  afd = queueGet(bibAFiledataPF, fileIDTestA, (void *)(intptr_t)id);
+  afd = listSetGet(bibAFiledataPF, fileIDTestA, (void *)(intptr_t)id);
 
   afd->command = IO_Close_file;
 
   writePF ( afd, id );
 
-  /* dequeue file element */
-
-  iret = queueDelNode(bibAFiledataPF, fileIDTestA, (void *)(intptr_t)id);
+  /* remove file element */
+  iret = listSetRemove(bibAFiledataPF, fileIDTestA, (void *)(intptr_t)id);
 
   return iret;
 }
 
 /***************************************************************/
-// baustelle, in modi vereinheitlichen, kapseln in pio_queue.c
 static void
 elemCheck(void *q, void *nm)
 {
@@ -483,7 +482,7 @@ elemCheck(void *q, void *nm)
   const char *name = nm;
 
   if (!strcmp(name, afd->name))
-    xabort("Filename %s is already enqueued\n", name);
+    xabort("Filename %s has already been added to set\n", name);
 }
 
 int fowPOSIXFPGUARDSENDRECV ( const char *filename )
@@ -512,16 +511,15 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
       firstOpen = false;
     }
 
-  /* init and enqueue file element */ 
-  
-  queueForeach(bibAFiledataPF, elemCheck, (void *)filename);
+  /* init and add file element */
+  listSetForeach(bibAFiledataPF, elemCheck, (void *)filename);
 
   afd = initAFiledataPF ( filename, buffersize );
 
-  if ((id = queueAdd(bibAFiledataPF, afd)) < 0)
+  if ((id = listSetAdd(bibAFiledataPF, afd)) < 0)
     xabort("filename %s not unique", afd->name);
 
-  xdebug ( "name=%s, init and enqueued aFiledataPF, return id = %d", 
+  xdebug ( "name=%s, init and add aFiledataPF, return id = %d", 
            filename, id );
   
   return id;
@@ -538,12 +536,12 @@ void  finalizePOSIXFPGUARDSENDRECV ( void )
 
   xmpi ( MPI_Send ( &buffer, 1, MPI_INT, specialRank, tag, commNode ));
 
-  if (!queueIsEmpty(bibAFiledataPF))
-    xabort("queue bibAFiledataM not empty");
+  if (!listSetIsEmpty(bibAFiledataPF))
+    xabort("set bibAFiledataM not empty");
   else
     {
-      xdebug("%s", "cleanup queue");
-      queueDestroy ( bibAFiledataPF );
+      xdebug("%s", "destroy set");
+      listSetDelete(bibAFiledataPF);
     }
 }
 
@@ -568,7 +566,7 @@ void initPOSIXFPGUARDSENDRECV ( void )
       commSendNodeInfo ();
       commRecvNodeMap ();
       commDefCommsIO ();
-      bibAFiledataPF = queueInit ( destroyAFiledataPF, compareNamesAPF );
+      bibAFiledataPF = listSetNew( destroyAFiledataPF, compareNamesAPF );
     }
 }
 

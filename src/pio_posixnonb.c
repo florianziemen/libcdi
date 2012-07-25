@@ -117,8 +117,6 @@ writeP(bFiledataP *bfd, long amount)
 }
 
 /***************************************************************/
-
-// TODO: unify in IOModi, encapsulate in pio_queue.c
 static void
 elemCheck(void *q, void *nm)
 {
@@ -126,14 +124,14 @@ elemCheck(void *q, void *nm)
   const char *name = nm;
 
   if (!strcmp(name, bfd->name))
-    xabort("Filename %s is already enqueued\n", name);
+    xabort("Filename %s has already been added to the set\n", name);
 }
 
 void
 pioWriterStdIO(void)
 {
   bFiledataP *bfd; 
-  queue_t * bibBFiledataP;
+  listSet * bibBFiledataP;
   size_t amount, buffersize;
   char *messageBuffer = NULL;
   char *pMB, *filename, *temp;
@@ -146,7 +144,7 @@ pioWriterStdIO(void)
 
   xdebug ( "ncollectors=%d on this node", nProcsCollNode );
 
-  bibBFiledataP = queueInit(destroyBFiledataP, compareNamesBP);
+  bibBFiledataP = listSetNew(destroyBFiledataP, compareNamesBP);
   sentFinalize = xmalloc ( nProcsCollNode * sizeof ( sentFinalize ));
   
   for ( ;; )
@@ -190,14 +188,14 @@ pioWriterStdIO(void)
                  command2charP[rtag.command], filename, buffersize, amount);
 	  
 	  
-          if (!(bfd = queueGet(bibBFiledataP, fileIDTest,
+          if (!(bfd = listSetGet(bibBFiledataP, fileIDTest,
                                (void *)(intptr_t)rtag.id)))
 	    {
-	      queueForeach(bibBFiledataP, elemCheck, filename);
+	      listSetForeach(bibBFiledataP, elemCheck, filename);
 	      bfd = initBFiledataP(filename, buffersize, nProcsCollNode,
                                    rtag.id);
 	      
-	      if ((id = queueAdd(bibBFiledataP, bfd)) < 0)
+	      if ((id = listSetAdd(bibBFiledataP, bfd)) < 0)
                 xabort("fileID=%d not unique", rtag.id);
 	    }
 	  else
@@ -214,9 +212,9 @@ pioWriterStdIO(void)
 
 	case IO_Send_buffer:
 
-          if (!(bfd = queueGet(bibBFiledataP, fileIDTest,
+          if (!(bfd = listSetGet(bibBFiledataP, fileIDTest,
                                (void *)(intptr_t)rtag.id)))
-            xabort("fileID=%d is not in queue", rtag.id );
+            xabort("fileID=%d is not in set", rtag.id );
 
 	  amount = messagesize;
 
@@ -235,9 +233,9 @@ pioWriterStdIO(void)
 	  xdebug("COMMAND %s,  FILE%d, SOURCE%d",
                  command2charP[rtag.command], rtag.id, source);
 
-          if (!(bfd = queueGet(bibBFiledataP, fileIDTest,
+          if (!(bfd = listSetGet(bibBFiledataP, fileIDTest,
                                (void *)(intptr_t)rtag.id)))
-            xabort("fileID=%d is not in queue", rtag.id);
+            xabort("fileID=%d is not in set", rtag.id);
 
           amount = messagesize;
 
@@ -252,8 +250,8 @@ pioWriterStdIO(void)
 	  if ( ! --(bfd->activeCollectors))
 	    {
 	      xdebug("all are finished with file %d, delete node", rtag.id);
-	      queueDelNode(bibBFiledataP, fileIDTest,
-                           (void *)(intptr_t)rtag.id);
+	      listSetRemove(bibBFiledataP, fileIDTest,
+                            (void *)(intptr_t)rtag.id);
 	    }
           break;
         case IO_Finalize:
@@ -274,13 +272,13 @@ pioWriterStdIO(void)
             
             if ( doFinalize )
               {
-                if (!queueIsEmpty(bibBFiledataP))
-                  xabort("Queue bibBfiledataP is not empty.");
+                if (!listSetIsEmpty(bibBFiledataP))
+                  xabort("set bibBfiledataP is not empty.");
                 else
                   {
-                    xdebug("%s", "all files are finished, destroy queue,"
+                    xdebug("%s", "all files are finished, destroy file set,"
                            " return");
-                    queueDestroy ( bibBFiledataP );
+                    listSetDelete(bibBFiledataP);
                   }
                 return;
               }

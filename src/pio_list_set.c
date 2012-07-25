@@ -20,18 +20,18 @@ struct cons
   struct cons * next;
 };
 
-struct queue_t {
+struct listSet {
   struct cons *head, *tail;
   valDestroyFunction valDestroy;
   eqPredicate keyCompare;
   int count;
 };
 
-queue_t *queueInit ( valDestroyFunction vD, eqPredicate kC )
+listSet *listSetNew( valDestroyFunction vD, eqPredicate kC )
 {
-  queue_t *myq;
+  listSet *myq;
 
-  myq = xmalloc ( sizeof ( queue_t ));
+  myq = xmalloc ( sizeof ( listSet ));
 
   myq->head = NULL;
   myq->tail = NULL;
@@ -42,7 +42,8 @@ queue_t *queueInit ( valDestroyFunction vD, eqPredicate kC )
   return myq;
 }
 
-void queueDestroy ( queue_t *q )
+void
+listSetDelete(listSet *q)
 {
   struct cons *curr, *succ;
 
@@ -65,7 +66,7 @@ void queueDestroy ( queue_t *q )
 }
 
 int
-queueAdd(queue_t *q, void *v)
+listSetAdd(listSet *q, void *v)
 {
   struct cons *newCons;
 
@@ -79,7 +80,7 @@ queueAdd(queue_t *q, void *v)
 
   if ((newCons = malloc(sizeof(struct cons))) == NULL)
     {
-      perror ( "pio_queue: queueAdd (): Not enough memory" );
+      perror ( "pio_listSet: listSetAdd (): Not enough memory" );
       /* FIXME: why not abort? */
       return 1;
     }
@@ -100,8 +101,8 @@ queueAdd(queue_t *q, void *v)
 }
 
 int
-queueDelNode(queue_t *q, int (*predicate)(void *, void *),
-             void *data)
+listSetRemove(listSet *q, int (*predicate)(void *, void *),
+              void *data)
 {
   struct cons **p;
 
@@ -119,7 +120,7 @@ queueDelNode(queue_t *q, int (*predicate)(void *, void *),
 }
 
 void *
-queueGet(queue_t *q, int (*predicate)(void *, void *), void *data)
+listSetGet(listSet *q, int (*predicate)(void *, void *), void *data)
 {
   struct cons *p;
   xassert(q && predicate);
@@ -130,14 +131,14 @@ queueGet(queue_t *q, int (*predicate)(void *, void *), void *data)
 }
 
 bool
-queueIsEmpty(queue_t *q)
+listSetIsEmpty(listSet *q)
 {
   return q->head == NULL;
 }
 
 
 void
-queueForeach(queue_t *q, void (*func)(void *elem, void *data), void *data)
+listSetForeach(listSet *q, void (*func)(void *elem, void *data), void *data)
 {
   struct cons *p;
   for (p = q->head; p; p = p->next)

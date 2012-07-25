@@ -28,7 +28,7 @@ typedef struct
   char name[];
 } remoteFileBuf;
 
-static queue_t * bibRemoteFileBuf;
+static listSet * bibRemoteFileBuf;
 
 static int
 fileIDTest(void *a, void *fileID)
@@ -65,7 +65,7 @@ initRemoteFileBuf(const char *filename, size_t bs)
   afp->command = IO_Open_file;
   afp->request = MPI_REQUEST_NULL;
 
-  xdebug ( "enqueued name=%s, return", afp->name );
+  xdebug ( "added name=%s, return", afp->name );
   return afp;
 }
 
@@ -163,7 +163,7 @@ pioSendWrite(int id, int tsID, const void *buffer, size_t len)
   int filled;
   remoteFileBuf *afd;
 
-  afd = queueGet(bibRemoteFileBuf, fileIDTest, (void *)(intptr_t)id);
+  afd = listSetGet(bibRemoteFileBuf, fileIDTest, (void *)(intptr_t)id);
 
   flush = ( tsID != afd->tsID ) ? 1 : 0;
 
@@ -171,7 +171,7 @@ pioSendWrite(int id, int tsID, const void *buffer, size_t len)
     {
       xdebug ( "tsID = %d, flush buffer", tsID );
 
-      queueForeach(bibRemoteFileBuf, flushOp, (void *)(intptr_t)tsID);
+      listSetForeach(bibRemoteFileBuf, flushOp, (void *)(intptr_t)tsID);
 
       {
         double startTime;
@@ -215,7 +215,7 @@ pioSendClose(int id)
 
   xdebug ( "fileID %d: send buffer, close file and cleanup",id );
 
-  afd = queueGet(bibRemoteFileBuf, fileIDTest, (void *)(intptr_t)id);
+  afd = listSetGet(bibRemoteFileBuf, fileIDTest, (void *)(intptr_t)id);
 
   afd->command = IO_Close_file;
 
@@ -225,8 +225,8 @@ pioSendClose(int id)
    * another has sent the close */
   xmpi(MPI_Barrier(commInqCommColl()));
 
-  /* dequeue file element */
-  iret = queueDelNode(bibRemoteFileBuf, fileIDTest, (void *)(intptr_t)id);
+  /* remove file element */
+  iret = listSetRemove(bibRemoteFileBuf, fileIDTest, (void *)(intptr_t)id);
 
   /* timer output */
   if ( ddebug )
@@ -264,12 +264,12 @@ pioSendOpen(const char *filename)
       xmpi(MPI_Bcast(&buffersize, 1, MPI_LONG, root, commInqCommColl()));
     }
 
-  /* init and enqueue remoteFileBuf */
+  /* init and add remoteFileBuf */
   afd = initRemoteFileBuf(filename, buffersize);
-  if ((id = queueAdd(bibRemoteFileBuf, afd)) < 0)
+  if ((id = listSetAdd(bibRemoteFileBuf, afd)) < 0)
     xabort("filename %s is not unique", afd->name);
 
-  xdebug("filename=%s, init and enqueued remoteFileBuf, return id = %d",
+  xdebug("filename=%s, init and added remoteFileBuf, return id = %d",
          filename, id);
 
   /* put filename, id and buffersize on buffer */
@@ -308,12 +308,12 @@ pioSendFinalize(void)
   xmpi(MPI_Send(&buffer, 1, MPI_INT, specialRank, tag, commNode));
   xdebug("%s", "SENT MESSAGE WITH TAG \"IO_FINALIZE\" TO SPECIAL PROCESS");
 
-  if (!queueIsEmpty(bibRemoteFileBuf))
-    xabort("Queue bibRemoteFileBuf not empty.");
+  if (!listSetIsEmpty(bibRemoteFileBuf))
+    xabort("set bibRemoteFileBuf not empty.");
   else
     {
-      xdebug("%s", "cleanup queue");
-      queueDestroy(bibRemoteFileBuf);
+      xdebug("%s", "destroy set");
+      listSetDelete(bibRemoteFileBuf);
     }
 }
 
@@ -346,7 +346,7 @@ pioSendInitialize(void)
       commSendNodeInfo ();
       commRecvNodeMap ();
       commDefCommsIO ();
-      bibRemoteFileBuf = queueInit(destroyRemoteFileBuf, compareNames);
+      bibRemoteFileBuf = listSetNew(destroyRemoteFileBuf, compareNames);
     }
 }
 

@@ -222,11 +222,11 @@ src/pio_dbuffer.c -text
 src/pio_impl.h -text
 src/pio_interface.c -text
 src/pio_interface.h -text
+src/pio_list_set.c -text
 src/pio_mpinonb.c -text
 src/pio_posixasynch.c -text
 src/pio_posixfpguardsendrecv.c -text
 src/pio_posixnonb.c -text
-src/pio_queue.c -text
 src/pio_record_send.c -text
 src/pio_rpc.c -text
 src/pio_rpc.h -text

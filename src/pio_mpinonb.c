@@ -36,7 +36,7 @@ typedef struct
   char name[];
 } aFiledataM;
 
-static queue_t *bibAFiledataM;
+static listSet *bibAFiledataM;
 
 static int
 fileIDTest(void *a, void *fileID)
@@ -180,7 +180,7 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
   aFiledataM *of;
   int rankNode = commInqRankNode ();
 
-  of = queueGet(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID);
+  of = listSetGet(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID);
   xassert(of);
 
   bool flush = tsID != of->tsID;
@@ -232,14 +232,13 @@ int fcMPINONB ( int fileID )
   xdebug("IOPE%d: write buffer, close file and cleanup, in %d",
          rankNode, fileID );
 
-  if (!(of = queueGet(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID)))
-    xabort("pio_queue, fileID=%d not found", fileID);
+  if (!(of = listSetGet(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID)))
+    xabort("listSet, fileID=%d not found", fileID);
 
   writeMPINONB(of);
 
-  /* dequeue file element */
-
-  iret = queueDelNode(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID);
+  /* remove file element */
+  iret = listSetRemove(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID);
 
   /* timer output */
 
@@ -258,7 +257,6 @@ int fcMPINONB ( int fileID )
 }
 
 /***************************************************************/
-// baustelle, in modi vereinheitlichen, kapseln in pio_queue.c
 static void
 elemCheck(void *q, void *nm)
 {
@@ -266,7 +264,7 @@ elemCheck(void *q, void *nm)
   const char *name = nm;
 
   if (!strcmp(name, afm->name))
-    xabort("Filename %s is already enqueued\n", name);
+    xabort("Filename %s has already been added to set\n", name);
 }
 
 
@@ -298,14 +296,14 @@ int fowMPINONB ( const char *filename )
 
   xdebug("buffersize=%ld", buffersize);
 
-  queueForeach(bibAFiledataM, elemCheck, (void *)filename);
+  listSetForeach(bibAFiledataM, elemCheck, (void *)filename);
   of = initAFiledataMPINONB(filename, buffersize);
 
-  if ((id = queueAdd(bibAFiledataM, of)) < 0 )
+  if ((id = listSetAdd(bibAFiledataM, of)) < 0 )
     xabort("filename %s not unique", of->name);
 
-  xdebug ( "IOPE%d: name=%s, init and enqueued aFiledataM, return id = %d", 
-           rankNode, filename, id );
+  xdebug("IOPE%d: name=%s, init and added aFiledataM, return id = %d",
+         rankNode, filename, id);
   
   return id;
 }
@@ -314,12 +312,12 @@ int fowMPINONB ( const char *filename )
 
 void finalizeMPINONB(void)
 {
-  if (!queueIsEmpty(bibAFiledataM))
-    xabort("queue bibAFiledataM not empty");
+  if (!listSetIsEmpty(bibAFiledataM))
+    xabort("set bibAFiledataM not empty");
   else
     {
-      xdebug("%s", "cleanup queue");
-      queueDestroy(bibAFiledataM);
+      xdebug("%s", "destroy set");
+      listSetDelete(bibAFiledataM);
     }
 }
 
@@ -332,10 +330,10 @@ void initMPINONB ( void )
   commRecvNodeMap ();
   commDefCommsIO ();
 
-  bibAFiledataM = queueInit ( destroyAFiledataMPINONB, compareNamesMPINONB );
+  bibAFiledataM = listSetNew( destroyAFiledataMPINONB, compareNamesMPINONB );
   
   if ( bibAFiledataM == NULL )
-    xabort ( "queueInit did not succeed" );   
+    xabort ( "listSetNew did not succeed" );   
 }
 
 #endif

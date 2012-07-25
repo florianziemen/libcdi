@@ -30,7 +30,7 @@ struct dBuffer
 typedef int ( * valDestroyFunction ) ( void * );
 typedef bool (*eqPredicate)(void *, void *);
 
-typedef struct queue_t queue_t;
+typedef struct listSet listSet;
 
 struct fileOpTag
 {
@@ -50,17 +50,17 @@ int       dbuffer_reset ( struct dBuffer * );
 void      dbuffer_cleanup ( struct dBuffer ** );
 size_t    dbuffer_free ( struct dBuffer * );
 
-/* pio_queue.c */
-queue_t *queueInit(valDestroyFunction, eqPredicate);
-void      queueDestroy ( queue_t * );
-int queueAdd(queue_t *, void *);
-bool queueIsEmpty(queue_t *);
-int queueDelNode(queue_t *, int (*predicate)(void *, void *),
-                 void *data);
-void *queueGet(queue_t *q, int (*predicate)(void *, void *), void *data);
+/* pio_list_set.c */
+listSet *listSetNew(valDestroyFunction, eqPredicate);
+void listSetDelete(listSet *);
+int listSetAdd(listSet *, void *);
+bool listSetIsEmpty(listSet *);
+int listSetRemove(listSet *, int (*predicate)(void *, void *),
+                  void *data);
+void *listSetGet(listSet *q, int (*predicate)(void *, void *), void *data);
 
 typedef void (*elemOp)(void *elem, void *data);
-void queueForeach(queue_t *q, elemOp func, void *data);
+void listSetForeach(listSet *q, elemOp func, void *data);
 
 /* pio_mpinonb.c */
 int       fowMPINONB ( const char * );
