@@ -1690,7 +1690,7 @@ void zaxisPack ( void * voidP, void * packBuffer, int packBufferSize,
 		 int * packBufferPos, MPI_Comm comm )
 {
   zaxis_t   * zaxisP = ( zaxis_t * ) voidP;
-  int intBuffer[zaxisNint + 1], size;
+  int intBuffer[zaxisNint + 1];
   double d;
   char charBuffer[zaxisNstrings * CDI_MAX_NAME];
 
