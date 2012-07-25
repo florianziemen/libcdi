@@ -68,6 +68,7 @@ size_t    dbuffer_free ( struct dBuffer * );
 queue_t *queueInit(valDestroyFunction, eqPredicate);
 void      queueDestroy ( queue_t * );
 int queueAdd(queue_t *, void *);
+bool queueIsEmpty(queue_t *);
 int queueDelNode(queue_t *, int (*predicate)(void *, void *),
                  void *data);
 void *queueGet(queue_t *q, int (*predicate)(void *, void *), void *data);

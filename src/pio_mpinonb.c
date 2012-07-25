@@ -360,16 +360,14 @@ int fowMPINONB ( const char *filename )
 
 /***************************************************************/
 
-void      finalizeMPINONB ( void )
+void finalizeMPINONB(void)
 {
-  if ( bibAFiledataM->head != NULL )
-    {
-      xabort ( "queue bibAFiledataM not empty" );
-    }
+  if (queueIsEmpty(bibAFiledataM))
+    xabort("queue bibAFiledataM not empty")
   else
     {
       xdebug("%s", "cleanup queue");
-      free ( bibAFiledataM );
+      queueDestroy(bibAFiledataM);
     }
 }
 

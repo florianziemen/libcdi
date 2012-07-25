@@ -113,6 +113,12 @@ queueGet(queue_t *q, int (*predicate)(void *, void *), void *data)
   return NULL;
 }
 
+bool
+queueIsEmpty(queue_t *q)
+{
+  return q->head == NULL;
+}
+
 
 #endif
 /*
