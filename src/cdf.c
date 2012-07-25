@@ -61,10 +61,10 @@ void cdfDebug(int debug)
     Message("debug level %d", debug);
 }
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfComment(int ncid)
 {
-#if  defined  (HAVE_LIBNETCDF)
   static char comment[256] = "Climate Data Interface version ";
   static int init = 0;
   char *blank;
@@ -85,8 +85,8 @@ void cdfComment(int ncid)
 
   cdf_put_att_text(ncid, NC_GLOBAL, "CDI", strlen(comment), comment);
   cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.4");
-#endif
 }
+#endif
 
 
 int cdfOpenFile(const char *filename, const char *mode, int *filetype)
