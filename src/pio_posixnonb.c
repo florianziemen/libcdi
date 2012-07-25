@@ -158,7 +158,7 @@ pioWriterStdIO(void)
   size_t amount, buffersize;
   char *messageBuffer = NULL;
   char *pMB, *filename, *temp;
-  int messagesize, source, tag, i, len, id;
+  int messagesize, source, tag, i, id;
   tag_t *rtag = NULL;
   MPI_Status status;
   MPI_Comm commNode = commInqCommNode ();
