@@ -26,9 +26,9 @@ struct rdmaWin
 {
   size_t size;
   unsigned char *buffer, *head;
+  MPI_Win win;
 } *txWin = NULL;
 
-MPI_Win        * win            = NULL;
 int            * winPostSet     = NULL;
 int            * refuseFuncCall = NULL;
 MPI_Group      * groupsIO       = NULL;
@@ -330,13 +330,13 @@ void modelWinCleanup ( void )
 
   xdebug("%s", "START");
   if ( winPostSet != NULL &&
-       win != NULL &&
+       txWin != NULL &&
        groupsIONetto != NULL )
     for ( collID = 0; collID < commInqNProcsColl (); collID ++ )
       {
         if ( winPostSet[collID] )
-          xmpi ( MPI_Win_wait ( win[collID] ));
-        xmpi ( MPI_Win_free ( &win[collID] ));
+          xmpi(MPI_Win_wait(txWin[collID].win));
+        xmpi(MPI_Win_free(&txWin[collID].win));
         xmpi ( MPI_Free_mem ( txWin[collID].buffer ));
         xmpi ( MPI_Group_free ( &groupsIONetto[collID] ));
       }
@@ -344,7 +344,6 @@ void modelWinCleanup ( void )
   if ( groupsIONetto )   free ( groupsIONetto );
   if ( refuseFuncCall )  free ( refuseFuncCall );
   if ( winPostSet )      free ( winPostSet );
-  if ( win )             free ( win );
   if (txWin) free(txWin);
 
   xdebug("%s", "RETURN. CLEANED UP MPI_WIN'S");
@@ -436,7 +435,6 @@ void modelWinCreate ( void )
 
   xdebug("%s", "START");
   txWin = xmalloc(nProcsColl * sizeof (txWin[0]));
-  win             = xmalloc ( nProcsColl * sizeof ( win[0] ));
   winPostSet      = xmalloc ( nProcsColl * sizeof ( winPostSet[0] ));
   refuseFuncCall  = xmalloc ( nProcsColl * sizeof ( refuseFuncCall[0] ));
   groupsIONetto   = xmalloc ( nProcsColl * sizeof ( groupsIONetto[0] ));
@@ -452,9 +450,9 @@ void modelWinCreate ( void )
                          &txWin[collID].buffer));
       xassert ( txWin[collID].buffer != NULL );
       txWin[collID].head = txWin[collID].buffer;
-      xmpi(MPI_Win_create(txWin[collID].buffer, (MPI_Aint) txWin[collID].size, 1,
+      xmpi(MPI_Win_create(txWin[collID].buffer, (MPI_Aint)txWin[collID].size, 1,
                           MPI_INFO_NULL, commInqCommsIO(collID),
-                          &win[collID]));
+                          &txWin[collID].win));
       xmpi ( MPI_Comm_group ( commInqCommsIO ( collID ), &groupsIONetto[collID] ));
       xmpi ( MPI_Group_incl ( groupsIONetto[collID], 1, ranks,
                               &groupsIONetto[collID] ));
@@ -508,12 +506,11 @@ void pioBufferData ( const int streamID, const int varID, const double *data, in
             chunk          >= 0                    &&
             txWin != NULL &&
             winPostSet     != NULL                 &&
-            refuseFuncCall != NULL                &&
-            win            != NULL );
+            refuseFuncCall != NULL);
 
   if ( winPostSet[collID] )
     {
-      xmpi ( MPI_Win_wait ( win[collID] ));
+      xmpi(MPI_Win_wait(txWin[collID].win));
       winPostSet[collID] = 0;
       modelWinFlushBuffer ( collID );
     }
@@ -565,8 +562,7 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
             argc          >= 1                    &&
             argc          <= 2                    &&
             txWin != NULL &&
-            winPostSet    != NULL                 &&
-            win           != NULL );
+            winPostSet != NULL);
 
   va_start ( ap, argc );
 
@@ -587,7 +583,7 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
 
             if ( winPostSet[collID] )
               {
-                xmpi ( MPI_Win_wait ( win[collID] ));
+                xmpi(MPI_Win_wait(txWin[collID].win));
                 winPostSet[collID] = 0;
                 modelWinFlushBuffer ( collID );
               }
@@ -629,7 +625,7 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
 
             if ( winPostSet[collID] )
               {
-                xmpi ( MPI_Win_wait ( win[collID] ));
+                xmpi(MPI_Win_wait(txWin[collID].win));
                 winPostSet[collID] = 0;
                 modelWinFlushBuffer ( collID );
               }
@@ -668,7 +664,7 @@ void pioBufferFuncCall ( const char * func, int argc, ... )
 
             if ( winPostSet[collID] )
               {
-                xmpi ( MPI_Win_wait ( win[collID] ));
+                xmpi(MPI_Win_wait(txWin[collID].win));
                 winPostSet[collID] = 0;
                 modelWinFlushBuffer ( collID );
               }
@@ -918,7 +914,7 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
             vdate      >= 0     &&
             vtime      >= 0     &&
             winPostSet != NULL  &&
-            win        != NULL );
+            txWin != NULL);
 
   buffer[0] = tsID;
   buffer[1] = vdate;
@@ -935,13 +931,13 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
     {
       if ( winPostSet[collID] )
         {
-          xmpi ( MPI_Win_wait ( win[collID] ));
+          xmpi(MPI_Win_wait(txWin[collID].win));
           winPostSet[collID] = 0;
           modelWinFlushBuffer ( collID );
         }
       modelWinBufferPutAtEnd ( __func__, collID, &tokenEnd, 
                                sizeof ( tokenEnd ));
-      xmpi ( MPI_Win_post ( groupsIONetto[collID], iAssert, win[collID] ));
+      xmpi(MPI_Win_post(groupsIONetto[collID], iAssert, txWin[collID].win));
       winPostSet[collID] = 1;
     }
 
