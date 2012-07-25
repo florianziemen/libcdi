@@ -37,9 +37,10 @@ enum
   winBufferOverhead = 1,
   winBufferOverheadChunk = 5,
   winBufferOverheadFuncCall = 3,
-  MAXWINBUFFERSIZE = 128 * 1024 * 1024,
   timestepSize = 3
 };
+
+#define MAXWINBUFFERSIZE ((size_t)512 * 1024 * 1024)
 
 enum { nFuncs = 3, STREAMOPEN = 0, STREAMDEFVLIST = 1, STREAMCLOSE = 2 };
 enum { MAXDATAFILENAME = 256, MINFUNCID = STREAMOPEN, MAXFUNCID = STREAMCLOSE };
