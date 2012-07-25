@@ -437,7 +437,7 @@ void streamCopyRecord(int streamID2, int streamID1)
 {
   int status = 0;
   int filetype = CDI_UNDEFID, filetype1, filetype2;
-  int byteorder1, byteorder2;
+  int byteorder1;
   stream_t *streamptr1;
   stream_t *streamptr2;
 
@@ -450,7 +450,6 @@ void streamCopyRecord(int streamID2, int streamID1)
   filetype1 = streamptr1->filetype;
   filetype2 = streamptr2->filetype;
   byteorder1 = streamptr1->byteorder;
-  byteorder2 = streamptr2->byteorder;
 
   if ( filetype1  == filetype2 ) filetype = filetype2;
 
