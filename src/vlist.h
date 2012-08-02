@@ -60,6 +60,14 @@ typedef struct
 }
 deco_t;
 
+typedef struct
+{
+  int ens_index;
+  int ens_count;
+  int forecast_init_type;
+}
+ensinfo_t;
+
 
 typedef struct
 {
@@ -71,12 +79,11 @@ typedef struct
   int         param;
   int         gridID;
   int         zaxisID;
-  int         timeID;    /* TIME_VARIABLE or TIME_CONSTANT */
+  int         tsteptype; /* TSTEP_* */
   int         datatype;  /* DATATYPE_PACKX for GRIB data, else DATATYPE_FLT32 or DATATYPE_FLT64 */
   int         instID;
   int         modelID;
   int         tableID;
-  int         tsteptype; /* Time step type: TSTEP_INSTANT, TSTEP_AVG ... */
   int         timave;
   int         timaccu;
   int         xyz;
@@ -93,6 +100,7 @@ typedef struct
   levinfo_t  *levinfo;
   int         comptype;     // compression type
   int         complevel;    // compression level
+  ensinfo_t  *ensdata;      /* Ensemble information */
   cdi_atts_t  atts;
   int         iorank;
   int         decoSize;
@@ -130,7 +138,7 @@ const char *vlistInqVarUnitsPtr(int vlistID, int varID);
 void     vlistDestroyVarName(int vlistID, int varID);
 void     vlistDestroyVarLongname(int vlistID, int varID);
 void     vlistDestroyVarUnits(int vlistID, int varID);
-void     vlistDefVarTime(int vlistID, int varID, int timeID);
+void     vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
 int      vlistInqVarMissvalUsed(int vlistID, int varID);
 int      vlistHasTime(int vlistID);
 

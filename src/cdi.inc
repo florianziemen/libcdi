@@ -3,7 +3,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   December 2011
+! Uwe Schulzweida, MPI-MET, Hamburg,   July 2012
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -253,19 +253,50 @@
       INTEGER    ZAXIS_REFERENCE       
       PARAMETER (ZAXIS_REFERENCE        = 16)
 !
+!  TIME types
+!
+      INTEGER    TIME_CONSTANT         
+      PARAMETER (TIME_CONSTANT          =  0)
+      INTEGER    TIME_VARIABLE         
+      PARAMETER (TIME_VARIABLE          =  1)
+!
+!  TSTEP types
+!
+      INTEGER    TSTEP_CONSTANT        
+      PARAMETER (TSTEP_CONSTANT         =  0)
+      INTEGER    TSTEP_INSTANT         
+      PARAMETER (TSTEP_INSTANT          =  1)
+      INTEGER    TSTEP_AVG             
+      PARAMETER (TSTEP_AVG              =  2)
+      INTEGER    TSTEP_ACCUM           
+      PARAMETER (TSTEP_ACCUM            =  3)
+      INTEGER    TSTEP_MAX             
+      PARAMETER (TSTEP_MAX              =  4)
+      INTEGER    TSTEP_MIN             
+      PARAMETER (TSTEP_MIN              =  5)
+      INTEGER    TSTEP_DIFF            
+      PARAMETER (TSTEP_DIFF             =  6)
+      INTEGER    TSTEP_RMS             
+      PARAMETER (TSTEP_RMS              =  7)
+      INTEGER    TSTEP_SD              
+      PARAMETER (TSTEP_SD               =  8)
+      INTEGER    TSTEP_COV             
+      PARAMETER (TSTEP_COV              =  9)
+      INTEGER    TSTEP_RATIO           
+      PARAMETER (TSTEP_RATIO            = 10)
+      INTEGER    TSTEP_RANGE           
+      PARAMETER (TSTEP_RANGE            = 11)
+      INTEGER    TSTEP_INSTANT2        
+      PARAMETER (TSTEP_INSTANT2         = 12)
+      INTEGER    TSTEP_INSTANT3        
+      PARAMETER (TSTEP_INSTANT3         = 13)
+!
 !  TAXIS types
 !
       INTEGER    TAXIS_ABSOLUTE        
       PARAMETER (TAXIS_ABSOLUTE         =  1)
       INTEGER    TAXIS_RELATIVE        
       PARAMETER (TAXIS_RELATIVE         =  2)
-!
-!  TIME types
-!
-      INTEGER    TIME_CONSTANT         
-      PARAMETER (TIME_CONSTANT          =  1)
-      INTEGER    TIME_VARIABLE         
-      PARAMETER (TIME_VARIABLE          =  2)
 !
 !  TUNIT types
 !
@@ -289,27 +320,6 @@
       PARAMETER (TUNIT_6HOURS           =  9)
       INTEGER    TUNIT_12HOURS         
       PARAMETER (TUNIT_12HOURS          = 10)
-!
-!  TSTEP types
-!
-      INTEGER    TSTEP_INSTANT         
-      PARAMETER (TSTEP_INSTANT          =  1)
-      INTEGER    TSTEP_AVG             
-      PARAMETER (TSTEP_AVG              =  2)
-      INTEGER    TSTEP_ACCUM           
-      PARAMETER (TSTEP_ACCUM            =  3)
-      INTEGER    TSTEP_MAX             
-      PARAMETER (TSTEP_MAX              =  4)
-      INTEGER    TSTEP_MIN             
-      PARAMETER (TSTEP_MIN              =  5)
-      INTEGER    TSTEP_DIFF            
-      PARAMETER (TSTEP_DIFF             =  6)
-      INTEGER    TSTEP_RANGE           
-      PARAMETER (TSTEP_RANGE            =  7)
-      INTEGER    TSTEP_INSTANT2        
-      PARAMETER (TSTEP_INSTANT2         =  8)
-      INTEGER    TSTEP_INSTANT3        
-      PARAMETER (TSTEP_INSTANT3         =  9)
 !
 !  CALENDAR types
 !
@@ -560,6 +570,13 @@
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVar
 
+!                     streamWriteVarF
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     REAL            data_vec,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamWriteVarF
+
 !                     streamReadVarSlice
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
@@ -575,6 +592,14 @@
 !                                     DOUBLEPRECISION data_vec,
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVarSlice
+
+!                     streamWriteVarSliceF
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     INTEGER         levelID,
+!                                     REAL            data_vec,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamWriteVarSliceF
 
 !
 !  STREAM record I/O routines
@@ -603,10 +628,22 @@
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteRecord
 
+!                     streamWriteRecordF
+!                                    (INTEGER         streamID,
+!                                     REAL            data_vec,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamWriteRecordF
+
 !                     streamCopyRecord
 !                                    (INTEGER         streamIDdest,
 !                                     INTEGER         streamIDsrc)
       EXTERNAL        streamCopyRecord
+
+!                     streamInqGinfo
+!                                    (INTEGER         streamID,
+!                                     INTEGER         intnum,
+!                                     REAL            fltnum)
+      EXTERNAL        streamInqGinfo
 
 !
 !  VLIST routines
@@ -770,7 +807,7 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         gridID,
 !                                     INTEGER         zaxisID,
-!                                     INTEGER         timeID)
+!                                     INTEGER         tsteptype)
       EXTERNAL        vlistDefVar
 
 !                     vlistChangeVarGrid
@@ -790,7 +827,7 @@
 !                                     INTEGER         varID,
 !                                     INTEGER         gridID,
 !                                     INTEGER         zaxisID,
-!                                     INTEGER         timeID)
+!                                     INTEGER         tsteptype)
       EXTERNAL        vlistInqVar
 
       INTEGER         vlistInqVarGrid
@@ -803,10 +840,24 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarZaxis
 
-      INTEGER         vlistInqVarTime
+!
+!  used in MPIOM
+!
+      INTEGER         vlistInqVarID
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         code)
+      EXTERNAL        vlistInqVarID
+
+      INTEGER         vlistInqVarTsteptype
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarTime
+      EXTERNAL        vlistInqVarTsteptype
+
+!                     vlistDefVarTsteptype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         tsteptype)
+      EXTERNAL        vlistDefVarTsteptype
 
 !                     vlistDefVarCompType
 !                                    (INTEGER         vlistID,
@@ -993,17 +1044,6 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarAddoffset
 
-!                     vlistDefVarTsteptype
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     INTEGER         tsteptype)
-      EXTERNAL        vlistDefVarTsteptype
-
-      INTEGER         vlistInqVarTsteptype
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarTsteptype
-
 !                     vlistDefVarTimave
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
@@ -1078,6 +1118,25 @@
 !                                     INTEGER         varID,
 !                                     INTEGER         levelID)
       EXTERNAL        vlistMergedLevel
+
+!
+!  Ensemble info routines
+!
+!                     vlistDefVarEnsemble
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         ensID,
+!                                     INTEGER         ensCount,
+!                                     INTEGER         forecast_type)
+      EXTERNAL        vlistDefVarEnsemble
+
+      INTEGER         vlistInqVarEnsemble
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         ensID,
+!                                     INTEGER         ensCount,
+!                                     INTEGER         forecast_type)
+      EXTERNAL        vlistInqVarEnsemble
 
 !
 !  VLIST attributes
@@ -1235,6 +1294,15 @@
       INTEGER         gridInqYsize
 !                                    (INTEGER         gridID)
       EXTERNAL        gridInqYsize
+
+!                     gridDefNP
+!                                    (INTEGER         gridID,
+!                                     INTEGER         np)
+      EXTERNAL        gridDefNP
+
+      INTEGER         gridInqNP
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqNP
 
 !                     gridDefXvals
 !                                    (INTEGER         gridID,
@@ -1467,6 +1535,16 @@
 !                                     CHARACTER*(*)   reference)
       EXTERNAL        gridDefReference
 
+      CHARACTER*80    gridInqUUID
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   uuid)
+      EXTERNAL        gridInqUUID
+
+!                     gridDefUUID
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   uuid)
+      EXTERNAL        gridDefUUID
+
 !
 !  Lambert Conformal Conic grid (GRIB version)
 !
@@ -1663,6 +1741,25 @@
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         levelID)
       EXTERNAL        zaxisInqLevel
+
+!                     zaxisDefReference
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         refID)
+      EXTERNAL        zaxisDefReference
+
+!                     zaxisDefUUID
+!                                    (INTEGER         zaxisID,
+!                                     CHARACTER*(*)   uuid)
+      EXTERNAL        zaxisDefUUID
+
+      CHARACTER*80    zaxisInqUUID
+!                                    (INTEGER         zaxisID,
+!                                     CHARACTER*(*)   uuid)
+      EXTERNAL        zaxisInqUUID
+
+      INTEGER         zaxisInqReference
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisInqReference
 
 !                     zaxisDefName
 !                                    (INTEGER         zaxisID,

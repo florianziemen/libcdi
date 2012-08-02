@@ -9,20 +9,20 @@ The function {\tt vlistDefVar} adds a new variable to vlistID.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    int vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID);
+    int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\tt vlistID\ }
+\begin{deflist}{\tt tsteptype\ }
 \item[{\tt vlistID}]
 Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
 \item[{\tt gridID}]
 Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
 \item[{\tt zaxisID}]
 Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
-\item[{\tt timeID}]
-One of the set of predefined {\CDI} time identifiers.
-                    The valid {\CDI} time identifiers are {\tt TIME\_CONSTANT} and {\tt TIME\_VARIABLE}.
+\item[{\tt tsteptype}]
+One of the set of predefined {\CDI} timestep types.
+                     The valid {\CDI} timestep types are {\tt TSTEP\_CONSTANT} and {\tt TSTEP\_INSTANT}.
 
 \end{deflist}
 \end{minipage}
@@ -44,7 +44,7 @@ and add a variable with {\tt vlistDefVar}.
     int vlistID, varID;
        ...
     vlistID = vlistCreate();
-    varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARIABLE);
+    varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_INSTANT);
        ...
     streamDefVlist(streamID, vlistID);
        ...
@@ -208,7 +208,7 @@ Variable identifier.
 \item[{\tt name}]
 Returned variable name. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI\_MAX\_NAME.
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
 
 \end{deflist}
 \end{minipage}
@@ -267,7 +267,7 @@ Variable identifier.
 \item[{\tt longname}]
 Long name of the variable. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI\_MAX\_NAME.
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
 
 \end{deflist}
 \end{minipage}
@@ -325,7 +325,7 @@ Variable identifier.
 \item[{\tt stdname}]
 Standard name of the variable. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI\_MAX\_NAME.
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
 
 \end{deflist}
 \end{minipage}
@@ -383,7 +383,7 @@ Variable identifier.
 \item[{\tt units}]
 Units of the variable. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant CDI\_MAX\_NAME.
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
 
 \end{deflist}
 \end{minipage}

@@ -5,7 +5,7 @@
 
 /* GRIB2 Level Types */
 #define  GRIB2_LTYPE_SURFACE               1
-#define  GRIB2_LTYPE_TOA           8
+#define  GRIB2_LTYPE_TOA                   8
 #define  GRIB2_LTYPE_SEA_BOTTOM            9
 #define  GRIB2_LTYPE_ATMOSPHERE           10
 #define  GRIB2_LTYPE_ISOBARIC            100
@@ -16,6 +16,7 @@
 #define  GRIB2_LTYPE_HYBRID              105
 #define  GRIB2_LTYPE_LANDDEPTH           106
 #define  GRIB2_LTYPE_ISENTROPIC          107
+#define  GRIB2_LTYPE_REFERENCE           150
 #define  GRIB2_LTYPE_SEADEPTH            160
 
 /* GRIB2 Data representation type (Grid Type) */

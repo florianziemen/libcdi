@@ -152,15 +152,32 @@ extern "C" {
 #define  ZAXIS_ATMOSPHERE        15  /* Entire atmosphere                       */
 #define  ZAXIS_REFERENCE         16  /* zaxis reference number                  */
 
+/* TIME types */
+
+#define  TIME_CONSTANT            0  /* obsolate, use TSTEP_CONSTANT            */
+#define  TIME_VARIABLE            1  /* obsolate, use TSTEP_INSTANT             */
+
+/* TSTEP types */
+
+#define  TSTEP_CONSTANT           0
+#define  TSTEP_INSTANT            1
+#define  TSTEP_AVG                2
+#define  TSTEP_ACCUM              3
+#define  TSTEP_MAX                4
+#define  TSTEP_MIN                5
+#define  TSTEP_DIFF               6
+#define  TSTEP_RMS                7
+#define  TSTEP_SD                 8
+#define  TSTEP_COV                9
+#define  TSTEP_RATIO             10
+#define  TSTEP_RANGE             11
+#define  TSTEP_INSTANT2          12
+#define  TSTEP_INSTANT3          13
+
 /* TAXIS types */
 
 #define  TAXIS_ABSOLUTE           1
 #define  TAXIS_RELATIVE           2
-
-/* TIME types */
-
-#define  TIME_CONSTANT            1
-#define  TIME_VARIABLE            2
 
 /* TUNIT types */
 
@@ -174,18 +191,6 @@ extern "C" {
 #define  TUNIT_3HOURS             8
 #define  TUNIT_6HOURS             9
 #define  TUNIT_12HOURS           10
-
-/* TSTEP types */
-
-#define  TSTEP_INSTANT            1
-#define  TSTEP_AVG                2
-#define  TSTEP_ACCUM              3
-#define  TSTEP_MAX                4
-#define  TSTEP_MIN                5
-#define  TSTEP_DIFF               6
-#define  TSTEP_RANGE              7
-#define  TSTEP_INSTANT2           8
-#define  TSTEP_INSTANT3           9
 
 /* CALENDAR types */
 
@@ -315,12 +320,14 @@ void    streamReadVar(int streamID, int varID, double *data_vec, int *nmiss);
 
 /*      streamWriteVar: Write a variable */
 void    streamWriteVar(int streamID, int varID, const double *data_vec, int nmiss);
+void    streamWriteVarF(int streamID, int varID, const float *data_vec, int nmiss);
 
 /*      streamReadVarSlice: Read a horizontal slice of a variable */
 void    streamReadVarSlice(int streamID, int varID, int levelID, double *data_vec, int *nmiss);
 
 /*      streamWriteVarSlice: Write a horizontal slice of a variable */
 void    streamWriteVarSlice(int streamID, int varID, int levelID, const double *data_vec, int nmiss);
+void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data_vec, int nmiss);
 
 
 /* STREAM record I/O routines */
@@ -329,6 +336,7 @@ void    streamInqRecord(int streamID, int *varID, int *levelID);
 void    streamDefRecord(int streamID, int  varID, int  levelID);
 void    streamReadRecord(int streamID, double *data_vec, int *nmiss);
 void    streamWriteRecord(int streamID, const double *data_vec, int nmiss);
+void    streamWriteRecordF(int streamID, const float *data_vec, int nmiss);
 void    streamCopyRecord(int streamIDdest, int streamIDsrc);
 
 void    streamInqGinfo(int streamID, int *intnum, float *fltnum);
@@ -402,15 +410,20 @@ int     vlistInqModel(int vlistID);
 /* VLIST VAR routines */
 
 /*      vlistDefVar: Create a new Variable */
-int     vlistDefVar(int vlistID, int gridID, int zaxisID, int timeID);
+int     vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype);
 
 void    vlistChangeVarGrid(int vlistID, int varID, int gridID);
 void    vlistChangeVarZaxis(int vlistID, int varID, int zaxisID);
 
-void    vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *timeID);
+void    vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *tsteptype);
 int     vlistInqVarGrid(int vlistID, int varID);
 int     vlistInqVarZaxis(int vlistID, int varID);
-int     vlistInqVarTime(int vlistID, int varID);
+
+/* used in MPIOM */
+int     vlistInqVarID(int vlistID, int code);
+
+int     vlistInqVarTsteptype(int vlistID, int varID);
+void    vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
 
 void    vlistDefVarCompType(int vlistID, int varID, int comptype);
 int     vlistInqVarCompType(int vlistID, int varID);
@@ -482,8 +495,6 @@ double  vlistInqVarScalefactor(int vlistID, int varID);
 void    vlistDefVarAddoffset(int vlistID, int varID, double addoffset);
 double  vlistInqVarAddoffset(int vlistID, int varID);
 
-void    vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
-int     vlistInqVarTsteptype(int vlistID, int varID);
 void    vlistDefVarTimave(int vlistID, int varID, int timave);
 int     vlistInqVarTimave(int vlistID, int varID);
 void    vlistDefVarTimaccu(int vlistID, int varID, int timaccu);
@@ -500,6 +511,9 @@ int     vlistFindLevel(int vlistID, int fvarID, int flevelID);
 int     vlistMergedVar(int vlistID, int varID);
 int     vlistMergedLevel(int vlistID, int varID, int levelID);
 
+/*     Ensemble info routines */
+void    vlistDefVarEnsemble(int vlistID, int varID, int ensID, int ensCount, int forecast_type);
+int     vlistInqVarEnsemble(int vlistID, int varID, int *ensID, int *ensCount, int *forecast_type);
 
 /* VLIST attributes */
 
@@ -566,6 +580,12 @@ void    gridDefYsize(int gridID, int ysize);
 
 /*      gridInqYsize: Get the size of a Y-axis */
 int     gridInqYsize(int gridID);
+
+/*      gridDefNP: Define the number of parallels between a pole and the equator */
+void    gridDefNP(int gridID, int np);
+
+/*      gridInqNP: Get the number of parallels between a pole and the equator */
+int     gridInqNP(int gridID);
 
 /*      gridDefXvals: Define the values of a X-axis */
 void    gridDefXvals(int gridID, const double *xvals_vec);
@@ -663,6 +683,8 @@ int     gridInqPosition(int gridID);
 void    gridDefPosition(int gridID, int position);
 int     gridInqReference(int gridID, char *reference);
 void    gridDefReference(int gridID, const char *reference);
+char   *gridInqUUID(int gridID, char *uuid);
+void    gridDefUUID(int gridID, const char *uuid);
 
 
 /* Lambert Conformal Conic grid (GRIB version) */
@@ -742,6 +764,18 @@ void    zaxisDefLevel(int zaxisID, int levelID, double levels);
 
 /*      zaxisInqLevel: Get one level of a Z-axis */
 double  zaxisInqLevel(int zaxisID, int levelID);
+
+/*      zaxisDefReference: Define the reference of a generalized Z-axis */
+void    zaxisDefReference(int zaxisID, int refID);
+
+/*      zaxisDefUUID: Define the uuid of a generalized Z-axis */
+void    zaxisDefUUID(int zaxisID, const char *uuid);
+
+/*      zaxisInqUUID: Get the reference of a generalized Z-axis */
+char   *zaxisInqUUID(int zaxisID, char *uuid);
+
+/*      zaxisInqReference: Get the reference of a generalized Z-axis */
+int     zaxisInqReference(int zaxisID);
 
 /*      zaxisDefName: Define the name of a Z-axis */
 void    zaxisDefName(int zaxisID, const char *name);

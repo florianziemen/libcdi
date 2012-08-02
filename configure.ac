@@ -1,6 +1,6 @@
 #  Process this file with autoconf to produce a configure script.
 
-AC_INIT([cdi], [1.5.4], [http://code.zmaw.de/projects/cdi])
+AC_INIT([cdi], [1.5.6], [http://code.zmaw.de/projects/cdi])
 
 echo "configuring ${PACKAGE_NAME} ${PACKAGE_VERSION}"
 
@@ -84,30 +84,6 @@ AC_CHECK_DECLS([isnan],,,[AC_INCLUDES_DEFAULT
 #  ----------------------------------------------------------------------
 #  Check for math library
 AC_CHECK_LIB(m, floor)
-
-
-#  ----------------------------------------------------------------------
-#  Checks for pthread library
-AC_ARG_WITH([threads],
-            [AC_HELP_STRING([--with-threads=<directory>],
-                            [Use the pthread library [default=yes]])],
-            [],
-            [with_threads=yes])
-AS_CASE([$with_threads],
-        [no],[AC_MSG_CHECKING([for pthread library])
-              AC_MSG_RESULT([suppressed])],
-        [yes],[AC_CHECK_HEADERS(pthread.h)
-               AC_CHECK_LIB([pthread],[pthread_create])
-               AC_SUBST([THREADS_LDFLAGS],[" -lpthread"])
-               AC_SUBST([THREADS_INCLUDE],[""])],
-        [*],[THREADS_ROOT=$with_threads
-             LDFLAGS="$LDFLAGS -L$THREADS_ROOT/lib"
-             CPPFLAGS="$CPPFLAGS -I$THREADS_ROOT/include"
-             AC_CHECK_HEADERS(pthread.h)
-             AC_CHECK_LIB([pthread],[pthread_create])
-             AC_SUBST([THREADS_LDFLAGS],[" -L$THREADS_ROOT/lib -lpthread"])
-             AC_SUBST([THREADS_INCLUDE],[" -I$THREADS_ROOT/include"])])
-
 #  ----------------------------------------------------------------------
 # Add basic configure options
 ACX_OPTIONS

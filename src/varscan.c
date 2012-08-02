@@ -22,6 +22,10 @@ extern void zaxisGetIndexList ( int, int * );
 static size_t Vctsize = 0;
 static double *Vct = NULL;
 
+static int numberOfVerticalLevels = 0;
+static int numberOfVerticalGrid = 0;
+static char uuidVGrid[17];
+
 typedef struct
 {
   int      level1;
@@ -283,7 +287,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
       vartable[varID].zaxistype = zaxistype;
       vartable[varID].ltype     = ltype;
       vartable[varID].lbounds   = lbounds;
-      if ( tsteptype > 0 ) vartable[varID].tsteptype = tsteptype;
+      if ( tsteptype != UNDEFID ) vartable[varID].tsteptype = tsteptype;
       if ( numavg ) vartable[varID].timave = 1;
 
       if ( name )     if ( name[0] )     vartable[varID].name     = strdup(name);
@@ -528,11 +532,10 @@ void cdiGenVars(int streamID)
       free(dlevels);
 
       varID = streamNewVar(streamID, gridID, zaxisID);
-      varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARIABLE);
+      varID = vlistDefVar(vlistID, gridID, zaxisID, tsteptype);
 
       vlistDefVarParam(vlistID, varID, param);
       vlistDefVarDatatype(vlistID, varID, prec);
-      vlistDefVarTsteptype(vlistID, varID, tsteptype);
       vlistDefVarTimave(vlistID, varID, timave);
       vlistDefVarTimaccu(vlistID, varID, timaccu);
       vlistDefVarCompType(vlistID, varID, comptype);
@@ -618,10 +621,16 @@ void varDefVCT(size_t vctsize, double *vctptr)
     {
       Vctsize = vctsize;
       Vct = (double *) malloc(vctsize*sizeof(double));
-      memcpy(Vct, vctptr, vctsize*sizeof(double)); 
+      memcpy(Vct, vctptr, vctsize*sizeof(double));
     }
 }
 
+void varDefZAxisReference(int nlev, int nvgrid, char *uuid)
+{
+  numberOfVerticalLevels = nlev;
+  numberOfVerticalGrid = nvgrid;
+  strncpy(uuidVGrid, uuid, 16);
+}
 
 int varDefGrid(int vlistID, grid_t grid, int mode)
 {

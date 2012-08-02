@@ -17,7 +17,7 @@ int main(void)
 
 
   // Open the dataset 
-  streamID = streamOpenRead("example.grb");
+  streamID = streamOpenRead("example.nc");
   if ( streamID < 0 )
     {
       fprintf(stderr, "%s\n", cdiStringError(streamID));

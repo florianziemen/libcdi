@@ -16,6 +16,7 @@
 
 int ECMWF  = UNDEFID;
 int MPIMET = UNDEFID;
+int DWD    = UNDEFID;
 int MCH    = UNDEFID;
 
 typedef struct

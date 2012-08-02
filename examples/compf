@@ -4,4 +4,7 @@ f77 -g -I../src -o cdi_copy_f cdi_copy_f.f   -L../src -lcdi -L/home/m214003/loca
 f77 -g -I../src -o cdi_write_f cdi_write_f.f   -L../src -lcdi -L/client/lib -lnetcdf
 f77 -g -I../src -o cdi_read_f cdi_read_f.f   -L../src -lcdi -L/client/lib -lnetcdf
 f77 -g -I../src -o cdi_copy_f cdi_copy_f.f   -L../src -lcdi -L/client/lib -lnetcdf
-g77 -g -I../src -o cdi_write_f cdi_write_f.f -L/pf/m/m214003/local/etch-ia32/lib -lcdi -static -L/scratch/local2/m214003/local/lib -lgrib_api -L/sw/etch-ia32/jasper-1.900.1/lib -ljasper -L/sw/etch-ia32/netcdf-4.0.1/lib -lnetcd
+g77 -g -I../src -o cdi_write_f cdi_write_f.f -L/pf/m/m214003/local/etch-ia32/lib -lcdi -static -L/scratch/local2/m214003/local/lib -lgrib_api -L/sw/etch-ia32/jasper-1.900.1/lib -ljasper -L/sw/etch-ia32/netcdf-4.0.1/lib -lnetcdf
+
+
+gfortran -g  -o cdi_write_simple cdi_write_simple.f  -I../src -L/Users/m214003/local/lib ../src/.libs/libcdi.a -L/Users/uwe/cdt/libs4cdo-0.0.9/build/lib -L/opt/local/lib -lgrib_api /Users/uwe/cdt/libs4cdo-0.0.9/build/lib/libjasper.dylib /Users/uwe/cdt/libs4cdo-0.0.9/build/lib/libnetcdf.dylib /opt/local/lib/libcurl.dylib /opt/local/lib/libidn.dylib /opt/local/lib/libintl.dylib -lc /opt/local/lib/libiconv.dylib -lssl -lcrypto /Users/uwe/cdt/libs4cdo-0.0.9/build/lib/libhdf5_hl.dylib /Users/uwe/cdt/libs4cdo-0.0.9/build/lib/libhdf5.dylib -lpthread /Users/uwe/cdt/libs4cdo-0.0.9/build/lib/libsz.dylib -lz -lm -pthread

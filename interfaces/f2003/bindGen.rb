@@ -337,7 +337,7 @@ OptionParser.new do |opts|
 #== LICENSE: 
 # BSD License
 #
-#  Copyright (c) 2009, Ralf Mueller (ralf.mueller@zmaw.de)
+#  Copyright (c) 2009-2012, Ralf Mueller (ralf.mueller@zmaw.de)
 #  All rights reserved.
 #  
 #  Redistribution and use in source and binary forms, with or without

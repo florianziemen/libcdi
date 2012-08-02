@@ -324,6 +324,7 @@ sub printproto {
   if ( "$ftype" eq "void"   ) { $ftype = "SUBROUTINE"; }
   if ( "$ftype" eq "int"    ) { $ftype = "INTEGER FUNCTION"; }
   if ( "$ftype" eq "double" ) { $ftype = "REAL*8 FUNCTION"; }
+  if ( "$ftype" eq "float"  ) { $ftype = "REAL*4 FUNCTION"; }
   $klen = 0;
   $klen += length($ftype) + length($fname) + 6;
   print FDOCFILE "    $ftype $fname(";
@@ -340,6 +341,9 @@ sub printproto {
     $tag =~ s/int /INTEGER /og;
     $tag =~ s/double \*/REAL*8 /og;
     $tag =~ s/double /REAL*8 /og;
+    $tag =~ s/float \*/REAL*4 /og;
+    $tag =~ s/float /REAL*4 /og;
+    $tag =~ s/const //og;
     $len = length($tag);
     if ( $plen + $len > 80 ) {
       print FDOCFILE "\n";
@@ -370,10 +374,12 @@ sub printfortran {
   }
   $line =~ s/ < / .LT. /og;
   $line =~ s/;$//og;
-  $line =~ s/int /INTEGER /og;
-  $line =~ s/double /REAL*8 /og;
   $line =~ s/const char \*/CHARACTER\*(\*) /og;
   $line =~ s/char \*/CHARACTER\*(\*) /og;
+  $line =~ s/int /INTEGER /og;
+  $line =~ s/double /REAL*8 /og;
+  $line =~ s/float /REAL*4 /og;
+  $line =~ s/const //og;
   $line =~ s/if /IF /og;
   $line =~ s/#include \"/INCLUDE \'/og;
   $line =~ s/\"$/\'/og;

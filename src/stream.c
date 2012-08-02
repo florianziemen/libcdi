@@ -310,8 +310,7 @@ int get_fnames(const char *argument, char *fnames[], int max_fnames)
 	  strcat(command, pch);
 
 	  pfp = popen(command, "r");
-	  if ( pfp == NULL )
-	    SysError("popen %s failed", command);
+	  if ( pfp == NULL ) SysError("popen %s failed", command);
 
 	  nfiles = 0;
 	  while ( _readline_(pfp, line, MAX_LINE) )
@@ -391,7 +390,7 @@ int getByteswap(int byteorder)
 
 @Prototype void streamDefByteorder(int streamID, int byteorder)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
     @Item  byteorder The byte order of a dataset, one of the CDI constants @func{CDI_BIGENDIAN} and
                      @func{CDI_LITTLEENDIAN}.
 
@@ -630,6 +629,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	case FILETYPE_GRB2:
 	  {
 	    fileID = gribOpen(filename, filemode);
+            if ( fileID < 0 ) fileID = CDI_ESYSTEM;
             xdebug("%s OPENED, fileID=%d", filename, fileID);
 	    record = (Record *) malloc(sizeof(Record));
 	    record->buffer = NULL;
@@ -640,6 +640,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	case FILETYPE_SRV:
 	  {
 	    fileID = fileOpen(filename, filemode);
+            if ( fileID < 0 ) fileID = CDI_ESYSTEM;
 	    record = (Record *) malloc(sizeof(Record));
 	    record->buffer = NULL;
 	    record->srvp   = srvNew();
@@ -650,6 +651,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	case FILETYPE_EXT:
 	  {
 	    fileID = fileOpen(filename, filemode);
+            if ( fileID < 0 ) fileID = CDI_ESYSTEM;
 	    record = (Record *) malloc(sizeof(Record));
 	    record->buffer = NULL;
 	    record->extp   = extNew();
@@ -660,6 +662,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	case FILETYPE_IEG:
 	  {
 	    fileID = fileOpen(filename, filemode);
+            if ( fileID < 0 ) fileID = CDI_ESYSTEM;
 	    record = (Record *) malloc(sizeof(Record));
 	    record->buffer = NULL;
 	    record->iegp   = iegNew();
@@ -720,7 +723,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
       streamptr = stream_new_entry();
       streamID  = streamptr->self;
 
-      if ( streamID < 0 ) return(CDI_ELIMIT);
+      if ( streamID < 0 ) return (CDI_ELIMIT);
 
       streamptr->record   = record;
       streamptr->filetype = filetype;
@@ -1015,6 +1018,8 @@ int streamOpenRead(const char *filenames)
   const char *filename;
   stream_t *streamptr = NULL;
 
+  cdiInitialize();
+
   //num_fnames = get_fnames(filenames, fnames, MAX_FNAMES);
 
   if ( num_fnames == 0 )
@@ -1056,6 +1061,8 @@ int streamOpenAppend(const char *filename)
   int filetype, byteorder;
   int streamID;
   stream_t *streamptr;
+
+  cdiInitialize();
 
   filetype = getFiletype(filename, &byteorder);
 
@@ -1115,6 +1122,8 @@ if ( streamID < 0 ) handle_error(streamID);
 */
 int streamOpenWrite(const char *filename, int filetype)
 {
+  cdiInitialize();
+
   return (streamOpen(filename, "w", filetype));
 }
 
@@ -1140,6 +1149,7 @@ void streamClose(int streamID)
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
+
   stream_check_ptr(__func__, streamptr);
 
   if ( CDI_Debug )
@@ -1348,7 +1358,7 @@ void streamSync(int streamID)
 
 @Prototype int streamDefTimestep(int streamID, int tsID)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
     @Item  tsID      Timestep identifier.
 
 @Description
@@ -1523,7 +1533,7 @@ int streamInqTimestep(int streamID, int tsID)
 
 @Prototype void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
     @Item  varID     Variable identifier.
     @Item  data      Pointer to the location into which the data values are read.
                      The caller must allocate space for the returned values.
@@ -1601,23 +1611,8 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
     }
 }
 
-/*
-@Function  streamWriteVar
-@Title     Write a variable
 
-@Prototype void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
-@Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
-    @Item  varID     Variable identifier.
-    @Item  data      Pointer to a block of data values to be written.
-    @Item  nmiss     Number of missing values.
-
-@Description
-The function streamWriteVar writes the values of one time step of a variable
-to an open dataset.
-@EndFunction
-*/
-void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
+void stream_write_var(int streamID, int varID, int memtype, const void *data, int nmiss)
 {
   int filetype;
   stream_t *streamptr;
@@ -1663,6 +1658,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("grbWriteVar not implemented for memtype float!");
         grbWriteVarDP(streamID, varID, data, nmiss);
 	break;
       }
@@ -1670,6 +1666,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("srvWriteVar not implemented for memtype float!");
         srvWriteVarDP(streamID, varID, data);
 	break;
       }
@@ -1677,6 +1674,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("extWriteVar not implemented for memtype float!");
         extWriteVarDP(streamID, varID, data);
 	break;
       }
@@ -1684,6 +1682,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("iegWriteVar not implemented for memtype float!");
         iegWriteVarDP(streamID, varID, data);
 	break;
       }
@@ -1695,7 +1694,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
     case FILETYPE_NC4C:
       {
 	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
-        cdfWriteVarDP(streamID, varID, data, nmiss);
+        cdf_write_var(streamID, varID, memtype, data, nmiss);
 	break;
       }
 #endif
@@ -1708,12 +1707,55 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 }
 
 /*
+@Function  streamWriteVar
+@Title     Write a variable
+
+@Prototype void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
+    @Item  varID     Variable identifier.
+    @Item  data      Pointer to a block of double precision floating point data values to be written.
+    @Item  nmiss     Number of missing values.
+
+@Description
+The function streamWriteVar writes the values of one time step of a variable to an open dataset.
+The values are converted to the external data type of the variable, if necessary.
+@EndFunction
+*/
+void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
+{
+  stream_write_var(streamID, varID, MEMTYPE_DOUBLE, data, nmiss);
+}
+
+/*
+@Function  streamWriteVarF
+@Title     Write a variable
+
+@Prototype void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
+    @Item  varID     Variable identifier.
+    @Item  data      Pointer to a block of single precision floating point data values to be written.
+    @Item  nmiss     Number of missing values.
+
+@Description
+The function streamWriteVarF writes the values of one time step of a variable to an open dataset.
+The values are converted to the external data type of the variable, if necessary.
+Only support for netCDF was implemented in this function.
+@EndFunction
+*/
+void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
+{
+  stream_write_var(streamID, varID, MEMTYPE_FLOAT, data, nmiss);
+}
+
+/*
 @Function  streamReadVarSlice
 @Title     Read a horizontal slice of a variable
 
 @Prototype void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
     @Item  varID     Variable identifier.
     @Item  levelID   Level identifier.
     @Item  data      Pointer to the location into which the data values are read.
@@ -1793,24 +1835,8 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
     }
 }
 
-/*
-@Function  streamWriteVarSlice
-@Title     Write a horizontal slice of a variable
 
-@Prototype void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
-@Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
-    @Item  varID     Variable identifier.
-    @Item  levelID   Level identifier.
-    @Item  data      Pointer to a block of data values to be written.
-    @Item  nmiss     Number of missing values.
-
-@Description
-The function streamWriteVarSlice writes the values of a horizontal slice of a
-variable to an open dataset.
-@EndFunction
-*/
-void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
+void stream_write_var_slice(int streamID, int varID, int levelID, int memtype, const void *data, int nmiss)
 {
   int filetype;
   stream_t *streamptr;
@@ -1831,6 +1857,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("grbWriteVarSlice not implemented for memtype float!");
         grbWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
 	break;
       }
@@ -1838,6 +1865,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("srvWriteVarSlice not implemented for memtype float!");
         srvWriteVarSliceDP(streamID, varID, levelID, data);
 	break;
       }
@@ -1845,6 +1873,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("extWriteVarSlice not implemented for memtype float!");
         extWriteVarSliceDP(streamID, varID, levelID, data);
 	break;
       }
@@ -1852,6 +1881,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("iegWriteVarSlice not implemented for memtype float!");
         iegWriteVarSliceDP(streamID, varID, levelID, data);
 	break;
       }
@@ -1864,7 +1894,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
       {
         int ierr = 0;
 	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
-        ierr = cdfWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
+        ierr = cdf_write_var_slice(streamID, varID, levelID, memtype, data, nmiss);
 	break;
       }
 #endif
@@ -1876,6 +1906,51 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
     }
 }
 
+/*
+@Function  streamWriteVarSlice
+@Title     Write a horizontal slice of a variable
+
+@Prototype void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
+    @Item  varID     Variable identifier.
+    @Item  levelID   Level identifier.
+    @Item  data      Pointer to a block of double precision floating point data values to be written.
+    @Item  nmiss     Number of missing values.
+
+@Description
+The function streamWriteVarSlice writes the values of a horizontal slice of a variable to an open dataset.
+The values are converted to the external data type of the variable, if necessary.
+@EndFunction
+*/
+void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
+{
+  stream_write_var_slice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, nmiss);
+}
+
+/*
+@Function  streamWriteVarSliceF
+@Title     Write a horizontal slice of a variable
+
+@Prototype void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, int nmiss)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
+    @Item  varID     Variable identifier.
+    @Item  levelID   Level identifier.
+    @Item  data      Pointer to a block of single precision floating point data values to be written.
+    @Item  nmiss     Number of missing values.
+
+@Description
+The function streamWriteVarSliceF writes the values of a horizontal slice of a variable to an open dataset.
+The values are converted to the external data type of the variable, if necessary.
+Only support for netCDF was implemented in this function.
+@EndFunction
+*/
+void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, int nmiss)
+{
+  stream_write_var_slice(streamID, varID, levelID, MEMTYPE_FLOAT, data, nmiss);
+}
+
 
 void streamWriteContents(int streamID, char *cname)
 {
@@ -1883,7 +1958,7 @@ void streamWriteContents(int streamID, char *cname)
   int tsID, recID, varID, levelID;
   long recsize;
   int nrecs, nvars;
-  int code, gridID, zaxisID, timeID, datatype;
+  int code, gridID, zaxisID, tsteptype, datatype;
   int ngrids;
   int filetype, gridtype;
   int xsize, ysize;
@@ -1925,18 +2000,18 @@ void streamWriteContents(int streamID, char *cname)
 
   fprintf(cnp, "#\n");
 
-  fprintf(cnp, "varID:code:gridID:zaxisID:timeID:datatype\n");
+  fprintf(cnp, "varID:code:gridID:zaxisID:tsteptype:datatype\n");
 
   nvars = vlistNvars(vlistID);
   for ( varID = 0; varID < nvars; varID++ )
     {
-      code     = vlistInqVarCode(vlistID, varID);
-      gridID   = vlistInqVarGrid(vlistID, varID);
-      zaxisID  = vlistInqVarZaxis(vlistID, varID);
-      timeID   = vlistInqVarTime(vlistID, varID);
-      datatype = vlistInqVarDatatype(vlistID, varID);
+      code      = vlistInqVarCode(vlistID, varID);
+      gridID    = vlistInqVarGrid(vlistID, varID);
+      zaxisID   = vlistInqVarZaxis(vlistID, varID);
+      tsteptype = vlistInqVarTsteptype(vlistID, varID);
+      datatype  = vlistInqVarDatatype(vlistID, varID);
       fprintf(cnp, "%4d:%4d:%4d:%4d:%4d:%4d:\n",
-	      varID+1, code, gridID, zaxisID, timeID, datatype);
+	      varID+1, code, gridID, zaxisID, tsteptype, datatype);
     }
 
   fprintf(cnp, "#\n");
@@ -2059,7 +2134,7 @@ off_t   streamNvals(int streamID)
 
 @Prototype void streamDefVlist(int streamID, int vlistID)
 @Parameter
-    @Item  streamID Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+    @Item  streamID Stream ID, from a previous call to @fref{streamOpenWrite}.
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
 
 @Description
@@ -2180,15 +2255,15 @@ void streamDefCompType(int streamID, int comptype)
 {
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
     {
       xwarning("%s", "Operation not executed.");
       return;
     }
+
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(__func__, streamptr);
 
   streamptr->comptype = comptype;
 }
@@ -2198,15 +2273,15 @@ void streamDefCompLevel(int streamID, int complevel)
 {
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
     {
       xwarning("%s", "Operation not executed.");
       return;
     }
+
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(__func__, streamptr);
 
   streamptr->complevel = complevel;
 }

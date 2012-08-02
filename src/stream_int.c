@@ -28,6 +28,7 @@ int cdiDefaultInstID   = CDI_UNDEFID;
 int cdiDefaultModelID  = CDI_UNDEFID;
 int cdiDefaultTableID  = CDI_UNDEFID;
 int cdiNcMissingValue  = CDI_UNDEFID;
+int cdiNcChunksizehint = CDI_UNDEFID;
 int cdiSplitLtype105   = CDI_UNDEFID;
 
 int cdiIgnoreAttCoordinates = FALSE;
@@ -166,6 +167,9 @@ void cdiInitialize(void)
       envString = getenv("NC_MISSING_VALUE");
       if ( envString ) cdiNcMissingValue = atoi(envString);
 
+      envString = getenv("NC_CHUNKSIZEHINT");
+      if ( envString ) cdiNcChunksizehint = atoi(envString);
+
       envString = getenv("SPLIT_LTYPE_105");
       if ( envString ) cdiSplitLtype105 = atoi(envString);
 
@@ -209,7 +213,9 @@ void cdiInitialize(void)
 	  if ( CDI_Debug )
 	    Message("Default calendar set to %s!", envString);
 	}
+#if  defined  (HAVE_LIBCGRIBEX)
       gribSetCalendar(cdiDefaultCalendar);
+#endif
 
       envString = getenv("PARTAB_INTERN");
       if ( envString ) cdiPartabIntern = atoi(envString);
@@ -340,6 +346,11 @@ void stream_check_ptr(const char *caller, stream_t *streamptr)
 }
 
 
+int streamSize(void)
+{
+  return reshCountType ( &streamOps );
+}
+
 
 void cdiDefGlobal(const char *string, int val)
 {
@@ -354,6 +365,10 @@ void cdiDefGlobal(const char *string, int val)
   else if ( strcmp(string, "HAVE_MISSVAL") == 0 )
     {
       cdiHaveMissval = val;
+    }
+  else if ( strcmp(string, "NC_CHUNKSIZEHINT") == 0 )
+    {
+      cdiNcChunksizehint = val;
     }
   else
     {
@@ -397,7 +412,6 @@ void cdiCheckContents(int streamID)
       if ( zaxisInqType(zaxisID) == ZAXIS_GENERIC )
 	cdiCheckZaxis(zaxisID);
     }
-    
 }
 
 
@@ -421,12 +435,12 @@ void streamDefineTaxis(int streamID)
     {
       int varID, nvars;
       int vlistID;
-  
+
       vlistID = streamInqVlist(streamID);
 
       nvars = vlistNvars(vlistID);
       for ( varID = 0; varID < nvars; varID++ )
-	if ( vlistInqVarTime(vlistID, varID) == TIME_VARIABLE ) break;
+	if ( vlistInqVarTsteptype(vlistID, varID) == TSTEP_CONSTANT ) break;
 
       if ( varID == nvars )
 	{
@@ -438,7 +452,7 @@ void streamDefineTaxis(int streamID)
 	      taxisID = taxisCreate(TAXIS_ABSOLUTE);
 	      vlistDefTaxis(vlistID, taxisID);
 	    }
-	    
+
 	  (void) streamDefTimestep(streamID, 0);
 	}
       else
@@ -607,12 +621,6 @@ void streamPrintP   ( void * streamptr, FILE * fp )
   fprintf ( fp, "//  char    **fnames;\n" );
   fprintf ( fp, "//  void     *gribContainers;\n" );
   fprintf ( fp, "vlistIDorig   = %d\n", sp->vlistIDorig );
-}
-
-
-int streamSize(void)
-{
-  return reshCountType ( &streamOps );
 }
 
 

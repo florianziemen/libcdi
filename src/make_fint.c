@@ -72,10 +72,10 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   int i, ii;
   int lineno = 0;
   size_t linelen, len;
-  enum              {ISVOID, ISSTRING,        ISSTRINGP,       ISINT,     ISINTP,     ISREAL, ISDOUBLE, ISDOUBLEP, ISCONSTSTRING};
-  char *f77name[] = {"",     "CHARACTER*(*)", "CHARACTER*(*)", "INTEGER", "INTEGER", "REAL", "DOUBLEPRECISION", "DOUBLEPRECISION", "CHARACTER*80"};
-  char *cfint[] =   {"",     "STRING",        "PSTRING",       "INT",     "PINT",    "FLOAT", "DOUBLE", "PDOUBLE",  "STRING"};
-  char *cname[] =   {"void", "char *",        "char *",        "int",     "int *",   "float", "double", "double *", "char *"};
+  enum              {ISVOID, ISSTRING,        ISSTRINGP,       ISINT,     ISINTP,    ISREAL,  ISREALP,   ISDOUBLE, ISDOUBLEP, ISCONSTSTRING};
+  char *f77name[] = {"",     "CHARACTER*(*)", "CHARACTER*(*)", "INTEGER", "INTEGER", "REAL",  "REAL",    "DOUBLEPRECISION", "DOUBLEPRECISION", "CHARACTER*80"};
+  char *cfint[] =   {"",     "STRING",        "PSTRING",       "INT",     "PINT",    "FLOAT", "PFLOAT",  "DOUBLE", "PDOUBLE",  "STRING"};
+  char *cname[] =   {"void", "char *",        "char *",        "int",     "int *",   "float", "float *", "double", "double *", "char *"};
   char funcname[128];
   char *funcargname[20];
   int  funcargtype[20];
@@ -187,6 +187,16 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	      functype = ISDOUBLE;
 	      pline += 6;
 	    }
+	  else if ( memcmp(line, "float*", 6) == 0 )
+	    {
+	      printf("skip: line %3d float *\n", lineno);
+	      continue;
+	    }
+	  else if ( memcmp(line, "float", 5) == 0 )
+	    {
+	      functype = ISREAL;
+	      pline += 5;
+	    }
 	  else if ( memcmp(line, "char*", 5) == 0 )
 	    {
 	      functype = ISCONSTSTRING;
@@ -282,6 +292,18 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 		{
 		  pline += 6;
 		  funcargtype[i] = ISDOUBLE;
+		  funcargname[i] = pline;
+		}
+	      else if ( memcmp(pline, "float*", 6) == 0 )
+		{
+		  pline += 6;
+		  funcargtype[i] = ISREALP;
+		  funcargname[i] = pline;
+		}
+	      else if ( memcmp(pline, "float", 5) == 0 )
+		{
+		  pline += 5;
+		  funcargtype[i] = ISREAL;
 		  funcargname[i] = pline;
 		}
 	      else 

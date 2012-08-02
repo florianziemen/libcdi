@@ -13,6 +13,15 @@ CDI library routines:
 Create a horizontal Grid.
 
 
+\section*{\tt \htmlref{gridDefNP}{gridDefNP}}
+
+\begin{verbatim}
+    void gridDefNP (intgridID, intnp);
+\end{verbatim}
+
+Define the number of parallels between a pole and the equator.
+
+
 \section*{\tt \htmlref{gridDefNvertex}{gridDefNvertex}}
 
 \begin{verbatim}
@@ -155,6 +164,15 @@ Destroy a horizontal Grid.
 \end{verbatim}
 
 Duplicate a Grid.
+
+
+\section*{\tt \htmlref{gridInqNP}{gridInqNP}}
+
+\begin{verbatim}
+    int gridInqNP (intgridID);
+\end{verbatim}
+
+Get the number of parallels between a pole and the equator.
 
 
 \section*{\tt \htmlref{gridInqNvertex}{gridInqNvertex}}
@@ -695,7 +713,7 @@ Define the time axis of a variable list.
 \section*{\tt \htmlref{vlistDefVar}{vlistDefVar}}
 
 \begin{verbatim}
-    int vlistDefVar (intvlistID, intgridID, intzaxisID, inttimeID);
+    int vlistDefVar (intvlistID, intgridID, intzaxisID, inttsteptype);
 \end{verbatim}
 
 Create a new Variable.
@@ -1008,6 +1026,24 @@ Define the longname of a Z-axis.
 Define the name of a Z-axis.
 
 
+\section*{\tt \htmlref{zaxisDefReference}{zaxisDefReference}}
+
+\begin{verbatim}
+    void zaxisDefReference (intzaxisID, intrefID);
+\end{verbatim}
+
+Define the reference of a generalized Z-axis.
+
+
+\section*{\tt \htmlref{zaxisDefUUID}{zaxisDefUUID}}
+
+\begin{verbatim}
+    void zaxisDefUUID (intzaxisID, char *uuid);
+\end{verbatim}
+
+Define the uuid of a generalized Z-axis.
+
+
 \section*{\tt \htmlref{zaxisDefUnits}{zaxisDefUnits}}
 
 \begin{verbatim}
@@ -1071,6 +1107,15 @@ Get the longname of a Z-axis.
 Get the name of a Z-axis.
 
 
+\section*{\tt \htmlref{zaxisInqReference}{zaxisInqReference}}
+
+\begin{verbatim}
+    int zaxisInqReference (intzaxisID);
+\end{verbatim}
+
+Get the reference of a generalized Z-axis.
+
+
 \section*{\tt \htmlref{zaxisInqSize}{zaxisInqSize}}
 
 \begin{verbatim}
@@ -1096,6 +1141,15 @@ Get the standard name of a Z-axis.
 \end{verbatim}
 
 Get the type of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisInqUUID}{zaxisInqUUID}}
+
+\begin{verbatim}
+    char * zaxisInqUUID (intzaxisID, char *uuid);
+\end{verbatim}
+
+Get the reference of a generalized Z-axis.
 
 
 \section*{\tt \htmlref{zaxisInqUnits}{zaxisInqUnits}}

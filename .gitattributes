@@ -91,6 +91,7 @@ examples/cdi_read_f.f -text
 examples/cdi_read_f2003.f90 -text
 examples/cdi_read_records.c -text
 examples/cdi_write.c -text
+examples/cdi_write_ens.c -text
 examples/cdi_write_f.f -text
 examples/cdi_write_f2003.f90 -text
 examples/compf -text
@@ -292,6 +293,9 @@ tables/echam5 -text
 tables/echam6 -text
 tables/ecmwf -text
 tables/gen_tableheaderfile -text
+tables/grib_api/grib2/4.5.78.150.table -text
+tables/grib_api/grib2/section.4.def -text
+tables/grib_api/grib2/template.3.101.def -text
 tables/mpiom1 -text
 tables/remo -text
 tables/template.3.101.def -text
