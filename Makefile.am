@@ -8,7 +8,8 @@ EXTRA_DIST=config/default \
 	src/cfortran.doc \
 	util/sunf95preproc-wrapper \
 	util/sxpreproc-wrapper \
-	util/xlfpreproc-wrapper
+	util/xlfpreproc-wrapper \
+	config/interface.rb
 #
 ACLOCAL_AMFLAGS = -I m4
 #
