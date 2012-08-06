@@ -2,7 +2,13 @@
 #
 SUBDIRS = src interfaces app examples tests
 #
-EXTRA_DIST=config/default doc/cdi_cman.pdf doc/cdi_fman.pdf src/cfortran.doc
+EXTRA_DIST=config/default \
+	doc/cdi_cman.pdf \
+	doc/cdi_fman.pdf \
+	src/cfortran.doc \
+	util/sunf95preproc-wrapper \
+	util/sxpreproc-wrapper \
+	util/xlfpreproc-wrapper
 #
 ACLOCAL_AMFLAGS = -I m4
 #
