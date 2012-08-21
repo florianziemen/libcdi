@@ -174,9 +174,6 @@ ENABLE_CGRIBEX = @ENABLE_CGRIBEX@
 ENABLE_EXTRA = @ENABLE_EXTRA@
 ENABLE_GRIB = @ENABLE_GRIB@
 ENABLE_IEG = @ENABLE_IEG@
-ENABLE_NC2 = @ENABLE_NC2@
-ENABLE_NC4 = @ENABLE_NC4@
-ENABLE_NETCDF = @ENABLE_NETCDF@
 ENABLE_PYTHON = @ENABLE_PYTHON@
 ENABLE_RUBY = @ENABLE_RUBY@
 ENABLE_SERVICE = @ENABLE_SERVICE@
@@ -320,7 +317,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 #
-SUBDIRS = src interfaces app examples tests pioExamples
+SUBDIRS = src interfaces app examples tests examples/pio
 #
 EXTRA_DIST = config/default \
 	doc/cdi_cman.pdf \

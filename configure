@@ -680,9 +680,6 @@ JASPER_LIBS
 NETCDF_LIBS
 NETCDF_INCLUDE
 NETCDF_ROOT
-ENABLE_NC4
-ENABLE_NC2
-ENABLE_NETCDF
 NC_CONFIG
 HDF5_LIBS
 HDF5_INCLUDE
@@ -25242,9 +25239,6 @@ fi
 NETCDF_ROOT=''
 NETCDF_INCLUDE=''
 NETCDF_LIBS=''
-ENABLE_NETCDF=no
-ENABLE_NC2=no
-ENABLE_NC4=no
 
 # Check whether --with-netcdf was given.
 if test "${with_netcdf+set}" = set; then :
@@ -25323,7 +25317,6 @@ if test "$ac_res" != no; then :
 
 $as_echo "#define HAVE_LIBNETCDF 1" >>confdefs.h
 
-                                            ENABLE_NETCDF=yes
 else
   as_fn_error $? "Could not link to netcdf library" "$LINENO" 5
 fi
@@ -25375,7 +25368,6 @@ $as_echo "#define HAVE_NETCDF2 1" >>confdefs.h
 
                                           { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-                                          ENABLE_NC2=yes
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -25386,7 +25378,6 @@ $as_echo_n "checking netcdf's nc4 support... " >&6; }
 
 $as_echo "#define HAVE_NETCDF4 1" >>confdefs.h
 
-                                    ENABLE_NC4=yes
                                     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 else
@@ -25469,7 +25460,6 @@ if test "$ac_res" != no; then :
 
 $as_echo "#define HAVE_LIBNETCDF 1" >>confdefs.h
 
-                                                 ENABLE_NETCDF=yes
 else
   as_fn_error $? "Could not link to netcdf library" "$LINENO" 5
 fi
@@ -25534,7 +25524,6 @@ $as_echo_n "checking netcdf's nc2 support... " >&6; }
 
 $as_echo "#define HAVE_NETCDF2 1" >>confdefs.h
 
-                                          ENABLE_NC2=yes
                                           { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 else
@@ -25547,7 +25536,6 @@ $as_echo_n "checking netcdf's nc4 support... " >&6; }
 
 $as_echo "#define HAVE_NETCDF4 1" >>confdefs.h
 
-                                          ENABLE_NC4=yes
                                           { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 else
@@ -25571,9 +25559,6 @@ $as_echo_n "checking for NETCDF library... " >&6; }
              { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
 fi
-
-
-
 
 
 
@@ -26968,7 +26953,7 @@ fi
 ac_config_files="$ac_config_files tests/test_cksum_grib tests/test_cksum_nc tests/test_cksum_nc2 tests/test_cksum_nc4 tests/test_cksum_extra tests/test_cksum_service tests/test_cksum_ieg tests/pio_write_run tests/pio_cksum_mpinonb tests/pio_cksum_fpguard tests/pio_cksum_asynch tests/pio_cksum_writer util/serialrun"
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile cdi.settings pioExamples/Makefile src/pkgconfig/cdi.pc"
+ac_config_files="$ac_config_files Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile cdi.settings examples/pio/Makefile src/pkgconfig/cdi.pc"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -28307,7 +28292,7 @@ do
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "examples/Makefile") CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;
     "cdi.settings") CONFIG_FILES="$CONFIG_FILES cdi.settings" ;;
-    "pioExamples/Makefile") CONFIG_FILES="$CONFIG_FILES pioExamples/Makefile" ;;
+    "examples/pio/Makefile") CONFIG_FILES="$CONFIG_FILES examples/pio/Makefile" ;;
     "src/pkgconfig/cdi.pc") CONFIG_FILES="$CONFIG_FILES src/pkgconfig/cdi.pc" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
