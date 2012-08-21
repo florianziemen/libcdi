@@ -636,6 +636,8 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+USE_FC_FALSE
+USE_FC_TRUE
 CREATE_INTERFACES_FALSE
 CREATE_INTERFACES_TRUE
 ENABLE_PYTHON
@@ -655,6 +657,10 @@ CDI_F90_INTERFACE_FCFLAGS
 FC_MOD_FLAG
 CREATE_ISOC_FALSE
 CREATE_ISOC_TRUE
+USE_MPI
+USE_MPI_FALSE
+USE_MPI_TRUE
+MPI_LAUNCH
 ENABLE_ALL_STATIC_FALSE
 ENABLE_ALL_STATIC_TRUE
 ENABLE_CDI_LIB
@@ -2353,6 +2359,52 @@ fi
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
 
 } # ac_fn_c_check_header_mongrel
+
+# ac_fn_c_check_decl LINENO SYMBOL VAR INCLUDES
+# ---------------------------------------------
+# Tests whether SYMBOL is declared in INCLUDES, setting cache variable VAR
+# accordingly.
+ac_fn_c_check_decl ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  as_decl_name=`echo $2|sed 's/ *(.*//'`
+  as_decl_use=`echo $2|sed -e 's/(/((/' -e 's/)/) 0&/' -e 's/,/) 0& (/g'`
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $as_decl_name is declared" >&5
+$as_echo_n "checking whether $as_decl_name is declared... " >&6; }
+if eval \${$3+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$4
+int
+main ()
+{
+#ifndef $as_decl_name
+#ifdef __cplusplus
+  (void) $as_decl_use;
+#else
+  (void) $as_decl_name;
+#endif
+#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  eval "$3=yes"
+else
+  eval "$3=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+
+} # ac_fn_c_check_decl
 cat >config.log <<_ACEOF
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
@@ -23931,16 +23983,18 @@ done
 
 #  ----------------------------------------------------------------------
 # Checks for the availability of ANSI-C99 functions
-for ac_func in isnan
-do :
-  ac_fn_c_check_func "$LINENO" "isnan" "ac_cv_func_isnan"
-if test "x$ac_cv_func_isnan" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_ISNAN 1
-_ACEOF
-
+ac_fn_c_check_decl "$LINENO" "isnan" "ac_cv_have_decl_isnan" "$ac_includes_default
+#include <math.h>
+"
+if test "x$ac_cv_have_decl_isnan" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
 fi
-done
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_ISNAN $ac_have_decl
+_ACEOF
 
 #  ----------------------------------------------------------------------
 #  Check for math library
@@ -24294,7 +24348,7 @@ $as_echo "${flag}" >&6; }
         CFLAGS="$save_CFLAGS"
 
         # More AIX lossage: must compile with xlc_r or cc_r
-	if test x"$GCC" != xyes; then
+	if test x"$GCC" != xyes -a \( x"$CC" = xxlc -o x"$CC" = cc \) ; then
           for ac_prog in xlc_r cc_r
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
@@ -26361,10 +26415,75 @@ fi
 # Compile with MPI support
 # Check whether --enable-mpi was given.
 if test "${enable_mpi+set}" = set; then :
-  enableval=$enable_mpi; enable_mpi=${enableval}
+  enableval=$enable_mpi; enable_mpi=yes
 else
   enable_mpi=no
 fi
+
+if test x"${enable_mpi}" = x"yes"; then :
+  USE_MPI=yes
+fi
+if test x"$USE_MPI" = xyes; then :
+
+$as_echo "#define USE_MPI 1" >>confdefs.h
+
+   for ac_prog in mpirun mpiexec
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_MPI_LAUNCH+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$MPI_LAUNCH"; then
+  ac_cv_prog_MPI_LAUNCH="$MPI_LAUNCH" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_MPI_LAUNCH="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+MPI_LAUNCH=$ac_cv_prog_MPI_LAUNCH
+if test -n "$MPI_LAUNCH"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MPI_LAUNCH" >&5
+$as_echo "$MPI_LAUNCH" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$MPI_LAUNCH" && break
+done
+
+   if test x$MPI_LAUNCH = x; then :
+
+fi
+else
+  MPI_LAUNCH="`pwd`/util/serialrun"
+
+fi
+ if test x"$USE_MPI" = xyes; then
+  USE_MPI_TRUE=
+  USE_MPI_FALSE='#'
+else
+  USE_MPI_TRUE='#'
+  USE_MPI_FALSE=
+fi
+
 
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
@@ -26459,7 +26578,8 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 fi
 
 #  Check the module extension of the fortran compiler
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for suffix of module files" >&5
+if test -n "$FC" && test "X$FC" != "Xno"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for suffix of module files" >&5
 $as_echo_n "checking for suffix of module files... " >&6; }
 
    ac_fc_mod_uppercase=no
@@ -26537,6 +26657,7 @@ fi
 
 
 
+fi
 # -----------------------------------------------------------------------
 # Check for SWIG - Generator for script-language bindings
 # Check whether --enable-swig was given.
@@ -26818,10 +26939,21 @@ $as_echo "#define HAVE_CF_INTERFACE 1" >>confdefs.h
 
 fi
 
+ if test -n "$FC" && test "X$FC" != "Xno" && test x$acx_cv_check_cfint = "xyes"; then
+  USE_FC_TRUE=
+  USE_FC_FALSE='#'
+else
+  USE_FC_TRUE='#'
+  USE_FC_FALSE=
+fi
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile cdi.settings src/pkgconfig/cdi.pc"
+
+ac_config_files="$ac_config_files tests/test_cksum_grib tests/test_cksum_nc tests/test_cksum_nc2 tests/test_cksum_nc4 tests/test_cksum_extra tests/test_cksum_service tests/test_cksum_ieg tests/pio_write_run tests/pio_cksum_mpinonb tests/pio_cksum_fpguard tests/pio_cksum_asynch tests/pio_cksum_writer util/serialrun"
+
+
+ac_config_files="$ac_config_files Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile cdi.settings examples/pio/Makefile src/pkgconfig/cdi.pc"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -26964,6 +27096,10 @@ if test -z "${ENABLE_ALL_STATIC_TRUE}" && test -z "${ENABLE_ALL_STATIC_FALSE}"; 
   as_fn_error $? "conditional \"ENABLE_ALL_STATIC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
+if test -z "${USE_MPI_TRUE}" && test -z "${USE_MPI_FALSE}"; then
+  as_fn_error $? "conditional \"USE_MPI\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${CREATE_ISOC_TRUE}" && test -z "${CREATE_ISOC_FALSE}"; then
   as_fn_error $? "conditional \"CREATE_ISOC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
@@ -26982,6 +27118,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CREATE_INTERFACES_TRUE}" && test -z "${CREATE_INTERFACES_FALSE}"; then
   as_fn_error $? "conditional \"CREATE_INTERFACES\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${USE_FC_TRUE}" && test -z "${USE_FC_FALSE}"; then
+  as_fn_error $? "conditional \"USE_FC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
@@ -28132,6 +28272,19 @@ do
     "src/config.h") CONFIG_HEADERS="$CONFIG_HEADERS src/config.h" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
+    "tests/test_cksum_grib") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_grib" ;;
+    "tests/test_cksum_nc") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_nc" ;;
+    "tests/test_cksum_nc2") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_nc2" ;;
+    "tests/test_cksum_nc4") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_nc4" ;;
+    "tests/test_cksum_extra") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_extra" ;;
+    "tests/test_cksum_service") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_service" ;;
+    "tests/test_cksum_ieg") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_ieg" ;;
+    "tests/pio_write_run") CONFIG_FILES="$CONFIG_FILES tests/pio_write_run" ;;
+    "tests/pio_cksum_mpinonb") CONFIG_FILES="$CONFIG_FILES tests/pio_cksum_mpinonb" ;;
+    "tests/pio_cksum_fpguard") CONFIG_FILES="$CONFIG_FILES tests/pio_cksum_fpguard" ;;
+    "tests/pio_cksum_asynch") CONFIG_FILES="$CONFIG_FILES tests/pio_cksum_asynch" ;;
+    "tests/pio_cksum_writer") CONFIG_FILES="$CONFIG_FILES tests/pio_cksum_writer" ;;
+    "util/serialrun") CONFIG_FILES="$CONFIG_FILES util/serialrun" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "interfaces/Makefile") CONFIG_FILES="$CONFIG_FILES interfaces/Makefile" ;;
@@ -28139,6 +28292,7 @@ do
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "examples/Makefile") CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;
     "cdi.settings") CONFIG_FILES="$CONFIG_FILES cdi.settings" ;;
+    "examples/pio/Makefile") CONFIG_FILES="$CONFIG_FILES examples/pio/Makefile" ;;
     "src/pkgconfig/cdi.pc") CONFIG_FILES="$CONFIG_FILES src/pkgconfig/cdi.pc" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
@@ -29946,6 +30100,19 @@ compiler_lib_search_path=$lt_compiler_lib_search_path_CXX
 _LT_EOF
 
  ;;
+    "tests/test_cksum_grib":F) chmod a+x "$ac_file" ;;
+    "tests/test_cksum_nc":F) chmod a+x "$ac_file" ;;
+    "tests/test_cksum_nc2":F) chmod a+x "$ac_file" ;;
+    "tests/test_cksum_nc4":F) chmod a+x "$ac_file" ;;
+    "tests/test_cksum_extra":F) chmod a+x "$ac_file" ;;
+    "tests/test_cksum_service":F) chmod a+x "$ac_file" ;;
+    "tests/test_cksum_ieg":F) chmod a+x "$ac_file" ;;
+    "tests/pio_write_run":F) chmod a+x "$ac_file" ;;
+    "tests/pio_cksum_mpinonb":F) chmod a+x "$ac_file" ;;
+    "tests/pio_cksum_fpguard":F) chmod a+x "$ac_file" ;;
+    "tests/pio_cksum_asynch":F) chmod a+x "$ac_file" ;;
+    "tests/pio_cksum_writer":F) chmod a+x "$ac_file" ;;
+    "util/serialrun":F) chmod a+x "$ac_file" ;;
 
   esac
 done # for ac_tag

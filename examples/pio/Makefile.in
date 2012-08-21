@@ -55,7 +55,7 @@ noinst_PROGRAMS = collectData$(EXEEXT) collectDataNStreams$(EXEEXT) \
 	$(am__EXEEXT_1) $(am__EXEEXT_2)
 @USE_MPI_TRUE@am__append_1 = compareResourcesArray
 @USE_FC_TRUE@am__append_2 = collectData2003
-subdir = pioExamples
+subdir = examples/pio
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps =  \
@@ -160,9 +160,6 @@ ENABLE_CGRIBEX = @ENABLE_CGRIBEX@
 ENABLE_EXTRA = @ENABLE_EXTRA@
 ENABLE_GRIB = @ENABLE_GRIB@
 ENABLE_IEG = @ENABLE_IEG@
-ENABLE_NC2 = @ENABLE_NC2@
-ENABLE_NC4 = @ENABLE_NC4@
-ENABLE_NETCDF = @ENABLE_NETCDF@
 ENABLE_PYTHON = @ENABLE_PYTHON@
 ENABLE_RUBY = @ENABLE_RUBY@
 ENABLE_SERVICE = @ENABLE_SERVICE@
@@ -306,13 +303,13 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CFLAGS = -I$(top_srcdir)/src
 collectData_SOURCES = collectData.c
-collectData_LDADD = -L../src -lcdi
+collectData_LDADD = -L../../src -lcdi
 collectData2003_SOURCES = collectData2003.F90
-collectData2003_LDADD = -L../src -lcdi
+collectData2003_LDADD = -L../../src -lcdi
 collectDataNStreams_SOURCES = collectDataNStreams.c
-collectDataNStreams_LDADD = -L../src -lcdi
+collectDataNStreams_LDADD = -L../../src -lcdi
 compareResourcesArray_SOURCES = compareResourcesArray.c
-compareResourcesArray_LDADD = -L../src -lcdi
+compareResourcesArray_LDADD = -L../../src -lcdi
 all: all-am
 
 .SUFFIXES:
@@ -326,9 +323,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu pioExamples/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu examples/pio/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu pioExamples/Makefile
+	  $(AUTOMAKE) --gnu examples/pio/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

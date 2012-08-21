@@ -78,7 +78,8 @@ AC_CHECK_HEADERS(malloc.h)
 AC_CHECK_FUNCS(mallinfo)
 #  ----------------------------------------------------------------------
 # Checks for the availability of ANSI-C99 functions
-AC_CHECK_FUNCS(isnan)
+AC_CHECK_DECLS([isnan],,,[AC_INCLUDES_DEFAULT
+@%:@include <math.h>])
 #  ----------------------------------------------------------------------
 #  Check for math library
 AC_CHECK_LIB(m, floor)
@@ -87,7 +88,17 @@ AC_CHECK_LIB(m, floor)
 ACX_OPTIONS
 #  ----------------------------------------------------------------------
 # Compile with MPI support
-AC_ARG_ENABLE(mpi,AS_HELP_STRING([--enable-mpi],[Compile with MPI compiler [default=no]]),enable_mpi=${enableval},enable_mpi=no)
+AC_ARG_ENABLE(mpi,AS_HELP_STRING([--enable-mpi],[Compile with MPI compiler [default=no]]),enable_mpi=yes,enable_mpi=no)
+AS_IF([test x"${enable_mpi}" = x"yes"],
+      [USE_MPI=yes])
+AS_IF([test x"$USE_MPI" = xyes],
+  [AC_DEFINE([USE_MPI],[1],[parallel I/O requested and available])
+   AC_CHECK_PROGS([MPI_LAUNCH],[mpirun mpiexec],[])
+   AS_IF([test x$MPI_LAUNCH = x],[])],
+  [MPI_LAUNCH="`pwd`/util/serialrun"
+   AC_SUBST([MPI_LAUNCH])])
+AM_CONDITIONAL([USE_MPI],[test x"$USE_MPI" = xyes])
+AC_SUBST([USE_MPI])
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
 AC_ARG_ENABLE(iso-c-interface,
@@ -106,7 +117,8 @@ AS_IF([test "x${enable_isoc}" = "xyes"],
    CDI_F90_INTERFACE_FCFLAGS="${FC_MOD_FLAG}${includedir}"])
 AC_SUBST([CDI_F90_INTERFACE_FCFLAGS])
 #  Check the module extension of the fortran compiler
-ACX_SL_FC_MOD_SUFFIX(,[FCMODEXT=mod])
+AS_IF([test -n "$FC" && test "X$FC" != "Xno"],
+  [ACX_SL_FC_MOD_SUFFIX(,[FCMODEXT=mod])])
 # -----------------------------------------------------------------------
 # Check for SWIG - Generator for script-language bindings
 AC_ARG_ENABLE(swig,
@@ -163,11 +175,27 @@ AM_CONDITIONAL(CREATE_INTERFACES, [test  "x$enable_ruby" = "xyes" -o "x$enable_p
 #  ----------------------------------------------------------------------
 #  Check C / Fortran interface
 ACX_CHECK_CFINT([$srcdir/src/cfortran.h])
+AM_CONDITIONAL([USE_FC],[test -n "$FC" && test "X$FC" != "Xno" && test x$acx_cv_check_cfint = "xyes"])
 
 AC_SUBST([CPPFLAGS])
 
+AC_CONFIG_FILES([tests/test_cksum_grib \
+                 tests/test_cksum_nc \
+                 tests/test_cksum_nc2 \
+                 tests/test_cksum_nc4 \
+                 tests/test_cksum_extra \
+                 tests/test_cksum_service \
+                 tests/test_cksum_ieg \
+                 tests/pio_write_run \
+                 tests/pio_cksum_mpinonb \
+                 tests/pio_cksum_fpguard \
+                 tests/pio_cksum_asynch \
+                 tests/pio_cksum_writer \
+                 util/serialrun],[chmod a+x "$ac_file"])
+
 AC_OUTPUT([Makefile src/Makefile interfaces/Makefile app/Makefile \
-   tests/Makefile examples/Makefile cdi.settings src/pkgconfig/cdi.pc])
+	tests/Makefile examples/Makefile cdi.settings \
+	examples/pio/Makefile src/pkgconfig/cdi.pc])
 
 #  ----------------------------------------------------------------------
 #  Show configuration
