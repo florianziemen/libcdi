@@ -95,6 +95,13 @@ examples/cdi_write_ens.c -text
 examples/cdi_write_f.f -text
 examples/cdi_write_f2003.f90 -text
 examples/compf -text
+examples/pio/Makefile.am -text
+examples/pio/Makefile.in -text
+examples/pio/cdi.inc -text
+examples/pio/collectData.c -text
+examples/pio/collectData2003.F90 -text
+examples/pio/collectDataNStreams.c -text
+examples/pio/compareResourcesArray.c -text
 interfaces/CdiInfo.cpp -text
 interfaces/Makefile.am -text
 interfaces/Makefile.in -text
