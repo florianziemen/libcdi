@@ -5,7 +5,7 @@ noinst_PROGRAMS+=compareResourcesArray
 endif
 
 if USE_FC
-noinst_PROGRAMS+=collectData2003
+ noinst_PROGRAMS+=collectData2003
 endif
 
 AM_CFLAGS=-I$(top_srcdir)/src

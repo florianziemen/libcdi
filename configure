@@ -636,6 +636,8 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+USE_FC_FALSE
+USE_FC_TRUE
 CREATE_INTERFACES_FALSE
 CREATE_INTERFACES_TRUE
 ENABLE_PYTHON
@@ -706,8 +708,6 @@ CXX
 ac_ct_F77
 FFLAGS
 F77
-USE_FC_FALSE
-USE_FC_TRUE
 FPP_INCOPT
 FPP_DEFOPT
 FPPFLAGS
@@ -16015,14 +16015,6 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 fi
- if test -n "$FC" && test "X$FC" != "Xno"; then
-  USE_FC_TRUE=
-  USE_FC_FALSE='#'
-else
-  USE_FC_TRUE='#'
-  USE_FC_FALSE=
-fi
-
 ac_ext=f
 ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
 ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -26962,6 +26954,14 @@ $as_echo "#define HAVE_CF_INTERFACE 1" >>confdefs.h
 
 fi
 
+ if test -n "$FC" && test "X$FC" != "Xno" && test x$acx_cv_check_cfint = "xyes"; then
+  USE_FC_TRUE=
+  USE_FC_FALSE='#'
+else
+  USE_FC_TRUE='#'
+  USE_FC_FALSE=
+fi
+
 
 
 
@@ -27099,10 +27099,6 @@ if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${USE_FC_TRUE}" && test -z "${USE_FC_FALSE}"; then
-  as_fn_error $? "conditional \"USE_FC\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCXX\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
@@ -27137,6 +27133,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CREATE_INTERFACES_TRUE}" && test -z "${CREATE_INTERFACES_FALSE}"; then
   as_fn_error $? "conditional \"CREATE_INTERFACES\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${USE_FC_TRUE}" && test -z "${USE_FC_FALSE}"; then
+  as_fn_error $? "conditional \"USE_FC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

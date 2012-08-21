@@ -43,7 +43,6 @@ AS_IF([test -n "$FC" && test "X$FC" != "Xno"],
    AC_LANG_PUSH([Fortran])
    AC_PROG_FPP
    AC_LANG_POP([Fortran])])
-AM_CONDITIONAL([USE_FC],[test -n "$FC" && test "X$FC" != "Xno"])
 AC_PROG_F77
 AC_PROG_RANLIB
 AC_PROG_CXX
@@ -176,6 +175,7 @@ AM_CONDITIONAL(CREATE_INTERFACES, [test  "x$enable_ruby" = "xyes" -o "x$enable_p
 #  ----------------------------------------------------------------------
 #  Check C / Fortran interface
 ACX_CHECK_CFINT([$srcdir/src/cfortran.h])
+AM_CONDITIONAL([USE_FC],[test -n "$FC" && test "X$FC" != "Xno" && test x$acx_cv_check_cfint = "xyes"])
 
 AC_SUBST([CPPFLAGS])
 
