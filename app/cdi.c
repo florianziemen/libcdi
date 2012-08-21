@@ -13,7 +13,7 @@
 #include <cdi.h>
 int      vlistInqVarMissvalUsed(int vlistID, int varID);
 #ifndef DBL_IS_NAN
-#if  defined  (HAVE_ISNAN)
+#if  defined  (HAVE_DECL_ISNAN)
 #  define DBL_IS_NAN(x)     (isnan(x))
 #elif  defined  (FP_NAN)
 #  define DBL_IS_NAN(x)     (fpclassify(x) == FP_NAN)
@@ -1056,3 +1056,12 @@ int main(int argc, char *argv[])
 
   return (0);
 }
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */
