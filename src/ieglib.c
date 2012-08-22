@@ -29,7 +29,7 @@ static int iegDefaultDprec = 0;
  */
 
 #undef  LIBVERSION
-#define LIBVERSION      1.3.0
+#define LIBVERSION      1.3.1
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char ieg_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
@@ -378,7 +378,7 @@ int iegRead(int fileID, iegrec_t *iegp)
   size_t datasize;
   size_t blocklen, blocklen2;
   size_t i;
-  char tmpbuf[800];
+  char tmpbuffer[800], *tmpbuf = tmpbuffer;
   int dprec = 0;
   void *buffer;
   int buffersize;

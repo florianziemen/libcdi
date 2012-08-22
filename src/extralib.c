@@ -32,7 +32,7 @@ static int extDefaultNumber = EXT_REAL;
  */
 
 #undef  LIBVERSION
-#define LIBVERSION      1.3.0
+#define LIBVERSION      1.3.1
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char ext_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
@@ -244,14 +244,13 @@ int extInqData(void *ext, int prec, void *data)
   size_t datasize;
   size_t i;
   int ierr = 0;
-  int rprec, number;
+  int rprec;
   void *buffer;
   int byteswap = extp->byteswap;
 
   datasize = extp->datasize;
   buffer   = extp->buffer;
   rprec    = extp->prec;
-  number   = extp->number;
 
   switch ( rprec )
     {
