@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include <time.h>
 
-//#include "config.h"
+#include "config.h"
 
 typedef struct
 {
@@ -116,7 +116,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 
   fprintf(fpinc, "! This file was automatically generated, don't edit!\n");
   fprintf(fpinc, "!\n");
-  //  fprintf(fpinc, "! Fortran interface for CDI library version %s\n", VERSION);
+  fprintf(fpinc, "! Fortran interface for CDI library version %s\n", VERSION);
   fprintf(fpinc, "!\n");
   fprintf(fpinc, "! Author:\n");
   fprintf(fpinc, "! -------\n");
