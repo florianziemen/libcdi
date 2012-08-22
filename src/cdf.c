@@ -88,7 +88,6 @@ void cdfComment(int ncid)
 }
 #endif
 
-
 int cdfOpenFile(const char *filename, const char *mode, int *filetype)
 {
   int ncid = -1;

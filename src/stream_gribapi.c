@@ -828,10 +828,6 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
   longname[0] = 0;
   units[0] = 0;
 
-  name[0] = 0;
-  longname[0] = 0;
-  units[0] = 0;
-
   vlen = 256;
   GRIB_CHECK(grib_get_string(gh, "shortName", name, &vlen), 0);
   if      ( vlen == 8 && memcmp(name, "unknown", vlen) == 0 ) name[0] = 0;

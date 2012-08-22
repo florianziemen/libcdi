@@ -1375,7 +1375,6 @@ void iegReadVarDP(int streamID, int varID, double *data, int *nmiss)
   int tsid;
   int recID;
   int i;
-  int status;
   double missval;
   iegrec_t *iegp;
   stream_t *streamptr;
@@ -1401,8 +1400,7 @@ void iegReadVarDP(int streamID, int varID, double *data, int *nmiss)
       recID = streamptr->vars[varID].level[levID];
       recpos = streamptr->tsteps[tsid].records[recID].position;
       fileSetPos(fileID, recpos, SEEK_SET);
-      /* FIXME: status value ignored */
-      status = iegRead(fileID, iegp);
+      iegRead(fileID, iegp);
       iegInqDataDP(iegp, &data[levID*gridsize]);
     }
   fileSetPos(fileID, currentfilepos, SEEK_SET);
@@ -1425,7 +1423,6 @@ void iegReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   int tsid;
   int recID;
   int i;
-  int status;
   double missval;
   iegrec_t *iegp;
   stream_t *streamptr;
@@ -1450,8 +1447,7 @@ void iegReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   recID = streamptr->vars[varID].level[levID];
   recpos = streamptr->tsteps[tsid].records[recID].position;
   fileSetPos(fileID, recpos, SEEK_SET);
-  /* FIXME: status value ignored */
-  status = iegRead(fileID, iegp);
+  iegRead(fileID, iegp);
   iegInqDataDP(iegp, data);
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
