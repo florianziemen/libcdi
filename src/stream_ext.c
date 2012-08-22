@@ -218,7 +218,6 @@ int extCopyRecord(int streamID2, int streamID1)
 
 int extDefRecord(int streamID)
 {
-  int fileID;
   int gridID;
   int header[4];
   int status = 0;
@@ -230,7 +229,6 @@ int extDefRecord(int streamID)
 
   stream_check_ptr(__func__, streamptr);
 
-  fileID   = streamInqFileID(streamID);
   gridID   = streamptr->record->gridID;
   extp     = streamptr->record->extp;
 
@@ -498,7 +496,7 @@ int extScanTimestep2(int streamID)
   int header[4];
   int status;
   int fileID;
-  int rxysize = 0;
+  // int rxysize = 0;
   int param = 0;
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
   int tsID;
@@ -565,7 +563,7 @@ int extScanTimestep2(int streamID)
       vtime  = 0;
       rcode  = header[1];
       rlevel = header[2];
-      rxysize = header[3];
+      // rxysize = header[3];
 
       param = cdiEncodeParam(rcode, 255, 255);
 
@@ -687,7 +685,7 @@ int extScanTimestep(int streamID)
   int status;
   int fileID;
   int tsID;
-  int rxysize = 0;
+  // int rxysize = 0;
   int param = 0;
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
   long recsize = 0;
@@ -750,7 +748,7 @@ int extScanTimestep(int streamID)
 	  vtime  = 0;
 	  rcode  = header[1];
 	  rlevel = header[2];
-	  rxysize = header[3];
+	  // rxysize = header[3];
 
 	  param = cdiEncodeParam(rcode, 255, 255);
 
@@ -856,7 +854,6 @@ void extReadVarDP(int streamID, int varID, double *data, int *nmiss)
   int tsid;
   int recID;
   int i;
-  int status;
   double missval;
   extrec_t *extp;
   stream_t *streamptr;
@@ -882,7 +879,7 @@ void extReadVarDP(int streamID, int varID, double *data, int *nmiss)
       recID = streamptr->vars[varID].level[levID];
       recpos = streamptr->tsteps[tsid].records[recID].position;
       fileSetPos(fileID, recpos, SEEK_SET);
-      status = extRead(fileID, extp);
+      extRead(fileID, extp);
       extInqHeader(extp, header);
       extInqDataDP(extp, &data[levID*gridsize]);
     }
@@ -919,7 +916,6 @@ void extReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   int tsid;
   int recID;
   int i;
-  int status;
   double missval;
   extrec_t *extp;
   stream_t *streamptr;
@@ -944,7 +940,7 @@ void extReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   recID = streamptr->vars[varID].level[levID];
   recpos = streamptr->tsteps[tsid].records[recID].position;
   fileSetPos(fileID, recpos, SEEK_SET);
-  status = extRead(fileID, extp);
+  extRead(fileID, extp);
   extInqHeader(extp, header);
   extInqDataDP(extp, data);
  

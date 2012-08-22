@@ -579,7 +579,7 @@ int iegCopyRecord(int streamID2, int streamID1)
 int iegDefRecord(int streamID)
 {
   int status = 0;
-  int fileID, vlistID;
+  int vlistID;
   int gridID;
   int date, time;
   int datatype;
@@ -594,7 +594,6 @@ int iegDefRecord(int streamID)
 
   stream_check_ptr(__func__, streamptr);
 
-  fileID  = streamInqFileID(streamID);
   vlistID = streamInqVlist(streamID);
   iegp    = streamptr->record->iegp;
   byteorder = streamptr->byteorder;
@@ -1376,7 +1375,6 @@ void iegReadVarDP(int streamID, int varID, double *data, int *nmiss)
   int tsid;
   int recID;
   int i;
-  int status;
   double missval;
   iegrec_t *iegp;
   stream_t *streamptr;
@@ -1402,7 +1400,7 @@ void iegReadVarDP(int streamID, int varID, double *data, int *nmiss)
       recID = streamptr->vars[varID].level[levID];
       recpos = streamptr->tsteps[tsid].records[recID].position;
       fileSetPos(fileID, recpos, SEEK_SET);
-      status = iegRead(fileID, iegp);
+      iegRead(fileID, iegp);
       iegInqDataDP(iegp, &data[levID*gridsize]);
     }
   fileSetPos(fileID, currentfilepos, SEEK_SET);
@@ -1425,7 +1423,6 @@ void iegReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   int tsid;
   int recID;
   int i;
-  int status;
   double missval;
   iegrec_t *iegp;
   stream_t *streamptr;
@@ -1450,7 +1447,7 @@ void iegReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   recID = streamptr->vars[varID].level[levID];
   recpos = streamptr->tsteps[tsid].records[recID].position;
   fileSetPos(fileID, recpos, SEEK_SET);
-  status = iegRead(fileID, iegp);
+  iegRead(fileID, iegp);
   iegInqDataDP(iegp, data);
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
@@ -1536,11 +1533,11 @@ void iegWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   int fileID;
   int gridID;
   int zaxisID;
-  double level;
+  /* double level; */
   int datatype;
-  int tsID;
+  /* int tsID; */
   int vlistID;
-  int param, date, time, datasize;
+  /* int param, date, time, datasize; */
   iegrec_t *iegp;
   stream_t *streamptr;
 
@@ -1549,18 +1546,18 @@ void iegWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   iegp     = streamptr->record->iegp;
   vlistID  = streamInqVlist(streamID);
   fileID   = streamInqFileID(streamID);
-  tsID     = streamptr->curTsID;
+  /* tsID     = streamptr->curTsID; */
   gridID   = vlistInqVarGrid(vlistID, varID);
   zaxisID  = vlistInqVarZaxis(vlistID, varID);
-  level    = zaxisInqLevel(zaxisID, levID);
+  /* level    = zaxisInqLevel(zaxisID, levID); */
 
   if ( CDI_Debug )
     Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
-  param = vlistInqVarParam(vlistID, varID);
-  date = streamptr->tsteps[tsID].taxis.vdate;
-  time = streamptr->tsteps[tsID].taxis.vtime;
-  datasize = gridInqSize(gridID);
+  /* param = vlistInqVarParam(vlistID, varID); */
+  /* date = streamptr->tsteps[tsID].taxis.vdate; */
+  /* time = streamptr->tsteps[tsID].taxis.vtime; */
+  /* datasize = gridInqSize(gridID); */
 
   datatype = vlistInqVarDatatype(vlistID, varID);
 
