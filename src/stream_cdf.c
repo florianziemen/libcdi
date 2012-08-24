@@ -103,6 +103,7 @@ typedef struct {
 }
 ncvar_t;
 
+#ifdef HAVE_LIBNETCDF
 static
 void strtolower(char *str)
 {
@@ -294,8 +295,6 @@ int splitBasetime(const char *timeunits, taxis_t *taxis)
   return (0);
 }
 
-
-#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfGetAttInt(int fileID, int ncvarid, char *attname, int attlen, int *attint)
 {
@@ -317,10 +316,9 @@ void cdfGetAttInt(int fileID, int ncvarid, char *attname, int attlen, int *attin
       free(pintatt);
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
-static void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double *attdouble)
+static
+void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double *attdouble)
 {
   size_t nc_attlen;
   double *pdoubleatt;
@@ -340,9 +338,7 @@ static void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, 
       free(pdoubleatt);
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfGetAttText(int fileID, int ncvarid, char *attname, int attlen, char *atttext)
 {
@@ -365,9 +361,7 @@ void cdfGetAttText(int fileID, int ncvarid, char *attname, int attlen, char *att
       atttext[0] = 0;
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 int cdfInqDatatype(int xtype, int lunsigned)
 {
@@ -394,9 +388,7 @@ int cdfInqDatatype(int xtype, int lunsigned)
 
   return (datatype);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 int cdfDefDatatype(int datatype, int filetype)
 {
@@ -437,10 +429,7 @@ int cdfDefDatatype(int datatype, int filetype)
 
   return (xtype);
 }
-#endif
 
-
-#if  defined  (HAVE_LIBNETCDF)
 static
 void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
 {
@@ -497,12 +486,12 @@ int cdfCopyRecord(int streamID2, int streamID1)
 {
   double *data;
   int datasize;
-  int tsID1, tsID2, recID1, recID2;
+  int tsID1, recID1;
   int ivarID, gridID;
   int nmiss;
   int ierr = 0;
   int memtype = MEMTYPE_DOUBLE;
-  int vlistID1, vlistID2;
+  int vlistID1;
   stream_t *streamptr1;
   stream_t *streamptr2;
 
@@ -513,13 +502,10 @@ int cdfCopyRecord(int streamID2, int streamID1)
   stream_check_ptr(__func__, streamptr2);
 
   vlistID1 = streamptr1->vlistID;
-  vlistID2 = streamptr2->vlistID;
 
   tsID1 = streamptr1->curTsID;
-  tsID2 = streamptr2->curTsID;
 
   recID1 = streamptr1->tsteps[tsID1].curRecID;
-  recID2 = streamptr2->tsteps[tsID2].curRecID;
 
   ivarID = streamptr1->tsteps[tsID1].records[recID1].varID;
 
@@ -675,11 +661,10 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 }
 #endif
 
-#if  defined  (HAVE_LIBNETCDF)
+#if  defined(HAVE_LIBNETCDF) && defined(NC_SZIP_NN_OPTION_MASK)
 static
 void cdfDefVarSzip(int ncid, int ncvarid)
 {
-#if  defined  (HAVE_NETCDF4) && defined (NC_SZIP_NN_OPTION_MASK)
   int retval;
   /* Set options_mask and bits_per_pixel. */
   int options_mask = NC_SZIP_NN_OPTION_MASK;
@@ -700,15 +685,6 @@ void cdfDefVarSzip(int ncid, int ncvarid)
       else
         Error("nc_def_var_szip failed, status = %d", retval);
     }
-#else
-  static int lwarn = TRUE;
-
-  if ( lwarn )
-    {
-      lwarn = FALSE;
-      Warning("netCDF4/Szip compression not available!");
-    }
-#endif
 }
 #endif
 
@@ -3119,7 +3095,6 @@ int cdfDefVar(int streamID, int varID)
 
   return (ncvarid);
 }
-#endif
 
 static
 void scale_add(long size, double *data, double addoffset, double scalefactor)
@@ -3140,7 +3115,7 @@ void scale_add(long size, double *data, double addoffset, double scalefactor)
         }
     }
 }
-
+#endif
 
 void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
 {
@@ -3271,10 +3246,10 @@ void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
 #endif
 }
 
+#if defined(HAVE_LIBNETCDF)
 static
 int cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, long nvals, size_t xsize, size_t ysize, int swapxy, size_t *start, size_t *count, int memtype, const void *data, int nmiss)
 {
-#if  defined  (HAVE_LIBNETCDF)
   long i, j;
   const double *pdata_dp = (const double *) data;
   double *mdata_dp = NULL;
@@ -3449,10 +3424,10 @@ int cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtyp
   if ( sdata_dp ) free(sdata_dp);
   if ( mdata_sp ) free(mdata_sp);
   if ( sdata_sp ) free(sdata_sp);
-#endif
+
   return (0);
 }
-
+#endif
 
 void cdf_write_var(int streamID, int varID, int memtype, const void *data, int nmiss)
 {
@@ -4006,11 +3981,11 @@ void cdfCreateRecords(int streamID, int tsID)
 #endif
 }
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 int cdfTimeDimID(int fileID, int ndims, int nvars)
 {
   int dimid = 0;
-#if  defined  (HAVE_LIBNETCDF)
   char dimname[80];
   char timeunits[256];
   char attname[256];
@@ -4057,7 +4032,6 @@ int cdfTimeDimID(int fileID, int ndims, int nvars)
         }
     }
 
-#endif
   return (dimid);
 }
 
@@ -4137,7 +4111,6 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
     }
 }
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 int isLonAxis(const char *units, const char *stdname)
 {
@@ -4160,9 +4133,7 @@ int isLonAxis(const char *units, const char *stdname)
 
   return (status);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 int isLatAxis(const char *units, const char *stdname)
 {
@@ -4185,9 +4156,7 @@ int isLatAxis(const char *units, const char *stdname)
 
   return (status);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 int isDBLAxis(const char *units, const char *longname)
 {
@@ -4241,9 +4210,7 @@ int isHeightAxis(const char *stdname, const char *longname)
 
   return (status);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 int unitsIsPressure(const char *units)
 {
@@ -4260,9 +4227,7 @@ int unitsIsPressure(const char *units)
 
   return (status);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 int isGaussGrid(long ysize, double yinc, double *yvals)
 {
@@ -4300,9 +4265,7 @@ int isGaussGrid(long ysize, double yinc, double *yvals)
 
   return (lgauss);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfSetVar(ncvar_t *ncvars, int ncvarid, int isvar)
 {
@@ -4322,7 +4285,6 @@ void cdfSetVar(ncvar_t *ncvars, int ncvarid, int isvar)
 
   ncvars[ncvarid].isvar = isvar;
 }
-#endif
 
 static
 void cdfSetDim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
@@ -4380,7 +4342,7 @@ void printNCvars(ncvar_t *ncvars, int nvars)
       printf("%3d %3d %3d  %-4s %s\n", ncvarid, ncvars[ncvarid].isvar, ndim-2, axis, ncvars[ncvarid].name);
     }
 }
-
+#endif
 
 typedef struct
 {
@@ -4390,6 +4352,7 @@ typedef struct
 varinfo_t;
 
 
+#ifdef HAVE_LIBNETCDF
 static
 int cmpvarname(const void *s1, const void *s2)
 {
@@ -4399,7 +4362,6 @@ int cmpvarname(const void *s1, const void *s2)
   return (strcmp(x->name, y->name));
 }
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                           int timedimid, int modelID, int format)
@@ -4896,7 +4858,6 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
 	}
     }
 }
-#endif
 
 static
 void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
@@ -4909,7 +4870,7 @@ void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
     {
       if ( ncvars[ncvarid].isvar == TRUE )
 	{
-	  int lxdim = 0, lydim = 0, lzdim = 0, ltdim = 0;
+	  int lxdim = 0, lydim = 0, lzdim = 0/* , ltdim = 0 */;
 	  ndims = ncvars[ncvarid].ndims;
 	  for ( i = 0; i < ndims; i++ )
 	    {
@@ -4933,7 +4894,7 @@ void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 	      if      ( ncvars[ncvarid].dimtype[i] == X_AXIS ) lxdim = TRUE;
 	      else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS ) lydim = TRUE;
 	      else if ( ncvars[ncvarid].dimtype[i] == Z_AXIS ) lzdim = TRUE;
-	      else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = TRUE;
+	      /* else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = TRUE; */
 	    }
 
 	  for ( i = ndims-1; i >= 0; i-- )
@@ -4964,7 +4925,6 @@ void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
     }
 }
 
-#if  defined  (HAVE_LIBNETCDF)
 /* verify coordinate vars - first scan (dimname == varname) */
 static
 void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int timedimid)
@@ -5057,9 +5017,7 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 	}
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 /* verify coordinate vars - second scan (all other variables) */
 static
 void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
@@ -5133,9 +5091,7 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 	}
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
 {
@@ -5156,9 +5112,7 @@ void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
     }
 
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 /* define all input grids */
 static
 void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid)
@@ -5757,9 +5711,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 	}
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 /* define all input zaxes */
 static
 void define_all_zaxes(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
@@ -5909,10 +5861,7 @@ void define_all_zaxes(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 	}
     }
 }
-#endif
 
-
-#if  defined  (HAVE_LIBNETCDF)
 /* define all input data variables */
 static
 void define_all_vars(int fileID, int streamID, int vlistID, int instID, int modelID, int *varids, ncdim_t *ncdims, int nvars, ncvar_t *ncvars)
@@ -6955,7 +6904,6 @@ void cdfDefGlobalAtts(int streamID)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int fileID, vlistID;
-  vlist_t *vlistptr;
   stream_t *streamptr;
   int natts;
 
@@ -6965,8 +6913,6 @@ void cdfDefGlobalAtts(int streamID)
 
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
-
-  vlistptr = vlist_to_pointer(vlistID);
 
   cdfDefSource(streamID);
   cdfDefInstitut(streamID);
@@ -7076,10 +7022,8 @@ void cdfDefVars(int streamID)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int index, gridID, zaxisID, vlistID;
-  int nvars, ngrids, nzaxis;
-  /*
-  int  ncvarid;
-  */
+  int ngrids, nzaxis;
+  /* int  nvars, ncvarid; */
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -7088,7 +7032,7 @@ void cdfDefVars(int streamID)
   if ( vlistID == UNDEFID )
     Error("Internal problem! vlist undefined for streamID %d", streamID);
 
-  nvars  = vlistNvars(vlistID);
+  /* nvars  = vlistNvars(vlistID); */
   ngrids = vlistNgrids(vlistID);
   nzaxis = vlistNzaxis(vlistID);
   /*
