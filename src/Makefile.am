@@ -48,6 +48,7 @@ libcdi_la_SOURCES = 	 \
 	ieg.h	 	 \
 	ieglib.c         \
 	institution.c  	 \
+	institution.h  	 \
 	model.c        	 \
 	model.h        	 \
 	namespace.c      \
