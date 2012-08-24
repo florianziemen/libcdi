@@ -49,10 +49,31 @@ libcdi_la_SOURCES = 	 \
 	ieglib.c         \
 	institution.c  	 \
 	model.c        	 \
-        namespace.c      \
-        namespace.h      \
-        pio_util.c       \
-        pio_util.h       \
+	namespace.c      \
+	namespace.h      \
+	pio.c            \
+	pio.h            \
+	pio_c_temp.h     \
+	pio_comm.c       \
+	pio_comm.h       \
+	pio_dbuffer.c    \
+	pio_impl.h 	 \
+	pio_interface.c  \
+	pio_interface.h	 \
+	pio_mpinonb.c    \
+	pio_record_send.c\
+	pio_posixasynch.c\
+	pio_posixfpguardsendrecv.c \
+	pio_posixnonb.c  \
+	pio_list_set.c			\
+	pio_rpc.c        \
+	pio_rpc.h        \
+	pio_server.c     \
+	pio_server.h     \
+	pio_util.c       \
+	pio_util.h       \
+	resource_handle.c\
+	resource_handle.h\
 	service.h	 \
 	servicelib.c     \
 	stream_cdf.c     \
@@ -91,6 +112,7 @@ libcdi_la_SOURCES = 	 \
 	vlist.h	         \
 	vlist_att.c 	 \
 	vlist_var.c 	 \
+	vlist_var.h	 \
 	zaxis.c		 \
         stream.c         \
         swap.c

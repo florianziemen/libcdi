@@ -1,6 +1,6 @@
 #  Process this file with autoconf to produce a configure script.
 
-AC_INIT([cdi], [1.5.6], [http://code.zmaw.de/projects/cdi])
+AC_INIT([cdi], [1.5.7], [http://code.zmaw.de/projects/cdi])
 
 echo "configuring ${PACKAGE_NAME} ${PACKAGE_VERSION}"
 
@@ -179,23 +179,23 @@ AM_CONDITIONAL([USE_FC],[test -n "$FC" && test "X$FC" != "Xno" && test x$acx_cv_
 
 AC_SUBST([CPPFLAGS])
 
-AC_CONFIG_FILES([tests/test_cksum_grib \
-                 tests/test_cksum_nc \
-                 tests/test_cksum_nc2 \
-                 tests/test_cksum_nc4 \
-                 tests/test_cksum_extra \
-                 tests/test_cksum_service \
-                 tests/test_cksum_ieg \
-                 tests/pio_write_run \
-                 tests/pio_cksum_mpinonb \
-                 tests/pio_cksum_fpguard \
-                 tests/pio_cksum_asynch \
-                 tests/pio_cksum_writer \
-                 util/serialrun],[chmod a+x "$ac_file"])
+#  AC_CONFIG_FILES([tests/test_cksum_grib \
+#                   tests/test_cksum_nc \
+#                   tests/test_cksum_nc2 \
+#                   tests/test_cksum_nc4 \
+#                   tests/test_cksum_extra \
+#                   tests/test_cksum_service \
+#                   tests/test_cksum_ieg \
+#                   tests/pio_write_run \
+#                   tests/pio_cksum_mpinonb \
+#                   tests/pio_cksum_fpguard \
+#                   tests/pio_cksum_asynch \
+#                   tests/pio_cksum_writer \
+#                   util/serialrun],[chmod a+x "$ac_file"])
 
 AC_OUTPUT([Makefile src/Makefile interfaces/Makefile app/Makefile \
-	tests/Makefile examples/Makefile cdi.settings \
-	examples/pio/Makefile src/pkgconfig/cdi.pc])
+	examples/Makefile cdi.settings \
+        src/pkgconfig/cdi.pc])
 
 #  ----------------------------------------------------------------------
 #  Show configuration

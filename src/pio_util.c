@@ -2,8 +2,11 @@
 #  include "config.h"
 #endif
 
+#include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "pio_util.h"
 #include "cdi.h"
@@ -20,15 +23,18 @@ void pcdiAssert   ( bool assumption, const char * filename,
   if ( !assumption )
     {
 #ifdef USE_MPI
-      int rank;
-
-      MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
-      fprintf ( stderr, "ERROR, ASSUMPTION FALSE: PE%d in %s, %s, line %d\n",
+      int rank = -1, init_flag = 0;
+      if (MPI_Initialized(&init_flag) == MPI_SUCCESS && init_flag)
+        MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+      fprintf ( stderr, "ERROR, FALSE ASSUMPTION: PE%d in %s, %s, line %d\n",
                 rank, functionname, filename, line );
       fflush ( stderr );
-      MPI_Abort ( MPI_COMM_WORLD, 1 );
+      if (init_flag)
+        MPI_Abort ( MPI_COMM_WORLD, 1 );
+      else
+        abort();
 #else
-      fprintf ( stderr, "ERROR ASSUMPTION FALSE, %s, %s, line %d\n",
+      fprintf ( stderr, "ERROR, FALSE ASSUMPTION, %s, %s, line %d\n",
                 functionname, filename, line );
       fflush ( stderr );
       abort();
@@ -38,21 +44,29 @@ void pcdiAssert   ( bool assumption, const char * filename,
 
 /****************************************************/
 
-void pcdiAbort ( char * errorString, const char * filename,
-		 const char *functionname, int line )
+void pcdiAbort(const char * filename, const char *functionname, int line,
+               const char * errorString, ... )
 {
+  va_list ap;
+  va_start(ap, errorString);
 #ifdef USE_MPI
-  int rank;
-
-  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
-  fprintf ( stderr, "ERROR, pe%d in %s, %s, line %d, errorString: \"%s\"\n",
-	    rank, functionname, filename, line, errorString );
+  {
+    int rank;
+    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+    fprintf(stderr, "ERROR, pe%d in %s, %s, line %d, errorString: \"",
+            rank, functionname, filename, line);
+  }
+  vfprintf(stderr, errorString, ap);
+  fputs("\"\n", stderr);
   MPI_Abort ( MPI_COMM_WORLD, 1 );
 #else
-  fprintf ( stderr, "ERROR, %s, %s, line %d, errorString: \"%s\"\n",
-            functionname, filename, line, errorString );
-  abort();
+  fprintf(stderr, "ERROR, %s, %s, line %d, errorString: \"",
+          functionname, filename, line);
+  vfprintf(stderr, errorString, ap);
+  fputs("\"\n", stderr);
 #endif
+  exit ( EXIT_FAILURE );
+  va_end(ap);
 }
 
 /*****************************************************************************/
@@ -63,7 +77,8 @@ void * pcdiXmalloc ( size_t size, const char *filename, const char *functionname
   void * value = calloc (1, size );
 
   if ( value == NULL )
-    pcdiAbort ( "malloc failed", filename, functionname, line );
+    pcdiAbort (filename, functionname, line, "malloc failed: %s",
+               strerror(errno));
 
   return value;
 }
@@ -74,7 +89,8 @@ void * pcdiXcalloc ( size_t nmemb, size_t size, const char *filename,
   void * value = calloc ( nmemb, size );
 
   if ( value == NULL )
-    pcdiAbort ( "calloc failed", filename, functionname, line );
+    pcdiAbort (filename, functionname, line, "calloc failed: %s",
+               strerror(errno) );
 
   return value;
 }
@@ -85,7 +101,8 @@ void * pcdiXrealloc ( void *p, size_t size, const char *functionname,
   void * value = realloc ( p, size );
 
   if ( value == NULL )
-    pcdiAbort ( "realloc failed", filename, functionname, line );
+    pcdiAbort(filename, functionname, line, "realloc failed: %s",
+              strerror(errno));
 
   return value;
 }
@@ -95,25 +112,24 @@ void * pcdiXrealloc ( void *p, size_t size, const char *functionname,
 #ifdef USE_MPI
 void pcdiXMPI ( int iret, const char *filename, int line )
 {
-  char errorString1[MPI_MAX_ERROR_STRING + 1];
-  char errorString2[MPI_MAX_ERROR_STRING + 1];
+  char errorString[2][MPI_MAX_ERROR_STRING + 1];
   int len, errorClass, rank;
-
-  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
 
   if ( iret != MPI_SUCCESS )
     {
+      MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+
       MPI_Error_class ( iret, &errorClass );
-      MPI_Error_string ( errorClass, errorString1, &len );
-      errorString1[len] = '\0';
-      MPI_Error_string ( iret, errorString2, &len);
-      errorString2[len] = '\0';
+      MPI_Error_string ( errorClass, errorString[0], &len );
+      errorString[0][len] = '\0';
+      MPI_Error_string ( iret, errorString[1], &len);
+      errorString[1][len] = '\0';
 
       fprintf ( stderr, "MPI ERROR, pe%d, %s, line %d,"
                 "errorClass: \"%s\""
                 "errorString: \"%s\"\n",
                 rank, filename, line,
-                errorString1, errorString2);
+                errorString[0], errorString[1]);
 
       MPI_Abort ( MPI_COMM_WORLD, iret );
     }
@@ -264,7 +280,13 @@ void printArray ( const char * cdiPioDebugString, char * ps, const void * array,
   double * dArray;
 
 #ifdef USE_MPI
-  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+  {
+    int init_flag;
+    if (MPI_Initialized(&init_flag) == MPI_SUCCESS && init_flag)
+      MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+    else
+      rank = -1;
+  }
   fprintf ( stdout, "%s pe%d in %s, %s, line %d: %s = ",
 	    cdiPioDebugString, rank, funname, filename, line, ps );
 #else

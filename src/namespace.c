@@ -70,6 +70,7 @@ namespaceTuple_t namespaceResHDecode ( int resH )
 
 void namespaceInit ( int nspn, int * argHasLocalFile )
 {
+  /* FIXME: this should not be PIO-only */
 #ifdef USE_MPI
   int nspID;
 
@@ -106,9 +107,9 @@ int namespaceGetNumber ()
 
 void pioNamespaceSetActive ( int nId )
 {
+  /* FIXME: this should not be PIO-only */
 #ifdef USE_MPI
-  if ( nId >= nNamespaces || nId < 0 )
-    abort ();
+  xassert ( nId < nNamespaces && nId >= 0 );
 
   activeNamespace = nId;
 #endif
@@ -123,8 +124,7 @@ int namespaceGetActive ()
 
 int namespaceHasLocalFile ( int nId )
 {
-  if ( nId >= nNamespaces || nId < 0 )
-    abort ();
+  xassert ( nId < nNamespaces && nId >= 0 );
 
   return hasLocalFiles ? hasLocalFiles[nId] : 0;
 }

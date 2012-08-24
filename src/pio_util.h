@@ -36,30 +36,45 @@
 #define MINFILETYPE        1
 #define MAXFILETYPE        9
 
-#define ddebug             0
+#define ddebug             1
 
-static char * debugString = "#####";
+#define debugString "#####"
 
+/* If we're not using GNU C, elide __attribute__ */
+#ifndef __GNUC__
+#  define  __attribute__(x)  /*NOTHING*/
+#endif
 
 void pcdiAssert   ( bool, const char *, const char *, int );
-#define xassert(arg) pcdiAssert ( arg, __FILE__, __func__, __LINE__ );
+#define xassert(arg) do {                               \
+    if ((arg)) {                                        \
+    } else {                                            \
+      pcdiAssert(0, __FILE__, __func__, __LINE__ );     \
+    }                                                   \
+  } while(0)
 
 #ifdef USE_MPI
-#define xdebug(fmt, ...)					\
-  if ( ddebug ){                                                \
-    int rank;                                                   \
-    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );                    \
-    fprintf ( stderr, "%s pe%d in %s, %s, line %d: " fmt "\n",     \
-              debugString, rank,  __func__, __FILE__,  __LINE__,     \
-              ## __VA_ARGS__ );                                 \
+#define xdebug(fmt, ...)                                                \
+  if ( ddebug ){                                                        \
+    int rank;                                                           \
+    {                                                                   \
+      int init_flag;                                                    \
+      if (MPI_Initialized(&init_flag) == MPI_SUCCESS && init_flag)      \
+        MPI_Comm_rank ( MPI_COMM_WORLD, &rank );                        \
+      else                                                              \
+        rank = -1;                                                      \
+    }                                                                   \
+    fprintf ( stderr, "%s pe%d in %s, %s, line %d: " fmt "\n",          \
+              debugString, rank,  __func__, __FILE__,  __LINE__,        \
+              __VA_ARGS__ );                                            \
   }
 
 #else
-#define xdebug(fmt, ...)					\
-  if ( ddebug ){                                                \
-    fprintf ( stderr, "%s, %s, line %d: " fmt "\n",             \
-              __func__, __FILE__,  __LINE__,                    \
-              ## __VA_ARGS__ );                                 \
+#define xdebug(fmt, ...)                                           \
+  if ( ddebug ){                                                   \
+    fprintf ( stderr, "%s %s, %s, line %d: " fmt "\n",             \
+              debugString, __func__, __FILE__,  __LINE__,          \
+              __VA_ARGS__ );                                       \
   }
 #endif
 
@@ -71,7 +86,7 @@ void pcdiAssert   ( bool, const char *, const char *, int );
     MPI_Comm_rank ( MPI_COMM_WORLD, &rank );                    \
     fprintf ( stderr, "pe%d in %s, %s, line %d: " fmt "\n",     \
               rank,  __func__, __FILE__,  __LINE__,             \
-              ## __VA_ARGS__ );                                 \
+              __VA_ARGS__ );                                    \
   }
 
 #else
@@ -79,7 +94,7 @@ void pcdiAssert   ( bool, const char *, const char *, int );
   if ( ddebug == MAXDEBUG ){                                    \
     fprintf ( stderr, "%s, %s, line %d: " fmt "\n",             \
               __func__, __FILE__,  __LINE__,                    \
-              ## __VA_ARGS__ );                                 \
+              __VA_ARGS__ );                                 \
   }
 #endif
 /*
@@ -103,19 +118,20 @@ char * outTextComm ( MPI_Comm * );
     MPI_Comm_rank ( MPI_COMM_WORLD, &rank );				\
     fprintf ( stderr, "WARNING: pe%d in %s, %s, line %d: " fmt "\n",	\
               rank,  __func__, __FILE__,  __LINE__,			\
-              ## __VA_ARGS__ );						\
+              __VA_ARGS__ );						\
   }
 #else
 #define xwarning(fmt, ...)					\
   if ( ddebug ){                                                \
     fprintf ( stderr, "WARNING: %s, %s, line %d: " fmt "\n",    \
               __func__, __FILE__,  __LINE__,                    \
-              ## __VA_ARGS__ );                                 \
+              __VA_ARGS__ );                                 \
   }
 #endif
 
-void pcdiAbort ( char *, const char *, const char *, int );
-#define xabort(text) pcdiAbort ( text, __FILE__, __func__, __LINE__ );
+void pcdiAbort (const char *, const char *, int, const char *, ... )
+  __attribute__((noreturn));
+#define xabort(...) pcdiAbort(__FILE__, __func__, __LINE__, __VA_ARGS__ )
 
 void * pcdiXmalloc ( size_t, const char *, const char *, int );
 #define xmalloc(size) pcdiXmalloc ( size, __FILE__, __func__,  __LINE__ )
@@ -168,7 +184,7 @@ void printArray ( const char *, char *, const void *, int, int, const char *, co
       printArray ( debugString, ps, array, n, datatype,  __func__, __FILE__, __LINE__ )
 
 
-void reshArrayPrint ( char * );
+void reshListPrint ( char * );
 
 #endif
 /*

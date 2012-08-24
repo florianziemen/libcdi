@@ -112,7 +112,11 @@ am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	cdf_int.lo cdi_error.lo cdi_util.lo cdiFortran.lo \
 	cgribexlib.lo dmemory.lo error.lo extralib.lo file.lo \
 	gaussgrid.lo gribapi.lo grid.lo ieglib.lo institution.lo \
-	model.lo namespace.lo pio_util.lo servicelib.lo stream_cdf.lo \
+	model.lo namespace.lo pio.lo pio_comm.lo pio_dbuffer.lo \
+	pio_interface.lo pio_mpinonb.lo pio_record_send.lo \
+	pio_posixasynch.lo pio_posixfpguardsendrecv.lo \
+	pio_posixnonb.lo pio_list_set.lo pio_rpc.lo pio_server.lo \
+	pio_util.lo resource_handle.lo servicelib.lo stream_cdf.lo \
 	stream_cgribex.lo stream_ext.lo stream_grb.lo \
 	stream_gribapi.lo stream_history.lo stream_ieg.lo \
 	stream_int.lo stream_record.lo stream_srv.lo stream_var.lo \
@@ -366,10 +370,31 @@ libcdi_la_SOURCES = \
 	ieglib.c         \
 	institution.c  	 \
 	model.c        	 \
-        namespace.c      \
-        namespace.h      \
-        pio_util.c       \
-        pio_util.h       \
+	namespace.c      \
+	namespace.h      \
+	pio.c            \
+	pio.h            \
+	pio_c_temp.h     \
+	pio_comm.c       \
+	pio_comm.h       \
+	pio_dbuffer.c    \
+	pio_impl.h 	 \
+	pio_interface.c  \
+	pio_interface.h	 \
+	pio_mpinonb.c    \
+	pio_record_send.c\
+	pio_posixasynch.c\
+	pio_posixfpguardsendrecv.c \
+	pio_posixnonb.c  \
+	pio_list_set.c			\
+	pio_rpc.c        \
+	pio_rpc.h        \
+	pio_server.c     \
+	pio_server.h     \
+	pio_util.c       \
+	pio_util.h       \
+	resource_handle.c\
+	resource_handle.h\
 	service.h	 \
 	servicelib.c     \
 	stream_cdf.c     \
@@ -408,6 +433,7 @@ libcdi_la_SOURCES = \
 	vlist.h	         \
 	vlist_att.c 	 \
 	vlist_var.c 	 \
+	vlist_var.h	 \
 	zaxis.c		 \
         stream.c         \
         swap.c
@@ -535,7 +561,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/institution.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/model.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/namespace.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_comm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_dbuffer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_interface.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_list_set.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_mpinonb.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixasynch.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixfpguardsendrecv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixnonb.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_record_send.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_rpc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_server.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resource_handle.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/servicelib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cdf.Plo@am__quote@
