@@ -14,6 +14,12 @@
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
 #include "gribapi.h"
 
+/* begin deike */
+#ifdef USE_MPI
+#include "pio.h"
+#include "pio_comm.h"
+#endif
+/* end deike */
 
 
 int grib1ltypeToZaxisType(int grib_ltype)
@@ -106,17 +112,12 @@ int grbInqRecord(int streamID, int *varID, int *levelID)
 
 int grbDefRecord(int streamID)
 {
-  int fileID;
-  int gridID;
   int status = 0;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
-
-  fileID = streamInqFileID(streamID);
-  gridID = streamptr->record->gridID;
 
   return (status);
 }
@@ -578,7 +579,15 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   if ( streamptr->comptype == COMPRESS_SZIP )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
-  nwrite = fileWrite(fileID, gribbuffer, nbytes);
+  /* begin deike */
+#ifdef USE_MPI
+  if ( commInqIOMode () != PIO_NONE )
+    nwrite = pioFileWrite ( fileID, tsID, gribbuffer, nbytes );
+  else
+#endif
+  /* end deike */
+    nwrite = fileWrite(fileID, gribbuffer, nbytes);
+
   if ( nwrite != nbytes ) perror(__func__);
 
   if ( gribbuffer ) free(gribbuffer);
@@ -689,7 +698,6 @@ void streamInqGinfo(int streamID, int *intnum, float *fltnum)
   int recID, vrecID, tsID;
   int filetype;
   void *gribbuffer;
-  long recsize;
   long gribbuffersize;
   off_t recpos;
   int zip;
@@ -707,7 +715,6 @@ void streamInqGinfo(int streamID, int *intnum, float *fltnum)
       vrecID  = streamptr->tsteps[tsID].curRecID;
       recID   = streamptr->tsteps[tsID].recIDs[vrecID];
       recpos  = streamptr->tsteps[tsID].records[recID].position;
-      recsize = streamptr->tsteps[tsID].records[recID].size;
       zip     = streamptr->tsteps[tsID].records[recID].zip;
 
       gribbuffer = streamptr->record->buffer;
