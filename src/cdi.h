@@ -201,8 +201,30 @@ extern "C" {
 #define  CALENDAR_366DAYS         4
 #define  CALENDAR_NONE            5
 
+  /* parallel IO IOMode */
+  
+#define  PIO_NONE                 0
+#define  PIO_MPI                  1
+#define  PIO_WRITER               2
+#define  PIO_ASYNCH               3
+#define  PIO_FPGUARD              4
 
-/* CDI control routines */
+#define  PIO_MINIOMODE                  PIO_NONE
+#define  PIO_MAXIOMODE                  PIO_FPGUARD
+#define  PIO_MINIOMODEWITHSPECIALPROCS  PIO_WRITER  
+ 
+  /* parallel IO routines */
+
+void     pioEndDef             ( void );
+void     pioEndTimestepping    ( void );
+void     pioFinalize           ( void );
+int      pioInit               ( int, int, int, int, int * );
+int      pioInqVarDecoChunk    ( int, int );
+int      pioInqVarDecoOff      ( int, int );
+void     pioNamespaceSetActive ( int );
+void     pioWriteTimestep      ( int, int, int );
+
+  /* CDI control routines */
 
 char   *cdiStringError(int cdiErrno);
 
@@ -255,6 +277,7 @@ void    streamDefVlist(int streamID, int vlistID);
 
 /*      streamInqVlist: Get the Vlist of a stream */
 int     streamInqVlist(int streamID);
+int     streamInqVlistIDorig(int streamID);
 
 /*      streamInqFiletype: Get the filetype */
 int     streamInqFiletype(int streamID);
@@ -288,6 +311,7 @@ char   *streamFilesuffix(int filetype);
 int     streamNtsteps(int streamID);
 off_t   streamNvals(int streamID);
 
+int     streamInqNvars ( int streamID );
 
 /* STREAM var I/O routines */
 
