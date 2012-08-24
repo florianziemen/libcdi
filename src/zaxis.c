@@ -20,10 +20,6 @@
 #define  LevelDown  2
 
 
-#define  LevelUp    1
-#define  LevelDown  2
-
-
 static struct {
   unsigned char positive;
   char *name;
@@ -134,7 +130,6 @@ zaxis_t *zaxisNewEntry(void)
   return (zaxisptr);
 }
 
-
 static
 void zaxisInit (void)
 {
@@ -148,7 +143,6 @@ void zaxisInit (void)
   env = getenv("ZAXIS_DEBUG");
   if ( env ) ZAXIS_Debug = atoi(env);
 }
-
 
 static
 void zaxis_copy(zaxis_t *zaxisptr2, zaxis_t *zaxisptr1)
@@ -1581,7 +1575,6 @@ int zaxisGetMemberMask ( zaxis_t * zaxisP )
 
   return memberMask;
 }
-
 
 static
 int zaxisGetPackSize ( void * voidP, MPI_Comm comm )
