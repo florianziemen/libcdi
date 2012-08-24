@@ -60,7 +60,6 @@ void instituteDefaultValue ( institute_t * instituteptr )
   instituteptr->longname   = NULL;
 }
 
-
 static
 institute_t * instituteNewEntry ( void )
 {
@@ -75,53 +74,36 @@ institute_t * instituteNewEntry ( void )
   return  instituteptr;
 }
 
-
 static
 void instituteDefaultEntries ( void )
 {
   cdiResH resH[12];
   int i;
 
-  resH[0]  = ECMWF   = institutDef( 98,   0, "ECMWF",     
-			 "European Centre for Medium-Range Weather Forecasts");
-  resH[1]  = MPIMET  = institutDef( 98, 232, "MPIMET",    
-			 "Max-Planck-Institute for Meteorology");
-  resH[2]  = institutDef( 98, 255, "MPIMET",    
-			 "Max-Planck-Institute for Meteorology");
-  resH[3]  = institutDef( 98, 232, "MPIMET",    
-			 "Max-Planck Institute for Meteorology");
-  resH[4]  = institutDef( 78, 255, "DWD",       
-			 "Deutscher Wetterdienst");
-  resH[5]  = MCH     = institutDef(215, 255, "MCH",       
-			"MeteoSwiss");
-  resH[6]  = institutDef(  7,   0, "NCEP",      
-			  "National Centers for Environmental Prediction");
-  resH[7]  = institutDef(  7,   1, "NCEP",      
-			  "National Centers for Environmental Prediction");
-  resH[8]  = institutDef( 60,   0, "NCAR",      
-			 "National Center for Atmospheric Research");
-  resH[9]  = institutDef( 74,   0, "METOFFICE", 
-			 "U.K. Met Office");
-  resH[10] = institutDef( 97,   0, "ESA",       
-			 "European Space Agency ");
-  resH[11] = institutDef( 99,   0, "KNMI",      
-			 "Royal Netherlands Meteorological Institute");
-     /*     (void) institutDef(  0,   0, "IPSL",      
-	    "IPSL (Institut Pierre Simon Laplace, Paris, France)"); */
-  
+  resH[0]  = ECMWF   = institutDef( 98,   0, "ECMWF",     "European Centre for Medium-Range Weather Forecasts");
+  resH[1]  = MPIMET  = institutDef( 98, 232, "MPIMET",    "Max-Planck-Institute for Meteorology");
+  resH[2]  =           institutDef( 98, 255, "MPIMET",    "Max-Planck-Institute for Meteorology");
+  resH[3]  =           institutDef( 98, 232, "MPIMET",    "Max-Planck Institute for Meteorology");
+  resH[4]  =           institutDef( 78, 255, "DWD",       "Deutscher Wetterdienst");
+  resH[5]  = MCH     = institutDef(215, 255, "MCH",       "MeteoSwiss");
+  resH[6]  =           institutDef(  7,   0, "NCEP",      "National Centers for Environmental Prediction");
+  resH[7]  =           institutDef(  7,   1, "NCEP",      "National Centers for Environmental Prediction");
+  resH[8]  =           institutDef( 60,   0, "NCAR",      "National Center for Atmospheric Research");
+  resH[9]  =           institutDef( 74,   0, "METOFFICE", "U.K. Met Office");
+  resH[10] =           institutDef( 97,   0, "ESA",       "European Space Agency ");
+  resH[11] =           institutDef( 99,   0, "KNMI",      "Royal Netherlands Meteorological Institute");
+  /*     (void) institutDef(  0,   0, "IPSL", "IPSL (Institut Pierre Simon Laplace, Paris, France)"); */
+
   if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
     for ( i = 0; i < 12 ; i++ )
-      reshSetStatus ( resH[i], &instituteOps, SUSPENDED );  
+      reshSetStatus ( resH[i], &instituteOps, SUSPENDED );
 }
-
-
 
 static
 void instituteFinalize ( void )
 {
   free ( instituteInitializedNsp );
 }
- 
 
 static
 void instituteInit (void)
@@ -130,12 +112,12 @@ void instituteInit (void)
   int nsp, nspc;
 
   nspc = namespaceGetNumber ();
-  
+
   if ( !instituteInitialized )
     {
       instituteInitialized = 1;
       instituteInitializedNsp = xcalloc ( 1, nspc * sizeof ( int ));
-      atexit ( instituteFinalize ); 
+      atexit ( instituteFinalize );
     }
 
   nsp = namespaceGetActive ();
@@ -224,7 +206,7 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
   instResHs = xmalloc ( instCount * sizeof ( int ));
   reshGetResHListOfType ( instCount, instResHs, &instituteOps );
 
-  for( i = 0; i < instCount; i++ )
+  for ( i = 0; i < instCount; i++ )
     {
       instID = instResHs[i];
       ip2 = ( institute_t * ) reshGetVal ( instID, &instituteOps );
@@ -389,7 +371,6 @@ int instituteGetSizeP ( void * instituteptr, MPI_Comm comm )
   txsize += txinc;
   return txsize;
 }
-
 
 static
 void institutePackP ( void * instituteptr, void *buf, int size,
