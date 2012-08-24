@@ -1068,7 +1068,7 @@ int fileOpen(const char *filename, const char *mode)
   bfile_t *fileptr = NULL;
 
 #ifdef USE_MPI
-  if ( memcmp ( mode, "w", 1 ) == 0 && commInqIOMode () != PIO_NONE )
+  if ( mode[0] == 'w' && commInqIOMode () != PIO_NONE )
       return pioFileOpenW ( filename );
 #endif
 
@@ -1160,12 +1160,13 @@ int fileClose(int fileID)
   char *ftname[] = {"unknown", "open", "fopen"};
   bfile_t *fileptr;
 
+  fileptr = file_to_pointer(fileID);
+
 #ifdef USE_MPI
-  if ( commInqIOMode () != PIO_NONE )
+  if (((fileptr && fileptr->mode == 'w') || !fileptr)
+      && commInqIOMode () != PIO_NONE )
     return pioFileClose ( fileID );
 #endif
-
-  fileptr = file_to_pointer(fileID);
 
   if ( fileptr == NULL )
     {
