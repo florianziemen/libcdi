@@ -5,6 +5,11 @@
 #include "dmemory.h"
 #include "cdi.h"
 #include "stream_int.h"
+#include "resource_handle.h"
+#include "pio_util.h"
+#include "resource_handle.h"
+#include "pio_rpc.h"
+#include "namespace.h"
 
 #undef  UNDEFID
 #define UNDEFID  -1
@@ -16,280 +21,392 @@ int MCH    = UNDEFID;
 
 typedef struct
 {
-  int    used;  
-  int    center;  
+  int    self;
+  int    used;
+  int    center;
   int    subcenter;
   char  *name;
   char  *longname;
 }
-Institut;
-
-Institut *instituts;
-
-static int institutsSize = 0;
-static int institutsNum  = 0;
-static int InstitutsInit = 0;
+institute_t;
 
 
-void institutsDefault(void);
-void institutsInit(void);
+static int    instituteCompareP ( void * instituteptr1, void * instituteptr2 );
+static void   instituteDestroyP ( void * instituteptr );
+static void   institutePrintP   ( void * instituteptr, FILE * fp );
+#ifdef USE_MPI
+static int    instituteGetSizeP ( void * instituteptr, MPI_Comm comm );
+static void   institutePackP    ( void * instituteptr, void *buf, int size,
+                                  int *position, MPI_Comm comm );
+static int    instituteTxCode   ( void );
+#endif
 
+resOps instituteOps = { instituteCompareP, instituteDestroyP, institutePrintP
+#ifdef USE_MPI
+                        ,instituteGetSizeP, institutePackP, instituteTxCode
+#endif
+ };
 
-void institutsInitEntry(int instID)
+static int * instituteInitializedNsp;
+
+static
+void instituteDefaultValue ( institute_t * instituteptr )
 {
-  if ( instID < 0 || instID >= institutsSize )
-    Error("instID %d undefined!", instID);
+  instituteptr->self       = UNDEFID;
+  instituteptr->used       = 0;
+  instituteptr->center     = UNDEFID;
+  instituteptr->subcenter  = UNDEFID;
+  instituteptr->name       = NULL;
+  instituteptr->longname   = NULL;
+}
 
-  instituts[instID].used       = 0;
-  instituts[instID].center     = UNDEFID;
-  instituts[instID].subcenter  = UNDEFID;
-  instituts[instID].name       = NULL;
-  instituts[instID].longname   = NULL;
+static
+institute_t * instituteNewEntry ( void )
+{
+  institute_t *instituteptr;
+
+  instituteptr = ( institute_t * ) xmalloc ( sizeof ( institute_t ));
+
+  instituteDefaultValue ( instituteptr );
+  instituteptr->self = reshPut (( void * ) instituteptr, &instituteOps );
+  instituteptr->used = 1;
+
+  return  instituteptr;
+}
+
+static
+void instituteDefaultEntries ( void )
+{
+  cdiResH resH[12];
+  int i;
+
+  resH[0]  = ECMWF   = institutDef( 98,   0, "ECMWF",     "European Centre for Medium-Range Weather Forecasts");
+  resH[1]  = MPIMET  = institutDef( 98, 232, "MPIMET",    "Max-Planck-Institute for Meteorology");
+  resH[2]  =           institutDef( 98, 255, "MPIMET",    "Max-Planck-Institute for Meteorology");
+  resH[3]  =           institutDef( 98, 232, "MPIMET",    "Max-Planck Institute for Meteorology");
+  resH[4]  =           institutDef( 78, 255, "DWD",       "Deutscher Wetterdienst");
+  resH[5]  = MCH     = institutDef(215, 255, "MCH",       "MeteoSwiss");
+  resH[6]  =           institutDef(  7,   0, "NCEP",      "National Centers for Environmental Prediction");
+  resH[7]  =           institutDef(  7,   1, "NCEP",      "National Centers for Environmental Prediction");
+  resH[8]  =           institutDef( 60,   0, "NCAR",      "National Center for Atmospheric Research");
+  resH[9]  =           institutDef( 74,   0, "METOFFICE", "U.K. Met Office");
+  resH[10] =           institutDef( 97,   0, "ESA",       "European Space Agency ");
+  resH[11] =           institutDef( 99,   0, "KNMI",      "Royal Netherlands Meteorological Institute");
+  /*     (void) institutDef(  0,   0, "IPSL", "IPSL (Institut Pierre Simon Laplace, Paris, France)"); */
+
+  if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
+    for ( i = 0; i < 12 ; i++ )
+      reshSetStatus ( resH[i], &instituteOps, SUSPENDED );
+}
+
+static
+void instituteFinalize ( void )
+{
+  free ( instituteInitializedNsp );
+}
+
+static
+void instituteInit (void)
+{
+  static int instituteInitialized = 0;
+  int nsp, nspc;
+
+  nspc = namespaceGetNumber ();
+
+  if ( !instituteInitialized )
+    {
+      instituteInitialized = 1;
+      instituteInitializedNsp = xcalloc ( 1, nspc * sizeof ( int ));
+      atexit ( instituteFinalize );
+    }
+
+  nsp = namespaceGetActive ();
+  if ( instituteInitializedNsp[nsp] ) return;
+  instituteInitializedNsp[nsp] = 1;
+
+  instituteDefaultEntries();
 }
 
 
-int institutsNewEntry(void)
+int instituteCount ( void )
 {
-  int instID = 0;
+  return reshCountType ( &instituteOps );
+}
 
-  /*
-    Look for a free slot in instituts.
-    (Create the table the first time through).
-  */
-  if ( !institutsSize )
+
+int instituteCompareKernel ( institute_t *  ip1, institute_t * ip2 )
+{
+  int differ = 0;
+  size_t len;
+
+  if ( ip1->name )
     {
-      int i;
+      if ( ip1->center    > 0 && ip2->center    != ip1->center )    differ = 1;
+      if ( ip1->subcenter > 0 && ip2->subcenter != ip1->subcenter ) differ = 1;
 
-      institutsSize = 32;
-      instituts = (Institut *) malloc(institutsSize*sizeof(Institut));
-      if( instituts == NULL )
-	{
-          Message("institutsSize = %d", institutsSize);
-	  SysError("Allocation of Institut failed");
-	}
-
-      for( i = 0; i < institutsSize; i++ )
-	institutsInitEntry(i);
+      if ( !differ )
+        {
+          if ( ip2->name )
+            {
+              len = strlen(ip2->name);
+              if ( memcmp(ip2->name, ip1->name, len)) differ = 1;
+            }
+        }
+    }
+  else if ( ip1->longname )
+    {
+      if ( ip2->longname )
+        {
+          len = strlen(ip2->longname);
+          if ( memcmp(ip2->longname, ip1->longname, len)) differ = 1;
+        }
     }
   else
     {
-      while( instID < institutsSize )
-	{
-	  if ( instituts[instID].used == 0 ) break;
-	  instID++;
-	}
-    }
-  /*
-    If the table overflows, double its size.
-  */
-  if ( instID == institutsSize )
-    {
-      int i;
-
-      institutsSize = 2*institutsSize;
-      instituts = (Institut *) realloc(instituts, institutsSize*sizeof(Institut));
-      if( instituts == NULL )
-	{
-          Message("institutsSize = %d", institutsSize);
-	  SysError("Reallocation of Institut failed");
-	}
-
-      for( i = instID; i < institutsSize; i++ )
-	institutsInitEntry(i);
+      if ( !( ip2->center    == ip1->center &&
+              ip2->subcenter == ip1->subcenter )) differ = 1;
     }
 
-  instituts[instID].used = 1;
-  institutsNum++;
-
-  return (instID);
+  return differ;
 }
 
 
-void institutsInit(void)
+static int instituteCompareP ( void *  instituteptr1, void * instituteptr2 )
 {
-  InstitutsInit = 1;
+  institute_t * i1, * i2;
 
-  institutsDefault();
+  i1 = ( institute_t * ) instituteptr1;
+  i2 = ( institute_t * ) instituteptr2;
+
+  xassert(i1);
+  xassert(i2);
+
+  return instituteCompareKernel ( i1, i2 );
 }
 
 
 int institutInq(int center, int subcenter, const char *name, const char *longname)
 {
-  int instID;
-  size_t len;
-  int found;
+  int instID = UNDEFID, instCount, * instResHs, i;
+  institute_t * ip1;
+  institute_t * ip2;
 
-  if ( ! InstitutsInit ) institutsInit();
+  instituteInit ();
 
-  for( instID = 0; instID < institutsSize; instID++ )
+  ip1 = xmalloc ( sizeof ( institute_t ));
+
+  ip1->self       = UNDEFID;
+  ip1->used       = 0;
+  ip1->center     = center;
+  ip1->subcenter  = subcenter;
+  ip1->name       = ( char * ) name;
+  ip1->longname   = ( char * ) longname;
+
+  instCount = instituteCount ();
+  instResHs = xmalloc ( instCount * sizeof ( int ));
+  reshGetResHListOfType ( instCount, instResHs, &instituteOps );
+
+  for ( i = 0; i < instCount; i++ )
     {
-      if ( instituts[instID].used )
-	{
-	  if ( name )
-	    {
-	      found = 1;
-	      if ( center    > 0 && instituts[instID].center    != center )    found = 0;
-	      if ( subcenter > 0 && instituts[instID].subcenter != subcenter ) found = 0;
+      instID = instResHs[i];
+      ip2 = ( institute_t * ) reshGetVal ( instID, &instituteOps );
+      xassert ( ip2 );
 
-	      if ( found )
-		{
-		  if ( instituts[instID].name )
-		    {
-		      len = strlen(instituts[instID].name);
-		      if ( memcmp(instituts[instID].name, name, len) == 0 ) break;
-		    }
-		}
-	    }
-	  else if ( longname )
-	    {
-	      if ( instituts[instID].longname )
-		{
-		  len = strlen(instituts[instID].longname);
-		  if ( memcmp(instituts[instID].longname, longname, len) == 0 ) break;
-		}
-	    }
-	  else
-	    {
-	      if ( instituts[instID].center    == center &&
-		   instituts[instID].subcenter == subcenter ) break;
-	    }
-	}
+      if ( ip2->used && ! instituteCompareKernel ( ip1, ip2 ))
+        {
+          instID = ip2->self;
+          break;
+        }
     }
 
-  if ( instID == institutsSize ) instID = UNDEFID;
+  free ( instResHs );
+  free ( ip1 );
 
-  return (instID);
+  return  (instID);
 }
 
 
 int institutDef(int center, int subcenter, const char *name, const char *longname)
 {
-  int instID;
+  institute_t * instituteptr;
 
-  if ( ! InstitutsInit ) institutsInit();
-  /*
-  instID = institutInq(center, subcenter, name, longname);
+  instituteInit ();
 
-  if ( instID == UNDEFID )
-  */
-    {
-      instID = institutsNewEntry();
+  instituteptr = instituteNewEntry();
 
-      instituts[instID].center    = center;
-      instituts[instID].subcenter = subcenter;
+  instituteptr->center    = center;
+  instituteptr->subcenter = subcenter;
+  if ( name )     instituteptr->name     = strdupx(name);
+  if ( longname ) instituteptr->longname = strdupx(longname);
 
-      if ( name )     instituts[instID].name     = strdupx(name);
-      if ( longname ) instituts[instID].longname = strdupx(longname);
-    }
-
-  return (instID);
-}
-
-
-void institutionCheckID(const char *caller, int instID)
-{
-  if ( instID < 0 || instID >= institutsSize )
-    Errorc("instID %d undefined!", instID);
-
-  if ( ! instituts[instID].used )
-    Errorc("instID %d undefined!", instID);
+  return instituteptr->self;
 }
 
 
 int institutInqCenter(int instID)
 {
-  int center = UNDEFID;
+  institute_t * instituteptr;
 
-  if ( ! InstitutsInit ) institutsInit();
+  instituteInit ();
 
-  if ( instID != UNDEFID )
-    {
-      institutionCheckID(__func__, instID);
+  instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
-      center = instituts[instID].center;
-    }
-
-  return (center);
+  return  instituteptr ? instituteptr->center : UNDEFID;
 }
 
 
 int institutInqSubcenter(int instID)
 {
-  int subcenter = UNDEFID;
+  institute_t * instituteptr;
 
-  if ( ! InstitutsInit ) institutsInit();
+  instituteInit ();
 
-  if ( instID != UNDEFID )
-    {
-      institutionCheckID(__func__, instID);
+  instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
-      subcenter = instituts[instID].subcenter;
-    }
-
-  return (subcenter);
+  return instituteptr ? instituteptr->subcenter: UNDEFID;
 }
 
 
 char *institutInqNamePtr(int instID)
 {
-  char *name = NULL;
+  institute_t * instituteptr;
 
-  if ( ! InstitutsInit ) institutsInit();
+  instituteInit ();
 
-  if ( instID != UNDEFID )
-    {
-      institutionCheckID(__func__, instID);
+  instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
-      if ( instituts[instID].name )
-	name = instituts[instID].name;
-    }
-
-  return (name);
+  return instituteptr ? instituteptr->name : NULL;
 }
 
 
 char *institutInqLongnamePtr(int instID)
 {
-  char *name = NULL;
+  institute_t * instituteptr;
 
-  if ( ! InstitutsInit ) institutsInit();
+  instituteInit ();
 
-  if ( instID != UNDEFID )
-    {
-      institutionCheckID(__func__, instID);
+  instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
-      if ( instituts[instID].longname )
-	name = instituts[instID].longname;
-    }
-
-  return (name);
+  return instituteptr ? instituteptr->longname : NULL;
 }
 
 
 int institutInqNumber(void)
 {
-  if ( ! InstitutsInit ) institutsInit();
+  int i, instCount, * instResHs, instNum = 0;
+  institute_t * instituteptr;
 
-  return (institutsNum);
+  instituteInit ();
+
+  instCount = reshCountType ( &instituteOps );
+  instResHs = xmalloc ( instCount * sizeof ( int ));
+  reshGetResHListOfType ( instCount, instResHs, &instituteOps );
+
+  for ( i = 0; i < instCount; i++ )
+    {
+      instituteptr = ( institute_t * ) reshGetVal ( instResHs[i], &instituteOps );
+      if ( instituteptr && instituteptr->used )
+        instNum++;
+    }
+
+  if ( instResHs ) free ( instResHs );
+
+  return instNum;
 }
 
 
-void institutsDefault(void)
+void instituteDestroyP ( void * instituteptr )
 {
-  ECMWF   = institutDef( 98,   0, "ECMWF",     "European Centre for Medium-Range Weather Forecasts");
-  MPIMET  = institutDef( 98, 232, "MPIMET",    "Max-Planck-Institute for Meteorology");
-     (void) institutDef( 98, 255, "MPIMET",    "Max-Planck-Institute for Meteorology");
-     (void) institutDef( 98, 232, "MPIMET",    "Max-Planck Institute for Meteorology");
-  DWD     = institutDef( 78, 255, "DWD",       "Deutscher Wetterdienst");
-  MCH     = institutDef(215, 255, "MCH",       "MeteoSwiss");
-     (void) institutDef(  7,   0, "NCEP",      "National Centers for Environmental Prediction");
-     (void) institutDef(  7,   1, "NCEP",      "National Centers for Environmental Prediction");
-     (void) institutDef( 60,   0, "NCAR",      "National Center for Atmospheric Research");
-     (void) institutDef( 74,   0, "METOFFICE", "U.K. Met Office");
-     (void) institutDef( 97,   0, "ESA",       "European Space Agency ");
-     (void) institutDef( 99,   0, "KNMI",      "Royal Netherlands Meteorological Institute");
-     /*     (void) institutDef(  0,   0, "IPSL",      "IPSL (Institut Pierre Simon Laplace, Paris, France)"); */
+  int id;
+  institute_t * i1 = ( institute_t * ) instituteptr;
+
+  xassert ( i1 );
+
+  id = i1->self;
+
+  if ( instituteptr ) free ( instituteptr );
+
+  reshRemove ( id, &instituteOps );
 }
+
+
+void institutePrintP   ( void * instituteptr, FILE * fp )
+{
+  institute_t * ip = ( institute_t * ) instituteptr;
+
+  if ( !ip ) return;
+
+  fprintf ( fp, "#\n");
+  fprintf ( fp, "# instituteID %d\n", ip->self);
+  fprintf ( fp, "#\n");
+  fprintf ( fp, "self          = %d\n", ip->self );
+  fprintf ( fp, "used          = %d\n", ip->used );
+  fprintf ( fp, "center        = %d\n", ip->center );
+  fprintf ( fp, "subcenter     = %d\n", ip->subcenter );
+  fprintf ( fp, "name          = %s\n", ip->name ? ip->name : "NN" );
+  fprintf ( fp, "longname      = %s\n", ip->longname ? ip->longname : "NN" );
+}
+
+
+#ifdef USE_MPI
+static int
+instituteTxCode ( void )
+{
+  return INSTITUTE;
+}
+
+enum {
+  institute_nints = 5,
+};
+
+static
+int instituteGetSizeP ( void * instituteptr, MPI_Comm comm )
+{
+  institute_t *p = instituteptr;
+  int txsize = 0, txinc;
+  xmpi(MPI_Pack_size(institute_nints, MPI_INT, comm, &txsize));
+  xmpi(MPI_Pack_size(strlen(p->name) + 1, MPI_CHAR, comm, &txinc));
+  txsize += txinc;
+  xmpi(MPI_Pack_size(strlen(p->longname) + 1, MPI_CHAR, comm, &txinc));
+  txsize += txinc;
+  return txsize;
+}
+
+static
+void institutePackP ( void * instituteptr, void *buf, int size,
+                      int *position, MPI_Comm comm )
+{
+  institute_t *p = instituteptr;
+  int tempbuf[institute_nints];
+  tempbuf[0] = p->self;
+  tempbuf[1] = p->center;
+  tempbuf[2] = p->subcenter;
+  tempbuf[3] = (int)strlen(p->name) + 1;
+  tempbuf[4] = (int)strlen(p->longname) + 1;
+  xmpi(MPI_Pack(tempbuf, institute_nints, MPI_INT, buf, size, position, comm));
+  xmpi(MPI_Pack(p->name, tempbuf[3], MPI_CHAR, buf, size, position, comm));
+  xmpi(MPI_Pack(p->longname, tempbuf[4], MPI_CHAR, buf, size, position, comm));
+}
+
+int
+instituteUnpack(void *buf, int size, int *position, int nspTarget,
+                MPI_Comm comm)
+{
+  int tempbuf[institute_nints];
+  int instituteID;
+  char *name, *longname;
+  xmpi(MPI_Unpack(buf, size, position, tempbuf, institute_nints, MPI_INT, comm));
+  name = xmalloc(tempbuf[3]);
+  longname = xmalloc(tempbuf[4]);
+  xmpi(MPI_Unpack(buf, size, position, name, tempbuf[3], MPI_CHAR, comm));
+  xmpi(MPI_Unpack(buf, size, position, longname, tempbuf[4], MPI_CHAR, comm));
+  instituteID = institutDef(tempbuf[1], tempbuf[2], name, longname);
+  // FIXME: this should work, once all types are transferred
+  //xassert(instituteID == tempbuf[0]);
+  return instituteID;
+}
+
+#endif
 /*
  * Local Variables:
  * c-file-style: "Java"
