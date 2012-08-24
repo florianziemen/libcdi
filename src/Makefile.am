@@ -113,6 +113,7 @@ libcdi_la_SOURCES = 	 \
 	vlist.c 	 \
 	vlist.h	         \
 	vlist_att.c 	 \
+	vlist_att.h 	 \
 	vlist_var.c 	 \
 	vlist_var.h	 \
 	zaxis.c		 \

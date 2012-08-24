@@ -205,6 +205,7 @@ src/grid.h -text
 src/ieg.h -text
 src/ieglib.c -text
 src/institution.c -text
+src/institution.h -text
 src/lock.h -text
 src/make_cdilib -text
 src/make_fint.c -text
@@ -276,6 +277,7 @@ src/version.c -text
 src/vlist.c -text
 src/vlist.h -text
 src/vlist_att.c -text
+src/vlist_att.h -text
 src/vlist_var.c -text
 src/vlist_var.h -text
 src/zaxis.c -text
