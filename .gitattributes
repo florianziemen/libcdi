@@ -210,6 +210,7 @@ src/make_cdilib -text
 src/make_fint.c -text
 src/mo_cdi.f90 -text
 src/model.c -text
+src/model.h -text
 src/namespace.c -text
 src/namespace.h -text
 src/pio.c -text
