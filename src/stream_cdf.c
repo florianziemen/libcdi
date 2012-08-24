@@ -317,7 +317,8 @@ void cdfGetAttInt(int fileID, int ncvarid, char *attname, int attlen, int *attin
     }
 }
 
-static void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double *attdouble)
+static
+void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double *attdouble)
 {
   size_t nc_attlen;
   double *pdoubleatt;
@@ -660,7 +661,7 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 }
 #endif
 
-#if  defined(HAVE_LIBNETCDF) && defined(HAVE_NETCDF4) && defined(NC_SZIP_NN_OPTION_MASK)
+#if  defined(HAVE_LIBNETCDF) && defined(NC_SZIP_NN_OPTION_MASK)
 static
 void cdfDefVarSzip(int ncid, int ncvarid)
 {
@@ -3116,7 +3117,6 @@ void scale_add(long size, double *data, double addoffset, double scalefactor)
 }
 #endif
 
-
 void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -3246,7 +3246,7 @@ void cdfReadVarDP(int streamID, int varID, double *data, int *nmiss)
 #endif
 }
 
-#ifdef HAVE_LIBNETCDF
+#if defined(HAVE_LIBNETCDF)
 static
 int cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, long nvals, size_t xsize, size_t ysize, int swapxy, size_t *start, size_t *count, int memtype, const void *data, int nmiss)
 {
@@ -3424,6 +3424,7 @@ int cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtyp
   if ( sdata_dp ) free(sdata_dp);
   if ( mdata_sp ) free(mdata_sp);
   if ( sdata_sp ) free(sdata_sp);
+
   return (0);
 }
 #endif
@@ -3745,7 +3746,7 @@ int cdf_write_var_slice(int streamID, int varID, int levelID, int memtype, const
   int xid = UNDEFID, yid = UNDEFID, zid = UNDEFID;
   int ncvarid;
   int ntsteps;
-  int nvals;
+  long nvals;
   size_t xsize = 0, ysize = 0;
   size_t start[4];
   size_t count[4];
@@ -4110,7 +4111,6 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
     }
 }
 
-
 static
 int isLonAxis(const char *units, const char *stdname)
 {
@@ -4134,7 +4134,6 @@ int isLonAxis(const char *units, const char *stdname)
   return (status);
 }
 
-
 static
 int isLatAxis(const char *units, const char *stdname)
 {
@@ -4157,7 +4156,6 @@ int isLatAxis(const char *units, const char *stdname)
 
   return (status);
 }
-
 
 static
 int isDBLAxis(const char *units, const char *longname)
@@ -4213,7 +4211,6 @@ int isHeightAxis(const char *stdname, const char *longname)
   return (status);
 }
 
-
 static
 int unitsIsPressure(const char *units)
 {
@@ -4230,7 +4227,6 @@ int unitsIsPressure(const char *units)
 
   return (status);
 }
-
 
 static
 int isGaussGrid(long ysize, double yinc, double *yvals)
@@ -4270,7 +4266,6 @@ int isGaussGrid(long ysize, double yinc, double *yvals)
   return (lgauss);
 }
 
-
 static
 void cdfSetVar(ncvar_t *ncvars, int ncvarid, int isvar)
 {
@@ -4290,7 +4285,6 @@ void cdfSetVar(ncvar_t *ncvars, int ncvarid, int isvar)
 
   ncvars[ncvarid].isvar = isvar;
 }
-
 
 static
 void cdfSetDim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
@@ -4900,7 +4894,7 @@ void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 	      if      ( ncvars[ncvarid].dimtype[i] == X_AXIS ) lxdim = TRUE;
 	      else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS ) lydim = TRUE;
 	      else if ( ncvars[ncvarid].dimtype[i] == Z_AXIS ) lzdim = TRUE;
-	      else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) /* ltdim = TRUE */;
+              /* else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = TRUE; */
 	    }
 
 	  for ( i = ndims-1; i >= 0; i-- )
@@ -5023,9 +5017,7 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 	}
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 /* verify coordinate vars - second scan (all other variables) */
 static
 void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
@@ -5099,9 +5091,7 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 	}
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
 {
@@ -5122,9 +5112,7 @@ void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
     }
 
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 /* define all input grids */
 static
 void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid)
@@ -5723,9 +5711,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 	}
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 /* define all input zaxes */
 static
 void define_all_zaxes(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
@@ -5875,10 +5861,7 @@ void define_all_zaxes(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 	}
     }
 }
-#endif
 
-
-#if  defined  (HAVE_LIBNETCDF)
 /* define all input data variables */
 static
 void define_all_vars(int fileID, int streamID, int vlistID, int instID, int modelID, int *varids, ncdim_t *ncdims, int nvars, ncvar_t *ncvars)
@@ -7039,10 +7022,8 @@ void cdfDefVars(int streamID)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int index, gridID, zaxisID, vlistID;
-  int /* nvars,  */ngrids, nzaxis;
-  /*
-  int  ncvarid;
-  */
+  int ngrids, nzaxis;
+  /* int  nvars, ncvarid; */
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
