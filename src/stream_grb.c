@@ -1,4 +1,4 @@
-#ifdef HAVE_CONFIG_H
+#if defined (HAVE_CONFIG_H)
 #  include "config.h"
 #endif
 
@@ -19,9 +19,7 @@
 #include "pio.h"
 #include "pio_comm.h"
 #endif
-
 /* end deike */
-
 
 
 int grib1ltypeToZaxisType(int grib_ltype)
@@ -530,6 +528,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   stream_check_ptr(__func__, streamptr);
 
   filetype  = streamptr->filetype;
+
   fileID    = streamInqFileID(streamID);
   vlistID   = streamInqVlist(streamID);
   gridID    = vlistInqVarGrid(vlistID, varID);
@@ -541,6 +540,7 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   time      = streamptr->tsteps[tsID].taxis.vtime;
   if ( vlistInqVarTimave(vlistID, varID) )
     numavg = streamptr->tsteps[tsID].taxis.numavg;
+
   if ( CDI_Debug )
     Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
@@ -580,19 +580,16 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
   /* begin deike */
-
 #ifdef USE_MPI
   if ( commInqIOMode () != PIO_NONE )
     nwrite = pioFileWrite ( fileID, tsID, gribbuffer, nbytes );
   else
-      nwrite = fileWrite(fileID, gribbuffer, nbytes); 
-#else
-  nwrite = fileWrite(fileID, gribbuffer, nbytes); 
 #endif
-
   /* end deike */
+    nwrite = fileWrite(fileID, gribbuffer, nbytes);
 
   if ( nwrite != nbytes ) perror(__func__);
+
   if ( gribbuffer ) free(gribbuffer);
 
   return ((int)nwrite);
