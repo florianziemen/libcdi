@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.5.6
+! Fortran interface for CDI library version 1.5.7
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   July 2012
+! Uwe Schulzweida, MPI-MET, Hamburg,   August 2012
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -336,9 +336,53 @@
       PARAMETER (CALENDAR_366DAYS       =  4)
       INTEGER    CALENDAR_NONE         
       PARAMETER (CALENDAR_NONE          =  5)
-!
-!  CDI control routines
-!
+      INTEGER    PIO_NONE              
+      PARAMETER (PIO_NONE               =  0)
+      INTEGER    PIO_MPI               
+      PARAMETER (PIO_MPI                =  1)
+      INTEGER    PIO_WRITER            
+      PARAMETER (PIO_WRITER             =  2)
+      INTEGER    PIO_ASYNCH            
+      PARAMETER (PIO_ASYNCH             =  3)
+      INTEGER    PIO_FPGUARD           
+      PARAMETER (PIO_FPGUARD            =  4)
+!                     pioEndDef
+      EXTERNAL        pioEndDef
+
+!                     pioEndTimestepping
+      EXTERNAL        pioEndTimestepping
+
+!                     pioFinalize
+      EXTERNAL        pioFinalize
+
+      INTEGER         pioInit
+!                                    (INTEGER         ,
+!                                     INTEGER         ,
+!                                     INTEGER         ,
+!                                     INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        pioInit
+
+      INTEGER         pioInqVarDecoChunk
+!                                    (INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        pioInqVarDecoChunk
+
+      INTEGER         pioInqVarDecoOff
+!                                    (INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        pioInqVarDecoOff
+
+!                     pioNamespaceSetActive
+!                                    (INTEGER         )
+      EXTERNAL        pioNamespaceSetActive
+
+!                     pioWriteTimestep
+!                                    (INTEGER         ,
+!                                     INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        pioWriteTimestep
+
       CHARACTER*80    cdiStringError
 !                                    (INTEGER         cdiErrno)
       EXTERNAL        cdiStringError
@@ -449,6 +493,10 @@
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqVlist
 
+      INTEGER         streamInqVlistIDorig
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamInqVlistIDorig
+
       INTEGER         streamInqFiletype
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqFiletype
@@ -501,6 +549,10 @@
       INTEGER         streamNtsteps
 !                                    (INTEGER         streamID)
       EXTERNAL        streamNtsteps
+
+      INTEGER         streamInqNvars
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamInqNvars
 
 !
 !  STREAM var I/O routines

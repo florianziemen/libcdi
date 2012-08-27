@@ -53,9 +53,14 @@
 
 /*  CALENDAR types  */
 
-
-/*  CDI control routines  */
-
+FCALLSCSUB0 (pioEndDef, PIOENDDEF, pioenddef)
+FCALLSCSUB0 (pioEndTimestepping, PIOENDTIMESTEPPING, pioendtimestepping)
+FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
+FCALLSCFUN5 (INT, pioInit, PIOINIT, pioinit, INT, INT, INT, INT, PINT)
+FCALLSCFUN2 (INT, pioInqVarDecoChunk, PIOINQVARDECOCHUNK, pioinqvardecochunk, INT, INT)
+FCALLSCFUN2 (INT, pioInqVarDecoOff, PIOINQVARDECOOFF, pioinqvardecooff, INT, INT)
+FCALLSCSUB1 (pioNamespaceSetActive, PIONAMESPACESETACTIVE, pionamespacesetactive, INT)
+FCALLSCSUB3 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep, INT, INT, INT)
 FCALLSCFUN1 (STRING, cdiStringError, CDISTRINGERROR, cdistringerror, INT)
 FCALLSCSUB1 (cdiDebug, CDIDEBUG, cdidebug, INT)
 FCALLSCFUN0 (STRING, cdiLibraryVersion, CDILIBRARYVERSION, cdilibraryversion)
@@ -86,6 +91,7 @@ FCALLSCSUB1 (streamClose, STREAMCLOSE, streamclose, INT)
 FCALLSCSUB1 (streamSync, STREAMSYNC, streamsync, INT)
 FCALLSCSUB2 (streamDefVlist, STREAMDEFVLIST, streamdefvlist, INT, INT)
 FCALLSCFUN1 (INT, streamInqVlist, STREAMINQVLIST, streaminqvlist, INT)
+FCALLSCFUN1 (INT, streamInqVlistIDorig, STREAMINQVLISTIDORIG, streaminqvlistidorig, INT)
 FCALLSCFUN1 (INT, streamInqFiletype, STREAMINQFILETYPE, streaminqfiletype, INT)
 FCALLSCSUB2 (streamDefByteorder, STREAMDEFBYTEORDER, streamdefbyteorder, INT, INT)
 FCALLSCFUN1 (INT, streamInqByteorder, STREAMINQBYTEORDER, streaminqbyteorder, INT)
@@ -98,6 +104,7 @@ FCALLSCFUN2 (INT, streamInqTimestep, STREAMINQTIMESTEP, streaminqtimestep, INT, 
 FCALLSCFUN1 (STRING, streamFilename, STREAMFILENAME, streamfilename, INT)
 FCALLSCFUN1 (STRING, streamFilesuffix, STREAMFILESUFFIX, streamfilesuffix, INT)
 FCALLSCFUN1 (INT, streamNtsteps, STREAMNTSTEPS, streamntsteps, INT)
+FCALLSCFUN1 (INT, streamInqNvars, STREAMINQNVARS, streaminqnvars, INT)
 
 /*  STREAM var I/O routines  */
 
