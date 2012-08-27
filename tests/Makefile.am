@@ -1,9 +1,9 @@
 ## Process this file with automake to produce Makefile.in
 #
 TESTS = test_grib.sh test_cksum_grib test_cksum_nc test_cksum_extra \
-	test_cksum_service test_cksum_nc2 test_cksum_nc4 test_cksum_ieg \
-	pio_write_run pio_cksum_mpinonb pio_cksum_fpguard \
-	pio_cksum_asynch pio_cksum_writer
+	test_cksum_service test_cksum_nc2 test_cksum_nc4 test_cksum_ieg
+#	pio_write_run pio_cksum_mpinonb pio_cksum_fpguard \
+#	pio_cksum_asynch pio_cksum_writer
 check_PROGRAMS = test_grib cksum_write cksum_read pio_write
 #
 test_grib_SOURCES = test_grib.c
