@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 #
-SUBDIRS = src interfaces app examples tests
+SUBDIRS = src interfaces app examples examples/pio tests
 #
 EXTRA_DIST=config/default \
 	doc/cdi_cman.pdf \
