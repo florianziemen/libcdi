@@ -89,7 +89,8 @@ void cdiDebug(int level)
 #define IsBigendian()  ( u_byteorder.c[sizeof(long) - 1] )
 
 
-static int getByteorder(int byteswap)
+static
+int getByteorder(int byteswap)
 {
   static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
   int byteorder = -1;
@@ -109,7 +110,8 @@ static int getByteorder(int byteswap)
 }
 
 
-static int getFiletype(const char *filename, int *byteorder)
+static
+int getFiletype(const char *filename, int *byteorder)
 {
   int filetype = CDI_EUFTYPE;
   int fileID;
