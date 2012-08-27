@@ -20,4 +20,4 @@ INCLUDES   = -I$(top_srcdir)/src
 #
 EXTRA_DIST = $(TESTS)
 #
-CLEANFILES  = `ls *~ *.grb *.nc *.srv *.ext`
+CLEANFILES  = `ls *~ *.grb *.nc *.srv *.ext example_*.cksum`
