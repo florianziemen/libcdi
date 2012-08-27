@@ -45,7 +45,7 @@ static int listInit = 0;
   if ( !listInit )                                              \
     {                                                           \
       listInitialize();                                         \
-      listInit = 1                                              \
+      listInit = 1;                                             \
     }                                                           \
   } while(0)
 
