@@ -36,7 +36,7 @@
 #define MINFILETYPE        1
 #define MAXFILETYPE        9
 
-#define ddebug             1
+#define ddebug             0
 
 #define debugString "#####"
 

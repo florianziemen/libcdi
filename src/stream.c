@@ -21,8 +21,20 @@
 #include "extra.h"
 #include "ieg.h"
 #include "vlist.h"
+#include "resource_handle.h"
+#include "pio_util.h"
+
+#include "namespace.h"
+#include "pio_interface.h"
+#include "pio_rpc.h"
+#include "pio_comm.h"
+
+#include <string.h>
 
 #define  MAX_FNAMES  3
+
+extern resOps streamOps;
+
 
 FILE *popen(const char *command, const char *type);
 int pclose(FILE *stream);
@@ -390,16 +402,21 @@ with the file format type @func{FILETYPE_SRV}, @func{FILETYPE_EXT} or @func{FILE
 */
 void streamDefByteorder(int streamID, int byteorder)
 {
-  int filetype, fileID;
+  int filetype;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
 
+  if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
+
   streamptr->byteorder = byteorder;
   filetype = streamptr->filetype;
-  fileID   = streamptr->fileID;
 
   switch (filetype)
     {
@@ -591,84 +608,113 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
   int status;
   Record *record = NULL;
   stream_t *streamptr = NULL;
+  int hasLocalFile = namespaceHasLocalFile ( namespaceGetActive ());
 
   if ( CDI_Debug )
     Message("Open %s mode %c file %s", strfiletype(filetype), (int) *filemode, filename);
 
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
 
-  switch (filetype)
+  xdebug("START, filename = %s, filemode = %s, filetype = %d, "
+         "namespaceHasLocalFile(%d)=%s",
+         filename, filemode, filetype, namespaceGetActive(),
+	 namespaceHasLocalFile ( namespaceGetActive ()) ? "true":"false");
+
+  if ( hasLocalFile )
     {
+      switch (filetype)
+	{
 #if  defined  (HAVE_LIBGRIB)
-    case FILETYPE_GRB:
-    case FILETYPE_GRB2:
-      {
-        fileID = gribOpen(filename, filemode);
-        if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-	record = (Record *) malloc(sizeof(Record));
-	record->buffer = NULL;
-	break;
-      }
+	case FILETYPE_GRB:
+	case FILETYPE_GRB2:
+	  {
+	    fileID = gribOpen(filename, filemode);
+            if ( fileID < 0 ) fileID = CDI_ESYSTEM;
+            xdebug("%s OPENED, fileID=%d", filename, fileID);
+	    record = (Record *) malloc(sizeof(Record));
+	    record->buffer = NULL;
+	    break;
+	  }
 #endif
 #if  defined  (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:
-      {
-        fileID = fileOpen(filename, filemode);
-        if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-	record = (Record *) malloc(sizeof(Record));
-	record->buffer = NULL;
-	record->srvp   = srvNew();
-	break;
-      }
+	case FILETYPE_SRV:
+	  {
+	    fileID = fileOpen(filename, filemode);
+            if ( fileID < 0 ) fileID = CDI_ESYSTEM;
+	    record = (Record *) malloc(sizeof(Record));
+	    record->buffer = NULL;
+	    record->srvp   = srvNew();
+	    break;
+	  }
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:
-      {
-        fileID = fileOpen(filename, filemode);
-        if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-	record = (Record *) malloc(sizeof(Record));
-	record->buffer = NULL;
-	record->extp   = extNew();
-	break;
-      }
+	case FILETYPE_EXT:
+	  {
+	    fileID = fileOpen(filename, filemode);
+            if ( fileID < 0 ) fileID = CDI_ESYSTEM;
+	    record = (Record *) malloc(sizeof(Record));
+	    record->buffer = NULL;
+	    record->extp   = extNew();
+	    break;
+	  }
 #endif
 #if  defined  (HAVE_LIBIEG)
-    case FILETYPE_IEG:
-      {
-        fileID = fileOpen(filename, filemode);
-        if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-	record = (Record *) malloc(sizeof(Record));
-	record->buffer = NULL;
-	record->iegp   = iegNew();
-	break;
-      }
+	case FILETYPE_IEG:
+	  {
+	    fileID = fileOpen(filename, filemode);
+            if ( fileID < 0 ) fileID = CDI_ESYSTEM;
+	    record = (Record *) malloc(sizeof(Record));
+	    record->buffer = NULL;
+	    record->iegp   = iegNew();
+	    break;
+	  }
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-      {
-	fileID = cdfOpen(filename, filemode);
-	break;
-      }
-    case FILETYPE_NC2:
-      {
-	fileID = cdfOpen64(filename, filemode);
-	break;
-      }
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
-      {
-	fileID = cdf4Open(filename, filemode, &filetype);
-	break;
-      }
- #endif
-    default:
-      {
-	if ( CDI_Debug ) Message("%s support not compiled in!", strfiletype(filetype));
-	return (CDI_ELIBNAVAIL);
-      }
+	case FILETYPE_NC:
+	  {
+	    fileID = cdfOpen(filename, filemode);
+	    break;
+	  }
+	case FILETYPE_NC2:
+	  {
+	    fileID = cdfOpen64(filename, filemode);
+	    break;
+	  }
+	case FILETYPE_NC4:
+	case FILETYPE_NC4C:
+	  {
+	    fileID = cdf4Open(filename, filemode, &filetype);
+	    break;
+	  }
+#endif
+	default:
+	  {
+	    if ( CDI_Debug ) Message("%s support not compiled in!", strfiletype(filetype));
+	    return (CDI_ELIBNAVAIL);
+	  }
+	}
     }
+#ifdef USE_MPI
+  else if ( tolower ( * filemode ) == 'w' )
+    {
+      statusCode nspStatus = namespaceInqResStatus ();
+      switch ( nspStatus )
+        {
+        case STAGE_DEFINITION:
+          break;
+        case STAGE_TIMELOOP:
+          pioBufferFuncCall(STREAMOPEN, 2, filename, filetype);
+          break;
+        case STAGE_CLEANUP:
+          xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
+        break;
+        default:
+          xabort ( "INTERNAL ERROR" );
+        }
+    }
+#endif
 
-  if ( fileID < 0 )
+  if ( fileID < 0 && hasLocalFile )
     {
       streamID = fileID;
     }
@@ -809,7 +855,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
       vlistptr = vlist_to_pointer(streamptr->vlistID);
       vlistptr->ntsteps = cdiInqTimeSize(streamID);
     }
- 
+
   switch (filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
@@ -980,7 +1026,7 @@ int streamOpenRead(const char *filenames)
     filename = filenames;
   else
     {
-      int i; 
+      int i;
       for ( i = 0; i < num_fnames; ++i ) printf("fnames: %d %s\n", i, fnames[i]);
       filename = fnames[0];
     }
@@ -1060,7 +1106,7 @@ open stream. Otherwise, a negative number with the error status is returned.
 @EndList
 
 @Example
-Here is an example using @func{streamOpenWrite} to create a new netCDF file 
+Here is an example using @func{streamOpenWrite} to create a new netCDF file
 named @func{foo.nc} for writing:
 
 @Source
@@ -1113,68 +1159,89 @@ void streamClose(int streamID)
   filetype = streamptr->filetype;
   vlistID  = streamptr->vlistID;
 
-  if ( fileID == CDI_UNDEFID )
-    Warning("File %s not open!", streamptr->filename);
-  else
-    switch (filetype)
-      {
+  if ( namespaceHasLocalFile ( namespaceGetActive ()))
+    {
+      if ( fileID == CDI_UNDEFID )
+        Warning("File %s not open!", streamptr->filename);
+      else
+	switch (filetype)
+	  {
 #if  defined  (HAVE_LIBGRIB)
-      case FILETYPE_GRB:
-      case FILETYPE_GRB2:
-	{
-	  gribClose(fileID);
-	  gribContainersDelete(streamID);
-	  break;
-	}
+	  case FILETYPE_GRB:
+	  case FILETYPE_GRB2:
+	    {
+	      gribClose(fileID);
+	      gribContainersDelete(streamID);
+	      break;
+	    }
 #endif
 #if  defined  (HAVE_LIBSERVICE)
-      case FILETYPE_SRV:
-	{
-	  fileClose(fileID);
-	  srvDelete(streamptr->record->srvp);
-	  break;
-	}
+	  case FILETYPE_SRV:
+	    {
+	      fileClose(fileID);
+	      srvDelete(streamptr->record->srvp);
+	      break;
+	    }
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-      case FILETYPE_EXT:
-	{
-	  fileClose(fileID);
-	  extDelete(streamptr->record->extp);
-	  break;
-	}
+	  case FILETYPE_EXT:
+	    {
+	      fileClose(fileID);
+	      extDelete(streamptr->record->extp);
+	      break;
+	    }
 #endif
 #if  defined  (HAVE_LIBIEG)
-      case FILETYPE_IEG:
-	{
-	  fileClose(fileID);
-	  iegDelete(streamptr->record->iegp);
-	  break;
-	}
+	  case FILETYPE_IEG:
+	    {
+	      fileClose(fileID);
+	      iegDelete(streamptr->record->iegp);
+	      break;
+	    }
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-      case FILETYPE_NC:
-      case FILETYPE_NC2:
-      case FILETYPE_NC4:
-      case FILETYPE_NC4C:
-	{
-	  cdfClose(fileID);
-	  break;
-	}
+	  case FILETYPE_NC:
+	  case FILETYPE_NC2:
+	  case FILETYPE_NC4:
+	  case FILETYPE_NC4C:
+	    {
+	      cdfClose(fileID);
+	      break;
+	    }
 #endif
-      default:
-	{
-	  Error("%s support not compiled in!", strfiletype(filetype));
-	  break;
-	}
-      }
+	  default:
+	    {
+	      Error("%s support not compiled in!", strfiletype(filetype));
+	      break;
+	    }
+	  }
+    }
+#ifdef USE_MPI
+  else
+    {
+      statusCode nspStatus = namespaceInqResStatus ();
+      switch ( nspStatus )
+        {
+        case STAGE_DEFINITION:
+          break;
+        case STAGE_TIMELOOP:
+          pioBufferFuncCall(STREAMCLOSE, 1, streamID);
+          break;
+        case STAGE_CLEANUP:
+        break;
+        default:
+          xabort ( "INTERNAL ERROR" );
+        }
+    }
+#endif
 
   if ( streamptr->record )
-    {
-      if ( streamptr->record->buffer )
-	free(streamptr->record->buffer);
+      {
+	  if ( streamptr->record->buffer )
+              free(streamptr->record->buffer);
 
-      free(streamptr->record);
-    }  
+	  free(streamptr->record);
+      }
 
   streamptr->filetype = 0;
   if ( streamptr->filename ) free(streamptr->filename);
@@ -1195,7 +1262,7 @@ void streamClose(int streamID)
       if ( streamptr->tsteps[index].recIDs )
 	free(streamptr->tsteps[index].recIDs);
     }
-    
+
   if ( streamptr->tsteps ) free(streamptr->tsteps);
 
   if ( streamptr->nfiles > 0 )
@@ -1240,6 +1307,8 @@ void streamSync(int streamID)
   int vlistID;
   int nvars;
   stream_t *streamptr;
+
+  if ( !namespaceHasLocalFile ( namespaceGetActive ())) return;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1334,11 +1403,12 @@ int streamDefTimestep(int streamID, int tsID)
 
   streamptr->ntsteps = tsID + 1;
 
-  if ( (streamptr->filetype == FILETYPE_NC  ||
-	streamptr->filetype == FILETYPE_NC2 ||
-	streamptr->filetype == FILETYPE_NC4 ||
-	streamptr->filetype == FILETYPE_NC4C)
-       && vlistHasTime(vlistID) )
+  if (namespaceHasLocalFile(namespaceGetActive())
+      && (streamptr->filetype == FILETYPE_NC  ||
+          streamptr->filetype == FILETYPE_NC2 ||
+          streamptr->filetype == FILETYPE_NC4 ||
+          streamptr->filetype == FILETYPE_NC4C)
+      && vlistHasTime(vlistID))
     cdfDefTimestep(streamID, tsID);
 
   cdiCreateRecords(streamID, tsID);
@@ -1551,6 +1621,29 @@ void stream_write_var(int streamID, int varID, int memtype, const void *data, in
 
   check_parg(data);
 
+  /* begin deike */
+#ifdef USE_MPI
+  if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
+    {
+      statusCode nspStatus = namespaceInqResStatus ();
+      switch ( nspStatus )
+        {
+        case STAGE_DEFINITION:
+          xabort ( "DEFINITION STAGE: PARALLEL WRITING NOT POSSIBLE." );
+          break;
+        case STAGE_TIMELOOP:
+          pioBufferData ( streamID, varID, data, nmiss );
+          return;
+        case STAGE_CLEANUP:
+          xabort ( "CLEANUP STAGE: PARALLEL WRITING NOT POSSIBLE." );
+          break;
+        default:
+          xabort ( "INTERNAL ERROR" );
+        }
+    }
+#endif
+  /* end deike */
+
   streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
@@ -1677,7 +1770,6 @@ from an open dataset.
 void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
 {
   int filetype;
-  int ierr = 0;
   stream_t *streamptr;
 
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamID, varID);
@@ -1730,7 +1822,8 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-        ierr = cdfReadVarSliceDP(streamID, varID, levelID, data, nmiss);
+        /* FIXME: status value ignored */
+        int ierr = cdfReadVarSliceDP(streamID, varID, levelID, data, nmiss);
 	break;
       }
 #endif
@@ -1746,7 +1839,6 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
 void stream_write_var_slice(int streamID, int varID, int levelID, int memtype, const void *data, int nmiss)
 {
   int filetype;
-  int ierr = 0;
   stream_t *streamptr;
 
   if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
@@ -1800,6 +1892,7 @@ void stream_write_var_slice(int streamID, int varID, int levelID, int memtype, c
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
+        int ierr = 0;
 	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
         ierr = cdf_write_var_slice(streamID, varID, levelID, memtype, data, nmiss);
 	break;
@@ -1866,7 +1959,7 @@ void streamWriteContents(int streamID, char *cname)
   long recsize;
   int nrecs, nvars;
   int code, gridID, zaxisID, tsteptype, datatype;
-  int ngrids, nzaxis;
+  int ngrids;
   int filetype, gridtype;
   int xsize, ysize;
   int date, time;
@@ -1904,7 +1997,6 @@ void streamWriteContents(int streamID, char *cname)
       ysize    = gridInqYsize(gridID);
       fprintf(cnp, "%4d:%4d:%4d:%4d\n", i+1, gridtype, xsize, ysize);
     }
-  nzaxis = vlistNzaxis(vlistID);
 
   fprintf(cnp, "#\n");
 
@@ -2059,10 +2151,31 @@ void streamDefVlist(int streamID, int vlistID)
   streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
+#ifdef USE_MPI
+  if (!namespaceHasLocalFile(namespaceGetActive()))
+  {
+    statusCode nspStatus = namespaceInqResStatus ();
+    switch ( nspStatus )
+      {
+      case STAGE_DEFINITION:
+        break;
+      case STAGE_TIMELOOP:
+        pioBufferFuncCall(STREAMDEFVLIST, 2, streamID, vlistID);
+        break;
+      case STAGE_CLEANUP:
+        xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
+        break;
+      default:
+        xabort ( "INTERNAL ERROR" );
+      }
+  }
+
+#endif
 
   if ( streamptr->vlistID == CDI_UNDEFID )
     {
       streamptr->vlistID = vlistDuplicate(vlistID);
+      streamptr->vlistIDorig = vlistID ;
 
       nvars = vlistNvars(vlistID);
       for ( varID = 0; varID < nvars; varID++ )
@@ -2071,10 +2184,12 @@ void streamDefVlist(int streamID, int vlistID)
 	  zaxisID = vlistInqVarZaxis(vlistID, varID);
 	  streamNewVar(streamID, gridID, zaxisID);
 	  if ( streamptr->have_missval )
-	    vlistDefVarMissval(streamptr->vlistID, varID, vlistInqVarMissval(vlistID, varID));
+	    vlistDefVarMissval(streamptr->vlistID, varID, 
+                               vlistInqVarMissval(vlistID, varID));
 	}
 
-      if ( streamptr->filemode == 'w' )
+      if (namespaceHasLocalFile(namespaceGetActive())
+          && streamptr->filemode == 'w' )
 	{
 	  if ( streamptr->filetype == FILETYPE_NC  ||
 	       streamptr->filetype == FILETYPE_NC2 ||
@@ -2124,9 +2239,27 @@ int streamInqVlist(int streamID)
 }
 
 
+int streamInqVlistIDorig(int streamID)
+{
+  stream_t *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(__func__, streamptr);
+
+  return (streamptr->vlistIDorig);
+}
+
+
 void streamDefCompType(int streamID, int comptype)
 {
   stream_t *streamptr;
+
+  if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
 
   streamptr = stream_to_pointer(streamID);
 
@@ -2139,6 +2272,12 @@ void streamDefCompType(int streamID, int comptype)
 void streamDefCompLevel(int streamID, int complevel)
 {
   stream_t *streamptr;
+
+  if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
 
   streamptr = stream_to_pointer(streamID);
 

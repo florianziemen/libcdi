@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <string.h> 
+#include <string.h>
 #include <errno.h>
 #include <math.h>
 #include <ctype.h>
@@ -13,6 +13,10 @@
 
 #include "cdi.h"
 #include "stream_int.h"
+#include "pio_util.h"
+#include "namespace.h"
+#include "resource_handle.h"
+#include "pio_rpc.h"
 
 #if  defined  (HAVE_LIBCGRIBEX)
 #include "cgribex.h"
@@ -36,7 +40,6 @@ int   cdiPartabIntern = 1;
 
 double cdiDefaultMissval = -9.E33;
 
-
 char *Filetypes[] = {
   "UNKNOWN",
   "GRIB",
@@ -56,12 +59,31 @@ char *Filetypes[] = {
 
 int CDI_Debug   = 0;    /* If set to 1, debugging           */
 
+static int  STREAM_Debug = 0;   /* If set to 1, debugging */
 
 int cdiDefaultLeveltype = -1;
 static int cdiDataUnreduced = 0;
 static int cdiSortName = 0;
 static int cdiHaveMissval = 0;
 
+
+static int    streamCompareP ( void * streamptr1, void * streamptr2 );
+static void   streamDestroyP ( void * streamptr );
+static void   streamPrintP   ( void * streamptr, FILE * fp );
+#ifdef USE_MPI
+static int    streamGetPackSize ( void * streamptr, MPI_Comm comm );
+static void   streamPack        ( void * streamptr, void * buff, int size,
+				  int * position, MPI_Comm comm );
+static int    streamTxCode      ( void );
+#endif
+
+resOps streamOps = { streamCompareP, streamDestroyP, streamPrintP,
+#ifdef USE_MPI
+                     streamGetPackSize,
+		     streamPack,
+                     streamTxCode
+#endif
+};
 
 long cdiGetenvInt(char *envName)
 {
@@ -200,6 +222,9 @@ void cdiInitialize(void)
 
       envString = getenv("PARTAB_PATH");
       if ( envString ) cdiPartabPath = strdup(envString);
+
+      envString = getenv("STREAM_DEBUG");
+      if ( envString ) STREAM_Debug = atoi(envString);
     }
 }
 
@@ -218,169 +243,18 @@ char *strfiletype(int filetype)
 }
 
 
-static int  STREAM_Debug = 0;   /* If set to 1, debugging */
-
-static int _stream_min = MIN_STREAMS;
-static int _stream_max = MAX_STREAMS;
-
-static void stream_initialize(void);
-
-static int _stream_init = FALSE;
-
-#if  defined  (HAVE_LIBPTHREAD)
-#  include <pthread.h>
-
-static pthread_once_t  _stream_init_thread = PTHREAD_ONCE_INIT;
-static pthread_mutex_t _stream_mutex;
-
-#  define STREAM_LOCK()         pthread_mutex_lock(&_stream_mutex)
-#  define STREAM_UNLOCK()       pthread_mutex_unlock(&_stream_mutex)
-#  define STREAM_INIT()        \
-   if ( _stream_init == FALSE ) pthread_once(&_stream_init_thread, stream_initialize)
-
-#else
-
-#  define STREAM_LOCK()
-#  define STREAM_UNLOCK()
-#  define STREAM_INIT()        \
-   if ( _stream_init == FALSE ) stream_initialize()
-
-#endif
-
-
-typedef struct _streamPtrToIdx {
-  int       idx;
-  int       next;
-  stream_t *ptr;
-} streamPtrToIdx;
-
-
-static streamPtrToIdx *_streamList  = NULL;
-static int             _streamAvail = -1;
-
-static
-void stream_list_new(void)
-{
-  assert(_streamList == NULL);
-
-  _streamList = (streamPtrToIdx *) malloc(_stream_min*sizeof(streamPtrToIdx));
-}
-
-static
-void stream_list_delete(void)
-{
-  if ( _streamList ) free(_streamList);
-}
-
-static
-void stream_init_pointer(void)
-{
-  int i;
-  
-  for ( i = 0; i < _stream_min; ++i )
-    {
-      _streamList[i].idx  = i;
-      _streamList[i].next = i + 1;
-      _streamList[i].ptr  = NULL;
-    }
-
-  _streamList[_stream_min-1].next = -1;
-
-  _streamAvail = 0;
-}
-
-static
-void stream_list_extend(void)
-{
-  int nstreams;
-  int i;
-
-  assert(_streamList != NULL);
-
-  nstreams = _stream_min + MIN_STREAMS;
-
-  if ( nstreams <= _stream_max)
-    {
-      _streamList = (streamPtrToIdx *) realloc(_streamList, nstreams*sizeof(streamPtrToIdx));
-  
-      for ( i = _stream_min; i < nstreams; ++i )
-	{
-	  _streamList[i].idx  = i;
-	  _streamList[i].next = i + 1;
-	  _streamList[i].ptr  = NULL;
-	}
-
-      _streamAvail = _stream_min;
-      _streamList[_stream_min-1].next = _stream_min;
-      _stream_min = nstreams;
-      _streamList[_stream_min-1].next = -1;
-    }
-  else
-    Warning("Too many open streams (limit is %d)!", _stream_max);
-}
-
-
 stream_t *stream_to_pointer(int idx)
 {
-  stream_t *streamptr = NULL;
-
-  STREAM_INIT();
-
-  if ( idx >= 0 && idx < _stream_min )
-    {
-      STREAM_LOCK();
-
-      streamptr = _streamList[idx].ptr;
-
-      STREAM_UNLOCK();
-    }
-  else
-    Error("stream index %d undefined!", idx);
-
-  return (streamptr);
+  return ( stream_t *) reshGetVal ( idx, &streamOps );
 }
 
-/* Create an index from a pointer (add the pointer to the stream list) */
-static
-int stream_from_pointer(stream_t *ptr)
-{
-  int idx = -1;
-
-  if ( ptr )
-    {
-      STREAM_LOCK();
-
-      if ( _streamAvail < 0 ) stream_list_extend();
-
-      if ( _streamAvail >= 0 )
-	{
-	  streamPtrToIdx *newptr;
-
-	  newptr       = &_streamList[_streamAvail];
-	  _streamAvail = newptr->next;
-	  newptr->next = -1;
-	  idx	       = newptr->idx;
-	  newptr->ptr  = ptr;
-      
-	  if ( STREAM_Debug )
-	    Message("Pointer %p has idx %d from stream list", ptr, idx);
-	}
-
-      STREAM_UNLOCK();
-    }
-  else
-    Error("Internal problem (pointer %p undefined)", ptr);
-
-  return (idx);
-}
 
 static
-void stream_init_entry(stream_t *streamptr)
+void streamDefaultValue ( stream_t * streamptr )
 {
   int i;
 
-  streamptr->self              = stream_from_pointer(streamptr);
-
+  streamptr->self              = UNDEFID;
   streamptr->accesstype        = UNDEFID;
   streamptr->accessmode        = 0;
   streamptr->filetype          = UNDEFID;
@@ -432,6 +306,7 @@ void stream_init_entry(stream_t *streamptr)
   streamptr->fnames            = NULL;
 
   streamptr->gribContainers    = NULL;
+  streamptr->vlistIDorig       = UNDEFID;
 }
 
 
@@ -441,13 +316,11 @@ stream_t *stream_new_entry(void)
 
   cdiInitialize(); /* ***************** make MT version !!! */
 
-  STREAM_INIT();
+  streamptr = (stream_t *) xmalloc(sizeof(stream_t));
+  streamDefaultValue ( streamptr );
+  streamptr->self = reshPut (( void * ) streamptr, &streamOps );
 
-  streamptr = (stream_t *) malloc(sizeof(stream_t));
-
-  if ( streamptr ) stream_init_entry(streamptr);
-
-  return (streamptr);
+  return streamptr;
 }
 
 
@@ -455,46 +328,14 @@ void stream_delete_entry(stream_t *streamptr)
 {
   int idx;
 
+  xassert ( streamptr );
+
   idx = streamptr->self;
-
-  STREAM_LOCK();
-
-  free(streamptr);
-
-  _streamList[idx].next = _streamAvail;
-  _streamList[idx].ptr  = 0;
-  _streamAvail          = idx;
-
-  STREAM_UNLOCK();
+  free ( streamptr );
+  reshRemove ( idx, &streamOps );
 
   if ( STREAM_Debug )
     Message("Removed idx %d from stream list", idx);
-}
-
-
-static
-void stream_initialize(void)
-{
-  char *env;
-
-#if  defined  (HAVE_LIBPTHREAD)
-  /* initialize global API mutex lock */
-  pthread_mutex_init(&_stream_mutex, NULL);
-#endif
-
-  env = getenv("STREAM_DEBUG");
-  if ( env ) STREAM_Debug = atoi(env);
-
-  stream_list_new();
-  atexit(stream_list_delete);
-
-  STREAM_LOCK();
-
-  stream_init_pointer();
-
-  STREAM_UNLOCK();
-
-  _stream_init = TRUE;
 }
 
 
@@ -507,19 +348,7 @@ void stream_check_ptr(const char *caller, stream_t *streamptr)
 
 int streamSize(void)
 {
-  int streamsize = 0;
-  int i;
-  
-  STREAM_INIT();
-
-  STREAM_LOCK();
-
-  for ( i = 0; i < _stream_min; i++ )
-    if ( _streamList[i].ptr ) streamsize++;
-
-  STREAM_UNLOCK();
-
-  return (streamsize);
+  return reshCountType ( &streamOps );
 }
 
 
@@ -570,7 +399,7 @@ void cdiCheckContents(int streamID)
   int vlistID;
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
 
   stream_check_ptr(__func__, streamptr);
 
@@ -590,7 +419,7 @@ int streamInqFileID(int streamID)
 {
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
 
   return (streamptr->fileID);
 }
@@ -600,7 +429,7 @@ void streamDefineTaxis(int streamID)
 {
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
 
   if ( streamptr->tsteps == NULL )
     {
@@ -636,7 +465,7 @@ void streamDefDimgroupID(int streamID, int dimgroupID)
 {
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
 
   streamptr->dimgroupID = dimgroupID;
 }
@@ -646,7 +475,7 @@ int streamInqDimgroupID(int streamID)
 {
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
 
   return (streamptr->dimgroupID);
 }
@@ -656,7 +485,7 @@ void cdiDefAccesstype(int streamID, int type)
 {
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
 
   if ( streamptr->accesstype == UNDEFID )
     {
@@ -679,10 +508,198 @@ int cdiInqAccesstype(int streamID)
 {
   stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
+  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
 
   return (streamptr->accesstype);
+} 
+
+
+int streamInqNvars ( int streamID )
+{
+  stream_t * streamptr;
+  streamptr = ( stream_t * ) reshGetVal ( streamID, &streamOps );
+  return ( streamptr->nvars );
 }
+
+
+int  streamCompareP ( void * streamptr1, void * streamptr2 )
+{
+  stream_t * s1 = ( stream_t * ) streamptr1;
+  stream_t * s2 = ( stream_t * ) streamptr2;
+  int differ = -1;
+  int equal  = 0;
+  int len;
+
+  xassert ( s1 );
+  xassert ( s2 );
+
+  if ( s1->filetype  != s2->filetype  ) return differ;
+  if (  namespaceAdaptKey2 ( s1->vlistIDorig ) != 			     
+	namespaceAdaptKey2 ( s2->vlistIDorig )) return differ;
+  if ( s1->byteorder != s2->byteorder ) return differ;
+  if ( s1->comptype  != s2->comptype  ) return differ;
+  if ( s1->complevel != s2->complevel ) return differ; 
+
+  if ( s1->filename )
+    {
+      len = strlen ( s1->filename ) + 1;
+      if ( memcmp ( s1->filename, s2->filename, len )) 
+	return differ;
+    }
+  else if ( s2->filename ) 
+    return differ;
+
+  return equal;
+}
+
+
+void streamDestroyP ( void * streamptr )
+{
+  int id;
+  stream_t * sp = ( stream_t * ) streamptr;
+
+  xassert ( sp );
+
+  id = sp->self;
+  streamClose ( id );
+}
+
+
+void streamPrintP   ( void * streamptr, FILE * fp )
+{
+  stream_t * sp = ( stream_t * ) streamptr;
+
+  if ( !sp ) return;
+
+  fprintf ( fp, "#\n");
+  fprintf ( fp, "# streamID %d\n", sp->self);
+  fprintf ( fp, "#\n"); 
+  fprintf ( fp, "self          = %d\n", sp->self );
+  fprintf ( fp, "accesstype    = %d\n", sp->accesstype );
+  fprintf ( fp, "accessmode    = %d\n", sp->accessmode ); 
+  fprintf ( fp, "filetype      = %d\n", sp->filetype );
+  fprintf ( fp, "byteorder     = %d\n", sp->byteorder );
+  fprintf ( fp, "fileID        = %d\n", sp->fileID );
+  fprintf ( fp, "dimgroupID    = %d\n", sp->dimgroupID );
+  fprintf ( fp, "filemode      = %d\n", sp->filemode );
+  fprintf ( fp, "//off_t numvals;\n" );
+  fprintf ( fp, "filename      = %s\n", sp->filename );
+  fprintf ( fp, "//Record   *record;\n" );
+  fprintf ( fp, "nrecs         = %d\n", sp->nrecs );
+  fprintf ( fp, "nvars         = %d\n", sp->nvars );
+  fprintf ( fp, "varlocked     = %d\n", sp->varlocked );
+  fprintf ( fp, "//SVARINFO *vars;\n" );
+  fprintf ( fp, "varsAllocated = %d\n", sp->varsAllocated );
+  fprintf ( fp, "varinit       = %d\n", sp->varinit );
+  fprintf ( fp, "curTsID       = %d\n", sp->curTsID );
+  fprintf ( fp, "rtsteps       = %d\n", sp->rtsteps );
+  fprintf ( fp, "//long ntsteps;\n" );
+  fprintf ( fp, "numTimestep   = %d\n", sp->numTimestep );
+  fprintf ( fp, "//  TSTEPS   *tsteps;\n" );
+  fprintf ( fp, "tstepsTableSize= %d\n", sp->tstepsTableSize );
+  fprintf ( fp, "tstepsNextID  = %d\n", sp->tstepsNextID );
+  fprintf ( fp, "//BaseTime  basetime;\n" );
+  fprintf ( fp, "ncmode        = %d\n", sp->ncmode );
+  fprintf ( fp, "vlistID       = %d\n", sp->vlistID );
+  fprintf ( fp, "//  int       xdimID[MAX_GRIDS_PS];\n" );
+  fprintf ( fp, "//  int       ydimID[MAX_GRIDS_PS];\n" );
+  fprintf ( fp, "//  int       zaxisID[MAX_ZAXES_PS];\n" );
+  fprintf ( fp, "//  int       ncxvarID[MAX_GRIDS_PS];\n" );
+  fprintf ( fp, "//  int       ncyvarID[MAX_GRIDS_PS];\n" );
+  fprintf ( fp, "//  int       ncavarID[MAX_GRIDS_PS];\n" );
+  fprintf ( fp, "historyID     = %d\n", sp->historyID );
+  fprintf ( fp, "globalatts    = %d\n", sp->globalatts );
+  fprintf ( fp, "localatts     = %d\n", sp->localatts );
+  fprintf ( fp, "//  VCT       vct;\n" );
+  fprintf ( fp, "unreduced     = %d\n", sp->unreduced );
+  fprintf ( fp, "sortname      = %d\n", sp->sortname );
+  fprintf ( fp, "have_missval  = %d\n", sp->have_missval );
+  fprintf ( fp, "ztype         = %d\n", sp->comptype );
+  fprintf ( fp, "zlevel        = %d\n", sp->complevel );
+  fprintf ( fp, "curfile       = %d\n", sp->curfile );
+  fprintf ( fp, "nfiles        = %d\n", sp->nfiles );
+  fprintf ( fp, "//  char    **fnames;\n" );
+  fprintf ( fp, "//  void     *gribContainers;\n" );
+  fprintf ( fp, "vlistIDorig   = %d\n", sp->vlistIDorig );
+}
+
+
+void streamGetIndexList ( int nstreams, int * streamIndexList )
+{
+  reshGetResHListOfType ( nstreams, streamIndexList, &streamOps );
+}
+
+
+#ifdef USE_MPI
+static int
+streamTxCode ( void )
+{
+  return STREAM;
+}
+
+
+int streamNint = 11 ;
+
+
+static
+int streamGetPackSize ( void * voidP, MPI_Comm comm )
+{
+  stream_t * streamP = ( stream_t * ) voidP;
+  int packBufferSize = 0, size;
+
+  xmpi ( MPI_Pack_size ( streamNint, MPI_INT, comm, &size ));
+  packBufferSize += size;
+  xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
+  packBufferSize += 2 * size;
+
+
+  xmpi ( MPI_Pack_size (( int ) strlen ( streamP->filename ) + 1,
+			MPI_CHAR, comm, &size ));
+  packBufferSize += size;
+  xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
+  packBufferSize += size;
+
+  return packBufferSize;
+}
+
+
+static
+void streamPack ( void * streamptr, void * packBuffer, int packBufferSize,
+                  int * packBufferPos, MPI_Comm comm )
+{
+  stream_t * streamP = ( stream_t * ) streamptr;
+  int intBuffer[streamNint];  
+  double d;
+
+  intBuffer[0]  = streamP->self;
+  intBuffer[1]  = streamP->filetype;
+  intBuffer[2]  =  ( int ) strlen ( streamP->filename ) + 1;
+  intBuffer[3]  = streamP->vlistID;
+  intBuffer[4]  = streamP->vlistIDorig;
+  intBuffer[5]  = streamP->byteorder;
+  intBuffer[6]  = streamP->comptype;
+  intBuffer[7]  = streamP->complevel; 
+  intBuffer[8]  = cdiDataUnreduced;
+  intBuffer[9]  = cdiSortName;
+  intBuffer[10] = cdiHaveMissval;
+  
+  xmpi ( MPI_Pack ( intBuffer, streamNint, MPI_INT, 
+		    packBuffer, packBufferSize, packBufferPos, comm ));
+  d = xchecksum ( DATATYPE_INT , streamNint, intBuffer );
+  xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
+		    packBuffer, packBufferSize, packBufferPos, comm ));
+
+  xmpi ( MPI_Pack ( &cdiDefaultMissval, 1, MPI_DOUBLE,
+		    packBuffer, packBufferSize, packBufferPos, comm ));
+
+  xmpi ( MPI_Pack ( streamP->filename, intBuffer[2], MPI_CHAR, 
+		    packBuffer, packBufferSize, packBufferPos, comm )); 
+  d = xchecksum  ( DATATYPE_TXT, intBuffer[2], &streamP->filename );
+  xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
+		    packBuffer, packBufferSize, packBufferPos, comm ));
+}
+
+#endif
 /*
  * Local Variables:
  * c-file-style: "Java"
