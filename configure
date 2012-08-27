@@ -26953,7 +26953,7 @@ fi
 ac_config_files="$ac_config_files tests/test_cksum_grib tests/test_cksum_nc tests/test_cksum_nc2 tests/test_cksum_nc4 tests/test_cksum_extra tests/test_cksum_service tests/test_cksum_ieg tests/pio_write_run tests/pio_cksum_mpinonb tests/pio_cksum_fpguard tests/pio_cksum_asynch tests/pio_cksum_writer util/serialrun"
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile cdi.settings src/pkgconfig/cdi.pc"
+ac_config_files="$ac_config_files Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile examples/pio/Makefile cdi.settings src/pkgconfig/cdi.pc"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -28291,6 +28291,7 @@ do
     "app/Makefile") CONFIG_FILES="$CONFIG_FILES app/Makefile" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "examples/Makefile") CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;
+    "examples/pio/Makefile") CONFIG_FILES="$CONFIG_FILES examples/pio/Makefile" ;;
     "cdi.settings") CONFIG_FILES="$CONFIG_FILES cdi.settings" ;;
     "src/pkgconfig/cdi.pc") CONFIG_FILES="$CONFIG_FILES src/pkgconfig/cdi.pc" ;;
 
