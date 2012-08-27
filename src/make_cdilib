@@ -171,13 +171,14 @@ c="dmemory.c         \
    swap.c            \
    binary.c          \
    cdf.c             \
+   namespace.c       \
+   resource_handle.c \
+   pio_util.c        \
    pio.c             \
    pio_dbuffer.c     \
    pio_mpinonb.c     \
    pio_posixasynch.c \
    pio_posixfpguardsendrecv.c\
-   pio_posixfpguardthread.c\
-   pio_posixfpguardthreadrefuse.c\
    pio_posixnonb.c   \
    pio_list_set.c"
 
@@ -186,7 +187,8 @@ h="cdi_limits.h taxis.h dtypes.h file.h cgribex.h gribapi.h service.h extra.h \
    stream_cgribex.h  stream_gribapi.h  stream_grb.h  stream_cdf.h \
    tablepar.h table.h gaussgrid.h grid.h varscan.h binary.h swap.h \
    service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \
-   cdf.h vlist.h pio.h pio_impl.h"
+   cdf.h vlist.h vlist_var.h vlist_att.h model.h institution.h \
+   namespace.h resource_handle.h pio_util.h pio.h pio_impl.h"
 
 #cat $h >> ${PROG}
 #cat $c | grep -v '#include' | grep -v '#  include' >> ${PROG}

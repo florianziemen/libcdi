@@ -1,9 +1,11 @@
 #ifndef INSTITUTION_H
 #define INSTITUTION_H
 
+#ifdef USE_MPI
 int
 instituteUnpack(void *buf, int size, int *position, int,
                 MPI_Comm comm);
+#endif
 
 #endif
 
