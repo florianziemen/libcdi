@@ -3,12 +3,22 @@
 #endif
 
 #include <limits.h>
+#ifdef USE_MPI
+#include <mpi.h>
+#include "pio_comm.h"
+#endif
 
 #include "dmemory.h"
 #include "cdi.h"
 #include "stream_int.h"
 #include "vlist.h"
+#include "vlist_var.h"
+#include "resource_handle.h"
+#include "vlist_att.h"
+#include "namespace.h"
+#include "pio_util.h"
 
+extern resOps vlist_ops;
 
 static
 void vlistvarInitEntry(int vlistID, int varID)
@@ -49,6 +59,9 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].validrange[0] = VALIDMISS;
   vlistptr->vars[varID].validrange[1] = VALIDMISS;
   vlistptr->vars[varID].ensdata       = NULL;
+  vlistptr->vars[varID].iorank       = CDI_UNDEFID;
+  vlistptr->vars[varID].decoSize     = 0;
+  vlistptr->vars[varID].deco         = NULL;
 }
 
 static
@@ -183,6 +196,11 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed." );
+      return CDI_UNDEFID;
+    }
 
   if ( CDI_Debug )
     Message("gridID = %d  zaxisID = %d  tsteptype = %d", gridID, zaxisID, tsteptype);
@@ -267,6 +285,12 @@ void vlistDefVarParam(int vlistID, int varID, int param)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed." );
+      return;
+    }
+
   vlistptr->vars[varID].param = param;
 }
 
@@ -293,6 +317,12 @@ void vlistDefVarCode(int vlistID, int varID, int code)
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed." );
+      return;
+    }
 
   param = vlistptr->vars[varID].param;
 
@@ -714,9 +744,6 @@ int vlistInqVarSize(int vlistID, int varID)
   int zaxisID, gridID;
   int nlevs, gridsize;
   int tsteptype;
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
 
@@ -805,6 +832,12 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed." );
+      return;
+    }
+
   vlistptr->vars[varID].datatype = datatype;
   
   if ( vlistptr->vars[varID].missvalused == FALSE )
@@ -826,6 +859,12 @@ void vlistDefVarInstitut(int vlistID, int varID, int instID)
 
   vlistptr = vlist_to_pointer(vlistID);
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed." );
+      return;
+    }
+
   vlistptr->vars[varID].instID = instID;
 }
 
@@ -843,6 +882,12 @@ int vlistInqVarInstitut(int vlistID, int varID)
 void vlistDefVarModel(int vlistID, int varID, int modelID)
 {
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed." );
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -863,6 +908,12 @@ int vlistInqVarModel(int vlistID, int varID)
 void vlistDefVarTable(int vlistID, int varID, int tableID)
 {
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed." );
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -913,6 +964,12 @@ void vlistDefVarName(int vlistID, int varID, const char *name)
 {
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed." );
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -947,6 +1004,12 @@ The function @func{vlistDefVarLongname} defines the long name of a variable.
 void vlistDefVarLongname(int vlistID, int varID, const char *longname)
 {
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed." );
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -983,6 +1046,12 @@ void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
 {
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -1017,6 +1086,12 @@ The function @func{vlistDefVarUnits} defines the units of a variable.
 void vlistDefVarUnits(int vlistID, int varID, const char *units)
 {
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed." );
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -1126,6 +1201,12 @@ double vlistInqVarScalefactor(int vlistID, int varID)
 {
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed." );
+      return 1.0;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -1149,6 +1230,12 @@ void vlistDefVarScalefactor(int vlistID, int varID, double scalefactor)
 {
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed." );
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -1161,6 +1248,12 @@ void vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
 {
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -1172,6 +1265,12 @@ void vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
 void vlistDefVarTsteptype(int vlistID, int varID, int tsteptype)
 {
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -1193,6 +1292,12 @@ void vlistDefVarTimave(int vlistID, int varID, int timave)
 {
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistptr->vars[varID].timave = timave;
@@ -1212,6 +1317,12 @@ int vlistInqVarTimave(int vlistID, int varID)
 void vlistDefVarTimaccu(int vlistID, int varID, int timaccu)
 {
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -1298,6 +1409,12 @@ int vlistInqVarMissvalUsed(int vlistID, int varID)
 void vlistDefFlag(int vlistID, int varID, int levID, int flag)
 {
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -1391,6 +1508,12 @@ void vlistDefIndex(int vlistID, int varID, int levelID, int index)
 {
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistptr->vars[varID].levinfo[levelID].index = index;  
@@ -1412,6 +1535,12 @@ void vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
   int nlevs1, nlevs2;
   int nvars, index;
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -1457,6 +1586,12 @@ void vlistChangeVarGrid(int vlistID, int varID, int gridID)
   int nvars, index;
   vlist_t *vlistptr;
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
+
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -1499,6 +1634,12 @@ void vlistDefVarCompType(int vlistID, int varID, int comptype)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
+
   vlistptr->vars[varID].comptype = comptype;
 }
 
@@ -1518,6 +1659,12 @@ int vlistInqVarCompType(int vlistID, int varID)
 void vlistDefVarCompLevel(int vlistID, int varID, int complevel)
 {
   vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -1551,15 +1698,14 @@ void  vlistDefVarXYZ(int vlistID, int varID, int xyz)
   {
     int dimorder[3];
     int dimx = 0, dimy = 0, dimz = 0;
-    int posx = -1, posy = -1, posz = -1;
     dimorder[0] = xyz/100;
     dimorder[1] = (xyz-dimorder[0]*100)/10;
     dimorder[2] = (xyz-dimorder[0]*100-dimorder[1]*10);
     for ( int id = 0; id < 3; ++id )
       {
-        if      ( dimorder[id] == 3 ) { dimz++; posz=id; }
-        else if ( dimorder[id] == 2 ) { dimy++; posy=id; }
-        else if ( dimorder[id] == 1 ) { dimx++; posx=id; }
+        if      ( dimorder[id] == 3 ) { dimz++; }
+        else if ( dimorder[id] == 2 ) { dimy++; }
+        else if ( dimorder[id] == 1 ) { dimx++; }
       }
     if ( dimz > 1 || dimy > 1 || dimx > 1 ) xyz = 321; // ZYX
     else
@@ -1656,6 +1802,370 @@ int vlistInqVarEnsemble( int vlistID, int varID, int *ensID, int *ensCount, int 
 
     return 0;
 }
+
+
+void vlistDefVarDeco ( int vlistID, int varID, int decoSize, deco_t * deco )
+{
+  vlist_t * vlistptr;
+  int i;
+
+  vlistptr = vlist_to_pointer(vlistID );
+
+  vlistCheckVarID ( __func__, vlistID, varID );
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
+
+  xassert ( decoSize && deco );
+ 
+  vlistptr->vars[varID].deco = xmalloc ( decoSize * sizeof ( deco_t )); 
+
+  for ( i = 0; i < decoSize; i++ )
+    {
+      vlistptr->vars[varID].deco[i].rank   = deco[i].rank;
+      vlistptr->vars[varID].deco[i].offset = deco[i].offset;
+      vlistptr->vars[varID].deco[i].chunk  = deco[i].chunk;
+    }
+
+  vlistptr->vars[varID].decoSize = decoSize;
+}
+
+
+int vlistInqVarDecoChunk ( int vlistID, int varID, int rankModel  )
+{
+  vlist_t *vlistptr;
+  int iret = CDI_UNDEFID;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+#ifdef USE_MPI
+  {
+    deco_t * deco;
+    int i, decoSize = 0;
+    xassert ( vlistptr->vars[varID].deco != NULL &&
+             vlistptr->vars[varID].decoSize != CDI_UNDEFID ); 
+    
+    deco  = vlistptr->vars[varID].deco;
+    decoSize = vlistptr->vars[varID].decoSize;
+    if ( decoSize && deco )
+      for ( i = 0; i < decoSize; i++ )
+        if ( deco[i].rank == rankModel ) 
+          {
+            iret = deco[i].chunk;
+            break;
+          }
+  }
+#else
+  iret = vlistInqVarSize ( vlistID, varID );
+#endif
+
+  xassert ( iret != CDI_UNDEFID );
+  return iret;
+}
+
+
+int vlistInqVarDecoOff ( int vlistID, int varID, int rankModel  )
+{
+  vlist_t *vlistptr;
+  int iret = CDI_UNDEFID;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+#ifdef USE_MPI
+  {
+    deco_t * deco;
+    int i, decoSize = 0;
+    
+    xassert ( vlistptr->vars[varID].deco != NULL &&
+             vlistptr->vars[varID].decoSize != CDI_UNDEFID );
+    
+    deco  = vlistptr->vars[varID].deco;
+    decoSize = vlistptr->vars[varID].decoSize;
+    if ( decoSize && deco )
+      for ( i = 0; i < decoSize; i++ )
+        if ( deco[i].rank == rankModel ) 
+          {
+            iret = deco[i].offset;
+            break;
+          }
+  }
+#else
+  iret = 0;
+#endif
+
+  xassert (  iret != CDI_UNDEFID );  
+  return iret;
+}
+
+
+void     vlistDefVarIOrank   ( int vlistID, int varID, int iorank )
+{
+  vlist_t * vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID );
+
+  vlistCheckVarID ( __func__, vlistID, varID );
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
+
+  vlistptr->vars[varID].iorank = iorank;
+}
+
+
+int vlistInqVarIOrank(int vlistID, int varID)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  return vlistptr->vars[varID].iorank;
+}
+
+
+#ifdef USE_MPI
+
+enum {
+  vlistvar_nints = 21,
+  vlistvar_ndbls = 3,
+};
+
+int vlistVarGetSize(vlist_t *p, int varID, MPI_Comm comm)
+{
+  var_t *var = p->vars + varID;
+  int varsize, txinc;
+
+  xmpi(MPI_Pack_size(vlistvar_nints, MPI_INT, comm, &varsize));
+  xmpi(MPI_Pack_size(vlistvar_ndbls, MPI_DOUBLE, comm, &txinc));
+  varsize += txinc;
+  if (var->name)
+  {
+    xmpi(MPI_Pack_size(strlen(var->name), MPI_CHAR, comm, &txinc));
+    varsize += txinc;
+  }
+  if (var->longname)
+  {
+    xmpi(MPI_Pack_size(strlen(var->longname), MPI_CHAR, comm, &txinc));
+    varsize += txinc;
+  }
+  if (var->stdname)
+  {
+    xmpi(MPI_Pack_size(strlen(var->stdname), MPI_CHAR, comm, &txinc));
+    varsize += txinc;
+  }
+  if (var->units)
+  {
+    xmpi(MPI_Pack_size(strlen(var->units), MPI_CHAR, comm, &txinc));
+    varsize += txinc;
+  }
+  xmpi(MPI_Pack_size(4 * var->nlevs, MPI_INT, comm, &txinc));
+  varsize += txinc;
+  if ( var->deco != NULL )
+    {
+      xmpi(MPI_Pack_size(3 * var->decoSize, MPI_INT, comm, &txinc));
+      varsize += txinc;
+    }
+  varsize += vlistAttsGetSize(p, varID, comm);
+  return varsize;
+}
+
+void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
+                  MPI_Comm comm)
+{
+  double dtempbuf[vlistvar_ndbls];
+  var_t *var = p->vars + varID;
+  int tempbuf[vlistvar_nints], namesz, longnamesz, stdnamesz, unitssz, i;
+
+  tempbuf[0] = var->flag;
+  tempbuf[1] = var->gridID;
+  tempbuf[2] = var->zaxisID;
+  tempbuf[3] = var->tsteptype;
+  tempbuf[4] = namesz = var->name?strlen(var->name):0;
+  tempbuf[5] = longnamesz = var->longname?strlen(var->longname):0;
+  tempbuf[6] = stdnamesz = var->stdname?strlen(var->stdname):0;
+  tempbuf[7] = unitssz = var->units?strlen(var->units):0;
+  tempbuf[8] = var->datatype;
+  tempbuf[9] = var->param;
+  tempbuf[10] = var->instID;
+  tempbuf[11] = var->modelID;
+  tempbuf[12] = var->tableID;
+  tempbuf[13] = var->timave;
+  tempbuf[14] = var->timaccu;
+  tempbuf[15] = var->missvalused;
+  tempbuf[16] = var->comptype;
+  tempbuf[17] = var->complevel;
+  tempbuf[18] = var->nlevs;
+  tempbuf[19] = var->iorank;
+  tempbuf[20] = var->decoSize;
+  dtempbuf[0] = var->missval;
+  dtempbuf[1] = var->scalefactor;
+  dtempbuf[2] = var->addoffset;
+  xmpi(MPI_Pack(tempbuf, vlistvar_nints, MPI_INT,
+                buf, size, position, comm));
+  xmpi(MPI_Pack(dtempbuf, vlistvar_ndbls, MPI_DOUBLE,
+                buf, size, position, comm));
+  if (namesz)
+    xmpi(MPI_Pack(var->name, namesz, MPI_CHAR, buf, size, position, comm));
+  if (longnamesz)
+    xmpi(MPI_Pack(var->longname, longnamesz, MPI_CHAR,
+                  buf, size, position, comm));
+  if (stdnamesz)
+    xmpi(MPI_Pack(var->stdname, stdnamesz, MPI_CHAR,
+                  buf, size, position, comm));
+  if (unitssz)
+    xmpi(MPI_Pack(var->units, unitssz, MPI_CHAR,
+                  buf, size, position, comm));
+  {
+    int levbuf[var->nlevs][4];
+    for (i = 0; i < var->nlevs; ++i)
+    {
+      levbuf[i][0] = var->levinfo[i].flag;
+      levbuf[i][1] = var->levinfo[i].index;
+      levbuf[i][2] = var->levinfo[i].mlevelID;
+      levbuf[i][3] = var->levinfo[i].flevelID;
+    }
+    xmpi(MPI_Pack(levbuf, var->nlevs * 4, MPI_INT,
+                  buf, size, position, comm));
+  }
+  if ( var->deco != NULL )
+    {
+      int deco[var->decoSize][3];
+      for (i = 0; i < var->decoSize; ++i)
+        {
+          deco[i][0] = var->deco[i].rank;
+          deco[i][1] = var->deco[i].offset;
+          deco[i][2] = var->deco[i].chunk;
+        }
+      xmpi(MPI_Pack(deco, var->decoSize * 3, MPI_INT,
+                    buf, size, position, comm));
+    }
+  vlistAttsPack(p, varID, buf, size, position, comm);
+}
+
+static inline int
+imax(int a, int b)
+{
+  return a>=b?a:b;
+}
+
+
+void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
+		    int nspTarget, MPI_Comm comm)
+{
+  double dtempbuf[vlistvar_ndbls];
+  int tempbuf[vlistvar_nints];
+  int newvar;
+  char *varname = NULL;
+  xmpi(MPI_Unpack(buf, size, position,
+                  tempbuf, vlistvar_nints, MPI_INT, comm));
+  xmpi(MPI_Unpack(buf, size, position,
+                  dtempbuf, vlistvar_ndbls, MPI_DOUBLE, comm));
+
+  newvar = vlistDefVar ( vlistID,
+			 namespaceAdaptKey ( tempbuf[1], nspTarget ),
+			 namespaceAdaptKey ( tempbuf[2], nspTarget ),
+			 tempbuf[3]);
+  if (tempbuf[4] || tempbuf[5] || tempbuf[6] || tempbuf[7])
+    varname = xmalloc(imax(imax(imax(tempbuf[4],tempbuf[5]),tempbuf[6]),
+                           tempbuf[7])+ 1);
+  if (tempbuf[4])
+  {
+    xmpi(MPI_Unpack(buf, size, position,
+                    varname, tempbuf[4], MPI_CHAR, comm));
+    varname[tempbuf[4]] = '\0';
+    vlistDefVarName(vlistID, newvar, varname);
+  }
+  if (tempbuf[5])
+  {
+    xmpi(MPI_Unpack(buf, size, position,
+                    varname, tempbuf[5], MPI_CHAR, comm));
+    varname[tempbuf[5]] = '\0';
+    vlistDefVarLongname(vlistID, newvar, varname);
+  }
+  if (tempbuf[6])
+  {
+    xmpi(MPI_Unpack(buf, size, position,
+                    varname, tempbuf[6], MPI_CHAR, comm));
+    varname[tempbuf[6]] = '\0';
+    vlistDefVarStdname(vlistID, newvar, varname);
+  }
+  if (tempbuf[7])
+  {
+    xmpi(MPI_Unpack(buf, size, position,
+                    varname, tempbuf[7], MPI_CHAR, comm));
+    varname[tempbuf[7]] = '\0';
+    vlistDefVarUnits(vlistID, newvar, varname);
+  }
+  if ( varname ) free ( varname );
+  vlistDefVarDatatype(vlistID, newvar, tempbuf[8]);
+  vlistDefVarInstitut ( vlistID, newvar,
+			namespaceAdaptKey ( tempbuf[10], nspTarget ));
+  vlistDefVarModel ( vlistID, newvar,
+		     namespaceAdaptKey ( tempbuf[11], nspTarget ));
+  vlistDefVarTable(vlistID, newvar, tempbuf[12]);
+  /* FIXME: changing the table might change the param code */
+  vlistDefVarParam(vlistID, newvar, tempbuf[9]);
+  vlistDefVarTimave(vlistID, newvar, tempbuf[13]);
+  vlistDefVarTimaccu(vlistID, newvar, tempbuf[14]);
+  if (tempbuf[15])
+    vlistDefVarMissval(vlistID, newvar, dtempbuf[0]);
+  vlistDefVarScalefactor(vlistID, newvar, dtempbuf[1]);
+  vlistDefVarAddoffset(vlistID, newvar, dtempbuf[2]);
+  vlistDefVarCompType(vlistID, newvar, tempbuf[16]);
+  vlistDefVarCompLevel(vlistID, newvar, tempbuf[17]);
+  {
+    int levbuf[tempbuf[18]][4];
+    var_t *var = vlist_to_pointer(vlistID)->vars + newvar;
+    int nlevs=tempbuf[18], i, flagSetLev = 0;
+    xassert(nlevs == var->nlevs);
+    xmpi(MPI_Unpack(buf, size, position,
+                    levbuf, nlevs * 4, MPI_INT, comm));
+    for (i = 0; i < nlevs; ++i)
+    {
+      vlistDefFlag(vlistID, newvar, i, levbuf[i][0]);
+      vlistDefIndex(vlistID, newvar, i, levbuf[i][1]);
+      // FIXME: these lack an accessor function
+      var->levinfo[i].mlevelID = levbuf[i][2];
+      var->levinfo[i].flevelID = levbuf[i][3];
+      if (levbuf[i][0] == tempbuf[0])
+        flagSetLev = i;
+    }
+    vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev][0]);
+  }
+  if ( tempbuf[20] != 0 )
+    {
+      int decoSize = tempbuf[20], i;
+      deco_t deco[decoSize];
+      int decobuf[decoSize][3];
+
+      xmpi ( MPI_Unpack(buf, size, position,
+                        decobuf, decoSize * 3, MPI_INT, comm ));
+      for (i = 0; i < decoSize; ++i)
+        {
+          deco[i].rank   = decobuf[i][0];
+          deco[i].offset = decobuf[i][1];
+          deco[i].chunk  = decobuf[i][2];
+        }
+      vlistDefVarDeco(vlistID, newvar, decoSize, &deco[0]);
+    }
+  vlistDefVarIOrank(vlistID, newvar, tempbuf[19]);
+  vlistAttsUnpack(vlistID, newvar, buf, size, position, comm);
+}
+
+
+#endif
 
 /*
  * Local Variables:
