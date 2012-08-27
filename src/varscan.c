@@ -11,7 +11,7 @@
 #include "varscan.h"
 #include "vlist.h"
 #include "grid.h"
-#include "pio_util.h"
+
 
 extern void zaxisGetIndexList ( int, int * );
 
@@ -681,9 +681,9 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
                   break;
                 }
             }
-          if ( gridIndexList ) free ( gridIndexList ); 
+          if ( gridIndexList ) free ( gridIndexList );
         }
-      
+
       ngrids = vlistptr->ngrids;
       if ( mode == 1 )
 	for ( index = 0; index < ngrids; index++ )
