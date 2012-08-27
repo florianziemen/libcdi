@@ -31,7 +31,7 @@ static pthread_once_t  _vlist_init_thread = PTHREAD_ONCE_INIT;
 static int vlistIsInitialized = 0;
 
 #  define VLIST_INIT()               \
-  if ( _vlist_init == FALSE ) vlist_initialize()
+  if ( vlistIsInitialized == FALSE ) vlist_initialize()
 #endif
 
 
@@ -127,6 +127,8 @@ void vlist_initialize(void)
 
   env = getenv("VLIST_DEBUG");
   if ( env ) VLIST_Debug = atoi(env);
+
+  vlistIsInitialized = TRUE;
 }
 
 static
