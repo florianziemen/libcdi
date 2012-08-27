@@ -16,6 +16,7 @@
 
 static int VLIST_Debug = 0;
 
+static int vlistIsInitialized = 0;
 static void vlist_initialize(void);
 
 #if  defined  (HAVE_LIBPTHREAD)
@@ -27,8 +28,6 @@ static pthread_once_t  _vlist_init_thread = PTHREAD_ONCE_INIT;
   pthread_once(&_vlist_init_thread, vlist_initialize)
 
 #else
-
-static int vlistIsInitialized = 0;
 
 #  define VLIST_INIT()               \
   if ( vlistIsInitialized == FALSE ) vlist_initialize()
