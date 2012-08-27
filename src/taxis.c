@@ -124,7 +124,6 @@ void taxisDefaultValue ( taxis_t *taxisptr )
   taxisptr->vtime_ub   = 0;
 }
 
-
 static
 taxis_t *taxisNewEntry(void)
 {
@@ -137,7 +136,6 @@ taxis_t *taxisNewEntry(void)
 
   return (taxisptr);
 }
-
 
 static
 void taxisInit (void)
@@ -225,8 +223,8 @@ int taxisCreate(int taxistype)
   return (taxisID);
 }
 
-
-void taxisDestroyKernel ( taxis_t * taxisptr )
+static
+void taxisDestroyKernel( taxis_t * taxisptr )
 {
   int id;
 
@@ -238,7 +236,6 @@ void taxisDestroyKernel ( taxis_t * taxisptr )
 
   reshRemove ( id, &taxisOps );
 }
-
 
 /*
 @Function  taxisDestroy
@@ -259,7 +256,8 @@ void taxisDestroy(int taxisID)
   taxisDestroyKernel ( taxisptr );
 }
 
-void taxisDestroyP ( void * taxisptr )
+
+void taxisDestroyP( void * taxisptr )
 {
   taxisDestroyKernel (( taxis_t * ) taxisptr );
 }
@@ -271,7 +269,6 @@ int taxisDuplicate(int taxisID1)
   taxis_t *taxisptr1;
   taxis_t *taxisptr2;
 
-  
   taxisptr1 = ( taxis_t * ) reshGetVal ( taxisID1, &taxisOps );
 
   taxisptr2 = taxisNewEntry();
@@ -488,7 +485,6 @@ void taxisDefNumavg(int taxisID, int numavg)
   taxisptr->numavg = numavg;
 }
 
-
 /*
 The type of the time axis, one of the set of predefined CDI time types.
 The valid CDI time types are TAXIS_ABSOLUTE and TAXIS_RELATIVE.
@@ -688,7 +684,6 @@ void taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub)
   taxisptr->has_bounds = TRUE;
 }
 
-
 /*
 @Function  taxisInqRdate
 @Title     Get the reference date
@@ -722,7 +717,6 @@ int taxisInqRdate(int taxisID)
   return (taxisptr->rdate);
 }
 
-
 /*
 @Function  taxisInqRtime
 @Title     Get the reference time
@@ -755,7 +749,6 @@ int taxisInqRtime(int taxisID)
 
   return (taxisptr->rtime);
 }
-
 
 /*
 @Function  taxisInqCalendar
@@ -946,12 +939,12 @@ void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
       double fmon;
 
       if ( timeunit == TUNIT_YEAR ) timevalue *= 12;
-	  
+
       nmon = (int) timevalue;
       fmon = timevalue - nmon;
-	  
+
       month += nmon;
-	  
+
       while ( month > 12 ) { month -= 12; year++; }
       while ( month <  1 ) { month += 12; year--; }
 
@@ -963,7 +956,7 @@ void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
   encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday, &secofday);
 
   cdiDecodeTimevalue(timeunit, timevalue, &days, &secs);
-  
+
   julday_add(days, secs, &julday, &secofday);
 
   decode_caldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute, &second);
@@ -1210,7 +1203,7 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   reshLock ();
 
   /* memcpy(dest, source, sizeof(taxis_t)); */
-  dest->used       = source->used;  
+  dest->used       = source->used;
   dest->type       = source->type;
   dest->vdate      = source->vdate;
   dest->vtime      = source->vtime;
@@ -1228,6 +1221,7 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   reshUnlock ();
 }
 
+
 void taxisPrintKernel ( taxis_t * taxisptr, FILE * fp )
 {
   int vdate_lb, vdate_ub;
@@ -1240,7 +1234,7 @@ void taxisPrintKernel ( taxis_t * taxisptr, FILE * fp )
 
   fprintf ( fp, "#\n");
   fprintf ( fp, "# taxisID %d\n", taxisptr->self);
-  fprintf ( fp, "#\n"); 
+  fprintf ( fp, "#\n");
   fprintf ( fp, "self       = %d\n", taxisptr->self );
   fprintf ( fp, "used       = %d\n", taxisptr->used );
   fprintf ( fp, "type       = %d\n", taxisptr->type );
@@ -1282,7 +1276,7 @@ int taxisCompareP ( void *  taxisptr1, void * taxisptr2 )
   xassert ( t1 );
   xassert ( t2 );
 
-  return ! ( t1->used       == t2->used       &&  
+  return ! ( t1->used       == t2->used       &&
 	     t1->type       == t2->type       &&
 	     t1->vdate      == t2->vdate      &&
 	     t1->vtime      == t2->vtime      &&
@@ -1295,7 +1289,7 @@ int taxisCompareP ( void *  taxisptr1, void * taxisptr2 )
 	     t1->vdate_lb   == t2->vdate_lb   &&
 	     t1->vtime_lb   == t2->vtime_lb   &&
 	     t1->vdate_ub   == t2->vdate_ub   &&
-	     t1->vtime_ub   == t2->vtime_ub ); 
+	     t1->vtime_ub   == t2->vtime_ub );
 }
 
 
@@ -1322,16 +1316,16 @@ int taxisGetPackSize ( void * voidP, MPI_Comm comm )
 }
 
 
-void taxisUnpack ( char * unpackBuffer, int unpackBufferSize, 
+void taxisUnpack ( char * unpackBuffer, int unpackBufferSize,
 		   int * unpackBufferPos, int nspTarget, MPI_Comm comm )
 {
   taxis_t * taxisP;
   int intBuffer[taxisNint];
   double d;
 
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos,
 		      intBuffer, taxisNint, MPI_INT, comm ));
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
+  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos,
 		      &d, 1, MPI_DOUBLE, comm ));
 
   xassert ( xchecksum ( DATATYPE_INT, taxisNint, intBuffer ) == d );
