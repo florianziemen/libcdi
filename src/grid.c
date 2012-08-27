@@ -168,7 +168,6 @@ grid_t *gridNewEntry ( void )
   return gridptr;
 }
 
-
 static
 void gridInit (void)
 {
@@ -182,7 +181,6 @@ void gridInit (void)
   env = getenv("GRID_DEBUG");
   if ( env ) GRID_Debug = atoi(env);
 }
-
 
 static
 void grid_copy(grid_t *gridptr2, grid_t *gridptr1)
@@ -202,6 +200,7 @@ void gridCheckPtr(const char *caller, int gridID, grid_t *gridptr)
 }
 
 #define  grid_check_ptr(gridID, gridptr)  gridCheckPtr(__func__, gridID, gridptr)
+
 
 int gridSize(void)
 {
@@ -348,7 +347,6 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
   */
 }
 
-
 /*
 @Function  gridCreate
 @Title     Create a horizontal Grid
@@ -492,7 +490,8 @@ int gridCreate(int gridtype, int size)
   return (gridID);
 }
 
-void gridDestroyKernel ( grid_t * gridptr )
+static
+void gridDestroyKernel( grid_t * gridptr )
 {
   int id;
 
@@ -559,7 +558,6 @@ void gridName(int gridtype, char *gridname)
   strcpy(gridname, gridNamePtr(gridtype));
 }
 
-
 /*
 @Function  gridDefXname
 @Title     Define the name of a X-axis
@@ -592,7 +590,6 @@ void gridDefXname(int gridID, const char *xname)
     strcpy(gridptr->xname, xname);
 }
 
-
 /*
 @Function  gridDefXlongname
 @Title     Define the longname of a X-axis
@@ -622,7 +619,6 @@ void gridDefXlongname(int gridID, const char *xlongname)
   if ( xlongname )
     strcpy(gridptr->xlongname, xlongname);
 }
-
 
 /*
 @Function  gridDefXunits
@@ -656,7 +652,6 @@ void gridDefXunits(int gridID, const char *xunits)
     strcpy(gridptr->xunits, xunits);
 }
 
-
 /*
 @Function  gridDefYname
 @Title     Define the name of a Y-axis
@@ -688,7 +683,6 @@ void gridDefYname(int gridID, const char *yname)
   if ( yname )
     strcpy(gridptr->yname, yname);
 }
-
 
 /*
 @Function  gridDefYlongname
@@ -722,7 +716,6 @@ void gridDefYlongname(int gridID, const char *ylongname)
     strcpy(gridptr->ylongname, ylongname);
 }
 
-
 /*
 @Function  gridDefYunits
 @Title     Define the units of a Y-axis
@@ -755,7 +748,6 @@ void gridDefYunits(int gridID, const char *yunits)
     strcpy(gridptr->yunits, yunits);
 }
 
-
 /*
 @Function  gridInqXname
 @Title     Get the name of a X-axis
@@ -786,7 +778,6 @@ void gridInqXname(int gridID, char *xname)
   strcpy(xname, gridptr->xname);
 }
 
-
 /*
 @Function  gridInqXlongname
 @Title     Get the longname of a X-axis
@@ -816,7 +807,6 @@ void gridInqXlongname(int gridID, char *xlongname)
 
   strcpy(xlongname, gridptr->xlongname);
 }
-
 
 /*
 @Function  gridInqXunits
@@ -860,7 +850,6 @@ void gridInqXstdname(int gridID, char *xstdname)
   strcpy(xstdname, gridptr->xstdname);
 }
 
-
 /*
 @Function  gridInqYname
 @Title     Get the name of a Y-axis
@@ -891,7 +880,6 @@ void gridInqYname(int gridID, char *yname)
   strcpy(yname, gridptr->yname);
 }
 
-
 /*
 @Function  gridInqYlongname
 @Title     Get the longname of a Y-axis
@@ -921,7 +909,6 @@ void gridInqYlongname(int gridID, char *ylongname)
 
   strcpy(ylongname, gridptr->ylongname);
 }
-
 
 /*
 @Function  gridInqYunits
@@ -963,7 +950,6 @@ void gridInqYstdname(int gridID, char *ystdname)
 
   strcpy(ystdname, gridptr->ystdname);
 }
-
 
 /*
 @Function  gridInqType
@@ -1098,7 +1084,6 @@ void gridDefTrunc(int gridID, int trunc)
   gridptr->trunc = trunc;
 }
 
-
 /*
 @Function  gridDefXsize
 @Title     Define the number of values of a X-axis
@@ -1144,7 +1129,6 @@ void gridDefXsize(int gridID, int xsize)
     }
 }
 
-
 /*
 @Function
 @Title
@@ -1172,7 +1156,6 @@ void gridDefPrec(int gridID, int prec)
   gridptr->prec = prec;
 }
 
-
 /*
 @Function
 @Title
@@ -1193,7 +1176,6 @@ int gridInqPrec(int gridID)
 
   return (gridptr->prec);
 }
-
 
 /*
 @Function  gridInqXsize
@@ -1384,7 +1366,6 @@ void gridDefRowlon(int gridID, int nrowlon, const int *rowlon)
   memcpy(gridptr->rowlon, rowlon, nrowlon*sizeof(int));
 }
 
-
 /*
 @Function
 @Title
@@ -1485,7 +1466,7 @@ int gridInqMaskGME(int gridID, int *mask)
 
   if ( CDI_Debug && size == 0 )
     Warning("Size undefined for gridID = %d", gridID);
-    
+
   if ( mask && gridptr->mask_gme )
     for ( i = 0; i < size; ++i )
       mask[i] = gridptr->mask_gme[i];
@@ -1525,7 +1506,6 @@ void gridDefMaskGME(int gridID, const int *mask)
     gridptr->mask_gme[i] = mask[i];
 }
 
-
 /*
 @Function  gridInqXvals
 @Title     Get all values of a X-axis
@@ -1562,7 +1542,7 @@ int gridInqXvals(int gridID, double *xvals)
 
   if ( CDI_Debug && size == 0 )
     Warning("Size undefined for gridID = %d", gridID);
-    
+
   if ( xvals && gridptr->xvals )
     memcpy(xvals, gridptr->xvals, size*sizeof(double));
 
@@ -1570,7 +1550,6 @@ int gridInqXvals(int gridID, double *xvals)
 
   return (size);
 }
-
 
 /*
 @Function  gridDefXvals
@@ -1620,7 +1599,6 @@ void gridDefXvals(int gridID, const double *xvals)
   memcpy(gridptr->xvals, xvals, size*sizeof(double));
 }
 
-
 /*
 @Function  gridInqYvals
 @Title     Get all values of a Y-axis
@@ -1665,7 +1643,6 @@ int gridInqYvals(int gridID, double *yvals)
 
   return (size);
 }
-
 
 /*
 @Function  gridDefYvals
@@ -1731,7 +1708,6 @@ double gridInqXval(int gridID, int index)
   return (xval);
 }
 
-
 /*
 @Function
 @Title
@@ -1756,7 +1732,6 @@ double gridInqYval(int gridID, int index)
 
   return (yval);
 }
-
 
 /*
 @Function
@@ -1800,7 +1775,6 @@ double gridInqXinc(int gridID)
 
   return (xinc);
 }
-
 
 /*
 @Function
@@ -1846,7 +1820,6 @@ double gridInqYinc(int gridID)
   return (yinc);
 }
 
-
 /*
 @Function
 @Title
@@ -1867,7 +1840,6 @@ double gridInqXpole(int gridID)
 
   return (gridptr->xpole);
 }
-
 
 /*
 @Function
@@ -1900,7 +1872,6 @@ void gridDefXpole(int gridID, double xpole)
   gridptr->xpole = xpole;
 }
 
-
 /*
 @Function
 @Title
@@ -1921,7 +1892,6 @@ double gridInqYpole(int gridID)
 
   return (gridptr->ypole);
 }
-
 
 /*
 @Function
@@ -1954,7 +1924,6 @@ void gridDefYpole(int gridID, double ypole)
   gridptr->ypole = ypole;
 }
 
-
 /*
 @Function
 @Title
@@ -1975,7 +1944,6 @@ double gridInqAngle(int gridID)
 
   return (gridptr->angle);
 }
-
 
 /*
 @Function
@@ -2005,7 +1973,6 @@ void gridDefAngle(int gridID, double angle)
   gridptr->angle = angle;
 }
 
-
 /*
 @Function
 @Title
@@ -2026,7 +1993,6 @@ int gridInqGMEnd(int gridID)
 
   return (gridptr->nd);
 }
-
 
 /*
 @Function
@@ -2055,7 +2021,6 @@ void gridDefGMEnd(int gridID, int nd)
   gridptr->nd = nd;
 }
 
-
 /*
 @Function
 @Title
@@ -2076,7 +2041,6 @@ int gridInqGMEni(int gridID)
 
   return (gridptr->ni);
 }
-
 
 /*
 @Function
@@ -2105,7 +2069,6 @@ void gridDefGMEni(int gridID, int ni)
   gridptr->ni = ni;
 }
 
-
 /*
 @Function
 @Title
@@ -2127,7 +2090,6 @@ int gridInqGMEni2(int gridID)
   return (gridptr->ni2);
 }
 
-
 /*
 @Function
 @Title
@@ -2147,14 +2109,12 @@ void gridDefGMEni2(int gridID, int ni2)
       xwarning("%s", "Operation not executed.");
       return;
     }
-
   gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
   gridptr->ni2 = ni2;
 }
-
 
 /*
 @Function
@@ -2194,7 +2154,6 @@ void gridDefGMEni3(int gridID, int ni3)
   gridptr->ni3 = ni3;
 }
 
-
 /*
 @Function
 @Title
@@ -2219,7 +2178,6 @@ void gridChangeType(int gridID, int gridtype)
 
   gridptr->type = gridtype;
 }
-
 
 static
 void grid_check_cyclic(grid_t *gridptr)
@@ -2367,7 +2325,7 @@ int compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yv
 	    differ = 1;
 	    break;
 	  }
-  
+
       free(xvals);
     }
 
@@ -2385,7 +2343,7 @@ int compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yv
 	    differ = 1;
 	    break;
 	  }
-      
+
       free(yvals);
     }
 
@@ -2490,7 +2448,7 @@ int gridCompare(int gridID, grid_t grid)
 		{
 		}
 	      else
-		differ = 1;		
+		differ = 1;
 	    }
 	  else if ( grid.type == GRID_GAUSSIAN )
 	    {
@@ -2514,7 +2472,7 @@ int gridCompare(int gridID, grid_t grid)
 		    }
 		}
 	      else
-		differ = 1;		
+		differ = 1;
 	    }
 	  else if ( grid.type == GRID_CURVILINEAR )
 	    {
@@ -2546,6 +2504,7 @@ int gridCompare(int gridID, grid_t grid)
 
   return (differ);
 }
+
 
 int gridCompareP ( void * gridptr1, void * gridptr2 )
 {
@@ -2941,7 +2900,6 @@ int gridGenerate(grid_t grid)
   return (gridID);
 }
 
-
 /*
 @Function  gridDuplicate
 @Title     Duplicate a horizontal Grid
@@ -3137,7 +3095,6 @@ void gridCompress(int gridID)
     }
   else
     Warning("Unsupported grid type: %s", gridNamePtr(gridtype));
-    
 }
 
 
@@ -3242,7 +3199,6 @@ int gridInqNvertex(int gridID)
   return (gridptr->nvertex);
 }
 
-
 /*
 @Function  gridDefXbounds
 @Title     Define the bounds of a X-axis
@@ -3295,7 +3251,6 @@ void gridDefXbounds(int gridID, const double *xbounds)
 
   memcpy(gridptr->xbounds, xbounds, size*sizeof(double));
 }
-
 
 /*
 @Function  gridInqXbounds
@@ -3359,7 +3314,6 @@ double *gridInqXboundsPtr(int gridID)
   return (gridptr->xbounds);
 }
 
-
 /*
 @Function  gridDefYbounds
 @Title     Define the bounds of a Y-axis
@@ -3412,7 +3366,6 @@ void gridDefYbounds(int gridID, const double *ybounds)
 
   memcpy(gridptr->ybounds, ybounds, size*sizeof(double));
 }
-
 
 /*
 @Function  gridInqYbounds
@@ -3886,7 +3839,6 @@ const double *gridInqYvalsPtr(int gridID)
   return ( gridptr->yvals );
 }
 
-
 /*
 @Function  gridDefLCC
 @Title     Define the parameter of a Lambert Conformal Conic grid
@@ -3942,7 +3894,6 @@ void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
       gridptr->lcc_defined   = TRUE;
     }
 }
-
 
 /*
 @Function  gridInqLCC
