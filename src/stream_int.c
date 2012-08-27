@@ -248,7 +248,6 @@ stream_t *stream_to_pointer(int idx)
   return ( stream_t *) reshGetVal ( idx, &streamOps );
 }
 
-
 static
 void streamDefaultValue ( stream_t * streamptr )
 {
