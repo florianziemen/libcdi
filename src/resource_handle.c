@@ -11,6 +11,7 @@
 #include "cdi.h"
 #include "error.h"
 #include "file.h"
+
 #ifdef USE_MPI
 #include "pio_comm.h"
 #include "pio_rpc.h"

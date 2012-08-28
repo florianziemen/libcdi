@@ -455,7 +455,7 @@ void streamCopyRecord(int streamID2, int streamID1)
   filetype1 = streamptr1->filetype;
   filetype2 = streamptr2->filetype;
 
-  if ( filetype1  == filetype2 ) filetype = filetype2;
+  if ( filetype1 == filetype2 ) filetype = filetype2;
 
   switch (filetype)
     {
