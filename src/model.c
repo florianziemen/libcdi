@@ -197,7 +197,7 @@ int modelInq(int instID, int modelgribID, char *name)
         }
     }
 
-  if ( modelID == modelCount ) modelID = UNDEFID;
+  if ( i == modelCount ) modelID = UNDEFID;
 
   if ( modelResHs ) free ( modelResHs );
 
