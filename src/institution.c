@@ -207,8 +207,7 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
 
   for ( i = 0; i < instCount; i++ )
     {
-      instID = instResHs[i];
-      ip2 = ( institute_t * ) reshGetVal ( instID, &instituteOps );
+      ip2 = ( institute_t * ) reshGetVal ( instResHs[i], &instituteOps );
       xassert ( ip2 );
 
       if ( ip2->used && ! instituteCompareKernel ( ip1, ip2 ))
