@@ -39,8 +39,7 @@ static void   modelDestroyP ( void * modelptr );
 static void   modelPrintP   ( void * modelptr, FILE * fp );
 #ifdef USE_MPI
 static int    modelGetSizeP ( void * modelptr, MPI_Comm comm );
-static void   modelPackP    ( void * modelptr, void * buff, int size,
-                              int *position, MPI_Comm comm);
+static void   modelPackP    ( void * modelptr, void * buff, int size, int *position, MPI_Comm comm);
 static int    modelTxCode   ( void );
 #endif
 
@@ -68,7 +67,7 @@ model_t *modelNewEntry ( void )
   modelptr = (model_t *) xmalloc(sizeof(model_t));
   modelDefaultValue ( modelptr );
   modelptr->self = reshPut (( void * ) modelptr, &modelOps );
-  modelptr->used        = 1;
+  modelptr->used = 1;
 
   return (modelptr);
 }
@@ -224,11 +223,12 @@ int modelDef(int instID, int modelgribID, const char *name)
 
 int modelInqInstitut(int modelID)
 {
-  model_t *modelptr;
+  model_t *modelptr = NULL;
 
   modelInit ();
 
-  modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
+  if ( modelID != UNDEFID )
+    modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
 
   return modelptr ? modelptr->instID : UNDEFID;
 }
@@ -236,11 +236,12 @@ int modelInqInstitut(int modelID)
 
 int modelInqGribID(int modelID)
 {
-  model_t *modelptr;
+  model_t *modelptr = NULL;
 
   modelInit ();
 
-  modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
+  if ( modelID != UNDEFID )
+    modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
 
   return modelptr ? modelptr->modelgribID : UNDEFID;
 }
@@ -248,11 +249,12 @@ int modelInqGribID(int modelID)
 
 char *modelInqNamePtr(int modelID)
 {
-  model_t *modelptr;
+  model_t *modelptr = NULL;
 
   modelInit ();
 
-  modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
+  if ( modelID != UNDEFID )
+    modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
 
   return modelptr ? modelptr->name : NULL;
 }
