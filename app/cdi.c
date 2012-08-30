@@ -287,10 +287,10 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 
       if ( vardis )
 	fprintf(stdout,
-		"   Var : Institut Source   Ttype    Layers Num  Gridsize Num Dtype : Parameter name\n");
+		"   Var : Institut Source   Ttype    Levels Num  Gridsize Num Dtype : Parameter name\n");
       else
 	fprintf(stdout,
-		"   Var : Institut Source   Ttype    Layers Num  Gridsize Num Dtype : Parameter ID\n");
+		"   Var : Institut Source   Ttype    Levels Num  Gridsize Num Dtype : Parameter ID\n");
 
       nvars = vlistNvars(vlistID);
 
@@ -373,11 +373,11 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  fprintf(stdout, "\n");
 	}
 
-      fprintf(stdout, "   Horizontal grids :\n");
+      fprintf(stdout, "   Grid coordinates :\n");
       printGridInfo(vlistID);
 
       nzaxis = vlistNzaxis(vlistID);
-      fprintf(stdout, "   Vertical grids :\n");
+      fprintf(stdout, "   Vertical coordinates :\n");
       for ( index = 0; index < nzaxis; index++)
 	{
 	  zaxisID   = vlistZaxis(vlistID, index);
@@ -433,9 +433,9 @@ void printShortinfo(int streamID, int vlistID, int vardis)
       if ( ntsteps != 0 )
 	{
 	  if ( ntsteps == CDI_UNDEFID )
-	    fprintf(stdout, "   Time axis :  unlimited steps\n");
+	    fprintf(stdout, "   Time coordinate :  unlimited steps\n");
 	  else
-	    fprintf(stdout, "   Time axis :  %d step%s\n", ntsteps, ntsteps == 1 ? "" : "s");
+	    fprintf(stdout, "   Time coordinate :  %d step%s\n", ntsteps, ntsteps == 1 ? "" : "s");
 
 	  if ( taxisID != CDI_UNDEFID )
 	    {
