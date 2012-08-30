@@ -287,10 +287,10 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 
       if ( vardis )
 	fprintf(stdout,
-		"   Var : Institut Source   Ttype    Levels Num  Gridsize Num Dtype : Parameter name\n");
+		"   Var : Institut Source   Ttype    Layers Num  Gridsize Num Dtype : Parameter name\n");
       else
 	fprintf(stdout,
-		"   Var : Institut Source   Ttype    Levels Num  Gridsize Num Dtype : Parameter ID\n");
+		"   Var : Institut Source   Ttype    Layers Num  Gridsize Num Dtype : Parameter ID\n");
 
       nvars = vlistNvars(vlistID);
 
