@@ -51,9 +51,7 @@ int cgribexGetGridType(int *isec2)
 
   return (gridtype);
 }
-#endif
 
-#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexGetIsRotated(int *isec2)
 {
@@ -66,9 +64,7 @@ int cgribexGetIsRotated(int *isec2)
  
   return (isRotated);
 }
-#endif
 
-#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexGetZaxisHasBounds(int grb_ltype)
 {
@@ -87,9 +83,7 @@ int cgribexGetZaxisHasBounds(int grb_ltype)
 
   return (lbounds);
 }
-#endif
 
-#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexGetTimeUnit(int *isec1)
 {
@@ -115,9 +109,7 @@ int cgribexGetTimeUnit(int *isec1)
 
   return (timeunit);
 }
-#endif
 
-#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexTimeIsFC(int *isec1)
 {
@@ -128,9 +120,7 @@ int cgribexTimeIsFC(int *isec1)
 
   return (isFC);
 }
-#endif
 
-#if  defined  (HAVE_LIBCGRIBEX)
 static
 int cgribexGetTsteptype(int timerange)
 {
@@ -156,9 +146,7 @@ int cgribexGetTsteptype(int timerange)
 
   return (tsteptype);
 }
-#endif
 
-#if  defined  (HAVE_LIBCGRIBEX)
 static
 void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid)
 {
@@ -346,9 +334,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid)
   grid->yvals = NULL;
   grid->type  = gridtype;
 }
-#endif
 
-#if  defined  (HAVE_LIBCGRIBEX)
 static
 void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
 		      int *isec4, long recsize, off_t position, int datatype, int comptype, int lmv)
@@ -415,6 +401,9 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
 
   varDefCompType(varID, comptype);
 
+  if ( isec1[36] )
+    varDefEnsembleInfo(varID, isec1[37], isec1[38], isec1[39]);
+
   if ( lmv ) varDefMissval(varID, FSEC3_MissVal);
 
   if ( varInqInst(varID) == CDI_UNDEFID )
@@ -455,9 +444,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
     Message("varID = %d  param = %d  zaxistype = %d  gridID = %d  levelID = %d",
 	    varID, param, zaxistype, gridID, levelID);
 }
-#endif
 
-#if  defined  (HAVE_LIBCGRIBEX)
 static
 void MCH_get_undef(int *isec1, double *undef_pds, double *undef_eps)
 {
@@ -482,9 +469,7 @@ void MCH_get_undef(int *isec1, double *undef_pds, double *undef_eps)
     }
   }
 }
-#endif
 
-#if  defined  (HAVE_LIBCGRIBEX)
 static
 void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
 			 int *isec3, double *fsec3, int *isec4, double *fsec4, 
@@ -1419,7 +1404,6 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
 
   return (status);
 }
-
 
 #if  defined  (HAVE_LIBCGRIBEX)
 static
