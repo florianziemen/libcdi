@@ -60,6 +60,7 @@ typedef struct
   char       *name;
   char       *longname;
   char       *units;
+  ensinfo_t  *ensdata;
 }
 vartable_t;
 
@@ -94,8 +95,8 @@ void paramInitEntry(int varID, int param)
   vartable[varID].name           = NULL;
   vartable[varID].longname       = NULL;
   vartable[varID].units          = NULL;
+  vartable[varID].ensdata        = NULL;
 }
-
 
 static
 int varGetEntry(int param, int zaxistype, int ltype)
@@ -113,7 +114,7 @@ int varGetEntry(int param, int zaxistype, int ltype)
   return (UNDEFID);
 }
 
-
+static
 void varFree(void)
 {
   int varID;
@@ -126,6 +127,7 @@ void varFree(void)
       if ( vartable[varID].name )     free(vartable[varID].name);
       if ( vartable[varID].longname ) free(vartable[varID].longname);
       if ( vartable[varID].units )    free(vartable[varID].units);
+      if ( vartable[varID].ensdata )  free(vartable[varID].ensdata);
     }
 
   if ( vartable )
@@ -142,6 +144,7 @@ void varFree(void)
   Vctsize = 0;
 }
 
+static
 int levelNewEntry(int varID, int level1, int level2)
 {
   int levelID = 0;
@@ -211,7 +214,8 @@ int levelNewEntry(int varID, int level1, int level2)
 
 #define  UNDEF_PARAM  -4711
 
-int paramNewEntry (int param)
+static
+int paramNewEntry(int param)
 {
   int varID = 0;
 
@@ -324,7 +328,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
   *plevelID = levelID;
 }
 
-
+static
 int dblcmp(const void *s1, const void *s2)
 {
   int cmp = 0;
@@ -335,7 +339,7 @@ int dblcmp(const void *s1, const void *s2)
   return (cmp);
 }
 
-
+static
 int cmpLevelTable(const void *s1, const void *s2)
 {
   int cmp = 0;
@@ -546,6 +550,10 @@ void cdiGenVars(int streamID)
       if ( vartable[varid].longname ) vlistDefVarLongname(vlistID, varID, vartable[varid].longname);
       if ( vartable[varid].units )    vlistDefVarUnits(vlistID, varID, vartable[varid].units);
 
+      if ( vartable[varid].ensdata )  vlistDefVarEnsemble(vlistID, varID, vartable[varid].ensdata->ens_index,
+	                                                  vartable[varid].ensdata->ens_count,
+							  vartable[varid].ensdata->forecast_init_type);
+
       if ( cdiDefaultTableID != UNDEFID )
 	{
 	  int pdis, pcat, pnum;
@@ -625,12 +633,14 @@ void varDefVCT(size_t vctsize, double *vctptr)
     }
 }
 
+
 void varDefZAxisReference(int nlev, int nvgrid, char *uuid)
 {
   numberOfVerticalLevels = nlev;
   numberOfVerticalGrid = nvgrid;
   strncpy(uuidVGrid, uuid, 16);
 }
+
 
 int varDefGrid(int vlistID, grid_t grid, int mode)
 {
@@ -907,6 +917,18 @@ void varDefTable(int varID, int tableID)
 {
   vartable[varID].tableID = tableID;
 }
+
+
+void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type)
+{
+  if ( vartable[varID].ensdata == NULL )
+      vartable[varID].ensdata = (ensinfo_t *) malloc( sizeof( ensinfo_t ) );
+
+  vartable[varID].ensdata->ens_index = ens_idx;
+  vartable[varID].ensdata->ens_count = ens_count;
+  vartable[varID].ensdata->forecast_init_type = forecast_type;
+}
+
 /*
  * Local Variables:
  * c-file-style: "Java"

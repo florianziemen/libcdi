@@ -27,6 +27,7 @@ void varDefModel(int varID, int modelID);
 int  varInqModel(int varID);
 void varDefTable(int varID, int tableID);
 int  varInqTable(int varID);
+void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type);
 
 int  zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, double *levels, char *longname, char *units, int ltype);
 
