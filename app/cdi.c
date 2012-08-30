@@ -56,7 +56,7 @@ int complevel = 0;              // Compression level
 static
 void version(void)
 {
-  fprintf(stderr, "CDI version 1.7.1\n");
+  fprintf(stderr, "CDI version 1.8\n");
 #if defined (COMPILER)
   fprintf(stderr, "Compiler: %s\n", COMPILER);
 #endif
@@ -287,10 +287,10 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 
       if ( vardis )
 	fprintf(stdout,
-		"   Var : Institut Source   Varname     Ttype   Dtype  Gridsize Num  Levels Num\n");
+		"   Var : Institut Source   Ttype    Levels Num  Gridsize Num Dtype : Parameter name\n");
       else
 	fprintf(stdout,
-		"   Var : Institut Source   Param       Ttype   Dtype  Gridsize Num  Levels Num\n");
+		"   Var : Institut Source   Ttype    Levels Num  Gridsize Num Dtype : Parameter ID\n");
 
       nvars = vlistNvars(vlistID);
 
@@ -300,41 +300,43 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  gridID  = vlistInqVarGrid(vlistID, varID);
 	  zaxisID = vlistInqVarZaxis(vlistID, varID);
 
-	  cdiParamToString(param, paramstr, sizeof(paramstr));
-
-	  if ( vardis ) vlistInqVarName(vlistID, varID, varname);
-
-	  gridsize = gridInqSize(gridID);
-
 	  fprintf(stdout, "%6d : ", varID + 1);
 
+	  /* institute info */
 	  instptr = institutInqNamePtr(vlistInqVarInstitut(vlistID, varID));
 	  if ( instptr )
 	    fprintf(stdout, "%-8s ", instptr);
 	  else
 	    fprintf(stdout, "unknown  ");
 
+	  /* source info */
 	  modelptr = modelInqNamePtr(vlistInqVarModel(vlistID, varID));
 	  if ( modelptr )
 	    fprintf(stdout, "%-8s ", modelptr);
 	  else
 	    fprintf(stdout, "unknown  ");
 
-	  if ( vardis )
-	    fprintf(stdout, "%-11s ", varname);
-	  else
-	    fprintf(stdout, "%-11s ", paramstr);
-
+	  /* tsteptype */
 	  tsteptype = vlistInqVarTsteptype(vlistID, varID);
-	  if      ( tsteptype == TSTEP_CONSTANT ) fprintf(stdout, "%-8s", "constant");
-	  else if ( tsteptype == TSTEP_INSTANT  ) fprintf(stdout, "%-8s", "instant");
-	  else if ( tsteptype == TSTEP_MIN      ) fprintf(stdout, "%-8s", "min");
-	  else if ( tsteptype == TSTEP_MAX      ) fprintf(stdout, "%-8s", "max");
-	  else if ( tsteptype == TSTEP_ACCUM    ) fprintf(stdout, "%-8s", "accum");
-	  else                                    fprintf(stdout, "%-8s", "unknown");
+	  if      ( tsteptype == TSTEP_CONSTANT ) fprintf(stdout, "%-8s ", "constant");
+	  else if ( tsteptype == TSTEP_INSTANT  ) fprintf(stdout, "%-8s ", "instant");
+	  else if ( tsteptype == TSTEP_MIN      ) fprintf(stdout, "%-8s ", "min");
+	  else if ( tsteptype == TSTEP_MAX      ) fprintf(stdout, "%-8s ", "max");
+	  else if ( tsteptype == TSTEP_ACCUM    ) fprintf(stdout, "%-8s ", "accum");
+	  else                                    fprintf(stdout, "%-8s ", "unknown");
 
+	  /* layer info */
+	  levelsize = zaxisInqSize(zaxisID);
+	  fprintf(stdout, "%6d ", levelsize);
+	  fprintf(stdout, "%3d ", vlistZaxisIndex(vlistID, zaxisID) + 1);
+
+	  /* grid info */
+	  gridsize = gridInqSize(gridID);
+	  fprintf(stdout, "%9d ", gridsize);
+	  fprintf(stdout, "%3d ", vlistGridIndex(vlistID, gridID) + 1);
+
+	  /* datatype */
 	  datatype = vlistInqVarDatatype(vlistID, varID);
-
 	  if      ( datatype == DATATYPE_PACK   ) strcpy(pstr, "P0");
 	  else if ( datatype > 0 && datatype <= 32  ) sprintf(pstr, "P%d", datatype);
 	  else if ( datatype == DATATYPE_CPX32  ) strcpy(pstr, "C32");
@@ -352,17 +354,21 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  fprintf(stdout, " %-3s", pstr);
 
 	  if ( vlistInqVarCompType(vlistID, varID) == COMPRESS_NONE )
-	    fprintf(stdout, " ");
+	    fprintf(stdout, "  ");
 	  else
-	    fprintf(stdout, "z");
+	    fprintf(stdout, "z ");
 
-	  fprintf(stdout, "%9d", gridsize);
+	  /* parameter info */
+	  fprintf(stdout, ": ");
 
-	  fprintf(stdout, " %3d ", vlistGridIndex(vlistID, gridID) + 1);
+	  cdiParamToString(param, paramstr, sizeof(paramstr));
 
-	  levelsize = zaxisInqSize(zaxisID);
-	  fprintf(stdout, " %6d", levelsize);
-	  fprintf(stdout, " %3d", vlistZaxisIndex(vlistID, zaxisID) + 1);
+	  if ( vardis ) vlistInqVarName(vlistID, varID, varname);
+
+          if ( vardis )
+	    fprintf(stdout, "%-11s ", varname);
+	  else
+	    fprintf(stdout, "%-11s ", paramstr);
 
 	  fprintf(stdout, "\n");
 	}

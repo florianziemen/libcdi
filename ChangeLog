@@ -1,3 +1,7 @@
+2012-08-30  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* app/cdi: changed output format of option -s (sinfo)
+
 2012-08-27  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Version 1.5.7 released
