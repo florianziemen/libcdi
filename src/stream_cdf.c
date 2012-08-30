@@ -100,6 +100,7 @@ typedef struct {
   char     longname[MAXNAMELEN];
   char     stdname[MAXNAMELEN];
   char     units[MAXNAMELEN];
+  ensinfo_t   *ensdata;    /* Ensemble information */
 }
 ncvar_t;
 
@@ -4108,6 +4109,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].lvalidrange     = 0;
       ncvars[ncvarid].validrange[0]   = VALIDMISS;
       ncvars[ncvarid].validrange[1]   = VALIDMISS;
+      ncvars[ncvarid].ensdata         = NULL;
     }
 }
 
@@ -4822,6 +4824,26 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
 			}
 		    }
 		}
+	    }
+	  else if ( ( strcmp(attname, "realization") == 0 )         ||
+	            ( strcmp(attname, "ensemble_members") == 0 )    ||
+	            ( strcmp(attname, "forecast_init_type") == 0 )    )
+	    {
+	      int temp;
+
+	      if( ncvars[ncvarid].ensdata == NULL )
+		ncvars[ncvarid].ensdata = (ensinfo_t *) malloc( sizeof( ensinfo_t ) );
+
+	      cdfGetAttInt(fileID, ncvarid, attname, 1, &temp);
+
+	      if( strcmp(attname, "realization") == 0 )
+		ncvars[ncvarid].ensdata->ens_index = temp;
+	      else if( strcmp(attname, "ensemble_members") == 0 )
+		ncvars[ncvarid].ensdata->ens_count = temp;
+	      else if( strcmp(attname, "forecast_init_type") == 0 )
+		ncvars[ncvarid].ensdata->forecast_init_type = temp;
+
+	      cdfSetVar(ncvars, ncvarid, TRUE);
 	    }
 	  else
 	    {
@@ -6001,6 +6023,14 @@ void define_all_vars(int fileID, int streamID, int vlistID, int instID, int mode
         printf("dimids: %d %d\n", i, ncvars[ncvarid].dimids[i]);
       printf("xdimid, ydimid %d %d\n", xdimid, ydimid);
       */
+      if ( ncvars[ncvarid].ensdata != NULL )
+        {
+          vlistDefVarEnsemble( vlistID, varID, ncvars[ncvarid].ensdata->ens_index,
+                               ncvars[ncvarid].ensdata->ens_count,
+                               ncvars[ncvarid].ensdata->forecast_init_type );
+          free(ncvars[ncvarid].ensdata);
+          ncvars[ncvarid].ensdata = NULL;
+        }
     }
 
   for ( varID = 0; varID < nvars; varID++ )
