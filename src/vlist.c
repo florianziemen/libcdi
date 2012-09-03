@@ -285,7 +285,6 @@ void vlistCopy(int vlistID2, int vlistID1)
           memcpy(vlistptr2->vars[varID].levinfo,
                  vlistptr1->vars[varID].levinfo, nlevs*sizeof(levinfo_t));
 
-          if ( vlistptr2->vars[varID].ensdata ) free(vlistptr2->vars[varID].ensdata);
           if ( vlistptr1->vars[varID].ensdata )
             {
               vlistptr2->vars[varID].ensdata = (ensinfo_t *) malloc(sizeof(ensinfo_t));

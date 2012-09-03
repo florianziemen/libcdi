@@ -840,11 +840,15 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
     Get the ensemble Info from the grib-2 Tables and update the intermediate datastructure.
     Further update to the "vlist" is handled in the same way as for GRIB-1 by "cdiGenVars"
   */
-  /*
-  GRIB_CHECK(grib_get_long(gh, "typeOfEnsembleForecast", &ens_forecast_type ), 0);
-  GRIB_CHECK(grib_get_long(gh, "numberOfForecastsInEnsemble", &ens_count ), 0);
-  GRIB_CHECK(grib_get_long(gh, "perturbationNumber", &ens_index ), 0);
-  */
+  {
+    int status;
+    status = grib_get_long(gh, "typeOfEnsembleForecast", &ens_forecast_type );
+    if ( status == 0 )
+      {
+        GRIB_CHECK(grib_get_long(gh, "numberOfForecastsInEnsemble", &ens_count ), 0);
+        GRIB_CHECK(grib_get_long(gh, "perturbationNumber", &ens_index ), 0);
+      }
+  }
   if ( ens_index > 0 )
     varDefEnsembleInfo(varID, (int)ens_index, (int)ens_count, (int)ens_forecast_type);
 
