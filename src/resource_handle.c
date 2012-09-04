@@ -297,7 +297,7 @@ void *reshGetVal ( cdiResH resH, resOps * ops  )
   else
     {
       LIST_UNLOCK();
-      xabort("invalid namespace %d or index %d", nspT.nsp, nspT.idx);
+      xabort("Invalid namespace %d or index %d for resH %d!", nspT.nsp, nspT.idx, (int)resH);
     }
 
   xassert(listElem && listElem->ops == ops);
