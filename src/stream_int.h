@@ -134,7 +134,7 @@ typedef struct
   srvrec_t   *srvp;
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-  extrec_t *extp;
+  extrec_t   *extp;
 #endif
 #if  defined  (HAVE_LIBIEG)
   iegrec_t   *iegp;

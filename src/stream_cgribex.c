@@ -477,6 +477,8 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
 {
   int iret = 0, ipunp = 0, iword = 0;
 
+  memset(isec1, 0, 256*sizeof(int));
+
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
 	   ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);
 
@@ -1633,7 +1635,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
   memset(isec2, 0, 16*sizeof(int));
 
   ISEC1_Sec2Or3Flag = 128;
-  
+
   gridtype = gridInqType(gridID);
 
   ISEC1_GridDefinition = 255;
