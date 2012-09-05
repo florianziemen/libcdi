@@ -1,3 +1,7 @@
+2012-09-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cgribexEncode: initialize the first 256 entries of isec1 to zero
+
 2012-08-30  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* app/cdi: changed output format of option -s (sinfo)

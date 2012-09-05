@@ -2172,7 +2172,7 @@ void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
 #ifdef DBG
 	if( DBG )  
 	  {
-	    fprintf( stderr, "cgribexDefEnsembleVar :\n EnsID  %d\n Enscount %d\n Forecast init type %d\n",  ensID, 
+	    fprintf( stderr, "cgribexDefEnsembleVar :\n EnsID  %d\n Enscount %d\n Forecast init type %d\n",  ensID,
 		     ensCount,  forecast_type );
 	  }
 #endif
@@ -2182,7 +2182,7 @@ void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
 
 
 size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
-		     int vdate, int vtime, int tsteptype, int numavg, 
+		     int vdate, int vtime, int tsteptype, int numavg,
 		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize)
 {
   size_t nbytes = 0;
@@ -2194,7 +2194,7 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   int datatype;
   int param;
 
-  memset(isec1, 0, 32*sizeof(int));
+  memset(isec1, 0, 256*sizeof(int));
   fsec2[0] = 0; fsec2[1] = 0;
 
   gribsize = gribbuffersize / sizeof(int);
