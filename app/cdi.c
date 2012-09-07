@@ -158,25 +158,25 @@ void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
   int i, ivals = 0, imiss = 0;
   double arrmean, arrmin, arrmax;
   char vdatestr[32], vtimestr[32];
- 
+
   if ( ! rec )
   {
     if ( vardis )
-      fprintf(stdout, 
-    "   Rec :       Date  Time    Varname      Level    Size    Miss :     Minimum        Mean     Maximum\n");
+      fprintf(stdout,
+    "   Rec :       Date     Time   Level Gridsize    Miss :     Minimum        Mean     Maximum : Parameter name\n");
 /*   ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0----+ */
     else
-      fprintf(stdout, 
-    "   Rec :       Date  Time    Param        Level    Size    Miss :     Minimum        Mean     Maximum\n");
+      fprintf(stdout,
+    "   Rec :       Date     Time   Level Gridsize    Miss :     Minimum        Mean     Maximum : Parameter ID\n");
 /*   ----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0----+ */
   }
 
   date2str(vdate, vdatestr, sizeof(vdatestr));
   time2str(vtime, vtimestr, sizeof(vtimestr));
 
-  fprintf(stdout, "%6d :%s %s %-10s %7g ", ++rec, vdatestr, vtimestr, varname, level);
+  fprintf(stdout, "%6d :%s %s %7g ", ++rec, vdatestr, vtimestr, level);
 
-  fprintf(stdout, "%7d ", datasize);
+  fprintf(stdout, "%8d ", datasize);
 
   fprintf(stdout, "%7d :", nmiss);
 
@@ -222,7 +222,7 @@ void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
 
       if ( datasize > 0 ) arrmean /= datasize;
 
-      fprintf(stdout, "%#12.5g%#12.5g%#12.5g\n", arrmin, arrmean, arrmax);
+      fprintf(stdout, "%#12.5g%#12.5g%#12.5g", arrmin, arrmean, arrmax);
     }
   else
     {
@@ -249,8 +249,10 @@ void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
 
       if ( nvals_r > 0 ) arrmean_r = arrsum_r / nvals_r;
       if ( nvals_i > 0 ) arrmean_i = arrsum_i / nvals_i;
-      fprintf(stdout, "  -  (%#12.5g,%#12.5g)  -\n", arrmean_r, arrmean_i);
+      fprintf(stdout, "  -  (%#12.5g,%#12.5g)  -", arrmean_r, arrmean_i);
     }
+
+  fprintf(stdout, " : %-11s\n", varname);
 
   if ( imiss != nmiss && nmiss > 0 )
     fprintf(stdout, "Found %d of %d missing values!\n", imiss, nmiss);
