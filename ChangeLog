@@ -3,6 +3,10 @@
 	* Version 1.5.8 released
 	* using CGRIBEX library version 1.5.5
 
+2012-09-10  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* unreduced: compute nlon and nvalues from rowlon[] (bug fix)
+
 2012-09-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cgribexEncode: initialize the first 256 entries of isec1 to zero

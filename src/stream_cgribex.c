@@ -148,17 +148,20 @@ int cgribexGetTsteptype(int timerange)
 }
 
 static
-void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid)
+void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, int iret)
 {
   int gridtype;
 
   gridtype = cgribexGetGridType(isec2);
 
-  if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
+  if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED && iret != -801 )
     {
+      int ilat, nlon = 0;
+      for ( ilat = 0; ilat < ISEC2_NumLat; ++ilat )
+        if ( ISEC2_RowLon(ilat) > nlon ) nlon = ISEC2_RowLon(ilat);
       gridtype = GRID_GAUSSIAN;
-      ISEC2_NumLon = 2*ISEC2_NumLat;
-      ISEC4_NumValues = ISEC2_NumLon*ISEC2_NumLat;
+      ISEC2_NumLon = nlon;
+      ISEC4_NumValues = nlon*ISEC2_NumLat;
     }
 
   memset(grid, 0, sizeof(grid_t));
@@ -337,7 +340,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid)
 
 static
 void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
-		      int *isec4, long recsize, off_t position, int datatype, int comptype, int lmv)
+		      int *isec4, long recsize, off_t position, int datatype, int comptype, int lmv, int iret)
 {
   int zaxistype;
   int gridID = CDI_UNDEFID, varID;
@@ -374,7 +377,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
   (*record).ilevel2  = level2;
   (*record).ltype    = ISEC1_LevelType;
 
-  cgribexGetGrid(streamptr, isec2, isec4, &grid);
+  cgribexGetGrid(streamptr, isec2, isec4, &grid, iret);
 
   gridID = varDefGrid(vlistID, grid, 0);
 
@@ -473,14 +476,14 @@ void MCH_get_undef(int *isec1, double *undef_pds, double *undef_eps)
 static
 void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
 			 int *isec3, double *fsec3, int *isec4, double *fsec4, 
-			 int *gribbuffer, int recsize, int *lmv)
+			 int *gribbuffer, int recsize, int *lmv, int *iret)
 {
-  int iret = 0, ipunp = 0, iword = 0;
+  int ipunp = 0, iword = 0;
 
   memset(isec1, 0, 256*sizeof(int));
 
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
-	   ipunp, (int *) gribbuffer, recsize, &iword, "J", &iret);
+	   ipunp, (int *) gribbuffer, recsize, &iword, "J", iret);
 
   *lmv = 0;
 
@@ -500,7 +503,7 @@ int cgribexScanTimestep1(int streamID)
 #if  defined  (HAVE_LIBCGRIBEX)
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
-  int lmv = 0;
+  int lmv = 0, iret = 0;
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
   long buffersize = 0;
@@ -595,7 +598,7 @@ int cgribexScanTimestep1(int streamID)
 	}
 
       cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
-			  (int *) gribbuffer, recsize, &lmv);
+			  (int *) gribbuffer, recsize, &lmv, &iret);
 
       param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
       if ( ISEC1_LevelType == 100 ) ISEC1_Level1 *= 100;
@@ -683,7 +686,7 @@ int cgribexScanTimestep1(int streamID)
 	Message("%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
 
       cgribexAddRecord(streamID, param, isec1, isec2, fsec2, fsec3,
-		       isec4, recsize, recpos, datatype, comptype, lmv);
+		       isec4, recsize, recpos, datatype, comptype, lmv, iret);
     }
 
   streamptr->rtsteps = 1;
@@ -764,7 +767,7 @@ int cgribexScanTimestep2(int streamID)
 #if  defined  (HAVE_LIBCGRIBEX)
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
-  int lmv = 0;
+  int lmv = 0, iret = 0;
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
   long buffersize = 0;
@@ -861,7 +864,7 @@ int cgribexScanTimestep2(int streamID)
 	}
 
       cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
-			  (int *) gribbuffer, recsize, &lmv);
+			  (int *) gribbuffer, recsize, &lmv, &iret);
 
       param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
       if ( ISEC1_LevelType == 100 ) ISEC1_Level1 *= 100;
@@ -1041,7 +1044,7 @@ int cgribexScanTimestep(int streamID)
 #if  defined  (HAVE_LIBCGRIBEX)
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
-  int lmv = 0;
+  int lmv = 0, iret = 0;
   long recsize = 0;
   off_t recpos = 0;
   unsigned char *gribbuffer;
@@ -1143,7 +1146,7 @@ int cgribexScanTimestep(int streamID)
 	    }
 
 	  cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
-			      (int *) gribbuffer, recsize, &lmv);
+			      (int *) gribbuffer, recsize, &lmv, &iret);
 
 	  param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
 	  if ( ISEC1_LevelType == 100 ) ISEC1_Level1 *= 100;
