@@ -6352,9 +6352,7 @@ int cdfInqContents(int streamID)
   else
     ntsteps = 0;
 
-  streamptr->ntsteps = ntsteps;
-
-  if ( CDI_Debug ) Message("Number of timesteps = %d", streamptr->ntsteps);
+  if ( CDI_Debug ) Message("Number of timesteps = %d", ntsteps);
   if ( CDI_Debug ) Message("Time dimid = %d", streamptr->basetime.ncdimid);
 
   /* read ncdims */
@@ -6662,11 +6660,17 @@ int cdfInqContents(int streamID)
   nvars = nvarids;
 
   if ( CDI_Debug ) Message("time varid = %d", streamptr->basetime.ncvarid);
-  if ( CDI_Debug ) Message("ntsteps = %d", streamptr->ntsteps);
+  if ( CDI_Debug ) Message("ntsteps = %d", ntsteps);
   if ( CDI_Debug ) Message("nvars = %d", nvars);
 
-  if ( nvars == 0 ) return (CDI_EUFSTRUCT);
 
+  if ( nvars == 0 )
+    {
+      streamptr->ntsteps = 0;
+      return (CDI_EUFSTRUCT);
+    }
+
+  streamptr->ntsteps = ntsteps;
 
   /* define all data variables */
   define_all_vars(fileID, streamID, vlistID, instID, modelID, varids, ncdims, nvars, ncvars);
