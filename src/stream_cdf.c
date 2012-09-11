@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+//#define TEST_GROUPS 1
 
 #include <stdio.h>
 #include <string.h>
@@ -50,6 +51,7 @@ typedef struct {
 ncdim_t;
 
 typedef struct {
+  int      ncid;
   int      ignore;
   int      isvar;
   int      islon;
@@ -4055,8 +4057,9 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
 {
   long ncvarid;
 
-  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+  for ( ncvarid = 0; ncvarid < nvars; ++ncvarid )
     {
+      ncvars[ncvarid].ncid            = UNDEFID;
       ncvars[ncvarid].ignore          = FALSE;
       ncvars[ncvarid].isvar           = UNDEFID;
       ncvars[ncvarid].islon           = FALSE;
@@ -4372,9 +4375,10 @@ int cmpvarname(const void *s1, const void *s2)
 }
 
 static
-void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
+void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                           int timedimid, int modelID, int format)
 {
+  int ncid;
   int ncvarid;
   int ncdimid;
   int nvdims, nvatts;
@@ -4390,9 +4394,10 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
 
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
+      ncid    = ncvars[ncvarid].ncid;
       dimidsp = ncvars[ncvarid].dimids;
 
-      cdf_inq_var(fileID, ncvarid, name, &xtype, &nvdims, dimidsp, &nvatts);
+      cdf_inq_var(ncid, ncvarid, name, &xtype, &nvdims, dimidsp, &nvatts);
       strcpy(ncvars[ncvarid].name, name);
 
       for ( ncdimid = 0; ncdimid < nvdims; ncdimid++ )
@@ -4405,7 +4410,7 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
       if ( format == NC_FORMAT_NETCDF4_CLASSIC || format == NC_FORMAT_NETCDF4 )
         {
           int shuffle, deflate, deflate_level;
-          nc_inq_var_deflate(fileID, ncvarid, &shuffle, &deflate, &deflate_level);
+          nc_inq_var_deflate(ncid, ncvarid, &shuffle, &deflate, &deflate_level);
           if ( deflate > 0 )
             ncvars[ncvarid].deflate = 1;
         }
@@ -4420,21 +4425,21 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
 
       for ( iatt = 0; iatt < nvatts; iatt++ )
         {
-          cdf_inq_attname(fileID, ncvarid, iatt, attname);
-          cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
-          cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
+          cdf_inq_attname(ncid, ncvarid, iatt, attname);
+          cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
+          cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
 
           if ( strcmp(attname, "long_name") == 0 && atttype == NC_CHAR )
             {
-              cdfGetAttText(fileID, ncvarid, attname, MAXNAMELEN, ncvars[ncvarid].longname);
+              cdfGetAttText(ncid, ncvarid, attname, MAXNAMELEN, ncvars[ncvarid].longname);
             }
           else if ( strcmp(attname, "standard_name") == 0 && atttype == NC_CHAR )
             {
-              cdfGetAttText(fileID, ncvarid, attname, MAXNAMELEN, ncvars[ncvarid].stdname);
+              cdfGetAttText(ncid, ncvarid, attname, MAXNAMELEN, ncvars[ncvarid].stdname);
             }
           else if ( strcmp(attname, "units") == 0 && atttype == NC_CHAR )
             {
-              cdfGetAttText(fileID, ncvarid, attname, MAXNAMELEN, ncvars[ncvarid].units);
+              cdfGetAttText(ncid, ncvarid, attname, MAXNAMELEN, ncvars[ncvarid].units);
             }
           else if ( strcmp(attname, "calendar") == 0 )
             {
@@ -4444,19 +4449,19 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
             {
 	      char paramstr[32];
 	      int pnum = 0, pcat = 255, pdis = 255;
-              cdfGetAttText(fileID, ncvarid, attname, sizeof(paramstr), paramstr);
+              cdfGetAttText(ncid, ncvarid, attname, sizeof(paramstr), paramstr);
 	      sscanf(paramstr, "%d.%d.%d", &pnum, &pcat, &pdis);
 	      ncvars[ncvarid].param = cdiEncodeParam(pnum, pcat, pdis);
               cdfSetVar(ncvars, ncvarid, TRUE);
             }
           else if ( strcmp(attname, "code") == 0 && atttype != NC_CHAR )
             {
-              cdfGetAttInt(fileID, ncvarid, attname, 1, &ncvars[ncvarid].code);
+              cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvars[ncvarid].code);
               cdfSetVar(ncvars, ncvarid, TRUE);
             }
           else if ( strcmp(attname, "table") == 0 && atttype != NC_CHAR )
             {
-              cdfGetAttInt(fileID, ncvarid, attname, 1, &tablenum);
+              cdfGetAttInt(ncid, ncvarid, attname, 1, &tablenum);
               if ( tablenum > 0 )
                 {
                   ncvars[ncvarid].tabnum = tablenum;
@@ -4468,13 +4473,13 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
             }
           else if ( strcmp(attname, "trunc_type") == 0 && atttype == NC_CHAR )
             {
-              cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
               if ( memcmp(attstring, "Triangular", attlen) == 0 )
                 ncvars[ncvarid].gridtype = GRID_SPECTRAL;
             }
           else if ( strcmp(attname, "grid_type") == 0 && atttype == NC_CHAR )
             {
-              cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
               strtolower(attstring);
 
               if      ( strcmp(attstring, "gaussian reduced") == 0 )
@@ -4517,7 +4522,7 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
             }
           else if ( strcmp(attname, "level_type") == 0 && atttype == NC_CHAR )
             {
-              cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
               strtolower(attstring);
 
               if      ( strcmp(attstring, "toa") == 0 )
@@ -4540,15 +4545,15 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
             }
           else if ( strcmp(attname, "trunc_count") == 0 && atttype != NC_CHAR )
             {
-              cdfGetAttInt(fileID, ncvarid, attname, 1, &ncvars[ncvarid].truncation);
+              cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvars[ncvarid].truncation);
             }
           else if ( strcmp(attname, "truncation") == 0 && atttype != NC_CHAR )
             {
-              cdfGetAttInt(fileID, ncvarid, attname, 1, &ncvars[ncvarid].truncation);
+              cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvars[ncvarid].truncation);
             }
           else if ( strcmp(attname, "add_offset") == 0 && atttype != NC_CHAR )
             {
-	      cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].addoffset);
+	      cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvars[ncvarid].addoffset);
 	      /*
 		if ( atttype != NC_BYTE && atttype != NC_SHORT && atttype != NC_INT )
 		if ( ncvars[ncvarid].addoffset != 0 )
@@ -4558,7 +4563,7 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
             }
           else if ( strcmp(attname, "scale_factor") == 0 && atttype != NC_CHAR )
             {
-	      cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].scalefactor);
+	      cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvars[ncvarid].scalefactor);
 	      /*
 		if ( atttype != NC_BYTE && atttype != NC_SHORT && atttype != NC_INT )
 		if ( ncvars[ncvarid].scalefactor != 1 )
@@ -4570,9 +4575,9 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
             {
               int status, ncboundsid;
 
-              cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
 
-              status = nc_inq_varid(fileID, attstring, &ncboundsid);
+              status = nc_inq_varid(ncid, attstring, &ncboundsid);
 
               if ( status == NC_NOERR )
                 {
@@ -4587,7 +4592,7 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
             {
               char *pstring, *cell_measures = NULL, *cell_var = NULL;
 
-              cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
               pstring = attstring;
 
               while ( isspace((int) *pstring) ) pstring++;
@@ -4607,7 +4612,7 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
                   int status;
                   int nc_cell_id;
 
-                  status = nc_inq_varid(fileID, cell_var, &nc_cell_id);
+                  status = nc_inq_varid(ncid, cell_var, &nc_cell_id);
                   if ( status == NC_NOERR )
                     {
                       ncvars[ncvarid].cellarea = nc_cell_id;
@@ -4628,7 +4633,7 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
             {
               char *pstring, *xvarname = NULL, *yvarname = NULL;
 
-              cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
               pstring = attstring;
 
               while ( isspace((int) *pstring) ) pstring++;
@@ -4640,8 +4645,8 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
               while ( isgraph((int) *pstring) ) pstring++;
               *pstring++ = 0;
 
-              cdf_inq_varid(fileID, xvarname, &ncvars[ncvarid].xvarid);
-              cdf_inq_varid(fileID, yvarname, &ncvars[ncvarid].yvarid);
+              cdf_inq_varid(ncid, xvarname, &ncvars[ncvarid].xvarid);
+              cdf_inq_varid(ncid, yvarname, &ncvars[ncvarid].yvarid);
 
               cdfSetVar(ncvars, ncvars[ncvarid].xvarid, FALSE);
               cdfSetVar(ncvars, ncvars[ncvarid].yvarid, FALSE);
@@ -4657,7 +4662,7 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
               int dimvarid;
               extern int cdiIgnoreAttCoordinates;
 
-              cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
               pstring = attstring;
 
               for ( i = 0; i < 4; i++ )
@@ -4669,7 +4674,7 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
                   if ( *pstring == 0 ) lstop = TRUE;
                   *pstring++ = 0;
 
-                  status = nc_inq_varid(fileID, varname, &dimvarid);
+                  status = nc_inq_varid(ncid, varname, &dimvarid);
                   if ( status == NC_NOERR )
                     {
                       cdfSetVar(ncvars, dimvarid, FALSE);
@@ -4692,9 +4697,9 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
               int status;
               int nc_gmap_id;
 
-              cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
 
-              status = nc_inq_varid(fileID, attstring, &nc_gmap_id);
+              status = nc_inq_varid(ncid, attstring, &nc_gmap_id);
               if ( status == NC_NOERR )
                 {
                   ncvars[ncvarid].gmapid = nc_gmap_id;
@@ -4707,7 +4712,7 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
             }
           else if ( strcmp(attname, "positive") == 0 && atttype == NC_CHAR )
             {
-              cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
               strtolower(attstring);
 
               if    ( memcmp(attstring, "down", 4) == 0 ) ncvars[ncvarid].positive = -1;
@@ -4723,7 +4728,7 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
           else if ( (strcmp(attname, "_FillValue") == 0 || strcmp(attname, "missing_value") == 0) &&
 		    atttype != NC_CHAR )
             {
-	      cdfGetAttDouble(fileID, ncvarid, attname, 1, &ncvars[ncvarid].missval);
+	      cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvars[ncvarid].missval);
 	      ncvars[ncvarid].defmiss = TRUE;
 	      /* cdfSetVar(ncvars, ncvarid, TRUE); */
             }
@@ -4731,7 +4736,7 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
             {
               if ( ncvars[ncvarid].lvalidrange == FALSE )
                 {
-                  cdfGetAttDouble(fileID, ncvarid, attname, 2, ncvars[ncvarid].validrange);
+                  cdfGetAttDouble(ncid, ncvarid, attname, 2, ncvars[ncvarid].validrange);
                   ncvars[ncvarid].lvalidrange = TRUE;
                   if ( ((int)ncvars[ncvarid].validrange[0]) == 0 && ((int)ncvars[ncvarid].validrange[1]) == 255 )
                     ncvars[ncvarid].lunsigned = TRUE;
@@ -4740,17 +4745,17 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
             }
           else if ( strcmp(attname, "valid_min") == 0 && attlen == 1 )
             {
-              cdfGetAttDouble(fileID, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[0]);
+              cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[0]);
               ncvars[ncvarid].lvalidrange = TRUE;
             }
           else if ( strcmp(attname, "valid_max") == 0 && attlen == 1 )
             {
-              cdfGetAttDouble(fileID, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[1]);
+              cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[1]);
               ncvars[ncvarid].lvalidrange = TRUE;
             }
           else if ( strcmp(attname, "_Unsigned") == 0 && atttype == NC_CHAR )
             {
-              cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
               strtolower(attstring);
 
               if ( memcmp(attstring, "true", 4) == 0 )
@@ -4766,7 +4771,7 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
             }
           else if ( strcmp(attname, "cdi") == 0 && atttype == NC_CHAR )
             {
-	      cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+	      cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
 	      strtolower(attstring);
 
 	      if ( memcmp(attstring, "ignore", 6) == 0 )
@@ -4777,7 +4782,7 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
             }
           else if ( strcmp(attname, "axis") == 0 && atttype == NC_CHAR )
             {
-              cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
 	      attlen = strlen(attstring);
 
 	      if ( (int) attlen > nvdims )
@@ -4853,7 +4858,7 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
 	      if( ncvars[ncvarid].ensdata == NULL )
 		ncvars[ncvarid].ensdata = (ensinfo_t *) malloc( sizeof( ensinfo_t ) );
 
-	      cdfGetAttInt(fileID, ncvarid, attname, 1, &temp);
+	      cdfGetAttInt(ncid, ncvarid, attname, 1, &temp);
 
 	      if( strcmp(attname, "realization") == 0 )
 		ncvars[ncvarid].ensdata->ens_index = temp;
@@ -4874,21 +4879,21 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
 	      int attrint;
 	      double attrflt;
 	      nc_type attrtype;
-	      cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
-	      cdf_inq_atttype(fileID, ncvarid, attname, &attrtype);
+	      cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
+	      cdf_inq_atttype(ncid, ncvarid, attname, &attrtype);
 	      if ( attlen == 1 && (attrtype == NC_INT || attrtype == NC_SHORT) )
 		{
-		  cdfGetAttInt(fileID, ncvarid, attname, 1, &attrint);
+		  cdfGetAttInt(ncid, ncvarid, attname, 1, &attrint);
 		  printf("int: %s.%s = %d\n", ncvars[ncvarid].name, attname, attrint);
 		}
 	      else if ( attlen == 1 && (attrtype == NC_FLOAT || attrtype == NC_DOUBLE) )
 		{
-		  cdfGetAttDouble(fileID, ncvarid, attname, 1, &attrflt);
+		  cdfGetAttDouble(ncid, ncvarid, attname, 1, &attrflt);
 		  printf("flt: %s.%s = %g\n", ncvars[ncvarid].name, attname, attrflt);
 		}
 	      else if ( attrtype == NC_CHAR )
 		{
-		  cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+		  cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
 		  attstring[attlen] = 0;
 		  printf("txt: %s.%s = %s\n", ncvars[ncvarid].name, attname, attstring);
 		}
@@ -5156,7 +5161,7 @@ void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
 
 /* define all input grids */
 static
-void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid)
+void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid)
 {
   int ncvarid, ncvarid2;
   int ndims;
@@ -5176,7 +5181,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
   const int attstringlen = 8192; char attstring[8192];
   double datt;
 
-  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+  for ( ncvarid = 0; ncvarid < nvars; ++ncvarid )
     {
       if ( ncvars[ncvarid].isvar && ncvars[ncvarid].gridID == UNDEFID )
 	{
@@ -5358,9 +5363,9 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		  grid.xvals = (double *) malloc(size*sizeof(double));
 
 		  if ( ltgrid )
-		    cdf_get_vara_double(fileID, xvarid, start, count, grid.xvals);
+		    cdf_get_vara_double(ncvars[xvarid].ncid, xvarid, start, count, grid.xvals);
 		  else
-		    cdf_get_var_double(fileID, xvarid, grid.xvals);
+		    cdf_get_var_double(ncvars[xvarid].ncid, xvarid, grid.xvals);
 
                   scale_add(size, grid.xvals, ncvars[xvarid].addoffset, ncvars[xvarid].scalefactor);
 
@@ -5431,9 +5436,9 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		  grid.yvals = (double *) malloc(size*sizeof(double));
 
 		  if ( ltgrid )
-		    cdf_get_vara_double(fileID, yvarid, start, count, grid.yvals);
+		    cdf_get_vara_double(ncvars[yvarid].ncid, yvarid, start, count, grid.yvals);
 		  else
-		    cdf_get_var_double(fileID, yvarid, grid.yvals);
+		    cdf_get_var_double(ncvars[yvarid].ncid, yvarid, grid.yvals);
 
                   scale_add(size, grid.yvals, ncvars[yvarid].addoffset, ncvars[yvarid].scalefactor);
 
@@ -5516,7 +5521,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			    nvertex = ncdims[ncvars[ncvars[xvarid].bounds].dimids[nbdims-1]].len;
 			    grid.nvertex = (int) nvertex;
 			    grid.xbounds = (double *) malloc(nvertex*size*sizeof(double));
-			    cdf_get_var_double(fileID, ncvars[xvarid].bounds, grid.xbounds);
+			    cdf_get_var_double(ncvars[xvarid].ncid, ncvars[xvarid].bounds, grid.xbounds);
 			  }
 		      }
 		  }
@@ -5535,7 +5540,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 				      grid.nvertex, (int) nvertex);
 			    */
 			    grid.ybounds = (double *) malloc(nvertex*size*sizeof(double));
-			    cdf_get_var_double(fileID, ncvars[yvarid].bounds, grid.ybounds);
+			    cdf_get_var_double(ncvars[yvarid].ncid, ncvars[yvarid].bounds, grid.ybounds);
 			  }
 		      }
 		  }
@@ -5543,7 +5548,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		if ( ncvars[ncvarid].cellarea != UNDEFID )
 		  {
 		    grid.area = (double *) malloc(size*sizeof(double));
-		    cdf_get_var_double(fileID, ncvars[ncvarid].cellarea, grid.area);
+		    cdf_get_var_double(ncvars[ncvarid].ncid, ncvars[ncvarid].cellarea, grid.area);
 		  }
 
 		break;
@@ -5589,16 +5594,16 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 
 	  if ( ncvars[ncvarid].gmapid >= 0 && ncvars[ncvarid].gridtype != GRID_CURVILINEAR )
 	    {
-	      cdf_inq_varnatts(fileID, ncvars[ncvarid].gmapid, &nvatts);
+	      cdf_inq_varnatts(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, &nvatts);
 
 	      for ( iatt = 0; iatt < nvatts; iatt++ )
 		{
-		  cdf_inq_attname(fileID, ncvars[ncvarid].gmapid, iatt, attname);
-		  cdf_inq_attlen(fileID, ncvars[ncvarid].gmapid, attname, &attlen);
+		  cdf_inq_attname(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, iatt, attname);
+		  cdf_inq_attlen(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, &attlen);
 
 		  if ( strcmp(attname, "grid_mapping_name") == 0 )
 		    {
-		      cdfGetAttText(fileID, ncvars[ncvarid].gmapid, attname, attstringlen-1, attstring);
+		      cdfGetAttText(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, attstringlen-1, attstring);
 		      strtolower(attstring);
 
 		      if ( strcmp(attstring, "rotated_latitude_longitude") == 0 )
@@ -5617,21 +5622,21 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		    }
 		  else if ( strcmp(attname, "earth_radius") == 0 )
 		    {
-		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &datt);
+		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &datt);
 		      grid.laea_a = datt;
 		      grid.lcc2_a = datt;
 		    }
 		  else if ( strcmp(attname, "longitude_of_projection_origin") == 0 )
 		    {
-		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &grid.laea_lon_0);
+		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &grid.laea_lon_0);
 		    }
 		  else if ( strcmp(attname, "longitude_of_central_meridian") == 0 )
 		    {
-		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &grid.lcc2_lon_0);
+		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &grid.lcc2_lon_0);
 		    }
 		  else if ( strcmp(attname, "latitude_of_projection_origin") == 0 )
 		    {
-		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &datt);
+		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &datt);
 		      grid.laea_lat_0 = datt;
 		      grid.lcc2_lat_0 = datt;
 		    }
@@ -5639,29 +5644,29 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		    {
 		      if ( attlen == 1 )
 			{
-			  cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &datt);
+			  cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &datt);
 			  grid.lcc2_lat_1 = datt;
 			  grid.lcc2_lat_2 = datt;
 			}
 		      else
 			{
 			  double datt2[2];
-			  cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 2, datt2);
+			  cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 2, datt2);
 			  grid.lcc2_lat_1 = datt2[0];
 			  grid.lcc2_lat_2 = datt2[1];
 			}
 		    }
 		  else if ( strcmp(attname, "grid_north_pole_latitude") == 0 )
 		    {
-		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &grid.ypole);
+		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &grid.ypole);
 		    }
 		  else if ( strcmp(attname, "grid_north_pole_longitude") == 0 )
 		    {
-		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &grid.xpole);
+		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &grid.xpole);
 		    }
 		  else if ( strcmp(attname, "north_pole_grid_longitude") == 0 )
 		    {
-		      cdfGetAttDouble(fileID, ncvars[ncvarid].gmapid, attname, 1, &grid.angle);
+		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &grid.angle);
 		    }
 		}
 	    }
@@ -5697,7 +5702,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 	  if ( proj.type == GRID_PROJECTION )
 	    {
 	      ncvars[ncvarid].gridID = varDefGrid(vlistID, proj, 1);
-	      copy_numeric_projatts(ncvars[ncvarid].gridID, ncvars[ncvarid].gmapid, fileID);
+	      copy_numeric_projatts(ncvars[ncvarid].gridID, ncvars[ncvarid].gmapid, ncvars[ncvarid].ncid);
 	    }
 	  else
 #endif
@@ -5755,7 +5760,7 @@ void define_all_grids(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 
 /* define all input zaxes */
 static
-void define_all_zaxes(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
+void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
 		      size_t vctsize, double *vct)
 {
   int ncvarid, ncvarid2;
@@ -5815,7 +5820,7 @@ void define_all_zaxes(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 		if ( pname[len-2] == '_' && isdigit((int) pname[len-1]) )
 		  pname[len-2] = 0;
 	      */
-	      cdf_get_var_double(fileID, zvarid, zvar);
+	      cdf_get_var_double(ncvars[zvarid].ncid, zvarid, zvar);
 
 	      if ( ncvars[zvarid].bounds != UNDEFID )
 		{
@@ -5831,7 +5836,7 @@ void define_all_zaxes(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 			  zbounds = (double *) malloc(2*nlevel*sizeof(double));
 			  lbounds = (double *) malloc(nlevel*sizeof(double));
 			  ubounds = (double *) malloc(nlevel*sizeof(double));
-			  cdf_get_var_double(fileID, ncvars[zvarid].bounds, zbounds);
+			  cdf_get_var_double(ncvars[zvarid].ncid, ncvars[zvarid].bounds, zbounds);
 			  for ( i = 0; i < nlevel; ++i )
 			    {
 			      lbounds[i] = zbounds[i*2];
@@ -5905,8 +5910,9 @@ void define_all_zaxes(stream_t *streamptr, int fileID, int vlistID, ncdim_t *ncd
 
 /* define all input data variables */
 static
-void define_all_vars(int fileID, int streamID, int vlistID, int instID, int modelID, int *varids, ncdim_t *ncdims, int nvars, ncvar_t *ncvars)
+void define_all_vars(int streamID, int vlistID, int instID, int modelID, int *varids, int nvars, ncvar_t *ncvars)
 {
+  int ncid;
   int varID1, varID, ncvarid;
   int code;
   int tableID;
@@ -6055,6 +6061,7 @@ void define_all_vars(int fileID, int streamID, int vlistID, int instID, int mode
   for ( varID = 0; varID < nvars; varID++ )
     {
       ncvarid = varids[varID];
+      ncid = ncvars[ncvarid].ncid;
 
       if ( ncvars[ncvarid].natts )
 	{
@@ -6070,14 +6077,14 @@ void define_all_vars(int fileID, int streamID, int vlistID, int instID, int mode
 	  for ( iatt = 0; iatt < nvatts; iatt++ )
 	    {
 	      attnum = ncvars[ncvarid].atts[iatt];
-	      cdf_inq_attname(fileID, ncvarid, attnum, attname);
-	      cdf_inq_attlen(fileID, ncvarid, attname, &attlen);
-	      cdf_inq_atttype(fileID, ncvarid, attname, &attrtype);
+	      cdf_inq_attname(ncid, ncvarid, attnum, attname);
+	      cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
+	      cdf_inq_atttype(ncid, ncvarid, attname, &attrtype);
 	      if ( attrtype == NC_SHORT || attrtype == NC_INT )
 		{
 		  int *attint;
 		  attint = (int *) malloc(attlen*sizeof(int));
-		  cdfGetAttInt(fileID, ncvarid, attname, attlen, attint);
+		  cdfGetAttInt(ncid, ncvarid, attname, attlen, attint);
 		  if ( attrtype == NC_SHORT )
 		    vlistDefAttInt(vlistID, varID, attname, DATATYPE_INT16, (int)attlen, attint);
 		  else
@@ -6090,7 +6097,7 @@ void define_all_vars(int fileID, int streamID, int vlistID, int instID, int mode
 		{
 		  double *attflt;
 		  attflt = (double *) malloc(attlen*sizeof(double));
-		  cdfGetAttDouble(fileID, ncvarid, attname, attlen, attflt);
+		  cdfGetAttDouble(ncid, ncvarid, attname, attlen, attflt);
 		  if ( attrtype == NC_FLOAT )
 		    vlistDefAttFlt(vlistID, varID, attname, DATATYPE_FLT32, (int)attlen, attflt);
 		  else
@@ -6101,7 +6108,7 @@ void define_all_vars(int fileID, int streamID, int vlistID, int instID, int mode
 		}
 	      else if ( attrtype == NC_CHAR )
 		{
-		  cdfGetAttText(fileID, ncvarid, attname, attstringlen-1, attstring);
+		  cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
 		  attlen = 1 + strlen(attstring);
 		  vlistDefAttTxt(vlistID, varID, attname, (int)attlen, attstring);
 		  if ( CDI_Debug )
@@ -6326,19 +6333,29 @@ int cdfInqContents(int streamID)
   cdf_inq(fileID, &ndims , &nvars, &ngatts, &unlimdimid);
 
   if ( CDI_Debug )
-    {
-      Message("root: ndims %d, nvars %d, ngatts %d", ndims, nvars, ngatts);
-    }
+    Message("root: ndims %d, nvars %d, ngatts %d", ndims, nvars, ngatts);
 
-  /* alloc ncdims */
-  if ( ndims > 0 )
-    ncdims = (ncdim_t *) malloc(ndims*sizeof(ncdim_t));
-  else
+  if ( ndims == 0 )
     {
       Warning("ndims = %d", ndims);
       return (CDI_EUFSTRUCT);
     }
-  /*
+
+  /* alloc ncdims */
+  ncdims = (ncdim_t *) malloc(ndims*sizeof(ncdim_t));
+  init_ncdims(ndims, ncdims);
+
+  if ( nvars > 0 )
+    {
+      /* alloc ncvars */
+      ncvars = (ncvar_t *) malloc(nvars*sizeof(ncvar_t));
+      init_ncvars(nvars, ncvars);
+
+      for ( ncvarid = 0; ncvarid < nvars; ++ncvarid )
+        ncvars[ncvarid].ncid = fileID;
+    }
+
+#if  defined  (TEST_GROUPS)
 #if  defined  (HAVE_NETCDF4)
   if ( format == NC_FORMAT_NETCDF4 )
     {
@@ -6347,38 +6364,30 @@ int cdfInqContents(int streamID)
       int ncids[NC_MAX_VARS];
       size_t len = 256;
       char name1[len];
-      char name2[len];
       int gndims, gnvars, gngatts, gunlimdimid;
       nc_inq_grps(fileID, &numgrps, ncids);
       for ( int i = 0; i < numgrps; ++i )
         {
           ncid = ncids[i];
           nc_inq_grpname (ncid, name1);
-          nc_inq_grpname_full (ncid, &len, name2);
-          printf("%d ncid %d >%s< >%s<\n", i, ncid, name1, name2);
           cdf_inq(ncid, &gndims , &gnvars, &gngatts, &gunlimdimid);
+
           if ( CDI_Debug )
-            {
-              Message("%s: ndims %d, nvars %d, ngatts %d", name1, gndims, gnvars, gngatts);
-            }
+            Message("%s: ndims %d, nvars %d, ngatts %d", name1, gndims, gnvars, gngatts);
+
           if ( gndims == 0 )
             {
             }
         }
     }
 #endif
-  */
-  /* alloc ncvars */
-  if ( nvars > 0 )
-    ncvars = (ncvar_t *) malloc(nvars*sizeof(ncvar_t));
-  else
+#endif
+
+  if ( nvars == 0 )
     {
       Warning("nvars = %d", nvars);
       return (CDI_EUFSTRUCT);
     }
-
-  init_ncdims(ndims, ncdims);
-  init_ncvars(nvars, ncvars);
 
   /* read global attributtes */
   read_global_attributtes(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les);
@@ -6411,7 +6420,7 @@ int cdfInqContents(int streamID)
   if ( CDI_Debug ) printNCvars(ncvars, nvars, "cdfScanVarAttributes");
 
   /* scan attributes of all variables */
-  cdfScanVarAttributes(fileID, nvars, ncvars, ncdims, timedimid, modelID, format);
+  cdfScanVarAttributes(nvars, ncvars, ncdims, timedimid, modelID, format);
 
 
   if ( CDI_Debug ) printNCvars(ncvars, nvars, "find coordinate vars");
@@ -6674,7 +6683,7 @@ int cdfInqContents(int streamID)
 
 
   /* define all grids */
-  define_all_grids(streamptr, fileID, vlistID, ncdims, nvars, ncvars, timedimid);
+  define_all_grids(streamptr, vlistID, ncdims, nvars, ncvars, timedimid);
 
 
   /* read VCT */
@@ -6689,7 +6698,7 @@ int cdfInqContents(int streamID)
 
 
   /* define all zaxes */
-  define_all_zaxes(streamptr, fileID, vlistID, ncdims, nvars, ncvars, vctsize, vct);
+  define_all_zaxes(streamptr, vlistID, ncdims, nvars, ncvars, vctsize, vct);
 
 
   if ( vct ) free(vct);
@@ -6716,7 +6725,7 @@ int cdfInqContents(int streamID)
   streamptr->ntsteps = ntsteps;
 
   /* define all data variables */
-  define_all_vars(fileID, streamID, vlistID, instID, modelID, varids, ncdims, nvars_data, ncvars);
+  define_all_vars(streamID, vlistID, instID, modelID, varids, nvars_data, ncvars);
 
 
   cdiCreateTimesteps(streamID);
