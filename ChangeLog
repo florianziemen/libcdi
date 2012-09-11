@@ -5,6 +5,10 @@
 
 2012-09-10  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* netCDF: set 1D arrays to coordiante variables if axis attribute is available
+
+2012-09-10  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
 	* unreduced: compute nlon and nvalues from rowlon[] (bug fix)
 
 2012-09-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

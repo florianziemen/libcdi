@@ -4302,12 +4302,14 @@ void cdfSetDim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
 }
 
 static
-void printNCvars(ncvar_t *ncvars, int nvars)
+void printNCvars(ncvar_t *ncvars, int nvars, const char *oname)
 {
   char axis[6];
   int ncvarid, i;
   int ndim;
   int iaxis[] = {'t', 'z', 'y', 'x'};
+
+  fprintf(stderr, "%s:\n", oname);
 
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
@@ -4323,7 +4325,12 @@ void printNCvars(ncvar_t *ncvars, int nvars)
               else if ( ncvars[ncvarid].xvarid != -1 ) axis[ndim++] = iaxis[3];
               else
              */
-              axis[ndim++] = '?';
+              if      ( ncvars[ncvarid].dimtype[i] == T_AXIS ) axis[ndim++] = iaxis[0];
+              else if ( ncvars[ncvarid].dimtype[i] == Z_AXIS ) axis[ndim++] = iaxis[1];
+              else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS ) axis[ndim++] = iaxis[2];
+              else if ( ncvars[ncvarid].dimtype[i] == X_AXIS ) axis[ndim++] = iaxis[3];
+              else
+                axis[ndim++] = '?';
             }
         }
       else
@@ -4341,7 +4348,7 @@ void printNCvars(ncvar_t *ncvars, int nvars)
 
       axis[ndim++] = 0;
 
-      printf("%3d %3d %3d  %-4s %s\n", ncvarid, ncvars[ncvarid].isvar, ndim-2, axis, ncvars[ncvarid].name);
+      fprintf(stderr, "%3d %3d %3d  %-4s %s\n", ncvarid, ncvars[ncvarid].isvar, ndim-2, axis, ncvars[ncvarid].name);
     }
 }
 #endif
@@ -4795,12 +4802,12 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
 		    {
 		      while ( attlen-- )
 			{
-			  if ( tolower((int) attstring[attlen]) == 't' )
+			  if ( (int) attstring[attlen] == 't' )
 			    {
 			      if ( attlen != 0 ) Warning("axis attribute 't' not on first position");
 			      cdfSetDim(ncvars, ncvarid, attlen, T_AXIS);
 			    }
-			  else if ( tolower((int) attstring[attlen]) == 'z' )
+			  else if ( (int) attstring[attlen] == 'z' )
 			    {
 			      ncvars[ncvarid].zdim = dimidsp[attlen];
 			      cdfSetDim(ncvars, ncvarid, attlen, Z_AXIS);
@@ -4811,15 +4818,27 @@ void cdfScanVarAttributes(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdim
 				  ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
 				}
 			    }
-			  else if ( tolower((int) attstring[attlen]) == 'y' )
+			  else if ( (int) attstring[attlen] == 'y' )
 			    {
 			      ncvars[ncvarid].ydim = dimidsp[attlen];
 			      cdfSetDim(ncvars, ncvarid, attlen, Y_AXIS);
+
+			      if ( ncvars[ncvarid].ndims == 1 )
+				{
+				  cdfSetVar(ncvars, ncvarid, FALSE);
+				  ncdims[ncvars[ncvarid].dimids[0]].dimtype = Y_AXIS;
+				}
 			    }
-			  else if ( tolower((int) attstring[attlen]) == 'x' )
+			  else if ( (int) attstring[attlen] == 'x' )
 			    {
 			      ncvars[ncvarid].xdim = dimidsp[attlen];
 			      cdfSetDim(ncvars, ncvarid, attlen, X_AXIS);
+
+			      if ( ncvars[ncvarid].ndims == 1 )
+				{
+				  cdfSetVar(ncvars, ncvarid, FALSE);
+				  ncdims[ncvars[ncvarid].dimids[0]].dimtype = X_AXIS;
+				}
 			    }
 			}
 		    }
@@ -6347,12 +6366,13 @@ int cdfInqContents(int streamID)
 	ncdims[ncdimid].dimtype = T_AXIS;
     }
 
+  if ( CDI_Debug ) printNCvars(ncvars, nvars, "cdfScanVarAttributes");
 
   /* scan attributes of all variables */
   cdfScanVarAttributes(fileID, nvars, ncvars, ncdims, timedimid, modelID, format);
 
 
-  if ( CDI_Debug ) printNCvars(ncvars, nvars);
+  if ( CDI_Debug ) printNCvars(ncvars, nvars, "find coordinate vars");
 
   /* find coordinate vars */
   for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
@@ -6518,7 +6538,7 @@ int cdfInqContents(int streamID)
   /* verify coordinate vars - second scan (all other variables) */
   verify_coordinate_vars_2(nvars, ncvars);
 
-  if ( CDI_Debug ) printNCvars(ncvars, nvars);
+  if ( CDI_Debug ) printNCvars(ncvars, nvars, "verify_coordinate_vars");
 
   if ( ucla_les == TRUE )
     {
@@ -6608,7 +6628,7 @@ int cdfInqContents(int streamID)
 	}
     }
 
-  if ( CDI_Debug ) printNCvars(ncvars, nvars);
+  if ( CDI_Debug ) printNCvars(ncvars, nvars, "define_all_grids");
 
 
   /* define all grids */
