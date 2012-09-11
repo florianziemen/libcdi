@@ -6192,81 +6192,17 @@ void define_all_vars(int fileID, int streamID, int vlistID, int instID, int mode
       if ( tableID != UNDEFID ) vlistDefVarTable(vlistID, varID, tableID);
     }
 }
-#endif
 
-int cdfInqContents(int streamID)
+static
+void read_global_attributtes(int fileID, int vlistID, stream_t *streamptr, int ngatts,
+                               int *instID, int *modelID, int *ucla_les)
 {
-#if  defined  (HAVE_LIBNETCDF)
-  int ndims, nvars, ngatts, unlimdimid;
-  int ncvarid;
-  int ncdimid;
-  int fileID;
   nc_type xtype;
-  size_t ntsteps;
-  int timedimid = -1;
-  int *varids;
-  int nvarids;
   size_t attlen;
   char attname[256];
   const int attstringlen = 8192; char attstring[8192];
-  int iatt, timehasunits = FALSE;
-  int time_has_bounds = FALSE;
-  size_t len;
-  int nc_nvars;
-  int nvcth_id = UNDEFID, vcta_id = UNDEFID, vctb_id = UNDEFID;
-  size_t vctsize = 0;
-  double *vct = NULL;
-  int instID  = UNDEFID;
-  int modelID = UNDEFID;
-  int taxisID;
-  int i;
-  int nbdims;
-  int calendar = UNDEFID;
-  ncdim_t *ncdims;
-  ncvar_t *ncvars;
-  int vlistID;
-  stream_t *streamptr;
-  int format = 0;
-  int ucla_les = FALSE;
+  int iatt;
 
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
-  vlistID = streamInqVlist(streamID);
-  fileID  = streamInqFileID(streamID);
-
-  if ( CDI_Debug )
-    Message("streamID = %d, fileID = %d", streamID, fileID);
-
-#if  defined  (HAVE_NETCDF4)
-  nc_inq_format(fileID, &format);
-#endif
-
-  cdf_inq(fileID, &ndims , &nvars, &ngatts, &unlimdimid);
-
-  /* alloc ncdims */
-  if ( ndims > 0 )
-    ncdims = (ncdim_t *) malloc(ndims*sizeof(ncdim_t));
-  else
-    {
-      Warning("ndims = %d", ndims);
-      return (CDI_EUFSTRUCT);
-    }
-
-  /* alloc ncvars */
-  if ( nvars > 0 )
-    ncvars = (ncvar_t *) malloc(nvars*sizeof(ncvar_t));
-  else
-    {
-      Warning("nvars = %d", nvars);
-      return (CDI_EUFSTRUCT);
-    }
-
-  init_ncdims(ndims, ncdims);
-  init_ncvars(nvars, ncvars);
-
-  /* read global attributtes */
   for ( iatt = 0; iatt < ngatts; iatt++ )
     {
       cdf_inq_attname(fileID, NC_GLOBAL, iatt, attname);
@@ -6285,18 +6221,18 @@ int cdfInqContents(int streamID)
 		}
 	      else if ( strcmp(attname, "institution") == 0 )
 		{
-		  instID = institutInq(0, 0, NULL, attstring);
-		  if ( instID == UNDEFID )
-		    instID = institutDef(0, 0, NULL, attstring);
+		  *instID = institutInq(0, 0, NULL, attstring);
+		  if ( *instID == UNDEFID )
+		    *instID = institutDef(0, 0, NULL, attstring);
 		}
 	      else if ( strcmp(attname, "source") == 0 )
 		{
-		  modelID = modelInq(-1, 0, attstring);
+		  *modelID = modelInq(-1, 0, attstring);
 		}
 	      else if ( strcmp(attname, "Source") == 0 )
 		{
 		  if ( strncmp(attstring, "UCLA-LES", 8) == 0 )
-		    ucla_les = TRUE;
+		    *ucla_les = TRUE;
 		}
 	      /*
 	      else if ( strcmp(attname, "Conventions") == 0 )
@@ -6338,6 +6274,114 @@ int cdfInqContents(int streamID)
 	  free(attflt);
 	}
     }
+}
+#endif
+
+int cdfInqContents(int streamID)
+{
+#if  defined  (HAVE_LIBNETCDF)
+  int ndims, nvars, ngatts, unlimdimid;
+  int ncvarid;
+  int ncdimid;
+  int fileID;
+  size_t ntsteps;
+  int timedimid = -1;
+  int *varids;
+  int nvarids;
+  const int attstringlen = 8192; char attstring[8192];
+  int timehasunits = FALSE;
+  int time_has_bounds = FALSE;
+  size_t len;
+  int nvars_data;
+  int nvcth_id = UNDEFID, vcta_id = UNDEFID, vctb_id = UNDEFID;
+  size_t vctsize = 0;
+  double *vct = NULL;
+  int instID  = UNDEFID;
+  int modelID = UNDEFID;
+  int taxisID;
+  int i;
+  int nbdims;
+  int calendar = UNDEFID;
+  ncdim_t *ncdims;
+  ncvar_t *ncvars;
+  int vlistID;
+  stream_t *streamptr;
+  int format = 0;
+  int ucla_les = FALSE;
+
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(__func__, streamptr);
+
+  vlistID = streamInqVlist(streamID);
+  fileID  = streamInqFileID(streamID);
+
+  if ( CDI_Debug )
+    Message("streamID = %d, fileID = %d", streamID, fileID);
+
+#if  defined  (HAVE_NETCDF4)
+  nc_inq_format(fileID, &format);
+#endif
+
+  cdf_inq(fileID, &ndims , &nvars, &ngatts, &unlimdimid);
+
+  if ( CDI_Debug )
+    {
+      Message("root: ndims %d, nvars %d, ngatts %d", ndims, nvars, ngatts);
+    }
+
+  /* alloc ncdims */
+  if ( ndims > 0 )
+    ncdims = (ncdim_t *) malloc(ndims*sizeof(ncdim_t));
+  else
+    {
+      Warning("ndims = %d", ndims);
+      return (CDI_EUFSTRUCT);
+    }
+  /*
+#if  defined  (HAVE_NETCDF4)
+  if ( format == NC_FORMAT_NETCDF4 )
+    {
+      int ncid;
+      int numgrps;
+      int ncids[NC_MAX_VARS];
+      size_t len = 256;
+      char name1[len];
+      char name2[len];
+      int gndims, gnvars, gngatts, gunlimdimid;
+      nc_inq_grps(fileID, &numgrps, ncids);
+      for ( int i = 0; i < numgrps; ++i )
+        {
+          ncid = ncids[i];
+          nc_inq_grpname (ncid, name1);
+          nc_inq_grpname_full (ncid, &len, name2);
+          printf("%d ncid %d >%s< >%s<\n", i, ncid, name1, name2);
+          cdf_inq(ncid, &gndims , &gnvars, &gngatts, &gunlimdimid);
+          if ( CDI_Debug )
+            {
+              Message("%s: ndims %d, nvars %d, ngatts %d", name1, gndims, gnvars, gngatts);
+            }
+          if ( gndims == 0 )
+            {
+            }
+        }
+    }
+#endif
+  */
+  /* alloc ncvars */
+  if ( nvars > 0 )
+    ncvars = (ncvar_t *) malloc(nvars*sizeof(ncvar_t));
+  else
+    {
+      Warning("nvars = %d", nvars);
+      return (CDI_EUFSTRUCT);
+    }
+
+  init_ncdims(ndims, ncdims);
+  init_ncvars(nvars, ncvars);
+
+  /* read global attributtes */
+  read_global_attributtes(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les);
 
   /* find time dim */
   if ( unlimdimid >= 0 )
@@ -6656,15 +6700,14 @@ int cdfInqContents(int streamID)
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
     if ( ncvars[ncvarid].isvar == TRUE ) varids[nvarids++] = ncvarid;
 
-  nc_nvars = nvars;
-  nvars = nvarids;
+  nvars_data = nvarids;
 
   if ( CDI_Debug ) Message("time varid = %d", streamptr->basetime.ncvarid);
   if ( CDI_Debug ) Message("ntsteps = %d", ntsteps);
-  if ( CDI_Debug ) Message("nvars = %d", nvars);
+  if ( CDI_Debug ) Message("nvars_data = %d", nvars_data);
 
 
-  if ( nvars == 0 )
+  if ( nvars_data == 0 )
     {
       streamptr->ntsteps = 0;
       return (CDI_EUFSTRUCT);
@@ -6673,7 +6716,7 @@ int cdfInqContents(int streamID)
   streamptr->ntsteps = ntsteps;
 
   /* define all data variables */
-  define_all_vars(fileID, streamID, vlistID, instID, modelID, varids, ncdims, nvars, ncvars);
+  define_all_vars(fileID, streamID, vlistID, instID, modelID, varids, ncdims, nvars_data, ncvars);
 
 
   cdiCreateTimesteps(streamID);
@@ -6861,7 +6904,7 @@ int cdfInqTimestep(int streamID, int tsID)
 void cdfEndDef(int streamID)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  int varID, ncvarid;
+  int varID;
   int nvars;
   int fileID;
   stream_t *streamptr;
@@ -6879,7 +6922,7 @@ void cdfEndDef(int streamID)
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
       for ( varID = 0; varID < nvars; varID++ )
-	ncvarid = cdfDefVar(streamID, varID);
+	cdfDefVar(streamID, varID);
 
       if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
 
