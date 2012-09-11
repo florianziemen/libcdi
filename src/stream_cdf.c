@@ -6310,7 +6310,7 @@ int cdfInqContents(int streamID)
   int nbdims;
   int calendar = UNDEFID;
   ncdim_t *ncdims;
-  ncvar_t *ncvars;
+  ncvar_t *ncvars = NULL;
   int vlistID;
   stream_t *streamptr;
   int format = 0;
