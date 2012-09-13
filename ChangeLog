@@ -5,6 +5,7 @@
 
 2012-09-11  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* cdfInqContents: make ncid local to varid
 	* cdfInqContents: group reading of global attribute to read_global_attributtes()
 	* cdfInqContents: set ntsteps to 0 if no data variable found
 	* netCDF: set 1D arrays to coordiante variables if axis attribute is available

@@ -9,7 +9,9 @@
 #include <mpi.h>
 #endif
 
+#ifndef _VLIST_H
 #include "vlist.h"
+#endif
 
 int  vlistInqVarDecoChunk ( int, int, int );
 int  vlistInqVarDecoOff   ( int, int, int );
