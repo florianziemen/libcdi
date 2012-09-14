@@ -64,9 +64,6 @@
 /* Define to 1 for JPEG compression for GRIB2 */
 #undef HAVE_LIBOPENJPEG
 
-/* Define to 1 if you have the <libpng14/png.h> header file. */
-#undef HAVE_LIBPNG14_PNG_H
-
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD
 
@@ -102,6 +99,9 @@
 
 /* Define to 1 if you have the <openjpeg.h> header file. */
 #undef HAVE_OPENJPEG_H
+
+/* Define to 1 if you have the <png.h> header file. */
+#undef HAVE_PNG_H
 
 /* Define if you have POSIX threads libraries and header files. */
 #undef HAVE_PTHREAD
