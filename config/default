@@ -73,13 +73,12 @@ case "${HOSTNAME}" in
 	;;
     thingol)
       ./configure --prefix=`pwd`/build \
-	            --with-netcdf=$HOME/local/libs4cdo-0.0.8 \
-	              --with-hdf5=$HOME/local/libs4cdo-0.0.8 \
-                     --with-szlib=$HOME/local/libs4cdo-0.0.8 \
-                      --with-proj=$HOME/local/libs4cdo-0.0.8 \
-                  --with-grib_api=$HOME/local/libs4cdo-0.0.8 \
-                    --with-jasper=$HOME/local/libs4cdo-0.0.8 \
-                      --with-pic \
+	            --with-netcdf=$HOME/builds/libs4cdo \
+	              --with-hdf5=$HOME/builds/libs4cdo \
+                     --with-szlib=$HOME/builds/libs4cdo \
+                  --with-grib_api=$HOME/builds/libs4cdo \
+                    --with-jasper=$HOME/builds/libs4cdo \
+                      --with-pic --enable-swig --enable-ruby --enable-python \
                       CC=gcc CFLAGS="-g -O2 -Wall" LIBS=-lopenjpeg
 	;;
 # sparc-sun-solaris2.9
