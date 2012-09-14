@@ -183,6 +183,7 @@ src/cfortran.doc -text
 src/cfortran.h -text
 src/cgribex.h -text
 src/cgribexlib.c -text
+src/config.h -text
 src/config.h.in -text
 src/datetime.h -text
 src/dmemory.c -text
