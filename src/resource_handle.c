@@ -671,6 +671,10 @@ void reshListPrint ( char * filename )
   pioNamespaceSetActive ( temp );
 }
 
+void cdiReset(void)
+{
+  listDestroy();
+}
 /*
  * Local Variables:
  * c-file-style: "Java"
