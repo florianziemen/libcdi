@@ -116,7 +116,8 @@ void listInitPointer ( void )
 
 /**************************************************************/
 
-static void listDestroy ( void )
+static
+void listDestroy ( void )
 {
   listElem_t * listElem;
   int i, j, nnsp;
@@ -187,7 +188,8 @@ void listInitialize ( void )
 
 /**************************************************************/
 
-static void listSizeExtend()
+static
+void listSizeExtend()
 {
   int newListSize;
   int i, nsp;
@@ -671,9 +673,18 @@ void reshListPrint ( char * filename )
   pioNamespaceSetActive ( temp );
 }
 
+
 void cdiReset(void)
 {
+  LIST_LOCK();
+
   listDestroy();
+
+  listNew ();
+
+  listInitPointer ();
+
+  LIST_UNLOCK();
 }
 /*
  * Local Variables:

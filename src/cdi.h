@@ -226,6 +226,8 @@ void     pioWriteTimestep      ( int, int, int );
 
   /* CDI control routines */
 
+void    cdiReset(void);
+
 char   *cdiStringError(int cdiErrno);
 
 void    cdiDebug(int debug);
