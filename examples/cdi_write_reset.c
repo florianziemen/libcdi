@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "cdi.h"
 
-#define  nrun   30 // Number of runs
+#define  nrun  100 // Number of runs
 #define  nlon   12 // Number of longitudes
 #define  nlat    6 // Number of latitudes 
 #define  nlev    5 // Number of levels    
@@ -85,14 +85,13 @@ int run(int irun)
   // Close the output stream
   streamClose(streamID);
 
-  // Destroy the object
-  /*
+  // Destroy the objects
   vlistDestroy(vlistID);
   taxisDestroy(taxisID);
   zaxisDestroy(zaxisID1);
   zaxisDestroy(zaxisID2);
   gridDestroy(gridID);
-  */
+
   return 0;
 }
 
@@ -103,7 +102,7 @@ int main(void)
   for ( irun = 0; irun < nrun; ++irun )
     {
       run(irun);
-      //     cdiReset();
+      cdiReset();
     }
  
   return 0;

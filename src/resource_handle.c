@@ -2,6 +2,8 @@
 #  include "config.h"
 #endif
 
+#define _XOPEN_SOURCE 600 /* PTHREAD_MUTEX_RECURSIVE */
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -134,7 +136,7 @@ void listDestroy ( void )
                 for ( j = 0; j < listSizeAllocated[i]; j++ )
                   {
                     listElem = listResources[i] + j;
-                    if ( listElem->val )
+                    if  ( listElem->val )
                       listElem->ops->valDestroy ( listElem->val );
                   }
               free ( listResources[i] );
@@ -163,8 +165,12 @@ static
 void listInitialize ( void )
 {
 #if  defined  (HAVE_LIBPTHREAD)
+  pthread_mutexattr_t ma;
+  pthread_mutexattr_init(&ma);
+  pthread_mutexattr_settype(&ma, PTHREAD_MUTEX_RECURSIVE);
   /* initialize global API mutex lock */
-  pthread_mutex_init ( &listMutex, NULL);
+  pthread_mutex_init ( &listMutex, &ma);
+  pthread_mutexattr_destroy(&ma);
 #endif
 
   listNew ();
@@ -203,8 +209,8 @@ void listSizeExtend()
 
   for ( i = listSizeAllocated[nsp]; i < newListSize; ++i )
     {
-      listResources[nsp][i].resH = namespaceIdxEncode2 ( nsp, i );
-      listResources[nsp][i].next = listResources[nsp] + i + 1;
+      listResources[nsp][i].resH   = namespaceIdxEncode2 ( nsp, i );
+      listResources[nsp][i].next   = listResources[nsp] + i + 1;
     }
 
   listResources[nsp][newListSize-1].next = freeListHead[nsp];
