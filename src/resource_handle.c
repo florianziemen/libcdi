@@ -211,6 +211,9 @@ void listSizeExtend()
     {
       listResources[nsp][i].resH   = namespaceIdxEncode2 ( nsp, i );
       listResources[nsp][i].next   = listResources[nsp] + i + 1;
+      listResources[nsp][i].ops    = NULL;
+      listResources[nsp][i].val    = NULL;
+      listResources[nsp][i].status = RESH_UNDEFID;
     }
 
   listResources[nsp][newListSize-1].next = freeListHead[nsp];

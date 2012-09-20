@@ -5,6 +5,10 @@
 
 2012-09-20  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* listSizeExtend: init ops, val and status
+
+2012-09-20  Thomas Jahns <jahns@dkrz.de>
+
 	* listInitialize: set mutex type to PTHREAD_MUTEX_RECURSIVE
 
 2012-09-11  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
