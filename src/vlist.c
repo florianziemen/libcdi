@@ -14,6 +14,8 @@
 #include "vlist_att.h"
 #include "pio_rpc.h"
 
+extern void zaxisGetIndexList ( int, int * );
+
 static int VLIST_Debug = 0;
 
 static int vlistIsInitialized = 0;
@@ -383,12 +385,22 @@ int vlistInqZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int l
   if ( ! zaxisdefined )
     {
       nzaxis = zaxisSize();
-      for ( zaxisID = 0; zaxisID < nzaxis; zaxisID++ )
-        if ( zaxisCompare(zaxisID, zaxistype, nlevels, lbounds, levels, NULL, NULL, 0) == 0 )
-          {
-            zaxisglobdefined = 1;
-            break;
-          }
+      if ( nzaxis > 0 )
+        {
+          int *zaxisIndexList;
+          zaxisIndexList = (int *) malloc ( nzaxis * sizeof ( int ));
+          zaxisGetIndexList ( nzaxis, zaxisIndexList );
+          for ( index = 0; index < nzaxis; index++ )
+            {
+              zaxisID = zaxisIndexList[index];
+              if ( zaxisCompare(zaxisID, zaxistype, nlevels, lbounds, levels, NULL, NULL, 0) == 0 )
+                {
+                  zaxisglobdefined = 1;
+                  break;
+                }
+            }
+          if ( zaxisIndexList ) free ( zaxisIndexList );
+        }
     }
 
   if ( ! zaxisdefined )
@@ -534,6 +546,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 		    nvct = zaxisInqVctSize(zaxisID);
 		    vct  = zaxisInqVctPtr(zaxisID);
 		  }
+
 		lbounds  = 0;     /* <------------ have to defined */
 		levels2  = NULL;  /* <------------ have to defined */
 		zaxisID2 = vlistInqZaxis(vlistID2, zaxisType, nlevs2, levels, lbounds, levels2, nvct, vct);
@@ -1084,7 +1097,7 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
           decoSize  = vlistptr->vars[varID].decoSize;
           size      = vlistptr->vars[varID].nlevs *
             gridInqSize ( vlistptr->vars[varID].gridID );
-          
+
           for ( i = 0; i < decoSize; i++ )
             {
               rank   = vlistptr->vars[varID].deco[i].rank;
@@ -1094,7 +1107,7 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
               fprintf ( fp, "%3d %8d %6d %6d %6d %8d %6d\n",
                         varID, size, iorank, decoSize, rank, offset, chunk );
             }
-        }      
+        }
     }
 }
 
