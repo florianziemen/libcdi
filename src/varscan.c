@@ -777,7 +777,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
   int index;
   int zaxisglobdefined = 0;
   vlist_t *vlistptr;
-  int * zaxisIndexList, i;
+  int i;
 
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -801,7 +801,8 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
       nzaxis = zaxisSize();
       if ( nzaxis > 0 )
         {
-          zaxisIndexList = malloc ( nzaxis * sizeof ( int ));
+          int *zaxisIndexList;
+          zaxisIndexList = (int *) malloc ( nzaxis * sizeof ( int ));
           zaxisGetIndexList ( nzaxis, zaxisIndexList );
           for ( i = 0; i < nzaxis; i++ )
             {

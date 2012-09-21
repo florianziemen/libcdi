@@ -131,7 +131,7 @@ zaxis_t *zaxisNewEntry(void)
 }
 
 static
-void zaxisInit (void)
+void zaxisInit(void)
 {
   static int zaxisInitialized = 0;
   char *env;
@@ -246,7 +246,7 @@ int zaxisCreate(int zaxistype, int size)
 }
 
 
-void zaxisDestroyKernel ( zaxis_t * zaxisptr )
+void zaxisDestroyKernel( zaxis_t * zaxisptr )
 {
   int id;
 
