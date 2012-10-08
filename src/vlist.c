@@ -659,7 +659,7 @@ void vlistCat(int vlistID2, int vlistID1)
 	{
 	  int pnum, pcat, pdis;
 	  cdiDecodeParam(vlistptr1->vars[varID].param, &pnum, &pcat, &pdis);
-	  pnum=-(varID2+1);
+	  pnum = -(varID2+1);
 	  vlistptr2->vars[varID2].param = cdiEncodeParam(pnum, pcat, pdis);
 	}
 
