@@ -201,8 +201,8 @@ extern "C" {
 #define  CALENDAR_366DAYS         4
 #define  CALENDAR_NONE            5
 
-  /* parallel IO IOMode */
-  
+/* parallel IO IOMode */
+
 #define  PIO_NONE                 0
 #define  PIO_MPI                  1
 #define  PIO_WRITER               2
@@ -211,9 +211,9 @@ extern "C" {
 
 #define  PIO_MINIOMODE                  PIO_NONE
 #define  PIO_MAXIOMODE                  PIO_FPGUARD
-#define  PIO_MINIOMODEWITHSPECIALPROCS  PIO_WRITER  
- 
-  /* parallel IO routines */
+#define  PIO_MINIOMODEWITHSPECIALPROCS  PIO_WRITER
+
+/* parallel IO routines */
 
 void     pioEndDef             ( void );
 void     pioEndTimestepping    ( void );
@@ -224,7 +224,7 @@ int      pioInqVarDecoOff      ( int, int );
 void     pioNamespaceSetActive ( int );
 void     pioWriteTimestep      ( int, int, int );
 
-  /* CDI control routines */
+/* CDI control routines */
 
 void    cdiReset(void);
 

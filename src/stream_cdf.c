@@ -2807,8 +2807,7 @@ int cdfDefVar(int streamID, int varID)
 
           if ( checkname ) iz++;
 
-          if ( iz > 99 )
-            Error("Double entry of variable name '%s'!", name);
+          if ( iz >= 256 ) Error("Double entry of variable name '%s'!", name);
         }
 
       if ( strcmp(name, varname) != 0 )
@@ -2850,7 +2849,7 @@ int cdfDefVar(int streamID, int varID)
 
           if ( checkname ) iz++;
 
-          if ( iz > 99 ) break;
+          if ( iz >= 256 ) break;
         }
 
       name = varname;
