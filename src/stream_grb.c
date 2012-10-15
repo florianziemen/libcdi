@@ -14,12 +14,10 @@
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
 #include "gribapi.h"
 
-/* begin deike */
 #ifdef USE_MPI
 #include "pio.h"
 #include "pio_comm.h"
 #endif
-/* end deike */
 
 
 int grib1ltypeToZaxisType(int grib_ltype)

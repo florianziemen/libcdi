@@ -16,8 +16,6 @@ int    pioFileOpenW    ( const char* );
 int    pioFileClose    ( int );
 size_t pioFileWrite    ( int, int, const void*, size_t );
 
-#else
-typedef int MPI_Comm;
 #endif
 
 #endif
