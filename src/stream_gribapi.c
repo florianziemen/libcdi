@@ -236,7 +236,7 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
       GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
       rdate = (int) lpar;
       GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
-      rtime = (int) lpar*100;    
+      rtime = (int) lpar*100;
       GRIB_CHECK(grib_get_long(gh, "forecastTime", &lpar), 0);
       startStep = (int) lpar;
       GRIB_CHECK(grib_get_long(gh, "endStep", &lpar), 0);
@@ -2012,27 +2012,59 @@ int gribapiDefStepUnits(grib_handle *gh, int timeunit, int gcinit)
 }
 
 static
-void gribapiDefDateTime(int editionNumber, grib_handle *gh, int date, int time)
+int gribapiDefSteptype(int editionNumber, grib_handle *gh, int tsteptype, int gcinit)
+{
+  long proDefTempNum = 0;
+  size_t len = 64;
+  char stepType[64];
+
+  switch ( tsteptype )
+    {
+    case TSTEP_INSTANT:  strcpy(stepType, "instant"); proDefTempNum = 0; break;
+    case TSTEP_AVG:      strcpy(stepType, "avg");     proDefTempNum = 8; break;
+    case TSTEP_ACCUM:    strcpy(stepType, "accum");   proDefTempNum = 8; break;
+    case TSTEP_MAX:      strcpy(stepType, "max");     proDefTempNum = 8; break;
+    case TSTEP_MIN:      strcpy(stepType, "min");     proDefTempNum = 8; break;
+    case TSTEP_DIFF:     strcpy(stepType, "diff");    proDefTempNum = 8; break;
+    case TSTEP_RMS:      strcpy(stepType, "rms");     proDefTempNum = 8; break;
+    case TSTEP_SD:       strcpy(stepType, "sd");      proDefTempNum = 8; break;
+    case TSTEP_COV:      strcpy(stepType, "cov");     proDefTempNum = 8; break;
+    case TSTEP_RATIO:    strcpy(stepType, "ratio");   proDefTempNum = 8; break;
+    default:             strcpy(stepType, "instant"); proDefTempNum = 0; break;
+    }
+
+  if ( !gcinit )
+    {
+      if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "productDefinitionTemplateNumber", proDefTempNum), 0);
+      len = strlen(stepType);
+      GRIB_CHECK(grib_set_string(gh, "stepType", stepType, &len), 0);
+    }
+
+  return ((int)proDefTempNum);
+}
+
+static
+void gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, int date, int time, int tsteptype, int gcinit)
 {
   if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 0), 0);
-  GRIB_CHECK(grib_set_long(gh, "stepRange", 0), 0);
+  if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "stepRange", 0), 0);
 
   if ( date == 0 ) date = 10101;
   GRIB_CHECK(grib_set_long(gh, "dataDate", date), 0);
   GRIB_CHECK(grib_set_long(gh, "dataTime", time/100), 0);
+
+  (void ) gribapiDefSteptype(editionNumber, gh, tsteptype, gcinit);
 }
 
 static
-int gribapiDefTsteptype(int editionNumber, grib_handle *gh, int tsteptype, int factor, int calendar,
-			int rdate, int rtime, int vdate, int vtime, int gcinit)
+int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rtime, int vdate, int vtime,
+                          int tsteptype, int factor, int calendar, int gcinit)
 {
   int status = -1;
   int year, month, day, hour, minute, second;
   int julday1, secofday1, julday2, secofday2, days, secs;
   long startStep = 0, endStep;
   long proDefTempNum = 0;
-  size_t len = 64;
-  char stepType[64];
 
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
@@ -2049,30 +2081,15 @@ int gribapiDefTsteptype(int editionNumber, grib_handle *gh, int tsteptype, int f
       endStep = (int) ((days*86400.0 + secs)/factor);
 
       if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
+      if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "stepRange", 0), 0);
+
+      if ( rdate == 0 ) rdate = 10101;
+      GRIB_CHECK(grib_set_long(gh, "dataDate", rdate), 0);
+      GRIB_CHECK(grib_set_long(gh, "dataTime", rtime/100), 0);
 
       // printf(">>>>> tsteptype %d  startStep %d  endStep %d\n", tsteptype, startStep, endStep);
 
-      switch ( tsteptype )
-	{
-	case TSTEP_INSTANT:  strcpy(stepType, "instant"); proDefTempNum = 0; break;
-	case TSTEP_AVG:      strcpy(stepType, "avg");     proDefTempNum = 8; break;
-	case TSTEP_ACCUM:    strcpy(stepType, "accum");   proDefTempNum = 8; break;
-	case TSTEP_MAX:      strcpy(stepType, "max");     proDefTempNum = 8; break;
-	case TSTEP_MIN:      strcpy(stepType, "min");     proDefTempNum = 8; break;
-	case TSTEP_DIFF:     strcpy(stepType, "diff");    proDefTempNum = 8; break;
-	case TSTEP_RMS:      strcpy(stepType, "rms");     proDefTempNum = 8; break;
-	case TSTEP_SD:       strcpy(stepType, "sd");      proDefTempNum = 8; break;
-	case TSTEP_COV:      strcpy(stepType, "cov");     proDefTempNum = 8; break;
-	case TSTEP_RATIO:    strcpy(stepType, "ratio");   proDefTempNum = 8; break;
-	default:             strcpy(stepType, "instant"); proDefTempNum = 0; break;
-	}
-
-      if ( !gcinit )
-        {
-          if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "productDefinitionTemplateNumber", proDefTempNum), 0);
-          len = strlen(stepType);
-          GRIB_CHECK(grib_set_string(gh, "stepType", stepType, &len), 0);
-        }
+      proDefTempNum = gribapiDefSteptype(editionNumber, gh, tsteptype, gcinit);
 
       if ( proDefTempNum == 0 ) startStep = endStep;
 
@@ -2100,25 +2117,20 @@ void gribapiDefTime(int editionNumber, grib_handle *gh , int vdate, int vtime, i
 
   if ( taxistype == TAXIS_RELATIVE )
     {
-      int rdate, rtime;
-      int calendar;
       int status;
+      int calendar = taxisInqCalendar(taxisID);
+      int rdate    = taxisInqRdate(taxisID);
+      int rtime    = taxisInqRtime(taxisID);
 
-      calendar = taxisInqCalendar(taxisID);
-      rdate    = taxisInqRdate(taxisID);
-      rtime    = taxisInqRtime(taxisID);
-
-      gribapiDefDateTime(editionNumber, gh, rdate, rtime);
-
-      status = gribapiDefTsteptype(editionNumber, gh, tsteptype, factor, calendar,
-				   rdate, rtime, vdate, vtime, gcinit);
+      status = gribapiDefDateTimeRel(editionNumber, gh, rdate, rtime, vdate, vtime,
+                                     tsteptype, factor, calendar, gcinit);
 
       if ( status != 0 ) taxistype = TAXIS_ABSOLUTE;
     }
 
   if ( taxistype == TAXIS_ABSOLUTE )
     {
-      gribapiDefDateTime(editionNumber, gh, vdate, vtime);
+      gribapiDefDateTimeAbs(editionNumber, gh, vdate, vtime, tsteptype, gcinit);
     }
 }
 

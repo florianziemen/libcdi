@@ -3,6 +3,10 @@
 	* Version 1.5.8 released
 	* using CGRIBEX library version 1.5.5
 
+2012-10-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* grib2: added stepType support for absolute time axis
+	
 2012-10-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* pio.h remove line 'typedef int MPI_Comm;' [Bug #2882]
