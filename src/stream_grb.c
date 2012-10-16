@@ -554,8 +554,13 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   else
 #endif
     {
+#if defined (GRIBCONTAINER2D)
+      gribContainer_t **gribContainers =  (gribContainer_t **) streamptr->gribContainers;
+      gc = (void *) &gribContainers[varID][levelID];
+#else
       gribContainer_t *gribContainers =  (gribContainer_t *) streamptr->gribContainers;
       gc = (void *) &gribContainers[varID];
+#endif
     }
 
   if ( streamptr->comptype == COMPRESS_JPEG )

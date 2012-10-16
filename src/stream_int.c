@@ -618,7 +618,7 @@ void streamPrintP   ( void * streamptr, FILE * fp )
   fprintf ( fp, "curfile       = %d\n", sp->curfile );
   fprintf ( fp, "nfiles        = %d\n", sp->nfiles );
   fprintf ( fp, "//  char    **fnames;\n" );
-  fprintf ( fp, "//  void     *gribContainers;\n" );
+  fprintf ( fp, "//  void    **gribContainers;\n" );
   fprintf ( fp, "vlistIDorig   = %d\n", sp->vlistIDorig );
 }
 

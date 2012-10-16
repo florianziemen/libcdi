@@ -186,7 +186,6 @@ typedef struct {
   int       gridID;
   int       zaxisID;
   int       tsteptype;   /* TSTEP_* */
-  int       nlevel;
 }
 svarinfo_t;
 
@@ -246,7 +245,11 @@ typedef struct {
   int         curfile;
   int         nfiles;
   char      **fnames;
+#if defined (GRIBCONTAINER2D)
+  void      **gribContainers;
+#else
   void       *gribContainers;
+#endif
   int         vlistIDorig;
 }
 stream_t;
