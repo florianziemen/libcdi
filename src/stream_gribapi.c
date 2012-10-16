@@ -2030,15 +2030,15 @@ int gribapiDefDateTime(grib_handle *gh, int timeunit, int date, int time)
 
 static
 int gribapiDefTsteptype(grib_handle *gh, int tsteptype, int timeunit, int factor, int calendar,
-			int rdate, int rtime, int vdate, int vtime)
+			int rdate, int rtime, int vdate, int vtime, int gcinit)
 {
   int status = -1;
   int year, month, day, hour, minute, second;
   int julday1, secofday1, julday2, secofday2, days, secs;
   long startStep = 0, endStep;
   long proDefTempNum = 0;
-  size_t len = 256;
-  char stepType[256];
+  size_t len = 64;
+  char stepType[64];
   long editionNumber;
 
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
@@ -2050,15 +2050,18 @@ int gribapiDefTsteptype(grib_handle *gh, int tsteptype, int timeunit, int factor
   cdiDecodeDate(vdate, &year, &month, &day);
   cdiDecodeTime(vtime, &hour, &minute, &second);
   encode_juldaysec(calendar, year, month, day, hour, minute, &julday2, &secofday2);
-  
+
   (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
 
   if ( !(int) fmod(days*86400.0 + secs, factor) )
     {
       endStep = (int) ((days*86400.0 + secs)/factor);
 
-      if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
-      gribapiDefStepUnits(gh, timeunit);
+      //  if ( !gcinit )
+        {
+          if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
+          gribapiDefStepUnits(gh, timeunit);
+        }
 
       // printf(">>>>> tsteptype %d  startStep %d  endStep %d\n", tsteptype, startStep, endStep);
 
@@ -2077,9 +2080,12 @@ int gribapiDefTsteptype(grib_handle *gh, int tsteptype, int timeunit, int factor
 	default:             strcpy(stepType, "instant"); proDefTempNum = 0; break;
 	}
 
-      if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "productDefinitionTemplateNumber", proDefTempNum), 0);
-      len = strlen(stepType);
-      GRIB_CHECK(grib_set_string(gh, "stepType", stepType, &len), 0);
+      if ( !gcinit )
+        {
+          if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "productDefinitionTemplateNumber", proDefTempNum), 0);
+          len = strlen(stepType);
+          GRIB_CHECK(grib_set_string(gh, "stepType", stepType, &len), 0);
+        }
 
       if ( proDefTempNum == 0 ) startStep = endStep;
 
@@ -2093,7 +2099,7 @@ int gribapiDefTsteptype(grib_handle *gh, int tsteptype, int timeunit, int factor
 }
 
 static
-void gribapiDefTime(grib_handle *gh , int vdate, int vtime, int tsteptype, int numavg, int taxisID)
+void gribapiDefTime(grib_handle *gh , int vdate, int vtime, int tsteptype, int numavg, int taxisID, int gcinit)
 {
   int taxistype = -1;
   int timeunit;
@@ -2116,7 +2122,7 @@ void gribapiDefTime(grib_handle *gh , int vdate, int vtime, int tsteptype, int n
       factor = gribapiDefDateTime(gh, timeunit, rdate, rtime);
 
       status = gribapiDefTsteptype(gh, tsteptype, timeunit, factor, calendar,
-				   rdate, rtime, vdate, vtime);
+				   rdate, rtime, vdate, vtime, gcinit);
 
       if ( status != 0 ) taxistype = TAXIS_ABSOLUTE;
     }
@@ -2888,7 +2894,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(grib_set_long(gh, "perturbationNumber", ensID ), 0);
     }
   */
-  gribapiDefTime(gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID));
+  gribapiDefTime(gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID), gc->init);
 
   if ( editionNumber == 2 && (datatype == DATATYPE_FLT32 || datatype == DATATYPE_FLT64) ) lieee = TRUE;
 
