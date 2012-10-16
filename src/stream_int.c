@@ -587,7 +587,7 @@ void streamPrintP   ( void * streamptr, FILE * fp )
   fprintf ( fp, "nrecs         = %d\n", sp->nrecs );
   fprintf ( fp, "nvars         = %d\n", sp->nvars );
   fprintf ( fp, "varlocked     = %d\n", sp->varlocked );
-  fprintf ( fp, "//SVARINFO *vars;\n" );
+  fprintf ( fp, "//svarinfo_t *vars;\n" );
   fprintf ( fp, "varsAllocated = %d\n", sp->varsAllocated );
   fprintf ( fp, "varinit       = %d\n", sp->varinit );
   fprintf ( fp, "curTsID       = %d\n", sp->curTsID );

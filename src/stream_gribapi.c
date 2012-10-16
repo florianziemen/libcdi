@@ -2793,7 +2793,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   int lieee = FALSE;
   int ensID, ensCount, forecast_type; /* Ensemble Data */
   long bitsPerValue;
-  long editionNumber;
+  long editionNumber = 2;
   char name[256];
   grib_handle *gh = NULL;
   gribContainer_t *gc = (gribContainer_t *) gribContainer;
@@ -2804,7 +2804,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   vlistInqVarName(vlistID, varID, name);
 
 #if defined(GRIBAPIENCODETEST)
-  gh = (grib_handle *) gribHandleNew();
+  gh = (grib_handle *) gribHandleNew(editionNumber);
 #else
   gh = gc->gribHandle;
 #endif

@@ -188,7 +188,7 @@ typedef struct {
   int       tsteptype;   /* TSTEP_* */
   int       nlevel;
 }
-SVARINFO;
+svarinfo_t;
 
 
 typedef struct {
@@ -201,53 +201,53 @@ VCT;
 
 
 typedef struct {
-  int       self;
-  int       accesstype;   /* TYPE_REC or TYPE_VAR */
-  int       accessmode;
-  int       filetype;
-  int       byteorder;
-  int       fileID;
-  int       dimgroupID;
-  int       filemode;
-  off_t     numvals;
-  char     *filename;
-  Record   *record;
-  int       nrecs;        /* number of records                  */
-  int       nvars;        /* number of variables                */
-  int       varlocked;    /* variables locked                   */
-  SVARINFO *vars;
-  int       varsAllocated;
-  int       varinit;
-  int       curTsID;      /* current timestep ID */
-  int       rtsteps;      /* number of tsteps accessed       */
-  long      ntsteps;      /* number of tsteps : only set if all records accessed */
-  int       numTimestep;  /* number of tsteps : only set if all records accessed */
-  TSTEPS   *tsteps;
-  int       tstepsTableSize;
-  int       tstepsNextID;
-  BaseTime  basetime;
-  int       ncmode;
-  int       vlistID;
-  int       xdimID[MAX_GRIDS_PS];
-  int       ydimID[MAX_GRIDS_PS];
-  int       zaxisID[MAX_ZAXES_PS];
-  int       ncxvarID[MAX_GRIDS_PS];
-  int       ncyvarID[MAX_GRIDS_PS];
-  int       ncavarID[MAX_GRIDS_PS];
-  int       historyID;
-  int       globalatts;
-  int       localatts;
-  VCT       vct;
-  int       unreduced;
-  int       sortname;
-  int       have_missval;
-  int       comptype;      // compression type
-  int       complevel;     // compression level
-  int       curfile;
-  int       nfiles;
-  char    **fnames;
-  void     *gribContainers;
-  int       vlistIDorig;
+  int         self;
+  int         accesstype;   /* TYPE_REC or TYPE_VAR */
+  int         accessmode;
+  int         filetype;
+  int         byteorder;
+  int         fileID;
+  int         dimgroupID;
+  int         filemode;
+  off_t       numvals;
+  char       *filename;
+  Record     *record;
+  int        nrecs;        /* number of records                  */
+  int         nvars;        /* number of variables                */
+  int         varlocked;    /* variables locked                   */
+  svarinfo_t *vars;
+  int         varsAllocated;
+  int         varinit;
+  int         curTsID;      /* current timestep ID */
+  int         rtsteps;      /* number of tsteps accessed       */
+  long        ntsteps;      /* number of tsteps : only set if all records accessed */
+  int         numTimestep;  /* number of tsteps : only set if all records accessed */
+  TSTEPS     *tsteps;
+  int         tstepsTableSize;
+  int         tstepsNextID;
+  BaseTime    basetime;
+  int         ncmode;
+  int         vlistID;
+  int         xdimID[MAX_GRIDS_PS];
+  int         ydimID[MAX_GRIDS_PS];
+  int         zaxisID[MAX_ZAXES_PS];
+  int         ncxvarID[MAX_GRIDS_PS];
+  int         ncyvarID[MAX_GRIDS_PS];
+  int         ncavarID[MAX_GRIDS_PS];
+  int         historyID;
+  int         globalatts;
+  int         localatts;
+  VCT         vct;
+  int         unreduced;
+  int         sortname;
+  int         have_missval;
+  int         comptype;      // compression type
+  int         complevel;     // compression level
+  int         curfile;
+  int         nfiles;
+  char      **fnames;
+  void       *gribContainers;
+  int         vlistIDorig;
 }
 stream_t;
 

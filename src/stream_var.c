@@ -36,7 +36,7 @@ int streamvarNewEntry(int streamID)
 {
   int varID = 0;
   int streamvarSize;
-  SVARINFO *streamvar;
+  svarinfo_t *streamvar;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -52,11 +52,11 @@ int streamvarNewEntry(int streamID)
       int i;
 
       streamvarSize = 2;
-      streamvar = (SVARINFO *) malloc(streamvarSize*sizeof(SVARINFO));
+      streamvar = (svarinfo_t *) malloc(streamvarSize*sizeof(svarinfo_t));
       if ( streamvar == NULL )
 	{
           Message("streamvarSize = %d", streamvarSize);
-	  SysError("Allocation of SVARINFO failed");
+	  SysError("Allocation of svarinfo_t failed");
 	}
 
       for ( i = 0; i < streamvarSize; i++ )
@@ -78,11 +78,11 @@ int streamvarNewEntry(int streamID)
       int i;
 
       streamvarSize = 2*streamvarSize;
-      streamvar = (SVARINFO *) realloc(streamvar, streamvarSize*sizeof(SVARINFO));
+      streamvar = (svarinfo_t *) realloc(streamvar, streamvarSize*sizeof(svarinfo_t));
       if ( streamvar == NULL )
 	{
           Message("streamvarSize = %d", streamvarSize);
-	  SysError("Reallocation of SVARINFO failed");
+	  SysError("Reallocation of svarinfo_t failed");
 	}
       varID = streamvarSize/2;
 
