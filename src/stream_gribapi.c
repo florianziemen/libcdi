@@ -1939,10 +1939,9 @@ void gribapiDefModel(grib_handle *gh, int vlistID, int varID)
 }
 
 static
-void gribapiDefParam(grib_handle *gh, int param, const char *name)
+void gribapiDefParam(int editionNumber, grib_handle *gh, int param, const char *name)
 {
   int pdis, pcat, pnum;
-  long editionNumber;
 
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
@@ -1958,8 +1957,6 @@ void gribapiDefParam(grib_handle *gh, int param, const char *name)
   else
     {
       if ( pnum < 0 ) pnum = -pnum;
-
-      GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
       if ( editionNumber <= 1 )
 	{
@@ -1985,7 +1982,7 @@ void gribapiDefParam(grib_handle *gh, int param, const char *name)
 }
 
 static
-int gribapiDefStepUnits(grib_handle *gh, int timeunit)
+int gribapiDefStepUnits(grib_handle *gh, int timeunit, int gcinit)
 {
   int factor = 1;
   long unitsOfTime;
@@ -2004,32 +2001,29 @@ int gribapiDefStepUnits(grib_handle *gh, int timeunit)
     default:            factor =  3600;  unitsOfTime =  1;  strcpy(stepunits, "h");   break;
     }
 
-  len = strlen(stepunits) + 1;
-  GRIB_CHECK(grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime), 0);
-  GRIB_CHECK(grib_set_string(gh, "stepUnits", stepunits, &len), 0);
+  if ( !gcinit )
+    {
+      len = strlen(stepunits) + 1;
+      GRIB_CHECK(grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime), 0);
+      GRIB_CHECK(grib_set_string(gh, "stepUnits", stepunits, &len), 0);
+    }
 
   return (factor);
 }
 
 static
-int gribapiDefDateTime(grib_handle *gh, int timeunit, int date, int time)
+void gribapiDefDateTime(int editionNumber, grib_handle *gh, int date, int time)
 {
-  long editionNumber;
-
-  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
-
   if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 0), 0);
   GRIB_CHECK(grib_set_long(gh, "stepRange", 0), 0);
 
   if ( date == 0 ) date = 10101;
   GRIB_CHECK(grib_set_long(gh, "dataDate", date), 0);
   GRIB_CHECK(grib_set_long(gh, "dataTime", time/100), 0);
-
-  return (gribapiDefStepUnits(gh, timeunit));
 }
 
 static
-int gribapiDefTsteptype(grib_handle *gh, int tsteptype, int timeunit, int factor, int calendar,
+int gribapiDefTsteptype(int editionNumber, grib_handle *gh, int tsteptype, int timeunit, int factor, int calendar,
 			int rdate, int rtime, int vdate, int vtime, int gcinit)
 {
   int status = -1;
@@ -2039,9 +2033,6 @@ int gribapiDefTsteptype(grib_handle *gh, int tsteptype, int timeunit, int factor
   long proDefTempNum = 0;
   size_t len = 64;
   char stepType[64];
-  long editionNumber;
-
-  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
@@ -2057,11 +2048,7 @@ int gribapiDefTsteptype(grib_handle *gh, int tsteptype, int timeunit, int factor
     {
       endStep = (int) ((days*86400.0 + secs)/factor);
 
-      //  if ( !gcinit )
-        {
-          if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
-          gribapiDefStepUnits(gh, timeunit);
-        }
+      if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
 
       // printf(">>>>> tsteptype %d  startStep %d  endStep %d\n", tsteptype, startStep, endStep);
 
@@ -2099,18 +2086,20 @@ int gribapiDefTsteptype(grib_handle *gh, int tsteptype, int timeunit, int factor
 }
 
 static
-void gribapiDefTime(grib_handle *gh , int vdate, int vtime, int tsteptype, int numavg, int taxisID, int gcinit)
+void gribapiDefTime(int editionNumber, grib_handle *gh , int vdate, int vtime, int tsteptype, int numavg, int taxisID, int gcinit)
 {
   int taxistype = -1;
   int timeunit;
+  int factor;
 
   if ( taxisID != -1 ) taxistype = taxisInqType(taxisID);
 
   timeunit = taxisInqTunit(taxisID);
 
+  factor = gribapiDefStepUnits(gh, timeunit, gcinit);
+
   if ( taxistype == TAXIS_RELATIVE )
     {
-      int factor = 1;
       int rdate, rtime;
       int calendar;
       int status;
@@ -2119,9 +2108,9 @@ void gribapiDefTime(grib_handle *gh , int vdate, int vtime, int tsteptype, int n
       rdate    = taxisInqRdate(taxisID);
       rtime    = taxisInqRtime(taxisID);
 
-      factor = gribapiDefDateTime(gh, timeunit, rdate, rtime);
+      gribapiDefDateTime(editionNumber, gh, rdate, rtime);
 
-      status = gribapiDefTsteptype(gh, tsteptype, timeunit, factor, calendar,
+      status = gribapiDefTsteptype(editionNumber, gh, tsteptype, timeunit, factor, calendar,
 				   rdate, rtime, vdate, vtime, gcinit);
 
       if ( status != 0 ) taxistype = TAXIS_ABSOLUTE;
@@ -2129,16 +2118,15 @@ void gribapiDefTime(grib_handle *gh , int vdate, int vtime, int tsteptype, int n
 
   if ( taxistype == TAXIS_ABSOLUTE )
     {
-      (void) gribapiDefDateTime(gh, timeunit, vdate, vtime);
+      (void) gribapiDefDateTime(editionNumber, gh, vdate, vtime);
     }
 }
 
 static
-void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg, int lieee, int datatype)
+void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, int lieee, int datatype)
 {
   int gridtype;
   int status;
-  long editionNumber;
   char uuid[17];
   static short lwarn = TRUE;
   size_t len;
@@ -2146,7 +2134,6 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg, int lieee, int datat
 
   gridtype = gridInqType(gridID);
 
-  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
   if ( editionNumber <= 1 )
     if ( gridtype == GRID_GME || gridtype == GRID_REFERENCE )
       gridtype = -1;
@@ -2470,17 +2457,14 @@ void gribapiDefGrid(grib_handle *gh, int gridID, int ljpeg, int lieee, int datat
 }
 
 static
-  void gribapiDefLevel(grib_handle *gh, int param, int zaxisID, int levelID, int gcinit)
+void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID, int levelID, int gcinit)
 {
   double level;
   int zaxistype, ltype;
   static int warning = 1;
-  long editionNumber;
   int reference;
   char uuid[17];
   size_t len;
-
-  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
   zaxistype = zaxisInqType(zaxisID);
   ltype = zaxisInqLtype(zaxisID);
@@ -2885,7 +2869,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   if ( ! gc->init ) gribapiDefInstitut(gh, vlistID, varID);
   if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
 
-  if ( ! gc->init ) gribapiDefParam(gh, param, name);
+  if ( ! gc->init ) gribapiDefParam(editionNumber, gh, param, name);
   /*
   if( !vlistInqVarEnsemble( vlistID,  varID, &ensID, &ensCount, &forecast_type ) )
     {
@@ -2894,7 +2878,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(grib_set_long(gh, "perturbationNumber", ensID ), 0);
     }
   */
-  gribapiDefTime(gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID), gc->init);
+  gribapiDefTime(editionNumber, gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID), gc->init);
 
   if ( editionNumber == 2 && (datatype == DATATYPE_FLT32 || datatype == DATATYPE_FLT64) ) lieee = TRUE;
 
@@ -2905,9 +2889,9 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
     }
 
-  if ( ! gc->init ) gribapiDefGrid(gh, gridID, ljpeg, lieee, datatype);
+  if ( ! gc->init ) gribapiDefGrid(editionNumber, gh, gridID, ljpeg, lieee, datatype);
 
-  gribapiDefLevel(gh, param, zaxisID, levelID, gc->init);
+  gribapiDefLevel(editionNumber, gh, param, zaxisID, levelID, gc->init);
 
   if ( nmiss > 0 )
     {
