@@ -2023,7 +2023,7 @@ void gribapiDefDateTime(int editionNumber, grib_handle *gh, int date, int time)
 }
 
 static
-int gribapiDefTsteptype(int editionNumber, grib_handle *gh, int tsteptype, int timeunit, int factor, int calendar,
+int gribapiDefTsteptype(int editionNumber, grib_handle *gh, int tsteptype, int factor, int calendar,
 			int rdate, int rtime, int vdate, int vtime, int gcinit)
 {
   int status = -1;
@@ -2110,7 +2110,7 @@ void gribapiDefTime(int editionNumber, grib_handle *gh , int vdate, int vtime, i
 
       gribapiDefDateTime(editionNumber, gh, rdate, rtime);
 
-      status = gribapiDefTsteptype(editionNumber, gh, tsteptype, timeunit, factor, calendar,
+      status = gribapiDefTsteptype(editionNumber, gh, tsteptype, factor, calendar,
 				   rdate, rtime, vdate, vtime, gcinit);
 
       if ( status != 0 ) taxistype = TAXIS_ABSOLUTE;
@@ -2118,7 +2118,7 @@ void gribapiDefTime(int editionNumber, grib_handle *gh , int vdate, int vtime, i
 
   if ( taxistype == TAXIS_ABSOLUTE )
     {
-      (void) gribapiDefDateTime(editionNumber, gh, vdate, vtime);
+      gribapiDefDateTime(editionNumber, gh, vdate, vtime);
     }
 }
 
@@ -2782,6 +2782,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
             len = 16;
             GRIB_CHECK(grib_set_string(gh, "uuidOfVGrid", zaxisInqUUID(zaxisID, uuid), &len), 0);
           }
+
         break;
       }
     case ZAXIS_GENERIC:
