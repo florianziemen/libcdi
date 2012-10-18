@@ -5,8 +5,12 @@
 
 2012-10-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* grib2: change packingType from grid_jpeg to grid_simple if nmiss > 0 (bug fix)
+
+2012-10-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
 	* grib2: added stepType support for absolute time axis
-	
+
 2012-10-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* pio.h remove line 'typedef int MPI_Comm;' [Bug #2882]
