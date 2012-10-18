@@ -225,7 +225,7 @@ void vlistDestroy(int vlistID)
 
       vlistDelAtts(vlistID, varID);
     }
- 
+
   if ( vlistptr->vars ) free(vlistptr->vars);
 
   vlist_delete_entry(vlistptr);
@@ -282,11 +282,6 @@ void vlistCopy(int vlistID2, int vlistID1)
           if ( vlistptr1->vars[varID].units )
             vlistptr2->vars[varID].units = strdupx(vlistptr1->vars[varID].units);
 
-          nlevs = vlistptr1->vars[varID].nlevs;
-          vlistptr2->vars[varID].levinfo = (levinfo_t *) malloc(nlevs*sizeof(levinfo_t));
-          memcpy(vlistptr2->vars[varID].levinfo,
-                 vlistptr1->vars[varID].levinfo, nlevs*sizeof(levinfo_t));
-
           if ( vlistptr1->vars[varID].ensdata )
             {
               vlistptr2->vars[varID].ensdata = (ensinfo_t *) malloc(sizeof(ensinfo_t));
@@ -296,6 +291,11 @@ void vlistCopy(int vlistID2, int vlistID1)
 
 	  vlistptr2->vars[varID].atts.nelems = 0;
 	  vlistCopyVarAtts(vlistID1, varID, vlistID2, varID);
+
+          nlevs = vlistptr1->vars[varID].nlevs;
+          vlistptr2->vars[varID].levinfo = (levinfo_t *) malloc(nlevs*sizeof(levinfo_t));
+          memcpy(vlistptr2->vars[varID].levinfo,
+                 vlistptr1->vars[varID].levinfo, nlevs*sizeof(levinfo_t));
 	}
     }
 }
@@ -508,15 +508,22 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	    if ( vlistptr1->vars[varID].units )
 	      vlistptr2->vars[varID2].units = strdupx(vlistptr1->vars[varID].units);
 
+            if ( vlistptr1->vars[varID].ensdata )
+              {
+                vlistptr2->vars[varID].ensdata = (ensinfo_t *) malloc(sizeof(ensinfo_t));
+                memcpy(vlistptr2->vars[varID].ensdata,
+                       vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
+              }
+
+	    vlistptr2->vars[varID2].atts.nelems = 0;
+	    vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
+
 	    nlevs  = vlistptr1->vars[varID].nlevs;
 	    nlevs2 = 0;
 	    for ( levID = 0; levID < nlevs; levID++ )
 	      if ( vlistptr1->vars[varID].levinfo[levID].flag ) nlevs2++;
 
 	    vlistptr2->vars[varID2].levinfo = (levinfo_t *) malloc(nlevs2*sizeof(levinfo_t));
-
-	    vlistptr2->vars[varID2].atts.nelems = 0;
-	    vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
 
 	    if ( nlevs != nlevs2 )
 	      {
