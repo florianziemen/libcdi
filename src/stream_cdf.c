@@ -3071,7 +3071,7 @@ int cdfDefVar(int streamID, int varID)
         }
     }
 
-  if( !vlistInqVarEnsemble( vlistID,  varID, &ensID, &ensCount, &forecast_type ) )
+  if( vlistInqVarEnsemble( vlistID,  varID, &ensID, &ensCount, &forecast_type ) )
     {
       /* void cdf_put_att_int(  int ncid, int varid, const char *name, nc_type xtype,
 	                        size_t len, const int *ip )
