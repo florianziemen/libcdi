@@ -404,8 +404,13 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
 
   varDefCompType(varID, comptype);
 
-  if ( isec1[36] )
-    varDefEnsembleInfo(varID, isec1[37], isec1[38], isec1[39]);
+  if ( ISEC1_LocalFLag )
+    {
+      if      ( ISEC1_CenterID == 78  && isec1[36] == 253 ) // DWD local extension
+        varDefEnsembleInfo(varID, isec1[54], isec1[53], isec1[52]);
+      else if ( ISEC1_CenterID == 252 && isec1[36] ==   1 ) // MPIM local extension
+        varDefEnsembleInfo(varID, isec1[38], isec1[39], isec1[37]);
+    }
 
   if ( lmv ) varDefMissval(varID, FSEC3_MissVal);
 
@@ -2152,9 +2157,6 @@ void cgribexDefaultSec4(int *isec4)
 static
 void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
 {
-
-  /* int *ensID, int *ensCount, int *forecast_type; */
-
   int ensID, ensCount, forecast_type;
 
   /* For Ensemble info  */
@@ -2165,22 +2167,17 @@ void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
   //Put2Byte(isec1[38]);        /* individual ensemble member                 */
   //Put2Byte(isec1[39]);        /* number of forecasts in ensemble            */
 
-  if( !vlistInqVarEnsemble( vlistID,  varID, &ensID, &ensCount, &forecast_type ) )
+  if ( !vlistInqVarEnsemble( vlistID,  varID, &ensID, &ensCount, &forecast_type ) )
     {
-        ISEC1_LocalFLag = 1;
-	isec1[36] = 1;
+      if ( ISEC1_CenterID == 252 )
+        {
+          ISEC1_LocalFLag = 1;
+          isec1[36] = 1;
 
-	isec1[37] =  forecast_type;
-	isec1[38] =  ensID;
-	isec1[39] =  ensCount;
-
-#ifdef DBG
-	if( DBG )  
-	  {
-	    fprintf( stderr, "cgribexDefEnsembleVar :\n EnsID  %d\n Enscount %d\n Forecast init type %d\n",  ensID,
-		     ensCount,  forecast_type );
-	  }
-#endif
+          isec1[37] =  forecast_type;
+          isec1[38] =  ensID;
+          isec1[39] =  ensCount;
+        }
     }
 }
 #endif
