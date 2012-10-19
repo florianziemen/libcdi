@@ -510,8 +510,8 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
             if ( vlistptr1->vars[varID].ensdata )
               {
-                vlistptr2->vars[varID].ensdata = (ensinfo_t *) malloc(sizeof(ensinfo_t));
-                memcpy(vlistptr2->vars[varID].ensdata,
+                vlistptr2->vars[varID2].ensdata = (ensinfo_t *) malloc(sizeof(ensinfo_t));
+                memcpy(vlistptr2->vars[varID2].ensdata,
                        vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
               }
 
