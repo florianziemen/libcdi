@@ -2167,7 +2167,7 @@ void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
   //Put2Byte(isec1[38]);        /* individual ensemble member                 */
   //Put2Byte(isec1[39]);        /* number of forecasts in ensemble            */
 
-  if ( !vlistInqVarEnsemble( vlistID,  varID, &ensID, &ensCount, &forecast_type ) )
+  if ( vlistInqVarEnsemble(vlistID, varID, &ensID, &ensCount, &forecast_type) )
     {
       if ( ISEC1_CenterID == 252 )
         {
