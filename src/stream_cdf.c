@@ -447,6 +447,8 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
     {
       vlistInqAtt(vlistID, varID, iatt, attname, &atttype, &attlen);
 
+      if ( attlen == 0 ) continue;
+
       if ( atttype == DATATYPE_TXT )
         {
           char *atttxt;
