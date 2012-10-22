@@ -53,6 +53,12 @@
 
 /*  CALENDAR types  */
 
+
+/*  parallel IO IOMode  */
+
+
+/*  parallel IO routines  */
+
 FCALLSCSUB0 (pioEndDef, PIOENDDEF, pioenddef)
 FCALLSCSUB0 (pioEndTimestepping, PIOENDTIMESTEPPING, pioendtimestepping)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
@@ -61,6 +67,10 @@ FCALLSCFUN2 (INT, pioInqVarDecoChunk, PIOINQVARDECOCHUNK, pioinqvardecochunk, IN
 FCALLSCFUN2 (INT, pioInqVarDecoOff, PIOINQVARDECOOFF, pioinqvardecooff, INT, INT)
 FCALLSCSUB1 (pioNamespaceSetActive, PIONAMESPACESETACTIVE, pionamespacesetactive, INT)
 FCALLSCSUB3 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep, INT, INT, INT)
+
+/*  CDI control routines  */
+
+FCALLSCSUB0 (cdiReset, CDIRESET, cdireset)
 FCALLSCFUN1 (STRING, cdiStringError, CDISTRINGERROR, cdistringerror, INT)
 FCALLSCSUB1 (cdiDebug, CDIDEBUG, cdidebug, INT)
 FCALLSCFUN0 (STRING, cdiLibraryVersion, CDILIBRARYVERSION, cdilibraryversion)
