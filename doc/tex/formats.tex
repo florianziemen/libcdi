@@ -50,18 +50,22 @@ GRIB1  & GRIB2 & & \\
 GRIB1  & GRIB2 & & \\
 \rowcolor[gray]{.9}
  level type &  level type & GRIB\_API name & description \\
-     1  &    1 & surface & Surface level \\
-   99  & --  & -- & Isobaric level in Pa \\
- 100  & 100 & isobaricInhPa & Isobaric level in hPa \\
- 103  & 102 & heightAboveSea & Altitude above mean sea level \\
- 105  & 103 & heightAboveGround & Height level above ground \\
- 107  & 104 & sigma & Sigma level \\
- 109  & 105 & hybrid & Hybrid level      \\
- 110  & 105 & hybridLayer & Layer between two hybrid levels   \\
- 111  & 106 & depthBelowLand & Depth below land surface    \\
+     1  &    1 & surface                        & Surface level \\
+     8  &    8 & nominalTop                 & Norminal top of atmosphere \\
+     9  &    9 & seaBottom                   & Sea bottom \\
+   10  &  10 & entireAtmosphere        & Entire atmosphere \\
+   99  & --  & --                                & Isobaric level in Pa \\
+ 100  & 100 & isobaricInhPa              & Isobaric level in hPa \\
+ 102  & 101 & meanSea                     & Mean sea level \\
+ 103  & 102 & heightAboveSea          & Altitude above mean sea level \\
+ 105  & 103 & heightAboveGround    & Height level above ground \\
+ 107  & 104 & sigma                          & Sigma level \\
+ 109  & 105 & hybrid                         & Hybrid level      \\
+ 110  & 105 & hybridLayer                 & Layer between two hybrid levels   \\
+ 111  & 106 & depthBelowLand          & Depth below land surface    \\
  112  & 106 & depthBelowLandLayer & Layer between two depths below land surface   \\   
- 113  & 107 & theta & Isentropic (theta) level \\
- 160  & 160 & depthBelowSea & Depth below sea level    \\
+ 113  & 107 & theta                           & Isentropic (theta) level \\
+ 160  & 160 & depthBelowSea            & Depth below sea level    \\
 \hline
 \end{tabular}
 
