@@ -180,6 +180,7 @@ src/cdiFortran.c -text
 src/cdi_error.c -text
 src/cdi_limits.h -text
 src/cdi_util.c -text
+src/cdilib.c -text
 src/cfortran.doc -text
 src/cfortran.h -text
 src/cgribex.h -text
