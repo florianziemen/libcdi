@@ -327,7 +327,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 #
-EXTRA_DIST = make_cdilib mo_cdi.f90
+EXTRA_DIST = cdilib.c mo_cdi.f90
 @ENABLE_CDI_LIB_TRUE@lib_LTLIBRARIES = libcdi.la
 @ENABLE_CDI_LIB_TRUE@include_HEADERS = cdi.h cdi.inc
 @ENABLE_CDI_LIB_FALSE@noinst_LTLIBRARIES = libcdi.la

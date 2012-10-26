@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 #
-EXTRA_DIST = make_cdilib mo_cdi.f90
+EXTRA_DIST = cdilib.c mo_cdi.f90
 
 if ENABLE_CDI_LIB
   lib_LTLIBRARIES = libcdi.la
