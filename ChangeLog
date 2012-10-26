@@ -3,6 +3,10 @@
 	* Version 1.5.8 released
 	* using CGRIBEX library version 1.5.5
 
+2012-10-26  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_gribapi.c::gribapiScanTimestep: changed GRIBAPI_MISSVAL to cdiDefaultMissval
+
 2012-10-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* vlistCopyFlag: copy ensdata (bug fix) [report: Jaison Ambadan]
