@@ -175,6 +175,7 @@ c="dmemory.c         \
    resource_handle.c \
    pio_util.c        \
    pio.c             \
+   pio_interface.c   \
    pio_dbuffer.c     \
    pio_mpinonb.c     \
    pio_posixasynch.c \
