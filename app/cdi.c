@@ -322,6 +322,8 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  tsteptype = vlistInqVarTsteptype(vlistID, varID);
 	  if      ( tsteptype == TSTEP_CONSTANT ) fprintf(stdout, "%-8s ", "constant");
 	  else if ( tsteptype == TSTEP_INSTANT  ) fprintf(stdout, "%-8s ", "instant");
+	  else if ( tsteptype == TSTEP_INSTANT2 ) fprintf(stdout, "%-8s ", "instant");
+	  else if ( tsteptype == TSTEP_INSTANT3 ) fprintf(stdout, "%-8s ", "instant");
 	  else if ( tsteptype == TSTEP_MIN      ) fprintf(stdout, "%-8s ", "min");
 	  else if ( tsteptype == TSTEP_MAX      ) fprintf(stdout, "%-8s ", "max");
 	  else if ( tsteptype == TSTEP_ACCUM    ) fprintf(stdout, "%-8s ", "accum");
