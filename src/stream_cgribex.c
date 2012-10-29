@@ -3,7 +3,7 @@
 #endif
 
 #include <stdio.h>
-#include <float.h>  /* FLT_EPSILON */
+// #include <float.h>  /* FLT_EPSILON */
 
 #include "dmemory.h"
 #include "cdi.h"
@@ -1765,8 +1765,8 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	    ISEC2_LastLon  = NINT(xlast*1000);
 	    ISEC2_LonIncr  = NINT(xinc*1000);
 	  }
-	if ( fabs(xinc*1000 - ISEC2_LonIncr) > FLT_EPSILON )
-	  ISEC2_LonIncr = 0;
+
+	// if ( fabs(xinc*1000 - ISEC2_LonIncr) > FLT_EPSILON ) ISEC2_LonIncr = 0;
 
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
           {
@@ -1777,8 +1777,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	else
 	  {
 	    ISEC2_LatIncr = NINT(yinc*1000);
-	    if ( fabs(yinc*1000 - ISEC2_LatIncr) > FLT_EPSILON )
-	      ISEC2_LatIncr = 0;
+	    // if ( fabs(yinc*1000 - ISEC2_LatIncr) > FLT_EPSILON ) ISEC2_LatIncr = 0;
 
 	    if ( ISEC2_LatIncr < 0 ) ISEC2_LatIncr = -ISEC2_LatIncr;
 	  }
