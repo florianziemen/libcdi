@@ -1,7 +1,12 @@
-2012-10-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+2012-10-30  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Version 1.5.8 released
 	* using CGRIBEX library version 1.5.5
+
+2012-10-29  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_cgribex.c: do not check fraction of xinc/yinc" stream_cgribex.c
+	* gridGenXvals/gridGenYvals: recheck xinc/yinc if (xfirst+(size-1)*inc) > last
 
 2012-10-26  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
