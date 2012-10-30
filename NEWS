@@ -1,6 +1,20 @@
 CDI NEWS
 --------
 
+Version 1.5.8 (30 October 2012):
+
+   New features:
+     * grib2: added stepType support for absolute time axis
+     * netCDF: set 1D arrays to coordinate variables if axis attribute is available
+
+   Fixed bugs:
+     * grib2: changed packingType from grid_jpeg to grid_simple if nmiss > 0
+
+Version 1.5.7 (27 August 2012):
+
+   New features:
+     * Merge of branch cdo-pio into trunk cdi
+
 Version 1.5.6 (27 July 2012):
 
    New features:

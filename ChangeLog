@@ -6,7 +6,7 @@
 2012-10-29  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* stream_cgribex.c: do not check fraction of xinc/yinc" stream_cgribex.c
-	* gridGenXvals/gridGenYvals: recheck xinc/yinc if (xfirst+(size-1)*inc) > last
+	* gridGenXvals/gridGenYvals: recheck xinc/yinc if (first+(size-1)*inc) > last
 
 2012-10-26  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
@@ -18,7 +18,7 @@
 
 2012-10-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* grib2: change packingType from grid_jpeg to grid_simple if nmiss > 0 (bug fix)
+	* grib2: changed packingType from grid_jpeg to grid_simple if nmiss > 0 (bug fix)
 
 2012-10-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
@@ -45,7 +45,7 @@
 	* cdfInqContents: make ncid local to varid
 	* cdfInqContents: group reading of global attribute to read_global_attributtes()
 	* cdfInqContents: set ntsteps to 0 if no data variable found
-	* netCDF: set 1D arrays to coordiante variables if axis attribute is available
+	* netCDF: set 1D arrays to coordinate variables if axis attribute is available
 
 2012-09-10  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
