@@ -10,6 +10,8 @@ endif
 
 AM_CFLAGS=-I$(top_srcdir)/src
 
+AM_FCFLAGS=$(FPP_INCOPT)$(top_srcdir)/src
+
 collectData_SOURCES=collectData.c
 
 collectData_LDADD=$(top_builddir)/src/libcdi.la
