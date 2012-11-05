@@ -680,7 +680,7 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
       ngrids = gridSize();
       if ( ngrids > 0 )
         {
-          gridIndexList = malloc ( ngrids * sizeof ( int ));
+          gridIndexList = malloc(ngrids*sizeof(int));
           gridGetIndexList ( ngrids, gridIndexList );
           for ( i = 0; i < ngrids; i++ )
             {
