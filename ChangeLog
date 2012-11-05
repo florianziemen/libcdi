@@ -1,5 +1,6 @@
 2012-11-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* grib2: correct endStep if timeunits is not equal stepUnits (big fix)
 	* cgribexGetGrid: bug fix for yinc for odd ysize
 
 2012-10-30  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

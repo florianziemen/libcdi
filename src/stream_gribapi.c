@@ -102,15 +102,9 @@ int gribapiGetZaxisType(long editionNumber, int grib_ltype)
 }
 
 static
-int gribapiGetTimeUnits(grib_handle *gh)
+int getTimeunits(long unitsOfTime)
 {
   int timeunits = -1;
-  long unitsOfTime;
-  // size_t len = 8;
-  //char stepunits[8];
-  //static int lprint = TRUE;
-
-  GRIB_CHECK(grib_get_long(gh, "indicatorOfUnitOfTimeRange", &unitsOfTime), 0);  
 
   switch (unitsOfTime)
     {
@@ -123,6 +117,63 @@ int gribapiGetTimeUnits(grib_handle *gh)
     case  2:  timeunits = TUNIT_DAY;     break;
     default:  timeunits = TUNIT_HOUR;    break;
     }
+
+  return (timeunits);
+}
+
+static
+double timeunit_factor(int tu1, int tu2)
+{
+  double factor = 1;
+
+  if ( tu2 == TUNIT_HOUR )
+    {
+      switch (tu1)
+        {
+        case TUNIT_SECOND:  factor = 3600;   break;
+        case TUNIT_MINUTE:  factor = 60;     break;
+        case TUNIT_HOUR:    factor = 1;      break;
+        case TUNIT_3HOURS:  factor = 1./3;   break;
+        case TUNIT_6HOURS:  factor = 1./6;   break;
+        case TUNIT_12HOURS: factor = 1./12;  break;
+        case TUNIT_DAY:     factor = 1./24;  break;
+        }
+    }
+
+  return (factor);
+}
+
+static
+int gribapiGetEndStep(grib_handle *gh, int startStep, int timeunits)
+{
+  int endStep = startStep;
+  int timeunits2;
+  long unitsOfTime;
+  long lpar;
+
+  GRIB_CHECK(grib_get_long(gh, "stepUnits", &unitsOfTime), 0);
+
+  timeunits2 = getTimeunits(unitsOfTime);
+
+  GRIB_CHECK(grib_get_long(gh, "endStep", &lpar), 0);
+
+  endStep = (int)  ((lpar * timeunit_factor(timeunits, timeunits2)) + 0.5);
+
+  return (endStep);
+}
+
+static
+int gribapiGetTimeUnits(grib_handle *gh)
+{
+  int timeunits = -1;
+  long unitsOfTime;
+  // size_t len = 8;
+  //char stepunits[8];
+  //static int lprint = TRUE;
+
+  GRIB_CHECK(grib_get_long(gh, "indicatorOfUnitOfTimeRange", &unitsOfTime), 0);
+
+  timeunits = getTimeunits(unitsOfTime);
 
   /*
   GRIB_CHECK(grib_get_string(gh, "stepUnits", stepunits, &len), 0);
@@ -239,9 +290,8 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
       rtime = (int) lpar*100;
       GRIB_CHECK(grib_get_long(gh, "forecastTime", &lpar), 0);
       startStep = (int) lpar;
-      GRIB_CHECK(grib_get_long(gh, "endStep", &lpar), 0);
-      endStep = (int) lpar;
       timeUnits = gribapiGetTimeUnits(gh);
+      endStep = gribapiGetEndStep(gh, startStep, timeUnits);
 
       range = endStep - startStep;
 
