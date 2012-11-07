@@ -1,3 +1,12 @@
+2012-??-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.5.9 released
+
+2012-11-07  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* gridGenXvals/gridGenYvals: removed changes from 1.5.8 (bug fix)
+	* cgribexGetGrid: bug fix for xinc/yinc recomputation
+
 2012-11-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* grib2: correct endStep if timeunits is not equal stepUnits (big fix)

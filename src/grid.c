@@ -211,28 +211,16 @@ int gridSize(void)
 
 void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *xvals)
 {
-  if ( xsize > 1 )
+  if ( (! (fabs(xinc) > 0)) && xsize > 1 )
     {
-      if ( (fabs(xinc) > 0) )
+      if ( xfirst >= xlast )
         {
-          if ( (xlast > xfirst) && (fabs(xinc*1000 - NINT(xinc*1000)) <= FLT_EPSILON) )
-            {
-              if ( IS_EQUAL(xfirst, 0) && (fabs(xlast*1000 - NINT(xlast*1000)) <= FLT_EPSILON) )
-                if ( xlast > 354. && xlast < 360. ) xlast = 360. - 360./(2*xsize);
-              if ( (xfirst + (xsize-1)*xinc) > xlast ) xinc = (xlast-xfirst)/(xsize-1);
-            }
+          while ( xfirst >= xlast ) xlast += 360;
+          xinc = (xlast-xfirst)/(xsize);
         }
       else
         {
-          if ( xfirst >= xlast )
-            {
-              while ( xfirst >= xlast ) xlast += 360;
-              xinc = (xlast-xfirst)/(xsize);
-            }
-          else
-            {
-              xinc = (xlast-xfirst)/(xsize-1);
-            }
+          xinc = (xlast-xfirst)/(xsize-1);
         }
     }
 
@@ -322,16 +310,9 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
         }
     }
   /*     else if ( gridtype == GRID_LONLAT || gridtype == GRID_GENERIC ) */
-  else if ( ysize > 1 )
+  else
     {
-      if ( (fabs(yinc) > 0) )
-        {
-          if ( fabs(yinc*1000 - NINT(yinc*1000)) <= FLT_EPSILON )
-            {
-              if ( (yfirst + (ysize-1)*yinc) > ylast ) yinc = (ylast-yfirst)/(ysize-1);
-            }
-        }
-      else
+      if ( (! (fabs(yinc) > 0)) && ysize > 1 )
         {
           if ( IS_EQUAL(yfirst, ylast) && IS_NOT_EQUAL(yfirst, 0) ) ylast *= -1;
 
