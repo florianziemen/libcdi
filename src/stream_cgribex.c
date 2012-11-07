@@ -195,8 +195,20 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
                       }
                   }
 
-		/* correct xinc if necessary */
+		/* recompute xinc if necessary */
                 if ( recompinc ) grid->xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->xsize-1);
+
+		/* correct xinc if necessary */
+		if ( ISEC2_FirstLon == 0 && ISEC2_LastLon > 354000 && ISEC2_LastLon < 360000 )
+		  {
+		    double xinc = 360. / grid->xsize;
+
+		    if ( fabs(grid->xinc-xinc) > 0.0 )
+		      {
+			grid->xinc = xinc;
+			if ( CDI_Debug ) Message("set xinc to %g", grid->xinc);
+		      }
+		  }
 	      }
 	    grid->xfirst = ISEC2_FirstLon * 0.001;
 	    grid->xlast  = ISEC2_LastLon  * 0.001;
@@ -218,7 +230,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
                       }
                   }
 
-		/* correct yinc if necessary */
+		/* recompute yinc if necessary */
                 if ( recompinc ) grid->yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->ysize - 1);
 	      }
 	    grid->yfirst = ISEC2_FirstLat * 0.001;
