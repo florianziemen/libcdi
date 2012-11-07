@@ -184,24 +184,20 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
 	  {
 	    if ( grid->xsize > 1 )
 	      {
-		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
-		  if ( ISEC2_LonIncr*(grid->xsize-1) > 360000 ) ISEC2_LonIncr = 0;
+                int recompinc = TRUE;
 
 		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
-		  grid->xinc = ISEC2_LonIncr * 0.001;
-		else
-		  grid->xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->xsize - 1);
+                  {
+                    if ( abs(ISEC2_LastLon - (ISEC2_FirstLon+ISEC2_LonIncr*(grid->xsize-1))) <= 2 )
+                      {
+                        recompinc = FALSE;
+                        grid->xinc = ISEC2_LonIncr * 0.001;
+                      }
+                    printf("x: %d %d %d %d\n", ISEC2_FirstLon, ISEC2_LastLon,  (ISEC2_LastLon-ISEC2_FirstLon), ISEC2_FirstLon+ISEC2_LonIncr*(grid->xsize-1));
+                  }
 
 		/* correct xinc if necessary */
-		if ( ISEC2_FirstLon == 0 && ISEC2_LastLon > 354000 && ISEC2_LastLon < 360000 )
-		  {
-		    double xinc = 360. / grid->xsize;
-		    if ( fabs(grid->xinc-xinc) > 0.0 )
-		      {
-			grid->xinc = xinc;
-			if ( CDI_Debug ) Message("set xinc to %g", grid->xinc);
-		      }
-		  }
+                if ( recompinc ) grid->xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->xsize-1);
 	      }
 	    grid->xfirst = ISEC2_FirstLon * 0.001;
 	    grid->xlast  = ISEC2_LastLon  * 0.001;
@@ -212,26 +208,19 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
 	  {
 	    if ( grid->ysize > 1 )
 	      {
-		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
-		  if ( ISEC2_LatIncr*(grid->ysize-1) > 180000 ) ISEC2_LatIncr = 0;
+                int recompinc = TRUE;
 
 		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
-		  grid->yinc = ISEC2_LatIncr * 0.001;
-		else
-		  grid->yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->ysize - 1);
+                  {
+                    if ( abs(ISEC2_LastLat - (ISEC2_FirstLat+ISEC2_LatIncr*(grid->ysize-1))) <= 2 )
+                      {
+                        recompinc = FALSE;
+                        grid->yinc = ISEC2_LatIncr * 0.001;
+                      }
+                  }
 
 		/* correct yinc if necessary */
-		if ( gridtype == GRID_LONLAT && abs(ISEC2_FirstLat) == abs(ISEC2_LastLat) && abs(ISEC2_LastLat) > 85000 )
-		  {
-                    double range = 2.*abs(ISEC2_LastLat)/1000.;
-		    double yinc  = range / (grid->ysize-1);
-
-		    if ( fabs(grid->yinc-yinc) > 0.0 )
-		      {
-			grid->yinc = yinc;
-			if ( CDI_Debug ) Message("set yinc to %g", grid->yinc);
-		      }
-		  }
+                if ( recompinc ) grid->yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->ysize - 1);
 	      }
 	    grid->yfirst = ISEC2_FirstLat * 0.001;
 	    grid->ylast  = ISEC2_LastLat  * 0.001;
