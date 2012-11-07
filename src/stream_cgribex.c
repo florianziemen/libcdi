@@ -193,7 +193,6 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
                         recompinc = FALSE;
                         grid->xinc = ISEC2_LonIncr * 0.001;
                       }
-                    printf("x: %d %d %d %d\n", ISEC2_FirstLon, ISEC2_LastLon,  (ISEC2_LastLon-ISEC2_FirstLon), ISEC2_FirstLon+ISEC2_LonIncr*(grid->xsize-1));
                   }
 
 		/* correct xinc if necessary */
