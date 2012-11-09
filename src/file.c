@@ -758,6 +758,11 @@ void file_initialize(void)
 
   value  = file_getenv("FILE_BUFSIZE");
   if ( value >= 0 ) FileBufferSizeEnv = value;
+  else
+    {
+      value  = file_getenv("GRIB_API_IO_BUFFER_SIZE");
+      if ( value >= 0 ) FileBufferSizeEnv = value;
+    }
 
   value = file_getenv("FILE_TYPE");
   if ( value > 0 )
