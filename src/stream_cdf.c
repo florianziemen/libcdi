@@ -57,6 +57,7 @@ typedef struct {
   int      islon;
   int      islat;
   int      islev;
+  int      istime;
   int      warn;
   int      tsteptype;
   int      param;
@@ -4066,6 +4067,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].islon           = FALSE;
       ncvars[ncvarid].islat           = FALSE;
       ncvars[ncvarid].islev           = FALSE;
+      ncvars[ncvarid].istime          = FALSE;
       ncvars[ncvarid].warn            = FALSE;
       ncvars[ncvarid].tsteptype       = TSTEP_CONSTANT;
       ncvars[ncvarid].param           = UNDEFID;
@@ -4308,7 +4310,7 @@ void cdfSetDim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
 static
 void printNCvars(ncvar_t *ncvars, int nvars, const char *oname)
 {
-  char axis[6];
+  char axis[7];
   int ncvarid, i;
   int ndim;
   int iaxis[] = {'t', 'z', 'y', 'x'};
@@ -4321,6 +4323,7 @@ void printNCvars(ncvar_t *ncvars, int nvars, const char *oname)
       if ( ncvars[ncvarid].isvar )
         {
           axis[ndim++] = 'v';
+          axis[ndim++] = ':';
           for ( i = 0; i < ncvars[ncvarid].ndims; i++ )
             {/*
               if      ( ncvars[ncvarid].tvarid != -1 ) axis[ndim++] = iaxis[0];
@@ -4333,26 +4336,23 @@ void printNCvars(ncvar_t *ncvars, int nvars, const char *oname)
               else if ( ncvars[ncvarid].dimtype[i] == Z_AXIS ) axis[ndim++] = iaxis[1];
               else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS ) axis[ndim++] = iaxis[2];
               else if ( ncvars[ncvarid].dimtype[i] == X_AXIS ) axis[ndim++] = iaxis[3];
-              else
-                axis[ndim++] = '?';
+              else                                             axis[ndim++] = '?';
             }
         }
       else
         {
           axis[ndim++] = 'c';
-          if ( ncvars[ncvarid].islev )
-            axis[ndim++] = iaxis[1];
-          else if ( ncvars[ncvarid].islat )
-            axis[ndim++] = iaxis[2];
-          else if ( ncvars[ncvarid].islon )
-            axis[ndim++] = iaxis[3];
-          else
-            axis[ndim++] = '?';
+          axis[ndim++] = ':';
+          if      ( ncvars[ncvarid].istime ) axis[ndim++] = iaxis[0];
+          else if ( ncvars[ncvarid].islev  ) axis[ndim++] = iaxis[1];
+          else if ( ncvars[ncvarid].islat  ) axis[ndim++] = iaxis[2];
+          else if ( ncvars[ncvarid].islon  ) axis[ndim++] = iaxis[3];
+          else                               axis[ndim++] = '?';
         }
 
       axis[ndim++] = 0;
 
-      fprintf(stderr, "%3d %3d %3d  %-4s %s\n", ncvarid, ncvars[ncvarid].isvar, ndim-2, axis, ncvars[ncvarid].name);
+      fprintf(stderr, "%3d %3d  %-6s %s\n", ncvarid, ndim-3, axis, ncvars[ncvarid].name);
     }
 }
 #endif
@@ -4944,30 +4944,28 @@ void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 	      /* else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = TRUE; */
 	    }
 
-	  for ( i = ndims-1; i >= 0; i-- )
-	    {
-	      if ( ncvars[ncvarid].dimtype[i] == -1 )
-		{
-		  /*
-		  printf("undef dim: %d %d %d %d %d\n", i, lxdim, lydim, lzdim, ltdim);
-		  */
-		  if ( lxdim == FALSE )
-		    {
-		      cdfSetDim(ncvars, ncvarid, i, X_AXIS);
-		      lxdim = TRUE;
-		    }
-		  else if ( lydim == FALSE && ncvars[ncvarid].gridtype != GRID_UNSTRUCTURED )
-		    {
-		      cdfSetDim(ncvars, ncvarid, i, Y_AXIS);
-		      lydim = TRUE;
-		    }
-		  else if ( lzdim == FALSE )
-		    {
-		      cdfSetDim(ncvars, ncvarid, i, Z_AXIS);
-		      lzdim = TRUE;
-		    }
-		}
-	    }
+          if ( ndims > 1 )
+            for ( i = ndims-1; i >= 0; i-- )
+              {
+                if ( ncvars[ncvarid].dimtype[i] == -1 )
+                  {
+                    if ( lxdim == FALSE )
+                      {
+                        cdfSetDim(ncvars, ncvarid, i, X_AXIS);
+                        lxdim = TRUE;
+                      }
+                    else if ( lydim == FALSE && ncvars[ncvarid].gridtype != GRID_UNSTRUCTURED )
+                      {
+                        cdfSetDim(ncvars, ncvarid, i, Y_AXIS);
+                        lydim = TRUE;
+                      }
+                    else if ( lzdim == FALSE )
+                      {
+                        cdfSetDim(ncvars, ncvarid, i, Z_AXIS);
+                        lzdim = TRUE;
+                      }
+                  }
+              }
 	}
     }
 }
@@ -4985,6 +4983,7 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 	{
 	  if ( ncvars[ncvarid].dimids[0] == timedimid )
 	    {
+              ncvars[ncvarid].istime = TRUE;
 	      ncdims[ncdimid].dimtype = T_AXIS;
 	      continue;
 	    }
@@ -5057,6 +5056,7 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 
 	  if ( ncvars[ncvarid].zaxistype != UNDEFID )
 	    {
+              ncvars[ncvarid].islev = TRUE;
 	      cdfSetVar(ncvars, ncvarid, FALSE);
 	      cdfSetDim(ncvars, ncvarid, 0, Z_AXIS);
 	      ncdims[ncdimid].dimtype = Z_AXIS;
