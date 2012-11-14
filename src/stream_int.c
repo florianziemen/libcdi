@@ -132,10 +132,11 @@ void cdiSetChunk(const char *chunkAlgo)
 {
   char *pch;
   size_t len = strlen(chunkAlgo);
+  int algo = -1;
 
-  if      ( strcmp("default", chunkAlgo) == 0 ) cdiChunkAlgo = CHUNK_DEFAULT;
-  else if ( strcmp("auto", chunkAlgo)    == 0 ) cdiChunkAlgo = CHUNK_AUTO;
-  else if ( strcmp("lines", chunkAlgo)   == 0 ) cdiChunkAlgo = CHUNK_LINES;
+  if      ( strcmp("default", chunkAlgo) == 0 ) algo = CHUNK_DEFAULT;
+  else if ( strcmp("auto", chunkAlgo)    == 0 ) algo = CHUNK_AUTO;
+  else if ( strcmp("lines", chunkAlgo)   == 0 ) algo = CHUNK_LINES;
   else if ( (pch = strstr(chunkAlgo,"x")) != 0 )
     {
       int ix, iy;
@@ -145,13 +146,19 @@ void cdiSetChunk(const char *chunkAlgo)
         {
           cdiChunkX = ix;
           cdiChunkY = iy;
-          cdiChunkAlgo = CHUNK_USER;
+          algo = CHUNK_USER;
         }
       else
         Warning("Invalid environment variable CDI_CHUNK_ALGO: %s", chunkAlgo);
     }
   else
     Warning("Invalid environment variable CDI_CHUNK_ALGO: %s", chunkAlgo);
+
+  if ( algo != -1 )
+    {
+      cdiChunkAlgo = algo;
+      if ( CDI_Debug ) Message("set ChunkAlgo to %s", chunkAlgo);
+    }
 }
 
 
