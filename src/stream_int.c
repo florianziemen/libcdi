@@ -29,6 +29,9 @@ int cdiDefaultModelID  = CDI_UNDEFID;
 int cdiDefaultTableID  = CDI_UNDEFID;
 int cdiNcMissingValue  = CDI_UNDEFID;
 int cdiNcChunksizehint = CDI_UNDEFID;
+int cdiChunkAlgo       = CHUNK_DEFAULT;
+int cdiChunkX          = -1;
+int cdiChunkY          = -1;
 int cdiSplitLtype105   = CDI_UNDEFID;
 
 int cdiIgnoreAttCoordinates = FALSE;
@@ -124,6 +127,33 @@ long cdiGetenvInt(char *envName)
   return (envValue);
 }
 
+static
+void cdiSetChunk(const char *chunkAlgo)
+{
+  char *pch;
+  size_t len = strlen(chunkAlgo);
+
+  if      ( strcmp("default", chunkAlgo) == 0 ) cdiChunkAlgo = CHUNK_DEFAULT;
+  else if ( strcmp("auto", chunkAlgo)    == 0 ) cdiChunkAlgo = CHUNK_AUTO;
+  else if ( strcmp("lines", chunkAlgo)   == 0 ) cdiChunkAlgo = CHUNK_LINES;
+  else if ( (pch = strstr(chunkAlgo,"x")) != 0 )
+    {
+      int ix, iy;
+      ix = atoi(chunkAlgo);
+      iy = atoi(pch+1);
+      if ( ix > 0 && iy > 0 )
+        {
+          cdiChunkX = ix;
+          cdiChunkY = iy;
+          cdiChunkAlgo = CHUNK_USER;
+        }
+      else
+        Warning("Invalid environment variable CDI_CHUNK_ALGO: %s", chunkAlgo);
+    }
+  else
+    Warning("Invalid environment variable CDI_CHUNK_ALGO: %s", chunkAlgo);
+}
+
 
 void cdiInitialize(void)
 {
@@ -140,9 +170,6 @@ void cdiInitialize(void)
       gribSetConst(1); // 1: Don't pack constant fields on regular grids
 #endif
 
-      value = cdiGetenvInt("CD_REGULARGRID");
-      if ( value >= 0 ) cdiDataUnreduced = (int) value;
-
       value = cdiGetenvInt("CDI_REGULARGRID");
       if ( value >= 0 ) cdiDataUnreduced = (int) value;
 
@@ -152,14 +179,8 @@ void cdiInitialize(void)
       value = cdiGetenvInt("CDI_HAVE_MISSVAL");
       if ( value >= 0 ) cdiHaveMissval = (int) value;
 
-      value = cdiGetenvInt("CD_LEVELTYPE");
-      if ( value >= 0 ) cdiDefaultLeveltype = (int) value;
-
       value = cdiGetenvInt("CDI_LEVELTYPE");
       if ( value >= 0 ) cdiDefaultLeveltype = (int) value;
-
-      envString = getenv("CD_MISSVAL");
-      if ( envString ) cdiDefaultMissval = atof(envString);
 
       envString = getenv("CDI_MISSVAL");
       if ( envString ) cdiDefaultMissval = atof(envString);
@@ -169,6 +190,9 @@ void cdiInitialize(void)
 
       envString = getenv("NC_CHUNKSIZEHINT");
       if ( envString ) cdiNcChunksizehint = atoi(envString);
+
+      envString = getenv("CDI_CHUNK_ALGO");
+      if ( envString ) cdiSetChunk(envString);
 
       envString = getenv("SPLIT_LTYPE_105");
       if ( envString ) cdiSplitLtype105 = atoi(envString);

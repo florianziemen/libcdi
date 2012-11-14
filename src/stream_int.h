@@ -105,6 +105,9 @@ char *strdup(const char *s);
 #define  MEMTYPE_FLOAT   2
 
 
+enum {CHUNK_DEFAULT, CHUNK_AUTO, CHUNK_LINES, CHUNK_USER};
+
+
 typedef struct
 {
   void     *buffer;
@@ -263,6 +266,9 @@ extern int cdiDefaultTableID;
 extern int cdiDefaultLeveltype;
 extern int cdiNcMissingValue;
 extern int cdiNcChunksizehint;
+extern int cdiChunkAlgo;
+extern int cdiChunkX;
+extern int cdiChunkY;
 extern int cdiSplitLtype105;
 
 extern char *cdiPartabPath;

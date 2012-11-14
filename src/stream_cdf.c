@@ -2774,8 +2774,7 @@ int cdfDefVar(int streamID, int varID)
     }
 
   if ( CDI_Debug )
-    fprintf(stderr, "chunks %d %d %d %d\n",
-            (int)chunks[0], (int)chunks[1], (int)chunks[2], (int)chunks[3]);
+    fprintf(stderr, "chunks %d %d %d %d\n", (int)chunks[0], (int)chunks[1], (int)chunks[2], (int)chunks[3]);
 
   tableID  = vlistInqVarTable(vlistID, varID);
 
@@ -4411,9 +4410,16 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
       if ( format == NC_FORMAT_NETCDF4_CLASSIC || format == NC_FORMAT_NETCDF4 )
         {
           int shuffle, deflate, deflate_level;
+          size_t chunks[nvdims];
+          int storage_in;
           nc_inq_var_deflate(ncid, ncvarid, &shuffle, &deflate, &deflate_level);
-          if ( deflate > 0 )
-            ncvars[ncvarid].deflate = 1;
+          if ( deflate > 0 ) ncvars[ncvarid].deflate = 1;
+
+          if ( nc_inq_var_chunking(ncid, ncvarid, &storage_in, chunks) == NC_NOERR )
+            {
+              //printf("storage %d\n", storage_in);
+              //for ( int i = 0; i < nvdims; ++i ) printf("chunk %d %d\n", i, chunks[i]);
+            }
         }
 #endif
 
