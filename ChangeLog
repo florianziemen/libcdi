@@ -2,6 +2,10 @@
 
 	* Version 1.5.9 released
 
+2012-11-14  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* app/cdi: added optional compression level -z zip[_1-9]
+
 2012-11-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* stream_cdf::setDimType: fill dims only if ndims > 1

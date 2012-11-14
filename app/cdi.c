@@ -111,13 +111,14 @@ void version(void)
   1.4.2  22 Mar 2005 : change level from int to double
   1.4.3  11 Apr 2005 : change date and time format to ISO
   1.5.0  22 Nov 2005 : IEG support
-  1.5.1  21 Feb 2006 : add option -s for short info
-  1.6.0   1 Aug 2006 : add option -z szip for SZIP compression of GRIB records
+  1.5.1  21 Feb 2006 : added option -s for short info
+  1.6.0   1 Aug 2006 : added option -z szip for SZIP compression of GRIB records
   1.6.1  27 Feb 2007 : short info with ltype for GENERIC zaxis
   1.6.2   3 Jan 2008 : changes for CDI library version 1.1.0 (compress)
   1.6.3  26 Mar 2008 : call streamDefTimestep also if ntsteps = 0 (buf fix)
-  1.7.0  11 Apr 2008 : add option -z zip for deflate compression of netCDF4 variables
-  1.7.1   1 Nov 2009 : add option -z jpeg for JPEG compression of GRIB2 records
+  1.7.0  11 Apr 2008 : added option -z zip for deflate compression of netCDF4 variables
+  1.7.1   1 Nov 2009 : added option -z jpeg for JPEG compression of GRIB2 records
+  1.7.2  14 Nov 2012 : added optional compression level -z zip[_1-9]
 */
 }
 
@@ -144,7 +145,7 @@ void usage(void)
   fprintf(stderr, "    -V             Print version number\n");
   fprintf(stderr, "    -z szip        SZIP compression of GRIB1 records\n");
   fprintf(stderr, "       jpeg        JPEG compression of GRIB2 records\n");
-  fprintf(stderr, "        zip        Deflate compression of netCDF4 variables\n");
+  fprintf(stderr, "        zip[_1-9]  Deflate compression of netCDF4 variables\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "  Report bugs to <http://code.zmaw.de/projects/cdi>\n");
 }
@@ -739,10 +740,13 @@ void defineCompress(const char *arg)
       comptype = COMPRESS_GZIP;
       complevel = 6;
     }
-  else if ( strncmp(arg, "zip", len) == 0 )
+  else if ( strncmp(arg, "zip", 3) == 0 )
     {
       comptype = COMPRESS_ZIP;
-      complevel = 1;
+      if ( len == 5 && arg[3] == '_' && isdigit(arg[4]) )
+	complevel = atoi(&arg[4]);
+      else
+        complevel = 1;
     }
   else
     fprintf(stderr, "%s compression unsupported!\n", arg);
