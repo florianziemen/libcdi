@@ -430,7 +430,6 @@ int cdfDefDatatype(int datatype, int filetype)
       else                                    xtype = NC_FLOAT;
     }
 
-
   return (xtype);
 }
 
@@ -486,7 +485,6 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
     }
 }
 #endif
-
 
 int cdfCopyRecord(int streamID2, int streamID1)
 {
@@ -6889,6 +6887,8 @@ int cdfInqTimestep(int streamID, int tsID)
 	  else
 	    {
 	      cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
+              if ( timevalue >= NC_FILL_DOUBLE ) timevalue = 0;
+
 	      cdiDecodeTimeval(timevalue, taxis, &taxis->vdate, &taxis->vtime);
 	    }
 
@@ -6898,11 +6898,13 @@ int cdfInqTimestep(int streamID, int tsID)
 	      size_t start[2], count[2];
 	      start[0] = tsID; count[0] = 1; start[1] = 0; count[1] = 1;
 	      cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
+              if ( timevalue >= NC_FILL_DOUBLE ) timevalue = 0;
 
 	      cdiDecodeTimeval(timevalue, taxis, &taxis->vdate_lb, &taxis->vtime_lb);
 
 	      start[0] = tsID; count[0] = 1; start[1] = 1; count[1] = 1;
 	      cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
+              if ( timevalue >= NC_FILL_DOUBLE ) timevalue = 0;
 
 	      cdiDecodeTimeval(timevalue, taxis, &taxis->vdate_ub, &taxis->vtime_ub);
 	    }

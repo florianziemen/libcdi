@@ -2,6 +2,10 @@
 
 	* Version 1.5.9 released
 
+2012-11-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdfInqTimestep: added check for timevalue = NC_FILL_DOUBLE
+
 2012-11-14  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* app/cdi: added optional compression level -z zip[_1-9]
