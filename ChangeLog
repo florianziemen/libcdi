@@ -4,6 +4,7 @@
 
 2012-11-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* cdfReadVarSliceDP: store DATATYPE_FLT32 in a float array and	convert it to double (speedup 2x)
 	* cdfInqTimestep: added check for timevalue = NC_FILL_DOUBLE
 
 2012-11-14  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

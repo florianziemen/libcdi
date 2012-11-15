@@ -3661,7 +3661,15 @@ int cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *n
     for (idim = 0; idim < ndims; idim++)
       Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
 
-  cdf_get_vara_double(fileID, ncvarid, start, count, data);
+  if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_FLT32 )
+    {
+      float *data_fp = (float *) data; 
+      cdf_get_vara_float(fileID, ncvarid, start, count, data_fp);
+      for ( i = gridsize-1; i >=0; i-- )
+        data[i] = (double) data_fp[i];
+    }
+  else
+    cdf_get_vara_double(fileID, ncvarid, start, count, data);
 
   if ( swapxy )
     {
