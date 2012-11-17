@@ -6122,7 +6122,6 @@ void define_all_vars(int streamID, int vlistID, int instID, int modelID, int *va
 	      else if ( attrtype == NC_CHAR )
 		{
 		  cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
-		  attlen = 1 + strlen(attstring);
 		  vlistDefAttTxt(vlistID, varID, attname, (int)attlen, attstring);
 		  if ( CDI_Debug )
 		    printf("txt: %s.%s = %s\n", ncvars[ncvarid].name, attname, attstring);
