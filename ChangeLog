@@ -19,10 +19,6 @@
 
 	* app/cdi: added optional compression level -z zip[_1-9]
 
-2012-11-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
-
-	* stream_cdf::setDimType: fill dims only if ndims > 1
-
 2012-11-09  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* file.c::file_initialize: added support for env GRIB_API_IO_BUFFER_SIZE [request: Florian Prill]

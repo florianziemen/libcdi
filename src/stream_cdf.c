@@ -4956,7 +4956,7 @@ void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 	      /* else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = TRUE; */
 	    }
 
-          if ( ndims > 1 )
+          //   if ( ndims > 1 )
             for ( i = ndims-1; i >= 0; i-- )
               {
                 if ( ncvars[ncvarid].dimtype[i] == -1 )
@@ -5167,7 +5167,7 @@ void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
       cdf_inq_atttype(ncfileID, ncvarID, attname, &xtype);
       cdf_inq_attlen(ncfileID, ncvarID, attname, &attlen);
 
-      printf("%s %d\n", attname, (int)attlen);
+      //  printf("%s %d\n", attname, (int)attlen);
     }
 
 }
