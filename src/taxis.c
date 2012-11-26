@@ -107,21 +107,23 @@ void taxis_defaults(void)
 static
 void taxisDefaultValue ( taxis_t *taxisptr )
 {
-  taxisptr->self       = CDI_UNDEFID;
-  taxisptr->used       = FALSE;
-  taxisptr->type       = DefaultTimeType;
-  taxisptr->vdate      = 0;
-  taxisptr->vtime      = 0;
-  taxisptr->rdate      = CDI_UNDEFID;
-  taxisptr->rtime      = 0;
-  taxisptr->calendar   = cdiDefaultCalendar;
-  taxisptr->unit       = DefaultTimeUnit;
-  taxisptr->numavg     = 0;
-  taxisptr->has_bounds = FALSE;
-  taxisptr->vdate_lb   = 0;
-  taxisptr->vtime_lb   = 0;
-  taxisptr->vdate_ub   = 0;
-  taxisptr->vtime_ub   = 0;
+  taxisptr->self        = CDI_UNDEFID;
+  taxisptr->used        = FALSE;
+  taxisptr->type        = DefaultTimeType;
+  taxisptr->vdate       = 0;
+  taxisptr->vtime       = 0;
+  taxisptr->rdate       = CDI_UNDEFID;
+  taxisptr->rtime       = 0;
+  taxisptr->calendar    = cdiDefaultCalendar;
+  taxisptr->unit        = DefaultTimeUnit;
+  taxisptr->numavg      = 0;
+  taxisptr->has_bounds  = FALSE;
+  taxisptr->vdate_lb    = 0;
+  taxisptr->vtime_lb    = 0;
+  taxisptr->vdate_ub    = 0;
+  taxisptr->vtime_ub    = 0;
+  taxisptr->name[0]     = 0;
+  taxisptr->longname[0] = 0;
 }
 
 static
@@ -1217,6 +1219,9 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->vtime_lb   = source->vtime_lb;
   dest->vdate_ub   = source->vdate_ub;
   dest->vtime_ub   = source->vtime_ub;
+
+  strcpy(dest->name, source->name);
+  strcpy(dest->longname, source->longname);
 
   reshUnlock ();
 }

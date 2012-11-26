@@ -32,6 +32,9 @@ char *strdup(const char *s);
 #endif
 
 
+#ifndef  _CDI_H
+#  include "cdi.h"
+#endif
 #ifndef  _ERROR_H
 #  include "error.h"
 #endif
