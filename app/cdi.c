@@ -876,7 +876,7 @@ int main(int argc, char *argv[])
       int recID;
       int tsID;
       int ntsteps = 0;
-      int taxisID;
+      int taxisID1, taxisID2 = CDI_UNDEFID;
       int gridtype;
       int vlistID1, vlistID2 = CDI_UNDEFID;
 
@@ -897,13 +897,18 @@ int main(int argc, char *argv[])
 	}
 
       nvars   = vlistNvars(vlistID1);
-      taxisID = vlistInqTaxis(vlistID1);
+      taxisID1 = vlistInqTaxis(vlistID1);
       ntsteps = vlistNtsteps(vlistID1);
 
       if ( Debug ) fprintf(stderr, "nvars   = %d\n", nvars);
       if ( Debug ) fprintf(stderr, "ntsteps = %d\n", ntsteps);
 
-      if ( fname2 ) vlistID2 = vlistDuplicate(vlistID1);
+      if ( fname2 )
+        {
+          vlistID2 = vlistDuplicate(vlistID1);
+          taxisID2 = taxisDuplicate(taxisID1);
+          vlistDefTaxis(vlistID2, taxisID2);
+        }
 
       for ( varID = 0; varID < nvars; varID++)
 	{
@@ -966,10 +971,12 @@ int main(int argc, char *argv[])
       while ( (nrecs = streamInqTimestep(streamID1, tsID)) > 0 )
 	{
 	  if ( fname2 /* && ntsteps != 0*/ )
-	    streamDefTimestep(streamID2, tsID);
-
-	  vdate = taxisInqVdate(taxisID);
-	  vtime = taxisInqVtime(taxisID);
+            {
+              taxisCopyTimestep(taxisID2, taxisID1);
+              streamDefTimestep(streamID2, tsID);
+            }
+	  vdate = taxisInqVdate(taxisID1);
+	  vtime = taxisInqVtime(taxisID1);
 
 	  if ( Debug )
 	    fprintf(stdout, "tsID = %d nrecs = %d date = %d time = %d\n", tsID, nrecs, vdate, vtime);

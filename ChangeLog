@@ -2,6 +2,10 @@
 
 	* Version 1.5.9 released
 
+2012-11-26  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* netCDF: added support for time axis name and long_name
+
 2012-11-17  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* stream_cdf::define_all_vars: added txt attributes to vlistDefAttTxt() without trailing 0 [Bug #3004]

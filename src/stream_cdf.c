@@ -835,6 +835,8 @@ void cdfDefTime(int streamID)
   char unitstr[80];
   char calstr[80];
   char tmpstr[256];
+  char default_name[] = "time";
+  char *taxis_name = default_name;
   size_t len;
   taxis_t *taxis;
   stream_t *streamptr;
@@ -849,18 +851,22 @@ void cdfDefTime(int streamID)
 
   if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-  cdf_def_dim(fileID, "time", NC_UNLIMITED, &streamptr->basetime.ncdimid);
+  taxis = &streamptr->tsteps[0].taxis;
+
+  if ( taxis->name && taxis->name[0] ) taxis_name = taxis->name;
+
+  cdf_def_dim(fileID, taxis_name, NC_UNLIMITED, &streamptr->basetime.ncdimid);
 
   dims[0] = streamptr->basetime.ncdimid;
-  cdf_def_var(fileID, "time", NC_DOUBLE, 1, dims, &time_varid);
+  cdf_def_var(fileID, taxis_name, NC_DOUBLE, 1, dims, &time_varid);
 
   streamptr->basetime.ncvarid = time_varid;
 
-  taxis = &streamptr->tsteps[0].taxis;
-
-
   strcpy(tmpstr, "time");
   cdf_put_att_text(fileID, time_varid, "standard_name", strlen(tmpstr), tmpstr);
+
+  if ( taxis->longname && taxis->longname[0] )
+    cdf_put_att_text(fileID, time_varid, "long_name", strlen(taxis->longname), taxis->longname);
 
   if ( taxis->has_bounds )
     {
@@ -869,11 +875,13 @@ void cdfDefTime(int streamID)
       if ( nc_inq_dimid(fileID, "nb2", &dims[1]) != NC_NOERR )
 	cdf_def_dim(fileID, "nb2", 2, &dims[1]);
 
-      cdf_def_var(fileID, "time_bnds", NC_DOUBLE, 2, dims, &time_bndsid);
+      strcpy(tmpstr, taxis_name);
+      strcat(tmpstr, "_bnds");
+      cdf_def_var(fileID, tmpstr, NC_DOUBLE, 2, dims, &time_bndsid);
 
       streamptr->basetime.ncvarboundsid = time_bndsid;
 
-      cdf_put_att_text(fileID, time_varid, "bounds", 9, "time_bnds");
+      cdf_put_att_text(fileID, time_varid, "bounds", strlen(tmpstr), tmpstr);
     }
 
   unitstr[0] = 0;
@@ -6757,6 +6765,16 @@ int cdfInqContents(int streamID)
 
   if ( time_has_bounds )
     streamptr->tsteps[0].taxis.has_bounds = TRUE;
+
+  if ( ncvarid != -1 )
+    {
+      taxis_t *taxis;
+      taxis = &streamptr->tsteps[0].taxis;
+
+      taxis->name = strdup(ncvars[ncvarid].name);
+      if ( ncvars[ncvarid].longname[0] )
+        taxis->longname = strdup(ncvars[ncvarid].longname);
+    }
 
   if ( ncvarid != -1 )
     if ( ncvars[ncvarid].calendar == TRUE )

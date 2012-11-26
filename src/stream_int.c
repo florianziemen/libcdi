@@ -625,7 +625,7 @@ void streamPrintP   ( void * streamptr, FILE * fp )
   fprintf ( fp, "rtsteps       = %d\n", sp->rtsteps );
   fprintf ( fp, "//long ntsteps;\n" );
   fprintf ( fp, "numTimestep   = %d\n", sp->numTimestep );
-  fprintf ( fp, "//  TSTEPS   *tsteps;\n" );
+  fprintf ( fp, "//  tsteps_t   *tsteps;\n" );
   fprintf ( fp, "tstepsTableSize= %d\n", sp->tstepsTableSize );
   fprintf ( fp, "tstepsNextID  = %d\n", sp->tstepsNextID );
   fprintf ( fp, "//BaseTime  basetime;\n" );

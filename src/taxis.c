@@ -122,8 +122,8 @@ void taxisDefaultValue ( taxis_t *taxisptr )
   taxisptr->vtime_lb    = 0;
   taxisptr->vdate_ub    = 0;
   taxisptr->vtime_ub    = 0;
-  taxisptr->name[0]     = 0;
-  taxisptr->longname[0] = 0;
+  taxisptr->name        = NULL;
+  taxisptr->longname    = NULL;
 }
 
 static
@@ -254,6 +254,9 @@ void taxisDestroy(int taxisID)
   taxis_t *taxisptr;
 
   taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+
+  if ( taxisptr->name     ) free(taxisptr->name);
+  if ( taxisptr->longname ) free(taxisptr->longname);
 
   taxisDestroyKernel ( taxisptr );
 }
@@ -538,7 +541,6 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
   taxis_t *taxisptr1;
   taxis_t *taxisptr2;
 
-  
   taxisptr1 = ( taxis_t * ) reshGetVal ( taxisID1, &taxisOps );
   taxisptr2 = ( taxis_t * ) reshGetVal ( taxisID2, &taxisOps );
 
@@ -560,6 +562,9 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
       taxisptr2->vdate_ub = taxisptr1->vdate_ub;
       taxisptr2->vtime_ub = taxisptr1->vtime_ub;
     }
+
+  if ( taxisptr2->name == NULL && taxisptr1->name && taxisptr1->name[0] )
+    taxisptr2->name = strdup(taxisptr1->name);
 
   reshUnlock ();
 }
@@ -1058,7 +1063,7 @@ void conv_timeval(double timevalue, int *rvdate, int *rvtime)
     daysec = (int) (-(timevalue - vdate)*86400 + 0.01);
   else
     daysec = (int) ( (timevalue - vdate)*86400 + 0.01);
-  
+
   hour   =  daysec / 3600;
   minute = (daysec - hour*3600)/60;
   second =  daysec - hour*3600 - minute*60;
@@ -1220,8 +1225,8 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->vdate_ub   = source->vdate_ub;
   dest->vtime_ub   = source->vtime_ub;
 
-  strcpy(dest->name, source->name);
-  strcpy(dest->longname, source->longname);
+  if ( source->name     ) dest->name = strdup(source->name);
+  if ( source->longname ) dest->longname = strdup(source->longname);
 
   reshUnlock ();
 }

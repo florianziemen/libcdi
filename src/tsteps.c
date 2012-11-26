@@ -30,7 +30,7 @@ int tstepsNewEntry(int streamID)
 {
   int tsID = 0;
   int tstepsTableSize;
-  TSTEPS *tstepsTable;
+  tsteps_t *tstepsTable;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -46,11 +46,11 @@ int tstepsNewEntry(int streamID)
     {
       if ( tstepsTableSize == 0 ) tstepsTableSize = 1;
       tstepsTableSize = 2*tstepsTableSize;
-      tstepsTable = (TSTEPS *) realloc(tstepsTable, tstepsTableSize*sizeof(TSTEPS));
+      tstepsTable = (tsteps_t *) realloc(tstepsTable, tstepsTableSize*sizeof(tsteps_t));
       if ( tstepsTable == NULL )
 	{
           Message("tstepsTableSize = %d", tstepsTableSize);
-	  SysError("Reallocation of TSTEPS failed");
+	  SysError("Reallocation of tsteps_t failed");
 	}
     }
 
@@ -78,9 +78,9 @@ void cdiCreateTimesteps(int streamID)
   if ( streamptr->ntsteps == 0 ) ntsteps = 1;    /* <<<<<-------- */
   else ntsteps = streamptr->ntsteps;
 
-  streamptr->tsteps = (TSTEPS *) malloc(ntsteps*sizeof(TSTEPS));
+  streamptr->tsteps = (tsteps_t *) malloc(ntsteps*sizeof(tsteps_t));
   if ( streamptr->tsteps == NULL )
-    SysError("Allocation of TSTEPS failed");
+    SysError("Allocation of tsteps_t failed");
 
   streamptr->tstepsTableSize = ntsteps;
   streamptr->tstepsNextID    = ntsteps;

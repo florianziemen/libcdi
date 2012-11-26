@@ -32,9 +32,6 @@ char *strdup(const char *s);
 #endif
 
 
-#ifndef  _CDI_H
-#  include "cdi.h"
-#endif
 #ifndef  _ERROR_H
 #  include "error.h"
 #endif
@@ -178,7 +175,7 @@ typedef struct {
   off_t     position;    /* timestep file position                */
   taxis_t   taxis;
 }
-TSTEPS;
+tsteps_t;
 
 
 typedef struct {
@@ -227,7 +224,7 @@ typedef struct {
   int         rtsteps;      /* number of tsteps accessed       */
   long        ntsteps;      /* number of tsteps : only set if all records accessed */
   int         numTimestep;  /* number of tsteps : only set if all records accessed */
-  TSTEPS     *tsteps;
+  tsteps_t   *tsteps;
   int         tstepsTableSize;
   int         tstepsNextID;
   BaseTime    basetime;
