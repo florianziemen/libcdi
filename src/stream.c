@@ -596,7 +596,13 @@ int cdiInqContents(int streamID)
       vlistID = streamInqVlist(streamID);
       taxisID = vlistInqTaxis(vlistID);
       if ( taxisID != -1 )
-	ptaxisCopy(taxisPtr(taxisID), &streamptr->tsteps[0].taxis);
+        {
+          taxis_t *taxisptr1 = &streamptr->tsteps[0].taxis;
+          taxis_t *taxisptr2 = taxisPtr(taxisID);
+          ptaxisCopy(taxisptr2, taxisptr1);
+          if ( taxisptr1->name     ) taxisptr2->name = taxisptr1->name;
+          if ( taxisptr1->longname ) taxisptr2->longname = taxisptr1->longname;
+        }
     }
 
   return (status);
@@ -1377,6 +1383,8 @@ int streamDefTimestep(int streamID, int tsID)
   int taxisID;
   int vlistID;
   stream_t *streamptr;
+  taxis_t *taxisptr1;
+  taxis_t *taxisptr2;
 
   streamptr = stream_to_pointer(streamID);
 
@@ -1401,7 +1409,14 @@ int streamDefTimestep(int streamID, int tsID)
 
   streamptr->curTsID = tsID;
 
-  ptaxisCopy(&streamptr->tsteps[tsID].taxis, taxisPtr(taxisID));
+  taxisptr1 = taxisPtr(taxisID);
+  taxisptr2 = &streamptr->tsteps[tsID].taxis;
+  ptaxisCopy(taxisptr2, taxisptr1);
+  if ( tsID == 0 )
+    {
+      if ( taxisptr1->name     ) taxisptr2->name = taxisptr1->name;
+      if ( taxisptr1->longname ) taxisptr2->longname = taxisptr1->longname;
+    }
 
   streamptr->ntsteps = tsID + 1;
 

@@ -285,6 +285,8 @@ int taxisDuplicate(int taxisID1)
     Message("taxisID2: %d", taxisID2);
 
   ptaxisCopy(taxisptr2, taxisptr1);
+  if ( taxisptr1->name     ) taxisptr2->name = strdup(taxisptr1->name);
+  if ( taxisptr1->longname ) taxisptr2->longname = strdup(taxisptr1->longname);
 
   // taxisptr2->has_bounds = FALSE;
 
@@ -562,9 +564,6 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
       taxisptr2->vdate_ub = taxisptr1->vdate_ub;
       taxisptr2->vtime_ub = taxisptr1->vtime_ub;
     }
-
-  if ( taxisptr2->name == NULL && taxisptr1->name && taxisptr1->name[0] )
-    taxisptr2->name = strdup(taxisptr1->name);
 
   reshUnlock ();
 }
@@ -1225,9 +1224,6 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->vdate_ub   = source->vdate_ub;
   dest->vtime_ub   = source->vtime_ub;
 
-  if ( source->name     ) dest->name = strdup(source->name);
-  if ( source->longname ) dest->longname = strdup(source->longname);
-
   reshUnlock ();
 }
 
@@ -1347,25 +1343,25 @@ void taxisUnpack ( char * unpackBuffer, int unpackBufferSize,
 
   xassert ( namespaceAdaptKey ( intBuffer[0], nspTarget ) == taxisP->self );
 
-  taxisP->used       = intBuffer[1];  
-  taxisP->type       = intBuffer[2];  
-  taxisP->vdate      = intBuffer[3];  
-  taxisP->vtime      = intBuffer[4];  
-  taxisP->rdate      = intBuffer[5];  
-  taxisP->rtime      = intBuffer[6];  
-  taxisP->calendar   = intBuffer[7];  
-  taxisP->unit       = intBuffer[8];  
-  taxisP->numavg     = intBuffer[9];  
+  taxisP->used       = intBuffer[1];
+  taxisP->type       = intBuffer[2];
+  taxisP->vdate      = intBuffer[3];
+  taxisP->vtime      = intBuffer[4];
+  taxisP->rdate      = intBuffer[5];
+  taxisP->rtime      = intBuffer[6];
+  taxisP->calendar   = intBuffer[7];
+  taxisP->unit       = intBuffer[8];
+  taxisP->numavg     = intBuffer[9];
   taxisP->has_bounds = intBuffer[10];
-  taxisP->vdate_lb   = intBuffer[11]; 
-  taxisP->vtime_lb   = intBuffer[12]; 
-  taxisP->vdate_ub   = intBuffer[13]; 
+  taxisP->vdate_lb   = intBuffer[11];
+  taxisP->vtime_lb   = intBuffer[12];
+  taxisP->vdate_ub   = intBuffer[13];
   taxisP->vtime_ub   = intBuffer[14];
 }
 
 
 static
-void taxisPack ( void * voidP, void * packBuffer, int packBufferSize, 
+void taxisPack ( void * voidP, void * packBuffer, int packBufferSize,
 		 int * packBufferPos, MPI_Comm comm )
 {
   taxis_t   * taxisP = ( taxis_t * ) voidP;

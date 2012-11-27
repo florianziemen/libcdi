@@ -1068,6 +1068,7 @@ int main(int argc, char *argv[])
 	{
 	  streamClose(streamID2);
 	  vlistDestroy(vlistID2);
+	  taxisDestroy(taxisID2);
 	}
       streamClose(streamID1);
     }
