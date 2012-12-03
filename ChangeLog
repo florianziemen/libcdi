@@ -2,6 +2,10 @@
 
 	* Version 1.5.9 released
 
+2012-12-03  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* vlistCopyFlag: added support for level bounds
+
 2012-11-26  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* netCDF: added support for time axis name and long_name
