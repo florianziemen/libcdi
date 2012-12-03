@@ -402,7 +402,7 @@ void cdiGenVars(int streamID)
   int timave, timaccu;
   int lbounds;
   int comptype;
-  char name[256], longname[256], units[256];
+  char name[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
   double *dlevels = NULL;
   double *dlevels1 = NULL;
   double *dlevels2 = NULL;
@@ -731,8 +731,8 @@ int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, double *l
       if ( nlevels == zaxisInqSize(zaxisID) && zlbounds == lbounds )
 	{
 	  const double *dlevels;
-	  char zlongname[256];
-	  char zunits[256];
+	  char zlongname[CDI_MAX_NAME];
+	  char zunits[CDI_MAX_NAME];
 
 	  dlevels = zaxisInqLevelsPtr(zaxisID);
 	  for ( levelID = 0; levelID < nlevels; levelID++ )

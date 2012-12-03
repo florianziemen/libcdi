@@ -35,7 +35,6 @@
 void cdfDefGlobalAtts(int streamID);
 void cdfDefLocalAtts(int streamID);
 
-#define  MAXNAMELEN  256
 
 #define  X_AXIS  1
 #define  Y_AXIS  2
@@ -46,7 +45,7 @@ typedef struct {
   int     ncvarid;
   int     dimtype;
   size_t  len;
-  char    name[MAXNAMELEN];
+  char    name[CDI_MAX_NAME];
 }
 ncdim_t;
 
@@ -99,10 +98,10 @@ typedef struct {
   double   addoffset;
   double   scalefactor;
   double   validrange[2];
-  char     name[MAXNAMELEN];
-  char     longname[MAXNAMELEN];
-  char     stdname[MAXNAMELEN];
-  char     units[MAXNAMELEN];
+  char     name[CDI_MAX_NAME];
+  char     longname[CDI_MAX_NAME];
+  char     stdname[CDI_MAX_NAME];
+  char     units[CDI_MAX_NAME];
   ensinfo_t   *ensdata;    /* Ensemble information */
 }
 ncvar_t;
@@ -834,7 +833,7 @@ void cdfDefTime(int streamID)
   int year, month, day, hour, minute, second;
   char unitstr[80];
   char calstr[80];
-  char tmpstr[256];
+  char tmpstr[CDI_MAX_NAME];
   char default_name[] = "time";
   char *taxis_name = default_name;
   size_t len;
@@ -1147,10 +1146,10 @@ void cdfDefFC(int streamID, int gridID)
 static
 void cdfDefTrajLon(int streamID, int gridID)
 {
-  char units[256];
-  char longname[256];
-  char stdname[256];
-  char axisname[256];
+  char units[CDI_MAX_NAME];
+  char longname[CDI_MAX_NAME];
+  char stdname[CDI_MAX_NAME];
+  char axisname[CDI_MAX_NAME];
   int gridtype, gridindex;
   int dimID = UNDEFID;
   int fileID;
@@ -1270,8 +1269,8 @@ int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID,
   int iz, index;
   int gridID0;
   int ncdimid;
-  char axisname0[256];
-  char axisname2[256];
+  char axisname0[CDI_MAX_NAME];
+  char axisname2[CDI_MAX_NAME];
   int checkname;
   int status;
 
@@ -1331,10 +1330,10 @@ int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID,
 static
 void cdfDefXaxis(int streamID, int gridID)
 {
-  char units[256];
-  char longname[256];
-  char stdname[256];
-  char axisname[256];
+  char units[CDI_MAX_NAME];
+  char longname[CDI_MAX_NAME];
+  char stdname[CDI_MAX_NAME];
+  char axisname[CDI_MAX_NAME];
   int index;
   /*  int index2; */
   int gridID0, gridtype0, gridindex;
@@ -1460,10 +1459,10 @@ void cdfDefXaxis(int streamID, int gridID)
 static
 void cdfDefYaxis(int streamID, int gridID)
 {
-  char units[256];
-  char longname[256];
-  char stdname[256];
-  char axisname[256];
+  char units[CDI_MAX_NAME];
+  char longname[CDI_MAX_NAME];
+  char stdname[CDI_MAX_NAME];
+  char axisname[CDI_MAX_NAME];
   int index;
   /*  int index2; */
   int gridID0, gridtype0, gridindex;
@@ -1589,14 +1588,14 @@ void cdfDefYaxis(int streamID, int gridID)
 static
 void cdfDefCurvilinear(int streamID, int gridID)
 {
-  char xunits[256];
-  char xlongname[256];
-  char xstdname[256];
-  char yunits[256];
-  char ylongname[256];
-  char ystdname[256];
-  char xaxisname[256];
-  char yaxisname[256];
+  char xunits[CDI_MAX_NAME];
+  char xlongname[CDI_MAX_NAME];
+  char xstdname[CDI_MAX_NAME];
+  char yunits[CDI_MAX_NAME];
+  char ylongname[CDI_MAX_NAME];
+  char ystdname[CDI_MAX_NAME];
+  char xaxisname[CDI_MAX_NAME];
+  char yaxisname[CDI_MAX_NAME];
   char xdimname[4] = "x";
   char ydimname[4] = "y";
   int index;
@@ -1932,14 +1931,14 @@ void cdfDefGdim(int streamID, int gridID)
 static
 void cdfDefUnstructured(int streamID, int gridID)
 {
-  char xunits[256];
-  char xlongname[256];
-  char xstdname[256];
-  char yunits[256];
-  char ylongname[256];
-  char ystdname[256];
-  char xaxisname[256];
-  char yaxisname[256];
+  char xunits[CDI_MAX_NAME];
+  char xlongname[CDI_MAX_NAME];
+  char xstdname[CDI_MAX_NAME];
+  char yunits[CDI_MAX_NAME];
+  char ylongname[CDI_MAX_NAME];
+  char ystdname[CDI_MAX_NAME];
+  char xaxisname[CDI_MAX_NAME];
+  char yaxisname[CDI_MAX_NAME];
   int index;
   int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
@@ -1999,8 +1998,8 @@ void cdfDefUnstructured(int streamID, int gridID)
   if ( dimID == UNDEFID )
     {
       int status;
-      char axisname[256];
-      char vertname[256];
+      char axisname[CDI_MAX_NAME];
+      char vertname[CDI_MAX_NAME];
       strcpy(axisname, "ncells");
       strcpy(vertname, "nv");
 
@@ -2115,7 +2114,7 @@ void cdfDefVCT(int streamID, int zaxisID)
       int ncdimid, ncdimid2;
       int hyaiid, hybiid, hyamid, hybmid;
       double mval;
-      char tmpname[256];
+      char tmpname[CDI_MAX_NAME];
 
       if ( streamptr->vct.ilev > 0 )
         {
@@ -2188,12 +2187,12 @@ void cdfDefVCT(int streamID, int zaxisID)
 static
 void cdfDefZaxis(int streamID, int zaxisID)
 {
-  /*  char zaxisname0[256]; */
-  char axisname[256];
-  char stdname[256];
-  char longname[256];
-  char units[256];
-  char tmpname[256];
+  /*  char zaxisname0[CDI_MAX_NAME]; */
+  char axisname[CDI_MAX_NAME];
+  char stdname[CDI_MAX_NAME];
+  char longname[CDI_MAX_NAME];
+  char units[CDI_MAX_NAME];
+  char tmpname[CDI_MAX_NAME];
   int index;
   int zaxisID0;
   int dimID = UNDEFID;
@@ -2246,8 +2245,8 @@ void cdfDefZaxis(int streamID, int zaxisID)
   */
   if ( dimID == UNDEFID )
     {
-      char axisname0[256];
-      char axisname2[256];
+      char axisname0[CDI_MAX_NAME];
+      char axisname2[CDI_MAX_NAME];
       int checkname = FALSE;
       int status;
 
@@ -2664,7 +2663,7 @@ int cdfDefVar(int streamID, int varID)
   size_t xsize = 0, ysize = 0;
   int code, param, gridID, zaxisID;
   int pnum, pcat, pdis;
-  char varname[256];
+  char varname[CDI_MAX_NAME];
   const char *name = NULL;
   const char *longname = NULL;
   const char *stdname = NULL;
@@ -2815,7 +2814,7 @@ int cdfDefVar(int streamID, int varID)
 
           if ( checkname ) iz++;
 
-          if ( iz >= 256 ) Error("Double entry of variable name '%s'!", name);
+          if ( iz >= CDI_MAX_NAME ) Error("Double entry of variable name '%s'!", name);
         }
 
       if ( strcmp(name, varname) != 0 )
@@ -2857,7 +2856,7 @@ int cdfDefVar(int streamID, int varID)
 
           if ( checkname ) iz++;
 
-          if ( iz >= 256 ) break;
+          if ( iz >= CDI_MAX_NAME ) break;
         }
 
       name = varname;
@@ -2990,8 +2989,8 @@ int cdfDefVar(int streamID, int varID)
     }
   else if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
     {
-      char coordinates[256] = "";
-      char cellarea[256] = "area: ";
+      char coordinates[CDI_MAX_NAME] = "";
+      char cellarea[CDI_MAX_NAME] = "area: ";
       int ncxvarID, ncyvarID, ncavarID;
       int gridindex;
       size_t len;
@@ -4005,9 +4004,9 @@ int cdfTimeDimID(int fileID, int ndims, int nvars)
 {
   int dimid = 0;
   char dimname[80];
-  char timeunits[256];
-  char attname[256];
-  char name[256];
+  char timeunits[CDI_MAX_NAME];
+  char attname[CDI_MAX_NAME];
+  char name[CDI_MAX_NAME];
   nc_type xtype;
   int nvdims, nvatts;
   int dimids[9];
@@ -4373,7 +4372,7 @@ void printNCvars(ncvar_t *ncvars, int nvars, const char *oname)
 typedef struct
 {
   int      ncvarid;
-  char     name[256];
+  char     name[CDI_MAX_NAME];
 }
 varinfo_t;
 
@@ -4399,8 +4398,8 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
   int *dimidsp;
   nc_type xtype, atttype;
   size_t attlen;
-  char name[256];
-  char attname[256];
+  char name[CDI_MAX_NAME];
+  char attname[CDI_MAX_NAME];
   const int attstringlen = 8192; char attstring[8192];
   int iatt;
   int i;
@@ -4452,15 +4451,15 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 
           if ( strcmp(attname, "long_name") == 0 && atttype == NC_CHAR )
             {
-              cdfGetAttText(ncid, ncvarid, attname, MAXNAMELEN, ncvars[ncvarid].longname);
+              cdfGetAttText(ncid, ncvarid, attname, CDI_MAX_NAME, ncvars[ncvarid].longname);
             }
           else if ( strcmp(attname, "standard_name") == 0 && atttype == NC_CHAR )
             {
-              cdfGetAttText(ncid, ncvarid, attname, MAXNAMELEN, ncvars[ncvarid].stdname);
+              cdfGetAttText(ncid, ncvarid, attname, CDI_MAX_NAME, ncvars[ncvarid].stdname);
             }
           else if ( strcmp(attname, "units") == 0 && atttype == NC_CHAR )
             {
-              cdfGetAttText(ncid, ncvarid, attname, MAXNAMELEN, ncvars[ncvarid].units);
+              cdfGetAttText(ncid, ncvarid, attname, CDI_MAX_NAME, ncvars[ncvarid].units);
             }
           else if ( strcmp(attname, "calendar") == 0 )
             {
@@ -5164,7 +5163,7 @@ void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
 {
   int iatt, nvatts;
   size_t attlen;
-  char attname[256];
+  char attname[CDI_MAX_NAME];
   nc_type xtype;
 
   cdf_inq_varnatts(ncfileID, ncvarID, &nvatts);
@@ -5194,11 +5193,11 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
   grid_t proj;
   int gridindex;
   size_t size = 0, xsize, ysize, np;
-  char name[256];
+  char name[CDI_MAX_NAME];
   int iatt;
   int ltwarn = TRUE;
   size_t attlen;
-  char attname[256];
+  char attname[CDI_MAX_NAME];
   const int attstringlen = 8192; char attstring[8192];
   double datt;
 
@@ -6091,7 +6090,7 @@ void define_all_vars(int streamID, int vlistID, int instID, int modelID, int *va
 	  int iatt;
 	  nc_type attrtype;
 	  size_t attlen;
-	  char attname[256];
+	  char attname[CDI_MAX_NAME];
 	  const int attstringlen = 8192; char attstring[8192];
 
 	  nvatts = ncvars[ncvarid].natts;
@@ -6226,7 +6225,7 @@ void read_global_attributtes(int fileID, int vlistID, stream_t *streamptr, int n
 {
   nc_type xtype;
   size_t attlen;
-  char attname[256];
+  char attname[CDI_MAX_NAME];
   const int attstringlen = 8192; char attstring[8192];
   int iatt;
 
@@ -6382,8 +6381,7 @@ int cdfInqContents(int streamID)
       int ncid;
       int numgrps;
       int ncids[NC_MAX_VARS];
-      size_t len = 256;
-      char name1[len];
+      char name1[CDI_MAX_NAME];
       int gndims, gnvars, gngatts, gunlimdimid;
       nc_inq_grps(fileID, &numgrps, ncids);
       for ( int i = 0; i < numgrps; ++i )

@@ -560,7 +560,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 		free(levels);
 
 		{
-		  char ctemp[256];
+		  char ctemp[CDI_MAX_NAME];
 		  zaxisInqName(zaxisID, ctemp);
 		  zaxisDefName(zaxisID2, ctemp);
 		  zaxisInqLongname(zaxisID, ctemp);
