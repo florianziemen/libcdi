@@ -483,7 +483,7 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
   buffer = (unsigned char *) malloc(buffersize);
 
   /*  memcpy(buffer, gribbuffer, gribbuffersize); */
-  
+
   if ( filetype == FILETYPE_GRB )
     {
       nbytes = gribZip(gribbuffer, (long) gribbuffersize, buffer, (long) buffersize);
@@ -494,7 +494,7 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
       lszip_warn = 0;
       nbytes = gribbuffersize;
     }
-      
+
   free(buffer);
 
   return (nbytes);
@@ -661,7 +661,7 @@ int grbCopyRecord(int streamID2, int streamID1)
   nbytes = recsize;
 
   izip = gribGetZip(recsize, gribbuffer, &unzipsize);
-  
+
   if ( izip == 0 )
     if ( streamptr2->comptype == COMPRESS_SZIP )
       nbytes = grbSzip(filetype, gribbuffer, nbytes);
