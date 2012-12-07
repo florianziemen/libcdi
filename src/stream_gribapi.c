@@ -2070,7 +2070,6 @@ int gribapiDefSteptype(int editionNumber, grib_handle *gh, int tsteptype, int gc
 
   switch ( tsteptype )
     {
-    case TSTEP_INSTANT:  strcpy(stepType, "instant"); proDefTempNum = 0; break;
     case TSTEP_AVG:      strcpy(stepType, "avg");     proDefTempNum = 8; break;
     case TSTEP_ACCUM:    strcpy(stepType, "accum");   proDefTempNum = 8; break;
     case TSTEP_MAX:      strcpy(stepType, "max");     proDefTempNum = 8; break;
@@ -2080,6 +2079,7 @@ int gribapiDefSteptype(int editionNumber, grib_handle *gh, int tsteptype, int gc
     case TSTEP_SD:       strcpy(stepType, "sd");      proDefTempNum = 8; break;
     case TSTEP_COV:      strcpy(stepType, "cov");     proDefTempNum = 8; break;
     case TSTEP_RATIO:    strcpy(stepType, "ratio");   proDefTempNum = 8; break;
+    case TSTEP_INSTANT:  strcpy(stepType, "instant"); proDefTempNum = 0; break;
     default:             strcpy(stepType, "instant"); proDefTempNum = 0; break;
     }
 
