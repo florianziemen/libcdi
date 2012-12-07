@@ -16,48 +16,6 @@
 #include <stdarg.h>
 #include <sys/types.h>
 
-//#undef _GET_X86_COUNTER
-//#undef _GET_IBM_COUNTER
-//#undef _ARCH_PWR6
-
-#if   defined(__GNUC__) && (__GNUC__ >= 4)
-#elif defined(__ICC)    && (__ICC >= 1100)
-#else
-#define DISABLE_SIMD
-#endif
-
-#ifdef DISABLE_SIMD
-#ifndef ENABLE_AVX
-#undef __AVX__
-#endif
-#ifndef ENABLE_SSE2
-#undef __SSE2__
-#endif
-#endif
-
-#ifdef _GET_IBM_COUNTER
-#include <libhpc.h>
-#endif
-
-#ifdef __AVX__
-#include <float.h>
-#include <stdint.h>
-#include <inttypes.h>
-#include <immintrin.h>
-#ifdef _GET_X86_COUNTER
-#include <x86intrin.h>
-#endif
-#else
-#ifdef __SSE2__
-#include <float.h>
-#include <stdint.h>
-#include <inttypes.h>
-#include <emmintrin.h>
-#ifdef _GET_X86_COUNTER
-#include <x86intrin.h>
-#endif
-#endif
-#endif
 
 #include "file.h"
 #include "dmemory.h"
@@ -403,6 +361,8 @@ void  gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 }
 
 #endif  /* _GRIBENCODE_H */
+#include <stdio.h>
+#include <math.h>
 
 
 double _pow2tab[158] = {
@@ -685,8 +645,11 @@ double intpow2(int x)
 #endif
 
 #if defined _GET_IBM_COUNTER
+#include <libhpc.h>
 #elif defined _GET_X86_COUNTER
+#include <x86intrin.h>
 #elif defined _GET_MACH_COUNTER
+#include <mach/mach_time.h>
 #endif
 
 //#define DISABLE_SIMD
@@ -701,7 +664,15 @@ double intpow2(int x)
 #endif
 
 #if defined __AVX__
+#include <float.h>
+#include <stdint.h>
+#include <inttypes.h>
+#include <immintrin.h>
 #elif defined __SSE2__
+#include <float.h>
+#include <stdint.h>
+#include <inttypes.h>
+#include <emmintrin.h>
 #endif
 
 #if defined __AVX__
@@ -1012,6 +983,7 @@ void minmax_val(const double *restrict data, size_t datasize, double *fmin, doub
 //#undef _GET_IBM_COUNTER
 //#undef _ARCH_PWR6
 
+#include <stdint.h>
 
 #if   defined(__GNUC__) && (__GNUC__ >= 4)
 #elif defined(__ICC)    && (__ICC >= 1100)
@@ -1021,8 +993,11 @@ void minmax_val(const double *restrict data, size_t datasize, double *fmin, doub
 #endif
 
 #if defined _GET_IBM_COUNTER
+#include <libhpc.h>
 #elif defined _GET_X86_COUNTER
+#include <x86intrin.h>
 #elif defined _GET_MACH_COUNTER
+#include <mach/mach_time.h>
 #endif
 
 //#define DISABLE_SIMD
@@ -1037,7 +1012,9 @@ void minmax_val(const double *restrict data, size_t datasize, double *fmin, doub
 #endif
 
 #if defined __AVX__
+#include <immintrin.h>
 #elif defined __SSE4_1__
+#include <smmintrin.h>
 #endif
 
 #if defined __AVX__
@@ -2104,6 +2081,9 @@ LABEL900:
 
   return (pval);
 } /* decfp2 */
+#include <stdio.h>
+#include <string.h>
+#include <stdarg.h>
 
 
 
@@ -2424,6 +2404,8 @@ void gribSetRefSP(float refval)
 void gribSetValueCheck(int vcheck)
 {
 }
+#include <string.h>
+#include <math.h>
 
 
 
@@ -3911,6 +3893,7 @@ void gribPrintSec4Wave(int *isec4)
       fprintf(grprsm, "%20.10f\n", *ptemp);
     }
 }
+#include <string.h>
 
 int  BitsPerInt = (int) (sizeof(int) * 8);
 
@@ -4876,6 +4859,7 @@ void gribEncode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 
   *kret = status;
 }
+#include <string.h>
 
 
 
@@ -6268,6 +6252,8 @@ void gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 #  include "config.h"
 #endif
 
+#include <string.h>
+#include <ctype.h>
 
 
 
@@ -6737,6 +6723,8 @@ int gribrec_len(int b1, int b2, int b3)
   return (gribsize);
 }
 
+#include <stdio.h>
+#include <math.h>
 
 
 /* calculate_pfactor: source code from grib_api-1.8.0 */
@@ -7832,6 +7820,9 @@ L900:
 
    return 0;
 } /* qu2reg3 */
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 
 FILE *grprsm = NULL;
@@ -8498,6 +8489,7 @@ long unpackInt32(unsigned char *cp, unsigned INT32 *up, long bc, long tc)
   return (bc);
 }
 #endif
+#include <stdio.h>
 
 void prtbin(int kin, int knbit, int *kout, int *kerr)
 {
@@ -8682,6 +8674,7 @@ void ref2ibm(double *pref, int kbits)
 
   return;
 } /* ref2ibm */
+#include <string.h>
 
 
 int correct_bdslen(int bdslen, long recsize, long gribpos)
@@ -9624,6 +9617,8 @@ void gribRepair1(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
       repair1(gribbuffer, recsize);
     }
 }
+#include <stdio.h>
+#include <string.h>
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -10188,7 +10183,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.5.6" " of ""Dec  7 2012"" ""13:14:12";
+static const char grb_libvers[] = "1.5.6" " of ""Dec  7 2012"" ""13:35:32";
 const char *
 cgribexLibraryVersion(void)
 {
