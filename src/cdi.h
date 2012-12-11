@@ -112,6 +112,11 @@ extern "C" {
 #define  DATATYPE_TXT           253
 #define  DATATYPE_CPX           254
 
+/* Chunks */
+
+#define  CHUNK_AUTO               1  /* use default chunk size                  */
+#define  CHUNK_GRID               2
+#define  CHUNK_LINES              3
 
 /* GRID types */
 
@@ -449,6 +454,9 @@ void    vlistDefVarDatatype(int vlistID, int varID, int datatype);
 
 /*      vlistInqVarDatatype: Get the data type of a Variable */
 int     vlistInqVarDatatype(int vlistID, int varID);
+
+void    vlistDefVarChunkType(int vlistID, int varID, int chunktype);
+int     vlistInqVarChunkType(int vlistID, int varID);
 
 void    vlistDefVarXYZ(int vlistID, int varID, int xyz);
 int     vlistInqVarXYZ(int vlistID, int varID);

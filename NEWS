@@ -6,7 +6,9 @@ Version 1.5.8 (30 October 2012):
    New features:
      * grib2: added stepType support for absolute time axis
      * netCDF: set 1D arrays to coordinate variables if axis attribute is available
-
+   New funktions:
+     * vlistDefVarChunktype(): set chunktype to CHUNK_AUTO, CHUNK_GRID, CHUNK_LINES
+     * vlistInqVarChunktype(): returns the chunktype
    Fixed bugs:
      * grib2: changed packingType from grid_jpeg to grid_simple if nmiss > 0
 

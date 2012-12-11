@@ -29,9 +29,7 @@ int cdiDefaultModelID  = CDI_UNDEFID;
 int cdiDefaultTableID  = CDI_UNDEFID;
 int cdiNcMissingValue  = CDI_UNDEFID;
 int cdiNcChunksizehint = CDI_UNDEFID;
-int cdiChunkAlgo       = CHUNK_DEFAULT;
-int cdiChunkX          = -1;
-int cdiChunkY          = -1;
+int cdiChunkType       = CHUNK_GRID;
 int cdiSplitLtype105   = CDI_UNDEFID;
 
 int cdiIgnoreAttCoordinates = FALSE;
@@ -134,9 +132,10 @@ void cdiSetChunk(const char *chunkAlgo)
   size_t len = strlen(chunkAlgo);
   int algo = -1;
 
-  if      ( strcmp("default", chunkAlgo) == 0 ) algo = CHUNK_DEFAULT;
-  else if ( strcmp("auto", chunkAlgo)    == 0 ) algo = CHUNK_AUTO;
+  if      ( strcmp("auto",  chunkAlgo)   == 0 ) algo = CHUNK_AUTO;
+  else if ( strcmp("grid",  chunkAlgo)   == 0 ) algo = CHUNK_GRID;
   else if ( strcmp("lines", chunkAlgo)   == 0 ) algo = CHUNK_LINES;
+  /*
   else if ( (pch = strstr(chunkAlgo,"x")) != 0 )
     {
       int ix, iy;
@@ -151,12 +150,13 @@ void cdiSetChunk(const char *chunkAlgo)
       else
         Warning("Invalid environment variable CDI_CHUNK_ALGO: %s", chunkAlgo);
     }
+  */
   else
     Warning("Invalid environment variable CDI_CHUNK_ALGO: %s", chunkAlgo);
 
   if ( algo != -1 )
     {
-      cdiChunkAlgo = algo;
+      cdiChunkType = algo;
       if ( CDI_Debug ) Message("set ChunkAlgo to %s", chunkAlgo);
     }
 }

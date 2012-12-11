@@ -86,6 +86,7 @@ typedef struct
   int         tableID;
   int         timave;
   int         timaccu;
+  int         chunktype;
   int         xyz;
   int         missvalused; /* TRUE if missval is defined */
   int         lvalidrange;

@@ -180,6 +180,8 @@ int vlistCreate(void)
   int vlistID = 0;
   vlist_t *vlistptr;
 
+  cdiInitialize();
+
   VLIST_INIT();
 
   vlistptr = vlist_new_entry();

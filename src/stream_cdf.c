@@ -2670,6 +2670,7 @@ int cdfDefVar(int streamID, int varID)
   const char *units = NULL;
   int dims[4];
   int lchunk = FALSE;
+  int chunktype;
   size_t chunks[4] = {0,0,0,0};
   int tableID;
   int ndims = 0;
@@ -2705,6 +2706,8 @@ int cdfDefVar(int streamID, int varID)
   code      = vlistInqVarCode(vlistID, varID);
   param     = vlistInqVarParam(vlistID, varID);
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
+
+  chunktype = vlistInqVarChunkType(vlistID, varID);
 
   ixyz    = vlistInqVarXYZ(vlistID, varID);
   if ( ixyz == 0 ) ixyz = 321; // ZYX
@@ -2766,7 +2769,10 @@ int cdfDefVar(int streamID, int varID)
         }
       else if ( dimorder[id] == 2 && yid != UNDEFID )
         {
-          chunks[ndims] = ysize;
+          if ( chunktype == CHUNK_LINES )
+            chunks[ndims] = 1;
+          else
+            chunks[ndims] = ysize;
           dims[ndims] = yid;
           ndims++;
         }
@@ -2779,7 +2785,7 @@ int cdfDefVar(int streamID, int varID)
     }
 
   if ( CDI_Debug )
-    fprintf(stderr, "chunks %d %d %d %d\n", (int)chunks[0], (int)chunks[1], (int)chunks[2], (int)chunks[3]);
+    fprintf(stderr, "chunktype %d  chunks %d %d %d %d\n", chunktype, (int)chunks[0], (int)chunks[1], (int)chunks[2], (int)chunks[3]);
 
   tableID  = vlistInqVarTable(vlistID, varID);
 
@@ -2874,8 +2880,12 @@ int cdfDefVar(int streamID, int varID)
 #if  defined  (HAVE_NETCDF4)
   if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
     {
-      if ( (retval = nc_def_var_chunking(fileID, ncvarid, 0, chunks)) )
-        Error("nc_def_var_chunking failed, status = %d", retval);
+      if ( chunktype == CHUNK_AUTO )
+        retval = nc_def_var_chunking(fileID, ncvarid, NC_CHUNKED, NULL);
+      else
+        retval = nc_def_var_chunking(fileID, ncvarid, NC_CHUNKED, chunks);
+
+      if ( retval ) Error("nc_def_var_chunking failed, status = %d", retval);
     }
 #endif
 
