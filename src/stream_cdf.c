@@ -87,6 +87,9 @@ typedef struct {
   int      positive;
   int      dimids[8];
   int      dimtype[8];
+  int      chunks[8];
+  int      chunked;
+  int      chunktype;
   int      natts;
   int     *atts;
   int      deflate;
@@ -4122,6 +4125,8 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].vdata           = NULL;
       ncvars[ncvarid].truncation      = 0;
       ncvars[ncvarid].positive        = 0;
+      ncvars[ncvarid].chunked         = 0;
+      ncvars[ncvarid].chunktype       = UNDEFID;
       ncvars[ncvarid].defmiss         = 0;
       ncvars[ncvarid].missval         = 0;
       ncvars[ncvarid].addoffset       = 0;
@@ -4440,8 +4445,15 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 
           if ( nc_inq_var_chunking(ncid, ncvarid, &storage_in, chunks) == NC_NOERR )
             {
-              //printf("storage %d\n", storage_in);
-              //for ( int i = 0; i < nvdims; ++i ) printf("chunk %d %d\n", i, chunks[i]);
+              if ( storage_in == NC_CHUNKED )
+                {
+                  ncvars[ncvarid].chunked = 1;
+                  for ( int i = 0; i < nvdims; ++i ) ncvars[ncvarid].chunks[i] = chunks[i];
+                  /*
+                  printf("storage %d %d %d\n", storage_in, NC_CONTIGUOUS, NC_CHUNKED);
+                  for ( int i = 0; i < nvdims; ++i ) printf("chunk %d %d\n", i, chunks[i]);
+                  */
+                }
             }
         }
 #endif
@@ -5738,6 +5750,30 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 #endif
 	    ncvars[ncvarid].gridID = varDefGrid(vlistID, grid, 1);
 
+          if ( ncvars[ncvarid].chunked )
+            {
+              ndims = ncvars[ncvarid].ndims;
+
+              if ( grid.type == GRID_UNSTRUCTURED )
+                {
+                  if ( ncvars[ncvarid].chunks[ndims-1] == grid.size )
+                    ncvars[ncvarid].chunktype = CHUNK_GRID;
+                  else
+                    ncvars[ncvarid].chunktype = CHUNK_AUTO;
+                }
+              else
+                {
+                  if ( grid.xsize > 1 && grid.xsize == ncvars[ncvarid].chunks[ndims-1] )
+                    ncvars[ncvarid].chunktype = CHUNK_LINES;
+                  else if ( grid.xsize > 1 && grid.ysize > 1 && ndims > 1 &&
+                            grid.xsize == ncvars[ncvarid].chunks[ndims-1] &&
+                            grid.ysize == ncvars[ncvarid].chunks[ndims-2] ) 
+                    ncvars[ncvarid].chunktype = CHUNK_GRID;
+                  else
+                    ncvars[ncvarid].chunktype = CHUNK_AUTO;
+                }
+            }
+
 	  gridindex = vlistGridIndex(vlistID, ncvars[ncvarid].gridID);
 	  streamptr->xdimID[gridindex] = xdimid;
 	  streamptr->ydimID[gridindex] = ydimid;
@@ -5781,6 +5817,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			  Message("Same gridID %d %d %s",
 				  ncvars[ncvarid].gridID, ncvarid2, ncvars[ncvarid2].name);
 			ncvars[ncvarid2].gridID = ncvars[ncvarid].gridID;
+			ncvars[ncvarid2].chunktype = ncvars[ncvarid].chunktype;
 		      }
 		  }
 	      }
@@ -5991,6 +6028,9 @@ void define_all_vars(int streamID, int vlistID, int instID, int modelID, int *va
 #if  defined  (HAVE_NETCDF4)
       if ( ncvars[ncvarid].deflate )
 	vlistDefVarCompType(vlistID, varID, COMPRESS_ZIP);
+
+      if ( ncvars[ncvarid].chunked && ncvars[ncvarid].chunktype != UNDEFID )
+        vlistDefVarChunkType(vlistID, varID, ncvars[ncvarid].chunktype);
 #endif
 
       streamptr->vars[varID1].level   = NULL;
