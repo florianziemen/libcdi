@@ -1589,6 +1589,20 @@ void cdfDefYaxis(int streamID, int gridID)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
+void cdfGridCompress(int fileID, int ncvarid, int gridsize, int filetype, int comptype)
+{
+#if  defined  (HAVE_NETCDF4)
+  if ( gridsize > 1 && comptype == COMPRESS_ZIP && (filetype == FILETYPE_NC4 || filetype == FILETYPE_NC4C) )
+    {
+      nc_def_var_chunking(fileID, ncvarid, NC_CHUNKED, NULL);
+      cdfDefVarDeflate(fileID, ncvarid, 1);
+    }
+#endif
+}
+#endif
+
+#if  defined  (HAVE_LIBNETCDF)
+static
 void cdfDefCurvilinear(int streamID, int gridID)
 {
   char xunits[CDI_MAX_NAME];
@@ -1695,6 +1709,7 @@ void cdfDefCurvilinear(int streamID, int gridID)
       if ( gridInqXvalsPtr(gridID) )
         {
           cdf_def_var(fileID, xaxisname, (nc_type) xtype, 2, dimIDs, &ncxvarid);
+          cdfGridCompress(fileID, ncxvarid, xdimlen*ydimlen, streamptr->filetype, streamptr->comptype);
 
           if ( (len = strlen(xstdname)) )
             cdf_put_att_text(fileID, ncxvarid, "standard_name", len, xstdname);
@@ -1715,6 +1730,8 @@ void cdfDefCurvilinear(int streamID, int gridID)
               dimIDs[1] = xdimID;
               dimIDs[2] = nvdimID;
               cdf_def_var(fileID, xaxisname, (nc_type) xtype, 3, dimIDs, &ncbxvarid);
+              cdfGridCompress(fileID, ncbxvarid, xdimlen*ydimlen, streamptr->filetype, streamptr->comptype);
+
               cdf_put_att_text(fileID, ncxvarid, "bounds", strlen(xaxisname), xaxisname);
             }
         }
@@ -1722,6 +1739,7 @@ void cdfDefCurvilinear(int streamID, int gridID)
       if ( gridInqYvalsPtr(gridID) )
         {
           cdf_def_var(fileID, yaxisname, (nc_type) xtype, 2, dimIDs, &ncyvarid);
+          cdfGridCompress(fileID, ncyvarid, xdimlen*ydimlen, streamptr->filetype, streamptr->comptype);
 
           if ( (len = strlen(ystdname)) )
             cdf_put_att_text(fileID, ncyvarid, "standard_name", len, ystdname);
@@ -1742,6 +1760,8 @@ void cdfDefCurvilinear(int streamID, int gridID)
               dimIDs[1] = xdimID;
               dimIDs[2] = nvdimID;
               cdf_def_var(fileID, yaxisname, (nc_type) xtype, 3, dimIDs, &ncbyvarid);
+              cdfGridCompress(fileID, ncbyvarid, xdimlen*ydimlen, streamptr->filetype, streamptr->comptype);
+
               cdf_put_att_text(fileID, ncyvarid, "bounds", strlen(yaxisname), yaxisname);
             }
         }
@@ -1987,7 +2007,7 @@ void cdfDefUnstructured(int streamID, int gridID)
             {
               dimlen0 = gridInqSize(gridID0);
               if ( dimlen == dimlen0 )
-		if ( gridInqNvertex(gridID0) == gridInqNvertex(gridID) && 
+		if ( gridInqNvertex(gridID0) == gridInqNvertex(gridID) &&
 		     IS_EQUAL(gridInqXval(gridID0, 0), gridInqXval(gridID, 0)) &&
                      IS_EQUAL(gridInqXval(gridID0, dimlen-1), gridInqXval(gridID, dimlen-1)) )
 		  {
@@ -2021,6 +2041,7 @@ void cdfDefUnstructured(int streamID, int gridID)
       if ( gridInqXvalsPtr(gridID) )
         {
           cdf_def_var(fileID, xaxisname, (nc_type) xtype, 1, &dimID, &ncxvarid);
+          cdfGridCompress(fileID, ncxvarid, dimlen, streamptr->filetype, streamptr->comptype);
 
           if ( (len = strlen(xstdname)) )
             cdf_put_att_text(fileID, ncxvarid, "standard_name", len, xstdname);
@@ -2038,6 +2059,8 @@ void cdfDefUnstructured(int streamID, int gridID)
               dimIDs[1] = nvdimID;
               strcat(xaxisname, "_vertices");
               cdf_def_var(fileID, xaxisname, (nc_type) xtype, 2, dimIDs, &ncbxvarid);
+              cdfGridCompress(fileID, ncbxvarid, dimlen, streamptr->filetype, streamptr->comptype);
+
               cdf_put_att_text(fileID, ncxvarid, "bounds", strlen(xaxisname), xaxisname);
             }
         }
@@ -2045,6 +2068,7 @@ void cdfDefUnstructured(int streamID, int gridID)
       if ( gridInqYvalsPtr(gridID) )
         {
           cdf_def_var(fileID, yaxisname, (nc_type) xtype, 1, &dimID, &ncyvarid);
+          cdfGridCompress(fileID, ncyvarid, dimlen, streamptr->filetype, streamptr->comptype);
 
           if ( (len = strlen(ystdname)) )
             cdf_put_att_text(fileID, ncyvarid, "standard_name", len, ystdname);
@@ -2062,6 +2086,8 @@ void cdfDefUnstructured(int streamID, int gridID)
               dimIDs[1] = nvdimID;
               strcat(yaxisname, "_vertices");
               cdf_def_var(fileID, yaxisname, (nc_type) xtype, 2, dimIDs, &ncbyvarid);
+              cdfGridCompress(fileID, ncbyvarid, dimlen, streamptr->filetype, streamptr->comptype);
+
               cdf_put_att_text(fileID, ncyvarid, "bounds", strlen(yaxisname), yaxisname);
             }
         }
