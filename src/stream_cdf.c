@@ -5763,12 +5763,12 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
                 }
               else
                 {
-                  if ( grid.xsize > 1 && grid.xsize == ncvars[ncvarid].chunks[ndims-1] )
-                    ncvars[ncvarid].chunktype = CHUNK_LINES;
-                  else if ( grid.xsize > 1 && grid.ysize > 1 && ndims > 1 &&
-                            grid.xsize == ncvars[ncvarid].chunks[ndims-1] &&
-                            grid.ysize == ncvars[ncvarid].chunks[ndims-2] ) 
+                  if ( grid.xsize > 1 && grid.ysize > 1 && ndims > 1 &&
+                       grid.xsize == ncvars[ncvarid].chunks[ndims-1] &&
+                       grid.ysize == ncvars[ncvarid].chunks[ndims-2] ) 
                     ncvars[ncvarid].chunktype = CHUNK_GRID;
+                  else if ( grid.xsize > 1 && grid.xsize == ncvars[ncvarid].chunks[ndims-1] )
+                    ncvars[ncvarid].chunktype = CHUNK_LINES;
                   else
                     ncvars[ncvarid].chunktype = CHUNK_AUTO;
                 }
