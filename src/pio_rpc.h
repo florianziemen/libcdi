@@ -54,7 +54,7 @@ void rpcUnpackResources ( char *, int, MPI_Comm );
 
 struct headerSize
 {
-  int sizeID, numHeaderEntries;
+  int sizeID, numDataEntries, numRPCEntries;
 };
 
 struct dataRecord

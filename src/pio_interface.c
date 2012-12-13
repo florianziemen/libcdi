@@ -29,7 +29,7 @@ static struct rdmaWin
   MPI_Win win;
   int postSet, refuseFuncCall;
   MPI_Group ioGroup;
-  int dictSize, dictUsed;
+  int dictSize, dictDataUsed, dictRPCUsed;
 } *txWin = NULL;
 
 
@@ -348,7 +348,7 @@ void modelWinCleanup ( void )
 
 struct collDesc
 {
-  int numRecords;
+  int numDataRecords, numRPCRecords;
 };
 
 static void
@@ -381,7 +381,7 @@ modelWinDefBufferSizes(void)
           collID = commRankGlob2CollID ( vlistInqVarIOrank ( vlistID, varID ));
           collIDchunk = vlistInqVarDecoChunk ( vlistID, varID, rankModel );
           xassert ( collID != CDI_UNDEFID && collIDchunk > 0 );
-          ++(collIndex[collID].numRecords);
+          ++(collIndex[collID].numDataRecords);
           txWin[collID].size += collIDchunk * sizeof (double) +
             sizeof (union winHeaderEntry);
         }
@@ -391,7 +391,7 @@ modelWinDefBufferSizes(void)
       if ( rankGlob == root )
         for ( collID = 0; collID < nProcsColl; collID++ )
           {
-            collIndex[collID].numRecords += 3;
+            collIndex[collID].numRPCRecords += 3;
             txWin[collID].size +=
               3 * sizeof (union winHeaderEntry)
               + MAXDATAFILENAME;
@@ -399,9 +399,11 @@ modelWinDefBufferSizes(void)
     }
   for (collID = 0; collID < nProcsColl; ++collID)
     {
-      int numRecords = ++(collIndex[collID].numRecords);
+      int numRecords = 1 + collIndex[collID].numDataRecords
+        + collIndex[collID].numRPCRecords;
       txWin[collID].dictSize = numRecords;
-      txWin[collID].dictUsed = 1;
+      txWin[collID].dictDataUsed = 1;
+      txWin[collID].dictRPCUsed = 0;
       txWin[collID].size += sizeof (union winHeaderEntry);
       sumWinBufferSize += txWin[collID].size;
     }
@@ -433,7 +435,8 @@ static
   txWin[collID].head = txWin[collID].buffer
     + txWin[collID].dictSize * sizeof (union winHeaderEntry);
   txWin[collID].refuseFuncCall = 0;
-  txWin[collID].dictUsed = 1;
+  txWin[collID].dictDataUsed = 1;
+  txWin[collID].dictRPCUsed = 0;
 }
 
 
@@ -479,23 +482,27 @@ modelWinEnqueue(int collID,
 {
   union winHeaderEntry *winDict
     = (union winHeaderEntry *)txWin[collID].buffer;
-  int nextEntry = txWin[collID].dictUsed;
+  int targetEntry;
   if (header.dataRecord.streamID > 0)
     {
+      targetEntry = (txWin[collID].dictDataUsed)++;
       header.dataRecord.offset
         = (int)(txWin[collID].head - txWin[collID].buffer);
       memcpy(txWin[collID].head, data, size);
       txWin[collID].head += size;
     }
-  else if (header.funcCall.funcID == STREAMOPEN)
+  else
     {
-      header.funcCall.funcArgs.newFile.offset
-        = (int)(txWin[collID].head - txWin[collID].buffer);
-      memcpy(txWin[collID].head, data, size);
-      txWin[collID].head += size;
+      targetEntry = txWin[collID].dictSize - ++(txWin[collID].dictRPCUsed);
+      if (header.funcCall.funcID == STREAMOPEN)
+        {
+          header.funcCall.funcArgs.newFile.offset
+            = (int)(txWin[collID].head - txWin[collID].buffer);
+          memcpy(txWin[collID].head, data, size);
+          txWin[collID].head += size;
+        }
     }
-  winDict[nextEntry] = header;
-  ++(txWin[collID].dictUsed);
+  winDict[targetEntry] = header;
 }
 
 void pioBufferData ( const int streamID, const int varID, const double *data, int nmiss )
@@ -591,7 +598,8 @@ void pioBufferFuncCall(int funcID, int argc, ... )
 
   for (collID = 0; collID < nProcsColl; ++collID)
     {
-      xassert(txWin[collID].dictSize > txWin[collID].dictUsed);
+      xassert((txWin[collID].dictSize - txWin[collID].dictRPCUsed)
+              > txWin[collID].dictDataUsed);
       if (txWin[collID].postSet)
         {
           xmpi(MPI_Win_wait(txWin[collID].win));
@@ -870,7 +878,8 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
        */
       union winHeaderEntry header
         = { .headerSize = { .sizeID = HEADERSIZEMARKER,
-                            .numHeaderEntries = txWin[collID].dictUsed } };
+                            .numDataEntries = txWin[collID].dictDataUsed,
+                            .numRPCEntries = txWin[collID].dictRPCUsed } };
       union winHeaderEntry *winDict
         = (union winHeaderEntry *)txWin[collID].buffer;
       winDict[0] = header;

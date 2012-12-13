@@ -28,7 +28,7 @@ static struct
 {
   size_t size;
   unsigned char *buffer, *head;
-  int currentRecord;
+  int currentRecord, dictSize;
 } *rxWin = NULL;
 
 static MPI_Win getWin = MPI_WIN_NULL;
@@ -89,6 +89,7 @@ static
                   xassert ( decoChunk > 0 );
                   rxWin[modelID].size += decoChunk * sizeof (double)
                     + sizeof (union winHeaderEntry);
+                  ++(rxWin[modelID].dictSize);
                 }
             }
         }
@@ -96,12 +97,14 @@ static
       // once per stream and timestep for all collprocs only on the modelproc root
       rxWin[root].size += 3 * sizeof (union winHeaderEntry)
         + MAXDATAFILENAME;
+      rxWin[root].dictSize += 3;
     }
   free ( streamIndexList );
 
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
       /* account for size header */
+      rxWin[modelID].dictSize += 1;
       rxWin[modelID].size += sizeof (union winHeaderEntry);
       sumGetBufferSizes += rxWin[modelID].size;
     }
@@ -126,7 +129,7 @@ static
   xmpi ( MPI_Comm_group ( commCalc, &groupCalc ));
   xmpi ( MPI_Group_excl ( groupCalc, 1, ranks, &groupModel ));
 
-  rxWin = xmalloc(nProcsModel * sizeof (rxWin[0]));
+  rxWin = xcalloc(nProcsModel, sizeof (rxWin[0]));
   collDefBufferSizes ();
 
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
@@ -205,71 +208,73 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
   char text[1024];
   int nProcsModel = commInqNProcsModel ();
   int root        = commInqRootGlob ();
-  int numFuncCalls = 0;
   xdebug("%s", "START");
 
   union winHeaderEntry *winDict
     = (union winHeaderEntry *)rxWin[root].buffer;
   xassert(winDict[0].headerSize.sizeID == HEADERSIZEMARKER);
-  int numHeaderEntries = winDict[0].headerSize.numHeaderEntries;
-
-  int headerIdx;
-  for (headerIdx = 1; headerIdx < numHeaderEntries; ++headerIdx)
-    {
-      union winHeaderEntry *header
-        = winDict + headerIdx;
-      if (header->dataRecord.streamID > 0)
-        {
-          streamIDNew = header->dataRecord.streamID;
-          if ( streamIDNew != streamID )
-            {
-              streamID = streamIDNew;
-              vlistID = streamInqVlist ( streamID );
-              taxisID = vlistInqTaxis ( vlistID );
-              taxisDefVdate ( taxisID, vdate );
-              taxisDefVtime ( taxisID, vtime );
-              streamDefTimestep ( streamID, tsID );
-            }
-          varID = header->dataRecord.varID;
-          size = vlistInqVarSize ( vlistID, varID );
-          data = xmalloc ( size * sizeof ( double ));
-          dataHead = data;
-          for ( modelID = 0; modelID < nProcsModel; modelID++ )
-            {
-              struct dataRecord *dataHeader;
-              if ( modelID != root )
-                {
-                  dataHeader = (struct dataRecord *)rxWin[modelID].buffer
-                    - numFuncCalls + headerIdx;
-                  xassert(dataHeader->streamID == streamID
-                          && dataHeader->varID == varID);
-                }
-              else
-                dataHeader = &(winDict[headerIdx].dataRecord);
-              int chunk = vlistInqVarDecoChunk(vlistID, varID, modelID);
-              memcpy(dataHead, rxWin[modelID].buffer
-                     + dataHeader->offset, chunk * sizeof (data[0]));
-              dataHead += chunk;
-              nmiss = dataHeader->nmiss;
-            }
-          streamWriteVar ( streamID, varID, data, nmiss );
-          if ( ddebug > 2 )
-            {
-              sprintf ( text, "streamID=%d, var[%d], size=%d", streamID, varID, size );
-              xprintArray ( text, data, size, DATATYPE_FLT );
-            }
-          free ( data );
-        }
-      else if (header->funcCall.funcID >= MINFUNCID
-               && header->funcCall.funcID <= MAXFUNCID)
-        {
-          struct funcCallDesc *header = &(winDict[headerIdx].funcCall);
-          ++numFuncCalls;
-          readFuncCall(header);
-        }
-      else
-        xabort("Unexpected header item!");
-    }
+  {
+    int dictSize = rxWin[root].dictSize,
+      firstNonRPCEntry = dictSize - winDict[0].headerSize.numRPCEntries - 1,
+      headerIdx,
+      numFuncCalls = 0;
+    for (headerIdx = dictSize - 1;
+         headerIdx > firstNonRPCEntry;
+         --headerIdx)
+      {
+        struct funcCallDesc *header
+          = &(winDict[headerIdx].funcCall);
+        xassert(header->funcID >= MINFUNCID
+                && header->funcID <= MAXFUNCID);
+        ++numFuncCalls;
+        readFuncCall(header);
+      }
+    xassert(numFuncCalls == winDict[0].headerSize.numRPCEntries);
+  }
+  {
+    int numDataEntries = winDict[0].headerSize.numDataEntries;
+    int headerIdx;
+    for (headerIdx = 1; headerIdx < numDataEntries; ++headerIdx)
+      {
+        union winHeaderEntry *header
+          = winDict + headerIdx;
+        xassert(header->dataRecord.streamID > 0);
+        streamIDNew = header->dataRecord.streamID;
+        if (streamIDNew != streamID)
+          {
+            streamID = streamIDNew;
+            vlistID = streamInqVlist(streamID);
+            taxisID = vlistInqTaxis(vlistID);
+            taxisDefVdate(taxisID, vdate);
+            taxisDefVtime(taxisID, vtime);
+            streamDefTimestep(streamID, tsID);
+          }
+        varID = header->dataRecord.varID;
+        size = vlistInqVarSize(vlistID, varID);
+        data = xmalloc(size * sizeof (data[0]));
+        dataHead = data;
+        for (modelID = 0; modelID < nProcsModel; modelID++)
+          {
+            struct dataRecord *dataHeader
+              = (struct dataRecord *)rxWin[modelID].buffer + headerIdx;
+            xassert(dataHeader->streamID == streamID
+                    && dataHeader->varID == varID);
+            int chunk = vlistInqVarDecoChunk(vlistID, varID, modelID);
+            memcpy(dataHead, rxWin[modelID].buffer
+                   + dataHeader->offset, chunk * sizeof (data[0]));
+            dataHead += chunk;
+            nmiss = dataHeader->nmiss;
+          }
+        streamWriteVar(streamID, varID, data, nmiss);
+        if ( ddebug > 2 )
+          {
+            sprintf(text, "streamID=%d, var[%d], size=%d",
+                    streamID, varID, size);
+            xprintArray(text, data, size, DATATYPE_FLT);
+          }
+        free(data);
+      }
+  }
   xdebug("%s", "RETURN");
 } 
 
