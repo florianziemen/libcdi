@@ -459,7 +459,7 @@ void IOServer ()
 	case RESOURCES:
 	  xdebugMsg (  tag, source, nfinished );
 	  xmpi ( MPI_Get_count ( &status, MPI_CHAR, &size ));
-	  buffer = xmalloc ( size * sizeof ( char ));
+	  buffer = xmalloc(size);
 	  xmpi ( MPI_Recv ( buffer, size, MPI_PACKED, source,
                             tag, commCalc, &status ));
           xdebug("%s", "RECEIVED MESSAGE WITH TAG \"RESOURCES\"");
