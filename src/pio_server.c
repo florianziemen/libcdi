@@ -398,7 +398,7 @@ void getData ( int tsID, int vdate, int vtime )
 
 void IOServer ()
 {
-  int source, tag, *iBuffer, size, nProcsModel=commInqNProcsModel();
+  int source, tag, size, nProcsModel=commInqNProcsModel();
   static int nfinished = 0;
   char * buffer;
   MPI_Comm commCalc;
@@ -472,18 +472,18 @@ void IOServer ()
 	  break;
 
 	case WRITETS:
-	  xdebugMsg (  tag, source, nfinished );
-          xmpi ( MPI_Get_count ( &status, MPI_INTEGER, &size ));     
-          xassert ( size == timestepSize );
-          iBuffer = xmalloc ( size * sizeof ( int ));
-          xmpi ( MPI_Recv ( iBuffer, size, MPI_INTEGER, source,
-                            tag, commCalc, &status ));
-          xdebug ( "RECEIVED MESSAGE WITH TAG \"WRITETS\": "
-                   "tsID=%d, vdate=%d, vtime=%d, source=%d", 
+          {
+            int iBuffer[timestepSize];
+            xdebugMsg(tag, source, nfinished);
+            xmpi(MPI_Get_count(&status, MPI_INTEGER, &size));
+            xassert(size == timestepSize);
+            xmpi(MPI_Recv(iBuffer, size, MPI_INTEGER, source,
+                          tag, commCalc, &status));
+            xdebug("RECEIVED MESSAGE WITH TAG \"WRITETS\": "
+                   "tsID=%d, vdate=%d, vtime=%d, source=%d",
                    iBuffer[0], iBuffer[1], iBuffer[2], source );
-          
-          getData ( iBuffer[0], iBuffer[1], iBuffer[2] );                
-          free ( iBuffer );
+            getData(iBuffer[0], iBuffer[1], iBuffer[2]);
+          }
 	  break;
 
 	default:
