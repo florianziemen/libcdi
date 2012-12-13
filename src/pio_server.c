@@ -344,7 +344,7 @@ static
 
 
 static
-void getData ( int tsID, int vdate, int vtime )
+void getTimeStepData ( int tsID, int vdate, int vtime )
 {
   int modelID;
   char text[1024];
@@ -482,7 +482,7 @@ void IOServer ()
             xdebug("RECEIVED MESSAGE WITH TAG \"WRITETS\": "
                    "tsID=%d, vdate=%d, vtime=%d, source=%d",
                    iBuffer[0], iBuffer[1], iBuffer[2], source );
-            getData(iBuffer[0], iBuffer[1], iBuffer[2]);
+            getTimeStepData(iBuffer[0], iBuffer[1], iBuffer[2]);
           }
 	  break;
 
