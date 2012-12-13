@@ -325,8 +325,8 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
 /************************************************************************/
 
 
-static 
-  void getFlushBuffer ( int modelID )
+static
+void clearModelWinBuffer(int modelID)
 {
   int nProcsModel = commInqNProcsModel ();
 
@@ -361,7 +361,7 @@ void getTimeStepData ( int tsID, int vdate, int vtime )
   xassert(attrFound);
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
-      getFlushBuffer ( modelID );
+      clearModelWinBuffer(modelID);
       xdebug("modelID=%d, nProcsModel=%d, rxWin[%d].size=%zu,"
              " getWin=%p, sizeof(int)=%u",
              modelID, nProcsModel, modelID, rxWin[modelID].size,
