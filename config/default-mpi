@@ -29,6 +29,14 @@ case "${HOSTNAME}" in
     export PKG_CONFIG_PATH="/sw/aix61/yaxt-0.1.1-64bit/lib/pkgconfig:/sw/aix61/ppm-1.0.1-64bit-xl-pe-noomp/lib/pkgconfig:${PKG_CONFIG_PATH+:$PKG_CONFIG_PATH}"
     OPTFLAGS='-O3 -qarch=pwr6 -qtune=pwr6'
     export CONFIG_SHELL=/bin/bash
+    # add shared library wrappers to PATH
+    case ":$PATH:" in
+      *:/sw/aix61/smartmpxlf/bin:*)
+        ;;
+      *)
+        PATH="/sw/aix61/smartmpxlf/bin:$PATH"
+        ;;
+    esac
     $CONFIG_SHELL "$confpath/configure" \
       --prefix="$HOME/opt/cdi-powerpc-ibm-aix6-netcdf4-pe" \
       --with-netcdf=/sw/aix61/netcdf-4.2.1.1-64bit-parallel \
