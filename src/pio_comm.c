@@ -372,57 +372,69 @@ int      commInqRankColl    ( void )
   return info->rankColl; 
 }
 
-
-static int cmpr ( const void *a, const void *b )
+static int
+cmpstringp(const void *p1, const void *p2)
 {
-  return strcmp ( *( char ** ) a, *( char ** ) b);
+  return strcmp(* (char * const *) p1, * (char * const *) p2);
 }
-
 
 void commDefCommNode ( void )
 {
-  int size, len, i, j, test;
-  char * myHost, ** allHosts, * allHosts0, * curr;
+  int size;
+  char * myHost, (*allHosts)[MPI_MAX_PROCESSOR_NAME], **sortedHosts;
 
   xassert ( info != NULL &&
            info->commPio != MPI_COMM_NULL );
 
   size = info->sizePio;
 
-  myHost = xmalloc ( MPI_MAX_PROCESSOR_NAME * sizeof ( myHost[0] ));
-  xmpi ( MPI_Get_processor_name ( myHost, &len ));
-  xassert ( myHost[0] != '\0' );
-  strncpy ( info->hostname, myHost, len );
-  info->hostname[len] = '\0';
+  myHost = xmalloc(MPI_MAX_PROCESSOR_NAME);
+  {
+    int len;
+    xmpi ( MPI_Get_processor_name ( myHost, &len ));
+    xassert ( myHost[0] != '\0' );
+    strncpy(info->hostname, myHost, len);
+    info->hostname[len] = '\0';
+  }
 
-  allHosts    = xmalloc ( size * sizeof ( allHosts[0] ));
-  allHosts[0] = xmalloc ( size * MPI_MAX_PROCESSOR_NAME *
-                          sizeof ( allHosts[0][0] ));
-  allHosts0 = allHosts[0];
-  for ( i = 1; i < size; i++ )
-    allHosts[i] = allHosts[0] + i * MPI_MAX_PROCESSOR_NAME;
+  allHosts = xmalloc(size * MPI_MAX_PROCESSOR_NAME);
+  sortedHosts = xmalloc(size * sizeof(sortedHosts[0]));
 
-  xmpi ( MPI_Allgather ( myHost, MPI_MAX_PROCESSOR_NAME, MPI_CHAR,
-                         & ( allHosts[0][0] ), MPI_MAX_PROCESSOR_NAME,
-                         MPI_CHAR, info->commPio ));
+  {
+    int i;
+    for (i = 0; i < size; ++i)
+      sortedHosts[i] = allHosts[i];
+  }
 
-  qsort ( allHosts, size, sizeof ( char * ), cmpr );
+  xmpi(MPI_Allgather(myHost, MPI_MAX_PROCESSOR_NAME, MPI_CHAR,
+                     allHosts[0], MPI_MAX_PROCESSOR_NAME,
+                     MPI_CHAR, info->commPio ));
 
-  i = 0;
-  j = 0;
+  qsort(sortedHosts, size, sizeof (sortedHosts[0]),
+        (int (*)(const void *, const void *))cmpstringp);
 
-  while ( i < size )
-    {
-      curr = allHosts[i];
-      j++;
-      if (( test = strcmp ( myHost, curr )) == 0 ) info->nodeInfo.hostID = j;
-
-      while ( ++i < size )
-        if (( test = strcmp ( allHosts[i], curr )) != 0)
-          break;
-    }
-
-  info->nodeInfo.nNodes = j;
+  {
+    int i = 1, nHosts = 1;
+    if (!strcmp(myHost, sortedHosts[0]))
+      {
+        info->nodeInfo.hostID = 1;
+      }
+    else
+      {
+        for (; i < size && strcmp(myHost, sortedHosts[i]); ++i)
+          if (strcmp(sortedHosts[i - 1], sortedHosts[i]))
+            {
+              /* new host seen, might be ours */
+              nHosts += 1;
+              if (!strcmp(sortedHosts[i], myHost))
+                info->nodeInfo.hostID = nHosts - 1;
+            }
+      }
+    for (; i < size && strcmp(myHost, sortedHosts[i]); ++i)
+      if (strcmp(sortedHosts[i - 1], sortedHosts[i]))
+        nHosts += 1;
+    info->nodeInfo.nNodes = nHosts;
+  }
 
   xassert ( info->nodeInfo.hostID != CDI_UNDEFID );
 
@@ -433,9 +445,9 @@ void commDefCommNode ( void )
   if ( info->IOMode >= info->minIOModeWithSpecialProcs )
     info->specialRankNode = info->sizeNode - 1;
 
-  free ( allHosts0 );
-  free ( allHosts );
-  free ( myHost );
+  free(sortedHosts);
+  free(allHosts);
+  free(myHost);
 
   return;
 }
