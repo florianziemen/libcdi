@@ -22,7 +22,7 @@ fi
 #
 case "${HOSTNAME}" in
 # powerpc-ibm-aix6.1.0.0
-  blizzard*)
+  blizzard*|passat*)
     export MP_PROCS=1
     export MP_HOSTFILE="${cwd}/hostfile"
     hostname >"$MP_HOSTFILE"
