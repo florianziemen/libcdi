@@ -153,16 +153,21 @@ AS_IF([test "x$enable_ruby" != "xno"],[AC_SUBST([ENABLE_RUBY],[true])],[AC_SUBST
 AC_ARG_ENABLE(python,
   [AS_HELP_STRING([--enable-python],[python language bindings [default=no] (EXPERIMENTAL)])],
   [AC_CHECK_PROG(PYTHON,python,python)
-   PYTHON_INCLUDES="-I$($PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_lib(1,1)' | $SED 's/lib/include/')"
-   save_CPPFLAGS=$CPPFLAGS
-   CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
-   AC_CHECK_HEADER([Python.h],,[enable_python=no
-                                PYTHON=
-                               ])
-   CPPFLAGS=$save_CPPFLAGS
-   AS_IF([test "x$PYTHON" != "x"],
+   enable_python=no
+   for PYTHON_INCLUDES in \
+     "-I`$PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_inc()'`" \
+     "-I`$PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_lib(1,1)' | $SED 's/lib/include/'`"
+   do
+     save_CPPFLAGS=$CPPFLAGS
+     CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
+     AC_CHECK_HEADER([Python.h],[enable_python=yes
+       break])
+     CPPFLAGS=$save_CPPFLAGS
+   done
+   AS_IF([test "x$enable_python" != "xno"],
          [AS_IF([test "x$SWIG" = "x"],
-                [AC_MSG_NOTICE([Python bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage])])],
+                [AC_MSG_NOTICE([Python bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage])],
+                [PYTHON=])],
                 [AS_IF([test `$SWIG -help 2>&1 | $GREP -c '\-python *- Generate'` = 0],
                        [AC_MSG_NOTICE([No (swig does not support -python option)])
                         enable_python=no

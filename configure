@@ -26839,24 +26839,28 @@ $as_echo "no" >&6; }
 fi
 
 
-   PYTHON_INCLUDES="-I$($PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_lib(1,1)' | $SED 's/lib/include/')"
-   save_CPPFLAGS=$CPPFLAGS
-   CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
-   ac_fn_c_check_header_mongrel "$LINENO" "Python.h" "ac_cv_header_Python_h" "$ac_includes_default"
+   enable_python=no
+   for PYTHON_INCLUDES in \
+     "-I`$PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_inc()'`" \
+     "-I`$PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_lib(1,1)' | $SED 's/lib/include/'`"
+   do
+     save_CPPFLAGS=$CPPFLAGS
+     CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
+     ac_fn_c_check_header_mongrel "$LINENO" "Python.h" "ac_cv_header_Python_h" "$ac_includes_default"
 if test "x$ac_cv_header_Python_h" = xyes; then :
-
-else
-  enable_python=no
-                                PYTHON=
-
+  enable_python=yes
+       break
 fi
 
 
-   CPPFLAGS=$save_CPPFLAGS
-   if test "x$PYTHON" != "x"; then :
+     CPPFLAGS=$save_CPPFLAGS
+   done
+   if test "x$enable_python" != "xno"; then :
   if test "x$SWIG" = "x"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: Python bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage" >&5
 $as_echo "$as_me: Python bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage" >&6;}
+else
+  PYTHON=
 fi
 else
   if test `$SWIG -help 2>&1 | $GREP -c '\-python *- Generate'` = 0; then :
