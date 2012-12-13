@@ -91,12 +91,51 @@ ACX_OPTIONS
 AC_ARG_ENABLE(mpi,AS_HELP_STRING([--enable-mpi],[Compile with MPI compiler [default=no]]),enable_mpi=yes,enable_mpi=no)
 AS_IF([test x"${enable_mpi}" = x"yes"],
       [USE_MPI=yes])
+HAVE_PARALLEL_NC4=0
 AS_IF([test x"$USE_MPI" = xyes],
   [AC_DEFINE([USE_MPI],[1],[parallel I/O requested and available])
    AC_CHECK_PROGS([MPI_LAUNCH],[mpirun mpiexec],[])
-   AS_IF([test x$MPI_LAUNCH = x],[])],
+   AS_IF([test x$MPI_LAUNCH = x],[])
+   AS_IF([test x"$ENABLE_NC4" = xyes],
+     [AC_CHECK_HEADERS([netcdf_par.h],
+        [AC_CHECK_DECL([MPI_Bcast],
+           [HAVE_PARALLEL_NC4=1],
+           [AC_MSG_WARN([The supplied netCDF library does not support MPI parallel invocations])],
+           [AC_INCLUDES_DEFAULT
+@%:@include <netcdf_par.h>])],
+        [AC_CHECK_DECL([MPI_Bcast],
+           [HAVE_PARALLEL_NC4=1],
+           [AC_MSG_WARN([The supplied netCDF library does not support MPI parallel invocations])],
+           [AC_INCLUDES_DEFAULT
+@%:@include <netcdf.h>])
+])
+      dnl parallel netCDF support still requires ScalES-PPM and YAXT to
+      dnl re-arrange the data when running with more than one collector
+      AS_IF([test $HAVE_PARALLEL_NC4 = 1],
+        [PKG_CHECK_MODULES([PPM_CORE],[scales-ppm-core],
+           [enable_ppm=yes
+            AC_DEFINE([HAVE_PPM_CORE],,
+              [ScalES PPM C core library is available])
+           ],
+           [enable_ppm=no])
+         PKG_CHECK_MODULES([YAXT],[yaxt],
+           [enable_yaxt=yes
+            AC_DEFINE([HAVE_YAXT],,
+              [yaxt library is available])
+           ],[enable_yaxt=no])
+        ])
+      dnl if not both scales-ppm and yaxt are available, netcdf can only be
+      dnl used in serial mode
+      AS_IF([test x$enable_ppm != xyes -o x$enable_yaxt = xno],
+        [HAVE_PARALLEL_NC4=0])
+     ])
+  ],
   [MPI_LAUNCH="`pwd`/util/serialrun"
    AC_SUBST([MPI_LAUNCH])])
+AS_IF([test $HAVE_PARALLEL_NC4 -gt 0],
+  [AC_DEFINE([HAVE_PARALLEL_NC4],[1],
+             [netCDF library does support MPI parallel invocations])])
+AC_SUBST([HAVE_PARALLEL_NC4])
 AM_CONDITIONAL([USE_MPI],[test x"$USE_MPI" = xyes])
 AC_SUBST([USE_MPI])
 #  ----------------------------------------------------------------------
@@ -196,6 +235,7 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
                  tests/pio_cksum_fpguard \
                  tests/pio_cksum_asynch \
                  tests/pio_cksum_writer \
+                 tests/pio_cksum_cdf \
                  util/serialrun],[chmod a+x "$ac_file"])
 
 AC_OUTPUT([Makefile src/Makefile interfaces/Makefile app/Makefile \

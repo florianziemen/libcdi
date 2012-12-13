@@ -329,6 +329,9 @@ void    streamReadVarSlice(int streamID, int varID, int levelID, double *data_ve
 void    streamWriteVarSlice(int streamID, int varID, int levelID, const double *data_vec, int nmiss);
 void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data_vec, int nmiss);
 
+void    streamWriteVarChunk(int streamID, int varID, const int rect[][2],
+                            const double *data_vec, int nmiss);
+
 
 /* STREAM record I/O routines */
 

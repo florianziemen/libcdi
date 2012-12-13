@@ -9,6 +9,7 @@ else
   noinst_LTLIBRARIES = libcdi.la
 endif
 
+AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS)
 
 libcdi_la_SOURCES = 	 \
 	basetime.c     	 \
@@ -117,7 +118,7 @@ libcdi_la_SOURCES = 	 \
         swap.c
 
 #libcdi_la_CPPFLAGS  = @CPPFLAGS@
-#libcdi_la_LIBADD    = @LDFLAGS@
+libcdi_la_LIBADD    = $(PPM_CORE_LIBS) $(YAXT_LIBS)
 #
 cdilib.c:
 	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src

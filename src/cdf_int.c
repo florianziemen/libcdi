@@ -11,6 +11,15 @@
 #include "stream_int.h"
 #include "cdf_int.h"
 
+#ifdef USE_MPI
+#include "namespace.h"
+#include "pio.h"
+#include "pio_comm.h"
+#include "pio_util.h"
+#ifdef HAVE_NETCDF_PAR_H
+#include <netcdf_par.h>
+#endif
+#endif
 
 extern int CDF_Fatal;
 extern int CDF_Verbose;
@@ -59,7 +68,32 @@ void cdf_create(const char *path, int cmode, int *ncidp)
 
   if ( cdiNcChunksizehint != CDI_UNDEFID ) chunksizehint = cdiNcChunksizehint;
 
+#if USE_MPI
+#if defined (HAVE_NETCDF4) && defined (HAVE_PARALLEL_NC4)
+  if (cmode & NC_NETCDF4
+      && namespaceHasLocalFile(namespaceGetActive())
+      && commInqIOMode() != PIO_NONE)
+    {
+      cmode |= NC_MPIPOSIX;
+      status = nc_create_par(path, cmode, commInqCommColl(),
+                             MPI_INFO_NULL, ncidp);
+    }
+  else if (cmode & (NC_64BIT_OFFSET | NC_CLASSIC_MODEL)
+           && namespaceHasLocalFile(namespaceGetActive())
+           && commInqIOMode() != PIO_NONE)
+    {
+      /* FIXME: improve handling of pnetcdf here */
+      abort();
+    }
+  else
+    status = nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
+#else
+  /* FIXME: Only open netcdf file on one task */
   status = nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
+#endif
+#else
+  status = nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
+#endif
 
   if ( CDF_Debug || status != NC_NOERR )
     Message("ncid = %d  mode = %d  file = %s", *ncidp, cmode, path);
@@ -102,6 +136,7 @@ int cdf_open(const char *path, int omode, int *ncidp)
       */
       if ( cdiNcChunksizehint != CDI_UNDEFID ) chunksizehint = cdiNcChunksizehint;
 
+      /* FIXME: parallel part missing */
       status = nc__open(path, omode, &chunksizehint, ncidp);
 
       if ( CDF_Debug ) Message("chunksizehint %d", chunksizehint);
@@ -259,6 +294,20 @@ void cdf_def_var(int ncid, const char *name, nc_type xtype, int ndims,
 
   if ( status != NC_NOERR )
     Error("%s", nc_strerror(status));
+
+#if USE_MPI
+#if defined (HAVE_NETCDF4) && defined (HAVE_PARALLEL_NC4)
+  if (namespaceHasLocalFile(namespaceGetActive())
+      && commInqIOMode() != PIO_NONE)
+    {
+      xdebug("%s", "calling nc_var_par_access");
+      status = nc_var_par_access(ncid, *varidp, NC_COLLECTIVE);
+      if ( status != NC_NOERR )
+        Error("%s", nc_strerror(status));
+    }
+#endif
+#endif
+
 }
 
 

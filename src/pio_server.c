@@ -9,9 +9,17 @@
 #include "pio_server.h"
 
 
+#include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "limits.h"
+
+#ifdef HAVE_PARALLEL_NC4
+#include <core/ppm_combinatorics.h>
+#include <core/ppm_rectilinear.h>
+#include <ppm/ppm_uniform_partition.h>
+#include <yaxt.h>
+#endif
+
 #include "cdi.h"
 #include "pio.h"
 #include "pio_comm.h"
@@ -20,6 +28,7 @@
 #include "stream_int.h"
 #include "resource_handle.h"
 #include "vlist_var.h"
+
 
 extern resOps streamOps;
 extern void arrayDestroy ( void );
@@ -34,6 +43,11 @@ static struct
 static MPI_Win getWin = MPI_WIN_NULL;
 static MPI_Group groupModel = MPI_GROUP_NULL;
 
+#ifdef HAVE_PARALLEL_NC4
+/* prime factorization of number of pio collectors */
+static uint32_t *pioPrimes;
+static int numPioPrimes;
+#endif
 
 /************************************************************************/
 
@@ -195,11 +209,135 @@ readFuncCall(struct funcCallDesc *header)
 
 /************************************************************************/
 
+static void
+resizeVarGatherBuf(int vlistID, int varID, double **buf, int *bufSize)
+{
+  int size = vlistInqVarSize(vlistID, varID);
+  if (size <= *bufSize) ; else
+    *buf = xrealloc(*buf, (*bufSize = size) * sizeof (buf[0][0]));
+}
+
+
+static void
+gatherArray(int root, int nProcsModel, int headerIdx,
+            int vlistID,
+            double *gatherBuf, int *nmiss)
+{
+  double *p = gatherBuf;
+  union winHeaderEntry *winDict
+    = (union winHeaderEntry *)rxWin[root].buffer;
+  int streamID = winDict[headerIdx].dataRecord.streamID;
+  int varID = winDict[headerIdx].dataRecord.varID;
+  *nmiss = 0;
+  for (int modelID = 0; modelID < nProcsModel; modelID++)
+    {
+      struct dataRecord *dataHeader
+        = (struct dataRecord *)rxWin[modelID].buffer
+        + headerIdx;
+      xassert(dataHeader->streamID == streamID
+              && dataHeader->varID == varID);
+      int chunk = vlistInqVarDecoChunk(vlistID, varID,
+                                       modelID);
+      memcpy(p, rxWin[modelID].buffer
+             + dataHeader->offset, chunk * sizeof (p[0]));
+      p += chunk;
+      *nmiss = dataHeader->nmiss;
+    }
+}
+
+struct xyzDims
+{
+  int sizes[3];
+};
+
+static inline int
+xyzGridSize(struct xyzDims dims)
+{
+  return dims.sizes[0] * dims.sizes[1] * dims.sizes[2];
+}
+
+#ifdef HAVE_PARALLEL_NC4
+static void
+queryVarDims(struct PPM_extent varShape[3], int vlistID, int varID)
+{
+  int gridID = vlistInqVarGrid(vlistID, varID);
+  int zaxisID = vlistInqVarZaxis(vlistID, varID);
+  int gridType = gridInqType(gridID);
+  switch (gridType)
+    {
+    case GRID_LONLAT:
+    case GRID_GAUSSIAN:
+      varShape[0].first = 0;
+      varShape[0].size = gridInqXsize(gridID);
+      varShape[1].first = 0;
+      varShape[1].size = gridInqYsize(gridID);
+      break;
+    case GRID_GENERIC:
+    case GRID_LCC:
+    case GRID_SPECTRAL:
+    case GRID_GME:
+    case GRID_CURVILINEAR:
+    case GRID_UNSTRUCTURED:
+    case GRID_REFERENCE:
+      xabort("unimplemented grid type: %d", gridType);
+      break;
+    }
+  varShape[2].first = 0;
+  varShape[2].size = zaxisInqSize(zaxisID);
+}
+
+/* compute distribution of collectors such that number of collectors
+ * <= number of variable grid cells in each dimension */
+static struct xyzDims
+varDimsCollGridMatch(const struct PPM_extent varDims[3])
+{
+  xassert(PPM_extents_size(3, varDims) >= commInqSizeColl());
+  struct xyzDims collGrid = { { 1, 1, 1 } };
+  /* because of storage order, dividing dimension 3 first is preferred */
+  for (int i = 0; i < numPioPrimes; ++i)
+    {
+      for (int dim = 2; dim >=0; --dim)
+        if (collGrid.sizes[dim] * pioPrimes[i] <= varDims[dim].size)
+          {
+            collGrid.sizes[dim] *= pioPrimes[i];
+            goto nextPrime;
+          }
+      /* no position found, retrack */
+      xabort("Not yet implemented back-tracking needed.");
+      nextPrime:
+      ;
+    }
+  return collGrid;
+}
+
+static void
+myVarPart(struct PPM_extent varShape[3], struct xyzDims collGrid,
+          struct PPM_extent myPart[3])
+{
+  int32_t myCollGridCoord[3];
+  {
+    struct PPM_extent collGridShape[3];
+    for (int i = 0; i < 3; ++i)
+      {
+        collGridShape[i].first = 0;
+        collGridShape[i].size = collGrid.sizes[i];
+      }
+    PPM_lidx2rlcoord_e(3, collGridShape, commInqRankColl(), myCollGridCoord);
+    xdebug("my coord: (%d, %d, %d)", myCollGridCoord[0], myCollGridCoord[1],
+           myCollGridCoord[2]);
+  }
+  PPM_uniform_partition_nd(3, varShape, collGrid.sizes,
+                           myCollGridCoord, myPart);
+}
+#endif
+
 static
 void readGetBuffers ( int tsID, int vdate, int vtime )
 {
   int nProcsModel = commInqNProcsModel ();
   int root        = commInqRootGlob ();
+  int myCollRank = commInqRankColl();
+  MPI_Comm collComm = commInqCommColl();
   xdebug("%s", "START");
 
   union winHeaderEntry *winDict
@@ -228,43 +366,69 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
     int numDataEntries = winDict[0].headerSize.numDataEntries;
     int streamIdx;
     struct {
-      int streamID;
+      int streamID, filetype;
       int firstHeaderIdx, lastHeaderIdx;
+      int numVars, *varMap;
     } *streamMap;
     int numStreamIDs = 0, sizeStreamMap = 16;
     streamMap = xmalloc(sizeStreamMap * sizeof (streamMap[0]));
     int streamIDOld = CDI_UNDEFID;
     int headerIdx, oldStreamIdx = CDI_UNDEFID;
+    int filetype = CDI_UNDEFID;
     for (headerIdx = 1; headerIdx < numDataEntries; ++headerIdx)
       {
         int streamID = winDict[headerIdx].dataRecord.streamID;
         xassert(streamID > 0);
         if (streamID != streamIDOld)
           {
-            int i;
-            for (i = numStreamIDs - 1; i >= 0; --i)
+            for (int i = numStreamIDs - 1; i >= 0; --i)
               if ((streamIDOld = streamMap[i].streamID) == streamID)
-                goto streamIDInventorized;
+                {
+                  filetype = streamMap[i].filetype;
+                  oldStreamIdx = i;
+                  goto streamIDInventorized;
+                }
             if (numStreamIDs < sizeStreamMap) ; else
               streamMap = xrealloc(streamMap,
                                    (sizeStreamMap *= 2)
                                    * sizeof (streamMap[0]));
             streamMap[numStreamIDs].streamID = streamID;
             streamMap[numStreamIDs].firstHeaderIdx = headerIdx;
+            streamMap[numStreamIDs].numVars = -1;
             oldStreamIdx = numStreamIDs;
             streamIDOld = streamID;
+            filetype = streamInqFiletype(streamID);
+            streamMap[numStreamIDs].filetype = filetype;
+            if (filetype == FILETYPE_NC || filetype == FILETYPE_NC2
+                || filetype == FILETYPE_NC4)
+              {
+                int vlistID = streamInqVlist(streamID);
+                int nvars = vlistNvars(vlistID);
+                streamMap[numStreamIDs].numVars = nvars;
+                streamMap[numStreamIDs].varMap
+                  = xmalloc(sizeof (streamMap[numStreamIDs].varMap[0])
+                            * nvars);
+                for (int i = 0; i < nvars; ++i)
+                  streamMap[numStreamIDs].varMap[i] = -1;
+              }
             ++numStreamIDs;
           }
         streamIDInventorized:
         streamMap[oldStreamIdx].lastHeaderIdx = headerIdx;
+        if (filetype == FILETYPE_NC || filetype == FILETYPE_NC2
+                || filetype == FILETYPE_NC4)
+          {
+            int varID = winDict[headerIdx].dataRecord.varID;
+            streamMap[oldStreamIdx].varMap[varID] = headerIdx;
+          }
       }
-    double * data = NULL;
+    double *data = NULL, *writeBuf = NULL;
     int currentDataBufSize = 0;
     for (streamIdx = 0; streamIdx < numStreamIDs; ++streamIdx)
       {
         int streamID = streamMap[streamIdx].streamID;
         int vlistID = streamInqVlist(streamID);
-        int fileType = streamInqFiletype(streamID);
+        int fileType = streamMap[streamIdx].filetype;
         int taxisID = vlistInqTaxis(vlistID);
         taxisDefVdate(taxisID, vdate);
         taxisDefVtime(taxisID, vtime);
@@ -281,26 +445,13 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
                    ++headerIdx)
                 if (streamID == winDict[headerIdx].dataRecord.streamID)
                   {
-                    double * dataHead = NULL;
                     int varID = winDict[headerIdx].dataRecord.varID;
                     int size = vlistInqVarSize(vlistID, varID);
-                    int nmiss = 0, modelID;
-                    if (size <= currentDataBufSize) ; else
-                      data = xrealloc(data, (currentDataBufSize = size)
-                                      * sizeof (data[0]));
-                    dataHead = data;
-                    for (modelID = 0; modelID < nProcsModel; modelID++)
-                      {
-                        struct dataRecord *dataHeader
-                          = (struct dataRecord *)rxWin[modelID].buffer + headerIdx;
-                        xassert(dataHeader->streamID == streamID
-                                && dataHeader->varID == varID);
-                        int chunk = vlistInqVarDecoChunk(vlistID, varID, modelID);
-                        memcpy(dataHead, rxWin[modelID].buffer
-                               + dataHeader->offset, chunk * sizeof (data[0]));
-                        dataHead += chunk;
-                        nmiss = dataHeader->nmiss;
-                      }
+                    int nmiss;
+                    resizeVarGatherBuf(vlistID, varID, &data,
+                                       &currentDataBufSize);
+                    gatherArray(root, nProcsModel, headerIdx,
+                                vlistID, data, &nmiss);
                     streamWriteVar(streamID, varID, data, nmiss);
                     if ( ddebug > 2 )
                       {
@@ -312,6 +463,117 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
                   }
             }
             break;
+#ifdef HAVE_NETCDF4
+          case FILETYPE_NC:
+          case FILETYPE_NC2:
+          case FILETYPE_NC4:
+#ifdef HAVE_PARALLEL_NC4
+            /* HAVE_PARALLE_NC4 implies having ScalES-PPM and yaxt */
+            {
+              int nvars = streamMap[streamIdx].numVars;
+              int *varMap = streamMap[streamIdx].varMap;
+              int *varIsWritten = xmalloc(sizeof (varIsWritten[0]) * nvars);
+              for (int varID = 0; varID < nvars; ++varID)
+                varIsWritten[varID] = ((varMap[varID] != -1)
+                                       ?myCollRank+1 : 0);
+              xmpi(MPI_Allreduce(MPI_IN_PLACE, varIsWritten, nvars,
+                                 MPI_INT, MPI_BOR, collComm));
+              for (int varID = 0; varID < nvars; ++varID)
+                if (varIsWritten[varID])
+                  {
+                    struct PPM_extent varShape[3];
+                    queryVarDims(varShape, vlistID, varID);
+                    struct xyzDims collGrid = varDimsCollGridMatch(varShape);
+                    xdebug("writing varID %d with dimensions: "
+                           "x=%d, y=%d, z=%d,\n"
+                           "found distribution with dimensions:"
+                           " x=%d, y=%d, z=%d.", varID,
+                           varShape[0].size, varShape[1].size, varShape[2].size,
+                           collGrid.sizes[0], collGrid.sizes[1],
+                           collGrid.sizes[2]);
+                    struct PPM_extent varChunk[3];
+                    myVarPart(varShape, collGrid, varChunk);
+                    int myChunk[3][2];
+                    for (int i = 0; i < 3; ++i)
+                      {
+                        myChunk[i][0] = PPM_extent_start(varChunk[i]);
+                        myChunk[i][1] = PPM_extent_end(varChunk[i]);
+                      }
+                    xdebug("Writing chunk { { %d, %d }, { %d, %d },"
+                           " { %d, %d } }", myChunk[0][0], myChunk[0][1],
+                           myChunk[1][0], myChunk[1][1], myChunk[2][0],
+                           myChunk[2][1]);
+                    Xt_int varSize[3];
+                    for (int i = 0; i < 3; ++i)
+                      varSize[2 - i] = varShape[i].size;
+                    Xt_idxlist preRedistChunk, preWriteChunk;
+                    /* prepare yaxt descriptor for current data
+                       distribution after collect */
+                    int nmiss;
+                    if (varMap[varID] == -1)
+                      {
+                        preRedistChunk = xt_idxempty_new();
+                        xdebug("%s", "I got none\n");
+                      }
+                    else
+                      {
+                        Xt_int preRedistStart[3] = { 0, 0, 0 };
+                        preRedistChunk
+                          = xt_idxsection_new(0, 3, varSize, varSize,
+                                              preRedistStart);
+                        resizeVarGatherBuf(vlistID, varID, &data,
+                                           &currentDataBufSize);
+                        int headerIdx = varMap[varID];
+                        gatherArray(root, nProcsModel, headerIdx,
+                                    vlistID, data, &nmiss);
+                        xdebug("%s", "I got all\n");
+                      }
+                    MPI_Bcast(&nmiss, 1, MPI_INT, varIsWritten[varID] - 1,
+                              collComm);
+                    /* prepare yaxt descriptor for write chunk */
+                    {
+                      Xt_int preWriteChunkStart[3], preWriteChunkSize[3];
+                      for (int i = 0; i < 3; ++i)
+                        {
+                          preWriteChunkStart[2 - i] = varChunk[i].first;
+                          preWriteChunkSize[2 - i] = varChunk[i].size;
+                        }
+                      preWriteChunk = xt_idxsection_new(0, 3, varSize,
+                                                        preWriteChunkSize,
+                                                        preWriteChunkStart);
+                    }
+                    /* prepare redistribution */
+                    {
+                      Xt_xmap xmap = xt_xmap_all2all_new(preRedistChunk,
+                                                         preWriteChunk,
+                                                         collComm);
+                      Xt_redist redist = xt_redist_p2p_new(xmap, MPI_DOUBLE);
+                      xt_idxlist_delete(preRedistChunk);
+                      xt_idxlist_delete(preWriteChunk);
+                      xt_xmap_delete(xmap);
+                      writeBuf = xrealloc(writeBuf,
+                                          sizeof (double)
+                                          * PPM_extents_size(3, varChunk));
+                      xt_redist_s_exchange(redist, (void **)&data, 1,
+                                           (void **)&writeBuf, 1);
+                      xt_redist_delete(redist);
+                    }
+                    /* write chunk */
+                    streamWriteVarChunk(streamID, varID,
+                                        (const int (*)[2])myChunk, writeBuf,
+                                        nmiss);
+                  }
+            }
+#else
+#error "serial netcdf libraries not yet supported in MPI mode"
+            /* determine process which has stream open (writer) and
+             * which has data for which variable (var owner) */
+            /* for each variable with a var owner send full variable
+             * contents to writer */
+            /* writer calls streamWrite */
+#endif
+            break;
+#endif
           default:
             xabort("unhandled filetype in parallel I/O.");
           }
@@ -410,6 +672,9 @@ void IOServer ()
   if ( commInqRankNode () == commInqSpecialRankNode ()) 
     backendFinalize ();
   commCalc = commInqCommCalc ();
+  numPioPrimes = PPM_prime_factorization_32((uint32_t)commInqSizeColl(),
+                                            &pioPrimes);
+  xt_initialize(commInqCommColl());
 
   for ( ;; )
     {

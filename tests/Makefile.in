@@ -54,12 +54,13 @@ check_PROGRAMS = test_grib$(EXEEXT) cksum_write$(EXEEXT) \
 	cksum_read$(EXEEXT) pio_write$(EXEEXT)
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/pio_cksum_asynch.in $(srcdir)/pio_cksum_fpguard.in \
-	$(srcdir)/pio_cksum_mpinonb.in $(srcdir)/pio_cksum_writer.in \
-	$(srcdir)/pio_write_run.in $(srcdir)/test_cksum_extra.in \
-	$(srcdir)/test_cksum_grib.in $(srcdir)/test_cksum_ieg.in \
-	$(srcdir)/test_cksum_nc.in $(srcdir)/test_cksum_nc2.in \
-	$(srcdir)/test_cksum_nc4.in $(srcdir)/test_cksum_service.in
+	$(srcdir)/pio_cksum_asynch.in $(srcdir)/pio_cksum_cdf.in \
+	$(srcdir)/pio_cksum_fpguard.in $(srcdir)/pio_cksum_mpinonb.in \
+	$(srcdir)/pio_cksum_writer.in $(srcdir)/pio_write_run.in \
+	$(srcdir)/test_cksum_extra.in $(srcdir)/test_cksum_grib.in \
+	$(srcdir)/test_cksum_ieg.in $(srcdir)/test_cksum_nc.in \
+	$(srcdir)/test_cksum_nc2.in $(srcdir)/test_cksum_nc4.in \
+	$(srcdir)/test_cksum_service.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps =  \
 	$(top_srcdir)/m4/acx_assert_lang_is_fortran_variant.m4 \
@@ -80,7 +81,8 @@ CONFIG_HEADER = $(top_builddir)/src/config.h
 CONFIG_CLEAN_FILES = test_cksum_grib test_cksum_nc test_cksum_nc2 \
 	test_cksum_nc4 test_cksum_extra test_cksum_service \
 	test_cksum_ieg pio_write_run pio_cksum_mpinonb \
-	pio_cksum_fpguard pio_cksum_asynch pio_cksum_writer
+	pio_cksum_fpguard pio_cksum_asynch pio_cksum_writer \
+	pio_cksum_cdf
 CONFIG_CLEAN_VPATH_FILES =
 am_cksum_read_OBJECTS = cksum_read.$(OBJEXT) var_cksum.$(OBJEXT) \
 	stream_cksum.$(OBJEXT) cksum.$(OBJEXT) \
@@ -160,6 +162,9 @@ ENABLE_CGRIBEX = @ENABLE_CGRIBEX@
 ENABLE_EXTRA = @ENABLE_EXTRA@
 ENABLE_GRIB = @ENABLE_GRIB@
 ENABLE_IEG = @ENABLE_IEG@
+ENABLE_NC2 = @ENABLE_NC2@
+ENABLE_NC4 = @ENABLE_NC4@
+ENABLE_NETCDF = @ENABLE_NETCDF@
 ENABLE_PYTHON = @ENABLE_PYTHON@
 ENABLE_RUBY = @ENABLE_RUBY@
 ENABLE_SERVICE = @ENABLE_SERVICE@
@@ -180,6 +185,7 @@ FPP_INCOPT = @FPP_INCOPT@
 GREP = @GREP@
 GRIB_API_INCLUDE = @GRIB_API_INCLUDE@
 GRIB_API_LIBS = @GRIB_API_LIBS@
+HAVE_PARALLEL_NC4 = @HAVE_PARALLEL_NC4@
 HDF5_INCLUDE = @HDF5_INCLUDE@
 HDF5_LIBS = @HDF5_LIBS@
 HDF5_ROOT = @HDF5_ROOT@
@@ -223,6 +229,11 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
+PPM_CORE_CFLAGS = @PPM_CORE_CFLAGS@
+PPM_CORE_LIBS = @PPM_CORE_LIBS@
 PTHREAD_CC = @PTHREAD_CC@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
@@ -242,6 +253,8 @@ THREADS_LIBS = @THREADS_LIBS@
 USER_NAME = @USER_NAME@
 USE_MPI = @USE_MPI@
 VERSION = @VERSION@
+YAXT_CFLAGS = @YAXT_CFLAGS@
+YAXT_LIBS = @YAXT_LIBS@
 ZLIB_INCLUDE = @ZLIB_INCLUDE@
 ZLIB_LIBS = @ZLIB_LIBS@
 abs_builddir = @abs_builddir@
@@ -306,7 +319,7 @@ top_srcdir = @top_srcdir@
 TESTS = test_grib.sh test_cksum_grib test_cksum_nc test_cksum_extra \
 	test_cksum_service test_cksum_nc2 test_cksum_nc4 test_cksum_ieg \
 	pio_write_run pio_cksum_mpinonb pio_cksum_fpguard \
-	pio_cksum_asynch pio_cksum_writer
+	pio_cksum_asynch pio_cksum_writer pio_cksum_cdf
 
 #
 test_grib_SOURCES = test_grib.c
@@ -382,6 +395,8 @@ pio_cksum_fpguard: $(top_builddir)/config.status $(srcdir)/pio_cksum_fpguard.in
 pio_cksum_asynch: $(top_builddir)/config.status $(srcdir)/pio_cksum_asynch.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 pio_cksum_writer: $(top_builddir)/config.status $(srcdir)/pio_cksum_writer.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+pio_cksum_cdf: $(top_builddir)/config.status $(srcdir)/pio_cksum_cdf.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-checkPROGRAMS:

@@ -1951,6 +1951,75 @@ void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *dat
   stream_write_var_slice(streamID, varID, levelID, MEMTYPE_FLOAT, data, nmiss);
 }
 
+void
+stream_write_var_chunk(int streamID, int varID, int memtype,
+                       const int rect[][2], const void *data, int nmiss)
+{
+  int filetype;
+  stream_t *streamptr;
+
+  if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
+
+  /* begin deike */
+#ifdef USE_MPI
+  if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
+    {
+      xabort("chunk writing not allowed in PIO mode");
+    }
+#endif
+  /* end deike */
+
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(__func__, streamptr);
+
+  streamDefineTaxis(streamID);
+
+  filetype = streamptr->filetype;
+
+  switch (filetype)
+    {
+#if defined (HAVE_LIBGRIB)
+    case FILETYPE_GRB:
+    case FILETYPE_GRB2:
+#endif
+#if defined (HAVE_LIBSERVICE)
+    case FILETYPE_SRV:
+#endif
+#if defined (HAVE_LIBEXTRA)
+    case FILETYPE_EXT:
+#endif
+#if defined (HAVE_LIBIEG)
+    case FILETYPE_IEG:
+#endif
+#if  defined (HAVE_LIBGRIB) || defined (HAVE_LIBSERVICE)      \
+  || defined (HAVE_LIBEXTRA) || defined (HAVE_LIBIEG)
+      xabort("streamWriteVarChunk not implemented for filetype %s!",
+             strfiletype(filetype));
+      break;
+#endif
+#if  defined  (HAVE_LIBNETCDF)
+    case FILETYPE_NC:
+    case FILETYPE_NC2:
+    case FILETYPE_NC4:
+    case FILETYPE_NC4C:
+      if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
+      cdf_write_var_chunk(streamID, varID, memtype, rect, data, nmiss);
+      break;
+#endif
+    default:
+      Error("%s support not compiled in!", strfiletype(filetype));
+      break;
+    }
+}
+
+void
+streamWriteVarChunk(int streamID, int varID,
+                    const int rect[][2], const double *data, int nmiss)
+{
+  stream_write_var_chunk(streamID, varID, MEMTYPE_DOUBLE, rect, data, nmiss);
+}
+
 
 void streamWriteContents(int streamID, char *cname)
 {

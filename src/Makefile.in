@@ -107,7 +107,8 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
-libcdi_la_LIBADD =
+am__DEPENDENCIES_1 =
+libcdi_la_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	cdf_int.lo cdi_error.lo cdi_util.lo cdiFortran.lo \
 	cgribexlib.lo dmemory.lo error.lo extralib.lo file.lo \
@@ -184,6 +185,9 @@ ENABLE_CGRIBEX = @ENABLE_CGRIBEX@
 ENABLE_EXTRA = @ENABLE_EXTRA@
 ENABLE_GRIB = @ENABLE_GRIB@
 ENABLE_IEG = @ENABLE_IEG@
+ENABLE_NC2 = @ENABLE_NC2@
+ENABLE_NC4 = @ENABLE_NC4@
+ENABLE_NETCDF = @ENABLE_NETCDF@
 ENABLE_PYTHON = @ENABLE_PYTHON@
 ENABLE_RUBY = @ENABLE_RUBY@
 ENABLE_SERVICE = @ENABLE_SERVICE@
@@ -204,6 +208,7 @@ FPP_INCOPT = @FPP_INCOPT@
 GREP = @GREP@
 GRIB_API_INCLUDE = @GRIB_API_INCLUDE@
 GRIB_API_LIBS = @GRIB_API_LIBS@
+HAVE_PARALLEL_NC4 = @HAVE_PARALLEL_NC4@
 HDF5_INCLUDE = @HDF5_INCLUDE@
 HDF5_LIBS = @HDF5_LIBS@
 HDF5_ROOT = @HDF5_ROOT@
@@ -247,6 +252,11 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
+PPM_CORE_CFLAGS = @PPM_CORE_CFLAGS@
+PPM_CORE_LIBS = @PPM_CORE_LIBS@
 PTHREAD_CC = @PTHREAD_CC@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
@@ -266,6 +276,8 @@ THREADS_LIBS = @THREADS_LIBS@
 USER_NAME = @USER_NAME@
 USE_MPI = @USE_MPI@
 VERSION = @VERSION@
+YAXT_CFLAGS = @YAXT_CFLAGS@
+YAXT_LIBS = @YAXT_LIBS@
 ZLIB_INCLUDE = @ZLIB_INCLUDE@
 ZLIB_LIBS = @ZLIB_LIBS@
 abs_builddir = @abs_builddir@
@@ -331,6 +343,7 @@ EXTRA_DIST = make_cdilib mo_cdi.f90
 @ENABLE_CDI_LIB_TRUE@lib_LTLIBRARIES = libcdi.la
 @ENABLE_CDI_LIB_TRUE@include_HEADERS = cdi.h cdi.inc
 @ENABLE_CDI_LIB_FALSE@noinst_LTLIBRARIES = libcdi.la
+AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS)
 libcdi_la_SOURCES = \
 	basetime.c     	 \
 	basetime.h	 \
@@ -437,6 +450,9 @@ libcdi_la_SOURCES = \
         stream.c         \
         swap.c
 
+
+#libcdi_la_CPPFLAGS  = @CPPFLAGS@
+libcdi_la_LIBADD = $(PPM_CORE_LIBS) $(YAXT_LIBS)
 LOCALTARGETS = $(am__append_1) $(am__append_2)
 #
 CLEANFILES = `ls *~` cdilib.c $(am__append_3) $(am__append_4)
@@ -864,9 +880,6 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES \
 	uninstall-am uninstall-includeHEADERS uninstall-libLTLIBRARIES \
 	uninstall-local
 
-
-#libcdi_la_CPPFLAGS  = @CPPFLAGS@
-#libcdi_la_LIBADD    = @LDFLAGS@
 #
 cdilib.c:
 	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src

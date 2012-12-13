@@ -660,6 +660,14 @@ CREATE_ISOC_TRUE
 USE_MPI
 USE_MPI_FALSE
 USE_MPI_TRUE
+HAVE_PARALLEL_NC4
+YAXT_LIBS
+YAXT_CFLAGS
+PPM_CORE_LIBS
+PPM_CORE_CFLAGS
+PKG_CONFIG_LIBDIR
+PKG_CONFIG_PATH
+PKG_CONFIG
 MPI_LAUNCH
 ENABLE_ALL_STATIC_FALSE
 ENABLE_ALL_STATIC_TRUE
@@ -680,6 +688,9 @@ JASPER_LIBS
 NETCDF_LIBS
 NETCDF_INCLUDE
 NETCDF_ROOT
+ENABLE_NC4
+ENABLE_NC2
+ENABLE_NETCDF
 NC_CONFIG
 HDF5_LIBS
 HDF5_INCLUDE
@@ -880,6 +891,13 @@ CXX
 CXXFLAGS
 CCC
 CXXCPP
+PKG_CONFIG
+PKG_CONFIG_PATH
+PKG_CONFIG_LIBDIR
+PPM_CORE_CFLAGS
+PPM_CORE_LIBS
+YAXT_CFLAGS
+YAXT_LIBS
 FCMODEXT'
 
 
@@ -1580,6 +1598,17 @@ Some influential environment variables:
   CXX         C++ compiler command
   CXXFLAGS    C++ compiler flags
   CXXCPP      C++ preprocessor
+  PKG_CONFIG  path to pkg-config utility
+  PKG_CONFIG_PATH
+              directories to add to pkg-config's search path
+  PKG_CONFIG_LIBDIR
+              path overriding pkg-config's built-in search path
+  PPM_CORE_CFLAGS
+              C compiler flags for PPM_CORE, overriding pkg-config
+  PPM_CORE_LIBS
+              linker flags for PPM_CORE, overriding pkg-config
+  YAXT_CFLAGS C compiler flags for YAXT, overriding pkg-config
+  YAXT_LIBS   linker flags for YAXT, overriding pkg-config
   FCMODEXT    file extension of compiled Fortran module files
 
 Use these variables to override the choices made by `configure' or to help
@@ -25239,6 +25268,9 @@ fi
 NETCDF_ROOT=''
 NETCDF_INCLUDE=''
 NETCDF_LIBS=''
+ENABLE_NETCDF=no
+ENABLE_NC2=no
+ENABLE_NC4=no
 
 # Check whether --with-netcdf was given.
 if test "${with_netcdf+set}" = set; then :
@@ -25317,6 +25349,7 @@ if test "$ac_res" != no; then :
 
 $as_echo "#define HAVE_LIBNETCDF 1" >>confdefs.h
 
+                                            ENABLE_NETCDF=yes
 else
   as_fn_error $? "Could not link to netcdf library" "$LINENO" 5
 fi
@@ -25368,6 +25401,7 @@ $as_echo "#define HAVE_NETCDF2 1" >>confdefs.h
 
                                           { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
+                                          ENABLE_NC2=yes
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -25378,6 +25412,7 @@ $as_echo_n "checking netcdf's nc4 support... " >&6; }
 
 $as_echo "#define HAVE_NETCDF4 1" >>confdefs.h
 
+                                    ENABLE_NC4=yes
                                     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 else
@@ -25460,6 +25495,7 @@ if test "$ac_res" != no; then :
 
 $as_echo "#define HAVE_LIBNETCDF 1" >>confdefs.h
 
+                                                 ENABLE_NETCDF=yes
 else
   as_fn_error $? "Could not link to netcdf library" "$LINENO" 5
 fi
@@ -25524,6 +25560,7 @@ $as_echo_n "checking netcdf's nc2 support... " >&6; }
 
 $as_echo "#define HAVE_NETCDF2 1" >>confdefs.h
 
+                                          ENABLE_NC2=yes
                                           { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 else
@@ -25536,6 +25573,7 @@ $as_echo_n "checking netcdf's nc4 support... " >&6; }
 
 $as_echo "#define HAVE_NETCDF4 1" >>confdefs.h
 
+                                          ENABLE_NC4=yes
                                           { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 else
@@ -25559,6 +25597,9 @@ $as_echo_n "checking for NETCDF library... " >&6; }
              { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
 fi
+
+
+
 
 
 
@@ -26423,6 +26464,126 @@ fi
 if test x"${enable_mpi}" = x"yes"; then :
   USE_MPI=yes
 fi
+HAVE_PARALLEL_NC4=0
+
+
+
+
+
+
+if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
+	if test -n "$ac_tool_prefix"; then
+  # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
+set dummy ${ac_tool_prefix}pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_PKG_CONFIG+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PKG_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKG_CONFIG="$PKG_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_PKG_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+PKG_CONFIG=$ac_cv_path_PKG_CONFIG
+if test -n "$PKG_CONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKG_CONFIG" >&5
+$as_echo "$PKG_CONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+fi
+if test -z "$ac_cv_path_PKG_CONFIG"; then
+  ac_pt_PKG_CONFIG=$PKG_CONFIG
+  # Extract the first word of "pkg-config", so it can be a program name with args.
+set dummy pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_ac_pt_PKG_CONFIG+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $ac_pt_PKG_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_ac_pt_PKG_CONFIG="$ac_pt_PKG_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_ac_pt_PKG_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+ac_pt_PKG_CONFIG=$ac_cv_path_ac_pt_PKG_CONFIG
+if test -n "$ac_pt_PKG_CONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_pt_PKG_CONFIG" >&5
+$as_echo "$ac_pt_PKG_CONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+  if test "x$ac_pt_PKG_CONFIG" = x; then
+    PKG_CONFIG=""
+  else
+    case $cross_compiling:$ac_tool_warned in
+yes:)
+{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using cross tools not prefixed with host triplet" >&5
+$as_echo "$as_me: WARNING: using cross tools not prefixed with host triplet" >&2;}
+ac_tool_warned=yes ;;
+esac
+    PKG_CONFIG=$ac_pt_PKG_CONFIG
+  fi
+else
+  PKG_CONFIG="$ac_cv_path_PKG_CONFIG"
+fi
+
+fi
+if test -n "$PKG_CONFIG"; then
+	_pkg_min_version=0.9.0
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking pkg-config is at least version $_pkg_min_version" >&5
+$as_echo_n "checking pkg-config is at least version $_pkg_min_version... " >&6; }
+	if $PKG_CONFIG --atleast-pkgconfig-version $_pkg_min_version; then
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	else
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+		PKG_CONFIG=""
+	fi
+fi
 if test x"$USE_MPI" = xyes; then :
 
 $as_echo "#define USE_MPI 1" >>confdefs.h
@@ -26472,10 +26633,205 @@ done
    if test x$MPI_LAUNCH = x; then :
 
 fi
+   if test x"$ENABLE_NC4" = xyes; then :
+  for ac_header in netcdf_par.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "netcdf_par.h" "ac_cv_header_netcdf_par_h" "$ac_includes_default"
+if test "x$ac_cv_header_netcdf_par_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NETCDF_PAR_H 1
+_ACEOF
+ ac_fn_c_check_decl "$LINENO" "MPI_Bcast" "ac_cv_have_decl_MPI_Bcast" "$ac_includes_default
+#include <netcdf_par.h>
+"
+if test "x$ac_cv_have_decl_MPI_Bcast" = xyes; then :
+  HAVE_PARALLEL_NC4=1
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: The supplied netCDF library does not support MPI parallel invocations" >&5
+$as_echo "$as_me: WARNING: The supplied netCDF library does not support MPI parallel invocations" >&2;}
+fi
+
+else
+  ac_fn_c_check_decl "$LINENO" "MPI_Bcast" "ac_cv_have_decl_MPI_Bcast" "$ac_includes_default
+#include <netcdf.h>
+"
+if test "x$ac_cv_have_decl_MPI_Bcast" = xyes; then :
+  HAVE_PARALLEL_NC4=1
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: The supplied netCDF library does not support MPI parallel invocations" >&5
+$as_echo "$as_me: WARNING: The supplied netCDF library does not support MPI parallel invocations" >&2;}
+fi
+
+
+fi
+
+done
+
+                  if test $HAVE_PARALLEL_NC4 = 1; then :
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for PPM_CORE" >&5
+$as_echo_n "checking for PPM_CORE... " >&6; }
+
+if test -n "$PPM_CORE_CFLAGS"; then
+    pkg_cv_PPM_CORE_CFLAGS="$PPM_CORE_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"scales-ppm-core\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "scales-ppm-core") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_PPM_CORE_CFLAGS=`$PKG_CONFIG --cflags "scales-ppm-core" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$PPM_CORE_LIBS"; then
+    pkg_cv_PPM_CORE_LIBS="$PPM_CORE_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"scales-ppm-core\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "scales-ppm-core") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_PPM_CORE_LIBS=`$PKG_CONFIG --libs "scales-ppm-core" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        PPM_CORE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "scales-ppm-core" 2>&1`
+        else
+	        PPM_CORE_PKG_ERRORS=`$PKG_CONFIG --print-errors "scales-ppm-core" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$PPM_CORE_PKG_ERRORS" >&5
+
+	enable_ppm=no
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	enable_ppm=no
+else
+	PPM_CORE_CFLAGS=$pkg_cv_PPM_CORE_CFLAGS
+	PPM_CORE_LIBS=$pkg_cv_PPM_CORE_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	enable_ppm=yes
+
+$as_echo "#define HAVE_PPM_CORE /**/" >>confdefs.h
+
+
+fi
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for YAXT" >&5
+$as_echo_n "checking for YAXT... " >&6; }
+
+if test -n "$YAXT_CFLAGS"; then
+    pkg_cv_YAXT_CFLAGS="$YAXT_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"yaxt\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "yaxt") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_YAXT_CFLAGS=`$PKG_CONFIG --cflags "yaxt" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$YAXT_LIBS"; then
+    pkg_cv_YAXT_LIBS="$YAXT_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"yaxt\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "yaxt") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_YAXT_LIBS=`$PKG_CONFIG --libs "yaxt" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        YAXT_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "yaxt" 2>&1`
+        else
+	        YAXT_PKG_ERRORS=`$PKG_CONFIG --print-errors "yaxt" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$YAXT_PKG_ERRORS" >&5
+
+	enable_yaxt=no
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	enable_yaxt=no
+else
+	YAXT_CFLAGS=$pkg_cv_YAXT_CFLAGS
+	YAXT_LIBS=$pkg_cv_YAXT_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	enable_yaxt=yes
+
+$as_echo "#define HAVE_YAXT /**/" >>confdefs.h
+
+
+fi
+
+fi
+                  if test x$enable_ppm != xyes -o x$enable_yaxt = xno; then :
+  HAVE_PARALLEL_NC4=0
+fi
+
+fi
+
 else
   MPI_LAUNCH="`pwd`/util/serialrun"
 
 fi
+if test $HAVE_PARALLEL_NC4 -gt 0; then :
+
+$as_echo "#define HAVE_PARALLEL_NC4 1" >>confdefs.h
+
+fi
+
  if test x"$USE_MPI" = xyes; then
   USE_MPI_TRUE=
   USE_MPI_FALSE='#'
@@ -26954,7 +27310,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files tests/test_cksum_grib tests/test_cksum_nc tests/test_cksum_nc2 tests/test_cksum_nc4 tests/test_cksum_extra tests/test_cksum_service tests/test_cksum_ieg tests/pio_write_run tests/pio_cksum_mpinonb tests/pio_cksum_fpguard tests/pio_cksum_asynch tests/pio_cksum_writer util/serialrun"
+ac_config_files="$ac_config_files tests/test_cksum_grib tests/test_cksum_nc tests/test_cksum_nc2 tests/test_cksum_nc4 tests/test_cksum_extra tests/test_cksum_service tests/test_cksum_ieg tests/pio_write_run tests/pio_cksum_mpinonb tests/pio_cksum_fpguard tests/pio_cksum_asynch tests/pio_cksum_writer tests/pio_cksum_cdf util/serialrun"
 
 
 ac_config_files="$ac_config_files Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile cdi.settings examples/pio/Makefile src/pkgconfig/cdi.pc"
@@ -28288,6 +28644,7 @@ do
     "tests/pio_cksum_fpguard") CONFIG_FILES="$CONFIG_FILES tests/pio_cksum_fpguard" ;;
     "tests/pio_cksum_asynch") CONFIG_FILES="$CONFIG_FILES tests/pio_cksum_asynch" ;;
     "tests/pio_cksum_writer") CONFIG_FILES="$CONFIG_FILES tests/pio_cksum_writer" ;;
+    "tests/pio_cksum_cdf") CONFIG_FILES="$CONFIG_FILES tests/pio_cksum_cdf" ;;
     "util/serialrun") CONFIG_FILES="$CONFIG_FILES util/serialrun" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
@@ -30116,6 +30473,7 @@ _LT_EOF
     "tests/pio_cksum_fpguard":F) chmod a+x "$ac_file" ;;
     "tests/pio_cksum_asynch":F) chmod a+x "$ac_file" ;;
     "tests/pio_cksum_writer":F) chmod a+x "$ac_file" ;;
+    "tests/pio_cksum_cdf":F) chmod a+x "$ac_file" ;;
     "util/serialrun":F) chmod a+x "$ac_file" ;;
 
   esac
