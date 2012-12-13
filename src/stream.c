@@ -1675,7 +1675,7 @@ void stream_write_var(int streamID, int varID, int memtype, const void *data, in
 
   stream_check_ptr(__func__, streamptr);
 
-  // streamDefineTaxis(streamID); call not needed
+  // streamDefineTaxis(streamID);
 
   filetype = streamptr->filetype;
 
