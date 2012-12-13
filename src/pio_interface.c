@@ -545,113 +545,81 @@ void pioBufferFuncCall(int funcID, int argc, ... )
 
   va_start ( ap, argc );
 
+  union winHeaderEntry header;
+  char * filename = NULL;
+  size_t filenamesz = 0;
+  int streamID = 0, vlistID = 0, filetype = 0;
+
   switch ( funcID )
     {
     case STREAMCLOSE:
+      xassert ( argc == 1 );
+    case STREAMDEFVLIST:
       {
-        int streamID;
-
-        xassert ( argc == 1 );
-        streamID  = va_arg ( ap, int );
-
-        for ( collID = 0; collID < nProcsColl; collID++ )
+        streamID = va_arg(ap, int);
+        vlistID = CDI_UNDEFID;
+        if (funcID == STREAMDEFVLIST)
           {
-            xassert(txWin[collID].dictSize > txWin[collID].dictUsed);
-
-            if (txWin[collID].postSet)
-              {
-                xmpi(MPI_Win_wait(txWin[collID].win));
-                txWin[collID].postSet = 0;
-                modelWinFlushBuffer ( collID );
-              }
-
-            xassert(txWin[collID].refuseFuncCall == 0);
-
-            union winHeaderEntry header
-              = { .funcCall = { .funcID = STREAMCLOSE,
-                                .funcArgs.streamChange = { streamID } } };
-            modelWinEnqueue(collID, header, 0, 0);
-
+            xassert ( argc == 2 );
+            vlistID = va_arg(ap, int);
           }
-      xdebug ( "WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d",
-               funcMap[(-1 - funcID)], streamID );
+        struct funcCallDesc f = { .funcID = funcID,
+                                  .funcArgs.streamChange = { streamID,
+                                                             vlistID } };
+        header.funcCall = f;
       }
       break;
     case STREAMOPEN:
       {
-        char * filename;
-        int    filetype;
-        size_t filenamesz;
-
         xassert ( argc == 2 );
-        filename  = va_arg ( ap, char * );
-        filenamesz = strlen ( filename );
+        filename = va_arg(ap, char *);
+        filenamesz = strlen(filename);
         xassert ( filenamesz > 0 &&
                   filenamesz < MAXDATAFILENAME );
-        filetype  = va_arg ( ap, int );
-
-        for ( collID = 0; collID < nProcsColl; collID++ )
-          {
-            xassert(txWin[collID].dictSize > txWin[collID].dictUsed);
-
-            if (txWin[collID].postSet)
-              {
-                xmpi(MPI_Win_wait(txWin[collID].win));
-                txWin[collID].postSet = 0;
-                modelWinFlushBuffer ( collID );
-              }
-            union winHeaderEntry header
-              = { .funcCall = { .funcID = STREAMOPEN,
-                                .funcArgs.newFile
-                                = { .fnamelen = filenamesz,
-                                    .filetype = filetype } } };
-            modelWinEnqueue(collID, header, filename, filenamesz + 1);
-
-          }
-
-        xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, filenamesz=%zu,"
-               " filename=%s, filetype=%d",
-               funcMap[(-1 - funcID)], filenamesz, filename, filetype );
-      }
-      break;
-    case STREAMDEFVLIST:
-      {
-        int streamID, vlistID;
-
-        xassert ( argc == 2 );
-        streamID  = va_arg ( ap, int );
-        vlistID   = va_arg ( ap, int );
-
-        for ( collID = 0; collID < nProcsColl; collID++ )
-          {
-            xassert(txWin[collID].dictSize > txWin[collID].dictUsed);
-
-            if (txWin[collID].postSet)
-              {
-                xmpi(MPI_Win_wait(txWin[collID].win));
-                txWin[collID].postSet = 0;
-                modelWinFlushBuffer ( collID );
-              }
-
-            union winHeaderEntry header
-              = { .funcCall = { .funcID = STREAMDEFVLIST,
-                                .funcArgs.streamChange = { streamID,
-                                                           vlistID } } };
-            modelWinEnqueue(collID, header, 0, 0);
-
-          }
-
-        xdebug ( "WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d,"
-                 " vlistID=%d",
-                 funcMap[(-1 - funcID)], streamID, vlistID );
+        filetype = va_arg(ap, int);
+        struct funcCallDesc f = { .funcID = STREAMOPEN,
+                                  .funcArgs.newFile
+                                  = { .fnamelen = filenamesz,
+                                      .filetype = filetype } };
+        header.funcCall = f;
+        ++filenamesz;
       }
       break;
     default:
-      xabort ( "FUNCTION NOT MAPPED!" );
+      xabort("FUNCTION NOT MAPPED!");
     }
 
-  va_end ( ap );
+  for (collID = 0; collID < nProcsColl; ++collID)
+    {
+      xassert(txWin[collID].dictSize > txWin[collID].dictUsed);
+      if (txWin[collID].postSet)
+        {
+          xmpi(MPI_Win_wait(txWin[collID].win));
+          txWin[collID].postSet = 0;
+          modelWinFlushBuffer ( collID );
+        }
+      xassert(txWin[collID].refuseFuncCall == 0);
+      modelWinEnqueue(collID, header, filename, filenamesz);
+    }
 
+  switch ( funcID )
+    {
+    case STREAMCLOSE:
+      xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d",
+             funcMap[(-1 - funcID)], streamID);
+      break;
+    case STREAMDEFVLIST:
+      xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d,"
+             " vlistID=%d", funcMap[(-1 - funcID)], streamID, vlistID);
+      break;
+    case STREAMOPEN:
+      xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, filenamesz=%zu,"
+             " filename=%s, filetype=%d",
+             funcMap[(-1 - funcID)], filenamesz, filename, filetype);
+      break;
+    }
+
+  va_end(ap);
   xdebug("%s", "RETURN");
 }
 
