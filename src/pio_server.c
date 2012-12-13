@@ -28,6 +28,7 @@ static struct
 {
   size_t size;
   unsigned char *buffer, *head;
+  int currentRecord;
 } *rxWin = NULL;
 
 static MPI_Win getWin = MPI_WIN_NULL;
@@ -87,24 +88,24 @@ static
                   decoChunk =  vlistInqVarDecoChunk ( vlistID, varID, modelID );
                   xassert ( decoChunk > 0 );
                   rxWin[modelID].size += decoChunk * sizeof (double)
-                    + winBufferOverheadChunk * sizeof (int);
+                    + sizeof (union winHeaderEntry);
                 }
             }
-    }
+        }
       // space required for the 3 function calls streamOpen, streamDefVlist, streamClose 
       // once per stream and timestep for all collprocs only on the modelproc root
-      rxWin[root].size += 3 * winBufferOverheadFuncCall * sizeof (int)
-        + 5 * sizeof (int) + MAXDATAFILENAME;
+      rxWin[root].size += 3 * sizeof (union winHeaderEntry)
+        + MAXDATAFILENAME;
     }
   free ( streamIndexList );
 
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
-      rxWin[modelID].size += winBufferOverhead * sizeof (int);
+      /* account for size header */
+      rxWin[modelID].size += sizeof (union winHeaderEntry);
       sumGetBufferSizes += rxWin[modelID].size;
     }
   xassert ( sumGetBufferSizes <= MAXWINBUFFERSIZE );
-  /* xprintArray ( "getBufferSize", getBufferSize, nProcsModel, DATATYPE_INT ); */
 }
 
  /************************************************************************/
@@ -127,7 +128,6 @@ static
 
   rxWin = xmalloc(nProcsModel * sizeof (rxWin[0]));
   collDefBufferSizes ();
-  /* xprintArray ( "getBufferSizes", getBufferSize, nProcsModel, DATATYPE_INT ); */
 
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
@@ -140,95 +140,54 @@ static
 
 /************************************************************************/
 
-static
-  void getBufferGetFromEnd ( const char * caller, int line,  
-                             int ID, void * argBuffer, size_t size )
+static void
+readFuncCall(struct funcCallDesc *header)
 {
-  if (rxWin == NULL ||
-      argBuffer     == NULL ||
-      size           < 0    ||
-      ID             < 0    ||
-      ID             >= commInqNProcsModel () ||
-      rxWin[ID].head - rxWin[ID].buffer + size > rxWin[ID].size)
-    xabort("caller: %s, line %d, ID = %d, nProcsModel=%d,"
-           " size = %lu, rxWin[%d].head = %ld, rxWin[%d].size = %lu",
-           caller, line, ID, (unsigned long)size, ID,
-           commInqNProcsModel(), rxWin[ID].head - rxWin[ID].buffer,
-           ID, (unsigned long)rxWin[ID].size);
-  memcpy ( argBuffer, rxWin[ID].head, size );
-  rxWin[ID].head += size;
-}
-
-/************************************************************************/
-
-static
-  void readFuncCall ( void )
-{
-  int funcID, tokenID;
   int root = commInqRootGlob ();
+  int funcID = header->funcID;
 
-  getBufferGetFromEnd ( __func__, __LINE__, 
-                        root, &funcID, sizeof ( funcID ));
-  xassert ( funcID >= MINFUNCID && funcID <= MAXFUNCID );
-  
+  xassert(funcID >= MINFUNCID && funcID <= MAXFUNCID);
   switch ( funcID )
     {
     case STREAMCLOSE:
       {
-        int streamID;
-
-        getBufferGetFromEnd ( __func__, __LINE__, 
-                              root, &streamID, sizeof ( streamID ));
-        streamClose ( streamID );
-        xdebug ( "READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
-                 " closed stream", 
-                 funcMap[(-1 - funcID)], streamID );
+        int streamID = header->funcArgs.streamChange.streamID;
+        streamClose(streamID);
+        xdebug("READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
+               " closed stream",
+               funcMap[(-1 - funcID)], streamID);
       }
       break;
     case STREAMOPEN:
       {
-        char *filename;
-        size_t filenamesz;
-        int filetype, streamID;
-
-        getBufferGetFromEnd ( __func__, __LINE__, 
-                              root, &filenamesz, sizeof ( filenamesz ));
+        size_t filenamesz = header->funcArgs.newFile.fnamelen;
         xassert ( filenamesz > 0 && filenamesz < MAXDATAFILENAME );
-        filename = xmalloc(filenamesz + 1);
-        getBufferGetFromEnd ( __func__, __LINE__, 
-                              root, filename, filenamesz );
-        filename[filenamesz] = '\0';
-        getBufferGetFromEnd ( __func__, __LINE__, 
-                              root, &filetype, sizeof ( filetype ));
+        const char *filename
+          = (const char *)(rxWin[root].buffer
+                           + header->funcArgs.newFile.offset);
+        xassert(filename[filenamesz] == '\0');
+        int filetype = header->funcArgs.newFile.filetype;
         xassert ( filetype >= MINFILETYPE && filetype <= MAXFILETYPE );
-        streamID = streamOpenWrite ( filename, filetype );
+        int streamID = streamOpenWrite(filename, filetype);
         xdebug("READ FUNCTION CALL FROM WIN:  %s, filenamesz=%zu,"
                " filename=%s, filetype=%d, OPENED STREAM %d",
                funcMap[(-1 - funcID)], filenamesz, filename,
                filetype, streamID);
-        free(filename);
       }
-      break; 
+      break;
     case STREAMDEFVLIST:
       {
-        int streamID, vlistID;
-
-        getBufferGetFromEnd ( __func__, __LINE__, 
-                              root, &streamID, sizeof ( vlistID ));
-        getBufferGetFromEnd ( __func__, __LINE__, 
-                              root, &vlistID, sizeof ( vlistID ));
-        streamDefVlist ( streamID, vlistID );
-        xdebug ( "READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
-                 " vlistID=%d, called streamDefVlist ().", 
-                 funcMap[(-1 - funcID)], streamID, vlistID );
+        int streamID = header->funcArgs.streamChange.streamID;
+        int vlistID = header->funcArgs.streamChange.vlistID;
+        streamDefVlist(streamID, vlistID);
+        xdebug("READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
+               " vlistID=%d, called streamDefVlist ().",
+               funcMap[(-1 - funcID)], streamID, vlistID);
       }
       break;
     default:
       xabort ( "REMOTE FUNCTIONCALL NOT IMPLEMENTED!" );
     }
-  getBufferGetFromEnd ( __func__, __LINE__, 
-                        root, &tokenID, sizeof ( tokenID ));
-  xassert ( tokenID == SEPARATOR );
 }
 
 /************************************************************************/
@@ -240,26 +199,28 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
   double * data = NULL, * dataHead = NULL;
   int streamID = CDI_UNDEFID, streamIDNew = CDI_UNDEFID;
   int varID, vlistID = CDI_UNDEFID, taxisID;
-  int size, chunk;
-  int tokenID, tokenID2;
-  
+  int size;
+
   int nmiss = 0;
   char text[1024];
   int nProcsModel = commInqNProcsModel ();
   int root        = commInqRootGlob ();
-  
+  int numFuncCalls = 0;
   xdebug("%s", "START");
-  
-  getBufferGetFromEnd ( __func__, __LINE__, 
-                        root, &tokenID, sizeof ( tokenID ));
 
-  while ( tokenID != END )
+  union winHeaderEntry *winDict
+    = (union winHeaderEntry *)rxWin[root].buffer;
+  xassert(winDict[0].headerSize.sizeID == HEADERSIZEMARKER);
+  int numHeaderEntries = winDict[0].headerSize.numHeaderEntries;
+
+  int headerIdx;
+  for (headerIdx = 1; headerIdx < numHeaderEntries; ++headerIdx)
     {
-      switch ( tokenID )
+      union winHeaderEntry *header
+        = winDict + headerIdx;
+      if (header->dataRecord.streamID > 0)
         {
-        case DATATOKEN:
-          getBufferGetFromEnd ( __func__, __LINE__, 
-                                root, &streamIDNew, sizeof ( streamID ));
+          streamIDNew = header->dataRecord.streamID;
           if ( streamIDNew != streamID )
             {
               streamID = streamIDNew;
@@ -269,55 +230,45 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
               taxisDefVtime ( taxisID, vtime );
               streamDefTimestep ( streamID, tsID );
             }
-          getBufferGetFromEnd(__func__, __LINE__, root, &varID, sizeof (varID));
+          varID = header->dataRecord.varID;
           size = vlistInqVarSize ( vlistID, varID );
           data = xmalloc ( size * sizeof ( double ));
           dataHead = data;
-          
           for ( modelID = 0; modelID < nProcsModel; modelID++ )
             {
+              struct dataRecord *dataHeader;
               if ( modelID != root )
                 {
-                  int tempID;
-                  getBufferGetFromEnd ( __func__, __LINE__, 
-                                        modelID, &tempID, sizeof ( tempID ));
-                  xassert ( tempID == DATATOKEN );
-                  getBufferGetFromEnd ( __func__, __LINE__, 
-                                        modelID, &tempID, sizeof ( tempID ));
-                  xassert ( tempID == streamID );
-                  getBufferGetFromEnd ( __func__, __LINE__, 
-                                        modelID, &tempID, sizeof ( tempID ));
-                  xassert ( tempID == varID );
+                  dataHeader = (struct dataRecord *)rxWin[modelID].buffer
+                    - numFuncCalls + headerIdx;
+                  xassert(dataHeader->streamID == streamID
+                          && dataHeader->varID == varID);
                 }
-              chunk  = vlistInqVarDecoChunk ( vlistID, varID, modelID );
-              getBufferGetFromEnd ( __func__, __LINE__, 
-                                    modelID, dataHead, chunk * sizeof ( double ));
+              else
+                dataHeader = &(winDict[headerIdx].dataRecord);
+              int chunk = vlistInqVarDecoChunk(vlistID, varID, modelID);
+              memcpy(dataHead, rxWin[modelID].buffer
+                     + dataHeader->offset, chunk * sizeof (data[0]));
               dataHead += chunk;
-              getBufferGetFromEnd ( __func__, __LINE__, 
-                                    modelID, &nmiss   , sizeof ( nmiss ));
-              getBufferGetFromEnd ( __func__, __LINE__, 
-                                    modelID, &tokenID2, sizeof ( tokenID2 ));
-              xassert ( tokenID2 == SEPARATOR );
+              nmiss = dataHeader->nmiss;
             }
-          
           streamWriteVar ( streamID, varID, data, nmiss );
-          
           if ( ddebug > 2 )
             {
               sprintf ( text, "streamID=%d, var[%d], size=%d", streamID, varID, size );
               xprintArray ( text, data, size, DATATYPE_FLT );
             }
-          
           free ( data );
-          break;
-        case FUNCCALL:
-          readFuncCall ();
-          break;
-        default:
-          xabort ( "BUFFER NOT READABLE!" );           
         }
-      getBufferGetFromEnd ( __func__, __LINE__, 
-                            root, &tokenID, sizeof ( tokenID ));
+      else if (header->funcCall.funcID >= MINFUNCID
+               && header->funcCall.funcID <= MAXFUNCID)
+        {
+          struct funcCallDesc *header = &(winDict[headerIdx].funcCall);
+          ++numFuncCalls;
+          readFuncCall(header);
+        }
+      else
+        xabort("Unexpected header item!");
     }
   xdebug("%s", "RETURN");
 } 

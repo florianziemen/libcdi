@@ -34,19 +34,56 @@ enum
 
 enum
 {
-  winBufferOverhead = 1,
-  winBufferOverheadChunk = 5,
-  winBufferOverheadFuncCall = 3,
   timestepSize = 3
 };
 
 #define MAXWINBUFFERSIZE ((size_t)512 * 1024 * 1024)
 
-enum { nFuncs = 3, STREAMOPEN = -1, STREAMDEFVLIST = -2, STREAMCLOSE = -3 };
+enum
+{
+  nFuncs = 3,
+  STREAMOPEN = -1,
+  STREAMDEFVLIST = -2,
+  STREAMCLOSE = -3,
+  HEADERSIZEMARKER = -nFuncs - 1,
+};
 enum { MAXDATAFILENAME = 256, MINFUNCID = STREAMCLOSE, MAXFUNCID = STREAMOPEN };
 extern char * funcMap[nFuncs];
 
 void rpcUnpackResources ( char *, int, MPI_Comm );
+
+struct headerSize
+{
+  int sizeID, numHeaderEntries;
+};
+
+struct dataRecord
+{
+  int streamID, varID, offset, nmiss;
+};
+
+struct funcCallDesc
+{
+  int funcID;
+  union
+  {
+    struct
+    {
+      int streamID, vlistID;
+    } streamChange;
+    struct
+    {
+      int fnamelen, offset, filetype;
+    } newFile;
+  } funcArgs;
+};
+
+union winHeaderEntry
+{
+  struct headerSize headerSize;
+  struct dataRecord dataRecord;
+  struct funcCallDesc funcCall;
+};
 
 #endif
 
