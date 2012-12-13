@@ -1382,6 +1382,7 @@ int streamDefTimestep(int streamID, int tsID)
   int newtsID;
   int taxisID;
   int vlistID;
+  int time_is_varying;
   stream_t *streamptr;
   taxis_t *taxisptr1;
   taxis_t *taxisptr2;
@@ -1394,12 +1395,18 @@ int streamDefTimestep(int streamID, int tsID)
   stream_check_ptr(__func__, streamptr);
 
   vlistID = streamInqVlist(streamID);
-  taxisID = vlistInqTaxis(vlistID);
-  if ( taxisID == CDI_UNDEFID )
+
+  time_is_varying = vlistHasTime(vlistID);
+
+  if ( time_is_varying )
     {
-      Warning("taxisID undefined for fileID = %d! Using absolute time axis.", streamID);
-      taxisID = taxisCreate(TAXIS_ABSOLUTE);
-      vlistDefTaxis(vlistID, taxisID);
+      taxisID = vlistInqTaxis(vlistID);
+      if ( taxisID == CDI_UNDEFID )
+        {
+          Warning("taxisID undefined for fileID = %d! Using absolute time axis.", streamID);
+          taxisID = taxisCreate(TAXIS_ABSOLUTE);
+          vlistDefTaxis(vlistID, taxisID);
+        }
     }
 
   newtsID = tstepsNewEntry(streamID);
@@ -1409,23 +1416,26 @@ int streamDefTimestep(int streamID, int tsID)
 
   streamptr->curTsID = tsID;
 
-  taxisptr1 = taxisPtr(taxisID);
-  taxisptr2 = &streamptr->tsteps[tsID].taxis;
-  ptaxisCopy(taxisptr2, taxisptr1);
-  if ( tsID == 0 )
+  if ( time_is_varying )
     {
-      if ( taxisptr1->name     ) taxisptr2->name = taxisptr1->name;
-      if ( taxisptr1->longname ) taxisptr2->longname = taxisptr1->longname;
+      taxisptr1 = taxisPtr(taxisID);
+      taxisptr2 = &streamptr->tsteps[tsID].taxis;
+      ptaxisCopy(taxisptr2, taxisptr1);
+      if ( tsID == 0 )
+        {
+          if ( taxisptr1->name     ) taxisptr2->name = taxisptr1->name;
+          if ( taxisptr1->longname ) taxisptr2->longname = taxisptr1->longname;
+        }
     }
 
   streamptr->ntsteps = tsID + 1;
 
-  if (namespaceHasLocalFile(namespaceGetActive())
-      && (streamptr->filetype == FILETYPE_NC  ||
-          streamptr->filetype == FILETYPE_NC2 ||
-          streamptr->filetype == FILETYPE_NC4 ||
-          streamptr->filetype == FILETYPE_NC4C)
-      && vlistHasTime(vlistID))
+  if ( namespaceHasLocalFile(namespaceGetActive())
+       && (streamptr->filetype == FILETYPE_NC  ||
+           streamptr->filetype == FILETYPE_NC2 ||
+           streamptr->filetype == FILETYPE_NC4 ||
+           streamptr->filetype == FILETYPE_NC4C)
+       && time_is_varying )
     cdfDefTimestep(streamID, tsID);
 
   cdiCreateRecords(streamID, tsID);
@@ -1665,7 +1675,7 @@ void stream_write_var(int streamID, int varID, int memtype, const void *data, in
 
   stream_check_ptr(__func__, streamptr);
 
-  streamDefineTaxis(streamID);
+  // streamDefineTaxis(streamID); call not needed
 
   filetype = streamptr->filetype;
 

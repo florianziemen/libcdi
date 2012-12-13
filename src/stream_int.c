@@ -454,7 +454,8 @@ int streamInqFileID(int streamID)
   return (streamptr->fileID);
 }
 
-
+/* not used anymore */
+/*
 void streamDefineTaxis(int streamID)
 {
   stream_t *streamptr;
@@ -489,7 +490,7 @@ void streamDefineTaxis(int streamID)
 	Error("time axis undefined");
     }
 }
-
+*/
 
 void streamDefDimgroupID(int streamID, int dimgroupID)
 {
