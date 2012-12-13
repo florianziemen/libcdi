@@ -40,6 +40,7 @@ typedef struct {
   int rankColl;
 
   MPI_Comm commCalc;
+  int rankCalc, sizeCalc;
 
   MPI_Comm * commsIO;
   int nProcsColl;
@@ -61,28 +62,30 @@ void pioInfoInit ( pioInfo_t * p )
   p->nProcsIO             = CDI_UNDEFID;
   p->nProcsModel          = CDI_UNDEFID;
   p->isProcIO             = CDI_UNDEFID;
-                          
+
   p->commGlob             = MPI_COMM_NULL;
   p->sizeGlob             = CDI_UNDEFID;
   p->rankGlob             = CDI_UNDEFID;
   p->root                 = CDI_UNDEFID;
-                          
+
   p->commPio              = MPI_COMM_NULL;
   p->sizePio              = CDI_UNDEFID;
-  p->rankPio              = CDI_UNDEFID;
-                          
+  p->rankPio              = -1;
+
   p->commNode             = MPI_COMM_NULL;
   p->sizeNode             = CDI_UNDEFID;
   p->rankNode             = CDI_UNDEFID;
   p->hostname[0]          = 0;
   p->specialRankNode      = CDI_UNDEFID;
-                          
+
   p->commColl             = MPI_COMM_NULL;
   p->sizeColl             = CDI_UNDEFID;
   p->rankColl             = CDI_UNDEFID;
-                          
+
   p->commCalc             = MPI_COMM_NULL;
-                          
+  p->rankCalc             = -1;
+  p->sizeCalc             = -1;
+
   p->commsIO              = NULL;
   p->nodeInfo.hostID      = CDI_UNDEFID;
   p->nodeInfo.isProcColl  = CDI_UNDEFID;
@@ -249,21 +252,50 @@ int      commInqIOMode  ( void )
 
 void     commDefCommPio  ( void )
 {
-  int nProcsModel;
+  int nProcsCalc;
+  MPI_Group grpAll, grpCalc, grpPio;
+  int calcRange[3], pioRange[3];
 
   xassert ( info != NULL &&
            info->commGlob != MPI_COMM_NULL &&
            info->IOMode  != CDI_UNDEFID &&
            info->nProcsIO != CDI_UNDEFID );
 
-  nProcsModel = info->sizeGlob - info->nProcsIO;
+  nProcsCalc = info->sizeGlob - info->nProcsIO;
 
-  info->isProcIO = info->rankGlob >= nProcsModel ? 1 : 0;
+  info->isProcIO = info->rankGlob >= nProcsCalc ? 1 : 0;
 
-  xmpi ( MPI_Comm_split ( info->commGlob, info->isProcIO, 0, 
-                          &info->commPio ));
-  xmpi ( MPI_Comm_size ( info->commPio, &info->sizePio ));
-  xmpi ( MPI_Comm_rank ( info->commPio, &info->rankPio )); 
+  xmpi(MPI_Comm_group(info->commGlob, &grpAll));
+
+  calcRange[0] = 0;
+  calcRange[1] = info->sizeGlob - info->nProcsIO - 1;
+  calcRange[2] = 1;
+  xmpi(MPI_Group_range_incl(grpAll, 1, &calcRange, &grpCalc));
+  xmpi(MPI_Comm_create(info->commGlob, grpCalc, &info->commCalc));
+
+  pioRange[0] = info->sizeGlob - info->nProcsIO;
+  pioRange[1] = info->sizeGlob - 1;
+  pioRange[2] = 1;
+  xmpi(MPI_Group_range_incl(grpAll, 1, &pioRange, &grpPio));
+  xmpi(MPI_Comm_create(info->commGlob, grpPio, &info->commPio));
+
+  if (info->commPio != MPI_COMM_NULL)
+    {
+      xmpi(MPI_Comm_size(info->commPio, &info->sizePio));
+      xmpi(MPI_Comm_rank(info->commPio, &info->rankPio));
+      info->sizeCalc = nProcsCalc;
+      info->rankCalc = -1;
+    }
+  else
+    {
+      info->sizePio = nProcsCalc;
+      info->rankPio = -1;
+      xmpi(MPI_Comm_size(info->commCalc, &info->sizeCalc));
+      xmpi(MPI_Comm_rank(info->commCalc, &info->rankCalc));
+    }
+  xmpi(MPI_Group_free(&grpCalc));
+  xmpi(MPI_Group_free(&grpPio));
+  xmpi(MPI_Group_free(&grpAll));
 }
 
 
@@ -279,16 +311,16 @@ MPI_Comm commInqCommPio  ( void )
 MPI_Comm commInqCommModel ( void )
 {
   xassert ( info != NULL &&
-           info->commPio != MPI_COMM_NULL &&
+           info->commCalc != MPI_COMM_NULL &&
            info->isProcIO == 0 );
-  return info->commPio;
+  return info->commCalc;
 }
 
 
 int      commInqRankPio       ( void )
 { 
   xassert ( info != NULL &&
-           info->rankPio != CDI_UNDEFID &&
+           info->rankPio >= 0 &&
            info->isProcIO == 1 );
   return info->rankPio;
 }
@@ -297,9 +329,9 @@ int      commInqRankPio       ( void )
 int      commInqRankModel       ( void )
 { 
   xassert ( info != NULL &&
-           info->rankPio != CDI_UNDEFID &&
+           info->rankCalc >= 0 &&
            info->isProcIO == 0 );
-  return info->rankPio;
+  return info->rankCalc;
 }
 
 
@@ -516,7 +548,7 @@ void     commEvalPhysNodes  ( void )
 
   if ( info->rankGlob == info->root )
     {
-      xassert ( info->rankPio == info->root );
+      xassert ( info->rankCalc == info->root );
  
       for ( i = info->nProcsModel; i < info->sizeGlob; i++ )
         {
@@ -527,7 +559,7 @@ void     commEvalPhysNodes  ( void )
     }
 
   xmpi ( MPI_Bcast ( nodeInfo, size, MPI_INTEGER, info->root, 
-                     info->commPio ));
+                     info->commCalc ));
 
   // consistency check, count collectors
   for ( IOID = 0; IOID < info->nProcsIO; IOID++ )
