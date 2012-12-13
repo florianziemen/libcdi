@@ -275,20 +275,20 @@ double xchecksum ( int type, int count, void * buffer )
 void printArray ( const char * cdiPioDebugString, char * ps, const void * array, int n,
                   int datatype, const char * funname, const char * filename, int line )
 {
-  int i, rank;
+  int i;
   int * iArray;
   double * dArray;
 
 #ifdef USE_MPI
   {
-    int init_flag;
+    int init_flag, rank;
     if (MPI_Initialized(&init_flag) == MPI_SUCCESS && init_flag)
       MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
     else
       rank = -1;
+    fprintf ( stdout, "%s pe%d in %s, %s, line %d: %s = ",
+              cdiPioDebugString, rank, funname, filename, line, ps );
   }
-  fprintf ( stdout, "%s pe%d in %s, %s, line %d: %s = ",
-	    cdiPioDebugString, rank, funname, filename, line, ps );
 #else
   fprintf ( stdout, "%s %s, %s, line %d: %s = ",
 	    cdiPioDebugString, funname, filename, line, ps );
