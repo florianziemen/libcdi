@@ -264,46 +264,57 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
       {
         int streamID = streamMap[streamIdx].streamID;
         int vlistID = streamInqVlist(streamID);
+        int fileType = streamInqFiletype(streamID);
         int taxisID = vlistInqTaxis(vlistID);
         taxisDefVdate(taxisID, vdate);
         taxisDefVtime(taxisID, vtime);
         streamDefTimestep(streamID, tsID);
 
-        int headerIdx, lastHeaderIdx = streamMap[streamIdx].lastHeaderIdx;
-        for (headerIdx = streamMap[streamIdx].firstHeaderIdx;
-             headerIdx <= lastHeaderIdx;
-             ++headerIdx)
-          if (streamID == winDict[headerIdx].dataRecord.streamID)
+        switch (fileType)
+          {
+          case FILETYPE_GRB:
+          case FILETYPE_GRB2:
             {
-              double * dataHead = NULL;
-              int varID = winDict[headerIdx].dataRecord.varID;
-              int size = vlistInqVarSize(vlistID, varID);
-              int nmiss = 0, modelID;
-              if (size <= currentDataBufSize) ; else
-                data = xrealloc(data, (currentDataBufSize = size)
-                                * sizeof (data[0]));
-              dataHead = data;
-              for (modelID = 0; modelID < nProcsModel; modelID++)
-                {
-                  struct dataRecord *dataHeader
-                    = (struct dataRecord *)rxWin[modelID].buffer + headerIdx;
-                  xassert(dataHeader->streamID == streamID
-                          && dataHeader->varID == varID);
-                  int chunk = vlistInqVarDecoChunk(vlistID, varID, modelID);
-                  memcpy(dataHead, rxWin[modelID].buffer
-                         + dataHeader->offset, chunk * sizeof (data[0]));
-                  dataHead += chunk;
-                  nmiss = dataHeader->nmiss;
-                }
-              streamWriteVar(streamID, varID, data, nmiss);
-              if ( ddebug > 2 )
-                {
-                  char text[1024];
-                  sprintf(text, "streamID=%d, var[%d], size=%d",
-                          streamID, varID, size);
-                  xprintArray(text, data, size, DATATYPE_FLT);
-                }
+              int headerIdx, lastHeaderIdx = streamMap[streamIdx].lastHeaderIdx;
+              for (headerIdx = streamMap[streamIdx].firstHeaderIdx;
+                   headerIdx <= lastHeaderIdx;
+                   ++headerIdx)
+                if (streamID == winDict[headerIdx].dataRecord.streamID)
+                  {
+                    double * dataHead = NULL;
+                    int varID = winDict[headerIdx].dataRecord.varID;
+                    int size = vlistInqVarSize(vlistID, varID);
+                    int nmiss = 0, modelID;
+                    if (size <= currentDataBufSize) ; else
+                      data = xrealloc(data, (currentDataBufSize = size)
+                                      * sizeof (data[0]));
+                    dataHead = data;
+                    for (modelID = 0; modelID < nProcsModel; modelID++)
+                      {
+                        struct dataRecord *dataHeader
+                          = (struct dataRecord *)rxWin[modelID].buffer + headerIdx;
+                        xassert(dataHeader->streamID == streamID
+                                && dataHeader->varID == varID);
+                        int chunk = vlistInqVarDecoChunk(vlistID, varID, modelID);
+                        memcpy(dataHead, rxWin[modelID].buffer
+                               + dataHeader->offset, chunk * sizeof (data[0]));
+                        dataHead += chunk;
+                        nmiss = dataHeader->nmiss;
+                      }
+                    streamWriteVar(streamID, varID, data, nmiss);
+                    if ( ddebug > 2 )
+                      {
+                        char text[1024];
+                        sprintf(text, "streamID=%d, var[%d], size=%d",
+                                streamID, varID, size);
+                        xprintArray(text, data, size, DATATYPE_FLT);
+                      }
+                  }
             }
+            break;
+          default:
+            xabort("unhandled filetype in parallel I/O.");
+          }
       }
     free(streamMap);
     free(data);
