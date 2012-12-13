@@ -248,6 +248,9 @@ typedef struct {
   char    **fnames;
   void     *gribContainers;
   int       vlistIDorig;
+#if USE_MPI
+  int       ownerRank;    // MPI rank of owner process
+#endif
 }
 stream_t;
 

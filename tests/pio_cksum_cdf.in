@@ -3,7 +3,7 @@ pio_write_args="-f nc4 -w 3"
 mpi_task_num=7
 LOG=pio_cksum_cdf.log
 suffix=nc4
-if [ "@USE_MPI@" = yes -a "@HAVE_PARALLEL_NC4@" -gt 0 ]; then
+if [ "@USE_MPI@" = yes -a "@ENABLE_NETCDF@" = yes ]; then
   . ./pio_write_run
 else
   exit 77

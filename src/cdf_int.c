@@ -33,6 +33,11 @@ extern int CDF_Debug;
 
 static size_t ChunkSizeMin = MIN_BUF_SIZE;
 */
+#if USE_MPI && !defined (HAVE_PARALLEL_NC4)
+/* When in PIO mode without a parallel netcdf library, each file is
+ * actually opened on only one host */
+extern int *cdiOpenFileMap, *cdiOpenFileCounts;
+#endif
 
 void cdf_create(const char *path, int cmode, int *ncidp)
 {

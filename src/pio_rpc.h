@@ -14,7 +14,9 @@ typedef enum
     FINALIZE,
     RESOURCES,
     WINCREATE,
-    WRITETS
+    WRITETS,
+    COLLBUFTX,
+    COLLBUFNMISS,
   } command;
 
 enum 

@@ -48,6 +48,7 @@ void streamUnpack ( char * unpackBuffer, int unpackBufferSize,
           " namespaceAdaptKey(a,b)=%d",
           streamID, intBuffer[0], nspTarget,  
           namespaceAdaptKey ( intBuffer[0], nspTarget ));
+  xdebug("streamID=%d\n", streamID);
   xassert ( streamID >= 0 &&
             namespaceAdaptKey ( intBuffer[0], nspTarget ) == streamID );
   xdebug ("streamID=%d, vlistID=%d", streamID, namespaceAdaptKey ( intBuffer[4], nspTarget ));

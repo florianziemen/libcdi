@@ -534,19 +534,19 @@ int  streamCompareP ( void * streamptr1, void * streamptr2 )
   xassert ( s2 );
 
   if ( s1->filetype  != s2->filetype  ) return differ;
-  if (  namespaceAdaptKey2 ( s1->vlistIDorig ) != 			     
+  if (  namespaceAdaptKey2 ( s1->vlistIDorig ) !=
 	namespaceAdaptKey2 ( s2->vlistIDorig )) return differ;
   if ( s1->byteorder != s2->byteorder ) return differ;
   if ( s1->comptype  != s2->comptype  ) return differ;
-  if ( s1->complevel != s2->complevel ) return differ; 
+  if ( s1->complevel != s2->complevel ) return differ;
 
   if ( s1->filename )
     {
       len = strlen ( s1->filename ) + 1;
-      if ( memcmp ( s1->filename, s2->filename, len )) 
+      if ( memcmp ( s1->filename, s2->filename, len ))
 	return differ;
     }
-  else if ( s2->filename ) 
+  else if ( s2->filename )
     return differ;
 
   return equal;

@@ -110,29 +110,23 @@ void * pcdiXrealloc ( void *p, size_t size, const char *functionname,
 /***************************************************************/
 
 #ifdef USE_MPI
-void pcdiXMPI ( int iret, const char *filename, int line )
+void pcdiXMPI(int iret, const char *filename, int line)
 {
   char errorString[2][MPI_MAX_ERROR_STRING + 1];
   int len, errorClass, rank;
 
-  if ( iret != MPI_SUCCESS )
-    {
-      MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
-
-      MPI_Error_class ( iret, &errorClass );
-      MPI_Error_string ( errorClass, errorString[0], &len );
-      errorString[0][len] = '\0';
-      MPI_Error_string ( iret, errorString[1], &len);
-      errorString[1][len] = '\0';
-
-      fprintf ( stderr, "MPI ERROR, pe%d, %s, line %d,"
-                "errorClass: \"%s\""
-                "errorString: \"%s\"\n",
-                rank, filename, line,
-                errorString[0], errorString[1]);
-
-      MPI_Abort ( MPI_COMM_WORLD, iret );
-    }
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Error_class(iret, &errorClass);
+  MPI_Error_string(errorClass, errorString[0], &len);
+  errorString[0][len] = '\0';
+  MPI_Error_string(iret, errorString[1], &len);
+  errorString[1][len] = '\0';
+  fprintf(stderr, "MPI ERROR, pe%d, %s, line %d,"
+          "errorClass: \"%s\""
+          "errorString: \"%s\"\n",
+          rank, filename, line,
+          errorString[0], errorString[1]);
+  MPI_Abort(MPI_COMM_WORLD, iret);
 }
 
 /*****************************************************************************/

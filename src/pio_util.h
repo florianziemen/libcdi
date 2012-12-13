@@ -144,8 +144,12 @@ void * pcdiXrealloc ( void *, size_t, const char *, const char *, int );
 #define xrealloc(p,size) pcdiXrealloc(p, size,            \
                                       __FILE__, __func__, __LINE__)
 
-void pcdiXMPI ( int, const char *, int );
-#define xmpi(ret) pcdiXMPI ( ret, __FILE__, __LINE__ )
+void pcdiXMPI(int iret, const char *, int);
+#define xmpi(ret) do {                                  \
+    int tmpIRet = (ret);                                   \
+    if (tmpIRet != MPI_SUCCESS)                            \
+      pcdiXMPI(tmpIRet, __FILE__, __LINE__ );              \
+  } while(0)
 
 #ifdef USE_MPI
 void pcdiXMPIStat ( int, const char *, int, MPI_Status * );

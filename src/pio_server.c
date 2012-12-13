@@ -329,6 +329,46 @@ myVarPart(struct PPM_extent varShape[3], struct xyzDims collGrid,
   PPM_uniform_partition_nd(3, varShape, collGrid.sizes,
                            myCollGridCoord, myPart);
 }
+#elif defined (HAVE_LIBNETCDF)
+/* needed for writing when some files are only written to by a single process */
+/* cdiOpenFileMap(fileID) gives the writer process */
+int cdiPioSerialOpenFileMap(int streamID)
+{
+  return stream_to_pointer(streamID)->ownerRank;
+}
+/* for load-balancing purposes, count number of files per process */
+/* cdiOpenFileCounts[rank] gives number of open files rank has to himself */
+static int *cdiSerialOpenFileCount = NULL;
+int cdiPioNextOpenRank()
+{
+  xassert(cdiSerialOpenFileCount != NULL);
+  int commCollSize = commInqSizeColl();
+  int minRank = 0, minOpenCount = cdiSerialOpenFileCount[0];
+  for (int i = 1; i < commCollSize; ++i)
+    if (cdiSerialOpenFileCount[i] < minOpenCount)
+      {
+        minOpenCount = cdiSerialOpenFileCount[i];
+        minRank = i;
+      }
+  return minRank;
+}
+
+void cdiPioOpenFileOnRank(int rank)
+{
+  xassert(cdiSerialOpenFileCount != NULL
+          && rank >= 0 && rank < commInqSizeColl());
+  ++(cdiSerialOpenFileCount[rank]);
+}
+
+
+void cdiPioCloseFileOnRank(int rank)
+{
+  xassert(cdiSerialOpenFileCount != NULL
+          && rank >= 0 && rank < commInqSizeColl());
+  xassert(cdiSerialOpenFileCount[rank] > 0);
+  --(cdiSerialOpenFileCount[rank]);
+}
+
 #endif
 
 static
@@ -337,7 +377,9 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
   int nProcsModel = commInqNProcsModel ();
   int root        = commInqRootGlob ();
   int myCollRank = commInqRankColl();
+#ifdef HAVE_NETCDF4
   MPI_Comm collComm = commInqCommColl();
+#endif
   xdebug("%s", "START");
 
   union winHeaderEntry *winDict
@@ -373,9 +415,9 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
     int numStreamIDs = 0, sizeStreamMap = 16;
     streamMap = xmalloc(sizeStreamMap * sizeof (streamMap[0]));
     int streamIDOld = CDI_UNDEFID;
-    int headerIdx, oldStreamIdx = CDI_UNDEFID;
+    int oldStreamIdx = CDI_UNDEFID;
     int filetype = CDI_UNDEFID;
-    for (headerIdx = 1; headerIdx < numDataEntries; ++headerIdx)
+    for (int headerIdx = 1; headerIdx < numDataEntries; ++headerIdx)
       {
         int streamID = winDict[headerIdx].dataRecord.streamID;
         xassert(streamID > 0);
@@ -422,7 +464,10 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
             streamMap[oldStreamIdx].varMap[varID] = headerIdx;
           }
       }
-    double *data = NULL, *writeBuf = NULL;
+    double *data = NULL;
+#if defined (HAVE_PARALLEL_NC4)
+    double *writeBuf = NULL;
+#endif
     int currentDataBufSize = 0;
     for (streamIdx = 0; streamIdx < numStreamIDs; ++streamIdx)
       {
@@ -565,12 +610,86 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
                   }
             }
 #else
-#error "serial netcdf libraries not yet supported in MPI mode"
             /* determine process which has stream open (writer) and
-             * which has data for which variable (var owner) */
-            /* for each variable with a var owner send full variable
-             * contents to writer */
-            /* writer calls streamWrite */
+             * which has data for which variable (var owner)
+             * three cases need to be distinguished */
+            {
+              int nvars = streamMap[streamIdx].numVars;
+              int *varMap = streamMap[streamIdx].varMap;
+              int *varIsWritten = xmalloc(sizeof (varIsWritten[0]) * nvars);
+              for (int varID = 0; varID < nvars; ++varID)
+                varIsWritten[varID] = ((varMap[varID] != -1)
+                                       ?myCollRank+1 : 0);
+              xmpi(MPI_Allreduce(MPI_IN_PLACE, varIsWritten, nvars,
+                                 MPI_INT, MPI_BOR, collComm));
+              int writerRank;
+              if ((writerRank = cdiPioSerialOpenFileMap(streamID))
+                  == myCollRank)
+                {
+                  for (int varID = 0; varID < nvars; ++varID)
+                    if (varIsWritten[varID])
+                      {
+                        int nmiss;
+                        int size = vlistInqVarSize(vlistID, varID);
+                        resizeVarGatherBuf(vlistID, varID, &data,
+                                           &currentDataBufSize);
+                        int headerIdx = varMap[varID];
+                        if (varIsWritten[varID] == myCollRank + 1)
+                          {
+                            /* this process has the full array and will
+                             * write it */
+                            xdebug("gathering varID=%d for direct writing",
+                                   varID);
+                            gatherArray(root, nProcsModel, headerIdx,
+                                        vlistID, data, &nmiss);
+                          }
+                        else
+                          {
+                            /* another process has the array and will
+                             * send it over */
+                            MPI_Status stat;
+                            xdebug("receiving varID=%d for writing from"
+                                   " process %d",
+                                   varID, varIsWritten[varID] - 1);
+                            xmpiStat(MPI_Recv(&nmiss, 1, MPI_INT,
+                                              varIsWritten[varID] - 1,
+                                              COLLBUFNMISS,
+                                              collComm, &stat), &stat);
+                            xmpiStat(MPI_Recv(data, size, MPI_DOUBLE,
+                                              varIsWritten[varID] - 1,
+                                              COLLBUFTX,
+                                              collComm, &stat), &stat);
+                          }
+                        streamWriteVar(streamID, varID, data, nmiss);
+                      }
+                }
+              else
+                for (int varID = 0; varID < nvars; ++varID)
+                  if (varIsWritten[varID] == myCollRank + 1)
+                    {
+                      /* this process has the full array and another
+                       * will write it */
+                      int nmiss;
+                      int size = vlistInqVarSize(vlistID, varID);
+                      resizeVarGatherBuf(vlistID, varID, &data,
+                                         &currentDataBufSize);
+                      int headerIdx = varMap[varID];
+                      gatherArray(root, nProcsModel, headerIdx,
+                                  vlistID, data, &nmiss);
+                      MPI_Request req;
+                      MPI_Status stat;
+                      xdebug("sending varID=%d for writing to"
+                             " process %d",
+                             varID, writerRank);
+                      xmpi(MPI_Isend(&nmiss, 1, MPI_INT,
+                                     writerRank, COLLBUFNMISS,
+                                     collComm, &req));
+                      xmpi(MPI_Send(data, size, MPI_DOUBLE,
+                                    writerRank, COLLBUFTX,
+                                    collComm));
+                      xmpiStat(MPI_Wait(&req, &stat), &stat);
+                    }
+            }
 #endif
             break;
 #endif
@@ -672,9 +791,14 @@ void IOServer ()
   if ( commInqRankNode () == commInqSpecialRankNode ()) 
     backendFinalize ();
   commCalc = commInqCommCalc ();
+#ifdef HAVE_PARALLEL_NC4
   numPioPrimes = PPM_prime_factorization_32((uint32_t)commInqSizeColl(),
                                             &pioPrimes);
   xt_initialize(commInqCommColl());
+#elif defined (HAVE_LIBNETCDF)
+  cdiSerialOpenFileCount = xcalloc(sizeof (cdiSerialOpenFileCount[0]),
+                                   commInqSizeColl());
+#endif
 
   for ( ;; )
     {

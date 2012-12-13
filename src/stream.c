@@ -600,6 +600,10 @@ int cdiInqContents(int streamID)
   return (status);
 }
 
+#if USE_MPI && ! HAVE_PARALLEL_NC4 && defined HAVE_LIBNETCDF
+extern int cdiPioNextOpenRank();
+extern int cdiPioSerialOpenFileMap(int streamID);
+#endif
 
 int streamOpen(const char *filename, const char *filemode, int filetype)
 {
@@ -609,6 +613,9 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
   Record *record = NULL;
   stream_t *streamptr = NULL;
   int hasLocalFile = namespaceHasLocalFile ( namespaceGetActive ());
+#if USE_MPI && ! defined (HAVE_PARALLEL_NC4)
+  int rank;
+#endif
 
   if ( CDI_Debug )
     Message("Open %s mode %c file %s", strfiletype(filetype), (int) *filemode, filename);
@@ -683,7 +690,15 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	case FILETYPE_NC4:
 	case FILETYPE_NC4C:
 	  {
-	    fileID = cdf4Open(filename, filemode, &filetype);
+#if USE_MPI && ! defined (HAVE_PARALLEL_NC4)
+            if (commInqIOMode() == PIO_NONE
+                || commInqRankColl() == (rank = cdiPioNextOpenRank()))
+#endif
+                fileID = cdf4Open(filename, filemode, &filetype);
+#if USE_MPI && ! defined (HAVE_PARALLEL_NC4)
+            if (commInqIOMode() != PIO_NONE)
+              xmpi(MPI_Bcast(&fileID, 1, MPI_INT, rank, commInqCommColl()));
+#endif
 	    break;
 	  }
 #endif
@@ -731,6 +746,14 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
       streamptr->filename = strdupx(filename);
       streamptr->fileID   = fileID;
 
+#if USE_MPI && defined  (HAVE_LIBNETCDF) && ! defined (HAVE_PARALLEL_NC4)
+      switch (filetype)
+	{
+	case FILETYPE_NC4:
+	case FILETYPE_NC4C:
+          streamptr->ownerRank = rank;
+        }
+#endif
       if ( streamptr->filemode == 'r' )
 	{
 	  vlist_t *vlistptr;
@@ -893,7 +916,13 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-	cdfClose(fileID);
+#if USE_MPI && ! defined (HAVE_PARALLEL_NC4)
+        int rank, rankOpen;
+        if (commInqIOMode() == PIO_NONE
+            || ((rank = commInqRankColl())
+                == (rankOpen = cdiPioSerialOpenFileMap(streamID))))
+#endif
+          cdfClose(fileID);
 	break;
       }
 #endif
@@ -1205,6 +1234,12 @@ void streamClose(int streamID)
 	  case FILETYPE_NC4:
 	  case FILETYPE_NC4C:
 	    {
+#if USE_MPI && ! defined (HAVE_PARALLEL_NC4)
+              int rank, rankOpen;
+              if (commInqIOMode() == PIO_NONE
+                  || ((rank = commInqRankColl())
+                      == (rankOpen = cdiPioSerialOpenFileMap(streamID))))
+#endif
 	      cdfClose(fileID);
 	      break;
 	    }
@@ -1409,7 +1444,15 @@ int streamDefTimestep(int streamID, int tsID)
           streamptr->filetype == FILETYPE_NC4 ||
           streamptr->filetype == FILETYPE_NC4C)
       && vlistHasTime(vlistID))
-    cdfDefTimestep(streamID, tsID);
+    {
+#if USE_MPI && defined  (HAVE_LIBNETCDF) && ! defined (HAVE_PARALLEL_NC4)
+      int rank, rankOpen;
+      if (commInqIOMode() == PIO_NONE
+          || ((rank = commInqRankColl())
+              == (rankOpen = cdiPioSerialOpenFileMap(streamID))))
+#endif
+        cdfDefTimestep(streamID, tsID);
+    }
 
   cdiCreateRecords(streamID, tsID);
 
@@ -2265,7 +2308,13 @@ void streamDefVlist(int streamID, int vlistID)
 	       streamptr->filetype == FILETYPE_NC4 ||
 	       streamptr->filetype == FILETYPE_NC4C )
 	    {
-	      cdfDefVars(streamID);
+#if USE_MPI && defined  (HAVE_LIBNETCDF) && ! defined (HAVE_PARALLEL_NC4)
+              int rank, rankOpen;
+              if (commInqIOMode() == PIO_NONE
+                  || ((rank = commInqRankColl())
+                      == (rankOpen = cdiPioSerialOpenFileMap(streamID))))
+#endif
+                cdfDefVars(streamID);
 	    }
 	  else if ( streamptr->filetype == FILETYPE_GRB  ||
 		    streamptr->filetype == FILETYPE_GRB2 )
