@@ -182,7 +182,7 @@ static
         streamClose ( streamID );
         xdebug ( "READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
                  " closed stream", 
-                 funcMap[funcID], streamID );
+                 funcMap[(-1 - funcID)], streamID );
       }
       break;
     case STREAMOPEN:
@@ -204,7 +204,7 @@ static
         streamID = streamOpenWrite ( filename, filetype );
         xdebug("READ FUNCTION CALL FROM WIN:  %s, filenamesz=%zu,"
                " filename=%s, filetype=%d, OPENED STREAM %d",
-               funcMap[funcID], filenamesz, filename,
+               funcMap[(-1 - funcID)], filenamesz, filename,
                filetype, streamID);
         free(filename);
       }
@@ -220,7 +220,7 @@ static
         streamDefVlist ( streamID, vlistID );
         xdebug ( "READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
                  " vlistID=%d, called streamDefVlist ().", 
-                 funcMap[funcID], streamID, vlistID );
+                 funcMap[(-1 - funcID)], streamID, vlistID );
       }
       break;
     default:

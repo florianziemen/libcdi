@@ -42,8 +42,8 @@ enum
 
 #define MAXWINBUFFERSIZE ((size_t)512 * 1024 * 1024)
 
-enum { nFuncs = 3, STREAMOPEN = 0, STREAMDEFVLIST = 1, STREAMCLOSE = 2 };
-enum { MAXDATAFILENAME = 256, MINFUNCID = STREAMOPEN, MAXFUNCID = STREAMCLOSE };
+enum { nFuncs = 3, STREAMOPEN = -1, STREAMDEFVLIST = -2, STREAMCLOSE = -3 };
+enum { MAXDATAFILENAME = 256, MINFUNCID = STREAMCLOSE, MAXFUNCID = STREAMOPEN };
 extern char * funcMap[nFuncs];
 
 void rpcUnpackResources ( char *, int, MPI_Comm );

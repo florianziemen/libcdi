@@ -521,8 +521,8 @@ void pioBufferFuncCall(int funcID, int argc, ... )
   int tokenSep = SEPARATOR, tokenFuncCall = FUNCCALL;
   size_t size = 0;
 
-  xassert(funcID >= 0 && funcID < nFuncs);
-  xdebug("%s, func: %s", "START", funcMap[funcID]);
+  xassert(funcID >= MINFUNCID && funcID <= MAXFUNCID);
+  xdebug("%s, func: %s", "START", funcMap[(-1 - funcID)]);
 
   if ( rankGlob != root ) return;
 
@@ -566,7 +566,7 @@ void pioBufferFuncCall(int funcID, int argc, ... )
                                      sizeof ( tokenSep ));
           }
       xdebug ( "WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d",
-               funcMap[funcID], streamID );
+               funcMap[(-1 - funcID)], streamID );
       }
       break;
     case STREAMOPEN:
@@ -611,7 +611,7 @@ void pioBufferFuncCall(int funcID, int argc, ... )
 
         xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, filenamesz=%zu,"
                " filename=%s, filetype=%d",
-               funcMap[funcID], filenamesz, filename, filetype );
+               funcMap[(-1 - funcID)], filenamesz, filename, filetype );
       }
       break;
     case STREAMDEFVLIST:
@@ -648,7 +648,7 @@ void pioBufferFuncCall(int funcID, int argc, ... )
 
         xdebug ( "WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d,"
                  " vlistID=%d",
-                 funcMap[funcID], streamID, vlistID );
+                 funcMap[(-1 - funcID)], streamID, vlistID );
       }
       break;
     default:
