@@ -19,6 +19,7 @@ config/compile -text
 config/config.guess -text
 config/config.sub -text
 config/default -text
+config/default-mpi -text
 config/depcomp -text
 config/install-sh -text
 config/interface.rb -text
