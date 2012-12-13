@@ -205,7 +205,6 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
   int size;
 
   int nmiss = 0;
-  char text[1024];
   int nProcsModel = commInqNProcsModel ();
   int root        = commInqRootGlob ();
   xdebug("%s", "START");
@@ -268,6 +267,7 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
         streamWriteVar(streamID, varID, data, nmiss);
         if ( ddebug > 2 )
           {
+            char text[1024];
             sprintf(text, "streamID=%d, var[%d], size=%d",
                     streamID, varID, size);
             xprintArray(text, data, size, DATATYPE_FLT);
