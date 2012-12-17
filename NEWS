@@ -1,14 +1,24 @@
 CDI NEWS
 --------
 
+Version 1.5.9 (17 December 2012):
+
+   New features:
+     * file.c::file_initialize: added support for env GRIB_API_IO_BUFFER_SIZE
+   New functions:
+     * vlistDefVarChunktype(): set chunktype to CHUNK_AUTO, CHUNK_GRID, CHUNK_LINES
+     * vlistInqVarChunktype(): returns the chunktype
+   Fixed bugs:
+     * vlistCopyFlag: added support for level bounds
+     * netCDF: added support for time axis name and long_name
+     * cgribexGetGrid: bug fix for xinc/yinc recomputation
+     * stream_cdf::define_all_vars: added txt attributes to vlistDefAttTxt() without trailing 0 [Bug #3004]
+
 Version 1.5.8 (30 October 2012):
 
    New features:
      * grib2: added stepType support for absolute time axis
      * netCDF: set 1D arrays to coordinate variables if axis attribute is available
-   New funktions:
-     * vlistDefVarChunktype(): set chunktype to CHUNK_AUTO, CHUNK_GRID, CHUNK_LINES
-     * vlistInqVarChunktype(): returns the chunktype
    Fixed bugs:
      * grib2: changed packingType from grid_jpeg to grid_simple if nmiss > 0
 

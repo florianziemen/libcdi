@@ -1,4 +1,4 @@
-2012-12-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+2012-12-17  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Version 1.5.9 released
         * using CGRIBEX library version 1.5.6
@@ -49,7 +49,7 @@
 
 2012-11-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* grib2: correct endStep if timeunits is not equal stepUnits (big fix)
+	* grib2: correct endStep if timeunits is not equal stepUnits (bug fix)
 	* cgribexGetGrid: bug fix for yinc for odd ysize
 
 2012-10-30  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
