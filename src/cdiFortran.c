@@ -33,6 +33,9 @@
 /*  internal data types  */
 
 
+/*  Chunks  */
+
+
 /*  GRID types  */
 
 
@@ -195,6 +198,8 @@ FCALLSCSUB3 (vlistDefVarCode, VLISTDEFVARCODE, vlistdefvarcode, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarCode, VLISTINQVARCODE, vlistinqvarcode, INT, INT)
 FCALLSCSUB3 (vlistDefVarDatatype, VLISTDEFVARDATATYPE, vlistdefvardatatype, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarDatatype, VLISTINQVARDATATYPE, vlistinqvardatatype, INT, INT)
+FCALLSCSUB3 (vlistDefVarChunkType, VLISTDEFVARCHUNKTYPE, vlistdefvarchunktype, INT, INT, INT)
+FCALLSCFUN2 (INT, vlistInqVarChunkType, VLISTINQVARCHUNKTYPE, vlistinqvarchunktype, INT, INT)
 FCALLSCSUB3 (vlistDefVarXYZ, VLISTDEFVARXYZ, vlistdefvarxyz, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarXYZ, VLISTINQVARXYZ, vlistinqvarxyz, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarNumber, VLISTINQVARNUMBER, vlistinqvarnumber, INT, INT)

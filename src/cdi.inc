@@ -182,6 +182,15 @@
       INTEGER    DATATYPE_CPX          
       PARAMETER (DATATYPE_CPX           = 254)
 !
+!  Chunks
+!
+      INTEGER    CHUNK_AUTO            
+      PARAMETER (CHUNK_AUTO             =  1)
+      INTEGER    CHUNK_GRID            
+      PARAMETER (CHUNK_GRID             =  2)
+      INTEGER    CHUNK_LINES           
+      PARAMETER (CHUNK_LINES            =  3)
+!
 !  GRID types
 !
       INTEGER    GRID_GENERIC          
@@ -395,7 +404,7 @@
 !                     cdiReset
       EXTERNAL        cdiReset
 
-      CHARACTER*80    cdiStringError
+      CHARACTER(80)   cdiStringError
 !                                    (INTEGER         cdiErrno)
       EXTERNAL        cdiStringError
 
@@ -403,7 +412,7 @@
 !                                    (INTEGER         debug)
       EXTERNAL        cdiDebug
 
-      CHARACTER*80    cdiLibraryVersion
+      CHARACTER(80)   cdiLibraryVersion
       EXTERNAL        cdiLibraryVersion
 
 !                     cdiPrintVersion
@@ -550,11 +559,11 @@
 !                                     INTEGER         tsID)
       EXTERNAL        streamInqTimestep
 
-      CHARACTER*80    streamFilename
+      CHARACTER(80)   streamFilename
 !                                    (INTEGER         streamID)
       EXTERNAL        streamFilename
 
-      CHARACTER*80    streamFilesuffix
+      CHARACTER(80)   streamFilesuffix
 !                                    (INTEGER         filetype)
       EXTERNAL        streamFilesuffix
 
@@ -927,6 +936,17 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarDatatype
 
+!                     vlistDefVarChunkType
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         chunktype)
+      EXTERNAL        vlistDefVarChunkType
+
+      INTEGER         vlistInqVarChunkType
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarChunkType
+
 !                     vlistDefVarXYZ
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
@@ -1233,7 +1253,7 @@
 !                                     CHARACTER*(*)   gridname)
       EXTERNAL        gridName
 
-      CHARACTER*80    gridNamePtr
+      CHARACTER(80)   gridNamePtr
 !                                    (INTEGER         gridtype)
       EXTERNAL        gridNamePtr
 
@@ -1548,7 +1568,7 @@
 !                                     CHARACTER*(*)   reference)
       EXTERNAL        gridDefReference
 
-      CHARACTER*80    gridInqUUID
+      CHARACTER(80)   gridInqUUID
 !                                    (INTEGER         gridID,
 !                                     CHARACTER*(*)   uuid)
       EXTERNAL        gridInqUUID
@@ -1765,7 +1785,7 @@
 !                                     CHARACTER*(*)   uuid)
       EXTERNAL        zaxisDefUUID
 
-      CHARACTER*80    zaxisInqUUID
+      CHARACTER(80)   zaxisInqUUID
 !                                    (INTEGER         zaxisID,
 !                                     CHARACTER*(*)   uuid)
       EXTERNAL        zaxisInqUUID
@@ -2015,7 +2035,7 @@
 !                                    (INTEGER         taxisID)
       EXTERNAL        taxisInqNumavg
 
-      CHARACTER*80    tunitNamePtr
+      CHARACTER(80)   tunitNamePtr
 !                                    (INTEGER         tunitID)
       EXTERNAL        tunitNamePtr
 
@@ -2047,11 +2067,11 @@
 !                                    (INTEGER         instID)
       EXTERNAL        institutInqSubcenter
 
-      CHARACTER*80    institutInqNamePtr
+      CHARACTER(80)   institutInqNamePtr
 !                                    (INTEGER         instID)
       EXTERNAL        institutInqNamePtr
 
-      CHARACTER*80    institutInqLongnamePtr
+      CHARACTER(80)   institutInqLongnamePtr
 !                                    (INTEGER         instID)
       EXTERNAL        institutInqLongnamePtr
 
@@ -2078,7 +2098,7 @@
 !                                    (INTEGER         modelID)
       EXTERNAL        modelInqGribID
 
-      CHARACTER*80    modelInqNamePtr
+      CHARACTER(80)   modelInqNamePtr
 !                                    (INTEGER         modelID)
       EXTERNAL        modelInqNamePtr
 
@@ -2105,7 +2125,7 @@
 !                                     CHARACTER*(*)   tablename)
       EXTERNAL        tableDef
 
-      CHARACTER*80    tableInqNamePtr
+      CHARACTER(80)   tableInqNamePtr
 !                                    (INTEGER         tableID)
       EXTERNAL        tableInqNamePtr
 
@@ -2166,17 +2186,17 @@
 !                                     CHARACTER*(*)   units)
       EXTERNAL        tableInqParUnits
 
-      CHARACTER*80    tableInqParNamePtr
+      CHARACTER(80)   tableInqParNamePtr
 !                                    (INTEGER         tableID,
 !                                     INTEGER         parID)
       EXTERNAL        tableInqParNamePtr
 
-      CHARACTER*80    tableInqParLongnamePtr
+      CHARACTER(80)   tableInqParLongnamePtr
 !                                    (INTEGER         tableID,
 !                                     INTEGER         parID)
       EXTERNAL        tableInqParLongnamePtr
 
-      CHARACTER*80    tableInqParUnitsPtr
+      CHARACTER(80)   tableInqParUnitsPtr
 !                                    (INTEGER         tableID,
 !                                     INTEGER         parID)
       EXTERNAL        tableInqParUnitsPtr

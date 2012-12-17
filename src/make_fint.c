@@ -73,7 +73,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   int lineno = 0;
   size_t linelen, len;
   enum              {ISVOID, ISSTRING,        ISSTRINGP,       ISINT,     ISINTP,    ISREAL,  ISREALP,   ISDOUBLE, ISDOUBLEP, ISCONSTSTRING};
-  char *f77name[] = {"",     "CHARACTER*(*)", "CHARACTER*(*)", "INTEGER", "INTEGER", "REAL",  "REAL",    "DOUBLEPRECISION", "DOUBLEPRECISION", "CHARACTER*80"};
+  char *f77name[] = {"",     "CHARACTER*(*)", "CHARACTER*(*)", "INTEGER", "INTEGER", "REAL",  "REAL",    "DOUBLEPRECISION", "DOUBLEPRECISION", "CHARACTER(80)"};
   char *cfint[] =   {"",     "STRING",        "PSTRING",       "INT",     "PINT",    "FLOAT", "PFLOAT",  "DOUBLE", "PDOUBLE",  "STRING"};
   char *cname[] =   {"void", "char *",        "char *",        "int",     "int *",   "float", "float *", "double", "double *", "char *"};
   char funcname[128];
