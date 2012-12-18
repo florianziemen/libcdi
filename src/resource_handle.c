@@ -282,7 +282,7 @@ void reshRemove ( cdiResH resH, resOps * ops )
 
 /**************************************************************/
 
-void *reshGetVal ( cdiResH resH, resOps * ops  )
+void *reshGetValue(const char * caller, cdiResH resH, resOps * ops)
 {
   int nsp;
   namespaceTuple_t nspT;
@@ -298,9 +298,8 @@ void *reshGetVal ( cdiResH resH, resOps * ops  )
 
   nspT = namespaceResHDecode ( resH );
 
-  if (nspT.nsp == nsp &&
-      nspT.idx >= 0 &&
-      nspT.idx < listSizeAllocated[nsp])
+  if ( nspT.nsp == nsp &&
+       nspT.idx >= 0 && nspT.idx < listSizeAllocated[nsp] )
     {
       listElem = listResources[nsp] + nspT.idx;
       LIST_UNLOCK();
@@ -308,10 +307,11 @@ void *reshGetVal ( cdiResH resH, resOps * ops  )
   else
     {
       LIST_UNLOCK();
-      xabort("Invalid namespace %d or index %d for resH %d!", nspT.nsp, nspT.idx, (int)resH);
+      xabortC(caller, "Invalid namespace %d or index %d for resource handle %d!", nspT.nsp, nspT.idx, (int)resH);
     }
 
-  xassert(listElem && listElem->ops == ops);
+  if ( !(listElem && listElem->ops == ops) )
+    xabortC(caller, "Invalid resource handle %d, list element not found!", (int)resH);
 
   return listElem->val;
 }

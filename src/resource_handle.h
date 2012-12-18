@@ -47,7 +47,8 @@ void   reshRemove ( cdiResH, resOps * );
 
 int    reshCountType ( resOps * );
 
-void * reshGetVal ( cdiResH, resOps * );
+void * reshGetValue(const char *, cdiResH, resOps * );
+#define reshGetVal(resH, ops)  reshGetValue(__func__, resH, ops)
 
 void   reshGetResHListOfType ( int, int *, resOps * );
 
