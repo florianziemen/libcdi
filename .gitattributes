@@ -27,6 +27,7 @@ config/missing -text
 config/mkinstalldirs -text
 /configure -text
 /configure.ac -text
+doc/Doxyfile -text
 doc/cdi_cman.pdf -text
 doc/cdi_fman.pdf -text
 doc/coding_standards/README -text
