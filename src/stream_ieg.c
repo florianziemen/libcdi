@@ -682,7 +682,7 @@ void iegAddRecord(int streamID, int param, int *pdb, int *gdb, double *vct,
 
   vlistID = streamInqVlist(streamID);
   tsID    = streamptr->curTsID;
-  recID   = recordNewEntry(streamID, tsID);
+  recID   = recordNewEntry(streamptr, tsID);
   record  = &streamptr->tsteps[tsID].records[recID];
 
   if ( IEG_P_LevelType(pdb) == IEG_LTYPE_HYBRID_LAYER )

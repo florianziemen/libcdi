@@ -782,7 +782,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 
   vlistID = streamInqVlist(streamID);
   tsID    = streamptr->curTsID;
-  recID   = recordNewEntry(streamID, tsID);
+  recID   = recordNewEntry(streamptr, tsID);
   record  = &streamptr->tsteps[tsID].records[recID];
 
   tsteptype = gribapiGetTsteptype(gh);

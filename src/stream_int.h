@@ -297,7 +297,7 @@ void    cdiCheckContents(int streamID);
 
 void    cdiCreateRecords(int streamID, int tsID);
 
-int     recordNewEntry(int streamID, int tsID);
+int     recordNewEntry(stream_t *streamptr, int tsID);
 
 void    cdiCreateTimesteps(int streamID);
 

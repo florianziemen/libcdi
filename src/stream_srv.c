@@ -29,7 +29,7 @@
 typedef struct {
   int param;
   int level;
-} SRVCOMPVAR; 
+} SRVCOMPVAR;
 
 
 int srvInqDatatype(int prec)
@@ -75,8 +75,8 @@ int srvInqRecord(int streamID, int *varID, int *levelID)
 
   stream_check_ptr(__func__, streamptr);
 
-  vlistID = streamInqVlist(streamID);
-  fileID  = streamInqFileID(streamID);
+  vlistID = streamptr->vlistID;
+  fileID  = streamptr->fileID;
   srvp    = streamptr->record->srvp;
 
   *varID   = -1;
@@ -97,7 +97,7 @@ int srvInqRecord(int streamID, int *varID, int *levelID)
   zaxisID = vlistInqVarZaxis(vlistID, *varID);
 
   *levelID = zaxisInqLevelID(zaxisID, (double) ilevel);
-  
+
   return (1);
 }
 */
@@ -119,8 +119,8 @@ int srvReadRecord(int streamID, double *data, int *nmiss)
 
   stream_check_ptr(__func__, streamptr);
 
-  vlistID = streamInqVlist(streamID);
-  fileID  = streamInqFileID(streamID);
+  vlistID = streamptr->vlistID;
+  fileID  = streamptr->fileID;
   tsID    = streamptr->curTsID;
   vrecID  = streamptr->tsteps[tsID].curRecID;
   recID   = streamptr->tsteps[tsID].recIDs[vrecID];
@@ -171,8 +171,8 @@ int srvCopyRecord(int streamID2, int streamID1)
   stream_check_ptr(__func__, streamptr1);
   stream_check_ptr(__func__, streamptr2);
 
-  fileID1 = streamInqFileID(streamID1);
-  fileID2 = streamInqFileID(streamID2);
+  fileID1 = streamptr1->fileID;
+  fileID2 = streamptr2->fileID;
 
   tsID    = streamptr1->curTsID;
   vrecID  = streamptr1->tsteps[tsID].curRecID;
@@ -255,7 +255,7 @@ int srvWriteRecord(int streamID, const double *data)
 
   stream_check_ptr(__func__, streamptr);
 
-  fileID = streamInqFileID(streamID);
+  fileID = streamptr->fileID;
   srvp   = streamptr->record->srvp;
 
   srvDefDataDP(srvp, data);
@@ -281,9 +281,9 @@ void srvAddRecord(int streamID, int param, int level, int xsize, int ysize,
 
   streamptr = stream_to_pointer(streamID);
 
-  vlistID = streamInqVlist(streamID);
+  vlistID = streamptr->vlistID;
   tsID    = streamptr->curTsID;
-  recID   = recordNewEntry(streamID, tsID);
+  recID   = recordNewEntry(streamptr, tsID);
   record  = &streamptr->tsteps[tsID].records[recID];
 
   (*record).size     = recsize;
@@ -292,7 +292,7 @@ void srvAddRecord(int streamID, int param, int level, int xsize, int ysize,
   (*record).ilevel   = level;
 
   memset(&grid, 0, sizeof(grid_t));
-  grid.type  = GRID_GENERIC; 
+  grid.type  = GRID_GENERIC;
   grid.size  = xsize*ysize;
   grid.xsize = xsize;
   grid.ysize = ysize;
@@ -353,7 +353,7 @@ void srvCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
 
 static
 void srvScanTimestep1(int streamID)
-{  
+{
   int header[8];
   int prec = 0;
   int status;
@@ -387,7 +387,7 @@ void srvScanTimestep1(int streamID)
   if ( tsID != 0 )
     Error("Internal problem! tstepsNewEntry returns %d", tsID);
 
-  fileID = streamInqFileID(streamID);
+  fileID = streamptr->fileID;
 
   nrecs = 0;
   while ( TRUE )
@@ -453,7 +453,7 @@ void srvScanTimestep1(int streamID)
   taxis->vdate = datetime0.date;
   taxis->vtime = datetime0.time;
 
-  vlistID = streamInqVlist(streamID);
+  vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
   cdiCheckContents(streamID);
@@ -496,7 +496,7 @@ void srvScanTimestep1(int streamID)
 
 static
 int srvScanTimestep2(int streamID)
-{  
+{
   int header[8];
   int status;
   int fileID;
@@ -520,8 +520,8 @@ int srvScanTimestep2(int streamID)
 
   streamptr->curTsID = 1;
 
-  vlistID = streamInqVlist(streamID);
-  fileID  = streamInqFileID(streamID);
+  vlistID = streamptr->vlistID;
+  fileID  = streamptr->fileID;
   srvp    = streamptr->record->srvp;
 
   tsID = streamptr->rtsteps;
@@ -667,12 +667,12 @@ int srvInqContents(int streamID)
 
   stream_check_ptr(__func__, streamptr);
 
-  fileID = streamInqFileID(streamID);
+  fileID = streamptr->fileID;
 
   streamptr->curTsID = 0;
 
   srvScanTimestep1(streamID);
- 
+
   if ( streamptr->ntsteps == -1 ) status = srvScanTimestep2(streamID);
 
   fileSetPos(fileID, 0, SEEK_SET);
@@ -729,7 +729,7 @@ int srvScanTimestep(int streamID)
       for ( recID = 0; recID < nrecs; recID++ )
 	streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
 
-      fileID = streamInqFileID(streamID);
+      fileID = streamptr->fileID;
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
@@ -829,7 +829,7 @@ int srvInqTimestep(int streamID, int tsID)
 
   if ( CDI_Debug )
     Message("tsID = %d rtsteps = %d", tsID, streamptr->rtsteps);
-  
+
   ntsteps = UNDEFID;
   while ( ( tsID + 1 ) > streamptr->rtsteps && ntsteps == UNDEFID )
     ntsteps = srvScanTimestep(streamID);
@@ -864,8 +864,8 @@ void srvReadVarDP(int streamID, int varID, double *data, int *nmiss)
   streamptr = stream_to_pointer(streamID);
 
   srvp     = streamptr->record->srvp;
-  vlistID  = streamInqVlist(streamID);
-  fileID   = streamInqFileID(streamID);
+  vlistID  = streamptr->vlistID;
+  fileID   = streamptr->fileID;
   nlevs    = streamptr->vars[varID].nlevs;
   missval  = vlistInqVarMissval(vlistID, varID);
   gridID   = vlistInqVarGrid(vlistID, varID);
@@ -914,8 +914,8 @@ void srvReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   streamptr = stream_to_pointer(streamID);
 
   srvp     = streamptr->record->srvp;
-  vlistID  = streamInqVlist(streamID);
-  fileID   = streamInqFileID(streamID);
+  vlistID  = streamptr->vlistID;
+  fileID   = streamptr->fileID;
   nlevs    = streamptr->vars[varID].nlevs;
   missval  = vlistInqVarMissval(vlistID, varID);
   gridID   = vlistInqVarGrid(vlistID, varID);
@@ -968,8 +968,8 @@ void srvWriteVarDP(int streamID, int varID, const double *data)
     Message("streamID = %d  varID = %d", streamID, varID);
 
   srvp     = streamptr->record->srvp;
-  vlistID  = streamInqVlist(streamID);
-  fileID   = streamInqFileID(streamID);
+  vlistID  = streamptr->vlistID;
+  fileID   = streamptr->fileID;
   tsID     = streamptr->curTsID;
   gridID   = vlistInqVarGrid(vlistID, varID);
   gridsize = gridInqSize(gridID);
@@ -1035,8 +1035,8 @@ void srvWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   streamptr = stream_to_pointer(streamID);
 
   srvp     = streamptr->record->srvp;
-  vlistID  = streamInqVlist(streamID);
-  fileID   = streamInqFileID(streamID);
+  vlistID  = streamptr->vlistID;
+  fileID   = streamptr->fileID;
   tsID     = streamptr->curTsID;
   gridID   = vlistInqVarGrid(vlistID, varID);
   zaxisID  = vlistInqVarZaxis(vlistID, varID);

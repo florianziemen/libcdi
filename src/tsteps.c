@@ -26,6 +26,7 @@ static void tstepsInitEntry(int streamID, int tsID)
   ptaxisInit(&streamptr->tsteps[tsID].taxis);
 }
 
+
 int tstepsNewEntry(int streamID)
 {
   int tsID = 0;
@@ -63,6 +64,7 @@ int tstepsNewEntry(int streamID)
 
   return (tsID);
 }
+
 
 void cdiCreateTimesteps(int streamID)
 {

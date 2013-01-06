@@ -284,7 +284,7 @@ void extAddRecord(int streamID, int param, int level, int xysize,
 
   vlistID = streamInqVlist(streamID);
   tsID    = streamptr->curTsID;
-  recID   = recordNewEntry(streamID, tsID);
+  recID   = recordNewEntry(streamptr, tsID);
   record  = &streamptr->tsteps[tsID].records[recID];
 
   (*record).size     = recsize;

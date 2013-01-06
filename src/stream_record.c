@@ -29,14 +29,11 @@ void recordInitEntry(record_t *record)
 }
 
 
-int recordNewEntry(int streamID, int tsID)
+int recordNewEntry(stream_t *streamptr, int tsID)
 {
   int recordID = 0;
   int recordSize;
   record_t *records;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   recordSize = streamptr->tsteps[tsID].recordSize;
   records    = streamptr->tsteps[tsID].records;

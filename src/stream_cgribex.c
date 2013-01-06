@@ -371,7 +371,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
 
   vlistID = streamInqVlist(streamID);
   tsID    = streamptr->curTsID;
-  recID   = recordNewEntry(streamID, tsID);
+  recID   = recordNewEntry(streamptr, tsID);
   record  = &streamptr->tsteps[tsID].records[recID];
 
   tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
