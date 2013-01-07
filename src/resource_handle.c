@@ -2,7 +2,9 @@
 #  include "config.h"
 #endif
 
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 600 /* PTHREAD_MUTEX_RECURSIVE */
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>

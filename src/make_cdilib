@@ -59,7 +59,7 @@ cat > ${PROG} << EOR
 #  include <grib_api.h>
 #endif
 
-#if defined (HAVE_MMAP)
+#if  defined  (HAVE_MMAP)
 #  include <sys/mman.h> /* mmap() is defined in this header */
 #endif
 
