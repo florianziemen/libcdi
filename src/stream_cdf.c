@@ -4600,7 +4600,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               else if ( strcmp(attstring, "atmosphere") == 0 )
                 ncvars[ncvarid].zaxistype = ZAXIS_ATMOSPHERE;
               else
-                { 
+                {
                   static int warn = TRUE;
                   if ( warn )
                     {
