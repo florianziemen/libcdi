@@ -6284,10 +6284,9 @@ void define_all_vars(int streamID, int vlistID, int instID, int modelID, int *va
 		  tableID = cdiDefaultTableID;
 		}
 	    }
-	  if ( cdiDefaultModelID != UNDEFID )
-	    modelID = cdiDefaultModelID;
-	  if ( cdiDefaultInstID != UNDEFID )
-	    instID = cdiDefaultInstID;
+
+	  if ( cdiDefaultModelID != UNDEFID ) modelID = cdiDefaultModelID;
+	  if ( cdiDefaultInstID  != UNDEFID ) instID  = cdiDefaultInstID;
 	}
       if ( instID  != UNDEFID ) vlistDefVarInstitut(vlistID, varID, instID);
       if ( modelID != UNDEFID ) vlistDefVarModel(vlistID, varID, modelID);
@@ -6330,6 +6329,8 @@ void read_global_attributtes(int fileID, int vlistID, stream_t *streamptr, int n
 	      else if ( strcmp(attname, "source") == 0 )
 		{
 		  *modelID = modelInq(-1, 0, attstring);
+		  if ( *modelID == UNDEFID )
+		    *modelID = modelDef(-1, 0, attstring);
 		}
 	      else if ( strcmp(attname, "Source") == 0 )
 		{

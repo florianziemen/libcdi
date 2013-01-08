@@ -1,3 +1,7 @@
+2013-01-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* global netCDF attribute "source" missing (bug fix)
+
 2012-12-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* reshGetValue: added caller function name to error message
