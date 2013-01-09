@@ -295,7 +295,7 @@ void    cdi_generate_vars(stream_t *streamptr);
 
 void    vlist_check_contents(int vlistID);
 
-void    cdiCreateRecords(int streamID, int tsID);
+void    cdi_create_records(stream_t *streamptr, int tsID);
 
 int     recordNewEntry(stream_t *streamptr, int tsID);
 

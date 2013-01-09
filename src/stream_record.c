@@ -494,21 +494,16 @@ void streamCopyRecord(int streamID2, int streamID1)
 }
 
 
-void cdiCreateRecords(int streamID, int tsID)
+void cdi_create_records(stream_t *streamptr, int tsID)
 {
   int nrecords, maxrecords;
   int nvars, varID, recID;
   record_t *records;
   int vlistID;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   if ( streamptr->tsteps[tsID].records ) return;
 
-  vlistID  = streamInqVlist(streamID);
+  vlistID  = streamptr->vlistID;
 
   if ( tsID == 0 )
     {

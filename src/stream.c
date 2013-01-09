@@ -1438,7 +1438,7 @@ int streamDefTimestep(int streamID, int tsID)
        && time_is_varying )
     cdfDefTimestep(streamID, tsID);
 
-  cdiCreateRecords(streamID, tsID);
+  cdi_create_records(streamptr, tsID);
 
   return (streamptr->ntsteps);
 }

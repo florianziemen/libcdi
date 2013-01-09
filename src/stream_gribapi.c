@@ -1324,7 +1324,7 @@ int gribapiScanTimestep2(int streamID)
 
   fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
-  cdiCreateRecords(streamID, tsID);
+  cdi_create_records(streamptr, tsID);
 
   nrecords = streamptr->tsteps[tsID].nallrecs;
   streamptr->tsteps[1].recIDs = (int *) malloc(nrecords*sizeof(int));
@@ -1626,7 +1626,7 @@ int gribapiScanTimestep(int streamID)
       gribbuffer = (unsigned char *) streamptr->record->buffer;
       buffersize = streamptr->record->buffersize;
 
-      cdiCreateRecords(streamID, tsID);
+      cdi_create_records(streamptr, tsID);
 
       nrecs = streamptr->tsteps[1].nrecs;
 
