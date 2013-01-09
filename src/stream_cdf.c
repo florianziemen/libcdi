@@ -784,7 +784,7 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
   fileID = streamptr->fileID;
 
   if ( CDI_Debug )
-    Message("streamID = %d, fileID = %d", streamID, fileID);
+    Message("streamptr = %p, fileID = %d", streamptr, fileID);
 
   taxis = &streamptr->tsteps[tsID].taxis;
 
@@ -2466,7 +2466,7 @@ void cdfDefZaxis(int streamID, int zaxisID)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
-void cdfDefPole(int streamID, int gridID)
+void cdfDefPole(stream_t *streamptr, int gridID)
 {
   int fileID;
   int ncvarid = UNDEFID;
@@ -2499,7 +2499,7 @@ void cdfDefPole(int streamID, int gridID)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
-void cdfDefMapping(int streamID, int gridID)
+void cdfDefMapping(stream_t *streamptr, int gridID)
 {
   int fileID;
   int ncvarid = UNDEFID;
@@ -2627,7 +2627,7 @@ void cdfDefGrid(int streamID, int gridID)
           if ( gridInqYsize(gridID) > 0 ) cdfDefYaxis(streamID, gridID);
         }
 
-      if ( gridIsRotated(gridID) ) cdfDefPole(streamID, gridID);
+      if ( gridIsRotated(gridID) ) cdfDefPole(streamptr, gridID);
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
@@ -2661,7 +2661,7 @@ void cdfDefGrid(int streamID, int gridID)
       cdfDefXaxis(streamID, gridID);
       cdfDefYaxis(streamID, gridID);
 
-      cdfDefMapping(streamID, gridID);
+      cdfDefMapping(streamptr, gridID);
     }
   /*
   else if ( gridtype == GRID_LCC )
