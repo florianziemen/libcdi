@@ -568,7 +568,7 @@ int cdiInqContents(int streamID)
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
-        status = iegInqContents(streamID);
+        status = iegInqContents(streamptr);
 	break;
       }
 #endif
@@ -1524,7 +1524,7 @@ int streamInqTimestep(int streamID, int tsID)
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
-        nrecs = iegInqTimestep(streamID, tsID);
+        nrecs = iegInqTimestep(streamptr, tsID);
 	break;
       }
 #endif
@@ -1616,7 +1616,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
-        iegReadVarDP(streamID, varID, data, nmiss);
+        iegReadVarDP(streamptr, varID, data, nmiss);
 	break;
       }
 #endif
@@ -1710,7 +1710,7 @@ void stream_write_var(int streamID, int varID, int memtype, const void *data, in
     case FILETYPE_IEG:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("iegWriteVar not implemented for memtype float!");
-        iegWriteVarDP(streamID, varID, data);
+        iegWriteVarDP(streamptr, varID, data);
 	break;
       }
 #endif
@@ -1839,7 +1839,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
-        iegReadVarSliceDP(streamID, varID, levelID, data, nmiss);
+        iegReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
 	break;
       }
 #endif
@@ -1909,7 +1909,7 @@ void stream_write_var_slice(int streamID, int varID, int levelID, int memtype, c
     case FILETYPE_IEG:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("iegWriteVarSlice not implemented for memtype float!");
-        iegWriteVarSliceDP(streamID, varID, levelID, data);
+        iegWriteVarSliceDP(streamptr, varID, levelID, data);
 	break;
       }
 #endif

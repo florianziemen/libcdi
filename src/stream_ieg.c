@@ -31,7 +31,7 @@
 typedef struct {
   int param;
   int level;
-} IEGCOMPVAR; 
+} IEGCOMPVAR;
 
 
 int iegInqDatatype(int prec)
@@ -62,7 +62,7 @@ int iegDefDatatype(int datatype)
 }
 
 /* not used
-int iegInqRecord(int streamID, int *varID, int *levelID)
+int iegInqRecord(stream_t *streamptr, int *varID, int *levelID)
 {
   int status;
   int fileID;
@@ -70,11 +70,6 @@ int iegInqRecord(int streamID, int *varID, int *levelID)
   int zaxisID = -1;
   int vlistID;
   iegrec_t *iegp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -99,12 +94,12 @@ int iegInqRecord(int streamID, int *varID, int *levelID)
   zaxisID = vlistInqVarZaxis(vlistID, *varID);
 
   *levelID = zaxisInqLevelID(zaxisID, (double) ilevel);
-  
+
   return (1);
 }
 */
 
-int iegReadRecord(int streamID, double *data, int *nmiss)
+int iegReadRecord(stream_t *streamptr, double *data, int *nmiss)
 {
   int vlistID, fileID;
   int status;
@@ -114,11 +109,6 @@ int iegReadRecord(int streamID, double *data, int *nmiss)
   int i, size;
   double missval;
   iegrec_t *iegp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -536,7 +526,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 }
 
 
-int iegCopyRecord(int streamID2, int streamID1)
+int iegCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 {
   int fileID1, fileID2;
   int tsID, recID, vrecID;
@@ -544,14 +534,6 @@ int iegCopyRecord(int streamID2, int streamID1)
   off_t recpos;
   int status = 0;
   char *buffer;
-  stream_t *streamptr1;
-  stream_t *streamptr2;
-
-  streamptr1 = stream_to_pointer(streamID1);
-  streamptr2 = stream_to_pointer(streamID2);
-
-  stream_check_ptr(__func__, streamptr1);
-  stream_check_ptr(__func__, streamptr2);
 
   fileID1 = streamptr1->fileID;
   fileID2 = streamptr2->fileID;
@@ -576,7 +558,7 @@ int iegCopyRecord(int streamID2, int streamID1)
 }
 
 
-int iegDefRecord(int streamID)
+int iegDefRecord(stream_t *streamptr)
 {
   int status = 0;
   int vlistID;
@@ -588,11 +570,6 @@ int iegDefRecord(int streamID)
   int varID, levelID, tsID, zaxisID;
   int byteorder;
   iegrec_t *iegp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamptr->vlistID;
   iegp    = streamptr->record->iegp;
@@ -604,7 +581,7 @@ int iegDefRecord(int streamID)
 
   gridID  = vlistInqVarGrid(vlistID, varID);
   zaxisID = vlistInqVarZaxis(vlistID, varID);
-  
+
   iegInitMem(iegp);
   for ( i = 0; i < 37; i++ ) iegp->ipdb[i] = -1;
 
@@ -629,23 +606,18 @@ int iegDefRecord(int streamID)
 }
 
 
-int iegWriteRecord(int streamID, const double *data)
+int iegWriteRecord(stream_t *streamptr, const double *data)
 {
   int fileID;
   int status = 0;
   int i, gridsize, gridID;
   double refval;
   iegrec_t *iegp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   fileID = streamptr->fileID;
   iegp   = streamptr->record->iegp;
   gridID = streamptr->record->gridID;
-  
+
   gridsize = gridInqSize(gridID);
 
   refval = data[0];
@@ -662,7 +634,7 @@ int iegWriteRecord(int streamID, const double *data)
 }
 
 static
-void iegAddRecord(int streamID, int param, int *pdb, int *gdb, double *vct,
+void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct,
 		  long recsize, off_t position, int prec)
 {
   int leveltype;
@@ -676,9 +648,6 @@ void iegAddRecord(int streamID, int param, int *pdb, int *gdb, double *vct,
   record_t *record;
   grid_t grid;
   int vlistID;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   vlistID = streamptr->vlistID;
   tsID    = streamptr->curTsID;
@@ -816,15 +785,12 @@ void iegAddRecord(int streamID, int param, int *pdb, int *gdb, double *vct,
 
 #if 0
 static
-void iegCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
+void iegCmpRecord(stream_t *streamptr, int tsID, int recID, off_t position, int param,
 		  int level, int xsize, int ysize)
 {
   int varID = 0;
   int levelID = 0;
   record_t *record;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   record  = &streamptr->tsteps[tsID].records[recID];
 
@@ -865,8 +831,8 @@ void iegDateTime(int *pdb, int *date, int *time)
 }
 
 static
-void iegScanTimestep1(int streamID)
-{  
+void iegScanTimestep1(stream_t *streamptr)
+{
   int prec = 0;
   int status;
   int fileID;
@@ -884,11 +850,6 @@ void iegScanTimestep1(int streamID)
   int vlistID;
   IEGCOMPVAR compVar, compVar0;
   iegrec_t *iegp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 0;
 
@@ -955,7 +916,7 @@ void iegScanTimestep1(int streamID)
       if ( CDI_Debug )
 	Message("%4d%8d%4d%8d%8d%6d", nrecs, (int)recpos, param, rlevel, vdate, vtime);
 
-      iegAddRecord(streamID, param, iegp->ipdb, iegp->igdb, iegp->vct, recsize, recpos, prec);
+      iegAddRecord(streamptr, param, iegp->ipdb, iegp->igdb, iegp->vct, recsize, recpos, prec);
     }
 
   streamptr->rtsteps = 1;
@@ -1009,7 +970,7 @@ void iegScanTimestep1(int streamID)
 }
 
 static
-int iegScanTimestep2(int streamID)
+int iegScanTimestep2(stream_t *streamptr)
 {
   int status;
   int fileID;
@@ -1026,11 +987,6 @@ int iegScanTimestep2(int streamID)
   int vlistID;
   IEGCOMPVAR compVar, compVar0;
   iegrec_t *iegp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 1;
 
@@ -1177,23 +1133,18 @@ int iegScanTimestep2(int streamID)
 }
 
 
-int iegInqContents(int streamID)
+int iegInqContents(stream_t *streamptr)
 {
   int fileID;
   int status = 0;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   fileID = streamptr->fileID;
 
   streamptr->curTsID = 0;
 
-  iegScanTimestep1(streamID);
- 
-  if ( streamptr->ntsteps == -1 ) status = iegScanTimestep2(streamID);
+  iegScanTimestep1(streamptr);
+
+  if ( streamptr->ntsteps == -1 ) status = iegScanTimestep2(streamptr);
 
   fileSetPos(fileID, 0, SEEK_SET);
 
@@ -1201,7 +1152,7 @@ int iegInqContents(int streamID)
 }
 
 static
-int iegScanTimestep(int streamID)
+int iegScanTimestep(stream_t *streamptr)
 {
   int status;
   int fileID;
@@ -1216,15 +1167,10 @@ int iegScanTimestep(int streamID)
   int rindex, nrecs = 0;
   IEGCOMPVAR compVar, compVar0;
   iegrec_t *iegp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   if ( CDI_Debug )
     {
-      Message("streamID = %d", streamID);
+      Message("streamptr = %p", streamptr);
       Message("cts = %d", streamptr->curTsID);
       Message("rts = %d", streamptr->rtsteps);
       Message("nts = %d", streamptr->ntsteps);
@@ -1334,24 +1280,19 @@ int iegScanTimestep(int streamID)
 }
 
 
-int iegInqTimestep(int streamID, int tsID)
+int iegInqTimestep(stream_t *streamptr, int tsID)
 {
   int ntsteps, nrecs;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   if ( tsID == 0 && streamptr->rtsteps == 0 )
     Error("Call to cdiInqContents missing!");
 
   if ( CDI_Debug )
     Message("tsID = %d rtsteps = %d", tsID, streamptr->rtsteps);
-  
+
   ntsteps = UNDEFID;
   while ( ( tsID + 1 ) > streamptr->rtsteps && ntsteps == UNDEFID )
-    ntsteps = iegScanTimestep(streamID);
+    ntsteps = iegScanTimestep(streamptr);
 
   if ( tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID )
     {
@@ -1367,7 +1308,7 @@ int iegInqTimestep(int streamID, int tsID)
 }
 
 
-void iegReadVarDP(int streamID, int varID, double *data, int *nmiss)
+void iegReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 {
   int vlistID, fileID;
   int levID, nlevs, gridID, gridsize;
@@ -1377,9 +1318,6 @@ void iegReadVarDP(int streamID, int varID, double *data, int *nmiss)
   int i;
   double missval;
   iegrec_t *iegp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   iegp     = streamptr->record->iegp;
   vlistID  = streamptr->vlistID;
@@ -1415,7 +1353,7 @@ void iegReadVarDP(int streamID, int varID, double *data, int *nmiss)
 }
 
 
-void iegReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nmiss)
+void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, int *nmiss)
 {
   int vlistID, fileID;
   int nlevs, gridID, gridsize;
@@ -1425,9 +1363,6 @@ void iegReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   int i;
   double missval;
   iegrec_t *iegp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   iegp     = streamptr->record->iegp;
   vlistID  = streamptr->vlistID;
@@ -1462,7 +1397,7 @@ void iegReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
 }
 
 
-void iegWriteVarDP(int streamID, int varID, const double *data)
+void iegWriteVarDP(stream_t *streamptr, int varID, const double *data)
 {
   int fileID;
   int levID, nlevs, gridID, gridsize;
@@ -1475,12 +1410,9 @@ void iegWriteVarDP(int streamID, int varID, const double *data)
   int param, pdis, pcat, pnum;
   double refval;
   iegrec_t *iegp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   if ( CDI_Debug )
-    Message("streamID = %d  varID = %d", streamID, varID);
+    Message("streamptr = %p  varID = %d", streamptr, varID);
 
   iegp     = streamptr->record->iegp;
 
@@ -1528,7 +1460,7 @@ void iegWriteVarDP(int streamID, int varID, const double *data)
 }
 
 
-void iegWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
+void iegWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data)
 {
   int fileID;
   int gridID;
@@ -1539,9 +1471,6 @@ void iegWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   int vlistID;
   /* int param, date, time, datasize; */
   iegrec_t *iegp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   iegp     = streamptr->record->iegp;
   vlistID  = streamptr->vlistID;

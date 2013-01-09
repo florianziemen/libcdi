@@ -94,13 +94,9 @@ int recordNewEntry(stream_t *streamptr, int tsID)
   return (recordID);
 }
 
-
-void cdiInitRecord(int streamID)
+static
+void cdiInitRecord(stream_t *streamptr)
 {
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
   streamptr->record = (Record *) malloc(sizeof(Record));
 
   streamptr->record->used       = 0;
@@ -137,7 +133,7 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
 
   cdiDefAccesstype(streamID, TYPE_REC);
 
-  if ( ! streamptr->record ) cdiInitRecord(streamID);
+  if ( ! streamptr->record ) cdiInitRecord(streamptr);
 
   tsID   = streamptr->curTsID;
   rindex = streamptr->tsteps[tsID].curRecID + 1;
@@ -219,7 +215,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
       streamDefTimestep(streamID, tsID);
     }
 
-  if ( ! streamptr->record ) cdiInitRecord(streamID);
+  if ( ! streamptr->record ) cdiInitRecord(streamptr);
 
   vlistID = streamptr->vlistID;
   gridID  = vlistInqVarGrid(vlistID, varID);
@@ -266,7 +262,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
-        status = iegDefRecord(streamID);
+        status = iegDefRecord(streamptr);
 	break;
       }
 #endif
@@ -334,7 +330,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
-        status = iegReadRecord(streamID, data, nmiss);
+        status = iegReadRecord(streamptr, data, nmiss);
 	break;
       }
 #endif
@@ -402,7 +398,7 @@ void stream_write_record(int streamID, int memtype, const void *data, int nmiss)
     case FILETYPE_IEG:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("iegWriteRecord not implemented for memtype float!");
-        status = iegWriteRecord(streamID, data);
+        status = iegWriteRecord(streamptr, data);
 	break;
       }
 #endif
@@ -481,7 +477,7 @@ void streamCopyRecord(int streamID2, int streamID1)
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
-	status = iegCopyRecord(streamID2, streamID1);
+	status = iegCopyRecord(streamptr2, streamptr1);
 	break;
       }
 #endif
