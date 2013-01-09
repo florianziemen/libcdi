@@ -29,7 +29,7 @@
 typedef struct {
   int param;
   int level;
-} extcompvar_t; 
+} extcompvar_t;
 
 static
 int extInqDatatype(int prec, int number)
@@ -379,7 +379,7 @@ void extScanTimestep1(int streamID)
   streamptr->curTsID = 0;
 
   extp  = streamptr->record->extp;
-  tsID  = tstepsNewEntry(streamID);
+  tsID  = tstepsNewEntry(streamptr);
   taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( tsID != 0 )
@@ -469,7 +469,7 @@ void extScanTimestep1(int streamID)
 
   if ( streamptr->ntsteps == -1 )
     {
-      tsID = tstepsNewEntry(streamID);
+      tsID = tstepsNewEntry(streamptr);
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
@@ -492,7 +492,7 @@ void extScanTimestep1(int streamID)
 
 static
 int extScanTimestep2(int streamID)
-{  
+{
   int header[4];
   int status;
   int fileID;
@@ -643,7 +643,7 @@ int extScanTimestep2(int streamID)
 
   if ( streamptr->ntsteps == -1 )
     {
-      tsID = tstepsNewEntry(streamID);
+      tsID = tstepsNewEntry(streamptr);
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
@@ -790,7 +790,7 @@ int extScanTimestep(int streamID)
 
       if ( streamptr->ntsteps != streamptr->rtsteps )
 	{
-	  tsID = tstepsNewEntry(streamID);
+	  tsID = tstepsNewEntry(streamptr);
 	  if ( tsID != streamptr->rtsteps )
 	    Error("Internal error. tsID = %d", tsID);
 

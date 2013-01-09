@@ -560,7 +560,7 @@ int cgribexScanTimestep1(int streamID)
   isec3 = streamptr->record->sec3;
   isec4 = streamptr->record->sec4;
 
-  tsID  = tstepsNewEntry(streamID);
+  tsID  = tstepsNewEntry(streamptr);
   taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( tsID != 0 )
@@ -751,7 +751,7 @@ int cgribexScanTimestep1(int streamID)
 
   if ( streamptr->ntsteps == -1 )
     {
-      tsID = tstepsNewEntry(streamID);
+      tsID = tstepsNewEntry(streamptr);
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
@@ -1039,7 +1039,7 @@ int cgribexScanTimestep2(int streamID)
 
   if ( streamptr->ntsteps == -1 )
     {
-      tsID = tstepsNewEntry(streamID);
+      tsID = tstepsNewEntry(streamptr);
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
@@ -1313,7 +1313,7 @@ int cgribexScanTimestep(int streamID)
 
       if ( streamptr->ntsteps != streamptr->rtsteps )
 	{
-	  tsID = tstepsNewEntry(streamID);
+	  tsID = tstepsNewEntry(streamptr);
 	  if ( tsID != streamptr->rtsteps )
 	    Error("Internal error. tsID = %d", tsID);
 

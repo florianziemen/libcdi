@@ -1002,7 +1002,7 @@ int gribapiScanTimestep1(int streamID)
 
   streamptr->curTsID = 0;
 
-  tsID  = tstepsNewEntry(streamID);
+  tsID  = tstepsNewEntry(streamptr);
   taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( tsID != 0 )
@@ -1243,7 +1243,7 @@ int gribapiScanTimestep1(int streamID)
 
   if ( streamptr->ntsteps == -1 )
     {
-      tsID = tstepsNewEntry(streamID);
+      tsID = tstepsNewEntry(streamptr);
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
@@ -1557,7 +1557,7 @@ int gribapiScanTimestep2(int streamID)
 
   if ( streamptr->ntsteps == -1 )
     {
-      tsID = tstepsNewEntry(streamID);
+      tsID = tstepsNewEntry(streamptr);
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
@@ -1856,7 +1856,7 @@ int gribapiScanTimestep(int streamID)
 
       if ( streamptr->ntsteps != streamptr->rtsteps )
 	{
-	  tsID = tstepsNewEntry(streamID);
+	  tsID = tstepsNewEntry(streamptr);
 	  if ( tsID != streamptr->rtsteps )
 	    Error("Internal error. tsID = %d", tsID);
 

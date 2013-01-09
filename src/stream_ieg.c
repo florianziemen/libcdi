@@ -893,7 +893,7 @@ void iegScanTimestep1(int streamID)
   streamptr->curTsID = 0;
 
   iegp  = streamptr->record->iegp;
-  tsID  = tstepsNewEntry(streamID);
+  tsID  = tstepsNewEntry(streamptr);
   taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( tsID != 0 )
@@ -987,7 +987,7 @@ void iegScanTimestep1(int streamID)
 
   if ( streamptr->ntsteps == -1 )
     {
-      tsID = tstepsNewEntry(streamID);
+      tsID = tstepsNewEntry(streamptr);
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
@@ -1010,7 +1010,7 @@ void iegScanTimestep1(int streamID)
 
 static
 int iegScanTimestep2(int streamID)
-{  
+{
   int status;
   int fileID;
   int tabnum;
@@ -1165,7 +1165,7 @@ int iegScanTimestep2(int streamID)
 
   if ( streamptr->ntsteps == -1 )
     {
-      tsID = tstepsNewEntry(streamID);
+      tsID = tstepsNewEntry(streamptr);
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
@@ -1312,7 +1312,7 @@ int iegScanTimestep(int streamID)
 
       if ( streamptr->ntsteps != streamptr->rtsteps )
 	{
-	  tsID = tstepsNewEntry(streamID);
+	  tsID = tstepsNewEntry(streamptr);
 	  if ( tsID != streamptr->rtsteps )
 	    Error("Internal error. tsID = %d", tsID);
 

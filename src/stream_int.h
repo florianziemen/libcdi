@@ -287,7 +287,7 @@ int     streamsNewEntry(int filetype);
 void    streamsInitEntry(int streamID);
 int     streamNewVar(int streamID, int gridID, int zaxisID);
 
-int     tstepsNewEntry(int streamID);
+int     tstepsNewEntry(stream_t *streamptr);
 
 char   *strfiletype(int filetype);
 

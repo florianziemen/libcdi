@@ -8,12 +8,9 @@
 #include "stream_int.h"
 
 
-static void tstepsInitEntry(int streamID, int tsID)
+static
+void tstepsInitEntry(stream_t *streamptr, int tsID)
 {
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
   streamptr->tsteps[tsID].curRecID     = CDI_UNDEFID;
   streamptr->tsteps[tsID].position     = 0;
   streamptr->tsteps[tsID].records      = NULL;
@@ -27,14 +24,11 @@ static void tstepsInitEntry(int streamID, int tsID)
 }
 
 
-int tstepsNewEntry(int streamID)
+int tstepsNewEntry(stream_t *streamptr)
 {
   int tsID = 0;
   int tstepsTableSize;
   tsteps_t *tstepsTable;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   tsID            = streamptr->tstepsNextID++;
   tstepsTableSize = streamptr->tstepsTableSize;
@@ -58,7 +52,7 @@ int tstepsNewEntry(int streamID)
   streamptr->tstepsTableSize = tstepsTableSize;
   streamptr->tsteps          = tstepsTable;
 
-  tstepsInitEntry(streamID, tsID);
+  tstepsInitEntry(streamptr, tsID);
 
   streamptr->tsteps[tsID].taxis.used = TRUE;
 
@@ -89,7 +83,7 @@ void cdiCreateTimesteps(int streamID)
 
   for ( tsID = 0; tsID < ntsteps; tsID++ )
     {
-      tstepsInitEntry(streamID, tsID);
+      tstepsInitEntry(streamptr, tsID);
       streamptr->tsteps[tsID].taxis.used = TRUE;
     }
 }

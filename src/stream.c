@@ -1409,7 +1409,7 @@ int streamDefTimestep(int streamID, int tsID)
         }
     }
 
-  newtsID = tstepsNewEntry(streamID);
+  newtsID = tstepsNewEntry(streamptr);
 
   if ( tsID != newtsID )
     Error("Internal problem: tsID = %d newtsID = %d", tsID, newtsID);

@@ -381,7 +381,7 @@ void srvScanTimestep1(int streamID)
   streamptr->curTsID = 0;
 
   srvp  = streamptr->record->srvp;
-  tsID  = tstepsNewEntry(streamID);
+  tsID  = tstepsNewEntry(streamptr);
   taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( tsID != 0 )
@@ -473,7 +473,7 @@ void srvScanTimestep1(int streamID)
 
   if ( streamptr->ntsteps == -1 )
     {
-      tsID = tstepsNewEntry(streamID);
+      tsID = tstepsNewEntry(streamptr);
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
@@ -645,7 +645,7 @@ int srvScanTimestep2(int streamID)
 
   if ( streamptr->ntsteps == -1 )
     {
-      tsID = tstepsNewEntry(streamID);
+      tsID = tstepsNewEntry(streamptr);
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
@@ -793,7 +793,7 @@ int srvScanTimestep(int streamID)
 
       if ( streamptr->ntsteps != streamptr->rtsteps )
 	{
-	  tsID = tstepsNewEntry(streamID);
+	  tsID = tstepsNewEntry(streamptr);
 	  if ( tsID != streamptr->rtsteps )
 	    Error("Internal error. tsID = %d", tsID);
 
