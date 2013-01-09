@@ -593,7 +593,7 @@ int cdiInqContents(int streamID)
 
   if ( status == 0 )
     {
-      vlistID = streamInqVlist(streamID);
+      vlistID = streamptr->vlistID;
       taxisID = vlistInqTaxis(vlistID);
       if ( taxisID != -1 )
         {
@@ -1324,7 +1324,7 @@ void streamSync(int streamID)
 
   fileID   = streamptr->fileID;
   filetype = streamptr->filetype;
-  vlistID  = streamInqVlist(streamID);
+  vlistID  = streamptr->vlistID;
   nvars    = vlistNvars(vlistID);
 
   if ( fileID == CDI_UNDEFID )
@@ -1394,7 +1394,7 @@ int streamDefTimestep(int streamID, int tsID)
 
   stream_check_ptr(__func__, streamptr);
 
-  vlistID = streamInqVlist(streamID);
+  vlistID = streamptr->vlistID;
 
   time_is_varying = vlistHasTime(vlistID);
 
@@ -1436,7 +1436,7 @@ int streamDefTimestep(int streamID, int tsID)
            streamptr->filetype == FILETYPE_NC4 ||
            streamptr->filetype == FILETYPE_NC4C)
        && time_is_varying )
-    cdfDefTimestep(streamID, tsID);
+    cdfDefTimestep(streamptr, tsID);
 
   cdi_create_records(streamptr, tsID);
 
@@ -1472,7 +1472,7 @@ int streamInqTimestep(int streamID, int tsID)
 
   stream_check_ptr(__func__, streamptr);
 
-  vlistID = streamInqVlist(streamID);
+  vlistID = streamptr->vlistID;
 
   if ( tsID < streamptr->rtsteps )
     {
@@ -1686,7 +1686,7 @@ void stream_write_var(int streamID, int varID, int memtype, const void *data, in
     case FILETYPE_GRB2:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("grbWriteVar not implemented for memtype float!");
-        grbWriteVarDP(streamID, varID, data, nmiss);
+        grbWriteVarDP(streamptr, varID, data, nmiss);
 	break;
       }
 #endif
@@ -1885,7 +1885,7 @@ void stream_write_var_slice(int streamID, int varID, int levelID, int memtype, c
     case FILETYPE_GRB2:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("grbWriteVarSlice not implemented for memtype float!");
-        grbWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
+        grbWriteVarSliceDP(streamptr, varID, levelID, data, nmiss);
 	break;
       }
 #endif
@@ -1999,7 +1999,7 @@ void streamWriteContents(int streamID, char *cname)
 
   stream_check_ptr(__func__, streamptr);
 
-  vlistID = streamInqVlist(streamID);
+  vlistID = streamptr->vlistID;
 
   cnp = fopen(cname, "w");
 

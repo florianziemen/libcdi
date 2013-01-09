@@ -221,7 +221,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
 
   if ( ! streamptr->record ) cdiInitRecord(streamID);
 
-  vlistID = streamInqVlist(streamID);
+  vlistID = streamptr->vlistID;
   gridID  = vlistInqVarGrid(vlistID, varID);
   zaxisID = vlistInqVarZaxis(vlistID, varID);
   param   = vlistInqVarParam(vlistID, varID);

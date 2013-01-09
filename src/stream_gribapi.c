@@ -780,7 +780,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 
   streamptr = stream_to_pointer(streamID);
 
-  vlistID = streamInqVlist(streamID);
+  vlistID = streamptr->vlistID;
   tsID    = streamptr->curTsID;
   recID   = recordNewEntry(streamptr, tsID);
   record  = &streamptr->tsteps[tsID].records[recID];
@@ -1008,7 +1008,7 @@ int gribapiScanTimestep1(int streamID)
   if ( tsID != 0 )
     Error("Internal problem! tstepsNewEntry returns %d", tsID);
 
-  fileID = streamInqFileID(streamID);
+  fileID = streamptr->fileID;
 
   nrecs = 0;
   while ( TRUE )
@@ -1222,7 +1222,7 @@ int gribapiScanTimestep1(int streamID)
   taxis->vdate = datetime0.date;
   taxis->vtime = datetime0.time;
 
-  vlistID = streamInqVlist(streamID);
+  vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
   nrecords = streamptr->tsteps[0].nallrecs;
@@ -1309,8 +1309,8 @@ int gribapiScanTimestep2(int streamID)
 
   streamptr->curTsID = 1;
 
-  fileID  = streamInqFileID(streamID);
-  vlistID = streamInqVlist(streamID);
+  fileID  = streamptr->fileID;
+  vlistID = streamptr->vlistID;
   taxisID = vlistInqTaxis(vlistID);
 
   gribbuffer = (unsigned char *) streamptr->record->buffer;
@@ -1608,7 +1608,7 @@ int gribapiScanTimestep(int streamID)
 
   stream_check_ptr(__func__, streamptr);
 
-  vlistID = streamInqVlist(streamID);
+  vlistID = streamptr->vlistID;
 
   if ( CDI_Debug )
     {
@@ -1635,7 +1635,7 @@ int gribapiScanTimestep(int streamID)
       for ( recID = 0; recID < nrecs; recID++ )
 	streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
 
-      fileID = streamInqFileID(streamID);
+      fileID = streamptr->fileID;
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 

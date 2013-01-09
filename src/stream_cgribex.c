@@ -369,7 +369,7 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
 
   streamptr = stream_to_pointer(streamID);
 
-  vlistID = streamInqVlist(streamID);
+  vlistID = streamptr->vlistID;
   tsID    = streamptr->curTsID;
   recID   = recordNewEntry(streamptr, tsID);
   record  = &streamptr->tsteps[tsID].records[recID];
@@ -566,7 +566,7 @@ int cgribexScanTimestep1(int streamID)
   if ( tsID != 0 )
     Error("Internal problem! tstepsNewEntry returns %d", tsID);
 
-  fileID = streamInqFileID(streamID);
+  fileID = streamptr->fileID;
 
   while ( nskip-- > 0 )
     {
@@ -730,7 +730,7 @@ int cgribexScanTimestep1(int streamID)
   taxis->vdate = datetime0.date;
   taxis->vtime = datetime0.time;
 
-  vlistID = streamInqVlist(streamID);
+  vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
   nrecords = streamptr->tsteps[0].nallrecs;
@@ -818,8 +818,8 @@ int cgribexScanTimestep2(int streamID)
   isec3 = streamptr->record->sec3;
   isec4 = streamptr->record->sec4;
 
-  fileID  = streamInqFileID(streamID);
-  vlistID = streamInqVlist(streamID);
+  fileID  = streamptr->fileID;
+  vlistID = streamptr->vlistID;
   taxisID = vlistInqTaxis(vlistID);
 
   gribbuffer = (unsigned char *) streamptr->record->buffer;
@@ -1086,7 +1086,7 @@ int cgribexScanTimestep(int streamID)
 
   stream_check_ptr(__func__, streamptr);
 
-  vlistID = streamInqVlist(streamID);
+  vlistID = streamptr->vlistID;
 
   if ( CDI_Debug )
     {
@@ -1119,7 +1119,7 @@ int cgribexScanTimestep(int streamID)
       for ( recID = 0; recID < nrecs; recID++ )
 	streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
 
-      fileID = streamInqFileID(streamID);
+      fileID = streamptr->fileID;
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 

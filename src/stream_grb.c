@@ -160,8 +160,8 @@ int grbReadRecord(int streamID, double *data, int *nmiss)
 
   gribbuffer = (unsigned char *) streamptr->record->buffer;
 
-  vlistID = streamInqVlist(streamID);
-  fileID  = streamInqFileID(streamID);
+  vlistID = streamptr->vlistID;
+  fileID  = streamptr->fileID;
   tsID    = streamptr->curTsID;
   vrecID  = streamptr->tsteps[tsID].curRecID;
   recID   = streamptr->tsteps[tsID].recIDs[vrecID];
@@ -270,7 +270,7 @@ int grbInqContents(int streamID)
 
   stream_check_ptr(__func__, streamptr);
 
-  fileID = streamInqFileID(streamID);
+  fileID = streamptr->fileID;
 
   streamptr->curTsID = 0;
 
@@ -347,8 +347,8 @@ void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
 
   gribbuffer = (unsigned char *) streamptr->record->buffer;
 
-  vlistID  = streamInqVlist(streamID);
-  fileID   = streamInqFileID(streamID);
+  vlistID  = streamptr->vlistID;
+  fileID   = streamptr->fileID;
   tsID     = streamptr->curTsID;
 
   nlevs    = streamptr->vars[varID].nlevs;
@@ -407,7 +407,7 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
 
   gribbuffer = (unsigned char *) streamptr->record->buffer;
 
-  vlistID  = streamInqVlist(streamID);
+  vlistID  = streamptr->vlistID;
   gridID   = vlistInqVarGrid(vlistID, varID);
   gridsize = gridInqSize(gridID);
   tsID     = streamptr->curTsID;
@@ -415,7 +415,7 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
   if ( CDI_Debug )
     Message("gridID = %d gridsize = %d", gridID, gridsize);
 
-  fileID = streamInqFileID(streamID);
+  fileID = streamptr->fileID;
 
   currentfilepos = fileGetPos(fileID);
 
@@ -501,7 +501,7 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
 }
 
 
-int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data, int nmiss)
+int grbWriteVarSliceDP(stream_t *streamptr, int varID, int levelID, const double *data, int nmiss)
 {
   size_t nwrite;
   int fileID;
@@ -516,19 +516,14 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   int numavg = 0;
   size_t nbytes;
   int filetype;
-  stream_t *streamptr;
   int ljpeg = 0;
   int ljpeg_warn = 1;
   void *gc = NULL;
 
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   filetype  = streamptr->filetype;
 
-  fileID    = streamInqFileID(streamID);
-  vlistID   = streamInqVlist(streamID);
+  fileID    = streamptr->fileID;
+  vlistID   = streamptr->vlistID;
   gridID    = vlistInqVarGrid(vlistID, varID);
   zaxisID   = vlistInqVarZaxis(vlistID, varID);
   tsteptype = vlistInqVarTsteptype(vlistID, varID);
@@ -599,12 +594,12 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
 }
 
 
-void grbWriteVarDP(int streamID, int varID, const double *data, int nmiss)
+void grbWriteVarDP(stream_t *streamptr, int varID, const double *data, int nmiss)
 {
   int vlistID, gridID, zaxisID, levelID, nlevs;
   int gridsize;
 
-  vlistID  = streamInqVlist(streamID);
+  vlistID  = streamptr->vlistID;
   gridID   = vlistInqVarGrid(vlistID, varID);
   gridsize = gridInqSize(gridID);
   zaxisID  = vlistInqVarZaxis(vlistID, varID);
@@ -612,7 +607,7 @@ void grbWriteVarDP(int streamID, int varID, const double *data, int nmiss)
 
   for ( levelID = 0; levelID < nlevs; levelID++ )
     {
-      grbWriteVarSliceDP(streamID, varID, levelID, data+levelID*gridsize, nmiss);
+      grbWriteVarSliceDP(streamptr, varID, levelID, data+levelID*gridsize, nmiss);
     }
 }
 
@@ -641,8 +636,8 @@ int grbCopyRecord(int streamID2, int streamID1)
 
   filetype = streamptr1->filetype;
 
-  fileID1 = streamInqFileID(streamID1);
-  fileID2 = streamInqFileID(streamID2);
+  fileID1 = streamptr1->fileID;
+  fileID2 = streamptr2->fileID;
 
   tsID    = streamptr1->curTsID;
   vrecID  = streamptr1->tsteps[tsID].curRecID;
@@ -690,7 +685,7 @@ int grbWriteRecord(int streamID, const double *data, int nmiss)
   varID   = streamptr->record->varID;
   levelID = streamptr->record->levelID;
 
-  status = grbWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
+  status = grbWriteVarSliceDP(streamptr, varID, levelID, data, nmiss);
 
   return (status);
 }

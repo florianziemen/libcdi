@@ -460,7 +460,7 @@ void streamDefineTaxis(int streamID)
       int varID, nvars;
       int vlistID;
 
-      vlistID = streamInqVlist(streamID);
+      vlistID = streamptr->vlistID;
 
       nvars = vlistNvars(vlistID);
       for ( varID = 0; varID < nvars; varID++ )

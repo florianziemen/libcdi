@@ -2,7 +2,7 @@
 #define _STREAM_CDF_H
 
 void   cdfDefVars(int streamID);
-void   cdfDefTimestep(int streamID, int tsID);
+void   cdfDefTimestep(stream_t *streamptr, int tsID);
 int    cdfInqTimestep(int streamID, int tsID);
 int    cdfInqContents(int streamID);
 void   cdfDefHistory(int streamID, int size, char *history);
