@@ -710,7 +710,7 @@ int cgribexScanTimestep1(int streamID)
 
   if ( nrecs == 0 ) return (CDI_EUFSTRUCT);
 
-  cdiGenVars(streamID);
+  cdi_generate_vars(streamptr);
 
   if ( fcast )
     {

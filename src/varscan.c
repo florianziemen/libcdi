@@ -392,7 +392,7 @@ int cmpltype(const void *s1, const void *s2)
 }
 
 
-void cdiGenVars(int streamID)
+void cdi_generate_vars(stream_t *streamptr)
 {
   int varID, gridID, zaxisID, levelID;
   int instID, modelID, tableID;
@@ -408,11 +408,8 @@ void cdiGenVars(int streamID)
   double *dlevels2 = NULL;
   int vlistID;
   int *varids, index, varid;
-  stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
-
-  vlistID =  streamInqVlist(streamID);
+  vlistID =  streamptr->vlistID;
 
   varids = (int *) malloc(nvars*sizeof(int));
   for ( varID = 0; varID < nvars; varID++ ) varids[varID] = varID;

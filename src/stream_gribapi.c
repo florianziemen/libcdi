@@ -888,7 +888,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 
   /*
     Get the ensemble Info from the grib-2 Tables and update the intermediate datastructure.
-    Further update to the "vlist" is handled in the same way as for GRIB-1 by "cdiGenVars"
+    Further update to the "vlist" is handled in the same way as for GRIB-1 by "cdi_generate_vars"
   */
   {
     int status;
@@ -1203,7 +1203,7 @@ int gribapiScanTimestep1(int streamID)
 
   if ( nrecs == 0 ) return (CDI_EUFSTRUCT);
 
-  cdiGenVars(streamID);
+  cdi_generate_vars(streamptr);
 
   if ( fcast )
     {

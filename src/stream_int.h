@@ -291,7 +291,7 @@ int     tstepsNewEntry(stream_t *streamptr);
 
 char   *strfiletype(int filetype);
 
-void    cdiGenVars(int streamID);
+void    cdi_generate_vars(stream_t *streamptr);
 
 void    cdiCheckContents(int streamID);
 

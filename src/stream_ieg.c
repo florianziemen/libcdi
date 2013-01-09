@@ -960,7 +960,7 @@ void iegScanTimestep1(int streamID)
 
   streamptr->rtsteps = 1;
 
-  cdiGenVars(streamID);
+  cdi_generate_vars(streamptr);
 
   taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxis->type  = TAXIS_ABSOLUTE;
