@@ -554,7 +554,7 @@ int cdiInqContents(int streamID)
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
-        status = srvInqContents(streamID);
+        status = srvInqContents(streamptr);
 	break;
       }
 #endif
@@ -1510,7 +1510,7 @@ int streamInqTimestep(int streamID, int tsID)
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
-        nrecs = srvInqTimestep(streamID, tsID);
+        nrecs = srvInqTimestep(streamptr, tsID);
 	break;
       }
 #endif
@@ -1602,7 +1602,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
-        srvReadVarDP(streamID, varID, data, nmiss);
+        srvReadVarDP(streamptr, varID, data, nmiss);
 	break;
       }
 #endif
@@ -1694,7 +1694,7 @@ void stream_write_var(int streamID, int varID, int memtype, const void *data, in
     case FILETYPE_SRV:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("srvWriteVar not implemented for memtype float!");
-        srvWriteVarDP(streamID, varID, data);
+        srvWriteVarDP(streamptr, varID, data);
 	break;
       }
 #endif
@@ -1825,7 +1825,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
-        srvReadVarSliceDP(streamID, varID, levelID, data, nmiss);
+        srvReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
 	break;
       }
 #endif
@@ -1893,7 +1893,7 @@ void stream_write_var_slice(int streamID, int varID, int levelID, int memtype, c
     case FILETYPE_SRV:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("srvWriteVarSlice not implemented for memtype float!");
-        srvWriteVarSliceDP(streamID, varID, levelID, data);
+        srvWriteVarSliceDP(streamptr, varID, levelID, data);
 	break;
       }
 #endif

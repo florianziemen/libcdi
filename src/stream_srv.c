@@ -60,7 +60,7 @@ int srvDefDatatype(int datatype)
 }
 
 /* not used
-int srvInqRecord(int streamID, int *varID, int *levelID)
+int srvInqRecord(stream_t *streamptr, int *varID, int *levelID)
 {
   int status;
   int fileID;
@@ -69,11 +69,6 @@ int srvInqRecord(int streamID, int *varID, int *levelID)
   int header[8];
   int vlistID;
   srvrec_t *srvp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -102,7 +97,7 @@ int srvInqRecord(int streamID, int *varID, int *levelID)
 }
 */
 
-int srvReadRecord(int streamID, double *data, int *nmiss)
+int srvReadRecord(stream_t *streamptr, double *data, int *nmiss)
 {
   int vlistID, fileID;
   int status;
@@ -113,11 +108,6 @@ int srvReadRecord(int streamID, double *data, int *nmiss)
   int i, size;
   double missval;
   srvrec_t *srvp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -154,7 +144,7 @@ int srvReadRecord(int streamID, double *data, int *nmiss)
 }
 
 
-int srvCopyRecord(int streamID2, int streamID1)
+int srvCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 {
   int fileID1, fileID2;
   int tsID, recID, vrecID;
@@ -162,14 +152,6 @@ int srvCopyRecord(int streamID2, int streamID1)
   off_t recpos;
   int status = 0;
   char *buffer;
-  stream_t *streamptr1;
-  stream_t *streamptr2;
-
-  streamptr1 = stream_to_pointer(streamID1);
-  streamptr2 = stream_to_pointer(streamID2);
-
-  stream_check_ptr(__func__, streamptr1);
-  stream_check_ptr(__func__, streamptr2);
 
   fileID1 = streamptr1->fileID;
   fileID2 = streamptr2->fileID;
@@ -194,7 +176,7 @@ int srvCopyRecord(int streamID2, int streamID1)
 }
 
 
-int srvDefRecord(int streamID)
+int srvDefRecord(stream_t *streamptr)
 {
   int gridID;
   int header[8];
@@ -203,11 +185,6 @@ int srvDefRecord(int streamID)
   int datatype;
   int pdis, pcat, pnum;
   srvrec_t *srvp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   gridID = streamptr->record->gridID;
   srvp   = streamptr->record->srvp;
@@ -244,16 +221,11 @@ int srvDefRecord(int streamID)
 }
 
 
-int srvWriteRecord(int streamID, const double *data)
+int srvWriteRecord(stream_t *streamptr, const double *data)
 {
   int fileID;
   int status = 0;
   srvrec_t *srvp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   fileID = streamptr->fileID;
   srvp   = streamptr->record->srvp;
@@ -319,15 +291,12 @@ void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ys
 }
 
 
-void srvCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
+void srvCmpRecord(stream_t *streamptr, int tsID, int recID, off_t position, int param,
 		  int level, int xsize, int ysize)
 {
   int varID = 0;
   int levelID = 0;
   record_t *record;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   record  = &streamptr->tsteps[tsID].records[recID];
 
@@ -644,15 +613,10 @@ int srvScanTimestep2(stream_t *streamptr)
 }
 
 
-int srvInqContents(int streamID)
+int srvInqContents(stream_t *streamptr)
 {
   int fileID;
   int status = 0;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   fileID = streamptr->fileID;
 
@@ -687,7 +651,7 @@ int srvScanTimestep(stream_t *streamptr)
 
   if ( CDI_Debug )
     {
-      Message("streamID = %p", streamptr);
+      Message("streamptr = %p", streamptr);
       Message("cts = %d", streamptr->curTsID);
       Message("rts = %d", streamptr->rtsteps);
       Message("nts = %d", streamptr->ntsteps);
@@ -748,7 +712,7 @@ int srvScanTimestep(stream_t *streamptr)
 	      taxis->vtime = vtime;
 	    }
 	  /*
-	  srvCmpRecord(streamID, tsID, nrecs, recpos, param, rlevel, rxsize, rysize);
+	  srvCmpRecord(streamptr, tsID, nrecs, recpos, param, rlevel, rxsize, rysize);
 	  */
 	  compVar.param  = param;
           compVar.level  = rlevel;
@@ -797,14 +761,9 @@ int srvScanTimestep(stream_t *streamptr)
 }
 
 
-int srvInqTimestep(int streamID, int tsID)
+int srvInqTimestep(stream_t *streamptr, int tsID)
 {
   int ntsteps, nrecs;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   if ( tsID == 0 && streamptr->rtsteps == 0 )
     Error("Call to cdiInqContents missing!");
@@ -830,7 +789,7 @@ int srvInqTimestep(int streamID, int tsID)
 }
 
 
-void srvReadVarDP(int streamID, int varID, double *data, int *nmiss)
+void srvReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 {
   int vlistID, fileID;
   int levID, nlevs, gridID, gridsize;
@@ -841,9 +800,6 @@ void srvReadVarDP(int streamID, int varID, double *data, int *nmiss)
   int i;
   double missval;
   srvrec_t *srvp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   srvp     = streamptr->record->srvp;
   vlistID  = streamptr->vlistID;
@@ -880,7 +836,7 @@ void srvReadVarDP(int streamID, int varID, double *data, int *nmiss)
 }
 
 
-void srvReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nmiss)
+void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, int *nmiss)
 {
   int vlistID, fileID;
   int nlevs, gridID, gridsize;
@@ -891,9 +847,6 @@ void srvReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
   int i;
   double missval;
   srvrec_t *srvp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   srvp     = streamptr->record->srvp;
   vlistID  = streamptr->vlistID;
@@ -929,7 +882,7 @@ void srvReadVarSliceDP(int streamID, int varID, int levID, double *data, int *nm
 }
 
 
-void srvWriteVarDP(int streamID, int varID, const double *data)
+void srvWriteVarDP(stream_t *streamptr, int varID, const double *data)
 {
   int fileID;
   int levID, nlevs, gridID, gridsize;
@@ -942,12 +895,9 @@ void srvWriteVarDP(int streamID, int varID, const double *data)
   int vlistID;
   int pdis, pcat, pnum;
   srvrec_t *srvp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   if ( CDI_Debug )
-    Message("streamID = %d  varID = %d", streamID, varID);
+    Message("streamptr = %p  varID = %d", streamptr, varID);
 
   srvp     = streamptr->record->srvp;
   vlistID  = streamptr->vlistID;
@@ -999,7 +949,7 @@ void srvWriteVarDP(int streamID, int varID, const double *data)
 }
 
 
-void srvWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
+void srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data)
 {
   int fileID;
   int gridID;
@@ -1012,9 +962,6 @@ void srvWriteVarSliceDP(int streamID, int varID, int levID, const double *data)
   int vlistID;
   int pdis, pcat, pnum;
   srvrec_t *srvp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   srvp     = streamptr->record->srvp;
   vlistID  = streamptr->vlistID;
