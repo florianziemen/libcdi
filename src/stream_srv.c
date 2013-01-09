@@ -265,9 +265,9 @@ int srvWriteRecord(int streamID, const double *data)
   return (status);
 }
 
-
-void srvAddRecord(int streamID, int param, int level, int xsize, int ysize,
-		  long recsize, off_t position, int prec)
+static
+void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ysize,
+                    long recsize, off_t position, int prec)
 {
   int leveltype;
   int gridID = UNDEFID;
@@ -277,9 +277,6 @@ void srvAddRecord(int streamID, int param, int level, int xsize, int ysize,
   record_t *record;
   grid_t grid;
   int vlistID;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   vlistID = streamptr->vlistID;
   tsID    = streamptr->curTsID;
@@ -441,7 +438,7 @@ void srvScanTimestep1(int streamID)
       if ( CDI_Debug )
 	Message("%4d%8d%4d%8d%8d%6d", nrecs, (int)recpos, rcode, rlevel, vdate, vtime);
 
-      srvAddRecord(streamID, param, rlevel, rxsize, rysize, recsize, recpos, prec);
+      srv_add_record(streamptr, param, rlevel, rxsize, rysize, recsize, recpos, prec);
     }
 
   streamptr->rtsteps = 1;
