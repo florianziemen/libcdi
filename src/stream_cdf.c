@@ -6048,7 +6048,7 @@ void define_all_vars(int streamID, int vlistID, int instID, int modelID, int *va
       gridID  = ncvars[ncvarid].gridID;
       zaxisID = ncvars[ncvarid].zaxisID;
 
-      varID = streamNewVar(streamID, gridID, zaxisID);
+      varID = stream_new_var(streamptr, gridID, zaxisID);
       varID = vlistDefVar(vlistID, gridID, zaxisID, ncvars[ncvarid].tsteptype);
 
 #if  defined  (HAVE_NETCDF4)

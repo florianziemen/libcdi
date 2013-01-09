@@ -285,7 +285,7 @@ void    streamDefineTaxis(int streamID);
 
 int     streamsNewEntry(int filetype);
 void    streamsInitEntry(int streamID);
-int     streamNewVar(int streamID, int gridID, int zaxisID);
+int     stream_new_var(stream_t *streamptr, int gridID, int zaxisID);
 
 int     tstepsNewEntry(stream_t *streamptr);
 

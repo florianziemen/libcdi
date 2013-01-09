@@ -2209,10 +2209,9 @@ void streamDefVlist(int streamID, int vlistID)
 	{
 	  gridID  = vlistInqVarGrid(vlistID, varID);
 	  zaxisID = vlistInqVarZaxis(vlistID, varID);
-	  streamNewVar(streamID, gridID, zaxisID);
+	  stream_new_var(streamptr, gridID, zaxisID);
 	  if ( streamptr->have_missval )
-	    vlistDefVarMissval(streamptr->vlistID, varID, 
-                               vlistInqVarMissval(vlistID, varID));
+	    vlistDefVarMissval(streamptr->vlistID, varID, vlistInqVarMissval(vlistID, varID));
 	}
 
       if (namespaceHasLocalFile(namespaceGetActive())

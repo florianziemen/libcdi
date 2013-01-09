@@ -535,7 +535,7 @@ void cdiGenVars(int streamID)
       if ( lbounds ) free(dlevels2);
       free(dlevels);
 
-      varID = streamNewVar(streamID, gridID, zaxisID);
+      varID = stream_new_var(streamptr, gridID, zaxisID);
       varID = vlistDefVar(vlistID, gridID, zaxisID, tsteptype);
 
       vlistDefVarParam(vlistID, varID, param);
