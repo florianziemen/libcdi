@@ -349,7 +349,7 @@ void srvCmpRecord(int streamID, int tsID, int recID, off_t position, int param,
 }
 
 static
-void srvScanTimestep1(int streamID)
+void srvScanTimestep1(stream_t *streamptr)
 {
   int header[8];
   int prec = 0;
@@ -369,11 +369,6 @@ void srvScanTimestep1(int streamID)
   int vlistID;
   SRVCOMPVAR compVar, compVar0;
   srvrec_t *srvp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 0;
 
@@ -492,7 +487,7 @@ void srvScanTimestep1(int streamID)
 }
 
 static
-int srvScanTimestep2(int streamID)
+int srvScanTimestep2(stream_t *streamptr)
 {
   int header[8];
   int status;
@@ -509,11 +504,6 @@ int srvScanTimestep2(int streamID)
   int vlistID;
   SRVCOMPVAR compVar, compVar0;
   srvrec_t *srvp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 1;
 
@@ -540,9 +530,9 @@ int srvScanTimestep2(int streamID)
   for ( recID = 0; recID < nrecords; recID++ )
     {
       varID = streamptr->tsteps[0].records[recID].varID;
-      streamptr->tsteps[tsID].records[recID].position = 
+      streamptr->tsteps[tsID].records[recID].position =
 	streamptr->tsteps[0].records[recID].position;
-      streamptr->tsteps[tsID].records[recID].size     = 
+      streamptr->tsteps[tsID].records[recID].size     =
 	streamptr->tsteps[0].records[recID].size;
     }
 
@@ -668,9 +658,9 @@ int srvInqContents(int streamID)
 
   streamptr->curTsID = 0;
 
-  srvScanTimestep1(streamID);
+  srvScanTimestep1(streamptr);
 
-  if ( streamptr->ntsteps == -1 ) status = srvScanTimestep2(streamID);
+  if ( streamptr->ntsteps == -1 ) status = srvScanTimestep2(streamptr);
 
   fileSetPos(fileID, 0, SEEK_SET);
 
@@ -678,7 +668,7 @@ int srvInqContents(int streamID)
 }
 
 static
-int srvScanTimestep(int streamID)
+int srvScanTimestep(stream_t *streamptr)
 {
   int header[8];
   int status;
@@ -694,15 +684,10 @@ int srvScanTimestep(int streamID)
   int rindex, nrecs = 0;
   SRVCOMPVAR compVar, compVar0;
   srvrec_t *srvp;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   if ( CDI_Debug )
     {
-      Message("streamID = %d", streamID);
+      Message("streamID = %p", streamptr);
       Message("cts = %d", streamptr->curTsID);
       Message("rts = %d", streamptr->rtsteps);
       Message("nts = %d", streamptr->ntsteps);
@@ -829,7 +814,7 @@ int srvInqTimestep(int streamID, int tsID)
 
   ntsteps = UNDEFID;
   while ( ( tsID + 1 ) > streamptr->rtsteps && ntsteps == UNDEFID )
-    ntsteps = srvScanTimestep(streamID);
+    ntsteps = srvScanTimestep(streamptr);
 
   if ( tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID )
     {
