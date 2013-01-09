@@ -293,7 +293,7 @@ char   *strfiletype(int filetype);
 
 void    cdi_generate_vars(stream_t *streamptr);
 
-void    cdiCheckContents(int streamID);
+void    vlist_check_contents(int vlistID);
 
 void    cdiCreateRecords(int streamID, int tsID);
 

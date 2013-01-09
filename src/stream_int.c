@@ -423,17 +423,10 @@ double cdiInqMissval(void)
 }
 
 
-void cdiCheckContents(int streamID)
+void vlist_check_contents(int vlistID)
 {
   int index, nzaxis, zaxisID;
-  int vlistID;
-  stream_t *streamptr;
 
-  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
-
-  stream_check_ptr(__func__, streamptr);
-
-  vlistID = streamInqVlist(streamID);
   nzaxis = vlistNzaxis(vlistID);
 
   for ( index = 0; index < nzaxis; index++ )

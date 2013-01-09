@@ -970,7 +970,7 @@ void iegScanTimestep1(int streamID)
   vlistID = streamInqVlist(streamID);
   vlistDefTaxis(vlistID, taxisID);
 
-  cdiCheckContents(streamID);
+  vlist_check_contents(vlistID);
 
   nrecords = streamptr->tsteps[0].nallrecs;
   if ( nrecords < streamptr->tsteps[0].recordSize )
