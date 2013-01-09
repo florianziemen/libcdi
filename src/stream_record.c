@@ -259,7 +259,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
-        status = extDefRecord(streamID);
+        status = extDefRecord(streamptr);
 	break;
       }
 #endif
@@ -327,7 +327,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
-        status = extReadRecord(streamID, data, nmiss);
+        status = extReadRecord(streamptr, data, nmiss);
 	break;
       }
 #endif
@@ -394,7 +394,7 @@ void stream_write_record(int streamID, int memtype, const void *data, int nmiss)
     case FILETYPE_EXT:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("extWriteRecord not implemented for memtype float!");
-        status = extWriteRecord(streamID, data);
+        status = extWriteRecord(streamptr, data);
 	break;
       }
 #endif
@@ -474,7 +474,7 @@ void streamCopyRecord(int streamID2, int streamID1)
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
-	status = extCopyRecord(streamID2, streamID1);
+	status = extCopyRecord(streamptr2, streamptr1);
 	break;
       }
 #endif

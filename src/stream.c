@@ -561,7 +561,7 @@ int cdiInqContents(int streamID)
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
-        status = extInqContents(streamID);
+        status = extInqContents(streamptr);
 	break;
       }
 #endif
@@ -1517,7 +1517,7 @@ int streamInqTimestep(int streamID, int tsID)
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
-        nrecs = extInqTimestep(streamID, tsID);
+        nrecs = extInqTimestep(streamptr, tsID);
 	break;
       }
 #endif
@@ -1609,7 +1609,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
-        extReadVarDP(streamID, varID, data, nmiss);
+        extReadVarDP(streamptr, varID, data, nmiss);
 	break;
       }
 #endif
@@ -1702,7 +1702,7 @@ void stream_write_var(int streamID, int varID, int memtype, const void *data, in
     case FILETYPE_EXT:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("extWriteVar not implemented for memtype float!");
-        extWriteVarDP(streamID, varID, data);
+        extWriteVarDP(streamptr, varID, data);
 	break;
       }
 #endif
@@ -1832,7 +1832,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
-        extReadVarSliceDP(streamID, varID, levelID, data, nmiss);
+        extReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
 	break;
       }
 #endif
@@ -1901,7 +1901,7 @@ void stream_write_var_slice(int streamID, int varID, int levelID, int memtype, c
     case FILETYPE_EXT:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("extWriteVarSlice not implemented for memtype float!");
-        extWriteVarSliceDP(streamID, varID, levelID, data);
+        extWriteVarSliceDP(streamptr, varID, levelID, data);
 	break;
       }
 #endif
