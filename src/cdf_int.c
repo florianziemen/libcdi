@@ -122,8 +122,7 @@ void cdf_close(int ncid)
 
   status = nc_close(ncid);
 
-  if ( status != NC_NOERR )
-    Error("%s", nc_strerror(status));
+  if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
 
 
@@ -432,6 +431,13 @@ void cdf_put_vara_double(int ncid, int varid, const size_t start[],
   if ( CDF_Debug || status != NC_NOERR )
     Message("ncid = %d varid = %d val0 = %f", ncid, varid, *dp);
 
+  if ( status != NC_NOERR )
+    {
+      char name[256];
+      nc_inq_varname(ncid, varid, name);
+      Message("varname = %s", name);
+    }
+
   if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
 
@@ -506,7 +512,7 @@ void  cdf_get_vara_text(int ncid, int varid, const size_t start[],
 }
 
 
-void cdf_put_var_double (int ncid, int varid, const double *dp)
+void cdf_put_var_double(int ncid, int varid, const double *dp)
 {
   int status;
 
