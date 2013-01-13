@@ -1,7 +1,7 @@
 #ifndef _STREAM_CDF_H
 #define _STREAM_CDF_H
 
-void   cdfDefVars(int streamID);
+void   cdfDefVars(stream_t *streamptr);
 void   cdfDefTimestep(stream_t *streamptr, int tsID);
 int    cdfInqTimestep(int streamID, int tsID);
 int    cdfInqContents(int streamID);
@@ -12,16 +12,16 @@ void   cdfInqHistoryString(int streamID, char *history);
 void   cdfEndDef(int streamID);
 int    cdfDefRecord(int streamID);
 
-int    cdfCopyRecord(int streamIDdest, int streamIDsrc);
+int    cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
 
-int    cdfReadRecord(int streamID, double *data, int *nmiss);
-void   cdf_write_record(int streamID, int memtype, const void *data, int nmiss);
+int    cdfReadRecord(stream_t *streamptr, double *data, int *nmiss);
+void   cdf_write_record(stream_t *streamptr, int memtype, const void *data, int nmiss);
 
-void   cdfReadVarDP(int streamID, int varID, double *data, int *nmiss);
+void   cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss);
 void   cdf_write_var(int streamID, int varID, int memtype, const void *data, int nmiss);
 
-int    cdfReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *nmiss);
-int    cdf_write_var_slice(int streamID, int varID, int levelID, int memtype, const void *data, int nmiss);
+int    cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss);
+int    cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, int nmiss);
 
 #endif
 /*

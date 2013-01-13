@@ -340,7 +340,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-	status = cdfReadRecord(streamID, data, nmiss);
+	status = cdfReadRecord(streamptr, data, nmiss);
 	break;
       }
 #endif
@@ -408,7 +408,7 @@ void stream_write_record(int streamID, int memtype, const void *data, int nmiss)
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-	cdf_write_record(streamID, memtype, data, nmiss);
+	cdf_write_record(streamptr, memtype, data, nmiss);
 	break;
       }
 #endif
@@ -483,7 +483,7 @@ void streamCopyRecord(int streamID2, int streamID1)
 #endif
     default:
       {
-	status = cdfCopyRecord(streamID2, streamID1);
+	status = cdfCopyRecord(streamptr2, streamptr1);
 	break;
       }
     }

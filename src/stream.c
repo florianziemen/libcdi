@@ -1626,7 +1626,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-        cdfReadVarDP(streamID, varID, data, nmiss);
+        cdfReadVarDP(streamptr, varID, data, nmiss);
 	break;
       }
 #endif
@@ -1850,7 +1850,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
     case FILETYPE_NC4C:
       {
         /* FIXME: status value ignored */
-        int ierr = cdfReadVarSliceDP(streamID, varID, levelID, data, nmiss);
+        int ierr = cdfReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
 	break;
       }
 #endif
@@ -1921,7 +1921,7 @@ void stream_write_var_slice(int streamID, int varID, int levelID, int memtype, c
       {
         int ierr = 0;
 	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
-        ierr = cdf_write_var_slice(streamID, varID, levelID, memtype, data, nmiss);
+        ierr = cdf_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 	break;
       }
 #endif
@@ -2214,15 +2214,14 @@ void streamDefVlist(int streamID, int vlistID)
 	    vlistDefVarMissval(streamptr->vlistID, varID, vlistInqVarMissval(vlistID, varID));
 	}
 
-      if (namespaceHasLocalFile(namespaceGetActive())
-          && streamptr->filemode == 'w' )
+      if ( namespaceHasLocalFile(namespaceGetActive()) && streamptr->filemode == 'w' )
 	{
 	  if ( streamptr->filetype == FILETYPE_NC  ||
 	       streamptr->filetype == FILETYPE_NC2 ||
 	       streamptr->filetype == FILETYPE_NC4 ||
 	       streamptr->filetype == FILETYPE_NC4C )
 	    {
-	      cdfDefVars(streamID);
+	      cdfDefVars(streamptr);
 	    }
 	  else if ( streamptr->filetype == FILETYPE_GRB  ||
 		    streamptr->filetype == FILETYPE_GRB2 )
