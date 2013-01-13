@@ -272,8 +272,8 @@ void streamDefRecord(int streamID, int varID, int levelID)
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
-	status = cdfDefRecord(streamID);
+	if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
+	status = cdfDefRecord(streamptr);
 	break;
       }
 #endif

@@ -578,7 +578,7 @@ int cdiInqContents(int streamID)
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-        status = cdfInqContents(streamID);
+        status = cdfInqContents(streamptr);
 	break;
       }
 #endif
@@ -1534,7 +1534,7 @@ int streamInqTimestep(int streamID, int tsID)
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-        nrecs = cdfInqTimestep(streamID, tsID);
+        nrecs = cdfInqTimestep(streamptr, tsID);
 	break;
       }
 #endif
@@ -1720,8 +1720,8 @@ void stream_write_var(int streamID, int varID, int memtype, const void *data, in
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
-        cdf_write_var(streamID, varID, memtype, data, nmiss);
+	if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
+        cdf_write_var(streamptr, varID, memtype, data, nmiss);
 	break;
       }
 #endif
@@ -1920,7 +1920,7 @@ void stream_write_var_slice(int streamID, int varID, int levelID, int memtype, c
     case FILETYPE_NC4C:
       {
         int ierr = 0;
-	if ( streamptr->accessmode == 0 ) cdfEndDef(streamID);
+	if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
         ierr = cdf_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 	break;
       }

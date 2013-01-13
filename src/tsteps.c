@@ -60,13 +60,10 @@ int tstepsNewEntry(stream_t *streamptr)
 }
 
 
-void cdiCreateTimesteps(int streamID)
+void cdiCreateTimesteps(stream_t *streamptr)
 {
   int ntsteps;
   int tsID;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   if ( streamptr->ntsteps < 0 || streamptr->tstepsTableSize > 0 )
     return;

@@ -299,7 +299,7 @@ void    cdi_create_records(stream_t *streamptr, int tsID);
 
 int     recordNewEntry(stream_t *streamptr, int tsID);
 
-void    cdiCreateTimesteps(int streamID);
+void    cdiCreateTimesteps(stream_t *streamptr);
 
 void    recordInitEntry(record_t *record);
 

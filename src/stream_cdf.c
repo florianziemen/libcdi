@@ -32,8 +32,8 @@
 #define UNDEFID  CDI_UNDEFID
 
 
-void cdfDefGlobalAtts(int streamID);
-void cdfDefLocalAtts(int streamID);
+void cdfDefGlobalAtts(stream_t *streamptr);
+void cdfDefLocalAtts(stream_t *streamptr);
 
 
 #define  X_AXIS  1
@@ -551,17 +551,9 @@ int cdfInqRecord(stream_t *streamptr, int *varID, int *levelID)
 */
 
 
-int cdfDefRecord(int streamID)
+int cdfDefRecord(stream_t *streamptr)
 {
   int ierr = 0;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  if ( CDI_Debug )
-    Message("streamID = %d", streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   return (ierr);
 }
@@ -3391,7 +3383,7 @@ int cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtyp
 }
 #endif
 
-void cdf_write_var(int streamID, int varID, int memtype, const void *data, int nmiss)
+void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int fileID;
@@ -3412,19 +3404,14 @@ void cdf_write_var(int streamID, int varID, int memtype, const void *data, int n
   int gridindex, zaxisindex;
   int dtype;
   int vlistID;
-  stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
-
-  if ( CDI_Debug )
-    Message("streamID = %d  varID = %d", streamID, varID);
+  if ( CDI_Debug ) Message("streamptr = %p  varID = %d", streamptr, varID);
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
 
   ntsteps = streamptr->ntsteps;
-  if ( CDI_Debug )
-    Message("ntsteps = %d", ntsteps); 
+  if ( CDI_Debug ) Message("ntsteps = %d", ntsteps);
 
   if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
 
@@ -3817,8 +3804,8 @@ int cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
   return (0);
 }
 
-
-void cdfCreateRecords(int streamID, int tsID)
+static
+void cdfCreateRecords(stream_t *streamptr, int tsID)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int varID, levelID, recID, vrecID, zaxisID;
@@ -3826,9 +3813,6 @@ void cdfCreateRecords(int streamID, int tsID)
   record_t *records = NULL;
   int *recIDs = NULL;
   int vlistID;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   vlistID  = streamptr->vlistID;
 
@@ -5909,17 +5893,12 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 /* define all input data variables */
 static
-void define_all_vars(int streamID, int vlistID, int instID, int modelID, int *varids, int nvars, ncvar_t *ncvars)
+void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int *varids, int nvars, ncvar_t *ncvars)
 {
   int ncid;
   int varID1, varID, ncvarid;
   int code;
   int tableID;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   if ( streamptr->sortname )
     {
@@ -6286,7 +6265,7 @@ void read_global_attributtes(int fileID, int vlistID, stream_t *streamptr, int n
 }
 #endif
 
-int cdfInqContents(int streamID)
+int cdfInqContents(stream_t *streamptr)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int ndims, nvars, ngatts, unlimdimid;
@@ -6314,19 +6293,13 @@ int cdfInqContents(int streamID)
   ncdim_t *ncdims;
   ncvar_t *ncvars = NULL;
   int vlistID;
-  stream_t *streamptr;
   int format = 0;
   int ucla_les = FALSE;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
 
-  if ( CDI_Debug )
-    Message("streamID = %d, fileID = %d", streamID, fileID);
+  if ( CDI_Debug ) Message("streamptr = %p, fileID = %d", streamptr, fileID);
 
 #if  defined  (HAVE_NETCDF4)
   nc_inq_format(fileID, &format);
@@ -6726,10 +6699,10 @@ int cdfInqContents(int streamID)
   streamptr->ntsteps = ntsteps;
 
   /* define all data variables */
-  define_all_vars(streamID, vlistID, instID, modelID, varids, nvars_data, ncvars);
+  define_all_vars(streamptr, vlistID, instID, modelID, varids, nvars_data, ncvars);
 
 
-  cdiCreateTimesteps(streamID);
+  cdiCreateTimesteps(streamptr);
 
   /* time varID */
   ncvarid = streamptr->basetime.ncvarid;
@@ -6819,9 +6792,9 @@ int cdfInqContents(int streamID)
   streamptr->curTsID = 0;
   streamptr->rtsteps = 1;
 
-  (void) cdfInqTimestep(streamID, 0);
+  (void) cdfInqTimestep(streamptr, 0);
 
-  cdfCreateRecords(streamID, 0);
+  cdfCreateRecords(streamptr, 0);
 
   /* free ncdims */
   free (ncdims);
@@ -6835,7 +6808,7 @@ int cdfInqContents(int streamID)
 }
 
 
-int cdfInqTimestep(int streamID, int tsID)
+int cdfInqTimestep(stream_t * streamptr, int tsID)
 {
   long nrecs = 0;
 #if  defined  (HAVE_LIBNETCDF)
@@ -6845,12 +6818,8 @@ int cdfInqTimestep(int streamID, int tsID)
   int fileID;
   size_t index;
   taxis_t *taxis;
-  stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
-
-  if ( CDI_Debug )
-    Message("streamID = %d  tsID = %d", streamID, tsID);
+  if ( CDI_Debug ) Message("streamptr= %p  tsID = %d", streamptr, tsID);
 
   stream_check_ptr(__func__, streamptr);
 
@@ -6858,7 +6827,7 @@ int cdfInqTimestep(int streamID, int tsID)
 
   if ( tsID < streamptr->ntsteps && streamptr->ntsteps > 0 )
     {
-      cdfCreateRecords(streamID, tsID);
+      cdfCreateRecords(streamptr, tsID);
 
       taxis = &streamptr->tsteps[tsID].taxis;
       if ( tsID > 0 )
@@ -6925,20 +6894,17 @@ int cdfInqTimestep(int streamID, int tsID)
 }
 
 
-void cdfEndDef(int streamID)
+void cdfEndDef(stream_t *streamptr)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int varID;
   int nvars;
   int fileID;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   fileID  = streamptr->fileID;
 
-  cdfDefGlobalAtts(streamID);
-  cdfDefLocalAtts(streamID);
+  cdfDefGlobalAtts(streamptr);
+  cdfDefLocalAtts(streamptr);
   if ( streamptr->accessmode == 0 )
     {
       nvars =  streamptr->nvars;
@@ -6956,16 +6922,13 @@ void cdfEndDef(int streamID)
 }
 
 
-void cdfDefInstitut(int streamID)
+void cdfDefInstitut(stream_t *streamptr)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int fileID, instID;
   char *longname;
   size_t len;
   int vlistID;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -6988,16 +6951,14 @@ void cdfDefInstitut(int streamID)
 #endif
 }
 
-void cdfDefSource(int streamID)
+
+void cdfDefSource(stream_t *streamptr)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int fileID, modelID;
   char *longname;
   size_t len;
   int vlistID;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -7021,22 +6982,19 @@ void cdfDefSource(int streamID)
 }
 
 
-void cdfDefGlobalAtts(int streamID)
+void cdfDefGlobalAtts(stream_t *streamptr)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int fileID, vlistID;
-  stream_t *streamptr;
   int natts;
-
-  streamptr = stream_to_pointer(streamID);
 
   if ( streamptr->globalatts ) return;
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
 
-  cdfDefSource(streamID);
-  cdfDefInstitut(streamID);
+  cdfDefSource(streamptr);
+  cdfDefInstitut(streamptr);
 
   vlistInqNatts(vlistID, CDI_GLOBAL, &natts);
 
@@ -7051,7 +7009,7 @@ void cdfDefGlobalAtts(int streamID)
 }
 
 
-void cdfDefLocalAtts(int streamID)
+void cdfDefLocalAtts(stream_t *streamptr)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int varID, instID, fileID;
@@ -7059,9 +7017,6 @@ void cdfDefLocalAtts(int streamID)
   size_t len;
   int ncvarid;
   int vlistID;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -7092,27 +7047,23 @@ void cdfDefLocalAtts(int streamID)
 #endif
 }
 
-void cdfDefHistory(int streamID, int size, char *history)
+
+void cdfDefHistory(stream_t *streamptr, int size, char *history)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int ncid;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   ncid = streamptr->fileID;
   cdf_put_att_text(ncid, NC_GLOBAL, "history", (size_t) size, history);
 #endif
 }
 
-int cdfInqHistorySize(int streamID)
+
+int cdfInqHistorySize(stream_t *streamptr)
 {
   size_t size = 0;
 #if  defined  (HAVE_LIBNETCDF)
   int ncid;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   ncid = streamptr->fileID;
   if ( streamptr->historyID != UNDEFID )
@@ -7123,13 +7074,10 @@ int cdfInqHistorySize(int streamID)
 }
 
 
-void cdfInqHistoryString(int streamID, char *history)
+void cdfInqHistoryString(stream_t *streamptr, char *history)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int ncid;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   ncid = streamptr->fileID;
   if ( streamptr->historyID != UNDEFID )
