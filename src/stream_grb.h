@@ -13,7 +13,7 @@ int   grbReadRecord(int streamID, double *data, int *nmiss);
 int   grbCopyRecord(int streamIDdest, int streamIDsrc);
 
 void  grbReadVarDP(int streamID, int varID, double *data, int *nmiss);
-void  grb_write_Var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss);
+void  grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss);
 
 void  grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *nmiss);
 int   grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, int nmiss);
