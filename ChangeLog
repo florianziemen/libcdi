@@ -1,3 +1,8 @@
+2013-03-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.6.0 released
+        * using CGRIBEX library version 1.6.0
+
 2013-01-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* global netCDF attribute "source" missing (bug fix)
