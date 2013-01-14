@@ -442,7 +442,7 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
 
 static
 size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
-		 int date, int time, int tsteptype, int numavg, 
+		 int date, int time, int tsteptype, int numavg,
 		 long datasize, const double *data, int nmiss, unsigned char **gribbuffer,
 		 int ljpeg, void *gribContainer)
 {
@@ -456,14 +456,14 @@ size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, 
       *gribbuffer = (unsigned char *) malloc(gribbuffersize);
 
       nbytes = cgribexEncode(varID, levelID, vlistID, gridID, zaxisID,
-			     date, time, tsteptype, numavg, 
+			     date, time, tsteptype, numavg,
 			     datasize, data, nmiss, *gribbuffer, gribbuffersize);
     }
   else
 #endif
     {
       nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID,
-			     date, time, tsteptype, numavg, 
+			     date, time, tsteptype, numavg,
 			     datasize, data, nmiss, gribbuffer, &gribbuffersize,
 			     ljpeg, gribContainer);
     }
