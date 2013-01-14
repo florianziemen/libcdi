@@ -373,7 +373,7 @@ void stream_write_record(int streamID, int memtype, const void *data, int nmiss)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
-        status = grbWriteRecord(streamID, memtype, data, nmiss);
+        status = grb_write_record(streamID, memtype, data, nmiss);
 	break;
       }
 #endif
