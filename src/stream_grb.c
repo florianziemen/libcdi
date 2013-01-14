@@ -608,7 +608,10 @@ void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data
 
   for ( levelID = 0; levelID < nlevs; levelID++ )
     {
-      grb_write_var_slice(streamptr, varID, levelID, memtype, data+levelID*gridsize, nmiss);
+      if ( memtype == MEMTYPE_FLOAT )
+        grb_write_var_slice(streamptr, varID, levelID, memtype, ((float*)data)+levelID*gridsize, nmiss);
+      else
+        grb_write_var_slice(streamptr, varID, levelID, memtype, ((double*)data)+levelID*gridsize, nmiss);
     }
 }
 
