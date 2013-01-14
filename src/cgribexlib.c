@@ -2459,12 +2459,12 @@ gribExDP(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 {
   int yfunc = *hoper;
 
-  if ( yfunc == 'D' || yfunc == 'J' || yfunc == 'R' )
-    gribDecode(isec0, isec1, isec2, fsec2, isec3,
+  if ( yfunc == 'C' )
+    gribEncode(isec0, isec1, isec2, fsec2, isec3,
 	       fsec3, isec4, fsec4, klenp, kgrib,
 	       kleng, kword, yfunc, kret);
-  else if ( yfunc == 'C' )
-    gribEncode(isec0, isec1, isec2, fsec2, isec3,
+  else if ( yfunc == 'D' || yfunc == 'J' || yfunc == 'R' )
+    gribDecode(isec0, isec1, isec2, fsec2, isec3,
 	       fsec3, isec4, fsec4, klenp, kgrib,
 	       kleng, kword, yfunc, kret);
   else if ( yfunc == 'V' )
@@ -10188,7 +10188,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.6.0" " of ""Jan 14 2013"" ""11:39:57";
+static const char grb_libvers[] = "1.6.0" " of ""Jan 14 2013"" ""13:42:16";
 const char *
 cgribexLibraryVersion(void)
 {

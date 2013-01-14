@@ -1685,8 +1685,7 @@ void stream_write_var(int streamID, int varID, int memtype, const void *data, in
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("grbWriteVar not implemented for memtype float!");
-        grbWriteVarDP(streamptr, varID, data, nmiss);
+        grb_write_var(streamptr, varID, memtype, data, nmiss);
 	break;
       }
 #endif
@@ -1884,8 +1883,7 @@ void stream_write_var_slice(int streamID, int varID, int levelID, int memtype, c
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("grbWriteVarSlice not implemented for memtype float!");
-        grbWriteVarSliceDP(streamptr, varID, levelID, data, nmiss);
+        grb_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 	break;
       }
 #endif

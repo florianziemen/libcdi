@@ -373,8 +373,7 @@ void stream_write_record(int streamID, int memtype, const void *data, int nmiss)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("grbWriteRecord not implemented for memtype float!");
-        status = grbWriteRecord(streamID, data, nmiss);
+        status = grbWriteRecord(streamID, memtype, data, nmiss);
 	break;
       }
 #endif

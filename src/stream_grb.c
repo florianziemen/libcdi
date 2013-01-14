@@ -501,7 +501,7 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
 }
 
 
-int grbWriteVarSliceDP(stream_t *streamptr, int varID, int levelID, const double *data, int nmiss)
+int grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, int nmiss)
 {
   size_t nwrite;
   int fileID;
@@ -520,8 +520,9 @@ int grbWriteVarSliceDP(stream_t *streamptr, int varID, int levelID, const double
   int ljpeg_warn = 1;
   void *gc = NULL;
 
-  filetype  = streamptr->filetype;
+  if ( memtype == MEMTYPE_FLOAT ) Error("cdf_write_var_slice not implemented for memtype float!");
 
+  filetype  = streamptr->filetype;
   fileID    = streamptr->fileID;
   vlistID   = streamptr->vlistID;
   gridID    = vlistInqVarGrid(vlistID, varID);
@@ -594,7 +595,7 @@ int grbWriteVarSliceDP(stream_t *streamptr, int varID, int levelID, const double
 }
 
 
-void grbWriteVarDP(stream_t *streamptr, int varID, const double *data, int nmiss)
+void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss)
 {
   int vlistID, gridID, zaxisID, levelID, nlevs;
   int gridsize;
@@ -607,7 +608,7 @@ void grbWriteVarDP(stream_t *streamptr, int varID, const double *data, int nmiss
 
   for ( levelID = 0; levelID < nlevs; levelID++ )
     {
-      grbWriteVarSliceDP(streamptr, varID, levelID, data+levelID*gridsize, nmiss);
+      grb_write_var_slice(streamptr, varID, levelID, memtype, data+levelID*gridsize, nmiss);
     }
 }
 
@@ -672,7 +673,7 @@ int grbCopyRecord(int streamID2, int streamID1)
 }
 
 
-int grbWriteRecord(int streamID, const double *data, int nmiss)
+int grb_write_record(int streamID, int memtype, const void *data, int nmiss)
 {
   int status = 0;
   int varID, levelID;
@@ -685,7 +686,7 @@ int grbWriteRecord(int streamID, const double *data, int nmiss)
   varID   = streamptr->record->varID;
   levelID = streamptr->record->levelID;
 
-  status = grbWriteVarSliceDP(streamptr, varID, levelID, data, nmiss);
+  status = grb_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 
   return (status);
 }
