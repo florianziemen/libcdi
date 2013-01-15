@@ -19,8 +19,9 @@ typedef struct
 }
 Docu;
 
-Docu cdoc[9999], fdoc[9999];
-size_t ncdoc = 0, nfdoc = 0;
+static Docu cdoc[9999], fdoc[9999];
+static size_t ncdoc = 0, nfdoc = 0;
+static int debug = 0;
 
 int doccmp(const void *s1, const void *s2)
 {
@@ -64,11 +65,25 @@ void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
     }
 }
 
-enum {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISINTP, ISINTV, ISINTVV, ISREALP, ISDOUBLEP, ISSTRING, ISSTRINGP, NUM_KNOWN_ARG_TYPES};
+enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISMPI_COMM,
+             ISINTP, ISINTV, ISINTVV, ISREALP, ISDOUBLEP, ISSTRING, ISSTRINGP,
+             NUM_KNOWN_ARG_TYPES};
+
+enum conversionType { CONV_ARG, CONV_RET };
+
+
+typedef int (*cfConversionEmitter)(FILE *outfp, const char *argName,
+                                   size_t argNameLen, enum conversionType part);
+
+static int cfMPICommConvert(FILE *outfp, const char *argName,
+                            size_t argNameLen, enum conversionType part);
 
 struct symbol {
   const char *f77name, *cfint, *cname, *parseRE;
   size_t nameMatch;
+  int needsExtraWrapper;
+  cfConversionEmitter convert;
+  const char *convcname;
   regex_t preg;
 };
 
@@ -79,43 +94,49 @@ struct symbol {
 #define NWS "[^[:blank:]\n]"
 static struct symbol funArgSym[]
   = { { "",                "",        "void",
-        "^"WS"*void"WS"*)", 0 },
+        "^"WS"*void"WS"*)", 0, 0 },
       { "CHARACTER*80",    "STRING",  "char *",
-        "^"WS"*const"WS"+char"WS"+\\*"SYMRE WS"*\\(", 1 },
+        "^"WS"*const"WS"+char"WS"+\\*"SYMRE WS"*\\(", 1, 0 },
       { "INTEGER",         "INT",     "int",
-        "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*[,\\)]", 3 },
+        "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*[,\\)]", 3, 0 },
       { "REAL",            "FLOAT",   "float",
-        "^"WS"*(const"WS"+)?float"WS"+"SYMRE"?"WS"*[,\\)]", 2 },
+        "^"WS"*(const"WS"+)?float"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0 },
       { "DOUBLEPRECISION", "DOUBLE",  "double",
-        "^"WS"*(const"WS"+)?double"WS"+"SYMRE"?"WS"*[,\\)]", 2 },
+        "^"WS"*(const"WS"+)?double"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0 },
+      { "INTEGER",         "INT", "MPI_Comm",
+        "^"WS"*MPI_Comm"WS"+"SYMRE"?"WS"*[,\\)]", 1, 1,
+        cfMPICommConvert, "int" },
       { "INTEGER",         "PINT",    "int *",
-        "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2 },
+        "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0 },
       { "INTEGER",         "INTV",    "int[]",
-        "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"WS"*[,\\)]", 3 },
+        "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
+        WS"*[,\\)]", 3, 0 },
       { "INTEGER",         "INTVV",    "int[][]",
         "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
-        WS"*\\[[^]]*\\]"WS"*[,\\)]", 3 },
+        WS"*\\[[^]]*\\]"WS"*[,\\)]", 3, 0 },
       { "REAL",            "PFLOAT",  "float *",
-        "^"WS"*(const"WS"+)?float"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2 },
+        "^"WS"*(const"WS"+)?float"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0 },
       { "DOUBLEPRECISION", "PDOUBLE", "double *",
-        "^"WS"*(const"WS"+)?double"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2 },
+        "^"WS"*(const"WS"+)?double"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0 },
       { "CHARACTER*(*)",   "STRING",  "char *",
-        "^"WS"*const"WS"+char"WS"+\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1 },
+        "^"WS"*const"WS"+char"WS"+\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0 },
       { "CHARACTER*(*)",   "PSTRING", "char *",
-        "^"WS"*char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 1 },
+        "^"WS"*char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 1, 0 },
 };
 
 static struct symbol funRet[] = {
   { "",                "",        "void",
-    "void"WS"+"SYMRE WS"*\\(", 1 },
+    "void"WS"+"SYMRE WS"*\\(", 1, 0 },
   { "CHARACTER",       "STRING",  "(const) char *",
-    "(const"WS"+)?char"WS"+\\*"WS"*"SYMRE WS"*\\(", 2 },
+    "(const"WS"+)?char"WS"+\\*"WS"*"SYMRE WS"*\\(", 2, 0 },
   { "INTEGER",         "INT",     "int",
-    "(const"WS"+)?int"WS"+"SYMRE WS"*\\(", 2 },
+    "(const"WS"+)?int"WS"+"SYMRE WS"*\\(", 2, 0 },
   { "REAL",            "FLOAT",   "float",
-    "(const"WS"+)?float"WS"+"SYMRE WS"*\\(", 2 },
+    "(const"WS"+)?float"WS"+"SYMRE WS"*\\(", 2, 0 },
   { "DOUBLEPRECISION", "DOUBLE",  "double",
-    "(const"WS"+)?double"WS"+"SYMRE WS"*\\(", 2 },
+    "(const"WS"+)?double"WS"+"SYMRE WS"*\\(", 2, 0 },
+  { "INTEGER",         "INT",     "MPI_Comm",
+    "MPI_Comm"WS"+"SYMRE WS"*\\(", 1, 0, cfMPICommConvert, "int" },
 };
 
 enum { NUM_RET_TYPES = sizeof (funRet) / sizeof (funRet[0]) };
@@ -123,6 +144,7 @@ enum decl { UNKNOWN_DECL, FUNC_DECL, PARAM_DECL };
 
 enum {
   MAX_FUNC_ARGS = 200,
+  MAX_FUNC_NAME_LEN = 127,
 };
 
 static inline size_t
@@ -138,11 +160,11 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   char xname[128], xdes[128];
   xname[0] = 0;
   int parvalue;
-  int functype;
+  enum cftype functype;
   int lineno = 0;
   size_t len;
 
-  char funcname[128];
+  char funcname[MAX_FUNC_NAME_LEN];
   regmatch_t funcargfull[MAX_FUNC_ARGS];
   regmatch_t funcargname[MAX_FUNC_ARGS];
   int  funcargtype[MAX_FUNC_ARGS];
@@ -273,10 +295,18 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   fprintf(fpint, "#  include \"config.h\"\n");
   fprintf(fpint, "#endif\n");
   fprintf(fpint, "\n");
-  fprintf(fpint, "#if ! defined (_CDI_H)\n");
-  fprintf(fpint, "#  include \"cdi.h\"\n");
-  fprintf(fpint, "#endif\n");
-  fprintf(fpint, "\n");
+  fputs("#if USE_MPI\n"
+        "#  include <mpi.h>\n"
+        "#else\n"
+        "#define MPI_Comm int\n"
+        "#define MPI_Comm_f2c(c) (c)\n"
+        "#define MPI_Comm_c2f(c) (c)\n"
+        "#endif\n"
+        "\n"
+        "#if ! defined (_CDI_H)\n"
+        "#  include \"cdi.h\"\n"
+        "#endif\n"
+        "\n", fpint);
   fprintf(fpint, "#if defined (HAVE_CF_INTERFACE)\n");
   fprintf(fpint, "\n");
   fprintf(fpint, "#if ! defined (__CFORTRAN_LOADED)\n");
@@ -291,6 +321,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
       functype = ISVOID;
       size_t funcargc = 0;
       pline = line;
+      int needsExtraWrapper = 0;
       enum decl declType = UNKNOWN_DECL;
       do {
         for (int retType = 0; retType < NUM_RET_TYPES; ++retType)
@@ -298,14 +329,17 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
             {
               functype = retType;
               declType = FUNC_DECL;
+              needsExtraWrapper
+                = needsExtraWrapper || funRet[retType].needsExtraWrapper;
               break;
             }
         if (declType == UNKNOWN_DECL)
           break;
         regmatch_t *nameMatch = reMatch + funRet[functype].nameMatch;
-        printf("Found: %.*s\n",
-               nameMatch->rm_eo - nameMatch->rm_so,
-               pline + nameMatch->rm_so);
+        if (debug)
+          printf("Found: %.*s\n",
+                 nameMatch->rm_eo - nameMatch->rm_so,
+                 pline + nameMatch->rm_so);
         ssize_t funNameLast = reMatch[0].rm_eo - 1;
         ssize_t nameLen = nameMatch->rm_eo - nameMatch->rm_so;
         if ( pline[funNameLast] != '(' )
@@ -359,7 +393,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	  /*  printf("funcargc = %d\n", funcargc);*/
           {
             size_t i;
-            for (i = 0; i < funcargc; i++ )
+            for (i = 0; i < funcargc; ++i )
               {
                 pline = line + funcargname[i].rm_so;
                 int argtype;
@@ -376,6 +410,8 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
                       regmatch_t *nameMatch = reMatch + funArgSym[argtype].nameMatch;
                       funcargname[i].rm_so = nameMatch->rm_so + argStart;
                       funcargname[i].rm_eo = nameMatch->rm_eo + argStart;
+                      needsExtraWrapper
+                        = needsExtraWrapper || funArgSym[argtype].needsExtraWrapper;
                       break;
                     }
                 if (argtype == NUM_KNOWN_ARG_TYPES)
@@ -419,7 +455,65 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	  fprintf(fpinc, "      %-16s%s\n\n", "EXTERNAL", sname);
 
 	  /* fortran interface */
-
+          const char *delegateName;
+          char delegateNameBuf[MAX_FUNC_NAME_LEN + 7];
+          /* emit wrapper for type conversions if needed */
+          if (needsExtraWrapper)
+            {
+              strcpy(delegateNameBuf, funcname);
+              strcat(delegateNameBuf, "_fwrap");
+              delegateName = delegateNameBuf;
+              fprintf(fpint, "static %s %s(",
+                      (funRet[functype].convert
+                       ?funRet[functype].convcname:funRet[functype].cname),
+                      delegateName);
+              for (size_t i = 0; i < funcargc; i++ )
+                {
+                  fprintf(fpint, "%s%s %.*s", (i > 0?", ":""),
+                          (funArgSym[funcargtype[i]].convert
+                           ?funArgSym[funcargtype[i]].convcname
+                           :funArgSym[funcargtype[i]].cname),
+                          (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
+                          line + funcargname[i].rm_so);
+                }
+              fputs(")\n{\n", fpint);
+              if (functype != ISVOID)
+                fprintf(fpint, "  %s v;\n"
+                        "  v = %s(", funRet[functype].cname,
+                        funcname);
+              else
+                fprintf(fpint, "  %s(", funcname);
+              for (size_t i = 0; i < funcargc; i++ )
+                {
+                  if (funArgSym[funcargtype[i]].convert)
+                    {
+                      if (i > 0)
+                        fputs(", ", fpint);
+                      funArgSym[funcargtype[i]]
+                        .convert(fpint,
+                                 line + funcargname[i].rm_so,
+                                 (size_t)(funcargname[i].rm_eo
+                                          - funcargname[i].rm_so), CONV_ARG);
+                    }
+                  else
+                    fprintf(fpint, "%s %.*s", (i > 0?", ":""),
+                            (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
+                            line + funcargname[i].rm_so);
+                }
+              fputs(");\n", fpint);
+              if (functype != ISVOID)
+                {
+                  fputs("  return ", fpint);
+                  if (funRet[functype].convert)
+                    funRet[functype].convert(fpint, "v", 1, CONV_RET);
+                  else
+                    fputc('v', fpint);
+                  fputs(";\n", fpint);
+                }
+              fputs("}\n", fpint);
+            }
+          else
+            delegateName = funcname;
 	  if ( functype == ISVOID )
 	    fprintf(fpint, "FCALLSCSUB");
 	  else
@@ -427,8 +521,8 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	  fprintf(fpint, "%zd ", funcargc);
 	  fprintf(fpint, "(");
 	  if ( functype != ISVOID )
-	    fprintf(fpint, "%s, ", funArgSym[functype].cfint);
-	  fprintf(fpint, "%s, ", funcname);
+	    fprintf(fpint, "%s, ", funRet[functype].cfint);
+	  fprintf(fpint, "%s, ", delegateName);
 	  for (size_t i = 0; i < len; i++ ) sname[i] = (char)toupper((int) sname[i]);
 	  fprintf(fpint, "%s, ", sname);
 	  for (size_t i = 0; i < len; i++ ) sname[i] = (char)tolower((int) sname[i]);
@@ -696,6 +790,23 @@ compress_whitespace(size_t len, char str[])
   return wpos;
 }
 
+/* emit conversion code for MPI_Comm argument */
+static int cfMPICommConvert(FILE *outfp, const char *argName,
+                               size_t argNameLen, enum conversionType part)
+{
+  int retval = 0;
+  switch (part)
+    {
+    case CONV_ARG:
+      retval
+        = fprintf(outfp, "MPI_Comm_f2c(%.*s)", (int)argNameLen, argName);
+      break;
+    case CONV_RET:
+      retval = fprintf(outfp, "MPI_Comm_c2f(%.*s)", (int)argNameLen, argName);
+      break;
+    }
+  return retval;
+}
 
 /*
  * Local Variables:

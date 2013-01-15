@@ -2,11 +2,16 @@
 #  include "config.h"
 #endif
 
+#include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
+
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
+
 #include "cdi.h"
-#include "limits.h"
 #include "pio_util.h"
 #include "vlist_var.h"
 
@@ -659,6 +664,10 @@ int pioInqVarDecoOff ( int vlistID, int varID )
 }
 
 /*****************************************************************************/
+/* pioInit definition must currently compile even in non-MPI configurations */
+#ifndef MPI_VERSION
+#  define MPI_Comm int
+#endif
 /**
    @brief initializes the MPI_Communicators needed for the
   communication between the calculator PEs and the I/O PEs and within the
@@ -679,10 +688,11 @@ int pioInqVarDecoOff ( int vlistID, int varID )
   @return int indicating wether the calling PE is a calcutator (1) or not (0)
 */
 
-#ifdef USE_MPI
-MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode,
-                     int nNamespaces, int * hasLocalFile )
+MPI_Comm
+pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
+        int nNamespaces, int * hasLocalFile)
 {
+#ifdef USE_MPI
   int sizeGlob;
 
   if ( IOMode < PIO_MINIOMODE || IOMode > PIO_MAXIOMODE )
@@ -728,36 +738,16 @@ MPI_Comm pioInit_c ( MPI_Comm commGlob, int nProcsIO, int IOMode,
 
   xdebug ( "nProcsGlob=%d, RETURN", sizeGlob );
   return commInqCommModel ();
+#else
+  abort();
+#endif
 }
+
+#ifndef MPI_VERSION
+#  undef MPI_Comm
 #endif
 
 /*****************************************************************************/
-
-int pioInit ( int commGlobArg, int nProcsIO, int IOMode, int nNamespaces,
-              int * hasLocalFile )
-{
-#ifdef USE_MPI
-  xdebug("START: %s, nProcsIO=%d, IOMode=%d, nNamespaces=%d",
-         "cdi parallel",
-         nProcsIO, IOMode, nNamespaces );
-#else
-  xdebug("START: %s, nProcsIO=%d, IOMode=%d, nNamespaces=%d",
-         "cdi serial",
-         nProcsIO, IOMode, nNamespaces );
-#endif
-
-#ifdef USE_MPI
-  MPI_Comm commGlob = MPI_Comm_f2c((MPI_Fint)commGlobArg);
-  xassert ( commGlob != MPI_COMM_NULL );
-
-  return MPI_Comm_c2f ( pioInit_c ( commGlob, nProcsIO, IOMode, nNamespaces,
-                                    hasLocalFile ));
-#endif
-  xdebug("%s", "RETURN" );
-  return 0;
-}
-
-/************************************************************************/
 
 void  pioEndDef ( void )
 {

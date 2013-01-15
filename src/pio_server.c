@@ -743,6 +743,7 @@ void getTimeStepData ( int tsID, int vdate, int vtime )
              " getWin=%p, sizeof(int)=%u",
              modelID, nProcsModel, modelID, rxWin[modelID].size,
              getWinBaseAddr, (unsigned)sizeof(int));
+      /* FIXME: this needs to use MPI_PACK for portability */
       xmpi(MPI_Get(rxWin[modelID].buffer, rxWin[modelID].size,
                    MPI_UNSIGNED_CHAR, modelID, 0,
                    rxWin[modelID].size, MPI_UNSIGNED_CHAR, getWin));

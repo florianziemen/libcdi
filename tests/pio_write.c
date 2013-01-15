@@ -469,8 +469,8 @@ int main (int argc, char *argv[])
   }
 
 #ifdef USE_MPI
-  commModel = pioInit_c(commGlob, nProcsIO, IOMode,
-                        nNamespaces, hasLocalFile);
+  commModel = pioInit(commGlob, nProcsIO, IOMode,
+                      nNamespaces, hasLocalFile);
 #else
   commModel = -1;
 #endif

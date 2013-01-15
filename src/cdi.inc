@@ -362,11 +362,11 @@
       EXTERNAL        pioFinalize
 
       INTEGER         pioInit
-!                                    (INTEGER         ,
-!                                     INTEGER         ,
-!                                     INTEGER         ,
-!                                     INTEGER         ,
-!                                     INTEGER         )
+!                                    (INTEGER         commSuper,
+!                                     INTEGER         nProcsIO,
+!                                     INTEGER         IOMode,
+!                                     INTEGER         nNamespaces,
+!                                     INTEGER         hasLocalFile)
       EXTERNAL        pioInit
 
       INTEGER         pioInqVarDecoChunk

@@ -186,7 +186,7 @@ int main (int argc, char *argv[])
       nProcsIO = nProcsIODef;
     }
 
-  commModel = pioInit_c ( commGlob, nProcsIO, IOMode, nNamespaces, hasLocalFile );
+  commModel = pioInit(commGlob, nProcsIO, IOMode, nNamespaces, hasLocalFile);
 #endif
 
   modelRun ();

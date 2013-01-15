@@ -214,15 +214,24 @@ extern "C" {
 #define  PIO_MINIOMODEWITHSPECIALPROCS  PIO_WRITER  
  
   /* parallel IO routines */
+#ifndef MPI_VERSION
+#  define MPI_Comm int
+#endif
 
 void     pioEndDef             ( void );
 void     pioEndTimestepping    ( void );
 void     pioFinalize           ( void );
-int      pioInit               ( int, int, int, int, int * );
+/*      pioInit: initialize I/O server processes and communication */
+MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode, int nNamespaces,
+                 int *hasLocalFile);
 int      pioInqVarDecoChunk    ( int, int );
 int      pioInqVarDecoOff      ( int, int );
 void     pioNamespaceSetActive ( int );
 void     pioWriteTimestep      ( int, int, int );
+
+#ifndef MPI_VERSION
+#undef MPI_Comm
+#endif
 
   /* CDI control routines */
 

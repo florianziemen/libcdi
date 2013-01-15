@@ -4,6 +4,14 @@
 #  include "config.h"
 #endif
 
+#if USE_MPI
+#  include <mpi.h>
+#else
+#define MPI_Comm int
+#define MPI_Comm_f2c(c) (c)
+#define MPI_Comm_c2f(c) (c)
+#endif
+
 #if ! defined (_CDI_H)
 #  include "cdi.h"
 #endif
@@ -62,7 +70,13 @@
 FCALLSCSUB0 (pioEndDef, PIOENDDEF, pioenddef)
 FCALLSCSUB0 (pioEndTimestepping, PIOENDTIMESTEPPING, pioendtimestepping)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
-FCALLSCFUN5 (INT, pioInit, PIOINIT, pioinit, INT, INT, INT, INT, PINT)
+static int pioInit_fwrap(int commSuper, int nProcsIO, int IOMode, int nNamespaces, int * hasLocalFile)
+{
+  MPI_Comm v;
+  v = pioInit(MPI_Comm_f2c(commSuper),  nProcsIO,  IOMode,  nNamespaces,  hasLocalFile);
+  return MPI_Comm_c2f(v);
+}
+FCALLSCFUN5 (INT, pioInit_fwrap, PIOINIT, pioinit, INT, INT, INT, INT, PINT)
 FCALLSCFUN2 (INT, pioInqVarDecoChunk, PIOINQVARDECOCHUNK, pioinqvardecochunk, INT, INT)
 FCALLSCFUN2 (INT, pioInqVarDecoOff, PIOINQVARDECOOFF, pioinqvardecooff, INT, INT)
 FCALLSCSUB1 (pioNamespaceSetActive, PIONAMESPACESETACTIVE, pionamespacesetactive, INT)
