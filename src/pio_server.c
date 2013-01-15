@@ -373,8 +373,8 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
 {
   int nProcsModel = commInqNProcsModel ();
   int root        = commInqRootGlob ();
-  int myCollRank = commInqRankColl();
 #ifdef HAVE_NETCDF4
+  int myCollRank = commInqRankColl();
   MPI_Comm collComm = commInqCommColl();
 #endif
   xdebug("%s", "START");
