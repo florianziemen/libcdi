@@ -114,33 +114,35 @@ void commDestroy ( void )
   if ( info->nodeMap   != NULL ) free ( info->nodeMap );
   if ( info->nodeSizes != NULL ) free ( info->nodeSizes );
 
-  if ( info->commsIO != NULL ) 
+  if ( info->commsIO != NULL )
     {
       for ( collID = 0; collID < info->nProcsColl; collID++ )
 	if ( info->commsIO[collID] != MPI_COMM_NULL )
 	  xmpi ( MPI_Comm_free ( &info->commsIO[collID] ));
-      free ( info->commsIO ); 
+      free ( info->commsIO );
       info->commsIO = NULL;
     }
 
   if ( info->commColl != MPI_COMM_NULL )
     {
-      xmpi ( MPI_Comm_free ( &info->commColl )); 
+      xmpi ( MPI_Comm_free ( &info->commColl ));
       info->commColl = MPI_COMM_NULL;
     }
-  
+
+  free(info->procsCollMap);
+
   if ( info->commNode != MPI_COMM_NULL )
     {
-      xmpi ( MPI_Comm_free ( &info->commNode )); 
+      xmpi ( MPI_Comm_free ( &info->commNode ));
       info->commNode = MPI_COMM_NULL;
     }
-  
+
   if ( info->commPio != MPI_COMM_NULL )
     {
-      xmpi ( MPI_Comm_free ( &info->commPio )); 
+      xmpi ( MPI_Comm_free ( &info->commPio ));
       info->commPio = MPI_COMM_NULL;
     }
-  
+
   free ( info );
   info = NULL;
 }
