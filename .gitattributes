@@ -200,6 +200,7 @@ src/file.c -text
 src/file.h -text
 src/gaussgrid.c -text
 src/gaussgrid.h -text
+src/getline.c -text
 src/gribapi.c -text
 src/gribapi.h -text
 src/grid.c -text
