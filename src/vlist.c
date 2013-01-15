@@ -219,7 +219,7 @@ void vlistDestroy(int vlistID)
       if ( vlistptr->vars[varID].units )    free(vlistptr->vars[varID].units);
 
       if ( vlistptr->vars[varID].ensdata )  free(vlistptr->vars[varID].ensdata);
-
+      if ( vlistptr->vars[varID].deco )     free(vlistptr->vars[varID].deco);
       vlistDelAtts(vlistID, varID);
     }
  
