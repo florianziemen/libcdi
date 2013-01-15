@@ -49,6 +49,9 @@ vlist_compare(vlist_t *a, vlist_t *b)
 
 static void
 vlistPrintKernel(vlist_t *vlistptr, FILE * fp );
+static void
+vlist_delete(vlist_t *vlistptr);
+
 #ifdef USE_MPI
 static int  vlistGetSizeP ( void * vlistptr, MPI_Comm comm );
 static void vlistPackP    ( void * vlistptr, void * buff, int size,
@@ -58,7 +61,7 @@ static int  vlistTxCode   ( void );
 
 resOps vlist_ops = {
   (valCompareFunc)vlist_compare,
-  free,
+  (valDestroyFunc)vlist_delete,
   (valPrintFunc)vlistPrintKernel
 #ifdef USE_MPI
   , vlistGetSizeP,
@@ -186,6 +189,36 @@ int vlistCreate(void)
   return (vlistID);
 }
 
+static void
+vlist_delete(vlist_t *vlistptr)
+{
+  vlist_check_ptr(__func__, vlistptr);
+
+  int vlistID = vlistptr->self;
+
+  vlistDelAtts(vlistID, CDI_GLOBAL);
+
+  int nvars = vlistptr->nvars;
+
+  for (int varID = 0; varID < nvars; varID++ )
+    {
+      if ( vlistptr->vars[varID].levinfo )  free(vlistptr->vars[varID].levinfo);
+      if ( vlistptr->vars[varID].name )     free(vlistptr->vars[varID].name);
+      if ( vlistptr->vars[varID].longname ) free(vlistptr->vars[varID].longname);
+      if ( vlistptr->vars[varID].stdname )  free(vlistptr->vars[varID].stdname);
+      if ( vlistptr->vars[varID].units )    free(vlistptr->vars[varID].units);
+
+      if ( vlistptr->vars[varID].ensdata )  free(vlistptr->vars[varID].ensdata);
+      if ( vlistptr->vars[varID].deco )     free(vlistptr->vars[varID].deco);
+      vlistDelAtts(vlistID, varID);
+    }
+
+  if ( vlistptr->vars ) free(vlistptr->vars);
+
+  vlist_delete_entry(vlistptr);
+}
+
+
 /*
 @Function  vlistDestroy
 @Title     Destroy a variable list
@@ -199,33 +232,10 @@ int vlistCreate(void)
 void vlistDestroy(int vlistID)
 {
   vlist_t *vlistptr;
-  int nvars;
-  int varID;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlist_check_ptr(__func__, vlistptr);
-
-  vlistDelAtts(vlistID, CDI_GLOBAL);
-
-  nvars = vlistptr->nvars;
-
-  for ( varID = 0; varID < nvars; varID++ )
-    {
-      if ( vlistptr->vars[varID].levinfo )  free(vlistptr->vars[varID].levinfo);
-      if ( vlistptr->vars[varID].name )     free(vlistptr->vars[varID].name);
-      if ( vlistptr->vars[varID].longname ) free(vlistptr->vars[varID].longname);
-      if ( vlistptr->vars[varID].stdname )  free(vlistptr->vars[varID].stdname);
-      if ( vlistptr->vars[varID].units )    free(vlistptr->vars[varID].units);
-
-      if ( vlistptr->vars[varID].ensdata )  free(vlistptr->vars[varID].ensdata);
-      if ( vlistptr->vars[varID].deco )     free(vlistptr->vars[varID].deco);
-      vlistDelAtts(vlistID, varID);
-    }
- 
-  if ( vlistptr->vars ) free(vlistptr->vars);
-
-  vlist_delete_entry(vlistptr);
+  vlist_delete(vlistptr);
 }
 
 /*
