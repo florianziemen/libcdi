@@ -455,6 +455,12 @@
 !                                     INTEGER         pdis)
       EXTERNAL        cdiEncodeParam
 
+!
+!  date format:  YYYYMMDD
+!
+!
+!  time format:    hhmmss
+!
 !                     cdiDecodeDate
 !                                    (INTEGER         date,
 !                                     INTEGER         year,
