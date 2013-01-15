@@ -36,7 +36,7 @@ extern void arrayDestroy ( void );
 static struct
 {
   size_t size;
-  unsigned char *buffer, *head;
+  unsigned char *buffer;
   int currentRecord, dictSize;
 } *rxWin = NULL;
 
@@ -147,10 +147,7 @@ static
   collDefBufferSizes ();
 
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
-    {
-      rxWin[modelID].buffer = xmalloc(rxWin[modelID].size);
-      rxWin[modelID].head = rxWin[modelID].buffer;
-    }
+    rxWin[modelID].buffer = xmalloc(rxWin[modelID].size);
 
   xdebug("%s", "created mpi_win, allocated getBuffer");
 }
@@ -717,7 +714,6 @@ void clearModelWinBuffer(int modelID)
             rxWin[modelID].size > 0 &&
             rxWin[modelID].size <= MAXWINBUFFERSIZE );
   memset(rxWin[modelID].buffer, 0, rxWin[modelID].size);
-  rxWin[modelID].head = rxWin[modelID].buffer;
 }
 
 
