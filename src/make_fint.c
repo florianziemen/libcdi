@@ -31,12 +31,6 @@ int doccmp(const void *s1, const void *s2)
   return (strcmp(x->fname, y->fname));
 }
 
-int strcompare(const char **s1, const char **s2)
-{
-  printf(">%s< >%s<\n", *s1, *s2);
-  return (strcmp(*s1, *s2));
-}
-
 void doctotex(FILE *fp, Docu *doc, size_t ndoc)
 {
   size_t i, k;
@@ -188,15 +182,6 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
       date_and_time = localtime(&date_and_time_in_sec);
       (void) strftime(timestr, sizeof(timestr), "%B %Y", date_and_time);
     }
-
-  /*
-  for ( i = 0; i < 8; i++ ) strsort[i] = funArgSym[i].cname;
-  for ( i = 0; i < 8; i++ ) printf("%d %d >%s<\n", i, &strsort[i], strsort[i]);
-  qsort(strsort, 8, sizeof(char *), strcompare);
-  for ( i = 0; i < 8; i++ ) printf("%d %d >%s<\n", i, &strsort[i], strsort[i]);
-
-  return;
-  */
 
   fpin = fopen(fname, "r");
   if ( fpin == NULL ) { perror(fname); return; }
