@@ -97,11 +97,8 @@ int vlistvarNewEntry(int vlistID)
     }
   else
     {
-      while ( varID < vlistvarSize )
-	{
-	  if ( ! vlistvar[varID].isUsed ) break;
-	  varID++;
-	}
+      while (varID < vlistvarSize && vlistvar[varID].isUsed)
+        ++varID;
     }
   /*
     If the table overflows, double its size.
