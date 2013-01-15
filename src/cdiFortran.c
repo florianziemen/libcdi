@@ -70,13 +70,13 @@
 FCALLSCSUB0 (pioEndDef, PIOENDDEF, pioenddef)
 FCALLSCSUB0 (pioEndTimestepping, PIOENDTIMESTEPPING, pioendtimestepping)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
-static int pioInit_fwrap(int commSuper, int nProcsIO, int IOMode, int nNamespaces, int * hasLocalFile)
+static int pioInit_fwrap(int commSuper, int nProcsIO, int IOMode, int nNamespaces, int * hasLocalFile, float partInflate)
 {
   MPI_Comm v;
-  v = pioInit(MPI_Comm_f2c(commSuper),  nProcsIO,  IOMode,  nNamespaces,  hasLocalFile);
+  v = pioInit(MPI_Comm_f2c(commSuper),  nProcsIO,  IOMode,  nNamespaces,  hasLocalFile,  partInflate);
   return MPI_Comm_c2f(v);
 }
-FCALLSCFUN5 (INT, pioInit_fwrap, PIOINIT, pioinit, INT, INT, INT, INT, PINT)
+FCALLSCFUN6 (INT, pioInit_fwrap, PIOINIT, pioinit, INT, INT, INT, INT, PINT, FLOAT)
 FCALLSCFUN2 (INT, pioInqVarDecoChunk, PIOINQVARDECOCHUNK, pioinqvardecochunk, INT, INT)
 FCALLSCFUN2 (INT, pioInqVarDecoOff, PIOINQVARDECOOFF, pioinqvardecooff, INT, INT)
 FCALLSCSUB1 (pioNamespaceSetActive, PIONAMESPACESETACTIVE, pionamespacesetactive, INT)

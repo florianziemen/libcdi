@@ -223,7 +223,7 @@ void     pioEndTimestepping    ( void );
 void     pioFinalize           ( void );
 /*      pioInit: initialize I/O server processes and communication */
 MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode, int nNamespaces,
-                 int *hasLocalFile);
+                 int *hasLocalFile, float partInflate);
 int      pioInqVarDecoChunk    ( int, int );
 int      pioInqVarDecoOff      ( int, int );
 void     pioNamespaceSetActive ( int );

@@ -8,6 +8,7 @@
 #ifdef USE_MPI
 
 #include <mpi.h>
+#include <yaxt.h>
 
 typedef enum
   {
@@ -48,6 +49,7 @@ enum
   STREAMDEFVLIST = -2,
   STREAMCLOSE = -3,
   HEADERSIZEMARKER = -nFuncs - 1,
+  PARTDESCMARKER = -nFuncs - 2,
 };
 enum { MAXDATAFILENAME = 256, MINFUNCID = STREAMCLOSE, MAXFUNCID = STREAMOPEN };
 extern char * funcMap[nFuncs];
@@ -80,11 +82,33 @@ struct funcCallDesc
   } funcArgs;
 };
 
+/* Describes offset and ID of serialized partition descriptor.
+ * partDescMarker == PARTDESCMARKER, always. */
+struct partDescRecord
+{
+  int partDescMarker, offset;
+  Xt_uid uid;
+};
+
 union winHeaderEntry
 {
   struct headerSize headerSize;
   struct dataRecord dataRecord;
   struct funcCallDesc funcCall;
+  struct partDescRecord partDesc;
+};
+
+/* round size to next multiple of factor */
+static inline size_t
+roundUpToMultiple(size_t size, size_t factor)
+{
+  return (size + factor - 1)/factor * factor;
+}
+
+enum
+{
+  /* align window base addresses and sizes to this value */
+  PIO_WIN_ALIGN = sizeof (double),
 };
 
 #endif

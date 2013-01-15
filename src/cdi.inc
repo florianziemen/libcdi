@@ -366,7 +366,8 @@
 !                                     INTEGER         nProcsIO,
 !                                     INTEGER         IOMode,
 !                                     INTEGER         nNamespaces,
-!                                     INTEGER         hasLocalFile)
+!                                     INTEGER         hasLocalFile,
+!                                     REAL            partInflate)
       EXTERNAL        pioInit
 
       INTEGER         pioInqVarDecoChunk

@@ -31,6 +31,11 @@
 
 #include <string.h>
 
+#ifdef HAVE_YAXT
+#include <yaxt.h>
+#endif
+
+
 #define  MAX_FNAMES  3
 
 extern resOps streamOps;
@@ -614,7 +619,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
   Record *record = NULL;
   stream_t *streamptr = NULL;
   int hasLocalFile = namespaceHasLocalFile ( namespaceGetActive ());
-#if USE_MPI && ! defined (HAVE_PARALLEL_NC4)
+#if defined (USE_MPI) && ! defined (HAVE_PARALLEL_NC4)
   int rank;
 #endif
 
@@ -1772,6 +1777,39 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 {
   stream_write_var(streamID, varID, MEMTYPE_DOUBLE, data, nmiss);
 }
+
+#if defined USE_MPI && defined HAVE_YAXT
+void
+streamWriteVarPart(int streamID, int varID, int memtype, const void *data,
+                   int nmiss, Xt_idxlist partDesc)
+{
+  int filetype;
+  stream_t *streamptr;
+
+  if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
+
+  check_parg(data);
+
+  if (namespaceHasLocalFile(namespaceGetActive ()))
+      xabort("local part writing is unsupported!");
+
+  switch (namespaceInqResStatus())
+    {
+    case STAGE_DEFINITION:
+      xabort("DEFINITION STAGE: PARALLEL WRITING NOT POSSIBLE.");
+      break;
+    case STAGE_TIMELOOP:
+      pioBufferPartData(streamID, varID, data, nmiss, partDesc);
+      return;
+    case STAGE_CLEANUP:
+      xabort("CLEANUP STAGE: PARALLEL WRITING NOT POSSIBLE.");
+      break;
+    default:
+      xabort("INTERNAL ERROR");
+    }
+}
+
+#endif
 
 /*
 @Function  streamWriteVarF

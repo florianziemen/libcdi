@@ -9,6 +9,7 @@
 
 #ifdef USE_MPI
 #include <mpi.h>
+#include <yaxt.h>
 #endif
 
 #include "cdi.h"
@@ -24,6 +25,8 @@
 #include "resource_handle.h"
 #include "stream_int.h"
 #include "vlist.h"
+
+
 extern resOps streamOps;
 
 
@@ -34,12 +37,13 @@ static struct rdmaWin
   MPI_Win win;
   int postSet, refuseFuncCall;
   MPI_Group ioGroup;
-  int dictSize, dictDataUsed, dictRPCUsed;
+  int dictSize, dictDataUsed, dictRPCUsed, dict;
 } *txWin = NULL;
 
 
 char * funcMap[nFuncs] = {"streamOpen", "streamDefVlist", "streamClose" };
 
+float cdiPIOpartInflate_;
 
 /****************************************************/
 
@@ -360,7 +364,7 @@ static void
 modelWinDefBufferSizes(void)
 {
   int collID, nstreams, * streamIndexList, streamNo, nvars, varID;
-  int collIDchunk = 0, sumWinBufferSize = 0;
+  int sumWinBufferSize = 0;
   int nProcsColl  = commInqNProcsColl ();
   int rankGlob    = commInqRankGlob ();
   int rankModel   = commInqRankModel ();
@@ -383,12 +387,19 @@ modelWinDefBufferSizes(void)
       for ( varID = 0; varID < nvars; varID++ )
         {
           collID = CDI_UNDEFID;
-          collID = commRankGlob2CollID ( vlistInqVarIOrank ( vlistID, varID ));
-          collIDchunk = vlistInqVarDecoChunk ( vlistID, varID, rankModel );
+          collID = cdiPIOpartInflate_
+            * commRankGlob2CollID(vlistInqVarIOrank(vlistID, varID));
+          int collIDchunk = vlistInqVarDecoChunk ( vlistID, varID, rankModel );
           xassert ( collID != CDI_UNDEFID && collIDchunk > 0 );
-          ++(collIndex[collID].numDataRecords);
-          txWin[collID].size += collIDchunk * sizeof (double) +
-            sizeof (union winHeaderEntry);
+          collIndex[collID].numDataRecords += 2;
+          txWin[collID].size += (size_t)collIDchunk * sizeof (double)
+            /* re-align chunks to multiple of double size */
+            + sizeof (double) - 1
+            /* one header for data record, one for corresponding part
+             * descriptor*/
+            + 2 * sizeof (union winHeaderEntry)
+            /* FIXME: heuristic for size of packed Xt_idxlist */
+            + sizeof (Xt_int) * collIDchunk * 3;
         }
 
       // memory required for the 3 function calls streamOpen, streamDefVlist, streamClose
@@ -409,7 +420,10 @@ modelWinDefBufferSizes(void)
       txWin[collID].dictSize = numRecords;
       txWin[collID].dictDataUsed = 1;
       txWin[collID].dictRPCUsed = 0;
+      /* account for size header */
       txWin[collID].size += sizeof (union winHeaderEntry);
+      txWin[collID].size = roundUpToMultiple(txWin[collID].size,
+                                             PIO_WIN_ALIGN);
       sumWinBufferSize += txWin[collID].size;
     }
   free(collIndex);
@@ -491,10 +505,47 @@ modelWinEnqueue(int collID,
   if (header.dataRecord.streamID > 0)
     {
       targetEntry = (txWin[collID].dictDataUsed)++;
-      header.dataRecord.offset
-        = (int)(txWin[collID].head - txWin[collID].buffer);
-      memcpy(txWin[collID].head, data, size);
-      txWin[collID].head += size;
+      int offset = header.dataRecord.offset
+        = (int)roundUpToMultiple(txWin[collID].head - txWin[collID].buffer,
+                                 sizeof (double));
+      memcpy(txWin[collID].buffer + offset, data, size);
+      txWin[collID].head = txWin[collID].buffer + offset + size;
+    }
+  else if (header.partDesc.partDescMarker == PARTDESCMARKER)
+    {
+      targetEntry = (txWin[collID].dictDataUsed)++;
+      Xt_uid uid = header.partDesc.uid;
+      int offset = -1;
+      /* search if same uid entry has already been enqueued */
+      for (int entry = 2; entry < targetEntry; entry += 2)
+        {
+          xassert(winDict[entry].partDesc.partDescMarker
+                  == PARTDESCMARKER);
+          if (winDict[entry].partDesc.uid == uid)
+            {
+              offset = winDict[entry].partDesc.offset;
+              break;
+            }
+        }
+      if (offset == -1)
+        {
+          /* not yet used partition descriptor, serialize at
+           * current position */
+          int position = 0;
+          MPI_Comm comm = commInqCommsIO(collID);
+          header.partDesc.offset
+            = (int)(txWin[collID].head - txWin[collID].buffer);
+          size_t size = xt_idxlist_get_pack_size((Xt_idxlist)data, comm);
+          size_t remaining_size = txWin[collID].size
+            - (txWin[collID].head - txWin[collID].buffer);
+          xassert(size <= remaining_size);
+          xt_idxlist_pack((Xt_idxlist)data, txWin[collID].head,
+                          (int)remaining_size, &position, comm);
+          txWin[collID].head += position;
+        }
+      else
+        /* duplicate entries are copied only once per timestep */
+        header.partDesc.offset = offset;
     }
   else
     {
@@ -510,17 +561,31 @@ modelWinEnqueue(int collID,
   winDict[targetEntry] = header;
 }
 
-void pioBufferData ( const int streamID, const int varID, const double *data, int nmiss )
+void pioBufferData(int streamID, int varID,
+                   const double *data, int nmiss)
 {
-  int chunk, vlistID, collID = CDI_UNDEFID;
   int rankModel = commInqRankModel ();
+
+  int vlistID = streamInqVlist(streamID);
+  int chunk = vlistInqVarDecoChunk(vlistID, varID, rankModel);
+  int start = pioInqVarDecoOff(vlistID, varID);
+
+  struct Xt_stripe stripe = { .start = start, .nstrides = chunk, .stride = 1 };
+  Xt_idxlist partDesc = xt_idxstripes_new(&stripe, 1);
+  pioBufferPartData(streamID, varID, data, nmiss, partDesc);
+  xt_idxlist_delete(partDesc);
+}
+
+void
+pioBufferPartData(int streamID, int varID, const double *data,
+                  int nmiss, Xt_idxlist partDesc)
+{
+  int vlistID, collID = CDI_UNDEFID;
 
   vlistID  = streamInqVlist ( streamID );
   collID   = commRankGlob2CollID ( vlistInqVarIOrank ( vlistID, varID ));
-  chunk    = vlistInqVarDecoChunk ( vlistID, varID, rankModel );
   xassert ( collID         >= 0                    &&
             collID         <  commInqNProcsColl () &&
-            chunk          >= 0                    &&
             txWin != NULL);
 
   if (txWin[collID].postSet)
@@ -530,9 +595,19 @@ void pioBufferData ( const int streamID, const int varID, const double *data, in
       modelWinFlushBuffer ( collID );
     }
 
-  union winHeaderEntry header
+  Xt_int chunk = xt_idxlist_get_num_indices(partDesc);
+  xassert(chunk <= INT_MAX);
+
+  union winHeaderEntry dataHeader
     = { .dataRecord = { streamID, varID, -1, nmiss } };
-  modelWinEnqueue(collID, header, data, chunk * sizeof (data[0]));
+  modelWinEnqueue(collID, dataHeader, data, chunk * sizeof (data[0]));
+  {
+    union winHeaderEntry partHeader
+      = { .partDesc = { .partDescMarker = PARTDESCMARKER,
+                        .uid = xt_idxlist_get_uid(partDesc),
+                        .offset = 0 } };
+    modelWinEnqueue(collID, partHeader, partDesc, 0);
+  }
 
   txWin[collID].refuseFuncCall = 1;
 }
@@ -685,12 +760,15 @@ int pioInqVarDecoOff ( int vlistID, int varID )
 
   @param comm MPI_Communicator of all calling PEs
   @param nIOP number of I/O PEs
+  @param partInflate allow for array partitions on comute
+  PE that are at most sized \f$ partInflate * \lceil arraySize /
+  numComputePEs \rceil \f$
   @return int indicating wether the calling PE is a calcutator (1) or not (0)
 */
 
 MPI_Comm
 pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
-        int nNamespaces, int * hasLocalFile)
+        int nNamespaces, int * hasLocalFile, float partInflate)
 {
 #ifdef USE_MPI
   int sizeGlob;
@@ -714,6 +792,9 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
   commDefNProcsIO ( nProcsIO );
   commDefIOMode   ( IOMode, PIO_MAXIOMODE, PIO_MINIOMODEWITHSPECIALPROCS );
   commDefCommPio  ();
+
+  xassert(partInflate >= 1.0);
+  cdiPIOpartInflate_ = partInflate;
 
   // JUST FOR TEST CASES WITH ONLY ONE MPI TASK
   if ( commInqSizeGlob () == 1 )
@@ -859,10 +940,6 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
           txWin[collID].postSet = 0;
           modelWinFlushBuffer ( collID );
         }
-      /*
-       * modelWinBufferPutAtEnd ( __func__, collID, &tokenEnd,
-       *                          sizeof ( tokenEnd ));
-       */
       union winHeaderEntry header
         = { .headerSize = { .sizeID = HEADERSIZEMARKER,
                             .numDataEntries = txWin[collID].dictDataUsed,
