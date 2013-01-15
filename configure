@@ -661,10 +661,10 @@ USE_MPI
 USE_MPI_FALSE
 USE_MPI_TRUE
 HAVE_PARALLEL_NC4
-YAXT_LIBS
-YAXT_CFLAGS
 PPM_CORE_LIBS
 PPM_CORE_CFLAGS
+YAXT_LIBS
+YAXT_CFLAGS
 PKG_CONFIG_LIBDIR
 PKG_CONFIG_PATH
 PKG_CONFIG
@@ -894,10 +894,10 @@ CXXCPP
 PKG_CONFIG
 PKG_CONFIG_PATH
 PKG_CONFIG_LIBDIR
-PPM_CORE_CFLAGS
-PPM_CORE_LIBS
 YAXT_CFLAGS
 YAXT_LIBS
+PPM_CORE_CFLAGS
+PPM_CORE_LIBS
 FCMODEXT'
 
 
@@ -1603,12 +1603,12 @@ Some influential environment variables:
               directories to add to pkg-config's search path
   PKG_CONFIG_LIBDIR
               path overriding pkg-config's built-in search path
+  YAXT_CFLAGS C compiler flags for YAXT, overriding pkg-config
+  YAXT_LIBS   linker flags for YAXT, overriding pkg-config
   PPM_CORE_CFLAGS
               C compiler flags for PPM_CORE, overriding pkg-config
   PPM_CORE_LIBS
               linker flags for PPM_CORE, overriding pkg-config
-  YAXT_CFLAGS C compiler flags for YAXT, overriding pkg-config
-  YAXT_LIBS   linker flags for YAXT, overriding pkg-config
   FCMODEXT    file extension of compiled Fortran module files
 
 Use these variables to override the choices made by `configure' or to help
@@ -26636,6 +26636,83 @@ done
    if test x$MPI_LAUNCH = x; then :
 
 fi
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for YAXT" >&5
+$as_echo_n "checking for YAXT... " >&6; }
+
+if test -n "$YAXT_CFLAGS"; then
+    pkg_cv_YAXT_CFLAGS="$YAXT_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"yaxt\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "yaxt") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_YAXT_CFLAGS=`$PKG_CONFIG --cflags "yaxt" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$YAXT_LIBS"; then
+    pkg_cv_YAXT_LIBS="$YAXT_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"yaxt\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "yaxt") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_YAXT_LIBS=`$PKG_CONFIG --libs "yaxt" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        YAXT_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "yaxt" 2>&1`
+        else
+	        YAXT_PKG_ERRORS=`$PKG_CONFIG --print-errors "yaxt" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$YAXT_PKG_ERRORS" >&5
+
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "Required yaxt library unavailable.
+See \`config.log' for more details" "$LINENO" 5; }
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "Required yaxt library unavailable.
+See \`config.log' for more details" "$LINENO" 5; }
+else
+	YAXT_CFLAGS=$pkg_cv_YAXT_CFLAGS
+	YAXT_LIBS=$pkg_cv_YAXT_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_YAXT /**/" >>confdefs.h
+
+fi
    if test x"$ENABLE_NC4" = xyes; then :
   for ac_header in netcdf_par.h
 do :
@@ -26745,81 +26822,8 @@ $as_echo "#define HAVE_PPM_CORE /**/" >>confdefs.h
 
 fi
 
-pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for YAXT" >&5
-$as_echo_n "checking for YAXT... " >&6; }
-
-if test -n "$YAXT_CFLAGS"; then
-    pkg_cv_YAXT_CFLAGS="$YAXT_CFLAGS"
- elif test -n "$PKG_CONFIG"; then
-    if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"yaxt\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "yaxt") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-  pkg_cv_YAXT_CFLAGS=`$PKG_CONFIG --cflags "yaxt" 2>/dev/null`
-else
-  pkg_failed=yes
 fi
- else
-    pkg_failed=untried
-fi
-if test -n "$YAXT_LIBS"; then
-    pkg_cv_YAXT_LIBS="$YAXT_LIBS"
- elif test -n "$PKG_CONFIG"; then
-    if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"yaxt\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "yaxt") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-  pkg_cv_YAXT_LIBS=`$PKG_CONFIG --libs "yaxt" 2>/dev/null`
-else
-  pkg_failed=yes
-fi
- else
-    pkg_failed=untried
-fi
-
-
-
-if test $pkg_failed = yes; then
-   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-
-if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
-        _pkg_short_errors_supported=yes
-else
-        _pkg_short_errors_supported=no
-fi
-        if test $_pkg_short_errors_supported = yes; then
-	        YAXT_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "yaxt" 2>&1`
-        else
-	        YAXT_PKG_ERRORS=`$PKG_CONFIG --print-errors "yaxt" 2>&1`
-        fi
-	# Put the nasty error message in config.log where it belongs
-	echo "$YAXT_PKG_ERRORS" >&5
-
-	enable_yaxt=no
-elif test $pkg_failed = untried; then
-     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-	enable_yaxt=no
-else
-	YAXT_CFLAGS=$pkg_cv_YAXT_CFLAGS
-	YAXT_LIBS=$pkg_cv_YAXT_LIBS
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-	enable_yaxt=yes
-
-$as_echo "#define HAVE_YAXT /**/" >>confdefs.h
-
-
-fi
-
-fi
-                  if test x$enable_ppm != xyes -o x$enable_yaxt = xno; then :
+                  if test x$enable_ppm != xyes; then :
   HAVE_PARALLEL_NC4=0
 fi
 

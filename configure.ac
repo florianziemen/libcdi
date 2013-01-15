@@ -96,6 +96,9 @@ AS_IF([test x"$USE_MPI" = xyes],
   [AC_DEFINE([USE_MPI],[1],[parallel I/O requested and available])
    AC_PATH_PROGS([MPI_LAUNCH],[mpirun mpiexec],[])
    AS_IF([test x$MPI_LAUNCH = x],[])
+   PKG_CHECK_MODULES([YAXT],[yaxt],
+     [AC_DEFINE([HAVE_YAXT],,[yaxt library is available])],
+     [AC_MSG_FAILURE([Required yaxt library unavailable.])])
    AS_IF([test x"$ENABLE_NC4" = xyes],
      [AC_CHECK_HEADERS([netcdf_par.h],
         [AC_CHECK_DECL([MPI_Bcast],
@@ -118,15 +121,10 @@ AS_IF([test x"$USE_MPI" = xyes],
               [ScalES PPM C core library is available])
            ],
            [enable_ppm=no])
-         PKG_CHECK_MODULES([YAXT],[yaxt],
-           [enable_yaxt=yes
-            AC_DEFINE([HAVE_YAXT],,
-              [yaxt library is available])
-           ],[enable_yaxt=no])
         ])
       dnl if not both scales-ppm and yaxt are available, netcdf can only be
       dnl used in serial mode
-      AS_IF([test x$enable_ppm != xyes -o x$enable_yaxt = xno],
+      AS_IF([test x$enable_ppm != xyes],
         [HAVE_PARALLEL_NC4=0])
      ])
   ],
