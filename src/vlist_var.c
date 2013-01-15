@@ -1833,10 +1833,7 @@ void vlistDefVarDeco ( int vlistID, int varID, int decoSize, deco_t * deco )
 
 int vlistInqVarDecoChunk ( int vlistID, int varID, int rankModel  )
 {
-  vlist_t *vlistptr;
   int iret = CDI_UNDEFID;
-
-  vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
 
@@ -1844,14 +1841,16 @@ int vlistInqVarDecoChunk ( int vlistID, int varID, int rankModel  )
   {
     deco_t * deco;
     int i, decoSize = 0;
+    vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
     xassert ( vlistptr->vars[varID].deco != NULL &&
-             vlistptr->vars[varID].decoSize != CDI_UNDEFID ); 
-    
+             vlistptr->vars[varID].decoSize != CDI_UNDEFID );
+
     deco  = vlistptr->vars[varID].deco;
     decoSize = vlistptr->vars[varID].decoSize;
     if ( decoSize && deco )
       for ( i = 0; i < decoSize; i++ )
-        if ( deco[i].rank == rankModel ) 
+        if ( deco[i].rank == rankModel )
           {
             iret = deco[i].chunk;
             break;
@@ -1868,10 +1867,7 @@ int vlistInqVarDecoChunk ( int vlistID, int varID, int rankModel  )
 
 int vlistInqVarDecoOff ( int vlistID, int varID, int rankModel  )
 {
-  vlist_t *vlistptr;
   int iret = CDI_UNDEFID;
-
-  vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
 
@@ -1879,15 +1875,15 @@ int vlistInqVarDecoOff ( int vlistID, int varID, int rankModel  )
   {
     deco_t * deco;
     int i, decoSize = 0;
-    
+    vlist_t *vlistptr = vlist_to_pointer(vlistID);
     xassert ( vlistptr->vars[varID].deco != NULL &&
              vlistptr->vars[varID].decoSize != CDI_UNDEFID );
-    
+
     deco  = vlistptr->vars[varID].deco;
     decoSize = vlistptr->vars[varID].decoSize;
     if ( decoSize && deco )
       for ( i = 0; i < decoSize; i++ )
-        if ( deco[i].rank == rankModel ) 
+        if ( deco[i].rank == rankModel )
           {
             iret = deco[i].offset;
             break;
@@ -1897,7 +1893,7 @@ int vlistInqVarDecoOff ( int vlistID, int varID, int rankModel  )
   iret = 0;
 #endif
 
-  xassert (  iret != CDI_UNDEFID );  
+  xassert (  iret != CDI_UNDEFID );
   return iret;
 }
 
