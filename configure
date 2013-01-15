@@ -26632,10 +26632,72 @@ fi
 
   test -n "$MPI_LAUNCH" && break
 done
+test -n "$MPI_LAUNCH" || MPI_LAUNCH="true"
 
-   if test x$MPI_LAUNCH = x; then :
+   if test x"$cross_compiling" = xno; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $MPI_LAUNCH works" >&5
+$as_echo_n "checking if $MPI_LAUNCH works... " >&6; }
+      saved_CFLAGS=$CFLAGS
+      saved_LIBS=$LIBS
+      CFLAGS="$CFLAGS $MPI_C_INCLUDE"
+      LIBS="$LIBS $MPI_C_LIB"
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <mpi.h>
+
+#define xmpi(ret)           \\
+  do {                      \\
+    if (ret != MPI_SUCCESS) \\
+      exit(EXIT_FAILURE);   \\
+  } while (0)
+
+int
+main(int argc, char **argv)
+{
+  xmpi(MPI_Init(&argc, &argv));
+  char *numarg = argv[1];
+  int cmdnum = atoi(numarg);
+  int procnum = 1;
+  xmpi(MPI_Allreduce(MPI_IN_PLACE, &procnum, 1, MPI_INT, MPI_SUM,
+                     MPI_COMM_WORLD));
+  xmpi(MPI_Finalize());
+  return (procnum == cmdnum)?EXIT_SUCCESS:EXIT_FAILURE;
+}
+
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  if $MPI_LAUNCH -n 4 ./conftest$EXEEXT 4; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+             { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "mpirun doesn't work
+See \`config.log' for more details" "$LINENO" 5; }
+fi
+else
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "Cannot compile simple MPI program
+See \`config.log' for more details" "$LINENO" 5; }
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+      CFLAGS=$saved_CFLAGS
+      LIBS=$saved_LIBS
 
 fi
+   if test "x$MPI_LAUNCH" = xtrue; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: MPI launch command unavailable" >&5
+$as_echo "$as_me: WARNING: MPI launch command unavailable" >&2;}
+fi
+
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for YAXT" >&5
