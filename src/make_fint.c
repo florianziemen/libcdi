@@ -1,14 +1,31 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <time.h>
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 700
+#endif
+
+#define _GNU_SOURCE // getline()
 
 #include "config.h"
 
+#include <ctype.h>
+#include <regex.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <time.h>
+
+#ifndef HAVE_GETLINE
+#include "getline.c"
+#endif
+
+#ifndef VERSION
+#define VERSION "1.0.0"
+#endif
+
+
 typedef struct
 {
-  int naline;
+  size_t naline;
   char *fname;
   char *aline[99];
   char *text;
@@ -16,7 +33,7 @@ typedef struct
 Docu;
 
 Docu cdoc[9999], fdoc[9999];
-int   ncdoc = 0, nfdoc = 0;
+size_t ncdoc = 0, nfdoc = 0;
 
 int doccmp(const void *s1, const void *s2)
 {
@@ -32,9 +49,9 @@ int strcompare(const char **s1, const char **s2)
   return (strcmp(*s1, *s2));
 }
 
-void doctotex(FILE *fp, Docu *doc, int ndoc)
+void doctotex(FILE *fp, Docu *doc, size_t ndoc)
 {
-  int i, k;
+  size_t i, k;
 
   for ( i = 0; i < ndoc; i++ )
     {
@@ -47,9 +64,9 @@ void doctotex(FILE *fp, Docu *doc, int ndoc)
     }
 }
 
-void doctotxt(FILE *fp, Docu *doc, int ndoc)
+void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
 {
-  int i, k;
+  size_t i, k;
 
   for ( i = 0; i < ndoc; i++ )
     {
@@ -60,30 +77,74 @@ void doctotxt(FILE *fp, Docu *doc, int ndoc)
     }
 }
 
+enum {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISINTP, ISINTV, ISINTVV, ISREALP, ISDOUBLEP, ISSTRING, ISSTRINGP, NUM_KNOWN_ARG_TYPES};
+
+struct symbol {
+  const char *f77name, *cfint, *cname, *parseRE;
+  size_t nameMatch;
+  regex_t preg;
+};
+
+/* C symbol names */
+#define SYMRE "([A-Za-z_][A-Za-z_0-9]*)"
+/* white-space */
+#define WS "[[:blank:]\n]"
+#define NWS "[^[:blank:]\n]"
+static struct symbol funArgSym[] = {
+  { "",                "",        "void",     "^"WS"*void"WS"*)", 0 },
+  { "CHARACTER(80)",   "STRING",  "char *",   "^"WS"*const"WS"+char"WS"+\\*"SYMRE WS"*\\(", 1 },
+  { "INTEGER",         "INT",     "int",      "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*[,\\)]", 3 },
+  { "REAL",            "FLOAT",   "float",    "^"WS"*(const"WS"+)?float"WS"+"SYMRE"?"WS"*[,\\)]", 2 },
+  { "DOUBLEPRECISION", "DOUBLE",  "double",   "^"WS"*(const"WS"+)?double"WS"+"SYMRE"?"WS"*[,\\)]", 2 },
+  { "INTEGER",         "PINT",    "int *",    "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2 },
+  { "INTEGER",         "INTV",    "int[]",    "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"WS"*[,\\)]", 3 },
+  { "INTEGER",         "INTVV",    "int[][]", "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"WS"*\\[[^]]*\\]"WS"*[,\\)]", 3 },
+  { "REAL",            "PFLOAT",  "float *",  "^"WS"*(const"WS"+)?float"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2 },
+  { "DOUBLEPRECISION", "PDOUBLE", "double *", "^"WS"*(const"WS"+)?double"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2 },
+  { "CHARACTER*(*)",   "STRING",  "char *",   "^"WS"*const"WS"+char"WS"+\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1 },
+  { "CHARACTER*(*)",   "PSTRING", "char *",   "^"WS"*char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 1 },
+};
+
+static struct symbol funRet[] = {
+  { "",                "",        "void",            "void"WS"+"SYMRE WS"*\\(", 1 },
+  { "CHARACTER",       "STRING",  "(const) char *",  "(const"WS"+)?char"WS"+\\*"WS"*"SYMRE WS"*\\(", 2 },
+  { "INTEGER",         "INT",     "int",             "(const"WS"+)?int"WS"+"SYMRE WS"*\\(", 2 },
+  { "REAL",            "FLOAT",   "float",           "(const"WS"+)?float"WS"+"SYMRE WS"*\\(", 2 },
+  { "DOUBLEPRECISION", "DOUBLE",  "double",          "(const"WS"+)?double"WS"+"SYMRE WS"*\\(", 2 },
+};
+
+enum { NUM_RET_TYPES = sizeof (funRet) / sizeof (funRet[0]) };
+enum decl { UNKNOWN_DECL, FUNC_DECL, PARAM_DECL };
+
+enum {
+  MAX_FUNC_ARGS = 200,
+};
+
 void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 {
   FILE *fpin, *fpinc, *fpint;
   FILE *fp;
-  char line[1024], *pline;
-  char sname[128], *parname, *comment;
+  char *line = NULL, *pline;
+  size_t lineBufSize = 0;
+  char sname[128], *parname;
   char xname[128], xdes[128];
+  xname[0] = 0;
   int parvalue;
   int functype;
-  int i, ii;
   int lineno = 0;
-  size_t linelen, len;
-  enum              {ISVOID, ISSTRING,        ISSTRINGP,       ISINT,     ISINTP,    ISREAL,  ISREALP,   ISDOUBLE, ISDOUBLEP, ISCONSTSTRING};
-  char *f77name[] = {"",     "CHARACTER*(*)", "CHARACTER*(*)", "INTEGER", "INTEGER", "REAL",  "REAL",    "DOUBLEPRECISION", "DOUBLEPRECISION", "CHARACTER(80)"};
-  char *cfint[] =   {"",     "STRING",        "PSTRING",       "INT",     "PINT",    "FLOAT", "PFLOAT",  "DOUBLE", "PDOUBLE",  "STRING"};
-  char *cname[] =   {"void", "char *",        "char *",        "int",     "int *",   "float", "float *", "double", "double *", "char *"};
+  size_t len;
+
   char funcname[128];
-  char *funcargname[20];
-  int  funcargtype[20];
-  int  funcargc;
-  char *strsort[99999];
+  regmatch_t funcargfull[MAX_FUNC_ARGS];
+  regmatch_t funcargname[MAX_FUNC_ARGS];
+  int  funcargtype[MAX_FUNC_ARGS];
+  ssize_t funcargc;
+  /* char *strsort[99999]; */
   char timestr[30];
   time_t date_and_time_in_sec;
   struct tm *date_and_time;
+  regmatch_t *reMatch = NULL;
+  size_t maxMatch = 0;
 
   date_and_time_in_sec = time(NULL);
   timestr[0] = 0;
@@ -95,7 +156,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
     }
 
   /*
-  for ( i = 0; i < 8; i++ ) strsort[i] = cname[i];
+  for ( i = 0; i < 8; i++ ) strsort[i] = funArgSym[i].cname;
   for ( i = 0; i < 8; i++ ) printf("%d %d >%s<\n", i, &strsort[i], strsort[i]);
   qsort(strsort, 8, sizeof(char *), strcompare);
   for ( i = 0; i < 8; i++ ) printf("%d %d >%s<\n", i, &strsort[i], strsort[i]);
@@ -112,6 +173,80 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   fpint = fopen(fnameint, "w");
   if ( fpint == NULL ) { perror(fnameint); return; }
 
+  /* complete symbol table data */
+  for (size_t argt = 0; argt < NUM_KNOWN_ARG_TYPES; ++argt)
+    {
+      int errcode;
+      if ((errcode = regcomp(&funArgSym[argt].preg, funArgSym[argt].parseRE,
+                             REG_EXTENDED)))
+        {
+          line = realloc(line, lineBufSize = 1024);
+          if (line)
+            {
+              regerror(errcode, &funArgSym[argt].preg, line, lineBufSize);
+              fprintf(stderr, "Error compiling regular expression: %s: %s\n",
+                      funArgSym[argt].parseRE, line);
+            }
+          exit(EXIT_FAILURE);
+        }
+      if (funArgSym[argt].nameMatch > maxMatch)
+        maxMatch = funArgSym[argt].nameMatch;
+    }
+  for (size_t retType = 0; retType < NUM_RET_TYPES; ++retType)
+    {
+      int errcode;
+      if ((errcode = regcomp(&funRet[retType].preg, funRet[retType].parseRE,
+                             REG_EXTENDED)))
+        {
+          line = realloc(line, lineBufSize = 1024);
+          if (line)
+            {
+              regerror(errcode, &funRet[retType].preg, line, lineBufSize);
+              fprintf(stderr, "Error compiling regular expression: %s: %s\n",
+                      funRet[retType].parseRE, line);
+            }
+          exit(EXIT_FAILURE);
+        }
+      if (funArgSym[retType].nameMatch > maxMatch)
+        maxMatch = funArgSym[retType].nameMatch;
+    }
+  ++maxMatch;
+  reMatch = malloc((size_t)maxMatch * sizeof (reMatch[0]));
+  /* compile comment regular expression */
+  regex_t commentRE;
+  {
+    int errcode;
+    char commentREString[] = "^"WS"*/\\*"WS"*(.*"NWS")"WS"*\\*/";
+    if ((errcode = regcomp(&commentRE, commentREString, REG_EXTENDED)))
+      {
+        line = realloc(line, lineBufSize = 1024);
+        if (line)
+          {
+            regerror(errcode, &commentRE, line, lineBufSize);
+            fprintf(stderr, "Error compiling regular expression: %s: %s\n",
+                    commentREString, line);
+            exit(EXIT_FAILURE);
+          }
+      }
+  }
+  /* compile documentation comment regular expression */
+  regex_t docCommentRE;
+  {
+    int errcode;
+    char docCommentREString[] = "^"WS"*/\\*"WS"*"SYMRE":"
+      WS"*("NWS".*"NWS")"WS"*\\*/";
+    if ((errcode = regcomp(&docCommentRE, docCommentREString, REG_EXTENDED)))
+      {
+        line = realloc(line, lineBufSize = 1024);
+        if (line)
+          {
+            regerror(errcode, &commentRE, line, lineBufSize);
+            fprintf(stderr, "Error compiling regular expression: %s: %s\n",
+                    docCommentREString, line);
+            exit(EXIT_FAILURE);
+          }
+      }
+  }
   /* fortran include */
 
   fprintf(fpinc, "! This file was automatically generated, don't edit!\n");
@@ -142,177 +277,125 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   fprintf(fpint, "#endif\n");
   fprintf(fpint, "\n");
 
-  while ( fgets(line, 1023, fpin) )
+  ssize_t lineLen;
+  while ((lineLen = getline(&line, &lineBufSize, fpin)) >= 0)
     {
       lineno++;
-      linelen = strlen(line);
-      line[linelen-1] = 0;
-      linelen -= 1;
       functype = ISVOID;
       funcargc = 0;
-      if ( memcmp(line, "int", 3)    == 0 || 
-	   memcmp(line, "void", 4)   == 0 ||
-	   memcmp(line, "char", 4)   == 0 ||
-	   memcmp(line, "const", 5)  == 0 ||
-	   memcmp(line, "double", 6) == 0 )
-	{
-	  /* printf("%s\n", line); */
-	  ii = 0;
-	  for ( i = 0; i < linelen; i++ )
-	    {
-	      if ( isspace((int) line[i]) ) continue;
-	      if ( line[i] == '\n' ) continue;
-	      line[ii++] = line[i];
-	    }
-	  line[ii] = 0;
-	  /* printf("%s\n", line); */
-	  pline = line;
-	  if ( memcmp(line, "int", 3) == 0 )
-	    {
-	      functype = ISINT;
-	      pline += 3;
-	    }
-	  else if ( memcmp(line, "void", 4) == 0 )
-	    {
-	      functype = ISVOID;
-	      pline += 4;
-	    }
-	  else if ( memcmp(line, "double*", 7) == 0 )
-	    {
-	      printf("skip: line %3d double *\n", lineno);
-	      continue;
-	    }
-	  else if ( memcmp(line, "double", 6) == 0 )
-	    {
-	      functype = ISDOUBLE;
-	      pline += 6;
-	    }
-	  else if ( memcmp(line, "float*", 6) == 0 )
-	    {
-	      printf("skip: line %3d float *\n", lineno);
-	      continue;
-	    }
-	  else if ( memcmp(line, "float", 5) == 0 )
-	    {
-	      functype = ISREAL;
-	      pline += 5;
-	    }
-	  else if ( memcmp(line, "char*", 5) == 0 )
-	    {
-	      functype = ISCONSTSTRING;
-	      pline += 5;
-	    }
-	  else if ( memcmp(line, "constchar*", 10) == 0 )
-	    {
-	      functype = ISCONSTSTRING;
-	      pline += 10;
-	    }
-	  else
-	    {
-	      printf("%s not implemented\n", line);
-	      continue;
-	    }
+      pline = line;
+      enum decl declType = UNKNOWN_DECL;
+      do {
+        for (int retType = 0; retType < NUM_RET_TYPES; ++retType)
+          if (!regexec(&funRet[retType].preg, pline, maxMatch, reMatch, 0))
+            {
+              functype = retType;
+              declType = FUNC_DECL;
+              break;
+            }
+        if (declType == UNKNOWN_DECL)
+          break;
+        regmatch_t *nameMatch = reMatch + funRet[functype].nameMatch;
+        printf("Found: %.*s\n",
+               nameMatch->rm_eo - nameMatch->rm_so,
+               pline + nameMatch->rm_so);
+        ssize_t funNameLast = reMatch[0].rm_eo - 1;
+        ssize_t nameLen = nameMatch->rm_eo - nameMatch->rm_so;
+        if ( pline[funNameLast] != '(' )
+          {
+            printf("%s\n>(< not found!", line);
+            return;
+          }
+        memcpy(funcname, pline + nameMatch->rm_so, (size_t)nameLen);
+        funcname[nameLen] = 0;
+        pline += reMatch[0].rm_eo;
+      } while (0);
+      if (declType == FUNC_DECL)
+        {
+	  /*
+           * len = 0;
+	   * while ( isalnum((int) pline[len]) ) len++;
+           * memcpy(funcname, pline, len);
+	   * funcname[len] = 0;
+           */
+	  /* printf("%s\n", funcname); */
+	  /* pline += len; */
+	  /*
+           * if ( *pline != '(' )
+	   *   {
+	   *     printf("%s\n>(< not found!", line);
+	   *     return;
+	   *   }
+	   * pline++;
+           */
 
-	  len = 0;
-	  while ( isalnum((int) pline[len]) ) len++;
-	  memcpy(funcname, pline, len);
-	  funcname[len] = 0;
-	  /* printf("%s\n", funcname);*/
-	  pline += len;
-	  if ( *pline != '(' )
-	    {
-	      printf("%s\n>(< not found!", line);
-	      return;
-	    }
-	  pline++;
-
-	  linelen = strlen(pline);
-	  funcargname[funcargc] = pline;
-	  for ( i = 0; i < linelen; i++ )
-	    {
-	      if ( pline[i] == ',' )
-		{
-		  pline[i] = 0;
-		  funcargc++;
-		  funcargname[funcargc] = &pline[i+1];
-		}
-	      if ( pline[i] == ')' )
-		{
-		  pline[i] = 0;
-		  funcargc++;
-		  break;
-		}
-	    }
+	  funcargname[funcargc].rm_so = (regoff_t)(pline - line);
+          ssize_t i = 0;
+          do {
+            ssize_t restLen = lineLen - (ssize_t)(pline - line);
+            for (; i < restLen; i++ )
+              {
+                if ( pline[i] == ',' )
+                  {
+                    funcargc++;
+                    funcargname[funcargc].rm_so
+                      = (regoff_t)(pline - line + i + 1);
+                  }
+                if ( pline[i] == ')' )
+                  {
+                    funcargc++;
+                    funcargname[funcargc].rm_so
+                      = (regoff_t)(pline - line + i + 1);
+                    break;
+                  }
+              }
+            if (i < restLen)
+              break;
+            char *lineExtension = NULL;
+            size_t extSize = 0, plineOff = (size_t)(pline - line);
+            ssize_t extLen;
+            if ((extLen = getline(&lineExtension, &extSize, fpin)) <= 0)
+              break;
+            if ((size_t)(lineLen + extLen) >= lineBufSize)
+              if (!(line = realloc(line, (size_t)(lineLen + extLen + 1))))
+                exit(EXIT_FAILURE);
+            memcpy(line + lineLen, lineExtension, (size_t)extLen + 1);
+            lineLen += extLen;
+            pline = line + plineOff;
+          } while (1);
 
 	  /*  printf("funcargc = %d\n", funcargc);*/
 
 	  for ( i = 0; i < funcargc; i++ )
 	    {
-	      pline = funcargname[i];
-	      if ( memcmp(pline, "const", 5) == 0 &&
-		   memcmp(pline, "constchar*", 10) != 0 ) pline += 5;
-
-	      if ( memcmp(pline, "void", 4) == 0 )
+	      pline = line + funcargname[i].rm_so;
+              int argtype;
+              regoff_t argStart = (regoff_t)(pline - line);
+              for (argtype = ISVOID;
+                   argtype < NUM_KNOWN_ARG_TYPES;
+                   ++argtype)
+                if (!regexec(&funArgSym[argtype].preg, pline, maxMatch,
+                             reMatch, 0))
+                  {
+                    funcargtype[i] = argtype;
+                    funcargfull[i].rm_so = reMatch[0].rm_so + argStart;
+                    funcargfull[i].rm_eo = reMatch[0].rm_eo + argStart;
+                    regmatch_t *nameMatch = reMatch + funArgSym[argtype].nameMatch;
+                    funcargname[i].rm_so = nameMatch->rm_so + argStart;
+                    funcargname[i].rm_eo = nameMatch->rm_eo + argStart;
+                    break;
+                  }
+              if (argtype == NUM_KNOWN_ARG_TYPES)
 		{
-		  pline += 4;
-		  funcargtype[i] = ISVOID;
-		  funcargname[i] = pline;
-		}
-	      else if ( memcmp(pline, "constchar*", 10) == 0 )
-		{
-		  pline += 10;
-		  funcargtype[i] = ISSTRING;
-		  funcargname[i] = pline;
-		}
-	      else if ( memcmp(pline, "char*", 5) == 0 )
-		{
-		  pline += 5;
-		  funcargtype[i] = ISSTRINGP;
-		  funcargname[i] = pline;
-		}
-	      else if ( memcmp(pline, "int*", 4) == 0 )
-		{
-		  pline += 4;
-		  funcargtype[i] = ISINTP;
-		  funcargname[i] = pline;
-		}
-	      else if ( memcmp(pline, "int", 3) == 0 )
-		{
-		  pline += 3;
-		  funcargtype[i] = ISINT;
-		  funcargname[i] = pline;
-		}
-	      else if ( memcmp(pline, "double*", 7) == 0 )
-		{
-		  pline += 7;
-		  funcargtype[i] = ISDOUBLEP;
-		  funcargname[i] = pline;
-		}
-	      else if ( memcmp(pline, "double", 6) == 0 )
-		{
-		  pline += 6;
-		  funcargtype[i] = ISDOUBLE;
-		  funcargname[i] = pline;
-		}
-	      else if ( memcmp(pline, "float*", 6) == 0 )
-		{
-		  pline += 6;
-		  funcargtype[i] = ISREALP;
-		  funcargname[i] = pline;
-		}
-	      else if ( memcmp(pline, "float", 5) == 0 )
-		{
-		  pline += 5;
-		  funcargtype[i] = ISREAL;
-		  funcargname[i] = pline;
-		}
-	      else 
-		{
-		  printf("%s not implemented\n", funcargname[i]);
+		  printf("%s not implemented\n", line + funcargname[i].rm_so);
 		  break;
 		}
 	    }
-	  if ( i != funcargc ) continue;
+	  if ( i != funcargc )
+            {
+              printf("problem parsing line: %s\n", line);
+              continue;
+            }
 
 	  strcpy(sname, funcname);
 	  len = strlen(sname);
@@ -331,13 +414,13 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	  sname[i] = '_';
 	  len++;
 	  */
-	  
+
 	  /* fortran include */
 
 	  if ( functype == ISVOID )
 	    fprintf(fpinc, "!     %-16s", "");
 	  else
-	    fprintf(fpinc, "      %-16s", f77name[functype]);
+	    fprintf(fpinc, "      %-16s", funArgSym[functype].f77name);
 
           fprintf(fpinc, "%s", sname);
 	  fprintf(fpinc, "\n");
@@ -348,7 +431,9 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 		fprintf(fpinc, "!%36s(", "");
 	      else
 		fprintf(fpinc, ",\n!%36s ", "");
-	      fprintf(fpinc, "%-16s%s", f77name[funcargtype[i]], funcargname[i]);
+	      fprintf(fpinc, "%-16s%.*s", funArgSym[funcargtype[i]].f77name,
+                      (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
+                      line + funcargname[i].rm_so);
 	    }
 	  if ( funcargc )
 	    fprintf(fpinc, ")\n");
@@ -360,35 +445,34 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	    fprintf(fpint, "FCALLSCSUB");
 	  else
 	    fprintf(fpint, "FCALLSCFUN");
-	  fprintf(fpint, "%d ", funcargc);
+	  fprintf(fpint, "%zd ", funcargc);
 	  fprintf(fpint, "(");
 	  if ( functype != ISVOID )
-	    fprintf(fpint, "%s, ", cfint[functype]);
+	    fprintf(fpint, "%s, ", funArgSym[functype].cfint);
 	  fprintf(fpint, "%s, ", funcname);
-	  for ( i = 0; i < len; i++ ) sname[i] = toupper((int) sname[i]);
+	  for (size_t i = 0; i < len; i++ ) sname[i] = (char)toupper((int) sname[i]);
 	  fprintf(fpint, "%s, ", sname);
-	  for ( i = 0; i < len; i++ ) sname[i] = tolower((int) sname[i]);
+	  for (size_t i = 0; i < len; i++ ) sname[i] = (char)tolower((int) sname[i]);
 	  fprintf(fpint, "%s", sname);
-	  for ( i = 0; i < funcargc; i++ )
+	  for (ssize_t i = 0; i < funcargc; i++ )
 	    {
-	      fprintf(fpint, ", %s", cfint[funcargtype[i]]);
-	    } 
+	      fprintf(fpint, ", %s", funArgSym[funcargtype[i]].cfint);
+	    }
 	  fprintf(fpint, ")\n");
 
 
-	  if ( strcmp(funcname, xname) == 0 ) 
+	  if ( strcmp(funcname, xname) == 0 )
 	    {
 	      char xline[128];
-	      char farg[128];
-	      int nch, ncha = 0, nchn;
-	      
+	      int nch;
+
 	      /* C Quick Guide */
 
 	      cdoc[ncdoc].naline = 0;
 	      cdoc[ncdoc].text   = NULL;
 	      cdoc[ncdoc].fname  = strdup(funcname);
 
-	      nch = sprintf(xline, "%s %s (", cname[functype], xname);
+	      nch = sprintf(xline, "%s %s (", funArgSym[functype].cname, xname);
 
 	      if ( (funcargc == 1 && funcargtype[0] == ISVOID) ) funcargc = 0;
 
@@ -396,9 +480,47 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 		{
 		  if ( i ) strcat(xline, ", ");
 
-		  nchn  = sprintf(farg, "%s %s", cname[funcargtype[i]], funcargname[i]);
-		  if ( (strlen(xline)+nchn) > 80 )
+                  /* extract full argument text from match */
+                  char farg[128];
+                  /* - 1 to omit closing paren ) or comma , */
+                  int nchn = snprintf(farg, sizeof (farg), "%.*s",
+                                      (int)(funcargfull[i].rm_eo
+                                            - funcargfull[i].rm_so - 1),
+                                      line + funcargfull[i].rm_so);
+                  if (nchn < 0)
+                    abort();
+                  /* compress white-space */
+                  {
+                    size_t wpos = 0;
+                    size_t i = 0;
+                    /* skip leading white-space */
+                    while (i < (size_t)nchn
+                           && (isblank(farg[i]) || farg[i] == '\n'))
+                      ++i;
+                    /* after the leading white-space the following is
+                     * an alternation of white- and non-white-space
+                     * characters, where sequences of the latter will
+                     * be compressed to a single space */
+                    while (i < (size_t)nchn)
+                      {
+                        /* handle white-space */
+                        while (i < (size_t)nchn
+                               && !(isblank(farg[i]) || farg[i] == '\n'))
+                          farg[wpos++] = farg[i++];
+                        /* skip non-white-space */
+                        size_t wscount = 0;
+                        while (i < (size_t)nchn
+                               && (isblank(farg[i]) || farg[i] == '\n'))
+                          ++i, ++wscount;
+                        if (wscount)
+                          farg[wpos++] = ' ';
+                      }
+                    farg[wpos] = '\0';
+                    nchn = (int)wpos;
+                  }
+		  if ( (strlen(xline)+(size_t)nchn) > (size_t)80 )
 		    {
+                      if (i) xline[strlen(xline) - 1] = 0;
 		      cdoc[ncdoc].aline[cdoc[ncdoc].naline++] = strdup(xline);
 		      sprintf(xline, "%*s", nch, "");
 		    }
@@ -412,7 +534,6 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 
 	      /* Fortran Quick Guide */
 
-	      ncha = 0;
 	      fdoc[nfdoc].naline = 0;
 	      fdoc[nfdoc].text   = NULL;
 	      fdoc[nfdoc].fname  = strdup(funcname);
@@ -420,7 +541,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	      if ( functype == ISVOID )
 		nch = sprintf(xline, "SUBROUTINE %s (", xname);
 	      else
-		nch = sprintf(xline, "%s FUNCTION %s (", f77name[functype], xname);
+		nch = sprintf(xline, "%s FUNCTION %s (", funArgSym[functype].f77name, xname);
 
 	      if ( (funcargc == 1 && funcargtype[0] == ISVOID) ) funcargc = 0;
 
@@ -428,8 +549,17 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 		{
 		  if ( i ) strcat(xline, ", ");
 
-		  nchn  = sprintf(farg, "%s %s", f77name[funcargtype[i]], funcargname[i]);
-		  if ( (strlen(xline)+nchn) > 80 )
+                  char farg[128];
+                  /* FIXME: optional empty argument name unhandled */
+		  int nchn
+                    = snprintf(farg, sizeof (farg), "%s %.*s",
+                               funArgSym[funcargtype[i]].f77name,
+                               (int)(funcargname[i].rm_eo
+                                     - funcargname[i].rm_so),
+                               line + funcargname[i].rm_so);
+                  if (nchn < 0)
+                    abort();
+		  if ( (strlen(xline)+(size_t)nchn) > 80 )
 		    {
 		      fdoc[nfdoc].aline[fdoc[nfdoc].naline++] = strdup(xline);
 		      sprintf(xline, "%*s", nch, "");
@@ -450,7 +580,8 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	  while ( isspace((int) *pline) ) pline++;
 	  parname = pline;
 	  len = strlen(pline);
-	  for ( i = 0; i < len; i++ )
+          size_t i = 0;
+	  for (; i < len; i++ )
 	    {
 	      if ( isspace((int) pline[i]) ) break;
 	    }
@@ -462,60 +593,37 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	  parvalue = atoi(pline);
 
 	  /* fortran include */
-	  
-	  fprintf(fpinc, "      INTEGER    %-22s\n", parname);
-	  fprintf(fpinc, "      PARAMETER (%-22s = %2d)\n", parname, parvalue);
+	  fprintf(fpinc, "      INTEGER    %-22s\n"
+                  "      PARAMETER (%-22s = %2d)\n", parname, parname,
+                  parvalue);
 	}
-      else if ( memcmp(line, "/*", 2) == 0 )
+      else if (!regexec(&docCommentRE, line, maxMatch, reMatch, 0))
+        {
+          /* found documentation comment */
+          size_t nameMatchLen = (size_t)(reMatch[1].rm_eo - reMatch[1].rm_so),
+            docMatchLen = (size_t)(reMatch[2].rm_eo - reMatch[2].rm_so);
+          memcpy(xname, line + reMatch[1].rm_so, nameMatchLen);
+          xname[nameMatchLen] = 0;
+          memcpy(xdes, line + reMatch[2].rm_so, docMatchLen);
+          xdes[docMatchLen] = 0;
+          printf("Found documentation for \"%s\": \"%s\"\n", xname,
+                 xdes);
+        }
+      else if (!regexec(&commentRE, line, maxMatch, reMatch, 0))
 	{
-	  int dpos = 0;
-	  pline = line;
-	  pline += 2;
-	  while ( isspace((int) *pline) ) pline++;
-	  comment = pline;
-	  len = strlen(pline);
-	  if ( len == 0 ) continue;
-	  for ( i = len-1; i > 0; i-- )
-	    if ( pline[i-1] == '*' && pline[i] == '/' ) break;
+          size_t commentLen = (size_t)(reMatch[1].rm_eo - reMatch[1].rm_so);
+          const char *comment = line + reMatch[1].rm_so;
+          /* fortran include */
+          fprintf(fpinc, "!\n!  %.*s\n!\n", (int)commentLen, comment);
 
-	  if ( i == 0 ) continue;
-	  pline[i-1] = 0;
-
-	  len -= 2;
-	  for ( i = len-1; i > 0; i-- )
-	    if ( pline[i] != ' ' ) break;
-	  pline[i+1] = 0;
-
-	  for ( i = 0; i < len ; i++ )
-	    if ( pline[i] == ':' ) dpos = i;
-
-	  xname[0] = 0;
-	  xdes[0]  = 0;
-	  if ( dpos )
-	    {
-	      for ( i = dpos-1; i > 0; i-- )
-		if ( pline[i] != ' ' ) break;
-	      pline[i+1] = 0;
-	      strcpy(xname, pline);
-	      pline += dpos+1;
-	      while ( isspace((int) *pline) ) pline++;
-	      strcpy(xdes, pline);
-	    }
-	  else
-	    {
-	      /* fortran include */
-	  
-	      fprintf(fpinc, "!\n!  %s\n!\n", comment);
-
-	      /* fortran interface */
-
-	      fprintf(fpint, "\n/*  %s  */\n\n", comment);
-	    }
+          /* fortran interface */
+          fprintf(fpint, "\n/*  %.*s  */\n\n", (int)commentLen, comment);
 	}
       else
 	{
-	  if ( linelen > 1 )
-	    printf("skip: line %3d  size %3d  %s\n", lineno, linelen, line);
+	  if ( lineLen > 1 )
+	    printf("skip: line %3d  size %3zd  %s%s", lineno, lineLen, line,
+                   line[lineLen-1]=='\n'?"":"missing new-line\n");
 	}
     }
 
@@ -595,14 +703,14 @@ int main(int argc, char *argv[])
 
   cp = strrchr(fname, '.');
   if ( cp == NULL ) len = strlen(fname);
-  else              len = cp - fname;
-  
+  else              len = (size_t)(cp - fname);
+
   memcpy(fnameinc, fname, len);
   memcpy(fnameint, fname, len);
 
   strcpy(fnameinc+len, ".inc");
   strcpy(fnameint+len, "Fortran.c");
-  
+
   fortran_interface(fname, fnameinc, fnameint);
 
   return (0);
@@ -616,3 +724,4 @@ int main(int argc, char *argv[])
  * require-trailing-newline: t
  * End:
  */
+
