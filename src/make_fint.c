@@ -396,7 +396,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 		{
 		  if ( i ) strcat(xline, ", ");
 
-		  nchn  = sprintf(farg, "%s%s", cname[funcargtype[i]], funcargname[i]);
+		  nchn  = sprintf(farg, "%s %s", cname[funcargtype[i]], funcargname[i]);
 		  if ( (strlen(xline)+nchn) > 80 )
 		    {
 		      cdoc[ncdoc].aline[cdoc[ncdoc].naline++] = strdup(xline);
