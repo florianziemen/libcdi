@@ -150,6 +150,11 @@ enum {
 static inline size_t
 compress_whitespace(size_t len, char str[]);
 
+static size_t
+symRegexCompile(size_t numSyms, struct symbol symList[],
+                char **line, size_t *lineBufSize);
+
+
 void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 {
   FILE *fpin, *fpinc, *fpint;
@@ -203,42 +208,14 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   if ( fpint == NULL ) { perror(fnameint); return; }
 
   /* complete symbol table data */
-  for (size_t argt = 0; argt < NUM_KNOWN_ARG_TYPES; ++argt)
-    {
-      int errcode;
-      if ((errcode = regcomp(&funArgSym[argt].preg, funArgSym[argt].parseRE,
-                             REG_EXTENDED)))
-        {
-          line = realloc(line, lineBufSize = 1024);
-          if (line)
-            {
-              regerror(errcode, &funArgSym[argt].preg, line, lineBufSize);
-              fprintf(stderr, "Error compiling regular expression: %s: %s\n",
-                      funArgSym[argt].parseRE, line);
-            }
-          exit(EXIT_FAILURE);
-        }
-      if (funArgSym[argt].nameMatch > maxMatch)
-        maxMatch = funArgSym[argt].nameMatch;
-    }
-  for (size_t retType = 0; retType < NUM_RET_TYPES; ++retType)
-    {
-      int errcode;
-      if ((errcode = regcomp(&funRet[retType].preg, funRet[retType].parseRE,
-                             REG_EXTENDED)))
-        {
-          line = realloc(line, lineBufSize = 1024);
-          if (line)
-            {
-              regerror(errcode, &funRet[retType].preg, line, lineBufSize);
-              fprintf(stderr, "Error compiling regular expression: %s: %s\n",
-                      funRet[retType].parseRE, line);
-            }
-          exit(EXIT_FAILURE);
-        }
-      if (funArgSym[retType].nameMatch > maxMatch)
-        maxMatch = funArgSym[retType].nameMatch;
-    }
+  {
+    maxMatch = symRegexCompile(NUM_KNOWN_ARG_TYPES, funArgSym,
+                             &line, &lineBufSize);
+    size_t maxFunMatch = symRegexCompile(NUM_RET_TYPES, funRet,
+                                         &line, &lineBufSize);
+    if (maxFunMatch > maxMatch)
+      maxMatch = maxFunMatch;
+  }
   ++maxMatch;
   reMatch = malloc((size_t)maxMatch * sizeof (reMatch[0]));
   /* compile comment regular expression */
@@ -788,6 +765,38 @@ compress_whitespace(size_t len, char str[])
     }
   str[wpos] = '\0';
   return wpos;
+}
+
+enum {
+  REGEX_MAX_ERRSTRLEN = 1024,
+};
+
+
+static size_t
+symRegexCompile(size_t numSyms, struct symbol symList[],
+                char **line, size_t *lineBufSize)
+{
+  size_t maxMatch = 0;
+  for (size_t sym = 0; sym < numSyms; ++sym)
+    {
+      int errcode;
+      if ((errcode = regcomp(&symList[sym].preg, symList[sym].parseRE,
+                             REG_EXTENDED)))
+        {
+          if (*lineBufSize < REGEX_MAX_ERRSTRLEN)
+            line = realloc(line, *lineBufSize = REGEX_MAX_ERRSTRLEN);
+          if (line)
+            {
+              regerror(errcode, &symList[sym].preg, *line, *lineBufSize);
+              fprintf(stderr, "Error compiling regular expression: %s: %s\n",
+                      symList[sym].parseRE, *line);
+            }
+          exit(EXIT_FAILURE);
+        }
+      if (symList[sym].nameMatch > maxMatch)
+        maxMatch = symList[sym].nameMatch;
+    }
+  return maxMatch;
 }
 
 /* emit conversion code for MPI_Comm argument */
