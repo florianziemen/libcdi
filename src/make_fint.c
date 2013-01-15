@@ -23,7 +23,7 @@ static Docu cdoc[9999], fdoc[9999];
 static size_t ncdoc = 0, nfdoc = 0;
 static int debug = 0;
 
-int doccmp(const void *s1, const void *s2)
+static int doccmp(const void *s1, const void *s2)
 {
   Docu *x = (Docu *) s1;
   Docu *y = (Docu *) s2;
@@ -31,7 +31,7 @@ int doccmp(const void *s1, const void *s2)
   return (strcmp(x->fname, y->fname));
 }
 
-void doctotex(FILE *fp, Docu *doc, size_t ndoc)
+static void doctotex(FILE *fp, Docu *doc, size_t ndoc)
 {
   size_t i, k;
 
@@ -46,7 +46,7 @@ void doctotex(FILE *fp, Docu *doc, size_t ndoc)
     }
 }
 
-void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
+static void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
 {
   size_t i, k;
 
@@ -149,7 +149,7 @@ symRegexCompile(size_t numSyms, struct symbol symList[],
                 char **line, size_t *lineBufSize);
 
 
-void fortran_interface(char *fname, char *fnameinc, char *fnameint)
+static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 {
   FILE *fpin, *fpinc, *fpint;
   FILE *fp;
