@@ -1096,7 +1096,6 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
             {
               rank   = vlistptr->vars[varID].deco[i].rank;
               offset = vlistptr->vars[varID].deco[i].offset;
-              offset = vlistptr->vars[varID].deco[i].offset;
               chunk  = vlistptr->vars[varID].deco[i].chunk;
               fprintf ( fp, "%3d %8d %6d %6d %6d %8d %6d\n",
                         varID, size, iorank, decoSize, rank, offset, chunk );
