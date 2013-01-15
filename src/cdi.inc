@@ -1,9 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
+! Fortran interface for CDI library version 1.5.6.1
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   July 2012
+! Uwe Schulzweida, MPI-MET, Hamburg,   January 2013
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -335,6 +336,9 @@
       PARAMETER (CALENDAR_366DAYS       =  4)
       INTEGER    CALENDAR_NONE         
       PARAMETER (CALENDAR_NONE          =  5)
+!
+!  parallel IO IOMode
+!
       INTEGER    PIO_NONE              
       PARAMETER (PIO_NONE               =  0)
       INTEGER    PIO_MPI               
@@ -345,6 +349,9 @@
       PARAMETER (PIO_ASYNCH             =  3)
       INTEGER    PIO_FPGUARD           
       PARAMETER (PIO_FPGUARD            =  4)
+!
+!  parallel IO routines
+!
 !                     pioEndDef
       EXTERNAL        pioEndDef
 
@@ -382,6 +389,9 @@
 !                                     INTEGER         )
       EXTERNAL        pioWriteTimestep
 
+!
+!  CDI control routines
+!
       CHARACTER*80    cdiStringError
 !                                    (INTEGER         cdiErrno)
       EXTERNAL        cdiStringError
@@ -433,6 +443,12 @@
 !                                     INTEGER         pdis)
       EXTERNAL        cdiEncodeParam
 
+!
+!  date format:  YYYYMMDD
+!
+!
+!  time format:    hhmmss
+!
 !                     cdiDecodeDate
 !                                    (INTEGER         date,
 !                                     INTEGER         year,
@@ -600,6 +616,14 @@
 !                                     REAL            data_vec,
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVarSliceF
+
+!                     streamWriteVarChunk
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     INTEGER         rect,
+!                                     DOUBLEPRECISION data_vec,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamWriteVarChunk
 
 !
 !  STREAM record I/O routines

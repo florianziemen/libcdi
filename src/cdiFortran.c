@@ -53,6 +53,12 @@
 
 /*  CALENDAR types  */
 
+
+/*  parallel IO IOMode  */
+
+
+/*  parallel IO routines  */
+
 FCALLSCSUB0 (pioEndDef, PIOENDDEF, pioenddef)
 FCALLSCSUB0 (pioEndTimestepping, PIOENDTIMESTEPPING, pioendtimestepping)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
@@ -61,6 +67,9 @@ FCALLSCFUN2 (INT, pioInqVarDecoChunk, PIOINQVARDECOCHUNK, pioinqvardecochunk, IN
 FCALLSCFUN2 (INT, pioInqVarDecoOff, PIOINQVARDECOOFF, pioinqvardecooff, INT, INT)
 FCALLSCSUB1 (pioNamespaceSetActive, PIONAMESPACESETACTIVE, pionamespacesetactive, INT)
 FCALLSCSUB3 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep, INT, INT, INT)
+
+/*  CDI control routines  */
+
 FCALLSCFUN1 (STRING, cdiStringError, CDISTRINGERROR, cdistringerror, INT)
 FCALLSCSUB1 (cdiDebug, CDIDEBUG, cdidebug, INT)
 FCALLSCFUN0 (STRING, cdiLibraryVersion, CDILIBRARYVERSION, cdilibraryversion)
@@ -77,6 +86,12 @@ FCALLSCSUB2 (cdiDefGlobal, CDIDEFGLOBAL, cdidefglobal, STRING, INT)
 FCALLSCSUB3 (cdiParamToString, CDIPARAMTOSTRING, cdiparamtostring, INT, PSTRING, INT)
 FCALLSCSUB4 (cdiDecodeParam, CDIDECODEPARAM, cdidecodeparam, INT, PINT, PINT, PINT)
 FCALLSCFUN3 (INT, cdiEncodeParam, CDIENCODEPARAM, cdiencodeparam, INT, INT, INT)
+
+/*  date format:  YYYYMMDD  */
+
+
+/*  time format:    hhmmss  */
+
 FCALLSCSUB4 (cdiDecodeDate, CDIDECODEDATE, cdidecodedate, INT, PINT, PINT, PINT)
 FCALLSCFUN3 (INT, cdiEncodeDate, CDIENCODEDATE, cdiencodedate, INT, INT, INT)
 FCALLSCSUB4 (cdiDecodeTime, CDIDECODETIME, cdidecodetime, INT, PINT, PINT, PINT)
@@ -114,6 +129,7 @@ FCALLSCSUB4 (streamWriteVarF, STREAMWRITEVARF, streamwritevarf, INT, INT, PFLOAT
 FCALLSCSUB5 (streamReadVarSlice, STREAMREADVARSLICE, streamreadvarslice, INT, INT, INT, PDOUBLE, PINT)
 FCALLSCSUB5 (streamWriteVarSlice, STREAMWRITEVARSLICE, streamwritevarslice, INT, INT, INT, PDOUBLE, INT)
 FCALLSCSUB5 (streamWriteVarSliceF, STREAMWRITEVARSLICEF, streamwritevarslicef, INT, INT, INT, PFLOAT, INT)
+FCALLSCSUB5 (streamWriteVarChunk, STREAMWRITEVARCHUNK, streamwritevarchunk, INT, INT, INTVV, PDOUBLE, INT)
 
 /*  STREAM record I/O routines  */
 

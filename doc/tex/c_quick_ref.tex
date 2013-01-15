@@ -7,7 +7,7 @@ CDI library routines:
 \section*{\tt \htmlref{gridCreate}{gridCreate}}
 
 \begin{verbatim}
-    int gridCreate (intgridtype, intsize);
+    int gridCreate (int gridtype, int size);
 \end{verbatim}
 
 Create a horizontal Grid.
@@ -16,7 +16,7 @@ Create a horizontal Grid.
 \section*{\tt \htmlref{gridDefNP}{gridDefNP}}
 
 \begin{verbatim}
-    void gridDefNP (intgridID, intnp);
+    void gridDefNP (int gridID, int np);
 \end{verbatim}
 
 Define the number of parallels between a pole and the equator.
@@ -25,7 +25,7 @@ Define the number of parallels between a pole and the equator.
 \section*{\tt \htmlref{gridDefNvertex}{gridDefNvertex}}
 
 \begin{verbatim}
-    void gridDefNvertex (intgridID, intnvertex);
+    void gridDefNvertex (int gridID, int nvertex);
 \end{verbatim}
 
 Define the number of vertex of a Gridbox.
@@ -34,7 +34,7 @@ Define the number of vertex of a Gridbox.
 \section*{\tt \htmlref{gridDefPrec}{gridDefPrec}}
 
 \begin{verbatim}
-    void gridDefPrec (intgridID, intprec);
+    void gridDefPrec (int gridID, int prec);
 \end{verbatim}
 
 Define the precision of a Grid.
@@ -43,7 +43,7 @@ Define the precision of a Grid.
 \section*{\tt \htmlref{gridDefXbounds}{gridDefXbounds}}
 
 \begin{verbatim}
-    void gridDefXbounds (intgridID, double *xbounds_vec);
+    void gridDefXbounds (int gridID, const double *xbounds_vec);
 \end{verbatim}
 
 Define the bounds of a X-axis.
@@ -52,7 +52,7 @@ Define the bounds of a X-axis.
 \section*{\tt \htmlref{gridDefXlongname}{gridDefXlongname}}
 
 \begin{verbatim}
-    void gridDefXlongname (intgridID, char *xlongname);
+    void gridDefXlongname (int gridID, const char *xlongname);
 \end{verbatim}
 
 Define the longname of a X-axis.
@@ -61,7 +61,7 @@ Define the longname of a X-axis.
 \section*{\tt \htmlref{gridDefXname}{gridDefXname}}
 
 \begin{verbatim}
-    void gridDefXname (intgridID, char *xname);
+    void gridDefXname (int gridID, const char *xname);
 \end{verbatim}
 
 Define the name of a X-axis.
@@ -70,7 +70,7 @@ Define the name of a X-axis.
 \section*{\tt \htmlref{gridDefXsize}{gridDefXsize}}
 
 \begin{verbatim}
-    void gridDefXsize (intgridID, intxsize);
+    void gridDefXsize (int gridID, int xsize);
 \end{verbatim}
 
 Define the size of a X-axis.
@@ -79,7 +79,7 @@ Define the size of a X-axis.
 \section*{\tt \htmlref{gridDefXunits}{gridDefXunits}}
 
 \begin{verbatim}
-    void gridDefXunits (intgridID, char *xunits);
+    void gridDefXunits (int gridID, const char *xunits);
 \end{verbatim}
 
 Define the units of a X-axis.
@@ -88,7 +88,7 @@ Define the units of a X-axis.
 \section*{\tt \htmlref{gridDefXvals}{gridDefXvals}}
 
 \begin{verbatim}
-    void gridDefXvals (intgridID, double *xvals_vec);
+    void gridDefXvals (int gridID, const double *xvals_vec);
 \end{verbatim}
 
 Define the values of a X-axis.
@@ -97,7 +97,7 @@ Define the values of a X-axis.
 \section*{\tt \htmlref{gridDefYbounds}{gridDefYbounds}}
 
 \begin{verbatim}
-    void gridDefYbounds (intgridID, double *ybounds_vec);
+    void gridDefYbounds (int gridID, const double *ybounds_vec);
 \end{verbatim}
 
 Define the bounds of a Y-axis.
@@ -106,7 +106,7 @@ Define the bounds of a Y-axis.
 \section*{\tt \htmlref{gridDefYlongname}{gridDefYlongname}}
 
 \begin{verbatim}
-    void gridDefYlongname (intgridID, char *ylongname);
+    void gridDefYlongname (int gridID, const char *ylongname);
 \end{verbatim}
 
 Define the longname of a Y-axis.
@@ -115,7 +115,7 @@ Define the longname of a Y-axis.
 \section*{\tt \htmlref{gridDefYname}{gridDefYname}}
 
 \begin{verbatim}
-    void gridDefYname (intgridID, char *yname);
+    void gridDefYname (int gridID, const char *yname);
 \end{verbatim}
 
 Define the name of a Y-axis.
@@ -124,7 +124,7 @@ Define the name of a Y-axis.
 \section*{\tt \htmlref{gridDefYsize}{gridDefYsize}}
 
 \begin{verbatim}
-    void gridDefYsize (intgridID, intysize);
+    void gridDefYsize (int gridID, int ysize);
 \end{verbatim}
 
 Define the size of a Y-axis.
@@ -133,7 +133,7 @@ Define the size of a Y-axis.
 \section*{\tt \htmlref{gridDefYunits}{gridDefYunits}}
 
 \begin{verbatim}
-    void gridDefYunits (intgridID, char *yunits);
+    void gridDefYunits (int gridID, const char *yunits);
 \end{verbatim}
 
 Define the units of a Y-axis.
@@ -142,7 +142,7 @@ Define the units of a Y-axis.
 \section*{\tt \htmlref{gridDefYvals}{gridDefYvals}}
 
 \begin{verbatim}
-    void gridDefYvals (intgridID, double *yvals_vec);
+    void gridDefYvals (int gridID, const double *yvals_vec);
 \end{verbatim}
 
 Define the values of a Y-axis.
@@ -151,7 +151,7 @@ Define the values of a Y-axis.
 \section*{\tt \htmlref{gridDestroy}{gridDestroy}}
 
 \begin{verbatim}
-    void gridDestroy (intgridID);
+    void gridDestroy (int gridID);
 \end{verbatim}
 
 Destroy a horizontal Grid.
@@ -160,7 +160,7 @@ Destroy a horizontal Grid.
 \section*{\tt \htmlref{gridDuplicate}{gridDuplicate}}
 
 \begin{verbatim}
-    int gridDuplicate (intgridID);
+    int gridDuplicate (int gridID);
 \end{verbatim}
 
 Duplicate a Grid.
@@ -169,7 +169,7 @@ Duplicate a Grid.
 \section*{\tt \htmlref{gridInqNP}{gridInqNP}}
 
 \begin{verbatim}
-    int gridInqNP (intgridID);
+    int gridInqNP (int gridID);
 \end{verbatim}
 
 Get the number of parallels between a pole and the equator.
@@ -178,7 +178,7 @@ Get the number of parallels between a pole and the equator.
 \section*{\tt \htmlref{gridInqNvertex}{gridInqNvertex}}
 
 \begin{verbatim}
-    int gridInqNvertex (intgridID);
+    int gridInqNvertex (int gridID);
 \end{verbatim}
 
 Get the number of vertex of a Gridbox.
@@ -187,7 +187,7 @@ Get the number of vertex of a Gridbox.
 \section*{\tt \htmlref{gridInqPrec}{gridInqPrec}}
 
 \begin{verbatim}
-    int gridInqPrec (intgridID);
+    int gridInqPrec (int gridID);
 \end{verbatim}
 
 Get the precision of a Grid.
@@ -196,7 +196,7 @@ Get the precision of a Grid.
 \section*{\tt \htmlref{gridInqSize}{gridInqSize}}
 
 \begin{verbatim}
-    int gridInqSize (intgridID);
+    int gridInqSize (int gridID);
 \end{verbatim}
 
 Get the size of a Grid.
@@ -205,7 +205,7 @@ Get the size of a Grid.
 \section*{\tt \htmlref{gridInqType}{gridInqType}}
 
 \begin{verbatim}
-    int gridInqType (intgridID);
+    int gridInqType (int gridID);
 \end{verbatim}
 
 Get the type of a Grid.
@@ -214,7 +214,7 @@ Get the type of a Grid.
 \section*{\tt \htmlref{gridInqXbounds}{gridInqXbounds}}
 
 \begin{verbatim}
-    int gridInqXbounds (intgridID, double *xbounds_vec);
+    int gridInqXbounds (int gridID, double *xbounds_vec);
 \end{verbatim}
 
 Get the bounds of a X-axis.
@@ -223,7 +223,7 @@ Get the bounds of a X-axis.
 \section*{\tt \htmlref{gridInqXlongname}{gridInqXlongname}}
 
 \begin{verbatim}
-    void gridInqXlongname (intgridID, char *xlongname);
+    void gridInqXlongname (int gridID, char *xlongname);
 \end{verbatim}
 
 Get the longname of a X-axis.
@@ -232,7 +232,7 @@ Get the longname of a X-axis.
 \section*{\tt \htmlref{gridInqXname}{gridInqXname}}
 
 \begin{verbatim}
-    void gridInqXname (intgridID, char *xname);
+    void gridInqXname (int gridID, char *xname);
 \end{verbatim}
 
 Get the name of a X-axis.
@@ -241,7 +241,7 @@ Get the name of a X-axis.
 \section*{\tt \htmlref{gridInqXsize}{gridInqXsize}}
 
 \begin{verbatim}
-    int gridInqXsize (intgridID);
+    int gridInqXsize (int gridID);
 \end{verbatim}
 
 Get the size of a X-axis.
@@ -250,7 +250,7 @@ Get the size of a X-axis.
 \section*{\tt \htmlref{gridInqXstdname}{gridInqXstdname}}
 
 \begin{verbatim}
-    void gridInqXstdname (intgridID, char *xstdname);
+    void gridInqXstdname (int gridID, char *xstdname);
 \end{verbatim}
 
 Get the standard name of a X-axis.
@@ -259,7 +259,7 @@ Get the standard name of a X-axis.
 \section*{\tt \htmlref{gridInqXunits}{gridInqXunits}}
 
 \begin{verbatim}
-    void gridInqXunits (intgridID, char *xunits);
+    void gridInqXunits (int gridID, char *xunits);
 \end{verbatim}
 
 Get the units of a X-axis.
@@ -268,7 +268,7 @@ Get the units of a X-axis.
 \section*{\tt \htmlref{gridInqXval}{gridInqXval}}
 
 \begin{verbatim}
-    double gridInqXval (intgridID, intindex);
+    double gridInqXval (int gridID, int index);
 \end{verbatim}
 
 Get one value of a X-axis.
@@ -277,7 +277,7 @@ Get one value of a X-axis.
 \section*{\tt \htmlref{gridInqXvals}{gridInqXvals}}
 
 \begin{verbatim}
-    int gridInqXvals (intgridID, double *xvals_vec);
+    int gridInqXvals (int gridID, double *xvals_vec);
 \end{verbatim}
 
 Get all values of a X-axis.
@@ -286,7 +286,7 @@ Get all values of a X-axis.
 \section*{\tt \htmlref{gridInqYbounds}{gridInqYbounds}}
 
 \begin{verbatim}
-    int gridInqYbounds (intgridID, double *ybounds_vec);
+    int gridInqYbounds (int gridID, double *ybounds_vec);
 \end{verbatim}
 
 Get the bounds of a Y-axis.
@@ -295,7 +295,7 @@ Get the bounds of a Y-axis.
 \section*{\tt \htmlref{gridInqYlongname}{gridInqYlongname}}
 
 \begin{verbatim}
-    void gridInqYlongname (intgridID, char *ylongname);
+    void gridInqYlongname (int gridID, char *ylongname);
 \end{verbatim}
 
 Get the longname of a Y-axis.
@@ -304,7 +304,7 @@ Get the longname of a Y-axis.
 \section*{\tt \htmlref{gridInqYname}{gridInqYname}}
 
 \begin{verbatim}
-    void gridInqYname (intgridID, char *yname);
+    void gridInqYname (int gridID, char *yname);
 \end{verbatim}
 
 Get the name of a Y-axis.
@@ -313,7 +313,7 @@ Get the name of a Y-axis.
 \section*{\tt \htmlref{gridInqYsize}{gridInqYsize}}
 
 \begin{verbatim}
-    int gridInqYsize (intgridID);
+    int gridInqYsize (int gridID);
 \end{verbatim}
 
 Get the size of a Y-axis.
@@ -322,7 +322,7 @@ Get the size of a Y-axis.
 \section*{\tt \htmlref{gridInqYstdname}{gridInqYstdname}}
 
 \begin{verbatim}
-    void gridInqYstdname (intgridID, char *ystdname);
+    void gridInqYstdname (int gridID, char *ystdname);
 \end{verbatim}
 
 Get the standard name of a Y-axis.
@@ -331,7 +331,7 @@ Get the standard name of a Y-axis.
 \section*{\tt \htmlref{gridInqYunits}{gridInqYunits}}
 
 \begin{verbatim}
-    void gridInqYunits (intgridID, char *yunits);
+    void gridInqYunits (int gridID, char *yunits);
 \end{verbatim}
 
 Get the units of a Y-axis.
@@ -340,7 +340,7 @@ Get the units of a Y-axis.
 \section*{\tt \htmlref{gridInqYval}{gridInqYval}}
 
 \begin{verbatim}
-    double gridInqYval (intgridID, intindex);
+    double gridInqYval (int gridID, int index);
 \end{verbatim}
 
 Get one value of a Y-axis.
@@ -349,7 +349,7 @@ Get one value of a Y-axis.
 \section*{\tt \htmlref{gridInqYvals}{gridInqYvals}}
 
 \begin{verbatim}
-    int gridInqYvals (intgridID, double *yvals_vec);
+    int gridInqYvals (int gridID, double *yvals_vec);
 \end{verbatim}
 
 Get all values of a Y-axis.
@@ -358,7 +358,7 @@ Get all values of a Y-axis.
 \section*{\tt \htmlref{streamClose}{streamClose}}
 
 \begin{verbatim}
-    void streamClose (intstreamID);
+    void streamClose (int streamID);
 \end{verbatim}
 
 Close an open dataset.
@@ -367,7 +367,7 @@ Close an open dataset.
 \section*{\tt \htmlref{streamDefByteorder}{streamDefByteorder}}
 
 \begin{verbatim}
-    void streamDefByteorder (intstreamID, intbyteorder);
+    void streamDefByteorder (int streamID, int byteorder);
 \end{verbatim}
 
 Define the byteorder.
@@ -376,7 +376,7 @@ Define the byteorder.
 \section*{\tt \htmlref{streamDefCompLevel}{streamDefCompLevel}}
 
 \begin{verbatim}
-    void streamDefCompLevel (intstreamID, intcomplevel);
+    void streamDefCompLevel (int streamID, int complevel);
 \end{verbatim}
 
 Define compression level.
@@ -385,7 +385,7 @@ Define compression level.
 \section*{\tt \htmlref{streamDefCompType}{streamDefCompType}}
 
 \begin{verbatim}
-    void streamDefCompType (intstreamID, intcomptype);
+    void streamDefCompType (int streamID, int comptype);
 \end{verbatim}
 
 Define compression type.
@@ -394,7 +394,7 @@ Define compression type.
 \section*{\tt \htmlref{streamDefTimestep}{streamDefTimestep}}
 
 \begin{verbatim}
-    int streamDefTimestep (intstreamID, inttsID);
+    int streamDefTimestep (int streamID, int tsID);
 \end{verbatim}
 
 Define time step.
@@ -403,7 +403,7 @@ Define time step.
 \section*{\tt \htmlref{streamDefVlist}{streamDefVlist}}
 
 \begin{verbatim}
-    void streamDefVlist (intstreamID, intvlistID);
+    void streamDefVlist (int streamID, int vlistID);
 \end{verbatim}
 
 Define the Vlist for a stream.
@@ -412,7 +412,7 @@ Define the Vlist for a stream.
 \section*{\tt \htmlref{streamInqByteorder}{streamInqByteorder}}
 
 \begin{verbatim}
-    int streamInqByteorder (intstreamID);
+    int streamInqByteorder (int streamID);
 \end{verbatim}
 
 Get the byteorder.
@@ -421,7 +421,7 @@ Get the byteorder.
 \section*{\tt \htmlref{streamInqCompLevel}{streamInqCompLevel}}
 
 \begin{verbatim}
-    int streamInqCompLevel (intstreamID);
+    int streamInqCompLevel (int streamID);
 \end{verbatim}
 
 Get compression level.
@@ -430,7 +430,7 @@ Get compression level.
 \section*{\tt \htmlref{streamInqCompType}{streamInqCompType}}
 
 \begin{verbatim}
-    int streamInqCompType (intstreamID);
+    int streamInqCompType (int streamID);
 \end{verbatim}
 
 Get compression type.
@@ -439,7 +439,7 @@ Get compression type.
 \section*{\tt \htmlref{streamInqFiletype}{streamInqFiletype}}
 
 \begin{verbatim}
-    int streamInqFiletype (intstreamID);
+    int streamInqFiletype (int streamID);
 \end{verbatim}
 
 Get the filetype.
@@ -448,7 +448,7 @@ Get the filetype.
 \section*{\tt \htmlref{streamInqTimestep}{streamInqTimestep}}
 
 \begin{verbatim}
-    int streamInqTimestep (intstreamID, inttsID);
+    int streamInqTimestep (int streamID, int tsID);
 \end{verbatim}
 
 Get time step.
@@ -457,7 +457,7 @@ Get time step.
 \section*{\tt \htmlref{streamInqVlist}{streamInqVlist}}
 
 \begin{verbatim}
-    int streamInqVlist (intstreamID);
+    int streamInqVlist (int streamID);
 \end{verbatim}
 
 Get the Vlist of a stream.
@@ -466,7 +466,7 @@ Get the Vlist of a stream.
 \section*{\tt \htmlref{streamOpenRead}{streamOpenRead}}
 
 \begin{verbatim}
-    int streamOpenRead (char *path);
+    int streamOpenRead (const char *path);
 \end{verbatim}
 
 Open a dataset for reading.
@@ -475,7 +475,7 @@ Open a dataset for reading.
 \section*{\tt \htmlref{streamOpenWrite}{streamOpenWrite}}
 
 \begin{verbatim}
-    int streamOpenWrite (char *path, intfiletype);
+    int streamOpenWrite (const char *path, int filetype);
 \end{verbatim}
 
 Create a new dataset.
@@ -484,7 +484,7 @@ Create a new dataset.
 \section*{\tt \htmlref{streamReadVar}{streamReadVar}}
 
 \begin{verbatim}
-    void streamReadVar (intstreamID, intvarID, double *data_vec, int *nmiss);
+    void streamReadVar (int streamID, int varID, double *data_vec, int *nmiss);
 \end{verbatim}
 
 Read a variable.
@@ -493,7 +493,7 @@ Read a variable.
 \section*{\tt \htmlref{streamReadVarSlice}{streamReadVarSlice}}
 
 \begin{verbatim}
-    void streamReadVarSlice (intstreamID, intvarID, intlevelID, double *data_vec, 
+    void streamReadVarSlice (int streamID, int varID, int levelID, double *data_vec,
                              int *nmiss);
 \end{verbatim}
 
@@ -503,7 +503,7 @@ Read a horizontal slice of a variable.
 \section*{\tt \htmlref{streamSync}{streamSync}}
 
 \begin{verbatim}
-    void streamSync (intstreamID);
+    void streamSync (int streamID);
 \end{verbatim}
 
 Synchronize an Open Dataset to Disk.
@@ -512,7 +512,7 @@ Synchronize an Open Dataset to Disk.
 \section*{\tt \htmlref{streamWriteVar}{streamWriteVar}}
 
 \begin{verbatim}
-    void streamWriteVar (intstreamID, intvarID, double *data_vec, intnmiss);
+    void streamWriteVar (int streamID, int varID, const double *data_vec, int nmiss);
 \end{verbatim}
 
 Write a variable.
@@ -521,8 +521,8 @@ Write a variable.
 \section*{\tt \htmlref{streamWriteVarSlice}{streamWriteVarSlice}}
 
 \begin{verbatim}
-    void streamWriteVarSlice (intstreamID, intvarID, intlevelID, double *data_vec, 
-                              intnmiss);
+    void streamWriteVarSlice (int streamID, int varID, int levelID,
+                              const double *data_vec, int nmiss);
 \end{verbatim}
 
 Write a horizontal slice of a variable.
@@ -531,7 +531,7 @@ Write a horizontal slice of a variable.
 \section*{\tt \htmlref{taxisCreate}{taxisCreate}}
 
 \begin{verbatim}
-    int taxisCreate (inttimetype);
+    int taxisCreate (int timetype);
 \end{verbatim}
 
 Create a Time axis.
@@ -540,7 +540,7 @@ Create a Time axis.
 \section*{\tt \htmlref{taxisDefCalendar}{taxisDefCalendar}}
 
 \begin{verbatim}
-    void taxisDefCalendar (inttaxisID, intcalendar);
+    void taxisDefCalendar (int taxisID, int calendar);
 \end{verbatim}
 
 Define the calendar.
@@ -549,7 +549,7 @@ Define the calendar.
 \section*{\tt \htmlref{taxisDefRdate}{taxisDefRdate}}
 
 \begin{verbatim}
-    void taxisDefRdate (inttaxisID, intdate);
+    void taxisDefRdate (int taxisID, int date);
 \end{verbatim}
 
 Define the reference date.
@@ -558,7 +558,7 @@ Define the reference date.
 \section*{\tt \htmlref{taxisDefRtime}{taxisDefRtime}}
 
 \begin{verbatim}
-    void taxisDefRtime (inttaxisID, inttime);
+    void taxisDefRtime (int taxisID, int time);
 \end{verbatim}
 
 Define the reference date.
@@ -567,7 +567,7 @@ Define the reference date.
 \section*{\tt \htmlref{taxisDefVdate}{taxisDefVdate}}
 
 \begin{verbatim}
-    void taxisDefVdate (inttaxisID, intdate);
+    void taxisDefVdate (int taxisID, int date);
 \end{verbatim}
 
 Define the verification date.
@@ -576,7 +576,7 @@ Define the verification date.
 \section*{\tt \htmlref{taxisDefVtime}{taxisDefVtime}}
 
 \begin{verbatim}
-    void taxisDefVtime (inttaxisID, inttime);
+    void taxisDefVtime (int taxisID, int time);
 \end{verbatim}
 
 Define the verification time.
@@ -585,7 +585,7 @@ Define the verification time.
 \section*{\tt \htmlref{taxisDestroy}{taxisDestroy}}
 
 \begin{verbatim}
-    void taxisDestroy (inttaxisID);
+    void taxisDestroy (int taxisID);
 \end{verbatim}
 
 Destroy a Time axis.
@@ -594,7 +594,7 @@ Destroy a Time axis.
 \section*{\tt \htmlref{taxisInqCalendar}{taxisInqCalendar}}
 
 \begin{verbatim}
-    int taxisInqCalendar (inttaxisID);
+    int taxisInqCalendar (int taxisID);
 \end{verbatim}
 
 Get the calendar.
@@ -603,7 +603,7 @@ Get the calendar.
 \section*{\tt \htmlref{taxisInqRdate}{taxisInqRdate}}
 
 \begin{verbatim}
-    int taxisInqRdate (inttaxisID);
+    int taxisInqRdate (int taxisID);
 \end{verbatim}
 
 Get the reference date.
@@ -612,7 +612,7 @@ Get the reference date.
 \section*{\tt \htmlref{taxisInqRtime}{taxisInqRtime}}
 
 \begin{verbatim}
-    int taxisInqRtime (inttaxisID);
+    int taxisInqRtime (int taxisID);
 \end{verbatim}
 
 Get the reference time.
@@ -621,7 +621,7 @@ Get the reference time.
 \section*{\tt \htmlref{taxisInqVdate}{taxisInqVdate}}
 
 \begin{verbatim}
-    int taxisInqVdate (inttaxisID);
+    int taxisInqVdate (int taxisID);
 \end{verbatim}
 
 Get the verification date.
@@ -630,7 +630,7 @@ Get the verification date.
 \section*{\tt \htmlref{taxisInqVtime}{taxisInqVtime}}
 
 \begin{verbatim}
-    int taxisInqVtime (inttaxisID);
+    int taxisInqVtime (int taxisID);
 \end{verbatim}
 
 Get the verification time.
@@ -639,7 +639,7 @@ Get the verification time.
 \section*{\tt \htmlref{vlistCat}{vlistCat}}
 
 \begin{verbatim}
-    void vlistCat (intvlistID2, intvlistID1);
+    void vlistCat (int vlistID2, int vlistID1);
 \end{verbatim}
 
 Concatenate two variable lists.
@@ -648,7 +648,7 @@ Concatenate two variable lists.
 \section*{\tt \htmlref{vlistCopy}{vlistCopy}}
 
 \begin{verbatim}
-    void vlistCopy (intvlistID2, intvlistID1);
+    void vlistCopy (int vlistID2, int vlistID1);
 \end{verbatim}
 
 Copy a variable list.
@@ -657,7 +657,7 @@ Copy a variable list.
 \section*{\tt \htmlref{vlistCopyFlag}{vlistCopyFlag}}
 
 \begin{verbatim}
-    void vlistCopyFlag (intvlistID2, intvlistID1);
+    void vlistCopyFlag (int vlistID2, int vlistID1);
 \end{verbatim}
 
 Copy some entries of a variable list.
@@ -675,8 +675,8 @@ Create a variable list.
 \section*{\tt \htmlref{vlistDefAttFlt}{vlistDefAttFlt}}
 
 \begin{verbatim}
-    int vlistDefAttFlt (intvlistID, intvarID, char *name, inttype, intlen, 
-                        double *dp_vec);
+    int vlistDefAttFlt (int vlistID, int varID, const char *name, int type, int len,
+                        const double *dp_vec);
 \end{verbatim}
 
 Define a floating point attribute.
@@ -685,8 +685,8 @@ Define a floating point attribute.
 \section*{\tt \htmlref{vlistDefAttInt}{vlistDefAttInt}}
 
 \begin{verbatim}
-    int vlistDefAttInt (intvlistID, intvarID, char *name, inttype, intlen, 
-                        int *ip_vec);
+    int vlistDefAttInt (int vlistID, int varID, const char *name, int type, int len,
+                        const int *ip_vec);
 \end{verbatim}
 
 Define an integer attribute.
@@ -695,7 +695,8 @@ Define an integer attribute.
 \section*{\tt \htmlref{vlistDefAttTxt}{vlistDefAttTxt}}
 
 \begin{verbatim}
-    int vlistDefAttTxt (intvlistID, intvarID, char *name, intlen, char *tp);
+    int vlistDefAttTxt (int vlistID, int varID, const char *name, int len,
+                        const char *tp);
 \end{verbatim}
 
 Define a text attribute.
@@ -704,7 +705,7 @@ Define a text attribute.
 \section*{\tt \htmlref{vlistDefTaxis}{vlistDefTaxis}}
 
 \begin{verbatim}
-    void vlistDefTaxis (intvlistID, inttaxisID);
+    void vlistDefTaxis (int vlistID, int taxisID);
 \end{verbatim}
 
 Define the time axis of a variable list.
@@ -713,7 +714,7 @@ Define the time axis of a variable list.
 \section*{\tt \htmlref{vlistDefVar}{vlistDefVar}}
 
 \begin{verbatim}
-    int vlistDefVar (intvlistID, intgridID, intzaxisID, inttsteptype);
+    int vlistDefVar (int vlistID, int gridID, int zaxisID, int tsteptype);
 \end{verbatim}
 
 Create a new Variable.
@@ -722,7 +723,7 @@ Create a new Variable.
 \section*{\tt \htmlref{vlistDefVarCode}{vlistDefVarCode}}
 
 \begin{verbatim}
-    void vlistDefVarCode (intvlistID, intvarID, intcode);
+    void vlistDefVarCode (int vlistID, int varID, int code);
 \end{verbatim}
 
 Define the code number of a Variable.
@@ -731,7 +732,7 @@ Define the code number of a Variable.
 \section*{\tt \htmlref{vlistDefVarDatatype}{vlistDefVarDatatype}}
 
 \begin{verbatim}
-    void vlistDefVarDatatype (intvlistID, intvarID, intdatatype);
+    void vlistDefVarDatatype (int vlistID, int varID, int datatype);
 \end{verbatim}
 
 Define the data type of a Variable.
@@ -740,7 +741,7 @@ Define the data type of a Variable.
 \section*{\tt \htmlref{vlistDefVarLongname}{vlistDefVarLongname}}
 
 \begin{verbatim}
-    void vlistDefVarLongname (intvlistID, intvarID, char *longname);
+    void vlistDefVarLongname (int vlistID, int varID, const char *longname);
 \end{verbatim}
 
 Define the long name of a Variable.
@@ -749,7 +750,7 @@ Define the long name of a Variable.
 \section*{\tt \htmlref{vlistDefVarMissval}{vlistDefVarMissval}}
 
 \begin{verbatim}
-    void vlistDefVarMissval (intvlistID, intvarID, doublemissval);
+    void vlistDefVarMissval (int vlistID, int varID, double missval);
 \end{verbatim}
 
 Define the missing value of a Variable.
@@ -758,7 +759,7 @@ Define the missing value of a Variable.
 \section*{\tt \htmlref{vlistDefVarName}{vlistDefVarName}}
 
 \begin{verbatim}
-    void vlistDefVarName (intvlistID, intvarID, char *name);
+    void vlistDefVarName (int vlistID, int varID, const char *name);
 \end{verbatim}
 
 Define the name of a Variable.
@@ -767,7 +768,7 @@ Define the name of a Variable.
 \section*{\tt \htmlref{vlistDefVarParam}{vlistDefVarParam}}
 
 \begin{verbatim}
-    void vlistDefVarParam (intvlistID, intvarID, intparam);
+    void vlistDefVarParam (int vlistID, int varID, int param);
 \end{verbatim}
 
 Define the parameter number of a Variable.
@@ -776,7 +777,7 @@ Define the parameter number of a Variable.
 \section*{\tt \htmlref{vlistDefVarStdname}{vlistDefVarStdname}}
 
 \begin{verbatim}
-    void vlistDefVarStdname (intvlistID, intvarID, char *stdname);
+    void vlistDefVarStdname (int vlistID, int varID, const char *stdname);
 \end{verbatim}
 
 Define the standard name of a Variable.
@@ -785,7 +786,7 @@ Define the standard name of a Variable.
 \section*{\tt \htmlref{vlistDefVarUnits}{vlistDefVarUnits}}
 
 \begin{verbatim}
-    void vlistDefVarUnits (intvlistID, intvarID, char *units);
+    void vlistDefVarUnits (int vlistID, int varID, const char *units);
 \end{verbatim}
 
 Define the units of a Variable.
@@ -794,7 +795,7 @@ Define the units of a Variable.
 \section*{\tt \htmlref{vlistDestroy}{vlistDestroy}}
 
 \begin{verbatim}
-    void vlistDestroy (intvlistID);
+    void vlistDestroy (int vlistID);
 \end{verbatim}
 
 Destroy a variable list.
@@ -803,7 +804,7 @@ Destroy a variable list.
 \section*{\tt \htmlref{vlistDuplicate}{vlistDuplicate}}
 
 \begin{verbatim}
-    int vlistDuplicate (intvlistID);
+    int vlistDuplicate (int vlistID);
 \end{verbatim}
 
 Duplicate a variable list.
@@ -812,7 +813,7 @@ Duplicate a variable list.
 \section*{\tt \htmlref{vlistInqAtt}{vlistInqAtt}}
 
 \begin{verbatim}
-    int vlistInqAtt (intvlistID, intvarID, intattrnum, char *name, int *typep, 
+    int vlistInqAtt (int vlistID, int varID, int attrnum, char *name, int *typep,
                      int *lenp);
 \end{verbatim}
 
@@ -822,7 +823,8 @@ Get information about an attribute.
 \section*{\tt \htmlref{vlistInqAttFlt}{vlistInqAttFlt}}
 
 \begin{verbatim}
-    int vlistInqAttFlt (intvlistID, intvarID, char *name, intmlen, double *dp_vec);
+    int vlistInqAttFlt (int vlistID, int varID, const char *name, int mlen,
+                        double *dp_vec);
 \end{verbatim}
 
 Get the value(s) of a floating point attribute.
@@ -831,7 +833,8 @@ Get the value(s) of a floating point attribute.
 \section*{\tt \htmlref{vlistInqAttInt}{vlistInqAttInt}}
 
 \begin{verbatim}
-    int vlistInqAttInt (intvlistID, intvarID, char *name, intmlen, int *ip_vec);
+    int vlistInqAttInt (int vlistID, int varID, const char *name, int mlen,
+                        int *ip_vec);
 \end{verbatim}
 
 Get the value(s) of an integer attribute.
@@ -840,7 +843,7 @@ Get the value(s) of an integer attribute.
 \section*{\tt \htmlref{vlistInqAttTxt}{vlistInqAttTxt}}
 
 \begin{verbatim}
-    int vlistInqAttTxt (intvlistID, intvarID, char *name, intmlen, char *tp);
+    int vlistInqAttTxt (int vlistID, int varID, const char *name, int mlen, char *tp);
 \end{verbatim}
 
 Get the value(s) of a text attribute.
@@ -849,7 +852,7 @@ Get the value(s) of a text attribute.
 \section*{\tt \htmlref{vlistInqNatts}{vlistInqNatts}}
 
 \begin{verbatim}
-    int vlistInqNatts (intvlistID, intvarID, int *nattsp);
+    int vlistInqNatts (int vlistID, int varID, int *nattsp);
 \end{verbatim}
 
 Get number of variable attributes assigned to this variable.
@@ -858,7 +861,7 @@ Get number of variable attributes assigned to this variable.
 \section*{\tt \htmlref{vlistInqTaxis}{vlistInqTaxis}}
 
 \begin{verbatim}
-    int vlistInqTaxis (intvlistID);
+    int vlistInqTaxis (int vlistID);
 \end{verbatim}
 
 Get the time axis of a variable list.
@@ -867,7 +870,7 @@ Get the time axis of a variable list.
 \section*{\tt \htmlref{vlistInqVarCode}{vlistInqVarCode}}
 
 \begin{verbatim}
-    int vlistInqVarCode (intvlistID, intvarID);
+    int vlistInqVarCode (int vlistID, int varID);
 \end{verbatim}
 
 Get the code number of a Variable.
@@ -876,7 +879,7 @@ Get the code number of a Variable.
 \section*{\tt \htmlref{vlistInqVarDatatype}{vlistInqVarDatatype}}
 
 \begin{verbatim}
-    int vlistInqVarDatatype (intvlistID, intvarID);
+    int vlistInqVarDatatype (int vlistID, int varID);
 \end{verbatim}
 
 Get the data type of a Variable.
@@ -885,7 +888,7 @@ Get the data type of a Variable.
 \section*{\tt \htmlref{vlistInqVarLongname}{vlistInqVarLongname}}
 
 \begin{verbatim}
-    void vlistInqVarLongname (intvlistID, intvarID, char *longname);
+    void vlistInqVarLongname (int vlistID, int varID, char *longname);
 \end{verbatim}
 
 Get the long name of a Variable.
@@ -894,7 +897,7 @@ Get the long name of a Variable.
 \section*{\tt \htmlref{vlistInqVarMissval}{vlistInqVarMissval}}
 
 \begin{verbatim}
-    double vlistInqVarMissval (intvlistID, intvarID);
+    double vlistInqVarMissval (int vlistID, int varID);
 \end{verbatim}
 
 Get the missing value of a Variable.
@@ -903,7 +906,7 @@ Get the missing value of a Variable.
 \section*{\tt \htmlref{vlistInqVarName}{vlistInqVarName}}
 
 \begin{verbatim}
-    void vlistInqVarName (intvlistID, intvarID, char *name);
+    void vlistInqVarName (int vlistID, int varID, char *name);
 \end{verbatim}
 
 Get the name of a Variable.
@@ -912,7 +915,7 @@ Get the name of a Variable.
 \section*{\tt \htmlref{vlistInqVarParam}{vlistInqVarParam}}
 
 \begin{verbatim}
-    int vlistInqVarParam (intvlistID, intvarID);
+    int vlistInqVarParam (int vlistID, int varID);
 \end{verbatim}
 
 Get the parameter number of a Variable.
@@ -921,7 +924,7 @@ Get the parameter number of a Variable.
 \section*{\tt \htmlref{vlistInqVarStdname}{vlistInqVarStdname}}
 
 \begin{verbatim}
-    void vlistInqVarStdname (intvlistID, intvarID, char *stdname);
+    void vlistInqVarStdname (int vlistID, int varID, char *stdname);
 \end{verbatim}
 
 Get the standard name of a Variable.
@@ -930,7 +933,7 @@ Get the standard name of a Variable.
 \section*{\tt \htmlref{vlistInqVarUnits}{vlistInqVarUnits}}
 
 \begin{verbatim}
-    void vlistInqVarUnits (intvlistID, intvarID, char *units);
+    void vlistInqVarUnits (int vlistID, int varID, char *units);
 \end{verbatim}
 
 Get the units of a Variable.
@@ -939,7 +942,7 @@ Get the units of a Variable.
 \section*{\tt \htmlref{vlistMerge}{vlistMerge}}
 
 \begin{verbatim}
-    void vlistMerge (intvlistID2, intvlistID1);
+    void vlistMerge (int vlistID2, int vlistID1);
 \end{verbatim}
 
 Merge two variable lists.
@@ -948,7 +951,7 @@ Merge two variable lists.
 \section*{\tt \htmlref{vlistNgrids}{vlistNgrids}}
 
 \begin{verbatim}
-    int vlistNgrids (intvlistID);
+    int vlistNgrids (int vlistID);
 \end{verbatim}
 
 Number of grids in a variable list.
@@ -957,7 +960,7 @@ Number of grids in a variable list.
 \section*{\tt \htmlref{vlistNumber}{vlistNumber}}
 
 \begin{verbatim}
-    int vlistNumber (intvlistID);
+    int vlistNumber (int vlistID);
 \end{verbatim}
 
 Number type in a variable list.
@@ -966,7 +969,7 @@ Number type in a variable list.
 \section*{\tt \htmlref{vlistNvars}{vlistNvars}}
 
 \begin{verbatim}
-    int vlistNvars (intvlistID);
+    int vlistNvars (int vlistID);
 \end{verbatim}
 
 Number of variables in a variable list.
@@ -975,7 +978,7 @@ Number of variables in a variable list.
 \section*{\tt \htmlref{vlistNzaxis}{vlistNzaxis}}
 
 \begin{verbatim}
-    int vlistNzaxis (intvlistID);
+    int vlistNzaxis (int vlistID);
 \end{verbatim}
 
 Number of zaxis in a variable list.
@@ -984,7 +987,7 @@ Number of zaxis in a variable list.
 \section*{\tt \htmlref{zaxisCreate}{zaxisCreate}}
 
 \begin{verbatim}
-    int zaxisCreate (intzaxistype, intsize);
+    int zaxisCreate (int zaxistype, int size);
 \end{verbatim}
 
 Create a vertical Z-axis.
@@ -993,7 +996,7 @@ Create a vertical Z-axis.
 \section*{\tt \htmlref{zaxisDefLevel}{zaxisDefLevel}}
 
 \begin{verbatim}
-    void zaxisDefLevel (intzaxisID, intlevelID, doublelevels);
+    void zaxisDefLevel (int zaxisID, int levelID, double levels);
 \end{verbatim}
 
 Define one level of a Z-axis.
@@ -1002,7 +1005,7 @@ Define one level of a Z-axis.
 \section*{\tt \htmlref{zaxisDefLevels}{zaxisDefLevels}}
 
 \begin{verbatim}
-    void zaxisDefLevels (intzaxisID, double *levels_vec);
+    void zaxisDefLevels (int zaxisID, const double *levels_vec);
 \end{verbatim}
 
 Define the levels of a Z-axis.
@@ -1011,7 +1014,7 @@ Define the levels of a Z-axis.
 \section*{\tt \htmlref{zaxisDefLongname}{zaxisDefLongname}}
 
 \begin{verbatim}
-    void zaxisDefLongname (intzaxisID, char *longname);
+    void zaxisDefLongname (int zaxisID, const char *longname);
 \end{verbatim}
 
 Define the longname of a Z-axis.
@@ -1020,7 +1023,7 @@ Define the longname of a Z-axis.
 \section*{\tt \htmlref{zaxisDefName}{zaxisDefName}}
 
 \begin{verbatim}
-    void zaxisDefName (intzaxisID, char *name);
+    void zaxisDefName (int zaxisID, const char *name);
 \end{verbatim}
 
 Define the name of a Z-axis.
@@ -1029,7 +1032,7 @@ Define the name of a Z-axis.
 \section*{\tt \htmlref{zaxisDefReference}{zaxisDefReference}}
 
 \begin{verbatim}
-    void zaxisDefReference (intzaxisID, intrefID);
+    void zaxisDefReference (int zaxisID, int refID);
 \end{verbatim}
 
 Define the reference of a generalized Z-axis.
@@ -1038,7 +1041,7 @@ Define the reference of a generalized Z-axis.
 \section*{\tt \htmlref{zaxisDefUUID}{zaxisDefUUID}}
 
 \begin{verbatim}
-    void zaxisDefUUID (intzaxisID, char *uuid);
+    void zaxisDefUUID (int zaxisID, const char *uuid);
 \end{verbatim}
 
 Define the uuid of a generalized Z-axis.
@@ -1047,7 +1050,7 @@ Define the uuid of a generalized Z-axis.
 \section*{\tt \htmlref{zaxisDefUnits}{zaxisDefUnits}}
 
 \begin{verbatim}
-    void zaxisDefUnits (intzaxisID, char *units);
+    void zaxisDefUnits (int zaxisID, const char *units);
 \end{verbatim}
 
 Define the units of a Z-axis.
@@ -1056,7 +1059,7 @@ Define the units of a Z-axis.
 \section*{\tt \htmlref{zaxisDestroy}{zaxisDestroy}}
 
 \begin{verbatim}
-    void zaxisDestroy (intzaxisID);
+    void zaxisDestroy (int zaxisID);
 \end{verbatim}
 
 Destroy a vertical Z-axis.
@@ -1065,7 +1068,7 @@ Destroy a vertical Z-axis.
 \section*{\tt \htmlref{zaxisDuplicate}{zaxisDuplicate}}
 
 \begin{verbatim}
-    int zaxisDuplicate (intzaxisID);
+    int zaxisDuplicate (int zaxisID);
 \end{verbatim}
 
 Duplicate a Z-axis.
@@ -1074,7 +1077,7 @@ Duplicate a Z-axis.
 \section*{\tt \htmlref{zaxisInqLevel}{zaxisInqLevel}}
 
 \begin{verbatim}
-    double zaxisInqLevel (intzaxisID, intlevelID);
+    double zaxisInqLevel (int zaxisID, int levelID);
 \end{verbatim}
 
 Get one level of a Z-axis.
@@ -1083,7 +1086,7 @@ Get one level of a Z-axis.
 \section*{\tt \htmlref{zaxisInqLevels}{zaxisInqLevels}}
 
 \begin{verbatim}
-    void zaxisInqLevels (intzaxisID, double *levels_vec);
+    void zaxisInqLevels (int zaxisID, double *levels_vec);
 \end{verbatim}
 
 Get all levels of a Z-axis.
@@ -1092,7 +1095,7 @@ Get all levels of a Z-axis.
 \section*{\tt \htmlref{zaxisInqLongname}{zaxisInqLongname}}
 
 \begin{verbatim}
-    void zaxisInqLongname (intzaxisID, char *longname);
+    void zaxisInqLongname (int zaxisID, char *longname);
 \end{verbatim}
 
 Get the longname of a Z-axis.
@@ -1101,7 +1104,7 @@ Get the longname of a Z-axis.
 \section*{\tt \htmlref{zaxisInqName}{zaxisInqName}}
 
 \begin{verbatim}
-    void zaxisInqName (intzaxisID, char *name);
+    void zaxisInqName (int zaxisID, char *name);
 \end{verbatim}
 
 Get the name of a Z-axis.
@@ -1110,7 +1113,7 @@ Get the name of a Z-axis.
 \section*{\tt \htmlref{zaxisInqReference}{zaxisInqReference}}
 
 \begin{verbatim}
-    int zaxisInqReference (intzaxisID);
+    int zaxisInqReference (int zaxisID);
 \end{verbatim}
 
 Get the reference of a generalized Z-axis.
@@ -1119,7 +1122,7 @@ Get the reference of a generalized Z-axis.
 \section*{\tt \htmlref{zaxisInqSize}{zaxisInqSize}}
 
 \begin{verbatim}
-    int zaxisInqSize (intzaxisID);
+    int zaxisInqSize (int zaxisID);
 \end{verbatim}
 
 Get the size of a Z-axis.
@@ -1128,7 +1131,7 @@ Get the size of a Z-axis.
 \section*{\tt \htmlref{zaxisInqStdname}{zaxisInqStdname}}
 
 \begin{verbatim}
-    void zaxisInqStdname (intzaxisID, char *stdname);
+    void zaxisInqStdname (int zaxisID, char *stdname);
 \end{verbatim}
 
 Get the standard name of a Z-axis.
@@ -1137,7 +1140,7 @@ Get the standard name of a Z-axis.
 \section*{\tt \htmlref{zaxisInqType}{zaxisInqType}}
 
 \begin{verbatim}
-    int zaxisInqType (intzaxisID);
+    int zaxisInqType (int zaxisID);
 \end{verbatim}
 
 Get the type of a Z-axis.
@@ -1146,7 +1149,7 @@ Get the type of a Z-axis.
 \section*{\tt \htmlref{zaxisInqUUID}{zaxisInqUUID}}
 
 \begin{verbatim}
-    char * zaxisInqUUID (intzaxisID, char *uuid);
+    char * zaxisInqUUID (int zaxisID, char *uuid);
 \end{verbatim}
 
 Get the reference of a generalized Z-axis.
@@ -1155,7 +1158,7 @@ Get the reference of a generalized Z-axis.
 \section*{\tt \htmlref{zaxisInqUnits}{zaxisInqUnits}}
 
 \begin{verbatim}
-    void zaxisInqUnits (intzaxisID, char *units);
+    void zaxisInqUnits (int zaxisID, char *units);
 \end{verbatim}
 
 Get the units of a Z-axis.
