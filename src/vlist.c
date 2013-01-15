@@ -291,6 +291,13 @@ void vlistCopy(int vlistID2, int vlistID1)
               memcpy(vlistptr2->vars[varID].ensdata,
                      vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
             }
+          if ( vlistptr1->vars[varID].deco )
+            {
+              size_t decoSize = (size_t)vlistptr1->vars[varID].decoSize;
+              vlistptr2->vars[varID].deco = malloc(decoSize * sizeof (deco_t));
+              memcpy(vlistptr2->vars[varID].deco, vlistptr1->vars[varID].deco,
+                     decoSize * sizeof (deco_t));
+            }
 
 	  vlistptr2->vars[varID].atts.nelems = 0;
 	  vlistCopyVarAtts(vlistID1, varID, vlistID2, varID);
