@@ -214,10 +214,11 @@ extern "C" {
 #define  PIO_MINIOMODEWITHSPECIALPROCS  PIO_WRITER  
  
   /* parallel IO routines */
-#ifndef MPI_VERSION
-#  define MPI_Comm int
+#ifdef MPI_VERSION
+#  include <yaxt.h>
 #endif
 
+#ifdef MPI_VERSION
 void     pioEndDef             ( void );
 void     pioEndTimestepping    ( void );
 void     pioFinalize           ( void );
@@ -229,8 +230,10 @@ int      pioInqVarDecoOff      ( int, int );
 void     pioNamespaceSetActive ( int );
 void     pioWriteTimestep      ( int, int, int );
 
-#ifndef MPI_VERSION
-#undef MPI_Comm
+void     streamWriteVarPart    (int streamID, int varID, int memtype,
+                                const void *data, int nmiss,
+                                Xt_idxlist partDesc);
+
 #endif
 
   /* CDI control routines */

@@ -31,8 +31,10 @@
 
 #include <string.h>
 
-#ifdef HAVE_YAXT
+#ifdef USE_MPI
 #include <yaxt.h>
+#else
+typedef struct Xt_idxlist_ *Xt_idxlist;
 #endif
 
 
@@ -1778,11 +1780,11 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
   stream_write_var(streamID, varID, MEMTYPE_DOUBLE, data, nmiss);
 }
 
-#if defined USE_MPI && defined HAVE_YAXT
 void
 streamWriteVarPart(int streamID, int varID, int memtype, const void *data,
                    int nmiss, Xt_idxlist partDesc)
 {
+#if defined USE_MPI
   int filetype;
   stream_t *streamptr;
 
@@ -1807,9 +1809,8 @@ streamWriteVarPart(int streamID, int varID, int memtype, const void *data,
     default:
       xabort("INTERNAL ERROR");
     }
-}
-
 #endif
+}
 
 /*
 @Function  streamWriteVarF

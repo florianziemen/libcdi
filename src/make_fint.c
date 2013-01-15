@@ -60,7 +60,8 @@ static void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
 }
 
 enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISMPI_COMM,
-             ISINTP, ISINTV, ISINTVV, ISREALP, ISDOUBLEP, ISSTRING, ISSTRINGP,
+             ISXT_IDXLIST, ISCHOICE, ISINTP, ISINTV, ISINTVV, ISREALP,
+             ISDOUBLEP, ISSTRING, ISSTRINGP,
              NUM_KNOWN_ARG_TYPES};
 
 enum conversionType { CONV_ARG, CONV_RET };
@@ -70,6 +71,9 @@ typedef int (*cfConversionEmitter)(FILE *outfp, const char *argName,
                                    size_t argNameLen, enum conversionType part);
 
 static int cfMPICommConvert(FILE *outfp, const char *argName,
+                            size_t argNameLen, enum conversionType part);
+
+static int cfXtIdxlistConvert(FILE *outfp, const char *argName,
                             size_t argNameLen, enum conversionType part);
 
 struct symbol {
@@ -100,6 +104,11 @@ static struct symbol funArgSym[]
       { "INTEGER",         "INT", "MPI_Comm",
         "^"WS"*MPI_Comm"WS"+"SYMRE"?"WS"*[,\\)]", 1, 1,
         cfMPICommConvert, "int" },
+      { "TYPE(XT_IDXLIST)", "PVOID", "Xt_idxlist",
+        "^"WS"*Xt_idxlist"WS"+"SYMRE"?"WS"*[,\\)]", 1, 1,
+        cfXtIdxlistConvert, "void *" },
+      { "CHOICE", "PVOID", "const void *",
+        "^"WS"*const"WS"+void"WS"*\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0 },
       { "INTEGER",         "PINT",    "int *",
         "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0 },
       { "INTEGER",         "INTV",    "int[]",
@@ -259,6 +268,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   fprintf(fpint, "\n");
   fputs("#if USE_MPI\n"
         "#  include <mpi.h>\n"
+        "#  include <yaxt.h>\n"
         "#else\n"
         "#define MPI_Comm int\n"
         "#define MPI_Comm_f2c(c) (c)\n"
@@ -786,7 +796,7 @@ symRegexCompile(size_t numSyms, struct symbol symList[],
 
 /* emit conversion code for MPI_Comm argument */
 static int cfMPICommConvert(FILE *outfp, const char *argName,
-                               size_t argNameLen, enum conversionType part)
+                            size_t argNameLen, enum conversionType part)
 {
   int retval = 0;
   switch (part)
@@ -797,6 +807,24 @@ static int cfMPICommConvert(FILE *outfp, const char *argName,
       break;
     case CONV_RET:
       retval = fprintf(outfp, "MPI_Comm_c2f(%.*s)", (int)argNameLen, argName);
+      break;
+    }
+  return retval;
+}
+
+/* emit conversion code for Xt_idxlist argument */
+static int cfXtIdxlistConvert(FILE *outfp, const char *argName,
+                              size_t argNameLen, enum conversionType part)
+{
+  int retval = 0;
+  switch (part)
+    {
+    case CONV_ARG:
+      retval
+        = fprintf(outfp, "(*(Xt_idxlist *)%.*s)", (int)argNameLen, argName);
+      break;
+    case CONV_RET:
+      abort();
       break;
     }
   return retval;

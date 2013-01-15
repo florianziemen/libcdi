@@ -6,6 +6,7 @@
 
 #if USE_MPI
 #  include <mpi.h>
+#  include <yaxt.h>
 #else
 #define MPI_Comm int
 #define MPI_Comm_f2c(c) (c)
@@ -81,6 +82,11 @@ FCALLSCFUN2 (INT, pioInqVarDecoChunk, PIOINQVARDECOCHUNK, pioinqvardecochunk, IN
 FCALLSCFUN2 (INT, pioInqVarDecoOff, PIOINQVARDECOOFF, pioinqvardecooff, INT, INT)
 FCALLSCSUB1 (pioNamespaceSetActive, PIONAMESPACESETACTIVE, pionamespacesetactive, INT)
 FCALLSCSUB3 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep, INT, INT, INT)
+static void streamWriteVarPart_fwrap(int streamID, int varID, int memtype, const void * data, int nmiss, void * partDesc)
+{
+  streamWriteVarPart( streamID,  varID,  memtype,  data,  nmiss, (*(Xt_idxlist *)partDesc));
+}
+FCALLSCSUB6 (streamWriteVarPart_fwrap, STREAMWRITEVARPART, streamwritevarpart, INT, INT, INT, PVOID, INT, PVOID)
 
 /*  CDI control routines  */
 
