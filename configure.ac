@@ -94,7 +94,7 @@ AS_IF([test x"${enable_mpi}" = x"yes"],
 HAVE_PARALLEL_NC4=0
 AS_IF([test x"$USE_MPI" = xyes],
   [AC_DEFINE([USE_MPI],[1],[parallel I/O requested and available])
-   AC_CHECK_PROGS([MPI_LAUNCH],[mpirun mpiexec],[])
+   AC_PATH_PROGS([MPI_LAUNCH],[mpirun mpiexec],[])
    AS_IF([test x$MPI_LAUNCH = x],[])
    AS_IF([test x"$ENABLE_NC4" = xyes],
      [AC_CHECK_HEADERS([netcdf_par.h],
