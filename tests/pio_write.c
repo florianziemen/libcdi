@@ -96,7 +96,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   int vlistID, varIDs[nVars], streamID, tsID, tfID = 0;
   int i, varID, nmiss = 0;
   double *lons, *lats;
-  double *var = NULL, *varslice;
+  double *var = NULL, *varslice = NULL;
   double mscale, mrscale;
   time_t current_time;
   int vdate = 19850101, vtime = 120000;
@@ -104,7 +104,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   char filename[1024];
   int nlon = setup.nlon, nlat = setup.nlat;
   uint32_t checksum_state[nVars];
-  size_t varSize[nVars], varslice_size;
+  size_t varSize[nVars], varslice_size = 0;
   int *nlev;
   double *levs;
 #if USE_MPI
@@ -128,10 +128,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
   gridID = gridCreate ( GRID_LONLAT, nlon*nlat );
   gridDefXsize ( gridID, nlon );
   gridDefYsize ( gridID, nlat );
-  lons = malloc(nlon * sizeof (lons[0]));
+  lons = xmalloc(nlon * sizeof (lons[0]));
   for (i = 0; i < nlon; ++i)
     lons[i] = ((double)(i * 360))/nlon;
-  lats = malloc(nlat * sizeof (lats[0]));
+  lats = xmalloc(nlat * sizeof (lats[0]));
   for (i = 0; i < nlat; ++i)
     lats[i] = ((double)(i * 180))/nlat - 90.0;
   gridDefXvals ( gridID, lons );
@@ -149,9 +149,6 @@ modelRun(struct model_config setup, MPI_Comm comm)
       zaxisID[i] = zaxisCreate ( ZAXIS_PRESSURE, nlev[i] );
       zaxisDefLevels ( zaxisID[i], levs );
     }
-
-  varslice = NULL;
-  varslice_size = 0;
 
   vlistID = vlistCreate ();
 
@@ -265,6 +262,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
           }
         }
     }
+  free(varslice);
   pioEndTimestepping ();
   streamClose ( streamID );
   vlistDestroy ( vlistID );
@@ -272,6 +270,13 @@ modelRun(struct model_config setup, MPI_Comm comm)
   for ( i = 0; i < nVars; i++ )
     zaxisDestroy ( zaxisID[i] );
   gridDestroy ( gridID );
+#if USE_MPI
+  free(displs);
+  free(chunks);
+  free(var);
+#endif
+  free(nlev);
+  free(levs);
   free(lats);
   free(lons);
 }
@@ -384,7 +389,7 @@ int main (int argc, char *argv[])
   int nProcsIO = 2;
 
   xmpi ( MPI_Init ( &argc, &argv));
-  xmpi ( MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob ));
+  commGlob = MPI_COMM_WORLD;
   xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
   xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
