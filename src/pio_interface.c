@@ -747,10 +747,7 @@ int pioInit ( int commGlobArg, int nProcsIO, int IOMode, int nNamespaces,
 #endif
 
 #ifdef USE_MPI
-  MPI_Comm commGlob;
-
-  commGlob = MPI_COMM_NULL;
-  commGlob = MPI_Comm_f2c (( MPI_Fint ) commGlobArg );
+  MPI_Comm commGlob = MPI_Comm_f2c((MPI_Fint)commGlobArg);
   xassert ( commGlob != MPI_COMM_NULL );
 
   return MPI_Comm_c2f ( pioInit_c ( commGlob, nProcsIO, IOMode, nNamespaces,
