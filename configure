@@ -23953,6 +23953,17 @@ _ACEOF
 fi
 done
 
+for ac_func in getline
+do :
+  ac_fn_c_check_func "$LINENO" "getline" "ac_cv_func_getline"
+if test "x$ac_cv_func_getline" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GETLINE 1
+_ACEOF
+
+fi
+done
+
 #  ----------------------------------------------------------------------
 # Checks for the availability of ANSI-C99 functions
 ac_fn_c_check_decl "$LINENO" "isnan" "ac_cv_have_decl_isnan" "$ac_includes_default

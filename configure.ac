@@ -75,7 +75,8 @@ AC_CHECK_MEMBERS([struct stat.st_blksize])
 AC_CHECK_HEADERS(malloc.h)
 #  ----------------------------------------------------------------------
 # Checks for the availability of functions
-AC_CHECK_FUNCS(mallinfo)
+AC_CHECK_FUNCS([mallinfo])
+AC_CHECK_FUNCS([getline])
 #  ----------------------------------------------------------------------
 # Checks for the availability of ANSI-C99 functions
 AC_CHECK_DECLS([isnan],,,[AC_INCLUDES_DEFAULT
