@@ -690,7 +690,7 @@ int *    commInqNodeSizes   ( void )
 // collective call
 void     commDefCommsIO     ( void )
 {
-  MPI_Group groupGlob, currGroupIO;
+  MPI_Group groupGlob;
   int collID, * ranks, i, currIORank;
   char name[MAXCOMMIONAME];
 
@@ -718,6 +718,7 @@ void     commDefCommsIO     ( void )
     {
       currIORank = info->nodeMap[collID];
       * ( ranks + info->nProcsModel ) = currIORank;
+      MPI_Group currGroupIO;
       xmpi ( MPI_Group_incl ( groupGlob, info->nProcsModel + 1, 
                               ranks, &currGroupIO ));
       xmpi ( MPI_Comm_create ( info->commGlob, currGroupIO,  
@@ -732,6 +733,7 @@ void     commDefCommsIO     ( void )
 	  sprintf ( &name[8], "%d", collID ); 
 	  xmpi ( MPI_Comm_set_name ( info->commsIO[collID], name ));
 	}
+      xmpi(MPI_Group_free(&currGroupIO));
     }
 
   if ( ddebug >= 2 )
@@ -743,7 +745,6 @@ void     commDefCommsIO     ( void )
 	xdebugComm ( &info->commCalc );
     }
 
-  xmpi ( MPI_Group_free ( &currGroupIO ));
   xmpi ( MPI_Group_free ( &groupGlob ));
   free ( ranks );
 
