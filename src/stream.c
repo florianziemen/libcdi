@@ -39,7 +39,8 @@ extern resOps streamOps;
 FILE *popen(const char *command, const char *type);
 int pclose(FILE *stream);
 
-void cdiPrintDefaults(void)
+static void
+cdiPrintDefaults(void)
 {
   fprintf (stderr, "default instID     :  %d\n", cdiDefaultInstID);
   fprintf (stderr, "default modelID    :  %d\n", cdiDefaultModelID);
