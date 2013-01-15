@@ -37,7 +37,7 @@ static struct
 {
   size_t size;
   unsigned char *buffer;
-  int currentRecord, dictSize;
+  int dictSize;
 } *rxWin = NULL;
 
 static MPI_Win getWin = MPI_WIN_NULL;
