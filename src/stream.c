@@ -1655,7 +1655,9 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 }
 
 
-void stream_write_var(int streamID, int varID, int memtype, const void *data, int nmiss)
+static void
+stream_write_var(int streamID, int varID, int memtype, const void *data,
+                 int nmiss)
 {
   int filetype;
   stream_t *streamptr;
