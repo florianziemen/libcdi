@@ -118,7 +118,7 @@ void commDestroy ( void )
     {
       for ( collID = 0; collID < info->nProcsColl; collID++ )
 	if ( info->commsIO[collID] != MPI_COMM_NULL )
-	  xmpi ( MPI_Comm_free ( &info->commsIO[collID] ));
+	  xmpi(MPI_Comm_free(info->commsIO + collID));
       free ( info->commsIO );
       info->commsIO = NULL;
     }
@@ -710,19 +710,20 @@ void     commDefCommsIO     ( void )
   
   ranks = xmalloc (( info->nProcsModel + 1 ) * sizeof ( ranks[0] ));
   for ( i = 0; i < info->nProcsModel; i++ )
-    * ( ranks + i ) = i;
+    ranks[i] = i;
   
   xmpi ( MPI_Comm_group ( info->commGlob, &groupGlob )); 
 
   for ( collID = 0; collID < info->nProcsColl; collID++ )
     {
       currIORank = info->nodeMap[collID];
-      * ( ranks + info->nProcsModel ) = currIORank;
+      ranks[info->nProcsModel] = currIORank;
       MPI_Group currGroupIO;
-      xmpi ( MPI_Group_incl ( groupGlob, info->nProcsModel + 1, 
-                              ranks, &currGroupIO ));
-      xmpi ( MPI_Comm_create ( info->commGlob, currGroupIO,  
-                               info->commsIO + collID ));
+      xmpi(MPI_Group_incl(groupGlob, info->nProcsModel + 1,
+                          ranks, &currGroupIO));
+      xmpi(MPI_Comm_create(info->commGlob, currGroupIO,
+                           info->commsIO + collID));
+      xmpi(MPI_Group_free(&currGroupIO));
       if ( info->rankGlob == currIORank )
 	info->commCalc = info->commsIO[collID];
 
@@ -733,7 +734,6 @@ void     commDefCommsIO     ( void )
 	  sprintf ( &name[8], "%d", collID ); 
 	  xmpi ( MPI_Comm_set_name ( info->commsIO[collID], name ));
 	}
-      xmpi(MPI_Group_free(&currGroupIO));
     }
 
   if ( ddebug >= 2 )

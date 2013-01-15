@@ -93,8 +93,8 @@ int destroyAFiledataMPINONB ( void *v )
 
   of = (aFiledataM * ) v;
 
-  xdebug ( "IOPE%d: name=%s, close file, in", 
-           rankNode, of->name );
+  xdebug ( "IOPE%d: close file %d, name=\"%s\"",
+           rankNode, of->fileID, of->name );
   
   /* close file */
 

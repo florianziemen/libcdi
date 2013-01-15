@@ -117,21 +117,18 @@ void listInitPointer ( void )
 
 static void listDestroy ( void )
 {
-  listElem_t * listElem;
-  int i, j, nnsp;
-
   if ( listResources )
     {
-      nnsp = namespaceGetNumber ();
-      for ( i = 0; i < nnsp; i++ )
+      int nnsp = namespaceGetNumber ();
+      for (int i = 0; i < nnsp; i++ )
 	{
 	  pioNamespaceSetActive ( i );
           if ( listResources[i] )
             {
               if ( listSizeAllocated )
-                for ( j = 0; j < listSizeAllocated[i]; j++ )
+                for ( int j = 0; j < listSizeAllocated[i]; j++ )
                   {
-                    listElem = listResources[i] + j;
+                    listElem_t *listElem = listResources[i] + j;
                     if ( listElem->val )
                       listElem->ops->valDestroy ( listElem->val );
                   }
