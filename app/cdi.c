@@ -396,9 +396,9 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  if ( vardis ) vlistInqVarName(vlistID, varID, varname);
 
           if ( vardis )
-	    fprintf(stdout, "%-11s ", varname);
+	    fprintf(stdout, "%-11s", varname);
 	  else
-	    fprintf(stdout, "%-11s ", paramstr);
+	    fprintf(stdout, "%-11s", paramstr);
 
 	  fprintf(stdout, "\n");
 	}

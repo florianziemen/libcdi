@@ -37,12 +37,14 @@ static
 int gribapiGetGridType(grib_handle *gh)
 {
   int gridtype = GRID_GENERIC;
-  int gribgridtype;
+  int gribgridtype = -1;
   long lpar;
 
     {
-      GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
-      gribgridtype = (int) lpar;
+      int status;
+      status = grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar);
+
+      if ( status ==  0 ) gribgridtype = (int) lpar;
 
       switch (gribgridtype)
 	{
@@ -71,15 +73,15 @@ static
 int gribapiGetIsRotated(grib_handle *gh)
 {
   int isRotated = 0;
-  int gribgridtype;
+  int gribgridtype = -1;
   long lpar;
+  int status;
 
-    {
-      GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
-      gribgridtype = (int) lpar;
+  status = grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar);
 
-      if ( gribgridtype == GRIB2_GTYPE_LATLON_ROT ) isRotated = 1;
-    }
+  if ( status ==  0 ) gribgridtype = (int) lpar;
+
+  if ( gribgridtype == GRIB2_GTYPE_LATLON_ROT ) isRotated = 1;
 
   return (isRotated);
 }
@@ -389,8 +391,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
           }
 
 	if ( numberOfPoints != nlon*nlat )
-	  Error("numberOfPoints (%d) and gridSize (%d) differ!",
-		(int)numberOfPoints, nlon*nlat);
+	  Error("numberOfPoints (%d) and gridSize (%d) differ!", (int)numberOfPoints, nlon*nlat);
 
 	grid->size  = numberOfPoints;
 	grid->xsize = nlon;
