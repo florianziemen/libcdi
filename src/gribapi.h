@@ -34,8 +34,8 @@
 #define  GRIB2_GTYPE_NUMBER              101  /*  General Unstructured Grid                */
 
 const char *gribapiLibraryVersion(void);
-void gribContainersNew(int streamID);
-void gribContainersDelete(int streamID);
+void gribContainersNew(stream_t * streamptr);
+void gribContainersDelete(stream_t * streamptr);
 void *gribHandleNew(int editionNumber);
 void gribHandleDelete(void *gh);
 

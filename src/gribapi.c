@@ -36,12 +36,9 @@ const char *gribapiLibraryVersion(void)
 }
 
 
-void gribContainersNew(int streamID)
+void gribContainersNew(stream_t * streamptr)
 {
-  stream_t *streamptr;
   int editionNumber = 2;
-
-  streamptr = stream_to_pointer(streamID);
 
   if ( streamptr->filetype == FILETYPE_GRB ) editionNumber = 1;
 
@@ -87,12 +84,8 @@ void gribContainersNew(int streamID)
 }
 
 
-void gribContainersDelete(int streamID)
+void gribContainersDelete(stream_t * streamptr)
 {
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
   if ( streamptr->gribContainers )
     {
       int nvars = streamptr->nvars;

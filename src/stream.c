@@ -505,7 +505,7 @@ char *streamFilename(int streamID)
   return (streamptr->filename);
 }
 
-
+static
 int cdiInqTimeSize(int streamID)
 {
   int ntsteps;
@@ -1174,7 +1174,7 @@ void streamClose(int streamID)
 	  case FILETYPE_GRB2:
 	    {
 	      gribClose(fileID);
-	      gribContainersDelete(streamID);
+	      gribContainersDelete(streamptr);
 	      break;
 	    }
 #endif
@@ -1633,7 +1633,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
     }
 }
 
-
+static
 void stream_write_var(int streamID, int varID, int memtype, const void *data, int nmiss)
 {
   int filetype;
@@ -1856,7 +1856,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
     }
 }
 
-
+static
 void stream_write_var_slice(int streamID, int varID, int levelID, int memtype, const void *data, int nmiss)
 {
   int filetype;
@@ -2219,7 +2219,7 @@ void streamDefVlist(int streamID, int vlistID)
 	  else if ( streamptr->filetype == FILETYPE_GRB  ||
 		    streamptr->filetype == FILETYPE_GRB2 )
 	    {
-	      gribContainersNew(streamID);
+	      gribContainersNew(streamptr);
 	    }
 	}
     }
