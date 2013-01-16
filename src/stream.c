@@ -526,18 +526,13 @@ int cdiInqTimeSize(int streamID)
   return (ntsteps);
 }
 
-
-int cdiInqContents(int streamID)
+static
+int cdiInqContents(stream_t * streamptr)
 {
   int filetype;
   int vlistID;
   int taxisID;
   int status = 0;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
@@ -748,7 +743,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 
 	  streamptr->vlistID = vlistID;
 	  /* cdiReadByteorder(streamID); */
-	  status = cdiInqContents(streamID);
+	  status = cdiInqContents(streamptr);
 	  if ( status < 0 ) return (status);
 	  vlistptr = vlist_to_pointer(streamptr->vlistID);
 	  vlistptr->ntsteps = streamNtsteps(streamID);
@@ -858,7 +853,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 
       streamptr->vlistID = vlistCreate();
       /* cdiReadByteorder(streamID); */
-      status = cdiInqContents(streamID);
+      status = cdiInqContents(streamptr);
       if ( status < 0 ) return (status);
       vlistptr = vlist_to_pointer(streamptr->vlistID);
       vlistptr->ntsteps = cdiInqTimeSize(streamID);
