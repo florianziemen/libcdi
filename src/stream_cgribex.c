@@ -351,7 +351,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
 }
 
 static
-void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
+void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
 		      int *isec4, long recsize, off_t position, int datatype, int comptype, int lmv, int iret)
 {
   int zaxistype;
@@ -365,9 +365,6 @@ void cgribexAddRecord(int streamID, int param, int *isec1, int *isec2, double *f
   record_t *record;
   grid_t grid;
   int vlistID;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
 
   vlistID = streamptr->vlistID;
   tsID    = streamptr->curTsID;
@@ -515,7 +512,7 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
 }
 #endif
 
-int cgribexScanTimestep1(int streamID)
+int cgribexScanTimestep1(stream_t * streamptr)
 {
 #if  defined  (HAVE_LIBCGRIBEX)
   int *isec0, *isec1, *isec2, *isec3, *isec4;
@@ -544,13 +541,8 @@ int cgribexScanTimestep1(int streamID)
   int comptype;
   long unzipsize;
   compvar_t compVar, compVar0;
-  stream_t *streamptr;
   extern int cdiSkipRecords;
   int nskip = cdiSkipRecords;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 0;
 
@@ -702,7 +694,7 @@ int cgribexScanTimestep1(int streamID)
       if ( CDI_Debug )
 	Message("%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
 
-      cgribexAddRecord(streamID, param, isec1, isec2, fsec2, fsec3,
+      cgribexAddRecord(streamptr, param, isec1, isec2, fsec2, fsec3,
 		       isec4, recsize, recpos, datatype, comptype, lmv, iret);
     }
 
@@ -778,7 +770,7 @@ int cgribexScanTimestep1(int streamID)
 }
 
 
-int cgribexScanTimestep2(int streamID)
+int cgribexScanTimestep2(stream_t * streamptr)
 {
   int rstatus = 0;
 #if  defined  (HAVE_LIBCGRIBEX)
@@ -804,11 +796,6 @@ int cgribexScanTimestep2(int streamID)
   int vlistID;
   long unzipsize;
   compvar_t compVar, compVar0;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 1;
 
@@ -1055,7 +1042,7 @@ int cgribexScanTimestep2(int streamID)
 }
 
 
-int cgribexScanTimestep(int streamID)
+int cgribexScanTimestep(stream_t * streamptr)
 {
   int rstatus = 0;
 #if  defined  (HAVE_LIBCGRIBEX)
@@ -1080,17 +1067,12 @@ int cgribexScanTimestep(int streamID)
   int rindex, nrecs = 0;
   long unzipsize;
   compvar_t compVar, compVar0;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   vlistID = streamptr->vlistID;
 
   if ( CDI_Debug )
     {
-      Message("streamID = %d", streamID);
+      Message("streamptr = %p", streamptr);
       Message("cts = %d", streamptr->curTsID);
       Message("rts = %d", streamptr->rtsteps);
       Message("nts = %d", streamptr->ntsteps);
