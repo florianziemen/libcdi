@@ -98,24 +98,19 @@ int grbBitsPerValue(int datatype)
 
 
 /*
-int grbInqRecord(int streamID, int *varID, int *levelID)
+int grbInqRecord(stream_t * streamptr, int *varID, int *levelID)
 {
   int status;
 
-  status = cgribexInqRecord(streamID, varID, levelID);
+  status = cgribexInqRecord(streamptr, varID, levelID);
 
   return (status);
 }
 */
 
-int grbDefRecord(int streamID)
+int grbDefRecord(stream_t * streamptr)
 {
   int status = 0;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   return (status);
 }
@@ -132,12 +127,12 @@ int grbDecode(int filetype, unsigned char *gribbuffer, int gribsize, double *dat
   else
 #endif
     status = gribapiDecode(gribbuffer, gribsize, data, gridsize, unreduced, nmiss, zip, missval);
- 
+
   return (status);
 }
 
 
-int grbReadRecord(int streamID, double *data, int *nmiss)
+int grbReadRecord(stream_t * streamptr, double *data, int *nmiss)
 {
   int status = 0;
   unsigned char *gribbuffer;
@@ -150,11 +145,6 @@ int grbReadRecord(int streamID, double *data, int *nmiss)
   int zip;
   int filetype;
   double missval;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
@@ -188,13 +178,11 @@ int grbReadRecord(int streamID, double *data, int *nmiss)
 }
 
 static
-int grbScanTimestep1(int streamID)
+int grbScanTimestep1(stream_t * streamptr)
 {
   int status;
   int filetype;
-  stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
   filetype  = streamptr->filetype;
 
 #if  defined  (HAVE_LIBCGRIBEX)
@@ -212,13 +200,11 @@ int grbScanTimestep1(int streamID)
 }
 
 static
-int grbScanTimestep2(int streamID)
+int grbScanTimestep2(stream_t * streamptr)
 {
   int status;
   int filetype;
-  stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
   filetype  = streamptr->filetype;
 
 #if  defined  (HAVE_LIBCGRIBEX)
@@ -236,13 +222,11 @@ int grbScanTimestep2(int streamID)
 }
 
 static
-int grbScanTimestep(int streamID)
+int grbScanTimestep(stream_t * streamptr)
 {
   int status;
   int filetype;
-  stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
   filetype  = streamptr->filetype;
 
 #if  defined  (HAVE_LIBCGRIBEX)
@@ -260,23 +244,18 @@ int grbScanTimestep(int streamID)
 }
 
 
-int grbInqContents(int streamID)
+int grbInqContents(stream_t * streamptr)
 {
   int fileID;
   int status = 0;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   fileID = streamptr->fileID;
 
   streamptr->curTsID = 0;
 
-  status = grbScanTimestep1(streamID);
+  status = grbScanTimestep1(streamptr);
 
-  if ( status == 0 && streamptr->ntsteps == -1 ) status = grbScanTimestep2(streamID);
+  if ( status == 0 && streamptr->ntsteps == -1 ) status = grbScanTimestep2(streamptr);
 
   fileSetPos(fileID, 0, SEEK_SET);
 
@@ -284,14 +263,9 @@ int grbInqContents(int streamID)
 }
 
 
-int grbInqTimestep(int streamID, int tsID)
+int grbInqTimestep(stream_t * streamptr, int tsID)
 {
   int ntsteps, nrecs;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   if ( tsID == 0 && streamptr->rtsteps == 0 )
     Error("Call to cdiInqContents missing!");
@@ -302,7 +276,7 @@ int grbInqTimestep(int streamID, int tsID)
   ntsteps = CDI_UNDEFID;
   while ( (tsID + 1) > streamptr->rtsteps && ntsteps == CDI_UNDEFID )
     {
-      ntsteps = grbScanTimestep(streamID);
+      ntsteps = grbScanTimestep(streamptr);
       if ( ntsteps == CDI_EUFSTRUCT )
 	{
 	  streamptr->ntsteps = streamptr->rtsteps;
@@ -324,7 +298,7 @@ int grbInqTimestep(int streamID, int tsID)
 }
 
 
-void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
+void grbReadVarDP(stream_t * streamptr, int varID, double *data, int *nmiss)
 {
   int fileID;
   int levelID, nlevs, gridID, gridsize;
@@ -337,11 +311,6 @@ void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
   int zip;
   int filetype;
   double missval;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
@@ -385,7 +354,7 @@ void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
 }
 
 
-void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *nmiss)
+void grbReadVarSliceDP(stream_t * streamptr, int varID, int levelID, double *data, int *nmiss)
 {
   int fileID;
   int gridID, gridsize;
@@ -397,11 +366,6 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
   int zip;
   int filetype;
   double missval;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
@@ -616,7 +580,7 @@ void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data
 }
 
 
-int grbCopyRecord(int streamID2, int streamID1)
+int grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 {
   int fileID1, fileID2;
   int tsID, recID, vrecID;
@@ -629,14 +593,6 @@ int grbCopyRecord(int streamID2, int streamID1)
   size_t nbytes;
   long unzipsize;
   int izip;
-  stream_t *streamptr1;
-  stream_t *streamptr2;
-
-  streamptr1 = stream_to_pointer(streamID1);
-  streamptr2 = stream_to_pointer(streamID2);
-
-  stream_check_ptr(__func__, streamptr1);
-  stream_check_ptr(__func__, streamptr2);
 
   filetype = streamptr1->filetype;
 
@@ -676,15 +632,10 @@ int grbCopyRecord(int streamID2, int streamID1)
 }
 
 
-int grb_write_record(int streamID, int memtype, const void *data, int nmiss)
+int grb_write_record(stream_t * streamptr, int memtype, const void *data, int nmiss)
 {
   int status = 0;
   int varID, levelID;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   varID   = streamptr->record->varID;
   levelID = streamptr->record->levelID;

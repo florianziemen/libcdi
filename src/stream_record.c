@@ -241,7 +241,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
-        status = grbDefRecord(streamID);
+        status = grbDefRecord(streamptr);
 	break;
       }
 #endif
@@ -309,7 +309,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
-        status = grbReadRecord(streamID, data, nmiss);
+        status = grbReadRecord(streamptr, data, nmiss);
 	break;
       }
 #endif
@@ -373,7 +373,7 @@ void stream_write_record(int streamID, int memtype, const void *data, int nmiss)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
-        status = grb_write_record(streamID, memtype, data, nmiss);
+        status = grb_write_record(streamptr, memtype, data, nmiss);
 	break;
       }
 #endif
@@ -455,7 +455,7 @@ void streamCopyRecord(int streamID2, int streamID1)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
-	status = grbCopyRecord(streamID2, streamID1);
+	status = grbCopyRecord(streamptr2, streamptr1);
 	break;
       }
 #endif

@@ -547,7 +547,7 @@ int cdiInqContents(int streamID)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
-        status = grbInqContents(streamID);
+        status = grbInqContents(streamptr);
 	break;
       }
 #endif
@@ -1503,7 +1503,7 @@ int streamInqTimestep(int streamID, int tsID)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
-        nrecs = grbInqTimestep(streamID, tsID);
+        nrecs = grbInqTimestep(streamptr, tsID);
 	break;
       }
 #endif
@@ -1595,7 +1595,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
-        grbReadVarDP(streamID, varID, data, nmiss);
+        grbReadVarDP(streamptr, varID, data, nmiss);
 	break;
       }
 #endif
@@ -1817,7 +1817,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
-        grbReadVarSliceDP(streamID, varID, levelID, data, nmiss);
+        grbReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
 	break;
       }
 #endif
