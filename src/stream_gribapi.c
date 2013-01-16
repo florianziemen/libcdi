@@ -756,7 +756,7 @@ void grib2GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
 }
 
 static
-void gribapiAddRecord(int streamID, int param, grib_handle *gh,
+void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 		      long recsize, off_t position, int datatype, int comptype)
 {
   long editionNumber;
@@ -771,15 +771,12 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
   record_t *record;
   grid_t grid;
   int vlistID;
-  stream_t *streamptr;
   int leveltype;
   long lpar;
   int status;
   char name[256], longname[256], units[256];
   size_t vlen;
   long ens_index = 0, ens_count = 0, ens_forecast_type = 0;
-
-  streamptr = stream_to_pointer(streamID);
 
   vlistID = streamptr->vlistID;
   tsID    = streamptr->curTsID;
@@ -958,7 +955,7 @@ void gribapiAddRecord(int streamID, int param, grib_handle *gh,
 }
 #endif
 
-int gribapiScanTimestep1(int streamID)
+int gribapiScanTimestep1(stream_t * streamptr)
 {
 #if  defined  (HAVE_LIBGRIB_API)
   off_t recpos = 0;
@@ -987,7 +984,6 @@ int gribapiScanTimestep1(int streamID)
   int comptype;
   long unzipsize;
   compvar2_t compVar, compVar0;
-  stream_t *streamptr;
   grib_handle *gh = NULL;
   int leveltype;
   int pdis = 0, pcat = 0, pnum = 0;
@@ -996,10 +992,6 @@ int gribapiScanTimestep1(int streamID)
   int bitsPerValue;
   int lieee = FALSE;
   int lbounds;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 0;
 
@@ -1192,7 +1184,7 @@ int gribapiScanTimestep1(int streamID)
       if ( CDI_Debug )
 	Message("%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
 
-      gribapiAddRecord(streamID, param, gh, recsize, recpos, datatype, comptype);
+      gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype);
 
       grib_handle_delete(gh);
       gh = NULL;
@@ -1271,7 +1263,7 @@ int gribapiScanTimestep1(int streamID)
 }
 
 
-int gribapiScanTimestep2(int streamID)
+int gribapiScanTimestep2(stream_t * streamptr)
 {
   int rstatus = 0;
 #if  defined  (HAVE_LIBGRIB_API)
@@ -1295,7 +1287,6 @@ int gribapiScanTimestep2(int streamID)
   int vlistID;
   long unzipsize;
   compvar2_t compVar, compVar0;
-  stream_t *streamptr;
   grib_handle *gh = NULL;
   int leveltype;
   int pdis = 0, pcat = 0, pnum = 0;
@@ -1303,10 +1294,6 @@ int gribapiScanTimestep2(int streamID)
   long editionNumber;
   long lpar;
   int lbounds;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   streamptr->curTsID = 1;
 
@@ -1574,7 +1561,7 @@ int gribapiScanTimestep2(int streamID)
 }
 
 
-int gribapiScanTimestep(int streamID)
+int gribapiScanTimestep(stream_t * streamptr)
 {
   int rstatus = 0;
 #if  defined  (HAVE_LIBGRIB_API)
@@ -1596,7 +1583,6 @@ int gribapiScanTimestep(int streamID)
   int rindex, nrecs = 0;
   long unzipsize;
   compvar2_t compVar, compVar0;
-  stream_t *streamptr;
   grib_handle *gh = NULL;
   int leveltype;
   int pdis = 0, pcat = 0, pnum = 0;
@@ -1605,15 +1591,11 @@ int gribapiScanTimestep(int streamID)
   long lpar;
   int lbounds;
 
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   vlistID = streamptr->vlistID;
 
   if ( CDI_Debug )
     {
-      Message("streamID = %d", streamID);
+      Message("streamptr = %p", streamptr);
       Message("cts = %d", streamptr->curTsID);
       Message("rts = %d", streamptr->rtsteps);
       Message("nts = %d", streamptr->ntsteps);

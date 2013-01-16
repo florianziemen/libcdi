@@ -200,12 +200,12 @@ int grbScanTimestep1(int streamID)
 #if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
     {
-      status = cgribexScanTimestep1(streamID);
+      status = cgribexScanTimestep1(streamptr);
     }
   else
 #endif
     {
-      status = gribapiScanTimestep1(streamID);
+      status = gribapiScanTimestep1(streamptr);
     }
 
   return (status);
@@ -224,12 +224,12 @@ int grbScanTimestep2(int streamID)
 #if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
     {
-      status = cgribexScanTimestep2(streamID);
+      status = cgribexScanTimestep2(streamptr);
     }
   else
 #endif
     {
-      status = gribapiScanTimestep2(streamID);
+      status = gribapiScanTimestep2(streamptr);
     }
 
   return (status);
@@ -248,12 +248,12 @@ int grbScanTimestep(int streamID)
 #if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
     {
-      status = cgribexScanTimestep(streamID);
+      status = cgribexScanTimestep(streamptr);
     }
   else
 #endif
     {
-      status = gribapiScanTimestep(streamID);
+      status = gribapiScanTimestep(streamptr);
     }
 
   return (status);
@@ -275,7 +275,7 @@ int grbInqContents(int streamID)
   streamptr->curTsID = 0;
 
   status = grbScanTimestep1(streamID);
- 
+
   if ( status == 0 && streamptr->ntsteps == -1 ) status = grbScanTimestep2(streamID);
 
   fileSetPos(fileID, 0, SEEK_SET);
@@ -298,7 +298,7 @@ int grbInqTimestep(int streamID, int tsID)
 
   if ( CDI_Debug )
     Message("tsid = %d rtsteps = %d", tsID, streamptr->rtsteps);
-  
+
   ntsteps = CDI_UNDEFID;
   while ( (tsID + 1) > streamptr->rtsteps && ntsteps == CDI_UNDEFID )
     {
