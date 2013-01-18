@@ -1072,7 +1072,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 
   if ( CDI_Debug )
     {
-      Message("streamptr = %p", streamptr);
+      Message("streamID = %d", streamptr->self);
       Message("cts = %d", streamptr->curTsID);
       Message("rts = %d", streamptr->rtsteps);
       Message("nts = %d", streamptr->ntsteps);

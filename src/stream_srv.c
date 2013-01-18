@@ -651,7 +651,7 @@ int srvScanTimestep(stream_t *streamptr)
 
   if ( CDI_Debug )
     {
-      Message("streamptr = %p", streamptr);
+      Message("streamID = %d", streamptr->self);
       Message("cts = %d", streamptr->curTsID);
       Message("rts = %d", streamptr->rtsteps);
       Message("nts = %d", streamptr->ntsteps);
@@ -897,7 +897,7 @@ void srvWriteVarDP(stream_t *streamptr, int varID, const double *data)
   srvrec_t *srvp;
 
   if ( CDI_Debug )
-    Message("streamptr = %p  varID = %d", streamptr, varID);
+    Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   srvp     = streamptr->record->srvp;
   vlistID  = streamptr->vlistID;

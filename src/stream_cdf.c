@@ -707,7 +707,7 @@ void cdf_write_record(stream_t *streamptr, int memtype, const void *data, int nm
   varID   = streamptr->record->varID;
   levelID = streamptr->record->levelID;
 
-  if ( CDI_Debug ) Message("streamptr = %p  varID = %d", streamptr, varID);
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   cdf_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 #endif
@@ -719,7 +719,7 @@ int cdfReadRecord(stream_t *streamptr, double *data, int *nmiss)
   int ierr = 0;
   int levelID, varID, tsID, recID, vrecID;
 
-  if ( CDI_Debug ) Message("streamptr = %p", streamptr);
+  if ( CDI_Debug ) Message("streamID = %d", streamptr->self);
 
   tsID    = streamptr->curTsID;
   vrecID  = streamptr->tsteps[tsID].curRecID;
@@ -745,7 +745,7 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
   fileID = streamptr->fileID;
 
   if ( CDI_Debug )
-    Message("streamptr = %p, fileID = %d", streamptr, fileID);
+    Message("streamID = %d, fileID = %d", streamptr->self, fileID);
 
   taxis = &streamptr->tsteps[tsID].taxis;
 
@@ -2633,7 +2633,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   fileID  = streamptr->fileID;
 
   if ( CDI_Debug )
-    Message("streamptr = %p, fileID = %d, varID = %d", streamptr, fileID, varID);
+    Message("streamID = %d, fileID = %d, varID = %d", streamptr->self, fileID, varID);
 
   if ( streamptr->vars[varID].ncvarid != UNDEFID )
     return (streamptr->vars[varID].ncvarid);
@@ -3097,7 +3097,7 @@ void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
   int laddoffset, lscalefactor;
   double addoffset, scalefactor;
 
-  if ( CDI_Debug ) Message("streamptr = %p  varID = %d", streamptr, varID);
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -3405,7 +3405,7 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   int dtype;
   int vlistID;
 
-  if ( CDI_Debug ) Message("streamptr = %p  varID = %d", streamptr, varID);
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -3516,7 +3516,7 @@ int cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data,
   double addoffset, scalefactor;
 
   if ( CDI_Debug )
-    Message("streamptr = %p  varID = %d  levelID = %d", streamptr, varID, levelID);
+    Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -3714,7 +3714,7 @@ int cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
   int vlistID;
   extern int CDF_Debug;
 
-  if ( CDI_Debug ) Message("streamptr = %p  varID = %d", streamptr, varID);
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -6299,7 +6299,7 @@ int cdfInqContents(stream_t *streamptr)
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
 
-  if ( CDI_Debug ) Message("streamptr = %p, fileID = %d", streamptr, fileID);
+  if ( CDI_Debug ) Message("streamID = %d, fileID = %d", streamptr->self, fileID);
 
 #if  defined  (HAVE_NETCDF4)
   nc_inq_format(fileID, &format);
@@ -6819,9 +6819,7 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
   size_t index;
   taxis_t *taxis;
 
-  if ( CDI_Debug ) Message("streamptr= %p  tsID = %d", streamptr, tsID);
-
-  stream_check_ptr(__func__, streamptr);
+  if ( CDI_Debug ) Message("streamID = %d  tsID = %d", streamptr->self, tsID);
 
   if ( tsID < 0 ) Error("unexpected tsID = %d", tsID);
 

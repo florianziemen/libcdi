@@ -1170,7 +1170,7 @@ int iegScanTimestep(stream_t *streamptr)
 
   if ( CDI_Debug )
     {
-      Message("streamptr = %p", streamptr);
+      Message("streamID = %d", streamptr->self);
       Message("cts = %d", streamptr->curTsID);
       Message("rts = %d", streamptr->rtsteps);
       Message("nts = %d", streamptr->ntsteps);
@@ -1412,7 +1412,7 @@ void iegWriteVarDP(stream_t *streamptr, int varID, const double *data)
   iegrec_t *iegp;
 
   if ( CDI_Debug )
-    Message("streamptr = %p  varID = %d", streamptr, varID);
+    Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   iegp     = streamptr->record->iegp;
 
