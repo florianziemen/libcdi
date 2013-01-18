@@ -4375,11 +4375,24 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 #endif
 
       if ( nvdims > 0 )
-        if ( timedimid == dimidsp[0] )
-          {
-            ncvars[ncvarid].tsteptype = TSTEP_INSTANT;
-            cdfSetDim(ncvars, ncvarid, 0, T_AXIS);
-          }
+        {
+          if ( timedimid == dimidsp[0] )
+            {
+              ncvars[ncvarid].tsteptype = TSTEP_INSTANT;
+              cdfSetDim(ncvars, ncvarid, 0, T_AXIS);
+            }
+          else
+            {
+              for ( ncdimid = 1; ncdimid < nvdims; ncdimid++ )
+                {
+                  if ( timedimid == dimidsp[ncdimid] )
+                    {
+                      Warning("Time must be the first dimension! Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
+                      ncvars[ncvarid].isvar = FALSE;
+                    }
+                }
+            }
+        }
 
       for ( iatt = 0; iatt < nvatts; iatt++ )
         {
@@ -6450,13 +6463,13 @@ int cdfInqContents(stream_t *streamptr)
 	      {
 		streamptr->basetime.ncvarid = ncvarid;
 		ltimevar = TRUE;
-		if ( CDI_Debug ) 
+		if ( CDI_Debug )
 		  fprintf(stderr, "timevar %s\n", ncvars[ncvarid].name);
 	      }
 	    else
 	      {
 		if ( CDI_Debug )
-		  fprintf(stderr, "skip timevar %s\n", ncvars[ncvarid].name);
+		  fprintf(stderr, "skipped timevar %s\n", ncvars[ncvarid].name);
 	      }
 	  }
 

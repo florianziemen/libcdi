@@ -3,6 +3,10 @@
 	* Version 1.6.0 released
         * using CGRIBEX library version 1.6.0
 
+2013-01-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* netCDF: check position of time dimension
+
 2013-01-15  Thomas Jahns  <jahns@dkrz.de>
 
 	* make_fint.c: added regexec support
