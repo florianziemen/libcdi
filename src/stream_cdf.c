@@ -2531,14 +2531,29 @@ void cdfDefGrid(stream_t *streamptr, int gridID)
        gridtype == GRID_LONLAT   ||
        gridtype == GRID_GENERIC )
     {
-      if ( gridtype == GRID_GENERIC && size == 1 && 
-           gridInqXsize(gridID) == 0 && gridInqYsize(gridID) == 0 )
+      if ( gridtype == GRID_GENERIC )
         {
-          /* no grid information */
-        }
-      else if ( gridtype == GRID_GENERIC && (gridInqXsize(gridID) == 0 || gridInqYsize(gridID) == 0) )
-        {
-          cdfDefGdim(streamptr, gridID);
+          if ( size == 1 && gridInqXsize(gridID) == 0 && gridInqYsize(gridID) == 0 )
+            {
+              /* no grid information */
+            }
+          else
+            {
+              int lx = 0, ly = 0;
+              if ( gridInqXsize(gridID) > 0 && gridInqXvals(gridID, NULL) > 0 )
+                {
+                  cdfDefXaxis(streamptr, gridID);
+                  lx = 1;
+                }
+
+              if ( gridInqYsize(gridID) > 0 && gridInqYvals(gridID, NULL) > 0 )
+                {
+                  cdfDefYaxis(streamptr, gridID);
+                  ly = 1;
+                }
+
+              if ( lx == 0 && ly == 0 ) cdfDefGdim(streamptr, gridID);
+            }
         }
       else
         {
