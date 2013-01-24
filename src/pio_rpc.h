@@ -40,7 +40,7 @@ enum
   timestepSize = 3
 };
 
-#define MAXWINBUFFERSIZE ((size_t)512 * 1024 * 1024)
+#define MAXWINBUFFERSIZE ((size_t)2048 * 1024 * 1024)
 
 enum
 {
