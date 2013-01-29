@@ -13,7 +13,7 @@ int julday_to_date(int calendar, int julday);
 int time_to_sec(int time);
 int sec_to_time(int secofday);
 
-void   julday_add_seconds(int seconds, int *julday, int *secofday);
+void   julday_add_seconds(int64_t seconds, int *julday, int *secofday);
 void   julday_add(int days, int secs, int *julday, int *secofday);
 double julday_sub(int julday1, int secofday1, int julday2, int secofday2, int *days, int *secs);
 
@@ -21,12 +21,3 @@ void encode_juldaysec(int calendar, int year, int month, int day, int hour, int 
 void decode_juldaysec(int calendar, int julday, int secofday, int *year, int *month, int *day, int *hour, int *minute);
 
 #endif  /* _TIMEBASE_H */
-/*
- * Local Variables:
- * c-file-style: "Java"
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * show-trailing-whitespace: t
- * require-trailing-newline: t
- * End:
- */
