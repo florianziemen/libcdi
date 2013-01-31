@@ -3,6 +3,10 @@
 	* Version 1.6.0 released
         * using CGRIBEX library version 1.6.0
 
+2013-01-31  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* starem_cgribex::cgribexGetGrid: add 360 to lastLon, if lastlon <firstLon [Bug #3189]
+
 2013-01-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* netCDF: check position of time dimension

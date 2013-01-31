@@ -188,6 +188,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
 
 		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
                   {
+                    if ( ISEC2_LastLon < ISEC2_FirstLon && ISEC2_LastLon < 0 ) ISEC2_LastLon += 360000;
                     if ( abs(ISEC2_LastLon - (ISEC2_FirstLon+ISEC2_LonIncr*(grid->xsize-1))) <= 2 )
                       {
                         recompinc = FALSE;
