@@ -4723,13 +4723,19 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               if ( ncvars[ncvarid].lvalidrange == FALSE )
                 {
                   extern int cdiIgnoreValidRange;
-                  if ( cdiIgnoreValidRange == FALSE )
+                  int lignore = FALSE;
+                  if ( (atttype == NC_FLOAT || atttype == NC_DOUBLE) && xtype != NC_FLOAT && xtype != NC_DOUBLE ) lignore = TRUE;
+                  if ( cdiIgnoreValidRange == FALSE && lignore == FALSE )
                     {
                       cdfGetAttDouble(ncid, ncvarid, attname, 2, ncvars[ncvarid].validrange);
                       ncvars[ncvarid].lvalidrange = TRUE;
                       if ( ((int)ncvars[ncvarid].validrange[0]) == 0 && ((int)ncvars[ncvarid].validrange[1]) == 255 )
                         ncvars[ncvarid].lunsigned = TRUE;
                       /* cdfSetVar(ncvars, ncvarid, TRUE); */
+                    }
+                  else if ( lignore )
+                    {
+                      Warning("Inconsistent data type for attribute %s:valid_range, ignored!", name);
                     }
                 }
             }
