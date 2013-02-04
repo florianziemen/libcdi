@@ -4722,11 +4722,15 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             {
               if ( ncvars[ncvarid].lvalidrange == FALSE )
                 {
-                  cdfGetAttDouble(ncid, ncvarid, attname, 2, ncvars[ncvarid].validrange);
-                  ncvars[ncvarid].lvalidrange = TRUE;
-                  if ( ((int)ncvars[ncvarid].validrange[0]) == 0 && ((int)ncvars[ncvarid].validrange[1]) == 255 )
-                    ncvars[ncvarid].lunsigned = TRUE;
-                  /* cdfSetVar(ncvars, ncvarid, TRUE); */
+                  extern int cdiIgnoreValidRange;
+                  if ( cdiIgnoreValidRange == FALSE )
+                    {
+                      cdfGetAttDouble(ncid, ncvarid, attname, 2, ncvars[ncvarid].validrange);
+                      ncvars[ncvarid].lvalidrange = TRUE;
+                      if ( ((int)ncvars[ncvarid].validrange[0]) == 0 && ((int)ncvars[ncvarid].validrange[1]) == 255 )
+                        ncvars[ncvarid].lunsigned = TRUE;
+                      /* cdfSetVar(ncvars, ncvarid, TRUE); */
+                    }
                 }
             }
           else if ( strcmp(attname, "valid_min") == 0 && attlen == 1 )

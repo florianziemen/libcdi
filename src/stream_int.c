@@ -33,6 +33,7 @@ int cdiChunkType       = CHUNK_GRID;
 int cdiSplitLtype105   = CDI_UNDEFID;
 
 int cdiIgnoreAttCoordinates = FALSE;
+int cdiIgnoreValidRange     = FALSE;
 int cdiSkipRecords          = 0;
 int cdiInventoryMode        = 1;
 
@@ -207,6 +208,9 @@ void cdiInitialize(void)
       envString = getenv("IGNORE_ATT_COORDINATES");
       if ( envString ) cdiIgnoreAttCoordinates = atoi(envString);
 
+      envString = getenv("IGNORE_VALID_RANGE");
+      if ( envString ) cdiIgnoreValidRange = atoi(envString);
+
       envString = getenv("CDI_SKIP_RECORDS");
       if ( envString )
 	{
@@ -268,7 +272,7 @@ char *strfiletype(int filetype)
   if ( filetype > 0 && filetype < size )
     name = Filetypes[filetype];
   else
-    name = Filetypes[0];  
+    name = Filetypes[0];
 
   return (name);
 }

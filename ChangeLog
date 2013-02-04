@@ -3,6 +3,10 @@
 	* Version 1.6.0 released
         * using CGRIBEX library version 1.6.0
 
+2013-02-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* netCDF: added env IGNORE_VALID_RANGE to ignore the attribute valid_range
+
 2013-01-31  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* stream_cgribex::cgribexGetGrid: add 360 to lastLon, if lastlon <firstLon [Bug #3189]
