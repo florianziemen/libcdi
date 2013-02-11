@@ -1476,7 +1476,7 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
       if ( !z2->vals ) return differ;
 
       for ( i = 0; i < z1->size; i++ )
-        if ( z1->vals[i] != z2->vals[i] ) return differ;
+        if ( IS_NOT_EQUAL(z1->vals[i], z2->vals[i]) ) return differ;
     }
   else if ( z2->vals )
     return differ;
@@ -1488,7 +1488,7 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
       if ( !z2->lbounds ) return differ;
 
       for ( i = 0; i < z1->size; i++ )
-        if ( z1->lbounds[i] != z2->lbounds[i] ) return differ;
+        if ( IS_NOT_EQUAL(z1->lbounds[i], z2->lbounds[i]) ) return differ;
     }
   else if ( z2->lbounds )
     return differ;
@@ -1500,7 +1500,7 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
       if ( !z2->ubounds ) return differ;
 
       for ( i = 0; i < z1->size; i++ )
-        if ( z1->ubounds[i] != z2->ubounds[i] ) return differ;
+        if ( IS_NOT_EQUAL(z1->ubounds[i], z2->ubounds[i]) ) return differ;
     }
   else if ( z2->ubounds )
     return differ;
@@ -1512,7 +1512,7 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
       if ( !z2->weights ) return differ;
 
       for ( i = 0; i < z1->size; i++ )
-        if ( z1->weights[i] != z2->weights[i] ) return differ;
+        if ( IS_NOT_EQUAL(z1->weights[i], z2->weights[i]) ) return differ;
     }
   else if ( z2->weights )
     return differ;
@@ -1524,7 +1524,7 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
       if ( !z2->vct ) return differ;
 
       for ( i = 0; i < z1->vctsize; i++ )
-        if ( z1->vct[i] != z2->vct[i] ) return differ;
+        if ( IS_NOT_EQUAL(z1->vct[i], z2->vct[i]) ) return differ;
     }
   else if ( z2->vct )
     return differ;
