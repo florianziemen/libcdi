@@ -96,6 +96,7 @@ void extLibInit()
 	      }
 	    default:
 	      Message("Invalid character in %s: %s", envName, envString);
+	      break;
 	    }
 	}
     }
@@ -291,6 +292,7 @@ int extInqData(void *ext, int prec, void *data)
     default:
       {
 	Error("unexpected data precision %d", rprec);
+        break;
       }
     }
 
@@ -374,6 +376,7 @@ int extDefData(void *ext, int prec, const void *data)
     default:
       {
 	Error("unexpected data precision %d", rprec);
+        break;
       }
     }
 
@@ -449,6 +452,7 @@ int extRead(int fileID, void *ext)
     default:
       {
 	Error("unexpected header precision %d", hprec);
+        break;
       }
     }
 
@@ -557,6 +561,7 @@ int extWrite(int fileID, void *ext)
     default:
       {
 	Error("unexpected header precision %d", rprec);
+        break;
       }
     }
   
@@ -587,6 +592,7 @@ int extWrite(int fileID, void *ext)
     default:
       {
 	Error("unexpected data precision %d", rprec);
+        break;
       }
     }
 

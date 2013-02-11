@@ -50,15 +50,15 @@ void cdiPrintDefaults(void)
 
 void cdiDebug(int level)
 {
-  if ( level == 1 || level &  2 ) CDI_Debug = 1;
+  if ( level == 1 || (level &  2) ) CDI_Debug = 1;
 
   if ( CDI_Debug ) Message("debug level %d", level);
 
-  if ( level == 1 || level &  4 ) memDebug(1);
+  if ( level == 1 || (level &  4) ) memDebug(1);
 
-  if ( level == 1 || level &  8 ) fileDebug(1);
+  if ( level == 1 || (level &  8) ) fileDebug(1);
 
-  if ( level == 1 || level & 16 )
+  if ( level == 1 || (level & 16) )
     {
 #if  defined  (HAVE_LIBGRIB)
       gribSetDebug(1);
@@ -583,6 +583,7 @@ int cdiInqContents(stream_t * streamptr)
 	  Message("%s support not compiled in!", strfiletype(filetype));
 
 	status = CDI_ELIBNAVAIL;
+        break;
       }
     }
 

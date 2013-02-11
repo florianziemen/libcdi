@@ -76,6 +76,7 @@ void iegLibInit()
 	      }
 	    default:
 	      Message("Invalid character in %s: %s", envName, envString);
+	      break;
 	    }
 	  pos += 2;
 	}
@@ -275,6 +276,7 @@ int iegInqData(iegrec_t *iegp, int prec, void *data)
     default:
       {
 	Error("unexpected data precision %d", dprec);
+        break;
       }
     }
 
@@ -354,6 +356,7 @@ int iegDefData(iegrec_t *iegp, int prec, const void *data)
     default:
       {
 	Error("unexpected data precision %d", dprec);
+        break;
       }
     }
 
@@ -592,6 +595,7 @@ int iegWrite(int fileID, iegrec_t *iegp)
     default:
       {
 	Error("unexpected data precision %d", dprec);
+        break;
       }
     }
 

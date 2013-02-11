@@ -3713,6 +3713,7 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
    default:
       {
 	fprintf(stderr, "Unsupported grid type: %s\n", gridNamePtr(type));
+        break;
       }
     }
 

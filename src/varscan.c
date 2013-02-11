@@ -327,7 +327,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
   *pvarID   = varID;
   *plevelID = levelID;
 }
-
+/*
 static
 int dblcmp(const void *s1, const void *s2)
 {
@@ -338,7 +338,7 @@ int dblcmp(const void *s1, const void *s2)
 
   return (cmp);
 }
-
+*/
 static
 int cmpLevelTable(const void *s1, const void *s2)
 {
