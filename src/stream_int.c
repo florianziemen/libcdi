@@ -113,6 +113,7 @@ long cdiGetenvInt(char *envName)
 		  fact = 0;
 		  Message("Invalid number string in %s: %s", envName, envString);
 		  Warning("%s must comprise only digits [0-9].",envName);
+		  break;
 		}
 	      break;
 	    }
@@ -129,8 +130,8 @@ long cdiGetenvInt(char *envName)
 static
 void cdiSetChunk(const char *chunkAlgo)
 {
-  char *pch;
-  size_t len = strlen(chunkAlgo);
+  //char *pch;
+  //size_t len = strlen(chunkAlgo);
   int algo = -1;
 
   if      ( strcmp("auto",  chunkAlgo)   == 0 ) algo = CHUNK_AUTO;

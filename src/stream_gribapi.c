@@ -331,6 +331,7 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
 	        Warning("Time unit %d unsupported", timeUnits);
 		lprint = FALSE;
 	      }
+	    break;
 	  }
 
 	julday_add_seconds(addsec, &julday, &secofday);
@@ -2533,6 +2534,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
     default:
       {
 	Error("Unsupported grid type: %s", gridNamePtr(gridtype));
+	break;
       }
     }
 }

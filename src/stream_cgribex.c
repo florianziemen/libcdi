@@ -105,6 +105,7 @@ int cgribexGetTimeUnit(int *isec1)
 	  Message("GRIB time unit %d unsupported!", ISEC1_TimeUnit);
 	  lprint = FALSE;
 	}
+      break;
     }
 
   return (timeunit);
@@ -142,6 +143,7 @@ int cgribexGetTsteptype(int timerange)
 	  Message("GRIB time range %d unsupported!", timerange);
 	  lprint = FALSE;
 	}
+      break;
     }
 
   return (tsteptype);
@@ -1873,6 +1875,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
       {
 	Warning("The CGRIBEX library can not store fields on the used grid!");
 	Error("Unsupported grid type: %s", gridNamePtr(gridtype));
+	break;
       }
     }
 }
