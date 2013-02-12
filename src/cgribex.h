@@ -212,7 +212,7 @@ void  gribPrintGDS(int nrec, long recpos, long recsize, unsigned char *gribbuffe
 void  gribPrintBMS(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
 void  gribPrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
 void  gribCheck1(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
-void  gribRepair1(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
+void  gribRepair1(int nrec, long recsize, unsigned char *gribbuffer);
 
 int grib1Sections(unsigned char *gribbuffer, long recsize, unsigned char **pdsp,
 		  unsigned char **gdsp, unsigned char **bmsp, unsigned char **bdsp);
