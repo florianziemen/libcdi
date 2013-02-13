@@ -125,7 +125,7 @@ int cgribexTimeIsFC(int *isec1)
 static
 int cgribexGetTsteptype(int timerange)
 {
-  int tsteptype = 0;
+  int tsteptype = TSTEP_INSTANT;
   static int lprint = TRUE;
 
   switch ( timerange )
@@ -826,7 +826,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
   cdi_create_records(streamptr, tsID);
 
   nrecords = streamptr->tsteps[tsID].nallrecs;
-  streamptr->tsteps[1].recIDs = (int *) malloc(nrecords*sizeof(int));
+  if ( nrecords ) streamptr->tsteps[1].recIDs = (int *) malloc(nrecords*sizeof(int));
   streamptr->tsteps[1].nrecs = 0;
   for ( recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[1].recIDs[recID] = -1;
