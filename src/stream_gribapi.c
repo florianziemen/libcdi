@@ -954,6 +954,27 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
     Message("varID = %d  param = %d  zaxistype = %d  gridID = %d  levelID = %d",
 	    varID, param, zaxistype, gridID, levelID);
 }
+
+static
+int gribapiGetParam(grib_handle *gh)
+{
+  int pdis = 0, pcat = 0, pnum = 0;
+  int param = 0;
+  long lpar;
+
+  GRIB_CHECK(grib_get_long(gh, "discipline", &lpar), 0);
+  pdis = (int) lpar;
+
+  GRIB_CHECK(grib_get_long(gh, "parameterCategory", &lpar), 0);
+  pcat = (int) lpar;
+
+  GRIB_CHECK(grib_get_long(gh, "parameterNumber", &lpar), 0);
+  pnum = (int) lpar;
+
+  param = cdiEncodeParam(pnum, pcat, pdis);
+  
+  return (param);
+}
 #endif
 
 int gribapiScanTimestep1(stream_t * streamptr)
@@ -987,7 +1008,6 @@ int gribapiScanTimestep1(stream_t * streamptr)
   compvar2_t compVar, compVar0;
   grib_handle *gh = NULL;
   int leveltype;
-  int pdis = 0, pcat = 0, pnum = 0;
   long editionNumber;
   long lpar;
   int bitsPerValue;
@@ -1070,16 +1090,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 	      else if ( strncmp(typeOfPacking, "grid_ieee", len) == 0 ) lieee = TRUE;
 	    }
 
-	  GRIB_CHECK(grib_get_long(gh, "discipline", &lpar), 0);
-	  pdis = (int) lpar;
-
-	  GRIB_CHECK(grib_get_long(gh, "parameterCategory", &lpar), 0);
-	  pcat = (int) lpar;
-
-	  GRIB_CHECK(grib_get_long(gh, "parameterNumber", &lpar), 0);
-	  pnum = (int) lpar;
-
-	  param = cdiEncodeParam(pnum, pcat, pdis);
+	  param = gribapiGetParam(gh);
 
 	  grib2GetLevel(gh, &leveltype, &lbounds, &level1, &level2);
 	}
@@ -1290,7 +1301,6 @@ int gribapiScanTimestep2(stream_t * streamptr)
   compvar2_t compVar, compVar0;
   grib_handle *gh = NULL;
   int leveltype;
-  int pdis = 0, pcat = 0, pnum = 0;
   int param = 0;
   long editionNumber;
   long lpar;
@@ -1378,16 +1388,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 	}
       else
 	{
-	  GRIB_CHECK(grib_get_long(gh, "discipline", &lpar), 0);
-	  pdis = (int) lpar;
-
-	  GRIB_CHECK(grib_get_long(gh, "parameterCategory", &lpar), 0);
-	  pcat = (int) lpar;
-
-	  GRIB_CHECK(grib_get_long(gh, "parameterNumber", &lpar), 0);
-	  pnum = (int) lpar;
-
-	  param = cdiEncodeParam(pnum, pcat, pdis);
+	  param = gribapiGetParam(gh);
 
 	  grib2GetLevel(gh, &leveltype, &lbounds, &level1, &level2);
 	}
@@ -1586,7 +1587,6 @@ int gribapiScanTimestep(stream_t * streamptr)
   compvar2_t compVar, compVar0;
   grib_handle *gh = NULL;
   int leveltype;
-  int pdis = 0, pcat = 0, pnum = 0;
   int param = 0;
   long editionNumber;
   long lpar;
@@ -1681,16 +1681,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	    }
 	  else
 	    {
-	      GRIB_CHECK(grib_get_long(gh, "discipline", &lpar), 0);
-	      pdis = (int) lpar;
-
-	      GRIB_CHECK(grib_get_long(gh, "parameterCategory", &lpar), 0);
-	      pcat = (int) lpar;
-
-	      GRIB_CHECK(grib_get_long(gh, "parameterNumber", &lpar), 0);
-	      pnum = (int) lpar;
-
-	      param = cdiEncodeParam(pnum, pcat, pdis);
+	      param = gribapiGetParam(gh);
 
 	      grib2GetLevel(gh, &leveltype, &lbounds, &level1, &level2);
 	    }
