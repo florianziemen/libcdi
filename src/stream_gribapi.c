@@ -150,16 +150,18 @@ int gribapiGetEndStep(grib_handle *gh, int startStep, int timeunits)
 {
   int endStep = startStep;
   int timeunits2;
+  int status;
   long unitsOfTime;
   long lpar;
 
-  GRIB_CHECK(grib_get_long(gh, "stepUnits", &unitsOfTime), 0);
+  status = grib_get_long(gh, "stepUnits", &unitsOfTime);
 
   timeunits2 = getTimeunits(unitsOfTime);
 
-  GRIB_CHECK(grib_get_long(gh, "endStep", &lpar), 0);
+  status = grib_get_long(gh, "endStep", &lpar);
 
-  endStep = (int)  ((lpar * timeunit_factor(timeunits, timeunits2)) + 0.5);
+  if ( status == 0 )
+    endStep = (int) ((lpar * timeunit_factor(timeunits, timeunits2)) + 0.5);
 
   return (endStep);
 }
@@ -168,12 +170,13 @@ static
 int gribapiGetTimeUnits(grib_handle *gh)
 {
   int timeunits = -1;
-  long unitsOfTime;
+  long unitsOfTime = -1;
+  int status;
   // size_t len = 8;
   //char stepunits[8];
   //static int lprint = TRUE;
 
-  GRIB_CHECK(grib_get_long(gh, "indicatorOfUnitOfTimeRange", &unitsOfTime), 0);
+  status = grib_get_long(gh, "indicatorOfUnitOfTimeRange", &unitsOfTime);
 
   timeunits = getTimeunits(unitsOfTime);
 
@@ -263,9 +266,10 @@ static
 int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
 {
   int rdate, rtime;
-  int timeUnits, startStep, endStep;
+  int timeUnits, startStep = 0, endStep;
   int tstepRange = 0;
   int range;
+  int status;
   long lpar;
   long sigofrtime = 3;
   long editionNumber;
@@ -290,8 +294,8 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
       rdate = (int) lpar;
       GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
       rtime = (int) lpar*100;
-      GRIB_CHECK(grib_get_long(gh, "forecastTime", &lpar), 0);
-      startStep = (int) lpar;
+      status = grib_get_long(gh, "forecastTime", &lpar);
+      if ( status == 0 ) startStep = (int) lpar;
       timeUnits = gribapiGetTimeUnits(gh);
       endStep = gribapiGetEndStep(gh, startStep, timeUnits);
 
@@ -960,19 +964,20 @@ int gribapiGetParam(grib_handle *gh)
 {
   int pdis = 0, pcat = 0, pnum = 0;
   int param = 0;
+  int status;
   long lpar;
 
   GRIB_CHECK(grib_get_long(gh, "discipline", &lpar), 0);
   pdis = (int) lpar;
 
-  GRIB_CHECK(grib_get_long(gh, "parameterCategory", &lpar), 0);
-  pcat = (int) lpar;
+  status = grib_get_long(gh, "parameterCategory", &lpar);
+  if ( status == 0 ) pcat = (int) lpar;
 
-  GRIB_CHECK(grib_get_long(gh, "parameterNumber", &lpar), 0);
-  pnum = (int) lpar;
+  status = grib_get_long(gh, "parameterNumber", &lpar);
+  if ( status == 0 ) pnum = (int) lpar;
 
   param = cdiEncodeParam(pnum, pcat, pdis);
-  
+
   return (param);
 }
 #endif
