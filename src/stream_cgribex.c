@@ -533,6 +533,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
   int varID;
   size_t readsize;
   int nrecords, nrecs, recID;
+  int nrecs_scanned;
   int datatype;
   long recsize = 0;
   int warn_time = TRUE;
@@ -573,6 +574,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
       fileSetPos(fileID, recsize, SEEK_CUR);
     }
 
+  nrecs_scanned = 0;
   nrecs = 0;
   while ( TRUE )
     {
@@ -609,6 +611,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	    }
 	}
 
+      nrecs_scanned++;
       cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
 			  (int *) gribbuffer, recsize, &lmv, &iret);
 
@@ -672,7 +675,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
 		{
 		  char paramstr[32];
 		  cdiParamToString(param, paramstr, sizeof(paramstr));
-		  Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
+		  Warning("Param=%s level=%d (record %d) already exist, skipped!", paramstr, level1, nrecs_scanned);
 		  continue;
 		}
 	    }

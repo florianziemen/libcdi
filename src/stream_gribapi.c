@@ -1000,6 +1000,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
   int varID;
   size_t readsize;
   int nrecords, nrecs, recID;
+  int nrecs_scanned;
   int datatype;
   long recsize = 0;
   int warn_time = TRUE;
@@ -1029,6 +1030,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
   fileID = streamptr->fileID;
 
+  nrecs_scanned = 0;
   nrecs = 0;
   while ( TRUE )
     {
@@ -1066,6 +1068,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 	    }
 	}
 
+      nrecs_scanned++;
       gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
       GRIB_CHECK(grib_set_double(gh, "missingValue", cdiDefaultMissval), 0);
 
@@ -1176,7 +1179,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 		{
 		  char paramstr[32];
 		  cdiParamToString(param, paramstr, sizeof(paramstr));
-		  Warning("Param=%s level=%d already exist, skipped!", paramstr, level1);
+		  Warning("Param=%s level=%d (record %d) already exist, skipped!", paramstr, level1, nrecs_scanned);
 		  continue;
 		}
 	    }
