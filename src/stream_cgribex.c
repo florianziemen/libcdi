@@ -513,6 +513,35 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
       *lmv = 1;
     }
 }
+
+static
+compvar_t cgribexVarSet(int param, int level1, int level2, int leveltype)
+{
+  compvar_t compVar;
+
+  compVar.param  = param;
+  compVar.level1 = level1;
+  compVar.level2 = level2;
+  compVar.ltype  = leveltype;
+
+  return (compVar);
+}
+
+static
+int cgribexVarCompare(compvar_t compVar, record_t record)
+{
+  int rstatus;
+  compvar_t compVar0;
+
+  compVar0.param  = record.param;
+  compVar0.level1 = record.ilevel;
+  compVar0.level2 = record.ilevel2;
+  compVar0.ltype  = record.ltype;
+
+  rstatus = memcmp(&compVar0, &compVar, sizeof(compvar_t));
+
+  return (rstatus);
+}
 #endif
 
 int cgribexScanTimestep1(stream_t * streamptr)
@@ -544,7 +573,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
   int vlistID;
   int comptype;
   long unzipsize;
-  compvar_t compVar, compVar0;
+  compvar_t compVar;
   extern int cdiSkipRecords;
   int nskip = cdiSkipRecords;
 
@@ -641,18 +670,12 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	{
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
-	  compVar.param  = param;
-          compVar.level1 = level1;
-          compVar.level2 = level2;
-          compVar.ltype  = ISEC1_LevelType;
+
+	  compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType);
+
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
-	      compVar0.param  = streamptr->tsteps[0].records[recID].param;
-	      compVar0.level1 = streamptr->tsteps[0].records[recID].ilevel;
-	      compVar0.level2 = streamptr->tsteps[0].records[recID].ilevel2;
-	      compVar0.ltype  = streamptr->tsteps[0].records[recID].ltype;
-
-	      if ( memcmp(&compVar0, &compVar, sizeof(compvar_t)) == 0 ) break;
+	      if ( cgribexVarCompare(compVar, streamptr->tsteps[0].records[recID]) == 0 ) break;
 	    }
 
 	  if ( cdiInventoryMode == 1 )
@@ -801,7 +824,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
   taxis_t *taxis;
   int vlistID;
   long unzipsize;
-  compvar_t compVar, compVar0;
+  compvar_t compVar;
 
   streamptr->curTsID = 1;
 
@@ -925,18 +948,12 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
       datetime.date  = vdate;
       datetime.time  = vtime;
-      compVar.param  = param;
-      compVar.level1 = level1;
-      compVar.level2 = level2;
-      compVar.ltype  = ISEC1_LevelType;
+
+      compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType);
+
       for ( recID = 0; recID < nrecords; recID++ )
 	{
-	  compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
-	  compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
-	  compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
-	  compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
-
-	  if ( memcmp(&compVar0, &compVar, sizeof(compvar_t)) == 0 ) break;
+	  if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) == 0 ) break;
 	}
 
       if ( recID == nrecords )
@@ -983,12 +1000,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
-      compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
-      compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
-      compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
-      compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
-
-      if ( memcmp(&compVar0, &compVar, sizeof(compvar_t)) != 0 )
+      if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) != 0 )
 	{
 	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
@@ -1072,7 +1084,7 @@ int cgribexScanTimestep(stream_t * streamptr)
   int vlistID;
   int rindex, nrecs = 0;
   long unzipsize;
-  compvar_t compVar, compVar0;
+  compvar_t compVar;
 
   vlistID = streamptr->vlistID;
 
@@ -1203,19 +1215,13 @@ int cgribexScanTimestep(stream_t * streamptr)
 
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
-	  compVar.param  = param;
-          compVar.level1 = level1;
-          compVar.level2 = level2;
-          compVar.ltype  = ISEC1_LevelType;
+
+	  compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType);
+
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
 	      recID   = streamptr->tsteps[1].recIDs[vrecID];
-	      compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
-	      compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
-	      compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
-	      compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
-
-	      if ( memcmp(&compVar0, &compVar, sizeof(compvar_t)) == 0 ) break;
+	      if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) == 0 ) break;
 	    }
 
 	  if ( vrecID == nrecs )
@@ -1259,12 +1265,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  if ( CDI_Debug )
 	    Message("%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
 
-	  compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
-	  compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
-	  compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
-	  compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
-
-	  if ( memcmp(&compVar0, &compVar, sizeof(compvar_t)) != 0 )
+	  if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) != 0 )
 	    {
 	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,
