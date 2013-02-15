@@ -29,6 +29,7 @@ typedef struct {
   int level1;
   int level2;
   int ltype;
+  //char name[32];
 } compvar2_t;
 
 
@@ -761,6 +762,16 @@ void grib2GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
 }
 
 static
+void gribapiGetString(grib_handle *gh, const char *key, char *string, size_t length)
+{
+  string[0] = 0;
+
+  GRIB_CHECK(grib_get_string(gh, key, string, &length), 0);
+  if      ( length == 8 && memcmp(string, "unknown", length) == 0 ) string[0] = 0;
+  else if ( length == 2 && memcmp(string, "~", length)       == 0 ) string[0] = 0;
+}
+
+static
 void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 		      long recsize, off_t position, int datatype, int comptype)
 {
@@ -865,18 +876,14 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   units[0] = 0;
 
   vlen = 256;
-  GRIB_CHECK(grib_get_string(gh, "shortName", name, &vlen), 0);
-  if      ( vlen == 8 && memcmp(name, "unknown", vlen) == 0 ) name[0] = 0;
-  else if ( vlen == 2 && memcmp(name, "~", vlen)       == 0 ) name[0] = 0;
+  gribapiGetString(gh, "shortName", name, vlen);
 
   if ( name[0] != 0 )
     {
       vlen = 256;
-      GRIB_CHECK(grib_get_string(gh, "name", longname, &vlen), 0);
-      if ( vlen == 8 && memcmp(longname, "unknown", vlen) == 0 ) longname[0] = 0;
+      gribapiGetString(gh, "name", longname, vlen);
       vlen = 256;
-      GRIB_CHECK(grib_get_string(gh, "units", units, &vlen), 0);
-      if ( vlen == 8 && memcmp(units, "unknown", vlen) == 0 ) units[0] = 0;
+      gribapiGetString(gh, "units", units, vlen);
     }
   // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units); 
 
@@ -982,7 +989,7 @@ int gribapiGetParam(grib_handle *gh)
 }
 
 static
-compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype)
+compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, char *name)
 {
   compvar2_t compVar;
 
@@ -990,6 +997,7 @@ compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype)
   compVar.level1 = level1;
   compVar.level2 = level2;
   compVar.ltype  = leveltype;
+  //memset(compVar.name, 0, sizeof(compVar.name));
 
   return (compVar);
 }
@@ -1004,6 +1012,7 @@ int gribapiVarCompare(compvar2_t compVar, record_t record)
   compVar0.level1 = record.ilevel;
   compVar0.level2 = record.ilevel2;
   compVar0.ltype  = record.ltype;
+  //memset(compVar0.name, 0, sizeof(compVar0.name));
 
   rstatus = memcmp(&compVar0, &compVar, sizeof(compvar2_t));
 
@@ -1048,6 +1057,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
   int bitsPerValue;
   int lieee = FALSE;
   int lbounds;
+  char name[256];
 
   streamptr->curTsID = 0;
 
@@ -1132,6 +1142,8 @@ int gribapiScanTimestep1(stream_t * streamptr)
 	  grib2GetLevel(gh, &leveltype, &lbounds, &level1, &level2);
 	}
 
+      gribapiGetString(gh, "shortName", name, 256);
+
       gribapiGetValidityDateTime(gh, &vdate, &vtime);
       /*
       printf("%d %d %d.%d.%d %d\n", vdate, vtime, pnum, pcat, pdis, leveltype);
@@ -1170,7 +1182,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
 
-	  compVar = gribapiVarSet(param, level1, level2, leveltype);
+	  compVar = gribapiVarSet(param, level1, level2, leveltype, name);
 
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
@@ -1331,6 +1343,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
   long editionNumber;
   long lpar;
   int lbounds;
+  char name[256];
 
   streamptr->curTsID = 1;
 
@@ -1419,6 +1432,8 @@ int gribapiScanTimestep2(stream_t * streamptr)
 	  grib2GetLevel(gh, &leveltype, &lbounds, &level1, &level2);
 	}
 
+      gribapiGetString(gh, "shortName", name, 256);
+
       gribapiGetValidityDateTime(gh, &vdate, &vtime);
 
       if ( rindex == 0 )
@@ -1461,7 +1476,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
       datetime.date  = vdate;
       datetime.time  = vtime;
 
-      compVar = gribapiVarSet(param, level1, level2, leveltype);
+      compVar = gribapiVarSet(param, level1, level2, leveltype, name);
 
       for ( recID = 0; recID < nrecords; recID++ )
 	{
@@ -1606,6 +1621,7 @@ int gribapiScanTimestep(stream_t * streamptr)
   long editionNumber;
   long lpar;
   int lbounds;
+  char name[256];
 
   vlistID = streamptr->vlistID;
 
@@ -1701,6 +1717,8 @@ int gribapiScanTimestep(stream_t * streamptr)
 	      grib2GetLevel(gh, &leveltype, &lbounds, &level1, &level2);
 	    }
 
+	  //gribapiGetString(gh, "shortName", name, 256);
+
 	  gribapiGetValidityDateTime(gh, &vdate, &vtime);
 
 	  if ( rindex == nrecs ) break;
@@ -1744,7 +1762,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
 
-	  compVar = gribapiVarSet(param, level1, level2, leveltype);
+	  compVar = gribapiVarSet(param, level1, level2, leveltype, name);
 
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {

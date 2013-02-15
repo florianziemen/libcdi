@@ -154,6 +154,7 @@ typedef struct
   short     used;
   short     varID;
   short     levelID;
+  //char      varname[32]; /* needed for grib decoding with GRIB_API */
 }
 record_t;
 
