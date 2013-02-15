@@ -980,6 +980,35 @@ int gribapiGetParam(grib_handle *gh)
 
   return (param);
 }
+
+static
+compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype)
+{
+  compvar2_t compVar;
+
+  compVar.param  = param;
+  compVar.level1 = level1;
+  compVar.level2 = level2;
+  compVar.ltype  = leveltype;
+
+  return (compVar);
+}
+
+static
+int gribapiVarCompare(compvar2_t compVar, record_t record)
+{
+  int rstatus;
+  compvar2_t compVar0;
+
+  compVar0.param  = record.param;
+  compVar0.level1 = record.ilevel;
+  compVar0.level2 = record.ilevel2;
+  compVar0.ltype  = record.ltype;
+
+  rstatus = memcmp(&compVar0, &compVar, sizeof(compvar2_t));
+
+  return (rstatus);
+}
 #endif
 
 int gribapiScanTimestep1(stream_t * streamptr)
@@ -1011,7 +1040,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
   int vlistID;
   int comptype;
   long unzipsize;
-  compvar2_t compVar, compVar0;
+  compvar2_t compVar;
   grib_handle *gh = NULL;
   int leveltype;
   long editionNumber;
@@ -1141,22 +1170,11 @@ int gribapiScanTimestep1(stream_t * streamptr)
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
 
-	  compVar.param  = param;
-          compVar.level1 = level1;
-          compVar.level2 = level2;
-	  compVar.ltype  = leveltype;
+	  compVar = gribapiVarSet(param, level1, level2, leveltype);
 
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
-	      compVar0.param  = streamptr->tsteps[0].records[recID].param;
-	      compVar0.level1 = streamptr->tsteps[0].records[recID].ilevel;
-	      compVar0.level2 = streamptr->tsteps[0].records[recID].ilevel2;
-	      compVar0.ltype  = streamptr->tsteps[0].records[recID].ltype;
-	      /*
-	      printf("var0: %d %d %d %d %d\n", recID, compVar0.param, compVar0.level1, compVar0.level2, compVar0.ltype);
-	      printf("var1: %d %d %d %d %d\n", recID, compVar.param, compVar.level1, compVar.level2, compVar.ltype);
-	      */
-	      if ( memcmp(&compVar0, &compVar, sizeof(compvar2_t)) == 0 ) break;
+	      if ( gribapiVarCompare(compVar, streamptr->tsteps[0].records[recID]) == 0 ) break;
 	    }
 
 	  if ( cdiInventoryMode == 1 )
@@ -1306,7 +1324,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
   taxis_t *taxis;
   int vlistID;
   long unzipsize;
-  compvar2_t compVar, compVar0;
+  compvar2_t compVar;
   grib_handle *gh = NULL;
   int leveltype;
   int param = 0;
@@ -1442,18 +1460,12 @@ int gribapiScanTimestep2(stream_t * streamptr)
       */
       datetime.date  = vdate;
       datetime.time  = vtime;
-      compVar.param  = param;
-      compVar.level1 = level1;
-      compVar.level2 = level2;
-      compVar.ltype  = leveltype;
+
+      compVar = gribapiVarSet(param, level1, level2, leveltype);
+
       for ( recID = 0; recID < nrecords; recID++ )
 	{
-	  compVar0.param = streamptr->tsteps[tsID].records[recID].param;
-	  compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
-	  compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
-	  compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
-
-	  if ( memcmp(&compVar0, &compVar, sizeof(compvar2_t)) == 0 ) break;
+	  if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) == 0 ) break;
 	}
 
       if ( recID == nrecords )
@@ -1500,12 +1512,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
-      compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
-      compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
-      compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
-      compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
-
-      if ( memcmp(&compVar0, &compVar, sizeof(compvar2_t)) != 0 )
+      if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) != 0 )
 	{
 	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
@@ -1592,7 +1599,7 @@ int gribapiScanTimestep(stream_t * streamptr)
   int vlistID;
   int rindex, nrecs = 0;
   long unzipsize;
-  compvar2_t compVar, compVar0;
+  compvar2_t compVar;
   grib_handle *gh = NULL;
   int leveltype;
   int param = 0;
@@ -1736,19 +1743,13 @@ int gribapiScanTimestep(stream_t * streamptr)
 	  */
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
-	  compVar.param  = param;
-          compVar.level1 = level1;
-          compVar.level2 = level2;
-          compVar.ltype  = leveltype;
+
+	  compVar = gribapiVarSet(param, level1, level2, leveltype);
+
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
 	      recID   = streamptr->tsteps[1].recIDs[vrecID];
-	      compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
-	      compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
-	      compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
-	      compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
-
-	      if ( memcmp(&compVar0, &compVar, sizeof(compvar2_t)) == 0 ) break;
+	      if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) == 0 ) break;
 	    }
 
 	  if ( vrecID == nrecs )
@@ -1792,12 +1793,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	  if ( CDI_Debug )
 	    Message("%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
 
-	  compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
-	  compVar0.level1 = streamptr->tsteps[tsID].records[recID].ilevel;
-	  compVar0.level2 = streamptr->tsteps[tsID].records[recID].ilevel2;
-	  compVar0.ltype  = streamptr->tsteps[tsID].records[recID].ltype;
-
-	  if ( memcmp(&compVar0, &compVar, sizeof(compvar2_t)) != 0 )
+	  if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) != 0 )
 	    {
 	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,
