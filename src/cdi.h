@@ -525,6 +525,15 @@ int     vlistMergedLevel(int vlistID, int varID, int levelID);
 void    vlistDefVarEnsemble(int vlistID, int varID, int ensID, int ensCount, int forecast_type);
 int     vlistInqVarEnsemble(int vlistID, int varID, int *ensID, int *ensCount, int *forecast_type);
 
+/* ---------------------------------- */
+/* Local change: 2013-01-28, FP (DWD) */
+/* ---------------------------------- */
+
+/* vlistDefVarIntKey: Set an arbitrary keyword/integer value pair for GRIB API */
+void    vlistDefVarIntKey(int vlistID, int varID, const char *name, int value);
+/* vlistDefVarDblKey: Set an arbitrary keyword/double value pair for GRIB API */
+void    vlistDefVarDblKey(int vlistID, int varID, const char *name, double value);
+
 /* VLIST attributes */
 
 /*      vlistInqNatts: Get number of variable attributes assigned to this variable */

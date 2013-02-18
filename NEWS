@@ -1,6 +1,15 @@
 CDI NEWS
 --------
 
+Version 1.6.0 (?? March 2013):
+
+   New functions:
+	 * vlistDefVarIntKey(): Set an arbitrary keyword/integer value pair for GRIB API
+	 * vlistDefVarDblKey(): Set an arbitrary keyword/double value pair for GRIB API
+   Fixed bugs:
+	 * netCDF: ignore the attribute valid_range, if the data type is inconsistent
+	 * global netCDF attribute "source" missing
+
 Version 1.5.9 (17 December 2012):
 
    New features:

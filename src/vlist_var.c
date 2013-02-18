@@ -63,6 +63,20 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].iorank        = CDI_UNDEFID;
   vlistptr->vars[varID].decoSize      = 0;
   vlistptr->vars[varID].deco          = NULL;
+
+  /* ---------------------------------- */
+  /* Local change: 2013-01-28, FP (DWD) */
+  /* ---------------------------------- */
+
+  vlistptr->vars[varID].opt_grib_dbl_nentries = 0;
+  vlistptr->vars[varID].opt_grib_int_nentries = 0;
+  int i;
+  for (i=0; i<MAX_OPT_GRIB_ENTRIES; i++) {
+    vlistptr->vars[varID].opt_grib_dbl_val[i] = 0.0;
+    vlistptr->vars[varID].opt_grib_int_val[i] =   0;
+    vlistptr->vars[varID].opt_grib_int_keyword[i] = NULL;
+    vlistptr->vars[varID].opt_grib_dbl_keyword[i] = NULL;
+  } // for
 }
 
 static
@@ -1796,6 +1810,42 @@ int vlistInqVarEnsemble( int vlistID, int varID, int *ensID, int *ensCount, int 
     }
 
   return (status);
+}
+
+/* ---------------------------------- */
+/* Local change: 2013-01-28, FP (DWD) */
+/* ---------------------------------- */
+
+/* vlistDefVarIntKey: Set an arbitrary keyword/integer value pair for GRIB API */
+void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
+{
+  vlist_t *vlistptr;
+  vlistptr = vlist_to_pointer(vlistID);
+
+  int idx = vlistptr->vars[varID].opt_grib_int_nentries;
+  vlistptr->vars[varID].opt_grib_int_nentries++;
+  if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
+  vlistptr->vars[varID].opt_grib_int_val[idx] = value;
+  if ( name )
+    vlistptr->vars[varID].opt_grib_int_keyword[idx] = strdupx(name);
+  else
+    Error("Internal error!");
+}
+
+/* vlistDefVarDblKey: Set an arbitrary keyword/double value pair for GRIB API */
+void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
+{
+  vlist_t *vlistptr;
+  vlistptr = vlist_to_pointer(vlistID);
+
+  int idx = vlistptr->vars[varID].opt_grib_dbl_nentries;
+  vlistptr->vars[varID].opt_grib_dbl_nentries++;
+  if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/double value pairs!");
+  vlistptr->vars[varID].opt_grib_dbl_val[idx] = value;
+  if ( name )
+    vlistptr->vars[varID].opt_grib_dbl_keyword[idx] = strdupx(name);
+  else
+    Error("Internal error!");
 }
 
 

@@ -1,7 +1,11 @@
 2013-03-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Version 1.6.0 released
-        * using CGRIBEX library version 1.6.0
+    * using CGRIBEX library version 1.6.0
+
+2013-02-18  Florian Prill  <Florian.Prill@dwd.de>
+
+	* Added function vlistDefVarIntKey() and vlistDefVarDblKey() to set GRIB_API Key/Value pairs
 
 2013-02-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
@@ -9,7 +13,7 @@
 
 2013-02-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* netCDF: ignore the attribute valid_range, if the data type is inconsitent
+	* netCDF: ignore the attribute valid_range, if the data type is inconsistent
 	* netCDF: added env IGNORE_VALID_RANGE to ignore the attribute valid_range
 
 2013-01-31  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

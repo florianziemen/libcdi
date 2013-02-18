@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   January 2013
+! Uwe Schulzweida, MPI-MET, Hamburg,   February 2013
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -1176,6 +1176,29 @@
 !                                     INTEGER         ensCount,
 !                                     INTEGER         forecast_type)
       EXTERNAL        vlistInqVarEnsemble
+
+!
+!  ----------------------------------
+!
+!
+!  Local change: 2013-01-28, FP (DWD)
+!
+!
+!  ----------------------------------
+!
+!                     vlistDefVarIntKey
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name,
+!                                     INTEGER         value)
+      EXTERNAL        vlistDefVarIntKey
+
+!                     vlistDefVarDblKey
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   name,
+!                                     DOUBLEPRECISION value)
+      EXTERNAL        vlistDefVarDblKey
 
 !
 !  VLIST attributes

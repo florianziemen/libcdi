@@ -2990,6 +2990,27 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   gribapiDefLevel(editionNumber, gh, param, zaxisID, levelID, gc->init);
 
+  /* ---------------------------------- */
+  /* Local change: 2013-01-28, FP (DWD) */
+  /* ---------------------------------- */
+
+  vlist_t *vlistptr;
+  vlistptr = vlist_to_pointer(vlistID);
+  if (!gc->init) {
+    int i;
+    for (i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++)
+      {
+	GRIB_CHECK(grib_set_double(gh, vlistptr->vars[varID].opt_grib_dbl_keyword[i],
+				   vlistptr->vars[varID].opt_grib_dbl_val[i]), 0);
+      }
+    for (i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++)
+      {
+	GRIB_CHECK(grib_set_long(gh, vlistptr->vars[varID].opt_grib_int_keyword[i],
+				 vlistptr->vars[varID].opt_grib_int_val[i]), 0);
+      }
+  }
+
+
   if ( nmiss > 0 )
     {
       GRIB_CHECK(grib_set_long(gh, "bitmapPresent", 1), 0);

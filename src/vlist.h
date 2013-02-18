@@ -68,6 +68,13 @@ typedef struct
 }
 ensinfo_t;
 
+/* ---------------------------------- */
+/* Local change: 2013-01-28, FP (DWD) */
+/* ---------------------------------- */
+
+/* Length of optional keyword/value pair list */
+#define MAX_OPT_GRIB_ENTRIES 50
+
 
 typedef struct
 {
@@ -107,6 +114,18 @@ typedef struct
   int         decoSize;
   deco_t     *deco;
 
+  /* ---------------------------------- */
+  /* Local change: 2013-01-28, FP (DWD) */
+  /* ---------------------------------- */
+
+  /* (Optional) list of keyword/double value pairs */
+  int    opt_grib_dbl_nentries;
+  char*  opt_grib_dbl_keyword[MAX_OPT_GRIB_ENTRIES];
+  double opt_grib_dbl_val[MAX_OPT_GRIB_ENTRIES];
+  /* (Optional) list of keyword/integer value pairs */
+  int    opt_grib_int_nentries;
+  char*  opt_grib_int_keyword[MAX_OPT_GRIB_ENTRIES];
+  int    opt_grib_int_val[MAX_OPT_GRIB_ENTRIES];
 }
 var_t;
 

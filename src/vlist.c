@@ -225,6 +225,16 @@ void vlistDestroy(int vlistID)
 
       if ( vlistptr->vars[varID].ensdata )  free(vlistptr->vars[varID].ensdata);
 
+      int i;
+      for (i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++) {
+	if ( vlistptr->vars[varID].opt_grib_int_keyword[i] )
+	  free(vlistptr->vars[varID].opt_grib_int_keyword[i]);
+      }
+      for (i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++) {
+	if ( vlistptr->vars[varID].opt_grib_dbl_keyword[i] )
+	  free(vlistptr->vars[varID].opt_grib_dbl_keyword[i]);
+      }
+
       vlistDelAtts(vlistID, varID);
     }
 
@@ -290,6 +300,26 @@ void vlistCopy(int vlistID2, int vlistID1)
               memcpy(vlistptr2->vars[varID].ensdata,
                      vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
             }
+
+          /* ---------------------------------- */
+          /* Local change: 2013-01-28, FP (DWD) */
+          /* ---------------------------------- */
+
+	  int i;
+	  vlistptr2->vars[varID].opt_grib_int_nentries = vlistptr1->vars[varID].opt_grib_int_nentries;
+	  for (i=0; i<vlistptr1->vars[varID].opt_grib_int_nentries; i++) {
+	    if ( vlistptr1->vars[varID].opt_grib_int_keyword[i] ) {
+	      vlistptr2->vars[varID].opt_grib_int_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_int_keyword[i]);
+	      vlistptr2->vars[varID].opt_grib_int_val[i]     = vlistptr1->vars[varID].opt_grib_int_val[i];
+	    }
+	  }
+	  vlistptr2->vars[varID].opt_grib_dbl_nentries = vlistptr1->vars[varID].opt_grib_dbl_nentries;
+	  for (i=0; i<vlistptr1->vars[varID].opt_grib_dbl_nentries; i++) {
+	    if ( vlistptr1->vars[varID].opt_grib_dbl_keyword[i] ) {
+	      vlistptr2->vars[varID].opt_grib_dbl_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_dbl_keyword[i]);
+	      vlistptr2->vars[varID].opt_grib_dbl_val[i]     = vlistptr1->vars[varID].opt_grib_dbl_val[i];
+	    }
+	  }
 
 	  vlistptr2->vars[varID].atts.nelems = 0;
 	  vlistCopyVarAtts(vlistID1, varID, vlistID2, varID);
@@ -520,6 +550,26 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                        vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
               }
 
+	    /* ---------------------------------- */
+	    /* Local change: 2013-01-28, FP (DWD) */
+	    /* ---------------------------------- */
+
+	    int i;
+	    vlistptr2->vars[varID].opt_grib_int_nentries = vlistptr1->vars[varID].opt_grib_int_nentries;
+	    for (i=0; i<vlistptr1->vars[varID].opt_grib_int_nentries; i++) {
+	      if ( vlistptr1->vars[varID].opt_grib_int_keyword[i] ) {
+		vlistptr2->vars[varID].opt_grib_int_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_int_keyword[i]);
+		vlistptr2->vars[varID].opt_grib_int_val[i]     = vlistptr1->vars[varID].opt_grib_int_val[i];
+	      }
+	    }
+	    vlistptr2->vars[varID].opt_grib_dbl_nentries = vlistptr1->vars[varID].opt_grib_dbl_nentries;
+	    for (i=0; i<vlistptr1->vars[varID].opt_grib_dbl_nentries; i++) {
+	      if ( vlistptr1->vars[varID].opt_grib_dbl_keyword[i] ) {
+		vlistptr2->vars[varID].opt_grib_dbl_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_dbl_keyword[i]);
+		vlistptr2->vars[varID].opt_grib_dbl_val[i]     = vlistptr1->vars[varID].opt_grib_dbl_val[i];
+	      }
+	    }
+
 	    vlistptr2->vars[varID2].atts.nelems = 0;
 	    vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
 
@@ -718,6 +768,26 @@ void vlistCat(int vlistID2, int vlistID1)
           vlistptr2->vars[varID2].ensdata = (ensinfo_t *) malloc(sizeof(ensinfo_t));
           memcpy(vlistptr2->vars[varID2].ensdata, vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
         }
+
+      /* ---------------------------------- */
+      /* Local change: 2013-01-28, FP (DWD) */
+      /* ---------------------------------- */
+
+      int i;
+      vlistptr2->vars[varID].opt_grib_int_nentries = vlistptr1->vars[varID].opt_grib_int_nentries;
+      for (i=0; i<vlistptr1->vars[varID].opt_grib_int_nentries; i++) {
+	if ( vlistptr1->vars[varID].opt_grib_int_keyword[i] ) {
+	  vlistptr2->vars[varID].opt_grib_int_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_int_keyword[i]);
+	  vlistptr2->vars[varID].opt_grib_int_val[i]     = vlistptr1->vars[varID].opt_grib_int_val[i];
+	}
+      }
+      vlistptr2->vars[varID].opt_grib_dbl_nentries = vlistptr1->vars[varID].opt_grib_dbl_nentries;
+      for (i=0; i<vlistptr1->vars[varID].opt_grib_dbl_nentries; i++) {
+	if ( vlistptr1->vars[varID].opt_grib_dbl_keyword[i] ) {
+	  vlistptr2->vars[varID].opt_grib_dbl_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_dbl_keyword[i]);
+	  vlistptr2->vars[varID].opt_grib_dbl_val[i]     = vlistptr1->vars[varID].opt_grib_dbl_val[i];
+	}
+      }
 
       vlistptr2->vars[varID2].atts.nelems = 0;
       vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
