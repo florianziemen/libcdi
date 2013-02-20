@@ -2198,9 +2198,10 @@ void grid_check_cyclic(grid_t *gridptr)
       if ( xvals && xsize > 1 )
         {
           xinc = xvals[1] - xvals[0];
-          if ( IS_EQUAL(xinc, 0) )
-            xinc = (xvals[xsize-1] - xvals[0])/(xsize-1);
+          if ( IS_EQUAL(xinc, 0) ) xinc = (xvals[xsize-1] - xvals[0])/(xsize-1);
+
           x0 = 2*xvals[xsize-1]-xvals[xsize-2]-360;
+
           if ( IS_NOT_EQUAL(xvals[0], xvals[xsize-1]) )
             if ( fabs(x0 - xvals[0]) < 0.01*xinc ) gridptr->isCyclic = TRUE;
         }
@@ -2228,6 +2229,7 @@ void grid_check_cyclic(grid_t *gridptr)
 	      if ( valn <    1 && val1 > 300 ) valn += 360;
 	      if ( val1 < -179 && valn > 120 ) val1 += 360;
 	      if ( valn < -179 && val1 > 120 ) valn += 360;
+              if ( fabs(valn-val1) > 180 ) val1 += 360;
 
               if ( valn > val1 ) x0 = valn - xinc;
               else               x0 = valn + xinc;
@@ -2259,6 +2261,7 @@ void grid_check_cyclic(grid_t *gridptr)
 		      if ( val2 <    1 && val1 > 300 ) val2 += 360;
 		      if ( val1 < -179 && val2 > 120 ) val1 += 360;
 		      if ( val2 < -179 && val1 > 120 ) val2 += 360;
+                      if ( fabs(val2-val1) > 180 ) val1 += 360;
 
 		      if ( fabs(val1-val2) < 0.001 )
 			{
