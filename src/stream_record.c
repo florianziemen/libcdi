@@ -448,6 +448,8 @@ void streamCopyRecord(int streamID2, int streamID1)
   filetype2 = streamptr2->filetype;
 
   if ( filetype1 == filetype2 ) filetype = filetype2;
+  else
+    Error("Streams have different file types (%s -> %s)!", strfiletype(filetype1), strfiletype(filetype2));
 
   switch (filetype)
     {
@@ -480,9 +482,19 @@ void streamCopyRecord(int streamID2, int streamID1)
 	break;
       }
 #endif
-    default:
+#if  defined  (HAVE_LIBNETCDF)
+    case FILETYPE_NC:
+    case FILETYPE_NC2:
+    case FILETYPE_NC4:
+    case FILETYPE_NC4C:
       {
 	status = cdfCopyRecord(streamptr2, streamptr1);
+	break;
+      }
+#endif
+    default:
+      {
+	Error("%s support not compiled in!", strfiletype(filetype));
 	break;
       }
     }
