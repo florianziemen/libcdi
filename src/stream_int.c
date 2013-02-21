@@ -49,6 +49,7 @@ char *Filetypes[] = {
   "netCDF",
   "netCDF2",
   "netCDF4",
+  "netCDF4c",
   "SERVICE",
   "EXTRA",
   "IEG",
