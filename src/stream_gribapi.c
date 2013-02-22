@@ -21,6 +21,7 @@
 #  include "grib_api.h"
 #endif
 
+#define  NINT(x)  ((x) < 0 ? (int)((x)-.5) : (int)((x)+.5))
 
 extern int cdiInventoryMode;
 
@@ -574,27 +575,26 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
     case GRID_REFERENCE:
       {
         char uuid[17];
-	char reference_link[8192];
-	size_t len = sizeof(reference_link);
-	reference_link[0] = 0;
+    	char reference_link[8192];
+	    size_t len = sizeof(reference_link);
+	    reference_link[0] = 0;
 
-	grid->size  = numberOfPoints;
-	if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )
-	  {
-	    grid->number   = lpar;
-	    if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 ) grid->position = lpar;
-	    if ( grib_get_string(gh, "gridDescriptionFile", reference_link, &len) == 0 )
+    	grid->size  = numberOfPoints;
+	    if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )
 	      {
-		if ( strncmp(reference_link, "file://", 7) == 0 )
-		  grid->reference = strdupx(reference_link);
+	        grid->number   = lpar;
+	        if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 ) grid->position = lpar;
+	        if ( grib_get_bytes(gh, "gridDescriptionFile", (unsigned char *) reference_link, &len) == 0 )
+	          {
+		        if ( strncmp(reference_link, "file://", 7) == 0 )
+		          grid->reference = strdupx(reference_link);
+	            }
+                len = (size_t) 16;
+                if ( grib_get_bytes(gh, "uuidOfHGrid", (unsigned char *) uuid, &len) == 0)
+                  {
+                    strncpy(grid->uuid, uuid, 16);
+                  }
 	      }
-            len = (size_t) 16;
-            if ( grib_get_string(gh, "uuidOfHGrid", uuid, &len) == 0)
-              {
-                strncpy(grid->uuid, uuid, 16);
-              }
-	  }
-
 	break;
       }
     case GRID_GENERIC:
@@ -850,19 +850,21 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       {
         size_t len;
         char uuid[17];
+        double dtmp;
         long nlev, nvgrid;
 
         GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
-        if ( lpar != 3 )
+        if ( lpar != 6 )
           {
             fprintf(stderr, "Warning ...\n");
           }
-        GRIB_CHECK(grib_get_long(gh, "nlev", &nlev), 0);
-        GRIB_CHECK(grib_get_long(gh, "numberOfVGridUsed", &nvgrid), 0);
-
+        GRIB_CHECK(grib_get_double(gh, "nlev", &dtmp), 0);
+        nlev = (int) NINT(dtmp);
+        GRIB_CHECK(grib_get_double(gh, "numberOfVGridUsed", &dtmp), 0);
+        nvgrid = NINT(dtmp);
         len = (size_t) 16;
         uuid[16] = 0;
-        GRIB_CHECK(grib_get_string(gh, "uuidOfVGrid", uuid, &len), 0);
+        GRIB_CHECK(grib_get_bytes(gh, "uuidOfVGrid", (unsigned char *) uuid, &len), 0);
         varDefZAxisReference((int) nlev, (int) nvgrid, uuid);
         break;
       }
@@ -2539,7 +2541,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 	    GRIB_CHECK(grib_set_long(gh, "numberOfGridUsed", gridInqNumber(gridID)), 0);
 	    GRIB_CHECK(grib_set_long(gh, "numberOfGridInReference", gridInqPosition(gridID)), 0);
             len = 16;
-            GRIB_CHECK(grib_set_string(gh, "uuidOfHGrid", gridInqUUID(gridID, uuid), &len), 0);
+            GRIB_CHECK(grib_set_bytes(gh, "uuidOfHGrid", (unsigned char *) gridInqUUID(gridID, uuid), &len), 0);
 	  }
 
 	break;
@@ -2870,13 +2872,12 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
           {
             reference = zaxisInqReference(zaxisID);
             if ( !gcinit ) GRIB_CHECK(grib_set_long(gh, "typeOfFirstFixedSurface", GRIB2_LTYPE_REFERENCE), 0);
-            GRIB_CHECK(grib_set_double(gh, "level", level), 0);
-
-            GRIB_CHECK(grib_set_long(gh, "NV", 3), 0);
-            GRIB_CHECK(grib_set_long(gh, "nlev", (long) zaxisInqSize(zaxisID)), 0);
-            GRIB_CHECK(grib_set_long(gh, "numberOfVGridUsed", reference), 0);
+            GRIB_CHECK(grib_set_long(gh, "NV", 6), 0);
+            GRIB_CHECK(grib_set_double(gh, "nlev", (double) zaxisInqSize(zaxisID)), 0);
+            GRIB_CHECK(grib_set_double(gh, "numberOfVGridUsed", (double) reference), 0);
             len = 16;
-            GRIB_CHECK(grib_set_string(gh, "uuidOfVGrid", zaxisInqUUID(zaxisID, uuid), &len), 0);
+            GRIB_CHECK(grib_set_bytes(gh, "uuidOfVGrid", (unsigned char *) zaxisInqUUID(zaxisID, uuid), &len), 0);
+            GRIB_CHECK(grib_set_double(gh, "level", level), 0);
           }
 
         break;
