@@ -769,7 +769,6 @@ int     zaxisDuplicate(int zaxisID);
 void    zaxisResize(int zaxisID, int size);
 
 void    zaxisPrint(int zaxisID);
-int     zaxisSize(void);
 
 /*      zaxisDefLevels: Define the levels of a Z-axis */
 void    zaxisDefLevels(int zaxisID, const double *levels_vec);

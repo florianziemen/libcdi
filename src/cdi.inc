@@ -1315,9 +1315,6 @@
 !                                     INTEGER         opt)
       EXTERNAL        gridPrint
 
-      INTEGER         gridSize
-      EXTERNAL        gridSize
-
       INTEGER         gridCreate
 !                                    (INTEGER         gridtype,
 !                                     INTEGER         size)
@@ -1779,9 +1776,6 @@
 !                     zaxisPrint
 !                                    (INTEGER         zaxisID)
       EXTERNAL        zaxisPrint
-
-      INTEGER         zaxisSize
-      EXTERNAL        zaxisSize
 
 !                     zaxisDefLevels
 !                                    (INTEGER         zaxisID,

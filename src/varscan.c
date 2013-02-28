@@ -11,6 +11,7 @@
 #include "varscan.h"
 #include "vlist.h"
 #include "grid.h"
+#include "zaxis.h"
 
 
 extern void zaxisGetIndexList ( int, int * );

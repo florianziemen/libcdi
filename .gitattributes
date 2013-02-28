@@ -284,6 +284,7 @@ src/vlist_att.h -text
 src/vlist_var.c -text
 src/vlist_var.h -text
 src/zaxis.c -text
+src/zaxis.h -text
 tables/cosmo002 -text
 tables/cosmo201 -text
 tables/cosmo202 -text

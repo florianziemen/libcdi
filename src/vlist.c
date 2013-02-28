@@ -6,6 +6,7 @@
 #include "cdi.h"
 #include "stream_int.h"
 #include "vlist.h"
+#include "zaxis.h"
 #include "varscan.h"
 #include "namespace.h"
 #include "pio_util.h"
