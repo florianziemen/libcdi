@@ -571,7 +571,6 @@ void    gridDefMask(int gridID, const int *mask_vec);
 int     gridInqMask(int gridID, int *mask_vec);
 
 void    gridPrint(int gridID, int opt);
-int     gridSize(void);
 
 /*      gridCreate: Create a horizontal Grid */
 int     gridCreate(int gridtype, int size);
