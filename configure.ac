@@ -27,7 +27,7 @@ AC_DEFINE_UNQUOTED([SYSTEM_TYPE],["$ac_cv_build"], [System type])
 AC_SUBST([SYSTEM_TYPE],["$ac_cv_build"])
 
 AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER([src/config.h])
+AC_CONFIG_HEADERS([src/config.h])
 AM_MAINTAINER_MODE([disable])
 
 # Set up libtool.
@@ -44,7 +44,6 @@ AS_IF([test -n "$FC" && test "X$FC" != "Xno"],
    AC_PROG_FPP
    AC_LANG_POP([Fortran])])
 AC_PROG_F77
-AC_PROG_RANLIB
 AC_PROG_CXX
 AC_CHECK_PROG(SED,sed,sed,false)
 AC_CHECK_PROG(GREP,grep,grep,false)
