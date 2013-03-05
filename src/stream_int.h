@@ -324,6 +324,9 @@ void  cdiInitialize(void);
 
 void stream_write_record(int streamID, int memtype, const void *data, int nmiss);
 
+void uuid2str(const char *uuid, char *uuidstr);
+void str2uuid(const char *uuidstr, char *uuid);
+
 
 #endif  /* _STREAM_INT_H */
 /*
