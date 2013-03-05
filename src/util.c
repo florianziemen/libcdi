@@ -93,6 +93,8 @@ void str2uuid(const char *uuidstr, char *uuid)
   if ( iret != 16 ) return;
 
   for ( int i = 0; i < 16; ++i ) uuid[i] = ui[i];
+
+  uuid[16] = 0;
 }
 
 /*

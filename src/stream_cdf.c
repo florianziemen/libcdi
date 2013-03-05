@@ -1831,7 +1831,7 @@ void cdfDefGdim(stream_t *streamptr, int gridID)
                     break;
                   }
                 else
-                  iz++; 
+                  iz++;
               }
           }
       }
@@ -1852,7 +1852,7 @@ void cdfDefGdim(stream_t *streamptr, int gridID)
                     break;
                   }
                 else
-                  iz++; 
+                  iz++;
               }
           }
       }
@@ -1864,6 +1864,7 @@ void cdfDefGdim(stream_t *streamptr, int gridID)
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
+      //printf("axisname, dimlen %s %d\n", axisname, dimlen);
       cdf_def_dim(fileID, axisname, dimlen, &dimID);
 
       cdf_enddef(fileID);
@@ -2511,6 +2512,23 @@ void cdfDefMapping(stream_t *streamptr, int gridID)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
+void cdfDefGridUUID(stream_t *streamptr, int gridID)
+{
+  char uuidOfHGrid[17];
+
+  gridInqUUID(gridID, uuidOfHGrid);
+  if ( uuidOfHGrid[0] != 0 )
+    {
+      char uuidOfHGridStr[37];
+      uuid2str(uuidOfHGrid, uuidOfHGridStr);
+      if ( uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36 )
+        {
+          // cdf_put_att_text(fileID, ncvarid, "uuid", 36, uuidOfHGridStr);
+        }
+    }
+}
+
+static
 void cdfDefGrid(stream_t *streamptr, int gridID)
 {
   int gridtype, size;
@@ -2607,6 +2625,8 @@ void cdfDefGrid(stream_t *streamptr, int gridID)
     {
       Error("Unsupported grid type: %s", gridNamePtr(gridtype));
     }
+
+  cdfDefGridUUID(streamptr, gridID);
 }
 #endif
 
@@ -5157,7 +5177,7 @@ void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
 
 /* define all input grids */
 static
-void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid)
+void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid, char *uuidOfHGrid)
 {
   int ncvarid, ncvarid2;
   int ndims;
@@ -5704,6 +5724,9 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 #endif
 	    ncvars[ncvarid].gridID = varDefGrid(vlistID, grid, 1);
 
+          if ( uuidOfHGrid[0] != 0 && grid.type == GRID_UNSTRUCTURED )
+            gridDefUUID(ncvars[ncvarid].gridID, uuidOfHGrid);
+
           if ( ncvars[ncvarid].chunked )
             {
               ndims = ncvars[ncvarid].ndims;
@@ -5719,7 +5742,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
                 {
                   if ( grid.xsize > 1 && grid.ysize > 1 && ndims > 1 &&
                        grid.xsize == ncvars[ncvarid].chunks[ndims-1] &&
-                       grid.ysize == ncvars[ncvarid].chunks[ndims-2] ) 
+                       grid.ysize == ncvars[ncvarid].chunks[ndims-2] )
                     ncvars[ncvarid].chunktype = CHUNK_GRID;
                   else if ( grid.xsize > 1 && grid.xsize == ncvars[ncvarid].chunks[ndims-1] )
                     ncvars[ncvarid].chunktype = CHUNK_LINES;
@@ -6218,8 +6241,8 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 }
 
 static
-void read_global_attributtes(int fileID, int vlistID, stream_t *streamptr, int ngatts,
-                               int *instID, int *modelID, int *ucla_les)
+void scan_global_attributtes(int fileID, int vlistID, stream_t *streamptr, int ngatts,
+                             int *instID, int *modelID, int *ucla_les, char *uuidOfHGrid)
 {
   nc_type xtype;
   size_t attlen;
@@ -6270,6 +6293,12 @@ void read_global_attributtes(int fileID, int vlistID, stream_t *streamptr, int n
 		}
 	      else if ( strcmp(attname, "CDO") == 0 )
 		{
+		}
+	      else if ( strcmp(attname, "uuid") == 0 && attlen == 36 )
+		{
+                  attstring[36] = 0;
+                  str2uuid(attstring, uuidOfHGrid);
+                  //   printf("uuid: %d %s\n", attlen, attstring);
 		}
 	      else
 		{
@@ -6333,6 +6362,9 @@ int cdfInqContents(stream_t *streamptr)
   int vlistID;
   int format = 0;
   int ucla_les = FALSE;
+  char uuidOfHGrid[17];
+
+  uuidOfHGrid[0] = 0;
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -6401,8 +6433,8 @@ int cdfInqContents(stream_t *streamptr)
       return (CDI_EUFSTRUCT);
     }
 
-  /* read global attributtes */
-  read_global_attributtes(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les);
+  /* scan global attributtes */
+  scan_global_attributtes(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les, uuidOfHGrid);
 
   /* find time dim */
   if ( unlimdimid >= 0 )
@@ -6695,7 +6727,7 @@ int cdfInqContents(stream_t *streamptr)
 
 
   /* define all grids */
-  define_all_grids(streamptr, vlistID, ncdims, nvars, ncvars, timedimid);
+  define_all_grids(streamptr, vlistID, ncdims, nvars, ncvars, timedimid, uuidOfHGrid);
 
 
   /* read VCT */
