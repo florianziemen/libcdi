@@ -2563,13 +2563,13 @@ void cdfDefGrid(stream_t *streamptr, int gridID)
           else
             {
               int lx = 0, ly = 0;
-              if ( gridInqXsize(gridID) > 0 && gridInqXvals(gridID, NULL) > 0 )
+              if ( gridInqXsize(gridID) > 0 /*&& gridInqXvals(gridID, NULL) > 0*/ )
                 {
                   cdfDefXaxis(streamptr, gridID);
                   lx = 1;
                 }
 
-              if ( gridInqYsize(gridID) > 0 && gridInqYvals(gridID, NULL) > 0 )
+              if ( gridInqYsize(gridID) > 0 /*&& gridInqYvals(gridID, NULL) > 0*/ )
                 {
                   cdfDefYaxis(streamptr, gridID);
                   ly = 1;
