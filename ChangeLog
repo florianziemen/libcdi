@@ -1,7 +1,11 @@
-2013-03-??  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+2013-03-14  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Version 1.6.0 released
-    * using CGRIBEX library version 1.6.0
+	* using CGRIBEX library version 1.6.0
+
+2013-03-07  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* netCDF: ignore the attribute valid_min/valid_max, if the data type is inconsistent
 
 2013-02-18  Florian Prill  <Florian.Prill@dwd.de>
 

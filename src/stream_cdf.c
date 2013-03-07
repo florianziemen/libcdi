@@ -4761,13 +4761,39 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             }
           else if ( strcmp(attname, "valid_min") == 0 && attlen == 1 )
             {
-              cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[0]);
-              ncvars[ncvarid].lvalidrange = TRUE;
+              if ( ncvars[ncvarid].lvalidrange == FALSE )
+                {
+                  extern int cdiIgnoreValidRange;
+                  int lignore = FALSE;
+                  if ( (atttype == NC_FLOAT || atttype == NC_DOUBLE) && xtype != NC_FLOAT && xtype != NC_DOUBLE ) lignore = TRUE;
+                  if ( cdiIgnoreValidRange == FALSE && lignore == FALSE )
+                    {
+                      cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[0]);
+                      ncvars[ncvarid].lvalidrange = TRUE;
+                    }
+                  else if ( lignore )
+                    {
+                      Warning("Inconsistent data type for attribute %s:valid_min, ignored!", name);
+                    }
+                }
             }
           else if ( strcmp(attname, "valid_max") == 0 && attlen == 1 )
             {
-              cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[1]);
-              ncvars[ncvarid].lvalidrange = TRUE;
+              if ( ncvars[ncvarid].lvalidrange == FALSE )
+                {
+                  extern int cdiIgnoreValidRange;
+                  int lignore = FALSE;
+                  if ( (atttype == NC_FLOAT || atttype == NC_DOUBLE) && xtype != NC_FLOAT && xtype != NC_DOUBLE ) lignore = TRUE;
+                  if ( cdiIgnoreValidRange == FALSE && lignore == FALSE )
+                    {
+                      cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[1]);
+                      ncvars[ncvarid].lvalidrange = TRUE;
+                    }
+                  else if ( lignore )
+                    {
+                      Warning("Inconsistent data type for attribute %s:valid_max, ignored!", name);
+                    }
+                }
             }
           else if ( strcmp(attname, "_Unsigned") == 0 && atttype == NC_CHAR )
             {
