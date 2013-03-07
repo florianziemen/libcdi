@@ -3524,8 +3524,8 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
 	  {
 	    double xfirst = 0.0, xinc = 0.0;
 
-	    if ( type == GRID_LONLAT     || type == GRID_GAUSSIAN || 
-		 type == GRID_GENERIC    || type == GRID_LCC2     || 
+	    if ( type == GRID_LONLAT     || type == GRID_GAUSSIAN ||
+		 type == GRID_GENERIC    || type == GRID_LCC2     ||
                  type == GRID_SINUSOIDAL || type == GRID_LAEA )
 	      {
 		xfirst = gridInqXval(gridID, 0);
