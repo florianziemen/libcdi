@@ -1221,7 +1221,7 @@ int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID,
   checkname = TRUE;
   iz = 0;
 
-  while ( checkname ) 
+  while ( checkname )
     {
       strcpy(axisname2, axisname);
       if ( iz ) sprintf(&axisname2[strlen(axisname2)], "_%d", iz+1);
@@ -1799,7 +1799,6 @@ void cdfDefRgrid(stream_t *streamptr, int gridID)
 static
 void cdfDefGdim(stream_t *streamptr, int gridID)
 {
-  char axisname[7] = "gsizeX";
   int index, iz = 0;
   int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
@@ -1859,9 +1858,15 @@ void cdfDefGdim(stream_t *streamptr, int gridID)
 
   if ( dimID == UNDEFID )
     {
+      int status;
+      char axisname[CDI_MAX_NAME];
+      strcpy(axisname, "gsize");
+
+      status = checkGridName('D', axisname, fileID, vlistID, gridID, ngrids, 'X');
+      /*
       if ( iz == 0 ) axisname[5] = '\0';
       else           sprintf(&axisname[5], "%1d", iz+1);
-
+      */
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
       //printf("axisname, dimlen %s %d\n", axisname, dimlen);
