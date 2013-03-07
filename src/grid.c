@@ -3428,7 +3428,7 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
   int nbyte0, nbyte;
   int i;
   int nvertex, iv;
-  char uuid[17];
+  char uuidOfHGrid[17];
   int gridID = gridptr->self;
   const double *area    = gridInqAreaPtr(gridID);
   const double *xvals   = gridInqXvalsPtr(gridID);
@@ -3697,14 +3697,16 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
       }
     case GRID_REFERENCE:
       {
-        const unsigned char *d;
+        // const unsigned char *d;
 	fprintf(fp, "number    = %d\n", gridInqNumber(gridID));
 	fprintf(fp, "position  = %d\n", gridInqPosition(gridID));
-        gridInqUUID(gridID, uuid);
-        d = (unsigned char *) &uuid;
+        /*
+        gridInqUUID(gridID, uuidOfHGrid);
+        d = (unsigned char *) &uuidOfHGrid;
 	fprintf(fp, "uuid      = %02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x\n", 
                 d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
                 d[8], d[9], d[10], d[11], d[12], d[13], d[14], d[15]);
+        */
 	if ( gridInqReference(gridID, NULL) )
 	  {
 	    char reference_link[8192];
@@ -3718,6 +3720,15 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
 	fprintf(stderr, "Unsupported grid type: %s\n", gridNamePtr(type));
         break;
       }
+    }
+
+  gridInqUUID(gridID, uuidOfHGrid);
+  if ( uuidOfHGrid[0] != 0 )
+    {
+      char uuidOfHGridStr[37];
+      uuid2str(uuidOfHGrid, uuidOfHGridStr);
+      if ( uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36 )
+        fprintf(fp, "uuid      = %s\n", uuidOfHGridStr);
     }
 
   if ( gridptr->mask )
