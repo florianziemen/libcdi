@@ -5,6 +5,7 @@
 
 2013-03-07  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* cdfDefGrid: bug fix for generic grids with nx or ny > 0
 	* netCDF: ignore the attribute valid_min/valid_max, if the data type is inconsistent
 
 2013-02-18  Florian Prill  <Florian.Prill@dwd.de>

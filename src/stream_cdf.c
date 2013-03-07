@@ -682,6 +682,7 @@ void cdfDefVarMissval(stream_t *streamptr, int varID, int dtype, int lcheck)
       fileID  = streamptr->fileID;
       ncvarid = streamptr->vars[varID].ncvarid;
       missval = vlistInqVarMissval(vlistID, varID);
+
       if ( lcheck && streamptr->ncmode == 2 ) cdf_redef(fileID);
 
       xtype = cdfDefDatatype(dtype, streamptr->filetype);
@@ -2528,7 +2529,10 @@ void cdfDefGridUUID(stream_t *streamptr, int gridID)
       uuid2str(uuidOfHGrid, uuidOfHGridStr);
       if ( uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36 )
         {
-          // cdf_put_att_text(fileID, ncvarid, "uuid", 36, uuidOfHGridStr);
+          int fileID  = streamptr->fileID;
+          if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+          cdf_put_att_text(fileID, NC_GLOBAL, "uuid", 36, uuidOfHGridStr);
+          if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
         }
     }
 }
