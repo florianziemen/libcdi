@@ -3,6 +3,10 @@
 	* Version 1.6.0 released
 	* using CGRIBEX library version 1.6.0
 
+2013-03-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* vtime2timeval: check validity of month
+
 2013-03-07  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cdfDefGrid: bug fix for generic grids with nx or ny > 0

@@ -1015,8 +1015,6 @@ double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
     {
       int nmonth, dpm;
 
-      dpm = days_per_month(calendar, year, month);
-
       value = (year-ryear)*12 - rmonth + month;
 
       nmonth = (int) value;
@@ -1024,6 +1022,8 @@ double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
 
       while ( month > 12 ) { month -= 12; year++; }
       while ( month <  1 ) { month += 12; year--; }
+
+      dpm = days_per_month(calendar, year, month);
 
       encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday2, &secofday2);
 
