@@ -3,6 +3,10 @@
 	* Version 1.6.0 released
 	* using CGRIBEX library version 1.6.0
 
+2013-03-11  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_gribapi: added support for local table shortName.def
+
 2013-03-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* vtime2timeval: check validity of month

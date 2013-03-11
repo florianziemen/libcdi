@@ -26,6 +26,7 @@ void recordInitEntry(record_t *record)
   (*record).used     = FALSE;
   (*record).varID    = CDI_UNDEFID;
   (*record).levelID  = CDI_UNDEFID;
+  memset((*record).varname, 0, sizeof((*record).varname));
 }
 
 

@@ -100,7 +100,7 @@ void paramInitEntry(int varID, int param)
 }
 
 static
-int varGetEntry(int param, int zaxistype, int ltype)
+int varGetEntry(int param, int zaxistype, int ltype, const char *name)
 {
   int varID;
 
@@ -109,7 +109,16 @@ int varGetEntry(int param, int zaxistype, int ltype)
       if ( vartable[varID].param     == param     &&
 	   vartable[varID].zaxistype == zaxistype &&
 	   vartable[varID].ltype     == ltype )
-	return (varID);
+        {
+          if ( name && name[0] && vartable[varID].name && vartable[varID].name[0] )
+            {
+              if ( strcmp(name, vartable[varID].name) == 0 ) return (varID);
+            }
+          else
+            {
+              return (varID);
+            }
+        }
     }
 
   return (UNDEFID);
@@ -282,7 +291,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
   int levelID = -1;
 
   if ( ! (cdiSplitLtype105 == 1 && zaxistype == ZAXIS_HEIGHT) )
-    varID = varGetEntry(param, zaxistype, ltype);
+    varID = varGetEntry(param, zaxistype, ltype, name);
 
   if ( varID == UNDEFID )
     {
