@@ -276,7 +276,7 @@ void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ys
 
   datatype = srvInqDatatype(prec);
 
-  varAddRecord(recID, param, gridID, leveltype, 0, level, 0,
+  varAddRecord(recID, param, gridID, leveltype, 0, level, 0, 0,
 	       datatype, &varID, &levelID, UNDEFID, 0, 0, NULL, NULL, NULL);
 
   (*record).varID   = varID;

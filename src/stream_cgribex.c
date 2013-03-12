@@ -408,7 +408,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   if ( datatype > 32 ) datatype = DATATYPE_PACK32;
   if ( datatype <  0 ) datatype = DATATYPE_PACK;
 
-  varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2,
+  varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, 0,
 	       datatype, &varID, &levelID, tsteptype, numavg, ISEC1_LevelType, NULL, NULL, NULL);
 
   (*record).varID   = varID;

@@ -3,9 +3,13 @@
 	* Version 1.6.0 released
 	* using CGRIBEX library version 1.6.0
 
+2013-03-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_gribapi: changed units for level type GRIB2_LTYPE_LANDDEPTH to m (internally mm) [Bug #3287]
+
 2013-03-11  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* stream_gribapi: added support for local table shortName.def
+	* stream_gribapi: added support for local table shortName.def (Bug #3343)
 
 2013-03-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 

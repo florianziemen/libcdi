@@ -47,6 +47,7 @@ typedef struct
   int         zaxistype;
   int         ltype;     /* GRIB level type */
   int         lbounds;
+  int         level_sf;
   int         zaxisID;
   int         nlevels;
   int         levelTableSize;
@@ -83,6 +84,8 @@ void paramInitEntry(int varID, int param)
   vartable[varID].gridID         = UNDEFID;
   vartable[varID].zaxistype      = 0;
   vartable[varID].ltype          = 0;
+  vartable[varID].lbounds        = 0;
+  vartable[varID].level_sf       = 0;
   vartable[varID].levelTable     = NULL;
   vartable[varID].levelTableSize = 0;
   vartable[varID].nlevels        = 0;
@@ -211,9 +214,9 @@ int levelNewEntry(int varID, int level1, int level2)
 	levelTable[i].recID = UNDEFID;
     }
 
-  levelTable[levelID].level1 = level1;
-  levelTable[levelID].level2 = level2;
-  levelTable[levelID].lindex = levelID;
+  levelTable[levelID].level1   = level1;
+  levelTable[levelID].level2   = level2;
+  levelTable[levelID].lindex   = levelID;
 
   vartable[varID].nlevels = levelID+1;
   vartable[varID].levelTableSize = levelTableSize;
@@ -283,7 +286,7 @@ int paramNewEntry(int param)
 
 
 void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
-		  int level1, int level2, int prec,
+		  int level1, int level2, int level_sf, int prec,
 		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype,
 		  const char *name, const char *longname, const char *units)
 {
@@ -301,6 +304,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
       vartable[varID].zaxistype = zaxistype;
       vartable[varID].ltype     = ltype;
       vartable[varID].lbounds   = lbounds;
+      vartable[varID].level_sf  = level_sf;
       if ( tsteptype != UNDEFID ) vartable[varID].tsteptype = tsteptype;
       if ( numavg ) vartable[varID].timave = 1;
 
@@ -418,6 +422,7 @@ void cdi_generate_vars(stream_t *streamptr)
   double *dlevels2 = NULL;
   int vlistID;
   int *varids, index, varid;
+  double level_sf = 1;
 
   vlistID =  streamptr->vlistID;
 
@@ -471,6 +476,8 @@ void cdi_generate_vars(stream_t *streamptr)
       timaccu   = vartable[varid].timaccu;
       comptype  = vartable[varid].comptype;
 
+      if ( vartable[varid].level_sf == 77 ) level_sf = 0.001;
+
       zaxisID = UNDEFID;
 
       if ( ltype == 0 && zaxistype == ZAXIS_GENERIC && nlevels == 1 &&
@@ -481,11 +488,11 @@ void cdi_generate_vars(stream_t *streamptr)
 
       if ( lbounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
 	for ( levelID = 0; levelID < nlevels; levelID++ )
-	  dlevels[levelID] = (vartable[varid].levelTable[levelID].level1 +
-	                      vartable[varid].levelTable[levelID].level2)/2;
+	  dlevels[levelID] = (level_sf*vartable[varid].levelTable[levelID].level1 +
+	                      level_sf*vartable[varid].levelTable[levelID].level2)/2;
       else
 	for ( levelID = 0; levelID < nlevels; levelID++ )
-	  dlevels[levelID] = vartable[varid].levelTable[levelID].level1;
+	  dlevels[levelID] = level_sf*vartable[varid].levelTable[levelID].level1;
 
       if ( nlevels > 1 )
 	{
@@ -511,16 +518,15 @@ void cdi_generate_vars(stream_t *streamptr)
 		  /*
 		  qsort(dlevels, nlevels, sizeof(double), dblcmp);
 		  */
-		  qsort(vartable[varid].levelTable, nlevels, 
-			sizeof(leveltable_t), cmpLevelTable);
+		  qsort(vartable[varid].levelTable, nlevels, sizeof(leveltable_t), cmpLevelTable);
 
 		  if ( lbounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
 		    for ( levelID = 0; levelID < nlevels; levelID++ )
-		      dlevels[levelID] = (vartable[varid].levelTable[levelID].level1 +
-					  vartable[varid].levelTable[levelID].level2)/2.;
+		      dlevels[levelID] = (level_sf*vartable[varid].levelTable[levelID].level1 +
+					  level_sf*vartable[varid].levelTable[levelID].level2)/2.;
 		  else
 		    for ( levelID = 0; levelID < nlevels; levelID++ )
-		      dlevels[levelID] = vartable[varid].levelTable[levelID].level1;
+		      dlevels[levelID] = level_sf*vartable[varid].levelTable[levelID].level1;
 		}
 	    }
 	}
@@ -529,14 +535,18 @@ void cdi_generate_vars(stream_t *streamptr)
 	{
 	  dlevels1 = (double *) malloc(nlevels*sizeof(double));
 	  for ( levelID = 0; levelID < nlevels; levelID++ )
-	    dlevels1[levelID] = vartable[varid].levelTable[levelID].level1;
+	    dlevels1[levelID] = level_sf*vartable[varid].levelTable[levelID].level1;
 	  dlevels2 = (double *) malloc(nlevels*sizeof(double));
 	  for ( levelID = 0; levelID < nlevels; levelID++ )
-	    dlevels2[levelID] = vartable[varid].levelTable[levelID].level2;
+	    dlevels2[levelID] = level_sf*vartable[varid].levelTable[levelID].level2;
 	}
 
-      zaxisID = varDefZaxis(vlistID, zaxistype, nlevels, dlevels, lbounds, dlevels1, dlevels2,
-			    Vctsize, Vct, NULL, NULL, NULL, 0, 0, ltype);
+      if ( vartable[varid].level_sf == 77 )
+        zaxisID = varDefZaxis(vlistID, zaxistype, nlevels, dlevels, lbounds, dlevels1, dlevels2,
+                              Vctsize, Vct, NULL, NULL, "m", 0, 0, ltype);
+      else
+        zaxisID = varDefZaxis(vlistID, zaxistype, nlevels, dlevels, lbounds, dlevels1, dlevels2,
+                              Vctsize, Vct, NULL, NULL, NULL, 0, 0, ltype);
 
       if ( lbounds ) free(dlevels1);
       if ( lbounds ) free(dlevels2);
@@ -612,8 +622,7 @@ void cdi_generate_vars(stream_t *streamptr)
       */
       for ( levelID = 0; levelID < nlevels; levelID++ )
 	{
-	  streamptr->vars[varID].level[levelID] =
-	    vartable[varid].levelTable[levelID].recID;
+	  streamptr->vars[varID].level[levelID] = vartable[varid].levelTable[levelID].recID;
 	  for ( lindex = 0; lindex < nlevels; lindex++ )
 	    if ( levelID == vartable[varid].levelTable[lindex].lindex ) break;
 

@@ -752,7 +752,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   gridID = varDefGrid(vlistID, grid, 0);
 
   leveltype = iegGetZaxisType(IEG_P_LevelType(pdb));
-  
+
   if ( leveltype == ZAXIS_HYBRID )
     {
       int i;
@@ -769,7 +769,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
 
   datatype = iegInqDatatype(prec);
 
-  varAddRecord(recID, param, gridID, leveltype, lbounds, level1, level2,
+  varAddRecord(recID, param, gridID, leveltype, lbounds, level1, level2, 0,
 	       datatype, &varID, &levelID, UNDEFID, 0, 0, NULL, NULL, NULL);
 
   (*record).varID   = varID;
