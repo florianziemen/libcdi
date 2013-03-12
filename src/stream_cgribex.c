@@ -1916,6 +1916,27 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	ISEC1_Level2    = 0;
 	break;
       }
+    case ZAXIS_CLOUD_BASE:
+      {
+	ISEC1_LevelType = GRIB1_LTYPE_CLOUDBASE;
+	ISEC1_Level1    = 0;
+	ISEC1_Level2    = 0;
+	break;
+      }
+    case ZAXIS_CLOUD_TOP:
+      {
+	ISEC1_LevelType = GRIB1_LTYPE_CLOUDTOP;
+	ISEC1_Level1    = 0;
+	ISEC1_Level2    = 0;
+	break;
+      }
+    case ZAXIS_ISOTHERM_ZERO:
+      {
+	ISEC1_LevelType = GRIB1_LTYPE_ISOTHERM0;
+	ISEC1_Level1    = 0;
+	ISEC1_Level2    = 0;
+	break;
+      }
     case ZAXIS_TOA:
       {
 	ISEC1_LevelType = GRIB1_LTYPE_TOA;
