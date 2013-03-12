@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   February 2013
+! Uwe Schulzweida, MPI-MET, Hamburg,   March 2013
 !
 
       INTEGER    CDI_MAX_NAME          
