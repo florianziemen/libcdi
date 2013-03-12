@@ -5,6 +5,7 @@
 
 2013-03-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* Added support for level type CLOUD_BASE, CLOUD_TOP and ISOTHERM_ZERO [Feature #3247]
 	* stream_gribapi: changed units for level type GRIB2_LTYPE_LANDDEPTH to m (internally mm) [Bug #3287]
 	* gribapiGetGrid: get gridDescriptionFile with grib_get_string() instead of grib_get_bytes() (bug fix)
 

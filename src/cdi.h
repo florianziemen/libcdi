@@ -155,7 +155,10 @@ extern "C" {
 #define  ZAXIS_TOA               13  /* Norminal top of atmosphere              */
 #define  ZAXIS_SEA_BOTTOM        14  /* Sea bottom                              */
 #define  ZAXIS_ATMOSPHERE        15  /* Entire atmosphere                       */
-#define  ZAXIS_REFERENCE         16  /* zaxis reference number                  */
+#define  ZAXIS_CLOUD_BASE        16  /*                        */
+#define  ZAXIS_CLOUD_TOP         17  /*                        */
+#define  ZAXIS_ISOTHERM_ZERO     18  /*                        */
+#define  ZAXIS_REFERENCE         19  /* zaxis reference number                  */
 
 /* TIME types */
 

@@ -2568,8 +2568,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
   if ( zaxistype == ZAXIS_GENERIC && ltype == 0 )
     {
       Message("Changed zaxis type from %s to %s",
-	      zaxisNamePtr(zaxistype),
-	      zaxisNamePtr(ZAXIS_PRESSURE));
+	      zaxisNamePtr(zaxistype), zaxisNamePtr(ZAXIS_PRESSURE));
       zaxistype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, zaxistype);
       zaxisDefUnits(zaxisID, "Pa");
@@ -2591,6 +2590,45 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
         GRIB_CHECK(grib_set_long(gh, "level", level), 0);
 
 	break;
+      }
+    case ZAXIS_CLOUD_BASE:
+      {
+	if ( editionNumber <= 1 )
+          {
+            if ( !gcinit ) GRIB_CHECK(grib_set_long(gh, "indicatorOfTypeOfLevel", GRIB1_LTYPE_CLOUDBASE), 0);
+          }
+        else
+          {
+            if ( !gcinit ) GRIB_CHECK(grib_set_long(gh, "typeOfFirstFixedSurface", GRIB2_LTYPE_CLOUDBASE), 0);
+          }
+
+        break;
+      }
+    case ZAXIS_CLOUD_TOP:
+      {
+	if ( editionNumber <= 1 )
+          {
+            if ( !gcinit ) GRIB_CHECK(grib_set_long(gh, "indicatorOfTypeOfLevel", GRIB1_LTYPE_CLOUDTOP), 0);
+          }
+        else
+          {
+            if ( !gcinit ) GRIB_CHECK(grib_set_long(gh, "typeOfFirstFixedSurface", GRIB2_LTYPE_CLOUDTOP), 0);
+          }
+
+        break;
+      }
+    case ZAXIS_ISOTHERM_ZERO:
+      {
+	if ( editionNumber <= 1 )
+          {
+            if ( !gcinit ) GRIB_CHECK(grib_set_long(gh, "indicatorOfTypeOfLevel", GRIB1_LTYPE_ISOTHERM0), 0);
+          }
+        else
+          {
+            if ( !gcinit ) GRIB_CHECK(grib_set_long(gh, "typeOfFirstFixedSurface", GRIB2_LTYPE_ISOTHERM0), 0);
+          }
+
+        break;
       }
     case ZAXIS_TOA:
       {

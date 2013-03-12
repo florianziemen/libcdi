@@ -2177,11 +2177,14 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   dimlen = zaxisInqSize(zaxisID);
   type   = zaxisInqType(zaxisID);
 
-  if ( dimlen == 1 && type == ZAXIS_SURFACE     ) return;
-  if ( dimlen == 1 && type == ZAXIS_TOA         ) return;
-  if ( dimlen == 1 && type == ZAXIS_SEA_BOTTOM  ) return;
-  if ( dimlen == 1 && type == ZAXIS_ATMOSPHERE  ) return;
-  if ( dimlen == 1 && type == ZAXIS_MEANSEA     ) return;
+  if ( dimlen == 1 && type == ZAXIS_SURFACE       ) return;
+  if ( dimlen == 1 && type == ZAXIS_CLOUD_BASE    ) return;
+  if ( dimlen == 1 && type == ZAXIS_CLOUD_TOP     ) return;
+  if ( dimlen == 1 && type == ZAXIS_ISOTHERM_ZERO ) return;
+  if ( dimlen == 1 && type == ZAXIS_TOA           ) return;
+  if ( dimlen == 1 && type == ZAXIS_SEA_BOTTOM    ) return;
+  if ( dimlen == 1 && type == ZAXIS_ATMOSPHERE    ) return;
+  if ( dimlen == 1 && type == ZAXIS_MEANSEA       ) return;
 
   zaxisInqName(zaxisID, axisname);
   /*
@@ -3062,8 +3065,11 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   if ( zid == -1 )
     {
-      if ( zaxisInqType(zaxisID) == ZAXIS_TOA         || 
-           zaxisInqType(zaxisID) == ZAXIS_SEA_BOTTOM  ||
+      if ( zaxisInqType(zaxisID) == ZAXIS_CLOUD_BASE    ||
+           zaxisInqType(zaxisID) == ZAXIS_CLOUD_TOP     ||
+           zaxisInqType(zaxisID) == ZAXIS_ISOTHERM_ZERO ||
+           zaxisInqType(zaxisID) == ZAXIS_TOA           ||
+           zaxisInqType(zaxisID) == ZAXIS_SEA_BOTTOM    ||
            zaxisInqType(zaxisID) == ZAXIS_ATMOSPHERE )
         {
           zaxisInqName(zaxisID, varname);
@@ -3071,12 +3077,11 @@ int cdfDefVar(stream_t *streamptr, int varID)
         }
     }
 
-  if( vlistInqVarEnsemble( vlistID,  varID, &ensID, &ensCount, &forecast_type ) )
+  if ( vlistInqVarEnsemble( vlistID,  varID, &ensID, &ensCount, &forecast_type ) )
     {
       /* void cdf_put_att_int(  int ncid, int varid, const char *name, nc_type xtype,
 	                        size_t len, const int *ip )
        */
-
 	cdf_put_att_int(fileID, ncvarid, "realization", NC_INT, 1, &ensID);
 	cdf_put_att_int(fileID, ncvarid, "ensemble_members", NC_INT, 1, &ensCount);
 	cdf_put_att_int(fileID, ncvarid, "forecast_init_type", NC_INT, 1, &forecast_type);
@@ -4542,6 +4547,12 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 
               if      ( strcmp(attstring, "toa") == 0 )
                 ncvars[ncvarid].zaxistype = ZAXIS_TOA;
+              else if ( strcmp(attstring, "cloudbase") == 0 )
+                ncvars[ncvarid].zaxistype = ZAXIS_CLOUD_BASE;
+              else if ( strcmp(attstring, "cloudtop") == 0 )
+                ncvars[ncvarid].zaxistype = ZAXIS_CLOUD_TOP;
+              else if ( strcmp(attstring, "isotherm0") == 0 )
+                ncvars[ncvarid].zaxistype = ZAXIS_ISOTHERM_ZERO;
               else if ( strcmp(attstring, "seabottom") == 0 )
                 ncvars[ncvarid].zaxistype = ZAXIS_SEA_BOTTOM;
               else if ( strcmp(attstring, "atmosphere") == 0 )
@@ -5966,7 +5977,7 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	    Message("zaxisID %d %d %s", ncvars[ncvarid].zaxisID, ncvarid, ncvars[ncvarid].name);
 
 	  for ( ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++ )
-	    if ( ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].zaxisID == UNDEFID )
+	    if ( ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].zaxisID == UNDEFID && ncvars[ncvarid2].zaxistype == UNDEFID )
 	      {
 		int zdimid2 = -1;
 		ndims = ncvars[ncvarid2].ndims;

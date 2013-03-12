@@ -44,7 +44,10 @@ ZaxistypeEntry[] = {
   { /* 13 */ 0, "toa",        "top_of_atmosphere", "",               ""},
   { /* 14 */ 0, "seabottom",  "sea_bottom",        "",               ""},
   { /* 15 */ 0, "atmosphere", "atmosphere",        "",               ""},
-  { /* 16 */ 0, "height",     "generalized height","height",         "m"},
+  { /* 16 */ 0, "cloudbase",  "cloud_base",        "",               ""},
+  { /* 17 */ 0, "cloudtop",   "cloud_top",         "",               ""},
+  { /* 18 */ 0, "isotherm0",  "isotherm_zero",     "",               ""},
+  { /* 19 */ 0, "height",     "generalized height","height",         "m"},
 };
 
 static int CDI_MaxZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]);
