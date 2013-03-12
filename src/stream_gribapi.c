@@ -576,25 +576,25 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       {
         char uuid[17];
     	char reference_link[8192];
-	    size_t len = sizeof(reference_link);
-	    reference_link[0] = 0;
+        size_t len = sizeof(reference_link);
+        reference_link[0] = 0;
 
     	grid->size  = numberOfPoints;
-	    if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )
-	      {
-	        grid->number   = lpar;
-	        if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 ) grid->position = lpar;
-	        if ( grib_get_bytes(gh, "gridDescriptionFile", (unsigned char *) reference_link, &len) == 0 )
-	          {
-		        if ( strncmp(reference_link, "file://", 7) == 0 )
-		          grid->reference = strdupx(reference_link);
-	            }
-                len = (size_t) 16;
-                if ( grib_get_bytes(gh, "uuidOfHGrid", (unsigned char *) uuid, &len) == 0)
-                  {
-                    strncpy(grid->uuid, uuid, 16);
-                  }
-	      }
+        if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )
+          {
+            grid->number   = lpar;
+            if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 ) grid->position = lpar;
+            if ( grib_get_string(gh, "gridDescriptionFile", reference_link, &len) == 0 )
+              {
+                if ( strncmp(reference_link, "file://", 7) == 0 )
+                  grid->reference = strdupx(reference_link);
+              }
+            len = (size_t) 16;
+            if ( grib_get_bytes(gh, "uuidOfHGrid", (unsigned char *) uuid, &len) == 0)
+              {
+                strncpy(grid->uuid, uuid, 16);
+              }
+          }
 	break;
       }
     case GRID_GENERIC:

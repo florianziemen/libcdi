@@ -6,6 +6,7 @@
 2013-03-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* stream_gribapi: changed units for level type GRIB2_LTYPE_LANDDEPTH to m (internally mm) [Bug #3287]
+	* gribapiGetGrid: get gridDescriptionFile with grib_get_string() instead of grib_get_bytes() (bug fix)
 
 2013-03-11  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
