@@ -276,6 +276,13 @@ void gribapiGetDataDateTime(grib_handle *gh, int *datadate, int *datatime)
 }
 
 static
+void gribapiSetDataDateTime(grib_handle *gh, int datadate, int datatime)
+{
+  GRIB_CHECK(grib_set_long(gh, "dataDate", datadate), 0);
+  GRIB_CHECK(grib_set_long(gh, "dataTime", datatime/100), 0);
+}
+
+static
 int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
 {
   int rdate, rtime;
@@ -2087,8 +2094,7 @@ void gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, int date, int tim
   if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "stepRange", 0), 0);
 
   if ( date == 0 ) date = 10101;
-  GRIB_CHECK(grib_set_long(gh, "dataDate", date), 0);
-  GRIB_CHECK(grib_set_long(gh, "dataTime", time/100), 0);
+  gribapiSetDataDateTime(gh, date, time);
 
   (void ) gribapiDefSteptype(editionNumber, gh, tsteptype, gcinit);
 }
@@ -2121,8 +2127,7 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
       if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "stepRange", 0), 0);
 
       if ( rdate == 0 ) rdate = 10101;
-      GRIB_CHECK(grib_set_long(gh, "dataDate", rdate), 0);
-      GRIB_CHECK(grib_set_long(gh, "dataTime", rtime/100), 0);
+      gribapiSetDataDateTime(gh, rdate, rtime);
 
       // printf(">>>>> tsteptype %d  startStep %d  endStep %d\n", tsteptype, startStep, endStep);
 
