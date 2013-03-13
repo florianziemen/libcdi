@@ -1482,11 +1482,11 @@ int cgribexDefTimerange(int tsteptype, int factor, int calendar,
 
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
-  encode_juldaysec(calendar, year, month, day, hour, minute, &julday1, &secofday1);
+  encode_juldaysec(calendar, year, month, day, hour, minute, second, &julday1, &secofday1);
 
   cdiDecodeDate(vdate, &year, &month, &day);
   cdiDecodeTime(vtime, &hour, &minute, &second);
-  encode_juldaysec(calendar, year, month, day, hour, minute, &julday2, &secofday2);
+  encode_juldaysec(calendar, year, month, day, hour, minute, second, &julday2, &secofday2);
 
   (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
 

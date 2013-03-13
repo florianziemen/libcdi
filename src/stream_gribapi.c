@@ -2111,11 +2111,11 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
 
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
-  encode_juldaysec(calendar, year, month, day, hour, minute, &julday1, &secofday1);
+  encode_juldaysec(calendar, year, month, day, hour, minute, second, &julday1, &secofday1);
 
   cdiDecodeDate(vdate, &year, &month, &day);
   cdiDecodeTime(vtime, &hour, &minute, &second);
-  encode_juldaysec(calendar, year, month, day, hour, minute, &julday2, &secofday2);
+  encode_juldaysec(calendar, year, month, day, hour, minute, second, &julday2, &secofday2);
 
   (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
 
@@ -2129,7 +2129,7 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
       if ( rdate == 0 ) rdate = 10101;
       gribapiSetDataDateTime(gh, rdate, rtime);
 
-      // printf(">>>>> tsteptype %d  startStep %d  endStep %d\n", tsteptype, startStep, endStep);
+      // printf(">>>>> tsteptype %d  startStep %ld  endStep %ld\n", tsteptype, startStep, endStep);
 
       proDefTempNum = gribapiDefSteptype(editionNumber, gh, tsteptype, gcinit);
 
