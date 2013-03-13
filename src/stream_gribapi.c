@@ -148,27 +148,6 @@ double timeunit_factor(int tu1, int tu2)
 }
 
 static
-int gribapiGetEndStep(grib_handle *gh, int startStep, int timeunits)
-{
-  int endStep = startStep;
-  int timeunits2;
-  int status;
-  long unitsOfTime;
-  long lpar;
-
-  status = grib_get_long(gh, "stepUnits", &unitsOfTime);
-
-  timeunits2 = getTimeunits(unitsOfTime);
-
-  status = grib_get_long(gh, "endStep", &lpar);
-
-  if ( status == 0 )
-    endStep = (int) ((lpar * timeunit_factor(timeunits, timeunits2)) + 0.5);
-
-  return (endStep);
-}
-
-static
 int gribapiGetTimeUnits(grib_handle *gh)
 {
   int timeunits = -1;
@@ -204,6 +183,29 @@ int gribapiGetTimeUnits(grib_handle *gh)
   */
 
   return (timeunits);
+}
+
+static
+int gribapiGetEndStep(grib_handle *gh, int startStep, int timeunits)
+{
+  int endStep = startStep;
+  int timeunits2;
+  int status;
+  long unitsOfTime;
+  long lpar;
+
+  // status = grib_get_long(gh, "stepUnits", &unitsOfTime);
+
+  // timeunits2 = getTimeunits(unitsOfTime);
+  timeunits2 = gribapiGetTimeUnits(gh);
+
+  status = grib_get_long(gh, "endStep", &lpar);
+
+  if ( status == 0 )
+    endStep = (int) ((lpar * timeunit_factor(timeunits, timeunits2)) + 0.5);
+  // printf("%d %d %d %d %d %g\n", startStep, endStep, lpar, timeunits, timeunits2, timeunit_factor(timeunits, timeunits2));
+
+  return (endStep);
 }
 
 static
@@ -356,9 +358,7 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
 	julday_add_seconds(addsec, &julday, &secofday);
 
 	decode_caldaysec(grib_calendar, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute, &rsecond);
-	/*
-	  printf("new %d/%d/%d %d:%d\n", ryear, rmonth, rday, rhour, rminute);
-	*/
+
 	*vdate = cdiEncodeDate(ryear, rmonth, rday);
 	*vtime = cdiEncodeTime(rhour, rminute, rsecond);
       }

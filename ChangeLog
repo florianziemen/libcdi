@@ -3,6 +3,10 @@
 	* Version 1.6.0 released
 	* using CGRIBEX library version 1.6.0
 
+2013-03-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* GRIB: added support for time step unit: seconds (Bug #3352)
+
 2013-03-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Added support for level type CLOUD_BASE, CLOUD_TOP and ISOTHERM_ZERO [Feature #3247]
