@@ -265,6 +265,17 @@ int gribapiGetTsteptype(grib_handle *gh)
 }
 
 static
+void gribapiGetDataDateTime(grib_handle *gh, int *datadate, int *datatime)
+{
+  long lpar;
+
+  GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
+  *datadate = (int) lpar;
+  GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
+  *datatime = (int) lpar*100;
+}
+
+static
 int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
 {
   int rdate, rtime;
@@ -285,17 +296,12 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
 
   if ( sigofrtime == 3 )
     {
-      GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
-      *vdate = (int) lpar;
-      GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
-      *vtime = (int) lpar*100;
+      gribapiGetDataDateTime(gh, vdate, vtime);
     }
   else
     {
-      GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
-      rdate = (int) lpar;
-      GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
-      rtime = (int) lpar*100;
+      gribapiGetDataDateTime(gh, &rdate, &rtime);
+
       status = grib_get_long(gh, "forecastTime", &lpar);
       if ( status == 0 ) startStep = (int) lpar;
       timeUnits = gribapiGetTimeUnits(gh);
@@ -1183,10 +1189,9 @@ int gribapiScanTimestep1(stream_t * streamptr)
 	{
 	  datetime0.date = vdate;
 	  datetime0.time = vtime;
-	  GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
-	  rdate = (int) lpar;
-	  GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
-	  rtime = (int) lpar*100;
+
+          gribapiGetDataDateTime(gh, &rdate, &rtime);
+
 	  fcast = gribapiTimeIsFC(gh);
 	  if ( fcast ) tunit = gribapiGetTimeUnits(gh);
 	}
@@ -1455,10 +1460,9 @@ int gribapiScanTimestep2(stream_t * streamptr)
 	  if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 	    {
 	      taxis->type  = TAXIS_RELATIVE;
-	      GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
-	      taxis->rdate = (int) lpar;
-	      GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
-	      taxis->rtime = (int) lpar*100;
+
+              gribapiGetDataDateTime(gh, &(taxis->rdate), &(taxis->rtime));
+
 	      taxis->unit  = gribapiGetTimeUnits(gh);
 	    }
 	  else
@@ -1729,10 +1733,9 @@ int gribapiScanTimestep(stream_t * streamptr)
 	      if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 		{
 		  taxis->type  = TAXIS_RELATIVE;
-		  GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
-		  taxis->rdate = (int) lpar;
-		  GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
-		  taxis->rtime = (int) lpar*100;
+
+                  gribapiGetDataDateTime(gh, &(taxis->rdate), &(taxis->rtime));
+
 		  taxis->unit  = gribapiGetTimeUnits(gh);
 		}
 	      else
