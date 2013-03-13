@@ -1207,6 +1207,24 @@
       EXTERNAL        vlistDefVarDblKey
 
 !
+!  ----------------------------------
+!
+!
+!  Local change: 2013-02-18, FP (DWD)
+!
+!
+!  ----------------------------------
+!
+!                     vlistInqVarRawBegin
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarRawBegin
+
+!                     vlistInqVarRawEnd
+!                                    (INTEGER         streamID)
+      EXTERNAL        vlistInqVarRawEnd
+
+!
 !  VLIST attributes
 !
       INTEGER         vlistInqNatts

@@ -259,6 +259,17 @@ FCALLSCFUN5 (INT, vlistInqVarEnsemble, VLISTINQVARENSEMBLE, vlistinqvarensemble,
 FCALLSCSUB4 (vlistDefVarIntKey, VLISTDEFVARINTKEY, vlistdefvarintkey, INT, INT, STRING, INT)
 FCALLSCSUB4 (vlistDefVarDblKey, VLISTDEFVARDBLKEY, vlistdefvardblkey, INT, INT, STRING, DOUBLE)
 
+/*  ----------------------------------  */
+
+
+/*  Local change: 2013-02-18, FP (DWD)  */
+
+
+/*  ----------------------------------  */
+
+FCALLSCSUB2 (vlistInqVarRawBegin, VLISTINQVARRAWBEGIN, vlistinqvarrawbegin, INT, INT)
+FCALLSCSUB1 (vlistInqVarRawEnd, VLISTINQVARRAWEND, vlistinqvarrawend, INT)
+
 /*  VLIST attributes  */
 
 FCALLSCFUN3 (INT, vlistInqNatts, VLISTINQNATTS, vlistinqnatts, INT, INT, PINT)

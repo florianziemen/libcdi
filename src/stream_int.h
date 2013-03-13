@@ -251,6 +251,12 @@ typedef struct {
   void       *gribContainers;
 #endif
   int         vlistIDorig;
+
+  /* ---------------------------------- */
+  /* Local change: 2013-02-18, FP (DWD) */
+  /* ---------------------------------- */
+
+  void *gh; // grib handle
 }
 stream_t;
 

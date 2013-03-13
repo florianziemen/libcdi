@@ -3,6 +3,10 @@
 	* Version 1.6.0 released
 	* using CGRIBEX library version 1.6.0
 
+2013-03-13  Florian Prill  <Florian.Prill@dwd.de>
+
+	* Read arbitrary GRIB keys [Feature #3267]
+
 2013-03-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* GRIB: added support for time step unit: seconds (Bug #3352)

@@ -348,7 +348,7 @@ void grbReadVarDP(stream_t * streamptr, int varID, double *data, int *nmiss)
 
       missval = vlistInqVarMissval(vlistID, varID);
 
-      grbDecode(filetype, gribbuffer, recsize, &data[levelID*gridsize], gridsize, 
+      grbDecode(filetype, gribbuffer, recsize, &data[levelID*gridsize], gridsize,
 		streamptr->unreduced, &imiss, &zip, missval);
 
       *nmiss += imiss;
