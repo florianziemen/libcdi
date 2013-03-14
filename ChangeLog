@@ -9,7 +9,7 @@
 
 2013-03-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* GRIB: added support for time step unit: seconds (Bug #3352)
+	* GRIB: added support for time step unit: seconds [Bug #3352]
 
 2013-03-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
@@ -19,7 +19,7 @@
 
 2013-03-11  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* stream_gribapi: added support for local table shortName.def (Bug #3343)
+	* stream_gribapi: added support for local table shortName.def [Bug #3343]
 
 2013-03-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
