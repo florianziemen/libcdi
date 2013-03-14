@@ -2534,7 +2534,7 @@ void cdfDefGridUUID(stream_t *streamptr, int gridID)
         {
           int fileID  = streamptr->fileID;
           if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-          cdf_put_att_text(fileID, NC_GLOBAL, "uuid", 36, uuidOfHGridStr);
+          cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfHGrid", 36, uuidOfHGridStr);
           if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
         }
     }
@@ -6340,7 +6340,7 @@ void scan_global_attributtes(int fileID, int vlistID, stream_t *streamptr, int n
 	      else if ( strcmp(attname, "CDO") == 0 )
 		{
 		}
-	      else if ( strcmp(attname, "uuid") == 0 && attlen == 36 )
+	      else if ( strcmp(attname, "uuidOfHGrid") == 0 && attlen == 36 )
 		{
                   attstring[36] = 0;
                   str2uuid(attstring, uuidOfHGrid);
