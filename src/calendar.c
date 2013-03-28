@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "cdi.h"  		/* CALENDAR_ */
+#include <inttypes.h>
 #include "timebase.h"
 
 
