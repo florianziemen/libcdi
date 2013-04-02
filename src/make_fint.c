@@ -153,6 +153,9 @@ enum {
 static inline size_t
 compress_whitespace(size_t len, char str[]);
 
+static int
+reCompile(regex_t *restrict RE, const char *restrict REstring,
+          char * restrict *restrict lineBuf, size_t * restrict lineBufSize);
 static size_t
 symRegexCompile(size_t numSyms, struct symbol symList[],
                 char **line, size_t *lineBufSize);
@@ -215,37 +218,17 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   /* compile comment regular expression */
   regex_t commentRE;
   {
-    int errcode;
-    char commentREString[] = "^"WS"*/\\*"WS"*(.*"NWS")"WS"*\\*/";
-    if ((errcode = regcomp(&commentRE, commentREString, REG_EXTENDED)))
-      {
-        line = realloc(line, lineBufSize = 1024);
-        if (line)
-          {
-            regerror(errcode, &commentRE, line, lineBufSize);
-            fprintf(stderr, "Error compiling regular expression: %s: %s\n",
-                    commentREString, line);
-            exit(EXIT_FAILURE);
-          }
-      }
+    static const char commentREString[] = "^"WS"*/\\*"WS"*(.*"NWS")"WS"*\\*/";
+    if (reCompile(&commentRE, commentREString, &line, &lineBufSize))
+      exit(EXIT_FAILURE);
   }
   /* compile documentation comment regular expression */
   regex_t docCommentRE;
   {
-    int errcode;
-    char docCommentREString[] = "^"WS"*/\\*"WS"*"SYMRE":"
+    static const char docCommentREString[] = "^"WS"*/\\*"WS"*"SYMRE":"
       WS"*("NWS".*"NWS")"WS"*\\*/";
-    if ((errcode = regcomp(&docCommentRE, docCommentREString, REG_EXTENDED)))
-      {
-        line = realloc(line, lineBufSize = 1024);
-        if (line)
-          {
-            regerror(errcode, &commentRE, line, lineBufSize);
-            fprintf(stderr, "Error compiling regular expression: %s: %s\n",
-                    docCommentREString, line);
-            exit(EXIT_FAILURE);
-          }
-      }
+    if (reCompile(&docCommentRE, docCommentREString, &line, &lineBufSize))
+      exit(EXIT_FAILURE);
   }
   /* fortran include */
 
@@ -774,24 +757,35 @@ symRegexCompile(size_t numSyms, struct symbol symList[],
   size_t maxMatch = 0;
   for (size_t sym = 0; sym < numSyms; ++sym)
     {
-      int errcode;
-      if ((errcode = regcomp(&symList[sym].preg, symList[sym].parseRE,
-                             REG_EXTENDED)))
-        {
-          if (*lineBufSize < REGEX_MAX_ERRSTRLEN)
-            line = realloc(line, *lineBufSize = REGEX_MAX_ERRSTRLEN);
-          if (line)
-            {
-              regerror(errcode, &symList[sym].preg, *line, *lineBufSize);
-              fprintf(stderr, "Error compiling regular expression: %s: %s\n",
-                      symList[sym].parseRE, *line);
-            }
-          exit(EXIT_FAILURE);
-        }
+      if (reCompile(&symList[sym].preg, symList[sym].parseRE,
+                    line, lineBufSize))
+        exit(EXIT_FAILURE);
       if (symList[sym].nameMatch > maxMatch)
         maxMatch = symList[sym].nameMatch;
     }
   return maxMatch;
+}
+
+static int
+reCompile(regex_t *restrict RE, const char *restrict REstring,
+          char * restrict *restrict lineBuf, size_t * restrict lineBufSize)
+{
+  int errcode;
+  if ((errcode = regcomp(RE, REstring, REG_EXTENDED)))
+    {
+      char *restrict line;
+      size_t resize;
+      if (*lineBufSize < REGEX_MAX_ERRSTRLEN
+          && (line = realloc(*lineBuf, resize = REGEX_MAX_ERRSTRLEN)))
+        {
+          *lineBuf = line;
+          *lineBufSize = resize;
+          regerror(errcode, RE, line, *lineBufSize);
+          fprintf(stderr, "Error compiling regular expression: %s: %s\n",
+                  REstring, *lineBuf);
+        }
+    }
+  return errcode;
 }
 
 /* emit conversion code for MPI_Comm argument */
