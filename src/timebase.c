@@ -3,7 +3,7 @@
 #include <math.h>		/* for floor() */
 
 #include "cdi.h"
-
+#include "timebase.h"
 
 /* convert Julian date into year, months, day */
 void decode_julday(int calendar,

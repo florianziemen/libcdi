@@ -559,9 +559,9 @@ void    vlistDefVarDblKey(int vlistID, int varID, const char *name, double value
 /* vlistInqVarRawBegin: Open GRIB record to retrieve raw meta-data in subsequent calls */
 void    vlistInqVarRawBegin(int streamID, int varID);
 /* vlistInqVarDblKey: raw access to GRIB meta-data */
-double  vlistInqVarDblKey(int streamID, const char* name);
+double  vlistInqVarDblKey(int streamID, const char *name);
 /* vlistInqVarIntKey: raw access to GRIB meta-data */
-int     vlistInqVarIntKey(int streamID, const char* name);
+int     vlistInqVarIntKey(int streamID, const char *name);
 /* vlistInqVarRawEnd: Free previously opened GRIB record */
 void    vlistInqVarRawEnd(int streamID);
 
