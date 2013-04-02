@@ -268,6 +268,8 @@ FCALLSCSUB4 (vlistDefVarDblKey, VLISTDEFVARDBLKEY, vlistdefvardblkey, INT, INT, 
 /*  ----------------------------------  */
 
 FCALLSCSUB2 (vlistInqVarRawBegin, VLISTINQVARRAWBEGIN, vlistinqvarrawbegin, INT, INT)
+FCALLSCFUN2 (DOUBLE, vlistInqVarDblKey, VLISTINQVARDBLKEY, vlistinqvardblkey, INT, STRING)
+FCALLSCFUN2 (INT, vlistInqVarIntKey, VLISTINQVARINTKEY, vlistinqvarintkey, INT, STRING)
 FCALLSCSUB1 (vlistInqVarRawEnd, VLISTINQVARRAWEND, vlistinqvarrawend, INT)
 
 /*  VLIST attributes  */

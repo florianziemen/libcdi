@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   March 2013
+! Uwe Schulzweida, MPI-MET, Hamburg,   April 2013
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -1219,6 +1219,16 @@
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarRawBegin
+
+      DOUBLEPRECISION vlistInqVarDblKey
+!                                    (INTEGER         streamID,
+!                                     CHARACTER*(*)   name)
+      EXTERNAL        vlistInqVarDblKey
+
+      INTEGER         vlistInqVarIntKey
+!                                    (INTEGER         streamID,
+!                                     CHARACTER*(*)   name)
+      EXTERNAL        vlistInqVarIntKey
 
 !                     vlistInqVarRawEnd
 !                                    (INTEGER         streamID)
