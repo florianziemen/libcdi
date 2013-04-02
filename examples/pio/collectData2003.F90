@@ -15,13 +15,13 @@ PROGRAM collectdata2003
   ! For parallel IO:
   !  Parameter and variables needed.
   INTEGER, PARAMETER :: nProcsIO     = 3
-  ! INTEGER, PARAMETER :: IOMode       = PIO_NONE                  
-  ! INTEGER, PARAMETER :: IOMode       = PIO_MPI              
-  ! INTEGER, PARAMETER :: IOMode       = PIO_WRITER            
-  ! INTEGER, PARAMETER :: IOMode       = PIO_ASYNCH          
-  INTEGER, PARAMETER :: IOMode       = PIO_FPGUARD 
-  INTEGER, PARAMETER :: nNamespaces  = 1 
-  INTEGER, PARAMETER :: hasLocalFile(nNamespaces) = (/ 0 /)  
+  ! INTEGER, PARAMETER :: IOMode       = PIO_NONE
+  ! INTEGER, PARAMETER :: IOMode       = PIO_MPI
+  ! INTEGER, PARAMETER :: IOMode       = PIO_WRITER
+  ! INTEGER, PARAMETER :: IOMode       = PIO_ASYNCH
+  INTEGER, PARAMETER :: IOMode       = PIO_FPGUARD
+  INTEGER, PARAMETER :: nNamespaces  = 1
+  INTEGER, PARAMETER :: hasLocalFile(nNamespaces) = (/ 0 /)
 
   INTEGER ::commGlob, commModel, error
 
@@ -129,11 +129,11 @@ CONTAINS
       CALL taxisDefVtime ( taxisID, vtime )
       status = streamDefTimestep ( streamID, tsID )
 
-      ! For parallel IO:    
+      ! For parallel IO:
       ! Inquire start index and chunk for IO transposition of var1
       startID = pioInqVarDecoOff   ( vlistID, varID1 ) + 1
       chunk   = pioInqVarDecoChunk ( vlistID, varID1 ) - 1
-      stopID = startID + chunk 
+      stopID = startID + chunk
       ! Init decomposed data for var1
       DO i = startID, stopID
         var1(i) = 1.1
@@ -141,7 +141,7 @@ CONTAINS
       ! Write var1
       CALL streamWriteVar(streamID, varID1, var1 ( startID ), nmiss)
 
-      ! For parallel IO: 
+      ! For parallel IO:
       ! Inquire start index and chunk for IO transposition of var2
       startID = pioInqVarDecoOff ( vlistID, varID2 ) + 1
       chunk = pioInqVarDecoChunk ( vlistID, varID2 ) - 1
