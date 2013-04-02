@@ -21,6 +21,9 @@ DATE=`date +%F`
 
 if test -f config.h ; then
    CDILIBVERSION=`grep PACKAGE_VERSION config.h | cut -f3 -d" "`
+else
+   echo "error: missing config.h" >&2
+   exit 1
 fi
 
 cat > ${PROG} << EOR
@@ -164,8 +167,6 @@ done
 
 if test -f  config.h ; then
    cpp -P -DHAVE_CONFIG_H  -I./ $srcdir/version.c >>  ${PROG}
-else
-   echo "error: missing config.h"
 fi
 
 # Fortran interface (with -DHAVE_CF_INTERFACE)
