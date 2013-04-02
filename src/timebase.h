@@ -1,6 +1,8 @@
 #ifndef  _TIMEBASE_H
 #define  _TIMEBASE_H
 
+#include <inttypes.h>
+
 /* date format:  YYYYMMDD */
 /* time format:  hhmmss   */
 
