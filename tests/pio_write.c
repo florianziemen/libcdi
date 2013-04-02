@@ -100,7 +100,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   double mscale, mrscale;
   time_t current_time;
   int vdate = 19850101, vtime = 120000;
-  int start = CDI_UNDEFID, chunk = CDI_UNDEFID, rank = 0, comm_size = 1;
+  int start = CDI_UNDEFID, chunk = CDI_UNDEFID, rank = 0;
   char filename[1024];
   int nlon = setup.nlon, nlat = setup.nlat;
   uint32_t checksum_state[nVars];
@@ -108,7 +108,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   int *nlev;
   double *levs;
 #if USE_MPI
-  int *chunks = NULL, *displs = NULL;
+  int *chunks = NULL, *displs = NULL, comm_size = 1;
 #endif
 
 #if USE_MPI
@@ -168,7 +168,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
   xassert ( streamID >= 0 );
   streamDefVlist ( streamID, vlistID);
 
+#ifdef USE_MPI
   pioEndDef ();
+#endif
 
   for ( tfID = 0; tfID < ntfiles; tfID++ )
     {
@@ -231,7 +233,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
 	      chunk = CDI_UNDEFID;
 	    }
           current_time += 86400;
+#ifdef USE_MPI
 	  pioWriteTimestep ( tsID, vdate, vtime );
+#endif
 	}
       if (rank == 0 && setup.compute_checksum)
         {
@@ -263,7 +267,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
         }
     }
   free(varslice);
+#ifdef USE_MPI
   pioEndTimestepping ();
+#endif
   streamClose ( streamID );
   vlistDestroy ( vlistID );
   taxisDestroy ( taxisID );

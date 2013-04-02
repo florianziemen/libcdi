@@ -29,19 +29,19 @@ PROGRAM collectdata2003
 #ifdef USE_MPI
   CALL MPI_INIT ( error )
   CALL MPI_COMM_DUP ( MPI_COMM_WORLD, commGlob, error )
-#endif
 
   ! For parallel IO:
   ! Initialize environment.
   commModel = pioInit ( commGlob, nProcsIO, IOMode, nNamespaces, hasLocalFile )
+#endif
 
   CALL modelrun ( commModel )
 
-  ! For parallel IO: 
+#ifdef USE_MPI
+  ! For parallel IO:
   ! Cleanup environment.
   CALL pioFinalize ()
 
-#ifdef USE_MPI
   CALL MPI_FINALIZE ( error )
 #endif
 
@@ -115,13 +115,14 @@ CONTAINS
     !     Assign the variable list to the dataset
     CALL streamDefVlist(streamID, vlistID)
 
-    !     For parallel IO: 
-    !          End definition stage for CDI resources, 
+#ifdef USE_MPI
+    !     For parallel IO:
+    !          End definition stage for CDI resources,
     !          balance load of variables among collecting IO server,
     !          Decompose data on model processes for IO
     !          Transfer resources to the collecting IO server.
-    CALL pioEndDef (); 
-
+    CALL pioEndDef ();
+#endif
     !     Loop over the number of time steps
     DO tsID = 0, nts-1
       CALL taxisDefVdate ( taxisID, vdate + tsID )
@@ -152,14 +153,18 @@ CONTAINS
       ! Write var2
       CALL streamWriteVar(streamID, varID2, var2 ( startID ), nmiss)
 
-      ! For parallel IO: 
+#ifdef USE_MPI
+      ! For parallel IO:
       ! Start transmission of all data for output in this timestep to IO server.
       CALL pioWriteTimestep ( tsID, vdate, vtime )
+#endif
     END DO
 
+#ifdef USE_MPI
     ! For parallel IO:
     ! Preparation for local cleanup
     CALL pioEndTimestepping ()
+#endif
 
     !     Close the output stream
     CALL streamClose(streamID)
