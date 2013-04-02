@@ -328,7 +328,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 #
-SUBDIRS = src interfaces app examples tests examples/pio
+SUBDIRS = src interfaces app examples examples/pio tests
 #
 EXTRA_DIST = config/default \
 	doc/cdi_cman.pdf \

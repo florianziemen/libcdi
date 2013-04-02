@@ -8,9 +8,8 @@ if USE_FC
  noinst_PROGRAMS+=collectData2003
 endif
 
-AM_CFLAGS=-I$(top_srcdir)/src $(YAXT_CFLAGS)
-
-AM_FCFLAGS=$(FPP_INCOPT)$(top_srcdir)/src
+AM_CPPFLAGS = -I$(top_srcdir)/src $(YAXT_CFLAGS)
+AM_FCFLAGS  = $(FPP_INCOPT)$(top_srcdir)/src
 
 collectData_SOURCES=collectData.c
 

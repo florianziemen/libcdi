@@ -153,7 +153,7 @@ static void file_table_print(void);
  * A version string.
  */
 #undef   LIBVERSION
-#define  LIBVERSION      1.8.0
+#define  LIBVERSION      1.8.1
 #define  XSTRING(x)	 #x
 #define  STRING(x) 	 XSTRING(x)
 const char file_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
@@ -173,6 +173,7 @@ const char file_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
   22/08/2010  1.7.0 refactor
   11/11/2010  1.7.1 update for changed interface of error.h
   02/02/2012  1.8.0 cleanup
+  16/11/2012  1.8.1 added support for unbuffered write
  */
 
 
@@ -758,6 +759,11 @@ void file_initialize(void)
 
   value  = file_getenv("FILE_BUFSIZE");
   if ( value >= 0 ) FileBufferSizeEnv = value;
+  else
+    {
+      value  = file_getenv("GRIB_API_IO_BUFFER_SIZE");
+      if ( value >= 0 ) FileBufferSizeEnv = value;
+    }
 
   value = file_getenv("FILE_TYPE");
   if ( value > 0 )
@@ -842,6 +848,8 @@ void file_set_buffer(bfile_t *fileptr)
 	  if ( buffersize < (size_t) fileptr->size && buffersize < minblocksize )
 	    buffersize = minblocksize;
 	}
+
+      if ( buffersize == 0 ) buffersize = 1;
     }
   else
     {
@@ -858,17 +866,18 @@ void file_set_buffer(bfile_t *fileptr)
 	}
     }
 
-  if ( buffersize == 0 ) buffersize = 1;
-
   if ( fileptr->bufferType == FILE_BUFTYPE_STD || fileptr->type == FILE_TYPE_FOPEN )
     {
-      fileptr->buffer = (char *) malloc(buffersize);
-      if ( fileptr->buffer == NULL )
-	SysError("Allocation of file buffer failed!");
+      if ( buffersize > 0 )
+        {
+          fileptr->buffer = (char *) malloc(buffersize);
+          if ( fileptr->buffer == NULL )
+            SysError("Allocation of file buffer failed!");
+        }
     }
 
   if ( fileptr->type == FILE_TYPE_FOPEN )
-    if ( setvbuf(fileptr->fp, fileptr->buffer, _IOFBF, buffersize) )
+    if ( setvbuf(fileptr->fp, fileptr->buffer, fileptr->buffer ? _IOFBF : _IONBF, buffersize) )
       SysError("setvbuf failed!");
 
   fileptr->bufferSize = buffersize;

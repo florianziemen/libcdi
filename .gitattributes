@@ -28,6 +28,7 @@ config/missing -text
 config/mkinstalldirs -text
 /configure -text
 /configure.ac -text
+doc/Doxyfile -text
 doc/cdi_cman.pdf -text
 doc/cdi_fman.pdf -text
 doc/coding_standards/README -text
@@ -114,6 +115,7 @@ examples/cdi_write.c -text
 examples/cdi_write_ens.c -text
 examples/cdi_write_f.f -text
 examples/cdi_write_f2003.f90 -text
+examples/cdi_write_reset.c -text
 examples/compf -text
 examples/pio/Makefile.am -text
 examples/pio/Makefile.in -text
@@ -181,6 +183,7 @@ src/cdiFortran.c -text
 src/cdi_error.c -text
 src/cdi_limits.h -text
 src/cdi_util.c -text
+src/cdilib.c -text
 src/cfortran.doc -text
 src/cfortran.h -text
 src/cgribex.h -text
@@ -199,6 +202,7 @@ src/file.c -text
 src/file.h -text
 src/gaussgrid.c -text
 src/gaussgrid.h -text
+src/getline.c -text
 src/gribapi.c -text
 src/gribapi.h -text
 src/grid.c -text
@@ -282,6 +286,7 @@ src/vlist_att.h -text
 src/vlist_var.c -text
 src/vlist_var.h -text
 src/zaxis.c -text
+src/zaxis.h -text
 tables/cosmo002 -text
 tables/cosmo201 -text
 tables/cosmo202 -text
@@ -292,6 +297,7 @@ tables/default_tables -text
 tables/echam4 -text
 tables/echam5 -text
 tables/echam6 -text
+tables/echam6cmip5 -text
 tables/ecmwf -text
 tables/gen_tableheaderfile -text
 tables/grib_api/grib2/4.5.78.150.table -text
@@ -333,4 +339,3 @@ util/serialrun.in -text
 util/sunf95preproc-wrapper -text
 util/sxpreproc-wrapper -text
 util/xlfpreproc-wrapper -text
-/write_tornado.job -text

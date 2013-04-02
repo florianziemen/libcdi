@@ -11,14 +11,15 @@
 #include "pio_util.h"
 #include "cdi.h"
 
+static
 char commands[][13] = { "FINALIZE\0",
                         "RESOURCES\0",
                         "WINCREATE\0",
                         "WRITETS\0"};
 
 
-void pcdiAssert   ( bool assumption, const char * filename,
-                    const char * functionname, int line )
+void pcdiAssert(bool assumption,
+                const char * filename, const char * functionname, int line )
 {
   if ( !assumption )
     {
@@ -43,6 +44,32 @@ void pcdiAssert   ( bool assumption, const char * filename,
 }
 
 /****************************************************/
+
+void pcdiAbortC(const char * caller, const char * filename,
+                const char *functionname, int line,
+                const char * errorString, ... )
+{
+  va_list ap;
+  va_start(ap, errorString);
+#ifdef USE_MPI
+  {
+    int rank;
+    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+    fprintf(stderr, "ERROR, pe%d in %s, %s, line %d, called from"
+            " %s\nerrorString: \"", rank, functionname, filename, line, caller);
+  }
+  vfprintf(stderr, errorString, ap);
+  fputs("\"\n", stderr);
+  MPI_Abort ( MPI_COMM_WORLD, 1 );
+#else
+  fprintf(stderr, "ERROR, %s, %s, line %d, called from %s\nerrorString: \"",
+          functionname, filename, line, caller);
+  vfprintf(stderr, errorString, ap);
+  fputs("\"\n", stderr);
+#endif
+  exit ( EXIT_FAILURE );
+  va_end(ap);
+}
 
 void pcdiAbort(const char * filename, const char *functionname, int line,
                const char * errorString, ... )

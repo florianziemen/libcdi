@@ -13,7 +13,7 @@
 void hoursPassingHack ( int * vdate, int * vtime, int hoursPassed )
 {
   int sum, days, hours, oldDays;
-  
+
   xassert ( hoursPassed % 10000 == 0 );
   sum = * vtime + hoursPassed;
   days = sum / 240000;
@@ -23,7 +23,7 @@ void hoursPassingHack ( int * vdate, int * vtime, int hoursPassed )
   * vtime = hours;
   * vdate = * vdate + days;
 }
- 
+
 void modelRun ()
 {
   enum {

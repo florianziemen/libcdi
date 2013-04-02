@@ -33,6 +33,10 @@ cat > ${PROG} << EOR
 #  include "config.h"
 #endif
 
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 600
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -59,7 +63,7 @@ cat > ${PROG} << EOR
 #  include <grib_api.h>
 #endif
 
-#if defined (HAVE_MMAP)
+#if  defined  (HAVE_MMAP)
 #  include <sys/mman.h> /* mmap() is defined in this header */
 #endif
 
@@ -70,51 +74,6 @@ cat > ${PROG} << EOR
 #if  defined  (HAVE_LIBSZ)
 #  include <szlib.h>
 #endif
-
-
-//#undef _GET_X86_COUNTER
-//#undef _GET_IBM_COUNTER
-//#undef _ARCH_PWR6
-
-#if   defined(__GNUC__) && (__GNUC__ >= 4)
-#elif defined(__ICC)    && (__ICC >= 1100)
-#else
-#define DISABLE_SIMD
-#endif
-
-#ifdef DISABLE_SIMD
-#ifndef ENABLE_AVX
-#undef __AVX__
-#endif
-#ifndef ENABLE_SSE2
-#undef __SSE2__
-#endif
-#endif
-
-#ifdef _GET_IBM_COUNTER
-#include <libhpc.h>
-#endif
-
-#ifdef __AVX__
-#include <float.h>
-#include <stdint.h>
-#include <inttypes.h>
-#include <immintrin.h>
-#ifdef _GET_X86_COUNTER
-#include <x86intrin.h>
-#endif
-#else
-#ifdef __SSE2__
-#include <float.h>
-#include <stdint.h>
-#include <inttypes.h>
-#include <emmintrin.h>
-#ifdef _GET_X86_COUNTER
-#include <x86intrin.h>
-#endif
-#endif
-#endif
-
 
 #if ! defined (HAVE_CONFIG_H)
 #  define  HAVE_LIBGRIB      1
@@ -130,7 +89,6 @@ c="dmemory.c         \
    dmemory.h         \
    error.c           \
    error.h           \
-   stream_int.h      \
    taxis.c           \
    timebase.c        \
    calendar.c        \
@@ -175,6 +133,7 @@ c="dmemory.c         \
    resource_handle.c \
    pio_util.c        \
    pio.c             \
+   pio_interface.c   \
    pio_dbuffer.c     \
    pio_mpinonb.c     \
    pio_posixasynch.c \
@@ -182,10 +141,11 @@ c="dmemory.c         \
    pio_posixnonb.c   \
    pio_list_set.c"
 
-h="cdi_limits.h taxis.h dtypes.h file.h cgribex.h gribapi.h service.h extra.h \
+h="cdi_limits.h taxis.h dtypes.h file.h service.h extra.h \
    ieg.h cdi.h timebase.h calendar.h basetime.h datetime.h \
+   stream_int.h cgribex.h gribapi.h \
    stream_cgribex.h  stream_gribapi.h  stream_grb.h  stream_cdf.h \
-   tablepar.h table.h gaussgrid.h grid.h varscan.h binary.h swap.h \
+   tablepar.h table.h gaussgrid.h grid.h zaxis.h varscan.h binary.h swap.h \
    service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \
    cdf.h vlist.h vlist_var.h vlist_att.h model.h institution.h \
    namespace.h resource_handle.h pio_util.h pio.h pio_impl.h"
@@ -198,7 +158,7 @@ for hfile in $h ; do
 done
 
 for cfile in $c ; do
-  cat $srcdir/$cfile | grep -v '#include' | grep -v '#  include' >> ${PROG}
+  cat $srcdir/$cfile | grep -v '#include "' | grep -v '#  include "' >> ${PROG}
 done
 
 

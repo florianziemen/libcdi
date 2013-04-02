@@ -1,4 +1,5 @@
 #define _XOPEN_SOURCE 700
+#define _GNU_SOURCE // needed for getline(3) on some systems it seems
 #include <ctype.h>
 #include <regex.h>
 #include <stdio.h>
@@ -9,7 +10,7 @@
 
 
 //#include "config.h"
-#define VERSION "1.5.6.1"
+#define VERSION "1.6.0"
 typedef struct
 {
   size_t naline;
@@ -93,7 +94,7 @@ struct symbol {
 static struct symbol funArgSym[]
   = { { "",                "",        "void",
         "^"WS"*void"WS"*)", 0, 0 },
-      { "CHARACTER*80",    "STRING",  "char *",
+      { "CHARACTER(80)",    "STRING",  "char *",
         "^"WS"*const"WS"+char"WS"+\\*"SYMRE WS"*\\(", 1, 0 },
       { "INTEGER",         "INT",     "int",
         "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*[,\\)]", 3, 0 },
@@ -720,13 +721,13 @@ int main(int argc, char *argv[])
   cp = strrchr(fname, '.');
   if ( cp == NULL ) len = strlen(fname);
   else              len = (size_t)(cp - fname);
-  
+
   memcpy(fnameinc, fname, len);
   memcpy(fnameint, fname, len);
 
   strcpy(fnameinc+len, ".inc");
   strcpy(fnameint+len, "Fortran.c");
-  
+
   fortran_interface(fname, fnameinc, fnameint);
 
   return (0);
@@ -848,3 +849,4 @@ static int cfXtIdxlistConvert(FILE *outfp, const char *argName,
  * require-trailing-newline: t
  * End:
  */
+

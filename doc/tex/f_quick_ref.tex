@@ -755,6 +755,26 @@ Define the code number of a Variable.
 Define the data type of a Variable.
 
 
+\section*{\tt \htmlref{vlistDefVarDblKey}{vlistDefVarDblKey}}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarDblKey (INTEGER vlistID, INTEGER varID, CHARACTER*(*) name, 
+                                  DOUBLEPRECISION value)
+\end{verbatim}
+
+Set an arbitrary keyword/double value pair for GRIB API.
+
+
+\section*{\tt \htmlref{vlistDefVarIntKey}{vlistDefVarIntKey}}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarIntKey (INTEGER vlistID, INTEGER varID, CHARACTER*(*) name, 
+                                  INTEGER value)
+\end{verbatim}
+
+Set an arbitrary keyword/integer value pair for GRIB API.
+
+
 \section*{\tt \htmlref{vlistDefVarLongname}{vlistDefVarLongname}}
 
 \begin{verbatim}
@@ -944,6 +964,24 @@ Get the name of a Variable.
 \end{verbatim}
 
 Get the parameter number of a Variable.
+
+
+\section*{\tt \htmlref{vlistInqVarRawBegin}{vlistInqVarRawBegin}}
+
+\begin{verbatim}
+    SUBROUTINE vlistInqVarRawBegin (INTEGER streamID, INTEGER varID)
+\end{verbatim}
+
+Open GRIB record to retrieve raw meta-data in subsequent calls.
+
+
+\section*{\tt \htmlref{vlistInqVarRawEnd}{vlistInqVarRawEnd}}
+
+\begin{verbatim}
+    SUBROUTINE vlistInqVarRawEnd (INTEGER streamID)
+\end{verbatim}
+
+Free previously opened GRIB record.
 
 
 \section*{\tt \htmlref{vlistInqVarStdname}{vlistInqVarStdname}}
@@ -1176,7 +1214,7 @@ Get the type of a Z-axis.
 \section*{\tt \htmlref{zaxisInqUUID}{zaxisInqUUID}}
 
 \begin{verbatim}
-    CHARACTER*80 FUNCTION zaxisInqUUID (INTEGER zaxisID, CHARACTER*(*) uuid)
+    CHARACTER(80) FUNCTION zaxisInqUUID (INTEGER zaxisID, CHARACTER*(*) uuid)
 \end{verbatim}
 
 Get the reference of a generalized Z-axis.

@@ -20,6 +20,8 @@ typedef struct {
   int     vtime_lb;       /* lower bounds of vtime */
   int     vdate_ub;       /* upper bounds of vdate */
   int     vtime_ub;       /* upper bounds of vtime */
+  char   *name;
+  char   *longname;
 }
 taxis_t;
 

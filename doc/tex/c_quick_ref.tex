@@ -748,6 +748,24 @@ Define the code number of a Variable.
 Define the data type of a Variable.
 
 
+\section*{\tt \htmlref{vlistDefVarDblKey}{vlistDefVarDblKey}}
+
+\begin{verbatim}
+    void vlistDefVarDblKey (int vlistID, int varID, const char *name, double value);
+\end{verbatim}
+
+Set an arbitrary keyword/double value pair for GRIB API.
+
+
+\section*{\tt \htmlref{vlistDefVarIntKey}{vlistDefVarIntKey}}
+
+\begin{verbatim}
+    void vlistDefVarIntKey (int vlistID, int varID, const char *name, int value);
+\end{verbatim}
+
+Set an arbitrary keyword/integer value pair for GRIB API.
+
+
 \section*{\tt \htmlref{vlistDefVarLongname}{vlistDefVarLongname}}
 
 \begin{verbatim}
@@ -929,6 +947,24 @@ Get the name of a Variable.
 \end{verbatim}
 
 Get the parameter number of a Variable.
+
+
+\section*{\tt \htmlref{vlistInqVarRawBegin}{vlistInqVarRawBegin}}
+
+\begin{verbatim}
+    void vlistInqVarRawBegin (int streamID, int varID);
+\end{verbatim}
+
+Open GRIB record to retrieve raw meta-data in subsequent calls.
+
+
+\section*{\tt \htmlref{vlistInqVarRawEnd}{vlistInqVarRawEnd}}
+
+\begin{verbatim}
+    void vlistInqVarRawEnd (int streamID);
+\end{verbatim}
+
+Free previously opened GRIB record.
 
 
 \section*{\tt \htmlref{vlistInqVarStdname}{vlistInqVarStdname}}

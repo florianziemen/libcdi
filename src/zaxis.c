@@ -44,7 +44,10 @@ ZaxistypeEntry[] = {
   { /* 13 */ 0, "toa",        "top_of_atmosphere", "",               ""},
   { /* 14 */ 0, "seabottom",  "sea_bottom",        "",               ""},
   { /* 15 */ 0, "atmosphere", "atmosphere",        "",               ""},
-  { /* 16 */ 0, "height",     "generalized height","height",         "m"},
+  { /* 16 */ 0, "cloudbase",  "cloud_base",        "",               ""},
+  { /* 17 */ 0, "cloudtop",   "cloud_top",         "",               ""},
+  { /* 18 */ 0, "isotherm0",  "isotherm_zero",     "",               ""},
+  { /* 19 */ 0, "height",     "generalized height","height",         "m"},
 };
 
 static int CDI_MaxZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]);
@@ -131,7 +134,7 @@ zaxis_t *zaxisNewEntry(void)
 }
 
 static
-void zaxisInit (void)
+void zaxisInit(void)
 {
   static int zaxisInitialized = 0;
   char *env;
@@ -178,6 +181,9 @@ int zaxisSize(void)
     @Item  zaxistype  The type of the Z-axis, one of the set of predefined CDI Z-axis types.
                       The valid CDI Z-axis types are @func{ZAXIS_GENERIC}, @func{ZAXIS_SURFACE},
                       @func{ZAXIS_HYBRID}, @func{ZAXIS_SIGMA}, @func{ZAXIS_PRESSURE}, @func{ZAXIS_HEIGHT},
+                      @func{ZAXIS_ISENTROPIC}, @func{ZAXIS_ALTITUDE}, @func{ZAXIS_MEANSEA}, @func{ZAXIS_TOA},
+                      @func{ZAXIS_SEA_BOTTOM}, @func{ZAXIS_ATMOSPHERE}, @func{ZAXIS_CLOUD_BASE},
+                      @func{ZAXIS_CLOUD_TOP}, @func{ZAXIS_ISOTHERM_ZERO}, 
                       @func{ZAXIS_DEPTH_BELOW_SEA} and @func{ZAXIS_DEPTH_BELOW_LAND}.
     @Item  size       Number of levels.
 
@@ -246,7 +252,7 @@ int zaxisCreate(int zaxistype, int size)
 }
 
 
-void zaxisDestroyKernel ( zaxis_t * zaxisptr )
+void zaxisDestroyKernel( zaxis_t * zaxisptr )
 {
   int id;
 
@@ -987,6 +993,9 @@ The function @func{zaxisInqType} returns the type of a Z-axis.
 one of the set of predefined CDI Z-axis types.
 The valid CDI Z-axis types are @func{ZAXIS_GENERIC}, @func{ZAXIS_SURFACE},
 @func{ZAXIS_HYBRID}, @func{ZAXIS_SIGMA}, @func{ZAXIS_PRESSURE}, @func{ZAXIS_HEIGHT},
+@func{ZAXIS_ISENTROPIC}, @func{ZAXIS_ALTITUDE}, @func{ZAXIS_MEANSEA}, @func{ZAXIS_TOA},
+@func{ZAXIS_SEA_BOTTOM}, @func{ZAXIS_ATMOSPHERE}, @func{ZAXIS_CLOUD_BASE},
+@func{ZAXIS_CLOUD_TOP}, @func{ZAXIS_ISOTHERM_ZERO}, 
 @func{ZAXIS_DEPTH_BELOW_SEA} and @func{ZAXIS_DEPTH_BELOW_LAND}.
 
 @EndFunction
@@ -1476,7 +1485,7 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
       if ( !z2->vals ) return differ;
 
       for ( i = 0; i < z1->size; i++ )
-        if ( z1->vals[i] != z2->vals[i] ) return differ;
+        if ( IS_NOT_EQUAL(z1->vals[i], z2->vals[i]) ) return differ;
     }
   else if ( z2->vals )
     return differ;
@@ -1488,7 +1497,7 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
       if ( !z2->lbounds ) return differ;
 
       for ( i = 0; i < z1->size; i++ )
-        if ( z1->lbounds[i] != z2->lbounds[i] ) return differ;
+        if ( IS_NOT_EQUAL(z1->lbounds[i], z2->lbounds[i]) ) return differ;
     }
   else if ( z2->lbounds )
     return differ;
@@ -1500,7 +1509,7 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
       if ( !z2->ubounds ) return differ;
 
       for ( i = 0; i < z1->size; i++ )
-        if ( z1->ubounds[i] != z2->ubounds[i] ) return differ;
+        if ( IS_NOT_EQUAL(z1->ubounds[i], z2->ubounds[i]) ) return differ;
     }
   else if ( z2->ubounds )
     return differ;
@@ -1512,7 +1521,7 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
       if ( !z2->weights ) return differ;
 
       for ( i = 0; i < z1->size; i++ )
-        if ( z1->weights[i] != z2->weights[i] ) return differ;
+        if ( IS_NOT_EQUAL(z1->weights[i], z2->weights[i]) ) return differ;
     }
   else if ( z2->weights )
     return differ;
@@ -1524,7 +1533,7 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
       if ( !z2->vct ) return differ;
 
       for ( i = 0; i < z1->vctsize; i++ )
-        if ( z1->vct[i] != z2->vct[i] ) return differ;
+        if ( IS_NOT_EQUAL(z1->vct[i], z2->vct[i]) ) return differ;
     }
   else if ( z2->vct )
     return differ;

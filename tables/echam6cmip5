@@ -1,0 +1,170 @@
+&parameter  name=low_cld           /
+&parameter  name=mid_cld           /
+&parameter  name=hih_cld           /
+&parameter  name=fage              /
+&parameter  name=snifrac           /
+&parameter  name=barefrac          /
+&parameter  name=alsom             /
+&parameter  name=alsobs            /
+&parameter  name=sicepdw           /
+&parameter  name=sicepdi           /
+&parameter  name=tsicepdi          /
+&parameter  name=sicepres          /
+&parameter  name=ameltdepth        /
+&parameter  name=ameltfrac         /
+&parameter  name=albedo_vis_dir    /
+&parameter  name=albedo_nir_dir    /
+&parameter  name=albedo_vis_dif    /
+&parameter  name=albedo_nir_dif    /
+&parameter  name=ocu               /
+&parameter  name=ocv               /
+&parameter  name=tradl                             standard_name=net_upward_longwave_flux_in_air      factor=-1  /
+&parameter  name=sradl                             standard_name=net_downward_shortwave_flux_in_air   /
+&parameter  name=trafl                             standard_name=net_upward_longwave_flux_in_air_assuming_clear_sky  factor=-1  /
+&parameter  name=srafl                             standard_name=net_downward_shortwave_flux_in_air_assuming_clear_sky  /
+&parameter  name=amlcorac          /
+&parameter  name=amlheatac         /
+&parameter  name=trfliac           /
+&parameter  name=trflwac           /
+&parameter  name=trfllac           /
+&parameter  name=sofliac           /
+&parameter  name=soflwac           /
+&parameter  name=sofllac           /
+&parameter  name=friac             /
+&parameter  name=tsi               /
+&parameter  name=tsw                               standard_name=surface_temperature_where_open_sea  /
+&parameter  name=ustri             /
+&parameter  name=vstri             /
+&parameter  name=ustrw             /
+&parameter  name=vstrw             /
+&parameter  name=ustrl             /
+&parameter  name=vstrl             /
+&parameter  name=ahfliac           /
+&parameter  name=ahflwac           /
+&parameter  name=ahfllac           /
+&parameter  name=evapiac           /
+&parameter  name=evapwac           /
+&parameter  name=evaplac           /
+&parameter  name=az0i              /
+&parameter  name=az0w              /
+&parameter  name=az0l              /
+&parameter  name=ahfsiac           /
+&parameter  name=ahfswac           /
+&parameter  name=ahfslac           /
+&parameter  name=alsoi             /
+&parameter  name=alsow             /
+&parameter  name=alsol                             standard_name=soil_albedo   /
+&parameter  name=ahfice            /
+&parameter  name=qres              /
+&parameter  name=alake             /
+&parameter  name=rintop            /
+&parameter  name=geosp                             standard_name=surface_geopotential  /
+&parameter  name=t               out_name=ta       standard_name=air_temperature  /
+&parameter  name=u               out_name=ua       standard_name=eastward_wind  /
+&parameter  name=v               out_name=va       standard_name=northward_wind  /
+&parameter  name=q               out_name=hus      standard_name=specific_humidity  /
+&parameter  name=aps             out_name=ps       standard_name=surface_air_pressure   /
+&parameter  name=omega           out_name=wap      standard_name=lagrangian_tendency_of_air_pressure  /
+&parameter  name=acdnc             /
+&parameter  name=apmeb             /
+&parameter  name=svo               /
+&parameter  name=tslm1           out_name=tslsi    standard_name=surface_temperature  /
+&parameter  name=ws                                standard_name=soil_moisture_content  /
+&parameter  name=sn                                standard_name=surface_snow_amount  /
+&parameter  name=aprl                              standard_name=large_scale_rainfall_flux  /
+&parameter  name=aprc            out_name=prc      standard_name=convective_precipitation_flux  /
+&parameter  name=aprs            out_name=prsn     standard_name=snowfall_flux  /
+&parameter  name=vdis              /
+&parameter  name=ahfs            out_name=hfss     standard_name=surface_upward_sensible_heat_flux  factor=-1  /
+&parameter  name=ahfl            out_name=hfls     standard_name=surface_upward_latent_heat_flux  factor=-1  /
+&parameter  name=stream                            standard_name=atmosphere_horizontal_streamfunction  /
+&parameter  name=velopot           /
+&parameter  name=xivi            out_name=clivi    standard_name=atmosphere_cloud_ice_content  /
+&parameter  name=slp             out_name=psl      standard_name=air_pressure_at_sea_level  /
+&parameter  name=lsp               /
+&parameter  name=xl                /
+&parameter  name=xi                /
+&parameter  name=sd                                standard_name=divergence_of_wind  /
+&parameter  name=geopoth         out_name=zg       standard_name=geopotential_height  /
+&parameter  name=rhumidity       out_name=rhs      standard_name=relative_humidity    /
+&parameter  name=wind10w           /
+&parameter  name=runoff                            standard_name=runoff_flux  /
+&parameter  name=drain             /
+&parameter  name=aclc              /
+&parameter  name=aclcv             /
+&parameter  name=aclcov                            standard_name=cloud_area_fraction  /
+&parameter  name=u10                               standard_name=eastward_wind  /
+&parameter  name=v10                               standard_name=northward_wind  /
+&parameter  name=temp2                             standard_name=air_temperature  /
+&parameter  name=dew2                              standard_name=dew_point_temperature  /
+&parameter  name=tsurf           out_name=ts       standard_name=surface_temperature  /
+&parameter  name=xvar              /
+&parameter  name=wind10                            standard_name=wind_speed  /
+&parameter  name=slm               /
+&parameter  name=az0                               standard_name=surface_roughness_length  /
+&parameter  name=alb               /
+&parameter  name=albedo                            standard_name=surface_albedo  /
+&parameter  name=srads                             standard_name=surface_net_downward_shortwave_flux  /
+&parameter  name=trads                             standard_name=surface_net_downward_longwave_flux   /
+&parameter  name=srad0           out_name=rsut     standard_name=toa_outgoing_shortwave_flux  factor=-1  /
+&parameter  name=trad0           out_name=rlut     standard_name=toa_outgoing_longwave_flux  factor=-1  /
+&parameter  name=ustr            out_name=tauu     standard_name=surface_downward_eastward_stress   /
+&parameter  name=vstr            out_name=tauv     standard_name=surface_downward_northward_stress   /
+&parameter  name=evap              /
+&parameter  name=xskew             /
+&parameter  name=srad0d          out_name=rsdt     standard_name=toa_incoming_shortwave_flux  /
+&parameter  name=srafs             /
+&parameter  name=trafs             /
+&parameter  name=sraf0           out_name=rsutcs   standard_name=toa_outgoing_shortwave_flux_assuming_clear_sky  factor=-1  /
+&parameter  name=traf0           out_name=rlutcs   standard_name=toa_outgoing_longwave_flux_assuming_clear_sky  factor=-1  /
+&parameter  name=sclfs             /
+&parameter  name=tclfs             /
+&parameter  name=sclf0             /
+&parameter  name=tclf0             /
+&parameter  name=wl                /
+&parameter  name=slf               /
+&parameter  name=ustrgw                            standard_name=atmosphere_eastward_stress_due_to_gravity_wave_drag   /
+&parameter  name=vstrgw                            standard_name=atmosphere_northward_stress_due_to_gravity_wave_drag   /
+&parameter  name=vdisgw           /
+&parameter  name=vgrat                             standard_name=vegetation_area_fraction  /
+&parameter  name=orostd           /
+&parameter  name=vlt                               standard_name=leaf_area_index  /
+&parameter  name=t2max                             standard_name=air_temperature  /
+&parameter  name=t2min                             standard_name=air_temperature  /
+&parameter  name=srad0u                            standard_name=toa_outgoing_shortwave_flux  factor=-1  /
+&parameter  name=sradsu          out_name=rsus     standard_name=surface_upwelling_shortwave_flux_in_air   factor=-1  /
+&parameter  name=tradsu          out_name=rlus     standard_name=surface_upwelling_longwave_flux_in_air  factor=-1  /
+&parameter  name=grndflux          /
+&parameter  name=tsoil                             standard_name=soil_temperature  /
+&parameter  name=ahfcon            /
+&parameter  name=ahfres            /
+&parameter  name=seaice            /
+&parameter  name=siced             /
+&parameter  name=forest            /
+&parameter  name=gld               /
+&parameter  name=sni               /
+&parameter  name=rogl              /
+&parameter  name=wimax             /
+&parameter  name=topmax            /
+&parameter  name=snmel                             standard_name=surface_snow_melt_flux  /
+&parameter  name=runtoc            /
+&parameter  name=runlnd            /
+&parameter  name=apmegl            /
+&parameter  name=snacl             /
+&parameter  name=aclcac          out_name=cl       standard_name=cloud_area_fraction_in_atmosphere_layer  /
+&parameter  name=tke               /
+&parameter  name=tkem1             /
+&parameter  name=fao                               standard_name=soil_type  /
+&parameter  name=rgcgn             /
+&parameter  name=sodif             /
+&parameter  name=wsmx                              standard_name=soil_moisture_content_at_field_capacity  /
+&parameter  name=qvi             out_name=prw      standard_name=atmosphere_water_vapor_content  /
+&parameter  name=xlvi            out_name=clwvi    standard_name=atmosphere_cloud_condensed_water_content   /
+&parameter  name=glac                              standard_name=land_ice_area_fraction   /
+&parameter  name=snc               /
+&parameter  name=rtype             /
+&parameter  name=abso4             /
+&parameter  name=ao3               /
+&parameter  name=tropo             /
+&parameter  name=windspeed       out_name=sfcWind  standard_name=wind_speed  /
+&parameter  name=precip          out_name=pr       standard_name=precipitation_flux  /

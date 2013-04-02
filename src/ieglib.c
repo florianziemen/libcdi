@@ -29,7 +29,7 @@ static int iegDefaultDprec = 0;
  */
 
 #undef  LIBVERSION
-#define LIBVERSION      1.3.0
+#define LIBVERSION      1.3.1
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char ieg_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
@@ -76,6 +76,7 @@ void iegLibInit()
 	      }
 	    default:
 	      Message("Invalid character in %s: %s", envName, envString);
+	      break;
 	    }
 	  pos += 2;
 	}
@@ -275,6 +276,7 @@ int iegInqData(iegrec_t *iegp, int prec, void *data)
     default:
       {
 	Error("unexpected data precision %d", dprec);
+        break;
       }
     }
 
@@ -354,6 +356,7 @@ int iegDefData(iegrec_t *iegp, int prec, const void *data)
     default:
       {
 	Error("unexpected data precision %d", dprec);
+        break;
       }
     }
 
@@ -378,7 +381,7 @@ int iegRead(int fileID, iegrec_t *iegp)
   size_t datasize;
   size_t blocklen, blocklen2;
   size_t i;
-  char tmpbuf[800], *bufp = tmpbuf;
+  char tmpbuffer[800], *tmpbuf = tmpbuffer;
   int dprec = 0;
   void *buffer;
   int buffersize;
@@ -414,41 +417,41 @@ int iegRead(int fileID, iegrec_t *iegp)
 
   iegp->dprec = dprec;
 
-  binReadInt32(fileID, byteswap, 37, (INT32 *) bufp);
-  for ( i = 0; i < 37; i++ ) iegp->ipdb[i] = (int) ((INT32 *) bufp)[i];
+  binReadInt32(fileID, byteswap, 37, (INT32 *) tmpbuf);
+  for ( i = 0; i < 37; i++ ) iegp->ipdb[i] = (int) ((INT32 *) tmpbuf)[i];
 
-  binReadInt32(fileID, byteswap, 18, (INT32 *) bufp);
-  for ( i = 0; i < 18; i++ ) iegp->igdb[i] = (int) ((INT32 *) bufp)[i];
+  binReadInt32(fileID, byteswap, 18, (INT32 *) tmpbuf);
+  for ( i = 0; i < 18; i++ ) iegp->igdb[i] = (int) ((INT32 *) tmpbuf)[i];
 
   if ( blocklen == 636 || blocklen == 1036 )
     {
-      fileRead(fileID, bufp, 4);
-      if ( byteswap ) swap4byte(bufp, 1);
-      iegp->refval = (double) ((float *) bufp)[0];
+      fileRead(fileID, tmpbuf, 4);
+      if ( byteswap ) swap4byte(tmpbuf, 1);
+      iegp->refval = (double) ((float *) tmpbuf)[0];
     }
   else
     {
-      fileRead(fileID, bufp, 8);
-      if ( byteswap ) swap8byte(bufp, 1);
-      iegp->refval = (double) ((double *) bufp)[0];
+      fileRead(fileID, tmpbuf, 8);
+      if ( byteswap ) swap8byte(tmpbuf, 1);
+      iegp->refval = (double) ((double *) tmpbuf)[0];
     }
 
-  binReadInt32(fileID, byteswap, 3, (INT32 *) bufp);
-  for ( i = 0; i < 3; i++ ) iegp->igdb[18+i] = (int) ((INT32 *) bufp)[i];
+  binReadInt32(fileID, byteswap, 3, (INT32 *) tmpbuf);
+  for ( i = 0; i < 3; i++ ) iegp->igdb[18+i] = (int) ((INT32 *) tmpbuf)[i];
 
   if ( dprec == SINGLE_PRECISION )
     {
-      fileRead(fileID, bufp, 400);
-      if ( byteswap ) swap4byte(bufp, 100);
+      fileRead(fileID, tmpbuf, 400);
+      if ( byteswap ) swap4byte(tmpbuf, 100);
       for ( i = 0; i < 100; i++ )
-	iegp->vct[i] = (double) ((float *) bufp)[i];
+	iegp->vct[i] = (double) ((float *) tmpbuf)[i];
     }
   else
     {
-      fileRead(fileID, bufp, 800);
-      if ( byteswap ) swap8byte(bufp, 100);
+      fileRead(fileID, tmpbuf, 800);
+      if ( byteswap ) swap8byte(tmpbuf, 100);
       for ( i = 0; i < 100; i++ )
-	iegp->vct[i] = (double) ((double *) bufp)[i];
+	iegp->vct[i] = (double) ((double *) tmpbuf)[i];
     }
   
   /*
@@ -592,6 +595,7 @@ int iegWrite(int fileID, iegrec_t *iegp)
     default:
       {
 	Error("unexpected data precision %d", dprec);
+        break;
       }
     }
 

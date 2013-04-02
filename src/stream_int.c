@@ -29,9 +29,11 @@ int cdiDefaultModelID  = CDI_UNDEFID;
 int cdiDefaultTableID  = CDI_UNDEFID;
 int cdiNcMissingValue  = CDI_UNDEFID;
 int cdiNcChunksizehint = CDI_UNDEFID;
+int cdiChunkType       = CHUNK_GRID;
 int cdiSplitLtype105   = CDI_UNDEFID;
 
 int cdiIgnoreAttCoordinates = FALSE;
+int cdiIgnoreValidRange     = FALSE;
 int cdiSkipRecords          = 0;
 int cdiInventoryMode        = 1;
 
@@ -47,6 +49,7 @@ char *Filetypes[] = {
   "netCDF",
   "netCDF2",
   "netCDF4",
+  "netCDF4c",
   "SERVICE",
   "EXTRA",
   "IEG",
@@ -111,6 +114,7 @@ long cdiGetenvInt(char *envName)
 		  fact = 0;
 		  Message("Invalid number string in %s: %s", envName, envString);
 		  Warning("%s must comprise only digits [0-9].",envName);
+		  break;
 		}
 	      break;
 	    }
@@ -122,6 +126,42 @@ long cdiGetenvInt(char *envName)
     }
 
   return (envValue);
+}
+
+static
+void cdiSetChunk(const char *chunkAlgo)
+{
+  //char *pch;
+  //size_t len = strlen(chunkAlgo);
+  int algo = -1;
+
+  if      ( strcmp("auto",  chunkAlgo)   == 0 ) algo = CHUNK_AUTO;
+  else if ( strcmp("grid",  chunkAlgo)   == 0 ) algo = CHUNK_GRID;
+  else if ( strcmp("lines", chunkAlgo)   == 0 ) algo = CHUNK_LINES;
+  /*
+  else if ( (pch = strstr(chunkAlgo,"x")) != 0 )
+    {
+      int ix, iy;
+      ix = atoi(chunkAlgo);
+      iy = atoi(pch+1);
+      if ( ix > 0 && iy > 0 )
+        {
+          cdiChunkX = ix;
+          cdiChunkY = iy;
+          algo = CHUNK_USER;
+        }
+      else
+        Warning("Invalid environment variable CDI_CHUNK_ALGO: %s", chunkAlgo);
+    }
+  */
+  else
+    Warning("Invalid environment variable CDI_CHUNK_ALGO: %s", chunkAlgo);
+
+  if ( algo != -1 )
+    {
+      cdiChunkType = algo;
+      if ( CDI_Debug ) Message("set ChunkAlgo to %s", chunkAlgo);
+    }
 }
 
 
@@ -140,9 +180,6 @@ void cdiInitialize(void)
       gribSetConst(1); // 1: Don't pack constant fields on regular grids
 #endif
 
-      value = cdiGetenvInt("CD_REGULARGRID");
-      if ( value >= 0 ) cdiDataUnreduced = (int) value;
-
       value = cdiGetenvInt("CDI_REGULARGRID");
       if ( value >= 0 ) cdiDataUnreduced = (int) value;
 
@@ -152,14 +189,8 @@ void cdiInitialize(void)
       value = cdiGetenvInt("CDI_HAVE_MISSVAL");
       if ( value >= 0 ) cdiHaveMissval = (int) value;
 
-      value = cdiGetenvInt("CD_LEVELTYPE");
-      if ( value >= 0 ) cdiDefaultLeveltype = (int) value;
-
       value = cdiGetenvInt("CDI_LEVELTYPE");
       if ( value >= 0 ) cdiDefaultLeveltype = (int) value;
-
-      envString = getenv("CD_MISSVAL");
-      if ( envString ) cdiDefaultMissval = atof(envString);
 
       envString = getenv("CDI_MISSVAL");
       if ( envString ) cdiDefaultMissval = atof(envString);
@@ -170,11 +201,17 @@ void cdiInitialize(void)
       envString = getenv("NC_CHUNKSIZEHINT");
       if ( envString ) cdiNcChunksizehint = atoi(envString);
 
+      envString = getenv("CDI_CHUNK_ALGO");
+      if ( envString ) cdiSetChunk(envString);
+
       envString = getenv("SPLIT_LTYPE_105");
       if ( envString ) cdiSplitLtype105 = atoi(envString);
 
       envString = getenv("IGNORE_ATT_COORDINATES");
       if ( envString ) cdiIgnoreAttCoordinates = atoi(envString);
+
+      envString = getenv("IGNORE_VALID_RANGE");
+      if ( envString ) cdiIgnoreValidRange = atoi(envString);
 
       envString = getenv("CDI_SKIP_RECORDS");
       if ( envString )
@@ -237,7 +274,7 @@ char *strfiletype(int filetype)
   if ( filetype > 0 && filetype < size )
     name = Filetypes[filetype];
   else
-    name = Filetypes[0];  
+    name = Filetypes[0];
 
   return (name);
 }
@@ -247,7 +284,6 @@ stream_t *stream_to_pointer(int idx)
 {
   return ( stream_t *) reshGetVal ( idx, &streamOps );
 }
-
 
 static
 void streamDefaultValue ( stream_t * streamptr )
@@ -393,17 +429,10 @@ double cdiInqMissval(void)
 }
 
 
-void cdiCheckContents(int streamID)
+void vlist_check_contents(int vlistID)
 {
   int index, nzaxis, zaxisID;
-  int vlistID;
-  stream_t *streamptr;
 
-  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
-
-  stream_check_ptr(__func__, streamptr);
-
-  vlistID = streamInqVlist(streamID);
   nzaxis = vlistNzaxis(vlistID);
 
   for ( index = 0; index < nzaxis; index++ )
@@ -424,7 +453,8 @@ int streamInqFileID(int streamID)
   return (streamptr->fileID);
 }
 
-
+/* not used anymore */
+/*
 void streamDefineTaxis(int streamID)
 {
   stream_t *streamptr;
@@ -436,7 +466,7 @@ void streamDefineTaxis(int streamID)
       int varID, nvars;
       int vlistID;
 
-      vlistID = streamInqVlist(streamID);
+      vlistID = streamptr->vlistID;
 
       nvars = vlistNvars(vlistID);
       for ( varID = 0; varID < nvars; varID++ )
@@ -459,7 +489,7 @@ void streamDefineTaxis(int streamID)
 	Error("time axis undefined");
     }
 }
-
+*/
 
 void streamDefDimgroupID(int streamID, int dimgroupID)
 {
@@ -588,14 +618,14 @@ void streamPrintP   ( void * streamptr, FILE * fp )
   fprintf ( fp, "nrecs         = %d\n", sp->nrecs );
   fprintf ( fp, "nvars         = %d\n", sp->nvars );
   fprintf ( fp, "varlocked     = %d\n", sp->varlocked );
-  fprintf ( fp, "//SVARINFO *vars;\n" );
+  fprintf ( fp, "//svarinfo_t *vars;\n" );
   fprintf ( fp, "varsAllocated = %d\n", sp->varsAllocated );
   fprintf ( fp, "varinit       = %d\n", sp->varinit );
   fprintf ( fp, "curTsID       = %d\n", sp->curTsID );
   fprintf ( fp, "rtsteps       = %d\n", sp->rtsteps );
   fprintf ( fp, "//long ntsteps;\n" );
   fprintf ( fp, "numTimestep   = %d\n", sp->numTimestep );
-  fprintf ( fp, "//  TSTEPS   *tsteps;\n" );
+  fprintf ( fp, "//  tsteps_t   *tsteps;\n" );
   fprintf ( fp, "tstepsTableSize= %d\n", sp->tstepsTableSize );
   fprintf ( fp, "tstepsNextID  = %d\n", sp->tstepsNextID );
   fprintf ( fp, "//BaseTime  basetime;\n" );
@@ -619,7 +649,7 @@ void streamPrintP   ( void * streamptr, FILE * fp )
   fprintf ( fp, "curfile       = %d\n", sp->curfile );
   fprintf ( fp, "nfiles        = %d\n", sp->nfiles );
   fprintf ( fp, "//  char    **fnames;\n" );
-  fprintf ( fp, "//  void     *gribContainers;\n" );
+  fprintf ( fp, "//  void    **gribContainers;\n" );
   fprintf ( fp, "vlistIDorig   = %d\n", sp->vlistIDorig );
 }
 

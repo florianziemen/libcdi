@@ -3,6 +3,11 @@
 #endif
 
 #include <string.h>
+#include <float.h>  /* FLT_EPSILON */
+
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
 
 #ifdef USE_MPI
 #include <mpi.h>
@@ -210,8 +215,6 @@ int gridSize(void)
 
 void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *xvals)
 {
-  long i;
-
   if ( (! (fabs(xinc) > 0)) && xsize > 1 )
     {
       if ( xfirst >= xlast )
@@ -225,7 +228,7 @@ void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *x
         }
     }
 
-  for ( i = 0; i < xsize; i++ )
+  for ( int i = 0; i < xsize; ++i )
     xvals[i] = xfirst + i*xinc;
 }
 
@@ -2199,9 +2202,10 @@ void grid_check_cyclic(grid_t *gridptr)
       if ( xvals && xsize > 1 )
         {
           xinc = xvals[1] - xvals[0];
-          if ( IS_EQUAL(xinc, 0) )
-            xinc = (xvals[xsize-1] - xvals[0])/(xsize-1);
+          if ( IS_EQUAL(xinc, 0) ) xinc = (xvals[xsize-1] - xvals[0])/(xsize-1);
+
           x0 = 2*xvals[xsize-1]-xvals[xsize-2]-360;
+
           if ( IS_NOT_EQUAL(xvals[0], xvals[xsize-1]) )
             if ( fabs(x0 - xvals[0]) < 0.01*xinc ) gridptr->isCyclic = TRUE;
         }
@@ -2229,6 +2233,7 @@ void grid_check_cyclic(grid_t *gridptr)
 	      if ( valn <    1 && val1 > 300 ) valn += 360;
 	      if ( val1 < -179 && valn > 120 ) val1 += 360;
 	      if ( valn < -179 && val1 > 120 ) valn += 360;
+              if ( fabs(valn-val1) > 180 ) val1 += 360;
 
               if ( valn > val1 ) x0 = valn - xinc;
               else               x0 = valn + xinc;
@@ -2260,6 +2265,7 @@ void grid_check_cyclic(grid_t *gridptr)
 		      if ( val2 <    1 && val1 > 300 ) val2 += 360;
 		      if ( val1 < -179 && val2 > 120 ) val1 += 360;
 		      if ( val2 < -179 && val1 > 120 ) val2 += 360;
+                      if ( fabs(val2-val1) > 180 ) val1 += 360;
 
 		      if ( fabs(val1-val2) < 0.001 )
 			{
@@ -2546,37 +2552,36 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( g1->rowlon )
     {
       for ( i = 0; i < g1->nrowlon; i++ )
-	if ( g1->rowlon[i] != g2->rowlon[i] ) return differ; 
-    } 
+	if ( g1->rowlon[i] != g2->rowlon[i] ) return differ;
+    }
   else if ( g2->rowlon )
     return differ;
 
-  if ( g1->xfirst        != g2->xfirst        ) return differ;       
-  if ( g1->yfirst	 != g2->yfirst        ) return differ;
-  if ( g1->xlast         != g2->xlast         ) return differ;
-  if ( g1->ylast         != g2->ylast         ) return differ;
-  if ( g1->xinc	         != g2->xinc          ) return differ;
-  if ( g1->yinc	         != g2->yinc          ) return differ;
-  if ( g1->lcc_originLon != g2->lcc_originLon ) return differ;         
-  if ( g1->lcc_originLat != g2->lcc_originLat ) return differ;
-  if ( g1->lcc_lonParY   != g2->lcc_lonParY   ) return differ;
-  if ( g1->lcc_lat1      != g2->lcc_lat1      ) return differ;
-  if ( g1->lcc_lat2      != g2->lcc_lat2      ) return differ;
-  if ( g1->lcc_xinc      != g2->lcc_xinc      ) return differ;
-  if ( g1->lcc_yinc      != g2->lcc_yinc      ) return differ;
-  if ( g1->lcc2_lon_0    != g2->lcc2_lon_0    ) return differ;         
-  if ( g1->lcc2_lat_0    != g2->lcc2_lat_0    ) return differ;
-  if ( g1->lcc2_lat_1    != g2->lcc2_lat_1    ) return differ;
-  if ( g1->lcc2_lat_2    != g2->lcc2_lat_2    ) return differ;
-  if ( g1->lcc2_a        != g2->lcc2_a        ) return differ;
-  if ( g1->laea_lon_0    != g2->laea_lon_0    ) return differ;         
-  if ( g1->laea_lat_0    != g2->laea_lat_0    ) return differ;
-  if ( g1->laea_a        != g2->laea_a        ) return differ;
-  if ( g1->xpole         != g2->xpole         ) return differ;
-  if ( g1->ypole         != g2->ypole         ) return differ;
-  if ( g1->angle         != g2->angle         ) return differ; 
+  if ( IS_NOT_EQUAL(g1->xfirst        , g2->xfirst)        ) return differ;
+  if ( IS_NOT_EQUAL(g1->yfirst	      , g2->yfirst)        ) return differ;
+  if ( IS_NOT_EQUAL(g1->xlast         , g2->xlast)         ) return differ;
+  if ( IS_NOT_EQUAL(g1->ylast         , g2->ylast)         ) return differ;
+  if ( IS_NOT_EQUAL(g1->xinc	      , g2->xinc)          ) return differ;
+  if ( IS_NOT_EQUAL(g1->yinc	      , g2->yinc)          ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc_originLon , g2->lcc_originLon) ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc_originLat , g2->lcc_originLat) ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc_lonParY   , g2->lcc_lonParY)   ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc_lat1      , g2->lcc_lat1)      ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc_lat2      , g2->lcc_lat2)      ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc_xinc      , g2->lcc_xinc)      ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc_yinc      , g2->lcc_yinc)      ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc2_lon_0    , g2->lcc2_lon_0)    ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc2_lat_0    , g2->lcc2_lat_0)    ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc2_lat_1    , g2->lcc2_lat_1)    ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc2_lat_2    , g2->lcc2_lat_2)    ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc2_a        , g2->lcc2_a)        ) return differ;
+  if ( IS_NOT_EQUAL(g1->laea_lon_0    , g2->laea_lon_0)    ) return differ;
+  if ( IS_NOT_EQUAL(g1->laea_lat_0    , g2->laea_lat_0)    ) return differ;
+  if ( IS_NOT_EQUAL(g1->laea_a        , g2->laea_a)        ) return differ;
+  if ( IS_NOT_EQUAL(g1->xpole         , g2->xpole)         ) return differ;
+  if ( IS_NOT_EQUAL(g1->ypole         , g2->ypole)         ) return differ;
+  if ( IS_NOT_EQUAL(g1->angle         , g2->angle)         ) return differ;
 
-  
   if ( g1->xvals )
     {
       if ( g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR )
@@ -2588,11 +2593,11 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
       if ( !g2->xvals ) return differ;
 
       for ( i = 0; i < size; i++ )
-	if ( g1->xvals[i] != g2->xvals[i] ) return differ; 
-    } 
+	if ( IS_NOT_EQUAL(g1->xvals[i], g2->xvals[i]) ) return differ;
+    }
   else if ( g2->xvals )
     return differ;
-  
+
   if ( g1->yvals )
     {
       if ( g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR )
@@ -2604,11 +2609,11 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
       if ( !g2->yvals ) return differ;
 
       for ( i = 0; i < size; i++ )
-	  if ( g1->yvals[i] != g2->yvals[i] ) return differ;
-    } 
+        if ( IS_NOT_EQUAL(g1->yvals[i], g2->yvals[i]) ) return differ;
+    }
   else if ( g2->yvals )
     return differ;
-  
+
   if ( g1->area )
     {
       xassert ( g1->size );
@@ -2616,8 +2621,8 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
       if ( !g2->area ) return differ;
 
       for ( i = 0; i < g1->size; i++ )
-	if ( g1->area[i] != g2->area[i] ) return differ;
-    } 
+	if ( IS_NOT_EQUAL(g1->area[i], g2->area[i]) ) return differ;
+    }
   else if ( g2->area )
     return differ;
 
@@ -2633,8 +2638,8 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
       if ( !g2->xbounds ) return differ;
 
       for ( i = 0; i < size; i++ )
-	if ( g1->xbounds[i] != g2->xbounds[i] ) return differ;
-    } 
+	if ( IS_NOT_EQUAL(g1->xbounds[i], g2->xbounds[i]) ) return differ;
+    }
   else if ( g2->xbounds )
     return differ;
 
@@ -2650,34 +2655,25 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
       if ( !g2->ybounds ) return differ;
 
       for ( i = 0; i < size; i++ )
-	if ( g1->ybounds[i] != g2->ybounds[i] ) return differ;
-    } 
+	if ( IS_NOT_EQUAL(g1->ybounds[i], g2->ybounds[i]) ) return differ;
+    }
   else if ( g2->ybounds )
     return differ;
 
-  if ( memcmp ( &g1->xname    ,&g2->xname    ,CDI_MAX_NAME )) 
-    return differ;
-  if ( memcmp ( &g1->yname    ,&g2->yname    ,CDI_MAX_NAME )) 
-    return differ;
-  if ( memcmp ( &g1->xlongname,&g2->xlongname,CDI_MAX_NAME )) 
-    return differ;
-  if ( memcmp ( &g1->ylongname,&g2->ylongname,CDI_MAX_NAME )) 
-    return differ;
-  if ( memcmp ( &g1->xstdname ,&g2->xstdname ,CDI_MAX_NAME )) 
-    return differ;
-  if ( memcmp ( &g1->ystdname ,&g2->ystdname ,CDI_MAX_NAME )) 
-    return differ;
-  if ( memcmp ( &g1->xunits   ,&g2->xunits   ,CDI_MAX_NAME )) 
-    return differ;
-  if ( memcmp ( &g1->yunits   ,&g2->yunits   ,CDI_MAX_NAME )) 
-    return differ; 
+  if ( memcmp ( &g1->xname    ,&g2->xname    ,CDI_MAX_NAME ) ) return differ;
+  if ( memcmp ( &g1->yname    ,&g2->yname    ,CDI_MAX_NAME ) ) return differ;
+  if ( memcmp ( &g1->xlongname,&g2->xlongname,CDI_MAX_NAME ) ) return differ;
+  if ( memcmp ( &g1->ylongname,&g2->ylongname,CDI_MAX_NAME ) ) return differ;
+  if ( memcmp ( &g1->xstdname ,&g2->xstdname ,CDI_MAX_NAME ) ) return differ;
+  if ( memcmp ( &g1->ystdname ,&g2->ystdname ,CDI_MAX_NAME ) ) return differ;
+  if ( memcmp ( &g1->xunits   ,&g2->xunits   ,CDI_MAX_NAME ) ) return differ;
+  if ( memcmp ( &g1->yunits   ,&g2->yunits   ,CDI_MAX_NAME ) ) return differ;
 
   if ( g1->reference )
     {
       if ( !g2->reference ) return differ;
       size = strlen ( g1->reference ) + 1;
-      if ( memcmp ( g1->reference, g2->reference, size )) 
-	return differ;
+      if ( memcmp ( g1->reference, g2->reference, size ) ) return differ;
     }
   else if ( g2->reference )
     return differ;
@@ -2686,8 +2682,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
     {
       xassert ( g1->size );
       if ( !g2->mask ) return differ;
-      if ( memcmp ( g1->mask, g2->mask, g1->size * sizeof ( unsigned char ))) 
-	return differ;
+      if ( memcmp ( g1->mask, g2->mask, g1->size*sizeof(unsigned char)) ) return differ;
     }
   else if ( g2->mask )
     return differ;
@@ -2696,8 +2691,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
     {
       xassert ( g1->size );
       if ( !g2->mask_gme ) return differ;
-      if ( memcmp ( g1->mask_gme, g2->mask_gme, 
-		    g1->size * sizeof ( unsigned char ))) return differ;
+      if ( memcmp ( g1->mask_gme, g2->mask_gme, g1->size*sizeof(unsigned char)) ) return differ;
     }
   else if ( g2->mask_gme )
     return differ;
@@ -3438,7 +3432,7 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
   int nbyte0, nbyte;
   int i;
   int nvertex, iv;
-  char uuid[17];
+  char uuidOfHGrid[17];
   int gridID = gridptr->self;
   const double *area    = gridInqAreaPtr(gridID);
   const double *xvals   = gridInqXvalsPtr(gridID);
@@ -3505,7 +3499,7 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
 
 	if ( type == GRID_LAEA )
 	  {
-	    double a, lon_0, lat_0;
+	    double a = 0, lon_0 = 0, lat_0 = 0;
 	    gridInqLaea(gridID, &a, &lon_0, &lat_0);
 	    fprintf(fp, "a         = %g\n", a);
 	    fprintf(fp, "lon_0     = %g\n", lon_0);
@@ -3514,7 +3508,7 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
 
 	if ( type == GRID_LCC2 )
 	  {
-	    double a, lon_0, lat_0, lat_1, lat_2;
+	    double a = 0, lon_0 = 0, lat_0 = 0, lat_1 = 0, lat_2 = 0;
 	    gridInqLcc2(gridID, &a, &lon_0, &lat_0, &lat_1, &lat_2);
 	    fprintf(fp, "a         = %g\n", a);
 	    fprintf(fp, "lon_0     = %g\n", lon_0);
@@ -3534,8 +3528,8 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
 	  {
 	    double xfirst = 0.0, xinc = 0.0;
 
-	    if ( type == GRID_LONLAT     || type == GRID_GAUSSIAN || 
-		 type == GRID_GENERIC    || type == GRID_LCC2     || 
+	    if ( type == GRID_LONLAT     || type == GRID_GAUSSIAN ||
+		 type == GRID_GENERIC    || type == GRID_LCC2     ||
                  type == GRID_SINUSOIDAL || type == GRID_LAEA )
 	      {
 		xfirst = gridInqXval(gridID, 0);
@@ -3667,8 +3661,8 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
       }
     case GRID_LCC:
       {
-	double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
-	int projflag, scanflag;
+	double originLon = 0, originLat = 0, lonParY = 0, lat1 = 0, lat2 = 0, xincm = 0, yincm = 0;
+	int projflag = 0, scanflag = 0;
 	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
 		   &projflag, &scanflag);
 
@@ -3707,14 +3701,16 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
       }
     case GRID_REFERENCE:
       {
-        const unsigned char *d;
+        // const unsigned char *d;
 	fprintf(fp, "number    = %d\n", gridInqNumber(gridID));
 	fprintf(fp, "position  = %d\n", gridInqPosition(gridID));
-        gridInqUUID(gridID, uuid);
-        d = (unsigned char *) &uuid;
+        /*
+        gridInqUUID(gridID, uuidOfHGrid);
+        d = (unsigned char *) &uuidOfHGrid;
 	fprintf(fp, "uuid      = %02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x\n", 
                 d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
                 d[8], d[9], d[10], d[11], d[12], d[13], d[14], d[15]);
+        */
 	if ( gridInqReference(gridID, NULL) )
 	  {
 	    char reference_link[8192];
@@ -3726,7 +3722,17 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
    default:
       {
 	fprintf(stderr, "Unsupported grid type: %s\n", gridNamePtr(type));
+        break;
       }
+    }
+
+  gridInqUUID(gridID, uuidOfHGrid);
+  if ( uuidOfHGrid[0] != 0 )
+    {
+      char uuidOfHGridStr[37];
+      uuid2str(uuidOfHGrid, uuidOfHGridStr);
+      if ( uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36 )
+        fprintf(fp, "uuid      = %s\n", uuidOfHGridStr);
     }
 
   if ( gridptr->mask )

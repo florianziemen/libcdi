@@ -42,6 +42,9 @@
 /*  internal data types  */
 
 
+/*  Chunks  */
+
+
 /*  GRID types  */
 
 
@@ -92,6 +95,7 @@ FCALLSCSUB1 (pioNamespaceSetActive, PIONAMESPACESETACTIVE, pionamespacesetactive
 
 /*  CDI control routines  */
 
+FCALLSCSUB0 (cdiReset, CDIRESET, cdireset)
 FCALLSCFUN1 (STRING, cdiStringError, CDISTRINGERROR, cdistringerror, INT)
 FCALLSCSUB1 (cdiDebug, CDIDEBUG, cdidebug, INT)
 FCALLSCFUN0 (STRING, cdiLibraryVersion, CDILIBRARYVERSION, cdilibraryversion)
@@ -223,6 +227,8 @@ FCALLSCSUB3 (vlistDefVarCode, VLISTDEFVARCODE, vlistdefvarcode, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarCode, VLISTINQVARCODE, vlistinqvarcode, INT, INT)
 FCALLSCSUB3 (vlistDefVarDatatype, VLISTDEFVARDATATYPE, vlistdefvardatatype, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarDatatype, VLISTINQVARDATATYPE, vlistinqvardatatype, INT, INT)
+FCALLSCSUB3 (vlistDefVarChunkType, VLISTDEFVARCHUNKTYPE, vlistdefvarchunktype, INT, INT, INT)
+FCALLSCFUN2 (INT, vlistInqVarChunkType, VLISTINQVARCHUNKTYPE, vlistinqvarchunktype, INT, INT)
 FCALLSCSUB3 (vlistDefVarXYZ, VLISTDEFVARXYZ, vlistdefvarxyz, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarXYZ, VLISTINQVARXYZ, vlistinqvarxyz, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarNumber, VLISTINQVARNUMBER, vlistinqvarnumber, INT, INT)
@@ -265,6 +271,28 @@ FCALLSCFUN3 (INT, vlistMergedLevel, VLISTMERGEDLEVEL, vlistmergedlevel, INT, INT
 FCALLSCSUB5 (vlistDefVarEnsemble, VLISTDEFVARENSEMBLE, vlistdefvarensemble, INT, INT, INT, INT, INT)
 FCALLSCFUN5 (INT, vlistInqVarEnsemble, VLISTINQVARENSEMBLE, vlistinqvarensemble, INT, INT, PINT, PINT, PINT)
 
+/*  ----------------------------------  */
+
+
+/*  Local change: 2013-01-28, FP (DWD)  */
+
+
+/*  ----------------------------------  */
+
+FCALLSCSUB4 (vlistDefVarIntKey, VLISTDEFVARINTKEY, vlistdefvarintkey, INT, INT, STRING, INT)
+FCALLSCSUB4 (vlistDefVarDblKey, VLISTDEFVARDBLKEY, vlistdefvardblkey, INT, INT, STRING, DOUBLE)
+
+/*  ----------------------------------  */
+
+
+/*  Local change: 2013-02-18, FP (DWD)  */
+
+
+/*  ----------------------------------  */
+
+FCALLSCSUB2 (vlistInqVarRawBegin, VLISTINQVARRAWBEGIN, vlistinqvarrawbegin, INT, INT)
+FCALLSCSUB1 (vlistInqVarRawEnd, VLISTINQVARRAWEND, vlistinqvarrawend, INT)
+
 /*  VLIST attributes  */
 
 FCALLSCFUN3 (INT, vlistInqNatts, VLISTINQNATTS, vlistinqnatts, INT, INT, PINT)
@@ -287,7 +315,6 @@ FCALLSCFUN2 (INT, gridInqMaskGME, GRIDINQMASKGME, gridinqmaskgme, INT, PINT)
 FCALLSCSUB2 (gridDefMask, GRIDDEFMASK, griddefmask, INT, PINT)
 FCALLSCFUN2 (INT, gridInqMask, GRIDINQMASK, gridinqmask, INT, PINT)
 FCALLSCSUB2 (gridPrint, GRIDPRINT, gridprint, INT, INT)
-FCALLSCFUN0 (INT, gridSize, GRIDSIZE, gridsize)
 FCALLSCFUN2 (INT, gridCreate, GRIDCREATE, gridcreate, INT, INT)
 FCALLSCSUB1 (gridDestroy, GRIDDESTROY, griddestroy, INT)
 FCALLSCFUN1 (INT, gridDuplicate, GRIDDUPLICATE, gridduplicate, INT)
@@ -395,7 +422,6 @@ FCALLSCFUN1 (INT, zaxisInqSize, ZAXISINQSIZE, zaxisinqsize, INT)
 FCALLSCFUN1 (INT, zaxisDuplicate, ZAXISDUPLICATE, zaxisduplicate, INT)
 FCALLSCSUB2 (zaxisResize, ZAXISRESIZE, zaxisresize, INT, INT)
 FCALLSCSUB1 (zaxisPrint, ZAXISPRINT, zaxisprint, INT)
-FCALLSCFUN0 (INT, zaxisSize, ZAXISSIZE, zaxissize)
 FCALLSCSUB2 (zaxisDefLevels, ZAXISDEFLEVELS, zaxisdeflevels, INT, PDOUBLE)
 FCALLSCSUB2 (zaxisInqLevels, ZAXISINQLEVELS, zaxisinqlevels, INT, PDOUBLE)
 FCALLSCSUB3 (zaxisDefLevel, ZAXISDEFLEVEL, zaxisdeflevel, INT, INT, DOUBLE)

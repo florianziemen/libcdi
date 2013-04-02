@@ -112,6 +112,11 @@ extern "C" {
 #define  DATATYPE_TXT           253
 #define  DATATYPE_CPX           254
 
+/* Chunks */
+
+#define  CHUNK_AUTO               1  /* use default chunk size                  */
+#define  CHUNK_GRID               2
+#define  CHUNK_LINES              3
 
 /* GRID types */
 
@@ -150,7 +155,10 @@ extern "C" {
 #define  ZAXIS_TOA               13  /* Norminal top of atmosphere              */
 #define  ZAXIS_SEA_BOTTOM        14  /* Sea bottom                              */
 #define  ZAXIS_ATMOSPHERE        15  /* Entire atmosphere                       */
-#define  ZAXIS_REFERENCE         16  /* zaxis reference number                  */
+#define  ZAXIS_CLOUD_BASE        16  /* Cloud base level                        */
+#define  ZAXIS_CLOUD_TOP         17  /* Level of cloud tops                     */
+#define  ZAXIS_ISOTHERM_ZERO     18  /* Level of 0o C isotherm                  */
+#define  ZAXIS_REFERENCE         19  /* zaxis reference number                  */
 
 /* TIME types */
 
@@ -201,8 +209,8 @@ extern "C" {
 #define  CALENDAR_366DAYS         4
 #define  CALENDAR_NONE            5
 
-  /* parallel IO IOMode */
-  
+/* parallel IO IOMode */
+
 #define  PIO_NONE                 0
 #define  PIO_MPI                  1
 #define  PIO_WRITER               2
@@ -211,9 +219,9 @@ extern "C" {
 
 #define  PIO_MINIOMODE                  PIO_NONE
 #define  PIO_MAXIOMODE                  PIO_FPGUARD
-#define  PIO_MINIOMODEWITHSPECIALPROCS  PIO_WRITER  
- 
-  /* parallel IO routines */
+#define  PIO_MINIOMODEWITHSPECIALPROCS  PIO_WRITER
+
+/* parallel IO routines */
 #ifdef MPI_VERSION
 #  include <yaxt.h>
 #endif
@@ -236,7 +244,9 @@ int      pioInqVarDecoChunk    ( int, int );
 int      pioInqVarDecoOff      ( int, int );
 void     pioNamespaceSetActive ( int );
 
-  /* CDI control routines */
+/* CDI control routines */
+
+void    cdiReset(void);
 
 char   *cdiStringError(int cdiErrno);
 
@@ -463,6 +473,9 @@ void    vlistDefVarDatatype(int vlistID, int varID, int datatype);
 /*      vlistInqVarDatatype: Get the data type of a Variable */
 int     vlistInqVarDatatype(int vlistID, int varID);
 
+void    vlistDefVarChunkType(int vlistID, int varID, int chunktype);
+int     vlistInqVarChunkType(int vlistID, int varID);
+
 void    vlistDefVarXYZ(int vlistID, int varID, int xyz);
 int     vlistInqVarXYZ(int vlistID, int varID);
 
@@ -530,6 +543,29 @@ int     vlistMergedLevel(int vlistID, int varID, int levelID);
 void    vlistDefVarEnsemble(int vlistID, int varID, int ensID, int ensCount, int forecast_type);
 int     vlistInqVarEnsemble(int vlistID, int varID, int *ensID, int *ensCount, int *forecast_type);
 
+/* ---------------------------------- */
+/* Local change: 2013-01-28, FP (DWD) */
+/* ---------------------------------- */
+
+/* vlistDefVarIntKey: Set an arbitrary keyword/integer value pair for GRIB API */
+void    vlistDefVarIntKey(int vlistID, int varID, const char *name, int value);
+/* vlistDefVarDblKey: Set an arbitrary keyword/double value pair for GRIB API */
+void    vlistDefVarDblKey(int vlistID, int varID, const char *name, double value);
+
+  /* ---------------------------------- */
+  /* Local change: 2013-02-18, FP (DWD) */
+  /* ---------------------------------- */
+
+/* vlistInqVarRawBegin: Open GRIB record to retrieve raw meta-data in subsequent calls */
+void    vlistInqVarRawBegin(int streamID, int varID);
+/* vlistInqVarDblKey: raw access to GRIB meta-data */
+double  vlistInqVarDblKey(int streamID, const char* name);
+/* vlistInqVarIntKey: raw access to GRIB meta-data */
+int     vlistInqVarIntKey(int streamID, const char* name);
+/* vlistInqVarRawEnd: Free previously opened GRIB record */
+void    vlistInqVarRawEnd(int streamID);
+
+
 /* VLIST attributes */
 
 /*      vlistInqNatts: Get number of variable attributes assigned to this variable */
@@ -567,7 +603,6 @@ void    gridDefMask(int gridID, const int *mask_vec);
 int     gridInqMask(int gridID, int *mask_vec);
 
 void    gridPrint(int gridID, int opt);
-int     gridSize(void);
 
 /*      gridCreate: Create a horizontal Grid */
 int     gridCreate(int gridtype, int size);
@@ -766,7 +801,6 @@ int     zaxisDuplicate(int zaxisID);
 void    zaxisResize(int zaxisID, int size);
 
 void    zaxisPrint(int zaxisID);
-int     zaxisSize(void);
 
 /*      zaxisDefLevels: Define the levels of a Z-axis */
 void    zaxisDefLevels(int zaxisID, const double *levels_vec);

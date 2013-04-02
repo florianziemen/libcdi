@@ -208,8 +208,7 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
 
   for ( i = 0; i < instCount; i++ )
     {
-      instID = instResHs[i];
-      ip2 = ( institute_t * ) reshGetVal ( instID, &instituteOps );
+      ip2 = ( institute_t * ) reshGetVal ( instResHs[i], &instituteOps );
       xassert ( ip2 );
 
       if ( ip2->used && ! instituteCompareKernel ( ip1, ip2 ))
@@ -245,11 +244,12 @@ int institutDef(int center, int subcenter, const char *name, const char *longnam
 
 int institutInqCenter(int instID)
 {
-  institute_t * instituteptr;
+  institute_t * instituteptr = NULL;
 
   instituteInit ();
 
-  instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
+  if ( instID != UNDEFID )
+    instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
   return  instituteptr ? instituteptr->center : UNDEFID;
 }
@@ -257,11 +257,12 @@ int institutInqCenter(int instID)
 
 int institutInqSubcenter(int instID)
 {
-  institute_t * instituteptr;
+  institute_t * instituteptr = NULL;
 
   instituteInit ();
 
-  instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
+  if ( instID != UNDEFID )
+    instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
   return instituteptr ? instituteptr->subcenter: UNDEFID;
 }
@@ -269,11 +270,12 @@ int institutInqSubcenter(int instID)
 
 char *institutInqNamePtr(int instID)
 {
-  institute_t * instituteptr;
+  institute_t * instituteptr = NULL;
 
   instituteInit ();
 
-  instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
+  if ( instID != UNDEFID )
+    instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
   return instituteptr ? instituteptr->name : NULL;
 }
@@ -281,11 +283,12 @@ char *institutInqNamePtr(int instID)
 
 char *institutInqLongnamePtr(int instID)
 {
-  institute_t * instituteptr;
+  institute_t * instituteptr = NULL;
 
   instituteInit ();
 
-  instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
+  if ( instID != UNDEFID )
+    instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
   return instituteptr ? instituteptr->longname : NULL;
 }

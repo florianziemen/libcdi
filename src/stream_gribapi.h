@@ -1,9 +1,9 @@
 #ifndef _STREAM_GRIBAPI_H
 #define _STREAM_GRIBAPI_H
 
-int gribapiScanTimestep1(int streamID);
-int gribapiScanTimestep2(int streamID);
-int gribapiScanTimestep(int streamID);
+int gribapiScanTimestep1(stream_t * streamptr);
+int gribapiScanTimestep2(stream_t * streamptr);
+int gribapiScanTimestep(stream_t * streamptr);
 
 int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
 		  int unreduced, int *nmiss, int *zip, double missval);

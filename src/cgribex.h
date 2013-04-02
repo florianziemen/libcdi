@@ -8,7 +8,10 @@
 
 /* GRIB1 Level Types */
 #define  GRIB1_LTYPE_SURFACE               1
-#define  GRIB1_LTYPE_TOA           8
+#define  GRIB1_LTYPE_CLOUDBASE             2
+#define  GRIB1_LTYPE_CLOUDTOP              3
+#define  GRIB1_LTYPE_ISOTHERM0             4
+#define  GRIB1_LTYPE_TOA                   8
 #define  GRIB1_LTYPE_SEA_BOTTOM            9
 #define  GRIB1_LTYPE_ATMOSPHERE           10
 #define  GRIB1_LTYPE_99                   99
@@ -212,7 +215,7 @@ void  gribPrintGDS(int nrec, long recpos, long recsize, unsigned char *gribbuffe
 void  gribPrintBMS(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
 void  gribPrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
 void  gribCheck1(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
-void  gribRepair1(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
+void  gribRepair1(int nrec, long recsize, unsigned char *gribbuffer);
 
 int grib1Sections(unsigned char *gribbuffer, long recsize, unsigned char **pdsp,
 		  unsigned char **gdsp, unsigned char **bmsp, unsigned char **bdsp);

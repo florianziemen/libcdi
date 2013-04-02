@@ -14,12 +14,10 @@
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
 #include "gribapi.h"
 
-/* begin deike */
 #ifdef USE_MPI
 #include "pio.h"
 #include "pio_comm.h"
 #endif
-/* end deike */
 
 
 int grib1ltypeToZaxisType(int grib_ltype)
@@ -28,23 +26,26 @@ int grib1ltypeToZaxisType(int grib_ltype)
 
   switch ( grib_ltype )
     {
-    case GRIB1_LTYPE_SURFACE:         { zaxistype = ZAXIS_SURFACE;           break; }
-    case GRIB1_LTYPE_TOA:             { zaxistype = ZAXIS_TOA;               break; }
-    case GRIB1_LTYPE_SEA_BOTTOM:      { zaxistype = ZAXIS_SEA_BOTTOM;        break; }
-    case GRIB1_LTYPE_ATMOSPHERE:      { zaxistype = ZAXIS_ATMOSPHERE;        break; }
-    case GRIB1_LTYPE_MEANSEA:         { zaxistype = ZAXIS_MEANSEA;           break; }
+    case GRIB1_LTYPE_SURFACE:            { zaxistype = ZAXIS_SURFACE;           break; }
+    case GRIB1_LTYPE_CLOUDBASE:          { zaxistype = ZAXIS_CLOUD_BASE;        break; }
+    case GRIB1_LTYPE_CLOUDTOP:           { zaxistype = ZAXIS_CLOUD_TOP;         break; }
+    case GRIB1_LTYPE_ISOTHERM0:          { zaxistype = ZAXIS_ISOTHERM_ZERO;     break; }
+    case GRIB1_LTYPE_TOA:                { zaxistype = ZAXIS_TOA;               break; }
+    case GRIB1_LTYPE_SEA_BOTTOM:         { zaxistype = ZAXIS_SEA_BOTTOM;        break; }
+    case GRIB1_LTYPE_ATMOSPHERE:         { zaxistype = ZAXIS_ATMOSPHERE;        break; }
+    case GRIB1_LTYPE_MEANSEA:            { zaxistype = ZAXIS_MEANSEA;           break; }
     case GRIB1_LTYPE_99:
-    case GRIB1_LTYPE_ISOBARIC:        { zaxistype = ZAXIS_PRESSURE;          break; }
-    case GRIB1_LTYPE_HEIGHT:          { zaxistype = ZAXIS_HEIGHT;            break; }
-    case GRIB1_LTYPE_ALTITUDE:        { zaxistype = ZAXIS_ALTITUDE;	     break; }
+    case GRIB1_LTYPE_ISOBARIC:           { zaxistype = ZAXIS_PRESSURE;          break; }
+    case GRIB1_LTYPE_HEIGHT:             { zaxistype = ZAXIS_HEIGHT;            break; }
+    case GRIB1_LTYPE_ALTITUDE:           { zaxistype = ZAXIS_ALTITUDE;	     break; }
     case GRIB1_LTYPE_SIGMA:
-    case GRIB1_LTYPE_SIGMA_LAYER:     { zaxistype = ZAXIS_SIGMA;	     break; }
+    case GRIB1_LTYPE_SIGMA_LAYER:        { zaxistype = ZAXIS_SIGMA;	     break; }
     case GRIB1_LTYPE_HYBRID:
-    case GRIB1_LTYPE_HYBRID_LAYER:    { zaxistype = ZAXIS_HYBRID;	     break; }
+    case GRIB1_LTYPE_HYBRID_LAYER:       { zaxistype = ZAXIS_HYBRID;	     break; }
     case GRIB1_LTYPE_LANDDEPTH:
-    case GRIB1_LTYPE_LANDDEPTH_LAYER: { zaxistype = ZAXIS_DEPTH_BELOW_LAND;  break; }
-    case GRIB1_LTYPE_ISENTROPIC:      { zaxistype = ZAXIS_ISENTROPIC;	     break; }
-    case GRIB1_LTYPE_SEADEPTH:        { zaxistype = ZAXIS_DEPTH_BELOW_SEA;   break; }
+    case GRIB1_LTYPE_LANDDEPTH_LAYER:    { zaxistype = ZAXIS_DEPTH_BELOW_LAND;  break; }
+    case GRIB1_LTYPE_ISENTROPIC:         { zaxistype = ZAXIS_ISENTROPIC;	     break; }
+    case GRIB1_LTYPE_SEADEPTH:           { zaxistype = ZAXIS_DEPTH_BELOW_SEA;   break; }
     }
 
   return (zaxistype);
@@ -58,6 +59,9 @@ int grib2ltypeToZaxisType(int grib_ltype)
   switch ( grib_ltype )
     {
     case GRIB2_LTYPE_SURFACE:            { zaxistype = ZAXIS_SURFACE;           break; }
+    case GRIB2_LTYPE_CLOUDBASE:          { zaxistype = ZAXIS_CLOUD_BASE;        break; }
+    case GRIB2_LTYPE_CLOUDTOP:           { zaxistype = ZAXIS_CLOUD_TOP;         break; }
+    case GRIB2_LTYPE_ISOTHERM0:          { zaxistype = ZAXIS_ISOTHERM_ZERO;     break; }
     case GRIB2_LTYPE_TOA:                { zaxistype = ZAXIS_TOA;               break; }
     case GRIB2_LTYPE_SEA_BOTTOM:         { zaxistype = ZAXIS_SEA_BOTTOM;        break; }
     case GRIB2_LTYPE_ATMOSPHERE:         { zaxistype = ZAXIS_ATMOSPHERE;        break; }
@@ -100,24 +104,19 @@ int grbBitsPerValue(int datatype)
 
 
 /*
-int grbInqRecord(int streamID, int *varID, int *levelID)
+int grbInqRecord(stream_t * streamptr, int *varID, int *levelID)
 {
   int status;
 
-  status = cgribexInqRecord(streamID, varID, levelID);
+  status = cgribexInqRecord(streamptr, varID, levelID);
 
   return (status);
 }
 */
 
-int grbDefRecord(int streamID)
+int grbDefRecord(stream_t * streamptr)
 {
   int status = 0;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   return (status);
 }
@@ -134,12 +133,12 @@ int grbDecode(int filetype, unsigned char *gribbuffer, int gribsize, double *dat
   else
 #endif
     status = gribapiDecode(gribbuffer, gribsize, data, gridsize, unreduced, nmiss, zip, missval);
- 
+
   return (status);
 }
 
 
-int grbReadRecord(int streamID, double *data, int *nmiss)
+int grbReadRecord(stream_t * streamptr, double *data, int *nmiss)
 {
   int status = 0;
   unsigned char *gribbuffer;
@@ -152,18 +151,13 @@ int grbReadRecord(int streamID, double *data, int *nmiss)
   int zip;
   int filetype;
   double missval;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
   gribbuffer = (unsigned char *) streamptr->record->buffer;
 
-  vlistID = streamInqVlist(streamID);
-  fileID  = streamInqFileID(streamID);
+  vlistID = streamptr->vlistID;
+  fileID  = streamptr->fileID;
   tsID    = streamptr->curTsID;
   vrecID  = streamptr->tsteps[tsID].curRecID;
   recID   = streamptr->tsteps[tsID].recIDs[vrecID];
@@ -190,95 +184,84 @@ int grbReadRecord(int streamID, double *data, int *nmiss)
 }
 
 static
-int grbScanTimestep1(int streamID)
+int grbScanTimestep1(stream_t * streamptr)
 {
   int status;
   int filetype;
-  stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
   filetype  = streamptr->filetype;
 
 #if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
     {
-      status = cgribexScanTimestep1(streamID);
+      status = cgribexScanTimestep1(streamptr);
     }
   else
 #endif
     {
-      status = gribapiScanTimestep1(streamID);
+      status = gribapiScanTimestep1(streamptr);
     }
 
   return (status);
 }
 
 static
-int grbScanTimestep2(int streamID)
+int grbScanTimestep2(stream_t * streamptr)
 {
   int status;
   int filetype;
-  stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
   filetype  = streamptr->filetype;
 
 #if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
     {
-      status = cgribexScanTimestep2(streamID);
+      status = cgribexScanTimestep2(streamptr);
     }
   else
 #endif
     {
-      status = gribapiScanTimestep2(streamID);
+      status = gribapiScanTimestep2(streamptr);
     }
 
   return (status);
 }
 
 static
-int grbScanTimestep(int streamID)
+int grbScanTimestep(stream_t * streamptr)
 {
   int status;
   int filetype;
-  stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
   filetype  = streamptr->filetype;
 
 #if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
     {
-      status = cgribexScanTimestep(streamID);
+      status = cgribexScanTimestep(streamptr);
     }
   else
 #endif
     {
-      status = gribapiScanTimestep(streamID);
+      status = gribapiScanTimestep(streamptr);
     }
 
   return (status);
 }
 
 
-int grbInqContents(int streamID)
+int grbInqContents(stream_t * streamptr)
 {
   int fileID;
   int status = 0;
-  stream_t *streamptr;
 
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
-  fileID = streamInqFileID(streamID);
+  fileID = streamptr->fileID;
 
   streamptr->curTsID = 0;
 
-  status = grbScanTimestep1(streamID);
- 
-  if ( status == 0 && streamptr->ntsteps == -1 ) status = grbScanTimestep2(streamID);
+  status = grbScanTimestep1(streamptr);
+
+  if ( status == 0 && streamptr->ntsteps == -1 ) status = grbScanTimestep2(streamptr);
 
   fileSetPos(fileID, 0, SEEK_SET);
 
@@ -286,25 +269,20 @@ int grbInqContents(int streamID)
 }
 
 
-int grbInqTimestep(int streamID, int tsID)
+int grbInqTimestep(stream_t * streamptr, int tsID)
 {
   int ntsteps, nrecs;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   if ( tsID == 0 && streamptr->rtsteps == 0 )
     Error("Call to cdiInqContents missing!");
 
   if ( CDI_Debug )
     Message("tsid = %d rtsteps = %d", tsID, streamptr->rtsteps);
-  
+
   ntsteps = CDI_UNDEFID;
   while ( (tsID + 1) > streamptr->rtsteps && ntsteps == CDI_UNDEFID )
     {
-      ntsteps = grbScanTimestep(streamID);
+      ntsteps = grbScanTimestep(streamptr);
       if ( ntsteps == CDI_EUFSTRUCT )
 	{
 	  streamptr->ntsteps = streamptr->rtsteps;
@@ -326,7 +304,7 @@ int grbInqTimestep(int streamID, int tsID)
 }
 
 
-void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
+void grbReadVarDP(stream_t * streamptr, int varID, double *data, int *nmiss)
 {
   int fileID;
   int levelID, nlevs, gridID, gridsize;
@@ -339,18 +317,13 @@ void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
   int zip;
   int filetype;
   double missval;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
   gribbuffer = (unsigned char *) streamptr->record->buffer;
 
-  vlistID  = streamInqVlist(streamID);
-  fileID   = streamInqFileID(streamID);
+  vlistID  = streamptr->vlistID;
+  fileID   = streamptr->fileID;
   tsID     = streamptr->curTsID;
 
   nlevs    = streamptr->vars[varID].nlevs;
@@ -375,7 +348,7 @@ void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
 
       missval = vlistInqVarMissval(vlistID, varID);
 
-      grbDecode(filetype, gribbuffer, recsize, &data[levelID*gridsize], gridsize, 
+      grbDecode(filetype, gribbuffer, recsize, &data[levelID*gridsize], gridsize,
 		streamptr->unreduced, &imiss, &zip, missval);
 
       *nmiss += imiss;
@@ -387,7 +360,7 @@ void grbReadVarDP(int streamID, int varID, double *data, int *nmiss)
 }
 
 
-void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *nmiss)
+void grbReadVarSliceDP(stream_t * streamptr, int varID, int levelID, double *data, int *nmiss)
 {
   int fileID;
   int gridID, gridsize;
@@ -399,17 +372,12 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
   int zip;
   int filetype;
   double missval;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
   gribbuffer = (unsigned char *) streamptr->record->buffer;
 
-  vlistID  = streamInqVlist(streamID);
+  vlistID  = streamptr->vlistID;
   gridID   = vlistInqVarGrid(vlistID, varID);
   gridsize = gridInqSize(gridID);
   tsID     = streamptr->curTsID;
@@ -417,7 +385,7 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
   if ( CDI_Debug )
     Message("gridID = %d gridsize = %d", gridID, gridsize);
 
-  fileID = streamInqFileID(streamID);
+  fileID = streamptr->fileID;
 
   currentfilepos = fileGetPos(fileID);
 
@@ -444,7 +412,7 @@ void grbReadVarSliceDP(int streamID, int varID, int levelID, double *data, int *
 
 static
 size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
-		 int date, int time, int tsteptype, int numavg, 
+		 int date, int time, int tsteptype, int numavg,
 		 long datasize, const double *data, int nmiss, unsigned char **gribbuffer,
 		 int ljpeg, void *gribContainer)
 {
@@ -458,14 +426,14 @@ size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, 
       *gribbuffer = (unsigned char *) malloc(gribbuffersize);
 
       nbytes = cgribexEncode(varID, levelID, vlistID, gridID, zaxisID,
-			     date, time, tsteptype, numavg, 
+			     date, time, tsteptype, numavg,
 			     datasize, data, nmiss, *gribbuffer, gribbuffersize);
     }
   else
 #endif
     {
       nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID,
-			     date, time, tsteptype, numavg, 
+			     date, time, tsteptype, numavg,
 			     datasize, data, nmiss, gribbuffer, &gribbuffersize,
 			     ljpeg, gribContainer);
     }
@@ -485,7 +453,7 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
   buffer = (unsigned char *) malloc(buffersize);
 
   /*  memcpy(buffer, gribbuffer, gribbuffersize); */
-  
+
   if ( filetype == FILETYPE_GRB )
     {
       nbytes = gribZip(gribbuffer, (long) gribbuffersize, buffer, (long) buffersize);
@@ -496,14 +464,14 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
       lszip_warn = 0;
       nbytes = gribbuffersize;
     }
-      
+
   free(buffer);
 
   return (nbytes);
 }
 
 
-int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data, int nmiss)
+int grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, int nmiss)
 {
   size_t nwrite;
   int fileID;
@@ -518,19 +486,15 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   int numavg = 0;
   size_t nbytes;
   int filetype;
-  stream_t *streamptr;
   int ljpeg = 0;
   int ljpeg_warn = 1;
   void *gc = NULL;
 
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
+  if ( memtype == MEMTYPE_FLOAT ) Error("cdf_write_var_slice not implemented for memtype float!");
 
   filetype  = streamptr->filetype;
-
-  fileID    = streamInqFileID(streamID);
-  vlistID   = streamInqVlist(streamID);
+  fileID    = streamptr->fileID;
+  vlistID   = streamptr->vlistID;
   gridID    = vlistInqVarGrid(vlistID, varID);
   zaxisID   = vlistInqVarZaxis(vlistID, varID);
   tsteptype = vlistInqVarTsteptype(vlistID, varID);
@@ -556,8 +520,13 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
   else
 #endif
     {
+#if defined (GRIBCONTAINER2D)
+      gribContainer_t **gribContainers =  (gribContainer_t **) streamptr->gribContainers;
+      gc = (void *) &gribContainers[varID][levelID];
+#else
       gribContainer_t *gribContainers =  (gribContainer_t *) streamptr->gribContainers;
       gc = (void *) &gribContainers[varID];
+#endif
     }
 
   if ( streamptr->comptype == COMPRESS_JPEG )
@@ -596,12 +565,12 @@ int grbWriteVarSliceDP(int streamID, int varID, int levelID, const double *data,
 }
 
 
-void grbWriteVarDP(int streamID, int varID, const double *data, int nmiss)
+void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss)
 {
   int vlistID, gridID, zaxisID, levelID, nlevs;
   int gridsize;
 
-  vlistID  = streamInqVlist(streamID);
+  vlistID  = streamptr->vlistID;
   gridID   = vlistInqVarGrid(vlistID, varID);
   gridsize = gridInqSize(gridID);
   zaxisID  = vlistInqVarZaxis(vlistID, varID);
@@ -609,12 +578,15 @@ void grbWriteVarDP(int streamID, int varID, const double *data, int nmiss)
 
   for ( levelID = 0; levelID < nlevs; levelID++ )
     {
-      grbWriteVarSliceDP(streamID, varID, levelID, data+levelID*gridsize, nmiss);
+      if ( memtype == MEMTYPE_FLOAT )
+        grb_write_var_slice(streamptr, varID, levelID, memtype, ((float*)data)+levelID*gridsize, nmiss);
+      else
+        grb_write_var_slice(streamptr, varID, levelID, memtype, ((double*)data)+levelID*gridsize, nmiss);
     }
 }
 
 
-int grbCopyRecord(int streamID2, int streamID1)
+int grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 {
   int fileID1, fileID2;
   int tsID, recID, vrecID;
@@ -627,19 +599,11 @@ int grbCopyRecord(int streamID2, int streamID1)
   size_t nbytes;
   long unzipsize;
   int izip;
-  stream_t *streamptr1;
-  stream_t *streamptr2;
-
-  streamptr1 = stream_to_pointer(streamID1);
-  streamptr2 = stream_to_pointer(streamID2);
-
-  stream_check_ptr(__func__, streamptr1);
-  stream_check_ptr(__func__, streamptr2);
 
   filetype = streamptr1->filetype;
 
-  fileID1 = streamInqFileID(streamID1);
-  fileID2 = streamInqFileID(streamID2);
+  fileID1 = streamptr1->fileID;
+  fileID2 = streamptr2->fileID;
 
   tsID    = streamptr1->curTsID;
   vrecID  = streamptr1->tsteps[tsID].curRecID;
@@ -658,7 +622,7 @@ int grbCopyRecord(int streamID2, int streamID1)
   nbytes = recsize;
 
   izip = gribGetZip(recsize, gribbuffer, &unzipsize);
-  
+
   if ( izip == 0 )
     if ( streamptr2->comptype == COMPRESS_SZIP )
       nbytes = grbSzip(filetype, gribbuffer, nbytes);
@@ -674,20 +638,15 @@ int grbCopyRecord(int streamID2, int streamID1)
 }
 
 
-int grbWriteRecord(int streamID, const double *data, int nmiss)
+int grb_write_record(stream_t * streamptr, int memtype, const void *data, int nmiss)
 {
   int status = 0;
   int varID, levelID;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   varID   = streamptr->record->varID;
   levelID = streamptr->record->levelID;
 
-  status = grbWriteVarSliceDP(streamID, varID, levelID, data, nmiss);
+  status = grb_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 
   return (status);
 }

@@ -35,6 +35,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].tsteptype     = TSTEP_INSTANT;
   vlistptr->vars[varID].timave        = 0;
   vlistptr->vars[varID].timaccu       = 0;
+  vlistptr->vars[varID].chunktype     = cdiChunkType;
   vlistptr->vars[varID].xyz           = 0;
   vlistptr->vars[varID].gridID        = CDI_UNDEFID;
   vlistptr->vars[varID].zaxisID       = CDI_UNDEFID;
@@ -59,9 +60,23 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].validrange[0] = VALIDMISS;
   vlistptr->vars[varID].validrange[1] = VALIDMISS;
   vlistptr->vars[varID].ensdata       = NULL;
-  vlistptr->vars[varID].iorank       = CDI_UNDEFID;
-  vlistptr->vars[varID].decoSize     = 0;
-  vlistptr->vars[varID].deco         = NULL;
+  vlistptr->vars[varID].iorank        = CDI_UNDEFID;
+  vlistptr->vars[varID].decoSize      = 0;
+  vlistptr->vars[varID].deco          = NULL;
+
+  /* ---------------------------------- */
+  /* Local change: 2013-01-28, FP (DWD) */
+  /* ---------------------------------- */
+
+  vlistptr->vars[varID].opt_grib_dbl_nentries = 0;
+  vlistptr->vars[varID].opt_grib_int_nentries = 0;
+  int i;
+  for (i=0; i<MAX_OPT_GRIB_ENTRIES; i++) {
+    vlistptr->vars[varID].opt_grib_dbl_val[i] = 0.0;
+    vlistptr->vars[varID].opt_grib_int_val[i] =   0;
+    vlistptr->vars[varID].opt_grib_int_keyword[i] = NULL;
+    vlistptr->vars[varID].opt_grib_dbl_keyword[i] = NULL;
+  } // for
 }
 
 static
@@ -656,7 +671,7 @@ void vlistInqVarStdname(int vlistID, int varID, char *stdname)
   if ( vlistptr->vars[varID].stdname == NULL )
     {
       stdname[0] = '\0';
-    }  
+    }
   else
     strcpy(stdname, vlistptr->vars[varID].stdname);
 
@@ -671,7 +686,7 @@ void vlistInqVarStdname(int vlistID, int varID, char *stdname)
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
     @Item  varID    Variable identifier.
-    @Item  units    Units of the variable. The caller must allocate space for the 
+    @Item  units    Units of the variable. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
@@ -1683,6 +1698,30 @@ int vlistInqVarCompLevel(int vlistID, int varID)
 }
 
 
+void  vlistDefVarChunkType(int vlistID, int varID, int chunktype)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  vlistptr->vars[varID].chunktype = chunktype;
+}
+
+
+int vlistInqVarChunkType(int vlistID, int varID)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  return (vlistptr->vars[varID].chunktype);
+}
+
+
 void  vlistDefVarXYZ(int vlistID, int varID, int xyz)
 {
   vlist_t *vlistptr;
@@ -1741,63 +1780,137 @@ void vlistDefVarEnsemble(int vlistID, int varID, int ensID, int ensCount, int fo
   vlistCheckVarID(__func__, vlistID, varID);
 
   if ( vlistptr->vars[varID].ensdata == NULL )
-  vlistptr->vars[varID].ensdata = (ensinfo_t *) malloc( sizeof( ensinfo_t ) );
+    vlistptr->vars[varID].ensdata = (ensinfo_t *) malloc( sizeof( ensinfo_t ) );
 
   vlistptr->vars[varID].ensdata->ens_index          = ensID;
   vlistptr->vars[varID].ensdata->ens_count          = ensCount;
   vlistptr->vars[varID].ensdata->forecast_init_type = forecast_type;
-
-  /*
-    int      ens_index;
-    int      ens_count;
-    int      forecast_init_type;
-  */
-
-#ifdef DBG
-  if( DBG )
-    {
-      fprintf( stderr, "vlistDefVarEnsemble Inputs: \n EnsID  %d\n Enscount %d\n Forecast init type %d\n", ensID, 
-	       ensCount, forecast_type );
-
-      fprintf( stderr, "vlistDefVarEnsemble outputs: \n EnsID  %d\n Enscount %d\n Forecast init type %d\n",vlistptr->vars[varID].ensdata->ens_index, 
-	       vlistptr->vars[varID].ensdata->ens_count,  vlistptr->vars[varID].ensdata->forecast_init_type );
-    }
-#endif
 }
 
 
 int vlistInqVarEnsemble( int vlistID, int varID, int *ensID, int *ensCount, int *forecast_type )
 {
   vlist_t *vlistptr;
+  int status = 0;
 
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  if(   vlistptr->vars[varID].ensdata )
+  if ( vlistptr->vars[varID].ensdata )
     {
       *ensID = vlistptr->vars[varID].ensdata->ens_index;
       *ensCount = vlistptr->vars[varID].ensdata->ens_count;
       *forecast_type = vlistptr->vars[varID].ensdata->forecast_init_type;
+
+      status = 1;
     }
+
+  return (status);
+}
+
+/* ---------------------------------- */
+/* Local change: 2013-01-28, FP (DWD) */
+/* ---------------------------------- */
+
+/* vlistDefVarIntKey: Set an arbitrary keyword/integer value pair for GRIB API */
+void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
+{
+  vlist_t *vlistptr;
+  vlistptr = vlist_to_pointer(vlistID);
+
+  int idx = vlistptr->vars[varID].opt_grib_int_nentries;
+  vlistptr->vars[varID].opt_grib_int_nentries++;
+  if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
+  vlistptr->vars[varID].opt_grib_int_val[idx] = value;
+  if ( name )
+    vlistptr->vars[varID].opt_grib_int_keyword[idx] = strdupx(name);
   else
-    return 1;
+    Error("Internal error!");
+}
 
-#ifdef DBG
-  if( DBG )
-    {
-      fprintf( stderr, "vlistInqVarEnsemble outputs: \n EnsID %d\n Enscount %d\n Forecast init type %d\n", *ensID, 
-	       *ensCount, *forecast_type );
+/* vlistDefVarDblKey: Set an arbitrary keyword/double value pair for GRIB API */
+void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
+{
+  vlist_t *vlistptr;
+  vlistptr = vlist_to_pointer(vlistID);
 
-      /*
-      fprintf( stderr, " EnsID  %d\n Enscount %d\n Forecast init type %d\n",vlistptr->vars[varID].ensdata->ens_index, 
-	       vlistptr->vars[varID].ensdata->ens_count,  vlistptr->vars[varID].ensdata->forecast_init_type );
-      */
+  int idx = vlistptr->vars[varID].opt_grib_dbl_nentries;
+  vlistptr->vars[varID].opt_grib_dbl_nentries++;
+  if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/double value pairs!");
+  vlistptr->vars[varID].opt_grib_dbl_val[idx] = value;
+  if ( name )
+    vlistptr->vars[varID].opt_grib_dbl_keyword[idx] = strdupx(name);
+  else
+    Error("Internal error!");
+}
 
-    }
+#if  defined  (HAVE_LIBGRIB_API)
+#  include "file.h"
+#  include "grib_api.h"
 #endif
 
-    return 0;
+/* vlistInqVarRawBegin: Open GRIB record to retrieve raw meta-data in subsequent calls */
+void vlistInqVarRawBegin(int streamID, int varID)
+{
+#if  defined  (HAVE_LIBGRIB_API)
+  stream_t *streamptr;
+  int       recID, tsID, fileID;
+  long      recpos, recsize;
+
+  streamptr = stream_to_pointer(streamID);
+  stream_check_ptr(__func__, streamptr);
+
+  fileID  = streamInqFileID(streamID);
+  tsID    = streamptr->curTsID;
+
+  // determine record ID for varID in current time step
+  for (recID=0; (recID<streamptr->tsteps[0].nrecs) && (varID != streamptr->tsteps[tsID].records[recID].varID); recID++);
+  recpos  = streamptr->tsteps[tsID].records[recID].position;
+  recsize = streamptr->tsteps[tsID].records[recID].size;
+
+  fileSetPos(fileID, recpos, SEEK_SET);
+  fileRead(fileID, streamptr->record->buffer, (size_t) recsize);
+
+  streamptr->gh = (void *) grib_handle_new_from_message(NULL, (void *) streamptr->record->buffer, recsize);
+#endif
+}
+
+
+/* vlistInqVarDblKey: raw access to GRIB meta-data */
+double vlistInqVarDblKey(int streamID, const char* name)
+{
+  double value = 0;
+#if  defined  (HAVE_LIBGRIB_API)
+  stream_t *streamptr = stream_to_pointer(streamID);
+  stream_check_ptr(__func__, streamptr);
+  GRIB_CHECK(grib_get_double((grib_handle*) streamptr->gh, name, &value), 0);
+#endif
+  return value;
+}
+
+
+/* vlistInqVarIntKey: raw access to GRIB meta-data */
+int vlistInqVarIntKey(int streamID, const char* name)
+{
+  long int value = 0;
+#if  defined  (HAVE_LIBGRIB_API)
+  stream_t *streamptr = stream_to_pointer(streamID);
+  stream_check_ptr(__func__, streamptr);
+  GRIB_CHECK(grib_get_long((grib_handle*) streamptr->gh, name, &value), 0);
+#endif
+  return (int) value;
+}
+
+
+/* vlistInqVarRawEnd: Free previously opened GRIB record */
+void vlistInqVarRawEnd(int streamID)
+{
+#if  defined  (HAVE_LIBGRIB_API)
+  stream_t *streamptr = stream_to_pointer(streamID);
+  stream_check_ptr(__func__, streamptr);
+  grib_handle_delete((grib_handle*) streamptr->gh);
+#endif
 }
 
 
@@ -1833,7 +1946,10 @@ void vlistDefVarDeco ( int vlistID, int varID, int decoSize, deco_t * deco )
 
 int vlistInqVarDecoChunk ( int vlistID, int varID, int rankModel  )
 {
+  vlist_t *vlistptr;
   int iret = CDI_UNDEFID;
+
+  vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
 
@@ -1841,16 +1957,14 @@ int vlistInqVarDecoChunk ( int vlistID, int varID, int rankModel  )
   {
     deco_t * deco;
     int i, decoSize = 0;
-    vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
     xassert ( vlistptr->vars[varID].deco != NULL &&
-             vlistptr->vars[varID].decoSize != CDI_UNDEFID );
-
+             vlistptr->vars[varID].decoSize != CDI_UNDEFID ); 
+    
     deco  = vlistptr->vars[varID].deco;
     decoSize = vlistptr->vars[varID].decoSize;
     if ( decoSize && deco )
       for ( i = 0; i < decoSize; i++ )
-        if ( deco[i].rank == rankModel )
+        if ( deco[i].rank == rankModel ) 
           {
             iret = deco[i].chunk;
             break;
@@ -1863,7 +1977,6 @@ int vlistInqVarDecoChunk ( int vlistID, int varID, int rankModel  )
   xassert ( iret != CDI_UNDEFID );
   return iret;
 }
-
 
 int vlistInqVarDecoOff ( int vlistID, int varID, int rankModel  )
 {

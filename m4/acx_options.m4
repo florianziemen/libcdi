@@ -267,19 +267,19 @@ AC_ARG_WITH([libpng],
             [AS_CASE(["$with_libpng"],
                      [no],[AC_MSG_CHECKING([for libpng library])
                            AC_MSG_RESULT([suppressed])],
-                     [yes],[AC_CHECK_HEADERS([libpng14/png.h])
-                            AC_SEARCH_LIBS([png_warning],[png14],[AC_DEFINE([HAVE_LIBLIBPNG],[1],[Define to 1 for PNG compression for GRIB2])],
+                     [yes],[AC_CHECK_HEADERS([png.h])
+                            AC_SEARCH_LIBS([png_warning],[png],[AC_DEFINE([HAVE_LIBLIBPNG],[1],[Define to 1 for PNG compression for GRIB2])],
                                            [AC_MSG_ERROR([Could not link to libpng library! Required for GRIB_API])])
-                            AC_SUBST([LIBPNG_LIBS],[" -lpng14"])],
+                            AC_SUBST([LIBPNG_LIBS],[" -lpng"])],
                      [*],[LIBPNG_ROOT=$with_libpng
                           AS_IF([test -d "$LIBPNG_ROOT"],
                                 [LDFLAGS="$LDFLAGS -L$LIBPNG_ROOT/lib"
                                  CPPFLAGS="$CPPFLAGS -I$LIBPNG_ROOT/include"
                                  AC_SEARCH_LIBS([png_warning],
-                                                [png14],
+                                                [png],
                                                 [AC_DEFINE([HAVE_LIBLIBPNG],[1],[Define to 1 for PNG compression for GRIB2])],
                                                 [AC_MSG_ERROR([Could not link to libpng library! Required for GRIB_API])])
-                                 LIBPNG_LIBS=" -L$LIBPNG_ROOT/lib -lpng14"],
+                                 LIBPNG_LIBS=" -L$LIBPNG_ROOT/lib -lpng"],
                                 [AC_MSG_ERROR([$LIBPNG_ROOT is not a directory! LIBPNG suppressed])])])],
             [AC_MSG_CHECKING([for the LIBPNG library])
              AC_MSG_RESULT([suppressed])])

@@ -2,6 +2,10 @@
 #  include "config.h"
 #endif
 
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 600 /* PTHREAD_MUTEX_RECURSIVE */
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -11,6 +15,7 @@
 #include "cdi.h"
 #include "error.h"
 #include "file.h"
+
 #ifdef USE_MPI
 #include "pio_comm.h"
 #include "pio_rpc.h"
@@ -158,8 +163,12 @@ static
 void listInitialize ( void )
 {
 #if  defined  (HAVE_LIBPTHREAD)
+  pthread_mutexattr_t ma;
+  pthread_mutexattr_init(&ma);
+  pthread_mutexattr_settype(&ma, PTHREAD_MUTEX_RECURSIVE);
   /* initialize global API mutex lock */
-  pthread_mutex_init ( &listMutex, NULL);
+  pthread_mutex_init ( &listMutex, &ma);
+  pthread_mutexattr_destroy(&ma);
 #endif
 
   listNew ();
@@ -183,7 +192,8 @@ void listInitialize ( void )
 
 /**************************************************************/
 
-static void listSizeExtend()
+static
+void listSizeExtend()
 {
   int newListSize;
   int i, nsp;
@@ -267,7 +277,7 @@ void reshRemove ( cdiResH resH, resOps * ops )
 
 /**************************************************************/
 
-void *reshGetVal ( cdiResH resH, resOps * ops  )
+void *reshGetValue(const char * caller, cdiResH resH, resOps * ops)
 {
   int nsp;
   namespaceTuple_t nspT;
@@ -293,10 +303,13 @@ void *reshGetVal ( cdiResH resH, resOps * ops  )
   else
     {
       LIST_UNLOCK();
-      xabort("invalid namespace %d or index %d", nspT.nsp, nspT.idx);
+      xabortC(caller, "Invalid namespace %d or index %d for resource handle %d!",
+              nspT.nsp, nspT.idx, (int)resH);
     }
 
-  xassert(listElem && listElem->ops == ops);
+  if ( !(listElem && listElem->ops == ops) )
+    xabortC(caller, "Invalid resource handle %d, list element not found!",
+            (int)resH);
 
   return listElem->val;
 }
@@ -667,6 +680,19 @@ void reshListPrint ( char * filename )
   pioNamespaceSetActive ( temp );
 }
 
+
+void cdiReset(void)
+{
+  LIST_LOCK();
+
+  listDestroy();
+
+  listNew ();
+
+  listInitPointer ();
+
+  LIST_UNLOCK();
+}
 /*
  * Local Variables:
  * c-file-style: "Java"

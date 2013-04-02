@@ -104,7 +104,6 @@ char *strdup(const char *s);
 #define  MEMTYPE_DOUBLE  1
 #define  MEMTYPE_FLOAT   2
 
-
 typedef struct
 {
   void     *buffer;
@@ -134,7 +133,7 @@ typedef struct
   srvrec_t   *srvp;
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-  extrec_t *extp;
+  extrec_t   *extp;
 #endif
 #if  defined  (HAVE_LIBIEG)
   iegrec_t   *iegp;
@@ -155,6 +154,7 @@ typedef struct
   short     used;
   short     varID;
   short     levelID;
+  char      varname[32]; /* needed for grib decoding with GRIB_API */
 }
 record_t;
 
@@ -172,7 +172,7 @@ typedef struct {
   off_t     position;    /* timestep file position                */
   taxis_t   taxis;
 }
-TSTEPS;
+tsteps_t;
 
 
 typedef struct {
@@ -186,9 +186,8 @@ typedef struct {
   int       gridID;
   int       zaxisID;
   int       tsteptype;   /* TSTEP_* */
-  int       nlevel;
 }
-SVARINFO;
+svarinfo_t;
 
 
 typedef struct {
@@ -201,56 +200,66 @@ VCT;
 
 
 typedef struct {
-  int       self;
-  int       accesstype;   /* TYPE_REC or TYPE_VAR */
-  int       accessmode;
-  int       filetype;
-  int       byteorder;
-  int       fileID;
-  int       dimgroupID;
-  int       filemode;
-  off_t     numvals;
-  char     *filename;
-  Record   *record;
-  int       nrecs;        /* number of records                  */
-  int       nvars;        /* number of variables                */
-  int       varlocked;    /* variables locked                   */
-  SVARINFO *vars;
-  int       varsAllocated;
-  int       varinit;
-  int       curTsID;      /* current timestep ID */
-  int       rtsteps;      /* number of tsteps accessed       */
-  long      ntsteps;      /* number of tsteps : only set if all records accessed */
-  int       numTimestep;  /* number of tsteps : only set if all records accessed */
-  TSTEPS   *tsteps;
-  int       tstepsTableSize;
-  int       tstepsNextID;
-  BaseTime  basetime;
-  int       ncmode;
-  int       vlistID;
-  int       xdimID[MAX_GRIDS_PS];
-  int       ydimID[MAX_GRIDS_PS];
-  int       zaxisID[MAX_ZAXES_PS];
-  int       ncxvarID[MAX_GRIDS_PS];
-  int       ncyvarID[MAX_GRIDS_PS];
-  int       ncavarID[MAX_GRIDS_PS];
-  int       historyID;
-  int       globalatts;
-  int       localatts;
-  VCT       vct;
-  int       unreduced;
-  int       sortname;
-  int       have_missval;
-  int       comptype;      // compression type
-  int       complevel;     // compression level
-  int       curfile;
-  int       nfiles;
-  char    **fnames;
-  void     *gribContainers;
-  int       vlistIDorig;
+  int         self;
+  int         accesstype;   /* TYPE_REC or TYPE_VAR */
+  int         accessmode;
+  int         filetype;
+  int         byteorder;
+  int         fileID;
+  int         dimgroupID;
+  int         filemode;
+  off_t       numvals;
+  char       *filename;
+  Record     *record;
+  int        nrecs;        /* number of records                  */
+  int         nvars;        /* number of variables                */
+  int         varlocked;    /* variables locked                   */
+  svarinfo_t *vars;
+  int         varsAllocated;
+  int         varinit;
+  int         curTsID;      /* current timestep ID */
+  int         rtsteps;      /* number of tsteps accessed       */
+  long        ntsteps;      /* number of tsteps : only set if all records accessed */
+  int         numTimestep;  /* number of tsteps : only set if all records accessed */
+  tsteps_t   *tsteps;
+  int         tstepsTableSize;
+  int         tstepsNextID;
+  BaseTime    basetime;
+  int         ncmode;
+  int         vlistID;
+  int         xdimID[MAX_GRIDS_PS];
+  int         ydimID[MAX_GRIDS_PS];
+  int         zaxisID[MAX_ZAXES_PS];
+  int         ncxvarID[MAX_GRIDS_PS];
+  int         ncyvarID[MAX_GRIDS_PS];
+  int         ncavarID[MAX_GRIDS_PS];
+  int         historyID;
+  int         globalatts;
+  int         localatts;
+  VCT         vct;
+  int         unreduced;
+  int         sortname;
+  int         have_missval;
+  int         comptype;      // compression type
+  int         complevel;     // compression level
+  int         curfile;
+  int         nfiles;
+  char      **fnames;
+#if defined (GRIBCONTAINER2D)
+  void      **gribContainers;
+#else
+  void       *gribContainers;
+#endif
+  int         vlistIDorig;
 #if USE_MPI
   int       ownerRank;    // MPI rank of owner process
 #endif
+
+  /* ---------------------------------- */
+  /* Local change: 2013-02-18, FP (DWD) */
+  /* ---------------------------------- */
+
+  void *gh; // grib handle
 }
 stream_t;
 
@@ -263,6 +272,7 @@ extern int cdiDefaultTableID;
 extern int cdiDefaultLeveltype;
 extern int cdiNcMissingValue;
 extern int cdiNcChunksizehint;
+extern int cdiChunkType;
 extern int cdiSplitLtype105;
 
 extern char *cdiPartabPath;
@@ -285,21 +295,21 @@ void    streamDefineTaxis(int streamID);
 
 int     streamsNewEntry(int filetype);
 void    streamsInitEntry(int streamID);
-int     streamNewVar(int streamID, int gridID, int zaxisID);
+int     stream_new_var(stream_t *streamptr, int gridID, int zaxisID);
 
-int     tstepsNewEntry(int streamID);
+int     tstepsNewEntry(stream_t *streamptr);
 
 char   *strfiletype(int filetype);
 
-void    cdiGenVars(int streamID);
+void    cdi_generate_vars(stream_t *streamptr);
 
-void    cdiCheckContents(int streamID);
+void    vlist_check_contents(int vlistID);
 
-void    cdiCreateRecords(int streamID, int tsID);
+void    cdi_create_records(stream_t *streamptr, int tsID);
 
-int     recordNewEntry(int streamID, int tsID);
+int     recordNewEntry(stream_t *streamptr, int tsID);
 
-void    cdiCreateTimesteps(int streamID);
+void    cdiCreateTimesteps(stream_t *streamptr);
 
 void    recordInitEntry(record_t *record);
 
@@ -322,6 +332,9 @@ void    streamGetIndexList ( int, int * );
 void  cdiInitialize(void);
 
 void stream_write_record(int streamID, int memtype, const void *data, int nmiss);
+
+void uuid2str(const char *uuid, char *uuidstr);
+void str2uuid(const char *uuidstr, char *uuid);
 
 
 #endif  /* _STREAM_INT_H */
