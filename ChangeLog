@@ -1,3 +1,7 @@
+2013-04-02  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* make_cdilib: changed position of error.c and error.h (bug fix)
+
 2013-03-14  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Version 1.6.0 released
