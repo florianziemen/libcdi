@@ -326,8 +326,7 @@ gatherArray(int root, int nProcsModel, int headerIdx,
   Xt_redist gatherRedist
     = xt_redist_p2p_off_new(gatherXmap, partOfs, gatherOfs, MPI_DOUBLE);
   xt_xmap_delete(gatherXmap);
-  xt_redist_s_exchange(gatherRedist, (void **)&rxWin[0].buffer, 1,
-                       (void **)&gatherBuf, 1);
+  xt_redist_s_exchange1(gatherRedist, rxWin[0].buffer, gatherBuf);
   free(partOfs);
   xt_redist_delete(gatherRedist);
 }
@@ -669,8 +668,7 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
                       writeBuf = xrealloc(writeBuf,
                                           sizeof (double)
                                           * PPM_extents_size(3, varChunk));
-                      xt_redist_s_exchange(redist, (void **)&data, 1,
-                                           (void **)&writeBuf, 1);
+                      xt_redist_s_exchange1(redist, data, writeBuf);
                       xt_redist_delete(redist);
                     }
                     /* write chunk */
