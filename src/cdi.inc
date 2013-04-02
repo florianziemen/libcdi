@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   January 2013
+! Uwe Schulzweida, MPI-MET, Hamburg,   March 2013
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -370,20 +370,6 @@
 !                                     REAL            partInflate)
       EXTERNAL        pioInit
 
-      INTEGER         pioInqVarDecoChunk
-!                                    (INTEGER         ,
-!                                     INTEGER         )
-      EXTERNAL        pioInqVarDecoChunk
-
-      INTEGER         pioInqVarDecoOff
-!                                    (INTEGER         ,
-!                                     INTEGER         )
-      EXTERNAL        pioInqVarDecoOff
-
-!                     pioNamespaceSetActive
-!                                    (INTEGER         )
-      EXTERNAL        pioNamespaceSetActive
-
 !                     pioWriteTimestep
 !                                    (INTEGER         ,
 !                                     INTEGER         ,
@@ -398,6 +384,20 @@
 !                                     INTEGER         nmiss,
 !                                     TYPE(XT_IDXLIST)partDesc)
       EXTERNAL        streamWriteVarPart
+
+      INTEGER         pioInqVarDecoChunk
+!                                    (INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        pioInqVarDecoChunk
+
+      INTEGER         pioInqVarDecoOff
+!                                    (INTEGER         ,
+!                                     INTEGER         )
+      EXTERNAL        pioInqVarDecoOff
+
+!                     pioNamespaceSetActive
+!                                    (INTEGER         )
+      EXTERNAL        pioNamespaceSetActive
 
 !
 !  CDI control routines

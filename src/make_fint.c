@@ -230,6 +230,16 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
     if (reCompile(&docCommentRE, docCommentREString, &line, &lineBufSize))
       exit(EXIT_FAILURE);
   }
+  /* compile keep-conditional regular expression */
+  /* if(n)def and endif preprocessor conditionals followed by
+     make_fint keep are copied to the Fortran interface file */
+  regex_t cppCondRE;
+  {
+    static const char cppCondREString[]
+      = "^"WS"*#"WS"*(ifn?def"WS"+"SYMRE"|endif)"WS"+/\\*"WS"*make_fint keep"WS"*\\*/";
+    if (reCompile(&cppCondRE, cppCondREString, &line, &lineBufSize))
+      exit(EXIT_FAILURE);
+  }
   /* fortran include */
 
   fprintf(fpinc, "! This file was automatically generated, don't edit!\n");
@@ -597,6 +607,11 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	  fprintf(fpinc, "      INTEGER    %-22s\n"
                   "      PARAMETER (%-22s = %2d)\n", parname, parname,
                   parvalue);
+	}
+      else if (!regexec(&cppCondRE, line, maxMatch, reMatch, 0))
+	{
+          /* fortran include */
+	  fputs(line, fpint);
 	}
       else if (!regexec(&docCommentRE, line, maxMatch, reMatch, 0))
         {

@@ -68,6 +68,7 @@
 
 /*  parallel IO routines  */
 
+#ifdef MPI_VERSION /* make_fint keep */
 FCALLSCSUB0 (pioEndDef, PIOENDDEF, pioenddef)
 FCALLSCSUB0 (pioEndTimestepping, PIOENDTIMESTEPPING, pioendtimestepping)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
@@ -78,15 +79,16 @@ static int pioInit_fwrap(int commSuper, int nProcsIO, int IOMode, int nNamespace
   return MPI_Comm_c2f(v);
 }
 FCALLSCFUN6 (INT, pioInit_fwrap, PIOINIT, pioinit, INT, INT, INT, INT, PINT, FLOAT)
-FCALLSCFUN2 (INT, pioInqVarDecoChunk, PIOINQVARDECOCHUNK, pioinqvardecochunk, INT, INT)
-FCALLSCFUN2 (INT, pioInqVarDecoOff, PIOINQVARDECOOFF, pioinqvardecooff, INT, INT)
-FCALLSCSUB1 (pioNamespaceSetActive, PIONAMESPACESETACTIVE, pionamespacesetactive, INT)
 FCALLSCSUB3 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep, INT, INT, INT)
 static void streamWriteVarPart_fwrap(int streamID, int varID, int memtype, const void * data, int nmiss, void * partDesc)
 {
   streamWriteVarPart( streamID,  varID,  memtype,  data,  nmiss, (*(Xt_idxlist *)partDesc));
 }
 FCALLSCSUB6 (streamWriteVarPart_fwrap, STREAMWRITEVARPART, streamwritevarpart, INT, INT, INT, PVOID, INT, PVOID)
+#endif /* make_fint keep */
+FCALLSCFUN2 (INT, pioInqVarDecoChunk, PIOINQVARDECOCHUNK, pioinqvardecochunk, INT, INT)
+FCALLSCFUN2 (INT, pioInqVarDecoOff, PIOINQVARDECOOFF, pioinqvardecooff, INT, INT)
+FCALLSCSUB1 (pioNamespaceSetActive, PIONAMESPACESETACTIVE, pionamespacesetactive, INT)
 
 /*  CDI control routines  */
 

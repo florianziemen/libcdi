@@ -218,23 +218,23 @@ extern "C" {
 #  include <yaxt.h>
 #endif
 
-#ifdef MPI_VERSION
+#ifdef MPI_VERSION /* make_fint keep */
 void     pioEndDef             ( void );
 void     pioEndTimestepping    ( void );
 void     pioFinalize           ( void );
 /*      pioInit: initialize I/O server processes and communication */
 MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode, int nNamespaces,
                  int *hasLocalFile, float partInflate);
-int      pioInqVarDecoChunk    ( int, int );
-int      pioInqVarDecoOff      ( int, int );
-void     pioNamespaceSetActive ( int );
 void     pioWriteTimestep      ( int, int, int );
 
 void     streamWriteVarPart    (int streamID, int varID, int memtype,
                                 const void *data, int nmiss,
                                 Xt_idxlist partDesc);
 
-#endif
+#endif /* make_fint keep */
+int      pioInqVarDecoChunk    ( int, int );
+int      pioInqVarDecoOff      ( int, int );
+void     pioNamespaceSetActive ( int );
 
   /* CDI control routines */
 
