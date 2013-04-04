@@ -1,3 +1,7 @@
+2013-04-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* vlistDefVarDatatype: changed default missing values of signed integers to -TYPE_MAX
+
 2013-04-02  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cdi.h: changed >char*< to >char *< (bug fix for fortran interface)

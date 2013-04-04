@@ -854,16 +854,16 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
     }
 
   vlistptr->vars[varID].datatype = datatype;
-  
+
   if ( vlistptr->vars[varID].missvalused == FALSE )
     switch (datatype)
       {
-      case DATATYPE_INT8:   vlistptr->vars[varID].missval = SCHAR_MIN; break;
-      case DATATYPE_UINT8:  vlistptr->vars[varID].missval = UCHAR_MAX; break;
-      case DATATYPE_INT16:  vlistptr->vars[varID].missval = SHRT_MIN;  break;
-      case DATATYPE_UINT16: vlistptr->vars[varID].missval = USHRT_MAX; break;
-      case DATATYPE_INT32:  vlistptr->vars[varID].missval = INT_MIN;   break;
-      case DATATYPE_UINT32: vlistptr->vars[varID].missval = UINT_MAX;  break;
+      case DATATYPE_INT8:   vlistptr->vars[varID].missval = -SCHAR_MAX; break;
+      case DATATYPE_UINT8:  vlistptr->vars[varID].missval =  UCHAR_MAX; break;
+      case DATATYPE_INT16:  vlistptr->vars[varID].missval = -SHRT_MAX;  break;
+      case DATATYPE_UINT16: vlistptr->vars[varID].missval =  USHRT_MAX; break;
+      case DATATYPE_INT32:  vlistptr->vars[varID].missval = -INT_MAX;   break;
+      case DATATYPE_UINT32: vlistptr->vars[varID].missval =  UINT_MAX;  break;
       }
 }
 
