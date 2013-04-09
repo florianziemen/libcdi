@@ -4212,7 +4212,7 @@ char *gridInqUUID(int gridID, char *uuid)
 
   grid_check_ptr(gridID, gridptr);
 
-  strncpy(uuid, gridptr->uuid, 16);
+  memcpy(uuid, gridptr->uuid, 16);
 
   return (uuid);
 }
@@ -4232,7 +4232,7 @@ void gridDefUUID(int gridID, const char *uuid)
 
   grid_check_ptr(gridID, gridptr);
 
-  strncpy(gridptr->uuid, uuid, 16);
+  memcpy(gridptr->uuid, uuid, 16);
 
   return;
 }

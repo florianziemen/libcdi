@@ -605,7 +605,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
             len = (size_t) 16;
             if ( grib_get_bytes(gh, "uuidOfHGrid", (unsigned char *) uuid, &len) == 0)
               {
-                strncpy(grid->uuid, uuid, 16);
+                memcpy(grid->uuid, uuid, 16);
               }
           }
 	break;

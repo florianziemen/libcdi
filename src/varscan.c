@@ -654,7 +654,7 @@ void varDefZAxisReference(int nlev, int nvgrid, char *uuid)
 {
   numberOfVerticalLevels = nlev;
   numberOfVerticalGrid = nvgrid;
-  strncpy(uuidVGrid, uuid, 16);
+  memcpy(uuidVGrid, uuid, 16);
 }
 
 

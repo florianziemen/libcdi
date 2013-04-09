@@ -717,7 +717,7 @@ void zaxisDefUUID(int zaxisID, const char *uuid)
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  strncpy(zaxisptr->uuid, uuid, 16);
+  memcpy(zaxisptr->uuid, uuid, 16);
 
   return;
 }
@@ -745,7 +745,7 @@ char *zaxisInqUUID(int zaxisID, char *uuid)
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  strncpy(uuid, zaxisptr->uuid, 16);
+  memcpy(uuid, zaxisptr->uuid, 16);
 
   return (uuid);
 }
