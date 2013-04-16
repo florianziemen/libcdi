@@ -6000,7 +6000,7 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 /* define all input data variables */
 static
-void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int *varids, int nvars, ncvar_t *ncvars)
+void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int *varids, int nvars, int num_ncvars, ncvar_t *ncvars)
 {
   int ncid;
   int varID1, varID, ncvarid;
@@ -6207,8 +6207,13 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 	    }
 
 	  free(ncvars[ncvarid].atts);
+          ncvars[ncvarid].atts = NULL;
 	}
     }
+
+  /* release mem of not freed attributes */
+  for ( ncvarid = 0; ncvarid < num_ncvars; ncvarid++ )
+    if ( ncvars[ncvarid].atts ) free(ncvars[ncvarid].atts);
 
   if ( varids ) free(varids);
 
@@ -6813,7 +6818,7 @@ int cdfInqContents(stream_t *streamptr)
   streamptr->ntsteps = ntsteps;
 
   /* define all data variables */
-  define_all_vars(streamptr, vlistID, instID, modelID, varids, nvars_data, ncvars);
+  define_all_vars(streamptr, vlistID, instID, modelID, varids, nvars_data, nvars, ncvars);
 
 
   cdiCreateTimesteps(streamptr);
@@ -6911,10 +6916,10 @@ int cdfInqContents(stream_t *streamptr)
   cdfCreateRecords(streamptr, 0);
 
   /* free ncdims */
-  free (ncdims);
+  free(ncdims);
 
   /* free ncvars */
-  free (ncvars);
+  free(ncvars);
 
 #endif
 
