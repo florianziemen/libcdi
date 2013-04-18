@@ -105,6 +105,7 @@ typedef struct {
   char     longname[CDI_MAX_NAME];
   char     stdname[CDI_MAX_NAME];
   char     units[CDI_MAX_NAME];
+  char     extra[CDI_MAX_NAME];
   ensinfo_t   *ensdata;    /* Ensemble information */
 }
 ncvar_t;
@@ -4100,6 +4101,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].longname[0]     = 0;
       ncvars[ncvarid].stdname[0]      = 0;
       ncvars[ncvarid].units[0]        = 0;
+      ncvars[ncvarid].extra[0]        = 0;
       ncvars[ncvarid].natts           = 0;
       ncvars[ncvarid].atts            = NULL;
       ncvars[ncvarid].deflate         = 0;
@@ -4402,6 +4404,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 #if  defined  (HAVE_NETCDF4)
       if ( format == NC_FORMAT_NETCDF4_CLASSIC || format == NC_FORMAT_NETCDF4 )
         {
+          char buf[CDI_MAX_NAME];
           int shuffle, deflate, deflate_level;
           size_t chunks[nvdims];
           int storage_in;
@@ -4414,10 +4417,20 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                 {
                   ncvars[ncvarid].chunked = 1;
                   for ( int i = 0; i < nvdims; ++i ) ncvars[ncvarid].chunks[i] = chunks[i];
-                  /*
-                  printf("storage %d %d %d\n", storage_in, NC_CONTIGUOUS, NC_CHUNKED);
-                  for ( int i = 0; i < nvdims; ++i ) printf("chunk %d %d\n", i, chunks[i]);
-                  */
+                  if ( CDI_Debug )
+                    {
+                      fprintf(stderr, "\nchunking %d %d %d\nchunks ", storage_in, NC_CONTIGUOUS, NC_CHUNKED);
+                      for ( int i = 0; i < nvdims; ++i ) fprintf(stderr, "%ld ", chunks[i]);
+                      fprintf(stderr, "\n");
+                    }
+                  strcat(ncvars[ncvarid].extra, "chunks=");
+                  for ( int i = nvdims-1; i >= 0; --i )
+                    {
+                      sprintf(buf, "%ld", (long) chunks[i]);
+                      strcat(ncvars[ncvarid].extra, buf);
+                      if ( i > 0 ) strcat(ncvars[ncvarid].extra, "x");
+                    }
+                  strcat(ncvars[ncvarid].extra, " ");
                 }
             }
         }
@@ -6141,6 +6154,11 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
                                ncvars[ncvarid].ensdata->forecast_init_type );
           free(ncvars[ncvarid].ensdata);
           ncvars[ncvarid].ensdata = NULL;
+        }
+
+      if ( ncvars[ncvarid].extra != NULL && ncvars[ncvarid].extra[0] != 0 )
+        {
+          vlistDefVarExtra(vlistID, varID, ncvars[ncvarid].extra);
         }
     }
 

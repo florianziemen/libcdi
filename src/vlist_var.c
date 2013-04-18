@@ -50,6 +50,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].longname      = NULL;
   vlistptr->vars[varID].stdname       = NULL;
   vlistptr->vars[varID].units         = NULL;
+  vlistptr->vars[varID].extra         = NULL;
   vlistptr->vars[varID].nlevs         = 0;
   vlistptr->vars[varID].levinfo       = NULL;
   vlistptr->vars[varID].comptype      = COMPRESS_NONE;
@@ -1177,6 +1178,87 @@ void vlistDefVarMissval(int vlistID, int varID, double missval)
 
   vlistptr->vars[varID].missval = missval;
   vlistptr->vars[varID].missvalused = TRUE;
+}
+
+/*
+@Function  vlistDefVarExtra
+@Title     Define extra information of a Variable
+
+@Prototype void vlistDefVarExtra(int vlistID, int varID, const char *extra)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
+    @Item  extra    Extra information.
+
+@Description
+The function @func{vlistDefVarExtra} defines the extra information of a variable.
+
+@EndFunction
+*/
+void vlistDefVarExtra(int vlistID, int varID, const char *extra)
+{
+  vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed." );
+      return;
+    }
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  if ( extra )
+    {
+      if ( vlistptr->vars[varID].extra )
+	{
+	  free(vlistptr->vars[varID].extra);
+	  vlistptr->vars[varID].extra = NULL;
+	}
+
+      vlistptr->vars[varID].extra = strdupx(extra);
+    }
+}
+
+/*
+@Function  vlistInqVarExtra
+@Title     Get extra information of a Variable
+
+@Prototype void vlistInqVarExtra(int vlistID, int varID, char *extra)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
+    @Item  extra    Returned variable extra information. The caller must allocate space for the
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
+
+@Description
+The function @func{vlistInqVarExtra} returns the extra information of a variable.
+
+@Result
+@func{vlistInqVarExtra} returns the extra information of the variable to the parameter extra if available,
+otherwise the result is an empty string.
+
+@EndFunction
+*/
+void vlistInqVarExtra(int vlistID, int varID, char *extra)
+{
+  int tableID;
+  int param;
+  int pdis, pcat, pnum;
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  if ( vlistptr->vars[varID].extra == NULL )
+      sprintf(extra, "-");
+  else
+    strcpy(extra, vlistptr->vars[varID].extra);
+
+  return;
 }
 
 

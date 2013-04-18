@@ -1,3 +1,7 @@
+2013-04-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added function vlistDefVarExtra() and vlistInqVarExtra()
+
 2013-04-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* vlistDefVarDatatype: changed default missing values of signed integers to -TYPE_MAX

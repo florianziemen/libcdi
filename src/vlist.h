@@ -101,6 +101,7 @@ typedef struct
   char       *longname;
   char       *stdname;
   char       *units;
+  char       *extra;
   double      missval;
   double      scalefactor;
   double      addoffset;
