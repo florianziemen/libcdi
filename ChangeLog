@@ -1,3 +1,7 @@
+2013-04-19  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_gribapi: replaced function getLevelFactor() [Bug #3446]
+
 2013-04-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added function vlistDefVarExtra() and vlistInqVarExtra()

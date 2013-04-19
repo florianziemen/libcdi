@@ -2548,15 +2548,21 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 }
 
 static
-void getLevelFactor(double level, long *factor, double *scale)
+void getLevelFactor(double level, long *factor, int *out_scaled_value)
 {
-  double dum;
+  int    i;
+  double scaled_value  = level;
+  int    iscaled_value = (int) round(scaled_value);
 
-  if      ( level >= 1     && (int)(1000*modf(level,      &dum)) == 0 ) { *factor = 0; *scale = 1; }
-  else if ( level >= 0.1   && (int)(1000*modf(level*10,   &dum)) == 0 ) { *factor = 1; *scale = 10; }
-  else if ( level >= 0.01  && (int)(1000*modf(level*100,  &dum)) == 0 ) { *factor = 2; *scale = 100; }
-  else if ( level >= 0.001 && (int)(1000*modf(level*1000, &dum)) == 0 ) { *factor = 3; *scale = 1000; }
-  else                                                                  { *factor = 2; *scale = 10; }
+  const double eps = 1.e-8;
+  for ( i=0; (fabs(scaled_value - (double) iscaled_value) >= eps) && i < 7; i++ )
+    {
+      scaled_value *= 10.;
+      iscaled_value = round(scaled_value);
+    }
+
+  (*factor)           = i;
+  (*out_scaled_value) = iscaled_value;
 }
 
 static
@@ -2848,8 +2854,8 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 	  }
 	else
 	  {
+            int scaled_level;
 	    long factor;
-            double scale;
             double scalefactor;
 
 	    if      ( memcmp(units, "mm", 2) == 0 ) scalefactor = 0.001;
@@ -2863,23 +2869,23 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 		level1 = scalefactor*zaxisInqLbound(zaxisID, levelID);
 		level2 = scalefactor*zaxisInqUbound(zaxisID, levelID);
 
-                getLevelFactor(level1, &factor, &scale);
+                getLevelFactor(level1, &factor, &scaled_level);
 		if ( !gcinit ) GRIB_CHECK(grib_set_long(gh, "typeOfFirstFixedSurface", GRIB2_LTYPE_LANDDEPTH), 0);
 		GRIB_CHECK(grib_set_long(gh, "scaleFactorOfFirstFixedSurface", factor), 0);
-		GRIB_CHECK(grib_set_double(gh, "scaledValueOfFirstFixedSurface", level1*scale), 0);
+		GRIB_CHECK(grib_set_double(gh, "scaledValueOfFirstFixedSurface", scaled_level), 0);
 
-                getLevelFactor(level, &factor, &scale);
+                getLevelFactor(level2, &factor, &scaled_level);
 		if ( !gcinit ) GRIB_CHECK(grib_set_long(gh, "typeOfSecondFixedSurface", GRIB2_LTYPE_LANDDEPTH), 0);
 		GRIB_CHECK(grib_set_long(gh, "scaleFactorOfSecondFixedSurface", factor), 0);
-		GRIB_CHECK(grib_set_double(gh, "scaledValueOfSecondFixedSurface", level2*scale), 0);
+		GRIB_CHECK(grib_set_double(gh, "scaledValueOfSecondFixedSurface", scaled_level), 0);
 	      }
 	    else
 	      {
                 level *= scalefactor;
-                getLevelFactor(level, &factor, &scale);
+                getLevelFactor(level, &factor, &scaled_level);
 		if ( !gcinit ) GRIB_CHECK(grib_set_long(gh, "typeOfFirstFixedSurface", GRIB2_LTYPE_LANDDEPTH), 0);
 		GRIB_CHECK(grib_set_long(gh, "scaleFactorOfFirstFixedSurface", factor), 0);
-	       	GRIB_CHECK(grib_set_double(gh, "scaledValueOfFirstFixedSurface", level*scale), 0);
+	       	GRIB_CHECK(grib_set_double(gh, "scaledValueOfFirstFixedSurface", scaled_level), 0);
 	      }
 	  }
 
