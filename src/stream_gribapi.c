@@ -2548,11 +2548,11 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 }
 
 static
-void getLevelFactor(double level, long *factor, int *out_scaled_value)
+void getLevelFactor(double level, long *factor, long *out_scaled_value)
 {
-  int    i;
   double scaled_value  = level;
-  int    iscaled_value = (int) round(scaled_value);
+  long   iscaled_value = (long) round(scaled_value);
+  long   i;
 
   const double eps = 1.e-8;
   for ( i=0; (fabs(scaled_value - (double) iscaled_value) >= eps) && i < 7; i++ )
@@ -2854,7 +2854,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 	  }
 	else
 	  {
-            int scaled_level;
+            long scaled_level;
 	    long factor;
             double scalefactor;
 
