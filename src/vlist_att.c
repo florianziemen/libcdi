@@ -247,7 +247,7 @@ int vlist_def_att(int indtype, int exdtype, int vlistID, int varID, const char *
 
   if ( attp != NULL )
     fill_att(attp, indtype, exdtype, len, xsz, xp);
-  
+
   return (status);
 }
 
@@ -337,11 +337,7 @@ The function @func{vlistDefAttInt} defines an integer attribute.
 */
 int vlistDefAttInt(int vlistID, int varID, const char *name, int type, int len, const int *ip)
 {
-  int status;
-
-  status = vlist_def_att(DATATYPE_INT, type, vlistID, varID, name, (size_t) len, len*sizeof(int), (const void *) ip);
-
-  return (status);
+  return vlist_def_att(DATATYPE_INT, type, vlistID, varID, name, (size_t) len, len*sizeof(int), (const void *) ip);
 }
 
 /*
@@ -365,11 +361,7 @@ The function @func{vlistDefAttFlt} defines a floating point attribute.
 */
 int vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, const double *dp)
 {
-  int status;
-
-  status = vlist_def_att(DATATYPE_FLT, type, vlistID, varID, name, (size_t) len, len*sizeof(double), (const void *) dp);
-
-  return (status);
+  return vlist_def_att(DATATYPE_FLT, type, vlistID, varID, name, (size_t) len, len*sizeof(double), (const void *) dp);
 }
 
 /*
@@ -392,11 +384,7 @@ The function @func{vlistDefAttTxt} defines a text attribute.
 */
 int vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp)
 {
-  int status;
-
-  status = vlist_def_att(DATATYPE_TXT, DATATYPE_TXT, vlistID, varID, name, (size_t) len, len*sizeof(char), (const void *) tp);
-
-  return (status);
+  return vlist_def_att(DATATYPE_TXT, DATATYPE_TXT, vlistID, varID, name, (size_t) len, len*sizeof(char), (const void *) tp);
 }
 
 /*
@@ -418,17 +406,14 @@ The function @func{vlistInqAttInt} gets the values(s) of an integer attribute.
 */
 int vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int *ip)
 {
-  int status
-    = vlist_inq_att(DATATYPE_INT, vlistID, varID, name,
-                    mlen*sizeof(int), (void *) ip);
-  return status;
+  return vlist_inq_att(DATATYPE_INT, vlistID, varID, name, mlen*sizeof(int), (void *) ip);
 }
 
 /*
 @Function  vlistInqAttFlt
 @Title     Get the value(s) of a floating point attribute
 
-@Prototype int vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, int *dp)
+@Prototype int vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double *dp)
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
@@ -443,18 +428,14 @@ The function @func{vlistInqAttFlt} gets the values(s) of a floating point attrib
 */
 int vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double *dp)
 {
-  int status = CDI_NOERR;
-
-  status = vlist_inq_att(DATATYPE_FLT, vlistID, varID, name, mlen*sizeof(double), (void *) dp);
-
-  return (status);
+  return vlist_inq_att(DATATYPE_FLT, vlistID, varID, name, mlen*sizeof(double), (void *) dp);
 }
 
 /*
 @Function  vlistInqAttTxt
 @Title     Get the value(s) of a text attribute
 
-@Prototype int vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, int *tp)
+@Prototype int vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp)
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
@@ -469,11 +450,7 @@ The function @func{vlistInqAttTxt} gets the values(s) of a text attribute.
 */
 int vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp)
 {
-  int status = CDI_NOERR;
-
-  status = vlist_inq_att(DATATYPE_TXT, vlistID, varID, name, mlen*sizeof(char), (void *) tp);
-
-  return (status);
+  return vlist_inq_att(DATATYPE_TXT, vlistID, varID, name, mlen*sizeof(char), (void *) tp);
 }
 
 #ifdef USE_MPI
