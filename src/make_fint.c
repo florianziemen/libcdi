@@ -101,7 +101,7 @@ static struct symbol funArgSym[] = {
   { "INTEGER",         "INTVV",    "int[][]", "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"WS"*\\[[^]]*\\]"WS"*[,\\)]", 3 },
   { "REAL",            "PFLOAT",  "float *",  "^"WS"*(const"WS"+)?float"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2 },
   { "DOUBLEPRECISION", "PDOUBLE", "double *", "^"WS"*(const"WS"+)?double"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2 },
-  //  { "CHARACTER*(*)",   "CBUF",    "char *",   "^"WS"*(const"WS"+)?char"WS"+\\*+tp_cbuf"WS"*[,\\)]", 1 },
+  //  { "CHARACTER*(*)",   "CBUF",    "char *",   "^"WS"*(const"WS"+)?char"WS"+\\*+"SYMRE"?_cbuf"WS"*[,\\)]", 1 },
   { "CHARACTER*(*)",   "STRING",  "char *",   "^"WS"*const"WS"+char"WS"+\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1 },
   { "CHARACTER*(*)",   "PSTRING", "char *",   "^"WS"*char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 1 },
 };
