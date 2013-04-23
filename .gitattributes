@@ -106,6 +106,7 @@ examples/cdi_copy_f.f -text
 examples/cdi_copy_file.c -text
 examples/cdi_open.c -text
 examples/cdi_read.c -text
+examples/cdi_read_atts.f -text
 examples/cdi_read_example.f90 -text
 examples/cdi_read_f.f -text
 examples/cdi_read_f2003.f90 -text
