@@ -1114,7 +1114,7 @@ Define the reference of a generalized Z-axis.
 \section*{\tt \htmlref{zaxisDefUUID}{zaxisDefUUID}}
 
 \begin{verbatim}
-    void zaxisDefUUID (int zaxisID, const char *uuid);
+    void zaxisDefUUID (int zaxisID, const char *uuid_cbuf);
 \end{verbatim}
 
 Define the uuid of a generalized Z-axis.
@@ -1222,7 +1222,7 @@ Get the type of a Z-axis.
 \section*{\tt \htmlref{zaxisInqUUID}{zaxisInqUUID}}
 
 \begin{verbatim}
-    char * zaxisInqUUID (int zaxisID, char *uuid);
+    char * zaxisInqUUID (int zaxisID, char *uuid_cbuf);
 \end{verbatim}
 
 Get the reference of a generalized Z-axis.
