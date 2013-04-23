@@ -1,5 +1,6 @@
 2013-04-23  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* cfortran.h::kill_trailing: wrong result with gcc -O3, use prama for -O2 (bug fix) [report: Luis Kornblueh]
 	* vlistXXXAttTxt: use cdi fortran datatype CBUF (char *) for the last argument (bug fix) [report: Luis Kornblueh]
 
 2013-04-19  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
