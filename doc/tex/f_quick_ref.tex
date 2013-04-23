@@ -701,7 +701,7 @@ Define an integer attribute.
 \begin{verbatim}
     INTEGER FUNCTION vlistDefAttTxt (INTEGER vlistID, INTEGER varID, 
                                      CHARACTER*(*) name, INTEGER len, 
-                                     CHARACTER*(*) tp)
+                                     CHARACTER*(*) tp_cbuf)
 \end{verbatim}
 
 Define a text attribute.
@@ -752,6 +752,15 @@ Define the data type of a Variable.
 \end{verbatim}
 
 Set an arbitrary keyword/double value pair for GRIB API.
+
+
+\section*{\tt \htmlref{vlistDefVarExtra}{vlistDefVarExtra}}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarExtra (INTEGER vlistID, INTEGER varID, CHARACTER*(*) extra)
+\end{verbatim}
+
+Define extra information of a Variable.
 
 
 \section*{\tt \htmlref{vlistDefVarIntKey}{vlistDefVarIntKey}}
@@ -876,7 +885,7 @@ Get the value(s) of an integer attribute.
 \begin{verbatim}
     INTEGER FUNCTION vlistInqAttTxt (INTEGER vlistID, INTEGER varID, 
                                      CHARACTER*(*) name, INTEGER mlen, 
-                                     CHARACTER*(*) tp)
+                                     CHARACTER*(*) tp_cbuf)
 \end{verbatim}
 
 Get the value(s) of a text attribute.
@@ -925,6 +934,15 @@ Get the data type of a Variable.
 \end{verbatim}
 
 raw access to GRIB meta-data.
+
+
+\section*{\tt \htmlref{vlistInqVarExtra}{vlistInqVarExtra}}
+
+\begin{verbatim}
+    SUBROUTINE vlistInqVarExtra (INTEGER vlistID, INTEGER varID, CHARACTER*(*) extra)
+\end{verbatim}
+
+Get extra information of a Variable.
 
 
 \section*{\tt \htmlref{vlistInqVarIntKey}{vlistInqVarIntKey}}

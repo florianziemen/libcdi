@@ -696,7 +696,7 @@ Define an integer attribute.
 
 \begin{verbatim}
     int vlistDefAttTxt (int vlistID, int varID, const char *name, int len,
-                        const char *tp);
+                        const char *tp_cbuf);
 \end{verbatim}
 
 Define a text attribute.
@@ -745,6 +745,15 @@ Define the data type of a Variable.
 \end{verbatim}
 
 Set an arbitrary keyword/double value pair for GRIB API.
+
+
+\section*{\tt \htmlref{vlistDefVarExtra}{vlistDefVarExtra}}
+
+\begin{verbatim}
+    void vlistDefVarExtra (int vlistID, int varID, const char *extra);
+\end{verbatim}
+
+Define extra information of a Variable.
 
 
 \section*{\tt \htmlref{vlistDefVarIntKey}{vlistDefVarIntKey}}
@@ -861,7 +870,8 @@ Get the value(s) of an integer attribute.
 \section*{\tt \htmlref{vlistInqAttTxt}{vlistInqAttTxt}}
 
 \begin{verbatim}
-    int vlistInqAttTxt (int vlistID, int varID, const char *name, int mlen, char *tp);
+    int vlistInqAttTxt (int vlistID, int varID, const char *name, int mlen,
+                        char *tp_cbuf);
 \end{verbatim}
 
 Get the value(s) of a text attribute.
@@ -910,6 +920,15 @@ Get the data type of a Variable.
 \end{verbatim}
 
 raw access to GRIB meta-data.
+
+
+\section*{\tt \htmlref{vlistInqVarExtra}{vlistInqVarExtra}}
+
+\begin{verbatim}
+    void vlistInqVarExtra (int vlistID, int varID, char *extra);
+\end{verbatim}
+
+Get extra information of a Variable.
 
 
 \section*{\tt \htmlref{vlistInqVarIntKey}{vlistInqVarIntKey}}

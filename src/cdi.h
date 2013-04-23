@@ -570,14 +570,14 @@ int     vlistDefAttInt(int vlistID, int varID, const char *name, int type, int l
 /*      vlistDefAttFlt: Define a floating point attribute */
 int     vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, const double *dp_vec);
 /*      vlistDefAttTxt: Define a text attribute */
-int     vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp);
+int     vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp_cbuf);
 
 /*      vlistInqAttInt: Get the value(s) of an integer attribute */
 int     vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int *ip_vec);
 /*      vlistInqAttFlt: Get the value(s) of a floating point attribute */
 int     vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double *dp_vec);
 /*      vlistInqAttTxt: Get the value(s) of a text attribute */
-int     vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp);
+int     vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp_cbuf);
 
 
 /* GRID routines */
