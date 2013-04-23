@@ -302,7 +302,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
           break;
         regmatch_t *nameMatch = reMatch + funRet[functype].nameMatch;
         printf("Found: %.*s\n",
-               nameMatch->rm_eo - nameMatch->rm_so,
+               (int) (nameMatch->rm_eo - nameMatch->rm_so),
                pline + nameMatch->rm_so);
         ssize_t funNameLast = reMatch[0].rm_eo - 1;
         ssize_t nameLen = nameMatch->rm_eo - nameMatch->rm_so;
