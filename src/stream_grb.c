@@ -490,7 +490,7 @@ int grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
   int ljpeg_warn = 1;
   void *gc = NULL;
 
-  if ( memtype == MEMTYPE_FLOAT ) Error("cdf_write_var_slice not implemented for memtype float!");
+  if ( memtype == MEMTYPE_FLOAT ) Error("grb_write_var_slice not implemented for memtype float!");
 
   filetype  = streamptr->filetype;
   fileID    = streamptr->fileID;

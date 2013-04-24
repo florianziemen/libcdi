@@ -112,6 +112,7 @@ examples/cdi_read_f.f -text
 examples/cdi_read_f2003.f90 -text
 examples/cdi_read_records.c -text
 examples/cdi_read_simple.f -text
+examples/cdi_read_sst.f -text
 examples/cdi_write.c -text
 examples/cdi_write_ens.c -text
 examples/cdi_write_f.f -text
