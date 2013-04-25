@@ -1,3 +1,7 @@
+2013-04-25  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* institutInq: check contents of name and longname (bug fix) [Bug #3419]
+
 2013-04-23  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cfortran.h::kill_trailing: wrong result with gcc -O3, use prama for -O2 (bug fix) [report: Luis Kornblueh]
