@@ -4,6 +4,15 @@
 This appendix provide a brief listing of the Fortran language bindings of the
 CDI library routines:
 
+\section*{\tt \htmlref{cdiDefAdditionalKey}{cdiDefAdditionalKey}}
+
+\begin{verbatim}
+    SUBROUTINE cdiDefAdditionalKey (CHARACTER*(*) string)
+\end{verbatim}
+
+Register an additional GRIB key which is read when file is opened..
+
+
 \section*{\tt \htmlref{gridCreate}{gridCreate}}
 
 \begin{verbatim}
@@ -930,7 +939,8 @@ Get the data type of a Variable.
 \section*{\tt \htmlref{vlistInqVarDblKey}{vlistInqVarDblKey}}
 
 \begin{verbatim}
-    DOUBLEPRECISION FUNCTION vlistInqVarDblKey (INTEGER streamID, CHARACTER*(*) name)
+    DOUBLEPRECISION FUNCTION vlistInqVarDblKey (INTEGER vlistID, INTEGER varID, 
+                                                CHARACTER*(*) name)
 \end{verbatim}
 
 raw access to GRIB meta-data.
@@ -948,7 +958,8 @@ Get extra information of a Variable.
 \section*{\tt \htmlref{vlistInqVarIntKey}{vlistInqVarIntKey}}
 
 \begin{verbatim}
-    INTEGER FUNCTION vlistInqVarIntKey (INTEGER streamID, CHARACTER*(*) name)
+    INTEGER FUNCTION vlistInqVarIntKey (INTEGER vlistID, INTEGER varID, 
+                                        CHARACTER*(*) name)
 \end{verbatim}
 
 raw access to GRIB meta-data.
@@ -989,24 +1000,6 @@ Get the name of a Variable.
 \end{verbatim}
 
 Get the parameter number of a Variable.
-
-
-\section*{\tt \htmlref{vlistInqVarRawBegin}{vlistInqVarRawBegin}}
-
-\begin{verbatim}
-    SUBROUTINE vlistInqVarRawBegin (INTEGER streamID, INTEGER varID)
-\end{verbatim}
-
-Open GRIB record to retrieve raw meta-data in subsequent calls.
-
-
-\section*{\tt \htmlref{vlistInqVarRawEnd}{vlistInqVarRawEnd}}
-
-\begin{verbatim}
-    SUBROUTINE vlistInqVarRawEnd (INTEGER streamID)
-\end{verbatim}
-
-Free previously opened GRIB record.
 
 
 \section*{\tt \htmlref{vlistInqVarStdname}{vlistInqVarStdname}}

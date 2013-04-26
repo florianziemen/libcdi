@@ -4,6 +4,15 @@
 This appendix provide a brief listing of the C language bindings of the
 CDI library routines:
 
+\section*{\tt \htmlref{cdiDefAdditionalKey}{cdiDefAdditionalKey}}
+
+\begin{verbatim}
+    void cdiDefAdditionalKey (const char *string);
+\end{verbatim}
+
+Register an additional GRIB key which is read when file is opened..
+
+
 \section*{\tt \htmlref{gridCreate}{gridCreate}}
 
 \begin{verbatim}
@@ -916,7 +925,7 @@ Get the data type of a Variable.
 \section*{\tt \htmlref{vlistInqVarDblKey}{vlistInqVarDblKey}}
 
 \begin{verbatim}
-    double vlistInqVarDblKey (int streamID, const char *name);
+    double vlistInqVarDblKey (int vlistID, int varID, const char *name);
 \end{verbatim}
 
 raw access to GRIB meta-data.
@@ -934,7 +943,7 @@ Get extra information of a Variable.
 \section*{\tt \htmlref{vlistInqVarIntKey}{vlistInqVarIntKey}}
 
 \begin{verbatim}
-    int vlistInqVarIntKey (int streamID, const char *name);
+    int vlistInqVarIntKey (int vlistID, int varID, const char *name);
 \end{verbatim}
 
 raw access to GRIB meta-data.
@@ -974,24 +983,6 @@ Get the name of a Variable.
 \end{verbatim}
 
 Get the parameter number of a Variable.
-
-
-\section*{\tt \htmlref{vlistInqVarRawBegin}{vlistInqVarRawBegin}}
-
-\begin{verbatim}
-    void vlistInqVarRawBegin (int streamID, int varID);
-\end{verbatim}
-
-Open GRIB record to retrieve raw meta-data in subsequent calls.
-
-
-\section*{\tt \htmlref{vlistInqVarRawEnd}{vlistInqVarRawEnd}}
-
-\begin{verbatim}
-    void vlistInqVarRawEnd (int streamID);
-\end{verbatim}
-
-Free previously opened GRIB record.
 
 
 \section*{\tt \htmlref{vlistInqVarStdname}{vlistInqVarStdname}}

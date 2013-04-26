@@ -15,7 +15,7 @@
 #endif
 
 #if ! defined (_CDIFORTRAN_H)
-#  include "cdiFortran.h"
+#  include "cdifortran.h"
 #endif
 
 
@@ -253,30 +253,11 @@ FCALLSCFUN3 (INT, vlistMergedLevel, VLISTMERGEDLEVEL, vlistmergedlevel, INT, INT
 
 FCALLSCSUB5 (vlistDefVarEnsemble, VLISTDEFVARENSEMBLE, vlistdefvarensemble, INT, INT, INT, INT, INT)
 FCALLSCFUN5 (INT, vlistInqVarEnsemble, VLISTINQVARENSEMBLE, vlistinqvarensemble, INT, INT, PINT, PINT, PINT)
-
-/*  ----------------------------------  */
-
-
-/*  Local change: 2013-01-28, FP (DWD)  */
-
-
-/*  ----------------------------------  */
-
+FCALLSCSUB1 (cdiDefAdditionalKey, CDIDEFADDITIONALKEY, cdidefadditionalkey, STRING)
 FCALLSCSUB4 (vlistDefVarIntKey, VLISTDEFVARINTKEY, vlistdefvarintkey, INT, INT, STRING, INT)
 FCALLSCSUB4 (vlistDefVarDblKey, VLISTDEFVARDBLKEY, vlistdefvardblkey, INT, INT, STRING, DOUBLE)
-
-/*  ----------------------------------  */
-
-
-/*  Local change: 2013-02-18, FP (DWD)  */
-
-
-/*  ----------------------------------  */
-
-FCALLSCSUB2 (vlistInqVarRawBegin, VLISTINQVARRAWBEGIN, vlistinqvarrawbegin, INT, INT)
-FCALLSCFUN2 (DOUBLE, vlistInqVarDblKey, VLISTINQVARDBLKEY, vlistinqvardblkey, INT, STRING)
-FCALLSCFUN2 (INT, vlistInqVarIntKey, VLISTINQVARINTKEY, vlistinqvarintkey, INT, STRING)
-FCALLSCSUB1 (vlistInqVarRawEnd, VLISTINQVARRAWEND, vlistinqvarrawend, INT)
+FCALLSCFUN3 (DOUBLE, vlistInqVarDblKey, VLISTINQVARDBLKEY, vlistinqvardblkey, INT, INT, STRING)
+FCALLSCFUN3 (INT, vlistInqVarIntKey, VLISTINQVARINTKEY, vlistinqvarintkey, INT, INT, STRING)
 
 /*  VLIST attributes  */
 

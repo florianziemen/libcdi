@@ -178,6 +178,10 @@ void    vlistDefVarValidrange(int vlistID, int varID, const double *validrange);
 /*      vlistInqVarValidrange: Get the valid range of a Variable */
 int     vlistInqVarValidrange(int vlistID, int varID, double *validrange);
 
+
+extern int   cdiNAdditionalGRIBKeys;
+extern char* cdiAdditionalGRIBKeys[];
+
 #endif  /* _VLIST_H */
 /*
  * Local Variables:

@@ -63,6 +63,14 @@ typedef struct
   char       *longname;
   char       *units;
   ensinfo_t  *ensdata;
+  /* (Optional) list of keyword/double value pairs */
+  int    opt_grib_dbl_nentries;
+  char*  opt_grib_dbl_keyword[MAX_OPT_GRIB_ENTRIES];
+  double opt_grib_dbl_val[MAX_OPT_GRIB_ENTRIES];
+  /* (Optional) list of keyword/integer value pairs */
+  int    opt_grib_int_nentries;
+  char*  opt_grib_int_keyword[MAX_OPT_GRIB_ENTRIES];
+  int    opt_grib_int_val[MAX_OPT_GRIB_ENTRIES];
 }
 vartable_t;
 
@@ -249,7 +257,11 @@ int paramNewEntry(int param)
 	}
 
       for( i = 0; i < varTablesize; i++ )
-	vartable[i].param = UNDEF_PARAM;
+	{
+	  vartable[i].param = UNDEF_PARAM;
+	  vartable[i].opt_grib_int_nentries = 0;
+	  vartable[i].opt_grib_dbl_nentries = 0;
+	}
     }
   else
     {
@@ -276,7 +288,11 @@ int paramNewEntry(int param)
       varID = varTablesize/2;
 
       for( i = varID; i < varTablesize; i++ )
-	vartable[i].param = UNDEF_PARAM;
+	{
+	  vartable[i].param = UNDEF_PARAM;
+	  vartable[i].opt_grib_int_nentries = 0;
+	  vartable[i].opt_grib_dbl_nentries = 0;
+	}
     }
 
   paramInitEntry(varID, param);
@@ -944,6 +960,36 @@ void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type
   vartable[varID].ensdata->ens_index = ens_idx;
   vartable[varID].ensdata->ens_count = ens_count;
   vartable[varID].ensdata->forecast_init_type = forecast_type;
+}
+
+
+void varDefOptGribInt(int varID, long lval, const char *keyword)
+{
+  int idx = vartable[varID].opt_grib_int_nentries;
+  vartable[varID].opt_grib_int_nentries++;
+  if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
+  vartable[varID].opt_grib_int_val[idx] = (int) lval;
+  vartable[varID].opt_grib_int_keyword[idx] = strdupx(keyword);
+}
+
+
+void varDefOptGribDbl(int varID, double dval, const char *keyword)
+{
+  int idx = vartable[varID].opt_grib_int_nentries;
+  vartable[varID].opt_grib_int_nentries++;
+  if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
+  vartable[varID].opt_grib_dbl_val[idx] = dval;
+  vartable[varID].opt_grib_dbl_keyword[idx] = strdupx(keyword);
+}
+
+
+int varOptGribNentries(int varID)
+{
+  int nentries = 0;
+
+  nentries = vartable[varID].opt_grib_int_nentries + vartable[varID].opt_grib_dbl_nentries;
+
+  return (nentries);
 }
 
 /*

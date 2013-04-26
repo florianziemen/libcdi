@@ -1935,67 +1935,83 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
 #  include "grib_api.h"
 #endif
 
-/* vlistInqVarRawBegin: Open GRIB record to retrieve raw meta-data in subsequent calls */
-void vlistInqVarRawBegin(int streamID, int varID)
+
+/* cdiClearAdditionalKeys: Clears the list of additional GRIB keys. */
+void cdiClearAdditionalKeys()
+{
+  int i;
+  for (i=0; i<cdiNAdditionalGRIBKeys; i++)  free(cdiAdditionalGRIBKeys[i]);
+  cdiNAdditionalGRIBKeys = 0;
+}
+
+/* cdiDefAdditionalKey: Register an additional GRIB key which is read when file is opened. */
+void cdiDefAdditionalKey(const char *name)
 {
 #if  defined  (HAVE_LIBGRIB_API)
-  stream_t *streamptr;
-  int       recID, tsID, fileID;
-  long      recpos, recsize;
-
-  streamptr = stream_to_pointer(streamID);
-  stream_check_ptr(__func__, streamptr);
-
-  fileID  = streamInqFileID(streamID);
-  tsID    = streamptr->curTsID;
-
-  // determine record ID for varID in current time step
-  for (recID=0; (recID<streamptr->tsteps[0].nrecs) && (varID != streamptr->tsteps[tsID].records[recID].varID); recID++);
-  recpos  = streamptr->tsteps[tsID].records[recID].position;
-  recsize = streamptr->tsteps[tsID].records[recID].size;
-
-  fileSetPos(fileID, recpos, SEEK_SET);
-  fileRead(fileID, streamptr->record->buffer, (size_t) recsize);
-
-  streamptr->gh = (void *) grib_handle_new_from_message(NULL, (void *) streamptr->record->buffer, recsize);
+  int idx = cdiNAdditionalGRIBKeys;
+  cdiNAdditionalGRIBKeys++;
+  if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many additional keywords!");
+  if ( name )
+    cdiAdditionalGRIBKeys[idx] = strdupx(name);
+  else
+    Error("Internal error!");
 #endif
 }
 
+/* vlistHasVarKey: returns 1 if meta-data key was read, 0 otherwise. */
+int vlistHasVarKey(int vlistID, int varID, const char* name)
+{
+#if  defined  (HAVE_LIBGRIB_API)
+  /* check if the GRIB key was previously read and is stored */
+  vlist_t *vlistptr;
+  int      i;
+  vlistptr = vlist_to_pointer(vlistID);
+
+  for (i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++)
+    if ( strcmp(name, vlistptr->vars[varID].opt_grib_dbl_keyword[i]) == 0 )
+      return 1;
+  for (i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++)
+    if ( strcmp(name, vlistptr->vars[varID].opt_grib_int_keyword[i]) == 0 )
+      return 1;
+#endif
+  return 0;
+}
 
 /* vlistInqVarDblKey: raw access to GRIB meta-data */
-double vlistInqVarDblKey(int streamID, const char* name)
+double vlistInqVarDblKey(int vlistID, int varID, const char* name)
 {
   double value = 0;
 #if  defined  (HAVE_LIBGRIB_API)
-  stream_t *streamptr = stream_to_pointer(streamID);
-  stream_check_ptr(__func__, streamptr);
-  GRIB_CHECK(grib_get_double((grib_handle*) streamptr->gh, name, &value), 0);
+  /* check if the GRIB key was previously read and is stored in
+     "opt_grib_dbl_val" */
+  vlist_t *vlistptr;
+  vlistptr = vlist_to_pointer(vlistID);
+
+  int i;
+  for (i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++)
+    if ( strcmp(name, vlistptr->vars[varID].opt_grib_dbl_keyword[i]) == 0 )
+      return vlistptr->vars[varID].opt_grib_dbl_val[i];
 #endif
   return value;
 }
 
 
 /* vlistInqVarIntKey: raw access to GRIB meta-data */
-int vlistInqVarIntKey(int streamID, const char* name)
+int vlistInqVarIntKey(int vlistID, int varID, const char* name)
 {
   long int value = 0;
 #if  defined  (HAVE_LIBGRIB_API)
-  stream_t *streamptr = stream_to_pointer(streamID);
-  stream_check_ptr(__func__, streamptr);
-  GRIB_CHECK(grib_get_long((grib_handle*) streamptr->gh, name, &value), 0);
+  /* check if the GRIB key was previously read and is stored in
+     "opt_grib_int_val" */
+  vlist_t *vlistptr;
+  vlistptr = vlist_to_pointer(vlistID);
+
+  int i;
+  for (i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++)
+    if ( strcmp(name, vlistptr->vars[varID].opt_grib_int_keyword[i]) == 0 )
+      return vlistptr->vars[varID].opt_grib_int_val[i];
 #endif
   return (int) value;
-}
-
-
-/* vlistInqVarRawEnd: Free previously opened GRIB record */
-void vlistInqVarRawEnd(int streamID)
-{
-#if  defined  (HAVE_LIBGRIB_API)
-  stream_t *streamptr = stream_to_pointer(streamID);
-  stream_check_ptr(__func__, streamptr);
-  grib_handle_delete((grib_handle*) streamptr->gh);
-#endif
 }
 
 

@@ -15,6 +15,12 @@
 #include "vlist_att.h"
 #include "pio_rpc.h"
 
+
+/* list of additional GRIB2 keywords which are read by the open process */
+int    cdiNAdditionalGRIBKeys = 0;
+char*  cdiAdditionalGRIBKeys[MAX_OPT_GRIB_ENTRIES];
+
+
 extern void zaxisGetIndexList ( int, int * );
 
 static int VLIST_Debug = 0;

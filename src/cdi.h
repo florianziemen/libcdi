@@ -534,27 +534,22 @@ int     vlistMergedLevel(int vlistID, int varID, int levelID);
 void    vlistDefVarEnsemble(int vlistID, int varID, int ensID, int ensCount, int forecast_type);
 int     vlistInqVarEnsemble(int vlistID, int varID, int *ensID, int *ensCount, int *forecast_type);
 
-/* ---------------------------------- */
-/* Local change: 2013-01-28, FP (DWD) */
-/* ---------------------------------- */
+/* cdiClearAdditionalKeys: Clear the list of additional GRIB keys. */
+void    cdiClearAdditionalKeys();
+/* cdiDefAdditionalKey: Register an additional GRIB key which is read when file is opened. */
+void    cdiDefAdditionalKey(const char *string);
 
 /* vlistDefVarIntKey: Set an arbitrary keyword/integer value pair for GRIB API */
 void    vlistDefVarIntKey(int vlistID, int varID, const char *name, int value);
 /* vlistDefVarDblKey: Set an arbitrary keyword/double value pair for GRIB API */
 void    vlistDefVarDblKey(int vlistID, int varID, const char *name, double value);
 
-  /* ---------------------------------- */
-  /* Local change: 2013-02-18, FP (DWD) */
-  /* ---------------------------------- */
-
-/* vlistInqVarRawBegin: Open GRIB record to retrieve raw meta-data in subsequent calls */
-void    vlistInqVarRawBegin(int streamID, int varID);
+/* vlistHasVarKey: returns 1 if meta-data key was read, 0 otherwise. */
+int     vlistHasVarKey(int vlistID, int varID, const char* name);
 /* vlistInqVarDblKey: raw access to GRIB meta-data */
-double  vlistInqVarDblKey(int streamID, const char *name);
+double  vlistInqVarDblKey(int vlistID, int varID, const char *name);
 /* vlistInqVarIntKey: raw access to GRIB meta-data */
-int     vlistInqVarIntKey(int streamID, const char *name);
-/* vlistInqVarRawEnd: Free previously opened GRIB record */
-void    vlistInqVarRawEnd(int streamID);
+int     vlistInqVarIntKey(int vlistID, int varID, const char *name);
 
 
 /* VLIST attributes */
