@@ -1,3 +1,11 @@
+2013-05-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added patch from Florian Prill: Lesen von "Nicht-Standard" GRIB-Keys (bug fix)
+
+2013-04-26  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added patch from Florian Prill: Lesen von "Nicht-Standard" GRIB-Keys
+
 2013-04-25  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* institutInq: check contents of name and longname (bug fix) [Bug #3419]

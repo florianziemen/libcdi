@@ -1968,11 +1968,16 @@ int vlistHasVarKey(int vlistID, int varID, const char* name)
   vlistptr = vlist_to_pointer(vlistID);
 
   for (i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++)
-    if ( strcmp(name, vlistptr->vars[varID].opt_grib_dbl_keyword[i]) == 0 )
-      return 1;
+    {
+      if ( strcmp(name, vlistptr->vars[varID].opt_grib_dbl_keyword[i]) == 0 )
+	return 1;
+    }
+
   for (i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++)
-    if ( strcmp(name, vlistptr->vars[varID].opt_grib_int_keyword[i]) == 0 )
-      return 1;
+    {
+      if ( strcmp(name, vlistptr->vars[varID].opt_grib_int_keyword[i]) == 0 )
+	return 1;
+    }
 #endif
   return 0;
 }

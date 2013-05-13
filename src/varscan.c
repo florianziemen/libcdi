@@ -587,6 +587,31 @@ void cdi_generate_vars(stream_t *streamptr)
 	                                                  vartable[varid].ensdata->ens_count,
 							  vartable[varid].ensdata->forecast_init_type);
 
+      /* ---------------------------------- */
+      /* Local change: 2013-04-23, FP (DWD) */
+      /* ---------------------------------- */
+
+      int    i;
+      vlist_t *vlistptr;
+      vlistptr = vlist_to_pointer(vlistID);
+      for (i=0; i<vartable[varid].opt_grib_int_nentries; i++)
+        {
+          int idx = vlistptr->vars[varID].opt_grib_int_nentries;
+          vlistptr->vars[varID].opt_grib_int_nentries++;
+          if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
+          vlistptr->vars[varID].opt_grib_int_val[idx] = vartable[varid].opt_grib_int_val[idx];
+          vlistptr->vars[varID].opt_grib_int_keyword[idx] = strdupx(vartable[varid].opt_grib_int_keyword[idx]);
+        }
+      for (i=0; i<vartable[varid].opt_grib_dbl_nentries; i++)
+        {
+          int idx = vlistptr->vars[varID].opt_grib_dbl_nentries;
+          vlistptr->vars[varID].opt_grib_dbl_nentries++;
+          if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/double value pairs!");
+          vlistptr->vars[varID].opt_grib_dbl_val[idx] = vartable[varid].opt_grib_dbl_val[idx];
+          vlistptr->vars[varID].opt_grib_dbl_keyword[idx] = strdupx(vartable[varid].opt_grib_dbl_keyword[idx]);
+        }
+      /* note: if the key is not defined, we do not throw an error! */
+
       if ( cdiDefaultTableID != UNDEFID )
 	{
 	  int pdis, pcat, pnum;
@@ -630,7 +655,7 @@ void cdi_generate_vars(stream_t *streamptr)
       for ( levelID = 0; levelID < nlevels; levelID++ )
 	{
 	  lindex = vartable[varid].levelTable[levelID].lindex;
-	  printf("%d %d %d %d %d\n", varID, levelID, 
+	  printf("%d %d %d %d %d\n", varID, levelID,
 		 vartable[varid].levelTable[levelID].lindex,
 		 vartable[varid].levelTable[levelID].recID,
 		 vartable[varid].levelTable[levelID].level1);
@@ -975,9 +1000,9 @@ void varDefOptGribInt(int varID, long lval, const char *keyword)
 
 void varDefOptGribDbl(int varID, double dval, const char *keyword)
 {
-  int idx = vartable[varID].opt_grib_int_nentries;
-  vartable[varID].opt_grib_int_nentries++;
-  if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
+  int idx = vartable[varID].opt_grib_dbl_nentries;
+  vartable[varID].opt_grib_dbl_nentries++;
+  if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/double value pairs!");
   vartable[varID].opt_grib_dbl_val[idx] = dval;
   vartable[varID].opt_grib_dbl_keyword[idx] = strdupx(keyword);
 }
