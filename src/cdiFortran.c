@@ -15,7 +15,7 @@
 #endif
 
 #if ! defined (_CDIFORTRAN_H)
-#  include "cdifortran.h"
+#  include "cdiFortran.h"
 #endif
 
 

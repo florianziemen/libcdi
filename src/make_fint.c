@@ -278,7 +278,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   fprintf(fpint, "#endif\n");
   fprintf(fpint, "\n");
   fprintf(fpint, "#if ! defined (_CDIFORTRAN_H)\n");
-  fprintf(fpint, "#  include \"cdifortran.h\"\n");
+  fprintf(fpint, "#  include \"cdiFortran.h\"\n");
   fprintf(fpint, "#endif\n");
   fprintf(fpint, "\n");
 
