@@ -77,7 +77,7 @@ void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
     }
 }
 
-enum {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISINTP, ISINTV, ISINTVV, ISREALP, ISDOUBLEP, ISSTRING, ISSTRINGP, NUM_KNOWN_ARG_TYPES};
+enum {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISINTP, ISINTV, ISINTVV, ISREALP, ISDOUBLEP, ISCBUF, ISSTRING, ISSTRINGP, NUM_KNOWN_ARG_TYPES};
 
 struct symbol {
   const char *f77name, *cfint, *cname, *parseRE;
@@ -98,10 +98,10 @@ static struct symbol funArgSym[] = {
   { "DOUBLEPRECISION", "DOUBLE",  "double",   "^"WS"*(const"WS"+)?double"WS"+"SYMRE"?"WS"*[,\\)]", 2 },
   { "INTEGER",         "PINT",    "int *",    "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2 },
   { "INTEGER",         "INTV",    "int[]",    "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"WS"*[,\\)]", 3 },
-  { "INTEGER",         "INTVV",    "int[][]", "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"WS"*\\[[^]]*\\]"WS"*[,\\)]", 3 },
+  { "INTEGER",         "INTVV",   "int[][]",  "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"WS"*\\[[^]]*\\]"WS"*[,\\)]", 3 },
   { "REAL",            "PFLOAT",  "float *",  "^"WS"*(const"WS"+)?float"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2 },
   { "DOUBLEPRECISION", "PDOUBLE", "double *", "^"WS"*(const"WS"+)?double"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2 },
-  //  { "CHARACTER*(*)",   "CBUF",    "char *",   "^"WS"*(const"WS"+)?char"WS"+\\*+"SYMRE"?_cbuf"WS"*[,\\)]", 1 },
+  { "CHARACTER*(*)",   "CBUF",    "char *",   "^"WS"*(const"WS"+)?char"WS"+\\*""([A-Za-z_][A-Za-z_0-9]*_cbuf)"WS"*[,\\)]", 2 },
   { "CHARACTER*(*)",   "STRING",  "char *",   "^"WS"*const"WS"+char"WS"+\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1 },
   { "CHARACTER*(*)",   "PSTRING", "char *",   "^"WS"*char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 1 },
 };
