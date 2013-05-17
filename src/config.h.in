@@ -1,5 +1,11 @@
 /* src/config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Compiler */
+#undef COMPILER
+
+/* Compiler version */
+#undef COMP_VERSION
+
 /* Define if C / Fortran interface cfortran.h works */
 #undef HAVE_CF_INTERFACE
 

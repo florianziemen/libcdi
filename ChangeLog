@@ -1,3 +1,11 @@
+2013-06-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.6.1 released
+
+2013-05-17  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added CDI function cdiHaveFiletype() to check whether a filetype is available
+
 2013-05-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added patch from Florian Prill: Lesen von "Nicht-Standard" GRIB-Keys (bug fix)

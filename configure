@@ -674,6 +674,9 @@ PTHREAD_CFLAGS
 PTHREAD_LIBS
 PTHREAD_CC
 ax_pthread_config
+SYSTEM_TYPE
+HOST_NAME
+USER_NAME
 AS
 CXXCPP
 am__fastdepCXX_FALSE
@@ -758,9 +761,6 @@ am__isrc
 INSTALL_DATA
 INSTALL_SCRIPT
 INSTALL_PROGRAM
-SYSTEM_TYPE
-HOST_NAME
-USER_NAME
 host_os
 host_vendor
 host_cpu
@@ -2848,41 +2848,6 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
 
-
-# Checks for username, hostname and system type
-USERNAME=$LOGNAME
-if test -z "$USERNAME" ; then USERNAME=$USER; fi;
-if test -z "$USERNAME" ; then USERNAME="unknown"; fi;
-
-cat >>confdefs.h <<_ACEOF
-#define USER_NAME "$USERNAME"
-_ACEOF
-
-USER_NAME="$USERNAME"
-
-if test -z "$HOST"; then :
-  HOST=unknown
-       if test -x /bin/hostname; then :
-  HOST=$(hostname)
-else
-  if test -x /bin/uname; then :
-  HOST=$(uname -n)
-fi
-fi
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HOST_NAME "$HOST"
-_ACEOF
-
-HOST_NAME="$HOST"
-
-
-cat >>confdefs.h <<_ACEOF
-#define SYSTEM_TYPE "$ac_cv_build"
-_ACEOF
-
-SYSTEM_TYPE="$ac_cv_build"
 
 
 am__api_version='1.11'
@@ -23887,6 +23852,62 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_ISNAN $ac_have_decl
 _ACEOF
 
+
+# Check compiler version
+case "$CC" in
+  pgcc*)  COMP_VERSION=`$CC -V | head -2 | tail -n 1`;;
+  *gcc*)  COMP_VERSION=`$CC --version | head -n 1`;;
+  g++*)   COMP_VERSION=`$CC --version | head -n 1`;;
+  clang*) COMP_VERSION=`$CC --version | head -n 1`;;
+  sxc*)   COMP_VERSION=`$CC -V 2>&1   | tail -n 1`;;
+  xlc*)   COMP_VERSION=`$CC -qversion 2>&1   | head -n 1`;;
+  *)      COMP_VERSION=`$CC -V 2>&1   | head -n 1`;;
+esac
+
+if test -z "$COMP_VERSION" ; then COMP_VERSION="unknown"; fi;
+
+cat >>confdefs.h <<_ACEOF
+#define COMP_VERSION "$COMP_VERSION"
+_ACEOF
+
+
+# Checks for username, hostname and system type
+USERNAME=$LOGNAME
+if test -z "$USERNAME" ; then USERNAME=$USER; fi;
+if test -z "$USERNAME" ; then USERNAME="unknown"; fi;
+
+cat >>confdefs.h <<_ACEOF
+#define USER_NAME "$USERNAME"
+_ACEOF
+
+USER_NAME="$USERNAME"
+
+
+if test -z "$HOST"; then :
+  HOST=unknown
+       if test -x /bin/hostname; then :
+  HOST=$(hostname)
+else
+  if test -x /bin/uname; then :
+  HOST=$(uname -n)
+fi
+fi
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HOST_NAME "$HOST"
+_ACEOF
+
+HOST_NAME="$HOST"
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define SYSTEM_TYPE "$ac_cv_build"
+_ACEOF
+
+SYSTEM_TYPE="$ac_cv_build"
+
 #  ----------------------------------------------------------------------
 #  Check for math library
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for floor in -lm" >&5
@@ -26839,6 +26860,14 @@ else
 fi
 
 
+
+
+# Checks for compiler
+COMPILER="$CC $CFLAGS"
+
+cat >>confdefs.h <<_ACEOF
+#define COMPILER "$COMPILER"
+_ACEOF
 
 
 ac_config_files="$ac_config_files tests/test_cksum_grib tests/test_cksum_nc tests/test_cksum_nc2 tests/test_cksum_nc4 tests/test_cksum_extra tests/test_cksum_service tests/test_cksum_ieg tests/pio_write_run tests/pio_cksum_mpinonb tests/pio_cksum_fpguard tests/pio_cksum_asynch tests/pio_cksum_writer util/serialrun"

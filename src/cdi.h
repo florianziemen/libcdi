@@ -243,6 +243,8 @@ void    cdiDebug(int debug);
 char   *cdiLibraryVersion(void);
 void    cdiPrintVersion(void);
 
+int     cdiHaveFiletype(int filetype);
+
 void    cdiDefMissval(double missval);
 double  cdiInqMissval(void);
 void    cdiDefGlobal(const char *string, int val);

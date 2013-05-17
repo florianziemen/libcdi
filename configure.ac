@@ -10,21 +10,6 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_HOST
 AC_CANONICAL_BUILD
 
-# Checks for username, hostname and system type
-USERNAME=$LOGNAME
-if test -z "$USERNAME" ; then USERNAME=$USER; fi;
-if test -z "$USERNAME" ; then USERNAME="unknown"; fi;
-AC_DEFINE_UNQUOTED([USER_NAME],["$USERNAME"], [User name])
-AC_SUBST([USER_NAME],["$USERNAME"])
-AS_IF([test -z "$HOST"],
-      [HOST=unknown
-       AS_IF([test -x /bin/hostname],[HOST=$(hostname)],
-             [AS_IF([test -x /bin/uname],
-                    [HOST=$(uname -n)])])])
-AC_DEFINE_UNQUOTED([HOST_NAME],["$HOST"],[Host name])
-AC_SUBST([HOST_NAME],["$HOST"])
-AC_DEFINE_UNQUOTED([SYSTEM_TYPE],["$ac_cv_build"], [System type])
-AC_SUBST([SYSTEM_TYPE],["$ac_cv_build"])
 
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS([src/config.h])
@@ -80,6 +65,38 @@ AC_CHECK_FUNCS([getline])
 # Checks for the availability of ANSI-C99 functions
 AC_CHECK_DECLS([isnan],,,[AC_INCLUDES_DEFAULT
 @%:@include <math.h>])
+
+# Check compiler version
+case "$CC" in
+  pgcc*)  COMP_VERSION=`$CC -V | head -2 | tail -n 1`;;
+  *gcc*)  COMP_VERSION=`$CC --version | head -n 1`;;
+  g++*)   COMP_VERSION=`$CC --version | head -n 1`;;
+  clang*) COMP_VERSION=`$CC --version | head -n 1`;;
+  sxc*)   COMP_VERSION=`$CC -V 2>&1   | tail -n 1`;;
+  xlc*)   COMP_VERSION=`$CC -qversion 2>&1   | head -n 1`;;
+  *)      COMP_VERSION=`$CC -V 2>&1   | head -n 1`;;
+esac
+
+if test -z "$COMP_VERSION" ; then COMP_VERSION="unknown"; fi;
+AC_DEFINE_UNQUOTED(COMP_VERSION, ["$COMP_VERSION"], [Compiler version])
+
+# Checks for username, hostname and system type
+USERNAME=$LOGNAME
+if test -z "$USERNAME" ; then USERNAME=$USER; fi;
+if test -z "$USERNAME" ; then USERNAME="unknown"; fi;
+AC_DEFINE_UNQUOTED([USER_NAME],["$USERNAME"], [User name])
+AC_SUBST([USER_NAME],["$USERNAME"])
+
+AS_IF([test -z "$HOST"],
+      [HOST=unknown
+       AS_IF([test -x /bin/hostname],[HOST=$(hostname)],
+             [AS_IF([test -x /bin/uname],
+                    [HOST=$(uname -n)])])])
+AC_DEFINE_UNQUOTED([HOST_NAME],["$HOST"],[Host name])
+AC_SUBST([HOST_NAME],["$HOST"])
+
+AC_DEFINE_UNQUOTED([SYSTEM_TYPE],["$ac_cv_build"], [System type])
+AC_SUBST([SYSTEM_TYPE],["$ac_cv_build"])
 #  ----------------------------------------------------------------------
 #  Check for math library
 AC_CHECK_LIB(m, floor)
@@ -178,6 +195,10 @@ ACX_CHECK_CFINT([$srcdir/src/cfortran.h])
 AM_CONDITIONAL([USE_FC],[test -n "$FC" && test "X$FC" != "Xno" && test x$acx_cv_check_cfint = "xyes"])
 
 AC_SUBST([CPPFLAGS])
+
+# Checks for compiler
+COMPILER="$CC $CFLAGS"
+AC_DEFINE_UNQUOTED(COMPILER, ["$COMPILER"], [Compiler])
 
 AC_CONFIG_FILES([tests/test_cksum_grib \
                  tests/test_cksum_nc \
