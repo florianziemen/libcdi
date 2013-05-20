@@ -127,8 +127,7 @@ main(int argc, char *argv[])
         nts = parse_intarg("error parsing number of timesteps");
         break;
       default: /* '?' */
-        fprintf(stderr, "Usage: %s [-m nlon] [-n nlat] [-o nlev] [-t nts]\n",
-                argv[0]);
+        fprintf(stderr, "Usage: %s [-m nlon] [-n nlat] [-o nlev] [-t nts]\n", argv[0]);
         exit(EXIT_FAILURE);
       }
   }
@@ -141,7 +140,7 @@ main(int argc, char *argv[])
     lats[i] = ((double)(i * 180))/nlat - 90.0;
   levs = malloc(nlev * sizeof (levs[0]));
   for (i = 0; i < nlev; ++i)
-    levs[i] = 101300 - 3940.3 * (exp(1.3579 * (double)(i)/(nlev - 1)) - 1.0);
+    levs[i] = 101300 - floor(3940.3 * (exp(2.3579 * (double)(i)/(nlev - 1)) - 1.0));
 
   varSize[0] = nlon * nlat;
   varSize[1] = nlon * nlat * nlev;
@@ -263,10 +262,8 @@ main(int argc, char *argv[])
                             / (lons[nlat-1] - lats[0]))
                       ) * mscale)) * mrscale;
 
-        memcrc_r(&checksum_state[0], (const unsigned char *)var[0],
-                 varSize[0] * sizeof (var[0][0]));
-        memcrc_r(&checksum_state[1], (const unsigned char *)var[1],
-                 varSize[1] * sizeof (var[1][0]));
+        memcrc_r(&checksum_state[0], (const unsigned char *)var[0], varSize[0] * sizeof (var[0][0]));
+        memcrc_r(&checksum_state[1], (const unsigned char *)var[1], varSize[1] * sizeof (var[1][0]));
 
         // Write var1 and var2
         streamWriteVar(streamID, varID[0], var[0], nmiss);
@@ -288,8 +285,7 @@ main(int argc, char *argv[])
         {
           uint32_t cksum;
           int code;
-          cksum = memcrc_finish(&checksum_state[i],
-                                (off_t)varSize[i] * sizeof (var[i][0]) * nts);
+          cksum = memcrc_finish(&checksum_state[i], (off_t)varSize[i] * sizeof (var[i][0]) * nts);
           code = vlistInqVarCode(vlistID, varID[i]);
           if (fprintf(tablefp, "%08lx %d\n", (unsigned long)cksum, code) < 0)
             {

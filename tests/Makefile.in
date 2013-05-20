@@ -87,19 +87,19 @@ am_cksum_read_OBJECTS = cksum_read.$(OBJEXT) var_cksum.$(OBJEXT) \
 	ensure_array_size.$(OBJEXT)
 cksum_read_OBJECTS = $(am_cksum_read_OBJECTS)
 cksum_read_LDADD = $(LDADD)
-cksum_read_DEPENDENCIES = ../src/libcdi.la
+cksum_read_DEPENDENCIES = $(top_srcdir)/src/libcdi.la
 am_cksum_write_OBJECTS = cksum_write.$(OBJEXT) cksum.$(OBJEXT)
 cksum_write_OBJECTS = $(am_cksum_write_OBJECTS)
 cksum_write_LDADD = $(LDADD)
-cksum_write_DEPENDENCIES = ../src/libcdi.la
+cksum_write_DEPENDENCIES = $(top_srcdir)/src/libcdi.la
 am_pio_write_OBJECTS = pio_write.$(OBJEXT) cksum.$(OBJEXT)
 pio_write_OBJECTS = $(am_pio_write_OBJECTS)
 pio_write_LDADD = $(LDADD)
-pio_write_DEPENDENCIES = ../src/libcdi.la
+pio_write_DEPENDENCIES = $(top_srcdir)/src/libcdi.la
 am_test_grib_OBJECTS = test_grib.$(OBJEXT)
 test_grib_OBJECTS = $(am_test_grib_OBJECTS)
 test_grib_LDADD = $(LDADD)
-test_grib_DEPENDENCIES = ../src/libcdi.la
+test_grib_DEPENDENCIES = $(top_srcdir)/src/libcdi.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -319,7 +319,7 @@ cksum_read_SOURCES = cksum_read.c \
 
 pio_write_SOURCES = pio_write.c cksum.h cksum.c
 #
-LDADD = ../src/libcdi.la -lm
+LDADD = $(top_srcdir)/src/libcdi.la -lm
 INCLUDES = -I$(top_srcdir)/src
 #
 EXTRA_DIST = $(TESTS)
