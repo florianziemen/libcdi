@@ -15,7 +15,7 @@ cksum_read_SOURCES = cksum_read.c \
 	ensure_array_size.h ensure_array_size.c
 pio_write_SOURCES = pio_write.c cksum.h cksum.c
 #
-LDADD = $(top_srcdir)/src/libcdi.la -lm
+LDADD = ../src/libcdi.la -lm
 INCLUDES   = -I$(top_srcdir)/src
 #
 EXTRA_DIST = $(TESTS)
