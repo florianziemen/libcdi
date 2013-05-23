@@ -80,7 +80,8 @@ typedef struct {
   int      calendar;
   int      tableID;
   int      truncation;
-  int      defmiss;
+  int      defmissval;
+  int      deffillval;
   int      xtype;
   int      ndims;
   int      gmapid;
@@ -98,6 +99,7 @@ typedef struct {
   size_t   vlen;
   double  *vdata;
   double   missval;
+  double   fillval;
   double   addoffset;
   double   scalefactor;
   double   validrange[2];
@@ -689,9 +691,7 @@ void cdfDefVarMissval(stream_t *streamptr, int varID, int dtype, int lcheck)
       xtype = cdfDefDatatype(dtype, streamptr->filetype);
 
       cdf_put_att_double(fileID, ncvarid, "_FillValue", (nc_type) xtype, 1, &missval);
-
-      if ( cdiNcMissingValue == 1 )
-        cdf_put_att_double(fileID, ncvarid, "missing_value", (nc_type) xtype, 1, &missval);
+      cdf_put_att_double(fileID, ncvarid, "missing_value", (nc_type) xtype, 1, &missval);
 
       if ( lcheck && streamptr->ncmode == 2 ) cdf_enddef(fileID);
 
@@ -4093,8 +4093,10 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].positive        = 0;
       ncvars[ncvarid].chunked         = 0;
       ncvars[ncvarid].chunktype       = UNDEFID;
-      ncvars[ncvarid].defmiss         = 0;
+      ncvars[ncvarid].defmissval      = 0;
+      ncvars[ncvarid].deffillval      = 0;
       ncvars[ncvarid].missval         = 0;
+      ncvars[ncvarid].fillval         = 0;
       ncvars[ncvarid].addoffset       = 0;
       ncvars[ncvarid].scalefactor     = 1;
       ncvars[ncvarid].name[0]         = 0;
@@ -4764,11 +4766,16 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
                 }
             }
-          else if ( (strcmp(attname, "_FillValue") == 0 || strcmp(attname, "missing_value") == 0) &&
-		    atttype != NC_CHAR )
+          else if ( strcmp(attname, "_FillValue") == 0 && atttype != NC_CHAR )
+            {
+	      cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvars[ncvarid].fillval);
+	      ncvars[ncvarid].deffillval = TRUE;
+	      /* cdfSetVar(ncvars, ncvarid, TRUE); */
+            }
+          else if ( strcmp(attname, "missing_value") == 0 && atttype != NC_CHAR )
             {
 	      cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvars[ncvarid].missval);
-	      ncvars[ncvarid].defmiss = TRUE;
+	      ncvars[ncvarid].defmissval = TRUE;
 	      /* cdfSetVar(ncvars, ncvarid, TRUE); */
             }
           else if ( strcmp(attname, "valid_range") == 0 && attlen == 2 )
@@ -6095,7 +6102,14 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
       if ( ncvars[ncvarid].tableID != UNDEFID )
 	vlistDefVarTable(vlistID, varID, ncvars[ncvarid].tableID);
 
-      if ( ncvars[ncvarid].defmiss == TRUE ) vlistDefVarMissval(vlistID, varID, ncvars[ncvarid].missval);
+      if ( ncvars[ncvarid].deffillval == FALSE && ncvars[ncvarid].defmissval == TRUE )
+        {
+          ncvars[ncvarid].deffillval = TRUE;
+          ncvars[ncvarid].fillval    = ncvars[ncvarid].missval;
+        }
+
+      if ( ncvars[ncvarid].deffillval == TRUE )
+        vlistDefVarMissval(vlistID, varID, ncvars[ncvarid].fillval);
 
       if ( CDI_Debug )
 	Message("varID = %d  gridID = %d  zaxisID = %d", varID,

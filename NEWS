@@ -1,6 +1,16 @@
 CDI NEWS
 --------
 
+Version 1.6.1 (18 June 2013):
+
+   New functions:
+     * cdiHaveFiletype(): Check whether a filetype is available
+   Fixed bugs:
+     * stream_gribapi: replaced function getLevelFactor() [Bug #3446]
+     * gridXXXUUID: use cdi fortran datatype CBUF (char *) for the last argument (bug fix) [Bug #3424]
+     * institutInq: check contents of name and longname (bug fix) [Bug #3419]
+     * netCDF: missing_value attribute removed [Bug #3592]
+
 Version 1.6.0 (14 March 2013):
 
    New features:

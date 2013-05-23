@@ -2,6 +2,10 @@
 
 	* Version 1.6.1 released
 
+2013-05-23  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* netCDF: missing_value attribute removed [Bug #3592]
+
 2013-05-17  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added CDI function cdiHaveFiletype() to check whether a filetype is available

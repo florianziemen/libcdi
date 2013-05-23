@@ -27,7 +27,7 @@ int cdiDefaultCalendar = CALENDAR_PROLEPTIC;
 int cdiDefaultInstID   = CDI_UNDEFID;
 int cdiDefaultModelID  = CDI_UNDEFID;
 int cdiDefaultTableID  = CDI_UNDEFID;
-int cdiNcMissingValue  = CDI_UNDEFID;
+//int cdiNcMissingValue  = CDI_UNDEFID;
 int cdiNcChunksizehint = CDI_UNDEFID;
 int cdiChunkType       = CHUNK_GRID;
 int cdiSplitLtype105   = CDI_UNDEFID;
@@ -194,10 +194,10 @@ void cdiInitialize(void)
 
       envString = getenv("CDI_MISSVAL");
       if ( envString ) cdiDefaultMissval = atof(envString);
-
+      /*
       envString = getenv("NC_MISSING_VALUE");
       if ( envString ) cdiNcMissingValue = atoi(envString);
-
+      */
       envString = getenv("NC_CHUNKSIZEHINT");
       if ( envString ) cdiNcChunksizehint = atoi(envString);
 
