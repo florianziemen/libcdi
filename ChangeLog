@@ -4,6 +4,7 @@
 
 2013-05-27  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* gribapiGetEndStep: use stepUnits for timeunits2
 	* grib2GetLevel: set level bounds if  0 < leveltype2 < 255
 
 2013-05-23  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

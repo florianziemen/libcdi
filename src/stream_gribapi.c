@@ -189,15 +189,14 @@ static
 int gribapiGetEndStep(grib_handle *gh, int startStep, int timeunits)
 {
   int endStep = startStep;
-  int timeunits2;
+  int timeunits2 = timeunits;
   int status;
   long unitsOfTime;
   long lpar;
 
-  // status = grib_get_long(gh, "stepUnits", &unitsOfTime);
-
-  // timeunits2 = getTimeunits(unitsOfTime);
-  timeunits2 = gribapiGetTimeUnits(gh);
+  status = grib_get_long(gh, "stepUnits", &unitsOfTime);
+  if ( status == 0 ) timeunits2 = getTimeunits(unitsOfTime);
+  //timeunits2 = gribapiGetTimeUnits(gh);
 
   status = grib_get_long(gh, "endStep", &lpar);
 
@@ -328,8 +327,9 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
 	static int lprint = TRUE;
 	extern int grib_calendar;
 	int ryear, rmonth, rday, rhour, rminute, rsecond;
-	int time_period = endStep;
-	int julday, secofday, addsec;
+	int julday, secofday;
+	int64_t time_period = endStep;
+        int64_t addsec;
 
 	cdiDecodeDate(rdate, &ryear, &rmonth, &rday);
 	cdiDecodeTime(rtime, &rhour, &rminute, &rsecond);
