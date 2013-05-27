@@ -2,6 +2,10 @@
 
 	* Version 1.6.1 released
 
+2013-05-27  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* grib2GetLevel: set level bounds if  0 < leveltype2 < 255
+
 2013-05-23  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* netCDF: missing_value attribute removed [Bug #3592]
