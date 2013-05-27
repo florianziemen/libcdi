@@ -724,7 +724,7 @@ void grib2GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
       status = grib_get_long(gh, "typeOfSecondFixedSurface", &lpar);
       if ( status == 0 ) leveltype2 = lpar;
 
-      if ( *leveltype != 255 && *leveltype2 != 255 &&  *leveltype2 > 0 ) *lbounds = 1;
+      if ( *leveltype != 255 && leveltype2 != 255 && leveltype2 > 0 ) *lbounds = 1;
 
       if ( *lbounds == 0 )
 	{
