@@ -21,11 +21,11 @@
 
 
 static struct {
-  unsigned char positive;
+  unsigned char positive;   // 1: up;  2: down
   char *name;
   char *longname;
   char *stdname;
-  char *units;    // 1: up;  2: down
+  char *units;
 }
 ZaxistypeEntry[] = {
   { /*  0 */ 0, "sfc",        "surface",           "",               ""},
