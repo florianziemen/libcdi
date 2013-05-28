@@ -2784,16 +2784,15 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
             getLevelFactor(dlevel1, &factor, &scaled_level);
             gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_ISOBARIC);
             GRIB_CHECK(grib_set_long(gh, "scaleFactorOfFirstFixedSurface", factor), 0);
-            GRIB_CHECK(grib_set_double(gh, "scaledValueOfFirstFixedSurface", scaled_level), 0);
+            GRIB_CHECK(grib_set_long(gh, "scaledValueOfFirstFixedSurface", scaled_level), 0);
             /*
-            printf("level1 %g level2 %g\n", dlevel1, dlevel2);
-
 	    if ( lbounds )
 	      {
                 getLevelFactor(dlevel2, &factor, &scaled_level);
+                printf("level1 %g level2 %g %ld %ld\n", dlevel1, dlevel2, factor, scaled_level);
 		gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", GRIB2_LTYPE_ISOBARIC);
 		GRIB_CHECK(grib_set_long(gh, "scaleFactorOfSecondFixedSurface", factor), 0);
-		GRIB_CHECK(grib_set_double(gh, "scaledValueOfSecondFixedSurface", scaled_level), 0);
+		GRIB_CHECK(grib_set_long(gh, "scaledValueOfSecondFixedSurface", scaled_level), 0);
 	      }
             */
 	  }
@@ -2860,7 +2859,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
             getLevelFactor(dlevel1, &factor, &scaled_level);
             gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_LANDDEPTH);
             GRIB_CHECK(grib_set_long(gh, "scaleFactorOfFirstFixedSurface", factor), 0);
-            GRIB_CHECK(grib_set_double(gh, "scaledValueOfFirstFixedSurface", scaled_level), 0);
+            GRIB_CHECK(grib_set_long(gh, "scaledValueOfFirstFixedSurface", scaled_level), 0);
 
 	    if ( lbounds )
 	      {
@@ -2868,7 +2867,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
                 getLevelFactor(dlevel2, &factor, &scaled_level);
 		gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", GRIB2_LTYPE_LANDDEPTH);
 		GRIB_CHECK(grib_set_long(gh, "scaleFactorOfSecondFixedSurface", factor), 0);
-		GRIB_CHECK(grib_set_double(gh, "scaledValueOfSecondFixedSurface", scaled_level), 0);
+		GRIB_CHECK(grib_set_long(gh, "scaledValueOfSecondFixedSurface", scaled_level), 0);
 	      }
 	  }
 
