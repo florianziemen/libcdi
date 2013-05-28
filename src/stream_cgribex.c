@@ -7,7 +7,7 @@
 
 #include "dmemory.h"
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "file.h"
 #include "varscan.h"
 #include "datetime.h"
@@ -408,7 +408,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   if ( datatype > 32 ) datatype = DATATYPE_PACK32;
   if ( datatype <  0 ) datatype = DATATYPE_PACK;
 
-  varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, 0,
+  varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, 0, 0,
 	       datatype, &varID, &levelID, tsteptype, numavg, ISEC1_LevelType, NULL, NULL, NULL);
 
   (*record).varID   = varID;

@@ -10,7 +10,7 @@
 #include "error.h"
 #include "file.h"
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "varscan.h"
 #include "datetime.h"
 #include "extra.h"
@@ -275,7 +275,7 @@ void extAddRecord(stream_t *streamptr, int param, int level, int xysize,
   */
   leveltype = ZAXIS_GENERIC;
 
-  varAddRecord(recID, param, gridID, leveltype, 0, level, 0, 0,
+  varAddRecord(recID, param, gridID, leveltype, 0, level, 0, 0, 0,
 	       extInqDatatype(prec, number), &varID, &levelID, UNDEFID, 0, 0, NULL, NULL, NULL);
 
   (*record).varID   = varID;

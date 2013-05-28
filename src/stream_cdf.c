@@ -15,7 +15,7 @@
 #include "cdi.h"
 #include "basetime.h"
 #include "gaussgrid.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "stream_cdf.h"
 #include "cdf_int.h"
 #include "varscan.h"

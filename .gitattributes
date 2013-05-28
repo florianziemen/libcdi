@@ -184,6 +184,8 @@ src/cdi.inc -text
 src/cdiFortran.c -text
 src/cdiFortran.h -text
 src/cdi_error.c -text
+src/cdi_int.c -text
+src/cdi_int.h -text
 src/cdi_limits.h -text
 src/cdi_util.c -text
 src/cdilib.c -text
@@ -262,8 +264,6 @@ src/stream_gribapi.h -text
 src/stream_history.c -text
 src/stream_ieg.c -text
 src/stream_ieg.h -text
-src/stream_int.c -text
-src/stream_int.h -text
 src/stream_record.c -text
 src/stream_srv.c -text
 src/stream_srv.h -text

@@ -7,7 +7,7 @@
 #include <float.h>
 #include <sys/types.h>
 
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "dmemory.h"
 #include "binary.h"
 

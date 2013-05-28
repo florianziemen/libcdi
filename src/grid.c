@@ -11,7 +11,7 @@
 
 #include "dmemory.h"
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "grid.h"
 #include "gaussgrid.h"
 #include "pio_util.h"

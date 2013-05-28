@@ -6,7 +6,7 @@
 #include <math.h>
 
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "dmemory.h"
 #include "varscan.h"
 #include "vlist.h"
@@ -48,6 +48,7 @@ typedef struct
   int         ltype;     /* GRIB level type */
   int         lbounds;
   int         level_sf;
+  int         level_unit;
   int         zaxisID;
   int         nlevels;
   int         levelTableSize;
@@ -94,6 +95,7 @@ void paramInitEntry(int varID, int param)
   vartable[varID].ltype          = 0;
   vartable[varID].lbounds        = 0;
   vartable[varID].level_sf       = 0;
+  vartable[varID].level_unit     = 0;
   vartable[varID].levelTable     = NULL;
   vartable[varID].levelTableSize = 0;
   vartable[varID].nlevels        = 0;
@@ -302,7 +304,7 @@ int paramNewEntry(int param)
 
 
 void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
-		  int level1, int level2, int level_sf, int prec,
+		  int level1, int level2, int level_sf, int level_unit, int prec,
 		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype,
 		  const char *name, const char *longname, const char *units)
 {
@@ -321,6 +323,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
       vartable[varID].ltype     = ltype;
       vartable[varID].lbounds   = lbounds;
       vartable[varID].level_sf  = level_sf;
+      vartable[varID].level_unit = level_unit;
       if ( tsteptype != UNDEFID ) vartable[varID].tsteptype = tsteptype;
       if ( numavg ) vartable[varID].timave = 1;
 
@@ -492,7 +495,7 @@ void cdi_generate_vars(stream_t *streamptr)
       comptype  = vartable[varid].comptype;
 
       level_sf  = 1;
-      if ( vartable[varid].level_sf == 77 ) level_sf = 0.001;
+      if ( vartable[varid].level_sf == CONV_MM_TO_M ) level_sf = 0.001;
 
       zaxisID = UNDEFID;
 
@@ -557,7 +560,7 @@ void cdi_generate_vars(stream_t *streamptr)
 	    dlevels2[levelID] = level_sf*vartable[varid].levelTable[levelID].level2;
 	}
 
-      if ( vartable[varid].level_sf == 77 )
+      if ( vartable[varid].level_sf == CONV_MM_TO_M )
         zaxisID = varDefZaxis(vlistID, zaxistype, nlevels, dlevels, lbounds, dlevels1, dlevels2,
                               Vctsize, Vct, NULL, NULL, "m", 0, 0, ltype);
       else

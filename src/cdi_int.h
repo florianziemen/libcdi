@@ -1,5 +1,5 @@
-#ifndef _STREAM_INT_H
-#define _STREAM_INT_H
+#ifndef _CDI_INT_H
+#define _CDI_INT_H
 
 #if defined (HAVE_CONFIG_H)
 #  include "config.h"
@@ -334,7 +334,7 @@ void uuid2str(const char *uuid, char *uuidstr);
 void str2uuid(const char *uuidstr, char *uuid);
 
 
-#endif  /* _STREAM_INT_H */
+#endif  /* _CDI_INT_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

@@ -4,7 +4,7 @@
 
 #include "dmemory.h"
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "pio_util.h"
 #include "resource_handle.h"
 #include "pio_rpc.h"

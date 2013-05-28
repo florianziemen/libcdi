@@ -108,7 +108,7 @@ c="dmemory.c         \
    cdf_int.c         \
    cdi_error.c       \
    cdi_util.c        \
-   stream_int.c      \
+   cdi_int.c         \
    stream.c          \
    stream_history.c  \
    stream_cgribex.c  \
@@ -141,7 +141,7 @@ c="dmemory.c         \
 
 h="cdi_limits.h taxis.h dtypes.h file.h service.h extra.h \
    ieg.h cdi.h timebase.h calendar.h basetime.h datetime.h \
-   error.c error.h stream_int.h cgribex.h gribapi.h \
+   error.c error.h cdi_int.h cgribex.h gribapi.h \
    stream_cgribex.h  stream_gribapi.h  stream_grb.h  stream_cdf.h \
    tablepar.h table.h gaussgrid.h grid.h zaxis.h varscan.h binary.h swap.h \
    service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \

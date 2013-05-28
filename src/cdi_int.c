@@ -12,7 +12,7 @@
 #include "dmemory.h"
 
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "pio_util.h"
 #include "namespace.h"
 #include "resource_handle.h"

@@ -12,7 +12,7 @@
 #include "error.h"
 #include "file.h"
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "varscan.h"
 #include "datetime.h"
 #include "ieg.h"
@@ -769,7 +769,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
 
   datatype = iegInqDatatype(prec);
 
-  varAddRecord(recID, param, gridID, leveltype, lbounds, level1, level2, 0,
+  varAddRecord(recID, param, gridID, leveltype, lbounds, level1, level2, 0, 0,
 	       datatype, &varID, &levelID, UNDEFID, 0, 0, NULL, NULL, NULL);
 
   (*record).varID   = varID;

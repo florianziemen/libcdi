@@ -9,7 +9,7 @@
 #include <stdio.h>
 
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "gribapi.h"
 #include "dmemory.h"
 

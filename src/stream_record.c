@@ -9,7 +9,7 @@
 
 #include "cdi.h"
 #include "cdf_int.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "stream_grb.h"
 #include "stream_cdf.h"
 #include "stream_srv.h"

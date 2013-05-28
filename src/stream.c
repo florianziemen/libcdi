@@ -6,7 +6,7 @@
 
 #include "dmemory.h"
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "cdf.h"
 #include "stream_grb.h"
 #include "stream_cdf.h"

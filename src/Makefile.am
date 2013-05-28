@@ -92,8 +92,8 @@ libcdi_la_SOURCES = 	 \
 	stream_history.c \
 	stream_ieg.c     \
 	stream_ieg.h	 \
-	stream_int.c     \
-	stream_int.h	 \
+	cdi_int.c        \
+	cdi_int.h	 \
 	stream_record.c  \
 	stream_srv.c     \
 	stream_srv.h	 \

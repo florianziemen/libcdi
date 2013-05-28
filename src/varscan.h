@@ -5,9 +5,10 @@
 #  include "grid.h"
 #endif
 
+#define CONV_MM_TO_M 77
 
 void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
-		  int level1, int level2, int level_sf, int prec,
+		  int level1, int level2, int level_sf, int level_unit, int prec,
 		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype,
 		  const char *name, const char *longname, const char *units);
 

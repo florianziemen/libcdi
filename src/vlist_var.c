@@ -10,7 +10,7 @@
 
 #include "dmemory.h"
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "vlist.h"
 #include "vlist_var.h"
 #include "resource_handle.h"
