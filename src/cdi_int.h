@@ -333,6 +333,16 @@ void stream_write_record(int streamID, int memtype, const void *data, int nmiss)
 void uuid2str(const char *uuid, char *uuidstr);
 void str2uuid(const char *uuidstr, char *uuid);
 
+#define CDI_UNIT_PA   1
+#define CDI_UNIT_HPA  2
+#define CDI_UNIT_MM   3
+#define CDI_UNIT_CM   4
+#define CDI_UNIT_DM   5
+#define CDI_UNIT_M    6
+
+char *cdiUnitNamePtr(int cdi_unit);
+
+
 
 #endif  /* _CDI_INT_H */
 /*

@@ -495,7 +495,7 @@ void cdi_generate_vars(stream_t *streamptr)
       comptype  = vartable[varid].comptype;
 
       level_sf  = 1;
-      if ( vartable[varid].level_sf == CONV_MM_TO_M ) level_sf = 0.001;
+      if ( vartable[varid].level_sf != 0 ) level_sf = 1./vartable[varid].level_sf;
 
       zaxisID = UNDEFID;
 
@@ -560,12 +560,9 @@ void cdi_generate_vars(stream_t *streamptr)
 	    dlevels2[levelID] = level_sf*vartable[varid].levelTable[levelID].level2;
 	}
 
-      if ( vartable[varid].level_sf == CONV_MM_TO_M )
-        zaxisID = varDefZaxis(vlistID, zaxistype, nlevels, dlevels, lbounds, dlevels1, dlevels2,
-                              Vctsize, Vct, NULL, NULL, "m", 0, 0, ltype);
-      else
-        zaxisID = varDefZaxis(vlistID, zaxistype, nlevels, dlevels, lbounds, dlevels1, dlevels2,
-                              Vctsize, Vct, NULL, NULL, NULL, 0, 0, ltype);
+      char *unitptr = cdiUnitNamePtr(vartable[varid].level_unit);
+      zaxisID = varDefZaxis(vlistID, zaxistype, nlevels, dlevels, lbounds, dlevels1, dlevels2,
+                            Vctsize, Vct, NULL, NULL, unitptr, 0, 0, ltype);
 
       if ( lbounds ) free(dlevels1);
       if ( lbounds ) free(dlevels2);
