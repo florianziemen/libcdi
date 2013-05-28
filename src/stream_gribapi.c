@@ -733,6 +733,7 @@ void grib2GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
   status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar);
   if ( status == 0 )
     {
+      long llevel;
       double dlevel1 = 0, dlevel2 = 0;
 
       *leveltype = (int) lpar;
@@ -742,55 +743,36 @@ void grib2GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
 
       if ( *leveltype != 255 && leveltype2 != 255 && leveltype2 > 0 ) *lbounds = 1;
 
-      if ( *lbounds == 0 )
-	{
-	  if ( *leveltype == GRIB2_LTYPE_LANDDEPTH )
-	    {
-	      GRIB_CHECK(grib_get_long(gh, "scaleFactorOfFirstFixedSurface", &factor), 0);
-	      GRIB_CHECK(grib_get_double(gh, "scaledValueOfFirstFixedSurface", &dlevel1), 0);
-              *level_sf = 1000;
-	      dlevel1 *= (*level_sf)*grib2ScaleFactor(factor);
-              *level_unit = CDI_UNIT_M;
-	    }
-	  else if ( *leveltype == GRIB2_LTYPE_ISOBARIC )
-	    {
-	      GRIB_CHECK(grib_get_long(gh, "scaleFactorOfFirstFixedSurface", &factor), 0);
-	      GRIB_CHECK(grib_get_double(gh, "scaledValueOfFirstFixedSurface", &dlevel1), 0);
-	      dlevel1 *= grib2ScaleFactor(factor);
-              printf("grib2GetLevel: level = %g leveltype = %d factor %ld\n", dlevel1, *leveltype, factor);
-	    }
-	  else
-	    {
-	      GRIB_CHECK(grib_get_double(gh, "level", &dlevel1), 0);
-	      if ( dlevel1 < -2.e9 || dlevel1 > 2.e9 ) dlevel1 = 0;
-	    }
+      if ( *leveltype == GRIB2_LTYPE_LANDDEPTH )
+        {
+          *level_sf = 1000;
+          *level_unit = CDI_UNIT_M;
+        }
+      else if ( *leveltype == GRIB2_LTYPE_ISOBARIC )
+        {
+          *level_sf = 1000;
+          *level_unit = CDI_UNIT_PA;
+        }
 
-	  *level1 = (int) dlevel1;
-	  *level2 = 0;
-	}
-      else
+      GRIB_CHECK(grib_get_long(gh, "scaleFactorOfFirstFixedSurface", &factor), 0);
+      GRIB_CHECK(grib_get_long(gh, "scaledValueOfFirstFixedSurface", &llevel), 0);
+      if ( llevel != GRIB_MISSING_LONG && factor != GRIB_MISSING_LONG )
+        dlevel1 = llevel*grib2ScaleFactor(factor);
+
+      if ( *level_sf != 0 ) dlevel1 *= (*level_sf);
+
+      if ( *lbounds == 1 )
 	{
-	  if ( *leveltype == GRIB2_LTYPE_LANDDEPTH )
-	    {
-	      GRIB_CHECK(grib_get_long(gh, "scaleFactorOfFirstFixedSurface", &factor), 0);
-	      GRIB_CHECK(grib_get_double(gh, "scaledValueOfFirstFixedSurface", &dlevel1), 0);
-              *level_sf = 1000;
-	      dlevel1 *= (*level_sf)*grib2ScaleFactor(factor);
-	      *level1 = (int) dlevel1;
-	      GRIB_CHECK(grib_get_long(gh, "scaleFactorOfSecondFixedSurface", &factor), 0);
-	      GRIB_CHECK(grib_get_double(gh, "scaledValueOfSecondFixedSurface", &dlevel2), 0);
-	      dlevel2 *= (*level_sf)*grib2ScaleFactor(factor);
-	      *level2 = (int) dlevel2;
-              *level_unit = CDI_UNIT_M;
-	    }
-	  else
-	    {
-	      GRIB_CHECK(grib_get_long(gh, "topLevel", &lpar), 0);
-	      *level1 = lpar;
-	      GRIB_CHECK(grib_get_long(gh, "bottomLevel", &lpar), 0);
-	      *level2 = lpar;
-	    }
-	}
+          GRIB_CHECK(grib_get_long(gh, "scaleFactorOfSecondFixedSurface", &factor), 0);
+          GRIB_CHECK(grib_get_long(gh, "scaledValueOfSecondFixedSurface", &llevel), 0);
+          if ( llevel != GRIB_MISSING_LONG && factor != GRIB_MISSING_LONG )
+            dlevel2 = llevel*grib2ScaleFactor(factor);
+
+          if ( *level_sf != 0 ) dlevel2 *= (*level_sf);
+        }
+
+      *level1 = (int) dlevel1;
+      *level2 = (int) dlevel2;
     }
 }
 
@@ -2631,7 +2613,6 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
       zaxisDefUnits(zaxisID, "Pa");
     }
 
-  printf("gribapiDefLevel: level %g  zaxistype %d\n", level, zaxistype);
   switch (zaxistype)
     {
     case ZAXIS_SURFACE:
