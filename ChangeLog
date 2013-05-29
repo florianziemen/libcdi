@@ -2,6 +2,10 @@
 
 	* Version 1.6.1 released
 
+2013-05-29  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* netCDF: skip 4D variables without time dimension (bug fix)
+
 2013-05-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* GRIB2: added support for pressure levels with 3 fractional digits

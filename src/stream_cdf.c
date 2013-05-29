@@ -6678,7 +6678,15 @@ int cdfInqContents(stream_t *streamptr)
       if ( ncvars[ncvarid].ndims > 4 )
 	{
 	  ncvars[ncvarid].isvar = 0;
-	  Warning("%d dimensional variables unsupported, skipped variable %s!",
+	  Warning("%d dimensional variables are not supported, skipped variable %s!",
+		ncvars[ncvarid].ndims, ncvars[ncvarid].name);
+	  continue;
+	}
+
+      if ( ncvars[ncvarid].ndims == 4 && timedimid == UNDEFID )
+	{
+	  ncvars[ncvarid].isvar = 0;
+	  Warning("%d dimensional variables without time dimension are not supported, skipped variable %s!",
 		ncvars[ncvarid].ndims, ncvars[ncvarid].name);
 	  continue;
 	}
