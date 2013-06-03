@@ -18,10 +18,10 @@ case "${HOSTNAME}" in
                     --enable-swig \
                     --enable-python \
                     --with-jasper=/opt/local \
-                    --with-grib_api=$HOME/local/gribapi-1.9.16 \
+                    --with-grib_api=$HOME/local/gribapi-1.10.4 \
                     --with-netcdf=$HOME/local \
                     --with-szlib=$HOME/local \
-	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O3 -march=native -Df2cFortran" LIBS="-L/opt/local/lib -lopenjpeg"
+	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O3 -march=native -Df2cFortran" XXLIBS="-L/opt/local/lib -lopenjpeg"
 	;;
     cinglung*|feilung*|wanglung*)
 	./configure --prefix=$HOME/local \
