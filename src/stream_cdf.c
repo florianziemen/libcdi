@@ -5674,7 +5674,8 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		}
 	    }
 
-	  if ( number_of_grid_used != UNDEFID )
+	  if ( number_of_grid_used != UNDEFID &&
+               (grid.type == UNDEFID || grid.type == GRID_GENERIC) )
 	    {
 	      grid.type   = GRID_REFERENCE;
 	      grid.number = number_of_grid_used;
