@@ -101,7 +101,7 @@ int cdiHaveFiletype(int filetype)
     case FILETYPE_IEG:  { status = 1; break; }
 #endif
 #if  defined  (HAVE_LIBGRIB)
-#if  defined  (HAVE_LIBGRIB_API) || defined  (HAVE_CGRIBEX)
+#if  defined  (HAVE_LIBGRIB_API) || defined  (HAVE_LIBCGRIBEX)
     case FILETYPE_GRB:  { status = 1; break; }
 #endif
 #if  defined  (HAVE_LIBGRIB_API)
