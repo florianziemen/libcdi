@@ -4,6 +4,7 @@
 
 2013-06-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* cdfDefVarMissval: changed xtype from NC_BYTE to NC_INT for missvals > 127 (workaround for a netCDF bug)
 	* use 'number_of_grid_used' only for undefined grid types
 
 2013-06-03  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
