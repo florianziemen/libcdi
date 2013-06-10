@@ -71,7 +71,7 @@ void cdf_create(const char *path, int cmode, int *ncidp)
 
   status = nc_set_fill(*ncidp, NC_NOFILL, &oldfill);
 
-  if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
+  if ( status != NC_NOERR ) Error("%s: %s", path, nc_strerror(status));
 }
 
 

@@ -689,8 +689,8 @@ void cdfDefVarMissval(stream_t *streamptr, int varID, int dtype, int lcheck)
       if ( lcheck && streamptr->ncmode == 2 ) cdf_redef(fileID);
 
       xtype = cdfDefDatatype(dtype, streamptr->filetype);
-      /* workaround for a netCDF bug? */
-      if ( xtype == NC_BYTE && missval > 127 ) xtype = NC_INT;
+
+      if ( xtype == NC_BYTE && missval > 127 && missval < 256 ) xtype = NC_INT;
 
       cdf_put_att_double(fileID, ncvarid, "_FillValue", (nc_type) xtype, 1, &missval);
       cdf_put_att_double(fileID, ncvarid, "missing_value", (nc_type) xtype, 1, &missval);
