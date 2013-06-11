@@ -266,8 +266,10 @@
       PARAMETER (ZAXIS_CLOUD_TOP        = 17)
       INTEGER    ZAXIS_ISOTHERM_ZERO   
       PARAMETER (ZAXIS_ISOTHERM_ZERO    = 18)
+      INTEGER    ZAXIS_SNOW            
+      PARAMETER (ZAXIS_SNOW             = 19)
       INTEGER    ZAXIS_REFERENCE       
-      PARAMETER (ZAXIS_REFERENCE        = 19)
+      PARAMETER (ZAXIS_REFERENCE        = 20)
 !
 !  TIME types
 !
