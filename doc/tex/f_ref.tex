@@ -1195,7 +1195,7 @@ vlistInqAttFlt
 }
 \begin{verbatim}
     INTEGER FUNCTION vlistInqAttFlt(INTEGER vlistID, INTEGER varID, 
-                                    CHARACTER*(*) name, INTEGER mlen, INTEGER dp)
+                                    CHARACTER*(*) name, INTEGER mlen, REAL*8 dp)
 \end{verbatim}
 
 Get the value(s) of a floating point attribute
@@ -1227,7 +1227,8 @@ vlistInqAttTxt
 }
 \begin{verbatim}
     INTEGER FUNCTION vlistInqAttTxt(INTEGER vlistID, INTEGER varID, 
-                                    CHARACTER*(*) name, INTEGER mlen, INTEGER tp)
+                                    CHARACTER*(*) name, INTEGER mlen, 
+                                    CHARACTER*(*) tp)
 \end{verbatim}
 
 Get the value(s) of a text attribute

@@ -2593,6 +2593,29 @@ void gribapiDefLevelType(grib_handle *gh, int gcinit, const char *keyname, long 
 }
 
 static
+void grib2DefLevel(grib_handle *gh, int gcinit, long leveltype, int lbounds, double level, double dlevel1, double dlevel2)
+{
+  long scaled_level;
+  long factor;
+
+  gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", leveltype);
+  if ( lbounds ) gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", leveltype);
+
+  if ( !lbounds ) dlevel1 = level;
+
+  getLevelFactor(dlevel1, &factor, &scaled_level);
+  GRIB_CHECK(grib_set_long(gh, "scaleFactorOfFirstFixedSurface", factor), 0);
+  GRIB_CHECK(grib_set_long(gh, "scaledValueOfFirstFixedSurface", scaled_level), 0);
+
+  if ( lbounds )
+    {
+      getLevelFactor(dlevel2, &factor, &scaled_level);
+      GRIB_CHECK(grib_set_long(gh, "scaleFactorOfSecondFixedSurface", factor), 0);
+      GRIB_CHECK(grib_set_long(gh, "scaledValueOfSecondFixedSurface", scaled_level), 0);
+    }
+}
+
+static
 void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID, int levelID, int gcinit)
 {
   double level;
@@ -2602,10 +2625,8 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
   int reference;
   char uuid[17];
   size_t len;
-  long scaled_level;
-  long factor;
   double scalefactor;
-  double dlevel1, dlevel2;
+  double dlevel1 = 0, dlevel2 = 0;
 
 
   zaxistype = zaxisInqType(zaxisID);
@@ -2715,8 +2736,6 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
       {
 	if ( lbounds )
 	  {
-	    long level1, level2;
-
 	    if ( editionNumber <= 1 )
 	      gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", GRIB1_LTYPE_HYBRID_LAYER);
             else
@@ -2725,11 +2744,8 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 		gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", GRIB2_LTYPE_HYBRID);
 	      }
 
-	    level1 = zaxisInqLbound(zaxisID, levelID);
-	    level2 = zaxisInqUbound(zaxisID, levelID);
-
-	    GRIB_CHECK(grib_set_long(gh, "topLevel", level1), 0);
-	    GRIB_CHECK(grib_set_long(gh, "bottomLevel", level2), 0);
+	    GRIB_CHECK(grib_set_long(gh, "topLevel", (long) dlevel1), 0);
+	    GRIB_CHECK(grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
 	  }
 	else
 	  {
@@ -2738,7 +2754,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
             else
               gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_HYBRID);
 
-	    GRIB_CHECK(grib_set_long(gh, "level", level), 0);
+	    GRIB_CHECK(grib_set_long(gh, "level", (long) level), 0);
 	  }
 
         if ( !gcinit )
@@ -2765,7 +2781,12 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 	if ( level < 0 ) Warning("Pressure level of %f Pa is below zero!", level);
 
 	zaxisInqUnits(zaxisID, units);
-	if ( memcmp(units, "Pa", 2) != 0 ) level *= 100;
+	if ( memcmp(units, "Pa", 2) != 0 )
+          {
+            level   *= 100;
+            dlevel1 *= 100;
+            dlevel2 *= 100;
+          }
 
         if ( editionNumber <= 1 )
           {
@@ -2781,20 +2802,19 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 	  }
 	else
 	  {
-            gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_ISOBARIC);
-            if ( lbounds ) gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", GRIB2_LTYPE_ISOBARIC);
-
-            getLevelFactor(dlevel1, &factor, &scaled_level);
-            GRIB_CHECK(grib_set_long(gh, "scaleFactorOfFirstFixedSurface", factor), 0);
-            GRIB_CHECK(grib_set_long(gh, "scaledValueOfFirstFixedSurface", scaled_level), 0);
-
-	    if ( lbounds )
-	      {
-                getLevelFactor(dlevel2, &factor, &scaled_level);
-               	GRIB_CHECK(grib_set_long(gh, "scaleFactorOfSecondFixedSurface", factor), 0);
-		GRIB_CHECK(grib_set_long(gh, "scaledValueOfSecondFixedSurface", scaled_level), 0);
-	      }
+            grib2DefLevel(gh, gcinit, GRIB2_LTYPE_ISOBARIC, lbounds, level, dlevel1, dlevel2);
 	  }
+
+	break;
+      }
+    case ZAXIS_SNOW:
+      {
+        if ( editionNumber <= 1 )
+          ; // not available
+	else
+          {
+            grib2DefLevel(gh, gcinit, GRIB2_LTYPE_SNOW, lbounds, level, dlevel1, dlevel2);
+          }
 
 	break;
       }
@@ -2854,21 +2874,11 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 	    else if ( memcmp(units, "dm", 2) == 0 ) scalefactor = 0.1;
 	    else                                    scalefactor = 1; // meter
 
-            gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_LANDDEPTH);
-            if ( lbounds ) gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", GRIB2_LTYPE_LANDDEPTH);
-
+            level   *= scalefactor;
             dlevel1 *= scalefactor;
-            getLevelFactor(dlevel1, &factor, &scaled_level);
-            GRIB_CHECK(grib_set_long(gh, "scaleFactorOfFirstFixedSurface", factor), 0);
-            GRIB_CHECK(grib_set_long(gh, "scaledValueOfFirstFixedSurface", scaled_level), 0);
+            dlevel1 *= scalefactor;
 
-	    if ( lbounds )
-	      {
-		dlevel2 *= scalefactor;
-                getLevelFactor(dlevel2, &factor, &scaled_level);
-		GRIB_CHECK(grib_set_long(gh, "scaleFactorOfSecondFixedSurface", factor), 0);
-		GRIB_CHECK(grib_set_long(gh, "scaledValueOfSecondFixedSurface", scaled_level), 0);
-	      }
+            grib2DefLevel(gh, gcinit, GRIB2_LTYPE_LANDDEPTH, lbounds, level, dlevel1, dlevel2);
 	  }
 
 	break;

@@ -158,7 +158,8 @@ extern "C" {
 #define  ZAXIS_CLOUD_BASE        16  /* Cloud base level                        */
 #define  ZAXIS_CLOUD_TOP         17  /* Level of cloud tops                     */
 #define  ZAXIS_ISOTHERM_ZERO     18  /* Level of 0o C isotherm                  */
-#define  ZAXIS_REFERENCE         19  /* zaxis reference number                  */
+#define  ZAXIS_SNOW              19  /* Snow level                              */
+#define  ZAXIS_REFERENCE         20  /* zaxis reference number                  */
 
 /* TIME types */
 

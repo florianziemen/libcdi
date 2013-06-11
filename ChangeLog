@@ -4,6 +4,7 @@
 
 2013-06-11  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* GRIB2: added support for snow level (level type 114)
 	* GRIB2: added support for layers with zaxis type ZAXIS_PRESSURE
 
 2013-06-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>

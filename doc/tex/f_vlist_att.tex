@@ -165,7 +165,7 @@ The function {\tt vlistInqAttFlt} gets the values(s) of a floating point attribu
 
 \begin{verbatim}
     INTEGER FUNCTION vlistInqAttFlt(INTEGER vlistID, INTEGER varID, 
-                                    CHARACTER*(*) name, INTEGER mlen, INTEGER dp)
+                                    CHARACTER*(*) name, INTEGER mlen, REAL*8 dp)
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -226,7 +226,8 @@ The function {\tt vlistInqAttTxt} gets the values(s) of a text attribute.
 
 \begin{verbatim}
     INTEGER FUNCTION vlistInqAttTxt(INTEGER vlistID, INTEGER varID, 
-                                    CHARACTER*(*) name, INTEGER mlen, INTEGER tp)
+                                    CHARACTER*(*) name, INTEGER mlen, 
+                                    CHARACTER*(*) tp)
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
