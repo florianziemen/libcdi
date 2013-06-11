@@ -3,6 +3,8 @@ CDI NEWS
 
 Version 1.6.1 (18 June 2013):
 
+   New features:
+     * GRIB2: added support for layers with zaxis type ZAXIS_PRESSURE
    New functions:
      * cdiHaveFiletype(): Check whether a filetype is available
    Fixed bugs:

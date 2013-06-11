@@ -2,6 +2,10 @@
 
 	* Version 1.6.1 released
 
+2013-06-11  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* GRIB2: added support for layers with zaxis type ZAXIS_PRESSURE
+
 2013-06-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cdfDefVarMissval: changed xtype from NC_BYTE to NC_INT for missvals > 127 (workaround for a netCDF bug)
