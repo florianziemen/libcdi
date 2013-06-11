@@ -64,6 +64,7 @@ typedef struct
   char       *longname;
   char       *units;
   ensinfo_t  *ensdata;
+#if  defined  (HAVE_LIBGRIB_API)
   /* (Optional) list of keyword/double value pairs */
   int    opt_grib_dbl_nentries;
   char*  opt_grib_dbl_keyword[MAX_OPT_GRIB_ENTRIES];
@@ -72,6 +73,7 @@ typedef struct
   int    opt_grib_int_nentries;
   char*  opt_grib_int_keyword[MAX_OPT_GRIB_ENTRIES];
   int    opt_grib_int_val[MAX_OPT_GRIB_ENTRIES];
+#endif
 }
 vartable_t;
 
@@ -261,8 +263,10 @@ int paramNewEntry(int param)
       for( i = 0; i < varTablesize; i++ )
 	{
 	  vartable[i].param = UNDEF_PARAM;
+#if  defined  (HAVE_LIBGRIB_API)
 	  vartable[i].opt_grib_int_nentries = 0;
 	  vartable[i].opt_grib_dbl_nentries = 0;
+#endif
 	}
     }
   else
@@ -292,8 +296,10 @@ int paramNewEntry(int param)
       for( i = varID; i < varTablesize; i++ )
 	{
 	  vartable[i].param = UNDEF_PARAM;
+#if  defined  (HAVE_LIBGRIB_API)
 	  vartable[i].opt_grib_int_nentries = 0;
 	  vartable[i].opt_grib_dbl_nentries = 0;
+#endif
 	}
     }
 
@@ -587,6 +593,7 @@ void cdi_generate_vars(stream_t *streamptr)
 	                                                  vartable[varid].ensdata->ens_count,
 							  vartable[varid].ensdata->forecast_init_type);
 
+#if  defined  (HAVE_LIBGRIB_API)
       /* ---------------------------------- */
       /* Local change: 2013-04-23, FP (DWD) */
       /* ---------------------------------- */
@@ -611,6 +618,7 @@ void cdi_generate_vars(stream_t *streamptr)
           vlistptr->vars[varID].opt_grib_dbl_keyword[idx] = strdupx(vartable[varid].opt_grib_dbl_keyword[idx]);
         }
       /* note: if the key is not defined, we do not throw an error! */
+#endif
 
       if ( cdiDefaultTableID != UNDEFID )
 	{
@@ -990,30 +998,34 @@ void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type
 
 void varDefOptGribInt(int varID, long lval, const char *keyword)
 {
+#if  defined  (HAVE_LIBGRIB_API)
   int idx = vartable[varID].opt_grib_int_nentries;
   vartable[varID].opt_grib_int_nentries++;
   if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
   vartable[varID].opt_grib_int_val[idx] = (int) lval;
   vartable[varID].opt_grib_int_keyword[idx] = strdupx(keyword);
+#endif
 }
 
 
 void varDefOptGribDbl(int varID, double dval, const char *keyword)
 {
+#if  defined  (HAVE_LIBGRIB_API)
   int idx = vartable[varID].opt_grib_dbl_nentries;
   vartable[varID].opt_grib_dbl_nentries++;
   if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/double value pairs!");
   vartable[varID].opt_grib_dbl_val[idx] = dval;
   vartable[varID].opt_grib_dbl_keyword[idx] = strdupx(keyword);
+#endif
 }
 
 
 int varOptGribNentries(int varID)
 {
   int nentries = 0;
-
+#if  defined  (HAVE_LIBGRIB_API)
   nentries = vartable[varID].opt_grib_int_nentries + vartable[varID].opt_grib_dbl_nentries;
-
+#endif
   return (nentries);
 }
 

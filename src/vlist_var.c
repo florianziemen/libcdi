@@ -65,6 +65,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].decoSize      = 0;
   vlistptr->vars[varID].deco          = NULL;
 
+#if  defined  (HAVE_LIBGRIB_API)
   /* ---------------------------------- */
   /* Local change: 2013-01-28, FP (DWD) */
   /* ---------------------------------- */
@@ -78,6 +79,7 @@ void vlistvarInitEntry(int vlistID, int varID)
     vlistptr->vars[varID].opt_grib_int_keyword[i] = NULL;
     vlistptr->vars[varID].opt_grib_dbl_keyword[i] = NULL;
   } // for
+#endif
 }
 
 static
@@ -1901,6 +1903,7 @@ int vlistInqVarEnsemble( int vlistID, int varID, int *ensID, int *ensCount, int 
 /* vlistDefVarIntKey: Set an arbitrary keyword/integer value pair for GRIB API */
 void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
 {
+#if  defined  (HAVE_LIBGRIB_API)
   vlist_t *vlistptr;
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -1912,11 +1915,13 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
     vlistptr->vars[varID].opt_grib_int_keyword[idx] = strdupx(name);
   else
     Error("Internal error!");
+#endif
 }
 
 /* vlistDefVarDblKey: Set an arbitrary keyword/double value pair for GRIB API */
 void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
 {
+#if  defined  (HAVE_LIBGRIB_API)
   vlist_t *vlistptr;
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -1928,6 +1933,7 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
     vlistptr->vars[varID].opt_grib_dbl_keyword[idx] = strdupx(name);
   else
     Error("Internal error!");
+#endif
 }
 
 #if  defined  (HAVE_LIBGRIB_API)
@@ -1939,9 +1945,11 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
 /* cdiClearAdditionalKeys: Clears the list of additional GRIB keys. */
 void cdiClearAdditionalKeys()
 {
+#if  defined  (HAVE_LIBGRIB_API)
   int i;
   for (i=0; i<cdiNAdditionalGRIBKeys; i++)  free(cdiAdditionalGRIBKeys[i]);
   cdiNAdditionalGRIBKeys = 0;
+#endif
 }
 
 /* cdiDefAdditionalKey: Register an additional GRIB key which is read when file is opened. */

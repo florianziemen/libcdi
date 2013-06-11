@@ -786,6 +786,7 @@ void gribapiGetString(grib_handle *gh, const char *key, char *string, size_t len
   else if ( length == 2 && memcmp(string, "~", length)       == 0 ) string[0] = 0;
 }
 
+#if  defined  (HAVE_LIBGRIB_API)
 static
 void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 		      long recsize, off_t position, int datatype, int comptype, size_t len, const char *varname,
@@ -993,6 +994,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
     Message("varID = %d  param = %d  zaxistype = %d  gridID = %d  levelID = %d",
 	    varID, param, zaxistype, gridID, levelID);
 }
+#endif
 
 static
 int gribapiGetParam(grib_handle *gh)

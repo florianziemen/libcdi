@@ -115,6 +115,7 @@ typedef struct
   int         decoSize;
   deco_t     *deco;
 
+#if  defined  (HAVE_LIBGRIB_API)
   /* ---------------------------------- */
   /* Local change: 2013-01-28, FP (DWD) */
   /* ---------------------------------- */
@@ -127,6 +128,7 @@ typedef struct
   int    opt_grib_int_nentries;
   char*  opt_grib_int_keyword[MAX_OPT_GRIB_ENTRIES];
   int    opt_grib_int_val[MAX_OPT_GRIB_ENTRIES];
+#endif
 }
 var_t;
 
@@ -178,9 +180,10 @@ void    vlistDefVarValidrange(int vlistID, int varID, const double *validrange);
 /*      vlistInqVarValidrange: Get the valid range of a Variable */
 int     vlistInqVarValidrange(int vlistID, int varID, double *validrange);
 
-
+#if  defined  (HAVE_LIBGRIB_API)
 extern int   cdiNAdditionalGRIBKeys;
 extern char* cdiAdditionalGRIBKeys[];
+#endif
 
 #endif  /* _VLIST_H */
 /*

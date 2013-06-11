@@ -131,9 +131,11 @@ int grbDecode(int filetype, unsigned char *gribbuffer, int gribsize, double *dat
 #if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
     {
+#if  defined  (HAVE_LIBGRIB_API)
       extern int cdiNAdditionalGRIBKeys;
       if ( cdiNAdditionalGRIBKeys > 0 )
 	Error("CGRIBEX decode does not support reading of additional GRIB keys!");
+#endif
       status = cgribexDecode(gribbuffer, gribsize, data, gridsize, unreduced, nmiss, zip, missval);
     }
   else
