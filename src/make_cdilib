@@ -19,10 +19,11 @@ rm -f ${PROG}
 
 DATE=`date +%F`
 
-if test -f config.h ; then
-   CDILIBVERSION=`grep PACKAGE_VERSION config.h | cut -f3 -d" "`
+if test -f ../configure.ac ; then
+   CDILIBVERSION=\"`sed -n '/^AC_INIT(/s/AC_INIT *( *[^,]*,[[ ]*\([^],]*\).*/\1/
+t print;b;: print;p' ../configure.ac`\"
 else
-   echo "error: missing config.h" >&2
+   echo "error: cannot find configure.ac" >&2
    exit 1
 fi
 
@@ -163,9 +164,7 @@ for cfile in $c ; do
 done
 
 
-if test -f  config.h ; then
-   cpp -P -DHAVE_CONFIG_H  -I./ $srcdir/version.c >>  ${PROG}
-fi
+cpp -P -DVERSION="${CDILIBVERSION}" $srcdir/version.c >>${PROG}
 
 # Fortran interface (with -DHAVE_CF_INTERFACE)
 
