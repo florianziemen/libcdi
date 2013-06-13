@@ -15,24 +15,8 @@
 #endif
 
 
-#define MAXSTRLNNETCDF    32
-#define MAXBUFFERSIZE     32
-#define MAXVALUE          10
 #define MAXDEBUG           3
-#define MAXLEVELINFOS     10
-#define MAXVARS           10
 
-#define MAXLEVEL          10
-#define MAXLEVELIDX       10
-#define MAXRECORDS        10
-#define MAXRECIDS         10
-#define MAXVARS           10
-#define MAXTSTEPS         10
-#define MAXFNAMES         10
-#define MAXGHBUFFERSIZE_0 10
-#define MAXGHBUFFERSIZE_1 10
-
-#define MAXSTRING        256
 #define MINFILETYPE        1
 #define MAXFILETYPE        9
 
