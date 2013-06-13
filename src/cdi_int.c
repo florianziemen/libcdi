@@ -693,7 +693,9 @@ cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig)
               || ((rank = commInqRankColl())
                   == (rankOpen = cdiPioSerialOpenFileMap(streamptr->self))))
 #endif
+#ifdef HAVE_LIBNETCDF
             cdfDefVars(streamptr);
+#endif
         }
       else if ( streamptr->filetype == FILETYPE_GRB  ||
                 streamptr->filetype == FILETYPE_GRB2 )
