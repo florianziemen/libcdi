@@ -8,10 +8,14 @@
 
 static int nNamespaces = 1;
 static int activeNamespace = 0;
-static int serialHLF = 1;
-static int * hasLocalFiles = &serialHLF;
-static int serialRS = STAGE_DEFINITION;
-static statusCode * resStatus = (statusCode *) &serialRS;
+
+struct namespace
+{
+  int hasLocalFiles;
+  statusCode resStage;
+} initialNamespace = { .hasLocalFiles = 1, .resStage = STAGE_DEFINITION };
+
+struct namespace *namespaces = &initialNamespace;
 
 enum {
   intbits = sizeof(int) * CHAR_BIT,
@@ -74,17 +78,18 @@ void namespaceInit ( int nspn, int * argHasLocalFile )
 {
   /* FIXME: this should not be PIO-only */
 #ifdef USE_MPI
-  int nspID;
 
   xassert(nspn <= NUM_NAMESPACES && nspn >= 1 );
 
   nNamespaces = nspn;
   if ( nspn >= 1 )
     {
-      hasLocalFiles = xmalloc ( nspn * sizeof ( hasLocalFiles[0] ));
-      for ( nspID = 0; nspID < nspn; nspID++ )
-	hasLocalFiles[nspID] = argHasLocalFile[nspID];
-      resStatus = xmalloc ( nspn * sizeof ( resStatus[0] ));
+      namespaces = xmalloc(nspn * sizeof (namespaces[0]));
+      for (int nspID = 0; nspID < nspn; ++nspID)
+        {
+          namespaces[nspID].hasLocalFiles = argHasLocalFile[nspID];
+          namespaces[nspID].resStage = STAGE_DEFINITION;
+        }
     }
 #endif
 }
@@ -94,9 +99,9 @@ void namespaceCleanup ( void )
 {
   if ( nNamespaces > 1 )
     {
-      free ( hasLocalFiles );
-      hasLocalFiles = NULL;
-      free ( resStatus );
+      free(namespaces);
+      namespaces = &initialNamespace;
+      nNamespaces = 1;
     }
 }
 
@@ -128,7 +133,7 @@ int namespaceHasLocalFile ( int nId )
 {
   xassert ( nId < nNamespaces && nId >= 0 );
 
-  return hasLocalFiles ? hasLocalFiles[nId] : 0;
+  return namespaces ? namespaces[nId].hasLocalFiles : 0;
 }
 
 
@@ -169,14 +174,14 @@ int namespaceAdaptKey2 ( int key )
 void namespaceDefResStatus ( statusCode argResStatus )
 {
   int nsp = namespaceGetActive ();
-  resStatus[nsp] = argResStatus;
+  namespaces[nsp].resStage = argResStatus;
 }
 
 
 statusCode namespaceInqResStatus ( void )
 {
   int nsp = namespaceGetActive ();
-  return resStatus[nsp];
+  return namespaces[nsp].resStage;
 }
 
 /*
