@@ -19,6 +19,13 @@
 
 #define debugString "#####"
 
+#ifdef USE_MPI
+void
+cdiAbortC_MPI(const char * caller, const char * filename,
+              const char *functionname, int line,
+              const char * errorString, va_list ap)
+  __attribute__((noreturn));
+#endif
 
 #ifdef USE_MPI
 static inline int

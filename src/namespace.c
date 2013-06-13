@@ -6,12 +6,14 @@
 #include "resource_handle.h"
 #include "pio_util.h"
 #include "serialize.h"
+#include "error.h"
 
 static int nNamespaces = 1;
 static int activeNamespace = 0;
 
-#define defaultSwitches { \
-    serializeGetSizeInCore,            \
+#define defaultSwitches {              \
+    cdiAbortC_serial,                  \
+      serializeGetSizeInCore,          \
       serializePackInCore,             \
       serializeUnpackInCore,           \
       }

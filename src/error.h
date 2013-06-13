@@ -1,6 +1,9 @@
 #ifndef _ERROR_H
 #define _ERROR_H
 
+#include <stdarg.h>
+#include <stdlib.h>
+
 #ifndef  WITH_CALLER_NAME
 #define  WITH_CALLER_NAME
 #endif
@@ -54,6 +57,12 @@ void cdiAbortC(const char *caller, const char *filename,
     if ((arg)) { } else {                       \
       xabort("assertion failed");}              \
   } while(0)
+
+void
+cdiAbortC_serial(const char *caller, const char *filename,
+                 const char *functionname, int line,
+                 const char *errorString, va_list ap)
+  __attribute__((noreturn));
 
 #endif  /* _ERROR_H */
 /*

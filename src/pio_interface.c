@@ -817,6 +817,7 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
   if ( commInqIsProcIO ())
     {
       serializeSetMPI();
+      namespaceSwitchSet(NSSWITCH_ABORT, cdiAbortC_MPI);
       IOServer ();
       namespaceDelete(0);
       commDestroy ();

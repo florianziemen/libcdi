@@ -21,6 +21,30 @@ char commands[][13] = { "FINALIZE\0",
 
 
 /*****************************************************************************/
+#ifdef USE_MPI
+void
+cdiAbortC_MPI(const char *caller, const char *filename,
+              const char *functionname, int line,
+              const char *errorString, va_list ap)
+{
+  {
+    int rank = getMPICommWorldRank();
+    fprintf(stderr, "ERROR, pe%d in %s, %s, line %d%s"
+            "%s\nerrorString: \"", rank, functionname, filename, line,
+            caller?", called from ":"", caller?caller:"");
+  }
+  vfprintf(stderr, errorString, ap);
+  fputs("\"\n", stderr);
+  if (callsToMPIAreAllowed())
+    MPI_Abort(MPI_COMM_WORLD, 1);
+  else
+    abort();
+  exit(EXIT_FAILURE);
+  va_end(ap);
+}
+#endif
+
+/*****************************************************************************/
 
 void * pcdiXmalloc ( size_t size, const char *filename, const char *functionname,
 		     int line )
