@@ -5,6 +5,7 @@
 #ifdef USE_MPI
 #include <unistd.h>
 #include <mpi.h>
+#include <yaxt.h>
 #endif
 
 #include "cdi.h"
@@ -125,7 +126,8 @@ int main (int argc, char *argv[])
   int nProcsIO = 2;
 
   xmpi ( MPI_Init ( &argc, &argv));
-  xmpi ( MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob ));
+  commGlob = MPI_COMM_WORLD;
+  xt_initialize(commGlob);
   xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
   xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
@@ -168,6 +170,7 @@ int main (int argc, char *argv[])
 
 #ifdef USE_MPI
   pioFinalize ();
+  xt_finalize();
   MPI_Finalize ();
 #endif
   return 0;

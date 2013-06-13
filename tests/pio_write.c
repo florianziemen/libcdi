@@ -14,6 +14,7 @@
 
 #ifdef USE_MPI
 #include <mpi.h>
+#include <yaxt.h>
 #else
 typedef int MPI_Comm;
 #endif
@@ -395,6 +396,7 @@ int main (int argc, char *argv[])
 
   xmpi ( MPI_Init ( &argc, &argv));
   commGlob = MPI_COMM_WORLD;
+  xt_initialize(commGlob);
   xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
   xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
@@ -489,6 +491,7 @@ int main (int argc, char *argv[])
 
 #ifdef USE_MPI
   pioFinalize ();
+  xt_finalize();
   MPI_Finalize ();
 #endif
   return 0;

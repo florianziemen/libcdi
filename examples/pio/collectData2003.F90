@@ -3,6 +3,9 @@
 #endif
 
 PROGRAM collectdata2003
+#ifdef USE_MPI
+  USE yaxt, ONLY: xt_initialize, xt_finalize
+#endif
 
   IMPLICIT NONE
 
@@ -28,7 +31,8 @@ PROGRAM collectdata2003
   ! Start parallel environment
 #ifdef USE_MPI
   CALL MPI_INIT ( error )
-  CALL MPI_COMM_DUP ( MPI_COMM_WORLD, commGlob, error )
+  commGlob = MPI_COMM_WORLD
+  CALL xt_initialize(commGlob)
 
   ! For parallel IO:
   ! Initialize environment.
@@ -41,7 +45,7 @@ PROGRAM collectdata2003
   ! For parallel IO:
   ! Cleanup environment.
   CALL pioFinalize ()
-
+  CALL xt_finalize
   CALL MPI_FINALIZE ( error )
 #endif
 

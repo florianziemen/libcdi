@@ -6,6 +6,7 @@
 
 #ifdef USE_MPI
 #include <mpi.h>
+#include <yaxt.h>
 #include "cdi.h"
 #include "pio_util.h"
 
@@ -225,7 +226,8 @@ int main (int argc, char *argv[])
   MPI_Comm commGlob, commModel;
 
   MPI_Init(&argc, &argv);           
-  xmpi ( MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob ));
+  commGlob = MPI_COMM_WORLD;
+  xt_initialize(commGlob);
   xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob )); 
 
@@ -240,6 +242,7 @@ int main (int argc, char *argv[])
 
   modelRun ( commModel );
 
+  xt_finalize();
   MPI_Finalize (); 
 #else
   printf ( "Use MPI for this testprogram.\n" );
