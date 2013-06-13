@@ -237,7 +237,7 @@ cdiPioStreamWriteVarChunk_(int streamID, int varID, int memtype,
 }
 
 void
-cdiPioStreamClose(stream_t *streamptr)
+cdiPioStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
   statusCode nspStatus = namespaceInqResStatus ();
   switch ( nspStatus )

@@ -25,7 +25,7 @@ void cdiPioStreamWriteVar_(int streamID, int varID, int memtype,
 void cdiPioStreamWriteVarChunk_(int streamID, int varID, int memtype,
                                 const int rect[][2], const void *data,
                                 int nmiss);
-void cdiPioStreamClose(stream_t *streamptr);
+void cdiPioStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted);
 
 #else
 typedef int MPI_Comm;

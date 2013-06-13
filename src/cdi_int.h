@@ -366,7 +366,8 @@ void
 cdiStreamwriteVarChunk_(int streamID, int varID, int memtype,
                         const int rect[][2], const void *data, int nmiss);
 void
-cdiStreamCloseDefaultDelegate(stream_t *streamptr);
+cdiStreamCloseDefaultDelegate(stream_t *streamptr,
+                              int recordBufIsToBeDeleted);
 
 char *cdiUnitNamePtr(int cdi_unit);
 

@@ -1124,7 +1124,7 @@ int streamOpenWrite(const char *filename, int filetype)
 }
 
 void
-cdiStreamCloseDefaultDelegate(stream_t *streamptr)
+cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
   int fileID   = streamptr->fileID;
   int filetype = streamptr->filetype;
@@ -1138,7 +1138,8 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr)
       case FILETYPE_GRB2:
         {
           gribClose(fileID);
-          gribContainersDelete(streamptr);
+          if (recordBufIsToBeDeleted)
+            gribContainersDelete(streamptr);
           break;
         }
 #endif
@@ -1146,7 +1147,8 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr)
       case FILETYPE_SRV:
         {
           fileClose(fileID);
-          srvDelete(streamptr->record->srvp);
+          if (recordBufIsToBeDeleted)
+            srvDelete(streamptr->record->srvp);
           break;
         }
 #endif
@@ -1154,7 +1156,8 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr)
       case FILETYPE_EXT:
         {
           fileClose(fileID);
-          extDelete(streamptr->record->extp);
+          if (recordBufIsToBeDeleted)
+            extDelete(streamptr->record->extp);
           break;
         }
 #endif
@@ -1162,7 +1165,8 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr)
       case FILETYPE_IEG:
         {
           fileClose(fileID);
-          iegDelete(streamptr->record->iegp);
+          if (recordBufIsToBeDeleted)
+            iegDelete(streamptr->record->iegp);
           break;
         }
 #endif
@@ -1219,10 +1223,10 @@ void streamClose(int streamID)
 
   vlistID  = streamptr->vlistID;
 
-  void (*streamCloseDelegate)(stream_t *)
+  void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
     = namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND);
 
-  streamCloseDelegate(streamptr);
+  streamCloseDelegate(streamptr, 1);
 
   if ( streamptr->record )
       {
