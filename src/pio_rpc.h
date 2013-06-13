@@ -20,21 +20,6 @@ typedef enum
     COLLBUFNMISS,
   } command;
 
-enum 
-{ GRID      = 1,
-  ZAXIS     = 2,
-  TAXIS     = 3,
-  INSTITUTE = 4,
-  MODEL     = 5,
-  STREAM    = 6,
-  VLIST     = 7,
-  START     = 55555555,
-  SEPARATOR = 66666666,
-  DATATOKEN = 77777777,
-  FUNCCALL  = 88888888,
-  END       = 99999999 
-};
-
 enum
 {
   timestepSize = 3
@@ -53,8 +38,6 @@ enum
 };
 enum { MAXDATAFILENAME = 256, MINFUNCID = STREAMCLOSE, MAXFUNCID = STREAMOPEN };
 extern char * funcMap[nFuncs];
-
-void rpcUnpackResources ( char *, int, MPI_Comm );
 
 struct headerSize
 {

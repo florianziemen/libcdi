@@ -7,10 +7,6 @@
 
 #include <stddef.h>  /* size_t */
 
-#ifdef USE_MPI
-#include <mpi.h>
-#endif
-
 #ifndef _CDI_LIMITS_H
 #  include "cdi_limits.h"
 #endif
@@ -168,11 +164,9 @@ int      vlistHasTime(int vlistID);
 int      vlistDelAtts(int vlistID, int varID);
 int      vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2);
 
-#ifdef USE_MPI
-void     vlistUnpack(char * buffer, int bufferSize, int * pos, int, MPI_Comm comm);
+void     vlistUnpack(char * buffer, int bufferSize, int * pos, int, void *context);
 void     vlistDefVarDeco ( int vlistID, int varID, int decoSize, 
                               deco_t * deco );
-#endif
 
 /*      vlistDefVarValidrange: Define the valid range of a Variable */
 void    vlistDefVarValidrange(int vlistID, int varID, const double *validrange);

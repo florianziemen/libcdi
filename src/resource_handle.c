@@ -12,15 +12,11 @@
 #include "resource_handle.h"
 #include "pio_util.h"
 #include "namespace.h"
+#include "serialize.h"
 #include "cdi.h"
 #include "error.h"
 #include "file.h"
-
-#ifdef USE_MPI
-#include "pio_comm.h"
-#include "pio_rpc.h"
-#endif
-
+#include "resource_unpack.h"
 
 enum { MIN_LIST_SIZE = 128 };
 
@@ -356,21 +352,16 @@ int reshCountType ( resOps * ops )
 
 /**************************************************************/
 
-#ifdef USE_MPI
-static
-int  getPackBufferSize ( MPI_Comm comm )
+static int getPackBufferSize(void *context)
 {
   int nsp, i;
-  int packBufferSize = 0;
-  int intpacksize;
+  int intpacksize, packBufferSize = 0;
   listElem_t * curr;
 
   nsp = namespaceGetActive ();
 
-  xmpi ( MPI_Pack_size ( 1, MPI_INT, comm, &intpacksize ));
-
   /* pack start marker, namespace and sererator marker */
-  packBufferSize += 3 * intpacksize;
+  packBufferSize += (intpacksize = serializeGetSize(3, DATATYPE_INT, context));
 
   /* pack resources, type marker and seperator marker */
   for ( i = 0; i < resHList[nsp].size; i++ )
@@ -381,7 +372,7 @@ int  getPackBufferSize ( MPI_Comm comm )
           xassert ( curr->ops );
 
           /* message plus frame of 2 ints */
-          packBufferSize += curr->ops->valGetPackSize ( curr->val, comm )
+          packBufferSize += curr->ops->valGetPackSize(curr->val, context)
             + 2 * intpacksize;
         }
 
@@ -400,9 +391,9 @@ void reshPackBufferDestroy ( char ** buffer )
 
 /**************************************************************/
 
-void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm comm )
+void reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
 {
-  int i, nsp, packBufferPos = 0;
+  int i, packBufferPos = 0;
   int start = START, end = END, sep = SEPARATOR, type;
   listElem_t * curr;
 
@@ -410,19 +401,15 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
 
   LIST_LOCK();
 
-  nsp = namespaceGetActive ();
+  int nsp = namespaceGetActive ();
 
-  * packBufferSize = getPackBufferSize ( comm );
-  * packBuffer = xcalloc ( 1, * packBufferSize );
+  int pBSize = *packBufferSize = getPackBufferSize(context);
+  char *pB = *packBuffer = xcalloc(1, *packBufferSize);
 
-  xmpi ( MPI_Pack ( &start, 1,  MPI_INT,
-		    * packBuffer, * packBufferSize, &packBufferPos, comm ));
-
-  xmpi ( MPI_Pack ( &nsp, 1,  MPI_INT,
-		    * packBuffer, * packBufferSize, &packBufferPos, comm ));
-
-  xmpi ( MPI_Pack ( &sep, 1,  MPI_INT,
-		    * packBuffer, * packBufferSize, &packBufferPos, comm ));
+  {
+    int header[3] = { start, nsp, sep };
+    serializePack(header, 3,  DATATYPE_INT, pB, pBSize, &packBufferPos, context);
+  }
 
   for ( i = 0; i < resHList[nsp].size; i++ )
     if ( resHList[nsp].resources[i].val )
@@ -435,28 +422,20 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
 
           if ( ! type ) continue;
 
-          xmpi ( MPI_Pack ( &type, 1, MPI_INT, * packBuffer,
-			    * packBufferSize, &packBufferPos, comm ));
+          serializePack( &type, 1, DATATYPE_INT, * packBuffer,
+			    * packBufferSize, &packBufferPos, context);
 
-          curr->ops->valPack ( curr->val,
-                               * packBuffer ,
-                               * packBufferSize,
-                               &packBufferPos,
-                               comm );
+          curr->ops->valPack(curr->val, pB, pBSize, &packBufferPos, context);
 
-          xmpi ( MPI_Pack ( &sep, 1,  MPI_INT, * packBuffer,
-			    * packBufferSize, &packBufferPos, comm ));
+          serializePack(&sep, 1, DATATYPE_INT, pB, pBSize, &packBufferPos, context);
 
           curr->status = CLOSED;
         }
 
   LIST_UNLOCK();
 
-  xmpi ( MPI_Pack ( &end, 1,  MPI_INT,
-                  * packBuffer, * packBufferSize, &packBufferPos, comm ));
+  serializePack(&end, 1,  DATATYPE_INT, pB, pBSize, &packBufferPos, context);
 }
-
-#endif
 
 /**************************************************************/
 
@@ -543,7 +522,6 @@ void reshUnlock ()
 int reshListCompare ( int nsp0, int nsp1 )
 {
   int valCompare = 0;
-#ifdef USE_MPI
   int i;
 
 
@@ -604,8 +582,6 @@ int reshListCompare ( int nsp0, int nsp1 )
     }
 
   LIST_UNLOCK();
-
-#endif
 
   return valCompare;
 }

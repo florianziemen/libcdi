@@ -106,11 +106,11 @@ extern "C" {
 #define  DATATYPE_UINT32        332
 
 /* internal data types */
-
 #define  DATATYPE_INT           251
 #define  DATATYPE_FLT           252
 #define  DATATYPE_TXT           253
 #define  DATATYPE_CPX           254
+#define  DATATYPE_UCHAR         255
 
 /* Chunks */
 

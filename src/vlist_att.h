@@ -5,24 +5,17 @@
 #include "config.h"
 #endif
 
-#ifdef USE_MPI
-#include <mpi.h>
-#endif
-
-#ifdef USE_MPI
-
 int
-vlistAttsGetSize(vlist_t *p, int varID, MPI_Comm comm);
+vlistAttsGetSize(vlist_t *p, int varID, void *context);
 
 void
 vlistAttsPack(vlist_t *p, int varID,
-              void * buf, int size, int *position, MPI_Comm comm);
+              void * buf, int size, int *position, void *context);
 
 void
 vlistAttsUnpack(int vlistID, int varID,
-                void * buf, int size, int *position, MPI_Comm comm);
+                void * buf, int size, int *position, void *context);
 
-#endif
 
 #endif
 

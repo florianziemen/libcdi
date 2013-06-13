@@ -181,6 +181,8 @@
       PARAMETER (DATATYPE_TXT           = 253)
       INTEGER    DATATYPE_CPX          
       PARAMETER (DATATYPE_CPX           = 254)
+      INTEGER    DATATYPE_UCHAR        
+      PARAMETER (DATATYPE_UCHAR         = 255)
 !
 !  Chunks
 !

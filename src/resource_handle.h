@@ -5,10 +5,7 @@
 #include "config.h"
 #endif
 
-#ifdef USE_MPI
-#include <mpi.h>
-#include <stdlib.h>
-#endif
+#include <stdio.h>
 
 /*
  * CDI internal handling of resource handles given to user code
@@ -23,21 +20,17 @@ typedef int cdiResH;
 typedef int    ( * valCompareFunc     )( void *, void * );
 typedef void   ( * valDestroyFunc     )( void * );
 typedef void   ( * valPrintFunc       )( void *, FILE * );
-#ifdef USE_MPI
-typedef int    ( * valGetPackSizeFunc )( void *, MPI_Comm comm );
-typedef void   ( * valPackFunc        )( void *, void *buf, int size, int *pos, MPI_Comm comm );
+typedef int    ( * valGetPackSizeFunc )( void *, void *context );
+typedef void   ( * valPackFunc        )( void *, void *buf, int size, int *pos, void *context );
 typedef int    ( * valTxCodeFunc      )( void );
-#endif
 
 typedef struct {
   valCompareFunc     valCompare;
   valDestroyFunc     valDestroy;
   valPrintFunc       valPrint;
-#ifdef USE_MPI
   valGetPackSizeFunc valGetPackSize;
   valPackFunc        valPack;
   valTxCodeFunc      valTxCode;
-#endif
 }resOps;
 
 enum { RESH_UNDEFID, ASSIGNED, SUSPENDED, CLOSED };
@@ -54,16 +47,15 @@ void * reshGetValue(const char *, cdiResH, resOps * );
 
 void   reshGetResHListOfType ( int, int *, resOps * );
 
-#ifdef USE_MPI
-void   reshPackBufferCreate ( char **, int *, MPI_Comm );
+void   reshPackBufferCreate ( char **, int *, void *context );
 void   reshPackBufferDestroy ( char ** );
-#endif
 
 void   reshSetStatus ( cdiResH, resOps *, int );
 int    reshGetStatus ( cdiResH, resOps * );
 
 void   reshLock   ( void );
 void   reshUnlock ( void );
+int reshListCompare(int nsp0, int nsp1);
 
 #endif
 /*

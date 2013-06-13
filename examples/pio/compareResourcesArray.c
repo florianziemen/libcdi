@@ -9,11 +9,10 @@
 #include <yaxt.h>
 #include "cdi.h"
 #include "pio_util.h"
+#include "resource_handle.h"
+#include "resource_unpack.h"
 
 extern int    reshListCompare      ( int, int );
-extern void   reshPackBufferCreate  ( char **, int *, MPI_Comm );
-extern void   reshPackBufferDestroy ( char ** );
-extern void   rpcUnpackResources    ( char *, int, MPI_Comm );
 extern void   arrayDestroy          ( void );
 
 enum {
@@ -192,15 +191,15 @@ void modelRun ( MPI_Comm comm )
   if ( streamID < 0 ) xabort ( "Could not open file" );
   defineStream ( streamID, vlistID );
 
-  reshPackBufferCreate ( &sendBuffer, &bufferSize, comm );
-  xmpi ( MPI_Send ( sendBuffer, bufferSize, MPI_PACKED, 0, 0, comm ));  
+  reshPackBufferCreate(&sendBuffer, &bufferSize, &comm);
+  xmpi ( MPI_Send ( sendBuffer, bufferSize, MPI_PACKED, 0, 0, comm ));
   recvBuffer = xmalloc ( bufferSize * sizeof ( char ));
   xmpi ( MPI_Recv ( recvBuffer, bufferSize, MPI_PACKED, 0,
 		    0, comm, &status ));
- 
+
   pioNamespaceSetActive ( 1 );
-  rpcUnpackResources ( recvBuffer, bufferSize, comm );  
-  free ( recvBuffer );  
+  reshUnpackResources(recvBuffer, bufferSize, &comm);
+  free ( recvBuffer );
   reshPackBufferDestroy ( &sendBuffer );
 
   differ = reshListCompare ( 0, 1 );

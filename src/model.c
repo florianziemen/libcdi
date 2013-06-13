@@ -7,8 +7,9 @@
 #include "cdi_int.h"
 #include "pio_util.h"
 #include "resource_handle.h"
-#include "pio_rpc.h"
+#include "resource_unpack.h"
 #include "namespace.h"
+#include "serialize.h"
 
 #undef  UNDEFID
 #define UNDEFID -1
@@ -37,17 +38,13 @@ static void modelInit(void);
 static int    modelCompareP ( void * modelptr1, void * modelptr2 );
 static void   modelDestroyP ( void * modelptr );
 static void   modelPrintP   ( void * modelptr, FILE * fp );
-#ifdef USE_MPI
-static int    modelGetSizeP ( void * modelptr, MPI_Comm comm );
+static int    modelGetSizeP ( void * modelptr, void *context);
 static void   modelPackP    ( void * modelptr, void * buff, int size,
-                              int *position, MPI_Comm comm);
+                              int *position, void *context);
 static int    modelTxCode   ( void );
-#endif
 
 resOps modelOps = { modelCompareP, modelDestroyP, modelPrintP
-#ifdef USE_MPI
                     , modelGetSizeP, modelPackP, modelTxCode
-#endif
 };
 
 static
@@ -288,8 +285,6 @@ void modelPrintP   ( void * modelptr, FILE * fp )
 }
 
 
-#ifdef USE_MPI
-
 static int
 modelTxCode ( void )
 {
@@ -301,21 +296,16 @@ enum {
 };
 
 
-static
-int modelGetSizeP ( void * modelptr, MPI_Comm comm )
+static int modelGetSizeP(void * modelptr, void *context)
 {
   model_t *p = modelptr;
-  int txsize = 0, txinc;
-  xmpi(MPI_Pack_size(model_nints, MPI_INT, comm, &txsize));
-  xmpi(MPI_Pack_size(strlen(p->name) + 1, MPI_CHAR, comm, &txinc));
-  txsize += txinc;
+  int txsize = serializeGetSize(model_nints, DATATYPE_INT, context)
+    + serializeGetSize(strlen(p->name) + 1, DATATYPE_TXT, context);
   return txsize;
 }
 
 
-static
-void modelPackP ( void * modelptr, void * buf, int size,
-                  int *position, MPI_Comm comm )
+static void modelPackP(void * modelptr, void * buf, int size, int *position, void *context)
 {
   model_t *p = modelptr;
   int tempbuf[model_nints];
@@ -323,27 +313,25 @@ void modelPackP ( void * modelptr, void * buf, int size,
   tempbuf[1] = p->instID;
   tempbuf[2] = p->modelgribID;
   tempbuf[3] = (int)strlen(p->name) + 1;
-  xmpi(MPI_Pack(tempbuf, model_nints, MPI_INT, buf, size, position, comm));
-  xmpi(MPI_Pack(p->name, tempbuf[3], MPI_CHAR, buf, size, position, comm));
+  serializePack(tempbuf, model_nints, DATATYPE_INT, buf, size, position, context);
+  serializePack(p->name, tempbuf[3], DATATYPE_TXT, buf, size, position, context);
 }
 
 int
-modelUnpack(void *buf, int size, int *position, int nspTarget,
-            MPI_Comm comm)
+modelUnpack(void *buf, int size, int *position, int nspTarget, void *context)
 {
   int tempbuf[model_nints];
   int modelID;
   char *name;
-  xmpi(MPI_Unpack(buf, size, position, tempbuf, model_nints, MPI_INT, comm));
+  serializeUnpack(buf, size, position, tempbuf, model_nints, DATATYPE_INT, context);
   name = xmalloc(tempbuf[3]);
-  xmpi(MPI_Unpack(buf, size, position, name, tempbuf[3], MPI_CHAR, comm));
+  serializeUnpack(buf, size, position, name, tempbuf[3], DATATYPE_TXT, context);
   modelID = modelDef( namespaceAdaptKey ( tempbuf[1], nspTarget ), tempbuf[2], name);
   // FIXME: this should work, once all types are transferred
   //assert(modelID == tempbuf[0]);
   return modelID;
 }
 
-#endif
 /*
  * Local Variables:
  * c-file-style: "Java"

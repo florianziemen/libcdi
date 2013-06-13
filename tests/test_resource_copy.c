@@ -8,11 +8,10 @@
 #include <mpi.h>
 #include "cdi.h"
 #include "pio_util.h"
+#include "resource_handle.h"
+#include "resource_unpack.h"
+#include "pio_serialize.h"
 
-extern int    reshListCompare      ( int, int );
-extern void   reshPackBufferCreate  ( char **, int *, MPI_Comm );
-extern void   reshPackBufferDestroy ( char ** );
-extern void   rpcUnpackResources    ( char *, int, MPI_Comm );
 extern void   arrayDestroy          ( void );
 
 enum {
@@ -182,6 +181,8 @@ int modelRun ( MPI_Comm comm )
   int bufferSize, differ;
 
   pioNamespaceSetActive ( 0 );
+  if (IOMode != PIO_NONE)
+    serializeSetMPI();
 
   gridID  = defineGrid      ();
   zaxisID = defineZaxis     ();
@@ -193,13 +194,13 @@ int modelRun ( MPI_Comm comm )
   if ( streamID < 0 ) xabort ( "Could not open file" );
   defineStream ( streamID, vlistID );
 
-  reshPackBufferCreate ( &sendBuffer, &bufferSize, comm );
+  reshPackBufferCreate ( &sendBuffer, &bufferSize, &comm );
   recvBuffer = xmalloc ( bufferSize * sizeof ( char ));
   xmpi(MPI_Sendrecv(sendBuffer, bufferSize, MPI_PACKED, 0, 0,
                     recvBuffer, bufferSize, MPI_PACKED, 0, 0,
                     MPI_COMM_SELF, MPI_STATUS_IGNORE));
   pioNamespaceSetActive ( 1 );
-  rpcUnpackResources ( recvBuffer, bufferSize, comm );
+  reshUnpackResources(recvBuffer, bufferSize, &comm);
   free ( recvBuffer );
   reshPackBufferDestroy ( &sendBuffer );
 

@@ -16,6 +16,7 @@
 #include "resource_handle.h"
 #include "vlist_att.h"
 #include "namespace.h"
+#include "serialize.h"
 #include "pio_util.h"
 
 extern resOps vlist_ops;
@@ -2150,54 +2151,33 @@ int vlistInqVarIOrank(int vlistID, int varID)
 }
 
 
-#ifdef USE_MPI
-
 enum {
   vlistvar_nints = 21,
   vlistvar_ndbls = 3,
 };
 
-int vlistVarGetSize(vlist_t *p, int varID, MPI_Comm comm)
+int vlistVarGetSize(vlist_t *p, int varID, void *context)
 {
   var_t *var = p->vars + varID;
-  int varsize, txinc;
-
-  xmpi(MPI_Pack_size(vlistvar_nints, MPI_INT, comm, &varsize));
-  xmpi(MPI_Pack_size(vlistvar_ndbls, MPI_DOUBLE, comm, &txinc));
-  varsize += txinc;
+  int varsize = serializeGetSize(vlistvar_nints, DATATYPE_INT, context)
+    + serializeGetSize(vlistvar_ndbls, DATATYPE_FLT64, context);
   if (var->name)
-  {
-    xmpi(MPI_Pack_size(strlen(var->name), MPI_CHAR, comm, &txinc));
-    varsize += txinc;
-  }
+    varsize += serializeGetSize(strlen(var->name), DATATYPE_TXT, context);
   if (var->longname)
-  {
-    xmpi(MPI_Pack_size(strlen(var->longname), MPI_CHAR, comm, &txinc));
-    varsize += txinc;
-  }
+    varsize += serializeGetSize(strlen(var->longname), DATATYPE_TXT, context);
   if (var->stdname)
-  {
-    xmpi(MPI_Pack_size(strlen(var->stdname), MPI_CHAR, comm, &txinc));
-    varsize += txinc;
-  }
+    varsize += serializeGetSize(strlen(var->stdname), DATATYPE_TXT, context);
   if (var->units)
-  {
-    xmpi(MPI_Pack_size(strlen(var->units), MPI_CHAR, comm, &txinc));
-    varsize += txinc;
-  }
-  xmpi(MPI_Pack_size(4 * var->nlevs, MPI_INT, comm, &txinc));
-  varsize += txinc;
+    varsize += serializeGetSize(strlen(var->units), DATATYPE_TXT, context);
+  varsize += serializeGetSize(4 * var->nlevs, DATATYPE_INT, context);
   if ( var->deco != NULL )
-    {
-      xmpi(MPI_Pack_size(3 * var->decoSize, MPI_INT, comm, &txinc));
-      varsize += txinc;
-    }
-  varsize += vlistAttsGetSize(p, varID, comm);
+    varsize += serializeGetSize(3 * var->decoSize, DATATYPE_INT, context);
+  varsize += vlistAttsGetSize(p, varID, context);
   return varsize;
 }
 
 void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
-                  MPI_Comm comm)
+                  void *context)
 {
   double dtempbuf[vlistvar_ndbls];
   var_t *var = p->vars + varID;
@@ -2227,21 +2207,21 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   dtempbuf[0] = var->missval;
   dtempbuf[1] = var->scalefactor;
   dtempbuf[2] = var->addoffset;
-  xmpi(MPI_Pack(tempbuf, vlistvar_nints, MPI_INT,
-                buf, size, position, comm));
-  xmpi(MPI_Pack(dtempbuf, vlistvar_ndbls, MPI_DOUBLE,
-                buf, size, position, comm));
+  serializePack(tempbuf, vlistvar_nints, DATATYPE_INT,
+                buf, size, position, context);
+  serializePack(dtempbuf, vlistvar_ndbls, DATATYPE_FLT64,
+                buf, size, position, context);
   if (namesz)
-    xmpi(MPI_Pack(var->name, namesz, MPI_CHAR, buf, size, position, comm));
+    serializePack(var->name, namesz, DATATYPE_TXT, buf, size, position, context);
   if (longnamesz)
-    xmpi(MPI_Pack(var->longname, longnamesz, MPI_CHAR,
-                  buf, size, position, comm));
+    serializePack(var->longname, longnamesz, DATATYPE_TXT,
+                  buf, size, position, context);
   if (stdnamesz)
-    xmpi(MPI_Pack(var->stdname, stdnamesz, MPI_CHAR,
-                  buf, size, position, comm));
+    serializePack(var->stdname, stdnamesz, DATATYPE_TXT,
+                  buf, size, position, context);
   if (unitssz)
-    xmpi(MPI_Pack(var->units, unitssz, MPI_CHAR,
-                  buf, size, position, comm));
+    serializePack(var->units, unitssz, DATATYPE_TXT,
+                  buf, size, position, context);
   {
     int levbuf[var->nlevs][4];
     for (i = 0; i < var->nlevs; ++i)
@@ -2251,8 +2231,8 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
       levbuf[i][2] = var->levinfo[i].mlevelID;
       levbuf[i][3] = var->levinfo[i].flevelID;
     }
-    xmpi(MPI_Pack(levbuf, var->nlevs * 4, MPI_INT,
-                  buf, size, position, comm));
+    serializePack(levbuf, var->nlevs * 4, DATATYPE_INT,
+                  buf, size, position, context);
   }
   if ( var->deco != NULL )
     {
@@ -2263,10 +2243,10 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
           deco[i][1] = var->deco[i].offset;
           deco[i][2] = var->deco[i].chunk;
         }
-      xmpi(MPI_Pack(deco, var->decoSize * 3, MPI_INT,
-                    buf, size, position, comm));
+      serializePack(deco, var->decoSize * 3, DATATYPE_INT,
+                    buf, size, position, context);
     }
-  vlistAttsPack(p, varID, buf, size, position, comm);
+  vlistAttsPack(p, varID, buf, size, position, context);
 }
 
 static inline int
@@ -2277,16 +2257,16 @@ imax(int a, int b)
 
 
 void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
-		    int nspTarget, MPI_Comm comm)
+		    int nspTarget, void *context)
 {
   double dtempbuf[vlistvar_ndbls];
   int tempbuf[vlistvar_nints];
   int newvar;
   char *varname = NULL;
-  xmpi(MPI_Unpack(buf, size, position,
-                  tempbuf, vlistvar_nints, MPI_INT, comm));
-  xmpi(MPI_Unpack(buf, size, position,
-                  dtempbuf, vlistvar_ndbls, MPI_DOUBLE, comm));
+  serializeUnpack(buf, size, position,
+                  tempbuf, vlistvar_nints, DATATYPE_INT, context);
+  serializeUnpack(buf, size, position,
+                  dtempbuf, vlistvar_ndbls, DATATYPE_FLT64, context);
 
   newvar = vlistDefVar ( vlistID,
 			 namespaceAdaptKey ( tempbuf[1], nspTarget ),
@@ -2297,29 +2277,29 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
                            tempbuf[7])+ 1);
   if (tempbuf[4])
   {
-    xmpi(MPI_Unpack(buf, size, position,
-                    varname, tempbuf[4], MPI_CHAR, comm));
+    serializeUnpack(buf, size, position,
+                    varname, tempbuf[4], DATATYPE_TXT, context);
     varname[tempbuf[4]] = '\0';
     vlistDefVarName(vlistID, newvar, varname);
   }
   if (tempbuf[5])
   {
-    xmpi(MPI_Unpack(buf, size, position,
-                    varname, tempbuf[5], MPI_CHAR, comm));
+    serializeUnpack(buf, size, position,
+                    varname, tempbuf[5], DATATYPE_TXT, context);
     varname[tempbuf[5]] = '\0';
     vlistDefVarLongname(vlistID, newvar, varname);
   }
   if (tempbuf[6])
   {
-    xmpi(MPI_Unpack(buf, size, position,
-                    varname, tempbuf[6], MPI_CHAR, comm));
+    serializeUnpack(buf, size, position,
+                    varname, tempbuf[6], DATATYPE_TXT, context);
     varname[tempbuf[6]] = '\0';
     vlistDefVarStdname(vlistID, newvar, varname);
   }
   if (tempbuf[7])
   {
-    xmpi(MPI_Unpack(buf, size, position,
-                    varname, tempbuf[7], MPI_CHAR, comm));
+    serializeUnpack(buf, size, position,
+                    varname, tempbuf[7], DATATYPE_TXT, context);
     varname[tempbuf[7]] = '\0';
     vlistDefVarUnits(vlistID, newvar, varname);
   }
@@ -2345,8 +2325,8 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
     var_t *var = vlist_to_pointer(vlistID)->vars + newvar;
     int nlevs=tempbuf[18], i, flagSetLev = 0;
     xassert(nlevs == var->nlevs);
-    xmpi(MPI_Unpack(buf, size, position,
-                    levbuf, nlevs * 4, MPI_INT, comm));
+    serializeUnpack(buf, size, position,
+                    levbuf, nlevs * 4, DATATYPE_INT, context);
     for (i = 0; i < nlevs; ++i)
     {
       vlistDefFlag(vlistID, newvar, i, levbuf[i][0]);
@@ -2365,8 +2345,8 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
       deco_t deco[decoSize];
       int decobuf[decoSize][3];
 
-      xmpi ( MPI_Unpack(buf, size, position,
-                        decobuf, decoSize * 3, MPI_INT, comm ));
+      serializeUnpack(buf, size, position,
+                      decobuf, decoSize * 3, DATATYPE_INT, context);
       for (i = 0; i < decoSize; ++i)
         {
           deco[i].rank   = decobuf[i][0];
@@ -2376,11 +2356,9 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
       vlistDefVarDeco(vlistID, newvar, decoSize, &deco[0]);
     }
   vlistDefVarIOrank(vlistID, newvar, tempbuf[19]);
-  vlistAttsUnpack(vlistID, newvar, buf, size, position, comm);
+  vlistAttsUnpack(vlistID, newvar, buf, size, position, context);
 }
 
-
-#endif
 
 /*
  * Local Variables:

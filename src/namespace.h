@@ -13,6 +13,16 @@ typedef struct {
   int nsp;
 } namespaceTuple_t;
 
+enum namespaceSwitch
+{
+  NSSWITCH_NO_SUCH_SWITCH = -1,
+  NSSWITCH_SERIALIZE_GET_SIZE,
+  NSSWITCH_SERIALIZE_PACK,
+  NSSWITCH_SERIALIZE_UNPACK,
+  NUM_NAMESPACE_SWITCH,
+};
+
+
 int              namespaceNew(int hasLocalFiles);
 void             namespaceDelete(int namespaceID);
 void             namespaceCleanup      ( void );
@@ -26,6 +36,8 @@ int              namespaceAdaptKey     ( int, int );
 int              namespaceAdaptKey2    ( int );
 void             namespaceDefResStatus ( statusCode );
 statusCode       namespaceInqResStatus ( void );
+void namespaceSwitchSet(enum namespaceSwitch sw, void *value);
+void *namespaceSwitchGet(enum namespaceSwitch sw);
 
 
 #endif

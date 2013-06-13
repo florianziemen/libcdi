@@ -29,6 +29,7 @@
 #include "pio_util.h"
 #include "cdi_int.h"
 #include "resource_handle.h"
+#include "resource_unpack.h"
 #include "vlist_var.h"
 
 
@@ -924,7 +925,7 @@ void IOServer ()
 	  xmpi ( MPI_Recv ( buffer, size, MPI_PACKED, source,
                             tag, commCalc, &status ));
           xdebug("%s", "RECEIVED MESSAGE WITH TAG \"RESOURCES\"");
-	  rpcUnpackResources ( buffer, size, commCalc );
+	  reshUnpackResources(buffer, size, &commCalc);
           xdebug("%s", "");
 	  free ( buffer );
           if ( ddebug > 0 && commInqRankGlob () == nProcsModel ) 

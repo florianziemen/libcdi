@@ -55,6 +55,8 @@ libcdi_la_SOURCES = 	 \
 	model.h        	 \
 	namespace.c      \
 	namespace.h      \
+	serialize.h	\
+	serialize.c	\
 	pio.c            \
 	pio.h            \
 	pio_comm.c       \
@@ -69,12 +71,15 @@ libcdi_la_SOURCES = 	 \
 	pio_posixfpguardsendrecv.c \
 	pio_posixnonb.c  \
 	pio_list_set.c	 \
-	pio_rpc.c        \
+	resource_unpack.h \
+	resource_unpack.c \
 	pio_rpc.h        \
 	pio_server.c     \
 	pio_server.h     \
 	pio_util.c       \
 	pio_util.h       \
+	pio_serialize.h	\
+	pio_serialize.c	\
 	resource_handle.c\
 	resource_handle.h\
 	service.h	 \

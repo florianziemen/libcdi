@@ -18,6 +18,7 @@
 
 #ifdef USE_MPI
 #include "namespace.h"
+#include "pio_serialize.h"
 #include "pio_interface.h"
 #include "pio_comm.h"
 #include "pio_rpc.h"
@@ -815,6 +816,7 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
 
   if ( commInqIsProcIO ())
     {
+      serializeSetMPI();
       IOServer ();
       namespaceDelete(0);
       commDestroy ();
@@ -827,6 +829,10 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
       commEvalPhysNodes ();
       commDefCommsIO ();
       pioNamespace_ = *pioNamespace = namespaceNew(0);
+      int callerCDINamespace = namespaceGetActive();
+      pioNamespaceSetActive(pioNamespace_);
+      serializeSetMPI();
+      pioNamespaceSetActive(callerCDINamespace);
     }
 
   xdebug ( "nProcsGlob=%d, RETURN", sizeGlob );
@@ -857,7 +863,8 @@ void  pioEndDef ( void )
   
   if ( rankGlob < commInqNProcsColl ())
     {
-      reshPackBufferCreate ( &buffer, &bufferSize, commInqCommsIO ( rankGlob ));
+      MPI_Comm comm = commInqCommsIO ( rankGlob );
+      reshPackBufferCreate(&buffer, &bufferSize, &comm);
 
       xmpi ( MPI_Send ( buffer, bufferSize, MPI_PACKED, commInqNProcsModel (),
                         RESOURCES, commInqCommsIO ( rankGlob )));

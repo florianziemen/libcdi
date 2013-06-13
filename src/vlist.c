@@ -15,6 +15,9 @@
 #include "vlist_att.h"
 #include "pio_rpc.h"
 
+#include "resource_unpack.h"
+#include "serialize.h"
+
 #if  defined  (HAVE_LIBGRIB_API)
 /* list of additional GRIB2 keywords which are read by the open process */
 int    cdiNAdditionalGRIBKeys = 0;
@@ -61,22 +64,18 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp );
 static void
 vlist_delete(vlist_t *vlistptr);
 
-#ifdef USE_MPI
-static int  vlistGetSizeP ( void * vlistptr, MPI_Comm comm );
+static int  vlistGetSizeP ( void * vlistptr, void *context);
 static void vlistPackP    ( void * vlistptr, void * buff, int size,
-                            int *position, MPI_Comm comm );
+                            int *position, void *context);
 static int  vlistTxCode   ( void );
-#endif
 
 resOps vlist_ops = {
   (valCompareFunc)vlist_compare,
   (valDestroyFunc)vlist_delete,
   (valPrintFunc)vlistPrintKernel
-#ifdef USE_MPI
   , vlistGetSizeP,
   vlistPackP,
   vlistTxCode
-#endif
 };
 
 
@@ -1706,8 +1705,6 @@ int vlistHasTime(int vlistID)
   return (hastime);
 }
 
-#ifdef USE_MPI
-
 enum {
   vlist_nints=7,
 };
@@ -1720,21 +1717,21 @@ vlistTxCode ( void )
 
 
 static
-int  vlistGetSizeP ( void * vlistptr, MPI_Comm comm )
+int  vlistGetSizeP ( void * vlistptr, void *context)
 {
   int txsize, varID;
   vlist_t *p = vlistptr;
-  xmpi(MPI_Pack_size(vlist_nints, MPI_INT, comm, &txsize));
-  txsize += vlistAttsGetSize(p, CDI_GLOBAL, comm);
+  txsize = serializeGetSize(vlist_nints, DATATYPE_INT, context);
+  txsize += vlistAttsGetSize(p, CDI_GLOBAL, context);
   for ( varID = 0; varID <  p->nvars; varID++ )
-    txsize += vlistVarGetSize(p, varID, comm);
+    txsize += vlistVarGetSize(p, varID, context);
   return txsize;
 }
 
 
 static
 void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
-                  MPI_Comm comm )
+                  void *context )
 {
   int varID, tempbuf[vlist_nints];
   vlist_t *p = vlistptr;
@@ -1745,31 +1742,29 @@ void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
   tempbuf[4] = p->tableID;
   tempbuf[5] = p->instID;
   tempbuf[6] = p->modelID;
-  xmpi(MPI_Pack(tempbuf, vlist_nints, MPI_INT, buf, size, position, comm));
-  vlistAttsPack(p, CDI_GLOBAL, buf, size, position, comm);
+  serializePack(tempbuf, vlist_nints, DATATYPE_INT, buf, size, position, context);
+  vlistAttsPack(p, CDI_GLOBAL, buf, size, position, context);
   for ( varID = 0; varID < p->nvars; varID++ )
     {
-      vlistVarPack(p, varID, buf, size, position, comm);
+      vlistVarPack(p, varID, buf, size, position, context);
     }
 }
 
-void vlistUnpack(char * buf, int size, int *position, int nspTarget, MPI_Comm comm)
+void vlistUnpack(char * buf, int size, int *position, int nspTarget, void *context)
 {
   int newvlist;
   int varID, tempbuf[vlist_nints];
-  xmpi(MPI_Unpack(buf, size, position, tempbuf, vlist_nints, MPI_INT, comm));
+  serializeUnpack(buf, size, position, tempbuf, vlist_nints, DATATYPE_INT, context);
   newvlist = vlistCreate();
   /* xassert(newvlist == tempbuf[0]); */
   vlistDefTaxis ( newvlist, namespaceAdaptKey ( tempbuf[3], nspTarget ));
   vlistDefTable(newvlist, tempbuf[4]);
   vlistDefInstitut ( newvlist, namespaceAdaptKey ( tempbuf[5], nspTarget ));
   vlistDefModel ( newvlist, namespaceAdaptKey ( tempbuf[6], nspTarget ));
-  vlistAttsUnpack(newvlist, CDI_GLOBAL, buf, size, position, comm);
+  vlistAttsUnpack(newvlist, CDI_GLOBAL, buf, size, position, context);
   for ( varID = 0; varID < tempbuf[1]; varID++ )
-    vlistVarUnpack ( newvlist, buf, size, position, nspTarget, comm );
+    vlistVarUnpack(newvlist, buf, size, position, nspTarget, context);
 }
-
-#endif
 
 /*
  * Local Variables:

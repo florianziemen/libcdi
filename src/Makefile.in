@@ -113,11 +113,12 @@ am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	cdf_int.lo cdi_error.lo cdi_util.lo cdiFortran.lo \
 	cgribexlib.lo dmemory.lo error.lo extralib.lo file.lo \
 	gaussgrid.lo gribapi.lo grid.lo ieglib.lo institution.lo \
-	model.lo namespace.lo pio.lo pio_comm.lo pio_dbuffer.lo \
-	pio_interface.lo pio_mpinonb.lo pio_record_send.lo \
-	pio_posixasynch.lo pio_posixfpguardsendrecv.lo \
-	pio_posixnonb.lo pio_list_set.lo pio_rpc.lo pio_server.lo \
-	pio_util.lo resource_handle.lo servicelib.lo stream_cdf.lo \
+	model.lo namespace.lo serialize.lo pio.lo pio_comm.lo \
+	pio_dbuffer.lo pio_interface.lo pio_mpinonb.lo \
+	pio_record_send.lo pio_posixasynch.lo \
+	pio_posixfpguardsendrecv.lo pio_posixnonb.lo pio_list_set.lo \
+	resource_unpack.lo pio_server.lo pio_util.lo pio_serialize.lo \
+	resource_handle.lo servicelib.lo stream_cdf.lo \
 	stream_cgribex.lo stream_ext.lo stream_grb.lo \
 	stream_gribapi.lo stream_history.lo stream_ieg.lo cdi_int.lo \
 	stream_record.lo stream_srv.lo stream_var.lo table.lo taxis.lo \
@@ -387,6 +388,8 @@ libcdi_la_SOURCES = \
 	model.h        	 \
 	namespace.c      \
 	namespace.h      \
+	serialize.h	\
+	serialize.c	\
 	pio.c            \
 	pio.h            \
 	pio_comm.c       \
@@ -401,12 +404,15 @@ libcdi_la_SOURCES = \
 	pio_posixfpguardsendrecv.c \
 	pio_posixnonb.c  \
 	pio_list_set.c	 \
-	pio_rpc.c        \
+	resource_unpack.h \
+	resource_unpack.c \
 	pio_rpc.h        \
 	pio_server.c     \
 	pio_server.h     \
 	pio_util.c       \
 	pio_util.h       \
+	pio_serialize.h	\
+	pio_serialize.c	\
 	resource_handle.c\
 	resource_handle.h\
 	service.h	 \
@@ -591,10 +597,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixfpguardsendrecv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixnonb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_record_send.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_rpc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_serialize.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_server.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resource_handle.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resource_unpack.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/serialize.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/servicelib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cdf.Plo@am__quote@

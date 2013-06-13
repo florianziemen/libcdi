@@ -344,6 +344,16 @@ void str2uuid(const char *uuidstr, char *uuid);
 #define CDI_UNIT_DM   5
 #define CDI_UNIT_M    6
 
+struct streamAssoc
+{
+  int streamID, vlistID, vlistIDorig;
+};
+
+struct streamAssoc
+streamUnpack(char * unpackBuffer, int unpackBufferSize,
+             int * unpackBufferPos, int nspTarget, void *context);
+
+
 char *cdiUnitNamePtr(int cdi_unit);
 
 

@@ -240,8 +240,9 @@ src/pio_posixasynch.c -text
 src/pio_posixfpguardsendrecv.c -text
 src/pio_posixnonb.c -text
 src/pio_record_send.c -text
-src/pio_rpc.c -text
 src/pio_rpc.h -text
+src/pio_serialize.c -text
+src/pio_serialize.h -text
 src/pio_server.c -text
 src/pio_server.h -text
 src/pio_util.c -text
@@ -249,6 +250,10 @@ src/pio_util.h -text
 src/pkgconfig/cdi.pc.in -text
 src/resource_handle.c -text
 src/resource_handle.h -text
+src/resource_unpack.c -text
+src/resource_unpack.h -text
+src/serialize.c -text
+src/serialize.h -text
 src/service.h -text
 src/servicelib.c -text
 src/stream.c -text

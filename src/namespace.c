@@ -5,15 +5,27 @@
 #include "namespace.h"
 #include "resource_handle.h"
 #include "pio_util.h"
+#include "serialize.h"
 
 static int nNamespaces = 1;
 static int activeNamespace = 0;
+
+#define defaultSwitches { \
+    serializeGetSizeInCore,            \
+      serializePackInCore,             \
+      serializeUnpackInCore,           \
+      }
 
 struct namespace
 {
   int hasLocalFiles;
   statusCode resStage;
-} initialNamespace = { .hasLocalFiles = 1, .resStage = STAGE_DEFINITION };
+  void *switches[NUM_NAMESPACE_SWITCH];
+} initialNamespace = {
+  .hasLocalFiles = 1,
+  .resStage = STAGE_DEFINITION,
+  .switches = defaultSwitches
+};
 
 struct namespace *namespaces = &initialNamespace;
 
@@ -133,6 +145,9 @@ namespaceNew(int hasLocalFiles)
   ++nNamespaces;
   namespaces[newNamespaceID].hasLocalFiles = hasLocalFiles;
   namespaces[newNamespaceID].resStage = STAGE_DEFINITION;
+  memcpy(namespaces[newNamespaceID].switches,
+         (void *[NUM_NAMESPACE_SWITCH])defaultSwitches,
+         sizeof (namespaces[newNamespaceID].switches));
   reshListCreate(newNamespaceID);
   NAMESPACE_UNLOCK();
   return newNamespaceID;
@@ -234,6 +249,20 @@ statusCode namespaceInqResStatus ( void )
 {
   int nsp = namespaceGetActive ();
   return namespaces[nsp].resStage;
+}
+
+void namespaceSwitchSet(enum namespaceSwitch sw, void *value)
+{
+  xassert(sw > NSSWITCH_NO_SUCH_SWITCH && sw < NUM_NAMESPACE_SWITCH);
+  int nsp = namespaceGetActive();
+  namespaces[nsp].switches[sw] = value;
+}
+
+void *namespaceSwitchGet(enum namespaceSwitch sw)
+{
+  xassert(sw > NSSWITCH_NO_SUCH_SWITCH && sw < NUM_NAMESPACE_SWITCH);
+  int nsp = namespaceGetActive();
+  return namespaces[nsp].switches[sw];
 }
 
 void cdiReset(void)
