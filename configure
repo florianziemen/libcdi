@@ -27299,7 +27299,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-ac_config_files="$ac_config_files tests/test_cksum_grib tests/test_cksum_nc tests/test_cksum_nc2 tests/test_cksum_nc4 tests/test_cksum_extra tests/test_cksum_service tests/test_cksum_ieg tests/pio_write_run tests/pio_cksum_mpinonb tests/pio_cksum_fpguard tests/pio_cksum_asynch tests/pio_cksum_writer tests/pio_cksum_cdf util/serialrun"
+ac_config_files="$ac_config_files tests/test_cksum_grib tests/test_cksum_nc tests/test_cksum_nc2 tests/test_cksum_nc4 tests/test_cksum_extra tests/test_cksum_service tests/test_cksum_ieg tests/test_chunk_cksum tests/pio_write_run tests/pio_cksum_mpinonb tests/pio_cksum_fpguard tests/pio_cksum_asynch tests/pio_cksum_writer tests/pio_cksum_cdf util/serialrun"
 
 
 ac_config_files="$ac_config_files Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile cdi.settings examples/pio/Makefile src/pkgconfig/cdi.pc"
@@ -28640,6 +28640,7 @@ do
     "tests/test_cksum_extra") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_extra" ;;
     "tests/test_cksum_service") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_service" ;;
     "tests/test_cksum_ieg") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_ieg" ;;
+    "tests/test_chunk_cksum") CONFIG_FILES="$CONFIG_FILES tests/test_chunk_cksum" ;;
     "tests/pio_write_run") CONFIG_FILES="$CONFIG_FILES tests/pio_write_run" ;;
     "tests/pio_cksum_mpinonb") CONFIG_FILES="$CONFIG_FILES tests/pio_cksum_mpinonb" ;;
     "tests/pio_cksum_fpguard") CONFIG_FILES="$CONFIG_FILES tests/pio_cksum_fpguard" ;;
@@ -30469,6 +30470,7 @@ _LT_EOF
     "tests/test_cksum_extra":F) chmod a+x "$ac_file" ;;
     "tests/test_cksum_service":F) chmod a+x "$ac_file" ;;
     "tests/test_cksum_ieg":F) chmod a+x "$ac_file" ;;
+    "tests/test_chunk_cksum":F) chmod a+x "$ac_file" ;;
     "tests/pio_write_run":F) chmod a+x "$ac_file" ;;
     "tests/pio_cksum_mpinonb":F) chmod a+x "$ac_file" ;;
     "tests/pio_cksum_fpguard":F) chmod a+x "$ac_file" ;;

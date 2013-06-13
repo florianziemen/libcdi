@@ -290,6 +290,7 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
                  tests/test_cksum_extra \
                  tests/test_cksum_service \
                  tests/test_cksum_ieg \
+                 tests/test_chunk_cksum \
                  tests/pio_write_run \
                  tests/pio_cksum_mpinonb \
                  tests/pio_cksum_fpguard \

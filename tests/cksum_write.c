@@ -11,6 +11,7 @@
 
 #include "cksum.h"
 
+
 static int
 parse_intarg(const char msg[])
 {
@@ -37,6 +38,13 @@ sign_flat(double v)
   return v;
 }
 
+static void
+allocError(const char *msg)
+{
+  perror(msg);
+  exit(EXIT_FAILURE);
+}
+
 static char *
 fname_create(const char *prefix, const char *suffix)
 {
@@ -44,16 +52,35 @@ fname_create(const char *prefix, const char *suffix)
   char *fname;
   if (!(fname =malloc((prefix_len = strlen(prefix)) + 1
                       + (suffix_len = strlen(suffix)) + 1)))
-    {
-      perror("cannot create string");
-      exit(EXIT_FAILURE);
-    }
+    allocError("cannot create string");
   strcpy(fname, prefix);
   fname[prefix_len] = '.';
   strcpy(fname + prefix_len + 1, suffix);
   return fname;
 }
 
+#ifdef TEST_CHUNK_WRITE
+static void
+get_chunk(double *chunkBuf, double *var, int varShape[3],
+          int chunk[3][2])
+{
+  size_t ofs = 0;
+  unsigned start_k = (unsigned)chunk[2][0], start_j = (unsigned)chunk[1][0],
+    start_i = (unsigned)chunk[0][0];
+  unsigned size_k = (unsigned)chunk[2][1] - (unsigned)chunk[2][0] + 1,
+    size_j = (unsigned)chunk[1][1] - (unsigned)chunk[1][0] + 1,
+    size_i = (unsigned)chunk[0][1] - (unsigned)chunk[0][0] + 1;
+  size_t stride_k = (size_t)varShape[0] * (size_t)varShape[1],
+    stride_j = (size_t)varShape[0];
+  for (unsigned k = 0; k < size_k ; ++k)
+    for (unsigned j = 0; j < size_j; ++j)
+      for (unsigned i = 0; i < size_i; ++i)
+        chunkBuf[ofs++] = var[(k + start_k) * stride_k
+                              + (j + start_j) * stride_j + (i + start_i)];
+}
+#endif
+
+#ifndef TEST_CHUNK_WRITE
 static const struct {
   char suffix[4];
   int type, defaultDT, defaultGrid;
@@ -66,7 +93,7 @@ static const struct {
   { "svc", FILETYPE_SRV, DATATYPE_FLT64, GRID_GENERIC, },
   { "ieg", FILETYPE_IEG, DATATYPE_FLT64, GRID_LONLAT },
 };
-
+#endif
 enum {
   nvars = 2,
 };
@@ -86,13 +113,24 @@ main(int argc, char *argv[])
   double *lons, *lats, *var[nvars], *levs, mscale, mrscale;
   size_t varSize[nvars];
   char *varName[nvars] = { "varname1", "varname2" };
+#ifndef TEST_CHUNK_WRITE
   const char *suffix = "grb", *prefix = "example";
   int grid = GRID_LONLAT;
   int filetype = FILETYPE_GRB, datatype = DATATYPE_PACK24;
+#else
+  const char *suffix = "nc", *prefix = "example";
+  int grid = GRID_LONLAT;
+  int filetype = FILETYPE_NC, datatype = DATATYPE_FLT64;
+#endif
   {
     int opt;
-    while ((opt = getopt(argc, argv, "f:m:n:o:t:")) != -1)
+    while ((opt = getopt(argc, argv,
+#ifndef TEST_CHUNK_WRITE
+                         "f:"
+#endif
+                         "m:n:o:t:")) != -1)
       switch (opt) {
+#ifndef TEST_CHUNK_WRITE
       case 'f':
         {
           int found = 0;
@@ -114,8 +152,17 @@ main(int argc, char *argv[])
             }
         }
         break;
+#endif
       case 'm':
         nlon = parse_intarg("error parsing number of longitudes");
+#ifdef TEST_CHUNK_WRITE
+        if (nlon < 2)
+          {
+            fputs("number of longitudes must be larger 1 for "
+                  "chunk write test\n", stderr);
+            exit(EXIT_FAILURE);
+          }
+#endif
         break;
       case 'n':
         nlat = parse_intarg("error parsing number of latitudes");
@@ -177,7 +224,6 @@ main(int argc, char *argv[])
       vlistDefVarDatatype(vlistID, varID[i], datatype);
       // create memory for variables
       var[i] = malloc(varSize[i] * sizeof (var[i][0]));
-
     }
 
   {
@@ -266,8 +312,38 @@ main(int argc, char *argv[])
         memcrc_r(&checksum_state[1], (const unsigned char *)var[1], varSize[1] * sizeof (var[1][0]));
 
         // Write var1 and var2
+#ifdef TEST_CHUNK_WRITE
+        {
+          size_t maxChunkSize = (nlon + 1)/2 * nlat * nlev;
+          double *chunkBuf = malloc(maxChunkSize * sizeof (double));
+          int varShape[2][3] = { { nlon, nlat, 1 }, { nlon, nlat, nlev } },
+            chunk[3][2] = { { 0, nlon/2 - 1 }, { 0, nlat - 1 }, { 0, 0 } };
+          if (!chunkBuf)
+              allocError("cannot create chunk buffer");
+          chunk[0][0] = 0; chunk[0][1] = nlon/2 - 1;
+          chunk[2][1] = 0;
+          get_chunk(chunkBuf, var[0], varShape[0], chunk);
+          streamWriteVarChunk(streamID, varID[0], (const int (*)[2])chunk,
+                              chunkBuf, nmiss);
+          chunk[2][1] = nlev - 1;
+          get_chunk(chunkBuf, var[1], varShape[1], chunk);
+          streamWriteVarChunk(streamID, varID[1], (const int (*)[2])chunk,
+                              chunkBuf, nmiss);
+          chunk[0][0] = chunk[0][1] + 1; chunk[0][1] = nlon - 1;
+          chunk[2][1] = 0;
+          get_chunk(chunkBuf, var[0], varShape[0], chunk);
+          streamWriteVarChunk(streamID, varID[0], (const int (*)[2])chunk,
+                              chunkBuf, nmiss);
+          chunk[2][1] = nlev - 1;
+          get_chunk(chunkBuf, var[1], varShape[1], chunk);
+          streamWriteVarChunk(streamID, varID[1], (const int (*)[2])chunk,
+                              chunkBuf, nmiss);
+          free(chunkBuf);
+        }
+#else
         streamWriteVar(streamID, varID[0], var[0], nmiss);
         streamWriteVar(streamID, varID[1], var[1], nmiss);
+#endif
       }
     // write checksums to table file
     {
@@ -301,12 +377,16 @@ main(int argc, char *argv[])
   streamClose(streamID);
 
   // Destroy the objects
+  for (i = 0; i < nvars; ++i)
+    free(var[i]);
   vlistDestroy(vlistID);
   taxisDestroy(taxisID);
   zaxisDestroy(zaxisID[0]);
   zaxisDestroy(zaxisID[1]);
   gridDestroy(gridID);
-
+  free(levs);
+  free(lats);
+  free(lons);
   return 0;
 }
 

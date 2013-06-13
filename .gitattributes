@@ -323,6 +323,7 @@ tests/cksum.c -text
 tests/cksum.h -text
 tests/cksum_read.c -text
 tests/cksum_write.c -text
+tests/cksum_write_chunk.c -text
 tests/ensure_array_size.c -text
 tests/ensure_array_size.h -text
 tests/pio_cksum_asynch.in -text
@@ -334,6 +335,7 @@ tests/pio_write.c -text
 tests/pio_write_run.in -text
 tests/stream_cksum.c -text
 tests/stream_cksum.h -text
+tests/test_chunk_cksum.in -text
 tests/test_cksum_extra.in -text
 tests/test_cksum_grib.in -text
 tests/test_cksum_ieg.in -text
