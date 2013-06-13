@@ -4,7 +4,8 @@
 
 PROGRAM collectdata2003
 #ifdef USE_MPI
-  USE yaxt, ONLY: xt_initialize, xt_finalize
+  USE yaxt, ONLY: xt_initialize, xt_finalize, xt_idxlist, xt_idxstripes_new, &
+       xt_idxlist_delete, xt_int_kind, xt_stripe
 #endif
 
   IMPLICIT NONE
@@ -13,6 +14,9 @@ PROGRAM collectdata2003
 
 #ifdef USE_MPI
   INCLUDE 'mpif.h'
+
+  INTEGER, PARAMETER :: i4 = SELECTED_INT_KIND(9)
+  INTEGER, PARAMETER :: i8 = SELECTED_INT_KIND(14)
 #endif
 
   ! For parallel IO:
@@ -23,10 +27,8 @@ PROGRAM collectdata2003
   ! INTEGER, PARAMETER :: IOMode       = PIO_WRITER
   ! INTEGER, PARAMETER :: IOMode       = PIO_ASYNCH
   INTEGER, PARAMETER :: IOMode       = PIO_FPGUARD
-  INTEGER, PARAMETER :: nNamespaces  = 1
-  INTEGER, PARAMETER :: hasLocalFile(nNamespaces) = (/ 0 /)
 
-  INTEGER ::commGlob, commModel, error
+  INTEGER ::commGlob, commModel, error, pio_namespace
 
   ! Start parallel environment
 #ifdef USE_MPI
@@ -36,7 +38,8 @@ PROGRAM collectdata2003
 
   ! For parallel IO:
   ! Initialize environment.
-  commModel = pioInit ( commGlob, nProcsIO, IOMode, nNamespaces, hasLocalFile )
+  commModel = pioInit(commGlob, nProcsIO, IOMode, pio_namespace, 1.1)
+  CALL pioNamespaceSetActive(pio_namespace)
 #endif
 
   CALL modelrun ( commModel )
@@ -69,7 +72,15 @@ CONTAINS
     DOUBLE PRECISION :: lons ( nlon ), lats ( nlat ), levs ( nlev )
     DOUBLE PRECISION :: var1 ( nlon * nlat ), var2 ( nlon * nlat * nlev )
     CHARACTER(len=256) :: varname
-    INTEGER :: startID, stopID, chunk
+    INTEGER :: last, start, chunk
+#ifdef USE_MPI
+    INTEGER :: rank, comm_size, ierror
+    TYPE var1ddeco
+      INTEGER :: start, chunksize
+      TYPE(xt_idxlist) :: partdesc
+    END TYPE var1ddeco
+    TYPE(var1ddeco) :: vardeco1, vardeco2
+#endif
 
     lons = (/0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330/)
     lats = (/-75, -45, -15, 15, 45, 75/)
@@ -98,6 +109,22 @@ CONTAINS
     varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TIME_VARIABLE)
     varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TIME_VARIABLE)
 
+#ifdef USE_MPI
+    CALL mpi_comm_rank(commModel, rank, ierror)
+    IF (ierror /= mpi_success) STOP 1
+    CALL mpi_comm_size(commModel, comm_size, ierror)
+    IF (ierror /= mpi_success) STOP 1
+    start = uniform_partition_start((/ 1, SIZE(var1) /), comm_size, rank + 1)
+    chunk = uniform_partition_start((/ 1, SIZE(var1) /), comm_size, rank + 2) &
+         - start
+    vardeco1 = var1ddeco(start, chunk, &
+         xt_idxstripes_new(xt_stripe(start - 1, chunk, 1)))
+    start = uniform_partition_start((/ 1, SIZE(var2) /), comm_size, rank + 1)
+    chunk = uniform_partition_start((/ 1, SIZE(var2) /), comm_size, rank + 2) &
+         - start
+    vardeco2 = var1ddeco(start, chunk, &
+         xt_idxstripes_new(xt_stripe(start - 1, chunk, 1)))
+#endif
     !     Define the variable names
     varname = 'varname1'
     CALL vlistDefVarName(vlistID, varID1, varname)
@@ -135,27 +162,44 @@ CONTAINS
 
       ! For parallel IO:
       ! Inquire start index and chunk for IO transposition of var1
-      startID = pioInqVarDecoOff   ( vlistID, varID1 ) + 1
-      chunk   = pioInqVarDecoChunk ( vlistID, varID1 ) - 1
-      stopID = startID + chunk
+#ifdef USE_MPI
+      start = vardeco1%start
+      last = start + vardeco1%chunksize - 1
+#else
+      start = 1
+      last = SIZE(var1)
+#endif
       ! Init decomposed data for var1
-      DO i = startID, stopID
+      DO i = start, last
         var1(i) = 1.1
       END DO
       ! Write var1
-      CALL streamWriteVar(streamID, varID1, var1 ( startID ), nmiss)
-
+#ifdef USE_MPI
+      CALL streamwritevarpart(streamID, varID1, var1(start:last), nmiss, &
+           vardeco1%partdesc)
+#else
+      CALL streamWriteVar(streamID, varID1, var1, nmiss)
+#endif
       ! For parallel IO:
       ! Inquire start index and chunk for IO transposition of var2
-      startID = pioInqVarDecoOff ( vlistID, varID2 ) + 1
-      chunk = pioInqVarDecoChunk ( vlistID, varID2 ) - 1
-      stopID = startID + chunk
+#ifdef USE_MPI
+      start = vardeco2%start
+      last = start + vardeco2%chunksize - 1
+#else
+      start = 1
+      last = SIZE(var2)
+#endif
       ! Init decomposed data for var2
-      DO i = startID, stopID
+      DO i = start, last
         var2(i) = 2.2
       END DO
       ! Write var2
-      CALL streamWriteVar(streamID, varID2, var2 ( startID ), nmiss)
+#ifdef USE_MPI
+      CALL streamwritevarpart(streamID, varID2, var2(start:last), nmiss, &
+           vardeco2%partdesc)
+#else
+      CALL streamWriteVar(streamID, varID2, var2, nmiss)
+#endif
 
 #ifdef USE_MPI
       ! For parallel IO:
@@ -184,4 +228,18 @@ CONTAINS
 #endif
   END SUBROUTINE modelrun
 
+#ifdef USE_MPI
+  FUNCTION uniform_partition_start(set_interval, nparts, part_idx) &
+       RESULT(start)
+    INTEGER(i4), INTENT(in) :: nparts
+    INTEGER(i4), INTENT(in) :: set_interval(2)
+    INTEGER(i4), INTENT(in) :: part_idx
+
+    INTEGER(i4) :: start, part_offset
+
+    part_offset = INT((INT(set_interval(2) - set_interval(1) + 1, i8) &
+         &             * INT(part_idx - 1, i8)) / INT(nparts, i8))
+    start = set_interval(1) + part_offset
+  END FUNCTION uniform_partition_start
+#endif
 END PROGRAM collectdata2003
