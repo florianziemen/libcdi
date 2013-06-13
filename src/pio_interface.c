@@ -768,6 +768,7 @@ int pioInqVarDecoOff ( int vlistID, int varID )
 
 #ifdef USE_MPI
 static int pioNamespace_ = -1;
+static int xtInitByCDI = 0;
 #endif
 
 MPI_Comm
@@ -785,6 +786,10 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
     xabort ( "PIO_ASYNCH DOES NOT WORK ON SX." );
 #endif
 
+  if ((xtInitByCDI = (!xt_initialized() || xt_finalized())))
+    {
+      xt_initialize(commGlob);
+    }
   commInit ();
   commDefCommGlob ( commGlob );
   sizeGlob = commInqSizeGlob ();
@@ -813,6 +818,7 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
       IOServer ();
       namespaceDelete(0);
       commDestroy ();
+      xt_finalize();
       MPI_Finalize ();
       exit ( EXIT_SUCCESS );
     }
@@ -905,6 +911,8 @@ void pioFinalize ( void )
     }
   modelWinCleanup ();
   commDestroy ();
+  if (xtInitByCDI)
+    xt_finalize();
   xdebug("%s", "RETURN");
 #endif
 }
