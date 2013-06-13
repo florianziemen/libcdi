@@ -658,11 +658,7 @@ extern int cdiPioSerialOpenFileMap(int streamID);
 #endif
 
 int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
-                                 int filetype, Record **record
-#if USE_MPI && ! HAVE_PARALLEL_NC4 && defined HAVE_LIBNETCDF
-                                 , int *rankp
-#endif
-                                 )
+                                 int filetype, stream_t *streamptr)
 {
   int fileID;
   switch (filetype)
@@ -673,8 +669,8 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
       {
         fileID = gribOpen(filename, filemode);
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-        *record = (Record *) malloc(sizeof(Record));
-        (*record)->buffer = NULL;
+        streamptr->record = (Record *) malloc(sizeof(Record));
+        streamptr->record->buffer = NULL;
         break;
       }
 #endif
@@ -683,9 +679,9 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
       {
         fileID = fileOpen(filename, filemode);
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-        (*record) = (Record *) malloc(sizeof(Record));
-        (*record)->buffer = NULL;
-        (*record)->srvp   = srvNew();
+        streamptr->record = (Record *) malloc(sizeof(Record));
+        streamptr->record->buffer = NULL;
+        streamptr->record->srvp   = srvNew();
         break;
       }
 #endif
@@ -694,9 +690,9 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
       {
         fileID = fileOpen(filename, filemode);
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-        (*record) = (Record *) malloc(sizeof(Record));
-        (*record)->buffer = NULL;
-        (*record)->extp   = extNew();
+        streamptr->record = (Record *) malloc(sizeof(Record));
+        streamptr->record->buffer = NULL;
+        streamptr->record->extp   = extNew();
         break;
       }
 #endif
@@ -705,9 +701,9 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
       {
         fileID = fileOpen(filename, filemode);
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-        (*record) = (Record *) malloc(sizeof(Record));
-        (*record)->buffer = NULL;
-        (*record)->iegp   = iegNew();
+        streamptr->record = (Record *) malloc(sizeof(Record));
+        streamptr->record->buffer = NULL;
+        streamptr->record->iegp   = iegNew();
         break;
       }
 #endif
@@ -734,7 +730,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
 #if USE_MPI && ! defined (HAVE_PARALLEL_NC4)
         if (commInqIOMode() != PIO_NONE)
           xmpi(MPI_Bcast(&fileID, 1, MPI_INT, rank, commInqCommColl()));
-        *rankp = rank;
+        streamptr->ownerRank = rank;
 #endif
         break;
       }
@@ -754,11 +750,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
   int fileID = CDI_UNDEFID;
   int streamID = CDI_ESYSTEM;
   int status;
-  Record *record = NULL;
-  stream_t *streamptr = NULL;
-#if USE_MPI && ! defined (HAVE_PARALLEL_NC4) && defined (HAVE_LIBNETCDF)
-  int rank;
-#endif
+  stream_t *streamptr = stream_new_entry();
 
   if ( CDI_Debug )
     Message("Open %s mode %c file %s", strfiletype(filetype), (int) *filemode, filename);
@@ -767,44 +759,28 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 
   {
     int (*streamOpenDelegate)(const char *filename, const char *filemode,
-                              int filetype, Record **record
-#if USE_MPI && ! defined (HAVE_PARALLEL_NC4) && defined (HAVE_LIBNETCDF)
-                              , int *rankp
-#endif
-                              )
+                              int filetype, stream_t *streamptr)
       = namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND);
-    fileID = streamOpenDelegate(filename, filemode, filetype, &record
-#if USE_MPI && ! defined (HAVE_PARALLEL_NC4) && defined (HAVE_LIBNETCDF)
-                                , &rank
-#endif
-                                );
+    fileID = streamOpenDelegate(filename, filemode, filetype, streamptr);
   }
 
   if (fileID < 0)
     {
+      free(streamptr->record);
+      stream_delete_entry(streamptr);
       streamID = fileID;
     }
   else
     {
-      streamptr = stream_new_entry();
       streamID  = streamptr->self;
 
       if ( streamID < 0 ) return (CDI_ELIMIT);
 
-      streamptr->record   = record;
       streamptr->filetype = filetype;
       streamptr->filemode = tolower(*filemode);
       streamptr->filename = strdupx(filename);
       streamptr->fileID   = fileID;
 
-#if USE_MPI && defined  (HAVE_LIBNETCDF) && ! defined (HAVE_PARALLEL_NC4)
-      switch (filetype)
-	{
-	case FILETYPE_NC4:
-	case FILETYPE_NC4C:
-          streamptr->ownerRank = rank;
-        }
-#endif
       if ( streamptr->filemode == 'r' )
 	{
 	  vlist_t *vlistptr;

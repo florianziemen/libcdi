@@ -355,11 +355,7 @@ streamUnpack(char * unpackBuffer, int unpackBufferSize,
 
 int
 cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
-                             int filetype, Record **record
-#if USE_MPI && ! HAVE_PARALLEL_NC4 && defined HAVE_LIBNETCDF
-                                 , int *rankp
-#endif
-);
+                             int filetype, stream_t *streamptr);
 
 void
 cdiStreamDefVlist_(int streamID, int vlistID);

@@ -143,7 +143,7 @@ int pioFileOpen(const char *filename, const char *mode)
 
 int
 cdiPioStreamOpen(const char *filename, const char *filemode,
-                 int filetype, Record **record)
+                 int filetype, stream_t *streamptr)
 {
   if ( tolower ( * filemode ) == 'w' )
     {
