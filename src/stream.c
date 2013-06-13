@@ -846,59 +846,11 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
       vlistptr->ntsteps = cdiInqTimeSize(streamID);
     }
 
-  switch (filetype)
-    {
-#if  defined  (HAVE_LIBGRIB)
-    case FILETYPE_GRB:
-    case FILETYPE_GRB2:
-      {
-	gribClose(fileID);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:
-      {
-	fileClose(fileID);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:
-      {
-	fileClose(fileID);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBIEG)
-    case FILETYPE_IEG:
-      {
-	fileClose(fileID);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-    case FILETYPE_NC2:
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
-      {
-#if USE_MPI && ! defined (HAVE_PARALLEL_NC4)
-        int rank, rankOpen;
-        if (commInqIOMode() == PIO_NONE
-            || ((rank = commInqRankColl())
-                == (rankOpen = cdiPioSerialOpenFileMap(streamID))))
-#endif
-          cdfClose(fileID);
-	break;
-      }
-#endif
-    default:
-      {
-	if ( CDI_Debug ) Message("%s support not compiled in!", strfiletype(filetype));
-	return (CDI_ELIBNAVAIL);
-      }
-    }
+  {
+    void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
+      = namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND);
+    streamCloseDelegate(streamptr, 0);
+  }
 
   switch (filetype)
     {
