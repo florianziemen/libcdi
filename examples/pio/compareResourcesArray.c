@@ -7,7 +7,6 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #include "cdi.h"
-#include "pio_c_temp.h"
 #include "pio_util.h"
 
 extern int    reshListCompare      ( int, int );

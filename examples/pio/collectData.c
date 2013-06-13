@@ -5,7 +5,6 @@
 #ifdef USE_MPI
 #include <unistd.h>
 #include <mpi.h>
-#include "pio_c_temp.h"
 #endif
 
 #include "cdi.h"

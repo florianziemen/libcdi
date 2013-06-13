@@ -14,7 +14,6 @@
 
 #ifdef USE_MPI
 #include <mpi.h>
-#include "pio_c_temp.h"
 #else
 typedef int MPI_Comm;
 #endif
