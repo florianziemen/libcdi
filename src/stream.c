@@ -2356,8 +2356,6 @@ The function @func{streamDefVlist} defines the variable list of a stream.
 */
 void streamDefVlist(int streamID, int vlistID)
 {
-  int nvars, varID;
-  int gridID, zaxisID;
   stream_t *streamptr;
 
   streamptr = stream_to_pointer(streamID);
@@ -2386,42 +2384,7 @@ void streamDefVlist(int streamID, int vlistID)
 
   if ( streamptr->vlistID == CDI_UNDEFID )
     {
-      streamptr->vlistID = vlistDuplicate(vlistID);
-      streamptr->vlistIDorig = vlistID ;
-
-      nvars = vlistNvars(vlistID);
-      for ( varID = 0; varID < nvars; varID++ )
-	{
-	  gridID  = vlistInqVarGrid(vlistID, varID);
-	  zaxisID = vlistInqVarZaxis(vlistID, varID);
-	  stream_new_var(streamptr, gridID, zaxisID);
-	  if ( streamptr->have_missval )
-	    vlistDefVarMissval(streamptr->vlistID, varID, 
-                               vlistInqVarMissval(vlistID, varID));
-	}
-
-      if (namespaceHasLocalFile(namespaceGetActive())
-          && streamptr->filemode == 'w' )
-	{
-	  if ( streamptr->filetype == FILETYPE_NC  ||
-	       streamptr->filetype == FILETYPE_NC2 ||
-	       streamptr->filetype == FILETYPE_NC4 ||
-	       streamptr->filetype == FILETYPE_NC4C )
-	    {
-#if USE_MPI && defined  (HAVE_LIBNETCDF) && ! defined (HAVE_PARALLEL_NC4)
-              int rank, rankOpen;
-              if (commInqIOMode() == PIO_NONE
-                  || ((rank = commInqRankColl())
-                      == (rankOpen = cdiPioSerialOpenFileMap(streamID))))
-#endif
-                cdfDefVars(streamptr);
-	    }
-	  else if ( streamptr->filetype == FILETYPE_GRB  ||
-		    streamptr->filetype == FILETYPE_GRB2 )
-	    {
-	      gribContainersNew(streamptr);
-	    }
-	}
+      cdiStreamSetupVlist(streamptr, vlistDuplicate(vlistID), vlistID);
     }
   else
     {

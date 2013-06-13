@@ -295,6 +295,7 @@ void    streamDefineTaxis(int streamID);
 
 int     streamsNewEntry(int filetype);
 void    streamsInitEntry(int streamID);
+void    cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig);
 int     stream_new_var(stream_t *streamptr, int gridID, int zaxisID);
 
 int     tstepsNewEntry(stream_t *streamptr);

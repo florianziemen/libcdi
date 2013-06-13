@@ -392,9 +392,6 @@ int vlistDuplicate(int vlistID)
 
   vlistCopy(vlistIDnew, vlistID);
 
-  if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
-    reshSetStatus ( vlistIDnew, &vlist_ops, SUSPENDED );
-
   return (vlistIDnew);
 }
 

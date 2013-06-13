@@ -659,6 +659,47 @@ void streamGetIndexList ( int nstreams, int * streamIndexList )
   reshGetResHListOfType ( nstreams, streamIndexList, &streamOps );
 }
 
+void
+cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig)
+{
+  int nvars = vlistNvars(vlistID);
+  int streamID = streamptr->self;
+  streamptr->vlistID = vlistID;
+  streamptr->vlistIDorig = vlistIDorig;
+  for (int varID = 0; varID < nvars; varID++ )
+    {
+      int gridID  = vlistInqVarGrid(vlistID, varID);
+      int zaxisID = vlistInqVarZaxis(vlistID, varID);
+      stream_new_var(streamptr, gridID, zaxisID);
+      if ( streamptr->have_missval )
+        vlistDefVarMissval(vlistID, varID,
+                           vlistInqVarMissval(vlistID, varID));
+    }
+
+  if (namespaceHasLocalFile(namespaceGetActive())
+      && streamptr->filemode == 'w' )
+    {
+      if ( streamptr->filetype == FILETYPE_NC  ||
+           streamptr->filetype == FILETYPE_NC2 ||
+           streamptr->filetype == FILETYPE_NC4 ||
+           streamptr->filetype == FILETYPE_NC4C )
+        {
+#if USE_MPI && defined  (HAVE_LIBNETCDF) && ! defined (HAVE_PARALLEL_NC4)
+          int rank, rankOpen;
+          if (commInqIOMode() == PIO_NONE
+              || ((rank = commInqRankColl())
+                  == (rankOpen = cdiPioSerialOpenFileMap(streamID))))
+#endif
+            cdfDefVars(streamptr);
+        }
+      else if ( streamptr->filetype == FILETYPE_GRB  ||
+                streamptr->filetype == FILETYPE_GRB2 )
+        {
+          gribContainersNew(streamptr);
+        }
+    }
+}
+
 
 #ifdef USE_MPI
 static int
