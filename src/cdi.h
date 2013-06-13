@@ -236,7 +236,7 @@ MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode,
                  int *pioNamespace, float partInflate);
 void     pioWriteTimestep      ( int, int, int );
 
-void     streamWriteVarPart    (int streamID, int varID, int memtype,
+void     streamWriteVarPart    (int streamID, int varID,
                                 const void *data, int nmiss,
                                 Xt_idxlist partDesc);
 

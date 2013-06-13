@@ -87,11 +87,11 @@ static int pioInit_fwrap(int commSuper, int nProcsIO, int IOMode, int * pioNames
 }
 FCALLSCFUN5 (INT, pioInit_fwrap, PIOINIT, pioinit, INT, INT, INT, PINT, FLOAT)
 FCALLSCSUB3 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep, INT, INT, INT)
-static void streamWriteVarPart_fwrap(int streamID, int varID, int memtype, const void * data, int nmiss, void * partDesc)
+static void streamWriteVarPart_fwrap(int streamID, int varID, const void * data, int nmiss, void * partDesc)
 {
-  streamWriteVarPart( streamID,  varID,  memtype,  data,  nmiss, (*(Xt_idxlist *)partDesc));
+  streamWriteVarPart( streamID,  varID,  data,  nmiss, (*(Xt_idxlist *)partDesc));
 }
-FCALLSCSUB6 (streamWriteVarPart_fwrap, STREAMWRITEVARPART, streamwritevarpart, INT, INT, INT, PVOID, INT, PVOID)
+FCALLSCSUB5 (streamWriteVarPart_fwrap, STREAMWRITEVARPART, streamwritevarpart, INT, INT, PVOID, INT, PVOID)
 #endif /* make_fint keep */
 FCALLSCFUN2 (INT, pioInqVarDecoChunk, PIOINQVARDECOCHUNK, pioinqvardecochunk, INT, INT)
 FCALLSCFUN2 (INT, pioInqVarDecoOff, PIOINQVARDECOOFF, pioinqvardecooff, INT, INT)

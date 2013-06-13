@@ -397,7 +397,6 @@
 !                     streamWriteVarPart
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
-!                                     INTEGER         memtype,
 !                                     CHOICE          data,
 !                                     INTEGER         nmiss,
 !                                     TYPE(XT_IDXLIST)partDesc)

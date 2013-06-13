@@ -993,7 +993,7 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
 
 #if defined USE_MPI
 void
-streamWriteVarPart(int streamID, int varID, int memtype, const void *data,
+streamWriteVarPart(int streamID, int varID, const void *data,
                    int nmiss, Xt_idxlist partDesc)
 {
   if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
