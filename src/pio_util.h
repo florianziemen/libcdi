@@ -45,6 +45,25 @@
 #  define  __attribute__(x)  /*NOTHING*/
 #endif
 
+#ifdef USE_MPI
+static inline int
+callsToMPIAreAllowed()
+{
+  int init_flag = 0, finished_flag = 0;
+  return MPI_Initialized(&init_flag) == MPI_SUCCESS && init_flag
+    && MPI_Finalized(&finished_flag) == MPI_SUCCESS && !finished_flag;
+}
+
+static inline int
+getMPICommWorldRank()
+{
+  int rank = -1;
+  if (callsToMPIAreAllowed())
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  return rank;
+}
+#endif
+
 void pcdiAssert( bool, const char *, const char *, int );
 #define xassert(arg) do {                               \
     if ((arg)) {                                        \
@@ -56,14 +75,7 @@ void pcdiAssert( bool, const char *, const char *, int );
 #ifdef USE_MPI
 #define xdebug(fmt, ...)                                                \
   if ( ddebug ){                                                        \
-    int rank;                                                           \
-    {                                                                   \
-      int init_flag;                                                    \
-      if (MPI_Initialized(&init_flag) == MPI_SUCCESS && init_flag)      \
-        MPI_Comm_rank ( MPI_COMM_WORLD, &rank );                        \
-      else                                                              \
-        rank = -1;                                                      \
-    }                                                                   \
+    int rank = getMPICommWorldRank();                                   \
     fprintf ( stderr, "%s pe%d in %s, %s, line %d: " fmt "\n",          \
               debugString, rank,  __func__, __FILE__,  __LINE__,        \
               __VA_ARGS__ );                                            \
@@ -80,13 +92,12 @@ void pcdiAssert( bool, const char *, const char *, int );
 
 
 #ifdef USE_MPI
-#define xdebug3(fmt, ...)					\
-  if ( ddebug == MAXDEBUG ){                                    \
-    int rank;                                                   \
-    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );                    \
-    fprintf ( stderr, "pe%d in %s, %s, line %d: " fmt "\n",     \
-              rank,  __func__, __FILE__,  __LINE__,             \
-              __VA_ARGS__ );                                    \
+#define xdebug3(fmt, ...)                                               \
+  if ( ddebug == MAXDEBUG ){                                            \
+    int rank = getMPICommWorldRank();                                   \
+    fprintf ( stderr, "pe%d in %s, %s, line %d: " fmt "\n",             \
+              rank,  __func__, __FILE__,  __LINE__,                     \
+              __VA_ARGS__ );                                            \
   }
 
 #else
@@ -97,25 +108,11 @@ void pcdiAssert( bool, const char *, const char *, int );
               __VA_ARGS__ );                                 \
   }
 #endif
-/*
-#ifdef USE_MPI
-char * outTextComm ( MPI_Comm * );
-
-#define xdebugComm(comm,fmt, ...)				\
-  if ( ddebug ){						\
-    fprintf ( stderr, "%s%s, %s, line %d%s: " fmt "\n",		\
-	      outTextRank (),  __func__, __FILE__,  __LINE__,	\
-	      outTextComm ( comm ),				\
-	      ## __VA_ARGS__  );				\
-    }
-#endif
-*/
 
 #ifdef USE_MPI
 #define xwarning(fmt, ...)						\
   if ( ddebug ){							\
-    int rank;								\
-    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );				\
+    int rank = getMPICommWorldRank();                                   \
     fprintf ( stderr, "WARNING: pe%d in %s, %s, line %d: " fmt "\n",	\
               rank,  __func__, __FILE__,  __LINE__,			\
               __VA_ARGS__ );						\

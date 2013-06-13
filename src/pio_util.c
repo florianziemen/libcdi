@@ -24,14 +24,12 @@ void pcdiAssert(bool assumption,
   if ( !assumption )
     {
 #ifdef USE_MPI
-      int rank = -1, init_flag = 0;
-      if (MPI_Initialized(&init_flag) == MPI_SUCCESS && init_flag)
-        MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+      int rank = getMPICommWorldRank();
       fprintf ( stderr, "ERROR, FALSE ASSUMPTION: PE%d in %s, %s, line %d\n",
                 rank, functionname, filename, line );
       fflush ( stderr );
-      if (init_flag)
-        MPI_Abort ( MPI_COMM_WORLD, 1 );
+      if (callsToMPIAreAllowed())
+        MPI_Abort(MPI_COMM_WORLD, 1);
       else
         abort();
 #else
@@ -53,14 +51,16 @@ void pcdiAbortC(const char * caller, const char * filename,
   va_start(ap, errorString);
 #ifdef USE_MPI
   {
-    int rank;
-    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+    int rank = getMPICommWorldRank();
     fprintf(stderr, "ERROR, pe%d in %s, %s, line %d, called from"
             " %s\nerrorString: \"", rank, functionname, filename, line, caller);
   }
   vfprintf(stderr, errorString, ap);
   fputs("\"\n", stderr);
-  MPI_Abort ( MPI_COMM_WORLD, 1 );
+  if (callsToMPIAreAllowed())
+    MPI_Abort(MPI_COMM_WORLD, 1);
+  else
+    abort();
 #else
   fprintf(stderr, "ERROR, %s, %s, line %d, called from %s\nerrorString: \"",
           functionname, filename, line, caller);
@@ -78,8 +78,7 @@ void pcdiAbort(const char * filename, const char *functionname, int line,
   va_start(ap, errorString);
 #ifdef USE_MPI
   {
-    int rank;
-    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+    int rank = getMPICommWorldRank();
     fprintf(stderr, "ERROR, pe%d in %s, %s, line %d, errorString: \"",
             rank, functionname, filename, line);
   }
@@ -140,9 +139,7 @@ void * pcdiXrealloc ( void *p, size_t size, const char *functionname,
 void pcdiXMPI(int iret, const char *filename, int line)
 {
   char errorString[2][MPI_MAX_ERROR_STRING + 1];
-  int len, errorClass, rank;
-
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  int len, errorClass, rank = getMPICommWorldRank();
   MPI_Error_class(iret, &errorClass);
   MPI_Error_string(errorClass, errorString[0], &len);
   errorString[0][len] = '\0';
@@ -161,9 +158,7 @@ void pcdiXMPI(int iret, const char *filename, int line)
 void pcdiXMPIStat ( int iret, const char *filename, int line, MPI_Status *status )
 {
   char errorString[MPI_MAX_ERROR_STRING + 1];
-  int len, rank;
-
-  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+  int len, rank = getMPICommWorldRank();
 
   if ( iret == MPI_ERR_IN_STATUS )
     {
@@ -197,15 +192,22 @@ void pcdiXMPIStat ( int iret, const char *filename, int line, MPI_Status *status
 #ifdef USE_MPI
 void pcdiDebugComm ( const char *filename, const char *functionname, int line, MPI_Comm *comm )
 {
-  int rank, size, len, rankGlob;
+  int rank = -1, size, len, rankGlob = -1;
   char *name;
 
   name = ( char * ) xmalloc ( MPI_MAX_OBJECT_NAME );
   memset ( name, 0, ( MPI_MAX_OBJECT_NAME ) * sizeof ( char ));
   MPI_Comm_get_name ( * comm, name, &len );
   MPI_Comm_size ( * comm, &size );
-  MPI_Comm_rank ( * comm, &rank );
-  MPI_Comm_rank ( MPI_COMM_WORLD, &rankGlob );
+  {
+    int init_flag = 0, finished_flag = 0;
+    if (MPI_Initialized(&init_flag) == MPI_SUCCESS && init_flag
+        && MPI_Finalized(&finished_flag) == MPI_SUCCESS && !finished_flag)
+      {
+        MPI_Comm_rank(*comm, &rank);
+        MPI_Comm_rank(MPI_COMM_WORLD, &rankGlob);
+      }
+  }
   fprintf ( stdout,
             "pe%d in %s, %s, line %d: comm: name=%s, size=%d, rank=%d\n",
             rankGlob, functionname, filename, line,
@@ -222,9 +224,7 @@ void pcdiDebugMsg ( const char * cdiPioDebugString, const char *filename,
                     const char *functionname, int line, int tag, int source,
                     int nfinished )
 {
-  int rank;
-
-  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+  int rank = getMPICommWorldRank();
 
   fprintf ( stdout,
             "%s pe%d in %s, %s, line %d: command %s, source %d, finalized=%d\n",
@@ -238,9 +238,7 @@ void pcdiDebugMsg ( const char * cdiPioDebugString, const char *filename,
 void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line,
                    int tag, int source, char * text )
 {
-  int rank;
-
-  MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
+  int rank = getMPICommWorldRank();
 
   fprintf ( stdout,
             "pe%d in %s, %s, line %d: command %s, source %d, %s\n",
@@ -302,11 +300,7 @@ void printArray ( const char * cdiPioDebugString, char * ps, const void * array,
 
 #ifdef USE_MPI
   {
-    int init_flag, rank;
-    if (MPI_Initialized(&init_flag) == MPI_SUCCESS && init_flag)
-      MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
-    else
-      rank = -1;
+    int rank = getMPICommWorldRank();
     fprintf ( stdout, "%s pe%d in %s, %s, line %d: %s = ",
               cdiPioDebugString, rank, funname, filename, line, ps );
   }
