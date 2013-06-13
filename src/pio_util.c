@@ -11,12 +11,13 @@
 #include "pio_util.h"
 #include "cdi.h"
 
+#ifdef USE_MPI
 static
 char commands[][13] = { "FINALIZE\0",
                         "RESOURCES\0",
                         "WINCREATE\0",
                         "WRITETS\0"};
-
+#endif
 
 void pcdiAssert(bool assumption,
                 const char * filename, const char * functionname, int line )
