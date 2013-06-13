@@ -195,7 +195,7 @@ int modelRun ( MPI_Comm comm )
   defineStream ( streamID, vlistID );
 
   reshPackBufferCreate ( &sendBuffer, &bufferSize, &comm );
-  recvBuffer = xmalloc ( bufferSize * sizeof ( char ));
+  recvBuffer = xmalloc(bufferSize);
   xmpi(MPI_Sendrecv(sendBuffer, bufferSize, MPI_PACKED, 0, 0,
                     recvBuffer, bufferSize, MPI_PACKED, 0, 0,
                     MPI_COMM_SELF, MPI_STATUS_IGNORE));
