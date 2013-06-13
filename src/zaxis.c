@@ -1678,7 +1678,7 @@ void zaxisUnpack ( char * unpackBuffer, int unpackBufferSize,
   zaxisP = zaxisNewEntry();
   if ( ! zaxisP ) Error("No memory");
 
-  xassert ( namespaceAdaptKey ( intBuffer[0], nspTarget ) == zaxisP->self );
+  xassert(namespaceAdaptKey(intBuffer[0], nspTarget) == zaxisP->self);
 
   zaxisP->prec      = intBuffer[1];
   zaxisP->type      = intBuffer[2];
