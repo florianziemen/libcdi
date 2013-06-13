@@ -174,7 +174,7 @@ int defineModel ( int instID )
   return modelID;
 }
 
-void modelRun ( MPI_Comm comm )
+int modelRun ( MPI_Comm comm )
 {
   int gridID, zaxisID, taxisID, instID, modelID, vlistID, streamID;
 
@@ -204,18 +204,17 @@ void modelRun ( MPI_Comm comm )
   reshPackBufferDestroy ( &sendBuffer );
 
   differ = reshListCompare ( 0, 1 );
-  printf ( "The resource arrays %s.\n", differ ? "differ" : "are equal" );
-  reshListPrint ( "reshArrayModel" );
 
   pioNamespaceSetActive ( 0 );
   streamClose(streamID);
-  return;
+  return differ;
 }
 
 #endif
 
 int main (int argc, char *argv[])
 {
+  int exitCode = 77;
 #ifdef USE_MPI
   int sizeGlob, pioNamespace;
   MPI_Comm commGlob, commModel;
@@ -234,14 +233,14 @@ int main (int argc, char *argv[])
   commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0f);
   pioNamespaceSetActive(pioNamespace);
 
-  modelRun ( commModel );
+  exitCode = modelRun(commModel);
 
-  MPI_Finalize ();
+  xmpi(MPI_Finalize());
 #else
   printf ( "Use MPI for this testprogram.\n" );
 #endif
 
-  return 0;
+  return exitCode;
 }
 
 /*
