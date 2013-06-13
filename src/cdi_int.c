@@ -667,7 +667,6 @@ void
 cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig)
 {
   int nvars = vlistNvars(vlistID);
-  int streamID = streamptr->self;
   streamptr->vlistID = vlistID;
   streamptr->vlistIDorig = vlistIDorig;
   for (int varID = 0; varID < nvars; varID++ )
@@ -692,7 +691,7 @@ cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig)
           int rank, rankOpen;
           if (commInqIOMode() == PIO_NONE
               || ((rank = commInqRankColl())
-                  == (rankOpen = cdiPioSerialOpenFileMap(streamID))))
+                  == (rankOpen = cdiPioSerialOpenFileMap(streamptr->self))))
 #endif
             cdfDefVars(streamptr);
         }
