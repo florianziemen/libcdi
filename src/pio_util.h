@@ -1,10 +1,6 @@
 #ifndef PIO_UTIL_
 #define PIO_UTIL_
 
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
-
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,6 +10,8 @@
 #include "mpi.h"
 #endif
 
+#include "error.h"
+
 
 #define MAXDEBUG           3
 
@@ -21,10 +19,6 @@
 
 #define debugString "#####"
 
-/* If we're not using GNU C, elide __attribute__ */
-#ifndef __GNUC__
-#  define  __attribute__(x)  /*NOTHING*/
-#endif
 
 #ifdef USE_MPI
 static inline int
@@ -44,14 +38,6 @@ getMPICommWorldRank()
   return rank;
 }
 #endif
-
-void pcdiAssert( bool, const char *, const char *, int );
-#define xassert(arg) do {                               \
-    if ((arg)) {                                        \
-    } else {                                            \
-      pcdiAssert(0, __FILE__, __func__, __LINE__ );     \
-    }                                                   \
-  } while(0)
 
 #ifdef USE_MPI
 #define xdebug(fmt, ...)                                                \
@@ -106,14 +92,6 @@ void pcdiAssert( bool, const char *, const char *, int );
               __VA_ARGS__ );                                 \
   }
 #endif
-
-void pcdiAbortC(const char *, const char *, const char *, int, const char *, ... )
-  __attribute__((noreturn));
-#define xabortC(caller, ...) pcdiAbortC(caller, __FILE__, __func__, __LINE__, __VA_ARGS__ )
-
-void pcdiAbort (const char *, const char *, int, const char *, ... )
-  __attribute__((noreturn));
-#define xabort(...) pcdiAbort(__FILE__, __func__, __LINE__, __VA_ARGS__ )
 
 void * pcdiXmalloc ( size_t, const char *, const char *, int );
 #define xmalloc(size) pcdiXmalloc ( size, __FILE__, __func__,  __LINE__ )

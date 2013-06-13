@@ -34,6 +34,27 @@ void  Message_(const char *caller, const char *fmt, ...);
 #  define   Message(...)   Message_((void *), __VA_ARGS__)
 #endif
 
+/* If we're not using GNU C, elide __attribute__ */
+#ifndef __GNUC__
+#  define  __attribute__(x)  /*NOTHING*/
+#endif
+
+void cdiAbortC(const char *caller, const char *filename,
+               const char *functionname, int line,
+               const char *errorString, ... )
+  __attribute__((noreturn));
+#define xabortC(caller, ...)                                    \
+  cdiAbortC(caller, __FILE__, __func__, __LINE__, __VA_ARGS__ )
+#define xabort(...)                                             \
+  cdiAbortC(NULL, __FILE__, __func__, __LINE__, __VA_ARGS__ )
+#define cdiAbort(file, func, line, ...)                 \
+  cdiAbortC(NULL, (file), (func), (line), __VA_ARGS__)
+
+#define xassert(arg) do {                       \
+    if ((arg)) { } else {                       \
+      xabort("assertion failed");}              \
+  } while(0)
+
 #endif  /* _ERROR_H */
 /*
  * Local Variables:

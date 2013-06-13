@@ -19,82 +19,6 @@ char commands[][13] = { "FINALIZE\0",
                         "WRITETS\0"};
 #endif
 
-void pcdiAssert(bool assumption,
-                const char * filename, const char * functionname, int line )
-{
-  if ( !assumption )
-    {
-#ifdef USE_MPI
-      int rank = getMPICommWorldRank();
-      fprintf ( stderr, "ERROR, FALSE ASSUMPTION: PE%d in %s, %s, line %d\n",
-                rank, functionname, filename, line );
-      fflush ( stderr );
-      if (callsToMPIAreAllowed())
-        MPI_Abort(MPI_COMM_WORLD, 1);
-      else
-        abort();
-#else
-      fprintf ( stderr, "ERROR, FALSE ASSUMPTION, %s, %s, line %d\n",
-                functionname, filename, line );
-      fflush ( stderr );
-      abort();
-#endif
-    }
-}
-
-/****************************************************/
-
-void pcdiAbortC(const char * caller, const char * filename,
-                const char *functionname, int line,
-                const char * errorString, ... )
-{
-  va_list ap;
-  va_start(ap, errorString);
-#ifdef USE_MPI
-  {
-    int rank = getMPICommWorldRank();
-    fprintf(stderr, "ERROR, pe%d in %s, %s, line %d, called from"
-            " %s\nerrorString: \"", rank, functionname, filename, line, caller);
-  }
-  vfprintf(stderr, errorString, ap);
-  fputs("\"\n", stderr);
-  if (callsToMPIAreAllowed())
-    MPI_Abort(MPI_COMM_WORLD, 1);
-  else
-    abort();
-#else
-  fprintf(stderr, "ERROR, %s, %s, line %d, called from %s\nerrorString: \"",
-          functionname, filename, line, caller);
-  vfprintf(stderr, errorString, ap);
-  fputs("\"\n", stderr);
-#endif
-  exit ( EXIT_FAILURE );
-  va_end(ap);
-}
-
-void pcdiAbort(const char * filename, const char *functionname, int line,
-               const char * errorString, ... )
-{
-  va_list ap;
-  va_start(ap, errorString);
-#ifdef USE_MPI
-  {
-    int rank = getMPICommWorldRank();
-    fprintf(stderr, "ERROR, pe%d in %s, %s, line %d, errorString: \"",
-            rank, functionname, filename, line);
-  }
-  vfprintf(stderr, errorString, ap);
-  fputs("\"\n", stderr);
-  MPI_Abort ( MPI_COMM_WORLD, 1 );
-#else
-  fprintf(stderr, "ERROR, %s, %s, line %d, errorString: \"",
-          functionname, filename, line);
-  vfprintf(stderr, errorString, ap);
-  fputs("\"\n", stderr);
-#endif
-  exit ( EXIT_FAILURE );
-  va_end(ap);
-}
 
 /*****************************************************************************/
 
@@ -102,11 +26,9 @@ void * pcdiXmalloc ( size_t size, const char *filename, const char *functionname
 		     int line )
 {
   void * value = calloc (1, size );
-
   if ( value == NULL )
-    pcdiAbort (filename, functionname, line, "malloc failed: %s",
-               strerror(errno));
-
+    cdiAbort(filename, functionname, line, "malloc failed: %s",
+             strerror(errno));
   return value;
 }
 
@@ -114,11 +36,9 @@ void * pcdiXcalloc ( size_t nmemb, size_t size, const char *filename,
 		     const char *functionname, int line )
 {
   void * value = calloc ( nmemb, size );
-
   if ( value == NULL )
-    pcdiAbort (filename, functionname, line, "calloc failed: %s",
-               strerror(errno) );
-
+    cdiAbort(filename, functionname, line, "calloc failed: %s",
+             strerror(errno) );
   return value;
 }
 
@@ -126,11 +46,9 @@ void * pcdiXrealloc ( void *p, size_t size, const char *functionname,
 		      const char *filename, int line )
 {
   void * value = realloc ( p, size );
-
   if ( value == NULL )
-    pcdiAbort(filename, functionname, line, "realloc failed: %s",
-              strerror(errno));
-
+    cdiAbort(filename, functionname, line, "realloc failed: %s",
+             strerror(errno));
   return value;
 }
 
