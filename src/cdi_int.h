@@ -251,10 +251,8 @@ typedef struct {
   void       *gribContainers;
 #endif
   int         vlistIDorig;
-#if USE_MPI
+  /* only used by MPI-parallelized version of library */
   int       ownerRank;    // MPI rank of owner process
-#endif
-
   /* ---------------------------------- */
   /* Local change: 2013-02-18, FP (DWD) */
   /* ---------------------------------- */
