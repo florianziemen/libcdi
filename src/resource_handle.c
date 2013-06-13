@@ -583,11 +583,6 @@ int reshListCompare ( int nsp0, int nsp1 )
 
 	  valCompare = listElem0->ops->valCompare(listElem0->val,
                                                   listElem1->val);
-	  fprintf(stderr, "type %d, values resH0=%d and resH1=%d %s\n",
-                  listElem0->ops->valTxCode (),
-                  listElem0->resH,
-                  listElem1->resH,
-                  !valCompare ? "are equal" : "differ" );
           if (valCompare)
             break;
 	}

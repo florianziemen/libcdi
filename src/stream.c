@@ -674,11 +674,6 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
 
-  xdebug("START, filename = %s, filemode = %s, filetype = %d, "
-         "namespaceHasLocalFile(%d)=%s",
-         filename, filemode, filetype, namespaceGetActive(),
-	 namespaceHasLocalFile ( namespaceGetActive ()) ? "true":"false");
-
   if ( hasLocalFile )
     {
       switch (filetype)
@@ -689,7 +684,6 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 	  {
 	    fileID = gribOpen(filename, filemode);
             if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-            xdebug("%s OPENED, fileID=%d", filename, fileID);
 	    record = (Record *) malloc(sizeof(Record));
 	    record->buffer = NULL;
 	    break;

@@ -49,15 +49,8 @@ streamUnpack ( char * unpackBuffer, int unpackBufferSize,
 		      &d, 1, MPI_DOUBLE, comm ));
   xassert ( d == xchecksum ( DATATYPE_TXT, intBuffer[2], filename ));
   streamID = streamOpenWrite ( filename, intBuffer[1] );
-  xdebug ("streamID=%d, intBuffer[0]=%d, nspTarget=%d,"
-          " namespaceAdaptKey(a,b)=%d",
-          streamID, intBuffer[0], nspTarget,  
-          namespaceAdaptKey ( intBuffer[0], nspTarget ));
-  xdebug("streamID=%d\n", streamID);
   xassert ( streamID >= 0 &&
             namespaceAdaptKey ( intBuffer[0], nspTarget ) == streamID );
-  xdebug ("streamID=%d, vlistID=%d", streamID, namespaceAdaptKey ( intBuffer[4], nspTarget ));
-
   streamDefByteorder ( streamID, intBuffer[5] );
   streamDefCompType  ( streamID, intBuffer[6] );
   streamDefCompLevel ( streamID, intBuffer[7] ); 
@@ -81,8 +74,6 @@ void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize,
   struct streamAssoc *associations
     = xmalloc(sizeof (associations[0]) * sizeAssociations);
 
-  xdebug("%s", "START");
-	  
   while ( unpackBufferPos < unpackBufferSize )
     {
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, &unpackBufferPos, 
@@ -147,7 +138,6 @@ void rpcUnpackResources ( char * unpackBuffer, int unpackBufferSize,
                                             nspTarget));
     }
   free(associations);
-  xdebug("%s", "RETURN");
 }
 
 #endif
