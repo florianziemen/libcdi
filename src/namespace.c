@@ -7,15 +7,23 @@
 #include "pio_util.h"
 #include "serialize.h"
 #include "error.h"
+#include "cdf_int.h"
 
 static int nNamespaces = 1;
 static int activeNamespace = 0;
+
+#ifdef HAVE_LIBNETCDF
+#define CDI_NETCDF_SWITCHES nc__create,cdf_def_var_serial,
+#else
+#define CDI_NETCDF_SWITCHES
+#endif
 
 #define defaultSwitches {              \
     cdiAbortC_serial,                  \
       serializeGetSizeInCore,          \
       serializePackInCore,             \
       serializeUnpackInCore,           \
+      CDI_NETCDF_SWITCHES              \
       }
 
 struct namespace

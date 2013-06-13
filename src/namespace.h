@@ -1,6 +1,11 @@
 #ifndef NAMESPACE_H
 #define NAMESPACE_H
 
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
+
 typedef enum {
   STAGE_DEFINITION = 0,
   STAGE_TIMELOOP   = 1,
@@ -20,6 +25,10 @@ enum namespaceSwitch
   NSSWITCH_SERIALIZE_GET_SIZE,
   NSSWITCH_SERIALIZE_PACK,
   NSSWITCH_SERIALIZE_UNPACK,
+#ifdef HAVE_LIBNETCDF
+  NSSWITCH_NC__CREATE,
+  NSSWITCH_CDF_DEF_VAR,
+#endif
   NUM_NAMESPACE_SWITCH,
 };
 

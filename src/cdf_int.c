@@ -10,16 +10,7 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "cdf_int.h"
-
-#ifdef USE_MPI
 #include "namespace.h"
-#include "pio.h"
-#include "pio_comm.h"
-#include "pio_util.h"
-#ifdef HAVE_NETCDF_PAR_H
-#include <netcdf_par.h>
-#endif
-#endif
 
 extern int CDF_Fatal;
 extern int CDF_Verbose;
@@ -67,32 +58,9 @@ void cdf_create(const char *path, int cmode, int *ncidp)
 
   if ( cdiNcChunksizehint != CDI_UNDEFID ) chunksizehint = cdiNcChunksizehint;
 
-#if USE_MPI
-#if defined (HAVE_NETCDF4) && defined (HAVE_PARALLEL_NC4)
-  if (cmode & NC_NETCDF4
-      && namespaceHasLocalFile(namespaceGetActive())
-      && commInqIOMode() != PIO_NONE)
-    {
-      cmode |= NC_MPIPOSIX;
-      status = nc_create_par(path, cmode, commInqCommColl(),
-                             MPI_INFO_NULL, ncidp);
-    }
-  else if (cmode & (NC_64BIT_OFFSET | NC_CLASSIC_MODEL)
-           && namespaceHasLocalFile(namespaceGetActive())
-           && commInqIOMode() != PIO_NONE)
-    {
-      /* FIXME: improve handling of pnetcdf here */
-      abort();
-    }
-  else
-    status = nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
-#else
-  /* FIXME: Only open netcdf file on one task */
-  status = nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
-#endif
-#else
-  status = nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
-#endif
+  cdi_nc__create_funcp my_nc__create =
+    namespaceSwitchGet(NSSWITCH_NC__CREATE);
+  status = my_nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
 
   if ( CDF_Debug || status != NC_NOERR )
     Message("ncid = %d  mode = %d  file = %s", *ncidp, cmode, path);
@@ -270,11 +238,18 @@ void cdf_inq_dimlen(int ncid, int dimid, size_t * lengthp)
 
 
 void cdf_def_var(int ncid, const char *name, nc_type xtype, int ndims,
-	    const int dimids[], int *varidp)
+                 const int dimids[], int *varidp)
 {
-  int status;
+  cdi_cdf_def_var_funcp my_cdf_def_var
+    = namespaceSwitchGet(NSSWITCH_CDF_DEF_VAR);
+  my_cdf_def_var(ncid, name, xtype, ndims, dimids, varidp);
+}
 
-  status = nc_def_var(ncid, name, xtype, ndims, dimids, varidp);
+void
+cdf_def_var_serial(int ncid, const char *name, nc_type xtype, int ndims,
+                   const int dimids[], int *varidp)
+{
+  int status = nc_def_var(ncid, name, xtype, ndims, dimids, varidp);
 
   if ( CDF_Debug || status != NC_NOERR )
     Message("ncid = %d  name = %s  xtype = %d  ndims = %d  varid = %d",
@@ -282,21 +257,8 @@ void cdf_def_var(int ncid, const char *name, nc_type xtype, int ndims,
 
   if ( status != NC_NOERR )
     Error("%s", nc_strerror(status));
-
-#if USE_MPI
-#if defined (HAVE_NETCDF4) && defined (HAVE_PARALLEL_NC4)
-  if (namespaceHasLocalFile(namespaceGetActive())
-      && commInqIOMode() != PIO_NONE)
-    {
-      xdebug("%s", "calling nc_var_par_access");
-      status = nc_var_par_access(ncid, *varidp, NC_COLLECTIVE);
-      if ( status != NC_NOERR )
-        Error("%s", nc_strerror(status));
-    }
-#endif
-#endif
-
 }
+
 
 
 void cdf_inq_varid(int ncid, const char *name, int *varidp)

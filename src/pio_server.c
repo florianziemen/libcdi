@@ -28,6 +28,7 @@
 #include "pio_rpc.h"
 #include "pio_util.h"
 #include "cdi_int.h"
+#include "pio_cdf_int.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
 #include "vlist_var.h"
@@ -866,6 +867,7 @@ void IOServer ()
     backendFinalize ();
   commCalc = commInqCommCalc ();
 #ifdef HAVE_PARALLEL_NC4
+  cdiPioEnableNetCDFParAccess();
   numPioPrimes = PPM_prime_factorization_32((uint32_t)commInqSizeColl(),
                                             &pioPrimes);
 #elif defined (HAVE_LIBNETCDF)

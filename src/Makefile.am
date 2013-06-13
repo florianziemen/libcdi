@@ -80,6 +80,8 @@ libcdi_la_SOURCES = 	 \
 	pio_util.h       \
 	pio_serialize.h	\
 	pio_serialize.c	\
+	pio_cdf_int.c	\
+	pio_cdf_int.h	\
 	resource_handle.c\
 	resource_handle.h\
 	service.h	 \
