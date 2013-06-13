@@ -789,7 +789,8 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
   commDefCommGlob ( commGlob );
   sizeGlob = commInqSizeGlob ();
 
-  if ( nProcsIO <= 0 || nProcsIO > sizeGlob - 1 )
+  if (((IOMode != PIO_NONE && (nProcsIO <= 0 || nProcsIO > sizeGlob - 1)))
+      || (IOMode == PIO_NONE && nProcsIO != 1))
     xabort("DISTRIBUTION OF TASKS ON PROCS IS NOT VALID.\n"
            "nProcsIO=%d, sizeGlob=%d\n", nProcsIO, sizeGlob);
 

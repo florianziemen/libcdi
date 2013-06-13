@@ -272,7 +272,8 @@ void     commDefCommPio  ( void )
   calcRange[0] = 0;
   calcRange[1] = info->sizeGlob - info->nProcsIO - 1;
   calcRange[2] = 1;
-  xmpi(MPI_Group_range_incl(grpAll, 1, &calcRange, &grpCalc));
+  xmpi(MPI_Group_range_incl(grpAll, info->nProcsIO==info->sizeGlob?0:1,
+                            &calcRange, &grpCalc));
   xmpi(MPI_Comm_create(info->commGlob, grpCalc, &info->commCalc));
 
   pioRange[0] = info->sizeGlob - info->nProcsIO;
