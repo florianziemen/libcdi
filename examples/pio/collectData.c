@@ -64,8 +64,9 @@ void modelRun(MPI_Comm commModel)
   xassert ( streamID >= 0 );
   streamDefVlist ( streamID, vlistID);
 
+#ifdef USE_MPI
   pioEndDef ();
-
+#endif
   for ( tfID = 0; tfID < ntfiles; tfID++ )
     {
       if ( tfID > 0 )
@@ -91,10 +92,14 @@ void modelRun(MPI_Comm commModel)
 	      start = CDI_UNDEFID;
 	      chunk = CDI_UNDEFID;
 	    }
+#ifdef USE_MPI
 	  pioWriteTimestep ( tsID, vdate, vtime );
+#endif
 	}
     }
+#ifdef USE_MPI
   pioEndTimestepping ();
+#endif
   streamClose ( streamID );
   vlistDestroy ( vlistID );
   taxisDestroy ( taxisID );

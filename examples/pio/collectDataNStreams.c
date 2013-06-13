@@ -92,7 +92,9 @@ void modelRun(MPI_Comm commModel)
       streamDefVlist ( streamID[i], vlistID[i]);
     }
 
+#ifdef USE_MPI
   pioEndDef ();
+#endif
 
   for ( tfID = 0; tfID < ntfiles; tfID++ )
     {
@@ -127,14 +129,18 @@ void modelRun(MPI_Comm commModel)
                   chunk = CDI_UNDEFID;
                 }
             }
+#ifdef USE_MPI
 	  pioWriteTimestep ( tsID, vdate, vtime );
+#endif
 	}
 #ifdef USE_MPI
       MPI_Barrier(commModel);
 #endif
     }
 
+#ifdef USE_MPI
   pioEndTimestepping ();
+#endif
 
   for ( i = 0; i < nStreams; i++ )
     {
