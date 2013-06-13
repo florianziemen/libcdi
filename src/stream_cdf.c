@@ -3969,10 +3969,10 @@ int cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
   return (0);
 }
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfCreateRecords(stream_t *streamptr, int tsID)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int varID, levelID, recID, vrecID, zaxisID;
   int nvars, nlev, nrecs, nvrecs;
   record_t *records = NULL;
@@ -4089,8 +4089,8 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
              streamptr->tsteps[1].recIDs,
              nvrecs*sizeof(int));
     }
-#endif
 }
+#endif
 
 #if  defined  (HAVE_LIBNETCDF)
 static
