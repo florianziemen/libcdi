@@ -83,6 +83,10 @@ modelRegionCompute(double region[], size_t offset, size_t len,
     }
 }
 
+#ifdef USE_MPI
+static int
+uniform_partition_start(int set_interval[2], int nparts, int part_idx);
+#endif
 
 static void
 modelRun(struct model_config setup, MPI_Comm comm)
@@ -94,13 +98,13 @@ modelRun(struct model_config setup, MPI_Comm comm)
 
   int gridID, zaxisID[nVars], taxisID;
   int vlistID, varIDs[nVars], streamID, tsID, tfID = 0;
-  int i, varID, nmiss = 0;
+  int i, nmiss = 0;
   double *lons, *lats;
   double *var = NULL, *varslice = NULL;
   double mscale, mrscale;
   time_t current_time;
   int vdate = 19850101, vtime = 120000;
-  int start = CDI_UNDEFID, chunk = CDI_UNDEFID, rank = 0;
+  int rank = 0;
   char filename[1024];
   int nlon = setup.nlon, nlat = setup.nlat;
   uint32_t checksum_state[nVars];
@@ -109,6 +113,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
   double *levs;
 #if USE_MPI
   int *chunks = NULL, *displs = NULL, comm_size = 1;
+  struct var1DDeco {
+    int chunkSize, start;
+    Xt_idxlist partDesc;
+  } varDeco[nVars];
 #endif
 
 #if USE_MPI
@@ -156,6 +164,24 @@ modelRun(struct model_config setup, MPI_Comm comm)
     {
       varIDs[i] = vlistDefVar ( vlistID, gridID, zaxisID[i], TIME_VARIABLE );
       varSize[i] = nlon * nlat * nlev[i];
+#ifdef USE_MPI
+      {
+         int start = uniform_partition_start((int [2]){ 0, varSize[i] - 1 },
+                                             comm_size, rank),
+           chunkSize = uniform_partition_start((int [2]){ 0, varSize[i] - 1 },
+                                               comm_size, rank + 1) - start;
+         fprintf(stderr, "%d: start=%d, chunkSize = %d\n", rank,
+                 start, chunkSize);
+         Xt_idxlist idxlist
+           = xt_idxstripes_new(&(struct Xt_stripe){ .start = start,
+                   .nstrides = chunkSize, .stride = 1 }, 1);
+         varDeco[i] = (struct var1DDeco){
+           .start = start,
+           .chunkSize = chunkSize,
+           .partDesc = idxlist
+         };
+      }
+#endif
       vlistDefVarCode(vlistID, varIDs[i], varCodes[i]);
       vlistDefVarDatatype(vlistID, varIDs[i], setup.datatype);
     }
@@ -192,10 +218,15 @@ modelRun(struct model_config setup, MPI_Comm comm)
 	  taxisDefVdate ( taxisID, vdate );
 	  taxisDefVtime ( taxisID, vtime );
 	  streamDefTimestep ( streamID, tsID );
-	  for ( varID = 0; varID < nVars; varID++ )
+	  for (int varID = 0; varID < nVars; ++varID)
 	    {
-              start = pioInqVarDecoOff(vlistID, varIDs[varID]);
-              chunk = pioInqVarDecoChunk(vlistID, varIDs[varID]);
+#ifdef USE_MPI
+              int start = varDeco[varID].start;
+              int chunk = varDeco[varID].chunkSize;
+#else
+              int chunk = varSize[varID];
+              int start = 0;
+#endif
               if (varslice_size < chunk)
                 {
                   varslice = xrealloc(varslice, chunk * sizeof (var[0]));
@@ -228,7 +259,12 @@ modelRun(struct model_config setup, MPI_Comm comm)
                            varSize[varID] * sizeof (var[0]));
                 }
 
-	      streamWriteVar ( streamID, varIDs[varID], varslice, nmiss );
+#ifdef USE_MPI
+	      streamWriteVarPart(streamID, varIDs[varID], varslice, nmiss,
+                                 varDeco[varID].partDesc);
+#else
+	      streamWriteVar(streamID, varIDs[varID], varslice, nmiss);
+#endif
 	      start = CDI_UNDEFID;
 	      chunk = CDI_UNDEFID;
 	    }
@@ -277,6 +313,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
     zaxisDestroy ( zaxisID[i] );
   gridDestroy ( gridID );
 #if USE_MPI
+  for (int varID = 0; varID < nVars; ++varID)
+    xt_idxlist_delete(varDeco[varID].partDesc);
   free(displs);
   free(chunks);
   free(var);
@@ -523,6 +561,17 @@ time_t2cditime(time_t t, int *date, int *timeofday)
   *timeofday = t_s->tm_hour * 10000 + t_s->tm_min * 100 + t_s->tm_sec;
 }
 
+#ifdef USE_MPI
+static int
+uniform_partition_start(int set_interval[2], int nparts, int part_idx)
+{
+  int part_offset
+    = (((long long)set_interval[1] - (long long)set_interval[0] + 1LL)
+       * (long long)part_idx) / (long long)nparts;
+  int start = set_interval[0] + part_offset;
+  return start;
+}
+#endif
 /*
  * Local Variables:
  * c-file-style: "Java"
