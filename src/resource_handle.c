@@ -71,48 +71,43 @@ static struct
 
 /**************************************************************/
 
+static void
+listInitResources(int nsp)
+{
+  xassert(nsp < namespaceGetNumber() && nsp >= 0);
+  listElem_t *p = resHList[nsp].resources;
+
+  int size = resHList[nsp].size;
+  for (int i = 0; i < size; i++ )
+    {
+      p[i].resH   = namespaceIdxEncode2(nsp, i);
+      p[i].next   = i + 1;
+      p[i].ops    = NULL;
+      p[i].val    = NULL;
+      p[i].status = RESH_UNDEFID;
+    }
+
+  p[resHList[nsp].size-1].next = -1;
+  resHList[nsp].freeHead = 0;
+}
+
 static
 void listNew ( void )
 {
-  int nnsp, i;
+  int nnsp;
 
   nnsp = namespaceGetNumber ();
 
   resHList = xcalloc ( nnsp, sizeof (resHList[0]));
 
-  for ( i = 0; i < nnsp; i++ )
+  for (int i = 0; i < nnsp; i++ )
     {
       resHList[i].size = MIN_LIST_SIZE;
 
       xassert ( resHList[i].resources == NULL);
 
       resHList[i].resources = xcalloc ( MIN_LIST_SIZE, sizeof (listElem_t));
-    }
-}
-
-/**************************************************************/
-
-static
-void listInitPointer ( void )
-{
-  int nnsp, i, j;
-
-  nnsp = namespaceGetNumber ();
-
-  for ( i = 0; i < nnsp; i++ )
-    {
-      for ( j = 0; j < resHList[i].size; j++ )
-        {
-          resHList[i].resources[j].resH   = namespaceIdxEncode2 ( i, j );
-          resHList[i].resources[j].next   = j + 1;
-          resHList[i].resources[j].ops    = NULL;
-          resHList[i].resources[j].val    = NULL;
-          resHList[i].resources[j].status = RESH_UNDEFID;
-        }
-
-      resHList[i].resources[resHList[i].size-1].next = -1;
-
-      resHList[i].freeHead = 0;
+      listInitResources(i);
     }
 }
 
@@ -157,7 +152,9 @@ void listInitialize ( void )
   pthread_mutexattr_destroy(&ma);
 #endif
 
+  LIST_LOCK();
   listNew ();
+  LIST_UNLOCK();
   /* file is special and has its own table, which needs to be
    * created, before we register the listDestroy exit handler */
   {
@@ -167,12 +164,6 @@ void listInitialize ( void )
       fileClose(null_id);
   }
   atexit ( listDestroy );
-
-  LIST_LOCK();
-
-  listInitPointer ();
-
-  LIST_UNLOCK();
 
 }
 
@@ -672,8 +663,6 @@ void cdiReset(void)
   listDestroy();
 
   listNew ();
-
-  listInitPointer ();
 
   LIST_UNLOCK();
 }
