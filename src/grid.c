@@ -4249,33 +4249,31 @@ gridTxCode ()
 enum { gridNint    = 26, 
        gridNdouble = 24,
        gridNstrings= 8,
-       mask        = 1 << 0,
-       mask_gme    = 1 << 1,
-       xvals       = 1 << 2,
-       yvals       = 1 << 3,
-       area        = 1 << 4,
-       xbounds     = 1 << 5,
-       ybounds     = 1 << 6,
-       reference   = 1 << 7,
-       rowlon      = 1 << 8
+       gridHasMaskFlag = 1 << 0,
+       gridHasGMEMaskFlag = 1 << 1,
+       gridHasXValsFlag = 1 << 2,
+       gridHasYValsFlag = 1 << 3,
+       gridHasAreaFlag = 1 << 4,
+       gridHasXBoundsFlag = 1 << 5,
+       gridHasYBoundsFlag = 1 << 6,
+       gridHasReferenceFlag = 1 << 7,
+       gridHasRowLonFlag = 1 << 8
 };
 
 
-static int getMemberMask ( grid_t * gridP )
+static int gridGetComponentFlags ( grid_t * gridP )
 {
-  int memberMask = 0;
+  int flags = (gridHasMaskFlag & (int)((unsigned)(gridP->mask == NULL) - 1U))
+    | (gridHasGMEMaskFlag & (int)((unsigned)(gridP->mask_gme == NULL) - 1U))
+    | (gridHasXValsFlag & (int)((unsigned)(gridP->xvals == NULL) - 1U))
+    | (gridHasYValsFlag & (int)((unsigned)(gridP->yvals == NULL) - 1U))
+    | (gridHasAreaFlag & (int)((unsigned)(gridP->area == NULL) - 1U))
+    | (gridHasXBoundsFlag & (int)((unsigned)(gridP->xbounds == NULL) - 1U))
+    | (gridHasYBoundsFlag & (int)((unsigned)(gridP->ybounds == NULL) - 1U))
+    | (gridHasReferenceFlag & (int)((unsigned)(gridP->reference == NULL) - 1U))
+    | (gridHasRowLonFlag & (int)((unsigned)(gridP->rowlon == NULL) - 1U));
 
-  if ( gridP->mask )       memberMask |= mask;
-  if ( gridP->mask_gme )   memberMask |= mask_gme;
-  if ( gridP->xvals )      memberMask |= xvals;
-  if ( gridP->yvals )      memberMask |= yvals; 
-  if ( gridP->area )       memberMask |= area;
-  if ( gridP->xbounds )    memberMask |= xbounds;
-  if ( gridP->ybounds )    memberMask |= ybounds;
-  if ( gridP->reference )  memberMask |= reference;
-  if ( gridP->rowlon )     memberMask |= rowlon;
-
-  return memberMask;
+  return flags;
 }
 
 
@@ -4458,7 +4456,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
   gridP->lcomplex      =   intBuffer[25];
   memberMask           =   intBuffer[26];
 
-  if ( memberMask & rowlon )
+  if ( memberMask & gridHasRowLonFlag )
     {
       xassert ( gridP->nrowlon );
       gridP->rowlon = xmalloc ( gridP->nrowlon * sizeof ( int ));
@@ -4500,7 +4498,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
   gridP->ypole	       =   doubleBuffer[22];
   gridP->angle         =   doubleBuffer[23]; 
 
-  if ( memberMask & xvals )
+  if ( memberMask & gridHasXValsFlag )
     {
       if ( gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR )
 	size = gridP->size;
@@ -4515,7 +4513,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
       xassert ( xchecksum ( DATATYPE_FLT, size, gridP->xvals ) == d );
     }
 
-  if ( memberMask & yvals )
+  if ( memberMask & gridHasYValsFlag )
     {
       if ( gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR )
 	size = gridP->size;
@@ -4530,7 +4528,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
       xassert ( xchecksum ( DATATYPE_FLT, size, gridP->yvals ) == d );
     }
 
-  if ( memberMask & area )
+  if ( memberMask & gridHasAreaFlag )
     {
       xassert ( gridP->size );
       
@@ -4542,7 +4540,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
       xassert ( xchecksum ( DATATYPE_FLT, gridP->size, gridP->area ) == d );
     }
 
-  if ( memberMask & xbounds )
+  if ( memberMask & gridHasXBoundsFlag )
     {
       xassert ( gridP->nvertex );
       if ( gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED )
@@ -4559,7 +4557,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
       xassert ( xchecksum ( DATATYPE_FLT, size, gridP->xbounds ) == d );
     }
 
-  if ( memberMask & ybounds )
+  if ( memberMask & gridHasYBoundsFlag )
     {
       xassert ( gridP->nvertex );
       if ( gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED )
@@ -4593,7 +4591,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
   memcpy ( gridP->xunits   , &charBuffer[CDI_MAX_NAME * 6], CDI_MAX_NAME );
   memcpy ( gridP->yunits   , &charBuffer[CDI_MAX_NAME * 7], CDI_MAX_NAME );
 
-  if ( memberMask & reference )
+  if ( memberMask & gridHasReferenceFlag )
     {
       xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
 			  &referenceSize, 1, MPI_INT, comm ));
@@ -4606,7 +4604,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
                             gridP->reference ) == d );
     }
 
-  if ( memberMask & mask )
+  if ( memberMask & gridHasMaskFlag )
     {
       xassert ( gridP->size );
       gridP->mask = xmalloc ( gridP->size * sizeof ( mask_t ));
@@ -4617,7 +4615,7 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
       xassert ( xchecksum ( DATATYPE_TXT, gridP->size, gridP->mask ) == d );
     }
 
-  if ( memberMask & mask_gme )
+  if ( memberMask & gridHasGMEMaskFlag )
     {
       xassert ( gridP->size );
       gridP->mask_gme = xmalloc ( gridP->size * sizeof ( mask_t ));
@@ -4666,7 +4664,7 @@ void gridPack ( void * voidP, void * packBuffer, int packBufferSize,
   intBuffer[23] = gridP->ysize;
   intBuffer[24] = gridP->locked;
   intBuffer[25] = gridP->lcomplex;
-  intBuffer[26] = getMemberMask ( gridP );
+  intBuffer[26] = gridGetComponentFlags(gridP);
   
   xmpi ( MPI_Pack ( intBuffer, gridNint + 1, MPI_INT, 
 		    packBuffer, packBufferSize, packBufferPos, comm ));
