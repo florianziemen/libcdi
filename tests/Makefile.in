@@ -51,7 +51,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 check_PROGRAMS = test_grib$(EXEEXT) cksum_write$(EXEEXT) \
-	cksum_read$(EXEEXT) pio_write$(EXEEXT)
+	cksum_read$(EXEEXT) pio_write$(EXEEXT) \
+	test_resource_copy$(EXEEXT)
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/pio_cksum_asynch.in $(srcdir)/pio_cksum_cdf.in \
@@ -102,6 +103,10 @@ am_test_grib_OBJECTS = test_grib.$(OBJEXT)
 test_grib_OBJECTS = $(am_test_grib_OBJECTS)
 test_grib_LDADD = $(LDADD)
 test_grib_DEPENDENCIES = ../src/libcdi.la
+am_test_resource_copy_OBJECTS = test_resource_copy.$(OBJEXT)
+test_resource_copy_OBJECTS = $(am_test_resource_copy_OBJECTS)
+test_resource_copy_LDADD = $(LDADD)
+test_resource_copy_DEPENDENCIES = ../src/libcdi.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -116,9 +121,11 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(cksum_read_SOURCES) $(cksum_write_SOURCES) \
-	$(pio_write_SOURCES) $(test_grib_SOURCES)
+	$(pio_write_SOURCES) $(test_grib_SOURCES) \
+	$(test_resource_copy_SOURCES)
 DIST_SOURCES = $(cksum_read_SOURCES) $(cksum_write_SOURCES) \
-	$(pio_write_SOURCES) $(test_grib_SOURCES)
+	$(pio_write_SOURCES) $(test_grib_SOURCES) \
+	$(test_resource_copy_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -331,6 +338,7 @@ cksum_read_SOURCES = cksum_read.c \
 	ensure_array_size.h ensure_array_size.c
 
 pio_write_SOURCES = pio_write.c cksum.h cksum.c
+test_resource_copy_SOURCES = test_resource_copy.c
 #
 AM_CFLAGS = $(YAXT_CFLAGS)
 LDADD = ../src/libcdi.la -lm
@@ -420,6 +428,9 @@ pio_write$(EXEEXT): $(pio_write_OBJECTS) $(pio_write_DEPENDENCIES) $(EXTRA_pio_w
 test_grib$(EXEEXT): $(test_grib_OBJECTS) $(test_grib_DEPENDENCIES) $(EXTRA_test_grib_DEPENDENCIES) 
 	@rm -f test_grib$(EXEEXT)
 	$(LINK) $(test_grib_OBJECTS) $(test_grib_LDADD) $(LIBS)
+test_resource_copy$(EXEEXT): $(test_resource_copy_OBJECTS) $(test_resource_copy_DEPENDENCIES) $(EXTRA_test_resource_copy_DEPENDENCIES) 
+	@rm -f test_resource_copy$(EXEEXT)
+	$(LINK) $(test_resource_copy_OBJECTS) $(test_resource_copy_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -434,6 +445,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_write.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_grib.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_resource_copy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/var_cksum.Po@am__quote@
 
 .c.o:
