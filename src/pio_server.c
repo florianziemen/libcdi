@@ -818,6 +818,62 @@ void getTimeStepData ( int tsID, int vdate, int vtime )
 
 /************************************************************************/
 
+#if defined (HAVE_LIBNETCDF) && ! defined (HAVE_PARALLEL_NC4)
+static int
+cdiPioStreamCDFOpenWrap(const char *filename, const char *filemode,
+                        int filetype, stream_t *streamptr,
+                        int recordBufIsToBeCreated)
+{
+  switch (filetype)
+    {
+    case FILETYPE_NC4:
+    case FILETYPE_NC4C:
+      {
+        int rank, fileID;
+        if (commInqIOMode() == PIO_NONE
+            || commInqRankColl() == (rank = cdiPioNextOpenRank()))
+          fileID = cdiStreamOpenDefaultDelegate(filename, filemode, filetype,
+                                                streamptr,
+                                                recordBufIsToBeCreated);
+        if (commInqIOMode() != PIO_NONE)
+          xmpi(MPI_Bcast(&fileID, 1, MPI_INT, rank, commInqCommColl()));
+        streamptr->ownerRank = rank;
+        return fileID;
+      }
+    default:
+      return cdiStreamOpenDefaultDelegate(filename, filemode, filetype,
+                                          streamptr, recordBufIsToBeCreated);
+    }
+}
+
+static void
+cdiPioStreamCDFCloseWrap(stream_t *streamptr, int recordBufIsToBeDeleted)
+{
+  int fileID   = streamptr->fileID;
+  int filetype = streamptr->filetype;
+  if ( fileID == CDI_UNDEFID )
+    Warning("File %s not open!", streamptr->filename);
+  else
+    switch (filetype)
+      {
+      case FILETYPE_NC:
+      case FILETYPE_NC2:
+      case FILETYPE_NC4:
+      case FILETYPE_NC4C:
+        {
+          int rank, rankOpen;
+          if (commInqIOMode() == PIO_NONE
+              || ((rank = commInqRankColl())
+                  == (rankOpen = cdiPioSerialOpenFileMap(streamptr->self))))
+            cdiStreamCloseDefaultDelegate(streamptr, recordBufIsToBeDeleted);
+          break;
+        }
+      default:
+        cdiStreamCloseDefaultDelegate(streamptr, recordBufIsToBeDeleted);
+      }
+}
+#endif
+
 /**
   @brief is encapsulated in CDI library and run on I/O PEs.
 
@@ -847,6 +903,8 @@ void IOServer ()
 #elif defined (HAVE_LIBNETCDF)
   cdiSerialOpenFileCount = xcalloc(sizeof (cdiSerialOpenFileCount[0]),
                                    commInqSizeColl());
+  namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND, cdiPioStreamCDFOpenWrap);
+  namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND, cdiPioStreamCDFCloseWrap);
 #endif
 
   for ( ;; )
