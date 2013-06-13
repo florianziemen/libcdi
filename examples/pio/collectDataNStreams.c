@@ -4,7 +4,9 @@
 
 #ifdef USE_MPI
 #include <mpi.h>
-#include "pio_c_temp.h"
+#else
+typedef int MPI_Comm;
+#define MPI_COMM_NULL 0
 #endif
 
 #include "cdi.h"
@@ -24,7 +26,7 @@ void hoursPassingHack ( int * vdate, int * vtime, int hoursPassed )
   * vdate = * vdate + days;
 }
 
-void modelRun ()
+void modelRun(MPI_Comm commModel)
 {
   enum {
     filetype    = FILETYPE_GRB,
@@ -42,12 +44,11 @@ void modelRun ()
 
   static char nameExp[7]           = "example";
   static int asciiA                = 65;
-  char nameStream[8];
   char filename[1024];
 
   int gridID, zaxisID[nStreams][nVars], taxisID;
   int streamID[nStreams], vlistID[nStreams], varID[nStreams][nVars], tsID, tfID = 0;
-  int i, j, k, nmiss = 0, rank;
+  int i, j, k, nmiss = 0;
   double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
   double lats[nlat] = {-75, -45, -15, 15, 45, 75};
   double levs[MAXNLEV] = {101300, 92500, 85000, 50000, 20000};
@@ -128,6 +129,9 @@ void modelRun ()
             }
 	  pioWriteTimestep ( tsID, vdate, vtime );
 	}
+#ifdef USE_MPI
+      MPI_Barrier(commModel);
+#endif
     }
 
   pioEndTimestepping ();
@@ -159,8 +163,9 @@ int main (int argc, char *argv[])
 
   static int hasLocalFile[nNamespaces] = { 0 };
 
+  MPI_Comm commModel = MPI_COMM_NULL;
 #ifdef USE_MPI
-  MPI_Comm commGlob, commModel;
+  MPI_Comm commGlob;
   int sizeGlob;
   int rankGlob;
   int IOMode, nProcsIO, count;
@@ -191,7 +196,7 @@ int main (int argc, char *argv[])
                       1.0f);
 #endif
 
-  modelRun ();
+  modelRun(commModel);
 
 #ifdef USE_MPI
   pioFinalize ();

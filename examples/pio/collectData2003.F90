@@ -179,7 +179,9 @@ CONTAINS
     CALL zaxisDestroy(zaxisID1)
     CALL zaxisDestroy(zaxisID2)
     CALL gridDestroy(gridID)
-
+#ifdef USE_MPI
+    CALL mpi_barrier(commGlob)
+#endif
   END SUBROUTINE modelrun
 
 END PROGRAM collectdata2003
