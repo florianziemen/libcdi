@@ -16,7 +16,8 @@ void   backendInit     ( void );
 void   backendFinalize ( void );
 int pioFileOpen(const char *filename, const char *mode);
 int    pioFileClose    ( int );
-size_t pioFileWrite    ( int, int, const void*, size_t );
+size_t cdiPioFileWrite(int fileID, const void *restrict buffer, size_t len,
+                       int tsID);
 int cdiPioStreamOpen(const char *filename, const char *filemode,
                      int filetype, stream_t *streamptr,
                      int recordBufIsToBeCreated);

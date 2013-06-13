@@ -27,6 +27,7 @@ static int activeNamespace = 0;
       serializePackInCore,                      \
       serializeUnpackInCore,                    \
       fileOpen_serial,                          \
+      fileWrite,                                \
       fileClose_serial,                         \
       cdiStreamOpenDefaultDelegate,             \
       cdiStreamDefVlist_,                       \

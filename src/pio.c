@@ -64,7 +64,8 @@ struct fileOpTag decodeFileOpTag(int tag)
 
 /***************************************************************/
 
-size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
+size_t
+cdiPioFileWrite(int fileID, const void *restrict buffer, size_t len, int tsID)
 {
   size_t iret = CDI_UNDEFID;
 

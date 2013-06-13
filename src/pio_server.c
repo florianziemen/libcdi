@@ -920,7 +920,8 @@ void IOServer ()
   namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND, cdiPioStreamCDFCloseWrap);
   namespaceSwitchSet(NSSWITCH_CDF_DEF_TIMESTEP, cdiPioCdfDefTimestep);
 #endif
-
+  namespaceSwitchSet(NSSWITCH_FILE_WRITE, cdiPioFileWrite);
+  
   for ( ;; )
     {
       xmpi ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commCalc, &status ));
