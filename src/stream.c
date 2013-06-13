@@ -658,7 +658,8 @@ extern int cdiPioSerialOpenFileMap(int streamID);
 #endif
 
 int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
-                                 int filetype, stream_t *streamptr)
+                                 int filetype, stream_t *streamptr,
+                                 int recordBufIsToBeCreated)
 {
   int fileID;
   switch (filetype)
@@ -669,8 +670,11 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
       {
         fileID = gribOpen(filename, filemode);
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-        streamptr->record = (Record *) malloc(sizeof(Record));
-        streamptr->record->buffer = NULL;
+        if (recordBufIsToBeCreated)
+          {
+            streamptr->record = (Record *) malloc(sizeof(Record));
+            streamptr->record->buffer = NULL;
+          }
         break;
       }
 #endif
@@ -679,9 +683,12 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
       {
         fileID = fileOpen(filename, filemode);
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-        streamptr->record = (Record *) malloc(sizeof(Record));
-        streamptr->record->buffer = NULL;
-        streamptr->record->srvp   = srvNew();
+        if (recordBufIsToBeCreated)
+          {
+            streamptr->record = (Record *) malloc(sizeof(Record));
+            streamptr->record->buffer = NULL;
+            streamptr->record->srvp   = srvNew();
+          }
         break;
       }
 #endif
@@ -690,9 +697,12 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
       {
         fileID = fileOpen(filename, filemode);
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-        streamptr->record = (Record *) malloc(sizeof(Record));
-        streamptr->record->buffer = NULL;
-        streamptr->record->extp   = extNew();
+        if (recordBufIsToBeCreated)
+          {
+            streamptr->record = (Record *) malloc(sizeof(Record));
+            streamptr->record->buffer = NULL;
+            streamptr->record->extp   = extNew();
+          }
         break;
       }
 #endif
@@ -701,9 +711,12 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
       {
         fileID = fileOpen(filename, filemode);
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-        streamptr->record = (Record *) malloc(sizeof(Record));
-        streamptr->record->buffer = NULL;
-        streamptr->record->iegp   = iegNew();
+        if (recordBufIsToBeCreated)
+          {
+            streamptr->record = (Record *) malloc(sizeof(Record));
+            streamptr->record->buffer = NULL;
+            streamptr->record->iegp   = iegNew();
+          }
         break;
       }
 #endif

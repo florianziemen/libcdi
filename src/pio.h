@@ -18,7 +18,8 @@ int pioFileOpen(const char *filename, const char *mode);
 int    pioFileClose    ( int );
 size_t pioFileWrite    ( int, int, const void*, size_t );
 int cdiPioStreamOpen(const char *filename, const char *filemode,
-                     int filetype, stream_t *streamptr);
+                     int filetype, stream_t *streamptr,
+                     int recordBufIsToBeCreated);
 void cdiPioStreamDefVlist_(int streamID, int vlistID);
 void cdiPioStreamWriteVar_(int streamID, int varID, int memtype,
                            const void *data, int nmiss);

@@ -355,7 +355,8 @@ streamUnpack(char * unpackBuffer, int unpackBufferSize,
 
 int
 cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
-                             int filetype, stream_t *streamptr);
+                             int filetype, stream_t *streamptr,
+                             int recordBufIsToBeCreated);
 
 void
 cdiStreamDefVlist_(int streamID, int vlistID);
