@@ -820,7 +820,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 }
 
 
-int streamOpenA(const char *filename, const char *filemode, int filetype)
+static int streamOpenA(const char *filename, const char *filemode, int filetype)
 {
   int fileID = CDI_UNDEFID;
   int streamID = CDI_ESYSTEM;
