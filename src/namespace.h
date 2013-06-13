@@ -10,7 +10,6 @@ typedef enum {
 typedef struct {
   int idx;
   int nsp;
-  statusCode resStatus;
 } namespaceTuple_t;
 
 void             namespaceCleanup      ( void );
