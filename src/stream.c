@@ -665,7 +665,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
   Record *record = NULL;
   stream_t *streamptr = NULL;
   int hasLocalFile = namespaceHasLocalFile ( namespaceGetActive ());
-#if defined (USE_MPI) && ! defined (HAVE_PARALLEL_NC4)
+#if USE_MPI && ! defined (HAVE_PARALLEL_NC4) && defined (HAVE_LIBNETCDF)
   int rank;
 #endif
 
