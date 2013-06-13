@@ -196,8 +196,8 @@ readFuncCall(struct funcCallDesc *header)
                            + header->funcArgs.newFile.offset);
         xassert(filename[filenamesz] == '\0');
         int filetype = header->funcArgs.newFile.filetype;
-        xassert ( filetype >= MINFILETYPE && filetype <= MAXFILETYPE );
         int streamID = streamOpenWrite(filename, filetype);
+        xassert(streamID != CDI_ELIBNAVAIL);
         xdebug("READ FUNCTION CALL FROM WIN:  %s, filenamesz=%zu,"
                " filename=%s, filetype=%d, OPENED STREAM %d",
                funcMap[(-1 - funcID)], filenamesz, filename,
