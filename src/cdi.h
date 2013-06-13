@@ -232,8 +232,8 @@ void     pioEndDef             ( void );
 void     pioEndTimestepping    ( void );
 void     pioFinalize           ( void );
 /*      pioInit: initialize I/O server processes and communication */
-MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode, int nNamespaces,
-                 int *hasLocalFile, float partInflate);
+MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode,
+                 int *pioNamespace, float partInflate);
 void     pioWriteTimestep      ( int, int, int );
 
 void     streamWriteVarPart    (int streamID, int varID, int memtype,

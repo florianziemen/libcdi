@@ -4,7 +4,8 @@
 typedef enum {
   STAGE_DEFINITION = 0,
   STAGE_TIMELOOP   = 1,
-  STAGE_CLEANUP    = 2
+  STAGE_CLEANUP    = 2,
+  STAGE_UNUSED     = 3,
 } statusCode;
 
 typedef struct {
@@ -12,8 +13,9 @@ typedef struct {
   int nsp;
 } namespaceTuple_t;
 
+int              namespaceNew(int hasLocalFiles);
+void             namespaceDelete(int namespaceID);
 void             namespaceCleanup      ( void );
-void             namespaceInit         ( int, int * );
 int              namespaceGetNumber    ( void );
 int              namespaceGetActive    ( void );
 int              namespaceIdxEncode    ( namespaceTuple_t );
@@ -24,6 +26,7 @@ int              namespaceAdaptKey     ( int, int );
 int              namespaceAdaptKey2    ( int );
 void             namespaceDefResStatus ( statusCode );
 statusCode       namespaceInqResStatus ( void );
+
 
 #endif
 /*

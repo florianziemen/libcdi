@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include "cdi.h"
 #include "namespace.h"
+#include "resource_handle.h"
 #include "pio_util.h"
-
 
 static int nNamespaces = 1;
 static int activeNamespace = 0;
@@ -16,6 +16,24 @@ struct namespace
 } initialNamespace = { .hasLocalFiles = 1, .resStage = STAGE_DEFINITION };
 
 struct namespace *namespaces = &initialNamespace;
+
+static int namespacesSize = 1;
+
+#if  defined  (HAVE_LIBPTHREAD)
+#  include <pthread.h>
+
+static pthread_mutex_t namespaceMutex = PTHREAD_MUTEX_INITIALIZER;
+
+#  define NAMESPACE_LOCK()         pthread_mutex_lock(&namespaceMutex)
+#  define NAMESPACE_UNLOCK()       pthread_mutex_unlock(&namespaceMutex)
+
+#else
+
+#  define NAMESPACE_LOCK()
+#  define NAMESPACE_UNLOCK()
+
+#endif
+
 
 enum {
   intbits = sizeof(int) * CHAR_BIT,
@@ -73,32 +91,69 @@ namespaceTuple_t namespaceResHDecode ( int resH )
   return tin;
 }
 
-
-void namespaceInit ( int nspn, int * argHasLocalFile )
+int
+namespaceNew(int hasLocalFiles)
 {
-  /* FIXME: this should not be PIO-only */
-#ifdef USE_MPI
-
-  xassert(nspn <= NUM_NAMESPACES && nspn >= 1 );
-
-  nNamespaces = nspn;
-  if ( nspn >= 1 )
+  int newNamespaceID = -1;
+  NAMESPACE_LOCK();
+  if (namespacesSize > nNamespaces)
     {
-      namespaces = xmalloc(nspn * sizeof (namespaces[0]));
-      for (int nspID = 0; nspID < nspn; ++nspID)
-        {
-          namespaces[nspID].hasLocalFiles = argHasLocalFile[nspID];
-          namespaces[nspID].resStage = STAGE_DEFINITION;
-        }
+      /* namespace is already available and only needs reinitialization */
+      for (int i = 0; i < namespacesSize; ++i)
+        if (namespaces[i].resStage == STAGE_UNUSED)
+          {
+            newNamespaceID = i;
+            break;
+          }
     }
-#endif
+  else if (namespacesSize == 1)
+    {
+      /* make room for additional namespace */
+      struct namespace *newNameSpaces
+        = xmalloc((namespacesSize + 1) * sizeof (namespaces[0]));
+      memcpy(newNameSpaces, namespaces, sizeof (namespaces[0]));
+      namespaces = newNameSpaces;
+      ++namespacesSize;
+      newNamespaceID = 1;
+    }
+  else if (namespacesSize < NUM_NAMESPACES)
+    {
+      /* make room for additional namespace */
+      newNamespaceID = namespacesSize;
+      namespaces
+        = xrealloc(namespaces, (namespacesSize + 1) * sizeof (namespaces[0]));
+      ++namespacesSize;
+    }
+  else /* implicit: namespacesSize >= NUM_NAMESPACES */
+    {
+      NAMESPACE_UNLOCK();
+      return -1;
+    }
+  xassert(newNamespaceID >= 0 && newNamespaceID < NUM_NAMESPACES);
+  ++nNamespaces;
+  namespaces[newNamespaceID].hasLocalFiles = hasLocalFiles;
+  namespaces[newNamespaceID].resStage = STAGE_DEFINITION;
+  reshListCreate(newNamespaceID);
+  NAMESPACE_UNLOCK();
+  return newNamespaceID;
 }
 
+void
+namespaceDelete(int namespaceID)
+{
+  NAMESPACE_LOCK();
+  xassert(namespaceID < namespacesSize && nNamespaces);
+  reshListDestruct(namespaceID);
+  namespaces[namespaceID].resStage = STAGE_UNUSED;
+  --nNamespaces;
+  NAMESPACE_UNLOCK();
+}
 
 void namespaceCleanup ( void )
 {
   if ( nNamespaces > 1 )
     {
+      initialNamespace = namespaces[0];
       free(namespaces);
       namespaces = &initialNamespace;
       nNamespaces = 1;
@@ -114,12 +169,9 @@ int namespaceGetNumber ()
 
 void pioNamespaceSetActive ( int nId )
 {
-  /* FIXME: this should not be PIO-only */
-#ifdef USE_MPI
-  xassert ( nId < nNamespaces && nId >= 0 );
-
+  xassert(nId < namespacesSize && nId >= 0
+          && namespaces[nId].resStage != STAGE_UNUSED);
   activeNamespace = nId;
-#endif
 }
 
 
@@ -131,7 +183,7 @@ int namespaceGetActive ()
 
 int namespaceHasLocalFile ( int nId )
 {
-  xassert ( nId < nNamespaces && nId >= 0 );
+  xassert(nId < namespacesSize && nId >= 0);
 
   return namespaces ? namespaces[nId].hasLocalFiles : 0;
 }
@@ -182,6 +234,18 @@ statusCode namespaceInqResStatus ( void )
 {
   int nsp = namespaceGetActive ();
   return namespaces[nsp].resStage;
+}
+
+void cdiReset(void)
+{
+  NAMESPACE_LOCK();
+  for (int namespaceID = 0; namespaceID < namespacesSize; ++namespaceID)
+    namespaceDelete(namespaceID);
+  namespaces = &initialNamespace;
+  namespacesSize = 1;
+  nNamespaces = 1;
+  activeNamespace = 0;
+  NAMESPACE_UNLOCK();
 }
 
 /*

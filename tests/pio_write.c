@@ -378,12 +378,6 @@ search_iomode_str(const char *modestr)
 
 int main (int argc, char *argv[])
 {
-#ifdef USE_MPI
-  enum {
-    nNamespaces = 2 };
-  static int hasLocalFile[nNamespaces] = { 0, 1 };
-#endif
-
   struct model_config setup = default_setup;
 
   MPI_Comm commModel;
@@ -481,8 +475,9 @@ int main (int argc, char *argv[])
   }
 
 #ifdef USE_MPI
-  commModel = pioInit(commGlob, nProcsIO, IOMode,
-                      nNamespaces, hasLocalFile, 1.0);
+  int pioNamespace;
+  commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0);
+  pioNamespaceSetActive(pioNamespace);
 #else
   commModel = -1;
 #endif

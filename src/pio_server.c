@@ -867,7 +867,6 @@ void IOServer ()
 #ifdef HAVE_PARALLEL_NC4
   numPioPrimes = PPM_prime_factorization_32((uint32_t)commInqSizeColl(),
                                             &pioPrimes);
-  xt_initialize(commInqCommColl());
 #elif defined (HAVE_LIBNETCDF)
   cdiSerialOpenFileCount = xcalloc(sizeof (cdiSerialOpenFileCount[0]),
                                    commInqSizeColl());

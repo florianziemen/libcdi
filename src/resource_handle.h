@@ -42,6 +42,8 @@ typedef struct {
 
 enum { RESH_UNDEFID, ASSIGNED, SUSPENDED, CLOSED };
 
+void   reshListCreate(int namespaceID);
+void   reshListDestruct(int namespaceID);
 int    reshPut ( void *, resOps * );
 void   reshRemove ( cdiResH, resOps * );
 

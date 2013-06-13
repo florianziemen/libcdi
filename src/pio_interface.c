@@ -766,9 +766,13 @@ int pioInqVarDecoOff ( int vlistID, int varID )
   @return int indicating wether the calling PE is a calcutator (1) or not (0)
 */
 
+#ifdef USE_MPI
+static int pioNamespace_ = -1;
+#endif
+
 MPI_Comm
 pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
-        int nNamespaces, int * hasLocalFile, float partInflate)
+        int *pioNamespace, float partInflate)
 {
 #ifdef USE_MPI
   int sizeGlob;
@@ -799,13 +803,14 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
   // JUST FOR TEST CASES WITH ONLY ONE MPI TASK
   if ( commInqSizeGlob () == 1 )
     {
-      namespaceInit ( nNamespaces, hasLocalFile );
+      pioNamespace_ = *pioNamespace = namespaceNew(0);
       return commInqCommGlob ();
     }
 
   if ( commInqIsProcIO ())
     {
       IOServer ();
+      namespaceDelete(0);
       commDestroy ();
       MPI_Finalize ();
       exit ( EXIT_SUCCESS );
@@ -814,7 +819,7 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
     {
       commEvalPhysNodes ();
       commDefCommsIO ();
-      namespaceInit ( nNamespaces, hasLocalFile );
+      pioNamespace_ = *pioNamespace = namespaceNew(0);
     }
 
   xdebug ( "nProcsGlob=%d, RETURN", sizeGlob );
@@ -890,7 +895,7 @@ void pioFinalize ( void )
 #ifdef USE_MPI
   int collID, ibuffer = 1111;
   xdebug("%s", "START");
-  namespaceCleanup ();
+  namespaceDelete(pioNamespace_);
   for ( collID = 0; collID < commInqNProcsColl (); collID++ )
     {
       xmpi ( MPI_Send ( &ibuffer, 1, MPI_INT, commInqNProcsModel (),

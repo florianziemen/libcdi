@@ -79,13 +79,13 @@
 FCALLSCSUB0 (pioEndDef, PIOENDDEF, pioenddef)
 FCALLSCSUB0 (pioEndTimestepping, PIOENDTIMESTEPPING, pioendtimestepping)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
-static int pioInit_fwrap(int commSuper, int nProcsIO, int IOMode, int nNamespaces, int * hasLocalFile, float partInflate)
+static int pioInit_fwrap(int commSuper, int nProcsIO, int IOMode, int * pioNamespace, float partInflate)
 {
   MPI_Comm v;
-  v = pioInit(MPI_Comm_f2c(commSuper),  nProcsIO,  IOMode,  nNamespaces,  hasLocalFile,  partInflate);
+  v = pioInit(MPI_Comm_f2c(commSuper),  nProcsIO,  IOMode,  pioNamespace,  partInflate);
   return MPI_Comm_c2f(v);
 }
-FCALLSCFUN6 (INT, pioInit_fwrap, PIOINIT, pioinit, INT, INT, INT, INT, PINT, FLOAT)
+FCALLSCFUN5 (INT, pioInit_fwrap, PIOINIT, pioinit, INT, INT, INT, PINT, FLOAT)
 FCALLSCSUB3 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep, INT, INT, INT)
 static void streamWriteVarPart_fwrap(int streamID, int varID, int memtype, const void * data, int nmiss, void * partDesc)
 {

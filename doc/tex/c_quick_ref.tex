@@ -367,8 +367,8 @@ Get all values of a Y-axis.
 \section*{\tt \htmlref{pioInit}{pioInit}}
 
 \begin{verbatim}
-    MPI_Comm pioInit (MPI_Comm commSuper, int nProcsIO, int IOMode, int nNamespaces,
-                      int *hasLocalFile, float partInflate);
+    MPI_Comm pioInit (MPI_Comm commSuper, int nProcsIO, int IOMode,
+                      int *pioNamespace, float partInflate);
 \end{verbatim}
 
 initialize I/O server processes and communication.

@@ -119,11 +119,6 @@ struct {
 
 int main (int argc, char *argv[])
 {
-  enum {
-    nNamespaces = 1 };
-
-  static int hasLocalFile[nNamespaces] = { 0 };
-
   MPI_Comm commModel = MPI_COMM_NULL;
 #ifdef USE_MPI
   MPI_Comm commGlob;
@@ -168,8 +163,8 @@ int main (int argc, char *argv[])
       }
   }
 
-  commModel = pioInit(commGlob, nProcsIO, IOMode, nNamespaces, hasLocalFile,
-                      1.0f);
+  commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0f);
+  pioNamespaceSetActive(pioNamespace);
 #endif
 
   modelRun(commModel);

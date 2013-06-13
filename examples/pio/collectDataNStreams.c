@@ -159,16 +159,14 @@ int main (int argc, char *argv[])
     IOModeDef       = PIO_FPGUARD,
     //IOModeDef       = PIO_ASYNCH,
     //IOModeDef       = PIO_WRITER,
-    nNamespaces = 1 };
-
-  static int hasLocalFile[nNamespaces] = { 0 };
+  };
 
   MPI_Comm commModel = MPI_COMM_NULL;
 #ifdef USE_MPI
   MPI_Comm commGlob;
   int sizeGlob;
   int rankGlob;
-  int IOMode, nProcsIO, count;
+  int IOMode, nProcsIO, pioNamespace;
 
   xmpi ( MPI_Init ( &argc, &argv));
   commGlob = MPI_COMM_WORLD;
@@ -192,8 +190,8 @@ int main (int argc, char *argv[])
       nProcsIO = nProcsIODef;
     }
 
-  commModel = pioInit(commGlob, nProcsIO, IOMode, nNamespaces, hasLocalFile,
-                      1.0f);
+  commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0f);
+  pioNamespaceSetActive(pioNamespace);
 #endif
 
   modelRun(commModel);

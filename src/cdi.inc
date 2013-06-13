@@ -382,8 +382,7 @@
 !                                    (INTEGER         commSuper,
 !                                     INTEGER         nProcsIO,
 !                                     INTEGER         IOMode,
-!                                     INTEGER         nNamespaces,
-!                                     INTEGER         hasLocalFile,
+!                                     INTEGER         pioNamespace,
 !                                     REAL            partInflate)
       EXTERNAL        pioInit
 

@@ -69,15 +69,19 @@ static struct
   listElem_t *resources;
 } *resHList;
 
+static int resHListSize = 0;
+
 /**************************************************************/
 
 static void
 listInitResources(int nsp)
 {
-  xassert(nsp < namespaceGetNumber() && nsp >= 0);
+  xassert(nsp < resHListSize && nsp >= 0);
+  int size = resHList[nsp].size = MIN_LIST_SIZE;
+  xassert(resHList[nsp].resources == NULL);
+  resHList[nsp].resources = xcalloc(MIN_LIST_SIZE, sizeof (listElem_t));
   listElem_t *p = resHList[nsp].resources;
 
-  int size = resHList[nsp].size;
   for (int i = 0; i < size; i++ )
     {
       p[i].resH   = namespaceIdxEncode2(nsp, i);
@@ -91,51 +95,65 @@ listInitResources(int nsp)
   resHList[nsp].freeHead = 0;
 }
 
-static
-void listNew ( void )
+static inline void
+reshListClearEntry(int i)
 {
-  int nnsp;
-
-  nnsp = namespaceGetNumber ();
-
-  resHList = xcalloc ( nnsp, sizeof (resHList[0]));
-
-  for (int i = 0; i < nnsp; i++ )
-    {
-      resHList[i].size = MIN_LIST_SIZE;
-
-      xassert ( resHList[i].resources == NULL);
-
-      resHList[i].resources = xcalloc ( MIN_LIST_SIZE, sizeof (listElem_t));
-      listInitResources(i);
-    }
+  resHList[i].size = 0;
+  resHList[i].resources = NULL;
+  resHList[i].freeHead = -1;
 }
+
+void
+reshListCreate(int namespaceID)
+{
+  LIST_LOCK();
+  if (resHListSize <= namespaceID)
+    {
+      resHList = xrealloc(resHList, (namespaceID + 1) * sizeof (resHList[0]));
+      for (int i = resHListSize; i <= namespaceID; ++i)
+        reshListClearEntry(i);
+      resHListSize = namespaceID + 1;
+    }
+  listInitResources(namespaceID);
+  LIST_UNLOCK();
+}
+
 
 /**************************************************************/
 
+void
+reshListDestruct(int namespaceID)
+{
+  LIST_LOCK();
+  xassert(resHList && namespaceID >= 0 && namespaceID < resHListSize);
+  int callerNamespaceID = namespaceGetActive();
+  pioNamespaceSetActive(namespaceID);
+  if (resHList[namespaceID].resources)
+    {
+      for ( int j = 0; j < resHList[namespaceID].size; j++ )
+        {
+          listElem_t *listElem = resHList[namespaceID].resources + j;
+          if (listElem->val)
+            listElem->ops->valDestroy(listElem->val);
+        }
+      free(resHList[namespaceID].resources);
+      reshListClearEntry(namespaceID);
+    }
+  if (resHList[callerNamespaceID].resources)
+    pioNamespaceSetActive(callerNamespaceID);
+  LIST_UNLOCK();
+}
+
+
 static void listDestroy ( void )
 {
-  if (resHList)
-    {
-      int nnsp = namespaceGetNumber ();
-      for (int i = 0; i < nnsp; ++i)
-	{
-	  pioNamespaceSetActive(i);
-          if (resHList[i].resources)
-            {
-              for ( int j = 0; j < resHList[i].size; j++ )
-                {
-                  listElem_t *listElem = resHList[i].resources + j;
-                  if (listElem->val)
-                    listElem->ops->valDestroy(listElem->val);
-                }
-              free(resHList[i].resources);
-              resHList[i].resources = NULL;
-            }
-	}
-      free(resHList);
-      resHList = NULL;
-    }
+  LIST_LOCK();
+  for (int i = 0; i < resHListSize; ++i)
+    if (resHList[i].resources)
+      namespaceDelete(i);
+  free(resHList);
+  resHList = NULL;
+  LIST_UNLOCK();
 }
 
 /**************************************************************/
@@ -151,10 +169,8 @@ void listInitialize ( void )
   pthread_mutex_init ( &listMutex, &ma);
   pthread_mutexattr_destroy(&ma);
 #endif
-
-  LIST_LOCK();
-  listNew ();
-  LIST_UNLOCK();
+  // create default namespace
+  reshListCreate(0);
   /* file is special and has its own table, which needs to be
    * created, before we register the listDestroy exit handler */
   {
@@ -278,8 +294,8 @@ void *reshGetValue(const char * caller, cdiResH resH, resOps * ops)
   else
     {
       LIST_UNLOCK();
-      xabortC(caller, "Invalid namespace %d or index %d for resource handle %d!",
-              nspT.nsp, nspT.idx, (int)resH);
+      xabortC(caller, "Invalid namespace %d or index %d for resource handle %d when using namespace %d of size %d!",
+              nspT.nsp, nspT.idx, (int)resH, nsp, resHList[nsp].size);
     }
 
   if ( !(listElem && listElem->ops == ops) )
@@ -536,7 +552,7 @@ int reshListCompare ( int nsp0, int nsp1 )
   LIST_INIT();
   LIST_LOCK();
 
-  xassert(namespaceGetNumber () > xmaxInt ( nsp0, nsp1 ) &&
+  xassert(resHListSize > xmaxInt ( nsp0, nsp1 ) &&
           xminInt ( nsp0, nsp1 ) >= 0 );
 
   for ( i = 0; i < resHList[nsp0].size; i++ )
@@ -659,16 +675,6 @@ void reshListPrint ( char * filename )
 }
 
 
-void cdiReset(void)
-{
-  LIST_LOCK();
-
-  listDestroy();
-
-  listNew ();
-
-  LIST_UNLOCK();
-}
 /*
  * Local Variables:
  * c-file-style: "Java"

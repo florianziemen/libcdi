@@ -19,14 +19,11 @@ extern void   arrayDestroy          ( void );
 enum {
   IOMode           = PIO_NONE,
   nProcsIO         = 1,
-  nNamespaces      = 2,
   DOUBLE_PRECISION = 8,
   nlon             = 12,
   nlat             = 6,
   nlev             = 5,
   ntsteps          = 3 };
-
-static int hasLocalFile[nNamespaces] = { 0, 0 };
 
 double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
 double lats[nlat] = {-75, -45, -15, 15, 45, 75};
@@ -220,7 +217,7 @@ void modelRun ( MPI_Comm comm )
 int main (int argc, char *argv[]) 
 {
 #ifdef USE_MPI
-  int sizeGlob;
+  int sizeGlob, pioNamespace;
   MPI_Comm commGlob, commModel;
 
   MPI_Init(&argc, &argv);           
@@ -235,8 +232,8 @@ int main (int argc, char *argv[])
   if ( nProcsIO != 1 )
     xabort ( "bad distribution of tasks on PEs" );
 
-  commModel = pioInit(commGlob, nProcsIO, IOMode, nNamespaces, hasLocalFile,
-                      1.0f);
+  commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0f);
+  pioNamespaceSetActive(pioNamespace);
 
   modelRun ( commModel );
 

@@ -94,9 +94,8 @@ void instituteDefaultEntries ( void )
   resH[11] =           institutDef( 99,   0, "KNMI",      "Royal Netherlands Meteorological Institute");
   /*     (void) institutDef(  0,   0, "IPSL", "IPSL (Institut Pierre Simon Laplace, Paris, France)"); */
 
-  if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
-    for ( i = 0; i < 12 ; i++ )
-      reshSetStatus ( resH[i], &instituteOps, SUSPENDED );
+  for ( i = 0; i < 12 ; i++ )
+    reshSetStatus(resH[i], &instituteOps, SUSPENDED);
 }
 
 static
