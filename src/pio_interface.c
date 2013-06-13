@@ -271,7 +271,6 @@ varsMapNDeco(int nNodes, int *nodeSizes)
     * collectsData;
   int i, j, k = 0;
   int nProcsColl = commInqNProcsColl ();
-  char text[1024];
 
   xdebug ( "START, nProcsColl=%d", nProcsColl );
 
@@ -313,14 +312,10 @@ varsMapNDeco(int nNodes, int *nodeSizes)
 
   for ( j = 0; j < nProcsColl; j++ )
     if ( collectsData[j] == 0 )
-      {
-        sprintf ( text,
-                  "\nAT LEAST ONE COLLECTOR PROCESS IDLES, "
-                  "CURRENTLY NOT COVERED: "
-                  "PE%d collects no data",
-                  commCollID2RankGlob ( j ));
-        xabort ( text );
-      }
+      xabort("AT LEAST ONE COLLECTOR PROCESS IDLES, "
+             "CURRENTLY NOT COVERED: "
+             "PE%d collects no data",
+             commCollID2RankGlob(j));
 
   if ( varMapping )   free ( varMapping );
   if ( varSizes )     free ( varSizes );
