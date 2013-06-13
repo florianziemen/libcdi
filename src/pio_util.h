@@ -157,7 +157,7 @@ void printArray ( const char *, char *, const void *, int, int, const char *, co
 /**
  * @return number of dimensions
  */
-void
+int
 cdiPioQueryVarDims(int varShape[3], int vlistID, int varID);
 
 #endif

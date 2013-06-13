@@ -273,7 +273,7 @@ void printArray ( const char * cdiPioDebugString, char * ps, const void * array,
   return;
 }
 
-void
+int
 cdiPioQueryVarDims(int varShape[3], int vlistID, int varID)
 {
   int gridID = vlistInqVarGrid(vlistID, varID);
@@ -297,6 +297,8 @@ cdiPioQueryVarDims(int varShape[3], int vlistID, int varID)
       break;
     }
   varShape[2] = zaxisInqSize(zaxisID);
+  /* FIXME: other grids have different dimensionality */
+  return (varShape[2] == 1)?2:3;
 }
 
 /****************************************************/
