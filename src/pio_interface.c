@@ -28,7 +28,6 @@
 #include "cdi_int.h"
 #include "vlist.h"
 
-
 extern resOps streamOps;
 
 
@@ -991,6 +990,37 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
 
 #endif
 }
+
+#if defined USE_MPI
+void
+streamWriteVarPart(int streamID, int varID, int memtype, const void *data,
+                   int nmiss, Xt_idxlist partDesc)
+{
+  if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
+
+  check_parg(data);
+
+  if (namespaceHasLocalFile(namespaceGetActive ()))
+      xabort("local part writing is unsupported!");
+
+  switch (namespaceInqResStatus())
+    {
+    case STAGE_DEFINITION:
+      xabort("DEFINITION STAGE: PARALLEL WRITING NOT POSSIBLE.");
+      break;
+    case STAGE_TIMELOOP:
+      pioBufferPartData(streamID, varID, data, nmiss, partDesc);
+      return;
+    case STAGE_CLEANUP:
+      xabort("CLEANUP STAGE: PARALLEL WRITING NOT POSSIBLE.");
+      break;
+    default:
+      xabort("INTERNAL ERROR");
+    }
+}
+#endif
+
+
 /*
  * Local Variables:
  * c-file-style: "Java"

@@ -31,13 +31,6 @@
 
 #include <string.h>
 
-#ifdef USE_MPI
-#include <yaxt.h>
-#else
-typedef struct Xt_idxlist_ *Xt_idxlist;
-#endif
-
-
 #define  MAX_FNAMES  3
 
 extern resOps streamOps;
@@ -1668,35 +1661,6 @@ cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data,
 	break;
       }
     }
-}
-
-void
-streamWriteVarPart(int streamID, int varID, int memtype, const void *data,
-                   int nmiss, Xt_idxlist partDesc)
-{
-#if defined USE_MPI
-  if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
-
-  check_parg(data);
-
-  if (namespaceHasLocalFile(namespaceGetActive ()))
-      xabort("local part writing is unsupported!");
-
-  switch (namespaceInqResStatus())
-    {
-    case STAGE_DEFINITION:
-      xabort("DEFINITION STAGE: PARALLEL WRITING NOT POSSIBLE.");
-      break;
-    case STAGE_TIMELOOP:
-      pioBufferPartData(streamID, varID, data, nmiss, partDesc);
-      return;
-    case STAGE_CLEANUP:
-      xabort("CLEANUP STAGE: PARALLEL WRITING NOT POSSIBLE.");
-      break;
-    default:
-      xabort("INTERNAL ERROR");
-    }
-#endif
 }
 
 /*
