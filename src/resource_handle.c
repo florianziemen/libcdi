@@ -542,11 +542,9 @@ void reshUnlock ()
 
 int reshListCompare ( int nsp0, int nsp1 )
 {
-  const int equal  = 0;
+  int valCompare = 0;
 #ifdef USE_MPI
-  const int differ = -1;
-  int i, valCompare;
-  listElem_t * listElem0, * listElem1;
+  int i;
 
 
   LIST_INIT();
@@ -557,53 +555,64 @@ int reshListCompare ( int nsp0, int nsp1 )
 
   for ( i = 0; i < resHList[nsp0].size; i++ )
     {
-      listElem0 = resHList[nsp0].resources + i;
+      listElem_t *listElem0 = resHList[nsp0].resources + i,
+        *listElem1 = resHList[nsp1].resources + i;
       if ( listElem0->val )
 	{
 	  if ( i >= resHList[nsp1].size )
 	    {
-	      xdebug("%s", "");
-	      return differ;
+              valCompare = 1;
+	      xdebug("%s %d", "namespace active length mismatch at resource",
+                     i);
+	      break;
 	    }
 
-	  listElem1 = resHList[nsp1].resources + i;
 	  if ( !listElem1->val )
 	    {
-	      xdebug("%s", "");
-	      return differ;
+              valCompare = 1;
+	      xdebug("%s %d", "namespace occupation mismatch at resource", i);
+              break;
 	    }
 
-	  xassert ( listElem0->ops && listElem1->ops );
-	  if ( listElem0->ops != listElem1->ops )
+	  if ( listElem0->ops != listElem1->ops || listElem0->ops == NULL )
 	    {
-	      xdebug("%s", "");
-	      return differ;
+              valCompare = 1;
+	      xdebug("%s %d", "resource type mismatch at resource", i);
+              break;
 	    }
 
-	  valCompare =  listElem0->ops->valCompare ( listElem0->val, listElem1->val );
-	  printf ( "type %d, values resH0=%d and resH1=%d %s\n", 
-		   listElem0->ops->valTxCode (), 
-		   listElem0->resH, 
-		   listElem1->resH,
-		   valCompare == equal ? "are equal" : "differ" );
-	  if ( valCompare != equal ) return differ;
+	  valCompare = listElem0->ops->valCompare(listElem0->val,
+                                                  listElem1->val);
+	  fprintf(stderr, "type %d, values resH0=%d and resH1=%d %s\n",
+                  listElem0->ops->valTxCode (),
+                  listElem0->resH,
+                  listElem1->resH,
+                  !valCompare ? "are equal" : "differ" );
+          if (valCompare)
+            break;
 	}
-      else if ( resHList[nsp1].resources[i].val )
-	return differ;
+      else if ( listElem1->val )
+        {
+          valCompare = 1;
+          xdebug("namespace 1 has value at empty place %d of namespace 0",
+                 i);
+          break;
+        }
     }
 
-  for ( ; i < resHList[nsp1].size; i++ )
-    if ( resHList[nsp1].resources[i].val )
-      {
-	xdebug("%s", "");
-	return differ;
-      }
+  if (!valCompare)
+    {
+      for ( ; i < resHList[nsp1].size; i++ )
+        valCompare = valCompare || resHList[nsp1].resources[i].val != NULL;
+      if (valCompare)
+        xdebug("%s", "extra elements in second namespace");
+    }
 
   LIST_UNLOCK();
 
 #endif
 
-  return equal;
+  return valCompare;
 }
 
 /**************************************************************/
