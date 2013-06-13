@@ -15,7 +15,6 @@ typedef struct {
 
 void             namespaceCleanup      ( void );
 void             namespaceInit         ( int, int * );
-void             namespaceShowbits     ( int, char * );
 int              namespaceGetNumber    ( void );
 int              namespaceGetActive    ( void );
 int              namespaceIdxEncode    ( namespaceTuple_t );

@@ -27,6 +27,7 @@ enum {
 };
 
 
+#if 0
 void namespaceShowbits ( int n, char *name )
 {
   int i;
@@ -42,6 +43,7 @@ void namespaceShowbits ( int n, char *name )
   bitvalues[intbits] = '\0';
   fprintf (stdout, "%s: %s\n", name, bitvalues );
 }
+#endif
 
 
 int namespaceIdxEncode ( namespaceTuple_t tin )
