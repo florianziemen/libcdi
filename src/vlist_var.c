@@ -2057,10 +2057,7 @@ void vlistDefVarDeco ( int vlistID, int varID, int decoSize, deco_t * deco )
 
 int vlistInqVarDecoChunk ( int vlistID, int varID, int rankModel  )
 {
-  vlist_t *vlistptr;
   int iret = CDI_UNDEFID;
-
-  vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
 
@@ -2068,6 +2065,7 @@ int vlistInqVarDecoChunk ( int vlistID, int varID, int rankModel  )
   {
     deco_t * deco;
     int i, decoSize = 0;
+    vlist_t *vlistptr = vlist_to_pointer(vlistID);
     xassert ( vlistptr->vars[varID].deco != NULL &&
              vlistptr->vars[varID].decoSize != CDI_UNDEFID ); 
     
