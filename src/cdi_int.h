@@ -353,6 +353,24 @@ struct streamAssoc
 streamUnpack(char * unpackBuffer, int unpackBufferSize,
              int * unpackBufferPos, int nspTarget, void *context);
 
+int
+cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
+                             int filetype, Record **record
+#if USE_MPI && ! HAVE_PARALLEL_NC4 && defined HAVE_LIBNETCDF
+                                 , int *rankp
+#endif
+);
+
+void
+cdiStreamDefVlist_(int streamID, int vlistID);
+void
+cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data,
+                   int nmiss);
+void
+cdiStreamwriteVarChunk_(int streamID, int varID, int memtype,
+                        const int rect[][2], const void *data, int nmiss);
+void
+cdiStreamCloseDefaultDelegate(stream_t *streamptr);
 
 char *cdiUnitNamePtr(int cdi_unit);
 

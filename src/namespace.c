@@ -9,6 +9,7 @@
 #include "error.h"
 #include "cdf_int.h"
 #include "file.h"
+#include "cdi_int.h"
 
 static int nNamespaces = 1;
 static int activeNamespace = 0;
@@ -19,14 +20,19 @@ static int activeNamespace = 0;
 #define CDI_NETCDF_SWITCHES
 #endif
 
-#define defaultSwitches {              \
-    cdiAbortC_serial,                  \
-      serializeGetSizeInCore,          \
-      serializePackInCore,             \
-      serializeUnpackInCore,           \
-      fileOpen_serial,                 \
-      fileClose_serial,                \
-      CDI_NETCDF_SWITCHES              \
+#define defaultSwitches {                       \
+    cdiAbortC_serial,                           \
+      serializeGetSizeInCore,                   \
+      serializePackInCore,                      \
+      serializeUnpackInCore,                    \
+      fileOpen_serial,                          \
+      fileClose_serial,                         \
+      cdiStreamOpenDefaultDelegate,             \
+      cdiStreamDefVlist_,                       \
+      cdiStreamWriteVar_,                       \
+      cdiStreamwriteVarChunk_,                  \
+      cdiStreamCloseDefaultDelegate,            \
+      CDI_NETCDF_SWITCHES                       \
       }
 
 struct namespace

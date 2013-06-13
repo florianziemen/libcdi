@@ -831,6 +831,12 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
       int callerCDINamespace = namespaceGetActive();
       pioNamespaceSetActive(pioNamespace_);
       serializeSetMPI();
+      namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND, cdiPioStreamOpen);
+      namespaceSwitchSet(NSSWITCH_STREAM_DEF_VLIST_, cdiPioStreamDefVlist_);
+      namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_, cdiPioStreamWriteVar_);
+      namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_,
+                         cdiPioStreamWriteVarChunk_);
+      namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND, cdiPioStreamClose);
       pioNamespaceSetActive(callerCDINamespace);
     }
 
