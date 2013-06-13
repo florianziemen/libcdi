@@ -387,9 +387,9 @@ modelWinDefBufferSizes(void)
       for ( varID = 0; varID < nvars; varID++ )
         {
           collID = CDI_UNDEFID;
-          collID = cdiPIOpartInflate_
-            * commRankGlob2CollID(vlistInqVarIOrank(vlistID, varID));
-          int collIDchunk = vlistInqVarDecoChunk ( vlistID, varID, rankModel );
+          collID = commRankGlob2CollID(vlistInqVarIOrank(vlistID, varID));
+          int collIDchunk = cdiPIOpartInflate_
+            * vlistInqVarDecoChunk(vlistID, varID, rankModel);
           xassert ( collID != CDI_UNDEFID && collIDchunk > 0 );
           collIndex[collID].numDataRecords += 2;
           txWin[collID].size += (size_t)collIDchunk * sizeof (double)
