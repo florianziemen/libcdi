@@ -24,8 +24,6 @@
 
 enum { MIN_LIST_SIZE = 128 };
 
-static int *listSizeAllocated;
-
 static void listInitialize(void);
 
 // ATTENTION: not thread safe yet, namespaces are set in model!
@@ -59,15 +57,17 @@ static int listInit = 0;
 
 typedef struct listElem {
   cdiResH       resH;//idx
-  struct listElem * next;
+  int next;
   resOps      * ops;
   void        * val;//ptr
   int           status;
 } listElem_t;
 
-
-static listElem_t **listResources;
-static listElem_t **freeListHead;
+static struct
+{
+  int size, freeHead;
+  listElem_t *resources;
+} *resHList;
 
 /**************************************************************/
 
@@ -78,17 +78,15 @@ void listNew ( void )
 
   nnsp = namespaceGetNumber ();
 
-  listSizeAllocated = xcalloc ( nnsp, sizeof( listSizeAllocated[0]));
-  listResources     = xcalloc ( nnsp, sizeof( listResources[0]));
-  freeListHead      = xcalloc ( nnsp, sizeof( freeListHead[0]));
+  resHList = xcalloc ( nnsp, sizeof (resHList[0]));
 
   for ( i = 0; i < nnsp; i++ )
     {
-      listSizeAllocated[i] = MIN_LIST_SIZE;
+      resHList[i].size = MIN_LIST_SIZE;
 
-      xassert ( listResources[i] == NULL);
+      xassert ( resHList[i].resources == NULL);
 
-      listResources[i] = xcalloc ( listSizeAllocated[i], sizeof ( listElem_t ));
+      resHList[i].resources = xcalloc ( MIN_LIST_SIZE, sizeof (listElem_t));
     }
 }
 
@@ -103,18 +101,18 @@ void listInitPointer ( void )
 
   for ( i = 0; i < nnsp; i++ )
     {
-      for ( j = 0; j < listSizeAllocated[i]; j++ )
+      for ( j = 0; j < resHList[i].size; j++ )
         {
-          listResources[i][j].resH   = namespaceIdxEncode2 ( i, j );
-          listResources[i][j].next   = listResources[i] + j + 1;
-          listResources[i][j].ops    = NULL;
-          listResources[i][j].val    = NULL;
-          listResources[i][j].status = RESH_UNDEFID;
+          resHList[i].resources[j].resH   = namespaceIdxEncode2 ( i, j );
+          resHList[i].resources[j].next   = j + 1;
+          resHList[i].resources[j].ops    = NULL;
+          resHList[i].resources[j].val    = NULL;
+          resHList[i].resources[j].status = RESH_UNDEFID;
         }
 
-      listResources[i][listSizeAllocated[i]-1].next = NULL;
+      resHList[i].resources[resHList[i].size-1].next = -1;
 
-      freeListHead[i] = listResources[i];
+      resHList[i].freeHead = 0;
     }
 }
 
@@ -122,38 +120,26 @@ void listInitPointer ( void )
 
 static void listDestroy ( void )
 {
-  if ( listResources )
+  if (resHList)
     {
       int nnsp = namespaceGetNumber ();
-      for (int i = 0; i < nnsp; i++ )
+      for (int i = 0; i < nnsp; ++i)
 	{
-	  pioNamespaceSetActive ( i );
-          if ( listResources[i] )
+	  pioNamespaceSetActive(i);
+          if (resHList[i].resources)
             {
-              if ( listSizeAllocated )
-                for ( int j = 0; j < listSizeAllocated[i]; j++ )
-                  {
-                    listElem_t *listElem = listResources[i] + j;
-                    if ( listElem->val )
-                      listElem->ops->valDestroy ( listElem->val );
-                  }
-              free ( listResources[i] );
-              listResources[i] = NULL;
+              for ( int j = 0; j < resHList[i].size; j++ )
+                {
+                  listElem_t *listElem = resHList[i].resources + j;
+                  if (listElem->val)
+                    listElem->ops->valDestroy(listElem->val);
+                }
+              free(resHList[i].resources);
+              resHList[i].resources = NULL;
             }
 	}
-      free ( listResources );
-      listResources = NULL;
-    }
-
-  if ( freeListHead )
-    {
-      free ( freeListHead );
-      freeListHead = NULL;
-    }
-  if ( listSizeAllocated )
-    {
-      free ( listSizeAllocated );
-      listSizeAllocated = NULL;
+      free(resHList);
+      resHList = NULL;
     }
 }
 
@@ -195,25 +181,23 @@ void listInitialize ( void )
 static
 void listSizeExtend()
 {
-  int newListSize;
-  int i, nsp;
+  int nsp = namespaceGetActive ();
+  int oldSize = resHList[nsp].size;
+  int newListSize = oldSize + MIN_LIST_SIZE;
 
-  nsp = namespaceGetActive ();
+  resHList[nsp].resources =
+    xrealloc(resHList[nsp].resources,
+             newListSize * sizeof (resHList[0].resources[0]));
 
-  newListSize = listSizeAllocated[nsp] + MIN_LIST_SIZE;
-
-  listResources[nsp] =
-    xrealloc(listResources[nsp], newListSize * sizeof (listResources[0][0]));
-
-  for ( i = listSizeAllocated[nsp]; i < newListSize; ++i )
+  for (int i = oldSize; i < newListSize; ++i)
     {
-      listResources[nsp][i].resH = namespaceIdxEncode2 ( nsp, i );
-      listResources[nsp][i].next = listResources[nsp] + i + 1;
+      resHList[nsp].resources[i].resH = namespaceIdxEncode2 ( nsp, i );
+      resHList[nsp].resources[i].next = i + 1;
     }
 
-  listResources[nsp][newListSize-1].next = freeListHead[nsp];
-  freeListHead[nsp] = listResources[nsp] + listSizeAllocated[nsp];
-  listSizeAllocated[nsp] = newListSize;
+  resHList[nsp].resources[newListSize-1].next = resHList[nsp].freeHead;
+  resHList[nsp].freeHead = oldSize;
+  resHList[nsp].size = newListSize;
 }
 
 /**************************************************************/
@@ -231,10 +215,10 @@ int reshPut ( void *p, resOps *ops )
 
   nsp = namespaceGetActive ();
 
-  if ( !freeListHead[nsp] ) listSizeExtend();
-  newListElem               = freeListHead[nsp];
-  freeListHead[nsp]         = freeListHead[nsp]->next;
-  newListElem->next         = NULL;
+  if ( resHList[nsp].freeHead == -1) listSizeExtend();
+  newListElem               = resHList[nsp].resources + resHList[nsp].freeHead;
+  resHList[nsp].freeHead    = newListElem->next;
+  newListElem->next         = -1;
   resH                      = newListElem->resH;
   newListElem->val          = p;
   newListElem->ops          = ops;
@@ -262,15 +246,15 @@ void reshRemove ( cdiResH resH, resOps * ops )
 
   xassert ( nspT.nsp == nsp &&
             nspT.idx >= 0 &&
-            nspT.idx < listSizeAllocated[nsp] &&
-            listResources[nsp][nspT.idx].ops &&
-            listResources[nsp][nspT.idx].ops == ops );
+            nspT.idx < resHList[nsp].size &&
+            resHList[nsp].resources[nspT.idx].ops &&
+            resHList[nsp].resources[nspT.idx].ops == ops );
 
-  listResources[nsp][nspT.idx].next   = freeListHead[nsp];
-  listResources[nsp][nspT.idx].ops    = NULL;
-  listResources[nsp][nspT.idx].val    = NULL;
-  listResources[nsp][nspT.idx].status = RESH_UNDEFID;
-  freeListHead[nsp]                   = listResources[nsp] + nspT.idx;
+  resHList[nsp].resources[nspT.idx].next   = resHList[nsp].freeHead;
+  resHList[nsp].resources[nspT.idx].ops    = NULL;
+  resHList[nsp].resources[nspT.idx].val    = NULL;
+  resHList[nsp].resources[nspT.idx].status = RESH_UNDEFID;
+  resHList[nsp].freeHead                   = nspT.idx;
 
   LIST_UNLOCK();
 }
@@ -295,9 +279,9 @@ void *reshGetValue(const char * caller, cdiResH resH, resOps * ops)
 
   if (nspT.nsp == nsp &&
       nspT.idx >= 0 &&
-      nspT.idx < listSizeAllocated[nsp])
+      nspT.idx < resHList[nsp].size)
     {
-      listElem = listResources[nsp] + nspT.idx;
+      listElem = resHList[nsp].resources + nspT.idx;
       LIST_UNLOCK();
     }
   else
@@ -328,9 +312,9 @@ void reshGetResHListOfType ( int c, int * resHs, resOps * ops )
 
   nsp = namespaceGetActive ();
 
-  for ( i = 0; i < listSizeAllocated[nsp]; i++ )
-    if ( listResources[nsp][i].val && listResources[nsp][i].ops )
-      if ( listResources[nsp][i].ops == ops )
+  for ( i = 0; i < resHList[nsp].size; i++ )
+    if ( resHList[nsp].resources[i].val && resHList[nsp].resources[i].ops )
+      if ( resHList[nsp].resources[i].ops == ops )
         {
           resHs[j++] = namespaceIdxEncode2 ( nsp, i );
           if ( j == c ) break;
@@ -353,9 +337,9 @@ int reshCountType ( resOps * ops )
 
   nsp = namespaceGetActive ();
 
-  for ( i = 0; i < listSizeAllocated[nsp]; i++ )
-    if ( listResources[nsp][i].val )
-      if ( listResources[nsp][i].ops == ops )
+  for ( i = 0; i < resHList[nsp].size; i++ )
+    if ( resHList[nsp].resources[i].val )
+      if ( resHList[nsp].resources[i].ops == ops )
         countType++;
 
   LIST_UNLOCK();
@@ -382,11 +366,11 @@ int  getPackBufferSize ( MPI_Comm comm )
   packBufferSize += 3 * intpacksize;
 
   /* pack resources, type marker and seperator marker */
-  for ( i = 0; i < listSizeAllocated[nsp]; i++ )
-    if ( listResources[nsp][i].val )
-      if ( listResources[nsp][i].status == ASSIGNED )
+  for ( i = 0; i < resHList[nsp].size; i++ )
+    if ( resHList[nsp].resources[i].val )
+      if ( resHList[nsp].resources[i].status == ASSIGNED )
         {
-          curr = listResources[nsp] + i;
+          curr = resHList[nsp].resources + i;
           xassert ( curr->ops );
 
           /* message plus frame of 2 ints */
@@ -433,11 +417,11 @@ void reshPackBufferCreate ( char ** packBuffer, int * packBufferSize, MPI_Comm c
   xmpi ( MPI_Pack ( &sep, 1,  MPI_INT,
 		    * packBuffer, * packBufferSize, &packBufferPos, comm ));
 
-  for ( i = 0; i < listSizeAllocated[nsp]; i++ )
-    if ( listResources[nsp][i].val )
-      if ( listResources[nsp][i].status == ASSIGNED )
+  for ( i = 0; i < resHList[nsp].size; i++ )
+    if ( resHList[nsp].resources[i].val )
+      if ( resHList[nsp].resources[i].status == ASSIGNED )
         {
-          curr = listResources[nsp] + i;
+          curr = resHList[nsp].resources + i;
           xassert ( curr->ops );
 
           type = curr->ops->valTxCode ();
@@ -489,9 +473,9 @@ void reshSetStatus ( cdiResH resH, resOps * ops, int status )
 
   xassert ( nspT.nsp == nsp &&
             nspT.idx >= 0 &&
-            nspT.idx < listSizeAllocated[nsp] );
+            nspT.idx < resHList[nsp].size );
 
-  listElem = listResources[nsp] + nspT.idx;
+  listElem = resHList[nsp].resources + nspT.idx;
 
   xassert ( listElem &&
             listElem->ops == ops );
@@ -521,9 +505,9 @@ int reshGetStatus ( cdiResH resH, resOps * ops )
 
   xassert ( nspT.nsp == nsp &&
             nspT.idx >= 0 &&
-            nspT.idx < listSizeAllocated[nsp] );
+            nspT.idx < resHList[nsp].size );
 
-  listElem = listResources[nsp] + nspT.idx;
+  listElem = resHList[nsp].resources + nspT.idx;
 
   LIST_UNLOCK();
 
@@ -563,18 +547,18 @@ int reshListCompare ( int nsp0, int nsp1 )
   xassert(namespaceGetNumber () > xmaxInt ( nsp0, nsp1 ) &&
           xminInt ( nsp0, nsp1 ) >= 0 );
 
-  for ( i = 0; i < listSizeAllocated[nsp0]; i++ )
+  for ( i = 0; i < resHList[nsp0].size; i++ )
     {
-      listElem0 = listResources[nsp0] + i;
+      listElem0 = resHList[nsp0].resources + i;
       if ( listElem0->val )
 	{
-	  if ( i >= listSizeAllocated[nsp1] )
+	  if ( i >= resHList[nsp1].size )
 	    {
 	      xdebug("%s", "");
 	      return differ;
 	    }
 
-	  listElem1 = listResources[nsp1] + i;
+	  listElem1 = resHList[nsp1].resources + i;
 	  if ( !listElem1->val )
 	    {
 	      xdebug("%s", "");
@@ -596,12 +580,12 @@ int reshListCompare ( int nsp0, int nsp1 )
 		   valCompare == equal ? "are equal" : "differ" );
 	  if ( valCompare != equal ) return differ;
 	}
-      else if ( listResources[nsp1][i].val )
+      else if ( resHList[nsp1].resources[i].val )
 	return differ;
     }
 
-  for ( ; i < listSizeAllocated[nsp1]; i++ )
-    if ( listResources[nsp1][i].val )
+  for ( ; i < resHList[nsp1].size; i++ )
+    if ( resHList[nsp1].resources[i].val )
       {
 	xdebug("%s", "");
 	return differ;
@@ -661,11 +645,11 @@ void reshListPrint ( char * filename )
       fprintf ( fp, "#\n" );
       fprintf ( fp, "##################################\n\n" );
 
-      fprintf ( fp, "listSizeAllocated[%d]=%d\n", i, listSizeAllocated[i] );
+      fprintf ( fp, "resHList[%d].size=%d\n", i, resHList[i].size );
 
-      for ( j = 0; j < listSizeAllocated[i]; j++ )
+      for ( j = 0; j < resHList[i].size; j++ )
         {
-          curr = listResources[i] + j;
+          curr = resHList[i].resources + j;
           if ( curr->ops && curr->val )
             {
               curr->ops->valPrint (( void * ) curr->val, fp );
