@@ -32,7 +32,7 @@ double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
 double lats[nlat] = {-75, -45, -15, 15, 45, 75};
 double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
 
-int defineGrid ()
+static int defineGrid()
 {
   int gridID = CDI_UNDEFID;
   int mask_vec[nlon*nlat];
@@ -89,7 +89,7 @@ int defineGrid ()
   return gridID;
 }
 
-int defineZaxis ()
+static int defineZaxis ()
 {
   int zaxisID = CDI_UNDEFID;
   double vct[3] = { 3.0, 3.3, 3.6 };
@@ -110,7 +110,7 @@ int defineZaxis ()
   return zaxisID;
 }
 
-int defineTaxis ()
+static int defineTaxis ()
 {
   int taxisID = CDI_UNDEFID;
 
@@ -159,7 +159,8 @@ int defineVlist ( int gridID, int zaxisID, int taxisID )
   return vlistID;
 }
 
-int defineInstitute ()
+static int
+defineInstitute ()
 {
   int instID = CDI_UNDEFID;
 
