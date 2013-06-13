@@ -180,7 +180,6 @@ void modelRun ( MPI_Comm comm )
 
   char * recvBuffer, * sendBuffer;
   int bufferSize, differ;
-  MPI_Status status;
 
   pioNamespaceSetActive ( 0 );
 
@@ -195,11 +194,10 @@ void modelRun ( MPI_Comm comm )
   defineStream ( streamID, vlistID );
 
   reshPackBufferCreate ( &sendBuffer, &bufferSize, comm );
-  xmpi ( MPI_Send ( sendBuffer, bufferSize, MPI_PACKED, 0, 0, comm ));
   recvBuffer = xmalloc ( bufferSize * sizeof ( char ));
-  xmpi ( MPI_Recv ( recvBuffer, bufferSize, MPI_PACKED, 0,
-                    0, comm, &status ));
-
+  xmpi(MPI_Sendrecv(sendBuffer, bufferSize, MPI_PACKED, 0, 0,
+                    recvBuffer, bufferSize, MPI_PACKED, 0, 0,
+                    MPI_COMM_SELF, MPI_STATUS_IGNORE));
   pioNamespaceSetActive ( 1 );
   rpcUnpackResources ( recvBuffer, bufferSize, comm );
   free ( recvBuffer );
