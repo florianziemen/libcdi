@@ -232,38 +232,6 @@ varMapGen(int *vSizes, int *sSizes, int *varMapping,
 /************************************************************************/
 
 static void
-defVarDeco(int vlistID, int varID)
-{
-  int varSize, cRank, lChunk, rem, lOffset;
-  int nProcsModel = commInqNProcsModel ();
-  deco_t deco[nProcsModel];
-
-  varSize = vlistInqVarSize ( vlistID, varID );
-
-  for ( cRank = 0; cRank < nProcsModel; cRank++ )
-    {
-      lChunk = varSize / nProcsModel;
-      lOffset = cRank * lChunk;
-      rem = varSize % nProcsModel;
-      if ( cRank < rem )
-        {
-          lChunk++;
-          lOffset += cRank;
-        }
-      else
-        lOffset += rem;
-
-      deco[cRank].rank   = cRank;
-      deco[cRank].offset = lOffset;
-      deco[cRank].chunk  = lChunk;
-    }
-  vlistDefVarDeco ( vlistID, varID, nProcsModel, &deco[0] );
-}
-
-/************************************************************************/
-
-
-static void
 varsMapNDeco(int nNodes, int *nodeSizes)
 {
   int nStreams, nVars, * resHs, * streamSizes, * varSizes, * varMapping,
@@ -300,8 +268,6 @@ varsMapNDeco(int nNodes, int *nodeSizes)
   for ( i = 0; i < nStreams; i++ )
     for ( j = 0; j < * ( streamSizes + i ); j++ )
       {
-        defVarDeco ( streamInqVlist ( *( resHs + i )), j );
-        defVarDeco ( streamInqVlistIDorig ( * ( resHs + i )), j );
         vlistDefVarIOrank ( streamInqVlist ( * ( resHs + i )), j,
                             * ( varMapping + k ));
         vlistDefVarIOrank ( streamInqVlistIDorig ( * ( resHs + i )), j,
@@ -382,10 +348,14 @@ modelWinDefBufferSizes(void)
       nvars = vlistNvars ( vlistID );
       for ( varID = 0; varID < nvars; varID++ )
         {
-          collID = CDI_UNDEFID;
-          collID = commRankGlob2CollID(vlistInqVarIOrank(vlistID, varID));
-          int collIDchunk = cdiPIOpartInflate_
-            * vlistInqVarDecoChunk(vlistID, varID, rankModel);
+          int collID = commRankGlob2CollID(vlistInqVarIOrank(vlistID, varID));
+          int collIDchunk;
+          {
+            int varSize = vlistInqVarSize(vlistID, varID);
+            int nProcsModel = commInqNProcsModel();
+            collIDchunk = (int)ceilf(cdiPIOpartInflate_
+                                     * (varSize + nProcsModel - 1)/nProcsModel);
+          }
           xassert ( collID != CDI_UNDEFID && collIDchunk > 0 );
           collIndex[collID].numDataRecords += 2;
           txWin[collID].size += (size_t)collIDchunk * sizeof (double)
@@ -557,21 +527,6 @@ modelWinEnqueue(int collID,
   winDict[targetEntry] = header;
 }
 
-void pioBufferData(int streamID, int varID,
-                   const double *data, int nmiss)
-{
-  int rankModel = commInqRankModel ();
-
-  int vlistID = streamInqVlist(streamID);
-  int chunk = vlistInqVarDecoChunk(vlistID, varID, rankModel);
-  int start = pioInqVarDecoOff(vlistID, varID);
-
-  struct Xt_stripe stripe = { .start = start, .nstrides = chunk, .stride = 1 };
-  Xt_idxlist partDesc = xt_idxstripes_new(&stripe, 1);
-  pioBufferPartData(streamID, varID, data, nmiss, partDesc);
-  xt_idxlist_delete(partDesc);
-}
-
 void
 pioBufferPartData(int streamID, int varID, const double *data,
                   int nmiss, Xt_idxlist partDesc)
@@ -711,30 +666,6 @@ void pioBufferFuncCall(int funcID, int argc, ... )
 
 /*****************************************************************************/
 
-int pioInqVarDecoChunk ( int vlistID, int varID )
-{
-#ifdef USE_MPI
-   int rankModel = commInqRankModel ();
-   xassert ( rankModel != CDI_UNDEFID );
-   return vlistInqVarDecoChunk ( vlistID, varID, rankModel );
-#endif
-   return vlistInqVarDecoChunk ( vlistID, varID, CDI_UNDEFID );
-}
-
-/*****************************************************************************/
-
-int pioInqVarDecoOff ( int vlistID, int varID )
-{
-#ifdef USE_MPI
-   int rankModel = commInqRankModel ();
-   xassert ( rankModel != CDI_UNDEFID );
-   return vlistInqVarDecoOff ( vlistID, varID, rankModel );
-#else
-   return vlistInqVarDecoOff ( vlistID, varID, CDI_UNDEFID );
-#endif
-}
-
-/*****************************************************************************/
 /* pioInit definition must currently compile even in non-MPI configurations */
 #ifndef MPI_VERSION
 #  define MPI_Comm int

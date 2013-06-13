@@ -100,9 +100,14 @@ collDefBufferSizes()
             {
               for ( modelID = 0; modelID < nProcsModel; modelID++ )
                 {
-                  int decoChunk
-                    = (int)(cdiPIOpartInflate_
-                            * vlistInqVarDecoChunk(vlistID, varID, modelID));
+                  int decoChunk;
+                  {
+                    int varSize = vlistInqVarSize(vlistID, varID);
+                    int nProcsModel = commInqNProcsModel();
+                    decoChunk =
+                      (int)ceilf(cdiPIOpartInflate_
+                                 * (varSize + nProcsModel - 1)/nProcsModel);
+                  }
                   xassert ( decoChunk > 0 );
                   rxWin[modelID].size += decoChunk * sizeof (double)
                     /* re-align chunks to multiple of double size */

@@ -50,14 +50,6 @@ levinfo_t;
 
 typedef struct
 {
-  int      rank;
-  int      offset;
-  int      chunk;
-}
-deco_t;
-
-typedef struct
-{
   int ens_index;
   int ens_count;
   int forecast_init_type;
@@ -108,9 +100,6 @@ typedef struct
   ensinfo_t  *ensdata;      /* Ensemble information */
   cdi_atts_t  atts;
   int         iorank;
-  int         decoSize;
-  deco_t     *deco;
-
 #if  defined  (HAVE_LIBGRIB_API)
   /* ---------------------------------- */
   /* Local change: 2013-01-28, FP (DWD) */
@@ -165,8 +154,6 @@ int      vlistDelAtts(int vlistID, int varID);
 int      vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2);
 
 void     vlistUnpack(char * buffer, int bufferSize, int * pos, int, void *context);
-void     vlistDefVarDeco ( int vlistID, int varID, int decoSize, 
-                              deco_t * deco );
 
 /*      vlistDefVarValidrange: Define the valid range of a Variable */
 void    vlistDefVarValidrange(int vlistID, int varID, const double *validrange);

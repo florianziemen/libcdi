@@ -197,21 +197,8 @@ void
 cdiPioStreamWriteVar_(int streamID, int varID, int memtype, const void *data,
                       int nmiss)
 {
-  statusCode nspStatus = namespaceInqResStatus ();
-  switch ( nspStatus )
-    {
-    case STAGE_DEFINITION:
-      xabort ( "DEFINITION STAGE: PARALLEL WRITING NOT POSSIBLE." );
-      break;
-    case STAGE_TIMELOOP:
-      pioBufferData ( streamID, varID, data, nmiss );
-      return;
-    case STAGE_CLEANUP:
-      xabort ( "CLEANUP STAGE: PARALLEL WRITING NOT POSSIBLE." );
-      break;
-    default:
-      xabort ( "INTERNAL ERROR" );
-    }
+  xabort("parallel writing must give explicit partition information,"
+         " use streamWriteVarPart!");
 }
 
 /***************************************************************/

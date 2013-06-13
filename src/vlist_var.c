@@ -3,10 +3,6 @@
 #endif
 
 #include <limits.h>
-#ifdef USE_MPI
-#include <mpi.h>
-#include "pio_comm.h"
-#endif
 
 #include "dmemory.h"
 #include "cdi.h"
@@ -63,8 +59,6 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].validrange[1] = VALIDMISS;
   vlistptr->vars[varID].ensdata       = NULL;
   vlistptr->vars[varID].iorank        = CDI_UNDEFID;
-  vlistptr->vars[varID].decoSize      = 0;
-  vlistptr->vars[varID].deco          = NULL;
 
 #if  defined  (HAVE_LIBGRIB_API)
   /* ---------------------------------- */
@@ -2026,101 +2020,6 @@ int vlistInqVarIntKey(int vlistID, int varID, const char* name)
 }
 
 
-void vlistDefVarDeco ( int vlistID, int varID, int decoSize, deco_t * deco )
-{
-  vlist_t * vlistptr;
-  int i;
-
-  vlistptr = vlist_to_pointer(vlistID );
-
-  vlistCheckVarID ( __func__, vlistID, varID );
-
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
-    {
-      xwarning("%s", "Operation not executed.");
-      return;
-    }
-
-  xassert ( decoSize && deco );
- 
-  vlistptr->vars[varID].deco = xmalloc ( decoSize * sizeof ( deco_t )); 
-
-  for ( i = 0; i < decoSize; i++ )
-    {
-      vlistptr->vars[varID].deco[i].rank   = deco[i].rank;
-      vlistptr->vars[varID].deco[i].offset = deco[i].offset;
-      vlistptr->vars[varID].deco[i].chunk  = deco[i].chunk;
-    }
-
-  vlistptr->vars[varID].decoSize = decoSize;
-}
-
-
-int vlistInqVarDecoChunk ( int vlistID, int varID, int rankModel  )
-{
-  int iret = CDI_UNDEFID;
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-#ifdef USE_MPI
-  {
-    deco_t * deco;
-    int i, decoSize = 0;
-    vlist_t *vlistptr = vlist_to_pointer(vlistID);
-    xassert ( vlistptr->vars[varID].deco != NULL &&
-             vlistptr->vars[varID].decoSize != CDI_UNDEFID ); 
-    
-    deco  = vlistptr->vars[varID].deco;
-    decoSize = vlistptr->vars[varID].decoSize;
-    if ( decoSize && deco )
-      for ( i = 0; i < decoSize; i++ )
-        if ( deco[i].rank == rankModel ) 
-          {
-            iret = deco[i].chunk;
-            break;
-          }
-  }
-#else
-  iret = vlistInqVarSize ( vlistID, varID );
-#endif
-
-  xassert ( iret != CDI_UNDEFID );
-  return iret;
-}
-
-int vlistInqVarDecoOff ( int vlistID, int varID, int rankModel  )
-{
-  int iret = CDI_UNDEFID;
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-#ifdef USE_MPI
-  {
-    deco_t * deco;
-    int i, decoSize = 0;
-    vlist_t *vlistptr = vlist_to_pointer(vlistID);
-    xassert ( vlistptr->vars[varID].deco != NULL &&
-             vlistptr->vars[varID].decoSize != CDI_UNDEFID );
-
-    deco  = vlistptr->vars[varID].deco;
-    decoSize = vlistptr->vars[varID].decoSize;
-    if ( decoSize && deco )
-      for ( i = 0; i < decoSize; i++ )
-        if ( deco[i].rank == rankModel )
-          {
-            iret = deco[i].offset;
-            break;
-          }
-  }
-#else
-  iret = 0;
-#endif
-
-  xassert (  iret != CDI_UNDEFID );
-  return iret;
-}
-
-
 void     vlistDefVarIOrank   ( int vlistID, int varID, int iorank )
 {
   vlist_t * vlistptr;
@@ -2152,7 +2051,7 @@ int vlistInqVarIOrank(int vlistID, int varID)
 
 
 enum {
-  vlistvar_nints = 21,
+  vlistvar_nints = 20,
   vlistvar_ndbls = 3,
 };
 
@@ -2170,8 +2069,6 @@ int vlistVarGetSize(vlist_t *p, int varID, void *context)
   if (var->units)
     varsize += serializeGetSize(strlen(var->units), DATATYPE_TXT, context);
   varsize += serializeGetSize(4 * var->nlevs, DATATYPE_INT, context);
-  if ( var->deco != NULL )
-    varsize += serializeGetSize(3 * var->decoSize, DATATYPE_INT, context);
   varsize += vlistAttsGetSize(p, varID, context);
   return varsize;
 }
@@ -2203,7 +2100,6 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   tempbuf[17] = var->complevel;
   tempbuf[18] = var->nlevs;
   tempbuf[19] = var->iorank;
-  tempbuf[20] = var->decoSize;
   dtempbuf[0] = var->missval;
   dtempbuf[1] = var->scalefactor;
   dtempbuf[2] = var->addoffset;
@@ -2234,18 +2130,6 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
     serializePack(levbuf, var->nlevs * 4, DATATYPE_INT,
                   buf, size, position, context);
   }
-  if ( var->deco != NULL )
-    {
-      int deco[var->decoSize][3];
-      for (i = 0; i < var->decoSize; ++i)
-        {
-          deco[i][0] = var->deco[i].rank;
-          deco[i][1] = var->deco[i].offset;
-          deco[i][2] = var->deco[i].chunk;
-        }
-      serializePack(deco, var->decoSize * 3, DATATYPE_INT,
-                    buf, size, position, context);
-    }
   vlistAttsPack(p, varID, buf, size, position, context);
 }
 
@@ -2339,22 +2223,6 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
     }
     vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev][0]);
   }
-  if ( tempbuf[20] != 0 )
-    {
-      int decoSize = tempbuf[20], i;
-      deco_t deco[decoSize];
-      int decobuf[decoSize][3];
-
-      serializeUnpack(buf, size, position,
-                      decobuf, decoSize * 3, DATATYPE_INT, context);
-      for (i = 0; i < decoSize; ++i)
-        {
-          deco[i].rank   = decobuf[i][0];
-          deco[i].offset = decobuf[i][1];
-          deco[i].chunk  = decobuf[i][2];
-        }
-      vlistDefVarDeco(vlistID, newvar, decoSize, &deco[0]);
-    }
   vlistDefVarIOrank(vlistID, newvar, tempbuf[19]);
   vlistAttsUnpack(vlistID, newvar, buf, size, position, context);
 }

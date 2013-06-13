@@ -402,16 +402,6 @@
 !                                     TYPE(XT_IDXLIST)partDesc)
       EXTERNAL        streamWriteVarPart
 
-      INTEGER         pioInqVarDecoChunk
-!                                    (INTEGER         ,
-!                                     INTEGER         )
-      EXTERNAL        pioInqVarDecoChunk
-
-      INTEGER         pioInqVarDecoOff
-!                                    (INTEGER         ,
-!                                     INTEGER         )
-      EXTERNAL        pioInqVarDecoOff
-
 !                     pioNamespaceSetActive
 !                                    (INTEGER         )
       EXTERNAL        pioNamespaceSetActive

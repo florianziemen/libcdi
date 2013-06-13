@@ -222,7 +222,6 @@ vlist_delete(vlist_t *vlistptr)
       if ( vlistptr->vars[varID].units )    free(vlistptr->vars[varID].units);
 
       if ( vlistptr->vars[varID].ensdata )  free(vlistptr->vars[varID].ensdata);
-      if ( vlistptr->vars[varID].deco )     free(vlistptr->vars[varID].deco);
 
 #if  defined  (HAVE_LIBGRIB_API)
       int i;
@@ -321,14 +320,6 @@ void vlistCopy(int vlistID2, int vlistID1)
               memcpy(vlistptr2->vars[varID].ensdata,
                      vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
             }
-          if ( vlistptr1->vars[varID].deco )
-            {
-              size_t decoSize = (size_t)vlistptr1->vars[varID].decoSize;
-              vlistptr2->vars[varID].deco = malloc(decoSize * sizeof (deco_t));
-              memcpy(vlistptr2->vars[varID].deco, vlistptr1->vars[varID].deco,
-                     decoSize * sizeof (deco_t));
-            }
-
 #if  defined  (HAVE_LIBGRIB_API)
           /* ---------------------------------- */
           /* Local change: 2013-01-28, FP (DWD) */
@@ -1153,7 +1144,7 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
   int param, gridID, zaxisID, tsteptype, nlevs;
   int dtype;
 
-  int i, iorank, decoSize, size, rank, offset, chunk;
+  int i, iorank, size, rank, offset, chunk;
 
   char paramstr[32];
   char *name, *longname, *units;
@@ -1176,7 +1167,7 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
   if ( nvars > 0 )
     {
       fprintf(fp, " varID param    gridID zaxisID tsteptype nlevel flag "
-              " name     longname iorank decosize\n");
+              " name     longname iorank\n");
       for ( varID = 0; varID < nvars; varID++ )
         {
           param    = vlistptr->vars[varID].param;
@@ -1189,14 +1180,13 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
           units    = vlistptr->vars[varID].units;
           flag     = vlistptr->vars[varID].flag;
           iorank   = vlistptr->vars[varID].iorank;
-          decoSize = vlistptr->vars[varID].decoSize;
 
           cdiParamToString(param, paramstr, sizeof(paramstr));
           fprintf(fp, "%6d %-8s %6d %6d %6d %6d %5d %-8s"
-                  " %s %6d %6d",
+                  " %s %6d",
                   varID, paramstr, gridID, zaxisID, tsteptype, nlevs, flag,
                   name ? name : "", longname ? longname : "",
-                  iorank, decoSize);
+                  iorank);
 
           if ( units ) fprintf ( fp, "   [%s]", units);
           fprintf ( fp, "\n");
@@ -1225,23 +1215,12 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
         }
 
       fprintf(fp, "\n");
-      fprintf(fp, " varID  size iorank decosize corank offset  chunk\n");
+      fprintf(fp, " varID  size iorank\n");
       for ( varID = 0; varID < nvars; varID++ )
-        {
-          iorank    = vlistptr->vars[varID].iorank;
-          decoSize  = vlistptr->vars[varID].decoSize;
-          size      = vlistptr->vars[varID].nlevs *
-            gridInqSize ( vlistptr->vars[varID].gridID );
-
-          for ( i = 0; i < decoSize; i++ )
-            {
-              rank   = vlistptr->vars[varID].deco[i].rank;
-              offset = vlistptr->vars[varID].deco[i].offset;
-              chunk  = vlistptr->vars[varID].deco[i].chunk;
-              fprintf ( fp, "%3d %8d %6d %6d %6d %8d %6d\n",
-                        varID, size, iorank, decoSize, rank, offset, chunk );
-            }
-        }
+        fprintf(fp, "%3d %8d %6d\n", varID,
+                vlistptr->vars[varID].nlevs
+                * gridInqSize(vlistptr->vars[varID].gridID),
+                vlistptr->vars[varID].iorank);
     }
 }
 

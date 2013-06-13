@@ -241,8 +241,6 @@ void     streamWriteVarPart    (int streamID, int varID,
                                 Xt_idxlist partDesc);
 
 #endif /* make_fint keep */
-int      pioInqVarDecoChunk    ( int, int );
-int      pioInqVarDecoOff      ( int, int );
 void     pioNamespaceSetActive ( int );
 
 /* CDI control routines */
