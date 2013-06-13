@@ -534,6 +534,7 @@ int reshListCompare ( int nsp0, int nsp1 )
 
 
   LIST_INIT();
+  LIST_LOCK();
 
   xassert(namespaceGetNumber () > xmaxInt ( nsp0, nsp1 ) &&
           xminInt ( nsp0, nsp1 ) >= 0 );
@@ -581,6 +582,8 @@ int reshListCompare ( int nsp0, int nsp1 )
 	xdebug("%s", "");
 	return differ;
       }
+
+  LIST_UNLOCK();
 
 #endif
 
