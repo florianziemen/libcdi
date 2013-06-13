@@ -4,7 +4,7 @@
 
 #include "dmemory.h"
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "pio_util.h"
 #include "resource_handle.h"
 #include "pio_rpc.h"
@@ -173,7 +173,7 @@ int modelInq(int instID, int modelgribID, char *name)
 
       if ( modelptr->used )
         {
-          if ( name )
+          if ( name && *name )
             {
               found = 1;
               if ( instID      != -1 && modelptr->instID      != instID )      found = 0;
@@ -216,7 +216,7 @@ int modelDef(int instID, int modelgribID, const char *name)
 
   modelptr->instID      = instID;
   modelptr->modelgribID = modelgribID;
-  if ( name ) modelptr->name = strdupx(name);
+  if ( name && *name ) modelptr->name = strdupx(name);
 
   return modelptr->self;
 }

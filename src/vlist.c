@@ -4,7 +4,7 @@
 
 #include "dmemory.h"
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "vlist.h"
 #include "zaxis.h"
 #include "varscan.h"
@@ -14,6 +14,12 @@
 #include "vlist_var.h"
 #include "vlist_att.h"
 #include "pio_rpc.h"
+
+#if  defined  (HAVE_LIBGRIB_API)
+/* list of additional GRIB2 keywords which are read by the open process */
+int    cdiNAdditionalGRIBKeys = 0;
+char*  cdiAdditionalGRIBKeys[MAX_OPT_GRIB_ENTRIES];
+#endif
 
 extern void zaxisGetIndexList ( int, int * );
 
@@ -219,6 +225,7 @@ vlist_delete(vlist_t *vlistptr)
       if ( vlistptr->vars[varID].ensdata )  free(vlistptr->vars[varID].ensdata);
       if ( vlistptr->vars[varID].deco )     free(vlistptr->vars[varID].deco);
 
+#if  defined  (HAVE_LIBGRIB_API)
       int i;
       for (i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++) {
 	if ( vlistptr->vars[varID].opt_grib_int_keyword[i] )
@@ -228,6 +235,7 @@ vlist_delete(vlist_t *vlistptr)
 	if ( vlistptr->vars[varID].opt_grib_dbl_keyword[i] )
 	  free(vlistptr->vars[varID].opt_grib_dbl_keyword[i]);
       }
+#endif
 
       vlistDelAtts(vlistID, varID);
     }
@@ -322,6 +330,7 @@ void vlistCopy(int vlistID2, int vlistID1)
                      decoSize * sizeof (deco_t));
             }
 
+#if  defined  (HAVE_LIBGRIB_API)
           /* ---------------------------------- */
           /* Local change: 2013-01-28, FP (DWD) */
           /* ---------------------------------- */
@@ -341,6 +350,7 @@ void vlistCopy(int vlistID2, int vlistID1)
 	      vlistptr2->vars[varID].opt_grib_dbl_val[i]     = vlistptr1->vars[varID].opt_grib_dbl_val[i];
 	    }
 	  }
+#endif
 
 	  vlistptr2->vars[varID].atts.nelems = 0;
 	  vlistCopyVarAtts(vlistID1, varID, vlistID2, varID);
@@ -571,6 +581,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                        vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
               }
 
+#if  defined  (HAVE_LIBGRIB_API)
 	    /* ---------------------------------- */
 	    /* Local change: 2013-01-28, FP (DWD) */
 	    /* ---------------------------------- */
@@ -590,6 +601,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 		vlistptr2->vars[varID2].opt_grib_dbl_val[i]     = vlistptr1->vars[varID].opt_grib_dbl_val[i];
 	      }
 	    }
+#endif
 
 	    vlistptr2->vars[varID2].atts.nelems = 0;
 	    vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
@@ -790,6 +802,7 @@ void vlistCat(int vlistID2, int vlistID1)
           memcpy(vlistptr2->vars[varID2].ensdata, vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
         }
 
+#if  defined  (HAVE_LIBGRIB_API)
       /* ---------------------------------- */
       /* Local change: 2013-01-28, FP (DWD) */
       /* ---------------------------------- */
@@ -809,6 +822,7 @@ void vlistCat(int vlistID2, int vlistID1)
 	  vlistptr2->vars[varID2].opt_grib_dbl_val[i]     = vlistptr1->vars[varID].opt_grib_dbl_val[i];
 	}
       }
+#endif
 
       vlistptr2->vars[varID2].atts.nelems = 0;
       vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);

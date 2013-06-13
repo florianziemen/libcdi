@@ -5,7 +5,7 @@
 #include "dmemory.h"
 
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 
 
 static

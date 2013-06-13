@@ -52,7 +52,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = cdi_write$(EXEEXT) cdi_write_ens$(EXEEXT) \
-	cdi_read$(EXEEXT) cdi_copy$(EXEEXT) $(am__EXEEXT_1)
+	cdi_write_hybrid$(EXEEXT) cdi_read$(EXEEXT) cdi_copy$(EXEEXT) \
+	$(am__EXEEXT_1)
 @CREATE_ISOC_TRUE@am__append_1 = cdi_read_f2003 cdi_write_f2003
 subdir = examples
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -113,6 +114,9 @@ cdi_write_f2003_DEPENDENCIES = $(top_builddir)/src/libcdi.la \
 cdi_write_f2003_LINK = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
 	$(cdi_write_f2003_LDFLAGS) $(LDFLAGS) -o $@
+am_cdi_write_hybrid_OBJECTS = cdi_write_hybrid.$(OBJEXT)
+cdi_write_hybrid_OBJECTS = $(am_cdi_write_hybrid_OBJECTS)
+cdi_write_hybrid_DEPENDENCIES = $(top_builddir)/src/libcdi.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -135,10 +139,12 @@ FCLINK = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(cdi_copy_SOURCES) $(cdi_read_SOURCES) \
 	$(cdi_read_f2003_SOURCES) $(cdi_write_SOURCES) \
-	$(cdi_write_ens_SOURCES) $(cdi_write_f2003_SOURCES)
+	$(cdi_write_ens_SOURCES) $(cdi_write_f2003_SOURCES) \
+	$(cdi_write_hybrid_SOURCES)
 DIST_SOURCES = $(cdi_copy_SOURCES) $(cdi_read_SOURCES) \
 	$(cdi_read_f2003_SOURCES) $(cdi_write_SOURCES) \
-	$(cdi_write_ens_SOURCES) $(cdi_write_f2003_SOURCES)
+	$(cdi_write_ens_SOURCES) $(cdi_write_f2003_SOURCES) \
+	$(cdi_write_hybrid_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -345,6 +351,9 @@ cdi_write_LDADD = $(top_builddir)/src/libcdi.la
 cdi_write_ens_SOURCES = cdi_write_ens.c
 cdi_write_ens_LDADD = $(top_builddir)/src/libcdi.la
 #
+cdi_write_hybrid_SOURCES = cdi_write_hybrid.c
+cdi_write_hybrid_LDADD = $(top_builddir)/src/libcdi.la
+#
 cdi_read_SOURCES = cdi_read.c
 cdi_read_LDADD = $(top_builddir)/src/libcdi.la
 #
@@ -421,6 +430,9 @@ cdi_write_ens$(EXEEXT): $(cdi_write_ens_OBJECTS) $(cdi_write_ens_DEPENDENCIES) $
 cdi_write_f2003$(EXEEXT): $(cdi_write_f2003_OBJECTS) $(cdi_write_f2003_DEPENDENCIES) $(EXTRA_cdi_write_f2003_DEPENDENCIES) 
 	@rm -f cdi_write_f2003$(EXEEXT)
 	$(cdi_write_f2003_LINK) $(cdi_write_f2003_OBJECTS) $(cdi_write_f2003_LDADD) $(LIBS)
+cdi_write_hybrid$(EXEEXT): $(cdi_write_hybrid_OBJECTS) $(cdi_write_hybrid_DEPENDENCIES) $(EXTRA_cdi_write_hybrid_DEPENDENCIES) 
+	@rm -f cdi_write_hybrid$(EXEEXT)
+	$(LINK) $(cdi_write_hybrid_OBJECTS) $(cdi_write_hybrid_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -432,6 +444,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_read.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_write.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_write_ens.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_write_hybrid.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

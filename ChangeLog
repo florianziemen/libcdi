@@ -1,3 +1,73 @@
+2013-06-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.6.1 released
+
+2013-06-11  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* GRIB2: added support for snow level (level type 114)
+	* GRIB2: added support for layers with zaxis type ZAXIS_PRESSURE
+
+2013-06-06  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cdfDefVarMissval: changed xtype from NC_BYTE to NC_INT for missvals > 127 (workaround for a netCDF bug)
+	* use 'number_of_grid_used' only for undefined grid types
+
+2013-06-03  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added patch from Florian Prill: Lesen von 'number_of_grid_used', GRID_REFERENCE (bug fix)
+
+2013-05-29  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* netCDF: skip 4D variables without time dimension (bug fix)
+
+2013-05-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* GRIB2: added support for pressure levels with 3 fractional digits
+
+2013-05-27  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* gribapiGetEndStep: use stepUnits for timeunits2
+	* grib2GetLevel: set level bounds if  0 < leveltype2 < 255
+
+2013-05-23  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* netCDF: missing_value attribute removed [Bug #3592]
+
+2013-05-17  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added CDI function cdiHaveFiletype() to check whether a filetype is available
+
+2013-05-13  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added patch from Florian Prill: Lesen von "Nicht-Standard" GRIB-Keys (bug fix)
+
+2013-04-26  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added patch from Florian Prill: Lesen von "Nicht-Standard" GRIB-Keys
+
+2013-04-25  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* institutInq: check contents of name and longname (bug fix) [Bug #3419]
+
+2013-04-23  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* cfortran.h::kill_trailing: wrong result with gcc -O3, use prama for -O2 (bug fix) [report: Luis Kornblueh]
+	* vlistXXXAttTxt: use cdi fortran datatype CBUF (char *) for the last argument (bug fix) [report: Luis Kornblueh]
+	* gridXXXUUID: use cdi fortran datatype CBUF (char *) for the last argument (bug fix) [Bug #3424]
+	* zaxisXXXUUID: use cdi fortran datatype CBUF (char *) for the last argument (bug fix)
+
+2013-04-19  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_gribapi: replaced function getLevelFactor() [Bug #3446]
+
+2013-04-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* added function vlistDefVarExtra() and vlistInqVarExtra()
+
+2013-04-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* vlistDefVarDatatype: changed default missing values of signed integers to -TYPE_MAX
+
 2013-04-02  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* cdi.h: changed >char*< to >char *< (bug fix for fortran interface)

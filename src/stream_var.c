@@ -8,7 +8,7 @@
 #include "error.h"
 
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 
 
 static
@@ -23,8 +23,6 @@ void streamvar_init_entry(stream_t *streamptr, int varID)
   streamptr->vars[varID].gridID       = CDI_UNDEFID;
   streamptr->vars[varID].zaxisID      = CDI_UNDEFID;
   streamptr->vars[varID].tsteptype    = CDI_UNDEFID;
-  streamptr->vars[varID].level        = NULL;
-  streamptr->vars[varID].nlevs        = 0;
 }
 
 static

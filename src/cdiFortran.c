@@ -23,6 +23,10 @@
 #  include "cfortran.h"
 #endif
 
+#if ! defined (_CDIFORTRAN_H)
+#  include "cdiFortran.h"
+#endif
+
 
 /*  Byte order  */
 
@@ -100,6 +104,7 @@ FCALLSCFUN1 (STRING, cdiStringError, CDISTRINGERROR, cdistringerror, INT)
 FCALLSCSUB1 (cdiDebug, CDIDEBUG, cdidebug, INT)
 FCALLSCFUN0 (STRING, cdiLibraryVersion, CDILIBRARYVERSION, cdilibraryversion)
 FCALLSCSUB0 (cdiPrintVersion, CDIPRINTVERSION, cdiprintversion)
+FCALLSCFUN1 (INT, cdiHaveFiletype, CDIHAVEFILETYPE, cdihavefiletype, INT)
 FCALLSCSUB1 (cdiDefMissval, CDIDEFMISSVAL, cdidefmissval, DOUBLE)
 FCALLSCFUN0 (DOUBLE, cdiInqMissval, CDIINQMISSVAL, cdiinqmissval)
 FCALLSCSUB2 (cdiDefGlobal, CDIDEFGLOBAL, cdidefglobal, STRING, INT)
@@ -248,6 +253,8 @@ FCALLSCSUB3 (vlistDefVarUnits, VLISTDEFVARUNITS, vlistdefvarunits, INT, INT, STR
 FCALLSCSUB3 (vlistInqVarUnits, VLISTINQVARUNITS, vlistinqvarunits, INT, INT, PSTRING)
 FCALLSCSUB3 (vlistDefVarMissval, VLISTDEFVARMISSVAL, vlistdefvarmissval, INT, INT, DOUBLE)
 FCALLSCFUN2 (DOUBLE, vlistInqVarMissval, VLISTINQVARMISSVAL, vlistinqvarmissval, INT, INT)
+FCALLSCSUB3 (vlistDefVarExtra, VLISTDEFVAREXTRA, vlistdefvarextra, INT, INT, STRING)
+FCALLSCSUB3 (vlistInqVarExtra, VLISTINQVAREXTRA, vlistinqvarextra, INT, INT, PSTRING)
 FCALLSCSUB3 (vlistDefVarScalefactor, VLISTDEFVARSCALEFACTOR, vlistdefvarscalefactor, INT, INT, DOUBLE)
 FCALLSCFUN2 (DOUBLE, vlistInqVarScalefactor, VLISTINQVARSCALEFACTOR, vlistinqvarscalefactor, INT, INT)
 FCALLSCSUB3 (vlistDefVarAddoffset, VLISTDEFVARADDOFFSET, vlistdefvaraddoffset, INT, INT, DOUBLE)
@@ -270,30 +277,11 @@ FCALLSCFUN3 (INT, vlistMergedLevel, VLISTMERGEDLEVEL, vlistmergedlevel, INT, INT
 
 FCALLSCSUB5 (vlistDefVarEnsemble, VLISTDEFVARENSEMBLE, vlistdefvarensemble, INT, INT, INT, INT, INT)
 FCALLSCFUN5 (INT, vlistInqVarEnsemble, VLISTINQVARENSEMBLE, vlistinqvarensemble, INT, INT, PINT, PINT, PINT)
-
-/*  ----------------------------------  */
-
-
-/*  Local change: 2013-01-28, FP (DWD)  */
-
-
-/*  ----------------------------------  */
-
+FCALLSCSUB1 (cdiDefAdditionalKey, CDIDEFADDITIONALKEY, cdidefadditionalkey, STRING)
 FCALLSCSUB4 (vlistDefVarIntKey, VLISTDEFVARINTKEY, vlistdefvarintkey, INT, INT, STRING, INT)
 FCALLSCSUB4 (vlistDefVarDblKey, VLISTDEFVARDBLKEY, vlistdefvardblkey, INT, INT, STRING, DOUBLE)
-
-/*  ----------------------------------  */
-
-
-/*  Local change: 2013-02-18, FP (DWD)  */
-
-
-/*  ----------------------------------  */
-
-FCALLSCSUB2 (vlistInqVarRawBegin, VLISTINQVARRAWBEGIN, vlistinqvarrawbegin, INT, INT)
-FCALLSCFUN2 (DOUBLE, vlistInqVarDblKey, VLISTINQVARDBLKEY, vlistinqvardblkey, INT, STRING)
-FCALLSCFUN2 (INT, vlistInqVarIntKey, VLISTINQVARINTKEY, vlistinqvarintkey, INT, STRING)
-FCALLSCSUB1 (vlistInqVarRawEnd, VLISTINQVARRAWEND, vlistinqvarrawend, INT)
+FCALLSCFUN3 (DOUBLE, vlistInqVarDblKey, VLISTINQVARDBLKEY, vlistinqvardblkey, INT, INT, STRING)
+FCALLSCFUN3 (INT, vlistInqVarIntKey, VLISTINQVARINTKEY, vlistinqvarintkey, INT, INT, STRING)
 
 /*  VLIST attributes  */
 
@@ -302,10 +290,10 @@ FCALLSCFUN6 (INT, vlistInqAtt, VLISTINQATT, vlistinqatt, INT, INT, INT, PSTRING,
 FCALLSCFUN3 (INT, vlistDelAtt, VLISTDELATT, vlistdelatt, INT, INT, STRING)
 FCALLSCFUN6 (INT, vlistDefAttInt, VLISTDEFATTINT, vlistdefattint, INT, INT, STRING, INT, INT, PINT)
 FCALLSCFUN6 (INT, vlistDefAttFlt, VLISTDEFATTFLT, vlistdefattflt, INT, INT, STRING, INT, INT, PDOUBLE)
-FCALLSCFUN5 (INT, vlistDefAttTxt, VLISTDEFATTTXT, vlistdefatttxt, INT, INT, STRING, INT, STRING)
+FCALLSCFUN5 (INT, vlistDefAttTxt, VLISTDEFATTTXT, vlistdefatttxt, INT, INT, STRING, INT, CBUF)
 FCALLSCFUN5 (INT, vlistInqAttInt, VLISTINQATTINT, vlistinqattint, INT, INT, STRING, INT, PINT)
 FCALLSCFUN5 (INT, vlistInqAttFlt, VLISTINQATTFLT, vlistinqattflt, INT, INT, STRING, INT, PDOUBLE)
-FCALLSCFUN5 (INT, vlistInqAttTxt, VLISTINQATTTXT, vlistinqatttxt, INT, INT, STRING, INT, PSTRING)
+FCALLSCFUN5 (INT, vlistInqAttTxt, VLISTINQATTTXT, vlistinqatttxt, INT, INT, STRING, INT, CBUF)
 
 /*  GRID routines  */
 
@@ -382,8 +370,8 @@ FCALLSCFUN1 (INT, gridInqPosition, GRIDINQPOSITION, gridinqposition, INT)
 FCALLSCSUB2 (gridDefPosition, GRIDDEFPOSITION, griddefposition, INT, INT)
 FCALLSCFUN2 (INT, gridInqReference, GRIDINQREFERENCE, gridinqreference, INT, PSTRING)
 FCALLSCSUB2 (gridDefReference, GRIDDEFREFERENCE, griddefreference, INT, STRING)
-FCALLSCFUN2 (STRING, gridInqUUID, GRIDINQUUID, gridinquuid, INT, PSTRING)
-FCALLSCSUB2 (gridDefUUID, GRIDDEFUUID, griddefuuid, INT, STRING)
+FCALLSCFUN2 (STRING, gridInqUUID, GRIDINQUUID, gridinquuid, INT, CBUF)
+FCALLSCSUB2 (gridDefUUID, GRIDDEFUUID, griddefuuid, INT, CBUF)
 
 /*  Lambert Conformal Conic grid (GRIB version)  */
 
@@ -429,8 +417,8 @@ FCALLSCSUB2 (zaxisInqLevels, ZAXISINQLEVELS, zaxisinqlevels, INT, PDOUBLE)
 FCALLSCSUB3 (zaxisDefLevel, ZAXISDEFLEVEL, zaxisdeflevel, INT, INT, DOUBLE)
 FCALLSCFUN2 (DOUBLE, zaxisInqLevel, ZAXISINQLEVEL, zaxisinqlevel, INT, INT)
 FCALLSCSUB2 (zaxisDefReference, ZAXISDEFREFERENCE, zaxisdefreference, INT, INT)
-FCALLSCSUB2 (zaxisDefUUID, ZAXISDEFUUID, zaxisdefuuid, INT, STRING)
-FCALLSCFUN2 (STRING, zaxisInqUUID, ZAXISINQUUID, zaxisinquuid, INT, PSTRING)
+FCALLSCSUB2 (zaxisDefUUID, ZAXISDEFUUID, zaxisdefuuid, INT, CBUF)
+FCALLSCFUN2 (STRING, zaxisInqUUID, ZAXISINQUUID, zaxisinquuid, INT, CBUF)
 FCALLSCFUN1 (INT, zaxisInqReference, ZAXISINQREFERENCE, zaxisinqreference, INT)
 FCALLSCSUB2 (zaxisDefName, ZAXISDEFNAME, zaxisdefname, INT, STRING)
 FCALLSCSUB2 (zaxisDefLongname, ZAXISDEFLONGNAME, zaxisdeflongname, INT, STRING)

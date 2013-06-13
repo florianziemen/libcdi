@@ -4,6 +4,15 @@
 This appendix provide a brief listing of the C language bindings of the
 CDI library routines:
 
+\section*{\tt \htmlref{cdiDefAdditionalKey}{cdiDefAdditionalKey}}
+
+\begin{verbatim}
+    void cdiDefAdditionalKey (const char *string);
+\end{verbatim}
+
+Register an additional GRIB key which is read when file is opened..
+
+
 \section*{\tt \htmlref{gridCreate}{gridCreate}}
 
 \begin{verbatim}
@@ -706,7 +715,7 @@ Define an integer attribute.
 
 \begin{verbatim}
     int vlistDefAttTxt (int vlistID, int varID, const char *name, int len,
-                        const char *tp);
+                        const char *tp_cbuf);
 \end{verbatim}
 
 Define a text attribute.
@@ -755,6 +764,15 @@ Define the data type of a Variable.
 \end{verbatim}
 
 Set an arbitrary keyword/double value pair for GRIB API.
+
+
+\section*{\tt \htmlref{vlistDefVarExtra}{vlistDefVarExtra}}
+
+\begin{verbatim}
+    void vlistDefVarExtra (int vlistID, int varID, const char *extra);
+\end{verbatim}
+
+Define extra information of a Variable.
 
 
 \section*{\tt \htmlref{vlistDefVarIntKey}{vlistDefVarIntKey}}
@@ -871,7 +889,8 @@ Get the value(s) of an integer attribute.
 \section*{\tt \htmlref{vlistInqAttTxt}{vlistInqAttTxt}}
 
 \begin{verbatim}
-    int vlistInqAttTxt (int vlistID, int varID, const char *name, int mlen, char *tp);
+    int vlistInqAttTxt (int vlistID, int varID, const char *name, int mlen,
+                        char *tp_cbuf);
 \end{verbatim}
 
 Get the value(s) of a text attribute.
@@ -916,16 +935,25 @@ Get the data type of a Variable.
 \section*{\tt \htmlref{vlistInqVarDblKey}{vlistInqVarDblKey}}
 
 \begin{verbatim}
-    double vlistInqVarDblKey (int streamID, const char *name);
+    double vlistInqVarDblKey (int vlistID, int varID, const char *name);
 \end{verbatim}
 
 raw access to GRIB meta-data.
 
 
+\section*{\tt \htmlref{vlistInqVarExtra}{vlistInqVarExtra}}
+
+\begin{verbatim}
+    void vlistInqVarExtra (int vlistID, int varID, char *extra);
+\end{verbatim}
+
+Get extra information of a Variable.
+
+
 \section*{\tt \htmlref{vlistInqVarIntKey}{vlistInqVarIntKey}}
 
 \begin{verbatim}
-    int vlistInqVarIntKey (int streamID, const char *name);
+    int vlistInqVarIntKey (int vlistID, int varID, const char *name);
 \end{verbatim}
 
 raw access to GRIB meta-data.
@@ -965,24 +993,6 @@ Get the name of a Variable.
 \end{verbatim}
 
 Get the parameter number of a Variable.
-
-
-\section*{\tt \htmlref{vlistInqVarRawBegin}{vlistInqVarRawBegin}}
-
-\begin{verbatim}
-    void vlistInqVarRawBegin (int streamID, int varID);
-\end{verbatim}
-
-Open GRIB record to retrieve raw meta-data in subsequent calls.
-
-
-\section*{\tt \htmlref{vlistInqVarRawEnd}{vlistInqVarRawEnd}}
-
-\begin{verbatim}
-    void vlistInqVarRawEnd (int streamID);
-\end{verbatim}
-
-Free previously opened GRIB record.
 
 
 \section*{\tt \htmlref{vlistInqVarStdname}{vlistInqVarStdname}}
@@ -1105,7 +1115,7 @@ Define the reference of a generalized Z-axis.
 \section*{\tt \htmlref{zaxisDefUUID}{zaxisDefUUID}}
 
 \begin{verbatim}
-    void zaxisDefUUID (int zaxisID, const char *uuid);
+    void zaxisDefUUID (int zaxisID, const char *uuid_cbuf);
 \end{verbatim}
 
 Define the uuid of a generalized Z-axis.
@@ -1213,7 +1223,7 @@ Get the type of a Z-axis.
 \section*{\tt \htmlref{zaxisInqUUID}{zaxisInqUUID}}
 
 \begin{verbatim}
-    char * zaxisInqUUID (int zaxisID, char *uuid);
+    char * zaxisInqUUID (int zaxisID, char *uuid_cbuf);
 \end{verbatim}
 
 Get the reference of a generalized Z-axis.

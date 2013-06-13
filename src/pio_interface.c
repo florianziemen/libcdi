@@ -23,7 +23,7 @@
 #include "pio_rpc.h"
 #include "pio_server.h"
 #include "resource_handle.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "vlist.h"
 
 

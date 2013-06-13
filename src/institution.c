@@ -4,7 +4,7 @@
 
 #include "dmemory.h"
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "resource_handle.h"
 #include "pio_util.h"
 #include "resource_handle.h"
@@ -199,8 +199,12 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
   ip1->used       = 0;
   ip1->center     = center;
   ip1->subcenter  = subcenter;
-  ip1->name       = ( char * ) name;
-  ip1->longname   = ( char * ) longname;
+  ip1->name       = NULL;
+  ip1->longname   = NULL;
+  if ( name && *name )
+    ip1->name     = ( char * ) name;
+  if ( longname && *longname )
+    ip1->longname = ( char * ) longname;
 
   instCount = instituteCount ();
   instResHs = xmalloc ( instCount * sizeof ( int ));
@@ -235,8 +239,8 @@ int institutDef(int center, int subcenter, const char *name, const char *longnam
 
   instituteptr->center    = center;
   instituteptr->subcenter = subcenter;
-  if ( name )     instituteptr->name     = strdupx(name);
-  if ( longname ) instituteptr->longname = strdupx(longname);
+  if ( name && *name )         instituteptr->name     = strdupx(name);
+  if ( longname && *longname ) instituteptr->longname = strdupx(longname);
 
   return instituteptr->self;
 }

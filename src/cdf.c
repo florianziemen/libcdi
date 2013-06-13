@@ -10,7 +10,7 @@
 
 #include "cdf.h"
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "cdf_int.h"
 
 

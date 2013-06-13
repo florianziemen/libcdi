@@ -8,7 +8,7 @@
 #include <string.h>
 
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "cdf_int.h"
 
 #ifdef USE_MPI
@@ -106,11 +106,11 @@ void cdf_create(const char *path, int cmode, int *ncidp)
   if ( CDF_Debug || status != NC_NOERR )
     Message("chunksizehint %d", chunksizehint);
 
-  if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
+  if ( status != NC_NOERR ) Error("%s: %s", path, nc_strerror(status));
 
   status = nc_set_fill(*ncidp, NC_NOFILL, &oldfill);
 
-  if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
+  if ( status != NC_NOERR ) Error("%s: %s", path, nc_strerror(status));
 }
 
 

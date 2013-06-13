@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.6.0
+! Fortran interface for CDI library version 1.6.1
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   April 2013
+! Uwe Schulzweida, MPI-MET, Hamburg,   June 2013
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -266,8 +266,10 @@
       PARAMETER (ZAXIS_CLOUD_TOP        = 17)
       INTEGER    ZAXIS_ISOTHERM_ZERO   
       PARAMETER (ZAXIS_ISOTHERM_ZERO    = 18)
+      INTEGER    ZAXIS_SNOW            
+      PARAMETER (ZAXIS_SNOW             = 19)
       INTEGER    ZAXIS_REFERENCE       
-      PARAMETER (ZAXIS_REFERENCE        = 19)
+      PARAMETER (ZAXIS_REFERENCE        = 20)
 !
 !  TIME types
 !
@@ -433,6 +435,10 @@
 
 !                     cdiPrintVersion
       EXTERNAL        cdiPrintVersion
+
+      INTEGER         cdiHaveFiletype
+!                                    (INTEGER         filetype)
+      EXTERNAL        cdiHaveFiletype
 
 !                     cdiDefMissval
 !                                    (DOUBLEPRECISION missval)
@@ -1085,6 +1091,18 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarMissval
 
+!                     vlistDefVarExtra
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   extra)
+      EXTERNAL        vlistDefVarExtra
+
+!                     vlistInqVarExtra
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     CHARACTER*(*)   extra)
+      EXTERNAL        vlistInqVarExtra
+
 !                     vlistDefVarScalefactor
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
@@ -1201,15 +1219,10 @@
 !                                     INTEGER         forecast_type)
       EXTERNAL        vlistInqVarEnsemble
 
-!
-!  ----------------------------------
-!
-!
-!  Local change: 2013-01-28, FP (DWD)
-!
-!
-!  ----------------------------------
-!
+!                     cdiDefAdditionalKey
+!                                    (CHARACTER*(*)   string)
+      EXTERNAL        cdiDefAdditionalKey
+
 !                     vlistDefVarIntKey
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID,
@@ -1224,33 +1237,17 @@
 !                                     DOUBLEPRECISION value)
       EXTERNAL        vlistDefVarDblKey
 
-!
-!  ----------------------------------
-!
-!
-!  Local change: 2013-02-18, FP (DWD)
-!
-!
-!  ----------------------------------
-!
-!                     vlistInqVarRawBegin
-!                                    (INTEGER         streamID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarRawBegin
-
       DOUBLEPRECISION vlistInqVarDblKey
-!                                    (INTEGER         streamID,
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name)
       EXTERNAL        vlistInqVarDblKey
 
       INTEGER         vlistInqVarIntKey
-!                                    (INTEGER         streamID,
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name)
       EXTERNAL        vlistInqVarIntKey
-
-!                     vlistInqVarRawEnd
-!                                    (INTEGER         streamID)
-      EXTERNAL        vlistInqVarRawEnd
 
 !
 !  VLIST attributes
@@ -1299,7 +1296,7 @@
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         len,
-!                                     CHARACTER*(*)   tp)
+!                                     CHARACTER*(*)   tp_cbuf)
       EXTERNAL        vlistDefAttTxt
 
       INTEGER         vlistInqAttInt
@@ -1323,7 +1320,7 @@
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         mlen,
-!                                     CHARACTER*(*)   tp)
+!                                     CHARACTER*(*)   tp_cbuf)
       EXTERNAL        vlistInqAttTxt
 
 !
@@ -1648,12 +1645,12 @@
 
       CHARACTER(80)   gridInqUUID
 !                                    (INTEGER         gridID,
-!                                     CHARACTER*(*)   uuid)
+!                                     CHARACTER*(*)   uuid_cbuf)
       EXTERNAL        gridInqUUID
 
 !                     gridDefUUID
 !                                    (INTEGER         gridID,
-!                                     CHARACTER*(*)   uuid)
+!                                     CHARACTER*(*)   uuid_cbuf)
       EXTERNAL        gridDefUUID
 
 !
@@ -1857,12 +1854,12 @@
 
 !                     zaxisDefUUID
 !                                    (INTEGER         zaxisID,
-!                                     CHARACTER*(*)   uuid)
+!                                     CHARACTER*(*)   uuid_cbuf)
       EXTERNAL        zaxisDefUUID
 
       CHARACTER(80)   zaxisInqUUID
 !                                    (INTEGER         zaxisID,
-!                                     CHARACTER*(*)   uuid)
+!                                     CHARACTER*(*)   uuid_cbuf)
       EXTERNAL        zaxisInqUUID
 
       INTEGER         zaxisInqReference

@@ -11,7 +11,7 @@
 
 #include "cdi.h"
 #include "taxis.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "calendar.h"
 #include "pio_util.h"
 #include "namespace.h"

@@ -8,3 +8,7 @@ g77 -g -I../src -o cdi_write_f cdi_write_f.f -L/pf/m/m214003/local/etch-ia32/lib
 
 
 gfortran -g  -o cdi_write_simple cdi_write_simple.f  -I../src -L/Users/m214003/local/lib ../src/.libs/libcdi.a -L/Users/uwe/cdt/libs4cdo-0.0.9/build/lib -L/opt/local/lib -lgrib_api /Users/uwe/cdt/libs4cdo-0.0.9/build/lib/libjasper.dylib /Users/uwe/cdt/libs4cdo-0.0.9/build/lib/libnetcdf.dylib /opt/local/lib/libcurl.dylib /opt/local/lib/libidn.dylib /opt/local/lib/libintl.dylib -lc /opt/local/lib/libiconv.dylib -lssl -lcrypto /Users/uwe/cdt/libs4cdo-0.0.9/build/lib/libhdf5_hl.dylib /Users/uwe/cdt/libs4cdo-0.0.9/build/lib/libhdf5.dylib -lpthread /Users/uwe/cdt/libs4cdo-0.0.9/build/lib/libsz.dylib -lz -lm -pthread
+
+
+gfortran -g  -o cdi_read_sst cdi_read_sst.f  -I../src ../src/.libs/libcdi.a -L/Users/m214003/local/gribapi-1.9.16/lib -lgrib_api /opt/local/lib/libjasper.dylib /opt/local/lib/libjpeg.dylib /opt/local/lib/libnetcdf.dylib /opt/local/lib/libhdf5_hl.dylib /opt/local/lib/libhdf5.dylib /opt/local/lib/libcurl.dylib /opt/local/lib/libidn.dylib /opt/local/lib/libintl.dylib -lc /opt/local/lib/libiconv.dylib -lssl -lcrypto /opt/local/lib/libsz.dylib -lz -lm -pthread
+

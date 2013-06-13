@@ -10,7 +10,7 @@
 
 
 //#include "config.h"
-#define VERSION "1.6.0"
+#define VERSION "1.6.1"
 typedef struct
 {
   size_t naline;
@@ -62,7 +62,7 @@ static void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
 
 enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISMPI_COMM,
              ISXT_IDXLIST, ISCHOICE, ISINTP, ISINTV, ISINTVV, ISREALP,
-             ISDOUBLEP, ISSTRING, ISSTRINGP,
+             ISDOUBLEP, ISCBUF, ISSTRING, ISSTRINGP,
              NUM_KNOWN_ARG_TYPES};
 
 enum conversionType { CONV_ARG, CONV_RET };
@@ -122,6 +122,8 @@ static struct symbol funArgSym[]
         "^"WS"*(const"WS"+)?float"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0 },
       { "DOUBLEPRECISION", "PDOUBLE", "double *",
         "^"WS"*(const"WS"+)?double"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0 },
+      { "CHARACTER*(*)",   "CBUF",    "char *",
+        "^"WS"*(const"WS"+)?char"WS"+\\*""([A-Za-z_][A-Za-z_0-9]*_cbuf)"WS"*[,\\)]", 2 },
       { "CHARACTER*(*)",   "STRING",  "char *",
         "^"WS"*const"WS"+char"WS"+\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0 },
       { "CHARACTER*(*)",   "PSTRING", "char *",
@@ -279,6 +281,10 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   fprintf(fpint, "#  include \"cfortran.h\"\n");
   fprintf(fpint, "#endif\n");
   fprintf(fpint, "\n");
+  fprintf(fpint, "#if ! defined (_CDIFORTRAN_H)\n");
+  fprintf(fpint, "#  include \"cdiFortran.h\"\n");
+  fprintf(fpint, "#endif\n");
+  fprintf(fpint, "\n");
 
   ssize_t lineLen;
   while ((lineLen = getline(&line, &lineBufSize, fpin)) >= 0)
@@ -304,7 +310,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
         regmatch_t *nameMatch = reMatch + funRet[functype].nameMatch;
         if (debug)
           printf("Found: %.*s\n",
-                 nameMatch->rm_eo - nameMatch->rm_so,
+                 (int) (nameMatch->rm_eo - nameMatch->rm_so),
                  pline + nameMatch->rm_so);
         ssize_t funNameLast = reMatch[0].rm_eo - 1;
         ssize_t nameLen = nameMatch->rm_eo - nameMatch->rm_so;

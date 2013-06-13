@@ -27,6 +27,7 @@ libcdi_la_SOURCES = 	 \
 	cdi_limits.h	 \
 	cdi_util.c       \
 	cdiFortran.c     \
+	cdiFortran.h     \
 	cfortran.h       \
 	cgribex.h	 \
 	cgribexlib.c  	 \
@@ -68,7 +69,7 @@ libcdi_la_SOURCES = 	 \
 	pio_posixasynch.c\
 	pio_posixfpguardsendrecv.c \
 	pio_posixnonb.c  \
-	pio_list_set.c			\
+	pio_list_set.c	 \
 	pio_rpc.c        \
 	pio_rpc.h        \
 	pio_server.c     \
@@ -92,8 +93,8 @@ libcdi_la_SOURCES = 	 \
 	stream_history.c \
 	stream_ieg.c     \
 	stream_ieg.h	 \
-	stream_int.c     \
-	stream_int.h	 \
+	cdi_int.c        \
+	cdi_int.h	 \
 	stream_record.c  \
 	stream_srv.c     \
 	stream_srv.h	 \

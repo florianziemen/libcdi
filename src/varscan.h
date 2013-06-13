@@ -7,7 +7,7 @@
 
 
 void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
-		  int level1, int level2, int level_sf, int prec,
+		  int level1, int level2, int level_sf, int level_unit, int prec,
 		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype,
 		  const char *name, const char *longname, const char *units);
 
@@ -28,6 +28,10 @@ int  varInqModel(int varID);
 void varDefTable(int varID, int tableID);
 int  varInqTable(int varID);
 void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type);
+
+void varDefOptGribInt(int varID, long lval, const char *keyword);
+void varDefOptGribDbl(int varID, double dval, const char *keyword);
+int varOptGribNentries(int varID);
 
 int  zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, double *levels, char *longname, char *units, int ltype);
 

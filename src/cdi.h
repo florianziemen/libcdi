@@ -158,7 +158,8 @@ extern "C" {
 #define  ZAXIS_CLOUD_BASE        16  /* Cloud base level                        */
 #define  ZAXIS_CLOUD_TOP         17  /* Level of cloud tops                     */
 #define  ZAXIS_ISOTHERM_ZERO     18  /* Level of 0o C isotherm                  */
-#define  ZAXIS_REFERENCE         19  /* zaxis reference number                  */
+#define  ZAXIS_SNOW              19  /* Snow level                              */
+#define  ZAXIS_REFERENCE         20  /* zaxis reference number                  */
 
 /* TIME types */
 
@@ -254,6 +255,8 @@ void    cdiDebug(int debug);
 
 char   *cdiLibraryVersion(void);
 void    cdiPrintVersion(void);
+
+int     cdiHaveFiletype(int filetype);
 
 void    cdiDefMissval(double missval);
 double  cdiInqMissval(void);
@@ -518,6 +521,12 @@ void    vlistDefVarMissval(int vlistID, int varID, double missval);
 /*      vlistInqVarMissval: Get the missing value of a Variable */
 double  vlistInqVarMissval(int vlistID, int varID);
 
+/*      vlistDefVarExtra: Define extra information of a Variable */
+void    vlistDefVarExtra(int vlistID, int varID, const char *extra);
+
+/*      vlistInqVarExtra: Get extra information of a Variable */
+void    vlistInqVarExtra(int vlistID, int varID, char *extra);
+
 void    vlistDefVarScalefactor(int vlistID, int varID, double scalefactor);
 double  vlistInqVarScalefactor(int vlistID, int varID);
 void    vlistDefVarAddoffset(int vlistID, int varID, double addoffset);
@@ -543,27 +552,22 @@ int     vlistMergedLevel(int vlistID, int varID, int levelID);
 void    vlistDefVarEnsemble(int vlistID, int varID, int ensID, int ensCount, int forecast_type);
 int     vlistInqVarEnsemble(int vlistID, int varID, int *ensID, int *ensCount, int *forecast_type);
 
-/* ---------------------------------- */
-/* Local change: 2013-01-28, FP (DWD) */
-/* ---------------------------------- */
+/* cdiClearAdditionalKeys: Clear the list of additional GRIB keys. */
+void    cdiClearAdditionalKeys();
+/* cdiDefAdditionalKey: Register an additional GRIB key which is read when file is opened. */
+void    cdiDefAdditionalKey(const char *string);
 
 /* vlistDefVarIntKey: Set an arbitrary keyword/integer value pair for GRIB API */
 void    vlistDefVarIntKey(int vlistID, int varID, const char *name, int value);
 /* vlistDefVarDblKey: Set an arbitrary keyword/double value pair for GRIB API */
 void    vlistDefVarDblKey(int vlistID, int varID, const char *name, double value);
 
-  /* ---------------------------------- */
-  /* Local change: 2013-02-18, FP (DWD) */
-  /* ---------------------------------- */
-
-/* vlistInqVarRawBegin: Open GRIB record to retrieve raw meta-data in subsequent calls */
-void    vlistInqVarRawBegin(int streamID, int varID);
+/* vlistHasVarKey: returns 1 if meta-data key was read, 0 otherwise. */
+int     vlistHasVarKey(int vlistID, int varID, const char* name);
 /* vlistInqVarDblKey: raw access to GRIB meta-data */
-double  vlistInqVarDblKey(int streamID, const char *name);
+double  vlistInqVarDblKey(int vlistID, int varID, const char *name);
 /* vlistInqVarIntKey: raw access to GRIB meta-data */
-int     vlistInqVarIntKey(int streamID, const char *name);
-/* vlistInqVarRawEnd: Free previously opened GRIB record */
-void    vlistInqVarRawEnd(int streamID);
+int     vlistInqVarIntKey(int vlistID, int varID, const char *name);
 
 
 /* VLIST attributes */
@@ -579,14 +583,14 @@ int     vlistDefAttInt(int vlistID, int varID, const char *name, int type, int l
 /*      vlistDefAttFlt: Define a floating point attribute */
 int     vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, const double *dp_vec);
 /*      vlistDefAttTxt: Define a text attribute */
-int     vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp);
+int     vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp_cbuf);
 
 /*      vlistInqAttInt: Get the value(s) of an integer attribute */
 int     vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int *ip_vec);
 /*      vlistInqAttFlt: Get the value(s) of a floating point attribute */
 int     vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double *dp_vec);
 /*      vlistInqAttTxt: Get the value(s) of a text attribute */
-int     vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp);
+int     vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp_cbuf);
 
 
 /* GRID routines */
@@ -733,8 +737,8 @@ int     gridInqPosition(int gridID);
 void    gridDefPosition(int gridID, int position);
 int     gridInqReference(int gridID, char *reference);
 void    gridDefReference(int gridID, const char *reference);
-char   *gridInqUUID(int gridID, char *uuid);
-void    gridDefUUID(int gridID, const char *uuid);
+char   *gridInqUUID(int gridID, char *uuid_cbuf);
+void    gridDefUUID(int gridID, const char *uuid_cbuf);
 
 
 /* Lambert Conformal Conic grid (GRIB version) */
@@ -818,10 +822,10 @@ double  zaxisInqLevel(int zaxisID, int levelID);
 void    zaxisDefReference(int zaxisID, int refID);
 
 /*      zaxisDefUUID: Define the uuid of a generalized Z-axis */
-void    zaxisDefUUID(int zaxisID, const char *uuid);
+void    zaxisDefUUID(int zaxisID, const char *uuid_cbuf);
 
 /*      zaxisInqUUID: Get the reference of a generalized Z-axis */
-char   *zaxisInqUUID(int zaxisID, char *uuid);
+char   *zaxisInqUUID(int zaxisID, char *uuid_cbuf);
 
 /*      zaxisInqReference: Get the reference of a generalized Z-axis */
 int     zaxisInqReference(int zaxisID);

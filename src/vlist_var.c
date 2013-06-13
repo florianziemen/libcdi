@@ -10,7 +10,7 @@
 
 #include "dmemory.h"
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "vlist.h"
 #include "vlist_var.h"
 #include "resource_handle.h"
@@ -50,6 +50,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].longname      = NULL;
   vlistptr->vars[varID].stdname       = NULL;
   vlistptr->vars[varID].units         = NULL;
+  vlistptr->vars[varID].extra         = NULL;
   vlistptr->vars[varID].nlevs         = 0;
   vlistptr->vars[varID].levinfo       = NULL;
   vlistptr->vars[varID].comptype      = COMPRESS_NONE;
@@ -64,6 +65,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].decoSize      = 0;
   vlistptr->vars[varID].deco          = NULL;
 
+#if  defined  (HAVE_LIBGRIB_API)
   /* ---------------------------------- */
   /* Local change: 2013-01-28, FP (DWD) */
   /* ---------------------------------- */
@@ -77,6 +79,7 @@ void vlistvarInitEntry(int vlistID, int varID)
     vlistptr->vars[varID].opt_grib_int_keyword[i] = NULL;
     vlistptr->vars[varID].opt_grib_dbl_keyword[i] = NULL;
   } // for
+#endif
 }
 
 static
@@ -851,16 +854,16 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
     }
 
   vlistptr->vars[varID].datatype = datatype;
-  
+
   if ( vlistptr->vars[varID].missvalused == FALSE )
     switch (datatype)
       {
-      case DATATYPE_INT8:   vlistptr->vars[varID].missval = SCHAR_MIN; break;
-      case DATATYPE_UINT8:  vlistptr->vars[varID].missval = UCHAR_MAX; break;
-      case DATATYPE_INT16:  vlistptr->vars[varID].missval = SHRT_MIN;  break;
-      case DATATYPE_UINT16: vlistptr->vars[varID].missval = USHRT_MAX; break;
-      case DATATYPE_INT32:  vlistptr->vars[varID].missval = INT_MIN;   break;
-      case DATATYPE_UINT32: vlistptr->vars[varID].missval = UINT_MAX;  break;
+      case DATATYPE_INT8:   vlistptr->vars[varID].missval = -SCHAR_MAX; break;
+      case DATATYPE_UINT8:  vlistptr->vars[varID].missval =  UCHAR_MAX; break;
+      case DATATYPE_INT16:  vlistptr->vars[varID].missval = -SHRT_MAX;  break;
+      case DATATYPE_UINT16: vlistptr->vars[varID].missval =  USHRT_MAX; break;
+      case DATATYPE_INT32:  vlistptr->vars[varID].missval = -INT_MAX;   break;
+      case DATATYPE_UINT32: vlistptr->vars[varID].missval =  UINT_MAX;  break;
       }
 }
 
@@ -1174,6 +1177,87 @@ void vlistDefVarMissval(int vlistID, int varID, double missval)
 
   vlistptr->vars[varID].missval = missval;
   vlistptr->vars[varID].missvalused = TRUE;
+}
+
+/*
+@Function  vlistDefVarExtra
+@Title     Define extra information of a Variable
+
+@Prototype void vlistDefVarExtra(int vlistID, int varID, const char *extra)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
+    @Item  extra    Extra information.
+
+@Description
+The function @func{vlistDefVarExtra} defines the extra information of a variable.
+
+@EndFunction
+*/
+void vlistDefVarExtra(int vlistID, int varID, const char *extra)
+{
+  vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed." );
+      return;
+    }
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  if ( extra )
+    {
+      if ( vlistptr->vars[varID].extra )
+	{
+	  free(vlistptr->vars[varID].extra);
+	  vlistptr->vars[varID].extra = NULL;
+	}
+
+      vlistptr->vars[varID].extra = strdupx(extra);
+    }
+}
+
+/*
+@Function  vlistInqVarExtra
+@Title     Get extra information of a Variable
+
+@Prototype void vlistInqVarExtra(int vlistID, int varID, char *extra)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  varID    Variable identifier.
+    @Item  extra    Returned variable extra information. The caller must allocate space for the
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
+
+@Description
+The function @func{vlistInqVarExtra} returns the extra information of a variable.
+
+@Result
+@func{vlistInqVarExtra} returns the extra information of the variable to the parameter extra if available,
+otherwise the result is an empty string.
+
+@EndFunction
+*/
+void vlistInqVarExtra(int vlistID, int varID, char *extra)
+{
+  int tableID;
+  int param;
+  int pdis, pcat, pnum;
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  if ( vlistptr->vars[varID].extra == NULL )
+      sprintf(extra, "-");
+  else
+    strcpy(extra, vlistptr->vars[varID].extra);
+
+  return;
 }
 
 
@@ -1816,6 +1900,7 @@ int vlistInqVarEnsemble( int vlistID, int varID, int *ensID, int *ensCount, int 
 /* vlistDefVarIntKey: Set an arbitrary keyword/integer value pair for GRIB API */
 void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
 {
+#if  defined  (HAVE_LIBGRIB_API)
   vlist_t *vlistptr;
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -1827,11 +1912,13 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
     vlistptr->vars[varID].opt_grib_int_keyword[idx] = strdupx(name);
   else
     Error("Internal error!");
+#endif
 }
 
 /* vlistDefVarDblKey: Set an arbitrary keyword/double value pair for GRIB API */
 void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
 {
+#if  defined  (HAVE_LIBGRIB_API)
   vlist_t *vlistptr;
   vlistptr = vlist_to_pointer(vlistID);
 
@@ -1843,6 +1930,7 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
     vlistptr->vars[varID].opt_grib_dbl_keyword[idx] = strdupx(name);
   else
     Error("Internal error!");
+#endif
 }
 
 #if  defined  (HAVE_LIBGRIB_API)
@@ -1850,67 +1938,90 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
 #  include "grib_api.h"
 #endif
 
-/* vlistInqVarRawBegin: Open GRIB record to retrieve raw meta-data in subsequent calls */
-void vlistInqVarRawBegin(int streamID, int varID)
+
+/* cdiClearAdditionalKeys: Clears the list of additional GRIB keys. */
+void cdiClearAdditionalKeys()
 {
 #if  defined  (HAVE_LIBGRIB_API)
-  stream_t *streamptr;
-  int       recID, tsID, fileID;
-  long      recpos, recsize;
-
-  streamptr = stream_to_pointer(streamID);
-  stream_check_ptr(__func__, streamptr);
-
-  fileID  = streamInqFileID(streamID);
-  tsID    = streamptr->curTsID;
-
-  // determine record ID for varID in current time step
-  for (recID=0; (recID<streamptr->tsteps[0].nrecs) && (varID != streamptr->tsteps[tsID].records[recID].varID); recID++);
-  recpos  = streamptr->tsteps[tsID].records[recID].position;
-  recsize = streamptr->tsteps[tsID].records[recID].size;
-
-  fileSetPos(fileID, recpos, SEEK_SET);
-  fileRead(fileID, streamptr->record->buffer, (size_t) recsize);
-
-  streamptr->gh = (void *) grib_handle_new_from_message(NULL, (void *) streamptr->record->buffer, recsize);
+  int i;
+  for (i=0; i<cdiNAdditionalGRIBKeys; i++)  free(cdiAdditionalGRIBKeys[i]);
+  cdiNAdditionalGRIBKeys = 0;
 #endif
 }
 
+/* cdiDefAdditionalKey: Register an additional GRIB key which is read when file is opened. */
+void cdiDefAdditionalKey(const char *name)
+{
+#if  defined  (HAVE_LIBGRIB_API)
+  int idx = cdiNAdditionalGRIBKeys;
+  cdiNAdditionalGRIBKeys++;
+  if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many additional keywords!");
+  if ( name )
+    cdiAdditionalGRIBKeys[idx] = strdupx(name);
+  else
+    Error("Internal error!");
+#endif
+}
+
+/* vlistHasVarKey: returns 1 if meta-data key was read, 0 otherwise. */
+int vlistHasVarKey(int vlistID, int varID, const char* name)
+{
+#if  defined  (HAVE_LIBGRIB_API)
+  /* check if the GRIB key was previously read and is stored */
+  vlist_t *vlistptr;
+  int      i;
+  vlistptr = vlist_to_pointer(vlistID);
+
+  for (i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++)
+    {
+      if ( strcmp(name, vlistptr->vars[varID].opt_grib_dbl_keyword[i]) == 0 )
+	return 1;
+    }
+
+  for (i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++)
+    {
+      if ( strcmp(name, vlistptr->vars[varID].opt_grib_int_keyword[i]) == 0 )
+	return 1;
+    }
+#endif
+  return 0;
+}
 
 /* vlistInqVarDblKey: raw access to GRIB meta-data */
-double vlistInqVarDblKey(int streamID, const char* name)
+double vlistInqVarDblKey(int vlistID, int varID, const char* name)
 {
   double value = 0;
 #if  defined  (HAVE_LIBGRIB_API)
-  stream_t *streamptr = stream_to_pointer(streamID);
-  stream_check_ptr(__func__, streamptr);
-  GRIB_CHECK(grib_get_double((grib_handle*) streamptr->gh, name, &value), 0);
+  /* check if the GRIB key was previously read and is stored in
+     "opt_grib_dbl_val" */
+  vlist_t *vlistptr;
+  vlistptr = vlist_to_pointer(vlistID);
+
+  int i;
+  for (i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++)
+    if ( strcmp(name, vlistptr->vars[varID].opt_grib_dbl_keyword[i]) == 0 )
+      return vlistptr->vars[varID].opt_grib_dbl_val[i];
 #endif
   return value;
 }
 
 
 /* vlistInqVarIntKey: raw access to GRIB meta-data */
-int vlistInqVarIntKey(int streamID, const char* name)
+int vlistInqVarIntKey(int vlistID, int varID, const char* name)
 {
   long int value = 0;
 #if  defined  (HAVE_LIBGRIB_API)
-  stream_t *streamptr = stream_to_pointer(streamID);
-  stream_check_ptr(__func__, streamptr);
-  GRIB_CHECK(grib_get_long((grib_handle*) streamptr->gh, name, &value), 0);
+  /* check if the GRIB key was previously read and is stored in
+     "opt_grib_int_val" */
+  vlist_t *vlistptr;
+  vlistptr = vlist_to_pointer(vlistID);
+
+  int i;
+  for (i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++)
+    if ( strcmp(name, vlistptr->vars[varID].opt_grib_int_keyword[i]) == 0 )
+      return vlistptr->vars[varID].opt_grib_int_val[i];
 #endif
   return (int) value;
-}
-
-
-/* vlistInqVarRawEnd: Free previously opened GRIB record */
-void vlistInqVarRawEnd(int streamID)
-{
-#if  defined  (HAVE_LIBGRIB_API)
-  stream_t *streamptr = stream_to_pointer(streamID);
-  stream_check_ptr(__func__, streamptr);
-  grib_handle_delete((grib_handle*) streamptr->gh);
-#endif
 }
 
 

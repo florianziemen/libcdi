@@ -6,7 +6,7 @@
 #include <math.h>
 
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "dmemory.h"
 #include "varscan.h"
 #include "vlist.h"
@@ -48,6 +48,7 @@ typedef struct
   int         ltype;     /* GRIB level type */
   int         lbounds;
   int         level_sf;
+  int         level_unit;
   int         zaxisID;
   int         nlevels;
   int         levelTableSize;
@@ -63,6 +64,16 @@ typedef struct
   char       *longname;
   char       *units;
   ensinfo_t  *ensdata;
+#if  defined  (HAVE_LIBGRIB_API)
+  /* (Optional) list of keyword/double value pairs */
+  int    opt_grib_dbl_nentries;
+  char*  opt_grib_dbl_keyword[MAX_OPT_GRIB_ENTRIES];
+  double opt_grib_dbl_val[MAX_OPT_GRIB_ENTRIES];
+  /* (Optional) list of keyword/integer value pairs */
+  int    opt_grib_int_nentries;
+  char*  opt_grib_int_keyword[MAX_OPT_GRIB_ENTRIES];
+  int    opt_grib_int_val[MAX_OPT_GRIB_ENTRIES];
+#endif
 }
 vartable_t;
 
@@ -86,6 +97,7 @@ void paramInitEntry(int varID, int param)
   vartable[varID].ltype          = 0;
   vartable[varID].lbounds        = 0;
   vartable[varID].level_sf       = 0;
+  vartable[varID].level_unit     = 0;
   vartable[varID].levelTable     = NULL;
   vartable[varID].levelTableSize = 0;
   vartable[varID].nlevels        = 0;
@@ -249,7 +261,13 @@ int paramNewEntry(int param)
 	}
 
       for( i = 0; i < varTablesize; i++ )
-	vartable[i].param = UNDEF_PARAM;
+	{
+	  vartable[i].param = UNDEF_PARAM;
+#if  defined  (HAVE_LIBGRIB_API)
+	  vartable[i].opt_grib_int_nentries = 0;
+	  vartable[i].opt_grib_dbl_nentries = 0;
+#endif
+	}
     }
   else
     {
@@ -276,7 +294,13 @@ int paramNewEntry(int param)
       varID = varTablesize/2;
 
       for( i = varID; i < varTablesize; i++ )
-	vartable[i].param = UNDEF_PARAM;
+	{
+	  vartable[i].param = UNDEF_PARAM;
+#if  defined  (HAVE_LIBGRIB_API)
+	  vartable[i].opt_grib_int_nentries = 0;
+	  vartable[i].opt_grib_dbl_nentries = 0;
+#endif
+	}
     }
 
   paramInitEntry(varID, param);
@@ -286,7 +310,7 @@ int paramNewEntry(int param)
 
 
 void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
-		  int level1, int level2, int level_sf, int prec,
+		  int level1, int level2, int level_sf, int level_unit, int prec,
 		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype,
 		  const char *name, const char *longname, const char *units)
 {
@@ -305,6 +329,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
       vartable[varID].ltype     = ltype;
       vartable[varID].lbounds   = lbounds;
       vartable[varID].level_sf  = level_sf;
+      vartable[varID].level_unit = level_unit;
       if ( tsteptype != UNDEFID ) vartable[varID].tsteptype = tsteptype;
       if ( numavg ) vartable[varID].timave = 1;
 
@@ -476,7 +501,7 @@ void cdi_generate_vars(stream_t *streamptr)
       comptype  = vartable[varid].comptype;
 
       level_sf  = 1;
-      if ( vartable[varid].level_sf == 77 ) level_sf = 0.001;
+      if ( vartable[varid].level_sf != 0 ) level_sf = 1./vartable[varid].level_sf;
 
       zaxisID = UNDEFID;
 
@@ -541,12 +566,9 @@ void cdi_generate_vars(stream_t *streamptr)
 	    dlevels2[levelID] = level_sf*vartable[varid].levelTable[levelID].level2;
 	}
 
-      if ( vartable[varid].level_sf == 77 )
-        zaxisID = varDefZaxis(vlistID, zaxistype, nlevels, dlevels, lbounds, dlevels1, dlevels2,
-                              Vctsize, Vct, NULL, NULL, "m", 0, 0, ltype);
-      else
-        zaxisID = varDefZaxis(vlistID, zaxistype, nlevels, dlevels, lbounds, dlevels1, dlevels2,
-                              Vctsize, Vct, NULL, NULL, NULL, 0, 0, ltype);
+      char *unitptr = cdiUnitNamePtr(vartable[varid].level_unit);
+      zaxisID = varDefZaxis(vlistID, zaxistype, nlevels, dlevels, lbounds, dlevels1, dlevels2,
+                            Vctsize, Vct, NULL, NULL, unitptr, 0, 0, ltype);
 
       if ( lbounds ) free(dlevels1);
       if ( lbounds ) free(dlevels2);
@@ -570,6 +592,33 @@ void cdi_generate_vars(stream_t *streamptr)
       if ( vartable[varid].ensdata )  vlistDefVarEnsemble(vlistID, varID, vartable[varid].ensdata->ens_index,
 	                                                  vartable[varid].ensdata->ens_count,
 							  vartable[varid].ensdata->forecast_init_type);
+
+#if  defined  (HAVE_LIBGRIB_API)
+      /* ---------------------------------- */
+      /* Local change: 2013-04-23, FP (DWD) */
+      /* ---------------------------------- */
+
+      int    i;
+      vlist_t *vlistptr;
+      vlistptr = vlist_to_pointer(vlistID);
+      for (i=0; i<vartable[varid].opt_grib_int_nentries; i++)
+        {
+          int idx = vlistptr->vars[varID].opt_grib_int_nentries;
+          vlistptr->vars[varID].opt_grib_int_nentries++;
+          if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
+          vlistptr->vars[varID].opt_grib_int_val[idx] = vartable[varid].opt_grib_int_val[idx];
+          vlistptr->vars[varID].opt_grib_int_keyword[idx] = strdupx(vartable[varid].opt_grib_int_keyword[idx]);
+        }
+      for (i=0; i<vartable[varid].opt_grib_dbl_nentries; i++)
+        {
+          int idx = vlistptr->vars[varID].opt_grib_dbl_nentries;
+          vlistptr->vars[varID].opt_grib_dbl_nentries++;
+          if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/double value pairs!");
+          vlistptr->vars[varID].opt_grib_dbl_val[idx] = vartable[varid].opt_grib_dbl_val[idx];
+          vlistptr->vars[varID].opt_grib_dbl_keyword[idx] = strdupx(vartable[varid].opt_grib_dbl_keyword[idx]);
+        }
+      /* note: if the key is not defined, we do not throw an error! */
+#endif
 
       if ( cdiDefaultTableID != UNDEFID )
 	{
@@ -614,7 +663,7 @@ void cdi_generate_vars(stream_t *streamptr)
       for ( levelID = 0; levelID < nlevels; levelID++ )
 	{
 	  lindex = vartable[varid].levelTable[levelID].lindex;
-	  printf("%d %d %d %d %d\n", varID, levelID, 
+	  printf("%d %d %d %d %d\n", varID, levelID,
 		 vartable[varid].levelTable[levelID].lindex,
 		 vartable[varid].levelTable[levelID].recID,
 		 vartable[varid].levelTable[levelID].level1);
@@ -654,7 +703,7 @@ void varDefZAxisReference(int nlev, int nvgrid, char *uuid)
 {
   numberOfVerticalLevels = nlev;
   numberOfVerticalGrid = nvgrid;
-  strncpy(uuidVGrid, uuid, 16);
+  memcpy(uuidVGrid, uuid, 16);
 }
 
 
@@ -944,6 +993,40 @@ void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type
   vartable[varID].ensdata->ens_index = ens_idx;
   vartable[varID].ensdata->ens_count = ens_count;
   vartable[varID].ensdata->forecast_init_type = forecast_type;
+}
+
+
+void varDefOptGribInt(int varID, long lval, const char *keyword)
+{
+#if  defined  (HAVE_LIBGRIB_API)
+  int idx = vartable[varID].opt_grib_int_nentries;
+  vartable[varID].opt_grib_int_nentries++;
+  if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
+  vartable[varID].opt_grib_int_val[idx] = (int) lval;
+  vartable[varID].opt_grib_int_keyword[idx] = strdupx(keyword);
+#endif
+}
+
+
+void varDefOptGribDbl(int varID, double dval, const char *keyword)
+{
+#if  defined  (HAVE_LIBGRIB_API)
+  int idx = vartable[varID].opt_grib_dbl_nentries;
+  vartable[varID].opt_grib_dbl_nentries++;
+  if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/double value pairs!");
+  vartable[varID].opt_grib_dbl_val[idx] = dval;
+  vartable[varID].opt_grib_dbl_keyword[idx] = strdupx(keyword);
+#endif
+}
+
+
+int varOptGribNentries(int varID)
+{
+  int nentries = 0;
+#if  defined  (HAVE_LIBGRIB_API)
+  nentries = vartable[varID].opt_grib_int_nentries + vartable[varID].opt_grib_dbl_nentries;
+#endif
+  return (nentries);
 }
 
 /*

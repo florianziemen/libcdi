@@ -4,6 +4,15 @@
 This appendix provide a brief listing of the Fortran language bindings of the
 CDI library routines:
 
+\section*{\tt \htmlref{cdiDefAdditionalKey}{cdiDefAdditionalKey}}
+
+\begin{verbatim}
+    SUBROUTINE cdiDefAdditionalKey (CHARACTER*(*) string)
+\end{verbatim}
+
+Register an additional GRIB key which is read when file is opened..
+
+
 \section*{\tt \htmlref{gridCreate}{gridCreate}}
 
 \begin{verbatim}
@@ -712,7 +721,7 @@ Define an integer attribute.
 \begin{verbatim}
     INTEGER FUNCTION vlistDefAttTxt (INTEGER vlistID, INTEGER varID, 
                                      CHARACTER*(*) name, INTEGER len, 
-                                     CHARACTER*(*) tp)
+                                     CHARACTER*(*) tp_cbuf)
 \end{verbatim}
 
 Define a text attribute.
@@ -763,6 +772,15 @@ Define the data type of a Variable.
 \end{verbatim}
 
 Set an arbitrary keyword/double value pair for GRIB API.
+
+
+\section*{\tt \htmlref{vlistDefVarExtra}{vlistDefVarExtra}}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarExtra (INTEGER vlistID, INTEGER varID, CHARACTER*(*) extra)
+\end{verbatim}
+
+Define extra information of a Variable.
 
 
 \section*{\tt \htmlref{vlistDefVarIntKey}{vlistDefVarIntKey}}
@@ -887,7 +905,7 @@ Get the value(s) of an integer attribute.
 \begin{verbatim}
     INTEGER FUNCTION vlistInqAttTxt (INTEGER vlistID, INTEGER varID, 
                                      CHARACTER*(*) name, INTEGER mlen, 
-                                     CHARACTER*(*) tp)
+                                     CHARACTER*(*) tp_cbuf)
 \end{verbatim}
 
 Get the value(s) of a text attribute.
@@ -932,16 +950,27 @@ Get the data type of a Variable.
 \section*{\tt \htmlref{vlistInqVarDblKey}{vlistInqVarDblKey}}
 
 \begin{verbatim}
-    DOUBLEPRECISION FUNCTION vlistInqVarDblKey (INTEGER streamID, CHARACTER*(*) name)
+    DOUBLEPRECISION FUNCTION vlistInqVarDblKey (INTEGER vlistID, INTEGER varID, 
+                                                CHARACTER*(*) name)
 \end{verbatim}
 
 raw access to GRIB meta-data.
 
 
+\section*{\tt \htmlref{vlistInqVarExtra}{vlistInqVarExtra}}
+
+\begin{verbatim}
+    SUBROUTINE vlistInqVarExtra (INTEGER vlistID, INTEGER varID, CHARACTER*(*) extra)
+\end{verbatim}
+
+Get extra information of a Variable.
+
+
 \section*{\tt \htmlref{vlistInqVarIntKey}{vlistInqVarIntKey}}
 
 \begin{verbatim}
-    INTEGER FUNCTION vlistInqVarIntKey (INTEGER streamID, CHARACTER*(*) name)
+    INTEGER FUNCTION vlistInqVarIntKey (INTEGER vlistID, INTEGER varID, 
+                                        CHARACTER*(*) name)
 \end{verbatim}
 
 raw access to GRIB meta-data.
@@ -982,24 +1011,6 @@ Get the name of a Variable.
 \end{verbatim}
 
 Get the parameter number of a Variable.
-
-
-\section*{\tt \htmlref{vlistInqVarRawBegin}{vlistInqVarRawBegin}}
-
-\begin{verbatim}
-    SUBROUTINE vlistInqVarRawBegin (INTEGER streamID, INTEGER varID)
-\end{verbatim}
-
-Open GRIB record to retrieve raw meta-data in subsequent calls.
-
-
-\section*{\tt \htmlref{vlistInqVarRawEnd}{vlistInqVarRawEnd}}
-
-\begin{verbatim}
-    SUBROUTINE vlistInqVarRawEnd (INTEGER streamID)
-\end{verbatim}
-
-Free previously opened GRIB record.
 
 
 \section*{\tt \htmlref{vlistInqVarStdname}{vlistInqVarStdname}}
@@ -1124,7 +1135,7 @@ Define the reference of a generalized Z-axis.
 \section*{\tt \htmlref{zaxisDefUUID}{zaxisDefUUID}}
 
 \begin{verbatim}
-    SUBROUTINE zaxisDefUUID (INTEGER zaxisID, CHARACTER*(*) uuid)
+    SUBROUTINE zaxisDefUUID (INTEGER zaxisID, CHARACTER*(*) uuid_cbuf)
 \end{verbatim}
 
 Define the uuid of a generalized Z-axis.
@@ -1232,7 +1243,7 @@ Get the type of a Z-axis.
 \section*{\tt \htmlref{zaxisInqUUID}{zaxisInqUUID}}
 
 \begin{verbatim}
-    CHARACTER(80) FUNCTION zaxisInqUUID (INTEGER zaxisID, CHARACTER*(*) uuid)
+    CHARACTER(80) FUNCTION zaxisInqUUID (INTEGER zaxisID, CHARACTER*(*) uuid_cbuf)
 \end{verbatim}
 
 Get the reference of a generalized Z-axis.

@@ -7,7 +7,7 @@
 
 #include "dmemory.h"
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "stream_cgribex.h"
 #include "stream_gribapi.h"
 #include "file.h"
@@ -37,14 +37,14 @@ int grib1ltypeToZaxisType(int grib_ltype)
     case GRIB1_LTYPE_99:
     case GRIB1_LTYPE_ISOBARIC:           { zaxistype = ZAXIS_PRESSURE;          break; }
     case GRIB1_LTYPE_HEIGHT:             { zaxistype = ZAXIS_HEIGHT;            break; }
-    case GRIB1_LTYPE_ALTITUDE:           { zaxistype = ZAXIS_ALTITUDE;	     break; }
+    case GRIB1_LTYPE_ALTITUDE:           { zaxistype = ZAXIS_ALTITUDE;	        break; }
     case GRIB1_LTYPE_SIGMA:
-    case GRIB1_LTYPE_SIGMA_LAYER:        { zaxistype = ZAXIS_SIGMA;	     break; }
+    case GRIB1_LTYPE_SIGMA_LAYER:        { zaxistype = ZAXIS_SIGMA;	        break; }
     case GRIB1_LTYPE_HYBRID:
-    case GRIB1_LTYPE_HYBRID_LAYER:       { zaxistype = ZAXIS_HYBRID;	     break; }
+    case GRIB1_LTYPE_HYBRID_LAYER:       { zaxistype = ZAXIS_HYBRID;	        break; }
     case GRIB1_LTYPE_LANDDEPTH:
     case GRIB1_LTYPE_LANDDEPTH_LAYER:    { zaxistype = ZAXIS_DEPTH_BELOW_LAND;  break; }
-    case GRIB1_LTYPE_ISENTROPIC:         { zaxistype = ZAXIS_ISENTROPIC;	     break; }
+    case GRIB1_LTYPE_ISENTROPIC:         { zaxistype = ZAXIS_ISENTROPIC;	break; }
     case GRIB1_LTYPE_SEADEPTH:           { zaxistype = ZAXIS_DEPTH_BELOW_SEA;   break; }
     }
 
@@ -75,6 +75,7 @@ int grib2ltypeToZaxisType(int grib_ltype)
     case GRIB2_LTYPE_LANDDEPTH:
  /* case GRIB2_LTYPE_LANDDEPTH_LAYER: */ { zaxistype = ZAXIS_DEPTH_BELOW_LAND;  break; }
     case GRIB2_LTYPE_ISENTROPIC:         { zaxistype = ZAXIS_ISENTROPIC;        break; }
+    case GRIB2_LTYPE_SNOW:               { zaxistype = ZAXIS_SNOW;              break; }
     case GRIB2_LTYPE_SEADEPTH:           { zaxistype = ZAXIS_DEPTH_BELOW_SEA;   break; }
     }
 
@@ -123,16 +124,25 @@ int grbDefRecord(stream_t * streamptr)
 
 static
 int grbDecode(int filetype, unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
-	      int unreduced, int *nmiss, int *zip, double missval)
+	      int unreduced, int *nmiss, int *zip, double missval, int vlistID, int varID)
 {
   int status = 0;
 
 #if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
-    status = cgribexDecode(gribbuffer, gribsize, data, gridsize, unreduced, nmiss, zip, missval);
+    {
+#if  defined  (HAVE_LIBGRIB_API)
+      extern int cdiNAdditionalGRIBKeys;
+      if ( cdiNAdditionalGRIBKeys > 0 )
+	Error("CGRIBEX decode does not support reading of additional GRIB keys!");
+#endif
+      status = cgribexDecode(gribbuffer, gribsize, data, gridsize, unreduced, nmiss, zip, missval);
+    }
   else
 #endif
-    status = gribapiDecode(gribbuffer, gribsize, data, gridsize, unreduced, nmiss, zip, missval);
+    {
+      status = gribapiDecode(gribbuffer, gribsize, data, gridsize, unreduced, nmiss, zip, missval, vlistID, varID);
+    }
 
   return (status);
 }
@@ -176,7 +186,7 @@ int grbReadRecord(stream_t * streamptr, double *data, int *nmiss)
 
   missval = vlistInqVarMissval(vlistID, varID);
 
-  grbDecode(filetype, gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, &zip, missval);
+  grbDecode(filetype, gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, &zip, missval, vlistID, varID);
 
   streamptr->tsteps[tsID].records[recID].zip = zip;
 
@@ -349,7 +359,7 @@ void grbReadVarDP(stream_t * streamptr, int varID, double *data, int *nmiss)
       missval = vlistInqVarMissval(vlistID, varID);
 
       grbDecode(filetype, gribbuffer, recsize, &data[levelID*gridsize], gridsize,
-		streamptr->unreduced, &imiss, &zip, missval);
+		streamptr->unreduced, &imiss, &zip, missval, vlistID, varID);
 
       *nmiss += imiss;
 
@@ -403,7 +413,7 @@ void grbReadVarSliceDP(stream_t * streamptr, int varID, int levelID, double *dat
 
   missval = vlistInqVarMissval(vlistID, varID);
 
-  grbDecode(filetype, gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, &zip, missval);
+  grbDecode(filetype, gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, &zip, missval, vlistID, varID);
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
@@ -490,7 +500,7 @@ int grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
   int ljpeg_warn = 1;
   void *gc = NULL;
 
-  if ( memtype == MEMTYPE_FLOAT ) Error("cdf_write_var_slice not implemented for memtype float!");
+  if ( memtype == MEMTYPE_FLOAT ) Error("grb_write_var_slice not implemented for memtype float!");
 
   filetype  = streamptr->filetype;
   fileID    = streamptr->fileID;

@@ -19,6 +19,7 @@
 #define  GRIB2_LTYPE_HYBRID              105
 #define  GRIB2_LTYPE_LANDDEPTH           106
 #define  GRIB2_LTYPE_ISENTROPIC          107
+#define  GRIB2_LTYPE_SNOW                114
 #define  GRIB2_LTYPE_REFERENCE           150
 #define  GRIB2_LTYPE_SEADEPTH            160
 

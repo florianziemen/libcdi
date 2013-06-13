@@ -26,7 +26,7 @@
 #include "pio_interface.h"
 #include "pio_rpc.h"
 #include "pio_util.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "resource_handle.h"
 #include "vlist_var.h"
 

@@ -15,7 +15,7 @@
 
 #include "dmemory.h"
 #include "cdi.h"
-#include "stream_int.h"
+#include "cdi_int.h"
 #include "grid.h"
 #include "gaussgrid.h"
 #include "pio_util.h"
@@ -4216,7 +4216,7 @@ char *gridInqUUID(int gridID, char *uuid)
 
   grid_check_ptr(gridID, gridptr);
 
-  strncpy(uuid, gridptr->uuid, 16);
+  memcpy(uuid, gridptr->uuid, 16);
 
   return (uuid);
 }
@@ -4236,7 +4236,7 @@ void gridDefUUID(int gridID, const char *uuid)
 
   grid_check_ptr(gridID, gridptr);
 
-  strncpy(gridptr->uuid, uuid, 16);
+  memcpy(gridptr->uuid, uuid, 16);
 
   return;
 }
