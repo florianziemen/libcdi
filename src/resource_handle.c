@@ -588,36 +588,13 @@ int reshListCompare ( int nsp0, int nsp1 )
 
 /**************************************************************/
 
-void reshListPrint ( char * filename )
+void reshListPrint(FILE *fp)
 {
   int i, j, temp;
   listElem_t * curr;
-  FILE * fp;
 
   LIST_INIT();
 
-#ifdef USE_MPI
-  {
-    int root = 0;
-    if ( commInqIsProcIO () == 0 )
-      {
-        if (  commInqRankModel () != root )  return;
-      }
-    else if ( commInqRankPio () != root ) return;
-  }
-#endif
-
-  if ( filename )
-    {
-      fp = fopen ( filename, "w" );
-      if ( ! fp )
-	{
-	  xdebug("%s", "could not open file" );
-	  fp = stdout;
-	}
-    }
-  else
-    fp = stdout;
 
   temp = namespaceGetActive ();
 
@@ -650,7 +627,6 @@ void reshListPrint ( char * filename )
   fprintf ( fp, "#\n#  end global resource list" \
             "\n#\n##########################################\n\n" );
 
-  fclose ( fp );;
   pioNamespaceSetActive ( temp );
 }
 

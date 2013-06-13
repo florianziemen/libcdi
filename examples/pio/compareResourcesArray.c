@@ -171,7 +171,18 @@ defineModel(int instID)
   modelDef(instID, 0, "myModel");
 }
 
-void modelRun ( MPI_Comm comm )
+static void
+printResources()
+{
+  FILE *fp = fopen("reshArrayModel.txt", "w");
+  if (!fp)
+    xabort("%s", "could not open file");
+  reshListPrint(fp);
+  fclose(fp);
+}
+
+
+static void modelRun ( MPI_Comm comm )
 {
   int gridID, zaxisID, taxisID, instID, vlistID, streamID;
 
@@ -204,7 +215,7 @@ void modelRun ( MPI_Comm comm )
 
   differ = reshListCompare ( 0, 1 );
   printf ( "The resource arrays %s.\n", differ ? "differ" : "are equal" );
-  reshListPrint ( "reshArrayModel" );
+  printResources();
 
   pioNamespaceSetActive ( 0 );
   streamClose(streamID);

@@ -154,9 +154,6 @@ void printArray ( const char *, char *, const void *, int, int, const char *, co
   if ( ddebug == MAXDEBUG )                                                         \
       printArray ( debugString, ps, array, n, datatype,  __func__, __FILE__, __LINE__ )
 
-
-void reshListPrint ( char * );
-
 #endif
 /*
  * Local Variables:

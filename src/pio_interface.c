@@ -860,8 +860,6 @@ void  pioEndDef ( void )
 
   varsMapNDeco ( commInqNNodes (), commInqNodeSizes ());
 
-  reshListPrint ( "reshListModel" );
-  
   if ( rankGlob < commInqNProcsColl ())
     {
       MPI_Comm comm = commInqCommsIO ( rankGlob );

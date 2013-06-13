@@ -928,9 +928,23 @@ void IOServer ()
 	  reshUnpackResources(buffer, size, &commCalc);
           xdebug("%s", "");
 	  free ( buffer );
-          if ( ddebug > 0 && commInqRankGlob () == nProcsModel ) 
-            reshListPrint ( "reshListIOServer" );
-	  serverWinCreate ();
+          {
+            int rankGlob = commInqRankGlob();
+            if ( ddebug > 0 && rankGlob == nProcsModel)
+              {
+                static const char baseName[] = "reshListIOServer.",
+                  suffix[] = ".txt";
+                /* 9 digits for rank at most */
+                char buf[sizeof (baseName) + 9 + sizeof (suffix) + 1];
+                snprintf(buf, sizeof (buf), "%s%d%s", baseName, rankGlob,
+                         suffix);
+                FILE *fp = fopen(buf, "w");
+                xassert(fp);
+                reshListPrint(fp);
+                fclose(fp);
+              }
+          }
+          serverWinCreate ();
 	  break;
 
 	case WRITETS:

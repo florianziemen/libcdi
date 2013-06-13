@@ -56,6 +56,7 @@ int    reshGetStatus ( cdiResH, resOps * );
 void   reshLock   ( void );
 void   reshUnlock ( void );
 int reshListCompare(int nsp0, int nsp1);
+void reshListPrint(FILE *fp);
 
 #endif
 /*
