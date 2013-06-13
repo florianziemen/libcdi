@@ -9,10 +9,6 @@
 #include <mpi.h>
 #endif
 
-#ifdef USE_MPI
-#include <mpi.h>
-#endif
-
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
