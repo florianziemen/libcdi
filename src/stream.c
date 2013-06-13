@@ -1228,7 +1228,7 @@ void streamClose(int streamID)
   stream_check_ptr(__func__, streamptr);
 
   if ( CDI_Debug )
-    Message("fileID = %d filename = %s", streamID, streamptr->filename);
+    Message("streamID = %d filename = %s", streamID, streamptr->filename);
 
   fileID   = streamptr->fileID;
   filetype = streamptr->filetype;
