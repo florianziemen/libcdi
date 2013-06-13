@@ -26,7 +26,7 @@ case "${HOSTNAME}" in
     export MP_PROCS=1
     export MP_HOSTFILE="${cwd}/hostfile"
     hostname >"$MP_HOSTFILE"
-    export PKG_CONFIG_PATH="/sw/aix61/yaxt-0.1.1-64bit/lib/pkgconfig:/sw/aix61/ppm-1.0.1-64bit-xl-pe-noomp/lib/pkgconfig:${PKG_CONFIG_PATH+:$PKG_CONFIG_PATH}"
+    export PKG_CONFIG_PATH="/sw/aix61/yaxt-0.1.4-64bit/lib/pkgconfig:/sw/aix61/ppm-1.0.1-64bit-xl-pe-noomp/lib/pkgconfig:${PKG_CONFIG_PATH+:$PKG_CONFIG_PATH}"
     OPTFLAGS='-O3 -qarch=pwr6 -qtune=pwr6'
     export CONFIG_SHELL=/bin/bash
     # add shared library wrappers to PATH
