@@ -154,6 +154,12 @@ void printArray ( const char *, char *, const void *, int, int, const char *, co
   if ( ddebug == MAXDEBUG )                                                         \
       printArray ( debugString, ps, array, n, datatype,  __func__, __FILE__, __LINE__ )
 
+/**
+ * @return number of dimensions
+ */
+void
+cdiPioQueryVarDims(int varShape[3], int vlistID, int varID);
+
 #endif
 /*
  * Local Variables:

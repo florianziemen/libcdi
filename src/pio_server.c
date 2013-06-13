@@ -232,32 +232,6 @@ resizeVarGatherBuf(int vlistID, int varID, double **buf, int *bufSize)
 }
 
 static void
-queryVarDims(int varShape[3], int vlistID, int varID)
-{
-  int gridID = vlistInqVarGrid(vlistID, varID);
-  int zaxisID = vlistInqVarZaxis(vlistID, varID);
-  int gridType = gridInqType(gridID);
-  switch (gridType)
-    {
-    case GRID_LONLAT:
-    case GRID_GAUSSIAN:
-      varShape[0] = gridInqXsize(gridID);
-      varShape[1] = gridInqYsize(gridID);
-      break;
-    case GRID_GENERIC:
-    case GRID_LCC:
-    case GRID_SPECTRAL:
-    case GRID_GME:
-    case GRID_CURVILINEAR:
-    case GRID_UNSTRUCTURED:
-    case GRID_REFERENCE:
-      xabort("unimplemented grid type: %d", gridType);
-      break;
-    }
-  varShape[2] = zaxisInqSize(zaxisID);
-}
-
-static void
 gatherArray(int root, int nProcsModel, int headerIdx,
             int vlistID,
             double *gatherBuf, int *nmiss)
@@ -267,7 +241,7 @@ gatherArray(int root, int nProcsModel, int headerIdx,
   int streamID = winDict[headerIdx].dataRecord.streamID;
   int varID = winDict[headerIdx].dataRecord.varID;
   int varShape[3] = { 0, 0, 0 };
-  queryVarDims(varShape, vlistID, varID);
+  cdiPioQueryVarDims(varShape, vlistID, varID);
   Xt_int varShapeXt[3];
   static const Xt_int origin[3] = { 0, 0, 0 };
   for (unsigned i = 0; i < 3; ++i)
@@ -355,7 +329,7 @@ queryVarBounds(struct PPM_extent varShape[3], int vlistID, int varID)
   varShape[1].first = 0;
   varShape[2].first = 0;
   int sizes[3];
-  queryVarDims(sizes, vlistID, varID);
+  cdiPioQueryVarDims(sizes, vlistID, varID);
   for (unsigned i = 0; i < 3; ++i)
     varShape[i].size = sizes[i];
 }

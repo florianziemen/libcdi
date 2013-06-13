@@ -273,6 +273,32 @@ void printArray ( const char * cdiPioDebugString, char * ps, const void * array,
   return;
 }
 
+void
+cdiPioQueryVarDims(int varShape[3], int vlistID, int varID)
+{
+  int gridID = vlistInqVarGrid(vlistID, varID);
+  int zaxisID = vlistInqVarZaxis(vlistID, varID);
+  int gridType = gridInqType(gridID);
+  switch (gridType)
+    {
+    case GRID_LONLAT:
+    case GRID_GAUSSIAN:
+      varShape[0] = gridInqXsize(gridID);
+      varShape[1] = gridInqYsize(gridID);
+      break;
+    case GRID_GENERIC:
+    case GRID_LCC:
+    case GRID_SPECTRAL:
+    case GRID_GME:
+    case GRID_CURVILINEAR:
+    case GRID_UNSTRUCTURED:
+    case GRID_REFERENCE:
+      xabort("unimplemented grid type: %d", gridType);
+      break;
+    }
+  varShape[2] = zaxisInqSize(zaxisID);
+}
+
 /****************************************************/
 /*
  * Local Variables:
