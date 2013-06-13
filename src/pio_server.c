@@ -21,6 +21,7 @@
 #include <yaxt.h>
 
 #include "cdi.h"
+#include "namespace.h"
 #include "pio.h"
 #include "pio_comm.h"
 #include "pio_interface.h"
@@ -177,7 +178,8 @@ readFuncCall(struct funcCallDesc *header)
     {
     case STREAMCLOSE:
       {
-        int streamID = header->funcArgs.streamChange.streamID;
+        int streamID
+          = namespaceAdaptKey2(header->funcArgs.streamChange.streamID);
         streamClose(streamID);
         xdebug("READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
                " closed stream",
@@ -203,8 +205,9 @@ readFuncCall(struct funcCallDesc *header)
       break;
     case STREAMDEFVLIST:
       {
-        int streamID = header->funcArgs.streamChange.streamID;
-        int vlistID = header->funcArgs.streamChange.vlistID;
+        int streamID
+          = namespaceAdaptKey2(header->funcArgs.streamChange.streamID);
+        int vlistID = namespaceAdaptKey2(header->funcArgs.streamChange.vlistID);
         streamDefVlist(streamID, vlistID);
         xdebug("READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
                " vlistID=%d, called streamDefVlist ().",
@@ -283,7 +286,7 @@ gatherArray(int root, int nProcsModel, int headerIdx,
           = &((union winHeaderEntry *)
               rxWin[modelID].buffer)[headerIdx + 1].partDesc;
         int position = partHeader->offset;
-        xassert(dataHeader->streamID == streamID
+        xassert(namespaceAdaptKey2(dataHeader->streamID) == streamID
                 && dataHeader->varID == varID
                 && partHeader->partDescMarker == PARTDESCMARKER
                 && position > 0
@@ -488,7 +491,9 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
     int filetype = CDI_UNDEFID;
     for (int headerIdx = 1; headerIdx < numDataEntries; headerIdx += 2)
       {
-        int streamID = winDict[headerIdx].dataRecord.streamID;
+        int streamID
+          = winDict[headerIdx].dataRecord.streamID
+          = namespaceAdaptKey2(winDict[headerIdx].dataRecord.streamID);
         xassert(streamID > 0);
         if (streamID != streamIDOld)
           {
