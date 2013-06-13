@@ -807,81 +807,22 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
   int streamID = CDI_ESYSTEM;
   int status;
   Record *record = NULL;
-  stream_t *streamptr = NULL;
+  stream_t *streamptr = stream_new_entry();
 
   if ( CDI_Debug )
     Message("Open %s mode %c file %s", strfiletype(filetype), (int) *filemode, filename);
 
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
 
-  switch (filetype)
-    {
-#if  defined  (HAVE_LIBGRIB)
-    case FILETYPE_GRB:
-    case FILETYPE_GRB2:
-      {
-        fileID = gribOpen(filename, "r");
-	record = (Record *) malloc(sizeof(Record));
-	record->buffer = NULL;
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:
-      {
-        fileID = fileOpen(filename, "r");
-	record = (Record *) malloc(sizeof(Record));
-	record->buffer = NULL;
-	record->srvp   = srvNew();
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:
-      {
-        fileID = fileOpen(filename, "r");
-	record = (Record *) malloc(sizeof(Record));
-	record->buffer = NULL;
-	record->extp   = extNew();
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBIEG)
-    case FILETYPE_IEG:
-      {
-        fileID = fileOpen(filename, "r");
-	record = (Record *) malloc(sizeof(Record));
-	record->buffer = NULL;
-	record->iegp   = iegNew();
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-      {
-	fileID = cdfOpen(filename, "r");
-	break;
-      }
-    case FILETYPE_NC2:
-      {
-	fileID = cdfOpen64(filename, "r");
-	break;
-      }
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
-      {
-	fileID = cdf4Open(filename, "r", &filetype);
-	break;
-      }
-#endif
-    default:
-      {
-	if ( CDI_Debug ) Message("%s support not compiled in!", strfiletype(filetype));
-	return (CDI_ELIBNAVAIL);
-      }
-    }
+  {
+    int (*streamOpenDelegate)(const char *filename, const char *filemode,
+                              int filetype, stream_t *streamptr)
+      = namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND);
+    fileID = streamOpenDelegate(filename, "r", filetype, streamptr);
+  }
 
-  if ( fileID == CDI_UNDEFID || fileID == CDI_ELIBNAVAIL )
+  if (fileID == CDI_UNDEFID || fileID == CDI_ELIBNAVAIL
+      || fileID == CDI_ESYSTEM )
     {
       streamID = fileID;
       return (streamID);
@@ -889,7 +830,6 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
   else
     {
       vlist_t *vlistptr;
-      streamptr = stream_new_entry();
       streamID = streamptr->self;
 
       streamptr->record   = record;
