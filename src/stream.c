@@ -1359,21 +1359,18 @@ int streamDefTimestep(int streamID, int tsID)
 
   streamptr->ntsteps = tsID + 1;
 
-  if (namespaceHasLocalFile(namespaceGetActive())
-      && (streamptr->filetype == FILETYPE_NC  ||
-          streamptr->filetype == FILETYPE_NC2 ||
-          streamptr->filetype == FILETYPE_NC4 ||
-          streamptr->filetype == FILETYPE_NC4C)
+#ifdef HAVE_LIBNETCDF
+  if ((streamptr->filetype == FILETYPE_NC  ||
+       streamptr->filetype == FILETYPE_NC2 ||
+       streamptr->filetype == FILETYPE_NC4 ||
+       streamptr->filetype == FILETYPE_NC4C)
       && vlistHasTime(vlistID))
     {
-#if USE_MPI && defined  (HAVE_LIBNETCDF) && ! defined (HAVE_PARALLEL_NC4)
-      int rank, rankOpen;
-      if (commInqIOMode() == PIO_NONE
-          || ((rank = commInqRankColl())
-              == (rankOpen = cdiPioSerialOpenFileMap(streamID))))
-#endif
-        cdfDefTimestep(streamptr, tsID);
+      void (*myCdfDefTimestep)(stream_t *streamptr, int tsID)
+        = namespaceSwitchGet(NSSWITCH_CDF_DEF_TIMESTEP);
+      myCdfDefTimestep(streamptr, tsID);
     }
+#endif
 
   cdi_create_records(streamptr, tsID);
 

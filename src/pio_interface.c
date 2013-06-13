@@ -768,6 +768,13 @@ static int pioNamespace_ = -1;
 static int xtInitByCDI = 0;
 #endif
 
+#if defined USE_MPI && defined HAVE_LIBNETCDF
+static void
+cdiPioCdfDefTimestepNOP(stream_t *streamptr, int tsID)
+{
+}
+#endif
+
 MPI_Comm
 pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
         int *pioNamespace, float partInflate)
@@ -837,6 +844,9 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
       namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_,
                          cdiPioStreamWriteVarChunk_);
       namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND, cdiPioStreamClose);
+#ifdef HAVE_LIBNETCDF
+      namespaceSwitchSet(NSSWITCH_CDF_DEF_TIMESTEP, cdiPioCdfDefTimestepNOP);
+#endif
       pioNamespaceSetActive(callerCDINamespace);
     }
 

@@ -31,6 +31,7 @@
 #include "pio_cdf_int.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
+#include "stream_cdf.h"
 #include "vlist_var.h"
 
 
@@ -830,12 +831,13 @@ cdiPioStreamCDFOpenWrap(const char *filename, const char *filemode,
     case FILETYPE_NC4C:
       {
         int rank, fileID;
-        if (commInqIOMode() == PIO_NONE
+        int ioMode = commInqIOMode();
+        if (ioMode == PIO_NONE
             || commInqRankColl() == (rank = cdiPioNextOpenRank()))
           fileID = cdiStreamOpenDefaultDelegate(filename, filemode, filetype,
                                                 streamptr,
                                                 recordBufIsToBeCreated);
-        if (commInqIOMode() != PIO_NONE)
+        if (ioMode != PIO_NONE)
           xmpi(MPI_Bcast(&fileID, 1, MPI_INT, rank, commInqCommColl()));
         streamptr->ownerRank = rank;
         return fileID;
@@ -872,6 +874,17 @@ cdiPioStreamCDFCloseWrap(stream_t *streamptr, int recordBufIsToBeDeleted)
         cdiStreamCloseDefaultDelegate(streamptr, recordBufIsToBeDeleted);
       }
 }
+
+static void
+cdiPioCdfDefTimestep(stream_t *streamptr, int tsID)
+{
+  int rank, rankOpen, streamID = streamptr->self;
+  if (commInqIOMode() == PIO_NONE
+      || ((rank = commInqRankColl())
+          == (rankOpen = cdiPioSerialOpenFileMap(streamID))))
+    cdfDefTimestep(streamptr, tsID);
+}
+
 #endif
 
 /**
@@ -905,6 +918,7 @@ void IOServer ()
                                    commInqSizeColl());
   namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND, cdiPioStreamCDFOpenWrap);
   namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND, cdiPioStreamCDFCloseWrap);
+  namespaceSwitchSet(NSSWITCH_CDF_DEF_TIMESTEP, cdiPioCdfDefTimestep);
 #endif
 
   for ( ;; )

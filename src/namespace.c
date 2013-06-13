@@ -10,12 +10,13 @@
 #include "cdf_int.h"
 #include "file.h"
 #include "cdi_int.h"
+#include "stream_cdf.h"
 
 static int nNamespaces = 1;
 static int activeNamespace = 0;
 
 #ifdef HAVE_LIBNETCDF
-#define CDI_NETCDF_SWITCHES nc__create,cdf_def_var_serial,
+#define CDI_NETCDF_SWITCHES nc__create,cdf_def_var_serial,cdfDefTimestep,
 #else
 #define CDI_NETCDF_SWITCHES
 #endif
