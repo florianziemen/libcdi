@@ -5,6 +5,8 @@
 
 #ifdef USE_MPI
 
+#include "file.h"
+
 #include "pio.h"
 #include "cdi.h"
 #include "pio_comm.h"
@@ -104,9 +106,12 @@ int pioFileClose ( int id )
 
 /***************************************************************/
 
-int pioFileOpenW ( const char *filename )
+int pioFileOpen(const char *filename, const char *mode)
 {
   int iret = CDI_UNDEFID;
+
+  if ((mode[0] != 'w' && mode[0] != 'W') || mode[0] == 0 || mode[1] != 0)
+    xabort("Unsupported mode \"%s\" in parallel file open.", mode);
 
   switch ( commInqIOMode ())
     {

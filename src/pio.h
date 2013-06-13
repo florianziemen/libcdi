@@ -12,7 +12,7 @@
 void   backendCleanup  ( void );
 void   backendInit     ( void );
 void   backendFinalize ( void );
-int    pioFileOpenW    ( const char* );
+int pioFileOpen(const char *filename, const char *mode);
 int    pioFileClose    ( int );
 size_t pioFileWrite    ( int, int, const void*, size_t );
 

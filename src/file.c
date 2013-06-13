@@ -19,13 +19,7 @@ size_t getpagesize(void);
 #include "error.h"
 #include "file.h"
 
-#ifdef USE_MPI
-#include "cdi.h"
 #include "namespace.h"
-#include "pio.h"
-#include "pio_comm.h"
-#include "pio_util.h"
-#endif
 
 #if ! defined(O_BINARY)
 #define O_BINARY 0
@@ -1069,17 +1063,19 @@ void fileSetBufferSize(int fileID, long buffersize)
  */
 int fileOpen(const char *filename, const char *mode)
 {
+  int (*myFileOpen)(const char *filename, const char *mode)
+    = namespaceSwitchGet(NSSWITCH_FILE_OPEN);
+  return myFileOpen(filename, mode);
+}
+
+int fileOpen_serial(const char *filename, const char *mode)
+{
   FILE *fp = NULL;    /* file pointer    (used for write) */
   int fd = -1;        /* file descriptor (used for read)  */
   int fileID = FILE_UNDEFID;
   int fmode = 0;
   struct stat filestat;
   bfile_t *fileptr = NULL;
-
-#ifdef USE_MPI
-  if ( mode[0] == 'w' && commInqIOMode () != PIO_NONE )
-      return pioFileOpenW ( filename );
-#endif
 
   FILE_INIT();
 
@@ -1163,19 +1159,18 @@ int fileOpen(const char *filename, const char *mode)
  */
 int fileClose(int fileID)
 {
+  int (*myFileClose)(int fileID)
+    = namespaceSwitchGet(NSSWITCH_FILE_CLOSE);
+  return myFileClose(fileID);
+}
+
+int fileClose_serial(int fileID)
+{
   char *name;
   int ret;
   char *fbtname[] = {"unknown", "standard", "mmap"};
   char *ftname[] = {"unknown", "open", "fopen"};
-  bfile_t *fileptr;
-
-  fileptr = file_to_pointer(fileID);
-
-#ifdef USE_MPI
-  if (((fileptr && fileptr->mode == 'w') || !fileptr)
-      && commInqIOMode () != PIO_NONE )
-    return pioFileClose ( fileID );
-#endif
+  bfile_t *fileptr = file_to_pointer(fileID);
 
   if ( fileptr == NULL )
     {

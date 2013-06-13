@@ -18,6 +18,7 @@
 
 #ifdef USE_MPI
 #include "namespace.h"
+#include "pio.h"
 #include "pio_serialize.h"
 #include "pio_interface.h"
 #include "pio_comm.h"
@@ -818,6 +819,8 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
     {
       serializeSetMPI();
       namespaceSwitchSet(NSSWITCH_ABORT, cdiAbortC_MPI);
+      namespaceSwitchSet(NSSWITCH_FILE_OPEN, pioFileOpen);
+      namespaceSwitchSet(NSSWITCH_FILE_CLOSE, pioFileClose);
       IOServer ();
       namespaceDelete(0);
       commDestroy ();

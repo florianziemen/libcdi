@@ -8,6 +8,7 @@
 #include "serialize.h"
 #include "error.h"
 #include "cdf_int.h"
+#include "file.h"
 
 static int nNamespaces = 1;
 static int activeNamespace = 0;
@@ -23,6 +24,8 @@ static int activeNamespace = 0;
       serializeGetSizeInCore,          \
       serializePackInCore,             \
       serializeUnpackInCore,           \
+      fileOpen_serial,                 \
+      fileClose_serial,                \
       CDI_NETCDF_SWITCHES              \
       }
 

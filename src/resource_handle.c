@@ -171,9 +171,9 @@ void listInitialize ( void )
    * created, before we register the listDestroy exit handler */
   {
     int null_id;
-    null_id = fileOpen("/dev/null", "r");
+    null_id = fileOpen_serial("/dev/null", "r");
     if (null_id != -1)
-      fileClose(null_id);
+      fileClose_serial(null_id);
   }
   atexit ( listDestroy );
 
