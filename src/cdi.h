@@ -548,7 +548,7 @@ void    vlistDefVarIntKey(int vlistID, int varID, const char *name, int value);
 void    vlistDefVarDblKey(int vlistID, int varID, const char *name, double value);
 
 /* vlistHasVarKey: returns 1 if meta-data key was read, 0 otherwise. */
-int     vlistHasVarKey(int vlistID, int varID, const char* name);
+int     vlistHasVarKey(int vlistID, int varID, const char *name);
 /* vlistInqVarDblKey: raw access to GRIB meta-data */
 double  vlistInqVarDblKey(int vlistID, int varID, const char *name);
 /* vlistInqVarIntKey: raw access to GRIB meta-data */
