@@ -2171,9 +2171,8 @@ void gridChangeType(int gridID, int gridtype)
 
   grid_check_ptr(gridID, gridptr);
 
-  Message("Changed grid type from %s to %s",
-          gridNamePtr(gridptr->type),
-          gridNamePtr(gridtype));
+  if ( CDI_Debug ) 
+    Message("Changed grid type from %s to %s", gridNamePtr(gridptr->type), gridNamePtr(gridtype));
 
   gridptr->type = gridtype;
 }
