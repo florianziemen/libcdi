@@ -1,6 +1,10 @@
-2013-06-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+2013-06-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Version 1.6.1 released
+
+2013-06-27  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* file.c: added env. var. FILE_TYPE_WRITE (1:open; 2:fopen)
 
 2013-06-11  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 

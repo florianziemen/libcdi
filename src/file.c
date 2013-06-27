@@ -27,7 +27,7 @@ size_t getpagesize(void);
 #include "pio_util.h"
 #endif
 
-#if ! defined(O_BINARY)
+#if ! defined (O_BINARY)
 #define O_BINARY 0
 #endif
 
@@ -142,7 +142,9 @@ static size_t FileBufferSizeMin = MIN_BUF_SIZE;
 static long   FileBufferSizeEnv = -1;
 static int    FileBufferTypeEnv =  0;
 
-static int    FileTypeEnv =  0;
+static int    FileTypeRead  = FILE_TYPE_OPEN;
+static int    FileTypeWrite = FILE_TYPE_FOPEN;
+static int    FileFlagWrite = 0;
 
 static int    FILE_Debug = 0;   /* If set to 1, debugging */
 
@@ -153,7 +155,7 @@ static void file_table_print(void);
  * A version string.
  */
 #undef   LIBVERSION
-#define  LIBVERSION      1.8.1
+#define  LIBVERSION      1.8.2
 #define  XSTRING(x)	 #x
 #define  STRING(x) 	 XSTRING(x)
 const char file_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
@@ -174,6 +176,7 @@ const char file_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
   11/11/2010  1.7.1 update for changed interface of error.h
   02/02/2012  1.8.0 cleanup
   16/11/2012  1.8.1 added support for unbuffered write
+  27/06/2013  1.8.2 added env. var. FILE_TYPE_WRITE (1:open; 2:fopen)
  */
 
 
@@ -740,6 +743,7 @@ static
 void file_initialize(void)
 {
   long value;
+  char *envString;
 
 #if  defined  (HAVE_LIBPTHREAD)
   /* initialize global API mutex lock */
@@ -765,18 +769,40 @@ void file_initialize(void)
       if ( value >= 0 ) FileBufferSizeEnv = value;
     }
 
-  value = file_getenv("FILE_TYPE");
+  value = file_getenv("FILE_TYPE_READ");
   if ( value > 0 )
     {
       switch (value)
 	{
 	case FILE_TYPE_OPEN:
 	case FILE_TYPE_FOPEN:
-	  FileTypeEnv = value;
+	  FileTypeRead = value;
 	  break;
 	default:
 	  Warning("File type %d not implemented!", value);
 	}
+    }
+
+  value = file_getenv("FILE_TYPE_WRITE");
+  if ( value > 0 )
+    {
+      switch (value)
+	{
+	case FILE_TYPE_OPEN:
+	case FILE_TYPE_FOPEN:
+	  FileTypeWrite = value;
+	  break;
+	default:
+	  Warning("File type %d not implemented!", value);
+	}
+    }
+
+  envString = getenv("FILE_FLAG_WRITE");
+  if ( envString )
+    {
+#if defined (O_NONBLOCK)
+      if ( strcmp(envString, "NONBLOCK") == 0 ) FileFlagWrite = O_NONBLOCK;
+#endif
     }
 
   value = file_getenv("FILE_BUFTYPE");
@@ -1088,13 +1114,18 @@ int fileOpen(const char *filename, const char *mode)
   switch ( fmode )
     {
     case 'r':
-      if ( FileTypeEnv == FILE_TYPE_FOPEN )
+      if ( FileTypeRead == FILE_TYPE_FOPEN )
 	fp = fopen(filename, "rb");
       else
 	fd =  open(filename, O_RDONLY | O_BINARY);
       break;
     case 'x':  fp = fopen(filename, "rb");      break;
-    case 'w':  fp = fopen(filename, "wb");      break;
+    case 'w':
+      if ( FileTypeWrite == FILE_TYPE_FOPEN )
+        fp = fopen(filename, "wb");
+      else
+	fd =  open(filename, O_CREAT | O_TRUNC | O_WRONLY | O_BINARY | FileFlagWrite, 0666);
+      break;
     case 'a':  fp = fopen(filename, "ab");      break;
     default:   Error("Mode %c unexpected!", fmode);
     }
@@ -1138,12 +1169,9 @@ int fileOpen(const char *filename, const char *mode)
 #endif
 
       if ( fmode == 'r' )
-	{
-	  if ( FileTypeEnv == FILE_TYPE_FOPEN )
-	    fileptr->type = FILE_TYPE_FOPEN;
-	  else
-	    fileptr->type = FILE_TYPE_OPEN;
-	}
+        fileptr->type = FileTypeRead;
+      else if ( fmode == 'w' )
+        fileptr->type = FileTypeWrite;
       else
 	fileptr->type = FILE_TYPE_FOPEN;
 
@@ -1195,10 +1223,10 @@ int fileClose(int fileID)
       fprintf(stderr, " file name        : %s\n",  fileptr->name);
       fprintf(stderr, " file type        : %d (%s)\n", fileptr->type, ftname[fileptr->type]);
 
-      if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
-	fprintf(stderr, " file descriptor  : %d\n",  fileptr->fd);
-      else
+      if ( fileptr->type == FILE_TYPE_FOPEN )
 	fprintf(stderr, " file pointer     : %p\n",  (void *) fileptr->fp);
+      else
+        fprintf(stderr, " file descriptor  : %d\n",  fileptr->fd);
 
       fprintf(stderr, " file mode        : %c\n",  fileptr->mode);
 
@@ -1238,7 +1266,13 @@ int fileClose(int fileID)
       fprintf(stderr, "--------------------------------------------\n");
     }
 
-  if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
+  if ( fileptr->type == FILE_TYPE_FOPEN )
+    {
+      ret = fclose(fileptr->fp);
+      if ( ret == EOF )
+	SysError("EOF returned for close of %s!", name);
+    }
+  else
     {
 #if defined (HAVE_MMAP)
       if ( fileptr->buffer && fileptr->mappedSize )
@@ -1251,12 +1285,6 @@ int fileClose(int fileID)
 #endif
       ret = close(fileptr->fd);
       if ( ret == -1 )
-	SysError("EOF returned for close of %s!", name);
-    }
-  else
-    {
-      ret = fclose(fileptr->fp);
-      if ( ret == EOF )
 	SysError("EOF returned for close of %s!", name);
     }
 
@@ -1362,7 +1390,7 @@ size_t fileRead(int fileID, void *restrict ptr, size_t size)
 
   if ( fileptr )
     {
-      if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
+      if ( fileptr->type == FILE_TYPE_OPEN )
 	nread = file_read_from_buffer(fileptr, ptr, size);
       else
 	{
@@ -1390,7 +1418,6 @@ size_t fileRead(int fileID, void *restrict ptr, size_t size)
 size_t fileWrite(int fileID, const void *restrict ptr, size_t size)
 {
   size_t nwrite = 0;
-  FILE *fp;
   bfile_t *fileptr;
 
   fileptr = file_to_pointer(fileID);
@@ -1399,9 +1426,10 @@ size_t fileWrite(int fileID, const void *restrict ptr, size_t size)
     {
       /* if ( fileptr->buffer == NULL ) file_set_buffer(fileptr); */
 
-      fp = fileptr->fp;
-
-      nwrite = fwrite(ptr, 1, size, fp);
+      if ( fileptr->type == FILE_TYPE_FOPEN )
+        nwrite = fwrite(ptr, 1, size, fileptr->fp);
+      else
+        nwrite =  write(fileptr->fd, ptr, size);
 
       fileptr->position  += nwrite;
       fileptr->byteTrans += nwrite;
