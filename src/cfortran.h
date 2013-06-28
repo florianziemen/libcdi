@@ -461,8 +461,10 @@ for (i=0; i<sizeofcstr/elem_len; i++) {
 } return cstr; }
 
 /* kill the trailing char t's in string s. */
+#if defined (__GNUC__)
 #pragma GCC push_options
 #pragma GCC optimize ("O2")
+#endif
 #ifndef __CF__KnR
 static char *kill_trailing(char *s, char t)
 #else
@@ -474,7 +476,9 @@ if (e>s) {                           /* Need this to handle NULL string.*/
   while (e>s && *--e==t);            /* Don't follow t's past beginning. */
   e[*e==t?0:1] = '\0';               /* Handle s[0]=t correctly.       */
 } return s; }
+#if defined (__GNUC__)
 #pragma GCC pop_options
+#endif
 
 /* kill_trailingn(s,t,e) will kill the trailing t's in string s. e normally 
 points to the terminating '\0' of s, but may actually point to anywhere in s.
