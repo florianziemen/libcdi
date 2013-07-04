@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>  // gettimeofday()
 #include <fcntl.h>
 /*
 size_t getpagesize(void);
@@ -116,6 +117,7 @@ typedef struct
   off_t      bufferStart;
   off_t      bufferEnd;
   size_t     bufferCnt;
+  double     time_in_sec;
 }
 bfile_t;
 
@@ -130,7 +132,7 @@ enum F_I_L_E_Flags
   };
 
 
-static int FileInfo = FALSE;
+static int FileInfo  = FALSE;
 
 
 #if ! defined (MIN_BUF_SIZE)
@@ -304,6 +306,7 @@ void file_init_entry(bfile_t *fileptr)
   fileptr->bufferPos     = 0;
   fileptr->bufferCnt     = 0;
   fileptr->bufferPtr     = NULL;
+  fileptr->time_in_sec   = 0.0;
 }
 
 static
@@ -360,6 +363,15 @@ int pagesize(void)
 #endif
 }
 
+static
+double file_time()
+{
+  double tseconds = 0.0;
+  struct timeval mytime;
+  gettimeofday(&mytime, NULL);
+  tseconds = (double) mytime.tv_sec + (double) mytime.tv_usec*1.0e-6;
+  return (tseconds);
+}
 
 void fileDebug(int debug)
 {
@@ -759,7 +771,7 @@ void file_initialize(void)
   if ( FILE_Debug )
     Message("FILE_MAX = %d", _file_max);
 
-  FileInfo = (int) file_getenv("FILE_INFO");
+  FileInfo  = (int) file_getenv("FILE_INFO");
 
   value  = file_getenv("FILE_BUFSIZE");
   if ( value >= 0 ) FileBufferSizeEnv = value;
@@ -1196,6 +1208,7 @@ int fileClose(int fileID)
   char *fbtname[] = {"unknown", "standard", "mmap"};
   char *ftname[] = {"unknown", "open", "fopen"};
   bfile_t *fileptr;
+  double rout = 0;
 
   fileptr = file_to_pointer(fileID);
 
@@ -1251,6 +1264,15 @@ int fileClose(int fileID)
 	    fprintf(stderr, " file position    : %ld\n", (long) fileptr->position);
 	  fprintf(stderr, " bytes transfered : %ld\n", (long) fileptr->byteTrans);
 	}
+
+      if ( fileptr->time_in_sec > 0 )
+        {
+          rout = fileptr->byteTrans;
+          rout /= 1024.*1014.*fileptr->time_in_sec;
+        }
+
+      fprintf(stderr, " wall time [s]    : %.2f\n", fileptr->time_in_sec);
+      fprintf(stderr, " data rate [MB/s] : %.1f\n", rout);
 
       fprintf(stderr, " file access      : %ld\n", fileptr->access);
       if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
@@ -1390,6 +1412,10 @@ size_t fileRead(int fileID, void *restrict ptr, size_t size)
 
   if ( fileptr )
     {
+      double t_begin = 0.0;
+
+      if ( FileInfo ) t_begin = file_time();
+
       if ( fileptr->type == FILE_TYPE_OPEN )
 	nread = file_read_from_buffer(fileptr, ptr, size);
       else
@@ -1403,6 +1429,8 @@ size_t fileRead(int fileID, void *restrict ptr, size_t size)
 		fileptr->flag |= FILE_ERROR;
 	    }
 	}
+
+      if ( FileInfo ) fileptr->time_in_sec += file_time() - t_begin;
 
       fileptr->position  += nread;
       fileptr->byteTrans += nread;
@@ -1424,12 +1452,18 @@ size_t fileWrite(int fileID, const void *restrict ptr, size_t size)
 
   if ( fileptr )
     {
+      double t_begin = 0.0;
+
       /* if ( fileptr->buffer == NULL ) file_set_buffer(fileptr); */
+
+      if ( FileInfo ) t_begin = file_time();
 
       if ( fileptr->type == FILE_TYPE_FOPEN )
         nwrite = fwrite(ptr, 1, size, fileptr->fp);
       else
         nwrite =  write(fileptr->fd, ptr, size);
+
+      if ( FileInfo ) fileptr->time_in_sec += file_time() - t_begin;
 
       fileptr->position  += nwrite;
       fileptr->byteTrans += nwrite;
