@@ -1,6 +1,7 @@
 2013-07-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* gribapiDefLevel::ZAXIS_DEPTH_BELOW_LAND: apply scalefactor to dlevel2 (bug fix) [report: Harald Anlauf]
+	* streamFilesuffix: changed default filename suffix for FILETYPE_NC2 to nc
 
 2013-06-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
