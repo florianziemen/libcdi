@@ -1,6 +1,11 @@
 CDI NEWS
 --------
 
+Version 1.6.2 (26 September 2013):
+
+   Fixed bugs:
+     * netCDF: wrong result if type  of data and type of attribute valid_range differ [Bug #3727]
+
 Version 1.6.1 (18 June 2013):
 
    New features:
