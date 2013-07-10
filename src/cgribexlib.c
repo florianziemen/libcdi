@@ -911,7 +911,7 @@ void pwr6_minmax_val_unrolled6(const double *restrict data, long idatasize, doub
 
 #if defined (__GNUC__) && defined (__GNUC_MINOR__) && (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 4)
 #pragma GCC push_options
-#pragma GCC optimize ("O3", "fast-math", "tree-vectorizer-verbose=1")
+#pragma GCC optimize ("O3", "fast-math")
 #endif
 static
 void minmax_val_orig(const double *restrict data, long idatasize, double *fmin, double *fmax)
@@ -1347,6 +1347,33 @@ void encode_double_array_common(int numBits, size_t packStart, size_t datasize, 
 }
 
 static
+void encode_double_array_2byte(size_t datasize, GRIBPACK *restrict lGrib,
+			       const double *restrict data, double zref, double factor, size_t *gz)
+{
+  size_t i, z = *gz;
+  uint16_t ui16;
+  double tmp;
+
+#if   defined (CRAY)
+#pragma _CRI ivdep
+#elif defined (SX)
+#pragma vdir nodep
+#elif defined (__uxp__)
+#pragma loop novrec
+#endif
+  for ( i = 0; i < datasize; i++ )
+    {
+      tmp = ((data[i] - zref) * factor + 0.5);
+      ui16 = (uint16_t) tmp;
+      lGrib[z  ] = ui16 >>  8;
+      lGrib[z+1] = ui16;
+      z += 2;
+    }
+
+  *gz = z;
+}
+
+static
 void encode_double_array_byte(int numBits, size_t packStart, size_t datasize, 
 			      GRIBPACK *restrict lGrib,
 			      const double *restrict data, 
@@ -1407,23 +1434,8 @@ void encode_double_array_byte(int numBits, size_t packStart, size_t datasize,
 
 #else
 
-      uint16_t ui16;
+      encode_double_array_2byte(datasize, lGrib, data, zref, factor, &z);
 
-#if   defined (CRAY)
-#pragma _CRI ivdep
-#elif defined (SX)
-#pragma vdir nodep
-#elif defined (__uxp__)
-#pragma loop novrec
-#endif
-      for ( i = 0; i < datasize; i++ )
-      	{
-      	  tmp = ((data[i] - zref) * factor + 0.5);
-          ui16 = (uint16_t) tmp;
-          lGrib[z  ] = ui16 >>  8;
-          lGrib[z+1] = ui16;
-          z += 2;
-      	}
 #endif
 
 #if defined _GET_X86_COUNTER || defined _GET_MACH_COUNTER
@@ -5105,7 +5117,7 @@ int encodeBDS(GRIBPACK *lGrib, long *gribLen, int decscale, int *isec2, int *ise
 
   fmin = fmax = data[PackStart];
 
-  minmax_val(data+PackStart+1, datasize-PackStart-1, &fmin, &fmax);
+  minmax_val(data+PackStart, datasize-PackStart, &fmin, &fmax);
 
   zref = fmin;
 
@@ -10566,7 +10578,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.6.2" " of ""Jul 10 2013"" ""09:45:08";
+static const char grb_libvers[] = "1.6.2" " of ""Jul 10 2013"" ""18:44:40";
 const char *
 cgribexLibraryVersion(void)
 {
