@@ -367,7 +367,7 @@ void  gribDecode(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 #include <math.h>
 
 
-const double const _pow2tab[158] = {
+const double _pow2tab[158] = {
  /* pow(2.0,  0.0) */  1.0,
  /* pow(2.0,  1.0) */  2.0,
  /* pow(2.0,  2.0) */  4.0,
@@ -529,7 +529,7 @@ const double const _pow2tab[158] = {
 };
 
 
-const double const _pow16tab[71] = {
+const double _pow16tab[71] = {
  /* pow(16.0,  0.0) */  1.0,
  /* pow(16.0,  1.0) */  16.0,
  /* pow(16.0,  2.0) */  256.0,
@@ -2319,7 +2319,7 @@ void confp3(double pval, int *kexp, int *kmant, int kbits, int kround)
   int iexp, isign;
   int iround;
   // extern int CGRIBEX_Debug;
-  extern const double const _pow16tab[71];
+  extern const double _pow16tab[71];
 
   /* ----------------------------------------------------------------- */
   /*   Section 1 . Initialise                                          */
@@ -2566,7 +2566,7 @@ double decfp2(int kexp, int kmant)
   double pval;
   int iexp, isign;
   //extern int CGRIBEX_Debug;
-  extern const double const _pow16tab[71];
+  extern const double _pow16tab[71];
   
   /* ----------------------------------------------------------------- */
   /*   Section 1 . Convert value of 0.0. Ignore sign bit.              */
@@ -5047,7 +5047,7 @@ int encodeBDS(GRIBPACK *lGrib, long *gribLen, int decscale, int *isec2, int *ise
   double jpepsln = 1.0e-12;     /* -----> tolerance used to check equality     */
                                 /*        of floating point numbers - needed   */
 		                /*        on some platforms (eg vpp700, linux) */
-  extern const double const _pow2tab[158];
+  extern const double _pow2tab[158];
   extern int CGRIBEX_Const;         /* 1: Don't pack constant fields on regular grids */
 
   if ( isec2 )
@@ -10604,7 +10604,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 
   return (gribLen);
 }
-static const char grb_libvers[] = "1.6.2" " of ""Jul 11 2013"" ""11:16:39";
+static const char grb_libvers[] = "1.6.2" " of ""Jul 11 2013"" ""11:42:31";
 const char *
 cgribexLibraryVersion(void)
 {
