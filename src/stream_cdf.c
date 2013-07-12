@@ -373,6 +373,14 @@ void cdfGetAttText(int fileID, int ncvarid, char *attname, int attlen, char *att
 }
 
 static
+int xtypeIsFloat(int xtype)
+{
+  int isFloat = FALSE;
+  if ( xtype == NC_FLOAT || xtype == NC_DOUBLE ) isFloat = TRUE;
+  return isFloat;
+}
+
+static
 int cdfInqDatatype(int xtype, int lunsigned)
 {
   int datatype = -1;
@@ -4899,7 +4907,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                 {
                   extern int cdiIgnoreValidRange;
                   int lignore = FALSE;
-                  if ( (atttype == NC_FLOAT || atttype == NC_DOUBLE) && xtype != NC_FLOAT && xtype != NC_DOUBLE ) lignore = TRUE;
+                  if ( xtypeIsFloat(atttype) != xtypeIsFloat(xtype) ) lignore = TRUE;
                   if ( cdiIgnoreValidRange == FALSE && lignore == FALSE )
                     {
                       cdfGetAttDouble(ncid, ncvarid, attname, 2, ncvars[ncvarid].validrange);
@@ -4920,7 +4928,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                 {
                   extern int cdiIgnoreValidRange;
                   int lignore = FALSE;
-                  if ( (atttype == NC_FLOAT || atttype == NC_DOUBLE) && xtype != NC_FLOAT && xtype != NC_DOUBLE ) lignore = TRUE;
+                  if ( xtypeIsFloat(atttype) != xtypeIsFloat(xtype) ) lignore = TRUE;
                   if ( cdiIgnoreValidRange == FALSE && lignore == FALSE )
                     {
                       cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[0]);
@@ -4938,7 +4946,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                 {
                   extern int cdiIgnoreValidRange;
                   int lignore = FALSE;
-                  if ( (atttype == NC_FLOAT || atttype == NC_DOUBLE) && xtype != NC_FLOAT && xtype != NC_DOUBLE ) lignore = TRUE;
+                  if ( xtypeIsFloat(atttype) != xtypeIsFloat(xtype) ) lignore = TRUE;
                   if ( cdiIgnoreValidRange == FALSE && lignore == FALSE )
                     {
                       cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[1]);

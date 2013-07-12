@@ -1,6 +1,25 @@
-2013-06-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+2013-09-26  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.6.2 released
+	* using CGRIBEX library version 1.6.2
+
+2013-07-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* netCDF: wrong result if type  of data and type of attribute valid_range differ [Bug #3727]
+
+2013-07-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* gribapiDefLevel::ZAXIS_DEPTH_BELOW_LAND: apply scalefactor to dlevel2 (bug fix) [report: Harald Anlauf]
+	* streamFilesuffix: changed default filename suffix for FILETYPE_NC2 to nc
+
+2013-06-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Version 1.6.1 released
+	* using CGRIBEX library version 1.6.1
+
+2013-06-27  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* file.c: added env. var. FILE_TYPE_WRITE (1:open; 2:fopen)
 
 2013-06-11  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 

@@ -20,8 +20,7 @@ rm -f ${PROG}
 DATE=`date +%F`
 
 if test -f ../configure.ac ; then
-   CDILIBVERSION=\"`sed -n '/^AC_INIT(/s/AC_INIT *( *[^,]*,[[ ]*\([^],]*\).*/\1/
-t print;b;: print;p' ../configure.ac`\"
+   CDILIBVERSION=\"`sed -n '/^AC_INIT(/s/AC_INIT *( *[^,]*,[[ ]*\([^],]*\).*/\1/ p' ../configure.ac`\"
 else
    echo "error: cannot find configure.ac" >&2
    exit 1
