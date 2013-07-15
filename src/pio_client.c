@@ -93,6 +93,26 @@ cdiPioClientStreamWriteVarChunk_(int streamID, int varID, int memtype,
   xt_idxlist_delete(chunkDesc);
 }
 
+static void
+cdiPioClientStreamWriteVarPart(int streamID, int varID, const void *data,
+                               int nmiss, Xt_idxlist partDesc)
+{
+  switch (namespaceInqResStatus())
+    {
+    case STAGE_DEFINITION:
+      xabort("DEFINITION STAGE: PARALLEL WRITING NOT POSSIBLE.");
+      break;
+    case STAGE_TIMELOOP:
+      pioBufferPartData(streamID, varID, data, nmiss, partDesc);
+      return;
+    case STAGE_CLEANUP:
+      xabort("CLEANUP STAGE: PARALLEL WRITING NOT POSSIBLE.");
+      break;
+    default:
+      xabort("INTERNAL ERROR");
+    }
+}
+
 #if defined HAVE_LIBNETCDF
 static void
 cdiPioCdfDefTimestepNOP(stream_t *streamptr, int tsID)
@@ -139,6 +159,8 @@ cdiPioClientSetup(int *pioNamespace_, int *pioNamespace)
   namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_, cdiPioClientStreamWriteVar_);
   namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_,
                      cdiPioClientStreamWriteVarChunk_);
+  namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_PART_,
+                     cdiPioClientStreamWriteVarPart);
   namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND, cdiPioClientStreamClose);
   namespaceSwitchSet(NSSWITCH_STREAM_SYNC, cdiPioClientStreamNOP);
 #ifdef HAVE_LIBNETCDF

@@ -909,23 +909,14 @@ streamWriteVarPart(int streamID, int varID, const void *data,
 
   check_parg(data);
 
-  if (namespaceHasLocalFile(namespaceGetActive ()))
-      xabort("local part writing is unsupported!");
+  void (*myStreamWriteVarPart)(int streamID, int varID, const void *data,
+                               int nmiss, Xt_idxlist partDesc)
+    = namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_PART_);
 
-  switch (namespaceInqResStatus())
-    {
-    case STAGE_DEFINITION:
-      xabort("DEFINITION STAGE: PARALLEL WRITING NOT POSSIBLE.");
-      break;
-    case STAGE_TIMELOOP:
-      pioBufferPartData(streamID, varID, data, nmiss, partDesc);
-      return;
-    case STAGE_CLEANUP:
-      xabort("CLEANUP STAGE: PARALLEL WRITING NOT POSSIBLE.");
-      break;
-    default:
-      xabort("INTERNAL ERROR");
-    }
+  if (!myStreamWriteVarPart)
+    xabort("local part writing is unsupported!");
+
+  myStreamWriteVarPart(streamID, varID, data, nmiss, partDesc);
 }
 #endif
 
