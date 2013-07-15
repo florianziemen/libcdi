@@ -16,7 +16,8 @@ static int nNamespaces = 1;
 static int activeNamespace = 0;
 
 #ifdef HAVE_LIBNETCDF
-#define CDI_NETCDF_SWITCHES nc__create,cdf_def_var_serial,cdfDefTimestep,
+#define CDI_NETCDF_SWITCHES nc__create,cdf_def_var_serial,cdfDefTimestep,\
+    cdfDefVars
 #else
 #define CDI_NETCDF_SWITCHES
 #endif

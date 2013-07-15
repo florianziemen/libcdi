@@ -22,9 +22,6 @@
 #include "serialize.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
-#ifdef USE_MPI
-#include "pio_comm.h"
-#endif
 
 #if  defined  (HAVE_LIBCGRIBEX)
 #include "cgribex.h"
@@ -680,22 +677,17 @@ cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig)
                            vlistInqVarMissval(vlistID, varID));
     }
 
-  if (namespaceHasLocalFile(namespaceGetActive())
-      && streamptr->filemode == 'w' )
+  if (streamptr->filemode == 'w' )
     {
       if ( streamptr->filetype == FILETYPE_NC  ||
            streamptr->filetype == FILETYPE_NC2 ||
            streamptr->filetype == FILETYPE_NC4 ||
            streamptr->filetype == FILETYPE_NC4C )
         {
-#if USE_MPI && defined  (HAVE_LIBNETCDF) && ! defined (HAVE_PARALLEL_NC4)
-          int rank, rankOpen;
-          if (commInqIOMode() == PIO_NONE
-              || ((rank = commInqRankColl())
-                  == (rankOpen = cdiPioSerialOpenFileMap(streamptr->self))))
-#endif
 #ifdef HAVE_LIBNETCDF
-            cdfDefVars(streamptr);
+          void (*myCdfDefVars)(stream_t *streamptr)
+            = namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP);
+          myCdfDefVars(streamptr);
 #endif
         }
       else if ( streamptr->filetype == FILETYPE_GRB  ||

@@ -426,6 +426,16 @@ void cdiPioCloseFileOnRank(int rank)
   --(cdiSerialOpenFileCount[rank]);
 }
 
+static void
+cdiPioServerCdfDefVars(stream_t *streamptr)
+{
+  int rank, rankOpen;
+  if (commInqIOMode() == PIO_NONE
+      || ((rank = commInqRankColl())
+          == (rankOpen = cdiPioSerialOpenFileMap(streamptr->self))))
+    cdfDefVars(streamptr);
+}
+
 #endif
 
 static
@@ -927,6 +937,7 @@ void IOServer ()
   namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND, cdiPioStreamCDFOpenWrap);
   namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND, cdiPioStreamCDFCloseWrap);
   namespaceSwitchSet(NSSWITCH_CDF_DEF_TIMESTEP, cdiPioCdfDefTimestep);
+  namespaceSwitchSet(NSSWITCH_CDF_STREAM_SETUP, cdiPioServerCdfDefVars);
 #endif
   namespaceSwitchSet(NSSWITCH_FILE_WRITE, cdiPioFileWrite);
   
