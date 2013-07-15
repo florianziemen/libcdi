@@ -1144,7 +1144,7 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
   int param, gridID, zaxisID, tsteptype, nlevs;
   int dtype;
 
-  int i, iorank, size, rank, offset, chunk;
+  int iorank;
 
   char paramstr[32];
   char *name, *longname, *units;
