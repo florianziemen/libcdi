@@ -47,6 +47,20 @@ void * reshGetValue(const char *, cdiResH, resOps * );
 
 void   reshGetResHListOfType ( int, int *, resOps * );
 
+enum cdiApplyRet {
+  CDI_APPLY_ERROR = -1,
+  CDI_APPLY_STOP,
+  CDI_APPLY_GO_ON,
+};
+enum cdiApplyRet
+cdiResHApply(enum cdiApplyRet (*func)(int id, void *res, const resOps *p,
+                                      void *data), void *data);
+enum cdiApplyRet
+cdiResHFilterApply(const resOps *p,
+                   enum cdiApplyRet (*func)(int id, void *res,
+                                            void *data),
+                   void *data);
+
 void   reshPackBufferCreate ( char **, int *, void *context );
 void   reshPackBufferDestroy ( char ** );
 

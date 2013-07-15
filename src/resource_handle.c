@@ -326,6 +326,52 @@ void reshGetResHListOfType ( int c, int * resHs, resOps * ops )
   LIST_UNLOCK();
 }
 
+enum cdiApplyRet
+cdiResHApply(enum cdiApplyRet (*func)(int id, void *res, const resOps *p,
+                                      void *data), void *data)
+{
+  xassert(func);
+
+  LIST_INIT();
+
+  LIST_LOCK();
+
+  int nsp = namespaceGetActive ();
+  enum cdiApplyRet ret = CDI_APPLY_GO_ON;
+  for (int i = 0; i < resHList[nsp].size && ret > 0; ++i)
+    if (resHList[nsp].resources[i].val && resHList[nsp].resources[i].ops)
+      ret = func(namespaceIdxEncode2(nsp, i), resHList[nsp].resources[i].val,
+                 resHList[nsp].resources[i].ops, data);
+  LIST_UNLOCK();
+  return ret;
+}
+
+
+enum cdiApplyRet
+cdiResHFilterApply(const resOps *p,
+                   enum cdiApplyRet (*func)(int id, void *res, void *data),
+                   void *data)
+{
+  xassert(p && func);
+
+  LIST_INIT();
+
+  LIST_LOCK();
+
+  int nsp = namespaceGetActive ();
+  enum cdiApplyRet ret = CDI_APPLY_GO_ON;
+  for (int i = 0; i < resHList[nsp].size && ret > 0; ++i)
+    if (resHList[nsp].resources[i].val && resHList[nsp].resources[i].ops
+        && resHList[nsp].resources[i].ops == p)
+      ret = func(namespaceIdxEncode2(nsp, i), resHList[nsp].resources[i].val,
+                 data);
+  LIST_UNLOCK();
+  return ret;
+}
+
+
+
+
 /**************************************************************/
 
 int reshCountType ( resOps * ops )
