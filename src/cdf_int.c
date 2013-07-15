@@ -255,8 +255,7 @@ cdf_def_var_serial(int ncid, const char *name, nc_type xtype, int ndims,
     Message("ncid = %d  name = %s  xtype = %d  ndims = %d  varid = %d",
 	    ncid, name, xtype, ndims, *varidp);
 
-  if ( status != NC_NOERR )
-    Error("%s", nc_strerror(status));
+  if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
 
 

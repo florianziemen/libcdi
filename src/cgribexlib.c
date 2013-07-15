@@ -24,8 +24,6 @@
 #include "calendar.h"
 #include "timebase.h"
 
-#include "pio_util.h"
-
 #ifndef _GRIB_INT_H
 #define _GRIB_INT_H
 
@@ -117,7 +115,7 @@
 
 double intpow2(int x);
 
-static int gribrec_len(int b1, int b2, int b3);
+int gribrec_len(int b1, int b2, int b3);
 int correct_bdslen(int bdslen, long recsize, long gribpos);
 
 /* CDI converter routines */
@@ -2803,9 +2801,9 @@ void gprintf(const char *caller, const char *fmt, ...)
 void
 gribExDP(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 	 double *fsec3, int *isec4, double *fsec4, int klenp, int *kgrib,
-	 int kleng, int *kword, char hoper, int *kret)
+	 int kleng, int *kword, char *hoper, int *kret)
 {
-  int yfunc = hoper;
+  int yfunc = *hoper;
 
   if ( yfunc == 'C' )
     gribEncode(isec0, isec1, isec2, fsec2, isec3,
@@ -2828,13 +2826,13 @@ gribExDP(int *isec0, int *isec1, int *isec2, double *fsec2, int *isec3,
 void
 gribExSP(int *isec0, int *isec1, int *isec2, float *fsec2sp, int *isec3,
 	 float *fsec3sp, int *isec4, float *fsec4sp, int klenp, int *kgrib,
-	 int kleng, int *kword, char hoper, int *kret)
+	 int kleng, int *kword, char *hoper, int *kret)
 {
   int inum, j;
   double fsec2dp[1024];
   double fsec3dp[2];
   double *fsec4dp = NULL;
-  int yfunc = hoper;
+  int yfunc = *hoper;
 
   if ( yfunc == 'C' )
     {
@@ -2850,8 +2848,6 @@ gribExSP(int *isec0, int *isec1, int *isec2, float *fsec2sp, int *isec3,
 
       for ( j = 0; j < inum; j++ ) fsec4dp[j] = fsec4sp[j];
 
-
-  printf ( "########## %s, %s, %d\n", __FILE__, __func__, __LINE__ );
       gribExDP(isec0, isec1, isec2, fsec2dp, isec3,
 	       fsec3dp, isec4, fsec4dp, klenp, kgrib,
 	       kleng, kword, hoper, kret);
@@ -2866,8 +2862,6 @@ gribExSP(int *isec0, int *isec1, int *isec2, float *fsec2sp, int *isec3,
       for ( j = 0; j < 10; j++ ) fsec2dp[j] = 0.0;
       for ( j = 0; j <  2; j++ ) fsec3dp[j] = 0.0;
 
-
-  printf ( "########## %s, %s, %d\n", __FILE__, __func__, __LINE__ );
       gribExDP(isec0, isec1, isec2, fsec2dp, isec3,
 	       fsec3dp, isec4, fsec4dp, klenp, kgrib,
 	       kleng, kword, hoper, kret);
@@ -4942,7 +4936,7 @@ void encodeBMS(GRIBPACK *lGrib, long *gribLen, double *fsec3, int *isec4, double
   long bmsLen, bmsUnusedBits;
   long fsec4size;
   long z = *gribLen;
-#ifdef VECTORCODE
+#if defined (VECTORCODE)
   unsigned int *imask;
 #endif
   static int lmissvalinfo = 1;
@@ -6626,6 +6620,7 @@ int gribOpen(const char *filename, const char *mode)
       fileSetBufferType(fileID, FILE_BUFTYPE_MMAP);
     }
 #endif
+
   return (fileID);  
 }
 
@@ -7063,7 +7058,7 @@ int gribWrite(int fileID, unsigned char *buffer, size_t buffersize)
 }
 
 
-static int gribrec_len(int b1, int b2, int b3)
+int gribrec_len(int b1, int b2, int b3)
 {
   int gribsize;
 
