@@ -878,7 +878,7 @@ void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
   extRead(fileID, extp);
   extInqHeader(extp, header);
   extInqDataDP(extp, data);
- 
+
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
   *nmiss = 0;

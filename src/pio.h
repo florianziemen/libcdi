@@ -9,13 +9,28 @@
 #include <stdlib.h>
 #include <mpi.h>
 
+#include "cdi_int.h"
+
 void   backendCleanup  ( void );
 void   backendInit     ( void );
 void   backendFinalize ( void );
-int    pioFileOpenW    ( const char* );
+int pioFileOpen(const char *filename, const char *mode);
 int    pioFileClose    ( int );
-size_t pioFileWrite    ( int, int, const void*, size_t );
+size_t cdiPioFileWrite(int fileID, const void *restrict buffer, size_t len,
+                       int tsID);
+int cdiPioStreamOpen(const char *filename, const char *filemode,
+                     int filetype, stream_t *streamptr,
+                     int recordBufIsToBeCreated);
+void cdiPioStreamDefVlist_(int streamID, int vlistID);
+void cdiPioStreamWriteVar_(int streamID, int varID, int memtype,
+                           const void *data, int nmiss);
+void cdiPioStreamWriteVarChunk_(int streamID, int varID, int memtype,
+                                const int rect[][2], const void *data,
+                                int nmiss);
+void cdiPioStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted);
 
+#else
+typedef int MPI_Comm;
 #endif
 
 #endif

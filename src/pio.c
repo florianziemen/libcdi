@@ -5,10 +5,19 @@
 
 #ifdef USE_MPI
 
+#include <ctype.h>
+#include <yaxt.h>
+
+#include "file.h"
+#include "cdi_int.h"
+#include "namespace.h"
+
 #include "pio.h"
 #include "cdi.h"
 #include "pio_comm.h"
 #include "pio_impl.h"
+#include "pio_interface.h"
+#include "pio_rpc.h"
 #include "pio_util.h"
 
 char * command2charP[6] = {"IO_Open_file", "IO_Close_file",
@@ -55,7 +64,8 @@ struct fileOpTag decodeFileOpTag(int tag)
 
 /***************************************************************/
 
-size_t pioFileWrite ( int fileID, int tsID, const void *buffer, size_t len )
+size_t
+cdiPioFileWrite(int fileID, const void *restrict buffer, size_t len, int tsID)
 {
   size_t iret = CDI_UNDEFID;
 
@@ -104,9 +114,12 @@ int pioFileClose ( int id )
 
 /***************************************************************/
 
-int pioFileOpenW ( const char *filename )
+int pioFileOpen(const char *filename, const char *mode)
 {
   int iret = CDI_UNDEFID;
+
+  if ((mode[0] != 'w' && mode[0] != 'W') || mode[0] == 0 || mode[1] != 0)
+    xabort("Unsupported mode \"%s\" in parallel file open.", mode);
 
   switch ( commInqIOMode ())
     {
@@ -125,6 +138,109 @@ int pioFileOpenW ( const char *filename )
     }
 
   return iret;
+}
+
+/***************************************************************/
+
+int
+cdiPioStreamOpen(const char *filename, const char *filemode,
+                 int filetype, stream_t *streamptr,
+                 int recordBufIsToBeCreated)
+{
+  if ( tolower ( * filemode ) == 'w' )
+    {
+      statusCode nspStatus = namespaceInqResStatus ();
+      switch ( nspStatus )
+        {
+        case STAGE_DEFINITION:
+          break;
+        case STAGE_TIMELOOP:
+          pioBufferFuncCall(STREAMOPEN, 2, filename, filetype);
+          break;
+        case STAGE_CLEANUP:
+          xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
+          break;
+        default:
+          xabort ( "INTERNAL ERROR" );
+        }
+    }
+  else
+    Error("cdiPIO read support not implemented");
+  return 1;
+}
+
+
+
+void
+cdiPioStreamDefVlist_(int streamID, int vlistID)
+{
+  statusCode nspStatus = namespaceInqResStatus ();
+  switch ( nspStatus )
+    {
+    case STAGE_DEFINITION:
+      break;
+    case STAGE_TIMELOOP:
+      pioBufferFuncCall(STREAMDEFVLIST, 2, streamID, vlistID);
+      break;
+    case STAGE_CLEANUP:
+      xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
+      break;
+    default:
+      xabort ( "INTERNAL ERROR" );
+    }
+  cdiStreamDefVlist_(streamID, vlistID);
+}
+
+/***************************************************************/
+
+void
+cdiPioStreamWriteVar_(int streamID, int varID, int memtype, const void *data,
+                      int nmiss)
+{
+  xabort("parallel writing must give explicit partition information,"
+         " use streamWriteVarPart!");
+}
+
+/***************************************************************/
+
+void
+cdiPioStreamWriteVarChunk_(int streamID, int varID, int memtype,
+                           const int rect[][2], const void *data, int nmiss)
+{
+  int vlistID = streamInqVlist(streamID);
+  int size = vlistInqVarSize(vlistID, varID),
+    varShape[3];
+  unsigned ndims = (unsigned)cdiPioQueryVarDims(varShape, vlistID, varID);
+  Xt_int varShapeXt[3], chunkShape[3] = { 1, 1, 1 }, origin[3] = { 0, 0, 0 };
+  /* FIXME: verify xt_int ranges are good enough */
+  for (unsigned i = 0; i < 3; ++i)
+    varShapeXt[i] = varShape[i];
+  for (unsigned i = 0; i < ndims; ++i)
+    chunkShape[i] = rect[i][1] - rect[i][0] + 1;
+  int varSize = varShape[0] * varShape[1] * varShape[2];
+  xassert(varSize == size);
+  Xt_idxlist chunkDesc
+    = xt_idxsection_new(0, ndims, varShapeXt, chunkShape, origin);
+  pioBufferPartData(streamID, varID, data, nmiss, chunkDesc);
+  xt_idxlist_delete(chunkDesc);
+}
+
+void
+cdiPioStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
+{
+  statusCode nspStatus = namespaceInqResStatus ();
+  switch ( nspStatus )
+    {
+    case STAGE_DEFINITION:
+      break;
+    case STAGE_TIMELOOP:
+      pioBufferFuncCall(STREAMCLOSE, 1, streamptr->self);
+      break;
+    case STAGE_CLEANUP:
+      break;
+    default:
+      xabort ( "INTERNAL ERROR" );
+    }
 }
 
 /***************************************************************/

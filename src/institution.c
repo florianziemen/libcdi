@@ -8,8 +8,9 @@
 #include "resource_handle.h"
 #include "pio_util.h"
 #include "resource_handle.h"
-#include "pio_rpc.h"
+#include "resource_unpack.h"
 #include "namespace.h"
+#include "serialize.h"
 
 #undef  UNDEFID
 #define UNDEFID  -1
@@ -34,16 +35,12 @@ institute_t;
 static int    instituteCompareP ( void * instituteptr1, void * instituteptr2 );
 static void   instituteDestroyP ( void * instituteptr );
 static void   institutePrintP   ( void * instituteptr, FILE * fp );
-#ifdef USE_MPI
-static int    instituteGetSizeP ( void * instituteptr, MPI_Comm comm );
-static void   institutePackP    ( void * instituteptr, void *buf, int size, int *position, MPI_Comm comm );
+static int    instituteGetSizeP ( void * instituteptr, void *context );
+static void   institutePackP    ( void * instituteptr, void *buf, int size, int *position, void *context );
 static int    instituteTxCode   ( void );
-#endif
 
 resOps instituteOps = { instituteCompareP, instituteDestroyP, institutePrintP
-#ifdef USE_MPI
                         ,instituteGetSizeP, institutePackP, instituteTxCode
-#endif
  };
 
 static int * instituteInitializedNsp;
@@ -93,9 +90,8 @@ void instituteDefaultEntries ( void )
   resH[11] =           institutDef( 99,   0, "KNMI",      "Royal Netherlands Meteorological Institute");
   /*     (void) institutDef(  0,   0, "IPSL", "IPSL (Institut Pierre Simon Laplace, Paris, France)"); */
 
-  if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
-    for ( i = 0; i < 12 ; i++ )
-      reshSetStatus ( resH[i], &instituteOps, SUSPENDED );
+  for ( i = 0; i < 12 ; i++ )
+    reshSetStatus(resH[i], &instituteOps, SUSPENDED);
 }
 
 static
@@ -354,7 +350,6 @@ void institutePrintP   ( void * instituteptr, FILE * fp )
 }
 
 
-#ifdef USE_MPI
 static int
 instituteTxCode ( void )
 {
@@ -365,22 +360,16 @@ enum {
   institute_nints = 5,
 };
 
-static
-int instituteGetSizeP ( void * instituteptr, MPI_Comm comm )
+static int instituteGetSizeP ( void * instituteptr, void *context)
 {
   institute_t *p = instituteptr;
-  int txsize = 0, txinc;
-  xmpi(MPI_Pack_size(institute_nints, MPI_INT, comm, &txsize));
-  xmpi(MPI_Pack_size(strlen(p->name) + 1, MPI_CHAR, comm, &txinc));
-  txsize += txinc;
-  xmpi(MPI_Pack_size(strlen(p->longname) + 1, MPI_CHAR, comm, &txinc));
-  txsize += txinc;
+  int txsize = serializeGetSize(institute_nints, DATATYPE_INT, context)
+    + serializeGetSize(strlen(p->name) + 1, DATATYPE_TXT, context)
+    + serializeGetSize(strlen(p->longname) + 1, DATATYPE_TXT, context);
   return txsize;
 }
 
-static
-void institutePackP ( void * instituteptr, void *buf, int size,
-                      int *position, MPI_Comm comm )
+static void institutePackP(void * instituteptr, void *buf, int size, int *position, void *context)
 {
   institute_t *p = instituteptr;
   int tempbuf[institute_nints];
@@ -389,30 +378,27 @@ void institutePackP ( void * instituteptr, void *buf, int size,
   tempbuf[2] = p->subcenter;
   tempbuf[3] = (int)strlen(p->name) + 1;
   tempbuf[4] = (int)strlen(p->longname) + 1;
-  xmpi(MPI_Pack(tempbuf, institute_nints, MPI_INT, buf, size, position, comm));
-  xmpi(MPI_Pack(p->name, tempbuf[3], MPI_CHAR, buf, size, position, comm));
-  xmpi(MPI_Pack(p->longname, tempbuf[4], MPI_CHAR, buf, size, position, comm));
+  serializePack(tempbuf, institute_nints, DATATYPE_INT, buf, size, position, context);
+  serializePack(p->name, tempbuf[3], DATATYPE_TXT, buf, size, position, context);
+  serializePack(p->longname, tempbuf[4], DATATYPE_TXT, buf, size, position, context);
 }
 
-int
-instituteUnpack(void *buf, int size, int *position, int nspTarget,
-                MPI_Comm comm)
+int instituteUnpack(void *buf, int size, int *position, int nspTarget, void *context)
 {
   int tempbuf[institute_nints];
   int instituteID;
   char *name, *longname;
-  xmpi(MPI_Unpack(buf, size, position, tempbuf, institute_nints, MPI_INT, comm));
+  serializeUnpack(buf, size, position, tempbuf, institute_nints, DATATYPE_INT, context);
   name = xmalloc(tempbuf[3]);
   longname = xmalloc(tempbuf[4]);
-  xmpi(MPI_Unpack(buf, size, position, name, tempbuf[3], MPI_CHAR, comm));
-  xmpi(MPI_Unpack(buf, size, position, longname, tempbuf[4], MPI_CHAR, comm));
+  serializeUnpack(buf, size, position, name, tempbuf[3], DATATYPE_TXT, context);
+  serializeUnpack(buf, size, position, longname, tempbuf[4], DATATYPE_TXT, context);
   instituteID = institutDef(tempbuf[1], tempbuf[2], name, longname);
   // FIXME: this should work, once all types are transferred
   //xassert(instituteID == tempbuf[0]);
   return instituteID;
 }
 
-#endif
 /*
  * Local Variables:
  * c-file-style: "Java"

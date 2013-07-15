@@ -21,6 +21,7 @@
 #include "varscan.h"
 #include "vlist.h"
 
+#include "pio_util.h"
 
 #if  defined  (HAVE_LIBNETCDF)
 #  include "netcdf.h"
@@ -3443,9 +3444,9 @@ int cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtyp
 }
 #endif
 
+#if  defined  (HAVE_LIBNETCDF)
 void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int fileID;
   int gridID;
   int zaxisID;
@@ -3542,8 +3543,120 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
 
   cdf_write_var_data(fileID, vlistID, varID, ncvarid, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, nmiss);
 
-#endif
 }
+#endif
+
+#if  defined  (HAVE_LIBNETCDF)
+void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
+                         const int rect[][2], const void *data, int nmiss)
+{
+  int fileID;
+  int gridID;
+  int zaxisID;
+  int xid = UNDEFID, yid = UNDEFID, zid = UNDEFID;
+  int ncvarid;
+  int ntsteps;
+  size_t xsize = 0, ysize = 0;
+  size_t start[4];
+  size_t count[4];
+  long nvals;
+  int swapxy = FALSE;
+  int ndims = 0;
+  int idim;
+  int tsteptype;
+  int gridindex, zaxisindex;
+  int dtype;
+  int vlistID;
+  int streamID = streamptr->self;
+
+  if ( CDI_Debug )
+    Message("streamID = %d  varID = %d", streamID, varID);
+
+  vlistID = streamInqVlist(streamID);
+  fileID  = streamInqFileID(streamID);
+
+  ntsteps = streamptr->ntsteps;
+  if ( CDI_Debug )
+    Message("ntsteps = %d", ntsteps);
+
+  if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
+
+  ncvarid = cdfDefVar(streamptr, varID);
+
+  gridID    = vlistInqVarGrid(vlistID, varID);
+  zaxisID   = vlistInqVarZaxis(vlistID, varID);
+  tsteptype = vlistInqVarTsteptype(vlistID, varID);
+
+  gridindex = vlistGridIndex(vlistID, gridID);
+  if ( gridInqType(gridID) == GRID_TRAJECTORY )
+    {
+      cdfWriteGridTraj(streamptr, gridID);
+    }
+  else
+    {
+      xid = streamptr->xdimID[gridindex];
+      yid = streamptr->ydimID[gridindex];
+    }
+
+  zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
+  zid = streamptr->zaxisID[zaxisindex];
+
+  if ( tsteptype != TSTEP_CONSTANT )
+    {
+      start[ndims] = ntsteps - 1;
+      count[ndims] = 1;
+      ndims++;
+    }
+  if ( zid != UNDEFID )
+    {
+      int size = zaxisInqSize(zaxisID);
+      xassert(rect[2][0] >= 0 && rect[2][0] <= rect[2][1]
+              && rect[2][1] <= size);
+      start[ndims] = rect[2][0];
+      count[ndims] = rect[2][1] - rect[2][0] + 1;
+      ndims++;
+    }
+  if ( yid != UNDEFID )
+    {
+      size_t size;
+      cdf_inq_dimlen(fileID, yid, &size);
+      xassert(rect[1][0] >= 0 && rect[1][0] <= rect[1][1]
+              && rect[1][1] <= size);
+      start[ndims] = rect[1][0];
+      count[ndims] = rect[1][1] - rect[1][0] + 1;
+      ndims++;
+    }
+  if ( xid != UNDEFID )
+    {
+      size_t size;
+      cdf_inq_dimlen(fileID, xid, &size);
+      xassert(rect[0][0] >= 0 && rect[0][0] <= rect[0][1]
+              && rect[0][1] <= size);
+      start[ndims] = rect[0][0];
+      count[ndims] = rect[0][1] - rect[0][0] + 1;
+      ndims++;
+    }
+
+  if ( CDI_Debug )
+    for (idim = 0; idim < ndims; idim++)
+      Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+
+  if ( streamptr->ncmode == 1 )
+    {
+      cdf_enddef(fileID);
+      streamptr->ncmode = 2;
+    }
+
+  dtype = vlistInqVarDatatype(vlistID, varID);
+
+  if ( nmiss > 0 ) cdfDefVarMissval(streamptr, varID, dtype, 1);
+
+  nvals = gridInqSize(gridID)*zaxisInqSize(zaxisID);
+
+  cdf_write_var_data(fileID, vlistID, varID, ncvarid, dtype, nvals,
+                     xsize, ysize, swapxy, start, count, memtype, data, nmiss);
+}
+#endif
 
 
 int cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss)
@@ -3864,10 +3977,10 @@ int cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
   return (0);
 }
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfCreateRecords(stream_t *streamptr, int tsID)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int varID, levelID, recID, vrecID, zaxisID;
   int nvars, nlev, nrecs, nvrecs;
   record_t *records = NULL;
@@ -3984,8 +4097,8 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
              streamptr->tsteps[1].recIDs,
              nvrecs*sizeof(int));
     }
-#endif
 }
+#endif
 
 #if  defined  (HAVE_LIBNETCDF)
 static
@@ -5230,6 +5343,7 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
     }
 }
 
+#if defined (PROJECTION_TEST)
 static
 void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
 {
@@ -5250,6 +5364,7 @@ void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
     }
 
 }
+#endif
 
 /* define all input grids */
 static

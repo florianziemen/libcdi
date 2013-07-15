@@ -3,9 +3,6 @@
 #endif
 
 #include <string.h>
-#ifdef USE_MPI
-#include <mpi.h>
-#endif
 
 #include "dmemory.h"
 
@@ -15,9 +12,9 @@
 #include "calendar.h"
 #include "pio_util.h"
 #include "namespace.h"
+#include "serialize.h"
 #include "resource_handle.h"
-#include "pio_rpc.h"
-#include "pio_util.h"
+#include "resource_unpack.h"
 
 extern int cdiDefaultCalendar;
 
@@ -43,17 +40,13 @@ char *Timeunits[] = {
 static int    taxisCompareP    ( void * taxisptr1, void * taxisptr2 );
 static void   taxisDestroyP    ( void * taxisptr );
 static void   taxisPrintP      ( void * taxisptr, FILE * fp );
-#ifdef USE_MPI
-static int    taxisGetPackSize ( void * taxisptr, MPI_Comm comm );
+static int    taxisGetPackSize ( void * taxisptr, void *context );
 static void   taxisPack        ( void * taxisptr, void *buf, int size,
-				 int *position, MPI_Comm comm );
+				 int *position, void *context );
 static int    taxisTxCode      ( void );
-#endif
 
 resOps taxisOps = { taxisCompareP, taxisDestroyP, taxisPrintP
-#ifdef USE_MPI
                     , taxisGetPackSize, taxisPack, taxisTxCode
-#endif
 };
 
 
@@ -1299,7 +1292,6 @@ int taxisCompareP ( void *  taxisptr1, void * taxisptr2 )
 }
 
 
-#ifdef USE_MPI
 static int
 taxisTxCode ( void )
 {
@@ -1308,40 +1300,36 @@ taxisTxCode ( void )
 
 enum { taxisNint = 15 };
 
-static
-int taxisGetPackSize ( void * voidP, MPI_Comm comm )
+static int
+taxisGetPackSize(void * voidP, void *context)
 {
-  int packBufferSize = 0, size;
-
-  xmpi ( MPI_Pack_size ( taxisNint, MPI_INT, comm, &size ));
-  packBufferSize += size;
-  xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
-  packBufferSize += size;
-
+  int packBufferSize
+    = serializeGetSize(taxisNint, DATATYPE_INT, context)
+    + serializeGetSize(1, DATATYPE_FLT64, context);
   return packBufferSize;
 }
 
-
-void taxisUnpack ( char * unpackBuffer, int unpackBufferSize,
-		   int * unpackBufferPos, int nspTarget, MPI_Comm comm )
+void
+taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
+            int nspTarget, void *context)
 {
   taxis_t * taxisP;
   int intBuffer[taxisNint];
   double d;
 
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos,
-		      intBuffer, taxisNint, MPI_INT, comm ));
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos,
-		      &d, 1, MPI_DOUBLE, comm ));
+  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                  intBuffer, taxisNint, DATATYPE_INT, context);
+  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                  &d, 1, DATATYPE_FLT64, context);
 
-  xassert ( xchecksum ( DATATYPE_INT, taxisNint, intBuffer ) == d );
+  xassert(xchecksum(DATATYPE_INT, taxisNint, intBuffer) == d);
 
-  taxisInit ();
+  taxisInit();
 
   taxisP = taxisNewEntry();
   if ( ! taxisP ) Error("No memory");
 
-  xassert ( namespaceAdaptKey ( intBuffer[0], nspTarget ) == taxisP->self );
+  xassert(namespaceAdaptKey(intBuffer[0], nspTarget) == taxisP->self);
 
   taxisP->used       = intBuffer[1];
   taxisP->type       = intBuffer[2];
@@ -1360,38 +1348,37 @@ void taxisUnpack ( char * unpackBuffer, int unpackBufferSize,
 }
 
 
-static
-void taxisPack ( void * voidP, void * packBuffer, int packBufferSize,
-		 int * packBufferPos, MPI_Comm comm )
+static void
+taxisPack(void * voidP, void * packBuffer, int packBufferSize, int * packBufferPos,
+          void *context)
 {
-  taxis_t   * taxisP = ( taxis_t * ) voidP;
+  taxis_t *taxisP = (taxis_t *)voidP;
   int intBuffer[taxisNint];
   double d;
 
-  intBuffer[0]  = taxisP->self; 
-  intBuffer[1]  = taxisP->used;      
-  intBuffer[2]  = taxisP->type;      
-  intBuffer[3]  = taxisP->vdate;     
-  intBuffer[4]  = taxisP->vtime;     
-  intBuffer[5]  = taxisP->rdate;     
-  intBuffer[6]  = taxisP->rtime;     
-  intBuffer[7]  = taxisP->calendar;  
-  intBuffer[8]  = taxisP->unit;      
-  intBuffer[9]  = taxisP->numavg;    
+  intBuffer[0]  = taxisP->self;
+  intBuffer[1]  = taxisP->used;
+  intBuffer[2]  = taxisP->type;
+  intBuffer[3]  = taxisP->vdate;
+  intBuffer[4]  = taxisP->vtime;
+  intBuffer[5]  = taxisP->rdate;
+  intBuffer[6]  = taxisP->rtime;
+  intBuffer[7]  = taxisP->calendar;
+  intBuffer[8]  = taxisP->unit;
+  intBuffer[9]  = taxisP->numavg;
   intBuffer[10] = taxisP->has_bounds;
-  intBuffer[11] = taxisP->vdate_lb;  
-  intBuffer[12] = taxisP->vtime_lb;  
-  intBuffer[13] = taxisP->vdate_ub;  
-  intBuffer[14] = taxisP->vtime_ub;  
-  
-  xmpi ( MPI_Pack ( intBuffer, taxisNint, MPI_INT, 
-		    packBuffer, packBufferSize, packBufferPos, comm ));
-  d = xchecksum ( DATATYPE_INT, taxisNint, intBuffer );
-  xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
-		    packBuffer, packBufferSize, packBufferPos, comm ));
+  intBuffer[11] = taxisP->vdate_lb;
+  intBuffer[12] = taxisP->vtime_lb;
+  intBuffer[13] = taxisP->vdate_ub;
+  intBuffer[14] = taxisP->vtime_ub;
+
+  serializePack(intBuffer, taxisNint, DATATYPE_INT,
+                packBuffer, packBufferSize, packBufferPos, context);
+  d = xchecksum(DATATYPE_INT, taxisNint, intBuffer);
+  serializePack(&d, 1, DATATYPE_FLT64,
+                packBuffer, packBufferSize, packBufferPos, context);
 }
 
-#endif
 /*
  * Local Variables:
  * c-file-style: "Java"

@@ -106,11 +106,11 @@ extern "C" {
 #define  DATATYPE_UINT32        332
 
 /* internal data types */
-
 #define  DATATYPE_INT           251
 #define  DATATYPE_FLT           252
 #define  DATATYPE_TXT           253
 #define  DATATYPE_CPX           254
+#define  DATATYPE_UCHAR         255
 
 /* Chunks */
 
@@ -223,15 +223,25 @@ extern "C" {
 #define  PIO_MINIOMODEWITHSPECIALPROCS  PIO_WRITER
 
 /* parallel IO routines */
+#ifdef MPI_VERSION
+#  include <yaxt.h>
+#endif
 
+#ifdef MPI_VERSION /* make_fint keep */
 void     pioEndDef             ( void );
 void     pioEndTimestepping    ( void );
 void     pioFinalize           ( void );
-int      pioInit               ( int, int, int, int, int * );
-int      pioInqVarDecoChunk    ( int, int );
-int      pioInqVarDecoOff      ( int, int );
-void     pioNamespaceSetActive ( int );
+/*      pioInit: initialize I/O server processes and communication */
+MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode,
+                 int *pioNamespace, float partInflate);
 void     pioWriteTimestep      ( int, int, int );
+
+void     streamWriteVarPart    (int streamID, int varID,
+                                const void *data, int nmiss,
+                                Xt_idxlist partDesc);
+
+#endif /* make_fint keep */
+void     pioNamespaceSetActive ( int );
 
 /* CDI control routines */
 
@@ -341,6 +351,9 @@ void    streamReadVarSlice(int streamID, int varID, int levelID, double *data_ve
 /*      streamWriteVarSlice: Write a horizontal slice of a variable */
 void    streamWriteVarSlice(int streamID, int varID, int levelID, const double *data_vec, int nmiss);
 void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data_vec, int nmiss);
+
+void    streamWriteVarChunk(int streamID, int varID, const int rect[][2],
+                            const double *data_vec, int nmiss);
 
 
 /* STREAM record I/O routines */

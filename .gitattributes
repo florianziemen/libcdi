@@ -19,6 +19,7 @@ config/compile -text
 config/config.guess -text
 config/config.sub -text
 config/default -text
+config/default-mpi -text
 config/depcomp -text
 config/install-sh -text
 config/interface.rb -text
@@ -33,17 +34,17 @@ doc/cdi_fman.pdf -text
 doc/coding_standards/README -text
 doc/coding_standards/footer.c -text
 doc/coding_standards/ref-example.c -text
-doc/pio/graphics/communicators.pdf -text
-doc/pio/graphics/encodeNBuffer.pdf -text
-doc/pio/graphics/legend.pdf -text
-doc/pio/graphics/pioBuffer.pdf -text
-doc/pio/graphics/pio_fpguard.pdf -text
-doc/pio/graphics/pio_mpi.pdf -text
-doc/pio/graphics/pio_none.pdf -text
-doc/pio/graphics/pio_writer.pdf -text
-doc/pio/graphics/serial.pdf -text
-doc/pio/graphics/timestep.pdf -text
-doc/pio/pio_docu.pdf -text
+doc/pio/graphics/communicators.pdf -text svneol=unset#unset
+doc/pio/graphics/encodeNBuffer.pdf -text svneol=unset#unset
+doc/pio/graphics/legend.pdf -text svneol=unset#unset
+doc/pio/graphics/pioBuffer.pdf -text svneol=unset#unset
+doc/pio/graphics/pio_fpguard.pdf -text svneol=unset#unset
+doc/pio/graphics/pio_mpi.pdf -text svneol=unset#unset
+doc/pio/graphics/pio_none.pdf -text svneol=unset#unset
+doc/pio/graphics/pio_writer.pdf -text svneol=unset#unset
+doc/pio/graphics/serial.pdf -text svneol=unset#unset
+doc/pio/graphics/timestep.pdf -text svneol=unset#unset
+doc/pio/pio_docu.pdf -text svneol=unset#unset
 doc/pio/tex/communicators.tex -text
 doc/pio/tex/intro.tex -text
 doc/pio/tex/makepdf_f -text
@@ -122,6 +123,7 @@ examples/cdi_write_reset.c -text
 examples/compf -text
 examples/pio/Makefile.am -text
 examples/pio/Makefile.in -text
+examples/pio/cdi.inc -text
 examples/pio/collectData.c -text
 examples/pio/collectData2003.F90 -text
 examples/pio/collectDataNStreams.c -text
@@ -226,7 +228,8 @@ src/namespace.c -text
 src/namespace.h -text
 src/pio.c -text
 src/pio.h -text
-src/pio_c_temp.h -text
+src/pio_cdf_int.c -text
+src/pio_cdf_int.h -text
 src/pio_comm.c -text
 src/pio_comm.h -text
 src/pio_dbuffer.c -text
@@ -239,8 +242,9 @@ src/pio_posixasynch.c -text
 src/pio_posixfpguardsendrecv.c -text
 src/pio_posixnonb.c -text
 src/pio_record_send.c -text
-src/pio_rpc.c -text
 src/pio_rpc.h -text
+src/pio_serialize.c -text
+src/pio_serialize.h -text
 src/pio_server.c -text
 src/pio_server.h -text
 src/pio_util.c -text
@@ -248,6 +252,10 @@ src/pio_util.h -text
 src/pkgconfig/cdi.pc.in -text
 src/resource_handle.c -text
 src/resource_handle.h -text
+src/resource_unpack.c -text
+src/resource_unpack.h -text
+src/serialize.c -text
+src/serialize.h -text
 src/service.h -text
 src/servicelib.c -text
 src/stream.c -text
@@ -315,9 +323,11 @@ tests/cksum.c -text
 tests/cksum.h -text
 tests/cksum_read.c -text
 tests/cksum_write.c -text
+tests/cksum_write_chunk.c -text
 tests/ensure_array_size.c -text
 tests/ensure_array_size.h -text
 tests/pio_cksum_asynch.in -text
+tests/pio_cksum_cdf.in -text
 tests/pio_cksum_fpguard.in -text
 tests/pio_cksum_mpinonb.in -text
 tests/pio_cksum_writer.in -text
@@ -325,6 +335,7 @@ tests/pio_write.c -text
 tests/pio_write_run.in -text
 tests/stream_cksum.c -text
 tests/stream_cksum.h -text
+tests/test_chunk_cksum.in -text
 tests/test_cksum_extra.in -text
 tests/test_cksum_grib.in -text
 tests/test_cksum_ieg.in -text
@@ -334,6 +345,7 @@ tests/test_cksum_nc4.in -text
 tests/test_cksum_service.in -text
 tests/test_grib.c -text
 tests/test_grib.sh -text
+tests/test_resource_copy.c -text
 tests/var_cksum.c -text
 tests/var_cksum.h -text
 util/mpi_launch_poe -text

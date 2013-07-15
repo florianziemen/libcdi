@@ -14,7 +14,7 @@
 
 #ifdef USE_MPI
 #include <mpi.h>
-#include "pio_c_temp.h"
+#include <yaxt.h>
 #else
 typedef int MPI_Comm;
 #endif
@@ -83,6 +83,10 @@ modelRegionCompute(double region[], size_t offset, size_t len,
     }
 }
 
+#ifdef USE_MPI
+static int
+uniform_partition_start(int set_interval[2], int nparts, int part_idx);
+#endif
 
 static void
 modelRun(struct model_config setup, MPI_Comm comm)
@@ -94,21 +98,25 @@ modelRun(struct model_config setup, MPI_Comm comm)
 
   int gridID, zaxisID[nVars], taxisID;
   int vlistID, varIDs[nVars], streamID, tsID, tfID = 0;
-  int i, varID, nmiss = 0;
+  int i, nmiss = 0;
   double *lons, *lats;
-  double *var = NULL, *varslice;
+  double *var = NULL, *varslice = NULL;
   double mscale, mrscale;
   time_t current_time;
   int vdate = 19850101, vtime = 120000;
-  int start = CDI_UNDEFID, chunk = CDI_UNDEFID, rank = 0, comm_size = 1;
+  int rank = 0;
   char filename[1024];
   int nlon = setup.nlon, nlat = setup.nlat;
   uint32_t checksum_state[nVars];
-  size_t varSize[nVars], varslice_size;
+  size_t varSize[nVars], varslice_size = 0;
   int *nlev;
   double *levs;
 #if USE_MPI
-  int *chunks = NULL, *displs = NULL;
+  int *chunks = NULL, *displs = NULL, comm_size = 1;
+  struct var1DDeco {
+    int chunkSize, start;
+    Xt_idxlist partDesc;
+  } varDeco[nVars];
 #endif
 
 #if USE_MPI
@@ -128,10 +136,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
   gridID = gridCreate ( GRID_LONLAT, nlon*nlat );
   gridDefXsize ( gridID, nlon );
   gridDefYsize ( gridID, nlat );
-  lons = malloc(nlon * sizeof (lons[0]));
+  lons = xmalloc(nlon * sizeof (lons[0]));
   for (i = 0; i < nlon; ++i)
     lons[i] = ((double)(i * 360))/nlon;
-  lats = malloc(nlat * sizeof (lats[0]));
+  lats = xmalloc(nlat * sizeof (lats[0]));
   for (i = 0; i < nlat; ++i)
     lats[i] = ((double)(i * 180))/nlat - 90.0;
   gridDefXvals ( gridID, lons );
@@ -150,15 +158,30 @@ modelRun(struct model_config setup, MPI_Comm comm)
       zaxisDefLevels ( zaxisID[i], levs );
     }
 
-  varslice = NULL;
-  varslice_size = 0;
-
   vlistID = vlistCreate ();
 
   for ( i = 0; i < nVars; i++ )
     {
       varIDs[i] = vlistDefVar ( vlistID, gridID, zaxisID[i], TIME_VARIABLE );
       varSize[i] = nlon * nlat * nlev[i];
+#ifdef USE_MPI
+      {
+         int start = uniform_partition_start((int [2]){ 0, varSize[i] - 1 },
+                                             comm_size, rank),
+           chunkSize = uniform_partition_start((int [2]){ 0, varSize[i] - 1 },
+                                               comm_size, rank + 1) - start;
+         fprintf(stderr, "%d: start=%d, chunkSize = %d\n", rank,
+                 start, chunkSize);
+         Xt_idxlist idxlist
+           = xt_idxstripes_new(&(struct Xt_stripe){ .start = start,
+                   .nstrides = chunkSize, .stride = 1 }, 1);
+         varDeco[i] = (struct var1DDeco){
+           .start = start,
+           .chunkSize = chunkSize,
+           .partDesc = idxlist
+         };
+      }
+#endif
       vlistDefVarCode(vlistID, varIDs[i], varCodes[i]);
       vlistDefVarDatatype(vlistID, varIDs[i], setup.datatype);
     }
@@ -171,7 +194,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
   xassert ( streamID >= 0 );
   streamDefVlist ( streamID, vlistID);
 
+#ifdef USE_MPI
   pioEndDef ();
+#endif
 
   for ( tfID = 0; tfID < ntfiles; tfID++ )
     {
@@ -193,10 +218,15 @@ modelRun(struct model_config setup, MPI_Comm comm)
 	  taxisDefVdate ( taxisID, vdate );
 	  taxisDefVtime ( taxisID, vtime );
 	  streamDefTimestep ( streamID, tsID );
-	  for ( varID = 0; varID < nVars; varID++ )
+	  for (int varID = 0; varID < nVars; ++varID)
 	    {
-              start = pioInqVarDecoOff(vlistID, varIDs[varID]);
-              chunk = pioInqVarDecoChunk(vlistID, varIDs[varID]);
+#ifdef USE_MPI
+              int start = varDeco[varID].start;
+              int chunk = varDeco[varID].chunkSize;
+#else
+              int chunk = varSize[varID];
+              int start = 0;
+#endif
               if (varslice_size < chunk)
                 {
                   varslice = xrealloc(varslice, chunk * sizeof (var[0]));
@@ -229,12 +259,19 @@ modelRun(struct model_config setup, MPI_Comm comm)
                            varSize[varID] * sizeof (var[0]));
                 }
 
-	      streamWriteVar ( streamID, varIDs[varID], varslice, nmiss );
+#ifdef USE_MPI
+	      streamWriteVarPart(streamID, varIDs[varID], varslice, nmiss,
+                                 varDeco[varID].partDesc);
+#else
+	      streamWriteVar(streamID, varIDs[varID], varslice, nmiss);
+#endif
 	      start = CDI_UNDEFID;
 	      chunk = CDI_UNDEFID;
 	    }
           current_time += 86400;
+#ifdef USE_MPI
 	  pioWriteTimestep ( tsID, vdate, vtime );
+#endif
 	}
       if (rank == 0 && setup.compute_checksum)
         {
@@ -265,13 +302,25 @@ modelRun(struct model_config setup, MPI_Comm comm)
           }
         }
     }
+  free(varslice);
+#ifdef USE_MPI
   pioEndTimestepping ();
+#endif
   streamClose ( streamID );
   vlistDestroy ( vlistID );
   taxisDestroy ( taxisID );
   for ( i = 0; i < nVars; i++ )
     zaxisDestroy ( zaxisID[i] );
   gridDestroy ( gridID );
+#if USE_MPI
+  for (int varID = 0; varID < nVars; ++varID)
+    xt_idxlist_delete(varDeco[varID].partDesc);
+  free(displs);
+  free(chunks);
+  free(var);
+#endif
+  free(nlev);
+  free(levs);
   free(lats);
   free(lons);
 }
@@ -367,12 +416,6 @@ search_iomode_str(const char *modestr)
 
 int main (int argc, char *argv[])
 {
-#ifdef USE_MPI
-  enum {
-    nNamespaces = 2 };
-  static int hasLocalFile[nNamespaces] = { 0, 1 };
-#endif
-
   struct model_config setup = default_setup;
 
   MPI_Comm commModel;
@@ -384,7 +427,8 @@ int main (int argc, char *argv[])
   int nProcsIO = 2;
 
   xmpi ( MPI_Init ( &argc, &argv));
-  xmpi ( MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob ));
+  commGlob = MPI_COMM_WORLD;
+  xt_initialize(commGlob);
   xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
   xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
@@ -469,8 +513,9 @@ int main (int argc, char *argv[])
   }
 
 #ifdef USE_MPI
-  commModel = pioInit_c(commGlob, nProcsIO, IOMode,
-                        nNamespaces, hasLocalFile);
+  int pioNamespace;
+  commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0);
+  pioNamespaceSetActive(pioNamespace);
 #else
   commModel = -1;
 #endif
@@ -479,6 +524,7 @@ int main (int argc, char *argv[])
 
 #ifdef USE_MPI
   pioFinalize ();
+  xt_finalize();
   MPI_Finalize ();
 #endif
   return 0;
@@ -515,6 +561,17 @@ time_t2cditime(time_t t, int *date, int *timeofday)
   *timeofday = t_s->tm_hour * 10000 + t_s->tm_min * 100 + t_s->tm_sec;
 }
 
+#ifdef USE_MPI
+static int
+uniform_partition_start(int set_interval[2], int nparts, int part_idx)
+{
+  int part_offset
+    = (((long long)set_interval[1] - (long long)set_interval[0] + 1LL)
+       * (long long)part_idx) / (long long)nparts;
+  int start = set_interval[0] + part_offset;
+  return start;
+}
+#endif
 /*
  * Local Variables:
  * c-file-style: "Java"

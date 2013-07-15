@@ -181,6 +181,8 @@
       PARAMETER (DATATYPE_TXT           = 253)
       INTEGER    DATATYPE_CPX          
       PARAMETER (DATATYPE_CPX           = 254)
+      INTEGER    DATATYPE_UCHAR        
+      PARAMETER (DATATYPE_UCHAR         = 255)
 !
 !  Chunks
 !
@@ -379,32 +381,30 @@
       EXTERNAL        pioFinalize
 
       INTEGER         pioInit
-!                                    (INTEGER         ,
-!                                     INTEGER         ,
-!                                     INTEGER         ,
-!                                     INTEGER         ,
-!                                     INTEGER         )
+!                                    (INTEGER         commSuper,
+!                                     INTEGER         nProcsIO,
+!                                     INTEGER         IOMode,
+!                                     INTEGER         pioNamespace,
+!                                     REAL            partInflate)
       EXTERNAL        pioInit
-
-      INTEGER         pioInqVarDecoChunk
-!                                    (INTEGER         ,
-!                                     INTEGER         )
-      EXTERNAL        pioInqVarDecoChunk
-
-      INTEGER         pioInqVarDecoOff
-!                                    (INTEGER         ,
-!                                     INTEGER         )
-      EXTERNAL        pioInqVarDecoOff
-
-!                     pioNamespaceSetActive
-!                                    (INTEGER         )
-      EXTERNAL        pioNamespaceSetActive
 
 !                     pioWriteTimestep
 !                                    (INTEGER         ,
 !                                     INTEGER         ,
 !                                     INTEGER         )
       EXTERNAL        pioWriteTimestep
+
+!                     streamWriteVarPart
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     CHOICE          data,
+!                                     INTEGER         nmiss,
+!                                     TYPE(XT_IDXLIST)partDesc)
+      EXTERNAL        streamWriteVarPart
+
+!                     pioNamespaceSetActive
+!                                    (INTEGER         )
+      EXTERNAL        pioNamespaceSetActive
 
 !
 !  CDI control routines
@@ -640,6 +640,14 @@
 !                                     REAL            data_vec,
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVarSliceF
+
+!                     streamWriteVarChunk
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     INTEGER         rect,
+!                                     DOUBLEPRECISION data_vec,
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamWriteVarChunk
 
 !
 !  STREAM record I/O routines

@@ -23,6 +23,9 @@ void   cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *da
 int    cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss);
 int    cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, int nmiss);
 
+void   cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
+                           const int rect[][2], const void *data, int nmiss);
+
 #endif
 /*
  * Local Variables:

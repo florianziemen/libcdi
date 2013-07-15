@@ -138,6 +138,9 @@ AC_SUBST([HDF5_LIBS])
 NETCDF_ROOT=''
 NETCDF_INCLUDE=''
 NETCDF_LIBS=''
+ENABLE_NETCDF=no
+ENABLE_NC2=no
+ENABLE_NC4=no
 AC_ARG_WITH([netcdf],
             [AS_HELP_STRING([--with-netcdf=<yes|no|directory> (default=yes)],[location of netcdf library (lib and include subdirs)])],
             [AS_CASE(["$with_netcdf"],
@@ -146,7 +149,8 @@ AC_ARG_WITH([netcdf],
                      [yes],[AC_CHECK_HEADERS([netcdf.h])
                             AC_SEARCH_LIBS([nc_open],
                                            [netcdf],
-                                           [AC_DEFINE([HAVE_LIBNETCDF],[1],[Define to 1 for NETCDF support])],
+                                           [AC_DEFINE([HAVE_LIBNETCDF],[1],[Define to 1 for NETCDF support])
+                                            ENABLE_NETCDF=yes],
                                            [AC_MSG_ERROR([Could not link to netcdf library])])
                             NETCDF_LIBS=" -lnetcdf"
                             AC_CHECK_PROG(NC_CONFIG,nc-config,nc-config)
@@ -154,10 +158,13 @@ AC_ARG_WITH([netcdf],
                                   [AC_MSG_CHECKING([netcdf's nc2 support])
                                    AS_IF([test "x$($NC_CONFIG --has-nc2)" = "xyes"],
                                          [AC_DEFINE([HAVE_NETCDF2],[1],[Define to 1 for NETCDF2 support])
-                                          AC_MSG_RESULT([yes])],[AC_MSG_RESULT([no])])
+                                          AC_MSG_RESULT([yes])
+                                          ENABLE_NC2=yes],
+                                         [AC_MSG_RESULT([no])])
                                    AC_MSG_CHECKING([netcdf's nc4 support])
                                    AS_IF([test "x$($NC_CONFIG --has-nc4)" = "xyes"],
                                    [AC_DEFINE([HAVE_NETCDF4],[1],[Define to 1 for NETCDF4 support])
+                                    ENABLE_NC4=yes
                                     AC_MSG_RESULT([yes])],[AC_MSG_RESULT([no])])],
                                   [AS_ECHO([Could not find nc-config! go on with default configuration])])],
                      [*],[AS_IF([test -d "$with_netcdf"],
@@ -167,7 +174,8 @@ AC_ARG_WITH([netcdf],
                                  AC_CHECK_HEADERS([netcdf.h])
                                  AC_SEARCH_LIBS([nc_open],
                                                 [netcdf],
-                                                [AC_DEFINE([HAVE_LIBNETCDF],[1],[Define to 1 for NETCDF support])],
+                                                [AC_DEFINE([HAVE_LIBNETCDF],[1],[Define to 1 for NETCDF support])
+                                                 ENABLE_NETCDF=yes],
                                                 [AC_MSG_ERROR([Could not link to netcdf library])])
                                  NETCDF_LIBS=" -L$NETCDF_ROOT/lib -lnetcdf"
                                  NETCDF_INCLUDE=" -I$NETCDF_ROOT/include"
@@ -181,15 +189,20 @@ AC_ARG_WITH([netcdf],
                                    [AC_MSG_CHECKING([netcdf's nc2 support])
                                    AS_IF([test "x$($NC_CONFIG --has-nc2)" = "xyes"],
                                          [AC_DEFINE([HAVE_NETCDF2],[1],[Define to 1 for NETCDF2 support])
+                                          ENABLE_NC2=yes
                                           AC_MSG_RESULT([yes])],[AC_MSG_RESULT([no])])
                                    AC_MSG_CHECKING([netcdf's nc4 support])
                                    AS_IF([test "x$($NC_CONFIG --has-nc4)" = "xyes"],
                                          [AC_DEFINE([HAVE_NETCDF4],[1],[Define to 1 for NETCDF4 support])
+                                          ENABLE_NC4=yes
                                           AC_MSG_RESULT([yes])],[AC_MSG_RESULT([no])])],
                                    [AC_MSG_RESULT([Could not find nc-config! go on with default configuration])])],
                                 [AC_MSG_NOTICE([$with_netcdf is not a directory! NETCDF suppressed])])])],
             [AC_MSG_CHECKING([for NETCDF library])
              AC_MSG_RESULT([suppressed])])
+AC_SUBST([ENABLE_NETCDF])
+AC_SUBST([ENABLE_NC2])
+AC_SUBST([ENABLE_NC4])
 AC_SUBST([NETCDF_ROOT])
 AC_SUBST([NETCDF_INCLUDE])
 AC_SUBST([NETCDF_LIBS])
@@ -383,3 +396,7 @@ AC_ARG_ENABLE([all-static],
 AC_MSG_RESULT([$enable_all_static])
 AM_CONDITIONAL([ENABLE_ALL_STATIC],[test x$enable_all_static = 'xyes'])
 ])
+dnl
+dnl Local Variables:
+dnl mode: autoconf
+dnl End:

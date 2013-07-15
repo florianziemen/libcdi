@@ -107,16 +107,18 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
-libcdi_la_LIBADD =
+am__DEPENDENCIES_1 =
+libcdi_la_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	cdf_int.lo cdi_error.lo cdi_util.lo cdiFortran.lo \
 	cgribexlib.lo dmemory.lo error.lo extralib.lo file.lo \
 	gaussgrid.lo gribapi.lo grid.lo ieglib.lo institution.lo \
-	model.lo namespace.lo pio.lo pio_comm.lo pio_dbuffer.lo \
-	pio_interface.lo pio_mpinonb.lo pio_record_send.lo \
-	pio_posixasynch.lo pio_posixfpguardsendrecv.lo \
-	pio_posixnonb.lo pio_list_set.lo pio_rpc.lo pio_server.lo \
-	pio_util.lo resource_handle.lo servicelib.lo stream_cdf.lo \
+	model.lo namespace.lo serialize.lo pio.lo pio_comm.lo \
+	pio_dbuffer.lo pio_interface.lo pio_mpinonb.lo \
+	pio_record_send.lo pio_posixasynch.lo \
+	pio_posixfpguardsendrecv.lo pio_posixnonb.lo pio_list_set.lo \
+	resource_unpack.lo pio_server.lo pio_util.lo pio_serialize.lo \
+	pio_cdf_int.lo resource_handle.lo servicelib.lo stream_cdf.lo \
 	stream_cgribex.lo stream_ext.lo stream_grb.lo \
 	stream_gribapi.lo stream_history.lo stream_ieg.lo cdi_int.lo \
 	stream_record.lo stream_srv.lo stream_var.lo table.lo taxis.lo \
@@ -183,6 +185,9 @@ ENABLE_CGRIBEX = @ENABLE_CGRIBEX@
 ENABLE_EXTRA = @ENABLE_EXTRA@
 ENABLE_GRIB = @ENABLE_GRIB@
 ENABLE_IEG = @ENABLE_IEG@
+ENABLE_NC2 = @ENABLE_NC2@
+ENABLE_NC4 = @ENABLE_NC4@
+ENABLE_NETCDF = @ENABLE_NETCDF@
 ENABLE_PYTHON = @ENABLE_PYTHON@
 ENABLE_RUBY = @ENABLE_RUBY@
 ENABLE_SERVICE = @ENABLE_SERVICE@
@@ -203,6 +208,7 @@ FPP_INCOPT = @FPP_INCOPT@
 GREP = @GREP@
 GRIB_API_INCLUDE = @GRIB_API_INCLUDE@
 GRIB_API_LIBS = @GRIB_API_LIBS@
+HAVE_PARALLEL_NC4 = @HAVE_PARALLEL_NC4@
 HDF5_INCLUDE = @HDF5_INCLUDE@
 HDF5_LIBS = @HDF5_LIBS@
 HDF5_ROOT = @HDF5_ROOT@
@@ -246,6 +252,11 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
+PPM_CORE_CFLAGS = @PPM_CORE_CFLAGS@
+PPM_CORE_LIBS = @PPM_CORE_LIBS@
 PTHREAD_CC = @PTHREAD_CC@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
@@ -265,6 +276,8 @@ THREADS_LIBS = @THREADS_LIBS@
 USER_NAME = @USER_NAME@
 USE_MPI = @USE_MPI@
 VERSION = @VERSION@
+YAXT_CFLAGS = @YAXT_CFLAGS@
+YAXT_LIBS = @YAXT_LIBS@
 ZLIB_INCLUDE = @ZLIB_INCLUDE@
 ZLIB_LIBS = @ZLIB_LIBS@
 abs_builddir = @abs_builddir@
@@ -330,6 +343,7 @@ EXTRA_DIST = cdilib.c mo_cdi.f90
 @ENABLE_CDI_LIB_TRUE@lib_LTLIBRARIES = libcdi.la
 @ENABLE_CDI_LIB_TRUE@include_HEADERS = cdi.h cdi.inc
 @ENABLE_CDI_LIB_FALSE@noinst_LTLIBRARIES = libcdi.la
+AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS)
 libcdi_la_SOURCES = \
 	basetime.c     	 \
 	basetime.h	 \
@@ -374,9 +388,10 @@ libcdi_la_SOURCES = \
 	model.h        	 \
 	namespace.c      \
 	namespace.h      \
+	serialize.h	\
+	serialize.c	\
 	pio.c            \
 	pio.h            \
-	pio_c_temp.h     \
 	pio_comm.c       \
 	pio_comm.h       \
 	pio_dbuffer.c    \
@@ -389,12 +404,17 @@ libcdi_la_SOURCES = \
 	pio_posixfpguardsendrecv.c \
 	pio_posixnonb.c  \
 	pio_list_set.c	 \
-	pio_rpc.c        \
+	resource_unpack.h \
+	resource_unpack.c \
 	pio_rpc.h        \
 	pio_server.c     \
 	pio_server.h     \
 	pio_util.c       \
 	pio_util.h       \
+	pio_serialize.h	\
+	pio_serialize.c	\
+	pio_cdf_int.c	\
+	pio_cdf_int.h	\
 	resource_handle.c\
 	resource_handle.h\
 	service.h	 \
@@ -442,6 +462,9 @@ libcdi_la_SOURCES = \
         stream.c         \
         swap.c
 
+
+#libcdi_la_CPPFLAGS  = @CPPFLAGS@
+libcdi_la_LIBADD = $(PPM_CORE_LIBS) $(YAXT_LIBS)
 LOCALTARGETS = $(am__append_1) $(am__append_2)
 #
 CLEANFILES = `ls *~` cdilib.c $(am__append_3) $(am__append_4)
@@ -567,6 +590,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/model.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/namespace.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_cdf_int.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_comm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_dbuffer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_interface.Plo@am__quote@
@@ -576,10 +600,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixfpguardsendrecv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixnonb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_record_send.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_rpc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_serialize.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_server.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resource_handle.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resource_unpack.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/serialize.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/servicelib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cdf.Plo@am__quote@
@@ -869,9 +895,6 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES \
 	uninstall-am uninstall-includeHEADERS uninstall-libLTLIBRARIES \
 	uninstall-local
 
-
-#libcdi_la_CPPFLAGS  = @CPPFLAGS@
-#libcdi_la_LIBADD    = @LDFLAGS@
 #
 cdilib.c:
 	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src

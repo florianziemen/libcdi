@@ -1,10 +1,6 @@
 #ifndef PIO_UTIL_
 #define PIO_UTIL_
 
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
-
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,56 +10,46 @@
 #include "mpi.h"
 #endif
 
+#include "error.h"
 
-#define MAXSTRLNNETCDF    32
-#define MAXBUFFERSIZE     32
-#define MAXVALUE          10
+
 #define MAXDEBUG           3
-#define MAXLEVELINFOS     10
-#define MAXVARS           10
 
-#define MAXLEVEL          10
-#define MAXLEVELIDX       10
-#define MAXRECORDS        10
-#define MAXRECIDS         10
-#define MAXVARS           10
-#define MAXTSTEPS         10
-#define MAXFNAMES         10
-#define MAXGHBUFFERSIZE_0 10
-#define MAXGHBUFFERSIZE_1 10
-
-#define MAXSTRING        256
-#define MINFILETYPE        1
-#define MAXFILETYPE        9
-
-#define ddebug             0
+#define ddebug             1
 
 #define debugString "#####"
 
-/* If we're not using GNU C, elide __attribute__ */
-#ifndef __GNUC__
-#  define  __attribute__(x)  /*NOTHING*/
+#ifdef USE_MPI
+void
+cdiAbortC_MPI(const char * caller, const char * filename,
+              const char *functionname, int line,
+              const char * errorString, va_list ap)
+  __attribute__((noreturn));
 #endif
 
-void pcdiAssert( bool, const char *, const char *, int );
-#define xassert(arg) do {                               \
-    if ((arg)) {                                        \
-    } else {                                            \
-      pcdiAssert(0, __FILE__, __func__, __LINE__ );     \
-    }                                                   \
-  } while(0)
+#ifdef USE_MPI
+static inline int
+callsToMPIAreAllowed()
+{
+  int init_flag = 0, finished_flag = 0;
+  return MPI_Initialized(&init_flag) == MPI_SUCCESS && init_flag
+    && MPI_Finalized(&finished_flag) == MPI_SUCCESS && !finished_flag;
+}
+
+static inline int
+getMPICommWorldRank()
+{
+  int rank = -1;
+  if (callsToMPIAreAllowed())
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  return rank;
+}
+#endif
 
 #ifdef USE_MPI
 #define xdebug(fmt, ...)                                                \
   if ( ddebug ){                                                        \
-    int rank;                                                           \
-    {                                                                   \
-      int init_flag;                                                    \
-      if (MPI_Initialized(&init_flag) == MPI_SUCCESS && init_flag)      \
-        MPI_Comm_rank ( MPI_COMM_WORLD, &rank );                        \
-      else                                                              \
-        rank = -1;                                                      \
-    }                                                                   \
+    int rank = getMPICommWorldRank();                                   \
     fprintf ( stderr, "%s pe%d in %s, %s, line %d: " fmt "\n",          \
               debugString, rank,  __func__, __FILE__,  __LINE__,        \
               __VA_ARGS__ );                                            \
@@ -80,13 +66,12 @@ void pcdiAssert( bool, const char *, const char *, int );
 
 
 #ifdef USE_MPI
-#define xdebug3(fmt, ...)					\
-  if ( ddebug == MAXDEBUG ){                                    \
-    int rank;                                                   \
-    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );                    \
-    fprintf ( stderr, "pe%d in %s, %s, line %d: " fmt "\n",     \
-              rank,  __func__, __FILE__,  __LINE__,             \
-              __VA_ARGS__ );                                    \
+#define xdebug3(fmt, ...)                                               \
+  if ( ddebug == MAXDEBUG ){                                            \
+    int rank = getMPICommWorldRank();                                   \
+    fprintf ( stderr, "pe%d in %s, %s, line %d: " fmt "\n",             \
+              rank,  __func__, __FILE__,  __LINE__,                     \
+              __VA_ARGS__ );                                            \
   }
 
 #else
@@ -97,25 +82,11 @@ void pcdiAssert( bool, const char *, const char *, int );
               __VA_ARGS__ );                                 \
   }
 #endif
-/*
-#ifdef USE_MPI
-char * outTextComm ( MPI_Comm * );
-
-#define xdebugComm(comm,fmt, ...)				\
-  if ( ddebug ){						\
-    fprintf ( stderr, "%s%s, %s, line %d%s: " fmt "\n",		\
-	      outTextRank (),  __func__, __FILE__,  __LINE__,	\
-	      outTextComm ( comm ),				\
-	      ## __VA_ARGS__  );				\
-    }
-#endif
-*/
 
 #ifdef USE_MPI
 #define xwarning(fmt, ...)						\
   if ( ddebug ){							\
-    int rank;								\
-    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );				\
+    int rank = getMPICommWorldRank();                                   \
     fprintf ( stderr, "WARNING: pe%d in %s, %s, line %d: " fmt "\n",	\
               rank,  __func__, __FILE__,  __LINE__,			\
               __VA_ARGS__ );						\
@@ -129,14 +100,6 @@ char * outTextComm ( MPI_Comm * );
   }
 #endif
 
-void pcdiAbortC(const char *, const char *, const char *, int, const char *, ... )
-  __attribute__((noreturn));
-#define xabortC(caller, ...) pcdiAbortC(caller, __FILE__, __func__, __LINE__, __VA_ARGS__ )
-
-void pcdiAbort (const char *, const char *, int, const char *, ... )
-  __attribute__((noreturn));
-#define xabort(...) pcdiAbort(__FILE__, __func__, __LINE__, __VA_ARGS__ )
-
 void * pcdiXmalloc ( size_t, const char *, const char *, int );
 #define xmalloc(size) pcdiXmalloc ( size, __FILE__, __func__,  __LINE__ )
 
@@ -148,8 +111,12 @@ void * pcdiXrealloc ( void *, size_t, const char *, const char *, int );
 #define xrealloc(p,size) pcdiXrealloc(p, size,            \
                                       __FILE__, __func__, __LINE__)
 
-void pcdiXMPI ( int, const char *, int );
-#define xmpi(ret) pcdiXMPI ( ret, __FILE__, __LINE__ )
+void pcdiXMPI(int iret, const char *, int);
+#define xmpi(ret) do {                                  \
+    int tmpIRet = (ret);                                   \
+    if (tmpIRet != MPI_SUCCESS)                            \
+      pcdiXMPI(tmpIRet, __FILE__, __LINE__ );              \
+  } while(0)
 
 #ifdef USE_MPI
 void pcdiXMPIStat ( int, const char *, int, MPI_Status * );
@@ -187,8 +154,11 @@ void printArray ( const char *, char *, const void *, int, int, const char *, co
   if ( ddebug == MAXDEBUG )                                                         \
       printArray ( debugString, ps, array, n, datatype,  __func__, __FILE__, __LINE__ )
 
-
-void reshListPrint ( char * );
+/**
+ * @return number of dimensions
+ */
+int
+cdiPioQueryVarDims(int varShape[3], int vlistID, int varID);
 
 #endif
 /*

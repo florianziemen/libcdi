@@ -7,10 +7,6 @@
 
 #include <stddef.h>  /* size_t */
 
-#ifdef USE_MPI
-#include <mpi.h>
-#endif
-
 #ifndef _CDI_LIMITS_H
 #  include "cdi_limits.h"
 #endif
@@ -51,14 +47,6 @@ typedef struct
 }
 levinfo_t;
 
-
-typedef struct
-{
-  int      rank;
-  int      offset;
-  int      chunk;
-}
-deco_t;
 
 typedef struct
 {
@@ -112,9 +100,6 @@ typedef struct
   ensinfo_t  *ensdata;      /* Ensemble information */
   cdi_atts_t  atts;
   int         iorank;
-  int         decoSize;
-  deco_t     *deco;
-
 #if  defined  (HAVE_LIBGRIB_API)
   /* ---------------------------------- */
   /* Local change: 2013-01-28, FP (DWD) */
@@ -168,11 +153,7 @@ int      vlistHasTime(int vlistID);
 int      vlistDelAtts(int vlistID, int varID);
 int      vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2);
 
-#ifdef USE_MPI
-void     vlistUnpack(char * buffer, int bufferSize, int * pos, int, MPI_Comm comm);
-void     vlistDefVarDeco ( int vlistID, int varID, int decoSize, 
-                              deco_t * deco );
-#endif
+void     vlistUnpack(char * buffer, int bufferSize, int * pos, int, void *context);
 
 /*      vlistDefVarValidrange: Define the valid range of a Variable */
 void    vlistDefVarValidrange(int vlistID, int varID, const double *validrange);

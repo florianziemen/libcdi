@@ -8,9 +8,15 @@
 #ifdef USE_MPI
 
 #include <mpi.h>
+#include <yaxt.h>
 
-void pioBufferData ( int, int, const double *, int );
+void
+pioBufferPartData(int streamID, int varID, const double *data,
+                  int nmiss, Xt_idxlist partDesc);
+void pioBufferData (int, int, const double *, int );
 void pioBufferFuncCall(int, int, ... );
+
+extern float cdiPIOpartInflate_;
 
 #endif
 

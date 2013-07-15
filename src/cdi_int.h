@@ -251,7 +251,8 @@ typedef struct {
   void       *gribContainers;
 #endif
   int         vlistIDorig;
-
+  /* only used by MPI-parallelized version of library */
+  int       ownerRank;    // MPI rank of owner process
   /* ---------------------------------- */
   /* Local change: 2013-02-18, FP (DWD) */
   /* ---------------------------------- */
@@ -292,6 +293,7 @@ void    streamDefineTaxis(int streamID);
 
 int     streamsNewEntry(int filetype);
 void    streamsInitEntry(int streamID);
+void    cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig);
 int     stream_new_var(stream_t *streamptr, int gridID, int zaxisID);
 
 int     tstepsNewEntry(stream_t *streamptr);
@@ -339,6 +341,32 @@ void str2uuid(const char *uuidstr, char *uuid);
 #define CDI_UNIT_CM   4
 #define CDI_UNIT_DM   5
 #define CDI_UNIT_M    6
+
+struct streamAssoc
+{
+  int streamID, vlistID, vlistIDorig;
+};
+
+struct streamAssoc
+streamUnpack(char * unpackBuffer, int unpackBufferSize,
+             int * unpackBufferPos, int nspTarget, void *context);
+
+int
+cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
+                             int filetype, stream_t *streamptr,
+                             int recordBufIsToBeCreated);
+
+void
+cdiStreamDefVlist_(int streamID, int vlistID);
+void
+cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data,
+                   int nmiss);
+void
+cdiStreamwriteVarChunk_(int streamID, int varID, int memtype,
+                        const int rect[][2], const void *data, int nmiss);
+void
+cdiStreamCloseDefaultDelegate(stream_t *streamptr,
+                              int recordBufIsToBeDeleted);
 
 char *cdiUnitNamePtr(int cdi_unit);
 

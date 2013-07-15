@@ -1,11 +1,9 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#ifdef USE_MPI
 int
 modelUnpack(void *buf, int size, int *position,
-            int, MPI_Comm comm);
-#endif
+            int, void *context);
 
 #endif
 /*

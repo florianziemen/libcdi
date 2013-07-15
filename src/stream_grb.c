@@ -13,11 +13,7 @@
 #include "file.h"
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
 #include "gribapi.h"
-
-#ifdef USE_MPI
-#include "pio.h"
-#include "pio_comm.h"
-#endif
+#include "namespace.h"
 
 
 int grib1ltypeToZaxisType(int grib_ltype)
@@ -558,14 +554,12 @@ int grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
   if ( streamptr->comptype == COMPRESS_SZIP )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
-  /* begin deike */
-#ifdef USE_MPI
-  if ( commInqIOMode () != PIO_NONE )
-    nwrite = pioFileWrite ( fileID, tsID, gribbuffer, nbytes );
-  else
-#endif
-  /* end deike */
-    nwrite = fileWrite(fileID, gribbuffer, nbytes);
+  {
+    size_t (*myFileWrite)(int fileID, const void *restrict buffer,
+                          size_t len, int tsID)
+      = namespaceSwitchGet(NSSWITCH_FILE_WRITE);
+    nwrite = myFileWrite(fileID, gribbuffer, nbytes, tsID);
+  }
 
   if ( nwrite != nbytes ) perror(__func__);
 

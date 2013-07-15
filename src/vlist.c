@@ -15,6 +15,9 @@
 #include "vlist_att.h"
 #include "pio_rpc.h"
 
+#include "resource_unpack.h"
+#include "serialize.h"
+
 #if  defined  (HAVE_LIBGRIB_API)
 /* list of additional GRIB2 keywords which are read by the open process */
 int    cdiNAdditionalGRIBKeys = 0;
@@ -25,7 +28,6 @@ extern void zaxisGetIndexList ( int, int * );
 
 static int VLIST_Debug = 0;
 
-static int vlistIsInitialized = 0;
 static void vlist_initialize(void);
 
 #if  defined  (HAVE_LIBPTHREAD)
@@ -38,8 +40,10 @@ static pthread_once_t  _vlist_init_thread = PTHREAD_ONCE_INIT;
 
 #else
 
+static int vlistIsInitialized = 0;
+
 #  define VLIST_INIT()               \
-  if ( vlistIsInitialized == FALSE ) vlist_initialize()
+  if ( !vlistIsInitialized ) vlist_initialize()
 #endif
 
 
@@ -57,22 +61,21 @@ vlist_compare(vlist_t *a, vlist_t *b)
 
 static void
 vlistPrintKernel(vlist_t *vlistptr, FILE * fp );
-#ifdef USE_MPI
-static int  vlistGetSizeP ( void * vlistptr, MPI_Comm comm );
+static void
+vlist_delete(vlist_t *vlistptr);
+
+static int  vlistGetSizeP ( void * vlistptr, void *context);
 static void vlistPackP    ( void * vlistptr, void * buff, int size,
-                            int *position, MPI_Comm comm );
+                            int *position, void *context);
 static int  vlistTxCode   ( void );
-#endif
 
 resOps vlist_ops = {
   (valCompareFunc)vlist_compare,
-  free,
+  (valDestroyFunc)vlist_delete,
   (valPrintFunc)vlistPrintKernel
-#ifdef USE_MPI
   , vlistGetSizeP,
   vlistPackP,
   vlistTxCode
-#endif
 };
 
 
@@ -135,8 +138,9 @@ void vlist_initialize(void)
 
   env = getenv("VLIST_DEBUG");
   if ( env ) VLIST_Debug = atoi(env);
-
+#ifndef HAVE_LIBPTHREAD
   vlistIsInitialized = TRUE;
+#endif
 }
 
 static
@@ -198,31 +202,18 @@ int vlistCreate(void)
   return (vlistID);
 }
 
-/*
-@Function  vlistDestroy
-@Title     Destroy a variable list
-
-@Prototype void vlistDestroy(int vlistID)
-@Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
-
-@EndFunction
-*/
-void vlistDestroy(int vlistID)
+static void
+vlist_delete(vlist_t *vlistptr)
 {
-  vlist_t *vlistptr;
-  int nvars;
-  int varID;
-
-  vlistptr = vlist_to_pointer(vlistID);
-
   vlist_check_ptr(__func__, vlistptr);
+
+  int vlistID = vlistptr->self;
 
   vlistDelAtts(vlistID, CDI_GLOBAL);
 
-  nvars = vlistptr->nvars;
+  int nvars = vlistptr->nvars;
 
-  for ( varID = 0; varID < nvars; varID++ )
+  for (int varID = 0; varID < nvars; varID++ )
     {
       if ( vlistptr->vars[varID].levinfo )  free(vlistptr->vars[varID].levinfo);
       if ( vlistptr->vars[varID].name )     free(vlistptr->vars[varID].name);
@@ -250,6 +241,26 @@ void vlistDestroy(int vlistID)
   if ( vlistptr->vars ) free(vlistptr->vars);
 
   vlist_delete_entry(vlistptr);
+}
+
+
+/*
+@Function  vlistDestroy
+@Title     Destroy a variable list
+
+@Prototype void vlistDestroy(int vlistID)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}
+
+@EndFunction
+*/
+void vlistDestroy(int vlistID)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlist_delete(vlistptr);
 }
 
 /*
@@ -309,7 +320,6 @@ void vlistCopy(int vlistID2, int vlistID1)
               memcpy(vlistptr2->vars[varID].ensdata,
                      vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
             }
-
 #if  defined  (HAVE_LIBGRIB_API)
           /* ---------------------------------- */
           /* Local change: 2013-01-28, FP (DWD) */
@@ -371,9 +381,6 @@ int vlistDuplicate(int vlistID)
   vlistIDnew = vlistCreate();
 
   vlistCopy(vlistIDnew, vlistID);
-
-  if ( ! namespaceHasLocalFile ( namespaceGetActive ()))
-    reshSetStatus ( vlistIDnew, &vlist_ops, SUSPENDED );
 
   return (vlistIDnew);
 }
@@ -1137,7 +1144,7 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
   int param, gridID, zaxisID, tsteptype, nlevs;
   int dtype;
 
-  int i, iorank, decoSize, size, rank, offset, chunk;
+  int i, iorank, size, rank, offset, chunk;
 
   char paramstr[32];
   char *name, *longname, *units;
@@ -1160,7 +1167,7 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
   if ( nvars > 0 )
     {
       fprintf(fp, " varID param    gridID zaxisID tsteptype nlevel flag "
-              " name     longname iorank decosize\n");
+              " name     longname iorank\n");
       for ( varID = 0; varID < nvars; varID++ )
         {
           param    = vlistptr->vars[varID].param;
@@ -1173,14 +1180,13 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
           units    = vlistptr->vars[varID].units;
           flag     = vlistptr->vars[varID].flag;
           iorank   = vlistptr->vars[varID].iorank;
-          decoSize = vlistptr->vars[varID].decoSize;
 
           cdiParamToString(param, paramstr, sizeof(paramstr));
           fprintf(fp, "%6d %-8s %6d %6d %6d %6d %5d %-8s"
-                  " %s %6d %6d",
+                  " %s %6d",
                   varID, paramstr, gridID, zaxisID, tsteptype, nlevs, flag,
                   name ? name : "", longname ? longname : "",
-                  iorank, decoSize);
+                  iorank);
 
           if ( units ) fprintf ( fp, "   [%s]", units);
           fprintf ( fp, "\n");
@@ -1209,24 +1215,12 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
         }
 
       fprintf(fp, "\n");
-      fprintf(fp, " varID  size iorank decosize corank offset  chunk\n");
+      fprintf(fp, " varID  size iorank\n");
       for ( varID = 0; varID < nvars; varID++ )
-        {
-          iorank    = vlistptr->vars[varID].iorank;
-          decoSize  = vlistptr->vars[varID].decoSize;
-          size      = vlistptr->vars[varID].nlevs *
-            gridInqSize ( vlistptr->vars[varID].gridID );
-
-          for ( i = 0; i < decoSize; i++ )
-            {
-              rank   = vlistptr->vars[varID].deco[i].rank;
-              offset = vlistptr->vars[varID].deco[i].offset;
-              offset = vlistptr->vars[varID].deco[i].offset;
-              chunk  = vlistptr->vars[varID].deco[i].chunk;
-              fprintf ( fp, "%3d %8d %6d %6d %6d %8d %6d\n",
-                        varID, size, iorank, decoSize, rank, offset, chunk );
-            }
-        }
+        fprintf(fp, "%3d %8d %6d\n", varID,
+                vlistptr->vars[varID].nlevs
+                * gridInqSize(vlistptr->vars[varID].gridID),
+                vlistptr->vars[varID].iorank);
     }
 }
 
@@ -1690,8 +1684,6 @@ int vlistHasTime(int vlistID)
   return (hastime);
 }
 
-#ifdef USE_MPI
-
 enum {
   vlist_nints=7,
 };
@@ -1704,21 +1696,21 @@ vlistTxCode ( void )
 
 
 static
-int  vlistGetSizeP ( void * vlistptr, MPI_Comm comm )
+int  vlistGetSizeP ( void * vlistptr, void *context)
 {
   int txsize, varID;
   vlist_t *p = vlistptr;
-  xmpi(MPI_Pack_size(vlist_nints, MPI_INT, comm, &txsize));
-  txsize += vlistAttsGetSize(p, CDI_GLOBAL, comm);
+  txsize = serializeGetSize(vlist_nints, DATATYPE_INT, context);
+  txsize += vlistAttsGetSize(p, CDI_GLOBAL, context);
   for ( varID = 0; varID <  p->nvars; varID++ )
-    txsize += vlistVarGetSize(p, varID, comm);
+    txsize += vlistVarGetSize(p, varID, context);
   return txsize;
 }
 
 
 static
 void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
-                  MPI_Comm comm )
+                  void *context )
 {
   int varID, tempbuf[vlist_nints];
   vlist_t *p = vlistptr;
@@ -1729,31 +1721,29 @@ void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
   tempbuf[4] = p->tableID;
   tempbuf[5] = p->instID;
   tempbuf[6] = p->modelID;
-  xmpi(MPI_Pack(tempbuf, vlist_nints, MPI_INT, buf, size, position, comm));
-  vlistAttsPack(p, CDI_GLOBAL, buf, size, position, comm);
+  serializePack(tempbuf, vlist_nints, DATATYPE_INT, buf, size, position, context);
+  vlistAttsPack(p, CDI_GLOBAL, buf, size, position, context);
   for ( varID = 0; varID < p->nvars; varID++ )
     {
-      vlistVarPack(p, varID, buf, size, position, comm);
+      vlistVarPack(p, varID, buf, size, position, context);
     }
 }
 
-void vlistUnpack(char * buf, int size, int *position, int nspTarget, MPI_Comm comm)
+void vlistUnpack(char * buf, int size, int *position, int nspTarget, void *context)
 {
   int newvlist;
   int varID, tempbuf[vlist_nints];
-  xmpi(MPI_Unpack(buf, size, position, tempbuf, vlist_nints, MPI_INT, comm));
+  serializeUnpack(buf, size, position, tempbuf, vlist_nints, DATATYPE_INT, context);
   newvlist = vlistCreate();
   /* xassert(newvlist == tempbuf[0]); */
   vlistDefTaxis ( newvlist, namespaceAdaptKey ( tempbuf[3], nspTarget ));
   vlistDefTable(newvlist, tempbuf[4]);
   vlistDefInstitut ( newvlist, namespaceAdaptKey ( tempbuf[5], nspTarget ));
   vlistDefModel ( newvlist, namespaceAdaptKey ( tempbuf[6], nspTarget ));
-  vlistAttsUnpack(newvlist, CDI_GLOBAL, buf, size, position, comm);
+  vlistAttsUnpack(newvlist, CDI_GLOBAL, buf, size, position, context);
   for ( varID = 0; varID < tempbuf[1]; varID++ )
-    vlistVarUnpack ( newvlist, buf, size, position, nspTarget, comm );
+    vlistVarUnpack(newvlist, buf, size, position, nspTarget, context);
 }
-
-#endif
 
 /*
  * Local Variables:

@@ -50,13 +50,20 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+TESTS = test_grib.sh test_cksum_grib test_cksum_nc test_cksum_extra \
+	test_cksum_service test_cksum_nc2 test_cksum_nc4 \
+	test_cksum_ieg pio_write_run pio_cksum_mpinonb \
+	pio_cksum_fpguard pio_cksum_asynch pio_cksum_writer \
+	pio_cksum_cdf test_resource_copy$(EXEEXT)
 check_PROGRAMS = test_grib$(EXEEXT) cksum_write$(EXEEXT) \
-	cksum_read$(EXEEXT) pio_write$(EXEEXT)
+	cksum_read$(EXEEXT) pio_write$(EXEEXT) \
+	test_resource_copy$(EXEEXT)
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/pio_cksum_asynch.in $(srcdir)/pio_cksum_fpguard.in \
-	$(srcdir)/pio_cksum_mpinonb.in $(srcdir)/pio_cksum_writer.in \
-	$(srcdir)/pio_write_run.in $(srcdir)/test_cksum_extra.in \
+	$(srcdir)/pio_cksum_asynch.in $(srcdir)/pio_cksum_cdf.in \
+	$(srcdir)/pio_cksum_fpguard.in $(srcdir)/pio_cksum_mpinonb.in \
+	$(srcdir)/pio_cksum_writer.in $(srcdir)/pio_write_run.in \
+	$(srcdir)/test_chunk_cksum.in $(srcdir)/test_cksum_extra.in \
 	$(srcdir)/test_cksum_grib.in $(srcdir)/test_cksum_ieg.in \
 	$(srcdir)/test_cksum_nc.in $(srcdir)/test_cksum_nc2.in \
 	$(srcdir)/test_cksum_nc4.in $(srcdir)/test_cksum_service.in
@@ -79,8 +86,9 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/config.h
 CONFIG_CLEAN_FILES = test_cksum_grib test_cksum_nc test_cksum_nc2 \
 	test_cksum_nc4 test_cksum_extra test_cksum_service \
-	test_cksum_ieg pio_write_run pio_cksum_mpinonb \
-	pio_cksum_fpguard pio_cksum_asynch pio_cksum_writer
+	test_cksum_ieg test_chunk_cksum pio_write_run \
+	pio_cksum_mpinonb pio_cksum_fpguard pio_cksum_asynch \
+	pio_cksum_writer pio_cksum_cdf
 CONFIG_CLEAN_VPATH_FILES =
 am_cksum_read_OBJECTS = cksum_read.$(OBJEXT) var_cksum.$(OBJEXT) \
 	stream_cksum.$(OBJEXT) cksum.$(OBJEXT) \
@@ -100,6 +108,10 @@ am_test_grib_OBJECTS = test_grib.$(OBJEXT)
 test_grib_OBJECTS = $(am_test_grib_OBJECTS)
 test_grib_LDADD = $(LDADD)
 test_grib_DEPENDENCIES = ../src/libcdi.la
+am_test_resource_copy_OBJECTS = test_resource_copy.$(OBJEXT)
+test_resource_copy_OBJECTS = $(am_test_resource_copy_OBJECTS)
+test_resource_copy_LDADD = $(LDADD)
+test_resource_copy_DEPENDENCIES = ../src/libcdi.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -114,9 +126,11 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(cksum_read_SOURCES) $(cksum_write_SOURCES) \
-	$(pio_write_SOURCES) $(test_grib_SOURCES)
+	$(pio_write_SOURCES) $(test_grib_SOURCES) \
+	$(test_resource_copy_SOURCES)
 DIST_SOURCES = $(cksum_read_SOURCES) $(cksum_write_SOURCES) \
-	$(pio_write_SOURCES) $(test_grib_SOURCES)
+	$(pio_write_SOURCES) $(test_grib_SOURCES) \
+	$(test_resource_copy_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -160,6 +174,9 @@ ENABLE_CGRIBEX = @ENABLE_CGRIBEX@
 ENABLE_EXTRA = @ENABLE_EXTRA@
 ENABLE_GRIB = @ENABLE_GRIB@
 ENABLE_IEG = @ENABLE_IEG@
+ENABLE_NC2 = @ENABLE_NC2@
+ENABLE_NC4 = @ENABLE_NC4@
+ENABLE_NETCDF = @ENABLE_NETCDF@
 ENABLE_PYTHON = @ENABLE_PYTHON@
 ENABLE_RUBY = @ENABLE_RUBY@
 ENABLE_SERVICE = @ENABLE_SERVICE@
@@ -180,6 +197,7 @@ FPP_INCOPT = @FPP_INCOPT@
 GREP = @GREP@
 GRIB_API_INCLUDE = @GRIB_API_INCLUDE@
 GRIB_API_LIBS = @GRIB_API_LIBS@
+HAVE_PARALLEL_NC4 = @HAVE_PARALLEL_NC4@
 HDF5_INCLUDE = @HDF5_INCLUDE@
 HDF5_LIBS = @HDF5_LIBS@
 HDF5_ROOT = @HDF5_ROOT@
@@ -223,6 +241,11 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
+PPM_CORE_CFLAGS = @PPM_CORE_CFLAGS@
+PPM_CORE_LIBS = @PPM_CORE_LIBS@
 PTHREAD_CC = @PTHREAD_CC@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
@@ -242,6 +265,8 @@ THREADS_LIBS = @THREADS_LIBS@
 USER_NAME = @USER_NAME@
 USE_MPI = @USE_MPI@
 VERSION = @VERSION@
+YAXT_CFLAGS = @YAXT_CFLAGS@
+YAXT_LIBS = @YAXT_LIBS@
 ZLIB_INCLUDE = @ZLIB_INCLUDE@
 ZLIB_LIBS = @ZLIB_LIBS@
 abs_builddir = @abs_builddir@
@@ -301,16 +326,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-
-#
-TESTS = test_grib.sh test_cksum_grib test_cksum_nc test_cksum_extra \
-	test_cksum_service test_cksum_nc2 test_cksum_nc4 test_cksum_ieg \
-	pio_write_run pio_cksum_mpinonb pio_cksum_fpguard \
-	pio_cksum_asynch pio_cksum_writer
-
 #
 test_grib_SOURCES = test_grib.c
 cksum_write_SOURCES = cksum_write.c cksum.c cksum.h
+cksum_write_chunk_SOURCES = cksum_write_chunkb main.c cksum.c cksum.h
 cksum_read_SOURCES = cksum_read.c \
 	var_cksum.c var_cksum.h \
 	stream_cksum.c stream_cksum.h \
@@ -318,7 +337,9 @@ cksum_read_SOURCES = cksum_read.c \
 	ensure_array_size.h ensure_array_size.c
 
 pio_write_SOURCES = pio_write.c cksum.h cksum.c
+test_resource_copy_SOURCES = test_resource_copy.c
 #
+AM_CFLAGS = $(YAXT_CFLAGS)
 LDADD = ../src/libcdi.la -lm
 INCLUDES = -I$(top_srcdir)/src
 #
@@ -373,6 +394,8 @@ test_cksum_service: $(top_builddir)/config.status $(srcdir)/test_cksum_service.i
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 test_cksum_ieg: $(top_builddir)/config.status $(srcdir)/test_cksum_ieg.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+test_chunk_cksum: $(top_builddir)/config.status $(srcdir)/test_chunk_cksum.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 pio_write_run: $(top_builddir)/config.status $(srcdir)/pio_write_run.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 pio_cksum_mpinonb: $(top_builddir)/config.status $(srcdir)/pio_cksum_mpinonb.in
@@ -382,6 +405,8 @@ pio_cksum_fpguard: $(top_builddir)/config.status $(srcdir)/pio_cksum_fpguard.in
 pio_cksum_asynch: $(top_builddir)/config.status $(srcdir)/pio_cksum_asynch.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 pio_cksum_writer: $(top_builddir)/config.status $(srcdir)/pio_cksum_writer.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+pio_cksum_cdf: $(top_builddir)/config.status $(srcdir)/pio_cksum_cdf.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-checkPROGRAMS:
@@ -404,6 +429,9 @@ pio_write$(EXEEXT): $(pio_write_OBJECTS) $(pio_write_DEPENDENCIES) $(EXTRA_pio_w
 test_grib$(EXEEXT): $(test_grib_OBJECTS) $(test_grib_DEPENDENCIES) $(EXTRA_test_grib_DEPENDENCIES) 
 	@rm -f test_grib$(EXEEXT)
 	$(LINK) $(test_grib_OBJECTS) $(test_grib_LDADD) $(LIBS)
+test_resource_copy$(EXEEXT): $(test_resource_copy_OBJECTS) $(test_resource_copy_DEPENDENCIES) $(EXTRA_test_resource_copy_DEPENDENCIES) 
+	@rm -f test_resource_copy$(EXEEXT)
+	$(LINK) $(test_resource_copy_OBJECTS) $(test_resource_copy_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -418,6 +446,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_write.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_grib.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_resource_copy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/var_cksum.Po@am__quote@
 
 .c.o:

@@ -4,6 +4,15 @@
 #  include "config.h"
 #endif
 
+#if USE_MPI
+#  include <mpi.h>
+#  include <yaxt.h>
+#else
+#define MPI_Comm int
+#define MPI_Comm_f2c(c) (c)
+#define MPI_Comm_c2f(c) (c)
+#endif
+
 #if ! defined (_CDI_H)
 #  include "cdi.h"
 #endif
@@ -66,14 +75,25 @@
 
 /*  parallel IO routines  */
 
+#ifdef MPI_VERSION /* make_fint keep */
 FCALLSCSUB0 (pioEndDef, PIOENDDEF, pioenddef)
 FCALLSCSUB0 (pioEndTimestepping, PIOENDTIMESTEPPING, pioendtimestepping)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
-FCALLSCFUN5 (INT, pioInit, PIOINIT, pioinit, INT, INT, INT, INT, PINT)
-FCALLSCFUN2 (INT, pioInqVarDecoChunk, PIOINQVARDECOCHUNK, pioinqvardecochunk, INT, INT)
-FCALLSCFUN2 (INT, pioInqVarDecoOff, PIOINQVARDECOOFF, pioinqvardecooff, INT, INT)
-FCALLSCSUB1 (pioNamespaceSetActive, PIONAMESPACESETACTIVE, pionamespacesetactive, INT)
+static int pioInit_fwrap(int commSuper, int nProcsIO, int IOMode, int * pioNamespace, float partInflate)
+{
+  MPI_Comm v;
+  v = pioInit(MPI_Comm_f2c(commSuper),  nProcsIO,  IOMode,  pioNamespace,  partInflate);
+  return MPI_Comm_c2f(v);
+}
+FCALLSCFUN5 (INT, pioInit_fwrap, PIOINIT, pioinit, INT, INT, INT, PINT, FLOAT)
 FCALLSCSUB3 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep, INT, INT, INT)
+static void streamWriteVarPart_fwrap(int streamID, int varID, const void * data, int nmiss, void * partDesc)
+{
+  streamWriteVarPart( streamID,  varID,  data,  nmiss, (*(Xt_idxlist *)partDesc));
+}
+FCALLSCSUB5 (streamWriteVarPart_fwrap, STREAMWRITEVARPART, streamwritevarpart, INT, INT, PVOID, INT, PVOID)
+#endif /* make_fint keep */
+FCALLSCSUB1 (pioNamespaceSetActive, PIONAMESPACESETACTIVE, pionamespacesetactive, INT)
 
 /*  CDI control routines  */
 
@@ -138,6 +158,7 @@ FCALLSCSUB4 (streamWriteVarF, STREAMWRITEVARF, streamwritevarf, INT, INT, PFLOAT
 FCALLSCSUB5 (streamReadVarSlice, STREAMREADVARSLICE, streamreadvarslice, INT, INT, INT, PDOUBLE, PINT)
 FCALLSCSUB5 (streamWriteVarSlice, STREAMWRITEVARSLICE, streamwritevarslice, INT, INT, INT, PDOUBLE, INT)
 FCALLSCSUB5 (streamWriteVarSliceF, STREAMWRITEVARSLICEF, streamwritevarslicef, INT, INT, INT, PFLOAT, INT)
+FCALLSCSUB5 (streamWriteVarChunk, STREAMWRITEVARCHUNK, streamwritevarchunk, INT, INT, INTVV, PDOUBLE, INT)
 
 /*  STREAM record I/O routines  */
 

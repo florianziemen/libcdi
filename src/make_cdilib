@@ -19,8 +19,11 @@ rm -f ${PROG}
 
 DATE=`date +%F`
 
-if test -f config.h ; then
-   CDILIBVERSION=`grep PACKAGE_VERSION config.h | cut -f3 -d" "`
+if test -f ../configure.ac ; then
+   CDILIBVERSION=\"`sed -n '/^AC_INIT(/s/AC_INIT *( *[^,]*,[[ ]*\([^],]*\).*/\1/ p' ../configure.ac`\"
+else
+   echo "error: cannot find configure.ac" >&2
+   exit 1
 fi
 
 cat > ${PROG} << EOR
@@ -128,7 +131,9 @@ c="dmemory.c         \
    binary.c          \
    cdf.c             \
    namespace.c       \
+   serialize.c       \
    resource_handle.c \
+   resource_unpack.c \
    pio_util.c        \
    pio.c             \
    pio_interface.c   \
@@ -146,7 +151,7 @@ h="cdi_limits.h taxis.h dtypes.h file.h service.h extra.h \
    tablepar.h table.h gaussgrid.h grid.h zaxis.h varscan.h binary.h swap.h \
    service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \
    cdf.h vlist.h vlist_var.h vlist_att.h model.h institution.h \
-   namespace.h resource_handle.h pio_util.h pio.h pio_impl.h"
+   namespace.h resource_handle.h resource_unpack.h pio_util.h pio.h pio_impl.h serialize.h"
 
 #cat $h >> ${PROG}
 #cat $c | grep -v '#include' | grep -v '#  include' >> ${PROG}
@@ -160,11 +165,7 @@ for cfile in $c ; do
 done
 
 
-if test -f  config.h ; then
-   cpp -P -DHAVE_CONFIG_H  -I./ $srcdir/version.c >>  ${PROG}
-else
-   echo "error: missing config.h"
-fi
+cpp -P -DVERSION="${CDILIBVERSION}" $srcdir/version.c >>${PROG}
 
 # Fortran interface (with -DHAVE_CF_INTERFACE)
 

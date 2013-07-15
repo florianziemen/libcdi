@@ -13,14 +13,24 @@
 
 #include "cdi.h"
 #include "cdi_int.h"
+#include "gribapi.h"
+#ifdef HAVE_LIBNETCDF
+#include "stream_cdf.h"
+#endif
 #include "pio_util.h"
 #include "namespace.h"
+#include "serialize.h"
 #include "resource_handle.h"
-#include "pio_rpc.h"
+#include "resource_unpack.h"
+#ifdef USE_MPI
+#include "pio_comm.h"
+#endif
 
 #if  defined  (HAVE_LIBCGRIBEX)
 #include "cgribex.h"
 #endif
+
+extern int cdiPioSerialOpenFileMap(int streamID);
 
 int cdiDefaultCalendar = CALENDAR_PROLEPTIC;
 
@@ -73,19 +83,14 @@ static int cdiHaveMissval = 0;
 static int    streamCompareP ( void * streamptr1, void * streamptr2 );
 static void   streamDestroyP ( void * streamptr );
 static void   streamPrintP   ( void * streamptr, FILE * fp );
-#ifdef USE_MPI
-static int    streamGetPackSize ( void * streamptr, MPI_Comm comm );
-static void   streamPack        ( void * streamptr, void * buff, int size,
-				  int * position, MPI_Comm comm );
+static int    streamGetPackSize ( void * streamptr, void *context);
+static void   streamPack        ( void * streamptr, void * buff, int size, int * position, void *context );
 static int    streamTxCode      ( void );
-#endif
 
 resOps streamOps = { streamCompareP, streamDestroyP, streamPrintP,
-#ifdef USE_MPI
                      streamGetPackSize,
 		     streamPack,
                      streamTxCode
-#endif
 };
 
 long cdiGetenvInt(char *envName)
@@ -564,19 +569,19 @@ int  streamCompareP ( void * streamptr1, void * streamptr2 )
   xassert ( s2 );
 
   if ( s1->filetype  != s2->filetype  ) return differ;
-  if (  namespaceAdaptKey2 ( s1->vlistIDorig ) != 			     
+  if (  namespaceAdaptKey2 ( s1->vlistIDorig ) !=
 	namespaceAdaptKey2 ( s2->vlistIDorig )) return differ;
   if ( s1->byteorder != s2->byteorder ) return differ;
   if ( s1->comptype  != s2->comptype  ) return differ;
-  if ( s1->complevel != s2->complevel ) return differ; 
+  if ( s1->complevel != s2->complevel ) return differ;
 
   if ( s1->filename )
     {
       len = strlen ( s1->filename ) + 1;
-      if ( memcmp ( s1->filename, s2->filename, len )) 
+      if ( memcmp ( s1->filename, s2->filename, len ))
 	return differ;
     }
-  else if ( s2->filename ) 
+  else if ( s2->filename )
     return differ;
 
   return equal;
@@ -659,10 +664,51 @@ void streamGetIndexList ( int nstreams, int * streamIndexList )
   reshGetResHListOfType ( nstreams, streamIndexList, &streamOps );
 }
 
+void
+cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig)
+{
+  int nvars = vlistNvars(vlistID);
+  streamptr->vlistID = vlistID;
+  streamptr->vlistIDorig = vlistIDorig;
+  for (int varID = 0; varID < nvars; varID++ )
+    {
+      int gridID  = vlistInqVarGrid(vlistID, varID);
+      int zaxisID = vlistInqVarZaxis(vlistID, varID);
+      stream_new_var(streamptr, gridID, zaxisID);
+      if ( streamptr->have_missval )
+        vlistDefVarMissval(vlistID, varID,
+                           vlistInqVarMissval(vlistID, varID));
+    }
 
-#ifdef USE_MPI
+  if (namespaceHasLocalFile(namespaceGetActive())
+      && streamptr->filemode == 'w' )
+    {
+      if ( streamptr->filetype == FILETYPE_NC  ||
+           streamptr->filetype == FILETYPE_NC2 ||
+           streamptr->filetype == FILETYPE_NC4 ||
+           streamptr->filetype == FILETYPE_NC4C )
+        {
+#if USE_MPI && defined  (HAVE_LIBNETCDF) && ! defined (HAVE_PARALLEL_NC4)
+          int rank, rankOpen;
+          if (commInqIOMode() == PIO_NONE
+              || ((rank = commInqRankColl())
+                  == (rankOpen = cdiPioSerialOpenFileMap(streamptr->self))))
+#endif
+#ifdef HAVE_LIBNETCDF
+            cdfDefVars(streamptr);
+#endif
+        }
+      else if ( streamptr->filetype == FILETYPE_GRB  ||
+                streamptr->filetype == FILETYPE_GRB2 )
+        {
+          gribContainersNew(streamptr);
+        }
+    }
+}
+
+
 static int
-streamTxCode ( void )
+streamTxCode(void)
 {
   return STREAM;
 }
@@ -671,65 +717,85 @@ streamTxCode ( void )
 int streamNint = 11 ;
 
 
-static
-int streamGetPackSize ( void * voidP, MPI_Comm comm )
+static int
+streamGetPackSize(void * voidP, void *context)
 {
   stream_t * streamP = ( stream_t * ) voidP;
-  int packBufferSize = 0, size;
-
-  xmpi ( MPI_Pack_size ( streamNint, MPI_INT, comm, &size ));
-  packBufferSize += size;
-  xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
-  packBufferSize += 2 * size;
-
-
-  xmpi ( MPI_Pack_size (( int ) strlen ( streamP->filename ) + 1,
-			MPI_CHAR, comm, &size ));
-  packBufferSize += size;
-  xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
-  packBufferSize += size;
-
+  int packBufferSize
+    = serializeGetSize(streamNint, DATATYPE_INT, context)
+    + serializeGetSize(2, DATATYPE_FLT64, context)
+    + serializeGetSize((int)strlen(streamP->filename) + 1,
+                       DATATYPE_TXT, context)
+    + serializeGetSize(1, DATATYPE_FLT64, context);
   return packBufferSize;
 }
 
 
-static
-void streamPack ( void * streamptr, void * packBuffer, int packBufferSize,
-                  int * packBufferPos, MPI_Comm comm )
+static void
+streamPack(void * streamptr, void * packBuffer, int packBufferSize,
+           int * packBufferPos, void *context)
 {
   stream_t * streamP = ( stream_t * ) streamptr;
-  int intBuffer[streamNint];  
+  int intBuffer[streamNint];
   double d;
 
   intBuffer[0]  = streamP->self;
   intBuffer[1]  = streamP->filetype;
-  intBuffer[2]  =  ( int ) strlen ( streamP->filename ) + 1;
+  intBuffer[2]  = (int)strlen(streamP->filename) + 1;
   intBuffer[3]  = streamP->vlistID;
   intBuffer[4]  = streamP->vlistIDorig;
   intBuffer[5]  = streamP->byteorder;
   intBuffer[6]  = streamP->comptype;
-  intBuffer[7]  = streamP->complevel; 
+  intBuffer[7]  = streamP->complevel;
   intBuffer[8]  = cdiDataUnreduced;
   intBuffer[9]  = cdiSortName;
   intBuffer[10] = cdiHaveMissval;
-  
-  xmpi ( MPI_Pack ( intBuffer, streamNint, MPI_INT, 
-		    packBuffer, packBufferSize, packBufferPos, comm ));
-  d = xchecksum ( DATATYPE_INT , streamNint, intBuffer );
-  xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
-		    packBuffer, packBufferSize, packBufferPos, comm ));
 
-  xmpi ( MPI_Pack ( &cdiDefaultMissval, 1, MPI_DOUBLE,
-		    packBuffer, packBufferSize, packBufferPos, comm ));
+  serializePack(intBuffer, streamNint, DATATYPE_INT, packBuffer, packBufferSize, packBufferPos, context);
+  d = xchecksum(DATATYPE_INT, streamNint, intBuffer);
+  serializePack(&d, 1, DATATYPE_FLT64, packBuffer, packBufferSize, packBufferPos, context);
 
-  xmpi ( MPI_Pack ( streamP->filename, intBuffer[2], MPI_CHAR, 
-		    packBuffer, packBufferSize, packBufferPos, comm )); 
-  d = xchecksum  ( DATATYPE_TXT, intBuffer[2], &streamP->filename );
-  xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
-		    packBuffer, packBufferSize, packBufferPos, comm ));
+  serializePack(&cdiDefaultMissval, 1, DATATYPE_FLT64, packBuffer, packBufferSize, packBufferPos, context);
+  serializePack(streamP->filename, intBuffer[2], DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos, context);
+  d = xchecksum(DATATYPE_TXT, intBuffer[2], &streamP->filename);
+  serializePack(&d, 1, DATATYPE_FLT64, packBuffer, packBufferSize, packBufferPos, context);
 }
 
-#endif
+struct streamAssoc
+streamUnpack(char * unpackBuffer, int unpackBufferSize,
+             int * unpackBufferPos, int nspTarget, void *context)
+{
+  int intBuffer[streamNint], streamID;
+  double d;
+  char filename[CDI_MAX_NAME];
+
+  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                  intBuffer, streamNint, DATATYPE_INT, context);
+  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                  &d, 1, DATATYPE_FLT64, context);
+  xassert(xchecksum(DATATYPE_INT, streamNint, intBuffer ) == d);
+
+  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                  &cdiDefaultMissval, 1, DATATYPE_FLT64, context);
+  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                  &filename, intBuffer[2], DATATYPE_TXT, context);
+  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                  &d, 1, DATATYPE_FLT64, context);
+  xassert(d == xchecksum(DATATYPE_TXT, intBuffer[2], filename));
+  streamID = streamOpenWrite ( filename, intBuffer[1] );
+  xassert ( streamID >= 0 &&
+            namespaceAdaptKey ( intBuffer[0], nspTarget ) == streamID );
+  streamDefByteorder(streamID, intBuffer[5]);
+  streamDefCompType(streamID, intBuffer[6]);
+  streamDefCompLevel(streamID, intBuffer[7]);
+  cdiDefGlobal("REGULARGRID", intBuffer[8]);
+  cdiDefGlobal("SORTNAME", intBuffer[9]);
+  cdiDefGlobal("HAVE_MISSVAL", intBuffer[10]);
+  struct streamAssoc retval = { streamID, intBuffer[3], intBuffer[4] };
+  return retval;
+}
+
+
 /*
  * Local Variables:
  * c-file-style: "Java"

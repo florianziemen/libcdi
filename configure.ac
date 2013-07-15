@@ -108,12 +108,90 @@ ACX_OPTIONS
 AC_ARG_ENABLE(mpi,AS_HELP_STRING([--enable-mpi],[Compile with MPI compiler [default=no]]),enable_mpi=yes,enable_mpi=no)
 AS_IF([test x"${enable_mpi}" = x"yes"],
       [USE_MPI=yes])
+HAVE_PARALLEL_NC4=0
 AS_IF([test x"$USE_MPI" = xyes],
   [AC_DEFINE([USE_MPI],[1],[parallel I/O requested and available])
-   AC_CHECK_PROGS([MPI_LAUNCH],[mpirun mpiexec],[])
-   AS_IF([test x$MPI_LAUNCH = x],[])],
+   AC_PATH_PROGS([MPI_LAUNCH],[mpirun mpiexec],[true])
+   AS_IF([test x"$cross_compiling" = xno],
+     [AC_MSG_CHECKING([if $MPI_LAUNCH works])
+      saved_CFLAGS=$CFLAGS
+      saved_LIBS=$LIBS
+      CFLAGS="$CFLAGS $MPI_C_INCLUDE"
+      LIBS="$LIBS $MPI_C_LIB"
+      AC_LINK_IFELSE([AC_LANG_SOURCE([
+@%:@include <stdio.h>
+@%:@include <stdlib.h>
+
+@%:@include <mpi.h>
+
+@%:@define xmpi(ret)           \\
+  do {                      \\
+    if (ret != MPI_SUCCESS) \\
+      exit(EXIT_FAILURE);   \\
+  } while (0)
+
+int
+main(int argc, char **argv)
+{
+  xmpi(MPI_Init(&argc, &argv));
+  char *numarg = argv@<:@1@:>@;
+  int cmdnum = atoi(numarg);
+  int procnum = 1;
+  xmpi(MPI_Allreduce(MPI_IN_PLACE, &procnum, 1, MPI_INT, MPI_SUM,
+                     MPI_COMM_WORLD));
+  xmpi(MPI_Finalize());
+  return (procnum == cmdnum)?EXIT_SUCCESS:EXIT_FAILURE;
+}
+])],
+         [AS_IF([$MPI_LAUNCH -n 4 ./conftest$EXEEXT 4],
+            [AC_MSG_RESULT([yes])],
+            [AC_MSG_RESULT([no])
+             AC_MSG_FAILURE([mpirun doesn't work])])],
+         [AC_MSG_FAILURE([Cannot compile simple MPI program])])
+      CFLAGS=$saved_CFLAGS
+      LIBS=$saved_LIBS
+     ])
+   AS_IF([test "x$MPI_LAUNCH" = xtrue],
+     [AC_MSG_WARN([MPI launch command unavailable])])
+
+   PKG_CHECK_MODULES([YAXT],[yaxt],
+     [AC_DEFINE([HAVE_YAXT],,[yaxt library is available])],
+     [AC_MSG_FAILURE([Required yaxt library unavailable.])])
+   AS_IF([test x"$ENABLE_NC4" = xyes],
+     [AC_CHECK_HEADERS([netcdf_par.h],
+        [AC_CHECK_DECL([MPI_Bcast],
+           [HAVE_PARALLEL_NC4=1],
+           [AC_MSG_WARN([The supplied netCDF library does not support MPI parallel invocations])],
+           [AC_INCLUDES_DEFAULT
+@%:@include <netcdf_par.h>])],
+        [AC_CHECK_DECL([MPI_Bcast],
+           [HAVE_PARALLEL_NC4=1],
+           [AC_MSG_WARN([The supplied netCDF library does not support MPI parallel invocations])],
+           [AC_INCLUDES_DEFAULT
+@%:@include <netcdf.h>])
+])
+      dnl parallel netCDF support still requires ScalES-PPM and YAXT to
+      dnl re-arrange the data when running with more than one collector
+      AS_IF([test $HAVE_PARALLEL_NC4 = 1],
+        [PKG_CHECK_MODULES([PPM_CORE],[scales-ppm-core],
+           [enable_ppm=yes
+            AC_DEFINE([HAVE_PPM_CORE],,
+              [ScalES PPM C core library is available])
+           ],
+           [enable_ppm=no])
+        ])
+      dnl if not both scales-ppm and yaxt are available, netcdf can only be
+      dnl used in serial mode
+      AS_IF([test x$enable_ppm != xyes],
+        [HAVE_PARALLEL_NC4=0])
+     ])
+  ],
   [MPI_LAUNCH="`pwd`/util/serialrun"
    AC_SUBST([MPI_LAUNCH])])
+AS_IF([test $HAVE_PARALLEL_NC4 -gt 0],
+  [AC_DEFINE([HAVE_PARALLEL_NC4],[1],
+             [netCDF library does support MPI parallel invocations])])
+AC_SUBST([HAVE_PARALLEL_NC4])
 AM_CONDITIONAL([USE_MPI],[test x"$USE_MPI" = xyes])
 AC_SUBST([USE_MPI])
 #  ----------------------------------------------------------------------
@@ -170,16 +248,21 @@ AS_IF([test "x$enable_ruby" != "xno"],[AC_SUBST([ENABLE_RUBY],[true])],[AC_SUBST
 AC_ARG_ENABLE(python,
   [AS_HELP_STRING([--enable-python],[python language bindings [default=no] (EXPERIMENTAL)])],
   [AC_CHECK_PROG(PYTHON,python,python)
-   PYTHON_INCLUDES="-I$($PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_lib(1,1)' | $SED 's/lib/include/')"
-   save_CPPFLAGS=$CPPFLAGS
-   CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
-   AC_CHECK_HEADER([Python.h],,[enable_python=no
-                                PYTHON=
-                               ])
-   CPPFLAGS=$save_CPPFLAGS
-   AS_IF([test "x$PYTHON" != "x"],
+   enable_python=no
+   for PYTHON_INCLUDES in \
+     "-I`$PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_inc()'`" \
+     "-I`$PYTHON -c 'from distutils import sysconfig;print sysconfig.get_python_lib(1,1)' | $SED 's/lib/include/'`"
+   do
+     save_CPPFLAGS=$CPPFLAGS
+     CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
+     AC_CHECK_HEADER([Python.h],[enable_python=yes
+       break])
+     CPPFLAGS=$save_CPPFLAGS
+   done
+   AS_IF([test "x$enable_python" != "xno"],
          [AS_IF([test "x$SWIG" = "x"],
-                [AC_MSG_NOTICE([Python bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage])])],
+                [AC_MSG_NOTICE([Python bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage])],
+                [PYTHON=])],
                 [AS_IF([test `$SWIG -help 2>&1 | $GREP -c '\-python *- Generate'` = 0],
                        [AC_MSG_NOTICE([No (swig does not support -python option)])
                         enable_python=no
@@ -207,16 +290,18 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
                  tests/test_cksum_extra \
                  tests/test_cksum_service \
                  tests/test_cksum_ieg \
+                 tests/test_chunk_cksum \
                  tests/pio_write_run \
                  tests/pio_cksum_mpinonb \
                  tests/pio_cksum_fpguard \
                  tests/pio_cksum_asynch \
                  tests/pio_cksum_writer \
+                 tests/pio_cksum_cdf \
                  util/serialrun],[chmod a+x "$ac_file"])
 
 AC_OUTPUT([Makefile src/Makefile interfaces/Makefile app/Makefile \
-	tests/Makefile examples/Makefile examples/pio/Makefile cdi.settings \
-        src/pkgconfig/cdi.pc])
+	tests/Makefile examples/Makefile cdi.settings \
+	examples/pio/Makefile src/pkgconfig/cdi.pc])
 
 #  ----------------------------------------------------------------------
 #  Show configuration

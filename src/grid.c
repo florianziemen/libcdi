@@ -5,10 +5,6 @@
 #include <string.h>
 #include <float.h>  /* FLT_EPSILON */
 
-#ifdef USE_MPI
-#include <mpi.h>
-#endif
-
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -16,8 +12,9 @@
 #include "gaussgrid.h"
 #include "pio_util.h"
 #include "resource_handle.h"
-#include "pio_rpc.h"
+#include "resource_unpack.h"
 #include "namespace.h"
+#include "serialize.h"
 
 #ifndef  RAD2DEG
 #define  RAD2DEG  (180./M_PI)   /* conversion for rad to deg */
@@ -52,17 +49,13 @@ char *Grids[] = {
 static int    gridCompareP    ( void * gridptr1, void * gridptr2 );
 static void   gridDestroyP    ( void * gridptr );
 static void   gridPrintP      ( void * gridptr, FILE * fp );
-#ifdef USE_MPI
-static int    gridGetPackSize ( void * gridptr, MPI_Comm comm );
+static int    gridGetPackSize ( void * gridptr, void *context);
 static void   gridPack        ( void * gridptr, void * buff, int size,
-				int *position, MPI_Comm comm );
+				int *position, void *context);
 static int    gridTxCode      ( void );
-#endif
 
 resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP
-#ifdef USE_MPI
                    , gridGetPackSize, gridPack, gridTxCode
-#endif
 };
 
 
@@ -4237,351 +4230,316 @@ void gridDefUUID(int gridID, const char *uuid)
 }
 
 
-#ifdef USE_MPI
-
 static int
 gridTxCode ()
 {
   return GRID;
 }
 
-enum { gridNint    = 26, 
-       gridNdouble = 24,
+enum { gridNint    = 27,
+       gridNdouble = 25,
        gridNstrings= 8,
-       mask        = 1 << 0,
-       mask_gme    = 1 << 1,
-       xvals       = 1 << 2,
-       yvals       = 1 << 3,
-       area        = 1 << 4,
-       xbounds     = 1 << 5,
-       ybounds     = 1 << 6,
-       reference   = 1 << 7,
-       rowlon      = 1 << 8
+       gridHasMaskFlag = 1 << 0,
+       gridHasGMEMaskFlag = 1 << 1,
+       gridHasXValsFlag = 1 << 2,
+       gridHasYValsFlag = 1 << 3,
+       gridHasAreaFlag = 1 << 4,
+       gridHasXBoundsFlag = 1 << 5,
+       gridHasYBoundsFlag = 1 << 6,
+       gridHasReferenceFlag = 1 << 7,
+       gridHasRowLonFlag = 1 << 8
 };
 
 
-static int getMemberMask ( grid_t * gridP )
+static int gridGetComponentFlags ( grid_t * gridP )
 {
-  int memberMask = 0;
+  int flags = (gridHasMaskFlag & (int)((unsigned)(gridP->mask == NULL) - 1U))
+    | (gridHasGMEMaskFlag & (int)((unsigned)(gridP->mask_gme == NULL) - 1U))
+    | (gridHasXValsFlag & (int)((unsigned)(gridP->xvals == NULL) - 1U))
+    | (gridHasYValsFlag & (int)((unsigned)(gridP->yvals == NULL) - 1U))
+    | (gridHasAreaFlag & (int)((unsigned)(gridP->area == NULL) - 1U))
+    | (gridHasXBoundsFlag & (int)((unsigned)(gridP->xbounds == NULL) - 1U))
+    | (gridHasYBoundsFlag & (int)((unsigned)(gridP->ybounds == NULL) - 1U))
+    | (gridHasReferenceFlag & (int)((unsigned)(gridP->reference == NULL) - 1U))
+    | (gridHasRowLonFlag & (int)((unsigned)(gridP->rowlon == NULL) - 1U));
 
-  if ( gridP->mask )       memberMask |= mask;
-  if ( gridP->mask_gme )   memberMask |= mask_gme;
-  if ( gridP->xvals )      memberMask |= xvals;
-  if ( gridP->yvals )      memberMask |= yvals; 
-  if ( gridP->area )       memberMask |= area;
-  if ( gridP->xbounds )    memberMask |= xbounds;
-  if ( gridP->ybounds )    memberMask |= ybounds;
-  if ( gridP->reference )  memberMask |= reference;
-  if ( gridP->rowlon )     memberMask |= rowlon;
-
-  return memberMask;
+  return flags;
 }
 
 
-static
-int gridGetPackSize ( void * voidP, MPI_Comm comm )
+static int
+gridGetPackSize(void * voidP, void *context)
 {
   grid_t * gridP = ( grid_t * ) voidP;
-  int packBuffSize = 0, size, count;
+  int packBuffSize = 0, count;
 
-  xmpi ( MPI_Pack_size ( gridNint + 1, MPI_INT, comm, &size ));
-  packBuffSize += size;
-  xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
-  packBuffSize += size;
+  packBuffSize += serializeGetSize(gridNint, DATATYPE_INT, context)
+    + serializeGetSize(1, DATATYPE_FLT64, context);
 
-  if ( gridP->rowlon )
+  if (gridP->rowlon)
     {
-      xassert ( gridP->nrowlon );
+      xassert(gridP->nrowlon);
+      packBuffSize += serializeGetSize(gridP->nrowlon, DATATYPE_INT, context)
+        + serializeGetSize( 1, DATATYPE_FLT64, context);
+    }
 
-      xmpi ( MPI_Pack_size ( gridP->nrowlon, MPI_INT, comm, &size ));
-      packBuffSize += size;
-      xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
-      packBuffSize += size;
-    }  
+  packBuffSize += serializeGetSize(gridNdouble, DATATYPE_FLT64, context);
 
-  xmpi ( MPI_Pack_size ( gridNdouble + 1, MPI_DOUBLE, comm, &size ));
-  packBuffSize += size;  
-
-  if ( gridP->xvals )
+  if (gridP->xvals)
     {
-      if ( gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR )
-	count =  gridP->size;
+      if (gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR)
+	count = gridP->size;
       else
-	count =  gridP->xsize;
-      xassert ( count );
-      
-      xmpi ( MPI_Pack_size ( count, MPI_DOUBLE, comm, &size ));
-      packBuffSize += size;
-      xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
-      packBuffSize += size;
+	count = gridP->xsize;
+      xassert(count);
+      packBuffSize += serializeGetSize(count + 1, DATATYPE_FLT64, context);
     }
 
-  if ( gridP->yvals )
+  if (gridP->yvals)
     {
-      if ( gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR )
-	count =  gridP->size;
+      if (gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR)
+	count = gridP->size;
       else
-	count =  gridP->ysize;
-      xassert ( count );
-      
-      xmpi ( MPI_Pack_size ( count, MPI_DOUBLE, comm, &size ));     
-      packBuffSize += size;
-      xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
-      packBuffSize += size;
+	count = gridP->ysize;
+      xassert(count);
+      packBuffSize += serializeGetSize(count + 1, DATATYPE_FLT64, context);
     }
 
-  if ( gridP->area )
+  if (gridP->area)
     {
-      xassert ( gridP->size );
-      
-      xmpi ( MPI_Pack_size ( gridP->size, MPI_DOUBLE, comm, &size ));     
-      packBuffSize += size;
-      xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
-      packBuffSize += size;
+      xassert(gridP->size);
+      packBuffSize +=
+        serializeGetSize(gridP->size + 1, DATATYPE_FLT64, context);
     }
 
-  if ( gridP->xbounds )
+  if (gridP->xbounds)
     {
-      xassert ( gridP->nvertex );
-      if ( gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED )
-	count = gridP->nvertex * gridP->size;
+      xassert(gridP->nvertex);
+      if (gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED)
+	count = gridP->size;
       else
-	count = gridP->nvertex * gridP->xsize;
-      xassert ( count );
-      
-      xmpi ( MPI_Pack_size ( count, MPI_DOUBLE, comm, &size ));     
-      packBuffSize += size;
-      xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
-      packBuffSize += size;
+	count = gridP->xsize;
+      xassert(count);
+      packBuffSize
+        += serializeGetSize(gridP->nvertex * count + 1, DATATYPE_FLT64, context);
     }
 
-  if ( gridP->ybounds )
+  if (gridP->ybounds)
     {
-      xassert ( gridP->nvertex );
-      if ( gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED )
-	count = gridP->nvertex * gridP->size;
+      xassert(gridP->nvertex);
+      if (gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED)
+	count = gridP->size;
       else
-	count = gridP->nvertex * gridP->ysize;
-      xassert ( count );
-      
-      xmpi ( MPI_Pack_size ( count, MPI_DOUBLE, comm, &size ));     
-      packBuffSize += size;
-      xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
-      packBuffSize += size;
+	count = gridP->ysize;
+      xassert(count);
+      packBuffSize
+        += serializeGetSize(gridP->nvertex * count + 1, DATATYPE_FLT64, context);
     }
 
-  xmpi ( MPI_Pack_size ( gridNstrings * CDI_MAX_NAME , MPI_CHAR, comm, &size ));
-  packBuffSize += size;
-  xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
-  packBuffSize += size;
+  packBuffSize +=
+    serializeGetSize(gridNstrings * CDI_MAX_NAME , DATATYPE_TXT, context)
+    + serializeGetSize(1, DATATYPE_FLT64, context);
 
-  if ( gridP->reference )
+  if (gridP->reference)
     {
-      count = strlen ( gridP->reference ) + 1;
-      xmpi ( MPI_Pack_size ( 1, MPI_INT, comm, &size ));
-      packBuffSize += size;
-      xmpi ( MPI_Pack_size ( count, MPI_CHAR, comm, &size ));     
-      packBuffSize += size;
-      xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
-      packBuffSize += size;
-    }
- 
-  if ( gridP->mask )
-    {
-      xassert ( gridP->size );
-      xmpi ( MPI_Pack_size ( gridP->size, MPI_UNSIGNED_CHAR, comm, &size ));     
-      packBuffSize += size;
-      xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
-      packBuffSize += size;
+      packBuffSize += serializeGetSize(1, DATATYPE_INT, context)
+        + serializeGetSize(strlen(gridP->reference) + 1, DATATYPE_TXT, context)
+        + serializeGetSize(1, DATATYPE_FLT64, context);
     }
 
-  if ( gridP->mask_gme )
+  if (gridP->mask)
     {
-      xassert ( gridP->size );
-      xmpi ( MPI_Pack_size ( gridP->size, MPI_UNSIGNED_CHAR, comm, &size ));     
-      packBuffSize += size;
-      xmpi ( MPI_Pack_size ( 1, MPI_DOUBLE, comm, &size ));
-      packBuffSize += size;
+      xassert(gridP->size);
+      packBuffSize
+        += serializeGetSize(gridP->size, DATATYPE_UCHAR, context)
+        + serializeGetSize(1, DATATYPE_FLT64, context);
     }
-  
-  return packBuffSize; 
+
+  if (gridP->mask_gme)
+    {
+      xassert(gridP->size);
+      packBuffSize += serializeGetSize(gridP->size, DATATYPE_UCHAR, context)
+        + serializeGetSize( 1, DATATYPE_FLT64, context);
+    }
+
+  return packBuffSize;
 }
 
 
-void gridUnpack ( char * unpackBuffer, int unpackBufferSize, 
-		  int * unpackBufferPos, int nspTarget, MPI_Comm comm )
+void
+gridUnpack(char * unpackBuffer, int unpackBufferSize,
+           int * unpackBufferPos, int nspTarget, void *context)
 {
   grid_t * gridP;
-  int intBuffer[gridNint + 1], memberMask, size, referenceSize;
-  double doubleBuffer[gridNdouble + 1], d;
+  int memberMask, size;
+  double d;
   char charBuffer[gridNstrings * CDI_MAX_NAME];
 
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      intBuffer, gridNint + 1, MPI_INT, comm ));
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      &d, 1, MPI_DOUBLE, comm ));
-
-  xassert ( xchecksum ( DATATYPE_INT , gridNint + 1, intBuffer ) == d );
-
-  gridInit ();
+  gridInit();
 
   gridP = gridNewEntry();
-  xassert ( gridP );
+  xassert(gridP);
+  {
+    int intBuffer[gridNint];
+    serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                    intBuffer, gridNint, DATATYPE_INT, context);
+    serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                    &d, 1, DATATYPE_FLT64, context);
 
-  xassert ( namespaceAdaptKey ( intBuffer[0], nspTarget ) == gridP->self );
+    xassert(xchecksum(DATATYPE_INT, gridNint, intBuffer) == d);
+    xassert(namespaceAdaptKey(intBuffer[0], nspTarget) == gridP->self);
 
-  gridP->type          =   intBuffer[1] ;
-  gridP->prec          =   intBuffer[2] ;
-  gridP->lcc_projflag  =   intBuffer[3] ;
-  gridP->lcc_scanflag  =   intBuffer[4] ;
-  gridP->lcc_defined   =   intBuffer[5] ;
-  gridP->lcc2_defined  =   intBuffer[6] ;
-  gridP->laea_defined  =   intBuffer[7] ;
-  gridP->isCyclic      =   intBuffer[8] ;
-  gridP->isRotated     =   intBuffer[9] ;
-  gridP->xdef          =   intBuffer[10] ;
-  gridP->ydef          =   intBuffer[11];
-  gridP->nd            =   intBuffer[12];
-  gridP->ni            =   intBuffer[13];
-  gridP->ni2           =   intBuffer[14];
-  gridP->ni3           =   intBuffer[15];
-  gridP->number        =   intBuffer[16];
-  gridP->position      =   intBuffer[17];
-  gridP->trunc         =   intBuffer[18];
-  gridP->nvertex       =   intBuffer[19];
-  gridP->nrowlon       =   intBuffer[20];
-  gridP->size          =   intBuffer[21];
-  gridP->xsize         =   intBuffer[22];
-  gridP->ysize         =   intBuffer[23];
-  gridP->locked        =   intBuffer[24];
-  gridP->lcomplex      =   intBuffer[25];
-  memberMask           =   intBuffer[26];
+    gridP->type          =   intBuffer[1];
+    gridP->prec          =   intBuffer[2];
+    gridP->lcc_projflag  =   intBuffer[3];
+    gridP->lcc_scanflag  =   intBuffer[4];
+    gridP->lcc_defined   =   intBuffer[5];
+    gridP->lcc2_defined  =   intBuffer[6];
+    gridP->laea_defined  =   intBuffer[7];
+    gridP->isCyclic      =   intBuffer[8];
+    gridP->isRotated     =   intBuffer[9];
+    gridP->xdef          =   intBuffer[10];
+    gridP->ydef          =   intBuffer[11];
+    gridP->nd            =   intBuffer[12];
+    gridP->ni            =   intBuffer[13];
+    gridP->ni2           =   intBuffer[14];
+    gridP->ni3           =   intBuffer[15];
+    gridP->number        =   intBuffer[16];
+    gridP->position      =   intBuffer[17];
+    gridP->trunc         =   intBuffer[18];
+    gridP->nvertex       =   intBuffer[19];
+    gridP->nrowlon       =   intBuffer[20];
+    gridP->size          =   intBuffer[21];
+    gridP->xsize         =   intBuffer[22];
+    gridP->ysize         =   intBuffer[23];
+    gridP->locked        =   intBuffer[24];
+    gridP->lcomplex      =   intBuffer[25];
+    memberMask           =   intBuffer[26];
+  }
 
-  if ( memberMask & rowlon )
+  if (memberMask & gridHasRowLonFlag)
     {
-      xassert ( gridP->nrowlon );
-      gridP->rowlon = xmalloc ( gridP->nrowlon * sizeof ( int ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			gridP->rowlon, gridP->nrowlon , MPI_INT, comm ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  &d, 1, MPI_DOUBLE, comm ));
-      xassert ( xchecksum ( DATATYPE_INT , gridP->nrowlon, gridP->rowlon ) == d );
-    } 
+      xassert(gridP->nrowlon);
+      gridP->rowlon = xmalloc(gridP->nrowlon * sizeof (int));
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      gridP->rowlon, gridP->nrowlon , DATATYPE_INT, context);
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      &d, 1, DATATYPE_FLT64, context);
+      xassert(xchecksum(DATATYPE_INT, gridP->nrowlon, gridP->rowlon) == d);
+    }
 
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      doubleBuffer, gridNdouble + 1, MPI_DOUBLE, comm ));
+  {
+    double doubleBuffer[gridNdouble];
+    serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                    doubleBuffer, gridNdouble, DATATYPE_FLT64, context);
+    xassert(doubleBuffer[24]
+            == xchecksum(DATATYPE_FLT, gridNdouble, doubleBuffer));
 
-  xassert ( doubleBuffer[24] == xchecksum ( DATATYPE_FLT, gridNdouble, 
-                                            doubleBuffer ));
+    gridP->xfirst = doubleBuffer[0];
+    gridP->yfirst = doubleBuffer[1];
+    gridP->xlast = doubleBuffer[2];
+    gridP->ylast = doubleBuffer[3];
+    gridP->xinc = doubleBuffer[4];
+    gridP->yinc = doubleBuffer[5];
+    gridP->lcc_originLon = doubleBuffer[6];
+    gridP->lcc_originLat = doubleBuffer[7];
+    gridP->lcc_lonParY = doubleBuffer[8];
+    gridP->lcc_lat1 = doubleBuffer[9];
+    gridP->lcc_lat2 = doubleBuffer[10];
+    gridP->lcc_xinc = doubleBuffer[11];
+    gridP->lcc_yinc = doubleBuffer[12];
+    gridP->lcc2_lon_0 = doubleBuffer[13];
+    gridP->lcc2_lat_0 = doubleBuffer[14];
+    gridP->lcc2_lat_1 = doubleBuffer[15];
+    gridP->lcc2_lat_2 = doubleBuffer[16];
+    gridP->lcc2_a = doubleBuffer[17];
+    gridP->laea_lon_0 = doubleBuffer[18];
+    gridP->laea_lat_0 = doubleBuffer[19];
+    gridP->laea_a = doubleBuffer[20];
+    gridP->xpole = doubleBuffer[21];
+    gridP->ypole = doubleBuffer[22];
+    gridP->angle = doubleBuffer[23];
+  }
 
-  gridP->xfirst        =   doubleBuffer[0] ;       
-  gridP->yfirst	       =   doubleBuffer[1] ;
-  gridP->xlast	       =   doubleBuffer[2] ;
-  gridP->ylast	       =   doubleBuffer[3] ;
-  gridP->xinc	       =   doubleBuffer[4] ;
-  gridP->yinc	       =   doubleBuffer[5] ;
-  gridP->lcc_originLon =   doubleBuffer[6] ;         
-  gridP->lcc_originLat =   doubleBuffer[7] ;
-  gridP->lcc_lonParY   =   doubleBuffer[8] ;
-  gridP->lcc_lat1      =   doubleBuffer[9] ;
-  gridP->lcc_lat2      =   doubleBuffer[10];
-  gridP->lcc_xinc      =   doubleBuffer[11];
-  gridP->lcc_yinc      =   doubleBuffer[12];
-  gridP->lcc2_lon_0    =   doubleBuffer[13];         
-  gridP->lcc2_lat_0    =   doubleBuffer[14];
-  gridP->lcc2_lat_1    =   doubleBuffer[15];
-  gridP->lcc2_lat_2    =   doubleBuffer[16];
-  gridP->lcc2_a	       =   doubleBuffer[17];
-  gridP->laea_lon_0    =   doubleBuffer[18];         
-  gridP->laea_lat_0    =   doubleBuffer[19];
-  gridP->laea_a	       =   doubleBuffer[20];
-  gridP->xpole 	       =   doubleBuffer[21];
-  gridP->ypole	       =   doubleBuffer[22];
-  gridP->angle         =   doubleBuffer[23]; 
-
-  if ( memberMask & xvals )
+  if (memberMask & gridHasXValsFlag)
     {
-      if ( gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR )
+      if (gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR)
 	size = gridP->size;
       else
 	size = gridP->xsize;
-      
-      gridP->xvals =  xmalloc( size * sizeof ( double ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  gridP->xvals, size, MPI_DOUBLE, comm ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  &d, 1, MPI_DOUBLE, comm ));
-      xassert ( xchecksum ( DATATYPE_FLT, size, gridP->xvals ) == d );
+
+      gridP->xvals = xmalloc(size * sizeof (double));
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      gridP->xvals, size, DATATYPE_FLT64, context);
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      &d, 1, DATATYPE_FLT64, context);
+      xassert(xchecksum(DATATYPE_FLT, size, gridP->xvals) == d );
     }
 
-  if ( memberMask & yvals )
+  if (memberMask & gridHasYValsFlag)
     {
       if ( gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR )
 	size = gridP->size;
       else
 	size = gridP->ysize;
-      
-      gridP->yvals =  xmalloc( size * sizeof ( double ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  gridP->yvals, size, MPI_DOUBLE, comm ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  &d, 1, MPI_DOUBLE, comm ));
-      xassert ( xchecksum ( DATATYPE_FLT, size, gridP->yvals ) == d );
+
+      gridP->yvals =  xmalloc( size * sizeof (double));
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      gridP->yvals, size, DATATYPE_FLT64, context);
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      &d, 1, DATATYPE_FLT64, context);
+      xassert(xchecksum(DATATYPE_FLT, size, gridP->yvals ) == d);
     }
 
-  if ( memberMask & area )
+  if (memberMask & gridHasAreaFlag)
     {
-      xassert ( gridP->size );
-      
-      gridP->area =  xmalloc( gridP->size * sizeof ( double ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  gridP->area, gridP->size, MPI_DOUBLE, comm ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  &d, 1, MPI_DOUBLE, comm ));
-      xassert ( xchecksum ( DATATYPE_FLT, gridP->size, gridP->area ) == d );
+      xassert((size = gridP->size));
+      gridP->area = xmalloc(size * sizeof (double));
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      gridP->area, size, DATATYPE_FLT64, context);
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      &d, 1, DATATYPE_FLT64, context);
+      xassert(xchecksum(DATATYPE_FLT, size, gridP->area) == d);
     }
 
-  if ( memberMask & xbounds )
+  if (memberMask & gridHasXBoundsFlag)
     {
-      xassert ( gridP->nvertex );
-      if ( gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED )
+      if (gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED)
 	size = gridP->nvertex * gridP->size;
       else
 	size = gridP->nvertex * gridP->xsize;
-      xassert ( size );
-      
-      gridP->xbounds =  xmalloc( size * sizeof ( double ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  gridP->xbounds, size, MPI_DOUBLE, comm ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  &d, 1, MPI_DOUBLE, comm ));
-      xassert ( xchecksum ( DATATYPE_FLT, size, gridP->xbounds ) == d );
+      xassert(size);
+
+      gridP->xbounds = xmalloc(size * sizeof (double));
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      gridP->xbounds, size, DATATYPE_FLT64, context);
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      &d, 1, DATATYPE_FLT64, context);
+      xassert(xchecksum(DATATYPE_FLT, size, gridP->xbounds ) == d);
     }
 
-  if ( memberMask & ybounds )
+  if (memberMask & gridHasYBoundsFlag)
     {
-      xassert ( gridP->nvertex );
-      if ( gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED )
+      if (gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED)
 	size = gridP->nvertex * gridP->size;
       else
 	size = gridP->nvertex * gridP->ysize;
-      xassert ( size );
-      
-      gridP->ybounds =  xmalloc( size * sizeof ( double ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  gridP->ybounds, size, MPI_DOUBLE, comm ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  &d, 1, MPI_DOUBLE, comm ));
-      xassert ( xchecksum ( DATATYPE_FLT, size, gridP->ybounds ) == d );
+      xassert(size);
+
+      gridP->ybounds = xmalloc(size * sizeof (double));
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+			  gridP->ybounds, size, DATATYPE_FLT64, context);
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      &d, 1, DATATYPE_FLT64, context);
+      xassert(xchecksum(DATATYPE_FLT, size, gridP->ybounds ) == d);
     }
 
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      charBuffer, gridNstrings * CDI_MAX_NAME, MPI_CHAR, comm ));
-  xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-		      &d, 1, MPI_DOUBLE, comm ));
+  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                  charBuffer, gridNstrings * CDI_MAX_NAME, DATATYPE_TXT, context);
+  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                  &d, 1, DATATYPE_FLT64, context);
 
-  xassert ( d == xchecksum ( DATATYPE_TXT, gridNstrings * CDI_MAX_NAME, 
-                             charBuffer ));
+  xassert(d == xchecksum(DATATYPE_TXT, gridNstrings * CDI_MAX_NAME, charBuffer));
 
   memcpy ( gridP->xname    , &charBuffer[CDI_MAX_NAME * 0], CDI_MAX_NAME );
   memcpy ( gridP->yname    , &charBuffer[CDI_MAX_NAME * 1], CDI_MAX_NAME );
@@ -4592,197 +4550,203 @@ void gridUnpack ( char * unpackBuffer, int unpackBufferSize,
   memcpy ( gridP->xunits   , &charBuffer[CDI_MAX_NAME * 6], CDI_MAX_NAME );
   memcpy ( gridP->yunits   , &charBuffer[CDI_MAX_NAME * 7], CDI_MAX_NAME );
 
-  if ( memberMask & reference )
+  if (memberMask & gridHasReferenceFlag)
     {
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  &referenceSize, 1, MPI_INT, comm ));
-      gridP->reference = xmalloc ( referenceSize );
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  gridP->reference, referenceSize, MPI_CHAR, comm ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  &d, 1, MPI_DOUBLE, comm ));
-      xassert ( xchecksum ( DATATYPE_TXT, referenceSize, 
-                            gridP->reference ) == d );
+      int referenceSize;
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      &referenceSize, 1, DATATYPE_INT, context);
+      gridP->reference = xmalloc(referenceSize);
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      gridP->reference, referenceSize, DATATYPE_TXT, context);
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      &d, 1, DATATYPE_FLT64, context);
+      xassert(xchecksum(DATATYPE_TXT, referenceSize, gridP->reference ) == d );
     }
 
-  if ( memberMask & mask )
+  if (memberMask & gridHasMaskFlag)
     {
-      xassert ( gridP->size );
-      gridP->mask = xmalloc ( gridP->size * sizeof ( mask_t ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  gridP->mask, gridP->size, MPI_UNSIGNED_CHAR, comm ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  &d, 1, MPI_DOUBLE, comm ));
-      xassert ( xchecksum ( DATATYPE_TXT, gridP->size, gridP->mask ) == d );
+      xassert((size = gridP->size));
+      gridP->mask = xmalloc(size * sizeof (mask_t));
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      gridP->mask, gridP->size, DATATYPE_UCHAR, context);
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      &d, 1, DATATYPE_FLT64, context);
+      xassert(xchecksum(DATATYPE_TXT, gridP->size, gridP->mask ) == d);
     }
 
-  if ( memberMask & mask_gme )
+  if (memberMask & gridHasGMEMaskFlag)
     {
-      xassert ( gridP->size );
-      gridP->mask_gme = xmalloc ( gridP->size * sizeof ( mask_t ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  gridP->mask_gme, gridP->size, MPI_UNSIGNED_CHAR, 
-                          comm ));
-      xmpi ( MPI_Unpack ( unpackBuffer, unpackBufferSize, unpackBufferPos, 
-			  &d, 1, MPI_DOUBLE, comm ));
-      xassert ( xchecksum ( DATATYPE_TXT, gridP->size, gridP->mask_gme ) == d );
+      xassert((size = gridP->size));
+      gridP->mask_gme = xmalloc(size * sizeof (mask_t));
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      gridP->mask_gme, gridP->size, DATATYPE_UCHAR, context);
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      &d, 1, DATATYPE_FLT64, context);
+      xassert(xchecksum(DATATYPE_TXT, gridP->size, gridP->mask_gme ) == d);
     }
-} 							       
+}
 
 
-static
-void gridPack ( void * voidP, void * packBuffer, int packBufferSize, 
-		int * packBufferPos, MPI_Comm comm )
+static void
+gridPack(void * voidP, void * packBuffer, int packBufferSize,
+         int * packBufferPos, void *context)
 {
   grid_t   * gridP = ( grid_t * )   voidP;
-  int intBuffer[gridNint + 1], size;
-  double doubleBuffer[gridNdouble + 1], d;
+  int size;
+  double d;
   char charBuffer[gridNstrings * CDI_MAX_NAME];
 
-  intBuffer[0]  = gridP->self;
-  intBuffer[1]  = gridP->type;
-  intBuffer[2]  = gridP->prec;
-  intBuffer[3]  = gridP->lcc_projflag;
-  intBuffer[4]  = gridP->lcc_scanflag;
-  intBuffer[5]  = gridP->lcc_defined;
-  intBuffer[6]  = gridP->lcc2_defined;
-  intBuffer[7]  = gridP->laea_defined;
-  intBuffer[8]  = gridP->isCyclic;
-  intBuffer[9]  = gridP->isRotated; 
-  intBuffer[10] = gridP->xdef; 
-  intBuffer[11] = gridP->ydef;
-  intBuffer[12] = gridP->nd;
-  intBuffer[13] = gridP->ni;
-  intBuffer[14] = gridP->ni2;
-  intBuffer[15] = gridP->ni3; 
-  intBuffer[16] = gridP->number;
-  intBuffer[17] = gridP->position;
-  intBuffer[18] = gridP->trunc;
-  intBuffer[19] = gridP->nvertex;
-  intBuffer[20] = gridP->nrowlon;
-  intBuffer[21] = gridP->size;
-  intBuffer[22] = gridP->xsize;
-  intBuffer[23] = gridP->ysize;
-  intBuffer[24] = gridP->locked;
-  intBuffer[25] = gridP->lcomplex;
-  intBuffer[26] = getMemberMask ( gridP );
-  
-  xmpi ( MPI_Pack ( intBuffer, gridNint + 1, MPI_INT, 
-		    packBuffer, packBufferSize, packBufferPos, comm ));
-  d = xchecksum ( DATATYPE_INT , gridNint + 1, intBuffer );
-  xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
-		    packBuffer, packBufferSize, packBufferPos, comm ));
+  {
+    int intBuffer[gridNint];
 
-  if ( gridP->rowlon )
+    intBuffer[0]  = gridP->self;
+    intBuffer[1]  = gridP->type;
+    intBuffer[2]  = gridP->prec;
+    intBuffer[3]  = gridP->lcc_projflag;
+    intBuffer[4]  = gridP->lcc_scanflag;
+    intBuffer[5]  = gridP->lcc_defined;
+    intBuffer[6]  = gridP->lcc2_defined;
+    intBuffer[7]  = gridP->laea_defined;
+    intBuffer[8]  = gridP->isCyclic;
+    intBuffer[9]  = gridP->isRotated;
+    intBuffer[10] = gridP->xdef;
+    intBuffer[11] = gridP->ydef;
+    intBuffer[12] = gridP->nd;
+    intBuffer[13] = gridP->ni;
+    intBuffer[14] = gridP->ni2;
+    intBuffer[15] = gridP->ni3;
+    intBuffer[16] = gridP->number;
+    intBuffer[17] = gridP->position;
+    intBuffer[18] = gridP->trunc;
+    intBuffer[19] = gridP->nvertex;
+    intBuffer[20] = gridP->nrowlon;
+    intBuffer[21] = gridP->size;
+    intBuffer[22] = gridP->xsize;
+    intBuffer[23] = gridP->ysize;
+    intBuffer[24] = gridP->locked;
+    intBuffer[25] = gridP->lcomplex;
+    intBuffer[26] = gridGetComponentFlags(gridP);
+
+    serializePack(intBuffer, gridNint, DATATYPE_INT,
+                  packBuffer, packBufferSize, packBufferPos, context);
+    d = xchecksum(DATATYPE_INT, gridNint, intBuffer);
+    serializePack(&d, 1, DATATYPE_FLT64,
+                  packBuffer, packBufferSize, packBufferPos, context);
+  }
+
+  if (gridP->rowlon)
     {
-      xassert ( gridP->nrowlon );
-      xmpi ( MPI_Pack ( gridP->rowlon, gridP->nrowlon, MPI_INT,
-			packBuffer, packBufferSize, packBufferPos, comm ));
-      d = xchecksum ( DATATYPE_INT , gridP->nrowlon, gridP->rowlon );
-      xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
-			packBuffer, packBufferSize, packBufferPos, comm ));
-    }  
+      xassert((size = gridP->nrowlon));
+      serializePack(gridP->rowlon, size, DATATYPE_INT,
+                    packBuffer, packBufferSize, packBufferPos, context);
+      d = xchecksum(DATATYPE_INT , size, gridP->rowlon);
+      serializePack(&d, 1, DATATYPE_FLT64,
+                    packBuffer, packBufferSize, packBufferPos, context);
+    }
 
-  doubleBuffer[0]  = gridP->xfirst;         
-  doubleBuffer[1]  = gridP->yfirst;
-  doubleBuffer[2]  = gridP->xlast;
-  doubleBuffer[3]  = gridP->ylast;
-  doubleBuffer[4]  = gridP->xinc;
-  doubleBuffer[5]  = gridP->yinc;
-  doubleBuffer[6]  = gridP->lcc_originLon;          
-  doubleBuffer[7]  = gridP->lcc_originLat;
-  doubleBuffer[8]  = gridP->lcc_lonParY;
-  doubleBuffer[9]  = gridP->lcc_lat1;
-  doubleBuffer[10] = gridP->lcc_lat2;
-  doubleBuffer[11] = gridP->lcc_xinc;
-  doubleBuffer[12] = gridP->lcc_yinc;
-  doubleBuffer[13] = gridP->lcc2_lon_0;             
-  doubleBuffer[14] = gridP->lcc2_lat_0;
-  doubleBuffer[15] = gridP->lcc2_lat_1;
-  doubleBuffer[16] = gridP->lcc2_lat_2;
-  doubleBuffer[17] = gridP->lcc2_a;
-  doubleBuffer[18] = gridP->laea_lon_0;             
-  doubleBuffer[19] = gridP->laea_lat_0;
-  doubleBuffer[20] = gridP->laea_a;
-  doubleBuffer[21] = gridP->xpole; 
-  doubleBuffer[22] = gridP->ypole;
-  doubleBuffer[23] = gridP->angle;
-  doubleBuffer[24] = xchecksum ( DATATYPE_FLT, gridNdouble - 1, doubleBuffer );
+  {
+    double doubleBuffer[gridNdouble];
 
-  xmpi ( MPI_Pack ( doubleBuffer, gridNdouble + 1, MPI_DOUBLE, 
-		    packBuffer, packBufferSize, packBufferPos, comm ));
+    doubleBuffer[0]  = gridP->xfirst;
+    doubleBuffer[1]  = gridP->yfirst;
+    doubleBuffer[2]  = gridP->xlast;
+    doubleBuffer[3]  = gridP->ylast;
+    doubleBuffer[4]  = gridP->xinc;
+    doubleBuffer[5]  = gridP->yinc;
+    doubleBuffer[6]  = gridP->lcc_originLon;
+    doubleBuffer[7]  = gridP->lcc_originLat;
+    doubleBuffer[8]  = gridP->lcc_lonParY;
+    doubleBuffer[9]  = gridP->lcc_lat1;
+    doubleBuffer[10] = gridP->lcc_lat2;
+    doubleBuffer[11] = gridP->lcc_xinc;
+    doubleBuffer[12] = gridP->lcc_yinc;
+    doubleBuffer[13] = gridP->lcc2_lon_0;
+    doubleBuffer[14] = gridP->lcc2_lat_0;
+    doubleBuffer[15] = gridP->lcc2_lat_1;
+    doubleBuffer[16] = gridP->lcc2_lat_2;
+    doubleBuffer[17] = gridP->lcc2_a;
+    doubleBuffer[18] = gridP->laea_lon_0;
+    doubleBuffer[19] = gridP->laea_lat_0;
+    doubleBuffer[20] = gridP->laea_a;
+    doubleBuffer[21] = gridP->xpole;
+    doubleBuffer[22] = gridP->ypole;
+    doubleBuffer[23] = gridP->angle;
+    doubleBuffer[24] = xchecksum(DATATYPE_FLT, gridNdouble - 1, doubleBuffer);
 
-  if ( gridP->xvals )
+    serializePack(doubleBuffer, gridNdouble, DATATYPE_FLT64,
+                  packBuffer, packBufferSize, packBufferPos, context);
+  }
+
+  if (gridP->xvals)
     {
-      if ( gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR )
+      if (gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR)
 	size = gridP->size;
       else
 	size = gridP->xsize;
-      xassert ( size );
-      
-      xmpi ( MPI_Pack ( gridP->xvals, size, MPI_DOUBLE, 
-			packBuffer, packBufferSize, packBufferPos, comm ));
-      d = xchecksum ( DATATYPE_FLT, size, gridP->xvals );
-      xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
-			packBuffer, packBufferSize, packBufferPos, comm ));
+      xassert(size);
+
+      serializePack(gridP->xvals, size, DATATYPE_FLT64,
+                    packBuffer, packBufferSize, packBufferPos, context);
+      d = xchecksum(DATATYPE_FLT, size, gridP->xvals);
+      serializePack(&d, 1, DATATYPE_FLT64,
+                    packBuffer, packBufferSize, packBufferPos, context);
     }
 
-  if ( gridP->yvals )
+  if (gridP->yvals)
     {
-      if ( gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR )
+      if (gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR )
 	size = gridP->size;
       else
 	size = gridP->ysize;
-      xassert ( size );
-      
-      xmpi ( MPI_Pack ( gridP->yvals, size, MPI_DOUBLE, 
-			packBuffer, packBufferSize, packBufferPos, comm ));
-      d = xchecksum ( DATATYPE_FLT, size, gridP->yvals );
-      xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
-			packBuffer, packBufferSize, packBufferPos, comm ));
+      xassert(size);
+      serializePack(gridP->yvals, size, DATATYPE_FLT64,
+                    packBuffer, packBufferSize, packBufferPos, context);
+      d = xchecksum(DATATYPE_FLT, size, gridP->yvals);
+      serializePack(&d, 1, DATATYPE_FLT64,
+                    packBuffer, packBufferSize, packBufferPos, context);
     }
 
-  if ( gridP->area )
+  if (gridP->area)
     {
-      xassert ( gridP->size );
+      xassert(gridP->size);
 
-      xmpi ( MPI_Pack ( gridP->area, gridP->size, MPI_DOUBLE, 
-			packBuffer, packBufferSize, packBufferPos, comm ));
-      d = xchecksum ( DATATYPE_FLT, gridP->size, gridP->area );
-      xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
-			packBuffer, packBufferSize, packBufferPos, comm ));
+      serializePack(gridP->area, gridP->size, DATATYPE_FLT64,
+                    packBuffer, packBufferSize, packBufferPos, context);
+      d = xchecksum(DATATYPE_FLT, gridP->size, gridP->area);
+      serializePack(&d, 1, DATATYPE_FLT64,
+                    packBuffer, packBufferSize, packBufferPos, context);
     }
 
-  if ( gridP->xbounds )
+  if (gridP->xbounds)
     {
       xassert ( gridP->nvertex );
-      if ( gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED )
+      if (gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED)
 	size = gridP->nvertex * gridP->size;
       else
 	size = gridP->nvertex * gridP->xsize;
       xassert ( size );
 
-      xmpi ( MPI_Pack ( gridP->xbounds, size, MPI_DOUBLE, 
-			packBuffer, packBufferSize, packBufferPos, comm ));
-      d = xchecksum ( DATATYPE_FLT, size, gridP->xbounds );
-      xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
-			packBuffer, packBufferSize, packBufferPos, comm ));
+      serializePack(gridP->xbounds, size, DATATYPE_FLT64,
+                    packBuffer, packBufferSize, packBufferPos, context);
+      d = xchecksum(DATATYPE_FLT, size, gridP->xbounds);
+      serializePack(&d, 1, DATATYPE_FLT64,
+                    packBuffer, packBufferSize, packBufferPos, context);
     }
 
-  if ( gridP->ybounds )
+  if (gridP->ybounds)
     {
-      xassert ( gridP->nvertex );
-      if ( gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED )
+      xassert(gridP->nvertex);
+      if (gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED)
 	size = gridP->nvertex * gridP->size;
       else
 	size = gridP->nvertex * gridP->ysize;
       xassert ( size );
 
-      xmpi ( MPI_Pack ( gridP->ybounds, size, MPI_DOUBLE, 
-			packBuffer, packBufferSize, packBufferPos, comm ));
-      d = xchecksum ( DATATYPE_FLT, size, gridP->ybounds );
-      xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
-			packBuffer, packBufferSize, packBufferPos, comm ));
+      serializePack(gridP->ybounds, size, DATATYPE_FLT64,
+                    packBuffer, packBufferSize, packBufferPos, context);
+      d = xchecksum(DATATYPE_FLT, size, gridP->ybounds);
+      serializePack(&d, 1, DATATYPE_FLT64,
+                    packBuffer, packBufferSize, packBufferPos, context);
     }
 
   memcpy ( &charBuffer[CDI_MAX_NAME * 0], gridP->xname,     CDI_MAX_NAME );
@@ -4794,47 +4758,45 @@ void gridPack ( void * voidP, void * packBuffer, int packBufferSize,
   memcpy ( &charBuffer[CDI_MAX_NAME * 6], gridP->xunits,    CDI_MAX_NAME );
   memcpy ( &charBuffer[CDI_MAX_NAME * 7], gridP->yunits,    CDI_MAX_NAME );
 
-  xmpi ( MPI_Pack ( charBuffer, gridNstrings * CDI_MAX_NAME, MPI_CHAR, 
-		    packBuffer, packBufferSize, packBufferPos, comm )); 
-  d = xchecksum  ( DATATYPE_TXT, gridNstrings * CDI_MAX_NAME, charBuffer );
-  xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
-		    packBuffer, packBufferSize, packBufferPos, comm ));
+  serializePack( charBuffer, gridNstrings * CDI_MAX_NAME, DATATYPE_TXT,
+		    packBuffer, packBufferSize, packBufferPos, context);
+  d = xchecksum(DATATYPE_TXT, gridNstrings * CDI_MAX_NAME, charBuffer);
+  serializePack(&d, 1, DATATYPE_FLT64,
+                packBuffer, packBufferSize, packBufferPos, context);
 
   if ( gridP->reference )
     {
       size = strlen ( gridP->reference ) + 1;
-      xmpi ( MPI_Pack ( &size, 1, MPI_INT, 
-			packBuffer, packBufferSize, packBufferPos, comm ));
-      xmpi ( MPI_Pack ( gridP->reference, size, MPI_CHAR, 
-			packBuffer, packBufferSize, packBufferPos, comm ));
-      d = xchecksum ( DATATYPE_TXT, size, gridP->reference );
-      xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
-			packBuffer, packBufferSize, packBufferPos, comm )); 
+      serializePack(&size, 1, DATATYPE_INT,
+                    packBuffer, packBufferSize, packBufferPos, context);
+      serializePack(gridP->reference, size, DATATYPE_TXT,
+                    packBuffer, packBufferSize, packBufferPos, context);
+      d = xchecksum(DATATYPE_TXT, size, gridP->reference);
+      serializePack(&d, 1, DATATYPE_FLT64,
+                    packBuffer, packBufferSize, packBufferPos, context);
     }
- 
+
   if ( gridP->mask )
     {
-      xassert ( gridP->size );
-      xmpi ( MPI_Pack ( gridP->mask, gridP->size, MPI_UNSIGNED_CHAR, 
-			packBuffer, packBufferSize, packBufferPos, comm ));
-      d = xchecksum ( DATATYPE_TXT, gridP->size, gridP->mask );
-      xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
-			packBuffer, packBufferSize, packBufferPos, comm )); 
+      xassert((size = gridP->size));
+      serializePack(gridP->mask, size, DATATYPE_UCHAR,
+                    packBuffer, packBufferSize, packBufferPos, context);
+      d = xchecksum(DATATYPE_TXT, size, gridP->mask);
+      serializePack(&d, 1, DATATYPE_FLT64,
+                    packBuffer, packBufferSize, packBufferPos, context);
     }
 
-  if ( gridP->mask_gme )
+  if (gridP->mask_gme)
     {
-      xassert ( gridP->size );
+      xassert((size = gridP->size));
 
-      xmpi ( MPI_Pack ( gridP->mask_gme, gridP->size, MPI_UNSIGNED_CHAR, 
-			packBuffer, packBufferSize, packBufferPos, comm ));
-      d = xchecksum ( DATATYPE_TXT, gridP->size, gridP->mask );
-      xmpi ( MPI_Pack ( &d, 1, MPI_DOUBLE,
-			packBuffer, packBufferSize, packBufferPos, comm )); 
+      serializePack(gridP->mask_gme, size, DATATYPE_UCHAR,
+                    packBuffer, packBufferSize, packBufferPos, context);
+      d = xchecksum(DATATYPE_TXT, size, gridP->mask);
+      serializePack(&d, 1, DATATYPE_FLT64,
+                    packBuffer, packBufferSize, packBufferPos, context);
     }
 }
-
-#endif
 
 /*
  * Local Variables:

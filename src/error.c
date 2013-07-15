@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <errno.h>
 
+#include "namespace.h"
 
 int _ExitOnError   = 1;	/* If set to 1, exit on error       */
 int _Verbose = 1;	/* If set to 1, errors are reported */
@@ -49,6 +50,34 @@ void Error_(const char *caller, const char *fmt, ...)
   if ( _ExitOnError ) exit(EXIT_FAILURE);
 }
 
+typedef void (*cdiAbortCFunc)(const char * caller, const char * filename,
+                              const char *functionname, int line,
+                              const char * errorString, va_list ap)
+  __attribute__((noreturn));
+
+void cdiAbortC(const char * caller, const char * filename,
+               const char *functionname, int line,
+               const char * errorString, ... )
+{
+  va_list ap;
+  va_start(ap, errorString);
+  cdiAbortCFunc cdiAbortC_p = namespaceSwitchGet(NSSWITCH_ABORT);
+  cdiAbortC_p(caller, filename, functionname, line, errorString, ap);
+  va_end(ap);
+}
+
+void
+cdiAbortC_serial(const char *caller, const char *filename,
+                 const char *functionname, int line,
+                 const char *errorString, va_list ap)
+{
+  fprintf(stderr, "ERROR, %s, %s, line %d%s%s\nerrorString: \"",
+          functionname, filename, line, caller?", called from ":"",
+          caller?caller:"");
+  vfprintf(stderr, errorString, ap);
+  fputs("\"\n", stderr);
+  exit(EXIT_FAILURE);
+}
 
 void Warning_(const char *caller, const char *fmt, ...)
 {

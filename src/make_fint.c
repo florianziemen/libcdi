@@ -1,11 +1,5 @@
-#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 700
-#endif
-
-#define _GNU_SOURCE // getline()
-
-#include "config.h"
-
+#define _GNU_SOURCE // needed for getline(3) on some systems it seems
 #include <ctype.h>
 #include <regex.h>
 #include <stdio.h>
@@ -14,15 +8,9 @@
 #include <sys/types.h>
 #include <time.h>
 
-#ifndef HAVE_GETLINE
-#include "getline.c"
-#endif
 
-#ifndef VERSION
-#define VERSION "1.0.0"
-#endif
-
-
+//#include "config.h"
+#define VERSION "1.6.1"
 typedef struct
 {
   size_t naline;
@@ -32,10 +20,11 @@ typedef struct
 }
 Docu;
 
-Docu cdoc[9999], fdoc[9999];
-size_t ncdoc = 0, nfdoc = 0;
+static Docu cdoc[9999], fdoc[9999];
+static size_t ncdoc = 0, nfdoc = 0;
+static int debug = 0;
 
-int doccmp(const void *s1, const void *s2)
+static int doccmp(const void *s1, const void *s2)
 {
   Docu *x = (Docu *) s1;
   Docu *y = (Docu *) s2;
@@ -43,13 +32,7 @@ int doccmp(const void *s1, const void *s2)
   return (strcmp(x->fname, y->fname));
 }
 
-int strcompare(const char **s1, const char **s2)
-{
-  printf(">%s< >%s<\n", *s1, *s2);
-  return (strcmp(*s1, *s2));
-}
-
-void doctotex(FILE *fp, Docu *doc, size_t ndoc)
+static void doctotex(FILE *fp, Docu *doc, size_t ndoc)
 {
   size_t i, k;
 
@@ -64,7 +47,7 @@ void doctotex(FILE *fp, Docu *doc, size_t ndoc)
     }
 }
 
-void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
+static void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
 {
   size_t i, k;
 
@@ -77,11 +60,29 @@ void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
     }
 }
 
-enum {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISINTP, ISINTV, ISINTVV, ISREALP, ISDOUBLEP, ISCBUF, ISSTRING, ISSTRINGP, NUM_KNOWN_ARG_TYPES};
+enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISMPI_COMM,
+             ISXT_IDXLIST, ISCHOICE, ISINTP, ISINTV, ISINTVV, ISREALP,
+             ISDOUBLEP, ISCBUF, ISSTRING, ISSTRINGP,
+             NUM_KNOWN_ARG_TYPES};
+
+enum conversionType { CONV_ARG, CONV_RET };
+
+
+typedef int (*cfConversionEmitter)(FILE *outfp, const char *argName,
+                                   size_t argNameLen, enum conversionType part);
+
+static int cfMPICommConvert(FILE *outfp, const char *argName,
+                            size_t argNameLen, enum conversionType part);
+
+static int cfXtIdxlistConvert(FILE *outfp, const char *argName,
+                            size_t argNameLen, enum conversionType part);
 
 struct symbol {
   const char *f77name, *cfint, *cname, *parseRE;
   size_t nameMatch;
+  int needsExtraWrapper;
+  cfConversionEmitter convert;
+  const char *convcname;
   regex_t preg;
 };
 
@@ -90,28 +91,58 @@ struct symbol {
 /* white-space */
 #define WS "[[:blank:]\n]"
 #define NWS "[^[:blank:]\n]"
-static struct symbol funArgSym[] = {
-  { "",                "",        "void",     "^"WS"*void"WS"*)", 0 },
-  { "CHARACTER(80)",   "STRING",  "char *",   "^"WS"*const"WS"+char"WS"+\\*"SYMRE WS"*\\(", 1 },
-  { "INTEGER",         "INT",     "int",      "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*[,\\)]", 3 },
-  { "REAL",            "FLOAT",   "float",    "^"WS"*(const"WS"+)?float"WS"+"SYMRE"?"WS"*[,\\)]", 2 },
-  { "DOUBLEPRECISION", "DOUBLE",  "double",   "^"WS"*(const"WS"+)?double"WS"+"SYMRE"?"WS"*[,\\)]", 2 },
-  { "INTEGER",         "PINT",    "int *",    "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2 },
-  { "INTEGER",         "INTV",    "int[]",    "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"WS"*[,\\)]", 3 },
-  { "INTEGER",         "INTVV",   "int[][]",  "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"WS"*\\[[^]]*\\]"WS"*[,\\)]", 3 },
-  { "REAL",            "PFLOAT",  "float *",  "^"WS"*(const"WS"+)?float"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2 },
-  { "DOUBLEPRECISION", "PDOUBLE", "double *", "^"WS"*(const"WS"+)?double"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2 },
-  { "CHARACTER*(*)",   "CBUF",    "char *",   "^"WS"*(const"WS"+)?char"WS"+\\*""([A-Za-z_][A-Za-z_0-9]*_cbuf)"WS"*[,\\)]", 2 },
-  { "CHARACTER*(*)",   "STRING",  "char *",   "^"WS"*const"WS"+char"WS"+\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1 },
-  { "CHARACTER*(*)",   "PSTRING", "char *",   "^"WS"*char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 1 },
+static struct symbol funArgSym[]
+  = { { "",                "",        "void",
+        "^"WS"*void"WS"*)", 0, 0 },
+      { "CHARACTER(80)",    "STRING",  "char *",
+        "^"WS"*const"WS"+char"WS"+\\*"SYMRE WS"*\\(", 1, 0 },
+      { "INTEGER",         "INT",     "int",
+        "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*[,\\)]", 3, 0 },
+      { "REAL",            "FLOAT",   "float",
+        "^"WS"*(const"WS"+)?float"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0 },
+      { "DOUBLEPRECISION", "DOUBLE",  "double",
+        "^"WS"*(const"WS"+)?double"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0 },
+      { "INTEGER",         "INT", "MPI_Comm",
+        "^"WS"*MPI_Comm"WS"+"SYMRE"?"WS"*[,\\)]", 1, 1,
+        cfMPICommConvert, "int" },
+      { "TYPE(XT_IDXLIST)", "PVOID", "Xt_idxlist",
+        "^"WS"*Xt_idxlist"WS"+"SYMRE"?"WS"*[,\\)]", 1, 1,
+        cfXtIdxlistConvert, "void *" },
+      { "CHOICE", "PVOID", "const void *",
+        "^"WS"*const"WS"+void"WS"*\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0 },
+      { "INTEGER",         "PINT",    "int *",
+        "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0 },
+      { "INTEGER",         "INTV",    "int[]",
+        "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
+        WS"*[,\\)]", 3, 0 },
+      { "INTEGER",         "INTVV",    "int[][]",
+        "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
+        WS"*\\[[^]]*\\]"WS"*[,\\)]", 3, 0 },
+      { "REAL",            "PFLOAT",  "float *",
+        "^"WS"*(const"WS"+)?float"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0 },
+      { "DOUBLEPRECISION", "PDOUBLE", "double *",
+        "^"WS"*(const"WS"+)?double"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0 },
+      { "CHARACTER*(*)",   "CBUF",    "char *",
+        "^"WS"*(const"WS"+)?char"WS"+\\*""([A-Za-z_][A-Za-z_0-9]*_cbuf)"WS"*[,\\)]", 2 },
+      { "CHARACTER*(*)",   "STRING",  "char *",
+        "^"WS"*const"WS"+char"WS"+\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0 },
+      { "CHARACTER*(*)",   "PSTRING", "char *",
+        "^"WS"*char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 1, 0 },
 };
 
 static struct symbol funRet[] = {
-  { "",                "",        "void",            "void"WS"+"SYMRE WS"*\\(", 1 },
-  { "CHARACTER",       "STRING",  "(const) char *",  "(const"WS"+)?char"WS"+\\*"WS"*"SYMRE WS"*\\(", 2 },
-  { "INTEGER",         "INT",     "int",             "(const"WS"+)?int"WS"+"SYMRE WS"*\\(", 2 },
-  { "REAL",            "FLOAT",   "float",           "(const"WS"+)?float"WS"+"SYMRE WS"*\\(", 2 },
-  { "DOUBLEPRECISION", "DOUBLE",  "double",          "(const"WS"+)?double"WS"+"SYMRE WS"*\\(", 2 },
+  { "",                "",        "void",
+    "void"WS"+"SYMRE WS"*\\(", 1, 0 },
+  { "CHARACTER",       "STRING",  "(const) char *",
+    "(const"WS"+)?char"WS"+\\*"WS"*"SYMRE WS"*\\(", 2, 0 },
+  { "INTEGER",         "INT",     "int",
+    "(const"WS"+)?int"WS"+"SYMRE WS"*\\(", 2, 0 },
+  { "REAL",            "FLOAT",   "float",
+    "(const"WS"+)?float"WS"+"SYMRE WS"*\\(", 2, 0 },
+  { "DOUBLEPRECISION", "DOUBLE",  "double",
+    "(const"WS"+)?double"WS"+"SYMRE WS"*\\(", 2, 0 },
+  { "INTEGER",         "INT",     "MPI_Comm",
+    "MPI_Comm"WS"+"SYMRE WS"*\\(", 1, 0, cfMPICommConvert, "int" },
 };
 
 enum { NUM_RET_TYPES = sizeof (funRet) / sizeof (funRet[0]) };
@@ -119,9 +150,21 @@ enum decl { UNKNOWN_DECL, FUNC_DECL, PARAM_DECL };
 
 enum {
   MAX_FUNC_ARGS = 200,
+  MAX_FUNC_NAME_LEN = 127,
 };
 
-void fortran_interface(char *fname, char *fnameinc, char *fnameint)
+static inline size_t
+compress_whitespace(size_t len, char str[]);
+
+static int
+reCompile(regex_t *restrict RE, const char *restrict REstring,
+          char * restrict *restrict lineBuf, size_t * restrict lineBufSize);
+static size_t
+symRegexCompile(size_t numSyms, struct symbol symList[],
+                char **line, size_t *lineBufSize);
+
+
+static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 {
   FILE *fpin, *fpinc, *fpint;
   FILE *fp;
@@ -131,15 +174,14 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   char xname[128], xdes[128];
   xname[0] = 0;
   int parvalue;
-  int functype;
+  enum cftype functype;
   int lineno = 0;
   size_t len;
 
-  char funcname[128];
+  char funcname[MAX_FUNC_NAME_LEN];
   regmatch_t funcargfull[MAX_FUNC_ARGS];
   regmatch_t funcargname[MAX_FUNC_ARGS];
   int  funcargtype[MAX_FUNC_ARGS];
-  ssize_t funcargc;
   /* char *strsort[99999]; */
   char timestr[30];
   time_t date_and_time_in_sec;
@@ -156,15 +198,6 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
       (void) strftime(timestr, sizeof(timestr), "%B %Y", date_and_time);
     }
 
-  /*
-  for ( i = 0; i < 8; i++ ) strsort[i] = funArgSym[i].cname;
-  for ( i = 0; i < 8; i++ ) printf("%d %d >%s<\n", i, &strsort[i], strsort[i]);
-  qsort(strsort, 8, sizeof(char *), strcompare);
-  for ( i = 0; i < 8; i++ ) printf("%d %d >%s<\n", i, &strsort[i], strsort[i]);
-
-  return;
-  */
-
   fpin = fopen(fname, "r");
   if ( fpin == NULL ) { perror(fname); return; }
 
@@ -175,78 +208,40 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   if ( fpint == NULL ) { perror(fnameint); return; }
 
   /* complete symbol table data */
-  for (size_t argt = 0; argt < NUM_KNOWN_ARG_TYPES; ++argt)
-    {
-      int errcode;
-      if ((errcode = regcomp(&funArgSym[argt].preg, funArgSym[argt].parseRE,
-                             REG_EXTENDED)))
-        {
-          line = realloc(line, lineBufSize = 1024);
-          if (line)
-            {
-              regerror(errcode, &funArgSym[argt].preg, line, lineBufSize);
-              fprintf(stderr, "Error compiling regular expression: %s: %s\n",
-                      funArgSym[argt].parseRE, line);
-            }
-          exit(EXIT_FAILURE);
-        }
-      if (funArgSym[argt].nameMatch > maxMatch)
-        maxMatch = funArgSym[argt].nameMatch;
-    }
-  for (size_t retType = 0; retType < NUM_RET_TYPES; ++retType)
-    {
-      int errcode;
-      if ((errcode = regcomp(&funRet[retType].preg, funRet[retType].parseRE,
-                             REG_EXTENDED)))
-        {
-          line = realloc(line, lineBufSize = 1024);
-          if (line)
-            {
-              regerror(errcode, &funRet[retType].preg, line, lineBufSize);
-              fprintf(stderr, "Error compiling regular expression: %s: %s\n",
-                      funRet[retType].parseRE, line);
-            }
-          exit(EXIT_FAILURE);
-        }
-      if (funArgSym[retType].nameMatch > maxMatch)
-        maxMatch = funArgSym[retType].nameMatch;
-    }
+  {
+    maxMatch = symRegexCompile(NUM_KNOWN_ARG_TYPES, funArgSym,
+                             &line, &lineBufSize);
+    size_t maxFunMatch = symRegexCompile(NUM_RET_TYPES, funRet,
+                                         &line, &lineBufSize);
+    if (maxFunMatch > maxMatch)
+      maxMatch = maxFunMatch;
+  }
   ++maxMatch;
   reMatch = malloc((size_t)maxMatch * sizeof (reMatch[0]));
   /* compile comment regular expression */
   regex_t commentRE;
   {
-    int errcode;
-    char commentREString[] = "^"WS"*/\\*"WS"*(.*"NWS")"WS"*\\*/";
-    if ((errcode = regcomp(&commentRE, commentREString, REG_EXTENDED)))
-      {
-        line = realloc(line, lineBufSize = 1024);
-        if (line)
-          {
-            regerror(errcode, &commentRE, line, lineBufSize);
-            fprintf(stderr, "Error compiling regular expression: %s: %s\n",
-                    commentREString, line);
-            exit(EXIT_FAILURE);
-          }
-      }
+    static const char commentREString[] = "^"WS"*/\\*"WS"*(.*"NWS")"WS"*\\*/";
+    if (reCompile(&commentRE, commentREString, &line, &lineBufSize))
+      exit(EXIT_FAILURE);
   }
   /* compile documentation comment regular expression */
   regex_t docCommentRE;
   {
-    int errcode;
-    char docCommentREString[] = "^"WS"*/\\*"WS"*"SYMRE":"
+    static const char docCommentREString[] = "^"WS"*/\\*"WS"*"SYMRE":"
       WS"*("NWS".*"NWS")"WS"*\\*/";
-    if ((errcode = regcomp(&docCommentRE, docCommentREString, REG_EXTENDED)))
-      {
-        line = realloc(line, lineBufSize = 1024);
-        if (line)
-          {
-            regerror(errcode, &commentRE, line, lineBufSize);
-            fprintf(stderr, "Error compiling regular expression: %s: %s\n",
-                    docCommentREString, line);
-            exit(EXIT_FAILURE);
-          }
-      }
+    if (reCompile(&docCommentRE, docCommentREString, &line, &lineBufSize))
+      exit(EXIT_FAILURE);
+  }
+  /* compile keep-conditional regular expression */
+  /* if(n)def and endif preprocessor conditionals followed by
+     make_fint keep are copied to the Fortran interface file */
+  regex_t cppCondRE;
+  {
+    static const char cppCondREString[]
+      = "^"WS"*#"WS"*(ifn?def"WS"+"SYMRE"|endif)"WS"+/\\*"WS"*make_fint keep"WS"*\\*/";
+    if (reCompile(&cppCondRE, cppCondREString, &line, &lineBufSize))
+      exit(EXIT_FAILURE);
   }
   /* fortran include */
 
@@ -267,10 +262,19 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   fprintf(fpint, "#  include \"config.h\"\n");
   fprintf(fpint, "#endif\n");
   fprintf(fpint, "\n");
-  fprintf(fpint, "#if ! defined (_CDI_H)\n");
-  fprintf(fpint, "#  include \"cdi.h\"\n");
-  fprintf(fpint, "#endif\n");
-  fprintf(fpint, "\n");
+  fputs("#if USE_MPI\n"
+        "#  include <mpi.h>\n"
+        "#  include <yaxt.h>\n"
+        "#else\n"
+        "#define MPI_Comm int\n"
+        "#define MPI_Comm_f2c(c) (c)\n"
+        "#define MPI_Comm_c2f(c) (c)\n"
+        "#endif\n"
+        "\n"
+        "#if ! defined (_CDI_H)\n"
+        "#  include \"cdi.h\"\n"
+        "#endif\n"
+        "\n", fpint);
   fprintf(fpint, "#if defined (HAVE_CF_INTERFACE)\n");
   fprintf(fpint, "\n");
   fprintf(fpint, "#if ! defined (__CFORTRAN_LOADED)\n");
@@ -287,8 +291,9 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
     {
       lineno++;
       functype = ISVOID;
-      funcargc = 0;
+      size_t funcargc = 0;
       pline = line;
+      int needsExtraWrapper = 0;
       enum decl declType = UNKNOWN_DECL;
       do {
         for (int retType = 0; retType < NUM_RET_TYPES; ++retType)
@@ -296,14 +301,17 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
             {
               functype = retType;
               declType = FUNC_DECL;
+              needsExtraWrapper
+                = needsExtraWrapper || funRet[retType].needsExtraWrapper;
               break;
             }
         if (declType == UNKNOWN_DECL)
           break;
         regmatch_t *nameMatch = reMatch + funRet[functype].nameMatch;
-        printf("Found: %.*s\n",
-               (int) (nameMatch->rm_eo - nameMatch->rm_so),
-               pline + nameMatch->rm_so);
+        if (debug)
+          printf("Found: %.*s\n",
+                 (int) (nameMatch->rm_eo - nameMatch->rm_so),
+                 pline + nameMatch->rm_so);
         ssize_t funNameLast = reMatch[0].rm_eo - 1;
         ssize_t nameLen = nameMatch->rm_eo - nameMatch->rm_so;
         if ( pline[funNameLast] != '(' )
@@ -317,108 +325,82 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
       } while (0);
       if (declType == FUNC_DECL)
         {
-	  /*
-           * len = 0;
-	   * while ( isalnum((int) pline[len]) ) len++;
-           * memcpy(funcname, pline, len);
-	   * funcname[len] = 0;
-           */
-	  /* printf("%s\n", funcname); */
-	  /* pline += len; */
-	  /*
-           * if ( *pline != '(' )
-	   *   {
-	   *     printf("%s\n>(< not found!", line);
-	   *     return;
-	   *   }
-	   * pline++;
-           */
-
 	  funcargname[funcargc].rm_so = (regoff_t)(pline - line);
-          ssize_t i = 0;
-          do {
-            ssize_t restLen = lineLen - (ssize_t)(pline - line);
-            for (; i < restLen; i++ )
+          {
+            ssize_t i = 0;
+            do {
+              ssize_t restLen = lineLen - (ssize_t)(pline - line);
+              for (; i < restLen; i++ )
+                {
+                  if ( pline[i] == ',' )
+                    {
+                      funcargc++;
+                      funcargname[funcargc].rm_so
+                        = (regoff_t)(pline - line + i + 1);
+                    }
+                  if ( pline[i] == ')' )
+                    {
+                      funcargc++;
+                      funcargname[funcargc].rm_so
+                        = (regoff_t)(pline - line + i + 1);
+                      break;
+                    }
+                }
+              if (i < restLen)
+                break;
+              char *lineExtension = NULL;
+              size_t extSize = 0, plineOff = (size_t)(pline - line);
+              ssize_t extLen;
+              if ((extLen = getline(&lineExtension, &extSize, fpin)) <= 0)
+                break;
+              if ((size_t)(lineLen + extLen) >= lineBufSize)
+                if (!(line = realloc(line, (size_t)(lineLen + extLen + 1))))
+                  exit(EXIT_FAILURE);
+              memcpy(line + lineLen, lineExtension, (size_t)extLen + 1);
+              lineLen += extLen;
+              pline = line + plineOff;
+            } while (1);
+          }
+
+	  /*  printf("funcargc = %d\n", funcargc);*/
+          {
+            size_t i;
+            for (i = 0; i < funcargc; ++i )
               {
-                if ( pline[i] == ',' )
+                pline = line + funcargname[i].rm_so;
+                int argtype;
+                regoff_t argStart = (regoff_t)(pline - line);
+                for (argtype = ISVOID;
+                     argtype < NUM_KNOWN_ARG_TYPES;
+                     ++argtype)
+                  if (!regexec(&funArgSym[argtype].preg, pline, maxMatch,
+                               reMatch, 0))
+                    {
+                      funcargtype[i] = argtype;
+                      funcargfull[i].rm_so = reMatch[0].rm_so + argStart;
+                      funcargfull[i].rm_eo = reMatch[0].rm_eo + argStart;
+                      regmatch_t *nameMatch = reMatch + funArgSym[argtype].nameMatch;
+                      funcargname[i].rm_so = nameMatch->rm_so + argStart;
+                      funcargname[i].rm_eo = nameMatch->rm_eo + argStart;
+                      needsExtraWrapper
+                        = needsExtraWrapper || funArgSym[argtype].needsExtraWrapper;
+                      break;
+                    }
+                if (argtype == NUM_KNOWN_ARG_TYPES)
                   {
-                    funcargc++;
-                    funcargname[funcargc].rm_so
-                      = (regoff_t)(pline - line + i + 1);
-                  }
-                if ( pline[i] == ')' )
-                  {
-                    funcargc++;
-                    funcargname[funcargc].rm_so
-                      = (regoff_t)(pline - line + i + 1);
+                    printf("%s not implemented\n", line + funcargname[i].rm_so);
                     break;
                   }
               }
-            if (i < restLen)
-              break;
-            char *lineExtension = NULL;
-            size_t extSize = 0, plineOff = (size_t)(pline - line);
-            ssize_t extLen;
-            if ((extLen = getline(&lineExtension, &extSize, fpin)) <= 0)
-              break;
-            if ((size_t)(lineLen + extLen) >= lineBufSize)
-              if (!(line = realloc(line, (size_t)(lineLen + extLen + 1))))
-                exit(EXIT_FAILURE);
-            memcpy(line + lineLen, lineExtension, (size_t)extLen + 1);
-            lineLen += extLen;
-            pline = line + plineOff;
-          } while (1);
-
-	  /*  printf("funcargc = %d\n", funcargc);*/
-
-	  for ( i = 0; i < funcargc; i++ )
-	    {
-	      pline = line + funcargname[i].rm_so;
-              int argtype;
-              regoff_t argStart = (regoff_t)(pline - line);
-              for (argtype = ISVOID;
-                   argtype < NUM_KNOWN_ARG_TYPES;
-                   ++argtype)
-                if (!regexec(&funArgSym[argtype].preg, pline, maxMatch,
-                             reMatch, 0))
-                  {
-                    funcargtype[i] = argtype;
-                    funcargfull[i].rm_so = reMatch[0].rm_so + argStart;
-                    funcargfull[i].rm_eo = reMatch[0].rm_eo + argStart;
-                    regmatch_t *nameMatch = reMatch + funArgSym[argtype].nameMatch;
-                    funcargname[i].rm_so = nameMatch->rm_so + argStart;
-                    funcargname[i].rm_eo = nameMatch->rm_eo + argStart;
-                    break;
-                  }
-              if (argtype == NUM_KNOWN_ARG_TYPES)
-		{
-		  printf("%s not implemented\n", line + funcargname[i].rm_so);
-		  break;
-		}
-	    }
-	  if ( i != funcargc )
-            {
-              printf("problem parsing line: %s\n", line);
-              continue;
-            }
+            if ( i != funcargc )
+              {
+                printf("problem parsing line: %s\n", line);
+                continue;
+              }
+          }
 
 	  strcpy(sname, funcname);
 	  len = strlen(sname);
-	  /*
-	  ii = 0;
-	  for ( i = 0; i < len; i++ )
-	    {
-	      if ( isupper((int) sname[i]) ) break;
-	      if ( islower((int) sname[i]) ) sname[i] = toupper((int) sname[i]);
-	    }
-	  sname[len+1] = 0;
-	  for ( ii = len; ii > i; ii-- )
-	    {
-	      sname[ii] = sname[ii-1];
-	    }
-	  sname[i] = '_';
-	  len++;
-	  */
 
 	  /* fortran include */
 
@@ -430,7 +412,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
           fprintf(fpinc, "%s", sname);
 	  fprintf(fpinc, "\n");
 	  if ( (funcargc == 1 && funcargtype[0] == ISVOID) ) funcargc = 0;
-	  for ( i = 0; i < funcargc; i++ )
+	  for (size_t i = 0; i < funcargc; i++ )
 	    {
 	      if ( i == 0 )
 		fprintf(fpinc, "!%36s(", "");
@@ -445,7 +427,65 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	  fprintf(fpinc, "      %-16s%s\n\n", "EXTERNAL", sname);
 
 	  /* fortran interface */
-
+          const char *delegateName;
+          char delegateNameBuf[MAX_FUNC_NAME_LEN + 7];
+          /* emit wrapper for type conversions if needed */
+          if (needsExtraWrapper)
+            {
+              strcpy(delegateNameBuf, funcname);
+              strcat(delegateNameBuf, "_fwrap");
+              delegateName = delegateNameBuf;
+              fprintf(fpint, "static %s %s(",
+                      (funRet[functype].convert
+                       ?funRet[functype].convcname:funRet[functype].cname),
+                      delegateName);
+              for (size_t i = 0; i < funcargc; i++ )
+                {
+                  fprintf(fpint, "%s%s %.*s", (i > 0?", ":""),
+                          (funArgSym[funcargtype[i]].convert
+                           ?funArgSym[funcargtype[i]].convcname
+                           :funArgSym[funcargtype[i]].cname),
+                          (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
+                          line + funcargname[i].rm_so);
+                }
+              fputs(")\n{\n", fpint);
+              if (functype != ISVOID)
+                fprintf(fpint, "  %s v;\n"
+                        "  v = %s(", funRet[functype].cname,
+                        funcname);
+              else
+                fprintf(fpint, "  %s(", funcname);
+              for (size_t i = 0; i < funcargc; i++ )
+                {
+                  if (funArgSym[funcargtype[i]].convert)
+                    {
+                      if (i > 0)
+                        fputs(", ", fpint);
+                      funArgSym[funcargtype[i]]
+                        .convert(fpint,
+                                 line + funcargname[i].rm_so,
+                                 (size_t)(funcargname[i].rm_eo
+                                          - funcargname[i].rm_so), CONV_ARG);
+                    }
+                  else
+                    fprintf(fpint, "%s %.*s", (i > 0?", ":""),
+                            (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
+                            line + funcargname[i].rm_so);
+                }
+              fputs(");\n", fpint);
+              if (functype != ISVOID)
+                {
+                  fputs("  return ", fpint);
+                  if (funRet[functype].convert)
+                    funRet[functype].convert(fpint, "v", 1, CONV_RET);
+                  else
+                    fputc('v', fpint);
+                  fputs(";\n", fpint);
+                }
+              fputs("}\n", fpint);
+            }
+          else
+            delegateName = funcname;
 	  if ( functype == ISVOID )
 	    fprintf(fpint, "FCALLSCSUB");
 	  else
@@ -453,13 +493,13 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	  fprintf(fpint, "%zd ", funcargc);
 	  fprintf(fpint, "(");
 	  if ( functype != ISVOID )
-	    fprintf(fpint, "%s, ", funArgSym[functype].cfint);
-	  fprintf(fpint, "%s, ", funcname);
+	    fprintf(fpint, "%s, ", funRet[functype].cfint);
+	  fprintf(fpint, "%s, ", delegateName);
 	  for (size_t i = 0; i < len; i++ ) sname[i] = (char)toupper((int) sname[i]);
 	  fprintf(fpint, "%s, ", sname);
 	  for (size_t i = 0; i < len; i++ ) sname[i] = (char)tolower((int) sname[i]);
 	  fprintf(fpint, "%s", sname);
-	  for (ssize_t i = 0; i < funcargc; i++ )
+	  for (size_t i = 0; i < funcargc; i++ )
 	    {
 	      fprintf(fpint, ", %s", funArgSym[funcargtype[i]].cfint);
 	    }
@@ -481,7 +521,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 
 	      if ( (funcargc == 1 && funcargtype[0] == ISVOID) ) funcargc = 0;
 
-	      for ( i = 0; i < funcargc; i++ )
+	      for (size_t i = 0; i < funcargc; i++ )
 		{
 		  if ( i ) strcat(xline, ", ");
 
@@ -495,34 +535,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
                   if (nchn < 0)
                     abort();
                   /* compress white-space */
-                  {
-                    size_t wpos = 0;
-                    size_t i = 0;
-                    /* skip leading white-space */
-                    while (i < (size_t)nchn
-                           && (isblank(farg[i]) || farg[i] == '\n'))
-                      ++i;
-                    /* after the leading white-space the following is
-                     * an alternation of white- and non-white-space
-                     * characters, where sequences of the latter will
-                     * be compressed to a single space */
-                    while (i < (size_t)nchn)
-                      {
-                        /* handle white-space */
-                        while (i < (size_t)nchn
-                               && !(isblank(farg[i]) || farg[i] == '\n'))
-                          farg[wpos++] = farg[i++];
-                        /* skip non-white-space */
-                        size_t wscount = 0;
-                        while (i < (size_t)nchn
-                               && (isblank(farg[i]) || farg[i] == '\n'))
-                          ++i, ++wscount;
-                        if (wscount)
-                          farg[wpos++] = ' ';
-                      }
-                    farg[wpos] = '\0';
-                    nchn = (int)wpos;
-                  }
+                  nchn = (int)compress_whitespace((size_t)nchn, farg);
 		  if ( (strlen(xline)+(size_t)nchn) > (size_t)80 )
 		    {
                       if (i) xline[strlen(xline) - 1] = 0;
@@ -550,7 +563,7 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 
 	      if ( (funcargc == 1 && funcargtype[0] == ISVOID) ) funcargc = 0;
 
-	      for ( i = 0; i < funcargc; i++ )
+	      for (size_t i = 0; i < funcargc; i++ )
 		{
 		  if ( i ) strcat(xline, ", ");
 
@@ -601,6 +614,11 @@ void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	  fprintf(fpinc, "      INTEGER    %-22s\n"
                   "      PARAMETER (%-22s = %2d)\n", parname, parname,
                   parvalue);
+	}
+      else if (!regexec(&cppCondRE, line, maxMatch, reMatch, 0))
+	{
+          /* fortran include */
+	  fputs(line, fpint);
 	}
       else if (!regexec(&docCommentRE, line, maxMatch, reMatch, 0))
         {
@@ -720,6 +738,114 @@ int main(int argc, char *argv[])
 
   return (0);
 }
+
+static inline size_t
+compress_whitespace(size_t len, char str[])
+{
+  size_t wpos = 0;
+  size_t i = 0;
+  /* skip leading white-space */
+  while (i < len && (isblank(str[i]) || str[i] == '\n'))
+    ++i;
+  /* after the leading white-space the following is
+   * an alternation of white- and non-white-space
+   * characters, where sequences of the latter will
+   * be compressed to a single space */
+  while (i < len)
+    {
+      /* handle white-space */
+      while (i < len && !(isblank(str[i]) || str[i] == '\n'))
+        str[wpos++] = str[i++];
+      /* skip non-white-space */
+      size_t wscount = 0;
+      while (i < len && (isblank(str[i]) || str[i] == '\n'))
+        ++i, ++wscount;
+      if (wscount)
+        str[wpos++] = ' ';
+    }
+  str[wpos] = '\0';
+  return wpos;
+}
+
+enum {
+  REGEX_MAX_ERRSTRLEN = 1024,
+};
+
+
+static size_t
+symRegexCompile(size_t numSyms, struct symbol symList[],
+                char **line, size_t *lineBufSize)
+{
+  size_t maxMatch = 0;
+  for (size_t sym = 0; sym < numSyms; ++sym)
+    {
+      if (reCompile(&symList[sym].preg, symList[sym].parseRE,
+                    line, lineBufSize))
+        exit(EXIT_FAILURE);
+      if (symList[sym].nameMatch > maxMatch)
+        maxMatch = symList[sym].nameMatch;
+    }
+  return maxMatch;
+}
+
+static int
+reCompile(regex_t *restrict RE, const char *restrict REstring,
+          char * restrict *restrict lineBuf, size_t * restrict lineBufSize)
+{
+  int errcode;
+  if ((errcode = regcomp(RE, REstring, REG_EXTENDED)))
+    {
+      char *restrict line;
+      size_t resize;
+      if (*lineBufSize < REGEX_MAX_ERRSTRLEN
+          && (line = realloc(*lineBuf, resize = REGEX_MAX_ERRSTRLEN)))
+        {
+          *lineBuf = line;
+          *lineBufSize = resize;
+          regerror(errcode, RE, line, *lineBufSize);
+          fprintf(stderr, "Error compiling regular expression: %s: %s\n",
+                  REstring, *lineBuf);
+        }
+    }
+  return errcode;
+}
+
+/* emit conversion code for MPI_Comm argument */
+static int cfMPICommConvert(FILE *outfp, const char *argName,
+                            size_t argNameLen, enum conversionType part)
+{
+  int retval = 0;
+  switch (part)
+    {
+    case CONV_ARG:
+      retval
+        = fprintf(outfp, "MPI_Comm_f2c(%.*s)", (int)argNameLen, argName);
+      break;
+    case CONV_RET:
+      retval = fprintf(outfp, "MPI_Comm_c2f(%.*s)", (int)argNameLen, argName);
+      break;
+    }
+  return retval;
+}
+
+/* emit conversion code for Xt_idxlist argument */
+static int cfXtIdxlistConvert(FILE *outfp, const char *argName,
+                              size_t argNameLen, enum conversionType part)
+{
+  int retval = 0;
+  switch (part)
+    {
+    case CONV_ARG:
+      retval
+        = fprintf(outfp, "(*(Xt_idxlist *)%.*s)", (int)argNameLen, argName);
+      break;
+    case CONV_RET:
+      abort();
+      break;
+    }
+  return retval;
+}
+
 /*
  * Local Variables:
  * c-file-style: "Java"

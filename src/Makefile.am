@@ -9,6 +9,7 @@ else
   noinst_LTLIBRARIES = libcdi.la
 endif
 
+AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS)
 
 libcdi_la_SOURCES = 	 \
 	basetime.c     	 \
@@ -54,9 +55,10 @@ libcdi_la_SOURCES = 	 \
 	model.h        	 \
 	namespace.c      \
 	namespace.h      \
+	serialize.h	\
+	serialize.c	\
 	pio.c            \
 	pio.h            \
-	pio_c_temp.h     \
 	pio_comm.c       \
 	pio_comm.h       \
 	pio_dbuffer.c    \
@@ -69,12 +71,17 @@ libcdi_la_SOURCES = 	 \
 	pio_posixfpguardsendrecv.c \
 	pio_posixnonb.c  \
 	pio_list_set.c	 \
-	pio_rpc.c        \
+	resource_unpack.h \
+	resource_unpack.c \
 	pio_rpc.h        \
 	pio_server.c     \
 	pio_server.h     \
 	pio_util.c       \
 	pio_util.h       \
+	pio_serialize.h	\
+	pio_serialize.c	\
+	pio_cdf_int.c	\
+	pio_cdf_int.h	\
 	resource_handle.c\
 	resource_handle.h\
 	service.h	 \
@@ -123,7 +130,7 @@ libcdi_la_SOURCES = 	 \
         swap.c
 
 #libcdi_la_CPPFLAGS  = @CPPFLAGS@
-#libcdi_la_LIBADD    = @LDFLAGS@
+libcdi_la_LIBADD    = $(PPM_CORE_LIBS) $(YAXT_LIBS)
 #
 cdilib.c:
 	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src

@@ -820,7 +820,8 @@ void srvReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
       recID = streamptr->vars[varID].level[levID];
       recpos = streamptr->tsteps[tsid].records[recID].position;
       fileSetPos(fileID, recpos, SEEK_SET);
-      srvRead(fileID, srvp);
+      if (srvRead(fileID, srvp) < 0)
+        abort();
       srvInqHeader(srvp, header);
       srvInqDataDP(srvp, &data[levID*gridsize]);
     }
@@ -866,7 +867,8 @@ void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
   recID = streamptr->vars[varID].level[levID];
   recpos = streamptr->tsteps[tsid].records[recID].position;
   fileSetPos(fileID, recpos, SEEK_SET);
-  srvRead(fileID, srvp);
+  if (srvRead(fileID, srvp) < 0)
+    abort();
   srvInqHeader(srvp, header);
   srvInqDataDP(srvp, data);
 

@@ -10,7 +10,7 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "cdf_int.h"
-
+#include "namespace.h"
 
 extern int CDF_Fatal;
 extern int CDF_Verbose;
@@ -24,7 +24,6 @@ extern int CDF_Debug;
 
 static size_t ChunkSizeMin = MIN_BUF_SIZE;
 */
-
 void cdf_create(const char *path, int cmode, int *ncidp)
 {
   int status;
@@ -59,7 +58,9 @@ void cdf_create(const char *path, int cmode, int *ncidp)
 
   if ( cdiNcChunksizehint != CDI_UNDEFID ) chunksizehint = cdiNcChunksizehint;
 
-  status = nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
+  cdi_nc__create_funcp my_nc__create =
+    namespaceSwitchGet(NSSWITCH_NC__CREATE);
+  status = my_nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
 
   if ( CDF_Debug || status != NC_NOERR )
     Message("ncid = %d  mode = %d  file = %s", *ncidp, cmode, path);
@@ -102,6 +103,7 @@ int cdf_open(const char *path, int omode, int *ncidp)
       */
       if ( cdiNcChunksizehint != CDI_UNDEFID ) chunksizehint = cdiNcChunksizehint;
 
+      /* FIXME: parallel part missing */
       status = nc__open(path, omode, &chunksizehint, ncidp);
 
       if ( CDF_Debug ) Message("chunksizehint %d", chunksizehint);
@@ -236,11 +238,18 @@ void cdf_inq_dimlen(int ncid, int dimid, size_t * lengthp)
 
 
 void cdf_def_var(int ncid, const char *name, nc_type xtype, int ndims,
-	    const int dimids[], int *varidp)
+                 const int dimids[], int *varidp)
 {
-  int status;
+  cdi_cdf_def_var_funcp my_cdf_def_var
+    = namespaceSwitchGet(NSSWITCH_CDF_DEF_VAR);
+  my_cdf_def_var(ncid, name, xtype, ndims, dimids, varidp);
+}
 
-  status = nc_def_var(ncid, name, xtype, ndims, dimids, varidp);
+void
+cdf_def_var_serial(int ncid, const char *name, nc_type xtype, int ndims,
+                   const int dimids[], int *varidp)
+{
+  int status = nc_def_var(ncid, name, xtype, ndims, dimids, varidp);
 
   if ( CDF_Debug || status != NC_NOERR )
     Message("ncid = %d  name = %s  xtype = %d  ndims = %d  varid = %d",
@@ -248,6 +257,7 @@ void cdf_def_var(int ncid, const char *name, nc_type xtype, int ndims,
 
   if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
+
 
 
 void cdf_inq_varid(int ncid, const char *name, int *varidp)

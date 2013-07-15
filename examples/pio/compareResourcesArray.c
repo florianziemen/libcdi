@@ -6,33 +6,29 @@
 
 #ifdef USE_MPI
 #include <mpi.h>
+#include <yaxt.h>
 #include "cdi.h"
-#include "pio_c_temp.h"
 #include "pio_util.h"
+#include "resource_handle.h"
+#include "resource_unpack.h"
 
 extern int    reshListCompare      ( int, int );
-extern void   reshPackBufferCreate  ( char **, int *, MPI_Comm );
-extern void   reshPackBufferDestroy ( char ** );
-extern void   rpcUnpackResources    ( char *, int, MPI_Comm );
 extern void   arrayDestroy          ( void );
 
 enum {
   IOMode           = PIO_NONE,
   nProcsIO         = 1,
-  nNamespaces      = 2,
   DOUBLE_PRECISION = 8,
   nlon             = 12,
   nlat             = 6,
   nlev             = 5,
   ntsteps          = 3 };
 
-static int hasLocalFile[nNamespaces] = { 0, 0 };
-
 double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
 double lats[nlat] = {-75, -45, -15, 15, 45, 75};
 double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
 
-int defineGrid ()
+static int defineGrid()
 {
   int gridID = CDI_UNDEFID;
   int mask_vec[nlon*nlat];
@@ -89,7 +85,7 @@ int defineGrid ()
   return gridID;
 }
 
-int defineZaxis ()
+static int defineZaxis ()
 {
   int zaxisID = CDI_UNDEFID;
   double vct[3] = { 3.0, 3.3, 3.6 };
@@ -110,7 +106,7 @@ int defineZaxis ()
   return zaxisID;
 }
 
-int defineTaxis ()
+static int defineTaxis ()
 {
   int taxisID = CDI_UNDEFID;
 
@@ -159,7 +155,8 @@ int defineVlist ( int gridID, int zaxisID, int taxisID )
   return vlistID;
 }
 
-int defineInstitute ()
+static int
+defineInstitute ()
 {
   int instID = CDI_UNDEFID;
 
@@ -168,18 +165,26 @@ int defineInstitute ()
   return instID;
 }
 
-int defineModel ( int instID )
+static void
+defineModel(int instID)
 {
-  int modelID = CDI_UNDEFID;
-
-  modelID = modelDef ( instID, 0, "myModel");
-
-  return modelID;
+  modelDef(instID, 0, "myModel");
 }
 
-void modelRun ( MPI_Comm comm )
+static void
+printResources()
 {
-  int gridID, zaxisID, taxisID, instID, modelID, vlistID, streamID;
+  FILE *fp = fopen("reshArrayModel.txt", "w");
+  if (!fp)
+    xabort("%s", "could not open file");
+  reshListPrint(fp);
+  fclose(fp);
+}
+
+
+static void modelRun ( MPI_Comm comm )
+{
+  int gridID, zaxisID, taxisID, instID, vlistID, streamID;
 
   char * recvBuffer, * sendBuffer;
   int bufferSize, differ;
@@ -191,26 +196,26 @@ void modelRun ( MPI_Comm comm )
   zaxisID = defineZaxis     ();
   taxisID = defineTaxis     ();
   instID  = defineInstitute ();
-  modelID = defineModel     ( instID );
+  defineModel(instID);
   vlistID = defineVlist     ( gridID, zaxisID, taxisID);
   streamID = streamOpenWrite("example.grb", FILETYPE_GRB);
   if ( streamID < 0 ) xabort ( "Could not open file" );
   defineStream ( streamID, vlistID );
 
-  reshPackBufferCreate ( &sendBuffer, &bufferSize, comm );
-  xmpi ( MPI_Send ( sendBuffer, bufferSize, MPI_PACKED, 0, 0, comm ));  
+  reshPackBufferCreate(&sendBuffer, &bufferSize, &comm);
+  xmpi ( MPI_Send ( sendBuffer, bufferSize, MPI_PACKED, 0, 0, comm ));
   recvBuffer = xmalloc ( bufferSize * sizeof ( char ));
   xmpi ( MPI_Recv ( recvBuffer, bufferSize, MPI_PACKED, 0,
 		    0, comm, &status ));
- 
+
   pioNamespaceSetActive ( 1 );
-  rpcUnpackResources ( recvBuffer, bufferSize, comm );  
-  free ( recvBuffer );  
+  reshUnpackResources(recvBuffer, bufferSize, &comm);
+  free ( recvBuffer );
   reshPackBufferDestroy ( &sendBuffer );
 
   differ = reshListCompare ( 0, 1 );
   printf ( "The resource arrays %s.\n", differ ? "differ" : "are equal" );
-  reshListPrint ( "reshArrayModel" );
+  printResources();
 
   pioNamespaceSetActive ( 0 );
   streamClose(streamID);
@@ -222,11 +227,12 @@ void modelRun ( MPI_Comm comm )
 int main (int argc, char *argv[]) 
 {
 #ifdef USE_MPI
-  int sizeGlob;
+  int sizeGlob, pioNamespace;
   MPI_Comm commGlob, commModel;
 
   MPI_Init(&argc, &argv);           
-  xmpi ( MPI_Comm_dup ( MPI_COMM_WORLD, &commGlob ));
+  commGlob = MPI_COMM_WORLD;
+  xt_initialize(commGlob);
   xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob )); 
 
@@ -236,10 +242,12 @@ int main (int argc, char *argv[])
   if ( nProcsIO != 1 )
     xabort ( "bad distribution of tasks on PEs" );
 
-  commModel = pioInit_c ( commGlob, nProcsIO, IOMode, nNamespaces, hasLocalFile );
+  commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0f);
+  pioNamespaceSetActive(pioNamespace);
 
   modelRun ( commModel );
 
+  xt_finalize();
   MPI_Finalize (); 
 #else
   printf ( "Use MPI for this testprogram.\n" );
