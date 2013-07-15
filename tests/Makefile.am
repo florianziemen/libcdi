@@ -11,7 +11,7 @@ check_PROGRAMS = test_grib cksum_write cksum_read pio_write \
 #
 test_grib_SOURCES = test_grib.c
 cksum_write_SOURCES = cksum_write.c cksum.c cksum.h
-cksum_write_chunk_SOURCES = cksum_write_chunkb main.c cksum.c cksum.h
+cksum_write_chunk_SOURCES = cksum_write_chunk.c cksum.c cksum.h
 cksum_read_SOURCES = cksum_read.c \
 	var_cksum.c var_cksum.h \
 	stream_cksum.c stream_cksum.h \

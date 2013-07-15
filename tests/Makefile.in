@@ -100,7 +100,8 @@ am_cksum_write_OBJECTS = cksum_write.$(OBJEXT) cksum.$(OBJEXT)
 cksum_write_OBJECTS = $(am_cksum_write_OBJECTS)
 cksum_write_LDADD = $(LDADD)
 cksum_write_DEPENDENCIES = ../src/libcdi.la
-am_cksum_write_chunk_OBJECTS = main.$(OBJEXT) cksum.$(OBJEXT)
+am_cksum_write_chunk_OBJECTS = cksum_write_chunk.$(OBJEXT) \
+	cksum.$(OBJEXT)
 cksum_write_chunk_OBJECTS = $(am_cksum_write_chunk_OBJECTS)
 cksum_write_chunk_LDADD = $(LDADD)
 cksum_write_chunk_DEPENDENCIES = ../src/libcdi.la
@@ -333,7 +334,7 @@ top_srcdir = @top_srcdir@
 #
 test_grib_SOURCES = test_grib.c
 cksum_write_SOURCES = cksum_write.c cksum.c cksum.h
-cksum_write_chunk_SOURCES = cksum_write_chunkb main.c cksum.c cksum.h
+cksum_write_chunk_SOURCES = cksum_write_chunk.c cksum.c cksum.h
 cksum_read_SOURCES = cksum_read.c \
 	var_cksum.c var_cksum.h \
 	stream_cksum.c stream_cksum.h \
@@ -449,8 +450,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_read.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_write.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_write_chunk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ensure_array_size.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_write.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_grib.Po@am__quote@
