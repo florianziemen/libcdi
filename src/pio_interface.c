@@ -23,6 +23,7 @@
 #include "pio_interface.h"
 #include "pio_comm.h"
 #include "pio_rpc.h"
+#include "pio_client.h"
 #include "pio_server.h"
 #include "resource_handle.h"
 #include "cdi_int.h"
@@ -698,13 +699,6 @@ static int pioNamespace_ = -1;
 static int xtInitByCDI = 0;
 #endif
 
-#if defined USE_MPI && defined HAVE_LIBNETCDF
-static void
-cdiPioCdfDefTimestepNOP(stream_t *streamptr, int tsID)
-{
-}
-#endif
-
 MPI_Comm
 pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
         int *pioNamespace, float partInflate)
@@ -761,24 +755,7 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
       exit ( EXIT_SUCCESS );
     }
   else
-    {
-      commEvalPhysNodes ();
-      commDefCommsIO ();
-      pioNamespace_ = *pioNamespace = namespaceNew(0);
-      int callerCDINamespace = namespaceGetActive();
-      pioNamespaceSetActive(pioNamespace_);
-      serializeSetMPI();
-      namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND, cdiPioStreamOpen);
-      namespaceSwitchSet(NSSWITCH_STREAM_DEF_VLIST_, cdiPioStreamDefVlist_);
-      namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_, cdiPioStreamWriteVar_);
-      namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_,
-                         cdiPioStreamWriteVarChunk_);
-      namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND, cdiPioStreamClose);
-#ifdef HAVE_LIBNETCDF
-      namespaceSwitchSet(NSSWITCH_CDF_DEF_TIMESTEP, cdiPioCdfDefTimestepNOP);
-#endif
-      pioNamespaceSetActive(callerCDINamespace);
-    }
+    cdiPioClientSetup(&pioNamespace_, pioNamespace);
 
   xdebug ( "nProcsGlob=%d, RETURN", sizeGlob );
   return commInqCommModel ();

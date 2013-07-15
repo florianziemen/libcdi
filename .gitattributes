@@ -230,6 +230,8 @@ src/pio.c -text
 src/pio.h -text
 src/pio_cdf_int.c -text
 src/pio_cdf_int.h -text
+src/pio_client.c -text
+src/pio_client.h -text
 src/pio_comm.c -text
 src/pio_comm.h -text
 src/pio_dbuffer.c -text
