@@ -3,6 +3,10 @@
 	* Version 1.6.2 released
 	* using CGRIBEX library version 1.6.2
 
+2013-07-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.6.1.1 released (merged branche cdi-pio to trunk cdi)
+
 2013-07-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* netCDF: wrong result if type  of data and type of attribute valid_range differ [Bug #3727]
