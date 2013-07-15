@@ -52,12 +52,12 @@ build_triplet = @build@
 host_triplet = @host@
 TESTS = test_grib.sh test_cksum_grib test_cksum_nc test_cksum_extra \
 	test_cksum_service test_cksum_nc2 test_cksum_nc4 \
-	test_cksum_ieg pio_write_run pio_cksum_mpinonb \
-	pio_cksum_fpguard pio_cksum_asynch pio_cksum_writer \
-	pio_cksum_cdf test_resource_copy$(EXEEXT)
+	test_cksum_ieg test_chunk_cksum pio_write_run \
+	pio_cksum_mpinonb pio_cksum_fpguard pio_cksum_asynch \
+	pio_cksum_writer pio_cksum_cdf test_resource_copy$(EXEEXT)
 check_PROGRAMS = test_grib$(EXEEXT) cksum_write$(EXEEXT) \
 	cksum_read$(EXEEXT) pio_write$(EXEEXT) \
-	test_resource_copy$(EXEEXT)
+	test_resource_copy$(EXEEXT) cksum_write_chunk$(EXEEXT)
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/pio_cksum_asynch.in $(srcdir)/pio_cksum_cdf.in \
@@ -100,6 +100,10 @@ am_cksum_write_OBJECTS = cksum_write.$(OBJEXT) cksum.$(OBJEXT)
 cksum_write_OBJECTS = $(am_cksum_write_OBJECTS)
 cksum_write_LDADD = $(LDADD)
 cksum_write_DEPENDENCIES = ../src/libcdi.la
+am_cksum_write_chunk_OBJECTS = main.$(OBJEXT) cksum.$(OBJEXT)
+cksum_write_chunk_OBJECTS = $(am_cksum_write_chunk_OBJECTS)
+cksum_write_chunk_LDADD = $(LDADD)
+cksum_write_chunk_DEPENDENCIES = ../src/libcdi.la
 am_pio_write_OBJECTS = pio_write.$(OBJEXT) cksum.$(OBJEXT)
 pio_write_OBJECTS = $(am_pio_write_OBJECTS)
 pio_write_LDADD = $(LDADD)
@@ -126,11 +130,11 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(cksum_read_SOURCES) $(cksum_write_SOURCES) \
-	$(pio_write_SOURCES) $(test_grib_SOURCES) \
-	$(test_resource_copy_SOURCES)
+	$(cksum_write_chunk_SOURCES) $(pio_write_SOURCES) \
+	$(test_grib_SOURCES) $(test_resource_copy_SOURCES)
 DIST_SOURCES = $(cksum_read_SOURCES) $(cksum_write_SOURCES) \
-	$(pio_write_SOURCES) $(test_grib_SOURCES) \
-	$(test_resource_copy_SOURCES)
+	$(cksum_write_chunk_SOURCES) $(pio_write_SOURCES) \
+	$(test_grib_SOURCES) $(test_resource_copy_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -423,6 +427,9 @@ cksum_read$(EXEEXT): $(cksum_read_OBJECTS) $(cksum_read_DEPENDENCIES) $(EXTRA_ck
 cksum_write$(EXEEXT): $(cksum_write_OBJECTS) $(cksum_write_DEPENDENCIES) $(EXTRA_cksum_write_DEPENDENCIES) 
 	@rm -f cksum_write$(EXEEXT)
 	$(LINK) $(cksum_write_OBJECTS) $(cksum_write_LDADD) $(LIBS)
+cksum_write_chunk$(EXEEXT): $(cksum_write_chunk_OBJECTS) $(cksum_write_chunk_DEPENDENCIES) $(EXTRA_cksum_write_chunk_DEPENDENCIES) 
+	@rm -f cksum_write_chunk$(EXEEXT)
+	$(LINK) $(cksum_write_chunk_OBJECTS) $(cksum_write_chunk_LDADD) $(LIBS)
 pio_write$(EXEEXT): $(pio_write_OBJECTS) $(pio_write_DEPENDENCIES) $(EXTRA_pio_write_DEPENDENCIES) 
 	@rm -f pio_write$(EXEEXT)
 	$(LINK) $(pio_write_OBJECTS) $(pio_write_LDADD) $(LIBS)
@@ -443,6 +450,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_read.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_write.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ensure_array_size.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_write.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_grib.Po@am__quote@

@@ -2,11 +2,12 @@
 #
 TESTS = test_grib.sh test_cksum_grib test_cksum_nc test_cksum_extra \
 	test_cksum_service test_cksum_nc2 test_cksum_nc4 test_cksum_ieg \
+	test_chunk_cksum \
 	pio_write_run pio_cksum_mpinonb pio_cksum_fpguard \
 	pio_cksum_asynch pio_cksum_writer pio_cksum_cdf \
 	test_resource_copy
 check_PROGRAMS = test_grib cksum_write cksum_read pio_write \
-	test_resource_copy
+	test_resource_copy cksum_write_chunk
 #
 test_grib_SOURCES = test_grib.c
 cksum_write_SOURCES = cksum_write.c cksum.c cksum.h
