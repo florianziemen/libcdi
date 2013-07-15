@@ -1217,37 +1217,12 @@ void streamClose(int streamID)
   stream_delete_entry(streamptr);
 }
 
-/*
-@Function  streamSync
-@Title     Synchronize an Open Dataset to Disk
-
-@Prototype  void streamSync(int streamID)
-@Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
-
-@Description
-The function @func{streamSync} offers a way to synchronize the disk copy of a dataset with in-memory buffers.
-
-@EndFunction
-*/
-void streamSync(int streamID)
+void cdiStreamSync_(stream_t *streamptr)
 {
-  int filetype;
-  int fileID;
-  int vlistID;
-  int nvars;
-  stream_t *streamptr;
-
-  if ( !namespaceHasLocalFile ( namespaceGetActive ())) return;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
-  fileID   = streamptr->fileID;
-  filetype = streamptr->filetype;
-  vlistID  = streamptr->vlistID;
-  nvars    = vlistNvars(vlistID);
+  int fileID   = streamptr->fileID;
+  int filetype = streamptr->filetype;
+  int vlistID  = streamptr->vlistID;
+  int nvars    = vlistNvars(vlistID);
 
   if ( fileID == CDI_UNDEFID )
     Warning("File %s not open!", streamptr->filename);
@@ -1280,6 +1255,32 @@ void streamSync(int streamID)
 	    }
 	}
     }
+}
+
+/*
+@Function  streamSync
+@Title     Synchronize an Open Dataset to Disk
+
+@Prototype  void streamSync(int streamID)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
+
+@Description
+The function @func{streamSync} offers a way to synchronize the disk copy of a dataset with in-memory buffers.
+
+@EndFunction
+*/
+void streamSync(int streamID)
+{
+  stream_t *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(__func__, streamptr);
+
+  void (*myStreamSync_)(stream_t *streamptr)
+    = namespaceSwitchGet(NSSWITCH_STREAM_SYNC);
+  myStreamSync_(streamptr);
 }
 
 /*

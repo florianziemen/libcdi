@@ -368,6 +368,8 @@ void
 cdiStreamCloseDefaultDelegate(stream_t *streamptr,
                               int recordBufIsToBeDeleted);
 
+void cdiStreamSync_(stream_t *streamptr);
+
 char *cdiUnitNamePtr(int cdi_unit);
 
 

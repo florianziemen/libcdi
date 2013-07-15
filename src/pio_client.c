@@ -98,12 +98,13 @@ static void
 cdiPioCdfDefTimestepNOP(stream_t *streamptr, int tsID)
 {
 }
+#endif
 
 static void
-cdiPioClientCdfDefVarsNOP(stream_t *streamptr)
+cdiPioClientStreamNOP(stream_t *streamptr)
 {
 }
-#endif
+
 
 static void
 cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
@@ -139,9 +140,10 @@ cdiPioClientSetup(int *pioNamespace_, int *pioNamespace)
   namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_,
                      cdiPioClientStreamWriteVarChunk_);
   namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND, cdiPioClientStreamClose);
+  namespaceSwitchSet(NSSWITCH_STREAM_SYNC, cdiPioClientStreamNOP);
 #ifdef HAVE_LIBNETCDF
   namespaceSwitchSet(NSSWITCH_CDF_DEF_TIMESTEP, cdiPioCdfDefTimestepNOP);
-  namespaceSwitchSet(NSSWITCH_CDF_STREAM_SETUP, cdiPioClientCdfDefVarsNOP);
+  namespaceSwitchSet(NSSWITCH_CDF_STREAM_SETUP, cdiPioClientStreamNOP);
 #endif
   pioNamespaceSetActive(callerCDINamespace);
 }

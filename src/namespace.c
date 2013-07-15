@@ -35,6 +35,7 @@ static int activeNamespace = 0;
       cdiStreamWriteVar_,                       \
       cdiStreamwriteVarChunk_,                  \
       cdiStreamCloseDefaultDelegate,            \
+      cdiStreamSync_,                           \
       CDI_NETCDF_SWITCHES                       \
       }
 
