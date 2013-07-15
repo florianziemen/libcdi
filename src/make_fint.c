@@ -8,6 +8,9 @@
 #include <sys/types.h>
 #include <time.h>
 
+#ifndef HAVE_GETLINE
+#include "getline.c"
+#endif
 
 //#include "config.h"
 #define VERSION "1.6.1"
