@@ -268,6 +268,7 @@ pioSendOpen(const char *filename)
   afd = initRemoteFileBuf(filename, buffersize);
   if ((id = listSetAdd(bibRemoteFileBuf, afd)) < 0)
     xabort("filename %s is not unique", afd->name);
+  afd->fileID = id;
 
   xdebug("filename=%s, init and added remoteFileBuf, return id = %d",
          filename, id);

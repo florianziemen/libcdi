@@ -304,7 +304,7 @@ int fowMPINONB ( const char *filename )
 
   xdebug("IOPE%d: name=%s, init and added aFiledataM, return id = %d",
          rankNode, filename, id);
-  
+  of->fileID = id;
   return id;
 }
 

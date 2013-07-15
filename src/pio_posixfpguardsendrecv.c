@@ -206,6 +206,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 
 	      if ((iret = listSetAdd(bibBFiledataPF, bfd)) < 0)
 		xabort("fileID=%d not unique", rtag.id);
+              bfd->fileID = iret;
 	    }
 
 	  *( bfd->nfinished + source ) = false;
@@ -493,7 +494,7 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
 
   if ((id = listSetAdd(bibAFiledataPF, afd)) < 0)
     xabort("filename %s not unique", afd->name);
-
+  afd->fileID = id;
   xdebug("name=%s, init and add aFiledataPF, return id = %d",
          filename, id);
   return id;
