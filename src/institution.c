@@ -289,27 +289,21 @@ char *institutInqLongnamePtr(int instID)
   return instituteptr ? instituteptr->longname : NULL;
 }
 
+static enum cdiApplyRet
+activeInstitutes(int id, void *res, void *data)
+{
+  if (res && ((institute_t *)res)->used)
+    ++(*(int *)data);
+  return CDI_APPLY_GO_ON;
+}
 
 int institutInqNumber(void)
 {
-  int i, instCount, * instResHs, instNum = 0;
-  institute_t * instituteptr;
+  int instNum = 0;
 
   instituteInit ();
 
-  instCount = reshCountType ( &instituteOps );
-  instResHs = xmalloc ( instCount * sizeof ( int ));
-  reshGetResHListOfType ( instCount, instResHs, &instituteOps );
-
-  for ( i = 0; i < instCount; i++ )
-    {
-      instituteptr = ( institute_t * ) reshGetVal ( instResHs[i], &instituteOps );
-      if ( instituteptr && instituteptr->used )
-        instNum++;
-    }
-
-  if ( instResHs ) free ( instResHs );
-
+  cdiResHFilterApply(&instituteOps, activeInstitutes, &instNum);
   return instNum;
 }
 
