@@ -89,13 +89,14 @@ mapProblems(int problemSizes[], int * problemMapping, int nProblems,
   for ( j = 0; j < nWriter; j++ )
     meanBucket[j] = ( double ) sum * ( * ( w + j ));
 
+  memset(buckets, 0, sizeof (buckets));
+
   for ( i = 0; i < nProblems; i++ )
     {
       currCapacity = INT_MIN;
 
       for ( j = 0; j < nWriter; j++ )
 	{
-	  if ( !i ) buckets[j] = 0.0;
 	  nextCapacity = meanBucket[j] - ( buckets[j] + ( *ip[i] ));
 
 	  if ( nextCapacity > currCapacity )
