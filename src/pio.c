@@ -169,50 +169,6 @@ cdiPioStreamOpen(const char *filename, const char *filemode,
   return 1;
 }
 
-
-
-/***************************************************************/
-
-void
-cdiPioStreamWriteVarChunk_(int streamID, int varID, int memtype,
-                           const int rect[][2], const void *data, int nmiss)
-{
-  int vlistID = streamInqVlist(streamID);
-  int size = vlistInqVarSize(vlistID, varID),
-    varShape[3];
-  unsigned ndims = (unsigned)cdiPioQueryVarDims(varShape, vlistID, varID);
-  Xt_int varShapeXt[3], chunkShape[3] = { 1, 1, 1 }, origin[3] = { 0, 0, 0 };
-  /* FIXME: verify xt_int ranges are good enough */
-  for (unsigned i = 0; i < 3; ++i)
-    varShapeXt[i] = varShape[i];
-  for (unsigned i = 0; i < ndims; ++i)
-    chunkShape[i] = rect[i][1] - rect[i][0] + 1;
-  int varSize = varShape[0] * varShape[1] * varShape[2];
-  xassert(varSize == size);
-  Xt_idxlist chunkDesc
-    = xt_idxsection_new(0, ndims, varShapeXt, chunkShape, origin);
-  pioBufferPartData(streamID, varID, data, nmiss, chunkDesc);
-  xt_idxlist_delete(chunkDesc);
-}
-
-void
-cdiPioStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
-{
-  statusCode nspStatus = namespaceInqResStatus ();
-  switch ( nspStatus )
-    {
-    case STAGE_DEFINITION:
-      break;
-    case STAGE_TIMELOOP:
-      pioBufferFuncCall(STREAMCLOSE, 1, streamptr->self);
-      break;
-    case STAGE_CLEANUP:
-      break;
-    default:
-      xabort ( "INTERNAL ERROR" );
-    }
-}
-
 /***************************************************************/
 
 void backendInit ( void )

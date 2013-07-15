@@ -21,11 +21,6 @@ size_t cdiPioFileWrite(int fileID, const void *restrict buffer, size_t len,
 int cdiPioStreamOpen(const char *filename, const char *filemode,
                      int filetype, stream_t *streamptr,
                      int recordBufIsToBeCreated);
-void cdiPioStreamWriteVarChunk_(int streamID, int varID, int memtype,
-                                const int rect[][2], const void *data,
-                                int nmiss);
-void cdiPioStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted);
-
 #else
 typedef int MPI_Comm;
 #endif
