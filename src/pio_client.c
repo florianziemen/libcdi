@@ -3,6 +3,8 @@
 #endif
 
 #ifdef USE_MPI
+#include <ctype.h>
+
 #include <yaxt.h>
 
 #include "namespace.h"
@@ -12,6 +14,33 @@
 #include "pio_interface.h"
 #include "pio_rpc.h"
 #include "pio_util.h"
+
+static int
+cdiPioClientStreamOpen(const char *filename, const char *filemode,
+                       int filetype, stream_t *streamptr,
+                       int recordBufIsToBeCreated)
+{
+  if ( tolower ( * filemode ) == 'w' )
+    {
+      statusCode nspStatus = namespaceInqResStatus ();
+      switch ( nspStatus )
+        {
+        case STAGE_DEFINITION:
+          break;
+        case STAGE_TIMELOOP:
+          pioBufferFuncCall(STREAMOPEN, 2, filename, filetype);
+          break;
+        case STAGE_CLEANUP:
+          xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
+          break;
+        default:
+          xabort ( "INTERNAL ERROR" );
+        }
+    }
+  else
+    Error("cdiPIO read support not implemented");
+  return 1;
+}
 
 static void
 cdiPioClientStreamDefVlist_(int streamID, int vlistID)
@@ -99,7 +128,7 @@ cdiPioClientSetup(int *pioNamespace_, int *pioNamespace)
   int callerCDINamespace = namespaceGetActive();
   pioNamespaceSetActive(*pioNamespace_);
   serializeSetMPI();
-  namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND, cdiPioStreamOpen);
+  namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND, cdiPioClientStreamOpen);
   namespaceSwitchSet(NSSWITCH_STREAM_DEF_VLIST_, cdiPioClientStreamDefVlist_);
   namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_, cdiPioClientStreamWriteVar_);
   namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_,

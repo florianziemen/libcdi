@@ -142,35 +142,6 @@ int pioFileOpen(const char *filename, const char *mode)
 
 /***************************************************************/
 
-int
-cdiPioStreamOpen(const char *filename, const char *filemode,
-                 int filetype, stream_t *streamptr,
-                 int recordBufIsToBeCreated)
-{
-  if ( tolower ( * filemode ) == 'w' )
-    {
-      statusCode nspStatus = namespaceInqResStatus ();
-      switch ( nspStatus )
-        {
-        case STAGE_DEFINITION:
-          break;
-        case STAGE_TIMELOOP:
-          pioBufferFuncCall(STREAMOPEN, 2, filename, filetype);
-          break;
-        case STAGE_CLEANUP:
-          xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
-          break;
-        default:
-          xabort ( "INTERNAL ERROR" );
-        }
-    }
-  else
-    Error("cdiPIO read support not implemented");
-  return 1;
-}
-
-/***************************************************************/
-
 void backendInit ( void )
 {
   int IOMode = commInqIOMode ();
