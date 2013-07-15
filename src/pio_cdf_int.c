@@ -17,7 +17,7 @@
 
 #include "pio_cdf_int.h"
 
-int
+static int
 cdiPio_nc__create(const char *path, int cmode,
                   size_t initialsz, size_t *chunksizehintp,
                   int *ncidp)
@@ -43,8 +43,9 @@ cdiPio_nc__create(const char *path, int cmode,
   return status;
 }
 
-void cdiPioCdfDefVar(int ncid, const char *name, nc_type xtype, int ndims,
-                     const int dimids[], int *varidp)
+static void
+cdiPioCdfDefVar(int ncid, const char *name, nc_type xtype, int ndims,
+                const int dimids[], int *varidp)
 {
   cdf_def_var_serial(ncid, name, xtype, ndims, dimids, varidp);
   if (commInqIOMode() != PIO_NONE)
