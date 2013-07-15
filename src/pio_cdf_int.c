@@ -43,37 +43,6 @@ cdiPio_nc__create(const char *path, int cmode,
   return status;
 }
 
-#if 0
-/* original code: */
-
-#if USE_MPI
-#if defined (HAVE_NETCDF4) && defined (HAVE_PARALLEL_NC4)
-  if (cmode & NC_NETCDF4
-      && namespaceHasLocalFile(namespaceGetActive())
-      && commInqIOMode() != PIO_NONE)
-    {
-      cmode |= NC_MPIPOSIX;
-      status = nc_create_par(path, cmode, commInqCommColl(),
-                             MPI_INFO_NULL, ncidp);
-    }
-  else if (cmode & (NC_64BIT_OFFSET | NC_CLASSIC_MODEL)
-           && namespaceHasLocalFile(namespaceGetActive())
-           && commInqIOMode() != PIO_NONE)
-    {
-      /* FIXME: improve handling of pnetcdf here */
-      abort();
-    }
-  else
-    status = nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
-#else
-  /* FIXME: Only open netcdf file on one task */
-  status = nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
-#endif
-#else
-  status = nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
-#endif
-#endif
-
 void cdiPioCdfDefVar(int ncid, const char *name, nc_type xtype, int ndims,
                      const int dimids[], int *varidp)
 {
