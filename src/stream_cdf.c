@@ -10,6 +10,11 @@
 #include <math.h>
 #include <float.h>
 
+#if  defined  (HAVE_LIBNETCDF)
+#  include <netcdf.h>
+#endif
+
+
 #include "dmemory.h"
 
 #include "cdi.h"
@@ -20,12 +25,6 @@
 #include "cdf_int.h"
 #include "varscan.h"
 #include "vlist.h"
-
-#include "pio_util.h"
-
-#if  defined  (HAVE_LIBNETCDF)
-#  include "netcdf.h"
-#endif
 
 //#define PROJECTION_TEST
 

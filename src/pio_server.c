@@ -28,6 +28,9 @@
 #include "pio_rpc.h"
 #include "pio_util.h"
 #include "cdi_int.h"
+#ifndef HAVE_NETCDF_PAR_H
+#define MPI_INCLUDED
+#endif
 #include "pio_cdf_int.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
