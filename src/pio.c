@@ -171,36 +171,6 @@ cdiPioStreamOpen(const char *filename, const char *filemode,
 
 
 
-void
-cdiPioStreamDefVlist_(int streamID, int vlistID)
-{
-  statusCode nspStatus = namespaceInqResStatus ();
-  switch ( nspStatus )
-    {
-    case STAGE_DEFINITION:
-      break;
-    case STAGE_TIMELOOP:
-      pioBufferFuncCall(STREAMDEFVLIST, 2, streamID, vlistID);
-      break;
-    case STAGE_CLEANUP:
-      xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
-      break;
-    default:
-      xabort ( "INTERNAL ERROR" );
-    }
-  cdiStreamDefVlist_(streamID, vlistID);
-}
-
-/***************************************************************/
-
-void
-cdiPioStreamWriteVar_(int streamID, int varID, int memtype, const void *data,
-                      int nmiss)
-{
-  xabort("parallel writing must give explicit partition information,"
-         " use streamWriteVarPart!");
-}
-
 /***************************************************************/
 
 void
