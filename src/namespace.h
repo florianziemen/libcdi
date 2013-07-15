@@ -45,7 +45,7 @@ enum namespaceSwitch
 };
 
 
-int              namespaceNew(int hasLocalFiles);
+int              namespaceNew();
 void             namespaceDelete(int namespaceID);
 void             namespaceCleanup      ( void );
 int              namespaceGetNumber    ( void );
@@ -53,7 +53,6 @@ int              namespaceGetActive    ( void );
 int              namespaceIdxEncode    ( namespaceTuple_t );
 int              namespaceIdxEncode2   ( int, int );
 namespaceTuple_t namespaceResHDecode   ( int );
-int              namespaceHasLocalFile ( int );
 int              namespaceAdaptKey     ( int, int );
 int              namespaceAdaptKey2    ( int );
 void             namespaceDefResStatus ( statusCode );

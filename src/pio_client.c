@@ -150,7 +150,7 @@ cdiPioClientSetup(int *pioNamespace_, int *pioNamespace)
 {
   commEvalPhysNodes ();
   commDefCommsIO ();
-  *pioNamespace_ = *pioNamespace = namespaceNew(0);
+  *pioNamespace_ = *pioNamespace = namespaceNew();
   int callerCDINamespace = namespaceGetActive();
   pioNamespaceSetActive(*pioNamespace_);
   serializeSetMPI();

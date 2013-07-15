@@ -42,11 +42,9 @@ static int activeNamespace = 0;
 
 struct namespace
 {
-  int hasLocalFiles;
   statusCode resStage;
   void *switches[NUM_NAMESPACE_SWITCH];
 } initialNamespace = {
-  .hasLocalFiles = 1,
   .resStage = STAGE_DEFINITION,
   .switches = defaultSwitches
 };
@@ -128,7 +126,7 @@ namespaceTuple_t namespaceResHDecode ( int resH )
 }
 
 int
-namespaceNew(int hasLocalFiles)
+namespaceNew()
 {
   int newNamespaceID = -1;
   NAMESPACE_LOCK();
@@ -167,7 +165,6 @@ namespaceNew(int hasLocalFiles)
     }
   xassert(newNamespaceID >= 0 && newNamespaceID < NUM_NAMESPACES);
   ++nNamespaces;
-  namespaces[newNamespaceID].hasLocalFiles = hasLocalFiles;
   namespaces[newNamespaceID].resStage = STAGE_DEFINITION;
   memcpy(namespaces[newNamespaceID].switches,
          (void *[NUM_NAMESPACE_SWITCH])defaultSwitches,
@@ -218,15 +215,6 @@ int namespaceGetActive ()
 {
   return activeNamespace;
 }
-
-
-int namespaceHasLocalFile ( int nId )
-{
-  xassert(nId < namespacesSize && nId >= 0);
-
-  return namespaces ? namespaces[nId].hasLocalFiles : 0;
-}
-
 
 int namespaceAdaptKey ( int key, int nspTarget )
 {

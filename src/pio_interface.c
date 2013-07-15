@@ -738,7 +738,7 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
   // JUST FOR TEST CASES WITH ONLY ONE MPI TASK
   if ( commInqSizeGlob () == 1 )
     {
-      pioNamespace_ = *pioNamespace = namespaceNew(0);
+      pioNamespace_ = *pioNamespace = namespaceNew();
       return commInqCommGlob ();
     }
 
