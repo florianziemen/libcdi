@@ -306,7 +306,7 @@ static int modelGetSizeP(void * modelptr, void *context)
 {
   model_t *p = modelptr;
   int txsize = serializeGetSize(model_nints, DATATYPE_INT, context)
-    + serializeGetSize(strlen(p->name) + 1, DATATYPE_TXT, context);
+    + serializeGetSize(p->name?strlen(p->name) + 1:0, DATATYPE_TXT, context);
   return txsize;
 }
 
@@ -318,9 +318,10 @@ static void modelPackP(void * modelptr, void * buf, int size, int *position, voi
   tempbuf[0] = p->self;
   tempbuf[1] = p->instID;
   tempbuf[2] = p->modelgribID;
-  tempbuf[3] = (int)strlen(p->name) + 1;
+  tempbuf[3] = p->name ? (int)strlen(p->name) + 1 : 0;
   serializePack(tempbuf, model_nints, DATATYPE_INT, buf, size, position, context);
-  serializePack(p->name, tempbuf[3], DATATYPE_TXT, buf, size, position, context);
+  if (p->name)
+    serializePack(p->name, tempbuf[3], DATATYPE_TXT, buf, size, position, context);
 }
 
 int
@@ -330,8 +331,15 @@ modelUnpack(void *buf, int size, int *position, int nspTarget, void *context)
   int modelID;
   char *name;
   serializeUnpack(buf, size, position, tempbuf, model_nints, DATATYPE_INT, context);
-  name = xmalloc(tempbuf[3]);
-  serializeUnpack(buf, size, position, name, tempbuf[3], DATATYPE_TXT, context);
+  if (tempbuf[3] != 0)
+    {
+      name = xmalloc(tempbuf[3]);
+      serializeUnpack(buf, size, position, name, tempbuf[3], DATATYPE_TXT, context);
+    }
+  else
+    {
+      name = "";
+    }
   modelID = modelDef( namespaceAdaptKey ( tempbuf[1], nspTarget ), tempbuf[2], name);
   // FIXME: this should work, once all types are transferred
   //assert(modelID == tempbuf[0]);
