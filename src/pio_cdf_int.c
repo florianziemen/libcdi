@@ -24,7 +24,6 @@ cdiPio_nc__create(const char *path, int cmode,
 {
   int status;
   if (cmode & NC_NETCDF4
-      && namespaceHasLocalFile(namespaceGetActive())
       && commInqIOMode() != PIO_NONE)
     {
       cmode |= NC_MPIPOSIX;
@@ -32,7 +31,6 @@ cdiPio_nc__create(const char *path, int cmode,
                              MPI_INFO_NULL, ncidp);
     }
   else if (cmode & (NC_64BIT_OFFSET | NC_CLASSIC_MODEL)
-           && namespaceHasLocalFile(namespaceGetActive())
            && commInqIOMode() != PIO_NONE)
     {
       /* FIXME: improve handling of pnetcdf here */
