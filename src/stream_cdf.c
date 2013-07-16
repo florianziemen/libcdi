@@ -42,6 +42,9 @@ void cdfDefLocalAtts(stream_t *streamptr);
 #define  Z_AXIS  3
 #define  T_AXIS  4
 
+#define  POSITIVE_UP    1
+#define  POSITIVE_DOWN  2
+
 typedef struct {
   int     ncvarid;
   int     dimtype;
@@ -2343,12 +2346,12 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
             cdf_put_att_text(fileID, ncvarid, "units", len, units);
 
 	  positive = zaxisInqPositive(zaxisID);
-	  if ( positive == 1 )
+	  if ( positive == POSITIVE_UP )
 	    {
 	      strcpy(tmpname, "up");
 	      cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
 	    }
-	  else if ( positive == 2 )
+	  else if ( positive == POSITIVE_DOWN )
 	    {
 	      strcpy(tmpname, "down");
 	      cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
@@ -4879,8 +4882,8 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
               strtolower(attstring);
 
-              if    ( memcmp(attstring, "down", 4) == 0 ) ncvars[ncvarid].positive = -1;
-              else if ( memcmp(attstring, "up", 2) == 0 ) ncvars[ncvarid].positive = 1;
+              if    ( memcmp(attstring, "down", 4) == 0 ) ncvars[ncvarid].positive = POSITIVE_DOWN;
+              else if ( memcmp(attstring, "up", 2) == 0 ) ncvars[ncvarid].positive = POSITIVE_UP;
 
               if ( ncvars[ncvarid].ndims == 1 )
                 {
@@ -6011,6 +6014,7 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
   int zaxisindex;
   int zprec;
   int nbdims, nvertex, nlevel;
+  int positive = 0;
   char *pname, *plongname, *punits;
 
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
@@ -6025,6 +6029,8 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  double *lbounds = NULL;
 	  double *ubounds = NULL;
 	  int zaxisType;
+
+          positive = 0;
 
 	  ndims = ncvars[ncvarid].ndims;
 	  for ( i = 0; i < ndims; i++ )
@@ -6053,6 +6059,7 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 	  if ( zvarid != UNDEFID )
 	    {
+	      positive  = ncvars[zvarid].positive;
 	      pname     = ncvars[zvarid].name;
 	      plongname = ncvars[zvarid].longname;
 	      punits    = ncvars[zvarid].units;
@@ -6119,6 +6126,9 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
       	  ncvars[ncvarid].zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, with_bounds, lbounds, ubounds,
 						vctsize, vct, pname, plongname, punits, zprec, 1, 0);
+
+          if ( positive > 0 ) zaxisDefPositive(ncvars[ncvarid].zaxisID, positive);
+
 	  free(zvar);
 	  free(lbounds);
 	  free(ubounds);

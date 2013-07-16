@@ -3,6 +3,10 @@
 	* Version 1.6.2 released
 	* using CGRIBEX library version 1.6.2
 
+2013-07-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* netCDF: added support for zaxis attribute: positive
+
 2013-07-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Version 1.6.1.1 released (merged branche cdi-pio to trunk cdi)

@@ -852,6 +852,7 @@ void    zaxisInqUnits(int zaxisID, char *units);
 void    zaxisDefPrec(int zaxisID, int prec);
 int     zaxisInqPrec(int zaxisID);
 
+void    zaxisDefPositive(int zaxisID, int positive);
 int     zaxisInqPositive(int zaxisID);
 
 void    zaxisDefLtype(int zaxisID, int ltype);

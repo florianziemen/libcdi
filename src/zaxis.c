@@ -542,6 +542,24 @@ int zaxisInqPrec(int zaxisID)
 }
 
 
+void zaxisDefPositive(int zaxisID, int positive)
+{
+  zaxis_t *zaxisptr;
+
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
+
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+
+  zaxis_check_ptr(zaxisID, zaxisptr);
+
+  zaxisptr->positive = positive;
+}
+
+
 int zaxisInqPositive(int zaxisID)
 {
   zaxis_t *zaxisptr;
