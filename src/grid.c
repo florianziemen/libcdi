@@ -1577,6 +1577,8 @@ void gridDefXvals(int gridID, const double *xvals)
 
   if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
     size = gridptr->size;
+  else if ( gridtype == GRID_GAUSSIAN_REDUCED )
+    size = 2;
   else
     size = gridptr->xsize;
 
@@ -2801,6 +2803,14 @@ int gridGenerate(grid_t grid)
 	gridDefYsize(gridID, grid.ysize);
 	gridDefRowlon(gridID, grid.ysize, grid.rowlon);
 
+        if ( grid.ydef == 2 )
+          {
+            double xvals[2];
+            xvals[0] = grid.xfirst;
+            xvals[1] = grid.xlast;
+            gridDefXvals(gridID, xvals);
+          }
+
 	if ( grid.ydef == 1 )
 	  {
 	    gridDefYvals(gridID, grid.yvals);
@@ -3459,6 +3469,7 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
     {
     case GRID_LONLAT:
     case GRID_GAUSSIAN:
+    case GRID_GAUSSIAN_REDUCED:
     case GRID_GENERIC:
     case GRID_LCC2:
     case GRID_SINUSOIDAL:
@@ -3466,13 +3477,18 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
     case GRID_CURVILINEAR:
     case GRID_UNSTRUCTURED:
       {
-        if ( type == GRID_GAUSSIAN ) fprintf(fp, "np        = %d\n", gridptr->np);
+        if ( type == GRID_GAUSSIAN || type == GRID_GAUSSIAN_REDUCED ) fprintf(fp, "np        = %d\n", gridptr->np);
 
 	if ( type == GRID_CURVILINEAR || type == GRID_UNSTRUCTURED )
 	  {
 	    xdim = gridsize;
 	    ydim = gridsize;
 	  }
+        else if ( type == GRID_GAUSSIAN_REDUCED )
+          {
+	    xdim = 2;
+	    ydim = ysize;
+          }
 	else
 	  {
 	    xdim = xsize;
@@ -3623,28 +3639,28 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
 	      }
 	    fprintf(fp, "\n");
 	  }
-	break;
-      }
-   case GRID_GAUSSIAN_REDUCED:
-      {
-	int *rowlon;
-	fprintf(fp, "ysize = %d\n", ysize);
-	nbyte0 = fprintf(fp, "rowlon = %d  ", ysize);
-	nbyte  = nbyte0;
-	rowlon = (int *) malloc(ysize*sizeof(int));
-	gridInqRowlon(gridID, rowlon);
-	for ( i = 0; i < ysize; i++ )
-	  {
-	    if ( nbyte > 80 )
-	      {
-		fprintf(fp, "\n");
-		fprintf(fp, "%*s", nbyte0, "");
-		nbyte = nbyte0;
-	      }
-	    nbyte += fprintf(fp, "%d ", rowlon[i]);
-	  }
-	fprintf(fp, "\n");
-	free(rowlon);
+
+        if ( GRID_GAUSSIAN_REDUCED )
+          {
+            int *rowlon;
+            nbyte0 = fprintf(fp, "rowlon    = ");
+            nbyte  = nbyte0;
+            rowlon = (int *) malloc(ysize*sizeof(int));
+            gridInqRowlon(gridID, rowlon);
+            for ( i = 0; i < ysize; i++ )
+              {
+                if ( nbyte > 80 )
+                  {
+                    fprintf(fp, "\n");
+                    fprintf(fp, "%*s", nbyte0, "");
+                    nbyte = nbyte0;
+                  }
+                nbyte += fprintf(fp, "%d ", rowlon[i]);
+              }
+            fprintf(fp, "\n");
+            free(rowlon);
+          }
+
 	break;
       }
     case GRID_LCC:
