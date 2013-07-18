@@ -32,6 +32,10 @@ cat > ${PROG} << EOR
 
 /* CDILIB_VERSION=${CDILIBVERSION} */
 
+#ifdef _ARCH_PWR6
+#pragma options nostrict
+#endif
+
 #if  defined  (HAVE_CONFIG_H)
 #  include "config.h"
 #endif

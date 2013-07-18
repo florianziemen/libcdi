@@ -129,7 +129,7 @@ case "${HOSTNAME}" in
                     --with-zlib=/sw/aix61/zlib-1.2.6 \
                     --with-szlib=/sw/aix61/szip-2.1-threadsafe \
                     AR="ar -X 64" LDFLAGS="-brtl" FC=xlf2003_r CC=xlc_r \
-                    CFLAGS="-g -O3 -q64 -qhot -qstrict -qarch=pwr6 -qtune=balanced -qlistfmt=html=transforms -DHAVE_MMAP -Dextname" \
+                    CFLAGS="-g -O3 -qhot -q64 -qarch=auto -qtune=auto -qlistfmt=html=transforms -DHAVE_MMAP -Dextname" \
                     FCFLAGS="-qsuffix=cpp=f90" \
                     SHELL=/bin/bash
         ;;
