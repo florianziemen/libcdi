@@ -54,6 +54,7 @@ build_triplet = @build@
 host_triplet = @host@
 @ENABLE_CDI_LIB_TRUE@am__append_1 = pkgconfig/cdi.pc
 @CREATE_ISOC_TRUE@am__append_2 = mo_cdi.o mo_cdi.$(FCMODEXT)
+#CLEANFILES += cdilib.c
 @CREATE_ISOC_TRUE@am__append_3 = $(top_builddir)/src/mo_cdi.$(FCMODEXT) $(top_builddir)/src/mo_cdi.o
 @ENABLE_CDI_LIB_TRUE@am__append_4 = pkgconfig/cdi.pc
 subdir = src
@@ -465,9 +466,15 @@ libcdi_la_SOURCES = \
 
 #libcdi_la_CPPFLAGS  = @CPPFLAGS@
 libcdi_la_LIBADD = $(PPM_CORE_LIBS) $(YAXT_LIBS)
+#
+#cdilib.c:
+#	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src
+#
+#cdilib.o: cdilib.c
+#	$(COMPILE) -c $<
 LOCALTARGETS = $(am__append_1) $(am__append_2)
 #
-CLEANFILES = `ls *~` cdilib.c $(am__append_3) $(am__append_4)
+CLEANFILES = `ls *~` $(am__append_3) $(am__append_4)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -895,12 +902,6 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES \
 	uninstall-am uninstall-includeHEADERS uninstall-libLTLIBRARIES \
 	uninstall-local
 
-#
-cdilib.c:
-	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src
-#
-cdilib.o: cdilib.c
-	$(COMPILE) -c $<
 #
 mo_cdi.f90:
 	ruby $(top_srcdir)/interfaces/f2003/bindGen.rb cdi.h $@

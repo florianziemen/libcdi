@@ -132,11 +132,11 @@ libcdi_la_SOURCES = 	 \
 #libcdi_la_CPPFLAGS  = @CPPFLAGS@
 libcdi_la_LIBADD    = $(PPM_CORE_LIBS) $(YAXT_LIBS)
 #
-cdilib.c:
-	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src
+#cdilib.c:
+#	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src
 #
-cdilib.o: cdilib.c
-	$(COMPILE) -c $<
+#cdilib.o: cdilib.c
+#	$(COMPILE) -c $<
 
 LOCALTARGETS  = 
 if ENABLE_CDI_LIB
@@ -162,7 +162,7 @@ pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
 all-local: $(LOCALTARGETS) 
 #
 CLEANFILES  = `ls *~`
-CLEANFILES += cdilib.c
+#CLEANFILES += cdilib.c
 if CREATE_ISOC
 CLEANFILES += $(top_builddir)/src/mo_cdi.$(FCMODEXT) $(top_builddir)/src/mo_cdi.o
 endif
