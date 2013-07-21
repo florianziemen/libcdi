@@ -173,8 +173,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
     case GRID_GAUSSIAN:
       {
 	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-	  Error("numberOfPoints (%d) and gridSize (%d) differ!",
-		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
+	  Error("numberOfPoints (%d) and gridSize (%d) differ!", ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
 	grid->size  = ISEC4_NumValues;
 	grid->xsize = ISEC2_NumLon;
 	grid->ysize = ISEC2_NumLat;
