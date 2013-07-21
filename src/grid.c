@@ -1529,6 +1529,8 @@ int gridInqXvals(int gridID, double *xvals)
 
   if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
     size = gridptr->size;
+  else if ( gridptr->type == GRID_GAUSSIAN_REDUCED )
+    size = 2;
   else
     size = gridptr->xsize;
 
@@ -2803,7 +2805,7 @@ int gridGenerate(grid_t grid)
 	gridDefYsize(gridID, grid.ysize);
 	gridDefRowlon(gridID, grid.ysize, grid.rowlon);
 
-        if ( grid.ydef == 2 )
+        if ( grid.xdef == 2 )
           {
             double xvals[2];
             xvals[0] = grid.xfirst;
