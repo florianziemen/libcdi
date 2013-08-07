@@ -3642,7 +3642,7 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
 	    fprintf(fp, "\n");
 	  }
 
-        if ( GRID_GAUSSIAN_REDUCED )
+        if ( type == GRID_GAUSSIAN_REDUCED )
           {
             int *rowlon;
             nbyte0 = fprintf(fp, "rowlon    = ");
