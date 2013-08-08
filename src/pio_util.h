@@ -15,7 +15,7 @@
 
 #define MAXDEBUG           3
 
-#define ddebug             1
+#define ddebug             0
 
 #define debugString "#####"
 
