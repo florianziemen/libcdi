@@ -294,7 +294,7 @@ pioSendOpen(const char *filename)
              filename, temp);
       free(temp);
     }
-
+  sendP(afd, afd->fileID);
   return id;
 }
 

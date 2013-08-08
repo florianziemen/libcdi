@@ -72,6 +72,7 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   aFiledataPF *afd;
   size_t len;
   int iret;
+  int specialRank = commInqSpecialRankNode ();
 
   len = strlen(key);
   afd = xcalloc(1, sizeof (*afd) + len + 1);
@@ -97,7 +98,6 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
     xabort("Failed to open %s", afd->name);
 
   afd->command = IO_Open_file;
-  
   return afd;
 }
 
@@ -229,7 +229,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 	case IO_Set_fp:
 
           if (!(bfd = listSetGet(bibBFiledataPF, fileIDTestB,
-                               (void *)(intptr_t)rtag.id)))
+                                 (void *)(intptr_t)rtag.id)))
             xabort("fileId=%d not in set", rtag.id);
 
           xdebug("id=%d, command=%d ( %s ), send offset=%ld", rtag.id,
@@ -497,6 +497,17 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
   afd->fileID = id;
   xdebug("name=%s, init and add aFiledataPF, return id = %d",
          filename, id);
+  {
+    long offset, amount = 0L;
+    int tag = encodeFileOpTag(afd->fileID, afd->command);
+    int specialRank = commInqSpecialRankNode ();
+    MPI_Status status;
+    MPI_Comm commNode = commInqCommNode ();
+    xmpi(MPI_Sendrecv(&amount, 1, MPI_LONG, specialRank, tag,
+                      &offset, 1, MPI_LONG, specialRank, tag,
+                      commNode, &status));
+  }
+  afd->command = IO_Set_fp;
   return id;
 }
 
