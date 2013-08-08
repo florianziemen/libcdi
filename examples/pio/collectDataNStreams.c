@@ -172,7 +172,7 @@ static void modelRun(MPI_Comm commModel)
                   int start = 0, chunk = varSize[i][j];
 #endif
                   for(int k = 0; k < chunk; k++)
-                    var[k] = 3.3;
+                    var[k] = 3.3 * (double)(k + start);
                   streamWriteVar(streamID[i], varID[i][j], var, nmiss );
                 }
             }
