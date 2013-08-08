@@ -166,7 +166,8 @@ struct {
   { "PIO_MPI", PIO_MPI },
   { "PIO_FPGUARD", PIO_FPGUARD },
   { "PIO_ASYNCH", PIO_ASYNCH },
-  { "PIO_WRITER", PIO_WRITER }
+  { "PIO_WRITER", PIO_WRITER },
+  { "PIO_FPGUARD", PIO_FPGUARD},
 };
 
 
