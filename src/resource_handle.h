@@ -63,7 +63,9 @@ cdiResHFilterApply(const resOps *p,
 
 void   reshPackBufferCreate ( char **, int *, void *context );
 void   reshPackBufferDestroy ( char ** );
-
+int    reshResourceGetPackSize(int resh, resOps *ops, void *context);
+void   reshPackResource(int resh, resOps *ops,
+                        void *buf, int buf_size, int *position, void *context);
 void   reshSetStatus ( cdiResH, resOps *, int );
 int    reshGetStatus ( cdiResH, resOps * );
 

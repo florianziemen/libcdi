@@ -403,6 +403,22 @@ int reshCountType ( resOps * ops )
 
 /**************************************************************/
 
+int
+reshResourceGetPackSize(int resH, resOps *ops, void *context)
+{
+  listElem_t *curr = reshGetElem(__func__, resH, ops);
+  return curr->ops->valGetPackSize(curr->val, context);
+}
+
+void
+reshPackResource(int resH, resOps *ops,
+                 void *buf, int buf_size, int *position, void *context)
+{
+  listElem_t *curr = reshGetElem(__func__, resH, ops);
+  curr->ops->valPack(curr->val, buf, buf_size, position, context);
+}
+
+
 static int getPackBufferSize(void *context)
 {
   int nsp, i;
