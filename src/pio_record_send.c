@@ -147,9 +147,8 @@ defTimestep(remoteFileBuf *afd, int tsID)
 }
 
 static void
-flushOp(void *b, void *tsID)
+flushOp(remoteFileBuf *fb, int tsID)
 {
-  remoteFileBuf *fb = b;
   sendP(fb, fb->fileID);
   defTimestep(fb, (int)(intptr_t)tsID);
 }
@@ -165,14 +164,13 @@ pioSendWrite(int id, int tsID, const void *buffer, size_t len)
 
   afd = listSetGet(bibRemoteFileBuf, fileIDTest, (void *)(intptr_t)id);
 
-  flush = ( tsID != afd->tsID ) ? 1 : 0;
+  flush = tsID != afd->tsID;
 
-  if ( flush == 1 )
+  if ( flush )
     {
-      xdebug ( "tsID = %d, flush buffer", tsID );
+      xdebug("tsID = %d, flush buffer for fileID=%d", tsID, afd->fileID);
 
-      listSetForeach(bibRemoteFileBuf, flushOp, (void *)(intptr_t)tsID);
-
+      flushOp(afd, tsID);
       {
         double startTime;
         MPI_Status status;
