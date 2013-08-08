@@ -103,7 +103,7 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
 
 /***************************************************************/
 static bFiledataPF *
-initBFiledataPF(int key, int nc)
+initBFiledataPF(int fileID, int nc)
 {
   bFiledataPF *bfd;
   int i;
@@ -113,6 +113,7 @@ initBFiledataPF(int key, int nc)
   bfd->offset = 0;
   bfd->finished = false;
   bfd->nfinished = ( bool * ) xmalloc ( nc * sizeof ( bool ));
+  bfd->fileID = fileID;
 
   for ( i = 0; i < nc; i++ )
     *( bfd->nfinished + i ) = true;
@@ -200,7 +201,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
       	case IO_Open_file:
 
           if (!(bfd = listSetGet(bibBFiledataPF, fileIDTestB,
-                               (void *)(intptr_t)rtag.id)))
+                                 (void *)(intptr_t)rtag.id)))
 	    {
 	      bfd = initBFiledataPF(rtag.id, nProcsCollNode);
 
