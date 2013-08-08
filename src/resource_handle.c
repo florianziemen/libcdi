@@ -264,12 +264,12 @@ void reshRemove ( cdiResH resH, resOps * ops )
 
 /**************************************************************/
 
-void *reshGetValue(const char * caller, cdiResH resH, resOps * ops)
+static listElem_t *
+reshGetElem(const char *caller, cdiResH resH, resOps *ops)
 {
+  listElem_t *listElem;
   int nsp;
   namespaceTuple_t nspT;
-  listElem_t * listElem;
-
   xassert ( ops );
 
   LIST_INIT();
@@ -297,8 +297,13 @@ void *reshGetValue(const char * caller, cdiResH resH, resOps * ops)
   if ( !(listElem && listElem->ops == ops) )
     xabortC(caller, "Invalid resource handle %d, list element not found!",
             (int)resH);
+  return listElem;
+}
 
-  return listElem->val;
+
+void *reshGetValue(const char * caller, cdiResH resH, resOps * ops)
+{
+  return reshGetElem(caller, resH, ops)->val;
 }
 
 /**************************************************************/
