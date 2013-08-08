@@ -324,6 +324,7 @@ tests/Makefile.in -text
 tests/cksum.c -text
 tests/cksum.h -text
 tests/cksum_read.c -text
+tests/cksum_verify.c -text
 tests/cksum_write.c -text
 tests/cksum_write_chunk.c -text
 tests/ensure_array_size.c -text
