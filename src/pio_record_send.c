@@ -248,6 +248,7 @@ pioSendOpen(const char *filename)
   static long buffersize = 0;
   int root = 0, id, iret, messageLength = 32;
   char message[messageLength];
+  MPI_Comm commCollectors = commInqCommColl();
 
   /* broadcast buffersize to collectors */
   if (!buffersize)
@@ -261,7 +262,7 @@ pioSendOpen(const char *filename)
           xdebug("filename=%s, broadcast buffersize=%ld to collectors ...",
                  filename, buffersize);
 	}
-      xmpi(MPI_Bcast(&buffersize, 1, MPI_LONG, root, commInqCommColl()));
+      xmpi(MPI_Bcast(&buffersize, 1, MPI_LONG, root, commCollectors));
     }
 
   /* init and add remoteFileBuf */
@@ -295,6 +296,7 @@ pioSendOpen(const char *filename)
       free(temp);
     }
   sendP(afd, afd->fileID);
+  xmpi(MPI_Barrier(commCollectors));
   return id;
 }
 
