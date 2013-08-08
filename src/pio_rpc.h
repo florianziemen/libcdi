@@ -29,15 +29,15 @@ enum
 
 enum
 {
-  nFuncs = 3,
+  numRPCFuncs = 3,
   STREAMOPEN = -1,
   STREAMDEFVLIST = -2,
   STREAMCLOSE = -3,
-  HEADERSIZEMARKER = -nFuncs - 1,
-  PARTDESCMARKER = -nFuncs - 2,
+  HEADERSIZEMARKER = -numRPCFuncs - 1,
+  PARTDESCMARKER = -numRPCFuncs - 2,
 };
 enum { MAXDATAFILENAME = 256, MINFUNCID = STREAMCLOSE, MAXFUNCID = STREAMOPEN };
-extern char * funcMap[nFuncs];
+extern char * funcMap[numRPCFuncs];
 
 struct headerSize
 {
