@@ -389,9 +389,6 @@
       EXTERNAL        pioInit
 
 !                     pioWriteTimestep
-!                                    (INTEGER         ,
-!                                     INTEGER         ,
-!                                     INTEGER         )
       EXTERNAL        pioWriteTimestep
 
 !                     streamWriteVarPart

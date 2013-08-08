@@ -46,7 +46,8 @@ static struct rdmaWin
 const char * const funcMap[numRPCFuncs] = {
   "streamOpen",
   "streamDefVlist",
-  "streamClose"
+  "streamClose",
+  "streamDefTimestep",
 };
 
 float cdiPIOpartInflate_;
@@ -385,7 +386,9 @@ modelWinDefBufferSizes(void)
             collIndex[collID].numRPCRecords += numRPCFuncs;
             txWin[collID].size +=
               numRPCFuncs * sizeof (union winHeaderEntry)
-              + MAXDATAFILENAME;
+              + MAXDATAFILENAME
+              /* data part of streamDefTimestep */
+              + (2 * CDI_MAX_NAME + sizeof (taxis_t));
           }
     }
   for (collID = 0; collID < nProcsColl; ++collID)
@@ -528,6 +531,13 @@ modelWinEnqueue(int collID,
       if (header.funcCall.funcID == STREAMOPEN)
         {
           header.funcCall.funcArgs.newFile.offset
+            = (int)(txWin[collID].head - txWin[collID].buffer);
+          memcpy(txWin[collID].head, data, size);
+          txWin[collID].head += size;
+        }
+      else if (header.funcCall.funcID == STREAMDEFTIMESTEP)
+        {
+          header.funcCall.funcArgs.streamNewTimestep.offset
             = (int)(txWin[collID].head - txWin[collID].buffer);
           memcpy(txWin[collID].head, data, size);
           txWin[collID].head += size;
@@ -789,10 +799,10 @@ void pioFinalize ( void )
 
  /************************************************************************/
 
-void pioWriteTimestep ( int tsID, int vdate, int vtime )
+void pioWriteTimestep()
 {
 #ifdef USE_MPI
-  int collID, buffer[timestepSize], iAssert = 0;
+  int collID, iAssert = 0;
   /* int tokenEnd = END; */
   int rankGlob = commInqRankGlob ();
   int nProcsColl = commInqNProcsColl ();
@@ -800,19 +810,12 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
 
   xdebug("%s", "START");
 
-  xassert ( tsID       >= 0     &&
-            vdate      >= 0     &&
-            vtime      >= 0     &&
-            txWin != NULL);
-
-  buffer[0] = tsID;
-  buffer[1] = vdate;
-  buffer[2] = vtime;
+  xassert(txWin != NULL);
 
   if ( rankGlob < nProcsColl )
     {
-      xmpi ( MPI_Send ( &buffer[0], timestepSize, MPI_INTEGER, nProcsModel,
-                        WRITETS, commInqCommsIO ( rankGlob )));
+      xmpi(MPI_Send(NULL, 0, MPI_INT, nProcsModel,
+                    WRITETS, commInqCommsIO(rankGlob)));
       xdebug("%s", "SENT MESSAGE WITH TAG \"WRITETS\"");
     }
 
@@ -836,8 +839,7 @@ void pioWriteTimestep ( int tsID, int vdate, int vtime )
       txWin[collID].postSet = 1;
     }
 
-  xdebug ( "RETURN. messages sent, windows posted: tsID=%d, vdate=%d, vtime=%d", 
-           tsID, vdate, vtime );
+  xdebug("%s", "RETURN. messages sent, windows posted");
 
 #endif
 }

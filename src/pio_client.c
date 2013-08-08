@@ -8,6 +8,8 @@
 #include <yaxt.h>
 
 #include "namespace.h"
+#include "taxis.h"
+
 #include "pio.h"
 #include "pio_client.h"
 #include "pio_comm.h"
@@ -172,6 +174,40 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
     }
 }
 
+static int
+cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
+{
+  union winHeaderEntry header;
+  statusCode nspStatus = namespaceInqResStatus ();
+  int taxisID, buf_size, position;
+  char *buf;
+  MPI_Comm commCalc;
+  switch ( nspStatus )
+    {
+    case STAGE_DEFINITION:
+      break;
+    case STAGE_TIMELOOP:
+      position = 0;
+      taxisID = vlistInqTaxis(streamptr->vlistID);
+      header.funcCall
+        = (struct funcCallDesc){
+        .funcID = STREAMDEFTIMESTEP,
+        .funcArgs.streamNewTimestep = { streamptr->self, tsID } };
+      commCalc = commInqCommCalc();
+      buf_size = reshResourceGetPackSize(taxisID, &taxisOps, &commCalc);
+      buf = xmalloc((size_t)buf_size);
+      reshPackResource(taxisID, &taxisOps, buf, buf_size, &position,
+                       &commCalc);
+      pioBufferFuncCall(header, buf, buf_size);
+      free(buf);
+      break;
+    case STAGE_CLEANUP:
+      break;
+    default:
+      xabort ( "INTERNAL ERROR" );
+    }
+  return cdiStreamDefTimestep_(streamptr, tsID);
+}
 
 void
 cdiPioClientSetup(int *pioNamespace_, int *pioNamespace)
@@ -194,6 +230,8 @@ cdiPioClientSetup(int *pioNamespace_, int *pioNamespace)
                      NSSW_FUNC(cdiPioClientStreamWriteVarPart));
   namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND,
                      NSSW_FUNC(cdiPioClientStreamClose));
+  namespaceSwitchSet(NSSWITCH_STREAM_DEF_TIMESTEP_,
+                     NSSW_FUNC(cdiPioClientStreamDefTimestep_));
   namespaceSwitchSet(NSSWITCH_STREAM_SYNC,
                      NSSW_FUNC(cdiPioClientStreamNOP));
 #ifdef HAVE_LIBNETCDF

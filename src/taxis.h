@@ -1,6 +1,7 @@
 #ifndef _TAXIS_H
 #define _TAXIS_H
 
+#include "resource_handle.h"
 
 typedef struct {
   /* Date format  YYYYMMDD */
@@ -32,6 +33,8 @@ void    cdiDecodeTimeval(double timevalue, taxis_t *taxis, int *date, int *time)
 double  cdiEncodeTimeval(int date, int time, taxis_t *taxis);
 void    timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime);
 double  vtime2timeval(int vdate, int vtime, taxis_t *taxis);
+
+extern resOps taxisOps;
 
 int
 taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,

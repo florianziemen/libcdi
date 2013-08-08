@@ -139,7 +139,7 @@ static void modelRun(MPI_Comm commModel)
 	      chunk = CDI_UNDEFID;
 	    }
 #ifdef USE_MPI
-	  pioWriteTimestep ( tsID, vdate, vtime );
+	  pioWriteTimestep();
 #endif
 	}
     }

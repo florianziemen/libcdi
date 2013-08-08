@@ -20,23 +20,19 @@ typedef enum
     COLLBUFNMISS,
   } command;
 
-enum
-{
-  timestepSize = 3
-};
-
 #define MAXWINBUFFERSIZE ((size_t)2048 * 1024 * 1024)
 
 enum
 {
-  numRPCFuncs = 3,
+  numRPCFuncs = 4,
   STREAMOPEN = -1,
   STREAMDEFVLIST = -2,
   STREAMCLOSE = -3,
+  STREAMDEFTIMESTEP = -4,
   HEADERSIZEMARKER = -numRPCFuncs - 1,
   PARTDESCMARKER = -numRPCFuncs - 2,
 };
-enum { MAXDATAFILENAME = 256, MINFUNCID = STREAMCLOSE, MAXFUNCID = STREAMOPEN };
+enum { MAXDATAFILENAME = 256, MINFUNCID = -numRPCFuncs, MAXFUNCID = -1 };
 extern const char * const funcMap[numRPCFuncs];
 
 struct headerSize
@@ -58,6 +54,10 @@ struct funcCallDesc
     {
       int streamID, vlistID;
     } streamChange;
+    struct
+    {
+      int streamID, tsID, offset;
+    } streamNewTimestep;
     struct
     {
       int fnamelen, offset, filetype;

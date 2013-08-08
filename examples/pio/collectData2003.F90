@@ -204,7 +204,7 @@ CONTAINS
 #ifdef USE_MPI
       ! For parallel IO:
       ! Start transmission of all data for output in this timestep to IO server.
-      CALL pioWriteTimestep ( tsID, vdate, vtime )
+      CALL pioWriteTimestep
 #endif
     END DO
 

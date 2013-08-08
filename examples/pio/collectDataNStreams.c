@@ -177,7 +177,7 @@ static void modelRun(MPI_Comm commModel)
                 }
             }
 #ifdef USE_MPI
-	  pioWriteTimestep ( tsID, vdate, vtime );
+	  pioWriteTimestep();
 #endif
 	}
 #ifdef USE_MPI
