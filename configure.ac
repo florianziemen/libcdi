@@ -279,6 +279,29 @@ AM_CONDITIONAL([USE_FC],[test -n "$FC" && test "X$FC" != "Xno" && test x$acx_cv_
 
 AC_SUBST([CPPFLAGS])
 
+AC_ARG_VAR([BUILD_CFLAGS],
+  [append to CFLAGS during build but not in configure phase])
+AC_CONFIG_COMMANDS_PRE([CFLAGS="$CFLAGS${BUILD_CFLAGS+ $BUILD_CFLAGS}"])
+AC_ARG_VAR([BUILD_FCFLAGS],
+  [append to FCFLAGS during build but not in configure phase])
+AC_CONFIG_COMMANDS_PRE([FCFLAGS="$FCFLAGS${BUILD_FCFLAGS+ $BUILD_FCFLAGS}"])
+AC_ARG_VAR([BUILD_LDFLAGS],
+  [append to LDFLAGS during build but not in configure phase])
+AC_CONFIG_COMMANDS_PRE([LDFLAGS="$LDFLAGS${BUILD_LDFLAGS+ $BUILD_LDFLAGS}"])
+AC_ARG_VAR([BUILD_CC],
+  [replace CC with expansion of $BUILD_CC during build but not in configure phase])
+AC_CONFIG_COMMANDS_PRE([CC="${BUILD_CC-$CC}"])
+AC_ARG_VAR([BUILD_CXX],
+  [replace CXX with expansion of $BUILD_CXX during build but not in configure phase])
+AC_CONFIG_COMMANDS_PRE([CXX="${BUILD_CXX-$CXX}"])
+AC_ARG_VAR([BUILD_FC],
+  [replace FC with expansion of $BUILD_FC during build but not in configure phase])
+AC_CONFIG_COMMANDS_PRE([FC="${BUILD_FC-$FC}"])
+AC_ARG_VAR([BUILD_F77],
+  [replace F77 with expansion of $BUILD_F77 during build but not in configure phase])
+AC_CONFIG_COMMANDS_PRE([F77="${BUILD_F77-$F77}"])
+
+
 # Checks for compiler
 COMPILER="$CC $CFLAGS"
 AC_DEFINE_UNQUOTED(COMPILER, ["$COMPILER"], [Compiler])
