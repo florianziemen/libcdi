@@ -72,7 +72,6 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   aFiledataPF *afd;
   size_t len;
   int iret;
-  int specialRank = commInqSpecialRankNode ();
 
   len = strlen(key);
   afd = xcalloc(1, sizeof (*afd) + len + 1);
