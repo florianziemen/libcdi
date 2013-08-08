@@ -1315,7 +1315,7 @@ taxisGetPackSize(void *p, void *context)
   return packBufferSize;
 }
 
-void
+int
 taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
             int nspTarget, void *context)
 {
@@ -1369,6 +1369,7 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
       longname[len] = '\0';
       taxisP->longname = longname;
     }
+  return taxisP->self;
 }
 
 
