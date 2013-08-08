@@ -177,7 +177,7 @@ int main (int argc, char *argv[])
 #ifdef USE_MPI
   MPI_Comm commGlob;
   int sizeGlob, rankGlob, pioNamespace;
-  int IOMode = PIO_MPI;
+  int IOMode = PIO_WRITER;
   int nProcsIO = 2;
 
   xmpi ( MPI_Init ( &argc, &argv));
