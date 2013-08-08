@@ -21,6 +21,8 @@ cdiPioClientStreamOpen(const char *filename, const char *filemode,
                        int filetype, stream_t *streamptr,
                        int recordBufIsToBeCreated)
 {
+  union winHeaderEntry header;
+  size_t filename_len;
   if ( tolower ( * filemode ) == 'w' )
     {
       statusCode nspStatus = namespaceInqResStatus ();
@@ -29,7 +31,18 @@ cdiPioClientStreamOpen(const char *filename, const char *filemode,
         case STAGE_DEFINITION:
           break;
         case STAGE_TIMELOOP:
-          pioBufferFuncCall(STREAMOPEN, 2, filename, filetype);
+          filename_len = strlen(filename);
+          xassert(filename_len > 0 && filename_len < MAXDATAFILENAME);
+          header.funcCall
+            = (struct funcCallDesc){
+            .funcID = STREAMOPEN,
+            .funcArgs.newFile = { .fnamelen = (int)filename_len,
+                                  .filetype = filetype } };
+          pioBufferFuncCall(header, filename, filename_len + 1);
+          xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, filenamesz=%zu,"
+                 " filename=%s, filetype=%d",
+                 funcMap[(-1 - STREAMOPEN)], filename_len + 1, filename,
+                 filetype);
           break;
         case STAGE_CLEANUP:
           xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
@@ -46,13 +59,20 @@ cdiPioClientStreamOpen(const char *filename, const char *filemode,
 static void
 cdiPioClientStreamDefVlist_(int streamID, int vlistID)
 {
+  union winHeaderEntry header;
   statusCode nspStatus = namespaceInqResStatus ();
   switch ( nspStatus )
     {
     case STAGE_DEFINITION:
       break;
     case STAGE_TIMELOOP:
-      pioBufferFuncCall(STREAMDEFVLIST, 2, streamID, vlistID);
+      header.funcCall
+        = (struct funcCallDesc){
+        .funcID = STREAMDEFVLIST,
+        .funcArgs.streamChange = { streamID, vlistID } };
+      pioBufferFuncCall(header, NULL, 0);
+      xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d,"
+             " vlistID=%d", funcMap[(-1 - STREAMDEFVLIST)], streamID, vlistID);
       break;
     case STAGE_CLEANUP:
       xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
@@ -130,13 +150,20 @@ cdiPioClientStreamNOP(stream_t *streamptr)
 static void
 cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
+  union winHeaderEntry header;
   statusCode nspStatus = namespaceInqResStatus ();
   switch ( nspStatus )
     {
     case STAGE_DEFINITION:
       break;
     case STAGE_TIMELOOP:
-      pioBufferFuncCall(STREAMCLOSE, 1, streamptr->self);
+      header.funcCall
+        = (struct funcCallDesc){
+        .funcID = STREAMCLOSE,
+        .funcArgs.streamChange = { streamptr->self, CDI_UNDEFID } };
+      pioBufferFuncCall(header, NULL, 0);
+      xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d",
+             funcMap[-1 - STREAMCLOSE], streamptr->self);
       break;
     case STAGE_CLEANUP:
       break;

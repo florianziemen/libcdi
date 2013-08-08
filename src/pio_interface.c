@@ -574,67 +574,20 @@ pioBufferPartData(int streamID, int varID, const double *data,
 
 /************************************************************************/
 
-void pioBufferFuncCall(int funcID, int argc, ... )
+void pioBufferFuncCall(union winHeaderEntry header,
+                       const void *data, size_t data_len)
 {
-  va_list ap;
   int rankGlob = commInqRankGlob ();
   int root = commInqRootGlob ();
   int collID, nProcsColl = commInqNProcsColl ();
+  int funcID = header.funcCall.funcID;
 
   xassert(funcID >= MINFUNCID && funcID <= MAXFUNCID);
   xdebug("%s, func: %s", "START", funcMap[(-1 - funcID)]);
 
   if ( rankGlob != root ) return;
 
-  xassert (argc          >= 1                    &&
-           argc          <= 2                    &&
-           txWin != NULL);
-
-  va_start ( ap, argc );
-
-  union winHeaderEntry header;
-  char * filename = NULL;
-  size_t filenamesz = 0;
-  int streamID = 0, vlistID = 0, filetype = 0;
-
-  switch ( funcID )
-    {
-    case STREAMCLOSE:
-      xassert ( argc == 1 );
-    case STREAMDEFVLIST:
-      {
-        streamID = va_arg(ap, int);
-        vlistID = CDI_UNDEFID;
-        if (funcID == STREAMDEFVLIST)
-          {
-            xassert ( argc == 2 );
-            vlistID = va_arg(ap, int);
-          }
-        struct funcCallDesc f = { .funcID = funcID,
-                                  .funcArgs.streamChange = { streamID,
-                                                             vlistID } };
-        header.funcCall = f;
-      }
-      break;
-    case STREAMOPEN:
-      {
-        xassert ( argc == 2 );
-        filename = va_arg(ap, char *);
-        filenamesz = strlen(filename);
-        xassert ( filenamesz > 0 &&
-                  filenamesz < MAXDATAFILENAME );
-        filetype = va_arg(ap, int);
-        struct funcCallDesc f = { .funcID = STREAMOPEN,
-                                  .funcArgs.newFile
-                                  = { .fnamelen = filenamesz,
-                                      .filetype = filetype } };
-        header.funcCall = f;
-        ++filenamesz;
-      }
-      break;
-    default:
-      xabort("FUNCTION NOT MAPPED!");
-    }
+  xassert(txWin != NULL);
 
   for (collID = 0; collID < nProcsColl; ++collID)
     {
@@ -647,27 +600,9 @@ void pioBufferFuncCall(int funcID, int argc, ... )
           modelWinFlushBuffer ( collID );
         }
       xassert(txWin[collID].refuseFuncCall == 0);
-      modelWinEnqueue(collID, header, filename, filenamesz);
+      modelWinEnqueue(collID, header, data, data_len);
     }
 
-  switch ( funcID )
-    {
-    case STREAMCLOSE:
-      xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d",
-             funcMap[(-1 - funcID)], streamID);
-      break;
-    case STREAMDEFVLIST:
-      xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d,"
-             " vlistID=%d", funcMap[(-1 - funcID)], streamID, vlistID);
-      break;
-    case STREAMOPEN:
-      xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, filenamesz=%zu,"
-             " filename=%s, filetype=%d",
-             funcMap[(-1 - funcID)], filenamesz, filename, filetype);
-      break;
-    }
-
-  va_end(ap);
   xdebug("%s", "RETURN");
 }
 
