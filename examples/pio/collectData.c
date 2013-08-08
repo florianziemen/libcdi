@@ -106,7 +106,7 @@ static void modelRun(MPI_Comm commModel)
 #endif
   for ( tfID = 0; tfID < ntfiles; tfID++ )
     {
-      if ( tfID > 0 )
+      /* if ( tfID > 0 ) */
 	{
 	  streamClose ( streamID );
 	  sprintf ( &filename[0], "%s_%d.grb", name, tfID );
