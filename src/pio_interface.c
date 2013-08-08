@@ -334,7 +334,6 @@ modelWinDefBufferSizes(void)
   int sumWinBufferSize = 0;
   int nProcsColl  = commInqNProcsColl ();
   int rankGlob    = commInqRankGlob ();
-  int rankModel   = commInqRankModel ();
   int root = commInqRootGlob ();
   struct collDesc *collIndex;
 
