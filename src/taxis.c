@@ -1298,14 +1298,20 @@ taxisTxCode ( void )
   return TAXIS;
 }
 
-enum { taxisNint = 15 };
+enum { taxisNint = 17 };
 
 static int
-taxisGetPackSize(void * voidP, void *context)
+taxisGetPackSize(void *p, void *context)
 {
+  taxis_t *taxisptr = p;
   int packBufferSize
     = serializeGetSize(taxisNint, DATATYPE_INT, context)
-    + serializeGetSize(1, DATATYPE_FLT64, context);
+    + serializeGetSize(1, DATATYPE_FLT64, context)
+    + (taxisptr->name ?
+       serializeGetSize(strlen(taxisptr->name), DATATYPE_TXT, context) : 0)
+    + (taxisptr->longname ?
+       serializeGetSize(strlen(taxisptr->longname), DATATYPE_TXT,
+                        context) : 0);
   return packBufferSize;
 }
 
@@ -1345,6 +1351,24 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
   taxisP->vtime_lb   = intBuffer[12];
   taxisP->vdate_ub   = intBuffer[13];
   taxisP->vtime_ub   = intBuffer[14];
+  if (intBuffer[15])
+    {
+      size_t len = intBuffer[15];
+      char *name = xmalloc(len + 1);
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      name, len, DATATYPE_TXT, context);
+      name[len] = '\0';
+      taxisP->name = name;
+    }
+  if (intBuffer[16])
+    {
+      size_t len = intBuffer[16];
+      char *longname = xmalloc(len + 1);
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      longname, len, DATATYPE_TXT, context);
+      longname[len] = '\0';
+      taxisP->longname = longname;
+    }
 }
 
 
@@ -1371,12 +1395,20 @@ taxisPack(void * voidP, void * packBuffer, int packBufferSize, int * packBufferP
   intBuffer[12] = taxisP->vtime_lb;
   intBuffer[13] = taxisP->vdate_ub;
   intBuffer[14] = taxisP->vtime_ub;
+  intBuffer[15] = taxisP->name ? strlen(taxisP->name) : 0;
+  intBuffer[16] = taxisP->longname ? strlen(taxisP->longname) : 0;
 
   serializePack(intBuffer, taxisNint, DATATYPE_INT,
                 packBuffer, packBufferSize, packBufferPos, context);
   d = xchecksum(DATATYPE_INT, taxisNint, intBuffer);
   serializePack(&d, 1, DATATYPE_FLT64,
                 packBuffer, packBufferSize, packBufferPos, context);
+  if (taxisP->name)
+    serializePack(taxisP->name, intBuffer[15], DATATYPE_TXT,
+                  packBuffer, packBufferSize, packBufferPos, context);
+  if (taxisP->longname)
+    serializePack(taxisP->longname, intBuffer[16], DATATYPE_TXT,
+                  packBuffer, packBufferSize, packBufferPos, context);
 }
 
 /*
