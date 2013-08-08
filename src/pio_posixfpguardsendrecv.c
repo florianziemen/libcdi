@@ -281,11 +281,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
             sentFinalize[source] = true;
             doFinalize = true;
             for ( collID = 0; collID < nProcsCollNode; collID++ )
-              if ( !sentFinalize[collID] ) 
-                {
-                  doFinalize = false;
-                  break;
-                }
+              doFinalize &= sentFinalize[collID];
             if ( doFinalize )
               {
                 if (!listSetIsEmpty(bibBFiledataPF))
