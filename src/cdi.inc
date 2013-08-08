@@ -1209,6 +1209,9 @@
 !                                     INTEGER         forecast_type)
       EXTERNAL        vlistInqVarEnsemble
 
+!                     cdiClearAdditionalKeys
+      EXTERNAL        cdiClearAdditionalKeys
+
 !                     cdiDefAdditionalKey
 !                                    (CHARACTER*(*)   string)
       EXTERNAL        cdiDefAdditionalKey

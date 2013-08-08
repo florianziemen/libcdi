@@ -4,6 +4,15 @@
 This appendix provide a brief listing of the C language bindings of the
 CDI library routines:
 
+\section*{\tt \htmlref{cdiClearAdditionalKeys}{cdiClearAdditionalKeys}}
+
+\begin{verbatim}
+    void cdiClearAdditionalKeys ();
+\end{verbatim}
+
+Clear the list of additional GRIB keys..
+
+
 \section*{\tt \htmlref{cdiDefAdditionalKey}{cdiDefAdditionalKey}}
 
 \begin{verbatim}
@@ -685,7 +694,7 @@ Copy some entries of a variable list.
 \section*{\tt \htmlref{vlistCreate}{vlistCreate}}
 
 \begin{verbatim}
-    int vlistCreate (
+    int vlistCreate ();
 \end{verbatim}
 
 Create a variable list.
