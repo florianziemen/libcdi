@@ -376,14 +376,15 @@ modelWinDefBufferSizes(void)
             + sizeof (Xt_int) * collIDchunk * 3;
         }
 
-      // memory required for the 3 function calls streamOpen, streamDefVlist, streamClose
+      // memory required for the function calls encoded
+      // for remote execution
       // once per stream and timestep for all collprocs only on the modelproc root
       if ( rankGlob == root )
         for ( collID = 0; collID < nProcsColl; collID++ )
           {
-            collIndex[collID].numRPCRecords += 3;
+            collIndex[collID].numRPCRecords += numRPCFuncs;
             txWin[collID].size +=
-              3 * sizeof (union winHeaderEntry)
+              numRPCFuncs * sizeof (union winHeaderEntry)
               + MAXDATAFILENAME;
           }
     }

@@ -126,9 +126,9 @@ collDefBufferSizes()
         }
       // space required for the 3 function calls streamOpen, streamDefVlist, streamClose 
       // once per stream and timestep for all collprocs only on the modelproc root
-      rxWin[root].size += 3 * sizeof (union winHeaderEntry)
+      rxWin[root].size += numRPCFuncs * sizeof (union winHeaderEntry)
         + MAXDATAFILENAME;
-      rxWin[root].dictSize += 3;
+      rxWin[root].dictSize += numRPCFuncs;
     }
   free ( streamIndexList );
 
