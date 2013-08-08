@@ -591,14 +591,14 @@ void pioBufferFuncCall(union winHeaderEntry header,
 
   for (collID = 0; collID < nProcsColl; ++collID)
     {
-      xassert((txWin[collID].dictSize - txWin[collID].dictRPCUsed)
-              > txWin[collID].dictDataUsed);
       if (txWin[collID].postSet)
         {
           xmpi(MPI_Win_wait(txWin[collID].win));
           txWin[collID].postSet = 0;
           modelWinFlushBuffer ( collID );
         }
+      xassert(txWin[collID].dictRPCUsed + txWin[collID].dictDataUsed
+              < txWin[collID].dictSize);
       xassert(txWin[collID].refuseFuncCall == 0);
       modelWinEnqueue(collID, header, data, data_len);
     }
