@@ -40,6 +40,7 @@ static int activeNamespace = 0;
     { .func = (void (*)()) cdiStreamwriteVarChunk_ },       \
     { .data = NULL },                                       \
     { .func = (void (*)()) cdiStreamCloseDefaultDelegate }, \
+    { .func = (void (*)()) cdiStreamDefTimestep_ }, \
     { .func = (void (*)()) cdiStreamSync_ },                \
     CDI_NETCDF_SWITCHES                        \
     }

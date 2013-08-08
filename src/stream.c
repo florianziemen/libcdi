@@ -1287,37 +1287,18 @@ void streamSync(int streamID)
   myStreamSync_(streamptr);
 }
 
-/*
-@Function  streamDefTimestep
-@Title     Define time step
 
-@Prototype int streamDefTimestep(int streamID, int tsID)
-@Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
-    @Item  tsID      Timestep identifier.
-
-@Description
-The function @func{streamDefTimestep} defines the time step of a stream.
-
-@Result
-@func{streamDefTimestep} returns the number of records of the time step.
-
-@EndFunction
-*/
-int streamDefTimestep(int streamID, int tsID)
+int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
 {
   int newtsID;
   int taxisID;
   int vlistID;
   int time_is_varying;
-  stream_t *streamptr;
   taxis_t *taxisptr1;
   taxis_t *taxisptr2;
 
-  streamptr = stream_to_pointer(streamID);
-
   if ( CDI_Debug )
-    Message("streamID = %d  tsID = %d", streamID, tsID);
+    Message("streamID = %d  tsID = %d", streamptr->self, tsID);
 
   stream_check_ptr(__func__, streamptr);
 
@@ -1330,7 +1311,7 @@ int streamDefTimestep(int streamID, int tsID)
       taxisID = vlistInqTaxis(vlistID);
       if ( taxisID == CDI_UNDEFID )
         {
-          Warning("taxisID undefined for fileID = %d! Using absolute time axis.", streamID);
+          Warning("taxisID undefined for fileID = %d! Using absolute time axis.", streamptr->self);
           taxisID = taxisCreate(TAXIS_ABSOLUTE);
           vlistDefTaxis(vlistID, taxisID);
         }
@@ -1374,6 +1355,32 @@ int streamDefTimestep(int streamID, int tsID)
   cdi_create_records(streamptr, tsID);
 
   return (streamptr->ntsteps);
+}
+
+/*
+@Function  streamDefTimestep
+@Title     Define time step
+
+@Prototype int streamDefTimestep(int streamID, int tsID)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
+    @Item  tsID      Timestep identifier.
+
+@Description
+The function @func{streamDefTimestep} defines the time step of a stream.
+
+@Result
+@func{streamDefTimestep} returns the number of records of the time step.
+
+@EndFunction
+*/
+int streamDefTimestep(int streamID, int tsID)
+{
+  stream_t *streamptr = stream_to_pointer(streamID);
+  int (*myStreamDefTimestep_)(stream_t *streamptr, int tsID)
+    = (int (*)(stream_t *, int))
+    namespaceSwitchGet(NSSWITCH_STREAM_DEF_TIMESTEP_).func;
+  return myStreamDefTimestep_(streamptr, tsID);
 }
 
 /*
