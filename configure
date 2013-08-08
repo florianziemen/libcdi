@@ -26857,7 +26857,7 @@ $as_echo_n "checking for flag to alter module search path... " >&6; }
 if ${acx_sl_cv_fc_mod_path_flag_fc+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-       mkdir conftestdir
+  mkdir conftestdir
       cd conftestdir
       cat > conftest.$ac_ext <<_ACEOF
       module cnftst
