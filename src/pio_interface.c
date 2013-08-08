@@ -747,9 +747,9 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
   if ( commInqIsProcIO ())
     {
       serializeSetMPI();
-      namespaceSwitchSet(NSSWITCH_ABORT, cdiAbortC_MPI);
-      namespaceSwitchSet(NSSWITCH_FILE_OPEN, pioFileOpen);
-      namespaceSwitchSet(NSSWITCH_FILE_CLOSE, pioFileClose);
+      namespaceSwitchSet(NSSWITCH_ABORT, NSSW_FUNC(cdiAbortC_MPI));
+      namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(pioFileOpen));
+      namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(pioFileClose));
       IOServer ();
       namespaceDelete(0);
       commDestroy ();
@@ -913,7 +913,8 @@ streamWriteVarPart(int streamID, int varID, const void *data,
 
   void (*myStreamWriteVarPart)(int streamID, int varID, const void *data,
                                int nmiss, Xt_idxlist partDesc)
-    = namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_PART_);
+    = (void (*)(int, int, const void *, int, Xt_idxlist))
+    namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_PART_).func;
 
   if (!myStreamWriteVarPart)
     xabort("local part writing is unsupported!");

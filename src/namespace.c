@@ -16,34 +16,38 @@ static int nNamespaces = 1;
 static int activeNamespace = 0;
 
 #ifdef HAVE_LIBNETCDF
-#define CDI_NETCDF_SWITCHES nc__create,cdf_def_var_serial,cdfDefTimestep,\
-    cdfDefVars
+#define CDI_NETCDF_SWITCHES                     \
+  { .func = (void (*)()) nc__create },          \
+  { .func = (void (*)()) cdf_def_var_serial },  \
+  { .func = (void (*)()) cdfDefTimestep },      \
+  { .func = (void (*)()) cdfDefVars }
+
 #else
 #define CDI_NETCDF_SWITCHES
 #endif
 
-#define defaultSwitches {                       \
-    cdiAbortC_serial,                           \
-      serializeGetSizeInCore,                   \
-      serializePackInCore,                      \
-      serializeUnpackInCore,                    \
-      fileOpen_serial,                          \
-      fileWrite,                                \
-      fileClose_serial,                         \
-      cdiStreamOpenDefaultDelegate,             \
-      cdiStreamDefVlist_,                       \
-      cdiStreamWriteVar_,                       \
-      cdiStreamwriteVarChunk_,                  \
-      NULL,                                     \
-      cdiStreamCloseDefaultDelegate,            \
-      cdiStreamSync_,                           \
-      CDI_NETCDF_SWITCHES                       \
-      }
+#define defaultSwitches {                                   \
+    { .func = (void (*)()) cdiAbortC_serial },              \
+    { .func = (void (*)()) serializeGetSizeInCore },        \
+    { .func = (void (*)()) serializePackInCore },           \
+    { .func = (void (*)()) serializeUnpackInCore },         \
+    { .func = (void (*)()) fileOpen_serial },               \
+    { .func = (void (*)()) fileWrite },                     \
+    { .func = (void (*)()) fileClose_serial },              \
+    { .func = (void (*)()) cdiStreamOpenDefaultDelegate },  \
+    { .func = (void (*)()) cdiStreamDefVlist_ },            \
+    { .func = (void (*)()) cdiStreamWriteVar_ },            \
+    { .func = (void (*)()) cdiStreamwriteVarChunk_ },       \
+    { .data = NULL },                                       \
+    { .func = (void (*)()) cdiStreamCloseDefaultDelegate }, \
+    { .func = (void (*)()) cdiStreamSync_ },                \
+    CDI_NETCDF_SWITCHES                        \
+    }
 
 struct namespace
 {
   statusCode resStage;
-  void *switches[NUM_NAMESPACE_SWITCH];
+  union namespaceSwitchValue switches[NUM_NAMESPACE_SWITCH];
 } initialNamespace = {
   .resStage = STAGE_DEFINITION,
   .switches = defaultSwitches
@@ -167,7 +171,7 @@ namespaceNew()
   ++nNamespaces;
   namespaces[newNamespaceID].resStage = STAGE_DEFINITION;
   memcpy(namespaces[newNamespaceID].switches,
-         (void *[NUM_NAMESPACE_SWITCH])defaultSwitches,
+         (union namespaceSwitchValue[NUM_NAMESPACE_SWITCH])defaultSwitches,
          sizeof (namespaces[newNamespaceID].switches));
   reshListCreate(newNamespaceID);
   NAMESPACE_UNLOCK();
@@ -263,14 +267,14 @@ statusCode namespaceInqResStatus ( void )
   return namespaces[nsp].resStage;
 }
 
-void namespaceSwitchSet(enum namespaceSwitch sw, void *value)
+void namespaceSwitchSet(enum namespaceSwitch sw, union namespaceSwitchValue value)
 {
   xassert(sw > NSSWITCH_NO_SUCH_SWITCH && sw < NUM_NAMESPACE_SWITCH);
   int nsp = namespaceGetActive();
   namespaces[nsp].switches[sw] = value;
 }
 
-void *namespaceSwitchGet(enum namespaceSwitch sw)
+union namespaceSwitchValue namespaceSwitchGet(enum namespaceSwitch sw)
 {
   xassert(sw > NSSWITCH_NO_SUCH_SWITCH && sw < NUM_NAMESPACE_SWITCH);
   int nsp = namespaceGetActive();

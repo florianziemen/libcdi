@@ -751,7 +751,8 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
   {
     int (*streamOpenDelegate)(const char *filename, const char *filemode,
                               int filetype, stream_t *streamptr)
-      = namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND);
+      = (int (*)(const char *, const char *, int, stream_t *))
+      namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND).func;
     fileID = streamOpenDelegate(filename, filemode, filetype, streamptr);
   }
 
@@ -808,7 +809,8 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
   {
     int (*streamOpenDelegate)(const char *filename, const char *filemode,
                               int filetype, stream_t *streamptr)
-      = namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND);
+      = (int (*)(const char *, const char *, int, stream_t *))
+      namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND).func;
     fileID = streamOpenDelegate(filename, "r", filetype, streamptr);
   }
 
@@ -839,7 +841,8 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
 
   {
     void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
-      = namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND);
+      = (void (*)(stream_t *, int))
+      namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
     streamCloseDelegate(streamptr, 0);
   }
 
@@ -1161,7 +1164,8 @@ void streamClose(int streamID)
   vlistID  = streamptr->vlistID;
 
   void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
-    = namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND);
+    = (void (*)(stream_t *, int))
+    namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
 
   streamCloseDelegate(streamptr, 1);
 
@@ -1279,7 +1283,7 @@ void streamSync(int streamID)
   stream_check_ptr(__func__, streamptr);
 
   void (*myStreamSync_)(stream_t *streamptr)
-    = namespaceSwitchGet(NSSWITCH_STREAM_SYNC);
+    = (void (*)(stream_t *))namespaceSwitchGet(NSSWITCH_STREAM_SYNC).func;
   myStreamSync_(streamptr);
 }
 
@@ -1361,7 +1365,8 @@ int streamDefTimestep(int streamID, int tsID)
       && vlistHasTime(vlistID))
     {
       void (*myCdfDefTimestep)(stream_t *streamptr, int tsID)
-        = namespaceSwitchGet(NSSWITCH_CDF_DEF_TIMESTEP);
+        = (void (*)(stream_t *, int))
+        namespaceSwitchGet(NSSWITCH_CDF_DEF_TIMESTEP).func;
       myCdfDefTimestep(streamptr, tsID);
     }
 #endif
@@ -1587,7 +1592,8 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 {
   void (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype,
                                const void *data, int nmiss)
-    = namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_);
+    = (void (*)(int, int, int, const void *, int))
+    namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
   myCdiStreamWriteVar_(streamID, varID, MEMTYPE_DOUBLE, data, nmiss);
 }
 
@@ -1685,7 +1691,8 @@ void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
 {
   void (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype,
                                const void *data, int nmiss)
-    = namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_);
+    = (void (*)(int, int, int, const void *, int))
+    namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
   myCdiStreamWriteVar_(streamID, varID, MEMTYPE_FLOAT, data, nmiss);
 }
 
@@ -1898,7 +1905,8 @@ streamWriteVarChunk(int streamID, int varID,
   void (*myCdiStreamWriteVarChunk_)(int streamID, int varID, int memtype,
                                     const int rect[][2], const void *data,
                                     int nmiss)
-    = namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_);
+    = (void (*)(int, int, int, const int [][2], const void *, int))
+    namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_).func;
   myCdiStreamWriteVarChunk_(streamID, varID, MEMTYPE_DOUBLE, rect, data, nmiss);
 }
 
@@ -2149,7 +2157,7 @@ The function @func{streamDefVlist} defines the variable list of a stream.
 void streamDefVlist(int streamID, int vlistID)
 {
   void (*myStreamDefVlist)(int streamID, int vlistID)
-    = namespaceSwitchGet(NSSWITCH_STREAM_DEF_VLIST_);
+    = (void (*)(int, int))namespaceSwitchGet(NSSWITCH_STREAM_DEF_VLIST_).func;
   myStreamDefVlist(streamID, vlistID);
 }
 

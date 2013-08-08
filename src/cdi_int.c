@@ -686,7 +686,8 @@ cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig)
         {
 #ifdef HAVE_LIBNETCDF
           void (*myCdfDefVars)(stream_t *streamptr)
-            = namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP);
+            = (void (*)(stream_t *))
+            namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP).func;
           myCdfDefVars(streamptr);
 #endif
         }

@@ -934,13 +934,18 @@ void IOServer ()
 #elif defined (HAVE_LIBNETCDF)
   cdiSerialOpenFileCount = xcalloc(sizeof (cdiSerialOpenFileCount[0]),
                                    commInqSizeColl());
-  namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND, cdiPioStreamCDFOpenWrap);
-  namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND, cdiPioStreamCDFCloseWrap);
-  namespaceSwitchSet(NSSWITCH_CDF_DEF_TIMESTEP, cdiPioCdfDefTimestep);
-  namespaceSwitchSet(NSSWITCH_CDF_STREAM_SETUP, cdiPioServerCdfDefVars);
+  namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND,
+                     NSSW_FUNC(cdiPioStreamCDFOpenWrap));
+  namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND,
+                     NSSW_FUNC(cdiPioStreamCDFCloseWrap));
+  namespaceSwitchSet(NSSWITCH_CDF_DEF_TIMESTEP,
+                     NSSW_FUNC(cdiPioCdfDefTimestep));
+  namespaceSwitchSet(NSSWITCH_CDF_STREAM_SETUP,
+                     NSSW_FUNC(cdiPioServerCdfDefVars));
 #endif
-  namespaceSwitchSet(NSSWITCH_FILE_WRITE, cdiPioFileWrite);
-  
+  namespaceSwitchSet(NSSWITCH_FILE_WRITE,
+                     NSSW_FUNC(cdiPioFileWrite));
+
   for ( ;; )
     {
       xmpi ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commCalc, &status ));

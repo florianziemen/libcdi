@@ -94,9 +94,12 @@ void serializeSetMPI()
   if (!dtDictMatchComplete)
     setupDtDict();
 #endif
-  namespaceSwitchSet(NSSWITCH_SERIALIZE_GET_SIZE, serializeGetSizeMPI);
-  namespaceSwitchSet(NSSWITCH_SERIALIZE_PACK, serializePackMPI);
-  namespaceSwitchSet(NSSWITCH_SERIALIZE_UNPACK, serializeUnpackMPI);
+  namespaceSwitchSet(NSSWITCH_SERIALIZE_GET_SIZE,
+                     NSSW_FUNC(serializeGetSizeMPI));
+  namespaceSwitchSet(NSSWITCH_SERIALIZE_PACK,
+                     NSSW_FUNC(serializePackMPI));
+  namespaceSwitchSet(NSSWITCH_SERIALIZE_UNPACK,
+                     NSSW_FUNC(serializeUnpackMPI));
 }
 
 

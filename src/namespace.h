@@ -44,6 +44,14 @@ enum namespaceSwitch
   NUM_NAMESPACE_SWITCH,
 };
 
+union namespaceSwitchValue
+{
+  void *data;
+  void (*func)();
+};
+
+#define NSSW_FUNC(p) ((union namespaceSwitchValue){ .func = (void (*)())(p) })
+#define NSSW_DATA(p) ((union namespaceSwitchValue){ .data = (void *)(p) })
 
 int              namespaceNew();
 void             namespaceDelete(int namespaceID);
@@ -57,8 +65,9 @@ int              namespaceAdaptKey     ( int, int );
 int              namespaceAdaptKey2    ( int );
 void             namespaceDefResStatus ( statusCode );
 statusCode       namespaceInqResStatus ( void );
-void namespaceSwitchSet(enum namespaceSwitch sw, void *value);
-void *namespaceSwitchGet(enum namespaceSwitch sw);
+void namespaceSwitchSet(enum namespaceSwitch sw,
+                        union namespaceSwitchValue value);
+union namespaceSwitchValue namespaceSwitchGet(enum namespaceSwitch sw);
 
 
 #endif

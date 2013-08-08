@@ -14,6 +14,7 @@
 #include "pio_interface.h"
 #include "pio_rpc.h"
 #include "pio_util.h"
+#include "pio_serialize.h"
 
 static int
 cdiPioClientStreamOpen(const char *filename, const char *filemode,
@@ -154,18 +155,25 @@ cdiPioClientSetup(int *pioNamespace_, int *pioNamespace)
   int callerCDINamespace = namespaceGetActive();
   pioNamespaceSetActive(*pioNamespace_);
   serializeSetMPI();
-  namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND, cdiPioClientStreamOpen);
-  namespaceSwitchSet(NSSWITCH_STREAM_DEF_VLIST_, cdiPioClientStreamDefVlist_);
-  namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_, cdiPioClientStreamWriteVar_);
+  namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND,
+                     NSSW_FUNC(cdiPioClientStreamOpen));
+  namespaceSwitchSet(NSSWITCH_STREAM_DEF_VLIST_,
+                     NSSW_FUNC(cdiPioClientStreamDefVlist_));
+  namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_,
+                     NSSW_FUNC(cdiPioClientStreamWriteVar_));
   namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_,
-                     cdiPioClientStreamWriteVarChunk_);
+                     NSSW_FUNC(cdiPioClientStreamWriteVarChunk_));
   namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_PART_,
-                     cdiPioClientStreamWriteVarPart);
-  namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND, cdiPioClientStreamClose);
-  namespaceSwitchSet(NSSWITCH_STREAM_SYNC, cdiPioClientStreamNOP);
+                     NSSW_FUNC(cdiPioClientStreamWriteVarPart));
+  namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND,
+                     NSSW_FUNC(cdiPioClientStreamClose));
+  namespaceSwitchSet(NSSWITCH_STREAM_SYNC,
+                     NSSW_FUNC(cdiPioClientStreamNOP));
 #ifdef HAVE_LIBNETCDF
-  namespaceSwitchSet(NSSWITCH_CDF_DEF_TIMESTEP, cdiPioCdfDefTimestepNOP);
-  namespaceSwitchSet(NSSWITCH_CDF_STREAM_SETUP, cdiPioClientStreamNOP);
+  namespaceSwitchSet(NSSWITCH_CDF_DEF_TIMESTEP,
+                     NSSW_FUNC(cdiPioCdfDefTimestepNOP));
+  namespaceSwitchSet(NSSWITCH_CDF_STREAM_SETUP,
+                     NSSW_FUNC(cdiPioClientStreamNOP));
 #endif
   pioNamespaceSetActive(callerCDINamespace);
 }

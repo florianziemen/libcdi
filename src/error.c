@@ -61,7 +61,8 @@ void cdiAbortC(const char * caller, const char * filename,
 {
   va_list ap;
   va_start(ap, errorString);
-  cdiAbortCFunc cdiAbortC_p = namespaceSwitchGet(NSSWITCH_ABORT);
+  cdiAbortCFunc cdiAbortC_p
+    = (cdiAbortCFunc)namespaceSwitchGet(NSSWITCH_ABORT).func;
   cdiAbortC_p(caller, filename, functionname, line, errorString, ap);
   va_end(ap);
 }

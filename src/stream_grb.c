@@ -557,7 +557,8 @@ int grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
   {
     size_t (*myFileWrite)(int fileID, const void *restrict buffer,
                           size_t len, int tsID)
-      = namespaceSwitchGet(NSSWITCH_FILE_WRITE);
+      = (size_t (*)(int, const void *restrict, size_t, int))
+      namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
     nwrite = myFileWrite(fileID, gribbuffer, nbytes, tsID);
   }
 
