@@ -54,7 +54,7 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
 	  break;
 	case TAXIS:
 	  taxisUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                      nspTarget, context);
+                      nspTarget, context, 1);
 	  break;
 	case INSTITUTE:
           instituteUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,

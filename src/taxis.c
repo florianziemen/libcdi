@@ -1317,7 +1317,7 @@ taxisGetPackSize(void *p, void *context)
 
 int
 taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
-            int nspTarget, void *context)
+            int nspTarget, void *context, int checkForSameID)
 {
   taxis_t * taxisP;
   int intBuffer[taxisNint];
@@ -1335,7 +1335,8 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
   taxisP = taxisNewEntry();
   if ( ! taxisP ) Error("No memory");
 
-  xassert(namespaceAdaptKey(intBuffer[0], nspTarget) == taxisP->self);
+  xassert(!checkForSameID
+          || namespaceAdaptKey(intBuffer[0], nspTarget) == taxisP->self);
 
   taxisP->used       = intBuffer[1];
   taxisP->type       = intBuffer[2];

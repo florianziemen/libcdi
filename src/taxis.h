@@ -35,7 +35,7 @@ double  vtime2timeval(int vdate, int vtime, taxis_t *taxis);
 
 int
 taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
-            int nspTarget, void *context);
+            int nspTarget, void *context, int checkForSameID);
 
 #endif  /* _TAXIS_H */
 /*
