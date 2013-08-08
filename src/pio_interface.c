@@ -109,12 +109,15 @@ mapProblems(int problemSizes[], int * problemMapping, int nProblems,
       buckets[writerIdx] +=  *ip[i];
     }
 
-  xprintArray3 (  "problemSizes = ", problemSizes, nProblems, DATATYPE_INT );
-  xprintArray3 ( "vector of indices, qsort of problemSizes", dummy,
-                nProblems, DATATYPE_INT );
-  xprintArray3 ( "problemMapping", problemMapping, nProblems, DATATYPE_INT );
-  xprintArray3 ( "meanBucket", meanBucket, nWriter, DATATYPE_FLT );
-  xprintArray3 ( "actual buckets", buckets, nWriter, DATATYPE_INT );
+  if ( ddebug )
+    {
+      xprintArray3 (  "problemSizes = ", problemSizes, nProblems, DATATYPE_INT );
+      xprintArray3 ( "vector of indices, qsort of problemSizes", dummy,
+                    nProblems, DATATYPE_INT );
+      xprintArray3 ( "problemMapping", problemMapping, nProblems, DATATYPE_INT );
+      xprintArray3 ( "meanBucket", meanBucket, nWriter, DATATYPE_FLT );
+      xprintArray3 ( "actual buckets", buckets, nWriter, DATATYPE_INT );
+    }
 }
 
 /****************************************************/
