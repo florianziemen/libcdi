@@ -47,8 +47,8 @@ typedef struct
 {
   long offset;
   bool finished;
-  bool *nfinished;
   int fileID;
+  bool nfinished[];
 } bFiledataPF;
 
 static int
@@ -106,17 +106,11 @@ static bFiledataPF *
 initBFiledataPF(int fileID, int nc)
 {
   bFiledataPF *bfd;
-  int i;
-
-  bfd = ( bFiledataPF * ) xmalloc ( sizeof ( bFiledataPF ));
-  memset ( bfd, 0, sizeof ( bFiledataPF ));
+  size_t bfdSize = sizeof (bFiledataPF) + nc * sizeof (bool);
+  bfd = xcalloc(1, bfdSize);
   bfd->offset = 0;
   bfd->finished = false;
-  bfd->nfinished = ( bool * ) xmalloc ( nc * sizeof ( bool ));
   bfd->fileID = fileID;
-
-  for ( i = 0; i < nc; i++ )
-    *( bfd->nfinished + i ) = true;
 
   return bfd;
 }
@@ -152,7 +146,6 @@ destroyBFiledataPF(void *v)
   int iret = 0;
   bFiledataPF *bfd = (bFiledataPF * ) v;
   
-  free ( bfd->nfinished );
   free ( bfd );
 
   return iret;
@@ -209,8 +202,6 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 		xabort("fileID=%d not unique", rtag.id);
               bfd->fileID = iret;
 	    }
-
-	  *( bfd->nfinished + source ) = false;
 
           xdebug("id=%d, command=%d ( %s ), send offset=%ld", rtag.id,
                  rtag.command, command2charP[rtag.command], bfd->offset);
