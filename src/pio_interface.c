@@ -43,7 +43,11 @@ static struct rdmaWin
 } *txWin = NULL;
 
 
-char * funcMap[numRPCFuncs] = {"streamOpen", "streamDefVlist", "streamClose" };
+const char * const funcMap[numRPCFuncs] = {
+  "streamOpen",
+  "streamDefVlist",
+  "streamClose"
+};
 
 float cdiPIOpartInflate_;
 

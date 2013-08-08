@@ -37,7 +37,7 @@ enum
   PARTDESCMARKER = -numRPCFuncs - 2,
 };
 enum { MAXDATAFILENAME = 256, MINFUNCID = STREAMCLOSE, MAXFUNCID = STREAMOPEN };
-extern char * funcMap[numRPCFuncs];
+extern const char * const funcMap[numRPCFuncs];
 
 struct headerSize
 {
