@@ -301,6 +301,10 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
     {
       GRIB_CHECK(grib_get_long(gh, "significanceOfReferenceTime", &sigofrtime), 0);
     }
+  else
+    {
+      GRIB_CHECK(grib_get_long(gh, "timeRangeIndicator", &sigofrtime), 0);
+    }
 
   if ( sigofrtime == 3 )
     {
@@ -1192,7 +1196,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
       gribapiGetValidityDateTime(gh, &vdate, &vtime);
       /*
-      printf("%d %d %d.%d.%d %d\n", vdate, vtime, pnum, pcat, pdis, leveltype);
+      printf("%d %d %d\n", vdate, vtime, leveltype);
       */
       if ( lieee )
         {
