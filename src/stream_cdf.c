@@ -2192,14 +2192,19 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   dimlen = zaxisInqSize(zaxisID);
   type   = zaxisInqType(zaxisID);
 
-  if ( dimlen == 1 && type == ZAXIS_SURFACE       ) return;
-  if ( dimlen == 1 && type == ZAXIS_CLOUD_BASE    ) return;
-  if ( dimlen == 1 && type == ZAXIS_CLOUD_TOP     ) return;
-  if ( dimlen == 1 && type == ZAXIS_ISOTHERM_ZERO ) return;
-  if ( dimlen == 1 && type == ZAXIS_TOA           ) return;
-  if ( dimlen == 1 && type == ZAXIS_SEA_BOTTOM    ) return;
-  if ( dimlen == 1 && type == ZAXIS_ATMOSPHERE    ) return;
-  if ( dimlen == 1 && type == ZAXIS_MEANSEA       ) return;
+  if ( dimlen == 1 && type == ZAXIS_SURFACE            ) return;
+  if ( dimlen == 1 && type == ZAXIS_CLOUD_BASE         ) return;
+  if ( dimlen == 1 && type == ZAXIS_CLOUD_TOP          ) return;
+  if ( dimlen == 1 && type == ZAXIS_ISOTHERM_ZERO      ) return;
+  if ( dimlen == 1 && type == ZAXIS_TOA                ) return;
+  if ( dimlen == 1 && type == ZAXIS_SEA_BOTTOM         ) return;
+  if ( dimlen == 1 && type == ZAXIS_ATMOSPHERE         ) return;
+  if ( dimlen == 1 && type == ZAXIS_MEANSEA            ) return;
+  if ( dimlen == 1 && type == ZAXIS_LAKE_BOTTOM        ) return;
+  if ( dimlen == 1 && type == ZAXIS_SEDIMENT_BOTTOM    ) return;
+  if ( dimlen == 1 && type == ZAXIS_SEDIMENT_BOTTOM_TA ) return;
+  if ( dimlen == 1 && type == ZAXIS_SEDIMENT_BOTTOM_TW ) return;
+  if ( dimlen == 1 && type == ZAXIS_MIX_LAYER          ) return;
 
   zaxisInqName(zaxisID, axisname);
   /*
@@ -3080,11 +3085,16 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   if ( zid == -1 )
     {
-      if ( zaxisInqType(zaxisID) == ZAXIS_CLOUD_BASE    ||
-           zaxisInqType(zaxisID) == ZAXIS_CLOUD_TOP     ||
-           zaxisInqType(zaxisID) == ZAXIS_ISOTHERM_ZERO ||
-           zaxisInqType(zaxisID) == ZAXIS_TOA           ||
-           zaxisInqType(zaxisID) == ZAXIS_SEA_BOTTOM    ||
+      if ( zaxisInqType(zaxisID) == ZAXIS_CLOUD_BASE          ||
+           zaxisInqType(zaxisID) == ZAXIS_CLOUD_TOP           ||
+           zaxisInqType(zaxisID) == ZAXIS_ISOTHERM_ZERO       ||
+           zaxisInqType(zaxisID) == ZAXIS_TOA                 ||
+           zaxisInqType(zaxisID) == ZAXIS_SEA_BOTTOM          ||
+           zaxisInqType(zaxisID) == ZAXIS_LAKE_BOTTOM         ||
+           zaxisInqType(zaxisID) == ZAXIS_SEDIMENT_BOTTOM     ||
+           zaxisInqType(zaxisID) == ZAXIS_SEDIMENT_BOTTOM_TA  ||
+           zaxisInqType(zaxisID) == ZAXIS_SEDIMENT_BOTTOM_TW  ||
+           zaxisInqType(zaxisID) == ZAXIS_MIX_LAYER           ||
            zaxisInqType(zaxisID) == ZAXIS_ATMOSPHERE )
         {
           zaxisInqName(zaxisID, varname);
@@ -4696,6 +4706,16 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                 ncvars[ncvarid].zaxistype = ZAXIS_ISOTHERM_ZERO;
               else if ( strcmp(attstring, "seabottom") == 0 )
                 ncvars[ncvarid].zaxistype = ZAXIS_SEA_BOTTOM;
+              else if ( strcmp(attstring, "lakebottom") == 0 )
+                ncvars[ncvarid].zaxistype = ZAXIS_LAKE_BOTTOM;
+              else if ( strcmp(attstring, "sedimentbottom") == 0 )
+                ncvars[ncvarid].zaxistype = ZAXIS_SEDIMENT_BOTTOM;
+              else if ( strcmp(attstring, "sedimentbottomta") == 0 )
+                ncvars[ncvarid].zaxistype = ZAXIS_SEDIMENT_BOTTOM_TA;
+              else if ( strcmp(attstring, "sedimentbottomtw") == 0 )
+                ncvars[ncvarid].zaxistype = ZAXIS_SEDIMENT_BOTTOM_TW;
+              else if ( strcmp(attstring, "mixlayer") == 0 )
+                ncvars[ncvarid].zaxistype = ZAXIS_MIX_LAYER;
               else if ( strcmp(attstring, "atmosphere") == 0 )
                 ncvars[ncvarid].zaxistype = ZAXIS_ATMOSPHERE;
               else

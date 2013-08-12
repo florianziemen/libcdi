@@ -29,27 +29,32 @@ static struct {
   char *units;
 }
 ZaxistypeEntry[] = {
-  { /*  0 */ 0, "sfc",        "surface",           "",               ""},
-  { /*  1 */ 0, "lev",        "generic",           "",               "level"},
-  { /*  2 */ 2, "lev",        "hybrid",            "",               "level"},
-  { /*  3 */ 2, "lev",        "hybrid_half",       "",               "level"},
-  { /*  4 */ 2, "lev",        "pressure",          "air_pressure",   "Pa"},
-  { /*  5 */ 1, "height",     "height",            "height",         "m"},
-  { /*  6 */ 2, "depth",      "depth_below_sea",   "depth",          "m"},
-  { /*  7 */ 2, "depth",      "depth_below_land",  "",               "cm"},
-  { /*  8 */ 0, "lev",        "isentropic",        "",               "K"},
-  { /*  9 */ 0, "lev",        "trajectory",        "",               ""},
-  { /* 10 */ 1, "alt",        "altitude",          "",               "m"},
-  { /* 11 */ 0, "lev",        "sigma",             "",               "level"},
-  { /* 12 */ 0, "lev",        "meansea",           "",               "level"},
-  { /* 13 */ 0, "toa",        "top_of_atmosphere", "",               ""},
-  { /* 14 */ 0, "seabottom",  "sea_bottom",        "",               ""},
-  { /* 15 */ 0, "atmosphere", "atmosphere",        "",               ""},
-  { /* 16 */ 0, "cloudbase",  "cloud_base",        "",               ""},
-  { /* 17 */ 0, "cloudtop",   "cloud_top",         "",               ""},
-  { /* 18 */ 0, "isotherm0",  "isotherm_zero",     "",               ""},
-  { /* 19 */ 0, "snow",       "snow",              "",               ""},
-  { /* 20 */ 0, "height",     "generalized height","height",         "m"},
+  { /*  0 */ 0, "sfc",               "surface",                "",               ""},
+  { /*  1 */ 0, "lev",               "generic",                "",               "level"},
+  { /*  2 */ 2, "lev",               "hybrid",                 "",               "level"},
+  { /*  3 */ 2, "lev",               "hybrid_half",            "",               "level"},
+  { /*  4 */ 2, "lev",               "pressure",               "air_pressure",   "Pa"},
+  { /*  5 */ 1, "height",            "height",                 "height",         "m"},
+  { /*  6 */ 2, "depth",             "depth_below_sea",        "depth",          "m"},
+  { /*  7 */ 2, "depth",             "depth_below_land",       "",               "cm"},
+  { /*  8 */ 0, "lev",               "isentropic",             "",               "K"},
+  { /*  9 */ 0, "lev",               "trajectory",             "",               ""},
+  { /* 10 */ 1, "alt",               "altitude",               "",               "m"},
+  { /* 11 */ 0, "lev",               "sigma",                  "",               "level"},
+  { /* 12 */ 0, "lev",               "meansea",                "",               "level"},
+  { /* 13 */ 0, "toa",               "top_of_atmosphere",      "",               ""},
+  { /* 14 */ 0, "seabottom",         "sea_bottom",             "",               ""},
+  { /* 15 */ 0, "atmosphere",        "atmosphere",             "",               ""},
+  { /* 16 */ 0, "cloudbase",         "cloud_base",             "",               ""},
+  { /* 17 */ 0, "cloudtop",          "cloud_top",              "",               ""},
+  { /* 18 */ 0, "isotherm0",         "isotherm_zero",          "",               ""},
+  { /* 19 */ 0, "snow",              "snow",                   "",               ""},
+  { /* 20 */ 0, "lakebottom",        "lake_bottom",            "",               ""},
+  { /* 21 */ 0, "sedimentbottom",    "sediment_bottom",        "",               ""},
+  { /* 22 */ 0, "sedimentbottomta",  "sediment_bottom_ta",     "",               ""},
+  { /* 23 */ 0, "sedimentbottomtw",  "sediment_bottom_tw",     "",               ""},
+  { /* 24 */ 0, "mixlayer",          "mix_layer",              "",               ""},
+  { /* 25 */ 0, "height",            "generalized height",     "height",         "m"},
 };
 
 static int CDI_MaxZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]);
@@ -181,6 +186,8 @@ int zaxisSize(void)
                       @func{ZAXIS_ISENTROPIC}, @func{ZAXIS_ALTITUDE}, @func{ZAXIS_MEANSEA}, @func{ZAXIS_TOA},
                       @func{ZAXIS_SEA_BOTTOM}, @func{ZAXIS_ATMOSPHERE}, @func{ZAXIS_CLOUD_BASE},
                       @func{ZAXIS_CLOUD_TOP}, @func{ZAXIS_ISOTHERM_ZERO}, @func{ZAXIS_SNOW},
+                      @func{ZAXIS_LAKE_BOTTOM}, @func{ZAXIS_SEDIMENT_BOTTOM}, @func{ZAXIS_SEDIMENT_BOTTOM_TA},
+                      @func{ZAXIS_SEDIMENT_BOTTOM_TW}, @func{ZAXIS_MIX_LAYER},
                       @func{ZAXIS_DEPTH_BELOW_SEA} and @func{ZAXIS_DEPTH_BELOW_LAND}.
     @Item  size       Number of levels.
 
@@ -1011,6 +1018,8 @@ The valid CDI Z-axis types are @func{ZAXIS_GENERIC}, @func{ZAXIS_SURFACE},
 @func{ZAXIS_ISENTROPIC}, @func{ZAXIS_ALTITUDE}, @func{ZAXIS_MEANSEA}, @func{ZAXIS_TOA},
 @func{ZAXIS_SEA_BOTTOM}, @func{ZAXIS_ATMOSPHERE}, @func{ZAXIS_CLOUD_BASE},
 @func{ZAXIS_CLOUD_TOP}, @func{ZAXIS_ISOTHERM_ZERO}, @func{ZAXIS_SNOW},
+@func{ZAXIS_LAKE_BOTTOM}, @func{ZAXIS_SEDIMENT_BOTTOM}, @func{ZAXIS_SEDIMENT_BOTTOM_TA},
+@func{ZAXIS_SEDIMENT_BOTTOM_TW}, @func{ZAXIS_MIX_LAYER},
 @func{ZAXIS_DEPTH_BELOW_SEA} and @func{ZAXIS_DEPTH_BELOW_LAND}.
 
 @EndFunction

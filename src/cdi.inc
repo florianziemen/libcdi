@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.6.1.1
+! Fortran interface for CDI library version 1.6.2
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   July 2013
+! Uwe Schulzweida, MPI-MET, Hamburg,   August 2013
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -270,8 +270,18 @@
       PARAMETER (ZAXIS_ISOTHERM_ZERO    = 18)
       INTEGER    ZAXIS_SNOW            
       PARAMETER (ZAXIS_SNOW             = 19)
+      INTEGER    ZAXIS_LAKE_BOTTOM     
+      PARAMETER (ZAXIS_LAKE_BOTTOM      = 20)
+      INTEGER    ZAXIS_SEDIMENT_BOTTOM 
+      PARAMETER (ZAXIS_SEDIMENT_BOTTOM  = 21)
+      INTEGER    ZAXIS_SEDIMENT_BOTTOM_TA
+      PARAMETER (ZAXIS_SEDIMENT_BOTTOM_TA = 22)
+      INTEGER    ZAXIS_SEDIMENT_BOTTOM_TW
+      PARAMETER (ZAXIS_SEDIMENT_BOTTOM_TW = 23)
+      INTEGER    ZAXIS_MIX_LAYER       
+      PARAMETER (ZAXIS_MIX_LAYER        = 24)
       INTEGER    ZAXIS_REFERENCE       
-      PARAMETER (ZAXIS_REFERENCE        = 20)
+      PARAMETER (ZAXIS_REFERENCE        = 25)
 !
 !  TIME types
 !
@@ -1905,6 +1915,11 @@
       INTEGER         zaxisInqPrec
 !                                    (INTEGER         zaxisID)
       EXTERNAL        zaxisInqPrec
+
+!                     zaxisDefPositive
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         positive)
+      EXTERNAL        zaxisDefPositive
 
       INTEGER         zaxisInqPositive
 !                                    (INTEGER         zaxisID)

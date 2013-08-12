@@ -2673,56 +2673,58 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 	break;
       }
     case ZAXIS_CLOUD_BASE:
-      {
-	if ( editionNumber <= 1 )
-          gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", GRIB1_LTYPE_CLOUDBASE);
-        else
-          gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_CLOUDBASE);
-
-        break;
-      }
     case ZAXIS_CLOUD_TOP:
-      {
-	if ( editionNumber <= 1 )
-          gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", GRIB1_LTYPE_CLOUDTOP);
-        else
-          gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_CLOUDTOP);
-
-        break;
-      }
     case ZAXIS_ISOTHERM_ZERO:
-      {
-	if ( editionNumber <= 1 )
-          gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", GRIB1_LTYPE_ISOTHERM0);
-        else
-          gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_ISOTHERM0);
-
-        break;
-      }
     case ZAXIS_TOA:
-      {
-	if ( editionNumber <= 1 )
-          gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", GRIB1_LTYPE_TOA);
-        else
-          gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_TOA);
-
-        break;
-      }
     case ZAXIS_SEA_BOTTOM:
-      {
-	if ( editionNumber <= 1 )
-          gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", GRIB1_LTYPE_SEA_BOTTOM);
-        else
-          gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_SEA_BOTTOM);
-
-        break;
-      }
+    case ZAXIS_LAKE_BOTTOM:
+    case ZAXIS_SEDIMENT_BOTTOM:
+    case ZAXIS_SEDIMENT_BOTTOM_TA:
+    case ZAXIS_SEDIMENT_BOTTOM_TW:
+    case ZAXIS_MIX_LAYER:
     case ZAXIS_ATMOSPHERE:
       {
+        int leveltype = -1;
+
 	if ( editionNumber <= 1 )
-          gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", GRIB1_LTYPE_ATMOSPHERE);
+          {
+            switch (zaxistype)
+              {
+              case ZAXIS_CLOUD_BASE:         leveltype = GRIB1_LTYPE_CLOUD_BASE; break;
+              case ZAXIS_CLOUD_TOP:          leveltype = GRIB1_LTYPE_CLOUD_TOP; break;
+              case ZAXIS_ISOTHERM_ZERO:      leveltype = GRIB1_LTYPE_ISOTHERM0; break;
+              case ZAXIS_TOA:                leveltype = GRIB1_LTYPE_TOA; break;
+              case ZAXIS_SEA_BOTTOM:         leveltype = GRIB1_LTYPE_SEA_BOTTOM; break;
+              case ZAXIS_LAKE_BOTTOM:        leveltype = GRIB1_LTYPE_LAKE_BOTTOM; break;
+              case ZAXIS_SEDIMENT_BOTTOM:    leveltype = GRIB1_LTYPE_SEDIMENT_BOTTOM; break;
+              case ZAXIS_SEDIMENT_BOTTOM_TA: leveltype = GRIB1_LTYPE_SEDIMENT_BOTTOM_TA; break;
+              case ZAXIS_SEDIMENT_BOTTOM_TW: leveltype = GRIB1_LTYPE_SEDIMENT_BOTTOM_TW; break;
+              case ZAXIS_MIX_LAYER:          leveltype = GRIB1_LTYPE_MIX_LAYER; break;
+              case ZAXIS_ATMOSPHERE:         leveltype = GRIB1_LTYPE_ATMOSPHERE; break;
+              }
+          }
         else
-          gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_ATMOSPHERE);
+          {
+            switch (zaxistype)
+              {
+              case ZAXIS_CLOUD_BASE:         leveltype = GRIB2_LTYPE_CLOUD_BASE; break;
+              case ZAXIS_CLOUD_TOP:          leveltype = GRIB2_LTYPE_CLOUD_TOP; break;
+              case ZAXIS_ISOTHERM_ZERO:      leveltype = GRIB2_LTYPE_ISOTHERM0; break;
+              case ZAXIS_TOA:                leveltype = GRIB2_LTYPE_TOA; break;
+              case ZAXIS_SEA_BOTTOM:         leveltype = GRIB2_LTYPE_SEA_BOTTOM; break;
+              case ZAXIS_LAKE_BOTTOM:        leveltype = GRIB2_LTYPE_LAKE_BOTTOM; break;
+              case ZAXIS_SEDIMENT_BOTTOM:    leveltype = GRIB2_LTYPE_SEDIMENT_BOTTOM; break;
+              case ZAXIS_SEDIMENT_BOTTOM_TA: leveltype = GRIB2_LTYPE_SEDIMENT_BOTTOM_TA; break;
+              case ZAXIS_SEDIMENT_BOTTOM_TW: leveltype = GRIB2_LTYPE_SEDIMENT_BOTTOM_TW; break;
+              case ZAXIS_MIX_LAYER:          leveltype = GRIB2_LTYPE_MIX_LAYER; break;
+              case ZAXIS_ATMOSPHERE:         leveltype = GRIB2_LTYPE_ATMOSPHERE; break;
+              }
+          }
+
+	if ( editionNumber <= 1 )
+          gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", leveltype);
+        else
+          gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", leveltype);
 
         break;
       }

@@ -3,6 +3,14 @@
 	* Version 1.6.2 released
 	* using CGRIBEX library version 1.6.2
 
+2013-08-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* GRIB2: added support for level type Lake Bottom (grib level type 162)
+        * GRIB2: added support for level type Bottom Of Sediment Layer (grib level type 163)
+        * GRIB2: added support for level type Bottom Of Thermally Active Sediment Layer (grib level type 164)
+        * GRIB2: added support for level type Bottom Of Sediment Layer Penetrated By Thermal Wave (grib level type 165)
+        * GRIB2: added support for level type Mixing Layer (grib level type 166)
+
 2013-08-09  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* gribapiGetValidityDateTime: check timeRangeIndicator for editionNumber =1 (bug fix)

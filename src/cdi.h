@@ -114,57 +114,62 @@ extern "C" {
 
 /* Chunks */
 
-#define  CHUNK_AUTO               1  /* use default chunk size                  */
-#define  CHUNK_GRID               2
-#define  CHUNK_LINES              3
+#define  CHUNK_AUTO                 1  /* use default chunk size                                */
+#define  CHUNK_GRID                 2
+#define  CHUNK_LINES                3
 
 /* GRID types */
 
-#define  GRID_GENERIC             1  /* Generic grid                            */
-#define  GRID_GAUSSIAN            2  /* Regular Gaussian lon/lat grid           */
-#define  GRID_GAUSSIAN_REDUCED    3  /* Reduced Gaussian lon/lat grid           */
-#define  GRID_LONLAT              4  /* Regular longitude/latitude grid         */
-#define  GRID_SPECTRAL            5  /* Spherical harmonic coefficients         */
-#define  GRID_FOURIER             6  /* Fourier coefficients                    */
-#define  GRID_GME                 7  /* Icosahedral-hexagonal GME grid          */
-#define  GRID_TRAJECTORY          8  /* Trajectory                              */
-#define  GRID_UNSTRUCTURED        9  /* General unstructured grid               */
-#define  GRID_CURVILINEAR        10  /* Curvilinear grid                        */
-#define  GRID_LCC                11  /* Lambert Conformal Conic (GRIB)          */
-#define  GRID_LCC2               12  /* Lambert Conformal Conic (PROJ)          */
-#define  GRID_LAEA               13  /* Lambert Azimuthal Equal Area            */
-#define  GRID_SINUSOIDAL         14  /* Sinusoidal                              */
-#define  GRID_REFERENCE          15  /* Grid reference number                   */
-#define  GRID_PROJECTION         16  /* Projected coordiantes                   */
+#define  GRID_GENERIC               1  /* Generic grid                                          */
+#define  GRID_GAUSSIAN              2  /* Regular Gaussian lon/lat grid                         */
+#define  GRID_GAUSSIAN_REDUCED      3  /* Reduced Gaussian lon/lat grid                         */
+#define  GRID_LONLAT                4  /* Regular longitude/latitude grid                       */
+#define  GRID_SPECTRAL              5  /* Spherical harmonic coefficients                       */
+#define  GRID_FOURIER               6  /* Fourier coefficients                                  */
+#define  GRID_GME                   7  /* Icosahedral-hexagonal GME grid                        */
+#define  GRID_TRAJECTORY            8  /* Trajectory                                            */
+#define  GRID_UNSTRUCTURED          9  /* General unstructured grid                             */
+#define  GRID_CURVILINEAR          10  /* Curvilinear grid                                      */
+#define  GRID_LCC                  11  /* Lambert Conformal Conic (GRIB)                        */
+#define  GRID_LCC2                 12  /* Lambert Conformal Conic (PROJ)                        */
+#define  GRID_LAEA                 13  /* Lambert Azimuthal Equal Area                          */
+#define  GRID_SINUSOIDAL           14  /* Sinusoidal                                            */
+#define  GRID_REFERENCE            15  /* Grid reference number                                 */
+#define  GRID_PROJECTION           16  /* Projected coordiantes                                 */
 
 /* ZAXIS types */
 
-#define  ZAXIS_SURFACE            0  /* Surface level                           */
-#define  ZAXIS_GENERIC            1  /* Generic level                           */
-#define  ZAXIS_HYBRID             2  /* Hybrid level                            */
-#define  ZAXIS_HYBRID_HALF        3  /* Hybrid half level                       */
-#define  ZAXIS_PRESSURE           4  /* Isobaric pressure level in Pascal       */
-#define  ZAXIS_HEIGHT             5  /* Height above ground in meters           */
-#define  ZAXIS_DEPTH_BELOW_SEA    6  /* Depth below sea level in meters         */
-#define  ZAXIS_DEPTH_BELOW_LAND   7  /* Depth below land surface in centimeters */
-#define  ZAXIS_ISENTROPIC         8  /* Isentropic                              */
-#define  ZAXIS_TRAJECTORY         9  /* Trajectory                              */
-#define  ZAXIS_ALTITUDE          10  /* Altitude above mean sea level in meters */
-#define  ZAXIS_SIGMA             11  /* Sigma level                             */
-#define  ZAXIS_MEANSEA           12  /* Mean sea level                          */
-#define  ZAXIS_TOA               13  /* Norminal top of atmosphere              */
-#define  ZAXIS_SEA_BOTTOM        14  /* Sea bottom                              */
-#define  ZAXIS_ATMOSPHERE        15  /* Entire atmosphere                       */
-#define  ZAXIS_CLOUD_BASE        16  /* Cloud base level                        */
-#define  ZAXIS_CLOUD_TOP         17  /* Level of cloud tops                     */
-#define  ZAXIS_ISOTHERM_ZERO     18  /* Level of 0o C isotherm                  */
-#define  ZAXIS_SNOW              19  /* Snow level                              */
-#define  ZAXIS_REFERENCE         20  /* zaxis reference number                  */
+#define  ZAXIS_SURFACE              0  /* Surface level                                         */
+#define  ZAXIS_GENERIC              1  /* Generic level                                         */
+#define  ZAXIS_HYBRID               2  /* Hybrid level                                          */
+#define  ZAXIS_HYBRID_HALF          3  /* Hybrid half level                                     */
+#define  ZAXIS_PRESSURE             4  /* Isobaric pressure level in Pascal                     */
+#define  ZAXIS_HEIGHT               5  /* Height above ground in meters                         */
+#define  ZAXIS_DEPTH_BELOW_SEA      6  /* Depth below sea level in meters                       */
+#define  ZAXIS_DEPTH_BELOW_LAND     7  /* Depth below land surface in centimeters               */
+#define  ZAXIS_ISENTROPIC           8  /* Isentropic                                            */
+#define  ZAXIS_TRAJECTORY           9  /* Trajectory                                            */
+#define  ZAXIS_ALTITUDE            10  /* Altitude above mean sea level in meters               */
+#define  ZAXIS_SIGMA               11  /* Sigma level                                           */
+#define  ZAXIS_MEANSEA             12  /* Mean sea level                                        */
+#define  ZAXIS_TOA                 13  /* Norminal top of atmosphere                            */
+#define  ZAXIS_SEA_BOTTOM          14  /* Sea bottom                                            */
+#define  ZAXIS_ATMOSPHERE          15  /* Entire atmosphere                                     */
+#define  ZAXIS_CLOUD_BASE          16  /* Cloud base level                                      */
+#define  ZAXIS_CLOUD_TOP           17  /* Level of cloud tops                                   */
+#define  ZAXIS_ISOTHERM_ZERO       18  /* Level of 0o C isotherm                                */
+#define  ZAXIS_SNOW                19  /* Snow level                                            */
+#define  ZAXIS_LAKE_BOTTOM         20  /* Lake or River Bottom                                  */
+#define  ZAXIS_SEDIMENT_BOTTOM     21  /* Bottom Of Sediment Layer                              */
+#define  ZAXIS_SEDIMENT_BOTTOM_TA  22  /* Bottom Of Thermally Active Sediment Layer             */
+#define  ZAXIS_SEDIMENT_BOTTOM_TW  23  /* Bottom Of Sediment Layer Penetrated By Thermal Wave   */
+#define  ZAXIS_MIX_LAYER           24  /* Mixing Layer                                          */
+#define  ZAXIS_REFERENCE           25  /* zaxis reference number                                */
 
 /* TIME types */
 
-#define  TIME_CONSTANT            0  /* obsolate, use TSTEP_CONSTANT            */
-#define  TIME_VARIABLE            1  /* obsolate, use TSTEP_INSTANT             */
+#define  TIME_CONSTANT              0  /* obsolate, use TSTEP_CONSTANT                          */
+#define  TIME_VARIABLE              1  /* obsolate, use TSTEP_INSTANT                           */
 
 /* TSTEP types */
 

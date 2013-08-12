@@ -3,6 +3,12 @@ CDI NEWS
 
 Version 1.6.2 (26 September 2013):
 
+   New features:
+     * GRIB2: added support for level type Lake Bottom (grib level type 162)
+     * GRIB2: added support for level type Bottom Of Sediment Layer (grib level type 163)
+     * GRIB2: added support for level type Bottom Of Thermally Active Sediment Layer (grib level type 164)
+     * GRIB2: added support for level type Bottom Of Sediment Layer Penetrated By Thermal Wave (grib level type 165)
+     * GRIB2: added support for level type Mixing Layer (grib level type 166)
    Fixed bugs:
      * netCDF: wrong result if type  of data and type of attribute valid_range differ [Bug #3727]
 
