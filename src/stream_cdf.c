@@ -5825,7 +5825,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  if ( number_of_grid_used != UNDEFID &&
                (grid.type == UNDEFID || grid.type == GRID_GENERIC) )
 	    {
-	      grid.type   = GRID_REFERENCE;
+	      grid.type   = GRID_UNSTRUCTURED;
 	      grid.number = number_of_grid_used;
 	    }
 
@@ -5945,8 +5945,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 #endif
 	    ncvars[ncvarid].gridID = varDefGrid(vlistID, grid, 1);
 
-          if ( uuidOfHGrid[0] != 0 && 
-	       (grid.type == GRID_UNSTRUCTURED || grid.type == GRID_REFERENCE) )
+          if ( uuidOfHGrid[0] != 0 && grid.type == GRID_UNSTRUCTURED )
             gridDefUUID(ncvars[ncvarid].gridID, uuidOfHGrid);
 
           if ( ncvars[ncvarid].chunked )

@@ -223,10 +223,8 @@
       PARAMETER (GRID_LAEA              = 13)
       INTEGER    GRID_SINUSOIDAL       
       PARAMETER (GRID_SINUSOIDAL        = 14)
-      INTEGER    GRID_REFERENCE        
-      PARAMETER (GRID_REFERENCE         = 15)
       INTEGER    GRID_PROJECTION       
-      PARAMETER (GRID_PROJECTION        = 16)
+      PARAMETER (GRID_PROJECTION        = 15)
 !
 !  ZAXIS types
 !

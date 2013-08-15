@@ -50,21 +50,21 @@ int gribapiGetGridType(grib_handle *gh)
 
       switch (gribgridtype)
 	{
-	case  GRIB2_GTYPE_LATLON:     { GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
-	                                if ( lpar == (long) GRIB_MISSING_LONG ) break;
-                                      }
-	case  GRIB2_GTYPE_LATLON_ROT: { gridtype = GRID_LONLAT;    break; }
-	case  GRIB2_GTYPE_LCC:        { gridtype = GRID_LCC;       break; }
-	case  GRIB2_GTYPE_GAUSSIAN:   { GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
-	                                if ( lpar == (long) GRIB_MISSING_LONG )
-					  gridtype = GRID_GAUSSIAN_REDUCED;
-					else
-					  gridtype = GRID_GAUSSIAN;
-					break;
-                                      }
-	case  GRIB2_GTYPE_SPECTRAL:   { gridtype = GRID_SPECTRAL;  break; }
-	case  GRIB2_GTYPE_GME:        { gridtype = GRID_GME;       break; }
-	case  GRIB2_GTYPE_NUMBER:     { gridtype = GRID_REFERENCE; break; }
+	case  GRIB2_GTYPE_LATLON:        { GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
+	                                   if ( lpar == (long) GRIB_MISSING_LONG ) break;
+                                         }
+	case  GRIB2_GTYPE_LATLON_ROT:    { gridtype = GRID_LONLAT;    break; }
+	case  GRIB2_GTYPE_LCC:           { gridtype = GRID_LCC;       break; }
+	case  GRIB2_GTYPE_GAUSSIAN:      { GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
+	                                   if ( lpar == (long) GRIB_MISSING_LONG )
+					     gridtype = GRID_GAUSSIAN_REDUCED;
+					   else
+					     gridtype = GRID_GAUSSIAN;
+				  	   break;
+                                         }
+	case  GRIB2_GTYPE_SPECTRAL:      { gridtype = GRID_SPECTRAL;  break; }
+	case  GRIB2_GTYPE_GME:           { gridtype = GRID_GME;       break; }
+	case  GRIB2_GTYPE_UNSTRUCTURED:  { gridtype = GRID_UNSTRUCTURED; break; }
 	}
     }
 
@@ -589,7 +589,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 
 	break;
       }
-    case GRID_REFERENCE:
+    case GRID_UNSTRUCTURED:
       {
         char uuid[17];
     	char reference_link[8192];
@@ -601,11 +601,13 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
           {
             grid->number   = lpar;
             if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 ) grid->position = lpar;
+            /*
             if ( grib_get_string(gh, "gridDescriptionFile", reference_link, &len) == 0 )
               {
                 if ( strncmp(reference_link, "file://", 7) == 0 )
                   grid->reference = strdupx(reference_link);
               }
+            */
             len = (size_t) 16;
             if ( grib_get_bytes(gh, "uuidOfHGrid", (unsigned char *) uuid, &len) == 0)
               {
@@ -2207,7 +2209,6 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 {
   int gridtype;
   int status;
-  char uuid[17];
   static short lwarn = TRUE;
   size_t len;
   char *mesg;
@@ -2215,7 +2216,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
   gridtype = gridInqType(gridID);
 
   if ( editionNumber <= 1 )
-    if ( gridtype == GRID_GME || gridtype == GRID_REFERENCE )
+    if ( gridtype == GRID_GME || gridtype == GRID_UNSTRUCTURED )
       gridtype = -1;
 
   if ( gridtype == GRID_GENERIC )
@@ -2544,21 +2545,26 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 
 	break;
       }
-    case GRID_REFERENCE:
+    case GRID_UNSTRUCTURED:
       {
 	static int warning = 1;
-	status = grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_NUMBER);
+	status = grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_UNSTRUCTURED);
 	if ( status != 0 && warning )
 	  {
 	    warning = 0;
 	    Warning("Can't write reference grid!");
 	    Warning("gridDefinitionTemplateNumber %d not found (grib2/template.3.%d.def)!",
-		    GRIB2_GTYPE_NUMBER, GRIB2_GTYPE_NUMBER);
+		    GRIB2_GTYPE_UNSTRUCTURED, GRIB2_GTYPE_UNSTRUCTURED);
 	  }
 	else
 	  {
-	    GRIB_CHECK(grib_set_long(gh, "numberOfGridUsed", gridInqNumber(gridID)), 0);
-	    GRIB_CHECK(grib_set_long(gh, "numberOfGridInReference", gridInqPosition(gridID)), 0);
+            char uuid[17];
+            int position = gridInqPosition(gridID);
+            int number = gridInqNumber(gridID);
+            if ( position < 0 ) position = 0;
+            if ( number < 0 ) number = 0;
+	    GRIB_CHECK(grib_set_long(gh, "numberOfGridUsed", number), 0);
+	    GRIB_CHECK(grib_set_long(gh, "numberOfGridInReference", position), 0);
             len = 16;
 	    if (grib_set_bytes(gh, "uuidOfHGrid", (unsigned char *) gridInqUUID(gridID, uuid), &len) != 0)
 	      Warning("Can't write UUID!");

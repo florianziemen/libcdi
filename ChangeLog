@@ -3,6 +3,11 @@
 	* Version 1.6.2 released
 	* using CGRIBEX library version 1.6.2
 
+2013-08-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* made gridtype GRID_REFERENCE part of GRID_UNSTRUCTED
+	* removed gridtype GRID_REFERENCE
+
 2013-08-12  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* GRIB2: added support for level type Lake Bottom (grib level type 162)

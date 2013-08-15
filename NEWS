@@ -4,6 +4,7 @@ CDI NEWS
 Version 1.6.2 (26 September 2013):
 
    New features:
+     * made gridtype GRID_REFERENCE part of GRID_UNSTRUCTED
      * GRIB2: added support for level type Lake Bottom (grib level type 162)
      * GRIB2: added support for level type Bottom Of Sediment Layer (grib level type 163)
      * GRIB2: added support for level type Bottom Of Thermally Active Sediment Layer (grib level type 164)

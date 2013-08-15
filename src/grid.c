@@ -41,8 +41,7 @@ char *Grids[] = {
   /* 12 */  "lcc2",
   /* 13 */  "laea",
   /* 14 */  "sinusoidal",
-  /* 15 */  "reference",
-  /* 16 */  "projection",
+  /* 15 */  "projection",
 };
 
 
@@ -348,8 +347,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
     @Item  gridtype  The type of the grid, one of the set of predefined CDI grid types.
                      The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
                      @func{GRID_LONLAT}, @func{GRID_LCC}, @func{GRID_SPECTRAL},
-                     @func{GRID_GME}, @func{GRID_CURVILINEAR}, @func{GRID_UNSTRUCTURED} and
-                     @func{GRID_REFERENCE}.
+                     @func{GRID_GME}, @func{GRID_CURVILINEAR} and @func{GRID_UNSTRUCTURED} and.
     @Item  size      Number of gridpoints.
 
 @Description
@@ -959,7 +957,7 @@ The function @func{gridInqType} returns the type of a Grid.
 one of the set of predefined CDI grid types.
 The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
 @func{GRID_LONLAT}, @func{GRID_LCC}, @func{GRID_SPECTRAL}, @func{GRID_GME},
-@func{GRID_CURVILINEAR}, @func{GRID_UNSTRUCTURED} and @func{GRID_REFERENCE}.
+@func{GRID_CURVILINEAR} and @func{GRID_UNSTRUCTURED}.
 
 @EndFunction
 */
@@ -2792,6 +2790,20 @@ int gridGenerate(grid_t grid)
 		     grid.lcc_lat1, grid.lcc_lat2, grid.lcc_xinc, grid.lcc_yinc,
 		     grid.lcc_projflag, grid.lcc_scanflag);
 
+	if ( grid.type == GRID_UNSTRUCTURED )
+          {
+            int number = grid.number;
+            int position = grid.position;
+            if ( position < 0 ) position = 0;
+            if ( number > 0 )
+              {
+                gridDefNumber(gridID, number);
+                gridDefPosition(gridID, position);
+              }
+            if ( grid.uuid[0] != 0 ) gridDefUUID(gridID, grid.uuid);
+            if ( grid.reference ) gridDefReference(gridID, grid.reference);
+          }
+
 	if ( grid.type == GRID_PROJECTION )
 	  {
 	    gridptr->name = strdup(grid.name);
@@ -2848,14 +2860,6 @@ int gridGenerate(grid_t grid)
         gridDefGMEni(gridID, grid.ni);
         gridDefGMEni2(gridID, grid.ni2);
         gridDefGMEni3(gridID, grid.ni3);
-        break;
-      }
-    case GRID_REFERENCE:
-      {
-        gridDefNumber(gridID, grid.number);
-        gridDefPosition(gridID, grid.position);
-        gridDefUUID(gridID, grid.uuid);
-        if ( grid.reference ) gridDefReference(gridID, grid.reference);
         break;
       }
       /*
@@ -3503,6 +3507,31 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
 	    if ( ysize > 0 ) fprintf(fp, "ysize     = %d\n", ysize);
 	  }
 
+	if ( type == GRID_UNSTRUCTURED )
+          {
+            int number = gridInqNumber(gridID);
+            int position = gridInqPosition(gridID);
+            // const unsigned char *d;
+            if ( number > 0 )
+              {
+                fprintf(fp, "number    = %d\n", number);
+                if ( position >= 0 ) fprintf(fp, "position  = %d\n", position);
+              }
+            /*
+              gridInqUUID(gridID, uuidOfHGrid);
+              d = (unsigned char *) &uuidOfHGrid;
+              fprintf(fp, "uuid      = %02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x\n", 
+              d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
+              d[8], d[9], d[10], d[11], d[12], d[13], d[14], d[15]);
+            */
+            if ( gridInqReference(gridID, NULL) )
+              {
+                char reference_link[8192];
+                gridInqReference(gridID, reference_link);
+                fprintf(fp, "path      = %s\n", reference_link);
+              }
+          }
+
 	if ( type == GRID_LAEA )
 	  {
 	    double a = 0, lon_0 = 0, lat_0 = 0;
@@ -3704,26 +3733,6 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
       {
         fprintf(fp, "ni        = %d\n", gridptr->ni );
         break;
-      }
-    case GRID_REFERENCE:
-      {
-        // const unsigned char *d;
-	fprintf(fp, "number    = %d\n", gridInqNumber(gridID));
-	fprintf(fp, "position  = %d\n", gridInqPosition(gridID));
-        /*
-        gridInqUUID(gridID, uuidOfHGrid);
-        d = (unsigned char *) &uuidOfHGrid;
-	fprintf(fp, "uuid      = %02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x\n", 
-                d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
-                d[8], d[9], d[10], d[11], d[12], d[13], d[14], d[15]);
-        */
-	if ( gridInqReference(gridID, NULL) )
-	  {
-	    char reference_link[8192];
-	    gridInqReference(gridID, reference_link);
-	    fprintf(fp, "path      = %s\n", reference_link);
-	  }
-	break;
       }
    default:
       {

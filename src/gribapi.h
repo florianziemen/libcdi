@@ -40,7 +40,7 @@
 #define  GRIB2_GTYPE_LCC                  30  /*  Lambert conformal                                    */
 #define  GRIB2_GTYPE_SPECTRAL             50  /*  spherical harmonics                                  */
 #define  GRIB2_GTYPE_GME                 100  /*  hexagonal GME grid                                   */
-#define  GRIB2_GTYPE_NUMBER              101  /*  General Unstructured Grid                            */
+#define  GRIB2_GTYPE_UNSTRUCTURED        101  /*  General Unstructured Grid                            */
 
 const char *gribapiLibraryVersion(void);
 void gribContainersNew(stream_t * streamptr);
