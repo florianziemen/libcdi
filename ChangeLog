@@ -3,6 +3,10 @@
 	* Version 1.6.2 released
 	* using CGRIBEX library version 1.6.2
 
+2013-08-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* netCDF: write reference of an unstructured grid
+
 2013-08-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* made gridtype GRID_REFERENCE part of GRID_UNSTRUCTED

@@ -84,6 +84,7 @@ typedef struct {
   int      calendar;
   int      tableID;
   int      truncation;
+  int      position;
   int      defmissval;
   int      deffillval;
   int      xtype;
@@ -1899,6 +1900,47 @@ void cdfDefGdim(stream_t *streamptr, int gridID)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
+void cdfDefGridReference(stream_t *streamptr, int gridID)
+{
+  int fileID  = streamptr->fileID;
+  int number = gridInqNumber(gridID);
+
+  if ( number > 0 )
+    {
+      cdf_put_att_int(fileID, NC_GLOBAL, "number_of_grid_used", NC_INT, 1, &number);
+    }
+
+  if ( gridInqReference(gridID, NULL) )
+    {
+      char gridfile[8912];
+      gridInqReference(gridID, gridfile);
+
+      if ( gridfile[0] != 0 )
+        cdf_put_att_text(fileID, NC_GLOBAL, "grid_file_uri", strlen(gridfile), gridfile);
+    }
+}
+
+static
+void cdfDefGridUUID(stream_t *streamptr, int gridID)
+{
+  char uuidOfHGrid[17];
+
+  gridInqUUID(gridID, uuidOfHGrid);
+  if ( uuidOfHGrid[0] != 0 )
+    {
+      char uuidOfHGridStr[37];
+      uuid2str(uuidOfHGrid, uuidOfHGridStr);
+      if ( uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36 )
+        {
+          int fileID  = streamptr->fileID;
+          //if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+          cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfHGrid", 36, uuidOfHGridStr);
+          //if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
+        }
+    }
+}
+
+static
 void cdfDefUnstructured(stream_t *streamptr, int gridID)
 {
   char xunits[CDI_MAX_NAME];
@@ -1981,6 +2023,10 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
 
       nvertex = gridInqNvertex(gridID);
       if ( nvertex > 0 ) cdf_def_dim(fileID, vertname, nvertex, &nvdimID);
+
+      cdfDefGridReference(streamptr, gridID);
+
+      cdfDefGridUUID(streamptr, gridID);
 
       if ( gridInqXvalsPtr(gridID) )
         {
@@ -2541,26 +2587,6 @@ void cdfDefMapping(stream_t *streamptr, int gridID)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
-void cdfDefGridUUID(stream_t *streamptr, int gridID)
-{
-  char uuidOfHGrid[17];
-
-  gridInqUUID(gridID, uuidOfHGrid);
-  if ( uuidOfHGrid[0] != 0 )
-    {
-      char uuidOfHGridStr[37];
-      uuid2str(uuidOfHGrid, uuidOfHGridStr);
-      if ( uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36 )
-        {
-          int fileID  = streamptr->fileID;
-          if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-          cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfHGrid", 36, uuidOfHGridStr);
-          if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
-        }
-    }
-}
-
-static
 void cdfDefGrid(stream_t *streamptr, int gridID)
 {
   int gridtype, size;
@@ -2657,8 +2683,6 @@ void cdfDefGrid(stream_t *streamptr, int gridID)
     {
       Error("Unsupported grid type: %s", gridNamePtr(gridtype));
     }
-
-  cdfDefGridUUID(streamptr, gridID);
 }
 #endif
 
@@ -3033,6 +3057,13 @@ int cdfDefVar(stream_t *streamptr, int varID)
           cdf_inq_varname(fileID, ncavarID, cellarea+len);
           len = strlen(cellarea);
           cdf_put_att_text(fileID, ncvarid, "cell_measures", len, cellarea);
+        }
+
+      if ( gridtype == GRID_UNSTRUCTURED )
+        {
+          int position = gridInqPosition(gridID);
+          if ( position > 0 )
+            cdf_put_att_int(fileID, ncvarid, "number_of_grid_in_reference", NC_INT, 1, &position);
         }
     }
   else if ( gridtype == GRID_SPECTRAL || gridtype == GRID_FOURIER )
@@ -3623,8 +3654,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   if ( zid != UNDEFID )
     {
       int size = zaxisInqSize(zaxisID);
-      xassert(rect[2][0] >= 0 && rect[2][0] <= rect[2][1]
-              && rect[2][1] <= size);
+      xassert(rect[2][0] >= 0 && rect[2][0] <= rect[2][1] && rect[2][1] <= size);
       start[ndims] = rect[2][0];
       count[ndims] = rect[2][1] - rect[2][0] + 1;
       ndims++;
@@ -3633,8 +3663,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
     {
       size_t size;
       cdf_inq_dimlen(fileID, yid, &size);
-      xassert(rect[1][0] >= 0 && rect[1][0] <= rect[1][1]
-              && rect[1][1] <= size);
+      xassert(rect[1][0] >= 0 && rect[1][0] <= rect[1][1] && rect[1][1] <= size);
       start[ndims] = rect[1][0];
       count[ndims] = rect[1][1] - rect[1][0] + 1;
       ndims++;
@@ -3643,8 +3672,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
     {
       size_t size;
       cdf_inq_dimlen(fileID, xid, &size);
-      xassert(rect[0][0] >= 0 && rect[0][0] <= rect[0][1]
-              && rect[0][1] <= size);
+      xassert(rect[0][0] >= 0 && rect[0][0] <= rect[0][1] && rect[0][1] <= size);
       start[ndims] = rect[0][0];
       count[ndims] = rect[0][1] - rect[0][0] + 1;
       ndims++;
@@ -4226,6 +4254,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].vlen            = 0;
       ncvars[ncvarid].vdata           = NULL;
       ncvars[ncvarid].truncation      = 0;
+      ncvars[ncvarid].position        = 0;
       ncvars[ncvarid].positive        = 0;
       ncvars[ncvarid].chunked         = 0;
       ncvars[ncvarid].chunktype       = UNDEFID;
@@ -4737,6 +4766,10 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
           else if ( strcmp(attname, "truncation") == 0 && atttype != NC_CHAR )
             {
               cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvars[ncvarid].truncation);
+            }
+          else if ( strcmp(attname, "number_of_grid_in_reference") == 0 && atttype != NC_CHAR )
+            {
+              cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvars[ncvarid].position);
             }
           else if ( strcmp(attname, "add_offset") == 0 && atttype != NC_CHAR )
             {
