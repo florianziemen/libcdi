@@ -5,6 +5,7 @@
 
 2013-08-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* netCDF: read reference of an unstructured grid
 	* netCDF: write reference of an unstructured grid
 
 2013-08-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
