@@ -3534,7 +3534,7 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
               {
                 char reference_link[8192];
                 gridInqReference(gridID, reference_link);
-                fprintf(fp, "path      = %s\n", reference_link);
+                fprintf(fp, "uri       = %s\n", reference_link);
               }
           }
 
