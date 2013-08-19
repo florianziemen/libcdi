@@ -2944,6 +2944,8 @@ int gridDuplicate(int gridID)
   strcpy(gridptrnew->xstdname, gridptr->xstdname);
   strcpy(gridptrnew->ystdname, gridptr->ystdname);
 
+  if ( gridptr->reference )  gridptrnew->reference = strdupx(gridptr->reference);
+
   nrowlon = gridptr->nrowlon;
   if ( nrowlon )
     {
