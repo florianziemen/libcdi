@@ -3462,13 +3462,19 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
 
   if ( type != GRID_GME )
     {
-      if ( gridptr->xname[0]     )     fprintf(fp, "xname     = %s\n", gridptr->xname);
-      if ( gridptr->xlongname[0] )     fprintf(fp, "xlongname = %s\n", gridptr->xlongname);
-      if ( gridptr->xunits[0]    )     fprintf(fp, "xunits    = %s\n", gridptr->xunits);
-      if ( gridptr->yname[0]     )     fprintf(fp, "yname     = %s\n", gridptr->yname);
-      if ( gridptr->ylongname[0] )     fprintf(fp, "ylongname = %s\n", gridptr->ylongname);
-      if ( gridptr->yunits[0]    )     fprintf(fp, "yunits    = %s\n", gridptr->yunits);
-      if ( type == GRID_UNSTRUCTURED ) fprintf(fp, "nvertex   = %d\n", nvertex);
+      if ( xvals )
+        {
+          if ( gridptr->xname[0]     )     fprintf(fp, "xname     = %s\n", gridptr->xname);
+          if ( gridptr->xlongname[0] )     fprintf(fp, "xlongname = %s\n", gridptr->xlongname);
+          if ( gridptr->xunits[0]    )     fprintf(fp, "xunits    = %s\n", gridptr->xunits);
+        }
+      if ( yvals )
+        {
+          if ( gridptr->yname[0]     )     fprintf(fp, "yname     = %s\n", gridptr->yname);
+          if ( gridptr->ylongname[0] )     fprintf(fp, "ylongname = %s\n", gridptr->ylongname);
+          if ( gridptr->yunits[0]    )     fprintf(fp, "yunits    = %s\n", gridptr->yunits);
+        }
+      if ( type == GRID_UNSTRUCTURED && nvertex > 0 ) fprintf(fp, "nvertex   = %d\n", nvertex);
     }
 
   switch (type)
