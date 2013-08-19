@@ -10,8 +10,9 @@
 #include "mpi.h"
 #endif
 
+#ifndef _ERROR_H
 #include "error.h"
-
+#endif
 
 #define MAXDEBUG           3
 
