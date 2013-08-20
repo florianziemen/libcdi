@@ -2351,6 +2351,9 @@ int compareXYvals2(int gridID, long gridsize, double *xvals, double *yvals)
 {
   int differ = 0;
 
+  if ( !differ && ((xvals == NULL && gridInqXvalsPtr(gridID) != NULL) || (xvals != NULL && gridInqXvalsPtr(gridID) == NULL)) ) differ = 1;
+  if ( !differ && ((yvals == NULL && gridInqYvalsPtr(gridID) != NULL) || (yvals != NULL && gridInqYvalsPtr(gridID) == NULL)) ) differ = 1;
+
   if ( !differ && xvals && gridInqXvalsPtr(gridID) )
     {
       if ( fabs(xvals[0] - gridInqXval(gridID, 0)) > 1.e-9 ||
@@ -2492,7 +2495,17 @@ int gridCompare(int gridID, grid_t grid)
 	    }
 	  else if ( grid.type == GRID_UNSTRUCTURED )
 	    {
-	      if ( grid.nvertex == gridInqNvertex(gridID) )
+              char uuidOfHGrid[17];
+              gridInqUUID(gridID, uuidOfHGrid);
+
+              if ( !differ && memcmp(uuidOfHGrid, grid.uuid, 16) != 0 ) differ = 1;
+
+              if ( !differ && grid.nvertex != gridInqNvertex(gridID) ) differ = 1;
+
+              if ( !differ && grid.number != gridInqNumber(gridID) ) differ = 1;
+              if ( !differ && grid.position != gridInqPosition(gridID) ) differ = 1;
+
+	      if ( !differ )
 		differ = compareXYvals2(gridID, grid.size, grid.xvals, grid.yvals);
 	    }
 	}
@@ -3528,7 +3541,7 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
             /*
               gridInqUUID(gridID, uuidOfHGrid);
               d = (unsigned char *) &uuidOfHGrid;
-              fprintf(fp, "uuid      = %02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x\n", 
+              fprintf(fp, "uuid      = %02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
               d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
               d[8], d[9], d[10], d[11], d[12], d[13], d[14], d[15]);
             */
