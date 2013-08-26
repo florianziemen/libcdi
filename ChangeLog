@@ -3,6 +3,10 @@
 	* Version 1.6.2 released
 	* using CGRIBEX library version 1.6.2
 
+2013-08-26  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* gribapiDefLevel: Bug fix for ZAXIS_REFERENCE (Bug #3747)
+
 2013-08-16  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* netCDF: read reference of an unstructured grid
