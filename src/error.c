@@ -55,7 +55,10 @@ void Error_(const char *caller, const char *fmt, ...)
 typedef void (*cdiAbortCFunc)(const char * caller, const char * filename,
                               const char *functionname, int line,
                               const char * errorString, va_list ap)
-  __attribute__((noreturn));
+#ifdef __GNUC__
+  __attribute__((noreturn))
+#endif
+;
 
 void cdiAbortC(const char * caller, const char * filename,
                const char *functionname, int line,
