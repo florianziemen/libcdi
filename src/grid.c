@@ -15,6 +15,7 @@
 #include "resource_unpack.h"
 #include "namespace.h"
 #include "serialize.h"
+#include "dtypes.h"
 
 #ifndef  RAD2DEG
 #define  RAD2DEG  (180./M_PI)   /* conversion for rad to deg */
@@ -385,6 +386,8 @@ int gridCreate(int gridtype, int size)
 
   if ( CDI_Debug )
     Message("gridtype: %d size: %d", gridtype, size);
+
+  if ( size < 0 || size > INT_MAX ) Error("grid size (%d) out of bounds (0 - %d)!", size, INT_MAX);
 
   gridInit ();
 
