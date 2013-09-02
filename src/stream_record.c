@@ -459,6 +459,28 @@ void streamCopyRecord(int streamID2, int streamID1)
 
   if ( filetype1 == filetype2 ) filetype = filetype2;
   else
+    {
+      switch (filetype1)
+        {
+        case FILETYPE_NC:
+        case FILETYPE_NC2:
+        case FILETYPE_NC4:
+        case FILETYPE_NC4C:
+          switch (filetype2)
+            {
+            case FILETYPE_NC:
+            case FILETYPE_NC2:
+            case FILETYPE_NC4:
+            case FILETYPE_NC4C:
+              Warning("Streams have different file types (%s -> %s)!", strfiletype(filetype1), strfiletype(filetype2));
+              filetype = filetype2;
+              break;
+            }
+          break;
+        }
+    }
+
+  if ( filetype == CDI_UNDEFID )
     Error("Streams have different file types (%s -> %s)!", strfiletype(filetype1), strfiletype(filetype2));
 
   switch (filetype)
