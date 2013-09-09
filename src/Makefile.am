@@ -147,7 +147,7 @@ if CREATE_ISOC
 LOCALTARGETS += mo_cdi.o mo_cdi.$(FCMODEXT)
 endif
 #
-mo_cdi.f90:
+mo_cdi.f90: cdi.h
 	ruby $(top_srcdir)/interfaces/f2003/bindGen.rb cdi.h $@
 #
 mo_cdi.o: mo_cdi.f90

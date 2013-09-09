@@ -15,6 +15,7 @@ case "${HOSTNAME}" in
     bailung*)
 	./configure --prefix=$HOME/local \
                     --enable-maintainer-mode \
+                    --enable-iso-c-interface \
                     --enable-swig \
                     --enable-python \
                     --with-jasper=/opt/local \
@@ -41,6 +42,7 @@ case "${HOSTNAME}" in
     hama*)
 	./configure --prefix=$HOME/local \
                     --enable-maintainer-mode \
+                    --enable-iso-c-interface \
                     --enable-swig \
                     --enable-python \
                     --with-jasper=/opt/local \
