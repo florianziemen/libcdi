@@ -350,7 +350,8 @@ const char *fileLibraryVersion(void)
 static
 int pagesize(void)
 {
-#if defined (HAVE_MMAP)
+#if defined(HAVE_MMAP) && defined(HAVE_GETPAGESIZE)
+  int getpagesize(void);
   return ((int) getpagesize());
 #else
   return ((int) POSIXIO_DEFAULT_PAGESIZE);

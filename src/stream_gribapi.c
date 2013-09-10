@@ -2884,21 +2884,6 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
               }
           }
 
-//        if ( editionNumber <= 1 )
-//          ; // not available
-//        else
-//          {
-//            reference = zaxisInqReference(zaxisID);
-//            gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_REFERENCE);
-//            GRIB_CHECK(grib_set_long(gh, "NV", 6), 0);
-//            GRIB_CHECK(grib_set_double(gh, "nlev", (double) zaxisInqSize(zaxisID)), 0);
-//            GRIB_CHECK(grib_set_double(gh, "numberOfVGridUsed", (double) reference), 0);
-//            len = 16;
-//        if (grib_set_bytes(gh, "uuidOfVGrid", (unsigned char *) zaxisInqUUID(zaxisID, uuid), &len) != 0)
-//          Warning("Can't write UUID!");
-//            GRIB_CHECK(grib_set_double(gh, "level", level), 0);
-//          }
-
         break;
       }
     case ZAXIS_GENERIC:

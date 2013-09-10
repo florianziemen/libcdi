@@ -698,7 +698,7 @@ void zaxisDefReference(int zaxisID, const int reference)
 {
   zaxis_t *zaxisptr;
 
-    if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
     {
       xwarning("%s", "Operation not executed.");
       return;
