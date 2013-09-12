@@ -1974,13 +1974,6 @@ module mo_cdi
       end interface
   
       interface
-        integer(c_int) function gridInqNumber(gridID) bind(c,name='gridInqNumber')
-          import :: c_int
-          integer(c_int), value :: gridID
-       end function gridInqNumber
-      end interface
-  
-      interface
         subroutine gridDefNumber(gridID,number) bind(c,name='gridDefNumber')
           import :: c_int
           integer(c_int), value :: gridID
@@ -1989,10 +1982,10 @@ module mo_cdi
       end interface
   
       interface
-        integer(c_int) function gridInqPosition(gridID) bind(c,name='gridInqPosition')
+        integer(c_int) function gridInqNumber(gridID) bind(c,name='gridInqNumber')
           import :: c_int
           integer(c_int), value :: gridID
-       end function gridInqPosition
+       end function gridInqNumber
       end interface
   
       interface
@@ -2004,11 +1997,10 @@ module mo_cdi
       end interface
   
       interface
-        integer(c_int) function gridInqReference(gridID,reference) bind(c,name='gridInqReference')
-          import :: c_int,c_char
+        integer(c_int) function gridInqPosition(gridID) bind(c,name='gridInqPosition')
+          import :: c_int
           integer(c_int), value :: gridID
-          character(c_char), dimension(*) :: reference
-       end function gridInqReference
+       end function gridInqPosition
       end interface
   
       interface
@@ -2020,11 +2012,11 @@ module mo_cdi
       end interface
   
       interface
-        character(c_char) function gridInqUUID(gridID,uuid_cbuf) bind(c,name='gridInqUUID')
+        integer(c_int) function gridInqReference(gridID,reference) bind(c,name='gridInqReference')
           import :: c_int,c_char
           integer(c_int), value :: gridID
-          character(c_char), dimension(*) :: uuid_cbuf
-       end function gridInqUUID
+          character(c_char), dimension(*) :: reference
+       end function gridInqReference
       end interface
   
       interface
@@ -2033,6 +2025,14 @@ module mo_cdi
           integer(c_int), value :: gridID
           character(c_char), dimension(*) :: uuid_cbuf
        end subroutine gridDefUUID
+      end interface
+  
+      interface
+        character(c_char) function gridInqUUID(gridID,uuid_cbuf) bind(c,name='gridInqUUID')
+          import :: c_int,c_char
+          integer(c_int), value :: gridID
+          character(c_char), dimension(*) :: uuid_cbuf
+       end function gridInqUUID
       end interface
   
       interface
@@ -2314,11 +2314,18 @@ module mo_cdi
       end interface
   
       interface
-        subroutine zaxisDefReference(zaxisID,refID) bind(c,name='zaxisDefReference')
+        subroutine zaxisDefNumber(gridID,number) bind(c,name='zaxisDefNumber')
           import :: c_int
-          integer(c_int), value :: zaxisID
-          integer(c_int), value :: refID
-       end subroutine zaxisDefReference
+          integer(c_int), value :: gridID
+          integer(c_int), value :: number
+       end subroutine zaxisDefNumber
+      end interface
+  
+      interface
+        integer(c_int) function zaxisInqNumber(gridID) bind(c,name='zaxisInqNumber')
+          import :: c_int
+          integer(c_int), value :: gridID
+       end function zaxisInqNumber
       end interface
   
       interface
@@ -2335,13 +2342,6 @@ module mo_cdi
           integer(c_int), value :: zaxisID
           character(c_char), dimension(*) :: uuid_cbuf
        end function zaxisInqUUID
-      end interface
-  
-      interface
-        integer(c_int) function zaxisInqReference(zaxisID) bind(c,name='zaxisInqReference')
-          import :: c_int
-          integer(c_int), value :: zaxisID
-       end function zaxisInqReference
       end interface
   
       interface
@@ -3248,14 +3248,14 @@ module mo_cdi
       public :: gridDefGMEni2
       public :: gridInqGMEni3
       public :: gridDefGMEni3
-      public :: gridInqNumber
       public :: gridDefNumber
-      public :: gridInqPosition
+      public :: gridInqNumber
       public :: gridDefPosition
-      public :: gridInqReference
+      public :: gridInqPosition
       public :: gridDefReference
-      public :: gridInqUUID
+      public :: gridInqReference
       public :: gridDefUUID
+      public :: gridInqUUID
       public :: gridDefLCC
       public :: gridInqLCC
       public :: gridDefLcc2
@@ -3288,10 +3288,10 @@ module mo_cdi
       public :: zaxisInqLevels
       public :: zaxisDefLevel
       public :: zaxisInqLevel
-      public :: zaxisDefReference
+      public :: zaxisDefNumber
+      public :: zaxisInqNumber
       public :: zaxisDefUUID
       public :: zaxisInqUUID
-      public :: zaxisInqReference
       public :: zaxisDefName
       public :: zaxisDefLongname
       public :: zaxisDefUnits

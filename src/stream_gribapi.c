@@ -866,7 +866,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       {
         size_t len;
         char uuid[17];
-        double dtmp;
+        long ltmp;
         long nlev, nvgrid;
 
         GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
@@ -874,10 +874,10 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
           {
             fprintf(stderr, "Warning ...\n");
           }
-        GRIB_CHECK(grib_get_double(gh, "nlev", &dtmp), 0);
-        nlev = (int) NINT(dtmp);
-        GRIB_CHECK(grib_get_double(gh, "numberOfVGridUsed", &dtmp), 0);
-        nvgrid = NINT(dtmp);
+        GRIB_CHECK(grib_get_long(gh, "nlev", &ltmp), 0);
+        nlev = ltmp;
+        GRIB_CHECK(grib_get_long(gh, "numberOfVGridUsed", &ltmp), 0);
+        nvgrid = ltmp;
         len = (size_t) 16;
         uuid[16] = 0;
         GRIB_CHECK(grib_get_bytes(gh, "uuidOfVGrid", (unsigned char *) uuid, &len), 0);
@@ -2634,7 +2634,6 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
   int lbounds = 0;
   int zaxistype, ltype;
   static int warning = 1;
-  int reference;
   char uuid[17];
   size_t len;
   double scalefactor;
@@ -2842,6 +2841,8 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
       }
     case ZAXIS_REFERENCE:
       {
+        int number;
+
         if ( !gcinit )
           {
             GRIB_CHECK(grib_set_long(gh, "genVertHeightCoords", 1), 0);
@@ -2853,12 +2854,12 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
               ; // not available
             else
               {
-                reference = zaxisInqReference(zaxisID);
+                number = zaxisInqNumber(zaxisID);
                 gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_REFERENCE);
                 gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", GRIB2_LTYPE_REFERENCE);
                 GRIB_CHECK(grib_set_long(gh, "NV", 6), 0);
-                GRIB_CHECK(grib_set_double(gh, "nlev", (double) zaxisInqSize(zaxisID)+1), 0);
-                GRIB_CHECK(grib_set_double(gh, "numberOfVGridUsed", (double) reference), 0);
+                GRIB_CHECK(grib_set_long(gh, "nlev", zaxisInqSize(zaxisID)+1), 0);
+                GRIB_CHECK(grib_set_long(gh, "numberOfVGridUsed", number), 0);
                 len = 16;
                 if (grib_set_bytes(gh, "uuidOfVGrid", (unsigned char *) zaxisInqUUID(zaxisID, uuid), &len) != 0)
                   Warning("Can't write UUID!");
@@ -2872,11 +2873,11 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
               ; // not available
             else
               {
-                reference = zaxisInqReference(zaxisID);
+                number = zaxisInqNumber(zaxisID);
                 gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_REFERENCE);
                 GRIB_CHECK(grib_set_long(gh, "NV", 6), 0);
-                GRIB_CHECK(grib_set_double(gh, "nlev", (double) zaxisInqSize(zaxisID)), 0);
-                GRIB_CHECK(grib_set_double(gh, "numberOfVGridUsed", (double) reference), 0);
+                GRIB_CHECK(grib_set_long(gh, "nlev", zaxisInqSize(zaxisID)), 0);
+                GRIB_CHECK(grib_set_long(gh, "numberOfVGridUsed", number), 0);
                 len = 16;
                 if (grib_set_bytes(gh, "uuidOfVGrid", (unsigned char *) zaxisInqUUID(zaxisID, uuid), &len) != 0)
                   Warning("Can't write UUID!");
