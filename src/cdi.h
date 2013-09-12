@@ -820,17 +820,17 @@ void    zaxisDefLevel(int zaxisID, int levelID, double levels);
 /*      zaxisInqLevel: Get one level of a Z-axis */
 double  zaxisInqLevel(int zaxisID, int levelID);
 
-/*      zaxisDefReference: Define the reference of a generalized Z-axis */
-void    zaxisDefReference(int zaxisID, int refID);
+/*      zaxisDefNumber: Define the reference number of a generalized Z-axis */
+void    zaxisDefNumber(int gridID, int number);
+
+/*      zaxisInqNumber: Get the reference number of a generalized Z-axis */
+int     zaxisInqNumber(int gridID);
 
 /*      zaxisDefUUID: Define the uuid of a generalized Z-axis */
 void    zaxisDefUUID(int zaxisID, const char *uuid_cbuf);
 
 /*      zaxisInqUUID: Get the reference of a generalized Z-axis */
 char   *zaxisInqUUID(int zaxisID, char *uuid_cbuf);
-
-/*      zaxisInqReference: Get the reference of a generalized Z-axis */
-int     zaxisInqReference(int zaxisID);
 
 /*      zaxisDefName: Define the name of a Z-axis */
 void    zaxisDefName(int zaxisID, const char *name);

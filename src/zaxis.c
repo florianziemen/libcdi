@@ -78,7 +78,7 @@ typedef struct {
   int      direction;
   int      vctsize;
   double  *vct;
-  int      reference;
+  int      number;   /* Reference number to a generalized Z-axis */
   char     uuid[17];
 }
 zaxis_t;
@@ -116,7 +116,7 @@ void zaxisDefaultValue ( zaxis_t *zaxisptr )
   zaxisptr->size        = 0;
   zaxisptr->vctsize     = 0;
   zaxisptr->vct         = NULL;
-  zaxisptr->reference   = CDI_UNDEFID;
+  zaxisptr->number      = 0;
   zaxisptr->uuid[0]     = 0;
 }
 
@@ -681,20 +681,20 @@ void zaxisDefLevel(int zaxisID, int levelID, double level)
 }
 
 /*
-@Function  zaxisDefReference
-@Title     Define the reference for a genralized Z-axis
+@Function  zaxisDefNumber
+@Title     Define the reference number for a generalized Z-axis
 
-@Prototype void zaxisDefReference(int zaxisID, const int reference)
+@Prototype void zaxisDefNumber(int zaxisID, const int number)
 @Parameter
     @Item  zaxisID     Z-axis ID, from a previous call to @fref{zaxisCreate}.
-    @Item  reference   Reference for a generalized Z-axis.
+    @Item  number      Reference number for a generalized Z-axis.
 
 @Description
-The function @func{zaxisDefReference} defines the reference for a generalized  Z-axis.
+The function @func{zaxisDefNumber} defines the reference number for a generalized Z-axis.
 
 @EndFunction
 */
-void zaxisDefReference(int zaxisID, const int reference)
+void zaxisDefNumber(int zaxisID, const int number)
 {
   zaxis_t *zaxisptr;
 
@@ -708,7 +708,7 @@ void zaxisDefReference(int zaxisID, const int reference)
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  zaxisptr->reference = reference;
+  zaxisptr->number = number;
 }
 
 /*
@@ -773,32 +773,32 @@ char *zaxisInqUUID(int zaxisID, char *uuid)
 }
 
 /*
-@Function  zaxisInqReference
-@Title     Get the reference to a generalized Z-axis.
+@Function  zaxisInqNumber
+@Title     Get the reference number to a generalized Z-axis.
 
-@Prototype int zaxisInqReference(int zaxisID)
+@Prototype int zaxisInqNumber(int zaxisID)
 @Parameter
     @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
 
 @Description
-The function @func{zaxisInqReference} returns the reference to a generalized Z-axis.
+The function @func{zaxisInqNumber} returns the reference number to a generalized Z-axis.
 
 @Result
-@func{zaxisInqReference} returns the reference to a generalized Z-axis.
+@func{zaxisInqNUmber} returns the reference number to a generalized Z-axis.
 @EndFunction
 */
-int zaxisInqReference(int zaxisID)
+int zaxisInqNumber(int zaxisID)
 {
-  int reference = -1;
+  int number = -1;
   zaxis_t *zaxisptr;
 
   zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  reference = zaxisptr->reference;
+  number = zaxisptr->number;
 
-  return (reference);
+  return (number);
 }
 
 /*
