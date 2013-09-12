@@ -94,6 +94,14 @@ gridDefYunits       grid
 gridInqYunits       grid
 gridDefLambert      grid
 gridInqLambert      grid
+gridDefNumber       grid
+gridInqNumber       grid
+gridDefPosition     grid
+gridInqPosition     grid
+gridDefReference    grid
+gridInqReference    grid
+gridDefUUID         grid
+gridInqUUID         grid
 zaxisCreate         zaxis
 zaxisDestroy        zaxis
  zaxisDuplicate      zaxis

@@ -732,15 +732,31 @@ void    gridDefGMEni2(int gridID, int ni2);
 int     gridInqGMEni3(int gridID);
 void    gridDefGMEni3(int gridID, int ni3);
 
-/* Reference grid */
-int     gridInqNumber(int gridID);
+/* Reference of an unstructured grid */
+
+/*      gridDefNumber: Define the reference number for an unstructured grid */
 void    gridDefNumber(int gridID, int number);
-int     gridInqPosition(int gridID);
+
+/*      gridInqNumber: Get the reference number to an unstructured grid */
+int     gridInqNumber(int gridID);
+
+/*      gridDefPosition: Define the position of grid in the reference file */
 void    gridDefPosition(int gridID, int position);
-int     gridInqReference(int gridID, char *reference);
+
+/*      gridInqPosition: Get the position of grid in the reference file */
+int     gridInqPosition(int gridID);
+
+/*      gridDefReference: Define the reference URI for an unstructured grid */
 void    gridDefReference(int gridID, const char *reference);
-char   *gridInqUUID(int gridID, char *uuid_cbuf);
+
+/*      gridInqReference: Get the reference URI to an unstructured grid */
+int     gridInqReference(int gridID, char *reference);
+
+/*      gridDefUUID: Define the UUID of an unstructured grid */
 void    gridDefUUID(int gridID, const char *uuid_cbuf);
+
+/*      gridInqUUID: Get the UUID of an unstructured grid */
+char   *gridInqUUID(int gridID, char *uuid_cbuf);
 
 
 /* Lambert Conformal Conic grid (GRIB version) */
@@ -820,16 +836,16 @@ void    zaxisDefLevel(int zaxisID, int levelID, double levels);
 /*      zaxisInqLevel: Get one level of a Z-axis */
 double  zaxisInqLevel(int zaxisID, int levelID);
 
-/*      zaxisDefNumber: Define the reference number of a generalized Z-axis */
+/*      zaxisDefNumber: Define the reference number for a generalized Z-axis */
 void    zaxisDefNumber(int gridID, int number);
 
-/*      zaxisInqNumber: Get the reference number of a generalized Z-axis */
+/*      zaxisInqNumber: Get the reference number to a generalized Z-axis */
 int     zaxisInqNumber(int gridID);
 
-/*      zaxisDefUUID: Define the uuid of a generalized Z-axis */
+/*      zaxisDefUUID: Define the UUID of a generalized Z-axis */
 void    zaxisDefUUID(int zaxisID, const char *uuid_cbuf);
 
-/*      zaxisInqUUID: Get the reference of a generalized Z-axis */
+/*      zaxisInqUUID: Get the UUID of a generalized Z-axis */
 char   *zaxisInqUUID(int zaxisID, char *uuid_cbuf);
 
 /*      zaxisDefName: Define the name of a Z-axis */

@@ -32,6 +32,66 @@ Define the number of parallels between a pole and the equator
 
 \section*{\tt 
 \ifpdf
+\hyperref[gridDefNumber]{gridDefNumber}
+\else
+gridDefNumber
+\fi
+}
+\begin{verbatim}
+    void gridDefNumber(int gridID, const int number);
+\end{verbatim}
+
+Define the reference number for an unstructured grid
+\ifpdfoutput{}{(\ref{gridDefNumber})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefPosition]{gridDefPosition}
+\else
+gridDefPosition
+\fi
+}
+\begin{verbatim}
+    void gridDefPosition(int gridID, const int position);
+\end{verbatim}
+
+Define the position of grid in the reference file
+\ifpdfoutput{}{(\ref{gridDefPosition})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefReference]{gridDefReference}
+\else
+gridDefReference
+\fi
+}
+\begin{verbatim}
+    void gridDefReference(int gridID, const char *reference);
+\end{verbatim}
+
+Define the reference URI for an unstructured grid
+\ifpdfoutput{}{(\ref{gridDefReference})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefUUID]{gridDefUUID}
+\else
+gridDefUUID
+\fi
+}
+\begin{verbatim}
+    void gridDefUUID(int gridID, const char *uuid);
+\end{verbatim}
+
+Define the UUID for an unstructured grid
+\ifpdfoutput{}{(\ref{gridDefUUID})}
+
+
+\section*{\tt 
+\ifpdf
 \hyperref[gridDefXbounds]{gridDefXbounds}
 \else
 gridDefXbounds
@@ -257,6 +317,51 @@ Get the number of parallels between a pole and the equator
 
 \section*{\tt 
 \ifpdf
+\hyperref[gridInqNumber]{gridInqNumber}
+\else
+gridInqNumber
+\fi
+}
+\begin{verbatim}
+    int gridInqNumber(int gridID);
+\end{verbatim}
+
+Get the reference number to an unstructured grid
+\ifpdfoutput{}{(\ref{gridInqNumber})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqPosition]{gridInqPosition}
+\else
+gridInqPosition
+\fi
+}
+\begin{verbatim}
+    int gridInqPosition(int gridID);
+\end{verbatim}
+
+Get the position of grid in the reference file
+\ifpdfoutput{}{(\ref{gridInqPosition})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqReference]{gridInqReference}
+\else
+gridInqReference
+\fi
+}
+\begin{verbatim}
+    char *gridInqReference(int gridID, char *reference);
+\end{verbatim}
+
+Get the reference URI to an unstructured grid
+\ifpdfoutput{}{(\ref{gridInqReference})}
+
+
+\section*{\tt 
+\ifpdf
 \hyperref[gridInqSize]{gridInqSize}
 \else
 gridInqSize
@@ -283,6 +388,21 @@ gridInqType
 
 Get the type of a Grid
 \ifpdfoutput{}{(\ref{gridInqType})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqUUID]{gridInqUUID}
+\else
+gridInqUUID
+\fi
+}
+\begin{verbatim}
+    char *gridInqUUID(int gridID, char *uuid);
+\end{verbatim}
+
+Get the UUID to an unstructured grid
+\ifpdfoutput{}{(\ref{gridInqUUID})}
 
 
 \section*{\tt 

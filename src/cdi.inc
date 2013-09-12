@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   August 2013
+! Uwe Schulzweida, MPI-MET, Hamburg,   September 2013
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -1617,45 +1617,45 @@
       EXTERNAL        gridDefGMEni3
 
 !
-!  Reference grid
+!  Reference of an unstructured grid
 !
-      INTEGER         gridInqNumber
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridInqNumber
-
 !                     gridDefNumber
 !                                    (INTEGER         gridID,
 !                                     INTEGER         number)
       EXTERNAL        gridDefNumber
 
-      INTEGER         gridInqPosition
+      INTEGER         gridInqNumber
 !                                    (INTEGER         gridID)
-      EXTERNAL        gridInqPosition
+      EXTERNAL        gridInqNumber
 
 !                     gridDefPosition
 !                                    (INTEGER         gridID,
 !                                     INTEGER         position)
       EXTERNAL        gridDefPosition
 
-      INTEGER         gridInqReference
-!                                    (INTEGER         gridID,
-!                                     CHARACTER*(*)   reference)
-      EXTERNAL        gridInqReference
+      INTEGER         gridInqPosition
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqPosition
 
 !                     gridDefReference
 !                                    (INTEGER         gridID,
 !                                     CHARACTER*(*)   reference)
       EXTERNAL        gridDefReference
 
-      CHARACTER(80)   gridInqUUID
+      INTEGER         gridInqReference
 !                                    (INTEGER         gridID,
-!                                     CHARACTER*(*)   uuid_cbuf)
-      EXTERNAL        gridInqUUID
+!                                     CHARACTER*(*)   reference)
+      EXTERNAL        gridInqReference
 
 !                     gridDefUUID
 !                                    (INTEGER         gridID,
 !                                     CHARACTER*(*)   uuid_cbuf)
       EXTERNAL        gridDefUUID
+
+      CHARACTER(80)   gridInqUUID
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   uuid_cbuf)
+      EXTERNAL        gridInqUUID
 
 !
 !  Lambert Conformal Conic grid (GRIB version)
@@ -1851,10 +1851,14 @@
 !                                     INTEGER         levelID)
       EXTERNAL        zaxisInqLevel
 
-!                     zaxisDefReference
-!                                    (INTEGER         zaxisID,
-!                                     INTEGER         refID)
-      EXTERNAL        zaxisDefReference
+!                     zaxisDefNumber
+!                                    (INTEGER         gridID,
+!                                     INTEGER         number)
+      EXTERNAL        zaxisDefNumber
+
+      INTEGER         zaxisInqNumber
+!                                    (INTEGER         gridID)
+      EXTERNAL        zaxisInqNumber
 
 !                     zaxisDefUUID
 !                                    (INTEGER         zaxisID,
@@ -1865,10 +1869,6 @@
 !                                    (INTEGER         zaxisID,
 !                                     CHARACTER*(*)   uuid_cbuf)
       EXTERNAL        zaxisInqUUID
-
-      INTEGER         zaxisInqReference
-!                                    (INTEGER         zaxisID)
-      EXTERNAL        zaxisInqReference
 
 !                     zaxisDefName
 !                                    (INTEGER         zaxisID,

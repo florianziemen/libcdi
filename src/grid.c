@@ -3900,7 +3900,7 @@ const double *gridInqYvalsPtr(int gridID)
     @Item  yinc      Y-direction grid lenght in meter.
     @Item  projflag  Projection centre flag.
     @Item  scanflag  Scanning mode flag.
- 
+
 @Description
 The function @func{gridDefLCC} defines the parameter of a Lambert Conformal Conic grid.
 
@@ -4133,20 +4133,21 @@ int gridInqComplexPacking(int gridID)
   return (lcomplex);
 }
 
+/*
+@Function  gridDefNumber
+@Title     Define the reference number for an unstructured grid
 
-int gridInqNumber(int gridID)
-{
-  grid_t *gridptr;
+@Prototype void gridDefNumber(int gridID, const int number)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  number   Reference number for an unstructured grid.
 
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+@Description
+The function @func{gridDefNumber} defines the reference number for an unstructured grid.
 
-  grid_check_ptr(gridID, gridptr);
-
-  return (gridptr->number);
-}
-
-
-void gridDefNumber(int gridID, int number)
+@EndFunction
+*/
+void gridDefNumber(int gridID, const int number)
 {
   grid_t *gridptr;
 
@@ -4163,8 +4164,22 @@ void gridDefNumber(int gridID, int number)
   gridptr->number = number;
 }
 
+/*
+@Function  gridInqNumber
+@Title     Get the reference number to an unstructured grid
 
-int gridInqPosition(int gridID)
+@Prototype int gridInqNumber(int gridID)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+
+@Description
+The function @func{gridInqNumber} returns the reference number to an unstructured grid.
+
+@Result
+@func{gridInqNumber} returns the reference number to an unstructured grid.
+@EndFunction
+*/
+int gridInqNumber(int gridID)
 {
   grid_t *gridptr;
 
@@ -4172,10 +4187,23 @@ int gridInqPosition(int gridID)
 
   grid_check_ptr(gridID, gridptr);
 
-  return (gridptr->position);
+  return (gridptr->number);
 }
 
+/*
+@Function  gridDefPosition
+@Title     Define the position of grid in the reference file
 
+@Prototype void gridDefPosition(int gridID, const int position)
+@Parameter
+    @Item  gridID     Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  position   Position of grid in the reference file.
+
+@Description
+The function @func{gridDefPosition} defines the position of grid in the reference file.
+
+@EndFunction
+*/
 void gridDefPosition(int gridID, int position)
 {
   grid_t *gridptr;
@@ -4193,28 +4221,46 @@ void gridDefPosition(int gridID, int position)
   gridptr->position = position;
 }
 
+/*
+@Function  gridInqPosition
+@Title     Get the position of grid in the reference file
 
-int gridInqReference(int gridID, char *reference)
+@Prototype int gridInqPosition(int gridID)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+
+@Description
+The function @func{gridInqPosition} returns the position of grid in the reference file.
+
+@Result
+@func{gridInqPosition} returns the position of grid in the reference file.
+@EndFunction
+*/
+int gridInqPosition(int gridID)
 {
   grid_t *gridptr;
-  int len = 0;
 
   gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
-  if ( gridptr->reference )
-    {
-      len = (int) strlen(gridptr->reference);
-
-      if ( reference )
-        strcpy(reference, gridptr->reference);
-    }
-
-  return (len);
+  return (gridptr->position);
 }
 
+/*
+@Function  gridDefReference
+@Title     Define the reference URI for an unstructured grid
 
+@Prototype void gridDefReference(int gridID, const char *reference)
+@Parameter
+    @Item  gridID      Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  reference   Reference URI for an unstructured grid.
+
+@Description
+The function @func{gridDefReference} defines the reference URI for an unstructured grid.
+
+@EndFunction
+*/
 void gridDefReference(int gridID, const char *reference)
 {
   grid_t *gridptr;
@@ -4241,26 +4287,55 @@ void gridDefReference(int gridID, const char *reference)
     }
 }
 
+/*
+@Function  gridInqReference
+@Title     Get the reference URI to an unstructured grid
 
-void gridGetIndexList ( int ngrids, int * gridIndexList )
-{
-  reshGetResHListOfType ( ngrids, gridIndexList, &gridOps );
-}
+@Prototype char *gridInqReference(int gridID, char *reference)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
 
-char *gridInqUUID(int gridID, char *uuid)
+@Description
+The function @func{gridInqReference} returns the reference URI to an unstructured grid.
+
+@Result
+@func{gridInqReference} returns the reference URI to an unstructured grid.
+@EndFunction
+*/
+int gridInqReference(int gridID, char *reference)
 {
   grid_t *gridptr;
+  int len = 0;
 
   gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
-  memcpy(uuid, gridptr->uuid, 16);
+  if ( gridptr->reference )
+    {
+      len = (int) strlen(gridptr->reference);
 
-  return (uuid);
+      if ( reference )
+        strcpy(reference, gridptr->reference);
+    }
+
+  return (len);
 }
 
+/*
+@Function  gridDefUUID
+@Title     Define the UUID for an unstructured grid
 
+@Prototype void gridDefUUID(int gridID, const char *uuid)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  uuid     UUID for an unstructured grid.
+
+@Description
+The function @func{gridDefUUID} defines the UUID for an unstructured grid.
+
+@EndFunction
+*/
 void gridDefUUID(int gridID, const char *uuid)
 {
   grid_t *gridptr;
@@ -4278,6 +4353,40 @@ void gridDefUUID(int gridID, const char *uuid)
   memcpy(gridptr->uuid, uuid, 16);
 
   return;
+}
+
+/*
+@Function  gridInqUUID
+@Title     Get the UUID to an unstructured grid
+
+@Prototype char *gridInqUUID(int gridID, char *uuid)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+
+@Description
+The function @func{gridInqUUID} returns the UUID to an unstructured grid.
+
+@Result
+@func{gridInqUUID} returns the UUID to an unstructured grid.
+@EndFunction
+*/
+char *gridInqUUID(int gridID, char *uuid)
+{
+  grid_t *gridptr;
+
+  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+
+  grid_check_ptr(gridID, gridptr);
+
+  memcpy(uuid, gridptr->uuid, 16);
+
+  return (uuid);
+}
+
+
+void gridGetIndexList ( int ngrids, int * gridIndexList )
+{
+  reshGetResHListOfType ( ngrids, gridIndexList, &gridOps );
 }
 
 

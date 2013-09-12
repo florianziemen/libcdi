@@ -712,6 +712,35 @@ void zaxisDefNumber(int zaxisID, const int number)
 }
 
 /*
+@Function  zaxisInqNumber
+@Title     Get the reference number to a generalized Z-axis
+
+@Prototype int zaxisInqNumber(int zaxisID)
+@Parameter
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+
+@Description
+The function @func{zaxisInqNumber} returns the reference number to a generalized Z-axis.
+
+@Result
+@func{zaxisInqNumber} returns the reference number to a generalized Z-axis.
+@EndFunction
+*/
+int zaxisInqNumber(int zaxisID)
+{
+  int number = -1;
+  zaxis_t *zaxisptr;
+
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+
+  zaxis_check_ptr(zaxisID, zaxisptr);
+
+  number = zaxisptr->number;
+
+  return (number);
+}
+
+/*
 @Function  zaxisDefUUID
 @Title     Define the UUID for a genralized Z-axis
 
@@ -746,7 +775,7 @@ void zaxisDefUUID(int zaxisID, const char *uuid)
 
 /*
 @Function  zaxisInqUUID
-@Title     Get the uuid to a generalized Z-axis.
+@Title     Get the uuid to a generalized Z-axis
 
 @Prototype char *zaxisInqUUID(int zaxisID, char *uuid)
 @Parameter
@@ -770,35 +799,6 @@ char *zaxisInqUUID(int zaxisID, char *uuid)
   memcpy(uuid, zaxisptr->uuid, 16);
 
   return (uuid);
-}
-
-/*
-@Function  zaxisInqNumber
-@Title     Get the reference number to a generalized Z-axis.
-
-@Prototype int zaxisInqNumber(int zaxisID)
-@Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
-
-@Description
-The function @func{zaxisInqNumber} returns the reference number to a generalized Z-axis.
-
-@Result
-@func{zaxisInqNUmber} returns the reference number to a generalized Z-axis.
-@EndFunction
-*/
-int zaxisInqNumber(int zaxisID)
-{
-  int number = -1;
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
-
-  zaxis_check_ptr(zaxisID, zaxisptr);
-
-  number = zaxisptr->number;
-
-  return (number);
 }
 
 /*
