@@ -570,6 +570,12 @@ void cdi_generate_vars(stream_t *streamptr)
       zaxisID = varDefZaxis(vlistID, zaxistype, nlevels, dlevels, lbounds, dlevels1, dlevels2,
                             Vctsize, Vct, NULL, NULL, unitptr, 0, 0, ltype);
 
+      if ( zaxisInqType(zaxisID) == ZAXIS_REFERENCE )
+        {
+          if ( numberOfVerticalGrid > 0 ) zaxisDefNumber(zaxisID, numberOfVerticalGrid);
+          if ( uuidVGrid[0] != 0 ) zaxisDefUUID(zaxisID, uuidVGrid);
+        }
+
       if ( lbounds ) free(dlevels1);
       if ( lbounds ) free(dlevels2);
       free(dlevels);

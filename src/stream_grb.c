@@ -83,6 +83,7 @@ int grib2ltypeToZaxisType(int grib_ltype)
     case GRIB2_LTYPE_SEDIMENT_BOTTOM_TA: { zaxistype = ZAXIS_SEDIMENT_BOTTOM_TA;     break; }
     case GRIB2_LTYPE_SEDIMENT_BOTTOM_TW: { zaxistype = ZAXIS_SEDIMENT_BOTTOM_TW;     break; }
     case GRIB2_LTYPE_MIX_LAYER:          { zaxistype = ZAXIS_MIX_LAYER;              break; }
+    case GRIB2_LTYPE_REFERENCE:          { zaxistype = ZAXIS_REFERENCE;              break; }
     }
 
   return (zaxistype);

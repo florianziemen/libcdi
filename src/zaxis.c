@@ -54,7 +54,7 @@ ZaxistypeEntry[] = {
   { /* 22 */ 0, "sedimentbottomta",  "sediment_bottom_ta",     "",               ""},
   { /* 23 */ 0, "sedimentbottomtw",  "sediment_bottom_tw",     "",               ""},
   { /* 24 */ 0, "mixlayer",          "mix_layer",              "",               ""},
-  { /* 25 */ 0, "height",            "generalized height",     "height",         "m"},
+  { /* 25 */ 0, "height",            "generalized height",     "height",         ""},
 };
 
 static int CDI_MaxZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]);
