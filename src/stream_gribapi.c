@@ -748,6 +748,7 @@ void grib2GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
       if ( status == 0 ) leveltype2 = lpar;
 
       if ( *leveltype != 255 && leveltype2 != 255 && leveltype2 > 0 ) *lbounds = 1;
+      if ( *leveltype == GRIB2_LTYPE_REFERENCE && leveltype2 == 1 ) *lbounds = 0;
 
       if ( *leveltype == GRIB2_LTYPE_LANDDEPTH )
         {
@@ -762,8 +763,13 @@ void grib2GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
 
       GRIB_CHECK(grib_get_long(gh, "scaleFactorOfFirstFixedSurface", &factor), 0);
       GRIB_CHECK(grib_get_long(gh, "scaledValueOfFirstFixedSurface", &llevel), 0);
-      if ( llevel != GRIB_MISSING_LONG && factor != GRIB_MISSING_LONG )
-        dlevel1 = llevel*grib2ScaleFactor(factor);
+      if ( llevel != GRIB_MISSING_LONG )
+        {
+          if ( factor != GRIB_MISSING_LONG )
+            dlevel1 = llevel*grib2ScaleFactor(factor);
+          else
+            dlevel1 = llevel;
+        }
 
       if ( *level_sf != 0 ) dlevel1 *= (*level_sf);
 
@@ -771,8 +777,13 @@ void grib2GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
 	{
           GRIB_CHECK(grib_get_long(gh, "scaleFactorOfSecondFixedSurface", &factor), 0);
           GRIB_CHECK(grib_get_long(gh, "scaledValueOfSecondFixedSurface", &llevel), 0);
-          if ( llevel != GRIB_MISSING_LONG && factor != GRIB_MISSING_LONG )
-            dlevel2 = llevel*grib2ScaleFactor(factor);
+          if ( llevel != GRIB_MISSING_LONG )
+            {
+              if ( factor != GRIB_MISSING_LONG )
+                dlevel2 = llevel*grib2ScaleFactor(factor);
+              else
+                dlevel2 = llevel;
+            }
 
           if ( *level_sf != 0 ) dlevel2 *= (*level_sf);
         }

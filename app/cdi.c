@@ -425,7 +425,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  levelsize = zaxisInqSize(zaxisID);
 	  /* zaxisInqLongname(zaxisID, longname); */
 	  zaxisName(zaxistype, longname);
-	  longname[17] = 0;
+	  longname[18] = 0;
 	  zaxisInqUnits(zaxisID, units);
 	  units[12] = 0;
 	  if ( zaxistype == ZAXIS_GENERIC && ltype != 0 )
