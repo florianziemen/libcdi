@@ -5292,11 +5292,11 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 		{
 		  if      ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer midpoints") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
-		  else if ( memcmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
+		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
 		  else if ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer interfaces") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
-		  else if ( memcmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
+		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
 		  else if ( strcmp(ncvars[ncvarid].units, "level") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
@@ -5371,11 +5371,11 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		{
 		  if      ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer midpoints") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
-		  else if ( memcmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
+		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
 		  else if ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer interfaces") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
-		  else if ( memcmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
+		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
 		  else if ( strcmp(ncvars[ncvarid].units, "level") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
