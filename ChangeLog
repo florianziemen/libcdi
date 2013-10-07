@@ -3,6 +3,10 @@
 	* Version 1.6.2 released
 	* using CGRIBEX library version 1.6.2
 
+2013-10-07  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_cdf::isLonAxis/isLatAxis: case sensitive units check
+
 2013-09-02  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* streamCopyRecord: allow mixed netCDF file types
