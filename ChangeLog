@@ -5,6 +5,10 @@
 
 2013-10-07  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
+	* listSizeExtend: initialize ops, val and status (Bug #3994) 
+
+2013-10-07  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
 	* stream_cdf::isLonAxis/isLatAxis: case sensitive units check
 
 2013-09-02  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
