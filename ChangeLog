@@ -3,6 +3,10 @@
 	* Version 1.6.2 released
 	* using CGRIBEX library version 1.6.2
 
+2013-10-09  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* file.c: replaced getpagesize() by sysconf(_SC_PAGESIZE)
+
 2013-10-07  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* listSizeExtend: initialize ops, val and status (Bug #3994) 
