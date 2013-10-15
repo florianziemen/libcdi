@@ -3,9 +3,10 @@
 	* Version 1.6.2 released
 	* using CGRIBEX library version 1.6.2
 
-2013-10-09  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+2013-10-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* file.c: replaced getpagesize() by sysconf(_SC_PAGESIZE)
+	* added support for GRIB2 key typeOfGeneratingProcess
+	* added interface function vlistDefVarTypeOfGeneratingProcess() and vlistInqVarTypeOfGeneratingProcess()
 
 2013-10-07  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 

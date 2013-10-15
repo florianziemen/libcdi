@@ -1431,6 +1431,32 @@ int vlistInqVarTimaccu(int vlistID, int varID)
 }
 
 
+void vlistDefVarTypeOfGeneratingProcess(int vlistID, int varID, int typeOfGeneratingProcess)
+{
+  vlist_t *vlistptr;
+
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistptr->vars[varID].typeOfGeneratingProcess = typeOfGeneratingProcess;
+}
+
+
+int vlistInqVarTypeOfGeneratingProcess(int vlistID, int varID)
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  return (vlistptr->vars[varID].typeOfGeneratingProcess);
+}
+
+
 void vlistDestroyVarName(int vlistID, int varID)
 {
   vlist_t *vlistptr;

@@ -925,17 +925,20 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
     Get the ensemble Info from the grib-2 Tables and update the intermediate datastructure.
     Further update to the "vlist" is handled in the same way as for GRIB-1 by "cdi_generate_vars"
   */
-  {
-    int status;
-    status = grib_get_long(gh, "typeOfEnsembleForecast", &ens_forecast_type );
-    if ( status == 0 )
-      {
-        GRIB_CHECK(grib_get_long(gh, "numberOfForecastsInEnsemble", &ens_count ), 0);
-        GRIB_CHECK(grib_get_long(gh, "perturbationNumber", &ens_index ), 0);
-      }
-  }
+  status = grib_get_long(gh, "typeOfEnsembleForecast", &ens_forecast_type );
+  if ( status == 0 )
+    {
+      GRIB_CHECK(grib_get_long(gh, "numberOfForecastsInEnsemble", &ens_count ), 0);
+      GRIB_CHECK(grib_get_long(gh, "perturbationNumber", &ens_index ), 0);
+    }
+
   if ( ens_index > 0 )
     varDefEnsembleInfo(varID, (int)ens_index, (int)ens_count, (int)ens_forecast_type);
+
+  long typeOfGeneratingProcess = 0;
+  status = grib_get_long(gh, "typeOfGeneratingProcess", &typeOfGeneratingProcess);
+  if ( status == 0 )
+    varDefTypeOfGeneratingProcess(varID, (int) typeOfGeneratingProcess);
 
   int    i;
   long   lval;
@@ -1255,9 +1258,22 @@ int gribapiScanTimestep1(stream_t * streamptr)
 	      if ( warn_time )
 		if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 )
 		  {
-		    Warning("Inconsistent verification time (param=%s level=%d)", paramstr, level1);
-		    warn_time = FALSE;
-		  }
+                    if ( datetime0.date == 10101 && datetime0.time == 0 )
+                      {
+                        datetime0.date = datetime.date;
+                        datetime0.time = datetime.time;
+
+                        gribapiGetDataDateTime(gh, &rdate, &rtime);
+
+                        fcast = gribapiTimeIsFC(gh);
+                        if ( fcast ) tunit = gribapiGetTimeUnits(gh);
+                      }
+                    else
+                      {
+                        Warning("Inconsistent verification time (param=%s level=%d)", paramstr, level1);
+                        warn_time = FALSE;
+                      }
+                  }
 	    }
 	  else
 	    {
@@ -2184,17 +2200,23 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
 }
 
 static
-void gribapiDefTime(int editionNumber, grib_handle *gh , int vdate, int vtime, int tsteptype, int numavg, int taxisID, int gcinit)
+void gribapiDefTime(int editionNumber, int typeOfGeneratingProcess, grib_handle *gh , int vdate, int vtime, int tsteptype, int numavg, int taxisID, int gcinit)
 {
   int taxistype = -1;
-  int timeunit;
-  int factor;
 
   if ( taxisID != -1 ) taxistype = taxisInqType(taxisID);
 
-  timeunit = taxisInqTunit(taxisID);
-
-  factor = gribapiDefStepUnits(gh, timeunit, gcinit);
+  if ( typeOfGeneratingProcess == 196 )
+    {
+      vdate = 10101;
+      vtime = 0;
+      taxistype = TAXIS_ABSOLUTE;
+    }
+  /*
+  else if ( typeOfGeneratingProcess == 9 )
+    {
+    }
+  */
 
   if ( taxistype == TAXIS_RELATIVE )
     {
@@ -2202,6 +2224,8 @@ void gribapiDefTime(int editionNumber, grib_handle *gh , int vdate, int vtime, i
       int calendar = taxisInqCalendar(taxisID);
       int rdate    = taxisInqRdate(taxisID);
       int rtime    = taxisInqRtime(taxisID);
+      int timeunit = taxisInqTunit(taxisID);
+      int factor   = gribapiDefStepUnits(gh, timeunit, gcinit);
 
       status = gribapiDefDateTimeRel(editionNumber, gh, rdate, rtime, vdate, vtime,
                                      tsteptype, factor, calendar, gcinit);
@@ -2548,7 +2572,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 	GRIB_CHECK(grib_set_long(gh, "Ni", gridInqGMEni(gridID)), 0);
 	GRIB_CHECK(grib_set_long(gh, "n2", gridInqGMEni2(gridID)), 0);
 	GRIB_CHECK(grib_set_long(gh, "n3", gridInqGMEni3(gridID)), 0);
-	GRIB_CHECK(grib_set_long(gh, "latitudeOfThePolePoint", 90000), 0);
+	GRIB_CHECK(grib_set_long(gh, "latitudeOfThePolePoint", 90000000), 0);
 	GRIB_CHECK(grib_set_long(gh, "longitudeOfThePolePoint", 0), 0);
 
 	GRIB_CHECK(grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
@@ -2957,6 +2981,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   int param;
   int lieee = FALSE;
   int ensID, ensCount, forecast_type; /* Ensemble Data */
+  int typeOfGeneratingProcess;
   long bitsPerValue;
   long editionNumber = 2;
   char name[256];
@@ -2966,6 +2991,8 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   param    = vlistInqVarParam(vlistID, varID);
   datatype = vlistInqVarDatatype(vlistID, varID);
+  typeOfGeneratingProcess = vlistInqVarTypeOfGeneratingProcess(vlistID, varID);
+
   vlistInqVarName(vlistID, varID, name);
 
 #if defined(GRIBAPIENCODETEST)
@@ -2975,6 +3002,9 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 #endif
 
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
+
+  if ( typeOfGeneratingProcess == -1 ) typeOfGeneratingProcess = 0;
+  if ( ! gc->init ) GRIB_CHECK(grib_set_long(gh, "typeOfGeneratingProcess", typeOfGeneratingProcess), 0);
 
   if ( ! gc->init ) gribapiDefInstitut(gh, vlistID, varID);
   if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
@@ -2988,7 +3018,8 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(grib_set_long(gh, "perturbationNumber", ensID ), 0);
     }
   */
-  gribapiDefTime(editionNumber, gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID), gc->init);
+
+  gribapiDefTime(editionNumber, typeOfGeneratingProcess, gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID), gc->init);
 
   if ( editionNumber == 2 && (datatype == DATATYPE_FLT32 || datatype == DATATYPE_FLT64) ) lieee = TRUE;
 

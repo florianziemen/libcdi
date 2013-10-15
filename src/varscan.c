@@ -38,41 +38,42 @@ leveltable_t;
 
 typedef struct
 {
-  int         param;
-  int         prec;
-  int         tsteptype;
-  int         timave;
-  int         timaccu;
-  int         gridID;
-  int         zaxistype;
-  int         ltype;     /* GRIB level type */
-  int         lbounds;
-  int         level_sf;
-  int         level_unit;
-  int         zaxisID;
-  int         nlevels;
-  int         levelTableSize;
+  int           param;
+  int           prec;
+  int           tsteptype;
+  int           timave;
+  int           timaccu;
+  int           gridID;
+  int           zaxistype;
+  int           ltype;     /* GRIB level type */
+  int           lbounds;
+  int           level_sf;
+  int           level_unit;
+  int           zaxisID;
+  int           nlevels;
+  int           levelTableSize;
   leveltable_t *levelTable;
-  int         instID;
-  int         modelID;
-  int         tableID;
-  int         comptype;       // compression type
-  int         complevel;      // compression level
-  int         lmissval;
-  double      missval;
-  char       *name;
-  char       *longname;
-  char       *units;
-  ensinfo_t  *ensdata;
+  int           instID;
+  int           modelID;
+  int           tableID;
+  int           comptype;       // compression type
+  int           complevel;      // compression level
+  int           lmissval;
+  double        missval;
+  char         *name;
+  char         *longname;
+  char         *units;
+  ensinfo_t    *ensdata;
+  int           typeOfGeneratingProcess;
 #if  defined  (HAVE_LIBGRIB_API)
   /* (Optional) list of keyword/double value pairs */
-  int    opt_grib_dbl_nentries;
-  char*  opt_grib_dbl_keyword[MAX_OPT_GRIB_ENTRIES];
-  double opt_grib_dbl_val[MAX_OPT_GRIB_ENTRIES];
+  int           opt_grib_dbl_nentries;
+  char         *opt_grib_dbl_keyword[MAX_OPT_GRIB_ENTRIES];
+  double        opt_grib_dbl_val[MAX_OPT_GRIB_ENTRIES];
   /* (Optional) list of keyword/integer value pairs */
-  int    opt_grib_int_nentries;
-  char*  opt_grib_int_keyword[MAX_OPT_GRIB_ENTRIES];
-  int    opt_grib_int_val[MAX_OPT_GRIB_ENTRIES];
+  int           opt_grib_int_nentries;
+  char         *opt_grib_int_keyword[MAX_OPT_GRIB_ENTRIES];
+  int           opt_grib_int_val[MAX_OPT_GRIB_ENTRIES];
 #endif
 }
 vartable_t;
@@ -104,6 +105,7 @@ void paramInitEntry(int varID, int param)
   vartable[varID].instID         = UNDEFID;
   vartable[varID].modelID        = UNDEFID;
   vartable[varID].tableID        = UNDEFID;
+  vartable[varID].typeOfGeneratingProcess  = UNDEFID;
   vartable[varID].comptype       = COMPRESS_NONE;
   vartable[varID].complevel      = 1;
   vartable[varID].lmissval       = 0;
@@ -589,6 +591,9 @@ void cdi_generate_vars(stream_t *streamptr)
       vlistDefVarTimaccu(vlistID, varID, timaccu);
       vlistDefVarCompType(vlistID, varID, comptype);
 
+      if ( vartable[varid].typeOfGeneratingProcess != UNDEFID )
+        vlistDefVarTypeOfGeneratingProcess(vlistID, varID, vartable[varid].typeOfGeneratingProcess);
+
       if ( vartable[varid].lmissval ) vlistDefVarMissval(vlistID, varID, vartable[varid].missval);
 
       if ( vartable[varid].name )     vlistDefVarName(vlistID, varID, vartable[varid].name);
@@ -999,6 +1004,12 @@ void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type
   vartable[varID].ensdata->ens_index = ens_idx;
   vartable[varID].ensdata->ens_count = ens_count;
   vartable[varID].ensdata->forecast_init_type = forecast_type;
+}
+
+
+void varDefTypeOfGeneratingProcess(int varID, int typeOfGeneratingProcess)
+{
+  vartable[varID].typeOfGeneratingProcess = typeOfGeneratingProcess;
 }
 
 

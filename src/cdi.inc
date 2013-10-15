@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   September 2013
+! Uwe Schulzweida, MPI-MET, Hamburg,   October 2013
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -1144,6 +1144,17 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarTimaccu
+
+!                     vlistDefVarTypeOfGeneratingProcess
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         typeOfGeneratingProcess)
+      EXTERNAL        vlistDefVarTypeOfGeneratingProcess
+
+      INTEGER         vlistInqVarTypeOfGeneratingProcess
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarTypeOfGeneratingProcess
 
       INTEGER         vlistInqVarSize
 !                                    (INTEGER         vlistID,
