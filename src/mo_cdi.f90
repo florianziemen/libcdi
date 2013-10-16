@@ -1249,6 +1249,24 @@ module mo_cdi
       end interface
   
       interface
+        subroutine vlistDefVarTypeOfGeneratingProcess(vlistID,varID,typeOfGeneratingProcess) bind(c,&
+       name='vlistDefVarTypeOfGeneratingProcess')
+          import :: c_int
+          integer(c_int), value :: vlistID
+          integer(c_int), value :: varID
+          integer(c_int), value :: typeOfGeneratingProcess
+       end subroutine vlistDefVarTypeOfGeneratingProcess
+      end interface
+  
+      interface
+        integer(c_int) function vlistInqVarTypeOfGeneratingProcess(vlistID,varID) bind(c,name='vlistInqVarTypeOfGeneratingProcess')
+          import :: c_int
+          integer(c_int), value :: vlistID
+          integer(c_int), value :: varID
+       end function vlistInqVarTypeOfGeneratingProcess
+      end interface
+  
+      interface
         integer(c_int) function vlistInqVarSize(vlistID,varID) bind(c,name='vlistInqVarSize')
           import :: c_int
           integer(c_int), value :: vlistID
@@ -3160,6 +3178,8 @@ module mo_cdi
       public :: vlistInqVarTimave
       public :: vlistDefVarTimaccu
       public :: vlistInqVarTimaccu
+      public :: vlistDefVarTypeOfGeneratingProcess
+      public :: vlistInqVarTypeOfGeneratingProcess
       public :: vlistInqVarSize
       public :: vlistDefIndex
       public :: vlistInqIndex
