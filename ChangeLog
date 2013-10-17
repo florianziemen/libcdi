@@ -3,6 +3,10 @@
 	* Version 1.6.2 released
 	* using CGRIBEX library version 1.6.2
 
+2013-10-17  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_cdf::isLatAxis() and isLonAxis(): added support for stdname latitude and longitude
+
 2013-10-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* added support for GRIB2 key typeOfGeneratingProcess

@@ -4292,15 +4292,15 @@ int isLonAxis(const char *units, const char *stdname)
 
   if ( memcmp(degree_units, "degree", 6) == 0 )
     {
-      int ioff = 6; 
+      int ioff = 6;
       if ( degree_units[ioff] == 's' ) ioff++;
       if ( degree_units[ioff] == '_' ) ioff++;
       if ( degree_units[ioff] == 'e' ) status = TRUE;
     }
 
   if ( status == TRUE ||
-       (memcmp(units, "degree", 6) == 0 && memcmp(stdname, "grid_longitude", 14) == 0) ||
-       (memcmp(units, "radian", 6) == 0 && memcmp(stdname, "grid_longitude", 14) == 0) )
+       ((memcmp(units, "degree", 6) == 0 ||memcmp(units, "radian", 6) == 0) &&
+        (memcmp(stdname, "grid_longitude", 14) == 0 || memcmp(stdname, "longitude", 9) == 0)) )
     {
       status = TRUE;
     }
@@ -4320,15 +4320,15 @@ int isLatAxis(const char *units, const char *stdname)
 
   if ( memcmp(degree_units, "degree", 6) == 0 )
     {
-      int ioff = 6; 
+      int ioff = 6;
       if ( degree_units[ioff] == 's' ) ioff++;
       if ( degree_units[ioff] == '_' ) ioff++;
       if ( degree_units[ioff] == 'n' ) status = TRUE;
     }
 
   if ( status == TRUE ||
-       (memcmp(units, "degree", 6) == 0 && memcmp(stdname, "grid_latitude", 13) == 0) ||
-       (memcmp(units, "radian", 6) == 0 && memcmp(stdname, "grid_latitude", 13) == 0) )
+       ((memcmp(units, "degree", 6) == 0 || memcmp(units, "radian", 6) == 0) &&
+        (memcmp(stdname, "grid_latitude", 13) == 0 || memcmp(stdname, "latitude", 8) == 0)) )
     {
       status = TRUE;
     }
