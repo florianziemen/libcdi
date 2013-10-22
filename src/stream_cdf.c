@@ -66,6 +66,7 @@ typedef struct {
   int      param;
   int      code;
   int      tabnum;
+  int      climatology;
   int      bounds;
   int      gridID;
   int      zaxisID;
@@ -849,13 +850,26 @@ void cdfDefTime(stream_t *streamptr)
       if ( nc_inq_dimid(fileID, "nb2", &dims[1]) != NC_NOERR )
 	cdf_def_dim(fileID, "nb2", 2, &dims[1]);
 
-      strcpy(tmpstr, taxis_name);
-      strcat(tmpstr, "_bnds");
-      cdf_def_var(fileID, tmpstr, NC_DOUBLE, 2, dims, &time_bndsid);
+      if ( taxis->climatology )
+        {
+          strcpy(tmpstr, "climatology");
+          strcat(tmpstr, "_bnds");
+          cdf_def_var(fileID, tmpstr, NC_DOUBLE, 2, dims, &time_bndsid);
 
-      streamptr->basetime.ncvarboundsid = time_bndsid;
+          streamptr->basetime.ncvarboundsid = time_bndsid;
 
-      cdf_put_att_text(fileID, time_varid, "bounds", strlen(tmpstr), tmpstr);
+          cdf_put_att_text(fileID, time_varid, "climatology", strlen(tmpstr), tmpstr);
+        }
+      else
+        {
+          strcpy(tmpstr, taxis_name);
+          strcat(tmpstr, "_bnds");
+          cdf_def_var(fileID, tmpstr, NC_DOUBLE, 2, dims, &time_bndsid);
+
+          streamptr->basetime.ncvarboundsid = time_bndsid;
+
+          cdf_put_att_text(fileID, time_varid, "bounds", strlen(tmpstr), tmpstr);
+        }
     }
 
   unitstr[0] = 0;
@@ -897,11 +911,12 @@ void cdfDefTime(stream_t *streamptr)
 
   len = strlen(unitstr);
   if ( len )
-    cdf_put_att_text(fileID, time_varid, "units", len, unitstr);
+    {
+      cdf_put_att_text(fileID, time_varid, "units", len, unitstr);
 
-  if ( taxis->has_bounds )
-    if ( len )
-      cdf_put_att_text(fileID, time_bndsid, "units", len, unitstr);
+      if ( taxis->has_bounds )
+        cdf_put_att_text(fileID, time_bndsid, "units", len, unitstr);
+    }
 
   if ( taxis->calendar != -1 )
     {
@@ -4229,6 +4244,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].code            = UNDEFID;
       ncvars[ncvarid].tabnum          = 0;
       ncvars[ncvarid].calendar        = FALSE;
+      ncvars[ncvarid].climatology     = FALSE;
       ncvars[ncvarid].bounds          = UNDEFID;
       ncvars[ncvarid].gridID          = UNDEFID;
       ncvars[ncvarid].zaxisID         = UNDEFID;
@@ -4800,6 +4816,24 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 		Warning("attribute scale_factor not supported for atttype %d", atttype);
 	      */
 	      /* (also used for lon/lat) cdfSetVar(ncvars, ncvarid, TRUE); */
+            }
+          else if ( strcmp(attname, "climatology") == 0 && atttype == NC_CHAR )
+            {
+              int status, ncboundsid;
+
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+
+              status = nc_inq_varid(ncid, attstring, &ncboundsid);
+
+              if ( status == NC_NOERR )
+                {
+                  ncvars[ncvarid].climatology = TRUE;
+                  ncvars[ncvarid].bounds = ncboundsid;
+                  cdfSetVar(ncvars, ncvars[ncvarid].bounds, FALSE);
+                  cdfSetVar(ncvars, ncvarid, FALSE);
+                }
+              else
+                Warning("%s - %s", nc_strerror(status), attstring);
             }
           else if ( strcmp(attname, "bounds") == 0 && atttype == NC_CHAR )
             {
@@ -6534,8 +6568,8 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 }
 
 static
-void scan_global_attributtes(int fileID, int vlistID, stream_t *streamptr, int ngatts,
-                             int *instID, int *modelID, int *ucla_les, char *uuidOfHGrid, char *gridfile, int *number_of_grid_used)
+void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ngatts,
+                            int *instID, int *modelID, int *ucla_les, char *uuidOfHGrid, char *gridfile, int *number_of_grid_used)
 {
   nc_type xtype;
   size_t attlen;
@@ -6654,8 +6688,9 @@ int cdfInqContents(stream_t *streamptr)
   int *varids;
   int nvarids;
   const int attstringlen = 8192; char attstring[8192];
-  int timehasunits = FALSE;
+  int time_has_units = FALSE;
   int time_has_bounds = FALSE;
+  int time_climatology = FALSE;
   size_t len;
   int nvars_data;
   int nvcth_id = UNDEFID, vcta_id = UNDEFID, vctb_id = UNDEFID;
@@ -6746,8 +6781,8 @@ int cdfInqContents(stream_t *streamptr)
       return (CDI_EUFSTRUCT);
     }
 
-  /* scan global attributtes */
-  scan_global_attributtes(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les, uuidOfHGrid, gridfile, &number_of_grid_used);
+  /* scan global attributes */
+  scan_global_attributes(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les, uuidOfHGrid, gridfile, &number_of_grid_used);
 
   /* find time dim */
   if ( unlimdimid >= 0 )
@@ -6866,7 +6901,7 @@ int cdfInqContents(stream_t *streamptr)
       else if ( streamptr->basetime.lwrf == FALSE )
 	{
 	  if ( ncvars[ncvarid].units[0] != 0 )
-	    timehasunits = TRUE;
+	    time_has_units = TRUE;
 
 	  if ( ncvars[ncvarid].bounds != UNDEFID )
 	    {
@@ -6876,8 +6911,10 @@ int cdfInqContents(stream_t *streamptr)
 		  len = ncdims[ncvars[ncvars[ncvarid].bounds].dimids[nbdims-1]].len;
 		  if ( (int)len == 2 && timedimid == ncvars[ncvars[ncvarid].bounds].dimids[0] )
 		    {
+
 		      time_has_bounds = TRUE;
 		      streamptr->basetime.ncvarboundsid = ncvars[ncvarid].bounds;
+                      if ( ncvars[ncvarid].climatology ) time_climatology = TRUE;
 		    }
 		}
 	    }
@@ -7098,7 +7135,7 @@ int cdfInqContents(stream_t *streamptr)
   /* time varID */
   ncvarid = streamptr->basetime.ncvarid;
 
-  if ( timehasunits )
+  if ( time_has_units )
     {
       taxis_t *taxis;
       taxis = &streamptr->tsteps[0].taxis;
@@ -7109,7 +7146,10 @@ int cdfInqContents(stream_t *streamptr)
     }
 
   if ( time_has_bounds )
-    streamptr->tsteps[0].taxis.has_bounds = TRUE;
+    {
+      streamptr->tsteps[0].taxis.has_bounds = TRUE;
+      if ( time_climatology ) streamptr->tsteps[0].taxis.climatology = TRUE;
+    }
 
   if ( ncvarid != -1 )
     {
@@ -7151,7 +7191,7 @@ int cdfInqContents(stream_t *streamptr)
   else
     {
       taxisID = taxisCreate(TAXIS_ABSOLUTE);
-      if ( !timehasunits )
+      if ( !time_has_units )
 	{
 	  taxisDefTunit(taxisID, TUNIT_DAY);
 	  streamptr->tsteps[0].taxis.unit = TUNIT_DAY;
