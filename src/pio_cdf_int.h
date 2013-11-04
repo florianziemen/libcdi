@@ -8,18 +8,8 @@
 #ifdef HAVE_LIBNETCDF
 #include "cdf_int.h"
 
-int
-cdiPio_nc__create(const char *path, int cmode,
-                  size_t initialsz, size_t *chunksizehintp,
-                  int *ncidp);
-
-void
-cdiPioCdfDefVar(int ncid, const char *name, nc_type xtype, int ndims,
-                const int dimids[], int *varidp);
-
 void
 cdiPioEnableNetCDFParAccess();
-
 
 #endif
 #endif

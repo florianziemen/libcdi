@@ -10,13 +10,12 @@
 #include "mpi.h"
 #endif
 
-#ifndef _ERROR_H
 #include "error.h"
-#endif
+
 
 #define MAXDEBUG           3
 
-#define ddebug             1
+#define ddebug             0
 
 #define debugString "#####"
 

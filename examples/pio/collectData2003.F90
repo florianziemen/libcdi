@@ -204,7 +204,7 @@ CONTAINS
 #ifdef USE_MPI
       ! For parallel IO:
       ! Start transmission of all data for output in this timestep to IO server.
-      CALL pioWriteTimestep ( tsID, vdate, vtime )
+      CALL pioWriteTimestep
 #endif
     END DO
 
@@ -224,7 +224,8 @@ CONTAINS
     CALL zaxisDestroy(zaxisID2)
     CALL gridDestroy(gridID)
 #ifdef USE_MPI
-    CALL mpi_barrier(commGlob)
+    CALL mpi_barrier(commModel, ierror)
+    IF (ierror /= mpi_success) STOP 1
 #endif
   END SUBROUTINE modelrun
 

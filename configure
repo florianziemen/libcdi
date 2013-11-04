@@ -616,6 +616,13 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+BUILD_F77
+BUILD_FC
+BUILD_CXX
+BUILD_CC
+BUILD_LDFLAGS
+BUILD_FCFLAGS
+BUILD_CFLAGS
 USE_FC_FALSE
 USE_FC_TRUE
 CREATE_INTERFACES_FALSE
@@ -878,7 +885,14 @@ YAXT_CFLAGS
 YAXT_LIBS
 PPM_CORE_CFLAGS
 PPM_CORE_LIBS
-FCMODEXT'
+FCMODEXT
+BUILD_CFLAGS
+BUILD_FCFLAGS
+BUILD_LDFLAGS
+BUILD_CC
+BUILD_CXX
+BUILD_FC
+BUILD_F77'
 
 
 # Initialize some variables set by options.
@@ -1592,6 +1606,20 @@ Some influential environment variables:
   PPM_CORE_LIBS
               linker flags for PPM_CORE, overriding pkg-config
   FCMODEXT    file extension of compiled Fortran module files
+  BUILD_CFLAGS
+              append to CFLAGS during build but not in configure phase
+  BUILD_FCFLAGS
+              append to FCFLAGS during build but not in configure phase
+  BUILD_LDFLAGS
+              append to LDFLAGS during build but not in configure phase
+  BUILD_CC    replace CC with expansion of $BUILD_CC during build but not in
+              configure phase
+  BUILD_CXX   replace CXX with expansion of $BUILD_CXX during build but not in
+              configure phase
+  BUILD_FC    replace FC with expansion of $BUILD_FC during build but not in
+              configure phase
+  BUILD_F77   replace F77 with expansion of $BUILD_F77 during build but not in
+              configure phase
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -26857,7 +26885,7 @@ $as_echo_n "checking for flag to alter module search path... " >&6; }
 if ${acx_sl_cv_fc_mod_path_flag_fc+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-       mkdir conftestdir
+  mkdir conftestdir
       cd conftestdir
       cat > conftest.$ac_ext <<_ACEOF
       module cnftst
@@ -27291,6 +27319,22 @@ fi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Checks for compiler
 COMPILER="$CC $CFLAGS"
 
@@ -27473,6 +27517,13 @@ if test -z "${USE_FC_TRUE}" && test -z "${USE_FC_FALSE}"; then
   as_fn_error $? "conditional \"USE_FC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
+CFLAGS="$CFLAGS${BUILD_CFLAGS+ $BUILD_CFLAGS}"
+FCFLAGS="$FCFLAGS${BUILD_FCFLAGS+ $BUILD_FCFLAGS}"
+LDFLAGS="$LDFLAGS${BUILD_LDFLAGS+ $BUILD_LDFLAGS}"
+CC="${BUILD_CC-$CC}"
+CXX="${BUILD_CXX-$CXX}"
+FC="${BUILD_FC-$FC}"
+F77="${BUILD_F77-$F77}"
 
 : "${CONFIG_STATUS=./config.status}"
 ac_write_fail=0

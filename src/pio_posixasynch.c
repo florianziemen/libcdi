@@ -304,6 +304,7 @@ void pioWriterAIO(void)
 	      bfd = initBFiledataPA(filename, buffersize, nProcsCollNode);
               if ((id = listSetAdd(bibBFiledataPA, bfd)) < 0)
                 xabort("fileID=%d not unique", rtag.id);
+              bfd->fileID = id;
 	    }
 	  else
 	    if (strcmp(filename, bfd->name) != 0)

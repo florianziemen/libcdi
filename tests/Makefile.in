@@ -50,14 +50,15 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-TESTS = test_grib.sh test_cksum_grib test_cksum_nc test_cksum_extra \
-	test_cksum_service test_cksum_nc2 test_cksum_nc4 \
-	test_cksum_ieg pio_write_run pio_cksum_mpinonb \
-	pio_cksum_fpguard pio_cksum_asynch pio_cksum_writer \
-	pio_cksum_cdf test_resource_copy$(EXEEXT)
-check_PROGRAMS = test_grib$(EXEEXT) cksum_write$(EXEEXT) \
-	cksum_read$(EXEEXT) pio_write$(EXEEXT) \
+TESTS = test_grib.sh cksum_verify$(EXEEXT) test_cksum_grib \
+	test_cksum_nc test_cksum_extra test_cksum_service \
+	test_cksum_nc2 test_cksum_nc4 test_cksum_ieg test_chunk_cksum \
+	pio_write_run pio_cksum_mpinonb pio_cksum_fpguard \
+	pio_cksum_asynch pio_cksum_writer pio_cksum_cdf \
 	test_resource_copy$(EXEEXT)
+check_PROGRAMS = cksum_verify$(EXEEXT) test_grib$(EXEEXT) \
+	cksum_write$(EXEEXT) cksum_read$(EXEEXT) pio_write$(EXEEXT) \
+	test_resource_copy$(EXEEXT) cksum_write_chunk$(EXEEXT)
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/pio_cksum_asynch.in $(srcdir)/pio_cksum_cdf.in \
@@ -96,10 +97,19 @@ am_cksum_read_OBJECTS = cksum_read.$(OBJEXT) var_cksum.$(OBJEXT) \
 cksum_read_OBJECTS = $(am_cksum_read_OBJECTS)
 cksum_read_LDADD = $(LDADD)
 cksum_read_DEPENDENCIES = ../src/libcdi.la
+am_cksum_verify_OBJECTS = cksum_verify.$(OBJEXT) cksum.$(OBJEXT)
+cksum_verify_OBJECTS = $(am_cksum_verify_OBJECTS)
+cksum_verify_LDADD = $(LDADD)
+cksum_verify_DEPENDENCIES = ../src/libcdi.la
 am_cksum_write_OBJECTS = cksum_write.$(OBJEXT) cksum.$(OBJEXT)
 cksum_write_OBJECTS = $(am_cksum_write_OBJECTS)
 cksum_write_LDADD = $(LDADD)
 cksum_write_DEPENDENCIES = ../src/libcdi.la
+am_cksum_write_chunk_OBJECTS = cksum_write_chunk.$(OBJEXT) \
+	cksum.$(OBJEXT)
+cksum_write_chunk_OBJECTS = $(am_cksum_write_chunk_OBJECTS)
+cksum_write_chunk_LDADD = $(LDADD)
+cksum_write_chunk_DEPENDENCIES = ../src/libcdi.la
 am_pio_write_OBJECTS = pio_write.$(OBJEXT) cksum.$(OBJEXT)
 pio_write_OBJECTS = $(am_pio_write_OBJECTS)
 pio_write_LDADD = $(LDADD)
@@ -125,10 +135,12 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(cksum_read_SOURCES) $(cksum_write_SOURCES) \
+SOURCES = $(cksum_read_SOURCES) $(cksum_verify_SOURCES) \
+	$(cksum_write_SOURCES) $(cksum_write_chunk_SOURCES) \
 	$(pio_write_SOURCES) $(test_grib_SOURCES) \
 	$(test_resource_copy_SOURCES)
-DIST_SOURCES = $(cksum_read_SOURCES) $(cksum_write_SOURCES) \
+DIST_SOURCES = $(cksum_read_SOURCES) $(cksum_verify_SOURCES) \
+	$(cksum_write_SOURCES) $(cksum_write_chunk_SOURCES) \
 	$(pio_write_SOURCES) $(test_grib_SOURCES) \
 	$(test_resource_copy_SOURCES)
 am__can_run_installinfo = \
@@ -138,8 +150,21 @@ am__can_run_installinfo = \
   esac
 ETAGS = etags
 CTAGS = ctags
+# If stdout is a non-dumb tty, use colors.  If test -t is not supported,
+# then this fails; a conservative approach.  Of course do not redirect
+# stdout here, just stderr.
 am__tty_colors = \
-red=; grn=; lgn=; blu=; std=
+red=; grn=; lgn=; blu=; std=; \
+test "X$(AM_COLOR_TESTS)" != Xno \
+&& test "X$$TERM" != Xdumb \
+&& { test "X$(AM_COLOR_TESTS)" = Xalways || test -t 1 2>/dev/null; } \
+&& { \
+  red='[0;31m'; \
+  grn='[0;32m'; \
+  lgn='[1;32m'; \
+  blu='[1;34m'; \
+  std='[m'; \
+}
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -149,6 +174,13 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BUILD_CC = @BUILD_CC@
+BUILD_CFLAGS = @BUILD_CFLAGS@
+BUILD_CXX = @BUILD_CXX@
+BUILD_F77 = @BUILD_F77@
+BUILD_FC = @BUILD_FC@
+BUILD_FCFLAGS = @BUILD_FCFLAGS@
+BUILD_LDFLAGS = @BUILD_LDFLAGS@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CDI_F90_INTERFACE_FCFLAGS = @CDI_F90_INTERFACE_FCFLAGS@
@@ -328,8 +360,9 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 #
 test_grib_SOURCES = test_grib.c
+cksum_verify_SOURCES = cksum_verify.c cksum.c cksum.h
 cksum_write_SOURCES = cksum_write.c cksum.c cksum.h
-#cksum_write_chunk_SOURCES = cksum_write_chunkb main.c cksum.c cksum.h
+cksum_write_chunk_SOURCES = cksum_write_chunk.c cksum.c cksum.h
 cksum_read_SOURCES = cksum_read.c \
 	var_cksum.c var_cksum.h \
 	stream_cksum.c stream_cksum.h \
@@ -346,6 +379,8 @@ INCLUDES = -I$(top_srcdir)/src
 EXTRA_DIST = $(TESTS)
 #
 CLEANFILES = `ls *~ *.grb *.nc *.srv *.ext example_*.cksum`
+#
+AUTOMAKE_OPTIONS = color-tests
 all: all-am
 
 .SUFFIXES:
@@ -420,9 +455,15 @@ clean-checkPROGRAMS:
 cksum_read$(EXEEXT): $(cksum_read_OBJECTS) $(cksum_read_DEPENDENCIES) $(EXTRA_cksum_read_DEPENDENCIES) 
 	@rm -f cksum_read$(EXEEXT)
 	$(LINK) $(cksum_read_OBJECTS) $(cksum_read_LDADD) $(LIBS)
+cksum_verify$(EXEEXT): $(cksum_verify_OBJECTS) $(cksum_verify_DEPENDENCIES) $(EXTRA_cksum_verify_DEPENDENCIES) 
+	@rm -f cksum_verify$(EXEEXT)
+	$(LINK) $(cksum_verify_OBJECTS) $(cksum_verify_LDADD) $(LIBS)
 cksum_write$(EXEEXT): $(cksum_write_OBJECTS) $(cksum_write_DEPENDENCIES) $(EXTRA_cksum_write_DEPENDENCIES) 
 	@rm -f cksum_write$(EXEEXT)
 	$(LINK) $(cksum_write_OBJECTS) $(cksum_write_LDADD) $(LIBS)
+cksum_write_chunk$(EXEEXT): $(cksum_write_chunk_OBJECTS) $(cksum_write_chunk_DEPENDENCIES) $(EXTRA_cksum_write_chunk_DEPENDENCIES) 
+	@rm -f cksum_write_chunk$(EXEEXT)
+	$(LINK) $(cksum_write_chunk_OBJECTS) $(cksum_write_chunk_LDADD) $(LIBS)
 pio_write$(EXEEXT): $(pio_write_OBJECTS) $(pio_write_DEPENDENCIES) $(EXTRA_pio_write_DEPENDENCIES) 
 	@rm -f pio_write$(EXEEXT)
 	$(LINK) $(pio_write_OBJECTS) $(pio_write_LDADD) $(LIBS)
@@ -441,7 +482,9 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_read.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_verify.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_write.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_write_chunk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ensure_array_size.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_write.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cksum.Po@am__quote@

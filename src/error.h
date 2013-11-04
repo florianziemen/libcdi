@@ -46,13 +46,10 @@ void cdiAbortC(const char *caller, const char *filename,
                const char *functionname, int line,
                const char *errorString, ... )
   __attribute__((noreturn));
-
 #define xabortC(caller, ...)                                    \
   cdiAbortC(caller, __FILE__, __func__, __LINE__, __VA_ARGS__ )
-
 #define xabort(...)                                             \
   cdiAbortC(NULL, __FILE__, __func__, __LINE__, __VA_ARGS__ )
-
 #define cdiAbort(file, func, line, ...)                 \
   cdiAbortC(NULL, (file), (func), (line), __VA_ARGS__)
 

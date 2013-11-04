@@ -11,11 +11,10 @@
 #include "namespace.h"
 #include "serialize.h"
 #include "resource_unpack.h"
-
+#include "taxis.h"
 
 extern void   gridUnpack ( char *, int, int *, int, void *context);
 extern void  zaxisUnpack ( char *, int, int *, int, void *context);
-extern void  taxisUnpack ( char *, int, int *, int, void *context);
 extern int streamNint;
 
 
@@ -55,7 +54,7 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
 	  break;
 	case TAXIS:
 	  taxisUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                      nspTarget, context);
+                      nspTarget, context, 1);
 	  break;
 	case INSTITUTE:
           instituteUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,

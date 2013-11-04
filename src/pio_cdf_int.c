@@ -17,14 +17,13 @@
 
 #include "pio_cdf_int.h"
 
-int
+static int
 cdiPio_nc__create(const char *path, int cmode,
                   size_t initialsz, size_t *chunksizehintp,
                   int *ncidp)
 {
   int status;
   if (cmode & NC_NETCDF4
-      && namespaceHasLocalFile(namespaceGetActive())
       && commInqIOMode() != PIO_NONE)
     {
       cmode |= NC_MPIPOSIX;
@@ -32,7 +31,6 @@ cdiPio_nc__create(const char *path, int cmode,
                              MPI_INFO_NULL, ncidp);
     }
   else if (cmode & (NC_64BIT_OFFSET | NC_CLASSIC_MODEL)
-           && namespaceHasLocalFile(namespaceGetActive())
            && commInqIOMode() != PIO_NONE)
     {
       /* FIXME: improve handling of pnetcdf here */
@@ -43,39 +41,9 @@ cdiPio_nc__create(const char *path, int cmode,
   return status;
 }
 
-#if 0
-/* original code: */
-
-#if USE_MPI
-#if defined (HAVE_NETCDF4) && defined (HAVE_PARALLEL_NC4)
-  if (cmode & NC_NETCDF4
-      && namespaceHasLocalFile(namespaceGetActive())
-      && commInqIOMode() != PIO_NONE)
-    {
-      cmode |= NC_MPIPOSIX;
-      status = nc_create_par(path, cmode, commInqCommColl(),
-                             MPI_INFO_NULL, ncidp);
-    }
-  else if (cmode & (NC_64BIT_OFFSET | NC_CLASSIC_MODEL)
-           && namespaceHasLocalFile(namespaceGetActive())
-           && commInqIOMode() != PIO_NONE)
-    {
-      /* FIXME: improve handling of pnetcdf here */
-      abort();
-    }
-  else
-    status = nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
-#else
-  /* FIXME: Only open netcdf file on one task */
-  status = nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
-#endif
-#else
-  status = nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
-#endif
-#endif
-
-void cdiPioCdfDefVar(int ncid, const char *name, nc_type xtype, int ndims,
-                     const int dimids[], int *varidp)
+static void
+cdiPioCdfDefVar(int ncid, const char *name, nc_type xtype, int ndims,
+                const int dimids[], int *varidp)
 {
   cdf_def_var_serial(ncid, name, xtype, ndims, dimids, varidp);
   if (commInqIOMode() != PIO_NONE)
@@ -90,8 +58,8 @@ void cdiPioCdfDefVar(int ncid, const char *name, nc_type xtype, int ndims,
 void
 cdiPioEnableNetCDFParAccess()
 {
-  namespaceSwitchSet(NSSWITCH_NC__CREATE, cdiPio_nc__create);
-  namespaceSwitchSet(NSSWITCH_CDF_DEF_VAR, cdiPioCdfDefVar);
+  namespaceSwitchSet(NSSWITCH_NC__CREATE, NSSW_FUNC(cdiPio_nc__create));
+  namespaceSwitchSet(NSSWITCH_CDF_DEF_VAR, NSSW_FUNC(cdiPioCdfDefVar));
 }
 
 

@@ -1100,7 +1100,8 @@ void fileSetBufferSize(int fileID, long buffersize)
 int fileOpen(const char *filename, const char *mode)
 {
   int (*myFileOpen)(const char *filename, const char *mode)
-    = namespaceSwitchGet(NSSWITCH_FILE_OPEN);
+    = (int (*)(const char *, const char *))
+    namespaceSwitchGet(NSSWITCH_FILE_OPEN).func;
   return myFileOpen(filename, mode);
 }
 
@@ -1198,7 +1199,7 @@ int fileOpen_serial(const char *filename, const char *mode)
 int fileClose(int fileID)
 {
   int (*myFileClose)(int fileID)
-    = namespaceSwitchGet(NSSWITCH_FILE_CLOSE);
+    = (int (*)(int))namespaceSwitchGet(NSSWITCH_FILE_CLOSE).func;
   return myFileClose(fileID);
 }
 

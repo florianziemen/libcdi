@@ -95,9 +95,8 @@ listSetAdd(listSet *q, void *v)
     q->head = newCons;
 
   q->tail = newCons;
-  q->count  ++;
 
-  return 0;
+  return q->count++;
 }
 
 int

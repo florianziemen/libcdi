@@ -246,6 +246,12 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
     if (reCompile(&cppCondRE, cppCondREString, &line, &lineBufSize))
       exit(EXIT_FAILURE);
   }
+  regex_t emptyStringRE;
+  {
+    static const char emptyStringREString[] = "^"WS"*";
+    if (reCompile(&emptyStringRE, emptyStringREString, &line, &lineBufSize))
+      exit(EXIT_FAILURE);
+  }
   /* fortran include */
 
   fprintf(fpinc, "! This file was automatically generated, don't edit!\n");
@@ -366,6 +372,15 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
           }
 
 	  /*  printf("funcargc = %d\n", funcargc);*/
+            /* test if argument list is actually empty */
+          if (funcargc == 1
+              && !regexec(&emptyStringRE, line + funcargname[0].rm_so, 1,
+                          reMatch, 0)
+              && (funcargname[0].rm_so + reMatch[0].rm_eo
+                  == funcargname[funcargc].rm_so - 1))
+            {
+              funcargc = 0;
+            }
           {
             size_t i;
             for (i = 0; i < funcargc; ++i )
@@ -547,7 +562,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 		    }
 		  strcat(xline, farg);
 		}
-	      if ( funcargc ) strcat(xline, ");");
+	      strcat(xline, ");");
 	      cdoc[ncdoc].aline[cdoc[ncdoc].naline++] = strdup(xline);
 	      cdoc[ncdoc].text  = strdup(xdes);
 
@@ -560,11 +575,12 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
 	      fdoc[nfdoc].fname  = strdup(funcname);
 
 	      if ( functype == ISVOID )
-		nch = sprintf(xline, "SUBROUTINE %s (", xname);
+		nch = sprintf(xline, "SUBROUTINE %s", xname);
 	      else
-		nch = sprintf(xline, "%s FUNCTION %s (", funArgSym[functype].f77name, xname);
+		nch = sprintf(xline, "%s FUNCTION %s", funArgSym[functype].f77name, xname);
 
 	      if ( (funcargc == 1 && funcargtype[0] == ISVOID) ) funcargc = 0;
+              if (funcargc) strcat(xline, " ("), nch += 2;
 
 	      for (size_t i = 0; i < funcargc; i++ )
 		{

@@ -194,11 +194,8 @@ void listSizeExtend()
 
   for (int i = oldSize; i < newListSize; ++i)
     {
-      resHList[nsp].resources[i].resH   = namespaceIdxEncode2 ( nsp, i );
-      resHList[nsp].resources[i].next   = i + 1;
-      resHList[nsp].resources[i].ops    = NULL;
-      resHList[nsp].resources[i].val    = NULL;
-      resHList[nsp].resources[i].status = RESH_UNDEFID;
+      resHList[nsp].resources[i].resH = namespaceIdxEncode2 ( nsp, i );
+      resHList[nsp].resources[i].next = i + 1;
     }
 
   resHList[nsp].resources[newListSize-1].next = resHList[nsp].freeHead;
@@ -267,12 +264,12 @@ void reshRemove ( cdiResH resH, resOps * ops )
 
 /**************************************************************/
 
-void *reshGetValue(const char * caller, cdiResH resH, resOps * ops)
+static listElem_t *
+reshGetElem(const char *caller, cdiResH resH, resOps *ops)
 {
+  listElem_t *listElem;
   int nsp;
   namespaceTuple_t nspT;
-  listElem_t * listElem;
-
   xassert ( ops );
 
   LIST_INIT();
@@ -300,8 +297,13 @@ void *reshGetValue(const char * caller, cdiResH resH, resOps * ops)
   if ( !(listElem && listElem->ops == ops) )
     xabortC(caller, "Invalid resource handle %d, list element not found!",
             (int)resH);
+  return listElem;
+}
 
-  return listElem->val;
+
+void *reshGetValue(const char * caller, cdiResH resH, resOps * ops)
+{
+  return reshGetElem(caller, resH, ops)->val;
 }
 
 /**************************************************************/
@@ -329,6 +331,52 @@ void reshGetResHListOfType ( int c, int * resHs, resOps * ops )
   LIST_UNLOCK();
 }
 
+enum cdiApplyRet
+cdiResHApply(enum cdiApplyRet (*func)(int id, void *res, const resOps *p,
+                                      void *data), void *data)
+{
+  xassert(func);
+
+  LIST_INIT();
+
+  LIST_LOCK();
+
+  int nsp = namespaceGetActive ();
+  enum cdiApplyRet ret = CDI_APPLY_GO_ON;
+  for (int i = 0; i < resHList[nsp].size && ret > 0; ++i)
+    if (resHList[nsp].resources[i].val && resHList[nsp].resources[i].ops)
+      ret = func(namespaceIdxEncode2(nsp, i), resHList[nsp].resources[i].val,
+                 resHList[nsp].resources[i].ops, data);
+  LIST_UNLOCK();
+  return ret;
+}
+
+
+enum cdiApplyRet
+cdiResHFilterApply(const resOps *p,
+                   enum cdiApplyRet (*func)(int id, void *res, void *data),
+                   void *data)
+{
+  xassert(p && func);
+
+  LIST_INIT();
+
+  LIST_LOCK();
+
+  int nsp = namespaceGetActive ();
+  enum cdiApplyRet ret = CDI_APPLY_GO_ON;
+  for (int i = 0; i < resHList[nsp].size && ret > 0; ++i)
+    if (resHList[nsp].resources[i].val && resHList[nsp].resources[i].ops
+        && resHList[nsp].resources[i].ops == p)
+      ret = func(namespaceIdxEncode2(nsp, i), resHList[nsp].resources[i].val,
+                 data);
+  LIST_UNLOCK();
+  return ret;
+}
+
+
+
+
 /**************************************************************/
 
 int reshCountType ( resOps * ops )
@@ -354,6 +402,22 @@ int reshCountType ( resOps * ops )
 }
 
 /**************************************************************/
+
+int
+reshResourceGetPackSize(int resH, resOps *ops, void *context)
+{
+  listElem_t *curr = reshGetElem(__func__, resH, ops);
+  return curr->ops->valGetPackSize(curr->val, context);
+}
+
+void
+reshPackResource(int resH, resOps *ops,
+                 void *buf, int buf_size, int *position, void *context)
+{
+  listElem_t *curr = reshGetElem(__func__, resH, ops);
+  curr->ops->valPack(curr->val, buf, buf_size, position, context);
+}
+
 
 static int getPackBufferSize(void *context)
 {

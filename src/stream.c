@@ -751,7 +751,8 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
   {
     int (*streamOpenDelegate)(const char *filename, const char *filemode,
                               int filetype, stream_t *streamptr)
-      = namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND);
+      = (int (*)(const char *, const char *, int, stream_t *))
+      namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND).func;
     fileID = streamOpenDelegate(filename, filemode, filetype, streamptr);
   }
 
@@ -808,7 +809,8 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
   {
     int (*streamOpenDelegate)(const char *filename, const char *filemode,
                               int filetype, stream_t *streamptr)
-      = namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND);
+      = (int (*)(const char *, const char *, int, stream_t *))
+      namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND).func;
     fileID = streamOpenDelegate(filename, "r", filetype, streamptr);
   }
 
@@ -839,7 +841,8 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
 
   {
     void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
-      = namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND);
+      = (void (*)(stream_t *, int))
+      namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
     streamCloseDelegate(streamptr, 0);
   }
 
@@ -1161,7 +1164,8 @@ void streamClose(int streamID)
   vlistID  = streamptr->vlistID;
 
   void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
-    = namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND);
+    = (void (*)(stream_t *, int))
+    namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
 
   streamCloseDelegate(streamptr, 1);
 
@@ -1217,37 +1221,12 @@ void streamClose(int streamID)
   stream_delete_entry(streamptr);
 }
 
-/*
-@Function  streamSync
-@Title     Synchronize an Open Dataset to Disk
-
-@Prototype  void streamSync(int streamID)
-@Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
-
-@Description
-The function @func{streamSync} offers a way to synchronize the disk copy of a dataset with in-memory buffers.
-
-@EndFunction
-*/
-void streamSync(int streamID)
+void cdiStreamSync_(stream_t *streamptr)
 {
-  int filetype;
-  int fileID;
-  int vlistID;
-  int nvars;
-  stream_t *streamptr;
-
-  if ( !namespaceHasLocalFile ( namespaceGetActive ())) return;
-
-  streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
-  fileID   = streamptr->fileID;
-  filetype = streamptr->filetype;
-  vlistID  = streamptr->vlistID;
-  nvars    = vlistNvars(vlistID);
+  int fileID   = streamptr->fileID;
+  int filetype = streamptr->filetype;
+  int vlistID  = streamptr->vlistID;
+  int nvars    = vlistNvars(vlistID);
 
   if ( fileID == CDI_UNDEFID )
     Warning("File %s not open!", streamptr->filename);
@@ -1283,36 +1262,43 @@ void streamSync(int streamID)
 }
 
 /*
-@Function  streamDefTimestep
-@Title     Define time step
+@Function  streamSync
+@Title     Synchronize an Open Dataset to Disk
 
-@Prototype int streamDefTimestep(int streamID, int tsID)
+@Prototype  void streamSync(int streamID)
 @Parameter
     @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
-    @Item  tsID      Timestep identifier.
 
 @Description
-The function @func{streamDefTimestep} defines the time step of a stream.
-
-@Result
-@func{streamDefTimestep} returns the number of records of the time step.
+The function @func{streamSync} offers a way to synchronize the disk copy of a dataset with in-memory buffers.
 
 @EndFunction
 */
-int streamDefTimestep(int streamID, int tsID)
+void streamSync(int streamID)
+{
+  stream_t *streamptr;
+
+  streamptr = stream_to_pointer(streamID);
+
+  stream_check_ptr(__func__, streamptr);
+
+  void (*myStreamSync_)(stream_t *streamptr)
+    = (void (*)(stream_t *))namespaceSwitchGet(NSSWITCH_STREAM_SYNC).func;
+  myStreamSync_(streamptr);
+}
+
+
+int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
 {
   int newtsID;
   int taxisID;
   int vlistID;
   int time_is_varying;
-  stream_t *streamptr;
   taxis_t *taxisptr1;
   taxis_t *taxisptr2;
 
-  streamptr = stream_to_pointer(streamID);
-
   if ( CDI_Debug )
-    Message("streamID = %d  tsID = %d", streamID, tsID);
+    Message("streamID = %d  tsID = %d", streamptr->self, tsID);
 
   stream_check_ptr(__func__, streamptr);
 
@@ -1325,7 +1311,7 @@ int streamDefTimestep(int streamID, int tsID)
       taxisID = vlistInqTaxis(vlistID);
       if ( taxisID == CDI_UNDEFID )
         {
-          Warning("taxisID undefined for fileID = %d! Using absolute time axis.", streamID);
+          Warning("taxisID undefined for fileID = %d! Using absolute time axis.", streamptr->self);
           taxisID = taxisCreate(TAXIS_ABSOLUTE);
           vlistDefTaxis(vlistID, taxisID);
         }
@@ -1360,7 +1346,8 @@ int streamDefTimestep(int streamID, int tsID)
       && vlistHasTime(vlistID))
     {
       void (*myCdfDefTimestep)(stream_t *streamptr, int tsID)
-        = namespaceSwitchGet(NSSWITCH_CDF_DEF_TIMESTEP);
+        = (void (*)(stream_t *, int))
+        namespaceSwitchGet(NSSWITCH_CDF_DEF_TIMESTEP).func;
       myCdfDefTimestep(streamptr, tsID);
     }
 #endif
@@ -1368,6 +1355,32 @@ int streamDefTimestep(int streamID, int tsID)
   cdi_create_records(streamptr, tsID);
 
   return (streamptr->ntsteps);
+}
+
+/*
+@Function  streamDefTimestep
+@Title     Define time step
+
+@Prototype int streamDefTimestep(int streamID, int tsID)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
+    @Item  tsID      Timestep identifier.
+
+@Description
+The function @func{streamDefTimestep} defines the time step of a stream.
+
+@Result
+@func{streamDefTimestep} returns the number of records of the time step.
+
+@EndFunction
+*/
+int streamDefTimestep(int streamID, int tsID)
+{
+  stream_t *streamptr = stream_to_pointer(streamID);
+  int (*myStreamDefTimestep_)(stream_t *streamptr, int tsID)
+    = (int (*)(stream_t *, int))
+    namespaceSwitchGet(NSSWITCH_STREAM_DEF_TIMESTEP_).func;
+  return myStreamDefTimestep_(streamptr, tsID);
 }
 
 /*
@@ -1586,7 +1599,8 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 {
   void (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype,
                                const void *data, int nmiss)
-    = namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_);
+    = (void (*)(int, int, int, const void *, int))
+    namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
   myCdiStreamWriteVar_(streamID, varID, MEMTYPE_DOUBLE, data, nmiss);
 }
 
@@ -1684,7 +1698,8 @@ void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
 {
   void (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype,
                                const void *data, int nmiss)
-    = namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_);
+    = (void (*)(int, int, int, const void *, int))
+    namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
   myCdiStreamWriteVar_(streamID, varID, MEMTYPE_FLOAT, data, nmiss);
 }
 
@@ -1897,7 +1912,8 @@ streamWriteVarChunk(int streamID, int varID,
   void (*myCdiStreamWriteVarChunk_)(int streamID, int varID, int memtype,
                                     const int rect[][2], const void *data,
                                     int nmiss)
-    = namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_);
+    = (void (*)(int, int, int, const int [][2], const void *, int))
+    namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_).func;
   myCdiStreamWriteVarChunk_(streamID, varID, MEMTYPE_DOUBLE, rect, data, nmiss);
 }
 
@@ -2148,7 +2164,7 @@ The function @func{streamDefVlist} defines the variable list of a stream.
 void streamDefVlist(int streamID, int vlistID)
 {
   void (*myStreamDefVlist)(int streamID, int vlistID)
-    = namespaceSwitchGet(NSSWITCH_STREAM_DEF_VLIST_);
+    = (void (*)(int, int))namespaceSwitchGet(NSSWITCH_STREAM_DEF_VLIST_).func;
   myStreamDefVlist(streamID, vlistID);
 }
 

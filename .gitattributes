@@ -231,6 +231,8 @@ src/pio.c -text
 src/pio.h -text
 src/pio_cdf_int.c -text
 src/pio_cdf_int.h -text
+src/pio_client.c -text
+src/pio_client.h -text
 src/pio_comm.c -text
 src/pio_comm.h -text
 src/pio_dbuffer.c -text
@@ -323,6 +325,7 @@ tests/Makefile.in -text
 tests/cksum.c -text
 tests/cksum.h -text
 tests/cksum_read.c -text
+tests/cksum_verify.c -text
 tests/cksum_write.c -text
 tests/cksum_write_chunk.c -text
 tests/ensure_array_size.c -text

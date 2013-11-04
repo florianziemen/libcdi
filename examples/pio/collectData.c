@@ -106,7 +106,7 @@ static void modelRun(MPI_Comm commModel)
 #endif
   for ( tfID = 0; tfID < ntfiles; tfID++ )
     {
-      if ( tfID > 0 )
+      /* if ( tfID > 0 ) */
 	{
 	  streamClose ( streamID );
 	  sprintf ( &filename[0], "%s_%d.grb", name, tfID );
@@ -139,7 +139,7 @@ static void modelRun(MPI_Comm commModel)
 	      chunk = CDI_UNDEFID;
 	    }
 #ifdef USE_MPI
-	  pioWriteTimestep ( tsID, vdate, vtime );
+	  pioWriteTimestep();
 #endif
 	}
     }
@@ -166,7 +166,8 @@ struct {
   { "PIO_MPI", PIO_MPI },
   { "PIO_FPGUARD", PIO_FPGUARD },
   { "PIO_ASYNCH", PIO_ASYNCH },
-  { "PIO_WRITER", PIO_WRITER }
+  { "PIO_WRITER", PIO_WRITER },
+  { "PIO_FPGUARD", PIO_FPGUARD},
 };
 
 
@@ -176,7 +177,7 @@ int main (int argc, char *argv[])
 #ifdef USE_MPI
   MPI_Comm commGlob;
   int sizeGlob, rankGlob, pioNamespace;
-  int IOMode = PIO_MPI;
+  int IOMode = PIO_WRITER;
   int nProcsIO = 2;
 
   xmpi ( MPI_Init ( &argc, &argv));

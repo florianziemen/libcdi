@@ -47,8 +47,8 @@ typedef struct
 {
   long offset;
   bool finished;
-  bool *nfinished;
   int fileID;
+  bool nfinished[];
 } bFiledataPF;
 
 static int
@@ -97,25 +97,19 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
     xabort("Failed to open %s", afd->name);
 
   afd->command = IO_Open_file;
-  
   return afd;
 }
 
 /***************************************************************/
 static bFiledataPF *
-initBFiledataPF(int key, int nc)
+initBFiledataPF(int fileID, int nc)
 {
   bFiledataPF *bfd;
-  int i;
-
-  bfd = ( bFiledataPF * ) xmalloc ( sizeof ( bFiledataPF ));
-  memset ( bfd, 0, sizeof ( bFiledataPF ));
+  size_t bfdSize = sizeof (bFiledataPF) + nc * sizeof (bool);
+  bfd = xcalloc(1, bfdSize);
   bfd->offset = 0;
   bfd->finished = false;
-  bfd->nfinished = ( bool * ) xmalloc ( nc * sizeof ( bool ));
-
-  for ( i = 0; i < nc; i++ )
-    *( bfd->nfinished + i ) = true;
+  bfd->fileID = fileID;
 
   return bfd;
 }
@@ -151,7 +145,6 @@ destroyBFiledataPF(void *v)
   int iret = 0;
   bFiledataPF *bfd = (bFiledataPF * ) v;
   
-  free ( bfd->nfinished );
   free ( bfd );
 
   return iret;
@@ -200,15 +193,14 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
       	case IO_Open_file:
 
           if (!(bfd = listSetGet(bibBFiledataPF, fileIDTestB,
-                               (void *)(intptr_t)rtag.id)))
+                                 (void *)(intptr_t)rtag.id)))
 	    {
 	      bfd = initBFiledataPF(rtag.id, nProcsCollNode);
 
 	      if ((iret = listSetAdd(bibBFiledataPF, bfd)) < 0)
 		xabort("fileID=%d not unique", rtag.id);
+              bfd->fileID = iret;
 	    }
-
-	  *( bfd->nfinished + source ) = false;
 
           xdebug("id=%d, command=%d ( %s ), send offset=%ld", rtag.id,
                  rtag.command, command2charP[rtag.command], bfd->offset);
@@ -228,7 +220,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
 	case IO_Set_fp:
 
           if (!(bfd = listSetGet(bibBFiledataPF, fileIDTestB,
-                               (void *)(intptr_t)rtag.id)))
+                                 (void *)(intptr_t)rtag.id)))
             xabort("fileId=%d not in set", rtag.id);
 
           xdebug("id=%d, command=%d ( %s ), send offset=%ld", rtag.id,
@@ -289,11 +281,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
             sentFinalize[source] = true;
             doFinalize = true;
             for ( collID = 0; collID < nProcsCollNode; collID++ )
-              if ( !sentFinalize[collID] ) 
-                {
-                  doFinalize = false;
-                  break;
-                }
+              doFinalize &= sentFinalize[collID];
             if ( doFinalize )
               {
                 if (!listSetIsEmpty(bibBFiledataPF))
@@ -493,9 +481,20 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
 
   if ((id = listSetAdd(bibAFiledataPF, afd)) < 0)
     xabort("filename %s not unique", afd->name);
-
+  afd->fileID = id;
   xdebug("name=%s, init and add aFiledataPF, return id = %d",
          filename, id);
+  {
+    long offset, amount = 0L;
+    int tag = encodeFileOpTag(afd->fileID, afd->command);
+    int specialRank = commInqSpecialRankNode ();
+    MPI_Status status;
+    MPI_Comm commNode = commInqCommNode ();
+    xmpi(MPI_Sendrecv(&amount, 1, MPI_LONG, specialRank, tag,
+                      &offset, 1, MPI_LONG, specialRank, tag,
+                      commNode, &status));
+  }
+  afd->command = IO_Set_fp;
   return id;
 }
 

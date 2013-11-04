@@ -1238,9 +1238,6 @@ otherwise the result is an empty string.
 */
 void vlistInqVarExtra(int vlistID, int varID, char *extra)
 {
-  int tableID;
-  int param;
-  int pdis, pcat, pnum;
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);

@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   October 2013
+! Uwe Schulzweida, MPI-MET, Hamburg,   November 2013
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -397,9 +397,6 @@
       EXTERNAL        pioInit
 
 !                     pioWriteTimestep
-!                                    (INTEGER         ,
-!                                     INTEGER         ,
-!                                     INTEGER         )
       EXTERNAL        pioWriteTimestep
 
 !                     streamWriteVarPart
@@ -1227,6 +1224,9 @@
 !                                     INTEGER         ensCount,
 !                                     INTEGER         forecast_type)
       EXTERNAL        vlistInqVarEnsemble
+
+!                     cdiClearAdditionalKeys
+      EXTERNAL        cdiClearAdditionalKeys
 
 !                     cdiDefAdditionalKey
 !                                    (CHARACTER*(*)   string)

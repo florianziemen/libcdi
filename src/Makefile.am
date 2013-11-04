@@ -74,6 +74,8 @@ libcdi_la_SOURCES = 	 \
 	resource_unpack.h \
 	resource_unpack.c \
 	pio_rpc.h        \
+	pio_client.c	\
+	pio_client.h	\
 	pio_server.c     \
 	pio_server.h     \
 	pio_util.c       \

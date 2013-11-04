@@ -5,6 +5,8 @@
 #ifndef SERIALIZE_H
 #define SERIALIZE_H
 
+#include "cdi.h"
+
 /*
  * Generic interfaces for (de-)marshalling
  */

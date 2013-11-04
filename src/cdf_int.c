@@ -59,7 +59,7 @@ void cdf_create(const char *path, int cmode, int *ncidp)
   if ( cdiNcChunksizehint != CDI_UNDEFID ) chunksizehint = cdiNcChunksizehint;
 
   cdi_nc__create_funcp my_nc__create =
-    namespaceSwitchGet(NSSWITCH_NC__CREATE);
+    (cdi_nc__create_funcp)namespaceSwitchGet(NSSWITCH_NC__CREATE).func;
   status = my_nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
 
   if ( CDF_Debug || status != NC_NOERR )
@@ -241,7 +241,7 @@ void cdf_def_var(int ncid, const char *name, nc_type xtype, int ndims,
                  const int dimids[], int *varidp)
 {
   cdi_cdf_def_var_funcp my_cdf_def_var
-    = namespaceSwitchGet(NSSWITCH_CDF_DEF_VAR);
+    = (cdi_cdf_def_var_funcp)namespaceSwitchGet(NSSWITCH_CDF_DEF_VAR).func;
   my_cdf_def_var(ncid, name, xtype, ndims, dimids, varidp);
 }
 

@@ -161,6 +161,13 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BUILD_CC = @BUILD_CC@
+BUILD_CFLAGS = @BUILD_CFLAGS@
+BUILD_CXX = @BUILD_CXX@
+BUILD_F77 = @BUILD_F77@
+BUILD_FC = @BUILD_FC@
+BUILD_FCFLAGS = @BUILD_FCFLAGS@
+BUILD_LDFLAGS = @BUILD_LDFLAGS@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CDI_F90_INTERFACE_FCFLAGS = @CDI_F90_INTERFACE_FCFLAGS@
@@ -359,10 +366,8 @@ cdi_read_LDADD = $(top_builddir)/src/libcdi.la
 #
 cdi_copy_SOURCES = cdi_copy.c
 cdi_copy_LDADD = $(top_builddir)/src/libcdi.la
-#
 cdi_read_f2003_SOURCES = cdi_read_f2003.f90
 cdi_read_f2003_LDADD = $(top_builddir)/src/libcdi.la $(top_builddir)/src/mo_cdi.o
-#
 cdi_write_f2003_SOURCES = cdi_write_f2003.f90
 cdi_write_f2003_LDADD = $(top_builddir)/src/libcdi.la $(top_builddir)/src/mo_cdi.o
 #

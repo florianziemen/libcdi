@@ -147,9 +147,8 @@ defTimestep(remoteFileBuf *afd, int tsID)
 }
 
 static void
-flushOp(void *b, void *tsID)
+flushOp(remoteFileBuf *fb, int tsID)
 {
-  remoteFileBuf *fb = b;
   sendP(fb, fb->fileID);
   defTimestep(fb, (int)(intptr_t)tsID);
 }
@@ -165,14 +164,13 @@ pioSendWrite(int id, int tsID, const void *buffer, size_t len)
 
   afd = listSetGet(bibRemoteFileBuf, fileIDTest, (void *)(intptr_t)id);
 
-  flush = ( tsID != afd->tsID ) ? 1 : 0;
+  flush = tsID != afd->tsID;
 
-  if ( flush == 1 )
+  if ( flush )
     {
-      xdebug ( "tsID = %d, flush buffer", tsID );
+      xdebug("tsID = %d, flush buffer for fileID=%d", tsID, afd->fileID);
 
-      listSetForeach(bibRemoteFileBuf, flushOp, (void *)(intptr_t)tsID);
-
+      flushOp(afd, tsID);
       {
         double startTime;
         MPI_Status status;
@@ -248,6 +246,7 @@ pioSendOpen(const char *filename)
   static long buffersize = 0;
   int root = 0, id, iret, messageLength = 32;
   char message[messageLength];
+  MPI_Comm commCollectors = commInqCommColl();
 
   /* broadcast buffersize to collectors */
   if (!buffersize)
@@ -261,13 +260,14 @@ pioSendOpen(const char *filename)
           xdebug("filename=%s, broadcast buffersize=%ld to collectors ...",
                  filename, buffersize);
 	}
-      xmpi(MPI_Bcast(&buffersize, 1, MPI_LONG, root, commInqCommColl()));
+      xmpi(MPI_Bcast(&buffersize, 1, MPI_LONG, root, commCollectors));
     }
 
   /* init and add remoteFileBuf */
   afd = initRemoteFileBuf(filename, buffersize);
   if ((id = listSetAdd(bibRemoteFileBuf, afd)) < 0)
     xabort("filename %s is not unique", afd->name);
+  afd->fileID = id;
 
   xdebug("filename=%s, init and added remoteFileBuf, return id = %d",
          filename, id);
@@ -293,7 +293,8 @@ pioSendOpen(const char *filename)
              filename, temp);
       free(temp);
     }
-
+  sendP(afd, afd->fileID);
+  xmpi(MPI_Barrier(commCollectors));
   return id;
 }
 

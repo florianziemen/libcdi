@@ -10,7 +10,8 @@ int
 serializeGetSize(int count, int datatype, void *context)
 {
   int (*serialize_get_size_p)(int count, int datatype, void *context)
-    = namespaceSwitchGet(NSSWITCH_SERIALIZE_GET_SIZE);
+    = (int (*)(int, int, void *))
+    namespaceSwitchGet(NSSWITCH_SERIALIZE_GET_SIZE).func;
   return serialize_get_size_p(count, datatype, context);
 }
 
@@ -19,7 +20,8 @@ void serializePack(void *data, int count, int datatype,
 {
   void (*serialize_pack_p)(void *data, int count, int datatype,
                            void *buf, int buf_size, int *position, void *context)
-    = namespaceSwitchGet(NSSWITCH_SERIALIZE_PACK);
+    = (void (*)(void *, int, int, void *, int, int *, void *))
+    namespaceSwitchGet(NSSWITCH_SERIALIZE_PACK).func;
   serialize_pack_p(data, count, datatype, buf, buf_size, position, context);
 }
 
@@ -28,7 +30,8 @@ void serializeUnpack(void *buf, int buf_size, int *position,
 {
   void (*serialize_unpack_p)(void *buf, int buf_size, int *position,
                              void *data, int count, int datatype, void *context)
-    = namespaceSwitchGet(NSSWITCH_SERIALIZE_UNPACK);
+    = (void (*)(void *, int, int *, void *, int, int, void *))
+    namespaceSwitchGet(NSSWITCH_SERIALIZE_UNPACK).func;
   serialize_unpack_p(buf, buf_size, position, data, count, datatype, context);
 }
 

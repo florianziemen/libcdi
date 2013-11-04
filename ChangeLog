@@ -3,6 +3,10 @@
 	* Version 1.6.2 released
 	* using CGRIBEX library version 1.6.2
 
+2013-11-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* merged branch cdi-pio to trunk cdi
+
 2013-10-22  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Added support for netCDF CF time attribute: climatology [Feature #4092]
@@ -60,7 +64,7 @@
 
 2013-07-15  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* Version 1.6.1.1 released (merged branche cdi-pio to trunk cdi)
+	* Version 1.6.1.1 released (merged branch cdi-pio to trunk cdi)
 
 2013-07-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 

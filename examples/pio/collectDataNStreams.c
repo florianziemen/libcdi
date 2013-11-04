@@ -100,9 +100,9 @@ static void modelRun(MPI_Comm commModel)
         varSize[i][j] = nlon * nlat * nlev[i][j];
 #ifdef USE_MPI
         {
-          int start = uniform_partition_start((int [2]){ 0, varSize[i] - 1 },
+          int start = uniform_partition_start((int [2]){ 0, varSize[i][j] - 1 },
                                               comm_size, rank),
-            chunkSize = uniform_partition_start((int [2]){ 0, varSize[i] - 1 },
+            chunkSize = uniform_partition_start((int [2]){ 0, varSize[i][j] - 1 },
                                                 comm_size, rank + 1) - start;
           if (maxChunkSize < chunkSize)
             maxChunkSize = chunkSize;
@@ -160,9 +160,14 @@ static void modelRun(MPI_Comm commModel)
           hoursPassingHack ( &vdate, &vtime, hourStep );
 	  taxisDefVdate ( taxisID, vdate );
 	  taxisDefVtime ( taxisID, vtime );
+          /* temporary fix for problem calling streamDefTimestep after
+           * streamWriteVarPart
+           * FIXME: this can be merged with the loop below again once
+           * per-stream RDMA windows are realized */
+          for ( i = 0; i < nStreams; i++ )
+            streamDefTimestep(streamID[i], tsID);
           for ( i = 0; i < nStreams; i++ )
             {
-              streamDefTimestep ( streamID[i], tsID );
               for ( j = 0; j < nVars; j++ )
                 {
 #ifdef USE_MPI
@@ -172,12 +177,17 @@ static void modelRun(MPI_Comm commModel)
                   int start = 0, chunk = varSize[i][j];
 #endif
                   for(int k = 0; k < chunk; k++)
-                    var[k] = 3.3;
-                  streamWriteVar(streamID[i], varID[i][j], var, nmiss );
+                    var[k] = 3.3 * (double)(k + start);
+#ifdef USE_MPI
+                  streamWriteVarPart(streamID[i], varID[i][j], var, nmiss,
+                                     varDeco[i][j].partDesc);
+#else
+                  streamWriteVar(streamID[i], varID[i][j], var, nmiss);
+#endif
                 }
             }
 #ifdef USE_MPI
-	  pioWriteTimestep ( tsID, vdate, vtime );
+	  pioWriteTimestep();
 #endif
 	}
 #ifdef USE_MPI

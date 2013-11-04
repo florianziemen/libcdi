@@ -32,17 +32,29 @@ enum namespaceSwitch
   NSSWITCH_STREAM_DEF_VLIST_,
   NSSWITCH_STREAM_WRITE_VAR_,
   NSSWITCH_STREAM_WRITE_VAR_CHUNK_,
+  NSSWITCH_STREAM_WRITE_VAR_PART_,
   NSSWITCH_STREAM_CLOSE_BACKEND,
+  NSSWITCH_STREAM_DEF_TIMESTEP_,
+  NSSWITCH_STREAM_SYNC,
 #ifdef HAVE_LIBNETCDF
   NSSWITCH_NC__CREATE,
   NSSWITCH_CDF_DEF_VAR,
   NSSWITCH_CDF_DEF_TIMESTEP,
+  NSSWITCH_CDF_STREAM_SETUP,
 #endif
   NUM_NAMESPACE_SWITCH,
 };
 
+union namespaceSwitchValue
+{
+  void *data;
+  void (*func)();
+};
 
-int              namespaceNew(int hasLocalFiles);
+#define NSSW_FUNC(p) ((union namespaceSwitchValue){ .func = (void (*)())(p) })
+#define NSSW_DATA(p) ((union namespaceSwitchValue){ .data = (void *)(p) })
+
+int              namespaceNew();
 void             namespaceDelete(int namespaceID);
 void             namespaceCleanup      ( void );
 int              namespaceGetNumber    ( void );
@@ -50,13 +62,13 @@ int              namespaceGetActive    ( void );
 int              namespaceIdxEncode    ( namespaceTuple_t );
 int              namespaceIdxEncode2   ( int, int );
 namespaceTuple_t namespaceResHDecode   ( int );
-int              namespaceHasLocalFile ( int );
 int              namespaceAdaptKey     ( int, int );
 int              namespaceAdaptKey2    ( int );
 void             namespaceDefResStatus ( statusCode );
 statusCode       namespaceInqResStatus ( void );
-void namespaceSwitchSet(enum namespaceSwitch sw, void *value);
-void *namespaceSwitchGet(enum namespaceSwitch sw);
+void namespaceSwitchSet(enum namespaceSwitch sw,
+                        union namespaceSwitchValue value);
+union namespaceSwitchValue namespaceSwitchGet(enum namespaceSwitch sw);
 
 
 #endif

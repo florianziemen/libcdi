@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <float.h>  /* FLT_EPSILON */
+#include <limits.h> /* INT_MAX     */
 
 #include "dmemory.h"
 #include "cdi.h"
@@ -15,7 +16,6 @@
 #include "resource_unpack.h"
 #include "namespace.h"
 #include "serialize.h"
-#include "dtypes.h"
 
 #ifndef  RAD2DEG
 #define  RAD2DEG  (180./M_PI)   /* conversion for rad to deg */

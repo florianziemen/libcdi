@@ -22,12 +22,16 @@
 
 #include "cdi.h"
 #include "namespace.h"
+#include "taxis.h"
 #include "pio.h"
 #include "pio_comm.h"
 #include "pio_interface.h"
 #include "pio_rpc.h"
 #include "pio_util.h"
 #include "cdi_int.h"
+#ifndef HAVE_NETCDF_PAR_H
+#define MPI_INCLUDED
+#endif
 #include "pio_cdf_int.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
@@ -123,9 +127,12 @@ collDefBufferSizes()
         }
       // space required for the 3 function calls streamOpen, streamDefVlist, streamClose 
       // once per stream and timestep for all collprocs only on the modelproc root
-      rxWin[root].size += 3 * sizeof (union winHeaderEntry)
-        + MAXDATAFILENAME;
-      rxWin[root].dictSize += 3;
+      rxWin[root].size += numRPCFuncs * sizeof (union winHeaderEntry)
+        /* serialized filename */
+        + MAXDATAFILENAME
+        /* data part of streamDefTimestep */
+        + (2 * CDI_MAX_NAME + sizeof (taxis_t));
+      rxWin[root].dictSize += numRPCFuncs;
     }
   free ( streamIndexList );
 
@@ -220,6 +227,27 @@ readFuncCall(struct funcCallDesc *header)
         xdebug("READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
                " vlistID=%d, called streamDefVlist ().",
                funcMap[(-1 - funcID)], streamID, vlistID);
+      }
+      break;
+    case STREAMDEFTIMESTEP:
+      {
+        MPI_Comm commCalc = commInqCommCalc ();
+        int streamID = header->funcArgs.streamNewTimestep.streamID;
+        int nspTarget = namespaceResHDecode(streamID).nsp;
+        streamID = namespaceAdaptKey2(streamID);
+        int tsID
+          = header->funcArgs.streamNewTimestep.tsID;
+        int oldTaxisID
+          = vlistInqTaxis(streamInqVlist(streamID));
+        int position = header->funcArgs.streamNewTimestep.offset;
+        int changedTaxisID
+          = taxisUnpack((char *)rxWin[root].buffer, (int)rxWin[root].size,
+                        &position, nspTarget, &commCalc, 0);
+        taxis_t *oldTaxisPtr = taxisPtr(oldTaxisID);
+        taxis_t *changedTaxisPtr = taxisPtr(changedTaxisID);
+        ptaxisCopy(oldTaxisPtr, changedTaxisPtr);
+        taxisDestroy(changedTaxisID);
+        streamDefTimestep(streamID, tsID);
       }
       break;
     default:
@@ -423,10 +451,19 @@ void cdiPioCloseFileOnRank(int rank)
   --(cdiSerialOpenFileCount[rank]);
 }
 
+static void
+cdiPioServerCdfDefVars(stream_t *streamptr)
+{
+  int rank, rankOpen;
+  if (commInqIOMode() == PIO_NONE
+      || ((rank = commInqRankColl())
+          == (rankOpen = cdiPioSerialOpenFileMap(streamptr->self))))
+    cdfDefVars(streamptr);
+}
+
 #endif
 
-static
-void readGetBuffers ( int tsID, int vdate, int vtime )
+static void readGetBuffers()
 {
   int nProcsModel = commInqNProcsModel ();
   int root        = commInqRootGlob ();
@@ -530,10 +567,6 @@ void readGetBuffers ( int tsID, int vdate, int vtime )
         int streamID = streamMap[streamIdx].streamID;
         int vlistID = streamInqVlist(streamID);
         int fileType = streamMap[streamIdx].filetype;
-        int taxisID = vlistInqTaxis(vlistID);
-        taxisDefVdate(taxisID, vdate);
-        taxisDefVtime(taxisID, vtime);
-        streamDefTimestep(streamID, tsID);
 
         switch (fileType)
           {
@@ -779,18 +812,17 @@ void clearModelWinBuffer(int modelID)
 
 
 static
-void getTimeStepData ( int tsID, int vdate, int vtime )
+void getTimeStepData()
 {
   int modelID;
   char text[1024];
   int nProcsModel = commInqNProcsModel ();
   void *getWinBaseAddr;
   int attrFound;
-          
+
   xdebug("%s", "START");
 
   // todo put in correct lbs and ubs
-  xassert ( tsID >= 0 && vdate >= 0 && vtime >= 0 );
   xmpi(MPI_Win_start(groupModel, 0, getWin));
   xmpi(MPI_Win_get_attr(getWin, MPI_WIN_BASE, &getWinBaseAddr, &attrFound));
   xassert(attrFound);
@@ -817,8 +849,8 @@ void getTimeStepData ( int tsID, int vdate, int vtime )
                     rxWin[modelID].size / sizeof (double),
                     DATATYPE_FLT);
       }
-  readGetBuffers ( tsID, vdate, vtime );
-          
+  readGetBuffers();
+
   xdebug("%s", "RETURN");
 }
 
@@ -921,12 +953,18 @@ void IOServer ()
 #elif defined (HAVE_LIBNETCDF)
   cdiSerialOpenFileCount = xcalloc(sizeof (cdiSerialOpenFileCount[0]),
                                    commInqSizeColl());
-  namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND, cdiPioStreamCDFOpenWrap);
-  namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND, cdiPioStreamCDFCloseWrap);
-  namespaceSwitchSet(NSSWITCH_CDF_DEF_TIMESTEP, cdiPioCdfDefTimestep);
+  namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND,
+                     NSSW_FUNC(cdiPioStreamCDFOpenWrap));
+  namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND,
+                     NSSW_FUNC(cdiPioStreamCDFCloseWrap));
+  namespaceSwitchSet(NSSWITCH_CDF_DEF_TIMESTEP,
+                     NSSW_FUNC(cdiPioCdfDefTimestep));
+  namespaceSwitchSet(NSSWITCH_CDF_STREAM_SETUP,
+                     NSSW_FUNC(cdiPioServerCdfDefVars));
 #endif
-  namespaceSwitchSet(NSSWITCH_FILE_WRITE, cdiPioFileWrite);
-  
+  namespaceSwitchSet(NSSWITCH_FILE_WRITE,
+                     NSSW_FUNC(cdiPioFileWrite));
+
   for ( ;; )
     {
       xmpi ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commCalc, &status ));
@@ -1003,16 +1041,12 @@ void IOServer ()
 
 	case WRITETS:
           {
-            int iBuffer[timestepSize];
             xdebugMsg(tag, source, nfinished);
-            xmpi(MPI_Get_count(&status, MPI_INTEGER, &size));
-            xassert(size == timestepSize);
-            xmpi(MPI_Recv(iBuffer, size, MPI_INTEGER, source,
+            xmpi(MPI_Recv(NULL, 0, MPI_INT, source,
                           tag, commCalc, &status));
-            xdebug("RECEIVED MESSAGE WITH TAG \"WRITETS\": "
-                   "tsID=%d, vdate=%d, vtime=%d, source=%d",
-                   iBuffer[0], iBuffer[1], iBuffer[2], source );
-            getTimeStepData(iBuffer[0], iBuffer[1], iBuffer[2]);
+            xdebug("RECEIVED MESSAGE WITH TAG \"WRITETS\": source=%d",
+                   source);
+            getTimeStepData();
           }
 	  break;
 

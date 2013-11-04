@@ -179,48 +179,45 @@ static int instituteCompareP ( void *  instituteptr1, void * instituteptr2 )
   return instituteCompareKernel ( i1, i2 );
 }
 
+struct instLoc
+{
+  institute_t *ip;
+  int id;
+};
+
+static enum cdiApplyRet
+findInstitute(int id, void *res, void *data)
+{
+  institute_t * ip1 = ((struct instLoc *)data)->ip;
+  institute_t * ip2 = res;
+  if (ip2->used && !instituteCompareKernel(ip1, ip2))
+    {
+      ((struct instLoc *)data)->id = id;
+      return CDI_APPLY_STOP;
+    }
+  else
+    return CDI_APPLY_GO_ON;
+}
+
 
 int institutInq(int center, int subcenter, const char *name, const char *longname)
 {
-  int instID = UNDEFID, instCount, * instResHs, i;
-  institute_t * ip1;
-  institute_t * ip2;
-
   instituteInit ();
 
-  ip1 = xmalloc ( sizeof ( institute_t ));
+  institute_t * ip_ref = xmalloc(sizeof (*ip_ref));
+  ip_ref->self       = UNDEFID;
+  ip_ref->used       = 0;
+  ip_ref->center     = center;
+  ip_ref->subcenter  = subcenter;
+  ip_ref->name       = name && name[0] ? (char *)name : NULL;
+  ip_ref->longname   = longname && longname[0] ? (char *)longname : NULL;
 
-  ip1->self       = UNDEFID;
-  ip1->used       = 0;
-  ip1->center     = center;
-  ip1->subcenter  = subcenter;
-  ip1->name       = NULL;
-  ip1->longname   = NULL;
-  if ( name && *name )
-    ip1->name     = ( char * ) name;
-  if ( longname && *longname )
-    ip1->longname = ( char * ) longname;
+  struct instLoc state = { .ip = ip_ref, .id = UNDEFID };
+  cdiResHFilterApply(&instituteOps, findInstitute, &state);
 
-  instCount = instituteCount ();
-  instResHs = xmalloc ( instCount * sizeof ( int ));
-  reshGetResHListOfType ( instCount, instResHs, &instituteOps );
+  free(ip_ref);
 
-  for ( i = 0; i < instCount; i++ )
-    {
-      ip2 = ( institute_t * ) reshGetVal ( instResHs[i], &instituteOps );
-      xassert ( ip2 );
-
-      if ( ip2->used && ! instituteCompareKernel ( ip1, ip2 ))
-        {
-          instID = ip2->self;
-          break;
-        }
-    }
-
-  free ( instResHs );
-  free ( ip1 );
-
-  return  (instID);
+  return state.id;
 }
 
 
@@ -292,27 +289,21 @@ char *institutInqLongnamePtr(int instID)
   return instituteptr ? instituteptr->longname : NULL;
 }
 
+static enum cdiApplyRet
+activeInstitutes(int id, void *res, void *data)
+{
+  if (res && ((institute_t *)res)->used)
+    ++(*(int *)data);
+  return CDI_APPLY_GO_ON;
+}
 
 int institutInqNumber(void)
 {
-  int i, instCount, * instResHs, instNum = 0;
-  institute_t * instituteptr;
+  int instNum = 0;
 
   instituteInit ();
 
-  instCount = reshCountType ( &instituteOps );
-  instResHs = xmalloc ( instCount * sizeof ( int ));
-  reshGetResHListOfType ( instCount, instResHs, &instituteOps );
-
-  for ( i = 0; i < instCount; i++ )
-    {
-      instituteptr = ( institute_t * ) reshGetVal ( instResHs[i], &instituteOps );
-      if ( instituteptr && instituteptr->used )
-        instNum++;
-    }
-
-  if ( instResHs ) free ( instResHs );
-
+  cdiResHFilterApply(&instituteOps, activeInstitutes, &instNum);
   return instNum;
 }
 

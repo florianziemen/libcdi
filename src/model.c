@@ -103,7 +103,7 @@ void modelDefaultEntries ( void )
 
   instID  = institutInq(  0,   1, "NCEP", NULL);
   resH[9] = modelDef(instID,  80, "T62L28MRF");
-
+  
   for ( i = 0; i < 10 ; i++ )
     reshSetStatus(resH[i], &modelOps, SUSPENDED);
 }
@@ -146,59 +146,65 @@ int modelSize ( void )
   return reshCountType ( &modelOps );
 }
 
+struct modelLoc
+{
+  char *name;
+  int instID, modelgribID, resID;
+};
+
+static enum cdiApplyRet
+findModelByID(int resID, void *res, void *data)
+{
+  model_t *modelptr = res;
+  struct modelLoc *ret = data;
+  int instID = ret->instID, modelgribID = ret->modelgribID;
+  if (modelptr->used
+      && modelptr->instID == instID
+      && modelptr->modelgribID == modelgribID)
+    {
+      ret->resID = resID;
+      return CDI_APPLY_STOP;
+    }
+  else
+    return CDI_APPLY_GO_ON;
+}
+
+static enum cdiApplyRet
+findModelByName(int resID, void *res, void *data)
+{
+  model_t *modelptr = res;
+  struct modelLoc *ret = data;
+  int instID = ret->instID, modelgribID = ret->modelgribID;
+  const char *name = ret->name;
+  if (modelptr->used
+      && (instID == -1 || modelptr->instID == instID)
+      && (modelgribID == 0 || modelptr->modelgribID == modelgribID)
+      && modelptr->name)
+    {
+      const char *p = name, *q = modelptr->name;
+      while (*p != '\0' && *p == *q)
+        ++p, ++q;
+      if (*p == '\0' || *q == '\0')
+        {
+          ret->resID = resID;
+          return CDI_APPLY_STOP;
+        }
+    }
+  return CDI_APPLY_GO_ON;
+}
 
 int modelInq(int instID, int modelgribID, char *name)
 {
-  int modelID = UNDEFID;
-  size_t len;
-  int found;
-  int modelCount;
-  model_t *modelptr;
-  int i, * modelResHs;
-
   modelInit ();
 
-  modelCount = modelSize();
-  modelResHs = xmalloc ( modelCount * sizeof ( int ));
-  reshGetResHListOfType ( modelCount, modelResHs, &modelOps );
-
-  for( i = 0; i < modelCount; i++ )
-    {
-      modelID = modelResHs[i];
-      modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
-
-      if ( modelptr->used )
-        {
-          if ( name && *name )
-            {
-              found = 1;
-              if ( instID      != -1 && modelptr->instID      != instID )      found = 0;
-              if ( modelgribID !=  0 && modelptr->modelgribID != modelgribID ) found = 0;
-
-              if ( found )
-                {
-                  if ( modelptr->name )
-                    {
-                      len = strlen(modelptr->name);
-                      if ( strncmp(modelptr->name, name, len) == 0 ) break;
-                      len = strlen(name);
-                      if ( strncmp(modelptr->name, name, len) == 0 ) break;
-                    }
-                }
-            }
-          else
-            {
-              if ( modelptr->instID      == instID &&
-                   modelptr->modelgribID == modelgribID ) break;
-            }
-        }
-    }
-
-  if ( i == modelCount ) modelID = UNDEFID;
-
-  if ( modelResHs ) free ( modelResHs );
-
-  return (modelID);
+  struct modelLoc searchState = { .name = name, .instID = instID,
+                                  .modelgribID = modelgribID,
+                                  .resID = UNDEFID };
+  if (name && *name)
+    cdiResHFilterApply(&modelOps, findModelByName, &searchState);
+  else
+    cdiResHFilterApply(&modelOps, findModelByID, &searchState);
+  return searchState.resID;
 }
 
 
@@ -300,7 +306,7 @@ static int modelGetSizeP(void * modelptr, void *context)
 {
   model_t *p = modelptr;
   int txsize = serializeGetSize(model_nints, DATATYPE_INT, context)
-    + serializeGetSize(strlen(p->name) + 1, DATATYPE_TXT, context);
+    + serializeGetSize(p->name?strlen(p->name) + 1:0, DATATYPE_TXT, context);
   return txsize;
 }
 
@@ -312,9 +318,10 @@ static void modelPackP(void * modelptr, void * buf, int size, int *position, voi
   tempbuf[0] = p->self;
   tempbuf[1] = p->instID;
   tempbuf[2] = p->modelgribID;
-  tempbuf[3] = (int)strlen(p->name) + 1;
+  tempbuf[3] = p->name ? (int)strlen(p->name) + 1 : 0;
   serializePack(tempbuf, model_nints, DATATYPE_INT, buf, size, position, context);
-  serializePack(p->name, tempbuf[3], DATATYPE_TXT, buf, size, position, context);
+  if (p->name)
+    serializePack(p->name, tempbuf[3], DATATYPE_TXT, buf, size, position, context);
 }
 
 int
@@ -324,8 +331,15 @@ modelUnpack(void *buf, int size, int *position, int nspTarget, void *context)
   int modelID;
   char *name;
   serializeUnpack(buf, size, position, tempbuf, model_nints, DATATYPE_INT, context);
-  name = xmalloc(tempbuf[3]);
-  serializeUnpack(buf, size, position, name, tempbuf[3], DATATYPE_TXT, context);
+  if (tempbuf[3] != 0)
+    {
+      name = xmalloc(tempbuf[3]);
+      serializeUnpack(buf, size, position, name, tempbuf[3], DATATYPE_TXT, context);
+    }
+  else
+    {
+      name = "";
+    }
   modelID = modelDef( namespaceAdaptKey ( tempbuf[1], nspTarget ), tempbuf[2], name);
   // FIXME: this should work, once all types are transferred
   //assert(modelID == tempbuf[0]);
