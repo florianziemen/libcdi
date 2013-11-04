@@ -5,8 +5,8 @@
 
 /* GRIB2 Level Types */
 #define  GRIB2_LTYPE_SURFACE               1
-#define  GRIB2_LTYPE_CLOUDBASE             2
-#define  GRIB2_LTYPE_CLOUDTOP              3
+#define  GRIB2_LTYPE_CLOUD_BASE            2
+#define  GRIB2_LTYPE_CLOUD_TOP             3
 #define  GRIB2_LTYPE_ISOTHERM0             4
 #define  GRIB2_LTYPE_TOA                   8
 #define  GRIB2_LTYPE_SEA_BOTTOM            9
@@ -21,21 +21,26 @@
 #define  GRIB2_LTYPE_ISENTROPIC          107
 #define  GRIB2_LTYPE_SNOW                114
 #define  GRIB2_LTYPE_REFERENCE           150
-#define  GRIB2_LTYPE_SEADEPTH            160
+#define  GRIB2_LTYPE_SEADEPTH            160  /* Depth Below Sea Level                                 */
+#define  GRIB2_LTYPE_LAKE_BOTTOM         162  /* Lake or River Bottom                                  */
+#define  GRIB2_LTYPE_SEDIMENT_BOTTOM     163  /* Bottom Of Sediment Layer                              */
+#define  GRIB2_LTYPE_SEDIMENT_BOTTOM_TA  164  /* Bottom Of Thermally Active Sediment Layer             */
+#define  GRIB2_LTYPE_SEDIMENT_BOTTOM_TW  165  /* Bottom Of Sediment Layer Penetrated By Thermal Wave   */
+#define  GRIB2_LTYPE_MIX_LAYER           166  /* Mixing Layer                                          */
 
 /* GRIB2 Data representation type (Grid Type) */
-#define  GRIB2_GTYPE_LATLON                0  /*  latitude/longitude                       */
-#define  GRIB2_GTYPE_LATLON_ROT            1  /*  rotated latitude/longitude               */
-#define  GRIB2_GTYPE_LATLON_STR            2  /*  stretched latitude/longitude             */
-#define  GRIB2_GTYPE_LATLON_ROTSTR         3  /*  rotated and stretched latitude/longitude */
-#define  GRIB2_GTYPE_GAUSSIAN             40  /*  gaussian grid                            */
-#define  GRIB2_GTYPE_GAUSSIAN_ROT         41  /*  rotated gaussian grid                    */
-#define  GRIB2_GTYPE_GAUSSIAN_STR         42  /*  stretched gaussian grid                  */
-#define  GRIB2_GTYPE_GAUSSIAN_ROTSTR      43  /*  rotated and stretched gaussian grid      */
-#define  GRIB2_GTYPE_LCC                  30  /*  Lambert conformal                        */
-#define  GRIB2_GTYPE_SPECTRAL             50  /*  spherical harmonics                      */
-#define  GRIB2_GTYPE_GME                 100  /*  hexagonal GME grid                       */
-#define  GRIB2_GTYPE_NUMBER              101  /*  General Unstructured Grid                */
+#define  GRIB2_GTYPE_LATLON                0  /*  latitude/longitude                                   */
+#define  GRIB2_GTYPE_LATLON_ROT            1  /*  rotated latitude/longitude                           */
+#define  GRIB2_GTYPE_LATLON_STR            2  /*  stretched latitude/longitude                         */
+#define  GRIB2_GTYPE_LATLON_ROTSTR         3  /*  rotated and stretched latitude/longitude             */
+#define  GRIB2_GTYPE_GAUSSIAN             40  /*  gaussian grid                                        */
+#define  GRIB2_GTYPE_GAUSSIAN_ROT         41  /*  rotated gaussian grid                                */
+#define  GRIB2_GTYPE_GAUSSIAN_STR         42  /*  stretched gaussian grid                              */
+#define  GRIB2_GTYPE_GAUSSIAN_ROTSTR      43  /*  rotated and stretched gaussian grid                  */
+#define  GRIB2_GTYPE_LCC                  30  /*  Lambert conformal                                    */
+#define  GRIB2_GTYPE_SPECTRAL             50  /*  spherical harmonics                                  */
+#define  GRIB2_GTYPE_GME                 100  /*  hexagonal GME grid                                   */
+#define  GRIB2_GTYPE_UNSTRUCTURED        101  /*  General Unstructured Grid                            */
 
 const char *gribapiLibraryVersion(void);
 void gribContainersNew(stream_t * streamptr);

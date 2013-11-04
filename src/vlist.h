@@ -81,6 +81,7 @@ typedef struct
   int         tableID;
   int         timave;
   int         timaccu;
+  int         typeOfGeneratingProcess;
   int         chunktype;
   int         xyz;
   int         missvalused; /* TRUE if missval is defined */

@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.6.1.1
+! Fortran interface for CDI library version 1.6.2
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   July 2013
+! Uwe Schulzweida, MPI-MET, Hamburg,   November 2013
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -223,10 +223,8 @@
       PARAMETER (GRID_LAEA              = 13)
       INTEGER    GRID_SINUSOIDAL       
       PARAMETER (GRID_SINUSOIDAL        = 14)
-      INTEGER    GRID_REFERENCE        
-      PARAMETER (GRID_REFERENCE         = 15)
       INTEGER    GRID_PROJECTION       
-      PARAMETER (GRID_PROJECTION        = 16)
+      PARAMETER (GRID_PROJECTION        = 15)
 !
 !  ZAXIS types
 !
@@ -270,8 +268,18 @@
       PARAMETER (ZAXIS_ISOTHERM_ZERO    = 18)
       INTEGER    ZAXIS_SNOW            
       PARAMETER (ZAXIS_SNOW             = 19)
+      INTEGER    ZAXIS_LAKE_BOTTOM     
+      PARAMETER (ZAXIS_LAKE_BOTTOM      = 20)
+      INTEGER    ZAXIS_SEDIMENT_BOTTOM 
+      PARAMETER (ZAXIS_SEDIMENT_BOTTOM  = 21)
+      INTEGER    ZAXIS_SEDIMENT_BOTTOM_TA
+      PARAMETER (ZAXIS_SEDIMENT_BOTTOM_TA = 22)
+      INTEGER    ZAXIS_SEDIMENT_BOTTOM_TW
+      PARAMETER (ZAXIS_SEDIMENT_BOTTOM_TW = 23)
+      INTEGER    ZAXIS_MIX_LAYER       
+      PARAMETER (ZAXIS_MIX_LAYER        = 24)
       INTEGER    ZAXIS_REFERENCE       
-      PARAMETER (ZAXIS_REFERENCE        = 20)
+      PARAMETER (ZAXIS_REFERENCE        = 25)
 !
 !  TIME types
 !
@@ -1134,6 +1142,17 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarTimaccu
 
+!                     vlistDefVarTypeOfGeneratingProcess
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         typeOfGeneratingProcess)
+      EXTERNAL        vlistDefVarTypeOfGeneratingProcess
+
+      INTEGER         vlistInqVarTypeOfGeneratingProcess
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarTypeOfGeneratingProcess
+
       INTEGER         vlistInqVarSize
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
@@ -1609,45 +1628,45 @@
       EXTERNAL        gridDefGMEni3
 
 !
-!  Reference grid
+!  Reference of an unstructured grid
 !
-      INTEGER         gridInqNumber
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridInqNumber
-
 !                     gridDefNumber
 !                                    (INTEGER         gridID,
 !                                     INTEGER         number)
       EXTERNAL        gridDefNumber
 
-      INTEGER         gridInqPosition
+      INTEGER         gridInqNumber
 !                                    (INTEGER         gridID)
-      EXTERNAL        gridInqPosition
+      EXTERNAL        gridInqNumber
 
 !                     gridDefPosition
 !                                    (INTEGER         gridID,
 !                                     INTEGER         position)
       EXTERNAL        gridDefPosition
 
-      INTEGER         gridInqReference
-!                                    (INTEGER         gridID,
-!                                     CHARACTER*(*)   reference)
-      EXTERNAL        gridInqReference
+      INTEGER         gridInqPosition
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqPosition
 
 !                     gridDefReference
 !                                    (INTEGER         gridID,
 !                                     CHARACTER*(*)   reference)
       EXTERNAL        gridDefReference
 
-      CHARACTER(80)   gridInqUUID
+      INTEGER         gridInqReference
 !                                    (INTEGER         gridID,
-!                                     CHARACTER*(*)   uuid_cbuf)
-      EXTERNAL        gridInqUUID
+!                                     CHARACTER*(*)   reference)
+      EXTERNAL        gridInqReference
 
 !                     gridDefUUID
 !                                    (INTEGER         gridID,
 !                                     CHARACTER*(*)   uuid_cbuf)
       EXTERNAL        gridDefUUID
+
+      CHARACTER(80)   gridInqUUID
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   uuid_cbuf)
+      EXTERNAL        gridInqUUID
 
 !
 !  Lambert Conformal Conic grid (GRIB version)
@@ -1843,10 +1862,14 @@
 !                                     INTEGER         levelID)
       EXTERNAL        zaxisInqLevel
 
-!                     zaxisDefReference
-!                                    (INTEGER         zaxisID,
-!                                     INTEGER         refID)
-      EXTERNAL        zaxisDefReference
+!                     zaxisDefNumber
+!                                    (INTEGER         gridID,
+!                                     INTEGER         number)
+      EXTERNAL        zaxisDefNumber
+
+      INTEGER         zaxisInqNumber
+!                                    (INTEGER         gridID)
+      EXTERNAL        zaxisInqNumber
 
 !                     zaxisDefUUID
 !                                    (INTEGER         zaxisID,
@@ -1857,10 +1880,6 @@
 !                                    (INTEGER         zaxisID,
 !                                     CHARACTER*(*)   uuid_cbuf)
       EXTERNAL        zaxisInqUUID
-
-      INTEGER         zaxisInqReference
-!                                    (INTEGER         zaxisID)
-      EXTERNAL        zaxisInqReference
 
 !                     zaxisDefName
 !                                    (INTEGER         zaxisID,
@@ -1905,6 +1924,11 @@
       INTEGER         zaxisInqPrec
 !                                    (INTEGER         zaxisID)
       EXTERNAL        zaxisInqPrec
+
+!                     zaxisDefPositive
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         positive)
+      EXTERNAL        zaxisDefPositive
 
       INTEGER         zaxisInqPositive
 !                                    (INTEGER         zaxisID)

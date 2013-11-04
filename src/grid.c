@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <float.h>  /* FLT_EPSILON */
+#include <limits.h> /* INT_MAX     */
 
 #include "dmemory.h"
 #include "cdi.h"
@@ -41,8 +42,7 @@ char *Grids[] = {
   /* 12 */  "lcc2",
   /* 13 */  "laea",
   /* 14 */  "sinusoidal",
-  /* 15 */  "reference",
-  /* 16 */  "projection",
+  /* 15 */  "projection",
 };
 
 
@@ -348,8 +348,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
     @Item  gridtype  The type of the grid, one of the set of predefined CDI grid types.
                      The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
                      @func{GRID_LONLAT}, @func{GRID_LCC}, @func{GRID_SPECTRAL},
-                     @func{GRID_GME}, @func{GRID_CURVILINEAR}, @func{GRID_UNSTRUCTURED} and
-                     @func{GRID_REFERENCE}.
+                     @func{GRID_GME}, @func{GRID_CURVILINEAR} and @func{GRID_UNSTRUCTURED} and.
     @Item  size      Number of gridpoints.
 
 @Description
@@ -387,6 +386,8 @@ int gridCreate(int gridtype, int size)
 
   if ( CDI_Debug )
     Message("gridtype: %d size: %d", gridtype, size);
+
+  if ( size < 0 || size > INT_MAX ) Error("grid size (%d) out of bounds (0 - %d)!", size, INT_MAX);
 
   gridInit ();
 
@@ -959,7 +960,7 @@ The function @func{gridInqType} returns the type of a Grid.
 one of the set of predefined CDI grid types.
 The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
 @func{GRID_LONLAT}, @func{GRID_LCC}, @func{GRID_SPECTRAL}, @func{GRID_GME},
-@func{GRID_CURVILINEAR}, @func{GRID_UNSTRUCTURED} and @func{GRID_REFERENCE}.
+@func{GRID_CURVILINEAR} and @func{GRID_UNSTRUCTURED}.
 
 @EndFunction
 */
@@ -1529,6 +1530,8 @@ int gridInqXvals(int gridID, double *xvals)
 
   if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
     size = gridptr->size;
+  else if ( gridptr->type == GRID_GAUSSIAN_REDUCED )
+    size = 2;
   else
     size = gridptr->xsize;
 
@@ -1577,6 +1580,8 @@ void gridDefXvals(int gridID, const double *xvals)
 
   if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
     size = gridptr->size;
+  else if ( gridtype == GRID_GAUSSIAN_REDUCED )
+    size = 2;
   else
     size = gridptr->xsize;
 
@@ -2349,6 +2354,9 @@ int compareXYvals2(int gridID, long gridsize, double *xvals, double *yvals)
 {
   int differ = 0;
 
+  if ( !differ && ((xvals == NULL && gridInqXvalsPtr(gridID) != NULL) || (xvals != NULL && gridInqXvalsPtr(gridID) == NULL)) ) differ = 1;
+  if ( !differ && ((yvals == NULL && gridInqYvalsPtr(gridID) != NULL) || (yvals != NULL && gridInqYvalsPtr(gridID) == NULL)) ) differ = 1;
+
   if ( !differ && xvals && gridInqXvalsPtr(gridID) )
     {
       if ( fabs(xvals[0] - gridInqXval(gridID, 0)) > 1.e-9 ||
@@ -2490,7 +2498,17 @@ int gridCompare(int gridID, grid_t grid)
 	    }
 	  else if ( grid.type == GRID_UNSTRUCTURED )
 	    {
-	      if ( grid.nvertex == gridInqNvertex(gridID) )
+              char uuidOfHGrid[17];
+              gridInqUUID(gridID, uuidOfHGrid);
+
+              if ( !differ && memcmp(uuidOfHGrid, grid.uuid, 16) != 0 ) differ = 1;
+
+              if ( !differ && grid.nvertex != gridInqNvertex(gridID) ) differ = 1;
+
+              if ( !differ && grid.number != gridInqNumber(gridID) ) differ = 1;
+              if ( !differ && grid.position != gridInqPosition(gridID) ) differ = 1;
+
+	      if ( !differ )
 		differ = compareXYvals2(gridID, grid.size, grid.xvals, grid.yvals);
 	    }
 	}
@@ -2788,6 +2806,20 @@ int gridGenerate(grid_t grid)
 		     grid.lcc_lat1, grid.lcc_lat2, grid.lcc_xinc, grid.lcc_yinc,
 		     grid.lcc_projflag, grid.lcc_scanflag);
 
+	if ( grid.type == GRID_UNSTRUCTURED )
+          {
+            int number = grid.number;
+            int position = grid.position;
+            if ( position < 0 ) position = 0;
+            if ( number > 0 )
+              {
+                gridDefNumber(gridID, number);
+                gridDefPosition(gridID, position);
+              }
+            if ( grid.uuid[0] != 0 ) gridDefUUID(gridID, grid.uuid);
+            if ( grid.reference ) gridDefReference(gridID, grid.reference);
+          }
+
 	if ( grid.type == GRID_PROJECTION )
 	  {
 	    gridptr->name = strdup(grid.name);
@@ -2800,6 +2832,14 @@ int gridGenerate(grid_t grid)
 	gridDefNP(gridID, grid.np);
 	gridDefYsize(gridID, grid.ysize);
 	gridDefRowlon(gridID, grid.ysize, grid.rowlon);
+
+        if ( grid.xdef == 2 )
+          {
+            double xvals[2];
+            xvals[0] = grid.xfirst;
+            xvals[1] = grid.xlast;
+            gridDefXvals(gridID, xvals);
+          }
 
 	if ( grid.ydef == 1 )
 	  {
@@ -2836,14 +2876,6 @@ int gridGenerate(grid_t grid)
         gridDefGMEni(gridID, grid.ni);
         gridDefGMEni2(gridID, grid.ni2);
         gridDefGMEni3(gridID, grid.ni3);
-        break;
-      }
-    case GRID_REFERENCE:
-      {
-        gridDefNumber(gridID, grid.number);
-        gridDefPosition(gridID, grid.position);
-        gridDefUUID(gridID, grid.uuid);
-        if ( grid.reference ) gridDefReference(gridID, grid.reference);
         break;
       }
       /*
@@ -2927,6 +2959,8 @@ int gridDuplicate(int gridID)
   strcpy(gridptrnew->yunits, gridptr->yunits);
   strcpy(gridptrnew->xstdname, gridptr->xstdname);
   strcpy(gridptrnew->ystdname, gridptr->ystdname);
+
+  if ( gridptr->reference )  gridptrnew->reference = strdupx(gridptr->reference);
 
   nrowlon = gridptr->nrowlon;
   if ( nrowlon )
@@ -3446,19 +3480,26 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
 
   if ( type != GRID_GME )
     {
-      if ( gridptr->xname[0]     )     fprintf(fp, "xname     = %s\n", gridptr->xname);
-      if ( gridptr->xlongname[0] )     fprintf(fp, "xlongname = %s\n", gridptr->xlongname);
-      if ( gridptr->xunits[0]    )     fprintf(fp, "xunits    = %s\n", gridptr->xunits);
-      if ( gridptr->yname[0]     )     fprintf(fp, "yname     = %s\n", gridptr->yname);
-      if ( gridptr->ylongname[0] )     fprintf(fp, "ylongname = %s\n", gridptr->ylongname);
-      if ( gridptr->yunits[0]    )     fprintf(fp, "yunits    = %s\n", gridptr->yunits);
-      if ( type == GRID_UNSTRUCTURED ) fprintf(fp, "nvertex   = %d\n", nvertex);
+      if ( xvals )
+        {
+          if ( gridptr->xname[0]     )     fprintf(fp, "xname     = %s\n", gridptr->xname);
+          if ( gridptr->xlongname[0] )     fprintf(fp, "xlongname = %s\n", gridptr->xlongname);
+          if ( gridptr->xunits[0]    )     fprintf(fp, "xunits    = %s\n", gridptr->xunits);
+        }
+      if ( yvals )
+        {
+          if ( gridptr->yname[0]     )     fprintf(fp, "yname     = %s\n", gridptr->yname);
+          if ( gridptr->ylongname[0] )     fprintf(fp, "ylongname = %s\n", gridptr->ylongname);
+          if ( gridptr->yunits[0]    )     fprintf(fp, "yunits    = %s\n", gridptr->yunits);
+        }
+      if ( type == GRID_UNSTRUCTURED && nvertex > 0 ) fprintf(fp, "nvertex   = %d\n", nvertex);
     }
 
   switch (type)
     {
     case GRID_LONLAT:
     case GRID_GAUSSIAN:
+    case GRID_GAUSSIAN_REDUCED:
     case GRID_GENERIC:
     case GRID_LCC2:
     case GRID_SINUSOIDAL:
@@ -3466,13 +3507,18 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
     case GRID_CURVILINEAR:
     case GRID_UNSTRUCTURED:
       {
-        if ( type == GRID_GAUSSIAN ) fprintf(fp, "np        = %d\n", gridptr->np);
+        if ( type == GRID_GAUSSIAN || type == GRID_GAUSSIAN_REDUCED ) fprintf(fp, "np        = %d\n", gridptr->np);
 
 	if ( type == GRID_CURVILINEAR || type == GRID_UNSTRUCTURED )
 	  {
 	    xdim = gridsize;
 	    ydim = gridsize;
 	  }
+        else if ( type == GRID_GAUSSIAN_REDUCED )
+          {
+	    xdim = 2;
+	    ydim = ysize;
+          }
 	else
 	  {
 	    xdim = xsize;
@@ -3484,6 +3530,31 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
 	    if ( xsize > 0 ) fprintf(fp, "xsize     = %d\n", xsize);
 	    if ( ysize > 0 ) fprintf(fp, "ysize     = %d\n", ysize);
 	  }
+
+	if ( type == GRID_UNSTRUCTURED )
+          {
+            int number = gridInqNumber(gridID);
+            int position = gridInqPosition(gridID);
+            // const unsigned char *d;
+            if ( number > 0 )
+              {
+                fprintf(fp, "number    = %d\n", number);
+                if ( position >= 0 ) fprintf(fp, "position  = %d\n", position);
+              }
+            /*
+              gridInqUUID(gridID, uuidOfHGrid);
+              d = (unsigned char *) &uuidOfHGrid;
+              fprintf(fp, "uuid      = %02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
+              d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
+              d[8], d[9], d[10], d[11], d[12], d[13], d[14], d[15]);
+            */
+            if ( gridInqReference(gridID, NULL) )
+              {
+                char reference_link[8192];
+                gridInqReference(gridID, reference_link);
+                fprintf(fp, "uri       = %s\n", reference_link);
+              }
+          }
 
 	if ( type == GRID_LAEA )
 	  {
@@ -3623,28 +3694,28 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
 	      }
 	    fprintf(fp, "\n");
 	  }
-	break;
-      }
-   case GRID_GAUSSIAN_REDUCED:
-      {
-	int *rowlon;
-	fprintf(fp, "ysize = %d\n", ysize);
-	nbyte0 = fprintf(fp, "rowlon = %d  ", ysize);
-	nbyte  = nbyte0;
-	rowlon = (int *) malloc(ysize*sizeof(int));
-	gridInqRowlon(gridID, rowlon);
-	for ( i = 0; i < ysize; i++ )
-	  {
-	    if ( nbyte > 80 )
-	      {
-		fprintf(fp, "\n");
-		fprintf(fp, "%*s", nbyte0, "");
-		nbyte = nbyte0;
-	      }
-	    nbyte += fprintf(fp, "%d ", rowlon[i]);
-	  }
-	fprintf(fp, "\n");
-	free(rowlon);
+
+        if ( type == GRID_GAUSSIAN_REDUCED )
+          {
+            int *rowlon;
+            nbyte0 = fprintf(fp, "rowlon    = ");
+            nbyte  = nbyte0;
+            rowlon = (int *) malloc(ysize*sizeof(int));
+            gridInqRowlon(gridID, rowlon);
+            for ( i = 0; i < ysize; i++ )
+              {
+                if ( nbyte > 80 )
+                  {
+                    fprintf(fp, "\n");
+                    fprintf(fp, "%*s", nbyte0, "");
+                    nbyte = nbyte0;
+                  }
+                nbyte += fprintf(fp, "%d ", rowlon[i]);
+              }
+            fprintf(fp, "\n");
+            free(rowlon);
+          }
+
 	break;
       }
     case GRID_LCC:
@@ -3686,26 +3757,6 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
       {
         fprintf(fp, "ni        = %d\n", gridptr->ni );
         break;
-      }
-    case GRID_REFERENCE:
-      {
-        // const unsigned char *d;
-	fprintf(fp, "number    = %d\n", gridInqNumber(gridID));
-	fprintf(fp, "position  = %d\n", gridInqPosition(gridID));
-        /*
-        gridInqUUID(gridID, uuidOfHGrid);
-        d = (unsigned char *) &uuidOfHGrid;
-	fprintf(fp, "uuid      = %02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x\n", 
-                d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
-                d[8], d[9], d[10], d[11], d[12], d[13], d[14], d[15]);
-        */
-	if ( gridInqReference(gridID, NULL) )
-	  {
-	    char reference_link[8192];
-	    gridInqReference(gridID, reference_link);
-	    fprintf(fp, "path      = %s\n", reference_link);
-	  }
-	break;
       }
    default:
       {
@@ -3849,7 +3900,7 @@ const double *gridInqYvalsPtr(int gridID)
     @Item  yinc      Y-direction grid lenght in meter.
     @Item  projflag  Projection centre flag.
     @Item  scanflag  Scanning mode flag.
- 
+
 @Description
 The function @func{gridDefLCC} defines the parameter of a Lambert Conformal Conic grid.
 
@@ -4082,20 +4133,21 @@ int gridInqComplexPacking(int gridID)
   return (lcomplex);
 }
 
+/*
+@Function  gridDefNumber
+@Title     Define the reference number for an unstructured grid
 
-int gridInqNumber(int gridID)
-{
-  grid_t *gridptr;
+@Prototype void gridDefNumber(int gridID, const int number)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  number   Reference number for an unstructured grid.
 
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+@Description
+The function @func{gridDefNumber} defines the reference number for an unstructured grid.
 
-  grid_check_ptr(gridID, gridptr);
-
-  return (gridptr->number);
-}
-
-
-void gridDefNumber(int gridID, int number)
+@EndFunction
+*/
+void gridDefNumber(int gridID, const int number)
 {
   grid_t *gridptr;
 
@@ -4112,8 +4164,22 @@ void gridDefNumber(int gridID, int number)
   gridptr->number = number;
 }
 
+/*
+@Function  gridInqNumber
+@Title     Get the reference number to an unstructured grid
 
-int gridInqPosition(int gridID)
+@Prototype int gridInqNumber(int gridID)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+
+@Description
+The function @func{gridInqNumber} returns the reference number to an unstructured grid.
+
+@Result
+@func{gridInqNumber} returns the reference number to an unstructured grid.
+@EndFunction
+*/
+int gridInqNumber(int gridID)
 {
   grid_t *gridptr;
 
@@ -4121,10 +4187,23 @@ int gridInqPosition(int gridID)
 
   grid_check_ptr(gridID, gridptr);
 
-  return (gridptr->position);
+  return (gridptr->number);
 }
 
+/*
+@Function  gridDefPosition
+@Title     Define the position of grid in the reference file
 
+@Prototype void gridDefPosition(int gridID, const int position)
+@Parameter
+    @Item  gridID     Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  position   Position of grid in the reference file.
+
+@Description
+The function @func{gridDefPosition} defines the position of grid in the reference file.
+
+@EndFunction
+*/
 void gridDefPosition(int gridID, int position)
 {
   grid_t *gridptr;
@@ -4142,28 +4221,46 @@ void gridDefPosition(int gridID, int position)
   gridptr->position = position;
 }
 
+/*
+@Function  gridInqPosition
+@Title     Get the position of grid in the reference file
 
-int gridInqReference(int gridID, char *reference)
+@Prototype int gridInqPosition(int gridID)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+
+@Description
+The function @func{gridInqPosition} returns the position of grid in the reference file.
+
+@Result
+@func{gridInqPosition} returns the position of grid in the reference file.
+@EndFunction
+*/
+int gridInqPosition(int gridID)
 {
   grid_t *gridptr;
-  int len = 0;
 
   gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
-  if ( gridptr->reference )
-    {
-      len = (int) strlen(gridptr->reference);
-
-      if ( reference )
-        strcpy(reference, gridptr->reference);
-    }
-
-  return (len);
+  return (gridptr->position);
 }
 
+/*
+@Function  gridDefReference
+@Title     Define the reference URI for an unstructured grid
 
+@Prototype void gridDefReference(int gridID, const char *reference)
+@Parameter
+    @Item  gridID      Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  reference   Reference URI for an unstructured grid.
+
+@Description
+The function @func{gridDefReference} defines the reference URI for an unstructured grid.
+
+@EndFunction
+*/
 void gridDefReference(int gridID, const char *reference)
 {
   grid_t *gridptr;
@@ -4190,26 +4287,55 @@ void gridDefReference(int gridID, const char *reference)
     }
 }
 
+/*
+@Function  gridInqReference
+@Title     Get the reference URI to an unstructured grid
 
-void gridGetIndexList ( int ngrids, int * gridIndexList )
-{
-  reshGetResHListOfType ( ngrids, gridIndexList, &gridOps );
-}
+@Prototype char *gridInqReference(int gridID, char *reference)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
 
-char *gridInqUUID(int gridID, char *uuid)
+@Description
+The function @func{gridInqReference} returns the reference URI to an unstructured grid.
+
+@Result
+@func{gridInqReference} returns the reference URI to an unstructured grid.
+@EndFunction
+*/
+int gridInqReference(int gridID, char *reference)
 {
   grid_t *gridptr;
+  int len = 0;
 
   gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
-  memcpy(uuid, gridptr->uuid, 16);
+  if ( gridptr->reference )
+    {
+      len = (int) strlen(gridptr->reference);
 
-  return (uuid);
+      if ( reference )
+        strcpy(reference, gridptr->reference);
+    }
+
+  return (len);
 }
 
+/*
+@Function  gridDefUUID
+@Title     Define the UUID for an unstructured grid
 
+@Prototype void gridDefUUID(int gridID, const char *uuid)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  uuid     UUID for an unstructured grid.
+
+@Description
+The function @func{gridDefUUID} defines the UUID for an unstructured grid.
+
+@EndFunction
+*/
 void gridDefUUID(int gridID, const char *uuid)
 {
   grid_t *gridptr;
@@ -4227,6 +4353,40 @@ void gridDefUUID(int gridID, const char *uuid)
   memcpy(gridptr->uuid, uuid, 16);
 
   return;
+}
+
+/*
+@Function  gridInqUUID
+@Title     Get the UUID to an unstructured grid
+
+@Prototype char *gridInqUUID(int gridID, char *uuid)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+
+@Description
+The function @func{gridInqUUID} returns the UUID to an unstructured grid.
+
+@Result
+@func{gridInqUUID} returns the UUID to an unstructured grid.
+@EndFunction
+*/
+char *gridInqUUID(int gridID, char *uuid)
+{
+  grid_t *gridptr;
+
+  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+
+  grid_check_ptr(gridID, gridptr);
+
+  memcpy(uuid, gridptr->uuid, 16);
+
+  return (uuid);
+}
+
+
+void gridGetIndexList ( int ngrids, int * gridIndexList )
+{
+  reshGetResHListOfType ( ngrids, gridIndexList, &gridOps );
 }
 
 

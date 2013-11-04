@@ -13,9 +13,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>  // gettimeofday()
 #include <fcntl.h>
-/*
-size_t getpagesize(void);
-*/
+
 #include "dmemory.h"
 #include "error.h"
 #include "file.h"
@@ -350,8 +348,8 @@ const char *fileLibraryVersion(void)
 static
 int pagesize(void)
 {
-#if defined (HAVE_MMAP)
-  return ((int) getpagesize());
+#if defined(_SC_PAGESIZE)
+  return ((int) sysconf(_SC_PAGESIZE));
 #else
   return ((int) POSIXIO_DEFAULT_PAGESIZE);
 #endif
@@ -1278,9 +1276,7 @@ int fileClose_serial(int fileID)
 	}
       fprintf(stderr, " buffer size      : %lu\n", (unsigned long) fileptr->bufferSize);
       fprintf(stderr, " block size       : %lu\n", (unsigned long) fileptr->blockSize);
-#if defined (HAVE_MMAP)
       fprintf(stderr, " page size        : %d\n",  pagesize());
-#endif
       fprintf(stderr, "--------------------------------------------\n");
     }
 

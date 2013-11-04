@@ -114,57 +114,61 @@ extern "C" {
 
 /* Chunks */
 
-#define  CHUNK_AUTO               1  /* use default chunk size                  */
-#define  CHUNK_GRID               2
-#define  CHUNK_LINES              3
+#define  CHUNK_AUTO                 1  /* use default chunk size                                */
+#define  CHUNK_GRID                 2
+#define  CHUNK_LINES                3
 
 /* GRID types */
 
-#define  GRID_GENERIC             1  /* Generic grid                            */
-#define  GRID_GAUSSIAN            2  /* Regular Gaussian lon/lat grid           */
-#define  GRID_GAUSSIAN_REDUCED    3  /* Reduced Gaussian lon/lat grid           */
-#define  GRID_LONLAT              4  /* Regular longitude/latitude grid         */
-#define  GRID_SPECTRAL            5  /* Spherical harmonic coefficients         */
-#define  GRID_FOURIER             6  /* Fourier coefficients                    */
-#define  GRID_GME                 7  /* Icosahedral-hexagonal GME grid          */
-#define  GRID_TRAJECTORY          8  /* Trajectory                              */
-#define  GRID_UNSTRUCTURED        9  /* General unstructured grid               */
-#define  GRID_CURVILINEAR        10  /* Curvilinear grid                        */
-#define  GRID_LCC                11  /* Lambert Conformal Conic (GRIB)          */
-#define  GRID_LCC2               12  /* Lambert Conformal Conic (PROJ)          */
-#define  GRID_LAEA               13  /* Lambert Azimuthal Equal Area            */
-#define  GRID_SINUSOIDAL         14  /* Sinusoidal                              */
-#define  GRID_REFERENCE          15  /* Grid reference number                   */
-#define  GRID_PROJECTION         16  /* Projected coordiantes                   */
+#define  GRID_GENERIC               1  /* Generic grid                                          */
+#define  GRID_GAUSSIAN              2  /* Regular Gaussian lon/lat grid                         */
+#define  GRID_GAUSSIAN_REDUCED      3  /* Reduced Gaussian lon/lat grid                         */
+#define  GRID_LONLAT                4  /* Regular longitude/latitude grid                       */
+#define  GRID_SPECTRAL              5  /* Spherical harmonic coefficients                       */
+#define  GRID_FOURIER               6  /* Fourier coefficients                                  */
+#define  GRID_GME                   7  /* Icosahedral-hexagonal GME grid                        */
+#define  GRID_TRAJECTORY            8  /* Trajectory                                            */
+#define  GRID_UNSTRUCTURED          9  /* General unstructured grid                             */
+#define  GRID_CURVILINEAR          10  /* Curvilinear grid                                      */
+#define  GRID_LCC                  11  /* Lambert Conformal Conic (GRIB)                        */
+#define  GRID_LCC2                 12  /* Lambert Conformal Conic (PROJ)                        */
+#define  GRID_LAEA                 13  /* Lambert Azimuthal Equal Area                          */
+#define  GRID_SINUSOIDAL           14  /* Sinusoidal                                            */
+#define  GRID_PROJECTION           15  /* Projected coordiantes                                 */
 
 /* ZAXIS types */
 
-#define  ZAXIS_SURFACE            0  /* Surface level                           */
-#define  ZAXIS_GENERIC            1  /* Generic level                           */
-#define  ZAXIS_HYBRID             2  /* Hybrid level                            */
-#define  ZAXIS_HYBRID_HALF        3  /* Hybrid half level                       */
-#define  ZAXIS_PRESSURE           4  /* Isobaric pressure level in Pascal       */
-#define  ZAXIS_HEIGHT             5  /* Height above ground in meters           */
-#define  ZAXIS_DEPTH_BELOW_SEA    6  /* Depth below sea level in meters         */
-#define  ZAXIS_DEPTH_BELOW_LAND   7  /* Depth below land surface in centimeters */
-#define  ZAXIS_ISENTROPIC         8  /* Isentropic                              */
-#define  ZAXIS_TRAJECTORY         9  /* Trajectory                              */
-#define  ZAXIS_ALTITUDE          10  /* Altitude above mean sea level in meters */
-#define  ZAXIS_SIGMA             11  /* Sigma level                             */
-#define  ZAXIS_MEANSEA           12  /* Mean sea level                          */
-#define  ZAXIS_TOA               13  /* Norminal top of atmosphere              */
-#define  ZAXIS_SEA_BOTTOM        14  /* Sea bottom                              */
-#define  ZAXIS_ATMOSPHERE        15  /* Entire atmosphere                       */
-#define  ZAXIS_CLOUD_BASE        16  /* Cloud base level                        */
-#define  ZAXIS_CLOUD_TOP         17  /* Level of cloud tops                     */
-#define  ZAXIS_ISOTHERM_ZERO     18  /* Level of 0o C isotherm                  */
-#define  ZAXIS_SNOW              19  /* Snow level                              */
-#define  ZAXIS_REFERENCE         20  /* zaxis reference number                  */
+#define  ZAXIS_SURFACE              0  /* Surface level                                         */
+#define  ZAXIS_GENERIC              1  /* Generic level                                         */
+#define  ZAXIS_HYBRID               2  /* Hybrid level                                          */
+#define  ZAXIS_HYBRID_HALF          3  /* Hybrid half level                                     */
+#define  ZAXIS_PRESSURE             4  /* Isobaric pressure level in Pascal                     */
+#define  ZAXIS_HEIGHT               5  /* Height above ground in meters                         */
+#define  ZAXIS_DEPTH_BELOW_SEA      6  /* Depth below sea level in meters                       */
+#define  ZAXIS_DEPTH_BELOW_LAND     7  /* Depth below land surface in centimeters               */
+#define  ZAXIS_ISENTROPIC           8  /* Isentropic                                            */
+#define  ZAXIS_TRAJECTORY           9  /* Trajectory                                            */
+#define  ZAXIS_ALTITUDE            10  /* Altitude above mean sea level in meters               */
+#define  ZAXIS_SIGMA               11  /* Sigma level                                           */
+#define  ZAXIS_MEANSEA             12  /* Mean sea level                                        */
+#define  ZAXIS_TOA                 13  /* Norminal top of atmosphere                            */
+#define  ZAXIS_SEA_BOTTOM          14  /* Sea bottom                                            */
+#define  ZAXIS_ATMOSPHERE          15  /* Entire atmosphere                                     */
+#define  ZAXIS_CLOUD_BASE          16  /* Cloud base level                                      */
+#define  ZAXIS_CLOUD_TOP           17  /* Level of cloud tops                                   */
+#define  ZAXIS_ISOTHERM_ZERO       18  /* Level of 0o C isotherm                                */
+#define  ZAXIS_SNOW                19  /* Snow level                                            */
+#define  ZAXIS_LAKE_BOTTOM         20  /* Lake or River Bottom                                  */
+#define  ZAXIS_SEDIMENT_BOTTOM     21  /* Bottom Of Sediment Layer                              */
+#define  ZAXIS_SEDIMENT_BOTTOM_TA  22  /* Bottom Of Thermally Active Sediment Layer             */
+#define  ZAXIS_SEDIMENT_BOTTOM_TW  23  /* Bottom Of Sediment Layer Penetrated By Thermal Wave   */
+#define  ZAXIS_MIX_LAYER           24  /* Mixing Layer                                          */
+#define  ZAXIS_REFERENCE           25  /* zaxis reference number                                */
 
 /* TIME types */
 
-#define  TIME_CONSTANT            0  /* obsolate, use TSTEP_CONSTANT            */
-#define  TIME_VARIABLE            1  /* obsolate, use TSTEP_INSTANT             */
+#define  TIME_CONSTANT              0  /* obsolate, use TSTEP_CONSTANT                          */
+#define  TIME_VARIABLE              1  /* obsolate, use TSTEP_INSTANT                           */
 
 /* TSTEP types */
 
@@ -535,6 +539,9 @@ int     vlistInqVarTimave(int vlistID, int varID);
 void    vlistDefVarTimaccu(int vlistID, int varID, int timaccu);
 int     vlistInqVarTimaccu(int vlistID, int varID);
 
+void    vlistDefVarTypeOfGeneratingProcess(int vlistID, int varID, int typeOfGeneratingProcess);
+int     vlistInqVarTypeOfGeneratingProcess(int vlistID, int varID);
+
 int     vlistInqVarSize(int vlistID, int varID);
 
 void    vlistDefIndex(int vlistID, int varID, int levID, int index);
@@ -728,15 +735,31 @@ void    gridDefGMEni2(int gridID, int ni2);
 int     gridInqGMEni3(int gridID);
 void    gridDefGMEni3(int gridID, int ni3);
 
-/* Reference grid */
-int     gridInqNumber(int gridID);
+/* Reference of an unstructured grid */
+
+/*      gridDefNumber: Define the reference number for an unstructured grid */
 void    gridDefNumber(int gridID, int number);
-int     gridInqPosition(int gridID);
+
+/*      gridInqNumber: Get the reference number to an unstructured grid */
+int     gridInqNumber(int gridID);
+
+/*      gridDefPosition: Define the position of grid in the reference file */
 void    gridDefPosition(int gridID, int position);
-int     gridInqReference(int gridID, char *reference);
+
+/*      gridInqPosition: Get the position of grid in the reference file */
+int     gridInqPosition(int gridID);
+
+/*      gridDefReference: Define the reference URI for an unstructured grid */
 void    gridDefReference(int gridID, const char *reference);
-char   *gridInqUUID(int gridID, char *uuid_cbuf);
+
+/*      gridInqReference: Get the reference URI to an unstructured grid */
+int     gridInqReference(int gridID, char *reference);
+
+/*      gridDefUUID: Define the UUID of an unstructured grid */
 void    gridDefUUID(int gridID, const char *uuid_cbuf);
+
+/*      gridInqUUID: Get the UUID of an unstructured grid */
+char   *gridInqUUID(int gridID, char *uuid_cbuf);
 
 
 /* Lambert Conformal Conic grid (GRIB version) */
@@ -816,17 +839,17 @@ void    zaxisDefLevel(int zaxisID, int levelID, double levels);
 /*      zaxisInqLevel: Get one level of a Z-axis */
 double  zaxisInqLevel(int zaxisID, int levelID);
 
-/*      zaxisDefReference: Define the reference of a generalized Z-axis */
-void    zaxisDefReference(int zaxisID, int refID);
+/*      zaxisDefNumber: Define the reference number for a generalized Z-axis */
+void    zaxisDefNumber(int gridID, int number);
 
-/*      zaxisDefUUID: Define the uuid of a generalized Z-axis */
+/*      zaxisInqNumber: Get the reference number to a generalized Z-axis */
+int     zaxisInqNumber(int gridID);
+
+/*      zaxisDefUUID: Define the UUID of a generalized Z-axis */
 void    zaxisDefUUID(int zaxisID, const char *uuid_cbuf);
 
-/*      zaxisInqUUID: Get the reference of a generalized Z-axis */
+/*      zaxisInqUUID: Get the UUID of a generalized Z-axis */
 char   *zaxisInqUUID(int zaxisID, char *uuid_cbuf);
-
-/*      zaxisInqReference: Get the reference of a generalized Z-axis */
-int     zaxisInqReference(int zaxisID);
 
 /*      zaxisDefName: Define the name of a Z-axis */
 void    zaxisDefName(int zaxisID, const char *name);
@@ -852,6 +875,7 @@ void    zaxisInqUnits(int zaxisID, char *units);
 void    zaxisDefPrec(int zaxisID, int prec);
 int     zaxisInqPrec(int zaxisID);
 
+void    zaxisDefPositive(int zaxisID, int positive);
 int     zaxisInqPositive(int zaxisID);
 
 void    zaxisDefLtype(int zaxisID, int ltype);

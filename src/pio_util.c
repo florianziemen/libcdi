@@ -295,7 +295,6 @@ cdiPioQueryVarDims(int varShape[3], int vlistID, int varID)
     case GRID_GME:
     case GRID_CURVILINEAR:
     case GRID_UNSTRUCTURED:
-    case GRID_REFERENCE:
       xabort("unimplemented grid type: %d", gridType);
       break;
     }

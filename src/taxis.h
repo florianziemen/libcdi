@@ -16,6 +16,7 @@ typedef struct {
   int     calendar;
   int     unit;           /* time unit             */
   int     numavg;
+  int     climatology;
   int     has_bounds;
   int     vdate_lb;       /* lower bounds of vdate */
   int     vtime_lb;       /* lower bounds of vtime */

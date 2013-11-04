@@ -18,8 +18,7 @@ The function {\tt gridCreate} creates a horizontal Grid.
 The type of the grid, one of the set of predefined {\CDI} grid types.
                      The valid {\CDI} grid types are {\tt GRID\_GENERIC}, {\tt GRID\_GAUSSIAN},
                      {\tt GRID\_LONLAT}, {\tt GRID\_LCC}, {\tt GRID\_SPECTRAL},
-                     {\tt GRID\_GME}, {\tt GRID\_CURVILINEAR}, {\tt GRID\_UNSTRUCTURED} and
-                     {\tt GRID\_REFERENCE}.
+                     {\tt GRID\_GME}, {\tt GRID\_CURVILINEAR} and {\tt GRID\_UNSTRUCTURED} and.
 \item[{\tt size}]
 Number of gridpoints.
 
@@ -126,7 +125,7 @@ Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
 one of the set of predefined {\CDI} grid types.
 The valid {\CDI} grid types are {\tt GRID\_GENERIC}, {\tt GRID\_GAUSSIAN},
 {\tt GRID\_LONLAT}, {\tt GRID\_LCC}, {\tt GRID\_SPECTRAL}, {\tt GRID\_GME},
-{\tt GRID\_CURVILINEAR}, {\tt GRID\_UNSTRUCTURED} and {\tt GRID\_REFERENCE}.
+{\tt GRID\_CURVILINEAR} and {\tt GRID\_UNSTRUCTURED}.
 
 
 
@@ -837,3 +836,195 @@ Units of the Y-axis. The caller must allocate space for the
 
 {\tt gridInqYunits} returns the units of the Y-axis to the parameter units.
 
+
+
+\subsection{Define the reference number for an unstructured grid: {\tt gridDefNumber}}
+\index{gridDefNumber}
+\label{gridDefNumber}
+
+The function {\tt gridDefNumber} defines the reference number for an unstructured grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE gridDefNumber(INTEGER gridID, INTEGER number)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt number}]
+Reference number for an unstructured grid.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the reference number to an unstructured grid: {\tt gridInqNumber}}
+\index{gridInqNumber}
+\label{gridInqNumber}
+
+The function {\tt gridInqNumber} returns the reference number to an unstructured grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridInqNumber(INTEGER gridID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqNumber} returns the reference number to an unstructured grid.
+
+
+\subsection{Define the position of grid in the reference file: {\tt gridDefPosition}}
+\index{gridDefPosition}
+\label{gridDefPosition}
+
+The function {\tt gridDefPosition} defines the position of grid in the reference file.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE gridDefPosition(INTEGER gridID, INTEGER position)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt position\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt position}]
+Position of grid in the reference file.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the position of grid in the reference file: {\tt gridInqPosition}}
+\index{gridInqPosition}
+\label{gridInqPosition}
+
+The function {\tt gridInqPosition} returns the position of grid in the reference file.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridInqPosition(INTEGER gridID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqPosition} returns the position of grid in the reference file.
+
+
+\subsection{Define the reference URI for an unstructured grid: {\tt gridDefReference}}
+\index{gridDefReference}
+\label{gridDefReference}
+
+The function {\tt gridDefReference} defines the reference URI for an unstructured grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE gridDefReference(INTEGER gridID, CHARACTER*(*) reference)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt reference\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt reference}]
+Reference URI for an unstructured grid.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the reference URI to an unstructured grid: {\tt gridInqReference}}
+\index{gridInqReference}
+\label{gridInqReference}
+
+The function {\tt gridInqReference} returns the reference URI to an unstructured grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    char *gridInqReference(INTEGER gridID, CHARACTER*(*) reference)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqReference} returns the reference URI to an unstructured grid.
+
+
+\subsection{Define the UUID for an unstructured grid: {\tt gridDefUUID}}
+\index{gridDefUUID}
+\label{gridDefUUID}
+
+The function {\tt gridDefUUID} defines the UUID for an unstructured grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE gridDefUUID(INTEGER gridID, CHARACTER*(*) uuid)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt uuid}]
+UUID for an unstructured grid.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the UUID to an unstructured grid: {\tt gridInqUUID}}
+\index{gridInqUUID}
+\label{gridInqUUID}
+
+The function {\tt gridInqUUID} returns the UUID to an unstructured grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    char *gridInqUUID(INTEGER gridID, CHARACTER*(*) uuid)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqUUID} returns the UUID to an unstructured grid.

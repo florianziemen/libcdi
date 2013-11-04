@@ -32,6 +32,10 @@ cat > ${PROG} << EOR
 
 /* CDILIB_VERSION=${CDILIBVERSION} */
 
+#ifdef _ARCH_PWR6
+#pragma options nostrict
+#endif
+
 #if  defined  (HAVE_CONFIG_H)
 #  include "config.h"
 #endif
@@ -145,7 +149,7 @@ c="dmemory.c         \
    pio_list_set.c"
 
 h="cdi_limits.h taxis.h dtypes.h file.h service.h extra.h \
-   ieg.h cdi.h timebase.h calendar.h basetime.h datetime.h \
+   ieg.h cdi.h timebase.h calendar.h basetime.h datetime.h namespace.h \
    error.c error.h cdi_int.h cgribex.h gribapi.h \
    stream_cgribex.h  stream_gribapi.h  stream_grb.h  stream_cdf.h \
    tablepar.h table.h gaussgrid.h grid.h zaxis.h varscan.h binary.h swap.h \

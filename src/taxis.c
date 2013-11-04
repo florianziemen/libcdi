@@ -117,6 +117,7 @@ void taxisDefaultValue ( taxis_t *taxisptr )
   taxisptr->vtime_ub    = 0;
   taxisptr->name        = NULL;
   taxisptr->longname    = NULL;
+  taxisptr->climatology = FALSE;
 }
 
 static
@@ -653,7 +654,7 @@ int taxisInqVtime(int taxisID)
 void taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub)
 {
   taxis_t *taxisptr;
-  
+
   taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
@@ -679,7 +680,7 @@ void taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub)
 
   taxisptr->vtime_lb = vtime_lb;
   taxisptr->vtime_ub = vtime_ub;
- 
+
   taxisptr->has_bounds = TRUE;
 }
 
@@ -1202,20 +1203,21 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   reshLock ();
 
   /* memcpy(dest, source, sizeof(taxis_t)); */
-  dest->used       = source->used;
-  dest->type       = source->type;
-  dest->vdate      = source->vdate;
-  dest->vtime      = source->vtime;
-  dest->rdate      = source->rdate;
-  dest->rtime      = source->rtime;
-  dest->calendar   = source->calendar;
-  dest->unit       = source->unit;
-  dest->numavg     = source->numavg;
-  dest->has_bounds = source->has_bounds;
-  dest->vdate_lb   = source->vdate_lb;
-  dest->vtime_lb   = source->vtime_lb;
-  dest->vdate_ub   = source->vdate_ub;
-  dest->vtime_ub   = source->vtime_ub;
+  dest->used        = source->used;
+  dest->type        = source->type;
+  dest->vdate       = source->vdate;
+  dest->vtime       = source->vtime;
+  dest->rdate       = source->rdate;
+  dest->rtime       = source->rtime;
+  dest->calendar    = source->calendar;
+  dest->unit        = source->unit;
+  dest->numavg      = source->numavg;
+  dest->has_bounds  = source->has_bounds;
+  dest->vdate_lb    = source->vdate_lb;
+  dest->vtime_lb    = source->vtime_lb;
+  dest->vdate_ub    = source->vdate_ub;
+  dest->vtime_ub    = source->vtime_ub;
+  dest->climatology = source->climatology;
 
   reshUnlock ();
 }
@@ -1234,21 +1236,22 @@ void taxisPrintKernel ( taxis_t * taxisptr, FILE * fp )
   fprintf ( fp, "#\n");
   fprintf ( fp, "# taxisID %d\n", taxisptr->self);
   fprintf ( fp, "#\n");
-  fprintf ( fp, "self       = %d\n", taxisptr->self );
-  fprintf ( fp, "used       = %d\n", taxisptr->used );
-  fprintf ( fp, "type       = %d\n", taxisptr->type );
-  fprintf ( fp, "vdate      = %d\n", taxisptr->vdate );
-  fprintf ( fp, "vtime      = %d\n", taxisptr->vtime );
-  fprintf ( fp, "rdate      = %d\n", taxisptr->rdate );
-  fprintf ( fp, "rtime      = %d\n", taxisptr->rtime );
-  fprintf ( fp, "calendar   = %d\n", taxisptr->calendar );
-  fprintf ( fp, "unit       = %d\n", taxisptr->unit );
-  fprintf ( fp, "numavg     = %d\n", taxisptr->numavg );
-  fprintf ( fp, "has_bounds = %d\n", taxisptr->has_bounds );
-  fprintf ( fp, "vdate_lb   = %d\n", vdate_lb );
-  fprintf ( fp, "vtime_lb   = %d\n", vtime_lb );
-  fprintf ( fp, "vdate_ub   = %d\n", vdate_ub );
-  fprintf ( fp, "vtime_ub   = %d\n", vtime_ub );
+  fprintf ( fp, "self        = %d\n", taxisptr->self );
+  fprintf ( fp, "used        = %d\n", taxisptr->used );
+  fprintf ( fp, "type        = %d\n", taxisptr->type );
+  fprintf ( fp, "vdate       = %d\n", taxisptr->vdate );
+  fprintf ( fp, "vtime       = %d\n", taxisptr->vtime );
+  fprintf ( fp, "rdate       = %d\n", taxisptr->rdate );
+  fprintf ( fp, "rtime       = %d\n", taxisptr->rtime );
+  fprintf ( fp, "calendar    = %d\n", taxisptr->calendar );
+  fprintf ( fp, "unit        = %d\n", taxisptr->unit );
+  fprintf ( fp, "numavg      = %d\n", taxisptr->numavg );
+  fprintf ( fp, "climatology = %d\n", taxisptr->climatology );
+  fprintf ( fp, "has_bounds  = %d\n", taxisptr->has_bounds );
+  fprintf ( fp, "vdate_lb    = %d\n", vdate_lb );
+  fprintf ( fp, "vtime_lb    = %d\n", vtime_lb );
+  fprintf ( fp, "vdate_ub    = %d\n", vdate_ub );
+  fprintf ( fp, "vtime_ub    = %d\n", vtime_ub );
   fprintf ( fp, "\n");
 }
 
@@ -1275,20 +1278,21 @@ int taxisCompareP ( void *  taxisptr1, void * taxisptr2 )
   xassert ( t1 );
   xassert ( t2 );
 
-  return ! ( t1->used       == t2->used       &&
-	     t1->type       == t2->type       &&
-	     t1->vdate      == t2->vdate      &&
-	     t1->vtime      == t2->vtime      &&
-	     t1->rdate      == t2->rdate      &&
-	     t1->rtime      == t2->rtime      &&
-	     t1->calendar   == t2->calendar   &&
-	     t1->unit       == t2->unit       &&
-	     t1->numavg     == t2->numavg     &&
-	     t1->has_bounds == t2->has_bounds &&
-	     t1->vdate_lb   == t2->vdate_lb   &&
-	     t1->vtime_lb   == t2->vtime_lb   &&
-	     t1->vdate_ub   == t2->vdate_ub   &&
-	     t1->vtime_ub   == t2->vtime_ub );
+  return ! ( t1->used        == t2->used        &&
+	     t1->type        == t2->type        &&
+	     t1->vdate       == t2->vdate       &&
+	     t1->vtime       == t2->vtime       &&
+	     t1->rdate       == t2->rdate       &&
+	     t1->rtime       == t2->rtime       &&
+	     t1->calendar    == t2->calendar    &&
+	     t1->unit        == t2->unit        &&
+	     t1->numavg      == t2->numavg      &&
+	     t1->climatology == t2->climatology &&
+	     t1->has_bounds  == t2->has_bounds  &&
+	     t1->vdate_lb    == t2->vdate_lb    &&
+	     t1->vtime_lb    == t2->vtime_lb    &&
+	     t1->vdate_ub    == t2->vdate_ub    &&
+	     t1->vtime_ub    == t2->vtime_ub );
 }
 
 
@@ -1298,7 +1302,7 @@ taxisTxCode ( void )
   return TAXIS;
 }
 
-enum { taxisNint = 17 };
+enum { taxisNint = 18 };
 
 static int
 taxisGetPackSize(void *p, void *context)
@@ -1338,20 +1342,20 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
   xassert(!checkForSameID
           || namespaceAdaptKey(intBuffer[0], nspTarget) == taxisP->self);
 
-  taxisP->used       = intBuffer[1];
-  taxisP->type       = intBuffer[2];
-  taxisP->vdate      = intBuffer[3];
-  taxisP->vtime      = intBuffer[4];
-  taxisP->rdate      = intBuffer[5];
-  taxisP->rtime      = intBuffer[6];
-  taxisP->calendar   = intBuffer[7];
-  taxisP->unit       = intBuffer[8];
-  taxisP->numavg     = intBuffer[9];
-  taxisP->has_bounds = intBuffer[10];
-  taxisP->vdate_lb   = intBuffer[11];
-  taxisP->vtime_lb   = intBuffer[12];
-  taxisP->vdate_ub   = intBuffer[13];
-  taxisP->vtime_ub   = intBuffer[14];
+  taxisP->used        = intBuffer[1];
+  taxisP->type        = intBuffer[2];
+  taxisP->vdate       = intBuffer[3];
+  taxisP->vtime       = intBuffer[4];
+  taxisP->rdate       = intBuffer[5];
+  taxisP->rtime       = intBuffer[6];
+  taxisP->calendar    = intBuffer[7];
+  taxisP->unit        = intBuffer[8];
+  taxisP->numavg      = intBuffer[9];
+  taxisP->has_bounds  = intBuffer[10];
+  taxisP->vdate_lb    = intBuffer[11];
+  taxisP->vtime_lb    = intBuffer[12];
+  taxisP->vdate_ub    = intBuffer[13];
+  taxisP->vtime_ub    = intBuffer[14];
   if (intBuffer[15])
     {
       size_t len = intBuffer[15];
@@ -1370,6 +1374,9 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
       longname[len] = '\0';
       taxisP->longname = longname;
     }
+
+  taxisP->climatology = intBuffer[17];
+
   return taxisP->self;
 }
 
@@ -1411,6 +1418,8 @@ taxisPack(void * voidP, void * packBuffer, int packBufferSize, int * packBufferP
   if (taxisP->longname)
     serializePack(taxisP->longname, intBuffer[16], DATATYPE_TXT,
                   packBuffer, packBufferSize, packBufferPos, context);
+
+  intBuffer[17] = taxisP->climatology;
 }
 
 /*

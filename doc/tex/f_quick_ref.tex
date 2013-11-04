@@ -40,6 +40,15 @@ Create a horizontal Grid.
 Define the number of parallels between a pole and the equator.
 
 
+\section*{\tt \htmlref{gridDefNumber}{gridDefNumber}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefNumber (INTEGER gridID, INTEGER number)
+\end{verbatim}
+
+Define the reference number for an unstructured grid.
+
+
 \section*{\tt \htmlref{gridDefNvertex}{gridDefNvertex}}
 
 \begin{verbatim}
@@ -49,6 +58,15 @@ Define the number of parallels between a pole and the equator.
 Define the number of vertex of a Gridbox.
 
 
+\section*{\tt \htmlref{gridDefPosition}{gridDefPosition}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefPosition (INTEGER gridID, INTEGER position)
+\end{verbatim}
+
+Define the position of grid in the reference file.
+
+
 \section*{\tt \htmlref{gridDefPrec}{gridDefPrec}}
 
 \begin{verbatim}
@@ -56,6 +74,24 @@ Define the number of vertex of a Gridbox.
 \end{verbatim}
 
 Define the precision of a Grid.
+
+
+\section*{\tt \htmlref{gridDefReference}{gridDefReference}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefReference (INTEGER gridID, CHARACTER*(*) reference)
+\end{verbatim}
+
+Define the reference URI for an unstructured grid.
+
+
+\section*{\tt \htmlref{gridDefUUID}{gridDefUUID}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefUUID (INTEGER gridID, CHARACTER*(*) uuid_cbuf)
+\end{verbatim}
+
+Define the UUID of an unstructured grid.
 
 
 \section*{\tt \htmlref{gridDefXbounds}{gridDefXbounds}}
@@ -193,6 +229,15 @@ Duplicate a Grid.
 Get the number of parallels between a pole and the equator.
 
 
+\section*{\tt \htmlref{gridInqNumber}{gridInqNumber}}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridInqNumber (INTEGER gridID)
+\end{verbatim}
+
+Get the reference number to an unstructured grid.
+
+
 \section*{\tt \htmlref{gridInqNvertex}{gridInqNvertex}}
 
 \begin{verbatim}
@@ -202,6 +247,15 @@ Get the number of parallels between a pole and the equator.
 Get the number of vertex of a Gridbox.
 
 
+\section*{\tt \htmlref{gridInqPosition}{gridInqPosition}}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridInqPosition (INTEGER gridID)
+\end{verbatim}
+
+Get the position of grid in the reference file.
+
+
 \section*{\tt \htmlref{gridInqPrec}{gridInqPrec}}
 
 \begin{verbatim}
@@ -209,6 +263,15 @@ Get the number of vertex of a Gridbox.
 \end{verbatim}
 
 Get the precision of a Grid.
+
+
+\section*{\tt \htmlref{gridInqReference}{gridInqReference}}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridInqReference (INTEGER gridID, CHARACTER*(*) reference)
+\end{verbatim}
+
+Get the reference URI to an unstructured grid.
 
 
 \section*{\tt \htmlref{gridInqSize}{gridInqSize}}
@@ -227,6 +290,15 @@ Get the size of a Grid.
 \end{verbatim}
 
 Get the type of a Grid.
+
+
+\section*{\tt \htmlref{gridInqUUID}{gridInqUUID}}
+
+\begin{verbatim}
+    CHARACTER(80) FUNCTION gridInqUUID (INTEGER gridID, CHARACTER*(*) uuid_cbuf)
+\end{verbatim}
+
+Get the UUID of an unstructured grid.
 
 
 \section*{\tt \htmlref{gridInqXbounds}{gridInqXbounds}}
@@ -1141,13 +1213,13 @@ Define the longname of a Z-axis.
 Define the name of a Z-axis.
 
 
-\section*{\tt \htmlref{zaxisDefReference}{zaxisDefReference}}
+\section*{\tt \htmlref{zaxisDefNumber}{zaxisDefNumber}}
 
 \begin{verbatim}
-    SUBROUTINE zaxisDefReference (INTEGER zaxisID, INTEGER refID)
+    SUBROUTINE zaxisDefNumber (INTEGER gridID, INTEGER number)
 \end{verbatim}
 
-Define the reference of a generalized Z-axis.
+Define the reference number for a generalized Z-axis.
 
 
 \section*{\tt \htmlref{zaxisDefUUID}{zaxisDefUUID}}
@@ -1156,7 +1228,7 @@ Define the reference of a generalized Z-axis.
     SUBROUTINE zaxisDefUUID (INTEGER zaxisID, CHARACTER*(*) uuid_cbuf)
 \end{verbatim}
 
-Define the uuid of a generalized Z-axis.
+Define the UUID of a generalized Z-axis.
 
 
 \section*{\tt \htmlref{zaxisDefUnits}{zaxisDefUnits}}
@@ -1222,13 +1294,13 @@ Get the longname of a Z-axis.
 Get the name of a Z-axis.
 
 
-\section*{\tt \htmlref{zaxisInqReference}{zaxisInqReference}}
+\section*{\tt \htmlref{zaxisInqNumber}{zaxisInqNumber}}
 
 \begin{verbatim}
-    INTEGER FUNCTION zaxisInqReference (INTEGER zaxisID)
+    INTEGER FUNCTION zaxisInqNumber (INTEGER gridID)
 \end{verbatim}
 
-Get the reference of a generalized Z-axis.
+Get the reference number to a generalized Z-axis.
 
 
 \section*{\tt \htmlref{zaxisInqSize}{zaxisInqSize}}
@@ -1264,7 +1336,7 @@ Get the type of a Z-axis.
     CHARACTER(80) FUNCTION zaxisInqUUID (INTEGER zaxisID, CHARACTER*(*) uuid_cbuf)
 \end{verbatim}
 
-Get the reference of a generalized Z-axis.
+Get the UUID of a generalized Z-axis.
 
 
 \section*{\tt \htmlref{zaxisInqUnits}{zaxisInqUnits}}

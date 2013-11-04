@@ -119,6 +119,7 @@ examples/cdi_write_ens.c -text
 examples/cdi_write_f.f -text
 examples/cdi_write_f2003.f90 -text
 examples/cdi_write_hybrid.c -text
+examples/cdi_write_point.c -text
 examples/cdi_write_reset.c -text
 examples/compf -text
 examples/pio/Makefile.am -text

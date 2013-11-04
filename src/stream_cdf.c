@@ -41,6 +41,9 @@ void cdfDefLocalAtts(stream_t *streamptr);
 #define  Z_AXIS  3
 #define  T_AXIS  4
 
+#define  POSITIVE_UP    1
+#define  POSITIVE_DOWN  2
+
 typedef struct {
   int     ncvarid;
   int     dimtype;
@@ -62,6 +65,7 @@ typedef struct {
   int      param;
   int      code;
   int      tabnum;
+  int      climatology;
   int      bounds;
   int      gridID;
   int      zaxisID;
@@ -80,6 +84,7 @@ typedef struct {
   int      calendar;
   int      tableID;
   int      truncation;
+  int      position;
   int      defmissval;
   int      deffillval;
   int      xtype;
@@ -844,13 +849,26 @@ void cdfDefTime(stream_t *streamptr)
       if ( nc_inq_dimid(fileID, "nb2", &dims[1]) != NC_NOERR )
 	cdf_def_dim(fileID, "nb2", 2, &dims[1]);
 
-      strcpy(tmpstr, taxis_name);
-      strcat(tmpstr, "_bnds");
-      cdf_def_var(fileID, tmpstr, NC_DOUBLE, 2, dims, &time_bndsid);
+      if ( taxis->climatology )
+        {
+          strcpy(tmpstr, "climatology");
+          strcat(tmpstr, "_bnds");
+          cdf_def_var(fileID, tmpstr, NC_DOUBLE, 2, dims, &time_bndsid);
 
-      streamptr->basetime.ncvarboundsid = time_bndsid;
+          streamptr->basetime.ncvarboundsid = time_bndsid;
 
-      cdf_put_att_text(fileID, time_varid, "bounds", strlen(tmpstr), tmpstr);
+          cdf_put_att_text(fileID, time_varid, "climatology", strlen(tmpstr), tmpstr);
+        }
+      else
+        {
+          strcpy(tmpstr, taxis_name);
+          strcat(tmpstr, "_bnds");
+          cdf_def_var(fileID, tmpstr, NC_DOUBLE, 2, dims, &time_bndsid);
+
+          streamptr->basetime.ncvarboundsid = time_bndsid;
+
+          cdf_put_att_text(fileID, time_varid, "bounds", strlen(tmpstr), tmpstr);
+        }
     }
 
   unitstr[0] = 0;
@@ -892,11 +910,12 @@ void cdfDefTime(stream_t *streamptr)
 
   len = strlen(unitstr);
   if ( len )
-    cdf_put_att_text(fileID, time_varid, "units", len, unitstr);
+    {
+      cdf_put_att_text(fileID, time_varid, "units", len, unitstr);
 
-  if ( taxis->has_bounds )
-    if ( len )
-      cdf_put_att_text(fileID, time_bndsid, "units", len, unitstr);
+      if ( taxis->has_bounds )
+        cdf_put_att_text(fileID, time_bndsid, "units", len, unitstr);
+    }
 
   if ( taxis->calendar != -1 )
     {
@@ -1895,6 +1914,47 @@ void cdfDefGdim(stream_t *streamptr, int gridID)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
+void cdfDefGridReference(stream_t *streamptr, int gridID)
+{
+  int fileID  = streamptr->fileID;
+  int number = gridInqNumber(gridID);
+
+  if ( number > 0 )
+    {
+      cdf_put_att_int(fileID, NC_GLOBAL, "number_of_grid_used", NC_INT, 1, &number);
+    }
+
+  if ( gridInqReference(gridID, NULL) )
+    {
+      char gridfile[8912];
+      gridInqReference(gridID, gridfile);
+
+      if ( gridfile[0] != 0 )
+        cdf_put_att_text(fileID, NC_GLOBAL, "grid_file_uri", strlen(gridfile), gridfile);
+    }
+}
+
+static
+void cdfDefGridUUID(stream_t *streamptr, int gridID)
+{
+  char uuidOfHGrid[17];
+
+  gridInqUUID(gridID, uuidOfHGrid);
+  if ( uuidOfHGrid[0] != 0 )
+    {
+      char uuidOfHGridStr[37];
+      uuid2str(uuidOfHGrid, uuidOfHGridStr);
+      if ( uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36 )
+        {
+          int fileID  = streamptr->fileID;
+          //if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+          cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfHGrid", 36, uuidOfHGridStr);
+          //if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
+        }
+    }
+}
+
+static
 void cdfDefUnstructured(stream_t *streamptr, int gridID)
 {
   char xunits[CDI_MAX_NAME];
@@ -1977,6 +2037,10 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
 
       nvertex = gridInqNvertex(gridID);
       if ( nvertex > 0 ) cdf_def_dim(fileID, vertname, nvertex, &nvdimID);
+
+      cdfDefGridReference(streamptr, gridID);
+
+      cdfDefGridUUID(streamptr, gridID);
 
       if ( gridInqXvalsPtr(gridID) )
         {
@@ -2188,14 +2252,19 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   dimlen = zaxisInqSize(zaxisID);
   type   = zaxisInqType(zaxisID);
 
-  if ( dimlen == 1 && type == ZAXIS_SURFACE       ) return;
-  if ( dimlen == 1 && type == ZAXIS_CLOUD_BASE    ) return;
-  if ( dimlen == 1 && type == ZAXIS_CLOUD_TOP     ) return;
-  if ( dimlen == 1 && type == ZAXIS_ISOTHERM_ZERO ) return;
-  if ( dimlen == 1 && type == ZAXIS_TOA           ) return;
-  if ( dimlen == 1 && type == ZAXIS_SEA_BOTTOM    ) return;
-  if ( dimlen == 1 && type == ZAXIS_ATMOSPHERE    ) return;
-  if ( dimlen == 1 && type == ZAXIS_MEANSEA       ) return;
+  if ( dimlen == 1 && type == ZAXIS_SURFACE            ) return;
+  if ( dimlen == 1 && type == ZAXIS_CLOUD_BASE         ) return;
+  if ( dimlen == 1 && type == ZAXIS_CLOUD_TOP          ) return;
+  if ( dimlen == 1 && type == ZAXIS_ISOTHERM_ZERO      ) return;
+  if ( dimlen == 1 && type == ZAXIS_TOA                ) return;
+  if ( dimlen == 1 && type == ZAXIS_SEA_BOTTOM         ) return;
+  if ( dimlen == 1 && type == ZAXIS_ATMOSPHERE         ) return;
+  if ( dimlen == 1 && type == ZAXIS_MEANSEA            ) return;
+  if ( dimlen == 1 && type == ZAXIS_LAKE_BOTTOM        ) return;
+  if ( dimlen == 1 && type == ZAXIS_SEDIMENT_BOTTOM    ) return;
+  if ( dimlen == 1 && type == ZAXIS_SEDIMENT_BOTTOM_TA ) return;
+  if ( dimlen == 1 && type == ZAXIS_SEDIMENT_BOTTOM_TW ) return;
+  if ( dimlen == 1 && type == ZAXIS_MIX_LAYER          ) return;
 
   zaxisInqName(zaxisID, axisname);
   /*
@@ -2342,12 +2411,12 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
             cdf_put_att_text(fileID, ncvarid, "units", len, units);
 
 	  positive = zaxisInqPositive(zaxisID);
-	  if ( positive == 1 )
+	  if ( positive == POSITIVE_UP )
 	    {
 	      strcpy(tmpname, "up");
 	      cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
 	    }
-	  else if ( positive == 2 )
+	  else if ( positive == POSITIVE_DOWN )
 	    {
 	      strcpy(tmpname, "down");
 	      cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
@@ -2532,26 +2601,6 @@ void cdfDefMapping(stream_t *streamptr, int gridID)
 
 #if  defined  (HAVE_LIBNETCDF)
 static
-void cdfDefGridUUID(stream_t *streamptr, int gridID)
-{
-  char uuidOfHGrid[17];
-
-  gridInqUUID(gridID, uuidOfHGrid);
-  if ( uuidOfHGrid[0] != 0 )
-    {
-      char uuidOfHGridStr[37];
-      uuid2str(uuidOfHGrid, uuidOfHGridStr);
-      if ( uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36 )
-        {
-          int fileID  = streamptr->fileID;
-          if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-          cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfHGrid", 36, uuidOfHGridStr);
-          if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
-        }
-    }
-}
-
-static
 void cdfDefGrid(stream_t *streamptr, int gridID)
 {
   int gridtype, size;
@@ -2648,8 +2697,6 @@ void cdfDefGrid(stream_t *streamptr, int gridID)
     {
       Error("Unsupported grid type: %s", gridNamePtr(gridtype));
     }
-
-  cdfDefGridUUID(streamptr, gridID);
 }
 #endif
 
@@ -3025,6 +3072,13 @@ int cdfDefVar(stream_t *streamptr, int varID)
           len = strlen(cellarea);
           cdf_put_att_text(fileID, ncvarid, "cell_measures", len, cellarea);
         }
+
+      if ( gridtype == GRID_UNSTRUCTURED )
+        {
+          int position = gridInqPosition(gridID);
+          if ( position > 0 )
+            cdf_put_att_int(fileID, ncvarid, "number_of_grid_in_reference", NC_INT, 1, &position);
+        }
     }
   else if ( gridtype == GRID_SPECTRAL || gridtype == GRID_FOURIER )
     {
@@ -3076,11 +3130,16 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   if ( zid == -1 )
     {
-      if ( zaxisInqType(zaxisID) == ZAXIS_CLOUD_BASE    ||
-           zaxisInqType(zaxisID) == ZAXIS_CLOUD_TOP     ||
-           zaxisInqType(zaxisID) == ZAXIS_ISOTHERM_ZERO ||
-           zaxisInqType(zaxisID) == ZAXIS_TOA           ||
-           zaxisInqType(zaxisID) == ZAXIS_SEA_BOTTOM    ||
+      if ( zaxisInqType(zaxisID) == ZAXIS_CLOUD_BASE          ||
+           zaxisInqType(zaxisID) == ZAXIS_CLOUD_TOP           ||
+           zaxisInqType(zaxisID) == ZAXIS_ISOTHERM_ZERO       ||
+           zaxisInqType(zaxisID) == ZAXIS_TOA                 ||
+           zaxisInqType(zaxisID) == ZAXIS_SEA_BOTTOM          ||
+           zaxisInqType(zaxisID) == ZAXIS_LAKE_BOTTOM         ||
+           zaxisInqType(zaxisID) == ZAXIS_SEDIMENT_BOTTOM     ||
+           zaxisInqType(zaxisID) == ZAXIS_SEDIMENT_BOTTOM_TA  ||
+           zaxisInqType(zaxisID) == ZAXIS_SEDIMENT_BOTTOM_TW  ||
+           zaxisInqType(zaxisID) == ZAXIS_MIX_LAYER           ||
            zaxisInqType(zaxisID) == ZAXIS_ATMOSPHERE )
         {
           zaxisInqName(zaxisID, varname);
@@ -4187,6 +4246,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].code            = UNDEFID;
       ncvars[ncvarid].tabnum          = 0;
       ncvars[ncvarid].calendar        = FALSE;
+      ncvars[ncvarid].climatology     = FALSE;
       ncvars[ncvarid].bounds          = UNDEFID;
       ncvars[ncvarid].gridID          = UNDEFID;
       ncvars[ncvarid].zaxisID         = UNDEFID;
@@ -4212,6 +4272,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].vlen            = 0;
       ncvars[ncvarid].vdata           = NULL;
       ncvars[ncvarid].truncation      = 0;
+      ncvars[ncvarid].position        = 0;
       ncvars[ncvarid].positive        = 0;
       ncvars[ncvarid].chunked         = 0;
       ncvars[ncvarid].chunktype       = UNDEFID;
@@ -4241,18 +4302,23 @@ static
 int isLonAxis(const char *units, const char *stdname)
 {
   int status = FALSE;
+  char degree_units[16];
 
-  if ( memcmp(units, "degrees_east", 12) == 0 ||
-       memcmp(units, "degree_east", 11)  == 0 ||
-       memcmp(units, "degree_E", 8)      == 0 ||
-       memcmp(units, "degrees_E", 9)     == 0 ||
-       memcmp(units, "degreeE", 7)       == 0 ||
-       memcmp(units, "degreesE", 8)      == 0 ||
-       memcmp(stdname, "longitude", 9)   == 0 ||
-       (memcmp(units, "degree", 6)            == 0 &&
-        memcmp(stdname, "grid_longitude", 14) == 0) ||
-       (memcmp(units, "radian", 6)            == 0 &&
-        memcmp(stdname, "grid_longitude", 14) == 0) )
+  memcpy(degree_units, units, 16);
+  degree_units[15] = 0;
+  strtolower(degree_units);
+
+  if ( memcmp(degree_units, "degree", 6) == 0 )
+    {
+      int ioff = 6;
+      if ( degree_units[ioff] == 's' ) ioff++;
+      if ( degree_units[ioff] == '_' ) ioff++;
+      if ( degree_units[ioff] == 'e' ) status = TRUE;
+    }
+
+  if ( status == TRUE ||
+       ((memcmp(units, "degree", 6) == 0 ||memcmp(units, "radian", 6) == 0) &&
+        (memcmp(stdname, "grid_longitude", 14) == 0 || memcmp(stdname, "longitude", 9) == 0)) )
     {
       status = TRUE;
     }
@@ -4264,18 +4330,23 @@ static
 int isLatAxis(const char *units, const char *stdname)
 {
   int status = FALSE;
+  char degree_units[16];
 
-  if ( memcmp(units, "degrees_north", 13) == 0 ||
-       memcmp(units, "degree_north", 12)  == 0 ||
-       memcmp(units, "degree_N", 8)       == 0 ||
-       memcmp(units, "degrees_N", 9)      == 0 ||
-       memcmp(units, "degreeN", 7)        == 0 ||
-       memcmp(units, "degreesN", 8)       == 0 ||
-       memcmp(stdname, "latitude", 8)     == 0 ||
-       (memcmp(units, "degree", 6)           == 0 &&
-        memcmp(stdname, "grid_latitude", 13) == 0) ||
-       (memcmp(units, "radian", 6)           == 0 &&
-        memcmp(stdname, "grid_latitude", 13) == 0) )
+  memcpy(degree_units, units, 16);
+  degree_units[15] = 0;
+  strtolower(degree_units);
+
+  if ( memcmp(degree_units, "degree", 6) == 0 )
+    {
+      int ioff = 6;
+      if ( degree_units[ioff] == 's' ) ioff++;
+      if ( degree_units[ioff] == '_' ) ioff++;
+      if ( degree_units[ioff] == 'n' ) status = TRUE;
+    }
+
+  if ( status == TRUE ||
+       ((memcmp(units, "degree", 6) == 0 || memcmp(units, "radian", 6) == 0) &&
+        (memcmp(stdname, "grid_latitude", 13) == 0 || memcmp(stdname, "latitude", 8) == 0)) )
     {
       status = TRUE;
     }
@@ -4692,6 +4763,16 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                 ncvars[ncvarid].zaxistype = ZAXIS_ISOTHERM_ZERO;
               else if ( strcmp(attstring, "seabottom") == 0 )
                 ncvars[ncvarid].zaxistype = ZAXIS_SEA_BOTTOM;
+              else if ( strcmp(attstring, "lakebottom") == 0 )
+                ncvars[ncvarid].zaxistype = ZAXIS_LAKE_BOTTOM;
+              else if ( strcmp(attstring, "sedimentbottom") == 0 )
+                ncvars[ncvarid].zaxistype = ZAXIS_SEDIMENT_BOTTOM;
+              else if ( strcmp(attstring, "sedimentbottomta") == 0 )
+                ncvars[ncvarid].zaxistype = ZAXIS_SEDIMENT_BOTTOM_TA;
+              else if ( strcmp(attstring, "sedimentbottomtw") == 0 )
+                ncvars[ncvarid].zaxistype = ZAXIS_SEDIMENT_BOTTOM_TW;
+              else if ( strcmp(attstring, "mixlayer") == 0 )
+                ncvars[ncvarid].zaxistype = ZAXIS_MIX_LAYER;
               else if ( strcmp(attstring, "atmosphere") == 0 )
                 ncvars[ncvarid].zaxistype = ZAXIS_ATMOSPHERE;
               else
@@ -4714,6 +4795,10 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             {
               cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvars[ncvarid].truncation);
             }
+          else if ( strcmp(attname, "number_of_grid_in_reference") == 0 && atttype != NC_CHAR )
+            {
+              cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvars[ncvarid].position);
+            }
           else if ( strcmp(attname, "add_offset") == 0 && atttype != NC_CHAR )
             {
 	      cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvars[ncvarid].addoffset);
@@ -4733,6 +4818,24 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 		Warning("attribute scale_factor not supported for atttype %d", atttype);
 	      */
 	      /* (also used for lon/lat) cdfSetVar(ncvars, ncvarid, TRUE); */
+            }
+          else if ( strcmp(attname, "climatology") == 0 && atttype == NC_CHAR )
+            {
+              int status, ncboundsid;
+
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+
+              status = nc_inq_varid(ncid, attstring, &ncboundsid);
+
+              if ( status == NC_NOERR )
+                {
+                  ncvars[ncvarid].climatology = TRUE;
+                  ncvars[ncvarid].bounds = ncboundsid;
+                  cdfSetVar(ncvars, ncvars[ncvarid].bounds, FALSE);
+                  cdfSetVar(ncvars, ncvarid, FALSE);
+                }
+              else
+                Warning("%s - %s", nc_strerror(status), attstring);
             }
           else if ( strcmp(attname, "bounds") == 0 && atttype == NC_CHAR )
             {
@@ -4878,8 +4981,8 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
               strtolower(attstring);
 
-              if    ( memcmp(attstring, "down", 4) == 0 ) ncvars[ncvarid].positive = -1;
-              else if ( memcmp(attstring, "up", 2) == 0 ) ncvars[ncvarid].positive = 1;
+              if    ( memcmp(attstring, "down", 4) == 0 ) ncvars[ncvarid].positive = POSITIVE_DOWN;
+              else if ( memcmp(attstring, "up", 2) == 0 ) ncvars[ncvarid].positive = POSITIVE_UP;
 
               if ( ncvars[ncvarid].ndims == 1 )
                 {
@@ -5235,11 +5338,11 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 		{
 		  if      ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer midpoints") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
-		  else if ( memcmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
+		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
 		  else if ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer interfaces") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
-		  else if ( memcmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
+		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
 		  else if ( strcmp(ncvars[ncvarid].units, "level") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
@@ -5314,11 +5417,11 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		{
 		  if      ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer midpoints") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
-		  else if ( memcmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
+		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at midpoints", 25) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID;
 		  else if ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer interfaces") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
-		  else if ( memcmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
+		  else if ( strncmp(ncvars[ncvarid].longname, "hybrid level at interfaces", 26) == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
 		  else if ( strcmp(ncvars[ncvarid].units, "level") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
@@ -5367,7 +5470,7 @@ void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
 
 /* define all input grids */
 static
-void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid, char *uuidOfHGrid, int number_of_grid_used)
+void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid, char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
   int ncvarid, ncvarid2;
   int ndims;
@@ -5798,12 +5901,11 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		}
 	    }
 
-	  if ( number_of_grid_used != UNDEFID &&
-               (grid.type == UNDEFID || grid.type == GRID_GENERIC) )
-	    {
-	      grid.type   = GRID_REFERENCE;
-	      grid.number = number_of_grid_used;
-	    }
+	  if ( number_of_grid_used != UNDEFID && (grid.type == UNDEFID || grid.type == GRID_GENERIC) )
+            grid.type   = GRID_UNSTRUCTURED;
+
+	  if ( number_of_grid_used != UNDEFID && grid.type == GRID_UNSTRUCTURED )
+            grid.number = number_of_grid_used;
 
 	  if ( ncvars[ncvarid].gmapid >= 0 && ncvars[ncvarid].gridtype != GRID_CURVILINEAR )
 	    {
@@ -5921,9 +6023,14 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 #endif
 	    ncvars[ncvarid].gridID = varDefGrid(vlistID, grid, 1);
 
-          if ( uuidOfHGrid[0] != 0 && 
-	       (grid.type == GRID_UNSTRUCTURED || grid.type == GRID_REFERENCE) )
-            gridDefUUID(ncvars[ncvarid].gridID, uuidOfHGrid);
+          if ( grid.type == GRID_UNSTRUCTURED )
+            {
+              if ( ncvars[ncvarid].position > 0 ) gridDefPosition(ncvars[ncvarid].gridID, ncvars[ncvarid].position);
+
+              if ( gridfile[0] != 0 ) gridDefReference(ncvars[ncvarid].gridID, gridfile);
+
+              if ( uuidOfHGrid[0] != 0 ) gridDefUUID(ncvars[ncvarid].gridID, uuidOfHGrid);
+            }
 
           if ( ncvars[ncvarid].chunked )
             {
@@ -5986,6 +6093,8 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		    if ( ncvars[ncvarid].xvarid != ncvars[ncvarid2].xvarid ) same_grid = FALSE;
 		    if ( ncvars[ncvarid].yvarid != ncvars[ncvarid2].yvarid ) same_grid = FALSE;
 
+		    if ( ncvars[ncvarid].position != ncvars[ncvarid2].position ) same_grid = FALSE;
+
 		    if ( same_grid )
 		      {
 			if ( CDI_Debug )
@@ -6010,6 +6119,7 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
   int zaxisindex;
   int zprec;
   int nbdims, nvertex, nlevel;
+  int positive = 0;
   char *pname, *plongname, *punits;
 
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
@@ -6024,6 +6134,8 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  double *lbounds = NULL;
 	  double *ubounds = NULL;
 	  int zaxisType;
+
+          positive = 0;
 
 	  ndims = ncvars[ncvarid].ndims;
 	  for ( i = 0; i < ndims; i++ )
@@ -6052,6 +6164,7 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 	  if ( zvarid != UNDEFID )
 	    {
+	      positive  = ncvars[zvarid].positive;
 	      pname     = ncvars[zvarid].name;
 	      plongname = ncvars[zvarid].longname;
 	      punits    = ncvars[zvarid].units;
@@ -6118,6 +6231,9 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
       	  ncvars[ncvarid].zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, with_bounds, lbounds, ubounds,
 						vctsize, vct, pname, plongname, punits, zprec, 1, 0);
+
+          if ( positive > 0 ) zaxisDefPositive(ncvars[ncvarid].zaxisID, positive);
+
 	  free(zvar);
 	  free(lbounds);
 	  free(ubounds);
@@ -6454,8 +6570,8 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 }
 
 static
-void scan_global_attributtes(int fileID, int vlistID, stream_t *streamptr, int ngatts,
-                             int *instID, int *modelID, int *ucla_les, char *uuidOfHGrid, int *number_of_grid_used)
+void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ngatts,
+                            int *instID, int *modelID, int *ucla_les, char *uuidOfHGrid, char *gridfile, int *number_of_grid_used)
 {
   nc_type xtype;
   size_t attlen;
@@ -6507,6 +6623,10 @@ void scan_global_attributtes(int fileID, int vlistID, stream_t *streamptr, int n
 	      else if ( strcmp(attname, "CDO") == 0 )
 		{
 		}
+	      else if ( strcmp(attname, "grid_file_uri") == 0 )
+		{
+                  memcpy(gridfile, attstring, attlen+1);
+		}
 	      else if ( strcmp(attname, "uuidOfHGrid") == 0 && attlen == 36 )
 		{
                   attstring[36] = 0;
@@ -6515,6 +6635,11 @@ void scan_global_attributtes(int fileID, int vlistID, stream_t *streamptr, int n
 		}
 	      else
 		{
+                  if ( strcmp(attname, "ICON_grid_file_uri") == 0 && gridfile[0] == 0 )
+                    {
+                      memcpy(gridfile, attstring, attlen+1);
+                    }
+
 		  vlistDefAttTxt(vlistID, CDI_GLOBAL, attname, (int)attlen, attstring);
 		}
 	    }
@@ -6565,8 +6690,9 @@ int cdfInqContents(stream_t *streamptr)
   int *varids;
   int nvarids;
   const int attstringlen = 8192; char attstring[8192];
-  int timehasunits = FALSE;
+  int time_has_units = FALSE;
   int time_has_bounds = FALSE;
+  int time_climatology = FALSE;
   size_t len;
   int nvars_data;
   int nvcth_id = UNDEFID, vcta_id = UNDEFID, vctb_id = UNDEFID;
@@ -6584,9 +6710,11 @@ int cdfInqContents(stream_t *streamptr)
   int format = 0;
   int ucla_les = FALSE;
   char uuidOfHGrid[17];
+  char gridfile[8912];
   int number_of_grid_used = UNDEFID;
 
   uuidOfHGrid[0] = 0;
+  gridfile[0] = 0;
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -6655,8 +6783,8 @@ int cdfInqContents(stream_t *streamptr)
       return (CDI_EUFSTRUCT);
     }
 
-  /* scan global attributtes */
-  scan_global_attributtes(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les, uuidOfHGrid, &number_of_grid_used);
+  /* scan global attributes */
+  scan_global_attributes(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les, uuidOfHGrid, gridfile, &number_of_grid_used);
 
   /* find time dim */
   if ( unlimdimid >= 0 )
@@ -6775,7 +6903,7 @@ int cdfInqContents(stream_t *streamptr)
       else if ( streamptr->basetime.lwrf == FALSE )
 	{
 	  if ( ncvars[ncvarid].units[0] != 0 )
-	    timehasunits = TRUE;
+	    time_has_units = TRUE;
 
 	  if ( ncvars[ncvarid].bounds != UNDEFID )
 	    {
@@ -6785,8 +6913,10 @@ int cdfInqContents(stream_t *streamptr)
 		  len = ncdims[ncvars[ncvars[ncvarid].bounds].dimids[nbdims-1]].len;
 		  if ( (int)len == 2 && timedimid == ncvars[ncvars[ncvarid].bounds].dimids[0] )
 		    {
+
 		      time_has_bounds = TRUE;
 		      streamptr->basetime.ncvarboundsid = ncvars[ncvarid].bounds;
+                      if ( ncvars[ncvarid].climatology ) time_climatology = TRUE;
 		    }
 		}
 	    }
@@ -6957,7 +7087,7 @@ int cdfInqContents(stream_t *streamptr)
 
 
   /* define all grids */
-  define_all_grids(streamptr, vlistID, ncdims, nvars, ncvars, timedimid, uuidOfHGrid, number_of_grid_used);
+  define_all_grids(streamptr, vlistID, ncdims, nvars, ncvars, timedimid, uuidOfHGrid, gridfile, number_of_grid_used);
 
 
   /* read VCT */
@@ -7007,7 +7137,7 @@ int cdfInqContents(stream_t *streamptr)
   /* time varID */
   ncvarid = streamptr->basetime.ncvarid;
 
-  if ( timehasunits )
+  if ( time_has_units )
     {
       taxis_t *taxis;
       taxis = &streamptr->tsteps[0].taxis;
@@ -7018,7 +7148,10 @@ int cdfInqContents(stream_t *streamptr)
     }
 
   if ( time_has_bounds )
-    streamptr->tsteps[0].taxis.has_bounds = TRUE;
+    {
+      streamptr->tsteps[0].taxis.has_bounds = TRUE;
+      if ( time_climatology ) streamptr->tsteps[0].taxis.climatology = TRUE;
+    }
 
   if ( ncvarid != -1 )
     {
@@ -7060,7 +7193,7 @@ int cdfInqContents(stream_t *streamptr)
   else
     {
       taxisID = taxisCreate(TAXIS_ABSOLUTE);
-      if ( !timehasunits )
+      if ( !time_has_units )
 	{
 	  taxisDefTunit(taxisID, TUNIT_DAY);
 	  streamptr->tsteps[0].taxis.unit = TUNIT_DAY;

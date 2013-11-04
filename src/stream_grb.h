@@ -21,6 +21,9 @@ int   grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memty
 int   grib1ltypeToZaxisType(int grib_ltype);
 int   grib2ltypeToZaxisType(int grib_ltype);
 
+int   zaxisTypeToGrib1ltype(int zaxistype);
+int   zaxisTypeToGrib2ltype(int zaxistype);
+
 #endif  /* _STREAM_GRB_H */
 /*
  * Local Variables:

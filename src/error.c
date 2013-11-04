@@ -7,7 +7,9 @@
 #include <stdarg.h>
 #include <errno.h>
 
+#if !defined (NAMESPACE_H)
 #include "namespace.h"
+#endif
 
 int _ExitOnError   = 1;	/* If set to 1, exit on error       */
 int _Verbose = 1;	/* If set to 1, errors are reported */
@@ -17,7 +19,7 @@ int _Debug   = 0;       /* If set to 1, debugging           */
 void SysError_(const char *caller, const char *fmt, ...)
 {
   va_list args;
-	
+
   va_start(args, fmt);
 
   printf("\n");
@@ -29,7 +31,7 @@ void SysError_(const char *caller, const char *fmt, ...)
 
   if ( errno )
     perror("System error message ");
-	
+
   exit(EXIT_FAILURE);
 }
 
@@ -37,7 +39,7 @@ void SysError_(const char *caller, const char *fmt, ...)
 void Error_(const char *caller, const char *fmt, ...)
 {
   va_list args;
-	
+
   va_start(args, fmt);
 
   printf("\n");
@@ -53,7 +55,10 @@ void Error_(const char *caller, const char *fmt, ...)
 typedef void (*cdiAbortCFunc)(const char * caller, const char * filename,
                               const char *functionname, int line,
                               const char * errorString, va_list ap)
-  __attribute__((noreturn));
+#ifdef __GNUC__
+  __attribute__((noreturn))
+#endif
+;
 
 void cdiAbortC(const char * caller, const char * filename,
                const char *functionname, int line,
@@ -83,7 +88,7 @@ cdiAbortC_serial(const char *caller, const char *filename,
 void Warning_(const char *caller, const char *fmt, ...)
 {
   va_list args;
-	
+
   va_start(args, fmt);
 
   if ( _Verbose )
@@ -100,7 +105,7 @@ void Warning_(const char *caller, const char *fmt, ...)
 void Message_(const char *caller, const char *fmt, ...)
 {
   va_list args;
-	
+
   va_start(args, fmt);
 
    fprintf(stdout, "%-18s : ", caller);

@@ -29,27 +29,32 @@ static struct {
   char *units;
 }
 ZaxistypeEntry[] = {
-  { /*  0 */ 0, "sfc",        "surface",           "",               ""},
-  { /*  1 */ 0, "lev",        "generic",           "",               "level"},
-  { /*  2 */ 2, "lev",        "hybrid",            "",               "level"},
-  { /*  3 */ 2, "lev",        "hybrid_half",       "",               "level"},
-  { /*  4 */ 2, "lev",        "pressure",          "air_pressure",   "Pa"},
-  { /*  5 */ 1, "height",     "height",            "height",         "m"},
-  { /*  6 */ 2, "depth",      "depth_below_sea",   "depth",          "m"},
-  { /*  7 */ 2, "depth",      "depth_below_land",  "",               "cm"},
-  { /*  8 */ 0, "lev",        "isentropic",        "",               "K"},
-  { /*  9 */ 0, "lev",        "trajectory",        "",               ""},
-  { /* 10 */ 1, "alt",        "altitude",          "",               "m"},
-  { /* 11 */ 0, "lev",        "sigma",             "",               "level"},
-  { /* 12 */ 0, "lev",        "meansea",           "",               "level"},
-  { /* 13 */ 0, "toa",        "top_of_atmosphere", "",               ""},
-  { /* 14 */ 0, "seabottom",  "sea_bottom",        "",               ""},
-  { /* 15 */ 0, "atmosphere", "atmosphere",        "",               ""},
-  { /* 16 */ 0, "cloudbase",  "cloud_base",        "",               ""},
-  { /* 17 */ 0, "cloudtop",   "cloud_top",         "",               ""},
-  { /* 18 */ 0, "isotherm0",  "isotherm_zero",     "",               ""},
-  { /* 19 */ 0, "snow",       "snow",              "",               ""},
-  { /* 20 */ 0, "height",     "generalized height","height",         "m"},
+  { /*  0 */ 0, "sfc",               "surface",                "",               ""},
+  { /*  1 */ 0, "lev",               "generic",                "",               "level"},
+  { /*  2 */ 2, "lev",               "hybrid",                 "",               "level"},
+  { /*  3 */ 2, "lev",               "hybrid_half",            "",               "level"},
+  { /*  4 */ 2, "lev",               "pressure",               "air_pressure",   "Pa"},
+  { /*  5 */ 1, "height",            "height",                 "height",         "m"},
+  { /*  6 */ 2, "depth",             "depth_below_sea",        "depth",          "m"},
+  { /*  7 */ 2, "depth",             "depth_below_land",       "",               "cm"},
+  { /*  8 */ 0, "lev",               "isentropic",             "",               "K"},
+  { /*  9 */ 0, "lev",               "trajectory",             "",               ""},
+  { /* 10 */ 1, "alt",               "altitude",               "",               "m"},
+  { /* 11 */ 0, "lev",               "sigma",                  "",               "level"},
+  { /* 12 */ 0, "lev",               "meansea",                "",               "level"},
+  { /* 13 */ 0, "toa",               "top_of_atmosphere",      "",               ""},
+  { /* 14 */ 0, "seabottom",         "sea_bottom",             "",               ""},
+  { /* 15 */ 0, "atmosphere",        "atmosphere",             "",               ""},
+  { /* 16 */ 0, "cloudbase",         "cloud_base",             "",               ""},
+  { /* 17 */ 0, "cloudtop",          "cloud_top",              "",               ""},
+  { /* 18 */ 0, "isotherm0",         "isotherm_zero",          "",               ""},
+  { /* 19 */ 0, "snow",              "snow",                   "",               ""},
+  { /* 20 */ 0, "lakebottom",        "lake_bottom",            "",               ""},
+  { /* 21 */ 0, "sedimentbottom",    "sediment_bottom",        "",               ""},
+  { /* 22 */ 0, "sedimentbottomta",  "sediment_bottom_ta",     "",               ""},
+  { /* 23 */ 0, "sedimentbottomtw",  "sediment_bottom_tw",     "",               ""},
+  { /* 24 */ 0, "mixlayer",          "mix_layer",              "",               ""},
+  { /* 25 */ 0, "height",            "generalized height",     "height",         ""},
 };
 
 static int CDI_MaxZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]);
@@ -73,7 +78,7 @@ typedef struct {
   int      direction;
   int      vctsize;
   double  *vct;
-  int      reference;
+  int      number;   /* Reference number to a generalized Z-axis */
   char     uuid[17];
 }
 zaxis_t;
@@ -111,7 +116,7 @@ void zaxisDefaultValue ( zaxis_t *zaxisptr )
   zaxisptr->size        = 0;
   zaxisptr->vctsize     = 0;
   zaxisptr->vct         = NULL;
-  zaxisptr->reference   = CDI_UNDEFID;
+  zaxisptr->number      = 0;
   zaxisptr->uuid[0]     = 0;
 }
 
@@ -181,6 +186,8 @@ int zaxisSize(void)
                       @func{ZAXIS_ISENTROPIC}, @func{ZAXIS_ALTITUDE}, @func{ZAXIS_MEANSEA}, @func{ZAXIS_TOA},
                       @func{ZAXIS_SEA_BOTTOM}, @func{ZAXIS_ATMOSPHERE}, @func{ZAXIS_CLOUD_BASE},
                       @func{ZAXIS_CLOUD_TOP}, @func{ZAXIS_ISOTHERM_ZERO}, @func{ZAXIS_SNOW},
+                      @func{ZAXIS_LAKE_BOTTOM}, @func{ZAXIS_SEDIMENT_BOTTOM}, @func{ZAXIS_SEDIMENT_BOTTOM_TA},
+                      @func{ZAXIS_SEDIMENT_BOTTOM_TW}, @func{ZAXIS_MIX_LAYER},
                       @func{ZAXIS_DEPTH_BELOW_SEA} and @func{ZAXIS_DEPTH_BELOW_LAND}.
     @Item  size       Number of levels.
 
@@ -542,6 +549,24 @@ int zaxisInqPrec(int zaxisID)
 }
 
 
+void zaxisDefPositive(int zaxisID, int positive)
+{
+  zaxis_t *zaxisptr;
+
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
+
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+
+  zaxis_check_ptr(zaxisID, zaxisptr);
+
+  zaxisptr->positive = positive;
+}
+
+
 int zaxisInqPositive(int zaxisID)
 {
   zaxis_t *zaxisptr;
@@ -656,24 +681,24 @@ void zaxisDefLevel(int zaxisID, int levelID, double level)
 }
 
 /*
-@Function  zaxisDefReference
-@Title     Define the reference for a genralized Z-axis
+@Function  zaxisDefNumber
+@Title     Define the reference number for a generalized Z-axis
 
-@Prototype void zaxisDefReference(int zaxisID, const int reference)
+@Prototype void zaxisDefNumber(int zaxisID, const int number)
 @Parameter
     @Item  zaxisID     Z-axis ID, from a previous call to @fref{zaxisCreate}.
-    @Item  reference   Reference for a generalized Z-axis.
+    @Item  number      Reference number for a generalized Z-axis.
 
 @Description
-The function @func{zaxisDefReference} defines the reference for a generalized  Z-axis.
+The function @func{zaxisDefNumber} defines the reference number for a generalized Z-axis.
 
 @EndFunction
 */
-void zaxisDefReference(int zaxisID, const int reference)
+void zaxisDefNumber(int zaxisID, const int number)
 {
   zaxis_t *zaxisptr;
 
-    if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
     {
       xwarning("%s", "Operation not executed.");
       return;
@@ -683,7 +708,36 @@ void zaxisDefReference(int zaxisID, const int reference)
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  zaxisptr->reference = reference;
+  zaxisptr->number = number;
+}
+
+/*
+@Function  zaxisInqNumber
+@Title     Get the reference number to a generalized Z-axis
+
+@Prototype int zaxisInqNumber(int zaxisID)
+@Parameter
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+
+@Description
+The function @func{zaxisInqNumber} returns the reference number to a generalized Z-axis.
+
+@Result
+@func{zaxisInqNumber} returns the reference number to a generalized Z-axis.
+@EndFunction
+*/
+int zaxisInqNumber(int zaxisID)
+{
+  int number = -1;
+  zaxis_t *zaxisptr;
+
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+
+  zaxis_check_ptr(zaxisID, zaxisptr);
+
+  number = zaxisptr->number;
+
+  return (number);
 }
 
 /*
@@ -721,7 +775,7 @@ void zaxisDefUUID(int zaxisID, const char *uuid)
 
 /*
 @Function  zaxisInqUUID
-@Title     Get the uuid to a generalized Z-axis.
+@Title     Get the uuid to a generalized Z-axis
 
 @Prototype char *zaxisInqUUID(int zaxisID, char *uuid)
 @Parameter
@@ -745,35 +799,6 @@ char *zaxisInqUUID(int zaxisID, char *uuid)
   memcpy(uuid, zaxisptr->uuid, 16);
 
   return (uuid);
-}
-
-/*
-@Function  zaxisInqReference
-@Title     Get the reference to a generalized Z-axis.
-
-@Prototype int zaxisInqReference(int zaxisID)
-@Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
-
-@Description
-The function @func{zaxisInqReference} returns the reference to a generalized Z-axis.
-
-@Result
-@func{zaxisInqReference} returns the reference to a generalized Z-axis.
-@EndFunction
-*/
-int zaxisInqReference(int zaxisID)
-{
-  int reference = -1;
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
-
-  zaxis_check_ptr(zaxisID, zaxisptr);
-
-  reference = zaxisptr->reference;
-
-  return (reference);
 }
 
 /*
@@ -993,6 +1018,8 @@ The valid CDI Z-axis types are @func{ZAXIS_GENERIC}, @func{ZAXIS_SURFACE},
 @func{ZAXIS_ISENTROPIC}, @func{ZAXIS_ALTITUDE}, @func{ZAXIS_MEANSEA}, @func{ZAXIS_TOA},
 @func{ZAXIS_SEA_BOTTOM}, @func{ZAXIS_ATMOSPHERE}, @func{ZAXIS_CLOUD_BASE},
 @func{ZAXIS_CLOUD_TOP}, @func{ZAXIS_ISOTHERM_ZERO}, @func{ZAXIS_SNOW},
+@func{ZAXIS_LAKE_BOTTOM}, @func{ZAXIS_SEDIMENT_BOTTOM}, @func{ZAXIS_SEDIMENT_BOTTOM_TA},
+@func{ZAXIS_SEDIMENT_BOTTOM_TW}, @func{ZAXIS_MIX_LAYER},
 @func{ZAXIS_DEPTH_BELOW_SEA} and @func{ZAXIS_DEPTH_BELOW_LAND}.
 
 @EndFunction

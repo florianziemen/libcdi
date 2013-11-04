@@ -102,6 +102,14 @@ Function catalog:
    gridInqYlongname     Get the longname of a Y-axis
    gridDefYunits        Define the units of a Y-axis
    gridInqYunits        Get the units of a Y-axis
+   gridDefNumber        Define the reference number for an unstructured grid
+   gridInqNumber        Get the reference number to an unstructured grid
+   gridDefPosition      Define the position of grid in the reference file
+   gridInqPosition      Get the position of grid in the reference file
+   gridDefReference     Define the reference URI for an unstructured grid
+   gridInqReference     Get the reference URI to an unstructured grid
+   gridDefUUID          Define the UUID for an unstructured grid
+   gridInqUUID          Get the UUID to an unstructured grid
 -------------------------------------------------------------
    zaxis
 -------------------------------------------------------------
