@@ -4,15 +4,6 @@
 This appendix provide a brief listing of the C language bindings of the
 CDI library routines:
 
-\section*{\tt \htmlref{cdiClearAdditionalKeys}{cdiClearAdditionalKeys}}
-
-\begin{verbatim}
-    void cdiClearAdditionalKeys ();
-\end{verbatim}
-
-Clear the list of additional GRIB keys..
-
-
 \section*{\tt \htmlref{cdiDefAdditionalKey}{cdiDefAdditionalKey}}
 
 \begin{verbatim}
@@ -766,7 +757,7 @@ Copy some entries of a variable list.
 \section*{\tt \htmlref{vlistCreate}{vlistCreate}}
 
 \begin{verbatim}
-    int vlistCreate ();
+    int vlistCreate (
 \end{verbatim}
 
 Create a variable list.
@@ -1193,6 +1184,15 @@ Define the longname of a Z-axis.
 Define the name of a Z-axis.
 
 
+\section*{\tt \htmlref{zaxisDefNlevRef}{zaxisDefNlevRef}}
+
+\begin{verbatim}
+    void zaxisDefNlevRef (int gridID, int nhlev);
+\end{verbatim}
+
+Define the number of half levels of a generalized Z-axis.
+
+
 \section*{\tt \htmlref{zaxisDefNumber}{zaxisDefNumber}}
 
 \begin{verbatim}
@@ -1272,6 +1272,15 @@ Get the longname of a Z-axis.
 \end{verbatim}
 
 Get the name of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisInqNlevRef}{zaxisInqNlevRef}}
+
+\begin{verbatim}
+    int zaxisInqNlevRef (int gridID);
+\end{verbatim}
+
+Get the number of half levels of a generalized Z-axis.
 
 
 \section*{\tt \htmlref{zaxisInqNumber}{zaxisInqNumber}}

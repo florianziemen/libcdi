@@ -4,15 +4,6 @@
 This appendix provide a brief listing of the Fortran language bindings of the
 CDI library routines:
 
-\section*{\tt \htmlref{cdiClearAdditionalKeys}{cdiClearAdditionalKeys}}
-
-\begin{verbatim}
-    SUBROUTINE cdiClearAdditionalKeys
-\end{verbatim}
-
-Clear the list of additional GRIB keys..
-
-
 \section*{\tt \htmlref{cdiDefAdditionalKey}{cdiDefAdditionalKey}}
 
 \begin{verbatim}
@@ -768,7 +759,7 @@ Copy some entries of a variable list.
 \section*{\tt \htmlref{vlistCreate}{vlistCreate}}
 
 \begin{verbatim}
-    INTEGER FUNCTION vlistCreate
+    INTEGER FUNCTION vlistCreate (
 \end{verbatim}
 
 Create a variable list.
@@ -1213,6 +1204,15 @@ Define the longname of a Z-axis.
 Define the name of a Z-axis.
 
 
+\section*{\tt \htmlref{zaxisDefNlevRef}{zaxisDefNlevRef}}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDefNlevRef (INTEGER gridID, INTEGER nhlev)
+\end{verbatim}
+
+Define the number of half levels of a generalized Z-axis.
+
+
 \section*{\tt \htmlref{zaxisDefNumber}{zaxisDefNumber}}
 
 \begin{verbatim}
@@ -1292,6 +1292,15 @@ Get the longname of a Z-axis.
 \end{verbatim}
 
 Get the name of a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisInqNlevRef}{zaxisInqNlevRef}}
+
+\begin{verbatim}
+    INTEGER FUNCTION zaxisInqNlevRef (INTEGER gridID)
+\end{verbatim}
+
+Get the number of half levels of a generalized Z-axis.
 
 
 \section*{\tt \htmlref{zaxisInqNumber}{zaxisInqNumber}}

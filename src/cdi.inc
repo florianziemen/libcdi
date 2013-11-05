@@ -396,9 +396,6 @@
 !                                     REAL            partInflate)
       EXTERNAL        pioInit
 
-!                     pioWriteTimestep
-      EXTERNAL        pioWriteTimestep
-
 !                     streamWriteVarPart
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
@@ -1225,9 +1222,6 @@
 !                                     INTEGER         forecast_type)
       EXTERNAL        vlistInqVarEnsemble
 
-!                     cdiClearAdditionalKeys
-      EXTERNAL        cdiClearAdditionalKeys
-
 !                     cdiDefAdditionalKey
 !                                    (CHARACTER*(*)   string)
       EXTERNAL        cdiDefAdditionalKey
@@ -1861,6 +1855,15 @@
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         levelID)
       EXTERNAL        zaxisInqLevel
+
+!                     zaxisDefNlevRef
+!                                    (INTEGER         gridID,
+!                                     INTEGER         nhlev)
+      EXTERNAL        zaxisDefNlevRef
+
+      INTEGER         zaxisInqNlevRef
+!                                    (INTEGER         gridID)
+      EXTERNAL        zaxisInqNlevRef
 
 !                     zaxisDefNumber
 !                                    (INTEGER         gridID,
