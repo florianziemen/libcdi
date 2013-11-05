@@ -839,6 +839,12 @@ void    zaxisDefLevel(int zaxisID, int levelID, double levels);
 /*      zaxisInqLevel: Get one level of a Z-axis */
 double  zaxisInqLevel(int zaxisID, int levelID);
 
+/*      zaxisDefNlevRef: Define the number of half levels of a generalized Z-axis */
+void    zaxisDefNlevRef(int gridID, int nhlev);
+
+/*      zaxisInqNlevRef: Get the number of half levels of a generalized Z-axis */
+int     zaxisInqNlevRef(int gridID);
+
 /*      zaxisDefNumber: Define the reference number for a generalized Z-axis */
 void    zaxisDefNumber(int gridID, int number);
 

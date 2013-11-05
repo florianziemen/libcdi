@@ -79,6 +79,7 @@ typedef struct {
   int      vctsize;
   double  *vct;
   int      number;   /* Reference number to a generalized Z-axis */
+  int      nhlev;
   char     uuid[17];
 }
 zaxis_t;
@@ -117,6 +118,7 @@ void zaxisDefaultValue ( zaxis_t *zaxisptr )
   zaxisptr->vctsize     = 0;
   zaxisptr->vct         = NULL;
   zaxisptr->number      = 0;
+  zaxisptr->nhlev       = 0;
   zaxisptr->uuid[0]     = 0;
 }
 
@@ -678,6 +680,39 @@ void zaxisDefLevel(int zaxisID, int levelID, double level)
 
   if ( levelID >= 0 && levelID < zaxisptr->size )
     zaxisptr->vals[levelID] = level;
+}
+
+
+void zaxisDefNlevRef(int zaxisID, const int nhlev)
+{
+  zaxis_t *zaxisptr;
+
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+    {
+      xwarning("%s", "Operation not executed.");
+      return;
+    }
+
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+
+  zaxis_check_ptr(zaxisID, zaxisptr);
+
+  zaxisptr->nhlev = nhlev;
+}
+
+
+int zaxisInqNlevRef(int zaxisID)
+{
+  int nhlev = -1;
+  zaxis_t *zaxisptr;
+
+  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+
+  zaxis_check_ptr(zaxisID, zaxisptr);
+
+  nhlev = zaxisptr->nhlev;
+
+  return (nhlev);
 }
 
 /*

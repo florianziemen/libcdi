@@ -3,6 +3,10 @@
 	* Version 1.6.2 released
 	* using CGRIBEX library version 1.6.2
 
+2013-11-05  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Added CDI function zaxisDefNlevRef() and zaxisInqNlevRef() [Feature #4117]
+
 2013-11-04  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* merged branch cdi-pio to trunk cdi
