@@ -2332,6 +2332,21 @@ module mo_cdi
       end interface
   
       interface
+        subroutine zaxisDefNlevRef(gridID,nhlev) bind(c,name='zaxisDefNlevRef')
+          import :: c_int
+          integer(c_int), value :: gridID
+          integer(c_int), value :: nhlev
+       end subroutine zaxisDefNlevRef
+      end interface
+  
+      interface
+        integer(c_int) function zaxisInqNlevRef(gridID) bind(c,name='zaxisInqNlevRef')
+          import :: c_int
+          integer(c_int), value :: gridID
+       end function zaxisInqNlevRef
+      end interface
+  
+      interface
         subroutine zaxisDefNumber(gridID,number) bind(c,name='zaxisDefNumber')
           import :: c_int
           integer(c_int), value :: gridID
@@ -3308,6 +3323,8 @@ module mo_cdi
       public :: zaxisInqLevels
       public :: zaxisDefLevel
       public :: zaxisInqLevel
+      public :: zaxisDefNlevRef
+      public :: zaxisInqNlevRef
       public :: zaxisDefNumber
       public :: zaxisInqNumber
       public :: zaxisDefUUID
