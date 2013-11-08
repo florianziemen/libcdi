@@ -86,6 +86,7 @@ static int pioInit_fwrap(int commSuper, int nProcsIO, int IOMode, int * pioNames
   return MPI_Comm_c2f(v);
 }
 FCALLSCFUN5 (INT, pioInit_fwrap, PIOINIT, pioinit, INT, INT, INT, PINT, FLOAT)
+FCALLSCSUB0 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep)
 static void streamWriteVarPart_fwrap(int streamID, int varID, const void * data, int nmiss, void * partDesc)
 {
   streamWriteVarPart( streamID,  varID,  data,  nmiss, (*(Xt_idxlist *)partDesc));
@@ -276,6 +277,7 @@ FCALLSCFUN3 (INT, vlistMergedLevel, VLISTMERGEDLEVEL, vlistmergedlevel, INT, INT
 
 FCALLSCSUB5 (vlistDefVarEnsemble, VLISTDEFVARENSEMBLE, vlistdefvarensemble, INT, INT, INT, INT, INT)
 FCALLSCFUN5 (INT, vlistInqVarEnsemble, VLISTINQVARENSEMBLE, vlistinqvarensemble, INT, INT, PINT, PINT, PINT)
+FCALLSCSUB0 (cdiClearAdditionalKeys, CDICLEARADDITIONALKEYS, cdiclearadditionalkeys)
 FCALLSCSUB1 (cdiDefAdditionalKey, CDIDEFADDITIONALKEY, cdidefadditionalkey, STRING)
 FCALLSCSUB4 (vlistDefVarIntKey, VLISTDEFVARINTKEY, vlistdefvarintkey, INT, INT, STRING, INT)
 FCALLSCSUB4 (vlistDefVarDblKey, VLISTDEFVARDBLKEY, vlistdefvardblkey, INT, INT, STRING, DOUBLE)

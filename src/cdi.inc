@@ -396,6 +396,9 @@
 !                                     REAL            partInflate)
       EXTERNAL        pioInit
 
+!                     pioWriteTimestep
+      EXTERNAL        pioWriteTimestep
+
 !                     streamWriteVarPart
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
@@ -1221,6 +1224,9 @@
 !                                     INTEGER         ensCount,
 !                                     INTEGER         forecast_type)
       EXTERNAL        vlistInqVarEnsemble
+
+!                     cdiClearAdditionalKeys
+      EXTERNAL        cdiClearAdditionalKeys
 
 !                     cdiDefAdditionalKey
 !                                    (CHARACTER*(*)   string)
