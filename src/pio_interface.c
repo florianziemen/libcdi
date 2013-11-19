@@ -598,9 +598,10 @@ cdiPioRDMAProgress()
 }
 
 
-void
-pioBufferPartData(int streamID, int varID, const double *data,
-                  int nmiss, Xt_idxlist partDesc)
+static void
+pioBufferPartData_(int streamID, int varID,
+                   const void *packData, valPackFunc packDataFunc,
+                   int nmiss, Xt_idxlist partDesc)
 {
   int vlistID, collID = CDI_UNDEFID;
 
@@ -612,14 +613,10 @@ pioBufferPartData(int streamID, int varID, const double *data,
 
   collWait(collID);
 
-  Xt_int chunk = xt_idxlist_get_num_indices(partDesc);
-  xassert(chunk <= INT_MAX);
 
   struct winHeaderEntry dataHeader
     = { .id = streamID, .specific.dataRecord = { varID, nmiss }, .offset = -1 };
-  modelWinEnqueue(collID, dataHeader,
-                  &(struct memCpyDataDesc){data, chunk * sizeof (data[0])},
-                  memcpyPackFunc);
+  modelWinEnqueue(collID, dataHeader, packData, packDataFunc);
   {
     struct winHeaderEntry partHeader
       = { .id = PARTDESCMARKER,
@@ -629,6 +626,18 @@ pioBufferPartData(int streamID, int varID, const double *data,
   }
 
   txWin[collID].refuseFuncCall = 1;
+}
+
+void
+pioBufferPartData(int streamID, int varID, const double *data,
+                  int nmiss, Xt_idxlist partDesc)
+{
+  int chunk = xt_idxlist_get_num_indices(partDesc);
+  xassert(chunk <= INT_MAX);
+  pioBufferPartData_(streamID, varID,
+                     &(struct memCpyDataDesc){data, chunk * sizeof (data[0])},
+                     memcpyPackFunc,
+                     nmiss, partDesc);
 }
 
 /************************************************************************/
