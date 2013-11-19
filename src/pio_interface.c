@@ -433,8 +433,8 @@ static
 
   xassert ( collID                >= 0         &&
             collID                < nProcsColl &&
-            txWin[collID].buffer     != NULL      &&
             txWin != NULL      &&
+            txWin[collID].buffer     != NULL      &&
             txWin[collID].size >= 0         &&
             txWin[collID].size <= MAXWINBUFFERSIZE);
   memset(txWin[collID].buffer, 0, txWin[collID].size);
