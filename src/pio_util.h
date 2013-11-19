@@ -140,8 +140,6 @@ void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line, \
 #define xdebugMsg2(tag,source,text) \
   if ( ddebug ) pcdiDebugMsg ( __FILE__, __func__,  __LINE__, tag, source, text )
 
-int xmaxInt ( int, int );
-int xminInt ( int, int );
 int xsum ( int, int * );
 
 double xchecksum ( int, int, void * );

@@ -598,8 +598,8 @@ int reshListCompare ( int nsp0, int nsp1 )
   LIST_INIT();
   LIST_LOCK();
 
-  xassert(resHListSize > xmaxInt ( nsp0, nsp1 ) &&
-          xminInt ( nsp0, nsp1 ) >= 0 );
+  xassert(resHListSize > nsp0 && resHListSize > nsp1 &&
+          nsp0 >= 0 && nsp1 >= 0);
 
   for ( i = 0; i < resHList[nsp0].size; i++ )
     {
