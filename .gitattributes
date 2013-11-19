@@ -337,6 +337,7 @@ tests/cksum_read.c -text
 tests/cksum_verify.c -text
 tests/cksum_write.c -text
 tests/cksum_write_chunk.c -text
+tests/deco2d_model.c -text
 tests/ensure_array_size.c -text
 tests/ensure_array_size.h -text
 tests/pio_cksum_asynch.in -text
@@ -346,6 +347,7 @@ tests/pio_cksum_mpinonb.in -text
 tests/pio_cksum_writer.in -text
 tests/pio_write.c -text
 tests/pio_write.h -text
+tests/pio_write_deco2d_run.in -text
 tests/pio_write_run.in -text
 tests/simple_model.c -text
 tests/stream_cksum.c -text

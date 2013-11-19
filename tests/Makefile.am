@@ -6,9 +6,10 @@ TESTS = test_grib.sh cksum_verify \
 	test_chunk_cksum \
 	pio_write_run pio_cksum_mpinonb pio_cksum_fpguard \
 	pio_cksum_asynch pio_cksum_writer pio_cksum_cdf \
-	test_resource_copy
+	test_resource_copy pio_write_deco2d_run
 check_PROGRAMS = cksum_verify test_grib cksum_write cksum_read pio_write \
-	test_resource_copy cksum_write_chunk
+	test_resource_copy cksum_write_chunk pio_write_deco2d
+
 #
 test_grib_SOURCES = test_grib.c
 cksum_verify_SOURCES = cksum_verify.c
@@ -19,6 +20,7 @@ cksum_read_SOURCES = cksum_read.c \
 	stream_cksum.c stream_cksum.h \
 	ensure_array_size.h ensure_array_size.c
 pio_write_SOURCES = pio_write.c pio_write.h simple_model.c
+pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c
 test_resource_copy_SOURCES = test_resource_copy.c \
 	$(top_srcdir)/src/resource_unpack.c
 test_resource_copy_mpi_SOURCES = test_resource_copy.c
@@ -26,12 +28,14 @@ test_resource_copy_mpi_SOURCES = test_resource_copy.c
 AM_CFLAGS = $(YAXT_CFLAGS)
 if USE_MPI
 pio_write_LDADD = ../src/libcdipio.la
+pio_write_deco2d_LDADD = ../src/libcdipio.la
 TESTS +=  test_resource_copy_mpi_run
 check_PROGRAMS += test_resource_copy_mpi
 test_resource_copy_mpi_LDADD = ../src/libcdipio.la
 test_resource_copy_mpi_CFLAGS = $(AM_CFLAGS) $(CFLAGS) -DMPI_MARSHALLING
 else
 pio_write_LDADD = $(LDADD)
+pio_write_deco2d_LDADD = $(LDADD)
 endif
 
 LDADD = ../src/libcdi.la -lm
