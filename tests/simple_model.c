@@ -71,7 +71,7 @@ void
 modelRun(struct model_config setup, MPI_Comm comm)
 {
   static int varCodes[nVars] = {129, 130, 131, 132, 133};
-  static char * name        = "example";
+  static const char * const fname_prefix        = "example";
 
   int gridID, zaxisID[nVars], taxisID;
   int vlistID, varIDs[nVars], streamID, tsID, tfID = 0;
@@ -188,7 +188,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   taxisID = taxisCreate ( TAXIS_ABSOLUTE );
   vlistDefTaxis ( vlistID, taxisID );
 
-  sprintf ( &filename[0], "%s_%d.%s", name, tfID, setup.suffix );
+  sprintf ( &filename[0], "%s_%d.%s", fname_prefix, tfID, setup.suffix );
   streamID = streamOpenWrite ( filename, setup.filetype );
   xassert ( streamID >= 0 );
   streamDefVlist ( streamID, vlistID);
@@ -203,7 +203,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
       if ( tfID > 0 )
 	{
 	  streamClose ( streamID );
-	  sprintf ( &filename[0], "%s_%d.%s", name, tfID, setup.suffix );
+	  sprintf ( &filename[0], "%s_%d.%s", fname_prefix, tfID, setup.suffix );
 	  streamID = streamOpenWrite ( filename, setup.filetype );
 	  xassert ( streamID >= 0 );
 	  streamDefVlist ( streamID, vlistID );
@@ -276,7 +276,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
         {
           FILE *tablefp;
           {
-            sprintf(filename, "%s_%d.cksum", name, tfID);
+            sprintf(filename, "%s_%d.cksum", fname_prefix, tfID);
             if (!(tablefp = fopen(filename, "w")))
               {
                 perror("failed to open table file");
