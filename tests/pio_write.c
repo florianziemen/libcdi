@@ -33,6 +33,7 @@ static const struct model_config default_setup
       .max_nlev = 5,
 };
 
+#ifdef USE_MPI
 static const struct {
   char *text;
   int mode;
@@ -42,6 +43,7 @@ static const struct {
   { "PIO_ASYNCH", PIO_ASYNCH },
   { "PIO_WRITER", PIO_WRITER }
 };
+#endif
 
 static const struct {
   char suffix[4];
@@ -74,6 +76,7 @@ parse_intarg(const char msg[])
   return (int)temp;
 }
 
+#ifdef USE_MPI
 static inline int
 search_iomode_str(const char *modestr)
 {
@@ -88,6 +91,7 @@ search_iomode_str(const char *modestr)
       }
   return retval;
 }
+#endif
 
 int main (int argc, char *argv[])
 {
