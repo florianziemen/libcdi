@@ -144,6 +144,10 @@ FCALLSCSUB2 (streamDefCompLevel, STREAMDEFCOMPLEVEL, streamdefcomplevel, INT, IN
 FCALLSCFUN1 (INT, streamInqCompType, STREAMINQCOMPTYPE, streaminqcomptype, INT)
 FCALLSCFUN1 (INT, streamInqCompLevel, STREAMINQCOMPLEVEL, streaminqcomplevel, INT)
 FCALLSCFUN2 (INT, streamDefTimestep, STREAMDEFTIMESTEP, streamdeftimestep, INT, INT)
+
+/*  query currently set timestep id  */
+
+FCALLSCFUN1 (INT, streamInqCurTimestepID, STREAMINQCURTIMESTEPID, streaminqcurtimestepid, INT)
 FCALLSCFUN2 (INT, streamInqTimestep, STREAMINQTIMESTEP, streaminqtimestep, INT, INT)
 FCALLSCFUN1 (STRING, streamFilename, STREAMFILENAME, streamfilename, INT)
 FCALLSCFUN1 (STRING, streamFilesuffix, STREAMFILESUFFIX, streamfilesuffix, INT)

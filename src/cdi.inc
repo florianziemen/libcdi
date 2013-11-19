@@ -577,6 +577,13 @@
 !                                     INTEGER         tsID)
       EXTERNAL        streamDefTimestep
 
+!
+!  query currently set timestep id
+!
+      INTEGER         streamInqCurTimestepID
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamInqCurTimestepID
+
       INTEGER         streamInqTimestep
 !                                    (INTEGER         streamID,
 !                                     INTEGER         tsID)

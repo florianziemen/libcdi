@@ -1383,6 +1383,13 @@ int streamDefTimestep(int streamID, int tsID)
   return myStreamDefTimestep_(streamptr, tsID);
 }
 
+int streamInqCurTimestepID(int streamID)
+{
+  stream_t *streamptr = stream_to_pointer(streamID);
+  return streamptr->curTsID;
+}
+
+
 /*
 @Function  streamInqTimestep
 @Title     Get time step

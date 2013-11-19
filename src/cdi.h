@@ -330,6 +330,9 @@ int     streamInqCompLevel(int streamID);
 /*      streamDefTimestep: Define time step */
 int     streamDefTimestep(int streamID, int tsID);
 
+/* query currently set timestep id  */
+int streamInqCurTimestepID(int streamID);
+
 /*      streamInqTimestep: Get time step */
 int     streamInqTimestep(int streamID, int tsID);
 
