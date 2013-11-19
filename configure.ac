@@ -275,31 +275,38 @@ AM_CONDITIONAL(CREATE_INTERFACES, [test  "x$enable_ruby" = "xyes" -o "x$enable_p
 #  ----------------------------------------------------------------------
 #  Check C / Fortran interface
 ACX_CHECK_CFINT([$srcdir/src/cfortran.h])
-AM_CONDITIONAL([USE_FC],[test -n "$FC" && test "X$FC" != "Xno" && test x$acx_cv_check_cfint = "xyes"])
-
-AC_SUBST([CPPFLAGS])
-
+AM_CONDITIONAL([USE_FC],[test -n "$FC" && test "X$FC" != "Xno" && test x$acx_cv_check_cfint = "xyes"])dnl
+dnl
+AC_SUBST([CPPFLAGS])dnl
+dnl
 AC_ARG_VAR([BUILD_CFLAGS],
-  [append to CFLAGS during build but not in configure phase])
-AC_CONFIG_COMMANDS_PRE([CFLAGS="$CFLAGS${BUILD_CFLAGS+ $BUILD_CFLAGS}"])
+  [append to CFLAGS during build but not in configure phase])dnl
+AC_CONFIG_COMMANDS_PRE([CFLAGS="$CFLAGS${BUILD_CFLAGS+ $BUILD_CFLAGS}"])dnl
+AM_SUBST_NOTMAKE([BUILD_CFLAGS])dnl
 AC_ARG_VAR([BUILD_FCFLAGS],
-  [append to FCFLAGS during build but not in configure phase])
-AC_CONFIG_COMMANDS_PRE([FCFLAGS="$FCFLAGS${BUILD_FCFLAGS+ $BUILD_FCFLAGS}"])
+  [append to FCFLAGS during build but not in configure phase])dnl
+AC_CONFIG_COMMANDS_PRE([FCFLAGS="$FCFLAGS${BUILD_FCFLAGS+ $BUILD_FCFLAGS}"])dnl
+AM_SUBST_NOTMAKE([BUILD_FCFLAGS])dnl
 AC_ARG_VAR([BUILD_LDFLAGS],
-  [append to LDFLAGS during build but not in configure phase])
-AC_CONFIG_COMMANDS_PRE([LDFLAGS="$LDFLAGS${BUILD_LDFLAGS+ $BUILD_LDFLAGS}"])
+  [append to LDFLAGS during build but not in configure phase])dnl
+AC_CONFIG_COMMANDS_PRE([LDFLAGS="$LDFLAGS${BUILD_LDFLAGS+ $BUILD_LDFLAGS}"])dnl
+AM_SUBST_NOTMAKE([BUILD_LDFLAGS])dnl
 AC_ARG_VAR([BUILD_CC],
-  [replace CC with expansion of $BUILD_CC during build but not in configure phase])
-AC_CONFIG_COMMANDS_PRE([CC="${BUILD_CC-$CC}"])
+  [replace CC with expansion of $BUILD_CC during build but not in configure phase])dnl
+AC_CONFIG_COMMANDS_PRE([CC="${BUILD_CC-$CC}"])dnl
+AM_SUBST_NOTMAKE([BUILD_CC])dnl
 AC_ARG_VAR([BUILD_CXX],
-  [replace CXX with expansion of $BUILD_CXX during build but not in configure phase])
-AC_CONFIG_COMMANDS_PRE([CXX="${BUILD_CXX-$CXX}"])
+  [replace CXX with expansion of $BUILD_CXX during build but not in configure phase])dnl
+AC_CONFIG_COMMANDS_PRE([CXX="${BUILD_CXX-$CXX}"])dnl
+AM_SUBST_NOTMAKE([BUILD_CXX])dnl
 AC_ARG_VAR([BUILD_FC],
-  [replace FC with expansion of $BUILD_FC during build but not in configure phase])
-AC_CONFIG_COMMANDS_PRE([FC="${BUILD_FC-$FC}"])
+  [replace FC with expansion of $BUILD_FC during build but not in configure phase])dnl
+AC_CONFIG_COMMANDS_PRE([FC="${BUILD_FC-$FC}"])dnl
+AM_SUBST_NOTMAKE([BUILD_FC])dnl
 AC_ARG_VAR([BUILD_F77],
-  [replace F77 with expansion of $BUILD_F77 during build but not in configure phase])
-AC_CONFIG_COMMANDS_PRE([F77="${BUILD_F77-$F77}"])
+  [replace F77 with expansion of $BUILD_F77 during build but not in configure phase])dnl
+AC_CONFIG_COMMANDS_PRE([F77="${BUILD_F77-$F77}"])dnl
+AM_SUBST_NOTMAKE([BUILD_F77])dnl
 
 
 # Checks for compiler

@@ -27317,24 +27317,6 @@ else
 fi
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Checks for compiler
 COMPILER="$CC $CFLAGS"
 
