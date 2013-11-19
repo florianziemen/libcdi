@@ -10,11 +10,9 @@
 #include "zaxis.h"
 #include "varscan.h"
 #include "namespace.h"
-#include "pio_util.h"
 #include "resource_handle.h"
 #include "vlist_var.h"
 #include "vlist_att.h"
-#include "pio_rpc.h"
 
 #include "resource_unpack.h"
 #include "serialize.h"

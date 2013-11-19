@@ -19,11 +19,11 @@ typedef int MPI_Comm;
 #endif
 
 #include "cdi.h"
-#include "pio_util.h"
 #include "dmemory.h"
 #include "pio_write.h"
 #ifdef USE_MPI
 #include "cdipio.h"
+#include "pio_util.h"
 #endif
 
 void

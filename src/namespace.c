@@ -5,7 +5,6 @@
 #include "dmemory.h"
 #include "namespace.h"
 #include "resource_handle.h"
-#include "pio_util.h"
 #include "serialize.h"
 #include "error.h"
 #include "cdf_int.h"

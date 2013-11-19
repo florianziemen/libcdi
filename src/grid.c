@@ -12,7 +12,6 @@
 #include "cdi_int.h"
 #include "grid.h"
 #include "gaussgrid.h"
-#include "pio_util.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
 #include "namespace.h"

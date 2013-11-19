@@ -3,6 +3,7 @@
 #endif
 
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -16,11 +17,12 @@ typedef int MPI_Comm;
 #include "cdi.h"
 #ifdef USE_MPI
 #include "cdipio.h"
+#include "pio_util.h"
 #endif
 
 #include "cksum.h"
-#include "pio_util.h"
 #include "dmemory.h"
+#include "error.h"
 #include "pio_write.h"
 
 enum {

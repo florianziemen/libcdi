@@ -11,7 +11,6 @@
 
 #include "dmemory.h"
 #include "resource_handle.h"
-#include "pio_util.h"
 #include "namespace.h"
 #include "serialize.h"
 #include "cdi.h"

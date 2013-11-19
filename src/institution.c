@@ -6,7 +6,6 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "resource_handle.h"
-#include "pio_util.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
 #include "namespace.h"

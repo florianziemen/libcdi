@@ -18,7 +18,6 @@
 #ifdef HAVE_LIBNETCDF
 #include "stream_cdf.h"
 #endif
-#include "pio_util.h"
 #include "namespace.h"
 #include "serialize.h"
 #include "resource_handle.h"

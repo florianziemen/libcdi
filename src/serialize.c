@@ -1,10 +1,11 @@
 #include <inttypes.h>
 #include <limits.h>
+#include <string.h>
 
 #include "cdi.h"
+#include "error.h"
 #include "serialize.h"
 #include "namespace.h"
-#include "pio_util.h"
 
 int
 serializeGetSize(int count, int datatype, void *context)

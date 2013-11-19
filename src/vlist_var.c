@@ -13,7 +13,7 @@
 #include "vlist_att.h"
 #include "namespace.h"
 #include "serialize.h"
-#include "pio_util.h"
+#include "error.h"
 
 extern resOps vlist_ops;
 

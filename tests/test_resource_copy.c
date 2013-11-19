@@ -8,11 +8,11 @@
 #include <mpi.h>
 #include "cdi.h"
 #include "cdipio.h"
-#include "pio_util.h"
 #include "dmemory.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
 #include "pio_serialize.h"
+#include "pio_util.h"
 
 extern void   arrayDestroy          ( void );
 

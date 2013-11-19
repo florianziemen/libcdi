@@ -12,7 +12,6 @@
 #include "cdi_cksum.h"
 #include "cdi_int.h"
 #include "calendar.h"
-#include "pio_util.h"
 #include "namespace.h"
 #include "serialize.h"
 #include "resource_handle.h"

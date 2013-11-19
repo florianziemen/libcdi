@@ -11,7 +11,6 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "vlist.h"
-#include "pio_util.h"
 #include "error.h"
 #include "serialize.h"
 

@@ -23,12 +23,8 @@
 #include "ieg.h"
 #include "vlist.h"
 #include "resource_handle.h"
-#include "pio_util.h"
 
 #include "namespace.h"
-#include "pio_interface.h"
-#include "pio_rpc.h"
-#include "pio_comm.h"
 
 #include <string.h>
 
