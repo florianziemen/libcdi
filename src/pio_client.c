@@ -23,7 +23,7 @@ cdiPioClientStreamOpen(const char *filename, const char *filemode,
                        int filetype, stream_t *streamptr,
                        int recordBufIsToBeCreated)
 {
-  union winHeaderEntry header;
+  struct winHeaderEntry header;
   size_t filename_len;
   if ( tolower ( * filemode ) == 'w' )
     {
@@ -35,7 +35,7 @@ cdiPioClientStreamOpen(const char *filename, const char *filemode,
         case STAGE_TIMELOOP:
           filename_len = strlen(filename);
           xassert(filename_len > 0 && filename_len < MAXDATAFILENAME);
-          header.funcCall
+          header.specific.funcCall
             = (struct funcCallDesc){
             .funcID = STREAMOPEN,
             .funcArgs.newFile = { .fnamelen = (int)filename_len,
@@ -61,14 +61,14 @@ cdiPioClientStreamOpen(const char *filename, const char *filemode,
 static void
 cdiPioClientStreamDefVlist_(int streamID, int vlistID)
 {
-  union winHeaderEntry header;
+  struct winHeaderEntry header;
   statusCode nspStatus = namespaceInqResStatus ();
   switch ( nspStatus )
     {
     case STAGE_DEFINITION:
       break;
     case STAGE_TIMELOOP:
-      header.funcCall
+      header.specific.funcCall
         = (struct funcCallDesc){
         .funcID = STREAMDEFVLIST,
         .funcArgs.streamChange = { streamID, vlistID } };
@@ -152,14 +152,14 @@ cdiPioClientStreamNOP(stream_t *streamptr)
 static void
 cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
-  union winHeaderEntry header;
+  struct winHeaderEntry header;
   statusCode nspStatus = namespaceInqResStatus ();
   switch ( nspStatus )
     {
     case STAGE_DEFINITION:
       break;
     case STAGE_TIMELOOP:
-      header.funcCall
+      header.specific.funcCall
         = (struct funcCallDesc){
         .funcID = STREAMCLOSE,
         .funcArgs.streamChange = { streamptr->self, CDI_UNDEFID } };
@@ -177,7 +177,7 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
 static int
 cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
 {
-  union winHeaderEntry header;
+  struct winHeaderEntry header;
   statusCode nspStatus = namespaceInqResStatus ();
   int taxisID, buf_size, position;
   char *buf;
@@ -189,7 +189,7 @@ cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
     case STAGE_TIMELOOP:
       position = 0;
       taxisID = vlistInqTaxis(streamptr->vlistID);
-      header.funcCall
+      header.specific.funcCall
         = (struct funcCallDesc){
         .funcID = STREAMDEFTIMESTEP,
         .funcArgs.streamNewTimestep = { streamptr->self, tsID } };

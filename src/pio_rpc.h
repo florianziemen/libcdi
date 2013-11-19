@@ -42,13 +42,13 @@ struct headerSize
 
 struct dataRecord
 {
-  int streamID, varID, offset, nmiss;
+  int streamID, varID, nmiss;
 };
 
 struct funcCallDesc
 {
   int funcID;
-  union
+  union funcArgs
   {
     struct
     {
@@ -56,11 +56,11 @@ struct funcCallDesc
     } streamChange;
     struct
     {
-      int streamID, tsID, offset;
+      int streamID, tsID;
     } streamNewTimestep;
     struct
     {
-      int fnamelen, offset, filetype;
+      int fnamelen, filetype;
     } newFile;
   } funcArgs;
 };
@@ -69,16 +69,20 @@ struct funcCallDesc
  * partDescMarker == PARTDESCMARKER, always. */
 struct partDescRecord
 {
-  int partDescMarker, offset;
+  int partDescMarker;
   Xt_uid uid;
 };
 
-union winHeaderEntry
+struct winHeaderEntry
 {
-  struct headerSize headerSize;
-  struct dataRecord dataRecord;
-  struct funcCallDesc funcCall;
-  struct partDescRecord partDesc;
+  union
+  {
+    struct headerSize headerSize;
+    struct dataRecord dataRecord;
+    struct funcCallDesc funcCall;
+    struct partDescRecord partDesc;
+  }  specific;
+  int offset;
 };
 
 /* round size to next multiple of factor */

@@ -118,7 +118,7 @@ collDefBufferSizes()
                     + sizeof (double) - 1
                     /* one header for data record, one for
                      * corresponding part descriptor*/
-                    + 2 * sizeof (union winHeaderEntry)
+                    + 2 * sizeof (struct winHeaderEntry)
                     /* FIXME: heuristic for size of packed Xt_idxlist */
                     + sizeof (Xt_int) * decoChunk * 3;
                   rxWin[modelID].dictSize += 2;
@@ -127,7 +127,7 @@ collDefBufferSizes()
         }
       // space required for the 3 function calls streamOpen, streamDefVlist, streamClose 
       // once per stream and timestep for all collprocs only on the modelproc root
-      rxWin[root].size += numRPCFuncs * sizeof (union winHeaderEntry)
+      rxWin[root].size += numRPCFuncs * sizeof (struct winHeaderEntry)
         /* serialized filename */
         + MAXDATAFILENAME
         /* data part of streamDefTimestep */
@@ -140,7 +140,7 @@ collDefBufferSizes()
     {
       /* account for size header */
       rxWin[modelID].dictSize += 1;
-      rxWin[modelID].size += sizeof (union winHeaderEntry);
+      rxWin[modelID].size += sizeof (struct winHeaderEntry);
       rxWin[modelID].size = roundUpToMultiple(rxWin[modelID].size,
                                               PIO_WIN_ALIGN);
       sumGetBufferSizes += (size_t)rxWin[modelID].size;
@@ -183,10 +183,11 @@ static
 /************************************************************************/
 
 static void
-readFuncCall(struct funcCallDesc *header)
+readFuncCall(struct winHeaderEntry *header)
 {
   int root = commInqRootGlob ();
-  int funcID = header->funcID;
+  int funcID = header->specific.funcCall.funcID;
+  union funcArgs *funcArgs = &(header->specific.funcCall.funcArgs);
 
   xassert(funcID >= MINFUNCID && funcID <= MAXFUNCID);
   switch ( funcID )
@@ -194,7 +195,7 @@ readFuncCall(struct funcCallDesc *header)
     case STREAMCLOSE:
       {
         int streamID
-          = namespaceAdaptKey2(header->funcArgs.streamChange.streamID);
+          = namespaceAdaptKey2(funcArgs->streamChange.streamID);
         streamClose(streamID);
         xdebug("READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
                " closed stream",
@@ -203,13 +204,12 @@ readFuncCall(struct funcCallDesc *header)
       break;
     case STREAMOPEN:
       {
-        size_t filenamesz = header->funcArgs.newFile.fnamelen;
+        size_t filenamesz = funcArgs->newFile.fnamelen;
         xassert ( filenamesz > 0 && filenamesz < MAXDATAFILENAME );
         const char *filename
-          = (const char *)(rxWin[root].buffer
-                           + header->funcArgs.newFile.offset);
+          = (const char *)(rxWin[root].buffer + header->offset);
         xassert(filename[filenamesz] == '\0');
-        int filetype = header->funcArgs.newFile.filetype;
+        int filetype = funcArgs->newFile.filetype;
         int streamID = streamOpenWrite(filename, filetype);
         xassert(streamID != CDI_ELIBNAVAIL);
         xdebug("READ FUNCTION CALL FROM WIN:  %s, filenamesz=%zu,"
@@ -221,8 +221,8 @@ readFuncCall(struct funcCallDesc *header)
     case STREAMDEFVLIST:
       {
         int streamID
-          = namespaceAdaptKey2(header->funcArgs.streamChange.streamID);
-        int vlistID = namespaceAdaptKey2(header->funcArgs.streamChange.vlistID);
+          = namespaceAdaptKey2(funcArgs->streamChange.streamID);
+        int vlistID = namespaceAdaptKey2(funcArgs->streamChange.vlistID);
         streamDefVlist(streamID, vlistID);
         xdebug("READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
                " vlistID=%d, called streamDefVlist ().",
@@ -232,14 +232,14 @@ readFuncCall(struct funcCallDesc *header)
     case STREAMDEFTIMESTEP:
       {
         MPI_Comm commCalc = commInqCommCalc ();
-        int streamID = header->funcArgs.streamNewTimestep.streamID;
+        int streamID = funcArgs->streamNewTimestep.streamID;
         int nspTarget = namespaceResHDecode(streamID).nsp;
         streamID = namespaceAdaptKey2(streamID);
         int tsID
-          = header->funcArgs.streamNewTimestep.tsID;
+          = funcArgs->streamNewTimestep.tsID;
         int oldTaxisID
           = vlistInqTaxis(streamInqVlist(streamID));
-        int position = header->funcArgs.streamNewTimestep.offset;
+        int position = header->offset;
         int changedTaxisID
           = taxisUnpack((char *)rxWin[root].buffer, (int)rxWin[root].size,
                         &position, nspTarget, &commCalc, 0);
@@ -270,10 +270,10 @@ gatherArray(int root, int nProcsModel, int headerIdx,
             int vlistID,
             double *gatherBuf, int *nmiss)
 {
-  union winHeaderEntry *winDict
-    = (union winHeaderEntry *)rxWin[root].buffer;
-  int streamID = winDict[headerIdx].dataRecord.streamID;
-  int varID = winDict[headerIdx].dataRecord.varID;
+  struct winHeaderEntry *winDict
+    = (struct winHeaderEntry *)rxWin[root].buffer;
+  int streamID = winDict[headerIdx].specific.dataRecord.streamID;
+  int varID = winDict[headerIdx].specific.dataRecord.varID;
   int varShape[3] = { 0, 0, 0 };
   cdiPioQueryVarDims(varShape, vlistID, varID);
   Xt_int varShapeXt[3];
@@ -290,24 +290,27 @@ gatherArray(int root, int nProcsModel, int headerIdx,
     for (int modelID = 0; modelID < nProcsModel; modelID++)
       {
         struct dataRecord *dataHeader
-          = &((union winHeaderEntry *)
-              rxWin[modelID].buffer)[headerIdx].dataRecord;
+          = &((struct winHeaderEntry *)
+              rxWin[modelID].buffer)[headerIdx].specific.dataRecord;
         struct partDescRecord *partHeader
-          = &((union winHeaderEntry *)
-              rxWin[modelID].buffer)[headerIdx + 1].partDesc;
-        int position = partHeader->offset;
+          = &((struct winHeaderEntry *)
+              rxWin[modelID].buffer)[headerIdx + 1].specific.partDesc;
+        int position =
+          ((struct winHeaderEntry *)rxWin[modelID].buffer)[headerIdx + 1].offset;
         xassert(namespaceAdaptKey2(dataHeader->streamID) == streamID
                 && dataHeader->varID == varID
                 && partHeader->partDescMarker == PARTDESCMARKER
                 && position > 0
                 && ((size_t)position
-                    >= sizeof (union winHeaderEntry) * rxWin[modelID].dictSize)
+                    >= sizeof (struct winHeaderEntry) * rxWin[modelID].dictSize)
                 && ((size_t)position < rxWin[modelID].size));
         part[modelID] = xt_idxlist_unpack(rxWin[modelID].buffer,
                                           (int)rxWin[modelID].size,
                                           &position, commCalc);
         Xt_int partSize = xt_idxlist_get_num_indices(part[modelID]);
-        size_t charOfs = (rxWin[modelID].buffer + dataHeader->offset)
+        size_t charOfs = (rxWin[modelID].buffer
+                          + ((struct winHeaderEntry *)
+                             rxWin[modelID].buffer)[headerIdx].offset)
           - rxWin[0].buffer;
         xassert(charOfs % sizeof (double) == 0
                 && charOfs / sizeof (double) + partSize <= INT_MAX);
@@ -527,7 +530,7 @@ streamIsInList(struct streamMapping *streamMap, int numStreamIDs,
 }
 
 static struct streamMap
-buildStreamMap(union winHeaderEntry *winDict)
+buildStreamMap(struct winHeaderEntry *winDict)
 {
   int streamIDOld = CDI_UNDEFID;
   int oldStreamIdx = CDI_UNDEFID;
@@ -535,14 +538,14 @@ buildStreamMap(union winHeaderEntry *winDict)
   int sizeStreamMap = 16;
   struct streamMapping *streamMap
     = xmalloc(sizeStreamMap * sizeof (streamMap[0]));
-  int numDataEntries = winDict[0].headerSize.numDataEntries;
+  int numDataEntries = winDict[0].specific.headerSize.numDataEntries;
   int numStreamIDs = 0;
   /* find streams written on this process */
   for (int headerIdx = 1; headerIdx < numDataEntries; headerIdx += 2)
     {
       int streamID
-        = winDict[headerIdx].dataRecord.streamID
-        = namespaceAdaptKey2(winDict[headerIdx].dataRecord.streamID);
+        = winDict[headerIdx].specific.dataRecord.streamID
+        = namespaceAdaptKey2(winDict[headerIdx].specific.dataRecord.streamID);
       xassert(streamID > 0);
       if (streamID != streamIDOld)
         {
@@ -563,7 +566,7 @@ buildStreamMap(union winHeaderEntry *winDict)
       if (filetype == FILETYPE_NC || filetype == FILETYPE_NC2
           || filetype == FILETYPE_NC4)
         {
-          int varID = winDict[headerIdx].dataRecord.varID;
+          int varID = winDict[headerIdx].specific.dataRecord.varID;
           streamMap[oldStreamIdx].varMap[varID] = headerIdx;
         }
     }
@@ -607,12 +610,12 @@ static void readGetBuffers()
 #endif
   xdebug("%s", "START");
 
-  union winHeaderEntry *winDict
-    = (union winHeaderEntry *)rxWin[root].buffer;
-  xassert(winDict[0].headerSize.sizeID == HEADERSIZEMARKER);
+  struct winHeaderEntry *winDict
+    = (struct winHeaderEntry *)rxWin[root].buffer;
+  xassert(winDict[0].specific.headerSize.sizeID == HEADERSIZEMARKER);
   {
     int dictSize = rxWin[root].dictSize,
-      firstNonRPCEntry = dictSize - winDict[0].headerSize.numRPCEntries - 1,
+      firstNonRPCEntry = dictSize - winDict[0].specific.headerSize.numRPCEntries - 1,
       headerIdx,
       numFuncCalls = 0;
     for (headerIdx = dictSize - 1;
@@ -620,13 +623,13 @@ static void readGetBuffers()
          --headerIdx)
       {
         struct funcCallDesc *header
-          = &(winDict[headerIdx].funcCall);
+          = &(winDict[headerIdx].specific.funcCall);
         xassert(header->funcID >= MINFUNCID
                 && header->funcID <= MAXFUNCID);
         ++numFuncCalls;
-        readFuncCall(header);
+        readFuncCall(winDict + headerIdx);
       }
-    xassert(numFuncCalls == winDict[0].headerSize.numRPCEntries);
+    xassert(numFuncCalls == winDict[0].specific.headerSize.numRPCEntries);
   }
   /* build list of streams, data was transferred for */
   {
@@ -657,9 +660,9 @@ static void readGetBuffers()
               for (headerIdx = map.entries[streamIdx].firstHeaderIdx;
                    headerIdx <= lastHeaderIdx;
                    headerIdx += 2)
-                if (streamID == winDict[headerIdx].dataRecord.streamID)
+                if (streamID == winDict[headerIdx].specific.dataRecord.streamID)
                   {
-                    int varID = winDict[headerIdx].dataRecord.varID;
+                    int varID = winDict[headerIdx].specific.dataRecord.varID;
                     int size = vlistInqVarSize(vlistID, varID);
                     int nmiss;
                     resizeVarGatherBuf(vlistID, varID, &data,
