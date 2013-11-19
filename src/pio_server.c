@@ -932,13 +932,14 @@ void getTimeStepData()
 
   xdebug("%s", "START");
 
+  for ( modelID = 0; modelID < nProcsModel; modelID++ )
+    clearModelWinBuffer(modelID);
   // todo put in correct lbs and ubs
   xmpi(MPI_Win_start(groupModel, 0, getWin));
   xmpi(MPI_Win_get_attr(getWin, MPI_WIN_BASE, &getWinBaseAddr, &attrFound));
   xassert(attrFound);
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {
-      clearModelWinBuffer(modelID);
       xdebug("modelID=%d, nProcsModel=%d, rxWin[%d].size=%zu,"
              " getWin=%p, sizeof(int)=%u",
              modelID, nProcsModel, modelID, rxWin[modelID].size,
