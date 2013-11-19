@@ -891,7 +891,8 @@ streamWriteVarPart(int streamID, int varID, const void *data,
 {
   if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
 
-  check_parg(data);
+  int chunk = xt_idxlist_get_num_indices(partDesc);
+  xassert(chunk == 0 || data);
 
   void (*myStreamWriteVarPart)(int streamID, int varID, const void *data,
                                int nmiss, Xt_idxlist partDesc)
