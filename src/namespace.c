@@ -88,25 +88,6 @@ enum {
 };
 
 
-#if 0
-void namespaceShowbits ( int n, char *name )
-{
-  int i;
-  unsigned mask;
-  char bitvalues[intbits + 1];
-
-  mask = 1;
-  for ( i = 0; i < intbits; i++ )
-    {
-      bitvalues[i] = ((unsigned)n & mask) ? '1':'0';
-      mask <<= 1;
-    }
-  bitvalues[intbits] = '\0';
-  fprintf (stdout, "%s: %s\n", name, bitvalues );
-}
-#endif
-
-
 int namespaceIdxEncode ( namespaceTuple_t tin )
 {
   xassert ( tin.nsp < NUM_NAMESPACES && tin.idx < NUM_IDX);
