@@ -820,7 +820,7 @@ void pioFinalize ( void )
 void pioWriteTimestep()
 {
 #ifdef USE_MPI
-  int collID, iAssert = 0;
+  int collID, iAssert = MPI_MODE_NOPUT;
   /* int tokenEnd = END; */
   int rankGlob = commInqRankGlob ();
   int nProcsColl = commInqNProcsColl ();
