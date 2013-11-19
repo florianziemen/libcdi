@@ -592,65 +592,47 @@ void reshUnlock ()
 
 int reshListCompare ( int nsp0, int nsp1 )
 {
-  int valCompare = 0;
-  int i;
-
-
   LIST_INIT();
   LIST_LOCK();
 
   xassert(resHListSize > nsp0 && resHListSize > nsp1 &&
           nsp0 >= 0 && nsp1 >= 0);
 
-  for ( i = 0; i < resHList[nsp0].size; i++ )
+  int valCompare = 0;
+  int i, listSizeMin = (resHList[nsp0].size <= resHList[nsp1].size)
+    ? resHList[nsp0].size : resHList[nsp1].size;
+  listElem_t *resources0 = resHList[nsp0].resources,
+    *resources1 = resHList[nsp1].resources;
+  for (i = 0; i < listSizeMin; i++)
     {
-      listElem_t *listElem0 = resHList[nsp0].resources + i,
-        *listElem1 = resHList[nsp1].resources + i;
-      if ( listElem0->val )
-	{
-	  if ( i >= resHList[nsp1].size )
-	    {
-              valCompare = 1;
-	      xdebug("%s %d", "namespace active length mismatch at resource",
-                     i);
-	      break;
-	    }
-
-	  if ( !listElem1->val )
-	    {
-              valCompare = 1;
-	      xdebug("%s %d", "namespace occupation mismatch at resource", i);
-              break;
-	    }
-
-	  if ( listElem0->ops != listElem1->ops || listElem0->ops == NULL )
-	    {
-              valCompare = 1;
-	      xdebug("%s %d", "resource type mismatch at resource", i);
-              break;
-	    }
-
-	  valCompare = listElem0->ops->valCompare(listElem0->val,
-                                                  listElem1->val);
-          if (valCompare)
-            break;
-	}
-      else if ( listElem1->val )
+      int occupied0 = resources0[i].val != NULL,
+        occupied1 = resources1[i].val != NULL;
+      /* occupation mismatch ? */
+      int diff = occupied0 ^ occupied1;
+      valCompare |= (diff << cdiResHListOccupationMismatch);
+      if (!diff && occupied0)
         {
-          valCompare = 1;
-          xdebug("namespace 1 has value at empty place %d of namespace 0",
-                 i);
-          break;
+          /* both occupied, do resource types match? */
+          diff = (resources0[i].ops != resources1[i].ops
+                  || resources0[i].ops == NULL);
+          valCompare |= (diff << cdiResHListResourceTypeMismatch);
+          if (!diff)
+            {
+              /* types match, does content match also? */
+              diff = resources0[i].ops->valCompare(resources0[i].val,
+                                                   resources1[i].val);
+              valCompare |= (diff << cdiResHListResourceContentMismatch);
+            }
         }
     }
-
-  if (!valCompare)
-    {
-      for ( ; i < resHList[nsp1].size; i++ )
-        valCompare = valCompare || resHList[nsp1].resources[i].val != NULL;
-      if (valCompare)
-        xdebug("%s", "extra elements in second namespace");
-    }
+  /* find resources in nsp 0 beyond end of nsp 1 */
+  for (int j = listSizeMin; j < resHList[nsp0].size; ++j)
+    valCompare |= ((resources0[j].val != NULL)
+                   << cdiResHListOccupationMismatch);
+  /* find resources in nsp 1 beyond end of nsp 0 */
+  for (; i < resHList[nsp1].size; ++i)
+    valCompare |= ((resources1[i].val != NULL)
+                   << cdiResHListOccupationMismatch);
 
   LIST_UNLOCK();
 
