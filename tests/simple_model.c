@@ -126,7 +126,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
     levs[i] = 101300.0
       - 3940.3 * (exp(1.3579 * (double)(i)/(setup.max_nlev - 1)) - 1.0);
 
-  nlev = xmalloc(nVars * sizeof (nlev[0]));
+  nlev = xmalloc(2 * nVars * sizeof (nlev[0]));
   for (int varIdx = 0; varIdx < nVars; varIdx++ )
     {
       int varLevs = random()%4;
@@ -156,7 +156,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
       ;
     }
 
-  int *varCodes = xmalloc(nVars * sizeof(varCodes[0]));
+  int *varCodes = nlev + nVars;
   for (int varIdx = 0; varIdx < nVars; ++varIdx)
     varCodes[varIdx] = 129 + varIdx;
 
@@ -187,7 +187,6 @@ modelRun(struct model_config setup, MPI_Comm comm)
       vlistDefVarCode(vlistID, varIDs[i], varCodes[i]);
       vlistDefVarDatatype(vlistID, varIDs[i], setup.datatype);
     }
-  free(varCodes);
 
   taxisID = taxisCreate ( TAXIS_ABSOLUTE );
   vlistDefTaxis ( vlistID, taxisID );
