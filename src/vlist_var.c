@@ -48,7 +48,6 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].stdname       = NULL;
   vlistptr->vars[varID].units         = NULL;
   vlistptr->vars[varID].extra         = NULL;
-  vlistptr->vars[varID].nlevs         = 0;
   vlistptr->vars[varID].levinfo       = NULL;
   vlistptr->vars[varID].comptype      = COMPRESS_NONE;
   vlistptr->vars[varID].complevel     = 1;
@@ -226,8 +225,6 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
       Message("Unexpected tstep type %d, set to TSTEP_INSTANT!", tsteptype);
       vlistptr->vars[varID].tsteptype = TSTEP_INSTANT;
     }
-
-  vlistptr->vars[varID].nlevs = zaxisInqSize(zaxisID);;
 
   for ( index = 0; index < vlistptr->ngrids; index++ )
     if ( gridID == vlistptr->gridIDs[index] ) break;
@@ -1595,12 +1592,13 @@ int vlistFindLevel(int vlistID, int fvarID, int flevelID)
 
   if ( varID != -1 )
     {
-      for ( levelID = 0; levelID < vlistptr->vars[varID].nlevs; levelID++ )
+      int nlevs = zaxisInqSize(vlistptr->vars[varID].zaxisID);
+      for ( levelID = 0; levelID < nlevs; levelID++ )
 	{
 	  if ( vlistptr->vars[varID].levinfo[levelID].flevelID == flevelID ) break;
 	}
 
-      if ( levelID == vlistptr->vars[varID].nlevs )
+      if ( levelID == nlevs )
 	{
 	  levelID = -1;
 	  Message("levelID not found for fvarID %d and levelID %d in vlistID %d!",
@@ -2124,7 +2122,8 @@ int vlistVarGetSize(vlist_t *p, int varID, void *context)
     varsize += serializeGetSize(strlen(var->stdname), DATATYPE_TXT, context);
   if (var->units)
     varsize += serializeGetSize(strlen(var->units), DATATYPE_TXT, context);
-  varsize += serializeGetSize(4 * var->nlevs, DATATYPE_INT, context);
+  varsize += serializeGetSize(4 * zaxisInqSize(var->zaxisID),
+                              DATATYPE_INT, context);
   varsize += vlistAttsGetSize(p, varID, context);
   return varsize;
 }
@@ -2154,7 +2153,7 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   tempbuf[15] = var->missvalused;
   tempbuf[16] = var->comptype;
   tempbuf[17] = var->complevel;
-  tempbuf[18] = var->nlevs;
+  tempbuf[18] = zaxisInqSize(var->zaxisID);
   tempbuf[19] = var->iorank;
   dtempbuf[0] = var->missval;
   dtempbuf[1] = var->scalefactor;
@@ -2175,9 +2174,10 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
     serializePack(var->units, unitssz, DATATYPE_TXT,
                   buf, size, position, context);
   {
-    int levbuf[var->nlevs][4];
+    int nlevs = zaxisInqSize(var->zaxisID);
+    int levbuf[nlevs][4];
     if (var->levinfo)
-      for (int levID = 0; levID < var->nlevs; ++levID)
+      for (int levID = 0; levID < nlevs; ++levID)
         {
           levbuf[levID][0] = var->levinfo[levID].flag;
           levbuf[levID][1] = var->levinfo[levID].index;
@@ -2185,7 +2185,7 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
           levbuf[levID][3] = var->levinfo[levID].flevelID;
         }
     else
-      for (int levID = 0; levID < var->nlevs; ++levID)
+      for (int levID = 0; levID < nlevs; ++levID)
         {
           levinfo_t li = DEFAULT_LEVINFO(levID);
           levbuf[levID][0] = li.flag;
@@ -2193,7 +2193,7 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
           levbuf[levID][2] = li.mlevelID;
           levbuf[levID][3] = li.flevelID;
         }
-    serializePack(levbuf, var->nlevs * 4, DATATYPE_INT,
+    serializePack(levbuf, nlevs * 4, DATATYPE_INT,
                   buf, size, position, context);
   }
   vlistAttsPack(p, varID, buf, size, position, context);
@@ -2275,7 +2275,6 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
     int levbuf[tempbuf[18]][4];
     var_t *var = vlistptr->vars + newvar;
     int nlevs=tempbuf[18], i, flagSetLev = 0;
-    xassert(nlevs == var->nlevs);
     cdiVlistCreateVarLevInfo(vlistptr, newvar);
     serializeUnpack(buf, size, position,
                     levbuf, nlevs * 4, DATATYPE_INT, context);
