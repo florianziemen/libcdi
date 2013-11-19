@@ -93,26 +93,23 @@ CONFIG_CLEAN_FILES = test_cksum_grib test_cksum_nc test_cksum_nc2 \
 	pio_cksum_writer pio_cksum_cdf
 CONFIG_CLEAN_VPATH_FILES =
 am_cksum_read_OBJECTS = cksum_read.$(OBJEXT) var_cksum.$(OBJEXT) \
-	stream_cksum.$(OBJEXT) cksum.$(OBJEXT) \
-	ensure_array_size.$(OBJEXT)
+	stream_cksum.$(OBJEXT) ensure_array_size.$(OBJEXT)
 cksum_read_OBJECTS = $(am_cksum_read_OBJECTS)
 cksum_read_LDADD = $(LDADD)
 cksum_read_DEPENDENCIES = ../src/libcdi.la
-am_cksum_verify_OBJECTS = cksum_verify.$(OBJEXT) cksum.$(OBJEXT)
+am_cksum_verify_OBJECTS = cksum_verify.$(OBJEXT)
 cksum_verify_OBJECTS = $(am_cksum_verify_OBJECTS)
 cksum_verify_LDADD = $(LDADD)
 cksum_verify_DEPENDENCIES = ../src/libcdi.la
-am_cksum_write_OBJECTS = cksum_write.$(OBJEXT) cksum.$(OBJEXT)
+am_cksum_write_OBJECTS = cksum_write.$(OBJEXT)
 cksum_write_OBJECTS = $(am_cksum_write_OBJECTS)
 cksum_write_LDADD = $(LDADD)
 cksum_write_DEPENDENCIES = ../src/libcdi.la
-am_cksum_write_chunk_OBJECTS = cksum_write_chunk.$(OBJEXT) \
-	cksum.$(OBJEXT)
+am_cksum_write_chunk_OBJECTS = cksum_write_chunk.$(OBJEXT)
 cksum_write_chunk_OBJECTS = $(am_cksum_write_chunk_OBJECTS)
 cksum_write_chunk_LDADD = $(LDADD)
 cksum_write_chunk_DEPENDENCIES = ../src/libcdi.la
-am_pio_write_OBJECTS = pio_write.$(OBJEXT) simple_model.$(OBJEXT) \
-	cksum.$(OBJEXT)
+am_pio_write_OBJECTS = pio_write.$(OBJEXT) simple_model.$(OBJEXT)
 pio_write_OBJECTS = $(am_pio_write_OBJECTS)
 am__DEPENDENCIES_1 = ../src/libcdi.la
 @USE_MPI_FALSE@pio_write_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -360,16 +357,15 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 #
 test_grib_SOURCES = test_grib.c
-cksum_verify_SOURCES = cksum_verify.c cksum.c cksum.h
-cksum_write_SOURCES = cksum_write.c cksum.c cksum.h
-cksum_write_chunk_SOURCES = cksum_write_chunk.c cksum.c cksum.h
+cksum_verify_SOURCES = cksum_verify.c
+cksum_write_SOURCES = cksum_write.c
+cksum_write_chunk_SOURCES = cksum_write_chunk.c
 cksum_read_SOURCES = cksum_read.c \
 	var_cksum.c var_cksum.h \
 	stream_cksum.c stream_cksum.h \
-	cksum.c cksum.h \
 	ensure_array_size.h ensure_array_size.c
 
-pio_write_SOURCES = pio_write.c pio_write.h simple_model.c cksum.h cksum.c
+pio_write_SOURCES = pio_write.c pio_write.h simple_model.c
 test_resource_copy_SOURCES = test_resource_copy.c $(am__append_1)
 #
 AM_CFLAGS = $(YAXT_CFLAGS)
@@ -484,7 +480,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_read.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_verify.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_write.Po@am__quote@

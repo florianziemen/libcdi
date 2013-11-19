@@ -202,6 +202,8 @@ src/cfortran.doc -text
 src/cfortran.h -text
 src/cgribex.h -text
 src/cgribexlib.c -text
+src/cksum.c -text
+src/cksum.h -text
 src/config.h.in -text
 src/datetime.h -text
 src/dmemory.c -text
@@ -329,8 +331,6 @@ tables/remo -text
 tables/wmo_001 -text
 tests/Makefile.am -text
 tests/Makefile.in -text
-tests/cksum.c -text
-tests/cksum.h -text
 tests/cksum_read.c -text
 tests/cksum_verify.c -text
 tests/cksum_write.c -text

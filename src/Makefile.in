@@ -117,8 +117,8 @@ LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 libcdi_la_DEPENDENCIES =
 am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	cdf_int.lo cdi_error.lo cdi_util.lo cdiFortran.lo \
-	cgribexlib.lo dmemory.lo pio_util.lo error.lo extralib.lo \
-	file.lo gaussgrid.lo gribapi.lo grid.lo ieglib.lo \
+	cgribexlib.lo dmemory.lo cksum.lo pio_util.lo error.lo \
+	extralib.lo file.lo gaussgrid.lo gribapi.lo grid.lo ieglib.lo \
 	institution.lo model.lo namespace.lo serialize.lo \
 	resource_handle.lo servicelib.lo stream_cdf.lo \
 	stream_cgribex.lo stream_ext.lo stream_grb.lo \
@@ -382,6 +382,8 @@ libcdi_la_SOURCES = \
 	datetime.h	 \
 	dmemory.c      	 \
 	dmemory.h	 \
+	cksum.c		\
+	cksum.h		\
 	pio_util.c							\
 	pio_util.h							\
 	dtypes.h	 \
@@ -612,6 +614,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdipioFortran.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cgribexlib.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmemory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extralib.Plo@am__quote@

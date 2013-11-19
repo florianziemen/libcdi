@@ -34,6 +34,8 @@ libcdi_la_SOURCES = 	 \
 	datetime.h	 \
 	dmemory.c      	 \
 	dmemory.h	 \
+	cksum.c		\
+	cksum.h		\
 	pio_util.c							\
 	pio_util.h							\
 	dtypes.h	 \

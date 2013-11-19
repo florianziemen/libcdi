@@ -11,15 +11,14 @@ check_PROGRAMS = cksum_verify test_grib cksum_write cksum_read pio_write \
 	test_resource_copy cksum_write_chunk
 #
 test_grib_SOURCES = test_grib.c
-cksum_verify_SOURCES = cksum_verify.c cksum.c cksum.h
-cksum_write_SOURCES = cksum_write.c cksum.c cksum.h
-cksum_write_chunk_SOURCES = cksum_write_chunk.c cksum.c cksum.h
+cksum_verify_SOURCES = cksum_verify.c
+cksum_write_SOURCES = cksum_write.c
+cksum_write_chunk_SOURCES = cksum_write_chunk.c
 cksum_read_SOURCES = cksum_read.c \
 	var_cksum.c var_cksum.h \
 	stream_cksum.c stream_cksum.h \
-	cksum.c cksum.h \
 	ensure_array_size.h ensure_array_size.c
-pio_write_SOURCES = pio_write.c pio_write.h simple_model.c cksum.h cksum.c
+pio_write_SOURCES = pio_write.c pio_write.h simple_model.c
 test_resource_copy_SOURCES = test_resource_copy.c
 #
 AM_CFLAGS = $(YAXT_CFLAGS)
