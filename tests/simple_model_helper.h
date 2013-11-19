@@ -34,6 +34,9 @@ struct PPM_extent
 PPM_uniform_partition(struct PPM_extent set_interval, int nparts,
                       int part_idx);
 
+int
+PPM_prime_factorization_32(uint32_t n, uint32_t **factors);
+
 #endif
 
 #endif

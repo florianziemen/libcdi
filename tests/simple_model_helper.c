@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "cdi.h"
+#include "dmemory.h"
 
 #include "simple_model_helper.h"
 
@@ -101,5 +102,34 @@ uniform_partition_start(struct PPM_extent set_interval, int nparts,
   int32_t start = set_interval.first + part_offset;
   return start;
 }
+
+int
+PPM_prime_factorization_32(uint32_t n, uint32_t **factors)
+{
+  if (n <= 1) return 0;
+  uint32_t * restrict pfactors = xrealloc(*factors, 32 * sizeof (pfactors[0]));
+  size_t numFactors = 0;
+  uint32_t unfactored = n;
+  while (!(unfactored & 1))
+  {
+    pfactors[numFactors] = 2;
+    ++numFactors;
+    unfactored >>= 1;
+  }
+  uint32_t divisor = 3;
+  while (unfactored > 1)
+  {
+    while (unfactored % divisor == 0)
+    {
+      unfactored /= divisor;
+      pfactors[numFactors] = divisor;
+      ++numFactors;
+    }
+    divisor += 1;
+  }
+  *factors = pfactors;
+  return numFactors;
+}
+
 #endif
 

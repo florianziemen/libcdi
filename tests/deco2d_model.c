@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+#include <inttypes.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,6 +21,7 @@ typedef int MPI_Comm;
 #include "pio_util.h"
 #ifdef HAVE_PPM_CORE
 #include <ppm/ppm_uniform_partition.h>
+#include <core/ppm_combinatorics.h>
 #endif
 #endif
 
@@ -34,28 +36,38 @@ enum {
   ntfiles     = 2,
 };
 
-
 static void
-modelRegionCompute(double region[], size_t offset, size_t len,
-                   int nlev, int nlat, int nlon,
+modelRegionCompute(double region[], int nlev, int nlat, int nlon,
+                   const int chunkStart[3], const int chunkSize[3],
                    int tsID, const double lons[], const double lats[],
                    double mscale, double mrscale)
 {
-  size_t local_pos;
-  for (local_pos = 0; local_pos < len; ++local_pos)
-    {
-      size_t global_pos = offset + local_pos;
-      int k = global_pos / (nlon * nlat);
-      int j = (global_pos % (nlon * nlat))/ nlon;
-      int i = global_pos % nlon;
-      region[local_pos]
-        = sign_flat(round((cos(2.0 * M_PI * (lons[(i + tsID)%nlon] - lons[0])
-                               / (lons[nlon-1] - lons[0]))
-                           * sin(2.0 * M_PI * (lats[(j + k)%nlat] - lats[0])
-                                 / (lats[nlat-1] - lats[0]))
-                           ) * mscale)) * mrscale;
-    }
+  unsigned is = (unsigned)chunkStart[0],
+    js = (unsigned)chunkStart[1],
+    ks = (unsigned)chunkStart[2],
+    m = (unsigned)chunkSize[0],
+    n = (unsigned)chunkSize[1],
+    o = (unsigned)chunkSize[2],
+    jstride = (unsigned)chunkSize[0],
+    kstride = jstride * (unsigned)chunkSize[1];
+
+  for (unsigned k = 0; k < o; ++k)
+    for (unsigned j = 0; j < n; ++j)
+      for (unsigned i = 0; i < m; ++i)
+        region[k * kstride + j * jstride + i]
+          = sign_flat(round((cos(2.0 * M_PI * (lons[(i + is + tsID)%nlon]
+                                               - lons[0])
+                                 / (lons[nlon-1] - lons[0]))
+                             * sin(2.0 * M_PI * (lats[(j + js + k + ks)%nlat]
+                                                 - lats[0])
+                                   / (lats[nlat-1] - lats[0]))
+                             ) * mscale)) * mrscale;
 }
+
+#ifdef USE_MPI
+static void
+findPartition2D(int npart[2], int num_parts);
+#endif
 
 void
 modelRun(struct model_config setup, MPI_Comm comm)
@@ -68,8 +80,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
     int nlev, zaxisID, id, code;
     uint32_t checksum_state;
 #if USE_MPI
-    int chunkSize, start;
+    int chunkSize[2], start[2];
     Xt_idxlist partDesc;
+    Xt_redist redist4gather;
 #endif
   } *varDesc;
   int gridID, taxisID, vlistID, streamID, tsID, tfID = 0;
@@ -85,7 +98,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
   int nVars = setup.nvars;
   size_t varslice_size = 0;
 #if USE_MPI
-  int *chunks = NULL, *displs = NULL, comm_size = 1;
+  int comm_size = 1;
+  int npart[2], rank_coord[2];
 #endif
 
 #if USE_MPI
@@ -93,10 +107,22 @@ modelRun(struct model_config setup, MPI_Comm comm)
   xmpi ( MPI_Comm_size ( comm, &comm_size ));
   if (rank == 0 && setup.compute_checksum)
     {
-      chunks = xmalloc(comm_size * sizeof (chunks[0]));
-      displs = xmalloc(comm_size * sizeof (displs[0]));
       var = xmalloc((size_t)nlon * (size_t)nlat
                     * (size_t)setup.max_nlev * sizeof(var[0]));
+    }
+
+  if (comm_size == 1)
+    {
+      npart[0] = 1;
+      npart[1] = 1;
+      rank_coord[0] = 0;
+      rank_coord[1] = 0;
+    }
+  else
+    {
+      findPartition2D(npart, comm_size);
+      rank_coord[0] = rank % npart[0],
+        rank_coord[1] = rank / npart[0];
     }
 #endif
 
@@ -139,7 +165,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
         }
       ++varLevs;
       varDesc[varIdx].nlev = varLevs;
-      for (i = 0; i < varIdx; ++i)
+      for (size_t i = 0; i < varIdx; ++i)
         if (varDesc[i].nlev == varLevs)
           {
             varDesc[varIdx].zaxisID = varDesc[i].zaxisID;
@@ -154,19 +180,52 @@ modelRun(struct model_config setup, MPI_Comm comm)
       varDesc[varIdx].size = nlon * nlat * varDesc[varIdx].nlev;
 #ifdef USE_MPI
       {
-        struct PPM_extent range
-          = PPM_uniform_partition((struct PPM_extent){ 0,
-                (int32_t)varDesc[varIdx].size }, comm_size, rank);
-        int start = range.first;
-        int chunkSize = range.size;
-         fprintf(stderr, "%d: start=%d, chunkSize = %d\n", rank,
-                 start, chunkSize);
-         Xt_idxlist idxlist
-           = xt_idxstripes_new(&(struct Xt_stripe){ .start = start,
-                 .nstrides = chunkSize, .stride = 1 }, 1);
-         varDesc[varIdx].start = start;
-         varDesc[varIdx].chunkSize = chunkSize;
-         varDesc[varIdx].partDesc = idxlist;
+        int start[2], chunkSize[3], varSize[2] = { nlon, nlat };
+        for (size_t i = 0; i < 2; ++i)
+          {
+            struct PPM_extent range
+              = PPM_uniform_partition((struct PPM_extent){ 0, varSize[i] },
+                                      npart[i], rank_coord[i]);
+            start[i] = range.first;
+            chunkSize[i] = range.size;
+            fprintf(stderr, "%d: start[%zu]=%d, chunkSize[%zu] = %d\n", rank,
+                    i, start[i], i, chunkSize[i]);
+            varDesc[varIdx].start[i] = range.first;
+            varDesc[varIdx].chunkSize[i] = range.size;
+          }
+        Xt_int varSizeXt[3] = { (Xt_int)nlon, (Xt_int)nlat, (Xt_int)varLevs };
+        chunkSize[2] = varLevs;
+        Xt_int varStartXt[3] = { start[0], start[1], 0 };
+        for (int i = 0; i < varIdx; ++i)
+          if (varDesc[i].nlev == varLevs)
+            {
+              varDesc[varIdx].redist4gather = varDesc[i].redist4gather;
+              varDesc[varIdx].partDesc = varDesc[i].partDesc;
+              goto gatherRedistSet;
+            }
+        Xt_idxlist part_idxlist
+          = xt_idxsection_new(0, (varLevs > 1 ? 3 : 2), varSizeXt,
+                              chunkSize, varStartXt),
+          gather_idxlist;
+        varDesc[varIdx].partDesc = part_idxlist;
+        if (setup.compute_checksum)
+          {
+            if (rank == 0)
+              {
+                gather_idxlist
+                  = xt_idxstripes_new(&(struct Xt_stripe){.start = 0,
+                        .stride = 1, .nstrides = varDesc[varIdx].size }, 1);
+              }
+            else
+              gather_idxlist = xt_idxempty_new();
+            Xt_xmap xmap4gather
+              = xt_xmap_all2all_new(part_idxlist, gather_idxlist, comm);
+            varDesc[varIdx].redist4gather
+              = xt_redist_p2p_new(xmap4gather, MPI_DOUBLE);
+            xt_xmap_delete(xmap4gather);
+            xt_idxlist_delete(gather_idxlist);
+          }
+        gatherRedistSet: ;
       }
 #endif
       varDesc[varIdx].code = 129 + varIdx;
@@ -210,34 +269,31 @@ modelRun(struct model_config setup, MPI_Comm comm)
 	  for (int varID = 0; varID < nVars; ++varID)
 	    {
 #ifdef USE_MPI
-              int start = varDesc[varID].start;
-              int chunk = varDesc[varID].chunkSize;
+              int start[3] = { varDesc[varID].start[0],
+                               varDesc[varID].start[1],
+                               0 };
+              int chunk[3] = { varDesc[varID].chunkSize[0],
+                               varDesc[varID].chunkSize[1],
+                               varDesc[varID].nlev };
 #else
-              int chunk = varDesc[varID].size;
-              int start = 0;
+              int chunk[3] = { nlon, nlat, varDesc[varID].nlev };
+              int start[3] = { 0, 0, 0 };
 #endif
-              if (varslice_size < chunk)
+              size_t chunkSize = (size_t)chunk[0]
+                * (size_t)chunk[1] * (size_t)varDesc[varID].nlev;
+              if (varslice_size < chunkSize)
                 {
-                  varslice = xrealloc(varslice, chunk * sizeof (var[0]));
-                  varslice_size = chunk;
+                  varslice = xrealloc(varslice, chunkSize * sizeof (var[0]));
+                  varslice_size = chunkSize;
                 }
-              modelRegionCompute(varslice, start, chunk,
-                                 varDesc[varID].nlev, nlat, nlon,
-                                 tsID, lons, lats,
+              modelRegionCompute(varslice, varDesc[varID].nlev, nlat, nlon,
+                                 start, chunk, tsID, lons, lats,
                                  mscale, mrscale);
               if (setup.compute_checksum)
                 {
 #if USE_MPI
-                  xmpi(MPI_Gather(&chunk, 1, MPI_INT,
-                                  chunks, 1, MPI_INT, 0, comm));
-                  if (rank == 0)
-                    {
-                      displs[0] = 0;
-                      for (i = 1; i < comm_size; ++i)
-                        displs[i] = displs[i - 1] + chunks[i - 1];
-                    }
-                  xmpi(MPI_Gatherv(varslice, chunk, MPI_DOUBLE,
-                                   var, chunks, displs, MPI_DOUBLE, 0, comm));
+                  xt_redist_s_exchange1(varDesc[varID].redist4gather,
+                                        varslice, var);
 #else
                   var = varslice;
 #endif
@@ -297,23 +353,23 @@ modelRun(struct model_config setup, MPI_Comm comm)
   streamClose ( streamID );
   vlistDestroy ( vlistID );
   taxisDestroy ( taxisID );
-  for ( i = 0; i < nVars; i++ )
+  for (int varID = 0; varID < nVars; varID++ )
     {
-      int zID = varDesc[i].zaxisID;
+      int zID = varDesc[varID].zaxisID;
       if (zID != CDI_UNDEFID)
         {
           zaxisDestroy(zID);
-          for (int j = i + 1; j < nVars; ++j)
+#if USE_MPI
+          xt_idxlist_delete(varDesc[varID].partDesc);
+          xt_redist_delete(varDesc[varID].redist4gather);
+#endif
+          for (int j = varID + 1; j < nVars; ++j)
             if (zID == varDesc[j].zaxisID)
               varDesc[j].zaxisID = CDI_UNDEFID;
         }
     }
   gridDestroy ( gridID );
 #if USE_MPI
-  for (int varID = 0; varID < nVars; ++varID)
-    xt_idxlist_delete(varDesc[varID].partDesc);
-  free(displs);
-  free(chunks);
   free(var);
 #endif
   free(varDesc);
@@ -321,6 +377,65 @@ modelRun(struct model_config setup, MPI_Comm comm)
   free(lats);
   free(lons);
 }
+
+#ifdef USE_MPI
+static void
+findPartition2D(int npart[2], int num_parts)
+{
+  const uint64_t rscale = 256;
+  uint32_t *factors = NULL;
+  xassert(num_parts > 0);
+  int numFactors
+    = PPM_prime_factorization_32((uint32_t)num_parts, &factors);
+  /* try to distribute prime factors on dimensions to get
+   * approx. 2 times as many parts in x dim than y dim */
+  const uint64_t optimumRatio = rscale * 2;
+  npart[0] = num_parts, npart[1] = 1;
+  uint_fast32_t npart_attempt[2];
+  uint64_t bestRatio = (uint64_t)num_parts * rscale,
+    bestDiff = llabs((long long)(bestRatio - optimumRatio));
+  /* test all assignments of factors to dimensions, starting with
+   * only one assigned to x dim (omitting 0 because that would
+   * always give npart[1] > npart[0] */
+  for (int assign2X = 1; assign2X <= numFactors; ++assign2X)
+    {
+      uint_fast32_t pattern = (1 << assign2X) - 1,
+        lastPattern = pattern << (numFactors - assign2X);
+      do {
+        npart_attempt[0] = 1;
+        npart_attempt[1] = 1;
+        /* loop over all factors */
+        for (uint_fast32_t i = 0; i < numFactors; ++i)
+          {
+            uint_fast32_t dim_idx = (pattern >> i) & 1;
+            npart_attempt[dim_idx] *= factors[i];
+          }
+        uint64_t ratio = ((uint64_t)npart_attempt[0] * rscale)
+          / (uint64_t)npart_attempt[1];
+        uint64_t diff = llabs(ratio - optimumRatio);
+        if (diff < bestDiff)
+          {
+            npart[0] = (int)npart_attempt[0];
+            npart[1] = (int)npart_attempt[1];
+            bestDiff = diff;
+            bestRatio = ratio;
+          }
+        {
+          uint_fast32_t t;
+#if HAVE_DECL___BUILTIN_CTZ
+          t = pattern | (pattern - 1);
+          pattern = (t + 1)
+            | (((~t & -~t) - 1) >> (__builtin_ctz(pattern) + 1));
+#else
+          t = (pattern | (pattern - 1)) + 1;
+          pattern = t | ((((t & -t) / (pattern & -pattern)) >> 1) - 1);
+#endif
+        }
+      } while (pattern <= lastPattern);
+    }
+  free(factors);
+}
+#endif
 
 /*
  * Local Variables:
