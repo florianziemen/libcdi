@@ -70,7 +70,6 @@ uniform_partition_start(int set_interval[2], int nparts, int part_idx);
 void
 modelRun(struct model_config setup, MPI_Comm comm)
 {
-  static int varCodes[nVars] = {129, 130, 131, 132, 133};
   static const char * const fname_prefix        = "example";
 
   int gridID, zaxisID[nVars], taxisID;
@@ -157,6 +156,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
       ;
     }
 
+  int *varCodes = xmalloc(nVars * sizeof(varCodes[0]));
+  for (int varIdx = 0; varIdx < nVars; ++varIdx)
+    varCodes[varIdx] = 129 + varIdx;
+
   vlistID = vlistCreate ();
 
   for ( i = 0; i < nVars; i++ )
@@ -184,6 +187,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
       vlistDefVarCode(vlistID, varIDs[i], varCodes[i]);
       vlistDefVarDatatype(vlistID, varIDs[i], setup.datatype);
     }
+  free(varCodes);
 
   taxisID = taxisCreate ( TAXIS_ABSOLUTE );
   vlistDefTaxis ( vlistID, taxisID );
