@@ -34,6 +34,7 @@ typedef int MPI_Comm;
 
 enum {
   ntfiles     = 2,
+  nproma = 16,
 };
 
 static void
@@ -49,7 +50,7 @@ modelRegionCompute(double region[], int nlev, int nlat, int nlon,
     n = (unsigned)chunkSize[1],
     o = (unsigned)chunkSize[2],
     jstride = (unsigned)chunkSize[0],
-    kstride = jstride * (unsigned)chunkSize[1];
+    kstride = ((jstride * (unsigned)chunkSize[1] + nproma - 1)/nproma)*nproma;
 
   for (unsigned k = 0; k < o; ++k)
     for (unsigned j = 0; j < n; ++j)
@@ -100,17 +101,21 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #if USE_MPI
   int comm_size = 1;
   int npart[2], rank_coord[2];
+  int *blk_displ, *blk_lens;
 #endif
 
 #if USE_MPI
   xmpi ( MPI_Comm_rank ( comm, &rank ));
   xmpi ( MPI_Comm_size ( comm, &comm_size ));
+#endif
+
   if (rank == 0 && setup.compute_checksum)
     {
       var = xmalloc((size_t)nlon * (size_t)nlat
                     * (size_t)setup.max_nlev * sizeof(var[0]));
     }
 
+#if USE_MPI
   if (comm_size == 1)
     {
       npart[0] = 1;
@@ -124,6 +129,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
       rank_coord[0] = rank % npart[0],
         rank_coord[1] = rank / npart[0];
     }
+  blk_displ = xmalloc(setup.max_nlev * sizeof (blk_displ[0]) * 2);
+  blk_lens = blk_displ + setup.max_nlev;
 #endif
 
   var_scale(setup.datatype, &mscale, &mrscale);
@@ -220,10 +227,26 @@ modelRun(struct model_config setup, MPI_Comm comm)
               gather_idxlist = xt_idxempty_new();
             Xt_xmap xmap4gather
               = xt_xmap_all2all_new(part_idxlist, gather_idxlist, comm);
-            varDesc[varIdx].redist4gather
-              = xt_redist_p2p_new(xmap4gather, MPI_DOUBLE);
-            xt_xmap_delete(xmap4gather);
             xt_idxlist_delete(gather_idxlist);
+            struct Xt_offset_ext *src_blocks = xmalloc(varLevs
+                                                       * sizeof (*src_blocks));
+            struct Xt_offset_ext dst_block = { .start = 0,
+                                               .size = nlon * nlat * varLevs,
+                                               .stride = 1 };
+            size_t levStride
+              = (((size_t)chunkSize[0] * (size_t)chunkSize[1] + nproma - 1)
+                 / nproma) * nproma;
+            for (size_t i = 0; i < (size_t)varLevs; ++i)
+              src_blocks[i] = (struct Xt_offset_ext)
+                { .start = (int)i * levStride,
+                  .size = chunkSize[0] * chunkSize[1],
+                  .stride = 1 };
+            varDesc[varIdx].redist4gather
+              = xt_redist_p2p_ext_new(xmap4gather,
+                                      varLevs, src_blocks, 1, &dst_block,
+                                      MPI_DOUBLE);
+            free(src_blocks);
+            xt_xmap_delete(xmap4gather);
           }
         gatherRedistSet: ;
       }
@@ -268,25 +291,27 @@ modelRun(struct model_config setup, MPI_Comm comm)
 	  streamDefTimestep ( streamID, tsID );
 	  for (int varID = 0; varID < nVars; ++varID)
 	    {
+              size_t varLevs = (size_t)varDesc[varID].nlev;
 #ifdef USE_MPI
               int start[3] = { varDesc[varID].start[0],
                                varDesc[varID].start[1],
                                0 };
               int chunk[3] = { varDesc[varID].chunkSize[0],
                                varDesc[varID].chunkSize[1],
-                               varDesc[varID].nlev };
+                               (int)varLevs };
 #else
-              int chunk[3] = { nlon, nlat, varDesc[varID].nlev };
+              int chunk[3] = { nlon, nlat, (int)varLevs };
               int start[3] = { 0, 0, 0 };
 #endif
-              size_t chunkSize = (size_t)chunk[0]
-                * (size_t)chunk[1] * (size_t)varDesc[varID].nlev;
+              size_t chunkSize
+                = (((size_t)chunk[0] * (size_t)chunk[1] + (size_t)(nproma - 1))
+                   / (size_t)nproma) * (size_t)nproma * varLevs;
               if (varslice_size < chunkSize)
                 {
                   varslice = xrealloc(varslice, chunkSize * sizeof (var[0]));
                   varslice_size = chunkSize;
                 }
-              modelRegionCompute(varslice, varDesc[varID].nlev, nlat, nlon,
+              modelRegionCompute(varslice, (int)varLevs, nlat, nlon,
                                  start, chunk, tsID, lons, lats,
                                  mscale, mrscale);
               if (setup.compute_checksum)
@@ -294,8 +319,28 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #if USE_MPI
                   xt_redist_s_exchange1(varDesc[varID].redist4gather,
                                         varslice, var);
+                  size_t layerSize = (size_t)(chunk[0] * chunk[1]);
+                  size_t nblk = (layerSize + nproma - 1)/nproma - 1;
+                  size_t npromz = layerSize - nblk * nproma;
+                  for (size_t k = 0; k < varLevs; ++k)
+                    {
+                      blk_displ[k] = k * (nblk + 1) * nproma;
+                      blk_lens[k] = layerSize;
+                    }
 #else
-                  var = varslice;
+                  size_t layerSize = (size_t)(chunk[0] * chunk[1]);
+                  size_t nblk = (layerSize + nproma - 1)/nproma - 1;
+                  size_t npromz = layerSize - nblk * nproma;
+                  for (size_t k = 0; k < varLevs; ++k)
+                    {
+                      for (size_t j = 0; j < nblk; ++j)
+                        for (size_t i = 0; i < nproma; ++i)
+                          var[k * layerSize + j * nproma + i] =
+                            varslice[k * (nblk + 1) * nproma + j * nproma + i];
+                      for (size_t i = 0; i < npromz; ++i)
+                        var[k * layerSize + nblk * nproma + i] =
+                          varslice[k * (nblk + 1) * nproma + nblk * nproma + i];
+                    }
 #endif
                 }
               if (rank == 0 && setup.compute_checksum)
@@ -306,10 +351,12 @@ modelRun(struct model_config setup, MPI_Comm comm)
                 }
 
 #ifdef USE_MPI
-	      streamWriteVarPart(streamID, varDesc[varID].id, varslice, nmiss,
-                                 varDesc[varID].partDesc);
+	      streamWriteScatteredVarPart(streamID, varDesc[varID].id,
+                                          varslice,
+                                          (int)varLevs, blk_lens, blk_displ,
+                                          nmiss, varDesc[varID].partDesc);
 #else
-	      streamWriteVar(streamID, varDesc[varID].id, varslice, nmiss);
+	      streamWriteVar(streamID, varDesc[varID].id, var, nmiss);
 #endif
 	    }
           current_time += 86400;
@@ -369,8 +416,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
         }
     }
   gridDestroy ( gridID );
-#if USE_MPI
   free(var);
+#if USE_MPI
+  free(blk_displ);
 #endif
   free(varDesc);
   free(levs);
