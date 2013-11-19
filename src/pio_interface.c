@@ -520,17 +520,12 @@ modelWinEnqueue(int collID,
         {
           /* not yet used partition descriptor, serialize at
            * current position */
-          int position = 0;
-          MPI_Comm comm = commInqCommsIO(collID);
-          header.offset
+          int position = header.offset
             = (int)(txWin[collID].head - txWin[collID].buffer);
-          size_t size = xt_idxlist_get_pack_size((Xt_idxlist)data, comm);
-          size_t remaining_size = txWin[collID].size
-            - (txWin[collID].head - txWin[collID].buffer);
-          xassert(size <= remaining_size);
-          xt_idxlist_pack((Xt_idxlist)data, txWin[collID].head,
-                          (int)remaining_size, &position, comm);
-          txWin[collID].head += position;
+          MPI_Comm comm = commInqCommsIO(collID);
+          packFunc((void *)data, txWin[collID].buffer, (int)txWin[collID].size,
+                   &position, &comm);
+          txWin[collID].head = txWin[collID].buffer + position;
         }
       else
         /* duplicate entries are copied only once per timestep */
@@ -555,6 +550,17 @@ modelWinEnqueue(int collID,
         }
     }
   winDict[targetEntry] = header;
+}
+
+static void
+cdiPio_xt_idxlist_pack_wrap(void *data, void *buf, int size, int *pos,
+                            void *context)
+{
+  MPI_Comm comm = *(MPI_Comm *)context;
+  int pack_size = xt_idxlist_get_pack_size((Xt_idxlist)data, comm);
+  xassert(size >= *pos && pack_size <= size - *pos);
+  xt_idxlist_pack((Xt_idxlist)data, (unsigned char *)buf,
+                  size, pos, comm);
 }
 
 void
@@ -589,7 +595,8 @@ pioBufferPartData(int streamID, int varID, const double *data,
       = { .id = PARTDESCMARKER,
           .specific.partDesc = { .uid = xt_idxlist_get_uid(partDesc) },
           .offset = 0 };
-    modelWinEnqueue(collID, partHeader, partDesc, 0, memcpyPackFunc);
+    modelWinEnqueue(collID, partHeader, partDesc, 0,
+                    cdiPio_xt_idxlist_pack_wrap);
   }
 
   txWin[collID].refuseFuncCall = 1;
