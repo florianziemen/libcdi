@@ -19,7 +19,8 @@
 #include "pio_util.h"
 #include "pio_serialize.h"
 
-void nullPackFunc(void *obj, void *buf, int size, int *pos, void *context)
+static void
+nullPackFunc(void *obj, void *buf, int size, int *pos, void *context)
 {
 }
 
