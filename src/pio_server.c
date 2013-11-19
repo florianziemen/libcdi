@@ -597,6 +597,21 @@ buildStreamMap(struct winHeaderEntry *winDict)
 }
 
 
+#ifdef HAVE_NETCDF4
+static void
+buildWrittenVars(struct streamMapping *mapping, int **varIsWritten_,
+                 int myCollRank, MPI_Comm collComm)
+{
+  int nvars = mapping->numVars;
+  int *varMap = mapping->varMap;
+  int *varIsWritten = *varIsWritten_ = xmalloc(sizeof (*varIsWritten) * nvars);
+  for (int varID = 0; varID < nvars; ++varID)
+    varIsWritten[varID] = ((varMap[varID] != -1)
+                           ?myCollRank+1 : 0);
+  xmpi(MPI_Allreduce(MPI_IN_PLACE, varIsWritten, nvars,
+                     MPI_INT, MPI_BOR, collComm));
+}
+#endif
 
 static void readGetBuffers()
 {
@@ -684,13 +699,10 @@ static void readGetBuffers()
             /* HAVE_PARALLE_NC4 implies having ScalES-PPM and yaxt */
             {
               int nvars = map.entries[streamIdx].numVars;
+              int *varIsWritten;
               int *varMap = map.entries[streamIdx].varMap;
-              int *varIsWritten = xmalloc(sizeof (varIsWritten[0]) * nvars);
-              for (int varID = 0; varID < nvars; ++varID)
-                varIsWritten[varID] = ((varMap[varID] != -1)
-                                       ?myCollRank+1 : 0);
-              xmpi(MPI_Allreduce(MPI_IN_PLACE, varIsWritten, nvars,
-                                 MPI_INT, MPI_BOR, collComm));
+              buildWrittenVars(map.entries + streamIdx, &varIsWritten,
+                               myCollRank, collComm);
               for (int varID = 0; varID < nvars; ++varID)
                 if (varIsWritten[varID])
                   {
@@ -782,13 +794,10 @@ static void readGetBuffers()
              * three cases need to be distinguished */
             {
               int nvars = map.entries[streamIdx].numVars;
+              int *varIsWritten;
               int *varMap = map.entries[streamIdx].varMap;
-              int *varIsWritten = xmalloc(sizeof (varIsWritten[0]) * nvars);
-              for (int varID = 0; varID < nvars; ++varID)
-                varIsWritten[varID] = ((varMap[varID] != -1)
-                                       ?myCollRank+1 : 0);
-              xmpi(MPI_Allreduce(MPI_IN_PLACE, varIsWritten, nvars,
-                                 MPI_INT, MPI_BOR, collComm));
+              buildWrittenVars(map.entries + streamIdx, &varIsWritten,
+                               myCollRank, collComm);
               int writerRank;
               if ((writerRank = cdiPioSerialOpenFileMap(streamID))
                   == myCollRank)
