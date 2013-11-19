@@ -1,6 +1,8 @@
 #ifndef CDI_CKSUM_H_
 #define CDI_CKSUM_H_
 
-double cdiCheckSum(int type, int count, void *data);
+#include <inttypes.h>
+
+uint32_t cdiCheckSum(int type, int count, void *data);
 
 #endif

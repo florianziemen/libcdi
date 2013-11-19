@@ -1312,7 +1312,7 @@ taxisGetPackSize(void *p, void *context)
   taxis_t *taxisptr = p;
   int packBufferSize
     = serializeGetSize(taxisNint, DATATYPE_INT, context)
-    + serializeGetSize(1, DATATYPE_FLT64, context)
+    + serializeGetSize(1, DATATYPE_UINT32, context)
     + (taxisptr->name ?
        serializeGetSize(strlen(taxisptr->name), DATATYPE_TXT, context) : 0)
     + (taxisptr->longname ?
@@ -1327,12 +1327,12 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
 {
   taxis_t * taxisP;
   int intBuffer[taxisNint];
-  double d;
+  uint32_t d;
 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                   intBuffer, taxisNint, DATATYPE_INT, context);
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                  &d, 1, DATATYPE_FLT64, context);
+                  &d, 1, DATATYPE_UINT32, context);
 
   xassert(cdiCheckSum(DATATYPE_INT, taxisNint, intBuffer) == d);
 
@@ -1389,7 +1389,7 @@ taxisPack(void * voidP, void * packBuffer, int packBufferSize, int * packBufferP
 {
   taxis_t *taxisP = (taxis_t *)voidP;
   int intBuffer[taxisNint];
-  double d;
+  uint32_t d;
 
   intBuffer[0]  = taxisP->self;
   intBuffer[1]  = taxisP->used;
@@ -1413,7 +1413,7 @@ taxisPack(void * voidP, void * packBuffer, int packBufferSize, int * packBufferP
   serializePack(intBuffer, taxisNint, DATATYPE_INT,
                 packBuffer, packBufferSize, packBufferPos, context);
   d = cdiCheckSum(DATATYPE_INT, taxisNint, intBuffer);
-  serializePack(&d, 1, DATATYPE_FLT64,
+  serializePack(&d, 1, DATATYPE_UINT32,
                 packBuffer, packBufferSize, packBufferPos, context);
   if (taxisP->name)
     serializePack(taxisP->name, intBuffer[15], DATATYPE_TXT,

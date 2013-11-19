@@ -1649,31 +1649,36 @@ zaxisGetPackSize(void * voidP, void *context)
 {
   zaxis_t * zaxisP = ( zaxis_t * ) voidP;
   int packBufferSize = serializeGetSize(zaxisNint, DATATYPE_INT, context)
-    + serializeGetSize(1, DATATYPE_FLT64, context);
+    + serializeGetSize(1, DATATYPE_UINT32, context);
 
   if (zaxisP->vals || zaxisP->lbounds || zaxisP->ubounds || zaxisP->weights)
     xassert(zaxisP->size);
 
   if ( zaxisP->vals )
-    packBufferSize += serializeGetSize( zaxisP->size + 1, DATATYPE_FLT64, context);
+    packBufferSize += serializeGetSize(zaxisP->size, DATATYPE_FLT64, context)
+      + serializeGetSize(1, DATATYPE_UINT32, context);
 
   if ( zaxisP->lbounds )
-    packBufferSize += serializeGetSize(zaxisP->size + 1, DATATYPE_FLT64, context);
+    packBufferSize += serializeGetSize(zaxisP->size, DATATYPE_FLT64, context)
+      + serializeGetSize(1, DATATYPE_UINT32, context);
 
   if ( zaxisP->ubounds )
-    packBufferSize += serializeGetSize(zaxisP->size + 1, DATATYPE_FLT64, context);
+    packBufferSize += serializeGetSize(zaxisP->size, DATATYPE_FLT64, context)
+      + serializeGetSize(1, DATATYPE_UINT32, context);
 
   if ( zaxisP->weights )
-    packBufferSize += serializeGetSize(zaxisP->size + 1, DATATYPE_FLT64, context);
+    packBufferSize += serializeGetSize(zaxisP->size, DATATYPE_FLT64, context)
+      + serializeGetSize(1, DATATYPE_UINT32, context);
 
   if ( zaxisP->vct )
     {
       xassert ( zaxisP->vctsize );
-      packBufferSize += serializeGetSize(zaxisP->vctsize + 1, DATATYPE_FLT64, context);
+      packBufferSize += serializeGetSize(zaxisP->vctsize, DATATYPE_FLT64, context)
+        + serializeGetSize(1, DATATYPE_UINT32, context);
     }
 
   packBufferSize += serializeGetSize(zaxisNstrings * CDI_MAX_NAME, DATATYPE_TXT, context)
-    + serializeGetSize(1, DATATYPE_FLT64, context)
+    + serializeGetSize(1, DATATYPE_UINT32, context)
     + serializeGetSize(1, DATATYPE_UCHAR, context);
   return packBufferSize;
 }
@@ -1685,13 +1690,13 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 {
   zaxis_t * zaxisP;
   int intBuffer[zaxisNint], memberMask;
-  double d;
+  uint32_t d;
   char charBuffer[zaxisNstrings * CDI_MAX_NAME];
 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                   intBuffer, zaxisNint, DATATYPE_INT, context);
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                  &d, 1, DATATYPE_FLT64, context);
+                  &d, 1, DATATYPE_UINT32, context);
 
   xassert(cdiCheckSum(DATATYPE_INT, zaxisNint, intBuffer) == d);
 
@@ -1719,7 +1724,7 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       zaxisP->vals, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_FLT64, context);
+                      &d, 1, DATATYPE_UINT32, context);
       xassert(cdiCheckSum(DATATYPE_FLT, size, zaxisP->vals) == d);
     }
 
@@ -1732,7 +1737,7 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       zaxisP->lbounds, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_FLT64, context);
+                      &d, 1, DATATYPE_UINT32, context);
       xassert(cdiCheckSum(DATATYPE_FLT, size, zaxisP->lbounds) == d);
     }
 
@@ -1745,7 +1750,7 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       zaxisP->ubounds, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_FLT64, context);
+                      &d, 1, DATATYPE_UINT32, context);
       xassert(cdiCheckSum(DATATYPE_FLT, size, zaxisP->ubounds) == d);
     }
 
@@ -1758,7 +1763,7 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       zaxisP->weights, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_FLT64, context);
+                      &d, 1, DATATYPE_UINT32, context);
       xassert(cdiCheckSum(DATATYPE_FLT, size, zaxisP->weights) == d);
     }
 
@@ -1771,14 +1776,14 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       zaxisP->vct, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_FLT64, context);
+                      &d, 1, DATATYPE_UINT32, context);
       xassert(cdiCheckSum(DATATYPE_FLT, size, zaxisP->vct) == d);
     }
 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                   charBuffer, zaxisNstrings * CDI_MAX_NAME, DATATYPE_TXT, context);
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                  &d, 1, DATATYPE_FLT64, context);
+                  &d, 1, DATATYPE_UINT32, context);
 
   xassert(d == cdiCheckSum(DATATYPE_TXT, zaxisNstrings * CDI_MAX_NAME, charBuffer));
 
@@ -1797,7 +1802,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
 {
   zaxis_t   * zaxisP = ( zaxis_t * ) voidP;
   int intBuffer[zaxisNint];
-  double d;
+  uint32_t d;
   char charBuffer[zaxisNstrings * CDI_MAX_NAME];
 
   intBuffer[0]  = zaxisP->self;
@@ -1812,7 +1817,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
   serializePack(intBuffer, zaxisNint, DATATYPE_INT,
                 packBuffer, packBufferSize, packBufferPos, context);
   d = cdiCheckSum(DATATYPE_INT, zaxisNint, intBuffer);
-  serializePack(&d, 1, DATATYPE_FLT64,
+  serializePack(&d, 1, DATATYPE_UINT32,
                 packBuffer, packBufferSize, packBufferPos, context);
 
 
@@ -1822,7 +1827,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
       serializePack(zaxisP->vals, zaxisP->size, DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
       d = cdiCheckSum(DATATYPE_FLT, zaxisP->size, zaxisP->vals );
-      serializePack(&d, 1, DATATYPE_FLT64,
+      serializePack(&d, 1, DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
@@ -1832,7 +1837,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
       serializePack(zaxisP->lbounds, zaxisP->size, DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
       d = cdiCheckSum(DATATYPE_FLT, zaxisP->size, zaxisP->lbounds);
-      serializePack(&d, 1, DATATYPE_FLT64,
+      serializePack(&d, 1, DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
@@ -1843,7 +1848,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
       serializePack(zaxisP->ubounds, zaxisP->size, DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
       d = cdiCheckSum(DATATYPE_FLT, zaxisP->size, zaxisP->ubounds);
-      serializePack(&d, 1, DATATYPE_FLT64,
+      serializePack(&d, 1, DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
@@ -1854,7 +1859,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
       serializePack(zaxisP->weights, zaxisP->size, DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
       d = cdiCheckSum(DATATYPE_FLT, zaxisP->size, zaxisP->weights);
-      serializePack(&d, 1, DATATYPE_FLT64,
+      serializePack(&d, 1, DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
@@ -1865,7 +1870,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
       serializePack(zaxisP->vct, zaxisP->vctsize, DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
       d = cdiCheckSum(DATATYPE_FLT, zaxisP->vctsize, zaxisP->vct);
-      serializePack(&d, 1, DATATYPE_FLT64,
+      serializePack(&d, 1, DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
@@ -1877,7 +1882,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
   serializePack(charBuffer, zaxisNstrings * CDI_MAX_NAME, DATATYPE_TXT,
                 packBuffer, packBufferSize, packBufferPos, context);
   d = cdiCheckSum(DATATYPE_TXT, zaxisNstrings * CDI_MAX_NAME, charBuffer);
-  serializePack(&d, 1, DATATYPE_FLT64,
+  serializePack(&d, 1, DATATYPE_UINT32,
                 packBuffer, packBufferSize, packBufferPos, context);
 
   serializePack(&zaxisP->positive, 1, DATATYPE_UCHAR,
