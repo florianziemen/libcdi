@@ -35,11 +35,11 @@ cdiPioClientStreamOpen(const char *filename, const char *filemode,
         case STAGE_TIMELOOP:
           filename_len = strlen(filename);
           xassert(filename_len > 0 && filename_len < MAXDATAFILENAME);
-          header.specific.funcCall
-            = (struct funcCallDesc){
-            .funcID = STREAMOPEN,
-            .funcArgs.newFile = { .fnamelen = (int)filename_len,
-                                  .filetype = filetype } };
+          header = (struct winHeaderEntry){
+            .id = STREAMOPEN,
+            .specific.funcCall.funcArgs.newFile
+            = { .fnamelen = (int)filename_len,
+                .filetype = filetype } };
           pioBufferFuncCall(header, filename, filename_len + 1);
           xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, filenamesz=%zu,"
                  " filename=%s, filetype=%d",
@@ -68,10 +68,9 @@ cdiPioClientStreamDefVlist_(int streamID, int vlistID)
     case STAGE_DEFINITION:
       break;
     case STAGE_TIMELOOP:
-      header.specific.funcCall
-        = (struct funcCallDesc){
-        .funcID = STREAMDEFVLIST,
-        .funcArgs.streamChange = { streamID, vlistID } };
+      header = (struct winHeaderEntry){
+        .id = STREAMDEFVLIST,
+        .specific.funcCall.funcArgs.streamChange = { streamID, vlistID } };
       pioBufferFuncCall(header, NULL, 0);
       xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d,"
              " vlistID=%d", funcMap[(-1 - STREAMDEFVLIST)], streamID, vlistID);
@@ -159,10 +158,10 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
     case STAGE_DEFINITION:
       break;
     case STAGE_TIMELOOP:
-      header.specific.funcCall
-        = (struct funcCallDesc){
-        .funcID = STREAMCLOSE,
-        .funcArgs.streamChange = { streamptr->self, CDI_UNDEFID } };
+      header = (struct winHeaderEntry){
+        .id = STREAMCLOSE,
+        .specific.funcCall.funcArgs.streamChange
+        = { streamptr->self, CDI_UNDEFID } };
       pioBufferFuncCall(header, NULL, 0);
       xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d",
              funcMap[-1 - STREAMCLOSE], streamptr->self);
@@ -189,10 +188,9 @@ cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
     case STAGE_TIMELOOP:
       position = 0;
       taxisID = vlistInqTaxis(streamptr->vlistID);
-      header.specific.funcCall
-        = (struct funcCallDesc){
-        .funcID = STREAMDEFTIMESTEP,
-        .funcArgs.streamNewTimestep = { streamptr->self, tsID } };
+      header = (struct winHeaderEntry){
+        .id = STREAMDEFTIMESTEP,
+        .specific.funcCall.funcArgs.streamNewTimestep = { streamptr->self, tsID } };
       commCalc = commInqCommCalc();
       buf_size = reshResourceGetPackSize(taxisID, &taxisOps, &commCalc);
       buf = xmalloc((size_t)buf_size);

@@ -37,17 +37,16 @@ extern const char * const funcMap[numRPCFuncs];
 
 struct headerSize
 {
-  int sizeID, numDataEntries, numRPCEntries;
+  int numDataEntries, numRPCEntries;
 };
 
 struct dataRecord
 {
-  int streamID, varID, nmiss;
+  int varID, nmiss;
 };
 
 struct funcCallDesc
 {
-  int funcID;
   union funcArgs
   {
     struct
@@ -69,12 +68,12 @@ struct funcCallDesc
  * partDescMarker == PARTDESCMARKER, always. */
 struct partDescRecord
 {
-  int partDescMarker;
   Xt_uid uid;
 };
 
 struct winHeaderEntry
 {
+  int id;
   union
   {
     struct headerSize headerSize;
