@@ -72,10 +72,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
 {
   static const char * const fname_prefix        = "example";
 
-  int gridID, *zaxisID, taxisID;
-  int vlistID, *varIDs, streamID, tsID, tfID = 0;
+  int *nlev, *zaxisID, *varIDs;
+  int gridID, taxisID, vlistID, streamID, tsID, tfID = 0;
   int i, nmiss = 0;
-  double *lons, *lats;
+  double *lons, *lats, *levs;
   double *var = NULL, *varslice = NULL;
   double mscale, mrscale;
   time_t current_time;
@@ -85,8 +85,6 @@ modelRun(struct model_config setup, MPI_Comm comm)
   int nlon = setup.nlon, nlat = setup.nlat;
   uint32_t checksum_state[nVars];
   size_t varSize[nVars], varslice_size = 0;
-  int *nlev;
-  double *levs;
 #if USE_MPI
   int *chunks = NULL, *displs = NULL, comm_size = 1;
   struct var1DDeco {
