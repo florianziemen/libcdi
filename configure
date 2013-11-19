@@ -645,6 +645,8 @@ FC_MOD_FLAG
 CREATE_ISOC_FALSE
 CREATE_ISOC_TRUE
 USE_MPI
+USE_PPM_CORE_FALSE
+USE_PPM_CORE_TRUE
 USE_MPI_FALSE
 USE_MPI_TRUE
 HAVE_PARALLEL_NC4
@@ -26758,6 +26760,7 @@ if test x"${enable_mpi}" = x"yes"; then :
   USE_MPI=yes
 fi
 HAVE_PARALLEL_NC4=0
+enable_ppm=no
 
 
 
@@ -27105,7 +27108,6 @@ fi
 
 done
 
-                  if test $HAVE_PARALLEL_NC4 = 1; then :
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for PPM_CORE" >&5
@@ -27181,8 +27183,6 @@ $as_echo "#define HAVE_PPM_CORE /**/" >>confdefs.h
 
 
 fi
-
-fi
                   if test x$enable_ppm != xyes; then :
   HAVE_PARALLEL_NC4=0
 fi
@@ -27205,6 +27205,14 @@ fi
 else
   USE_MPI_TRUE='#'
   USE_MPI_FALSE=
+fi
+
+ if test $enable_ppm = yes; then
+  USE_PPM_CORE_TRUE=
+  USE_PPM_CORE_FALSE='#'
+else
+  USE_PPM_CORE_TRUE='#'
+  USE_PPM_CORE_FALSE=
 fi
 
 
@@ -27832,6 +27840,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_MPI_TRUE}" && test -z "${USE_MPI_FALSE}"; then
   as_fn_error $? "conditional \"USE_MPI\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${USE_PPM_CORE_TRUE}" && test -z "${USE_PPM_CORE_FALSE}"; then
+  as_fn_error $? "conditional \"USE_PPM_CORE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CREATE_ISOC_TRUE}" && test -z "${CREATE_ISOC_FALSE}"; then

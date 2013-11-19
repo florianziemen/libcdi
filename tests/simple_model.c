@@ -18,6 +18,9 @@ typedef int MPI_Comm;
 #ifdef USE_MPI
 #include "cdipio.h"
 #include "pio_util.h"
+#ifdef HAVE_PPM_CORE
+#include <ppm/ppm_uniform_partition.h>
+#endif
 #endif
 
 #include "cksum.h"
@@ -151,12 +154,11 @@ modelRun(struct model_config setup, MPI_Comm comm)
       varDesc[varIdx].size = nlon * nlat * varDesc[varIdx].nlev;
 #ifdef USE_MPI
       {
-         int start
-           = uniform_partition_start((int [2]){ 0, varDesc[varIdx].size - 1 },
-                                     comm_size, rank),
-           chunkSize
-           = uniform_partition_start((int [2]){ 0, varDesc[varIdx].size - 1 },
-                                     comm_size, rank + 1) - start;
+        struct PPM_extent range
+          = PPM_uniform_partition((struct PPM_extent){ 0,
+                (int32_t)varDesc[varIdx].size }, comm_size, rank);
+        int start = range.first;
+        int chunkSize = range.size;
          fprintf(stderr, "%d: start=%d, chunkSize = %d\n", rank,
                  start, chunkSize);
          Xt_idxlist idxlist

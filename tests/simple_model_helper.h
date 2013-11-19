@@ -5,6 +5,7 @@
 #  include "config.h"
 #endif
 
+#include <inttypes.h>
 #include <time.h>
 
 void
@@ -23,9 +24,16 @@ cditime2time_t(int date, int timeofday);
 void
 time_t2cditime(time_t t, int *date, int *timeofday);
 
-#ifdef USE_MPI
-int
-uniform_partition_start(int set_interval[2], int nparts, int part_idx);
+#if defined (USE_MPI) && ! defined(HAVE_PPM_CORE)
+struct PPM_extent
+{
+  int32_t first, size;
+};
+
+struct PPM_extent
+PPM_uniform_partition(struct PPM_extent set_interval, int nparts,
+                      int part_idx);
+
 #endif
 
 #endif

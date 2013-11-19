@@ -113,6 +113,7 @@ AC_ARG_ENABLE(mpi,AS_HELP_STRING([--enable-mpi],[Compile with MPI compiler [defa
 AS_IF([test x"${enable_mpi}" = x"yes"],
       [USE_MPI=yes])
 HAVE_PARALLEL_NC4=0
+enable_ppm=no
 AS_IF([test x"$USE_MPI" = xyes],
   [AC_DEFINE([USE_MPI],[1],[parallel I/O requested and available])
    AC_PATH_PROGS([MPI_LAUNCH],[mpirun mpiexec],[true])
@@ -176,14 +177,12 @@ main(int argc, char **argv)
 ])
       dnl parallel netCDF support still requires ScalES-PPM and YAXT to
       dnl re-arrange the data when running with more than one collector
-      AS_IF([test $HAVE_PARALLEL_NC4 = 1],
-        [PKG_CHECK_MODULES([PPM_CORE],[scales-ppm-core],
-           [enable_ppm=yes
-            AC_DEFINE([HAVE_PPM_CORE],,
-              [ScalES PPM C core library is available])
-           ],
-           [enable_ppm=no])
-        ])
+      PKG_CHECK_MODULES([PPM_CORE],[scales-ppm-core],
+        [enable_ppm=yes
+         AC_DEFINE([HAVE_PPM_CORE],,
+           [ScalES PPM C core library is available])
+        ],
+        [enable_ppm=no])
       dnl if not both scales-ppm and yaxt are available, netcdf can only be
       dnl used in serial mode
       AS_IF([test x$enable_ppm != xyes],
@@ -197,6 +196,7 @@ AS_IF([test $HAVE_PARALLEL_NC4 -gt 0],
              [netCDF library does support MPI parallel invocations])])
 AC_SUBST([HAVE_PARALLEL_NC4])
 AM_CONDITIONAL([USE_MPI],[test x"$USE_MPI" = xyes])
+AM_CONDITIONAL([USE_PPM_CORE],[test $enable_ppm = yes])
 AC_SUBST([USE_MPI])
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)

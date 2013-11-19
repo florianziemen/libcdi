@@ -27,7 +27,7 @@ test_resource_copy_SOURCES = test_resource_copy.c \
 	$(top_srcdir)/src/resource_unpack.c
 test_resource_copy_mpi_SOURCES = test_resource_copy.c
 #
-AM_CFLAGS = $(YAXT_CFLAGS)
+AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS)
 if USE_MPI
 pio_write_LDADD = ../src/libcdipio.la
 pio_write_deco2d_LDADD = ../src/libcdipio.la

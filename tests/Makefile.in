@@ -398,7 +398,7 @@ test_resource_copy_SOURCES = test_resource_copy.c \
 
 test_resource_copy_mpi_SOURCES = test_resource_copy.c
 #
-AM_CFLAGS = $(YAXT_CFLAGS)
+AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS)
 @USE_MPI_FALSE@pio_write_LDADD = $(LDADD)
 @USE_MPI_TRUE@pio_write_LDADD = ../src/libcdipio.la
 @USE_MPI_FALSE@pio_write_deco2d_LDADD = $(LDADD)

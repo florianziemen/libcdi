@@ -75,14 +75,30 @@ time_t2cditime(time_t t, int *date, int *timeofday)
   *timeofday = t_s->tm_hour * 10000 + t_s->tm_min * 100 + t_s->tm_sec;
 }
 
-#ifdef USE_MPI
-int
-uniform_partition_start(int set_interval[2], int nparts, int part_idx)
+#if defined USE_MPI && ! defined HAVE_PPM_CORE
+
+static int32_t
+uniform_partition_start(struct PPM_extent set_interval, int nparts,
+                        int part_idx);
+
+struct PPM_extent
+PPM_uniform_partition(struct PPM_extent set_interval, int nparts,
+                      int part_idx)
 {
-  int part_offset
-    = (((long long)set_interval[1] - (long long)set_interval[0] + 1LL)
-       * (long long)part_idx) / (long long)nparts;
-  int start = set_interval[0] + part_offset;
+  struct PPM_extent range;
+  range.first = uniform_partition_start(set_interval, nparts, part_idx);
+  range.size = uniform_partition_start(set_interval, nparts, part_idx + 1)
+    - range.first;
+  return range;
+}
+
+static int32_t
+uniform_partition_start(struct PPM_extent set_interval, int nparts,
+                        int part_idx)
+{
+  int32_t part_offset
+    = ((int64_t)set_interval.size * (int64_t)part_idx) / (int64_t)nparts;
+  int32_t start = set_interval.first + part_offset;
   return start;
 }
 #endif
