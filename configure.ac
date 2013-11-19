@@ -70,6 +70,10 @@ AC_CHECK_FUNCS([getline])
 AC_CHECK_DECLS([isnan],,,[AC_INCLUDES_DEFAULT
 @%:@include <math.h>])
 
+#
+# Check for non-standard builtin
+AC_CHECK_DECLS([__builtin_ctz])
+
 # Check compiler version
 case "$CC" in
   pgcc*)  COMP_VERSION=`$CC -V | head -2 | tail -n 1`;;

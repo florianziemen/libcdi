@@ -16,6 +16,10 @@
    */
 #undef HAVE_DECL_ISNAN
 
+/* Define to 1 if you have the declaration of `__builtin_ctz', and to 0 if you
+   don't. */
+#undef HAVE_DECL___BUILTIN_CTZ
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
