@@ -285,12 +285,12 @@ gatherArray(int root, int nProcsModel, int headerIdx,
   for (unsigned i = 0; i < 3; ++i)
     varShapeXt[i] = varShape[i];
   int varSize = varShape[0] * varShape[1] * varShape[2];
-  int *partOfs = xmalloc(2 * varSize * sizeof (partOfs[0])),
-    *gatherOfs = partOfs + varSize;
+  struct Xt_offset_ext *partExts
+    = xmalloc(nProcsModel * sizeof (partExts[0]));
   Xt_idxlist *part = xmalloc(nProcsModel * sizeof (part[0]));
   MPI_Comm commCalc = commInqCommCalc();
   {
-    int nmiss_ = 0, partOfsOfs = 0;
+    int nmiss_ = 0;
     for (int modelID = 0; modelID < nProcsModel; modelID++)
       {
         struct dataRecord *dataHeader
@@ -311,7 +311,7 @@ gatherArray(int root, int nProcsModel, int headerIdx,
         part[modelID] = xt_idxlist_unpack(rxWin[modelID].buffer,
                                           (int)rxWin[modelID].size,
                                           &position, commCalc);
-        Xt_int partSize = xt_idxlist_get_num_indices(part[modelID]);
+        int partSize = xt_idxlist_get_num_indices(part[modelID]);
         size_t charOfs = (rxWin[modelID].buffer
                           + ((struct winHeaderEntry *)
                              rxWin[modelID].buffer)[headerIdx].offset)
@@ -319,9 +319,9 @@ gatherArray(int root, int nProcsModel, int headerIdx,
         xassert(charOfs % sizeof (double) == 0
                 && charOfs / sizeof (double) + partSize <= INT_MAX);
         int elemOfs = charOfs / sizeof (double);
-        for (int i = 0; i < (int)partSize; ++i)
-          partOfs[partOfsOfs + i] = elemOfs + i;
-        partOfsOfs += partSize;
+        partExts[modelID].start = elemOfs;
+        partExts[modelID].size = partSize;
+        partExts[modelID].stride = 1;
         nmiss_ += dataHeader->nmiss;
       }
     *nmiss = nmiss_;
@@ -336,18 +336,18 @@ gatherArray(int root, int nProcsModel, int headerIdx,
       = xt_idxsection_new(0, 3, varShapeXt, varShapeXt, origin);
     struct Xt_com_list full = { .list = dstList, .rank = 0 };
     gatherXmap = xt_xmap_intersection_new(1, &full, 1, &full, srcList, dstList,
-                                        MPI_COMM_SELF);
+                                          MPI_COMM_SELF);
     xt_idxlist_delete(dstList);
   }
   xt_idxlist_delete(srcList);
-  for (int i = 0; i < varSize; ++i)
-    gatherOfs[i] = i;
 
+  struct Xt_offset_ext gatherExt = { .start = 0, .size = varSize, .stride = 1 };
   Xt_redist gatherRedist
-    = xt_redist_p2p_off_new(gatherXmap, partOfs, gatherOfs, MPI_DOUBLE);
+    = xt_redist_p2p_ext_new(gatherXmap, nProcsModel, partExts, 1, &gatherExt,
+                            MPI_DOUBLE);
   xt_xmap_delete(gatherXmap);
   xt_redist_s_exchange1(gatherRedist, rxWin[0].buffer, gatherBuf);
-  free(partOfs);
+  free(partExts);
   xt_redist_delete(gatherRedist);
 }
 
