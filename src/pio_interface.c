@@ -573,6 +573,30 @@ collWait(int collID)
     }
 }
 
+static inline void
+collProbe(int collID)
+{
+  if (txWin[collID].postSet)
+    {
+      int flag;
+      xmpi(MPI_Win_test(txWin[collID].win, &flag));
+      if (flag)
+        {
+          txWin[collID].postSet = 0;
+          modelWinFlushBuffer(collID);
+        }
+    }
+}
+
+void
+cdiPioRDMAProgress()
+{
+  int nProcsColl = commInqNProcsColl();
+  for (int collID = 0; collID < nProcsColl; collID++)
+    collProbe(collID);
+}
+
+
 void
 pioBufferPartData(int streamID, int varID, const double *data,
                   int nmiss, Xt_idxlist partDesc)

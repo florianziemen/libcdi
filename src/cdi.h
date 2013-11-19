@@ -239,6 +239,7 @@ void     pioFinalize           ( void );
 MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode,
                  int *pioNamespace, float partInflate);
 void     pioWriteTimestep();
+void     cdiPioRDMAProgress();
 
 void     streamWriteVarPart    (int streamID, int varID,
                                 const void *data, int nmiss,

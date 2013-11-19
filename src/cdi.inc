@@ -399,6 +399,9 @@
 !                     pioWriteTimestep
       EXTERNAL        pioWriteTimestep
 
+!                     cdiPioRDMAProgress
+      EXTERNAL        cdiPioRDMAProgress
+
 !                     streamWriteVarPart
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
