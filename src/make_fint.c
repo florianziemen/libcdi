@@ -1,12 +1,14 @@
 #define _XOPEN_SOURCE 700
 #define _GNU_SOURCE // needed for getline(3) on some systems it seems
 #include <ctype.h>
+#include <errno.h>
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <time.h>
+#include <unistd.h>
 
 #ifndef HAVE_GETLINE
 #include "getline.c"
@@ -22,6 +24,26 @@ typedef struct
   char *text;
 }
 Docu;
+
+
+static const char default_doc_root[] = "../doc";
+static struct {
+  const char *name;
+  size_t len;
+} fname_list[] = {
+  { "c_quick_ref.txt", 0 },
+  { "f_quick_ref.txt", 0 },
+  { "tex/c_quick_ref.tex", 0 },
+  { "tex/f_quick_ref.tex", 0 },
+};
+enum {
+  NAME_C_QUICK_REF,
+  NAME_F_QUICK_REF,
+  NAME_C_QUICK_REF_TEX,
+  NAME_F_QUICK_REF_TEX,
+  fname_list_size = sizeof(fname_list)/sizeof(fname_list[0]),
+};
+
 
 static Docu cdoc[9999], fdoc[9999];
 static size_t ncdoc = 0, nfdoc = 0;
@@ -126,7 +148,7 @@ static struct symbol funArgSym[]
       { "DOUBLEPRECISION", "PDOUBLE", "double *",
         "^"WS"*(const"WS"+)?double"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0 },
       { "CHARACTER*(*)",   "CBUF",    "char *",
-        "^"WS"*(const"WS"+)?char"WS"+\\*""([A-Za-z_][A-Za-z_0-9]*_cbuf)"WS"*[,\\)]", 2 },
+        "^"WS"*(const"WS"+)?char"WS"+\\*""([A-Za-z_][A-Za-z_0-9]*_cbuf)"WS"*[,\\)]", 2, 0 },
       { "CHARACTER*(*)",   "STRING",  "char *",
         "^"WS"*const"WS"+char"WS"+\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0 },
       { "CHARACTER*(*)",   "PSTRING", "char *",
@@ -167,7 +189,8 @@ symRegexCompile(size_t numSyms, struct symbol symList[],
                 char **line, size_t *lineBufSize);
 
 
-static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
+static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
+                              const char *doc_root)
 {
   FILE *fpin, *fpinc, *fpint;
   FILE *fp;
@@ -679,7 +702,29 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
   qsort(cdoc, ncdoc, sizeof(Docu), doccmp);
   qsort(fdoc, nfdoc, sizeof(Docu), doccmp);
 
-  fp = fopen("../doc/c_quick_ref.txt", "w");
+
+  char *filename;
+  size_t doc_root_len = strlen(doc_root);
+  {
+    size_t max_len = 0;
+    for (size_t i = 0; i < (size_t)fname_list_size; ++i)
+      {
+        size_t len = strlen(fname_list[i].name);
+        fname_list[i].len = len;
+        if (len > max_len)
+          max_len = len;
+      }
+    /* path to document root, separating /, max of path within root,
+     * terminating '\0'  */
+    filename = malloc(doc_root_len + 1 + max_len + 1);
+  }
+
+  memcpy(filename, doc_root, doc_root_len);
+  filename[doc_root_len] = '/';
+  memcpy(filename + doc_root_len + 1,
+         fname_list[NAME_C_QUICK_REF].name,
+         fname_list[NAME_C_QUICK_REF].len + 1);
+  fp = fopen(filename, "w");
   if ( fp )
     {
       fprintf(fp, "C Quick Reference\n");
@@ -688,8 +733,16 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
       doctotxt(fp, cdoc, ncdoc);
       fclose(fp);
     }
+  else
+    {
+      fprintf(stderr, "warning: cannot open documentation output file %s, %s",
+              filename, strerror(errno));
+    }
 
-  fp = fopen("../doc/f_quick_ref.txt", "w");
+  memcpy(filename + doc_root_len + 1,
+         fname_list[NAME_F_QUICK_REF].name,
+         fname_list[NAME_F_QUICK_REF].len + 1);
+  fp = fopen(filename, "w");
   if ( fp )
     {
       fprintf(fp, "Fortran Quick Reference\n");
@@ -698,8 +751,16 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
       doctotxt(fp, fdoc, nfdoc);
       fclose(fp);
     }
+  else
+    {
+      fprintf(stderr, "warning: cannot open documentation output file %s, %s",
+              filename, strerror(errno));
+    }
 
-  fp = fopen("../doc/tex/c_quick_ref.tex", "w");
+  memcpy(filename + doc_root_len + 1,
+         fname_list[NAME_C_QUICK_REF_TEX].name,
+         fname_list[NAME_C_QUICK_REF_TEX].len + 1);
+  fp = fopen(filename, "w");
   if ( fp )
     {
       fprintf(fp, "\\chapter*{Quick Reference}\n");
@@ -712,8 +773,16 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
       doctotex(fp, cdoc, ncdoc);
       fclose(fp);
     }
+  else
+    {
+      fprintf(stderr, "warning: cannot open documentation output file %s, %s",
+              filename, strerror(errno));
+    }
 
-  fp = fopen("../doc/tex/f_quick_ref.tex", "w");
+  memcpy(filename + doc_root_len + 1,
+         fname_list[NAME_F_QUICK_REF_TEX].name,
+         fname_list[NAME_F_QUICK_REF_TEX].len + 1);
+  fp = fopen(filename, "w");
   if ( fp )
     {
       fprintf(fp, "\\chapter*{Quick Reference}\n");
@@ -726,22 +795,45 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint)
       doctotex(fp, fdoc, nfdoc);
       fclose(fp);
     }
+  else
+    {
+      fprintf(stderr, "warning: cannot open documentation output file %s, %s",
+              filename, strerror(errno));
+    }
+  free(filename);
 }
 
 int main(int argc, char *argv[])
 {
   char *fname;
   char *cp;
+  const char *doc_root = default_doc_root;
   char fnameinc[128], fnameint[128];
   size_t len;
 
-  if ( argc != 2 )
+  int optargCount = 0;
+  {
+    int opt;
+    while ((opt = getopt(argc, argv, "d:")) != -1)
+      switch (opt) {
+      case 'd':
+        doc_root = optarg;
+        optargCount = 2;
+        break;
+      default: /* '?' */
+        fprintf(stderr, "Usage: %s [-d DOCROOT] includefile\n", argv[0]);
+        return(EXIT_FAILURE);
+      }
+  }
+
+
+  if ( argc != 2 + optargCount)
     {
-      printf("Usage:  %s  includefile\n", argv[0]);
+      printf("Usage:  %s [-d DOCROOT] includefile\n", argv[0]);
       return (1);
     }
 
-  fname = argv[1];
+  fname = argv[1 + optargCount];
 
   cp = strrchr(fname, '.');
   if ( cp == NULL ) len = strlen(fname);
@@ -753,7 +845,7 @@ int main(int argc, char *argv[])
   strcpy(fnameinc+len, ".inc");
   strcpy(fnameint+len, "Fortran.c");
 
-  fortran_interface(fname, fnameinc, fnameint);
+  fortran_interface(fname, fnameinc, fnameint, doc_root);
 
   return (0);
 }
