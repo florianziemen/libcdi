@@ -1116,6 +1116,9 @@ void IOServer(void (*postCommSetupActions)(void))
               }
               backendCleanup();
               serverWinCleanup();
+#ifdef HAVE_PARALLEL_NC4
+              free(pioPrimes);
+#endif
               /* listDestroy(); */
               xdebug("%s", "RETURN");
               return;
