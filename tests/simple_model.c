@@ -265,8 +265,6 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #else
 	      streamWriteVar(streamID, varDesc[varID].id, varslice, nmiss);
 #endif
-	      start = CDI_UNDEFID;
-	      chunk = CDI_UNDEFID;
 	    }
           current_time += 86400;
 #ifdef USE_MPI
