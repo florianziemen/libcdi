@@ -475,6 +475,38 @@ struct streamMap
   int numEntries;
 };
 
+static inline int
+inventorizeStream(struct streamMapping *streamMap, int numStreamIDs,
+                  int *sizeStreamMap_, int streamID, int headerIdx)
+{
+  int sizeStreamMap = *sizeStreamMap_;
+  if (numStreamIDs < sizeStreamMap) ; else
+    {
+      streamMap = xrealloc(streamMap,
+                           (sizeStreamMap *= 2)
+                           * sizeof (streamMap[0]));
+      *sizeStreamMap_ = sizeStreamMap;
+    }
+  streamMap[numStreamIDs].streamID = streamID;
+  streamMap[numStreamIDs].firstHeaderIdx = headerIdx;
+  streamMap[numStreamIDs].numVars = -1;
+  int filetype = streamInqFiletype(streamID);
+  streamMap[numStreamIDs].filetype = filetype;
+  if (filetype == FILETYPE_NC || filetype == FILETYPE_NC2
+      || filetype == FILETYPE_NC4)
+    {
+      int vlistID = streamInqVlist(streamID);
+      int nvars = vlistNvars(vlistID);
+      streamMap[numStreamIDs].numVars = nvars;
+      streamMap[numStreamIDs].varMap
+        = xmalloc(sizeof (streamMap[numStreamIDs].varMap[0])
+                  * nvars);
+      for (int i = 0; i < nvars; ++i)
+        streamMap[numStreamIDs].varMap[i] = -1;
+    }
+  return numStreamIDs + 1;
+}
+
 static struct streamMap
 buildStreamMap(union winHeaderEntry *winDict)
 {
@@ -496,36 +528,16 @@ buildStreamMap(union winHeaderEntry *winDict)
           for (int i = numStreamIDs - 1; i >= 0; --i)
             if ((streamIDOld = streamMap[i].streamID) == streamID)
               {
-                filetype = streamMap[i].filetype;
                 oldStreamIdx = i;
                 goto streamIDInventorized;
               }
-          if (numStreamIDs < sizeStreamMap) ; else
-            streamMap = xrealloc(streamMap,
-                                 (sizeStreamMap *= 2)
-                                 * sizeof (streamMap[0]));
-          streamMap[numStreamIDs].streamID = streamID;
-          streamMap[numStreamIDs].firstHeaderIdx = headerIdx;
-          streamMap[numStreamIDs].numVars = -1;
           oldStreamIdx = numStreamIDs;
           streamIDOld = streamID;
-          filetype = streamInqFiletype(streamID);
-          streamMap[numStreamIDs].filetype = filetype;
-          if (filetype == FILETYPE_NC || filetype == FILETYPE_NC2
-              || filetype == FILETYPE_NC4)
-            {
-              int vlistID = streamInqVlist(streamID);
-              int nvars = vlistNvars(vlistID);
-              streamMap[numStreamIDs].numVars = nvars;
-              streamMap[numStreamIDs].varMap
-                = xmalloc(sizeof (streamMap[numStreamIDs].varMap[0])
-                          * nvars);
-              for (int i = 0; i < nvars; ++i)
-                streamMap[numStreamIDs].varMap[i] = -1;
-            }
-          ++numStreamIDs;
+          numStreamIDs = inventorizeStream(streamMap, numStreamIDs,
+                                           &sizeStreamMap, streamID, headerIdx);
         }
       streamIDInventorized:
+      filetype = streamMap[oldStreamIdx].filetype;
       streamMap[oldStreamIdx].lastHeaderIdx = headerIdx;
       if (filetype == FILETYPE_NC || filetype == FILETYPE_NC2
           || filetype == FILETYPE_NC4)
