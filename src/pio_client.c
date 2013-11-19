@@ -37,7 +37,7 @@ cdiPioClientStreamOpen(const char *filename, const char *filemode,
           xassert(filename_len > 0 && filename_len < MAXDATAFILENAME);
           header = (struct winHeaderEntry){
             .id = STREAMOPEN,
-            .specific.funcCall.funcArgs.newFile
+            .specific.funcArgs.newFile
             = { .fnamelen = (int)filename_len,
                 .filetype = filetype } };
           pioBufferFuncCall(header, filename, filename_len + 1);
@@ -70,7 +70,7 @@ cdiPioClientStreamDefVlist_(int streamID, int vlistID)
     case STAGE_TIMELOOP:
       header = (struct winHeaderEntry){
         .id = STREAMDEFVLIST,
-        .specific.funcCall.funcArgs.streamChange = { streamID, vlistID } };
+        .specific.funcArgs.streamChange = { streamID, vlistID } };
       pioBufferFuncCall(header, NULL, 0);
       xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d,"
              " vlistID=%d", funcMap[(-1 - STREAMDEFVLIST)], streamID, vlistID);
@@ -160,7 +160,7 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
     case STAGE_TIMELOOP:
       header = (struct winHeaderEntry){
         .id = STREAMCLOSE,
-        .specific.funcCall.funcArgs.streamChange
+        .specific.funcArgs.streamChange
         = { streamptr->self, CDI_UNDEFID } };
       pioBufferFuncCall(header, NULL, 0);
       xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d",
@@ -190,7 +190,7 @@ cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
       taxisID = vlistInqTaxis(streamptr->vlistID);
       header = (struct winHeaderEntry){
         .id = STREAMDEFTIMESTEP,
-        .specific.funcCall.funcArgs.streamNewTimestep = { streamptr->self, tsID } };
+        .specific.funcArgs.streamNewTimestep = { streamptr->self, tsID } };
       commCalc = commInqCommCalc();
       buf_size = reshResourceGetPackSize(taxisID, &taxisOps, &commCalc);
       buf = xmalloc((size_t)buf_size);

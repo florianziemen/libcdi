@@ -187,7 +187,7 @@ readFuncCall(struct winHeaderEntry *header)
 {
   int root = commInqRootGlob ();
   int funcID = header->id;
-  union funcArgs *funcArgs = &(header->specific.funcCall.funcArgs);
+  union funcArgs *funcArgs = &(header->specific.funcArgs);
 
   xassert(funcID >= MINFUNCID && funcID <= MAXFUNCID);
   switch ( funcID )

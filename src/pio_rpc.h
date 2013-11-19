@@ -45,23 +45,20 @@ struct dataRecord
   int varID, nmiss;
 };
 
-struct funcCallDesc
+union funcArgs
 {
-  union funcArgs
+  struct
   {
-    struct
-    {
-      int streamID, vlistID;
-    } streamChange;
-    struct
-    {
-      int streamID, tsID;
-    } streamNewTimestep;
-    struct
-    {
-      int fnamelen, filetype;
-    } newFile;
-  } funcArgs;
+    int streamID, vlistID;
+  } streamChange;
+  struct
+  {
+    int streamID, tsID;
+  } streamNewTimestep;
+  struct
+  {
+    int fnamelen, filetype;
+  } newFile;
 };
 
 /* Describes offset and ID of serialized partition descriptor.
@@ -78,7 +75,7 @@ struct winHeaderEntry
   {
     struct headerSize headerSize;
     struct dataRecord dataRecord;
-    struct funcCallDesc funcCall;
+    union funcArgs funcArgs;
     struct partDescRecord partDesc;
   }  specific;
   int offset;
