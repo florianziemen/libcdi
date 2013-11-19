@@ -49,6 +49,9 @@ serializeGetSizeInCore(int count, int datatype, void *context)
   case DATATYPE_INT16:
     elemSize = sizeof (int16_t);
     break;
+  case DATATYPE_UINT32:
+    elemSize = sizeof (uint32_t);
+    break;
   case DATATYPE_INT:
     elemSize = sizeof (int);
     break;
