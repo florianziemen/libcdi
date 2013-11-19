@@ -1,7 +1,3 @@
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
-
 PROGRAM collectdata2003
 #ifdef USE_MPI
   USE yaxt, ONLY: xt_initialize, xt_finalize, xt_idxlist, xt_idxstripes_new, &
