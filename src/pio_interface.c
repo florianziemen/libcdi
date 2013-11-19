@@ -722,6 +722,8 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
 #ifdef USE_MPI
   int sizeGlob;
 
+  namespaceSwitchSet(NSSWITCH_WARNING, NSSW_FUNC(cdiPioWarning));
+
   if ( IOMode < PIO_MINIOMODE || IOMode > PIO_MAXIOMODE )
     xabort ( "IOMODE IS NOT VALID." );
 

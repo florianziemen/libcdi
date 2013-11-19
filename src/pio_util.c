@@ -42,6 +42,15 @@ cdiAbortC_MPI(const char *caller, const char *filename,
   exit(EXIT_FAILURE);
   va_end(ap);
 }
+
+void cdiPioWarning(const char *caller, const char *fmt, va_list ap)
+{
+  int rank = getMPICommWorldRank();
+  fprintf(stderr, "pe%d: Warning (%s) : ", rank, caller);
+  vfprintf(stderr, fmt, ap);
+  fputc('\n', stderr);
+}
+
 #endif
 
 /*****************************************************************************/

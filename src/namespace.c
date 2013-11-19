@@ -28,6 +28,7 @@ static int activeNamespace = 0;
 
 #define defaultSwitches {                                   \
     { .func = (void (*)()) cdiAbortC_serial },              \
+    { .func = (void (*)()) cdiWarning },                    \
     { .func = (void (*)()) serializeGetSizeInCore },        \
     { .func = (void (*)()) serializePackInCore },           \
     { .func = (void (*)()) serializeUnpackInCore },         \

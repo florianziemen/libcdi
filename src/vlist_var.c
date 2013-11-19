@@ -205,7 +205,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
   vlistptr = vlist_to_pointer(vlistID);
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return CDI_UNDEFID;
     }
 
@@ -294,7 +294,7 @@ void vlistDefVarParam(int vlistID, int varID, int param)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -327,7 +327,7 @@ void vlistDefVarCode(int vlistID, int varID, int code)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -841,7 +841,7 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -868,7 +868,7 @@ void vlistDefVarInstitut(int vlistID, int varID, int instID)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -892,7 +892,7 @@ void vlistDefVarModel(int vlistID, int varID, int modelID)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -918,7 +918,7 @@ void vlistDefVarTable(int vlistID, int varID, int tableID)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -973,7 +973,7 @@ void vlistDefVarName(int vlistID, int varID, const char *name)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -1014,7 +1014,7 @@ void vlistDefVarLongname(int vlistID, int varID, const char *longname)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -1055,7 +1055,7 @@ void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1096,7 +1096,7 @@ void vlistDefVarUnits(int vlistID, int varID, const char *units)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -1192,7 +1192,7 @@ void vlistDefVarExtra(int vlistID, int varID, const char *extra)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -1288,7 +1288,7 @@ double vlistInqVarScalefactor(int vlistID, int varID)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return 1.0;
     }
 
@@ -1317,7 +1317,7 @@ void vlistDefVarScalefactor(int vlistID, int varID, double scalefactor)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -1335,7 +1335,7 @@ void vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1353,7 +1353,7 @@ void vlistDefVarTsteptype(int vlistID, int varID, int tsteptype)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1379,7 +1379,7 @@ void vlistDefVarTimave(int vlistID, int varID, int timave)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1405,7 +1405,7 @@ void vlistDefVarTimaccu(int vlistID, int varID, int timaccu)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1431,7 +1431,7 @@ void vlistDefVarTypeOfGeneratingProcess(int vlistID, int varID, int typeOfGenera
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1523,7 +1523,7 @@ void vlistDefFlag(int vlistID, int varID, int levID, int flag)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1642,7 +1642,7 @@ void vlistDefIndex(int vlistID, int varID, int levelID, int index)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1683,7 +1683,7 @@ void vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1733,7 +1733,7 @@ void vlistChangeVarGrid(int vlistID, int varID, int gridID)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1781,7 +1781,7 @@ void vlistDefVarCompType(int vlistID, int varID, int comptype)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1807,7 +1807,7 @@ void vlistDefVarCompLevel(int vlistID, int varID, int complevel)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -2084,7 +2084,7 @@ void     vlistDefVarIOrank   ( int vlistID, int varID, int iorank )
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 

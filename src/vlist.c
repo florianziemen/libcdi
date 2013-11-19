@@ -5,6 +5,7 @@
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
+#include "error.h"
 #include "vlist.h"
 #include "zaxis.h"
 #include "varscan.h"
@@ -1132,7 +1133,7 @@ void vlistDefNtsteps(int vlistID, int nts)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -1280,7 +1281,7 @@ void vlistDefTaxis(int vlistID, int taxisID)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -1325,7 +1326,7 @@ void  vlistDefTable(int vlistID, int tableID)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -1355,9 +1356,7 @@ void vlistDefInstitut(int vlistID, int instID)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
-
-      xdebug("%s", "");
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -1403,7 +1402,7 @@ void vlistDefModel(int vlistID, int modelID)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -1507,7 +1506,7 @@ void vlistChangeGridIndex(int vlistID, int index, int gridID)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -1533,7 +1532,7 @@ void vlistChangeGrid(int vlistID, int gridID1, int gridID2)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -1600,7 +1599,7 @@ void vlistChangeZaxisIndex(int vlistID, int index, int zaxisID)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -1640,7 +1639,7 @@ void vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2)
 
   if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 

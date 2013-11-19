@@ -4,10 +4,11 @@
 
 #include <ctype.h>
 
-#include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
 #include "cdf.h"
+#include "dmemory.h"
+#include "error.h"
 #include "stream_grb.h"
 #include "stream_cdf.h"
 #include "stream_srv.h"
@@ -454,7 +455,7 @@ void streamDefByteorder(int streamID, int byteorder)
 
   if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -2235,7 +2236,7 @@ void streamDefCompType(int streamID, int comptype)
 
   if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -2253,7 +2254,7 @@ void streamDefCompLevel(int streamID, int complevel)
 
   if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 

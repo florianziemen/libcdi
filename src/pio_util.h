@@ -26,6 +26,9 @@ cdiAbortC_MPI(const char * caller, const char * filename,
               const char *functionname, int line,
               const char * errorString, va_list ap)
   __attribute__((noreturn));
+
+void cdiPioWarning(const char *caller, const char *fmt, va_list ap);
+
 #endif
 
 #ifdef USE_MPI
@@ -79,23 +82,6 @@ getMPICommWorldRank()
 #define xdebug3(fmt, ...)					\
   if ( ddebug == MAXDEBUG ){                                    \
     fprintf ( stderr, "%s, %s, line %d: " fmt "\n",             \
-              __func__, __FILE__,  __LINE__,                    \
-              __VA_ARGS__ );                                 \
-  }
-#endif
-
-#ifdef USE_MPI
-#define xwarning(fmt, ...)						\
-  if ( ddebug ){							\
-    int rank = getMPICommWorldRank();                                   \
-    fprintf ( stderr, "WARNING: pe%d in %s, %s, line %d: " fmt "\n",	\
-              rank,  __func__, __FILE__,  __LINE__,			\
-              __VA_ARGS__ );						\
-  }
-#else
-#define xwarning(fmt, ...)					\
-  if ( ddebug ){                                                \
-    fprintf ( stderr, "WARNING: %s, %s, line %d: " fmt "\n",    \
               __func__, __FILE__,  __LINE__,                    \
               __VA_ARGS__ );                                 \
   }

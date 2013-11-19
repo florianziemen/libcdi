@@ -571,7 +571,7 @@ void gridDefXname(int gridID, const char *xname)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning ("%s", "Operation not executed." );
+      Warning ("%s", "Operation not executed." );
       return;
     }
 
@@ -603,7 +603,7 @@ void gridDefXlongname(int gridID, const char *xlongname)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning ("%s", "Operation not executed." );
+      Warning ("%s", "Operation not executed." );
       return;
     }
 
@@ -633,7 +633,7 @@ void gridDefXunits(int gridID, const char *xunits)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed." );
+      Warning("%s", "Operation not executed." );
       return;
     }
 
@@ -665,7 +665,7 @@ void gridDefYname(int gridID, const char *yname)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -697,7 +697,7 @@ void gridDefYlongname(int gridID, const char *ylongname)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -729,7 +729,7 @@ void gridDefYunits(int gridID, const char *yunits)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1066,7 +1066,7 @@ void gridDefTrunc(int gridID, int trunc)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1097,7 +1097,7 @@ void gridDefXsize(int gridID, int xsize)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1138,7 +1138,7 @@ void gridDefPrec(int gridID, int prec)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1217,7 +1217,7 @@ void gridDefYsize(int gridID, int ysize)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1290,7 +1290,7 @@ void gridDefNP(int gridID, int np)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning ("%s", "Operation not executed." );
+      Warning ("%s", "Operation not executed." );
       return;
     }
 
@@ -1345,7 +1345,7 @@ void gridDefRowlon(int gridID, int nrowlon, const int *rowlon)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1414,7 +1414,7 @@ void gridDefMask(int gridID, const int *mask)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1477,7 +1477,7 @@ void gridDefMaskGME(int gridID, const int *mask)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1568,7 +1568,7 @@ void gridDefXvals(int gridID, const double *xvals)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1663,7 +1663,7 @@ void gridDefYvals(int gridID, const double *yvals)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1854,7 +1854,7 @@ void gridDefXpole(int gridID, double xpole)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1906,7 +1906,7 @@ void gridDefYpole(int gridID, double ypole)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1958,7 +1958,7 @@ void gridDefAngle(int gridID, double angle)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -2007,7 +2007,7 @@ void gridDefGMEnd(int gridID, int nd)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -2055,7 +2055,7 @@ void gridDefGMEni(int gridID, int ni)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -2103,7 +2103,7 @@ void gridDefGMEni2(int gridID, int ni2)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
   gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
@@ -2140,7 +2140,7 @@ void gridDefGMEni3(int gridID, int ni3)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -3121,7 +3121,7 @@ void gridDefArea(int gridID, const double *area)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -3192,7 +3192,7 @@ void gridDefNvertex(int gridID, int nvertex)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -3237,7 +3237,7 @@ void gridDefXbounds(int gridID, const double *xbounds)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning ("%s", "Operation not executed.");
+      Warning ("%s", "Operation not executed.");
       return;
     }
 
@@ -3352,7 +3352,7 @@ void gridDefYbounds(int gridID, const double *ybounds)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -3914,7 +3914,7 @@ void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -4000,7 +4000,7 @@ void gridDefLcc2(int gridID, double earth_radius, double lon_0, double lat_0, do
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -4055,7 +4055,7 @@ void gridDefLaea(int gridID, double earth_radius, double lon_0, double lat_0)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -4107,7 +4107,7 @@ void gridDefComplexPacking(int gridID, int lcomplex)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -4153,7 +4153,7 @@ void gridDefNumber(int gridID, const int number)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -4210,7 +4210,7 @@ void gridDefPosition(int gridID, int position)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -4267,7 +4267,7 @@ void gridDefReference(int gridID, const char *reference)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -4342,7 +4342,7 @@ void gridDefUUID(int gridID, const char *uuid)
 
   if ( reshGetStatus ( gridID, &gridOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
