@@ -1,6 +1,15 @@
+#if defined (HAVE_CONFIG_H)
+#  include "config.h"
+#endif
+
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 600 /* PTHREAD_MUTEX_RECURSIVE */
+#endif
+
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
+
 #include "cdi.h"
 #include "dmemory.h"
 #include "namespace.h"
@@ -63,13 +72,28 @@ static int namespacesSize = 1;
 #if  defined  (HAVE_LIBPTHREAD)
 #  include <pthread.h>
 
-static pthread_mutex_t namespaceMutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_once_t  namespaceOnce = PTHREAD_ONCE_INIT;
+static pthread_mutex_t namespaceMutex;
+
+static void
+namespaceInitialize(void)
+{
+  pthread_mutexattr_t ma;
+  pthread_mutexattr_init(&ma);
+  pthread_mutexattr_settype(&ma, PTHREAD_MUTEX_RECURSIVE);
+  pthread_mutex_init(&namespaceMutex, &ma);
+  pthread_mutexattr_destroy(&ma);
+}
 
 #  define NAMESPACE_LOCK()         pthread_mutex_lock(&namespaceMutex)
 #  define NAMESPACE_UNLOCK()       pthread_mutex_unlock(&namespaceMutex)
+#  define NAMESPACE_INIT()         pthread_once(&namespaceOnce, \
+                                                namespaceInitialize)
+
 
 #else
 
+#  define NAMESPACE_INIT() do { } while (0)
 #  define NAMESPACE_LOCK()
 #  define NAMESPACE_UNLOCK()
 
@@ -117,6 +141,7 @@ int
 namespaceNew()
 {
   int newNamespaceID = -1;
+  NAMESPACE_INIT();
   NAMESPACE_LOCK();
   if (namespacesSize > nNamespaces)
     {
@@ -165,6 +190,7 @@ namespaceNew()
 void
 namespaceDelete(int namespaceID)
 {
+  NAMESPACE_INIT();
   NAMESPACE_LOCK();
   xassert(namespaceID < namespacesSize && nNamespaces);
   reshListDestruct(namespaceID);
@@ -172,18 +198,6 @@ namespaceDelete(int namespaceID)
   --nNamespaces;
   NAMESPACE_UNLOCK();
 }
-
-void namespaceCleanup ( void )
-{
-  if ( nNamespaces > 1 )
-    {
-      initialNamespace = namespaces[0];
-      free(namespaces);
-      namespaces = &initialNamespace;
-      nNamespaces = 1;
-    }
-}
-
 
 int namespaceGetNumber ()
 {
@@ -267,10 +281,16 @@ union namespaceSwitchValue namespaceSwitchGet(enum namespaceSwitch sw)
 
 void cdiReset(void)
 {
+  NAMESPACE_INIT();
   NAMESPACE_LOCK();
   for (int namespaceID = 0; namespaceID < namespacesSize; ++namespaceID)
-    namespaceDelete(namespaceID);
-  namespaces = &initialNamespace;
+    if (namespaces[namespaceID].resStage != STAGE_UNUSED)
+      namespaceDelete(namespaceID);
+  if (namespaces != &initialNamespace)
+    {
+      free(namespaces);
+      namespaces = &initialNamespace;
+    }
   namespacesSize = 1;
   nNamespaces = 1;
   activeNamespace = 0;

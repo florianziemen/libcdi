@@ -150,6 +150,7 @@ static void listDestroy ( void )
       namespaceDelete(i);
   free(resHList);
   resHList = NULL;
+  cdiReset();
   LIST_UNLOCK();
 }
 
