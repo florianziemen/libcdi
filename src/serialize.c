@@ -55,6 +55,7 @@ serializeGetSizeInCore(int count, int datatype, void *context)
   case DATATYPE_INT:
     elemSize = sizeof (int);
     break;
+  case DATATYPE_FLT:
   case DATATYPE_FLT64:
     elemSize = sizeof (double);
     break;
