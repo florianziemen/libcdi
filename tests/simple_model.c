@@ -128,6 +128,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
     levs[i] = 101300.0
       - 3940.3 * (exp(1.3579 * (double)(i)/(setup.max_nlev - 1)) - 1.0);
 
+  vlistID = vlistCreate ();
+
   varDesc = xmalloc(nVars * sizeof (varDesc[0]));
   for (int varIdx = 0; varIdx < nVars; varIdx++ )
     {
@@ -156,37 +158,30 @@ modelRun(struct model_config setup, MPI_Comm comm)
         = zaxisCreate(ZAXIS_PRESSURE, varDesc[varIdx].nlev);
       zaxisDefLevels(varDesc[varIdx].zaxisID, levs);
       zaxisIDset:
-      ;
-      varDesc[varIdx].code = 129 + varIdx;
-    }
-
-  vlistID = vlistCreate ();
-
-  for ( i = 0; i < nVars; i++ )
-    {
-      varDesc[i].id = vlistDefVar(vlistID, gridID, varDesc[i].zaxisID,
-                                  TIME_VARIABLE);
-      varDesc[i].size = nlon * nlat * varDesc[i].nlev;
+      varDesc[varIdx].id = vlistDefVar(vlistID, gridID, varDesc[varIdx].zaxisID,
+                                       TIME_VARIABLE);
+      varDesc[varIdx].size = nlon * nlat * varDesc[varIdx].nlev;
 #ifdef USE_MPI
       {
          int start
-           = uniform_partition_start((int [2]){ 0, varDesc[i].size - 1 },
+           = uniform_partition_start((int [2]){ 0, varDesc[varIdx].size - 1 },
                                      comm_size, rank),
            chunkSize
-           = uniform_partition_start((int [2]){ 0, varDesc[i].size - 1 },
+           = uniform_partition_start((int [2]){ 0, varDesc[varIdx].size - 1 },
                                      comm_size, rank + 1) - start;
          fprintf(stderr, "%d: start=%d, chunkSize = %d\n", rank,
                  start, chunkSize);
          Xt_idxlist idxlist
            = xt_idxstripes_new(&(struct Xt_stripe){ .start = start,
                  .nstrides = chunkSize, .stride = 1 }, 1);
-         varDesc[i].start = start;
-         varDesc[i].chunkSize = chunkSize;
-         varDesc[i].partDesc = idxlist;
+         varDesc[varIdx].start = start;
+         varDesc[varIdx].chunkSize = chunkSize;
+         varDesc[varIdx].partDesc = idxlist;
       }
 #endif
-      vlistDefVarCode(vlistID, varDesc[i].id, varDesc[i].code);
-      vlistDefVarDatatype(vlistID, varDesc[i].id, setup.datatype);
+      varDesc[varIdx].code = 129 + varIdx;
+      vlistDefVarCode(vlistID, varDesc[varIdx].id, varDesc[varIdx].code);
+      vlistDefVarDatatype(vlistID, varDesc[varIdx].id, setup.datatype);
     }
 
   taxisID = taxisCreate ( TAXIS_ABSOLUTE );
