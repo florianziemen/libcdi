@@ -83,8 +83,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
   int rank = 0;
   char filename[1024];
   int nlon = setup.nlon, nlat = setup.nlat;
-  uint32_t checksum_state[nVars];
-  size_t varSize[nVars], varslice_size = 0;
+  uint32_t *checksum_state;
+  size_t *varSize, varslice_size = 0;
 #if USE_MPI
   int *chunks = NULL, *displs = NULL, comm_size = 1;
   struct var1DDeco {
@@ -162,6 +162,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   vlistID = vlistCreate ();
 
   varIDs = nlev + 2 * nVars;
+  varSize = xmalloc(nVars * sizeof (varSize[0]));
   for ( i = 0; i < nVars; i++ )
     {
       varIDs[i] = vlistDefVar ( vlistID, gridID, zaxisID[i], TIME_VARIABLE );
@@ -200,9 +201,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
   pioEndDef ();
 #endif
 
+  checksum_state = xmalloc(nVars * sizeof(checksum_state[0]));
   for ( tfID = 0; tfID < ntfiles; tfID++ )
     {
-      memset(checksum_state, 0, sizeof(checksum_state));
+      memset(checksum_state, 0, sizeof(checksum_state[0]) * nVars);
       if ( tfID > 0 )
 	{
 	  streamClose ( streamID );
@@ -304,7 +306,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
           }
         }
     }
+  free(checksum_state);
   free(varslice);
+  free(varSize);
 #ifdef USE_MPI
   pioEndTimestepping ();
 #endif
