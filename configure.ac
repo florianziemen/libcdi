@@ -42,6 +42,9 @@ AC_CHECK_TOOL([DLLTOOL],[dlltool],[:])
 AC_CHECK_TOOL([OBJDUMP],[objdump],[:])
 AC_CHECK_TOOL([STRIP],[strip],[:])
 AC_CHECK_TOOL([RANLIB],[ranlib],[:])
+# -----------------------------------------------------------------------
+# Check endianess of system
+AC_C_BIGENDIAN
 #  ----------------------------------------------------------------------
 # Check large file support on 32 bit systems
 AC_SYS_LARGEFILE
