@@ -15473,11 +15473,13 @@ fi
    rm -f conftest*
 
          done
+                  \rm a.out 2>/dev/null
 fi
       if test -z "$FPP"; then :
 
 else
   eval "$as_acx_sl_prog_fpp=\$FPP"
+
 fi
 fi
 eval ac_res=\$$as_acx_sl_prog_fpp
@@ -15632,7 +15634,7 @@ fi
       if test $ac_fpp_need_i = yes; then :
   acx_sl_prog_fc_cpp_i=no
          $as_echo "$as_me:${as_lineno-$LINENO}: Trying flag to add directories to preprocessor search path." >&5
-         mkdir conftst
+         as_dir=conftst; as_fn_mkdir_p
          cd conftst
 
    ac_ext=${ac_fc_srcext-f}
@@ -15770,9 +15772,8 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
                  program main
-
 #define LONG '901234567890123456789012345678901234567890123456789012345678901234567890'
-      CHARACTER*80 A
+      CHARACTER(LEN=80) :: A
       A=LONG
 
       end
@@ -15904,7 +15905,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
                  PROGRAM MAIN
-      CHARACTER*10 C
+      CHARACTER(LEN=10) :: C
       C = "abcde" // "fghij"; END PROGRAM
 
 
@@ -15948,7 +15949,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
                  PROGRAM MAIN
-      CHARACTER*10 C
+      CHARACTER(LEN=10) :: C
       C = "abcde" // "fghij"; END PROGRAM
 
 
