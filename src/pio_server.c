@@ -475,6 +475,14 @@ struct streamMap
   int numEntries;
 };
 
+static int
+smCmpStreamID(const void *a_, const void *b_)
+{
+  const struct streamMapping *a = a_, *b = b_;
+  int streamIDa = a->streamID, streamIDb = b->streamID;
+  return (streamIDa > streamIDb) - (streamIDa < streamIDb);
+}
+
 static inline int
 inventorizeStream(struct streamMapping *streamMap, int numStreamIDs,
                   int *sizeStreamMap_, int streamID, int headerIdx)
@@ -581,6 +589,9 @@ buildStreamMap(union winHeaderEntry *winDict)
 
     free(streamIDs);
   }
+  /* sort written streams by streamID */
+  streamMap = xrealloc(streamMap, sizeof (streamMap[0]) * numStreamIDs);
+  qsort(streamMap, numStreamIDs, sizeof (streamMap[0]), smCmpStreamID);
   return (struct streamMap){ .entries = streamMap, .numEntries = numStreamIDs };
 }
 
