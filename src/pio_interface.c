@@ -476,9 +476,10 @@ void modelWinCreate ( void )
       xmpi(MPI_Win_create(txWin[collID].buffer, (MPI_Aint)txWin[collID].size, 1,
                           no_locks_info, commInqCommsIO(collID),
                           &txWin[collID].win));
-      xmpi(MPI_Comm_group(commInqCommsIO(collID), &txWin[collID].ioGroup));
-      xmpi(MPI_Group_incl(txWin[collID].ioGroup, 1, ranks,
-                          &txWin[collID].ioGroup ));
+      MPI_Group commGroup;
+      xmpi(MPI_Comm_group(commInqCommsIO(collID), &commGroup));
+      xmpi(MPI_Group_incl(commGroup, 1, ranks, &txWin[collID].ioGroup));
+      xmpi(MPI_Group_free(&commGroup));
     }
 
   xmpi(MPI_Info_free(&no_locks_info));
