@@ -735,7 +735,7 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
            "nProcsIO=%d, sizeGlob=%d\n", nProcsIO, sizeGlob);
 
   commDefNProcsIO ( nProcsIO );
-  commDefIOMode   ( IOMode, PIO_MAXIOMODE, PIO_MINIOMODEWITHSPECIALPROCS );
+  commDefIOMode   ( IOMode );
   commDefCommPio  ();
 
   xassert(partInflate >= 1.0);

@@ -15,8 +15,6 @@
 
 typedef struct {
   int IOMode;
-  int maxIOMode;
-  int minIOModeWithSpecialProcs;
   int nProcsIO;
   int nProcsModel;
   int isProcIO;
@@ -59,8 +57,6 @@ static
 void pioInfoInit ( pioInfo_t * p )
 {
   p->IOMode               = CDI_UNDEFID;
-  p->maxIOMode            = CDI_UNDEFID;
-  p->minIOModeWithSpecialProcs = CDI_UNDEFID;
   p->nProcsIO             = CDI_UNDEFID;
   p->nProcsModel          = CDI_UNDEFID;
   p->isProcIO             = CDI_UNDEFID;
@@ -229,16 +225,10 @@ int commInqNProcsModel ( void )
 }
 
 
-void     commDefIOMode  ( int IOMode, int maxIOMode, int minIOModeWithSpecialProcs )
+void     commDefIOMode  ( int IOMode )
 {
-  xassert ( info != NULL &&
-	   IOMode >= 0 &&
-           maxIOMode >= IOMode &&
-           minIOModeWithSpecialProcs > 0 &&
-           minIOModeWithSpecialProcs <= maxIOMode );
+  xassert(info != NULL && IOMode >= PIO_MINIOMODE && IOMode <= PIO_MAXIOMODE );
   info->IOMode = IOMode;
-  info->maxIOMode = maxIOMode;
-  info->minIOModeWithSpecialProcs = minIOModeWithSpecialProcs;
 }
 
 
@@ -447,7 +437,7 @@ void commDefCommNode ( void )
                           &info->commNode ));
   xmpi ( MPI_Comm_size ( info->commNode, &info->sizeNode ));
   xmpi ( MPI_Comm_rank ( info->commNode, &info->rankNode ));
-  if ( info->IOMode >= info->minIOModeWithSpecialProcs )
+  if ( info->IOMode >= PIO_MINIOMODEWITHSPECIALPROCS )
     info->specialRankNode = info->sizeNode - 1;
 
   free(sortedHosts);
@@ -796,8 +786,6 @@ void commPrint ( FILE * fp )
   fprintf ( fp, "######## pioinfo PE%d ###########\n", info->rankGlob );
   fprintf ( fp, "#\n" );
   fprintf ( fp, "# IOMode      = %d\n", info->IOMode );
-  fprintf ( fp, "# maxIOMode   = %d\n", info->maxIOMode );
-  fprintf ( fp, "# minIOModeWithSpecialProcs  = %d\n", info->minIOModeWithSpecialProcs );
   fprintf ( fp, "# nProcsIO    = %d\n", info->nProcsIO );
   fprintf ( fp, "# nProcsModel = %d\n", info->nProcsModel );
   fprintf ( fp, "# isProcIO    = %d\n", info->isProcIO );
