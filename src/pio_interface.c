@@ -490,9 +490,12 @@ modelWinEnqueue(int collID,
   struct winHeaderEntry *winDict
     = (struct winHeaderEntry *)txWin[collID].buffer;
   int targetEntry;
+  if (header.id > 0 || header.id == PARTDESCMARKER)
+    targetEntry = (txWin[collID].dictDataUsed)++;
+  else
+    targetEntry = txWin[collID].dictSize - ++(txWin[collID].dictRPCUsed);
   if (header.id > 0)
     {
-      targetEntry = (txWin[collID].dictDataUsed)++;
       int offset = header.offset
         = (int)roundUpToMultiple(txWin[collID].head - txWin[collID].buffer,
                                  sizeof (double));
@@ -503,7 +506,6 @@ modelWinEnqueue(int collID,
     }
   else if (header.id == PARTDESCMARKER)
     {
-      targetEntry = (txWin[collID].dictDataUsed)++;
       Xt_uid uid = header.specific.partDesc.uid;
       int offset = -1;
       /* search if same uid entry has already been enqueued */
@@ -533,7 +535,6 @@ modelWinEnqueue(int collID,
     }
   else
     {
-      targetEntry = txWin[collID].dictSize - ++(txWin[collID].dictRPCUsed);
       int position = header.offset
         = (int)(txWin[collID].head - txWin[collID].buffer);
       MPI_Comm comm = commInqCommsIO(collID);
