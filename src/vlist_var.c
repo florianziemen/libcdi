@@ -200,8 +200,6 @@ vlistDestroy(vlistID);
 int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
 {
   int varID;
-  int nlevs;
-  int levID;
   int index;
   vlist_t *vlistptr;
 
@@ -229,19 +227,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
       vlistptr->vars[varID].tsteptype = TSTEP_INSTANT;
     }
 
-  nlevs = zaxisInqSize(zaxisID);
-
-  vlistptr->vars[varID].levinfo = (levinfo_t *) malloc(nlevs*sizeof(levinfo_t));
-
-  for ( levID = 0; levID < nlevs; levID++ )
-    {
-      vlistptr->vars[varID].levinfo[levID].flag     = 0;
-      vlistptr->vars[varID].levinfo[levID].index    = -1;
-      vlistptr->vars[varID].levinfo[levID].flevelID = levID;
-      vlistptr->vars[varID].levinfo[levID].mlevelID = levID;
-    }
-
-  vlistptr->vars[varID].nlevs = nlevs;
+  vlistptr->vars[varID].nlevs = zaxisInqSize(zaxisID);;
 
   for ( index = 0; index < vlistptr->ngrids; index++ )
     if ( gridID == vlistptr->gridIDs[index] ) break;
@@ -270,6 +256,20 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
   vlistptr->vars[varID].param = cdiEncodeParam(-(varID + 1), 255, 255);
 
   return (varID);
+}
+
+void
+cdiVlistCreateVarLevInfo(vlist_t *vlistptr, int varID)
+{
+  xassert(varID >= 0 && varID < vlistptr->nvars
+          && vlistptr->vars[varID].levinfo == NULL);
+  int zaxisID = vlistptr->vars[varID].zaxisID;
+  int nlevs = zaxisInqSize(zaxisID);
+
+  vlistptr->vars[varID].levinfo = malloc(nlevs * sizeof(levinfo_t));
+
+  for (int levID = 0; levID < nlevs; levID++ )
+      vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO(levID);
 }
 
 /*
@@ -1533,6 +1533,14 @@ void vlistDefFlag(int vlistID, int varID, int levID, int flag)
   vlistptr = vlist_to_pointer(vlistID);
 
   vlistptr->vars[varID].flag = flag;
+
+  levinfo_t li = DEFAULT_LEVINFO(levID);
+  if (vlistptr->vars[varID].levinfo)
+    ;
+  else if (flag != li.flag)
+    cdiVlistCreateVarLevInfo(vlistptr, varID);
+  else
+    return;
   vlistptr->vars[varID].levinfo[levID].flag = flag;
 }
 
@@ -1543,7 +1551,13 @@ int vlistInqFlag(int vlistID, int varID, int levID)
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  return (vlistptr->vars[varID].levinfo[levID].flag);
+  if (vlistptr->vars[varID].levinfo)
+    return (vlistptr->vars[varID].levinfo[levID].flag);
+  else
+    {
+      levinfo_t li = DEFAULT_LEVINFO(levID);
+      return li.flag;
+    }
 }
 
 
@@ -1594,7 +1608,7 @@ int vlistFindLevel(int vlistID, int fvarID, int flevelID)
 	}
     }
 
-  return (levelID);  
+  return (levelID);
 }
 
 
@@ -1604,7 +1618,7 @@ int vlistMergedVar(int vlistID, int varID)
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  return (vlistptr->vars[varID].mvarID);  
+  return (vlistptr->vars[varID].mvarID);
 }
 
 
@@ -1614,7 +1628,13 @@ int vlistMergedLevel(int vlistID, int varID, int levelID)
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  return (vlistptr->vars[varID].levinfo[levelID].mlevelID);  
+  if (vlistptr->vars[varID].levinfo)
+    return vlistptr->vars[varID].levinfo[levelID].mlevelID;
+  else
+    {
+      levinfo_t li = DEFAULT_LEVINFO(levelID);
+      return li.mlevelID;
+    }
 }
 
 
@@ -1630,7 +1650,14 @@ void vlistDefIndex(int vlistID, int varID, int levelID, int index)
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistptr->vars[varID].levinfo[levelID].index = index;  
+  levinfo_t li = DEFAULT_LEVINFO(levelID);
+  if (vlistptr->vars[varID].levinfo)
+    ;
+  else if (index != li.index)
+    cdiVlistCreateVarLevInfo(vlistptr, varID);
+  else
+    return;
+  vlistptr->vars[varID].levinfo[levelID].index = index;
 }
 
 
@@ -1640,7 +1667,13 @@ int vlistInqIndex(int vlistID, int varID, int levelID)
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  return (vlistptr->vars[varID].levinfo[levelID].index);  
+  if (vlistptr->vars[varID].levinfo)
+    return (vlistptr->vars[varID].levinfo[levelID].index);
+  else
+    {
+      levinfo_t li = DEFAULT_LEVINFO(levelID);
+      return li.index;
+    }
 }
 
 
@@ -2101,7 +2134,7 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
 {
   double dtempbuf[vlistvar_ndbls];
   var_t *var = p->vars + varID;
-  int tempbuf[vlistvar_nints], namesz, longnamesz, stdnamesz, unitssz, i;
+  int tempbuf[vlistvar_nints], namesz, longnamesz, stdnamesz, unitssz;
 
   tempbuf[0] = var->flag;
   tempbuf[1] = var->gridID;
@@ -2143,13 +2176,23 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
                   buf, size, position, context);
   {
     int levbuf[var->nlevs][4];
-    for (i = 0; i < var->nlevs; ++i)
-    {
-      levbuf[i][0] = var->levinfo[i].flag;
-      levbuf[i][1] = var->levinfo[i].index;
-      levbuf[i][2] = var->levinfo[i].mlevelID;
-      levbuf[i][3] = var->levinfo[i].flevelID;
-    }
+    if (var->levinfo)
+      for (int levID = 0; levID < var->nlevs; ++levID)
+        {
+          levbuf[levID][0] = var->levinfo[levID].flag;
+          levbuf[levID][1] = var->levinfo[levID].index;
+          levbuf[levID][2] = var->levinfo[levID].mlevelID;
+          levbuf[levID][3] = var->levinfo[levID].flevelID;
+        }
+    else
+      for (int levID = 0; levID < var->nlevs; ++levID)
+        {
+          levinfo_t li = DEFAULT_LEVINFO(levID);
+          levbuf[levID][0] = li.flag;
+          levbuf[levID][1] = li.index;
+          levbuf[levID][2] = li.mlevelID;
+          levbuf[levID][3] = li.flevelID;
+        }
     serializePack(levbuf, var->nlevs * 4, DATATYPE_INT,
                   buf, size, position, context);
   }
@@ -2170,6 +2213,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   int tempbuf[vlistvar_nints];
   int newvar;
   char *varname = NULL;
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
   serializeUnpack(buf, size, position,
                   tempbuf, vlistvar_nints, DATATYPE_INT, context);
   serializeUnpack(buf, size, position,
@@ -2229,9 +2273,10 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   vlistDefVarCompLevel(vlistID, newvar, tempbuf[17]);
   {
     int levbuf[tempbuf[18]][4];
-    var_t *var = vlist_to_pointer(vlistID)->vars + newvar;
+    var_t *var = vlistptr->vars + newvar;
     int nlevs=tempbuf[18], i, flagSetLev = 0;
     xassert(nlevs == var->nlevs);
+    cdiVlistCreateVarLevInfo(vlistptr, newvar);
     serializeUnpack(buf, size, position,
                     levbuf, nlevs * 4, DATATYPE_INT, context);
     for (i = 0; i < nlevs; ++i)

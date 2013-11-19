@@ -20,6 +20,8 @@ void vlistVarUnpack(int vlistID,
 void vlistDefVarIOrank    ( int, int, int );
 int  vlistInqVarIOrank    ( int, int );
 
+void cdiVlistCreateVarLevInfo(vlist_t *vlistptr, int varID);
+
 #endif
 /*
  * Local Variables:
