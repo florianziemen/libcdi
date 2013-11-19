@@ -40,6 +40,7 @@ static int activeNamespace = 0;
     { .func = (void (*)()) cdiStreamWriteVar_ },            \
     { .func = (void (*)()) cdiStreamwriteVarChunk_ },       \
     { .func = (void (*)()) 0 },                             \
+    { .func = (void (*)()) 0 },                             \
     { .func = (void (*)()) cdiStreamCloseDefaultDelegate }, \
     { .func = (void (*)()) cdiStreamDefTimestep_ }, \
     { .func = (void (*)()) cdiStreamSync_ },                \

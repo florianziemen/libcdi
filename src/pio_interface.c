@@ -642,6 +642,57 @@ pioBufferPartData(int streamID, int varID, const double *data,
                      nmiss, partDesc);
 }
 
+struct scatterGatherDesc
+{
+  void *data;
+  const int *blocklengths, *displacements;
+  size_t elemSize;
+  unsigned numBlocks;
+};
+
+static void
+scatterGatherPackFunc(void *dataDesc, void *buf, int size, int *pos,
+                      void *context)
+{
+  const struct scatterGatherDesc *p = dataDesc;
+  unsigned numBlocks = p->numBlocks;
+  const int *bls = p->blocklengths, *disps = p->displacements;
+  int pos_ = *pos;
+  unsigned char *dstBuf = buf + pos_, *bufEnd = (unsigned char *)buf + size;
+  size_t elemSize = p->elemSize;
+  const unsigned char *data = p->data;
+  for (unsigned j = 0; j < numBlocks; ++j)
+    {
+      int bl = bls[j];
+      if (bl > 0)
+        {
+          size_t bsize = (size_t)bl * elemSize;
+          xassert(dstBuf + bsize <= bufEnd);
+          memcpy(dstBuf, data + elemSize * disps[j], bsize);
+          dstBuf += bsize;
+        }
+    }
+  *pos = (int)(dstBuf - (unsigned char *)buf);
+}
+
+
+void
+cdiPioBufferPartDataGather(int streamID, int varID, const double *data,
+                           int numBlocks, const int blocklengths[],
+                           const int displacements[],
+                           int nmiss, Xt_idxlist partDesc)
+{
+  xassert(numBlocks >= 0);
+  pioBufferPartData_(streamID, varID,
+                     &(struct scatterGatherDesc)
+                     { .data = (void *)data, .blocklengths = blocklengths,
+                       .displacements = displacements,
+                       .elemSize = sizeof (data[0]), .numBlocks = numBlocks },
+                     scatterGatherPackFunc,
+                     nmiss, partDesc);
+}
+
+
 /************************************************************************/
 
 void pioBufferFuncCall(struct winHeaderEntry header,
@@ -928,6 +979,34 @@ streamWriteVarPart(int streamID, int varID, const void *data,
     xabort("local part writing is unsupported!");
 
   myStreamWriteVarPart(streamID, varID, data, nmiss, partDesc);
+}
+
+void
+streamWriteScatteredVarPart(int streamID, int varID, const void *data,
+                            int numBlocks, const int blocklengths[],
+                            const int displacements[],
+                            int nmiss, Xt_idxlist partDesc)
+{
+  if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
+
+  int chunk = xt_idxlist_get_num_indices(partDesc);
+  xassert(chunk == 0 || data);
+
+  void (*myStreamWriteScatteredVarPart)(int streamID, int varID,
+                                        const void *data,
+                                        int numBlocks, const int blocklengths[],
+                                        const int displacements[],
+                                        int nmiss, Xt_idxlist partDesc)
+    = (void (*)(int, int, const void *, int, const int[], const int[], int,
+                Xt_idxlist))
+    namespaceSwitchGet(NSSWITCH_STREAM_WRITE_SCATTERED_VAR_PART_).func;
+
+  if (!myStreamWriteScatteredVarPart)
+    xabort("local part writing is unsupported!");
+
+  myStreamWriteScatteredVarPart(streamID, varID, data,
+                                numBlocks, blocklengths, displacements,
+                                nmiss, partDesc);
 }
 #endif
 

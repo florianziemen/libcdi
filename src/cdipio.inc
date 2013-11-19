@@ -58,3 +58,14 @@
 !                                     TYPE(XT_IDXLIST)partDesc)
       EXTERNAL        streamWriteVarPart
 
+!                     streamWriteScatteredVarPart
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     CHOICE          data,
+!                                     INTEGER         numBlocks,
+!                                     INTEGER         blocklengths,
+!                                     INTEGER         displacements,
+!                                     INTEGER         nmiss,
+!                                     TYPE(XT_IDXLIST)partDesc)
+      EXTERNAL        streamWriteScatteredVarPart
+

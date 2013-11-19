@@ -45,5 +45,10 @@ static void streamWriteVarPart_fwrap(int streamID, int varID, const void *data, 
   streamWriteVarPart(streamID, varID, data, nmiss, (*(Xt_idxlist *)partDesc));
 }
 FCALLSCSUB5 (streamWriteVarPart_fwrap, STREAMWRITEVARPART, streamwritevarpart, INT, INT, PVOID, INT, PVOID)
+static void streamWriteScatteredVarPart_fwrap(int streamID, int varID, const void *data, int numBlocks, int  blocklengths[], int  displacements[], int nmiss, void *partDesc)
+{
+  streamWriteScatteredVarPart(streamID, varID, data, numBlocks, blocklengths, displacements, nmiss, (*(Xt_idxlist *)partDesc));
+}
+FCALLSCSUB8 (streamWriteScatteredVarPart_fwrap, STREAMWRITESCATTEREDVARPART, streamwritescatteredvarpart, INT, INT, PVOID, INT, INTV, INTV, INT, PVOID)
 
 #endif

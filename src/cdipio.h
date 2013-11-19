@@ -41,5 +41,9 @@ void     cdiPioRDMAProgress();
 void     streamWriteVarPart    (int streamID, int varID,
                                 const void *data, int nmiss,
                                 Xt_idxlist partDesc);
+void     streamWriteScatteredVarPart(int streamID, int varID, const void *data,
+                                     int numBlocks, const int blocklengths[],
+                                     const int displacements[],
+                                     int nmiss, Xt_idxlist partDesc);
 
 #endif

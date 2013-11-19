@@ -143,6 +143,30 @@ cdiPioClientStreamWriteVarPart(int streamID, int varID, const void *data,
     }
 }
 
+static void
+cdiPioClientStreamWriteScatteredVarPart(int streamID, int varID,
+                                        const void *data,
+                                        int numBlocks, const int blocklengths[],
+                                        const int displacements[],
+                                        int nmiss, Xt_idxlist partDesc)
+{
+  switch (namespaceInqResStatus())
+    {
+    case STAGE_DEFINITION:
+      xabort("DEFINITION STAGE: PARALLEL WRITING NOT POSSIBLE.");
+      break;
+    case STAGE_TIMELOOP:
+      cdiPioBufferPartDataGather(streamID, varID, data, numBlocks,
+                                 blocklengths, displacements, nmiss, partDesc);
+      return;
+    case STAGE_CLEANUP:
+      xabort("CLEANUP STAGE: PARALLEL WRITING NOT POSSIBLE.");
+      break;
+    default:
+      xabort("INTERNAL ERROR");
+    }
+}
+
 #if defined HAVE_LIBNETCDF
 static void
 cdiPioCdfDefTimestepNOP(stream_t *streamptr, int tsID)
@@ -234,6 +258,8 @@ cdiPioClientSetup(int *pioNamespace_, int *pioNamespace)
                      NSSW_FUNC(cdiPioClientStreamWriteVarChunk_));
   namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_PART_,
                      NSSW_FUNC(cdiPioClientStreamWriteVarPart));
+  namespaceSwitchSet(NSSWITCH_STREAM_WRITE_SCATTERED_VAR_PART_,
+                     NSSW_FUNC(cdiPioClientStreamWriteScatteredVarPart));
   namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND,
                      NSSW_FUNC(cdiPioClientStreamClose));
   namespaceSwitchSet(NSSWITCH_STREAM_DEF_TIMESTEP_,
