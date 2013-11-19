@@ -193,21 +193,6 @@ void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line,
 
 /****************************************************/
 
-
-int xsum ( int n, int * argarray )
-{
-  int i, sum = 0;
-
-  for ( i = 0; i < n; i++ )
-    sum += * ( argarray + i );
-
-  return sum;
-}
-
-
-/****************************************************/
-
-
 double xchecksum ( int type, int count, void * buffer )
 {
   return 0.0;

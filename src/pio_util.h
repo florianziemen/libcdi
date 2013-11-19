@@ -140,7 +140,15 @@ void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line, \
 #define xdebugMsg2(tag,source,text) \
   if ( ddebug ) pcdiDebugMsg ( __FILE__, __func__,  __LINE__, tag, source, text )
 
-int xsum ( int, int * );
+static inline int
+sum_int(size_t n, int *a)
+{
+  int sum = 0;
+  for (size_t i = 0; i < n; ++i)
+    sum += a[i];
+  return sum;
+}
+
 
 double xchecksum ( int, int, void * );
  

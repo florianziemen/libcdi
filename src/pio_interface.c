@@ -271,7 +271,7 @@ varsMapNDeco(int nNodes, int *nodeSizes)
   for ( i = 0; i < nStreams; i++ )
     streamSizes[i] = streamInqNvars ( * ( resHs + i ));
 
-  nVars = xsum ( nStreams, streamSizes );
+  nVars = sum_int(nStreams, streamSizes);
   varSizes   = xmalloc ( nVars * sizeof ( varSizes[0] ));
   varMapping = xmalloc ( nVars * sizeof ( varMapping[0] ));
 
