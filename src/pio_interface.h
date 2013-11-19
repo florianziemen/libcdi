@@ -15,7 +15,6 @@
 void
 pioBufferPartData(int streamID, int varID, const double *data,
                   int nmiss, Xt_idxlist partDesc);
-void pioBufferData (int, int, const double *, int );
 void pioBufferFuncCall(struct winHeaderEntry header,
                        const void *data, size_t dataSize);
 
