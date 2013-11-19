@@ -596,6 +596,42 @@ buildStreamMap(struct winHeaderEntry *winDict)
   return (struct streamMap){ .entries = streamMap, .numEntries = numStreamIDs };
 }
 
+static void
+writeGribStream(struct winHeaderEntry *winDict, struct streamMapping *mapping,
+                double **data_, int *currentDataBufSize, int root,
+                int nProcsModel)
+{
+  int streamID = mapping->streamID;
+  int headerIdx, lastHeaderIdx = mapping->lastHeaderIdx;
+  int vlistID = streamInqVlist(streamID);
+  if (lastHeaderIdx < 0)
+    {
+      cdiPioFileWrite(streamInqFileID(streamID), NULL, 0,
+                      streamInqCurTimestepID(streamID));
+    }
+  else
+    for (headerIdx = mapping->firstHeaderIdx;
+         headerIdx <= lastHeaderIdx;
+         headerIdx += 2)
+      if (streamID == winDict[headerIdx].id)
+        {
+          int varID = winDict[headerIdx].specific.dataRecord.varID;
+          int size = vlistInqVarSize(vlistID, varID);
+          int nmiss;
+          resizeVarGatherBuf(vlistID, varID, data_, currentDataBufSize);
+          double *data = *data_;
+          gatherArray(root, nProcsModel, headerIdx,
+                      vlistID, data, &nmiss);
+          streamWriteVar(streamID, varID, data, nmiss);
+          if ( ddebug > 2 )
+            {
+              char text[1024];
+              sprintf(text, "streamID=%d, var[%d], size=%d",
+                      streamID, varID, size);
+              xprintArray(text, data, size, DATATYPE_FLT);
+            }
+        }
+}
 
 #ifdef HAVE_NETCDF4
 static void
@@ -660,36 +696,9 @@ static void readGetBuffers()
           {
           case FILETYPE_GRB:
           case FILETYPE_GRB2:
-            {
-              int headerIdx, lastHeaderIdx = map.entries[streamIdx].lastHeaderIdx;
-              if (lastHeaderIdx < 0)
-                {
-                  cdiPioFileWrite(streamInqFileID(streamID), NULL, 0,
-                                  streamInqCurTimestepID(streamID));
-                  break;
-                }
-              for (headerIdx = map.entries[streamIdx].firstHeaderIdx;
-                   headerIdx <= lastHeaderIdx;
-                   headerIdx += 2)
-                if (streamID == winDict[headerIdx].id)
-                  {
-                    int varID = winDict[headerIdx].specific.dataRecord.varID;
-                    int size = vlistInqVarSize(vlistID, varID);
-                    int nmiss;
-                    resizeVarGatherBuf(vlistID, varID, &data,
-                                       &currentDataBufSize);
-                    gatherArray(root, nProcsModel, headerIdx,
-                                vlistID, data, &nmiss);
-                    streamWriteVar(streamID, varID, data, nmiss);
-                    if ( ddebug > 2 )
-                      {
-                        char text[1024];
-                        sprintf(text, "streamID=%d, var[%d], size=%d",
-                                streamID, varID, size);
-                        xprintArray(text, data, size, DATATYPE_FLT);
-                      }
-                  }
-            }
+            writeGribStream(winDict, map.entries + streamIdx,
+                            &data, &currentDataBufSize,
+                            root, nProcsModel);
             break;
 #ifdef HAVE_NETCDF4
           case FILETYPE_NC:
