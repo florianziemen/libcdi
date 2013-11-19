@@ -4961,7 +4961,7 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
 
       serializePack(gridP->mask_gme, size, DATATYPE_UCHAR,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_TXT, size, gridP->mask);
+      d = cdiCheckSum(DATATYPE_TXT, size, gridP->mask_gme);
       serializePack(&d, 1, DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
