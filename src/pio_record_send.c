@@ -326,30 +326,23 @@ pioSendInitialize(void)
     xabort ( "USAGE: # IO PROCESSES ON A PHYSICAL NODE >= 2" );
 
 
-  if ( commInqRankNode () == commInqSpecialRankNode ())
-    {
-      commDefCommColl ( 0 );
-      commSendNodeInfo ();
-      commRecvNodeMap ();
-      commDefCommsIO ();
-      switch ( commInqIOMode ())
-        {
-        case PIO_WRITER:
-          pioWriterStdIO();
-          break;
-        case PIO_ASYNCH:
-          pioWriterAIO();
-          break;
-        }
-    }
+  int isCollector = commInqRankNode () != commInqSpecialRankNode ();
+  commDefCommColl(isCollector);
+  commSendNodeInfo();
+  commRecvNodeMap();
+  commDefCommsIO();
+  if (!isCollector)
+    switch ( commInqIOMode ())
+      {
+      case PIO_WRITER:
+        pioWriterStdIO();
+        break;
+      case PIO_ASYNCH:
+        pioWriterAIO();
+        break;
+      }
   else
-    {
-      commDefCommColl ( 1 );
-      commSendNodeInfo ();
-      commRecvNodeMap ();
-      commDefCommsIO ();
-      bibRemoteFileBuf = listSetNew(destroyRemoteFileBuf, compareNames);
-    }
+    bibRemoteFileBuf = listSetNew(destroyRemoteFileBuf, compareNames);
 }
 
 #endif

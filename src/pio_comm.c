@@ -336,7 +336,7 @@ void     commDefCommColl  ( int isProcColl )
            info->commNode != MPI_COMM_NULL &&
            info->commColl == MPI_COMM_NULL );
 
-  info->nodeInfo.isProcColl = isProcColl;  
+  info->nodeInfo.isProcColl = isProcColl;
   xmpi ( MPI_Comm_split ( info->commNode, info->nodeInfo.isProcColl, 0, 
                           &info->commColl ));
   xmpi ( MPI_Comm_size ( info->commColl, &info->sizeColl ));
