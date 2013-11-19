@@ -14,6 +14,9 @@ typedef int MPI_Comm;
 #endif
 
 #include "cdi.h"
+#ifdef USE_MPI
+#include "cdipio.h"
+#endif
 
 #include "cksum.h"
 #include "pio_util.h"

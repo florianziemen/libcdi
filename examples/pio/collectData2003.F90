@@ -11,6 +11,7 @@ PROGRAM collectdata2003
   IMPLICIT NONE
 
   INCLUDE 'cdi.inc'
+  INCLUDE 'cdipio.inc'
 
 #ifdef USE_MPI
   INCLUDE 'mpif.h'

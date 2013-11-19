@@ -10,6 +10,7 @@
 #include "namespace.h"
 #include "taxis.h"
 
+#include "cdipio.h"
 #include "pio.h"
 #include "pio_client.h"
 #include "pio_comm.h"

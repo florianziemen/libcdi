@@ -334,7 +334,7 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
 
 AC_OUTPUT([Makefile src/Makefile interfaces/Makefile app/Makefile \
 	tests/Makefile examples/Makefile cdi.settings \
-	examples/pio/Makefile src/pkgconfig/cdi.pc])
+	examples/pio/Makefile src/pkgconfig/cdi.pc src/pkgconfig/cdipio.pc])
 
 #  ----------------------------------------------------------------------
 #  Show configuration

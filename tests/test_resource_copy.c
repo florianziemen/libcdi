@@ -7,6 +7,7 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #include "cdi.h"
+#include "cdipio.h"
 #include "pio_util.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"

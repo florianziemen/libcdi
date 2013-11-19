@@ -11,6 +11,8 @@
 
 #ifdef USE_MPI
 
+#include "cdipio.h"
+
 typedef struct {
   int IOMode;
   int maxIOMode;

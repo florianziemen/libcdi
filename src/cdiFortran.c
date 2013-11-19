@@ -4,16 +4,7 @@
 #  include "config.h"
 #endif
 
-#if USE_MPI
-#  include <mpi.h>
-#  include <yaxt.h>
-#else
-#define MPI_Comm int
-#define MPI_Comm_f2c(c) (c)
-#define MPI_Comm_c2f(c) (c)
-#endif
-
-#if ! defined (_CDI_H)
+#if ! defined (CDI_H_)
 #  include "cdi.h"
 #endif
 
@@ -69,32 +60,6 @@
 
 /*  CALENDAR types  */
 
-
-/*  parallel IO IOMode  */
-
-
-/*  parallel IO routines  */
-
-#ifdef MPI_VERSION /* make_fint keep */
-FCALLSCSUB0 (pioEndDef, PIOENDDEF, pioenddef)
-FCALLSCSUB0 (pioEndTimestepping, PIOENDTIMESTEPPING, pioendtimestepping)
-FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
-static int pioInit_fwrap(int commSuper, int nProcsIO, int IOMode, int * pioNamespace, float partInflate)
-{
-  MPI_Comm v;
-  v = pioInit(MPI_Comm_f2c(commSuper),  nProcsIO,  IOMode,  pioNamespace,  partInflate);
-  return MPI_Comm_c2f(v);
-}
-FCALLSCFUN5 (INT, pioInit_fwrap, PIOINIT, pioinit, INT, INT, INT, PINT, FLOAT)
-FCALLSCSUB0 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep)
-FCALLSCSUB0 (cdiPioRDMAProgress, CDIPIORDMAPROGRESS, cdipiordmaprogress)
-static void streamWriteVarPart_fwrap(int streamID, int varID, const void * data, int nmiss, void * partDesc)
-{
-  streamWriteVarPart( streamID,  varID,  data,  nmiss, (*(Xt_idxlist *)partDesc));
-}
-FCALLSCSUB5 (streamWriteVarPart_fwrap, STREAMWRITEVARPART, streamwritevarpart, INT, INT, PVOID, INT, PVOID)
-#endif /* make_fint keep */
-FCALLSCSUB1 (pioNamespaceSetActive, PIONAMESPACESETACTIVE, pionamespacesetactive, INT)
 
 /*  CDI control routines  */
 

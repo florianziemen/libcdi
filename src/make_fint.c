@@ -188,6 +188,8 @@ static size_t
 symRegexCompile(size_t numSyms, struct symbol symList[],
                 char **line, size_t *lineBufSize);
 
+static void
+build_header_name(const char *fname, char *cppMacro);
 
 static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                               const char *doc_root)
@@ -294,19 +296,14 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   fprintf(fpint, "#  include \"config.h\"\n");
   fprintf(fpint, "#endif\n");
   fprintf(fpint, "\n");
-  fputs("#if USE_MPI\n"
-        "#  include <mpi.h>\n"
-        "#  include <yaxt.h>\n"
-        "#else\n"
-        "#define MPI_Comm int\n"
-        "#define MPI_Comm_f2c(c) (c)\n"
-        "#define MPI_Comm_c2f(c) (c)\n"
-        "#endif\n"
-        "\n"
-        "#if ! defined (_CDI_H)\n"
-        "#  include \"cdi.h\"\n"
-        "#endif\n"
-        "\n", fpint);
+  {
+    char *cppMacro = malloc(strlen(fname) + 2);
+    build_header_name(fname, cppMacro);
+    fprintf(fpint, "#if ! defined (%s)\n"
+            "#  include \"%s\"\n"
+            "#endif\n"
+            "\n", cppMacro, fname);
+  }
   fprintf(fpint, "#if defined (HAVE_CF_INTERFACE)\n");
   fprintf(fpint, "\n");
   fprintf(fpint, "#if ! defined (__CFORTRAN_LOADED)\n");
@@ -801,6 +798,23 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
               filename, strerror(errno));
     }
   free(filename);
+}
+
+static void
+build_header_name(const char *fname, char *cppMacro)
+{
+  size_t len = strlen(fname);
+  for (size_t i = 0; i < len; ++i)
+    switch (fname[i])
+      {
+      case '.':
+        cppMacro[i] = '_';
+        break;
+      default:
+        cppMacro[i] = (char)toupper((int)fname[i]);
+      }
+  cppMacro[len] = '_';
+  cppMacro[len + 1] = '\0';
 }
 
 int main(int argc, char *argv[])

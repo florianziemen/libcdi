@@ -21,6 +21,9 @@ typedef int MPI_Comm;
 #include "cdi.h"
 #include "pio_util.h"
 #include "pio_write.h"
+#ifdef USE_MPI
+#include "cdipio.h"
+#endif
 
 void
 modelRun(struct model_config setup, MPI_Comm comm);

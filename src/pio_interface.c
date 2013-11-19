@@ -13,6 +13,7 @@
 #endif
 
 #include "cdi.h"
+#include "cdipio.h"
 #include "pio_util.h"
 #include "vlist_var.h"
 

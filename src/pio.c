@@ -14,6 +14,7 @@
 
 #include "pio.h"
 #include "cdi.h"
+#include "cdipio.h"
 #include "pio_comm.h"
 #include "pio_impl.h"
 #include "pio_interface.h"

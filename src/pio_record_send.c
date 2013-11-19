@@ -7,6 +7,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 
+#include "cdipio.h"
 #include "pio_comm.h"
 #include "pio_impl.h"
 #include "pio_util.h"

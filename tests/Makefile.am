@@ -23,6 +23,14 @@ pio_write_SOURCES = pio_write.c pio_write.h simple_model.c cksum.h cksum.c
 test_resource_copy_SOURCES = test_resource_copy.c
 #
 AM_CFLAGS = $(YAXT_CFLAGS)
+if USE_MPI
+pio_write_LDADD= ../src/libcdipio.la
+test_resource_copy_LDADD = ../src/libcdipio.la
+else
+pio_write_LDADD = $(LDADD)
+test_resource_copy_SOURCES += $(top_srcdir)/src/resource_unpack.c
+test_resource_copy_LDADD = ../src/libcdi.la
+endif
 LDADD = ../src/libcdi.la -lm
 INCLUDES   = -I$(top_srcdir)/src
 #

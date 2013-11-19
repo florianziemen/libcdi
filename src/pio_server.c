@@ -21,6 +21,7 @@
 #include <yaxt.h>
 
 #include "cdi.h"
+#include "cdipio.h"
 #include "namespace.h"
 #include "taxis.h"
 #include "pio.h"

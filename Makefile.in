@@ -54,6 +54,7 @@ subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/cdi.settings.in \
 	$(top_srcdir)/configure $(top_srcdir)/src/pkgconfig/cdi.pc.in \
+	$(top_srcdir)/src/pkgconfig/cdipio.pc.in \
 	$(top_srcdir)/util/serialrun.in AUTHORS COPYING ChangeLog \
 	INSTALL NEWS config/compile config/config.guess \
 	config/config.sub config/depcomp config/install-sh \
@@ -77,7 +78,8 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/config.h
-CONFIG_CLEAN_FILES = util/serialrun cdi.settings src/pkgconfig/cdi.pc
+CONFIG_CLEAN_FILES = util/serialrun cdi.settings src/pkgconfig/cdi.pc \
+	src/pkgconfig/cdipio.pc
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -385,6 +387,8 @@ util/serialrun: $(top_builddir)/config.status $(top_srcdir)/util/serialrun.in
 cdi.settings: $(top_builddir)/config.status $(srcdir)/cdi.settings.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 src/pkgconfig/cdi.pc: $(top_builddir)/config.status $(top_srcdir)/src/pkgconfig/cdi.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+src/pkgconfig/cdipio.pc: $(top_builddir)/config.status $(top_srcdir)/src/pkgconfig/cdipio.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:

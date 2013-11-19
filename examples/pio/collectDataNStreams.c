@@ -12,6 +12,10 @@ typedef int MPI_Comm;
 #include "cdi.h"
 #include "pio_util.h"
 
+#ifdef USE_MPI
+#include "cdipio.h"
+#endif
+
 static void hoursPassingHack ( int * vdate, int * vtime, int hoursPassed )
 {
   int sum, days, hours, oldDays;
@@ -223,7 +227,9 @@ int main (int argc, char *argv[])
     nProcsIODef    = 3,
     //IOModeDef       = PIO_NONE,
     //IOModeDef       = PIO_MPI,
+#ifdef USE_MPI
     IOModeDef       = PIO_FPGUARD,
+#endif
     //IOModeDef       = PIO_ASYNCH,
     //IOModeDef       = PIO_WRITER,
   };

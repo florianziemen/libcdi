@@ -45,7 +45,9 @@ doc/pio/graphics/pio_writer.pdf -text svneol=unset#unset
 doc/pio/graphics/serial.pdf -text svneol=unset#unset
 doc/pio/graphics/timestep.pdf -text svneol=unset#unset
 doc/pio/pio_docu.pdf -text svneol=unset#unset
+doc/pio/tex/c_quick_ref.tex -text
 doc/pio/tex/communicators.tex -text
+doc/pio/tex/f_quick_ref.tex -text
 doc/pio/tex/intro.tex -text
 doc/pio/tex/makepdf_f -text
 doc/pio/tex/modes.tex -text
@@ -193,6 +195,9 @@ src/cdi_int.h -text
 src/cdi_limits.h -text
 src/cdi_util.c -text
 src/cdilib.c -text
+src/cdipio.h -text
+src/cdipio.inc -text
+src/cdipioFortran.c -text
 src/cfortran.doc -text
 src/cfortran.h -text
 src/cgribex.h -text
@@ -254,6 +259,7 @@ src/pio_server.h -text
 src/pio_util.c -text
 src/pio_util.h -text
 src/pkgconfig/cdi.pc.in -text
+src/pkgconfig/cdipio.pc.in -text
 src/resource_handle.c -text
 src/resource_handle.h -text
 src/resource_unpack.c -text
