@@ -151,16 +151,18 @@ collDefBufferSizes()
 
  /************************************************************************/
 
-static 
- void serverWinCreate ()
-{ 
+static void
+serverWinCreate(void)
+{
   int ranks[1], modelID;
   MPI_Comm commCalc = commInqCommCalc ();
   MPI_Group groupCalc;
   int nProcsModel = commInqNProcsModel ();
+  MPI_Info no_locks_info;
+  xmpi(MPI_Info_create(&no_locks_info));
+  xmpi(MPI_Info_set(no_locks_info, "no_locks", "true"));
 
-  xmpi ( MPI_Win_create ( MPI_BOTTOM, 0, 1, MPI_INFO_NULL,
-                          commCalc, &getWin ));
+  xmpi(MPI_Win_create(MPI_BOTTOM, 0, 1, no_locks_info, commCalc, &getWin));
 
   /* target group */
   ranks[0] = nProcsModel;
@@ -176,6 +178,8 @@ static
       ofs += rxWin[modelID - 1].size;
       rxWin[modelID].buffer = rxWin[0].buffer + ofs;
     }
+
+  xmpi(MPI_Info_free(&no_locks_info));
 
   xdebug("%s", "created mpi_win, allocated getBuffer");
 }

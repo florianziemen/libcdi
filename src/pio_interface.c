@@ -461,6 +461,9 @@ void modelWinCreate ( void )
   modelWinDefBufferSizes ();
   ranks[0] = commInqNProcsModel ();
 
+  MPI_Info no_locks_info;
+  xmpi(MPI_Info_create(&no_locks_info));
+  xmpi(MPI_Info_set(no_locks_info, "no_locks", "true"));
   for ( collID = 0; collID < nProcsColl; collID ++ )
     {
       xassert(txWin[collID].size > 0);
@@ -471,12 +474,15 @@ void modelWinCreate ( void )
       txWin[collID].head = txWin[collID].buffer
         + txWin[collID].dictSize * sizeof (struct winHeaderEntry);
       xmpi(MPI_Win_create(txWin[collID].buffer, (MPI_Aint)txWin[collID].size, 1,
-                          MPI_INFO_NULL, commInqCommsIO(collID),
+                          no_locks_info, commInqCommsIO(collID),
                           &txWin[collID].win));
       xmpi(MPI_Comm_group(commInqCommsIO(collID), &txWin[collID].ioGroup));
       xmpi(MPI_Group_incl(txWin[collID].ioGroup, 1, ranks,
                           &txWin[collID].ioGroup ));
     }
+
+  xmpi(MPI_Info_free(&no_locks_info));
+
   xdebug("%s", "RETURN, CREATED MPI_WIN'S");
 }
 
