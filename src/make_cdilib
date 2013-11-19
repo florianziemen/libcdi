@@ -155,7 +155,7 @@ h="cdi_limits.h resource_handle.h taxis.h dtypes.h file.h service.h extra.h \
    tablepar.h table.h gaussgrid.h grid.h zaxis.h varscan.h binary.h swap.h \
    service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \
    cdf.h vlist.h vlist_var.h vlist_att.h model.h institution.h \
-   namespace.h resource_unpack.h pio_util.h pio.h pio_impl.h serialize.h"
+   resource_unpack.h pio_util.h pio.h pio_impl.h serialize.h"
 
 #cat $h >> ${PROG}
 #cat $c | grep -v '#include' | grep -v '#  include' >> ${PROG}
