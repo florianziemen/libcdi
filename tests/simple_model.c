@@ -25,25 +25,12 @@ typedef int MPI_Comm;
 #include "error.h"
 #include "pio_write.h"
 
+#include "simple_model_helper.h"
+
 enum {
   ntfiles     = 2,
 };
 
-static void
-var_scale(int datatype, double *mscale, double *mrscale);
-
-static inline double
-sign_flat(double v)
-{
-  if (v == 0.0)
-    return 0.0;
-  return v;
-}
-
-static time_t
-cditime2time_t(int date, int timeofday);
-static void
-time_t2cditime(time_t t, int *date, int *timeofday);
 
 static void
 modelRegionCompute(double region[], size_t offset, size_t len,
@@ -66,11 +53,6 @@ modelRegionCompute(double region[], size_t offset, size_t len,
                            ) * mscale)) * mrscale;
     }
 }
-
-#ifdef USE_MPI
-static int
-uniform_partition_start(int set_interval[2], int nparts, int part_idx);
-#endif
 
 void
 modelRun(struct model_config setup, MPI_Comm comm)
@@ -337,82 +319,6 @@ modelRun(struct model_config setup, MPI_Comm comm)
   free(lats);
   free(lons);
 }
-
-static time_t
-cditime2time_t(int date, int timeofday)
-{
-  struct tm t_s;
-  time_t t;
-  t_s.tm_year = date / 10000;
-  t_s.tm_mon = (date - t_s.tm_year * 10000)/100;
-  t_s.tm_mday = date % 100;
-  t_s.tm_year -= 1900;
-  t_s.tm_hour = timeofday/10000;
-  t_s.tm_min = (timeofday%10000)/100;
-  t_s.tm_sec = timeofday%100;
-  t_s.tm_isdst = 0;
-  t = mktime(&t_s);
-  /* 
-   * fprintf(stderr, "converted %d,%d to %s to %lld.\n", date, timeofday,
-   *         asctime(&t_s), (long long)t);
-   */
-  return t;
-}
-
-static void
-var_scale(int datatype, double *mscale, double *mrscale)
-{
-  int mant_bits;
-  switch (datatype)
-    {
-    case DATATYPE_PACK8:
-      mant_bits = 7;
-      break;
-    case DATATYPE_PACK16:
-      mant_bits = 15;
-      break;
-    case DATATYPE_PACK24:
-      mant_bits = 23;
-      break;
-    case DATATYPE_FLT32:
-      mant_bits = 24;
-      break;
-    case DATATYPE_FLT64:
-      mant_bits = 53;
-      break;
-    case DATATYPE_INT8:
-    case DATATYPE_INT16:
-    case DATATYPE_INT32:
-    default:
-      fprintf(stderr, "Unexpected or unusable content format: %d\n",
-              datatype);
-      exit(EXIT_FAILURE);
-    }
-  *mscale = INT64_C(1) << mant_bits;
-  *mrscale = 1.0 / *mscale;
-}
-
-static void
-time_t2cditime(time_t t, int *date, int *timeofday)
-{
-  struct tm *t_s;
-  t_s = localtime(&t);
-  /* fprintf(stderr, "converted %lld to %s.\n", (long long)t, asctime(t_s)); */
-  *date = (t_s->tm_year + 1900) * 10000 + t_s->tm_mon * 100 + t_s->tm_mday;
-  *timeofday = t_s->tm_hour * 10000 + t_s->tm_min * 100 + t_s->tm_sec;
-}
-
-#ifdef USE_MPI
-static int
-uniform_partition_start(int set_interval[2], int nparts, int part_idx)
-{
-  int part_offset
-    = (((long long)set_interval[1] - (long long)set_interval[0] + 1LL)
-       * (long long)part_idx) / (long long)nparts;
-  int start = set_interval[0] + part_offset;
-  return start;
-}
-#endif
 
 /*
  * Local Variables:

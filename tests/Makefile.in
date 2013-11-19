@@ -116,13 +116,14 @@ am_cksum_write_chunk_OBJECTS = cksum_write_chunk.$(OBJEXT)
 cksum_write_chunk_OBJECTS = $(am_cksum_write_chunk_OBJECTS)
 cksum_write_chunk_LDADD = $(LDADD)
 cksum_write_chunk_DEPENDENCIES = ../src/libcdi.la
-am_pio_write_OBJECTS = pio_write.$(OBJEXT) simple_model.$(OBJEXT)
+am_pio_write_OBJECTS = pio_write.$(OBJEXT) simple_model.$(OBJEXT) \
+	simple_model_helper.$(OBJEXT)
 pio_write_OBJECTS = $(am_pio_write_OBJECTS)
 am__DEPENDENCIES_1 = ../src/libcdi.la
 @USE_MPI_FALSE@pio_write_DEPENDENCIES = $(am__DEPENDENCIES_1)
 @USE_MPI_TRUE@pio_write_DEPENDENCIES = ../src/libcdipio.la
 am_pio_write_deco2d_OBJECTS = pio_write.$(OBJEXT) \
-	deco2d_model.$(OBJEXT)
+	deco2d_model.$(OBJEXT) simple_model_helper.$(OBJEXT)
 pio_write_deco2d_OBJECTS = $(am_pio_write_deco2d_OBJECTS)
 @USE_MPI_FALSE@pio_write_deco2d_DEPENDENCIES = $(am__DEPENDENCIES_1)
 @USE_MPI_TRUE@pio_write_deco2d_DEPENDENCIES = ../src/libcdipio.la
@@ -386,8 +387,12 @@ cksum_read_SOURCES = cksum_read.c \
 	stream_cksum.c stream_cksum.h \
 	ensure_array_size.h ensure_array_size.c
 
-pio_write_SOURCES = pio_write.c pio_write.h simple_model.c
-pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c
+pio_write_SOURCES = pio_write.c pio_write.h simple_model.c \
+	simple_model_helper.h simple_model_helper.c
+
+pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c \
+	simple_model_helper.h simple_model_helper.c
+
 test_resource_copy_SOURCES = test_resource_copy.c \
 	$(top_srcdir)/src/resource_unpack.c
 
@@ -526,6 +531,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_write.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resource_unpack.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple_model.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple_model_helper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_grib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_resource_copy.Po@am__quote@

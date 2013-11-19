@@ -19,8 +19,10 @@ cksum_read_SOURCES = cksum_read.c \
 	var_cksum.c var_cksum.h \
 	stream_cksum.c stream_cksum.h \
 	ensure_array_size.h ensure_array_size.c
-pio_write_SOURCES = pio_write.c pio_write.h simple_model.c
-pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c
+pio_write_SOURCES = pio_write.c pio_write.h simple_model.c \
+	simple_model_helper.h simple_model_helper.c
+pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c \
+	simple_model_helper.h simple_model_helper.c
 test_resource_copy_SOURCES = test_resource_copy.c \
 	$(top_srcdir)/src/resource_unpack.c
 test_resource_copy_mpi_SOURCES = test_resource_copy.c
