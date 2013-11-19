@@ -1406,6 +1406,7 @@ taxisPack(void * voidP, void * packBuffer, int packBufferSize, int * packBufferP
   intBuffer[14] = taxisP->vtime_ub;
   intBuffer[15] = taxisP->name ? strlen(taxisP->name) : 0;
   intBuffer[16] = taxisP->longname ? strlen(taxisP->longname) : 0;
+  intBuffer[17] = taxisP->climatology;
 
   serializePack(intBuffer, taxisNint, DATATYPE_INT,
                 packBuffer, packBufferSize, packBufferPos, context);
@@ -1419,7 +1420,6 @@ taxisPack(void * voidP, void * packBuffer, int packBufferSize, int * packBufferP
     serializePack(taxisP->longname, intBuffer[16], DATATYPE_TXT,
                   packBuffer, packBufferSize, packBufferPos, context);
 
-  intBuffer[17] = taxisP->climatology;
 }
 
 /*
