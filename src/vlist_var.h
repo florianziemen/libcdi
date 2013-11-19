@@ -9,9 +9,6 @@
 #include "vlist.h"
 #endif
 
-int  vlistInqVarDecoChunk ( int, int, int );
-int  vlistInqVarDecoOff   ( int, int, int );
-
 int  vlistVarGetSize(vlist_t *p, int varID, void *context);
 void vlistVarPack(vlist_t *p, int varID,
                   char * buffer, int bufferSize, int * pos, void *context);
