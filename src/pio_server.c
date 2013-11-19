@@ -887,6 +887,9 @@ static void readGetBuffers()
       }
 #ifdef HAVE_NETCDF4
     free(varIsWritten);
+#ifdef HAVE_PARALLEL_NC4
+    free(writeBuf);
+#endif
 #endif
     free(map.entries);
     free(data);
