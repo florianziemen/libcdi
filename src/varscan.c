@@ -574,6 +574,7 @@ void cdi_generate_vars(stream_t *streamptr)
 
       if ( zaxisInqType(zaxisID) == ZAXIS_REFERENCE )
         {
+          if ( numberOfVerticalLevels > 0 ) zaxisDefNlevRef(zaxisID, numberOfVerticalLevels);
           if ( numberOfVerticalGrid > 0 ) zaxisDefNumber(zaxisID, numberOfVerticalGrid);
           if ( uuidVGrid[0] != 0 ) zaxisDefUUID(zaxisID, uuidVGrid);
         }
@@ -710,9 +711,9 @@ void varDefVCT(size_t vctsize, double *vctptr)
 }
 
 
-void varDefZAxisReference(int nlev, int nvgrid, char *uuid)
+void varDefZAxisReference(int nhlev, int nvgrid, char *uuid)
 {
-  numberOfVerticalLevels = nlev;
+  numberOfVerticalLevels = nhlev;
   numberOfVerticalGrid = nvgrid;
   memcpy(uuidVGrid, uuid, 16);
 }

@@ -1862,6 +1862,15 @@
 !                                     INTEGER         levelID)
       EXTERNAL        zaxisInqLevel
 
+!                     zaxisDefNlevRef
+!                                    (INTEGER         gridID,
+!                                     INTEGER         nhlev)
+      EXTERNAL        zaxisDefNlevRef
+
+      INTEGER         zaxisInqNlevRef
+!                                    (INTEGER         gridID)
+      EXTERNAL        zaxisInqNlevRef
+
 !                     zaxisDefNumber
 !                                    (INTEGER         gridID,
 !                                     INTEGER         number)

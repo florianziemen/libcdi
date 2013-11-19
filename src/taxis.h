@@ -1,7 +1,9 @@
 #ifndef _TAXIS_H
 #define _TAXIS_H
 
+#ifndef RESOURCE_HANDLE_H
 #include "resource_handle.h"
+#endif
 
 typedef struct {
   /* Date format  YYYYMMDD */
