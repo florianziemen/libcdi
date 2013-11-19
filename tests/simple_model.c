@@ -72,8 +72,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
 {
   static const char * const fname_prefix        = "example";
 
-  int gridID, zaxisID[nVars], taxisID;
-  int vlistID, varIDs[nVars], streamID, tsID, tfID = 0;
+  int gridID, *zaxisID, taxisID;
+  int vlistID, *varIDs, streamID, tsID, tfID = 0;
   int i, nmiss = 0;
   double *lons, *lats;
   double *var = NULL, *varslice = NULL;
@@ -126,7 +126,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
     levs[i] = 101300.0
       - 3940.3 * (exp(1.3579 * (double)(i)/(setup.max_nlev - 1)) - 1.0);
 
-  nlev = xmalloc(2 * nVars * sizeof (nlev[0]));
+  nlev = xmalloc(4 * nVars * sizeof (nlev[0]));
+  zaxisID = nlev + 3 * nVars;
   for (int varIdx = 0; varIdx < nVars; varIdx++ )
     {
       int varLevs = random()%4;
@@ -162,6 +163,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
 
   vlistID = vlistCreate ();
 
+  varIDs = nlev + 2 * nVars;
   for ( i = 0; i < nVars; i++ )
     {
       varIDs[i] = vlistDefVar ( vlistID, gridID, zaxisID[i], TIME_VARIABLE );
