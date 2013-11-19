@@ -289,3 +289,13 @@ uniform_partition_start(int set_interval[2], int nparts, int part_idx)
   return start;
 }
 #endif
+
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */
