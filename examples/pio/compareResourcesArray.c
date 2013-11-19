@@ -9,6 +9,7 @@
 #include <yaxt.h>
 #include "cdi.h"
 #include "cdipio.h"
+#include "dmemory.h"
 #include "pio_util.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"

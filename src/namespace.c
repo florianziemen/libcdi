@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "cdi.h"
+#include "dmemory.h"
 #include "namespace.h"
 #include "resource_handle.h"
 #include "pio_util.h"

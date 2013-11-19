@@ -7,6 +7,7 @@
 
 #include "pio_comm.h"
 #include "cdi.h"
+#include "dmemory.h"
 #include "pio_util.h"
 
 #ifdef USE_MPI

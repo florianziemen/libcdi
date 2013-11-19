@@ -87,17 +87,6 @@ getMPICommWorldRank()
   }
 #endif
 
-void * pcdiXmalloc ( size_t, const char *, const char *, int );
-#define xmalloc(size) pcdiXmalloc ( size, __FILE__, __func__,  __LINE__ )
-
-void * pcdiXcalloc ( size_t, size_t, const char *, const char *, int );
-#define xcalloc(nmemb,size) pcdiXcalloc(nmemb, size,            \
-                                        __FILE__, __func__, __LINE__)
-
-void * pcdiXrealloc ( void *, size_t, const char *, const char *, int );
-#define xrealloc(p,size) pcdiXrealloc(p, size,            \
-                                      __FILE__, __func__, __LINE__)
-
 void pcdiXMPI(int iret, const char *, int);
 #define xmpi(ret) do {                                  \
     int tmpIRet = (ret);                                   \

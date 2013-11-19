@@ -15,6 +15,8 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
+#include "dmemory.h"
+
 extern char * command2charP[6];
 
 extern char *token;

@@ -11,6 +11,7 @@
 #include "pio_comm.h"
 #include "pio_impl.h"
 #include "pio_util.h"
+#include "dmemory.h"
 
 extern char *command2charP[];
 extern double accumWait;

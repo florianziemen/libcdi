@@ -2,7 +2,7 @@
 #include "cksum.h"
 #include "stream_cksum.h"
 #include "pio_util.h"
-
+#include "dmemory.h"
 
 struct cksum_table *
 cksum_stream(const char *fname, size_t *table_len)

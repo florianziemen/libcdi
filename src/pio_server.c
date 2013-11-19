@@ -22,6 +22,7 @@
 
 #include "cdi.h"
 #include "cdipio.h"
+#include "dmemory.h"
 #include "namespace.h"
 #include "taxis.h"
 #include "pio.h"

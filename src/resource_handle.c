@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "dmemory.h"
 #include "resource_handle.h"
 #include "pio_util.h"
 #include "namespace.h"

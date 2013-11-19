@@ -20,6 +20,7 @@ typedef int MPI_Comm;
 
 #include "cksum.h"
 #include "pio_util.h"
+#include "dmemory.h"
 #include "pio_write.h"
 
 enum {
