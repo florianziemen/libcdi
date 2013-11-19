@@ -606,6 +606,7 @@ writeGribStream(struct winHeaderEntry *winDict, struct streamMapping *mapping,
   int vlistID = streamInqVlist(streamID);
   if (lastHeaderIdx < 0)
     {
+      /* write zero bytes to trigger synchronization code in fileWrite */
       cdiPioFileWrite(streamInqFileID(streamID), NULL, 0,
                       streamInqCurTimestepID(streamID));
     }
