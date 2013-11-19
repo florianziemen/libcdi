@@ -60,8 +60,9 @@ static void
 {
   dtDictFixMPIType(lookupDt(DATATYPE_INT8), MPI_TYPECLASS_INTEGER,
                    (int)sizeof (int8_t));
-  dtDictFixMPIType(lookupDt(DATATYPE_INT8), MPI_TYPECLASS_INTEGER,
+  dtDictFixMPIType(lookupDt(DATATYPE_INT16), MPI_TYPECLASS_INTEGER,
                    (int)sizeof (int16_t));
+  dtDictMatchComplete = 1;
 }
 #endif
 
