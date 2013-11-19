@@ -1055,8 +1055,8 @@ void IOServer(void (*postCommSetupActions)(void))
   xdebug("%s", "START");
 
   backendInit(postCommSetupActions);
-  if ( commInqRankNode () == commInqSpecialRankNode ()) 
-    backendFinalize ();
+  if (commInqRankNode() == commInqSpecialRankNode())
+    return;
   commCalc = commInqCommCalc ();
 #ifdef HAVE_PARALLEL_NC4
   cdiPioEnableNetCDFParAccess();

@@ -731,9 +731,7 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
 #endif
 
   if ((xtInitByCDI = (!xt_initialized() || xt_finalized())))
-    {
-      xt_initialize(commGlob);
-    }
+    xt_initialize(commGlob);
   commInit ();
   commDefCommGlob ( commGlob );
   sizeGlob = commInqSizeGlob ();
@@ -765,10 +763,11 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
       namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(pioFileClose));
       IOServer(postCommSetupActions);
       namespaceDelete(0);
+      namespaceNew();
       commDestroy ();
-      xt_finalize();
-      MPI_Finalize ();
-      exit ( EXIT_SUCCESS );
+      if (xtInitByCDI)
+        xt_finalize();
+      return MPI_COMM_NULL;
     }
   else
     cdiPioClientSetup(&pioNamespace_, pioNamespace);
@@ -845,6 +844,10 @@ void pioFinalize ( void )
 #ifdef USE_MPI
   int collID, ibuffer = 1111;
   xdebug("%s", "START");
+
+  /* pioNamespace_ is unchanged on I/O servers */
+  if (pioNamespace_ == -1)
+    return;
   namespaceDelete(pioNamespace_);
   for ( collID = 0; collID < commInqNProcsColl (); collID++ )
     {

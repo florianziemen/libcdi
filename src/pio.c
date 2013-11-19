@@ -202,12 +202,6 @@ void backendCleanup ( void )
 
 /***************************************************************/
 
-void backendFinalize ( void )
-{
-  commDestroy ();
-  MPI_Finalize ();
-  exit ( EXIT_SUCCESS );
-}
 #endif
 /*
  * Local Variables:

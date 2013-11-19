@@ -213,14 +213,17 @@ int main (int argc, char *argv[])
   int pioNamespace;
   commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0,
                       cdiPioNoPostCommSetup);
-  pioNamespaceSetActive(pioNamespace);
+  if (commModel != MPI_COMM_NULL)
+    {
+      pioNamespaceSetActive(pioNamespace);
 #else
-  commModel = -1;
+      commModel = -1;
 #endif
 
-  modelRun (setup, commModel);
+      modelRun (setup, commModel);
 
 #ifdef USE_MPI
+    }
   pioFinalize ();
   xt_finalize();
   MPI_Finalize ();

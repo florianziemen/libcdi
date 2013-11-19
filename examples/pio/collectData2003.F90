@@ -30,6 +30,11 @@ PROGRAM collectdata2003
   INTEGER, PARAMETER :: IOMode       = PIO_FPGUARD
 
   INTEGER ::commGlob, commModel, error, pio_namespace
+#ifdef USE_MPI
+  LOGICAL :: run_model
+#else
+  LOGICAL, PARAMETER :: run_model = .TRUE.
+#endif
 
   ! Start parallel environment
 #ifdef USE_MPI
@@ -41,15 +46,16 @@ PROGRAM collectdata2003
   ! Initialize environment.
   commModel = pioInit(commGlob, nProcsIO, IOMode, pio_namespace, 1.1, &
        cdiPioNoPostCommSetup)
-  CALL pioNamespaceSetActive(pio_namespace)
+  run_model = commModel /= MPI_COMM_NULL
+  IF (run_model) CALL pioNamespaceSetActive(pio_namespace)
 #endif
 
-  CALL modelrun ( commModel )
+  IF (run_model) CALL modelrun ( commModel )
 
 #ifdef USE_MPI
   ! For parallel IO:
   ! Cleanup environment.
-  CALL pioFinalize ()
+  IF (run_model) CALL pioFinalize ()
   CALL xt_finalize
   CALL MPI_FINALIZE ( error )
 #endif
