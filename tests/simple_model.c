@@ -70,8 +70,6 @@ uniform_partition_start(int set_interval[2], int nparts, int part_idx);
 void
 modelRun(struct model_config setup, MPI_Comm comm)
 {
-
-  static int nlev_scale[nVars]    = {0,0,1,1,1};
   static int varCodes[nVars] = {129, 130, 131, 132, 133};
   static char * name        = "example";
 
@@ -130,11 +128,33 @@ modelRun(struct model_config setup, MPI_Comm comm)
       - 3940.3 * (exp(1.3579 * (double)(i)/(setup.max_nlev - 1)) - 1.0);
 
   nlev = xmalloc(nVars * sizeof (nlev[0]));
-  for ( i = 0; i < nVars; i++ )
+  for (int varIdx = 0; varIdx < nVars; varIdx++ )
     {
-      nlev[i] = nlev_scale[i] * (setup.max_nlev - 1) + 1;
-      zaxisID[i] = zaxisCreate ( ZAXIS_PRESSURE, nlev[i] );
-      zaxisDefLevels ( zaxisID[i], levs );
+      int varLevs = random()%4;
+      switch (varLevs)
+        {
+        case 1:
+          varLevs = setup.max_nlev / 3;
+          break;
+        case 2:
+          varLevs = setup.max_nlev >= 11 ? 11 : setup.max_nlev / 2;
+          break;
+        case 3:
+          varLevs = setup.max_nlev - 1;
+          break;
+        }
+      ++varLevs;
+      nlev[varIdx] = varLevs;
+      for (i = 0; i < varIdx; ++i)
+        if (nlev[i] == varLevs)
+          {
+            zaxisID[varIdx] = zaxisID[i];
+            goto zaxisIDset;
+          }
+      zaxisID[varIdx] = zaxisCreate ( ZAXIS_PRESSURE, nlev[varIdx] );
+      zaxisDefLevels ( zaxisID[varIdx], levs );
+      zaxisIDset:
+      ;
     }
 
   vlistID = vlistCreate ();
@@ -289,7 +309,16 @@ modelRun(struct model_config setup, MPI_Comm comm)
   vlistDestroy ( vlistID );
   taxisDestroy ( taxisID );
   for ( i = 0; i < nVars; i++ )
-    zaxisDestroy ( zaxisID[i] );
+    {
+      int zID = zaxisID[i];
+      if (zID != CDI_UNDEFID)
+        {
+          zaxisDestroy(zID);
+          for (int j = i + 1; j < nVars; ++j)
+            if (zID == zaxisID[j])
+              zaxisID[j] = CDI_UNDEFID;
+        }
+    }
   gridDestroy ( gridID );
 #if USE_MPI
   for (int varID = 0; varID < nVars; ++varID)
