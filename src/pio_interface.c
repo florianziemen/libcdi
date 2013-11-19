@@ -562,6 +562,17 @@ cdiPio_xt_idxlist_pack_wrap(void *data, void *buf, int size, int *pos,
                   size, pos, comm);
 }
 
+static inline void
+collWait(int collID)
+{
+  if (txWin[collID].postSet)
+    {
+      xmpi(MPI_Win_wait(txWin[collID].win));
+      txWin[collID].postSet = 0;
+      modelWinFlushBuffer(collID);
+    }
+}
+
 void
 pioBufferPartData(int streamID, int varID, const double *data,
                   int nmiss, Xt_idxlist partDesc)
@@ -574,12 +585,7 @@ pioBufferPartData(int streamID, int varID, const double *data,
             collID         <  commInqNProcsColl () &&
             txWin != NULL);
 
-  if (txWin[collID].postSet)
-    {
-      xmpi(MPI_Win_wait(txWin[collID].win));
-      txWin[collID].postSet = 0;
-      modelWinFlushBuffer ( collID );
-    }
+  collWait(collID);
 
   Xt_int chunk = xt_idxlist_get_num_indices(partDesc);
   xassert(chunk <= INT_MAX);
@@ -619,12 +625,7 @@ void pioBufferFuncCall(struct winHeaderEntry header,
 
   for (collID = 0; collID < nProcsColl; ++collID)
     {
-      if (txWin[collID].postSet)
-        {
-          xmpi(MPI_Win_wait(txWin[collID].win));
-          txWin[collID].postSet = 0;
-          modelWinFlushBuffer ( collID );
-        }
+      collWait(collID);
       xassert(txWin[collID].dictRPCUsed + txWin[collID].dictDataUsed
               < txWin[collID].dictSize);
       xassert(txWin[collID].refuseFuncCall == 0);
@@ -839,12 +840,7 @@ void pioWriteTimestep()
 
   for ( collID = 0; collID < nProcsColl; collID++ )
     {
-      if (txWin[collID].postSet)
-        {
-          xmpi(MPI_Win_wait(txWin[collID].win));
-          txWin[collID].postSet = 0;
-          modelWinFlushBuffer ( collID );
-        }
+      collWait(collID);
       struct winHeaderEntry header
         = { .id = HEADERSIZEMARKER,
             .specific.headerSize
