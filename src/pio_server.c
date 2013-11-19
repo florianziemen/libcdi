@@ -463,6 +463,12 @@ cdiPioServerCdfDefVars(stream_t *streamptr)
 
 #endif
 
+struct streamMapping {
+  int streamID, filetype;
+  int firstHeaderIdx, lastHeaderIdx;
+  int numVars, *varMap;
+};
+
 static void readGetBuffers()
 {
   int nProcsModel = commInqNProcsModel ();
@@ -498,11 +504,7 @@ static void readGetBuffers()
   {
     int numDataEntries = winDict[0].headerSize.numDataEntries;
     int streamIdx;
-    struct {
-      int streamID, filetype;
-      int firstHeaderIdx, lastHeaderIdx;
-      int numVars, *varMap;
-    } *streamMap;
+    struct streamMapping *streamMap;
     int numStreamIDs = 0, sizeStreamMap = 16;
     streamMap = xmalloc(sizeStreamMap * sizeof (streamMap[0]));
     int streamIDOld = CDI_UNDEFID;
