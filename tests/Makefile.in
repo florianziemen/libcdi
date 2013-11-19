@@ -110,7 +110,8 @@ am_cksum_write_chunk_OBJECTS = cksum_write_chunk.$(OBJEXT) \
 cksum_write_chunk_OBJECTS = $(am_cksum_write_chunk_OBJECTS)
 cksum_write_chunk_LDADD = $(LDADD)
 cksum_write_chunk_DEPENDENCIES = ../src/libcdi.la
-am_pio_write_OBJECTS = pio_write.$(OBJEXT) cksum.$(OBJEXT)
+am_pio_write_OBJECTS = pio_write.$(OBJEXT) simple_model.$(OBJEXT) \
+	cksum.$(OBJEXT)
 pio_write_OBJECTS = $(am_pio_write_OBJECTS)
 pio_write_LDADD = $(LDADD)
 pio_write_DEPENDENCIES = ../src/libcdi.la
@@ -362,7 +363,7 @@ cksum_read_SOURCES = cksum_read.c \
 	cksum.c cksum.h \
 	ensure_array_size.h ensure_array_size.c
 
-pio_write_SOURCES = pio_write.c cksum.h cksum.c
+pio_write_SOURCES = pio_write.c pio_write.h simple_model.c cksum.h cksum.c
 test_resource_copy_SOURCES = test_resource_copy.c
 #
 AM_CFLAGS = $(YAXT_CFLAGS)
@@ -480,6 +481,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_write_chunk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ensure_array_size.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_write.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple_model.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_grib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_resource_copy.Po@am__quote@

@@ -19,7 +19,7 @@ cksum_read_SOURCES = cksum_read.c \
 	stream_cksum.c stream_cksum.h \
 	cksum.c cksum.h \
 	ensure_array_size.h ensure_array_size.c
-pio_write_SOURCES = pio_write.c cksum.h cksum.c
+pio_write_SOURCES = pio_write.c pio_write.h simple_model.c cksum.h cksum.c
 test_resource_copy_SOURCES = test_resource_copy.c
 #
 AM_CFLAGS = $(YAXT_CFLAGS)
