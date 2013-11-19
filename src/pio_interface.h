@@ -10,13 +10,24 @@
 #include <mpi.h>
 #include <yaxt.h>
 
+#include "resource_handle.h"
 #include "pio_rpc.h"
 
 void
 pioBufferPartData(int streamID, int varID, const double *data,
                   int nmiss, Xt_idxlist partDesc);
 void pioBufferFuncCall(struct winHeaderEntry header,
-                       const void *data, size_t dataSize);
+                       const void *data, size_t dataSize,
+                       valPackFunc dataPackFunc);
+
+
+struct memCpyDataDesc
+{
+  const void *obj;
+  size_t obj_size;
+};
+
+void memcpyPackFunc(void *dataDesc, void *buf, int size, int *pos, void *context);
 
 extern float cdiPIOpartInflate_;
 

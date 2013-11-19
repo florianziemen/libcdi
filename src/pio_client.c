@@ -18,6 +18,11 @@
 #include "pio_util.h"
 #include "pio_serialize.h"
 
+void nullPackFunc(void *obj, void *buf, int size, int *pos, void *context)
+{
+}
+
+
 static int
 cdiPioClientStreamOpen(const char *filename, const char *filemode,
                        int filetype, stream_t *streamptr,
@@ -40,7 +45,7 @@ cdiPioClientStreamOpen(const char *filename, const char *filemode,
             .specific.funcArgs.newFile
             = { .fnamelen = (int)filename_len,
                 .filetype = filetype } };
-          pioBufferFuncCall(header, filename, filename_len + 1);
+          pioBufferFuncCall(header, filename, filename_len + 1, nullPackFunc);
           xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, filenamesz=%zu,"
                  " filename=%s, filetype=%d",
                  funcMap[(-1 - STREAMOPEN)], filename_len + 1, filename,
@@ -71,7 +76,7 @@ cdiPioClientStreamDefVlist_(int streamID, int vlistID)
       header = (struct winHeaderEntry){
         .id = STREAMDEFVLIST,
         .specific.funcArgs.streamChange = { streamID, vlistID } };
-      pioBufferFuncCall(header, NULL, 0);
+      pioBufferFuncCall(header, NULL, 0, nullPackFunc);
       xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d,"
              " vlistID=%d", funcMap[(-1 - STREAMDEFVLIST)], streamID, vlistID);
       break;
@@ -162,7 +167,7 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
         .id = STREAMCLOSE,
         .specific.funcArgs.streamChange
         = { streamptr->self, CDI_UNDEFID } };
-      pioBufferFuncCall(header, NULL, 0);
+      pioBufferFuncCall(header, NULL, 0, nullPackFunc);
       xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d",
              funcMap[-1 - STREAMCLOSE], streamptr->self);
       break;
@@ -196,7 +201,7 @@ cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
       buf = xmalloc((size_t)buf_size);
       reshPackResource(taxisID, &taxisOps, buf, buf_size, &position,
                        &commCalc);
-      pioBufferFuncCall(header, buf, buf_size);
+      pioBufferFuncCall(header, buf, buf_size, nullPackFunc);
       free(buf);
       break;
     case STAGE_CLEANUP:
