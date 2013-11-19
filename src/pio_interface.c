@@ -484,7 +484,7 @@ void modelWinCreate ( void )
 
 static void
 modelWinEnqueue(int collID,
-                struct winHeaderEntry header, const void *data, size_t size,
+                struct winHeaderEntry header, const void *data,
                 valPackFunc packFunc)
 {
   struct winHeaderEntry *winDict
@@ -581,14 +581,13 @@ pioBufferPartData(int streamID, int varID, const double *data,
     = { .id = streamID, .specific.dataRecord = { varID, nmiss }, .offset = -1 };
   modelWinEnqueue(collID, dataHeader,
                   &(struct memCpyDataDesc){data, chunk * sizeof (data[0])},
-                  0, memcpyPackFunc);
+                  memcpyPackFunc);
   {
     struct winHeaderEntry partHeader
       = { .id = PARTDESCMARKER,
           .specific.partDesc = { .uid = xt_idxlist_get_uid(partDesc) },
           .offset = 0 };
-    modelWinEnqueue(collID, partHeader, partDesc, 0,
-                    cdiPio_xt_idxlist_pack_wrap);
+    modelWinEnqueue(collID, partHeader, partDesc, cdiPio_xt_idxlist_pack_wrap);
   }
 
   txWin[collID].refuseFuncCall = 1;
@@ -597,8 +596,7 @@ pioBufferPartData(int streamID, int varID, const double *data,
 /************************************************************************/
 
 void pioBufferFuncCall(struct winHeaderEntry header,
-                       const void *data, size_t data_len,
-                       valPackFunc dataPackFunc)
+                       const void *data, valPackFunc dataPackFunc)
 {
   int rankGlob = commInqRankGlob ();
   int root = commInqRootGlob ();
@@ -623,7 +621,7 @@ void pioBufferFuncCall(struct winHeaderEntry header,
       xassert(txWin[collID].dictRPCUsed + txWin[collID].dictDataUsed
               < txWin[collID].dictSize);
       xassert(txWin[collID].refuseFuncCall == 0);
-      modelWinEnqueue(collID, header, data, data_len, dataPackFunc);
+      modelWinEnqueue(collID, header, data, dataPackFunc);
     }
 
   xdebug("%s", "RETURN");

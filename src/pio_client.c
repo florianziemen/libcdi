@@ -47,7 +47,7 @@ cdiPioClientStreamOpen(const char *filename, const char *filemode,
                 .filetype = filetype } };
           pioBufferFuncCall(header,
                             &(struct memCpyDataDesc){filename,
-                                filename_len + 1}, 0, memcpyPackFunc);
+                                filename_len + 1}, memcpyPackFunc);
           xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, filenamesz=%zu,"
                  " filename=%s, filetype=%d",
                  funcMap[(-1 - STREAMOPEN)], filename_len + 1, filename,
@@ -78,7 +78,7 @@ cdiPioClientStreamDefVlist_(int streamID, int vlistID)
       header = (struct winHeaderEntry){
         .id = STREAMDEFVLIST,
         .specific.funcArgs.streamChange = { streamID, vlistID } };
-      pioBufferFuncCall(header, NULL, 0, nullPackFunc);
+      pioBufferFuncCall(header, NULL, nullPackFunc);
       xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d,"
              " vlistID=%d", funcMap[(-1 - STREAMDEFVLIST)], streamID, vlistID);
       break;
@@ -169,7 +169,7 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
         .id = STREAMCLOSE,
         .specific.funcArgs.streamChange
         = { streamptr->self, CDI_UNDEFID } };
-      pioBufferFuncCall(header, NULL, 0, nullPackFunc);
+      pioBufferFuncCall(header, NULL, nullPackFunc);
       xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d",
              funcMap[-1 - STREAMCLOSE], streamptr->self);
       break;
@@ -204,7 +204,7 @@ cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
         .id = STREAMDEFTIMESTEP,
         .specific.funcArgs.streamNewTimestep = { streamptr->self, tsID } };
       xassert(sizeof (void *) >= sizeof (int));
-      pioBufferFuncCall(header, (void *)(intptr_t)taxisID, 0, cdiPioTaxisPackWrap);
+      pioBufferFuncCall(header, (void *)(intptr_t)taxisID, cdiPioTaxisPackWrap);
       break;
     case STAGE_CLEANUP:
       break;
