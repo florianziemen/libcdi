@@ -222,7 +222,7 @@ cdiPioClientSetup(int *pioNamespace_, int *pioNamespace)
   commDefCommsIO ();
   *pioNamespace_ = *pioNamespace = namespaceNew();
   int callerCDINamespace = namespaceGetActive();
-  pioNamespaceSetActive(*pioNamespace_);
+  namespaceSetActive(*pioNamespace_);
   serializeSetMPI();
   namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND,
                      NSSW_FUNC(cdiPioClientStreamOpen));
@@ -246,7 +246,7 @@ cdiPioClientSetup(int *pioNamespace_, int *pioNamespace)
   namespaceSwitchSet(NSSWITCH_CDF_STREAM_SETUP,
                      NSSW_FUNC(cdiPioClientStreamNOP));
 #endif
-  pioNamespaceSetActive(callerCDINamespace);
+  namespaceSetActive(callerCDINamespace);
 }
 
 

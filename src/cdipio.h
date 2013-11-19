@@ -42,6 +42,4 @@ void     streamWriteVarPart    (int streamID, int varID,
                                 const void *data, int nmiss,
                                 Xt_idxlist partDesc);
 
-void     pioNamespaceSetActive ( int );
-
 #endif

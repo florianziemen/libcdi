@@ -45,6 +45,5 @@ static void streamWriteVarPart_fwrap(int streamID, int varID, const void *data, 
   streamWriteVarPart(streamID, varID, data, nmiss, (*(Xt_idxlist *)partDesc));
 }
 FCALLSCSUB5 (streamWriteVarPart_fwrap, STREAMWRITEVARPART, streamwritevarpart, INT, INT, PVOID, INT, PVOID)
-FCALLSCSUB1 (pioNamespaceSetActive, PIONAMESPACESETACTIVE, pionamespacesetactive, INT)
 
 #endif

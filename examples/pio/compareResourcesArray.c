@@ -192,7 +192,7 @@ static void modelRun ( MPI_Comm comm )
   int bufferSize, differ;
   MPI_Status status;
 
-  pioNamespaceSetActive ( 0 );
+  namespaceSetActive ( 0 );
 
   gridID  = defineGrid      ();
   zaxisID = defineZaxis     ();
@@ -210,7 +210,7 @@ static void modelRun ( MPI_Comm comm )
   xmpi ( MPI_Recv ( recvBuffer, bufferSize, MPI_PACKED, 0,
 		    0, comm, &status ));
 
-  pioNamespaceSetActive ( 1 );
+  namespaceSetActive ( 1 );
   reshUnpackResources(recvBuffer, bufferSize, &comm);
   free ( recvBuffer );
   reshPackBufferDestroy ( &sendBuffer );
@@ -219,7 +219,7 @@ static void modelRun ( MPI_Comm comm )
   printf ( "The resource arrays %s.\n", differ ? "differ" : "are equal" );
   printResources();
 
-  pioNamespaceSetActive ( 0 );
+  namespaceSetActive ( 0 );
   streamClose(streamID);
   return;
 }
@@ -246,7 +246,7 @@ int main (int argc, char *argv[])
 
   commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0f,
                       cdiPioNoPostCommSetup);
-  pioNamespaceSetActive(pioNamespace);
+  namespaceSetActive(pioNamespace);
 
   modelRun ( commModel );
 

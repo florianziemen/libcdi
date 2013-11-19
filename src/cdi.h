@@ -232,6 +232,11 @@ void    cdiDefMissval(double missval);
 double  cdiInqMissval(void);
 void    cdiDefGlobal(const char *string, int val);
 
+int     namespaceNew();
+void    namespaceSetActive(int namespaceID);
+void    namespaceDelete(int namespaceID);
+
+
 /* CDI converter routines */
 
 /* parameter */

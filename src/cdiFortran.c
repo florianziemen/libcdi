@@ -72,6 +72,9 @@ FCALLSCFUN1 (INT, cdiHaveFiletype, CDIHAVEFILETYPE, cdihavefiletype, INT)
 FCALLSCSUB1 (cdiDefMissval, CDIDEFMISSVAL, cdidefmissval, DOUBLE)
 FCALLSCFUN0 (DOUBLE, cdiInqMissval, CDIINQMISSVAL, cdiinqmissval)
 FCALLSCSUB2 (cdiDefGlobal, CDIDEFGLOBAL, cdidefglobal, STRING, INT)
+FCALLSCFUN0 (INT, namespaceNew, NAMESPACENEW, namespacenew)
+FCALLSCSUB1 (namespaceSetActive, NAMESPACESETACTIVE, namespacesetactive, INT)
+FCALLSCSUB1 (namespaceDelete, NAMESPACEDELETE, namespacedelete, INT)
 
 /*  CDI converter routines  */
 

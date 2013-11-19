@@ -182,7 +182,7 @@ int modelRun ( MPI_Comm comm )
   char * recvBuffer, * sendBuffer;
   int bufferSize, differ;
 
-  pioNamespaceSetActive ( 0 );
+  namespaceSetActive(0);
   if (IOMode != PIO_NONE)
     serializeSetMPI();
 
@@ -201,14 +201,14 @@ int modelRun ( MPI_Comm comm )
   xmpi(MPI_Sendrecv(sendBuffer, bufferSize, MPI_PACKED, 0, 0,
                     recvBuffer, bufferSize, MPI_PACKED, 0, 0,
                     MPI_COMM_SELF, MPI_STATUS_IGNORE));
-  pioNamespaceSetActive ( 1 );
+  namespaceSetActive(1);
   reshUnpackResources(recvBuffer, bufferSize, &comm);
   free ( recvBuffer );
   reshPackBufferDestroy ( &sendBuffer );
 
   differ = reshListCompare ( 0, 1 );
 
-  pioNamespaceSetActive ( 0 );
+  namespaceSetActive(0);
   streamClose(streamID);
   return differ;
 }
@@ -235,7 +235,7 @@ int main (int argc, char *argv[])
 
   commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0f,
                       cdiPioNoPostCommSetup);
-  pioNamespaceSetActive(pioNamespace);
+  namespaceSetActive(pioNamespace);
 
   exitCode = modelRun(commModel);
 

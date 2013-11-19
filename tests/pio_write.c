@@ -216,7 +216,7 @@ int main (int argc, char *argv[])
                       cdiPioNoPostCommSetup);
   if (commModel != MPI_COMM_NULL)
     {
-      pioNamespaceSetActive(pioNamespace);
+      namespaceSetActive(pioNamespace);
 #else
       commModel = -1;
 #endif

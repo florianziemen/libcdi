@@ -1,6 +1,6 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.6.1.1
+! Fortran interface for CDI library version 1.6.2
 !
 ! Author:
 ! -------
@@ -57,8 +57,4 @@
 !                                     INTEGER         nmiss,
 !                                     TYPE(XT_IDXLIST)partDesc)
       EXTERNAL        streamWriteVarPart
-
-!                     pioNamespaceSetActive
-!                                    (INTEGER         )
-      EXTERNAL        pioNamespaceSetActive
 

@@ -43,7 +43,7 @@ PROGRAM collectdata2003
   commModel = pioInit(commGlob, nProcsIO, IOMode, pio_namespace, 1.1, &
        cdiPioNoPostCommSetup)
   run_model = commModel /= MPI_COMM_NULL
-  IF (run_model) CALL pioNamespaceSetActive(pio_namespace)
+  IF (run_model) CALL namespaceSetActive(pio_namespace)
 #endif
 
   IF (run_model) CALL modelrun ( commModel )

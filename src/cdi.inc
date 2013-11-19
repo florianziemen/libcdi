@@ -399,6 +399,17 @@
 !                                     INTEGER         val)
       EXTERNAL        cdiDefGlobal
 
+      INTEGER         namespaceNew
+      EXTERNAL        namespaceNew
+
+!                     namespaceSetActive
+!                                    (INTEGER         namespaceID)
+      EXTERNAL        namespaceSetActive
+
+!                     namespaceDelete
+!                                    (INTEGER         namespaceID)
+      EXTERNAL        namespaceDelete
+
 !
 !  CDI converter routines
 !

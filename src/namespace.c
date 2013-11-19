@@ -190,7 +190,7 @@ int namespaceGetNumber ()
 }
 
 
-void pioNamespaceSetActive ( int nId )
+void namespaceSetActive ( int nId )
 {
   xassert(nId < namespacesSize && nId >= 0
           && namespaces[nId].resStage != STAGE_UNUSED);

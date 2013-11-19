@@ -124,7 +124,7 @@ reshListDestruct(int namespaceID)
   LIST_LOCK();
   xassert(resHList && namespaceID >= 0 && namespaceID < resHListSize);
   int callerNamespaceID = namespaceGetActive();
-  pioNamespaceSetActive(namespaceID);
+  namespaceSetActive(namespaceID);
   if (resHList[namespaceID].resources)
     {
       for ( int j = 0; j < resHList[namespaceID].size; j++ )
@@ -137,7 +137,7 @@ reshListDestruct(int namespaceID)
       reshListClearEntry(namespaceID);
     }
   if (resHList[callerNamespaceID].resources)
-    pioNamespaceSetActive(callerNamespaceID);
+    namespaceSetActive(callerNamespaceID);
   LIST_UNLOCK();
 }
 
@@ -656,7 +656,7 @@ void reshListPrint(FILE *fp)
 
   for ( i = 0; i < namespaceGetNumber (); i++ )
     {
-      pioNamespaceSetActive ( i );
+      namespaceSetActive ( i );
 
       fprintf ( fp, "\n" );
       fprintf ( fp, "##################################\n" );
@@ -680,7 +680,7 @@ void reshListPrint(FILE *fp)
   fprintf ( fp, "#\n#  end global resource list" \
             "\n#\n##########################################\n\n" );
 
-  pioNamespaceSetActive ( temp );
+  namespaceSetActive ( temp );
 }
 
 

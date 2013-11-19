@@ -267,7 +267,7 @@ int main (int argc, char *argv[])
                       cdiPioNoPostCommSetup);
   if (commModel != MPI_COMM_NULL)
     {
-      pioNamespaceSetActive(pioNamespace);
+      namespaceSetActive(pioNamespace);
 #endif
 
       modelRun(commModel);
