@@ -164,7 +164,7 @@ memcrc_r_eswap(uint32_t *state, const unsigned char *elems, size_t num_elems,
 }
 
 
-unsigned long
+uint32_t
 memcrc_finish(uint32_t *state, off_t total_size)
 {
   register uint32_t c, s = *state;
