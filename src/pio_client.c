@@ -45,7 +45,9 @@ cdiPioClientStreamOpen(const char *filename, const char *filemode,
             .specific.funcArgs.newFile
             = { .fnamelen = (int)filename_len,
                 .filetype = filetype } };
-          pioBufferFuncCall(header, filename, filename_len + 1, nullPackFunc);
+          pioBufferFuncCall(header,
+                            &(struct memCpyDataDesc){filename,
+                                filename_len + 1}, 0, memcpyPackFunc);
           xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, filenamesz=%zu,"
                  " filename=%s, filetype=%d",
                  funcMap[(-1 - STREAMOPEN)], filename_len + 1, filename,
@@ -178,31 +180,31 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
     }
 }
 
+static void
+cdiPioTaxisPackWrap(void *data, void *buf, int size, int *pos,
+                    void *context)
+{
+  int taxisID = (int)(intptr_t)data;
+  reshPackResource(taxisID, &taxisOps, buf, size, pos, context);
+}
+
 static int
 cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
 {
   struct winHeaderEntry header;
   statusCode nspStatus = namespaceInqResStatus ();
-  int taxisID, buf_size, position;
-  char *buf;
-  MPI_Comm commCalc;
+  int taxisID;
   switch ( nspStatus )
     {
     case STAGE_DEFINITION:
       break;
     case STAGE_TIMELOOP:
-      position = 0;
       taxisID = vlistInqTaxis(streamptr->vlistID);
       header = (struct winHeaderEntry){
         .id = STREAMDEFTIMESTEP,
         .specific.funcArgs.streamNewTimestep = { streamptr->self, tsID } };
-      commCalc = commInqCommCalc();
-      buf_size = reshResourceGetPackSize(taxisID, &taxisOps, &commCalc);
-      buf = xmalloc((size_t)buf_size);
-      reshPackResource(taxisID, &taxisOps, buf, buf_size, &position,
-                       &commCalc);
-      pioBufferFuncCall(header, buf, buf_size, nullPackFunc);
-      free(buf);
+      xassert(sizeof (void *) >= sizeof (int));
+      pioBufferFuncCall(header, (void *)(intptr_t)taxisID, 0, cdiPioTaxisPackWrap);
       break;
     case STAGE_CLEANUP:
       break;

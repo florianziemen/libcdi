@@ -534,20 +534,12 @@ modelWinEnqueue(int collID,
   else
     {
       targetEntry = txWin[collID].dictSize - ++(txWin[collID].dictRPCUsed);
-      if (header.id == STREAMOPEN)
-        {
-          header.offset
-            = (int)(txWin[collID].head - txWin[collID].buffer);
-          memcpy(txWin[collID].head, data, size);
-          txWin[collID].head += size;
-        }
-      else if (header.id == STREAMDEFTIMESTEP)
-        {
-          header.offset
-            = (int)(txWin[collID].head - txWin[collID].buffer);
-          memcpy(txWin[collID].head, data, size);
-          txWin[collID].head += size;
-        }
+      int position = header.offset
+        = (int)(txWin[collID].head - txWin[collID].buffer);
+      MPI_Comm comm = commInqCommsIO(collID);
+      packFunc((void *)data, txWin[collID].buffer, (int)txWin[collID].size,
+               &position, &comm);
+      txWin[collID].head = txWin[collID].buffer + position;
     }
   winDict[targetEntry] = header;
 }
