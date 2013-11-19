@@ -235,8 +235,6 @@ readFuncCall(struct winHeaderEntry *header)
         int streamID = funcArgs->streamNewTimestep.streamID;
         int nspTarget = namespaceResHDecode(streamID).nsp;
         streamID = namespaceAdaptKey2(streamID);
-        int tsID
-          = funcArgs->streamNewTimestep.tsID;
         int oldTaxisID
           = vlistInqTaxis(streamInqVlist(streamID));
         int position = header->offset;
@@ -247,7 +245,7 @@ readFuncCall(struct winHeaderEntry *header)
         taxis_t *changedTaxisPtr = taxisPtr(changedTaxisID);
         ptaxisCopy(oldTaxisPtr, changedTaxisPtr);
         taxisDestroy(changedTaxisID);
-        streamDefTimestep(streamID, tsID);
+        streamDefTimestep(streamID, funcArgs->streamNewTimestep.tsID);
       }
       break;
     default:
