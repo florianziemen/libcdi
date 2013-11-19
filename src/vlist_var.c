@@ -2153,7 +2153,8 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   tempbuf[15] = var->missvalused;
   tempbuf[16] = var->comptype;
   tempbuf[17] = var->complevel;
-  tempbuf[18] = zaxisInqSize(var->zaxisID);
+  int nlevs = var->levinfo ? zaxisInqSize(var->zaxisID) : 0;
+  tempbuf[18] = nlevs;
   tempbuf[19] = var->iorank;
   dtempbuf[0] = var->missval;
   dtempbuf[1] = var->scalefactor;
@@ -2173,10 +2174,9 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   if (unitssz)
     serializePack(var->units, unitssz, DATATYPE_TXT,
                   buf, size, position, context);
-  {
-    int nlevs = zaxisInqSize(var->zaxisID);
-    int levbuf[nlevs][4];
-    if (var->levinfo)
+  if (nlevs)
+    {
+      int levbuf[nlevs][4];
       for (int levID = 0; levID < nlevs; ++levID)
         {
           levbuf[levID][0] = var->levinfo[levID].flag;
@@ -2184,18 +2184,9 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
           levbuf[levID][2] = var->levinfo[levID].mlevelID;
           levbuf[levID][3] = var->levinfo[levID].flevelID;
         }
-    else
-      for (int levID = 0; levID < nlevs; ++levID)
-        {
-          levinfo_t li = DEFAULT_LEVINFO(levID);
-          levbuf[levID][0] = li.flag;
-          levbuf[levID][1] = li.index;
-          levbuf[levID][2] = li.mlevelID;
-          levbuf[levID][3] = li.flevelID;
-        }
-    serializePack(levbuf, nlevs * 4, DATATYPE_INT,
-                  buf, size, position, context);
-  }
+      serializePack(levbuf, nlevs * 4, DATATYPE_INT,
+                    buf, size, position, context);
+    }
   vlistAttsPack(p, varID, buf, size, position, context);
 }
 
@@ -2271,25 +2262,27 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   vlistDefVarAddoffset(vlistID, newvar, dtempbuf[2]);
   vlistDefVarCompType(vlistID, newvar, tempbuf[16]);
   vlistDefVarCompLevel(vlistID, newvar, tempbuf[17]);
-  {
-    int levbuf[tempbuf[18]][4];
-    var_t *var = vlistptr->vars + newvar;
-    int nlevs=tempbuf[18], i, flagSetLev = 0;
-    cdiVlistCreateVarLevInfo(vlistptr, newvar);
-    serializeUnpack(buf, size, position,
-                    levbuf, nlevs * 4, DATATYPE_INT, context);
-    for (i = 0; i < nlevs; ++i)
+  int nlevs = tempbuf[18];
+  if (nlevs)
     {
-      vlistDefFlag(vlistID, newvar, i, levbuf[i][0]);
-      vlistDefIndex(vlistID, newvar, i, levbuf[i][1]);
-      // FIXME: these lack an accessor function
-      var->levinfo[i].mlevelID = levbuf[i][2];
-      var->levinfo[i].flevelID = levbuf[i][3];
-      if (levbuf[i][0] == tempbuf[0])
-        flagSetLev = i;
+      int levbuf[nlevs][4];
+      var_t *var = vlistptr->vars + newvar;
+      int i, flagSetLev = 0;
+      cdiVlistCreateVarLevInfo(vlistptr, newvar);
+      serializeUnpack(buf, size, position,
+                      levbuf, nlevs * 4, DATATYPE_INT, context);
+      for (i = 0; i < nlevs; ++i)
+        {
+          vlistDefFlag(vlistID, newvar, i, levbuf[i][0]);
+          vlistDefIndex(vlistID, newvar, i, levbuf[i][1]);
+          // FIXME: these lack an accessor function
+          var->levinfo[i].mlevelID = levbuf[i][2];
+          var->levinfo[i].flevelID = levbuf[i][3];
+          if (levbuf[i][0] == tempbuf[0])
+            flagSetLev = i;
+        }
+      vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev][0]);
     }
-    vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev][0]);
-  }
   vlistDefVarIOrank(vlistID, newvar, tempbuf[19]);
   vlistAttsUnpack(vlistID, newvar, buf, size, position, context);
 }
