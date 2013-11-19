@@ -648,6 +648,7 @@ struct scatterGatherDesc
   const int *blocklengths, *displacements;
   size_t elemSize;
   unsigned numBlocks;
+  unsigned numElems;
 };
 
 static void
@@ -661,9 +662,16 @@ scatterGatherPackFunc(void *dataDesc, void *buf, int size, int *pos,
   unsigned char *dstBuf = buf + pos_, *bufEnd = (unsigned char *)buf + size;
   size_t elemSize = p->elemSize;
   const unsigned char *data = p->data;
-  for (unsigned j = 0; j < numBlocks; ++j)
+  unsigned copyCount = 0, numElems = p->numElems;
+  for (unsigned j = 0; j < numBlocks && copyCount < numElems; ++j)
     {
       int bl = bls[j];
+      if (bl + copyCount > numElems)
+        {
+          bl = numElems - copyCount;
+          Warning("%s: %s", "streamWriteScatteredVarPart",
+                  "blocks longer than number of elements in index list!");
+        }
       if (bl > 0)
         {
           size_t bsize = (size_t)bl * elemSize;
@@ -687,7 +695,9 @@ cdiPioBufferPartDataGather(int streamID, int varID, const double *data,
                      &(struct scatterGatherDesc)
                      { .data = (void *)data, .blocklengths = blocklengths,
                        .displacements = displacements,
-                       .elemSize = sizeof (data[0]), .numBlocks = numBlocks },
+                       .elemSize = sizeof (data[0]), .numBlocks = numBlocks,
+                       .numElems
+                         = (unsigned)xt_idxlist_get_num_indices(partDesc) },
                      scatterGatherPackFunc,
                      nmiss, partDesc);
 }
