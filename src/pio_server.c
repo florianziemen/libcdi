@@ -640,7 +640,8 @@ buildWrittenVars(struct streamMapping *mapping, int **varIsWritten_,
 {
   int nvars = mapping->numVars;
   int *varMap = mapping->varMap;
-  int *varIsWritten = *varIsWritten_ = xmalloc(sizeof (*varIsWritten) * nvars);
+  int *varIsWritten = *varIsWritten_
+    = xrealloc(*varIsWritten_, sizeof (*varIsWritten) * nvars);
   for (int varID = 0; varID < nvars; ++varID)
     varIsWritten[varID] = ((varMap[varID] != -1)
                            ?myCollRank+1 : 0);
@@ -682,6 +683,9 @@ static void readGetBuffers()
   {
     struct streamMap map = buildStreamMap(winDict);
     double *data = NULL;
+#ifdef HAVE_NETCDF4
+    int *varIsWritten = NULL;
+#endif
 #if defined (HAVE_PARALLEL_NC4)
     double *writeBuf = NULL;
 #endif
@@ -708,7 +712,6 @@ static void readGetBuffers()
             /* HAVE_PARALLE_NC4 implies having ScalES-PPM and yaxt */
             {
               int nvars = map.entries[streamIdx].numVars;
-              int *varIsWritten;
               int *varMap = map.entries[streamIdx].varMap;
               buildWrittenVars(map.entries + streamIdx, &varIsWritten,
                                myCollRank, collComm);
@@ -803,7 +806,6 @@ static void readGetBuffers()
              * three cases need to be distinguished */
             {
               int nvars = map.entries[streamIdx].numVars;
-              int *varIsWritten;
               int *varMap = map.entries[streamIdx].varMap;
               buildWrittenVars(map.entries + streamIdx, &varIsWritten,
                                myCollRank, collComm);
@@ -882,6 +884,9 @@ static void readGetBuffers()
             xabort("unhandled filetype in parallel I/O.");
           }
       }
+#ifdef HAVE_NETCDF4
+    free(varIsWritten);
+#endif
     free(map.entries);
     free(data);
   }
