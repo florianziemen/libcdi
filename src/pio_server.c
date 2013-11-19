@@ -638,7 +638,11 @@ static void readGetBuffers()
             {
               int headerIdx, lastHeaderIdx = map.entries[streamIdx].lastHeaderIdx;
               if (lastHeaderIdx < 0)
-                break;
+                {
+                  cdiPioFileWrite(streamInqFileID(streamID), NULL, 0,
+                                  streamInqCurTimestepID(streamID));
+                  break;
+                }
               for (headerIdx = map.entries[streamIdx].firstHeaderIdx;
                    headerIdx <= lastHeaderIdx;
                    headerIdx += 2)
