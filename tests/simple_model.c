@@ -72,7 +72,16 @@ modelRun(struct model_config setup, MPI_Comm comm)
 {
   static const char * const fname_prefix        = "example";
 
-  int *nlev, *zaxisID, *varIDs;
+  struct
+  {
+    size_t size;
+    int nlev, zaxisID, id, code;
+    uint32_t checksum_state;
+#if USE_MPI
+    int chunkSize, start;
+    Xt_idxlist partDesc;
+#endif
+  } *varDesc;
   int gridID, taxisID, vlistID, streamID, tsID, tfID = 0;
   int i, nmiss = 0;
   double *lons, *lats, *levs;
@@ -83,14 +92,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
   int rank = 0;
   char filename[1024];
   int nlon = setup.nlon, nlat = setup.nlat;
-  uint32_t *checksum_state;
-  size_t *varSize, varslice_size = 0;
+  size_t varslice_size = 0;
 #if USE_MPI
   int *chunks = NULL, *displs = NULL, comm_size = 1;
-  struct var1DDeco {
-    int chunkSize, start;
-    Xt_idxlist partDesc;
-  } varDeco[nVars];
 #endif
 
 #if USE_MPI
@@ -124,8 +128,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
     levs[i] = 101300.0
       - 3940.3 * (exp(1.3579 * (double)(i)/(setup.max_nlev - 1)) - 1.0);
 
-  nlev = xmalloc(4 * nVars * sizeof (nlev[0]));
-  zaxisID = nlev + 3 * nVars;
+  varDesc = xmalloc(nVars * sizeof (varDesc[0]));
   for (int varIdx = 0; varIdx < nVars; varIdx++ )
     {
       int varLevs = random()%4;
@@ -142,51 +145,48 @@ modelRun(struct model_config setup, MPI_Comm comm)
           break;
         }
       ++varLevs;
-      nlev[varIdx] = varLevs;
+      varDesc[varIdx].nlev = varLevs;
       for (i = 0; i < varIdx; ++i)
-        if (nlev[i] == varLevs)
+        if (varDesc[i].nlev == varLevs)
           {
-            zaxisID[varIdx] = zaxisID[i];
+            varDesc[varIdx].zaxisID = varDesc[i].zaxisID;
             goto zaxisIDset;
           }
-      zaxisID[varIdx] = zaxisCreate ( ZAXIS_PRESSURE, nlev[varIdx] );
-      zaxisDefLevels ( zaxisID[varIdx], levs );
+      varDesc[varIdx].zaxisID
+        = zaxisCreate(ZAXIS_PRESSURE, varDesc[varIdx].nlev);
+      zaxisDefLevels(varDesc[varIdx].zaxisID, levs);
       zaxisIDset:
       ;
+      varDesc[varIdx].code = 129 + varIdx;
     }
-
-  int *varCodes = nlev + nVars;
-  for (int varIdx = 0; varIdx < nVars; ++varIdx)
-    varCodes[varIdx] = 129 + varIdx;
 
   vlistID = vlistCreate ();
 
-  varIDs = nlev + 2 * nVars;
-  varSize = xmalloc(nVars * sizeof (varSize[0]));
   for ( i = 0; i < nVars; i++ )
     {
-      varIDs[i] = vlistDefVar ( vlistID, gridID, zaxisID[i], TIME_VARIABLE );
-      varSize[i] = nlon * nlat * nlev[i];
+      varDesc[i].id = vlistDefVar(vlistID, gridID, varDesc[i].zaxisID,
+                                  TIME_VARIABLE);
+      varDesc[i].size = nlon * nlat * varDesc[i].nlev;
 #ifdef USE_MPI
       {
-         int start = uniform_partition_start((int [2]){ 0, varSize[i] - 1 },
-                                             comm_size, rank),
-           chunkSize = uniform_partition_start((int [2]){ 0, varSize[i] - 1 },
-                                               comm_size, rank + 1) - start;
+         int start
+           = uniform_partition_start((int [2]){ 0, varDesc[i].size - 1 },
+                                     comm_size, rank),
+           chunkSize
+           = uniform_partition_start((int [2]){ 0, varDesc[i].size - 1 },
+                                     comm_size, rank + 1) - start;
          fprintf(stderr, "%d: start=%d, chunkSize = %d\n", rank,
                  start, chunkSize);
          Xt_idxlist idxlist
            = xt_idxstripes_new(&(struct Xt_stripe){ .start = start,
-                   .nstrides = chunkSize, .stride = 1 }, 1);
-         varDeco[i] = (struct var1DDeco){
-           .start = start,
-           .chunkSize = chunkSize,
-           .partDesc = idxlist
-         };
+                 .nstrides = chunkSize, .stride = 1 }, 1);
+         varDesc[i].start = start;
+         varDesc[i].chunkSize = chunkSize;
+         varDesc[i].partDesc = idxlist;
       }
 #endif
-      vlistDefVarCode(vlistID, varIDs[i], varCodes[i]);
-      vlistDefVarDatatype(vlistID, varIDs[i], setup.datatype);
+      vlistDefVarCode(vlistID, varDesc[i].id, varDesc[i].code);
+      vlistDefVarDatatype(vlistID, varDesc[i].id, setup.datatype);
     }
 
   taxisID = taxisCreate ( TAXIS_ABSOLUTE );
@@ -201,10 +201,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
   pioEndDef ();
 #endif
 
-  checksum_state = xmalloc(nVars * sizeof(checksum_state[0]));
   for ( tfID = 0; tfID < ntfiles; tfID++ )
     {
-      memset(checksum_state, 0, sizeof(checksum_state[0]) * nVars);
+      for (int varIdx = 0; varIdx < nVars; ++varIdx)
+        varDesc[varIdx].checksum_state = 0;
       if ( tfID > 0 )
 	{
 	  streamClose ( streamID );
@@ -225,10 +225,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
 	  for (int varID = 0; varID < nVars; ++varID)
 	    {
 #ifdef USE_MPI
-              int start = varDeco[varID].start;
-              int chunk = varDeco[varID].chunkSize;
+              int start = varDesc[varID].start;
+              int chunk = varDesc[varID].chunkSize;
 #else
-              int chunk = varSize[varID];
+              int chunk = varDesc[varID].size;
               int start = 0;
 #endif
               if (varslice_size < chunk)
@@ -237,7 +237,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                   varslice_size = chunk;
                 }
               modelRegionCompute(varslice, start, chunk,
-                                 nlev[varID], nlat, nlon,
+                                 varDesc[varID].nlev, nlat, nlon,
                                  tsID, lons, lats,
                                  mscale, mrscale);
               if (setup.compute_checksum)
@@ -259,15 +259,16 @@ modelRun(struct model_config setup, MPI_Comm comm)
                 }
               if (rank == 0 && setup.compute_checksum)
                 {
-                  memcrc_r(&checksum_state[varID], (const unsigned char *)var,
-                           varSize[varID] * sizeof (var[0]));
+                  memcrc_r(&varDesc[varID].checksum_state,
+                           (const unsigned char *)var,
+                           varDesc[varID].size * sizeof (var[0]));
                 }
 
 #ifdef USE_MPI
-	      streamWriteVarPart(streamID, varIDs[varID], varslice, nmiss,
-                                 varDeco[varID].partDesc);
+	      streamWriteVarPart(streamID, varDesc[varID].id, varslice, nmiss,
+                                 varDesc[varID].partDesc);
 #else
-	      streamWriteVar(streamID, varIDs[varID], varslice, nmiss);
+	      streamWriteVar(streamID, varDesc[varID].id, varslice, nmiss);
 #endif
 	      start = CDI_UNDEFID;
 	      chunk = CDI_UNDEFID;
@@ -291,10 +292,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
               {
                 uint32_t cksum;
                 int code;
-                cksum = memcrc_finish(&checksum_state[i],
-                                      (off_t)varSize[i]
+                cksum = memcrc_finish(&varDesc[i].checksum_state,
+                                      (off_t)varDesc[i].size
                                       * sizeof (var[0]) * setup.nts);
-                code = vlistInqVarCode(vlistID, varIDs[i]);
+                code = vlistInqVarCode(vlistID, varDesc[i].id);
                 if (fprintf(tablefp, "%08lx %d\n", (unsigned long)cksum,
                             code) < 0)
                   {
@@ -306,9 +307,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
           }
         }
     }
-  free(checksum_state);
   free(varslice);
-  free(varSize);
 #ifdef USE_MPI
   pioEndTimestepping ();
 #endif
@@ -317,24 +316,24 @@ modelRun(struct model_config setup, MPI_Comm comm)
   taxisDestroy ( taxisID );
   for ( i = 0; i < nVars; i++ )
     {
-      int zID = zaxisID[i];
+      int zID = varDesc[i].zaxisID;
       if (zID != CDI_UNDEFID)
         {
           zaxisDestroy(zID);
           for (int j = i + 1; j < nVars; ++j)
-            if (zID == zaxisID[j])
-              zaxisID[j] = CDI_UNDEFID;
+            if (zID == varDesc[j].zaxisID)
+              varDesc[j].zaxisID = CDI_UNDEFID;
         }
     }
   gridDestroy ( gridID );
 #if USE_MPI
   for (int varID = 0; varID < nVars; ++varID)
-    xt_idxlist_delete(varDeco[varID].partDesc);
+    xt_idxlist_delete(varDesc[varID].partDesc);
   free(displs);
   free(chunks);
   free(var);
 #endif
-  free(nlev);
+  free(varDesc);
   free(levs);
   free(lats);
   free(lons);
