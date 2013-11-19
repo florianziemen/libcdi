@@ -750,7 +750,7 @@ streamPack(void * streamptr, void * packBuffer, int packBufferSize,
 
   serializePack(&cdiDefaultMissval, 1, DATATYPE_FLT64, packBuffer, packBufferSize, packBufferPos, context);
   serializePack(streamP->filename, intBuffer[2], DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos, context);
-  d = cdiCheckSum(DATATYPE_TXT, intBuffer[2], &streamP->filename);
+  d = cdiCheckSum(DATATYPE_TXT, intBuffer[2], streamP->filename);
   serializePack(&d, 1, DATATYPE_UINT32, packBuffer, packBufferSize, packBufferPos, context);
 }
 
