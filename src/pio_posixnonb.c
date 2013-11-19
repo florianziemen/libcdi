@@ -8,8 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <mpi.h>
 
-#include "mpi.h"
 #include "pio.h"
 #include "pio_comm.h"
 #include "pio_impl.h"
