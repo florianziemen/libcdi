@@ -496,8 +496,10 @@ modelWinEnqueue(int collID,
       int offset = header.offset
         = (int)roundUpToMultiple(txWin[collID].head - txWin[collID].buffer,
                                  sizeof (double));
-      memcpy(txWin[collID].buffer + offset, data, size);
-      txWin[collID].head = txWin[collID].buffer + offset + size;
+      MPI_Comm comm = commInqCommsIO(collID);
+      packFunc((void *)data, txWin[collID].buffer, (int)txWin[collID].size,
+               &offset, &comm);
+      txWin[collID].head = txWin[collID].buffer + offset;
     }
   else if (header.id == PARTDESCMARKER)
     {
@@ -579,8 +581,9 @@ pioBufferPartData(int streamID, int varID, const double *data,
 
   struct winHeaderEntry dataHeader
     = { .id = streamID, .specific.dataRecord = { varID, nmiss }, .offset = -1 };
-  modelWinEnqueue(collID, dataHeader, data, chunk * sizeof (data[0]),
-                  memcpyPackFunc);
+  modelWinEnqueue(collID, dataHeader,
+                  &(struct memCpyDataDesc){data, chunk * sizeof (data[0])},
+                  0, memcpyPackFunc);
   {
     struct winHeaderEntry partHeader
       = { .id = PARTDESCMARKER,
