@@ -58,6 +58,7 @@ int              namespaceNew();
 void             namespaceDelete(int namespaceID);
 void             namespaceCleanup      ( void );
 int              namespaceGetNumber    ( void );
+void pioNamespaceSetActive(int namespaceID);
 int              namespaceGetActive    ( void );
 int              namespaceIdxEncode    ( namespaceTuple_t );
 int              namespaceIdxEncode2   ( int, int );
