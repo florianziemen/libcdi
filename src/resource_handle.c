@@ -120,6 +120,7 @@ reshListCreate(int namespaceID)
 void
 reshListDestruct(int namespaceID)
 {
+  LIST_INIT();
   LIST_LOCK();
   xassert(resHList && namespaceID >= 0 && namespaceID < resHListSize);
   int callerNamespaceID = namespaceGetActive();
