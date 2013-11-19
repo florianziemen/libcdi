@@ -95,6 +95,7 @@ EOR
 c="dmemory.c         \
    dmemory.h         \
    cksum.c           \
+   cdi_cksum.c       \
    taxis.c           \
    timebase.c        \
    calendar.c        \
@@ -142,7 +143,7 @@ c="dmemory.c         \
 
 h="cdi_limits.h resource_handle.h taxis.h dtypes.h file.h service.h extra.h \
    ieg.h cdi.h timebase.h calendar.h basetime.h datetime.h namespace.h \
-   cksum.h error.c error.h cdi_int.h cgribex.h gribapi.h \
+   cksum.h cdi_cksum.h error.c error.h cdi_int.h cgribex.h gribapi.h \
    stream_cgribex.h stream_gribapi.h  stream_grb.h  stream_cdf.h \
    tablepar.h table.h gaussgrid.h grid.h zaxis.h varscan.h binary.h swap.h \
    service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \

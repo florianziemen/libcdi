@@ -125,8 +125,6 @@ sum_int(size_t n, int *a)
 }
 
 
-double xchecksum ( int, int, void * );
- 
 void printArray ( const char *, char *, const void *, int, int, const char *, const char *, int );
 #define xprintArray(ps,array,n,datatype)                                \
   if ( ddebug )                                                         \

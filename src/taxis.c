@@ -9,6 +9,7 @@
 #include "cdi.h"
 #include "error.h"
 #include "taxis.h"
+#include "cdi_cksum.h"
 #include "cdi_int.h"
 #include "calendar.h"
 #include "pio_util.h"
@@ -1333,7 +1334,7 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                   &d, 1, DATATYPE_FLT64, context);
 
-  xassert(xchecksum(DATATYPE_INT, taxisNint, intBuffer) == d);
+  xassert(cdiCheckSum(DATATYPE_INT, taxisNint, intBuffer) == d);
 
   taxisInit();
 
@@ -1411,7 +1412,7 @@ taxisPack(void * voidP, void * packBuffer, int packBufferSize, int * packBufferP
 
   serializePack(intBuffer, taxisNint, DATATYPE_INT,
                 packBuffer, packBufferSize, packBufferPos, context);
-  d = xchecksum(DATATYPE_INT, taxisNint, intBuffer);
+  d = cdiCheckSum(DATATYPE_INT, taxisNint, intBuffer);
   serializePack(&d, 1, DATATYPE_FLT64,
                 packBuffer, packBufferSize, packBufferPos, context);
   if (taxisP->name)

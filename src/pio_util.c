@@ -173,14 +173,6 @@ void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line,
 
 /****************************************************/
 
-double xchecksum ( int type, int count, void * buffer )
-{
-  return 0.0;
-}
-
-
-/****************************************************/
-
 void printArray ( const char * cdiPioDebugString, char * ps, const void * array, int n,
                   int datatype, const char * funname, const char * filename, int line )
 {

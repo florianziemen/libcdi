@@ -36,6 +36,8 @@ libcdi_la_SOURCES = 	 \
 	dmemory.h	 \
 	cksum.c		\
 	cksum.h		\
+	cdi_cksum.c	\
+	cdi_cksum.h	\
 	pio_util.c							\
 	pio_util.h							\
 	dtypes.h	 \

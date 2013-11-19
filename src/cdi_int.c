@@ -12,6 +12,7 @@
 #include "dmemory.h"
 
 #include "cdi.h"
+#include "cdi_cksum.h"
 #include "cdi_int.h"
 #include "gribapi.h"
 #ifdef HAVE_LIBNETCDF
@@ -745,12 +746,12 @@ streamPack(void * streamptr, void * packBuffer, int packBufferSize,
   intBuffer[10] = cdiHaveMissval;
 
   serializePack(intBuffer, streamNint, DATATYPE_INT, packBuffer, packBufferSize, packBufferPos, context);
-  d = xchecksum(DATATYPE_INT, streamNint, intBuffer);
+  d = cdiCheckSum(DATATYPE_INT, streamNint, intBuffer);
   serializePack(&d, 1, DATATYPE_FLT64, packBuffer, packBufferSize, packBufferPos, context);
 
   serializePack(&cdiDefaultMissval, 1, DATATYPE_FLT64, packBuffer, packBufferSize, packBufferPos, context);
   serializePack(streamP->filename, intBuffer[2], DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos, context);
-  d = xchecksum(DATATYPE_TXT, intBuffer[2], &streamP->filename);
+  d = cdiCheckSum(DATATYPE_TXT, intBuffer[2], &streamP->filename);
   serializePack(&d, 1, DATATYPE_FLT64, packBuffer, packBufferSize, packBufferPos, context);
 }
 
@@ -766,7 +767,7 @@ streamUnpack(char * unpackBuffer, int unpackBufferSize,
                   intBuffer, streamNint, DATATYPE_INT, context);
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                   &d, 1, DATATYPE_FLT64, context);
-  xassert(xchecksum(DATATYPE_INT, streamNint, intBuffer ) == d);
+  xassert(cdiCheckSum(DATATYPE_INT, streamNint, intBuffer) == d);
 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                   &cdiDefaultMissval, 1, DATATYPE_FLT64, context);
@@ -774,7 +775,7 @@ streamUnpack(char * unpackBuffer, int unpackBufferSize,
                   &filename, intBuffer[2], DATATYPE_TXT, context);
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                   &d, 1, DATATYPE_FLT64, context);
-  xassert(d == xchecksum(DATATYPE_TXT, intBuffer[2], filename));
+  xassert(d == cdiCheckSum(DATATYPE_TXT, intBuffer[2], filename));
   streamID = streamOpenWrite ( filename, intBuffer[1] );
   xassert ( streamID >= 0 &&
             namespaceAdaptKey ( intBuffer[0], nspTarget ) == streamID );
