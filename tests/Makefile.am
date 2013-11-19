@@ -19,17 +19,21 @@ cksum_read_SOURCES = cksum_read.c \
 	stream_cksum.c stream_cksum.h \
 	ensure_array_size.h ensure_array_size.c
 pio_write_SOURCES = pio_write.c pio_write.h simple_model.c
-test_resource_copy_SOURCES = test_resource_copy.c
+test_resource_copy_SOURCES = test_resource_copy.c \
+	$(top_srcdir)/src/resource_unpack.c
+test_resource_copy_mpi_SOURCES = test_resource_copy.c
 #
 AM_CFLAGS = $(YAXT_CFLAGS)
 if USE_MPI
-pio_write_LDADD= ../src/libcdipio.la
-test_resource_copy_LDADD = ../src/libcdipio.la
+pio_write_LDADD = ../src/libcdipio.la
+TESTS +=  test_resource_copy_mpi_run
+check_PROGRAMS += test_resource_copy_mpi
+test_resource_copy_mpi_LDADD = ../src/libcdipio.la
+test_resource_copy_mpi_CFLAGS = $(AM_CFLAGS) $(CFLAGS) -DMPI_MARSHALLING
 else
 pio_write_LDADD = $(LDADD)
-test_resource_copy_SOURCES += $(top_srcdir)/src/resource_unpack.c
-test_resource_copy_LDADD = ../src/libcdi.la
 endif
+
 LDADD = ../src/libcdi.la -lm
 INCLUDES   = -I$(top_srcdir)/src
 #

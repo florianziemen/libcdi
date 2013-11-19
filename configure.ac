@@ -22,6 +22,7 @@ LT_INIT([pic-only])
 # Check building environment
 AC_CHECK_TOOL([CC],[gcc],[:])
 AC_PROG_CC_C99
+AM_PROG_CC_C_O
 AC_PROG_FC
 AS_IF([test -n "$FC" && test "X$FC" != "Xno"],
   [AC_FC_SRCEXT([f90])
@@ -330,6 +331,7 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
                  tests/pio_cksum_asynch \
                  tests/pio_cksum_writer \
                  tests/pio_cksum_cdf \
+                 tests/test_resource_copy_mpi_run \
                  util/serialrun],[chmod a+x "$ac_file"])
 
 AC_OUTPUT([Makefile src/Makefile interfaces/Makefile app/Makefile \
