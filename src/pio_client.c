@@ -110,7 +110,8 @@ cdiPioClientStreamWriteVarChunk_(int streamID, int varID, int memtype,
   int size = vlistInqVarSize(vlistID, varID),
     varShape[3];
   unsigned ndims = (unsigned)cdiPioQueryVarDims(varShape, vlistID, varID);
-  Xt_int varShapeXt[3], chunkShape[3] = { 1, 1, 1 }, origin[3] = { 0, 0, 0 };
+  Xt_int varShapeXt[3], origin[3] = { 0, 0, 0 };
+  int chunkShape[3] = { 1, 1, 1 };
   /* FIXME: verify xt_int ranges are good enough */
   for (unsigned i = 0; i < 3; ++i)
     varShapeXt[i] = varShape[i];
