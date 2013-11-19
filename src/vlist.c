@@ -1712,7 +1712,7 @@ int  vlistGetSizeP ( void * vlistptr, void *context)
   txsize = serializeGetSize(vlist_nints, DATATYPE_INT, context);
   txsize += vlistAttsGetSize(p, CDI_GLOBAL, context);
   for ( varID = 0; varID <  p->nvars; varID++ )
-    txsize += vlistVarGetSize(p, varID, context);
+    txsize += vlistVarGetPackSize(p, varID, context);
   return txsize;
 }
 

@@ -2109,7 +2109,7 @@ enum {
   vlistvar_ndbls = 3,
 };
 
-int vlistVarGetSize(vlist_t *p, int varID, void *context)
+int vlistVarGetPackSize(vlist_t *p, int varID, void *context)
 {
   var_t *var = p->vars + varID;
   int varsize = serializeGetSize(vlistvar_nints, DATATYPE_INT, context)

@@ -9,7 +9,7 @@
 #include "vlist.h"
 #endif
 
-int  vlistVarGetSize(vlist_t *p, int varID, void *context);
+int  vlistVarGetPackSize(vlist_t *p, int varID, void *context);
 void vlistVarPack(vlist_t *p, int varID,
                   char * buffer, int bufferSize, int * pos, void *context);
 void vlistVarUnpack(int vlistID,
