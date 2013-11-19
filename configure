@@ -26411,6 +26411,7 @@ HAVE_PARALLEL_NC4=0
 
 
 
+
 if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
 	if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
@@ -26653,6 +26654,7 @@ if test -n "$YAXT_CFLAGS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_YAXT_CFLAGS=`$PKG_CONFIG --cflags "yaxt" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -26669,6 +26671,7 @@ if test -n "$YAXT_LIBS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_YAXT_LIBS=`$PKG_CONFIG --libs "yaxt" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -26688,9 +26691,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        YAXT_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "yaxt" 2>&1`
+	        YAXT_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "yaxt" 2>&1`
         else
-	        YAXT_PKG_ERRORS=`$PKG_CONFIG --print-errors "yaxt" 2>&1`
+	        YAXT_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "yaxt" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$YAXT_PKG_ERRORS" >&5
@@ -26765,6 +26768,7 @@ if test -n "$PPM_CORE_CFLAGS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_PPM_CORE_CFLAGS=`$PKG_CONFIG --cflags "scales-ppm-core" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -26781,6 +26785,7 @@ if test -n "$PPM_CORE_LIBS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_PPM_CORE_LIBS=`$PKG_CONFIG --libs "scales-ppm-core" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -26800,9 +26805,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        PPM_CORE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "scales-ppm-core" 2>&1`
+	        PPM_CORE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "scales-ppm-core" 2>&1`
         else
-	        PPM_CORE_PKG_ERRORS=`$PKG_CONFIG --print-errors "scales-ppm-core" 2>&1`
+	        PPM_CORE_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "scales-ppm-core" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$PPM_CORE_PKG_ERRORS" >&5
