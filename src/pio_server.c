@@ -1044,7 +1044,7 @@ cdiPioCdfDefTimestep(stream_t *streamptr, int tsID)
   @return
 */
 
-void IOServer ()
+void IOServer(void (*postCommSetupActions)(void))
 {
   int source, tag, size, nProcsModel=commInqNProcsModel();
   static int nfinished = 0;
@@ -1054,7 +1054,7 @@ void IOServer ()
 
   xdebug("%s", "START");
 
-  backendInit ();
+  backendInit(postCommSetupActions);
   if ( commInqRankNode () == commInqSpecialRankNode ()) 
     backendFinalize ();
   commCalc = commInqCommCalc ();

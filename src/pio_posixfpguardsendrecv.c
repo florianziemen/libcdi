@@ -519,7 +519,8 @@ finalizePOSIXFPGUARDSENDRECV(void)
 
 /***************************************************************/
 
-void initPOSIXFPGUARDSENDRECV ( void )
+void
+initPOSIXFPGUARDSENDRECV(void (*postCommSetupActions)(void))
 {
   if ( commInqSizeNode () < 2 ) 
     xabort ( "USAGE: # IO PROCESSES ON A PHYSICAL NODE >= 2" );
@@ -529,6 +530,7 @@ void initPOSIXFPGUARDSENDRECV ( void )
   commSendNodeInfo ();
   commRecvNodeMap ();
   commDefCommsIO ();
+  postCommSetupActions();
   if (!isCollector)
     fpgPOSIXFPGUARDSENDRECV ();
   else

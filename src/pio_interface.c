@@ -672,6 +672,12 @@ void pioBufferFuncCall(struct winHeaderEntry header,
 
 #endif
 
+
+void
+cdiPioNoPostCommSetup(void)
+{
+}
+
 /*****************************************************************************/
 
 /* pioInit definition must currently compile even in non-MPI configurations */
@@ -698,6 +704,8 @@ void pioBufferFuncCall(struct winHeaderEntry header,
   @param partInflate allow for array partitions on comute
   PE that are at most sized \f$ partInflate * \lceil arraySize /
   numComputePEs \rceil \f$
+  @param postSetupActions function which is called by all I/O servers
+  after communicator split
   @return int indicating wether the calling PE is a calcutator (1) or not (0)
 */
 
@@ -708,7 +716,8 @@ static int xtInitByCDI = 0;
 
 MPI_Comm
 pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
-        int *pioNamespace, float partInflate)
+        int *pioNamespace, float partInflate,
+        void (*postCommSetupActions)(void))
 {
 #ifdef USE_MPI
   int sizeGlob;
@@ -754,7 +763,7 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
       namespaceSwitchSet(NSSWITCH_ABORT, NSSW_FUNC(cdiAbortC_MPI));
       namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(pioFileOpen));
       namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(pioFileClose));
-      IOServer ();
+      IOServer(postCommSetupActions);
       namespaceDelete(0);
       commDestroy ();
       xt_finalize();

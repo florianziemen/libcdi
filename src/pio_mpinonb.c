@@ -323,13 +323,14 @@ void finalizeMPINONB(void)
 
 /***************************************************************/
 
-void initMPINONB ( void )
+void
+initMPINONB(void (*postCommSetupActions)(void))
 {
   commDefCommColl ( 1 );
   commSendNodeInfo ();
   commRecvNodeMap ();
   commDefCommsIO ();
-
+  postCommSetupActions();
   bibAFiledataM = listSetNew( destroyAFiledataMPINONB, compareNamesMPINONB );
   
   if ( bibAFiledataM == NULL )

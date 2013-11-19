@@ -27,18 +27,22 @@
 FCALLSCSUB0 (pioEndDef, PIOENDDEF, pioenddef)
 FCALLSCSUB0 (pioEndTimestepping, PIOENDTIMESTEPPING, pioendtimestepping)
 FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
-static int pioInit_fwrap(int commSuper, int nProcsIO, int IOMode, int * pioNamespace, float partInflate)
+FCALLSCSUB0 (cdiPioNoPostCommSetup, CDIPIONOPOSTCOMMSETUP, cdipionopostcommsetup)
+
+#undef ROUTINE_5
+#define ROUTINE_5 (void (*)(void))
+static int pioInit_fwrap(int commSuper, int nProcsIO, int IOMode, int *pioNamespace, float partInflate, void (*postCommSetupActions)(void))
 {
   MPI_Comm v;
-  v = pioInit(MPI_Comm_f2c(commSuper),  nProcsIO,  IOMode,  pioNamespace,  partInflate);
+  v = pioInit(MPI_Comm_f2c(commSuper), nProcsIO, IOMode, pioNamespace, partInflate, postCommSetupActions);
   return MPI_Comm_c2f(v);
 }
-FCALLSCFUN5 (INT, pioInit_fwrap, PIOINIT, pioinit, INT, INT, INT, PINT, FLOAT)
+FCALLSCFUN6 (INT, pioInit_fwrap, PIOINIT, pioinit, INT, INT, INT, PINT, FLOAT, ROUTINE)
 FCALLSCSUB0 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep)
 FCALLSCSUB0 (cdiPioRDMAProgress, CDIPIORDMAPROGRESS, cdipiordmaprogress)
-static void streamWriteVarPart_fwrap(int streamID, int varID, const void * data, int nmiss, void * partDesc)
+static void streamWriteVarPart_fwrap(int streamID, int varID, const void *data, int nmiss, void *partDesc)
 {
-  streamWriteVarPart( streamID,  varID,  data,  nmiss, (*(Xt_idxlist *)partDesc));
+  streamWriteVarPart(streamID, varID, data, nmiss, (*(Xt_idxlist *)partDesc));
 }
 FCALLSCSUB5 (streamWriteVarPart_fwrap, STREAMWRITEVARPART, streamwritevarpart, INT, INT, PVOID, INT, PVOID)
 FCALLSCSUB1 (pioNamespaceSetActive, PIONAMESPACESETACTIVE, pionamespacesetactive, INT)

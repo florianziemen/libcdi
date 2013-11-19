@@ -12,7 +12,7 @@
 #include "cdi_int.h"
 
 void   backendCleanup  ( void );
-void   backendInit     ( void );
+void backendInit(void (*postCommSetupActions)(void));
 void   backendFinalize ( void );
 int pioFileOpen(const char *filename, const char *mode);
 int    pioFileClose    ( int );

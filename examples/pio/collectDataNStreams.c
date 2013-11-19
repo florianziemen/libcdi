@@ -263,7 +263,8 @@ int main (int argc, char *argv[])
       nProcsIO = nProcsIODef;
     }
 
-  commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0f);
+  commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0f,
+                      cdiPioNoPostCommSetup);
   pioNamespaceSetActive(pioNamespace);
 #endif
 

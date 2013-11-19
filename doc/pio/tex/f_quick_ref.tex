@@ -7,8 +7,9 @@ CDI library routines:
 \section*{\tt \htmlref{pioInit}{pioInit}}
 
 \begin{verbatim}
-    INTEGER FUNCTION pioInit (INTEGER commSuper, INTEGER nProcsIO, INTEGER IOMode, 
-                              INTEGER pioNamespace, REAL partInflate)
+    INTEGER FUNCTION pioInit (INTEGER commSuper, INTEGER nProcsIO, INTEGER IOMode,
+                              INTEGER pioNamespace, REAL partInflate,
+                              PROCEDURE postCommSetupActions)
 \end{verbatim}
 
 initialize I/O server processes and communication.

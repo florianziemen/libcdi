@@ -39,7 +39,8 @@ PROGRAM collectdata2003
 
   ! For parallel IO:
   ! Initialize environment.
-  commModel = pioInit(commGlob, nProcsIO, IOMode, pio_namespace, 1.1)
+  commModel = pioInit(commGlob, nProcsIO, IOMode, pio_namespace, 1.1, &
+       cdiPioNoPostCommSetup)
   CALL pioNamespaceSetActive(pio_namespace)
 #endif
 

@@ -32,12 +32,16 @@
 !                     pioFinalize
       EXTERNAL        pioFinalize
 
+!                     cdiPioNoPostCommSetup
+      EXTERNAL        cdiPioNoPostCommSetup
+
       INTEGER         pioInit
 !                                    (INTEGER         commSuper,
 !                                     INTEGER         nProcsIO,
 !                                     INTEGER         IOMode,
 !                                     INTEGER         pioNamespace,
-!                                     REAL            partInflate)
+!                                     REAL            partInflate,
+!                                     PROCEDURE       postCommSetupActions)
       EXTERNAL        pioInit
 
 !                     pioWriteTimestep

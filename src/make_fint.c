@@ -87,7 +87,7 @@ static void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
 
 enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISMPI_COMM,
              ISXT_IDXLIST, ISCHOICE, ISINTP, ISINTV, ISINTVV, ISREALP,
-             ISDOUBLEP, ISCBUF, ISSTRING, ISSTRINGP,
+             ISDOUBLEP, ISCBUF, ISSTRING, ISSTRINGP, VOIDFUNCVOID,
              NUM_KNOWN_ARG_TYPES};
 
 enum conversionType { CONV_ARG, CONV_RET };
@@ -95,6 +95,8 @@ enum conversionType { CONV_ARG, CONV_RET };
 
 typedef int (*cfConversionEmitter)(FILE *outfp, const char *argName,
                                    size_t argNameLen, enum conversionType part);
+typedef int (*cfPrologueEmitter)(FILE *outfp, size_t argNum);
+
 
 static int cfMPICommConvert(FILE *outfp, const char *argName,
                             size_t argNameLen, enum conversionType part);
@@ -102,13 +104,16 @@ static int cfMPICommConvert(FILE *outfp, const char *argName,
 static int cfXtIdxlistConvert(FILE *outfp, const char *argName,
                             size_t argNameLen, enum conversionType part);
 
+static int cfVoidFuncPrologue(FILE *outfp, size_t argNum);
+
 struct symbol {
   const char *f77name, *cfint, *cfmt, *parseRE;
   /* pair of parentheses which matches the argument name */
   size_t nameMatch;
-  int needsExtraWrapper;
+  int needsExtraWrapper, needsPrologue;
   cfConversionEmitter convert;
   const char *convcfmt;
+  cfPrologueEmitter prologue;
   regex_t preg;
 };
 
@@ -155,6 +160,10 @@ static struct symbol funArgSym[]
         "^"WS"*const"WS"+char"WS"+\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0, 0 },
       { "CHARACTER*(*)",   "PSTRING", "char *%.*s",
         "^"WS"*char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 1, 0, 0 },
+      { "PROCEDURE", "ROUTINE", "void (*%.*s)(void)",
+        "^"WS"*void"WS"*\\("WS"*\\*"WS"*"SYMRE"?"WS"*\\)"
+        WS"*\\("WS"*void"WS"*\\)"WS"*[,\\)]", 1, 0, 1,
+        NULL, NULL, cfVoidFuncPrologue }
 };
 
 static struct symbol funRet[] = {
@@ -324,7 +333,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
       functype = ISVOID;
       size_t funcargc = 0;
       pline = line;
-      int needsExtraWrapper = 0;
+      int needsExtraWrapper = 0, needsPrologue = 0;
       size_t funcnameLen;
       enum decl declType = UNKNOWN_DECL;
       do {
@@ -361,24 +370,38 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 	  funcargname[funcargc].rm_so = (regoff_t)(pline - line);
           {
             ssize_t i = 0;
+            size_t innerParens = 0;
             do {
               ssize_t restLen = lineLen - (ssize_t)(pline - line);
               for (; i < restLen; i++ )
                 {
-                  if ( pline[i] == ',' )
+                  switch (pline[i])
                     {
-                      funcargc++;
-                      funcargname[funcargc].rm_so
-                        = (regoff_t)(pline - line + i + 1);
-                    }
-                  if ( pline[i] == ')' )
-                    {
-                      funcargc++;
-                      funcargname[funcargc].rm_so
-                        = (regoff_t)(pline - line + i + 1);
+                    case ',':
+                      if (!innerParens)
+                        {
+                          funcargc++;
+                          funcargname[funcargc].rm_so
+                            = (regoff_t)(pline - line + i + 1);
+                        }
+                      break;
+                    case '(':
+                      ++innerParens;
+                      break;
+                    case ')':
+                      if (!innerParens)
+                        {
+                          funcargc++;
+                          funcargname[funcargc].rm_so
+                            = (regoff_t)(pline - line + i + 1);
+                          goto endOfArgSearch;
+                        }
+                      else
+                        --innerParens;
                       break;
                     }
                 }
+              endOfArgSearch:
               if (i < restLen)
                 break;
               char *lineExtension = NULL;
@@ -426,6 +449,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                       funcargname[i].rm_eo = nameMatch->rm_eo + argStart;
                       needsExtraWrapper
                         = needsExtraWrapper || funArgSym[argtype].needsExtraWrapper;
+                      needsPrologue = needsPrologue
+                        || funArgSym[argtype].needsPrologue;
                       break;
                     }
                 if (argtype == NUM_KNOWN_ARG_TYPES)
@@ -471,6 +496,17 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
           const char *delegateName;
           char delegateNameBuf[MAX_FUNC_NAME_LEN + 7];
           size_t delegateNameLen = funcnameLen;
+          /* emit prologue if needed */
+          if (needsPrologue)
+            {
+              if (funRet[functype].needsPrologue)
+                funRet[functype].prologue(fpint, (size_t)-1);
+              for (size_t i = 0; i < funcargc; i++ )
+                {
+                  if (funArgSym[funcargtype[i]].needsPrologue)
+                    funArgSym[funcargtype[i]].prologue(fpint, i);
+                }
+            }
           /* emit wrapper for type conversions if needed */
           if (needsExtraWrapper)
             {
@@ -1005,6 +1041,16 @@ static int cfXtIdxlistConvert(FILE *outfp, const char *argName,
     }
   return retval;
 }
+
+static int cfVoidFuncPrologue(FILE *outfp, size_t argNum)
+{
+  int retval
+    = fprintf(outfp, "\n#undef ROUTINE_%zu\n#define ROUTINE_%zu %s\n", argNum,
+              argNum, "(void (*)(void))");
+  return retval;
+}
+
+
 
 /*
  * Local Variables:

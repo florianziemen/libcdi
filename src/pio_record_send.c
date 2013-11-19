@@ -320,7 +320,7 @@ pioSendFinalize(void)
 }
 
 void
-pioSendInitialize(void)
+pioSendInitialize(void (*postCommSetupActions)(void))
 {
   if (commInqSizeNode() < 2)
     xabort ( "USAGE: # IO PROCESSES ON A PHYSICAL NODE >= 2" );
@@ -331,6 +331,7 @@ pioSendInitialize(void)
   commSendNodeInfo();
   commRecvNodeMap();
   commDefCommsIO();
+  postCommSetupActions();
   if (!isCollector)
     switch ( commInqIOMode ())
       {

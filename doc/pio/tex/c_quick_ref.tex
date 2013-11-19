@@ -8,7 +8,8 @@ CDI library routines:
 
 \begin{verbatim}
     MPI_Comm pioInit (MPI_Comm commSuper, int nProcsIO, int IOMode,
-                      int *pioNamespace, float partInflate);
+                      int *pioNamespace, float partInflate,
+                      void (*postCommSetupActions)(void));
 \end{verbatim}
 
 initialize I/O server processes and communication.

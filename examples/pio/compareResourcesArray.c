@@ -243,7 +243,8 @@ int main (int argc, char *argv[])
   if ( nProcsIO != 1 )
     xabort ( "bad distribution of tasks on PEs" );
 
-  commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0f);
+  commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0f,
+                      cdiPioNoPostCommSetup);
   pioNamespaceSetActive(pioNamespace);
 
   modelRun ( commModel );

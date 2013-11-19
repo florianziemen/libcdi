@@ -211,7 +211,8 @@ int main (int argc, char *argv[])
 
 #ifdef USE_MPI
   int pioNamespace;
-  commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0);
+  commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0,
+                      cdiPioNoPostCommSetup);
   pioNamespaceSetActive(pioNamespace);
 #else
   commModel = -1;
