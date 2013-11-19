@@ -21,7 +21,6 @@ typedef int MPI_Comm;
 
 enum {
   ntfiles     = 2,
-  nVars       = 5,
 };
 
 static void
@@ -92,6 +91,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   int rank = 0;
   char filename[1024];
   int nlon = setup.nlon, nlat = setup.nlat;
+  int nVars = setup.nvars;
   size_t varslice_size = 0;
 #if USE_MPI
   int *chunks = NULL, *displs = NULL, comm_size = 1;

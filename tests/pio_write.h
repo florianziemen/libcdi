@@ -9,7 +9,7 @@
 
 struct model_config
 {
-  int nlon, nlat, nts, max_nlev;
+  int nlon, nlat, nts, max_nlev, nvars;
   int filetype, datatype;
   bool compute_checksum;
   const char *suffix;

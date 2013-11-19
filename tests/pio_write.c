@@ -26,7 +26,7 @@ void
 modelRun(struct model_config setup, MPI_Comm comm);
 
 static const struct model_config default_setup
-  = { .nlon = 12, .nts = 3, .nlat = 6,
+  = { .nlon = 12, .nts = 3, .nlat = 6, .nvars = 5,
       .filetype = FILETYPE_GRB, .datatype = DATATYPE_PACK24,
       .compute_checksum = 1,
       .suffix = "grb",
@@ -111,7 +111,7 @@ int main (int argc, char *argv[])
 
   {
     int opt;
-    while ((opt = getopt(argc, argv, "f:m:n:z:t:c"
+    while ((opt = getopt(argc, argv, "f:m:n:z:t:y:c"
 #ifdef USE_MPI
                          "p:w:"
 #endif
@@ -160,6 +160,21 @@ int main (int argc, char *argv[])
       case 'n':
         setup.nlat = parse_intarg("error parsing number of latitudes");
         break;
+      case 'y':
+        setup.nvars = parse_intarg("error parsing number of variables");
+        if (setup.nvars < 1)
+          {
+            fputs("number of levels must be greater than zero!\n",
+                  stderr);
+            exit(EXIT_FAILURE);
+          }
+        if (setup.nvars > 127)
+          {
+            fputs("number of variables must not exceed 127!\n",
+                  stderr);
+            exit(EXIT_FAILURE);
+          }
+        break;
       case 'z':
         setup.max_nlev = parse_intarg("error parsing number of levels");
         if (setup.max_nlev < 1)
@@ -177,7 +192,7 @@ int main (int argc, char *argv[])
         break;
       default: /* '?' */
         fprintf(stderr, "Usage: %s "
-                "[-m nlon] [-n nlat] [-z nlev] [-t nts]"
+                "[-m nlon] [-n nlat] [-z nlev] [-t nts] [-y num_vars]"
 #ifdef USE_MPI
                 " [-p PIO_MODE] [-w NIOSERVERS] [-c]"
 #endif
