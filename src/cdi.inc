@@ -364,54 +364,6 @@
       INTEGER    CALENDAR_NONE         
       PARAMETER (CALENDAR_NONE          =  5)
 !
-!  parallel IO IOMode
-!
-      INTEGER    PIO_NONE              
-      PARAMETER (PIO_NONE               =  0)
-      INTEGER    PIO_MPI               
-      PARAMETER (PIO_MPI                =  1)
-      INTEGER    PIO_WRITER            
-      PARAMETER (PIO_WRITER             =  2)
-      INTEGER    PIO_ASYNCH            
-      PARAMETER (PIO_ASYNCH             =  3)
-      INTEGER    PIO_FPGUARD           
-      PARAMETER (PIO_FPGUARD            =  4)
-!
-!  parallel IO routines
-!
-!                     pioEndDef
-      EXTERNAL        pioEndDef
-
-!                     pioEndTimestepping
-      EXTERNAL        pioEndTimestepping
-
-!                     pioFinalize
-      EXTERNAL        pioFinalize
-
-      INTEGER         pioInit
-!                                    (INTEGER         commSuper,
-!                                     INTEGER         nProcsIO,
-!                                     INTEGER         IOMode,
-!                                     INTEGER         pioNamespace,
-!                                     REAL            partInflate)
-      EXTERNAL        pioInit
-
-!                     pioWriteTimestep
-      EXTERNAL        pioWriteTimestep
-
-!                     streamWriteVarPart
-!                                    (INTEGER         streamID,
-!                                     INTEGER         varID,
-!                                     CHOICE          data,
-!                                     INTEGER         nmiss,
-!                                     TYPE(XT_IDXLIST)partDesc)
-      EXTERNAL        streamWriteVarPart
-
-!                     pioNamespaceSetActive
-!                                    (INTEGER         )
-      EXTERNAL        pioNamespaceSetActive
-
-!
 !  CDI control routines
 !
 !                     cdiReset
@@ -446,6 +398,17 @@
 !                                    (CHARACTER*(*)   string,
 !                                     INTEGER         val)
       EXTERNAL        cdiDefGlobal
+
+      INTEGER         namespaceNew
+      EXTERNAL        namespaceNew
+
+!                     namespaceSetActive
+!                                    (INTEGER         namespaceID)
+      EXTERNAL        namespaceSetActive
+
+!                     namespaceDelete
+!                                    (INTEGER         namespaceID)
+      EXTERNAL        namespaceDelete
 
 !
 !  CDI converter routines
@@ -576,6 +539,13 @@
 !                                    (INTEGER         streamID,
 !                                     INTEGER         tsID)
       EXTERNAL        streamDefTimestep
+
+!
+!  query currently set timestep id
+!
+      INTEGER         streamInqCurTimestepID
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamInqCurTimestepID
 
       INTEGER         streamInqTimestep
 !                                    (INTEGER         streamID,

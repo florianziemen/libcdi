@@ -94,6 +94,8 @@ EOR
 
 c="dmemory.c         \
    dmemory.h         \
+   cksum.c           \
+   cdi_cksum.c       \
    taxis.c           \
    timebase.c        \
    calendar.c        \
@@ -136,26 +138,16 @@ c="dmemory.c         \
    cdf.c             \
    namespace.c       \
    serialize.c       \
-   resource_handle.c \
-   resource_unpack.c \
-   pio_util.c        \
-   pio.c             \
-   pio_interface.c   \
-   pio_dbuffer.c     \
-   pio_mpinonb.c     \
-   pio_posixasynch.c \
-   pio_posixfpguardsendrecv.c\
-   pio_posixnonb.c   \
-   pio_list_set.c"
+   resource_handle.c"
 
 h="cdi_limits.h resource_handle.h taxis.h dtypes.h file.h service.h extra.h \
    ieg.h cdi.h timebase.h calendar.h basetime.h datetime.h namespace.h \
-   error.c error.h cdi_int.h cgribex.h gribapi.h \
-   stream_cgribex.h  stream_gribapi.h  stream_grb.h  stream_cdf.h \
+   cksum.h cdi_cksum.h error.c error.h cdi_int.h cgribex.h gribapi.h \
+   stream_cgribex.h stream_gribapi.h  stream_grb.h  stream_cdf.h \
    tablepar.h table.h gaussgrid.h grid.h zaxis.h varscan.h binary.h swap.h \
    service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \
    cdf.h vlist.h vlist_var.h vlist_att.h model.h institution.h \
-   namespace.h resource_unpack.h pio_util.h pio.h pio_impl.h serialize.h"
+   resource_unpack.h serialize.h"
 
 #cat $h >> ${PROG}
 #cat $c | grep -v '#include' | grep -v '#  include' >> ${PROG}

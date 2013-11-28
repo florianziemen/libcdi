@@ -295,7 +295,7 @@ Get the type of a Grid.
 \section*{\tt \htmlref{gridInqUUID}{gridInqUUID}}
 
 \begin{verbatim}
-    char * gridInqUUID (int gridID, char *uuid_cbuf);
+    char *gridInqUUID (int gridID, char *uuid_cbuf);
 \end{verbatim}
 
 Get the UUID of an unstructured grid.
@@ -443,16 +443,6 @@ Get one value of a Y-axis.
 \end{verbatim}
 
 Get all values of a Y-axis.
-
-
-\section*{\tt \htmlref{pioInit}{pioInit}}
-
-\begin{verbatim}
-    MPI_Comm pioInit (MPI_Comm commSuper, int nProcsIO, int IOMode,
-                      int *pioNamespace, float partInflate);
-\end{verbatim}
-
-initialize I/O server processes and communication.
 
 
 \section*{\tt \htmlref{streamClose}{streamClose}}
@@ -1331,7 +1321,7 @@ Get the type of a Z-axis.
 \section*{\tt \htmlref{zaxisInqUUID}{zaxisInqUUID}}
 
 \begin{verbatim}
-    char * zaxisInqUUID (int zaxisID, char *uuid_cbuf);
+    char *zaxisInqUUID (int zaxisID, char *uuid_cbuf);
 \end{verbatim}
 
 Get the UUID of a generalized Z-axis.

@@ -1,0 +1,17 @@
+\chapter*{Quick Reference}
+\addcontentsline{toc}{chapter}{Quick Reference}
+
+This appendix provide a brief listing of the C language bindings of the
+CDI library routines:
+
+\section*{\tt \htmlref{pioInit}{pioInit}}
+
+\begin{verbatim}
+    MPI_Comm pioInit (MPI_Comm commSuper, int nProcsIO, int IOMode,
+                      int *pioNamespace, float partInflate,
+                      void (*postCommSetupActions)(void));
+\end{verbatim}
+
+initialize I/O server processes and communication.
+
+

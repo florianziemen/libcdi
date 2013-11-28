@@ -45,7 +45,9 @@ doc/pio/graphics/pio_writer.pdf -text svneol=unset#unset
 doc/pio/graphics/serial.pdf -text svneol=unset#unset
 doc/pio/graphics/timestep.pdf -text svneol=unset#unset
 doc/pio/pio_docu.pdf -text svneol=unset#unset
+doc/pio/tex/c_quick_ref.tex -text
 doc/pio/tex/communicators.tex -text
+doc/pio/tex/f_quick_ref.tex -text
 doc/pio/tex/intro.tex -text
 doc/pio/tex/makepdf_f -text
 doc/pio/tex/modes.tex -text
@@ -169,6 +171,7 @@ m4/ltoptions.m4 -text
 m4/ltsugar.m4 -text
 m4/ltversion.m4 -text
 m4/lt~obsolete.m4 -text
+m4/pkg.m4 -text
 m4/starlink_fpp.m4 -text
 src/Makefile.am -text
 src/Makefile.in -text
@@ -186,16 +189,23 @@ src/cdi.h -text
 src/cdi.inc -text
 src/cdiFortran.c -text
 src/cdiFortran.h -text
+src/cdi_cksum.c -text
+src/cdi_cksum.h -text
 src/cdi_error.c -text
 src/cdi_int.c -text
 src/cdi_int.h -text
 src/cdi_limits.h -text
 src/cdi_util.c -text
 src/cdilib.c -text
+src/cdipio.h -text
+src/cdipio.inc -text
+src/cdipioFortran.c -text
 src/cfortran.doc -text
 src/cfortran.h -text
 src/cgribex.h -text
 src/cgribexlib.c -text
+src/cksum.c -text
+src/cksum.h -text
 src/config.h.in -text
 src/datetime.h -text
 src/dmemory.c -text
@@ -253,6 +263,7 @@ src/pio_server.h -text
 src/pio_util.c -text
 src/pio_util.h -text
 src/pkgconfig/cdi.pc.in -text
+src/pkgconfig/cdipio.pc.in -text
 src/resource_handle.c -text
 src/resource_handle.h -text
 src/resource_unpack.c -text
@@ -322,12 +333,11 @@ tables/remo -text
 tables/wmo_001 -text
 tests/Makefile.am -text
 tests/Makefile.in -text
-tests/cksum.c -text
-tests/cksum.h -text
 tests/cksum_read.c -text
 tests/cksum_verify.c -text
 tests/cksum_write.c -text
 tests/cksum_write_chunk.c -text
+tests/deco2d_model.c -text
 tests/ensure_array_size.c -text
 tests/ensure_array_size.h -text
 tests/pio_cksum_asynch.in -text
@@ -336,7 +346,12 @@ tests/pio_cksum_fpguard.in -text
 tests/pio_cksum_mpinonb.in -text
 tests/pio_cksum_writer.in -text
 tests/pio_write.c -text
+tests/pio_write.h -text
+tests/pio_write_deco2d_run.in -text
 tests/pio_write_run.in -text
+tests/simple_model.c -text
+tests/simple_model_helper.c -text
+tests/simple_model_helper.h -text
 tests/stream_cksum.c -text
 tests/stream_cksum.h -text
 tests/test_chunk_cksum.in -text
@@ -350,6 +365,7 @@ tests/test_cksum_service.in -text
 tests/test_grib.c -text
 tests/test_grib.sh -text
 tests/test_resource_copy.c -text
+tests/test_resource_copy_mpi_run.in -text
 tests/var_cksum.c -text
 tests/var_cksum.h -text
 util/mpi_launch_poe -text

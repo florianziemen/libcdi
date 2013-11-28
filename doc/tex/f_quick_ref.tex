@@ -445,16 +445,6 @@ Get one value of a Y-axis.
 Get all values of a Y-axis.
 
 
-\section*{\tt \htmlref{pioInit}{pioInit}}
-
-\begin{verbatim}
-    INTEGER FUNCTION pioInit (INTEGER commSuper, INTEGER nProcsIO, INTEGER IOMode, 
-                              INTEGER pioNamespace, REAL partInflate)
-\end{verbatim}
-
-initialize I/O server processes and communication.
-
-
 \section*{\tt \htmlref{streamClose}{streamClose}}
 
 \begin{verbatim}
@@ -584,7 +574,7 @@ Create a new dataset.
 \section*{\tt \htmlref{streamReadVar}{streamReadVar}}
 
 \begin{verbatim}
-    SUBROUTINE streamReadVar (INTEGER streamID, INTEGER varID, 
+    SUBROUTINE streamReadVar (INTEGER streamID, INTEGER varID,
                               DOUBLEPRECISION data_vec, INTEGER nmiss)
 \end{verbatim}
 
@@ -594,7 +584,7 @@ Read a variable.
 \section*{\tt \htmlref{streamReadVarSlice}{streamReadVarSlice}}
 
 \begin{verbatim}
-    SUBROUTINE streamReadVarSlice (INTEGER streamID, INTEGER varID, INTEGER levelID, 
+    SUBROUTINE streamReadVarSlice (INTEGER streamID, INTEGER varID, INTEGER levelID,
                                    DOUBLEPRECISION data_vec, INTEGER nmiss)
 \end{verbatim}
 
@@ -613,7 +603,7 @@ Synchronize an Open Dataset to Disk.
 \section*{\tt \htmlref{streamWriteVar}{streamWriteVar}}
 
 \begin{verbatim}
-    SUBROUTINE streamWriteVar (INTEGER streamID, INTEGER varID, 
+    SUBROUTINE streamWriteVar (INTEGER streamID, INTEGER varID,
                                DOUBLEPRECISION data_vec, INTEGER nmiss)
 \end{verbatim}
 
@@ -623,7 +613,7 @@ Write a variable.
 \section*{\tt \htmlref{streamWriteVarSlice}{streamWriteVarSlice}}
 
 \begin{verbatim}
-    SUBROUTINE streamWriteVarSlice (INTEGER streamID, INTEGER varID, INTEGER levelID, 
+    SUBROUTINE streamWriteVarSlice (INTEGER streamID, INTEGER varID, INTEGER levelID,
                                     DOUBLEPRECISION data_vec, INTEGER nmiss)
 \end{verbatim}
 
@@ -777,8 +767,8 @@ Create a variable list.
 \section*{\tt \htmlref{vlistDefAttFlt}{vlistDefAttFlt}}
 
 \begin{verbatim}
-    INTEGER FUNCTION vlistDefAttFlt (INTEGER vlistID, INTEGER varID, 
-                                     CHARACTER*(*) name, INTEGER type, INTEGER len, 
+    INTEGER FUNCTION vlistDefAttFlt (INTEGER vlistID, INTEGER varID,
+                                     CHARACTER*(*) name, INTEGER type, INTEGER len,
                                      DOUBLEPRECISION dp_vec)
 \end{verbatim}
 
@@ -788,8 +778,8 @@ Define a floating point attribute.
 \section*{\tt \htmlref{vlistDefAttInt}{vlistDefAttInt}}
 
 \begin{verbatim}
-    INTEGER FUNCTION vlistDefAttInt (INTEGER vlistID, INTEGER varID, 
-                                     CHARACTER*(*) name, INTEGER type, INTEGER len, 
+    INTEGER FUNCTION vlistDefAttInt (INTEGER vlistID, INTEGER varID,
+                                     CHARACTER*(*) name, INTEGER type, INTEGER len,
                                      INTEGER ip_vec)
 \end{verbatim}
 
@@ -799,8 +789,8 @@ Define an integer attribute.
 \section*{\tt \htmlref{vlistDefAttTxt}{vlistDefAttTxt}}
 
 \begin{verbatim}
-    INTEGER FUNCTION vlistDefAttTxt (INTEGER vlistID, INTEGER varID, 
-                                     CHARACTER*(*) name, INTEGER len, 
+    INTEGER FUNCTION vlistDefAttTxt (INTEGER vlistID, INTEGER varID,
+                                     CHARACTER*(*) name, INTEGER len,
                                      CHARACTER*(*) tp_cbuf)
 \end{verbatim}
 
@@ -819,7 +809,7 @@ Define the time axis of a variable list.
 \section*{\tt \htmlref{vlistDefVar}{vlistDefVar}}
 
 \begin{verbatim}
-    INTEGER FUNCTION vlistDefVar (INTEGER vlistID, INTEGER gridID, INTEGER zaxisID, 
+    INTEGER FUNCTION vlistDefVar (INTEGER vlistID, INTEGER gridID, INTEGER zaxisID,
                                   INTEGER tsteptype)
 \end{verbatim}
 
@@ -847,7 +837,7 @@ Define the data type of a Variable.
 \section*{\tt \htmlref{vlistDefVarDblKey}{vlistDefVarDblKey}}
 
 \begin{verbatim}
-    SUBROUTINE vlistDefVarDblKey (INTEGER vlistID, INTEGER varID, CHARACTER*(*) name, 
+    SUBROUTINE vlistDefVarDblKey (INTEGER vlistID, INTEGER varID, CHARACTER*(*) name,
                                   DOUBLEPRECISION value)
 \end{verbatim}
 
@@ -866,7 +856,7 @@ Define extra information of a Variable.
 \section*{\tt \htmlref{vlistDefVarIntKey}{vlistDefVarIntKey}}
 
 \begin{verbatim}
-    SUBROUTINE vlistDefVarIntKey (INTEGER vlistID, INTEGER varID, CHARACTER*(*) name, 
+    SUBROUTINE vlistDefVarIntKey (INTEGER vlistID, INTEGER varID, CHARACTER*(*) name,
                                   INTEGER value)
 \end{verbatim}
 
@@ -876,7 +866,7 @@ Set an arbitrary keyword/integer value pair for GRIB API.
 \section*{\tt \htmlref{vlistDefVarLongname}{vlistDefVarLongname}}
 
 \begin{verbatim}
-    SUBROUTINE vlistDefVarLongname (INTEGER vlistID, INTEGER varID, 
+    SUBROUTINE vlistDefVarLongname (INTEGER vlistID, INTEGER varID,
                                     CHARACTER*(*) longname)
 \end{verbatim}
 
@@ -886,7 +876,7 @@ Define the long name of a Variable.
 \section*{\tt \htmlref{vlistDefVarMissval}{vlistDefVarMissval}}
 
 \begin{verbatim}
-    SUBROUTINE vlistDefVarMissval (INTEGER vlistID, INTEGER varID, 
+    SUBROUTINE vlistDefVarMissval (INTEGER vlistID, INTEGER varID,
                                    DOUBLEPRECISION missval)
 \end{verbatim}
 
@@ -914,7 +904,7 @@ Define the parameter number of a Variable.
 \section*{\tt \htmlref{vlistDefVarStdname}{vlistDefVarStdname}}
 
 \begin{verbatim}
-    SUBROUTINE vlistDefVarStdname (INTEGER vlistID, INTEGER varID, 
+    SUBROUTINE vlistDefVarStdname (INTEGER vlistID, INTEGER varID,
                                    CHARACTER*(*) stdname)
 \end{verbatim}
 
@@ -951,7 +941,7 @@ Duplicate a variable list.
 \section*{\tt \htmlref{vlistHasVarKey}{vlistHasVarKey}}
 
 \begin{verbatim}
-    INTEGER FUNCTION vlistHasVarKey (INTEGER vlistID, INTEGER varID, 
+    INTEGER FUNCTION vlistHasVarKey (INTEGER vlistID, INTEGER varID,
                                      CHARACTER*(*) name)
 \end{verbatim}
 
@@ -961,7 +951,7 @@ returns 1 if meta-data key was read, 0 otherwise..
 \section*{\tt \htmlref{vlistInqAtt}{vlistInqAtt}}
 
 \begin{verbatim}
-    INTEGER FUNCTION vlistInqAtt (INTEGER vlistID, INTEGER varID, INTEGER attrnum, 
+    INTEGER FUNCTION vlistInqAtt (INTEGER vlistID, INTEGER varID, INTEGER attrnum,
                                   CHARACTER*(*) name, INTEGER typep, INTEGER lenp)
 \end{verbatim}
 
@@ -971,8 +961,8 @@ Get information about an attribute.
 \section*{\tt \htmlref{vlistInqAttFlt}{vlistInqAttFlt}}
 
 \begin{verbatim}
-    INTEGER FUNCTION vlistInqAttFlt (INTEGER vlistID, INTEGER varID, 
-                                     CHARACTER*(*) name, INTEGER mlen, 
+    INTEGER FUNCTION vlistInqAttFlt (INTEGER vlistID, INTEGER varID,
+                                     CHARACTER*(*) name, INTEGER mlen,
                                      DOUBLEPRECISION dp_vec)
 \end{verbatim}
 
@@ -982,8 +972,8 @@ Get the value(s) of a floating point attribute.
 \section*{\tt \htmlref{vlistInqAttInt}{vlistInqAttInt}}
 
 \begin{verbatim}
-    INTEGER FUNCTION vlistInqAttInt (INTEGER vlistID, INTEGER varID, 
-                                     CHARACTER*(*) name, INTEGER mlen, 
+    INTEGER FUNCTION vlistInqAttInt (INTEGER vlistID, INTEGER varID,
+                                     CHARACTER*(*) name, INTEGER mlen,
                                      INTEGER ip_vec)
 \end{verbatim}
 
@@ -993,8 +983,8 @@ Get the value(s) of an integer attribute.
 \section*{\tt \htmlref{vlistInqAttTxt}{vlistInqAttTxt}}
 
 \begin{verbatim}
-    INTEGER FUNCTION vlistInqAttTxt (INTEGER vlistID, INTEGER varID, 
-                                     CHARACTER*(*) name, INTEGER mlen, 
+    INTEGER FUNCTION vlistInqAttTxt (INTEGER vlistID, INTEGER varID,
+                                     CHARACTER*(*) name, INTEGER mlen,
                                      CHARACTER*(*) tp_cbuf)
 \end{verbatim}
 
@@ -1040,7 +1030,7 @@ Get the data type of a Variable.
 \section*{\tt \htmlref{vlistInqVarDblKey}{vlistInqVarDblKey}}
 
 \begin{verbatim}
-    DOUBLEPRECISION FUNCTION vlistInqVarDblKey (INTEGER vlistID, INTEGER varID, 
+    DOUBLEPRECISION FUNCTION vlistInqVarDblKey (INTEGER vlistID, INTEGER varID,
                                                 CHARACTER*(*) name)
 \end{verbatim}
 
@@ -1059,7 +1049,7 @@ Get extra information of a Variable.
 \section*{\tt \htmlref{vlistInqVarIntKey}{vlistInqVarIntKey}}
 
 \begin{verbatim}
-    INTEGER FUNCTION vlistInqVarIntKey (INTEGER vlistID, INTEGER varID, 
+    INTEGER FUNCTION vlistInqVarIntKey (INTEGER vlistID, INTEGER varID,
                                         CHARACTER*(*) name)
 \end{verbatim}
 
@@ -1069,7 +1059,7 @@ raw access to GRIB meta-data.
 \section*{\tt \htmlref{vlistInqVarLongname}{vlistInqVarLongname}}
 
 \begin{verbatim}
-    SUBROUTINE vlistInqVarLongname (INTEGER vlistID, INTEGER varID, 
+    SUBROUTINE vlistInqVarLongname (INTEGER vlistID, INTEGER varID,
                                     CHARACTER*(*) longname)
 \end{verbatim}
 
@@ -1106,7 +1096,7 @@ Get the parameter number of a Variable.
 \section*{\tt \htmlref{vlistInqVarStdname}{vlistInqVarStdname}}
 
 \begin{verbatim}
-    SUBROUTINE vlistInqVarStdname (INTEGER vlistID, INTEGER varID, 
+    SUBROUTINE vlistInqVarStdname (INTEGER vlistID, INTEGER varID,
                                    CHARACTER*(*) stdname)
 \end{verbatim}
 
@@ -1179,7 +1169,7 @@ Create a vertical Z-axis.
 \section*{\tt \htmlref{zaxisDefLevel}{zaxisDefLevel}}
 
 \begin{verbatim}
-    SUBROUTINE zaxisDefLevel (INTEGER zaxisID, INTEGER levelID, 
+    SUBROUTINE zaxisDefLevel (INTEGER zaxisID, INTEGER levelID,
                               DOUBLEPRECISION levels)
 \end{verbatim}
 

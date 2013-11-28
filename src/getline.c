@@ -60,26 +60,29 @@ getline(char **linebuf, size_t *linebuf_size, FILE *fp)
     buf_size = *linebuf_size;
     buf = *linebuf;
   }
-  if ((status = (fgets(buf, buf_size, fp) != NULL)))
+  /* initially buf_size is guaranteed < INT_MAX */
+  if ((status = (fgets(buf, (int)buf_size, fp) != NULL)))
   {
     len = strlen(buf);
     if (buf[len-1] != '\n')
     {
       do {
-        void *temp = realloc(buf, buf_size * 2);
+        size_t increment = 2 * buf_size - len <= INT_MAX
+          ? 2 * buf_size - len : INT_MAX - (buf_size - len);
+        void *temp = realloc(buf, buf_size + increment);
         if (!temp)
         {
           status = -1;
           break;
         }
         buf = temp;
-        buf_size *= 2;
+        buf_size += increment;
         old_len = len;
-      } while(fgets(buf + len, buf_size - len, fp)
+      } while(fgets(buf + len, (int)(buf_size - len), fp)
               && (len += strlen(buf + len)) > old_len
               && buf[len-1] != '\n');
     }
-    status = len > SSIZE_MAX ? SSIZE_MAX : len;
+    status = len > SSIZE_MAX ? SSIZE_MAX : (ssize_t)len;
   }
   if (linebuf_size)
     *linebuf_size = buf_size;

@@ -4,16 +4,7 @@
 #  include "config.h"
 #endif
 
-#if USE_MPI
-#  include <mpi.h>
-#  include <yaxt.h>
-#else
-#define MPI_Comm int
-#define MPI_Comm_f2c(c) (c)
-#define MPI_Comm_c2f(c) (c)
-#endif
-
-#if ! defined (_CDI_H)
+#if ! defined (CDI_H_)
 #  include "cdi.h"
 #endif
 
@@ -70,31 +61,6 @@
 /*  CALENDAR types  */
 
 
-/*  parallel IO IOMode  */
-
-
-/*  parallel IO routines  */
-
-#ifdef MPI_VERSION /* make_fint keep */
-FCALLSCSUB0 (pioEndDef, PIOENDDEF, pioenddef)
-FCALLSCSUB0 (pioEndTimestepping, PIOENDTIMESTEPPING, pioendtimestepping)
-FCALLSCSUB0 (pioFinalize, PIOFINALIZE, piofinalize)
-static int pioInit_fwrap(int commSuper, int nProcsIO, int IOMode, int * pioNamespace, float partInflate)
-{
-  MPI_Comm v;
-  v = pioInit(MPI_Comm_f2c(commSuper),  nProcsIO,  IOMode,  pioNamespace,  partInflate);
-  return MPI_Comm_c2f(v);
-}
-FCALLSCFUN5 (INT, pioInit_fwrap, PIOINIT, pioinit, INT, INT, INT, PINT, FLOAT)
-FCALLSCSUB0 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep)
-static void streamWriteVarPart_fwrap(int streamID, int varID, const void * data, int nmiss, void * partDesc)
-{
-  streamWriteVarPart( streamID,  varID,  data,  nmiss, (*(Xt_idxlist *)partDesc));
-}
-FCALLSCSUB5 (streamWriteVarPart_fwrap, STREAMWRITEVARPART, streamwritevarpart, INT, INT, PVOID, INT, PVOID)
-#endif /* make_fint keep */
-FCALLSCSUB1 (pioNamespaceSetActive, PIONAMESPACESETACTIVE, pionamespacesetactive, INT)
-
 /*  CDI control routines  */
 
 FCALLSCSUB0 (cdiReset, CDIRESET, cdireset)
@@ -106,6 +72,9 @@ FCALLSCFUN1 (INT, cdiHaveFiletype, CDIHAVEFILETYPE, cdihavefiletype, INT)
 FCALLSCSUB1 (cdiDefMissval, CDIDEFMISSVAL, cdidefmissval, DOUBLE)
 FCALLSCFUN0 (DOUBLE, cdiInqMissval, CDIINQMISSVAL, cdiinqmissval)
 FCALLSCSUB2 (cdiDefGlobal, CDIDEFGLOBAL, cdidefglobal, STRING, INT)
+FCALLSCFUN0 (INT, namespaceNew, NAMESPACENEW, namespacenew)
+FCALLSCSUB1 (namespaceSetActive, NAMESPACESETACTIVE, namespacesetactive, INT)
+FCALLSCSUB1 (namespaceDelete, NAMESPACEDELETE, namespacedelete, INT)
 
 /*  CDI converter routines  */
 
@@ -144,6 +113,10 @@ FCALLSCSUB2 (streamDefCompLevel, STREAMDEFCOMPLEVEL, streamdefcomplevel, INT, IN
 FCALLSCFUN1 (INT, streamInqCompType, STREAMINQCOMPTYPE, streaminqcomptype, INT)
 FCALLSCFUN1 (INT, streamInqCompLevel, STREAMINQCOMPLEVEL, streaminqcomplevel, INT)
 FCALLSCFUN2 (INT, streamDefTimestep, STREAMDEFTIMESTEP, streamdeftimestep, INT, INT)
+
+/*  query currently set timestep id  */
+
+FCALLSCFUN1 (INT, streamInqCurTimestepID, STREAMINQCURTIMESTEPID, streaminqcurtimestepid, INT)
 FCALLSCFUN2 (INT, streamInqTimestep, STREAMINQTIMESTEP, streaminqtimestep, INT, INT)
 FCALLSCFUN1 (STRING, streamFilename, STREAMFILENAME, streamfilename, INT)
 FCALLSCFUN1 (STRING, streamFilesuffix, STREAMFILESUFFIX, streamfilesuffix, INT)

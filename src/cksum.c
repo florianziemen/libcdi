@@ -108,7 +108,63 @@ memcrc_r(uint32_t *state, const unsigned char *block, size_t block_len)
   *state = s;
 }
 
-unsigned long
+#define SWAP_CSUM(BITWIDTH,BYTEWIDTH)                             \
+  do {                                                            \
+  for (size_t i = num_elems; i > 0; --i) {                        \
+    {                                                             \
+      uint##BITWIDTH##_t accum = *(uint##BITWIDTH##_t *)b++;      \
+      for (j = 0; j < BYTEWIDTH; ++j)                             \
+      {                                                           \
+        uint32_t c = (uint32_t)(accum & UCHAR_MAX);               \
+        s = (s << 8) ^ crctab[(s >> 24) ^ c];                     \
+        accum >>= 8;                                              \
+      }                                                           \
+    }                                                             \
+  } while (0)
+
+
+
+/**
+ *  Does endian-swapping prior to checksumming in case platform is big-endian
+ *
+ *  @param elems points to first first element with alignment elem_size
+ *  @param num_elems number of elements to process
+ *  @param elem_size size of each element in bytes
+ */
+void
+memcrc_r_eswap(uint32_t *state, const unsigned char *elems, size_t num_elems,
+               size_t elem_size)
+{
+#ifdef WORDS_BIGENDIAN
+  register uint32_t c, s = *state;
+  register size_t n = block_len;
+  register unsigned char *b = elems;
+
+  switch (elem_size)
+  {
+  case 1:
+    return memcrc_r(state, elems, num_elems, elem_size);
+  case 2:
+    SWAP_CSUM(16,2);
+    break;
+  case 4:
+    SWAP_CSUM(32,4);
+    break;
+  case 8:
+    SWAP_CSUM(64,8);
+    break;
+  case 16:
+    SWAP_CSUM(64,8);
+    break;
+  }
+  *state = s;
+#else
+  memcrc_r(state, elems, num_elems * elem_size);
+#endif
+}
+
+
+uint32_t
 memcrc_finish(uint32_t *state, off_t total_size)
 {
   register uint32_t c, s = *state;

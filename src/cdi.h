@@ -4,8 +4,8 @@
   This is the only file that must be included to use the CDI library from C.
 */
 
-#ifndef  _CDI_H
-#define  _CDI_H
+#ifndef  CDI_H_
+#define  CDI_H_
 
 #include <sys/types.h>
 
@@ -214,38 +214,6 @@ extern "C" {
 #define  CALENDAR_366DAYS         4
 #define  CALENDAR_NONE            5
 
-/* parallel IO IOMode */
-
-#define  PIO_NONE                 0
-#define  PIO_MPI                  1
-#define  PIO_WRITER               2
-#define  PIO_ASYNCH               3
-#define  PIO_FPGUARD              4
-
-#define  PIO_MINIOMODE                  PIO_NONE
-#define  PIO_MAXIOMODE                  PIO_FPGUARD
-#define  PIO_MINIOMODEWITHSPECIALPROCS  PIO_WRITER
-
-/* parallel IO routines */
-#ifdef MPI_VERSION
-#  include <yaxt.h>
-#endif
-
-#ifdef MPI_VERSION /* make_fint keep */
-void     pioEndDef             ( void );
-void     pioEndTimestepping    ( void );
-void     pioFinalize           ( void );
-/*      pioInit: initialize I/O server processes and communication */
-MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode,
-                 int *pioNamespace, float partInflate);
-void     pioWriteTimestep();
-
-void     streamWriteVarPart    (int streamID, int varID,
-                                const void *data, int nmiss,
-                                Xt_idxlist partDesc);
-
-#endif /* make_fint keep */
-void     pioNamespaceSetActive ( int );
 
 /* CDI control routines */
 
@@ -263,6 +231,11 @@ int     cdiHaveFiletype(int filetype);
 void    cdiDefMissval(double missval);
 double  cdiInqMissval(void);
 void    cdiDefGlobal(const char *string, int val);
+
+int     namespaceNew();
+void    namespaceSetActive(int namespaceID);
+void    namespaceDelete(int namespaceID);
+
 
 /* CDI converter routines */
 
@@ -329,6 +302,9 @@ int     streamInqCompLevel(int streamID);
 
 /*      streamDefTimestep: Define time step */
 int     streamDefTimestep(int streamID, int tsID);
+
+/* query currently set timestep id  */
+int streamInqCurTimestepID(int streamID);
 
 /*      streamInqTimestep: Get time step */
 int     streamInqTimestep(int streamID, int tsID);
@@ -1026,7 +1002,7 @@ void    streamInqHistoryString(int streamID, char *history);
 }
 #endif
 
-#endif  /* _CDI_H */
+#endif  /* CDI_H_ */
 /*
  * Local Variables:
  * c-file-style: "Java"

@@ -4,10 +4,11 @@
 
 #include <ctype.h>
 
-#include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
 #include "cdf.h"
+#include "dmemory.h"
+#include "error.h"
 #include "stream_grb.h"
 #include "stream_cdf.h"
 #include "stream_srv.h"
@@ -22,12 +23,8 @@
 #include "ieg.h"
 #include "vlist.h"
 #include "resource_handle.h"
-#include "pio_util.h"
 
 #include "namespace.h"
-#include "pio_interface.h"
-#include "pio_rpc.h"
-#include "pio_comm.h"
 
 #include <string.h>
 
@@ -454,7 +451,7 @@ void streamDefByteorder(int streamID, int byteorder)
 
   if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -1383,6 +1380,13 @@ int streamDefTimestep(int streamID, int tsID)
   return myStreamDefTimestep_(streamptr, tsID);
 }
 
+int streamInqCurTimestepID(int streamID)
+{
+  stream_t *streamptr = stream_to_pointer(streamID);
+  return streamptr->curTsID;
+}
+
+
 /*
 @Function  streamInqTimestep
 @Title     Get time step
@@ -2228,7 +2232,7 @@ void streamDefCompType(int streamID, int comptype)
 
   if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
@@ -2246,7 +2250,7 @@ void streamDefCompLevel(int streamID, int complevel)
 
   if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
     {
-      xwarning("%s", "Operation not executed.");
+      Warning("%s", "Operation not executed.");
       return;
     }
 
