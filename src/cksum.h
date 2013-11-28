@@ -3,6 +3,7 @@
 #endif
 
 #include <inttypes.h>
+#include <sys/types.h>
 
 void
 memcrc_r(uint32_t *state, const unsigned char *block, size_t block_len);
