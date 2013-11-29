@@ -1,6 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 #
-TESTS = test_grib.sh cksum_verify \
+#TESTS = test_grib.sh
+TESTS = cksum_verify \
 	test_cksum_grib test_cksum_nc test_cksum_extra \
 	test_cksum_service test_cksum_nc2 test_cksum_nc4 test_cksum_ieg \
 	test_chunk_cksum \
@@ -43,7 +44,7 @@ endif
 LDADD = ../src/libcdi.la -lm
 INCLUDES   = -I$(top_srcdir)/src
 #
-EXTRA_DIST = $(TESTS)
+# EXTRA_DIST = $(TESTS)
 #
 CLEANFILES  = `ls *~ *.grb *.nc *.srv *.ext example_*.cksum`
 #
