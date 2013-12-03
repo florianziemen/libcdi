@@ -1125,7 +1125,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 #endif
       default:
         {
-          Error("%s support not compiled in!", strfiletype(filetype));
+          Error("%s support not compiled in (fileID = %d)!", strfiletype(filetype), fileID);
           break;
         }
       }
