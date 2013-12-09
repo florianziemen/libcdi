@@ -750,6 +750,7 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
                               int filetype, stream_t *streamptr)
       = (int (*)(const char *, const char *, int, stream_t *))
       namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND).func;
+
     fileID = streamOpenDelegate(filename, filemode, filetype, streamptr);
   }
 
@@ -797,9 +798,10 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
   int status;
   Record *record = NULL;
   stream_t *streamptr = stream_new_entry();
+  vlist_t *vlistptr;
 
   if ( CDI_Debug )
-    Message("Open %s mode %c file %s", strfiletype(filetype), (int) *filemode, filename);
+    Message("Open %s file (mode=%c); filename: %s", strfiletype(filetype), (int) *filemode, filename);
 
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
 
@@ -808,38 +810,32 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
                               int filetype, stream_t *streamptr)
       = (int (*)(const char *, const char *, int, stream_t *))
       namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND).func;
+
     fileID = streamOpenDelegate(filename, "r", filetype, streamptr);
   }
 
-  if (fileID == CDI_UNDEFID || fileID == CDI_ELIBNAVAIL
-      || fileID == CDI_ESYSTEM )
-    {
-      streamID = fileID;
-      return (streamID);
-    }
-  else
-    {
-      vlist_t *vlistptr;
-      streamID = streamptr->self;
+  if ( fileID == CDI_UNDEFID || fileID == CDI_ELIBNAVAIL || fileID == CDI_ESYSTEM ) return (fileID);
 
-      streamptr->record   = record;
-      streamptr->filetype = filetype;
-      streamptr->filemode = tolower(*filemode);
-      streamptr->filename = strdupx(filename);
-      streamptr->fileID   = fileID;
+  streamID = streamptr->self;
 
-      streamptr->vlistID = vlistCreate();
-      /* cdiReadByteorder(streamID); */
-      status = cdiInqContents(streamptr);
-      if ( status < 0 ) return (status);
-      vlistptr = vlist_to_pointer(streamptr->vlistID);
-      vlistptr->ntsteps = cdiInqTimeSize(streamID);
-    }
+  //streamptr->record   = record;
+  streamptr->filetype = filetype;
+  streamptr->filemode = tolower(*filemode);
+  streamptr->filename = strdupx(filename);
+  streamptr->fileID   = fileID;
+
+  streamptr->vlistID = vlistCreate();
+  /* cdiReadByteorder(streamID); */
+  status = cdiInqContents(streamptr);
+  if ( status < 0 ) return (status);
+  vlistptr = vlist_to_pointer(streamptr->vlistID);
+  vlistptr->ntsteps = cdiInqTimeSize(streamID);
 
   {
     void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
       = (void (*)(stream_t *, int))
       namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
+
     streamCloseDelegate(streamptr, 0);
   }
 
@@ -905,7 +901,7 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
   if ( fileID == CDI_UNDEFID )
     streamID = CDI_UNDEFID;
   else
-    streamptr->fileID   = fileID;
+    streamptr->fileID = fileID;
 
   return (streamID);
 }
@@ -1167,12 +1163,12 @@ void streamClose(int streamID)
   streamCloseDelegate(streamptr, 1);
 
   if ( streamptr->record )
-      {
-	  if ( streamptr->record->buffer )
-              free(streamptr->record->buffer);
+    {
+      if ( streamptr->record->buffer )
+        free(streamptr->record->buffer);
 
-	  free(streamptr->record);
-      }
+      free(streamptr->record);
+    }
 
   streamptr->filetype = 0;
   if ( streamptr->filename ) free(streamptr->filename);

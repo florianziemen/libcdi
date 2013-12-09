@@ -1,3 +1,7 @@
+2013-12-09  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* streamOpenA: removed line "streamptr->record   = record"; record is allocated in cdiStreamOpenDefaultDelegate() (bug fix)
+
 2013-11-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Merged branch cdi-pio to trunk cdi
