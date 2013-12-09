@@ -796,7 +796,6 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
   int fileID = CDI_UNDEFID;
   int streamID = CDI_ESYSTEM;
   int status;
-  Record *record = NULL;
   stream_t *streamptr = stream_new_entry();
   vlist_t *vlistptr;
 
@@ -818,7 +817,6 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
 
   streamID = streamptr->self;
 
-  //streamptr->record   = record;
   streamptr->filetype = filetype;
   streamptr->filemode = tolower(*filemode);
   streamptr->filename = strdupx(filename);
