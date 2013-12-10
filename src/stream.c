@@ -801,6 +801,7 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
 
   if ( CDI_Debug )
     Message("Open %s file (mode=%c); filename: %s", strfiletype(filetype), (int) *filemode, filename);
+  if ( CDI_Debug ) printf("streamOpenA: %s\n", filename); // seg fault without this line on thunder/squall with "cdo cat x y"
 
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
 
