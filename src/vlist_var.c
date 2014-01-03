@@ -1529,8 +1529,6 @@ void vlistDefFlag(int vlistID, int varID, int levID, int flag)
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  vlistptr->vars[varID].flag = flag;
-
   levinfo_t li = DEFAULT_LEVINFO(levID);
   if (vlistptr->vars[varID].levinfo)
     ;
@@ -1538,7 +1536,20 @@ void vlistDefFlag(int vlistID, int varID, int levID, int flag)
     cdiVlistCreateVarLevInfo(vlistptr, varID);
   else
     return;
+
   vlistptr->vars[varID].levinfo[levID].flag = flag;
+
+  vlistptr->vars[varID].flag = 0;
+
+  int nlevs = zaxisInqSize(vlistptr->vars[varID].zaxisID);
+  for ( int levelID = 0; levelID < nlevs; levelID++ )
+    {
+      if ( vlistptr->vars[varID].levinfo[levelID].flag )
+        {
+          vlistptr->vars[varID].flag = 1;
+          break;
+        }
+    }
 }
 
 
@@ -1576,7 +1587,7 @@ int vlistFindVar(int vlistID, int fvarID)
       Message("varID not found for fvarID %d in vlistID %d!", fvarID, vlistID);
     }
 
-  return (varID);  
+  return (varID);
 }
 
 
