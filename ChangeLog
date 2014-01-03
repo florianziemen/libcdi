@@ -1,3 +1,7 @@
+2014-01-03  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* streamOpenA, streamOpen: parameter recordBufIsToBeCreated missing in call to cdiStreamOpenDefaultDelegate() (bug fix)
+
 2013-12-09  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* streamOpenA: removed line "streamptr->record   = record"; record is allocated in cdiStreamOpenDefaultDelegate() (bug fix)
