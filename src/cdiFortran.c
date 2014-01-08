@@ -141,7 +141,6 @@ FCALLSCSUB3 (streamReadRecord, STREAMREADRECORD, streamreadrecord, INT, PDOUBLE,
 FCALLSCSUB3 (streamWriteRecord, STREAMWRITERECORD, streamwriterecord, INT, PDOUBLE, INT)
 FCALLSCSUB3 (streamWriteRecordF, STREAMWRITERECORDF, streamwriterecordf, INT, PFLOAT, INT)
 FCALLSCSUB2 (streamCopyRecord, STREAMCOPYRECORD, streamcopyrecord, INT, INT)
-FCALLSCSUB3 (streamInqGinfo, STREAMINQGINFO, streaminqginfo, INT, PINT, PFLOAT)
 
 /*  VLIST routines  */
 

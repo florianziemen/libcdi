@@ -1,3 +1,7 @@
+2014-01-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* streamInqGinfo: added support for GRIB files > 2GB
+
 2014-01-03  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* streamOpenA, streamOpen: parameter recordBufIsToBeCreated missing in call to cdiStreamOpenDefaultDelegate() (bug fix)

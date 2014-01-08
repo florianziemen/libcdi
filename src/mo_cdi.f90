@@ -578,15 +578,6 @@ module mo_cdi
       end interface
   
       interface
-        subroutine streamInqGinfo(streamID,intnum,fltnum) bind(c,name='streamInqGinfo')
-          import :: c_int,c_float
-          integer(c_int), value :: streamID
-          integer(c_int), intent(out) :: intnum
-          real(c_float), intent(out) :: fltnum
-       end subroutine streamInqGinfo
-      end interface
-  
-      interface
         integer(c_int) function vlistCreate() bind(c,name='vlistCreate')
           import :: c_int
        end function vlistCreate
@@ -3135,7 +3126,6 @@ module mo_cdi
       public :: streamWriteRecord
       public :: streamWriteRecordF
       public :: streamCopyRecord
-      public :: streamInqGinfo
       public :: vlistCreate
       public :: vlistDestroy
       public :: vlistDuplicate

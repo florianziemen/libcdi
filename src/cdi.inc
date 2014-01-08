@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   November 2013
+! Uwe Schulzweida, MPI-MET, Hamburg,   January 2014
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -661,12 +661,6 @@
 !                                    (INTEGER         streamIDdest,
 !                                     INTEGER         streamIDsrc)
       EXTERNAL        streamCopyRecord
-
-!                     streamInqGinfo
-!                                    (INTEGER         streamID,
-!                                     INTEGER         intnum,
-!                                     REAL            fltnum)
-      EXTERNAL        streamInqGinfo
 
 !
 !  VLIST routines
