@@ -1,3 +1,7 @@
+2014-01-13 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_cdf::define_all_grids: bug fix for unstructured grids with and an additional undefined dimension [report: Florian Prill]
+
 2014-01-08  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* streamInqGinfo: added support for GRIB files > 2GB

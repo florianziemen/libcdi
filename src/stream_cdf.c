@@ -5595,8 +5595,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		{
 		  if ( ncvars[xvarid].ndims != ncvars[yvarid].ndims )
 		    {
-		      Warning("Inconsistent grid structure for variable %s!",
-			      ncvars[ncvarid].name);
+		      Warning("Inconsistent grid structure for variable %s!", ncvars[ncvarid].name);
 		      ncvars[ncvarid].xvarid = UNDEFID;
 		      ncvars[ncvarid].yvarid = UNDEFID;
 		      xvarid = UNDEFID;
@@ -5772,7 +5771,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 	      if      ( (int) ysize == 0 ) size = xsize;
 	      else if ( (int) xsize == 0 ) size = ysize;
-	      else if ( ncvars[ncvarid].gridtype == GRID_UNSTRUCTURED ) size = xsize; 
+	      else if ( ncvars[ncvarid].gridtype == GRID_UNSTRUCTURED ) size = xsize;
 	      else                         size = xsize*ysize;
 	    }
 
@@ -5986,6 +5985,46 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		}
 	    }
 
+          if ( grid.type == GRID_UNSTRUCTURED )
+            {
+              int zdimid = UNDEFID;
+              int xdimidx = -1, ydimidx = -1;
+
+              for ( i = 0; i < ndims; i++ )
+                {
+                  if      ( ncvars[ncvarid].dimtype[i] == X_AXIS ) xdimidx = i;
+                  else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS ) ydimidx = i;
+                  else if ( ncvars[ncvarid].dimtype[i] == Z_AXIS ) zdimid = ncvars[ncvarid].dimids[i];
+                }
+
+              if ( xdimid != UNDEFID && ydimid != UNDEFID && zdimid == UNDEFID )
+                {
+                  if ( grid.xsize > grid.ysize && grid.ysize < 1000 )
+                    {
+                      ncvars[ncvarid].dimtype[ydimidx] = Z_AXIS;
+                      ydimid = UNDEFID;
+                      grid.size  = grid.xsize;
+                      grid.ysize = 0;
+                    }
+                  else if ( grid.ysize > grid.xsize && grid.xsize < 1000 )
+                    {
+                      ncvars[ncvarid].dimtype[xdimidx] = Z_AXIS;
+                      xdimid = ydimid;
+                      ydimid = UNDEFID;
+                      grid.size  = grid.ysize;
+                      grid.xsize = grid.ysize;
+                      grid.ysize = 0;
+                    }
+                }
+
+              if ( grid.size != grid.xsize )
+                {
+                  Warning("Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
+                  ncvars[ncvarid].isvar = -1;
+                  continue;
+                }
+            }
+
 #if defined (PROJECTION_TEST)
 	  if ( proj.type == GRID_PROJECTION )
 	    {
@@ -6025,10 +6064,16 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
           if ( grid.type == GRID_UNSTRUCTURED )
             {
+              if ( CDI_Debug)
+                {
+                  if ( grid.number != UNDEFID ) printf("number : %d\n", grid.number);
+                  if ( ncvars[ncvarid].position > 0 ) printf("position : %d\n", ncvars[ncvarid].position);
+                  if ( gridfile[0] != 0 ) printf("gridfile: %s\n", gridfile);
+                  if ( uuidOfHGrid[0] != 0 ) printf("uuidOfHGrid: defined\n");
+                }
+
               if ( ncvars[ncvarid].position > 0 ) gridDefPosition(ncvars[ncvarid].gridID, ncvars[ncvarid].position);
-
               if ( gridfile[0] != 0 ) gridDefReference(ncvars[ncvarid].gridID, gridfile);
-
               if ( uuidOfHGrid[0] != 0 ) gridDefUUID(ncvars[ncvarid].gridID, uuidOfHGrid);
             }
 
@@ -6060,26 +6105,43 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  streamptr->xdimID[gridindex] = xdimid;
 	  streamptr->ydimID[gridindex] = ydimid;
 
-	  grid_free(&grid);
-	  grid_free(&proj);
-
 	  if ( CDI_Debug )
 	    Message("gridID %d %d %s", ncvars[ncvarid].gridID, ncvarid, ncvars[ncvarid].name);
 
 	  for ( ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++ )
 	    if ( ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].gridID == UNDEFID )
 	      {
-		int xdimid2 = -1, ydimid2 = -1;
-		ndims = ncvars[ncvarid2].ndims;
-		for ( i = 0; i < ndims; i++ )
+		int xdimid2 = UNDEFID, ydimid2 = UNDEFID, zdimid2 = UNDEFID;
+                int xdimidx = -1, ydimidx = -1;
+		int ndims2 = ncvars[ncvarid2].ndims;
+
+		for ( i = 0; i < ndims2; i++ )
 		  {
 		    if ( ncvars[ncvarid2].dimtype[i] == X_AXIS )
-		      xdimid2 = ncvars[ncvarid2].dimids[i];
+		      { xdimid2 = ncvars[ncvarid2].dimids[i]; xdimidx = i; }
 		    else if ( ncvars[ncvarid2].dimtype[i] == Y_AXIS )
-		      ydimid2 = ncvars[ncvarid2].dimids[i];
+		      { ydimid2 = ncvars[ncvarid2].dimids[i]; ydimidx = i; }
+		    else if ( ncvars[ncvarid2].dimtype[i] == Z_AXIS )
+		      { zdimid2 = ncvars[ncvarid2].dimids[i]; }
 		  }
 
-		if ( xdimid == xdimid2 &&
+                if ( ncvars[ncvarid2].gridtype == UNDEFID && grid.type == GRID_UNSTRUCTURED )
+                  {
+                    if ( xdimid == xdimid2 && ydimid2 != UNDEFID && zdimid2 == UNDEFID )
+                      {
+                        ncvars[ncvarid2].dimtype[ydimidx] = Z_AXIS;
+                        ydimid2 = UNDEFID;
+                      }
+
+                    if ( xdimid == ydimid2 && xdimid2 != UNDEFID && zdimid2 == UNDEFID )
+                      {
+                        ncvars[ncvarid2].dimtype[xdimidx] = Z_AXIS;
+                        xdimid2 = ydimid2;
+                        ydimid2 = UNDEFID;
+                      }
+                  }
+
+                if ( xdimid == xdimid2 &&
 		    (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == UNDEFID)) )
 		  {
 		    int same_grid = TRUE;
@@ -6098,13 +6160,15 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		    if ( same_grid )
 		      {
 			if ( CDI_Debug )
-			  Message("Same gridID %d %d %s",
-				  ncvars[ncvarid].gridID, ncvarid2, ncvars[ncvarid2].name);
+			  Message("Same gridID %d %d %s", ncvars[ncvarid].gridID, ncvarid2, ncvars[ncvarid2].name);
 			ncvars[ncvarid2].gridID = ncvars[ncvarid].gridID;
 			ncvars[ncvarid2].chunktype = ncvars[ncvarid].chunktype;
 		      }
 		  }
 	      }
+
+	  grid_free(&grid);
+	  grid_free(&proj);
 	}
     }
 }
