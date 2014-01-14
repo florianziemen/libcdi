@@ -3883,7 +3883,7 @@ int cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data,
 
       // printf("XXX %31.0f %31.0f %31.0f %31.0f\n", missval, (float)data[0]);
       for ( i = 0; i < gridsize; i++ )
-        if ( DBL_IS_EQUAL(data[i], missval) ) *nmiss += 1;
+        if ( DBL_IS_EQUAL(data[i], missval) ) (*nmiss)++;
     }
 
   addoffset    = vlistInqVarAddoffset(vlistID, varID);
