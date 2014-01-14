@@ -1403,7 +1403,7 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
 
       *nmiss = 0;
       for ( i = 0; i < gridsize; i++ )
-        if ( (abs(data[i]-undef_pds) < undef_eps) || IS_EQUAL(data[i],FSEC3_MissVal) ) {
+        if ( (fabs(data[i]-undef_pds) < undef_eps) || IS_EQUAL(data[i],FSEC3_MissVal) ) {
           data[i] = missval;
           (*nmiss)++;
         }
