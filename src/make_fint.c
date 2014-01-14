@@ -25,6 +25,7 @@ typedef struct
 }
 Docu;
 
+// Example: ./make_fint -d ../doc/pio/ cdipio.h
 
 static const char default_doc_root[] = "../doc";
 static struct {
