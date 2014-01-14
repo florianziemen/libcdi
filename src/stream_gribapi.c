@@ -957,7 +957,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       if ( linitial_field )
 	{
 	  if ( grib_get_double(gh, cdiAdditionalGRIBKeys[i], &dval) == 0 )
-            varDefOptGribInt(varID, dval, cdiAdditionalGRIBKeys[i]);
+            varDefOptGribDbl(varID, dval, cdiAdditionalGRIBKeys[i]);
 	}
       /* note: if the key is not defined, we do not throw an error! */
     }
