@@ -85,7 +85,7 @@ void instituteDefaultEntries ( void )
   resH[7]  =           institutDef(  7,   1, "NCEP",      "National Centers for Environmental Prediction");
   resH[8]  =           institutDef( 60,   0, "NCAR",      "National Center for Atmospheric Research");
   resH[9]  =           institutDef( 74,   0, "METOFFICE", "U.K. Met Office");
-  resH[10] =           institutDef( 97,   0, "ESA",       "European Space Agency ");
+  resH[10] =           institutDef( 97,   0, "ESA",       "European Space Agency");
   resH[11] =           institutDef( 99,   0, "KNMI",      "Royal Netherlands Meteorological Institute");
   /*     (void) institutDef(  0,   0, "IPSL", "IPSL (Institut Pierre Simon Laplace, Paris, France)"); */
 
@@ -131,7 +131,7 @@ int instituteCount ( void )
 int instituteCompareKernel ( institute_t *  ip1, institute_t * ip2 )
 {
   int differ = 0;
-  size_t len;
+  size_t len1, len2;
 
   if ( ip1->name )
     {
@@ -142,8 +142,9 @@ int instituteCompareKernel ( institute_t *  ip1, institute_t * ip2 )
         {
           if ( ip2->name )
             {
-              len = strlen(ip2->name);
-              if ( memcmp(ip2->name, ip1->name, len)) differ = 1;
+              len1 = strlen(ip1->name);
+              len2 = strlen(ip2->name);
+              if ( (len1 != len2) || memcmp(ip2->name, ip1->name, len2) ) differ = 1;
             }
         }
     }
@@ -151,8 +152,9 @@ int instituteCompareKernel ( institute_t *  ip1, institute_t * ip2 )
     {
       if ( ip2->longname )
         {
-          len = strlen(ip2->longname);
-          if ( memcmp(ip2->longname, ip1->longname, len)) differ = 1;
+          len1 = strlen(ip1->longname);
+          len2 = strlen(ip2->longname);
+          if ( (len1 < len2) || memcmp(ip2->longname, ip1->longname, len2) ) differ = 1;
         }
     }
   else
