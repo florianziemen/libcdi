@@ -3716,6 +3716,54 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
 }
 #endif
 
+static
+int set_validrange(long gridsize, double *data, double missval, double validmin, double validmax)
+{
+  long i;
+  int nmiss = 0;
+  /*
+  for ( i = 0; i < gridsize; i++, data++ )
+    {
+      if ( IS_NOT_EQUAL(validmin, VALIDMISS) && (*data) < validmin ) *data = missval;
+      if ( IS_NOT_EQUAL(validmax, VALIDMISS) && (*data) > validmax ) *data = missval;
+      if ( DBL_IS_EQUAL((*data), missval) ) nmiss++;
+    }
+  */
+
+  if ( IS_NOT_EQUAL(validmin, VALIDMISS) && !IS_NOT_EQUAL(validmax, VALIDMISS) )
+    {
+      for ( i = 0; i < gridsize; i++, data++ )
+        {
+          if ( (*data) < validmin )  { (*data) = missval; nmiss++; }
+          else if ( DBL_IS_EQUAL((*data), missval) )  nmiss++;
+        } // i
+    }
+  else if ( IS_NOT_EQUAL(validmax, VALIDMISS) && !IS_NOT_EQUAL(validmin, VALIDMISS))
+    {
+      for ( i = 0; i < gridsize; i++, data++ )
+        {
+          if ( (*data) > validmax )  { (*data) = missval; nmiss++; }
+          else if ( DBL_IS_EQUAL((*data), missval) )  nmiss++;
+        } // i
+    }
+  else if ( IS_NOT_EQUAL(validmin, VALIDMISS) && IS_NOT_EQUAL(validmax, VALIDMISS))
+    {
+      for ( i = 0; i < gridsize; i++, data++ )
+        {
+          if      ( (*data) < validmin )  { (*data) = missval; nmiss++; }
+          else if ( (*data) > validmax )  { (*data) = missval; nmiss++; }
+          else if ( DBL_IS_EQUAL((*data), missval) )  nmiss++;
+        } // i
+    }
+  else
+    {
+      for ( i = 0; i < gridsize; i++, data++ )
+        if ( DBL_IS_EQUAL((*data), missval) ) nmiss++;
+    }
+
+  return (nmiss);
+}
+
 
 int cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss)
 {
@@ -3875,15 +3923,15 @@ int cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data,
       lvalidrange = vlistInqVarValidrange(vlistID, varID, validrange);
       // printf("readvarslice: validrange %d %g %g\n", lvalidrange, validrange[0], validrange[1]);
       if ( lvalidrange )
-        for ( i = 0; i < gridsize; i++ )
-          {
-            if ( IS_NOT_EQUAL(validrange[0], VALIDMISS) && data[i] < validrange[0] ) data[i] = missval;
-            if ( IS_NOT_EQUAL(validrange[1], VALIDMISS) && data[i] > validrange[1] ) data[i] = missval;
-          }
-
-      // printf("XXX %31.0f %31.0f %31.0f %31.0f\n", missval, (float)data[0]);
-      for ( i = 0; i < gridsize; i++ )
-        if ( DBL_IS_EQUAL(data[i], missval) ) (*nmiss)++;
+        {
+          *nmiss = set_validrange(gridsize, data, missval, validrange[0], validrange[1]);
+        }
+      else
+        {
+          double *data_ptr = data; 
+          for ( i = 0; i < gridsize; i++, data_ptr++ )
+            if ( DBL_IS_EQUAL((*data_ptr), missval) ) (*nmiss)++;
+        }
     }
 
   addoffset    = vlistInqVarAddoffset(vlistID, varID);
