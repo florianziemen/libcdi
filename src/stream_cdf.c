@@ -3729,6 +3729,7 @@ int set_validrange(long gridsize, double *data, double missval, double validmin,
       if ( DBL_IS_EQUAL((*data), missval) ) nmiss++;
     }
   */
+  // 21/01/2014 Florian Prill: SX-9 vectorization
 
   if ( IS_NOT_EQUAL(validmin, VALIDMISS) && !IS_NOT_EQUAL(validmax, VALIDMISS) )
     {
