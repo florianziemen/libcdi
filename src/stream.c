@@ -1159,7 +1159,7 @@ void streamClose(int streamID)
     = (void (*)(stream_t *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_CLOSE_BACKEND).func;
 
-  streamCloseDelegate(streamptr, 1);
+  if ( streamptr->filetype != -1 ) streamCloseDelegate(streamptr, 1);
 
   if ( streamptr->record )
     {
