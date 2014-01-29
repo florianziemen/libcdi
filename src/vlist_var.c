@@ -32,6 +32,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].tsteptype     = TSTEP_INSTANT;
   vlistptr->vars[varID].timave        = 0;
   vlistptr->vars[varID].timaccu       = 0;
+  vlistptr->vars[varID].typeOfGeneratingProcess = 0;
   vlistptr->vars[varID].chunktype     = cdiChunkType;
   vlistptr->vars[varID].xyz           = 0;
   vlistptr->vars[varID].gridID        = CDI_UNDEFID;
