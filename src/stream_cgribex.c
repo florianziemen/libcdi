@@ -1566,13 +1566,15 @@ int cgribexDefDateTime(int *isec1, int timeunit, int date, int time)
 static
 void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg, int taxisID)
 {
-  int timetype = -1;
+  int timetype = TAXIS_ABSOLUTE;
   int timerange = 0;
-  int timeunit;
+  int timeunit = TUNIT_HOUR;
 
-  if ( taxisID != -1 ) timetype = taxisInqType(taxisID);
-
-  timeunit = taxisInqTunit(taxisID);
+  if ( taxisID != -1 ) 
+    {
+      timetype = taxisInqType(taxisID);
+      timeunit = taxisInqTunit(taxisID);
+    }
 
   if ( timetype == TAXIS_RELATIVE )
     {
