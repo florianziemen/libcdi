@@ -1619,7 +1619,8 @@ cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data,
 
   stream_check_ptr(__func__, streamptr);
 
-  // streamDefineTaxis(streamID);
+  // check taxis
+  if ( streamptr->curTsID == CDI_UNDEFID ) streamDefTimestep(streamID, 0);
 
   filetype = streamptr->filetype;
 
@@ -1801,6 +1802,9 @@ void stream_write_var_slice(int streamID, int varID, int levelID, int memtype, c
   streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
+
+  // check taxis
+  if ( streamptr->curTsID == CDI_UNDEFID ) streamDefTimestep(streamID, 0);
 
   filetype = streamptr->filetype;
 
