@@ -87,7 +87,7 @@ The function {\tt zaxisInqType} returns the type of a Z-axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt zaxisID\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}} or {\htmlref{\tt vlistInqVarZaxis}{vlistInqVarZaxis}}.
 
 \end{deflist}
 \end{minipage}
@@ -122,7 +122,7 @@ The function {\tt zaxisInqSize} returns the size of a Z-axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt zaxisID\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}} or {\htmlref{\tt vlistInqVarZaxis}{vlistInqVarZaxis}}.
 
 \end{deflist}
 \end{minipage}
@@ -171,7 +171,7 @@ The function {\tt zaxisInqLevels} returns all levels of a Z-axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt zaxisID\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}} or {\htmlref{\tt vlistInqVarZaxis}{vlistInqVarZaxis}}.
 \item[{\tt levels}]
 Pointer to the location into which the levels are read.
                     The caller must allocate space for the returned values.
@@ -199,7 +199,7 @@ The function {\tt zaxisInqLevel} returns one level of a Z-axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt zaxisID\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}} or {\htmlref{\tt vlistInqVarZaxis}{vlistInqVarZaxis}}.
 \item[{\tt levelID}]
 Level index (range: 0 to nlevel-1).
 
@@ -249,7 +249,7 @@ The function {\tt zaxisInqName} returns the name of a Z-axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt zaxisID\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}} or {\htmlref{\tt vlistInqVarZaxis}{vlistInqVarZaxis}}.
 \item[{\tt name}]
 Name of the Z-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
@@ -302,7 +302,7 @@ The function {\tt zaxisInqLongname} returns the longname of a Z-axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt longname\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}} or {\htmlref{\tt vlistInqVarZaxis}{vlistInqVarZaxis}}.
 \item[{\tt longname}]
 Longname of the Z-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
@@ -355,7 +355,7 @@ The function {\tt zaxisInqUnits} returns the units of a Z-axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt zaxisID\ }
 \item[{\tt zaxisID}]
-Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}} or {\htmlref{\tt vlistInqVarZaxis}{vlistInqVarZaxis}}.
 \item[{\tt units}]
 Units of the Z-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of

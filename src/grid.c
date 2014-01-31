@@ -747,8 +747,8 @@ void gridDefYunits(int gridID, const char *yunits)
 
 @Prototype void gridInqXname(int gridID, char *name)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  name     Name of the X-axis. The caller must allocate space for the 
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
+    @Item  name     Name of the X-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
@@ -777,8 +777,8 @@ void gridInqXname(int gridID, char *xname)
 
 @Prototype void gridInqXlongname(int gridID, char *longname)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  longname Longname of the X-axis. The caller must allocate space for the 
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
+    @Item  longname Longname of the X-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
@@ -807,8 +807,8 @@ void gridInqXlongname(int gridID, char *xlongname)
 
 @Prototype void gridInqXunits(int gridID, char *units)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  units    Units of the X-axis. The caller must allocate space for the 
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
+    @Item  units    Units of the X-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
@@ -849,8 +849,8 @@ void gridInqXstdname(int gridID, char *xstdname)
 
 @Prototype void gridInqYname(int gridID, char *name)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  name     Name of the Y-axis. The caller must allocate space for the 
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
+    @Item  name     Name of the Y-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
@@ -879,8 +879,8 @@ void gridInqYname(int gridID, char *yname)
 
 @Prototype void gridInqXlongname(int gridID, char *longname)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  longname Longname of the Y-axis. The caller must allocate space for the 
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
+    @Item  longname Longname of the Y-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
@@ -909,8 +909,8 @@ void gridInqYlongname(int gridID, char *ylongname)
 
 @Prototype void gridInqYunits(int gridID, char *units)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  units    Units of the Y-axis. The caller must allocate space for the 
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
+    @Item  units    Units of the Y-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
@@ -950,7 +950,7 @@ void gridInqYstdname(int gridID, char *ystdname)
 
 @Prototype int gridInqType(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
 
 @Description
 The function @func{gridInqType} returns the type of a Grid.
@@ -982,7 +982,7 @@ int gridInqType(int gridID)
 
 @Prototype int gridInqSize(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
 
 @Description
 The function @func{gridInqSize} returns the size of a Grid.
@@ -1176,7 +1176,7 @@ int gridInqPrec(int gridID)
 
 @Prototype int gridInqXsize(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
 
 @Description
 The function @func{gridInqXsize} returns the number of values of a X-axis.
@@ -1248,7 +1248,7 @@ void gridDefYsize(int gridID, int ysize)
 
 @Prototype int gridInqYsize(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
 
 @Description
 The function @func{gridInqYsize} returns the number of values of a Y-axis.
@@ -1307,7 +1307,7 @@ void gridDefNP(int gridID, int np)
 
 @Prototype int gridInqNP(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
 
 @Description
 The function @func{gridInqNP} returns the number of parallels between a pole and the equator
@@ -1505,7 +1505,7 @@ void gridDefMaskGME(int gridID, const int *mask)
 
 @Prototype int gridInqXvals(int gridID, double *xvals)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
     @Item  xvals    Pointer to the location into which the X-values are read.
                     The caller must allocate space for the returned values.
 
@@ -1602,7 +1602,7 @@ void gridDefXvals(int gridID, const double *xvals)
 
 @Prototype int gridInqYvals(int gridID, double *yvals)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
     @Item  yvals    Pointer to the location into which the Y-values are read.
                     The caller must allocate space for the returned values.
 
@@ -2920,8 +2920,7 @@ int gridGenerate(grid_t grid)
 
 @Prototype int gridDuplicate(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate},
-                    @fref{gridDuplicate} or @fref{vlistInqVarGrid}.
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
 
 @Description
 The function @func{gridDuplicate} duplicates a horizontal Grid.
@@ -3274,7 +3273,7 @@ void gridDefXbounds(int gridID, const double *xbounds)
 
 @Prototype int gridInqXbounds(int gridID, double *xbounds)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
     @Item  xbounds  Pointer to the location into which the X-bounds are read.
                     The caller must allocate space for the returned values.
 
@@ -3389,7 +3388,7 @@ void gridDefYbounds(int gridID, const double *ybounds)
 
 @Prototype int gridInqYbounds(int gridID, double *ybounds)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
     @Item  ybounds  Pointer to the location into which the Y-bounds are read.
                     The caller must allocate space for the returned values.
 
@@ -3946,7 +3945,7 @@ void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
 
 @Prototype void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonParY, double *lat1, double *lat2, double *xinc, double *yinc, int *projflag, int *scanflag)
 @Parameter
-    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
     @Item  originLon Longitude of the first grid point.
     @Item  originLat Latitude of the first grid point.
     @Item  lonParY   The East longitude of the meridian which is parallel to the Y-axis.
@@ -4170,7 +4169,7 @@ void gridDefNumber(int gridID, const int number)
 
 @Prototype int gridInqNumber(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
 
 @Description
 The function @func{gridInqNumber} returns the reference number to an unstructured grid.
@@ -4227,7 +4226,7 @@ void gridDefPosition(int gridID, int position)
 
 @Prototype int gridInqPosition(int gridID)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
 
 @Description
 The function @func{gridInqPosition} returns the position of grid in the reference file.
@@ -4293,7 +4292,7 @@ void gridDefReference(int gridID, const char *reference)
 
 @Prototype char *gridInqReference(int gridID, char *reference)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
 
 @Description
 The function @func{gridInqReference} returns the reference URI to an unstructured grid.
@@ -4361,7 +4360,7 @@ void gridDefUUID(int gridID, const char *uuid)
 
 @Prototype char *gridInqUUID(int gridID, char *uuid)
 @Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
 
 @Description
 The function @func{gridInqUUID} returns the UUID to an unstructured grid.

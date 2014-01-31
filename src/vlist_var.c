@@ -335,7 +335,7 @@ void vlistDefVarCode(int vlistID, int varID, int code)
   param = vlistptr->vars[varID].param;
 
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
-  
+
   vlistptr->vars[varID].param = cdiEncodeParam(code, pcat, pdis);
 }
 
@@ -361,7 +361,7 @@ void vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *tstepty
 
 @Prototype int vlistInqVarGrid(int vlistID, int varID)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier.
 
 @Description
@@ -389,7 +389,7 @@ int vlistInqVarGrid(int vlistID, int varID)
 
 @Prototype int vlistInqVarZaxis(int vlistID, int varID)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier.
 
 @Description
@@ -417,7 +417,7 @@ int vlistInqVarZaxis(int vlistID, int varID)
 
 @Prototype int vlistInqVarParam(int vlistID, int varID)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier.
 
 @Description
@@ -448,7 +448,7 @@ int vlistInqVarParam(int vlistID, int varID)
 
 @Prototype int vlistInqVarCode(int vlistID, int varID)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier.
 
 @Description
@@ -535,7 +535,7 @@ const char *vlistInqVarUnitsPtr(int vlistID, int varID)
 
 @Prototype void vlistInqVarName(int vlistID, int varID, char *name)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier.
     @Item  name     Returned variable name. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
@@ -589,7 +589,7 @@ void vlistInqVarName(int vlistID, int varID, char *name)
 
 @Prototype void vlistInqVarLongname(int vlistID, int varID, char *longname)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier.
     @Item  longname Long name of the variable. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
@@ -641,7 +641,7 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
 
 @Prototype void vlistInqVarStdname(int vlistID, int varID, char *stdname)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier.
     @Item  stdname  Standard name of the variable. The caller must allocate space for the 
                     returned string. The maximum possible length, in characters, of
@@ -680,7 +680,7 @@ void vlistInqVarStdname(int vlistID, int varID, char *stdname)
 
 @Prototype void vlistInqVarUnits(int vlistID, int varID, char *units)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier.
     @Item  units    Units of the variable. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
@@ -772,7 +772,7 @@ int vlistInqVarSize(int vlistID, int varID)
 
 @Prototype int vlistInqVarDatatype(int vlistID, int varID)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier.
 
 @Description
@@ -1123,7 +1123,7 @@ void vlistDefVarUnits(int vlistID, int varID, const char *units)
 
 @Prototype double vlistInqVarMissval(int vlistID, int varID)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier.
 
 @Description
@@ -1219,7 +1219,7 @@ void vlistDefVarExtra(int vlistID, int varID, const char *extra)
 
 @Prototype void vlistInqVarExtra(int vlistID, int varID, char *extra)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier.
     @Item  extra    Returned variable extra information. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of

@@ -424,7 +424,7 @@ void zaxisDefUnits(int zaxisID, const char *units)
 
 @Prototype void zaxisInqName(int zaxisID, char *name)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate} or @fref{vlistInqVarZaxis}.
     @Item  name     Name of the Z-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant @func{CDI_MAX_NAME}.
@@ -454,7 +454,7 @@ void zaxisInqName(int zaxisID, char *name)
 
 @Prototype void zaxisInqLongname(int zaxisID, char *longname)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate} or @fref{vlistInqVarZaxis}.
     @Item  longname Longname of the Z-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant @func{CDI_MAX_NAME}.
@@ -484,7 +484,7 @@ void zaxisInqLongname(int zaxisID, char *longname)
 
 @Prototype void zaxisInqUnits(int zaxisID, char *units)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate} or @fref{vlistInqVarZaxis}.
     @Item  units    Units of the Z-axis. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant @func{CDI_MAX_NAME}.
@@ -752,7 +752,7 @@ void zaxisDefNumber(int zaxisID, const int number)
 
 @Prototype int zaxisInqNumber(int zaxisID)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate} or @fref{vlistInqVarZaxis}.
 
 @Description
 The function @func{zaxisInqNumber} returns the reference number to a generalized Z-axis.
@@ -814,7 +814,7 @@ void zaxisDefUUID(int zaxisID, const char *uuid)
 
 @Prototype char *zaxisInqUUID(int zaxisID, char *uuid)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate} or @fref{vlistInqVarZaxis}.
 
 @Description
 The function @func{zaxisInqUUID} returns the UUID to a generalized Z-axis.
@@ -842,7 +842,7 @@ char *zaxisInqUUID(int zaxisID, char *uuid)
 
 @Prototype double zaxisInqLevel(int zaxisID, int levelID)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate} or @fref{vlistInqVarZaxis}.
     @Item  levelID  Level index (range: 0 to nlevel-1).
 
 @Description
@@ -918,7 +918,7 @@ const double *zaxisInqLevelsPtr(int zaxisID)
 
 @Prototype void zaxisInqLevels(int zaxisID, double *levels)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate} or @fref{vlistInqVarZaxis}.
     @Item  levels   Pointer to the location into which the levels are read.
                     The caller must allocate space for the returned values.
 
@@ -1040,7 +1040,7 @@ int zaxisInqLevelID(int zaxisID, double level)
 
 @Prototype int zaxisInqType(int zaxisID)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate} or @fref{vlistInqVarZaxis}.
 
 @Description
 The function @func{zaxisInqType} returns the type of a Z-axis.
@@ -1076,7 +1076,7 @@ int zaxisInqType(int zaxisID)
 
 @Prototype int zaxisInqSize(int zaxisID)
 @Parameter
-    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}
+    @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate} or @fref{vlistInqVarZaxis}.
 
 @Description
 The function @func{zaxisInqSize} returns the size of a Z-axis.
