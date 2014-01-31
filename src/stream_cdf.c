@@ -1955,6 +1955,26 @@ void cdfDefGridUUID(stream_t *streamptr, int gridID)
 }
 
 static
+void cdfDefZaxisUUID(stream_t *streamptr, int zaxisID)
+{
+  char uuidOfVGrid[17];
+  zaxisInqUUID(zaxisID, uuidOfVGrid);
+
+  if ( uuidOfVGrid[0] != 0 )
+    {
+      char uuidOfVGridStr[37];
+      uuid2str(uuidOfVGrid, uuidOfVGridStr);
+      if ( uuidOfVGridStr[0] != 0 && strlen(uuidOfVGridStr) == 36 )
+        {
+          int fileID  = streamptr->fileID;
+          if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+          cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfVGrid", 36, uuidOfVGridStr);
+          if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
+        }
+    }
+}
+
+static
 void cdfDefUnstructured(stream_t *streamptr, int gridID)
 {
   char xunits[CDI_MAX_NAME];
@@ -2323,6 +2343,9 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
         }
 
       if ( ilevel ) sprintf(&axisname[strlen(axisname)], "_%1d", ilevel+1);
+
+      if ( type == ZAXIS_REFERENCE )
+	cdfDefZaxisUUID(streamptr, zaxisID);
 
       if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
         {

@@ -1,3 +1,12 @@
+2014-02-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* Version 1.6.3 released
+	* using CGRIBEX library version 1.6.3
+
+2014-01-31 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* stream_cdf: added cdfDefZaxisUUID() [patch: Florian Prill]
+
 2014-01-13 Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* stream_cdf::define_all_grids: bug fix for unstructured grids and an additional undefined dimension [report: Florian Prill]
