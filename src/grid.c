@@ -129,7 +129,7 @@ void grid_init(grid_t *gridptr)
   gridptr->yunits[0]    = 0;
   gridptr->xstdname[0]  = 0;
   gridptr->ystdname[0]  = 0;
-  gridptr->uuid[0]      = 0;
+  memset(gridptr->uuid, 0, 16);
   gridptr->name         = NULL;
 }
 
