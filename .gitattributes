@@ -188,7 +188,6 @@ src/cdf_int.h -text
 src/cdi.h -text
 src/cdi.inc -text
 src/cdiFortran.c -text
-src/cdiFortran.h -text
 src/cdi_cksum.c -text
 src/cdi_cksum.h -text
 src/cdi_error.c -text

@@ -172,7 +172,6 @@ echo "#undef calloc"  >>  ${PROG}
 echo "#undef free"    >>  ${PROG}
 echo "#undef DOUBLE_PRECISION" >>  ${PROG}
 cat $srcdir/cfortran.h   >>  ${PROG}
-cat $srcdir/cdiFortran.h   >>  ${PROG}
 echo "#endif" >>  ${PROG}
 cat $srcdir/cdiFortran.c >>  ${PROG}
 

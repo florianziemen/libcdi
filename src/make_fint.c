@@ -154,7 +154,7 @@ static struct symbol funArgSym[]
         "^"WS"*(const"WS"+)?float"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
       { "DOUBLEPRECISION", "PDOUBLE", "double *%.*s",
         "^"WS"*(const"WS"+)?double"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
-      { "CHARACTER*(*)",   "CBUF",    "char *%.*s",
+      { "CHARACTER*(*)",   "PPSTRING",    "char *%.*s",
         "^"WS"*(const"WS"+)?char"WS"+\\*""([A-Za-z_][A-Za-z_0-9]*_cbuf)"
         WS"*[,\\)]", 2, 0, 0 },
       { "CHARACTER*(*)",   "STRING",  "char *%.*s",
@@ -320,10 +320,6 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   fprintf(fpint, "\n");
   fprintf(fpint, "#if ! defined (__CFORTRAN_LOADED)\n");
   fprintf(fpint, "#  include \"cfortran.h\"\n");
-  fprintf(fpint, "#endif\n");
-  fprintf(fpint, "\n");
-  fprintf(fpint, "#if ! defined (_CDIFORTRAN_H)\n");
-  fprintf(fpint, "#  include \"cdiFortran.h\"\n");
   fprintf(fpint, "#endif\n");
   fprintf(fpint, "\n");
 

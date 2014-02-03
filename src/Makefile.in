@@ -375,7 +375,6 @@ libcdi_la_SOURCES = \
 	cdi_limits.h	 \
 	cdi_util.c       \
 	cdiFortran.c     \
-	cdiFortran.h     \
 	cfortran.h       \
 	cgribex.h	 \
 	cgribexlib.c  	 \

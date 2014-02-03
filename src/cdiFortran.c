@@ -14,10 +14,6 @@
 #  include "cfortran.h"
 #endif
 
-#if ! defined (_CDIFORTRAN_H)
-#  include "cdiFortran.h"
-#endif
-
 
 /*  Byte order  */
 
@@ -264,10 +260,10 @@ FCALLSCFUN6 (INT, vlistInqAtt, VLISTINQATT, vlistinqatt, INT, INT, INT, PSTRING,
 FCALLSCFUN3 (INT, vlistDelAtt, VLISTDELATT, vlistdelatt, INT, INT, STRING)
 FCALLSCFUN6 (INT, vlistDefAttInt, VLISTDEFATTINT, vlistdefattint, INT, INT, STRING, INT, INT, PINT)
 FCALLSCFUN6 (INT, vlistDefAttFlt, VLISTDEFATTFLT, vlistdefattflt, INT, INT, STRING, INT, INT, PDOUBLE)
-FCALLSCFUN5 (INT, vlistDefAttTxt, VLISTDEFATTTXT, vlistdefatttxt, INT, INT, STRING, INT, CBUF)
+FCALLSCFUN5 (INT, vlistDefAttTxt, VLISTDEFATTTXT, vlistdefatttxt, INT, INT, STRING, INT, PPSTRING)
 FCALLSCFUN5 (INT, vlistInqAttInt, VLISTINQATTINT, vlistinqattint, INT, INT, STRING, INT, PINT)
 FCALLSCFUN5 (INT, vlistInqAttFlt, VLISTINQATTFLT, vlistinqattflt, INT, INT, STRING, INT, PDOUBLE)
-FCALLSCFUN5 (INT, vlistInqAttTxt, VLISTINQATTTXT, vlistinqatttxt, INT, INT, STRING, INT, CBUF)
+FCALLSCFUN5 (INT, vlistInqAttTxt, VLISTINQATTTXT, vlistinqatttxt, INT, INT, STRING, INT, PPSTRING)
 
 /*  GRID routines  */
 
@@ -344,8 +340,8 @@ FCALLSCSUB2 (gridDefPosition, GRIDDEFPOSITION, griddefposition, INT, INT)
 FCALLSCFUN1 (INT, gridInqPosition, GRIDINQPOSITION, gridinqposition, INT)
 FCALLSCSUB2 (gridDefReference, GRIDDEFREFERENCE, griddefreference, INT, STRING)
 FCALLSCFUN2 (INT, gridInqReference, GRIDINQREFERENCE, gridinqreference, INT, PSTRING)
-FCALLSCSUB2 (gridDefUUID, GRIDDEFUUID, griddefuuid, INT, CBUF)
-FCALLSCFUN2 (STRING, gridInqUUID, GRIDINQUUID, gridinquuid, INT, CBUF)
+FCALLSCSUB2 (gridDefUUID, GRIDDEFUUID, griddefuuid, INT, PPSTRING)
+FCALLSCFUN2 (STRING, gridInqUUID, GRIDINQUUID, gridinquuid, INT, PPSTRING)
 
 /*  Lambert Conformal Conic grid (GRIB version)  */
 
@@ -394,8 +390,8 @@ FCALLSCSUB2 (zaxisDefNlevRef, ZAXISDEFNLEVREF, zaxisdefnlevref, INT, INT)
 FCALLSCFUN1 (INT, zaxisInqNlevRef, ZAXISINQNLEVREF, zaxisinqnlevref, INT)
 FCALLSCSUB2 (zaxisDefNumber, ZAXISDEFNUMBER, zaxisdefnumber, INT, INT)
 FCALLSCFUN1 (INT, zaxisInqNumber, ZAXISINQNUMBER, zaxisinqnumber, INT)
-FCALLSCSUB2 (zaxisDefUUID, ZAXISDEFUUID, zaxisdefuuid, INT, CBUF)
-FCALLSCFUN2 (STRING, zaxisInqUUID, ZAXISINQUUID, zaxisinquuid, INT, CBUF)
+FCALLSCSUB2 (zaxisDefUUID, ZAXISDEFUUID, zaxisdefuuid, INT, PPSTRING)
+FCALLSCFUN2 (STRING, zaxisInqUUID, ZAXISINQUUID, zaxisinquuid, INT, PPSTRING)
 FCALLSCSUB2 (zaxisDefName, ZAXISDEFNAME, zaxisdefname, INT, STRING)
 FCALLSCSUB2 (zaxisDefLongname, ZAXISDEFLONGNAME, zaxisdeflongname, INT, STRING)
 FCALLSCSUB2 (zaxisDefUnits, ZAXISDEFUNITS, zaxisdefunits, INT, STRING)
