@@ -4358,18 +4358,18 @@ void gridDefUUID(int gridID, const char *uuid)
 @Function  gridInqUUID
 @Title     Get the UUID to an unstructured grid
 
-@Prototype char *gridInqUUID(int gridID, char *uuid)
+@Prototype void gridInqUUID(int gridID, char *uuid)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
 
 @Description
-The function @func{gridInqUUID} returns the UUID to an unstructured grid.
+The function @func{gridInqUUID} returns the UUID to an unstructured grid to the parameter uuid.
 
 @Result
 @func{gridInqUUID} returns the UUID to an unstructured grid.
 @EndFunction
 */
-char *gridInqUUID(int gridID, char *uuid)
+void gridInqUUID(int gridID, char *uuid)
 {
   grid_t *gridptr;
 
@@ -4378,8 +4378,6 @@ char *gridInqUUID(int gridID, char *uuid)
   grid_check_ptr(gridID, gridptr);
 
   memcpy(uuid, gridptr->uuid, 16);
-
-  return (uuid);
 }
 
 

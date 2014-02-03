@@ -2059,11 +2059,11 @@ module mo_cdi
       end interface
   
       interface
-        character(c_char) function gridInqUUID(gridID,uuid_cbuf) bind(c,name='gridInqUUID')
+        subroutine gridInqUUID(gridID,uuid_cbuf) bind(c,name='gridInqUUID')
           import :: c_int,c_char
           integer(c_int), value :: gridID
           character(c_char), dimension(*) :: uuid_cbuf
-       end function gridInqUUID
+       end subroutine gridInqUUID
       end interface
   
       interface

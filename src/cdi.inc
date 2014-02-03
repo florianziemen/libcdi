@@ -1627,7 +1627,7 @@
 !                                     CHARACTER*(*)   uuid_cbuf)
       EXTERNAL        gridDefUUID
 
-      CHARACTER(80)   gridInqUUID
+!                     gridInqUUID
 !                                    (INTEGER         gridID,
 !                                     CHARACTER*(*)   uuid_cbuf)
       EXTERNAL        gridInqUUID

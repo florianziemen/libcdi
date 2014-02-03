@@ -2601,7 +2601,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 	    GRIB_CHECK(grib_set_long(gh, "numberOfGridUsed", number), 0);
 	    GRIB_CHECK(grib_set_long(gh, "numberOfGridInReference", position), 0);
             len = 16;
-	    if (grib_set_bytes(gh, "uuidOfHGrid", (unsigned char *) gridInqUUID(gridID, uuid), &len) != 0)
+            gridInqUUID(gridID, uuid);
+	    if (grib_set_bytes(gh, "uuidOfHGrid", (unsigned char *) uuid, &len) != 0)
 	      Warning("Can't write UUID!");
 	  }
 

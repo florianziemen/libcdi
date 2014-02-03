@@ -735,7 +735,7 @@ int     gridInqReference(int gridID, char *reference);
 void    gridDefUUID(int gridID, const char *uuid_cbuf);
 
 /*      gridInqUUID: Get the UUID of an unstructured grid */
-char   *gridInqUUID(int gridID, char *uuid_cbuf);
+void    gridInqUUID(int gridID, char *uuid_cbuf);
 
 
 /* Lambert Conformal Conic grid (GRIB version) */

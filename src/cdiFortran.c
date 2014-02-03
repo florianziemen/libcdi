@@ -341,7 +341,7 @@ FCALLSCFUN1 (INT, gridInqPosition, GRIDINQPOSITION, gridinqposition, INT)
 FCALLSCSUB2 (gridDefReference, GRIDDEFREFERENCE, griddefreference, INT, STRING)
 FCALLSCFUN2 (INT, gridInqReference, GRIDINQREFERENCE, gridinqreference, INT, PSTRING)
 FCALLSCSUB2 (gridDefUUID, GRIDDEFUUID, griddefuuid, INT, PPSTRING)
-FCALLSCFUN2 (STRING, gridInqUUID, GRIDINQUUID, gridinquuid, INT, PPSTRING)
+FCALLSCSUB2 (gridInqUUID, GRIDINQUUID, gridinquuid, INT, PPSTRING)
 
 /*  Lambert Conformal Conic grid (GRIB version)  */
 
