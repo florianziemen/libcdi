@@ -2383,11 +2383,11 @@ module mo_cdi
       end interface
   
       interface
-        character(c_char) function zaxisInqUUID(zaxisID,uuid_cbuf) bind(c,name='zaxisInqUUID')
+        subroutine zaxisInqUUID(zaxisID,uuid_cbuf) bind(c,name='zaxisInqUUID')
           import :: c_int,c_char
           integer(c_int), value :: zaxisID
           character(c_char), dimension(*) :: uuid_cbuf
-       end function zaxisInqUUID
+       end subroutine zaxisInqUUID
       end interface
   
       interface

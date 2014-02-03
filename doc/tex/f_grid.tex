@@ -1013,7 +1013,7 @@ The function {\tt gridInqUUID} returns the UUID to an unstructured grid.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    char *gridInqUUID(INTEGER gridID, CHARACTER*(*) uuid)
+    SUBROUTINE gridInqUUID(INTEGER gridID, CHARACTER*(*) uuid)
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -1026,4 +1026,4 @@ Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htm
 
 \subsubsection*{Result}
 
-{\tt gridInqUUID} returns the UUID to an unstructured grid.
+{\tt gridInqUUID} returns the UUID to an unstructured grid to the parameter uuid.

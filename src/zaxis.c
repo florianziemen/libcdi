@@ -812,7 +812,7 @@ void zaxisDefUUID(int zaxisID, const char *uuid)
 @Function  zaxisInqUUID
 @Title     Get the uuid to a generalized Z-axis
 
-@Prototype char *zaxisInqUUID(int zaxisID, char *uuid)
+@Prototype void zaxisInqUUID(int zaxisID, char *uuid)
 @Parameter
     @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate} or @fref{vlistInqVarZaxis}.
 
@@ -820,10 +820,10 @@ void zaxisDefUUID(int zaxisID, const char *uuid)
 The function @func{zaxisInqUUID} returns the UUID to a generalized Z-axis.
 
 @Result
-@func{zaxisInqUUID} returns the UUID to a generalized Z-axis.
+@func{zaxisInqUUID} returns the UUID to a generalized Z-axis to the parameter uuid.
 @EndFunction
 */
-char *zaxisInqUUID(int zaxisID, char *uuid)
+void zaxisInqUUID(int zaxisID, char *uuid)
 {
   zaxis_t *zaxisptr;
 
@@ -832,8 +832,6 @@ char *zaxisInqUUID(int zaxisID, char *uuid)
   zaxis_check_ptr(zaxisID, zaxisptr);
 
   memcpy(uuid, zaxisptr->uuid, 16);
-
-  return (uuid);
 }
 
 /*

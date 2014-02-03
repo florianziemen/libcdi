@@ -4363,10 +4363,10 @@ void gridDefUUID(int gridID, const char *uuid)
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
 
 @Description
-The function @func{gridInqUUID} returns the UUID to an unstructured grid to the parameter uuid.
+The function @func{gridInqUUID} returns the UUID to an unstructured grid.
 
 @Result
-@func{gridInqUUID} returns the UUID to an unstructured grid.
+@func{gridInqUUID} returns the UUID to an unstructured grid to the parameter uuid.
 @EndFunction
 */
 void gridInqUUID(int gridID, char *uuid)

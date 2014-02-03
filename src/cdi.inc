@@ -1849,7 +1849,7 @@
 !                                     CHARACTER*(*)   uuid_cbuf)
       EXTERNAL        zaxisDefUUID
 
-      CHARACTER(80)   zaxisInqUUID
+!                     zaxisInqUUID
 !                                    (INTEGER         zaxisID,
 !                                     CHARACTER*(*)   uuid_cbuf)
       EXTERNAL        zaxisInqUUID

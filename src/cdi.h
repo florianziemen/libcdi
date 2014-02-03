@@ -831,7 +831,7 @@ int     zaxisInqNumber(int gridID);
 void    zaxisDefUUID(int zaxisID, const char *uuid_cbuf);
 
 /*      zaxisInqUUID: Get the UUID of a generalized Z-axis */
-char   *zaxisInqUUID(int zaxisID, char *uuid_cbuf);
+void    zaxisInqUUID(int zaxisID, char *uuid_cbuf);
 
 /*      zaxisDefName: Define the name of a Z-axis */
 void    zaxisDefName(int zaxisID, const char *name);
