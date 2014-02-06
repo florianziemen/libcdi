@@ -539,7 +539,7 @@ void cdi_generate_vars(stream_t *streamptr)
 
       if ( nlevels > 1 )
 	{
-          bool linc = false, ldec = false, lsort = false;
+          bool linc = true, ldec = true, lsort = false;
           for ( levelID = 1; levelID < nlevels; levelID++ )
             {
               /* check increasing of levels */
@@ -547,6 +547,7 @@ void cdi_generate_vars(stream_t *streamptr)
               /* check decreasing of levels */
               ldec &= (dlevels[levelID] < dlevels[levelID-1]);
             }
+          printf("ldec %d linc %d\n", ldec, linc);
           /*
            * always sort pressure z-axis to ensure
            * vartable[varid].levelTable[levelID1].level1 < vartable[varid].levelTable[levelID2].level1 <=> levelID1 > levelID2
