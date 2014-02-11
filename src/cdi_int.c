@@ -2,11 +2,7 @@
 #  include "config.h"
 #endif
 
-#include <stdio.h>
 #include <stdarg.h>
-#include <string.h>
-#include <errno.h>
-#include <math.h>
 #include <ctype.h>
 
 #include "dmemory.h"

@@ -1639,8 +1639,8 @@ static
 void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 {
   int gridtype;
-  int lcurvi = FALSE;
-  static short lwarn = TRUE;
+  bool lcurvi = false;
+  static bool lwarning = true;
 
   memset(isec2, 0, 16*sizeof(int));
 
@@ -1661,7 +1661,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
       if ( (ysize ==  32 || ysize ==  48 || ysize ==  64 ||
 	    ysize ==  96 || ysize == 160 || ysize == 192 ||
 	    ysize == 240 || ysize == 320 || ysize == 384 ||
-	    ysize == 480 || ysize == 768 ) && 
+	    ysize == 480 || ysize == 768 ) &&
 	   (xsize == 2*ysize || xsize == 1) )
 	{
 	  gridtype = GRID_GAUSSIAN;
@@ -1680,13 +1680,13 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
-      if ( lwarn && gridInqSize(gridID) > 1 )
+      if ( lwarning && gridInqSize(gridID) > 1 )
 	{
-	  lwarn = FALSE;
+	  lwarning = false;
 	  Warning("Curvilinear grids are unsupported in GRIB1! Created wrong GDS!");
 	}
       gridtype = GRID_LONLAT;
-      lcurvi = TRUE;
+      lcurvi = true;
     }
 
   ISEC2_Reduced  = FALSE;
@@ -1890,8 +1890,8 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 {
   double level;
   int ilevel, zaxistype, ltype;
-  static int warning = 1;
-  static int vct_warning = 1;
+  static bool lwarning = true;
+  static bool lwarning_vct = true;
 
   zaxistype = zaxisInqType(zaxisID);
   ltype = zaxisInqLtype(zaxisID);
@@ -1985,18 +1985,18 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	  }
 
 	vctsize = zaxisInqVctSize(zaxisID);
-	if ( vctsize == 0 && warning )
+	if ( vctsize == 0 && lwarning )
 	  {
 	    Warning("VCT missing. ( param = %d, zaxisID = %d )", ISEC1_Parameter, zaxisID);
-	    warning = 0;
+	    lwarning = false;
 	  }
 	if ( vctsize > 255 )
 	  {
 	    ISEC2_NumVCP = 0;
-	    if ( vct_warning )
+	    if ( lwarning_vct )
 	      {
 		Warning("VCT size of %d is too large (maximum is 255). Set to 0!", vctsize);
-		vct_warning = 0;
+		lwarning_vct = false;
 	      }
 	  }
 	else
