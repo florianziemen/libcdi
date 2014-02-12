@@ -172,20 +172,20 @@ extern "C" {
 
 /* TSTEP types */
 
-#define  TSTEP_CONSTANT           0
-#define  TSTEP_INSTANT            1
-#define  TSTEP_AVG                2
-#define  TSTEP_ACCUM              3
-#define  TSTEP_MAX                4
-#define  TSTEP_MIN                5
-#define  TSTEP_DIFF               6
-#define  TSTEP_RMS                7
-#define  TSTEP_SD                 8
-#define  TSTEP_COV                9
-#define  TSTEP_RATIO             10
-#define  TSTEP_RANGE             11
-#define  TSTEP_INSTANT2          12
-#define  TSTEP_INSTANT3          13
+#define  TSTEP_CONSTANT             0  /* Constant            */
+#define  TSTEP_INSTANT              1  /* Instant             */
+#define  TSTEP_AVG                  2  /* Average             */
+#define  TSTEP_ACCUM                3  /* Accumulation        */
+#define  TSTEP_MAX                  4  /* Maximum             */
+#define  TSTEP_MIN                  5  /* Minimum             */
+#define  TSTEP_DIFF                 6  /* Difference          */
+#define  TSTEP_RMS                  7  /* Root mean square    */
+#define  TSTEP_SD                   8  /* Standard deviation  */
+#define  TSTEP_COV                  9  /* Covariance          */
+#define  TSTEP_RATIO               10  /* Ratio               */
+#define  TSTEP_RANGE               11
+#define  TSTEP_INSTANT2            12
+#define  TSTEP_INSTANT3            13
 
 /* TAXIS types */
 
