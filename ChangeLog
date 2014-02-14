@@ -1,4 +1,4 @@
-2014-02-18  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+2014-02-14  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Version 1.6.3 released
 	* using CGRIBEX library version 1.6.3
@@ -26,7 +26,7 @@
 
 2013-12-09  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
-	* streamOpenA: removed line "streamptr->record   = record"; record is allocated in cdiStreamOpenDefaultDelegate() (bug fix)
+	* streamOpenA: removed line "streamptr->record = record"; record is allocated in cdiStreamOpenDefaultDelegate() (bug fix)
 
 2013-11-28  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
