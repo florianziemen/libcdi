@@ -150,37 +150,15 @@ double timeunit_factor(int tu1, int tu2)
 static
 int gribapiGetTimeUnits(grib_handle *gh)
 {
+  int status;
   int timeunits = -1;
   long unitsOfTime = -1;
-  int status;
-  // size_t len = 8;
-  //char stepunits[8];
-  //static int lprint = TRUE;
 
   status = grib_get_long(gh, "indicatorOfUnitOfTimeRange", &unitsOfTime);
 
+  GRIB_CHECK(grib_set_long(gh, "stepUnits", unitsOfTime), 0);
+
   timeunits = getTimeunits(unitsOfTime);
-
-  /*
-  GRIB_CHECK(grib_get_string(gh, "stepUnits", stepunits, &len), 0);
-
-  len--;
-
-  if      ( memcmp(stepunits, "s",   len) == 0 ) timeunits = TUNIT_SECOND;
-  else if ( memcmp(stepunits, "m",   len) == 0 ) timeunits = TUNIT_MINUTE;
-  else if ( memcmp(stepunits, "h",   len) == 0 ) timeunits = TUNIT_HOUR;
-  else if ( memcmp(stepunits, "3h",  len) == 0 ) timeunits = TUNIT_3HOURS;
-  else if ( memcmp(stepunits, "6h",  len) == 0 ) timeunits = TUNIT_6HOURS;
-  else if ( memcmp(stepunits, "12h", len) == 0 ) timeunits = TUNIT_12HOURS;
-  else if ( memcmp(stepunits, "D",   len) == 0 ) timeunits = TUNIT_DAY;
-  else if ( memcmp(stepunits, "M",   len) == 0 ) timeunits = TUNIT_MONTH;
-  else if ( memcmp(stepunits, "Y",   len) == 0 ) timeunits = TUNIT_YEAR;
-  else if ( lprint )
-    {
-      Message("Step units >%s< unsupported!", stepunits);
-      lprint = FALSE;
-    }
-  */
 
   return (timeunits);
 }
@@ -2081,33 +2059,47 @@ void gribapiDefParam(int editionNumber, grib_handle *gh, int param, const char *
 }
 
 static
-int gribapiDefStepUnits(grib_handle *gh, int timeunit, int gcinit)
+int getTimeunitFactor(int timeunit)
 {
   int factor = 1;
-  long unitsOfTime;
-  char stepunits[8];
-  size_t len;
 
   switch (timeunit)
     {
-    case TUNIT_SECOND:  factor =     1;  unitsOfTime = 13;  strcpy(stepunits, "s");   break;
-    case TUNIT_MINUTE:  factor =    60;  unitsOfTime =  0;  strcpy(stepunits, "m");   break;
-    case TUNIT_HOUR:    factor =  3600;  unitsOfTime =  1;  strcpy(stepunits, "h");   break;
-    case TUNIT_3HOURS:  factor = 10800;  unitsOfTime = 10;  strcpy(stepunits, "3h");  break;
-    case TUNIT_6HOURS:  factor = 21600;  unitsOfTime = 11;  strcpy(stepunits, "6h");  break;
-    case TUNIT_12HOURS: factor = 43200;  unitsOfTime = 12;  strcpy(stepunits, "12h"); break;
-    case TUNIT_DAY:     factor = 86400;  unitsOfTime =  2;  strcpy(stepunits, "D");   break;
-    default:            factor =  3600;  unitsOfTime =  1;  strcpy(stepunits, "h");   break;
+    case TUNIT_SECOND:  factor =     1;  break;
+    case TUNIT_MINUTE:  factor =    60;  break;
+    case TUNIT_HOUR:    factor =  3600;  break;
+    case TUNIT_3HOURS:  factor = 10800;  break;
+    case TUNIT_6HOURS:  factor = 21600;  break;
+    case TUNIT_12HOURS: factor = 43200;  break;
+    case TUNIT_DAY:     factor = 86400;  break;
+    default:            factor =  3600;  break;
+    }
+
+  return (factor);
+}
+
+static
+void gribapiDefStepUnits(grib_handle *gh, int timeunit, int gcinit)
+{
+  long unitsOfTime;
+
+  switch (timeunit)
+    {
+    case TUNIT_SECOND:  unitsOfTime = 13;  break;
+    case TUNIT_MINUTE:  unitsOfTime =  0;  break;
+    case TUNIT_HOUR:    unitsOfTime =  1;  break;
+    case TUNIT_3HOURS:  unitsOfTime = 10;  break;
+    case TUNIT_6HOURS:  unitsOfTime = 11;  break;
+    case TUNIT_12HOURS: unitsOfTime = 12;  break;
+    case TUNIT_DAY:     unitsOfTime =  2;  break;
+    default:            unitsOfTime =  1;  break;
     }
 
   if ( !gcinit )
     {
-      len = strlen(stepunits) + 1;
+      GRIB_CHECK(grib_set_long(gh, "stepUnits", unitsOfTime), 0);
       GRIB_CHECK(grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime), 0);
-      GRIB_CHECK(grib_set_string(gh, "stepUnits", stepunits, &len), 0);
     }
-
-  return (factor);
 }
 
 static
@@ -2115,7 +2107,7 @@ int gribapiDefSteptype(int editionNumber, grib_handle *gh, int tsteptype, int gc
 {
   long proDefTempNum = 0;
   size_t len = 64;
-  char stepType[64];
+  char stepType[len];
 
   switch ( tsteptype )
     {
@@ -2145,24 +2137,24 @@ int gribapiDefSteptype(int editionNumber, grib_handle *gh, int tsteptype, int gc
 static
 void gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, int date, int time, int tsteptype, int gcinit)
 {
+  (void ) gribapiDefSteptype(editionNumber, gh, tsteptype, gcinit);
+
   if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 0), 0);
   if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "stepRange", 0), 0);
 
   if ( date == 0 ) date = 10101;
   gribapiSetDataDateTime(gh, date, time);
-
-  (void ) gribapiDefSteptype(editionNumber, gh, tsteptype, gcinit);
 }
 
 static
 int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rtime, int vdate, int vtime,
-                          int tsteptype, int factor, int calendar, int gcinit)
+                          int tsteptype, int timeunit, int calendar, int gcinit)
 {
   int status = -1;
   int year, month, day, hour, minute, second;
   int julday1, secofday1, julday2, secofday2, days, secs;
+  int factor;
   long startStep = 0, endStep;
-  long proDefTempNum = 0;
 
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
@@ -2174,8 +2166,14 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
 
   (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
 
+  factor = getTimeunitFactor(timeunit);
+
   if ( !(int) fmod(days*86400.0 + secs, factor) )
     {
+      int proDefTempNum = gribapiDefSteptype(editionNumber, gh, tsteptype, gcinit);
+
+      gribapiDefStepUnits(gh, timeunit, gcinit);
+
       endStep = (int) ((days*86400.0 + secs)/factor);
 
       if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
@@ -2185,8 +2183,6 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
       gribapiSetDataDateTime(gh, rdate, rtime);
 
       // printf(">>>>> tsteptype %d  startStep %ld  endStep %ld\n", tsteptype, startStep, endStep);
-
-      proDefTempNum = gribapiDefSteptype(editionNumber, gh, tsteptype, gcinit);
 
       if ( proDefTempNum == 0 ) startStep = endStep;
 
@@ -2225,10 +2221,9 @@ void gribapiDefTime(int editionNumber, int typeOfGeneratingProcess, grib_handle 
       int rdate    = taxisInqRdate(taxisID);
       int rtime    = taxisInqRtime(taxisID);
       int timeunit = taxisInqTunit(taxisID);
-      int factor   = gribapiDefStepUnits(gh, timeunit, gcinit);
 
       status = gribapiDefDateTimeRel(editionNumber, gh, rdate, rtime, vdate, vtime,
-                                     tsteptype, factor, calendar, gcinit);
+                                     tsteptype, timeunit, calendar, gcinit);
 
       if ( status != 0 ) taxistype = TAXIS_ABSOLUTE;
     }

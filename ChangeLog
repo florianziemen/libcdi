@@ -1,3 +1,7 @@
+2014-02-20  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* grib2: set stepUnits after changing the template [Bug #4500]
+
 2014-02-14  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* Version 1.6.3 released
