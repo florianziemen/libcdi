@@ -1,3 +1,7 @@
+2014-02-21  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
+
+	* grib_api: debug patch from Florian and Daniel
+
 2014-02-20  Uwe Schulzweida  <Uwe.Schulzweida@zmaw.de>
 
 	* grib2: set stepUnits after changing the template [Bug #4500]

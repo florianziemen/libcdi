@@ -36,6 +36,33 @@ typedef struct {
 
 #if  defined  (HAVE_LIBGRIB_API)
 static
+int my_grib_set_double(grib_handle* h, const char* key, double val)
+{
+  if ( cdiGribApiDebug )
+    fprintf(stderr, "grib_set_double(\tgrib_handle* h, \"%s\", %f)\n", key, val);
+
+  return grib_set_double(h, key, val);
+}
+
+static
+int my_grib_set_long(grib_handle* h, const char* key, long val)
+{
+  if ( cdiGribApiDebug )
+    fprintf(stderr, "grib_set_long(  \tgrib_handle* h, \"%s\", %ld)\n", key, val);
+
+  return grib_set_long(h, key, val);
+}
+
+static
+int my_grib_set_string(grib_handle* h, const char* key, const char* val, size_t* length)
+{
+  if ( cdiGribApiDebug )
+    fprintf(stderr, "grib_set_string(\tgrib_handle* h, \"%s\", \"%s\")\n", key, val);
+
+  return grib_set_string(h, key, val, length);
+}
+
+static
 int gribapiGetGridType(grib_handle *gh)
 {
   int gridtype = GRID_GENERIC;
@@ -156,7 +183,7 @@ int gribapiGetTimeUnits(grib_handle *gh)
 
   status = grib_get_long(gh, "indicatorOfUnitOfTimeRange", &unitsOfTime);
 
-  GRIB_CHECK(grib_set_long(gh, "stepUnits", unitsOfTime), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "stepUnits", unitsOfTime), 0);
 
   timeunits = getTimeunits(unitsOfTime);
 
@@ -257,8 +284,8 @@ void gribapiGetDataDateTime(grib_handle *gh, int *datadate, int *datatime)
 static
 void gribapiSetDataDateTime(grib_handle *gh, int datadate, int datatime)
 {
-  GRIB_CHECK(grib_set_long(gh, "dataDate", datadate), 0);
-  GRIB_CHECK(grib_set_long(gh, "dataTime", datatime/100), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "dataDate", datadate), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "dataTime", datatime/100), 0);
 }
 
 static
@@ -1145,7 +1172,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
       nrecs_scanned++;
       gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
-      GRIB_CHECK(grib_set_double(gh, "missingValue", cdiDefaultMissval), 0);
+      GRIB_CHECK(my_grib_set_double(gh, "missingValue", cdiDefaultMissval), 0);
 
       GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
@@ -1463,7 +1490,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 	}
 
       gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
-      GRIB_CHECK(grib_set_double(gh, "missingValue", cdiDefaultMissval), 0);
+      GRIB_CHECK(my_grib_set_double(gh, "missingValue", cdiDefaultMissval), 0);
 
       GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
@@ -1734,7 +1761,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	    }
 
 	  gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
-	  GRIB_CHECK(grib_set_double(gh, "missingValue", cdiDefaultMissval), 0);
+	  GRIB_CHECK(my_grib_set_double(gh, "missingValue", cdiDefaultMissval), 0);
 
 	  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
@@ -1936,7 +1963,7 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
 
   recsize = gribsize;
   gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
-  GRIB_CHECK(grib_set_double(gh, "missingValue", missval), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "missingValue", missval), 0);
 
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
@@ -1995,9 +2022,9 @@ void gribapiDefInstitut(grib_handle *gh, int vlistID, int varID)
       GRIB_CHECK(grib_get_long(gh, "subCentre", &subcenter0), 0);
 
       if ( center != center0 )
-	GRIB_CHECK(grib_set_long(gh, "centre", center), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "centre", center), 0);
       if ( subcenter != subcenter0 )
-	GRIB_CHECK(grib_set_long(gh, "subCentre", subcenter), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "subCentre", subcenter), 0);
     }
 }
 
@@ -2012,7 +2039,7 @@ void gribapiDefModel(grib_handle *gh, int vlistID, int varID)
     modelID = vlistInqVarModel(vlistID, varID);
 
   if ( modelID != CDI_UNDEFID )
-    GRIB_CHECK(grib_set_long(gh, "generatingProcessIdentifier", modelInqGribID(modelID)), 0);
+    GRIB_CHECK(my_grib_set_long(gh, "generatingProcessIdentifier", modelInqGribID(modelID)), 0);
 }
 
 static
@@ -2027,7 +2054,7 @@ void gribapiDefParam(int editionNumber, grib_handle *gh, int param, const char *
       size_t len;
       int status;
       len = strlen(name);
-      status = grib_set_string(gh, "shortName", name, &len);
+      status = my_grib_set_string(gh, "shortName", name, &len);
       if ( status != 0 )
 	Warning("grib_api: No match for shortName=%s", name);
     }
@@ -2044,14 +2071,14 @@ void gribapiDefParam(int editionNumber, grib_handle *gh, int param, const char *
 	      Warning("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
 	    }
 
-	  GRIB_CHECK(grib_set_long(gh, "table2Version",        pcat), 0);
-	  GRIB_CHECK(grib_set_long(gh, "indicatorOfParameter", pnum), 0);
+	  GRIB_CHECK(my_grib_set_long(gh, "table2Version",        pcat), 0);
+	  GRIB_CHECK(my_grib_set_long(gh, "indicatorOfParameter", pnum), 0);
 	}
       else
 	{
-	  GRIB_CHECK(grib_set_long(gh, "discipline",        pdis), 0);
-	  GRIB_CHECK(grib_set_long(gh, "parameterCategory", pcat), 0);
-	  GRIB_CHECK(grib_set_long(gh, "parameterNumber",   pnum), 0);
+	  GRIB_CHECK(my_grib_set_long(gh, "discipline",        pdis), 0);
+	  GRIB_CHECK(my_grib_set_long(gh, "parameterCategory", pcat), 0);
+	  GRIB_CHECK(my_grib_set_long(gh, "parameterNumber",   pnum), 0);
 	}
     }
 
@@ -2097,8 +2124,8 @@ void gribapiDefStepUnits(grib_handle *gh, int timeunit, int gcinit)
 
   if ( !gcinit )
     {
-      GRIB_CHECK(grib_set_long(gh, "stepUnits", unitsOfTime), 0);
-      GRIB_CHECK(grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "stepUnits", unitsOfTime), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime), 0);
     }
 }
 
@@ -2126,9 +2153,9 @@ int gribapiDefSteptype(int editionNumber, grib_handle *gh, int tsteptype, int gc
 
   if ( !gcinit )
     {
-      if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "productDefinitionTemplateNumber", proDefTempNum), 0);
+      if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "productDefinitionTemplateNumber", proDefTempNum), 0);
       len = strlen(stepType);
-      GRIB_CHECK(grib_set_string(gh, "stepType", stepType, &len), 0);
+      GRIB_CHECK(my_grib_set_string(gh, "stepType", stepType, &len), 0);
     }
 
   return ((int)proDefTempNum);
@@ -2139,8 +2166,8 @@ void gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, int date, int tim
 {
   (void ) gribapiDefSteptype(editionNumber, gh, tsteptype, gcinit);
 
-  if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 0), 0);
-  if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "stepRange", 0), 0);
+  if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "significanceOfReferenceTime", 0), 0);
+  if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "stepRange", 0), 0);
 
   if ( date == 0 ) date = 10101;
   gribapiSetDataDateTime(gh, date, time);
@@ -2176,8 +2203,8 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
 
       endStep = (int) ((days*86400.0 + secs)/factor);
 
-      if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
-      if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "stepRange", 0), 0);
+      if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
+      if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "stepRange", 0), 0);
 
       if ( rdate == 0 ) rdate = 10101;
       gribapiSetDataDateTime(gh, rdate, rtime);
@@ -2186,8 +2213,8 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
 
       if ( proDefTempNum == 0 ) startStep = endStep;
 
-      if ( editionNumber > 1 ) GRIB_CHECK(grib_set_long(gh, "forecastTime", startStep), 0);
-      GRIB_CHECK(grib_set_long(gh, "endStep", endStep), 0);
+      if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "forecastTime", startStep), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "endStep", endStep), 0);
 
       status = 0;
     }
@@ -2299,12 +2326,12 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
           if ( ljpeg )
             {
               mesg = "grid_jpeg"; len = strlen(mesg);
-              GRIB_CHECK(grib_set_string(gh, "packingType", mesg, &len), 0);
+              GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
             }
           else
             {
               mesg = "grid_simple"; len = strlen(mesg);
-              GRIB_CHECK(grib_set_string(gh, "packingType", mesg, &len), 0);
+              GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
             }
         }
     }
@@ -2326,22 +2353,22 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 	if ( gridtype == GRID_GAUSSIAN )
 	  {
 	    mesg = "regular_gg"; len = strlen(mesg);
-	    GRIB_CHECK(grib_set_string(gh, "gridType", mesg, &len), 0);
+	    GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 	  }
 	else if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
 	    mesg = "reduced_gg"; len = strlen(mesg);
-	    GRIB_CHECK(grib_set_string(gh, "gridType", mesg, &len), 0);
+	    GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 	  }
 	else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
 	  {
 	    mesg = "rotated_ll"; len = strlen(mesg);
-	    GRIB_CHECK(grib_set_string(gh, "gridType", mesg, &len), 0);
+	    GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 	  }
 	else
 	  {
 	    mesg = "regular_ll"; len = strlen(mesg);
-	    GRIB_CHECK(grib_set_string(gh, "gridType", mesg, &len), 0);
+	    GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 	  }
 
 	nlon = gridInqXsize(gridID);
@@ -2359,7 +2386,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 	    gridInqRowlon(gridID, rowlon);
 	    for ( i = 0; i < nlat; ++i ) pl[i] = rowlon[i];
 
-	    // GRIB_CHECK(grib_set_long_array(gh, "pl", pl, nlat), 0);
+	    // GRIB_CHECK(my_grib_set_long_array(gh, "pl", pl, nlat), 0);
 
 	    free(pl);
 	    free(rowlon);
@@ -2389,18 +2416,18 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 	    yinc   = gridInqYinc(gridID);
 	  }
 
-	GRIB_CHECK(grib_set_long(gh, "Ni", nlon), 0);
-	GRIB_CHECK(grib_set_long(gh, "Nj", nlat), 0);
-	GRIB_CHECK(grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xfirst), 0);
-	GRIB_CHECK(grib_set_double(gh, "longitudeOfLastGridPointInDegrees",  xlast), 0);
-	GRIB_CHECK(grib_set_double(gh, "latitudeOfFirstGridPointInDegrees",  yfirst), 0);
-	GRIB_CHECK(grib_set_double(gh, "latitudeOfLastGridPointInDegrees",   ylast), 0);
-	GRIB_CHECK(grib_set_double(gh, "iDirectionIncrementInDegrees", xinc), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "Ni", nlon), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "Nj", nlat), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xfirst), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfLastGridPointInDegrees",  xlast), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees",  yfirst), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfLastGridPointInDegrees",   ylast), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "iDirectionIncrementInDegrees", xinc), 0);
 
         {
           long jscan = 0;
           if ( yfirst < ylast ) jscan = 1;
-          GRIB_CHECK(grib_set_long(gh, "jScansPositively", jscan), 0);
+          GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", jscan), 0);
         }
 	/*
 	if ( fabs(xinc*1000 - ISEC2_LonIncr) > FLT_EPSILON )
@@ -2410,13 +2437,13 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
           {
             int np = gridInqNP(gridID);
             if ( np == 0 ) np = nlat/2;
-            GRIB_CHECK(grib_set_long(gh, "numberOfParallelsBetweenAPoleAndTheEquator", np), 0);
+            GRIB_CHECK(my_grib_set_long(gh, "numberOfParallelsBetweenAPoleAndTheEquator", np), 0);
           }
 	else
 	  {
 	    latIncr = yinc;
 	    if ( latIncr < 0 ) latIncr = -latIncr;
-	    GRIB_CHECK(grib_set_double(gh, "jDirectionIncrementInDegrees", latIncr), 0);
+	    GRIB_CHECK(my_grib_set_double(gh, "jDirectionIncrementInDegrees", latIncr), 0);
 	    /*
 	    if ( fabs(yinc*1000 - ISEC2_LatIncr) > FLT_EPSILON )
 	      ISEC2_LatIncr = 0;
@@ -2443,9 +2470,9 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 	    /* change from noth to south pole */
 	    ypole = -ypole;
 	    xpole =  xpole + 180;
-	    GRIB_CHECK(grib_set_double(gh, "latitudeOfSouthernPoleInDegrees",  ypole), 0);
-	    GRIB_CHECK(grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", xpole), 0);
-	    GRIB_CHECK(grib_set_double(gh, "angleOfRotation", angle), 0);
+	    GRIB_CHECK(my_grib_set_double(gh, "latitudeOfSouthernPoleInDegrees",  ypole), 0);
+	    GRIB_CHECK(my_grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", xpole), 0);
+	    GRIB_CHECK(my_grib_set_double(gh, "angleOfRotation", angle), 0);
 	  }
 
 	/* East -> West */
@@ -2459,12 +2486,12 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
         if ( lieee )
           {
             mesg = "grid_ieee"; len = strlen(mesg);
-            GRIB_CHECK(grib_set_string(gh, "packingType", mesg, &len), 0);
+            GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
 
 	    if ( datatype == DATATYPE_FLT64 )
-	      GRIB_CHECK(grib_set_long(gh, "precision", 2), 0);
+	      GRIB_CHECK(my_grib_set_long(gh, "precision", 2), 0);
 	    else
-	      GRIB_CHECK(grib_set_long(gh, "precision", 1), 0);
+	      GRIB_CHECK(my_grib_set_long(gh, "precision", 1), 0);
           }
         else if ( ljpeg )
 	  {
@@ -2473,18 +2500,18 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
             if ( ljpeg )
               {
                 mesg = "grid_jpeg"; len = strlen(mesg);
-                GRIB_CHECK(grib_set_string(gh, "packingType", mesg, &len), 0);
+                GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
               }
             else
               {
                 mesg = "grid_simple"; len = strlen(mesg);
-                GRIB_CHECK(grib_set_string(gh, "packingType", mesg, &len), 0);
+                GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
               }
 	  }
 	else
 	  {
 	    mesg = "grid_simple"; len = strlen(mesg);
-	    GRIB_CHECK(grib_set_string(gh, "packingType", mesg, &len), 0);
+	    GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
 	  }
 
 	break;
@@ -2525,60 +2552,60 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 	int trunc = gridInqTrunc(gridID);
 
 	mesg = "sh"; len = strlen(mesg);
-	GRIB_CHECK(grib_set_string(gh, "gridType", mesg, &len), 0);
+	GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 
-	GRIB_CHECK(grib_set_long(gh, "J", trunc), 0);
-	GRIB_CHECK(grib_set_long(gh, "K", trunc), 0);
-	GRIB_CHECK(grib_set_long(gh, "M", trunc), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "J", trunc), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "K", trunc), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "M", trunc), 0);
 
-	// GRIB_CHECK(grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
+	// GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
         /*
         if ( lieee )
           {
             printf("spectral_ieee\n");
-            if ( editionNumber == 2 ) GRIB_CHECK(grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
+            if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
             mesg = "spectral_ieee"; len = strlen(mesg);
-            GRIB_CHECK(grib_set_string(gh, "packingType", mesg, &len), 0);
+            GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
           }
         else */ if ( gridInqComplexPacking(gridID) )
 	  {
-	    if ( editionNumber == 2 ) GRIB_CHECK(grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
+	    if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
 	    mesg = "spectral_complex"; len = strlen(mesg);
-	    GRIB_CHECK(grib_set_string(gh, "packingType", mesg, &len), 0);
+	    GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
 	    /*
-	    GRIB_CHECK(grib_set_long(gh, "JS", 20), 0);
-	    GRIB_CHECK(grib_set_long(gh, "KS", 20), 0);
-	    GRIB_CHECK(grib_set_long(gh, "MS", 20), 0);
+	    GRIB_CHECK(my_grib_set_long(gh, "JS", 20), 0);
+	    GRIB_CHECK(my_grib_set_long(gh, "KS", 20), 0);
+	    GRIB_CHECK(my_grib_set_long(gh, "MS", 20), 0);
 	    */
 	  }
 	else
 	  {
 	    mesg = "spectral_simple"; len = strlen(mesg);
-	    GRIB_CHECK(grib_set_string(gh, "packingType", mesg, &len), 0);
+	    GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
 	  }
 
 	break;
       }
     case GRID_GME:
       {
-	GRIB_CHECK(grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_GME), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_GME), 0);
 
-	GRIB_CHECK(grib_set_long(gh, "nd", gridInqGMEnd(gridID)), 0);
-	GRIB_CHECK(grib_set_long(gh, "Ni", gridInqGMEni(gridID)), 0);
-	GRIB_CHECK(grib_set_long(gh, "n2", gridInqGMEni2(gridID)), 0);
-	GRIB_CHECK(grib_set_long(gh, "n3", gridInqGMEni3(gridID)), 0);
-	GRIB_CHECK(grib_set_long(gh, "latitudeOfThePolePoint", 90000000), 0);
-	GRIB_CHECK(grib_set_long(gh, "longitudeOfThePolePoint", 0), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "nd", gridInqGMEnd(gridID)), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "Ni", gridInqGMEni(gridID)), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "n2", gridInqGMEni2(gridID)), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "n3", gridInqGMEni3(gridID)), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "latitudeOfThePolePoint", 90000000), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "longitudeOfThePolePoint", 0), 0);
 
-	GRIB_CHECK(grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
-	GRIB_CHECK(grib_set_long(gh, "totalNumberOfGridPoints", gridInqSize(gridID)), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "totalNumberOfGridPoints", gridInqSize(gridID)), 0);
 
 	break;
       }
     case GRID_UNSTRUCTURED:
       {
 	static int warning = 1;
-	status = grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_UNSTRUCTURED);
+	status = my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_UNSTRUCTURED);
 	if ( status != 0 && warning )
 	  {
 	    warning = 0;
@@ -2593,8 +2620,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
             int number = gridInqNumber(gridID);
             if ( position < 0 ) position = 0;
             if ( number < 0 ) number = 0;
-	    GRIB_CHECK(grib_set_long(gh, "numberOfGridUsed", number), 0);
-	    GRIB_CHECK(grib_set_long(gh, "numberOfGridInReference", position), 0);
+	    GRIB_CHECK(my_grib_set_long(gh, "numberOfGridUsed", number), 0);
+	    GRIB_CHECK(my_grib_set_long(gh, "numberOfGridInReference", position), 0);
             len = 16;
             gridInqUUID(gridID, uuid);
 	    if (grib_set_bytes(gh, "uuidOfHGrid", (unsigned char *) uuid, &len) != 0)
@@ -2632,7 +2659,7 @@ void getLevelFactor(double level, long *factor, long *out_scaled_value)
 static
 void gribapiDefLevelType(grib_handle *gh, int gcinit, const char *keyname, long leveltype)
 {
-  if ( !gcinit ) GRIB_CHECK(grib_set_long(gh, keyname, leveltype), 0);
+  if ( !gcinit ) GRIB_CHECK(my_grib_set_long(gh, keyname, leveltype), 0);
 }
 
 static
@@ -2647,14 +2674,14 @@ void grib2DefLevel(grib_handle *gh, int gcinit, long leveltype, int lbounds, dou
   if ( !lbounds ) dlevel1 = level;
 
   getLevelFactor(dlevel1, &factor, &scaled_level);
-  GRIB_CHECK(grib_set_long(gh, "scaleFactorOfFirstFixedSurface", factor), 0);
-  GRIB_CHECK(grib_set_long(gh, "scaledValueOfFirstFixedSurface", scaled_level), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "scaleFactorOfFirstFixedSurface", factor), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "scaledValueOfFirstFixedSurface", scaled_level), 0);
 
   if ( lbounds )
     {
       getLevelFactor(dlevel2, &factor, &scaled_level);
-      GRIB_CHECK(grib_set_long(gh, "scaleFactorOfSecondFixedSurface", factor), 0);
-      GRIB_CHECK(grib_set_long(gh, "scaledValueOfSecondFixedSurface", scaled_level), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "scaleFactorOfSecondFixedSurface", factor), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "scaledValueOfSecondFixedSurface", scaled_level), 0);
     }
 }
 
@@ -2710,7 +2737,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
         else
           gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", zaxisTypeToGrib2ltype(zaxistype));
 
-        GRIB_CHECK(grib_set_long(gh, "level", level), 0);
+        GRIB_CHECK(my_grib_set_long(gh, "level", level), 0);
 
 	break;
       }
@@ -2736,8 +2763,8 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
                 gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", zaxisTypeToGrib2ltype(zaxistype));
               }
 
-            GRIB_CHECK(grib_set_long(gh, "topLevel", (long) dlevel1), 0);
-            GRIB_CHECK(grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
+            GRIB_CHECK(my_grib_set_long(gh, "topLevel", (long) dlevel1), 0);
+            GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
           }
         else
           {
@@ -2746,7 +2773,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
             else
               gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", zaxisTypeToGrib2ltype(zaxistype));
 
-            GRIB_CHECK(grib_set_long(gh, "level", (long) level), 0);
+            GRIB_CHECK(my_grib_set_long(gh, "level", (long) level), 0);
           }
 
         break;
@@ -2764,8 +2791,8 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 		gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", GRIB2_LTYPE_HYBRID);
 	      }
 
-	    GRIB_CHECK(grib_set_long(gh, "topLevel", (long) dlevel1), 0);
-	    GRIB_CHECK(grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
+	    GRIB_CHECK(my_grib_set_long(gh, "topLevel", (long) dlevel1), 0);
+	    GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
 	  }
 	else
 	  {
@@ -2774,7 +2801,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
             else
               gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_HYBRID);
 
-	    GRIB_CHECK(grib_set_long(gh, "level", (long) level), 0);
+	    GRIB_CHECK(my_grib_set_long(gh, "level", (long) level), 0);
 	  }
 
         if ( !gcinit )
@@ -2787,7 +2814,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
                 Warning("VCT missing ( param = %s, zaxisID = %d )", paramstr, zaxisID);
                 warning = 0;
               }
-            GRIB_CHECK(grib_set_long(gh, "PVPresent", 1), 0);
+            GRIB_CHECK(my_grib_set_long(gh, "PVPresent", 1), 0);
             GRIB_CHECK(grib_set_double_array(gh, "pv", zaxisInqVctPtr(zaxisID), vctsize), 0);
           }
 
@@ -2818,7 +2845,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
               level /= 100;
 
             gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", leveltype);
-            GRIB_CHECK(grib_set_double(gh, "level", level), 0);
+            GRIB_CHECK(my_grib_set_double(gh, "level", level), 0);
 	  }
 	else
 	  {
@@ -2852,7 +2879,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 	    else                                    scalefactor = 100;
 
 	    gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", GRIB1_LTYPE_LANDDEPTH);
-	    GRIB_CHECK(grib_set_double(gh, "level", level*scalefactor), 0);
+	    GRIB_CHECK(my_grib_set_double(gh, "level", level*scalefactor), 0);
 	  }
 	else
 	  {
@@ -2876,7 +2903,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 
         if ( !gcinit )
           {
-            GRIB_CHECK(grib_set_long(gh, "genVertHeightCoords", 1), 0);
+            GRIB_CHECK(my_grib_set_long(gh, "genVertHeightCoords", 1), 0);
           }
 
         if ( lbounds )
@@ -2888,15 +2915,15 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
                 number = zaxisInqNumber(zaxisID);
                 gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_REFERENCE);
                 gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", GRIB2_LTYPE_REFERENCE);
-                GRIB_CHECK(grib_set_long(gh, "NV", 6), 0);
-                GRIB_CHECK(grib_set_long(gh, "nlev", zaxisInqNlevRef(zaxisID)), 0);
-                GRIB_CHECK(grib_set_long(gh, "numberOfVGridUsed", number), 0);
+                GRIB_CHECK(my_grib_set_long(gh, "NV", 6), 0);
+                GRIB_CHECK(my_grib_set_long(gh, "nlev", zaxisInqNlevRef(zaxisID)), 0);
+                GRIB_CHECK(my_grib_set_long(gh, "numberOfVGridUsed", number), 0);
                 len = 16;
                 zaxisInqUUID(zaxisID, uuid);
                 if (grib_set_bytes(gh, "uuidOfVGrid", (unsigned char *) uuid, &len) != 0)
                   Warning("Can't write UUID!");
-                GRIB_CHECK(grib_set_long(gh, "topLevel", (long) dlevel1), 0);
-                GRIB_CHECK(grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
+                GRIB_CHECK(my_grib_set_long(gh, "topLevel", (long) dlevel1), 0);
+                GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
               }
           }
         else
@@ -2907,14 +2934,14 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
               {
                 number = zaxisInqNumber(zaxisID);
                 gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_REFERENCE);
-                GRIB_CHECK(grib_set_long(gh, "NV", 6), 0);
-                GRIB_CHECK(grib_set_long(gh, "nlev", zaxisInqNlevRef(zaxisID)), 0);
-                GRIB_CHECK(grib_set_long(gh, "numberOfVGridUsed", number), 0);
+                GRIB_CHECK(my_grib_set_long(gh, "NV", 6), 0);
+                GRIB_CHECK(my_grib_set_long(gh, "nlev", zaxisInqNlevRef(zaxisID)), 0);
+                GRIB_CHECK(my_grib_set_long(gh, "numberOfVGridUsed", number), 0);
                 len = 16;
                 zaxisInqUUID(zaxisID, uuid);
                 if (grib_set_bytes(gh, "uuidOfVGrid", (unsigned char *) uuid, &len) != 0)
                   Warning("Can't write UUID!");
-                GRIB_CHECK(grib_set_double(gh, "level", level), 0);
+                GRIB_CHECK(my_grib_set_double(gh, "level", level), 0);
               }
           }
 
@@ -2927,7 +2954,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
         else
           gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", ltype);
 
-	GRIB_CHECK(grib_set_double(gh, "level", level), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "level", level), 0);
 
 	break;
       }
@@ -3002,7 +3029,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
   if ( typeOfGeneratingProcess == -1 ) typeOfGeneratingProcess = 0;
-  if ( ! gc->init ) GRIB_CHECK(grib_set_long(gh, "typeOfGeneratingProcess", typeOfGeneratingProcess), 0);
+  if ( ! gc->init ) GRIB_CHECK(my_grib_set_long(gh, "typeOfGeneratingProcess", typeOfGeneratingProcess), 0);
 
   if ( ! gc->init ) gribapiDefInstitut(gh, vlistID, varID);
   if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
@@ -3011,9 +3038,9 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   /*
   if( vlistInqVarEnsemble( vlistID,  varID, &ensID, &ensCount, &forecast_type ) )
     {
-      GRIB_CHECK(grib_set_long(gh, "typeOfEnsembleForecast", forecast_type ), 0);
-      GRIB_CHECK(grib_set_long(gh, "numberOfForecastsInEnsemble", ensCount ), 0);
-      GRIB_CHECK(grib_set_long(gh, "perturbationNumber", ensID ), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "typeOfEnsembleForecast", forecast_type ), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "numberOfForecastsInEnsemble", ensCount ), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "perturbationNumber", ensID ), 0);
     }
   */
 
@@ -3025,7 +3052,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   //  if ( lieee == FALSE )
     {
       bitsPerValue = grbBitsPerValue(datatype);
-      GRIB_CHECK(grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
     }
 
   gribapiDefGrid(editionNumber, gh, gridID, ljpeg, lieee, datatype, nmiss, gc->init);
@@ -3042,7 +3069,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
     int i;
     for (i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++)
       {
-	int ret = grib_set_double(gh, vlistptr->vars[varID].opt_grib_dbl_keyword[i],
+	int ret = my_grib_set_double(gh, vlistptr->vars[varID].opt_grib_dbl_keyword[i],
                                   vlistptr->vars[varID].opt_grib_dbl_val[i]);
 	if (ret != 0) {
 	    fprintf(stderr, "key \"%s\"  :   value = %g\n",
@@ -3053,7 +3080,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       }
     for (i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++)
       {
-	int ret = grib_set_long(gh, vlistptr->vars[varID].opt_grib_int_keyword[i],
+	int ret = my_grib_set_long(gh, vlistptr->vars[varID].opt_grib_int_keyword[i],
 	                        vlistptr->vars[varID].opt_grib_int_val[i]);
 	if (ret != 0) {
 	    fprintf(stderr, "key \"%s\"  :   value = %d\n",
@@ -3067,8 +3094,8 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   if ( nmiss > 0 )
     {
-      GRIB_CHECK(grib_set_long(gh, "bitmapPresent", 1), 0);
-      GRIB_CHECK(grib_set_double(gh, "missingValue", vlistInqVarMissval(vlistID, varID)), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "bitmapPresent", 1), 0);
+      GRIB_CHECK(my_grib_set_double(gh, "missingValue", vlistInqVarMissval(vlistID, varID)), 0);
     }
 
   GRIB_CHECK(grib_set_double_array(gh, "values", data, datasize), 0);

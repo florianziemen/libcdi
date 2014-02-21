@@ -265,6 +265,7 @@ stream_t;
 
 
 extern int CDI_Debug;      /* If set to 1, debuggig (default 0)            */
+extern int cdiGribApiDebug;
 extern double cdiDefaultMissval;
 extern int cdiDefaultInstID;
 extern int cdiDefaultModelID;

@@ -67,6 +67,7 @@ int CDI_Debug   = 0;    /* If set to 1, debugging           */
 
 static int  STREAM_Debug = 0;   /* If set to 1, debugging */
 
+int cdiGribApiDebug     = 0;
 int cdiDefaultLeveltype = -1;
 static int cdiDataUnreduced = 0;
 static int cdiSortName = 0;
@@ -177,6 +178,9 @@ void cdiInitialize(void)
       gribFixZSE(1);   // 1: Fix ZeroShiftError of simple packed spherical harmonics
       gribSetConst(1); // 1: Don't pack constant fields on regular grids
 #endif
+
+      value = cdiGetenvInt("CDI_GRIBAPI_DEBUG");
+      if ( value >= 0 ) cdiGribApiDebug = (int) value;
 
       value = cdiGetenvInt("CDI_REGULARGRID");
       if ( value >= 0 ) cdiDataUnreduced = (int) value;
@@ -388,26 +392,12 @@ int streamSize(void)
 
 void cdiDefGlobal(const char *string, int val)
 {
-  if ( strcmp(string, "REGULARGRID") == 0 )
-    {
-      cdiDataUnreduced = val;
-    }
-  else if ( strcmp(string, "SORTNAME") == 0 )
-    {
-      cdiSortName = val;
-    }
-  else if ( strcmp(string, "HAVE_MISSVAL") == 0 )
-    {
-      cdiHaveMissval = val;
-    }
-  else if ( strcmp(string, "NC_CHUNKSIZEHINT") == 0 )
-    {
-      cdiNcChunksizehint = val;
-    }
-  else
-    {
-      Warning("Unsupported global key: %s", string);
-    }
+  if      ( strcmp(string, "REGULARGRID")      == 0 ) cdiDataUnreduced = val;
+  else if ( strcmp(string, "GRIBAPI_DEBUG")    == 0 ) cdiGribApiDebug = val;
+  else if ( strcmp(string, "SORTNAME")         == 0 ) cdiSortName = val;
+  else if ( strcmp(string, "HAVE_MISSVAL")     == 0 ) cdiHaveMissval = val;
+  else if ( strcmp(string, "NC_CHUNKSIZEHINT") == 0 ) cdiNcChunksizehint = val;
+  else Warning("Unsupported global key: %s", string);
 }
 
 
