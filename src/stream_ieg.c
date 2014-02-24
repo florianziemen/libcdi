@@ -304,11 +304,11 @@ void iegDefGrid(int *gdb, int gridID)
 
       IEG_G_NumLon(gdb)   = nlon;
       IEG_G_NumLat(gdb)   = nlat;
-      IEG_G_FirstLat(gdb) = NINT(yfirst*1000);
-      IEG_G_LastLat(gdb)  = NINT(ylast*1000);
-      IEG_G_FirstLon(gdb) = NINT(xfirst*1000);
-      IEG_G_LastLon(gdb)  = NINT(xlast*1000);
-      IEG_G_LonIncr(gdb)  = NINT(xinc*1000);
+      IEG_G_FirstLat(gdb) = lround(yfirst*1000);
+      IEG_G_LastLat(gdb)  = lround(ylast*1000);
+      IEG_G_FirstLon(gdb) = lround(xfirst*1000);
+      IEG_G_LastLon(gdb)  = lround(xlast*1000);
+      IEG_G_LonIncr(gdb)  = lround(xinc*1000);
       if ( fabs(xinc*1000 - IEG_G_LonIncr(gdb)) > FLT_EPSILON )
 	IEG_G_LonIncr(gdb) = 0;
 
@@ -316,17 +316,17 @@ void iegDefGrid(int *gdb, int gridID)
 	IEG_G_LatIncr(gdb) = nlat/2;
       else
 	{
-	  IEG_G_LatIncr(gdb) = NINT(yinc*1000);
+	  IEG_G_LatIncr(gdb) = lround(yinc*1000);
 	  if ( fabs(yinc*1000 - IEG_G_LatIncr(gdb)) > FLT_EPSILON )
 	    IEG_G_LatIncr(gdb) = 0;
 
 	  if ( IEG_G_LatIncr(gdb) < 0 ) IEG_G_LatIncr(gdb) = -IEG_G_LatIncr(gdb);
 	}
 
-      if ( IEG_G_NumLon(gdb) > 1 && IEG_G_NumLat(gdb) == 1 ) 
+      if ( IEG_G_NumLon(gdb) > 1 && IEG_G_NumLat(gdb) == 1 )
 	if ( IEG_G_LonIncr(gdb) != 0 && IEG_G_LatIncr(gdb) == 0 ) IEG_G_LatIncr(gdb) = IEG_G_LonIncr(gdb);
 
-      if ( IEG_G_NumLon(gdb) == 1 && IEG_G_NumLat(gdb) > 1 ) 
+      if ( IEG_G_NumLon(gdb) == 1 && IEG_G_NumLat(gdb) > 1 )
 	if ( IEG_G_LonIncr(gdb) == 0 && IEG_G_LatIncr(gdb) != 0 ) IEG_G_LonIncr(gdb) = IEG_G_LatIncr(gdb);
 
       if ( IEG_G_LatIncr(gdb) == 0 || IEG_G_LonIncr(gdb) == 0 )
@@ -336,8 +336,8 @@ void iegDefGrid(int *gdb, int gridID)
 
       if ( gridIsRotated(gridID) )
 	{
-	  IEG_G_LatSP(gdb) = - NINT(gridInqYpole(gridID) * 1000);
-	  IEG_G_LonSP(gdb) =   NINT((gridInqXpole(gridID) + 180) * 1000);
+	  IEG_G_LatSP(gdb) = - lround(gridInqYpole(gridID) * 1000);
+	  IEG_G_LonSP(gdb) =   lround((gridInqXpole(gridID) + 180) * 1000);
 	  IEG_G_Size(gdb)  = 42;
 	}
       else

@@ -2484,8 +2484,6 @@ void decode_double_array_unrolled(const unsigned char * restrict igrib, long jle
 #undef _ENABLE_AVX
 #undef _ENABLE_SSE4_1
 
-#define  NINT(x)  ((x) < 0 ? (int)((x)-.5) : (int)((x)+.5))
-
 
 void confp3(double pval, int *kexp, int *kmant, int kbits, int kround)
 {
@@ -2637,14 +2635,14 @@ void confp3(double pval, int *kexp, int *kmant, int kbits, int kround)
       if ( isign == 0 )
 	*kmant = (int) rpowref;
       else
-	*kmant = NINT(rpowref + 0.5);
+	*kmant = lround(rpowref + 0.5);
     }
   else
     {
       /*  Closest number in GRIB format to the original number   */
       /*  (equal to, greater than or less than original number). */
 
-      *kmant = NINT(rpowref);
+      *kmant = lround(rpowref);
     }
 
   /*  Check that mantissa value does not exceed 24 bits. */
@@ -2694,14 +2692,14 @@ void confp3(double pval, int *kexp, int *kmant, int kbits, int kround)
 	  if ( isign == 0 )
 	    *kmant = (int) rpowref;
 	  else
-	    *kmant = NINT(rpowref + 0.5);
+	    *kmant = lround(rpowref + 0.5);
 	}
       else
 	{
 	  /*  Closest number in GRIB format to the original number */
 	  /*  (equal to, greater or less than original number). */
 
-	  *kmant = NINT(rpowref);
+	  *kmant = lround(rpowref);
 	}
 
       /*  Repeat calculation (with modified exponent) if still have */

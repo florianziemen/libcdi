@@ -89,14 +89,6 @@ char *strdup(const char *s);
 #endif
 
 
-#ifndef INT
-#  define  INT(x)  ((int)(x))
-#endif
-
-#ifndef NINT
-#  define  NINT(x)  ((x) < 0 ? (int)((x)-.5) : (int)((x)+.5))
-#endif
-
 #define  FALSE  0
 #define  TRUE   1
 

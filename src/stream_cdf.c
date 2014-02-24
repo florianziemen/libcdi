@@ -3436,7 +3436,7 @@ int cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtyp
                   pdata_sp = mdata_sp;
                 }
 
-              for ( i = 0; i < nvals; i++ ) mdata_sp[i] = NINT(mdata_sp[i]);
+              for ( i = 0; i < nvals; i++ ) mdata_sp[i] = roundf(mdata_sp[i]);
 
               if ( dtype == DATATYPE_UINT8 )
                 {
@@ -3458,7 +3458,7 @@ int cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtyp
                   pdata_dp = mdata_dp;
                 }
 
-              for ( i = 0; i < nvals; i++ ) mdata_dp[i] = NINT(mdata_dp[i]);
+              for ( i = 0; i < nvals; i++ ) mdata_dp[i] = round(mdata_dp[i]);
 
               if ( dtype == DATATYPE_UINT8 )
                 {

@@ -21,8 +21,6 @@
 #  include "grib_api.h"
 #endif
 
-#define  NINT(x)  ((x) < 0 ? (int)((x)-.5) : (int)((x)+.5))
-
 extern int cdiInventoryMode;
 
 typedef struct {
@@ -2532,13 +2530,13 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 	ISEC2_GridType = GRIB2_GTYPE_LCC;
 	ISEC2_NumLon   = xsize;
 	ISEC2_NumLat   = ysize;
-	ISEC2_FirstLon = NINT(originLon * 1000);
-	ISEC2_FirstLat = NINT(originLat * 1000);
-	ISEC2_Lambert_Lov    = NINT(lonParY * 1000);
-	ISEC2_Lambert_LatS1  = NINT(lat1 * 1000);
-	ISEC2_Lambert_LatS2  = NINT(lat2 * 1000);
-	ISEC2_Lambert_dx     = NINT(xincm);
-	ISEC2_Lambert_dy     = NINT(yincm);
+	ISEC2_FirstLon = lround(originLon * 1000);
+	ISEC2_FirstLat = lround(originLat * 1000);
+	ISEC2_Lambert_Lov    = lround(lonParY * 1000);
+	ISEC2_Lambert_LatS1  = lround(lat1 * 1000);
+	ISEC2_Lambert_LatS2  = lround(lat2 * 1000);
+	ISEC2_Lambert_dx     = lround(xincm);
+	ISEC2_Lambert_dy     = lround(yincm);
 	ISEC2_Lambert_LatSP  = 0;
 	ISEC2_Lambert_LatSP  = 0;
 	ISEC2_Lambert_ProjFlag = projflag;
