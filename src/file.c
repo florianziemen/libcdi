@@ -1047,10 +1047,10 @@ size_t file_read_from_buffer(bfile_t *fileptr, void *ptr, size_t size)
   size_t offset = 0;
 
   if ( FILE_Debug )
-    Message("size = %ld  Cnt = %d", size, (int) fileptr->bufferCnt);
+    Message("size = %ld  Cnt = %ld", size, (long) fileptr->bufferCnt);
 
-  if ( ((int)fileptr->bufferCnt) < 0 )
-    Error("Internal problem. bufferCnt = %d", (int) fileptr->bufferCnt);
+  if ( ((long)fileptr->bufferCnt) < 0L )
+    Error("Internal problem. bufferCnt = %ld", (long) fileptr->bufferCnt);
 
   rsize = size;
 
