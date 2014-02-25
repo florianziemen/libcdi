@@ -918,7 +918,6 @@ int file_fill_buffer(bfile_t *fileptr)
 {
   long nread;
   int fd;
-  int ret;
   long offset = 0;
   off_t retseek;
 
@@ -948,19 +947,17 @@ int file_fill_buffer(bfile_t *fileptr)
 
 	  if ( fileptr->buffer )
 	    {
+              int ret;
 	      ret = munmap(fileptr->buffer, fileptr->mappedSize);
-	      if ( ret == -1 )
-		SysError("munmap error for read %s", fileptr->name);
+	      if ( ret == -1 ) SysError("munmap error for read %s", fileptr->name);
 	      fileptr->buffer = NULL;
 	    }
 
 	  fileptr->mappedSize = (size_t) nread;
 
-	  fileptr->buffer =
-            (char *) mmap(0, (size_t) nread, PROT_READ, MAP_SHARED, fd, fileptr->bufferPos);
+	  fileptr->buffer = mmap(NULL, (size_t) nread, PROT_READ, MAP_PRIVATE, fd, fileptr->bufferPos);
 
-	  if ( fileptr->buffer == (void *)-1 )
-	    SysError("mmap error for read %s", fileptr->name);
+	  if ( fileptr->buffer == MAP_FAILED ) SysError("mmap error for read %s", fileptr->name);
 
 	  offset = fileptr->position - fileptr->bufferPos;
 	}
@@ -1292,8 +1289,7 @@ int fileClose_serial(int fileID)
       if ( fileptr->buffer && fileptr->mappedSize )
 	{
 	  ret = munmap(fileptr->buffer, fileptr->mappedSize);
-	  if ( ret == -1 )
-	    SysError("munmap error for close %s", fileptr->name);
+	  if ( ret == -1 ) SysError("munmap error for close %s", fileptr->name);
 	  fileptr->buffer = NULL;
 	}
 #endif
