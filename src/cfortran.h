@@ -474,7 +474,13 @@ for (i=0; i<sizeofcstr/elem_len; i++) {
 } return cstr; }
 
 /* kill the trailing char t's in string s. */
-#if defined (__GNUC__)
+#if !defined(GNUC_PUSH_POP) && defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 4)
+#define GNUC_PUSH_POP
+#endif
+#endif
+
+#if defined(GNUC_PUSH_POP)
 #pragma GCC push_options
 #pragma GCC optimize ("O2")
 #endif
@@ -489,7 +495,7 @@ if (e>s) {                           /* Need this to handle NULL string.*/
   while (e>s && *--e==t);            /* Don't follow t's past beginning. */
   e[*e==t?0:1] = '\0';               /* Handle s[0]=t correctly.       */
 } return s; }
-#if defined (__GNUC__)
+#if defined(GNUC_PUSH_POP)
 #pragma GCC pop_options
 #endif
 
