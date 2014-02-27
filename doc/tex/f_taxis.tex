@@ -67,7 +67,7 @@ Time axis ID, from a previous call to {\tt taxisCreate}
 \index{taxisDefRdate}
 \label{taxisDefRdate}
 
-The function {\tt taxisDefVdate} defines the reference date of a Time axis.
+The function {\tt taxisDefRdate} defines the reference date of a Time axis.
 
 \subsubsection*{Usage}
 
@@ -101,14 +101,14 @@ The function {\tt taxisInqRdate} returns the reference date of a Time axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt taxisID\ }
 \item[{\tt taxisID}]
-Time axis ID, from a previous call to {\htmlref{\tt taxisCreate}{taxisCreate}}
+Time axis ID, from a previous call to {\htmlref{\tt taxisCreate}{taxisCreate}} or {\htmlref{\tt vlistInqTaxis}{vlistInqTaxis}}
 
 \end{deflist}
 \end{minipage}
 
 \subsubsection*{Result}
 
-{\tt taxisInqVdate} returns the reference date.
+{\tt taxisInqRdate} returns the reference date.
 
 
 
@@ -116,7 +116,7 @@ Time axis ID, from a previous call to {\htmlref{\tt taxisCreate}{taxisCreate}}
 \index{taxisDefRtime}
 \label{taxisDefRtime}
 
-The function {\tt taxisDefVdate} defines the reference time of a Time axis.
+The function {\tt taxisDefRtime} defines the reference time of a Time axis.
 
 \subsubsection*{Usage}
 
@@ -150,14 +150,14 @@ The function {\tt taxisInqRtime} returns the reference time of a Time axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt taxisID\ }
 \item[{\tt taxisID}]
-Time axis ID, from a previous call to {\htmlref{\tt taxisCreate}{taxisCreate}}
+Time axis ID, from a previous call to {\htmlref{\tt taxisCreate}{taxisCreate}} or {\htmlref{\tt vlistInqTaxis}{vlistInqTaxis}}
 
 \end{deflist}
 \end{minipage}
 
 \subsubsection*{Result}
 
-{\tt taxisInqVtime} returns the reference time.
+{\tt taxisInqRtime} returns the reference time.
 
 
 
@@ -199,7 +199,7 @@ The function {\tt taxisInqVdate} returns the verification date of a Time axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt taxisID\ }
 \item[{\tt taxisID}]
-Time axis ID, from a previous call to {\htmlref{\tt taxisCreate}{taxisCreate}}
+Time axis ID, from a previous call to {\htmlref{\tt taxisCreate}{taxisCreate}} or {\htmlref{\tt vlistInqTaxis}{vlistInqTaxis}}
 
 \end{deflist}
 \end{minipage}
@@ -248,7 +248,7 @@ The function {\tt taxisInqVtime} returns the verification time of a Time axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt taxisID\ }
 \item[{\tt taxisID}]
-Time axis ID, from a previous call to {\htmlref{\tt taxisCreate}{taxisCreate}}
+Time axis ID, from a previous call to {\htmlref{\tt taxisCreate}{taxisCreate}} or {\htmlref{\tt vlistInqTaxis}{vlistInqTaxis}}
 
 \end{deflist}
 \end{minipage}
@@ -277,7 +277,7 @@ The function {\tt taxisDefCalendar} defines the calendar of a Time axis.
 Time axis ID, from a previous call to {\htmlref{\tt taxisCreate}{taxisCreate}}
 \item[{\tt calendar}]
 The type of the calendar, one of the set of predefined {\CDI} calendar types.
-                    The valid {\CDI} calendar types are {\tt CALENDAR\_STANDARD}, {\tt CALENDAR\_PROLEPTIC}, 
+                    The valid {\CDI} calendar types are {\tt CALENDAR\_STANDARD}, {\tt CALENDAR\_PROLEPTIC},
                     {\tt CALENDAR\_360DAYS}, {\tt CALENDAR\_365DAYS} and {\tt CALENDAR\_366DAYS}.
 
 \end{deflist}
@@ -299,7 +299,7 @@ The function {\tt taxisInqCalendar} returns the calendar of a Time axis.
 \hspace*{4mm}\begin{minipage}[]{15cm}
 \begin{deflist}{\tt taxisID\ }
 \item[{\tt taxisID}]
-Time axis ID, from a previous call to {\htmlref{\tt taxisCreate}{taxisCreate}}
+Time axis ID, from a previous call to {\htmlref{\tt taxisCreate}{taxisCreate}} or {\htmlref{\tt vlistInqTaxis}{vlistInqTaxis}}
 
 \end{deflist}
 \end{minipage}
@@ -308,6 +308,6 @@ Time axis ID, from a previous call to {\htmlref{\tt taxisCreate}{taxisCreate}}
 
 {\tt taxisInqCalendar} returns the type of the calendar,
 one of the set of predefined {\CDI} calendar types.
-The valid {\CDI} calendar types are {\tt CALENDAR\_STANDARD}, {\tt CALENDAR\_PROLEPTIC}, 
+The valid {\CDI} calendar types are {\tt CALENDAR\_STANDARD}, {\tt CALENDAR\_PROLEPTIC},
 {\tt CALENDAR\_360DAYS}, {\tt CALENDAR\_365DAYS} and {\tt CALENDAR\_366DAYS}.
 

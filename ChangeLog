@@ -1,3 +1,13 @@
+2014-05-20  Uwe Schulzweida
+
+	* Version 1.6.4 released
+	* using CGRIBEX library version 1.6.4
+
+2014-02-27  Uwe Schulzweida
+
+	* added taxisDefFdate() and taxisDefFtime() - Define the forecast reference date
+	* added taxisInqFdate() and taxisInqFtime() - Get  the forecast reference date
+
 2014-02-21  Uwe Schulzweida
 
 	* grib_api: debug patch from Florian and Daniel
