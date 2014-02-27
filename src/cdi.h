@@ -191,6 +191,7 @@ extern "C" {
 
 #define  TAXIS_ABSOLUTE           1
 #define  TAXIS_RELATIVE           2
+#define  TAXIS_FORECAST           3
 
 /* TUNIT types */
 
@@ -901,8 +902,14 @@ void    taxisDefVtime(int taxisID, int time);
 /*      taxisDefRdate: Define the reference date */
 void    taxisDefRdate(int taxisID, int date);
 
-/*      taxisDefRtime: Define the reference date */
+/*      taxisDefRtime: Define the reference time */
 void    taxisDefRtime(int taxisID, int time);
+
+/*      taxisDefFdate: Define the forecast reference date */
+void    taxisDefFdate(int taxisID, int date);
+
+/*      taxisDefFtime: Define the forecast reference time */
+void    taxisDefFtime(int taxisID, int time);
 
 int     taxisHasBounds(int taxisID);
 

@@ -146,6 +146,7 @@ module mo_cdi
       integer :: TSTEP_INSTANT3 = 13
       integer :: TAXIS_ABSOLUTE = 1
       integer :: TAXIS_RELATIVE = 2
+      integer :: TAXIS_FORECAST = 3
       integer :: TUNIT_SECOND = 1
       integer :: TUNIT_MINUTE = 2
       integer :: TUNIT_HOUR = 3
@@ -2671,6 +2672,22 @@ module mo_cdi
       end interface
   
       interface
+        subroutine taxisDefFdate(taxisID,date) bind(c,name='taxisDefFdate')
+          import :: c_int
+          integer(c_int), value :: taxisID
+          integer(c_int), value :: date
+       end subroutine taxisDefFdate
+      end interface
+  
+      interface
+        subroutine taxisDefFtime(taxisID,time) bind(c,name='taxisDefFtime')
+          import :: c_int
+          integer(c_int), value :: taxisID
+          integer(c_int), value :: time
+       end subroutine taxisDefFtime
+      end interface
+  
+      interface
         integer(c_int) function taxisHasBounds(taxisID) bind(c,name='taxisHasBounds')
           import :: c_int
           integer(c_int), value :: taxisID
@@ -3381,6 +3398,8 @@ module mo_cdi
       public :: taxisDefVtime
       public :: taxisDefRdate
       public :: taxisDefRtime
+      public :: taxisDefFdate
+      public :: taxisDefFtime
       public :: taxisHasBounds
       public :: taxisDeleteBounds
       public :: taxisDefVdateBounds
@@ -3574,6 +3593,7 @@ module mo_cdi
       public :: TSTEP_INSTANT3
       public :: TAXIS_ABSOLUTE
       public :: TAXIS_RELATIVE
+      public :: TAXIS_FORECAST
       public :: TUNIT_SECOND
       public :: TUNIT_MINUTE
       public :: TUNIT_HOUR
