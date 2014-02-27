@@ -633,7 +633,7 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
 
 @Prototype int taxisInqVdate(int taxisID)
 @Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate} or @fref{vlistInqTaxis}
 
 @Description
 The function @func{taxisInqVdate} returns the verification date of a Time axis.
@@ -694,7 +694,7 @@ void taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub)
 
 @Prototype int taxisInqVtime(int taxisID)
 @Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate} or @fref{vlistInqTaxis}
 
 @Description
 The function @func{taxisInqVtime} returns the verification time of a Time axis.
@@ -755,13 +755,13 @@ void taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub)
 
 @Prototype int taxisInqRdate(int taxisID)
 @Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate} or @fref{vlistInqTaxis}
 
 @Description
 The function @func{taxisInqRdate} returns the reference date of a Time axis.
 
 @Result
-@func{taxisInqVdate} returns the reference date.
+@func{taxisInqRdate} returns the reference date.
 
 @EndFunction
 */
@@ -788,13 +788,13 @@ int taxisInqRdate(int taxisID)
 
 @Prototype int taxisInqRtime(int taxisID)
 @Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate} or @fref{vlistInqTaxis}
 
 @Description
 The function @func{taxisInqRtime} returns the reference time of a Time axis.
 
 @Result
-@func{taxisInqVtime} returns the reference time.
+@func{taxisInqRtime} returns the reference time.
 
 @EndFunction
 */
@@ -816,12 +816,78 @@ int taxisInqRtime(int taxisID)
 }
 
 /*
+@Function  taxisInqFdate
+@Title     Get the forecast reference date
+
+@Prototype int taxisInqFdate(int taxisID)
+@Parameter
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate} or @fref{vlistInqTaxis}
+
+@Description
+The function @func{taxisInqFdate} returns the forecast reference date of a Time axis.
+
+@Result
+@func{taxisInqFdate} returns the forecast reference date.
+
+@EndFunction
+*/
+int taxisInqFdate(int taxisID)
+{
+  taxis_t *taxisptr;
+
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+
+  taxis_check_ptr(__func__, taxisptr);
+
+  if ( taxisptr->fdate == -1 )
+    {
+      taxisptr->fdate = taxisptr->vdate;
+      taxisptr->ftime = taxisptr->vtime;
+    }
+
+  return (taxisptr->fdate);
+}
+
+/*
+@Function  taxisInqFtime
+@Title     Get the forecast reference time
+
+@Prototype int taxisInqFtime(int taxisID)
+@Parameter
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate} or @fref{vlistInqTaxis}
+
+@Description
+The function @func{taxisInqFtime} returns the forecast reference time of a Time axis.
+
+@Result
+@func{taxisInqFtime} returns the forecast reference time.
+
+@EndFunction
+*/
+int taxisInqFtime(int taxisID)
+{
+  taxis_t *taxisptr;
+
+  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+
+  taxis_check_ptr(__func__, taxisptr);
+
+  if ( taxisptr->fdate == -1 )
+    {
+      taxisptr->fdate = taxisptr->vdate;
+      taxisptr->ftime = taxisptr->vtime;
+    }
+
+  return (taxisptr->ftime);
+}
+
+/*
 @Function  taxisInqCalendar
 @Title     Get the calendar
 
 @Prototype int taxisInqCalendar(int taxisID)
 @Parameter
-    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate}
+    @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate} or @fref{vlistInqTaxis}
 
 @Description
 The function @func{taxisInqCalendar} returns the calendar of a Time axis.
@@ -829,7 +895,7 @@ The function @func{taxisInqCalendar} returns the calendar of a Time axis.
 @Result
 @func{taxisInqCalendar} returns the type of the calendar,
 one of the set of predefined CDI calendar types.
-The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_PROLEPTIC}, 
+The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_PROLEPTIC},
 @func{CALENDAR_360DAYS}, @func{CALENDAR_365DAYS} and @func{CALENDAR_366DAYS}.
 
 @EndFunction

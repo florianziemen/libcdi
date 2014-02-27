@@ -638,6 +638,24 @@ Create a Time axis.
 Define the calendar.
 
 
+\section*{\tt \htmlref{taxisDefFdate}{taxisDefFdate}}
+
+\begin{verbatim}
+    SUBROUTINE taxisDefFdate (INTEGER taxisID, INTEGER date)
+\end{verbatim}
+
+Define the forecast reference date.
+
+
+\section*{\tt \htmlref{taxisDefFtime}{taxisDefFtime}}
+
+\begin{verbatim}
+    SUBROUTINE taxisDefFtime (INTEGER taxisID, INTEGER time)
+\end{verbatim}
+
+Define the forecast reference time.
+
+
 \section*{\tt \htmlref{taxisDefRdate}{taxisDefRdate}}
 
 \begin{verbatim}
@@ -653,7 +671,7 @@ Define the reference date.
     SUBROUTINE taxisDefRtime (INTEGER taxisID, INTEGER time)
 \end{verbatim}
 
-Define the reference date.
+Define the reference time.
 
 
 \section*{\tt \htmlref{taxisDefVdate}{taxisDefVdate}}
@@ -690,6 +708,24 @@ Destroy a Time axis.
 \end{verbatim}
 
 Get the calendar.
+
+
+\section*{\tt \htmlref{taxisInqFdate}{taxisInqFdate}}
+
+\begin{verbatim}
+    INTEGER FUNCTION taxisInqFdate (INTEGER taxisID)
+\end{verbatim}
+
+Get the forecast reference date.
+
+
+\section*{\tt \htmlref{taxisInqFtime}{taxisInqFtime}}
+
+\begin{verbatim}
+    INTEGER FUNCTION taxisInqFtime (INTEGER taxisID)
+\end{verbatim}
+
+Get the forecast reference time.
 
 
 \section*{\tt \htmlref{taxisInqRdate}{taxisInqRdate}}

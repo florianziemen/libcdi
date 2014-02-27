@@ -2797,6 +2797,20 @@ module mo_cdi
       end interface
   
       interface
+        integer(c_int) function taxisInqFdate(taxisID) bind(c,name='taxisInqFdate')
+          import :: c_int
+          integer(c_int), value :: taxisID
+       end function taxisInqFdate
+      end interface
+  
+      interface
+        integer(c_int) function taxisInqFtime(taxisID) bind(c,name='taxisInqFtime')
+          import :: c_int
+          integer(c_int), value :: taxisID
+       end function taxisInqFtime
+      end interface
+  
+      interface
         integer(c_int) function taxisInqCalendar(taxisID) bind(c,name='taxisInqCalendar')
           import :: c_int
           integer(c_int), value :: taxisID
@@ -3414,6 +3428,8 @@ module mo_cdi
       public :: taxisInqVtime
       public :: taxisInqRdate
       public :: taxisInqRtime
+      public :: taxisInqFdate
+      public :: taxisInqFtime
       public :: taxisInqCalendar
       public :: taxisInqTunit
       public :: taxisInqNumavg

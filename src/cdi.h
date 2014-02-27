@@ -944,6 +944,12 @@ int     taxisInqRdate(int taxisID);
 /*      taxisInqRtime: Get the reference time */
 int     taxisInqRtime(int taxisID);
 
+/*      taxisInqFdate: Get the forecast reference date */
+int     taxisInqFdate(int taxisID);
+
+/*      taxisInqFtime: Get the forecast reference time */
+int     taxisInqFtime(int taxisID);
+
 /*      taxisInqCalendar: Get the calendar */
 int     taxisInqCalendar(int taxisID);
 
