@@ -749,10 +749,10 @@ int cdfReadRecord(stream_t *streamptr, double *data, int *nmiss)
   return (ierr);
 }
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefTimeValue(stream_t *streamptr, int tsID)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int fileID;
   double timevalue;
   int ncvarid;
@@ -797,111 +797,59 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
   /*
 printf("fileID = %d %d %d %f\n", fileID, time_varid, index, timevalue);
   */
-#endif
 }
 
 static
-void cdfDefCalendar(int fileID, int ncvarid, int calendar)
+int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, char* taxis_name, taxis_t* taxis)
 {
-  size_t len;
-  char calstr[80];
-
-  calstr[0] = 0;
-
-  if      ( calendar == CALENDAR_STANDARD )  strcpy(calstr, "standard");
-  else if ( calendar == CALENDAR_PROLEPTIC ) strcpy(calstr, "proleptic_gregorian");
-  else if ( calendar == CALENDAR_NONE )      strcpy(calstr, "none");
-  else if ( calendar == CALENDAR_360DAYS )   strcpy(calstr, "360_day");
-  else if ( calendar == CALENDAR_365DAYS )   strcpy(calstr, "365_day");
-  else if ( calendar == CALENDAR_366DAYS )   strcpy(calstr, "366_day");
-
-  len = strlen(calstr);
-
-  if ( len ) cdf_put_att_text(fileID, ncvarid, "calendar", len, calstr);
-}
-
-static
-void cdfDefTime(stream_t *streamptr)
-{
-#if  defined  (HAVE_LIBNETCDF)
-  int fileID;
-  int time_varid;
-  int time_bndsid;
+  int time_bndsid = -1;
   int dims[2];
-  int year, month, day, hour, minute, second;
-  char unitstr[80];
   char tmpstr[CDI_MAX_NAME];
-  char default_name[] = "time";
-  char *taxis_name = default_name;
-  size_t len;
-  taxis_t *taxis;
 
-  if ( streamptr->basetime.ncvarid != UNDEFID ) return;
+  dims[0] = nctimedimid;
 
-  fileID = streamptr->fileID;
+  /* fprintf(stderr, "time has bounds\n"); */
 
-  if ( streamptr->ncmode == 0 ) streamptr->ncmode = 1;
+  if ( nc_inq_dimid(fileID, "nb2", &dims[1]) != NC_NOERR )
+    cdf_def_dim(fileID, "nb2", 2, &dims[1]);
 
-  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-
-  taxis = &streamptr->tsteps[0].taxis;
-
-  if ( taxis->name && taxis->name[0] ) taxis_name = taxis->name;
-
-  cdf_def_dim(fileID, taxis_name, NC_UNLIMITED, &streamptr->basetime.ncdimid);
-
-  dims[0] = streamptr->basetime.ncdimid;
-  cdf_def_var(fileID, taxis_name, NC_DOUBLE, 1, dims, &time_varid);
-
-  streamptr->basetime.ncvarid = time_varid;
-
-  strcpy(tmpstr, "time");
-  cdf_put_att_text(fileID, time_varid, "standard_name", strlen(tmpstr), tmpstr);
-
-  if ( taxis->longname && taxis->longname[0] )
-    cdf_put_att_text(fileID, time_varid, "long_name", strlen(taxis->longname), taxis->longname);
-
-  if ( taxis->has_bounds )
+  if ( taxis->climatology )
     {
-      /* fprintf(stderr, "time has bounds\n"); */
+      strcpy(tmpstr, "climatology");
+      strcat(tmpstr, "_bnds");
+      cdf_def_var(fileID, tmpstr, NC_DOUBLE, 2, dims, &time_bndsid);
 
-      if ( nc_inq_dimid(fileID, "nb2", &dims[1]) != NC_NOERR )
-	cdf_def_dim(fileID, "nb2", 2, &dims[1]);
+      cdf_put_att_text(fileID, nctimevarid, "climatology", strlen(tmpstr), tmpstr);
+    }
+  else
+    {
+      strcpy(tmpstr, taxis_name);
+      strcat(tmpstr, "_bnds");
+      cdf_def_var(fileID, tmpstr, NC_DOUBLE, 2, dims, &time_bndsid);
 
-      if ( taxis->climatology )
-        {
-          strcpy(tmpstr, "climatology");
-          strcat(tmpstr, "_bnds");
-          cdf_def_var(fileID, tmpstr, NC_DOUBLE, 2, dims, &time_bndsid);
-
-          streamptr->basetime.ncvarboundsid = time_bndsid;
-
-          cdf_put_att_text(fileID, time_varid, "climatology", strlen(tmpstr), tmpstr);
-        }
-      else
-        {
-          strcpy(tmpstr, taxis_name);
-          strcat(tmpstr, "_bnds");
-          cdf_def_var(fileID, tmpstr, NC_DOUBLE, 2, dims, &time_bndsid);
-
-          streamptr->basetime.ncvarboundsid = time_bndsid;
-
-          cdf_put_att_text(fileID, time_varid, "bounds", strlen(tmpstr), tmpstr);
-        }
+      cdf_put_att_text(fileID, nctimevarid, "bounds", strlen(tmpstr), tmpstr);
     }
 
+  return (time_bndsid);
+}
+
+static
+void cdfDefTimeUnits(char *unitstr, taxis_t* taxis0, taxis_t* taxis)
+{
   unitstr[0] = 0;
-  if ( streamptr->tsteps[0].taxis.type == TAXIS_ABSOLUTE )
+
+  if ( taxis0->type == TAXIS_ABSOLUTE )
     {
-      if ( streamptr->tsteps[0].taxis.unit == TUNIT_YEAR )
+      if ( taxis0->unit == TUNIT_YEAR )
         sprintf(unitstr, "year as %s", "%Y.%f");
-      else if ( streamptr->tsteps[0].taxis.unit == TUNIT_MONTH )
+      else if ( taxis0->unit == TUNIT_MONTH )
         sprintf(unitstr, "month as %s", "%Y%m.%f");
       else
         sprintf(unitstr, "day as %s", "%Y%m%d.%f");
     }
   else
     {
+      int year, month, day, hour, minute, second;
       int rdate, rtime;
       int timeunit;
 
@@ -926,6 +874,78 @@ void cdfDefTime(stream_t *streamptr)
       sprintf(unitstr, "%s since %d-%02d-%02d %02d:%02d:%02d",
               tunitNamePtr(timeunit), year, month, day, hour, minute, second);
     }
+}
+#endif
+
+static
+void cdfDefCalendar(int fileID, int ncvarid, int calendar)
+{
+  size_t len;
+  char calstr[80];
+
+  calstr[0] = 0;
+
+  if      ( calendar == CALENDAR_STANDARD )  strcpy(calstr, "standard");
+  else if ( calendar == CALENDAR_PROLEPTIC ) strcpy(calstr, "proleptic_gregorian");
+  else if ( calendar == CALENDAR_NONE )      strcpy(calstr, "none");
+  else if ( calendar == CALENDAR_360DAYS )   strcpy(calstr, "360_day");
+  else if ( calendar == CALENDAR_365DAYS )   strcpy(calstr, "365_day");
+  else if ( calendar == CALENDAR_366DAYS )   strcpy(calstr, "366_day");
+
+  len = strlen(calstr);
+
+#if  defined  (HAVE_LIBNETCDF)
+  if ( len ) cdf_put_att_text(fileID, ncvarid, "calendar", len, calstr);
+#endif
+}
+
+static
+void cdfDefTime(stream_t* streamptr)
+{
+#if  defined  (HAVE_LIBNETCDF)
+  int fileID;
+  int time_varid;
+  int time_dimid;
+  int time_bndsid = -1;
+  char unitstr[CDI_MAX_NAME];
+  char tmpstr[CDI_MAX_NAME];
+  char default_name[] = "time";
+  char* taxis_name = default_name;
+  size_t len;
+  taxis_t* taxis;
+
+  if ( streamptr->basetime.ncvarid != UNDEFID ) return;
+
+  fileID = streamptr->fileID;
+
+  if ( streamptr->ncmode == 0 ) streamptr->ncmode = 1;
+
+  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+
+  taxis = &streamptr->tsteps[0].taxis;
+
+  if ( taxis->name && taxis->name[0] ) taxis_name = taxis->name;
+
+  cdf_def_dim(fileID, taxis_name, NC_UNLIMITED, &time_dimid);
+  streamptr->basetime.ncdimid = time_dimid;
+
+  cdf_def_var(fileID, taxis_name, NC_DOUBLE, 1, &time_dimid, &time_varid);
+
+  streamptr->basetime.ncvarid = time_varid;
+
+  strcpy(tmpstr, "time");
+  cdf_put_att_text(fileID, time_varid, "standard_name", strlen(tmpstr), tmpstr);
+
+  if ( taxis->longname && taxis->longname[0] )
+    cdf_put_att_text(fileID, time_varid, "long_name", strlen(taxis->longname), taxis->longname);
+
+  if ( taxis->has_bounds )
+    {
+      time_bndsid = cdfDefTimeBounds(fileID, time_varid, time_dimid, taxis_name, taxis);
+      streamptr->basetime.ncvarboundsid = time_bndsid;
+    }
+
+  cdfDefTimeUnits(unitstr, &streamptr->tsteps[0].taxis, taxis);
 
   len = strlen(unitstr);
   if ( len )
