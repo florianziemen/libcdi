@@ -801,6 +801,26 @@ printf("fileID = %d %d %d %f\n", fileID, time_varid, index, timevalue);
 }
 
 static
+void cdfDefCalendar(int fileID, int ncvarid, int calendar)
+{
+  size_t len;
+  char calstr[80];
+
+  calstr[0] = 0;
+
+  if      ( calendar == CALENDAR_STANDARD )  strcpy(calstr, "standard");
+  else if ( calendar == CALENDAR_PROLEPTIC ) strcpy(calstr, "proleptic_gregorian");
+  else if ( calendar == CALENDAR_NONE )      strcpy(calstr, "none");
+  else if ( calendar == CALENDAR_360DAYS )   strcpy(calstr, "360_day");
+  else if ( calendar == CALENDAR_365DAYS )   strcpy(calstr, "365_day");
+  else if ( calendar == CALENDAR_366DAYS )   strcpy(calstr, "366_day");
+
+  len = strlen(calstr);
+
+  if ( len ) cdf_put_att_text(fileID, ncvarid, "calendar", len, calstr);
+}
+
+static
 void cdfDefTime(stream_t *streamptr)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -810,7 +830,6 @@ void cdfDefTime(stream_t *streamptr)
   int dims[2];
   int year, month, day, hour, minute, second;
   char unitstr[80];
-  char calstr[80];
   char tmpstr[CDI_MAX_NAME];
   char default_name[] = "time";
   char *taxis_name = default_name;
@@ -919,23 +938,10 @@ void cdfDefTime(stream_t *streamptr)
 
   if ( taxis->calendar != -1 )
     {
-      calstr[0] = 0;
+      cdfDefCalendar(fileID, time_varid, taxis->calendar);
 
-      if      ( taxis->calendar == CALENDAR_STANDARD )  strcpy(calstr, "standard");
-      else if ( taxis->calendar == CALENDAR_PROLEPTIC ) strcpy(calstr, "proleptic_gregorian");
-      else if ( taxis->calendar == CALENDAR_NONE )      strcpy(calstr, "none");
-      else if ( taxis->calendar == CALENDAR_360DAYS )   strcpy(calstr, "360_day");
-      else if ( taxis->calendar == CALENDAR_365DAYS )   strcpy(calstr, "365_day");
-      else if ( taxis->calendar == CALENDAR_366DAYS )   strcpy(calstr, "366_day");
-
-      len = strlen(calstr);
-      if ( len )
-        {
-          cdf_put_att_text(fileID, time_varid, "calendar", len, calstr);
-
-          if ( taxis->has_bounds )
-            cdf_put_att_text(fileID, time_bndsid, "calendar", len, calstr);
-        }
+      if ( taxis->has_bounds )
+        cdfDefCalendar(fileID, time_bndsid, taxis->calendar);
     }
 
   if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
