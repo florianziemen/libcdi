@@ -1538,8 +1538,8 @@ taxisPack(void * voidP, void * packBuffer, int packBufferSize, int * packBufferP
   intBuffer[idx++] = taxisP->vtime;
   intBuffer[idx++] = taxisP->rdate;
   intBuffer[idx++] = taxisP->rtime;
-  intBuffer[idx++] = taxisP->rdate;
-  intBuffer[idx++] = taxisP->rtime;
+  intBuffer[idx++] = taxisP->fdate;
+  intBuffer[idx++] = taxisP->ftime;
   intBuffer[idx++] = taxisP->calendar;
   intBuffer[idx++] = taxisP->unit;
   intBuffer[idx++] = taxisP->numavg;
