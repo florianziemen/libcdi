@@ -971,6 +971,7 @@ void cdfDefTime(stream_t* streamptr)
 
 void cdfDefTimestep(stream_t *streamptr, int tsID)
 {
+#if  defined  (HAVE_LIBNETCDF)
   int vlistID;
 
   vlistID = streamptr->vlistID;
@@ -978,6 +979,7 @@ void cdfDefTimestep(stream_t *streamptr, int tsID)
   if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
 
   cdfDefTimeValue(streamptr, tsID);
+#endif
 }
 
 #if  defined  (HAVE_LIBNETCDF)
