@@ -14,10 +14,6 @@
 #  include "cfortran.h"
 #endif
 
-#if ! defined (_CDIFORTRAN_H)
-#  include "cdiFortran.h"
-#endif
-
 
 /*  parallel IO IOMode  */
 
