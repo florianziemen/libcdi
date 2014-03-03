@@ -1,4 +1,8 @@
 #include <inttypes.h>
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 #include <stdlib.h>
 #include <sys/types.h>
 
@@ -108,18 +112,18 @@ memcrc_r(uint32_t *state, const unsigned char *block, size_t block_len)
   *state = s;
 }
 
-#define SWAP_CSUM(BITWIDTH,BYTEWIDTH)                             \
-  do {                                                            \
-  for (size_t i = num_elems; i > 0; --i) {                        \
-    {                                                             \
-      uint##BITWIDTH##_t accum = *(uint##BITWIDTH##_t *)b++;      \
-      for (j = 0; j < BYTEWIDTH; ++j)                             \
-      {                                                           \
-        uint32_t c = (uint32_t)(accum & UCHAR_MAX);               \
-        s = (s << 8) ^ crctab[(s >> 24) ^ c];                     \
-        accum >>= 8;                                              \
-      }                                                           \
-    }                                                             \
+#define SWAP_CSUM(BITWIDTH,BYTEWIDTH)                                   \
+  do {                                                                  \
+    register const uint##BITWIDTH##_t *b = (uint##BITWIDTH##_t *)elems; \
+    for (size_t i = 0; i < num_elems; ++i) {                            \
+      uint##BITWIDTH##_t accum = b[i];                                  \
+      for (size_t j = 0; j < BYTEWIDTH; ++j)                            \
+      {                                                                 \
+        uint32_t c = (uint32_t)(accum & UCHAR_MAX);                     \
+        s = (s << 8) ^ crctab[(s >> 24) ^ c];                           \
+        accum >>= 8;                                                    \
+      }                                                                 \
+    }                                                                   \
   } while (0)
 
 
@@ -136,14 +140,13 @@ memcrc_r_eswap(uint32_t *state, const unsigned char *elems, size_t num_elems,
                size_t elem_size)
 {
 #ifdef WORDS_BIGENDIAN
-  register uint32_t c, s = *state;
-  register size_t n = block_len;
-  register unsigned char *b = elems;
+  register uint32_t s = *state;
 
   switch (elem_size)
   {
   case 1:
-    return memcrc_r(state, elems, num_elems, elem_size);
+    memcrc_r(state, elems, num_elems * elem_size);
+    return;
   case 2:
     SWAP_CSUM(16,2);
     break;
