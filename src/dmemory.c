@@ -47,9 +47,9 @@ typedef struct
   char      file[MAXNAME];
   char      caller[MAXNAME];
 }
-MemTable;
+MemTable_t;
 
-static MemTable *memTable;
+static MemTable_t* memTable;
 static int     memTableSize  = 0;
 static long    memAccess     = 0;
 
@@ -86,8 +86,8 @@ static
 void memError(const char *caller, const char *file, int line, size_t size)
 {
   printf("\n");
-  fprintf(stderr, "Error (%s) : Allocation of %lu bytes failed. [ line %d file %s ]\n",
-	  caller, (unsigned long) size, line, file);
+  fprintf(stderr, "Error (%s) : Allocation of %zu bytes failed. [ line %d file %s ]\n",
+	  caller, size, line, file);
 
   if ( errno ) perror("System error message ");
 
@@ -115,7 +115,7 @@ void memListPrintEntry(int mtype, int item, size_t size, void *ptr,
     }
 
    fprintf(stderr, "memory item %3d ", item);
-   fprintf(stderr, "(%6lu byte) ", (unsigned long) size);
+   fprintf(stderr, "(%6zu byte) ", size);
    fprintf(stderr, "at %p", ptr);
    if ( file != NULL )
      {
@@ -270,8 +270,8 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
   if ( memTableSize == 0 )
     {
       memTableSize = 8;
-      memSize  = memTableSize*sizeof(MemTable);
-      memTable = (MemTable *) malloc(memSize);
+      memSize  = memTableSize*sizeof(MemTable_t);
+      memTable = (MemTable_t*) malloc(memSize);
       if( memTable == NULL ) memError(__func__, __FILE__, __LINE__, memSize);
 
       for( i = 0; i < memTableSize; i++ )
@@ -291,8 +291,8 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
   if ( memID == memTableSize )
     {
       memTableSize = 2*memTableSize;
-      memSize  = memTableSize*sizeof(MemTable);
-      memTable = (MemTable *) realloc(memTable, memSize);
+      memSize  = memTableSize*sizeof(MemTable_t);
+      memTable = (MemTable_t*) realloc(memTable, memSize);
       if( memTable == NULL ) memError(__func__, __FILE__, __LINE__, memSize);
 
       for( i = memID; i < memTableSize; i++ )
