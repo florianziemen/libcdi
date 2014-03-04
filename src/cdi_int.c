@@ -179,6 +179,9 @@ void cdiInitialize(void)
       gribSetConst(1); // 1: Don't pack constant fields on regular grids
 #endif
 
+      value = cdiGetenvInt("CDI_DEBUG");
+      if ( value >= 0 ) CDI_Debug = (int) value;
+
       value = cdiGetenvInt("CDI_GRIBAPI_DEBUG");
       if ( value >= 0 ) cdiGribApiDebug = (int) value;
 
