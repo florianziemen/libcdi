@@ -384,12 +384,11 @@ int gridCreate(int gridtype, int size)
   int gridID;
   grid_t *gridptr;
 
-  if ( CDI_Debug )
-    Message("gridtype: %d size: %d", gridtype, size);
+  if ( CDI_Debug ) Message("gridtype=%s  size=%d", gridNamePtr(gridtype), size);
 
-  if ( size < 0 || size > INT_MAX ) Error("grid size (%d) out of bounds (0 - %d)!", size, INT_MAX);
+  if ( size < 0 || size > INT_MAX ) Error("Grid size (%d) out of bounds (0 - %d)!", size, INT_MAX);
 
-  gridInit ();
+  gridInit();
 
   gridptr = gridNewEntry();
   if ( ! gridptr ) Error("No memory");

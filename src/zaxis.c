@@ -223,10 +223,11 @@ int zaxisCreate(int zaxistype, int size)
   double *vals;
   zaxis_t *zaxisptr;
 
-  if ( CDI_Debug )
-    Message("zaxistype: %d size: %d ", zaxistype, size);
+  if ( CDI_Debug ) Message("zaxistype=%s  levels=%d", zaxisNamePtr(zaxistype), size);
 
-  zaxisInit ();
+  if ( size < 0 ) Error("Negativ number of levels (%d) not allowed!", size);
+
+  zaxisInit();
 
   zaxisptr = zaxisNewEntry();
 
@@ -249,8 +250,7 @@ int zaxisCreate(int zaxistype, int size)
 
   vals = (double *) malloc(size*sizeof(double));
 
-  for ( ilev = 0; ilev < size; ilev++ )
-    vals[ilev] = 0.0;
+  for ( ilev = 0; ilev < size; ilev++ ) vals[ilev] = 0.0;
 
   zaxisptr->vals = vals;
 
