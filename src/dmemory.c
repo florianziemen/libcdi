@@ -69,7 +69,7 @@ static
 void memInternalProblem(const char *caller, const char *fmt, ...)
 {
   va_list args;
-	
+
   va_start(args, fmt);
 
   printf("\n");
@@ -89,9 +89,8 @@ void memError(const char *caller, const char *file, int line, size_t size)
   fprintf(stderr, "Error (%s) : Allocation of %lu bytes failed. [ line %d file %s ]\n",
 	  caller, (unsigned long) size, line, file);
 
-  if ( errno )
-    perror("System error message ");
-	
+  if ( errno ) perror("System error message ");
+
   exit(EXIT_FAILURE);
 }
 
@@ -122,9 +121,9 @@ void memListPrintEntry(int mtype, int item, size_t size, void *ptr,
      {
        fprintf(stderr, " line %4d", line);
        fprintf(stderr, " file %s", file);
-     }    
+     }
    if ( caller != NULL )
-     fprintf(stderr, " (%s)", caller);     
+     fprintf(stderr, " (%s)", caller);
    fprintf(stderr, "]\n");
 }
 
@@ -213,7 +212,7 @@ void memInit(void)
     {
       memGetDebugLevel();
       initDebugLevel = 1;
-    }  
+    }
 }
 
 static
@@ -311,7 +310,7 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
     {
       len = strlen(file);
       if ( len > MAXNAME-1 ) len = MAXNAME-1;
-    
+
       (void) memcpy(memTable[memID].file, file, len);
       memTable[memID].file[len] = '\0';
     }
@@ -367,7 +366,7 @@ int memListChangeEntry(void *ptrold, void *ptr, size_t size,
       item = memTable[memID].item;
 
       sizeold = memTable[memID].size*memTable[memID].nobj;
-      
+
       memTable[memID].ptr   = ptr;
       memTable[memID].size  = size;
       memTable[memID].nobj  = 1;
@@ -424,8 +423,7 @@ void *Calloc(const char *caller, const char *file, int line, size_t nobjs, size_
 	{
 	  memAccess++;
 
-	  if ( ptr )
-	    item = memListNewEntry(CALLOC_FUNC, ptr, size, nobjs, caller, file, line);
+	  if ( ptr ) item = memListNewEntry(CALLOC_FUNC, ptr, size, nobjs, caller, file, line);
 
 	  memListPrintEntry(CALLOC_FUNC, item, size*nobjs, ptr, caller, file, line);
 	}
@@ -455,8 +453,7 @@ void *Malloc(const char *caller, const char *file, int line, size_t size)
 	{
 	  memAccess++;
 
-	  if ( ptr )
-	    item = memListNewEntry(MALLOC_FUNC, ptr, size, 1, caller, file, line);
+	  if ( ptr ) item = memListNewEntry(MALLOC_FUNC, ptr, size, 1, caller, file, line);
 
 	  memListPrintEntry(MALLOC_FUNC, item, size, ptr, caller, file, line);
 	}
@@ -490,8 +487,7 @@ void *Realloc(const char *caller, const char *file, int line, void *ptrold, size
 	    {
 	      item = memListChangeEntry(ptrold, ptr, size, caller, file, line);
 
-	      if ( item == UNDEFID )
-		item = memListNewEntry(REALLOC_FUNC, ptr, size, 1, caller, file, line);
+	      if ( item == UNDEFID ) item = memListNewEntry(REALLOC_FUNC, ptr, size, 1, caller, file, line);
 	    }
 
 	  memListPrintEntry(REALLOC_FUNC, item, size, ptr, caller, file, line);
