@@ -3,6 +3,10 @@
 	* Version 1.6.4 released
 	* using CGRIBEX library version 1.6.4
 
+2014-03-10  Uwe Schulzweida
+
+	* cgribexDefParam: check validity of parameter number
+
 2014-03-04  Uwe Schulzweida
 
 	* zaxisCreate: check number of levels

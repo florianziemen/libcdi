@@ -319,7 +319,8 @@ void printShortinfo(int streamID, int vlistID, int vardis)
   char pstr[4];
   char paramstr[32];
 
-      printf("   File format: ");
+      fprintf(stdout, "   File format");
+      fprintf(stdout, " : ");
       printFiletype(streamID, vlistID);
 
       if ( vardis )
