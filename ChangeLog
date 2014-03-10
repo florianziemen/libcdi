@@ -5,6 +5,7 @@
 
 2014-03-10  Uwe Schulzweida
 
+	* netCDF4 classic: existing files are converted to netCDF4 - classic flag is lost (bug fix)
 	* cgribexDefParam: check validity of parameter number
 
 2014-03-04  Uwe Schulzweida

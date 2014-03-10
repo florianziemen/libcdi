@@ -729,6 +729,9 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
         return (CDI_ELIBNAVAIL);
       }
     }
+
+  streamptr->filetype = filetype;
+
   return fileID;
 }
 
@@ -766,7 +769,6 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 
       if ( streamID < 0 ) return (CDI_ELIMIT);
 
-      streamptr->filetype = filetype;
       streamptr->filemode = tolower(*filemode);
       streamptr->filename = strdupx(filename);
       streamptr->fileID   = fileID;
@@ -818,7 +820,6 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
 
   streamID = streamptr->self;
 
-  streamptr->filetype = filetype;
   streamptr->filemode = tolower(*filemode);
   streamptr->filename = strdupx(filename);
   streamptr->fileID   = fileID;
