@@ -342,8 +342,8 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
   if ( cgribexGetIsRotated(isec2) )
     {
       grid->isRotated = TRUE;
-      grid->ypole     = - ISEC2_LatSP * 0.001;
-      grid->xpole     =   ISEC2_LonSP * 0.001 - 180;
+      grid->ypole     = - ISEC2_LatSP*0.001;
+      grid->xpole     =   ISEC2_LonSP*0.001 - 180;
       grid->angle     = 0;
     }
 

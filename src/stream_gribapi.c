@@ -2465,7 +2465,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 	    xpole = gridInqXpole(gridID);
 	    ypole = gridInqYpole(gridID);
 	    angle = gridInqAngle(gridID);
-	    /* change from noth to south pole */
+	    /* change from north to south pole */
 	    ypole = -ypole;
 	    xpole =  xpole + 180;
 	    GRIB_CHECK(my_grib_set_double(gh, "latitudeOfSouthernPoleInDegrees",  ypole), 0);
