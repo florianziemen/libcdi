@@ -3,6 +3,11 @@
 	* Version 1.6.4 released
 	* using CGRIBEX library version 1.6.4
 
+2014-03-20  Uwe Schulzweida
+
+	* netCDF4: changed default file name suffix from nc4 to nc
+	* GRIB2: changed default file name suffix fromg g2 to grb
+
 2014-03-10  Uwe Schulzweida
 
 	* netCDF4 classic: existing files are converted to netCDF4 - classic flag is lost (bug fix)
