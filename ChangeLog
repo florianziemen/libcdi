@@ -5,6 +5,7 @@
 
 2014-03-24  Uwe Schulzweida
 
+	* configure --with-netCDF: set default=no
 	* gribapiDefDateTimeRel: set vdate to rdate for time invariant fields [Bug #4641]
 
 2014-03-20  Uwe Schulzweida
