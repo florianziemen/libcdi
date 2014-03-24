@@ -3,6 +3,10 @@
 	* Version 1.6.4 released
 	* using CGRIBEX library version 1.6.4
 
+2014-03-24  Uwe Schulzweida
+
+	* gribapiDefDateTimeRel: set vdate to rdate for time invariant fields [Bug #4641]
+
 2014-03-20  Uwe Schulzweida
 
 	* netCDF4: changed default file name suffix from nc4 to nc

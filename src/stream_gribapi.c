@@ -2185,6 +2185,8 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
   cdiDecodeTime(rtime, &hour, &minute, &second);
   encode_juldaysec(calendar, year, month, day, hour, minute, second, &julday1, &secofday1);
 
+  if ( vdate == 0 && vtime == 0 ) { vdate = rdate; vtime = rtime; }
+
   cdiDecodeDate(vdate, &year, &month, &day);
   cdiDecodeTime(vtime, &hour, &minute, &second);
   encode_juldaysec(calendar, year, month, day, hour, minute, second, &julday2, &secofday2);
@@ -2448,10 +2450,10 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 	    */
 	  }
 	/*
-	if ( ISEC2_NumLon > 1 && ISEC2_NumLat == 1 ) 
+	if ( ISEC2_NumLon > 1 && ISEC2_NumLat == 1 )
 	  if ( ISEC2_LonIncr != 0 && ISEC2_LatIncr == 0 ) ISEC2_LatIncr = ISEC2_LonIncr;
 
-	if ( ISEC2_NumLon == 1 && ISEC2_NumLat > 1 ) 
+	if ( ISEC2_NumLon == 1 && ISEC2_NumLat > 1 )
 	  if ( ISEC2_LonIncr == 0 && ISEC2_LatIncr != 0 ) ISEC2_LonIncr = ISEC2_LatIncr;
 
 	if ( ISEC2_LatIncr == 0 || ISEC2_LonIncr == 0 )
