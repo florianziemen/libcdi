@@ -1501,7 +1501,7 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
   if (intBuffer[idx])
     {
       size_t len = intBuffer[idx];
-      char *name = xmalloc(len + 1);
+      char *name = (char*) xmalloc(len + 1);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       name, len, DATATYPE_TXT, context);
       name[len] = '\0';
@@ -1511,7 +1511,7 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
   if (intBuffer[idx])
     {
       size_t len = intBuffer[idx];
-      char *longname = xmalloc(len + 1);
+      char *longname = (char*) xmalloc(len + 1);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       longname, len, DATATYPE_TXT, context);
       longname[len] = '\0';

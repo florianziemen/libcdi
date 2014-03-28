@@ -4581,7 +4581,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
   if (memberMask & gridHasRowLonFlag)
     {
       xassert(gridP->nrowlon);
-      gridP->rowlon = xmalloc(gridP->nrowlon * sizeof (int));
+      gridP->rowlon = (int*) xmalloc(gridP->nrowlon * sizeof (int));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->rowlon, gridP->nrowlon , DATATYPE_INT, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4630,7 +4630,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
       else
 	size = gridP->xsize;
 
-      gridP->xvals = xmalloc(size * sizeof (double));
+      gridP->xvals = (double*) xmalloc(size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->xvals, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4645,7 +4645,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
       else
 	size = gridP->ysize;
 
-      gridP->yvals =  xmalloc( size * sizeof (double));
+      gridP->yvals =  (double*) xmalloc( size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->yvals, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4656,7 +4656,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
   if (memberMask & gridHasAreaFlag)
     {
       xassert((size = gridP->size));
-      gridP->area = xmalloc(size * sizeof (double));
+      gridP->area = (double*) xmalloc(size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->area, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4672,7 +4672,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
 	size = gridP->nvertex * gridP->xsize;
       xassert(size);
 
-      gridP->xbounds = xmalloc(size * sizeof (double));
+      gridP->xbounds = (double*) xmalloc(size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->xbounds, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4688,7 +4688,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
 	size = gridP->nvertex * gridP->ysize;
       xassert(size);
 
-      gridP->ybounds = xmalloc(size * sizeof (double));
+      gridP->ybounds = (double*) xmalloc(size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
 			  gridP->ybounds, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4717,7 +4717,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
       int referenceSize;
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       &referenceSize, 1, DATATYPE_INT, context);
-      gridP->reference = xmalloc(referenceSize);
+      gridP->reference = (char*) xmalloc(referenceSize);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->reference, referenceSize, DATATYPE_TXT, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4728,7 +4728,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
   if (memberMask & gridHasMaskFlag)
     {
       xassert((size = gridP->size));
-      gridP->mask = xmalloc(size * sizeof (mask_t));
+      gridP->mask = (mask_t*) xmalloc(size * sizeof (mask_t));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->mask, gridP->size, DATATYPE_UCHAR, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4739,7 +4739,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
   if (memberMask & gridHasGMEMaskFlag)
     {
       xassert((size = gridP->size));
-      gridP->mask_gme = xmalloc(size * sizeof (mask_t));
+      gridP->mask_gme = (mask_t*) xmalloc(size * sizeof (mask_t));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->mask_gme, gridP->size, DATATYPE_UCHAR, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,

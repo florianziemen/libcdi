@@ -955,7 +955,7 @@ int file_fill_buffer(bfile_t *fileptr)
 
 	  fileptr->mappedSize = (size_t) nread;
 
-	  fileptr->buffer = mmap(NULL, (size_t) nread, PROT_READ, MAP_PRIVATE, fd, fileptr->bufferPos);
+	  fileptr->buffer = (char*) mmap(NULL, (size_t) nread, PROT_READ, MAP_PRIVATE, fd, fileptr->bufferPos);
 
 	  if ( fileptr->buffer == MAP_FAILED ) SysError("mmap error for read %s", fileptr->name);
 

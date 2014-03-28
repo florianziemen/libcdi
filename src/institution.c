@@ -111,7 +111,7 @@ void instituteInit (void)
   if ( !instituteInitialized )
     {
       instituteInitialized = 1;
-      instituteInitializedNsp = xcalloc ( 1, nspc * sizeof ( int ));
+      instituteInitializedNsp = (int*) xcalloc ( 1, nspc * sizeof ( int ));
       atexit ( instituteFinalize );
     }
 
@@ -191,7 +191,7 @@ static enum cdiApplyRet
 findInstitute(int id, void *res, void *data)
 {
   institute_t * ip1 = ((struct instLoc *)data)->ip;
-  institute_t * ip2 = res;
+  institute_t * ip2 = (institute_t*) res;
   if (ip2->used && !instituteCompareKernel(ip1, ip2))
     {
       ((struct instLoc *)data)->id = id;
@@ -206,7 +206,7 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
 {
   instituteInit ();
 
-  institute_t * ip_ref = xmalloc(sizeof (*ip_ref));
+  institute_t * ip_ref = (institute_t*) xmalloc(sizeof (*ip_ref));
   ip_ref->self       = UNDEFID;
   ip_ref->used       = 0;
   ip_ref->center     = center;
@@ -355,7 +355,7 @@ enum {
 
 static int instituteGetSizeP ( void * instituteptr, void *context)
 {
-  institute_t *p = instituteptr;
+  institute_t *p = (institute_t*) instituteptr;
   int txsize = serializeGetSize(institute_nints, DATATYPE_INT, context)
     + serializeGetSize(strlen(p->name) + 1, DATATYPE_TXT, context)
     + serializeGetSize(strlen(p->longname) + 1, DATATYPE_TXT, context);
@@ -364,7 +364,7 @@ static int instituteGetSizeP ( void * instituteptr, void *context)
 
 static void institutePackP(void * instituteptr, void *buf, int size, int *position, void *context)
 {
-  institute_t *p = instituteptr;
+  institute_t *p = (institute_t*) instituteptr;
   int tempbuf[institute_nints];
   tempbuf[0] = p->self;
   tempbuf[1] = p->center;
@@ -382,8 +382,8 @@ int instituteUnpack(void *buf, int size, int *position, int nspTarget, void *con
   int instituteID;
   char *name, *longname;
   serializeUnpack(buf, size, position, tempbuf, institute_nints, DATATYPE_INT, context);
-  name = xmalloc(tempbuf[3]);
-  longname = xmalloc(tempbuf[4]);
+  name = (char*) xmalloc(tempbuf[3]);
+  longname = (char*) xmalloc(tempbuf[4]);
   serializeUnpack(buf, size, position, name, tempbuf[3], DATATYPE_TXT, context);
   serializeUnpack(buf, size, position, longname, tempbuf[4], DATATYPE_TXT, context);
   instituteID = institutDef(tempbuf[1], tempbuf[2], name, longname);

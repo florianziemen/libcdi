@@ -202,8 +202,7 @@ namespaceNew()
   else if (namespacesSize == 1)
     {
       /* make room for additional namespace */
-      struct namespace *newNameSpaces
-        = xmalloc((namespacesSize + 1) * sizeof (namespaces[0]));
+      struct namespace *newNameSpaces = (struct namespace*) xmalloc((namespacesSize + 1) * sizeof (namespaces[0]));
       memcpy(newNameSpaces, namespaces, sizeof (namespaces[0]));
       namespaces = newNameSpaces;
       ++namespacesSize;
@@ -213,8 +212,7 @@ namespaceNew()
     {
       /* make room for additional namespace */
       newNamespaceID = namespacesSize;
-      namespaces
-        = xrealloc(namespaces, (namespacesSize + 1) * sizeof (namespaces[0]));
+      namespaces = (struct namespace*) xrealloc(namespaces, (namespacesSize + 1) * sizeof (namespaces[0]));
       ++namespacesSize;
     }
   else /* implicit: namespacesSize >= NUM_NAMESPACES */

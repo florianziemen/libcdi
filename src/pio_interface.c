@@ -184,7 +184,7 @@ varMapGen(int *vSizes, int *sSizes, int *varMapping,
 	weightsStreams[i] += * ( vSizes + offset++ );
     }
 
-  w = ( double * ) xmalloc ( nNodes * sizeof ( double ));
+  w = ( double * ) xmalloc( nNodes * sizeof ( double ));
   for ( j = 0; j < nNodes; j++ )
     nPEs += * ( nodeSizes + j );
 
@@ -201,9 +201,9 @@ varMapGen(int *vSizes, int *sSizes, int *varMapping,
 	if ( * ( streamMapping + j ) == i )
 	  nVarsNode += * ( sSizes + j );
 
-      weightsVarsNode = ( int * ) xmalloc ( nVarsNode * sizeof ( int ));
-      varMappingNode = ( int * ) xmalloc ( nVarsNode * sizeof ( int ));
-      w = ( double * ) xmalloc ( * ( nodeSizes + i ) * sizeof ( double ));
+      weightsVarsNode = ( int * ) xmalloc( nVarsNode * sizeof ( int ));
+      varMappingNode = ( int * ) xmalloc( nVarsNode * sizeof ( int ));
+      w = ( double * ) xmalloc( * ( nodeSizes + i ) * sizeof ( double ));
       offset = 0;
       offsetN = 0;
 
@@ -264,17 +264,17 @@ varsMapNDeco(int nNodes, int *nodeSizes)
 
   nStreams = streamSize ();
 
-  resHs       = xmalloc ( nStreams * sizeof ( resHs[0] ));
-  streamSizes = xmalloc ( nStreams * sizeof ( streamSizes[0] ));
-  collectsData = xmalloc ( nProcsColl * sizeof ( collectsData[0] ));
+  resHs       = (int*) xmalloc( nStreams * sizeof ( resHs[0] ));
+  streamSizes = (int*) xmalloc( nStreams * sizeof ( streamSizes[0] ));
+  collectsData = (int*) xmalloc( nProcsColl * sizeof ( collectsData[0] ));
   streamGetIndexList ( nStreams, resHs );
 
   for ( i = 0; i < nStreams; i++ )
     streamSizes[i] = streamInqNvars ( * ( resHs + i ));
 
   nVars = sum_int(nStreams, streamSizes);
-  varSizes   = xmalloc ( nVars * sizeof ( varSizes[0] ));
-  varMapping = xmalloc ( nVars * sizeof ( varMapping[0] ));
+  varSizes   = (int*) xmalloc( nVars * sizeof ( varSizes[0] ));
+  varMapping = (int*) xmalloc( nVars * sizeof ( varMapping[0] ));
 
   for ( i = 0; i < nStreams; i++ )
     for ( j = 0; j < * ( streamSizes + i ); j++ )
@@ -357,8 +357,8 @@ modelWinDefBufferSizes(void)
   xassert(txWin != NULL);
 
   nstreams = reshCountType ( &streamOps );
-  streamIndexList = xmalloc ( nstreams * sizeof ( streamIndexList[0] ));
-  collIndex = xcalloc(nProcsColl, sizeof (collIndex[0]));
+  streamIndexList = (int*) xmalloc( nstreams * sizeof ( streamIndexList[0] ));
+  collIndex = (struct collDesc*) xcalloc(nProcsColl, sizeof (collIndex[0]));
   reshGetResHListOfType ( nstreams, streamIndexList, &streamOps );
   for ( streamNo = 0; streamNo < nstreams; streamNo++ )
     {
@@ -458,7 +458,7 @@ void modelWinCreate ( void )
   int nProcsColl = commInqNProcsColl ();
 
   xdebug("%s", "START");
-  txWin = xmalloc(nProcsColl * sizeof (txWin[0]));
+  txWin = (struct rdmaWin*) xmalloc(nProcsColl * sizeof (txWin[0]));
 
   modelWinDefBufferSizes ();
   ranks[0] = commInqNProcsModel ();

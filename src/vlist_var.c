@@ -264,7 +264,7 @@ cdiVlistCreateVarLevInfo(vlist_t *vlistptr, int varID)
   int zaxisID = vlistptr->vars[varID].zaxisID;
   int nlevs = zaxisInqSize(zaxisID);
 
-  vlistptr->vars[varID].levinfo = malloc(nlevs * sizeof(levinfo_t));
+  vlistptr->vars[varID].levinfo = (levinfo_t*) malloc(nlevs * sizeof(levinfo_t));
 
   for (int levID = 0; levID < nlevs; levID++ )
       vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO(levID);
@@ -2227,7 +2227,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
 			 namespaceAdaptKey ( tempbuf[2], nspTarget ),
 			 tempbuf[3]);
   if (tempbuf[4] || tempbuf[5] || tempbuf[6] || tempbuf[7])
-    varname = xmalloc(imax(imax(imax(tempbuf[4],tempbuf[5]),tempbuf[6]),
+    varname = (char*) xmalloc(imax(imax(imax(tempbuf[4],tempbuf[5]),tempbuf[6]),
                            tempbuf[7])+ 1);
   if (tempbuf[4])
   {

@@ -102,7 +102,7 @@ void modelDefaultEntries ( void )
 
   instID  = institutInq(  0,   1, "NCEP", NULL);
   resH[9] = modelDef(instID,  80, "T62L28MRF");
-  
+
   for ( i = 0; i < 10 ; i++ )
     reshSetStatus(resH[i], &modelOps, SUSPENDED);
 }
@@ -121,22 +121,22 @@ void modelInit(void)
   char *env;
 
   nspc = namespaceGetNumber ();
-  
+
   if ( !modelInitialized )
     {
       modelInitialized = 1;
-      modelInitializedNsp = xcalloc ( 1, nspc * sizeof ( int ));
+      modelInitializedNsp = (int*) xcalloc ( 1, nspc * sizeof ( int ));
       atexit ( modelFinalize );
       env = getenv("MODEL_DEBUG");
-      if ( env ) MODEL_Debug = atoi(env);  
+      if ( env ) MODEL_Debug = atoi(env);
     }
 
   nsp = namespaceGetActive ();
-  
+
   if ( modelInitializedNsp[nsp] ) return;
-  
+
   modelInitializedNsp[nsp] = 1;
-  
+
   modelDefaultEntries ();
 }
 
@@ -154,8 +154,8 @@ struct modelLoc
 static enum cdiApplyRet
 findModelByID(int resID, void *res, void *data)
 {
-  model_t *modelptr = res;
-  struct modelLoc *ret = data;
+  model_t *modelptr = (model_t*) res;
+  struct modelLoc *ret = (struct modelLoc*) data;
   int instID = ret->instID, modelgribID = ret->modelgribID;
   if (modelptr->used
       && modelptr->instID == instID
@@ -171,8 +171,8 @@ findModelByID(int resID, void *res, void *data)
 static enum cdiApplyRet
 findModelByName(int resID, void *res, void *data)
 {
-  model_t *modelptr = res;
-  struct modelLoc *ret = data;
+  model_t *modelptr = (model_t*) res;
+  struct modelLoc *ret = (struct modelLoc*) data;
   int instID = ret->instID, modelgribID = ret->modelgribID;
   const char *name = ret->name;
   if (modelptr->used
@@ -303,7 +303,7 @@ enum {
 
 static int modelGetSizeP(void * modelptr, void *context)
 {
-  model_t *p = modelptr;
+  model_t *p = (model_t*) modelptr;
   int txsize = serializeGetSize(model_nints, DATATYPE_INT, context)
     + serializeGetSize(p->name?strlen(p->name) + 1:0, DATATYPE_TXT, context);
   return txsize;
@@ -312,7 +312,7 @@ static int modelGetSizeP(void * modelptr, void *context)
 
 static void modelPackP(void * modelptr, void * buf, int size, int *position, void *context)
 {
-  model_t *p = modelptr;
+  model_t *p = (model_t*) modelptr;
   int tempbuf[model_nints];
   tempbuf[0] = p->self;
   tempbuf[1] = p->instID;
@@ -328,17 +328,14 @@ modelUnpack(void *buf, int size, int *position, int nspTarget, void *context)
 {
   int tempbuf[model_nints];
   int modelID;
-  char *name;
+  char *name = NULL;
   serializeUnpack(buf, size, position, tempbuf, model_nints, DATATYPE_INT, context);
   if (tempbuf[3] != 0)
     {
-      name = xmalloc(tempbuf[3]);
+      name = (char*) xmalloc(tempbuf[3]);
       serializeUnpack(buf, size, position, name, tempbuf[3], DATATYPE_TXT, context);
     }
-  else
-    {
-      name = "";
-    }
+
   modelID = modelDef( namespaceAdaptKey ( tempbuf[1], nspTarget ), tempbuf[2], name);
   // FIXME: this should work, once all types are transferred
   //assert(modelID == tempbuf[0]);

@@ -91,7 +91,7 @@ collDefBufferSizes()
   xassert(rxWin != NULL);
 
   nstreams = reshCountType ( &streamOps );
-  streamIndexList = xmalloc ( nstreams * sizeof ( streamIndexList[0] ));
+  streamIndexList = (int*) xmalloc( nstreams * sizeof ( streamIndexList[0] ));
   reshGetResHListOfType ( nstreams, streamIndexList, &streamOps );
   for ( streamNo = 0; streamNo < nstreams; streamNo++ )
     {
@@ -173,7 +173,7 @@ serverWinCreate(void)
 
   rxWin = xcalloc(nProcsModel, sizeof (rxWin[0]));
   size_t totalBufferSize = collDefBufferSizes();
-  rxWin[0].buffer = xmalloc(totalBufferSize);
+  rxWin[0].buffer = (unsigned char*) xmalloc(totalBufferSize);
   size_t ofs = 0;
   for ( modelID = 1; modelID < nProcsModel; modelID++ )
     {
@@ -266,7 +266,7 @@ resizeVarGatherBuf(int vlistID, int varID, double **buf, int *bufSize)
 {
   int size = vlistInqVarSize(vlistID, varID);
   if (size <= *bufSize) ; else
-    *buf = xrealloc(*buf, (*bufSize = size) * sizeof (buf[0][0]));
+    *buf = (double*) xrealloc(*buf, (*bufSize = size) * sizeof (buf[0][0]));
 }
 
 static void
@@ -285,9 +285,8 @@ gatherArray(int root, int nProcsModel, int headerIdx,
   for (unsigned i = 0; i < 3; ++i)
     varShapeXt[i] = varShape[i];
   int varSize = varShape[0] * varShape[1] * varShape[2];
-  struct Xt_offset_ext *partExts
-    = xmalloc(nProcsModel * sizeof (partExts[0]));
-  Xt_idxlist *part = xmalloc(nProcsModel * sizeof (part[0]));
+  struct Xt_offset_ext *partExts = (struct Xt_offset_ext*) xmalloc(nProcsModel * sizeof (partExts[0]));
+  Xt_idxlist *part = (Xt_idxlist*) xmalloc(nProcsModel * sizeof (part[0]));
   MPI_Comm commCalc = commInqCommCalc();
   {
     int nmiss_ = 0;
@@ -497,9 +496,9 @@ inventorizeStream(struct streamMapping *streamMap, int numStreamIDs,
   int sizeStreamMap = *sizeStreamMap_;
   if (numStreamIDs < sizeStreamMap) ; else
     {
-      streamMap = xrealloc(streamMap,
-                           (sizeStreamMap *= 2)
-                           * sizeof (streamMap[0]));
+      streamMap = (struct streamMapping*) xrealloc(streamMap,
+                                                   (sizeStreamMap *= 2)
+                                                   * sizeof (streamMap[0]));
       *sizeStreamMap_ = sizeStreamMap;
     }
   streamMap[numStreamIDs].streamID = streamID;
@@ -514,9 +513,7 @@ inventorizeStream(struct streamMapping *streamMap, int numStreamIDs,
       int vlistID = streamInqVlist(streamID);
       int nvars = vlistNvars(vlistID);
       streamMap[numStreamIDs].numVars = nvars;
-      streamMap[numStreamIDs].varMap
-        = xmalloc(sizeof (streamMap[numStreamIDs].varMap[0])
-                  * nvars);
+      streamMap[numStreamIDs].varMap = (int*) xmalloc(sizeof (streamMap[numStreamIDs].varMap[0]) * nvars);
       for (int i = 0; i < nvars; ++i)
         streamMap[numStreamIDs].varMap[i] = -1;
     }
@@ -540,8 +537,7 @@ buildStreamMap(struct winHeaderEntry *winDict)
   int oldStreamIdx = CDI_UNDEFID;
   int filetype = CDI_UNDEFID;
   int sizeStreamMap = 16;
-  struct streamMapping *streamMap
-    = xmalloc(sizeStreamMap * sizeof (streamMap[0]));
+  struct streamMapping *streamMap = (struct streamMapping *) xmalloc(sizeStreamMap * sizeof (streamMap[0]));
   int numDataEntries = winDict[0].specific.headerSize.numDataEntries;
   int numStreamIDs = 0;
   /* find streams written on this process */
@@ -578,7 +574,7 @@ buildStreamMap(struct winHeaderEntry *winDict)
   {
     int *streamIDs, *streamIsWritten;
     int numTotalStreamIDs = streamSize();
-    streamIDs = xmalloc(2 * sizeof (streamIDs[0]) * (size_t)numTotalStreamIDs);
+    streamIDs = (int*) xmalloc(2 * sizeof (streamIDs[0]) * (size_t)numTotalStreamIDs);
     streamGetIndexList(numTotalStreamIDs, streamIDs);
     streamIsWritten = streamIDs + numTotalStreamIDs;
     for (int i = 0; i < numTotalStreamIDs; ++i)
@@ -597,7 +593,7 @@ buildStreamMap(struct winHeaderEntry *winDict)
     free(streamIDs);
   }
   /* sort written streams by streamID */
-  streamMap = xrealloc(streamMap, sizeof (streamMap[0]) * numStreamIDs);
+  streamMap = (struct streamMapping*) xrealloc(streamMap, sizeof (streamMap[0]) * numStreamIDs);
   qsort(streamMap, numStreamIDs, sizeof (streamMap[0]), smCmpStreamID);
   return (struct streamMap){ .entries = streamMap, .numEntries = numStreamIDs };
 }
@@ -647,8 +643,7 @@ buildWrittenVars(struct streamMapping *mapping, int **varIsWritten_,
 {
   int nvars = mapping->numVars;
   int *varMap = mapping->varMap;
-  int *varIsWritten = *varIsWritten_
-    = xrealloc(*varIsWritten_, sizeof (*varIsWritten) * nvars);
+  int *varIsWritten = *varIsWritten_ = (int*) xrealloc(*varIsWritten_, sizeof (*varIsWritten) * nvars);
   for (int varID = 0; varID < nvars; ++varID)
     varIsWritten[varID] = ((varMap[varID] != -1)
                            ?myCollRank+1 : 0);
@@ -795,9 +790,9 @@ static void readGetBuffers()
                       xt_idxlist_delete(preRedistChunk);
                       xt_idxlist_delete(preWriteChunk);
                       xt_xmap_delete(xmap);
-                      writeBuf = xrealloc(writeBuf,
-                                          sizeof (double)
-                                          * PPM_extents_size(3, varChunk));
+                      writeBuf = (double*) xrealloc(writeBuf,
+                                                    sizeof (double)
+                                                    * PPM_extents_size(3, varChunk));
                       xt_redist_s_exchange1(redist, data, writeBuf);
                       xt_redist_delete(redist);
                     }
@@ -1064,7 +1059,7 @@ void IOServer(void (*postCommSetupActions)(void))
   numPioPrimes = PPM_prime_factorization_32((uint32_t)commInqSizeColl(),
                                             &pioPrimes);
 #elif defined (HAVE_LIBNETCDF)
-  cdiSerialOpenFileCount = xcalloc(sizeof (cdiSerialOpenFileCount[0]),
+  cdiSerialOpenFileCount = (int*) xcalloc(sizeof (cdiSerialOpenFileCount[0]),
                                    commInqSizeColl());
   namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND,
                      NSSW_FUNC(cdiPioStreamCDFOpenWrap));
@@ -1107,7 +1102,7 @@ void IOServer(void (*postCommSetupActions)(void))
                     int streamNo;
                     int * resHs;
 
-                    resHs       = xmalloc ( nStreams * sizeof ( resHs[0] ));
+                    resHs       = (int*) xmalloc ( nStreams * sizeof ( resHs[0] ));
                     streamGetIndexList ( nStreams, resHs );
                     for ( streamNo = 0; streamNo < nStreams; streamNo++ )
                       streamClose ( resHs[streamNo] );
@@ -1129,7 +1124,7 @@ void IOServer(void (*postCommSetupActions)(void))
 	case RESOURCES:
 	  xdebugMsg (  tag, source, nfinished );
 	  xmpi ( MPI_Get_count ( &status, MPI_CHAR, &size ));
-	  buffer = xmalloc(size);
+	  buffer = (char*) xmalloc(size);
 	  xmpi ( MPI_Recv ( buffer, size, MPI_PACKED, source,
                             tag, commCalc, &status ));
           xdebug("%s", "RECEIVED MESSAGE WITH TAG \"RESOURCES\"");

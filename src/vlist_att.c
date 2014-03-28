@@ -544,7 +544,7 @@ vlistAttUnpack(int vlistID, int varID,
 
   serializeUnpack(buf, size, position,
                   tempbuf, vlist_att_nints, DATATYPE_INT, context);
-  attName = xmalloc(tempbuf[0] + 1);
+  attName = (char*) xmalloc(tempbuf[0] + 1);
   serializeUnpack(buf, size, position, attName, tempbuf[0], DATATYPE_TXT, context);
   attName[tempbuf[0]] = '\0';
   switch (tempbuf[2])

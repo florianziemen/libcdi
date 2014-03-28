@@ -54,7 +54,7 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   int iret;
   MPI_Comm commNode = commInqCommNode ();
 
-  of = xmalloc(sizeof (*of) + strlen(filename) + 1);
+  of = (aFiledataM*) xmalloc(sizeof (*of) + strlen(filename) + 1);
 
   strcpy(of->name, filename);
   of->size = bs;

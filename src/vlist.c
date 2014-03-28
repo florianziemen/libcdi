@@ -1660,8 +1660,8 @@ void vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2)
         if ( vlistptr->vars[varID].levinfo && nlevs2 != nlevs1 )
           {
             vlistptr->vars[varID].levinfo
-              = realloc(vlistptr->vars[varID].levinfo,
-                        nlevs2 * sizeof(levinfo_t));
+              = (levinfo_t*) realloc(vlistptr->vars[varID].levinfo,
+                                     nlevs2 * sizeof(levinfo_t));
 
             for ( levID = 0; levID < nlevs2; levID++ )
               vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO(levID);

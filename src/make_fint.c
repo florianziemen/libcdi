@@ -257,7 +257,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
       maxMatch = maxFunMatch;
   }
   ++maxMatch;
-  reMatch = malloc((size_t)maxMatch * sizeof (reMatch[0]));
+  reMatch = (regmatch_t*) malloc((size_t)maxMatch * sizeof (reMatch[0]));
   /* compile comment regular expression */
   regex_t commentRE;
   {
@@ -309,7 +309,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   fprintf(fpint, "#endif\n");
   fprintf(fpint, "\n");
   {
-    char *cppMacro = malloc(strlen(fname) + 2);
+    char *cppMacro = (char*) malloc(strlen(fname) + 2);
     build_header_name(fname, cppMacro);
     fprintf(fpint, "#if ! defined (%s)\n"
             "#  include \"%s\"\n"
@@ -407,7 +407,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
               if ((extLen = getline(&lineExtension, &extSize, fpin)) <= 0)
                 break;
               if ((size_t)(lineLen + extLen) >= lineBufSize)
-                if (!(line = realloc(line, (size_t)(lineLen + extLen + 1))))
+                if (!(line = (char*) realloc(line, (size_t)(lineLen + extLen + 1))))
                   exit(EXIT_FAILURE);
               memcpy(line + lineLen, lineExtension, (size_t)extLen + 1);
               lineLen += extLen;
@@ -781,7 +781,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
       }
     /* path to document root, separating /, max of path within root,
      * terminating '\0'  */
-    filename = malloc(doc_root_len + 1 + max_len + 1);
+    filename = (char*) malloc(doc_root_len + 1 + max_len + 1);
   }
 
   memcpy(filename, doc_root, doc_root_len);
@@ -991,7 +991,7 @@ reCompile(regex_t *restrict RE, const char *restrict REstring,
       char *restrict line;
       size_t resize;
       if (*lineBufSize < REGEX_MAX_ERRSTRLEN
-          && (line = realloc(*lineBuf, resize = REGEX_MAX_ERRSTRLEN)))
+          && (line = (char*) realloc(*lineBuf, resize = REGEX_MAX_ERRSTRLEN)))
         {
           *lineBuf = line;
           *lineBufSize = resize;

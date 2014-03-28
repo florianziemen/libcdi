@@ -128,7 +128,7 @@ zaxis_t *zaxisNewEntry(void)
 {
   zaxis_t *zaxisptr;
 
-  zaxisptr = (zaxis_t *) xmalloc(sizeof(zaxis_t));
+  zaxisptr = (zaxis_t*) xmalloc(sizeof(zaxis_t));
 
   zaxisDefaultValue ( zaxisptr );
 
@@ -1717,7 +1717,7 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
       int size;
       xassert((size = zaxisP->size));
 
-      zaxisP->vals = xmalloc(size * sizeof ( double ));
+      zaxisP->vals = (double*) xmalloc(size * sizeof ( double ));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       zaxisP->vals, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -1730,7 +1730,7 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
       int size;
       xassert((size = zaxisP->size));
 
-      zaxisP->lbounds = xmalloc(size * sizeof (double));
+      zaxisP->lbounds = (double*) xmalloc(size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       zaxisP->lbounds, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -1743,7 +1743,7 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
       int size;
       xassert((size = zaxisP->size));
 
-      zaxisP->ubounds = xmalloc(size * sizeof (double));
+      zaxisP->ubounds = (double*) xmalloc(size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       zaxisP->ubounds, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -1756,7 +1756,7 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
       int size;
       xassert((size = zaxisP->size));
 
-      zaxisP->weights = xmalloc(size * sizeof (double));
+      zaxisP->weights = (double*) xmalloc(size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       zaxisP->weights, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -1769,7 +1769,7 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
       int size;
       xassert((size = zaxisP->vctsize));
 
-      zaxisP->vct = xmalloc(size * sizeof (double));
+      zaxisP->vct = (double*) xmalloc(size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       zaxisP->vct, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
