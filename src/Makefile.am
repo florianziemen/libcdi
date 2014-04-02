@@ -37,8 +37,6 @@ libcdi_la_SOURCES = 	 \
 	cksum.h		\
 	cdi_cksum.c	\
 	cdi_cksum.h	\
-	pio_util.c							\
-	pio_util.h							\
 	dtypes.h	 \
 	error.c        	 \
 	error.h	 	 \
@@ -145,6 +143,8 @@ libcdipio_la_SOURCES =							\
 	pio_server.h							\
 	pio_serialize.h							\
 	pio_serialize.c							\
+	pio_util.c							\
+	pio_util.h							\
 	pio_cdf_int.c							\
 	pio_cdf_int.h
 

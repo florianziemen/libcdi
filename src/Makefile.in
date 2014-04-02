@@ -145,9 +145,9 @@ LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 libcdi_la_DEPENDENCIES =
 am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	cdf_int.lo cdi_error.lo cdi_util.lo cdiFortran.lo \
-	cgribexlib.lo dmemory.lo cksum.lo cdi_cksum.lo pio_util.lo \
-	error.lo extralib.lo file.lo gaussgrid.lo gribapi.lo grid.lo \
-	ieglib.lo institution.lo model.lo namespace.lo serialize.lo \
+	cgribexlib.lo dmemory.lo cksum.lo cdi_cksum.lo error.lo \
+	extralib.lo file.lo gaussgrid.lo gribapi.lo grid.lo ieglib.lo \
+	institution.lo model.lo namespace.lo serialize.lo \
 	resource_handle.lo servicelib.lo stream_cdf.lo \
 	stream_cgribex.lo stream_ext.lo stream_grb.lo \
 	stream_gribapi.lo stream_history.lo stream_ieg.lo cdi_int.lo \
@@ -169,7 +169,7 @@ am_libcdipio_la_OBJECTS = cdipioFortran.lo pio.lo pio_comm.lo \
 	pio_record_send.lo pio_posixasynch.lo \
 	pio_posixfpguardsendrecv.lo pio_posixnonb.lo pio_list_set.lo \
 	resource_unpack.lo pio_client.lo pio_server.lo \
-	pio_serialize.lo pio_cdf_int.lo
+	pio_serialize.lo pio_util.lo pio_cdf_int.lo
 libcdipio_la_OBJECTS = $(am_libcdipio_la_OBJECTS)
 @ENABLE_CDI_LIB_FALSE@@USE_MPI_TRUE@am_libcdipio_la_rpath =
 @ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am_libcdipio_la_rpath = -rpath \
@@ -457,8 +457,6 @@ libcdi_la_SOURCES = \
 	cksum.h		\
 	cdi_cksum.c	\
 	cdi_cksum.h	\
-	pio_util.c							\
-	pio_util.h							\
 	dtypes.h	 \
 	error.c        	 \
 	error.h	 	 \
@@ -556,6 +554,8 @@ libcdipio_la_SOURCES = \
 	pio_server.h							\
 	pio_serialize.h							\
 	pio_serialize.c							\
+	pio_util.c							\
+	pio_util.h							\
 	pio_cdf_int.c							\
 	pio_cdf_int.h
 
