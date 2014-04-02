@@ -3,8 +3,6 @@
 #endif
 
 
-#ifdef USE_MPI
-
 #include <ctype.h>
 #include <yaxt.h>
 
@@ -202,7 +200,6 @@ void backendCleanup ( void )
 
 /***************************************************************/
 
-#endif
 /*
  * Local Variables:
  * c-file-style: "Java"

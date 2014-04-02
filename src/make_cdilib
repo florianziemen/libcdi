@@ -61,9 +61,6 @@ cat > ${PROG} << EOR
 #include <aio.h>
 #endif
 #include <stdbool.h>
-#ifdef USE_MPI
-#include "mpi.h"
-#endif
 #include <assert.h>
 
 #if  defined  (HAVE_LIBGRIB_API)

@@ -10,8 +10,6 @@
 #include "dmemory.h"
 #include "pio_util.h"
 
-#ifdef USE_MPI
-
 #include "cdipio.h"
 
 typedef struct {
@@ -859,9 +857,6 @@ void commPrint ( FILE * fp )
   fprintf ( fp, "############################\n" );
   fprintf ( fp, "\n" );
 }
-
-#endif
-
 
 /************************************************************************/
 /*

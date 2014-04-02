@@ -7,8 +7,7 @@
 
 #include <stdbool.h>
 
-#ifdef USE_MPI
-#include "mpi.h"
+#include <mpi.h>
 
 typedef enum 
 {
@@ -93,7 +92,6 @@ void      finalizePOSIXFPGUARDSENDRECV ( void );
 /* pio_posixnonb.c */
 void pioWriterStdIO(void);
 
-#endif
 #endif
 /*
  * Local Variables:

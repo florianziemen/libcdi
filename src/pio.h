@@ -5,7 +5,6 @@
 #  include "config.h"
 #endif
 
-#ifdef USE_MPI
 #include <stdlib.h>
 #include <mpi.h>
 
@@ -17,9 +16,6 @@ int pioFileOpen(const char *filename, const char *mode);
 int    pioFileClose    ( int );
 size_t cdiPioFileWrite(int fileID, const void *restrict buffer, size_t len,
                        int tsID);
-#else
-typedef int MPI_Comm;
-#endif
 
 #endif
 /*

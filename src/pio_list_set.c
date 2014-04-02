@@ -11,7 +11,6 @@
 #include "cdi.h"
 #include "dmemory.h"
 
-#ifdef USE_MPI
 #include "pio_impl.h"
 #include "pio_util.h"
 
@@ -145,8 +144,6 @@ listSetForeach(listSet *q, void (*func)(void *elem, void *data), void *data)
     func(p->val, data);
 }
 
-
-#endif
 /*
  * Local Variables:
  * c-file-style: "Java"

@@ -7,10 +7,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#ifdef USE_MPI
 #include <mpi.h>
 #include <yaxt.h>
-#endif
 
 #include "cdi.h"
 #include "cdipio.h"
@@ -18,7 +16,6 @@
 #include "pio_util.h"
 #include "vlist_var.h"
 
-#ifdef USE_MPI
 #include "namespace.h"
 #include "pio.h"
 #include "pio_serialize.h"
@@ -732,8 +729,6 @@ void pioBufferFuncCall(struct winHeaderEntry header,
   xdebug("%s", "RETURN");
 }
 
-#endif
-
 
 void
 cdiPioNoPostCommSetup(void)
@@ -743,9 +738,6 @@ cdiPioNoPostCommSetup(void)
 /*****************************************************************************/
 
 /* pioInit definition must currently compile even in non-MPI configurations */
-#ifndef MPI_VERSION
-#  define MPI_Comm int
-#endif
 /**
    @brief initializes the MPI_Communicators needed for the
   communication between the calculator PEs and the I/O PEs and within the
@@ -771,17 +763,14 @@ cdiPioNoPostCommSetup(void)
   @return int indicating wether the calling PE is a calcutator (1) or not (0)
 */
 
-#ifdef USE_MPI
 static int pioNamespace_ = -1;
 static int xtInitByCDI = 0;
-#endif
 
 MPI_Comm
 pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
         int *pioNamespace, float partInflate,
         void (*postCommSetupActions)(void))
 {
-#ifdef USE_MPI
   int sizeGlob;
 
   namespaceSwitchSet(NSSWITCH_WARNING, NSSW_FUNC(cdiPioWarning));
@@ -838,20 +827,12 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
 
   xdebug ( "nProcsGlob=%d, RETURN", sizeGlob );
   return commInqCommModel ();
-#else
-  abort();
-#endif
 }
-
-#ifndef MPI_VERSION
-#  undef MPI_Comm
-#endif
 
 /*****************************************************************************/
 
 void  pioEndDef ( void )
 {
-#ifdef USE_MPI
   char   * buffer;
   int bufferSize;
   int rankGlob = commInqRankGlob ();
@@ -876,18 +857,15 @@ void  pioEndDef ( void )
   modelWinCreate ();
   namespaceDefResStatus ( STAGE_TIMELOOP );
   xdebug("%s", "RETURN");
-#endif
 }
 
 /************************************************************************/
 
 void  pioEndTimestepping ( void )
 {
-#ifdef USE_MPI
   xdebug("%s", "START");
   namespaceDefResStatus ( STAGE_CLEANUP );
   xdebug("%s", "RETURN");
-#endif
 }
 
 
@@ -905,7 +883,6 @@ void  pioEndTimestepping ( void )
 
 void pioFinalize ( void )
 {
-#ifdef USE_MPI
   int collID, ibuffer = 1111;
   xdebug("%s", "START");
 
@@ -924,14 +901,12 @@ void pioFinalize ( void )
   if (xtInitByCDI)
     xt_finalize();
   xdebug("%s", "RETURN");
-#endif
 }
 
  /************************************************************************/
 
 void pioWriteTimestep()
 {
-#ifdef USE_MPI
   int collID, iAssert = MPI_MODE_NOPUT;
   /* int tokenEnd = END; */
   int rankGlob = commInqRankGlob ();
@@ -966,11 +941,8 @@ void pioWriteTimestep()
     }
 
   xdebug("%s", "RETURN. messages sent, windows posted");
-
-#endif
 }
 
-#if defined USE_MPI
 void
 streamWriteVarPart(int streamID, int varID, const void *data,
                    int nmiss, Xt_idxlist partDesc)
@@ -1018,8 +990,6 @@ streamWriteScatteredVarPart(int streamID, int varID, const void *data,
                                 numBlocks, blocklengths, displacements,
                                 nmiss, partDesc);
 }
-#endif
-
 
 /*
  * Local Variables:

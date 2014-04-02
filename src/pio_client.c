@@ -2,7 +2,6 @@
 #  include "config.h"
 #endif
 
-#ifdef USE_MPI
 #include <ctype.h>
 
 #include <yaxt.h>
@@ -280,7 +279,6 @@ cdiPioClientSetup(int *pioNamespace_, int *pioNamespace)
 }
 
 
-#endif
 /*
  * Local Variables:
  * c-file-style: "Java"

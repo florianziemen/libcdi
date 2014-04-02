@@ -2,8 +2,6 @@
 #  include "config.h"
 #endif
 
-#ifdef USE_MPI
-
 #include <inttypes.h>
 
 #include <mpi.h>
@@ -110,7 +108,6 @@ void serializeSetMPI()
 }
 
 
-#endif
 /*
  * Local Variables:
  * c-file-style: "Java"

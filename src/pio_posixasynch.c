@@ -7,7 +7,6 @@
 #endif
 
 
-#ifdef USE_MPI
 #ifndef _SX
 
 #include <aio.h>
@@ -410,10 +409,7 @@ void pioWriterAIO(void)
 
 /***************************************************************/
 
-/***************************************************************/
 
-
-#endif
 #endif
 /*
  * Local Variables:

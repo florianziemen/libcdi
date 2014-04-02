@@ -2,8 +2,6 @@
 #  include "config.h"
 #endif
 
-#ifdef USE_MPI
-
 #include <inttypes.h>
 #include <stdlib.h>
 
@@ -347,7 +345,6 @@ pioSendInitialize(void (*postCommSetupActions)(void))
     bibRemoteFileBuf = listSetNew(destroyRemoteFileBuf, compareNames);
 }
 
-#endif
 /*
  * Local Variables:
  * c-file-style: "Java"

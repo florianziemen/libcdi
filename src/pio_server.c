@@ -4,8 +4,6 @@
 #  include "config.h"
 #endif
 
-#ifdef USE_MPI
-
 #include "pio_server.h"
 
 
@@ -1169,7 +1167,6 @@ void IOServer(void (*postCommSetupActions)(void))
     }
 }
 
-#endif
 /*
  * Local Variables:
  * c-file-style: "Java"

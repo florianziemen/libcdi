@@ -8,8 +8,6 @@
 #  include "config.h"
 #endif
 
-#ifdef USE_MPI
-
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -538,7 +536,6 @@ initPOSIXFPGUARDSENDRECV(void (*postCommSetupActions)(void))
     bibAFiledataPF = listSetNew( destroyAFiledataPF, compareNamesAPF );
 }
 
-#endif
 /*
  * Local Variables:
  * c-file-style: "Java"

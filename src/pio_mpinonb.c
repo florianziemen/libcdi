@@ -2,8 +2,6 @@
 #  include "config.h"
 #endif
 
-#ifdef USE_MPI
-
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -338,7 +336,6 @@ initMPINONB(void (*postCommSetupActions)(void))
     xabort ( "listSetNew did not succeed" );   
 }
 
-#endif
 /*
  * Local Variables:
  * c-file-style: "Java"
