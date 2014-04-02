@@ -12,21 +12,20 @@
 
 #include "cdi.h"
 #include "cdipio.h"
+#include "cdi_int.h"
 #include "dmemory.h"
-#include "pio_util.h"
-#include "vlist_var.h"
-
 #include "namespace.h"
 #include "pio.h"
+#include "pio_client.h"
 #include "pio_serialize.h"
 #include "pio_interface.h"
 #include "pio_comm.h"
 #include "pio_rpc.h"
-#include "pio_client.h"
 #include "pio_server.h"
+#include "pio_util.h"
 #include "resource_handle.h"
-#include "cdi_int.h"
 #include "vlist.h"
+#include "vlist_var.h"
 
 extern resOps streamOps;
 
