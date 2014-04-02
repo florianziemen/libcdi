@@ -128,21 +128,17 @@ static void modelRun(MPI_Comm commModel)
 	  for ( i = 0; i < nVars; i++ )
 	    {
 #ifdef USE_MPI
-              int start = varDeco[i].start;
               int chunk = varDeco[i].chunkSize;
 #else
               int chunk = varSize[i];
-              int start = 0;
 #endif
 	      for (j = 0; j < chunk; ++j) var[j] = 2.2;
 #ifdef USE_MPI
               streamWriteVarPart(streamID, varID[i], var, nmiss,
                                  varDeco[i].partDesc);
 #else
-	      streamWriteVar ( streamID, varID[i], &var[start], nmiss );
+	      streamWriteVar ( streamID, varID[i], var, nmiss );
 #endif
-	      start = CDI_UNDEFID;
-	      chunk = CDI_UNDEFID;
 	    }
 #ifdef USE_MPI
 	  pioWriteTimestep();
