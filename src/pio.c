@@ -141,7 +141,7 @@ int pioFileOpen(const char *filename, const char *mode)
 
 /***************************************************************/
 
-void backendInit(void (*postCommSetupActions)(void))
+void cdiPioFileWritingInit(void (*postCommSetupActions)(void))
 {
   int IOMode = commInqIOMode ();
 
@@ -174,7 +174,7 @@ void backendInit(void (*postCommSetupActions)(void))
 
 /***************************************************************/
 
-void backendCleanup ( void )
+void cdiPioFileWritingFinalize(void)
 {
   int IOMode = commInqIOMode ();
   switch ( IOMode )

@@ -1050,7 +1050,7 @@ void cdiPioServer(void (*postCommSetupActions)(void))
 
   xdebug("%s", "START");
 
-  backendInit(postCommSetupActions);
+  cdiPioFileWritingInit(postCommSetupActions);
   if (commInqRankNode() == commInqSpecialRankNode())
     return;
   commCalc = commInqCommCalc ();
@@ -1109,7 +1109,7 @@ void cdiPioServer(void (*postCommSetupActions)(void))
                     free ( resHs );
                   }
               }
-              backendCleanup();
+              cdiPioFileWritingFinalize();
               serverWinCleanup();
 #ifdef HAVE_PARALLEL_NC4
               free(pioPrimes);
