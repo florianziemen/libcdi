@@ -38,6 +38,7 @@ cdiPioClientStreamOpen(const char *filename, const char *filemode,
       switch ( nspStatus )
         {
         case STAGE_DEFINITION:
+          streamptr->filetype = filetype;
           break;
         case STAGE_TIMELOOP:
           filename_len = strlen(filename);
