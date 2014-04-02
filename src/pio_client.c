@@ -54,6 +54,7 @@ cdiPioClientStreamOpen(const char *filename, const char *filemode,
                  " filename=%s, filetype=%d",
                  funcMap[(-1 - STREAMOPEN)], filename_len + 1, filename,
                  filetype);
+          streamptr->filetype = filetype;
           break;
         case STAGE_CLEANUP:
           xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
