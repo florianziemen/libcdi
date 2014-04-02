@@ -982,6 +982,8 @@ cdiPioStreamCDFOpenWrap(const char *filename, const char *filemode,
           fileID = cdiStreamOpenDefaultDelegate(filename, filemode, filetype,
                                                 streamptr,
                                                 recordBufIsToBeCreated);
+        else
+          streamptr->filetype = filetype;
         if (ioMode != PIO_NONE)
           xmpi(MPI_Bcast(&fileID, 1, MPI_INT, rank, commInqCommColl()));
         streamptr->ownerRank = rank;
