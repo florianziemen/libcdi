@@ -1040,7 +1040,7 @@ cdiPioCdfDefTimestep(stream_t *streamptr, int tsID)
   @return
 */
 
-void IOServer(void (*postCommSetupActions)(void))
+void cdiPioServer(void (*postCommSetupActions)(void))
 {
   int source, tag, size, nProcsModel=commInqNProcsModel();
   static int nfinished = 0;

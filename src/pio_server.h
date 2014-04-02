@@ -7,7 +7,7 @@
 
 #include <mpi.h>
 
-void IOServer(void (*postCommSetupActions)(void));
+void cdiPioServer(void (*postCommSetupActions)(void));
 
 #endif
 /*
