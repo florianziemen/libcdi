@@ -1042,8 +1042,8 @@ static int cfXtIdxlistConvert(FILE *outfp, const char *argName,
 static int cfVoidFuncPrologue(FILE *outfp, size_t argNum)
 {
   int retval
-    = fprintf(outfp, "\n#undef ROUTINE_%zu\n#define ROUTINE_%zu %s\n", argNum,
-              argNum, "(void (*)(void))");
+    = fprintf(outfp, "\n#undef ROUTINE_%zu\n#define ROUTINE_%zu %s\n",
+              argNum+1, argNum+1, "(void (*)(void))");
   return retval;
 }
 
