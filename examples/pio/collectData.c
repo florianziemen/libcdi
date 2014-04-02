@@ -2,19 +2,23 @@
 #  include "config.h"
 #endif
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef USE_MPI
 #include <unistd.h>
 #include <mpi.h>
 #include <yaxt.h>
+
+#include "pio_util.h"
 #else
 typedef int MPI_Comm;
 #define MPI_COMM_NULL 0
 #endif
 
 #include "cdi.h"
-#include "pio_util.h"
+#include "error.h"
 
 #ifdef USE_MPI
 #include "cdipio.h"

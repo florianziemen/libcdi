@@ -2,6 +2,9 @@
 #  include "config.h"
 #endif
 
+#include <stdio.h>
+#include <string.h>
+
 #ifdef USE_MPI
 #include <mpi.h>
 #else
@@ -10,10 +13,11 @@ typedef int MPI_Comm;
 #endif
 
 #include "cdi.h"
-#include "pio_util.h"
+#include "error.h"
 
 #ifdef USE_MPI
 #include "cdipio.h"
+#include "pio_util.h"
 #endif
 
 static void hoursPassingHack ( int * vdate, int * vtime, int hoursPassed )
@@ -217,7 +221,6 @@ static void modelRun(MPI_Comm commModel)
       zaxisDestroy ( zaxisID[i][j] );
   gridDestroy ( gridID );
   free(var);
-  xdebug("%s", "RETURN");
 }
 
 
