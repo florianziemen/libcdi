@@ -1738,14 +1738,11 @@ double gridInqYval(int gridID, int index)
 */
 double gridInqXinc(int gridID)
 {
-  double xinc;
-  grid_t *gridptr;
-
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  grid_t *gridptr = (grid_t *)reshGetVal(gridID, &gridOps);
 
   grid_check_ptr(gridID, gridptr);
 
-  xinc = gridptr->xinc;
+  double xinc = gridptr->xinc;
 
   if ( (! (fabs(xinc) > 0)) && gridptr->xvals )
     {
@@ -1781,14 +1778,11 @@ double gridInqXinc(int gridID)
 */
 double gridInqYinc(int gridID)
 {
-  double yinc;
-  grid_t *gridptr;
-
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  grid_t *gridptr = (grid_t *)reshGetVal(gridID, &gridOps);
 
   grid_check_ptr(gridID, gridptr);
 
-  yinc = gridptr->yinc;
+  double yinc = gridptr->yinc;
 
   if ( (! (fabs(yinc) > 0)) && gridptr->yvals )
     {
