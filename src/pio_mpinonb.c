@@ -81,7 +81,8 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
 
 /***************************************************************/
 
-int destroyAFiledataMPINONB ( void *v )
+static int
+destroyAFiledataMPINONB(void *v)
 {
   int iret = 0;
   aFiledataM *of;
