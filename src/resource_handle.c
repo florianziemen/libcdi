@@ -52,7 +52,6 @@ static int listInit = 0;
 
 
 typedef struct listElem {
-  cdiResH       resH;//idx
   int next;
   resOps      * ops;
   void        * val;//ptr
@@ -80,7 +79,6 @@ listInitResources(int nsp)
 
   for (int i = 0; i < size; i++ )
     {
-      p[i].resH   = namespaceIdxEncode2(nsp, i);
       p[i].next   = i + 1;
       p[i].ops    = NULL;
       p[i].val    = NULL;
@@ -196,7 +194,6 @@ void listSizeExtend()
 
   for (int i = oldSize; i < newListSize; ++i)
     {
-      resHList[nsp].resources[i].resH   = namespaceIdxEncode2 ( nsp, i );
       resHList[nsp].resources[i].next   = i + 1;
       resHList[nsp].resources[i].ops    = NULL;
       resHList[nsp].resources[i].val    = NULL;
@@ -212,7 +209,6 @@ void listSizeExtend()
 
 int reshPut ( void *p, resOps *ops )
 {
-  cdiResH resH = -1, nsp;
   listElem_t * newListElem;
 
   xassert ( p && ops );
@@ -221,13 +217,14 @@ int reshPut ( void *p, resOps *ops )
 
   LIST_LOCK();
 
-  nsp = namespaceGetActive ();
+  int nsp = namespaceGetActive ();
 
   if ( resHList[nsp].freeHead == -1) listSizeExtend();
-  newListElem               = resHList[nsp].resources + resHList[nsp].freeHead;
+  int entry = resHList[nsp].freeHead;
+  cdiResH resH = namespaceIdxEncode2(nsp, entry);
+  newListElem               = resHList[nsp].resources + entry;
   resHList[nsp].freeHead    = newListElem->next;
   newListElem->next         = -1;
-  resH                      = newListElem->resH;
   newListElem->val          = p;
   newListElem->ops          = ops;
   newListElem->status       = ASSIGNED;
