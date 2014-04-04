@@ -53,8 +53,8 @@ static int listInit = 0;
 
 typedef struct listElem {
   int next;
-  resOps      * ops;
-  void        * val;//ptr
+  const resOps *ops;
+  void         *val;//ptr
   int           status;
 } listElem_t;
 
@@ -207,7 +207,7 @@ void listSizeExtend()
 
 /**************************************************************/
 
-int reshPut ( void *p, resOps *ops )
+int reshPut ( void *p, const resOps *ops )
 {
   listElem_t * newListElem;
 
@@ -236,7 +236,7 @@ int reshPut ( void *p, resOps *ops )
 
 /**************************************************************/
 
-void reshRemove ( cdiResH resH, resOps * ops )
+void reshRemove ( cdiResH resH, const resOps * ops )
 {
   int nsp;
   namespaceTuple_t nspT;
@@ -267,7 +267,7 @@ void reshRemove ( cdiResH resH, resOps * ops )
 /**************************************************************/
 
 static listElem_t *
-reshGetElem(const char *caller, cdiResH resH, resOps *ops)
+reshGetElem(const char *caller, cdiResH resH, const resOps *ops)
 {
   listElem_t *listElem;
   int nsp;
@@ -303,14 +303,14 @@ reshGetElem(const char *caller, cdiResH resH, resOps *ops)
 }
 
 
-void *reshGetValue(const char * caller, cdiResH resH, resOps * ops)
+void *reshGetValue(const char * caller, cdiResH resH, const resOps * ops)
 {
   return reshGetElem(caller, resH, ops)->val;
 }
 
 /**************************************************************/
 
-void reshGetResHListOfType ( int c, int * resHs, resOps * ops )
+void reshGetResHListOfType ( int c, int * resHs, const resOps * ops )
 {
   int i, j = 0, nsp;
 
@@ -381,7 +381,7 @@ cdiResHFilterApply(const resOps *p,
 
 /**************************************************************/
 
-int reshCountType ( resOps * ops )
+int reshCountType ( const resOps * ops )
 {
   int i, nsp, countType = 0;
 
@@ -406,14 +406,14 @@ int reshCountType ( resOps * ops )
 /**************************************************************/
 
 int
-reshResourceGetPackSize(int resH, resOps *ops, void *context)
+reshResourceGetPackSize(int resH, const resOps *ops, void *context)
 {
   listElem_t *curr = reshGetElem(__func__, resH, ops);
   return curr->ops->valGetPackSize(curr->val, context);
 }
 
 void
-reshPackResource(int resH, resOps *ops,
+reshPackResource(int resH, const resOps *ops,
                  void *buf, int buf_size, int *position, void *context)
 {
   listElem_t *curr = reshGetElem(__func__, resH, ops);
@@ -510,7 +510,7 @@ void reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
 
 /* for thread safety this feature would have to be integrated in reshPut */
 
-void reshSetStatus ( cdiResH resH, resOps * ops, int status )
+void reshSetStatus ( cdiResH resH, const resOps * ops, int status )
 {
   int nsp;
   namespaceTuple_t nspT;
@@ -542,7 +542,7 @@ void reshSetStatus ( cdiResH resH, resOps * ops, int status )
 
 /**************************************************************/
 
-int reshGetStatus ( cdiResH resH, resOps * ops )
+int reshGetStatus ( cdiResH resH, const resOps * ops )
 {
   int nsp;
   namespaceTuple_t nspT;
