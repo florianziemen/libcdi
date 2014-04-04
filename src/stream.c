@@ -449,7 +449,7 @@ void streamDefByteorder(int streamID, int byteorder)
 
   stream_check_ptr(__func__, streamptr);
 
-  if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
+  if ( reshGetStatus ( streamID, &streamOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -2231,7 +2231,7 @@ void streamDefCompType(int streamID, int comptype)
 {
   stream_t *streamptr;
 
-  if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
+  if ( reshGetStatus ( streamID, &streamOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -2249,7 +2249,7 @@ void streamDefCompLevel(int streamID, int complevel)
 {
   stream_t *streamptr;
 
-  if ( reshGetStatus ( streamID, &streamOps ) == CLOSED )
+  if ( reshGetStatus ( streamID, &streamOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;

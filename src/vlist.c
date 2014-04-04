@@ -1129,7 +1129,7 @@ void vlistDefNtsteps(int vlistID, int nts)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -1277,7 +1277,7 @@ void vlistDefTaxis(int vlistID, int taxisID)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -1322,7 +1322,7 @@ void  vlistDefTable(int vlistID, int tableID)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -1352,7 +1352,7 @@ void vlistDefInstitut(int vlistID, int instID)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -1398,7 +1398,7 @@ void vlistDefModel(int vlistID, int modelID)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -1502,7 +1502,7 @@ void vlistChangeGridIndex(int vlistID, int index, int gridID)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -1528,7 +1528,7 @@ void vlistChangeGrid(int vlistID, int gridID1, int gridID2)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -1595,7 +1595,7 @@ void vlistChangeZaxisIndex(int vlistID, int index, int zaxisID)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -1635,7 +1635,7 @@ void vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;

@@ -295,7 +295,7 @@ void taxisDefType(int taxisID, int type)
 {
   taxis_t *taxisptr;
 
-  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+  if ( reshGetStatus ( taxisID, &taxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -376,7 +376,7 @@ void taxisDefRdate(int taxisID, int rdate)
 {
   taxis_t *taxisptr;
 
-  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+  if ( reshGetStatus ( taxisID, &taxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -407,7 +407,7 @@ void taxisDefRtime(int taxisID, int rtime)
 {
   taxis_t *taxisptr;
 
-  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+  if ( reshGetStatus ( taxisID, &taxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -438,7 +438,7 @@ void taxisDefFdate(int taxisID, int fdate)
 {
   taxis_t *taxisptr;
 
-  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+  if ( reshGetStatus ( taxisID, &taxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -469,7 +469,7 @@ void taxisDefFtime(int taxisID, int ftime)
 {
   taxis_t *taxisptr;
 
-  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+  if ( reshGetStatus ( taxisID, &taxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -502,7 +502,7 @@ void taxisDefCalendar(int taxisID, int calendar)
 {
   taxis_t *taxisptr;
 
-  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+  if ( reshGetStatus ( taxisID, &taxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -520,7 +520,7 @@ void taxisDefTunit(int taxisID, int unit)
 {
   taxis_t *taxisptr;
 
-  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+  if ( reshGetStatus ( taxisID, &taxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -538,7 +538,7 @@ void taxisDefNumavg(int taxisID, int numavg)
 {
   taxis_t *taxisptr;
 
-  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+  if ( reshGetStatus ( taxisID, &taxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -583,7 +583,7 @@ void taxisDeleteBounds(int taxisID)
 {
   taxis_t *taxisptr;
 
-  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+  if ( reshGetStatus ( taxisID, &taxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -672,7 +672,7 @@ void taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub)
 {
   taxis_t *taxisptr;
 
-  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+  if ( reshGetStatus ( taxisID, &taxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -733,7 +733,7 @@ void taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub)
 {
   taxis_t *taxisptr;
 
-  if ( reshGetStatus ( taxisID, &taxisOps ) == CLOSED )
+  if ( reshGetStatus ( taxisID, &taxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;

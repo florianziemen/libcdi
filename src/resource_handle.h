@@ -33,7 +33,12 @@ typedef struct {
   valTxCodeFunc      valTxCode;
 }resOps;
 
-enum { RESH_UNDEFID, ASSIGNED, SUSPENDED, CLOSED };
+enum {
+  RESH_UNUSED,             /* resource holds no value */
+  RESH_ASSIGNED,           /* resource is user-assigned */
+  RESH_PRE_ASSIGNED,       /* resource is pre-assigned by library */
+  RESH_CLOSED,             /* resource is marked immutable */
+};
 
 void   reshListCreate(int namespaceID);
 void   reshListDestruct(int namespaceID);

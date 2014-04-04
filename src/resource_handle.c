@@ -82,7 +82,7 @@ listInitResources(int nsp)
       p[i].next   = i + 1;
       p[i].ops    = NULL;
       p[i].val    = NULL;
-      p[i].status = RESH_UNDEFID;
+      p[i].status = RESH_UNUSED;
     }
 
   p[resHList[nsp].size-1].next = -1;
@@ -197,7 +197,7 @@ void listSizeExtend()
       resHList[nsp].resources[i].next   = i + 1;
       resHList[nsp].resources[i].ops    = NULL;
       resHList[nsp].resources[i].val    = NULL;
-      resHList[nsp].resources[i].status = RESH_UNDEFID;
+      resHList[nsp].resources[i].status = RESH_UNUSED;
     }
 
   resHList[nsp].resources[newListSize-1].next = resHList[nsp].freeHead;
@@ -227,7 +227,7 @@ int reshPut ( void *p, resOps *ops )
   newListElem->next         = -1;
   newListElem->val          = p;
   newListElem->ops          = ops;
-  newListElem->status       = ASSIGNED;
+  newListElem->status       = RESH_ASSIGNED;
 
   LIST_UNLOCK();
 
@@ -258,7 +258,7 @@ void reshRemove ( cdiResH resH, resOps * ops )
   resHList[nsp].resources[nspT.idx].next   = resHList[nsp].freeHead;
   resHList[nsp].resources[nspT.idx].ops    = NULL;
   resHList[nsp].resources[nspT.idx].val    = NULL;
-  resHList[nsp].resources[nspT.idx].status = RESH_UNDEFID;
+  resHList[nsp].resources[nspT.idx].status = RESH_UNUSED;
   resHList[nsp].freeHead                   = nspT.idx;
 
   LIST_UNLOCK();
@@ -435,7 +435,7 @@ static int getPackBufferSize(void *context)
   /* pack resources, type marker and seperator marker */
   for ( i = 0; i < resHList[nsp].size; i++ )
     if ( resHList[nsp].resources[i].val )
-      if ( resHList[nsp].resources[i].status == ASSIGNED )
+      if ( resHList[nsp].resources[i].status == RESH_ASSIGNED )
         {
           curr = resHList[nsp].resources + i;
           xassert ( curr->ops );
@@ -482,7 +482,7 @@ void reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
 
   for ( i = 0; i < resHList[nsp].size; i++ )
     if ( resHList[nsp].resources[i].val )
-      if ( resHList[nsp].resources[i].status == ASSIGNED )
+      if ( resHList[nsp].resources[i].status == RESH_ASSIGNED )
         {
           curr = resHList[nsp].resources + i;
           xassert ( curr->ops );
@@ -498,7 +498,7 @@ void reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
 
           serializePack(&sep, 1, DATATYPE_INT, pB, pBSize, &packBufferPos, context);
 
-          curr->status = CLOSED;
+          curr->status = RESH_CLOSED;
         }
 
   LIST_UNLOCK();

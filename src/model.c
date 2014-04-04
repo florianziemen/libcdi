@@ -104,7 +104,7 @@ void modelDefaultEntries ( void )
   resH[9] = modelDef(instID,  80, "T62L28MRF");
 
   for ( i = 0; i < 10 ; i++ )
-    reshSetStatus(resH[i], &modelOps, SUSPENDED);
+    reshSetStatus(resH[i], &modelOps, RESH_PRE_ASSIGNED);
 }
 
 static

@@ -204,7 +204,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
   vlist_t *vlistptr;
 
   vlistptr = vlist_to_pointer(vlistID);
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return CDI_UNDEFID;
@@ -293,7 +293,7 @@ void vlistDefVarParam(int vlistID, int varID, int param)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -326,7 +326,7 @@ void vlistDefVarCode(int vlistID, int varID, int code)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -840,7 +840,7 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -867,7 +867,7 @@ void vlistDefVarInstitut(int vlistID, int varID, int instID)
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -891,7 +891,7 @@ void vlistDefVarModel(int vlistID, int varID, int modelID)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -917,7 +917,7 @@ void vlistDefVarTable(int vlistID, int varID, int tableID)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -972,7 +972,7 @@ void vlistDefVarName(int vlistID, int varID, const char *name)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -1013,7 +1013,7 @@ void vlistDefVarLongname(int vlistID, int varID, const char *longname)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -1054,7 +1054,7 @@ void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -1095,7 +1095,7 @@ void vlistDefVarUnits(int vlistID, int varID, const char *units)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -1191,7 +1191,7 @@ void vlistDefVarExtra(int vlistID, int varID, const char *extra)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -1287,7 +1287,7 @@ double vlistInqVarScalefactor(int vlistID, int varID)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return 1.0;
@@ -1316,7 +1316,7 @@ void vlistDefVarScalefactor(int vlistID, int varID, double scalefactor)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed." );
       return;
@@ -1334,7 +1334,7 @@ void vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -1352,7 +1352,7 @@ void vlistDefVarTsteptype(int vlistID, int varID, int tsteptype)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -1378,7 +1378,7 @@ void vlistDefVarTimave(int vlistID, int varID, int timave)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -1404,7 +1404,7 @@ void vlistDefVarTimaccu(int vlistID, int varID, int timaccu)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -1430,7 +1430,7 @@ void vlistDefVarTypeOfGeneratingProcess(int vlistID, int varID, int typeOfGenera
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -1522,7 +1522,7 @@ void vlistDefFlag(int vlistID, int varID, int levID, int flag)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -1652,7 +1652,7 @@ void vlistDefIndex(int vlistID, int varID, int levelID, int index)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -1693,7 +1693,7 @@ void vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
   int nvars, index;
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -1743,7 +1743,7 @@ void vlistChangeVarGrid(int vlistID, int varID, int gridID)
   int nvars, index;
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -1791,7 +1791,7 @@ void vlistDefVarCompType(int vlistID, int varID, int comptype)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -1817,7 +1817,7 @@ void vlistDefVarCompLevel(int vlistID, int varID, int complevel)
 {
   vlist_t *vlistptr;
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -2094,7 +2094,7 @@ void     vlistDefVarIOrank   ( int vlistID, int varID, int iorank )
 
   vlistCheckVarID ( __func__, vlistID, varID );
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == CLOSED )
+  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;

@@ -340,7 +340,7 @@ void zaxisDefName(int zaxisID, const char *name)
 {
   zaxis_t *zaxisptr;
 
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -372,7 +372,7 @@ void zaxisDefLongname(int zaxisID, const char *longname)
 {
   zaxis_t *zaxisptr;
 
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -404,7 +404,7 @@ void zaxisDefUnits(int zaxisID, const char *units)
 {
   zaxis_t *zaxisptr;
 
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -525,7 +525,7 @@ void zaxisDefPrec(int zaxisID, int prec)
 {
   zaxis_t *zaxisptr;
 
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -555,7 +555,7 @@ void zaxisDefPositive(int zaxisID, int positive)
 {
   zaxis_t *zaxisptr;
 
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -585,7 +585,7 @@ void zaxisDefLtype(int zaxisID, int ltype)
 {
   zaxis_t *zaxisptr;
 
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -631,7 +631,7 @@ void zaxisDefLevels(int zaxisID, const double *levels)
   double *vals;
   zaxis_t *zaxisptr;
 
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -668,7 +668,7 @@ void zaxisDefLevel(int zaxisID, int levelID, double level)
 {
   zaxis_t *zaxisptr;
 
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -687,7 +687,7 @@ void zaxisDefNlevRef(int zaxisID, const int nhlev)
 {
   zaxis_t *zaxisptr;
 
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -733,7 +733,7 @@ void zaxisDefNumber(int zaxisID, const int number)
 {
   zaxis_t *zaxisptr;
 
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -793,7 +793,7 @@ void zaxisDefUUID(int zaxisID, const char *uuid)
 {
   zaxis_t *zaxisptr;
 
-    if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+    if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -1150,7 +1150,7 @@ void zaxisDefVct(int zaxisID, int size, const double *vct)
 {
   zaxis_t *zaxisptr;
 
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -1213,7 +1213,7 @@ void zaxisDefLbounds(int zaxisID, const double *lbounds)
   size_t size;
   zaxis_t *zaxisptr;
 
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -1241,7 +1241,7 @@ void zaxisDefUbounds(int zaxisID, const double *ubounds)
   size_t size;
   zaxis_t *zaxisptr;
 
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
@@ -1269,7 +1269,7 @@ void zaxisDefWeights(int zaxisID, const double *weights)
   size_t size;
   zaxis_t *zaxisptr;
 
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == CLOSED )
+  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
