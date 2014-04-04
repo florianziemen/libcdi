@@ -27,8 +27,6 @@
 #include "vlist.h"
 #include "vlist_var.h"
 
-extern resOps streamOps;
-
 
 static struct rdmaWin
 {

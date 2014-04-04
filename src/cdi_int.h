@@ -58,6 +58,9 @@ char *strdup(const char *s);
 #ifndef  _IEG_H
 #  include "ieg.h"
 #endif
+#ifndef RESOURCE_HANDLE_H
+#  include "resource_handle.h"
+#endif
 
 
 #define check_parg(arg)  if ( arg == 0 ) Warning("Argument '" #arg "' not allocated!")
@@ -369,7 +372,7 @@ void cdiStreamSync_(stream_t *streamptr);
 
 char *cdiUnitNamePtr(int cdi_unit);
 
-
+extern resOps streamOps;
 
 #endif  /* _CDI_INT_H */
 /*

@@ -39,7 +39,6 @@
 #include "vlist_var.h"
 
 
-extern resOps streamOps;
 extern void arrayDestroy ( void );
 
 static struct

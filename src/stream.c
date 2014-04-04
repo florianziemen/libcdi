@@ -30,9 +30,6 @@
 
 #define  MAX_FNAMES  3
 
-extern resOps streamOps;
-
-
 FILE *popen(const char *command, const char *type);
 int pclose(FILE *stream);
 
