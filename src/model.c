@@ -42,8 +42,13 @@ static void   modelPackP    ( void * modelptr, void * buff, int size,
                               int *position, void *context);
 static int    modelTxCode   ( void );
 
-resOps modelOps = { modelCompareP, modelDestroyP, modelPrintP
-                    , modelGetSizeP, modelPackP, modelTxCode
+static resOps modelOps = {
+  modelCompareP,
+  modelDestroyP,
+  modelPrintP,
+  modelGetSizeP,
+  modelPackP,
+  modelTxCode
 };
 
 static

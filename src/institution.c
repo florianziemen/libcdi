@@ -38,9 +38,14 @@ static int    instituteGetSizeP ( void * instituteptr, void *context );
 static void   institutePackP    ( void * instituteptr, void *buf, int size, int *position, void *context );
 static int    instituteTxCode   ( void );
 
-resOps instituteOps = { instituteCompareP, instituteDestroyP, institutePrintP
-                        ,instituteGetSizeP, institutePackP, instituteTxCode
- };
+static resOps instituteOps = {
+  instituteCompareP,
+  instituteDestroyP,
+  institutePrintP,
+  instituteGetSizeP,
+  institutePackP,
+  instituteTxCode
+};
 
 static int * instituteInitializedNsp;
 
