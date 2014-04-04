@@ -279,7 +279,7 @@ void stream_check_ptr(const char *caller, stream_t *streamptr);
 int     streamInqFileID(int streamID);
 
 int     zaxisInqLevelID(int zaxisID, double level);
-char   *gridNamePtr(int gridtype);
+const char *gridNamePtr(int gridtype);
 char   *zaxisNamePtr(int leveltype);
 
 void    streamCheckID(const char *caller, int streamID);

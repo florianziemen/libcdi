@@ -578,7 +578,7 @@ int     vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char 
 /* GRID routines */
 
 void    gridName(int gridtype, char *gridname);
-char   *gridNamePtr(int gridtype);
+const char *gridNamePtr(int gridtype);
 
 void    gridCompress(int gridID);
 

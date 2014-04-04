@@ -26,7 +26,9 @@
 #endif
 
 
-char *Grids[] = {
+/* the value in the second pair of brackets must match the length of
+ * the longest string (including terminating NUL) */
+static const char Grids[][17] = {
   /*  0 */  "undefined",
   /*  1 */  "generic",
   /*  2 */  "gaussian",
@@ -531,9 +533,9 @@ void gridDestroyP ( void * gridptr )
 }
 
 
-char *gridNamePtr(int gridtype)
+const char *gridNamePtr(int gridtype)
 {
-  char *name;
+  const char *name;
   int size = (int) (sizeof(Grids)/sizeof(char *));
 
   if ( gridtype >= 0 && gridtype < size )
