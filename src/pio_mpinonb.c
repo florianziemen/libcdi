@@ -15,8 +15,6 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
-extern char * command2charP[6];
-
 extern long initial_buffersize;
 
 extern double accumWait;
