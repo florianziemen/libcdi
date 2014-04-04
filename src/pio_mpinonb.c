@@ -130,7 +130,8 @@ compareNamesMPINONB(void *v1, void *v2)
 
 /***************************************************************/
 
-void writeMPINONB(aFiledataM *of)
+static void
+writeMPINONB(aFiledataM *of)
 {
   int amount;
   MPI_Status status;
