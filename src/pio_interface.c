@@ -809,7 +809,7 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
 
   if ( commInqIsProcIO ())
     {
-      serializeSetMPI();
+      cdiPioSerializeSetMPI();
       namespaceSwitchSet(NSSWITCH_ABORT, NSSW_FUNC(cdiAbortC_MPI));
       namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(pioFileOpen));
       namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(pioFileClose));

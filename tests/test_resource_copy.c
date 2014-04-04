@@ -188,7 +188,7 @@ int modelRun(MPI_Comm comm)
   int bufferSize, differ;
 
 #ifdef MPI_MARSHALLING
-  serializeSetMPI();
+  cdiPioSerializeSetMPI();
 #endif
 
   gridID  = defineGrid      ();
