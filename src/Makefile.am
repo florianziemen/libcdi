@@ -169,18 +169,15 @@ endif
 endif
 
 if CREATE_ISOC
-LOCALTARGETS += mo_cdi.o mo_cdi.$(FCMODEXT)
+LOCALTARGETS += mo_cdi.$(OBJEXT)
 endif
 #
 mo_cdi.f90: $(top_srcdir)/src/cdi.h
 	ruby $(top_srcdir)/interfaces/f2003/bindGen.rb $(top_srcdir)/src/cdi.h $@
 #
-mo_cdi.o: mo_cdi.f90
+mo_cdi.$(OBJEXT): mo_cdi.f90
 	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) $<
 #
-mo_cdi.$(FCMODEXT): mo_cdi.f90
-	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) $<
-
 pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
 	(cd .. ; ./config.status src/pkgconfig/cdi.pc)
 
@@ -192,7 +189,7 @@ all-local: $(LOCALTARGETS)
 CLEANFILES  = `ls *~`
 #CLEANFILES += cdilib.c
 if CREATE_ISOC
-CLEANFILES += $(top_builddir)/src/mo_cdi.$(FCMODEXT) $(top_builddir)/src/mo_cdi.o
+CLEANFILES += $(top_builddir)/src/mo_cdi.$(FCMODEXT) $(top_builddir)/src/mo_cdi.$(OBJEXT)
 endif
 
 if ENABLE_CDI_LIB
