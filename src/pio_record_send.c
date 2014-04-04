@@ -22,7 +22,7 @@ typedef struct
   struct dBuffer *db1;
   struct dBuffer *db2;
   struct dBuffer *db;
-  IO_Server_command command;
+  enum IO_Server_command command;
   MPI_Request request;
   int tsID, fileID;
   char name[];

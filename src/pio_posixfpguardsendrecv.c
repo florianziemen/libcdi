@@ -31,7 +31,7 @@ typedef struct
   struct dBuffer *db2;
   struct dBuffer *db;
   FILE *fp;
-  IO_Server_command command;
+  enum IO_Server_command command;
   int tsID, fileID;
   char name[];
 } aFiledataPF;
