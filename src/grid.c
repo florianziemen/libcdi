@@ -226,21 +226,19 @@ void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *x
 static
 void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 {
-  double *yw;
   long yhsize;
-  long i;
 
-  yw = (double *) malloc(ysize*sizeof(double));
+  double *yw = (double *)xmalloc(ysize*sizeof(double));
   gaussaw(yvals, yw, ysize);
   free(yw);
-  for ( i = 0; i < ysize; i++ )
+  for (long i = 0; i < ysize; i++ )
     yvals[i] = asin(yvals[i])/M_PI*180.0;
 
   if ( yfirst < ylast && yfirst > -90.0 && ylast < 90.0 )
     {
       double ytmp;
       yhsize = ysize/2;
-      for ( i = 0; i < yhsize; i++ )
+      for (long i = 0; i < yhsize; i++ )
         {
           ytmp = yvals[i];
           yvals[i] = yvals[ysize-i-1];
@@ -1589,11 +1587,9 @@ void gridDefXvals(int gridID, const double *xvals)
   if ( size == 0 )
     Error("Size undefined for gridID = %d", gridID);
 
-  if ( gridptr->xvals == NULL )
-    gridptr->xvals = (double *) malloc(size*sizeof(double));
-  else if ( CDI_Debug )
+  if (gridptr->xvals && CDI_Debug)
     Warning("values already defined!");
-
+  gridptr->xvals = (double *)xrealloc(gridptr->xvals, size * sizeof(double));
   memcpy(gridptr->xvals, xvals, size*sizeof(double));
 }
 
@@ -1682,11 +1678,10 @@ void gridDefYvals(int gridID, const double *yvals)
   if ( size == 0 )
     Error("Size undefined for gridID = %d!", gridID);
 
-  if ( gridptr->yvals == NULL )
-    gridptr->yvals = (double *) malloc(size*sizeof(double));
-  else if ( CDI_Debug )
+  if (gridptr->yvals && CDI_Debug)
     Warning("Values already defined!");
 
+  gridptr->yvals = (double *)xrealloc(gridptr->yvals, size*sizeof(double));
   memcpy(gridptr->yvals, yvals, size*sizeof(double));
 }
 
