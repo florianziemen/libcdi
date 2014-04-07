@@ -12,6 +12,18 @@ set -x
 #
 case "${HOSTNAME}" in
 # i386-apple-darwin10
+    icc)
+	./configure --prefix=$HOME/local \
+                    --enable-maintainer-mode \
+                    --enable-iso-c-interface \
+                    --enable-swig \
+                    --enable-python \
+                    --with-jasper=/opt/local \
+                    --with-grib_api=$HOME/local/gribapi-1.10.4 \
+                    --with-netcdf=$HOME/local \
+                    --with-szlib=$HOME/local \
+	            CC=icc CFLAGS="-g -D_REENTRANT -Wall -O3 -march=native -Df2cFortran -fp-model source"
+	;;
     bailung*)
 	./configure --prefix=$HOME/local \
                     --enable-maintainer-mode \
