@@ -21,7 +21,7 @@
 #define  LevelDown  2
 
 
-static struct {
+static const struct {
   unsigned char positive;   // 1: up;  2: down
   char *name;
   char *longname;
