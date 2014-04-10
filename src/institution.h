@@ -5,6 +5,8 @@ int
 instituteUnpack(void *buf, int size, int *position, int,
                 void *context);
 
+void instituteDefaultEntries(void);
+
 #endif
 
 /*

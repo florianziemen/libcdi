@@ -17,39 +17,11 @@
 #include "error.h"
 #include "file.h"
 #include "resource_unpack.h"
+#include "institution.h"
 
 enum { MIN_LIST_SIZE = 128 };
 
 static void listInitialize(void);
-
-// ATTENTION: not thread safe yet, namespaces are set in model!
-
-#if  defined  (HAVE_LIBPTHREAD)
-#  include <pthread.h>
-
-static pthread_once_t  listInitThread = PTHREAD_ONCE_INIT;
-static pthread_mutex_t listMutex;
-
-#  define LIST_LOCK()         pthread_mutex_lock(&listMutex)
-#  define LIST_UNLOCK()       pthread_mutex_unlock(&listMutex)
-#  define LIST_INIT()         pthread_once(&listInitThread, listInitialize)
-
-#else
-
-static int listInit = 0;
-
-#  define LIST_LOCK()
-#  define LIST_UNLOCK()
-#  define LIST_INIT()        do {                               \
-  if ( !listInit )                                              \
-    {                                                           \
-      listInitialize();                                         \
-      listInit = 1;                                             \
-    }                                                           \
-  } while(0)
-
-#endif
-
 
 typedef struct listElem {
   int next;
@@ -60,11 +32,47 @@ typedef struct listElem {
 
 static struct
 {
-  int size, freeHead;
+  int size, freeHead, hasDefaultRes;
   listElem_t *resources;
 } *resHList;
 
 static int resHListSize = 0;
+
+#if  defined  (HAVE_LIBPTHREAD)
+#  include <pthread.h>
+
+static pthread_once_t  listInitThread = PTHREAD_ONCE_INIT;
+static pthread_mutex_t listMutex;
+
+#  define LIST_LOCK()         pthread_mutex_lock(&listMutex)
+#  define LIST_UNLOCK()       pthread_mutex_unlock(&listMutex)
+#  define LIST_INIT(init0)         do {                         \
+    pthread_once(&listInitThread, listInitialize);              \
+    pthread_mutex_lock(&listMutex);                             \
+    if ((init0) && (!resHList || !resHList[0].resources))       \
+      reshListCreate(0);                                        \
+    pthread_mutex_unlock(&listMutex);                           \
+  } while (0)
+
+
+
+#else
+
+static int listInit = 0;
+
+#  define LIST_LOCK()
+#  define LIST_UNLOCK()
+#  define LIST_INIT(init0)        do {                          \
+  if ( !listInit )                                              \
+    {                                                           \
+      listInitialize();                                         \
+      if ((init0) && (!resHList || !resHList[0].resources))     \
+        reshListCreate(0);                                      \
+      listInit = 1;                                             \
+    }                                                           \
+  } while(0)
+
+#endif
 
 /**************************************************************/
 
@@ -87,6 +95,10 @@ listInitResources(int nsp)
 
   p[resHList[nsp].size-1].next = -1;
   resHList[nsp].freeHead = 0;
+  int oldNsp = namespaceGetActive();
+  namespaceSetActive(nsp);
+  instituteDefaultEntries();
+  namespaceSetActive(oldNsp);
 }
 
 static inline void
@@ -100,6 +112,7 @@ reshListClearEntry(int i)
 void
 reshListCreate(int namespaceID)
 {
+  LIST_INIT(namespaceID != 0);
   LIST_LOCK();
   if (resHListSize <= namespaceID)
     {
@@ -118,7 +131,6 @@ reshListCreate(int namespaceID)
 void
 reshListDestruct(int namespaceID)
 {
-  LIST_INIT();
   LIST_LOCK();
   xassert(resHList && namespaceID >= 0 && namespaceID < resHListSize);
   int callerNamespaceID = namespaceGetActive();
@@ -143,9 +155,9 @@ reshListDestruct(int namespaceID)
 static void listDestroy ( void )
 {
   LIST_LOCK();
-  for (int i = 0; i < resHListSize; ++i)
-    if (resHList[i].resources)
-      namespaceDelete(i);
+  for (int i = resHListSize; i > 0; --i)
+    if (resHList[i-1].resources)
+      namespaceDelete(i-1);
   free(resHList);
   resHList = NULL;
   cdiReset();
@@ -165,8 +177,6 @@ void listInitialize ( void )
   pthread_mutex_init ( &listMutex, &ma);
   pthread_mutexattr_destroy(&ma);
 #endif
-  // create default namespace
-  reshListCreate(0);
   /* file is special and has its own table, which needs to be
    * created, before we register the listDestroy exit handler */
   {
@@ -176,7 +186,6 @@ void listInitialize ( void )
       fileClose_serial(null_id);
   }
   atexit ( listDestroy );
-
 }
 
 /**************************************************************/
@@ -213,7 +222,7 @@ int reshPut ( void *p, const resOps *ops )
 
   xassert ( p && ops );
 
-  LIST_INIT();
+  LIST_INIT(1);
 
   LIST_LOCK();
 
@@ -241,7 +250,7 @@ void reshRemove ( cdiResH resH, const resOps * ops )
   int nsp;
   namespaceTuple_t nspT;
 
-  LIST_INIT();
+  LIST_INIT(1);
 
   LIST_LOCK();
 
@@ -274,7 +283,7 @@ reshGetElem(const char *caller, cdiResH resH, const resOps *ops)
   namespaceTuple_t nspT;
   xassert ( ops );
 
-  LIST_INIT();
+  LIST_INIT(1);
 
   LIST_LOCK();
 
@@ -316,7 +325,7 @@ void reshGetResHListOfType ( int c, int * resHs, const resOps * ops )
 
   xassert ( resHs && ops );
 
-  LIST_INIT();
+  LIST_INIT(1);
 
   LIST_LOCK();
 
@@ -339,7 +348,7 @@ cdiResHApply(enum cdiApplyRet (*func)(int id, void *res, const resOps *p,
 {
   xassert(func);
 
-  LIST_INIT();
+  LIST_INIT(1);
 
   LIST_LOCK();
 
@@ -361,7 +370,7 @@ cdiResHFilterApply(const resOps *p,
 {
   xassert(p && func);
 
-  LIST_INIT();
+  LIST_INIT(1);
 
   LIST_LOCK();
 
@@ -387,7 +396,7 @@ int reshCountType ( const resOps * ops )
 
   xassert ( ops );
 
-  LIST_INIT();
+  LIST_INIT(1);
 
   LIST_LOCK();
 
@@ -518,7 +527,7 @@ void reshSetStatus ( cdiResH resH, const resOps * ops, int status )
 
   xassert ( ops );
 
-  LIST_INIT();
+  LIST_INIT(1);
 
   LIST_LOCK();
 
@@ -550,7 +559,7 @@ int reshGetStatus ( cdiResH resH, const resOps * ops )
 
   xassert ( ops );
 
-  LIST_INIT();
+  LIST_INIT(1);
 
   LIST_LOCK();
 
@@ -590,7 +599,7 @@ void reshUnlock ()
 
 int reshListCompare ( int nsp0, int nsp1 )
 {
-  LIST_INIT();
+  LIST_INIT(1);
   LIST_LOCK();
 
   xassert(resHListSize > nsp0 && resHListSize > nsp1 &&
@@ -644,7 +653,7 @@ void reshListPrint(FILE *fp)
   int i, j, temp;
   listElem_t * curr;
 
-  LIST_INIT();
+  LIST_INIT(1);
 
 
   temp = namespaceGetActive ();

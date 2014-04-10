@@ -47,8 +47,6 @@ static const resOps instituteOps = {
   instituteTxCode
 };
 
-static int * instituteInitializedNsp;
-
 static
 void instituteDefaultValue ( institute_t * instituteptr )
 {
@@ -74,7 +72,7 @@ institute_t * instituteNewEntry ( void )
   return  instituteptr;
 }
 
-static
+
 void instituteDefaultEntries ( void )
 {
   cdiResH resH[64];
@@ -97,34 +95,6 @@ void instituteDefaultEntries ( void )
 
   for ( i = 0; i < n ; i++ )
     reshSetStatus(resH[i], &instituteOps, RESH_PRE_ASSIGNED);
-}
-
-static
-void instituteFinalize ( void )
-{
-  free ( instituteInitializedNsp );
-}
-
-static
-void instituteInit (void)
-{
-  static int instituteInitialized = 0;
-  int nsp, nspc;
-
-  nspc = namespaceGetNumber ();
-
-  if ( !instituteInitialized )
-    {
-      instituteInitialized = 1;
-      instituteInitializedNsp = (int*) xcalloc ( 1, nspc * sizeof ( int ));
-      atexit ( instituteFinalize );
-    }
-
-  nsp = namespaceGetActive ();
-  if ( instituteInitializedNsp[nsp] ) return;
-  instituteInitializedNsp[nsp] = 1;
-
-  instituteDefaultEntries();
 }
 
 
@@ -209,9 +179,7 @@ findInstitute(int id, void *res, void *data)
 
 int institutInq(int center, int subcenter, const char *name, const char *longname)
 {
-  instituteInit ();
-
-  institute_t * ip_ref = (institute_t*) xmalloc(sizeof (*ip_ref));
+  institute_t * ip_ref = (institute_t *)xmalloc(sizeof (*ip_ref));
   ip_ref->self       = UNDEFID;
   ip_ref->used       = 0;
   ip_ref->center     = center;
@@ -232,8 +200,6 @@ int institutDef(int center, int subcenter, const char *name, const char *longnam
 {
   institute_t * instituteptr;
 
-  instituteInit ();
-
   instituteptr = instituteNewEntry();
 
   instituteptr->center    = center;
@@ -249,8 +215,6 @@ int institutInqCenter(int instID)
 {
   institute_t * instituteptr = NULL;
 
-  instituteInit ();
-
   if ( instID != UNDEFID )
     instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
@@ -261,8 +225,6 @@ int institutInqCenter(int instID)
 int institutInqSubcenter(int instID)
 {
   institute_t * instituteptr = NULL;
-
-  instituteInit ();
 
   if ( instID != UNDEFID )
     instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
@@ -275,8 +237,6 @@ char *institutInqNamePtr(int instID)
 {
   institute_t * instituteptr = NULL;
 
-  instituteInit ();
-
   if ( instID != UNDEFID )
     instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
@@ -287,8 +247,6 @@ char *institutInqNamePtr(int instID)
 char *institutInqLongnamePtr(int instID)
 {
   institute_t * instituteptr = NULL;
-
-  instituteInit ();
 
   if ( instID != UNDEFID )
     instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
@@ -307,8 +265,6 @@ activeInstitutes(int id, void *res, void *data)
 int institutInqNumber(void)
 {
   int instNum = 0;
-
-  instituteInit ();
 
   cdiResHFilterApply(&instituteOps, activeInstitutes, &instNum);
   return instNum;

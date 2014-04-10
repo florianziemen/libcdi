@@ -812,7 +812,6 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
       namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(pioFileOpen));
       namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(pioFileClose));
       cdiPioServer(postCommSetupActions);
-      namespaceDelete(0);
       namespaceNew();
       commDestroy ();
       if (xtInitByCDI)
