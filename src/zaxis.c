@@ -58,7 +58,7 @@ ZaxistypeEntry[] = {
 };
 
 enum {
-  CDI_MaxZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]),
+  CDI_NumZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]),
 };
 
 
@@ -243,8 +243,8 @@ int zaxisCreate(int zaxistype, int size)
   zaxisptr->type = zaxistype;
   zaxisptr->size = size;
 
-  if ( zaxistype > CDI_MaxZaxistype )
-    Error("Internal problem! zaxistype > CDI_MaxZaxistype");
+  if ( zaxistype >= CDI_NumZaxistype || zaxistype < 0)
+    Error("Internal problem! zaxistype not in [0,CDI_NumZaxistype)");
 
   zaxisDefName(zaxisID, ZaxistypeEntry[zaxistype].name);
   zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
@@ -315,7 +315,7 @@ char *zaxisNamePtr(int zaxistype)
 {
   char *name;
 
-  if ( zaxistype >= 0 && zaxistype < CDI_MaxZaxistype )
+  if ( zaxistype >= 0 && zaxistype < CDI_NumZaxistype )
     name = ZaxistypeEntry[zaxistype].longname;
   else
     name = ZaxistypeEntry[ZAXIS_GENERIC].longname;
