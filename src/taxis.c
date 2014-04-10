@@ -46,8 +46,13 @@ static void   taxisPack        ( void * taxisptr, void *buf, int size,
 				 int *position, void *context );
 static int    taxisTxCode      ( void );
 
-resOps taxisOps = { taxisCompareP, taxisDestroyP, taxisPrintP
-                    , taxisGetPackSize, taxisPack, taxisTxCode
+const resOps taxisOps = {
+  taxisCompareP,
+  taxisDestroyP,
+  taxisPrintP,
+  taxisGetPackSize,
+  taxisPack,
+  taxisTxCode
 };
 
 

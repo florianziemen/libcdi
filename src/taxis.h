@@ -40,7 +40,7 @@ void     timeval2vtime(double timevalue, taxis_t* taxis, int* vdate, int* vtime)
 double   vtime2timeval(int vdate, int vtime, taxis_t *taxis);
 
 #if !defined (SX)
-extern resOps taxisOps;
+extern const resOps taxisOps;
 #endif
 
 int

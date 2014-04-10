@@ -372,7 +372,7 @@ void cdiStreamSync_(stream_t *streamptr);
 
 char *cdiUnitNamePtr(int cdi_unit);
 
-extern resOps streamOps;
+extern const resOps streamOps;
 
 #endif  /* _CDI_INT_H */
 /*

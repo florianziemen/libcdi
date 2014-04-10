@@ -42,7 +42,7 @@ static void   modelPackP    ( void * modelptr, void * buff, int size,
                               int *position, void *context);
 static int    modelTxCode   ( void );
 
-static resOps modelOps = {
+static const resOps modelOps = {
   modelCompareP,
   modelDestroyP,
   modelPrintP,

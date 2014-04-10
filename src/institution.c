@@ -38,7 +38,7 @@ static int    instituteGetSizeP ( void * instituteptr, void *context );
 static void   institutePackP    ( void * instituteptr, void *buf, int size, int *position, void *context );
 static int    instituteTxCode   ( void );
 
-static resOps instituteOps = {
+static const resOps instituteOps = {
   instituteCompareP,
   instituteDestroyP,
   institutePrintP,

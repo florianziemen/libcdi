@@ -81,10 +81,13 @@ static int    streamGetPackSize ( void * streamptr, void *context);
 static void   streamPack        ( void * streamptr, void * buff, int size, int * position, void *context );
 static int    streamTxCode      ( void );
 
-resOps streamOps = { streamCompareP, streamDestroyP, streamPrintP,
-                     streamGetPackSize,
-		     streamPack,
-                     streamTxCode
+const resOps streamOps = {
+  streamCompareP,
+  streamDestroyP,
+  streamPrintP,
+  streamGetPackSize,
+  streamPack,
+  streamTxCode
 };
 
 long cdiGetenvInt(char *envName)
