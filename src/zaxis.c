@@ -57,7 +57,9 @@ ZaxistypeEntry[] = {
   { /* 25 */ 0, "height",            "generalized height",     "height",         ""},
 };
 
-static int CDI_MaxZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]);
+enum {
+  CDI_MaxZaxistype = sizeof(ZaxistypeEntry) / sizeof(ZaxistypeEntry[0]),
+};
 
 
 typedef struct {
