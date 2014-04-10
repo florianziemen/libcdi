@@ -252,6 +252,10 @@ int  modelCompareP ( void * modelptr1, void * modelptr2 )
 
 void modelDestroyP ( void * modelptr )
 {
+  model_t *mp = modelptr;
+  if (mp->name)
+    free(mp->name);
+  free(mp);
 }
 
 
@@ -319,6 +323,8 @@ modelUnpack(void *buf, int size, int *position, int nspTarget, void *context)
     }
 
   modelID = modelDef( namespaceAdaptKey ( tempbuf[1], nspTarget ), tempbuf[2], name);
+  if (tempbuf[3] != 0)
+    free(name);
   // FIXME: this should work, once all types are transferred
   //assert(modelID == tempbuf[0]);
   return modelID;

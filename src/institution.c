@@ -280,9 +280,10 @@ void instituteDestroyP ( void * instituteptr )
 
   id = i1->self;
 
-  if ( instituteptr ) free ( instituteptr );
-
+  free(i1->name);
+  free(i1->longname);
   reshRemove ( id, &instituteOps );
+  free(instituteptr);
 }
 
 
@@ -343,13 +344,14 @@ int instituteUnpack(void *buf, int size, int *position, int nspTarget, void *con
   int instituteID;
   char *name, *longname;
   serializeUnpack(buf, size, position, tempbuf, institute_nints, DATATYPE_INT, context);
-  name = (char*) xmalloc(tempbuf[3]);
-  longname = (char*) xmalloc(tempbuf[4]);
+  name = (char *)xmalloc(tempbuf[3] + tempbuf[4]);
+  longname = name + tempbuf[3];
   serializeUnpack(buf, size, position, name, tempbuf[3], DATATYPE_TXT, context);
   serializeUnpack(buf, size, position, longname, tempbuf[4], DATATYPE_TXT, context);
   instituteID = institutDef(tempbuf[1], tempbuf[2], name, longname);
   // FIXME: this should work, once all types are transferred
   //xassert(instituteID == tempbuf[0]);
+  free(name);
   return instituteID;
 }
 
