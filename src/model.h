@@ -5,6 +5,8 @@ int
 modelUnpack(void *buf, int size, int *position,
             int, void *context);
 
+void modelDefaultEntries(void);
+
 #endif
 /*
  * Local Variables:

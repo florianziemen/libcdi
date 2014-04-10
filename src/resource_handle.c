@@ -18,6 +18,7 @@
 #include "file.h"
 #include "resource_unpack.h"
 #include "institution.h"
+#include "model.h"
 
 enum { MIN_LIST_SIZE = 128 };
 
@@ -98,6 +99,7 @@ listInitResources(int nsp)
   int oldNsp = namespaceGetActive();
   namespaceSetActive(nsp);
   instituteDefaultEntries();
+  modelDefaultEntries();
   namespaceSetActive(oldNsp);
 }
 

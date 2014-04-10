@@ -29,7 +29,6 @@ model_t;
 
 
 static int  MODEL_Debug = 0;   /* If set to 1, debugging */
-static int * modelInitializedNsp;
 
 static void modelInit(void);
 
@@ -77,7 +76,6 @@ model_t *modelNewEntry ( void )
 
 int modelDef(int instID, int modelgribID, const char *name);
 
-static
 void modelDefaultEntries ( void )
 {
   int instID, i;
@@ -113,36 +111,15 @@ void modelDefaultEntries ( void )
 }
 
 static
-void modelFinalize ( void )
-{
-  free (   modelInitializedNsp );
-}
-
-static
 void modelInit(void)
 {
   static int modelInitialized = 0;
-  int nsp, nspc;
-  char *env;
 
-  nspc = namespaceGetNumber ();
+  if (modelInitialized) return;
 
-  if ( !modelInitialized )
-    {
-      modelInitialized = 1;
-      modelInitializedNsp = (int*) xcalloc ( 1, nspc * sizeof ( int ));
-      atexit ( modelFinalize );
-      env = getenv("MODEL_DEBUG");
-      if ( env ) MODEL_Debug = atoi(env);
-    }
-
-  nsp = namespaceGetActive ();
-
-  if ( modelInitializedNsp[nsp] ) return;
-
-  modelInitializedNsp[nsp] = 1;
-
-  modelDefaultEntries ();
+  modelInitialized = 1;
+  char *env = getenv("MODEL_DEBUG");
+  if ( env ) MODEL_Debug = atoi(env);
 }
 
 int modelSize ( void )
