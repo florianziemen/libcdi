@@ -30,7 +30,7 @@ typedef struct listElem {
     /* free-list management data */
     struct
     {
-      int next;
+      int next, prev;
     } free;
     /* holding an actual value */
     struct
@@ -99,7 +99,8 @@ listInitResources(int nsp)
 
   for (int i = 0; i < size; i++ )
     {
-      p[i].res.free.next   = i + 1;
+      p[i].res.free.next = i + 1;
+      p[i].res.free.prev = i - 1;
       p[i].status = RESH_UNUSED;
     }
 
@@ -212,13 +213,19 @@ void listSizeExtend()
     xrealloc(resHList[nsp].resources,
              newListSize * sizeof (resHList[0].resources[0]));
 
+  listElem_t *r = resHList[nsp].resources;
   for (int i = oldSize; i < newListSize; ++i)
     {
-      resHList[nsp].resources[i].res.free.next   = i + 1;
-      resHList[nsp].resources[i].status = RESH_UNUSED;
+      r[i].res.free.next = i + 1;
+      r[i].res.free.prev = i - 1;
+      r[i].status = RESH_UNUSED;
     }
 
-  resHList[nsp].resources[newListSize-1].res.free.next = resHList[nsp].freeHead;
+  if (resHList[nsp].freeHead != -1)
+    r[resHList[nsp].freeHead].res.free.next
+      = newListSize - 1;
+  r[newListSize-1].res.free.next = resHList[nsp].freeHead;
+  r[oldSize].res.free.prev = -1;
   resHList[nsp].freeHead = oldSize;
   resHList[nsp].size = newListSize;
 }
@@ -239,7 +246,10 @@ int reshPut ( void *p, const resOps *ops )
   int entry = resHList[nsp].freeHead;
   cdiResH resH = namespaceIdxEncode2(nsp, entry);
   listElem_t *newListElem = resHList[nsp].resources + entry;
-  resHList[nsp].freeHead = newListElem->res.free.next;
+  int next = newListElem->res.free.next;
+  if (next != -1)
+    resHList[nsp].resources[next].res.free.prev = -1;
+  resHList[nsp].freeHead = next;
   newListElem->res.v.val = p;
   newListElem->res.v.ops = ops;
   newListElem->status       = RESH_ASSIGNED;
@@ -270,7 +280,10 @@ void reshRemove ( cdiResH resH, const resOps * ops )
             resHList[nsp].resources[nspT.idx].res.v.ops &&
             resHList[nsp].resources[nspT.idx].res.v.ops == ops );
 
-  resHList[nsp].resources[nspT.idx].res.free.next = resHList[nsp].freeHead;
+  int curFree = resHList[nsp].freeHead;
+  resHList[nsp].resources[nspT.idx].res.free.next = curFree;
+  if (curFree != -1)
+    resHList[nsp].resources[curFree].res.free.prev = nspT.idx;
   resHList[nsp].resources[nspT.idx].status = RESH_UNUSED;
   resHList[nsp].freeHead                   = nspT.idx;
 
@@ -335,13 +348,10 @@ void reshGetResHListOfType ( int c, int * resHs, const resOps * ops )
 
   nsp = namespaceGetActive ();
 
-  for ( i = 0; i < resHList[nsp].size; i++ )
-    if (resHList[nsp].resources[i].status != RESH_UNUSED)
-      if (resHList[nsp].resources[i].res.v.ops == ops)
-        {
-          resHs[j++] = namespaceIdxEncode2 ( nsp, i );
-          if ( j == c ) break;
-        }
+  for ( i = 0; i < resHList[nsp].size && j < c; i++ )
+    if (resHList[nsp].resources[i].status != RESH_UNUSED
+        && resHList[nsp].resources[i].res.v.ops == ops)
+      resHs[j++] = namespaceIdxEncode2(nsp, i);
 
   LIST_UNLOCK();
 }
