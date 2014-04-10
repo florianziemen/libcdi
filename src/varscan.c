@@ -422,30 +422,14 @@ param_t;
 static
 int cmpparam(const void* s1, const void* s2)
 {
-  int cmp = 0;
   const param_t* x = s1;
   const param_t* y = s2;
 
-  if      ( x->param > y->param ) cmp =  1;
-  else if ( x->param < y->param ) cmp = -1;
+  int cmp = (( x->param > y->param ) - ( x->param < y->param )) * 2
+           + ( x->ltype > y->ltype ) - ( x->ltype < y->ltype );
 
   return (cmp);
 }
-
-
-static
-int cmpltype(const void* s1, const void* s2)
-{
-  int cmp = 0;
-  const param_t* x = s1;
-  const param_t* y = s2;
-
-  if      ( x->ltype > y->ltype ) cmp =  1;
-  else if ( x->ltype < y->ltype ) cmp = -1;
-
-  return (cmp);
-}
-
 
 void cdi_generate_vars(stream_t *streamptr)
 {
@@ -486,7 +470,6 @@ void cdi_generate_vars(stream_t *streamptr)
 	  varInfo[varid]->param = vartable[varid].param;
 	  varInfo[varid]->ltype = vartable[varid].ltype;
 	}
-      qsort(varInfo[0], nvars, sizeof(param_t), cmpltype);
       qsort(varInfo[0], nvars, sizeof(param_t), cmpparam);
       for ( varid = 0; varid < nvars; varid++ )
 	{

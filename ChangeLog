@@ -3,6 +3,10 @@
 	* Version 1.6.4 released
 	* using CGRIBEX library version 1.6.4
 
+2014-04-10  Uwe Schulzweida
+
+	* varscan::cmpparam: apply patch from Thomas Jahns
+
 2014-03-24  Uwe Schulzweida
 
 	* configure --with-netCDF: set default=no
