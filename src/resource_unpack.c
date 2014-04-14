@@ -56,7 +56,7 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
 	  break;
 	case INSTITUTE:
           instituteUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                          nspTarget, context);
+                          nspTarget, context, 1);
 	  break;
 	case MODEL:
           modelUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
