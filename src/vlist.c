@@ -46,15 +46,20 @@ static int vlistIsInitialized = 0;
 #endif
 
 
-/* FIXME: implementation incomplete, fix once leaf nodes are complete */
 static int
 vlist_compare(vlist_t *a, vlist_t *b)
 {
   int diff;
-  diff = (a->nvars != b->nvars) || (a->ngrids != b->ngrids)
-    || (a->nzaxis != b->nzaxis) || (a->instID != b->instID)
-    || (a->modelID != b->modelID) || (a->tableID != b->tableID)
-    || (a->ntsteps != b->ntsteps);
+  diff = (a->nvars != b->nvars) | (a->ngrids != b->ngrids)
+    | (a->nzaxis != b->nzaxis) | (a->instID != b->instID)
+    | (a->modelID != b->modelID) | (a->tableID != b->tableID)
+    | (a->ntsteps != b->ntsteps) | (a->atts.nelems != b->atts.nelems);
+  int nvars = a->nvars;
+  for (int varID = 0; varID < nvars; ++varID)
+    diff |= vlistVarCompare(a, varID, b, varID);
+  int natts = a->atts.nelems;
+  for (int attID = 0; attID < natts; ++attID)
+    diff |= vlist_att_compare(a, CDI_GLOBAL, b, CDI_GLOBAL, attID);
   return diff;
 }
 

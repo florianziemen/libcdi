@@ -164,6 +164,9 @@ void    vlistDefVarValidrange(int vlistID, int varID, const double *validrange);
 /*      vlistInqVarValidrange: Get the valid range of a Variable */
 int     vlistInqVarValidrange(int vlistID, int varID, double *validrange);
 
+int vlist_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB,
+                      int attnum);
+
 #if  defined  (HAVE_LIBGRIB_API)
 extern int   cdiNAdditionalGRIBKeys;
 extern char* cdiAdditionalGRIBKeys[];

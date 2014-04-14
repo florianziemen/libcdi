@@ -473,6 +473,32 @@ vlistAttTypeLookup(cdi_att_t *attp)
   return type;
 }
 
+
+int vlist_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB,
+                      int attnum)
+{
+  cdi_atts_t *attspa = get_attsp(a, varIDA),
+    *attspb = get_attsp(b, varIDB);
+  if (attspa == NULL && attspb == NULL)
+    return 0;
+  xassert(attnum >= 0 && attnum < (int)attspa->nelems
+          && attnum < (int)attspb->nelems);
+  cdi_att_t *attpa = attspa->value + attnum,
+    *attpb = attspb->value + attnum;
+  size_t len;
+  if ((len = attpa->namesz) != attpb->namesz)
+    return 1;
+  int diff;
+  if ((diff = memcmp(attpa->name, attpb->name, len)))
+    return 1;
+  if (attpa->indtype != attpb->indtype
+      || attpa->exdtype != attpb->exdtype
+      || attpa->nelems != attpb->nelems)
+    return 1;
+  return memcmp(attpa->xvalue, attpb->xvalue, attpa->xsz);
+}
+
+
 static int
 vlistAttGetSize(vlist_t *vlistptr, int varID, int attnum, void *context)
 {

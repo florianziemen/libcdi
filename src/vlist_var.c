@@ -2116,6 +2116,51 @@ int vlistInqVarIOrank(int vlistID, int varID)
 }
 
 
+int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
+{
+  xassert(a && b
+          && varIDA >= 0 && varIDA < a->nvars
+          && varIDB >= 0 && varIDB < b->nvars);
+  var_t *pva = a->vars + varIDA, *pvb = b->vars + varIDB;
+#define FCMP(f) ((pva->f) != (pvb->f))
+#define FCMPSTR(fs) ((pva->fs) != (pvb->fs) && strcmp((pva->fs), (pvb->fs)))
+#define FCMP2(f) (namespaceResHDecode(pva->f).idx       \
+                  != namespaceResHDecode(pvb->f).idx)
+  int diff = FCMP(fvarID) | FCMP(mvarID) | FCMP(flag) | FCMP(param)
+    | FCMP(datatype) | FCMP(tsteptype) | FCMP(timave) | FCMP(timaccu)
+    | FCMP(chunktype) | FCMP(xyz) | FCMP2(gridID) | FCMP2(zaxisID)
+    | FCMP2(instID) | FCMP2(modelID) | FCMP2(tableID) | FCMP(missvalused)
+    | FCMP(missval) | FCMP(addoffset) | FCMP(scalefactor) | FCMPSTR(name)
+    | FCMPSTR(longname) | FCMPSTR(stdname) | FCMPSTR(units) | FCMPSTR(extra)
+    | FCMP(comptype) | FCMP(complevel) | FCMP(lvalidrange)
+    | FCMP(validrange[0]) | FCMP(validrange[1]);
+#undef FCMP
+#undef FCMP2
+  if ((diff |= ((pva->levinfo == NULL) ^ (pvb->levinfo == NULL))))
+    return 1;
+  if (pva->levinfo)
+    {
+      int zaxisID = pva->zaxisID;
+      int nlevs = zaxisInqSize(zaxisID);
+      diff |= (memcmp(pva->levinfo, pvb->levinfo, sizeof (levinfo_t) * nlevs)
+               != 0);
+      if (diff)
+        return 1;
+    }
+  int natts = a->vars[varIDA].atts.nelems;
+  if (natts != b->vars[varIDB].atts.nelems)
+    return 1;
+  for (int attID = 0; attID < natts; ++attID)
+    diff |= vlist_att_compare(a, varIDA, b, varIDB, attID);
+  if ((diff |= ((pva->ensdata == NULL) ^ (pvb->ensdata == NULL))))
+    return 1;
+  if (pva->ensdata)
+    diff = (memcmp(pva->ensdata, pvb->ensdata, sizeof (*(pva->ensdata)))) != 0;
+  return diff;
+}
+
+
+
 enum {
   vlistvar_nints = 20,
   vlistvar_ndbls = 3,
