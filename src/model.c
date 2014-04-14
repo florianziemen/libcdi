@@ -73,9 +73,6 @@ model_t *modelNewEntry ( void )
   return (modelptr);
 }
 
-
-int modelDef(int instID, int modelgribID, const char *name);
-
 void modelDefaultEntries ( void )
 {
   int instID, i;
