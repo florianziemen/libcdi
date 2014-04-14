@@ -87,8 +87,7 @@ vlist_t *vlist_to_pointer(int code)
 static
 void vlist_init_entry(vlist_t *vlistptr)
 {
-  vlistptr->self           = reshPut(vlistptr, &vlist_ops);
-
+  vlistptr->self           = CDI_UNDEFID;
   vlistptr->nvars          = 0;
   vlistptr->vars           = NULL;
   vlistptr->ngrids         = 0;
@@ -104,14 +103,17 @@ void vlist_init_entry(vlist_t *vlistptr)
 }
 
 static
-vlist_t *vlist_new_entry(void)
+vlist_t *vlist_new_entry(cdiResH resH)
 {
-  vlist_t *vlistptr;
-
-  vlistptr = (vlist_t *)xmalloc(sizeof(vlist_t));
-
+  vlist_t *vlistptr = xmalloc(sizeof(vlist_t));
   vlist_init_entry(vlistptr);
-
+  if (resH == CDI_UNDEFID)
+    vlistptr->self = reshPut(vlistptr, &vlist_ops);
+  else
+    {
+      vlistptr->self = resH;
+      reshReplace(resH, vlistptr, &vlist_ops);
+    }
   return (vlistptr);
 }
 
@@ -194,7 +196,7 @@ int vlistCreate(void)
 
   VLIST_INIT();
 
-  vlistptr = vlist_new_entry();
+  vlistptr = vlist_new_entry(CDI_UNDEFID);
 
   vlistID = vlistptr->self;
 
@@ -1735,21 +1737,23 @@ void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
     }
 }
 
-void vlistUnpack(char * buf, int size, int *position, int nspTarget, void *context)
+void vlistUnpack(char * buf, int size, int *position, int nspTarget,
+                 void *context, int force_id)
 {
-  int newvlist;
-  int varID, tempbuf[vlist_nints];
+  int tempbuf[vlist_nints];
   serializeUnpack(buf, size, position, tempbuf, vlist_nints, DATATYPE_INT, context);
-  newvlist = vlistCreate();
-  /* xassert(newvlist == tempbuf[0]); */
-  vlist_t *p = vlist_to_pointer(newvlist);
+  int targetID = namespaceAdaptKey(tempbuf[0], nspTarget);
+  vlist_t *p = vlist_new_entry(force_id?targetID:CDI_UNDEFID);
+  xassert(!force_id || p->self == targetID);
+  if (!force_id)
+    targetID = p->self;
   p->taxisID = namespaceAdaptKey(tempbuf[3], nspTarget);
   p->tableID = tempbuf[4];
   p->instID = namespaceAdaptKey(tempbuf[5], nspTarget);
   p->modelID = namespaceAdaptKey(tempbuf[6], nspTarget);
-  vlistAttsUnpack(newvlist, CDI_GLOBAL, buf, size, position, context);
-  for ( varID = 0; varID < tempbuf[1]; varID++ )
-    vlistVarUnpack(newvlist, buf, size, position, nspTarget, context);
+  vlistAttsUnpack(targetID, CDI_GLOBAL, buf, size, position, context);
+  for (int varID = 0; varID < tempbuf[1]; varID++ )
+    vlistVarUnpack(targetID, buf, size, position, nspTarget, context);
 }
 
 /*

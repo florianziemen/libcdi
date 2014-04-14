@@ -155,7 +155,8 @@ int      vlistHasTime(int vlistID);
 int      vlistDelAtts(int vlistID, int varID);
 int      vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2);
 
-void     vlistUnpack(char * buffer, int bufferSize, int * pos, int, void *context);
+void     vlistUnpack(char * buffer, int bufferSize, int * pos, int nspTarget,
+                     void *context, int force_id);
 
 /*      vlistDefVarValidrange: Define the valid range of a Variable */
 void    vlistDefVarValidrange(int vlistID, int varID, const double *validrange);

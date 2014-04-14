@@ -71,7 +71,7 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
 	  break;
 	case VLIST:
           vlistUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                      nspTarget, context);
+                      nspTarget, context, 1);
 	  break;
 	default:
 	  xabort ( "TOKEN MAPS NO VALID DATATYPE" );
