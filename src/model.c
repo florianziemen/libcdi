@@ -60,15 +60,24 @@ void modelDefaultValue ( model_t *modelptr )
   modelptr->name        = NULL;
 }
 
-static
-model_t *modelNewEntry ( void )
+static model_t *
+modelNewEntry(cdiResH resH, int instID, int modelgribID, const char *name)
 {
   model_t *modelptr;
 
   modelptr = (model_t *) xmalloc(sizeof(model_t));
   modelDefaultValue ( modelptr );
-  modelptr->self = reshPut (( void * ) modelptr, &modelOps );
+  if (resH == CDI_UNDEFID)
+    modelptr->self = reshPut(modelptr, &modelOps);
+  else
+    {
+      modelptr->self = resH;
+      reshReplace(resH, modelptr, &modelOps);
+    }
   modelptr->used = 1;
+  modelptr->instID = instID;
+  modelptr->modelgribID = modelgribID;
+  if ( name && *name ) modelptr->name = strdupx(name);
 
   return (modelptr);
 }
@@ -193,11 +202,7 @@ int modelDef(int instID, int modelgribID, const char *name)
 
   modelInit ();
 
-  modelptr = modelNewEntry();
-
-  modelptr->instID      = instID;
-  modelptr->modelgribID = modelgribID;
-  if ( name && *name ) modelptr->name = strdupx(name);
+  modelptr = modelNewEntry(CDI_UNDEFID, instID, modelgribID, name);
 
   return modelptr->self;
 }
@@ -308,24 +313,29 @@ static void modelPackP(void * modelptr, void * buf, int size, int *position, voi
 }
 
 int
-modelUnpack(void *buf, int size, int *position, int nspTarget, void *context)
+modelUnpack(void *buf, int size, int *position, int nspTarget, void *context,
+            int force_id)
 {
   int tempbuf[model_nints];
-  int modelID;
-  char *name = NULL;
+  char *name;
   serializeUnpack(buf, size, position, tempbuf, model_nints, DATATYPE_INT, context);
   if (tempbuf[3] != 0)
     {
       name = (char*) xmalloc(tempbuf[3]);
       serializeUnpack(buf, size, position, name, tempbuf[3], DATATYPE_TXT, context);
     }
-
-  modelID = modelDef( namespaceAdaptKey ( tempbuf[1], nspTarget ), tempbuf[2], name);
+  else
+    {
+      name = "";
+    }
+  int targetID = namespaceAdaptKey(tempbuf[0], nspTarget);
+  model_t *mp = modelNewEntry(force_id?targetID:CDI_UNDEFID,
+                              namespaceAdaptKey(tempbuf[1], nspTarget),
+                              tempbuf[2], name);
   if (tempbuf[3] != 0)
     free(name);
-  // FIXME: this should work, once all types are transferred
-  //assert(modelID == tempbuf[0]);
-  return modelID;
+  xassert(!force_id || (mp->self == namespaceAdaptKey(tempbuf[0], nspTarget)));
+  return mp->self;
 }
 
 /*
