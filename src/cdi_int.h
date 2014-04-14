@@ -296,7 +296,7 @@ int     stream_new_var(stream_t *streamptr, int gridID, int zaxisID);
 
 int     tstepsNewEntry(stream_t *streamptr);
 
-char   *strfiletype(int filetype);
+const char *strfiletype(int filetype);
 
 void    cdi_generate_vars(stream_t *streamptr);
 

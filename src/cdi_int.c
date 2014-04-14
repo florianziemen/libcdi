@@ -45,7 +45,7 @@ int   cdiPartabIntern = 1;
 
 double cdiDefaultMissval = -9.E33;
 
-char *Filetypes[] = {
+const char Filetypes[][9] = {
   "UNKNOWN",
   "GRIB",
   "GRIB2",
@@ -274,9 +274,9 @@ void cdiInitialize(void)
 }
 
 
-char *strfiletype(int filetype)
+const char *strfiletype(int filetype)
 {
-  char *name;
+  const char *name;
   int size = (int) (sizeof(Filetypes)/sizeof(char *));
 
   if ( filetype > 0 && filetype < size )
