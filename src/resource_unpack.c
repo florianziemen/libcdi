@@ -4,6 +4,7 @@
 
 #include "cdi.h"
 #include "dmemory.h"
+#include "grid.h"
 #include "institution.h"
 #include "model.h"
 #include "cdi_int.h"
@@ -14,11 +15,7 @@
 #include "taxis.h"
 #include "zaxis.h"
 
-extern void   gridUnpack ( char *, int, int *, int, void *context);
-
 /*****************************************************************************/
-
-
 
 void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
                          void *context)
@@ -44,7 +41,7 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
 	  break;
 	case GRID:
 	  gridUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                     nspTarget, context );
+                     nspTarget, context, 1);
 	  break;
 	case ZAXIS:
 	  zaxisUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,

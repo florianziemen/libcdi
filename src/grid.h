@@ -87,6 +87,11 @@ int gridGenerate(grid_t grid);
 
 void gridGetIndexList( int, int * );
 
+void
+gridUnpack(char * unpackBuffer, int unpackBufferSize,
+           int * unpackBufferPos, int nspTarget, void *context,
+           int force_id);
+
 #endif
 /*
  * Local Variables:

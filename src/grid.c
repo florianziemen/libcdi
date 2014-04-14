@@ -157,15 +157,18 @@ void grid_free(grid_t *gridptr)
   grid_init(gridptr);
 }
 
-static
-grid_t *gridNewEntry ( void )
+static grid_t *
+gridNewEntry(cdiResH resH)
 {
-  grid_t *gridptr;
-
-  gridptr = ( grid_t *) xmalloc ( sizeof ( grid_t ));
-  grid_init ( gridptr );
-  gridptr->self = reshPut (( void * ) gridptr, &gridOps );
-
+  grid_t *gridptr = xmalloc(sizeof (grid_t));
+  grid_init(gridptr);
+  if (resH == CDI_UNDEFID)
+    gridptr->self = reshPut(gridptr, &gridOps);
+  else
+    {
+      gridptr->self = resH;
+      reshReplace(resH, gridptr, &gridOps);
+    }
   return gridptr;
 }
 
@@ -395,7 +398,7 @@ int gridCreate(int gridtype, int size)
 
   gridInit();
 
-  gridptr = gridNewEntry();
+  gridptr = gridNewEntry(CDI_UNDEFID);
   if ( ! gridptr ) Error("No memory");
 
   gridID = gridptr->self;
@@ -4525,7 +4528,8 @@ gridGetPackSize(void * voidP, void *context)
 
 void
 gridUnpack(char * unpackBuffer, int unpackBufferSize,
-           int * unpackBufferPos, int nspTarget, void *context)
+           int * unpackBufferPos, int nspTarget, void *context,
+           int force_id)
 {
   grid_t * gridP;
   uint32_t d;
@@ -4534,8 +4538,6 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
 
   gridInit();
 
-  gridP = gridNewEntry();
-  xassert(gridP);
   {
     int intBuffer[gridNint];
     serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4544,7 +4546,10 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
                     &d, 1, DATATYPE_UINT32, context);
 
     xassert(cdiCheckSum(DATATYPE_INT, gridNint, intBuffer) == d);
-    xassert(namespaceAdaptKey(intBuffer[0], nspTarget) == gridP->self);
+    int targetID = namespaceAdaptKey(intBuffer[0], nspTarget);
+    gridP = gridNewEntry(force_id?targetID:CDI_UNDEFID);
+
+    xassert(!force_id || targetID == gridP->self);
 
     gridP->type          =   intBuffer[1];
     gridP->prec          =   intBuffer[2];
