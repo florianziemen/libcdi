@@ -12,11 +12,9 @@
 #include "serialize.h"
 #include "resource_unpack.h"
 #include "taxis.h"
+#include "zaxis.h"
 
 extern void   gridUnpack ( char *, int, int *, int, void *context);
-extern void  zaxisUnpack ( char *, int, int *, int, void *context);
-extern int streamNint;
-
 
 /*****************************************************************************/
 
@@ -50,7 +48,7 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
 	  break;
 	case ZAXIS:
 	  zaxisUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                      nspTarget, context);
+                      nspTarget, context, 1);
 	  break;
 	case TAXIS:
 	  taxisUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,

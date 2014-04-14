@@ -232,6 +232,19 @@ void listSizeExtend()
 
 /**************************************************************/
 
+static void
+reshPut_(int nsp, int entry, void *p, const resOps *ops)
+{
+  listElem_t *newListElem = resHList[nsp].resources + entry;
+  int next = newListElem->res.free.next;
+  if (next != -1)
+    resHList[nsp].resources[next].res.free.prev = -1;
+  resHList[nsp].freeHead = next;
+  newListElem->res.v.val = p;
+  newListElem->res.v.ops = ops;
+  newListElem->status = RESH_ASSIGNED;
+}
+
 int reshPut ( void *p, const resOps *ops )
 {
   xassert ( p && ops );
@@ -245,14 +258,7 @@ int reshPut ( void *p, const resOps *ops )
   if ( resHList[nsp].freeHead == -1) listSizeExtend();
   int entry = resHList[nsp].freeHead;
   cdiResH resH = namespaceIdxEncode2(nsp, entry);
-  listElem_t *newListElem = resHList[nsp].resources + entry;
-  int next = newListElem->res.free.next;
-  if (next != -1)
-    resHList[nsp].resources[next].res.free.prev = -1;
-  resHList[nsp].freeHead = next;
-  newListElem->res.v.val = p;
-  newListElem->res.v.ops = ops;
-  newListElem->status       = RESH_ASSIGNED;
+  reshPut_(nsp, entry, p, ops);
 
   LIST_UNLOCK();
 
@@ -260,6 +266,18 @@ int reshPut ( void *p, const resOps *ops )
 }
 
 /**************************************************************/
+
+static void
+reshRemove_(int nsp, int idx)
+{
+  int curFree = resHList[nsp].freeHead;
+  listElem_t *r = resHList[nsp].resources;
+  r[idx].res.free.next = curFree;
+  if (curFree != -1)
+    r[curFree].res.free.prev = idx;
+  r[idx].status = RESH_UNUSED;
+  resHList[nsp].freeHead = idx;
+}
 
 void reshRemove ( cdiResH resH, const resOps * ops )
 {
@@ -274,23 +292,39 @@ void reshRemove ( cdiResH resH, const resOps * ops )
 
   nspT = namespaceResHDecode ( resH );
 
-  xassert ( nspT.nsp == nsp &&
-            nspT.idx >= 0 &&
-            nspT.idx < resHList[nsp].size &&
-            resHList[nsp].resources[nspT.idx].res.v.ops &&
-            resHList[nsp].resources[nspT.idx].res.v.ops == ops );
+  xassert ( nspT.nsp == nsp
+            && nspT.idx >= 0
+            && nspT.idx < resHList[nsp].size
+            && resHList[nsp].resources[nspT.idx].status != RESH_UNUSED
+            && resHList[nsp].resources[nspT.idx].res.v.ops
+            && resHList[nsp].resources[nspT.idx].res.v.ops == ops );
 
-  int curFree = resHList[nsp].freeHead;
-  resHList[nsp].resources[nspT.idx].res.free.next = curFree;
-  if (curFree != -1)
-    resHList[nsp].resources[curFree].res.free.prev = nspT.idx;
-  resHList[nsp].resources[nspT.idx].status = RESH_UNUSED;
-  resHList[nsp].freeHead                   = nspT.idx;
+  reshRemove_(nsp, nspT.idx);
 
   LIST_UNLOCK();
 }
 
 /**************************************************************/
+
+void reshReplace(cdiResH resH, void *p, const resOps *ops)
+{
+  xassert(p && ops);
+  LIST_INIT(1);
+  LIST_LOCK();
+  int nsp = namespaceGetActive();
+  namespaceTuple_t nspT = namespaceResHDecode(resH);
+  while (resHList[nsp].size <= nspT.idx)
+    listSizeExtend();
+  listElem_t *q = resHList[nsp].resources + nspT.idx;
+  if (q->status != RESH_UNUSED)
+    {
+      q->res.v.ops->valDestroy(q->res.v.val);
+      reshRemove_(nsp, nspT.idx);
+    }
+  reshPut_(nsp, nspT.idx, p, ops);
+  LIST_UNLOCK();
+}
+
 
 static listElem_t *
 reshGetElem(const char *caller, cdiResH resH, const resOps *ops)

@@ -131,7 +131,7 @@ void zaxisDefaultValue ( zaxis_t *zaxisptr )
 
 
 static
-zaxis_t *zaxisNewEntry(void)
+zaxis_t *zaxisNewEntry(int id)
 {
   zaxis_t *zaxisptr;
 
@@ -139,7 +139,13 @@ zaxis_t *zaxisNewEntry(void)
 
   zaxisDefaultValue ( zaxisptr );
 
-  zaxisptr->self = reshPut (( void * ) zaxisptr, &zaxisOps );
+  if (id == CDI_UNDEFID)
+    zaxisptr->self = reshPut(zaxisptr, &zaxisOps);
+  else
+    {
+      zaxisptr->self = id;
+      reshReplace(id, zaxisptr, &zaxisOps);
+    }
 
   return (zaxisptr);
 }
@@ -180,6 +186,36 @@ void zaxisCheckPtr(const char *caller, int zaxisID, zaxis_t *zaxisptr)
 int zaxisSize(void)
 {
   return reshCountType ( &zaxisOps );
+}
+
+static int
+zaxisCreate_(int zaxistype, int size, int id)
+{
+  zaxis_t *zaxisptr = zaxisNewEntry(id);
+
+  zaxisptr->type = zaxistype;
+  zaxisptr->size = size;
+
+  if ( zaxistype >= CDI_NumZaxistype || zaxistype < 0 )
+    Error("Internal problem! zaxistype > CDI_MaxZaxistype");
+
+  int zaxisID = zaxisptr->self;
+  zaxisDefName(zaxisID, ZaxistypeEntry[zaxistype].name);
+  zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
+  zaxisDefUnits(zaxisID, ZaxistypeEntry[zaxistype].units);
+
+  if ( *ZaxistypeEntry[zaxistype].stdname )
+    strcpy(zaxisptr->stdname, ZaxistypeEntry[zaxistype].stdname);
+
+  zaxisptr->positive = ZaxistypeEntry[zaxistype].positive;
+
+  double *vals = (double *)xmalloc(size*sizeof(double));
+
+  for ( int ilev = 0; ilev < size; ilev++ )
+    vals[ilev] = 0.0;
+
+  zaxisptr->vals = vals;
+  return zaxisID;
 }
 
 
@@ -225,47 +261,15 @@ zaxisDefLevels(zaxisID, levs);
 */
 int zaxisCreate(int zaxistype, int size)
 {
-  int ilev;
-  int zaxisID;
-  double *vals;
-  zaxis_t *zaxisptr;
+  if ( CDI_Debug )
+    Message("zaxistype: %d size: %d ", zaxistype, size);
 
-  if ( CDI_Debug ) Message("zaxistype=%s  levels=%d", zaxisNamePtr(zaxistype), size);
-
-  if ( size < 0 ) Error("Negativ number of levels (%d) not allowed!", size);
-
-  zaxisInit();
-
-  zaxisptr = zaxisNewEntry();
-
-  zaxisID = zaxisptr->self;
-
-  zaxisptr->type = zaxistype;
-  zaxisptr->size = size;
-
-  if ( zaxistype >= CDI_NumZaxistype || zaxistype < 0)
-    Error("Internal problem! zaxistype not in [0,CDI_NumZaxistype)");
-
-  zaxisDefName(zaxisID, ZaxistypeEntry[zaxistype].name);
-  zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
-  zaxisDefUnits(zaxisID, ZaxistypeEntry[zaxistype].units);
-
-  if ( *ZaxistypeEntry[zaxistype].stdname )
-    strcpy(zaxisptr->stdname, ZaxistypeEntry[zaxistype].stdname);
-
-  zaxisptr->positive = ZaxistypeEntry[zaxistype].positive;
-
-  vals = (double *) malloc(size*sizeof(double));
-
-  for ( ilev = 0; ilev < size; ilev++ ) vals[ilev] = 0.0;
-
-  zaxisptr->vals = vals;
-
-  return (zaxisID);
+  zaxisInit ();
+  return zaxisCreate_(zaxistype, size, CDI_UNDEFID);
 }
 
 
-void zaxisDestroyKernel( zaxis_t * zaxisptr )
+static void zaxisDestroyKernel( zaxis_t * zaxisptr )
 {
   int id;
 
@@ -1690,7 +1694,8 @@ zaxisGetPackSize(void * voidP, void *context)
 
 void
 zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
-            int * unpackBufferPos, int nspTarget, void *context)
+            int * unpackBufferPos, int nspTarget, void *context,
+            int force_id)
 {
   zaxis_t * zaxisP;
   int intBuffer[zaxisNint], memberMask;
@@ -1704,12 +1709,11 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
   xassert(cdiCheckSum(DATATYPE_INT, zaxisNint, intBuffer) == d);
 
-  zaxisInit ();
+  zaxisInit();
 
-  zaxisP = zaxisNewEntry();
-  if ( ! zaxisP ) Error("No memory");
-
-  xassert(namespaceAdaptKey(intBuffer[0], nspTarget) == zaxisP->self);
+  zaxisP = zaxisNewEntry(force_id?
+                         namespaceAdaptKey(intBuffer[0], nspTarget)
+                         :CDI_UNDEFID);
 
   zaxisP->prec      = intBuffer[1];
   zaxisP->type      = intBuffer[2];

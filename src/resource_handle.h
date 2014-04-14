@@ -43,6 +43,7 @@ enum {
 void   reshListCreate(int namespaceID);
 void   reshListDestruct(int namespaceID);
 int    reshPut ( void *, const resOps * );
+void reshReplace(cdiResH resH, void *p, const resOps *ops);
 void   reshRemove ( cdiResH, const resOps * );
 
 int    reshCountType ( const resOps * );
