@@ -79,7 +79,8 @@ int modelDef(int instID, int modelgribID, const char *name);
 void modelDefaultEntries ( void )
 {
   int instID, i;
-  cdiResH resH[10];
+  enum { nDefModels = 10 };
+  cdiResH resH[nDefModels];
 
   instID  = institutInq(  0,   0, "ECMWF", NULL);
   /* (void)    modelDef(instID, 131, "ERA15"); */
@@ -106,7 +107,7 @@ void modelDefaultEntries ( void )
   instID  = institutInq(  0,   1, "NCEP", NULL);
   resH[9] = modelDef(instID,  80, "T62L28MRF");
 
-  for ( i = 0; i < 10 ; i++ )
+  for ( i = 0; i < nDefModels ; i++ )
     reshSetStatus(resH[i], &modelOps, RESH_PRE_ASSIGNED);
 }
 
