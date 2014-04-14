@@ -128,15 +128,19 @@ void taxisDefaultValue(taxis_t* taxisptr)
   taxisptr->climatology = FALSE;
 }
 
-static
-taxis_t *taxisNewEntry(void)
+static taxis_t *
+taxisNewEntry(cdiResH resH)
 {
-  taxis_t *taxisptr;
+  taxis_t *taxisptr = xmalloc(sizeof (taxis_t));
 
-  taxisptr = (taxis_t *) xmalloc ( sizeof ( taxis_t ));
-
-  taxisDefaultValue ( taxisptr );
-  taxisptr->self = reshPut (( void * ) taxisptr, &taxisOps );
+  taxisDefaultValue(taxisptr);
+  if (resH == CDI_UNDEFID)
+    taxisptr->self = reshPut(taxisptr, &taxisOps);
+  else
+    {
+      taxisptr->self = resH;
+      reshReplace(resH, taxisptr, &taxisOps);
+    }
 
   return (taxisptr);
 }
@@ -149,7 +153,7 @@ void taxisInit (void)
 
   if ( taxisInitialized ) return;
 
-  taxisInitialized = 1; 
+  taxisInitialized = 1;
 
   env = getenv("TAXIS_DEBUG");
   if ( env ) TAXIS_Debug = atoi(env);
@@ -216,7 +220,7 @@ int taxisCreate(int taxistype)
 
   taxisInit ();
 
-  taxisptr = taxisNewEntry();
+  taxisptr = taxisNewEntry(CDI_UNDEFID);
 
   taxisID = taxisptr->self;
   taxisptr->type = taxistype;
@@ -278,7 +282,7 @@ int taxisDuplicate(int taxisID1)
 
   taxisptr1 = ( taxis_t * ) reshGetVal ( taxisID1, &taxisOps );
 
-  taxisptr2 = taxisNewEntry();
+  taxisptr2 = taxisNewEntry(CDI_UNDEFID);
   if ( ! taxisptr2 ) Error("No memory");
 
   taxisID2 = taxisptr2->self;
@@ -1463,7 +1467,7 @@ taxisGetPackSize(void *p, void *context)
 
 int
 taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
-            int nspTarget, void *context, int checkForSameID)
+            int nspTarget, void *context, int force_id)
 {
   taxis_t * taxisP;
   int intBuffer[taxisNint];
@@ -1479,11 +1483,10 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
 
   taxisInit();
 
-  taxisP = taxisNewEntry();
-  if ( ! taxisP ) Error("No memory");
+  cdiResH targetID = namespaceAdaptKey(intBuffer[idx++], nspTarget);
+  taxisP = taxisNewEntry(force_id?targetID:CDI_UNDEFID);
 
-  xassert(!checkForSameID
-          || namespaceAdaptKey(intBuffer[idx++], nspTarget) == taxisP->self);
+  xassert(!force_id || targetID == taxisP->self);
 
   taxisP->used        = intBuffer[idx++];
   taxisP->type        = intBuffer[idx++];
