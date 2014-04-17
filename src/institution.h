@@ -2,7 +2,7 @@
 #define INSTITUTION_H
 
 int
-instituteUnpack(void *buf, int size, int *position, int nspTarget,
+instituteUnpack(void *buf, int size, int *position, int originNamespace,
                 void *context, int force_id);
 
 void instituteDefaultEntries(void);

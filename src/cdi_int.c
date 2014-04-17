@@ -747,7 +747,7 @@ streamPack(void * streamptr, void * packBuffer, int packBufferSize,
 
 struct streamAssoc
 streamUnpack(char * unpackBuffer, int unpackBufferSize,
-             int * unpackBufferPos, int nspTarget, void *context)
+             int * unpackBufferPos, int originNamespace, void *context)
 {
   int intBuffer[streamNint], streamID;
   uint32_t d;
@@ -768,7 +768,7 @@ streamUnpack(char * unpackBuffer, int unpackBufferSize,
   xassert(d == cdiCheckSum(DATATYPE_TXT, intBuffer[2], filename));
   streamID = streamOpenWrite ( filename, intBuffer[1] );
   xassert ( streamID >= 0 &&
-            namespaceAdaptKey ( intBuffer[0], nspTarget ) == streamID );
+            namespaceAdaptKey ( intBuffer[0], originNamespace ) == streamID );
   streamDefByteorder(streamID, intBuffer[5]);
   streamDefCompType(streamID, intBuffer[6]);
   streamDefCompLevel(streamID, intBuffer[7]);

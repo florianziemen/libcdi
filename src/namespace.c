@@ -267,17 +267,17 @@ int namespaceGetActive ()
   return activeNamespace;
 }
 
-int namespaceAdaptKey ( int key, int nspTarget )
+int namespaceAdaptKey ( int originResH, int originNamespace )
 {
   namespaceTuple_t tin;
   int nsp;
 
-  if ( key == CDI_UNDEFID ) return CDI_UNDEFID;
+  if ( originResH == CDI_UNDEFID ) return CDI_UNDEFID;
 
-  tin.idx = key & idxmask;
-  tin.nsp = (int)(((unsigned)( key & nspmask )) >> idxbits);
+  tin.idx = originResH & idxmask;
+  tin.nsp = (int)(((unsigned)( originResH & nspmask )) >> idxbits);
 
-  xassert ( tin.nsp == nspTarget );
+  xassert ( tin.nsp == originNamespace );
 
   nsp = namespaceGetActive ();
 
@@ -285,15 +285,15 @@ int namespaceAdaptKey ( int key, int nspTarget )
 }
 
 
-int namespaceAdaptKey2 ( int key )
+int namespaceAdaptKey2 ( int originResH )
 {
   namespaceTuple_t tin;
   int nsp;
 
-  if ( key == CDI_UNDEFID ) return CDI_UNDEFID;
+  if ( originResH == CDI_UNDEFID ) return CDI_UNDEFID;
 
-  tin.idx = key & idxmask;
-  tin.nsp = (int)(((unsigned)( key & nspmask )) >> idxbits);
+  tin.idx = originResH & idxmask;
+  tin.nsp = (int)(((unsigned)( originResH & nspmask )) >> idxbits);
 
   nsp = namespaceGetActive ();
 

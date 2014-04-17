@@ -340,7 +340,7 @@ static void institutePackP(void * instituteptr, void *buf, int size, int *positi
   serializePack(p->longname, tempbuf[4], DATATYPE_TXT, buf, size, position, context);
 }
 
-int instituteUnpack(void *buf, int size, int *position, int nspTarget,
+int instituteUnpack(void *buf, int size, int *position, int originNamespace,
                     void *context, int force_id)
 {
   int tempbuf[institute_nints];
@@ -351,7 +351,7 @@ int instituteUnpack(void *buf, int size, int *position, int nspTarget,
   longname = name + tempbuf[3];
   serializeUnpack(buf, size, position, name, tempbuf[3], DATATYPE_TXT, context);
   serializeUnpack(buf, size, position, longname, tempbuf[4], DATATYPE_TXT, context);
-  int targetID = namespaceAdaptKey(tempbuf[0], nspTarget);
+  int targetID = namespaceAdaptKey(tempbuf[0], originNamespace);
   institute_t *ip = instituteNewEntry(force_id?targetID:CDI_UNDEFID,
                                       tempbuf[1], tempbuf[2], name, longname);
   instituteID = ip->self;

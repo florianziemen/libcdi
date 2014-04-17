@@ -89,7 +89,7 @@ void gridGetIndexList( int, int * );
 
 void
 gridUnpack(char * unpackBuffer, int unpackBufferSize,
-           int * unpackBufferPos, int nspTarget, void *context,
+           int * unpackBufferPos, int originNamespace, void *context,
            int force_id);
 
 #endif

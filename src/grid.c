@@ -4528,7 +4528,7 @@ gridGetPackSize(void * voidP, void *context)
 
 void
 gridUnpack(char * unpackBuffer, int unpackBufferSize,
-           int * unpackBufferPos, int nspTarget, void *context,
+           int * unpackBufferPos, int originNamespace, void *context,
            int force_id)
 {
   grid_t * gridP;
@@ -4546,7 +4546,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
                     &d, 1, DATATYPE_UINT32, context);
 
     xassert(cdiCheckSum(DATATYPE_INT, gridNint, intBuffer) == d);
-    int targetID = namespaceAdaptKey(intBuffer[0], nspTarget);
+    int targetID = namespaceAdaptKey(intBuffer[0], originNamespace);
     gridP = gridNewEntry(force_id?targetID:CDI_UNDEFID);
 
     xassert(!force_id || targetID == gridP->self);

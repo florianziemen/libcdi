@@ -1742,23 +1742,23 @@ void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
     }
 }
 
-void vlistUnpack(char * buf, int size, int *position, int nspTarget,
+void vlistUnpack(char * buf, int size, int *position, int originNamespace,
                  void *context, int force_id)
 {
   int tempbuf[vlist_nints];
   serializeUnpack(buf, size, position, tempbuf, vlist_nints, DATATYPE_INT, context);
-  int targetID = namespaceAdaptKey(tempbuf[0], nspTarget);
+  int targetID = namespaceAdaptKey(tempbuf[0], originNamespace);
   vlist_t *p = vlist_new_entry(force_id?targetID:CDI_UNDEFID);
   xassert(!force_id || p->self == targetID);
   if (!force_id)
     targetID = p->self;
-  p->taxisID = namespaceAdaptKey(tempbuf[3], nspTarget);
+  p->taxisID = namespaceAdaptKey(tempbuf[3], originNamespace);
   p->tableID = tempbuf[4];
-  p->instID = namespaceAdaptKey(tempbuf[5], nspTarget);
-  p->modelID = namespaceAdaptKey(tempbuf[6], nspTarget);
+  p->instID = namespaceAdaptKey(tempbuf[5], originNamespace);
+  p->modelID = namespaceAdaptKey(tempbuf[6], originNamespace);
   vlistAttsUnpack(targetID, CDI_GLOBAL, buf, size, position, context);
   for (int varID = 0; varID < tempbuf[1]; varID++ )
-    vlistVarUnpack(targetID, buf, size, position, nspTarget, context);
+    vlistVarUnpack(targetID, buf, size, position, originNamespace, context);
 }
 
 /*

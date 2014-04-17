@@ -44,8 +44,8 @@ extern const resOps taxisOps;
 #endif
 
 int
-taxisUnpack(char* unpackBuffer, int unpackBufferSize, int* unpackBufferPos,
-            int nspTarget, void* context, int checkForSameID);
+taxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos,
+            int originNamespace, void *context, int checkForSameID);
 
 #endif  /* _TAXIS_H */
 /*

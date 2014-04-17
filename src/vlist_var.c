@@ -2255,7 +2255,7 @@ imax(int a, int b)
 
 
 void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
-		    int nspTarget, void *context)
+		    int originNamespace, void *context)
 {
   double dtempbuf[vlistvar_ndbls];
   int tempbuf[vlistvar_nints];
@@ -2268,8 +2268,8 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
                   dtempbuf, vlistvar_ndbls, DATATYPE_FLT64, context);
 
   newvar = vlistDefVar ( vlistID,
-			 namespaceAdaptKey ( tempbuf[1], nspTarget ),
-			 namespaceAdaptKey ( tempbuf[2], nspTarget ),
+			 namespaceAdaptKey ( tempbuf[1], originNamespace ),
+			 namespaceAdaptKey ( tempbuf[2], originNamespace ),
 			 tempbuf[3]);
   if (tempbuf[4] || tempbuf[5] || tempbuf[6] || tempbuf[7])
     varname = (char*) xmalloc(imax(imax(imax(tempbuf[4],tempbuf[5]),tempbuf[6]),
@@ -2305,9 +2305,9 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   if ( varname ) free ( varname );
   vlistDefVarDatatype(vlistID, newvar, tempbuf[8]);
   vlistDefVarInstitut ( vlistID, newvar,
-			namespaceAdaptKey ( tempbuf[10], nspTarget ));
+			namespaceAdaptKey ( tempbuf[10], originNamespace ));
   vlistDefVarModel ( vlistID, newvar,
-		     namespaceAdaptKey ( tempbuf[11], nspTarget ));
+		     namespaceAdaptKey ( tempbuf[11], originNamespace ));
   vlistDefVarTable(vlistID, newvar, tempbuf[12]);
   /* FIXME: changing the table might change the param code */
   vlistDefVarParam(vlistID, newvar, tempbuf[9]);

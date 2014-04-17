@@ -1467,7 +1467,7 @@ taxisGetPackSize(void *p, void *context)
 
 int
 taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
-            int nspTarget, void *context, int force_id)
+            int originNamespace, void *context, int force_id)
 {
   taxis_t * taxisP;
   int intBuffer[taxisNint];
@@ -1483,7 +1483,7 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
 
   taxisInit();
 
-  cdiResH targetID = namespaceAdaptKey(intBuffer[idx++], nspTarget);
+  cdiResH targetID = namespaceAdaptKey(intBuffer[idx++], originNamespace);
   taxisP = taxisNewEntry(force_id?targetID:CDI_UNDEFID);
 
   xassert(!force_id || targetID == taxisP->self);

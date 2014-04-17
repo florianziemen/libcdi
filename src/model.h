@@ -3,7 +3,7 @@
 
 int
 modelUnpack(void *buf, int size, int *position,
-            int nspTarget, void *context, int force_id);
+            int originNamespace, void *context, int force_id);
 
 void modelDefaultEntries(void);
 

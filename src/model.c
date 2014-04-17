@@ -313,7 +313,7 @@ static void modelPackP(void * modelptr, void * buf, int size, int *position, voi
 }
 
 int
-modelUnpack(void *buf, int size, int *position, int nspTarget, void *context,
+modelUnpack(void *buf, int size, int *position, int originNamespace, void *context,
             int force_id)
 {
   int tempbuf[model_nints];
@@ -328,13 +328,14 @@ modelUnpack(void *buf, int size, int *position, int nspTarget, void *context,
     {
       name = "";
     }
-  int targetID = namespaceAdaptKey(tempbuf[0], nspTarget);
+  int targetID = namespaceAdaptKey(tempbuf[0], originNamespace);
   model_t *mp = modelNewEntry(force_id?targetID:CDI_UNDEFID,
-                              namespaceAdaptKey(tempbuf[1], nspTarget),
+                              namespaceAdaptKey(tempbuf[1], originNamespace),
                               tempbuf[2], name);
   if (tempbuf[3] != 0)
     free(name);
-  xassert(!force_id || (mp->self == namespaceAdaptKey(tempbuf[0], nspTarget)));
+  xassert(!force_id
+          || (mp->self == namespaceAdaptKey(tempbuf[0], originNamespace)));
   return mp->self;
 }
 

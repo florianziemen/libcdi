@@ -236,14 +236,14 @@ readFuncCall(struct winHeaderEntry *header)
       {
         MPI_Comm commCalc = commInqCommCalc ();
         int streamID = funcArgs->streamNewTimestep.streamID;
-        int nspTarget = namespaceResHDecode(streamID).nsp;
+        int originNamespace = namespaceResHDecode(streamID).nsp;
         streamID = namespaceAdaptKey2(streamID);
         int oldTaxisID
           = vlistInqTaxis(streamInqVlist(streamID));
         int position = header->offset;
         int changedTaxisID
           = taxisUnpack((char *)rxWin[root].buffer, (int)rxWin[root].size,
-                        &position, nspTarget, &commCalc, 0);
+                        &position, originNamespace, &commCalc, 0);
         taxis_t *oldTaxisPtr = taxisPtr(oldTaxisID);
         taxis_t *changedTaxisPtr = taxisPtr(changedTaxisID);
         ptaxisCopy(oldTaxisPtr, changedTaxisPtr);

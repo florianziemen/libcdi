@@ -347,7 +347,7 @@ struct streamAssoc
 
 struct streamAssoc
 streamUnpack(char * unpackBuffer, int unpackBufferSize,
-             int * unpackBufferPos, int nspTarget, void *context);
+             int * unpackBufferPos, int originNamespace, void *context);
 
 int
 cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,

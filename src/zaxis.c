@@ -1694,7 +1694,7 @@ zaxisGetPackSize(void * voidP, void *context)
 
 void
 zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
-            int * unpackBufferPos, int nspTarget, void *context,
+            int * unpackBufferPos, int originNamespace, void *context,
             int force_id)
 {
   zaxis_t * zaxisP;
@@ -1712,7 +1712,7 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
   zaxisInit();
 
   zaxisP = zaxisNewEntry(force_id?
-                         namespaceAdaptKey(intBuffer[0], nspTarget)
+                         namespaceAdaptKey(intBuffer[0], originNamespace)
                          :CDI_UNDEFID);
 
   zaxisP->prec      = intBuffer[1];
