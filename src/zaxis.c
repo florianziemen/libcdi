@@ -86,7 +86,7 @@ typedef struct {
 }
 zaxis_t;
 
-static int    zaxisCompareP    ( void * zaxisptr1, void * zaxisptr2 );
+static int zaxisCompareP(zaxis_t *z1, zaxis_t *z2);
 static void   zaxisDestroyP    ( void * zaxisptr );
 static void   zaxisPrintP      ( void * zaxisptr, FILE * fp );
 static int    zaxisGetPackSize ( void * zaxisptr, void *context);
@@ -94,7 +94,7 @@ static void   zaxisPack        ( void * zaxisptr, void * buffer, int size, int *
 static int    zaxisTxCode      ( void );
 
 static const resOps zaxisOps = {
-  zaxisCompareP,
+  (int (*)(void *, void *))zaxisCompareP,
   zaxisDestroyP,
   zaxisPrintP,
   zaxisGetPackSize,
@@ -1528,10 +1528,8 @@ void zaxisPrintP ( void * voidptr, FILE * fp )
 
 
 static int
-zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
+zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
 {
-  zaxis_t * z1 = ( zaxis_t * ) zaxisptr1 ;
-  zaxis_t * z2 = ( zaxis_t * ) zaxisptr2 ;
   enum {
     differ = -1,
   };
