@@ -40,7 +40,7 @@ char *Timeunits[] = {
 
 static int    taxisCompareP    ( void * taxisptr1, void * taxisptr2 );
 static void   taxisDestroyP    ( void * taxisptr );
-static void   taxisPrintP      ( void * taxisptr, FILE * fp );
+static void   taxisPrintKernel(taxis_t *taxisptr, FILE * fp);
 static int    taxisGetPackSize ( void * taxisptr, void *context );
 static void   taxisPack        ( void * taxisptr, void *buf, int size,
 				 int *position, void *context );
@@ -49,7 +49,7 @@ static int    taxisTxCode      ( void );
 const resOps taxisOps = {
   taxisCompareP,
   taxisDestroyP,
-  taxisPrintP,
+  (void (*)(void *, FILE *))taxisPrintKernel,
   taxisGetPackSize,
   taxisPack,
   taxisTxCode
@@ -1365,7 +1365,8 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
 }
 
 
-void taxisPrintKernel ( taxis_t * taxisptr, FILE * fp )
+static void
+taxisPrintKernel(taxis_t * taxisptr, FILE * fp)
 {
   int vdate_lb, vdate_ub;
   int vtime_lb, vtime_ub;
@@ -1407,12 +1408,8 @@ void taxisPrint ( int taxisID )
   taxisPrintKernel ( taxisptr, stdout );
 }
 
-void taxisPrintP ( void * taxisptr, FILE * fp )
-{
-  taxisPrintKernel (( taxis_t * ) taxisptr, fp );
-}
-
-int taxisCompareP ( void *  taxisptr1, void * taxisptr2 )
+static int
+taxisCompareP(void *taxisptr1, void *taxisptr2)
 {
   taxis_t * t1, * t2;
 
