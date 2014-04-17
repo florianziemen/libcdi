@@ -1527,100 +1527,88 @@ void zaxisPrintP ( void * voidptr, FILE * fp )
 }
 
 
-static
-int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
+static int
+zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
 {
   zaxis_t * z1 = ( zaxis_t * ) zaxisptr1 ;
   zaxis_t * z2 = ( zaxis_t * ) zaxisptr2 ;
   enum {
     differ = -1,
-    equal  =  0,
   };
-  int i;
+  int diff = 0;
+  xassert(z1 && z2);
 
-  xassert ( z1 );
-  xassert ( z2 );
+  diff |= (z1->type != z2->type)
+    | (z1->ltype != z2->ltype)
+    | (z1->direction != z2->direction)
+    | (z1->prec != z2->prec)
+    | (z1->size != z2->size)
+    | (z1->vctsize != z2->vctsize)
+    | (z1->positive != z2->positive);
 
-  if ( z1->type      != z2->type )      return differ;
-  if ( z1->ltype     != z2->ltype )     return differ;
-  if ( z1->direction != z2->direction ) return differ;
-  if ( z1->prec      != z2->prec )      return differ;
-  if ( z1->size      != z2->size )      return differ;
-  if ( z1->vctsize   != z2->vctsize )   return differ;
-
-  if ( z1->vals )
+  if (diff)
+    return differ;
+  int size = z1->size;
+  int anyPresent = 0;
+  int present = (z1->vals != NULL);
+  diff |= (present ^ (z2->vals != NULL));
+  anyPresent |= present;
+  if (!diff && present)
     {
-      xassert ( z1->size );
-
-      if ( !z2->vals ) return differ;
-
-      for ( i = 0; i < z1->size; i++ )
-        if ( IS_NOT_EQUAL(z1->vals[i], z2->vals[i]) ) return differ;
+      double *p = z1->vals, *q = z2->vals;
+      for (int i = 0; i < size; i++)
+        diff |= IS_NOT_EQUAL(p[i], q[i]);
     }
-  else if ( z2->vals )
-    return differ;
 
-  if ( z1->lbounds )
+  present = (z1->lbounds != NULL);
+  diff |= (present ^ (z2->lbounds != NULL));
+  anyPresent |= present;
+  if (!diff && present)
     {
-      xassert ( z1->size );
-
-      if ( !z2->lbounds ) return differ;
-
-      for ( i = 0; i < z1->size; i++ )
-        if ( IS_NOT_EQUAL(z1->lbounds[i], z2->lbounds[i]) ) return differ;
+      double *p = z1->lbounds, *q = z2->lbounds;
+      for (int i = 0; i < size; i++)
+        diff |= IS_NOT_EQUAL(p[i], q[i]);
     }
-  else if ( z2->lbounds )
-    return differ;
 
-  if ( z1->ubounds )
+  present = (z1->ubounds != NULL);
+  diff |= (present ^ (z2->ubounds != NULL));
+  anyPresent |= present;
+  if (!diff && present)
     {
-      xassert ( z1->size );
-
-      if ( !z2->ubounds ) return differ;
-
-      for ( i = 0; i < z1->size; i++ )
-        if ( IS_NOT_EQUAL(z1->ubounds[i], z2->ubounds[i]) ) return differ;
+      double *p = z1->ubounds, *q = z2->ubounds;
+      for (int i = 0; i < size; ++i)
+        diff |= IS_NOT_EQUAL(p[i], q[i]);
     }
-  else if ( z2->ubounds )
-    return differ;
 
-  if ( z1->weights )
+  present = (z1->weights != NULL);
+  diff |= (present ^ (z2->weights != NULL));
+  anyPresent |= present;
+  if (!diff && present)
     {
-      xassert ( z1->size );
-
-      if ( !z2->weights ) return differ;
-
-      for ( i = 0; i < z1->size; i++ )
-        if ( IS_NOT_EQUAL(z1->weights[i], z2->weights[i]) ) return differ;
+      double *p = z1->weights, *q = z2->weights;
+      for (int i = 0; i < size; ++i)
+        diff |= IS_NOT_EQUAL(p[i], q[i]);
     }
-  else if ( z2->weights )
-    return differ;
 
- if ( z1->vct )
+  present = (z1->vct != NULL);
+  diff |= (present ^ (z2->vct != NULL));
+  if (!diff && present)
     {
-      xassert ( z1->vctsize );
-
-      if ( !z2->vct ) return differ;
-
-      for ( i = 0; i < z1->vctsize; i++ )
-        if ( IS_NOT_EQUAL(z1->vct[i], z2->vct[i]) ) return differ;
+      int vctsize = z1->vctsize;
+      xassert(vctsize);
+      double *p = z1->vct, *q = z2->vct;
+      for (int i = 0; i < vctsize; ++i)
+        diff |= IS_NOT_EQUAL(p[i], q[i]);
     }
-  else if ( z2->vct )
-    return differ;
 
-  if ( memcmp ( &z1->name    , &z2->name    , CDI_MAX_NAME ))
-    return differ;
-  if ( memcmp ( &z1->longname, &z2->longname, CDI_MAX_NAME ))
-    return differ;
-  if ( memcmp ( &z1->stdname , &z2->stdname , CDI_MAX_NAME ))
-    return differ;
-  if ( memcmp ( &z1->units   , &z2->units   , CDI_MAX_NAME ))
-    return differ;
+  if (anyPresent)
+    xassert(size);
 
-  if ( z1->positive != z2->positive ) return differ;
-
-
-  return equal;
+  diff |= strcmp(z1->name, z2->name)
+    | strcmp(z1->longname, z2->longname)
+    | strcmp(z1->stdname, z2->stdname)
+    | strcmp(z1->units, z2->units);
+  return diff;
 }
 
 
