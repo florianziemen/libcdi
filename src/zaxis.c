@@ -1532,8 +1532,10 @@ int  zaxisCompareP ( void * zaxisptr1, void * zaxisptr2 )
 {
   zaxis_t * z1 = ( zaxis_t * ) zaxisptr1 ;
   zaxis_t * z2 = ( zaxis_t * ) zaxisptr2 ;
-  static int differ = -1;
-  static int equal  =  0;
+  enum {
+    differ = -1,
+    equal  =  0,
+  };
   int i;
 
   xassert ( z1 );
