@@ -3316,7 +3316,7 @@ int gridInqXbounds(int gridID, double *xbounds)
 }
 
 
-double *gridInqXboundsPtr(int gridID)
+const double *gridInqXboundsPtr(int gridID)
 {
   grid_t *gridptr;
 
@@ -3431,7 +3431,7 @@ int gridInqYbounds(int gridID, double *ybounds)
 }
 
 
-double *gridInqYboundsPtr(int gridID)
+const double *gridInqYboundsPtr(int gridID)
 {
   grid_t *gridptr;
 

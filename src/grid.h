@@ -78,8 +78,8 @@ int gridSize(void);
 const double *gridInqXvalsPtr(int gridID);
 const double *gridInqYvalsPtr(int gridID);
 
-double *gridInqXboundsPtr(int gridID);
-double *gridInqYboundsPtr(int gridID);
+const double *gridInqXboundsPtr(int gridID);
+const double *gridInqYboundsPtr(int gridID);
 const double *gridInqAreaPtr(int gridID);
 
 int gridCompare(int gridID, grid_t grid);
