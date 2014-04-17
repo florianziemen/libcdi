@@ -35,7 +35,7 @@ institute_t;
 static int instituteCompareKernel(institute_t *ip1, institute_t *ip2);
 static void instituteDestroyP(institute_t *instituteptr);
 static void   institutePrintP(institute_t *instituteptr, FILE * fp);
-static int    instituteGetSizeP ( void * instituteptr, void *context );
+static int instituteGetPackSize(institute_t *instituteptr, void *context);
 static void   institutePackP    ( void * instituteptr, void *buf, int size, int *position, void *context );
 static int    instituteTxCode   ( void );
 
@@ -43,7 +43,7 @@ static const resOps instituteOps = {
   (int (*)(void *, void *))instituteCompareKernel,
   (void (*)(void *))instituteDestroyP,
   (void (*)(void *, FILE *))institutePrintP,
-  instituteGetSizeP,
+  (int (*)(void *, void *))instituteGetPackSize,
   institutePackP,
   instituteTxCode
 };
@@ -302,12 +302,11 @@ enum {
   institute_nints = 5,
 };
 
-static int instituteGetSizeP ( void * instituteptr, void *context)
+static int instituteGetPackSize(institute_t *ip, void *context)
 {
-  institute_t *p = (institute_t*) instituteptr;
   int txsize = serializeGetSize(institute_nints, DATATYPE_INT, context)
-    + serializeGetSize(strlen(p->name) + 1, DATATYPE_TXT, context)
-    + serializeGetSize(strlen(p->longname) + 1, DATATYPE_TXT, context);
+    + serializeGetSize(strlen(ip->name) + 1, DATATYPE_TXT, context)
+    + serializeGetSize(strlen(ip->longname) + 1, DATATYPE_TXT, context);
   return txsize;
 }
 
