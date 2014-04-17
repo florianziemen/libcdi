@@ -32,17 +32,17 @@ typedef struct
 institute_t;
 
 
-static int    instituteCompareP ( void * instituteptr1, void * instituteptr2 );
-static void   instituteDestroyP ( void * instituteptr );
-static void   institutePrintP   ( void * instituteptr, FILE * fp );
+static int instituteCompareKernel(institute_t *ip1, institute_t *ip2);
+static void instituteDestroyP(institute_t *instituteptr);
+static void   institutePrintP(institute_t *instituteptr, FILE * fp);
 static int    instituteGetSizeP ( void * instituteptr, void *context );
 static void   institutePackP    ( void * instituteptr, void *buf, int size, int *position, void *context );
 static int    instituteTxCode   ( void );
 
 static const resOps instituteOps = {
-  instituteCompareP,
-  instituteDestroyP,
-  institutePrintP,
+  (int (*)(void *, void *))instituteCompareKernel,
+  (void (*)(void *))instituteDestroyP,
+  (void (*)(void *, FILE *))institutePrintP,
   instituteGetSizeP,
   institutePackP,
   instituteTxCode
@@ -90,7 +90,8 @@ int instituteCount ( void )
 }
 
 
-int instituteCompareKernel ( institute_t *  ip1, institute_t * ip2 )
+static int
+instituteCompareKernel(institute_t *  ip1, institute_t * ip2)
 {
   int differ = 0;
   size_t len1, len2;
@@ -128,19 +129,6 @@ int instituteCompareKernel ( institute_t *  ip1, institute_t * ip2 )
   return differ;
 }
 
-
-static int instituteCompareP ( void *  instituteptr1, void * instituteptr2 )
-{
-  institute_t * i1, * i2;
-
-  i1 = ( institute_t * ) instituteptr1;
-  i2 = ( institute_t * ) instituteptr2;
-
-  xassert(i1);
-  xassert(i2);
-
-  return instituteCompareKernel ( i1, i2 );
-}
 
 struct instLoc
 {
@@ -273,37 +261,34 @@ int institutInqNumber(void)
 }
 
 
-void instituteDestroyP ( void * instituteptr )
+static void
+instituteDestroyP(institute_t *instituteptr)
 {
-  int id;
-  institute_t * i1 = ( institute_t * ) instituteptr;
+  xassert(instituteptr);
 
-  xassert ( i1 );
-
-  id = i1->self;
-
-  free(i1->name);
-  free(i1->longname);
-  reshRemove ( id, &instituteOps );
+  int instituteID = instituteptr->self;
+  free(instituteptr->name);
+  free(instituteptr->longname);
+  reshRemove(instituteID, &instituteOps);
   free(instituteptr);
 }
 
 
-void institutePrintP   ( void * instituteptr, FILE * fp )
+static void institutePrintP(institute_t *ip, FILE * fp )
 {
-  institute_t * ip = ( institute_t * ) instituteptr;
-
-  if ( !ip ) return;
-
-  fprintf ( fp, "#\n");
-  fprintf ( fp, "# instituteID %d\n", ip->self);
-  fprintf ( fp, "#\n");
-  fprintf ( fp, "self          = %d\n", ip->self );
-  fprintf ( fp, "used          = %d\n", ip->used );
-  fprintf ( fp, "center        = %d\n", ip->center );
-  fprintf ( fp, "subcenter     = %d\n", ip->subcenter );
-  fprintf ( fp, "name          = %s\n", ip->name ? ip->name : "NN" );
-  fprintf ( fp, "longname      = %s\n", ip->longname ? ip->longname : "NN" );
+  if (ip)
+    fprintf(fp, "#\n"
+            "# instituteID %d\n"
+            "#\n"
+            "self          = %d\n"
+            "used          = %d\n"
+            "center        = %d\n"
+            "subcenter     = %d\n"
+            "name          = %s\n"
+            "longname      = %s\n",
+            ip->self, ip->self, ip->used, ip->center, ip->subcenter,
+            ip->name ? ip->name : "NN",
+            ip->longname ? ip->longname : "NN");
 }
 
 
