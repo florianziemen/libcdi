@@ -207,12 +207,11 @@ zaxisCreate_(int zaxistype, int size, int id)
 
   zaxisptr->positive = ZaxistypeEntry[zaxistype].positive;
 
-  double *vals = (double *)xmalloc(size*sizeof(double));
+  double *vals = zaxisptr->vals = (double *)xmalloc(size*sizeof(double));
 
   for ( int ilev = 0; ilev < size; ilev++ )
     vals[ilev] = 0.0;
 
-  zaxisptr->vals = vals;
   return zaxisID;
 }
 
