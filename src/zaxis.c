@@ -355,7 +355,10 @@ void zaxisDefName(int zaxisID, const char *name)
   zaxis_check_ptr(zaxisID, zaxisptr);
 
   if ( name )
-    strcpy(zaxisptr->name, name);
+    {
+      strncpy(zaxisptr->name, name, CDI_MAX_NAME - 1);
+      zaxisptr->name[CDI_MAX_NAME - 1] = '\0';
+    }
 }
 
 /*
@@ -387,7 +390,10 @@ void zaxisDefLongname(int zaxisID, const char *longname)
   zaxis_check_ptr(zaxisID, zaxisptr);
 
   if ( longname )
-    strcpy(zaxisptr->longname, longname);
+    {
+      strncpy(zaxisptr->longname, longname, CDI_MAX_NAME - 1);
+      zaxisptr->longname[CDI_MAX_NAME - 1] = '\0';
+    }
 }
 
 /*
@@ -419,7 +425,10 @@ void zaxisDefUnits(int zaxisID, const char *units)
   zaxis_check_ptr(zaxisID, zaxisptr);
 
   if ( units )
-    strcpy(zaxisptr->units, units);
+    {
+      strncpy(zaxisptr->units, units, CDI_MAX_NAME - 1);
+      zaxisptr->units[CDI_MAX_NAME - 1] = '\0';
+    }
 }
 
 /*
