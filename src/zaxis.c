@@ -1685,7 +1685,6 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
             int * unpackBufferPos, int originNamespace, void *context,
             int force_id)
 {
-  zaxis_t * zaxisP;
   int intBuffer[zaxisNint], memberMask;
   uint32_t d;
   char charBuffer[zaxisNstrings * CDI_MAX_NAME];
@@ -1699,9 +1698,9 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
   zaxisInit();
 
-  zaxisP = zaxisNewEntry(force_id?
-                         namespaceAdaptKey(intBuffer[0], originNamespace)
-                         :CDI_UNDEFID);
+  zaxis_t *zaxisP
+    = zaxisNewEntry(force_id ? namespaceAdaptKey(intBuffer[0], originNamespace)
+                    : CDI_UNDEFID);
 
   zaxisP->prec      = intBuffer[1];
   zaxisP->type      = intBuffer[2];
