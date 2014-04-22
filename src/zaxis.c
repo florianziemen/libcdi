@@ -165,9 +165,7 @@ void zaxisInit(void)
 static
 void zaxis_copy(zaxis_t *zaxisptr2, zaxis_t *zaxisptr1)
 {
-  int zaxisID2;
-
-  zaxisID2 = zaxisptr2->self;
+  int zaxisID2 = zaxisptr2->self;
   memcpy(zaxisptr2, zaxisptr1, sizeof(zaxis_t));
   zaxisptr2->self = zaxisID2;
 }
@@ -1114,9 +1112,7 @@ void zaxisDefVct(int zaxisID, int size, const double *vct)
 
 void zaxisInqVct(int zaxisID, double *vct)
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -1126,9 +1122,7 @@ void zaxisInqVct(int zaxisID, double *vct)
 
 int zaxisInqVctSize(int zaxisID)
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -1138,9 +1132,7 @@ int zaxisInqVctSize(int zaxisID)
 
 const double *zaxisInqVctPtr(int zaxisID)
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -1150,7 +1142,6 @@ const double *zaxisInqVctPtr(int zaxisID)
 
 void zaxisDefLbounds(int zaxisID, const double *lbounds)
 {
-  size_t size;
   zaxis_t *zaxisptr;
 
   if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
@@ -1163,7 +1154,7 @@ void zaxisDefLbounds(int zaxisID, const double *lbounds)
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  size = zaxisptr->size;
+  size_t size = zaxisptr->size;
 
   if ( CDI_Debug )
     if ( zaxisptr->lbounds != NULL )
@@ -1178,7 +1169,6 @@ void zaxisDefLbounds(int zaxisID, const double *lbounds)
 
 void zaxisDefUbounds(int zaxisID, const double *ubounds)
 {
-  size_t size;
   zaxis_t *zaxisptr;
 
   if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
@@ -1191,7 +1181,7 @@ void zaxisDefUbounds(int zaxisID, const double *ubounds)
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  size = zaxisptr->size;
+  size_t size = zaxisptr->size;
 
   if ( CDI_Debug )
     if ( zaxisptr->ubounds != NULL )
@@ -1206,7 +1196,6 @@ void zaxisDefUbounds(int zaxisID, const double *ubounds)
 
 void zaxisDefWeights(int zaxisID, const double *weights)
 {
-  size_t size;
   zaxis_t *zaxisptr;
 
   if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
@@ -1219,7 +1208,7 @@ void zaxisDefWeights(int zaxisID, const double *weights)
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  size = zaxisptr->size;
+  size_t size = zaxisptr->size;
 
   if ( CDI_Debug )
     if ( zaxisptr->weights != NULL )
@@ -1234,9 +1223,7 @@ void zaxisDefWeights(int zaxisID, const double *weights)
 
 void zaxisChangeType(int zaxisID, int zaxistype)
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -1246,9 +1233,7 @@ void zaxisChangeType(int zaxisID, int zaxistype)
 
 void zaxisResize(int zaxisID, int size)
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -1264,9 +1249,7 @@ int zaxisDuplicate(int zaxisID)
   int zaxisIDnew;
   int zaxistype, zaxissize;
   int size;
-  zaxis_t *zaxisptr, *zaxisptrnew;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -1274,7 +1257,7 @@ int zaxisDuplicate(int zaxisID)
   zaxissize = zaxisInqSize(zaxisID);
 
   zaxisIDnew = zaxisCreate(zaxistype, zaxissize);
-  zaxisptrnew = ( zaxis_t * ) reshGetVal ( zaxisIDnew, &zaxisOps );
+  zaxis_t *zaxisptrnew = reshGetVal(zaxisIDnew, &zaxisOps);
 
   zaxis_copy(zaxisptrnew, zaxisptr);
 
@@ -1437,9 +1420,7 @@ void zaxisPrintKernel ( zaxis_t * zaxisptr, FILE * fp )
 
 void zaxisPrint ( int zaxisID )
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxisPrintKernel ( zaxisptr, stdout );
 }
