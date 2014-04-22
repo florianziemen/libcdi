@@ -1050,43 +1050,36 @@ int zaxisInqSize(int zaxisID)
 
 void cdiCheckZaxis(int zaxisID)
 {
-  int size, i, found;
   zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
   if ( zaxisInqType(zaxisID) == ZAXIS_GENERIC )
     {
-      size = zaxisptr->size;
+      int size = zaxisptr->size;
       if ( size > 1 )
         {
           /* check direction */
           if ( ! zaxisptr->direction )
             {
-              found = 0;
-              for ( i = 1; i < size; i++ )
-                if ( zaxisptr->vals[i] > zaxisptr->vals[i-1] )
-                  found++;
-              if ( found == size-1 )
+              int ups = 0, downs = 0;
+              for ( int i = 1; i < size; i++ )
+                {
+                  ups += (zaxisptr->vals[i] > zaxisptr->vals[i-1]);
+                  downs += (zaxisptr->vals[i] < zaxisptr->vals[i-1]);
+                }
+              if ( ups == size-1 )
                 {
                   zaxisptr->direction = LevelUp;
                 }
-              else
+              else if ( downs == size-1 )
                 {
-                  found = 0;
-                  for ( i = 1; i < size; i++ )
-                    if ( zaxisptr->vals[i] < zaxisptr->vals[i-1] )
-                      found++;
-                  if ( found == size-1 )
-                    {
-                      zaxisptr->direction = LevelDown;
-                    }
+                  zaxisptr->direction = LevelDown;
                 }
-            }
-          /* check consistent */
-          if ( !zaxisptr->direction )
-            {
-              Warning("Direction undefined for zaxisID %d", zaxisID);
+              else /* !zaxisptr->direction */
+                {
+                  Warning("Direction undefined for zaxisID %d", zaxisID);
+                }
             }
         }
     }
