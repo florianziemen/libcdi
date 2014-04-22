@@ -133,9 +133,7 @@ void zaxisDefaultValue ( zaxis_t *zaxisptr )
 static
 zaxis_t *zaxisNewEntry(int id)
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = (zaxis_t*) xmalloc(sizeof(zaxis_t));
+  zaxis_t *zaxisptr = (zaxis_t *)xmalloc(sizeof(zaxis_t));
 
   zaxisDefaultValue ( zaxisptr );
 
@@ -637,9 +635,6 @@ The function @func{zaxisDefLevels} defines the levels of a Z-axis.
 */
 void zaxisDefLevels(int zaxisID, const double *levels)
 {
-  int ilev;
-  int size;
-  double *vals;
   zaxis_t *zaxisptr;
 
   if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
@@ -652,11 +647,11 @@ void zaxisDefLevels(int zaxisID, const double *levels)
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  size = zaxisptr->size;
+  int size = zaxisptr->size;
 
-  vals = zaxisptr->vals;
+  double *vals = zaxisptr->vals;
 
-  for ( ilev = 0; ilev < size; ilev++ )
+  for (int ilev = 0; ilev < size; ilev++ )
     vals[ilev] = levels[ilev];
 }
 
