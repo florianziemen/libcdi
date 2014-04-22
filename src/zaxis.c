@@ -445,9 +445,7 @@ The function @func{zaxisInqName} returns the name of a Z-axis.
 */
 void zaxisInqName(int zaxisID, char *name)
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -475,9 +473,7 @@ The function @func{zaxisInqLongname} returns the longname of a Z-axis.
 */
 void zaxisInqLongname(int zaxisID, char *longname)
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -505,9 +501,7 @@ The function @func{zaxisInqUnits} returns the units of a Z-axis.
 */
 void zaxisInqUnits(int zaxisID, char *units)
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -517,9 +511,7 @@ void zaxisInqUnits(int zaxisID, char *units)
 
 void zaxisInqStdname(int zaxisID, char *stdname)
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -547,9 +539,7 @@ void zaxisDefPrec(int zaxisID, int prec)
 
 int zaxisInqPrec(int zaxisID)
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -577,9 +567,7 @@ void zaxisDefPositive(int zaxisID, int positive)
 
 int zaxisInqPositive(int zaxisID)
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -607,9 +595,7 @@ void zaxisDefLtype(int zaxisID, int ltype)
 
 int zaxisInqLtype(int zaxisID)
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -706,16 +692,11 @@ void zaxisDefNlevRef(int zaxisID, const int nhlev)
 
 int zaxisInqNlevRef(int zaxisID)
 {
-  int nhlev = -1;
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  nhlev = zaxisptr->nhlev;
-
-  return (nhlev);
+  return (zaxisptr->nhlev);
 }
 
 /*
@@ -766,16 +747,11 @@ The function @func{zaxisInqNumber} returns the reference number to a generalized
 */
 int zaxisInqNumber(int zaxisID)
 {
-  int number = -1;
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  number = zaxisptr->number;
-
-  return (number);
+  return (zaxisptr->number);
 }
 
 /*
@@ -828,9 +804,7 @@ The function @func{zaxisInqUUID} returns the UUID to a generalized Z-axis.
 */
 void zaxisInqUUID(int zaxisID, char *uuid)
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -856,9 +830,7 @@ The function @func{zaxisInqLevel} returns one level of a Z-axis.
 double zaxisInqLevel(int zaxisID, int levelID)
 {
   double level = 0;
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -871,9 +843,7 @@ double zaxisInqLevel(int zaxisID, int levelID)
 double zaxisInqLbound(int zaxisID, int index)
 {
   double level = 0;
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -888,9 +858,7 @@ double zaxisInqLbound(int zaxisID, int index)
 double zaxisInqUbound(int zaxisID, int index)
 {
   double level = 0;
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -904,9 +872,7 @@ double zaxisInqUbound(int zaxisID, int index)
 
 const double *zaxisInqLevelsPtr(int zaxisID)
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -932,16 +898,12 @@ The function @func{zaxisInqLevels} returns all levels of a Z-axis.
 */
 void zaxisInqLevels(int zaxisID, double *levels)
 {
-  int size;
-  int i;
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  size = zaxisptr->size;
-  for ( i = 0; i < size; i++ )
+  int size = zaxisptr->size;
+  for (int i = 0; i < size; i++ )
     levels[i] =  zaxisptr->vals[i];
 }
 
@@ -949,10 +911,7 @@ void zaxisInqLevels(int zaxisID, double *levels)
 int zaxisInqLbounds(int zaxisID, double *lbounds)
 {
   int size = 0;
-  int i;
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -961,7 +920,7 @@ int zaxisInqLbounds(int zaxisID, double *lbounds)
       size = zaxisptr->size;
 
       if ( lbounds )
-        for ( i = 0; i < size; i++ )
+        for (int i = 0; i < size; i++ )
           lbounds[i] =  zaxisptr->lbounds[i];
     }
 
@@ -972,10 +931,7 @@ int zaxisInqLbounds(int zaxisID, double *lbounds)
 int zaxisInqUbounds(int zaxisID, double *ubounds)
 {
   int size = 0;
-  int i;
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -984,7 +940,7 @@ int zaxisInqUbounds(int zaxisID, double *ubounds)
       size = zaxisptr->size;
 
       if ( ubounds )
-        for ( i = 0; i < size; i++ )
+        for (int i = 0; i < size; i++ )
           ubounds[i] =  zaxisptr->ubounds[i];
     }
 
@@ -995,10 +951,7 @@ int zaxisInqUbounds(int zaxisID, double *ubounds)
 int zaxisInqWeights(int zaxisID, double *weights)
 {
   int size = 0;
-  int i;
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -1007,7 +960,7 @@ int zaxisInqWeights(int zaxisID, double *weights)
       size = zaxisptr->size;
 
       if ( weights )
-        for ( i = 0; i < size; i++ )
+        for ( int i = 0; i < size; i++ )
           weights[i] =  zaxisptr->weights[i];
     }
 
@@ -1017,20 +970,18 @@ int zaxisInqWeights(int zaxisID, double *weights)
 
 int zaxisInqLevelID(int zaxisID, double level)
 {
-  int size;
   int levelID = CDI_UNDEFID;
-  int i;
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  size = zaxisptr->size;
-  for ( i = 0; i < size; i++ )
-    if ( fabs(level-zaxisptr->vals[i]) < DBL_EPSILON ) break;
-
-  if ( i < size ) levelID = i;
+  int size = zaxisptr->size;
+  for ( int i = 0; i < size; i++ )
+    if ( fabs(level-zaxisptr->vals[i]) < DBL_EPSILON )
+      {
+        levelID = i;
+        break;
+      }
 
   return (levelID);
 }
@@ -1062,9 +1013,7 @@ The valid CDI Z-axis types are @func{ZAXIS_GENERIC}, @func{ZAXIS_SURFACE},
 */
 int zaxisInqType(int zaxisID)
 {
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -1089,14 +1038,11 @@ The function @func{zaxisInqSize} returns the size of a Z-axis.
 */
 int zaxisInqSize(int zaxisID)
 {
-  int size = 1;
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  size = zaxisptr->size;
+  int size = zaxisptr->size;
 
   return (size);
 }
@@ -1105,9 +1051,7 @@ int zaxisInqSize(int zaxisID)
 void cdiCheckZaxis(int zaxisID)
 {
   int size, i, found;
-  zaxis_t *zaxisptr;
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
