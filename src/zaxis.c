@@ -1161,7 +1161,7 @@ void zaxisDefLbounds(int zaxisID, const double *lbounds)
       Warning("Lower bounds already defined for zaxisID = %d", zaxisID);
 
   if ( zaxisptr->lbounds == NULL )
-    zaxisptr->lbounds = (double *) malloc(size*sizeof(double));
+    zaxisptr->lbounds = (double *)xmalloc(size*sizeof(double));
 
   memcpy(zaxisptr->lbounds, lbounds, size*sizeof(double));
 }
@@ -1188,7 +1188,7 @@ void zaxisDefUbounds(int zaxisID, const double *ubounds)
       Warning("Upper bounds already defined for zaxisID = %d", zaxisID);
 
   if ( zaxisptr->ubounds == NULL )
-    zaxisptr->ubounds = (double *) malloc(size*sizeof(double));
+    zaxisptr->ubounds = (double *)xmalloc(size*sizeof(double));
 
   memcpy(zaxisptr->ubounds, ubounds, size*sizeof(double));
 }
@@ -1215,7 +1215,7 @@ void zaxisDefWeights(int zaxisID, const double *weights)
       Warning("Weights already defined for zaxisID = %d", zaxisID);
 
   if ( zaxisptr->weights == NULL )
-    zaxisptr->weights = (double *) malloc(size*sizeof(double));
+    zaxisptr->weights = (double *)xmalloc(size*sizeof(double));
 
   memcpy(zaxisptr->weights, weights, size*sizeof(double));
 }
@@ -1240,7 +1240,7 @@ void zaxisResize(int zaxisID, int size)
   zaxisptr->size = size;
 
   if ( zaxisptr->vals )
-    zaxisptr->vals = (double *) realloc(zaxisptr->vals, size*sizeof(double));
+    zaxisptr->vals = (double *)xrealloc(zaxisptr->vals, size*sizeof(double));
 }
 
 
@@ -1269,7 +1269,7 @@ int zaxisDuplicate(int zaxisID)
     {
       size = zaxissize;
 
-      zaxisptrnew->vals = (double *) malloc(size*sizeof(double));
+      zaxisptrnew->vals = (double *)xmalloc(size*sizeof(double));
       memcpy(zaxisptrnew->vals, zaxisptr->vals, size*sizeof(double));
     }
 
@@ -1277,7 +1277,7 @@ int zaxisDuplicate(int zaxisID)
     {
       size = zaxissize;
 
-      zaxisptrnew->lbounds = (double *) malloc(size*sizeof(double));
+      zaxisptrnew->lbounds = (double *)xmalloc(size*sizeof(double));
       memcpy(zaxisptrnew->lbounds, zaxisptr->lbounds, size*sizeof(double));
     }
 
@@ -1285,7 +1285,7 @@ int zaxisDuplicate(int zaxisID)
     {
       size = zaxissize;
 
-      zaxisptrnew->ubounds = (double *) malloc(size*sizeof(double));
+      zaxisptrnew->ubounds = (double *)xmalloc(size*sizeof(double));
       memcpy(zaxisptrnew->ubounds, zaxisptr->ubounds, size*sizeof(double));
     }
 
@@ -1296,7 +1296,7 @@ int zaxisDuplicate(int zaxisID)
       if ( size )
         {
           zaxisptrnew->vctsize = size;
-          zaxisptrnew->vct = (double *) malloc(size*sizeof(double));
+          zaxisptrnew->vct = (double *)xmalloc(size*sizeof(double));
           memcpy(zaxisptrnew->vct, zaxisptr->vct, size*sizeof(double));
         }
     }
