@@ -2,7 +2,13 @@
 #  include "config.h"
 #endif
 
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 600
+#endif
+
 #include <ctype.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "cdi.h"
 #include "cdi_int.h"
@@ -26,12 +32,8 @@
 
 #include "namespace.h"
 
-#include <string.h>
 
 #define  MAX_FNAMES  3
-
-FILE *popen(const char *command, const char *type);
-int pclose(FILE *stream);
 
 static void
 cdiPrintDefaults(void)
