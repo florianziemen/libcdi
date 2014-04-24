@@ -571,6 +571,8 @@ int cdfDefRecord(stream_t *streamptr)
 {
   int ierr = 0;
 
+  if ( streamptr->fileID < 0 ) ierr = 1;
+
   return (ierr);
 }
 
@@ -1676,11 +1678,10 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
 
   if ( xdimID == UNDEFID || ydimID == UNDEFID )
     {
-      int status;
-      status = checkGridName('V', xaxisname, fileID, vlistID, gridID, ngrids, 'X');
-      status = checkGridName('V', yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
-      status = checkGridName('D', xdimname, fileID, vlistID, gridID, ngrids, 'X');
-      status = checkGridName('D', ydimname, fileID, vlistID, gridID, ngrids, 'Y');
+      checkGridName('V', xaxisname, fileID, vlistID, gridID, ngrids, 'X');
+      checkGridName('V', yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
+      checkGridName('D', xdimname, fileID, vlistID, gridID, ngrids, 'X');
+      checkGridName('D', ydimname, fileID, vlistID, gridID, ngrids, 'Y');
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
@@ -1917,11 +1918,10 @@ void cdfDefGdim(stream_t *streamptr, int gridID)
 
   if ( dimID == UNDEFID )
     {
-      int status;
       char axisname[CDI_MAX_NAME];
       strcpy(axisname, "gsize");
 
-      status = checkGridName('D', axisname, fileID, vlistID, gridID, ngrids, 'X');
+      checkGridName('D', axisname, fileID, vlistID, gridID, ngrids, 'X');
       /*
       if ( iz == 0 ) axisname[5] = '\0';
       else           sprintf(&axisname[5], "%1d", iz+1);
@@ -2068,16 +2068,15 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
 
   if ( dimID == UNDEFID )
     {
-      int status;
       char axisname[CDI_MAX_NAME];
       char vertname[CDI_MAX_NAME];
       strcpy(axisname, "ncells");
       strcpy(vertname, "nv");
 
-      status = checkGridName('V', xaxisname, fileID, vlistID, gridID, ngrids, 'X');
-      status = checkGridName('V', yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
-      status = checkGridName('D', axisname, fileID, vlistID, gridID, ngrids, 'X');
-      status = checkGridName('D', vertname, fileID, vlistID, gridID, ngrids, 'X');
+      checkGridName('V', xaxisname, fileID, vlistID, gridID, ngrids, 'X');
+      checkGridName('V', yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
+      checkGridName('D', axisname, fileID, vlistID, gridID, ngrids, 'X');
+      checkGridName('D', vertname, fileID, vlistID, gridID, ngrids, 'X');
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
@@ -4262,7 +4261,8 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 static
 int cdfTimeDimID(int fileID, int ndims, int nvars)
 {
-  int dimid = 0;
+  int dimid = UNDEFID;
+  int timedimid = UNDEFID;
   char dimname[80];
   char timeunits[CDI_MAX_NAME];
   char attname[CDI_MAX_NAME];
@@ -4275,41 +4275,44 @@ int cdfTimeDimID(int fileID, int ndims, int nvars)
   for ( dimid = 0; dimid < ndims; dimid++ )
     {
       cdf_inq_dimname(fileID, dimid, dimname);
-      if ( memcmp(dimname, "time", 4) == 0 ) break;
+      if ( memcmp(dimname, "time", 4) == 0 )
+        {
+          timedimid = dimid;
+          break;
+        }
     }
 
-  if ( dimid == ndims ) dimid = UNDEFID;
-
-  for ( varid = 0; varid < nvars; varid++ )
+  if ( timedimid == UNDEFID )
     {
-      if ( dimid != UNDEFID ) break;
-
-      cdf_inq_var(fileID, varid, name, &xtype, &nvdims, dimids, &nvatts);
-      if ( nvdims == 1 )
+      for ( varid = 0; varid < nvars; varid++ )
         {
-          for ( iatt = 0; iatt < nvatts; iatt++ )
+          cdf_inq_var(fileID, varid, name, &xtype, &nvdims, dimids, &nvatts);
+          if ( nvdims == 1 )
             {
-              cdf_inq_attname(fileID, varid, iatt, attname);
-              if ( memcmp(attname, "units", 5) == 0 )
+              for ( iatt = 0; iatt < nvatts; iatt++ )
                 {
-                  cdfGetAttText(fileID, varid, "units", sizeof(timeunits), timeunits);
-                  strtolower(timeunits);
-
-                  if ( memcmp(timeunits, "sec",    3) == 0 ||
-                       memcmp(timeunits, "minute", 6) == 0 ||
-                       memcmp(timeunits, "hour",   4) == 0 ||
-                       memcmp(timeunits, "day",    3) == 0 ||
-                       memcmp(timeunits, "month",  5) == 0 )
+                  cdf_inq_attname(fileID, varid, iatt, attname);
+                  if ( memcmp(attname, "units", 5) == 0 )
                     {
-                      dimid = dimids[0];
-                      break;
+                      cdfGetAttText(fileID, varid, "units", sizeof(timeunits), timeunits);
+                      strtolower(timeunits);
+
+                      if ( memcmp(timeunits, "sec",    3) == 0 ||
+                           memcmp(timeunits, "minute", 6) == 0 ||
+                           memcmp(timeunits, "hour",   4) == 0 ||
+                           memcmp(timeunits, "day",    3) == 0 ||
+                           memcmp(timeunits, "month",  5) == 0 )
+                        {
+                          timedimid = dimids[0];
+                          break;
+                        }
                     }
                 }
             }
         }
     }
 
-  return (dimid);
+  return (timedimid);
 }
 
 static
@@ -4455,7 +4458,7 @@ int isLatAxis(const char *units, const char *stdname)
 }
 
 static
-int isDBLAxis(const char *units, const char *longname)
+int isDBLAxis(/*const char *units,*/ const char *longname)
 {
   int status = FALSE;
 
@@ -5447,7 +5450,7 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 		  else if ( strcmp(ncvars[ncvarid].units, "level") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
 		}
-	      else if ( isDBLAxis(ncvars[ncvarid].units, ncvars[ncvarid].longname) )
+	      else if ( isDBLAxis(ncvars[ncvarid].longname) )
                 {
                   ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_LAND;
 		}
@@ -5527,7 +5530,7 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
 		  continue;
 		}
-	      else if ( isDBLAxis(ncvars[ncvarid].units, ncvars[ncvarid].longname) )
+	      else if ( isDBLAxis(ncvars[ncvarid].longname) )
 		{
                   ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_LAND;
 		  continue;
@@ -7063,7 +7066,9 @@ int cdfInqContents(stream_t *streamptr)
       ncvarid = streamptr->basetime.ncvarid;
 
       if ( ncvarid == UNDEFID )
-	Warning("Variable >time< not found!");
+        {
+          Warning("Time variable >%s< not found!", ncdims[timedimid].name);
+        }
       else if ( streamptr->basetime.lwrf == FALSE )
 	{
 	  if ( ncvars[ncvarid].units[0] != 0 )

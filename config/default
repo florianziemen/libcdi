@@ -144,7 +144,7 @@ case "${HOSTNAME}" in
                     --with-szlib=/sw/aix61/szip-2.1-threadsafe \
                     AR="ar -X 64" LDFLAGS="-brtl" FC=xlf2003_r CC=xlc_r \
                     CFLAGS="-g -O3 -qhot -q64 -qarch=auto -qtune=auto -qlistfmt=html=transforms -DHAVE_MMAP -Dextname" \
-                    FCFLAGS="-qsuffix=cpp=f90" \
+                    FCFLAGS="-qsuffix=cpp=f90 -qextname" \
                     SHELL=/bin/bash
         ;;
     *)
