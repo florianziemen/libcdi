@@ -3718,8 +3718,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   if ( zid != UNDEFID )
     {
       int size = zaxisInqSize(zaxisID);
-      xassert(rect[2][0] >= 0 && rect[2][0] <= rect[2][1]
-              && rect[2][1] <= size);
+      xassert(rect[2][0] >= 0 && rect[2][0] <= rect[2][1] && rect[2][1] <= size);
       start[ndims] = rect[2][0];
       count[ndims] = rect[2][1] - rect[2][0] + 1;
       ndims++;
@@ -3728,8 +3727,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
     {
       size_t size;
       cdf_inq_dimlen(fileID, yid, &size);
-      xassert(rect[1][0] >= 0 && rect[1][0] <= rect[1][1]
-              && rect[1][1] <= size);
+      xassert(rect[1][0] >= 0 && rect[1][0] <= rect[1][1] && rect[1][1] <= (int)size);
       start[ndims] = rect[1][0];
       count[ndims] = rect[1][1] - rect[1][0] + 1;
       ndims++;
@@ -3738,8 +3736,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
     {
       size_t size;
       cdf_inq_dimlen(fileID, xid, &size);
-      xassert(rect[0][0] >= 0 && rect[0][0] <= rect[0][1]
-              && rect[0][1] <= size);
+      xassert(rect[0][0] >= 0 && rect[0][0] <= rect[0][1] && rect[0][1] <= (int)size);
       start[ndims] = rect[0][0];
       count[ndims] = rect[0][1] - rect[0][0] + 1;
       ndims++;
