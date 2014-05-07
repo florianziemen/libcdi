@@ -2336,7 +2336,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
       checkname = TRUE;
       ilevel = 0;
 
-      while ( checkname ) 
+      while ( checkname )
         {
           strcpy(axisname2, axisname);
           if ( ilevel ) sprintf(&axisname2[strlen(axisname2)], "_%d", ilevel+1);

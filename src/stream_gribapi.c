@@ -763,6 +763,11 @@ void grib2GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
           *level_sf = 1000;
           *level_unit = CDI_UNIT_PA;
         }
+      else if ( *leveltype == GRIB2_LTYPE_SIGMA )
+        {
+          *level_sf = 1000;
+          *level_unit = 0;
+        }
 
       GRIB_CHECK(grib_get_long(gh, "scaleFactorOfFirstFixedSurface", &factor), 0);
       GRIB_CHECK(grib_get_long(gh, "scaledValueOfFirstFixedSurface", &llevel), 0);
@@ -1309,7 +1314,8 @@ int gribapiScanTimestep1(stream_t * streamptr)
       nrecs++;
 
       if ( CDI_Debug )
-	Message("%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
+	Message("%4d %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vdate=%d vtime=%d",
+                nrecs, (int)recpos, varname, paramstr, leveltype, level1, level2, vdate, vtime);
 
       gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, len, varname,
                        leveltype, lbounds, level1, level2, level_sf, level_unit);
@@ -1590,7 +1596,8 @@ int gribapiScanTimestep2(stream_t * streamptr)
       streamptr->tsteps[tsID].recIDs[rindex] = recID;
 
       if ( CDI_Debug )
-	Message("%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
+	Message("%4d %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vdate=%d vtime=%d",
+                nrecs_scanned, (int)recpos, varname, paramstr, leveltype, level1, level2, vdate, vtime);
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
@@ -3016,7 +3023,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   int datatype;
   int param;
   int lieee = FALSE;
-  int ensID, ensCount, forecast_type; /* Ensemble Data */
+  /*  int ensID, ensCount, forecast_type; *//* Ensemble Data */
   int typeOfGeneratingProcess;
   long bitsPerValue;
   long editionNumber = 2;
