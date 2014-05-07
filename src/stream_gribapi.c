@@ -720,6 +720,11 @@ double grib2ScaleFactor(long factor)
   else if ( factor == 2 ) scaleFactor =    0.01;
   else if ( factor == 3 ) scaleFactor =    0.001;
   else if ( factor == 4 ) scaleFactor =    0.0001;
+  else if ( factor == 5 ) scaleFactor =    0.00001;
+  else if ( factor == 6 ) scaleFactor =    0.000001;
+  else if ( factor == 7 ) scaleFactor =    0.0000001;
+  else if ( factor == 8 ) scaleFactor =    0.00000001;
+  else if ( factor == 9 ) scaleFactor =    0.000000001;
 
   return (scaleFactor);
 }
