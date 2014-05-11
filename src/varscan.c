@@ -61,6 +61,7 @@ typedef struct
   int           lmissval;
   double        missval;
   char         *name;
+  char         *stdname;
   char         *longname;
   char         *units;
   ensinfo_t    *ensdata;
@@ -111,6 +112,7 @@ void paramInitEntry(int varID, int param)
   vartable[varID].lmissval       = 0;
   vartable[varID].missval        = 0;
   vartable[varID].name           = NULL;
+  vartable[varID].stdname        = NULL;
   vartable[varID].longname       = NULL;
   vartable[varID].units          = NULL;
   vartable[varID].ensdata        = NULL;
@@ -152,6 +154,7 @@ void varFree(void)
 	free(vartable[varID].levelTable);
 
       if ( vartable[varID].name )     free(vartable[varID].name);
+      if ( vartable[varID].stdname )  free(vartable[varID].stdname);
       if ( vartable[varID].longname ) free(vartable[varID].longname);
       if ( vartable[varID].units )    free(vartable[varID].units);
       if ( vartable[varID].ensdata )  free(vartable[varID].ensdata);
@@ -314,7 +317,7 @@ int paramNewEntry(int param)
 void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 		  int level1, int level2, int level_sf, int level_unit, int prec,
 		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype,
-		  const char *name, const char *longname, const char *units)
+		  const char *name, const char *stdname, const char *longname, const char *units)
 {
   int varID = UNDEFID;
   int levelID = -1;
@@ -336,6 +339,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
       if ( numavg ) vartable[varID].timave = 1;
 
       if ( name )     if ( name[0] )     vartable[varID].name     = strdup(name);
+      if ( stdname )  if ( stdname[0] )  vartable[varID].stdname  = strdup(stdname);
       if ( longname ) if ( longname[0] ) vartable[varID].longname = strdup(longname);
       if ( units )    if ( units[0] )    vartable[varID].units    = strdup(units);
     }
@@ -430,6 +434,7 @@ int cmpparam(const void* s1, const void* s2)
 
   return (cmp);
 }
+
 
 void cdi_generate_vars(stream_t *streamptr)
 {
@@ -604,6 +609,7 @@ void cdi_generate_vars(stream_t *streamptr)
       if ( vartable[varid].lmissval ) vlistDefVarMissval(vlistID, varID, vartable[varid].missval);
 
       if ( vartable[varid].name )     vlistDefVarName(vlistID, varID, vartable[varid].name);
+      if ( vartable[varid].stdname )  vlistDefVarStdname(vlistID, varID, vartable[varid].stdname);
       if ( vartable[varid].longname ) vlistDefVarLongname(vlistID, varID, vartable[varid].longname);
       if ( vartable[varid].units )    vlistDefVarUnits(vlistID, varID, vartable[varid].units);
 

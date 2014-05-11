@@ -834,7 +834,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   int vlistID;
   long lpar;
   int status;
-  char longname[256], units[256];
+  char stdname[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
   size_t vlen;
   long ens_index = 0, ens_count = 0, ens_forecast_type = 0;
 
@@ -913,21 +913,28 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   // if ( datatype > 32 ) datatype = DATATYPE_PACK32;
   if ( datatype <  0 ) datatype = DATATYPE_PACK;
 
+  stdname[0] = 0;
   longname[0] = 0;
   units[0] = 0;
 
   if ( varname[0] != 0 )
     {
-      vlen = 256;
+      vlen = CDI_MAX_NAME;
       gribapiGetString(gh, "name", longname, vlen);
-      vlen = 256;
+      vlen = CDI_MAX_NAME;
       gribapiGetString(gh, "units", units, vlen);
+
+      {
+        vlen = CDI_MAX_NAME;
+        status = grib_get_string(gh, "cfName", stdname, &vlen);
+        if ( status != 0 || vlen <= 1 ) stdname[0] = 0;
+      }
     }
   // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units);
 
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, level_sf, level_unit,
 	       datatype, &varID, &levelID, tsteptype, numavg, leveltype,
-	       varname, longname, units);
+	       varname, stdname, longname, units);
 
   (*record).varID   = varID;
   (*record).levelID = levelID;

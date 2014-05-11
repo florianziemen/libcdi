@@ -408,7 +408,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   if ( datatype <  0 ) datatype = DATATYPE_PACK;
 
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, 0, 0,
-	       datatype, &varID, &levelID, tsteptype, numavg, ISEC1_LevelType, NULL, NULL, NULL);
+	       datatype, &varID, &levelID, tsteptype, numavg, ISEC1_LevelType, NULL, NULL, NULL, NULL);
 
   (*record).varID   = varID;
   (*record).levelID = levelID;
@@ -491,7 +491,7 @@ void MCH_get_undef(int *isec1, double *undef_pds, double *undef_eps)
 
 static
 void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
-			 int *isec3, double *fsec3, int *isec4, double *fsec4, 
+			 int *isec3, double *fsec3, int *isec4, double *fsec4,
 			 int *gribbuffer, int recsize, int *lmv, int *iret)
 {
   int ipunp = 0, iword = 0;
