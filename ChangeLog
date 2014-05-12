@@ -4,6 +4,10 @@
 	* using EXSE library version 1.3.2
 	* using CGRIBEX library version 1.6.4
 
+2014-05-12  Uwe Schulzweida
+
+	* gridCreate: removed default stdname and units  for GENERIC grids
+
 2014-05-11  Uwe Schulzweida
 
 	* added support for GRIB_API key cfName

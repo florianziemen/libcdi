@@ -467,10 +467,12 @@ int gridCreate(int gridtype, int size)
       {
         gridDefXname(gridID, "x");
         gridDefYname(gridID, "y");
+        /*
         strcpy(gridptr->xstdname, "grid_longitude");
         strcpy(gridptr->ystdname, "grid_latitude");
         gridDefXunits(gridID, "degrees");
         gridDefYunits(gridID, "degrees");
+        */
         break;
       }
     case GRID_LCC2:
