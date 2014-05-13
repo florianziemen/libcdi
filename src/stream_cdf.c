@@ -4480,7 +4480,7 @@ int isDepthAxis(const char *stdname, const char *longname)
   int status = FALSE;
 
   if ( strcmp(stdname, "depth") == 0 ) status = TRUE;
- 
+
   if ( status == FALSE )
     if ( strcmp(longname, "depth_below_sea") == 0 ||
          strcmp(longname, "depth below sea") == 0 )
@@ -5338,7 +5338,7 @@ void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 	    {
 	      Message("var %d %s", ncvarid, ncvars[ncvarid].name);
 	      for ( i = 0; i < ndims; i++ )
-		printf("  dim %d type %d  ", i, ncvars[ncvarid].dimtype[i]);
+		printf("  dim%d type=%d  ", i, ncvars[ncvarid].dimtype[i]);
 	      printf("\n");
 	    }
 
@@ -5349,6 +5349,16 @@ void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 	      else if ( ncvars[ncvarid].dimtype[i] == Z_AXIS ) lzdim = TRUE;
 	      /* else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = TRUE; */
 	    }
+
+          if ( lxdim == FALSE && ncvars[ncvarid].xvarid != UNDEFID )
+            {
+              if (  ncvars[ncvars[ncvarid].xvarid].ndims == 0 ) lxdim = TRUE;
+            }
+
+          if ( lydim == FALSE && ncvars[ncvarid].yvarid != UNDEFID )
+            {
+              if (  ncvars[ncvars[ncvarid].yvarid].ndims == 0 ) lydim = TRUE;
+            }
 
           //   if ( ndims > 1 )
             for ( i = ndims-1; i >= 0; i-- )
@@ -5577,6 +5587,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
   int nbdims;
   int i;
   int nvatts;
+  int skipvar;
   size_t nvertex;
   grid_t grid;
   grid_t proj;
@@ -5671,7 +5682,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	    }
 
 	  if ( ncvars[ncvarid].gridtype == UNDEFID || ncvars[ncvarid].gridtype == GRID_GENERIC )
-	    if ( ydimid == xdimid ) ncvars[ncvarid].gridtype = GRID_UNSTRUCTURED;
+	    if ( xdimid != UNDEFID && xdimid == ydimid ) ncvars[ncvarid].gridtype = GRID_UNSTRUCTURED;
 
 	  grid_init(&grid);
 	  grid_init(&proj);
@@ -5727,6 +5738,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 	      if ( xvarid != UNDEFID )
 		{
+                  skipvar = TRUE;
 		  islon = ncvars[xvarid].islon;
 		  ndims = ncvars[xvarid].ndims;
 		  if ( ndims == 2 || ndims == 3 )
@@ -5741,15 +5753,10 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			dimsize1 = ncdims[dimid].len;
 			dimid = ncvars[xvarid].dimids[ndims-1];
 			dimsize2 = ncdims[dimid].len;
-			if ( dimsize1*dimsize2 != size )
-			  {
-			    Warning("Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
-			    ncvars[ncvarid].isvar = -1;
-			    continue;
-			  }
+			if ( dimsize1*dimsize2 == size ) skipvar = FALSE;
 		      }
 		    }
-		  else
+		  else if ( ndims == 1 )
 		    {
 		      size = xsize;
 		      /* Check size of 1 dimensional coordinate variables */
@@ -5758,14 +5765,22 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			size_t dimsize;
 			dimid = ncvars[xvarid].dimids[0];
 			dimsize = ncdims[dimid].len;
-			if ( dimsize != size )
-			  {
-			    Warning("Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
-			    ncvars[ncvarid].isvar = -1;
-			    continue;
-			  }
+			if ( dimsize == size ) skipvar = FALSE;
 		      }
 		    }
+		  else if ( ndims == 0 && xsize == 0 )
+		    {
+                      xsize = 1;
+		      size = xsize;
+                      skipvar = FALSE;
+		    }
+
+                  if ( skipvar )
+                    {
+                      Warning("Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
+                      ncvars[ncvarid].isvar = -1;
+                      continue;
+                    }
 
 		  if ( ncvars[xvarid].xtype == NC_FLOAT ) grid.prec = DATATYPE_FLT32;
 		  grid.xvals = (double *) malloc(size*sizeof(double));
@@ -5798,6 +5813,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 	      if ( yvarid != UNDEFID )
 		{
+                  skipvar = TRUE;
 		  islat = ncvars[yvarid].islat;
 		  ndims = ncvars[yvarid].ndims;
 		  if ( ndims == 2 || ndims == 3 )
@@ -5812,15 +5828,10 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			dimsize1 = ncdims[dimid].len;
 			dimid = ncvars[yvarid].dimids[ndims-1];
 			dimsize2 = ncdims[dimid].len;
-			if ( dimsize1*dimsize2 != size )
-			  {
-			    Warning("Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
-			    ncvars[ncvarid].isvar = -1;
-			    continue;
-			  }
+			if ( dimsize1*dimsize2 == size ) skipvar = FALSE;
 		      }
 		    }
-		  else
+		  else if ( ndims == 1 )
 		    {
 		      if ( (int) ysize == 0 ) size = xsize;
 		      else                    size = ysize;
@@ -5831,14 +5842,22 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			size_t dimsize;
 			dimid = ncvars[yvarid].dimids[0];
 			dimsize = ncdims[dimid].len;
-			if ( dimsize != size )
-			  {
-			    Warning("Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
-			    ncvars[ncvarid].isvar = -1;
-			    continue;
-			  }
+			if ( dimsize == size ) skipvar = FALSE;
 		      }
 		    }
+		  else if ( ndims == 0 && ysize == 0 )
+		    {
+                      ysize = 1;
+		      size = ysize;
+                      skipvar = FALSE;
+		    }
+
+                  if ( skipvar )
+                    {
+                      Warning("Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
+                      ncvars[ncvarid].isvar = -1;
+                      continue;
+                    }
 
 		  if ( ncvars[yvarid].xtype == NC_FLOAT ) grid.prec = DATATYPE_FLT32;
 		  grid.yvals = (double *) malloc(size*sizeof(double));
@@ -7202,8 +7221,6 @@ int cdfInqContents(stream_t *streamptr)
 	}
     }
   */
-  /* set dim type */
-  setDimType(nvars, ncvars, ncdims);
 
   /* Set coordinate varids (att: associate)  */
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
@@ -7223,6 +7240,9 @@ int cdfInqContents(stream_t *streamptr)
 	    }
 	}
     }
+
+  /* set dim type */
+  setDimType(nvars, ncvars, ncdims);
 
   /* find VCT */
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
