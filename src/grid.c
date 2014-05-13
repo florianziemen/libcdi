@@ -1545,9 +1545,9 @@ int gridInqXvals(int gridID, double *xvals)
     size = gridptr->xsize;
 
   if ( CDI_Debug && size == 0 )
-    Warning("Size undefined for gridID = %d", gridID);
+    Warning("size undefined for gridID = %d", gridID);
 
-  if ( xvals && gridptr->xvals )
+  if ( size && xvals && gridptr->xvals )
     memcpy(xvals, gridptr->xvals, size*sizeof(double));
 
   if ( gridptr->xvals == NULL ) size = 0;
@@ -1638,9 +1638,9 @@ int gridInqYvals(int gridID, double *yvals)
     size = gridptr->ysize;
 
   if ( CDI_Debug && size == 0 )
-    Warning("Size undefined for gridID = %d!", gridID);
+    Warning("size undefined for gridID = %d!", gridID);
 
-  if ( yvals && gridptr->yvals )
+  if ( size && yvals && gridptr->yvals )
     memcpy(yvals, gridptr->yvals, size*sizeof(double));
 
   if ( gridptr->yvals == NULL ) size = 0;
@@ -3309,7 +3309,7 @@ int gridInqXbounds(int gridID, double *xbounds)
   if ( CDI_Debug && size == 0 )
     Warning("size undefined for gridID = %d", gridID);
 
-  if ( xbounds && gridptr->xbounds )
+  if ( size && xbounds && gridptr->xbounds )
     memcpy(xbounds, gridptr->xbounds, size*sizeof(double));
 
   if ( gridptr->xbounds == NULL ) size = 0;
@@ -3424,7 +3424,7 @@ int gridInqYbounds(int gridID, double *ybounds)
   if ( CDI_Debug && size == 0 )
     Warning("size undefined for gridID = %d", gridID);
 
-  if ( ybounds && gridptr->ybounds )
+  if ( size && ybounds && gridptr->ybounds )
     memcpy(ybounds, gridptr->ybounds, size*sizeof(double));
 
   if ( gridptr->ybounds == NULL ) size = 0;
