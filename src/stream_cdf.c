@@ -3254,8 +3254,8 @@ void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
   int ncvarid;
   int tsID;
   size_t size;
-  size_t start[4];
-  size_t count[4];
+  size_t start[5];
+  size_t count[5];
   int ndims = 0;
   int idim;
   int tsteptype;
@@ -3563,8 +3563,8 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   int ntsteps;
   size_t xsize = 0, ysize = 0;
   size_t size;
-  size_t start[4];
-  size_t count[4];
+  size_t start[5];
+  size_t count[5];
   long nvals;
   int swapxy = FALSE;
   int ndims = 0;
@@ -3665,8 +3665,8 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   int ncvarid;
   int ntsteps;
   size_t xsize = 0, ysize = 0;
-  size_t start[4];
-  size_t count[4];
+  size_t start[5];
+  size_t count[5];
   long nvals;
   int swapxy = FALSE;
   int ndims = 0;
@@ -3824,9 +3824,10 @@ int cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data,
   int tsID;
   int gridsize, xsize, ysize;
   size_t size;
-  size_t start[4];
-  size_t count[4];
+  size_t start[5];
+  size_t count[5];
   int ndims = 0;
+  int nvdims;
   int idim;
   int tsteptype;
   int gridindex;
@@ -3852,6 +3853,7 @@ int cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data,
   if ( CDI_Debug ) Message("tsID = %d", tsID);
 
   ncvarid = streamptr->vars[varID].ncvarid;
+  cdf_inq_varndims(fileID, ncvarid, &nvdims);
 
   gridID    = vlistInqVarGrid(vlistID, varID);
   zaxisID   = vlistInqVarZaxis(vlistID, varID);
@@ -3882,6 +3884,24 @@ int cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data,
 
   zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   zid = streamptr->zaxisID[zaxisindex];
+
+  int skipdim = 0;
+  if ( xid == -1 && yid == -1 && nvdims == 3 )
+    {
+      int dimids[3];
+      cdf_inq_vardimid(fileID, ncvarid, dimids);
+      size = 0;
+      if ( zid == dimids[2] )
+        {
+          cdf_inq_dimlen(fileID, dimids[1], &size);
+          if ( size == 1 ) skipdim = 1;
+        }
+      else if ( zid == dimids[1] )
+        {
+          cdf_inq_dimlen(fileID, dimids[2], &size);
+          if ( size == 1 ) skipdim = 2;
+        }
+    }
   /*
   printf("2 %p %d %d %s\n", streamptr, zaxisindex, streamptr->zaxisID[zaxisindex], vlistInqVarNamePtr(vlistID, varID));
   */
@@ -3899,6 +3919,13 @@ int cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data,
   if ( tsteptype != TSTEP_CONSTANT )
     {
       start[ndims] = tsID;
+      count[ndims] = 1;
+      ndims++;
+    }
+
+  if ( skipdim == 1 )
+    {
+      start[ndims] = 0;
       count[ndims] = 1;
       ndims++;
     }
@@ -3927,9 +3954,19 @@ int cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data,
         }
     }
 
+  if ( skipdim == 2 )
+    {
+      start[ndims] = 0;
+      count[ndims] = 1;
+      ndims++;
+    }
+
   if ( CDI_Debug )
     for (idim = 0; idim < ndims; idim++)
       Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+
+  if ( nvdims != ndims )
+    Error("Internal error, variable %s has an unsupported array structure!", vlistInqVarNamePtr(vlistID, varID));
 
   if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_FLT32 )
     {
@@ -3976,7 +4013,7 @@ int cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data,
         }
       else
         {
-          double *data_ptr = data; 
+          double *data_ptr = data;
           for ( i = 0; i < gridsize; i++, data_ptr++ )
             if ( DBL_IS_EQUAL((*data_ptr), missval) ) (*nmiss)++;
         }
@@ -4028,8 +4065,8 @@ int cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
   int ntsteps;
   long nvals;
   size_t xsize = 0, ysize = 0;
-  size_t start[4];
-  size_t count[4];
+  size_t start[5];
+  size_t count[5];
   int ndims = 0;
   int idim;
   int tsteptype;

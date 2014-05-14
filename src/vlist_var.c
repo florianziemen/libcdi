@@ -1875,6 +1875,8 @@ void  vlistDefVarXYZ(int vlistID, int varID, int xyz)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
+  if ( xyz == 3 ) xyz = 321;
+
   /* check xyz dimension order */
   {
     int dimorder[3];
