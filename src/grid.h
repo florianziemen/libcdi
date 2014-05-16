@@ -57,6 +57,7 @@ typedef struct {
   int     np;                     /* number of parallels between a pole and the equator */
   int     locked;
   int     lcomplex;
+  int     hasdims;
   char    xname[CDI_MAX_NAME];
   char    yname[CDI_MAX_NAME];
   char    xlongname[CDI_MAX_NAME];

@@ -128,6 +128,7 @@ void grid_init(grid_t *gridptr)
   gridptr->angle        = 0.0;
   gridptr->locked       = FALSE;
   gridptr->lcomplex     = 0;
+  gridptr->hasdims      = TRUE;
   gridptr->xname[0]     = 0;
   gridptr->yname[0]     = 0;
   gridptr->xlongname[0] = 0;
@@ -4050,15 +4051,13 @@ void gridInqLcc2(int gridID, double *earth_radius, double *lon_0, double *lat_0,
 
 void gridDefLaea(int gridID, double earth_radius, double lon_0, double lat_0)
 {
-  grid_t *gridptr;
-
   if ( reshGetStatus ( gridID, &gridOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
     }
 
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  grid_t* gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -4077,9 +4076,7 @@ void gridDefLaea(int gridID, double earth_radius, double lon_0, double lat_0)
 
 void gridInqLaea(int gridID, double *earth_radius, double *lon_0, double *lat_0)
 {
-  grid_t *gridptr;
-
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  grid_t* gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -4102,15 +4099,13 @@ void gridInqLaea(int gridID, double *earth_radius, double *lon_0, double *lat_0)
 
 void gridDefComplexPacking(int gridID, int lcomplex)
 {
-  grid_t *gridptr;
-
   if ( reshGetStatus ( gridID, &gridOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
     }
 
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  grid_t* gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -4120,16 +4115,37 @@ void gridDefComplexPacking(int gridID, int lcomplex)
 
 int gridInqComplexPacking(int gridID)
 {
-  int lcomplex;
-  grid_t *gridptr;
-
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  grid_t* gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
-  lcomplex = gridptr->lcomplex;
+  return (gridptr->lcomplex);
+}
 
-  return (lcomplex);
+
+void gridDefHasDims(int gridID, int hasdims)
+{
+  if ( reshGetStatus ( gridID, &gridOps ) == RESH_CLOSED )
+    {
+      Warning("%s", "Operation not executed.");
+      return;
+    }
+
+  grid_t* gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+
+  grid_check_ptr(gridID, gridptr);
+
+  gridptr->hasdims = hasdims;
+}
+
+
+int gridInqHasDims(int gridID)
+{
+  grid_t* gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+
+  grid_check_ptr(gridID, gridptr);
+
+  return (gridptr->hasdims);
 }
 
 /*
@@ -4148,15 +4164,13 @@ The function @func{gridDefNumber} defines the reference number for an unstructur
 */
 void gridDefNumber(int gridID, const int number)
 {
-  grid_t *gridptr;
-
   if ( reshGetStatus ( gridID, &gridOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
     }
 
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  grid_t* gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -4180,9 +4194,7 @@ The function @func{gridInqNumber} returns the reference number to an unstructure
 */
 int gridInqNumber(int gridID)
 {
-  grid_t *gridptr;
-
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  grid_t* gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -4205,15 +4217,13 @@ The function @func{gridDefPosition} defines the position of grid in the referenc
 */
 void gridDefPosition(int gridID, int position)
 {
-  grid_t *gridptr;
-
   if ( reshGetStatus ( gridID, &gridOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
     }
 
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  grid_t* gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -4237,9 +4247,7 @@ The function @func{gridInqPosition} returns the position of grid in the referenc
 */
 int gridInqPosition(int gridID)
 {
-  grid_t *gridptr;
-
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  grid_t* gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -4262,15 +4270,13 @@ The function @func{gridDefReference} defines the reference URI for an unstructur
 */
 void gridDefReference(int gridID, const char *reference)
 {
-  grid_t *gridptr;
-
   if ( reshGetStatus ( gridID, &gridOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
     }
 
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  grid_t* gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -4303,10 +4309,8 @@ The function @func{gridInqReference} returns the reference URI to an unstructure
 */
 int gridInqReference(int gridID, char *reference)
 {
-  grid_t *gridptr;
   int len = 0;
-
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  grid_t* gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
@@ -4337,21 +4341,17 @@ The function @func{gridDefUUID} defines the UUID for an unstructured grid.
 */
 void gridDefUUID(int gridID, const char *uuid)
 {
-  grid_t *gridptr;
-
   if ( reshGetStatus ( gridID, &gridOps ) == RESH_CLOSED )
     {
       Warning("%s", "Operation not executed.");
       return;
     }
 
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  grid_t* gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
   memcpy(gridptr->uuid, uuid, 16);
-
-  return;
 }
 
 /*
@@ -4371,9 +4371,7 @@ The function @func{gridInqUUID} returns the UUID to an unstructured grid.
 */
 void gridInqUUID(int gridID, char *uuid)
 {
-  grid_t *gridptr;
-
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  grid_t* gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 

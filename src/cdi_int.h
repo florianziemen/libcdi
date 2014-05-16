@@ -281,9 +281,11 @@ void stream_check_ptr(const char *caller, stream_t *streamptr);
 
 int     streamInqFileID(int streamID);
 
-int     zaxisInqLevelID(int zaxisID, double level);
+void    gridDefHasDims(int gridID, int hasdims);
+int     gridInqHasDims(int gridID);
 const char *gridNamePtr(int gridtype);
 char   *zaxisNamePtr(int leveltype);
+int     zaxisInqLevelID(int zaxisID, double level);
 
 void    streamCheckID(const char *caller, int streamID);
 
