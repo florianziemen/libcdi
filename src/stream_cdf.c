@@ -7095,8 +7095,7 @@ int cdfInqContents(stream_t *streamptr)
 	      }
 	    else
 	      {
-		if ( CDI_Debug )
-		  fprintf(stderr, "skipped timevar %s\n", ncvars[ncvarid].name);
+                Warning("Found more than one time variable, skipped variable %s!", ncvars[ncvarid].name);
 	      }
 	  }
 
