@@ -52,6 +52,9 @@ typedef struct {
 }
 ncdim_t;
 
+#define  MAX_COORDVARS  4
+#define  MAX_AUXVARS    4
+
 typedef struct {
   int      ncid;
   int      ignore;
@@ -79,7 +82,9 @@ typedef struct {
   int      zvarid;
   int      tvarid;
   int      ncoordvars;
-  int      coordvarids[4];
+  int      coordvarids[MAX_COORDVARS];
+  int      nauxvars;
+  int      auxvarids[MAX_AUXVARS];
   int      cellarea;
   int      calendar;
   int      tableID;
@@ -4432,10 +4437,11 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].zvarid          = UNDEFID;
       ncvars[ncvarid].tvarid          = UNDEFID;
       ncvars[ncvarid].ncoordvars      = 0;
-      ncvars[ncvarid].coordvarids[0]  = UNDEFID;
-      ncvars[ncvarid].coordvarids[1]  = UNDEFID;
-      ncvars[ncvarid].coordvarids[2]  = UNDEFID;
-      ncvars[ncvarid].coordvarids[3]  = UNDEFID;
+      for ( int i = 0; i < MAX_COORDVARS; ++i )
+        ncvars[ncvarid].coordvarids[i]  = UNDEFID;
+      ncvars[ncvarid].nauxvars      = 0;
+      for ( int i = 0; i < MAX_AUXVARS; ++i )
+        ncvars[ncvarid].auxvarids[i]  = UNDEFID;
       ncvars[ncvarid].cellarea        = UNDEFID;
       ncvars[ncvarid].tableID         = UNDEFID;
       ncvars[ncvarid].xtype           = 0;
@@ -5091,8 +5097,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               cdfSetVar(ncvars, ncvarid, TRUE);
             }
           */
-          else if ( (strcmp(attname, "associate")  == 0 || strcmp(attname, "coordinates") == 0) &&
-		    atttype == NC_CHAR )
+          else if ( (strcmp(attname, "associate")  == 0 || strcmp(attname, "coordinates") == 0) && atttype == NC_CHAR )
             {
               int status;
               char *pstring, *varname = NULL;
@@ -5103,7 +5108,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
               pstring = attstring;
 
-              for ( i = 0; i < 4; i++ )
+              for ( i = 0; i < MAX_COORDVARS; i++ )
                 {
                   while ( isspace((int) *pstring) ) pstring++;
                   if ( *pstring == 0 ) break;
@@ -5120,6 +5125,44 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                         {
                           ncvars[ncvarid].coordvarids[i] = dimvarid;
                           ncvars[ncvarid].ncoordvars++;
+                        }
+                    }
+                  else
+                    Warning("%s - %s", nc_strerror(status), varname);
+
+                  if ( lstop ) break;
+                }
+
+              cdfSetVar(ncvars, ncvarid, TRUE);
+            }
+          else if ( (strcmp(attname, "auxiliary_variable") == 0) && atttype == NC_CHAR )
+            {
+              int status;
+              char *pstring, *varname = NULL;
+              int lstop = FALSE;
+              int dimvarid;
+              extern int cdiIgnoreAttCoordinates;
+
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+              pstring = attstring;
+
+              for ( i = 0; i < MAX_AUXVARS; i++ )
+                {
+                  while ( isspace((int) *pstring) ) pstring++;
+                  if ( *pstring == 0 ) break;
+                  varname = pstring;
+                  while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
+                  if ( *pstring == 0 ) lstop = TRUE;
+                  *pstring++ = 0;
+
+                  status = nc_inq_varid(ncid, varname, &dimvarid);
+                  if ( status == NC_NOERR )
+                    {
+                      cdfSetVar(ncvars, dimvarid, FALSE);
+                      if ( cdiIgnoreAttCoordinates == FALSE )
+                        {
+                          ncvars[ncvarid].auxvarids[i] = dimvarid;
+                          ncvars[ncvarid].nauxvars++;
                         }
                     }
                   else
