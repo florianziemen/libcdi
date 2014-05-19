@@ -6631,9 +6631,9 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 	  param = cdiEncodeParam(ncvars[ncvarid].code, ncvars[ncvarid].tabnum, 255);
 	  vlistDefVarParam(vlistID, varID, param);
 	}
-      if ( ncvars[ncvarid].longname[0] )      vlistDefVarLongname(vlistID, varID, ncvars[ncvarid].longname);
-      if ( ncvars[ncvarid].stdname[0] )       vlistDefVarStdname(vlistID, varID, ncvars[ncvarid].stdname);
-      if ( ncvars[ncvarid].units[0] )         vlistDefVarUnits(vlistID, varID, ncvars[ncvarid].units);
+      if ( ncvars[ncvarid].longname[0] )  vlistDefVarLongname(vlistID, varID, ncvars[ncvarid].longname);
+      if ( ncvars[ncvarid].stdname[0] )   vlistDefVarStdname(vlistID, varID, ncvars[ncvarid].stdname);
+      if ( ncvars[ncvarid].units[0] )     vlistDefVarUnits(vlistID, varID, ncvars[ncvarid].units);
 
       if ( ncvars[ncvarid].lvalidrange )
         vlistDefVarValidrange(vlistID, varID, ncvars[ncvarid].validrange);
@@ -6976,6 +6976,101 @@ void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ng
 	}
     }
 }
+
+static
+int find_leadtime(int nvars, ncvar_t *ncvars)
+{
+  int leadtime_id = UNDEFID;
+  int ncvarid;
+
+  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+    {
+    }
+
+  return (leadtime_id);
+}
+
+static
+void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, stream_t *streamptr,
+                    int *time_has_units, int *time_has_bounds, int *time_climatology)
+{
+  int ncvarid;
+
+  if ( timedimid != UNDEFID )
+    {
+      int ltimevar = FALSE;
+
+      if ( ncdims[timedimid].ncvarid != UNDEFID )
+        {
+          streamptr->basetime.ncvarid = ncdims[timedimid].ncvarid;
+          ltimevar = TRUE;
+        }
+
+      for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+        if ( ncvarid != streamptr->basetime.ncvarid &&
+             ncvars[ncvarid].ndims == 1 &&
+             timedimid == ncvars[ncvarid].dimids[0] &&
+             ncvars[ncvarid].xtype != NC_CHAR &&
+             isTimeUnits(ncvars[ncvarid].units) )
+          {
+            ncvars[ncvarid].isvar = FALSE;
+
+            if ( !ltimevar )
+              {
+                streamptr->basetime.ncvarid = ncvarid;
+                ltimevar = TRUE;
+                if ( CDI_Debug )
+                  fprintf(stderr, "timevar %s\n", ncvars[ncvarid].name);
+              }
+            else
+              {
+                Warning("Found more than one time variable, skipped variable %s!", ncvars[ncvarid].name);
+              }
+          }
+
+      if ( ltimevar == FALSE ) /* search for WRF time description */
+        {
+          for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+            if ( ncvarid != streamptr->basetime.ncvarid &&
+                 ncvars[ncvarid].ndims == 2 &&
+                 timedimid == ncvars[ncvarid].dimids[0] &&
+                 ncvars[ncvarid].xtype == NC_CHAR &&
+                 ncdims[ncvars[ncvarid].dimids[1]].len == 19 )
+              {
+                streamptr->basetime.ncvarid = ncvarid;
+                streamptr->basetime.lwrf    = TRUE;
+                break;
+              }
+        }
+
+      /* time varID */
+      ncvarid = streamptr->basetime.ncvarid;
+
+      if ( ncvarid == UNDEFID )
+        {
+          Warning("Time variable >%s< not found!", ncdims[timedimid].name);
+        }
+      else if ( streamptr->basetime.lwrf == FALSE )
+        {
+          if ( ncvars[ncvarid].units[0] != 0 ) *time_has_units = TRUE;
+
+          if ( ncvars[ncvarid].bounds != UNDEFID )
+            {
+              int nbdims = ncvars[ncvars[ncvarid].bounds].ndims;
+              if ( nbdims == 2 )
+                {
+                  int len = (int) ncdims[ncvars[ncvars[ncvarid].bounds].dimids[nbdims-1]].len;
+                  if ( len == 2 && timedimid == ncvars[ncvars[ncvarid].bounds].dimids[0] )
+                    {
+                      *time_has_bounds = TRUE;
+                      streamptr->basetime.ncvarboundsid = ncvars[ncvarid].bounds;
+                      if ( ncvars[ncvarid].climatology ) *time_climatology = TRUE;
+                    }
+                }
+            }
+        }
+    }
+}
 #endif
 
 int cdfInqContents(stream_t *streamptr)
@@ -6993,7 +7088,7 @@ int cdfInqContents(stream_t *streamptr)
   int time_has_units = FALSE;
   int time_has_bounds = FALSE;
   int time_climatology = FALSE;
-  size_t len;
+  int leadtime_id = UNDEFID;
   int nvars_data;
   int nvcth_id = UNDEFID, vcta_id = UNDEFID, vctb_id = UNDEFID;
   size_t vctsize = 0;
@@ -7002,7 +7097,6 @@ int cdfInqContents(stream_t *streamptr)
   int modelID = UNDEFID;
   int taxisID;
   int i;
-  int nbdims;
   int calendar = UNDEFID;
   ncdim_t *ncdims;
   ncvar_t *ncvars = NULL;
@@ -7147,82 +7241,9 @@ int cdfInqContents(stream_t *streamptr)
     }
 
   /* find time vars */
-  if ( timedimid != UNDEFID )
-    {
-      int ltimevar = FALSE;
+  find_time_vars(nvars, ncvars, ncdims, timedimid, streamptr, &time_has_units, &time_has_bounds, &time_climatology);
 
-      if ( ncdims[timedimid].ncvarid != UNDEFID )
-	{
-	  streamptr->basetime.ncvarid = ncdims[timedimid].ncvarid;
-	  ltimevar = TRUE;
-	}
-
-      for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-	if ( ncvarid != streamptr->basetime.ncvarid &&
-	     ncvars[ncvarid].ndims == 1 &&
-	     timedimid == ncvars[ncvarid].dimids[0] &&
-	     ncvars[ncvarid].xtype != NC_CHAR &&
-	     isTimeUnits(ncvars[ncvarid].units) )
-	  {
-	    ncvars[ncvarid].isvar = FALSE;
-
-	    if ( !ltimevar )
-	      {
-		streamptr->basetime.ncvarid = ncvarid;
-		ltimevar = TRUE;
-		if ( CDI_Debug )
-		  fprintf(stderr, "timevar %s\n", ncvars[ncvarid].name);
-	      }
-	    else
-	      {
-                Warning("Found more than one time variable, skipped variable %s!", ncvars[ncvarid].name);
-	      }
-	  }
-
-      if ( ltimevar == FALSE ) /* search for WRF time description */
-	{
-	  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-	    if ( ncvarid != streamptr->basetime.ncvarid &&
-		 ncvars[ncvarid].ndims == 2 &&
-		 timedimid == ncvars[ncvarid].dimids[0] &&
-		 ncvars[ncvarid].xtype == NC_CHAR &&
-		 ncdims[ncvars[ncvarid].dimids[1]].len == 19 )
-	      {
-		streamptr->basetime.ncvarid = ncvarid;
-		streamptr->basetime.lwrf    = TRUE;
-		break;
-	      }
-	}
-
-      /* time varID */
-      ncvarid = streamptr->basetime.ncvarid;
-
-      if ( ncvarid == UNDEFID )
-        {
-          Warning("Time variable >%s< not found!", ncdims[timedimid].name);
-        }
-      else if ( streamptr->basetime.lwrf == FALSE )
-	{
-	  if ( ncvars[ncvarid].units[0] != 0 )
-	    time_has_units = TRUE;
-
-	  if ( ncvars[ncvarid].bounds != UNDEFID )
-	    {
-	      nbdims = ncvars[ncvars[ncvarid].bounds].ndims;
-	      if ( nbdims == 2 )
-		{
-		  len = ncdims[ncvars[ncvars[ncvarid].bounds].dimids[nbdims-1]].len;
-		  if ( (int)len == 2 && timedimid == ncvars[ncvars[ncvarid].bounds].dimids[0] )
-		    {
-
-		      time_has_bounds = TRUE;
-		      streamptr->basetime.ncvarboundsid = ncvars[ncvarid].bounds;
-                      if ( ncvars[ncvarid].climatology ) time_climatology = TRUE;
-		    }
-		}
-	    }
-	}
-    }
+  leadtime_id = find_leadtime(nvars, ncvars);
 
   /* check ncvars */
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
