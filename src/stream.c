@@ -161,7 +161,7 @@ int getFiletype(const char *filename, int *byteorder)
 
   if ( fileID == CDI_UNDEFID )
     {
-      if ( memcmp(filename, "http:", 5) == 0 )
+      if ( strncmp(filename, "http:", 5) == 0 || strncmp(filename, "https:", 6) == 0 )
 	return (FILETYPE_NC);
       else
 	return (CDI_ESYSTEM);

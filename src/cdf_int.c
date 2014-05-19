@@ -84,7 +84,7 @@ int cdf_open(const char *path, int omode, int *ncidp)
   size_t chunksizehint = 0;
 
 #if  defined  (HAVE_LIBNC_DAP)
-  if ( memcmp(path, "http:", 5) == 0 ) dapfile = TRUE;
+  if ( strncmp(path, "http:", 5) == 0 || strncmp(path, "https:", 6) == 0 ) dapfile = TRUE;
 #endif
 
   if ( dapfile )
