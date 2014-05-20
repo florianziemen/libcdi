@@ -285,7 +285,7 @@ const char * tunit2str(int tunits)
 }
 
 
-const char * calendar2str(int calendar)
+const char* calendar2str(int calendar)
 {
   if      ( calendar == CALENDAR_STANDARD )  return ("standard");
   else if ( calendar == CALENDAR_PROLEPTIC ) return ("proleptic_gregorian");
@@ -293,6 +293,22 @@ const char * calendar2str(int calendar)
   else if ( calendar == CALENDAR_365DAYS )   return ("365_day");
   else if ( calendar == CALENDAR_366DAYS )   return ("366_day");
   else                                       return ("unknown");
+}
+
+static
+void limit_string_length(char* string)
+{
+  size_t len = strlen(string);
+
+  if ( len > 10 )
+    {
+      for ( size_t i = 3; i < len; ++i )
+	if ( string[i] == ' ' )
+	  {
+	    string[i] = 0;
+	    break;
+	  }
+    }
 }
 
 static
@@ -305,6 +321,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
   int nvars, ntsteps;
   int levelsize;
   int tsteptype, taxisID;
+  char tmpname[CDI_MAX_NAME];
   char varname[CDI_MAX_NAME];
   char *modelptr, *instptr;
   int datatype;
@@ -335,17 +352,17 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 
 	  /* institute info */
 	  instptr = institutInqNamePtr(vlistInqVarInstitut(vlistID, varID));
-	  if ( instptr )
-	    fprintf(stdout, "%-8s ", instptr);
-	  else
-	    fprintf(stdout, "unknown  ");
+	  strcpy(tmpname, "unknown");
+	  if ( instptr ) strcpy(tmpname, instptr);
+	  limit_string_length(tmpname);
+	  fprintf(stdout, "%-8s ", tmpname);
 
 	  /* source info */
 	  modelptr = modelInqNamePtr(vlistInqVarModel(vlistID, varID));
-	  if ( modelptr )
-	    fprintf(stdout, "%-8s ", modelptr);
-	  else
-	    fprintf(stdout, "unknown  ");
+	  strcpy(tmpname, "unknown");
+	  if ( modelptr ) strcpy(tmpname, modelptr);
+	  limit_string_length(tmpname);
+	  fprintf(stdout, "%-8s ", tmpname);
 
 	  /* tsteptype */
 	  tsteptype = vlistInqVarTsteptype(vlistID, varID);
@@ -456,7 +473,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 
 	  fprintf(stdout, "  YYYY-MM-DD hh:mm:ss  YYYY-MM-DD hh:mm:ss  YYYY-MM-DD hh:mm:ss  YYYY-MM-DD hh:mm:ss\n");
 
-	  printTimesteps(streamID, taxisID);
+	  printTimesteps(streamID, taxisID, 0);
 
 	  fprintf(stdout, "\n");
 	}
