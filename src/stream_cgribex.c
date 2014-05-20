@@ -461,10 +461,6 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
 
   streamptr->tsteps[tsID].nallrecs++;
   streamptr->nrecs++;
-
-  if ( CDI_Debug )
-    Message("varID = %d  param = %d  zaxistype = %d  gridID = %d  levelID = %d",
-	    varID, param, zaxistype, gridID, levelID);
 }
 
 static
@@ -723,7 +719,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
       nrecs++;
 
       if ( CDI_Debug )
-	Message("%4d %8d %4d  %8d %8d %6d", nrecs, (int)recpos, param, level1, vdate, vtime);
+	Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
 
       cgribexAddRecord(streamptr, param, isec1, isec2, fsec2, fsec3,
 		       isec4, recsize, recpos, datatype, comptype, lmv, iret);
@@ -904,6 +900,8 @@ int cgribexScanTimestep2(stream_t * streamptr)
       cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
 			  (int *) gribbuffer, recsize, &lmv, &iret);
 
+      nrecs_scanned++;
+
       param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
       cdiParamToString(param, paramstr, sizeof(paramstr));
 
@@ -997,7 +995,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	}
 
       if ( CDI_Debug )
-	Message("%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
+	Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
@@ -1090,7 +1088,7 @@ int cgribexScanTimestep(stream_t * streamptr)
   char paramstr[32];
 
   vlistID = streamptr->vlistID;
-
+  /*
   if ( CDI_Debug )
     {
       Message("streamID = %d", streamptr->self);
@@ -1098,7 +1096,7 @@ int cgribexScanTimestep(stream_t * streamptr)
       Message("rts = %d", streamptr->rtsteps);
       Message("nts = %d", streamptr->ntsteps);
     }
-
+  */
   isec0 = streamptr->record->sec0;
   isec1 = streamptr->record->sec1;
   isec2 = streamptr->record->sec2;
@@ -1168,6 +1166,8 @@ int cgribexScanTimestep(stream_t * streamptr)
 
 	  cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
 			      (int *) gribbuffer, recsize, &lmv, &iret);
+
+          nrecs_scanned++;
 
 	  param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
           cdiParamToString(param, paramstr, sizeof(paramstr));
@@ -1266,7 +1266,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	    }
 
 	  if ( CDI_Debug )
-	    Message("%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
+            Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
 
 	  if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) != 0 )
 	    {
@@ -1279,9 +1279,6 @@ int cgribexScanTimestep(stream_t * streamptr)
 
 	  streamptr->tsteps[tsID].records[recID].position = recpos;
 	  streamptr->tsteps[tsID].records[recID].size = recsize;
-
-	  if ( CDI_Debug )
-	    Message("%4d %8d %4d %8d %8d %6d", rindex, (int)recpos, param, level1, vdate, vtime);
 
 	  rindex++;
 	}

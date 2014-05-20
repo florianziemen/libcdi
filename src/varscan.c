@@ -365,9 +365,6 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
   levelID = levelNewEntry(varID, level1, level2);
   vartable[varID].levelTable[levelID].recID = recID;
 
-  if ( CDI_Debug )
-    Message("varID = %d  levelID = %d", varID, levelID);
-
   *pvarID   = varID;
   *plevelID = levelID;
 }
