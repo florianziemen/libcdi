@@ -541,33 +541,44 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 	  }
 	break;
       }
-      /*
     case GRID_LCC:
       {
-	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-	  Error("numberOfPoints (%d) and gridSize (%d) differ!",
-		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
+	int nlon, nlat;
 
-	grid->size  = ISEC4_NumValues;
-	grid->xsize = ISEC2_NumLon;
-	grid->ysize = ISEC2_NumLat;
+	GRIB_CHECK(grib_get_long(gh, "Nx", &lpar), 0);
+	nlon = lpar;
+	GRIB_CHECK(grib_get_long(gh, "Ny", &lpar), 0);
+	nlat = lpar;
 
-	grid->lcc_xinc      = ISEC2_Lambert_dx;
-	grid->lcc_yinc      = ISEC2_Lambert_dy;
-	grid->lcc_originLon = ISEC2_FirstLon * 0.001;
-	grid->lcc_originLat = ISEC2_FirstLat * 0.001;
-	grid->lcc_lonParY   = ISEC2_Lambert_Lov * 0.001;
-	grid->lcc_lat1      = ISEC2_Lambert_LatS1 * 0.001;
-	grid->lcc_lat2      = ISEC2_Lambert_LatS2 * 0.001;
-	grid->lcc_projflag  = ISEC2_Lambert_ProjFlag;
-	grid->lcc_scanflag  = ISEC2_ScanFlag;
+	if ( numberOfPoints != nlon*nlat )
+	  Error("numberOfPoints (%d) and gridSize (%d) differ!", (int)numberOfPoints, nlon*nlat);
+
+	grid->size  = numberOfPoints;
+	grid->xsize = nlon;
+	grid->ysize = nlat;
+
+	GRIB_CHECK(grib_get_double(gh, "DxInMetres", &grid->lcc_xinc), 0);
+	GRIB_CHECK(grib_get_double(gh, "DyInMetres", &grid->lcc_yinc), 0);
+	GRIB_CHECK(grib_get_double(gh, "longitudeOfFirstGridPoint", &grid->lcc_originLon), 0);
+	GRIB_CHECK(grib_get_double(gh, "latitudeOfFirstGridPoint", &grid->lcc_originLat), 0);
+	GRIB_CHECK(grib_get_double(gh, "LoV", &grid->lcc_lonParY), 0);
+	GRIB_CHECK(grib_get_double(gh, "Latin1", &grid->lcc_lat1), 0);
+	GRIB_CHECK(grib_get_double(gh, "Latin2", &grid->lcc_lat2), 0);
+        grid->lcc_originLon *= 0.001;
+        grid->lcc_originLat *= 0.001;
+        grid->lcc_lonParY *= 0.001;
+        grid->lcc_lat1 *= 0.001;
+        grid->lcc_lat2 *= 0.001;
+	GRIB_CHECK(grib_get_long(gh, "projectionCenterFlag", &lpar), 0);
+	grid->lcc_projflag  = (int) lpar;
+	GRIB_CHECK(grib_get_long(gh, "scanningMode", &lpar), 0);
+	grid->lcc_scanflag  = (int) lpar;
 
 	grid->xdef   = 0;
 	grid->ydef   = 0;
 
 	break;
       }
-      */
     case GRID_SPECTRAL:
       {
 	size_t len = 256;
