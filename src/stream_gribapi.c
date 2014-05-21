@@ -559,20 +559,19 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 
 	GRIB_CHECK(grib_get_double(gh, "DxInMetres", &grid->lcc_xinc), 0);
 	GRIB_CHECK(grib_get_double(gh, "DyInMetres", &grid->lcc_yinc), 0);
-	GRIB_CHECK(grib_get_double(gh, "longitudeOfFirstGridPoint", &grid->lcc_originLon), 0);
-	GRIB_CHECK(grib_get_double(gh, "latitudeOfFirstGridPoint", &grid->lcc_originLat), 0);
-	GRIB_CHECK(grib_get_double(gh, "LoV", &grid->lcc_lonParY), 0);
-	GRIB_CHECK(grib_get_double(gh, "Latin1", &grid->lcc_lat1), 0);
-	GRIB_CHECK(grib_get_double(gh, "Latin2", &grid->lcc_lat2), 0);
-        grid->lcc_originLon *= 0.001;
-        grid->lcc_originLat *= 0.001;
-        grid->lcc_lonParY *= 0.001;
-        grid->lcc_lat1 *= 0.001;
-        grid->lcc_lat2 *= 0.001;
-	GRIB_CHECK(grib_get_long(gh, "projectionCenterFlag", &lpar), 0);
-	grid->lcc_projflag  = (int) lpar;
-	GRIB_CHECK(grib_get_long(gh, "scanningMode", &lpar), 0);
-	grid->lcc_scanflag  = (int) lpar;
+	GRIB_CHECK(grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &grid->lcc_originLon), 0);
+	GRIB_CHECK(grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &grid->lcc_originLat), 0);
+	GRIB_CHECK(grib_get_double(gh, "LoVInDegrees", &grid->lcc_lonParY), 0);
+	GRIB_CHECK(grib_get_double(gh, "Latin1InDegrees", &grid->lcc_lat1), 0);
+	GRIB_CHECK(grib_get_double(gh, "Latin2InDegrees", &grid->lcc_lat2), 0);
+
+        if ( editionNumber <= 1 )
+          {
+            GRIB_CHECK(grib_get_long(gh, "projectionCenterFlag", &lpar), 0);
+            grid->lcc_projflag  = (int) lpar;
+            GRIB_CHECK(grib_get_long(gh, "scanningMode", &lpar), 0);
+            grid->lcc_scanflag  = (int) lpar;
+          }
 
 	grid->xdef   = 0;
 	grid->ydef   = 0;
@@ -2558,7 +2557,6 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 
 	break;
       }
-      /*
     case GRID_LCC:
       {
 	double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
@@ -2571,24 +2569,31 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
 		   &projflag, &scanflag);
 
-	ISEC2_GridType = GRIB2_GTYPE_LCC;
-	ISEC2_NumLon   = xsize;
-	ISEC2_NumLat   = ysize;
-	ISEC2_FirstLon = lround(originLon * 1000);
-	ISEC2_FirstLat = lround(originLat * 1000);
-	ISEC2_Lambert_Lov    = lround(lonParY * 1000);
-	ISEC2_Lambert_LatS1  = lround(lat1 * 1000);
-	ISEC2_Lambert_LatS2  = lround(lat2 * 1000);
-	ISEC2_Lambert_dx     = lround(xincm);
-	ISEC2_Lambert_dy     = lround(yincm);
-	ISEC2_Lambert_LatSP  = 0;
-	ISEC2_Lambert_LatSP  = 0;
-	ISEC2_Lambert_ProjFlag = projflag;
-	ISEC2_ScanFlag = scanflag;
+        mesg = "lambert"; len = strlen(mesg);
+        GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 
+	GRIB_CHECK(my_grib_set_long(gh, "Nx", xsize), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "Ny", ysize), 0);
+
+	GRIB_CHECK(my_grib_set_double(gh, "DxInMetres", lround(xincm)), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "DyInMetres", lround(yincm)), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", originLon), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", originLat), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "LoVInDegrees", lonParY), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "Latin1InDegrees", lat1), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "Latin2InDegrees", lat2), 0);
+
+        if ( editionNumber <= 1 )
+          {
+            GRIB_CHECK(my_grib_set_long(gh, "projectionCenterFlag", projflag), 0);
+            GRIB_CHECK(my_grib_set_long(gh, "scanningMode", scanflag), 0);
+          }
+        /*
+	ISEC2_Lambert_LatSP  = 0;
+	ISEC2_Lambert_LatSP  = 0;
+        */
 	break;
       }
-      */
     case GRID_SPECTRAL:
       {
 	int trunc = gridInqTrunc(gridID);
@@ -3070,8 +3075,11 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
-  if ( typeOfGeneratingProcess == -1 ) typeOfGeneratingProcess = 0;
-  if ( ! gc->init ) GRIB_CHECK(my_grib_set_long(gh, "typeOfGeneratingProcess", typeOfGeneratingProcess), 0);
+  if ( editionNumber == 2 )
+    {
+      if ( typeOfGeneratingProcess == -1 ) typeOfGeneratingProcess = 0;
+      if ( ! gc->init ) GRIB_CHECK(my_grib_set_long(gh, "typeOfGeneratingProcess", typeOfGeneratingProcess), 0);
+    }
 
   if ( ! gc->init ) gribapiDefInstitut(gh, vlistID, varID);
   if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
