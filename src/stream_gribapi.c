@@ -928,6 +928,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
         vlen = CDI_MAX_NAME;
         status = grib_get_string(gh, "cfName", stdname, &vlen);
         if ( status != 0 || vlen <= 1 ) stdname[0] = 0;
+        else if ( strncmp(stdname, "unknown", 7) == 0 ) stdname[0] = 0;
       }
     }
   // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units);
