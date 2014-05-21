@@ -2619,11 +2619,10 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 	    if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
 	    mesg = "spectral_complex"; len = strlen(mesg);
 	    GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-	    /*
+
 	    GRIB_CHECK(my_grib_set_long(gh, "JS", 20), 0);
 	    GRIB_CHECK(my_grib_set_long(gh, "KS", 20), 0);
 	    GRIB_CHECK(my_grib_set_long(gh, "MS", 20), 0);
-	    */
 	  }
 	else
 	  {
