@@ -117,6 +117,7 @@ void taxisDefaultValue(taxis_t* taxisptr)
   taxisptr->ftime       = 0;
   taxisptr->calendar    = cdiDefaultCalendar;
   taxisptr->unit        = DefaultTimeUnit;
+  taxisptr->fc_unit     = DefaultTimeUnit;
   taxisptr->numavg      = 0;
   taxisptr->has_bounds  = FALSE;
   taxisptr->vdate_lb    = 0;
@@ -512,6 +513,22 @@ void taxisDefTunit(int taxisID, int unit)
 }
 
 
+void taxisDefForecastTunit(int taxisID, int unit)
+{
+  if ( reshGetStatus ( taxisID, &taxisOps ) == RESH_CLOSED )
+    {
+      Warning("%s", "Operation not executed.");
+      return;
+    }
+
+  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+
+  taxis_check_ptr(__func__, taxisptr);
+
+  taxisptr->fc_unit = unit;
+}
+
+
 void taxisDefNumavg(int taxisID, int numavg)
 {
   if ( reshGetStatus ( taxisID, &taxisOps ) == RESH_CLOSED )
@@ -864,6 +881,16 @@ int taxisInqTunit(int taxisID)
   taxis_check_ptr(__func__, taxisptr);
 
   return (taxisptr->unit);
+}
+
+
+int taxisInqForecastTunit(int taxisID)
+{
+  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+
+  taxis_check_ptr(__func__, taxisptr);
+
+  return (taxisptr->fc_unit);
 }
 
 
@@ -1283,6 +1310,7 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->ftime       = source->ftime;
   dest->calendar    = source->calendar;
   dest->unit        = source->unit;
+  dest->fc_unit     = source->fc_unit;
   dest->numavg      = source->numavg;
   dest->has_bounds  = source->has_bounds;
   dest->vdate_lb    = source->vdate_lb;
@@ -1320,6 +1348,7 @@ taxisPrintKernel(taxis_t * taxisptr, FILE * fp)
   fprintf ( fp, "ftime       = %d\n", taxisptr->ftime );
   fprintf ( fp, "calendar    = %d\n", taxisptr->calendar );
   fprintf ( fp, "unit        = %d\n", taxisptr->unit );
+  fprintf ( fp, "fc_unit     = %d\n", taxisptr->fc_unit );
   fprintf ( fp, "numavg      = %d\n", taxisptr->numavg );
   fprintf ( fp, "climatology = %d\n", taxisptr->climatology );
   fprintf ( fp, "has_bounds  = %d\n", taxisptr->has_bounds );
@@ -1359,6 +1388,7 @@ taxisCompareP(void *taxisptr1, void *taxisptr2)
 	     t1->ftime       == t2->ftime       &&
 	     t1->calendar    == t2->calendar    &&
 	     t1->unit        == t2->unit        &&
+	     t1->fc_unit     == t2->fc_unit     &&
 	     t1->numavg      == t2->numavg      &&
 	     t1->climatology == t2->climatology &&
 	     t1->has_bounds  == t2->has_bounds  &&
@@ -1375,7 +1405,7 @@ taxisTxCode ( void )
   return TAXIS;
 }
 
-enum { taxisNint = 20 };
+enum { taxisNint = 21 };
 
 static int
 taxisGetPackSize(void *p, void *context)
@@ -1425,6 +1455,7 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
   taxisP->ftime       = intBuffer[idx++];
   taxisP->calendar    = intBuffer[idx++];
   taxisP->unit        = intBuffer[idx++];
+  taxisP->fc_unit     = intBuffer[idx++];
   taxisP->numavg      = intBuffer[idx++];
   taxisP->climatology = intBuffer[idx++];
   taxisP->has_bounds  = intBuffer[idx++];
@@ -1477,6 +1508,7 @@ taxisPack(void * voidP, void * packBuffer, int packBufferSize, int * packBufferP
   intBuffer[idx++] = taxisP->ftime;
   intBuffer[idx++] = taxisP->calendar;
   intBuffer[idx++] = taxisP->unit;
+  intBuffer[idx++] = taxisP->fc_unit;
   intBuffer[idx++] = taxisP->numavg;
   intBuffer[idx++] = taxisP->climatology;
   intBuffer[idx++] = taxisP->has_bounds;

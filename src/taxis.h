@@ -19,6 +19,7 @@ typedef struct {
   int     ftime;          // forecast reference time
   int     calendar;
   int     unit;           // time unit
+  int     fc_unit;        // forecast time unit
   int     numavg;
   int     climatology;
   int     has_bounds;
