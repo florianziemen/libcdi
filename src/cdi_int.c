@@ -597,10 +597,10 @@ void streamPrintP   ( void * streamptr, FILE * fp )
 
   fprintf ( fp, "#\n");
   fprintf ( fp, "# streamID %d\n", sp->self);
-  fprintf ( fp, "#\n"); 
+  fprintf ( fp, "#\n");
   fprintf ( fp, "self          = %d\n", sp->self );
   fprintf ( fp, "accesstype    = %d\n", sp->accesstype );
-  fprintf ( fp, "accessmode    = %d\n", sp->accessmode ); 
+  fprintf ( fp, "accessmode    = %d\n", sp->accessmode );
   fprintf ( fp, "filetype      = %d\n", sp->filetype );
   fprintf ( fp, "byteorder     = %d\n", sp->byteorder );
   fprintf ( fp, "fileID        = %d\n", sp->fileID );
@@ -622,7 +622,7 @@ void streamPrintP   ( void * streamptr, FILE * fp )
   fprintf ( fp, "//  tsteps_t   *tsteps;\n" );
   fprintf ( fp, "tstepsTableSize= %d\n", sp->tstepsTableSize );
   fprintf ( fp, "tstepsNextID  = %d\n", sp->tstepsNextID );
-  fprintf ( fp, "//BaseTime  basetime;\n" );
+  fprintf ( fp, "//basetime_t  basetime;\n" );
   fprintf ( fp, "ncmode        = %d\n", sp->ncmode );
   fprintf ( fp, "vlistID       = %d\n", sp->vlistID );
   fprintf ( fp, "//  int       xdimID[MAX_GRIDS_PS];\n" );

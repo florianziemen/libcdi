@@ -221,7 +221,7 @@ typedef struct {
   tsteps_t   *tsteps;
   int         tstepsTableSize;
   int         tstepsNextID;
-  BaseTime    basetime;
+  basetime_t  basetime;
   int         ncmode;
   int         vlistID;
   int         xdimID[MAX_GRIDS_PS];

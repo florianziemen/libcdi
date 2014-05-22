@@ -7470,8 +7470,7 @@ int cdfInqContents(stream_t *streamptr)
 
   if ( time_has_units )
     {
-      taxis_t *taxis;
-      taxis = &streamptr->tsteps[0].taxis;
+      taxis_t *taxis = &streamptr->tsteps[0].taxis;
 
       cdfGetAttText(fileID, ncvarid, "units", attstringlen-1, attstring);
       if ( splitBasetime(attstring, taxis) == 1 )
@@ -7486,8 +7485,7 @@ int cdfInqContents(stream_t *streamptr)
 
   if ( ncvarid != -1 )
     {
-      taxis_t *taxis;
-      taxis = &streamptr->tsteps[0].taxis;
+      taxis_t *taxis = &streamptr->tsteps[0].taxis;
 
       taxis->name = strdup(ncvars[ncvarid].name);
       if ( ncvars[ncvarid].longname[0] )
@@ -7520,7 +7518,9 @@ int cdfInqContents(stream_t *streamptr)
       }
 
   if ( streamptr->tsteps[0].taxis.type == TAXIS_RELATIVE )
-    taxisID = taxisCreate(TAXIS_RELATIVE);
+    {
+      taxisID = taxisCreate(TAXIS_RELATIVE);
+    }
   else
     {
       taxisID = taxisCreate(TAXIS_ABSOLUTE);
@@ -7531,22 +7531,15 @@ int cdfInqContents(stream_t *streamptr)
 	}
     }
 
+
+  if ( calendar == UNDEFID && streamptr->tsteps[0].taxis.type != TAXIS_ABSOLUTE )
+    {
+      calendar = CALENDAR_STANDARD;
+    }
+
   if ( calendar != UNDEFID )
     {
-      taxis_t *taxis;
-      taxis = &streamptr->tsteps[0].taxis;
-
-      taxis->calendar = calendar;
-      taxisDefCalendar(taxisID, calendar);
-    }
-  else if ( streamptr->tsteps[0].taxis.type == TAXIS_RELATIVE )
-    {
-      taxis_t *taxis;
-
-      calendar = CALENDAR_STANDARD;
-
-      taxis = &streamptr->tsteps[0].taxis;
-
+      taxis_t *taxis = &streamptr->tsteps[0].taxis;
       taxis->calendar = calendar;
       taxisDefCalendar(taxisID, calendar);
     }
