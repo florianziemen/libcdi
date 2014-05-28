@@ -384,8 +384,8 @@ static
 int cmpLevelTable(const void* s1, const void* s2)
 {
   int cmp = 0;
-  const leveltable_t* x = s1;
-  const leveltable_t* y = s2;
+  const leveltable_t* x = (const leveltable_t*) s1;
+  const leveltable_t* y = (const leveltable_t*) s2;
   /*
   printf("%g %g  %d %d\n", x->leve11, y->level1, x, y);
   */
@@ -399,8 +399,8 @@ static
 int cmpLevelTableInv(const void* s1, const void* s2)
 {
   int cmp = 0;
-  const leveltable_t* x = s1;
-  const leveltable_t* y = s2;
+  const leveltable_t* x = (const leveltable_t*) s1;
+  const leveltable_t* y = (const leveltable_t*) s2;
   /*
   printf("%g %g  %d %d\n", x->leve11, y->level1, x, y);
   */
@@ -423,8 +423,8 @@ param_t;
 static
 int cmpparam(const void* s1, const void* s2)
 {
-  const param_t* x = s1;
-  const param_t* y = s2;
+  const param_t* x = (const param_t*) s1;
+  const param_t* y = (const param_t*) s2;
 
   int cmp = (( x->param > y->param ) - ( x->param < y->param )) * 2
            + ( x->ltype > y->ltype ) - ( x->ltype < y->ltype );
