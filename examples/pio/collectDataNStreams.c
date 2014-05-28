@@ -55,8 +55,8 @@ static void modelRun(MPI_Comm commModel)
   static int nlev[nStreams][nVars] =
     {{1,1,5,5,2},{3,5,2,2,1},{3,5,2,2,1},{5,2,2,2,1}, {3,3,3,3,3}};
 
-  static char nameExp[7]           = "example";
-  static int asciiA                = 65;
+  static char nameExp[] = "example";
+  static int asciiA     = 65;
   char filename[1024];
 
   int gridID, zaxisID[nStreams][nVars], taxisID;
@@ -130,7 +130,7 @@ static void modelRun(MPI_Comm commModel)
           maxChunkSize = varSize[i][j];
 #endif
       }
-    var = malloc(maxChunkSize * sizeof (var[0]));
+    var = (double*) malloc(maxChunkSize * sizeof (var[0]));
   }
   taxisID = taxisCreate ( TAXIS_ABSOLUTE );
   for ( i = 0; i < nStreams; i++ )
