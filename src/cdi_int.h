@@ -127,10 +127,10 @@ typedef struct
   int       sec3[2];
   int       sec4[512];
 #if  defined  (HAVE_LIBSERVICE)
-  srvrec_t   *srvp;
+  srvrec_t  *srvp;
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-  extrec_t   *extp;
+  void      *exsep;
 #endif
 #if  defined  (HAVE_LIBIEG)
   iegrec_t   *iegp;

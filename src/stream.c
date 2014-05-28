@@ -458,7 +458,7 @@ void streamDefByteorder(int streamID, int byteorder)
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
-	srvrec_t *srvp = streamptr->record->srvp;
+	srvrec_t *srvp = (srvrec_t*) streamptr->record->exsep;
 	srvp->byteswap = getByteswap(byteorder);
 
 	break;
@@ -467,7 +467,7 @@ void streamDefByteorder(int streamID, int byteorder)
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
-	extrec_t *extp = streamptr->record->extp;
+	extrec_t *extp = (extrec_t*) streamptr->record->exsep;
 	extp->byteswap = getByteswap(byteorder);
 
 	break;
@@ -662,7 +662,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
           {
             streamptr->record = (Record *) malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
-            streamptr->record->srvp   = srvNew();
+            streamptr->record->exsep  = srvNew();
           }
         break;
       }
@@ -676,7 +676,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
           {
             streamptr->record = (Record *) malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
-            streamptr->record->extp   = extNew();
+            streamptr->record->exsep  = extNew();
           }
         break;
       }
@@ -1074,7 +1074,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
         {
           fileClose(fileID);
           if (recordBufIsToBeDeleted)
-            srvDelete(streamptr->record->srvp);
+            srvDelete(streamptr->record->exsep);
           break;
         }
 #endif
@@ -1083,7 +1083,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
         {
           fileClose(fileID);
           if (recordBufIsToBeDeleted)
-            extDelete(streamptr->record->extp);
+            extDelete(streamptr->record->exsep);
           break;
         }
 #endif
