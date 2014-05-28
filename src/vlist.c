@@ -73,7 +73,7 @@ static void vlistPackP    ( void * vlistptr, void * buff, int size,
                             int *position, void *context);
 static int  vlistTxCode   ( void );
 
-const resOps vlist_ops = {
+/*const*/ resOps vlist_ops = {
   (valCompareFunc)vlist_compare,
   (valDestroyFunc)vlist_delete,
   (valPrintFunc)vlistPrintKernel

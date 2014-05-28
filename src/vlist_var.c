@@ -15,7 +15,11 @@
 #include "serialize.h"
 #include "error.h"
 
-extern const resOps vlist_ops;
+extern
+#if !defined(__cplusplus)
+const
+#endif
+resOps vlist_ops;
 
 static
 void vlistvarInitEntry(int vlistID, int varID)
