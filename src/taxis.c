@@ -132,7 +132,7 @@ void taxisDefaultValue(taxis_t* taxisptr)
 static taxis_t *
 taxisNewEntry(cdiResH resH)
 {
-  taxis_t *taxisptr = xmalloc(sizeof (taxis_t));
+  taxis_t *taxisptr = (taxis_t*) xmalloc(sizeof(taxis_t));
 
   taxisDefaultValue(taxisptr);
   if (resH == CDI_UNDEFID)
@@ -1410,7 +1410,7 @@ enum { taxisNint = 21 };
 static int
 taxisGetPackSize(void *p, void *context)
 {
-  taxis_t *taxisptr = p;
+  taxis_t *taxisptr = (taxis_t*) p;
   int packBufferSize
     = serializeGetSize(taxisNint, DATATYPE_INT, context)
     + serializeGetSize(1, DATATYPE_UINT32, context)
