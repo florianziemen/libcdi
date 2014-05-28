@@ -42,11 +42,13 @@ typedef struct listElem {
   int           status;
 } listElem_t;
 
-static struct
+struct resHList_t
 {
   int size, freeHead, hasDefaultRes;
   listElem_t *resources;
-} *resHList;
+};
+
+static struct resHList_t *resHList;
 
 static int resHListSize = 0;
 
@@ -94,7 +96,7 @@ listInitResources(int nsp)
   xassert(nsp < resHListSize && nsp >= 0);
   int size = resHList[nsp].size = MIN_LIST_SIZE;
   xassert(resHList[nsp].resources == NULL);
-  resHList[nsp].resources = xcalloc(MIN_LIST_SIZE, sizeof (listElem_t));
+  resHList[nsp].resources = (listElem_t*) xcalloc(MIN_LIST_SIZE, sizeof(listElem_t));
   listElem_t *p = resHList[nsp].resources;
 
   for (int i = 0; i < size; i++ )
@@ -128,7 +130,7 @@ reshListCreate(int namespaceID)
   LIST_LOCK();
   if (resHListSize <= namespaceID)
     {
-      resHList = xrealloc(resHList, (namespaceID + 1) * sizeof (resHList[0]));
+      resHList = (resHList_t*) xrealloc(resHList, (namespaceID + 1) * sizeof (resHList[0]));
       for (int i = resHListSize; i <= namespaceID; ++i)
         reshListClearEntry(i);
       resHListSize = namespaceID + 1;
@@ -209,9 +211,8 @@ void listSizeExtend()
   int oldSize = resHList[nsp].size;
   int newListSize = oldSize + MIN_LIST_SIZE;
 
-  resHList[nsp].resources =
-    xrealloc(resHList[nsp].resources,
-             newListSize * sizeof (resHList[0].resources[0]));
+  resHList[nsp].resources = (listElem_t*) xrealloc(resHList[nsp].resources,
+                                                   newListSize * sizeof(listElem_t));
 
   listElem_t *r = resHList[nsp].resources;
   for (int i = oldSize; i < newListSize; ++i)
@@ -527,7 +528,7 @@ void reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
   int nsp = namespaceGetActive ();
 
   int pBSize = *packBufferSize = getPackBufferSize(context);
-  char *pB = *packBuffer = xcalloc(1, *packBufferSize);
+  char *pB = *packBuffer = (char*) xcalloc(1, *packBufferSize);
 
   {
     int header[3] = { start, nsp, sep };
