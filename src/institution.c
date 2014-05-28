@@ -173,7 +173,7 @@ static
 institute_t *instituteNewEntry(cdiResH resH, int center, int subcenter,
                                const char *name, const char *longname)
 {
-  institute_t *instituteptr = xmalloc(sizeof (institute_t));
+  institute_t *instituteptr = (institute_t*) xmalloc(sizeof(institute_t));
   instituteDefaultValue(instituteptr);
   if (resH == CDI_UNDEFID)
     instituteptr->self = reshPut(instituteptr, &instituteOps);

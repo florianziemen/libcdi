@@ -161,7 +161,7 @@ void grid_free(grid_t *gridptr)
 static grid_t *
 gridNewEntry(cdiResH resH)
 {
-  grid_t *gridptr = xmalloc(sizeof (grid_t));
+  grid_t *gridptr = (grid_t*) xmalloc(sizeof(grid_t));
   grid_init(gridptr);
   if (resH == CDI_UNDEFID)
     gridptr->self = reshPut(gridptr, &gridOps);

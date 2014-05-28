@@ -255,7 +255,7 @@ int  modelCompareP ( void * modelptr1, void * modelptr2 )
 
 void modelDestroyP ( void * modelptr )
 {
-  model_t *mp = modelptr;
+  model_t *mp = (model_t*) modelptr;
   if (mp->name)
     free(mp->name);
   free(mp);
@@ -264,7 +264,7 @@ void modelDestroyP ( void * modelptr )
 
 void modelPrintP   ( void * modelptr, FILE * fp )
 {
-  model_t * mp = ( model_t * ) modelptr;
+  model_t *mp = (model_t*) modelptr;
 
   if ( !mp ) return;
 
