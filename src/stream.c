@@ -476,7 +476,7 @@ void streamDefByteorder(int streamID, int byteorder)
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
-	iegrec_t *iegp = streamptr->record->iegp;
+	iegrec_t *iegp = (iegrec_t*) streamptr->record->exsep;
 	iegp->byteswap = getByteswap(byteorder);
 
 	break;
@@ -690,7 +690,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
           {
             streamptr->record = (Record *) malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
-            streamptr->record->iegp   = iegNew();
+            streamptr->record->exsep   = iegNew();
           }
         break;
       }
@@ -1092,7 +1092,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
         {
           fileClose(fileID);
           if (recordBufIsToBeDeleted)
-            iegDelete(streamptr->record->iegp);
+            iegDelete(streamptr->record->exsep);
           break;
         }
 #endif
