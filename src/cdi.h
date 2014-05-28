@@ -8,11 +8,11 @@
 #define  CDI_H_
 
 #include <sys/types.h>
-
+/*
 #if defined(__cplusplus)
 extern "C" {
 #endif
-
+*/
 #define  CDI_MAX_NAME           256   /* max length of a name                 */
 
 #define  CDI_UNDEFID             -1
@@ -1014,10 +1014,11 @@ void    streamDefHistory(int streamID, int size, const char *history);
 int     streamInqHistorySize(int streamID);
 void    streamInqHistoryString(int streamID, char *history);
 
+/*
 #if defined (__cplusplus)
 }
 #endif
-
+*/
 #endif  /* CDI_H_ */
 /*
  * Local Variables:
