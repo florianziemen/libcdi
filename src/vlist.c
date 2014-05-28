@@ -86,7 +86,7 @@ const resOps vlist_ops = {
 vlist_t *vlist_to_pointer(int code)
 {
   VLIST_INIT();
-  return reshGetVal(code, &vlist_ops );
+  return (vlist_t*) reshGetVal(code, &vlist_ops );
 }
 
 static
@@ -110,7 +110,7 @@ void vlist_init_entry(vlist_t *vlistptr)
 static
 vlist_t *vlist_new_entry(cdiResH resH)
 {
-  vlist_t *vlistptr = xmalloc(sizeof(vlist_t));
+  vlist_t *vlistptr = (vlist_t*) xmalloc(sizeof(vlist_t));
   vlist_init_entry(vlistptr);
   if (resH == CDI_UNDEFID)
     vlistptr->self = reshPut(vlistptr, &vlist_ops);
@@ -926,7 +926,7 @@ void vlistMerge(int vlistID2, int vlistID1)
           */
           if (vlistptr1->vars[varID].levinfo)
             {
-              vlistptr2->vars[varID].levinfo =
+              vlistptr2->vars[varID].levinfo = (levinfo_t*)
                 xrealloc(vlistptr2->vars[varID].levinfo, nlevs*sizeof(levinfo_t));
 
               memcpy(vlistptr2->vars[varID].levinfo+nlevs2,
@@ -1712,7 +1712,7 @@ static
 int  vlistGetSizeP ( void * vlistptr, void *context)
 {
   int txsize, varID;
-  vlist_t *p = vlistptr;
+  vlist_t *p = (vlist_t*) vlistptr;
   txsize = serializeGetSize(vlist_nints, DATATYPE_INT, context);
   txsize += vlistAttsGetSize(p, CDI_GLOBAL, context);
   for ( varID = 0; varID <  p->nvars; varID++ )
@@ -1726,7 +1726,7 @@ void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
                   void *context )
 {
   int varID, tempbuf[vlist_nints];
-  vlist_t *p = vlistptr;
+  vlist_t *p = (vlist_t*) vlistptr;
   tempbuf[0] = p->self;
   tempbuf[1] = p->nvars;
   tempbuf[2] = p->ntsteps;
